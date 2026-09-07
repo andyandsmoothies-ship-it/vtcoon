@@ -1118,21 +1118,47 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command]
 
 ---
 
-## BẢNG TRA CỨU CÂU LỆNH NHANH (CHEAT SHEET & SLASH COMMANDS)
+## 11. BẢNG TỪ ĐIỂN SLASH COMMANDS TOÀN DIỆN (THE MASTER SLASH COMMANDS REGISTRY)
+*(Dành cho lập trình viên Junior: Hướng dẫn toàn bộ phím tắt Slash Commands, gồm cả Native Antigravity 2.0 và Kho Kỹ Năng Mở Rộng từ Matt Pocock & Superpowers)*
 
-| Tình huống thực tế | Lời chat chuẩn | Kỹ năng AI nạp ngầm | Sản phẩm sinh ra |
-| :--- | :--- | :--- | :--- |
-| **Bắt đầu ý tưởng mới** | `/grill-me [Ý tưởng]` | `grill-me`, `shaping`, `risk-assessment` | `CONTEXT.md`, `design.md`, `shaping.md` |
-| **Viết đặc tả & Kiến trúc 4D** | `Dùng use-case-creator và openapi viết spec kèm ADR 4D` | `use-case-creator`, `openapi` | `spec_[TIMESTAMP].md`, `adr/*.md` |
-| **Cắt lát, Phân tích tác động & Lập tickets**| `Chạy Change Impact Analysis (nếu Brownfield), chia slice`| `use-case-slicing`, `to-tickets` | `_epic_ledger.md`, `issues/*.md` |
-| **Thi công an toàn TDD** | `Gọi implementer thi công ticket #N trong branch (boundary check)`| `atdd-quality-gates`, `tdd` | Code xanh, sạch kiến trúc |
-| **Kiểm toán Cổng Nghiệm Thu** | `Gọi spec-reviewer và code-reviewer quét 6 Cờ Đỏ Slop & UI` | `vertical-slice-completeness`, `de-sloppify`| `report_qa_[TIMESTAMP].md` |
-| **Nghiệm thu & Commit** | Bạn tự chạy `git diff` và `git commit` | (Con người kiểm soát) | Commit sạch trên Git |
-| **Gặp bug khó / Thuật toán**| `/boost [Mô tả vấn đề hóc búa]` | `DeepInvestigator` / `DeepCoder` | Fix triệt me bug khó |
-| **Test giao diện web thật** | `/browser [URL & Thao tác kiểm tra]` | Chrome DevTools MCP | Ảnh chụp & Log UI thật |
-| **Refactor lớn xuyên đêm** | `/goal [Mục tiêu nén Cyclomatic & LOC]`| Chế độ tự hành Autonomous Loop | Nén gọn code, test pass 100% |
-| **Ghi nhớ luật mới** | `/learn [Quy tắc cần nhớ vĩnh viễn]` | Cập nhật cấu hình | Lưu luật vào hệ thống |
-| **Nén bộ nhớ sang task mới**| `/handoff` ➔ Mở Chat mới | `handoff`, `convention-learner` | `handoff_[TIMESTAMP].md` |
+```text
+[BẢN ĐỒ PHÂN BỔ TOÀN BỘ SLASH COMMANDS THEO VÒNG ĐỜI DỰ ÁN]
+
+1. KHÁM PHÁ & THIẾT KẾ     ──► /grill-me (Matt)  |  /boost (Native)  |  /brainstorming (Super)  |  /prototype (Matt)
+2. LẬP KẾ HOẠCH BẺ NHỎ     ──► /writing-plans (Super)  |  /wayfinder (Matt)  |  /ask-matt (Matt)
+3. THI CÔNG & ĐIỀU PHỐI    ──► /executing-plans (Super)  |  /subagent-driven-development (Super)  |  /tdd (Core)
+4. CHẨN ĐOÁN LỖI KHOA HỌC  ──► /diagnosing-bugs (Matt)  |  /systematic-debugging (Super)  |  /boost (Native)
+5. DIỆT SLOP & KIỂM ĐỊNH   ──► /de-sloppify (Core)  |  /verification-before-completion (Super)  |  /code-review (Matt)  |  /browser (Native)
+6. BÀN GIAO & TỰ HÀNH      ──► /handoff (Matt)  |  /learn (Native)  |  /goal (Native)  |  /retro (Matt)
+```
+
+### Bảng Tra Cứu Chi Tiết Toàn Bộ Slash Commands Cho Junior
+
+| Lệnh Slash Command | Nguồn Gốc | Khi Nào Junior Nên Gõ? (Tình Huống Thực Tế) | Hành Vi Của AI Khi Nhận Lệnh |
+| :--- | :---: | :--- | :--- |
+| **`/wait-what`** | `mattpocock_skills` | Thấy AI bắt đầu nói lan man, hiểu sai ý hoặc đề xuất giải pháp quá phức tạp. | Phanh dừng khẩn cấp: Hủy bỏ lập luận sai, yêu cầu bạn giải thích lại và trình bày phương án đơn giản hơn. |
+| **`/grill-me`** | `mattpocock_skills` | Trước khi làm tính năng mới, khi ý tưởng còn mơ hồ hoặc sợ bị sót yêu cầu. | Bắt AI phỏng vấn ngược lại bạn (Socratic Grilling) để bóc trần 100% giả định ngầm và chốt ranh giới No-gos. |
+| **`/boost [vấn đề]`** | `Native AG 2.0` | Gặp bài toán kiến trúc phân tán khó, thuật toán FSM/PRNG, hoặc bug bế tắc không rõ nguyên nhân. | Kích hoạt chế độ Deep Reasoning 3 pha (Đa chiều ➔ Lập mô hình ➔ Thẩm định phản biện). |
+| **`/brainstorming`** | `superpowers` | Cần tìm các giải pháp kỹ thuật khác nhau trước khi chốt phương án thi công. | Đưa ra 2-3 phương án kiến trúc kèm bảng so sánh ưu/nhược điểm (Trade-offs). |
+| **`/ask-matt`** | `mattpocock_skills` | Đang phân vân không biết bước tiếp theo nên làm gì hoặc nên dùng công cụ nào. | Đóng vai trò Router phân tích tình huống và gợi ý chính xác skill/lệnh tiếp theo. |
+| **`/writing-plans`** | `superpowers` | Bắt đầu Bước 2.3a, muốn bẻ nhỏ Slice thành các Task tuần tự $\le 50-80$ dòng code. | Xuất bản Kế hoạch thi công chi tiết (Task DAG) kèm tệp test và tiêu chuẩn hoàn thành. |
+| **`/wayfinder`** | `mattpocock_skills` | Đối mặt với một khối lượng công việc khổng lồ vượt quá phạm vi của 1 phiên làm việc. | Lập bản đồ điều hướng kiến trúc và các vé quyết định (decision tickets) đa phiên. |
+| **`/prototype`** | `mattpocock_skills` | Muốn làm thử nghiệm một ý tưởng (Spike) để xem giao diện 3D hoặc trạng thái có chạy được không. | Dựng nhanh mã nguồn nháp (throwaway code) trong nhánh cô lập để bạn bấm thử. |
+| **`/executing-plans`** | `superpowers` | Có bản kế hoạch từ `writing-plans`, muốn thi công tuần tự từng task một có kiểm soát. | Lần lượt thi công từng Task, dừng lại kiểm tra sau mỗi Task, cấm nhảy cóc. |
+| **`/subagent-driven-development`** | `superpowers` | Cần phân bổ các tác vụ độc lập cho các subagent chạy trong `Workspace: "branch"`. | Điều phối và giám sát các subagent thi công, giữ nhánh chính sạch 100%. |
+| **`/dispatching-parallel-agents`** | `superpowers` | Có 2 hoặc nhiều tác vụ hoàn toàn độc lập (không chung dữ liệu) muốn làm nhanh. | Phân luồng chạy nhiều worker song song để tiết kiệm thời gian. |
+| **`/diagnosing-bugs`** | `mattpocock_skills` | Bị lỗi test ĐỎ, lỗi khó hiểu hoặc suy giảm hiệu năng (giật lag Canvas). | Chặn đứng sửa mò (shotgun debugging): Bắt buộc lập giả thuyết ➔ Thu thập chứng cứ ➔ Sửa đúng gốc. |
+| **`/systematic-debugging`** | `superpowers` | Gặp lỗi quy trình cần điều tra có hệ thống 4 bước. | Tái hiện lỗi ổn định ➔ Thu hẹp phạm vi ➔ Phân tích dòng dữ liệu ➔ Vá lỗi tối thiểu. |
+| **`/de-sloppify`** | `Core Skills` | Vừa code xong, muốn kiểm tra xem có đoạn code nào bị rườm rà, thừa thãi không. | Quét sạch 6 cờ đỏ Slop Nash: Xóa abstraction thừa (YAGNI), nén 15-20% LOC mà test vẫn xanh. |
+| **`/codebase-design`** | `mattpocock_skills` | Muốn thiết kế một module mới theo triết lý Deep Module (John Ousterhout). | Hướng dẫn tạo giao diện (Interface) tối giản, giấu kín sự phức tạp vào trong ruột module. |
+| **`/verification-before-completion`** | `superpowers` | AI tuyên bố "Đã làm xong" nhưng bạn nghi ngờ nó chưa chạy test thật. | Chặn đứng nhận vơ: Buộc AI phải chạy `npm test` trên Terminal và đưa ra bằng chứng kết quả xanh. |
+| **`/code-review`** | `mattpocock_skills` | Cần rà soát lại toàn bộ diff vừa viết trước khi commit. | Đánh giá diff trên 2 trục: Chuẩn mực cú pháp (Standards) và Độ sâu thiết kế (Architecture). |
+| **`/browser [URL]`** | `Native AG 2.0` | Cần mở trình duyệt xem giao diện web, chụp ảnh màn hình hoặc đọc tài liệu mới online. | Sử dụng Chrome DevTools MCP để tương tác trình duyệt trực tiếp. |
+| **`/learn [quy tắc]`** | `Native AG 2.0` | Vừa sửa xong 1 lỗi đặc thù (bug riêng của dự án), muốn AI không bao giờ tái phạm. | Đúc kết bài học và tự động ghi nhớ vĩnh viễn vào file hiến pháp `GEMINI.md`. |
+| **`/handoff`** | `mattpocock_skills` | Vừa git commit xong 1 Slice, muốn đổi sang phiên mới với bộ nhớ sạch 100%. | Nén trạng thái vào tài liệu tóm tắt, xuất danh sách suggested skills, đưa token về 0. |
+| **`/goal [mục tiêu]`** | `Native AG 2.0` | Cuối tuần hoặc sau khi xong 1 Epic lớn, muốn tối ưu hóa toàn bộ dự án xuyên đêm. | Vòng lặp tự hành: Nén độ phức tạp Cyclomatic <= 4, xóa code thừa, tự động revert nếu test đỏ. |
+| **`/retro`** | `mattpocock_skills` | Sau một đợt phát hành, muốn hồi cứu xem quy trình làm việc có trục trặc gì không. | Đóng vai trò điều phối buổi Retrospective phân tích điểm mạnh, điểm yếu để tối ưu. |
+| **`/teach [khái niệm]`** | `mattpocock_skills` | Muốn học hiểu một công nghệ, thuật toán hoặc thư viện mới trong dự án. | Giảng bài theo phương pháp tương tác: Giải thích bản chất kèm các bài tập thực hành nhỏ. |
 
 ---
 
@@ -1293,14 +1319,14 @@ Khi bạn chạy lệnh trong Terminal gặp lỗi đỏ, hoặc Subagent báo t
 | **1.1** | Phân loại đầu vào | • Nếu ý tưởng thô: 💬 Gõ `/grill-me + shaping`<br>• Nếu đã có spec chi tiết: 💬 Bỏ qua `/grill-me`, nạp tài liệu vào `docs/` | Sonnet / Flash | Bộ tài liệu SSOT hoàn chỉnh |
 | **1.2** | Dựng bản đồ Use Case | 💬 `[AG 2.0]` Dùng `use-case-creator` lập sơ đồ mục lục `docs/domain/use_cases.puml` | Flash / Sonnet | File PlantUML 3 cột chuẩn |
 | **1.3** | Lập Sổ Cái Tiến Độ | 💬 `[AG 2.0]` Dựng `docs/epics/[epic]/_epic_ledger.md` (phân bổ Use Cases vào Slices) | Flash | Sổ Cái tiến độ theo dõi |
-| **2.1** | Cắt Lát Cắt (JIT) | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.1]** cắt 1 ticket vào `issues/[TICKET].md` (Khóa phạm vi MSS, test contracts)<br>*(Quy tắc JIT: CẤM cắt sẵn nhiều ticket)* | Flash | File `issues/[TICKET].md` |
-| **2.2** | Trinh sát bối cảnh | 💬 `[AG 2.0]` Gọi `scout` trinh sát hiện trạng mã nguồn:<br>• **Greenfield (Slice 00):** Dùng **[Mẫu Prompt P-2.2A]** khảo sát nền móng & Target File Map<br>• **Brownfield (Từ S01):** Dùng **[Mẫu Prompt P-2.2B]** phân tích Change Impact | Flash | Báo cáo hiện trạng & tọa độ tác động |
-| **2.3a** | Lập Kế Hoạch Bẻ Nhỏ | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3a]** kích hoạt `writing-plans` bẻ Slice thành **Micro-Tasks DAG** (Mỗi Task $\le 50-80$ LOC, có test con) | Sonnet 4.6 | Kế Hoạch Thi Công (Task DAG) |
-| **2.3b** | Khởi tạo Test Harness<br>*(Chỉ làm ở Slice 00)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3b]** gọi `implementer` dựng Test Runner tối thiểu (`package.json`, `tsconfig.json`, `vitest`...) ➔ Chạy smoke test PASS | Flash / Sonnet | Lệnh `npm test` chạy PASS trên CMD |
-| **2.3c** | Thi công TDD Vi Mô<br>*(Lặp cho từng Task)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3c]** gọi `implementer` thi công từng Task trong `Workspace: "branch"` (Pass 1: Test Đỏ/Xanh ➔ Pass 2: Nén Lean ➔ Pass 3: Quality Gate) | Sonnet 4.6 | Mã nguồn + Test con PASS 100% |
-| **2.3d** | Chẩn đoán lỗi khoa học<br>*(Nếu gặp Test Đỏ)* | 💬 `[AG 2.0]` Khi test đỏ hóc búa, dùng **[Mẫu Prompt P-2.3d]** kích hoạt `diagnosing-bugs` (Lập giả thuyết ➔ Tìm chứng cứ ➔ Sửa đúng gốc, cấm sửa mò) | Sonnet 4.6 | Báo cáo chẩn đoán & bản sửa đúng gốc |
-| **2.3e** | Nghiệm thu tích hợp | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3e]** gọi `implementer` chạy toàn bộ Test Suite để nghiệm thu tất cả Test Contracts `[TC-xx.x/MSS]` và `[TC-xx.x/A#]` | Flash / Sonnet | 100% Test Contracts PASS |
-| **2.4** | Kiểm toán 2 Cổng | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.4]** gọi đồng thời `spec-reviewer` (đạt 23 tiêu chí) và `code-reviewer` (sạch 6 cờ đỏ slop Nash) | Sonnet / Flash | Báo cáo 2 cổng APPROVED 100% |
+| **2.1** | Cắt Lát Cắt (JIT)<br>*(Song tác nhân)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.1]**: `slicer` soạn thảo ticket ➔ `spec-reviewer` quét rò rỉ Zone 3 trước khi lưu | Flash | File `issues/[TICKET].md` sạch |
+| **2.2** | Trinh sát bối cảnh<br>*(Đơn tác nhân)* | 💬 `[AG 2.0]` Gọi `scout` (Read-only) trinh sát hiện trạng mã nguồn:<br>• **Greenfield (S00):** Dùng **[Mẫu P-2.2A]** Target File Map<br>• **Brownfield (S01+):** Dùng **[Mẫu P-2.2B]** Change Impact | Flash | Báo cáo hiện trạng & tọa độ dòng |
+| **2.3a** | Lập Kế Hoạch Bẻ Nhỏ<br>*(Song tác nhân)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3a]**: `architect` bẻ Task DAG $\le 80$ LOC ➔ `spec-reviewer` thẩm định 5 Tiêu Chuẩn Vàng | Sonnet 4.6 | Kế Hoạch được `[APPROVED]` |
+| **2.3b** | Khởi tạo Test Harness<br>*(Đơn tác nhân - S00)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3b]** gọi `implementer` dựng Test Runner tối thiểu (`package.json`, `tsconfig.json`, `vitest`...) ➔ Chạy smoke test PASS | Flash / Sonnet | Lệnh `npm test` chạy PASS trên CMD |
+| **2.3c** | Thi công TDD Vi Mô<br>*(Song tác nhân đối kháng)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3c]**: **1 prompt duy nhất** điều phối `QA Tester` (viết test ĐỎ) ➔ `Implementer` (viết code XANH) ➔ `Inversion Gate` | Sonnet 4.6 | Test con + Inversion PASS 100% |
+| **2.3d** | Chẩn đoán lỗi khoa học<br>*(Song tác nhân)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3d]**: `Investigator` truy nguyên nhân gốc ➔ `Implementer` sửa mã nguồn tối thiểu | Sonnet 4.6 | Báo cáo nguyên nhân & bản sửa tối thiểu |
+| **2.3e** | Nghiệm thu tích hợp<br>*(Đơn tác nhân)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3e]** gọi `implementer` chạy toàn bộ Test Suite với cờ `--randomize` (cách ly trạng thái) | Flash / Sonnet | 100% Test Contracts PASS |
+| **2.4** | Kiểm toán 2 Cổng<br>*(Song tác nhân độc lập)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.4]** gọi đồng thời `spec-reviewer` (23 tiêu chí) và `code-reviewer` (6 cờ đỏ slop Nash) | Sonnet / Flash | Báo cáo 2 cổng APPROVED 100% |
 | **2.5** | Nghiệm thu & Commit | 💻 `[CMD]` Chạy lệnh **[Lệnh Terminal P-2.5]**: Smoke test 30s ➔ Tự gõ `git commit` trên CMD ➔ Đánh dấu `[x]` vào Sổ Cái `_epic_ledger.md` | Bạn (Human) | Git commit sạch, không lỗi |
 | **2.6** | Chuyển phiên chat | 💬 `[AG 2.0]` Dùng **[Mẫu Lệnh P-2.6]**: Gõ `/handoff` ➔ Bấm **New Conversation** (Ngữ cảnh về 0, không bị bloat trước khi sang Slice mới) | Flash | Tài liệu bàn giao gọn, sạch |
 | **3.1** | Xử lý bài toán khó | 💬 `[AG 2.0]` Gõ `/boost [bài toán phức tạp]` để kích hoạt deep reasoning 3 pha | Sonnet / Opus | Lời giải FSM / Thuật toán sạch |
@@ -1308,327 +1334,248 @@ Khi bạn chạy lệnh trong Terminal gặp lỗi đỏ, hoặc Subagent báo t
 
 ---
 
-## 12.1 SỔ TAY PROMPTS THỰC CHIẾN COPY-PASTE CHO JUNIOR (JUNIOR PROMPT COOKBOOK)
-*(Dành cho lập trình viên Junior: Chỉ việc sao chép chính xác đoạn text trong ô, điền thông tin trong ngoặc vuông `[...]` và gửi vào Chat Antigravity)*
+## 12.1 SỔ TAY PROMPTS THỰC CHIẾN 4 CẠNH CHO JUNIOR (THE 4-TIER STEP HARNESS PLAYBOOK)
+*(Chuẩn hóa theo mô hình 4 cạnh: TRƯỚC kiểm tra ➔ TRONG kích hoạt Skill cụ thể ➔ GÁC CỔNG cơ học 0-token ➔ SAU kiểm tra bằng chứng mới được đi tiếp. Phân định rõ chế độ [ĐƠN TÁC NHÂN] và [SONG TÁC NHÂN ĐỐI KHÁNG - PING-PONG] để triệt tiêu thiên kiến).*
 
 ```text
-[SƠ ĐỒ TRÌNH TỰ SỬ DỤNG CÁC MẪU PROMPT TRONG 1 LÁT CẮT]
+[KHUNG KIỂM SOÁT 4 CẠNH BẮT BUỘC TRONG TỪNG BƯỚC]
 
-   [P-2.1: Cắt Ticket JIT] ──► Tạo issues/[TICKET].md
-              │
-              ▼
-   [P-2.2A (Greenfield) HOẶC P-2.2B (Brownfield)] ──► Báo cáo Trinh Sát
-              │
-              ▼
-   [P-2.3a: Lập Kế Hoạch Bẻ Nhỏ] ──► Danh sách Micro-Tasks (DAG)
-              │
-              ▼ (Chỉ chạy 1 lần ở Slice 00)
-   [P-2.3b: Dựng Test Harness] ──► package.json, vitest ➔ 1 smoke test PASS
-              │
-              ▼
-   [P-2.3c: Thi Công TDD Từng Task] ◄──┐ (Lặp lại cho từng Task 1, 2, 3...)
-              │                         │
-              ├─► Nếu gặp Test Đỏ ──────┴──► [P-2.3d: Chẩn Đoán Lỗi Khoa Học]
-              ▼
-   [P-2.3e: Nghiệm Thu Tích Hợp Lát Cắt] ──► 100% Test Contracts PASS
-              │
-              ▼
-   [P-2.4: Kiểm Toán 2 Cổng Độc Lập] ──► spec-reviewer & code-reviewer APPROVED
-              │
-              ▼
-   [P-2.5: Con Người Nghiệm Thu & Commit] ──► Tự gõ git commit trên CMD
-              │
-              ▼
-   [P-2.6: Bàn Giao Ngữ Cảnh (Handoff)] ──► Gõ /handoff ➔ Bấm New Conversation
+   🛑 1. TRƯỚC KHI GỬI (Pre-Check)       : Kiểm tra điều kiện đầu vào (thiếu ➔ dừng lại)
+   💬 2. TRONG KHI GỬI (Prompt & Skills)  : Câu lệnh copy-paste BẮT BUỘC NÊU RÕ TÊN SKILL
+   🛡️ 3. RÀO CHẮN GÁC CỔNG (Guardrails)   : Hook, Script, Rule GEMINI.md chạy ngầm tự động
+   ✅ 4. SAU KHI CHẠY (Post-Check)       : Bằng chứng nghiệm thu bắt buộc có mới được sang bước sau
 ```
 
 ---
 
 ### 📋 MẪU P-2.1: CẮT TICKET LÁT CẮT (JIT SLICING)
-- **Khi nào dùng**: Khi bắt đầu một Slice mới (sau khi Slice trước đã hoàn thành và commit xong).
-- **Model**: `Flash`
-- **Copy & Paste vào Chat AG 2.0**:
+- **🏷️ CHẾ ĐỘ THỰC THI**: `[SONG TÁC NHÂN TỰ KIỂM TOÁN]` *(Slicer soạn thảo ➔ Spec-Reviewer quét Zone 3)*.
+- **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Sổ cái `docs/epics/[epic]/_epic_ledger.md` đã có danh sách Use Cases. Slice trước đó (nếu có) đã được commit sạch trên Git.
+- **🛡️ RÀO CHẮN GÁC CỔNG**: `GEMINI.md` khóa cứng giới hạn ngân sách mã nguồn (LOC $\le 50-100$). Hook `use_case_guard.py` tự động quét Zone 3 Blocklist khi lưu ticket.
+- **💬 CÂU LỆNH PROMPT CHUẨN (Model: Flash)**:
 ```text
-Hãy đọc Sổ Cái docs/epics/[TÊN_EPIC]/_epic_ledger.md và cấu trúc mã nguồn hiện có trong src/.
+Hãy điều phối 2 subagent phối hợp để tạo tệp ticket issues/[MÃ_TICKET].md cho [TÊN_SLICE]:
 
-Kích hoạt skill use-case-slicing để tạo tệp ticket issues/[MÃ_TICKET].md cho [TÊN_SLICE, ví dụ: Slice 01 - Vòng lặp lượt chơi cơ bản].
+1. Subagent Slicer (Kỹ năng use-case-slicing):
+   - Đọc Sổ Cái docs/epics/[TÊN_EPIC]/_epic_ledger.md và cấu trúc mã nguồn hiện có trong src/.
+   - Kế thừa chính xác cấu trúc thư mục, tên miền và kiểu dữ liệu hiện hữu từ Slice trước.
+   - [Nếu là Slice 01]: CHỈ thi công kịch bản chính (MSS). Cấm làm trước luồng rẽ nhánh A#.
+   - Soạn thảo bản nháp ticket với LOC budget <= 50-100 và 3-5 hợp đồng kiểm thử [TC-xx.x/MSS].
 
-Yêu cầu kỹ thuật bắt buộc:
-1. Kế thừa chính xác cấu trúc thư mục và kiểu dữ liệu hiện hữu từ Slice trước, không tự phát sinh cấu trúc mới.
-2. [Nếu là Slice 01]: CHỈ thi công kịch bản chính (Main Success Scenario - MSS). Tuyệt đối cấm làm trước các luồng rẽ nhánh hoặc xử lý ngoại lệ (Alternative Flows A#) của các slice sau.
-3. Thiết lập ngân sách mã nguồn dự kiến (LOC budget <= 50-100 dòng) và 3-5 hợp đồng kiểm thử nghiệm thu [TC-xx.x/MSS].
-4. CHỈ tạo tệp ticket và DỪNG LẠI để tôi duyệt, TUYỆT ĐỐI CHƯA VIẾT CODE lúc này.
+2. Subagent Spec-Reviewer (Read-only, Kỹ năng vertical-slice-completeness):
+   - Quét độc lập bản nháp ticket để phát hiện rò rỉ cơ chế Zone 3 (SQL, JWT, tên giao thức).
+   - Nếu phát hiện rò rỉ: Yêu cầu Slicer sửa lại ngay lập tức.
+   - Chỉ lưu tệp ticket khi đạt chuẩn 100%.
+
+CHỈ tạo tệp ticket và DỪNG LẠI để tôi duyệt, TUYỆT ĐỐI CHƯA VIẾT CODE lúc này.
 ```
+- **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu)**: Tệp `issues/[MÃ_TICKET].md` đã được tạo. Đủ 4 phần: Metadata, Intent & Confinement, Test Contracts, DoD. Đã được Spec-Reviewer xác nhận sạch Zone 3.
 
 ---
 
-### 📋 MẪU P-2.2A: TRINH SÁT NỀN MÓNG KỸ THUẬT (DÀNH CHO GREENFIELD - SLICE 00)
-- **Khi nào dùng**: Khi bắt đầu dự án mới tinh từ số 0, thư mục `src/` còn rỗng.
-- **Model**: `Flash`
-- **Copy & Paste vào Chat AG 2.0**:
+### 📋 MẪU P-2.2A: TRINH SÁT NỀN MÓNG KỸ THUẬT (GREENFIELD - SLICE 00)
+- **🏷️ CHẾ ĐỘ THỰC THI**: `[ĐƠN TÁC NHÂN]` *(Chỉ đọc dữ liệu, không sinh mã nguồn nên 1 Scout là tối ưu)*.
+- **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Dự án mới từ số 0, `src/` rỗng, đã có `issues/[MÃ_TICKET_S00].md` và `GEMINI.md`.
+- **🛡️ RÀO CHẮN GÁC CỔNG**: Subagent `scout` ở chế độ Read-only (không có quyền tạo/sửa file nguồn).
+- **💬 CÂU LỆNH PROMPT CHUẨN (Model: Flash)**:
 ```text
-Hãy gọi subagent scout (Model: flash) khảo sát nền móng kỹ thuật cho Slice 00 Greenfield:
-1. Kiểm tra toolchain local (Node.js, npm, compiler) và xác nhận trạng thái thư mục src/.
-2. Đọc GEMINI.md và issues/[MÃ_TICKET_S00].md để trích xuất các ràng buộc kỹ thuật bắt buộc và 4 hợp đồng kiểm thử [TC-00.x].
+Hãy gọi subagent scout (Model: flash), kích hoạt kỹ năng domain-modeling và skill-dispatcher để khảo sát nền móng kỹ thuật cho Slice 00 Greenfield:
+1. Kiểm tra toolchain local (Node, npm, python, dotnet...) trên CMD Windows và xác nhận trạng thái thư mục src/.
+2. Đọc GEMINI.md và issues/[MÃ_TICKET_S00].md để trích xuất các ràng buộc kỹ thuật bắt buộc và các hợp đồng kiểm thử [TC-00.x].
 3. Xuất Bản đồ tọa độ tệp mục tiêu (Target File Map) dự kiến cho toàn bộ Slice 00 (đặt tên file chuẩn, cấu trúc rõ ràng).
 Báo cáo ngắn gọn dưới 20 dòng, TUYỆT ĐỐI KHÔNG sửa mã nguồn.
 ```
+- **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu)**: Nhận được báo cáo có đủ 4 mục: Hiện trạng Toolchain, Ràng buộc `GEMINI.md`, 4 Test Contracts, và Target File Map rõ ràng từng file.
 
 ---
 
-### 📋 MẪU P-2.2B: TRINH SÁT MÃ NGUỒN & TÁC ĐỘNG LAN TỎA (DÀNH CHO BROWNFIELD - TỪ SLICE 01 TRỞ ĐI)
-- **Khi nào dùng**: Khi dự án đã có mã nguồn, cần sửa đổi hoặc thêm tính năng mới mà không làm vỡ code cũ.
-- **Model**: `Flash`
-- **Copy & Paste vào Chat AG 2.0**:
+### 📋 MẪU P-2.2B: TRINH SÁT MÃ NGUỒN & TÁC ĐỘNG LAN TỎA (BROWNFIELD - TỪ SLICE 01 TRỞ ĐI)
+- **🏷️ CHẾ ĐỘ THỰC THI**: `[ĐƠN TÁC NHÂN]` *(Trinh sát hiện trạng mã nguồn tĩnh)*.
+- **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Dự án đã có mã nguồn trong `src/`, đã có ticket `issues/[MÃ_TICKET].md`.
+- **🛡️ RÀO CHẮN GÁC CỔNG**: Subagent `scout` chỉ đọc; cấm sửa đổi mã nguồn.
+- **💬 CÂU LỆNH PROMPT CHUẨN (Model: Flash)**:
 ```text
-Hãy gọi subagent scout (Model: flash) trinh sát hiện trạng mã nguồn cho ticket issues/[MÃ_TICKET].md:
+Hãy gọi subagent scout (Model: flash), kích hoạt kỹ năng codebase-design và skill-dispatcher để trinh sát hiện trạng mã nguồn cho ticket issues/[MÃ_TICKET].md:
 1. Định vị chính xác tọa độ các file:dòng liên quan cần can thiệp [file.ts#L10-L30].
 2. Phân tích tác động lan tỏa (Change Impact Analysis): Hàm này, class này hoặc kiểu dữ liệu này đang được gọi ở đâu trong src/? Có nguy cơ làm hỏng bài test cũ nào không?
 Báo cáo ngắn gọn dưới 15 dòng, TUYỆT ĐỐI KHÔNG sửa mã nguồn.
 ```
+- **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu)**: Báo cáo chỉ rõ tọa độ dòng cần sửa và đánh giá rủi ro hồi quy (Regression Risk) trên các test cũ.
 
 ---
 
 ### 📋 MẪU P-2.3a: LẬP KẾ HOẠCH BẺ NHỎ (MICRO-TASK BREAKDOWN DAG)
-- **Khi nào dùng**: Ngay sau khi Scout báo cáo xong, TRƯỚC KHI viết bất kỳ dòng code nào.
-- **Model**: `Sonnet 4.6`
-- **Copy & Paste vào Chat AG 2.0**:
+- **🏷️ CHẾ ĐỘ THỰC THI**: `[SONG TÁC NHÂN TỰ DUYỆT CỔNG 1]` *(Architect bẻ nhỏ ➔ Spec-Reviewer thẩm định 5 Tiêu Chuẩn Vàng)*.
+- **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Đã có báo cáo của Scout ở Bước 2.2.
+- **🛡️ RÀO CHẮN GÁC CỔNG**: Bắt buộc dùng `writing-plans`. Kế hoạch bắt buộc lưu vào `docs/plans/[MÃ_TICKET]_plan.md` để chống bị ghi đè.
+- **💬 CÂU LỆNH PROMPT CHUẨN (Model: Sonnet 4.6)**:
 ```text
-Dựa trên ticket issues/[MÃ_TICKET].md và báo cáo của scout, hãy kích hoạt skill writing-plans để bẻ lát cắt này thành danh sách các Micro-Tasks tuần tự:
-1. Bẻ nhỏ thành chuỗi Task tuần tự (Task 1 -> Task 2 -> Task N). Mỗi Task có phạm vi hẹp (LOC budget <= 50-80 dòng), giải quyết 1 mục tiêu kỹ thuật cụ thể.
-2. Mỗi Task phải chỉ rõ:
-   - Tệp cần tạo hoặc sửa (đúng theo Target File Map).
-   - Hợp đồng kiểm thử con (Test Contract) tương ứng.
-   - Tiêu chuẩn hoàn thành (DoD).
-3. [Nếu là Slice 00 Greenfield]: Bắt buộc đưa "Task 0: Khởi tạo Test Harness tối thiểu (package.json, tsconfig.json, vitest)" lên vị trí đầu tiên.
-4. DỪNG LẠI xuất bản kế hoạch để tôi duyệt, TUYỆT ĐỐI CHƯA VIẾT CODE lúc này.
+Hãy điều phối 2 subagent phối hợp để thiết lập bản kế hoạch thi công docs/plans/[MÃ_TICKET]_plan.md:
+
+1. Subagent Architect (Kỹ năng writing-plans):
+   - Đọc ticket issues/[MÃ_TICKET].md và báo cáo của scout.
+   - Bẻ nhỏ lát cắt thành chuỗi Micro-Tasks tuần tự (Task 1 -> Task N). Mỗi Task LOC budget <= 50-80 dòng.
+   - [Nếu là Slice 00]: Bắt buộc đưa "Task 0: Khởi tạo Test Runner Harness" lên đầu tiên.
+   - Mỗi Task phải chỉ rõ: Tệp tác động (theo Target File Map), Test Contract tương ứng, DoD.
+
+2. Subagent Spec-Reviewer (Read-only, Kỹ năng vertical-slice-completeness):
+   - Thẩm định bản nháp kế hoạch dựa trên 5 Tiêu Chuẩn Vàng (DAG thứ tự đúng, đủ Test Contracts, LOC <= 80, không lấn scope, tuân thủ GEMINI.md).
+   - Nếu chưa đạt: Yêu cầu Architect điều chỉnh lại.
+   - Khi đạt 100%: Cho phép lưu vào docs/plans/[MÃ_TICKET]_plan.md và xuất chữ [APPROVED].
+
+DỪNG LẠI sau khi lưu kế hoạch, TUYỆT ĐỐI CHƯA VIẾT CODE lúc này.
 ```
+- **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu - TRẠM 1: PLAN GATE)**:
+  - Bản kế hoạch đã được lưu tại `docs/plans/[MÃ_TICKET]_plan.md` với xác nhận **`[APPROVED]`** từ Spec-Reviewer.
 
 ---
 
-### 📋 MẪU P-2.3b: KHỞI TẠO TEST RUNNER HARNESS (CHỈ CHẠY 1 LẦN Ở SLICE 00)
-- **Khi nào dùng**: Khi kế hoạch bước 2.3a đã được duyệt và dự án chưa có môi trường chạy test.
-- **Model**: `Flash` hoặc `Sonnet 4.6`
-- **Copy & Paste vào Chat AG 2.0**:
+### 📋 MẪU P-2.3b: KHỞI TẠO TEST RUNNER HARNESS (PHỔ QUÁT MỌI DỰ ÁN - SLICE 00)
+- **🏷️ CHẾ ĐỘ THỰC THI**: `[ĐƠN TÁC NHÂN IMPLEMENTER]` *(Thiết lập hạ tầng compiler và test runner nền móng)*.
+- **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Kế hoạch bước 2.3a đã được duyệt (APPROVED).
+- **🛡️ RÀO CHẮN GÁC CỔNG**: Bắt buộc chạy trong `Workspace: "branch"` để bảo vệ nhánh chính. Hook `git-safety-gate` chặn lệnh commit.
+- **💬 CÂU LỆNH PROMPT CHUẨN (Model: Flash hoặc Sonnet 4.6)**:
 ```text
-Hãy gọi subagent implementer trong Workspace: "branch" thi công Task 0 (Khởi tạo Test Runner Harness tối thiểu):
-1. Tạo package.json với dependencies tối thiểu (typescript, vitest).
-2. Tạo tsconfig.json (tuân thủ nghiêm ngặt strict: true theo GEMINI.md) và vitest.config.ts.
-3. Tạo 1 bài test mẫu tests/smoke.test.ts để kiểm tra môi trường chạy test.
-4. Chạy lệnh "npm test" trên CMD Windows và chứng minh bài test PASS 100%.
-Báo cáo kết quả và dừng lại để tôi kiểm tra.
+Kế hoạch đã được duyệt. Hãy gọi subagent implementer trong Workspace: "branch", kích hoạt kỹ năng tdd và atdd-quality-gates để thi công Task 0 (Khởi tạo Test Runner Harness) bám sát 100% Kế Hoạch:
+1. Đọc kỹ đặc tả của Task 0 trong Kế Hoạch và các ràng buộc kỹ thuật trong GEMINI.md.
+2. Thiết lập tệp cấu hình dự án, cấu hình compiler nghiêm ngặt, và công cụ test runner tương ứng với tech stack của dự án (TS/Node, Python, C#, Flutter, Go...).
+3. Tạo 1 bài test mẫu (Smoke test) để kiểm chứng môi trường.
+4. Chạy lệnh kiểm thử tương ứng trên Terminal CMD Windows và chứng minh bài test PASS 100%.
+Báo cáo kết quả lệnh test và dừng lại để tôi kiểm tra.
 ```
+- **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu)**: Lệnh test của ngôn ngữ dự án (`npm test`, `pytest`, `dotnet test`, `flutter test`, `go test`) chạy trên Terminal CMD in ra kết quả **PASS 100%**. Yêu cầu copy sang main workspace và chạy lại CMD thật trước khi sang Task 1.
 
 ---
 
-### 📋 MẪU P-2.3c: THI CÔNG TDD TỪNG MICRO-TASK (MICRO-EXECUTION LOOP)
-- **Khi nào dùng**: Thi công lần lượt từng Task trong bản kế hoạch (Task 1 ➔ Task 2 ➔ Task N).
-- **Model**: `Sonnet 4.6`
-- **Copy & Paste vào Chat AG 2.0**:
+### 📋 MẪU P-2.3c: THI CÔNG TDD TỪNG MICRO-TASK (SONG TÁC NHÂN ĐỐI KHÁNG - PING-PONG TDD)
+- **🏷️ CHẾ ĐỘ THỰC THI**: `[SONG TÁC NHÂN ĐỐI KHÁNG BẮT BUỘC]` *(QA Tester viết test Đỏ ➔ Implementer viết code Xanh ➔ QA Inversion Gate)*.
+- **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Task trước đó đã hoàn thành và test xanh trên máy thật (nếu là Task 1 thì Task 0 Harness đã chạy được trên CMD).
+- **🛡️ RÀO CHẮN GÁC CỔNG**: `Workspace: "branch"`. Rào chắn Sandbox: QA Tester chỉ ghi vào `tests/` (Read-only `src/`); Implementer chỉ ghi vào `src/` (Read-only `tests/`).
+- **💬 CÂU LỆNH PROMPT CHUẨN DUY NHẤT 1 LẦN GỬI (Model: Sonnet 4.6)**:
 ```text
-Hãy gọi subagent implementer trong Workspace: "branch" thi công [ĐIỀN TÊN TASK, ví dụ: Task 1 - Logic Nhịp tim 5s & Thời gian ân hạn 60s] theo đúng quy trình TDD 3-Pass:
+Hãy điều phối 2 subagent trong Workspace: "branch" thi công [ĐIỀN TÊN TASK, ví dụ: Task 1] bám sát Kế Hoạch theo cơ chế Song Tác Nhân Đối Kháng (Ping-Pong TDD):
 
-1. Pass 1 (Make it Work - Adversarial TDD):
-   - Viết bài test con trước trong tests/ (Red).
-   - Viết mã nguồn tối thiểu trong src/ để test chuyển sang màu Xanh (Green).
-   - Thử nghiệm Inversion Test: Cố tình sửa sai 1 dòng logic để chứng minh test chuyển sang màu ĐỎ.
-2. Pass 2 (Make it Lean - De-sloppify):
-   - Rà soát nén mã nguồn, loại bỏ abstraction thừa chỉ dùng 1 lần (YAGNI).
-3. Pass 3 (Quality Gate):
-   - Đảm bảo Cyclomatic Complexity <= 5, hàm <= 30 dòng, file <= 400 dòng.
-   - [Nếu có UI]: Tuân thủ nghiêm ngặt UI tokens trong docs/domain/design.md.
+1. Pha 1 (Subagent QA Tester - Kỹ năng tdd, atdd-quality-gates):
+   - Đọc đặc tả của Task trong Kế Hoạch và hợp đồng kiểm thử tương ứng.
+   - VÙNG CÔ LẬP: CHỈ được phép tạo hoặc sửa tệp test trong tests/ (TUYỆT ĐỐI CẤM sửa mã nguồn trong src/).
+   - Viết bài test con kiểm chứng hành vi nghiệp vụ.
+   - Chạy lệnh test trên Terminal CMD và chứng minh bài test bị ĐỎ (FAIL) do chưa có mã nguồn.
 
-Báo cáo tóm tắt diff thay đổi (file:dòng) và kết quả chạy test.
+2. Pha 2 (Subagent Implementer - Kỹ năng tdd, de-sloppify):
+   - Đọc bài test ĐỎ ở Pha 1. VÙNG CÔ LẬP: TUYỆT ĐỐI CẤM sửa tệp test trong tests/.
+   - CHỈ viết mã nguồn tối thiểu vào src/ để giải quyết bài test.
+   - Chạy lại lệnh test và chứng minh bài test chuyển sang XANH (PASS 100%).
+   - Tối ưu mã nguồn (De-sloppify), đảm bảo Cyclomatic Complexity <= 5, hàm <= 30 dòng.
+
+3. Pha 3 (Nghiệm Thu Đối Kháng - TRẠM 2: INVERSION GATE):
+   - QA Tester thử sửa sai 1 dòng logic trong src/ để chứng minh bài test lập tức ĐỎ trở lại (chống pass giả tạo).
+   - Khôi phục lại dòng sửa và xác nhận bài test XANH 100% dưới 1 giây.
+
+Báo cáo kết quả tổng hợp: Tệp test đã tạo, mã nguồn đã viết, bằng chứng Inversion Test, và log test PASS.
 ```
+- **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu - TRẠM 2: INVERSION GATE)**:
+  - Báo cáo chỉ rõ bằng chứng Inversion Test (sửa sai 1 dòng test ĐỎ).
+  - Tệp test và tệp mã nguồn tách biệt hoàn toàn. Lệnh test chạy PASS 100%. Nếu test ĐỎ ngoài ý muốn ➔ Chuyển sang mẫu `P-2.3d`.
 
 ---
 
 ### 📋 MẪU P-2.3d: CHẨN ĐOÁN LỖI KHOA HỌC KHI GẶP TEST ĐỎ (SCIENTIFIC DEBUGGING)
-- **Khi nào dùng**: Khi chạy test ở bước 2.3c hoặc 2.3e bị báo ĐỎ (FAIL).
-- **Model**: `Sonnet 4.6`
-- **Copy & Paste vào Chat AG 2.0**:
+- **🏷️ CHẾ ĐỘ THỰC THI**: `[SONG TÁC NHÂN PHẢN BIỆN]` *(Investigator chẩn đoán nguyên nhân gốc ➔ Implementer sửa mã tối thiểu)*.
+- **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Bài test ở bước 2.3c hoặc 2.3e bị FAIL. Có thông báo lỗi hoặc stack trace.
+- **🛡️ RÀO CHẮN GÁC CỔNG**: CẤM sửa code ngay lập tức (chặn đứng sửa mò shotgun debugging).
+- **💬 CÂU LỆNH PROMPT CHUẨN (Model: Sonnet 4.6)**:
 ```text
 Bài test đang bị ĐỎ tại [ĐIỀN TÊN BÀI TEST HOẶC DÁN 3-5 DÒNG STACK TRACE LỖI].
 
-Kích hoạt skill diagnosing-bugs:
-1. TUYỆT ĐỐI CẤM sửa mã nguồn ngay lập tức (chặn đứng hành vi sửa mò / shotgun debugging).
-2. Phân tích thông báo lỗi và thiết lập giả thuyết nguyên nhân gốc (Root Cause Hypothesis).
-3. Thu thập chứng cứ thực nghiệm từ mã nguồn và log thực thi để chứng minh hoặc bác bỏ giả thuyết.
-4. Đưa ra phương án sửa chữa tối thiểu và chỉ thực hiện sửa khi đã chắc chắn 100% nguyên nhân.
-5. Chạy lại bài test và lưu ca lỗi này vào tests/regressions/ nếu là lỗi logic nghiêm trọng.
+Hãy điều phối 2 subagent xử lý lỗi theo phương pháp khoa học:
+1. Subagent Investigator (Kỹ năng diagnosing-bugs, systematic-debugging):
+   - TUYỆT ĐỐI CẤM sửa mã nguồn lúc này.
+   - Phân tích thông báo lỗi và thiết lập giả thuyết nguyên nhân gốc (Root Cause Hypothesis).
+   - Thu thập chứng cứ thực nghiệm từ mã nguồn và log thực thi để chứng minh giả thuyết.
+   - Đưa ra đề xuất sửa đổi tối thiểu (Minimal Fix Proposal).
+
+2. Subagent Implementer (Kỹ năng tdd):
+   - Nhận phương án sửa từ Investigator, chỉ sửa đúng các dòng được chỉ định trong src/.
+   - Chạy lại bài test và chứng minh test chuyển sang XANH hoàn toàn.
+   - Thêm ca kiểm thử hồi quy vào tests/regressions/ nếu là lỗi logic quan trọng.
+
+Báo cáo nguyên nhân gốc và bản diff thay đổi tối thiểu.
 ```
+- **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu)**: Báo cáo chẩn đoán chỉ ra đúng nguyên nhân gốc, bản sửa lỗi tối thiểu giúp test chuyển sang XANH hoàn toàn mà không làm hỏng các test khác.
 
 ---
 
 ### 📋 MẪU P-2.3e: CHẠY NGHIỆM THU TÍCH HỢP TOÀN BỘ LÁT CẮT
-- **Khi nào dùng**: Sau khi tất cả các Micro-Tasks trong Slice đã thi công xong.
-- **Model**: `Sonnet 4.6`
-- **Copy & Paste vào Chat AG 2.0**:
+- **🏷️ CHẾ ĐỘ THỰC THI**: `[ĐƠN TÁC NHÂN TỔNG HỢP]` *(Chạy toàn bộ test suite tích hợp)*.
+- **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Toàn bộ các Micro-Tasks trong bản kế hoạch đều đã thi công xong.
+- **🛡️ RÀO CHẮN GÁC CỔNG**: Bắt buộc chạy test với cờ `--randomize` để kiểm tra tính cách ly trạng thái (State Isolation).
+- **💬 CÂU LỆNH PROMPT CHUẨN (Model: Sonnet 4.6)**:
 ```text
-Hãy gọi subagent implementer chạy toàn bộ Test Suite của lát cắt issues/[MÃ_TICKET].md:
+Hãy gọi subagent implementer, kích hoạt kỹ năng verification-before-completion và atdd-quality-gates để chạy toàn bộ Test Suite của lát cắt issues/[MÃ_TICKET].md:
 1. Chạy toàn bộ các bài test con và bài test tích hợp liên quan đến lát cắt này.
 2. Đối chiếu chứng minh đạt 100% các Hợp đồng kiểm thử nghiệm thu [TC-xx.1] đến [TC-xx.n] được quy định trong ticket.
 3. Chạy test suite với cờ ngẫu nhiên (--randomize) để đảm bảo không có bài test nào bị phụ thuộc thứ tự (State Isolation).
 Báo cáo kết quả tổng kết: Số lượng test PASS, độ phủ và xác nhận toàn bộ xanh 100%.
 ```
+- **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu)**: 100% các Test Contracts quy định trong ticket đều có bằng chứng chạy PASS.
 
 ---
 
 ### 📋 MẪU P-2.4: KIỂM TOÁN 2 CỔNG ĐỘC LẬP (ACCEPTANCE GATE)
-- **Khi nào dùng**: Sau khi toàn bộ test của lát cắt đã xanh 100%.
-- **Model**: `Sonnet 4.6`
-- **Copy & Paste vào Chat AG 2.0**:
+- **🏷️ CHẾ ĐỘ THỰC THI**: `[SONG TÁC NHÂN ĐỘC LẬP BẮT BUỘC - 2 CỔNG]` *(Spec-Reviewer + Code-Reviewer chạy song song, Read-only)*.
+- **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Toàn bộ test suite ở bước 2.3e đã XANH 100%.
+- **🛡️ RÀO CHẮN GÁC CỔNG**: Cả 2 subagent đều ở chế độ Read-Only, không thể tự sửa code để "chữa cháy".
+- **💬 CÂU LỆNH PROMPT CHUẨN (Model: Sonnet 4.6)**:
 ```text
-Hãy gọi đồng thời 2 subagent spec-reviewer và code-reviewer để kiểm toán lát cắt issues/[MÃ_TICKET].md:
+Hãy gọi đồng thời 2 subagent spec-reviewer và code-reviewer, kích hoạt kỹ năng code-review, vertical-slice-completeness và de-sloppify để kiểm toán toàn diện lát cắt issues/[MÃ_TICKET].md:
 
-1. Subagent spec-reviewer:
+1. Subagent spec-reviewer (Read-only):
    - Đối chiếu 100% tiêu chí nghiệp vụ của Use Case trong docs/domain/use_cases.puml và sổ cái.
    - Kiểm tra rò rỉ cơ chế Zone 3 (SQL, JWT, tên giao thức trong spec) và xác thực Failure Postconditions.
-2. Subagent code-reviewer:
+2. Subagent code-reviewer (Read-only):
    - Kiểm toán 6 Cờ Đỏ Slop Nash: Không abstraction thừa (YAGNI), không thư viện ngoài dư thừa.
    - Đo lường Cyclomatic Complexity <= 5, không dính bẫy Code Golf (one-liner ma thuật).
    - Kiểm tra tuân thủ Visual UI/UX tokens trong docs/domain/design.md (nếu có UI).
 
 Yêu cầu xuất biên bản thẩm định: Ghi rõ [APPROVED] hoặc [REJECTED] kèm danh sách lỗi cụ thể (nếu có).
 ```
+- **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu - TRẠM 3A: REVIEW GATE)**: Nhận được biên bản báo cáo ghi chữ **`[APPROVED]`** từ cả 2 cổng. Nếu bị REJECTED ➔ Yêu cầu sửa lỗi và kiểm toán lại.
 
 ---
 
 ### 📋 MẪU P-2.5: CON NGƯỜI NGHIỆM THU & TỰ GÕ GIT COMMIT (HUMAN GATE)
-- **Khi nào dùng**: Sau khi 2 cổng Reviewer đã APPROVED 100%. BẠN (con người) tự thực hiện trên CMD Terminal.
-- **Thao tác 3 bước trên Command Prompt (cmd)**:
+- **🏷️ CHẾ ĐỘ THỰC THI**: `[CON NGƯỜI TRỰC TIẾP]` *(Chốt chặn vật lý cuối cùng)*.
+- **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Bước 2.4 đã được 2 Subagents APPROVED 100%.
+- **🛡️ RÀO CHẮN GÁC CỔNG**: AI tuyệt đối bị cấm gõ lệnh `git commit`. Con người là chốt chặn duy nhất kiểm soát kho mã nguồn.
+- **💻 THAO TÁC TRÊN TERMINAL CMD WINDOWS**:
 ```cmd
-REM Bước 1: Chạy lại toàn bộ test suite để kiểm chứng lần cuối
+REM 1. Chạy lại toàn bộ test suite để kiểm chứng độc lập lần cuối
 npm test
 
-REM Bước 2: Kiểm tra danh sách các file thay đổi
+REM 2. Xem lại danh sách các file thay đổi (hoặc mở GitHub Desktop)
 git status
 
-REM Bước 3: Tự tay gõ lệnh commit an toàn (AI tuyệt đối cấm gõ lệnh này)
+REM 3. Tự tay gõ lệnh commit an toàn
 git add .
 git commit -m "feat([tên_epic]): hoàn thành [MÃ_TICKET] - [TÊN_TÍNH_NĂNG]"
 ```
+- **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu - TRẠM 3B: HUMAN GATE)**: Lệnh commit thành công trên Git, thư mục làm việc sạch sẽ (Working tree clean).
 
 ---
 
 ### 📋 MẪU P-2.6: BÀN GIAO NGỮ CẢNH & CHUYỂN PHIÊN (SESSION HANDOFF)
-- **Khi nào dùng**: Ngay sau khi đã gõ git commit xong 1 Slice, chuẩn bị chuyển sang Slice tiếp theo.
-- **Model**: `Flash`
-- **Copy & Paste vào Chat AG 2.0**:
+- **🏷️ CHẾ ĐỘ THỰC THI**: `[ĐƠN TÁC NHÂN TỔNG HỢP]` *(Lưu trạng thái và reset context)*.
+- **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Bước 2.5 đã commit xong vào Git.
+- **🛡️ RÀO CHẮN GÁC CỔNG**: Lọc sạch 100% thông tin nhạy cảm (API keys, secrets) trước khi nạp vào tài liệu bàn giao.
+- **💬 CÂU LỆNH PROMPT CHUẨN (Model: Flash)**:
 ```text
-/handoff Hãy tổng hợp trạng thái vừa hoàn thành của issues/[MÃ_TICKET].md:
+/handoff Hãy tổng hợp trạng thái vừa hoàn thành của issues/[MÃ_TICKET].md, kích hoạt kỹ năng handoff và writing-for-agents:
 1. Cập nhật đánh dấu [x] DONE vào Sổ Cái docs/epics/[TÊN_EPIC]/_epic_ledger.md.
 2. Tạo tài liệu bàn giao nén gọn chứa danh sách file đã tạo, các hợp đồng test đã PASS, và danh sách Suggested Skills cho phiên tiếp theo.
 3. Lọc sạch mọi thông tin nhạy cảm (API keys, secrets).
 Sau khi xuất tài liệu bàn giao, hãy nhắc tôi bấm nút New Conversation để bắt đầu Slice tiếp theo với bộ nhớ sạch 100%.
 ```
-
-
-
----
-
-## 12.2 BA TRẠM KIỂM SOÁT CHỐT CHẶN TRONG 1 LÁT CẮT (THE 3 QUALITY GATES)
-*(Quy chuẩn kiểm định không khoan nhượng: Trong suốt vòng đời của 1 Slice chỉ có đúng 3 thời điểm dừng lại để kiểm tra)*
-
-```text
-[VÒNG ĐỜI 1 LÁT CẮT & 3 TRẠM KIỂM SOÁT CHỐT CHẶN]
-
-  [Cắt Ticket 2.1 ➔ Trinh Sát 2.2 ➔ Lập Kế Hoạch 2.3a]
-                           │
-                           ▼
-  =======================================================
-  🛑 TRẠM 1: CỔNG THẨM ĐỊNH KẾ HOẠCH (PLAN REVIEW GATE)
-  • Thời điểm: Ngay sau khi lập Kế Hoạch 2.3a, TRƯỚC KHI viết code.
-  • Cơ chế: Tự động hóa qua `spec-reviewer` HOẶC Con người soi 5 Tiêu Chuẩn Vàng.
-  • Tiêu chí: DAG đúng thứ tự, bao phủ 100% Test Contracts, LOC <= 80/task.
-  =======================================================
-                           │ (APPROVED)
-                           ▼
-  [Thi công Task 0 Test Harness 2.3b ➔ Thi công Micro-Tasks 2.3c]
-                           │
-                           ▼
-  =======================================================
-  🛑 TRẠM 2: CỔNG ĐỐI NGHỊCH TỪNG TASK (ADVERSARIAL INVERSION GATE)
-  • Thời điểm: Trong quá trình viết từng Task nhỏ (Pass 1 TDD).
-  • Cơ chế: Tự động hóa qua bài test tự động (Automated Unit/Integration Test).
-  • Tiêu chí: Cố tình sửa sai logic 1 dòng ➔ Test BẮT BUỘC PHẢI ĐỎ.
-              (Triệt tiêu 100% bẫy test xanh giả tạo False Green).
-  =======================================================
-                           │ (ALL TASKS GREEN)
-                           ▼
-  [Nghiệm thu tích hợp toàn bộ Slice 2.3e]
-                           │
-                           ▼
-  =======================================================
-  🛑 TRẠM 3: CỔNG XUẤT XƯỞNG & THẾ GIỚI THỰC (ACCEPTANCE & HUMAN GATE)
-  • Thời điểm: Sau khi toàn bộ các Task đã tích hợp xong.
-  • Cơ chế: 
-    1. Cổng AI Độc Lập: `spec-reviewer` (23 tiêu chí) + `code-reviewer` (6 cờ đỏ Slop).
-    2. Cổng Con Người (Human Gate): Chạy smoke test 30 giây trên trình duyệt/CMD.
-  • Tiêu chí: 2 Reviewer APPROVED ➔ Con người tự tay gõ `git commit`.
-  =======================================================
-                           │ (COMMITTED)
-                           ▼
-  [Chuyển Phiên: Gõ /handoff ➔ Bấm New Conversation ➔ Sang Slice sau]
-```
-
-### Hướng Dẫn Chi Tiết Cách Vận Hành Từng Trạm Cho Junior:
-
-#### 1. Tại Trạm 1 (Plan Gate - Trước khi viết code):
-- **Có cần mở chat mới không?**: **KHÔNG**. Chat tiếp tục ngay trong phiên hội thoại hiện tại vì ngữ cảnh đang nhẹ (<15k tokens) và AI đang nắm trọn vẹn mạch tư duy của Slice.
-- **Cách tự động hóa**: Sau khi Agent xuất bản Kế hoạch 2.3a, bạn gửi ngay lệnh:
-  > *"Hãy gọi subagent `spec-reviewer` (Model: flash) đối chiếu bản Kế Hoạch vừa lập với `issues/[MÃ_TICKET].md` theo 5 Tiêu Chuẩn Vàng (DAG thứ tự, độ bao phủ hợp đồng, ngân sách LOC, ranh giới lát cắt, hiến pháp GEMINI.md). Nếu APPROVED thì cho phép bắt đầu 2.3b; nếu REJECTED thì chỉ ra lỗi cụ thể để sửa lại kế hoạch."*
-- **Quyền quyết định**: Bạn chỉ cần đọc lướt báo cáo thẩm định của `spec-reviewer`, nếu thấy chữ `[APPROVED]` thì gõ: *"Tiến hành Bước 2.3b"*.
-
-#### 2. Tại Trạm 2 (Adversarial Inversion Gate - Trong khi viết từng Task):
-- **Cách hoạt động**: Tự động 100% trong mã nguồn kiểm thử.
-- Khi `implementer` viết bài test con cho từng Task (như Heartbeat 5s hay Disconnect Grace 60s), `implementer` phải xuất ra bằng chứng:
-  - *Ảnh chụp hoặc log chứng minh*: Khi hàm xử lý trả về sai thời gian (ví dụ 10s thay vì 5s) ➔ Test báo lỗi ĐỎ rực rỡ.
-  - Sau khi đưa code chuẩn vào ➔ Test chuyển sang XANH hoàn toàn.
-- **Junior cần làm gì?**: Chỉ cần nhìn vào báo cáo của `implementer`, thấy có dòng ghi nhận: *"Inversion Test: PASS (Failed when timeout altered)"* là đạt chuẩn.
-
-#### 3. Tại Trạm 3 (Acceptance & Human Gate - Xuất xưởng toàn bộ Slice):
-- **Cổng AI**: Bạn gửi prompt `P-2.4` gọi đồng thời `spec-reviewer` và `code-reviewer`. Hai subagent này đọc độc lập và xuất báo cáo `[APPROVED]`.
-- **Cổng Con Người (Không thể tự động hóa - Bắt buộc con người làm)**:
-  - Bạn mở Terminal CMD gõ: `npm test` để tận mắt thấy toàn bộ bài test chạy xanh trên máy của bạn.
-  - Bạn tự gõ `git add .` và `git commit -m "..."`. AI tuyệt đối bị cấm tự động commit để bảo vệ an toàn kho mã nguồn của bạn.
-
-
-
----
-
-### 💡 QUY TẮC ĐẶT TÊN KHI LÀM NHIỀU SLICE TRONG CÙNG 1 PHIÊN CHAT (MULTI-SLICE IN SINGLE CONVERSATION)
-*(Dành cho trường hợp bạn không mở New Conversation sau mỗi Slice mà tiếp tục làm liên tiếp các Slice trong cùng 1 cửa sổ chat)*:
-
-```text
-[NGUY CƠ KHI DÙNG FILE CỐ ĐỊNH implementation_plan.md TRONG CÙNG 1 PHIÊN]
-Slice 00 ──► Ghi implementation_plan.md
-                │
-Slice 01 ──► GHI ĐÈ & XÓA SẠCH KẾ HOẠCH SLICE 00! (Mất toàn bộ lịch sử)
-
-──────────────────────────────────────────────────────────────────────────
-
-[GIẢI PHÁP BẢO VỆ 100%: QUY TẮC ĐỊNH DANH THEO MÃ LÁT CẮT]
-docs/plans/
-  ├── GAME-S00_walking_skeleton_plan.md  <── Lưu trữ vĩnh cửu kế hoạch Slice 00
-  ├── GAME-S01_turn_loop_plan.md         <── Lưu trữ vĩnh cửu kế hoạch Slice 01
-  └── GAME-S02_property_trading_plan.md  <── Lưu trữ vĩnh cửu kế hoạch Slice 02
-```
-
-1. **Khóa cứng quy tắc đặt tên Kế Hoạch**:
-   - Khi ra lệnh cho AI ở Bước 2.3a, BẮT BUỘC chỉ định đường dẫn lưu:  
-     `docs/plans/[MÃ_TICKET]_plan.md` (hoặc nhúng vào chính `issues/[MÃ_TICKET].md`).
-   - Tệp `implementation_plan.md` trong bộ nhớ IDE chỉ được coi là bản hiển thị tạm thời (Transient View), không phải bản lưu trữ chính.
-
-2. **Lệnh phân cách ngữ cảnh (Soft Context Reset Prompt)**:
-   - Khi vừa kết thúc Slice N và chuẩn bị sang Slice N+1 trong cùng 1 phiên chat, gửi câu lệnh phân cách sau:
-     > *"CHỐT HOÀN TẤT [MÃ_TICKET_CŨ]. Bây giờ hãy chuyển trọng tâm ngữ cảnh 100% sang lát cắt mới: [MÃ_TICKET_MỚI]. Không suy đoán hoặc áp dụng các logic của lát cắt cũ vào lát cắt mới này."*
-
-3. **Dấu hiệu cảnh báo bắt buộc phải mở New Conversation**:
-   - Nếu bạn làm đến Slice thứ 2 hoặc thứ 3 trong cùng 1 phiên và thấy:
-     - AI phản hồi chậm khác thường (>20 giây).
-     - AI bắt đầu lặp lại các đoạn code của Slice trước hoặc nói nhầm tên file.
-     ➔ **ĐÂY LÀ DẤU HIỆU BỘ NHỚ BỊ TRÀN (Context Drift)**. Lúc này BẮT BUỘC gõ `/handoff` và bấm **New Conversation** ngay lập tức để làm mới 100% năng lực tư duy.
+- **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu)**: Sổ cái `_epic_ledger.md` đã có dấu `[x] DONE`. Bấm nút **New Conversation** trên IDE để đưa Token về 0.
 
 
 > [!IMPORTANT]

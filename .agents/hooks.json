@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python scripts/use_case_guard.py --check-command",
+            "command": "python .agents/scripts/use_case_guard.py --check-command",
             "timeout": 5
           }
         ]
@@ -20,7 +20,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python scripts/use_case_guard.py --audit-file",
+            "command": "python .agents/scripts/use_case_guard.py --audit-file",
             "timeout": 5
           }
         ]
@@ -30,7 +30,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python scripts/use_case_guard.py --audit-file",
+            "command": "python .agents/scripts/use_case_guard.py --audit-file",
             "timeout": 5
           }
         ]
