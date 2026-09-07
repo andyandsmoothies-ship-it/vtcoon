@@ -1,0 +1,22 @@
+{
+  "name": "vtcoon",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.0",
+    "vitest": "^3.2.0",
+    "@types/node": "^24.0.0"
+  },
+  "dependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "@react-three/fiber": "^9.1.0",
+    "three": "^0.175.0",
+    "@types/three": "^0.175.0"
+  }
+}

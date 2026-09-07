@@ -7,7 +7,10 @@
 - **Traceability Chain:** Requirement -> Epic Gameplay -> Slice 00
 - **Flow Paths:** Khởi tạo hạ tầng WebSocket, cơ chế ping-pong heartbeat định kỳ, ân hạn mất mạng, đồng bộ vi sai trạng thái.
 - **Value Delivered:** Khung WebGL R3F sa bàn 40 ô cơ bản và hạ tầng kết nối Client/Server qua WebSocket ổn định.
-- **Lifecycle Status:** Prepared (Chờ duyệt)
+- **Lifecycle Status:** Done (2026-09-07)
+- **Deliverables:** board_config.ts (64L) · session_manager.ts (73L) · game_canvas.tsx (41L)
+- **Test Coverage:** 22/22 tests PASS · 6 files · Adversarial Inversion ×3 PASS
+- **LOC Final:** 380/400
 - **Preconditions Required:** Môi trường server hoạt động, client hỗ trợ WebGL.
 - **Exit Guarantees:** 
   - Success: Client kết nối vững chắc với Server, sa bàn hiển thị và trạng thái đồng bộ liên tục.

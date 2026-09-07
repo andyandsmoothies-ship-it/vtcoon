@@ -1118,6 +1118,54 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command]
 
 ---
 
+## 10. CHIẾN LƯỢC MÔ HÌNH & BẢO VỆ NGỮ CẢNH: TẠI SAO CẤM ĐỔI MODEL GIỮA CHỪNG? (THE MODEL STABILITY PRINCIPLE)
+*(Đúc kết từ nghiên cứu kỹ thuật của MindStudio & Cursor về chi phí ngầm và suy thoái ngữ cảnh khi đổi Model giữa phiên).*
+
+```text
+[SAI LẦM PHỔ BIẾN: ĐỔI MODEL GIỮA PHIÊN CHAT CHÍNH]
+  Turn 1..5: Dùng Claude Sonnet (KV-Cache tích lũy ấm)
+       │
+       ▼ [Bấm đổi sang GPT-4o hoặc Gemini giữa chừng]
+  Turn 6: KV-Cache BỊ HỦY HOÀN TOÀN (100% Cache Miss)
+       ├── Phải tính toán lại từ đầu toàn bộ lịch sử ➔ Độ trễ giật lag, tốn x2-x3 chi phí token
+       └── Lệch phân phối ngữ cảnh (Out-of-Distribution Context) ➔ Lệch phong cách mã (Style Drift), đứt gãy chuỗi suy luận
+
+─────────────────────────────────────────────────────────────────────────────
+
+[CHUẨN MỰC HARNESS: GIỮ NGUYÊN PHIÊN CHÍNH + ROUTE QUA SUBAGENTS ĐỘC LẬP]
+  Phiên chat chính (Orchestrator): Giữ NGUYÊN 1 Model duy nhất (Sonnet hoặc Flash)
+       │
+       ├──► Cần khảo sát / đọc file? ──► Gọi Subagent Scout (Model: Flash, context sạch)
+       ├──► Cần viết test hợp đồng?  ──► Gọi Subagent QA Tester (Model: Sonnet, context sạch)
+       ├──► Cần viết code thuật toán? ──► Gọi Subagent Implementer (Model: Sonnet, context sạch)
+       └──► Cần kiểm toán 2 cổng?    ──► Gọi Subagents Reviewer (Model: Sonnet, context sạch)
+  (Kết quả: Zero cache miss, Zero nhiễm bẩn ngữ cảnh, mỗi việc dùng đúng model tối ưu nhất!)
+```
+
+### 10.1 Hai Cái Giá Phải Trả Khi Đổi Model Giữa Chừng
+1. **Mất Bộ Nhớ Đệm Chú Ý (Full KV-Cache Miss)**:
+   - KV-Cache lưu trữ các phép tính attention của từng token gắn chặt với cấu trúc trọng số của từng model. Cache của Claude không thể dùng cho GPT-4o hay Gemini.
+   - Khi đổi model, model mới buộc phải đọc lại từ đầu toàn bộ lịch sử hội thoại (hàng chục nghìn token). Chi phí token đầu vào bị tính lại từ đầu, thời gian phản hồi tăng vọt.
+2. **Hiện Tượng Lệch Phân Phối Ngữ Cảnh (Out-of-Distribution Context & Style Drift)**:
+   - Mỗi mô hình có phong cách và giả định ngầm khác nhau. Khi Model B thừa hưởng một đoạn chat dài do Model A tạo ra, nó đang xử lý một "ngữ cảnh dị biệt".
+   - Hậu quả: Đổi quy ước đặt tên biến (Style Drift), quên mất các ràng buộc framework đã thỏa thuận ở các lượt trước, gãy chuỗi suy luận khi refactor phức tạp.
+
+### 10.2 Quy Tắc Vàng Dành Cho Người Junior: Model Routing Qua Subagents
+- **Quy tắc 1: Một Hội Thoại Chính = Một Mô Hình Ổn Định**. Khi đã bắt đầu Slice bằng model nào (ví dụ Sonnet 4.6), giữ nguyên model đó làm Orchestrator cho đến khi commit xong Slice.
+- **Quy tắc 2: Phân chia nhiệm vụ bằng Subagents thay vì đổi model thủ công**. Mỗi Subagent bắt đầu bằng một ngữ cảnh mới tinh (Clean Scoped Context), mang model phù hợp nhất cho tác vụ đó, và chỉ trả về bản tóm tắt súc tích (~15 dòng).
+- **Quy tắc 3: Bàn giao có cấu trúc (Structured Handoff)**. Khi chuyển Slice, không sao chép toàn bộ đoạn chat cũ mà dùng lệnh `/handoff` để nén trạng thái thành một bản tóm tắt ngắn gọn và bấm **New Conversation**.
+
+| Vai Trò | Model Khuyên Dùng | Lý Do Kỹ Thuật |
+| :--- | :--- | :--- |
+| **Orchestrator (Phiên chính)** | **Sonnet 4.6 / Gemini Flash** | Ổn định KV-Cache, điều phối luồng mượt mà |
+| **Scout (Trinh sát)** | **Flash** | Tốc độ siêu tốc (<2s), đọc file lớn, chi phí token tối thiểu |
+| **QA Tester (Viết test Red)** | **Sonnet / Pro** | Suy luận hợp đồng kiểm thử sắc bén, hiểu rõ biên nghiệp vụ |
+| **Implementer (Viết code Green)** | **Sonnet / Pro** | Tuân thủ strict architecture, nén code chuẩn (De-sloppify) |
+| **Reviewer (2 Cổng độc lập)** | **Sonnet / Pro** | Khách quan, soi 6 cờ đỏ Slop và rò rỉ cơ chế Zone 3 |
+| **Handoff (Bàn giao)** | **Flash** | Khả năng tổng hợp và tóm tắt văn bản nhanh gọn |
+
+---
+
 ## 11. BẢNG TỪ ĐIỂN SLASH COMMANDS TOÀN DIỆN (THE MASTER SLASH COMMANDS REGISTRY)
 *(Dành cho lập trình viên Junior: Hướng dẫn toàn bộ phím tắt Slash Commands, gồm cả Native Antigravity 2.0 và Kho Kỹ Năng Mở Rộng từ Matt Pocock & Superpowers)*
 
@@ -1311,10 +1359,10 @@ Khi bạn chạy lệnh trong Terminal gặp lỗi đỏ, hoặc Subagent báo t
 
 | Bước | Tên Công Việc | Thao Tác Chi Tiết & Mẫu Prompt Copy-Paste | Model | Sản Phẩm Nghiệm Thu |
 | :---: | :--- | :--- | :---: | :--- |
-| **0.1** | Tạo thư mục chuẩn | 💻 `[CMD]` `mkdir .agents\agents .agents\scripts docs\epics docs\domain docs\domain\adr docs\test_cases docs\reports\audits issues tests` | - | Khung thư mục tiêu chuẩn |
+| **0.1** | Tạo thư mục chuẩn & .gitignore | 💻 `[CMD]` `mkdir .agents\agents .agents\scripts docs\epics docs\domain docs\domain\adr docs\test_cases docs\reports\audits issues tests` ➔ Tạo tệp `.gitignore` chặn `node_modules/`, `dist/`, `.agents/tmp/` | - | Khung thư mục & .gitignore chuẩn |
 | **0.2** | Cài hiến pháp | 💬 `[AG 2.0]` Tạo `GEMINI.md` (<50 dòng: nén luật NFRs, DoD, cấm tự ý git commit) | Flash | `GEMINI.md` |
 | **0.3** | Cài rào chắn cơ học | 💬 `[AG 2.0]` Tạo `.agents/hooks.json` và `.agents/scripts/use_case_guard.py` | Flash | Cổng chặn cơ học 0ms, 0-token |
-| **0.4** | Cài 4 Subagents | 💬 `[AG 2.0]` Tạo 4 file trong `.agents/agents/` (`scout`, `implementer`, 2 reviewers) | Flash | 4 agent chuyên trách độc lập |
+| **0.4** | Cài 5 Subagents | 💬 `[AG 2.0]` Tạo 5 file trong `.agents/agents/` (`scout`, `implementer`, `qa-tester`, 2 reviewers) | Flash | 5 agent chuyên trách độc lập |
 | **0.5** | Nạp Bộ Kỹ Năng | 💻 `[CMD]` Đồng bộ kỹ năng cốt lõi từ `backup\skills_backup\` vào `.agents/skills/` | - | `.agents/skills/` có đủ 46 skills |
 | **1.1** | Phân loại đầu vào | • Nếu ý tưởng thô: 💬 Gõ `/grill-me + shaping`<br>• Nếu đã có spec chi tiết: 💬 Bỏ qua `/grill-me`, nạp tài liệu vào `docs/` | Sonnet / Flash | Bộ tài liệu SSOT hoàn chỉnh |
 | **1.2** | Dựng bản đồ Use Case | 💬 `[AG 2.0]` Dùng `use-case-creator` lập sơ đồ mục lục `docs/domain/use_cases.puml` | Flash / Sonnet | File PlantUML 3 cột chuẩn |
@@ -1326,7 +1374,7 @@ Khi bạn chạy lệnh trong Terminal gặp lỗi đỏ, hoặc Subagent báo t
 | **2.3c** | Thi công TDD Vi Mô<br>*(Song tác nhân đối kháng)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3c]**: **1 prompt duy nhất** điều phối `QA Tester` (viết test ĐỎ) ➔ `Implementer` (viết code XANH) ➔ `Inversion Gate` | Sonnet 4.6 | Test con + Inversion PASS 100% |
 | **2.3d** | Chẩn đoán lỗi khoa học<br>*(Song tác nhân)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3d]**: `Investigator` truy nguyên nhân gốc ➔ `Implementer` sửa mã nguồn tối thiểu | Sonnet 4.6 | Báo cáo nguyên nhân & bản sửa tối thiểu |
 | **2.3e** | Nghiệm thu tích hợp<br>*(Đơn tác nhân)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3e]** gọi `implementer` chạy toàn bộ Test Suite với cờ `--randomize` (cách ly trạng thái) | Flash / Sonnet | 100% Test Contracts PASS |
-| **2.4** | Kiểm toán 2 Cổng<br>*(Song tác nhân độc lập)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.4]** gọi đồng thời `spec-reviewer` (23 tiêu chí) và `code-reviewer` (6 cờ đỏ slop Nash) | Sonnet / Flash | Báo cáo 2 cổng APPROVED 100% |
+| **2.4** | Kiểm toán 2 Cổng<br>*(Song tác nhân độc lập)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.4]** gọi `spec-reviewer` + `code-reviewer` thẩm định ➔ Lưu Biên bản nghiệm thu vào `docs/reports/audits/` | Sonnet / Flash | Báo cáo APPROVED + File `docs/reports/audits/[MÃ]_acceptance_report.md` |
 | **2.5** | Nghiệm thu & Commit | 💻 `[CMD]` Chạy lệnh **[Lệnh Terminal P-2.5]**: Smoke test 30s ➔ Tự gõ `git commit` trên CMD ➔ Đánh dấu `[x]` vào Sổ Cái `_epic_ledger.md` | Bạn (Human) | Git commit sạch, không lỗi |
 | **2.6** | Chuyển phiên chat | 💬 `[AG 2.0]` Dùng **[Mẫu Lệnh P-2.6]**: Gõ `/handoff` ➔ Bấm **New Conversation** (Ngữ cảnh về 0, không bị bloat trước khi sang Slice mới) | Flash | Tài liệu bàn giao gọn, sạch |
 | **3.1** | Xử lý bài toán khó | 💬 `[AG 2.0]` Gõ `/boost [bài toán phức tạp]` để kích hoạt deep reasoning 3 pha | Sonnet / Opus | Lời giải FSM / Thuật toán sạch |
@@ -1432,7 +1480,7 @@ DỪNG LẠI sau khi lưu kế hoạch, TUYỆT ĐỐI CHƯA VIẾT CODE lúc n�
 
 ### 📋 MẪU P-2.3b: KHỞI TẠO TEST RUNNER HARNESS (PHỔ QUÁT MỌI DỰ ÁN - SLICE 00)
 - **🏷️ CHẾ ĐỘ THỰC THI**: `[ĐƠN TÁC NHÂN IMPLEMENTER]` *(Thiết lập hạ tầng compiler và test runner nền móng)*.
-- **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Kế hoạch bước 2.3a đã được duyệt (APPROVED).
+- **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Kế hoạch bước 2.3a đã được duyệt (APPROVED). BẮT BUỘC kiểm tra đã có tệp `.gitignore` (chặn `node_modules/`, `dist/`, `.agents/tmp/`) để ngăn Git theo dõi hàng ngàn file thư viện bên thứ ba.
 - **🛡️ RÀO CHẮN GÁC CỔNG**: Bắt buộc chạy trong `Workspace: "branch"` để bảo vệ nhánh chính. Hook `git-safety-gate` chặn lệnh commit.
 - **💬 CÂU LỆNH PROMPT CHUẨN (Model: Flash hoặc Sonnet 4.6)**:
 ```text
@@ -1450,7 +1498,9 @@ Báo cáo kết quả lệnh test và dừng lại để tôi kiểm tra.
 ### 📋 MẪU P-2.3c: THI CÔNG TDD TỪNG MICRO-TASK (SONG TÁC NHÂN ĐỐI KHÁNG - PING-PONG TDD)
 - **🏷️ CHẾ ĐỘ THỰC THI**: `[SONG TÁC NHÂN ĐỐI KHÁNG BẮT BUỘC]` *(QA Tester viết test Đỏ ➔ Implementer viết code Xanh ➔ QA Inversion Gate)*.
 - **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Task trước đó đã hoàn thành và test xanh trên máy thật (nếu là Task 1 thì Task 0 Harness đã chạy được trên CMD).
-- **🛡️ RÀO CHẮN GÁC CỔNG**: `Workspace: "branch"`. Rào chắn Sandbox: QA Tester chỉ ghi vào `tests/` (Read-only `src/`); Implementer chỉ ghi vào `src/` (Read-only `tests/`).
+- **🛡️ RÀO CHẮN GÁC CỔNG**: 
+  - Khuyên dùng `Workspace: "inherit"` cho các Micro-Tasks trong cùng một Slice để tránh Antigravity tạo các git worktree/branch tạm gây rác mã nguồn cục bộ (Mã nguồn được Git và Hook `git-safety-gate` bảo vệ tuyệt đối, AI không thể tự commit).
+  - Rào chắn Sandbox 3 Pha: QA Tester chỉ ghi vào `tests/` (Read-only `src/`); Implementer chỉ ghi vào `src/` (Read-only `tests/`).
 - **💬 CÂU LỆNH PROMPT CHUẨN DUY NHẤT 1 LẦN GỬI (Model: Sonnet 4.6)**:
 ```text
 Hãy điều phối 2 subagent trong Workspace: "branch" thi công [ĐIỀN TÊN TASK, ví dụ: Task 1] bám sát Kế Hoạch theo cơ chế Song Tác Nhân Đối Kháng (Ping-Pong TDD):
@@ -1537,9 +1587,13 @@ Hãy gọi đồng thời 2 subagent spec-reviewer và code-reviewer, kích ho�
    - Đo lường Cyclomatic Complexity <= 5, không dính bẫy Code Golf (one-liner ma thuật).
    - Kiểm tra tuân thủ Visual UI/UX tokens trong docs/domain/design.md (nếu có UI).
 
-Yêu cầu xuất biên bản thẩm định: Ghi rõ [APPROVED] hoặc [REJECTED] kèm danh sách lỗi cụ thể (nếu có).
+Yêu cầu xuất biên bản thẩm định:
+1. In biên bản tóm tắt trực tiếp ra cửa sổ chat: Ghi rõ [APPROVED] hoặc [REJECTED] kèm chi tiết từng cổng.
+2. Khi cả 2 cổng đều [APPROVED]: Tự động lưu toàn bộ Biên Bản Thẩm Định Nghiệm Thu vào tệp docs/reports/audits/[MÃ_TICKET]_acceptance_report.md để làm bằng chứng kiểm toán vĩnh viễn (Audit Trail) cho các phiên làm việc tiếp theo.
 ```
-- **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu - TRẠM 3A: REVIEW GATE)**: Nhận được biên bản báo cáo ghi chữ **`[APPROVED]`** từ cả 2 cổng. Nếu bị REJECTED ➔ Yêu cầu sửa lỗi và kiểm toán lại.
+- **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu - TRẠM 3A: REVIEW GATE)**: 
+  - Nhận được biên bản báo cáo ghi chữ **`[APPROVED]`** từ cả 2 cổng trên màn hình chat.
+  - Tệp `docs/reports/audits/[MÃ_TICKET]_acceptance_report.md` đã được tạo và lưu trữ đầy đủ trên đĩa. Nếu bị REJECTED ➔ Yêu cầu sửa lỗi và kiểm toán lại.
 
 ---
 
