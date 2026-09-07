@@ -1,0 +1,185 @@
+@startuml
+title VTCoOn - Mục Lục Use Case Hệ Thống (Master System Use Cases)
+
+left to right direction
+
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam defaultFontName "Segoe UI", Tahoma, sans-serif
+skinparam usecaseFontSize 11
+skinparam actorFontSize 12
+skinparam roundCorner 8
+skinparam ArrowColor #2563EB
+skinparam packageTitleFontStyle bold
+skinparam packageBorderColor #64748B
+skinparam packageBackgroundColor #F8FAFC
+skinparam usecaseBackgroundColor #FFFFFF
+skinparam usecaseBorderColor #334155
+
+actor "Player\\n(Người Chơi)" as Player
+
+rectangle "VTCoOn Game System (Server-Authoritative FSM)" as SystemBoundary {
+
+  ' ============================================================================
+  ' 1. SẢNH ĐẤU & KẾT NỐI
+  ' ============================================================================
+  package "1. Room & Session" as PkgRoomSession {
+    usecase "UC-GAME-001: Khởi Tạo Phòng Đấu & Cấp Mã Phòng 6 Ký Tự" as UC_001
+    usecase "UC-GAME-002: Cấu Hình Tham Số Trận Đấu & Vị Trí Bot AI" as UC_002
+    usecase "UC-GAME-003: Gia Nhập Sảnh Chờ Qua Liên Kết / Mã QR" as UC_003
+    usecase "UC-GAME-004: Thiết Lập Kết Nối WebSocket & Tín Hiệu Heartbeat 5s" as UC_004
+    usecase "UC-GAME-005: Điều Phối Quyết Định Bot AI Theo 3 Tính Cách" as UC_005
+    usecase "UC-GAME-006: Kích Hoạt Thời Gian Ân Hạn Mất Kết Nối 60s" as UC_006
+    usecase "UC-GAME-007: Khôi Phục Quyền Điều Khiển Qua Token Trình Duyệt" as UC_007
+    usecase "UC-GAME-008: Chuyển Đổi Tài Khoản Mất Kết Nối Thành Bot Vĩnh Viễn" as UC_008
+    usecase "UC-GAME-009: Đồng Bộ Vi Sai Trạng Thái & Khóa Dữ Liệu Đồng Thời" as UC_009
+    usecase "UC-GAME-010: Tổng Kết Ván Đấu & Giải Phóng Phòng Sau 10 Phút" as UC_010
+
+    UC_001 ..> UC_004 : <<include>>
+    UC_007 ..> UC_006 : <<extend>>
+    UC_008 ..> UC_006 : <<extend>>
+  }
+
+  ' ============================================================================
+  ' 2. VÒNG ĐỜI LƯỢT CHƠI FSM
+  ' ============================================================================
+  package "2. Turn Lifecycle FSM" as PkgTurnFSM {
+    usecase "UC-GAME-011: Khởi Động Lượt Chơi & Đếm Ngược Thời Gian Lượt" as UC_011
+    usecase "UC-GAME-012: Đổ Xúc Xắc 2D6 Ngẫu Nhiên Bảo Mật (Server PRNG)" as UC_012
+    usecase "UC-GAME-013: Xử Lý Đổ Đôi & Cưỡng Chế Giam Khi Đôi 3 Lần" as UC_013
+    usecase "UC-GAME-014: Di Chuyển Quân Cờ Sa Bàn Theo Điểm Xúc Xắc" as UC_014
+    usecase "UC-GAME-015: Nhận Thưởng 2.000 Tr. VNĐ Khi Đi Qua Ô Khởi Hành (GO)" as UC_015
+    usecase "UC-GAME-016: Nộp Thuế Tài Sản Lũy Tiến Danh Mục Tại Ô GO" as UC_016
+    usecase "UC-GAME-017: Kích Hoạt Xử Lý Ô Dừng Chân (Tile Resolution)" as UC_017
+    usecase "UC-GAME-018: Tự Động Xử Lý Hành Động Mặc Định Khi Hết Thời Gian" as UC_018
+    usecase "UC-GAME-019: Chốt Kiểm Tra Tài Chính & Chuyển Giao Lượt Chơi" as UC_019
+
+    UC_013 ..> UC_012 : <<extend>>
+    UC_014 ..> UC_017 : <<include>>
+    UC_015 ..> UC_014 : <<extend>>
+    UC_015 ..> UC_016 : <<include>>
+  }
+
+  ' ============================================================================
+  ' 3. BẤT ĐỘNG SẢN & ĐẦU TƯ
+  ' ============================================================================
+  package "3. Real Estate & Upgrades" as PkgRealEstate {
+    usecase "UC-GAME-020: Mua Đất Nền Cấp 0 Theo Giá Niêm Yết" as UC_020
+    usecase "UC-GAME-021: Mở Phiên Đấu Giá Bất Động Sản Tự Động 15s" as UC_021
+    usecase "UC-GAME-022: Đặt Giá Đấu Giá Bất Động Sản Công Khai" as UC_022
+    usecase "UC-GAME-023: Chốt Quyền Sở Hữu & Sang Tên BĐS Sau Đấu Giá" as UC_023
+    usecase "UC-GAME-024: Nâng Cấp Shophouse / Nhà Phố Thương Mại Cấp 1" as UC_024
+    usecase "UC-GAME-025: Nâng Cấp Tòa Nhà Văn Phòng / Khách Sạn Cấp 2" as UC_025
+    usecase "UC-GAME-026: Nâng Cấp Đại TTTM / Quần Thể Phức Hợp Cấp 3" as UC_026
+    usecase "UC-GAME-027: Thanh Toán Tiền Thuê Đất & Công Trình Cho Chủ Sở Hữu" as UC_027
+    usecase "UC-GAME-028: Đề Xuất & Thương Lượng Giao Dịch Song Phương P2P" as UC_028
+    usecase "UC-GAME-029: Nộp Thuế Chuyển Nhượng BĐS 5% Vào Kho Bạc" as UC_029
+    usecase "UC-GAME-030: Thanh Lý Công Trình Về Cấp 0 Trước Khi Chuyển Nhượng" as UC_030
+
+    UC_021 ..> UC_020 : <<extend>>
+    UC_021 ..> UC_022 : <<include>>
+    UC_021 ..> UC_023 : <<include>>
+    UC_028 ..> UC_029 : <<include>>
+    UC_028 ..> UC_030 : <<include>>
+  }
+
+  ' ============================================================================
+  ' 4. HẠ TẦNG TIỆN ÍCH ĐẶC BIỆT
+  ' ============================================================================
+  package "4. Special Facilities" as PkgSpecialFacilities {
+    usecase "UC-GAME-031: Thanh Toán Phí Vào Cổng & Dịch Vụ Cấp 0 Và Cấp 1" as UC_031
+    usecase "UC-GAME-032: Tung Xúc Xắc 1D6 Nộp Phụ Thu Dịch Vụ Chẵn 200 Tr. VNĐ" as UC_032
+    usecase "UC-GAME-033: Áp Dụng Hiệu Ứng Giữ Chân Mất Lượt Kế Tiếp (Cấp 3)" as UC_033
+    usecase "UC-GAME-034: Nộp Phí Lưu Thông Cảng Biển / Sân Bay / Cao Tốc Lũy Tiến" as UC_034
+    usecase "UC-GAME-035: Lắp Đặt Gói Cảng Thông Minh & Trạm Thu Phí Tự Động ETC" as UC_035
+    usecase "UC-GAME-036: Nộp Phí Tiện Ích Điện & Viễn Thông Theo Xúc Xắc 2D6" as UC_036
+    usecase "UC-GAME-037: Đầu Tư Nâng Cấp Lưới Điện Thông Minh & Trạm 5G Siêu Tốc" as UC_037
+
+    UC_032 ..> UC_031 : <<extend>>
+    UC_033 ..> UC_031 : <<extend>>
+    UC_035 ..> UC_034 : <<extend>>
+    UC_037 ..> UC_036 : <<extend>>
+  }
+
+  ' ============================================================================
+  ' 5. BIẾN CỐ & THẺ BÀI
+  ' ============================================================================
+  package "5. Events & Chance Cards" as PkgEventsCards {
+    usecase "UC-GAME-038: Rút & Thực Thi Thẻ Phiếu Thị Trường Vĩ Mô" as UC_038
+    usecase "UC-GAME-039: Rút & Thực Thi Thẻ Phiếu Cơ Hội Cá Nhân" as UC_039
+    usecase "UC-GAME-040: Áp Dụng Hiệu Ứng Mùa Cao Điểm Du Lịch (x2 Tiền Thuê)" as UC_040
+    usecase "UC-GAME-041: Áp Dụng Hiệu Ứng Thời Tiết Cực Đoan Miền Trung" as UC_041
+    usecase "UC-GAME-042: Thực Thi Biến Động Thị Trường Kinh Tế Toàn Sàn" as UC_042
+    usecase "UC-GAME-043: Kích Hoạt Quyền Miễn Phí Bằng Thẻ Miễn Trừ Ngoại Giao" as UC_043
+    usecase "UC-GAME-044: Thực Thi Đặc Quyền & Chế Tài Thẻ Cơ Hội Cá Nhân" as UC_044
+    usecase "UC-GAME-045: Khớp Lệnh Đầu Tư Lướt Sóng Sàn Chứng Khoán HOSE (1D6)" as UC_045
+    usecase "UC-GAME-046: Nộp Lệ Phí Đăng Ký Đất Đai Tại Ô 04 (2.000 Tr. Hoặc 10%)" as UC_046
+    usecase "UC-GAME-047: Dừng Chân Nghỉ Ngơi Tại Ô Nghỉ Dưỡng Miễn Phí (Ô 20)" as UC_047
+    usecase "UC-GAME-048: Cưỡng Chế Di Chuyển Theo Lệnh Thanh Tra Thuế (Ô 30)" as UC_048
+    usecase "UC-GAME-049: Dừng Chân Thăm Viếng Tại Trạm Kiểm Toán (Ô 10)" as UC_049
+    usecase "UC-GAME-050: Nộp Phạt Bảo Lãnh / Đổ Đôi Thoát Khỏi Trạm Kiểm Toán" as UC_050
+
+    UC_040 ..> UC_038 : <<extend>>
+    UC_041 ..> UC_038 : <<extend>>
+    UC_042 ..> UC_038 : <<extend>>
+    UC_043 ..> UC_039 : <<extend>>
+    UC_044 ..> UC_039 : <<extend>>
+    UC_048 ..> UC_050 : <<include>>
+  }
+
+  ' ============================================================================
+  ' 6. TÀI CHÍNH & PHÁ SẢN
+  ' ============================================================================
+  package "6. Financial & Bankruptcy" as PkgFinancial {
+    usecase "UC-GAME-051: Thế Chấp Bất Động Sản Nhận 50% Hạn Mức Tín Dụng" as UC_051
+    usecase "UC-GAME-052: Nộp Lãi Vay Thế Chấp Định Kỳ 5% Khi Qua Ô GO" as UC_052
+    usecase "UC-GAME-053: Chuộc Bất Động Sản & Nộp Phí Hành Chính 10% (Giải Chấp)" as UC_053
+    usecase "UC-GAME-054: Bán Nhà Hạ Cấp Công Trình Thu Hồi Thanh Khoản" as UC_054
+    usecase "UC-GAME-055: Kích Hoạt Diện Thanh Lý Cưỡng Chế Khi Âm Tiền Mặt" as UC_055
+    usecase "UC-GAME-056: Đấu Giá Cưỡng Chế BĐS Cầm Cố Khởi Điểm 70% Để Xử Lý Nợ" as UC_056
+    usecase "UC-GAME-057: Tuyên Bố Phá Sản & Rời Khỏi Ván Đấu" as UC_057
+    usecase "UC-GAME-058: Quyết Toán Tổng Tài Sản Ròng & Xác Định Thứ Hạng Thắng Cuộc" as UC_058
+
+    UC_051 ..> UC_055 : <<extend>>
+    UC_054 ..> UC_055 : <<extend>>
+    UC_055 ..> UC_056 : <<include>>
+    UC_057 ..> UC_055 : <<extend>>
+    UC_057 ..> UC_058 : <<include>>
+  }
+}
+
+actor "Bank / Real Estate Ledger\\n(Ngân Hàng & Sổ Cái)" as Bank << Ledger >>
+
+' ==============================================================================
+' RÀNG BUỘC LƯỚI 3 CỘT x 2 HÀNG
+' ==============================================================================
+PkgRoomSession -[hidden]down-> PkgTurnFSM
+PkgRealEstate -[hidden]down-> PkgSpecialFacilities
+PkgEventsCards -[hidden]down-> PkgFinancial
+
+PkgRoomSession -[hidden]right-> PkgRealEstate
+PkgRealEstate -[hidden]right-> PkgEventsCards
+
+' ==============================================================================
+' LIÊN KẾT TÁC NHÂN & LUỒNG LIÊN GÓI (ACTOR & INTER-PACKAGE FLOWS)
+' ==============================================================================
+Player --> UC_001
+Player --> UC_003
+Player --> UC_011
+Player --> UC_012
+
+UC_017 ..> UC_020 : <<landing>>
+UC_017 ..> UC_027 : <<landing>>
+UC_017 ..> UC_031 : <<landing>>
+UC_017 ..> UC_034 : <<landing>>
+UC_017 ..> UC_038 : <<landing>>
+UC_017 ..> UC_039 : <<landing>>
+
+UC_027 ..> UC_055 : <<insolvency>>
+UC_031 ..> UC_055 : <<insolvency>>
+
+UC_056 --> Bank
+UC_058 --> Bank
+UC_051 --> Bank
+
+@enduml

@@ -1,0 +1,40 @@
+{
+  "git-safety-gate": {
+    "PreToolUse": [
+      {
+        "matcher": "run_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python scripts/use_case_guard.py --check-command",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  },
+  "spec-and-traceability-guard": {
+    "PostToolUse": [
+      {
+        "matcher": "write_to_file",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python scripts/use_case_guard.py --audit-file",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "replace_file_content",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python scripts/use_case_guard.py --audit-file",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
