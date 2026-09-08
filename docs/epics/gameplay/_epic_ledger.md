@@ -27,7 +27,10 @@
 - **Traceability Chain:** Requirement -> Epic Gameplay -> Slice 01
 - **Flow Paths:** Khởi tạo phòng, gia nhập, FSM Turn Loop, đổ xúc xắc, di chuyển, xử lý ô GO.
 - **Value Delivered:** Hoàn thiện luồng Sảnh Đấu chờ, vòng lặp FSM lượt chơi cơ bản, cơ chế đổ xúc xắc 2D6 và vượt qua ô Khởi Hành.
-- **Lifecycle Status:** Pending
+- **Lifecycle Status:** Done (2026-09-07)
+- **Deliverables:** room.ts · dice.ts · room_manager.ts
+- **Test Coverage:** 61/61 tests PASS · 9 files · Adversarial Inversion ×3 PASS
+- **LOC Final:** ≤400
 - **Preconditions Required:** Slice 00 hoàn tất, Client vào trang chủ hệ thống.
 - **Exit Guarantees:** 
   - Success: Vòng lặp lượt chơi xoay vòng ổn định, tiền thưởng cộng tự động, kết thúc ván bình thường.
@@ -45,7 +48,10 @@
 - **Traceability Chain:** Requirement -> Epic Gameplay -> Slice 02
 - **Flow Paths:** Mua đất nền cấp 0, thanh toán phí dừng chân, giao dịch P2P song phương.
 - **Value Delivered:** Xây dựng luồng sở hữu bất động sản sơ cấp, cơ chế nộp tiền thuê khi dẫm vào đất có chủ và thỏa thuận chuyển nhượng.
-- **Lifecycle Status:** Pending
+- **Lifecycle Status:** Done (2026-09-08)
+- **Deliverables:** property_manager.ts (116L) · room_manager.ts (+15L)
+- **Test Coverage:** 69/69 tests PASS · 11 files · Adversarial Inversion ×4 PASS
+- **LOC Final:** ≤65/80
 - **Preconditions Required:** Slice 01 hoàn tất, người chơi có đủ tiền mặt và đứng tại ô đất trống.
 - **Exit Guarantees:** 
   - Success: Quyền sở hữu được cập nhật, tiền trong quỹ các bên thay đổi chính xác.
@@ -62,7 +68,11 @@
 - **Traceability Chain:** Requirement -> Epic Gameplay -> Slice 03
 - **Flow Paths:** Mở phiên đấu giá, nâng cấp công trình (C1-C3), thu phí Tiện ích/Hạ tầng.
 - **Value Delivered:** Quản trị vòng đời tài sản chuyên sâu (đấu giá, nâng cấp khi đủ màu) và khai thác đặc quyền hạ tầng giao thông, viễn thông.
-- **Lifecycle Status:** Pending
+- **Lifecycle Status:** Done (2026-09-08)
+- **Deliverables:** board_config.ts (+15L) · property_manager.ts (+65L) · room.ts (+4L) · room_manager.ts (+55L)
+- **Test Coverage:** 81/81 tests PASS · 15 files · Adversarial Inversion ×4 PASS · E2E Golden Flow PASS
+- **Defects Resolved:** Bổ sung ô 35 Short Line Railroad vào PROPERTY_DEEDS
+- **LOC Final:** ≤140/150
 - **Preconditions Required:** Slice 02 hoàn tất, có người bỏ qua mua đất hoặc người chơi có đủ bộ màu.
 - **Exit Guarantees:** 
   - Success: Tài sản thăng cấp, đấu giá kết thúc xác định người mua hợp lệ.
@@ -72,8 +82,10 @@
 - **Test Contracts:**
   - `TC-03.1`: [Người chơi từ chối mua đất] -> [Mở phiên đấu giá công khai tự động, sang tên cho người trả giá cao nhất]
   - `TC-03.2`: [Chủ sở hữu có đủ bộ màu yêu cầu nâng cấp] -> [Cấu trúc tài sản thăng Cấp 1-3, trừ chi phí tương ứng và tăng mức phí thuê]
-  - `TC-03.3`: [Người chơi dừng tại ô Giao thông hoặc Viễn thông] -> [Tính phí thu dựa trên số lượng ô hạ tầng sở hữu hoặc kết quả xúc xắc]
-  - `TC-03.4`: [Yêu cầu chuyển nhượng ô đất có công trình] -> [Bắt buộc thanh lý công trình về Cấp 0 và hoàn tiền theo quy định trước khi giao dịch]
+  - `TC-03.3`: [Người chơi dừng tại ô Giao thông (Railroad)] -> [Thu phí lũy tiến theo số ô sở hữu và tăng 50% khi đã lắp ETC]
+  - `TC-03.4`: [Người chơi dừng tại ô Tiện ích (Utility)] -> [Tính phí biến thiên 2D6 theo số ô sở hữu hoặc nhân 150 khi đã nâng cấp Full]
+  - `TC-03.5`: [Chưa sở hữu trọn bộ màu] -> [Từ chối yêu cầu nâng cấp công trình với lỗi MISSING_MONOPOLY]
+  - `TC-03.6`: [Yêu cầu hạ cấp công trình] -> [Thanh lý công trình về Cấp 0 và hoàn tiền 50% tổng chi phí nâng cấp]
 
 ### Slice 04: Biến Cố Thị Trường Vĩ Mô & Thẻ Cơ Hội Cá Nhân
 - **Use Case Ref:** UC-GAME-038, UC-GAME-039, UC-GAME-040, UC-GAME-041, UC-GAME-042, UC-GAME-043, UC-GAME-044, UC-GAME-045, UC-GAME-046, UC-GAME-047, UC-GAME-048, UC-GAME-049, UC-GAME-050

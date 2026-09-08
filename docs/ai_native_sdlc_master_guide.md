@@ -111,16 +111,22 @@
 │        - Spike / Prototype Mode: Kích hoạt `prototype` code nháp trên giao diện khi ý tưởng chưa rõ, sau đó Agent tự trích xuất ngược ra Use Case 3.0.
 │        - Kill & Prune: Xóa dứt khoát tính năng khỏi Ledger và codebase khi không còn giá trị sử dụng.
 │
-└── 12. PHÂN LOẠI RỦI RO (2-BUCKET APPROACH) & CONTRACT-FIRST CODEGEN (ANTI-SLOP 2026):
-       • Phân loại rủi ro 2 xô (Risk-Based 2-Bucket Approach):
-         - Bucket 1 (Low-Stakes / Khám phá): Script migrate 1 lần, internal tool nhỏ, demo prototype ➔ Tối đa tốc độ,
-           cho phép AI tự do thi công nhanh, miễn là test chạy qua, không bắt viết spec hay rào cản nặng nề.
-         - Bucket 2 (High-Stakes / Lõi nghiệp vụ): Auth, Payment, Ledger tiền, DB Schema, Data Integrity ➔ Bắt buộc
-           áp dụng 100% Use Case 3.0, 3 Zones, Transaction Rollback, 2-Tier Defense và con người duyệt từng dòng diff.
-       • Contract-First Codegen (Triệt tiêu bẫy AI tự bịa shape dữ liệu): OpenAPI / Protobuf / JSON Schema là SSOT duy nhất.
-         Chạy công cụ sinh code tự động ra Types/DTOs/Zod schemas. AI chỉ được nối logic, CẤM tự gõ interface dữ liệu thủ công.
-       • Khóa cứng Trình biên dịch (Strict Compiler Flags): Bật `strict: true`, `noUncheckedIndexedAccess`, `<Nullable>enable</Nullable>`.
-         Khi compiler đã bảo đảm biến không thể null/undefined, CẤM Agent viết code phòng thủ rác (`if (x != null)`) làm tăng độ phức tạp.
+├── 12. PHÂN LOẠI RỦI RO (2-BUCKET APPROACH) & CONTRACT-FIRST CODEGEN (ANTI-SLOP 2026):
+│      • Phân loại rủi ro 2 xô (Risk-Based 2-Bucket Approach):
+│        - Bucket 1 (Low-Stakes / Khám phá): Script migrate 1 lần, internal tool nhỏ, demo prototype ➔ Tối đa tốc độ,
+│          cho phép AI tự do thi công nhanh, miễn là test chạy qua, không bắt viết spec hay rào cản nặng nề.
+│        - Bucket 2 (High-Stakes / Lõi nghiệp vụ): Auth, Payment, Ledger tiền, DB Schema, Data Integrity ➔ Bắt buộc
+│          áp dụng 100% Use Case 3.0, 3 Zones, Transaction Rollback, 2-Tier Defense và con người duyệt từng dòng diff.
+│      • Contract-First Codegen (Triệt tiêu bẫy AI tự bịa shape dữ liệu): OpenAPI / Protobuf / JSON Schema là SSOT duy nhất.
+│        Chạy công cụ sinh code tự động ra Types/DTOs/Zod schemas. AI chỉ được nối logic, CẤM tự gõ interface dữ liệu thủ công.
+│      • Khóa cứng Trình biên dịch (Strict Compiler Flags): Bật `strict: true`, `noUncheckedIndexedAccess`, `<Nullable>enable</Nullable>`.
+│        Khi compiler đã bảo đảm biến không thể null/undefined, CẤM Agent viết code phòng thủ rác (`if (x != null)`) làm tăng độ phức tạp.
+│
+└── 13. KHẢ NĂNG QUAN SÁT TINH GỌN (LEAN RUNTIME OBSERVABILITY - CHARITY MAJORS):
+       • "Testing chứng minh lỗi đã biết trong phòng thí nghiệm; Observability giải thích sự cố bất ngờ ngoài đời thực."
+       • CẤM Tuyệt đối nuốt lỗi âm thầm (empty catch). Mọi ngoại lệ hoặc từ chối hành động bắt buộc có mã lý do (Reason Code).
+       • Mọi chuyển dịch trạng thái nghiệp vụ (FSM Transitions, Transactions) bắt buộc phát ra Structured Log
+         ({ event, correlationId, timestamp, delta }) để tua lại hành động khi gặp sự cố ngoài thực tế.
 ```
 
 
@@ -502,11 +508,16 @@ Antigravity tự động tìm và nạp các file luật Markdown theo cơ chế
 | **Con trỏ tài liệu (Pointers)** | ❌ Không đưa vào | ✅ Trỏ `CONTEXT.md`, `design.md` | ❌ |
 | **Quy chuẩn chuyên sâu tầng** | ❌ Không đưa vào | ❌ Không đưa vào | ✅ Token CSS, SQL Rollback |
 
-##### C. 4 Nguyên tắc vàng khi viết File Luật (Rule Design Principles):
+##### C. 5 Nguyên tắc vàng khi thiết kế File Luật Dự Án cho Junior (Project Rule Principles):
 1. **Ngân sách ngắn gọn (<80 - 100 dòng)**: File luật luôn bị tiêm ngầm vào mọi lượt prompt. File dài gây lãng phí token và làm loãng khả năng chú ý của mô hình (Context Drift).
 2. **Rules $\neq$ Skills**: File luật chỉ chứa **Rào chắn cấm đoán / Tiêu chuẩn xuất xưởng** (CẤM làm X, PHẢI giữ Y). Quy trình hướng dẫn nhiều bước phải đưa vào `SKILL.md` để nạp theo nhu cầu (Progressive Disclosure).
 3. **Rules $\neq$ Hooks**: Những gì máy móc kiểm tra tự động được (chặn lệnh git, đếm số dòng, lọc từ cấm), hãy viết vào `.agents/hooks.json` (chạy 0 token, 0ms). File luật chỉ dành để định hướng tư duy lập trình.
 4. **Không viết luật suy đoán**: Chỉ đưa vào file luật các rào chắn từ những lỗi/bug thực tế đã từng xảy ra.
+5. **CẤM Sao chép Mù quáng (Anti-Copy-Paste Trap) & Quy tắc Lưu vết Subagent (Dual Output Pattern)**:
+   - *Tại sao không được copy nguyên xi Rule cũ sang dự án mới?* Mỗi dự án có tech stack, ranh giới NFRs và cấu trúc domain khác nhau. Copy mù quáng sẽ tiêm các ràng buộc thừa thãi hoặc lệch pha, làm loãng sự chú ý của AI.
+   - *Quy tắc phổ quát bắt buộc giữ lại (Dual Output Pattern)*:
+     • **Subagent tạo tài liệu lớn** (như `docs/plans/`, `issues/` >50 dòng): BẮT BUỘC ghi trực tiếp ra đĩa bằng `write_to_file` trong `Workspace: "inherit"` và chỉ trả về bản tóm tắt <20 dòng kèm link file vào chat. Triệt tiêu 100% nguy cơ tràn context và ngăn Agent mẹ phải chạy script cào `transcript_full.jsonl` (gây lỗi nuốt dấu `$` và JSON parse).
+     • **Subagent kiểm toán** (`spec-reviewer`, `code-reviewer`, `scout`): BẮT BUỘC giữ nguyên trạng thái **STRICTLY READ-ONLY**. TUYỆT ĐỐI CẤM ép Reviewers ghi file vì chúng không có tool `write_to_file` (vi phạm phân quyền Rule 8). Reviewer chỉ xuất báo cáo 1 trang (1-page packet) trực tiếp vào cửa sổ chat.
 
 ---
 
@@ -527,12 +538,14 @@ Tạo file `C:\Projects\my-app\GEMINI.md`:
 - Test State Isolation: CẤM Order-Dependent Tests (chạy test độc lập với `--randomize`). Bắt buộc Transactional Rollback sau mỗi test để DB luôn sạch 100% (chống Flaky Test lừa AI). Dữ liệu test bắt buộc dùng Literal Data cụ thể.
 - Zero-Polling & Background Offloading (Google Cloud LRO): CẤM Agent chạy vòng lặp in-loop poll/sleep chờ lệnh. Tác vụ dài (>10s như build Docker, migrate DB, test suite lớn) phải đưa vào Background Task, dừng lượt ngay để Reactive Wakeup đánh thức. Cưỡng chế kill tiến trình treo >60s.
 - Zero-Memorization Interaction: Con người giao tiếp bằng tiếng Việt tự nhiên ("Làm tiếp", "Đổi nút này"). Agent tự tra cứu Ledger, tự tìm Use Case, tự báo cáo và đề xuất (Con người chỉ cần gõ "OK").
+- Subagent Artifact Persistence (Dual Output Pattern): Subagents tạo tài liệu lớn (`docs/plans/`, `issues/`) BẮT BUỘC ghi đĩa bằng `write_to_file` trong `Workspace: "inherit"` và chỉ trả về tóm tắt <20 dòng kèm link file. Subagents kiểm toán (`spec-reviewer`, `code-reviewer`) giữ nguyên trạng thái Read-only và báo cáo 1-page packet vào chat.
+- Lean Runtime Observability: CẤM nuốt lỗi âm thầm (empty catch). Mọi chuyển dịch trạng thái nghiệp vụ (FSM, transactions) bắt buộc emit structured logs ({ event, correlationId, timestamp, delta }). Rejection of actions must carry an explicit Reason Code.
 
 ## 2. DEFINITION OF DONE (TIÊU CHUẨN XUẤT XƯỞNG)
 Một task chỉ được coi là hoàn thành khi:
 1. Có bài test tự động chứng minh vượt qua Thử thách đối nghịch (Adversarial Inversion) và gắn nhãn truy xuất `[UC-XXX/MSS]` hoặc `[UC-XXX/A#]`.
 2. Vượt qua bộ lọc 6 Cờ Đỏ Slop tại Cổng Nghiệm Thu (Không thừa cấu trúc mới, Cyclomatic <= 5, đúng Visual UI/UX tokens).
-3. Được Subagent `spec-reviewer` (phê duyệt đúng phạm vi Slice, 0 anti-patterns) và `code-reviewer` phê duyệt (Approved).
+3. Được Subagent `spec-reviewer` (phê duyệt đúng phạm vi Slice, 0 anti-patterns) và `code-reviewer` phê duyệt (Approved - chuẩn kiến trúc, Lean Observability).
 4. Được ghi nhận vào Sổ Cái `_epic_ledger.md` và con người tự commit trên Git.
 
 ## 3. PROJECT NFR BASELINE (RÀO CHẮN VẬN HÀNH THEO LOẠI ỨNG DỤNG)
@@ -854,6 +867,7 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command]
    - Quét đủ 6 tầng theo `vertical-slice-completeness` (Entity -> Mapping -> DTO -> Query -> Client -> UI).
    - Kiểm toán NFR: Kiểm tra có query trong vòng lặp (N+1) không, có lệnh gọi ngoại vi thiếu timeout không, có tính toán nặng block UI thread không.
     - KIỂM TOÁN CÁCH LY TRẠNG THÁI TEST (Test State Isolation Audit): Chạy test với cờ ngẫu nhiên hóa (`--randomize`) để triệt tiêu Order-Dependent tests. Xác minh mọi test ghi DB đều có Transaction Rollback (`BEGIN...ROLLBACK`) bảo đảm DB sạch 100%.
+    - KIỂM TOÁN KHẢ NĂNG QUAN SÁT (Lean Observability Audit): Kiểm tra zero silent error swallowing (CẤM catch rỗng). Mọi chuyển dịch trạng thái nghiệp vụ (FSM, transactions) bắt buộc emit structured logs. Khi từ chối hành động bắt buộc có mã lý do (Reason Code) rõ ràng.
 5. **Giao Thức TRIM & Quét Dọn Tàn Dư Thử Nghiệm (Trajectory Redundancy Purge - arXiv 2026)**:
    - *Quét Tàn Dư Trajectory*: Kiểm tra `git status --porcelain`. Phát hiện và XÓA BỎ 100% các file nháp tạm thời, package cài thử không dùng, biến/hàm mồ côi (orphaned code) do các lần thử nghiệm thất bại của Agent để lại trước khi chốt nghiệm thu.
    - *Quét Dead-Code Tự Động*: Chạy `knip` (TypeScript/Node) hoặc compiler analyzer tương đương để diệt sạch unreferenced exports, unused variables/types.
@@ -887,6 +901,7 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command]
 - **Net LOC Delta**: +[N] dòng (Nằm trong ngân sách $\le +50$ LOC, Deletions: -[M] dòng).
 - **Độ phức tạp**: Cyclomatic lớn nhất = [K] ($\le 5$). Không dùng mẹo Code Golf, không nén cú pháp bất thường.
 - **6 Cờ Đỏ Slop**: 0 Abstraction 1 lần, 0 Dependency rác, 0 Code mồ côi (TRIM Purge sạch sẽ).
+- **Lean Observability**: PASS (Structured logging trên FSM transitions, zero catch rỗng, explicit Reason Codes).
 
 #### 6. Bằng chứng Hành vi Thực tế (Proof of Behavior by Software Type)
 - *Web / UI*: Ảnh chụp màn hình giao diện kiểm tra qua `/browser` (Console: 0 lỗi).
@@ -1396,6 +1411,29 @@ Khi bạn chạy lệnh trong Terminal gặp lỗi đỏ, hoặc Subagent báo t
 
 ---
 
+### 🧠 NGUYÊN LÝ CON TRỎ KẾ HOẠCH & BỘ PROMPT VẠN NĂNG (THE UNIVERSAL POINTER TRIGGER PRINCIPLE)
+> **Tuyên ngôn cốt lõi cho Junior**: *"Tệp Kế Hoạch (`_plan.md`) là Bộ Não — Câu Prompt chỉ là Cò Súng (Trigger Pointer)."*
+
+```text
+[Người Lập Trình Junior] ──(Gửi Universal Prompt: "Làm Task N trong Plan X")──┐
+                                                                               │
+                                                                               ▼
+[AI Subagents] ◄───(Tự đọc từ đĩa: Files cần sửa, Code diffs, Lệnh test thật)──┘
+       │
+       ▼ (Đọc trực tiếp docs/plans/[MÃ_TICKET]_plan.md trên đĩa cứng)
+[Thực thi TDD]: Viết Test ĐỎ ➔ Viết Code XANH ➔ Chạy Lệnh Test thật ➔ Báo Cáo
+```
+
+**Tại sao phương pháp này vạn năng cho mọi ngôn ngữ & framework?**
+1. **Độc lập 100% với Công nghệ (Language-Agnostic)**: Dù dự án là TypeScript (`npm test`), Python (`pytest`), C# (`dotnet test`), Flutter (`flutter test`), hay Go (`go test`), câu lệnh prompt của Junior **giữ nguyên 100% không đổi một chữ**. AI tự động đọc mục "Test Command" và "Target Files" được ghi sẵn trong `_plan.md` để chạy trên Terminal CMD.
+2. **Khử Ảo Giác Tuyệt Đối (Zero Hallucination)**: Prompt ép AI đọc trực tiếp từ `_plan.md` đã được duyệt `[APPROVED]`. AI không thể tự ý bịa thêm logic hoặc sinh code thừa (Slop).
+3. **Quy tắc 5 Giây cho Junior**: Trong toàn bộ vòng lặp, Junior không cần mở code ra đọc rồi tóm tắt lại. Bạn chỉ cần quản lý đúng 3 con trỏ đường dẫn trong dấu `[...]`:
+   - Con trỏ Ticket: `[MÃ_TICKET]` (VD: `issues/GAME-S01-turn-loop.md`)
+   - Con trỏ Plan: `[ĐƯỜNG_DẪN_TỆP_PLAN]` (VD: `docs/plans/GAME-S01-turn-loop_plan.md`)
+   - Con trỏ Task: `[MÃ_TASK]` (VD: `Task 1`, `Task 2`, `Task N`)
+
+---
+
 ### 📋 MẪU P-2.1: CẮT TICKET LÁT CẮT (JIT SLICING)
 - **🏷️ CHẾ ĐỘ THỰC THI**: `[SONG TÁC NHÂN TỰ KIỂM TOÁN]` *(Slicer soạn thảo ➔ Spec-Reviewer quét Zone 3)*.
 - **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Sổ cái `docs/epics/[epic]/_epic_ledger.md` đã có danh sách Use Cases. Slice trước đó (nếu có) đã được commit sạch trên Git.
@@ -1418,6 +1456,9 @@ Hãy điều phối 2 subagent phối hợp để tạo tệp ticket issues/[MÃ
 CHỈ tạo tệp ticket và DỪNG LẠI để tôi duyệt, TUYỆT ĐỐI CHƯA VIẾT CODE lúc này.
 ```
 - **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu)**: Tệp `issues/[MÃ_TICKET].md` đã được tạo. Đủ 4 phần: Metadata, Intent & Confinement, Test Contracts, DoD. Đã được Spec-Reviewer xác nhận sạch Zone 3.
+- **📌 CHỈ DẪN VẠN NĂNG CHO JUNIOR**:
+  - *Biến số cần thay thế*: `[TÊN_EPIC]` (VD: `gameplay`), `[TÊN_SLICE]` (VD: `Slice 01`), `[MÃ_TICKET]` (VD: `GAME-S01-turn-loop`).
+  - *Dữ liệu AI tự động đọc*: AI tự đọc `docs/epics/[TÊN_EPIC]/_epic_ledger.md` để lấy danh sách Use Cases và tự soi `src/` để kế thừa cấu trúc. Junior tuyệt đối KHÔNG tự gõ tên file code hay use case vào prompt.
 
 ---
 
@@ -1434,6 +1475,9 @@ Hãy gọi subagent scout (Model: flash), kích hoạt kỹ năng domain-modelin
 Báo cáo ngắn gọn dưới 20 dòng, TUYỆT ĐỐI KHÔNG sửa mã nguồn.
 ```
 - **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu)**: Nhận được báo cáo có đủ 4 mục: Hiện trạng Toolchain, Ràng buộc `GEMINI.md`, 4 Test Contracts, và Target File Map rõ ràng từng file.
+- **📌 CHỈ DẪN VẠN NĂNG CHO JUNIOR**:
+  - *Biến số cần thay thế*: `[MÃ_TICKET_S00]` (VD: `issues/INFRA-S00-scaffold.md`).
+  - *Dữ liệu AI tự động đọc*: Scout tự chạy lệnh kiểm tra toolchain (node, python, dotnet...) trên CMD và đọc `GEMINI.md`. Junior KHÔNG cần tự gõ thông số môi trường.
 
 ---
 
@@ -1449,13 +1493,16 @@ Hãy gọi subagent scout (Model: flash), kích hoạt kỹ năng codebase-desig
 Báo cáo ngắn gọn dưới 15 dòng, TUYỆT ĐỐI KHÔNG sửa mã nguồn.
 ```
 - **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu)**: Báo cáo chỉ rõ tọa độ dòng cần sửa và đánh giá rủi ro hồi quy (Regression Risk) trên các test cũ.
+- **📌 CHỈ DẪN VẠN NĂNG CHO JUNIOR**:
+  - *Biến số cần thay thế*: `[MÃ_TICKET]` (VD: `issues/GAME-S01-turn-loop.md`).
+  - *Dữ liệu AI tự động đọc*: Scout tự đọc ticket và tự dùng tool `grep_search` / `find_by_name` quét mã nguồn để tìm tọa độ `File:Dòng` và phân tích tác động lan tỏa. Junior KHÔNG cần chỉ định file cho Scout.
 
 ---
 
 ### 📋 MẪU P-2.3a: LẬP KẾ HOẠCH BẺ NHỎ (MICRO-TASK BREAKDOWN DAG)
 - **🏷️ CHẾ ĐỘ THỰC THI**: `[SONG TÁC NHÂN TỰ DUYỆT CỔNG 1]` *(Architect bẻ nhỏ ➔ Spec-Reviewer thẩm định 5 Tiêu Chuẩn Vàng)*.
 - **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Đã có báo cáo của Scout ở Bước 2.2.
-- **🛡️ RÀO CHẮN GÁC CỔNG**: Bắt buộc dùng `writing-plans`. Kế hoạch bắt buộc lưu vào `docs/plans/[MÃ_TICKET]_plan.md` để chống bị ghi đè.
+- **🛡️ RÀO CHẮN GÁC CỔNG**: Bắt buộc dùng `writing-plans`. Kế hoạch bắt buộc lưu vào `docs/plans/[MÃ_TICKET]_plan.md` để chống bị ghi đè. Áp dụng Dual Output Pattern: Architect chạy `Workspace: "inherit"`, ghi đĩa trực tiếp và chỉ xuất tóm tắt <20 dòng ra chat.
 - **💬 CÂU LỆNH PROMPT CHUẨN (Model: Sonnet 4.6)**:
 ```text
 Hãy điều phối 2 subagent phối hợp để thiết lập bản kế hoạch thi công docs/plans/[MÃ_TICKET]_plan.md:
@@ -1471,10 +1518,13 @@ Hãy điều phối 2 subagent phối hợp để thiết lập bản kế hoạ
    - Nếu chưa đạt: Yêu cầu Architect điều chỉnh lại.
    - Khi đạt 100%: Cho phép lưu vào docs/plans/[MÃ_TICKET]_plan.md và xuất chữ [APPROVED].
 
-DỪNG LẠI sau khi lưu kế hoạch, TUYỆT ĐỐI CHƯA VIẾT CODE lúc này.
+DỪNG LẠI sau khi lưu kế hoạch, TUYỆT ĐỐI CHƯA VIẾT CODE lúc này. Subagent chỉ trả về bản tóm tắt danh sách Micro-Tasks (<20 dòng) kèm link file docs/plans/[MÃ_TICKET]_plan.md.
 ```
 - **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu - TRẠM 1: PLAN GATE)**:
   - Bản kế hoạch đã được lưu tại `docs/plans/[MÃ_TICKET]_plan.md` với xác nhận **`[APPROVED]`** từ Spec-Reviewer.
+- **📌 CHỈ DẪN VẠN NĂNG CHO JUNIOR**:
+  - *Biến số cần thay thế*: `[MÃ_TICKET]` (VD: `issues/GAME-S01-turn-loop.md`).
+  - *Dữ liệu AI tự động đọc*: Architect đọc Ticket + Báo cáo Scout ➔ Tự bẻ nhỏ Task DAG $\le 80$ LOC ➔ Ghi ra `docs/plans/[MÃ_TICKET]_plan.md`. Tệp này chính là "Bộ Não" duy nhất cho toàn bộ các bước thi công tiếp theo.
 
 ---
 
@@ -1492,6 +1542,9 @@ Kế hoạch đã được duyệt. Hãy gọi subagent implementer trong Worksp
 Báo cáo kết quả lệnh test và dừng lại để tôi kiểm tra.
 ```
 - **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu)**: Lệnh test của ngôn ngữ dự án (`npm test`, `pytest`, `dotnet test`, `flutter test`, `go test`) chạy trên Terminal CMD in ra kết quả **PASS 100%**. Yêu cầu copy sang main workspace và chạy lại CMD thật trước khi sang Task 1.
+- **📌 CHỈ DẪN VẠN NĂNG CHO JUNIOR**:
+  - *Biến số cần thay thế*: `Task 0` (Khởi tạo Test Runner Harness).
+  - *Dữ liệu AI tự động đọc*: AI đọc Task 0 trong plan và `GEMINI.md` để tự khởi tạo đúng công cụ test runner tương ứng với tech stack (TS, Python, C#, Flutter...).
 
 ---
 
@@ -1501,20 +1554,20 @@ Báo cáo kết quả lệnh test và dừng lại để tôi kiểm tra.
 - **🛡️ RÀO CHẮN GÁC CỔNG**: 
   - Khuyên dùng `Workspace: "inherit"` cho các Micro-Tasks trong cùng một Slice để tránh Antigravity tạo các git worktree/branch tạm gây rác mã nguồn cục bộ (Mã nguồn được Git và Hook `git-safety-gate` bảo vệ tuyệt đối, AI không thể tự commit).
   - Rào chắn Sandbox 3 Pha: QA Tester chỉ ghi vào `tests/` (Read-only `src/`); Implementer chỉ ghi vào `src/` (Read-only `tests/`).
-- **💬 CÂU LỆNH PROMPT CHUẨN DUY NHẤT 1 LẦN GỬI (Model: Sonnet 4.6)**:
+- **💬 CÂU LỆNH PROMPT CHUẨN DUY NHẤT 1 LẦN GỬI - CÒ SÚNG VẠN NĂNG (Model: Sonnet 4.6)**:
 ```text
-Hãy điều phối 2 subagent trong Workspace: "branch" thi công [ĐIỀN TÊN TASK, ví dụ: Task 1] bám sát Kế Hoạch theo cơ chế Song Tác Nhân Đối Kháng (Ping-Pong TDD):
+Hãy điều phối 2 subagent trong Workspace: "inherit" thi công [MÃ_TASK, ví dụ: Task 1] bám sát 100% kịch bản trong tệp kế hoạch [ĐƯỜNG_DẪN_TỆP_PLAN] theo cơ chế Song Tác Nhân Đối Kháng (Ping-Pong TDD):
 
 1. Pha 1 (Subagent QA Tester - Kỹ năng tdd, atdd-quality-gates):
-   - Đọc đặc tả của Task trong Kế Hoạch và hợp đồng kiểm thử tương ứng.
-   - VÙNG CÔ LẬP: CHỈ được phép tạo hoặc sửa tệp test trong tests/ (TUYỆT ĐỐI CẤM sửa mã nguồn trong src/).
+   - Đọc đặc tả của [MÃ_TASK] trong tệp kế hoạch [ĐƯỜNG_DẪN_TỆP_PLAN] và hợp đồng kiểm thử tương ứng.
+   - VÙNG CÔ LẬP: CHỈ được phép tạo hoặc sửa tệp test trong tests/ theo đúng đường dẫn chỉ định trong kế hoạch (TUYỆT ĐỐI CẤM sửa mã nguồn trong src/).
    - Viết bài test con kiểm chứng hành vi nghiệp vụ.
-   - Chạy lệnh test trên Terminal CMD và chứng minh bài test bị ĐỎ (FAIL) do chưa có mã nguồn.
+   - Chạy lệnh test được quy định trong kế hoạch trên Terminal CMD và chứng minh bài test bị ĐỎ (FAIL) do chưa có mã nguồn.
 
 2. Pha 2 (Subagent Implementer - Kỹ năng tdd, de-sloppify):
-   - Đọc bài test ĐỎ ở Pha 1. VÙNG CÔ LẬP: TUYỆT ĐỐI CẤM sửa tệp test trong tests/.
-   - CHỈ viết mã nguồn tối thiểu vào src/ để giải quyết bài test.
-   - Chạy lại lệnh test và chứng minh bài test chuyển sang XANH (PASS 100%).
+   - Đọc bài test ĐỎ ở Pha 1 và mục hướng dẫn kỹ thuật của [MÃ_TASK] trong kế hoạch. VÙNG CÔ LẬP: TUYỆT ĐỐI CẤM sửa tệp test trong tests/.
+   - CHỈ viết mã nguồn tối thiểu vào src/ theo đúng danh sách tệp được phê duyệt trong kế hoạch để giải quyết bài test.
+   - Chạy lại lệnh test được chỉ định trong kế hoạch và chứng minh bài test chuyển sang XANH (PASS 100%).
    - Tối ưu mã nguồn (De-sloppify), đảm bảo Cyclomatic Complexity <= 5, hàm <= 30 dòng.
 
 3. Pha 3 (Nghiệm Thu Đối Kháng - TRẠM 2: INVERSION GATE):
@@ -1526,6 +1579,10 @@ Báo cáo kết quả tổng hợp: Tệp test đã tạo, mã nguồn đã vi�
 - **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu - TRẠM 2: INVERSION GATE)**:
   - Báo cáo chỉ rõ bằng chứng Inversion Test (sửa sai 1 dòng test ĐỎ).
   - Tệp test và tệp mã nguồn tách biệt hoàn toàn. Lệnh test chạy PASS 100%. Nếu test ĐỎ ngoài ý muốn ➔ Chuyển sang mẫu `P-2.3d`.
+- **📌 CHỈ DẪN VẠN NĂNG CHO JUNIOR (UNIVERSAL TASK TRIGGER)**:
+  - *Biến số cần thay thế*: Đúng 2 tham số: `[ĐƯỜNG_DẪN_TỆP_PLAN]` (VD: `docs/plans/GAME-S01-turn-loop_plan.md`) và `[MÃ_TASK]` (VD: `Task 1`, `Task 2`...).
+  - *Thời gian tạo prompt*: 5 giây. Xong Task 1 ➔ Gõ lệnh đổi thành `Task 2` ➔ Xong Task 2 ➔ Gõ lệnh đổi thành `Task 3`.
+  - *Dữ liệu AI tự động đọc*: AI tự đọc tên file, code mẫu và lệnh test từ `_plan.md`. Junior tuyệt đối KHÔNG copy-paste code hay tên file vào prompt.
 
 ---
 
@@ -1540,7 +1597,7 @@ Bài test đang bị ĐỎ tại [ĐIỀN TÊN BÀI TEST HOẶC DÁN 3-5 DÒNG S
 Hãy điều phối 2 subagent xử lý lỗi theo phương pháp khoa học:
 1. Subagent Investigator (Kỹ năng diagnosing-bugs, systematic-debugging):
    - TUYỆT ĐỐI CẤM sửa mã nguồn lúc này.
-   - Phân tích thông báo lỗi và thiết lập giả thuyết nguyên nhân gốc (Root Cause Hypothesis).
+   - Phân tích thông báo lỗi, đối chiếu State Snapshot và Structured Event Logs gần nhất để thiết lập giả thuyết nguyên nhân gốc (Root Cause Hypothesis).
    - Thu thập chứng cứ thực nghiệm từ mã nguồn và log thực thi để chứng minh giả thuyết.
    - Đưa ra đề xuất sửa đổi tối thiểu (Minimal Fix Proposal).
 
@@ -1552,6 +1609,9 @@ Hãy điều phối 2 subagent xử lý lỗi theo phương pháp khoa học:
 Báo cáo nguyên nhân gốc và bản diff thay đổi tối thiểu.
 ```
 - **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu)**: Báo cáo chẩn đoán chỉ ra đúng nguyên nhân gốc, bản sửa lỗi tối thiểu giúp test chuyển sang XANH hoàn toàn mà không làm hỏng các test khác.
+- **📌 CHỈ DẪN VẠN NĂNG CHO JUNIOR**:
+  - *Biến số cần thay thế*: Dán `[3-5 DÒNG LỖI TERMINAL]` hoặc tên bài test bị đỏ.
+  - *Cách làm*: Không cần suy đoán hay giải thích nguyên nhân bằng lời. Chỉ copy 3 dòng stack trace từ cửa sổ CMD dán vào. AI tự động truy vết mã nguồn để tìm nguyên nhân gốc.
 
 ---
 
@@ -1568,6 +1628,9 @@ Hãy gọi subagent implementer, kích hoạt kỹ năng verification-before-com
 Báo cáo kết quả tổng kết: Số lượng test PASS, độ phủ và xác nhận toàn bộ xanh 100%.
 ```
 - **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu)**: 100% các Test Contracts quy định trong ticket đều có bằng chứng chạy PASS.
+- **📌 CHỈ DẪN VẠN NĂNG CHO JUNIOR**:
+  - *Biến số cần thay thế*: `[MÃ_TICKET]` (VD: `issues/GAME-S01-turn-loop.md`).
+  - *Dữ liệu AI tự động đọc*: AI tự đọc ticket để lấy toàn bộ danh sách Test Contracts `[TC-xx.x]` và tự chạy lệnh test của dự án kèm cờ `--randomize`.
 
 ---
 
@@ -1585,6 +1648,7 @@ Hãy gọi đồng thời 2 subagent spec-reviewer và code-reviewer, kích ho�
 2. Subagent code-reviewer (Read-only):
    - Kiểm toán 6 Cờ Đỏ Slop Nash: Không abstraction thừa (YAGNI), không thư viện ngoài dư thừa.
    - Đo lường Cyclomatic Complexity <= 5, không dính bẫy Code Golf (one-liner ma thuật).
+   - Kiểm toán Lean Observability: Zero silent exceptions (cấm catch rỗng), chuyển dịch trạng thái có structured logs kèm Reason Code.
    - Kiểm tra tuân thủ Visual UI/UX tokens trong docs/domain/design.md (nếu có UI).
 
 Yêu cầu xuất biên bản thẩm định:
@@ -1594,6 +1658,9 @@ Yêu cầu xuất biên bản thẩm định:
 - **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu - TRẠM 3A: REVIEW GATE)**: 
   - Nhận được biên bản báo cáo ghi chữ **`[APPROVED]`** từ cả 2 cổng trên màn hình chat.
   - Tệp `docs/reports/audits/[MÃ_TICKET]_acceptance_report.md` đã được tạo và lưu trữ đầy đủ trên đĩa. Nếu bị REJECTED ➔ Yêu cầu sửa lỗi và kiểm toán lại.
+- **📌 CHỈ DẪN VẠN NĂNG CHO JUNIOR**:
+  - *Biến số cần thay thế*: `[MÃ_TICKET]` (VD: `issues/GAME-S01-turn-loop.md`).
+  - *Dữ liệu AI tự động đọc*: 2 Reviewer tự động đối soát spec, diff, 6 cờ đỏ slop và xuất biên bản `docs/reports/audits/[MÃ_TICKET]_acceptance_report.md`.
 
 ---
 
@@ -1630,6 +1697,9 @@ git commit -m "feat([tên_epic]): hoàn thành [MÃ_TICKET] - [TÊN_TÍNH_NĂNG]
 Sau khi xuất tài liệu bàn giao, hãy nhắc tôi bấm nút New Conversation để bắt đầu Slice tiếp theo với bộ nhớ sạch 100%.
 ```
 - **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu)**: Sổ cái `_epic_ledger.md` đã có dấu `[x] DONE`. Bấm nút **New Conversation** trên IDE để đưa Token về 0.
+- **📌 CHỈ DẪN VẠN NĂNG CHO JUNIOR**:
+  - *Biến số cần thay thế*: `[MÃ_TICKET]` và `[TÊN_EPIC]`.
+  - *Hành động bắt buộc*: Sau khi AI xuất file bàn giao, Junior BẮT BUỘC bấm nút **New Conversation** trên IDE để đưa Token về 0 trước khi sang Slice tiếp theo.
 
 
 > [!IMPORTANT]

@@ -150,8 +150,22 @@ describe('[UC-GAME-003/MSS] TC-01.5 xoay luot', () => {
     mgr.joinRoom(room.roomCode, 'p2');
     mgr.startGame(room.roomCode);
 
-    mgr.handleRollDice(room.roomCode, 'p1');
-    const updated = mgr.getRoom(room.roomCode);
+    // Khong the ket thuc luot khi chua do xuc xac (phase = WaitingRoll)
+    expect(mgr.handleEndTurn(room.roomCode, 'p1')).toBeUndefined();
+
+    // p1 do xuc xac: currentPlayerIndex van la 0, phase dung o ActionPhase hoac PropertyManagement
+    const rollRes = mgr.handleRollDice(room.roomCode, 'p1');
+    expect(rollRes).toBeDefined();
+    expect(room.currentPlayerIndex).toBe(0);
+    expect(
+      room.phase === TurnPhase.ActionPhase || room.phase === TurnPhase.PropertyManagement
+    ).toBe(true);
+
+    // p2 khong the ket thuc luot thay p1
+    expect(mgr.handleEndTurn(room.roomCode, 'p2')).toBeUndefined();
+
+    // p1 ket thuc luot hop le: chuyen sang p2, phase tro lai WaitingRoll
+    const updated = mgr.handleEndTurn(room.roomCode, 'p1');
     expect(updated).toBeDefined();
     if (updated === undefined) return;
     expect(updated.currentPlayerIndex).toBe(1);
@@ -166,8 +180,11 @@ describe('[UC-GAME-003/MSS] TC-01.5 xoay luot', () => {
     mgr.startGame(room.roomCode);
 
     mgr.handleRollDice(room.roomCode, 'p1');
+    mgr.handleEndTurn(room.roomCode, 'p1');
     mgr.handleRollDice(room.roomCode, 'p2');
+    mgr.handleEndTurn(room.roomCode, 'p2');
     mgr.handleRollDice(room.roomCode, 'p3');
+    mgr.handleEndTurn(room.roomCode, 'p3');
     const r = mgr.getRoom(room.roomCode);
     expect(r).toBeDefined();
     if (r === undefined) return;

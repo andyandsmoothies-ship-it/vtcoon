@@ -22,6 +22,7 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command]
    - Visual Audit: Verify visual output against `docs/domain/design.md` (no Anti-AI-Tells, adherence to semantic tokens).
    - NFR Audit: Verify zero queries in loops (N+1), foreign calls have timeouts (max 3s), 60 FPS maintained on render thread.
    - Test State Isolation Audit: Run test suite with `--randomize` to prove zero order-dependent tests. Verify clean state resets.
+   - Lean Observability Audit: Verify zero silent error swallowing (empty catch forbidden). Verify domain state transitions emit structured logs with explicit Reason Codes.
 5. **Trajectory Redundancy Purge**:
    - Verify `git status --porcelain` is clean of scratch files, orphan variables, or dead exports.
 6. **Report Template (1-Page Universal Reviewer Packet)**:
@@ -49,6 +50,7 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command]
 - Flag 4 (Unnecessary Dependencies): 0 detected.
 - Flag 5 (Outside Causal Path): 0 detected.
 - Flag 6 (Self-introduced Complexity): 0 detected.
+- Lean Observability: PASS (Structured logging on transitions, zero silent catches).
 
 ### 🎯 ACCEPTANCE VERDICT: [APPROVED / REJECTED]
 ```

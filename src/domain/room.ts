@@ -6,8 +6,12 @@ export const INITIAL_BALANCE  = 15_000;
 export const ROOM_CODE_LENGTH = 6;
 
 export enum TurnPhase {
-  WaitingRoll = 'WaitingRoll',
-  TurnEnd     = 'TurnEnd',
+  WaitingRoll        = 'WaitingRoll',
+  ActionPhase        = 'ActionPhase',
+  AuctionPhase       = 'AuctionPhase',
+  PropertyManagement = 'PropertyManagement',
+  BankruptcyCheck    = 'BankruptcyCheck',
+  TurnEnd            = 'TurnEnd',
 }
 
 export interface Player {
