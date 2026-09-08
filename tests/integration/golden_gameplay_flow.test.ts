@@ -1,7 +1,8 @@
-// [UC-GAME-001..050/MSS] Golden Gameplay Flow — Slice 00 đến Slice 04
+// [UC-GAME-001..055/MSS] Golden Gameplay Flow — Slice 00 đến Slice 05
 // Traceability: Slice 00 (Room/Session), Slice 01 (Turn FSM/Dice/GO),
 //               Slice 02 (Buy Property/Base Rent), Slice 03 (Monopoly/C1 Upgrade/Auction/ETC),
-//               Slice 04 (HOSE Market/TaxOrder Audit Bailout)
+//               Slice 04 (HOSE Market/TaxOrder Audit Bailout),
+//               Slice 05 (Credit/Mortgage, GO Mortgage Interest, Insolvency & Bankruptcy Net Worth)
 
 import { describe, it, expect } from 'vitest';
 import { RoomManager } from '../../src/server/room_manager';
@@ -314,7 +315,128 @@ function step13_P2ChanceCardPlateAuction(mgr: RoomManager, room: Room): void {
   expect(room.phase, 'FSM quay về WaitingRoll cho P2 lượt bổ sung').toBe(TurnPhase.WaitingRoll);
 }
 
-describe('[UC-GAME-001..050/MSS] Golden Gameplay Flow — Slice 00 đến Slice 04', () => {
+// [Slice 05] Step 14: P2 thực hiện lượt bổ sung & P1 gửi Intent thế chấp ô 03 (nhận 50% tiền đất = 300)
+function step14_P2ExtraTurnAndP1Mortgage(mgr: RoomManager, room: Room): void {
+  // P2 tung xúc xắc cho lượt bổ sung (extraTurns = 0, đang ở WaitingRoll)
+  room.players[1]!.position = 7;
+  const roll13 = mgr.handleRollDice(room.roomCode, 'P2');
+  expect(roll13, 'P2 phải tung xúc xắc lượt bổ sung thành công').toBeDefined();
+  expect(roll13!.player.position, 'P2 dừng tại ô 10 (Trạm Kiểm Toán - Thăm dò)').toBe(10);
+  expect(room.phase, 'FSM tự động chuyển sang PropertyManagement').toBe(TurnPhase.PropertyManagement);
+
+  const endP2 = mgr.handlePlayerIntent(room.roomCode, 'P2', { type: 'INTENT_END_TURN' });
+  expect(endP2.success, 'P2 kết thúc lượt bổ sung').toBe(true);
+  expect(room.currentPlayerIndex, 'Lượt quay trở lại P1').toBe(0);
+  expect(room.phase, 'FSM ở WaitingRoll chờ P1').toBe(TurnPhase.WaitingRoll);
+
+  // P1 tung xúc xắc và di chuyển (không vượt GO)
+  room.players[0]!.position = 6;
+  const roll14 = mgr.handleRollDice(room.roomCode, 'P1');
+  expect(roll14, 'P1 tung xúc xắc thành công').toBeDefined();
+  expect(roll14!.player.position, 'P1 dừng tại ô 15 (Cảng Cái Mép đã sở hữu)').toBe(15);
+  expect(room.phase, 'FSM tự động chuyển sang PropertyManagement').toBe(TurnPhase.PropertyManagement);
+
+  // P1 gửi INTENT_MORTGAGE thế chấp ô 03 (Cần Thơ - Ninh Kiều, C0, giá niêm yết 600 Tr.)
+  const p1Before = room.players[0]!.balance;
+  const mortRes = mgr.handlePlayerIntent(room.roomCode, 'P1', { type: 'INTENT_MORTGAGE', cellIndex: 3 });
+  expect(mortRes.success, 'P1 thế chấp ô 03 thành công').toBe(true);
+  expect(room.players[0]!.balance, 'P1 nhận 300 Tr. tiền giải ngân thế chấp (50% giá đất)').toBe(p1Before + 300);
+  expect(room.players[0]!.mortgagedProperties, 'Danh sách mortgagedProperties chứa ô 03').toContain(3);
+
+  const endP1 = mgr.handlePlayerIntent(room.roomCode, 'P1', { type: 'INTENT_END_TURN' });
+  expect(endP1.success, 'P1 kết thúc lượt sau khi thế chấp').toBe(true);
+  expect(room.currentPlayerIndex, 'Chuyển lượt sang P2').toBe(1);
+  expect(room.phase, 'FSM ở WaitingRoll chờ P2').toBe(TurnPhase.WaitingRoll);
+}
+
+// [Slice 05] Step 15: P1 vượt ô GO với dư nợ thế chấp 300 Tr. → Hệ thống tự động thu 5% lãi vay (15 Tr.)
+function step15_P1PassGoWithMortgageInterest(mgr: RoomManager, room: Room): void {
+  // P2 đi bình thường: dừng ô 13 (Lâm Đồng), từ chối mua -> P1 AUCTION_PASS -> chốt phiên
+  room.players[1]!.position = 10;
+  const roll15a = mgr.handleRollDice(room.roomCode, 'P2');
+  expect(roll15a, 'P2 tung xúc xắc thành công').toBeDefined();
+  expect(roll15a!.player.position, 'P2 dừng chân tại ô 13 (Lâm Đồng)').toBe(13);
+  expect(room.phase, 'FSM chuyển sang ActionPhase do ô 13 chưa có chủ').toBe(TurnPhase.ActionPhase);
+
+  const decRes = mgr.handlePlayerIntent(room.roomCode, 'P2', { type: 'INTENT_DECLINE' });
+  expect(decRes.success, 'P2 từ chối mua ô 13').toBe(true);
+  expect(room.phase, 'FSM mở phiên đấu giá').toBe(TurnPhase.AuctionPhase);
+
+  const passRes = mgr.handlePlayerIntent(room.roomCode, 'P1', { type: 'INTENT_AUCTION_PASS' });
+  expect(passRes.success, 'P1 bỏ qua đấu giá').toBe(true);
+  expect(room.phase, 'FSM trở về PropertyManagement sau khi chốt phiên').toBe(TurnPhase.PropertyManagement);
+
+  const endP2 = mgr.handlePlayerIntent(room.roomCode, 'P2', { type: 'INTENT_END_TURN' });
+  expect(endP2.success, 'P2 kết thúc lượt sau đấu giá').toBe(true);
+  expect(room.currentPlayerIndex, 'Chuyển lượt sang P1').toBe(0);
+  expect(room.phase, 'FSM ở WaitingRoll chờ P1').toBe(TurnPhase.WaitingRoll);
+
+  // P1 bắt đầu từ ô 36, tung xúc xắc vượt qua ô GO (total >= 4 đưa P1 qua GO)
+  room.players[0]!.position = 36;
+  const p1Before = room.players[0]!.balance;
+  const roll15 = mgr.handleRollDice(room.roomCode, 'P1');
+  expect(roll15, 'P1 tung xúc xắc thành công').toBeDefined();
+  expect(roll15!.passedGo, 'P1 vượt qua ô GO').toBe(true);
+  expect(roll15!.player.position, 'P1 dừng tại ô 05 (Cảng Long Thành đã sở hữu)').toBe(5);
+  expect(room.phase, 'FSM tự động chuyển sang PropertyManagement').toBe(TurnPhase.PropertyManagement);
+
+  // Tính toán qua GO:
+  // - GO Bonus = +2.000 Tr.
+  // - Thuế tài sản (4 ô: 1, 3, 5, 15) = 150 * 4 = 600 Tr.
+  // - Lãi thế chấp ô 03 (dư nợ 300 Tr., 5% lãi = floor(300 * 0.05) = 15 Tr.)
+  // Số dư thay đổi ròng: +2000 - 600 - 15 = +1385 Tr.
+  expect(room.players[0]!.balance, 'P1 nhận GO +2000, trừ thuế 600 và lãi vay thế chấp 15 (net +1385)').toBe(p1Before + 1385);
+
+  const endP1 = mgr.handlePlayerIntent(room.roomCode, 'P1', { type: 'INTENT_END_TURN' });
+  expect(endP1.success, 'P1 kết thúc lượt').toBe(true);
+  expect(room.currentPlayerIndex, 'Chuyển lượt sang P2').toBe(1);
+  expect(room.phase, 'FSM ở WaitingRoll chờ P2').toBe(TurnPhase.WaitingRoll);
+}
+
+// [Slice 05] Step 16: P2 cạn tiền, dừng ô Hạ tầng ETC của P1 → Âm tiền → InsolvencyPhase → Phá sản & Game Over
+function step16_P2InsolvencyAndBankruptcy(mgr: RoomManager, room: Room): void {
+  // P2 cạn kiệt tiền mặt (còn 500 Tr. VNĐ)
+  room.players[1]!.balance = 500;
+
+  // P2 bắt đầu từ ô 08, xúc xắc đổ 7 -> dừng tại ô 15 (Cảng Nước Sâu Cái Mép có gói ETC của P1, phí 1.500 Tr.)
+  // Không qua ô GO (passedGo = false), P2 bị trừ 1.500 -> balance = 500 - 1500 = -1.000 Tr. < 0
+  room.players[1]!.position = 8;
+  const roll16 = mgr.handleRollDice(room.roomCode, 'P2');
+  expect(roll16, 'P2 tung xúc xắc thành công').toBeDefined();
+  expect(roll16!.player.position, 'P2 dừng tại ô 15 (Cảng Cái Mép của P1)').toBe(15);
+  expect(roll16!.passedGo, 'P2 không vượt qua ô GO').toBe(false);
+  expect(roll16!.rentCharged, 'Phí thuê ô 15 có gói ETC là 1.500 Tr.').toBe(1_500);
+  expect(room.players[1]!.balance, 'Số dư P2 âm -1.000 Tr. (500 - 1500 = -1000)').toBe(-1_000);
+
+  // handleRollDice tự động phát hiện số dư âm và chuyển FSM sang InsolvencyPhase
+  expect(room.phase, 'FSM tự động chuyển sang InsolvencyPhase khi số dư bị âm').toBe(TurnPhase.InsolvencyPhase);
+
+  // Trong InsolvencyPhase, hệ thống từ chối các Intent không hợp lệ (như INTENT_END_TURN, INTENT_BUY)
+  const invalidEndTurn = mgr.handlePlayerIntent(room.roomCode, 'P2', { type: 'INTENT_END_TURN' });
+  expect(invalidEndTurn.success, 'Từ chối INTENT_END_TURN khi đang mất khả năng thanh toán').toBe(false);
+  expect(invalidEndTurn.reason, 'Lý do từ chối: INVALID_PHASE').toBe('INVALID_PHASE');
+  const invalidBuy = mgr.handlePlayerIntent(room.roomCode, 'P2', { type: 'INTENT_BUY' });
+  expect(invalidBuy.success, 'Từ chối INTENT_BUY trong InsolvencyPhase').toBe(false);
+  expect(invalidBuy.reason, 'Lý do từ chối: INVALID_PHASE').toBe('INVALID_PHASE');
+  expect(mgr.handleEndTurn(room.roomCode, 'P2'), 'handleEndTurn trực tiếp cũng bị chặn khi ở InsolvencyPhase').toBeUndefined();
+
+  // Cưỡng chế thanh lý tài sản: P2 không sở hữu BĐS nào -> không đủ tài sản giải cứu, vẫn âm tiền
+  const liqRes = mgr.handleLiquidate(room.roomCode, 'P2');
+  expect(liqRes.success, 'Lệnh thanh lý thực thi hoàn tất').toBe(true);
+  expect(room.players[1]!.balance, 'P2 không còn tài sản để bù trừ nên vẫn âm -1.000 Tr.').toBe(-1_000);
+  expect(room.phase, 'FSM vẫn duy trì InsolvencyPhase do số dư chưa phục hồi').toBe(TurnPhase.InsolvencyPhase);
+
+  // Tuyên bố phá sản qua handleBankruptcy -> gameOver = true, xuất bảng xếp hạng Net Worth chuẩn xác
+  const bankruptRes = mgr.handleBankruptcy(room.roomCode, 'P2');
+  expect(bankruptRes.gameOver, 'Trận đấu kết thúc do chỉ còn 1 người sống sót').toBe(true);
+  expect(room.players[1]!.bankrupt, 'P2 được đánh dấu phá sản').toBe(true);
+  expect(bankruptRes.rankings, 'Hệ thống xuất bảng xếp hạng Net Worth').toBeDefined();
+  expect(bankruptRes.rankings![0]!.id, 'P1 là người chiến thắng dẫn đầu Net Worth').toBe('P1');
+  expect(bankruptRes.rankings![1]!.id, 'P2 xếp sau do phá sản').toBe('P2');
+  expect(bankruptRes.rankings![0]!.netWorth, 'Net Worth của P1 vượt trội P2').toBeGreaterThan(bankruptRes.rankings![1]!.netWorth);
+}
+
+describe('[UC-GAME-001..055/MSS] Golden Gameplay Flow — Slice 00 đến Slice 05', () => {
 
   it('[TC-E2E-GOLDEN/MSS] Mô phỏng ván đấu liên hoàn hoàn chỉnh giữa P1 và P2', () => {
     // 1. [Khởi tạo - Slice 00]: Tạo phòng với 2 người chơi (vốn 15.000)
@@ -361,6 +483,16 @@ describe('[UC-GAME-001..050/MSS] Golden Gameplay Flow — Slice 00 đến Slice 
 
     // 13. [Hotfix] Thẻ Cơ Hội CC_PLATE_AUCTION → +1 lượt đi tiếp
     step13_P2ChanceCardPlateAuction(mgr, room);
+
+    // 14. [Thế chấp BĐS Cấp 0 - Slice 05] P1 thế chấp ô 03 nhận 300 Tr. tiền mặt
+    step14_P2ExtraTurnAndP1Mortgage(mgr, room);
+
+    // 15. [Lãi Vay Thế Chấp Qua GO - Slice 05] P1 vượt GO tự động trừ 5% lãi vay
+    step15_P1PassGoWithMortgageInterest(mgr, room);
+
+    // 16. [Mất khả năng thanh toán & Phá sản - Slice 05] P2 âm tiền → Phá sản → Game Over
+    step16_P2InsolvencyAndBankruptcy(mgr, room);
   });
 });
+
 

@@ -1,7 +1,8 @@
 // [UC-GAME-047/MSS] Audit Manager — Trạm Kiểm Toán & Thanh Tra Logic
 import { TurnPhase } from '../domain/room';
 import type { Room, Player } from '../domain/room';
-import { ChanceCardId } from '../domain/event_card_engine';
+import type { DiceResult } from '../domain/dice';
+import { ChanceCardId } from '../domain/event_card_types';
 
 export function sendToAudit(room: Room, playerId: string): void {
   const player = room.players.find((p) => p.id === playerId);
@@ -55,11 +56,12 @@ export function handleUseDiplomatic(
   return { success: true };
 }
 
-export function processRollDoubles(
-  room: Room,
-  current: Player,
-  dice: { die1: number; die2: number; total: number; isDouble: boolean },
-): { stopped: boolean; result?: { dice: typeof dice; player: { id: string; position: number; balance: number }; passedGo: boolean; rentCharged: number } } {
+export interface RollDoublesResult {
+  stopped: boolean;
+  result?: { dice: DiceResult; player: { id: string; position: number; balance: number }; passedGo: boolean; rentCharged: number };
+}
+
+export function processRollDoubles(room: Room, current: Player, dice: DiceResult): RollDoublesResult {
   if (current.auditTurnsLeft > 0) {
     if (!dice.isDouble) {
       room.phase = TurnPhase.PropertyManagement;
@@ -67,48 +69,17 @@ export function processRollDoubles(
     }
     current.auditTurnsLeft = 0;
     current.consecutiveDoubles = 0;
-  } else if (dice.isDouble) {
-    current.consecutiveDoubles += 1;
-    if (current.consecutiveDoubles >= 3) {
-      sendToAudit(room, current.id);
-      current.consecutiveDoubles = 0;
-      return {
-        stopped: true,
-        result: {
-          dice,
-          player: { id: current.id, position: current.position, balance: current.balance },
-          passedGo: false,
-          rentCharged: 0,
-        },
-      };
-    }
-  } else {
+    return { stopped: false };
+  }
+  if (!dice.isDouble) {
     current.consecutiveDoubles = 0;
+    return { stopped: false };
   }
-  return { stopped: false };
-}
+  current.consecutiveDoubles += 1;
+  if (current.consecutiveDoubles < 3) return { stopped: false };
 
-export class AuditManager {
-  sendToAudit(room: Room, playerId: string): void {
-    sendToAudit(room, playerId);
-  }
-
-  handleTurnStart(room: Room | undefined, playerId: string): { canRoll: boolean; reason?: string } {
-    return handleTurnStart(room, playerId);
-  }
-
-  handleBailOut(
-    room: Room | undefined,
-    playerId: string,
-    rolledThisTurn: boolean,
-  ): { success: boolean; reason?: string } {
-    return handleBailOut(room, playerId, rolledThisTurn);
-  }
-
-  handleUseDiplomatic(
-    player: Player,
-    chanceDiscard: ChanceCardId[],
-  ): { success: boolean; reason?: string } {
-    return handleUseDiplomatic(player, chanceDiscard);
-  }
+  sendToAudit(room, current.id);
+  current.consecutiveDoubles = 0;
+  const player = { id: current.id, position: current.position, balance: current.balance };
+  return { stopped: true, result: { dice, player, passedGo: false, rentCharged: 0 } };
 }

@@ -204,6 +204,7 @@ describe('[TC-GAME-038..041/MSS] Chance Cards Handlers', () => {
       affectedCells: INFRA_CELLS,
       remainingRounds: 2,
       multiplier: 0.5,
+      beneficiaryId: 'p1',
     });
   });
 

@@ -19,7 +19,7 @@ export function handleSpecialCell(
       drawMarketCard(room, reg, sm, deckRng);
       return true;
     case CellType.Chance:
-      drawChanceCard(room, cur, deckRng, reg, sm);
+      drawChanceCard(room, cur, deckRng, reg, sm, room.permanentRentBonus);
       return true;
     case CellType.Hose:
       room.phase = TurnPhase.HosePhase;

@@ -54,9 +54,11 @@ export function applyChanceCard(
   activeModifiers?: MarketModifier[],
   registry?: PropertyRegistry,
   stateMap?: PropertyStateMap,
+  permanentRentBonus?: Record<number, number>,
 ): Record<string, never> {
-  return executeChanceCard(card, playerId, players, activeModifiers, registry, stateMap);
+  return executeChanceCard(card, playerId, players, activeModifiers, registry, stateMap, permanentRentBonus);
 }
+
 
 export function drawMarketCard(room: Room, reg: PropertyRegistry, sm: PropertyStateMap, rng: () => number): void {
   if (room.marketDeck.length === 0 && room.marketDiscard.length > 0) {
@@ -70,17 +72,22 @@ export function drawMarketCard(room: Room, reg: PropertyRegistry, sm: PropertySt
   room.phase = TurnPhase.PropertyManagement;
 }
 
-export function drawChanceCard(room: Room, current: Player, rng: () => number, reg?: PropertyRegistry, sm?: PropertyStateMap): void {
+export function drawChanceCard(
+  room: Room, current: Player, rng: () => number,
+  reg?: PropertyRegistry, sm?: PropertyStateMap,
+  permanentRentBonus?: Record<number, number>,
+): void {
   if (room.chanceDeck.length === 0 && room.chanceDiscard.length > 0) {
     room.chanceDeck = shuffle(room.chanceDiscard.splice(0), rng);
   }
   const card = room.chanceDeck.shift();
   if (card) {
-    applyChanceCard(card, current.id, room.players, room.activeModifiers, reg, sm);
+    applyChanceCard(card, current.id, room.players, room.activeModifiers, reg, sm, permanentRentBonus ?? room.permanentRentBonus);
     if (card !== ChanceCardId.CC_DIPLOMATIC) room.chanceDiscard.push(card);
   }
   room.phase = TurnPhase.PropertyManagement;
 }
+
 
 export function decayModifiers(modifiers: MarketModifier[]): MarketModifier[] {
   return modifiers

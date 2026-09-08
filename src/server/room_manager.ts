@@ -1,4 +1,4 @@
-// [UC-GAME-001..003,005,007,008/MSS] Room Manager & FSM Turn Loop
+// [UC-GAME-001..003,005,007,008/MSS][UC-GAME-051..057/MSS] Room Manager & FSM Turn Loop
 import {
   createRoom as domainCreateRoom, createPlayer, checkPassedGo, GO_BONUS, BOARD_SIZE, TurnPhase,
 } from '../domain/room';
@@ -19,10 +19,15 @@ import {
 } from './auction_manager';
 import {
   handleBuyProperty, handleUpgrade, handleUpgradeETC, handleUpgradeUtility,
+  handleDowngrade, executeP2PTrade,
 } from './property_actions';
 import { handleHoseInvest, handleHoseSkip } from './hose_actions';
 import { dispatchPlayerIntent, type PlayerIntent } from './intent_dispatcher';
 import { handleSpecialCell } from './special_cell_handler';
+import {
+  mortgageProperty, redeemProperty, collectMortgageInterest,
+} from './mortgage_manager';
+import { checkInsolvency, liquidateAssets, declareBankruptcy, calculateRankings } from './insolvency_manager';
 
 export type { AuctionSession, PlayerIntent };
 
@@ -128,19 +133,28 @@ export class RoomManager {
     const sm = this.propertyStates.get(roomCode) ?? new Map();
     if (checkPassedGo(oldPos, newPos)) {
       current.balance += GO_BONUS - calculateGoPropertyTax(current.id, reg, sm);
+      // UC-052: Thu lãi thế chấp khi vượt GO
+      collectMortgageInterest(room, current.id);
     }
 
     const cell = BOARD_CONFIG[newPos];
     let rentCharged = 0;
 
     if (!cell || !handleSpecialCell(room, current, cell.type, reg, sm, this.deckRng)) {
-      const landing = handleLanding(current, newPos, reg, room.players, sm, dice.total, room.activeModifiers, this.rng, room.chanceDiscard);
+      const landing = handleLanding(
+        current, newPos, reg, room.players, sm, dice.total,
+        room.activeModifiers, this.rng, room.chanceDiscard, room.permanentRentBonus,
+      );
       room.phase = landing.result === LandingResult.Unowned ? TurnPhase.ActionPhase : TurnPhase.PropertyManagement;
       rentCharged = landing.rentAmount;
     }
 
+    // UC-053: Kiem tra mat kha nang thanh toan neu so du am sau khi thu thue / lai / phi
+    if (current.balance < 0) checkInsolvency(room);
+
     return { dice, player: { id: current.id, position: current.position, balance: current.balance }, passedGo: checkPassedGo(oldPos, newPos), rentCharged };
   }
+
 
   handleBuyProperty(roomCode: string, playerId: string): { result: BuyResult } | undefined {
     return handleBuyProperty(this.rooms.get(roomCode), this.getActivePlayer(this.rooms.get(roomCode), playerId), this.registries.get(roomCode));
@@ -189,11 +203,73 @@ export class RoomManager {
     return dispatchPlayerIntent(this, roomCode, playerId, intent);
   }
 
+  // --- S05 Handlers ---
+
+  handleMortgage(roomCode: string, playerId: string, cellIndex: number): { success: boolean; reason?: string } {
+    const room = this.rooms.get(roomCode);
+    const reg  = this.registries.get(roomCode);
+    const sm   = this.propertyStates.get(roomCode);
+    if (!room || !reg || !sm) return { success: false, reason: 'INVALID_ROOM' };
+    const res = mortgageProperty(room, playerId, cellIndex, reg, sm);
+    if (res.success && room.phase === TurnPhase.InsolvencyPhase) {
+      const p = room.players.find((pl) => pl.id === playerId);
+      if (p && p.balance >= 0) room.phase = TurnPhase.PropertyManagement;
+    }
+    return res;
+  }
+
+  handleRedeem(roomCode: string, playerId: string, cellIndex: number): { success: boolean; reason?: string } {
+    const room = this.rooms.get(roomCode);
+    const reg  = this.registries.get(roomCode);
+    if (!room || !reg) return { success: false, reason: 'INVALID_ROOM' };
+    return redeemProperty(room, playerId, cellIndex, reg);
+  }
+
+  handleDowngrade(roomCode: string, playerId: string, cellIndex: number): { success: boolean; reason?: string } {
+    const room = this.rooms.get(roomCode), reg = this.registries.get(roomCode), sm = this.propertyStates.get(roomCode);
+    if (!room || !reg || !sm) return { success: false, reason: 'INVALID_ROOM' };
+    const player = this.getActivePlayer(room, playerId);
+    const res = handleDowngrade(player, room.phase, cellIndex, reg, sm, roomCode);
+    if (res.success && room.phase === TurnPhase.InsolvencyPhase && player && player.balance >= 0) {
+      room.phase = TurnPhase.PropertyManagement;
+    }
+    return res;
+  }
+
+  handleLiquidate(roomCode: string, playerId: string): { success: boolean } {
+    const room = this.rooms.get(roomCode), reg = this.registries.get(roomCode), sm = this.propertyStates.get(roomCode);
+    if (!room || !reg || !sm) return { success: false };
+    liquidateAssets(room, playerId, reg, sm);
+    return { success: true };
+  }
+
+  handleTradeOffer(
+    roomCode: string, requesterId: string, sellerId: string, buyerId: string, cellIndex: number, price: number,
+  ): { success: boolean; reason?: string } {
+    const room = this.rooms.get(roomCode);
+    const reg  = this.registries.get(roomCode);
+    const sm   = this.propertyStates.get(roomCode);
+    if (!room || !reg || !sm) return { success: false, reason: 'INVALID_ROOM' };
+    if (requesterId !== sellerId && requesterId !== buyerId) return { success: false, reason: 'UNAUTHORIZED' };
+    return executeP2PTrade(room, sellerId, buyerId, cellIndex, price, reg, sm);
+  }
+
+  handleBankruptcy(roomCode: string, playerId: string): { gameOver: boolean; rankings?: Array<{ id: string; netWorth: number }> } {
+    const room = this.rooms.get(roomCode);
+    const reg  = this.registries.get(roomCode);
+    const sm   = this.propertyStates.get(roomCode);
+    if (!room || !reg || !sm) return { gameOver: false };
+    const isCurrent = room.players[room.currentPlayerIndex]?.id === playerId;
+    const res = declareBankruptcy(room, playerId, reg, sm);
+    if (isCurrent) this.rolledThisTurn.set(roomCode, false);
+    return res;
+  }
+
   handleEndTurn(roomCode: string, playerId: string, continueDoubles?: boolean): Room | undefined {
     const room = this.rooms.get(roomCode);
     const current = this.getActivePlayer(room, playerId);
     if (!current || !room) return undefined;
-    if (room.phase === TurnPhase.AuctionPhase) return undefined;
+    if (room.phase === TurnPhase.AuctionPhase || room.phase === TurnPhase.InsolvencyPhase) return undefined;
     if (!this.rolledThisTurn.get(roomCode) && room.phase === TurnPhase.WaitingRoll) return undefined;
 
     if (continueDoubles && current.consecutiveDoubles > 0) {
@@ -210,8 +286,16 @@ export class RoomManager {
       this.rolledThisTurn.set(roomCode, false);
       return room;
     }
-    room.currentPlayerIndex = (room.currentPlayerIndex + 1) % room.players.length;
-    if (room.currentPlayerIndex === 0) room.activeModifiers = decayModifiers(room.activeModifiers);
+    const total = room.players.length;
+    let next = (room.currentPlayerIndex + 1) % total;
+    let steps = 0;
+    while (steps < total) {
+      if (next === 0) room.activeModifiers = decayModifiers(room.activeModifiers);
+      if (!room.players[next]?.bankrupt) break;
+      next = (next + 1) % total;
+      steps++;
+    }
+    room.currentPlayerIndex = next;
 
     const nextPlayer = room.players[room.currentPlayerIndex];
     if (nextPlayer?.skipNextTurn) {
@@ -232,5 +316,13 @@ export class RoomManager {
     const ownerId = reg?.get(cellIndex);
     if (!reg || !ownerId) return 0;
     return resolveRent(BOARD_CONFIG[cellIndex], cellIndex, ownerId, reg, this.propertyStates.get(roomCode), diceTotal);
+  }
+
+  getRankings(roomCode: string): Array<{ id: string; netWorth: number }> {
+    const room = this.rooms.get(roomCode);
+    const reg  = this.registries.get(roomCode);
+    const sm   = this.propertyStates.get(roomCode);
+    if (!room || !reg || !sm) return [];
+    return calculateRankings(room, reg, sm);
   }
 }

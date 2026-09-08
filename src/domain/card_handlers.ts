@@ -243,6 +243,7 @@ export function executeChanceCard(
   activeModifiers?: MarketModifier[],
   registry?: PropertyRegistry,
   stateMap?: PropertyStateMap,
+  permanentRentBonus?: Record<number, number>,
 ): Record<string, never> {
   const player = players.find((p) => p.id === playerId);
   if (!player) return {};
@@ -275,7 +276,17 @@ export function executeChanceCard(
       handleContractPenalty(player, players);
       break;
     case ChanceCardId.CC_LAND_CHANGE:
+      // Trừ 800 Tr và tăng vĩnh viễn +50% thu phí của 1 ô đất trống tùy chọn đang sở hữu
       player.balance -= 800;
+      if (registry && permanentRentBonus) {
+        const ownedEmpty = Array.from(registry.entries()).find(
+          ([c, o]) => o === player.id &&
+            BOARD_CONFIG[c]?.type === CellType.Property &&
+            (stateMap?.get(c)?.level ?? 0) === 0 &&
+            !(permanentRentBonus[c]),
+        );
+        if (ownedEmpty) permanentRentBonus[ownedEmpty[0]] = 0.5;
+      }
       break;
     case ChanceCardId.CC_BUILD_HALT:
       if (registry && activeModifiers) {
@@ -311,7 +322,16 @@ export function executeChanceCard(
       player.doubleNextDice = true;
       break;
     case ChanceCardId.CC_PORT_EXCLUSIVE:
-      if (activeModifiers) activeModifiers.push({ type: card as unknown as MarketCardId, affectedCells: INFRA_CELLS, remainingRounds: 2, multiplier: 0.5 });
+      // Người rút thẻ nhận 50% phí cảng từ mỗi chuyến tàu của đối thủ × 2 vòng
+      if (activeModifiers) {
+        activeModifiers.push({
+          type: card as unknown as MarketCardId,
+          affectedCells: INFRA_CELLS,
+          remainingRounds: 2,
+          multiplier: 0.5,
+          beneficiaryId: playerId,
+        });
+      }
       break;
     case ChanceCardId.CC_SLOW_BUILD:
       if (registry) {
@@ -331,3 +351,4 @@ export function executeChanceCard(
   }
   return {};
 }
+

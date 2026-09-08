@@ -11,7 +11,7 @@
 3. [CƠ CHẾ KỸ NĂNG HẠT GIỐNG (Seed Skill & JIT Dispatcher)](#3-cơ-chế-kỹ-năng-hạt-giống-seed-skill--jit-dispatcher)
 4. [SƠ ĐỒ DÒNG CHẢY KẾT HỢP CÁC KỸ NĂNG (The Artifact Pipeline)](#4-sơ-đồ-dòng-chảy-kết-hợp-các-kỹ-năng-the-artifact-pipeline)
 5. [HỆ THỐNG TRUY XUẤT NGUỒN GỐC ARTIFACTS (3-Bucket Taxonomy, 4D ADR & Universal design.md)](#5-hệ-thống-truy-xuất-nguồn-gốc-artifacts-3-bucket-taxonomy-4d-adr--universal-designmd)
-6. [7 NGUYÊN TẮC KIỂM THỬ ĐỈNH CAO (Testing Integrity)](#6-7-nguyên-tắc-kiểm-thử-đỉnh-cao-testing-integrity)
+6. [10 NGUYÊN TẮC KIỂM THỬ ĐỈNH CAO & KHẢ NĂNG SINH TỒN PRODUCTION (Testing Integrity & Resilience)](#6-10-nguyên-tắc-kiểm-thử-đỉnh-cao--khả-năng-sinh-tồn-production-testing-integrity--resilience)
 7. [GIAI ĐOẠN 1: Khởi Tạo Dự Án & Cài Đặt Cấp Project (Setup 1 Lần)](#giai-đoạn-1-khởi-tạo-dự-án--cài-đặt-cấp-project-setup-1-lần)
 8. [GIAI ĐOẠN 2: Trọn Bộ 4 Subagents Native AG 2.0 Sẵn Sàng Sử Dụng](#giai-đoạn-2-trọn-bộ-4-subagents-native-ag-20-sẵn-sàng-sử-dụng)
 9. [KỊCH BẢN THỰC CHIẾN: Greenfield, Feature Slices, Bug/CR (Sign-off Test) & Brownfield](#9-kịch-bản-thực-chiến-từ-số-0-greenfield-đến-từng-tính-năng-feature)
@@ -384,7 +384,7 @@ graph LR
 
 ---
 
-## 6. 7 NGUYÊN TẮC KIỂM THỬ ĐỈNH CAO (Testing Integrity)
+## 6. 10 NGUYÊN TẮC KIỂM THỬ ĐỈNH CAO & KHẢ NĂNG SINH TỒN PRODUCTION (Testing Integrity & Resilience)
 
 1. **Thử Thách Đối Nghịch (Adversarial Inversion - Sharon Y. Barr)**: Trước khi kết luận test pass, `implementer` bắt buộc phải cố tình sửa sai 1 dòng logic để chứng minh bài test **thực sự chuyển sang màu ĐỎ**. Tránh 100% bẫy "Test Xanh Giả Tạo" (False Green).
 2. **Quy Tắc Mock Có Chọn Lọc (Selective Layered Mocking)**:
@@ -404,7 +404,42 @@ graph LR
 7. **Cổng Chống Tráo Hợp Đồng Kiểm Thử (Anti-Smuggling Contract Gate - Universal Principle)**:
    - Tuyệt đối cấm hiện tượng "treo đầu dê bán thịt chó" trong viết test: Gắn nhãn tag một Use Case lớn (ví dụ `[TC-AUTH-002: Reset Password]` hoặc `[TC-GAME-023: P2P Trading]`), nhưng bên trong phần thân test chỉ gọi và kiểm tra một assertion tầm thường, không liên quan (như kiểm tra xem user có tồn tại hay kiểm tra số dư cơ bản) để lừa cổng nghiệm thu.
    - Cổng nghiệm thu (`spec-reviewer`) bắt buộc đọc ruột `expect()` và biến đầu vào để xác nhận bài test thực thi đúng giao diện và hành vi của Use Case đó.
+8. **Phòng Thủ Tấn Công Trái Lượt & Dữ Liệu Độc Hại (Out-of-Turn & Boundary Exploit Defense - Universal Principle)**:
+   - ❌ **CẤM Bẫy "Người dùng ngoan ngoãn" (Cooperative User Bias)**: Không bao giờ chỉ test kịch bản người dùng hành động đúng lượt và nhập dữ liệu chuẩn.
+   - ✅ **BẮT BUỘC test kẻ phá hoại**:
+     + Gửi thao tác khi chưa tới lượt hoặc không có quyền (`NOT_YOUR_TURN`, `UNAUTHORIZED`) ➔ Hệ thống từ chối an toàn, bảo toàn trạng thái 100%.
+     + Gửi giá trị biên âm (`amount: -1000`, `price: 0`), ID không tồn tại hoặc ID của đối tượng khác ➔ Chặn đứng bằng Reason Code định danh.
+     + Thao tác lặp (Double submission / Spam click) ➔ Xử lý chuẩn Idempotent, không gây double charge hay duplicate state.
+9. **Định Luật Bất Biến Bảo Toàn Dòng Chảy (Global Conservation Invariants - Universal Principle)**:
+   - Khi kiểm thử bất kỳ hệ thống nào có luân chuyển tài nguyên (tiền tệ FinTech, điểm thưởng, hàng tồn kho E-commerce, slot đặt chỗ):
+   - ❌ **CẤM chỉ assert biến cục bộ**: Không chỉ kiểm tra `expect(buyer.balance).toBe(X)`.
+   - ✅ **BẮT BUỘC assert Đẳng thức Bảo toàn Toàn cục (Conservation Invariant)**:
+     $$\sum \text{Tài nguyên Người dùng} + \text{Tài nguyên Quỹ/Kho bạc/Pool} = \text{Tổng cung ban đầu} + \text{Tổng phát sinh hợp lệ} - \text{Tổng tiêu hủy}$$
+     Tại mọi tick sau chuỗi giao dịch đa bên phức tạp, sai số cho phép là **0 tuyệt đối**. Nếu lệch dù chỉ 1 đơn vị ➔ Báo ĐỎ lập tức (Financial/Resource Leak).
+10. **Thử Nghiệm Sinh Tồn Mạng & Ân Hạn Phiên Tại Điểm Hiểm Hóc (Critical Drop & Grace Period Resilience)**:
+    - Cố tình ngắt kết nối (Drop Socket/Connection) ngay tại bước nhạy cảm nhất của chu trình (khi đang nợ, đang ở modal thanh toán, hoặc giữa phiên giao dịch dở dang):
+    - *Bảo vệ đồng đội*: Xác nhận luồng của các người dùng khác trong phòng/hệ thống không bị treo hoặc deadlock.
+    - *Ân hạn có thời hạn (Grace Period)*: Hệ thống lưu giữ snapshot phiên trong thời gian quy định (ví dụ 60s).
+    - *Khôi phục vi sai*: Khi reconnect trong hạn, hệ thống trả về snapshot đầy đủ và cho phép tiếp tục; nếu quá hạn, hệ thống tự động xử lý an toàn (Forfeit/Rollback/Default).
 
+### 6.1 KIM TỰ THÁP KIỂM THỬ THỰC CHIẾN 4 TẦNG (THE 4-LAYER TESTING PYRAMID)
+Để tránh "Ảo tưởng Test Xanh" (The Illusion of False Green), mọi tính năng trước khi xuất xưởng phải phân bổ kiểm thử theo 4 tầng khép kín:
+
+```text
+               [KIM TỰ THÁP KIỂM THỬ 4 TẦNG PRODUCTION-GRADE]
+                                     ▲
+                                    / \
+                                   / 4 \    <-- Tầng 4: Production Resilience & Chaos (<= 500 LOC)
+                                  /-----\        (Bão nợ, ván đấu >= 3 bên, rớt mạng, Fuzzing 50 lượt)
+                                 /   3   \   <-- Tầng 3: Living Golden Path E2E (<= 600 LOC)
+                                /---------\       (Hành trình liên hoàn thuận từ đầu đến cuối qua FSM)
+                               /     2     \  <-- Tầng 2: Adversarial Unit Tests (<= 300 LOC)
+                              /-------------\      (Logic cô lập, kiểm tra Reason Code + Inversion Gate)
+                             /       1       \ <-- Tầng 1: Contract & Fixture SSOT (<= 300 LOC)
+                            /-----------------\     (Khớp 100% tham số, giá trị, schema với tài liệu gốc)
+```
+
+---
 ---
 
 ## GIAI ĐOẠN 1: Khởi Tạo Dự Án & Cài Đặt Cấp Project (Setup 1 Lần)
@@ -1135,6 +1170,16 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command]
   > 1. `spec-reviewer`: Đối chiếu 100% tiêu chí nghiệm thu trong spec.md gốc.
   > 2. `code-reviewer`: Rà soát diff theo nguyên tắc Least New Structure, quét sạch 6 Cờ Đỏ Slop (trừu tượng hóa 1 lần, YAGNI, dependency thừa...), kiểm tra Visual Audit (design.md) và quét đủ 6 tầng bằng `vertical-slice-completeness`."*
 - **Sản phẩm xuất ra**: Báo cáo kiểm toán Cổng Nghiệm Thu Pass 100% xuất hiện trên màn hình chat.
+
+---
+
+### 🟢 CHỐT CHẶN 5.5: Trạm Kiểm Thử Khả Năng Sinh Tồn (Production Resilience Gate)
+*(Bắt buộc trước khi đóng Epic hoặc xuất xưởng các lát cắt nghiệp vụ cốt lõi, tài chính, giao dịch đa bên)*:
+1. **Phá vỡ "Ảo tưởng Test Xanh" (The Illusion of False Green)**: Unit test xanh chỉ chứng minh code chạy đúng trong phòng thí nghiệm. Bắt buộc kiểm chứng khả năng chịu đựng của hệ thống khi người dùng thao tác sai hoặc phá hoại.
+2. **3 Tiêu chí sinh tồn bắt buộc (Production Resilience Criteria)**:
+   - *Defensive Actions*: Gửi thao tác trái lượt, ID rác, giá trị âm ➔ Hệ thống chặn đứng an toàn bằng Reason Code định danh, 0 crash.
+   - *Conservation Invariant*: Đẳng thức bảo toàn tài nguyên tổng thể $\sum \text{Tài nguyên các bên} + \text{Quỹ} = \text{Tổng cung}$ có sai số **0 tuyệt đối**.
+   - *Deadlock-Free & Grace Period*: Rớt mạng tại trạng thái nhạy cảm nhất khôi phục vi sai an toàn qua Grace Period; Fuzzing ngẫu nhiên 50 lượt chứng minh FSM không bị bế tắc vô tận.
 
 ---
 

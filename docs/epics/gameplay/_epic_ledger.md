@@ -85,7 +85,7 @@
   - `TC-03.3`: [Người chơi dừng tại ô Giao thông (Railroad)] -> [Thu phí lũy tiến theo số ô sở hữu và tăng 50% khi đã lắp ETC]
   - `TC-03.4`: [Người chơi dừng tại ô Tiện ích (Utility)] -> [Tính phí biến thiên 2D6 theo số ô sở hữu hoặc nhân 150 khi đã nâng cấp Full]
   - `TC-03.5`: [Chưa sở hữu trọn bộ màu] -> [Từ chối yêu cầu nâng cấp công trình với lỗi MISSING_MONOPOLY]
-  - `TC-03.6`: [Yêu cầu hạ cấp công trình] -> [Thanh lý công trình về Cấp 0 và hoàn tiền 50% tổng chi phí nâng cấp]
+  - `TC-03.6`: [Yêu cầu hạ cấp công trình] -> [Thanh lý công trình về Cấp 0 và hoàn tiền 50% tổng chi phí nâng cấp] (✅ ĐÃ GIẢI QUYẾT TRONG SLICE 05 - TASK 8 / TC-05.6)
 
 ### Slice 04: Biến Cố Thị Trường Vĩ Mô & Thẻ Cơ Hội Cá Nhân
 - **Use Case Ref:** UC-GAME-038, UC-GAME-039, UC-GAME-040, UC-GAME-041, UC-GAME-042, UC-GAME-043, UC-GAME-044, UC-GAME-045, UC-GAME-046, UC-GAME-047, UC-GAME-048, UC-GAME-049, UC-GAME-050
@@ -113,16 +113,19 @@
 - **Traceability Chain:** Requirement -> Epic Gameplay -> Slice 05
 - **Flow Paths:** Cầm cố tài sản, trả lãi vay, thanh lý khi âm tiền, tuyên bố phá sản, kết thúc ván.
 - **Value Delivered:** Hoàn thiện đòn bẩy tín dụng, kịch bản xấu nhất (phá sản) và quyết toán tài sản ròng khi kết thúc trận đấu.
-- **Lifecycle Status:** Pending
+- **Lifecycle Status:** Done (2026-09-09)
+- **Deliverables:** action_reasons.ts (26L) · room.ts (106L) · property_manager.ts (370L) · card_handlers.ts (355L) · property_actions.ts (277L) · mortgage_manager.ts (219L) · insolvency_manager.ts (180L) · room_manager.ts (329L) · session_manager.ts (123L) · intent_dispatcher.ts (67L)
+- **Test Coverage:** 373/373 tests PASS · 30 files · Adversarial Inversion ×4 PASS · E2E Golden Flow S00->S05 PASS
+- **Tech Debt Ledger:** 0 khoản nợ kỹ thuật tồn đọng (DEBT-01 đến DEBT-07 đã thanh toán 100%).
 - **Preconditions Required:** Slice 04 hoàn tất, quỹ tiền mặt âm hoặc cần vay thế chấp.
 - **Inherited Tech Debt Ledger (Tiếp nhận nợ kỹ thuật từ Slice 00-04):**
-  - `DEBT-01 (TC-02.3)`: Nghiệp vụ P2P Trading (chuyển nhượng song phương BĐS + 5% thuế nộp Kho bạc).
-  - `DEBT-02 (TC-03.6)`: Đấu nối `downgradeProperty` vào FSM Intent (`INTENT_DOWNGRADE`) để hoàn tiền 50%.
-  - `DEBT-03`: Dọn dẹp dead code class `AuditManager` trong `audit_manager.ts`.
-  - `DEBT-04 (TC-05.7)`: Thẻ sự kiện nâng cao `CC_PORT_EXCLUSIVE` (chia sẻ 50% tiền cảng) và `CC_LAND_CHANGE` (tăng giá đất vĩnh viễn).
-  - `DEBT-05 (TC-05.8)`: Mở rộng `DeltaPayload` đồng bộ cấp công trình và cờ hạ tầng lên sa bàn 3D (VSC).
-  - `DEBT-06 (TC-05.9)`: `MC_RATE_HIKE` thiếu logic tăng lãi thế chấp +10%/vòng (§V.1.5). Kích hoạt sau Slice 05 mortgage engine.
-  - `DEBT-07 (TC-05.10)`: `MC_CREDIT_STIMULUS` thiếu logic miễn lãi vay trong 2 vòng (§V.1.6). Kích hoạt sau Slice 05 mortgage engine.
+  - `DEBT-01 (TC-02.3 / TC-05.5)`: Nghiệp vụ P2P Trading (chuyển nhượng song phương BĐS + 5% thuế nộp Kho bạc) (✅ ĐÃ GIẢI QUYẾT TRONG TASK 7).
+  - `DEBT-02 (TC-03.6 / TC-05.6)`: Đấu nối `downgradeProperty` vào FSM Intent (`INTENT_DOWNGRADE`) để hoàn tiền 50% (✅ ĐÃ GIẢI QUYẾT TRONG TASK 8).
+  - `DEBT-03`: Dọn dẹp dead code class `AuditManager` trong `audit_manager.ts` (✅ ĐÃ GIẢI QUYẾT TRONG TASK 1).
+  - `DEBT-04 (TC-05.7)`: Thẻ sự kiện nâng cao `CC_PORT_EXCLUSIVE` (chia sẻ 50% tiền cảng) và `CC_LAND_CHANGE` (tăng giá đất vĩnh viễn) (✅ ĐÃ GIẢI QUYẾT TRONG TASK 9).
+  - `DEBT-05 (TC-05.8)`: Mở rộng `DeltaPayload` đồng bộ cấp công trình và cờ hạ tầng lên sa bàn 3D (VSC) (✅ ĐÃ GIẢI QUYẾT TRONG TASK 10).
+  - `DEBT-06 (TC-05.9)`: `MC_RATE_HIKE` tăng lãi thế chấp +10%/vòng (§V.1.5) (✅ ĐÃ GIẢI QUYẾT TRONG TASK 4).
+  - `DEBT-07 (TC-05.10)`: `MC_CREDIT_STIMULUS` miễn lãi vay trong 2 vòng (§V.1.6) (✅ ĐÃ GIẢI QUYẾT TRONG TASK 4).
 - **Exit Guarantees:** 
   - Success: Quỹ tiền được bơm từ thế chấp, hoặc game loại người chơi phá sản thành công.
   - Failure: Dừng game nếu tất cả trừ 1 người phá sản.

@@ -15,10 +15,54 @@ export interface Session {
   lastPongAt:  number;
 }
 
-export interface DeltaPayload {
-  readonly tick:  number;
-  readonly cells: ReadonlyArray<{ index: number; ownerId: string | null }>;
+export interface CellDelta {
+  readonly index:    number;
+  readonly ownerId?:  string | null;
+  readonly level?:   number;
+  readonly isETC?:   boolean;
 }
+
+export interface PlayerDelta {
+  readonly id:       string;
+  readonly position: number;
+  readonly balance:  number;
+}
+
+export interface DeltaPayload {
+  readonly tick:     number;
+  readonly cells:    ReadonlyArray<CellDelta>;
+  readonly players?:  ReadonlyArray<PlayerDelta>;
+}
+
+export function buildDeltaPayload(options: {
+  tick: number;
+  cells: ReadonlyArray<CellDelta>;
+  players?: ReadonlyArray<PlayerDelta>;
+}): DeltaPayload;
+export function buildDeltaPayload(
+  tick: number,
+  cells?: ReadonlyArray<CellDelta>,
+  players?: ReadonlyArray<PlayerDelta>,
+): DeltaPayload;
+export function buildDeltaPayload(
+  tickOrOptions: number | { tick: number; cells: ReadonlyArray<CellDelta>; players?: ReadonlyArray<PlayerDelta> },
+  cells?: ReadonlyArray<CellDelta>,
+  players?: ReadonlyArray<PlayerDelta>,
+): DeltaPayload {
+  if (typeof tickOrOptions === 'object') {
+    return {
+      tick: tickOrOptions.tick,
+      cells: tickOrOptions.cells.map((c) => ({ ...c })),
+      ...(tickOrOptions.players !== undefined ? { players: tickOrOptions.players.map((p) => ({ ...p })) } : {}),
+    };
+  }
+  return {
+    tick: tickOrOptions,
+    cells: (cells ?? []).map((c) => ({ ...c })),
+    ...(players !== undefined ? { players: players.map((p) => ({ ...p })) } : {}),
+  };
+}
+
 
 export class SessionManager {
   private readonly sessions = new Map<string, Session>();
@@ -63,7 +107,13 @@ export class SessionManager {
   }
 
   broadcastDelta(payload: DeltaPayload): void {
-    this.lastDelta = payload;
+    this.lastDelta = {
+      tick: payload.tick,
+      cells: payload.cells.map((c) => ({ ...c })),
+      ...(payload.players !== undefined
+        ? { players: payload.players.map((p) => ({ ...p })) }
+        : {}),
+    };
   }
 
   getLastDelta(): DeltaPayload | undefined {
