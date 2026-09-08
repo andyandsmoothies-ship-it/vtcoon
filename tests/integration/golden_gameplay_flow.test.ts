@@ -7,6 +7,7 @@ import { describe, it, expect } from 'vitest';
 import { RoomManager } from '../../src/server/room_manager';
 import { TurnPhase, INITIAL_BALANCE, GO_BONUS } from '../../src/domain/room';
 import type { Room } from '../../src/domain/room';
+import { ChanceCardId } from '../../src/domain/event_card_engine';
 function setupGame(seed = 42): { mgr: RoomManager; room: Room } {
   const mgr = new RoomManager(seed);
   const room = mgr.createRoom('P1');
@@ -207,7 +208,114 @@ function step9_P2TaxOrderAndAuditBailOut(mgr: RoomManager, room: Room): void {
   expect(room.phase, 'FSM ở WaitingRoll chờ P1').toBe(TurnPhase.WaitingRoll);
 }
 
+
+// [Hotfix] Step 10: P1 vượt ô GO — Nhận 2.000 Tr., tự động trừ Thuế tài sản lũy tiến (P1 sở hữu 4 ô → 600)
+function step10_P1PassGOWithPropertyTax(mgr: RoomManager, room: Room): void {
+  // P1 bắt đầu từ ô 36, DiceRoll 9 cho total=5 → ô (36+5)%40 = 1 (ô 01 - P1 đã sở hữu)
+  room.players[0]!.position = 36;
+  const roll9 = mgr.handleRollDice(room.roomCode, 'P1');
+  expect(roll9, 'P1 phải tung xúc xắc thành công').toBeDefined();
+  expect(roll9!.player.position, 'P1 dừng chân tại ô 01 (sở hữu của P1)').toBe(1);
+  expect(roll9!.passedGo, 'P1 vượt qua ô GO').toBe(true);
+  // P1 sở hữu 4 ô (1, 3, 5, 15), ownedCount=4 >= 4 → property_tax = 150×4 = 600
+  // Net GO bonus = 2000 - 600 = 1400 → balance = 12360 + 1400 = 13760
+  expect(room.players[0]!.balance, 'P1 nhận 1400 Tr. (2000 GO - 600 thuế tài sản): 12360 + 1400 = 13760').toBe(13_760);
+  expect(room.phase, 'FSM chuyển sang PropertyManagement (đất đã sở hữu)').toBe(TurnPhase.PropertyManagement);
+
+  const endRes = mgr.handlePlayerIntent(room.roomCode, 'P1', { type: 'INTENT_END_TURN' });
+  expect(endRes.success, 'P1 kết thúc lượt').toBe(true);
+  expect(room.currentPlayerIndex, 'Chuyển lượt sang P2').toBe(1);
+  expect(room.phase, 'FSM ở WaitingRoll chờ P2').toBe(TurnPhase.WaitingRoll);
+}
+
+// [Hotfix] Step 11: P2 dừng ô 04 (Lệ Phí Đất Đai) sau khi vượt GO — Thuế tài sản 0 (P2 không có ô)
+function step11_P2TaxCellAfterGO(mgr: RoomManager, room: Room): void {
+  // P2 bắt đầu từ ô 35, DiceRoll 10 cho total=9 → ô (35+9)%40 = 4 (Lệ Phí Đất Đai)
+  room.players[1]!.position = 35;
+  const roll10 = mgr.handleRollDice(room.roomCode, 'P2');
+  expect(roll10, 'P2 phải tung xúc xắc thành công').toBeDefined();
+  expect(roll10!.player.position, 'P2 dừng chân tại ô 04 (Lệ Phí Đất Đai)').toBe(4);
+  expect(roll10!.passedGo, 'P2 vượt qua ô GO').toBe(true);
+  // P2 không có tài sản → thuế tài sản lũy tiến = 0 → nhận đủ 2.000 GO bonus
+  // Sau GO: 18940 + 2000 = 20940
+  // Lệ Phí Đất Đai 10%: min(2000, floor(20940*0.1)) = min(2000, 2094) = 2000 (capped)
+  // P2 balance sau thuế: 20940 - 2000 = 18940 (thuế tối đa 2.000 Tr. bị giới hạn)
+  expect(room.players[1]!.balance, 'P2 nhận GO +2000 (thuế tài sản=0), nộp lệ phí đất đai tối đa 2000 (20940-2000=18940)').toBe(18_940);
+  expect(room.phase, 'FSM chuyển sang PropertyManagement tại ô Tax').toBe(TurnPhase.PropertyManagement);
+
+  const endRes = mgr.handlePlayerIntent(room.roomCode, 'P2', { type: 'INTENT_END_TURN' });
+  expect(endRes.success, 'P2 kết thúc lượt').toBe(true);
+  expect(room.currentPlayerIndex, 'Lượt quay về P1').toBe(0);
+  expect(room.phase, 'FSM ở WaitingRoll chờ P1').toBe(TurnPhase.WaitingRoll);
+}
+
+// [Hotfix] Step 12: P1 từ chối mua ô 06 → Auto-Auction → P2 AUCTION_PASS → chốt phiên không người thắng
+function step12_P1DeclineAutoAuctionNoWinner(mgr: RoomManager, room: Room): void {
+  // P1 bắt đầu từ ô 01 (vừa dừng ở step10), DiceRoll 11 cho total=5 → ô (1+5)%40 = 6 (Bình Dương - chưa có chủ)
+  room.players[0]!.position = 1;
+  const roll11 = mgr.handleRollDice(room.roomCode, 'P1');
+  expect(roll11, 'P1 phải tung xúc xắc thành công').toBeDefined();
+  expect(roll11!.player.position, 'P1 dừng chân tại ô 06 (Bình Dương - chưa có chủ)').toBe(6);
+  expect(roll11!.passedGo, 'P1 không vượt ô GO').toBe(false);
+  expect(room.phase, 'FSM ở ActionPhase do ô 06 chưa có chủ').toBe(TurnPhase.ActionPhase);
+
+  // P1 từ chối mua → Auto-Auction mở, declinedPlayerId = 'P1'
+  const decRes = mgr.handlePlayerIntent(room.roomCode, 'P1', { type: 'INTENT_DECLINE' });
+  expect(decRes.success, 'P1 từ chối mua ô 06 thành công').toBe(true);
+  expect(room.phase, 'FSM mở phiên AuctionPhase tự động').toBe(TurnPhase.AuctionPhase);
+
+  // P1 bị cấm đặt giá (người từ chối) — thử BID → phải bị từ chối
+  const forbiddenBid = mgr.handlePlayerIntent(room.roomCode, 'P1', { type: 'INTENT_BID', amount: 600 });
+  expect(forbiddenBid.success, 'P1 (người từ chối) bị cấm đặt giá').toBe(false);
+  expect(forbiddenBid.reason, 'Lý do: DECLINED_PLAYER_CANNOT_BID').toBe('DECLINED_PLAYER_CANNOT_BID');
+
+  // P2 gửi INTENT_AUCTION_PASS → không có người đặt giá → phiên tự chốt, không có người thắng
+  const passRes = mgr.handlePlayerIntent(room.roomCode, 'P2', { type: 'INTENT_AUCTION_PASS' });
+  expect(passRes.success, 'P2 gửi AUCTION_PASS thành công').toBe(true);
+  // Sau khi tất cả người hợp lệ pass, phiên tự động chốt → PropertyManagement
+  expect(room.phase, 'FSM trở về PropertyManagement sau khi chốt phiên').toBe(TurnPhase.PropertyManagement);
+  // Ô 06 không có chủ sở hữu (phiên không có người đặt giá)
+  expect(mgr.getPropertyOwner(room.roomCode, 6), 'Ô 06 không có chủ (phiên đấu giá không có người thắng)').toBeUndefined();
+  // Số dư hai bên không thay đổi
+  expect(room.players[0]!.balance, 'Số dư P1 giữ nguyên 13.760').toBe(13_760);
+  expect(room.players[1]!.balance, 'Số dư P2 giữ nguyên 18.940').toBe(18_940);
+
+  const endRes = mgr.handlePlayerIntent(room.roomCode, 'P1', { type: 'INTENT_END_TURN' });
+  expect(endRes.success, 'P1 kết thúc lượt sau phiên đấu giá').toBe(true);
+  expect(room.currentPlayerIndex, 'Chuyển lượt sang P2').toBe(1);
+  expect(room.phase, 'FSM ở WaitingRoll chờ P2').toBe(TurnPhase.WaitingRoll);
+}
+
+// [Hotfix] Step 13: P2 dừng ô Cơ Hội (ô 07) → rút thẻ CC_PLATE_AUCTION (+1 lượt đi tiếp)
+function step13_P2ChanceCardPlateAuction(mgr: RoomManager, room: Room): void {
+  // Tiêm thẻ CC_PLATE_AUCTION lên đầu deck để kết quả xác định
+  room.chanceDeck = [
+    ChanceCardId.CC_PLATE_AUCTION,
+    ...room.chanceDeck.filter((c) => c !== ChanceCardId.CC_PLATE_AUCTION),
+  ];
+
+  // P2 bắt đầu từ ô 04, DiceRoll 12 cho total=3 → ô (4+3)%40 = 7 (Phiếu Cơ Hội)
+  room.players[1]!.position = 4;
+  const roll12 = mgr.handleRollDice(room.roomCode, 'P2');
+  expect(roll12, 'P2 phải tung xúc xắc thành công').toBeDefined();
+  expect(roll12!.player.position, 'P2 dừng chân tại ô 07 (Phiếu Cơ Hội)').toBe(7);
+  expect(roll12!.passedGo, 'P2 không vượt ô GO').toBe(false);
+  // CC_PLATE_AUCTION: balance -500, extraTurns +1, consecutiveDoubles +1
+  // P2 balance: 18940 - 500 = 18440
+  expect(room.players[1]!.balance, 'P2 bị trừ 500 Tr. phí biển số (18940 - 500 = 18440)').toBe(18_440);
+  expect(room.players[1]!.extraTurns, 'P2 nhận +1 lượt đi tiếp (extraTurns = 1)').toBe(1);
+  expect(room.phase, 'FSM chuyển sang PropertyManagement sau khi rút thẻ Cơ Hội').toBe(TurnPhase.PropertyManagement);
+
+  // P2 kết thúc lượt → extraTurns > 0 → lượt không chuyển, P2 được thêm 1 lượt
+  const endRes = mgr.handlePlayerIntent(room.roomCode, 'P2', { type: 'INTENT_END_TURN' });
+  expect(endRes.success, 'P2 kết thúc lượt với extra turn').toBe(true);
+  expect(room.currentPlayerIndex, 'Lượt vẫn ở P2 do extraTurns được kích hoạt').toBe(1);
+  expect(room.players[1]!.extraTurns, 'extraTurns P2 giảm về 0 sau khi tiêu').toBe(0);
+  expect(room.phase, 'FSM quay về WaitingRoll cho P2 lượt bổ sung').toBe(TurnPhase.WaitingRoll);
+}
+
 describe('[UC-GAME-001..050/MSS] Golden Gameplay Flow — Slice 00 đến Slice 04', () => {
+
   it('[TC-E2E-GOLDEN/MSS] Mô phỏng ván đấu liên hoàn hoàn chỉnh giữa P1 và P2', () => {
     // 1. [Khởi tạo - Slice 00]: Tạo phòng với 2 người chơi (vốn 15.000)
     const { mgr, room } = setupGame(42);
@@ -241,5 +349,18 @@ describe('[UC-GAME-001..050/MSS] Golden Gameplay Flow — Slice 00 đến Slice 
 
     // 9. [Lệnh Thu Thuế & Giải cứu Trạm Kiểm Toán - Slice 04]
     step9_P2TaxOrderAndAuditBailOut(mgr, room);
+
+    // 10. [Hotfix] Vượt ô GO - Nhận 2.000 Tr. trừ Thuế tài sản lũy tiến (P1 có 4 ô → tax=600)
+    step10_P1PassGOWithPropertyTax(mgr, room);
+
+    // 11. [Hotfix] Dừng ô Tax (ô04) sau khi vượt GO - Lệ Phí Đất Đai 10% & PropertyManagement
+    step11_P2TaxCellAfterGO(mgr, room);
+
+    // 12. [Hotfix] Từ chối mua → Auto-Auction → AUCTION_PASS → chốt phiên không người thắng
+    step12_P1DeclineAutoAuctionNoWinner(mgr, room);
+
+    // 13. [Hotfix] Thẻ Cơ Hội CC_PLATE_AUCTION → +1 lượt đi tiếp
+    step13_P2ChanceCardPlateAuction(mgr, room);
   });
 });
+

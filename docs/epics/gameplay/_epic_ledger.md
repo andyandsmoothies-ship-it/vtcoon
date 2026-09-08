@@ -119,8 +119,10 @@
   - `DEBT-01 (TC-02.3)`: Nghiệp vụ P2P Trading (chuyển nhượng song phương BĐS + 5% thuế nộp Kho bạc).
   - `DEBT-02 (TC-03.6)`: Đấu nối `downgradeProperty` vào FSM Intent (`INTENT_DOWNGRADE`) để hoàn tiền 50%.
   - `DEBT-03`: Dọn dẹp dead code class `AuditManager` trong `audit_manager.ts`.
-  - `DEBT-04`: Thẻ sự kiện nâng cao `CC_PORT_EXCLUSIVE` (chia sẻ 50% tiền cảng) và `CC_LAND_CHANGE` (tăng giá đất vĩnh viễn).
-  - `DEBT-05`: Mở rộng `DeltaPayload` đồng bộ cấp công trình và cờ hạ tầng lên sa bàn 3D (VSC).
+  - `DEBT-04 (TC-05.7)`: Thẻ sự kiện nâng cao `CC_PORT_EXCLUSIVE` (chia sẻ 50% tiền cảng) và `CC_LAND_CHANGE` (tăng giá đất vĩnh viễn).
+  - `DEBT-05 (TC-05.8)`: Mở rộng `DeltaPayload` đồng bộ cấp công trình và cờ hạ tầng lên sa bàn 3D (VSC).
+  - `DEBT-06 (TC-05.9)`: `MC_RATE_HIKE` thiếu logic tăng lãi thế chấp +10%/vòng (§V.1.5). Kích hoạt sau Slice 05 mortgage engine.
+  - `DEBT-07 (TC-05.10)`: `MC_CREDIT_STIMULUS` thiếu logic miễn lãi vay trong 2 vòng (§V.1.6). Kích hoạt sau Slice 05 mortgage engine.
 - **Exit Guarantees:** 
   - Success: Quỹ tiền được bơm từ thế chấp, hoặc game loại người chơi phá sản thành công.
   - Failure: Dừng game nếu tất cả trừ 1 người phá sản.
@@ -133,3 +135,7 @@
   - `TC-05.4`: [Hết thời gian hoặc số vòng quy định] -> [Quyết toán tổng tài sản ròng và xếp hạng người chiến thắng]
   - `TC-05.5`: [Giao dịch P2P đất nền song phương] -> [Chuyển nhượng thành công và khấu trừ 5% thuế chuyển nhượng vào Kho bạc - Khôi phục TC-02.3]
   - `TC-05.6`: [Yêu cầu hạ cấp công trình qua INTENT_DOWNGRADE] -> [Hoàn trả 50% chi phí xây dựng công trình về tài khoản - Khôi phục TC-03.6]
+  - `TC-05.7`: [Rút CC_PORT_EXCLUSIVE] -> [Người rút thẻ nhận đúng 50% tiền cảng từ chủ sở hữu Hạ tầng trong 2 vòng tiếp theo - Khôi phục DEBT-04]
+  - `TC-05.8`: [Nâng cấp công trình hoặc ETC] -> [DeltaPayload gửi đi bao gồm đúng cấp công trình và cờ ETC để sa bàn 3D render đúng - Khôi phục DEBT-05]
+  - `TC-05.9`: [Rút MC_RATE_HIKE khi có thế chấp đang nợ] -> [Lãi thế chấp tăng lên 10%/vòng thay vì 5%/vòng trong duration của thẻ - Khôi phục DEBT-06]
+  - `TC-05.10`: [Rút MC_CREDIT_STIMULUS khi có thế chấp đang nợ] -> [Lãi thế chấp được miễn trong 2 vòng kế tiếp - Khôi phục DEBT-07]
