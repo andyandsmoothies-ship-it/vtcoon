@@ -12,7 +12,9 @@ import {
   BOARD_SIZE,
   INITIAL_BALANCE,
   TurnPhase,
+  type MarketModifier,
 } from '../../src/domain/room';
+import { MarketCardId, ChanceCardId } from '../../src/domain/event_card_engine';
 
 describe('[UC-GAME-001/MSS] TC-01.1 createRoom', () => {
   test('tra ve phong voi roomCode dai 6 ky tu', () => {
@@ -97,5 +99,60 @@ describe('[UC-GAME-001/MSS][UC-GAME-008/MSS] Hang so domain', () => {
 
   test('GO_BONUS = 2000', () => {
     expect(GO_BONUS).toBe(2_000);
+  });
+});
+
+describe('[TC-04.T3/MSS] Domain State Extension (room.ts)', () => {
+  test('createPlayer khoi tao skipNextTurn=false, auditTurnsLeft=0, hand=[], pendingDebts=[]', () => {
+    const p1 = createPlayer('p1');
+    expect(p1.skipNextTurn).toBe(false);
+    expect(p1.auditTurnsLeft).toBe(0);
+    expect(p1.hand).toEqual([]);
+    expect(p1.pendingDebts).toEqual([]);
+
+    // Kiểm chứng nạp thẻ vào tay và ghi nhận nợ độc lập giữa các player
+    const p2 = createPlayer('p2');
+    p1.hand.push(ChanceCardId.CC_DIPLOMATIC);
+    p1.pendingDebts.push('DEBT_OVERDRAFT_1000');
+    expect(p1.hand).toHaveLength(1);
+    expect(p1.pendingDebts).toHaveLength(1);
+    expect(p2.hand).toEqual([]);
+    expect(p2.pendingDebts).toEqual([]);
+  });
+
+  test('TurnPhase bao gom HosePhase', () => {
+    expect(TurnPhase.HosePhase).toBe('HosePhase');
+  });
+
+  test('createRoom khoi tao activeModifiers=[], marketDeck/chanceDeck co the duoc nap', () => {
+    const room = createRoom('host-1');
+    expect(room.activeModifiers).toEqual([]);
+    expect(room.marketDeck).toEqual([]);
+    expect(room.chanceDeck).toEqual([]);
+    expect(room.marketDiscard).toEqual([]);
+    expect(room.chanceDiscard).toEqual([]);
+
+    // Kiểm chứng marketDeck/chanceDeck có thể nạp thẻ và activeModifiers lưu MarketModifier
+    room.marketDeck.push(MarketCardId.MC_PEAK_TOURISM);
+    room.chanceDeck.push(ChanceCardId.CC_STOCK_PROFIT);
+    const mod: MarketModifier = {
+      type: MarketCardId.MC_PEAK_TOURISM,
+      affectedCells: [11, 13, 14],
+      remainingRounds: 1,
+      multiplier: 2,
+    };
+    room.activeModifiers.push(mod);
+
+    expect(room.marketDeck).toEqual([MarketCardId.MC_PEAK_TOURISM]);
+    expect(room.chanceDeck).toEqual([ChanceCardId.CC_STOCK_PROFIT]);
+    expect(room.activeModifiers).toHaveLength(1);
+    expect(room.activeModifiers[0]?.type).toBe(MarketCardId.MC_PEAK_TOURISM);
+    expect(room.activeModifiers[0]?.multiplier).toBe(2);
+
+    // Kiểm chứng tính độc lập trạng thái giữa các room
+    const room2 = createRoom('host-2');
+    expect(room2.marketDeck).toEqual([]);
+    expect(room2.chanceDeck).toEqual([]);
+    expect(room2.activeModifiers).toEqual([]);
   });
 });

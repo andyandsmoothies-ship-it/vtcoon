@@ -1,4 +1,5 @@
 // [UC-GAME-001/MSS][UC-GAME-008/MSS] Room & Player Domain Types
+import type { MarketCardId, ChanceCardId } from './event_card_engine';
 
 export const BOARD_SIZE       = 40;
 export const GO_BONUS         = 2_000;
@@ -12,21 +13,41 @@ export enum TurnPhase {
   PropertyManagement = 'PropertyManagement',
   BankruptcyCheck    = 'BankruptcyCheck',
   TurnEnd            = 'TurnEnd',
+  HosePhase          = 'HosePhase',
+}
+
+export interface MarketModifier {
+  readonly type: MarketCardId;
+  readonly affectedCells: readonly number[];
+  remainingRounds: number;
+  readonly multiplier?: number;
 }
 
 export interface Player {
-  readonly id: string;
-  position:    number;
-  balance:     number;
+  readonly id:        string;
+  position:           number;
+  balance:            number;
+  skipNextTurn:       boolean;
+  auditTurnsLeft:     number;
+  consecutiveDoubles: number;
+  hand:               ChanceCardId[];
+  pendingDebts:       string[];
+  extraTurns:         number;
+  doubleNextDice:     boolean;
 }
 
 export interface Room {
-  readonly roomCode:    string;
-  readonly hostId:      string;
-  players:             Player[];
-  currentPlayerIndex:  number;
-  phase:               TurnPhase;
-  started:             boolean;
+  readonly roomCode:   string;
+  readonly hostId:     string;
+  players:            Player[];
+  currentPlayerIndex: number;
+  phase:              TurnPhase;
+  started:            boolean;
+  activeModifiers:    MarketModifier[];
+  marketDeck:         MarketCardId[];
+  marketDiscard:      MarketCardId[];
+  chanceDeck:         ChanceCardId[];
+  chanceDiscard:      ChanceCardId[];
 }
 
 const CHARSET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -40,7 +61,12 @@ export function generateRoomCode(): string {
 }
 
 export function createPlayer(id: string): Player {
-  return { id, position: 0, balance: INITIAL_BALANCE };
+  return {
+    id, position: 0, balance: INITIAL_BALANCE,
+    skipNextTurn: false, auditTurnsLeft: 0, consecutiveDoubles: 0,
+    hand: [], pendingDebts: [],
+    extraTurns: 0, doubleNextDice: false,
+  };
 }
 
 export function createRoom(hostId: string): Room {
@@ -51,6 +77,11 @@ export function createRoom(hostId: string): Room {
     currentPlayerIndex: 0,
     phase:              TurnPhase.WaitingRoll,
     started:            false,
+    activeModifiers:    [],
+    marketDeck:         [],
+    marketDiscard:      [],
+    chanceDeck:         [],
+    chanceDiscard:      [],
   };
 }
 

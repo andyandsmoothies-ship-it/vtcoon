@@ -6,6 +6,10 @@ Bản tài liệu thiết kế hoàn chỉnh của trò chơi **"Đại Gia Đ�
 * **Vốn khả dụng ban đầu:** $15.000$ Tr. VNĐ/người chơi (tương đương 15 tỷ đồng).  
 * **Tiền thưởng qua ô Khởi Hành (GO):** $+2.000$ Tr. VNĐ/vòng.  
 * **Cơ chế di chuyển:** Lắc 2 xúc xắc ($2D6$). Đổ đôi được đi tiếp; đổ đôi 3 lần liên tiếp bị đưa vào **Ô 10 (Trạm Kiểm Toán & Thanh Tra)**.  
+* **Quy tắc Trạm Kiểm Toán & Thanh Tra (Ô 10):**  
+  * Người chơi bị đưa vào ô 10 do: đổ đôi 3 lần liên tiếp hoặc dừng tại ô 30 (Lệnh Thanh Tra Thuế). Khi đang bị tạm giữ (tối đa 3 lượt), người chơi bị phong tỏa di chuyển.  
+  * Cơ chế rời Trạm Kiểm Toán: (1) Nộp bảo lãnh $500$ Tr. VNĐ vào đầu lượt để rời trạm ngay; (2) Đổ xúc xắc ra đôi để được tự do di chuyển ngay theo điểm xúc xắc; (3) Chờ hết 3 lượt thụ án thụ động, tự động rời trạm ở lượt tiếp theo.  
+  * Dừng chân bình thường tại ô 10 (chỉ ghé thăm) không bị tạm giữ hay phạt tiền.  
 * **Điều kiện kết thúc & Thắng cuộc:**  
   * *Theo thời gian/vòng đấu:* Kết thúc sau 15 vòng hoặc 60 phút. Người có **Tổng tài sản ròng** lớn nhất (Tiền mặt \+ Giá trị định giá BĐS & Công trình \- Dư nợ ngân hàng) chiến thắng.  
   * *Theo thanh khoản:* Nếu có người chơi phá sản (âm tiền mặt sau khi đã thế chấp/bán toàn bộ tài sản), trận đấu dừng lại và chốt kết quả ngay lập tức.  
@@ -16,6 +20,7 @@ Bản tài liệu thiết kế hoàn chỉnh của trò chơi **"Đại Gia Đ�
   * Người chơi chỉ được mở giao dịch trong lượt của mình (giai đoạn Quản lý tài sản).  
   * Đối tượng giao dịch hợp lệ: Đất trống (Cấp 0), Thẻ Miễn Trừ Ngoại Giao, tiền mặt. Không được phép giao dịch các ô đất đã xây dựng công trình (phải thanh lý công trình về Cấp 0 trước khi chuyển nhượng).  
   * Áp dụng thuế chuyển nhượng bất động sản: Bên nhận tiền phải đóng thuế giao dịch $5\\%$ trên tổng giá trị nhận được vào Kho bạc Nhà nước.
+* **Mức Bảo Lãnh Trạm Kiểm Toán (Ô 10):** Người chơi đang bị phong tỏa tại Trạm Kiểm Toán có thể nộp khoản bảo lãnh $500$ Tr. VNĐ để thoát ngay lập tức. Nếu số dư tiền mặt không đủ 500 Tr. VNĐ, yêu cầu bị từ chối và người chơi tiếp tục thụ án.
 
 ### **II. BẢNG DANH MỤC 40 Ô BÀN CỜ VIỆT NAM (MASTER LAYOUT)**
 
@@ -189,7 +194,9 @@ Người chơi khi dừng chân tại ô này có quyền lựa chọn bỏ qua 
 > 13. **Biến Động Tỷ Giá & Giá Xăng Dầu:** Chi phí lưu thông tăng; tất cả người chơi dừng tại các ô Hạ tầng Giao thông phải trả thêm $500$ Tr. VNĐ phụ phí vận tải.  
 > 14. **Phê Duyệt Quy Hoạch Đô Thị Đặc Biệt:** Định giá đất của các ô thuộc nhóm Xanh Lá (Hà Nội) và Tím (TP.HCM) tăng thêm $20\\%$ giá trị khi thế chấp.  
 > 15. **Tăng Khung Giá Bán Lẻ Điện & Viễn Thông:** Doanh thu thu phí của EVN và Viettel nhân đôi ($x2$) từ người chơi dẫm vào.  
-> 16. **Thời Tiết Cực Đoan Duyên Hải:** Miễn toàn bộ tiền thuê đất tại các ô thuộc dải miền Trung (Bình Thuận, Khánh Hòa, Bình Định, Huế, Đà Nẵng) trong 1 vòng.
+> 16. **Thời Tiết Cực Đoan Duyên Hải:** Miễn toàn bộ tiền thuê đất tại các ô thuộc dải miền Trung (Bình Thuận, Khánh Hòa, Bình Định, Huế, Đà Nẵng) trong 1 vòng.  
+> 
+> * **Quy tắc Giải Quyết Xung Đột Thẻ Thị Trường (Conflict Resolution):** Khi có nhiều thẻ thị trường tác động đồng thời lên cùng một ô đất (ví dụ: Thẻ 11 tăng $100\%$ tiền thuê du lịch và Thẻ 16 bão lũ miền Trung tại ô 11 Mũi Né, ô 14 Nha Trang), hiệu ứng bất khả kháng (Thiên tai / Miễn phí thuê $= 0$) luôn có độ ưu tiên cao nhất (Zero-rent rule).
 
 #### **2\. Bộ 20 Thẻ "Phiếu Cơ Hội" (Quyết Định & Rủi Ro Cá Nhân)**
 

@@ -92,7 +92,11 @@
 - **Traceability Chain:** Requirement -> Epic Gameplay -> Slice 04
 - **Flow Paths:** Rút thẻ thị trường/cơ hội, áp dụng hiệu ứng mùa vụ, đầu tư chứng khoán HOSE, vào Trạm Kiểm Toán.
 - **Value Delivered:** Kích hoạt hệ thống Thẻ Bài (Phiếu Cơ Hội, Phiếu Thị Trường) gây ảnh hưởng biến động toàn bàn cờ hoặc cá nhân.
-- **Lifecycle Status:** Pending
+- **Lifecycle Status:** Done (2026-09-08)
+- **Deliverables:** board_config.ts (88L) · audit_manager.ts (115L) · auction_manager.ts (117L) · card_handlers.ts (334L) · property_manager.ts (336L) · room_manager.ts (237L) · room.ts (95L) · special_cell_handler.ts (43L)
+- **Test Coverage:** 198/198 tests PASS · 21 files · Adversarial Inversion ×4 PASS · E2E Golden Flow S00->S04 PASS
+- **Defects Resolved:** Xử lý triệt để 8 lỗi BLOCKER theo Báo Cáo Đối Soát Định Kỳ: (1) Ô 04 thu Lệ phí đất đai 2000 hoặc 10% tiền mặt; (2) Thuế tài sản lũy tiến tại ô GO theo §IV.1; (3) Đấu giá cấm người từ chối mua đặt giá; (4) Khắc phục bế tắc runtime Auto-Auction qua INTENT_AUCTION_PASS & auto-close; (5) MC_FREEZE_TRADE chặn mua đất; (6) MC_CREDIT_STIMULUS giảm 20% chi phí xây; (7) CC_PLATE_AUCTION extraTurns & CC_CONCERT_SPONSOR doubleNextDice; (8) Đồng bộ rentAmount khi phụ thu Dịch vụ C2.
+- **Tech Debt Deferred to Slice 05:** (1) Giao dịch P2P 5% thuế (khôi phục hợp đồng TC-02.3); (2) Đấu nối downgradeProperty vào FSM Intent; (3) Dọn dẹp dead code class AuditManager; (4) Thẻ CC_PORT_EXCLUSIVE chia sẻ 50% tiền cảng và CC_LAND_CHANGE tăng vĩnh viễn; (5) Mở rộng DeltaPayload đồng bộ cấp công trình và cờ hạ tầng lên sa bàn 3D (VSC).
 - **Preconditions Required:** Slice 03 hoàn tất, người chơi dẫm vào ô Sự kiện, ô HOSE hoặc Trạm Kiểm Toán.
 - **Exit Guarantees:** 
   - Success: Các chỉ số giá trị đất/thuế phí thay đổi đúng theo biến cố.
@@ -111,6 +115,12 @@
 - **Value Delivered:** Hoàn thiện đòn bẩy tín dụng, kịch bản xấu nhất (phá sản) và quyết toán tài sản ròng khi kết thúc trận đấu.
 - **Lifecycle Status:** Pending
 - **Preconditions Required:** Slice 04 hoàn tất, quỹ tiền mặt âm hoặc cần vay thế chấp.
+- **Inherited Tech Debt Ledger (Tiếp nhận nợ kỹ thuật từ Slice 00-04):**
+  - `DEBT-01 (TC-02.3)`: Nghiệp vụ P2P Trading (chuyển nhượng song phương BĐS + 5% thuế nộp Kho bạc).
+  - `DEBT-02 (TC-03.6)`: Đấu nối `downgradeProperty` vào FSM Intent (`INTENT_DOWNGRADE`) để hoàn tiền 50%.
+  - `DEBT-03`: Dọn dẹp dead code class `AuditManager` trong `audit_manager.ts`.
+  - `DEBT-04`: Thẻ sự kiện nâng cao `CC_PORT_EXCLUSIVE` (chia sẻ 50% tiền cảng) và `CC_LAND_CHANGE` (tăng giá đất vĩnh viễn).
+  - `DEBT-05`: Mở rộng `DeltaPayload` đồng bộ cấp công trình và cờ hạ tầng lên sa bàn 3D (VSC).
 - **Exit Guarantees:** 
   - Success: Quỹ tiền được bơm từ thế chấp, hoặc game loại người chơi phá sản thành công.
   - Failure: Dừng game nếu tất cả trừ 1 người phá sản.
@@ -121,3 +131,5 @@
   - `TC-05.2`: [Quỹ tiền mặt âm vượt ngưỡng tài sản] -> [Kích hoạt chế độ cưỡng chế thanh lý tài sản tự động]
   - `TC-05.3`: [Bán sạch tài sản vẫn không đủ trả nợ] -> [Tuyên bố phá sản, loại bỏ người chơi và giải phóng toàn bộ tài sản về trạng thái trống]
   - `TC-05.4`: [Hết thời gian hoặc số vòng quy định] -> [Quyết toán tổng tài sản ròng và xếp hạng người chiến thắng]
+  - `TC-05.5`: [Giao dịch P2P đất nền song phương] -> [Chuyển nhượng thành công và khấu trừ 5% thuế chuyển nhượng vào Kho bạc - Khôi phục TC-02.3]
+  - `TC-05.6`: [Yêu cầu hạ cấp công trình qua INTENT_DOWNGRADE] -> [Hoàn trả 50% chi phí xây dựng công trình về tài khoản - Khôi phục TC-03.6]

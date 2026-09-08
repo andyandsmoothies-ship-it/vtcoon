@@ -11,7 +11,7 @@
 3. [CƠ CHẾ KỸ NĂNG HẠT GIỐNG (Seed Skill & JIT Dispatcher)](#3-cơ-chế-kỹ-năng-hạt-giống-seed-skill--jit-dispatcher)
 4. [SƠ ĐỒ DÒNG CHẢY KẾT HỢP CÁC KỸ NĂNG (The Artifact Pipeline)](#4-sơ-đồ-dòng-chảy-kết-hợp-các-kỹ-năng-the-artifact-pipeline)
 5. [HỆ THỐNG TRUY XUẤT NGUỒN GỐC ARTIFACTS (3-Bucket Taxonomy, 4D ADR & Universal design.md)](#5-hệ-thống-truy-xuất-nguồn-gốc-artifacts-3-bucket-taxonomy-4d-adr--universal-designmd)
-6. [5 NGUYÊN TẮC KIỂM THỬ ĐỈNH CAO (Testing Integrity)](#6-5-nguyên-tắc-kiểm-thử-đỉnh-cao-testing-integrity)
+6. [7 NGUYÊN TẮC KIỂM THỬ ĐỈNH CAO (Testing Integrity)](#6-7-nguyên-tắc-kiểm-thử-đỉnh-cao-testing-integrity)
 7. [GIAI ĐOẠN 1: Khởi Tạo Dự Án & Cài Đặt Cấp Project (Setup 1 Lần)](#giai-đoạn-1-khởi-tạo-dự-án--cài-đặt-cấp-project-setup-1-lần)
 8. [GIAI ĐOẠN 2: Trọn Bộ 4 Subagents Native AG 2.0 Sẵn Sàng Sử Dụng](#giai-đoạn-2-trọn-bộ-4-subagents-native-ag-20-sẵn-sàng-sử-dụng)
 9. [KỊCH BẢN THỰC CHIẾN: Greenfield, Feature Slices, Bug/CR (Sign-off Test) & Brownfield](#9-kịch-bản-thực-chiến-từ-số-0-greenfield-đến-từng-tính-năng-feature)
@@ -61,7 +61,15 @@
 │        File sửa ngoài quan hệ nhân quả, Comment/Wrapper sinh ra chỉ để bao biện cho sự phức tạp tự đẻ ra.
 │      • Đặt Ngân sách Dòng Code linh hoạt (LOC Budget): Max +30 đến +50 LOC per ticket.
 │      • Cyclomatic Complexity <= 5 (Nhưng CẤM xé nhỏ hàm <5 dòng gây phân mảnh code).
-│      • CHỐNG BẪY CODE GOLF: Cấm viết code gộp dòng khó đọc/tắt mắt chỉ để giảm LOC.
+│      • KHUNG PHÂN LOẠI 5 TẦNG GIỚI HẠN TỆP THEO BẢN CHẤT (5-TIER FILE BUDGET FRAMEWORK):
+│        - Tier 1 (Lõi Logic / FSM / Domain Services): Max 400 LOC. BẮT BUỘC kích hoạt tách module con khi chạm 300 LOC (75%).
+│        - Tier 2 (Giao diện Khai báo / UI Components): Max 500 LOC. Bắt buộc rút Custom Hook nếu logic state vượt 50 LOC.
+│        - Tier 3 (Dữ liệu Tĩnh / Bảng Tra Cứu / Config): Max 800 LOC. Dành cho danh mục phẳng, hằng số, Cyclomatic Complexity = 1.
+│        - Tier 4 (Kịch bản Test Tích Hợp / E2E Living Flow): Max 600 LOC (Unit test giữ <= 300 LOC).
+│        - Tier 5 (Schemas / DTOs / Migrations): Max 1000 LOC (hoặc miễn trừ nếu là mã tự động sinh).
+│      • CHỐNG BẪY CODE GOLF & NO-OP STUBBING:
+│        - Tuyệt đối CẤM gộp câu lệnh, xóa comment, viết tắt biến hoặc tạo hàm No-Op/Stub rỗng chỉ để né trần LOC.
+│        - Khi nghiệp vụ đòi hỏi code mở rộng, giải pháp DUY NHẤT là tách module chuyên trách (Modular Decomposition).
 │
 ├── 6. CƯỠNG CHẾ KIẾN TRÚC TẤT ĐỊNH (DETERMINISTIC ARCHITECTURE ENFORCEMENT - NICK TUNE):
 │      "Rào chắn cơ học của Trình biên dịch/Linter luôn đánh bại rào chắn đạo đức trong Markdown."
@@ -122,11 +130,24 @@
 │      • Khóa cứng Trình biên dịch (Strict Compiler Flags): Bật `strict: true`, `noUncheckedIndexedAccess`, `<Nullable>enable</Nullable>`.
 │        Khi compiler đã bảo đảm biến không thể null/undefined, CẤM Agent viết code phòng thủ rác (`if (x != null)`) làm tăng độ phức tạp.
 │
-└── 13. KHẢ NĂNG QUAN SÁT TINH GỌN (LEAN RUNTIME OBSERVABILITY - CHARITY MAJORS):
-       • "Testing chứng minh lỗi đã biết trong phòng thí nghiệm; Observability giải thích sự cố bất ngờ ngoài đời thực."
-       • CẤM Tuyệt đối nuốt lỗi âm thầm (empty catch). Mọi ngoại lệ hoặc từ chối hành động bắt buộc có mã lý do (Reason Code).
-       • Mọi chuyển dịch trạng thái nghiệp vụ (FSM Transitions, Transactions) bắt buộc phát ra Structured Log
-         ({ event, correlationId, timestamp, delta }) để tua lại hành động khi gặp sự cố ngoài thực tế.
+├── 13. KHẢ NĂNG QUAN SÁT TINH GỌN (LEAN RUNTIME OBSERVABILITY - CHARITY MAJORS):
+│      • "Testing chứng minh lỗi đã biết trong phòng thí nghiệm; Observability giải thích sự cố bất ngờ ngoài đời thực."
+│      • CẤM Tuyệt đối nuốt lỗi âm thầm (empty catch). Mọi ngoại lệ hoặc từ chối hành động bắt buộc có mã lý do (Reason Code).
+│      • Mọi chuyển dịch trạng thái nghiệp vụ (FSM Transitions, Transactions) bắt buộc phát ra Structured Log
+│        ({ event, correlationId, timestamp, delta }) để tua lại hành động khi gặp sự cố ngoài thực tế.
+│
+└── 14. 3 VÒNG PHÒNG VỆ CHỐNG TRÔI DẠT NGHIỆP VỤ & TÍNH NĂNG MỒ CÔI (THE THREE LINES OF DEFENSE):
+       • Triệt tiêu 2 căn bệnh cố hữu của LLM: "Mù ngữ cảnh cục bộ (Context Myopia)" và "Ảo tưởng hoàn thành (Completion Illusion)".
+       • VÒNG 1 (Khóa Ticket SSOT, Sổ Nợ Kỹ Thuật & Cổng Runtime Wire Gate): Mọi ticket bắt buộc map 1-1 danh mục từ `docs/requirements.md`.
+         Nếu hoãn luồng Alternative (A#) vì MSS, BẮT BUỘC đăng ký vào Sổ Nợ Kỹ Thuật (Tech Debt Ledger) trong Sổ Cái với Slice đích tiếp nhận.
+         CẤM tuyệt đối âm thầm hoãn tính năng mà không có địa chỉ nhận nợ. BẮT BUỘC mọi public mutation method phải được đấu nối vào Route/Intent/Dispatcher (Cấm hàm nghiệp vụ mồ côi).
+       • VÒNG 2 (Kiểm Thử Hợp Đồng Thực Thể, Consumer-Side Assertion & Anti-Smuggling Gate):
+         - Viết Fixture Contract Test tự động đối chiếu 100% Config, Schema, Danh mục so với bảng SSOT trong tài liệu gốc.
+         - Consumer-Side Assertion: Kiểm thử hiệu ứng/modifier/discount bắt buộc assert tại hàm TIÊU THỤ (hàm tính tiền, checkout, execute), CẤM chỉ assert mảng trạng thái lưu trữ.
+         - Anti-Smuggling Gate: Cấm tráo ruột test (gắn nhãn Feature A nhưng bên trong chỉ assert kiểm tra của Feature B tầm thường để lừa cổng nghiệm thu).
+       • VÒNG 3 (Kiểm Toán Mốc Định Kỳ - Periodic Milestone Deep Audit): Cứ sau mỗi 2 Slices hoặc trước khi đóng Epic,
+         bắt buộc điều phối subagent độc lập chạy phiên Deep Audit rà soát 1-1 toàn bộ codebase với `docs/requirements.md`
+         để truy tìm và xóa sổ mọi hàm No-Op, mock data hoặc tính năng bị bỏ quên.
 ```
 
 
@@ -231,13 +252,16 @@ docs/
 │   ├── entity_model.md              <── Mô hình thực thể DUY NHẤT (Single Source of Truth)
 │   ├── design.md                    <── Chuẩn Quản trị Visual UI/UX (Web, Mobile, PDF, CLI)
 │   └── adr/                         <── Nhật ký quyết định kiến trúc 4 chiều (ADR-0001-use-postgres.md)
-├── test_cases/                     <── Kịch bản kiểm thử E2E liên Use Case (TC-[EPIC]-[NNN].md)
 └── reports/                        <── Bucket 3: Báo cáo kiểm định, chẩn đoán & bàn giao
     ├── audits/                      <── Báo cáo audit kiến trúc, bảo mật (audit_[TIMESTAMP].md)
     ├── diagnostics/                 <── Báo cáo phân tích bug (diag_[TIMESTAMP].md)
     └── handoff/                     <── Báo cáo nén trạng thái bàn giao phiên (handoff_[TIMESTAMP].md)
 issues/                             <── Thư mục chứa ticket thi công từng lát cắt
 └── [EPIC]-S[NN]-[kebab-name].md     <── Ticket thi công lát cắt khép kín (Ví dụ: AUTH-S01-mss-registration.md)
+tests/                              <── Thư mục CHÂN LÝ KIỂM THỬ THỰC THI (Executable Truth)
+├── domain/                          <── Unit tests cho quy tắc nghiệp vụ
+├── integration/                     <── Integration / E2E tests luồng Use Case
+└── regressions/                     <── Kho test hồi quy tự lớn lên
 ```
 
 ### 5.0 CHUỖI ARTIFACTS & ĐỊNH DANH TRUY XUẤT NGUỒN GỐC (AIUP TRACEABILITY CHAIN)
@@ -260,10 +284,10 @@ docs/domain/use_cases.puml  docs/domain/entity_model.md
         docs/epics/[epic]/UC-[EPIC]-[NNN]-[kebab-name].md (MSS, Alt Flows, BR-[EPIC]-NNN)
                    │
                    ▼
-        docs/test_cases/TC-[EPIC]-[NNN]-[name].md (Hành trình kiểm thử E2E liên Use Case)
+        issues/[EPIC]-S[NN]-[kebab-name].md (Ticket lát cắt & Hợp đồng kiểm thử [TC-xx.x])
                    │
                    ▼
-        [/implement UC-[EPIC]-[NNN]] (Code sinh ra + Unit/Integration Tests)
+        tests/ (Mã nguồn kiểm thử thực thi: Unit, Integration, Regressions) ➔ Code trong src/
 ```
 
 - **Chuỗi Truy Xuất Nguồn Gốc (The Traceability Chain)**:
@@ -286,7 +310,7 @@ docs/domain/use_cases.puml  docs/domain/entity_model.md
 | **BR- (Business Rule)** | `BR-{EPIC}-{NNN}` (trong UC hoặc file `BR-...md`) | `BR-AUTH-001: Mật khẩu tối thiểu 8 ký tự` | Quy tắc nghiệp vụ độc lập, đánh số tăng dần theo từng Epic. |
 | **ADR- (Architecture)** | `docs/domain/adr/ADR-{NNNN}-{title-kebab}.md` | `docs/domain/adr/ADR-0001-use-postgresql-for-ledger.md` | Quyết định kiến trúc 4D theo chuẩn MADR 3.0. |
 | **S- (Slice Ticket)** | `issues/{EPIC}-S{NN}-{kebab-name}.md` | `issues/AUTH-S01-mss-registration.md` | Ticket thi công lát cắt kỹ thuật khép kín (UI ➔ API ➔ DB). |
-| **TC- (Test Case E2E)**| `docs/test_cases/TC-{EPIC}-{NNN}-{name}.md` | `docs/test_cases/TC-AUTH-001-e2e-signup-flow.md` | Kịch bản kiểm thử E2E liên kết nhiều Use Case. |
+| **TC- (Test Contract)**| Nhãn `[TC-xx.x]` trong Ticket & Test Code (`tests/`) | `[TC-01.1]`, `tests/integration/auth_signup.test.ts` | Hợp đồng kiểm thử nghiệm thu thực thi bằng máy (Executable Truth). |
 | **BUG- (Regression)** | `tests/regressions/bug_{TIMESTAMP}_{slug}.test.ts` | `tests/regressions/bug_20260906_token_expiry.test.ts` | Kho hồi quy tự lớn lên, lưu vết vĩnh viễn mọi lỗi đã sửa. |
 | **REPORT- (Báo Cáo)** | `docs/reports/{audits\|handoff}/{type}_{TIMESTAMP}.md` | `docs/reports/audits/audit_20260906_gate.md` | Báo cáo kiểm toán chất lượng và bàn giao phiên làm việc. |
 | **LEDGER- (Sổ Cái)** | `docs/epics/{epic}/_epic_ledger.md` | `docs/epics/auth/_epic_ledger.md` | Sổ cái duy nhất theo dõi tiến độ và trạng thái các lát cắt của Epic. |
@@ -360,7 +384,7 @@ graph LR
 
 ---
 
-## 6. 5 NGUYÊN TẮC KIỂM THỬ ĐỈNH CAO (Testing Integrity)
+## 6. 7 NGUYÊN TẮC KIỂM THỬ ĐỈNH CAO (Testing Integrity)
 
 1. **Thử Thách Đối Nghịch (Adversarial Inversion - Sharon Y. Barr)**: Trước khi kết luận test pass, `implementer` bắt buộc phải cố tình sửa sai 1 dòng logic để chứng minh bài test **thực sự chuyển sang màu ĐỎ**. Tránh 100% bẫy "Test Xanh Giả Tạo" (False Green).
 2. **Quy Tắc Mock Có Chọn Lọc (Selective Layered Mocking)**:
@@ -373,6 +397,13 @@ graph LR
    - *Cấm Order-Dependent Tests*: Mọi bài test phải độc lập 100%, không bài test nào được pass nhờ dữ liệu của bài test trước để lại. Định kỳ chạy test với cờ ngẫu nhiên (`--randomize`).
    - *Transactional Rollback per test*: Sử dụng cơ chế `BEGIN ... ROLLBACK` sau mỗi test để database luôn sạch 100% mà tốc độ đạt <10ms/test, triệt tiêu 100% nguy cơ Flaky Test đánh lừa AI Agent.
    - *Batch Seed Inserts*: Gom nhóm các lệnh chèn dữ liệu mẫu (1 query batch thay vì 50 query rời rạc) để rút ngắn tối đa vòng lặp phản hồi của Agent (<30 giây).
+6. **Kiểm Thử Tại Điểm Tiêu Thụ Hiệu Ứng (Consumer-Side Assertion - Universal Principle)**:
+   - Khi kiểm thử một hiệu ứng, cờ trạng thái (flag), chính sách chiết khấu (discount), hay quyền hạn (permission):
+   - ❌ **CẤM chỉ assert phía Lưu trữ/Producer**: Không chỉ kiểm tra `cart.discounts.add(...)` hoặc `player.modifiers.push(...)` có phần tử. Đây là bẫy "Xanh giả" phổ biến nhất khiến code thực tế bị liệt mà test vẫn pass.
+   - ✅ **BẮT BUỘC assert phía Tiêu thụ/Consumer**: Test phải gọi hàm tính toán cuối cùng (như `checkout()`, `calculateTotal()`, `authorizeEndpoint()`, `rollDice()`) để chứng minh hiệu ứng đó thực sự làm biến đổi kết quả đầu ra quan sát được.
+7. **Cổng Chống Tráo Hợp Đồng Kiểm Thử (Anti-Smuggling Contract Gate - Universal Principle)**:
+   - Tuyệt đối cấm hiện tượng "treo đầu dê bán thịt chó" trong viết test: Gắn nhãn tag một Use Case lớn (ví dụ `[TC-AUTH-002: Reset Password]` hoặc `[TC-GAME-023: P2P Trading]`), nhưng bên trong phần thân test chỉ gọi và kiểm tra một assertion tầm thường, không liên quan (như kiểm tra xem user có tồn tại hay kiểm tra số dư cơ bản) để lừa cổng nghiệm thu.
+   - Cổng nghiệm thu (`spec-reviewer`) bắt buộc đọc ruột `expect()` và biến đầu vào để xác nhận bài test thực thi đúng giao diện và hành vi của Use Case đó.
 
 ---
 
@@ -408,7 +439,7 @@ Trước khi gõ bất kỳ prompt nào, bạn kiểm tra 4 setting hệ điều
 ```cmd
 mkdir C:\Projects\my-app
 cd /d C:\Projects\my-app
-mkdir .agents\agents .agents\skills .agents\scripts docs\epics docs\domain docs\domain\adr docs\test_cases docs\reports\audits docs\reports\diagnostics docs\reports\handoff tests\regressions issues
+mkdir .agents\agents .agents\skills .agents\scripts docs\epics docs\domain docs\domain\adr docs\reports\audits docs\reports\diagnostics docs\reports\handoff tests\regressions issues
 ```
 
 **Cấu hình Compiler nghiêm ngặt (Chống AI sinh code phòng thủ rác - Null Checks vô nghĩa)**:
@@ -620,67 +651,168 @@ Tạo file `.agents/hooks.json`:
 
 Tạo file `.agents/scripts/use_case_guard.py`:
 ```python
-import sys
-import re
+"""
+Use Case & Safety Quality Gate Script
+Enforces deterministic mechanical guardrails:
+1. Blocks forbidden Git mutation commands (AI must never commit/push/merge).
+2. Audits file line count budgets (warns if file > 400 lines).
+3. Detects Zone 3 technical implementation leaks in Use Case specs.
+4. Detects vague delegated decision words (The Blank Check) in specs.
+5. Verifies traceability tags in test files.
+6. Source micro-guards: Anti-Silent Catch & Anti-Debug Slop.
+"""
+
 import os
+import re
+import sys
+
+# Ensure UTF-8 output on Windows
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding="utf-8")
 
 ZONE_3_BLOCKLIST = [
-    r'\bJWT\b', r'\bSQL\b', r'\bSELECT\b', r'\bINSERT\b', r'\bUPDATE\b',
-    r'\bDELETE\s+FROM\b', r'\bbcrypt\b', r'\bsalt\b', r'\bSMTP\b',
-    r'\bHTTP\s+(GET|POST|PUT|DELETE)\b', r'\bregex\b', r'\bException\b'
+    r"\bJWT\b",
+    r"\bSQL\b",
+    r"\bSELECT\b",
+    r"\bINSERT\b",
+    r"\bUPDATE\b",
+    r"\bDELETE\s+FROM\b",
+    r"\bbcrypt\b",
+    r"\bsalt\b",
+    r"\bSMTP\b",
+    r"\bHTTP\s+(GET|POST|PUT|DELETE)\b",
+    r"\bregex\b",
+    r"\bException\b",
 ]
 
 VAGUE_WORDS_BLOCKLIST = [
-    r'\bappropriately\b', r'\bhandles\s+the\s+error\b', r'\betc\.?\b',
-    r'\band\s+so\s+on\b', r'\bshows?\s+the\s+relevant\s+data\b', r'\bas\s+needed\b'
+    r"\bappropriately\b",
+    r"\bhandles\s+the\s+error\b",
+    r"\betc\.?\b",
+    r"\band\s+so\s+on\b",
+    r"\bshows?\s+the\s+relevant\s+data\b",
+    r"\bas\s+needed\b",
 ]
 
-def check_command():
-    cmd = os.environ.get('AG_TOOL_COMMAND', '') or (' '.join(sys.argv[2:]) if len(sys.argv) > 2 else '')
-    if any(banned in cmd.lower() for banned in ['git commit', 'git push', 'git merge']):
-        print("ERROR [Safety Gate]: AI is forbidden from running git commit/push. User controls Git.")
-        sys.exit(1)
+FORBIDDEN_GIT_COMMANDS = [
+    "git commit",
+    "git push",
+    "git merge",
+    "git rebase",
+    "git cherry-pick",
+]
 
-def audit_file():
-    target_file = os.environ.get('AG_TOOL_TARGET_FILE', '') or (sys.argv[2] if len(sys.argv) > 2 else '')
+
+def check_command() -> None:
+    """Inspects CLI commands before execution to prevent source control mutation."""
+    cmd = os.environ.get("AG_TOOL_COMMAND", "") or (
+        " ".join(sys.argv[2:]) if len(sys.argv) > 2 else ""
+    )
+    cmd_lower = cmd.lower()
+    for forbidden in FORBIDDEN_GIT_COMMANDS:
+        if forbidden in cmd_lower:
+            print(
+                f"ERROR [Safety Gate]: Prohibited command detected: '{forbidden}'. "
+                "AI is forbidden from modifying Git history directly. The human user controls Git."
+            )
+            sys.exit(1)
+
+
+def audit_file() -> None:
+    """Audits file modifications for budget, zone leaks, traceability, and micro-cleanliness."""
+    target_file = os.environ.get("AG_TOOL_TARGET_FILE", "") or (
+        sys.argv[2] if len(sys.argv) > 2 else ""
+    )
     if not target_file or not os.path.exists(target_file):
         return
 
-    with open(target_file, 'r', encoding='utf-8', errors='ignore') as f:
+    with open(target_file, "r", encoding="utf-8", errors="ignore") as f:
         lines = f.readlines()
 
-    # 1. Kiểm soát ngân sách file (>400 dòng)
-    if len(lines) > 400:
-        print(f"WARNING [Budget]: {target_file} has {len(lines)} lines (budget max 400 lines). Extract logic!")
+    line_count = len(lines)
+    norm_path = target_file.replace("\\", "/")
 
-    norm_path = target_file.replace('\\', '/')
-    # 2. Quét từ khóa cấm Zone 3 & The Blank Check trong các file spec Use Case
-    if '/docs/epics/' in norm_path and norm_path.endswith('.md') and ('UC-' in norm_path or 'spec_' in norm_path):
-        content = ''.join(lines)
+    # 1. Kiểm soát ngân sách file (>400 dòng)
+    if line_count > 400:
+        print(
+            f"WARNING [Budget]: {target_file} has {line_count} lines (budget limit is 400 lines). "
+            "Extract logic into smaller modular files."
+        )
+
+    # 2. Quét rò rỉ Zone 3 và The Blank Check trong các file spec Use Case
+    if "/docs/epics/" in norm_path and norm_path.endswith(".md") and ("UC-" in norm_path or "spec_" in norm_path):
+        content = "".join(lines)
         for pattern in ZONE_3_BLOCKLIST:
-            if re.search(pattern, content, re.IGNORECASE):
-                print(f"ERROR [Zone 3 Leak]: Found banned technical mechanism: {pattern}")
+            match = re.search(pattern, content, re.IGNORECASE)
+            if match:
+                print(f"ERROR [Zone 3 Leak]: Detected forbidden technical mechanism: '{match.group(0)}'")
                 print("ACTION: Rewrite spec using observable behavior or reference docs/domain/entity_model.md.")
                 sys.exit(1)
+
         for pattern in VAGUE_WORDS_BLOCKLIST:
-            if re.search(pattern, content, re.IGNORECASE):
-                print(f"ERROR [The Blank Check]: Found vague delegated decision word: {pattern}")
-                print("ACTION: Be concrete (state exact message, column, or quantity). Delegate consciously or not at all.")
+            match = re.search(pattern, content, re.IGNORECASE)
+            if match:
+                print(f"ERROR [The Blank Check]: Detected vague decision word: '{match.group(0)}'")
+                print("ACTION: Specify exact concrete outcomes (state exact error message, field, or quantity).")
                 sys.exit(1)
 
     # 3. Quét nhãn vết truy xuất nguồn gốc trong file test
-    if '/tests/' in norm_path or norm_path.endswith('.test.ts') or norm_path.endswith('_test.py') or norm_path.endswith('_test.go'):
-        content = ''.join(lines)
-        if not re.search(r'\[UC-[A-Z]+-\d+', content):
-            print(f"WARNING [Traceability]: Test file {target_file} lacks traceability tag [UC-[EPIC]-NNN].")
+    if "/tests/" in norm_path or norm_path.endswith(".test.ts") or norm_path.endswith("_test.py") or norm_path.endswith(".spec.ts"):
+        content = "".join(lines)
+        if not re.search(r"\[UC-[A-Z0-9]+-\d+", content):
+            print(f"WARNING [Traceability]: Test file '{target_file}' lacks required traceability tag [UC-[EPIC]-NNN].")
 
-if __name__ == '__main__':
-    mode = sys.argv[1] if len(sys.argv) > 1 else ''
-    if mode == '--check-command':
+    # 4. Micro-guards cho mã nguồn trong src/ / lib/ / app/ (Anti-Silent Catch & Anti-Debug Slop)
+    if "/src/" in norm_path or "/lib/" in norm_path or "/app/" in norm_path:
+        content = "".join(lines)
+        # 4a. Anti-Silent Catch (Lean Observability)
+        if re.search(r"catch\s*\([^)]*\)\s*\{\s*\}", content) or re.search(r"except\s*:\s*pass\b", content):
+            print(
+                f"WARNING [Lean Observability]: Empty catch/except block detected in '{target_file}'. "
+                "Forbidden silent error swallowing. Rejections must emit structured logs or explicit reason codes."
+            )
+        # 4b. Anti-Debug Slop (debugger, raw console.log)
+        if re.search(r"\bdebugger\s*;", content):
+            print(f"WARNING [Slop]: 'debugger;' statement detected in '{target_file}'. Remove before commit.")
+        if re.search(r"\bconsole\.log\(", content) and not norm_path.endswith((".test.ts", ".spec.ts")):
+            print(f"INFO [Slop]: Raw 'console.log' detected in '{target_file}'. Prefer structured logging for state transitions.")
+
+
+if __name__ == "__main__":
+    mode = sys.argv[1] if len(sys.argv) > 1 else ""
+    if mode == "--check-command":
         check_command()
-    elif mode == '--audit-file':
+    elif mode == "--audit-file":
         audit_file()
+    else:
+        print("Usage: python use_case_guard.py [--check-command <cmd>] | [--audit-file <filepath>]")
 ```
+
+#### 1.5.1 NGUYÊN TẮC PHÂN TẦNG KIỂM SOÁT CƠ HỌC (TIERED MECHANICAL GUARDING)
+> [!TIP]
+> **Tại sao KHÔNG đưa linter (`eslint`), typecheck (`tsc`), hay dead-code scanner (`knip`) vào Hook từng file?**
+> 
+> ```text
+> [Agent Sửa File] ──(0.01s)──► [Tier 1: Micro-Hooks (use_case_guard.py)] ──► PASS / WARN
+>                                     │ (Chỉ dùng Regex cục bộ siêu nhẹ 0.01s, 0 token)
+>                                     │ • Chặn Git mutation commands
+>                                     │ • Chặn rò rỉ Zone 3 & từ mơ hồ trong Spec
+>                                     │ • Cảnh báo file vượt 400 dòng
+>                                     │ • Cảnh báo nuốt lỗi âm thầm (empty catch) & debug slop
+>                                     ▼
+> [Hoàn thành Slice] ──(1 lần)──► [Tier 2: Macro-Audit Gates (P-2.4 & P-2.5)] ──► COMMIT
+>                                     │ (Chạy toàn diện ở Cổng Nghiệm Thu cuối Slice)
+>                                     │ • Strict Compiler Typecheck (tsc --noEmit, mypy, dotnet build)
+>                                     │ • Architecture Boundary Linter (eslint-plugin-boundaries)
+>                                     │ • Toàn bộ Test Suite tự động (npm test, pytest)
+>                                     │ • Subagents Reviewer kiểm toán 6 Cờ Đỏ Slop & Observability
+> ```
+> 
+> 1. **Bảo vệ Chu Trình TDD (Ping-Pong TDD Integrity)**: Khi QA Tester viết test ĐỎ (Fail) trước, mã nguồn giải quyết bài test chưa hề tồn tại. Nếu hook ép chạy linter hoặc typecheck toàn diện ngay lúc lưu file, tool call sẽ bị chặn đứng (BÁO ĐỎ) vì lỗi "hàm/kiểu chưa khai báo", khiến AI không thể thực hiện TDD.
+> 2. **Triệt Tiêu Độ Trễ Terminal (Zero-Latency Iteration)**: Linter hoặc TypeScript compiler quét toàn bộ project thường mất từ 2-5 giây cho mỗi lần ghi file. Một task sửa 8 file sẽ bị cộng thêm 20-40 giây chờ đợi lãng phí và rất dễ vượt ngưỡng `timeout: 5` của hook AG 2.0.
+> 3. **Phân Tách Rõ Ràng Trách Nhiệm**:
+>    - **Tier 1 (Micro-Hooks - 0.01s, 0 Token)**: Chỉ lọc các lỗi cú pháp thô sơ, vi phạm an toàn mã nguồn, và rò rỉ cơ chế ngay lập tức tại chỗ.
+>    - **Tier 2 (Macro-Audit - Cuối Slice)**: Kiểm tra tính đúng đắn toàn cục, ranh giới kiến trúc, và chất lượng tổng thể một lần duy nhất trước khi bàn giao cho con người.
 
 ---
 
@@ -825,8 +957,9 @@ tools: [view_file, list_dir, find_by_name, grep_search]
    - *Nhóm 5 (Business Rules & References - Tiêu chí 18-20)*: Mọi `(BR-[EPIC]-NNN)` trích dẫn phải tồn tại và được trích dẫn ít nhất 1 lần; Mọi danh từ thực thể phải có trong `docs/domain/entity_model.md` (cấm vẽ bảng thuộc tính); OpenAPI/Mockups/NFRs chỉ được tham chiếu, cấm sao chép lại.
    - *Nhóm 6 (The Three-Reader Test - Tiêu chí 21-23)*: Zone 3 blocklist sạch 100% (cấm JWT, SQL, bcrypt, HTTP verbs, regex); Stakeholder xác nhận nghiệm thu được; Regeneration check (câu văn vẫn đúng nếu đổi framework sang năm).
    - *Phán quyết*: Dính bất kỳ vi phạm nào trong 23 tiêu chí trên ➔ Đánh giá **REJECTED (Yêu cầu hoàn thiện spec)** ngay lập tức.
-5. **Kiểm Định Ranh Giới Lát Cắt & Truy Xuất Nguồn Gốc (Slice Scope & Traceability Gate)**:
+5. **Kiểm Định Ranh Giới Lát Cắt, Nhãn Vết & Chống Tráo Hợp Đồng (Slice Scope & Anti-Smuggling Gate)**:
    - *Nhãn Truy xuất*: Mọi method và test case mới phải gắn nhãn nguồn `[UC-XXX/MSS]` hoặc `[UC-XXX/A#]` và `[BR-XXX]`.
+   - *Anti-Smuggling Gate (Chống tráo ruột hợp đồng)*: Không chỉ nhìn nhãn tag [TC-xxx]. BẮT BUỘC đọc ruột câu lệnh `expect()` và tham số: Khẳng định (assertion) phải xác minh đúng ngữ nghĩa cốt lõi của Use Case. CẤM hiện tượng gắn nhãn Feature A nhưng bên trong chỉ assert kiểm tra của Feature B tầm thường (MANDATORY REJECT nếu gian lận).
    - *Chặn tràn phạm vi Slice*: Nếu ticket là Slice 1 (Basic Flow), nhưng diff xuất hiện code/giao diện xử lý của Alternative Flows (A1, A2...) $\rightarrow$ Đánh giá **REJECTED (Vi phạm Slice Scope - Tràn tính năng sớm)**.
    - *Bảo đảm Hợp đồng Thất bại*: Mọi luồng rẽ kết thúc bằng `Use case ends` bắt buộc có test assertion chứng minh Failure Postconditions (rollback dữ liệu sạch sẽ).
 6. **Mẫu báo cáo**:
@@ -865,9 +998,10 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command]
 4. **Kiểm toán Thị giác, Kiến trúc & NFRs**:
    - UNIVERSAL VISUAL UI/UX AUDIT: Đối chiếu đầu ra thị giác với `docs/domain/design.md` (diệt Anti-AI-Tells, đúng Token Schema).
    - Quét đủ 6 tầng theo `vertical-slice-completeness` (Entity -> Mapping -> DTO -> Query -> Client -> UI).
+   - CỔNG RUNTIME WIRE GATE (Anti-Orphan Mutation): Rà soát toàn bộ chuỗi gọi từ điểm vào (Entry Point) đến Domain Logic. Mọi hàm thay đổi dữ liệu (mutation method) mới hoặc sửa đổi trong Service/Manager bắt buộc phải được đấu nối vào ít nhất 1 Route (Web API), Controller, hoặc Intent Dispatcher (FSM/Socket). CẤM để tồn tại hàm nghiệp vụ mồ côi không có đường gọi kích hoạt runtime.
    - Kiểm toán NFR: Kiểm tra có query trong vòng lặp (N+1) không, có lệnh gọi ngoại vi thiếu timeout không, có tính toán nặng block UI thread không.
-    - KIỂM TOÁN CÁCH LY TRẠNG THÁI TEST (Test State Isolation Audit): Chạy test với cờ ngẫu nhiên hóa (`--randomize`) để triệt tiêu Order-Dependent tests. Xác minh mọi test ghi DB đều có Transaction Rollback (`BEGIN...ROLLBACK`) bảo đảm DB sạch 100%.
-    - KIỂM TOÁN KHẢ NĂNG QUAN SÁT (Lean Observability Audit): Kiểm tra zero silent error swallowing (CẤM catch rỗng). Mọi chuyển dịch trạng thái nghiệp vụ (FSM, transactions) bắt buộc emit structured logs. Khi từ chối hành động bắt buộc có mã lý do (Reason Code) rõ ràng.
+   - KIỂM TOÁN CÁCH LY TRẠNG THÁI TEST (Test State Isolation Audit): Chạy test với cờ ngẫu nhiên hóa (`--randomize`) để triệt tiêu Order-Dependent tests. Xác minh mọi test ghi DB đều có Transaction Rollback (`BEGIN...ROLLBACK`) bảo đảm DB sạch 100%.
+   - KIỂM TOÁN KHẢ NĂNG QUAN SÁT (Lean Observability Audit): Kiểm tra zero silent error swallowing (CẤM catch rỗng). Mọi chuyển dịch trạng thái nghiệp vụ (FSM, transactions) bắt buộc emit structured logs. Khi từ chối hành động bắt buộc có mã lý do (Reason Code) rõ ràng.
 5. **Giao Thức TRIM & Quét Dọn Tàn Dư Thử Nghiệm (Trajectory Redundancy Purge - arXiv 2026)**:
    - *Quét Tàn Dư Trajectory*: Kiểm tra `git status --porcelain`. Phát hiện và XÓA BỎ 100% các file nháp tạm thời, package cài thử không dùng, biến/hàm mồ côi (orphaned code) do các lần thử nghiệm thất bại của Agent để lại trước khi chốt nghiệm thu.
    - *Quét Dead-Code Tự Động*: Chạy `knip` (TypeScript/Node) hoặc compiler analyzer tương đương để diệt sạch unreferenced exports, unused variables/types.
@@ -901,6 +1035,7 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command]
 - **Net LOC Delta**: +[N] dòng (Nằm trong ngân sách $\le +50$ LOC, Deletions: -[M] dòng).
 - **Độ phức tạp**: Cyclomatic lớn nhất = [K] ($\le 5$). Không dùng mẹo Code Golf, không nén cú pháp bất thường.
 - **6 Cờ Đỏ Slop**: 0 Abstraction 1 lần, 0 Dependency rác, 0 Code mồ côi (TRIM Purge sạch sẽ).
+- **Runtime Wire Gate**: PASS (Mọi public domain mutation đều được đấu nối vào Router/Dispatcher, 0 hàm mồ côi).
 - **Lean Observability**: PASS (Structured logging trên FSM transitions, zero catch rỗng, explicit Reason Codes).
 
 #### 6. Bằng chứng Hành vi Thực tế (Proof of Behavior by Software Type)
@@ -1034,7 +1169,7 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command]
    [Cập nhật docs/epics/[epic]/UC-[EPIC]-[NNN]-*.md trước]
             |
             v
-   [Cập nhật hoặc thêm TC-[EPIC]-NNN vào docs/test_cases/]
+   [Cập nhật Hợp đồng [TC-xx.x] trong Ticket và tests/regressions/]
             |
             v
    [Chạy lại /implement thi công theo Slice mới]
@@ -1051,7 +1186,7 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command]
   1. *Tái sinh Sơ đồ Use Case* (`docs/domain/use_cases.puml`): Cập nhật quan hệ Actor - Use Case nếu có luồng/tác nhân mới.
   2. *Cập nhật Mô hình Thực thể* (`docs/domain/entity_model.md`): Bổ sung thuộc tính/quan hệ nếu dữ liệu miền thay đổi.
   3. *Chỉnh sửa Bản Đặc tả Use Case* (`docs/epics/[epic]/UC-[EPIC]-[NNN]-[kebab-name].md`): Cập nhật các bước và Business Rules `BR-[EPIC]-NNN`.
-  4. *Cập nhật Test Cases Hành trình* (`docs/test_cases/TC-[EPIC]-*.md`): Cập nhật assertions và dữ liệu kiểm thử thực tế (Literal Data).
+  4. *Cập nhật Hợp đồng Kiểm thử & Kho Hồi quy* (Ticket `issues/` & `tests/`): Cập nhật assertions, hợp đồng `[TC-xx.x]`, và thêm ca test vào `tests/regressions/` với dữ liệu thực tế (Literal Data).
   5. *Sinh lại Mã nguồn & Test Suite* (`/implement`): Thi công code mới và chạy test để bảo đảm Traceability Chain pass 100%.
 - **Kỷ Luật Thực Thi**:
   1. Tuyệt đối cấm sửa mã nguồn trực tiếp (No hotfixes). Vá code trước khi sửa spec làm gãy đổ chuỗi truy xuất nguồn gốc (Traceability Chain).
@@ -1374,7 +1509,7 @@ Khi bạn chạy lệnh trong Terminal gặp lỗi đỏ, hoặc Subagent báo t
 
 | Bước | Tên Công Việc | Thao Tác Chi Tiết & Mẫu Prompt Copy-Paste | Model | Sản Phẩm Nghiệm Thu |
 | :---: | :--- | :--- | :---: | :--- |
-| **0.1** | Tạo thư mục chuẩn & .gitignore | 💻 `[CMD]` `mkdir .agents\agents .agents\scripts docs\epics docs\domain docs\domain\adr docs\test_cases docs\reports\audits issues tests` ➔ Tạo tệp `.gitignore` chặn `node_modules/`, `dist/`, `.agents/tmp/` | - | Khung thư mục & .gitignore chuẩn |
+| **0.1** | Tạo thư mục chuẩn & .gitignore | 💻 `[CMD]` `mkdir .agents\agents .agents\scripts docs\epics docs\domain docs\domain\adr docs\reports\audits issues tests` ➔ Tạo tệp `.gitignore` chặn `node_modules/`, `dist/`, `.agents/tmp/` | - | Khung thư mục & .gitignore chuẩn |
 | **0.2** | Cài hiến pháp | 💬 `[AG 2.0]` Tạo `GEMINI.md` (<50 dòng: nén luật NFRs, DoD, cấm tự ý git commit) | Flash | `GEMINI.md` |
 | **0.3** | Cài rào chắn cơ học | 💬 `[AG 2.0]` Tạo `.agents/hooks.json` và `.agents/scripts/use_case_guard.py` | Flash | Cổng chặn cơ học 0ms, 0-token |
 | **0.4** | Cài 5 Subagents | 💬 `[AG 2.0]` Tạo 5 file trong `.agents/agents/` (`scout`, `implementer`, `qa-tester`, 2 reviewers) | Flash | 5 agent chuyên trách độc lập |
@@ -1434,8 +1569,66 @@ Khi bạn chạy lệnh trong Terminal gặp lỗi đỏ, hoặc Subagent báo t
 
 ---
 
+### 🏗️ NGUYÊN LÝ TỔNG THẦU & DÂY CHUYỀN 3 VAI DIỄN (THE GENERAL CONTRACTOR PRINCIPLE)
+> **Tuyên ngôn đắt giá nhất cho Junior**:
+> *"Bạn không cần phải viết code thay cho AI. Nhưng bạn **BẮT BUỘC PHẢI THIẾT LẬP DÂY CHUYỀN GIÁM SÁT 3 VAI DIỄN** trong câu prompt."*
+
+```text
+[Sai Lầm Phổ Biến Của Junior]:
+Gửi prompt chung chung: "Lập kế hoạch làm tính năng này đi"
+  │
+  ▼
+AI tự biên tự diễn ──► Viết vài gạch đầu dòng sơ sài ──► Vội vàng nhảy vào sửa code
+                                                           │
+                                                           ▼
+                                                LÀM VỠ TAN TÀNH BỘ TESTS CŨ!
+
+[Kỹ Thuật Chuẩn AI-Native - Dây Chuyền 3 Chặng Khép Kín]:
+Junior gửi prompt chi tiết phân định rõ 3 vai trò:
+  │
+  ├── 1. [SCOUT] (Tiền trạm / Trinh sát):
+  │      Bắt buộc định vị tọa độ File:Dòng và phân tích tác động lan tỏa (Change Impact Analysis)
+  │      TRƯỚC KHI vẽ kế hoạch. Đảm bảo không làm hỏng bất kỳ bài test cũ nào.
+  │
+  ├── 2. [ARCHITECT] (Thiết kế / Bản vẽ):
+  │      Đọc báo cáo Scout + Spec ──► Bẻ nhỏ thành DAG Micro-Tasks (mỗi task <= 50-80 LOC).
+  │      Ghi trực tiếp kế hoạch xuống đĩa (`_plan.md`).
+  │
+  └── 3. [SPEC-REVIEWER] (Nghiệm thu / Gác cổng):
+         Độc lập, chỉ đọc ──► Soi 5 Tiêu Chuẩn Vàng ──► Chỉ cấp chữ [APPROVED] khi hoàn hảo.
+         DỪNG LẠI tại Trạm 1 (Plan Gate) cho con người duyệt trước khi gõ 1 dòng code!
+```
+
+**Tại sao câu prompt có độ chi tiết cao lại kích hoạt được điều này?**
+Khi bạn nêu đích danh 3 vai trò kèm tiêu chí kiểm soát trong prompt, Agent sẽ tự động chuyển từ chế độ "Chatbot đối thoại" sang chế độ **`Routine: Delegation`** — một dây chuyền làm việc nội bộ kỷ luật tuyệt đối. AI sẽ tự đối soát, tự bóc lỗi của nhau, triệt tiêu $100\%$ hiện tượng ảo giác (hallucination) và bốc đồng sửa code ẩu.
+
+---
+
+### 🧭 CÂY QUYẾT ĐỊNH 30 GIÂY: XÁC ĐỊNH BẢN CHẤT LÁT CẮT (CHO MỌI DỰ ÁN)
+> **Dành cho Junior mới tiếp cận dự án (Web SaaS, Mobile App, AI, Game, CLI, Data Pipeline)**:
+> Bất kể dự án dùng công nghệ gì và có bao nhiêu lát cắt, mọi lát cắt trong kỹ nghệ phần mềm đều chỉ thuộc về **1 trong 3 tầng nghiệp vụ** (theo chuẩn Use-Case 3.0). Hãy trả lời 2 câu hỏi sau để biết bạn cần ra lệnh gì cho AI:
+>
+> ```text
+> [CÂU HỎI 1: Hệ thống đã nối dây thông suốt A -> Z (Input -> Process -> Output) chưa?]
+>    ├── CHƯA ──► [TẦNG 1: SỢI CHỈ MỎNG / WALKING SKELETON] (Thường là Slice 00)
+>    │            • Mục tiêu: Nối thông luồng dữ liệu tối thiểu, xác nhận môi trường/test chạy được.
+>    │            • Lệnh cho AI: "CHỈ nối thông đầu cuối, TUYỆT ĐỐI KHÔNG viết logic nghiệp vụ phức tạp."
+>    │
+>    └── ĐÃ THÔNG ──► [CÂU HỎI 2: Lát cắt này làm luồng chính hay phân nhánh / ngoại lệ?]
+>            │
+>            ├── LUỒNG CHÍNH ──► [TẦNG 2: KỊCH BẢN THÀNH CÔNG CHÍNH - HAPPY PATH / MSS] (Thường là Slice 01, 02)
+>            │                   • Mục tiêu: Người dùng đạt mục đích cốt lõi trong điều kiện hoàn hảo (đặt đơn, mua đất, gửi tin).
+>            │                   • Lệnh cho AI: "CHỈ thi công Main Success Scenario (MSS). CẤM viết trước luồng rẽ nhánh A# hay xử lý lỗi phức tạp."
+>            │
+>            └── RẼ NHÁNH / LỖI ──► [TẦNG 3: LUỒNG PHÂN NHÁNH & NGOẠI LỆ - EXTENSIONS / EXCEPTIONS] (Các Slice tiếp theo)
+>                                • Mục tiêu: Điều kiện kinh doanh If/Else, khuyến mãi, bão lũ, xung đột thẻ, thanh toán thất bại, thế chấp, phá sản.
+>                                • Lệnh cho AI: "Tập trung vào điều kiện biên, ưu tiên giải quyết xung đột quy tắc và khôi phục trạng thái an toàn."
+> ```
+
+---
+
 ### 📋 MẪU P-2.1: CẮT TICKET LÁT CẮT (JIT SLICING)
-- **🏷️ CHẾ ĐỘ THỰC THI**: `[SONG TÁC NHÂN TỰ KIỂM TOÁN]` *(Slicer soạn thảo ➔ Spec-Reviewer quét Zone 3)*.
+- **🏷️ CHẾ ĐỘ THỰC THI**: `[SONG TÁC NHÂN TỰ KIỂM TOÁN]` *(Slicer soạn thảo ➔ Spec-Reviewer quét Zone 3 & SSOT)*.
 - **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Sổ cái `docs/epics/[epic]/_epic_ledger.md` đã có danh sách Use Cases. Slice trước đó (nếu có) đã được commit sạch trên Git.
 - **🛡️ RÀO CHẮN GÁC CỔNG**: `GEMINI.md` khóa cứng giới hạn ngân sách mã nguồn (LOC $\le 50-100$). Hook `use_case_guard.py` tự động quét Zone 3 Blocklist khi lưu ticket.
 - **💬 CÂU LỆNH PROMPT CHUẨN (Model: Flash)**:
@@ -1445,12 +1638,19 @@ Hãy điều phối 2 subagent phối hợp để tạo tệp ticket issues/[MÃ
 1. Subagent Slicer (Kỹ năng use-case-slicing):
    - Đọc Sổ Cái docs/epics/[TÊN_EPIC]/_epic_ledger.md và cấu trúc mã nguồn hiện có trong src/.
    - Kế thừa chính xác cấu trúc thư mục, tên miền và kiểu dữ liệu hiện hữu từ Slice trước.
-   - [Nếu là Slice 01]: CHỈ thi công kịch bản chính (MSS). Cấm làm trước luồng rẽ nhánh A#.
-   - Soạn thảo bản nháp ticket với LOC budget <= 50-100 và 3-5 hợp đồng kiểm thử [TC-xx.x/MSS].
+   - [ĐỊNH HÌNH TẦNG NGHIỆP VỤ THEO CÂY QUYẾT ĐỊNH]:
+     + Nếu là Tầng 1 (Skeleton): CHỈ nối thông luồng đầu cuối, không viết logic nghiệp vụ.
+     + Nếu là Tầng 2 (MSS / Happy Path): CHỈ thi công kịch bản chính hoàn hảo, cấm rẽ nhánh sớm.
+     + Nếu là Tầng 3 (Extensions / Exceptions): Tập trung điều kiện biên, xung đột quy tắc và khôi phục lỗi.
+   - [KHÓA CỨNG SSOT & SỔ NỢ KỸ THUẬT - VÒNG 1]:
+     + Đối chiếu toàn bộ danh mục thực thể/luồng từ docs/requirements.md thuộc phạm vi Slice.
+     + Nếu có bất kỳ luồng phân nhánh (A#) nào bị hoãn (như Đổ Đôi, phạt thời gian), BẮT BUỘC ghi rõ vào mục "Nợ Kỹ Thuật Chuyển Tiếp" và đăng ký vào Sổ Cái docs/epics/[TÊN_EPIC]/_epic_ledger.md kèm tên Slice đích tiếp nhận. Tuyệt đối CẤM âm thầm hoãn tính năng.
+   - Soạn thảo bản nháp ticket với LOC budget <= 50-100 và 3-5 hợp đồng kiểm thử [TC-xx.x/MSS hoặc TC-xx.x/A#].
 
 2. Subagent Spec-Reviewer (Read-only, Kỹ năng vertical-slice-completeness):
    - Quét độc lập bản nháp ticket để phát hiện rò rỉ cơ chế Zone 3 (SQL, JWT, tên giao thức).
-   - Nếu phát hiện rò rỉ: Yêu cầu Slicer sửa lại ngay lập tức.
+   - Đối chiếu với tài liệu SSOT gốc (docs/requirements.md, docs/domain/entity_model.md).
+   - Nếu phát hiện rò rỉ hoặc thiếu thông số / xung đột luật: Dừng lại và nêu rõ câu hỏi mở (Open Questions).
    - Chỉ lưu tệp ticket khi đạt chuẩn 100%.
 
 CHỈ tạo tệp ticket và DỪNG LẠI để tôi duyệt, TUYỆT ĐỐI CHƯA VIẾT CODE lúc này.
@@ -1459,6 +1659,18 @@ CHỈ tạo tệp ticket và DỪNG LẠI để tôi duyệt, TUYỆT ĐỐI CH�
 - **📌 CHỈ DẪN VẠN NĂNG CHO JUNIOR**:
   - *Biến số cần thay thế*: `[TÊN_EPIC]` (VD: `gameplay`), `[TÊN_SLICE]` (VD: `Slice 01`), `[MÃ_TICKET]` (VD: `GAME-S01-turn-loop`).
   - *Dữ liệu AI tự động đọc*: AI tự đọc `docs/epics/[TÊN_EPIC]/_epic_ledger.md` để lấy danh sách Use Cases và tự soi `src/` để kế thừa cấu trúc. Junior tuyệt đối KHÔNG tự gõ tên file code hay use case vào prompt.
+
+- **⚠️ XỬ LÝ KHI SPEC-REVIEWER BÁO "OPEN QUESTIONS — CẦN QUYẾT ĐỊNH" (STOP & ESCALATE)**:
+  - *Hiện tượng*: `spec-reviewer` không phê duyệt ngay mà chặn lại, đưa ra 2–3 câu hỏi mở (Open Questions).
+  - *Bản chất*: Đây là **tính năng an toàn tối cao**, không phải lỗi. AI phát hiện tài liệu SSOT gốc bị thiếu thông số hoặc có 2 quy tắc mâu thuẫn triệt tiêu lẫn nhau. AI tuyệt đối bị cấm tự bịa đặt luật chơi.
+  - *Quy trình 3 bước xử lý cho Junior*:
+    1. **Báo cáo Tech Lead / Product Owner**: Chuyển các câu hỏi mở để người có thẩm quyền chọn phương án.
+    2. **Cập nhật ngược lại SSOT**: Ghi nhận quyết định vào tài liệu gốc (`docs/requirements.md` hoặc `docs/domain/entity_model.md`).
+    3. **Gõ lệnh tiếp theo**: 
+       ```text
+       Đã chốt quyết định cho các Open Questions và cập nhật ngược lại tài liệu SSOT gốc.
+       Hãy cập nhật lại tệp ticket issues/[MÃ_TICKET].md theo các quyết định này và chạy lại spec-reviewer để thẩm định đạt [APPROVED].
+       ```
 
 ---
 
@@ -1488,7 +1700,7 @@ Báo cáo ngắn gọn dưới 20 dòng, TUYỆT ĐỐI KHÔNG sửa mã nguồn
 - **💬 CÂU LỆNH PROMPT CHUẨN (Model: Flash)**:
 ```text
 Hãy gọi subagent scout (Model: flash), kích hoạt kỹ năng codebase-design và skill-dispatcher để trinh sát hiện trạng mã nguồn cho ticket issues/[MÃ_TICKET].md:
-1. Định vị chính xác tọa độ các file:dòng liên quan cần can thiệp [file.ts#L10-L30].
+1. Định vị chính xác tọa độ các file:dòng liên quan cần can thiệp [file.ts#L10-L30]. Đo lường số LOC hiện tại của từng tệp; nếu tệp logic >= 300 LOC thì đánh dấu [CẢNH BÁO TÁCH MODULE].
 2. Phân tích tác động lan tỏa (Change Impact Analysis): Hàm này, class này hoặc kiểu dữ liệu này đang được gọi ở đâu trong src/? Có nguy cơ làm hỏng bài test cũ nào không?
 Báo cáo ngắn gọn dưới 15 dòng, TUYỆT ĐỐI KHÔNG sửa mã nguồn.
 ```
@@ -1509,9 +1721,10 @@ Hãy điều phối 2 subagent phối hợp để thiết lập bản kế hoạ
 
 1. Subagent Architect (Kỹ năng writing-plans):
    - Đọc ticket issues/[MÃ_TICKET].md và báo cáo của scout.
+   - [KIỂM TRA NGƯỠNG LOC 300]: Nếu tệp logic mục tiêu >= 300 LOC, BẮT BUỘC đưa Task tách module con (Sub-manager Decomposition) lên Task 1 để đưa tệp về < 250 LOC trước khi viết thêm tính năng.
    - Bẻ nhỏ lát cắt thành chuỗi Micro-Tasks tuần tự (Task 1 -> Task N). Mỗi Task LOC budget <= 50-80 dòng.
    - [Nếu là Slice 00]: Bắt buộc đưa "Task 0: Khởi tạo Test Runner Harness" lên đầu tiên.
-   - Mỗi Task phải chỉ rõ: Tệp tác động (theo Target File Map), Test Contract tương ứng, DoD.
+   - Mỗi Task phải chỉ rõ: Tệp tác động (theo Target File Map & 5-Tier Archetypes), Test Contract tương ứng, DoD.
 
 2. Subagent Spec-Reviewer (Read-only, Kỹ năng vertical-slice-completeness):
    - Thẩm định bản nháp kế hoạch dựa trên 5 Tiêu Chuẩn Vàng (DAG thứ tự đúng, đủ Test Contracts, LOC <= 80, không lấn scope, tuân thủ GEMINI.md).
@@ -1615,22 +1828,39 @@ Báo cáo nguyên nhân gốc và bản diff thay đổi tối thiểu.
 
 ---
 
-### 📋 MẪU P-2.3e: CHẠY NGHIỆM THU TÍCH HỢP TOÀN BỘ LÁT CẮT
-- **🏷️ CHẾ ĐỘ THỰC THI**: `[ĐƠN TÁC NHÂN TỔNG HỢP]` *(Chạy toàn bộ test suite tích hợp)*.
+### 📋 MẪU P-2.3e: CHẠY NGHIỆM THU TÍCH HỢP TOÀN BỘ LÁT CẮT (THE GOLDEN PATH LIVING TEST)
+- **🏷️ CHẾ ĐỘ THỰC THI**: `[ĐƠN TÁC NHÂN TỔNG HỢP]` *(Chạy toàn bộ test suite tích hợp & Xương sống Hành trình Vàng)*.
 - **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Toàn bộ các Micro-Tasks trong bản kế hoạch đều đã thi công xong.
-- **🛡️ RÀO CHẮN GÁC CỔNG**: Bắt buộc chạy test với cờ `--randomize` để kiểm tra tính cách ly trạng thái (State Isolation).
+- **🛡️ RÀO CHẮN GÁC CỔNG**: Bắt buộc chạy test với cờ `--randomize` (hoặc `--sequence.shuffle`) và kiểm chứng bài test Golden Path E2E liên hoàn.
 - **💬 CÂU LỆNH PROMPT CHUẨN (Model: Sonnet 4.6)**:
 ```text
 Hãy gọi subagent implementer, kích hoạt kỹ năng verification-before-completion và atdd-quality-gates để chạy toàn bộ Test Suite của lát cắt issues/[MÃ_TICKET].md:
 1. Chạy toàn bộ các bài test con và bài test tích hợp liên quan đến lát cắt này.
 2. Đối chiếu chứng minh đạt 100% các Hợp đồng kiểm thử nghiệm thu [TC-xx.1] đến [TC-xx.n] được quy định trong ticket.
-3. Chạy test suite với cờ ngẫu nhiên (--randomize) để đảm bảo không có bài test nào bị phụ thuộc thứ tự (State Isolation).
-Báo cáo kết quả tổng kết: Số lượng test PASS, độ phủ và xác nhận toàn bộ xanh 100%.
+3. Chạy test suite với cờ ngẫu nhiên (--randomize hoặc --sequence.shuffle) để đảm bảo State Isolation.
+4. Kiểm chứng The Golden Path Living Test (Xương sống hành trình sống E2E): Đảm bảo mắt xích của lát cắt này đã được nối vào chuỗi ván chơi liên hoàn và toàn bộ luồng từ Bước 1 đến hiện tại PASS 100%.
+Báo cáo kết quả tổng kết: Số lượng test PASS, độ phủ, log chạy Golden Path và xác nhận toàn bộ xanh 100%.
 ```
-- **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu)**: 100% các Test Contracts quy định trong ticket đều có bằng chứng chạy PASS.
-- **📌 CHỈ DẪN VẠN NĂNG CHO JUNIOR**:
-  - *Biến số cần thay thế*: `[MÃ_TICKET]` (VD: `issues/GAME-S01-turn-loop.md`).
-  - *Dữ liệu AI tự động đọc*: AI tự đọc ticket để lấy toàn bộ danh sách Test Contracts `[TC-xx.x]` và tự chạy lệnh test của dự án kèm cờ `--randomize`.
+- **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu)**: 100% Test Contracts PASS và bài test Golden Path E2E chạy xuyên suốt không lỗi.
+- **📌 CHỈ DẪN VẠN NĂNG CHO JUNIOR: NGUYÊN TẮC XƯƠNG SỐNG HÀNH TRÌNH VÀNG (GOLDEN PATH)**:
+  - *Ý nghĩa cốt lõi*: Đừng chỉ tin vào Unit Test riêng lẻ (bẫy mock-heavy). Mọi tính năng viết ra đều phải phục vụ một hành trình người dùng hoàn chỉnh không mock.
+  - *Quy tắc Lắp Gạch Lego*: Các bước cũ [1..N-1] đã có sẵn trong tệp Golden Path (CẤM SỬA). Nhiệm vụ duy nhất của em là nối thêm bước mới của Slice này vào cuối chuỗi và chạy thử.
+  - *Lưới bảo hiểm*: Khi toàn bộ tệp Golden Path chạy xanh thông suốt từ đầu đến đuôi, em tự tin 100% rằng tính năng mới không làm gãy vỡ sản phẩm và an toàn để bước qua Cổng Kiểm Toán 2.4.
+
+---
+
+### 📋 MẪU P-2.3f: KIỂM THỬ HỢP ĐỒNG THỰC THỂ & DỮ LIỆU TĨNH (FIXTURE CONTRACT TEST - VÒNG 2)
+- **🏷️ CHẾ ĐỘ THỰC THI**: `[ĐƠN TÁC NHÂN TỔNG HỢP]` *(Khóa cứng 100% Schema, Dữ liệu tĩnh và Danh mục SSOT)*.
+- **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Có các tệp cấu hình (Config), bảng tra cứu dữ liệu tĩnh (Data Table), Enum hoặc Localization.
+- **🛡️ RÀO CHẮN GÁC CỔNG**: Bắt buộc assert trực tiếp từng giá trị chuỗi/chỉ số so với bảng SSOT trong `docs/requirements.md` hoặc `docs/domain/entity_model.md`.
+- **💬 CÂU LỆNH PROMPT CHUẨN (Model: Flash)**:
+```text
+Hãy gọi subagent implementer, kích hoạt kỹ năng tdd để tạo hoặc cập nhật bài test hợp đồng thực thể tests/contracts/[TÊN_MODULE]_fixture.test.ts:
+1. Đối chiếu 100% dữ liệu tĩnh trong src/domain/ với bảng SSOT trong docs/requirements.md (ví dụ: đúng 40 tên ô bàn cờ tiếng Việt, đủ 36 enum thẻ sự kiện, đủ 28 Title Deeds).
+2. Viết các assertion trực diện khóa cứng giá trị hiển thị và thuộc tính (khóa index, tên tiếng Việt, nhóm phân loại, giá niêm yết).
+3. Chạy test chứng minh PASS. Bất kỳ sự thiếu sót, tên tiếng Anh tạm thời hay enum rỗng đều phải làm bài test BÁO ĐỎ ngay lập tức.
+```
+- **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu)**: Tệp test hợp đồng thực thể tồn tại trong `tests/contracts/` và chạy PASS 100%.
 
 ---
 
@@ -1643,13 +1873,24 @@ Báo cáo kết quả tổng kết: Số lượng test PASS, độ phủ và xá
 Hãy gọi đồng thời 2 subagent spec-reviewer và code-reviewer, kích hoạt kỹ năng code-review, vertical-slice-completeness và de-sloppify để kiểm toán toàn diện lát cắt issues/[MÃ_TICKET].md:
 
 1. Subagent spec-reviewer (Read-only):
+   - ĐỐI SOÁT TAM GIÁC 3 LỚP (Three-Way Spec Reconciliation):
+     Bắt buộc đối chiếu song song: (1) Mã nguồn diff <---> (2) Vé con issues/[MÃ_TICKET].md <---> (3) TÀI LIỆU GỐC docs/requirements.md & docs/domain/use_cases.puml.
+     Nếu vé con hoặc mã nguồn có bất kỳ mâu thuẫn hay diễn giải sai lệch nào so với docs/requirements.md (ví dụ: đổi chức năng thẻ, phạt sai tiền, nuốt tiền vay) ➔ BẮT BUỘC [REJECTED] NGAY LẬP TỨC vì Spec Drift.
    - Đối chiếu 100% tiêu chí nghiệp vụ của Use Case trong docs/domain/use_cases.puml và sổ cái.
    - Kiểm tra rò rỉ cơ chế Zone 3 (SQL, JWT, tên giao thức trong spec) và xác thực Failure Postconditions.
 2. Subagent code-reviewer (Read-only):
-   - Kiểm toán 6 Cờ Đỏ Slop Nash: Không abstraction thừa (YAGNI), không thư viện ngoài dư thừa.
-   - Đo lường Cyclomatic Complexity <= 5, không dính bẫy Code Golf (one-liner ma thuật).
+   - Đọc toàn bộ diff VÀ ngữ cảnh mã nguồn xung quanh (Nearby code) cùng các hàm gọi liên quan.
+   - Quét lỗi logic thực tế, rủi ro hồi quy (Regressions) và sự phức tạp không cần thiết (Unnecessary complexity).
+   - Tái sử dụng patterns/enums sẵn có, kiểm toán 6 Cờ Đỏ Slop Nash (0 abstraction 1 lần/YAGNI, 0 dependencies thừa).
+   - Đo lường Cyclomatic Complexity <= 5, hàm <= 30 dòng.
+   - Kiểm toán trần LOC theo Khung Phân Loại 5 Tầng (Logic <= 400, UI <= 500, Static Data <= 800, E2E <= 600).
+   - CẢNH BÁO ĐỎ nếu phát hiện Code Golf (gộp dòng), xóa comment hoặc No-Op stubs giả để né trần LOC.
    - Kiểm toán Lean Observability: Zero silent exceptions (cấm catch rỗng), chuyển dịch trạng thái có structured logs kèm Reason Code.
    - Kiểm tra tuân thủ Visual UI/UX tokens trong docs/domain/design.md (nếu có UI).
+   - Lọc bỏ cảnh báo giả (Filter false positives), tập trung vào rủi ro thực tế; xếp hạng phát hiện theo: [BLOCKER] / [HIGH] / [MEDIUM] / [LOW].
+   - Xác thực The Golden Path Living Test: Đảm bảo lát cắt này đã nối dài thêm mắt xích mới vào tệp E2E và toàn bộ luồng chạy PASS 100%. Bắt buộc REJECT nếu chưa có test Golden Flow.
+   - Vòng lặp đóng: Chỉ cấp [APPROVED] khi mọi lỗi BLOCKER/HIGH đã được sửa và kiểm thử lại sạch sẽ.
+   - Đúc kết tri thức (Lean Retrospective): Áp dụng Kim Tự Tháp 4 Tầng & Bộ Lọc Anti-Bloat (Type > Shared Helper > Scoped Gotchas). Ghi bài học vào `docs/domain/gotchas.md` (không làm phình to rule chung).
 
 Yêu cầu xuất biên bản thẩm định:
 1. In biên bản tóm tắt trực tiếp ra cửa sổ chat: Ghi rõ [APPROVED] hoặc [REJECTED] kèm chi tiết từng cổng.
@@ -1681,6 +1922,11 @@ git add .
 git commit -m "feat([tên_epic]): hoàn thành [MÃ_TICKET] - [TÊN_TÍNH_NĂNG]"
 ```
 - **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu - TRẠM 3B: HUMAN GATE)**: Lệnh commit thành công trên Git, thư mục làm việc sạch sẽ (Working tree clean).
+- **💡 BỘ LỌC AN TÂM TUYỆT ĐỐI TRƯỚC KHI COMMIT (SANITY VERIFICATION GATE)**:
+  - *Tâm lý Junior*: Thường cảm thấy bất an, sợ rằng việc sửa code ở lát cắt hiện tại vô tình làm hỏng ngầm các lát cắt trước mà không biết.
+  - *2 Tuyệt chiêu giải tỏa bất an (Kiểm chứng bằng bằng chứng thực tế)*:
+    1. **Kiểm thử Hồi quy Xáo trộn (Shuffled Regression)**: Chạy test suite với cờ ngẫu nhiên (`npm test -- --sequence.shuffle` hoặc `--randomize`). Nếu 100% bài test vẫn xanh trong điều kiện xáo trộn thứ tự ➔ Chứng minh zero state-leakage, các test hoàn toàn độc lập.
+    2. **Kịch bản Tích hợp Liên hoàn (E2E Golden Gameplay/User Flow)**: Khi chuẩn bị kết thúc một giai đoạn nền tảng quan trọng, hãy yêu cầu Agent viết 1 bài test tích hợp mô phỏng toàn bộ hành trình người dùng thực tế từ Slice 00 đến hiện tại (`tests/integration/golden_flow.test.ts`). Khi ván đấu mẫu chạy thông suốt từ đầu đến cuối ➔ Đạt độ an tâm tuyệt đối 100% để gõ lệnh `git commit`.
 
 ---
 
@@ -1701,6 +1947,32 @@ Sau khi xuất tài liệu bàn giao, hãy nhắc tôi bấm nút New Conversati
   - *Biến số cần thay thế*: `[MÃ_TICKET]` và `[TÊN_EPIC]`.
   - *Hành động bắt buộc*: Sau khi AI xuất file bàn giao, Junior BẮT BUỘC bấm nút **New Conversation** trên IDE để đưa Token về 0 trước khi sang Slice tiếp theo.
 
+---
+
+### 📋 MẪU P-2.7: KIỂM TOÁN MỐC ĐỊNH KỲ (PERIODIC MILESTONE DEEP AUDIT - VÒNG 3)
+- **🏷️ CHẾ ĐỘ THỰC THI**: `[ĐIỀU TRA VIÊN ĐỘC LẬP - DEEP INVESTIGATION]` *(Rà soát toàn diện sau mỗi 2 Slices hoặc trước khi chốt Epic)*.
+- **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Đã hoàn thành ít nhất 2 Slices liên tiếp hoặc chuẩn bị kết thúc Epic hiện tại.
+- **🛡️ RÀO CHẮN GÁC CỔNG**: Subagent điều tra bắt buộc ở chế độ Read-Only, đối chiếu 1-1 toàn bộ mã nguồn với `docs/requirements.md` và `docs/domain/entity_model.md`.
+- **💬 CÂU LỆNH PROMPT CHUẨN (Model: Sonnet 4.6)**:
+```text
+Hãy điều phối subagent research (hoặc DeepInvestigator), kích hoạt kỹ năng code-review và vertical-slice-completeness để thực hiện KIỂM TOÁN MỐC ĐỊNH KỲ (Milestone Deep Audit) cho toàn bộ mã nguồn hiện tại:
+
+1. ĐỐI SOÁT 1-1 TOÀN DIỆN VỚI TÀI LIỆU GỐC SSOT (docs/requirements.md & docs/domain/entity_model.md):
+   - Rà soát toàn bộ danh mục thực thể, hằng số, quy tắc tính toán và luồng FSM từ đầu đến nay.
+   - So sánh danh sách tính năng thực tế trong src/ với yêu cầu đặc tả gốc.
+2. TRUY LÙNG CÁC LỖ HỔNG SLOP & NO-OP:
+   - Liệt kê toàn bộ các Enum, Interface hoặc Function đang chỉ khai báo mà không có mã xử lý (No-Op stubs, default return).
+   - Kiểm tra các nợ kỹ thuật mồ côi (tính năng bị hoãn từ các Slice trước mà chưa có Slice nào tiếp nhận).
+   - Kiểm tra tên hiển thị, nhãn dữ liệu xem có còn sót tiếng Anh mock data hay không.
+3. KIỂM TOÁN GIỚI HẠN LOC VÀ NGUY CƠ PHÂN MẢNH:
+   - Quét toàn bộ tệp trong src/ để phát hiện các tệp vượt ngưỡng 300 LOC (đặt lịch refactor/tách module con).
+   - Quét lỗi "code golf" hoặc cố tình gộp dòng để né trần LOC.
+
+Yêu cầu xuất Báo cáo Đối Soát Định Kỳ (Periodic Audit Gap Report) phân loại: [BLOCKER CẦN FIX NGAY] / [NỢ KỸ THUẬT ĐƯỢC CHUYỂN TIẾP] / [AN TOÀN].
+```
+- **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu)**: Nhận Báo cáo Đối Soát Định Kỳ. Xử lý triệt để mọi lỗi Blocker trước khi mở Slice mới.
+
+---
 
 > [!IMPORTANT]
 > **Quy Tắc Vàng Về Cắt Lát Độc Bản (Just-In-Time Slicing vs Big Design Up Front):**

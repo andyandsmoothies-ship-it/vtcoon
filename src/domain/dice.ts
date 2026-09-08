@@ -1,9 +1,10 @@
 // [UC-GAME-005/MSS] Deterministic 2D6 PRNG — Dice Service
 
 export interface DiceResult {
-  readonly die1:  number;
-  readonly die2:  number;
-  readonly total: number;
+  readonly die1:     number;
+  readonly die2:     number;
+  readonly total:    number;
+  readonly isDouble: boolean;
 }
 
 /**
@@ -26,10 +27,10 @@ function dieRoll(rng: () => number): number {
 
 /**
  * Tung 2 xúc xắc 6 mặt bằng RNG đã cho.
- * Mỗi viên ∈ [1..6], total ∈ [2..12].
+ * Mỗi viên ∈ [1..6], total ∈ [2..12], isDouble = die1 === die2.
  */
 export function rollDice(rng: () => number): DiceResult {
   const die1 = dieRoll(rng);
   const die2 = dieRoll(rng);
-  return { die1, die2, total: die1 + die2 };
+  return { die1, die2, total: die1 + die2, isDouble: die1 === die2 };
 }

@@ -1,53 +1,62 @@
 // [UC-GAME-001..003,005,007,008/MSS] Room Manager & FSM Turn Loop
-
 import {
-  createRoom as domainCreateRoom, createPlayer, checkPassedGo,
-  GO_BONUS, BOARD_SIZE, TurnPhase,
+  createRoom as domainCreateRoom, createPlayer, checkPassedGo, GO_BONUS, BOARD_SIZE, TurnPhase,
 } from '../domain/room';
 import type { Room, Player } from '../domain/room';
 import { mulberry32, rollDice } from '../domain/dice';
 import type { DiceResult } from '../domain/dice';
 import {
-  handleLanding, buyProperty, LandingResult, BuyResult,
-  upgradeProperty, upgradeETC, upgradeUtilityFull, PROPERTY_DEEDS,
-  resolveRent, type PropertyRegistry, type PropertyStateMap, type PropertyState,
+  handleLanding, LandingResult, BuyResult,
+  resolveRent, calculateGoPropertyTax, type PropertyRegistry, type PropertyStateMap, type PropertyState,
 } from '../domain/property_manager';
-import { BOARD_CONFIG } from '../domain/board_config';
+import { BOARD_CONFIG, CellType } from '../domain/board_config';
+import {
+  createMarketDeck, createChanceDeck, decayModifiers,
+} from '../domain/event_card_engine';
+import { sendToAudit, handleTurnStart, handleBailOut, handleUseDiplomatic, processRollDoubles } from './audit_manager';
+import {
+  handleDecline, handleAuctionBid, handleAuctionPass, handleAuctionClose, type AuctionSession,
+} from './auction_manager';
+import {
+  handleBuyProperty, handleUpgrade, handleUpgradeETC, handleUpgradeUtility,
+} from './property_actions';
+import { handleHoseInvest, handleHoseSkip } from './hose_actions';
+import { dispatchPlayerIntent, type PlayerIntent } from './intent_dispatcher';
+import { handleSpecialCell } from './special_cell_handler';
+
+export type { AuctionSession, PlayerIntent };
 
 export interface RollResult {
-  readonly dice:         DiceResult;
-  readonly player:       Readonly<{ id: string; position: number; balance: number }>;
-  readonly passedGo:     boolean;
-  readonly rentCharged:  number;
-}
-
-export type PlayerIntent =
-  | { type: 'INTENT_BUY' } | { type: 'INTENT_DECLINE' }
-  | { type: 'INTENT_BID'; amount: number }
-  | { type: 'INTENT_UPGRADE'; cellIndex: number }
-  | { type: 'INTENT_UPGRADE_ETC' }
-  | { type: 'INTENT_UPGRADE_UTILITY'; cellIndex: number }
-  | { type: 'INTENT_END_TURN' };
-
-export interface AuctionSession {
-  readonly cellIndex: number;
-  highestBid: number;
-  highestBidder?: string;
+  readonly dice:        DiceResult;
+  readonly player:      Readonly<{ id: string; position: number; balance: number }>;
+  readonly passedGo:    boolean;
+  readonly rentCharged: number;
 }
 
 export class RoomManager {
   private readonly rooms = new Map<string, Room>();
   private readonly rng: () => number;
+  private readonly deckRng: () => number;
   private readonly registries = new Map<string, PropertyRegistry>();
   private readonly propertyStates = new Map<string, PropertyStateMap>();
   private readonly auctions = new Map<string, AuctionSession>();
+  private readonly rolledThisTurn = new Map<string, boolean>();
 
-  constructor(seed?: number) {
-    this.rng = mulberry32(seed ?? Date.now());
+  constructor(seed?: number | (() => number)) {
+    if (typeof seed === 'function') {
+      this.rng = seed;
+      this.deckRng = seed;
+    } else {
+      const s = seed ?? Date.now();
+      this.rng = mulberry32(s);
+      this.deckRng = mulberry32((s ^ 0x9e3779b9) | 0);
+    }
   }
 
   createRoom(hostId: string): Room {
     const room = domainCreateRoom(hostId);
+    room.marketDeck = createMarketDeck(this.deckRng);
+    room.chanceDeck = createChanceDeck(this.deckRng);
     this.rooms.set(room.roomCode, room);
     this.registries.set(room.roomCode, new Map());
     this.propertyStates.set(room.roomCode, new Map());
@@ -56,17 +65,19 @@ export class RoomManager {
 
   joinRoom(roomCode: string, playerId: string): Room | undefined {
     const room = this.rooms.get(roomCode);
-    if (room === undefined || room.started) return undefined;
+    if (!room || room.started) return undefined;
     room.players.push(createPlayer(playerId));
     return room;
   }
 
   startGame(roomCode: string): Room | undefined {
     const room = this.rooms.get(roomCode);
-    if (room === undefined || room.players.length < 2) return undefined;
+    if (!room || room.players.length < 2) return undefined;
     room.started = true;
-    room.phase = TurnPhase.WaitingRoll;
     room.currentPlayerIndex = 0;
+    const first = room.players[0];
+    room.phase = first?.skipNextTurn ? TurnPhase.PropertyManagement : TurnPhase.WaitingRoll;
+    if (first?.skipNextTurn) first.skipNextTurn = false;
     return room;
   }
 
@@ -76,163 +87,150 @@ export class RoomManager {
     return current?.id === playerId ? current : undefined;
   }
 
+  sendToAudit(room: Room, playerId: string): void { sendToAudit(room, playerId); }
+  handleTurnStart(roomCode: string, playerId: string): { canRoll: boolean; reason?: string } {
+    return handleTurnStart(this.rooms.get(roomCode), playerId);
+  }
+  handleBailOut(roomCode: string, playerId: string): { success: boolean; reason?: string } {
+    return handleBailOut(this.rooms.get(roomCode), playerId, Boolean(this.rolledThisTurn.get(roomCode)));
+  }
+  handleUseDiplomatic(roomCode: string, playerId: string): { success: boolean; reason?: string } {
+    const room = this.rooms.get(roomCode);
+    const player = room?.players.find((p) => p.id === playerId);
+    return (!room || !player) ? { success: false, reason: 'INVALID_PLAYER' } : handleUseDiplomatic(player, room.chanceDiscard);
+  }
+
   handleRollDice(roomCode: string, playerId: string): RollResult | undefined {
     const room = this.rooms.get(roomCode);
     const current = this.getActivePlayer(room, playerId);
-    if (!current || !room || room.phase !== TurnPhase.WaitingRoll) return undefined;
+    if (!current || !room) return undefined;
+    if (current.skipNextTurn) return undefined;
 
-    const dice = rollDice(this.rng);
+    const canRoll = room.phase === TurnPhase.WaitingRoll ||
+      (current.consecutiveDoubles > 0 && room.phase === TurnPhase.PropertyManagement);
+    if (!canRoll) return undefined;
+
+    let dice = rollDice(this.rng);
+    if (current.doubleNextDice) {
+      current.doubleNextDice = false;
+      dice = { ...dice, total: (dice.die1 + dice.die2) * 2 };
+    }
+    this.rolledThisTurn.set(roomCode, true);
+
+    const rollCheck = processRollDoubles(room, current, dice);
+    if (rollCheck.stopped) return rollCheck.result;
+
     const oldPos = current.position;
     const newPos = (oldPos + dice.total) % BOARD_SIZE;
     current.position = newPos;
 
-    const passedGo = checkPassedGo(oldPos, newPos);
-    if (passedGo) current.balance += GO_BONUS;
-
     const reg = this.registries.get(roomCode) ?? new Map();
-    const stateMap = this.propertyStates.get(roomCode) ?? new Map();
-    const landing = handleLanding(current, newPos, reg, room.players, stateMap, dice.total);
+    const sm = this.propertyStates.get(roomCode) ?? new Map();
+    if (checkPassedGo(oldPos, newPos)) {
+      current.balance += GO_BONUS - calculateGoPropertyTax(current.id, reg, sm);
+    }
 
-    room.phase = landing.result === LandingResult.Unowned
-      ? TurnPhase.ActionPhase
-      : TurnPhase.PropertyManagement;
+    const cell = BOARD_CONFIG[newPos];
+    let rentCharged = 0;
 
-    return { dice, player: { id: current.id, position: current.position, balance: current.balance }, passedGo, rentCharged: landing.rentAmount };
+    if (!cell || !handleSpecialCell(room, current, cell.type, reg, sm, this.deckRng)) {
+      const landing = handleLanding(current, newPos, reg, room.players, sm, dice.total, room.activeModifiers, this.rng, room.chanceDiscard);
+      room.phase = landing.result === LandingResult.Unowned ? TurnPhase.ActionPhase : TurnPhase.PropertyManagement;
+      rentCharged = landing.rentAmount;
+    }
+
+    return { dice, player: { id: current.id, position: current.position, balance: current.balance }, passedGo: checkPassedGo(oldPos, newPos), rentCharged };
   }
 
   handleBuyProperty(roomCode: string, playerId: string): { result: BuyResult } | undefined {
-    const room = this.rooms.get(roomCode);
-    const current = this.getActivePlayer(room, playerId);
-    if (!current || !room || room.phase !== TurnPhase.ActionPhase) return undefined;
-    const reg = this.registries.get(roomCode);
-    if (!reg) return undefined;
-    const res = buyProperty(current, current.position, reg);
-    if (res.result === BuyResult.Success) room.phase = TurnPhase.PropertyManagement;
-    return res;
+    return handleBuyProperty(this.rooms.get(roomCode), this.getActivePlayer(this.rooms.get(roomCode), playerId), this.registries.get(roomCode));
   }
 
-  private handleDecline(roomCode: string, playerId: string): { success: boolean; reason?: string } {
-    const room = this.rooms.get(roomCode);
-    const current = this.getActivePlayer(room, playerId);
-    if (!current || room?.phase !== TurnPhase.ActionPhase) return { success: false, reason: 'INVALID_PHASE' };
-    const deed = PROPERTY_DEEDS.get(current.position);
-    if (!deed) return { success: false, reason: 'NOT_PURCHASABLE' };
-    this.auctions.set(roomCode, { cellIndex: current.position, highestBid: Math.floor(deed.price * 0.5) });
-    room.phase = TurnPhase.AuctionPhase;
-    return { success: true };
-  }
-
-  private handleUpgradeETC(roomCode: string, playerId: string): { success: boolean; reason?: string } {
-    const room = this.rooms.get(roomCode);
-    const current = this.getActivePlayer(room, playerId);
-    if (!current || room?.phase !== TurnPhase.PropertyManagement) return { success: false, reason: 'INVALID_PHASE' };
-    const reg = this.registries.get(roomCode);
-    const sm = this.propertyStates.get(roomCode);
-    if (!reg || !sm) return { success: false, reason: 'INVALID_ROOM' };
-    return upgradeETC(current, reg, sm);
-  }
-
-  private handleUpgradeUtility(roomCode: string, playerId: string, cellIndex: number): { success: boolean; reason?: string } {
-    const room = this.rooms.get(roomCode);
-    const current = this.getActivePlayer(room, playerId);
-    if (!current || room?.phase !== TurnPhase.PropertyManagement) return { success: false, reason: 'INVALID_PHASE' };
-    const reg = this.registries.get(roomCode);
-    const sm = this.propertyStates.get(roomCode);
-    if (!reg || !sm) return { success: false, reason: 'INVALID_ROOM' };
-    return upgradeUtilityFull(current, cellIndex, reg, sm);
-  }
-
-  handlePlayerIntent(roomCode: string, playerId: string, intent: PlayerIntent): { success: boolean; reason?: string } {
-    if (intent.type === 'INTENT_BUY') {
-      const res = this.handleBuyProperty(roomCode, playerId);
-      return { success: res?.result === BuyResult.Success, reason: res?.result };
-    }
-    if (intent.type === 'INTENT_DECLINE') return this.handleDecline(roomCode, playerId);
-    if (intent.type === 'INTENT_BID') return this.handleAuctionBid(roomCode, playerId, intent.amount);
-    if (intent.type === 'INTENT_UPGRADE') return this.handleUpgrade(roomCode, playerId, intent.cellIndex);
-    if (intent.type === 'INTENT_UPGRADE_ETC') return this.handleUpgradeETC(roomCode, playerId);
-    if (intent.type === 'INTENT_UPGRADE_UTILITY') return this.handleUpgradeUtility(roomCode, playerId, intent.cellIndex);
-    if (intent.type === 'INTENT_END_TURN') {
-      const r = this.handleEndTurn(roomCode, playerId);
-      return { success: r !== undefined, reason: r ? undefined : 'INVALID_PHASE' };
-    }
-    return { success: false, reason: 'INVALID_INTENT' };
+  handleDecline(roomCode: string, playerId: string): { success: boolean; reason?: string } {
+    return handleDecline(this.rooms.get(roomCode), this.getActivePlayer(this.rooms.get(roomCode), playerId), this.auctions, roomCode);
   }
 
   handleAuctionBid(roomCode: string, playerId: string, amount: number): { success: boolean; reason?: string } {
-    const room = this.rooms.get(roomCode);
-    const session = this.auctions.get(roomCode);
-    if (!room?.started || room.phase !== TurnPhase.AuctionPhase || !session) return { success: false, reason: 'INVALID_PHASE' };
-    if (!Number.isFinite(amount) || amount <= 0 || !Number.isInteger(amount)) return { success: false, reason: 'BID_TOO_LOW' };
-    const player = room.players.find((p) => p.id === playerId);
-    if (!player) return { success: false, reason: 'PLAYER_NOT_FOUND' };
-    if (session.highestBidder === playerId) return { success: false, reason: 'ALREADY_HIGHEST_BIDDER' };
-    if (player.balance < amount) return { success: false, reason: 'INSUFFICIENT_FUNDS' };
-    const minBid = session.highestBidder !== undefined ? session.highestBid + 100 : session.highestBid;
-    if (amount < minBid) return { success: false, reason: 'BID_TOO_LOW' };
-    session.highestBid = amount;
-    session.highestBidder = playerId;
-    return { success: true };
+    return handleAuctionBid(this.rooms.get(roomCode), this.auctions.get(roomCode), playerId, amount, this.registries.get(roomCode), this.auctions, roomCode);
+  }
+
+  handleAuctionPass(roomCode: string, playerId: string): { success: boolean; reason?: string } {
+    return handleAuctionPass(this.rooms.get(roomCode), this.auctions.get(roomCode), playerId, this.registries.get(roomCode), this.auctions, roomCode);
   }
 
   handleAuctionClose(roomCode: string): { winnerId?: string; winningBid: number } {
+    return handleAuctionClose(this.rooms.get(roomCode), this.auctions.get(roomCode), this.registries.get(roomCode), this.auctions, roomCode);
+  }
+
+  handleUpgradeETC(roomCode: string, playerId: string): { success: boolean; reason?: string } {
     const room = this.rooms.get(roomCode);
-    const session = this.auctions.get(roomCode);
-    if (!room?.started || room.phase !== TurnPhase.AuctionPhase || !session) return { winnerId: undefined, winningBid: 0 };
-    let winnerId: string | undefined;
-    let winningBid = 0;
-    if (session.highestBidder) {
-      const winner = room.players.find((p) => p.id === session.highestBidder);
-      if (winner && winner.balance >= session.highestBid) {
-        winner.balance -= session.highestBid;
-        this.registries.get(roomCode)?.set(session.cellIndex, winner.id);
-        winnerId = session.highestBidder;
-        winningBid = session.highestBid;
-      }
-    }
-    room.phase = TurnPhase.PropertyManagement;
-    this.auctions.delete(roomCode);
-    return { winnerId, winningBid };
+    return handleUpgradeETC(this.getActivePlayer(room, playerId), room?.phase, this.registries.get(roomCode), this.propertyStates.get(roomCode));
+  }
+
+  handleUpgradeUtility(roomCode: string, playerId: string, cellIndex: number): { success: boolean; reason?: string } {
+    const room = this.rooms.get(roomCode);
+    return handleUpgradeUtility(this.getActivePlayer(room, playerId), room?.phase, cellIndex, this.registries.get(roomCode), this.propertyStates.get(roomCode));
   }
 
   handleUpgrade(roomCode: string, playerId: string, cellIndex: number): { success: boolean; reason?: string } {
     const room = this.rooms.get(roomCode);
-    const current = this.getActivePlayer(room, playerId);
-    if (!current || room?.phase !== TurnPhase.PropertyManagement) return { success: false, reason: 'INVALID_PHASE' };
-    const reg = this.registries.get(roomCode);
-    const sm = this.propertyStates.get(roomCode);
-    if (!reg || !sm) return { success: false, reason: 'INVALID_ROOM' };
-    return upgradeProperty(current, cellIndex, reg, sm);
+    return handleUpgrade(this.getActivePlayer(room, playerId), room?.phase, cellIndex, this.registries.get(roomCode), this.propertyStates.get(roomCode), room?.activeModifiers);
   }
 
-  handleEndTurn(roomCode: string, playerId: string): Room | undefined {
+  handleHoseInvest(roomCode: string, playerId: string, stake: number): { success: boolean; reason?: string } {
+    return handleHoseInvest(this.rooms.get(roomCode), this.getActivePlayer(this.rooms.get(roomCode), playerId), this.rng, stake);
+  }
+
+  handleHoseSkip(roomCode: string, playerId: string): { success: boolean; reason?: string } {
+    return handleHoseSkip(this.rooms.get(roomCode), this.getActivePlayer(this.rooms.get(roomCode), playerId));
+  }
+
+  handlePlayerIntent(roomCode: string, playerId: string, intent: PlayerIntent): { success: boolean; reason?: string } {
+    return dispatchPlayerIntent(this, roomCode, playerId, intent);
+  }
+
+  handleEndTurn(roomCode: string, playerId: string, continueDoubles?: boolean): Room | undefined {
     const room = this.rooms.get(roomCode);
     const current = this.getActivePlayer(room, playerId);
     if (!current || !room) return undefined;
-    if (room.phase === TurnPhase.WaitingRoll || room.phase === TurnPhase.AuctionPhase) return undefined;
+    if (room.phase === TurnPhase.AuctionPhase) return undefined;
+    if (!this.rolledThisTurn.get(roomCode) && room.phase === TurnPhase.WaitingRoll) return undefined;
+
+    if (continueDoubles && current.consecutiveDoubles > 0) {
+      room.phase = TurnPhase.WaitingRoll;
+      this.rolledThisTurn.set(roomCode, false);
+      return room;
+    }
+
+    current.consecutiveDoubles = 0;
+    if (current.auditTurnsLeft > 0) current.auditTurnsLeft -= 1;
+    if (current.extraTurns > 0) {
+      current.extraTurns -= 1;
+      room.phase = TurnPhase.WaitingRoll;
+      this.rolledThisTurn.set(roomCode, false);
+      return room;
+    }
     room.currentPlayerIndex = (room.currentPlayerIndex + 1) % room.players.length;
-    room.phase = TurnPhase.WaitingRoll;
+    if (room.currentPlayerIndex === 0) room.activeModifiers = decayModifiers(room.activeModifiers);
+
+    const nextPlayer = room.players[room.currentPlayerIndex];
+    if (nextPlayer?.skipNextTurn) {
+      nextPlayer.skipNextTurn = false;
+      room.phase = TurnPhase.PropertyManagement;
+    } else {
+      room.phase = TurnPhase.WaitingRoll;
+    }
+    this.rolledThisTurn.set(roomCode, false);
     return room;
   }
 
-  getRoom(roomCode: string): Room | undefined {
-    return this.rooms.get(roomCode);
-  }
-
-  getPropertyOwner(roomCode: string, cellIndex: number): string | undefined {
-    return this.registries.get(roomCode)?.get(cellIndex);
-  }
-
-  getPropertyState(roomCode: string, cellIndex: number): PropertyState | undefined {
-    return this.propertyStates.get(roomCode)?.get(cellIndex);
-  }
-
+  getRoom(roomCode: string): Room | undefined { return this.rooms.get(roomCode); }
+  getPropertyOwner(roomCode: string, cellIndex: number): string | undefined { return this.registries.get(roomCode)?.get(cellIndex); }
+  getPropertyState(roomCode: string, cellIndex: number): PropertyState | undefined { return this.propertyStates.get(roomCode)?.get(cellIndex); }
   getPropertyRent(roomCode: string, cellIndex: number, diceTotal?: number): number {
     const reg = this.registries.get(roomCode);
     const ownerId = reg?.get(cellIndex);
     if (!reg || !ownerId) return 0;
-    const cell = BOARD_CONFIG[cellIndex];
-    const sm = this.propertyStates.get(roomCode);
-    return resolveRent(cell, cellIndex, ownerId, reg, sm, diceTotal);
+    return resolveRent(BOARD_CONFIG[cellIndex], cellIndex, ownerId, reg, this.propertyStates.get(roomCode), diceTotal);
   }
 }

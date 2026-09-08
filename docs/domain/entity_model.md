@@ -320,6 +320,6 @@ Toàn bộ 28 ô tài sản kinh tế trên bàn cờ được phân chia thành
 
 - **Nhóm Đô thị (Nâu, Cam, Đỏ, Xanh Lá, Tím):** Tích lũy tài sản ổn định, thanh khoản thế chấp $50\%$ ngay lập tức, tiền thuê đều đặn.  
 - **Nhóm Dịch vụ & Giải trí (06, 08, 26, 27):** Thu phụ phí xúc xắc ngẫu nhiên (Cấp 2) và ép đối thủ mất lượt (Cấp 3).  
-- **Nhóm Nghỉ dưỡng (09, 11, 13, 14, 16, 18, 21, 24, 29):** $\times 2$ tiền thuê khi trúng thẻ "Mùa Du Lịch", đóng băng khi gặp thiên tai miền Trung.  
+- **Nhóm Nghỉ dưỡng (09, 11, 13, 14, 16, 18, 21, 24, 29):** Trong đó 6 ô trọng điểm (11, 13, 14, 21, 24, 29 theo requirements.md §V.1.11) hưởng $\times 2$ tiền thuê khi trúng thẻ "Mùa Du Lịch"; các ô duyên hải miền Trung (11, 14, 16, 18, 19) được miễn tiền thuê khi gặp thiên tai miền Trung (Zero-rent rule có độ ưu tiên tuyệt đối khi xảy ra xung đột).  
 - **Nhóm Hạ tầng Giao thông (05, 15, 25, 35):** Không cần gom theo màu, tăng lũy tiến theo số lượng sở hữu, nâng cấp công nghệ ETC ($+50\%$).  
 - **Nhóm Tiện ích (12, 28):** Phí tính biến thiên bằng điểm xúc xắc $\times 40$ / $100$ / $150$ Tr. VNĐ.

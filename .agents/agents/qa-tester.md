@@ -23,6 +23,10 @@ tools: [view_file, write_to_file, replace_file_content, list_dir, find_by_name, 
    - Traceability Tagging: Every test suite or test case MUST include standardized tags: `[TC-xx.x/MSS]` or `[TC-xx.x/A#]` and `[UC-xxx]`.
    - Failure Postcondition Tests: If testing error or alternative flows ending in failure, assert clean rollback and zero dangling state.
    - Realistic Literal Test Data: Use realistic domain values, never lazy placeholder strings like `"foo"`, `"bar"`, or `"test"`.
+   - **Consumer-Side Assertion (Universal Rule - Assert Effect at Point of Consumption)**:
+     - In any domain (Web, REST API, Microservice, Game, Desktop), when testing an effect, policy, modifier, discount, or role permission:
+     - ❌ **NEVER** assert only the storage/producer side (e.g. `expect(cart.discounts).toHaveLength(1)` or `expect(player.modifiers).toContain(...)`). That creates a "False Green" if the business logic forgets to query the state.
+     - ✅ **ALWAYS** assert the effect at the point of CONSUMPTION/EXECUTION (e.g. `checkout()` actually reduces the total invoice amount; `authorize()` actually permits/blocks the endpoint; `calculateRent()` or `rollDice()` actually applies the multiplier/penalty).
 
 4. **Phase 3: Business RED Validation (ATDD Quality Gate)**:
    - Run the newly written test file using the project's test runner.
@@ -47,6 +51,7 @@ tools: [view_file, write_to_file, replace_file_content, list_dir, find_by_name, 
 - **Test File Created**: `[tests/path/to/test.ts]`
 - **Contract Tags**: `[TC-xx.x/MSS]`, `[UC-xxx]`
 - **Red Verification**: ✔️ Business RED confirmed (Output: [Brief failure message])
+- **Consumer Assertion**: ✔️ Verified at consumption point (asserted execution result, not just state flag)
 - **Isolation Check**: ✔️ Zero files touched in `src/` (or production directories)
 - **Inversion Gate**: [VERIFIED RED on mutation / PENDING Implementation]
 ```

@@ -1,7 +1,8 @@
 // [UC-GAME-020/MSS][UC-GAME-027/MSS][UC-GAME-028/MSS] Property Manager — Slice 02
 
 import { CellType, ColorGroup, BOARD_CONFIG } from './board_config';
-import type { Player } from './room';
+import type { Player, MarketModifier } from './room';
+import { MarketCardId, COASTAL_CELLS, RESORT_CELLS, SERVICE_CELLS, ChanceCardId } from './event_card_engine';
 
 // --- Enum xuat khau ---
 
@@ -17,6 +18,7 @@ export enum BuyResult {
   InsufficientFunds = 'InsufficientFunds',
   AlreadyOwned      = 'AlreadyOwned',
   NotPurchasable    = 'NotPurchasable',
+  TradeFrozen       = 'TradeFrozen',
 }
 
 // --- Kieu du lieu ---
@@ -95,7 +97,11 @@ export function buyProperty(
   player: Player,
   cellIndex: number,
   registry: PropertyRegistry,
+  modifiers?: readonly MarketModifier[],
 ): { result: BuyResult } {
+  if (modifiers?.some((m) => m.type === MarketCardId.MC_FREEZE_TRADE && m.remainingRounds > 0)) {
+    return { result: BuyResult.TradeFrozen };
+  }
   if (!isPurchasable(cellIndex)) return { result: BuyResult.NotPurchasable };
   if (registry.has(cellIndex))   return { result: BuyResult.AlreadyOwned };
   const deed = PROPERTY_DEEDS.get(cellIndex);
@@ -106,29 +112,86 @@ export function buyProperty(
   return { result: BuyResult.Success };
 }
 
+const SERVICE_C2_SURCHARGE = 200;
+
+/** @see docs/domain/gotchas.md#1-market-modifiers-lifecycle--scope-slice-04 */
+function hasZeroRent(cellIndex: number, modifiers?: readonly MarketModifier[]): boolean {
+  return Boolean(modifiers?.some((m) => m.remainingRounds > 0 &&
+    (m.type === MarketCardId.MC_COASTAL_STORM || m.multiplier === 0) && (m.affectedCells ?? COASTAL_CELLS).includes(cellIndex)));
+}
+
+function calculateRent(baseRent: number, cellIndex: number, modifiers?: readonly MarketModifier[]): number {
+  let rent = baseRent;
+  for (const m of modifiers ?? []) {
+    if (m.remainingRounds > 0 && (m.affectedCells ?? []).includes(cellIndex)) {
+      const mult = m.multiplier ?? (m.type === MarketCardId.MC_PEAK_TOURISM ? 2 : undefined);
+      if (mult !== undefined) {
+        rent = Math.floor(rent * mult);
+      }
+      if (m.type === MarketCardId.MC_FUEL_SURGE) {
+        rent += 500;
+      }
+    }
+  }
+  return rent;
+}
+
+function applyC2Surcharge(player: Player, owner: Player | undefined, rng: () => number): number {
+  const face = Math.floor(rng() * 6) + 1;
+  if (face % 2 === 0) {
+    player.balance -= SERVICE_C2_SURCHARGE;
+    if (owner !== undefined) owner.balance += SERVICE_C2_SURCHARGE;
+    return SERVICE_C2_SURCHARGE;
+  }
+  return 0;
+}
+
+function applyServiceBonus(
+  cellIndex: number, stateMap: PropertyStateMap | undefined, player: Player, owner?: Player, rng?: () => number,
+): number {
+  if (!(SERVICE_CELLS as readonly number[]).includes(cellIndex)) return 0;
+  const lvl = stateMap?.get(cellIndex)?.level;
+  if (lvl === 3) {
+    player.skipNextTurn = true;
+    return 0;
+  }
+  if (lvl === 2 && rng) return applyC2Surcharge(player, owner, rng);
+  return 0;
+}
+
+function tryUseDiplomaticCard(
+  player: Player, cellIndex: number, stateMap?: PropertyStateMap, chanceDiscard?: ChanceCardId[],
+): boolean {
+  if (BOARD_CONFIG[cellIndex]?.type !== CellType.Property) return false;
+  const lvl = stateMap?.get(cellIndex)?.level ?? 0;
+  if (lvl >= 3) return false;
+  const idx = player.hand.indexOf(ChanceCardId.CC_DIPLOMATIC);
+  if (idx === -1) return false;
+  player.hand.splice(idx, 1);
+  chanceDiscard?.push(ChanceCardId.CC_DIPLOMATIC);
+  return true;
+}
+
 export function handleLanding(
-  player: Player,
-  cellIndex: number,
-  registry: PropertyRegistry,
-  players: Player[],
-  stateMap?: PropertyStateMap,
-  diceTotal?: number,
+  player: Player, cellIndex: number, registry: PropertyRegistry, players: Player[],
+  stateMap?: PropertyStateMap, diceTotal?: number, modifiers?: readonly MarketModifier[], rng?: () => number,
+  chanceDiscard?: ChanceCardId[],
 ): { result: LandingResult; rentAmount: number; landlordId: string | undefined } {
-  if (!isPurchasable(cellIndex)) {
-    return { result: LandingResult.NotPurchasable, rentAmount: 0, landlordId: undefined };
-  }
+  if (!isPurchasable(cellIndex)) return { result: LandingResult.NotPurchasable, rentAmount: 0, landlordId: undefined };
   const ownerId = registry.get(cellIndex);
-  if (ownerId === undefined) {
-    return { result: LandingResult.Unowned, rentAmount: 0, landlordId: undefined };
-  }
-  if (ownerId === player.id) {
-    return { result: LandingResult.OwnProperty, rentAmount: 0, landlordId: ownerId };
+  if (ownerId === undefined) return { result: LandingResult.Unowned, rentAmount: 0, landlordId: undefined };
+  if (ownerId === player.id) return { result: LandingResult.OwnProperty, rentAmount: 0, landlordId: ownerId };
+  if (hasZeroRent(cellIndex, modifiers)) return { result: LandingResult.RentPaid, rentAmount: 0, landlordId: ownerId };
+  if (tryUseDiplomaticCard(player, cellIndex, stateMap, chanceDiscard)) {
+    return { result: LandingResult.RentPaid, rentAmount: 0, landlordId: ownerId };
   }
   const cell = BOARD_CONFIG[cellIndex];
-  const rentAmount = resolveRent(cell, cellIndex, ownerId, registry, stateMap, diceTotal);
+  let rentAmount = calculateRent(resolveRent(cell, cellIndex, ownerId, registry, stateMap, diceTotal), cellIndex, modifiers);
   const owner = players.find((p) => p.id === ownerId);
   player.balance -= rentAmount;
   if (owner !== undefined) owner.balance += rentAmount;
+  const surcharge = applyServiceBonus(cellIndex, stateMap, player, owner, rng);
+  rentAmount += surcharge;
   return { result: LandingResult.RentPaid, rentAmount, landlordId: ownerId };
 }
 
@@ -179,6 +242,7 @@ export function hasMonopoly(playerId: string, cellIndex: number, registry: Prope
 
 export function upgradeProperty(
   player: Player, cellIndex: number, registry: PropertyRegistry, stateMap: PropertyStateMap,
+  modifiers?: readonly MarketModifier[],
 ): { success: boolean; reason?: string } {
   if (registry.get(cellIndex) !== player.id) return { success: false, reason: 'NOT_OWNER' };
   if (!hasMonopoly(player.id, cellIndex, registry)) return { success: false, reason: 'MISSING_MONOPOLY' };
@@ -186,7 +250,10 @@ export function upgradeProperty(
   if (!deed?.upgradeCosts) return { success: false, reason: 'NOT_UPGRADEABLE' };
   const state = stateMap.get(cellIndex) ?? { level: 0 };
   if (state.level >= 3) return { success: false, reason: 'MAX_LEVEL' };
-  const cost = deed.upgradeCosts[state.level]!;
+  let cost = deed.upgradeCosts[state.level]!;
+  if (modifiers?.some((m) => m.type === MarketCardId.MC_CREDIT_STIMULUS && m.remainingRounds > 0)) {
+    cost = Math.floor(cost * 0.8);
+  }
   if (player.balance < cost) return { success: false, reason: 'INSUFFICIENT_FUNDS' };
   player.balance -= cost;
   stateMap.set(cellIndex, { ...state, level: state.level + 1 });
@@ -247,4 +314,22 @@ export function calcUtilityFee(
   if (cellIndex !== undefined && stateMap?.get(cellIndex)?.isUpgradedUtility) return diceTotal * 150;
   const count = UTILITY_CELLS.filter((c) => registry.get(c) === ownerId).length;
   return count >= 2 ? diceTotal * 100 : diceTotal * 40;
+}
+
+export function calculateGoPropertyTax(
+  playerId: string, registry?: PropertyRegistry, stateMap?: PropertyStateMap,
+): number {
+  if (!registry) return 0;
+  let ownedCount = 0;
+  let c2c3Count = 0;
+  for (const [cell, owner] of registry) {
+    if (owner === playerId) {
+      ownedCount++;
+      const lvl = stateMap?.get(cell)?.level ?? 0;
+      if (lvl === 2 || lvl === 3) c2c3Count++;
+    }
+  }
+  if (ownedCount >= 7) return 400 * ownedCount + 300 * c2c3Count;
+  if (ownedCount >= 4) return 150 * ownedCount;
+  return 0;
 }

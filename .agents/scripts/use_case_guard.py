@@ -108,6 +108,21 @@ def audit_file() -> None:
         if not re.search(r"\[UC-[A-Z0-9]+-\d+", content):
             print(f"WARNING [Traceability]: Test file '{target_file}' lacks required traceability tag [UC-[EPIC]-NNN].")
 
+    # 4. Source code micro-guards for src/ (Anti-Debug Slop & Anti-Silent Catch)
+    if "/src/" in norm_path or "/lib/" in norm_path or "/app/" in norm_path:
+        content = "".join(lines)
+        # 4a. Anti-Silent Catch (Lean Observability)
+        if re.search(r"catch\s*\([^)]*\)\s*\{\s*\}", content) or re.search(r"except\s*:\s*pass\b", content):
+            print(
+                f"WARNING [Lean Observability]: Empty catch/except block detected in '{target_file}'. "
+                "Forbidden silent error swallowing. Rejections must emit structured logs or explicit reason codes."
+            )
+        # 4b. Anti-Debug Slop (console.log, debugger)
+        if re.search(r"\bdebugger\s*;", content):
+            print(f"WARNING [Slop]: 'debugger;' statement detected in '{target_file}'. Remove before commit.")
+        if re.search(r"\bconsole\.log\(", content) and not norm_path.endswith((".test.ts", ".spec.ts")):
+            print(f"INFO [Slop]: Raw 'console.log' detected in '{target_file}'. Prefer structured logging for state transitions.")
+
 
 if __name__ == "__main__":
     mode = sys.argv[1] if len(sys.argv) > 1 else ""
