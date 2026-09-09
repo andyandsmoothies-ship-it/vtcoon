@@ -2,6 +2,7 @@
 import { TurnPhase, type Room, type Player } from '../domain/room';
 import { PROPERTY_DEEDS, type PropertyRegistry, type PropertyStateMap } from '../domain/property_manager';
 import { decayModifiers } from '../domain/event_card_engine';
+import type { AuctionSession } from './auction_manager';
 
 const LEVEL_MULTIPLIER: Record<number, number> = { 0: 1, 1: 1.5, 2: 2.5, 3: 4 };
 
@@ -47,13 +48,15 @@ function liquidateCell(
   if (player.mortgageLoans) delete player.mortgageLoans[cellIndex];
 }
 
-// --- Thanh lý cưỡng chế tài sản (ưu tiên cấp cao trước, dừng khi số dư >= 0) ---
+// --- Thanh lý cưỡng chế tài sản — tạo phiên đấu giá 70% niêm yết (§V.3) ---
 
 export function liquidateAssets(
   room: Room,
   playerId: string,
   registry: PropertyRegistry,
   stateMap: PropertyStateMap,
+  auctions?: Map<string, AuctionSession>,
+  roomCode?: string,
 ): void {
   const player = room.players.find((p) => p.id === playerId);
   if (!player) return;
@@ -62,6 +65,31 @@ export function liquidateAssets(
     .filter(([, owner]) => owner === playerId)
     .sort(([a], [b]) => comparePropertiesForLiquidation(a, b, stateMap));
 
+  // [DEBT-S06-04] Tạo phiên đấu giá cưỡng chế 70% niêm yết cho tài sản đầu tiên
+  if (ownedCells.length > 0 && auctions && roomCode) {
+    const [cellIndex] = ownedCells[0]!;
+    const deed = PROPERTY_DEEDS.get(cellIndex);
+    if (deed) {
+      const startingBid = Math.floor(deed.price * 0.70);
+      registry.delete(cellIndex);
+      auctions.set(roomCode, {
+        cellIndex,
+        declinedPlayerId: playerId,    // Người phá sản KHÔNG được đặt giá
+        highestBid: startingBid,
+        passedPlayers: new Set<string>(),
+        insolvencyPlayerId: playerId,  // Tiền đấu giá trả nợ + hoàn surplus cho player này
+      });
+      room.phase = TurnPhase.AuctionPhase;
+
+      console.info(JSON.stringify({
+        event: 'LIQUIDATE_ASSETS', correlationId: roomCode,
+        timestamp: Date.now(), delta: { playerId, balance: player.balance, cellIndex, startingBid },
+      }));
+      return;
+    }
+  }
+
+  // Fallback: nếu không có auctions context, vẫn thanh lý trực tiếp (backward compat)
   for (const [cellIndex] of ownedCells) {
     if (player.balance >= 0) break;
     liquidateCell(player, cellIndex, registry, stateMap);

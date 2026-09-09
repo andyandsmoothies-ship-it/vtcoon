@@ -18,7 +18,6 @@ import {
   SERVICE_CELLS,
   INFRA_CELLS,
   UTILITY_CELLS,
-  UTILITY_CELLS_ECE,
   HANOI_HCMC_CELLS,
   LAND_FEVER_CELLS,
   HOSE_OUTCOMES,
@@ -53,7 +52,6 @@ describe('[TC-04.T1/MSS] Event Card Engine — Enums & Constants', () => {
     expect(SERVICE_CELLS).toEqual([6, 8, 26, 27]);
     expect(INFRA_CELLS).toEqual([5, 15, 25, 35]);
     expect(UTILITY_CELLS).toEqual([12, 28]);
-    expect(UTILITY_CELLS_ECE).toEqual([12, 28]);
     expect(HANOI_HCMC_CELLS).toEqual([31, 32, 34, 37, 39]);
     expect(LAND_FEVER_CELLS).toEqual([6, 8, 31]);
   });
@@ -347,7 +345,9 @@ describe('[TC-04.T4/MSS] Market Modifier System & apply/decay Functions', () => 
 });
 
 describe('[TC-04.T4-UC050/MSS] Chance Cards Multi-Round Debt Recording', () => {
-  test('[TC-04.T4-UC050/MSS] applyChanceCard ghi nhận CC_OVERDRAFT và CC_FREE_CREDIT vào player.pendingDebts và cộng tiền mặt', () => {
+  test('[TC-04.T4-UC050/MSS] applyChanceCard: CC_OVERDRAFT vào pendingDebts, CC_FREE_CREDIT vào hand[] — cả hai cộng tiền mặt', () => {
+    // [DEBT-S06-01] CC_OVERDRAFT → pendingDebts (bộ đếm 3 vòng)
+    // [DEBT-S06-02] CC_FREE_CREDIT → hand[] (lãi suất thu khi qua GO, KHÔNG vào pendingDebts)
     const player = createPlayer('p1');
     expect(player.pendingDebts).toEqual([]);
     const startBal = player.balance;
@@ -357,8 +357,9 @@ describe('[TC-04.T4-UC050/MSS] Chance Cards Multi-Round Debt Recording', () => {
     expect(player.balance).toBe(startBal + 3000);
 
     applyChanceCard(ChanceCardId.CC_FREE_CREDIT, player.id, [player], []);
-    expect(player.pendingDebts).toContain(ChanceCardId.CC_FREE_CREDIT);
-    expect(player.pendingDebts).toHaveLength(2);
+    expect(player.hand).toContain(ChanceCardId.CC_FREE_CREDIT);          // [DEBT-S06-02] vào hand[]
+    expect(player.pendingDebts).not.toContain(ChanceCardId.CC_FREE_CREDIT); // KHÔNG vào pendingDebts
+    expect(player.pendingDebts).toHaveLength(1); // Chỉ CC_OVERDRAFT trong pendingDebts
     expect(player.balance).toBe(startBal + 3000 + 2000);
   });
 });

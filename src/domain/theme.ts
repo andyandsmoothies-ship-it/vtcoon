@@ -16,3 +16,18 @@ export const PLAYER_TOKEN_PALETTE = [
   '#8e44ad', // Tím Hoàng Gia (Royal Purple)— Cạnh 4: TP.Thủ Đức, Q.Nguyễn Huệ
   '#f1c40f', // Vàng Ánh Kim (Golden)    — Cạnh 3: Hải Phòng, Phú Quốc, Hạ Long
 ] as const;
+
+import { ColorGroup } from './board_config';
+
+/** Bảng màu HEX nhận diện nhóm đất — SSOT: docs/domain/design.md */
+export const COLOR_GROUP_HEX: Record<ColorGroup, string> = {
+  [ColorGroup.Nau]:        '#8B5E3C',
+  [ColorGroup.XanhDaTroi]: '#2980b9',
+  [ColorGroup.Hong]:       '#FF6B6B',
+  [ColorGroup.Cam]:        '#FF8C42',
+  [ColorGroup.Do]:         '#C0392B',
+  [ColorGroup.Vang]:       '#F1C40F',
+  [ColorGroup.XanhLa]:     '#27AE60',
+  [ColorGroup.Tim]:        '#8E44AD',
+} as const;
+

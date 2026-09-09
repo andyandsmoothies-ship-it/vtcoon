@@ -204,6 +204,12 @@ Bạn gõ: /grill-me + nạp `shaping` + `risk-assessment`
     │   └── Chốt Appetite, No-gos và chọn Visual Archetype
     │
     ▼ (Sinh ra: docs/domain/CONTEXT.md & docs/domain/design.md)
+[LƯỢT 1.5: MASTER ROADMAP & QUY HOẠCH EPICS (ROLLING WAVE PLANNING)]
+Bạn gõ: nạp `use-case-slicing` + `writing-plans`
+    │   ├── Quy hoạch 100% các Epics từ Day-0 đến Go-Live (Sóng gần bẻ nhỏ, sóng xa vạch ranh giới)
+    │   └── Xác lập thứ tự hoàn tất & DoD từng giai đoạn
+    │
+    ▼ (Sinh ra: docs/master_roadmap.md)
 [LƯỢT 2: ĐẶC TẢ USE-CASE 3.0 & MA TRẬN KIẾN TRÚC 4 CHIỀU]
 Bạn gõ: nạp `use-case-creator` + `openapi`
     │   ├── Tạo Use-Case 3.0 (Happy path, Extensions 3a/3b, Abstract Business Rules)
@@ -240,6 +246,7 @@ Mọi tài liệu bắt buộc phải được lưu vào **3 Thùng Chứa (3-Bu
 
 ```text
 docs/
+├── master_roadmap.md               <── Bản đồ lộ trình tổng thể sản phẩm (Quy hoạch 100% các Epics từ Day-0 đến Go-Live)
 ├── epics/                          <── Bucket 1: Cho các Epic lớn đa giai đoạn
 │   └── [tên_epic]/
 │       ├── _epic_ledger.md          <── Sổ cái theo dõi tiến độ của Epic (Single Source of Truth)
@@ -440,6 +447,16 @@ graph LR
                              /       1       \ <-- Tầng 1: Contract & Fixture SSOT (<= 300 LOC)
                             /-----------------\     (Khớp 100% tham số, giá trị, schema với tài liệu gốc)
 ```
+
+### 6.2 CHỐT CHẶN THỊ GIÁC & GIAO DIỆN (VISUAL SMOKE GATE — BẮT BUỘC CHO FRONTEND/3D)
+*(Chống bẫy "Virtual Green Trap": Test Vitest/Jest chạy in-memory xanh 100% nhưng màn hình WebGL thực tế bị đen, camera lệch hoặc CSS vỡ nát)*:
+1. **Khởi động Dev Server thực tế**: Chạy `npm run dev` trên Terminal trước khi nghiệm thu lát cắt UI.
+2. **Kiểm chứng trực quan bằng `/browser`**: Dùng Chrome DevTools MCP mở `http://localhost:5173` để:
+   - Chụp ảnh màn hình (screenshot) đối chiếu với `docs/domain/design.md`.
+   - Kiểm tra Console Log của trình duyệt: Không có lỗi WebGL shader crash, React key warning hoặc unhandled exception.
+3. **Quy tắc Kiến trúc 2 Lớp Tương Tác (Z-Index & Pointer-Events)**:
+   - Lớp Canvas 3D (Z-0): Nhận tương tác chuột xoay camera/raycasting (`pointer-events-auto`).
+   - Lớp DOM HUD (Z-10): Khung root bao ngoài phải đặt `pointer-events-none`; chỉ các nút bấm, modal con mới đặt `pointer-events-auto` để không chặn tia chiếu (raycast) vào sa bàn 3D.
 
 ---
 ---
@@ -860,6 +877,7 @@ Khi bắt đầu bất kỳ dự án nào, bạn chỉ cần nhìn vào bản đ
 | :--- | :--- | :--- | :--- | :--- |
 | **1. SETUP (1 Lần)** | **Day 0 Setup** | 💻 `[TERMINAL CMD]` Chạy lệnh tạo thư mục, cài kỹ năng, tạo `GEMINI.md`, `hooks.json`, `use_case_guard.py` và 4 subagents. | Bạn (Human) | Repo có đủ `.agents/`, `docs/`, `issues/`, `GEMINI.md`, `hooks.json` |
 | **2. TỪ SỐ 0**<br>*(Walking Skeleton - Slice 00)* | **Lượt 1: Inception** | 💬 `[CHAT AG 2.0]` Gõ: `/grill-me Tôi muốn làm ứng dụng [Tên]. Hãy chốt tầm nhìn và tech stack.` | `shaping`, `risk-assessment` | `docs/vision.md`, `docs/requirements.md` |
+| | **Lượt 1.5: Master Roadmap** | 💬 `[CHAT AG 2.0]` Gõ: `Lập bản đồ lộ trình tổng thể docs/master_roadmap.md chia dự án thành các Epics/Phases từ Day-0 đến Go-Live theo nguyên lý Rolling Wave Planning.` | `shaping`, `risk-assessment` | `docs/master_roadmap.md` (Định hình 100% các Epics/Phases lớn đến ngày Go-Live) |
 | | **Lượt 2: Spec Slice 00** | 💬 `[CHAT AG 2.0]` Gõ: `Hãy viết spec Slice 00 (Bộ xương sống đơn giản nhất kết nối từ UI -> DB) và dựng PlantUML.` | `use-case-creator` | `docs/domain/use_cases.puml`, `entity_model.md`, `docs/epics/infrastructure/UC-INFRA-000-walking-skeleton.md` |
 | | **Lượt 3: Tickets** | 💬 `[CHAT AG 2.0]` Gõ: `Bẻ spec Slice 00 thành ticket giàn giáo (Linter boundary, DB test connection).` | `use-case-slicing` | `docs/epics/infrastructure/_epic_ledger.md` + `issues/INFRA-S00-scaffold.md` |
 | | **Lượt 4: Thi công** | 💬 `[CHAT AG 2.0]` Gõ: `Gọi subagent implementer thi công ticket issues/INFRA-S00-scaffold.md trong Workspace: 'branch'.` | `implementer` | Tracer bullet 0 thông từ UI đến DB test |
@@ -890,6 +908,7 @@ Nếu bạn là Fresher hoặc lần đầu tiếp xúc với các thuật ngữ
 | **Adversarial Inversion** | **Phép thử cố tình phá hoại** | Cố tình sửa sai logic 1 dòng để chứng minh bài test tự động thực sự báo ĐỎ, tránh bị lừa bởi bài test luôn báo xanh giả. |
 | **Least New Structure** | **Chống chế thêm bánh xe** | Tuyệt đối không viết thêm class, interface hay cấu trúc phức tạp khi một hàm đơn giản đã giải quyết trọn vẹn bài toán. |
 | **Context Offloading** | **Nén phao thi** | Không đưa toàn bộ hàng nghìn dòng log hay code vào chat; chạy script bên ngoài để rút gọn thành 5-10 dòng tóm tắt trước khi gửi AI. |
+| **Master Roadmap (Rolling Wave Planning)** | **Bản đồ toàn chuyến đi** | Bản đồ lộ trình tổng thể (`master_roadmap.md`) định hình toàn bộ các chặng lớn (Core ➔ UI ➔ Network ➔ Go-Live) từ ngày đầu tiên, tránh lạc hướng khi cắm cúi làm từng chặng nhỏ. |
 | **Epic Ledger** | **Sổ cái công nhật** | Bảng danh sách công việc (`_epic_ledger.md`) ghi rõ việc nào đã xong `[x]`, việc nào đang làm để đổi phiên chat không bị quên. |
 | **Workspace: "branch"** | **Phòng thí nghiệm cách ly** | Môi trường rẽ nhánh riêng để AI thử nghiệm và chạy test; chỉ khi bài test xanh 100% thì mới đưa mã nguồn vào dự án chính. |
 
@@ -1182,6 +1201,30 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command]
    - *Defensive Actions*: Gửi thao tác trái lượt, ID rác, giá trị âm ➔ Hệ thống chặn đứng an toàn bằng Reason Code định danh, 0 crash.
    - *Conservation Invariant*: Đẳng thức bảo toàn tài nguyên tổng thể (Tổng tài nguyên các bên + Quỹ = Tổng cung) có sai số **0 tuyệt đối**.
    - *Deadlock-Free & Grace Period*: Rớt mạng tại trạng thái nhạy cảm nhất khôi phục vi sai an toàn qua Grace Period; Fuzzing ngẫu nhiên 50 lượt chứng minh FSM không bị bế tắc vô tận.
+
+---
+
+### 🟢 CHỐT CHẶN 5.6: Trạm Quản Trị Thị Giác & Giao Diện (Visual Smoke Gate — Bắt Buộc Cho Frontend/UI)
+*(Bắt buộc cho mọi Slice có đầu ra thị giác: WebGL, R3F, HTML/DOM, Mobile)*:
+1. **Phá vỡ bẫy "Test Xanh Ảo" (Virtual Green Trap)**:
+   - Nghiêm cấm tuyên bố hoàn thành Slice UI chỉ dựa trên Unit/Snapshot test.
+   - Bắt buộc kích hoạt máy chủ dev (`npm run dev`) và dùng lệnh `/browser` (hoặc DevTools) để chụp ảnh màn hình nghiệm thu trực quan bằng mắt người.
+2. **Quy tắc Phân Tầng Z-Index & Cô Lập Sự Kiện (Pointer-Events Isolation)**:
+   - *Layer 1 (3D WebGL Canvas - Z-Index 0)*: Phải nhận sự kiện tương tác sa bàn, xoay camera, click ô đất.
+   - *Layer 2 (DOM UI Overlay - Z-Index 10)*: Container bao ngoài bắt buộc đặt `pointer-events-none`; chỉ các nút bấm, input, modal con mới đặt `pointer-events-auto` để tránh che liệt chuột của lớp 3D bên dưới.
+3. **Hiệu Năng Khung Hình (60 FPS Guard)**:
+   - Không bind toàn bộ State store vào render loop của Canvas; bắt buộc dùng selective selectors (Zustand) để chống re-render toàn bàn cờ khi số dư người chơi thay đổi.
+
+---
+
+### 🟢 MA TRẬN 5 SLASH COMMANDS ĐIỀU PHỐI NHẬN THỨC THEO GIAI ĐOẠN
+| Lệnh | Mức nhận thức | Khi nào nên dùng? | Giá trị cốt tử |
+|---|:---:|---|---|
+| `/grill-me` | Chất vấn sâu | Đầu mỗi Epic / Tính năng mới | Bóc trần 100% giả định ngầm, chốt Bounded Context & NFRs trước khi viết code. |
+| `/boost` | Suy luận phức tạp | Lập Kế hoạch thi công DAG | Ép AI suy nghĩ đa chiều, chia nhỏ Micro-Tasks (LOC <= 80), dự trù ma trận rủi ro. |
+| `/browser` | Thị giác thực tế | Kiểm thử các Slice Frontend/UI | Mở trình duyệt thật, chống bẫy test xanh trên thế giới ảo do AI tự tưởng tượng. |
+| `/goal` | Tự hành dài hạn | Chạy càn quét kiểm thử tải & Audit | Giao mục tiêu lớn chạy qua đêm (Fuzzing 1000 lượt, quét memory leak, load test). |
+| `/learn` | Đúc kết tri thức | Khi giải quyết xong lỗi khó / Gotcha | Lưu bài học vĩnh viễn vào `docs/domain/gotchas.md`, ngăn AI thế hệ sau lặp lại lỗi cũ. |
 
 ---
 
@@ -1563,6 +1606,7 @@ Khi bạn chạy lệnh trong Terminal gặp lỗi đỏ, hoặc Subagent báo t
 | **0.5** | Nạp Bộ Kỹ Năng | 💻 `[CMD]` Đồng bộ kỹ năng cốt lõi từ `backup\skills_backup\` vào `.agents/skills/` | - | `.agents/skills/` có đủ 46 skills |
 | **1.1** | Phân loại đầu vào | • Nếu ý tưởng thô: 💬 Gõ `/grill-me + shaping`<br>• Nếu đã có spec chi tiết: 💬 Bỏ qua `/grill-me`, nạp tài liệu vào `docs/` | Sonnet / Flash | Bộ tài liệu SSOT hoàn chỉnh |
 | **1.2** | Dựng bản đồ Use Case | 💬 `[AG 2.0]` Dùng `use-case-creator` lập sơ đồ mục lục `docs/domain/use_cases.puml` | Flash / Sonnet | File PlantUML 3 cột chuẩn |
+| **1.25** | Quy hoạch Master Roadmap | 💬 `[AG 2.0]` Dựng `docs/master_roadmap.md` (Rolling Wave Planning: vạch rõ ranh giới & DoD 100% các Epics trước khi đi sâu) | Flash / Sonnet | File `docs/master_roadmap.md` |
 | **1.3** | Lập Sổ Cái Tiến Độ | 💬 `[AG 2.0]` Dựng `docs/epics/[epic]/_epic_ledger.md` (phân bổ Use Cases vào Slices) | Flash | Sổ Cái tiến độ theo dõi |
 | **2.1** | Cắt Lát Cắt (JIT)<br>*(Song tác nhân)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.1]**: `slicer` soạn thảo ticket ➔ `spec-reviewer` quét rò rỉ Zone 3 trước khi lưu | Flash | File `issues/[TICKET].md` sạch |
 | **2.2** | Trinh sát bối cảnh<br>*(Đơn tác nhân)* | 💬 `[AG 2.0]` Gọi `scout` (Read-only) trinh sát hiện trạng mã nguồn:<br>• **Greenfield (S00):** Dùng **[Mẫu P-2.2A]** Target File Map<br>• **Brownfield (S01+):** Dùng **[Mẫu P-2.2B]** Change Impact | Flash | Báo cáo hiện trạng & tọa độ dòng |

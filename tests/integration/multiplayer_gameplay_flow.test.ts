@@ -7,6 +7,8 @@ import { describe, it, expect } from 'vitest';
 import { RoomManager } from '../../src/server/room_manager';
 import { TurnPhase, INITIAL_BALANCE, GO_BONUS } from '../../src/domain/room';
 import type { Room } from '../../src/domain/room';
+import { executeChanceCard } from '../../src/domain/chance_card_handlers';
+import { ChanceCardId } from '../../src/domain/event_card_types';
 
 function setupGame(seed = 42): { mgr: RoomManager; room: Room } {
   const mgr = new RoomManager(seed);
@@ -312,5 +314,128 @@ describe('[UC-GAME-001..057/MSS] Multiplayer Gameplay Flow — E2E 3 Người Ch
 
     // Bước 5: Trận đấu tiếp diễn 2 người & Chung kết (gameOver = true, rankings P1 > P2 > P3)
     step5_TwoPlayerContinuationAndFinalChampionship(mgr, room);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// [TC-06.E2E] Slice 06 — Kịch bản hội tụ: CC_OVERDRAFT → InsolvencyPhase → Auto-Auction 70%
+// Traceability: DEBT-S06-01, DEBT-S06-04, UC-GAME-056
+// ---------------------------------------------------------------------------
+
+describe('[TC-06.E2E] Slice 06 — CC_OVERDRAFT → InsolvencyPhase → Auto-Auction 70%', () => {
+  it('[TC-06.E2E/MSS] P1 vỡ nợ CC_OVERDRAFT, InsolvencyPhase, BOT1 thắng đấu giá 70%', () => {
+    // ─── SETUP: Phòng 2 người: P1 (human) + BOT1 (bot) ───
+    const mgr = new RoomManager(99);
+    const room = mgr.createRoom('P1');
+    mgr.joinRoom(room.roomCode, 'BOT1');
+    const code = room.roomCode;
+
+    // Đánh dấu BOT1 là bot
+    room.players[1]!.isBot = true;
+
+    mgr.startGame(code);
+    expect(room.started, 'Phòng đã bắt đầu').toBe(true);
+    expect(room.players[0]!.id).toBe('P1');
+    expect(room.players[1]!.id).toBe('BOT1');
+
+    // ─── BƯỚC 1: Gán P1 sở hữu ô 01 (Cần Thơ, giá 600) ───
+    // P1 phải có đất để liquidateAssets tạo được AuctionSession 70%
+    (mgr as any).registries.get(code).set(1, 'P1');
+    (mgr as any).propertyStates.get(code).set(1, { level: 0 });
+    expect(mgr.getPropertyOwner(code, 1), 'P1 sở hữu ô 01').toBe('P1');
+
+    // ─── BƯỚC 2: Giả lập P1 đã rút thẻ CC_OVERDRAFT (dùng executeChanceCard) ───
+    // executeChanceCard: balance += 3000, overdraftRoundsLeft = 3, pendingDebts = [CC_OVERDRAFT]
+    const initialBalance = 200; // Cố tình nhỏ để sau khi trừ 3300 bị âm
+    room.players[0]!.balance = initialBalance;
+
+    executeChanceCard(
+      ChanceCardId.CC_OVERDRAFT,
+      'P1',
+      room.players,
+    );
+    // Sau rút thẻ: balance = 200 + 3000 = 3200, overdraftRoundsLeft = 3
+    expect(room.players[0]!.balance, 'P1 nhận +3.000 Tr. vay khẩn').toBe(3_200);
+    expect(room.players[0]!.overdraftRoundsLeft, 'Bộ đếm 3 vòng kích hoạt').toBe(3);
+    expect(room.players[0]!.pendingDebts, 'CC_OVERDRAFT vào pendingDebts').toContain(ChanceCardId.CC_OVERDRAFT);
+
+    // ─── BƯỚC 3: Shortcut — đặt overdraftRoundsLeft = 1 để simulate vòng cuối quyết định ───
+    // Tránh simulate 3 lần roll thực tế; chỉ kiểm tra cơ chế thu hồi nợ vòng cuối
+    room.players[0]!.overdraftRoundsLeft = 1;
+    // Đặt balance = 200 (nhỏ hơn 3300) để khi trừ nợ bị âm:
+    // processPendingDebts: 200 - 3300 = -3100 → checkInsolvency → InsolvencyPhase
+    // Rồi + GO_BONUS 2000 → balance = -1100 (vẫn âm)
+    room.players[0]!.balance = 200;
+
+    // Ghi nhớ tổng dòng tiền ban đầu (trước roll)
+    const p1BalanceBefore = room.players[0]!.balance;       // 200
+    const bot1BalanceBefore = room.players[1]!.balance;     // 15000
+    const treasuryBefore = room.treasury;
+    const initialTotal = p1BalanceBefore + bot1BalanceBefore + treasuryBefore;
+
+    // ─── BƯỚC 4: P1 tung xúc xắc — vượt GO → processPendingDebts → InsolvencyPhase ───
+    // Đặt P1 gần cuối bảng để chắc chắn vượt GO với bất kỳ tổng dice nào
+    room.players[0]!.position = 38;
+    const roll = mgr.handleRollDice(code, 'P1');
+    expect(roll, 'P1 tung xúc xắc thành công').toBeDefined();
+    expect(roll!.passedGo, 'P1 vượt qua ô GO').toBe(true);
+
+    // processPendingDebts: overdraftRoundsLeft 1→0 → trừ 3.300 → balance âm → InsolvencyPhase
+    // Sau đó: balance += GO_BONUS 2000 nhưng vẫn âm (-1100)
+    expect(room.players[0]!.balance, 'Balance P1 âm sau thu hồi nợ (200 - 3300 + 2000 = -1100)').toBe(-1_100);
+    // [Adversarial] Confirmed fail: nếu không trừ 3300, balance = 200 + 2000 = 2200 > 0 → không vào InsolvencyPhase
+    expect(room.phase, 'FSM tự động chuyển sang InsolvencyPhase khi balance < 0').toBe(TurnPhase.InsolvencyPhase);
+
+    // ─── BƯỚC 5: Kích hoạt liquidateAssets → tạo phiên đấu giá cưỡng chế 70% ───
+    // Ô 01 (Cần Thơ, price = 600) → startingBid = floor(600 * 0.70) = 420
+    const expectedStartingBid = Math.floor(600 * 0.70); // = 420
+    mgr.handleLiquidate(code, 'P1');
+
+    // Assert phòng chuyển sang AuctionPhase
+    expect(room.phase, 'liquidateAssets mở phiên đấu giá → AuctionPhase').toBe(TurnPhase.AuctionPhase);
+
+    // Assert AuctionSession tồn tại với highestBid = 70% niêm yết
+    const auction = (mgr as any).auctions.get(code) as {
+      cellIndex: number;
+      highestBid: number;
+      declinedPlayerId: string;
+      insolvencyPlayerId: string;
+    } | undefined;
+    expect(auction, 'AuctionSession được tạo bởi liquidateAssets').toBeDefined();
+    expect(auction!.cellIndex, 'Ô đấu giá là ô 01').toBe(1);
+    expect(auction!.highestBid, 'Giá khởi điểm = 70% niêm yết (420 Tr.)').toBe(expectedStartingBid);
+    // [Adversarial] Confirmed fail: nếu startingBid = floor(600 * 0.50) = 300 thì expect 420 fail
+    expect(auction!.insolvencyPlayerId, 'insolvencyPlayerId = P1 (tiền đấu giá hoàn trả nợ P1)').toBe('P1');
+    expect(auction!.declinedPlayerId, 'P1 không được phép đặt giá (người vỡ nợ)').toBe('P1');
+
+    // ─── BƯỚC 6: BOT1 đặt giá startingBid ───
+    // Theo handleAuctionBid: minBid = highestBid khi chưa có highestBidder → BOT1 đặt đúng = 420 hợp lệ
+    const bidRes = mgr.handleAuctionBid(code, 'BOT1', expectedStartingBid);
+    expect(bidRes.success, 'BOT1 đặt giá 420 Tr. thành công').toBe(true);
+
+    // ─── BƯỚC 7: Đóng phiên đấu giá — BOT1 thắng, nhận ô 01 ───
+    const closeRes = mgr.handleAuctionClose(code);
+    expect(closeRes.winnerId, 'BOT1 thắng đấu giá ô 01').toBe('BOT1');
+    expect(closeRes.winningBid, 'Giá thắng = 420 Tr.').toBe(expectedStartingBid);
+
+    // BOT1 được sang tên ô 01
+    expect(mgr.getPropertyOwner(code, 1), 'Ô 01 chuyển sang tên BOT1').toBe('BOT1');
+    // [Adversarial] Confirmed fail: nếu handleAuctionClose không cập nhật registry, trả về undefined
+
+    // Tiền đấu giá (420) chuyển vào P1 (insolvencyPlayerId) để trả bớt nợ
+    expect(room.players[0]!.balance, 'P1 nhận 420 Tr. trả nợ (-1100 + 420 = -680)').toBe(-1_100 + expectedStartingBid);
+    // BOT1 bị trừ 420 Tr.
+    expect(room.players[1]!.balance, 'BOT1 bị trừ 420 Tr. (15000 - 420 = 14580)').toBe(bot1BalanceBefore - expectedStartingBid);
+
+    // ─── BƯỚC 8: Bảo toàn dòng tiền ───
+    // Tiền vào hệ thống: GO_BONUS +2000 (ngân hàng bơm)
+    // Tiền rời hệ thống: thu hồi nợ CC_OVERDRAFT -3300 (không về treasury, về "ngân hàng")
+    // Net delta = +2000 - 3300 = -1300 (tiền bị hút ra ngoài ròng)
+    // Tiền trong hệ thống (P1 + BOT1 + treasury) giảm -1300 là đúng chuẩn SSOT
+    const finalTotal = room.players[0]!.balance + room.players[1]!.balance + room.treasury;
+    const balanceDelta = finalTotal - initialTotal;
+    const OVERDRAFT_REPAYMENT = 3_300;
+    expect(balanceDelta, 'Dòng tiền = GO_BONUS - thu hồi nợ OVERDRAFT (2000 - 3300 = -1300)').toBe(GO_BONUS - OVERDRAFT_REPAYMENT);
+    // [Adversarial] Confirmed fail: nếu tiền đấu giá không chuyển về P1, P1.balance vẫn âm -1100 → delta sai
   });
 });

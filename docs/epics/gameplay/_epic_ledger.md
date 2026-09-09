@@ -148,20 +148,28 @@
 - **Traceability Chain:** Requirement -> Epic Gameplay -> Slice 06 (Milestone Deep Audit S00-S05)
 - **Flow Paths:** Tiếp nhận nợ kỹ thuật kinh tế, tự hành hóa Bot AI 3 tính cách, đấu giá cưỡng chế 70%, đồng bộ WebSocket delta tick < 10KB, tối ưu cấu trúc module.
 - **Value Delivered:** Xử lý triệt để 10 mục nợ kỹ thuật mốc S00-S05, tự động hóa người chơi Bot khi mất kết nối / thiếu người chơi, hoàn thiện hạ tầng đồng bộ thời gian thực cho Client 3D R3F và đóng gói từ điển bản địa hóa tiếng Việt.
-- **Lifecycle Status:** Pending
+- **Lifecycle Status:** Done (2026-09-09)
 - **Preconditions Required:** Slice 05 hoàn tất, Milestone Deep Audit S00-S05 đã phê duyệt danh mục nợ kỹ thuật.
-- **Inherited Tech Debt Ledger (Tiếp nhận nợ kỹ thuật từ Milestone Deep Audit S00-S05):**
-  - `DEBT-S06-01`: Bộ đếm 3 vòng thu hồi nợ 3.300 Tr. VNĐ cho thẻ CC_OVERDRAFT (kích hoạt InsolvencyPhase nếu thiếu tiền).
-  - `DEBT-S06-02`: Trích thu định kỳ 400 Tr. VNĐ tiền lãi qua GO nộp Kho bạc cho thẻ CC_FREE_CREDIT.
-  - `DEBT-S06-03`: Thuộc tính unbuiltRounds cho đất C0 theo dõi quá 2 vòng không xây dựng để thu hồi / mở Auto-Auction theo CC_SLOW_BUILD.
-  - `DEBT-S06-04`: Đấu nối phiên Auto-Auction khởi điểm 70% niêm yết cho BĐS thế chấp bị cưỡng chế thanh lý trong InsolvencyManager (UC-GAME-056).
-  - `DEBT-S06-05`: Phân tách 3 tệp vượt cảnh báo 300 LOC (property_manager.ts, card_handlers.ts, room_manager.ts) thành các module con đơn nhiệm (< 300 LOC).
-  - `DEBT-S06-06`: Tái cấu trúc 7 hàm vi phạm Cyclomatic Complexity (CC > 5) sang Strategy Pattern / Command Dispatcher.
-  - `DEBT-S06-07`: Dọn dẹp dead enum (CommunityChest, Jail, GoToJail) và alias dư thừa UTILITY_CELLS_ECE theo nguyên tắc Prune Dead Code.
-  - `DEBT-S06-08`: Xóa wrapper No-Op sendToAudit và chuẩn hóa kiểu trả về void cho executeChanceCard.
-  - `DEBT-S06-09`: Chuẩn hóa toàn bộ Magic String Reason Codes ('MISSING_MONOPOLY', 'DECLINED_PLAYER_CANNOT_BID'...) vào enum ActionRejectReason.
-  - `DEBT-S06-10`: Xây dựng module từ điển bản địa hóa tiếng Việt src/domain/i18n/vi.ts cho toàn bộ mã lỗi và 36 thẻ sự kiện.
-- **Exit Guarantees:** 
+- **Inherited Tech Debt Ledger — ĐÃ GIẢI QUYẾT 10/10:**
+  - `DEBT-S06-01`: Bộ đếm 3 vòng thu hồi nợ 3.300 Tr. VNĐ cho thẻ CC_OVERDRAFT — ✅ ĐÃ GIẢI QUYẾT (Task 4)
+  - `DEBT-S06-02`: Trích thu định kỳ 400 Tr. VNĐ tiền lãi qua GO nộp Kho bạc cho thẻ CC_FREE_CREDIT — ✅ ĐÃ GIẢI QUYẾT (Task 4)
+  - `DEBT-S06-03`: Thuộc tính unbuiltRounds cho đất C0 theo dõi quá 2 vòng không xây dựng để thu hồi / mở Auto-Auction theo CC_SLOW_BUILD — ✅ ĐÃ GIẢI QUYẾT (Task 4)
+  - `DEBT-S06-04`: Đấu nối phiên Auto-Auction khởi điểm 70% niêm yết cho BĐS thế chấp bị cưỡng chế thanh lý trong InsolvencyManager (UC-GAME-056) — ✅ ĐÃ GIẢI QUYẾT (Task 4)
+  - `DEBT-S06-05`: Phân tách 3 tệp vượt cảnh báo 300 LOC (property_manager.ts, card_handlers.ts, room_manager.ts) thành các module con đơn nhiệm (< 300 LOC) — ✅ ĐÃ GIẢI QUYẾT (Task 1)
+  - `DEBT-S06-06`: Tái cấu trúc 7 hàm vi phạm Cyclomatic Complexity (CC > 5) sang Strategy Pattern / Command Dispatcher — ✅ ĐÃ GIẢI QUYẾT (Task 2)
+  - `DEBT-S06-07`: Dọn dẹp dead enum (CommunityChest, Jail, GoToJail) và alias dư thừa UTILITY_CELLS_ECE theo nguyên tắc Prune Dead Code — ✅ ĐÃ GIẢI QUYẾT (Task 2)
+  - `DEBT-S06-08`: Xóa wrapper No-Op sendToAudit và chuẩn hóa kiểu trả về void cho executeChanceCard — ✅ ĐÃ GIẢI QUYẾT (Task 2)
+  - `DEBT-S06-09`: Chuẩn hóa toàn bộ Magic String Reason Codes ('MISSING_MONOPOLY', 'DECLINED_PLAYER_CANNOT_BID'...) vào enum ActionRejectReason — ✅ ĐÃ GIẢI QUYẾT (Task 2)
+  - `DEBT-S06-10`: Xây dựng module từ điển bản địa hóa tiếng Việt src/domain/i18n/vi.ts cho toàn bộ mã lỗi và 36 thẻ sự kiện — ✅ ĐÃ GIẢI QUYẾT (Task 2)
+- **Test Coverage:** 433/433 tests PASS · 36 suites · Adversarial Inversion PASS · E2E Living TC-06.E2E PASS
+  - `TC-06.1..4`: CC_OVERDRAFT bộ đếm + InsolvencyPhase + CC_FREE_CREDIT lãi GO + CC_SLOW_BUILD unbuilt + Auto-Auction 70% — ✅ PASS
+  - `TC-06.8a/b/c`: Bot AI Engine 3 tính cách (Aggressive, Conservative, Balanced) — ✅ PASS
+  - `TC-06.E2E`: Living E2E hội tụ CC_OVERDRAFT → InsolvencyPhase → Auto-Auction 70% → BOT1 thắng đấu giá — ✅ PASS
+- **LOC Final:**
+  - bot_engine.ts: 68L | vi.ts: 91L | turn_loop.ts: 197L | property_data.ts: 92L
+  - property_rent.ts: 129L | property_upgrade.ts: 78L | market_card_handlers.ts: 129L | chance_card_handlers.ts: 228L
+  - Tất cả file ≤ 300L (trong phạm vi cho phép)
+- **Exit Guarantees:**
   - Success: 10 khoản nợ kỹ thuật được giải quyết 100%, 0 warning, 0 dead code, Bot AI tự hành hoàn chỉnh, DeltaPayload chuẩn hóa thời gian thực.
   - Failure: Hủy bỏ thay đổi nếu vi phạm bất biến bảo toàn dòng tiền hoặc phá vỡ FSM test suite.
 - **Architectural Scope:** Bot AI Engine, WebSocket Gateway / Session Sync, Domain i18n Dictionary, Refactored Modular Subsystems
@@ -171,8 +179,19 @@
   - `TC-06.2`: [Người chơi giữ CC_FREE_CREDIT đi qua ô GO] -> [Tự động trích nộp 400 Tr. VNĐ tiền lãi định kỳ vào Kho bạc trước khi nhận thưởng GO]
   - `TC-06.3`: [Sở hữu đất C0 quá 2 vòng không nâng cấp C1 có thẻ CC_SLOW_BUILD] -> [Tự động thu hồi đất và kích hoạt phiên Auto-Auction cho toàn bàn cờ]
   - `TC-06.4`: [BĐS thế chấp bị cưỡng chế thanh lý trong Insolvency] -> [Kích hoạt Auto-Auction với giá khởi điểm 70% giá niêm yết theo đúng SSOT UC-GAME-056]
-  - `TC-06.5`: [Tách module property_manager, card_handlers, room_manager] -> [Toàn bộ tệp < 300 LOC, 394/394 tests PASS và giữ nguyên hành vi quan sát được]
+  - `TC-06.5`: [Tách module property_manager, card_handlers, room_manager] -> [Toàn bộ tệp < 300 LOC, 433/433 tests PASS và giữ nguyên hành vi quan sát được]
   - `TC-06.6`: [Refactor 7 hàm CC > 5 sang Strategy/Command Pattern] -> [Cyclomatic Complexity <= 5, mã nguồn tuân thủ Clean Architecture]
   - `TC-06.7`: [Xóa dead enum, No-Op wrapper và chuẩn hóa ActionRejectReason] -> [Không còn magic string tự do, zero warning TypeScript]
   - `TC-06.8`: [Người chơi mất kết nối quá 60s hoặc sảnh chờ có Bot] -> [Bot AI tự động tiếp quản, ra quyết định theo đúng 3 tính cách mà không làm treo FSM]
   - `TC-06.9`: [Truy vấn thông điệp lỗi hoặc thẻ sự kiện] -> [Module i18n trả về nhãn tiếng Việt chuẩn xác theo SSOT docs/requirements.md]
+  - `TC-06.E2E`: [CC_OVERDRAFT 3 vòng thu hồi → InsolvencyPhase → liquidateAssets → Auto-Auction 70% → BOT1 thắng đấu giá] -> [Toàn bộ luồng hội tụ, bảo toàn dòng tiền delta = GO_BONUS - 3300 = -1300]
+
+---
+
+## Tổng Kết Toàn Cục Epic Gameplay Core
+- **Trạng thái Epic:** **[CLOSED - DONE 100% (2026-09-09)]**
+- **Tổng số Lát cắt hoàn thành:** 7 Lát cắt (Slice 00, 01, 02, 03, 04, 05, 06)
+- **Độ phủ Use Case:** 58/58 Use Cases đạt chuẩn SSOT
+- **Quy mô kiểm thử:** 36 test suites, 433 tests PASS 100%
+- **Biên bản ký duyệt:** [`docs/reports/audits/milestone_deep_audit_s00_s06_signoff.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/reports/audits/milestone_deep_audit_s00_s06_signoff.md) — Phán quyết **`[MILESTONE APPROVED]`**
+

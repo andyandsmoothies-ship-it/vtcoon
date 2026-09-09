@@ -18,18 +18,21 @@ export interface Session {
 }
 
 export interface CellDelta {
-  readonly index:        number;
-  readonly ownerId?:     string | null;
-  readonly level?:       number;
-  readonly isETC?:       boolean;
-  readonly isMortgaged?: boolean;
+  readonly index:          number;
+  readonly ownerId?:       string | null;
+  readonly level?:         number;
+  readonly isETC?:         boolean;
+  readonly isMortgaged?:   boolean;
+  readonly unbuiltRounds?: number;
 }
 
 export interface PlayerDelta {
-  readonly id:        string;
-  readonly position:  number;
-  readonly balance:   number;
-  readonly bankrupt?: boolean;
+  readonly id:                  string;
+  readonly position:            number;
+  readonly balance:             number;
+  readonly bankrupt?:           boolean;
+  readonly isBot?:              boolean;
+  readonly overdraftRoundsLeft?: number;
 }
 
 export interface DeltaPayload {
@@ -63,6 +66,7 @@ export function buildDeltaFromRoom(
       ...(state?.level !== undefined ? { level: state.level } : {}),
       ...(state?.isETC ? { isETC: true } : {}),
       ...(isM ? { isMortgaged: true } : {}),
+      ...(state?.unbuiltRounds ? { unbuiltRounds: state.unbuiltRounds } : {}),
     };
     cells.push(cellDelta);
   }
@@ -72,6 +76,10 @@ export function buildDeltaFromRoom(
     position: p.position,
     balance: p.balance,
     ...(p.bankrupt ? { bankrupt: true } : {}),
+    ...(p.isBot ? { isBot: true } : {}),
+    ...(p.overdraftRoundsLeft ? { overdraftRoundsLeft: p.overdraftRoundsLeft } : {}),
+    // TODO Slice 07: Client R3F nhận isBot để hiển thị icon Bot
+    // TODO Slice 07: HUD hiển thị countdown nợ overdraft
   }));
 
   return buildDeltaPayload({ tick, cells, players });

@@ -46,7 +46,6 @@ export const COASTAL_CELLS     = [11, 14, 16, 18, 19] as const;
 export const SERVICE_CELLS     = [6, 8, 26, 27] as const;
 export const INFRA_CELLS       = [5, 15, 25, 35] as const;
 export const UTILITY_CELLS     = [12, 28] as const;
-export const UTILITY_CELLS_ECE = UTILITY_CELLS;
 export const HANOI_HCMC_CELLS  = [31, 32, 34, 37, 39] as const;
 export const LAND_FEVER_CELLS  = [6, 8, 31] as const;
 

@@ -36,9 +36,7 @@ describe('[TC-04.T2/MSS] Mo rong CellType & Board Config', () => {
   });
 
   it('bao toan cac gia tri enum cu trong CellType de tranh gay tuong thich nguoc', () => {
-    expect(CellType.CommunityChest).toBe('CommunityChest');
     expect(CellType.Jail).toBe('Jail');
-    expect(CellType.GoToJail).toBe('GoToJail');
     expect(CellType.Tax).toBe('Tax');
   });
 

@@ -329,4 +329,90 @@ describe('[TC-05.8/MSS] DeltaPayload VSC 3D Synchronization', () => {
       expect(mgr.createDelta('NON_EXIST', 1)).toBeUndefined();
     });
   });
+
+  describe('[VSC-A/B/C] Vertical Slice Completeness — isBot, overdraftRoundsLeft, unbuiltRounds [DEBT-S06-05]', () => {
+    // [TC-VSC-A] isBot propagation [DEBT-S06-05/VSC-A]
+    it('[VSC-A] createPlayer() mặc định isBot = false', () => {
+      const mgr = new RoomManager();
+      const room = mgr.createRoom('p-vsc-a');
+      const p = room.players[0]!;
+      expect(p.isBot).toBe(false);
+    });
+
+    it('[VSC-A] isBot: true được map sang PlayerDelta', () => {
+      const mgr = new RoomManager();
+      const room = mgr.createRoom('p-bot');
+      mgr.joinRoom(room.roomCode, 'p-human');
+      mgr.startGame(room.roomCode);
+
+      const reg = (mgr as any).registries.get(room.roomCode) as Map<number, string>;
+      const sm  = (mgr as any).propertyStates.get(room.roomCode) as Map<number, any>;
+
+      // Đặt player 0 là bot
+      room.players[0]!.isBot = true;
+
+      const delta = mgr.createDelta(room.roomCode, 1);
+      expect(delta).toBeDefined();
+      const botDelta = delta?.players?.find((p) => p.id === 'p-bot');
+      expect(botDelta?.isBot).toBe(true);
+
+      // Human player không có isBot
+      const humanDelta = delta?.players?.find((p) => p.id === 'p-human');
+      expect(humanDelta?.isBot).toBeUndefined();
+
+      void reg; void sm;
+    });
+
+    // [TC-VSC-B] overdraftRoundsLeft propagation [DEBT-S06-05/VSC-B]
+    it('[VSC-B] createPlayer() mặc định overdraftRoundsLeft = 0', () => {
+      const mgr = new RoomManager();
+      const room = mgr.createRoom('p-vsc-b');
+      const p = room.players[0]!;
+      expect(p.overdraftRoundsLeft).toBe(0);
+    });
+
+    it('[VSC-B] overdraftRoundsLeft: 3 được map sang PlayerDelta', () => {
+      const mgr = new RoomManager();
+      const room = mgr.createRoom('p-debt');
+      mgr.startGame(room.roomCode);
+
+      const reg = (mgr as any).registries.get(room.roomCode) as Map<number, string>;
+      const sm  = (mgr as any).propertyStates.get(room.roomCode) as Map<number, any>;
+
+      // Đặt overdraftRoundsLeft = 3
+      room.players[0]!.overdraftRoundsLeft = 3;
+
+      const delta = mgr.createDelta(room.roomCode, 2);
+      expect(delta).toBeDefined();
+      const playerDelta = delta?.players?.find((p) => p.id === 'p-debt');
+      expect(playerDelta?.overdraftRoundsLeft).toBe(3);
+
+      void reg; void sm;
+    });
+
+    // [TC-VSC-C] unbuiltRounds propagation [DEBT-S06-03/WARN-2]
+    it('[VSC-C] unbuiltRounds: 2 được map sang CellDelta', () => {
+      const mgr = new RoomManager();
+      const room = mgr.createRoom('p-build');
+      mgr.startGame(room.roomCode);
+
+      const reg = (mgr as any).registries.get(room.roomCode) as Map<number, string>;
+      const sm  = (mgr as any).propertyStates.get(room.roomCode) as Map<number, any>;
+
+      // Đặt ô 1 có unbuiltRounds = 2
+      reg.set(1, 'p-build');
+      sm.set(1, { level: 0, unbuiltRounds: 2 });
+
+      const delta = mgr.createDelta(room.roomCode, 3);
+      expect(delta).toBeDefined();
+      const cell1 = delta?.cells[1];
+      expect(cell1?.unbuiltRounds).toBe(2);
+
+      // Ô không có unbuiltRounds thì không có field
+      const cell0 = delta?.cells[0];
+      expect(cell0?.unbuiltRounds).toBeUndefined();
+
+      // TODO Slice 07: Badge cảnh báo ô bị nguy cơ thu hồi
+    });
+  });
 });

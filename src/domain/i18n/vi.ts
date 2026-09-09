@@ -1,0 +1,91 @@
+// [DEBT-S06-10] Từ điển tiếng Việt — Domain-only module
+// Consumer: card_handlers (log), action_reasons (reject), bot_engine (log Bot action)
+// Đường đi phụ thuộc: Domain → Server → Client (một chiều)
+
+import { MarketCardId, ChanceCardId } from '../event_card_types';
+import { ActionRejectReason } from '../action_reasons';
+import { TurnPhase } from '../room';
+
+export const vi = {
+  marketCards: {
+    [MarketCardId.MC_NIGHT_ECONOMY]:   'Chính Sách Phát Triển Kinh Tế Đêm',
+    [MarketCardId.MC_MEGA_CONCERT]:    'Đại Nhạc Hội Quốc Tế',
+    [MarketCardId.MC_ALCOHOL_CHECK]:   'Chiến Dịch Kiểm Tra Nồng Độ Cồn',
+    [MarketCardId.MC_CASINO_PILOT]:    'Thí Điểm Mô Hình Casino Dành Cho Người Việt',
+    [MarketCardId.MC_RATE_HIKE]:       'Ngân Hàng Nhà Nước Tăng Lãi Suất',
+    [MarketCardId.MC_CREDIT_STIMULUS]: 'Gói Kích Cầu Tín Dụng Bất Động Sản',
+    [MarketCardId.MC_LAND_FEVER]:      'Sốt Đất Quy Hoạch Đô Thị Vệ Tinh',
+    [MarketCardId.MC_FIRE_INSPECTION]: 'Thanh Tra PCCC Toàn Diện',
+    [MarketCardId.MC_PUBLIC_INVEST]:   'Đẩy Mạnh Vốn Đầu Tư Công',
+    [MarketCardId.MC_ANTI_SPECULATE]:  'Áp Thuế Chống Đầu Cơ Sang Nhượng',
+    [MarketCardId.MC_PEAK_TOURISM]:    'Mùa Cao Điểm Du Lịch Quốc Tế',
+    [MarketCardId.MC_FREEZE_TRADE]:    'Đóng Băng Giao Dịch Bất Động Sản',
+    [MarketCardId.MC_FUEL_SURGE]:      'Biến Động Tỷ Giá & Giá Xăng Dầu',
+    [MarketCardId.MC_URBAN_PLANNING]:  'Phê Duyệt Quy Hoạch Đô Thị Đặc Biệt',
+    [MarketCardId.MC_UTILITY_DOUBLE]:  'Tăng Khung Giá Bán Lẻ Điện & Viễn Thông',
+    [MarketCardId.MC_COASTAL_STORM]:   'Thời Tiết Cực Đoan Duyên Hải',
+  } as Record<MarketCardId, string>,
+
+  chanceCards: {
+    [ChanceCardId.CC_PLATE_AUCTION]:    'Đấu Giá Biển Số Xe Định Danh',
+    [ChanceCardId.CC_TAX_AUDIT]:        'Thanh Tra Thuế Doanh Nghiệp Đột Xuất',
+    [ChanceCardId.CC_STOCK_PROFIT]:     'Chốt Lời Danh Mục Đầu Tư Chứng Khoán',
+    [ChanceCardId.CC_DIPLOMATIC]:       'Thẻ Miễn Trừ Ngoại Giao',
+    [ChanceCardId.CC_CONTRACT_PENALTY]: 'Bồi Thường Hợp Đồng Chậm Bàn Giao',
+    [ChanceCardId.CC_LAND_CHANGE]:      'Chuyển Mục Đích Sử Dụng Đất Thành Công',
+    [ChanceCardId.CC_BUILD_HALT]:       'Đình Chỉ Xây Dựng Để Hoàn Thiện Pháp Lý',
+    [ChanceCardId.CC_MA_FORCE]:         'Thương Vụ M&A Bắt Buộc',
+    [ChanceCardId.CC_COPYRIGHT]:        'Vi Phạm Bản Quyền Chương Trình Nghệ Thuật',
+    [ChanceCardId.CC_OVERDRAFT]:        'Hạn Mức Thấu Chi Doanh Nghiệp',
+    [ChanceCardId.CC_JUNK_STOCK]:       'Kẹp Thanh Khoản Cổ Phiếu Rác',
+    [ChanceCardId.CC_FRANCHISE]:        'Nhượng Quyền Thương Hiệu Ẩm Thực',
+    [ChanceCardId.CC_LAND_RECLAIM]:     'Thu Hồi Đất Phục Vụ Dự Án Công Cộng',
+    [ChanceCardId.CC_VENUE_INCIDENT]:   'Sự Cố An Ninh Khu Giải Trí',
+    [ChanceCardId.CC_CONCERT_SPONSOR]:  'Tài Trợ Đại Nhạc Hội Countdown',
+    [ChanceCardId.CC_FREE_CREDIT]:      'Huy Động Vốn Tín Dụng Tự Do',
+    [ChanceCardId.CC_PORT_EXCLUSIVE]:   'Hợp Tác Độc Quyền Cảng Quốc Tế',
+    [ChanceCardId.CC_SLOW_BUILD]:       'Thu Hồi Do Chậm Triển Khai 24 Tháng',
+    [ChanceCardId.CC_MEDIA_CRISIS]:     'Khủng Hoảng Truyền Thông Dịch Vụ Khách Hàng',
+    [ChanceCardId.CC_SWAP_PROJECT]:     'Quyền Ưu Tiên Hoán Đổi Dự Án',
+  } as Record<ChanceCardId, string>,
+
+  rejectReasons: {
+    [ActionRejectReason.GAME_NOT_STARTED]:           'Trò chơi chưa bắt đầu',
+    [ActionRejectReason.NOT_YOUR_TURN]:              'Chưa đến lượt của bạn',
+    [ActionRejectReason.INVALID_PHASE]:              'Giai đoạn không hợp lệ',
+    [ActionRejectReason.FREEZE_ACTIVE]:              'Giao dịch đang bị đóng băng',
+    [ActionRejectReason.NOT_OWNER]:                  'Bạn không phải chủ sở hữu',
+    [ActionRejectReason.HAS_BUILDING]:               'Ô đất đang có công trình',
+    [ActionRejectReason.ALREADY_MORTGAGED]:          'Ô đất đã thế chấp',
+    [ActionRejectReason.NOT_MORTGAGEABLE]:           'Ô đất không thể thế chấp',
+    [ActionRejectReason.PLAYER_NOT_FOUND]:           'Không tìm thấy người chơi',
+    [ActionRejectReason.NOT_MORTGAGED]:              'Ô đất chưa được thế chấp',
+    [ActionRejectReason.INSUFFICIENT_FUNDS]:         'Không đủ tiền',
+    [ActionRejectReason.INVALID_TRADE]:              'Giao dịch không hợp lệ',
+    [ActionRejectReason.INVALID_PRICE]:              'Giá không hợp lệ',
+    [ActionRejectReason.PROPERTY_HAS_BUILDING]:      'Bất động sản có công trình',
+    [ActionRejectReason.NOT_PURCHASABLE]:            'Không thể mua ô đất này',
+    [ActionRejectReason.PLAYER_BANKRUPT]:            'Người chơi đã phá sản',
+    [ActionRejectReason.PROPERTY_MORTGAGED]:         'Bất động sản đang thế chấp',
+    [ActionRejectReason.UNAUTHORIZED]:               'Không có quyền thực hiện',
+    [ActionRejectReason.NOT_UPGRADEABLE]:            'Không thể nâng cấp ô đất này',
+    [ActionRejectReason.INVALID_ROOM]:               'Phòng không hợp lệ',
+    [ActionRejectReason.MISSING_MONOPOLY]:           'Chưa độc quyền nhóm màu',
+    [ActionRejectReason.MAX_LEVEL]:                  'Đã đạt cấp độ tối đa',
+    [ActionRejectReason.NEED_2_RAILROADS]:           'Cần sở hữu ít nhất 2 hạ tầng',
+    [ActionRejectReason.NOT_UTILITY]:                'Ô không phải Tiện ích',
+    [ActionRejectReason.INVALID_PLAYER]:             'Người chơi không hợp lệ',
+    [ActionRejectReason.DECLINED_PLAYER_CANNOT_BID]: 'Người chơi đã bỏ qua không được đặt giá',
+  } as Record<string, string>,
+
+  turnPhases: {
+    [TurnPhase.WaitingRoll]:        'Chờ Đổ Xúc Xắc',
+    [TurnPhase.ActionPhase]:        'Giai Đoạn Hành Động',
+    [TurnPhase.AuctionPhase]:       'Giai Đoạn Đấu Giá',
+    [TurnPhase.PropertyManagement]: 'Quản Lý Tài Sản',
+    [TurnPhase.InsolvencyPhase]:    'Giai Đoạn Mất Khả Năng',
+    [TurnPhase.BankruptcyCheck]:    'Kiểm Tra Phá Sản',
+    [TurnPhase.TurnEnd]:            'Kết Thúc Lượt',
+    [TurnPhase.HosePhase]:          'Giai Đoạn Đầu Tư HOSE',
+  } as Record<TurnPhase, string>,
+} as const;

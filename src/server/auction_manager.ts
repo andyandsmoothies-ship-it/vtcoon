@@ -2,6 +2,7 @@
 import type { Room, Player } from '../domain/room';
 import { TurnPhase } from '../domain/room';
 import { PROPERTY_DEEDS, type PropertyRegistry } from '../domain/property_manager';
+import { ActionRejectReason } from '../domain/action_reasons';
 
 export interface AuctionSession {
   readonly cellIndex: number;
@@ -9,6 +10,7 @@ export interface AuctionSession {
   highestBid: number;
   highestBidder?: string;
   passedPlayers?: Set<string>;
+  insolvencyPlayerId?: string;  // [DEBT-S06-04] set when auction is a forced liquidation
 }
 
 export function handleDecline(
@@ -40,7 +42,7 @@ export function handleAuctionBid(
   roomCode?: string,
 ): { success: boolean; reason?: string } {
   if (!room?.started || room.phase !== TurnPhase.AuctionPhase || !session) return { success: false, reason: 'INVALID_PHASE' };
-  if (playerId === session.declinedPlayerId) return { success: false, reason: 'DECLINED_PLAYER_CANNOT_BID' };
+  if (playerId === session.declinedPlayerId) return { success: false, reason: ActionRejectReason.DECLINED_PLAYER_CANNOT_BID };
   if (session.passedPlayers?.has(playerId)) return { success: false, reason: 'PLAYER_ALREADY_PASSED' };
   if (!Number.isFinite(amount) || amount <= 0 || !Number.isInteger(amount)) return { success: false, reason: 'BID_TOO_LOW' };
   const player = room.players.find((p) => p.id === playerId);
@@ -69,7 +71,7 @@ export function handleAuctionPass(
   roomCode?: string,
 ): { success: boolean; reason?: string } {
   if (!room?.started || room.phase !== TurnPhase.AuctionPhase || !session) return { success: false, reason: 'INVALID_PHASE' };
-  if (playerId === session.declinedPlayerId) return { success: false, reason: 'DECLINED_PLAYER_CANNOT_BID' };
+  if (playerId === session.declinedPlayerId) return { success: false, reason: ActionRejectReason.DECLINED_PLAYER_CANNOT_BID };
   const player = room.players.find((p) => p.id === playerId);
   if (!player) return { success: false, reason: 'PLAYER_NOT_FOUND' };
   if (session.highestBidder === playerId) return { success: false, reason: 'HIGHEST_BIDDER_CANNOT_PASS' };
@@ -106,6 +108,17 @@ export function handleAuctionClose(
       registry?.set(session.cellIndex, winner.id);
       winnerId = session.highestBidder;
       winningBid = session.highestBid;
+
+      // [DEBT-S06-04] Insolvency auction: proceeds clear debt, surplus returned to insolvent player
+      if (session.insolvencyPlayerId) {
+        const insolventPlayer = room.players.find((p) => p.id === session.insolvencyPlayerId);
+        if (insolventPlayer) {
+          insolventPlayer.balance += winningBid;
+          if (insolventPlayer.balance >= 0) {
+            room.phase = TurnPhase.PropertyManagement;
+          }
+        }
+      }
     }
   }
   room.phase = TurnPhase.PropertyManagement;

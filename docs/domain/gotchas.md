@@ -106,3 +106,27 @@ Tài liệu lưu trữ các bẫy nghiệp vụ thực chiến rút ra qua từn
 - **Ràng buộc cứng**:
   1. Mọi thuộc tính trạng thái tác động lên hiển thị bàn cờ bắt buộc phải ánh xạ đồng thời sang `CellDelta` (`isMortgaged?: boolean`) và `PlayerDelta` (`bankrupt?: boolean`) trong `session_manager.ts`.
   2. Client 3D (R3F) dựa hoàn toàn vào `DeltaPayload` để cập nhật mô hình visual (úp thẻ BĐS khi thế chấp, làm mờ avatar khi phá sản). Thiếu trường DTO khiến Client bị mất đồng bộ hiển thị.
+
+---
+
+## Slice 06 — Bot AI Engine & Debt Mechanics (2026-09-09)
+
+### PROPERTY_DEEDS là ReadonlyMap, không phải Array
+- **Vấn đề**: Spec và khối planning mô tả PROPERTY_DEEDS như array, nhưng thực tế là `ReadonlyMap<number, PropertyDeed>`.
+- **Giải pháp**: Dùng `.get(position)` — KHÔNG dùng `.find()` hay `.filter()`.
+- **Ảnh hưởng**: `bot_engine.ts`, bất kỳ code nào cần tra cứu PropertyDeed theo position.
+
+### Bot Intent Dispatch: INTENT_ROLL không qua IntentDispatcher
+- **Vấn đề**: `INTENT_ROLL` không thuộc `PlayerIntent` union type của `intent_dispatcher.ts`.
+- **Giải pháp**: `runBotTurn()` gọi `handleRollDice(roomCode, id)` trực tiếp, sau đó mới vào dispatch loop cho các intent khác.
+- **Quy tắc**: Mọi intent khác (BUY, DECLINE, END_TURN) vẫn qua `handlePlayerIntent` / `IntentDispatcher`.
+
+### Safety Counter Pattern cho Bot Turn Loop
+- **Vấn đề**: Bot AI có thể gây infinite loop nếu FSM không tiến.
+- **Giải pháp**: Hard-limit 50 intents/lượt. Nếu vượt, thoát vòng lặp (không throw).
+- **Quy tắc**: `runBotTurn` là no-op nếu `!current?.isBot` hoặc room không hợp lệ.
+
+### processPendingDebts phải gọi TRƯỚC GO_BONUS
+- **Vấn đề**: Nếu trừ lãi CC_FREE_CREDIT SAU khi cộng GO_BONUS, test thấy net balance sai.
+- **Giải pháp**: `processPendingDebts(room, player)` luôn được gọi TRƯỚC dòng cộng `player.balance += GO_BONUS`.
+- **Verification**: TC-06.2b assert `treasury += 400` và net balance = +1.600 (không phải +2.000).

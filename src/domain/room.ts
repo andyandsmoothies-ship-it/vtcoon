@@ -40,6 +40,8 @@ export interface Player {
   mortgagedProperties:  number[];
   bankrupt:             boolean;
   mortgageLoans?:       Record<number, number>;
+  isBot?:               boolean;
+  overdraftRoundsLeft?: number;
 }
 
 export interface Room {
@@ -77,6 +79,8 @@ export function createPlayer(id: string): Player {
     extraTurns: 0, doubleNextDice: false,
     mortgagedProperties: [], bankrupt: false,
     mortgageLoans: {},
+    isBot: false,
+    overdraftRoundsLeft: 0,
   };
 }
 

@@ -3,6 +3,7 @@ import { TurnPhase } from '../domain/room';
 import type { Room, Player } from '../domain/room';
 import type { DiceResult } from '../domain/dice';
 import { ChanceCardId } from '../domain/event_card_types';
+import { ActionRejectReason } from '../domain/action_reasons';
 
 export function sendToAudit(room: Room, playerId: string): void {
   const player = room.players.find((p) => p.id === playerId);
@@ -14,9 +15,9 @@ export function sendToAudit(room: Room, playerId: string): void {
 }
 
 export function handleTurnStart(room: Room | undefined, playerId: string): { canRoll: boolean; reason?: string } {
-  if (!room?.started) return { canRoll: false, reason: 'INVALID_PLAYER' };
+  if (!room?.started) return { canRoll: false, reason: ActionRejectReason.INVALID_PLAYER };
   const current = room.players[room.currentPlayerIndex];
-  if (current?.id !== playerId) return { canRoll: false, reason: 'INVALID_PLAYER' };
+  if (current?.id !== playerId) return { canRoll: false, reason: ActionRejectReason.INVALID_PLAYER };
   if (current.skipNextTurn) {
     current.skipNextTurn = false;
     room.phase = TurnPhase.PropertyManagement;
@@ -34,11 +35,11 @@ export function handleBailOut(
   playerId: string,
   rolledThisTurn: boolean,
 ): { success: boolean; reason?: string } {
-  if (!room?.started) return { success: false, reason: 'INVALID_PLAYER' };
+  if (!room?.started) return { success: false, reason: ActionRejectReason.INVALID_PLAYER };
   const current = room.players[room.currentPlayerIndex];
-  if (current?.id !== playerId) return { success: false, reason: 'INVALID_PLAYER' };
+  if (current?.id !== playerId) return { success: false, reason: ActionRejectReason.INVALID_PLAYER };
   if (current.auditTurnsLeft <= 0) return { success: false, reason: 'NOT_IN_AUDIT' };
-  if (current.balance < 500) return { success: false, reason: 'INSUFFICIENT_FUNDS' };
+  if (current.balance < 500) return { success: false, reason: ActionRejectReason.INSUFFICIENT_FUNDS };
   current.balance -= 500;
   current.auditTurnsLeft = 0;
   room.phase = rolledThisTurn ? TurnPhase.PropertyManagement : TurnPhase.WaitingRoll;

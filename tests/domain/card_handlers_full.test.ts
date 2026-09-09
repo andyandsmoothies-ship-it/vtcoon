@@ -185,13 +185,16 @@ describe('[TC-GAME-038..041/MSS] Chance Cards Handlers', () => {
     expect(p1.balance).toBe(startBal - 800);
   });
 
-  it('CC_SLOW_BUILD thu hồi quyền sở hữu đất trống Cấp 0 do chậm tiến độ', () => {
+  it('CC_SLOW_BUILD bắt đầu đếm 3 vòng: stateMap[1].unbuiltRounds = 1, registry KHÔNG bị xóa ngay', () => {
+    // [DEBT-S06-03] Spec mới: handler chỉ SET unbuiltRounds=1 (countdown bắt đầu)
+    // Việc thu hồi xảy ra trong executeTurnEnd sau khi unbuiltRounds > 2
     const p1 = createPlayer('p1');
     const registry: PropertyRegistry = new Map([[1, 'p1']]);
     const stateMap: PropertyStateMap = new Map([[1, { level: 0 }]]);
 
     executeChanceCard(ChanceCardId.CC_SLOW_BUILD, 'p1', [p1], [], registry, stateMap);
-    expect(registry.has(1)).toBe(false);
+    expect(registry.get(1)).toBe('p1');          // Chủ sở hữu KHÔNG thay đổi ngay
+    expect(stateMap.get(1)?.unbuiltRounds).toBe(1); // Bộ đếm bắt đầu
   });
 
   it('CC_PORT_EXCLUSIVE tạo modifier giảm 50% tiền thuê Hạ tầng trong 2 vòng', () => {

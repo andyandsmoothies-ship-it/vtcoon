@@ -119,7 +119,8 @@ describe('[TC-04.4/MSS] Rút Phiếu Cơ Hội & Hiệu Ứng Cá Nhân', () => 
     expect(room.phase).toBe(TurnPhase.PropertyManagement);
   });
 
-  it('Kịch bản D & E: CC_OVERDRAFT (+3.000) & CC_FREE_CREDIT (+2.000) cộng tiền mặt và lưu pendingDebts', () => {
+  it('Kịch bản D & E: CC_OVERDRAFT (+3.000) vào pendingDebts, CC_FREE_CREDIT (+2.000) vào hand[] — cả hai cộng tiền mặt', () => {
+    // [DEBT-S06-01] CC_OVERDRAFT → pendingDebts  [DEBT-S06-02] CC_FREE_CREDIT → hand[]
     const { mgr, room } = setup();
     room.chanceDeck = [ChanceCardId.CC_OVERDRAFT, ...room.chanceDeck.filter((c) => c !== ChanceCardId.CC_OVERDRAFT)];
     room.players[0]!.position = 5; room.players[0]!.balance = 5000;
@@ -131,8 +132,9 @@ describe('[TC-04.4/MSS] Rút Phiếu Cơ Hội & Hiệu Ứng Cá Nhân', () => 
     room.players[0]!.position = 20; room.phase = TurnPhase.WaitingRoll;
     mgr.handleRollDice(room.roomCode, 'p1');
     expect(room.players[0]!.balance).toBe(10000); // 8000 + 2000
-    expect(room.players[0]!.pendingDebts).toContain(ChanceCardId.CC_FREE_CREDIT);
-    expect(room.players[0]!.pendingDebts).toHaveLength(2);
+    expect(room.players[0]!.hand).toContain(ChanceCardId.CC_FREE_CREDIT);             // [DEBT-S06-02] vào hand[]
+    expect(room.players[0]!.pendingDebts).not.toContain(ChanceCardId.CC_FREE_CREDIT); // KHÔNG vào pendingDebts
+    expect(room.players[0]!.pendingDebts).toHaveLength(1); // Chỉ CC_OVERDRAFT
   });
 
   it('Kịch bản F: Dẫm BĐS đối thủ với CC_DIPLOMATIC trong hand -> miễn 100% tiền thuê, thẻ vào discard', () => {
