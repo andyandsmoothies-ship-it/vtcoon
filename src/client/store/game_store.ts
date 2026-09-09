@@ -1,4 +1,4 @@
-// [UI-S01/MSS][UI-S02/MSS][UI-S03/MSS] Zustand Store — State, 3D animations, HUD & player turns
+// [UI-S01/MSS][UI-S02/MSS][UI-S03/MSS][UI-S04/MSS] Zustand Store — State, 3D animations, HUD, player turns & modals
 import { create } from 'zustand';
 import { clampDiceFace } from '../3d/dice_math';
 import { calculatePathWaypoints, BOARD_TOTAL_CELLS } from '../3d/pawn_path';
@@ -23,6 +23,33 @@ export interface PlayerHudInfo {
   readonly bankrupt?: boolean;
 }
 
+export type ActiveModalType = 'deed' | 'auction' | 'trade' | 'event' | null;
+
+export interface ModalPayloadMap {
+  deed: { cellIndex: number; canBuy?: boolean };
+  auction: {
+    cellIndex: number;
+    currentBid: number;
+    highestBidderId: string | null;
+    timeRemaining: number;
+    hasPassed?: boolean;
+  };
+  trade: {
+    targetPlayerId: string;
+    offeredProperties: number[];
+    requestedProperties: number[];
+    cashOffer: number;
+    cashRequest: number;
+  };
+  event: {
+    cardType: 'chance' | 'market';
+    cardId: string;
+    title: string;
+    description: string;
+    effectDelta?: number;
+  };
+}
+
 export interface GameState {
   readonly levelMap: Record<number, 0 | 1 | 2 | 3>;
   readonly playerPositions: Record<string, number>;
@@ -37,6 +64,10 @@ export interface GameState {
   readonly treasuryPool: number;
   readonly roundNumber: number;
   readonly maxRounds: number;
+
+  // UI-04 Business Modals State
+  readonly activeModal: ActiveModalType;
+  readonly modalPayload: ModalPayloadMap[keyof ModalPayloadMap] | null;
 
   setLevelMap: (map: Record<number, 0 | 1 | 2 | 3>) => void;
   setPlayerPositions: (positions: Record<string, number>) => void;
@@ -54,6 +85,11 @@ export interface GameState {
   decrementTurnTimer: () => void;
   setTreasuryPool: (amount: number) => void;
   setRoundInfo: (round: number, maxRounds?: number) => void;
+
+  // UI-04 Business Modals Actions
+  openModal: <T extends keyof ModalPayloadMap>(type: T, payload: ModalPayloadMap[T]) => void;
+  closeModal: () => void;
+  updateModalPayload: <T extends keyof ModalPayloadMap>(patch: Partial<ModalPayloadMap[T]>) => void;
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -69,6 +105,9 @@ export const useGameStore = create<GameState>((set, get) => ({
   treasuryPool: 0,
   roundNumber: 1,
   maxRounds: 30,
+
+  activeModal: null,
+  modalPayload: null,
 
   setLevelMap: (map) => set({ levelMap: map }),
   setPlayerPositions: (positions) => set({ playerPositions: positions }),
@@ -176,5 +215,12 @@ export const useGameStore = create<GameState>((set, get) => ({
     set((state) => ({
       roundNumber: Math.max(1, round),
       maxRounds: maxRounds ?? state.maxRounds,
+    })),
+
+  openModal: (type, payload) => set({ activeModal: type, modalPayload: payload }),
+  closeModal: () => set({ activeModal: null, modalPayload: null }),
+  updateModalPayload: (patch) =>
+    set((state) => ({
+      modalPayload: state.modalPayload ? { ...state.modalPayload, ...patch } : state.modalPayload,
     })),
 }));

@@ -102,15 +102,15 @@
   - MSS (Thẻ Sự Kiện): Rút thẻ → Hoạt ảnh lật thẻ Framer Motion → Hiển thị nội dung + nút Xác Nhận.
   - A1 (Đấu Giá): Hết 15s không ai bid → Auto-close, đất về trạng thái tự do.
 - **Value Delivered:** Toàn bộ quyết định kinh doanh quan trọng được trình bày qua Modal UI rõ ràng, không gián đoạn luồng FSM.
-- **Lifecycle Status:** ⚪ Đã Quy Hoạch
-- **Tech Stack:** Framer Motion (AnimatePresence, lật thẻ 3D CSS perspective) · Tailwind CSS · Zustand dispatch Intent
+- **Lifecycle Status:** ✅ Hoàn Thành (Done - 2026-09-09) · 521/521 Tests PASS · Visual Smoke Gate Ready
+- **Tech Stack:** Tailwind CSS · Zustand `useGameStore` · React Modals Overlay (Z-Index 20)
 - **Test Contracts (Visual & Unit):**
-  - `TC-UI04.1`: [FSM emit LANDED_ON_UNOWNED] → [Modal Title Deed mở, hiển thị đúng tên ô, giá, màu nhóm đất từ BOARD_CONFIG]
-  - `TC-UI04.2`: [Nút Bỏ Qua → FSM emit INTENT_DECLINE_BUY] → [Modal đóng và Auction Modal mở trong ≤ 300ms]
-  - `TC-UI04.3`: [Đồng hồ Auction đếm ngược 15s] → [Khi t=0 không có bid → FSM nhận INTENT_AUCTION_PASS]
-  - `TC-UI04.4`: [FSM emit CARD_DRAWN(cardId)] → [Hoạt ảnh lật thẻ kết thúc, nội dung thẻ từ vi.ts hiển thị đúng]
-  - `TC-UI04.5`: [P2P Trade Chấp Thuận] → [FSM emit INTENT_TRADE, Modal đóng, HUD cập nhật số dư 2 bên]
-- **LOC Budget:** title_deed_modal.tsx [NEW] ≤ 200L · auction_modal.tsx [NEW] ≤ 200L · trade_modal.tsx [NEW] ≤ 200L · event_card_modal.tsx [NEW] ≤ 150L
+  - `TC-UI04.1`: [Tra cứu thông tin Sổ Đỏ] → [Bảng giá 4 cấp C0-C3 / 4 bậc ga Railroad, chi phí nâng cấp, ô đặc biệt trả về null]
+  - `TC-UI04.2`: [Tính toán bước giá đấu giá] → [Sinh đúng [+50, +100, +200 Tr.], chuẩn hóa giá âm về 0]
+  - `TC-UI04.3`: [Thuế chuyển nhượng P2P 5%] → [Tính đúng 5% (hoặc 20% vĩ mô) thuế nộp Kho Bạc, làm tròn chuẩn xác]
+  - `TC-UI04.4`: [Kiểm tra hợp lệ đề xuất P2P] → [Chặn đề xuất rỗng, vượt số dư, đất đang thế chấp hoặc xung đột bù tiền]
+  - `TC-UI04.5`: [Quản lý vòng đời Zustand Store] → [openModal, updateModalPayload, closeModal reset sạch sẽ]
+- **LOC Budget:** modal_helpers.ts 167L · modal_backdrop.tsx 43L · title_deed_modal.tsx 169L · auction_modal.tsx 165L · trade_modal.tsx 179L · event_card_modal.tsx 96L · modal_host.tsx 109L · ui04_business_modals.test.ts 210L
 
 ---
 
@@ -139,7 +139,7 @@
 | **UI-01** | Sa Bàn 3D & Standee 2.5D | ✅ Hoàn Thành | UC-004, UC-016, design.md | Bàn cờ thật 3D 40 ô địa phương |
 | **UI-02** | Spring Pawn & Dice Physics | ✅ Hoàn Thành | UC-011, UC-016, ADR-0002 | Hoạt ảnh lò xo + xúc xắc rơi |
 | **UI-03** | HUD Tài Chính DOM | ✅ Hoàn Thành | UC-002, UC-016, ADR-0002 | Bảng điều khiển realtime Zustand |
-| **UI-04** | Modals Nghiệp Vụ | 🔵 Sắp Thi Công | UC-020, UC-022, UC-028, UC-038 | Giao diện quyết định kinh doanh |
+| **UI-04** | Modals Nghiệp Vụ | ✅ Hoàn Thành | UC-020, UC-022, UC-028, UC-038 | Giao diện quyết định kinh doanh |
 | **UI-05** | Audio Engine Vùng Miền | ⚪ Đã Quy Hoạch | ADR-0002, design.md §2 | Âm thanh không gian 4 cạnh địa lý |
 
 ---

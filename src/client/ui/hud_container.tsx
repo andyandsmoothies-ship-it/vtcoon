@@ -1,8 +1,9 @@
-// [UI-S03/MSS] HudContainer — Root HUD DOM Overlay (Z-10, pointer-events-none root)
+// [UI-S03/MSS][UI-S04/MSS] HudContainer — Root HUD DOM Overlay (Z-10, pointer-events-none root)
 import React from 'react';
 import { TopBar } from './top_bar';
 import { PlayerHudList } from './player_hud_list';
 import { ActionDock, type ActionDockProps } from './action_dock';
+import { ModalHost } from './modals/modal_host';
 
 export interface HudContainerProps extends ActionDockProps {
   readonly children?: React.ReactNode;
@@ -41,6 +42,9 @@ export function HudContainer({
           localPlayerId={localPlayerId}
         />
       </footer>
+
+      {/* Tầng Modals Tương Tác Nghiệp Vụ (Z-20 Host) */}
+      <ModalHost />
     </div>
   );
 }

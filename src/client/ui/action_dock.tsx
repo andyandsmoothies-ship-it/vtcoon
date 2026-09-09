@@ -23,6 +23,7 @@ export function ActionDock({
   const currentTurnPlayerId = useGameStore((state) => state.currentTurnPlayerId);
   const playersInfo = useGameStore((state) => state.playersInfo);
   const triggerDiceRoll = useGameStore((state) => state.triggerDiceRoll);
+  const openModal = useGameStore((state) => state.openModal);
 
   const actingPlayerId = localPlayerId ?? currentTurnPlayerId;
   const isMyTurn = !localPlayerId || currentTurnPlayerId === localPlayerId;
@@ -54,6 +55,32 @@ export function ActionDock({
     }
   };
 
+  const handleOpenProperties = () => {
+    if (onOpenProperties) {
+      onOpenProperties();
+    } else {
+      const activeInfo = actingPlayerId ? playersInfo[actingPlayerId] : undefined;
+      const firstProp = activeInfo?.ownedProperties?.[0] ?? 1;
+      const isOwned = Boolean(activeInfo?.ownedProperties?.includes(firstProp));
+      openModal('deed', { cellIndex: firstProp, canBuy: !isOwned });
+    }
+  };
+
+  const handleOpenTrade = () => {
+    if (onOpenTrade) {
+      onOpenTrade();
+    } else {
+      const otherId = Object.keys(playersInfo).find((id) => id !== actingPlayerId) ?? 'p2';
+      openModal('trade', {
+        targetPlayerId: otherId,
+        offeredProperties: [],
+        requestedProperties: [],
+        cashOffer: 0,
+        cashRequest: 0,
+      });
+    }
+  };
+
   return (
     <nav
       className="pointer-events-auto flex items-center gap-2 md:gap-3 bg-slate-900/90 backdrop-blur-md border border-slate-700/70 rounded-2xl p-2 px-4 shadow-2xl"
@@ -82,7 +109,7 @@ export function ActionDock({
       {/* Nút Quản Lý Tài Sản */}
       <button
         type="button"
-        onClick={onOpenProperties}
+        onClick={handleOpenProperties}
         disabled={isBankrupt}
         className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-slate-200 hover:text-white bg-slate-800/80 hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed border border-slate-700/60 transition-all text-sm font-medium active:scale-95"
         aria-label="Quản lý tài sản"
@@ -94,7 +121,7 @@ export function ActionDock({
       {/* Nút Đàm Phán P2P */}
       <button
         type="button"
-        onClick={onOpenTrade}
+        onClick={handleOpenTrade}
         disabled={isBankrupt}
         className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-slate-200 hover:text-white bg-slate-800/80 hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed border border-slate-700/60 transition-all text-sm font-medium active:scale-95"
         aria-label="Đàm phán thương lượng"

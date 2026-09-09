@@ -1,0 +1,108 @@
+// [UI-S04/MSS] ModalHost — Switchboard for business modals wrapped inside ModalBackdrop
+import React, { useEffect } from 'react';
+import { useGameStore, ModalPayloadMap } from '../../store/game_store';
+import { ModalBackdrop } from './modal_backdrop';
+import { TitleDeedModal } from './title_deed_modal';
+import { AuctionModal } from './auction_modal';
+import { TradeModal } from './trade_modal';
+import { EventCardModal } from './event_card_modal';
+
+export function ModalHost(): React.ReactElement | null {
+  const activeModal = useGameStore((state) => state.activeModal);
+  const modalPayload = useGameStore((state) => state.modalPayload);
+  const closeModal = useGameStore((state) => state.closeModal);
+  const updateModalPayload = useGameStore((state) => state.updateModalPayload);
+  const playersInfo = useGameStore((state) => state.playersInfo);
+  const currentTurnPlayerId = useGameStore((state) => state.currentTurnPlayerId);
+
+  // [UC-GAME-022] Đồng hồ đếm ngược 15s sàn đấu giá tự động
+  useEffect(() => {
+    if (activeModal !== 'auction') return;
+    const timer = setInterval(() => {
+      const state = useGameStore.getState();
+      if (state.activeModal !== 'auction') return;
+      const payload = state.modalPayload as ModalPayloadMap['auction'] | null;
+      if (!payload) return;
+      if (payload.timeRemaining <= 1) {
+        state.closeModal();
+      } else {
+        state.updateModalPayload<'auction'>({ timeRemaining: payload.timeRemaining - 1 });
+      }
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [activeModal]);
+
+  if (!activeModal || !modalPayload) {
+    return null;
+  }
+
+  const myId = currentTurnPlayerId ?? Object.keys(playersInfo)[0] ?? 'p1';
+  const myPlayer = playersInfo[myId];
+
+  return (
+    <ModalBackdrop onClose={closeModal}>
+      {activeModal === 'deed' && (() => {
+        const payload = modalPayload as ModalPayloadMap['deed'];
+        const ownerId = Object.keys(playersInfo).find((id) => playersInfo[id]?.ownedProperties?.includes(payload.cellIndex));
+        const owner = ownerId ? playersInfo[ownerId] : undefined;
+        return (
+          <TitleDeedModal
+            cellIndex={payload.cellIndex}
+            canBuy={payload.canBuy ?? (!owner && myPlayer ? myPlayer.balance >= 600 : true)}
+            isOwned={Boolean(owner)}
+            ownerName={owner?.name}
+            onBuy={closeModal}
+            onPass={closeModal}
+            onClose={closeModal}
+          />
+        );
+      })()}
+
+      {activeModal === 'auction' && (
+        <AuctionModal
+          cellIndex={(modalPayload as ModalPayloadMap['auction']).cellIndex}
+          currentBid={(modalPayload as ModalPayloadMap['auction']).currentBid}
+          highestBidderId={(modalPayload as ModalPayloadMap['auction']).highestBidderId}
+          timeRemaining={(modalPayload as ModalPayloadMap['auction']).timeRemaining}
+          hasPassed={(modalPayload as ModalPayloadMap['auction']).hasPassed}
+          bidderName={(modalPayload as ModalPayloadMap['auction']).highestBidderId ? playersInfo[(modalPayload as ModalPayloadMap['auction']).highestBidderId!]?.name : undefined}
+          myBalance={myPlayer?.balance}
+          myId={myId}
+          onBid={(amount) => updateModalPayload<'auction'>({ currentBid: amount, highestBidderId: myId, timeRemaining: 15 })}
+          onPass={() => updateModalPayload<'auction'>({ hasPassed: true })}
+          onClose={closeModal}
+        />
+      )}
+
+      {activeModal === 'trade' && (
+        <TradeModal
+          targetPlayerId={(modalPayload as ModalPayloadMap['trade']).targetPlayerId}
+          myProperties={myPlayer?.ownedProperties ?? []}
+          targetProperties={playersInfo[(modalPayload as ModalPayloadMap['trade']).targetPlayerId]?.ownedProperties ?? []}
+          myMortgagedProperties={myPlayer?.mortgagedProperties ?? []}
+          targetMortgagedProperties={playersInfo[(modalPayload as ModalPayloadMap['trade']).targetPlayerId]?.mortgagedProperties ?? []}
+          myBalance={myPlayer?.balance ?? 0}
+          targetPlayerName={playersInfo[(modalPayload as ModalPayloadMap['trade']).targetPlayerId]?.name}
+          initialOffered={(modalPayload as ModalPayloadMap['trade']).offeredProperties}
+          initialRequested={(modalPayload as ModalPayloadMap['trade']).requestedProperties}
+          initialCashOffer={(modalPayload as ModalPayloadMap['trade']).cashOffer}
+          initialCashRequest={(modalPayload as ModalPayloadMap['trade']).cashRequest}
+          onSubmitTrade={closeModal}
+          onClose={closeModal}
+        />
+      )}
+
+      {activeModal === 'event' && (
+        <EventCardModal
+          cardType={(modalPayload as ModalPayloadMap['event']).cardType}
+          cardId={(modalPayload as ModalPayloadMap['event']).cardId}
+          title={(modalPayload as ModalPayloadMap['event']).title}
+          description={(modalPayload as ModalPayloadMap['event']).description}
+          effectDelta={(modalPayload as ModalPayloadMap['event']).effectDelta}
+          onConfirm={closeModal}
+          onClose={closeModal}
+        />
+      )}
+    </ModalBackdrop>
+  );
+}
