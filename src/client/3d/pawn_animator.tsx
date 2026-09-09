@@ -9,13 +9,14 @@ import { PLAYER_TOKEN_PALETTE } from '../../domain/theme';
 import { getEmoteDef } from '../../domain/emotes';
 import { useGameStore, type PawnAnimationState } from '../store/game_store';
 import { cellPosition } from './board_coords';
-import { interpolatePawnPosition, BASE_PAWN_Y } from './pawn_path';
+import { interpolatePawnPosition, BASE_PAWN_Y, getPawnSquashStretch } from './pawn_path';
+import { AudioEngine } from '../audio/audio_engine';
+import { SoundEffect } from '../audio/audio_types';
+
+export { getPawnSquashStretch } from './pawn_path';
 
 export const PLAYER_OFFSETS: readonly [number, number, number][] = [
-  [-0.2, 0, -0.2],
-  [0.2, 0, -0.2],
-  [-0.2, 0, 0.2],
-  [0.2, 0, 0.2],
+  [-0.2, 0, -0.2], [0.2, 0, -0.2], [-0.2, 0, 0.2], [0.2, 0, 0.2],
 ] as const;
 
 export function PawnMesh({ color }: { readonly color: string }): React.ReactElement {
@@ -84,11 +85,9 @@ export function PawnEmoteBubble({ emoteId }: { readonly emoteId: string }): Reac
       <Billboard follow={true}>
         <mesh>
           <planeGeometry args={[0.65, 0.65]} />
-          {texture ? (
-            <meshBasicMaterial map={texture} transparent depthWrite={false} />
-          ) : (
-            <meshBasicMaterial color="#F59E0B" />
-          )}
+          {texture
+            ? <meshBasicMaterial map={texture} transparent depthWrite={false} />
+            : <meshBasicMaterial color="#F59E0B" />}
         </mesh>
       </Billboard>
     </group>
@@ -105,19 +104,51 @@ interface SingleHopProps {
 }
 
 function SingleHopPawn({ fromCell, toCell, offset, color, onHopComplete, emoteId }: SingleHopProps): React.ReactElement {
+  const [isRecovered, setIsRecovered] = useState(false);
+  const landedRef = useRef(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+  }, []);
+
   const { t } = useSpring({
     from: { t: 0 },
     to: { t: 1 },
     config: { tension: 170, friction: 12 },
-    onRest: onHopComplete,
+    onRest: (result) => {
+      if (result && result.finished === false) return;
+      if (landedRef.current) return;
+      landedRef.current = true;
+
+      // Kích hoạt âm thanh sfx_pawn_step.mp3 với tốc độ phát biến thiên ngẫu nhiên (playbackRate: 0.95 - 1.05)
+      const randomPitch = 0.95 + Math.random() * 0.10;
+      AudioEngine.playSfx(SoundEffect.PAWN_STEP, randomPitch);
+
+      // Sau khi tiếp đất 0.1s: Hồi phục hình dạng tự nhiên [1, 1, 1]
+      timerRef.current = setTimeout(() => {
+        setIsRecovered(true);
+        onHopComplete();
+      }, 100);
+    },
   });
 
   const posX = t.to((val) => interpolatePawnPosition(fromCell, toCell, val)[0] + offset[0]);
   const posY = t.to((val) => interpolatePawnPosition(fromCell, toCell, val)[1]);
   const posZ = t.to((val) => interpolatePawnPosition(fromCell, toCell, val)[2] + offset[2]);
 
+  const scaleXZ = t.to((val) => getPawnSquashStretch(val, isRecovered)[0]);
+  const scaleY = t.to((val) => getPawnSquashStretch(val, isRecovered)[1]);
+
   return (
-    <a.group position-x={posX} position-y={posY} position-z={posZ}>
+    <a.group
+      position-x={posX}
+      position-y={posY}
+      position-z={posZ}
+      scale-x={scaleXZ}
+      scale-y={scaleY}
+      scale-z={scaleXZ}
+    >
       <PawnMesh color={color} />
       {emoteId && <PawnEmoteBubble emoteId={emoteId} />}
     </a.group>

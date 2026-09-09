@@ -1,5 +1,7 @@
 // [TC-UI03/MSS] Test Suite Slice UI-03: DOM HUD Tai Chinh & Bang Dieu Khien
 import { describe, it, expect, beforeEach } from 'vitest';
+import React from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import {
   formatCurrency,
   formatTimeRemaining,
@@ -10,6 +12,7 @@ import {
 } from '../../src/client/ui/ui_helpers';
 import { useGameStore } from '../../src/client/store/game_store';
 import { ColorGroup } from '../../src/domain/board_config';
+import { ActionDock } from '../../src/client/ui/action_dock';
 
 describe('[TC-UI03.1/MSS] Format Tien Te Thuan Tuy (formatCurrency)', () => {
   it('Dinh dang dung so nguyen duong co phan tach hang nghin dau cham', () => {
@@ -184,3 +187,43 @@ describe('[TC-UI03.6/MSS] Visual Helpers & Owned Color Groups', () => {
     expect(getOwnedColorGroups(undefined as unknown as number[])).toHaveLength(0);
   });
 });
+
+describe('[TC-UI03.7/MSS] ActionDock DOM Markup & Tactile 3D Buttons', () => {
+  beforeEach(() => {
+    useGameStore.setState({
+      playersInfo: {
+        p1: { id: 'p1', name: 'P1', balance: 10000, tokenColor: '#fff', ownedProperties: [1] },
+      },
+      currentTurnPlayerId: 'p1',
+      isRolling: false,
+      activePawnAnimation: null,
+    });
+  });
+
+  it('Hien thi hao quang vang kim animate-pulse khi den luot nguoi choi', () => {
+    const html = renderToStaticMarkup(React.createElement(ActionDock));
+    expect(html).toContain('aria-label="Thanh điều khiển tác vụ"');
+    expect(html).toContain('aria-label="Đổ xúc xắc"');
+    expect(html).toContain('ring-amber-400/60');
+    expect(html).toContain('animate-pulse');
+    expect(html).toContain('border-emerald-800');
+  });
+
+  it('Hien thi cac nut 3D tactile cho Tai San, Xay Dung, Dam Phan va Het Luot', () => {
+    const html = renderToStaticMarkup(React.createElement(ActionDock, { localPlayerId: 'p1' }));
+    expect(html).toContain('Tài Sản');
+    expect(html).toContain('Xây Dựng');
+    expect(html).toContain('Đàm Phán');
+    expect(html).toContain('Hết Lượt');
+    expect(html).toContain('border-b-2');
+    expect(html).toContain('active:translate-y-0.5');
+  });
+
+  it('Vo hieu hoa hao quang vang kim khi khong phai luot cua minh', () => {
+    useGameStore.setState({ currentTurnPlayerId: 'p2' });
+    const html = renderToStaticMarkup(React.createElement(ActionDock, { localPlayerId: 'p1' }));
+    expect(html).not.toContain('animate-pulse');
+    expect(html).toContain('cursor-not-allowed');
+  });
+});
+

@@ -8,6 +8,7 @@ import { TILE_METADATA_MAP, formatPriceLabel } from '../../src/client/3d/tile_te
 import { getTileTexture, getStandeeTexture } from '../../src/client/3d/tile_texture_generator';
 import { tileRotation } from '../../src/client/3d/board_layout';
 import { ICON_RENDERERS, drawIcon } from '../../src/client/3d/tile_icons';
+import { getStandeeWebpUrl, clearStandeeWebpCache, standeeWebpCache } from '../../src/client/3d/board_tile';
 
 // TC-UI01.1: 40-tile coordinate coverage
 describe('[TC-UI01.1] cellPosition — coordinate coverage', () => {
@@ -252,6 +253,27 @@ describe('[TC-UI01.7] tileRotation — 4-Side Perpendicular Board Orientation', 
     expect(tileRotation(10)).toEqual([0, -Math.PI / 2, 0]);
     expect(tileRotation(20)).toEqual([0, Math.PI, 0]);
     expect(tileRotation(30)).toEqual([0, Math.PI / 2, 0]);
+  });
+});
+
+// TC-UI01.8: Smart Standee WebP Loader & Resilient Fallback
+describe('[TC-UI01.8] Smart Standee WebP Loader & Resilient Fallback', () => {
+  beforeEach(() => {
+    clearStandeeWebpCache();
+  });
+
+  it('getStandeeWebpUrl tao dung duong dan webp cho moi index 0..39', () => {
+    for (let i = 0; i < 40; i++) {
+      expect(getStandeeWebpUrl(i)).toBe(`/assets/tiles/tile_${i}.webp`);
+    }
+  });
+
+  it('standeeWebpCache cache texture hop le va clear hoat dong', () => {
+    expect(standeeWebpCache.size).toBe(0);
+    standeeWebpCache.set(1, null);
+    expect(standeeWebpCache.has(1)).toBe(true);
+    clearStandeeWebpCache();
+    expect(standeeWebpCache.size).toBe(0);
   });
 });
 

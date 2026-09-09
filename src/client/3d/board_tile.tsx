@@ -1,8 +1,8 @@
 // [UI-S01/MSS][OPS-02/MSS] LayeredDioramaTile — Diorama-style 3D board tile with standee harmonic animation
-import React, { useRef, useMemo } from 'react';
+import React, { useRef, useMemo, useState, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Billboard } from '@react-three/drei';
-import type { Group } from 'three';
+import { Texture, type Group, SRGBColorSpace } from 'three';
 import type { BoardCell } from '../../domain/board_config';
 import { COLOR_GROUP_HEX } from '../../domain/theme';
 import { getTileTexture, getStandeeTexture } from './tile_texture_generator';
@@ -33,6 +33,73 @@ export function calculateStandeeElevation(
   return baseHeight + Math.sin(omega * time + phase) * amplitude;
 }
 
+export function getStandeeWebpUrl(index: number): string {
+  return `/assets/tiles/tile_${index}.webp`;
+}
+
+export const standeeWebpCache = new Map<number, Texture | null>();
+
+export function clearStandeeWebpCache(): void {
+  standeeWebpCache.clear();
+}
+
+/**
+ * Nạp ảnh WebP cho Standee với cơ chế hủy đăng ký (unmount safe) và cache tức thời.
+ */
+export function loadStandeeWebp(
+  cellIndex: number,
+  onResolve?: (tex: Texture | null) => void
+): () => void {
+  if (standeeWebpCache.has(cellIndex)) {
+    onResolve?.(standeeWebpCache.get(cellIndex) ?? null);
+    return () => {};
+  }
+  if (typeof window === 'undefined' || typeof Image === 'undefined') {
+    return () => {};
+  }
+
+  let isMounted = true;
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.src = getStandeeWebpUrl(cellIndex);
+  img.onload = () => {
+    const loadedTex = new Texture(img);
+    loadedTex.colorSpace = SRGBColorSpace;
+    loadedTex.needsUpdate = true;
+    standeeWebpCache.set(cellIndex, loadedTex);
+    if (isMounted) {
+      onResolve?.(loadedTex);
+    }
+  };
+  img.onerror = () => {
+    standeeWebpCache.set(cellIndex, null);
+    if (isMounted) {
+      onResolve?.(null);
+    }
+  };
+
+  return () => {
+    isMounted = false;
+  };
+}
+
+/**
+ * Smart Standee Asset Loader (2.5D)
+ * Kiểm tra và tải ảnh .webp từ public/assets/tiles/tile_${index}.webp nếu có.
+ * Nếu chưa có hoặc lỗi nạp, tự động hiển thị Standee Vector Procedural 2.5D từ tile_icons.ts.
+ */
+export function useSmartStandeeTexture(cellIndex: number): Texture | null {
+  const cached = standeeWebpCache.get(cellIndex);
+  const [texture, setTexture] = useState<Texture | null>(cached ?? null);
+
+  useEffect(() => {
+    return loadStandeeWebp(cellIndex, setTexture);
+  }, [cellIndex]);
+
+  const proceduralTexture = useMemo(() => getStandeeTexture(cellIndex), [cellIndex]);
+  return (standeeWebpCache.has(cellIndex) ? cached : texture) ?? proceduralTexture;
+}
+
 interface StandeeBillboardProps {
   readonly cellIndex: number;
   readonly groupColor: string;
@@ -40,7 +107,7 @@ interface StandeeBillboardProps {
 
 function StandeeBillboard({ cellIndex, groupColor }: StandeeBillboardProps): React.ReactElement {
   const groupRef = useRef<Group>(null);
-  const standeeTexture = useMemo(() => getStandeeTexture(cellIndex), [cellIndex]);
+  const standeeTexture = useSmartStandeeTexture(cellIndex);
 
   useFrame((state) => {
     if (groupRef.current) {
@@ -102,10 +169,10 @@ export function LayeredDioramaTile({
   if (isCornerTile) {
     return (
       <group position={position} rotation={rotation} onClick={onClick}>
-        {/* Corner tile — larger square base */}
+        {/* Corner tile — larger square base with polished stone PBR */}
         <mesh receiveShadow castShadow>
           <boxGeometry args={[2.2, 0.22, 2.2]} />
-          <meshStandardMaterial color="#334155" roughness={0.4} metalness={0.2} />
+          <meshStandardMaterial color="#334155" roughness={0.22} metalness={0.1} />
         </mesh>
         {/* Inner corner accent badge with texture */}
         <mesh position={[0, 0.115, 0]} rotation={[-Math.PI / 2, 0, 0]}>
@@ -124,10 +191,10 @@ export function LayeredDioramaTile({
 
   return (
     <group position={position} rotation={rotation} onClick={onClick}>
-      {/* 1. Base tile — Warm stone/parchment with subtle bevel */}
+      {/* 1. Base tile — Polished white marble PBR */}
       <mesh receiveShadow castShadow>
         <boxGeometry args={[1.68, 0.2, 2.2]} />
-        <meshStandardMaterial color="#E8E2D2" roughness={0.45} />
+        <meshStandardMaterial color="#F8FAFC" roughness={0.22} metalness={0.1} />
       </mesh>
 
       {/* 2. Top surface information texture */}

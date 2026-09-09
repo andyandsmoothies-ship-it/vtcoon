@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { useLobbyStore } from '../../store/lobby_store';
 import { PlayerSlotCard } from './player_slot_card';
 import { QrCodeCard } from './qr_code_card';
-
 import { type LobbySlot } from '../../store/lobby_types';
 
 export interface LobbyViewProps {
@@ -63,26 +62,25 @@ export function LobbyView({
 
   const getStartButtonHint = (): string => {
     if (!canStartCheck.canStart) {
-      if (canStartCheck.reasonCode === 'ROOM_STARTED') {
-        return 'Trận đấu đang diễn ra';
-      }
-      if (canStartCheck.reasonCode === 'NOT_ENOUGH_PLAYERS') {
-        return 'Cần tối thiểu 2 người chơi (hoặc thêm Bot AI) để bắt đầu';
-      }
-      if (canStartCheck.reasonCode === 'PLAYERS_NOT_READY') {
-        return 'Đang chờ tất cả người chơi sẵn sàng...';
-      }
-      if (canStartCheck.reasonCode === 'NOT_HOST') {
-        return 'Chỉ Chủ Phòng mới có quyền bắt đầu trận đấu';
-      }
+      if (canStartCheck.reasonCode === 'ROOM_STARTED') return 'Trận đấu đang diễn ra';
+      if (canStartCheck.reasonCode === 'NOT_ENOUGH_PLAYERS') return 'Cần tối thiểu 2 người chơi (hoặc thêm Bot AI) để bắt đầu';
+      if (canStartCheck.reasonCode === 'PLAYERS_NOT_READY') return 'Đang chờ tất cả người chơi sẵn sàng...';
+      if (canStartCheck.reasonCode === 'NOT_HOST') return 'Chỉ Chủ Phòng mới có quyền bắt đầu trận đấu';
     }
     return 'Tất cả đã sẵn sàng! Nhấn để bước vào Sa bàn 3D.';
   };
 
   return (
-    <div className="w-full h-full min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-between p-4 md:p-8 select-none overflow-y-auto">
+    <div className="relative w-full h-full min-h-screen bg-slate-950 bg-radial from-slate-900 to-slate-950 text-slate-100 flex flex-col items-center justify-between p-4 md:p-8 select-none overflow-y-auto">
+      {/* Phông nền Skyline Silhouette mờ 15% chiều sâu */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-64 md:h-80 opacity-15 overflow-hidden flex items-end justify-center z-0 text-slate-400" aria-hidden="true">
+        <svg viewBox="0 0 1200 260" className="w-full h-full object-cover" preserveAspectRatio="none" fill="currentColor">
+          <path d="M0,260 L0,180 L40,180 L40,130 L70,130 L70,190 L110,190 L110,100 L140,100 L140,80 L150,50 L160,80 L160,100 L180,100 L180,210 L220,210 L220,150 L260,150 L260,260 L310,260 L310,120 L350,120 L350,70 L360,70 L360,30 L370,70 L380,70 L380,120 L410,120 L410,170 L450,170 L450,260 L510,260 L510,130 L550,130 L550,80 L590,80 L590,260 L650,260 L650,150 L690,150 L690,60 L700,30 L710,60 L710,150 L750,150 L750,260 L810,260 L810,110 L850,110 L850,170 L890,170 L890,260 L950,260 L950,120 L990,120 L990,70 L1030,70 L1030,200 L1070,200 L1070,260 L1130,260 L1130,140 L1170,140 L1170,190 L1200,190 L1200,260 Z" />
+        </svg>
+      </div>
+
       {/* Header */}
-      <header className="w-full max-w-5xl flex flex-col sm:flex-row items-center justify-between gap-4 py-3 border-b border-slate-800/80">
+      <header className="relative z-10 w-full max-w-5xl flex flex-col sm:flex-row items-center justify-between gap-4 py-3 border-b border-slate-800/80">
         <div>
           <h1 className="text-2xl md:text-3xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-200">
             VTCOON
@@ -91,12 +89,9 @@ export function LobbyView({
         </div>
 
         {/* 6-character room code */}
-        <div className="flex items-center gap-3 bg-slate-900 border border-slate-800 rounded-xl px-4 py-2 shadow-inner">
+        <div className="flex items-center gap-3 bg-slate-900/90 border border-slate-800 rounded-xl px-4 py-2 shadow-inner">
           <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Mã Phòng:</span>
-          <span
-            className="text-xl md:text-2xl font-mono font-extrabold tracking-widest text-amber-400"
-            data-testid="lobby-room-code"
-          >
+          <span className="text-xl md:text-2xl font-mono font-extrabold tracking-widest text-amber-400" data-testid="lobby-room-code">
             {roomCode}
           </span>
           <button
@@ -111,8 +106,8 @@ export function LobbyView({
         </div>
       </header>
 
-      {/* Main Grid: Slots (Left) & QR Code (Right) */}
-      <main className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-6 my-6 flex-1 items-start">
+      {/* Main Grid: Slots (Left) & QR Code + Rules (Right) */}
+      <main className="relative z-10 w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-6 my-auto items-center justify-center flex-1">
         <section className="lg:col-span-7 flex flex-col gap-3">
           <div className="flex items-center justify-between px-1">
             <h2 className="text-sm font-bold uppercase tracking-wider text-slate-300">
@@ -121,7 +116,8 @@ export function LobbyView({
             <span className="text-xs text-slate-400">Tối đa 4 người/bàn</span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" data-testid="lobby-slots-grid">
+          {/* Căn giữa đối xứng 4 slot người chơi */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 justify-center" data-testid="lobby-slots-grid">
             {slots.map((slot) => (
               <PlayerSlotCard
                 key={slot.slotIndex}
@@ -139,9 +135,9 @@ export function LobbyView({
             <QrCodeCard roomCode={roomCode} />
           </div>
 
-          {/* Thẻ Tóm Tắt Thể Lệ Thi Đấu */}
+          {/* Thẻ Thể Lệ Thi Đấu: Cụm 3 huy hiệu đồ họa trực quan nằm ngang */}
           <div
-            className="w-full max-w-sm bg-slate-900/90 border border-slate-800/90 rounded-2xl p-4 shadow-xl text-left"
+            className="w-full max-w-sm bg-slate-900/90 backdrop-blur-sm border border-slate-800/90 rounded-2xl p-4 shadow-xl text-left"
             data-testid="lobby-rules-card"
           >
             <div className="flex items-center gap-2 pb-2 mb-3 border-b border-slate-800">
@@ -151,38 +147,37 @@ export function LobbyView({
               </h3>
             </div>
 
-            <ul className="flex flex-col gap-2.5 text-xs text-slate-300">
-              <li className="flex items-start gap-2">
-                <span className="text-amber-400 font-bold shrink-0">•</span>
-                <span>
-                  <strong className="text-amber-300">Vốn khởi điểm:</strong> 15.000 Tr. VNĐ (15 Tỷ) cho mỗi đại gia.
-                </span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-amber-400 font-bold shrink-0">•</span>
-                <span>
-                  <strong className="text-amber-300">Thời lượng ván đấu:</strong> Tối đa 30 vòng bàn cờ.
-                </span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-amber-400 font-bold shrink-0">•</span>
-                <span>
-                  <strong className="text-amber-300">Thu nhập qua GO:</strong> Nhận ngay +2.000 Tr. VNĐ mỗi khi vượt qua ô Khởi Hành.
-                </span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-amber-400 font-bold shrink-0">•</span>
-                <span>
-                  <strong className="text-amber-300">Điều kiện thắng:</strong> Đại gia có Tổng tài sản (Tiền mặt + Giá trị BĐS) lớn nhất sau 30 vòng, hoặc là người duy nhất không bị phá sản.
-                </span>
-              </li>
-            </ul>
+            <div className="grid grid-cols-3 gap-2">
+              {/* Huy hiệu 1: Vốn khởi điểm */}
+              <div className="flex flex-col items-center text-center p-2 rounded-xl bg-slate-950/70 border border-slate-800/80 hover:border-amber-400/30 transition-colors">
+                <span className="text-2xl mb-1" aria-hidden="true">💰</span>
+                <span className="text-[11px] font-black text-amber-300">Vốn 15 Tỷ VNĐ</span>
+                <span className="text-[9px] text-slate-400 mt-0.5 leading-tight">15.000 Tr. VNĐ</span>
+                <span className="text-[8px] text-emerald-400 mt-0.5 leading-tight">+2.000 Tr. VNĐ qua GO</span>
+              </div>
+
+              {/* Huy hiệu 2: Thời lượng ván đấu */}
+              <div className="flex flex-col items-center text-center p-2 rounded-xl bg-slate-950/70 border border-slate-800/80 hover:border-amber-400/30 transition-colors">
+                <span className="text-2xl mb-1" aria-hidden="true">⏳</span>
+                <span className="text-[11px] font-black text-amber-300">30 Vòng Đấu</span>
+                <span className="text-[9px] text-slate-400 mt-0.5 leading-tight">Tối đa 30 vòng</span>
+                <span className="text-[8px] text-slate-500 mt-0.5 leading-tight">Bàn cờ 40 ô</span>
+              </div>
+
+              {/* Huy hiệu 3: Điều kiện thắng */}
+              <div className="flex flex-col items-center text-center p-2 rounded-xl bg-slate-950/70 border border-slate-800/80 hover:border-amber-400/30 transition-colors">
+                <span className="text-2xl mb-1" aria-hidden="true">🏆</span>
+                <span className="text-[11px] font-black text-amber-300">Đại Gia Vô Địch</span>
+                <span className="text-[9px] text-slate-400 mt-0.5 leading-tight">Điều kiện thắng</span>
+                <span className="text-[8px] text-slate-500 mt-0.5 leading-tight">Tài sản cực đại</span>
+              </div>
+            </div>
           </div>
         </section>
       </main>
 
       {/* Footer / Action Bar */}
-      <footer className="w-full max-w-5xl pt-4 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <footer className="relative z-10 w-full max-w-5xl pt-4 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4">
         <button
           type="button"
           onClick={resetLobby}

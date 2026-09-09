@@ -58,3 +58,44 @@ export function interpolatePawnPosition(
 
   return [x, y, z];
 }
+
+/**
+ * Tính toán tỷ lệ co dãn [scaleX, scaleY, scaleZ] theo nguyên lý Squash & Stretch:
+ * - [0% -> 15%]: Co nén lấy đà (Squash) --> scaleY: 0.85, scaleXZ: 1.08.
+ * - [15% -> 70%]: Kéo dài thân trên không trung theo hướng bay (Stretch) --> scaleY: 1.25, scaleXZ: 0.90.
+ * - [70% -> 90%]: Rơi xuống gia tốc.
+ * - [90% -> 100%]: Tiếp đất nhún giảm chấn (Squash) --> scaleY: 0.80, scaleXZ: 1.15.
+ * - Sau khi tiếp đất 0.1s (isRecovered=true): Hồi phục hình dạng tự nhiên [1, 1, 1].
+ */
+export function getPawnSquashStretch(
+  progress: number,
+  isRecovered = false
+): [number, number, number] {
+  if (isRecovered || !Number.isFinite(progress)) {
+    return [1, 1, 1];
+  }
+
+  const t = Math.max(0, Math.min(1, progress));
+  let scaleY = 1.0;
+  let scaleXZ = 1.0;
+
+  if (t <= 0.15) {
+    const p = t / 0.15;
+    scaleY = 1.0 - 0.15 * p;
+    scaleXZ = 1.0 + 0.08 * p;
+  } else if (t <= 0.70) {
+    const p = (t - 0.15) / 0.55;
+    scaleY = 0.85 + 0.40 * p;
+    scaleXZ = 1.08 - 0.18 * p;
+  } else if (t <= 0.90) {
+    const p = (t - 0.70) / 0.20;
+    scaleY = 1.25 - 0.25 * p;
+    scaleXZ = 0.90 + 0.10 * p;
+  } else {
+    const p = (t - 0.90) / 0.10;
+    scaleY = 1.00 - 0.20 * p;
+    scaleXZ = 1.00 + 0.15 * p;
+  }
+
+  return [scaleXZ, scaleY, scaleXZ];
+}

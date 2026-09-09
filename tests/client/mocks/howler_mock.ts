@@ -45,6 +45,15 @@ export class MockHowl {
     return this;
   }
 
+  public currentRate = 1;
+  public rate(): number;
+  public rate(r: number): this;
+  public rate(r?: number): number | this {
+    if (r === undefined) return this.currentRate;
+    this.currentRate = r;
+    return this;
+  }
+
   public playing(): boolean {
     return this.isPlaying;
   }

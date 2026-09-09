@@ -108,6 +108,16 @@ describe('[TC-UI05.3/MSS] AudioEngine — One-Shot SFX Specs', () => {
     expect(diceHowl.isPlaying).toBe(true);
     expect(buyHowl.isPlaying).toBe(true);
   });
+
+  it('PAWN_STEP plays with variable playbackRate pitch', () => {
+    AudioEngine.playSfx(SoundEffect.PAWN_STEP, 1.04);
+    const howl = AudioEngine.getOrCreateSfx(SoundEffect.PAWN_STEP) as unknown as MockHowl;
+    expect(howl.isPlaying).toBe(true);
+    expect(howl.currentRate).toBe(1.04);
+
+    AudioEngine.playSfx(SoundEffect.PAWN_STEP, 0.96);
+    expect(howl.currentRate).toBe(0.96);
+  });
 });
 
 describe('[TC-UI05.4/MSS] AudioStore — Volume Clamping & Mute Toggle', () => {

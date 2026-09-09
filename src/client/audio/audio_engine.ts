@@ -153,12 +153,15 @@ class AudioEngineImpl {
     }
   }
 
-  public playSfx(sfx: SoundEffect): void {
+  public playSfx(sfx: SoundEffect, rate?: number): void {
     const volume = this.getEffectiveSfxVolume();
     if (volume <= 0) return;
     try {
       const howl = this.getOrCreateSfx(sfx);
       howl.volume(volume);
+      if (typeof howl.rate === 'function') {
+        howl.rate(rate ?? 1);
+      }
       howl.play();
     } catch {
       // Fallback an toàn khi audio buffer chưa nạp

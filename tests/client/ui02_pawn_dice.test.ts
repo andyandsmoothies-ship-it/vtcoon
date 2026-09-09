@@ -3,12 +3,19 @@ import {
   calculatePathWaypoints,
   getParabolicHeight,
   interpolatePawnPosition,
+  getPawnSquashStretch,
 } from '../../src/client/3d/pawn_path';
 import {
   getDiceFaceRotation,
   isValidDiceFace,
   clampDiceFace,
   DICE_FACES,
+  calculateDiceElevation,
+  calculateDiceRotationFactor,
+  generateRandomDiceSpin,
+  DICE_REST_Y,
+  DICE_PEAK_Y,
+  DICE_BOUNCE_1_Y,
 } from '../../src/client/3d/dice_math';
 import { useGameStore } from '../../src/client/store/game_store';
 import {
@@ -218,5 +225,128 @@ describe('[TC-UI02.6/MSS] Multi-Player Slot Offsets Defense', () => {
       expect(Math.abs(offset[2])).toBeLessThanOrEqual(0.5);
       expect(offset[1]).toBe(0);
     }
+  });
+});
+
+describe('[TC-UI02.7/MSS] Pawn Squash & Stretch Deformation (Disney Animation Principles)', () => {
+  it('TC-UI02.7a: [0% -> 15%] Co nen lay da (Squash) dat scaleY: 0.85, scaleXZ: 1.08', () => {
+    const start = getPawnSquashStretch(0);
+    expect(start).toEqual([1.0, 1.0, 1.0]);
+
+    const squash15 = getPawnSquashStretch(0.15);
+    expect(squash15[1]).toBeCloseTo(0.85, 4);
+    expect(squash15[0]).toBeCloseTo(1.08, 4);
+    expect(squash15[2]).toBeCloseTo(1.08, 4);
+  });
+
+  it('TC-UI02.7b: [15% -> 70%] Keo dai than tren khong trung (Stretch) dat scaleY: 1.25, scaleXZ: 0.90', () => {
+    const stretch70 = getPawnSquashStretch(0.70);
+    expect(stretch70[1]).toBeCloseTo(1.25, 4);
+    expect(stretch70[0]).toBeCloseTo(0.90, 4);
+    expect(stretch70[2]).toBeCloseTo(0.90, 4);
+  });
+
+  it('TC-UI02.7c: [70% -> 90%] Roi xuong gia toc, scale giam dan ve [1.0, 1.0, 1.0]', () => {
+    const falling = getPawnSquashStretch(0.90);
+    expect(falling[1]).toBeCloseTo(1.00, 4);
+    expect(falling[0]).toBeCloseTo(1.00, 4);
+    expect(falling[2]).toBeCloseTo(1.00, 4);
+  });
+
+  it('TC-UI02.7d: [90% -> 100%] Tiep dat nhun giam chan (Squash) dat scaleY: 0.80, scaleXZ: 1.15', () => {
+    const landing = getPawnSquashStretch(1.00);
+    expect(landing[1]).toBeCloseTo(0.80, 4);
+    expect(landing[0]).toBeCloseTo(1.15, 4);
+    expect(landing[2]).toBeCloseTo(1.15, 4);
+  });
+
+  it('TC-UI02.7e: Sau khi tiep dat 0.1s (isRecovered=true), hoi phuc hinh dang tu nhien [1, 1, 1]', () => {
+    expect(getPawnSquashStretch(1.0, true)).toEqual([1, 1, 1]);
+    expect(getPawnSquashStretch(0.5, true)).toEqual([1, 1, 1]);
+  });
+
+  it('TC-UI02.7f: Bao toan the tich vat ly tuong doi (scaleX * scaleY * scaleZ ~ 1.0)', () => {
+    const testPoints = [0.05, 0.15, 0.35, 0.70, 0.80, 0.90, 1.00];
+    for (const p of testPoints) {
+      const [sx, sy, sz] = getPawnSquashStretch(p);
+      const volume = sx * sy * sz;
+      expect(volume).toBeGreaterThan(0.90);
+      expect(volume).toBeLessThan(1.15);
+    }
+  });
+
+  it('[Adversarial Inversion] Gia tri bat thuong (NaN, Infinity, so am, > 1) van giu vung an toan', () => {
+    expect(getPawnSquashStretch(Number.NaN)).toEqual([1, 1, 1]);
+    expect(getPawnSquashStretch(Number.POSITIVE_INFINITY)).toEqual([1, 1, 1]);
+    expect(getPawnSquashStretch(-0.5)).toEqual([1, 1, 1]);
+    expect(getPawnSquashStretch(1.5)).toEqual([1.15, 0.80, 1.15]);
+  });
+});
+
+describe('[TC-UI02.8/MSS] 3D Dice Elastic Bounce & High-Speed Tumble Physics', () => {
+  it('TC-UI02.8a: Giai doan 1 (0 -> 0.55 / 0.8s): Phong len cao dat posY: 3.8 va cham san tai t=0.55', () => {
+    expect(calculateDiceElevation(0)).toBeCloseTo(DICE_REST_Y, 4);
+
+    // Dinh cua giai doan 1 o giua (u = 0.5, t = 0.275)
+    const peak = calculateDiceElevation(0.275);
+    expect(peak).toBeCloseTo(DICE_PEAK_Y, 4);
+
+    // Chot ha cham san ni khay xuc xac tai t = 0.55
+    const touchdown1 = calculateDiceElevation(0.55);
+    expect(touchdown1).toBeCloseTo(DICE_REST_Y, 4);
+  });
+
+  it('TC-UI02.8b: Giai doan 2 (0.55 -> 0.85): Nay dan hoi 2 nhip giam dan (nhip 1 len 0.8, nhip 2 len 0.45)', () => {
+    // Dinh nhip nay 1 (u = 0.5 tai t = 0.55 + 0.085 = 0.635)
+    const bounce1Apex = calculateDiceElevation(0.635);
+    expect(bounce1Apex).toBeCloseTo(DICE_BOUNCE_1_Y, 4);
+
+    // Tiep dat nhip 1 tai t = 0.72
+    const bounce1Land = calculateDiceElevation(0.72);
+    expect(bounce1Land).toBeCloseTo(DICE_REST_Y, 4);
+
+    // Dinh nhip nay 2 (u = 0.5 tai t = 0.72 + 0.065 = 0.785)
+    const bounce2Apex = calculateDiceElevation(0.785);
+    expect(bounce2Apex).toBeCloseTo(0.45, 4);
+
+    // Tiep dat nhip 2 tai t = 0.85
+    const bounce2Land = calculateDiceElevation(0.85);
+    expect(bounce2Land).toBeCloseTo(DICE_REST_Y, 4);
+  });
+
+  it('TC-UI02.8c: Giai doan 3 (0.85 -> 1.00): Khoa tinh ket qua tren san khay ni tai posY = 0.26', () => {
+    expect(calculateDiceElevation(0.86)).toBeCloseTo(DICE_REST_Y, 4);
+    expect(calculateDiceElevation(0.95)).toBeCloseTo(DICE_REST_Y, 4);
+    expect(calculateDiceElevation(1.00)).toBeCloseTo(DICE_REST_Y, 4);
+  });
+
+  it('TC-UI02.8d: calculateDiceRotationFactor giam dan va tat han ve 0 tai giai doan 3', () => {
+    expect(calculateDiceRotationFactor(0)).toBe(1.0);
+    expect(calculateDiceRotationFactor(0.55)).toBeCloseTo(0.25, 4);
+    expect(calculateDiceRotationFactor(0.85)).toBe(0);
+    expect(calculateDiceRotationFactor(1.0)).toBe(0);
+  });
+
+  it('TC-UI02.8e: generateRandomDiceSpin sinh 3 goc Euler co do lon 3-4 vong (6pi -> 8pi)', () => {
+    for (let i = 0; i < 20; i++) {
+      const spin = generateRandomDiceSpin();
+      expect(spin).toHaveLength(3);
+      for (const axis of spin) {
+        expect(Number.isFinite(axis)).toBe(true);
+        expect(Math.abs(axis)).toBeGreaterThanOrEqual(6 * Math.PI - 1e-4);
+        expect(Math.abs(axis)).toBeLessThanOrEqual(8 * Math.PI + 1e-4);
+      }
+    }
+  });
+
+  it('[Adversarial Inversion] calculateDiceElevation & RotationFactor xu ly an toan NaN, Infinity, so am', () => {
+    expect(calculateDiceElevation(Number.NaN)).toBe(DICE_REST_Y);
+    expect(calculateDiceElevation(Number.NEGATIVE_INFINITY)).toBe(DICE_REST_Y);
+    expect(calculateDiceElevation(-0.5)).toBe(DICE_REST_Y);
+    expect(calculateDiceElevation(1.5)).toBe(DICE_REST_Y);
+
+    expect(calculateDiceRotationFactor(Number.NaN)).toBe(0);
+    expect(calculateDiceRotationFactor(-1)).toBe(1.0);
+    expect(calculateDiceRotationFactor(2)).toBe(0);
   });
 });

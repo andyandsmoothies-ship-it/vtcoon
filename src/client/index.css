@@ -55,3 +55,27 @@
 .animate-emote-pop {
   animation: emotePop 3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
+
+@theme {
+  --color-slate-850: #131d33;
+}
+
+@keyframes popInSpring {
+  0% {
+    opacity: 0;
+    transform: scale(0.88);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.03);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-in {
+  animation: popInSpring 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+

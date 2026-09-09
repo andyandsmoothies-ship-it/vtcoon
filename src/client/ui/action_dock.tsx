@@ -93,20 +93,24 @@ export function ActionDock({
     }
   };
 
+  const isGlowActive = isMyTurn && !isRollDisabled;
+
   return (
     <nav
       className="pointer-events-auto flex items-center gap-2 md:gap-3 bg-slate-900/90 backdrop-blur-md border border-slate-700/70 rounded-2xl p-2 px-4 shadow-2xl"
       aria-label="Thanh điều khiển tác vụ"
     >
-      {/* Nút Đổ Xúc Xắc (CTA chính) */}
+      {/* Nút Đổ Xúc Xắc (CTA chính có hiệu ứng nhịp thở hào quang vàng kim & nút bấm nổi 3D) */}
       <button
         type="button"
         onClick={handleRollClick}
         disabled={isRollDisabled}
         className={`min-h-[44px] flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-white shadow-lg transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 ${
           isRollDisabled
-            ? 'bg-slate-700/60 text-slate-400 cursor-not-allowed opacity-60'
-            : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 active:scale-95 shadow-emerald-900/30'
+            ? 'bg-slate-700/60 text-slate-400 cursor-not-allowed opacity-60 border-b-4 border-slate-900'
+            : `bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 border-b-4 border-emerald-800 active:border-b-0 active:translate-y-1 shadow-emerald-900/30 ${
+                isGlowActive ? 'ring-4 ring-amber-400/60 shadow-[0_0_20px_rgba(245,158,11,0.5)] animate-pulse' : ''
+              }`
         }`}
         aria-label="Đổ xúc xắc"
       >
@@ -118,43 +122,43 @@ export function ActionDock({
 
       <div className="h-6 w-px bg-slate-700/80" aria-hidden="true" />
 
-      {/* Nút Quản Lý Tài Sản */}
+      {/* Nút Quản Lý Tài Sản với hiệu ứng nổi 3D */}
       <button
         type="button"
         onClick={handleOpenProperties}
         disabled={isBankrupt}
-        className="min-h-[44px] flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-slate-200 hover:text-white bg-slate-800/80 hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed border border-slate-700/60 transition-all text-sm font-medium active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+        className="min-h-[44px] flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-slate-200 hover:text-white bg-slate-800/80 hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed border border-slate-700/60 border-b-2 border-b-slate-950 active:border-b-0 active:translate-y-0.5 transition-all text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
         aria-label="Quản lý tài sản"
       >
         <span aria-hidden="true">🏛️</span>
         <span className="hidden sm:inline">Tài Sản</span>
       </button>
 
-      {/* Nút Xây Dựng / Nâng Cấp */}
+      {/* Nút Xây Dựng / Nâng Cấp với hiệu ứng nổi 3D */}
       <button
         type="button"
         onClick={handleOpenUpgrade}
         disabled={isBankrupt || !actingPlayerId || !(playersInfo[actingPlayerId]?.ownedProperties?.length)}
-        className="min-h-[44px] flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-slate-200 hover:text-white bg-slate-800/80 hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed border border-slate-700/60 transition-all text-sm font-medium active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+        className="min-h-[44px] flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-slate-200 hover:text-white bg-slate-800/80 hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed border border-slate-700/60 border-b-2 border-b-slate-950 active:border-b-0 active:translate-y-0.5 transition-all text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
         aria-label="Xây dựng và nâng cấp bất động sản"
       >
         <span aria-hidden="true">🏗️</span>
         <span className="hidden sm:inline">Xây Dựng</span>
       </button>
 
-      {/* Nút Đàm Phán P2P */}
+      {/* Nút Đàm Phán P2P với hiệu ứng nổi 3D */}
       <button
         type="button"
         onClick={handleOpenTrade}
         disabled={isBankrupt}
-        className="min-h-[44px] flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-slate-200 hover:text-white bg-slate-800/80 hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed border border-slate-700/60 transition-all text-sm font-medium active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+        className="min-h-[44px] flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-slate-200 hover:text-white bg-slate-800/80 hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed border border-slate-700/60 border-b-2 border-b-slate-950 active:border-b-0 active:translate-y-0.5 transition-all text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
         aria-label="Đàm phán thương lượng"
       >
         <span aria-hidden="true">🤝</span>
         <span className="hidden sm:inline">Đàm Phán</span>
       </button>
 
-      {/* Nút Kết Thúc Lượt */}
+      {/* Nút Kết Thúc Lượt với hiệu ứng nổi 3D */}
       <button
         type="button"
         onClick={onEndTurn}
@@ -162,7 +166,7 @@ export function ActionDock({
         className={`min-h-[44px] flex items-center gap-1.5 px-3.5 py-2 rounded-xl border transition-all text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 ${
           isEndDisabled
             ? 'bg-slate-800/40 text-slate-500 border-slate-800 cursor-not-allowed'
-            : 'text-amber-300 hover:text-amber-200 bg-amber-950/30 hover:bg-amber-900/40 border-amber-600/40 active:scale-95'
+            : 'text-amber-300 hover:text-amber-200 bg-amber-950/30 hover:bg-amber-900/40 border-amber-600/40 border-b-2 border-b-amber-950 active:border-b-0 active:translate-y-0.5'
         }`}
         aria-label="Kết thúc lượt"
       >

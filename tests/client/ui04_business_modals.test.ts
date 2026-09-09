@@ -1,5 +1,7 @@
 // [TC-UI04/MSS] Test Suite Slice UI-04: Business Modals Logic & Store Contracts
 import { describe, it, expect, beforeEach } from 'vitest';
+import React from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import {
   getDeedDisplayInfo,
   calculateAuctionIncrements,
@@ -8,6 +10,7 @@ import {
 } from '../../src/client/ui/modals/modal_helpers';
 import { useGameStore } from '../../src/client/store/game_store';
 import { ColorGroup } from '../../src/domain/board_config';
+import { TitleDeedModal } from '../../src/client/ui/modals/title_deed_modal';
 
 describe('[TC-UI04.1/MSS] Tra Cuu Thong Tin So Do (getDeedDisplayInfo)', () => {
   it('Tra cuu chinh xac bang gia 4 cap va chi phi nang cap cho o BĐS binh thuong', () => {
@@ -192,3 +195,61 @@ describe('[TC-UI04.5/MSS] Quan Ly Trang Thai Modals Trong Zustand Store', () => 
     expect(useGameStore.getState().modalPayload).toBeNull();
   });
 });
+
+describe('[TC-UI04.6/MSS] Thẻ Bài Game Vật Lý TitleDeedModal Markup', () => {
+  it('Render TitleDeedModal voi day du ruy-bang, chip phan cap C0-C3 va nut 3D tactile', () => {
+    const html = renderToStaticMarkup(
+      React.createElement(TitleDeedModal, { cellIndex: 1, canBuy: true, isOwned: false })
+    );
+    expect(html).toContain('data-testid="title-deed-modal"');
+    expect(html).toContain('Cần Thơ (Cái Răng)');
+    expect(html).toContain('Giấy Chứng Nhận Quyền Sở Hữu');
+    expect(html).toContain('C0');
+    expect(html).toContain('C1');
+    expect(html).toContain('C2');
+    expect(html).toContain('C3');
+    expect(html).toContain('Đất Nền');
+    expect(html).toContain('Nhà Phố');
+    expect(html).toContain('Khách Sạn');
+    expect(html).toContain('Quần thể Resort/TTTM');
+    expect(html).toContain('Mua BĐS');
+    expect(html).toContain('Bỏ Qua');
+    expect(html).toContain('border-emerald-800');
+    expect(html).toContain('border-slate-950');
+  });
+
+  it('Render TitleDeedModal o trang thai da so huu va cho phep The Chap / Giai Chap', () => {
+    const html = renderToStaticMarkup(
+      React.createElement(TitleDeedModal, {
+        cellIndex: 1,
+        isOwned: true,
+        isOwner: true,
+        isMortgaged: false,
+        ownerName: 'Đại Gia Hà Nội',
+        onMortgage: () => {},
+      })
+    );
+    expect(html).toContain('Đã Sở Hữu (Đại Gia Hà Nội)');
+    expect(html).toContain('Thế Chấp');
+    expect(html).toContain('Đóng');
+  });
+
+  it('Render TitleDeedModal cho o Railroad hien thi 4 cap Ga', () => {
+    const html = renderToStaticMarkup(
+      React.createElement(TitleDeedModal, { cellIndex: 5, canBuy: true, isOwned: false })
+    );
+    expect(html).toContain('Hạ Tầng Giao Thông');
+    expect(html).toContain('1 Ga');
+    expect(html).toContain('4 Ga');
+    expect(html).toContain('Toàn mạng lưới');
+  });
+
+  it('[Adversarial] Render thong bao an toan khi khong tim thay So Do', () => {
+    const html = renderToStaticMarkup(
+      React.createElement(TitleDeedModal, { cellIndex: 0 })
+    );
+    expect(html).toContain('Không tìm thấy thông tin Sổ Đỏ');
+    expect(html).toContain('Đóng');
+  });
+});
+

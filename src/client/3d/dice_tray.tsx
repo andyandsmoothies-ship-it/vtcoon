@@ -1,8 +1,16 @@
 // [UI-S02/MSS] DiceTray — 3D Central dice tray & spring physics falling dice
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { a, useSpring } from '@react-spring/three';
 import { useGameStore } from '../store/game_store';
-import { getDiceFaceRotation } from './dice_math';
+import {
+  getDiceFaceRotation,
+  calculateDiceElevation,
+  calculateDiceRotationFactor,
+  generateRandomDiceSpin,
+  clampDiceFace,
+} from './dice_math';
+import { AudioEngine } from '../audio/audio_engine';
+import { SoundEffect } from '../audio/audio_types';
 
 interface PipDef {
   readonly pos: [number, number, number];
@@ -36,45 +44,31 @@ function SingleDie({
   readonly onRest?: () => void;
   readonly highlight?: boolean;
 }): React.ReactElement {
-  const targetRot = getDiceFaceRotation(face);
-  const spinRot: [number, number, number] = [
-    targetRot[0] + spinOffset[0],
-    targetRot[1] + spinOffset[1],
-    targetRot[2] + spinOffset[2],
-  ];
+  const targetRot = getDiceFaceRotation(clampDiceFace(face));
 
-  const { posX, posY, posZ, rotX, rotY, rotZ } = useSpring({
-    from: {
-      posX: targetX,
-      posY: 3.5,
-      posZ: 0,
-      rotX: spinRot[0],
-      rotY: spinRot[1],
-      rotZ: spinRot[2],
-    },
-    to: {
-      posX: targetX,
-      posY: 0.26,
-      posZ: 0,
-      rotX: targetRot[0],
-      rotY: targetRot[1],
-      rotZ: targetRot[2],
-    },
+  const { t } = useSpring({
+    from: { t: 0 },
+    to: { t: 1 },
     reset: isRolling,
     immediate: !isRolling,
-    config: { tension: 170, friction: 14 },
-    onRest: () => {
-      if (isRolling && onRest) {
+    config: { duration: 1400 },
+    onRest: (result) => {
+      if (isRolling && onRest && (!result || result.finished !== false)) {
         onRest();
       }
     },
   });
 
+  const posY = t.to((val) => calculateDiceElevation(val));
+  const rotX = t.to((val) => targetRot[0] + spinOffset[0] * calculateDiceRotationFactor(val));
+  const rotY = t.to((val) => targetRot[1] + spinOffset[1] * calculateDiceRotationFactor(val));
+  const rotZ = t.to((val) => targetRot[2] + spinOffset[2] * calculateDiceRotationFactor(val));
+
   return (
     <a.group
-      position-x={posX}
+      position-x={targetX}
       position-y={posY}
-      position-z={posZ}
+      position-z={0}
       rotation-x={rotX}
       rotation-y={rotY}
       rotation-z={rotZ}
@@ -101,6 +95,25 @@ export function DiceTray(): React.ReactElement {
   const dice = useGameStore((s) => s.dice);
   const isRolling = useGameStore((s) => s.isRolling);
   const setIsRolling = useGameStore((s) => s.setIsRolling);
+
+  const prevRollingRef = useRef(false);
+  const spinOffsetsRef = useRef<
+    readonly [readonly [number, number, number], readonly [number, number, number]]
+  >([
+    [Math.PI * 6, Math.PI * 8, Math.PI * 6],
+    [-Math.PI * 8, Math.PI * 6, -Math.PI * 8],
+  ]);
+
+  if (isRolling && !prevRollingRef.current) {
+    spinOffsetsRef.current = [generateRandomDiceSpin(), generateRandomDiceSpin()];
+  }
+
+  useEffect(() => {
+    if (isRolling && !prevRollingRef.current) {
+      AudioEngine.playSfx(SoundEffect.DICE_ROLL);
+    }
+    prevRollingRef.current = isRolling;
+  }, [isRolling]);
 
   const isDoubles = dice[0] === dice[1];
   const trimColor = isDoubles ? '#F59E0B' : '#78350F';
@@ -136,14 +149,14 @@ export function DiceTray(): React.ReactElement {
         face={dice[0]}
         targetX={-0.6}
         isRolling={isRolling}
-        spinOffset={[Math.PI * 4, Math.PI * 6, Math.PI * 2]}
+        spinOffset={spinOffsetsRef.current[0]}
         highlight={isDoubles}
       />
       <SingleDie
         face={dice[1]}
         targetX={0.6}
         isRolling={isRolling}
-        spinOffset={[-Math.PI * 4, Math.PI * 8, -Math.PI * 4]}
+        spinOffset={spinOffsetsRef.current[1]}
         highlight={isDoubles}
         onRest={() => setIsRolling(false)}
       />
