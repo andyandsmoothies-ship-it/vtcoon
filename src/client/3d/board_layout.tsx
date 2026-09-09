@@ -4,6 +4,7 @@ import { BOARD_CONFIG } from '../../domain/board_config';
 import { useGameStore } from '../store/game_store';
 import { cellPosition } from './board_coords';
 import { LayeredDioramaTile } from './board_tile';
+import { DiceTray } from './dice_tray';
 
 const CORNER_INDICES = new Set([0, 10, 20, 30]);
 
@@ -28,13 +29,16 @@ export function GameBoard(): React.ReactElement {
         <meshStandardMaterial color="#1E293B" roughness={0.7} />
       </mesh>
 
-      {/* 2. Outer board foundation bevel (20.6 x 20.6) */}
+      {/* 2. Central 3D Dice Tray with falling dice */}
+      <DiceTray />
+
+      {/* 3. Outer board foundation bevel (20.6 x 20.6) */}
       <mesh receiveShadow position={[0, -0.12, 0]}>
         <boxGeometry args={[20.6, 0.16, 20.6]} />
         <meshStandardMaterial color="#0F172A" roughness={0.85} />
       </mesh>
 
-      {/* 3. All 40 tiles seamlessly closed in an unbroken square ring */}
+      {/* 4. All 40 tiles seamlessly closed in an unbroken square ring */}
       {BOARD_CONFIG.map((cell) => (
         <LayeredDioramaTile
           key={cell.index}

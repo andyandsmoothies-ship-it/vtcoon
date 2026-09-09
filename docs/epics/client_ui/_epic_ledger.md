@@ -60,15 +60,16 @@
   - A1: Đổ đôi (doubles) → Highlight xúc xắc vàng, pawn nhảy liên tiếp không dừng.
   - A2: Vật lý xúc xắc kết thúc (onSleep) → emit kết quả số chấm về FSM.
 - **Value Delivered:** Hoạt cảnh bàn cờ sống động — xúc xắc rơi vật lý thật và quân cờ nhảy đàn hồi từng ô.
-- **Lifecycle Status:** ⚪ Đã Quy Hoạch
-- **Tech Stack:** `@react-three/rapier` (RigidBody, CuboidCollider) · `@react-spring/three` (useSpring) · Zustand dispatch
+- **Lifecycle Status:** ✅ Hoàn Thành (Done - 2026-09-09) · 474/474 Tests PASS · Visual Smoke Gate Ready
+- **Tech Stack:** `@react-spring/three` (useSpring) · Zustand dispatch · Procedural 3D Dice Tray
 - **Test Contracts (Visual & Unit):**
-  - `TC-UI02.1`: [FSM emit DICE_ROLLED(value=7)] → [Xúc xắc 3D rơi và dừng, trả về tổng đúng 7 về store]
-  - `TC-UI02.2`: [Pawn di chuyển 7 ô] → [Spring animation kích hoạt đúng 7 lần nhảy, mỗi nhảy duration ≤ 400ms]
-  - `TC-UI02.3`: [Doubles] → [Xúc xắc highlight viền vàng, pawn không dừng sau lần nhảy đầu]
-  - `TC-UI02.4`: [Preload 28 bộ WebP asset] → [Không có texture flash/pop khi thay đổi cấp độ trên bàn cờ]
-- **Tech Debt Nhận từ UI-01:** Preloading `useImage.preload()` — giải quyết trong Task 1 của Slice này.
-- **LOC Budget:** dice_physics.tsx [NEW] ≤ 200L · pawn_animator.tsx [NEW] ≤ 150L
+  - `TC-UI02.1`: [calculatePathWaypoints & getParabolicHeight] → [Tính đúng bước nhảy wrap-around qua ô 0 và quỹ đạo parabol]
+  - `TC-UI02.2`: [getDiceFaceRotation(1..6)] → [Ánh xạ chính xác 6 góc Euler phân biệt hướng lên camera]
+  - `TC-UI02.3`: [useGameStore dice & isRolling] → [Kích hoạt rơi xúc xắc, chặn giá trị ngoài 1-6]
+  - `TC-UI02.4`: [startPawnMove & completePawnMove] → [Quản lý hoạt ảnh quân cờ nhảy từng ô, chống ghi đè khi đang chạy]
+  - `TC-UI02.5`: [preloadTileAssets] → [Sinh đủ 112 URLs chuẩn format, đóng triệt để DEBT-UI01-01]
+- **Tech Debt Nhận từ UI-01:** ✅ Đã đóng `DEBT-UI01-01` qua `src/client/assets/tile_assets.ts`.
+- **LOC Budget:** dice_tray.tsx 153L · pawn_animator.tsx 138L · pawn_path.ts 61L · dice_math.ts 33L · tile_assets.ts 43L
 
 ---
 
@@ -133,8 +134,8 @@
 
 | Slice | Tiêu đề | Trạng thái | Use Case Refs | Value Cốt Lõi |
 |---|---|:---:|---|---|
-| **UI-01** | Sa Bàn 3D & Standee 2.5D | 🔵 Sắp Thi Công | UC-004, UC-016, design.md | Bàn cờ thật 3D 40 ô địa phương |
-| **UI-02** | Spring Pawn & Dice Physics | ⚪ Đã Quy Hoạch | UC-011, UC-016, ADR-0002 | Hoạt ảnh lò xo + xúc xắc rơi |
+| **UI-01** | Sa Bàn 3D & Standee 2.5D | ✅ Hoàn Thành | UC-004, UC-016, design.md | Bàn cờ thật 3D 40 ô địa phương |
+| **UI-02** | Spring Pawn & Dice Physics | ✅ Hoàn Thành | UC-011, UC-016, ADR-0002 | Hoạt ảnh lò xo + xúc xắc rơi |
 | **UI-03** | HUD Tài Chính DOM | ⚪ Đã Quy Hoạch | UC-002, UC-016, ADR-0002 | Bảng điều khiển realtime Zustand |
 | **UI-04** | Modals Nghiệp Vụ | ⚪ Đã Quy Hoạch | UC-020, UC-022, UC-028, UC-038 | Giao diện quyết định kinh doanh |
 | **UI-05** | Audio Engine Vùng Miền | ⚪ Đã Quy Hoạch | ADR-0002, design.md §2 | Âm thanh không gian 4 cạnh địa lý |
@@ -145,10 +146,10 @@
 
 > Trạng thái khởi điểm: 0 khoản nợ. Các khoản nợ phát sinh sẽ được đăng ký tại đây với Slice nhận.
 
-| Mã Nợ | Mô tả | Slice Phát Sinh | Slice Nhận |
-|---|---|---|---|
-| DEBT-UI01-01 | Preloading 28 bộ WebP bằng useImage.preload() khi Lobby load | UI-01 | UI-02 Task 1 |
-| DEBT-UI01-02 | Hoạt ảnh nhấp nhô điều hòa sin(omega*t) trên Standee | UI-01 | UI-02 Task 2 |
+| Mã Nợ | Mô tả | Slice Phát Sinh | Slice Nhận | Trạng Thái |
+|---|---|---|---|:---:|
+| DEBT-UI01-01 | Preloading 28 bộ WebP bằng preloadTileAssets() | UI-01 | UI-02 Task 1 | ✅ ĐÃ ĐÓNG |
+| DEBT-UI01-02 | Hoạt ảnh nhấp nhô điều hòa sin(omega*t) trên Standee | UI-01 | UI-02 Task 2 | ⚪ Đang Chờ |
 
 ---
 

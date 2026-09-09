@@ -6,23 +6,8 @@ import React from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import type { Player } from '../domain/room';
-import { PLAYER_TOKEN_PALETTE } from '../domain/theme';
 import { GameBoard } from './3d/board_layout';
-import { cellPosition as _cellPosition } from './3d/board_coords';
-
-function PlayerToken({ player, index }: { player: Player; index: number }): React.ReactElement {
-  const pos = _cellPosition(player.position);
-  return (
-    <mesh position={[pos[0], 0.45, pos[2]]} castShadow>
-      <sphereGeometry args={[0.3, 16, 16]} />
-      <meshStandardMaterial
-        color={PLAYER_TOKEN_PALETTE[index % PLAYER_TOKEN_PALETTE.length]}
-        roughness={0.2}
-        metalness={0.4}
-      />
-    </mesh>
-  );
-}
+import { PawnAnimator } from './3d/pawn_animator';
 
 export function GameCanvas({ players = [] }: { players?: Player[] }): React.ReactElement {
   return (
@@ -49,9 +34,7 @@ export function GameCanvas({ players = [] }: { players?: Player[] }): React.Reac
       />
       <directionalLight position={[-15, 20, -15]} intensity={0.6} />
       <GameBoard />
-      {players.map((p, i) => (
-        <PlayerToken key={p.id} player={p} index={i} />
-      ))}
+      <PawnAnimator players={players} />
     </Canvas>
   );
 }
