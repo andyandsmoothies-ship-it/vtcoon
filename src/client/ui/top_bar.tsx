@@ -1,6 +1,7 @@
-// [UI-S03/MSS] TopBar Component — Round info, turn timer & treasury pool
+// [UI-S03/MSS][UI-S05/MSS] TopBar Component — Round info, turn timer, treasury pool & audio toggle
 import React from 'react';
 import { useGameStore } from '../store/game_store';
+import { useAudioStore } from '../store/audio_store';
 import { formatCurrency, formatTimeRemaining } from './ui_helpers';
 
 export function TopBar(): React.ReactElement {
@@ -8,6 +9,8 @@ export function TopBar(): React.ReactElement {
   const maxRounds = useGameStore((state) => state.maxRounds);
   const turnTimeRemaining = useGameStore((state) => state.turnTimeRemaining);
   const treasuryPool = useGameStore((state) => state.treasuryPool);
+  const isMuted = useAudioStore((state) => state.isMuted);
+  const toggleMute = useAudioStore((state) => state.toggleMute);
 
   const isLowTime = turnTimeRemaining <= 10;
   const timerColorClass = isLowTime
@@ -47,6 +50,21 @@ export function TopBar(): React.ReactElement {
             {formatCurrency(treasuryPool)}
           </span>
         </div>
+
+        <div className="h-4 w-px bg-slate-700" aria-hidden="true" />
+
+        {/* Nút Bật / Tắt âm thanh */}
+        <button
+          type="button"
+          onClick={toggleMute}
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors cursor-pointer text-xs font-medium border border-slate-600/50"
+          title={isMuted ? 'Bật âm thanh' : 'Tắt âm thanh'}
+          aria-label={isMuted ? 'Bật âm thanh' : 'Tắt âm thanh'}
+          data-testid="mute-toggle-button"
+        >
+          <span className="text-sm" aria-hidden="true">{isMuted ? '🔇' : '🔊'}</span>
+          <span className="hidden sm:inline">{isMuted ? 'Tắt' : 'Bật'}</span>
+        </button>
       </div>
     </header>
   );

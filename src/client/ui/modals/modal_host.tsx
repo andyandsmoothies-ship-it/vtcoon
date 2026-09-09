@@ -1,4 +1,4 @@
-// [UI-S04/MSS] ModalHost — Switchboard for business modals wrapped inside ModalBackdrop
+// [UI-S04/MSS][UI-S05/MSS] ModalHost — Switchboard for business modals with SFX integration
 import React, { useEffect } from 'react';
 import { useGameStore, ModalPayloadMap } from '../../store/game_store';
 import { ModalBackdrop } from './modal_backdrop';
@@ -6,6 +6,8 @@ import { TitleDeedModal } from './title_deed_modal';
 import { AuctionModal } from './auction_modal';
 import { TradeModal } from './trade_modal';
 import { EventCardModal } from './event_card_modal';
+import { AudioEngine } from '../../audio/audio_engine';
+import { SoundEffect } from '../../audio/audio_types';
 
 export function ModalHost(): React.ReactElement | null {
   const activeModal = useGameStore((state) => state.activeModal);
@@ -32,6 +34,13 @@ export function ModalHost(): React.ReactElement | null {
     return () => clearInterval(timer);
   }, [activeModal]);
 
+  // SFX khi mở thẻ sự kiện
+  useEffect(() => {
+    if (activeModal === 'event') {
+      AudioEngine.playSfx(SoundEffect.CARD_DRAW);
+    }
+  }, [activeModal]);
+
   if (!activeModal || !modalPayload) {
     return null;
   }
@@ -51,7 +60,10 @@ export function ModalHost(): React.ReactElement | null {
             canBuy={payload.canBuy ?? (!owner && myPlayer ? myPlayer.balance >= 600 : true)}
             isOwned={Boolean(owner)}
             ownerName={owner?.name}
-            onBuy={closeModal}
+            onBuy={() => {
+              AudioEngine.playSfx(SoundEffect.BUY_PROPERTY);
+              closeModal();
+            }}
             onPass={closeModal}
             onClose={closeModal}
           />
@@ -68,7 +80,10 @@ export function ModalHost(): React.ReactElement | null {
           bidderName={(modalPayload as ModalPayloadMap['auction']).highestBidderId ? playersInfo[(modalPayload as ModalPayloadMap['auction']).highestBidderId!]?.name : undefined}
           myBalance={myPlayer?.balance}
           myId={myId}
-          onBid={(amount) => updateModalPayload<'auction'>({ currentBid: amount, highestBidderId: myId, timeRemaining: 15 })}
+          onBid={(amount) => {
+            AudioEngine.playSfx(SoundEffect.AUCTION_BID);
+            updateModalPayload<'auction'>({ currentBid: amount, highestBidderId: myId, timeRemaining: 15 });
+          }}
           onPass={() => updateModalPayload<'auction'>({ hasPassed: true })}
           onClose={closeModal}
         />
@@ -87,7 +102,10 @@ export function ModalHost(): React.ReactElement | null {
           initialRequested={(modalPayload as ModalPayloadMap['trade']).requestedProperties}
           initialCashOffer={(modalPayload as ModalPayloadMap['trade']).cashOffer}
           initialCashRequest={(modalPayload as ModalPayloadMap['trade']).cashRequest}
-          onSubmitTrade={closeModal}
+          onSubmitTrade={() => {
+            AudioEngine.playSfx(SoundEffect.TRADE_SUCCESS);
+            closeModal();
+          }}
           onClose={closeModal}
         />
       )}

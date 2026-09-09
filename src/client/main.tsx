@@ -1,4 +1,4 @@
-// [UI-S01/MSS][UI-S03/MSS] Client Entrypoint — Hybrid Viewport (WebGL Canvas Z-0 + DOM HUD Z-10)
+// [UI-S01/MSS][UI-S03/MSS][UI-S05/MSS] Client Entrypoint — Hybrid Viewport + Audio Engine
 import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
@@ -6,6 +6,8 @@ import { GameCanvas } from './game_canvas';
 import { HudContainer } from './ui/hud_container';
 import { useGameStore } from './store/game_store';
 import { PLAYER_TOKEN_PALETTE } from '../domain/theme';
+import { AudioEngine } from './audio/audio_engine';
+import { SoundEffect } from './audio/audio_types';
 
 export function App(): React.ReactElement {
   const setPlayersInfo = useGameStore((state) => state.setPlayersInfo);
@@ -18,6 +20,10 @@ export function App(): React.ReactElement {
   const playerPositions = useGameStore((state) => state.playerPositions);
 
   useEffect(() => {
+    // Khởi tạo AudioEngine và mở khóa Web Audio context
+    AudioEngine.init();
+    AudioEngine.handlePawnLanded(0);
+
     // Initial demo setup for visual inspection
     setPlayersInfo({
       p1: {
@@ -49,11 +55,15 @@ export function App(): React.ReactElement {
     const d1 = Math.floor(Math.random() * 6) + 1;
     const d2 = Math.floor(Math.random() * 6) + 1;
     triggerDiceRoll([d1, d2]);
+    AudioEngine.playSfx(SoundEffect.DICE_ROLL);
+
     const activeId = currentTurnPlayerId ?? 'p1';
     const currentPos = playerPositions[activeId] ?? 0;
     const targetCell = (currentPos + d1 + d2) % 40;
     setTimeout(() => {
       startPawnMove(activeId, targetCell);
+      AudioEngine.playSfx(SoundEffect.PAWN_STEP);
+      AudioEngine.handlePawnLanded(targetCell);
     }, 650);
   };
 
