@@ -66,3 +66,19 @@ export function decideBotIntent(
       return null;
   }
 }
+
+/**
+ * Chuyển giao quyền điều khiển của người chơi sang Bot khi hết thời gian ân hạn.
+ * [UC-GAME-008/MSS]
+ */
+export function takeover(room: Room, playerId: string): boolean {
+  const player = room.players.find((p) => p.id === playerId);
+  if (!player) return false;
+  player.isBot = true;
+  return true;
+}
+
+export const BotEngine = {
+  decideIntent: decideBotIntent,
+  takeover,
+};

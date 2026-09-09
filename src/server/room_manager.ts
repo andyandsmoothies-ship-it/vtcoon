@@ -257,8 +257,11 @@ export class RoomManager {
     const MAX_INTENTS = 50;
 
     while (safetyCounter < MAX_INTENTS) {
+      const active = room.players[room.currentPlayerIndex];
+      if (!active || !active.isBot || active.id !== current.id) break;
+
       const intent = decideBotIntent(
-        current, room,
+        active, room,
         this.registries.get(roomCode) ?? new Map(),
         this.propertyStates.get(roomCode) ?? new Map(),
         config,
@@ -267,11 +270,12 @@ export class RoomManager {
 
       // INTENT_ROLL không qua dispatchPlayerIntent — gọi handleRollDice trực tiếp
       if (intent.type === 'INTENT_ROLL') {
-        this.handleRollDice(roomCode, current.id);
-        break;
+        this.handleRollDice(roomCode, active.id);
+        safetyCounter++;
+        continue;
       }
 
-      const result = this.handlePlayerIntent(roomCode, current.id, intent as PlayerIntent);
+      const result = this.handlePlayerIntent(roomCode, active.id, intent as PlayerIntent);
       if (!result.success) break;
 
       safetyCounter++;

@@ -21,6 +21,7 @@ export interface PlayerHudInfo {
   readonly mortgageLoans?: Record<number, number>;
   readonly inAudit?: boolean;
   readonly bankrupt?: boolean;
+  readonly isBot?: boolean;
 }
 
 export type ActiveModalType = 'deed' | 'auction' | 'trade' | 'event' | null;

@@ -183,7 +183,7 @@ const CHANCE_HANDLERS: Partial<Record<ChanceCardId, ChanceHandler>> = {
     // Người rút thẻ nhận 50% phí cảng từ mỗi chuyến tàu của đối thủ × 2 vòng
     if (activeModifiers) {
       activeModifiers.push({
-        type: ChanceCardId.CC_PORT_EXCLUSIVE as unknown as MarketCardId,
+        type: ChanceCardId.CC_PORT_EXCLUSIVE,
         affectedCells: INFRA_CELLS,
         remainingRounds: 2,
         multiplier: 0.5,

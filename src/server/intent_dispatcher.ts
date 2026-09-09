@@ -17,11 +17,16 @@ export type PlayerIntent =
   | { type: 'INTENT_END_TURN' }
   | { type: 'INTENT_INVEST'; stake: number }
   | { type: 'INTENT_SKIP' }
-  | { type: 'INTENT_BAIL_OUT' };
+  | { type: 'INTENT_BAIL_OUT' }
+  | { type: 'INTENT_ROLL' };
 
 type IntentHandler = (mgr: RoomManager, rc: string, p: string, intent: PlayerIntent) => { success: boolean; reason?: string };
 
 const INTENT_DISPATCH: Record<PlayerIntent['type'], IntentHandler> = {
+  INTENT_ROLL: (m, rc, p) => {
+    const res = m.handleRollDice(rc, p);
+    return { success: res !== undefined, reason: res ? undefined : 'CANNOT_ROLL' };
+  },
   INTENT_BUY: (m, rc, p) => {
     const res = m.handleBuyProperty(rc, p);
     return { success: res?.result === BuyResult.Success, reason: res?.result };

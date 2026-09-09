@@ -2,8 +2,8 @@ import type { Room } from '../domain/room';
 import { BOARD_SIZE } from '../domain/room';
 import type { PropertyRegistry, PropertyStateMap } from '../domain/property_manager';
 
-const HEARTBEAT_INTERVAL_MS = 5_000;
-const GRACE_PERIOD_MS       = 60_000;
+export const HEARTBEAT_INTERVAL_MS = 5_000;
+export const GRACE_PERIOD_MS       = 60_000;
 
 export enum SessionState {
   Connected    = 'Connected',
