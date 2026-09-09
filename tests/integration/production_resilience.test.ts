@@ -226,7 +226,7 @@ describe('[TC-E2E-RESILIENCE/MSS] Production-Grade Resilience & Defensive Testin
         sellerId: 'P1', buyerId: 'P2', cellIndex: 3, price: 1000,
       });
       expect(tradeRes.success).toBe(true);
-      // P2 trả 1.050, P1 nhận 1.000, Kho bạc nhận 50 -> Tổng Cash + Treasury không đổi
+      // P2 trả 1.000, P1 nhận 950 (sau thuế 5%), Kho bạc nhận 50 -> Tổng Cash + Treasury không đổi
       assertConservation();
 
       // T5: P2 thế chấp ô 03 (nhận 300 Tr. vay)

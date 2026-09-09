@@ -1,4 +1,6 @@
-// [UC-GAME-004/MSS][UC-GAME-006/A1][UC-GAME-006/A2] Session Manager
+import type { Room } from '../domain/room';
+import { BOARD_SIZE } from '../domain/room';
+import type { PropertyRegistry, PropertyStateMap } from '../domain/property_manager';
 
 const HEARTBEAT_INTERVAL_MS = 5_000;
 const GRACE_PERIOD_MS       = 60_000;
@@ -16,22 +18,63 @@ export interface Session {
 }
 
 export interface CellDelta {
-  readonly index:    number;
-  readonly ownerId?:  string | null;
-  readonly level?:   number;
-  readonly isETC?:   boolean;
+  readonly index:        number;
+  readonly ownerId?:     string | null;
+  readonly level?:       number;
+  readonly isETC?:       boolean;
+  readonly isMortgaged?: boolean;
 }
 
 export interface PlayerDelta {
-  readonly id:       string;
-  readonly position: number;
-  readonly balance:  number;
+  readonly id:        string;
+  readonly position:  number;
+  readonly balance:   number;
+  readonly bankrupt?: boolean;
 }
 
 export interface DeltaPayload {
   readonly tick:     number;
   readonly cells:    ReadonlyArray<CellDelta>;
-  readonly players?:  ReadonlyArray<PlayerDelta>;
+  readonly players?: ReadonlyArray<PlayerDelta>;
+}
+
+export function buildDeltaFromRoom(
+  room: Room,
+  registry: PropertyRegistry,
+  stateMap: PropertyStateMap,
+  tick: number,
+): DeltaPayload {
+  const mortgagedSet = new Set<number>();
+  for (const player of room.players) {
+    for (const cellIndex of player.mortgagedProperties ?? []) {
+      mortgagedSet.add(cellIndex);
+    }
+  }
+
+  const cells: CellDelta[] = [];
+  for (let i = 0; i < BOARD_SIZE; i++) {
+    const ownerId = registry.get(i) ?? null;
+    const state = stateMap.get(i);
+    const isM = mortgagedSet.has(i);
+
+    const cellDelta: CellDelta = {
+      index: i,
+      ownerId,
+      ...(state?.level !== undefined ? { level: state.level } : {}),
+      ...(state?.isETC ? { isETC: true } : {}),
+      ...(isM ? { isMortgaged: true } : {}),
+    };
+    cells.push(cellDelta);
+  }
+
+  const players: PlayerDelta[] = room.players.map((p) => ({
+    id: p.id,
+    position: p.position,
+    balance: p.balance,
+    ...(p.bankrupt ? { bankrupt: true } : {}),
+  }));
+
+  return buildDeltaPayload({ tick, cells, players });
 }
 
 export function buildDeltaPayload(options: {
@@ -39,17 +82,34 @@ export function buildDeltaPayload(options: {
   cells: ReadonlyArray<CellDelta>;
   players?: ReadonlyArray<PlayerDelta>;
 }): DeltaPayload;
+export function buildDeltaPayload(options: {
+  tick: number;
+  room: Room;
+  registry: PropertyRegistry;
+  stateMap: PropertyStateMap;
+}): DeltaPayload;
 export function buildDeltaPayload(
   tick: number,
   cells?: ReadonlyArray<CellDelta>,
   players?: ReadonlyArray<PlayerDelta>,
 ): DeltaPayload;
 export function buildDeltaPayload(
-  tickOrOptions: number | { tick: number; cells: ReadonlyArray<CellDelta>; players?: ReadonlyArray<PlayerDelta> },
+  tickOrOptions:
+    | number
+    | { tick: number; cells: ReadonlyArray<CellDelta>; players?: ReadonlyArray<PlayerDelta> }
+    | { tick: number; room: Room; registry: PropertyRegistry; stateMap: PropertyStateMap },
   cells?: ReadonlyArray<CellDelta>,
   players?: ReadonlyArray<PlayerDelta>,
 ): DeltaPayload {
   if (typeof tickOrOptions === 'object') {
+    if ('room' in tickOrOptions) {
+      return buildDeltaFromRoom(
+        tickOrOptions.room,
+        tickOrOptions.registry,
+        tickOrOptions.stateMap,
+        tickOrOptions.tick,
+      );
+    }
     return {
       tick: tickOrOptions.tick,
       cells: tickOrOptions.cells.map((c) => ({ ...c })),

@@ -196,7 +196,7 @@ describe('[TC-05.5/MSS] P2P trade dat Cap 0', () => {
     const res = executeP2PTrade(room, 'p1', 'p2', 1, 800, reg, sm);
     expect(res.success, String(res.reason)).toBe(true);
     expect(reg.get(1)).toBe('p2');
-    expect(room.players[1]!.balance).toBe(10000 - 840);
+    expect(room.players[1]!.balance).toBe(10000 - 800);
     expect(room.treasury).toBe(40);
   });
   it('[TC-05.5-inv/Adversarial] BDS co cong trinh -> PROPERTY_HAS_BUILDING', () => {

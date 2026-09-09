@@ -15,6 +15,7 @@ Any documents, artifacts of this project must be in Vietnamese. This project is 
 - **SSOT & Player Intent Integrity**: All player business decisions (buy property, upgrade, trade) must be explicit Intent/Action transitions per ADR-0001. Never execute player choices as implicit side-effects of pawn movement.
 - **Subagent Artifact Persistence (Dual Output Pattern)**: Authoring subagents (planners, slicers) creating large artifacts (`docs/plans/`, `issues/`) MUST write directly to disk files using `write_to_file` in `Workspace: "inherit"` and return only a concise summary (<20 lines) with clickable file links. Read-only reviewers (`spec-reviewer`, `code-reviewer`) remain strictly read-only and report 1-page structured packets directly into chat.
 - **Lean Runtime Observability**: Zero silent error swallowing (empty `catch` forbidden). All domain state transitions (FSM, transactions) must emit structured logs (`{ event, correlationId, timestamp, delta }`). Rejection of player actions must return an explicit Reason Code.
+- **Vertical Slice Completeness & Closed-Loop Testing**: Any new state field on `Player` or `PropertyState` (such as `bankrupt`, `isMortgaged`) must be mapped simultaneously to `DeltaPayload` (`CellDelta` / `PlayerDelta`). Strictly forbid test mirroring (Bug-Codification); every emitted event card or modifier (Producer) must have a test proving that the beneficiary or paying consumer changes actual cash flow.
 
 ## 2. DEFINITION OF DONE
 A task is COMPLETE only when:

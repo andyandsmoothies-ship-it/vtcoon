@@ -3,10 +3,12 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import {
   SessionManager,
   buildDeltaPayload,
+  buildDeltaFromRoom,
   type DeltaPayload,
   type CellDelta,
   type PlayerDelta,
 } from '../../src/server/session_manager';
+import { RoomManager } from '../../src/server/room_manager';
 
 describe('[TC-05.8/MSS] DeltaPayload VSC 3D Synchronization', () => {
   let sessionMgr: SessionManager;
@@ -43,6 +45,33 @@ describe('[TC-05.8/MSS] DeltaPayload VSC 3D Synchronization', () => {
       });
       expect(last?.cells[0]?.level).toBe(2);
       expect(last?.cells[0]?.isETC).toBe(true);
+    });
+
+    it('[TC-05.8/MSS] lưu trữ và hoàn trả đầy đủ isMortgaged trong CellDelta và bankrupt trong PlayerDelta', () => {
+      const cell: CellDelta = {
+        index: 3,
+        ownerId: 'p1',
+        level: 0,
+        isMortgaged: true,
+      };
+      const player: PlayerDelta = {
+        id: 'p2',
+        position: 10,
+        balance: -200,
+        bankrupt: true,
+      };
+      const delta: DeltaPayload = {
+        tick: 15,
+        cells: [cell],
+        players: [player],
+      };
+
+      sessionMgr.broadcastDelta(delta);
+      const last = sessionMgr.getLastDelta();
+
+      expect(last).toBeDefined();
+      expect(last?.cells[0]?.isMortgaged).toBe(true);
+      expect(last?.players?.[0]?.bankrupt).toBe(true);
     });
   });
 
@@ -229,6 +258,75 @@ describe('[TC-05.8/MSS] DeltaPayload VSC 3D Synchronization', () => {
       sessionMgr.broadcastDelta(delta);
       const last = sessionMgr.getLastDelta();
       expect(last?.players).toBeUndefined();
+    });
+  });
+
+  describe('[TC-05.8-extract/MSS] Trích xuất DeltaPayload từ trạng thái Room (buildDeltaFromRoom & createDelta)', () => {
+    it('trích xuất chính xác 40 ô cờ kèm isMortgaged, level, isETC và trạng thái bankrupt của players', () => {
+      const mgr = new RoomManager();
+      const room = mgr.createRoom('p1');
+      mgr.joinRoom(room.roomCode, 'p2');
+      mgr.startGame(room.roomCode);
+
+      const reg = (mgr as any).registries.get(room.roomCode) as Map<number, string>;
+      const sm = (mgr as any).propertyStates.get(room.roomCode) as Map<number, any>;
+
+      reg.set(1, 'p1');
+      sm.set(1, { level: 2 });
+
+      reg.set(3, 'p1');
+      room.players[0]!.mortgagedProperties = [3];
+
+      reg.set(5, 'p2');
+      sm.set(5, { level: 0, isETC: true });
+
+      room.players[1]!.bankrupt = true;
+
+      // Trích xuất qua RoomManager.createDelta
+      const delta = mgr.createDelta(room.roomCode, 100);
+      expect(delta).toBeDefined();
+      expect(delta?.tick).toBe(100);
+      expect(delta?.cells).toHaveLength(40);
+      expect(delta?.players).toHaveLength(2);
+
+      // Ô 1: p1 sở hữu, level 2
+      const cell1 = delta?.cells[1];
+      expect(cell1?.ownerId).toBe('p1');
+      expect(cell1?.level).toBe(2);
+      expect(cell1?.isMortgaged).toBeUndefined();
+
+      // Ô 3: p1 sở hữu, đang thế chấp (isMortgaged = true)
+      const cell3 = delta?.cells[3];
+      expect(cell3?.ownerId).toBe('p1');
+      expect(cell3?.isMortgaged).toBe(true);
+
+      // Ô 5: p2 sở hữu, isETC = true
+      const cell5 = delta?.cells[5];
+      expect(cell5?.ownerId).toBe('p2');
+      expect(cell5?.isETC).toBe(true);
+
+      // Ô 0: GO (không có chủ)
+      expect(delta?.cells[0]?.ownerId).toBeNull();
+
+      // Players: p1 bình thường, p2 bankrupt
+      expect(delta?.players?.[0]?.bankrupt).toBeUndefined();
+      expect(delta?.players?.[1]?.bankrupt).toBe(true);
+
+      // Kiểm tra overload buildDeltaPayload với { tick, room, registry, stateMap }
+      const directDelta = buildDeltaPayload({
+        tick: 200,
+        room,
+        registry: reg,
+        stateMap: sm,
+      });
+      expect(directDelta.tick).toBe(200);
+      expect(directDelta.cells[3]?.isMortgaged).toBe(true);
+      expect(directDelta.players?.[1]?.bankrupt).toBe(true);
+    });
+
+    it('createDelta trả về undefined khi roomCode không tồn tại', () => {
+      const mgr = new RoomManager();
+      expect(mgr.createDelta('NON_EXIST', 1)).toBeUndefined();
     });
   });
 });

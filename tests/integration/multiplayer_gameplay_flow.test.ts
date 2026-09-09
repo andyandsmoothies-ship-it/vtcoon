@@ -43,10 +43,10 @@ function step1_P1BuyAndTradeToP2(mgr: RoomManager, room: Room): void {
     price: 1_000,
   });
   expect(tradeRes.success, 'Giao dịch P2P ô 01 thành công').toBe(true);
-  // P2 bị trừ 1.000 + 50 (5% thuế) = 1.050 Tr. (15.000 - 1.050 = 13.950)
-  expect(room.players[1]!.balance, 'P2 bị trừ 1.050 Tr. (1.000 giá + 50 thuế)').toBe(13_950);
-  // P1 nhận đủ 1.000 Tr. (16.400 + 1.000 = 17.400)
-  expect(room.players[0]!.balance, 'P1 nhận 1.000 Tr. từ P2 (16.400 + 1.000 = 17.400)').toBe(17_400);
+  // P2 (người mua) bị trừ đúng 1.000 Tr. (15.000 - 1.000 = 14.000)
+  expect(room.players[1]!.balance, 'P2 bị trừ đúng 1.000 Tr. giá mua').toBe(14_000);
+  // P1 (người bán) nhận 950 Tr. sau thuế (16.400 + 950 = 17.350)
+  expect(room.players[0]!.balance, 'P1 nhận 950 Tr. sau khi trừ 5% thuế (16.400 + 950 = 17.350)').toBe(17_350);
   // Kho bạc nhận 50 Tr. tiền thuế
   expect(room.treasury, 'Kho bạc nhận 50 Tr. thuế chuyển nhượng').toBe(50);
   // Ô 01 chuyển chủ sang P2 trong registry
@@ -66,26 +66,26 @@ function step2_P2MonopolyUpgradeDowngradeAndP3Safe(mgr: RoomManager, room: Room)
   expect(roll2, 'P2 tung xúc xắc thành công').toBeDefined();
   expect(roll2!.passedGo, 'P2 vượt qua ô GO nhận 2.000').toBe(true);
   expect(roll2!.player.position, 'P2 dừng chân tại ô 03 (An Giang)').toBe(3);
-  expect(room.players[1]!.balance, 'P2 có 15.950 (13.950 + 2.000)').toBe(15_950);
+  expect(room.players[1]!.balance, 'P2 có 16.000 (14.000 + 2.000)').toBe(16_000);
   expect(room.phase, 'FSM ở ActionPhase do ô 03 chưa có chủ').toBe(TurnPhase.ActionPhase);
 
   // P2 mua ô 03 với giá 600 Tr. -> hoàn thành Monopoly Nâu (ô 01 + ô 03)
   const buyRes = mgr.handlePlayerIntent(room.roomCode, 'P2', { type: 'INTENT_BUY' });
   expect(buyRes.success, 'P2 mua ô 03 thành công').toBe(true);
-  expect(room.players[1]!.balance, 'P2 trừ 600 mua ô 03 còn 15.350').toBe(15_350);
+  expect(room.players[1]!.balance, 'P2 trừ 600 mua ô 03 còn 15.400').toBe(15_400);
   expect(mgr.getPropertyOwner(room.roomCode, 3), 'P2 sở hữu ô 03').toBe('P2');
   expect(room.phase, 'FSM chuyển sang PropertyManagement').toBe(TurnPhase.PropertyManagement);
 
   // P2 nâng cấp ô 01 lên C1 Shophouse (chi phí 300 Tr.)
   const upRes = mgr.handlePlayerIntent(room.roomCode, 'P2', { type: 'INTENT_UPGRADE', cellIndex: 1 });
   expect(upRes.success, 'P2 nâng cấp C1 ô 01 thành công').toBe(true);
-  expect(room.players[1]!.balance, 'P2 trừ 300 phí C1 còn 15.050').toBe(15_050);
+  expect(room.players[1]!.balance, 'P2 trừ 300 phí C1 còn 15.100').toBe(15_100);
   expect(mgr.getPropertyState(room.roomCode, 1)?.level, 'Cấp độ công trình ô 01 là 1 (C1)').toBe(1);
 
   // P2 hạ cấp ô 01 về C0, nhận lại đúng 50% chi phí xây dựng (+150 Tr.)
   const downRes = mgr.handlePlayerIntent(room.roomCode, 'P2', { type: 'INTENT_DOWNGRADE', cellIndex: 1 });
   expect(downRes.success, 'P2 hạ cấp ô 01 về C0 thành công').toBe(true);
-  expect(room.players[1]!.balance, 'P2 nhận lại 150 Tr. hoàn trả còn 15.200').toBe(15_200);
+  expect(room.players[1]!.balance, 'P2 nhận lại 150 Tr. hoàn trả còn 15.250').toBe(15_250);
   expect(mgr.getPropertyState(room.roomCode, 1)?.level, 'Cấp độ công trình ô 01 trở về 0 (C0)').toBe(0);
 
   // P2 chuyển nhượng ô 03 cho P1 qua INTENT_TRADE_OFFER (giá 600 Tr., thuế 30 Tr. nộp Kho bạc)
@@ -97,8 +97,8 @@ function step2_P2MonopolyUpgradeDowngradeAndP3Safe(mgr: RoomManager, room: Room)
     price: 600,
   });
   expect(tradeRes.success, 'P2 chuyển nhượng ô 03 cho P1 thành công').toBe(true);
-  expect(room.players[0]!.balance, 'P1 trừ 630 Tr. (600 + 30 thuế) còn 16.770').toBe(16_770);
-  expect(room.players[1]!.balance, 'P2 nhận 600 Tr. còn 15.800').toBe(15_800);
+  expect(room.players[0]!.balance, 'P1 trừ đúng 600 Tr. còn 16.750').toBe(16_750);
+  expect(room.players[1]!.balance, 'P2 nhận 570 Tr. sau thuế (600 - 30) còn 15.820').toBe(15_820);
   expect(room.treasury, 'Kho bạc tăng thêm 30 Tr. lên 80 Tr.').toBe(80);
   expect(mgr.getPropertyOwner(room.roomCode, 3), 'Ô 03 chuyển chủ sang P1').toBe('P1');
 

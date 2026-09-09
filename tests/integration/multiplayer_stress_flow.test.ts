@@ -204,10 +204,10 @@ describe('[TC-E2E-STRESS/MSS] Living E2E Test: Multiplayer Stress Flow (3 Player
     const tradeRes = INTENT_TRADE_OFFER(mgr, rc, 'P2', 'P2', 'P3', 9, 1_000);
     expect(tradeRes.success, 'P2 ban o 09 cho P3 thanh cong').toBe(true);
     expect(mgr.getPropertyOwner(rc, 9), 'Quyen so huu o 09 chuyen sang P3').toBe('P3');
-    // P3 tra 1.000 + 50 thue = 1.050
-    expect(room.players[2]!.balance, 'P3 bi tru 1.050 (gia + thue)').toBe(p3BalanceBefore - 1_050);
-    // P2 nhan du 1.000
-    expect(room.players[1]!.balance, 'P2 nhan du 1.000 len 1.550').toBe(1_550);
+    // P3 (nguoi mua) tra dung 1.000
+    expect(room.players[2]!.balance, 'P3 bi tru dung 1.000').toBe(p3BalanceBefore - 1_000);
+    // P2 (nguoi ban) nhan 950 sau thue (1.000 - 50 = 950) -> 550 + 950 = 1.500
+    expect(room.players[1]!.balance, 'P2 nhan 950 sau thue len 1.500').toBe(1_500);
     // Kho bac nhan 50 Tr. thue
     expect(room.treasury, 'Kho bac nhan dung 50 thue chuyen nhuong').toBe(50);
 

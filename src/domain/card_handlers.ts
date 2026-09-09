@@ -325,7 +325,7 @@ export function executeChanceCard(
       // Người rút thẻ nhận 50% phí cảng từ mỗi chuyến tàu của đối thủ × 2 vòng
       if (activeModifiers) {
         activeModifiers.push({
-          type: card as unknown as MarketCardId,
+          type: card,
           affectedCells: INFRA_CELLS,
           remainingRounds: 2,
           multiplier: 0.5,

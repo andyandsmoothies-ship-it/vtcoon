@@ -93,7 +93,7 @@
 - **Vị trí mã nguồn:** [`src/domain/property_manager.ts:274-285, 294-301`](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/property_manager.ts#L274) và [`src/server/property_actions.ts:31-41`](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/property_actions.ts#L31-L41).
 - **Thực trạng kiểm toán:**
   - Chi phí nâng cấp: `1.000 Tr. VNĐ`.
-  - `upgradeUtilityFull()`: Xác thực quyền sở hữu ô 12 hoặc 28, kiểm tra số dư $\ge 1.000$, kích hoạt `isUpgradedUtility = true`.
+  - `upgradeUtilityFull()`: Xác thực quyền sở hữu ô 12 hoặc 28, kiểm tra số dư >= 1.000, kích hoạt `isUpgradedUtility = true`.
   - `calcUtilityFee()`: Khi dẫm vào ô đã nâng cấp, trả về đúng `diceTotal * 150`.
   - Được điều phối qua `INTENT_UPGRADE_UTILITY` và kiểm chứng qua [`tests/domain/property_manager_upgrades.test.ts:94`](file:///c:/Users/HP/Documents/GitHub/vtcoon/tests/domain/property_manager_upgrades.test.ts#L94).
 - **Xếp loại:** **`[PASS]`**.
@@ -101,11 +101,11 @@
 #### 2.3. Quy Tắc Auto-Auction (Đấu Giá Tự Động)
 - **Vị trí mã nguồn:** [`src/server/auction_manager.ts:1-68`](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/auction_manager.ts#L1-L68) và [`src/server/intent_dispatcher.ts:18-35`](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/intent_dispatcher.ts#L18-L35).
 - **Thực trạng kiểm toán & Phát hiện 2 Lỗ hổng nghiêm trọng:**
-  1. *Khởi tạo phiên*: Nhận lệnh `INTENT_DECLINE`, tự động mở phiên đấu giá khởi điểm 50% giá niêm yết, chuyển `TurnPhase.AuctionPhase` $\rightarrow$ **`[PASS]`**.
+  1. *Khởi tạo phiên*: Nhận lệnh `INTENT_DECLINE`, tự động mở phiên đấu giá khởi điểm 50% giá niêm yết, chuyển `TurnPhase.AuctionPhase` -> **`[PASS]`**.
   2. *Lỗ hổng 1 — Vi phạm luật loại trừ người từ chối*:  
-     `docs/requirements.md` §I quy định: *"Mọi người chơi khác (ngoại trừ người vừa bỏ qua) đều có quyền đặt giá."* Cấu trúc `AuctionSession` (L6-10) không lưu `declinedPlayerId`. Người vừa từ chối vẫn được phép đặt giá để mua rẻ 50% $\rightarrow$ **`[BLOCKER]`**.
+     `docs/requirements.md` §I quy định: *"Mọi người chơi khác (ngoại trừ người vừa bỏ qua) đều có quyền đặt giá."* Cấu trúc `AuctionSession` (L6-10) không lưu `declinedPlayerId`. Người vừa từ chối vẫn được phép đặt giá để mua rẻ 50% -> **`[BLOCKER]`**.
   3. *Lỗ hổng 2 — Bế tắc Runtime (Runtime Deadlock)*:  
-     Hàm `handleAuctionClose()` (L45) không hề được đấu nối vào `intent_dispatcher.ts`. Không có Intent kết thúc đấu giá, không có Intent bỏ quyền (Pass Bid), không có timer tự động. Game bị treo vĩnh viễn ở `TurnPhase.AuctionPhase` $\rightarrow$ **`[BLOCKER]`**.
+     Hàm `handleAuctionClose()` (L45) không hề được đấu nối vào `intent_dispatcher.ts`. Không có Intent kết thúc đấu giá, không có Intent bỏ quyền (Pass Bid), không có timer tự động. Game bị treo vĩnh viễn ở `TurnPhase.AuctionPhase` -> **`[BLOCKER]`**.
 
 ---
 
@@ -113,7 +113,7 @@
 
 | STT | Vị trí (File:Dòng) | Tên Thành Phần | Quy định SSOT | Thực trạng mã nguồn thực tế | Xếp loại |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| 1 | [`src/server/room_manager.ts:149`](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/room_manager.ts#L149) | `checkPassedGo` | §IV.1: Nộp Thuế tài sản lũy tiến (4-6 ô: 150 Tr/ô; $\ge 7$ ô: 400 Tr/ô + 300 Tr/công trình C2-C3) | **NO-OP THUẾ**: Chỉ có dòng `current.balance += GO_BONUS`. Thuế tài sản bị bỏ sót 100%. | **`[BLOCKER]`** |
+| 1 | [`src/server/room_manager.ts:149`](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/room_manager.ts#L149) | `checkPassedGo` | §IV.1: Nộp Thuế tài sản lũy tiến (4-6 ô: 150 Tr/ô; >= 7 ô: 400 Tr/ô + 300 Tr/công trình C2-C3) | **NO-OP THUẾ**: Chỉ có dòng `current.balance += GO_BONUS`. Thuế tài sản bị bỏ sót 100%. | **`[BLOCKER]`** |
 | 2 | [`src/domain/card_handlers.ts:116-118`](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/card_handlers.ts#L116-L118) | `MC_CREDIT_STIMULUS` | §V.1.6: Giảm 20% chi phí xây dựng công trình toàn bàn cờ | **NO-OP EFFECT**: Đẩy modifier rỗng (`affectedCells: []`). Hàm `upgradeProperty()` không nhận modifiers nên chi phí không hề giảm. | **`[BLOCKER]`** |
 | 3 | [`src/domain/card_handlers.ts:122-124`](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/card_handlers.ts#L122-L124) | `MC_FREEZE_TRADE` | §V.1.12: Đóng băng giao dịch, cấm mua bán tài sản | **NO-OP EFFECT**: Đẩy modifier rỗng. Cả `buyProperty()` và `handleBuyProperty()` không kiểm tra cờ này, người chơi vẫn mua đất bình thường. | **`[BLOCKER]`** |
 | 4 | [`src/domain/card_handlers.ts:269-272`](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/card_handlers.ts#L269-L272) | `CC_PLATE_AUCTION` | §V.2.1: Nộp 500 Tr nhận đặc quyền tung xúc xắc đi thêm một lượt ngay lập tức | **LOGIC KHUYẾT TẬT**: Gán `player.consecutiveDoubles += 1`. Khi người chơi gửi `INTENT_END_TURN`, hàm `handleEndTurn` xóa sạch biến này về 0. Mất toi 500 Tr mà không được đi tiếp. | **`[BLOCKER]`** |
@@ -134,7 +134,7 @@
 | **Ô 04 (Lệ phí đất đai)** | Requirements §II Ô 04 | `board_config.ts:45`, `room_manager.ts:102` | Không trừ tiền khi dẫm vào (No-Op hoàn toàn) | **`[BLOCKER]`** |
 | **Ô 20 (Nghỉ dưỡng)** | Requirements §II Ô 20 | `board_config.ts:63`, `room_manager.ts:156` | Dừng chân an toàn, không phát sinh dòng tiền | **`[PASS]`** |
 | **Thuế chuyển nhượng P2P 5%** | Requirements §I P2P | `intent_dispatcher.ts:5-14`, `_epic_ledger.md:64` | Tráo mã kiểm thử `TC-02.3`, hoãn sang Slice 05 | **`[NỢ KỸ THUẬT SLICE 05]`** |
-| **Gói ETC Giao thông (+50%)** | Requirements §III.4 | `property_manager.ts:259, 287` | Đủ điều kiện $\ge 2$ ô, tăng đúng 50% biểu phí | **`[PASS]`** |
+| **Gói ETC Giao thông (+50%)** | Requirements §III.4 | `property_manager.ts:259, 287` | Đủ điều kiện >= 2 ô, tăng đúng 50% biểu phí | **`[PASS]`** |
 | **Gói 5G / Điện EVN (x150)** | Requirements §III.5 | `property_manager.ts:274, 294` | Tốn 1.000 Tr, nhân chuẩn 150× điểm xúc xắc | **`[PASS]`** |
 | **Auto-Auction: Khởi tạo** | Requirements §I Auto-Auction | `auction_manager.ts:12-24` | Kích hoạt phiên với giá khởi điểm 50% | **`[PASS]`** |
 | **Auto-Auction: Loại trừ người bỏ** | Requirements §I Auto-Auction | `auction_manager.ts:26-43` | Người từ chối vẫn được tham gia đặt giá | **`[BLOCKER]`** |

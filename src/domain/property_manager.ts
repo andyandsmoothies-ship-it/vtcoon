@@ -120,10 +120,18 @@ function hasZeroRent(cellIndex: number, modifiers?: readonly MarketModifier[]): 
     (m.type === MarketCardId.MC_COASTAL_STORM || m.multiplier === 0) && (m.affectedCells ?? COASTAL_CELLS).includes(cellIndex)));
 }
 
-function calculateRent(baseRent: number, cellIndex: number, modifiers?: readonly MarketModifier[]): number {
+function calculateRent(
+  baseRent: number,
+  cellIndex: number,
+  modifiers?: readonly MarketModifier[],
+  stateMap?: PropertyStateMap,
+): number {
   let rent = baseRent;
   for (const m of modifiers ?? []) {
     if (m.remainingRounds > 0 && (m.affectedCells ?? []).includes(cellIndex)) {
+      if (m.type === MarketCardId.MC_NIGHT_ECONOMY && (stateMap?.get(cellIndex)?.level ?? 0) < 1) {
+        continue;
+      }
       const mult = m.beneficiaryId !== undefined
         ? undefined
         : (m.multiplier ?? (m.type === MarketCardId.MC_PEAK_TOURISM ? 2 : undefined));
@@ -162,11 +170,9 @@ function applyServiceBonus(
 }
 
 function tryUseDiplomaticCard(
-  player: Player, cellIndex: number, stateMap?: PropertyStateMap, chanceDiscard?: ChanceCardId[],
+  player: Player, cellIndex: number, _stateMap?: PropertyStateMap, chanceDiscard?: ChanceCardId[],
 ): boolean {
   if (BOARD_CONFIG[cellIndex]?.type !== CellType.Property) return false;
-  const lvl = stateMap?.get(cellIndex)?.level ?? 0;
-  if (lvl >= 3) return false;
   const idx = player.hand.indexOf(ChanceCardId.CC_DIPLOMATIC);
   if (idx === -1) return false;
   player.hand.splice(idx, 1);
@@ -201,7 +207,7 @@ export function handleLanding(
   const bonusPct = permanentRentBonus?.[cellIndex] ?? 0;
   if (bonusPct > 0) baseRent = Math.floor(baseRent * (1 + bonusPct));
 
-  let rentAmount = calculateRent(baseRent, cellIndex, modifiers);
+  let rentAmount = calculateRent(baseRent, cellIndex, modifiers, stateMap);
 
   // CC_PORT_EXCLUSIVE: chia 50% phí cảng cho beneficiary; chủ nhận 50%; người trả = 100%
   const portMod = modifiers?.find(

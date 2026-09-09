@@ -5,7 +5,9 @@ import { TurnPhase } from '../../src/domain/room';
 import { MarketCardId } from '../../src/domain/event_card_types';
 import {
   mortgageProperty, redeemProperty, collectMortgageInterest, getMortgageInterestRate,
+  getEffectiveMortgageRate, calcTotalMortgageDebt,
 } from '../../src/server/mortgage_manager';
+import { calculateNetWorth } from '../../src/server/insolvency_manager';
 import { handleLanding } from '../../src/domain/property_manager';
 
 function setup(rng = () => 0) {
@@ -271,4 +273,147 @@ describe('[TC-05.9/MSS][TC-05.10/MSS] Macro Interest Rate Modifiers & Priority',
     expect(room.players[0]!.balance).toBe(before + 2000);
   });
 });
+
+describe('[TC-05.1-urban/MSS] MC_URBAN_PLANNING Modifier Tang 20% Dinh Gia The Chap (HN & HCM)', () => {
+  it('Khi MC_URBAN_PLANNING active, the chap o Ha Noi (31, 32, 34) hoac HCM (37, 39) nhan 60% gia dat', () => {
+    const { room, reg, sm } = setup();
+    reg.set(31, 'p1'); // Ha Noi (Gia 3000)
+    room.phase = TurnPhase.PropertyManagement;
+    room.activeModifiers = [
+      { type: MarketCardId.MC_URBAN_PLANNING, affectedCells: [31, 32, 34, 37, 39], remainingRounds: 1 },
+    ];
+    const before = room.players[0]!.balance;
+
+    const res = mortgageProperty(room, 'p1', 31, reg, sm);
+    expect(res.success, String(res.reason)).toBe(true);
+    // 3000 * 0.60 = 1800 (thay vi 1500 o 50%)
+    expect(room.players[0]!.balance).toBe(before + 1800);
+    expect(room.players[0]!.mortgagedProperties).toContain(31);
+  });
+
+  it('Khi MC_URBAN_PLANNING active tren o HCM (37, Gia 3500), nhan 2100 Tr. (60%)', () => {
+    const { room, reg, sm } = setup();
+    reg.set(37, 'p1'); // TP.HCM (Gia 3500)
+    room.phase = TurnPhase.PropertyManagement;
+    room.activeModifiers = [
+      { type: MarketCardId.MC_URBAN_PLANNING, affectedCells: [31, 32, 34, 37, 39], remainingRounds: 1 },
+    ];
+    const before = room.players[0]!.balance;
+
+    const res = mortgageProperty(room, 'p1', 37, reg, sm);
+    expect(res.success, String(res.reason)).toBe(true);
+    // 3500 * 0.60 = 2100 (thay vi 1750 o 50%)
+    expect(room.players[0]!.balance).toBe(before + 2100);
+  });
+
+  it('Khi MC_URBAN_PLANNING active nhung the chap o khong thuoc HN/HCM (o 1 Can Tho, Gia 600), van nhan 50% (300)', () => {
+    const { room, reg, sm } = setup();
+    reg.set(1, 'p1');
+    room.phase = TurnPhase.PropertyManagement;
+    room.activeModifiers = [
+      { type: MarketCardId.MC_URBAN_PLANNING, affectedCells: [31, 32, 34, 37, 39], remainingRounds: 1 },
+    ];
+    const before = room.players[0]!.balance;
+
+    const res = mortgageProperty(room, 'p1', 1, reg, sm);
+    expect(res.success, String(res.reason)).toBe(true);
+    expect(room.players[0]!.balance).toBe(before + 300);
+  });
+
+  it('Khi MC_URBAN_PLANNING da het han (remainingRounds = 0), o Ha Noi (31) tro ve 50% (1500)', () => {
+    const { room, reg, sm } = setup();
+    reg.set(31, 'p1');
+    room.phase = TurnPhase.PropertyManagement;
+    room.activeModifiers = [
+      { type: MarketCardId.MC_URBAN_PLANNING, affectedCells: [31, 32, 34, 37, 39], remainingRounds: 0 },
+    ];
+    const before = room.players[0]!.balance;
+
+    const res = mortgageProperty(room, 'p1', 31, reg, sm);
+    expect(res.success, String(res.reason)).toBe(true);
+    expect(room.players[0]!.balance).toBe(before + 1500);
+  });
+
+  it('Helper getEffectiveMortgageRate tra ve dung he so 0.60 hoac 0.50', () => {
+    const { room } = setup();
+    room.activeModifiers = [
+      { type: MarketCardId.MC_URBAN_PLANNING, affectedCells: [31, 32, 34, 37, 39], remainingRounds: 1 },
+    ];
+    expect(getEffectiveMortgageRate(room, 31)).toBe(0.60);
+    expect(getEffectiveMortgageRate(room, 32)).toBe(0.60);
+    expect(getEffectiveMortgageRate(room, 34)).toBe(0.60);
+    expect(getEffectiveMortgageRate(room, 37)).toBe(0.60);
+    expect(getEffectiveMortgageRate(room, 39)).toBe(0.60);
+    expect(getEffectiveMortgageRate(room, 1)).toBe(0.50);
+  });
+
+  it('Chuoc dat da the chap duoi thoi ky MC_URBAN_PLANNING phai hoan tra dung khoan vay 60% + 10% phi (chan infinite money exploit)', () => {
+    const { room, reg, sm } = setup();
+    reg.set(39, 'p1'); // TP.HCM Q1 (Gia 4000)
+    room.phase = TurnPhase.PropertyManagement;
+    room.activeModifiers = [
+      { type: MarketCardId.MC_URBAN_PLANNING, affectedCells: [31, 32, 34, 37, 39], remainingRounds: 1 },
+    ];
+    const initialBal = room.players[0]!.balance;
+
+    // 1. The chap: nhan 60% = 2400
+    const mortRes = mortgageProperty(room, 'p1', 39, reg, sm);
+    expect(mortRes.success).toBe(true);
+    expect(room.players[0]!.balance).toBe(initialBal + 2400);
+
+    // Dư nợ phản ánh đúng 2400
+    expect(calcTotalMortgageDebt(room.players[0]!)).toBe(2400);
+
+    // 2. Chuộc lại: Phải trả 2400 * 1.1 = 2640 (thay vì 2000 * 1.1 = 2200)
+    const redeemRes = redeemProperty(room, 'p1', 39, reg);
+    expect(redeemRes.success).toBe(true);
+    // Net: +2400 - 2640 = -240 (chi phí vay 10%), không thể trục lợi tạo tiền vô tận
+    expect(room.players[0]!.balance).toBe(initialBal - 240);
+    expect(room.players[0]!.mortgagedProperties).not.toContain(39);
+    expect(calcTotalMortgageDebt(room.players[0]!)).toBe(0);
+  });
+
+  it('Chuoc dat da the chap 60% sau khi MC_URBAN_PLANNING het han van phai tra du 60% + 10% phi', () => {
+    const { room, reg, sm } = setup();
+    reg.set(31, 'p1'); // Ha Noi (Gia 3000)
+    room.phase = TurnPhase.PropertyManagement;
+    room.activeModifiers = [
+      { type: MarketCardId.MC_URBAN_PLANNING, affectedCells: [31, 32, 34, 37, 39], remainingRounds: 1 },
+    ];
+
+    // Vay 60% = 1800
+    mortgageProperty(room, 'p1', 31, reg, sm);
+    expect(calcTotalMortgageDebt(room.players[0]!)).toBe(1800);
+
+    // The het han
+    room.activeModifiers[0]!.remainingRounds = 0;
+
+    // Chuoc dat van tinh tren no goc 1800 -> tra 1800 * 1.1 = 1980
+    const beforeRedeem = room.players[0]!.balance;
+    const redeemRes = redeemProperty(room, 'p1', 31, reg);
+    expect(redeemRes.success).toBe(true);
+    expect(room.players[0]!.balance).toBe(beforeRedeem - 1980);
+  });
+
+  it('Net worth va thu lai GO tinh chinh xac theo du no 60% khi co MC_URBAN_PLANNING', () => {
+    const { room, reg, sm } = setup();
+    reg.set(31, 'p1'); // Ha Noi (Gia 3000)
+    room.players[0]!.balance = 5000;
+    room.phase = TurnPhase.PropertyManagement;
+    room.activeModifiers = [
+      { type: MarketCardId.MC_URBAN_PLANNING, affectedCells: [31, 32, 34, 37, 39], remainingRounds: 1 },
+    ];
+
+    mortgageProperty(room, 'p1', 31, reg, sm);
+    // Balance: 5000 + 1800 = 6800. Du no: 1800. Gia dat: 3000.
+    // Net Worth = Cash (6800) + Land (3000) - Debt (1800) = 8000
+    const nw = calculateNetWorth('p1', reg, sm, room.players);
+    expect(nw).toBe(8000);
+
+    // Thu lai 5% tren du no 1800 = 90 (thay vi 1500 * 0.05 = 75)
+    collectMortgageInterest(room, 'p1');
+    expect(room.players[0]!.balance).toBe(6800 - 90);
+  });
+});
+
 

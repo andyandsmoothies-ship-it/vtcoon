@@ -245,6 +245,42 @@ describe('[TC-04.T4/MSS] Market Modifier System & apply/decay Functions', () => 
     expect(owner.balance).toBe(5000);
   });
 
+  test('[TC-04.T4/MSS] handleLanding: MC_NIGHT_ECONOMY KHÔNG nhân đôi tiền thuê ô Dịch vụ Cấp 0 (đất trống)', () => {
+    const registry: PropertyRegistry = new Map([[6, 'p_owner']]);
+    const stateMap: PropertyStateMap = new Map([[6, { level: 0 }]]); // deed6 rent0 = 120
+    const visitor = createPlayer('visitor');
+    visitor.balance = 5000;
+    const owner = createPlayer('p_owner');
+    owner.balance = 2000;
+    const modifiers: MarketModifier[] = [
+      { type: MarketCardId.MC_NIGHT_ECONOMY, affectedCells: SERVICE_CELLS, remainingRounds: 1, multiplier: 2 },
+    ];
+
+    const res = handleLanding(visitor, 6, registry, [visitor, owner], stateMap, undefined, modifiers);
+    // Cấp 0 không bị nhân đôi, giữ nguyên rent0 = 120
+    expect(res.rentAmount).toBe(120);
+    expect(visitor.balance).toBe(5000 - 120);
+    expect(owner.balance).toBe(2000 + 120);
+  });
+
+  test('[TC-04.T4/MSS] handleLanding: MC_NIGHT_ECONOMY nhân đôi tiền thuê ô Dịch vụ từ Cấp 1 trở lên', () => {
+    const registry: PropertyRegistry = new Map([[6, 'p_owner']]);
+    const stateMap: PropertyStateMap = new Map([[6, { level: 1 }]]); // deed6 rent1 = 400
+    const visitor = createPlayer('visitor');
+    visitor.balance = 5000;
+    const owner = createPlayer('p_owner');
+    owner.balance = 2000;
+    const modifiers: MarketModifier[] = [
+      { type: MarketCardId.MC_NIGHT_ECONOMY, affectedCells: SERVICE_CELLS, remainingRounds: 1, multiplier: 2 },
+    ];
+
+    const res = handleLanding(visitor, 6, registry, [visitor, owner], stateMap, undefined, modifiers);
+    // Cấp 1 được nhân đôi: 400 * 2 = 800
+    expect(res.rentAmount).toBe(800);
+    expect(visitor.balance).toBe(5000 - 800);
+    expect(owner.balance).toBe(2000 + 800);
+  });
+
   test('[TC-04.T4/MSS] handleLanding: Ô Dịch vụ C2 + xúc xắc chẵn -> phụ thu 200 Tr. VNĐ', () => {
     const registry: PropertyRegistry = new Map([[6, 'p_owner']]);
     const stateMap: PropertyStateMap = new Map([[6, { level: 2 }]]); // deed6 rent2 = 1000
@@ -346,7 +382,7 @@ describe('[TC-04.T4-DIP/MSS] Thẻ Miễn Trừ Ngoại Giao (CC_DIPLOMATIC) tro
     expect(chanceDiscard).toContain(ChanceCardId.CC_DIPLOMATIC);
   });
 
-  test('CC_DIPLOMATIC KHÔNG áp dụng cho công trình Cấp 3: nộp đủ tiền thuê, giữ nguyên thẻ trong hand', () => {
+  test('CC_DIPLOMATIC áp dụng cho cả công trình Cấp 3: miễn 100% tiền thuê và thu hồi thẻ vào chanceDiscard', () => {
     const registry: PropertyRegistry = new Map([[1, 'owner_p']]);
     const stateMap: PropertyStateMap = new Map([[1, { level: 3 }]]); // rent3 = 1320
     const visitor = createPlayer('visitor');
@@ -357,11 +393,11 @@ describe('[TC-04.T4-DIP/MSS] Thẻ Miễn Trừ Ngoại Giao (CC_DIPLOMATIC) tro
     const chanceDiscard: ChanceCardId[] = [];
 
     const res = handleLanding(visitor, 1, registry, [visitor, owner], stateMap, undefined, undefined, undefined, chanceDiscard);
-    expect(res.rentAmount).toBe(1320);
-    expect(visitor.balance).toBe(5000 - 1320);
-    expect(owner.balance).toBe(2000 + 1320);
-    expect(visitor.hand).toContain(ChanceCardId.CC_DIPLOMATIC);
-    expect(chanceDiscard).not.toContain(ChanceCardId.CC_DIPLOMATIC);
+    expect(res.rentAmount).toBe(0);
+    expect(visitor.balance).toBe(5000);
+    expect(owner.balance).toBe(2000);
+    expect(visitor.hand).not.toContain(ChanceCardId.CC_DIPLOMATIC);
+    expect(chanceDiscard).toContain(ChanceCardId.CC_DIPLOMATIC);
   });
 
   test('CC_DIPLOMATIC KHÔNG áp dụng cho Hạ tầng (Railroad) và Tiện ích (Utility): giữ nguyên thẻ trên tay', () => {

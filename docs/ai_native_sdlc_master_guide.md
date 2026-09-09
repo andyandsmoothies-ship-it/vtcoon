@@ -414,7 +414,9 @@ graph LR
    - Khi kiểm thử bất kỳ hệ thống nào có luân chuyển tài nguyên (tiền tệ FinTech, điểm thưởng, hàng tồn kho E-commerce, slot đặt chỗ):
    - ❌ **CẤM chỉ assert biến cục bộ**: Không chỉ kiểm tra `expect(buyer.balance).toBe(X)`.
    - ✅ **BẮT BUỘC assert Đẳng thức Bảo toàn Toàn cục (Conservation Invariant)**:
-     $$\sum \text{Tài nguyên Người dùng} + \text{Tài nguyên Quỹ/Kho bạc/Pool} = \text{Tổng cung ban đầu} + \text{Tổng phát sinh hợp lệ} - \text{Tổng tiêu hủy}$$
+     ```text
+     Tổng tài nguyên Người dùng + Tài nguyên Quỹ/Kho bạc/Pool = Tổng cung ban đầu + Tổng phát sinh hợp lệ - Tổng tiêu hủy
+     ```
      Tại mọi tick sau chuỗi giao dịch đa bên phức tạp, sai số cho phép là **0 tuyệt đối**. Nếu lệch dù chỉ 1 đơn vị ➔ Báo ĐỎ lập tức (Financial/Resource Leak).
 10. **Thử Nghiệm Sinh Tồn Mạng & Ân Hạn Phiên Tại Điểm Hiểm Hóc (Critical Drop & Grace Period Resilience)**:
     - Cố tình ngắt kết nối (Drop Socket/Connection) ngay tại bước nhạy cảm nhất của chu trình (khi đang nợ, đang ở modal thanh toán, hoặc giữa phiên giao dịch dở dang):
@@ -576,8 +578,8 @@ Antigravity tự động tìm và nạp các file luật Markdown theo cơ chế
 
 ##### C. 5 Nguyên tắc vàng khi thiết kế File Luật Dự Án cho Junior (Project Rule Principles):
 1. **Ngân sách ngắn gọn (<80 - 100 dòng)**: File luật luôn bị tiêm ngầm vào mọi lượt prompt. File dài gây lãng phí token và làm loãng khả năng chú ý của mô hình (Context Drift).
-2. **Rules $\neq$ Skills**: File luật chỉ chứa **Rào chắn cấm đoán / Tiêu chuẩn xuất xưởng** (CẤM làm X, PHẢI giữ Y). Quy trình hướng dẫn nhiều bước phải đưa vào `SKILL.md` để nạp theo nhu cầu (Progressive Disclosure).
-3. **Rules $\neq$ Hooks**: Những gì máy móc kiểm tra tự động được (chặn lệnh git, đếm số dòng, lọc từ cấm), hãy viết vào `.agents/hooks.json` (chạy 0 token, 0ms). File luật chỉ dành để định hướng tư duy lập trình.
+2. **Rules != Skills**: File luật chỉ chứa **Rào chắn cấm đoán / Tiêu chuẩn xuất xưởng** (CẤM làm X, PHẢI giữ Y). Quy trình hướng dẫn nhiều bước phải đưa vào `SKILL.md` để nạp theo nhu cầu (Progressive Disclosure).
+3. **Rules != Hooks**: Những gì máy móc kiểm tra tự động được (chặn lệnh git, đếm số dòng, lọc từ cấm), hãy viết vào `.agents/hooks.json` (chạy 0 token, 0ms). File luật chỉ dành để định hướng tư duy lập trình.
 4. **Không viết luật suy đoán**: Chỉ đưa vào file luật các rào chắn từ những lỗi/bug thực tế đã từng xảy ra.
 5. **CẤM Sao chép Mù quáng (Anti-Copy-Paste Trap) & Quy tắc Lưu vết Subagent (Dual Output Pattern)**:
    - *Tại sao không được copy nguyên xi Rule cũ sang dự án mới?* Mỗi dự án có tech stack, ranh giới NFRs và cấu trúc domain khác nhau. Copy mù quáng sẽ tiêm các ràng buộc thừa thãi hoặc lệch pha, làm loãng sự chú ý của AI.
@@ -943,7 +945,7 @@ tools: [view_file, write_to_file, replace_file_content, list_dir, find_by_name, 
 5. **Quy Trình Thi Công 3-Pass (Three-Pass Implementation Loop - Anti-Slop)**:
    - *Pass 1 (Make it Work - Adversarial TDD)*: Viết test trước (Red) ➔ Viết code tối thiểu để test chuyển sang màu XANH (Green) ➔ Inversion Test (sửa sai 1 dòng xem test có ĐỎ không). Mọi test bắt buộc gắn nhãn truy xuất nguồn gốc `[UC-XXX/MSS]` hoặc `[UC-XXX/A#]` và `[BR-XXX]`.
    - *Pass 2 (Make it Lean - Prune & Simplify)*: Rà soát lại diff vừa viết: Xóa bỏ các helper/interface chỉ dùng 1 lần (YAGNI), nén LOC lại 15–20% mà toàn bộ test suite vẫn PASS 100%.
-   - *Pass 3 (Quality & Anti-Code-Golf Gate)*: Đo lường Cyclomatic Complexity ($\le 5$). CẤM BẪY CODE GOLF: Giữ code rõ ràng, không viết one-liner ma thuật, không viết dòng quá dài, không gộp tắt mắt. Tests được miễn trừ khỏi áp lực giảm LOC.
+   - *Pass 3 (Quality & Anti-Code-Golf Gate)*: Đo lường Cyclomatic Complexity (<= 5). CẤM BẪY CODE GOLF: Giữ code rõ ràng, không viết one-liner ma thuật, không viết dòng quá dài, không gộp tắt mắt. Tests được miễn trừ khỏi áp lực giảm LOC.
 7. **Literal Test Data & Failure Postconditions**:
    - Dữ liệu test bắt buộc là dữ liệu thực tế cụ thể (Literal Data: `"Acme Corp"`, `"ISBN 978-0-13-235088-4"`, số nguyên 5). CẤM dùng string mơ hồ (`"test"`, `"valid_user"`).
    - Với các test của Alternative Flow kết thúc bằng `Use case ends`, BẮT BUỘC viết assertion kiểm tra Failure Postconditions (giao dịch DB rollback sạch sẽ, không có bản ghi dở dang).
@@ -995,7 +997,7 @@ tools: [view_file, list_dir, find_by_name, grep_search]
 5. **Kiểm Định Ranh Giới Lát Cắt, Nhãn Vết & Chống Tráo Hợp Đồng (Slice Scope & Anti-Smuggling Gate)**:
    - *Nhãn Truy xuất*: Mọi method và test case mới phải gắn nhãn nguồn `[UC-XXX/MSS]` hoặc `[UC-XXX/A#]` và `[BR-XXX]`.
    - *Anti-Smuggling Gate (Chống tráo ruột hợp đồng)*: Không chỉ nhìn nhãn tag [TC-xxx]. BẮT BUỘC đọc ruột câu lệnh `expect()` và tham số: Khẳng định (assertion) phải xác minh đúng ngữ nghĩa cốt lõi của Use Case. CẤM hiện tượng gắn nhãn Feature A nhưng bên trong chỉ assert kiểm tra của Feature B tầm thường (MANDATORY REJECT nếu gian lận).
-   - *Chặn tràn phạm vi Slice*: Nếu ticket là Slice 1 (Basic Flow), nhưng diff xuất hiện code/giao diện xử lý của Alternative Flows (A1, A2...) $\rightarrow$ Đánh giá **REJECTED (Vi phạm Slice Scope - Tràn tính năng sớm)**.
+   - *Chặn tràn phạm vi Slice*: Nếu ticket là Slice 1 (Basic Flow), nhưng diff xuất hiện code/giao diện xử lý của Alternative Flows (A1, A2...) -> Đánh giá **REJECTED (Vi phạm Slice Scope - Tràn tính năng sớm)**.
    - *Bảo đảm Hợp đồng Thất bại*: Mọi luồng rẽ kết thúc bằng `Use case ends` bắt buộc có test assertion chứng minh Failure Postconditions (rollback dữ liệu sạch sẽ).
 6. **Mẫu báo cáo**:
 ```markdown
@@ -1067,8 +1069,8 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command]
 - **Test State Isolation**: PASS (Transactional Rollback sau mỗi test, chạy `--randomize` không có lỗi phụ thuộc thứ tự).
 
 #### 5. Kiểm toán 6 Cờ Đỏ Slop (Least New Structure)
-- **Net LOC Delta**: +[N] dòng (Nằm trong ngân sách $\le +50$ LOC, Deletions: -[M] dòng).
-- **Độ phức tạp**: Cyclomatic lớn nhất = [K] ($\le 5$). Không dùng mẹo Code Golf, không nén cú pháp bất thường.
+- **Net LOC Delta**: +[N] dòng (Nằm trong ngân sách <= +50 LOC, Deletions: -[M] dòng).
+- **Độ phức tạp**: Cyclomatic lớn nhất = [K] (<= 5). Không dùng mẹo Code Golf, không nén cú pháp bất thường.
 - **6 Cờ Đỏ Slop**: 0 Abstraction 1 lần, 0 Dependency rác, 0 Code mồ côi (TRIM Purge sạch sẽ).
 - **Runtime Wire Gate**: PASS (Mọi public domain mutation đều được đấu nối vào Router/Dispatcher, 0 hàm mồ côi).
 - **Lean Observability**: PASS (Structured logging trên FSM transitions, zero catch rỗng, explicit Reason Codes).
@@ -1178,7 +1180,7 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command]
 1. **Phá vỡ "Ảo tưởng Test Xanh" (The Illusion of False Green)**: Unit test xanh chỉ chứng minh code chạy đúng trong phòng thí nghiệm. Bắt buộc kiểm chứng khả năng chịu đựng của hệ thống khi người dùng thao tác sai hoặc phá hoại.
 2. **3 Tiêu chí sinh tồn bắt buộc (Production Resilience Criteria)**:
    - *Defensive Actions*: Gửi thao tác trái lượt, ID rác, giá trị âm ➔ Hệ thống chặn đứng an toàn bằng Reason Code định danh, 0 crash.
-   - *Conservation Invariant*: Đẳng thức bảo toàn tài nguyên tổng thể $\sum \text{Tài nguyên các bên} + \text{Quỹ} = \text{Tổng cung}$ có sai số **0 tuyệt đối**.
+   - *Conservation Invariant*: Đẳng thức bảo toàn tài nguyên tổng thể (Tổng tài nguyên các bên + Quỹ = Tổng cung) có sai số **0 tuyệt đối**.
    - *Deadlock-Free & Grace Period*: Rớt mạng tại trạng thái nhạy cảm nhất khôi phục vi sai an toàn qua Grace Period; Fuzzing ngẫu nhiên 50 lượt chứng minh FSM không bị bế tắc vô tận.
 
 ---
@@ -1384,7 +1386,7 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command]
 | **`/boost [vấn đề]`** | `Native AG 2.0` | Gặp bài toán kiến trúc phân tán khó, thuật toán FSM/PRNG, hoặc bug bế tắc không rõ nguyên nhân. | Kích hoạt chế độ Deep Reasoning 3 pha (Đa chiều ➔ Lập mô hình ➔ Thẩm định phản biện). |
 | **`/brainstorming`** | `superpowers` | Cần tìm các giải pháp kỹ thuật khác nhau trước khi chốt phương án thi công. | Đưa ra 2-3 phương án kiến trúc kèm bảng so sánh ưu/nhược điểm (Trade-offs). |
 | **`/ask-matt`** | `mattpocock_skills` | Đang phân vân không biết bước tiếp theo nên làm gì hoặc nên dùng công cụ nào. | Đóng vai trò Router phân tích tình huống và gợi ý chính xác skill/lệnh tiếp theo. |
-| **`/writing-plans`** | `superpowers` | Bắt đầu Bước 2.3a, muốn bẻ nhỏ Slice thành các Task tuần tự $\le 50-80$ dòng code. | Xuất bản Kế hoạch thi công chi tiết (Task DAG) kèm tệp test và tiêu chuẩn hoàn thành. |
+| **`/writing-plans`** | `superpowers` | Bắt đầu Bước 2.3a, muốn bẻ nhỏ Slice thành các Task tuần tự <= 50-80 dòng code. | Xuất bản Kế hoạch thi công chi tiết (Task DAG) kèm tệp test và tiêu chuẩn hoàn thành. |
 | **`/wayfinder`** | `mattpocock_skills` | Đối mặt với một khối lượng công việc khổng lồ vượt quá phạm vi của 1 phiên làm việc. | Lập bản đồ điều hướng kiến trúc và các vé quyết định (decision tickets) đa phiên. |
 | **`/prototype`** | `mattpocock_skills` | Muốn làm thử nghiệm một ý tưởng (Spike) để xem giao diện 3D hoặc trạng thái có chạy được không. | Dựng nhanh mã nguồn nháp (throwaway code) trong nhánh cô lập để bạn bấm thử. |
 | **`/executing-plans`** | `superpowers` | Có bản kế hoạch từ `writing-plans`, muốn thi công tuần tự từng task một có kiểm soát. | Lần lượt thi công từng Task, dừng lại kiểm tra sau mỗi Task, cấm nhảy cóc. |
@@ -1435,7 +1437,7 @@ Luồng rẽ (Alternative Flows - A#):
 
 - **Thời điểm sử dụng**: Cuối tuần hoặc sau khi kết thúc trọn vẹn 1 Epic lớn (sau 5-10 lát cắt) để đại phẫu thuật dọn sạch nợ kỹ thuật toàn bộ dự án.
 - **Lời chat mẫu chuẩn kích hoạt `/goal`**:
-  > *"/goal Hãy tối ưu hóa toàn bộ mã nguồn trong thư mục `src/`: Giảm tối đa Cyclomatic Complexity (mục tiêu $\le 4$), triệt tiêu các cấu trúc thừa (Least New Structure) mà không làm suy giảm chức năng nghiệp vụ. RÀO CHẮN BẤT BIẾN: Toàn bộ bài test tự động trong `tests/` phải luôn luôn PASS 100%. Nếu bất kỳ thay đổi nào làm test ĐỎ ➔ Phải tự động revert ngay lập tức và thử giải pháp khác. Hãy chạy vòng lặp liên tục cho đến khi không thể tối ưu thêm."*
+  > *"/goal Hãy tối ưu hóa toàn bộ mã nguồn trong thư mục `src/`: Giảm tối đa Cyclomatic Complexity (mục tiêu <= 4), triệt tiêu các cấu trúc thừa (Least New Structure) mà không làm suy giảm chức năng nghiệp vụ. RÀO CHẮN BẤT BIẾN: Toàn bộ bài test tự động trong `tests/` phải luôn luôn PASS 100%. Nếu bất kỳ thay đổi nào làm test ĐỎ ➔ Phải tự động revert ngay lập tức và thử giải pháp khác. Hãy chạy vòng lặp liên tục cho đến khi không thể tối ưu thêm."*
 - **Lưu ý chi phí (Cost Warning)**: Lệnh `/goal` chạy tự hành liên tục không dừng nên sẽ tiêu tốn lượng token và chi phí API lớn hơn các lượt chat thông thường. Tuyệt đối không dùng cho các sửa đổi nhỏ lẻ hàng ngày; chỉ dùng cho các đợt đại tu toàn diện!
 
 ---
@@ -1564,7 +1566,7 @@ Khi bạn chạy lệnh trong Terminal gặp lỗi đỏ, hoặc Subagent báo t
 | **1.3** | Lập Sổ Cái Tiến Độ | 💬 `[AG 2.0]` Dựng `docs/epics/[epic]/_epic_ledger.md` (phân bổ Use Cases vào Slices) | Flash | Sổ Cái tiến độ theo dõi |
 | **2.1** | Cắt Lát Cắt (JIT)<br>*(Song tác nhân)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.1]**: `slicer` soạn thảo ticket ➔ `spec-reviewer` quét rò rỉ Zone 3 trước khi lưu | Flash | File `issues/[TICKET].md` sạch |
 | **2.2** | Trinh sát bối cảnh<br>*(Đơn tác nhân)* | 💬 `[AG 2.0]` Gọi `scout` (Read-only) trinh sát hiện trạng mã nguồn:<br>• **Greenfield (S00):** Dùng **[Mẫu P-2.2A]** Target File Map<br>• **Brownfield (S01+):** Dùng **[Mẫu P-2.2B]** Change Impact | Flash | Báo cáo hiện trạng & tọa độ dòng |
-| **2.3a** | Lập Kế Hoạch Bẻ Nhỏ<br>*(Song tác nhân)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3a]**: `architect` bẻ Task DAG $\le 80$ LOC ➔ `spec-reviewer` thẩm định 5 Tiêu Chuẩn Vàng | Sonnet 4.6 | Kế Hoạch được `[APPROVED]` |
+| **2.3a** | Lập Kế Hoạch Bẻ Nhỏ<br>*(Song tác nhân)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3a]**: `architect` bẻ Task DAG <= 80 LOC ➔ `spec-reviewer` thẩm định 5 Tiêu Chuẩn Vàng | Sonnet 4.6 | Kế Hoạch được `[APPROVED]` |
 | **2.3b** | Khởi tạo Test Harness<br>*(Đơn tác nhân - S00)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3b]** gọi `implementer` dựng Test Runner tối thiểu (`package.json`, `tsconfig.json`, `vitest`...) ➔ Chạy smoke test PASS | Flash / Sonnet | Lệnh `npm test` chạy PASS trên CMD |
 | **2.3c** | Thi công TDD Vi Mô<br>*(Song tác nhân đối kháng)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3c]**: **1 prompt duy nhất** điều phối `QA Tester` (viết test ĐỎ) ➔ `Implementer` (viết code XANH) ➔ `Inversion Gate` | Sonnet 4.6 | Test con + Inversion PASS 100% |
 | **2.3d** | Chẩn đoán lỗi khoa học<br>*(Song tác nhân)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3d]**: `Investigator` truy nguyên nhân gốc ➔ `Implementer` sửa mã nguồn tối thiểu | Sonnet 4.6 | Báo cáo nguyên nhân & bản sửa tối thiểu |
@@ -1645,7 +1647,7 @@ Junior gửi prompt chi tiết phân định rõ 3 vai trò:
 ```
 
 **Tại sao câu prompt có độ chi tiết cao lại kích hoạt được điều này?**
-Khi bạn nêu đích danh 3 vai trò kèm tiêu chí kiểm soát trong prompt, Agent sẽ tự động chuyển từ chế độ "Chatbot đối thoại" sang chế độ **`Routine: Delegation`** — một dây chuyền làm việc nội bộ kỷ luật tuyệt đối. AI sẽ tự đối soát, tự bóc lỗi của nhau, triệt tiêu $100\%$ hiện tượng ảo giác (hallucination) và bốc đồng sửa code ẩu.
+Khi bạn nêu đích danh 3 vai trò kèm tiêu chí kiểm soát trong prompt, Agent sẽ tự động chuyển từ chế độ "Chatbot đối thoại" sang chế độ **`Routine: Delegation`** — một dây chuyền làm việc nội bộ kỷ luật tuyệt đối. AI sẽ tự đối soát, tự bóc lỗi của nhau, triệt tiêu 100% hiện tượng ảo giác (hallucination) và bốc đồng sửa code ẩu.
 
 ---
 
@@ -1675,7 +1677,7 @@ Khi bạn nêu đích danh 3 vai trò kèm tiêu chí kiểm soát trong prompt,
 ### 📋 MẪU P-2.1: CẮT TICKET LÁT CẮT (JIT SLICING)
 - **🏷️ CHẾ ĐỘ THỰC THI**: `[SONG TÁC NHÂN TỰ KIỂM TOÁN]` *(Slicer soạn thảo ➔ Spec-Reviewer quét Zone 3 & SSOT)*.
 - **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Sổ cái `docs/epics/[epic]/_epic_ledger.md` đã có danh sách Use Cases. Slice trước đó (nếu có) đã được commit sạch trên Git.
-- **🛡️ RÀO CHẮN GÁC CỔNG**: `GEMINI.md` khóa cứng giới hạn ngân sách mã nguồn (LOC $\le 50-100$). Hook `use_case_guard.py` tự động quét Zone 3 Blocklist khi lưu ticket.
+- **🛡️ RÀO CHẮN GÁC CỔNG**: `GEMINI.md` khóa cứng giới hạn ngân sách mã nguồn (LOC <= 50-100). Hook `use_case_guard.py` tự động quét Zone 3 Blocklist khi lưu ticket.
 - **💬 CÂU LỆNH PROMPT CHUẨN (Model: Flash)**:
 ```text
 Hãy điều phối 2 subagent phối hợp để tạo tệp ticket issues/[MÃ_TICKET].md cho [TÊN_SLICE]:
@@ -1782,7 +1784,7 @@ DỪNG LẠI sau khi lưu kế hoạch, TUYỆT ĐỐI CHƯA VIẾT CODE lúc n�
   - Bản kế hoạch đã được lưu tại `docs/plans/[MÃ_TICKET]_plan.md` với xác nhận **`[APPROVED]`** từ Spec-Reviewer.
 - **📌 CHỈ DẪN VẠN NĂNG CHO JUNIOR**:
   - *Biến số cần thay thế*: `[MÃ_TICKET]` (VD: `issues/GAME-S01-turn-loop.md`).
-  - *Dữ liệu AI tự động đọc*: Architect đọc Ticket + Báo cáo Scout ➔ Tự bẻ nhỏ Task DAG $\le 80$ LOC ➔ Ghi ra `docs/plans/[MÃ_TICKET]_plan.md`. Tệp này chính là "Bộ Não" duy nhất cho toàn bộ các bước thi công tiếp theo.
+  - *Dữ liệu AI tự động đọc*: Architect đọc Ticket + Báo cáo Scout ➔ Tự bẻ nhỏ Task DAG <= 80 LOC ➔ Ghi ra `docs/plans/[MÃ_TICKET]_plan.md`. Tệp này chính là "Bộ Não" duy nhất cho toàn bộ các bước thi công tiếp theo.
 
 ---
 

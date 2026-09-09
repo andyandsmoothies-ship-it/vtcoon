@@ -28,6 +28,7 @@ import {
   mortgageProperty, redeemProperty, collectMortgageInterest,
 } from './mortgage_manager';
 import { checkInsolvency, liquidateAssets, declareBankruptcy, calculateRankings } from './insolvency_manager';
+import { buildDeltaFromRoom, type DeltaPayload } from './session_manager';
 
 export type { AuctionSession, PlayerIntent };
 
@@ -324,5 +325,13 @@ export class RoomManager {
     const sm   = this.propertyStates.get(roomCode);
     if (!room || !reg || !sm) return [];
     return calculateRankings(room, reg, sm);
+  }
+
+  createDelta(roomCode: string, tick: number): DeltaPayload | undefined {
+    const room = this.rooms.get(roomCode);
+    const reg  = this.registries.get(roomCode);
+    const sm   = this.propertyStates.get(roomCode);
+    if (!room || !reg || !sm) return undefined;
+    return buildDeltaFromRoom(room, reg, sm, tick);
   }
 }

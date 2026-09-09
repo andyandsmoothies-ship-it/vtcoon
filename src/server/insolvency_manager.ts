@@ -44,6 +44,7 @@ function liquidateCell(
   player.mortgagedProperties ??= [];
   const mortIdx = player.mortgagedProperties.indexOf(cellIndex);
   if (mortIdx !== -1) player.mortgagedProperties.splice(mortIdx, 1);
+  if (player.mortgageLoans) delete player.mortgageLoans[cellIndex];
 }
 
 // --- Thanh lý cưỡng chế tài sản (ưu tiên cấp cao trước, dừng khi số dư >= 0) ---
@@ -99,6 +100,7 @@ export function declareBankruptcy(
     }
   }
   if (player.mortgagedProperties) player.mortgagedProperties.length = 0;
+  if (player.mortgageLoans) player.mortgageLoans = {};
 
   console.info(JSON.stringify({
     event: 'BANKRUPTCY_DECLARED', correlationId: room.roomCode,
@@ -161,7 +163,8 @@ export function calculateNetWorth(
     worth += Math.floor(deed.price * mult);
 
     if (player.mortgagedProperties?.includes(cellIndex)) {
-      worth -= Math.floor(deed.price * MORTGAGE_RATE);
+      const loan = player.mortgageLoans?.[cellIndex] ?? Math.floor(deed.price * MORTGAGE_RATE);
+      worth -= loan;
     }
   }
   return worth;

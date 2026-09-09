@@ -1,15 +1,16 @@
 // [UC-GAME-051/MSS][UC-GAME-052/MSS] Mortgage Manager — Cam Co & Tin Dung
 import type { Room, Player } from '../domain/room';
 import { TurnPhase } from '../domain/room';
-import { MarketCardId } from '../domain/event_card_types';
+import { MarketCardId, HANOI_HCMC_CELLS } from '../domain/event_card_types';
 import { PROPERTY_DEEDS } from '../domain/property_manager';
 import type { PropertyRegistry, PropertyStateMap, PropertyState } from '../domain/property_manager';
 import { ActionRejectReason } from '../domain/action_reasons';
 
-const MORTGAGE_RATE         = 0.5;
-const REDEEM_FEE_RATE       = 1.1;
-const DEFAULT_INTEREST_RATE = 0.05;
-const RATE_HIKE_RATE        = 0.10;
+const MORTGAGE_RATE                = 0.5;
+const URBAN_PLANNING_MORTGAGE_RATE = 0.60;
+const REDEEM_FEE_RATE              = 1.1;
+const DEFAULT_INTEREST_RATE        = 0.05;
+const RATE_HIKE_RATE               = 0.10;
 
 function getPlayer(room: Room, playerId: string): Player | undefined {
   return room.players.find((p) => p.id === playerId);
@@ -33,6 +34,8 @@ export function getMortgageInterestRate(room: Room): number {
 
 export function calcTotalMortgageDebt(player: Player): number {
   return (player.mortgagedProperties ?? []).reduce((sum, cell) => {
+    const loan = player.mortgageLoans?.[cell];
+    if (loan !== undefined) return sum + loan;
     const deed = PROPERTY_DEEDS.get(cell);
     return sum + (deed ? Math.floor(deed.price * MORTGAGE_RATE) : 0);
   }, 0);
@@ -79,6 +82,14 @@ export type MortgageValidation =
   | { valid: false; reason: ActionRejectReason }
   | { valid: true; reason?: undefined; player: Player; loan: number };
 
+export function getEffectiveMortgageRate(room: Room, cellIndex: number): number {
+  if (!(HANOI_HCMC_CELLS as readonly number[]).includes(cellIndex)) return MORTGAGE_RATE;
+  const isUrbanPlanningActive = (room.activeModifiers ?? []).some(
+    (m) => m.type === MarketCardId.MC_URBAN_PLANNING && m.remainingRounds > 0,
+  );
+  return isUrbanPlanningActive ? URBAN_PLANNING_MORTGAGE_RATE : MORTGAGE_RATE;
+}
+
 function checkMortgagePlayer(
   room: Room,
   playerId: string,
@@ -95,7 +106,8 @@ function checkMortgagePlayer(
   const deed = PROPERTY_DEEDS.get(cellIndex);
   if (!deed) return { valid: false, reason: ActionRejectReason.NOT_MORTGAGEABLE };
 
-  const loan = Math.floor(deed.price * MORTGAGE_RATE);
+  const rate = getEffectiveMortgageRate(room, cellIndex);
+  const loan = Math.floor(deed.price * rate);
   return { valid: true, player, loan };
 }
 
@@ -127,6 +139,8 @@ export function mortgageProperty(
 
   v.player.balance += v.loan;
   v.player.mortgagedProperties.push(cellIndex);
+  v.player.mortgageLoans ??= {};
+  v.player.mortgageLoans[cellIndex] = v.loan;
 
   console.info(JSON.stringify({
     event: 'MORTGAGE_PROPERTY', correlationId: room.roomCode,
@@ -161,7 +175,7 @@ function checkRedeemPlayerFunds(
   const deed = PROPERTY_DEEDS.get(cellIndex);
   if (!deed) return { valid: false, reason: ActionRejectReason.NOT_MORTGAGEABLE };
 
-  const loan  = Math.floor(deed.price * MORTGAGE_RATE);
+  const loan  = player.mortgageLoans?.[cellIndex] ?? Math.floor(deed.price * MORTGAGE_RATE);
   const repay = Math.floor(loan * REDEEM_FEE_RATE);
   if (player.balance < repay) return { valid: false, reason: ActionRejectReason.INSUFFICIENT_FUNDS };
 
@@ -192,6 +206,9 @@ export function redeemProperty(
 
   v.player.balance -= v.repay;
   v.player.mortgagedProperties.splice(v.idx, 1);
+  if (v.player.mortgageLoans) {
+    delete v.player.mortgageLoans[cellIndex];
+  }
 
   console.info(JSON.stringify({
     event: 'REDEEM_PROPERTY', correlationId: room.roomCode,

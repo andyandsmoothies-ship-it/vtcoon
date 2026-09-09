@@ -146,6 +146,7 @@ export type P2PTradeValidation =
       taxRate?: undefined;
       totalCost?: undefined;
       taxAmount?: undefined;
+      sellerNet?: undefined;
       buyer?: undefined;
       seller?: undefined;
     }
@@ -155,19 +156,22 @@ export type P2PTradeValidation =
       taxRate: number;
       totalCost: number;
       taxAmount: number;
+      sellerNet: number;
       buyer: Player;
       seller: Player;
     };
 
-function calcP2PTax(room: Room, price: number): { taxRate: number; totalCost: number; taxAmount: number } {
+function calcP2PTax(room: Room, price: number): { taxRate: number; totalCost: number; taxAmount: number; sellerNet: number } {
   const antiSpeculate = (room.activeModifiers ?? []).some(
     (m) => m.type === MarketCardId.MC_ANTI_SPECULATE && m.remainingRounds > 0,
   );
   const taxRate = antiSpeculate ? P2P_ANTI_SPECULATE_TAX : P2P_TAX_RATE;
+  const taxAmount = Math.floor(price * taxRate);
   return {
     taxRate,
-    totalCost: Math.floor(price * (1 + taxRate)),
-    taxAmount: Math.floor(price * taxRate),
+    totalCost: price,
+    taxAmount,
+    sellerNet: price - taxAmount,
   };
 }
 
@@ -227,10 +231,10 @@ function checkTradeParties(
     return { valid: false, reason: ActionRejectReason.PROPERTY_MORTGAGED };
   }
 
-  const { taxRate, totalCost, taxAmount } = calcP2PTax(room, price);
+  const { taxRate, totalCost, taxAmount, sellerNet } = calcP2PTax(room, price);
   if (buyer!.balance < totalCost) return { valid: false, reason: ActionRejectReason.INSUFFICIENT_FUNDS };
 
-  return { valid: true, taxRate, totalCost, taxAmount, buyer: buyer!, seller: seller! };
+  return { valid: true, taxRate, totalCost, taxAmount, sellerNet, buyer: buyer!, seller: seller! };
 }
 
 export function validateP2PTrade(
@@ -264,7 +268,7 @@ export function executeP2PTrade(
   if (!v.valid) return { success: false, reason: v.reason };
 
   v.buyer.balance -= v.totalCost;
-  v.seller.balance += price;
+  v.seller.balance += v.sellerNet;
   room.treasury += v.taxAmount;
   registry.set(cellIndex, buyerId);
 

@@ -19,7 +19,7 @@ export enum TurnPhase {
 }
 
 export interface MarketModifier {
-  readonly type: MarketCardId;
+  readonly type: MarketCardId | ChanceCardId;
   readonly affectedCells: readonly number[];
   remainingRounds: number;
   readonly multiplier?: number;
@@ -39,6 +39,7 @@ export interface Player {
   doubleNextDice:       boolean;
   mortgagedProperties:  number[];
   bankrupt:             boolean;
+  mortgageLoans?:       Record<number, number>;
 }
 
 export interface Room {
@@ -75,6 +76,7 @@ export function createPlayer(id: string): Player {
     hand: [], pendingDebts: [],
     extraTurns: 0, doubleNextDice: false,
     mortgagedProperties: [], bankrupt: false,
+    mortgageLoans: {},
   };
 }
 

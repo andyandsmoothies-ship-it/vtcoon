@@ -18,7 +18,7 @@ function setup(rng = () => 0) {
 }
 
 describe('[TC-05.5/MSS] P2P Trading Cap 0 & 5% Thue Chuyen Nhuong', () => {
-  it('Giao dich truc tiep executeP2PTrade: nguoi mua tra tien + 5% thue, nguoi ban nhan du, so huu doi', () => {
+  it('Giao dich truc tiep executeP2PTrade: nguoi mua tra dung gia, nguoi ban chiu 5% thue, so huu doi', () => {
     const { room, reg, sm } = setup();
     reg.set(1, 'p1');
     room.players[0]!.balance = 5000;
@@ -28,8 +28,8 @@ describe('[TC-05.5/MSS] P2P Trading Cap 0 & 5% Thue Chuyen Nhuong', () => {
     const res = executeP2PTrade(room, 'p1', 'p2', 1, 800, reg, sm);
     expect(res.success, String(res.reason)).toBe(true);
     expect(reg.get(1)).toBe('p2');
-    expect(room.players[1]!.balance).toBe(10000 - 840); // 800 + 40 tax (5%)
-    expect(room.players[0]!.balance).toBe(5000 + 800);
+    expect(room.players[1]!.balance).toBe(10000 - 800); // Nguoi mua tra dung 800
+    expect(room.players[0]!.balance).toBe(5000 + 760); // 800 - 40 thue (5%)
     expect(room.treasury).toBe(40);
   });
 
@@ -43,8 +43,8 @@ describe('[TC-05.5/MSS] P2P Trading Cap 0 & 5% Thue Chuyen Nhuong', () => {
     const res = mgr.handleTradeOffer(room.roomCode, 'p1', 'p1', 'p2', 3, 1000);
     expect(res.success, String(res.reason)).toBe(true);
     expect(reg.get(3)).toBe('p2');
-    expect(room.players[1]!.balance).toBe(8000 - 1050); // 1000 + 50 tax (5%)
-    expect(room.players[0]!.balance).toBe(3000 + 1000);
+    expect(room.players[1]!.balance).toBe(8000 - 1000); // 1000
+    expect(room.players[0]!.balance).toBe(3000 + 950); // 1000 - 50 thue (5%)
     expect(room.treasury).toBe(100 + 50);
   });
 
@@ -64,8 +64,8 @@ describe('[TC-05.5/MSS] P2P Trading Cap 0 & 5% Thue Chuyen Nhuong', () => {
     });
     expect(res.success, String(res.reason)).toBe(true);
     expect(reg.get(6)).toBe('p2');
-    expect(room.players[1]!.balance).toBe(6000 - 2100); // 2000 + 100 (5%)
-    expect(room.players[0]!.balance).toBe(4000 + 2000);
+    expect(room.players[1]!.balance).toBe(6000 - 2000); // 2000
+    expect(room.players[0]!.balance).toBe(4000 + 1900); // 2000 - 100 thue (5%)
     expect(room.treasury).toBe(100);
   });
 });
@@ -84,8 +84,8 @@ describe('[TC-05.5-anti/MSS] Macro Card MC_ANTI_SPECULATE Tang Thue 20%', () => 
     const res = executeP2PTrade(room, 'p1', 'p2', 1, 1000, reg, sm);
     expect(res.success, String(res.reason)).toBe(true);
     expect(reg.get(1)).toBe('p2');
-    expect(room.players[1]!.balance).toBe(5000 - 1200); // 1000 + 200 tax (20%)
-    expect(room.players[0]!.balance).toBe(2000 + 1000);
+    expect(room.players[1]!.balance).toBe(5000 - 1000); // 1000
+    expect(room.players[0]!.balance).toBe(2000 + 800); // 1000 - 200 tax (20%)
     expect(room.treasury).toBe(50 + 200);
   });
 
@@ -101,8 +101,8 @@ describe('[TC-05.5-anti/MSS] Macro Card MC_ANTI_SPECULATE Tang Thue 20%', () => 
 
     const res = executeP2PTrade(room, 'p1', 'p2', 1, 1000, reg, sm);
     expect(res.success, String(res.reason)).toBe(true);
-    expect(room.players[1]!.balance).toBe(5000 - 1050); // 1000 + 50 tax (5%)
-    expect(room.players[0]!.balance).toBe(2000 + 1000);
+    expect(room.players[1]!.balance).toBe(5000 - 1000); // 1000
+    expect(room.players[0]!.balance).toBe(2000 + 950); // 1000 - 50 tax (5%)
     expect(room.treasury).toBe(50);
   });
 });
@@ -152,22 +152,22 @@ describe('[TC-05.5-inv/Adversarial] Tu Choi Giao Dich Bat Hop Le', () => {
     expect(resUnowned.reason).toBe('NOT_OWNER');
   });
 
-  it('Tu choi khi nguoi mua khong du tien (bao gom ca thue) -> INSUFFICIENT_FUNDS', () => {
+  it('Tu choi khi nguoi mua khong du tien -> INSUFFICIENT_FUNDS', () => {
     const { room, reg, sm } = setup();
     reg.set(1, 'p1');
-    room.players[1]!.balance = 839; // Needs 800 + 40 = 840
+    room.players[1]!.balance = 799; // Needs 800
 
     const res = executeP2PTrade(room, 'p1', 'p2', 1, 800, reg, sm);
     expect(res.success).toBe(false);
     expect(res.reason).toBe('INSUFFICIENT_FUNDS');
     expect(reg.get(1)).toBe('p1');
-    expect(room.players[1]!.balance).toBe(839);
+    expect(room.players[1]!.balance).toBe(799);
 
-    // With MC_ANTI_SPECULATE: needs 1000 + 200 = 1200
+    // With MC_ANTI_SPECULATE: buyer still pays exact price 1000
     room.activeModifiers = [
       { type: MarketCardId.MC_ANTI_SPECULATE, affectedCells: [], remainingRounds: 1 },
     ];
-    room.players[1]!.balance = 1199;
+    room.players[1]!.balance = 999;
     const resAnti = executeP2PTrade(room, 'p1', 'p2', 1, 1000, reg, sm);
     expect(resAnti.success).toBe(false);
     expect(resAnti.reason).toBe('INSUFFICIENT_FUNDS');
