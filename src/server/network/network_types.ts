@@ -19,7 +19,12 @@ export type ReasonCode =
   | 'INVALID_INTENT'
   | 'INVALID_ROOM'
   | 'NOT_YOUR_TURN'
-  | 'WARN_DELTA_OVERSIZED';
+  | 'WARN_DELTA_OVERSIZED'
+  | 'OUT_OF_TURN'
+  | 'RATE_LIMIT_EXCEEDED'
+  | 'ABUSE_DETECTED'
+  | 'INVALID_ENVELOPE'
+  | 'INVALID_VALUE';
 
 // ─── Client → Server ────────────────────────────────────────────
 export type WsClientMessage =
@@ -57,6 +62,11 @@ export type WsServerMessage =
       readonly reasonCode: ReasonCode;
     }
   | {
+      readonly type: 'INTENT_REJECTED';
+      readonly reasonCode: ReasonCode;
+      readonly playerId?: string;
+    }
+  | {
       readonly type: 'PING';
       readonly roomCode: string;
     }
@@ -86,6 +96,11 @@ export type WsServerMessage =
   | {
       readonly type: 'PLAYER_RECONNECTED';
       readonly playerId: string;
+    }
+  | {
+      readonly type: 'GAME_OVER';
+      readonly roomCode: string;
+      readonly leaderboard: ReadonlyArray<{ readonly id: string; readonly netWorth: number }>;
     };
 
 // Hàm helper: serialize message thành JSON string

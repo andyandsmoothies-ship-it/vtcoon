@@ -1,8 +1,6 @@
-// [UI-S01/MSS][UI-S03/MSS][UI-S05/MSS][TC-NET02/MSS] Client Entrypoint — Sảnh Chờ & Sa Bàn 3D
-import React, { useEffect } from 'react';
+import React, { useEffect, Suspense, lazy } from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import { GameCanvas } from './game_canvas';
 import { HudContainer } from './ui/hud_container';
 import { useGameStore, type PlayerHudInfo } from './store/game_store';
 import { useLobbyStore } from './store/lobby_store';
@@ -10,6 +8,10 @@ import { LobbyView } from './ui/lobby/lobby_view';
 import { PLAYER_TOKEN_PALETTE } from '../domain/theme';
 import { AudioEngine } from './audio/audio_engine';
 import { SoundEffect } from './audio/audio_types';
+
+export const GameCanvas = lazy(() =>
+  import('./game_canvas').then((m) => ({ default: m.GameCanvas }))
+);
 
 export function App(): React.ReactElement {
   const gameStarted = useLobbyStore((s) => s.gameStarted);
@@ -113,17 +115,32 @@ export function App(): React.ReactElement {
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-slate-950">
-      <GameCanvas />
+      <Suspense
+        fallback={
+          <div
+            role="status"
+            aria-live="polite"
+            className="w-full h-full flex flex-col items-center justify-center bg-slate-950 text-amber-400 gap-3"
+          >
+            <div className="w-10 h-10 border-4 border-amber-400 border-t-transparent rounded-full animate-spin" />
+            <span className="text-sm font-semibold tracking-wide">ĐANG TẢI SA BÀN 3D...</span>
+          </div>
+        }
+      >
+        <GameCanvas />
+      </Suspense>
       <HudContainer onRollDice={handleRollDice} onEndTurn={handleEndTurn} />
     </div>
   );
 }
 
-const rootElement = document.getElementById('root');
-if (rootElement) {
-  ReactDOM.createRoot(rootElement).render(
-    <React.StrictMode>
-      <App />
-    </React.StrictMode>
-  );
+if (typeof document !== 'undefined') {
+  const rootElement = document.getElementById('root');
+  if (rootElement) {
+    ReactDOM.createRoot(rootElement).render(
+      <React.StrictMode>
+        <App />
+      </React.StrictMode>
+    );
+  }
 }

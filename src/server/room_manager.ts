@@ -48,6 +48,12 @@ export class RoomManager {
   private readonly propertyStates = new Map<string, PropertyStateMap>();
   private readonly auctions = new Map<string, AuctionSession>();
   private readonly rolledThisTurn = new Map<string, boolean>();
+  private readonly activeTimersMap = new Map<string, Set<NodeJS.Timeout>>();
+  private readonly lastActivity = new Map<string, number>();
+  private readonly closeHooks: Array<(roomCode: string, room: Room) => void> = [];
+
+  get roomMap(): Map<string, Room> { return this.rooms; }
+  get activeTimers(): Map<string, Set<NodeJS.Timeout>> { return this.activeTimersMap; }
 
   constructor(seed?: number | (() => number)) {
     if (typeof seed === 'function') {
@@ -67,6 +73,7 @@ export class RoomManager {
     this.rooms.set(room.roomCode, room);
     this.registries.set(room.roomCode, new Map());
     this.propertyStates.set(room.roomCode, new Map());
+    this.touchActivity(room.roomCode);
     return room;
   }
 
@@ -74,6 +81,7 @@ export class RoomManager {
     const room = this.rooms.get(roomCode);
     if (!room || room.started) return undefined;
     room.players.push(createPlayer(playerId));
+    this.touchActivity(roomCode);
     return room;
   }
 
@@ -85,6 +93,7 @@ export class RoomManager {
     const first = room.players[0];
     room.phase = first?.skipNextTurn ? TurnPhase.PropertyManagement : TurnPhase.WaitingRoll;
     if (first?.skipNextTurn) first.skipNextTurn = false;
+    this.touchActivity(roomCode);
     return room;
   }
 
@@ -107,6 +116,7 @@ export class RoomManager {
   }
 
   handleRollDice(roomCode: string, playerId: string): RollResult | undefined {
+    this.touchActivity(roomCode);
     const room = this.rooms.get(roomCode);
     const current = this.getActivePlayer(room, playerId);
     if (!current || !room) return undefined;
@@ -159,6 +169,7 @@ export class RoomManager {
   }
 
   handlePlayerIntent(roomCode: string, playerId: string, intent: PlayerIntent): { success: boolean; reason?: string } {
+    this.touchActivity(roomCode);
     return dispatchPlayerIntent(this, roomCode, playerId, intent);
   }
 
@@ -214,6 +225,7 @@ export class RoomManager {
   }
 
   handleBankruptcy(roomCode: string, playerId: string): { gameOver: boolean; rankings?: Array<{ id: string; netWorth: number }> } {
+    this.touchActivity(roomCode);
     const room = this.rooms.get(roomCode);
     const reg  = this.registries.get(roomCode);
     const sm   = this.propertyStates.get(roomCode);
@@ -225,6 +237,7 @@ export class RoomManager {
   }
 
   handleEndTurn(roomCode: string, playerId: string, continueDoubles?: boolean): Room | undefined {
+    this.touchActivity(roomCode);
     const room = this.rooms.get(roomCode);
     const current = this.getActivePlayer(room, playerId);
     if (!current || !room) return undefined;
@@ -306,5 +319,74 @@ export class RoomManager {
     const sm   = this.propertyStates.get(roomCode);
     if (!room || !reg || !sm) return undefined;
     return buildDeltaFromRoom(room, reg, sm, tick);
+  }
+
+  registerTimer(roomCode: string, timer: NodeJS.Timeout): void {
+    let timers = this.activeTimersMap.get(roomCode);
+    if (!timers) {
+      timers = new Set();
+      this.activeTimersMap.set(roomCode, timers);
+    }
+    timers.add(timer);
+  }
+
+  clearRoomTimers(roomCode: string): void {
+    const timers = this.activeTimersMap.get(roomCode);
+    if (timers) {
+      for (const t of timers) {
+        clearTimeout(t);
+      }
+      this.activeTimersMap.delete(roomCode);
+    }
+  }
+
+  getActiveTimers(roomCode: string): Set<NodeJS.Timeout> | undefined {
+    return this.activeTimersMap.get(roomCode);
+  }
+
+  touchActivity(roomCode: string, timestamp: number = Date.now()): void {
+    if (this.rooms.has(roomCode)) {
+      this.lastActivity.set(roomCode, timestamp);
+    }
+  }
+
+  getLastActivity(roomCode: string): number | undefined {
+    return this.lastActivity.get(roomCode);
+  }
+
+  getAllRoomCodes(): string[] {
+    return Array.from(this.rooms.keys());
+  }
+
+  getRoomCount(): number {
+    return this.rooms.size;
+  }
+
+  hasRoom(roomCode: string): boolean {
+    return this.rooms.has(roomCode);
+  }
+
+  onCloseRoom(hook: (roomCode: string, room: Room) => void): () => void {
+    this.closeHooks.push(hook);
+    return () => {
+      const idx = this.closeHooks.indexOf(hook);
+      if (idx !== -1) this.closeHooks.splice(idx, 1);
+    };
+  }
+
+  closeRoom(roomCode: string): boolean {
+    const room = this.rooms.get(roomCode);
+    if (!room) return false;
+    this.rooms.delete(roomCode);
+    this.clearRoomTimers(roomCode);
+    for (const hook of this.closeHooks) {
+      hook(roomCode, room);
+    }
+    this.registries.delete(roomCode);
+    this.propertyStates.delete(roomCode);
+    this.auctions.delete(roomCode);
+    this.rolledThisTurn.delete(roomCode);
+    this.lastActivity.delete(roomCode);
+    return true;
   }
 }

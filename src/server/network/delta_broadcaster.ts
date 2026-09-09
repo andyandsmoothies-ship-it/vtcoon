@@ -177,4 +177,9 @@ export class DeltaBroadcaster {
     socket.send(JSON.stringify(msg));
     return fullDelta;
   }
+
+  clearRoom(roomCode: string): void {
+    this.lastFullDeltas.delete(roomCode);
+    this.ticks.delete(roomCode);
+  }
 }

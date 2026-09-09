@@ -24,7 +24,7 @@ export interface PlayerHudInfo {
   readonly isBot?: boolean;
 }
 
-export type ActiveModalType = 'deed' | 'auction' | 'trade' | 'event' | null;
+export type ActiveModalType = 'deed' | 'auction' | 'trade' | 'event' | 'hose' | 'insolvency' | null;
 
 export interface ModalPayloadMap {
   deed: { cellIndex: number; canBuy?: boolean };
@@ -48,6 +48,17 @@ export interface ModalPayloadMap {
     title: string;
     description: string;
     effectDelta?: number;
+  };
+  hose: {
+    minStake?: number;
+    maxStake?: number;
+    currentStake?: number;
+    lastDiceRoll?: number;
+    lastPayout?: number;
+  };
+  insolvency: {
+    playerId: string;
+    deficit: number;
   };
 }
 

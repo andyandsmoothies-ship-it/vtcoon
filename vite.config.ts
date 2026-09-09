@@ -11,4 +11,32 @@ export default defineConfig({
       ignored: ['**/src/server/**', '**/docs/**', '**/issues/**', '**/tests/**'],
     },
   },
+  build: {
+    chunkSizeWarningLimit: 800,
+    rollupOptions: {
+      output: {
+        manualChunks(id: string) {
+          if (id.includes('node_modules')) {
+            if (id.includes('/node_modules/three/') || id.includes('\\node_modules\\three\\')) {
+              return 'vendor-three';
+            }
+            if (
+              id.includes('@react-three') ||
+              id.includes('@react-spring') ||
+              id.includes('three-stdlib')
+            ) {
+              return 'vendor-r3f';
+            }
+            if (id.includes('howler')) {
+              return 'vendor-audio';
+            }
+            if (id.includes('react') || id.includes('zustand') || id.includes('scheduler')) {
+              return 'vendor-react';
+            }
+          }
+        },
+      },
+    },
+  },
 });
+

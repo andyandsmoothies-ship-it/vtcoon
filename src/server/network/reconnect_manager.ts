@@ -179,6 +179,25 @@ export class ReconnectManager {
     return this.playerTokens.get(`${roomCode}:${playerId}`);
   }
 
+  clearRoom(roomCode: string): void {
+    const prefix = `${roomCode}:`;
+    for (const [key, timer] of this.graceTimers.entries()) {
+      if (key.startsWith(prefix)) {
+        clearTimeout(timer);
+        this.graceTimers.delete(key);
+        this.graceStartTimes.delete(key);
+      }
+    }
+    for (const [key, token] of this.playerTokens.entries()) {
+      if (key.startsWith(prefix)) {
+        const record = this.tokens.get(token);
+        if (record) record.expired = true;
+        this.tokens.delete(token);
+        this.playerTokens.delete(key);
+      }
+    }
+  }
+
   clear(): void {
     for (const timer of this.graceTimers.values()) {
       clearTimeout(timer);

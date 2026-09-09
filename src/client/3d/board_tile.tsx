@@ -1,8 +1,73 @@
-// [UI-S01/MSS] LayeredDioramaTile — Diorama-style 3D board tile with standee and tier markers
-import React from 'react';
+// [UI-S01/MSS][OPS-02/MSS] LayeredDioramaTile — Diorama-style 3D board tile with standee harmonic animation
+import React, { useRef } from 'react';
+import { useFrame } from '@react-three/fiber';
 import { Billboard } from '@react-three/drei';
+import type { Group } from 'three';
 import type { BoardCell } from '../../domain/board_config';
 import { COLOR_GROUP_HEX } from '../../domain/theme';
+
+export interface StandeeElevationOptions {
+  readonly omega?: number;
+  readonly amplitude?: number;
+  readonly baseHeight?: number;
+  readonly phase?: number;
+}
+
+/**
+ * [DEBT-UI01-02] Tính toán độ cao nhấp nhô điều hòa sin(omega*t) của Standee.
+ * Hàm thuần túy (pure math function) phục vụ 60 FPS animation loop và kiểm thử.
+ */
+export function calculateStandeeElevation(
+  time: number,
+  options: StandeeElevationOptions = {}
+): number {
+  const baseHeight = Number.isFinite(options.baseHeight) ? options.baseHeight! : 0.72;
+  if (!Number.isFinite(time)) {
+    return baseHeight;
+  }
+  const omega = Number.isFinite(options.omega) ? options.omega! : 2.0;
+  const amplitude = Number.isFinite(options.amplitude) ? options.amplitude! : 0.04;
+  const phase = Number.isFinite(options.phase) ? options.phase! : 0;
+  return baseHeight + Math.sin(omega * time + phase) * amplitude;
+}
+
+interface StandeeBillboardProps {
+  readonly cellIndex: number;
+  readonly groupColor: string;
+}
+
+function StandeeBillboard({ cellIndex, groupColor }: StandeeBillboardProps): React.ReactElement {
+  const groupRef = useRef<Group>(null);
+
+  useFrame((state) => {
+    if (groupRef.current) {
+      const t = state.clock.getElapsedTime();
+      groupRef.current.position.y = calculateStandeeElevation(t, {
+        omega: 2.0,
+        amplitude: 0.04,
+        baseHeight: 0.72,
+        phase: cellIndex * 0.25,
+      });
+    }
+  });
+
+  return (
+    <group ref={groupRef} position={[0, 0.72, 0.05]}>
+      <Billboard follow={true}>
+        {/* Standee background plate */}
+        <mesh castShadow>
+          <planeGeometry args={[1.0, 1.05]} />
+          <meshBasicMaterial color="#FFFFFF" />
+        </mesh>
+        {/* Standee graphic preview */}
+        <mesh position={[0, 0, 0.01]}>
+          <planeGeometry args={[0.9, 0.95]} />
+          <meshStandardMaterial color={groupColor} roughness={0.3} />
+        </mesh>
+      </Billboard>
+    </group>
+  );
+}
 
 interface LayeredDioramaTileProps {
   readonly cell: BoardCell;
@@ -60,19 +125,8 @@ export function LayeredDioramaTile({
         </mesh>
       )}
 
-      {/* 3. Standee 2.5D Billboard — Facing camera */}
-      <Billboard position={[0, 0.72, 0.05]} follow={true}>
-        {/* Standee background plate */}
-        <mesh castShadow>
-          <planeGeometry args={[1.0, 1.05]} />
-          <meshBasicMaterial color="#FFFFFF" />
-        </mesh>
-        {/* Standee graphic preview */}
-        <mesh position={[0, 0, 0.01]}>
-          <planeGeometry args={[0.9, 0.95]} />
-          <meshStandardMaterial color={groupColor} roughness={0.3} />
-        </mesh>
-      </Billboard>
+      {/* 3. Standee 2.5D Billboard — Harmonic bobbing sin(omega*t) at 60 FPS */}
+      <StandeeBillboard cellIndex={cell.index} groupColor={groupColor} />
 
       {/* 4. Tier Markers — Cylinder indicators per upgrade level */}
       {Array.from({ length: currentLevel }, (_, i) => (

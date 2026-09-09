@@ -75,8 +75,8 @@ export function handleWsMessage(
   } else if (msg.type === 'PING') {
     const pongMsg: WsClientMessage = { type: 'PONG', playerId: ctx.playerId, roomCode: ctx.roomCode };
     ctx.socket.send(JSON.stringify(pongMsg));
-  } else if (msg.type === 'ERROR') {
-    if (msg.reasonCode === 'TOKEN_INVALID' || msg.reasonCode === 'TOKEN_EXPIRED') {
+  } else if (msg.type === 'ERROR' || msg.type === 'INTENT_REJECTED') {
+    if (msg.type === 'ERROR' && (msg.reasonCode === 'TOKEN_INVALID' || msg.reasonCode === 'TOKEN_EXPIRED')) {
       clearReconnectToken(ctx.roomCode);
     }
     ctx.setErrorReason?.(msg.reasonCode);
@@ -118,8 +118,11 @@ export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
   const connect = useCallback(() => {
     if (wsRef.current && wsRef.current.readyState === 1) return;
 
+    const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:';
     const defaultUrl = typeof window !== 'undefined'
-      ? `ws://${window.location.hostname || 'localhost'}:3001`
+      ? (isHttps
+          ? `wss://${window.location.host}/rooms/${roomCode}`
+          : `ws://${window.location.hostname || 'localhost'}:3001`)
       : 'ws://localhost:3001';
     const targetUrl = url ?? defaultUrl;
 

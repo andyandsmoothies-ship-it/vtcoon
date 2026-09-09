@@ -4,7 +4,7 @@ import { BuyResult } from '../domain/property_manager';
 import type { RoomManager } from './room_manager';
 
 export type PlayerIntent =
-  | { type: 'INTENT_BUY' } | { type: 'INTENT_DECLINE' }
+  | { type: 'INTENT_BUY' } | { type: 'INTENT_BUY_PROPERTY' } | { type: 'INTENT_DECLINE' }
   | { type: 'INTENT_BID'; amount: number }
   | { type: 'INTENT_AUCTION_PASS' }
   | { type: 'INTENT_UPGRADE'; cellIndex: number }
@@ -18,6 +18,7 @@ export type PlayerIntent =
   | { type: 'INTENT_INVEST'; stake: number }
   | { type: 'INTENT_SKIP' }
   | { type: 'INTENT_BAIL_OUT' }
+  | { type: 'INTENT_BANKRUPTCY' }
   | { type: 'INTENT_ROLL' };
 
 type IntentHandler = (mgr: RoomManager, rc: string, p: string, intent: PlayerIntent) => { success: boolean; reason?: string };
@@ -28,6 +29,10 @@ const INTENT_DISPATCH: Record<PlayerIntent['type'], IntentHandler> = {
     return { success: res !== undefined, reason: res ? undefined : 'CANNOT_ROLL' };
   },
   INTENT_BUY: (m, rc, p) => {
+    const res = m.handleBuyProperty(rc, p);
+    return { success: res?.result === BuyResult.Success, reason: res?.result };
+  },
+  INTENT_BUY_PROPERTY: (m, rc, p) => {
     const res = m.handleBuyProperty(rc, p);
     return { success: res?.result === BuyResult.Success, reason: res?.result };
   },
@@ -47,6 +52,10 @@ const INTENT_DISPATCH: Record<PlayerIntent['type'], IntentHandler> = {
   INTENT_INVEST: (m, rc, p, i) => m.handleHoseInvest(rc, p, (i as { stake: number }).stake),
   INTENT_SKIP: (m, rc, p) => m.handleHoseSkip(rc, p),
   INTENT_BAIL_OUT: (m, rc, p) => m.handleBailOut(rc, p),
+  INTENT_BANKRUPTCY: (m, rc, p) => {
+    m.handleBankruptcy(rc, p);
+    return { success: true };
+  },
   INTENT_END_TURN: (m, rc, p) => {
     const r = m.handleEndTurn(rc, p);
     return { success: r !== undefined, reason: r ? undefined : 'INVALID_PHASE' };
@@ -61,7 +70,7 @@ export function dispatchPlayerIntent(
 ): { success: boolean; reason?: string } {
   const room = mgr.getRoom(roomCode);
   if (room?.phase === TurnPhase.InsolvencyPhase) {
-    if (intent.type !== 'INTENT_MORTGAGE' && intent.type !== 'INTENT_DOWNGRADE') {
+    if (intent.type !== 'INTENT_MORTGAGE' && intent.type !== 'INTENT_DOWNGRADE' && intent.type !== 'INTENT_BANKRUPTCY') {
       return { success: false, reason: 'INVALID_PHASE' };
     }
   }

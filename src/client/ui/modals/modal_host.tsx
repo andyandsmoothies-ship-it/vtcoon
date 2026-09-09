@@ -1,17 +1,27 @@
 // [UI-S04/MSS][UI-S05/MSS] ModalHost — Switchboard for business modals with SFX integration
 import React, { useEffect } from 'react';
-import { useGameStore, ModalPayloadMap } from '../../store/game_store';
+import { useGameStore, ModalPayloadMap, type ActiveModalType } from '../../store/game_store';
 import { ModalBackdrop } from './modal_backdrop';
 import { TitleDeedModal } from './title_deed_modal';
 import { AuctionModal } from './auction_modal';
 import { TradeModal } from './trade_modal';
 import { EventCardModal } from './event_card_modal';
+import { HoseModal } from './hose_modal';
+import { InsolvencyBanner } from './insolvency_banner';
 import { AudioEngine } from '../../audio/audio_engine';
 import { SoundEffect } from '../../audio/audio_types';
 
-export function ModalHost(): React.ReactElement | null {
-  const activeModal = useGameStore((state) => state.activeModal);
-  const modalPayload = useGameStore((state) => state.modalPayload);
+export interface ModalHostProps {
+  readonly activeModal?: ActiveModalType;
+  readonly modalPayload?: ModalPayloadMap[keyof ModalPayloadMap] | null;
+}
+
+export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
+  const { activeModal: propActiveModal, modalPayload: propModalPayload } = props;
+  const storeActiveModal = useGameStore((state) => state.activeModal);
+  const storeModalPayload = useGameStore((state) => state.modalPayload);
+  const activeModal = propActiveModal !== undefined ? propActiveModal : storeActiveModal;
+  const modalPayload = propModalPayload !== undefined ? propModalPayload : storeModalPayload;
   const closeModal = useGameStore((state) => state.closeModal);
   const updateModalPayload = useGameStore((state) => state.updateModalPayload);
   const playersInfo = useGameStore((state) => state.playersInfo);
@@ -118,6 +128,35 @@ export function ModalHost(): React.ReactElement | null {
           description={(modalPayload as ModalPayloadMap['event']).description}
           effectDelta={(modalPayload as ModalPayloadMap['event']).effectDelta}
           onConfirm={closeModal}
+          onClose={closeModal}
+        />
+      )}
+
+      {activeModal === 'hose' && (
+        <HoseModal
+          myBalance={myPlayer?.balance}
+          defaultStake={(modalPayload as ModalPayloadMap['hose']).currentStake ?? 500}
+          lastDiceRoll={(modalPayload as ModalPayloadMap['hose']).lastDiceRoll}
+          lastPayout={(modalPayload as ModalPayloadMap['hose']).lastPayout}
+          onInvest={(_stake) => {
+            AudioEngine.playSfx(SoundEffect.DICE_ROLL);
+            closeModal();
+          }}
+          onSkip={closeModal}
+          onClose={closeModal}
+        />
+      )}
+
+      {activeModal === 'insolvency' && (
+        <InsolvencyBanner
+          playerId={(modalPayload as ModalPayloadMap['insolvency']).playerId}
+          playerName={playersInfo[(modalPayload as ModalPayloadMap['insolvency']).playerId]?.name}
+          deficit={(modalPayload as ModalPayloadMap['insolvency']).deficit}
+          onManageProperties={closeModal}
+          onDeclareBankruptcy={() => {
+            AudioEngine.playSfx(SoundEffect.BANKRUPT);
+            closeModal();
+          }}
           onClose={closeModal}
         />
       )}
