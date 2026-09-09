@@ -33,18 +33,18 @@ export function PlayerSlotCard({
               Vị Trí {slotNumber}
             </span>
           </div>
-          <span className="text-[11px] px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-500">
+          <span className="text-[11px] px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400">
             Trống
           </span>
         </div>
 
         <div className="flex items-center justify-between mt-2">
-          <span className="text-xs italic text-slate-500">Đang đợi người chơi...</span>
+          <span className="text-xs italic text-slate-400">Đang đợi người chơi...</span>
           {isHostViewer && slot.slotIndex > 0 && onToggleBot && (
             <button
               type="button"
               onClick={() => onToggleBot(slot.slotIndex)}
-              className="text-xs px-3 py-1 rounded-lg bg-indigo-900/60 hover:bg-indigo-800/80 text-indigo-200 border border-indigo-700/50 transition-all cursor-pointer shadow"
+              className="min-h-[44px] inline-flex items-center justify-center text-xs px-3.5 py-2 rounded-lg bg-indigo-900/60 hover:bg-indigo-800/80 text-indigo-200 border border-indigo-700/50 transition-all cursor-pointer shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
               data-testid={`add-bot-slot-${slot.slotIndex}-btn`}
             >
               + Thêm Bot AI
@@ -91,7 +91,7 @@ export function PlayerSlotCard({
               <button
                 type="button"
                 onClick={() => onCycleBotPersonality(slot.slotIndex)}
-                className="text-[11px] px-2 py-0.5 rounded bg-cyan-900/60 hover:bg-cyan-800 text-cyan-200 border border-cyan-700/50 transition-all cursor-pointer"
+                className="text-[11px] px-2.5 py-1 rounded bg-cyan-900/60 hover:bg-cyan-800 text-cyan-200 border border-cyan-700/50 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
                 title="Nhấn để đổi tính cách Bot (Cân Bằng / Hiếu Chiến / Phòng Thủ)"
                 data-testid={`cycle-bot-${slot.slotIndex}-btn`}
               >
@@ -127,7 +127,7 @@ export function PlayerSlotCard({
           <button
             type="button"
             onClick={() => onToggleBot(slot.slotIndex)}
-            className="text-xs px-2.5 py-1 rounded-lg bg-rose-950/60 hover:bg-rose-900/80 text-rose-300 border border-rose-800/50 transition-all cursor-pointer"
+            className="text-xs px-3 py-1.5 rounded-lg bg-rose-950/60 hover:bg-rose-900/80 text-rose-300 border border-rose-800/50 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
             data-testid={`remove-bot-slot-${slot.slotIndex}-btn`}
           >
             Xóa Bot

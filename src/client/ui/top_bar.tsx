@@ -57,9 +57,9 @@ export function TopBar(): React.ReactElement {
         <button
           type="button"
           onClick={toggleMute}
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors cursor-pointer text-xs font-medium border border-slate-600/50"
+          className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors cursor-pointer text-xs font-medium border border-slate-600/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
           title={isMuted ? 'Bật âm thanh' : 'Tắt âm thanh'}
-          aria-label={isMuted ? 'Bật âm thanh' : 'Tắt âm thanh'}
+          aria-label={isMuted ? 'Bật âm thanh trò chơi' : 'Tắt âm thanh trò chơi'}
           data-testid="mute-toggle-button"
         >
           <span className="text-sm" aria-hidden="true">{isMuted ? '🔇' : '🔊'}</span>

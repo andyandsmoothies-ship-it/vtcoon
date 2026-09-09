@@ -77,7 +77,7 @@ export function TradeModal({
       </h3>
       <div className="flex-1 max-h-36 overflow-y-auto space-y-1 pr-1">
         {props.length === 0 ? (
-          <p className="text-[11px] text-slate-500 italic">Không có BĐS</p>
+          <p className="text-[11px] text-slate-400 italic">Không có BĐS</p>
         ) : (
           props.map((id) => {
             const deed = getDeedDisplayInfo(id);
@@ -140,7 +140,12 @@ export function TradeModal({
           </h2>
         </div>
         {onClose && (
-          <button type="button" onClick={onClose} aria-label="Đóng đàm phán" className="text-white/70 hover:text-white text-lg font-bold p-1 leading-none">
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Đóng đàm phán"
+            className="min-w-[44px] min-h-[44px] inline-flex items-center justify-center text-white/80 hover:text-white text-xl font-bold rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+          >
             ✕
           </button>
         )}
@@ -163,13 +168,17 @@ export function TradeModal({
           type="button"
           onClick={handleSubmit}
           disabled={!isValid}
-          className={`flex-1 py-2 px-3 rounded-xl font-bold text-white shadow-md text-xs transition-all ${
-            isValid ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 active:scale-95' : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
+          className={`flex-1 min-h-[44px] py-2 px-3 rounded-xl font-bold text-white shadow-md text-xs transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+            isValid ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 active:scale-95' : 'bg-slate-800 text-slate-400 cursor-not-allowed border border-slate-700'
           }`}
         >
           Gửi Đề Xuất Đàm Phán
         </button>
-        <button type="button" onClick={onClose} className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 active:scale-95">
+        <button
+          type="button"
+          onClick={onClose}
+          className="min-h-[44px] px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+        >
           Hủy
         </button>
       </footer>

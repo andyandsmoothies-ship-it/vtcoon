@@ -30,6 +30,7 @@ export interface UseGameWsOptions {
   readonly onGrace?: (playerId: string, secondsLeft: number) => void;
   readonly onBotTakeover?: (playerId: string) => void;
   readonly onReconnected?: (playerId: string) => void;
+  readonly onGameOver?: (leaderboard: ReadonlyArray<{ readonly id: string; readonly netWorth: number }>) => void;
   readonly webSocketFactory?: (url: string) => WebSocketLike;
 }
 
@@ -52,6 +53,7 @@ export interface WsMessageHandlerContext {
   readonly onGrace?: (playerId: string, secondsLeft: number) => void;
   readonly onBotTakeover?: (playerId: string) => void;
   readonly onReconnected?: (playerId: string) => void;
+  readonly onGameOver?: (leaderboard: ReadonlyArray<{ readonly id: string; readonly netWorth: number }>) => void;
   readonly setLastTick?: (tick: number) => void;
   readonly setErrorReason?: (reason: ReasonCode | null) => void;
 }
@@ -64,6 +66,8 @@ export function handleWsMessage(
     applyDeltaToStore(msg.delta);
     ctx.setLastTick?.(msg.delta.tick);
     ctx.onDelta?.(msg.delta);
+  } else if (msg.type === 'GAME_OVER') {
+    ctx.onGameOver?.(msg.leaderboard);
   } else if (msg.type === 'SESSION_INIT') {
     saveReconnectToken(msg.roomCode || ctx.roomCode, msg.reconnectToken);
   } else if (msg.type === 'PLAYER_GRACE') {
@@ -115,6 +119,9 @@ export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
   const onReconnectedRef = useRef(options.onReconnected);
   onReconnectedRef.current = options.onReconnected;
 
+  const onGameOverRef = useRef(options.onGameOver);
+  onGameOverRef.current = options.onGameOver;
+
   const connect = useCallback(() => {
     if (wsRef.current && wsRef.current.readyState === 1) return;
 
@@ -157,6 +164,7 @@ export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
           onGrace: onGraceRef.current,
           onBotTakeover: onBotTakeoverRef.current,
           onReconnected: onReconnectedRef.current,
+          onGameOver: onGameOverRef.current,
           setLastTick,
           setErrorReason,
         });

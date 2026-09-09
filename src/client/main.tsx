@@ -1,4 +1,4 @@
-import React, { useEffect, Suspense, lazy } from 'react';
+import React, { useEffect, useCallback, Suspense, lazy } from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import { HudContainer } from './ui/hud_container';
@@ -8,6 +8,8 @@ import { LobbyView } from './ui/lobby/lobby_view';
 import { PLAYER_TOKEN_PALETTE } from '../domain/theme';
 import { AudioEngine } from './audio/audio_engine';
 import { SoundEffect } from './audio/audio_types';
+import { BOARD_CONFIG, CellType } from '../domain/board_config';
+import { useGameWs } from './network/use_game_ws';
 
 export const GameCanvas = lazy(() =>
   import('./game_canvas').then((m) => ({ default: m.GameCanvas }))
@@ -25,8 +27,23 @@ export function App(): React.ReactElement {
   const setPlayerPositions = useGameStore((state) => state.setPlayerPositions);
   const triggerDiceRoll = useGameStore((state) => state.triggerDiceRoll);
   const startPawnMove = useGameStore((state) => state.startPawnMove);
+  const openModal = useGameStore((state) => state.openModal);
   const currentTurnPlayerId = useGameStore((state) => state.currentTurnPlayerId);
   const playerPositions = useGameStore((state) => state.playerPositions);
+
+  const handleGameOver = useCallback(
+    (leaderboard: ReadonlyArray<{ readonly id: string; readonly netWorth: number }>) => {
+      openModal('game_over', { leaderboard });
+    },
+    [openModal]
+  );
+
+  const { isConnected, sendIntent } = useGameWs({
+    roomCode: roomCode || 'VT8888',
+    playerId: 'p1',
+    autoConnect: true,
+    onGameOver: handleGameOver,
+  });
 
   useEffect(() => {
     AudioEngine.init();
@@ -69,6 +86,7 @@ export function App(): React.ReactElement {
         balance: 15000,
         tokenColor: s.tokenColor ?? (PLAYER_TOKEN_PALETTE[idx] ?? '#38BDF8'),
         ownedProperties: [],
+        isBot: s.isBot,
       };
       positions[pid] = 0;
     });
@@ -84,11 +102,70 @@ export function App(): React.ReactElement {
     return () => clearInterval(timer);
   }, [gameStarted, lobbySlots, setPlayersInfo, setPlayerPositions, setCurrentTurnPlayerId, setTreasuryPool]);
 
+  // Router xử lý sự kiện khi quân cờ đáp xuống ô [UC-GAME-017]
+  const handleCellLanding = useCallback(
+    (activeId: string, targetCell: number) => {
+      const tile = BOARD_CONFIG[targetCell];
+      if (!tile) return;
+
+      const state = useGameStore.getState();
+      const activePlayer = state.playersInfo[activeId];
+      const isLocal = activeId === (currentTurnPlayerId ?? 'p1');
+
+      if (tile.type === CellType.Property || tile.type === CellType.Railroad || tile.type === CellType.Utility) {
+        const ownerEntry = Object.entries(state.playersInfo).find(([_, p]) =>
+          p.ownedProperties?.includes(targetCell)
+        );
+        if (!ownerEntry) {
+          if (isLocal) {
+            openModal('deed', { cellIndex: targetCell, canBuy: (activePlayer?.balance ?? 0) >= 600 });
+          }
+        } else if (ownerEntry[0] !== activeId) {
+          AudioEngine.playSfx(SoundEffect.TAX_PENALTY);
+        }
+      } else if (tile.type === CellType.Chance) {
+        if (isLocal) {
+          openModal('event', {
+            cardType: 'chance',
+            cardId: `chance_${targetCell}`,
+            title: 'PHIẾU CƠ HỘI',
+            description: 'Cơ hội phát triển kinh doanh và mở rộng mạng lưới địa ốc.',
+          });
+        }
+      } else if (tile.type === CellType.Market) {
+        if (isLocal) {
+          openModal('event', {
+            cardType: 'market',
+            cardId: `market_${targetCell}`,
+            title: 'PHIẾU THỊ TRƯỜNG',
+            description: 'Biến động chính sách vĩ mô và dòng vốn đầu tư toàn quốc.',
+          });
+        }
+      } else if (tile.type === CellType.Hose) {
+        if (isLocal) {
+          openModal('hose', { currentStake: 500 });
+        }
+      } else if (tile.type === CellType.Tax || tile.type === CellType.TaxOrder) {
+        AudioEngine.playSfx(SoundEffect.TAX_PENALTY);
+      }
+
+      // Kiểm tra tình trạng nợ / thấu chi âm tiền
+      if (activePlayer && activePlayer.balance < 0 && isLocal) {
+        openModal('insolvency', { playerId: activeId, deficit: -activePlayer.balance });
+      }
+    },
+    [currentTurnPlayerId, openModal]
+  );
+
   const handleRollDice = () => {
     const d1 = Math.floor(Math.random() * 6) + 1;
     const d2 = Math.floor(Math.random() * 6) + 1;
     triggerDiceRoll([d1, d2]);
     AudioEngine.playSfx(SoundEffect.DICE_ROLL);
+
+    if (isConnected) {
+      sendIntent({ type: 'INTENT_ROLL' });
+    }
 
     const activeId = currentTurnPlayerId ?? 'p1';
     const currentPos = playerPositions[activeId] ?? 0;
@@ -97,10 +174,14 @@ export function App(): React.ReactElement {
       startPawnMove(activeId, targetCell);
       AudioEngine.playSfx(SoundEffect.PAWN_STEP);
       AudioEngine.handlePawnLanded(targetCell);
+      handleCellLanding(activeId, targetCell);
     }, 650);
   };
 
   const handleEndTurn = () => {
+    if (isConnected) {
+      sendIntent({ type: 'INTENT_END_TURN' });
+    }
     const activeId = currentTurnPlayerId ?? 'p1';
     const activePlayers = Object.keys(useGameStore.getState().playersInfo);
     const currentIdx = activePlayers.indexOf(activeId);
@@ -129,7 +210,11 @@ export function App(): React.ReactElement {
       >
         <GameCanvas />
       </Suspense>
-      <HudContainer onRollDice={handleRollDice} onEndTurn={handleEndTurn} />
+      <HudContainer
+        onRollDice={handleRollDice}
+        onEndTurn={handleEndTurn}
+        onIntent={sendIntent}
+      />
     </div>
   );
 }

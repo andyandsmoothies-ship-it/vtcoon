@@ -10,14 +10,17 @@ import { HoseModal } from './hose_modal';
 import { InsolvencyBanner } from './insolvency_banner';
 import { AudioEngine } from '../../audio/audio_engine';
 import { SoundEffect } from '../../audio/audio_types';
+import { formatCurrency } from '../ui_helpers';
+import type { PlayerIntent } from '../../../server/intent_dispatcher';
 
 export interface ModalHostProps {
   readonly activeModal?: ActiveModalType;
   readonly modalPayload?: ModalPayloadMap[keyof ModalPayloadMap] | null;
+  readonly onIntent?: (intent: PlayerIntent) => void;
 }
 
 export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
-  const { activeModal: propActiveModal, modalPayload: propModalPayload } = props;
+  const { activeModal: propActiveModal, modalPayload: propModalPayload, onIntent } = props;
   const storeActiveModal = useGameStore((state) => state.activeModal);
   const storeModalPayload = useGameStore((state) => state.modalPayload);
   const activeModal = propActiveModal !== undefined ? propActiveModal : storeActiveModal;
@@ -64,14 +67,27 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
         const payload = modalPayload as ModalPayloadMap['deed'];
         const ownerId = Object.keys(playersInfo).find((id) => playersInfo[id]?.ownedProperties?.includes(payload.cellIndex));
         const owner = ownerId ? playersInfo[ownerId] : undefined;
+        const isOwner = ownerId === myId;
+        const isMortgaged = Boolean(owner?.mortgagedProperties?.includes(payload.cellIndex));
         return (
           <TitleDeedModal
             cellIndex={payload.cellIndex}
             canBuy={payload.canBuy ?? (!owner && myPlayer ? myPlayer.balance >= 600 : true)}
             isOwned={Boolean(owner)}
+            isOwner={isOwner}
+            isMortgaged={isMortgaged}
             ownerName={owner?.name}
             onBuy={() => {
               AudioEngine.playSfx(SoundEffect.BUY_PROPERTY);
+              onIntent?.({ type: 'INTENT_BUY_PROPERTY' });
+              closeModal();
+            }}
+            onMortgage={() => {
+              onIntent?.({ type: 'INTENT_MORTGAGE', cellIndex: payload.cellIndex });
+              closeModal();
+            }}
+            onRedeem={() => {
+              onIntent?.({ type: 'INTENT_REDEEM', cellIndex: payload.cellIndex });
               closeModal();
             }}
             onPass={closeModal}
@@ -92,9 +108,13 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
           myId={myId}
           onBid={(amount) => {
             AudioEngine.playSfx(SoundEffect.AUCTION_BID);
+            onIntent?.({ type: 'INTENT_BID', amount });
             updateModalPayload<'auction'>({ currentBid: amount, highestBidderId: myId, timeRemaining: 15 });
           }}
-          onPass={() => updateModalPayload<'auction'>({ hasPassed: true })}
+          onPass={() => {
+            onIntent?.({ type: 'INTENT_AUCTION_PASS' });
+            updateModalPayload<'auction'>({ hasPassed: true });
+          }}
           onClose={closeModal}
         />
       )}
@@ -114,6 +134,16 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
           initialCashRequest={(modalPayload as ModalPayloadMap['trade']).cashRequest}
           onSubmitTrade={() => {
             AudioEngine.playSfx(SoundEffect.TRADE_SUCCESS);
+            const tradePayload = modalPayload as ModalPayloadMap['trade'];
+            if (tradePayload.offeredProperties[0] !== undefined) {
+              onIntent?.({
+                type: 'INTENT_TRADE_OFFER',
+                sellerId: myId,
+                buyerId: tradePayload.targetPlayerId,
+                cellIndex: tradePayload.offeredProperties[0],
+                price: tradePayload.cashRequest || 1000,
+              });
+            }
             closeModal();
           }}
           onClose={closeModal}
@@ -138,11 +168,15 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
           defaultStake={(modalPayload as ModalPayloadMap['hose']).currentStake ?? 500}
           lastDiceRoll={(modalPayload as ModalPayloadMap['hose']).lastDiceRoll}
           lastPayout={(modalPayload as ModalPayloadMap['hose']).lastPayout}
-          onInvest={(_stake) => {
+          onInvest={(stake) => {
             AudioEngine.playSfx(SoundEffect.DICE_ROLL);
+            onIntent?.({ type: 'INTENT_INVEST', stake: stake ?? 500 });
             closeModal();
           }}
-          onSkip={closeModal}
+          onSkip={() => {
+            onIntent?.({ type: 'INTENT_SKIP' });
+            closeModal();
+          }}
           onClose={closeModal}
         />
       )}
@@ -155,11 +189,45 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
           onManageProperties={closeModal}
           onDeclareBankruptcy={() => {
             AudioEngine.playSfx(SoundEffect.BANKRUPT);
+            onIntent?.({ type: 'INTENT_BANKRUPTCY' });
             closeModal();
           }}
           onClose={closeModal}
         />
       )}
+
+      {activeModal === 'game_over' && (
+        <div className="w-full max-w-md bg-slate-900 border border-amber-500/60 rounded-2xl shadow-2xl p-6 text-center" data-testid="game-over-modal">
+          <div className="text-4xl mb-2" aria-hidden="true">🏆</div>
+          <h2 className="text-xl font-black text-amber-400 uppercase tracking-wide">
+            VÁN ĐẤU KẾT THÚC
+          </h2>
+          <p className="text-xs text-slate-400 mt-1 mb-4">Bảng Xếp Hạng Đại Gia Địa Ốc</p>
+          <div className="space-y-2 mb-6">
+            {(modalPayload as ModalPayloadMap['game_over'])?.leaderboard?.map((entry, idx) => (
+              <div key={entry.id} className="flex items-center justify-between p-3 rounded-xl bg-slate-800/80 border border-slate-700 text-sm">
+                <div className="flex items-center gap-2">
+                  <span className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs ${idx === 0 ? 'bg-amber-400 text-slate-950' : 'bg-slate-700 text-slate-200'}`}>
+                    {idx + 1}
+                  </span>
+                  <span className="font-semibold text-slate-100">{playersInfo[entry.id]?.name ?? entry.id}</span>
+                </div>
+                <span className="font-bold text-emerald-400 tabular-nums">{formatCurrency(entry.netWorth)}</span>
+              </div>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              closeModal();
+              if (typeof window !== 'undefined') window.location.reload();
+            }}
+            className="w-full min-h-[44px] py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm shadow-lg active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+          >
+            Về Sảnh Chờ
+          </button>
+        </div>
+      )}
     </ModalBackdrop>
   );
-}
+};

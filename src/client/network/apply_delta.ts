@@ -111,6 +111,7 @@ export function applyDeltaToStore(
           balance: p.balance,
           ...(p.bankrupt !== undefined ? { bankrupt: p.bankrupt } : {}),
           ...(p.isBot !== undefined ? { isBot: p.isBot } : {}),
+          ...(p.overdraftRoundsLeft !== undefined ? { overdraftRoundsLeft: p.overdraftRoundsLeft } : {}),
         });
       }
     }

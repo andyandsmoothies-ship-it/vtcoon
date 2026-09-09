@@ -55,6 +55,11 @@ export function PlayerCard({
 
         {/* Badges */}
         <div className="flex items-center gap-1 shrink-0">
+          {player.isBot && (
+            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-cyan-400 border border-cyan-700/50">
+              BOT
+            </span>
+          )}
           {player.bankrupt && (
             <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-950 text-rose-300 border border-rose-800">
               Phá Sản
@@ -80,6 +85,11 @@ export function PlayerCard({
           <span className={`tabular-nums ${balanceColorClass}`}>
             {formatCurrency(player.balance)}
           </span>
+          {isNegativeBalance && (
+            <span className="text-[10px] text-rose-400 font-semibold mt-0.5">
+              Thấu chi: còn {player.overdraftRoundsLeft ?? 3} vòng
+            </span>
+          )}
         </div>
         <div className="flex flex-col text-right">
           <span className="text-[10px] text-slate-400 uppercase">Tài sản ròng</span>
@@ -92,7 +102,7 @@ export function PlayerCard({
       {/* Dải chấm màu nhóm đất sở hữu */}
       {ownedGroups.length > 0 && (
         <div className="flex items-center gap-1 pt-1 border-t border-slate-800/80">
-          <span className="text-[9px] text-slate-500 uppercase tracking-tighter mr-0.5">
+          <span className="text-[9px] text-slate-400 uppercase tracking-tighter mr-0.5">
             BĐS:
           </span>
           <div className="flex items-center gap-1 flex-wrap">

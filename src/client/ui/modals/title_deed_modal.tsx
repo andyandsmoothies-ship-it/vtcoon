@@ -9,10 +9,14 @@ export interface TitleDeedModalProps {
   readonly cellIndex: number;
   readonly canBuy?: boolean;
   readonly isOwned?: boolean;
+  readonly isOwner?: boolean;
+  readonly isMortgaged?: boolean;
   readonly ownerName?: string;
   readonly onBuy?: () => void;
   readonly onPass?: () => void;
   readonly onClose?: () => void;
+  readonly onMortgage?: () => void;
+  readonly onRedeem?: () => void;
 }
 
 const PROPERTY_LEVELS = ['Đất Nền (C0)', 'Nhà Phố (C1)', 'Khách Sạn (C2)', 'TTTM (C3)'] as const;
@@ -22,10 +26,14 @@ export function TitleDeedModal({
   cellIndex,
   canBuy = true,
   isOwned = false,
+  isOwner = false,
+  isMortgaged = false,
   ownerName,
   onBuy,
   onPass,
   onClose,
+  onMortgage,
+  onRedeem,
 }: TitleDeedModalProps): React.ReactElement {
   const deed = getDeedDisplayInfo(cellIndex);
 
@@ -68,7 +76,7 @@ export function TitleDeedModal({
             type="button"
             onClick={onClose}
             aria-label="Đóng Sổ Đỏ"
-            className="absolute top-3 right-3 text-white/70 hover:text-white text-lg font-bold leading-none p-1"
+            className="absolute top-2 right-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-white/80 hover:text-white text-xl font-bold rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
           >
             ✕
           </button>
@@ -99,7 +107,7 @@ export function TitleDeedModal({
                 <span>Phí cơ sở (1 trạm):</span>
                 <span className="font-bold text-slate-100">{formatCurrency(deed.rents[0])}</span>
               </div>
-              <p className="text-[10px] text-slate-500 italic mt-1">
+              <p className="text-[10px] text-slate-400 italic mt-1">
                 * Thu 4× điểm xúc xắc (1 trạm) hoặc 10× điểm xúc xắc (khi sở hữu cả 2 trạm).
               </p>
             </div>
@@ -110,7 +118,7 @@ export function TitleDeedModal({
                   <div className="flex flex-col">
                     <span className="text-slate-300 font-medium">{levelLabels[idx]}</span>
                     {hasUpgrades && idx > 0 && deed.upgradeCosts[idx - 1]! > 0 && (
-                      <span className="text-[10px] text-slate-500">
+                      <span className="text-[10px] text-slate-400">
                         Nâng cấp: +{formatCurrency(deed.upgradeCosts[idx - 1]!)}
                       </span>
                     )}
@@ -127,13 +135,22 @@ export function TitleDeedModal({
       <footer className="p-4 pt-1 bg-slate-900/90 border-t border-slate-800/80 flex gap-2">
         {isOwned ? (
           <>
-            <div className="flex-1 py-2 px-3 rounded-xl font-bold text-emerald-400 bg-emerald-950/40 border border-emerald-600/40 text-xs text-center flex items-center justify-center">
+            <div className="flex-1 min-h-[44px] py-2 px-3 rounded-xl font-bold text-emerald-400 bg-emerald-950/40 border border-emerald-600/40 text-xs text-center flex items-center justify-center">
               ✓ Đã Sở Hữu {ownerName ? `(${ownerName})` : ''}
             </div>
+            {isOwner && onMortgage && (
+              <button
+                type="button"
+                onClick={isMortgaged ? onRedeem : onMortgage}
+                className="min-h-[44px] px-3.5 py-2 rounded-xl font-semibold text-xs bg-amber-600 hover:bg-amber-500 text-white transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+              >
+                {isMortgaged ? 'Giải Chấp' : 'Thế Chấp'}
+              </button>
+            )}
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl font-medium text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs transition-all active:scale-95"
+              className="min-h-[44px] px-4 py-2 rounded-xl font-medium text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
             >
               Đóng
             </button>
@@ -144,10 +161,10 @@ export function TitleDeedModal({
               type="button"
               onClick={onBuy}
               disabled={!canBuy}
-              className={`flex-1 py-2.5 px-3 rounded-xl font-bold text-white shadow-md text-sm transition-all duration-150 ${
+              className={`flex-1 min-h-[44px] py-2.5 px-3 rounded-xl font-bold text-white shadow-md text-sm transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
                 canBuy
                   ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 active:scale-95'
-                  : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
+                  : 'bg-slate-800 text-slate-400 cursor-not-allowed border border-slate-700'
               }`}
             >
               {canBuy ? `Mua BĐS (${formatCurrency(deed.price)})` : 'Không Đủ Tiền'}
@@ -156,7 +173,7 @@ export function TitleDeedModal({
             <button
               type="button"
               onClick={onPass ?? onClose}
-              className="px-4 py-2.5 rounded-xl font-medium text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-sm transition-all active:scale-95"
+              className="min-h-[44px] px-4 py-2.5 rounded-xl font-medium text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-sm transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
             >
               Bỏ Qua
             </button>

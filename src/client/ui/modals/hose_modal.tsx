@@ -50,8 +50,8 @@ export function HoseModal({
         </div>
         <button
           onClick={onClose}
-          aria-label="Đóng"
-          className="text-slate-400 hover:text-white text-xl font-bold p-1 cursor-pointer transition-colors"
+          aria-label="Đóng sàn HOSE"
+          className="min-w-[44px] min-h-[44px] inline-flex items-center justify-center text-slate-400 hover:text-white text-xl font-bold rounded-lg cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
         >
           ✕
         </button>
@@ -106,7 +106,7 @@ export function HoseModal({
                 key={amount}
                 disabled={disabled}
                 onClick={() => setStake(amount)}
-                className={`py-2 px-1 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                className={`min-h-[44px] py-2 px-1 rounded-xl text-xs font-bold transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
                   isSelected
                     ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
                     : disabled
@@ -125,14 +125,14 @@ export function HoseModal({
       <div className="flex gap-3 pt-2">
         <button
           onClick={onSkip}
-          className="flex-1 py-2.5 rounded-xl border border-slate-600 hover:bg-slate-800 text-slate-300 font-semibold text-sm cursor-pointer transition-colors"
+          className="flex-1 min-h-[44px] py-2.5 rounded-xl border border-slate-600 hover:bg-slate-800 text-slate-300 font-semibold text-sm cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
         >
           Bỏ Qua
         </button>
         <button
           disabled={!canAfford}
           onClick={() => onInvest(stake)}
-          className={`flex-1 py-2.5 rounded-xl font-bold text-sm cursor-pointer transition-all shadow-md ${
+          className={`flex-1 min-h-[44px] py-2.5 rounded-xl font-bold text-sm cursor-pointer transition-all shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
             canAfford
               ? 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 shadow-amber-500/20'
               : 'bg-slate-800 text-slate-500 cursor-not-allowed'

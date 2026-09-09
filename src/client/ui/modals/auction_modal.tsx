@@ -64,12 +64,17 @@ export function AuctionModal({
             type="button"
             onClick={onClose}
             aria-label="Đóng sàn đấu giá"
-            className="text-white/70 hover:text-white text-lg font-bold p-1 leading-none"
+            className="min-w-[44px] min-h-[44px] inline-flex items-center justify-center text-white/80 hover:text-white text-xl font-bold rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
           >
             ✕
           </button>
         )}
       </header>
+
+      {/* Vùng Live Region cho Trình Đọc Màn Hình [WCAG 4.1.3] */}
+      <div aria-live="polite" aria-atomic="true" className="sr-only">
+        {`Giá thầu cao nhất hiện tại: ${formatCurrency(currentBid)}, người dẫn đầu: ${displayName}, thời gian còn lại: ${timeRemaining} giây`}
+      </div>
 
       {/* Thông tin BĐS đang đấu giá */}
       <div className="p-4 space-y-3.5">
@@ -130,14 +135,14 @@ export function AuctionModal({
                     type="button"
                     onClick={() => onBid?.(targetBid)}
                     disabled={!canAfford}
-                    className={`py-2 px-1.5 font-bold text-xs rounded-xl shadow border flex flex-col items-center justify-center transition-all ${
+                    className={`min-h-[48px] py-2 px-1.5 font-bold text-xs rounded-xl shadow border flex flex-col items-center justify-center transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
                       canAfford
                         ? 'bg-gradient-to-b from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 active:scale-95 text-white border-amber-400/30'
-                        : 'bg-slate-800 text-slate-500 border-slate-700 cursor-not-allowed opacity-50'
+                        : 'bg-slate-800 text-slate-400 border-slate-700 cursor-not-allowed opacity-50'
                     }`}
                   >
                     <span>+{step} Tr.</span>
-                    <span className={`text-[9px] font-normal ${canAfford ? 'text-amber-200' : 'text-slate-500'}`}>
+                    <span className={`text-[9px] font-normal ${canAfford ? 'text-amber-200' : 'text-slate-400'}`}>
                       ({formatCurrency(targetBid)})
                     </span>
                   </button>
@@ -154,7 +159,7 @@ export function AuctionModal({
           type="button"
           onClick={onPass ?? onClose}
           disabled={hasPassed}
-          className="w-full py-2 px-4 rounded-xl text-xs font-semibold text-rose-300 hover:text-rose-200 bg-rose-950/30 hover:bg-rose-900/40 border border-rose-800/40 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95"
+          className="w-full min-h-[44px] py-2 px-4 rounded-xl text-xs font-semibold text-rose-300 hover:text-rose-200 bg-rose-950/30 hover:bg-rose-900/40 border border-rose-800/40 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
         >
           {hasPassed ? 'Đã Rút Lui' : 'Rút Lui / Bỏ Cuộc'}
         </button>

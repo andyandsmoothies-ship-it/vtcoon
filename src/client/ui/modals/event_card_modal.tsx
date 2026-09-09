@@ -44,6 +44,17 @@ export function EventCardModal({
       className={`w-full max-w-xs bg-slate-900 border-2 rounded-2xl shadow-2xl p-5 flex flex-col items-center text-center relative pointer-events-auto transition-all animate-in fade-in zoom-in-95 duration-200 ${borderColor}`}
       data-testid="event-card-modal"
     >
+      {onClose && (
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Đóng thẻ sự kiện"
+          className="absolute top-2 right-2 min-w-[44px] min-h-[44px] inline-flex items-center justify-center text-white/80 hover:text-white text-xl font-bold rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+        >
+          ✕
+        </button>
+      )}
+
       {/* Category Badge */}
       <span className={`px-2.5 py-0.5 rounded-full text-[10px] uppercase font-bold tracking-wider border mb-3 ${badgeColor}`}>
         {categoryLabel}
@@ -82,7 +93,7 @@ export function EventCardModal({
       <button
         type="button"
         onClick={onConfirm ?? onClose}
-        className={`w-full py-2.5 rounded-xl font-bold text-white text-xs shadow-lg transition-all active:scale-95 ${
+        className={`w-full min-h-[44px] py-2.5 rounded-xl font-bold text-white text-xs shadow-lg transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
           isMarket
             ? 'bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500'
             : 'bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500'

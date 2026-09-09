@@ -4,17 +4,21 @@ import { TopBar } from './top_bar';
 import { PlayerHudList } from './player_hud_list';
 import { ActionDock, type ActionDockProps } from './action_dock';
 import { ModalHost } from './modals/modal_host';
+import type { PlayerIntent } from '../../server/intent_dispatcher';
 
 export interface HudContainerProps extends ActionDockProps {
   readonly children?: React.ReactNode;
+  readonly onIntent?: (intent: PlayerIntent) => void;
 }
 
 export function HudContainer({
   onRollDice,
   onOpenProperties,
   onOpenTrade,
+  onOpenUpgrade,
   onEndTurn,
   localPlayerId,
+  onIntent,
   children,
 }: HudContainerProps): React.ReactElement {
   return (
@@ -38,13 +42,14 @@ export function HudContainer({
           onRollDice={onRollDice}
           onOpenProperties={onOpenProperties}
           onOpenTrade={onOpenTrade}
+          onOpenUpgrade={onOpenUpgrade}
           onEndTurn={onEndTurn}
           localPlayerId={localPlayerId}
         />
       </footer>
 
       {/* Tầng Modals Tương Tác Nghiệp Vụ (Z-20 Host) */}
-      <ModalHost />
+      <ModalHost onIntent={onIntent} />
     </div>
   );
 }

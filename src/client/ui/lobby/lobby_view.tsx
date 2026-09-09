@@ -102,8 +102,9 @@ export function LobbyView({
           <button
             type="button"
             onClick={handleCopyCode}
-            className="text-xs px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition-all cursor-pointer border border-slate-700 active:scale-95"
+            className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center text-xs px-3 py-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition-all cursor-pointer border border-slate-700 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
             data-testid="copy-room-code-btn"
+            aria-label="Sao chép mã phòng"
           >
             {copiedCode ? '✓ Đã chép' : 'Sao chép'}
           </button>
@@ -117,7 +118,7 @@ export function LobbyView({
             <h2 className="text-sm font-bold uppercase tracking-wider text-slate-300">
               Danh Sách Người Chơi ({occupiedCount}/4)
             </h2>
-            <span className="text-xs text-slate-500">Tối đa 4 người/bàn</span>
+            <span className="text-xs text-slate-400">Tối đa 4 người/bàn</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" data-testid="lobby-slots-grid">
@@ -145,21 +146,22 @@ export function LobbyView({
         <button
           type="button"
           onClick={resetLobby}
-          className="text-xs text-slate-400 hover:text-rose-400 transition-colors py-2 px-3 rounded-lg hover:bg-slate-900 border border-transparent hover:border-slate-800 cursor-pointer"
+          className="min-h-[44px] inline-flex items-center justify-center text-xs text-slate-400 hover:text-rose-400 transition-colors py-2 px-4 rounded-lg hover:bg-slate-900 border border-transparent hover:border-slate-800 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
           data-testid="leave-lobby-btn"
+          aria-label="Rời phòng chờ"
         >
           ← Rời Phòng
         </button>
 
         <div className="flex flex-col items-center sm:items-end gap-1">
-          <span className="text-[11px] text-slate-400">{getStartButtonHint()}</span>
+          <span className="text-[11px] text-slate-400" aria-live="polite">{getStartButtonHint()}</span>
 
           {isHost ? (
             <button
               type="button"
               disabled={!canStartCheck.canStart}
               onClick={handleStartGame}
-              className={`py-3 px-8 rounded-xl font-bold text-sm tracking-wide transition-all shadow-lg cursor-pointer ${
+              className={`min-h-[44px] py-3 px-8 rounded-xl font-bold text-sm tracking-wide transition-all shadow-lg cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
                 canStartCheck.canStart
                   ? 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 active:scale-95'
                   : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700/50'
@@ -172,14 +174,14 @@ export function LobbyView({
             <button
               type="button"
               onClick={toggleMyReady}
-              className={`py-3 px-8 rounded-xl font-bold text-sm tracking-wide transition-all shadow-lg cursor-pointer ${
+              className={`min-h-[44px] py-3 px-8 rounded-xl font-bold text-sm tracking-wide transition-all shadow-lg cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
                 isReady
-                  ? 'bg-amber-600 hover:bg-amber-500 text-white'
-                  : 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                  ? 'bg-emerald-600 hover:bg-emerald-500 text-white active:scale-95'
+                  : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 active:scale-95'
               }`}
               data-testid="toggle-ready-btn"
             >
-              {isReady ? 'HỦY SẴN SÀNG' : 'SẴN SÀNG'}
+              {isReady ? '✓ ĐÃ SẴN SÀNG' : 'SẴN SÀNG'}
             </button>
           )}
         </div>

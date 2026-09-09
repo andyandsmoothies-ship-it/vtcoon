@@ -22,9 +22,10 @@ export interface PlayerHudInfo {
   readonly inAudit?: boolean;
   readonly bankrupt?: boolean;
   readonly isBot?: boolean;
+  readonly overdraftRoundsLeft?: number;
 }
 
-export type ActiveModalType = 'deed' | 'auction' | 'trade' | 'event' | 'hose' | 'insolvency' | null;
+export type ActiveModalType = 'deed' | 'auction' | 'trade' | 'event' | 'hose' | 'insolvency' | 'game_over' | null;
 
 export interface ModalPayloadMap {
   deed: { cellIndex: number; canBuy?: boolean };
@@ -59,6 +60,9 @@ export interface ModalPayloadMap {
   insolvency: {
     playerId: string;
     deficit: number;
+  };
+  game_over: {
+    leaderboard: ReadonlyArray<{ readonly id: string; readonly netWorth: number }>;
   };
 }
 

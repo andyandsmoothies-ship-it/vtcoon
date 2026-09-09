@@ -1,0 +1,197 @@
+# Sổ Cái Tiến Độ Epic: Gameplay Core (VTCoOn)
+
+## Danh sách Lát cắt dọc (Vertical Slices)
+
+### Slice 00: Bộ Xương Sống Kỹ Thuật (Walking Skeleton)
+- **Use Case Ref:** UC-GAME-004, UC-GAME-006, UC-GAME-009
+- **Traceability Chain:** Requirement -> Epic Gameplay -> Slice 00
+- **Flow Paths:** Khởi tạo hạ tầng WebSocket, cơ chế ping-pong heartbeat định kỳ, ân hạn mất mạng, đồng bộ vi sai trạng thái.
+- **Value Delivered:** Khung WebGL R3F sa bàn 40 ô cơ bản và hạ tầng kết nối Client/Server qua WebSocket ổn định.
+- **Lifecycle Status:** Done (2026-09-07)
+- **Deliverables:** board_config.ts (64L) · session_manager.ts (73L) · game_canvas.tsx (41L)
+- **Test Coverage:** 22/22 tests PASS · 6 files · Adversarial Inversion ×3 PASS
+- **LOC Final:** 380/400
+- **Preconditions Required:** Môi trường server hoạt động, client hỗ trợ WebGL.
+- **Exit Guarantees:** 
+  - Success: Client kết nối vững chắc với Server, sa bàn hiển thị và trạng thái đồng bộ liên tục.
+  - Failure: Cảnh báo mất kết nối, hệ thống không lưu trạng thái rác.
+- **Architectural Scope:** UI (R3F), WebSocket Server, State Sync Manager
+- **LOC Budget:** < 400 dòng
+- **Test Contracts:**
+  - `TC-00.1`: [Khởi tạo kết nối Client] -> [Server phản hồi thành công và duy trì tín hiệu heartbeat định kỳ 5s]
+  - `TC-00.2`: [Có cập nhật vi sai trạng thái từ Server] -> [Client nhận và đồng bộ khung hình sa bàn R3F chính xác]
+  - `TC-00.3`: [Mất kết nối mạng đột ngột] -> [Hệ thống ân hạn 60s để khôi phục qua mã định danh, bảo vệ state]
+
+### Slice 01: Sảnh Đấu & Vòng Lặp Lượt Chơi Cơ Bản
+- **Use Case Ref:** UC-GAME-001, UC-GAME-002, UC-GAME-003, UC-GAME-005, UC-GAME-007, UC-GAME-008, UC-GAME-010, UC-GAME-011, UC-GAME-012, UC-GAME-013, UC-GAME-014, UC-GAME-015, UC-GAME-016, UC-GAME-017, UC-GAME-018, UC-GAME-019
+- **Traceability Chain:** Requirement -> Epic Gameplay -> Slice 01
+- **Flow Paths:** Khởi tạo phòng, gia nhập, FSM Turn Loop, đổ xúc xắc, di chuyển, xử lý ô GO.
+- **Value Delivered:** Hoàn thiện luồng Sảnh Đấu chờ, vòng lặp FSM lượt chơi cơ bản, cơ chế đổ xúc xắc 2D6 và vượt qua ô Khởi Hành.
+- **Lifecycle Status:** Done (2026-09-07)
+- **Deliverables:** room.ts · dice.ts · room_manager.ts
+- **Test Coverage:** 61/61 tests PASS · 9 files · Adversarial Inversion ×3 PASS
+- **LOC Final:** ≤400
+- **Preconditions Required:** Slice 00 hoàn tất, Client vào trang chủ hệ thống.
+- **Exit Guarantees:** 
+  - Success: Vòng lặp lượt chơi xoay vòng ổn định, tiền thưởng cộng tự động, kết thúc ván bình thường.
+  - Failure: Không thao tác kích hoạt tự động đi hoặc chuyển Bot.
+- **Architectural Scope:** Room Manager, FSM Turn Engine, PRNG Service
+- **LOC Budget:** < 400 dòng
+- **Test Contracts:**
+  - `TC-01.1`: [Tạo phòng đấu mới] -> [Trả về mã 6 ký tự và cho phép người chơi khác gia nhập thành công]
+  - `TC-01.2`: [Đến lượt người chơi] -> [FSM kích hoạt đếm ngược thời gian, kết thúc tự động nếu quá hạn 60s]
+  - `TC-01.3`: [Người chơi đổ xúc xắc 2D6] -> [Di chuyển quân cờ đúng số điểm, nếu đổ đôi 3 lần liên tiếp cưỡng chế vào Trạm Kiểm Toán]
+  - `TC-01.4`: [Quân cờ đi qua hoặc dừng tại ô GO] -> [Cộng 2.000 Tr. VNĐ và trừ phí thuế tài sản lũy tiến tương ứng]
+
+### Slice 02: Bất Động Sản Đất Nền & Thu Tiền Thuê Cơ Bản
+- **Use Case Ref:** UC-GAME-020, UC-GAME-027, UC-GAME-028, UC-GAME-029
+- **Traceability Chain:** Requirement -> Epic Gameplay -> Slice 02
+- **Flow Paths:** Mua đất nền cấp 0, thanh toán phí dừng chân, giao dịch P2P song phương.
+- **Value Delivered:** Xây dựng luồng sở hữu bất động sản sơ cấp, cơ chế nộp tiền thuê khi dẫm vào đất có chủ và thỏa thuận chuyển nhượng.
+- **Lifecycle Status:** Done (2026-09-08)
+- **Deliverables:** property_manager.ts (116L) · room_manager.ts (+15L)
+- **Test Coverage:** 69/69 tests PASS · 11 files · Adversarial Inversion ×4 PASS
+- **LOC Final:** ≤65/80
+- **Preconditions Required:** Slice 01 hoàn tất, người chơi có đủ tiền mặt và đứng tại ô đất trống.
+- **Exit Guarantees:** 
+  - Success: Quyền sở hữu được cập nhật, tiền trong quỹ các bên thay đổi chính xác.
+  - Failure: Hủy bỏ giao dịch nếu không đủ tiền mặt.
+- **Architectural Scope:** Property Manager, Transaction Ledger
+- **LOC Budget:** < 400 dòng
+- **Test Contracts:**
+  - `TC-02.1`: [Người chơi dừng tại ô đất trống chưa chủ] -> [Cho phép mua với giá niêm yết, quỹ tiền mặt giảm tương ứng]
+  - `TC-02.2`: [Đối thủ dẫm vào ô đất đã có chủ] -> [Tự động trừ tiền mặt của người dẫm và cộng quỹ cho chủ sở hữu]
+  - `TC-02.3`: [Thỏa thuận mua bán P2P đất nền] -> [Chuyển nhượng thành công, trừ 5% thuế chuyển nhượng vào Kho bạc]
+
+### Slice 03: Nâng Cấp Công Trình C1-C3, Đấu Giá & Tiện Ích Đặc Biệt
+- **Use Case Ref:** UC-GAME-021, UC-GAME-022, UC-GAME-023, UC-GAME-024, UC-GAME-025, UC-GAME-026, UC-GAME-030, UC-GAME-031, UC-GAME-032, UC-GAME-033, UC-GAME-034, UC-GAME-035, UC-GAME-036, UC-GAME-037
+- **Traceability Chain:** Requirement -> Epic Gameplay -> Slice 03
+- **Flow Paths:** Mở phiên đấu giá, nâng cấp công trình (C1-C3), thu phí Tiện ích/Hạ tầng.
+- **Value Delivered:** Quản trị vòng đời tài sản chuyên sâu (đấu giá, nâng cấp khi đủ màu) và khai thác đặc quyền hạ tầng giao thông, viễn thông.
+- **Lifecycle Status:** Done (2026-09-08)
+- **Deliverables:** board_config.ts (+15L) · property_manager.ts (+65L) · room.ts (+4L) · room_manager.ts (+55L)
+- **Test Coverage:** 81/81 tests PASS · 15 files · Adversarial Inversion ×4 PASS · E2E Golden Flow PASS
+- **Defects Resolved:** Bổ sung ô 35 Short Line Railroad vào PROPERTY_DEEDS
+- **LOC Final:** ≤140/150
+- **Preconditions Required:** Slice 02 hoàn tất, có người bỏ qua mua đất hoặc người chơi có đủ bộ màu.
+- **Exit Guarantees:** 
+  - Success: Tài sản thăng cấp, đấu giá kết thúc xác định người mua hợp lệ.
+  - Failure: Hủy nâng cấp nếu thiếu màu, hủy đấu giá nếu không ai tham gia.
+- **Architectural Scope:** Property Upgrades, Auction System, Special Utilities Manager
+- **LOC Budget:** < 400 dòng
+- **Test Contracts:**
+  - `TC-03.1`: [Người chơi từ chối mua đất] -> [Mở phiên đấu giá công khai tự động, sang tên cho người trả giá cao nhất]
+  - `TC-03.2`: [Chủ sở hữu có đủ bộ màu yêu cầu nâng cấp] -> [Cấu trúc tài sản thăng Cấp 1-3, trừ chi phí tương ứng và tăng mức phí thuê]
+  - `TC-03.3`: [Người chơi dừng tại ô Giao thông (Railroad)] -> [Thu phí lũy tiến theo số ô sở hữu và tăng 50% khi đã lắp ETC]
+  - `TC-03.4`: [Người chơi dừng tại ô Tiện ích (Utility)] -> [Tính phí biến thiên 2D6 theo số ô sở hữu hoặc nhân 150 khi đã nâng cấp Full]
+  - `TC-03.5`: [Chưa sở hữu trọn bộ màu] -> [Từ chối yêu cầu nâng cấp công trình với lỗi MISSING_MONOPOLY]
+  - `TC-03.6`: [Yêu cầu hạ cấp công trình] -> [Thanh lý công trình về Cấp 0 và hoàn tiền 50% tổng chi phí nâng cấp] (✅ ĐÃ GIẢI QUYẾT TRONG SLICE 05 - TASK 8 / TC-05.6)
+
+### Slice 04: Biến Cố Thị Trường Vĩ Mô & Thẻ Cơ Hội Cá Nhân
+- **Use Case Ref:** UC-GAME-038, UC-GAME-039, UC-GAME-040, UC-GAME-041, UC-GAME-042, UC-GAME-043, UC-GAME-044, UC-GAME-045, UC-GAME-046, UC-GAME-047, UC-GAME-048, UC-GAME-049, UC-GAME-050
+- **Traceability Chain:** Requirement -> Epic Gameplay -> Slice 04
+- **Flow Paths:** Rút thẻ thị trường/cơ hội, áp dụng hiệu ứng mùa vụ, đầu tư chứng khoán HOSE, vào Trạm Kiểm Toán.
+- **Value Delivered:** Kích hoạt hệ thống Thẻ Bài (Phiếu Cơ Hội, Phiếu Thị Trường) gây ảnh hưởng biến động toàn bàn cờ hoặc cá nhân.
+- **Lifecycle Status:** Done (2026-09-08)
+- **Deliverables:** board_config.ts (88L) · audit_manager.ts (115L) · auction_manager.ts (117L) · card_handlers.ts (334L) · property_manager.ts (336L) · room_manager.ts (237L) · room.ts (95L) · special_cell_handler.ts (43L)
+- **Test Coverage:** 198/198 tests PASS · 21 files · Adversarial Inversion ×4 PASS · E2E Golden Flow S00->S04 PASS
+- **Defects Resolved:** Xử lý triệt để 8 lỗi BLOCKER theo Báo Cáo Đối Soát Định Kỳ: (1) Ô 04 thu Lệ phí đất đai 2000 hoặc 10% tiền mặt; (2) Thuế tài sản lũy tiến tại ô GO theo §IV.1; (3) Đấu giá cấm người từ chối mua đặt giá; (4) Khắc phục bế tắc runtime Auto-Auction qua INTENT_AUCTION_PASS & auto-close; (5) MC_FREEZE_TRADE chặn mua đất; (6) MC_CREDIT_STIMULUS giảm 20% chi phí xây; (7) CC_PLATE_AUCTION extraTurns & CC_CONCERT_SPONSOR doubleNextDice; (8) Đồng bộ rentAmount khi phụ thu Dịch vụ C2.
+- **Tech Debt Deferred to Slice 05:** (1) Giao dịch P2P 5% thuế (khôi phục hợp đồng TC-02.3); (2) Đấu nối downgradeProperty vào FSM Intent; (3) Dọn dẹp dead code class AuditManager; (4) Thẻ CC_PORT_EXCLUSIVE chia sẻ 50% tiền cảng và CC_LAND_CHANGE tăng vĩnh viễn; (5) Mở rộng DeltaPayload đồng bộ cấp công trình và cờ hạ tầng lên sa bàn 3D (VSC).
+- **Preconditions Required:** Slice 03 hoàn tất, người chơi dẫm vào ô Sự kiện, ô HOSE hoặc Trạm Kiểm Toán.
+- **Exit Guarantees:** 
+  - Success: Các chỉ số giá trị đất/thuế phí thay đổi đúng theo biến cố.
+  - Failure: Thẻ lỗi bị vô hiệu hóa, không phá vỡ state.
+- **Architectural Scope:** Event Card Engine, Modifier System, Stock Market System
+- **LOC Budget:** < 400 dòng
+- **Test Contracts:**
+  - `TC-04.1`: [Rút Phiếu Thị Trường vĩ mô] -> [Áp dụng hiệu ứng lập tức lên toàn bộ người chơi hoặc thay đổi mức phí các ô tương ứng]
+  - `TC-04.2`: [Kích hoạt thẻ Mùa Cao Điểm Du Lịch / Cực Đoan Miền Trung] -> [Doanh thu nhóm Nghỉ dưỡng tăng x2 hoặc đưa về 0]
+  - `TC-04.3`: [Quyết định đầu tư chứng khoán HOSE với vốn cược] -> [Tung xúc xắc 1D6 và cập nhật quỹ tiền mặt theo đúng biên độ lời/lỗ quy định]
+
+### Slice 05: Nghiệp Vụ Tài Chính, Thế Chấp, Thanh Lý Cưỡng Chế & Phá Sản
+- **Use Case Ref:** UC-GAME-051, UC-GAME-052, UC-GAME-053, UC-GAME-054, UC-GAME-055, UC-GAME-056, UC-GAME-057, UC-GAME-058
+- **Traceability Chain:** Requirement -> Epic Gameplay -> Slice 05
+- **Flow Paths:** Cầm cố tài sản, trả lãi vay, thanh lý khi âm tiền, tuyên bố phá sản, kết thúc ván.
+- **Value Delivered:** Hoàn thiện đòn bẩy tín dụng, kịch bản xấu nhất (phá sản) và quyết toán tài sản ròng khi kết thúc trận đấu.
+- **Lifecycle Status:** Done (2026-09-09)
+- **Deliverables:** action_reasons.ts (26L) · room.ts (106L) · property_manager.ts (370L) · card_handlers.ts (355L) · property_actions.ts (277L) · mortgage_manager.ts (219L) · insolvency_manager.ts (180L) · room_manager.ts (329L) · session_manager.ts (123L) · intent_dispatcher.ts (67L)
+- **Test Coverage:** 394/394 tests PASS · 33 files · Adversarial Inversion ×4 PASS · E2E Golden Flow S00->S05 PASS · Production Resilience Living E2E PASS
+- **Tech Debt Ledger:** 0 khoản nợ kỹ thuật tồn đọng trong phạm vi Slice 05 (DEBT-01 đến DEBT-07 đã thanh toán 100%). Hoàn thành Milestone Deep Audit S00-S05; đã xử lý triệt để 6 Blocker (BLK-01..06) và bàn giao 10 mục nợ kỹ thuật mới phát hiện (DEBT-S06-01 đến DEBT-S06-10) sang Slice 06.
+- **Preconditions Required:** Slice 04 hoàn tất, quỹ tiền mặt âm hoặc cần vay thế chấp.
+- **Inherited Tech Debt Ledger (Tiếp nhận nợ kỹ thuật từ Slice 00-04):**
+  - `DEBT-01 (TC-02.3 / TC-05.5)`: Nghiệp vụ P2P Trading (chuyển nhượng song phương BĐS + 5% thuế nộp Kho bạc) (✅ ĐÃ GIẢI QUYẾT TRONG TASK 7).
+  - `DEBT-02 (TC-03.6 / TC-05.6)`: Đấu nối `downgradeProperty` vào FSM Intent (`INTENT_DOWNGRADE`) để hoàn tiền 50% (✅ ĐÃ GIẢI QUYẾT TRONG TASK 8).
+  - `DEBT-03`: Dọn dẹp dead code class `AuditManager` trong `audit_manager.ts` (✅ ĐÃ GIẢI QUYẾT TRONG TASK 1).
+  - `DEBT-04 (TC-05.7)`: Thẻ sự kiện nâng cao `CC_PORT_EXCLUSIVE` (chia sẻ 50% tiền cảng) và `CC_LAND_CHANGE` (tăng giá đất vĩnh viễn) (✅ ĐÃ GIẢI QUYẾT TRONG TASK 9).
+  - `DEBT-05 (TC-05.8)`: Mở rộng `DeltaPayload` đồng bộ cấp công trình và cờ hạ tầng lên sa bàn 3D (VSC) (✅ ĐÃ GIẢI QUYẾT TRONG TASK 10).
+  - `DEBT-06 (TC-05.9)`: `MC_RATE_HIKE` tăng lãi thế chấp +10%/vòng (§V.1.5) (✅ ĐÃ GIẢI QUYẾT TRONG TASK 4).
+  - `DEBT-07 (TC-05.10)`: `MC_CREDIT_STIMULUS` miễn lãi vay trong 2 vòng (§V.1.6) (✅ ĐÃ GIẢI QUYẾT TRONG TASK 4).
+- **Exit Guarantees:** 
+  - Success: Quỹ tiền được bơm từ thế chấp, hoặc game loại người chơi phá sản thành công.
+  - Failure: Dừng game nếu tất cả trừ 1 người phá sản.
+- **Architectural Scope:** Bank Credit Ledger, Insolvency Engine
+- **LOC Budget:** < 400 dòng
+- **Test Contracts:**
+  - `TC-05.1`: [Gửi yêu cầu thế chấp BĐS] -> [Nhận 50% giá trị gốc bằng tiền mặt, tài sản bị úp và tự động trừ 5% lãi vay mỗi khi qua GO]
+  - `TC-05.2`: [Quỹ tiền mặt âm vượt ngưỡng tài sản] -> [Kích hoạt chế độ cưỡng chế thanh lý tài sản tự động]
+  - `TC-05.3`: [Bán sạch tài sản vẫn không đủ trả nợ] -> [Tuyên bố phá sản, loại bỏ người chơi và giải phóng toàn bộ tài sản về trạng thái trống]
+  - `TC-05.4`: [Hết thời gian hoặc số vòng quy định] -> [Quyết toán tổng tài sản ròng và xếp hạng người chiến thắng]
+  - `TC-05.5`: [Giao dịch P2P đất nền song phương] -> [Chuyển nhượng thành công và khấu trừ 5% thuế chuyển nhượng vào Kho bạc - Khôi phục TC-02.3]
+  - `TC-05.6`: [Yêu cầu hạ cấp công trình qua INTENT_DOWNGRADE] -> [Hoàn trả 50% chi phí xây dựng công trình về tài khoản - Khôi phục TC-03.6]
+  - `TC-05.7`: [Rút CC_PORT_EXCLUSIVE] -> [Người rút thẻ nhận đúng 50% tiền cảng từ chủ sở hữu Hạ tầng trong 2 vòng tiếp theo - Khôi phục DEBT-04]
+  - `TC-05.8`: [Nâng cấp công trình hoặc ETC] -> [DeltaPayload gửi đi bao gồm đúng cấp công trình và cờ ETC để sa bàn 3D render đúng - Khôi phục DEBT-05]
+  - `TC-05.9`: [Rút MC_RATE_HIKE khi có thế chấp đang nợ] -> [Lãi thế chấp tăng lên 10%/vòng thay vì 5%/vòng trong duration của thẻ - Khôi phục DEBT-06]
+  - `TC-05.10`: [Rút MC_CREDIT_STIMULUS khi có thế chấp đang nợ] -> [Lãi thế chấp được miễn trong 2 vòng kế tiếp - Khôi phục DEBT-07]
+
+### Slice 06: Mạng Lưới Đồng Bộ Thời Gian Thực, Tự Hành Hóa Bot & Hoàn Thiện Vận Hành
+- **Use Case Ref:** UC-GAME-002, UC-GAME-005, UC-GAME-008, UC-GAME-009, UC-GAME-056, UC-GAME-058 (Refinement & Full Automation)
+- **Traceability Chain:** Requirement -> Epic Gameplay -> Slice 06 (Milestone Deep Audit S00-S05)
+- **Flow Paths:** Tiếp nhận nợ kỹ thuật kinh tế, tự hành hóa Bot AI 3 tính cách, đấu giá cưỡng chế 70%, đồng bộ WebSocket delta tick < 10KB, tối ưu cấu trúc module.
+- **Value Delivered:** Xử lý triệt để 10 mục nợ kỹ thuật mốc S00-S05, tự động hóa người chơi Bot khi mất kết nối / thiếu người chơi, hoàn thiện hạ tầng đồng bộ thời gian thực cho Client 3D R3F và đóng gói từ điển bản địa hóa tiếng Việt.
+- **Lifecycle Status:** Done (2026-09-09)
+- **Preconditions Required:** Slice 05 hoàn tất, Milestone Deep Audit S00-S05 đã phê duyệt danh mục nợ kỹ thuật.
+- **Inherited Tech Debt Ledger — ĐÃ GIẢI QUYẾT 10/10:**
+  - `DEBT-S06-01`: Bộ đếm 3 vòng thu hồi nợ 3.300 Tr. VNĐ cho thẻ CC_OVERDRAFT — ✅ ĐÃ GIẢI QUYẾT (Task 4)
+  - `DEBT-S06-02`: Trích thu định kỳ 400 Tr. VNĐ tiền lãi qua GO nộp Kho bạc cho thẻ CC_FREE_CREDIT — ✅ ĐÃ GIẢI QUYẾT (Task 4)
+  - `DEBT-S06-03`: Thuộc tính unbuiltRounds cho đất C0 theo dõi quá 2 vòng không xây dựng để thu hồi / mở Auto-Auction theo CC_SLOW_BUILD — ✅ ĐÃ GIẢI QUYẾT (Task 4)
+  - `DEBT-S06-04`: Đấu nối phiên Auto-Auction khởi điểm 70% niêm yết cho BĐS thế chấp bị cưỡng chế thanh lý trong InsolvencyManager (UC-GAME-056) — ✅ ĐÃ GIẢI QUYẾT (Task 4)
+  - `DEBT-S06-05`: Phân tách 3 tệp vượt cảnh báo 300 LOC (property_manager.ts, card_handlers.ts, room_manager.ts) thành các module con đơn nhiệm (< 300 LOC) — ✅ ĐÃ GIẢI QUYẾT (Task 1)
+  - `DEBT-S06-06`: Tái cấu trúc 7 hàm vi phạm Cyclomatic Complexity (CC > 5) sang Strategy Pattern / Command Dispatcher — ✅ ĐÃ GIẢI QUYẾT (Task 2)
+  - `DEBT-S06-07`: Dọn dẹp dead enum (CommunityChest, Jail, GoToJail) và alias dư thừa UTILITY_CELLS_ECE theo nguyên tắc Prune Dead Code — ✅ ĐÃ GIẢI QUYẾT (Task 2)
+  - `DEBT-S06-08`: Xóa wrapper No-Op sendToAudit và chuẩn hóa kiểu trả về void cho executeChanceCard — ✅ ĐÃ GIẢI QUYẾT (Task 2)
+  - `DEBT-S06-09`: Chuẩn hóa toàn bộ Magic String Reason Codes ('MISSING_MONOPOLY', 'DECLINED_PLAYER_CANNOT_BID'...) vào enum ActionRejectReason — ✅ ĐÃ GIẢI QUYẾT (Task 2)
+  - `DEBT-S06-10`: Xây dựng module từ điển bản địa hóa tiếng Việt src/domain/i18n/vi.ts cho toàn bộ mã lỗi và 36 thẻ sự kiện — ✅ ĐÃ GIẢI QUYẾT (Task 2)
+- **Test Coverage:** 433/433 tests PASS · 36 suites · Adversarial Inversion PASS · E2E Living TC-06.E2E PASS
+  - `TC-06.1..4`: CC_OVERDRAFT bộ đếm + InsolvencyPhase + CC_FREE_CREDIT lãi GO + CC_SLOW_BUILD unbuilt + Auto-Auction 70% — ✅ PASS
+  - `TC-06.8a/b/c`: Bot AI Engine 3 tính cách (Aggressive, Conservative, Balanced) — ✅ PASS
+  - `TC-06.E2E`: Living E2E hội tụ CC_OVERDRAFT → InsolvencyPhase → Auto-Auction 70% → BOT1 thắng đấu giá — ✅ PASS
+- **LOC Final:**
+  - bot_engine.ts: 68L | vi.ts: 91L | turn_loop.ts: 197L | property_data.ts: 92L
+  - property_rent.ts: 129L | property_upgrade.ts: 78L | market_card_handlers.ts: 129L | chance_card_handlers.ts: 228L
+  - Tất cả file ≤ 300L (trong phạm vi cho phép)
+- **Exit Guarantees:**
+  - Success: 10 khoản nợ kỹ thuật được giải quyết 100%, 0 warning, 0 dead code, Bot AI tự hành hoàn chỉnh, DeltaPayload chuẩn hóa thời gian thực.
+  - Failure: Hủy bỏ thay đổi nếu vi phạm bất biến bảo toàn dòng tiền hoặc phá vỡ FSM test suite.
+- **Architectural Scope:** Bot AI Engine, WebSocket Gateway / Session Sync, Domain i18n Dictionary, Refactored Modular Subsystems
+- **LOC Budget:** < 400 dòng / tệp
+- **Test Contracts:**
+  - `TC-06.1`: [Rút thẻ CC_OVERDRAFT] -> [Bộ đếm kích hoạt 3 vòng, tại vòng thứ 3 tự động khấu trừ 3.300 Tr. VNĐ gốc và lãi; chuyển Insolvency nếu không đủ tiền]
+  - `TC-06.2`: [Người chơi giữ CC_FREE_CREDIT đi qua ô GO] -> [Tự động trích nộp 400 Tr. VNĐ tiền lãi định kỳ vào Kho bạc trước khi nhận thưởng GO]
+  - `TC-06.3`: [Sở hữu đất C0 quá 2 vòng không nâng cấp C1 có thẻ CC_SLOW_BUILD] -> [Tự động thu hồi đất và kích hoạt phiên Auto-Auction cho toàn bàn cờ]
+  - `TC-06.4`: [BĐS thế chấp bị cưỡng chế thanh lý trong Insolvency] -> [Kích hoạt Auto-Auction với giá khởi điểm 70% giá niêm yết theo đúng SSOT UC-GAME-056]
+  - `TC-06.5`: [Tách module property_manager, card_handlers, room_manager] -> [Toàn bộ tệp < 300 LOC, 433/433 tests PASS và giữ nguyên hành vi quan sát được]
+  - `TC-06.6`: [Refactor 7 hàm CC > 5 sang Strategy/Command Pattern] -> [Cyclomatic Complexity <= 5, mã nguồn tuân thủ Clean Architecture]
+  - `TC-06.7`: [Xóa dead enum, No-Op wrapper và chuẩn hóa ActionRejectReason] -> [Không còn magic string tự do, zero warning TypeScript]
+  - `TC-06.8`: [Người chơi mất kết nối quá 60s hoặc sảnh chờ có Bot] -> [Bot AI tự động tiếp quản, ra quyết định theo đúng 3 tính cách mà không làm treo FSM]
+  - `TC-06.9`: [Truy vấn thông điệp lỗi hoặc thẻ sự kiện] -> [Module i18n trả về nhãn tiếng Việt chuẩn xác theo SSOT docs/requirements.md]
+  - `TC-06.E2E`: [CC_OVERDRAFT 3 vòng thu hồi → InsolvencyPhase → liquidateAssets → Auto-Auction 70% → BOT1 thắng đấu giá] -> [Toàn bộ luồng hội tụ, bảo toàn dòng tiền delta = GO_BONUS - 3300 = -1300]
+
+---
+
+## Tổng Kết Toàn Cục Epic Gameplay Core
+- **Trạng thái Epic:** **[CLOSED - DONE 100% (2026-09-09)]**
+- **Tổng số Lát cắt hoàn thành:** 7 Lát cắt (Slice 00, 01, 02, 03, 04, 05, 06)
+- **Độ phủ Use Case:** 58/58 Use Cases đạt chuẩn SSOT
+- **Quy mô kiểm thử:** 36 test suites, 433 tests PASS 100%
+- **Biên bản ký duyệt:** [`docs/reports/audits/milestone_deep_audit_s00_s06_signoff.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/reports/audits/milestone_deep_audit_s00_s06_signoff.md) — Phán quyết **`[MILESTONE APPROVED]`**
+
