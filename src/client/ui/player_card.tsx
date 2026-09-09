@@ -1,8 +1,8 @@
-// [UI-S03/MSS] PlayerCard Component — Individual player stats, balance, net worth, assets
 import React from 'react';
-import type { PlayerHudInfo } from '../store/game_store';
+import { useGameStore, type PlayerHudInfo } from '../store/game_store';
 import { formatCurrency, calculatePlayerNetWorth, getOwnedColorGroups } from './ui_helpers';
 import { COLOR_GROUP_HEX } from '../../domain/theme';
+import { getEmoteDef } from '../../domain/emotes';
 
 interface PlayerCardProps {
   readonly player: PlayerHudInfo;
@@ -15,6 +15,8 @@ export function PlayerCard({
   isCurrentTurn,
   levelMap,
 }: PlayerCardProps): React.ReactElement {
+  const activeEmote = useGameStore((state) => state.activeEmotes[player.id]);
+
   const netWorth = calculatePlayerNetWorth(
     player.balance,
     player.ownedProperties ?? [],
@@ -40,6 +42,19 @@ export function PlayerCard({
       role="region"
       aria-label={`Thông tin ${player.name}`}
     >
+      {/* Emote Bubble Popover trên Avatar (3 giây) */}
+      {activeEmote && (
+        <div
+          className="absolute -top-6 -right-2 z-30 animate-emote-pop pointer-events-none flex items-center justify-center bg-slate-800/95 border-2 border-amber-400/90 rounded-2xl p-1 px-2.5 shadow-2xl backdrop-blur-md"
+          role="status"
+          aria-label={`${player.name} gửi biểu cảm ${getEmoteDef(activeEmote.emoteId)?.label ?? activeEmote.emoteId}`}
+        >
+          <span className="text-2xl drop-shadow-md" aria-hidden="true">
+            {getEmoteDef(activeEmote.emoteId)?.icon ?? '💬'}
+          </span>
+          <div className="absolute -bottom-1 left-4 w-2 h-2 bg-slate-800 border-r-2 border-b-2 border-amber-400 rotate-45" />
+        </div>
+      )}
       {/* Header: Token avatar, Tên, Badges */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">

@@ -42,6 +42,12 @@ export type WsClientMessage =
       readonly type: 'INTENT_REQUEST_RESYNC';
       readonly roomCode: string;
       readonly playerId: string;
+    }
+  | {
+      readonly type: 'EMOTE';
+      readonly roomCode: string;
+      readonly playerId: string;
+      readonly emoteId: string;
     };
 
 // ─── Server → Client ────────────────────────────────────────────
@@ -96,6 +102,12 @@ export type WsServerMessage =
   | {
       readonly type: 'PLAYER_RECONNECTED';
       readonly playerId: string;
+    }
+  | {
+      readonly type: 'PLAYER_EMOTE';
+      readonly playerId: string;
+      readonly emoteId: string;
+      readonly timestamp: number;
     }
   | {
       readonly type: 'GAME_OVER';

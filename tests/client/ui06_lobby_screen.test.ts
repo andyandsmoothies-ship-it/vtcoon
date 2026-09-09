@@ -116,4 +116,22 @@ describe('[UI-06.3/MSS] LobbyView Full Screen Markup', () => {
     expect(html).toContain('SẴN SÀNG');
     expect(html).not.toContain('data-testid="start-game-btn"');
   });
+
+  it('Render thẻ Tóm Tắt Thể Lệ Thi Đấu với vốn 15.000 Tr., 30 vòng và điều kiện thắng', () => {
+    useLobbyStore.getState().initLobby('HN1234', 'h1', true, 'Host');
+    const state = useLobbyStore.getState();
+    const element = React.createElement(LobbyView, {
+      roomCode: state.roomCode ?? undefined,
+      isHost: state.isHost,
+      slots: state.slots,
+    });
+    const html = renderToStaticMarkup(element);
+
+    expect(html).toContain('data-testid="lobby-rules-card"');
+    expect(html).toContain('Tóm Tắt Thể Lệ Thi Đấu');
+    expect(html).toContain('15.000 Tr. VNĐ');
+    expect(html).toContain('30 vòng');
+    expect(html).toContain('+2.000 Tr. VNĐ');
+    expect(html).toContain('Điều kiện thắng');
+  });
 });

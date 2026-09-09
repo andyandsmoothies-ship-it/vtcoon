@@ -2,6 +2,9 @@
 import { create } from 'zustand';
 import { clampDiceFace } from '../3d/dice_math';
 import { calculatePathWaypoints, BOARD_TOTAL_CELLS } from '../3d/pawn_path';
+import { EMOTE_DISPLAY_DURATION_MS } from '../../domain/emotes';
+
+export const FLOATING_TEXT_DURATION_MS = 2000;
 
 export interface PawnAnimationState {
   readonly playerId: string;
@@ -23,6 +26,25 @@ export interface PlayerHudInfo {
   readonly bankrupt?: boolean;
   readonly isBot?: boolean;
   readonly overdraftRoundsLeft?: number;
+}
+
+export interface ActiveEmote {
+  readonly playerId: string;
+  readonly emoteId: string;
+  readonly timestamp: number;
+}
+
+export enum FloatingTextType {
+  Reward = 'reward',
+  Penalty = 'penalty',
+}
+
+export interface FloatingTextItem {
+  readonly id: string;
+  readonly text: string;
+  readonly type: FloatingTextType;
+  readonly playerId: string;
+  readonly timestamp: number;
 }
 
 export type ActiveModalType = 'deed' | 'auction' | 'trade' | 'event' | 'hose' | 'insolvency' | 'game_over' | null;
@@ -85,6 +107,10 @@ export interface GameState {
   readonly activeModal: ActiveModalType;
   readonly modalPayload: ModalPayloadMap[keyof ModalPayloadMap] | null;
 
+  // UI-05 Social Emotes & Micro-VFX
+  readonly activeEmotes: Record<string, ActiveEmote>;
+  readonly floatingTexts: readonly FloatingTextItem[];
+
   setLevelMap: (map: Record<number, 0 | 1 | 2 | 3>) => void;
   setPlayerPositions: (positions: Record<string, number>) => void;
   setDice: (dice: [number, number]) => void;
@@ -106,6 +132,13 @@ export interface GameState {
   openModal: <T extends keyof ModalPayloadMap>(type: T, payload: ModalPayloadMap[T]) => void;
   closeModal: () => void;
   updateModalPayload: <T extends keyof ModalPayloadMap>(patch: Partial<ModalPayloadMap[T]>) => void;
+
+  // UI-05 Social Emotes & Micro-VFX Actions
+  triggerEmote: (playerId: string, emoteId: string) => void;
+  clearEmote: (playerId: string) => void;
+  addFloatingText: (item: Omit<FloatingTextItem, 'id' | 'timestamp'> & { id?: string }) => void;
+  removeFloatingText: (id: string) => void;
+  clearExpiredFloatingTexts: (now?: number) => void;
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -124,6 +157,9 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   activeModal: null,
   modalPayload: null,
+
+  activeEmotes: {},
+  floatingTexts: [],
 
   setLevelMap: (map) => set({ levelMap: map }),
   setPlayerPositions: (positions) => set({ playerPositions: positions }),
@@ -238,5 +274,61 @@ export const useGameStore = create<GameState>((set, get) => ({
   updateModalPayload: (patch) =>
     set((state) => ({
       modalPayload: state.modalPayload ? { ...state.modalPayload, ...patch } : state.modalPayload,
+    })),
+
+  triggerEmote: (playerId, emoteId) => {
+    const timestamp = Date.now();
+    set((state) => ({
+      activeEmotes: {
+        ...state.activeEmotes,
+        [playerId]: { playerId, emoteId, timestamp },
+      },
+    }));
+    if (typeof setTimeout !== 'undefined') {
+      setTimeout(() => {
+        const cur = get().activeEmotes[playerId];
+        if (cur && cur.timestamp === timestamp) {
+          get().clearEmote(playerId);
+        }
+      }, EMOTE_DISPLAY_DURATION_MS);
+    }
+  },
+
+  clearEmote: (playerId) =>
+    set((state) => {
+      if (!state.activeEmotes[playerId]) return state;
+      const next = { ...state.activeEmotes };
+      delete next[playerId];
+      return { activeEmotes: next };
+    }),
+
+  addFloatingText: (item) => {
+    const id = item.id ?? `ft_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+    const timestamp = Date.now();
+    const newItem: FloatingTextItem = {
+      id,
+      text: item.text,
+      type: item.type,
+      playerId: item.playerId,
+      timestamp,
+    };
+    set((state) => ({
+      floatingTexts: [...state.floatingTexts, newItem],
+    }));
+    if (typeof setTimeout !== 'undefined') {
+      setTimeout(() => {
+        get().removeFloatingText(id);
+      }, FLOATING_TEXT_DURATION_MS);
+    }
+  },
+
+  removeFloatingText: (id) =>
+    set((state) => ({
+      floatingTexts: state.floatingTexts.filter((t) => t.id !== id),
+    })),
+
+  clearExpiredFloatingTexts: (now = Date.now()) =>
+    set((state) => ({
+      floatingTexts: state.floatingTexts.filter((t) => now - t.timestamp < FLOATING_TEXT_DURATION_MS),
     })),
 }));

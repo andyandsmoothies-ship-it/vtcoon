@@ -1,8 +1,11 @@
 // [UC-GAME-009/MSS][TC-NET03.1/MSS][TC-NET03.2/MSS][UC-GAME-008/MSS]
 // Đồng bộ hóa DeltaPayload (kể cả Sparse Diff) vào Zustand useGameStore
-import { useGameStore, type PlayerHudInfo } from '../store/game_store.js';
+import { useGameStore, type PlayerHudInfo, FloatingTextType } from '../store/game_store.js';
 import { BOARD_SIZE } from '../../domain/room.js';
 import type { DeltaPayload } from '../../server/session_manager.js';
+import { formatCurrency } from '../ui/ui_helpers.js';
+import { AudioEngine } from '../audio/audio_engine.js';
+import { SoundEffect } from '../audio/audio_types.js';
 
 export function applyDeltaToStore(
   delta: DeltaPayload,
@@ -28,8 +31,17 @@ export function applyDeltaToStore(
 
     for (const cell of delta.cells) {
       if (cell.level !== undefined) {
-        nextLevelMap[cell.index] = Math.max(0, Math.min(3, cell.level)) as 0 | 1 | 2 | 3;
+        const oldLevel = state.levelMap[cell.index] ?? 0;
+        const targetLevel = Math.max(0, Math.min(3, cell.level)) as 0 | 1 | 2 | 3;
+        nextLevelMap[cell.index] = targetLevel;
         hasLevelChange = true;
+        if (!isFullSync && targetLevel === 3 && oldLevel < 3) {
+          try {
+            AudioEngine.playSfx(SoundEffect.UPGRADE_C3);
+          } catch {
+            // Fallback im lặng trong môi trường test
+          }
+        }
       }
 
       if (cell.ownerId !== undefined) {
@@ -107,6 +119,24 @@ export function applyDeltaToStore(
       }
 
       if (state.playersInfo[p.id]) {
+        const oldBalance = state.playersInfo[p.id]?.balance;
+        if (!isFullSync && oldBalance !== undefined && oldBalance !== p.balance) {
+          const diff = p.balance - oldBalance;
+          if (diff > 0) {
+            state.addFloatingText({
+              text: `+${formatCurrency(diff)}`,
+              type: FloatingTextType.Reward,
+              playerId: p.id,
+            });
+          } else if (diff < 0) {
+            state.addFloatingText({
+              text: formatCurrency(diff),
+              type: FloatingTextType.Penalty,
+              playerId: p.id,
+            });
+          }
+        }
+
         state.updatePlayerInfo(p.id, {
           balance: p.balance,
           ...(p.bankrupt !== undefined ? { bankrupt: p.bankrupt } : {}),

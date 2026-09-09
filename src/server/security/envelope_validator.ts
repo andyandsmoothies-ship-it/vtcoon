@@ -1,5 +1,6 @@
 // [UC-SEC-003/MSS] Envelope Validator — Kiểm Chuẩn Cấu Trúc JSON & Chống Giá Trị Âm
 import type { WsClientMessage } from '../network/network_types.js';
+import { isValidEmoteId } from '../../domain/emotes.js';
 
 export type EnvelopeValidationResult =
   | { success: true; message: WsClientMessage }
@@ -7,7 +8,7 @@ export type EnvelopeValidationResult =
   | { success: false; ignore: true };
 
 const VALID_CLIENT_TYPES = new Set([
-  'CREATE_ROOM', 'JOIN_ROOM', 'PONG', 'RECONNECT', 'INTENT', 'INTENT_REQUEST_RESYNC',
+  'CREATE_ROOM', 'JOIN_ROOM', 'PONG', 'RECONNECT', 'INTENT', 'INTENT_REQUEST_RESYNC', 'EMOTE',
 ]);
 
 const CELL_INTENTS = new Set([
@@ -93,6 +94,12 @@ export class EnvelopeValidator {
     if (type === 'INTENT_REQUEST_RESYNC') {
       return typeof pId === 'string' && typeof rc === 'string' && pId.length > 0 && rc.length > 0
         ? { success: true, message: { type, roomCode: rc, playerId: pId } }
+        : { success: false, reasonCode: 'INVALID_ENVELOPE' };
+    }
+    if (type === 'EMOTE') {
+      const emoteId = obj['emoteId'];
+      return typeof pId === 'string' && typeof rc === 'string' && pId.length > 0 && rc.length > 0 && isValidEmoteId(emoteId)
+        ? { success: true, message: { type, roomCode: rc, playerId: pId, emoteId } }
         : { success: false, reasonCode: 'INVALID_ENVELOPE' };
     }
     return this.validateIntentEnvelope(obj);

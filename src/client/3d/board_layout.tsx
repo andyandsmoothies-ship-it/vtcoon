@@ -8,7 +8,7 @@ import { DiceTray } from './dice_tray';
 
 const CORNER_INDICES = new Set([0, 10, 20, 30]);
 
-function tileRotation(index: number): [number, number, number] {
+export function tileRotation(index: number): [number, number, number] {
   const side = Math.floor(index / 10);
   switch (side) {
     case 0: return [0, 0, 0];

@@ -20,15 +20,26 @@ class AudioEngineImpl {
     if (this.isInitialized) return;
     this.isInitialized = true;
 
-    // Tự động mở khóa AudioContext khi người dùng click tương tác đầu tiên
+    // Tự động mở khóa AudioContext khi người dùng click/chạm tương tác đầu tiên
     if (typeof window !== 'undefined') {
       const unlock = () => {
-        if (Howler.ctx && Howler.ctx.state === 'suspended') {
-          Howler.ctx.resume().catch(() => {});
+        try {
+          if (Howler.ctx && Howler.ctx.state === 'suspended') {
+            Howler.ctx.resume().catch(() => {});
+          }
+          if (this.currentTrack) {
+            const currentHowl = this.bgmCache.get(this.currentTrack);
+            if (currentHowl && !currentHowl.playing()) {
+              currentHowl.play();
+            }
+          }
+        } catch {
+          // Fallback im lặng khi truy cập AudioContext bị hạn chế
         }
       };
       window.addEventListener('pointerdown', unlock, { once: true, capture: true });
       window.addEventListener('keydown', unlock, { once: true, capture: true });
+      window.addEventListener('touchstart', unlock, { once: true, capture: true });
     }
 
     // Lắng nghe thay đổi volume/mute từ Zustand store
@@ -65,6 +76,13 @@ class AudioEngineImpl {
         loop: true,
         volume: 0,
       });
+      // Fallback im lặng khi Autoplay bị chặn bởi chính sách trình duyệt
+      howl.on('playerror', () => {
+        // Tự động im lặng, đợi tương tác người dùng mở khóa
+      });
+      howl.on('loaderror', () => {
+        // Fallback im lặng nếu tài nguyên chưa nạp kịp
+      });
       this.bgmCache.set(track, howl);
     }
     return howl;
@@ -78,6 +96,12 @@ class AudioEngineImpl {
         html5: false,
         loop: false,
         volume: this.getEffectiveSfxVolume(),
+      });
+      howl.on('playerror', () => {
+        // Fallback im lặng khi Autoplay bị chặn
+      });
+      howl.on('loaderror', () => {
+        // Fallback an toàn không ném lỗi console
       });
       this.sfxCache.set(sfx, howl);
     }
@@ -115,13 +139,17 @@ class AudioEngineImpl {
     }
 
     const newHowl = this.getOrCreateBgm(track);
-    if (crossfade) {
-      newHowl.volume(0);
-      newHowl.play();
-      newHowl.fade(0, targetVolume, 1500);
-    } else {
-      newHowl.volume(targetVolume);
-      newHowl.play();
+    try {
+      if (crossfade) {
+        newHowl.volume(0);
+        newHowl.play();
+        newHowl.fade(0, targetVolume, 1500);
+      } else {
+        newHowl.volume(targetVolume);
+        newHowl.play();
+      }
+    } catch {
+      // Fallback im lặng khi trình duyệt chặn Autoplay
     }
   }
 

@@ -31,6 +31,7 @@ export interface UseGameWsOptions {
   readonly onBotTakeover?: (playerId: string) => void;
   readonly onReconnected?: (playerId: string) => void;
   readonly onGameOver?: (leaderboard: ReadonlyArray<{ readonly id: string; readonly netWorth: number }>) => void;
+  readonly onEmote?: (playerId: string, emoteId: string, timestamp: number) => void;
   readonly webSocketFactory?: (url: string) => WebSocketLike;
 }
 
@@ -39,6 +40,7 @@ export interface UseGameWsReturn {
   readonly lastTick: number;
   readonly errorReason: ReasonCode | null;
   readonly sendIntent: (intent: PlayerIntent) => boolean;
+  readonly sendEmote: (emoteId: string) => boolean;
   readonly requestResync: () => boolean;
   readonly connect: () => void;
   readonly disconnect: () => void;
@@ -54,6 +56,7 @@ export interface WsMessageHandlerContext {
   readonly onBotTakeover?: (playerId: string) => void;
   readonly onReconnected?: (playerId: string) => void;
   readonly onGameOver?: (leaderboard: ReadonlyArray<{ readonly id: string; readonly netWorth: number }>) => void;
+  readonly onEmote?: (playerId: string, emoteId: string, timestamp: number) => void;
   readonly setLastTick?: (tick: number) => void;
   readonly setErrorReason?: (reason: ReasonCode | null) => void;
 }
@@ -76,6 +79,8 @@ export function handleWsMessage(
     ctx.onBotTakeover?.(msg.playerId);
   } else if (msg.type === 'PLAYER_RECONNECTED') {
     ctx.onReconnected?.(msg.playerId);
+  } else if (msg.type === 'PLAYER_EMOTE') {
+    ctx.onEmote?.(msg.playerId, msg.emoteId, msg.timestamp);
   } else if (msg.type === 'PING') {
     const pongMsg: WsClientMessage = { type: 'PONG', playerId: ctx.playerId, roomCode: ctx.roomCode };
     ctx.socket.send(JSON.stringify(pongMsg));
@@ -122,6 +127,9 @@ export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
   const onGameOverRef = useRef(options.onGameOver);
   onGameOverRef.current = options.onGameOver;
 
+  const onEmoteRef = useRef(options.onEmote);
+  onEmoteRef.current = options.onEmote;
+
   const connect = useCallback(() => {
     if (wsRef.current && wsRef.current.readyState === 1) return;
 
@@ -165,6 +173,7 @@ export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
           onBotTakeover: onBotTakeoverRef.current,
           onReconnected: onReconnectedRef.current,
           onGameOver: onGameOverRef.current,
+          onEmote: onEmoteRef.current,
           setLastTick,
           setErrorReason,
         });
@@ -207,6 +216,21 @@ export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
     [roomCode, playerId],
   );
 
+  const sendEmote = useCallback(
+    (emoteId: string): boolean => {
+      if (!wsRef.current || wsRef.current.readyState !== 1) return false;
+      const msg: WsClientMessage = {
+        type: 'EMOTE',
+        roomCode,
+        playerId,
+        emoteId,
+      };
+      wsRef.current.send(JSON.stringify(msg));
+      return true;
+    },
+    [roomCode, playerId],
+  );
+
   const requestResync = useCallback((): boolean => {
     if (!wsRef.current || wsRef.current.readyState !== 1) return false;
     const msg: WsClientMessage = {
@@ -232,6 +256,7 @@ export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
     lastTick,
     errorReason,
     sendIntent,
+    sendEmote,
     requestResync,
     connect,
     disconnect,

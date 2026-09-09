@@ -202,7 +202,25 @@ export class WssServer {
           this.broadcaster.resyncClient(msg.roomCode, socket);
         }
         break;
+      case 'EMOTE':
+        this.handleEmote(socket, msg);
+        break;
     }
+  }
+
+  private handleEmote(socket: WebSocket, msg: Extract<WsClientMessage, { type: 'EMOTE' }>): void {
+    const room = this.rooms.getRoom(msg.roomCode);
+    if (!room || !room.players.some((p) => p.id === msg.playerId)) {
+      this.sendSafe(socket, { type: 'ERROR', reasonCode: 'ROOM_NOT_FOUND' });
+      return;
+    }
+    this.bindSocket(msg.roomCode, msg.playerId, socket);
+    this.broadcast(msg.roomCode, {
+      type: 'PLAYER_EMOTE',
+      playerId: msg.playerId,
+      emoteId: msg.emoteId,
+      timestamp: Date.now(),
+    });
   }
 
   private handleReconnect(socket: WebSocket, msg: { reconnectToken: string; roomCode?: string }): void {
@@ -328,26 +346,21 @@ export class WssServer {
         }
         this.roomSockets.delete(roomCode);
       }
-
       const prefix = `${roomCode}:`;
       for (const key of Array.from(this.playerSockets.keys())) {
         if (key.startsWith(prefix)) {
           this.playerSockets.delete(key);
         }
       }
-
       this.reconnects.clearRoom(roomCode);
-
       const room = this.rooms.getRoom(roomCode);
       if (room) {
         for (const p of room.players) {
           this.sessions.removeSession(p.id);
         }
       }
-
       this.broadcaster.clearRoom(roomCode);
       this.intentMutex.clear(roomCode);
-
       this.rooms.closeRoom(roomCode);
     } finally {
       this.closingRooms.delete(roomCode);

@@ -134,9 +134,49 @@ export function LobbyView({
           </div>
         </section>
 
-        <section className="lg:col-span-5 flex justify-center">
+        <section className="lg:col-span-5 flex flex-col items-center gap-4">
           <div className="w-full max-w-sm">
             <QrCodeCard roomCode={roomCode} />
+          </div>
+
+          {/* Thẻ Tóm Tắt Thể Lệ Thi Đấu */}
+          <div
+            className="w-full max-w-sm bg-slate-900/90 border border-slate-800/90 rounded-2xl p-4 shadow-xl text-left"
+            data-testid="lobby-rules-card"
+          >
+            <div className="flex items-center gap-2 pb-2 mb-3 border-b border-slate-800">
+              <span className="text-amber-400 text-base font-black" aria-hidden="true">📜</span>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-200">
+                Tóm Tắt Thể Lệ Thi Đấu
+              </h3>
+            </div>
+
+            <ul className="flex flex-col gap-2.5 text-xs text-slate-300">
+              <li className="flex items-start gap-2">
+                <span className="text-amber-400 font-bold shrink-0">•</span>
+                <span>
+                  <strong className="text-amber-300">Vốn khởi điểm:</strong> 15.000 Tr. VNĐ (15 Tỷ) cho mỗi đại gia.
+                </span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-400 font-bold shrink-0">•</span>
+                <span>
+                  <strong className="text-amber-300">Thời lượng ván đấu:</strong> Tối đa 30 vòng bàn cờ.
+                </span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-400 font-bold shrink-0">•</span>
+                <span>
+                  <strong className="text-amber-300">Thu nhập qua GO:</strong> Nhận ngay +2.000 Tr. VNĐ mỗi khi vượt qua ô Khởi Hành.
+                </span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-400 font-bold shrink-0">•</span>
+                <span>
+                  <strong className="text-amber-300">Điều kiện thắng:</strong> Đại gia có Tổng tài sản (Tiền mặt + Giá trị BĐS) lớn nhất sau 30 vòng, hoặc là người duy nhất không bị phá sản.
+                </span>
+              </li>
+            </ul>
           </div>
         </section>
       </main>

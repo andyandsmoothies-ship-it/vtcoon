@@ -2,7 +2,7 @@ import React, { useEffect, useCallback, Suspense, lazy } from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import { HudContainer } from './ui/hud_container';
-import { useGameStore, type PlayerHudInfo } from './store/game_store';
+import { useGameStore, type PlayerHudInfo, FloatingTextType } from './store/game_store';
 import { useLobbyStore } from './store/lobby_store';
 import { LobbyView } from './ui/lobby/lobby_view';
 import { PLAYER_TOKEN_PALETTE } from '../domain/theme';
@@ -20,6 +20,8 @@ export function App(): React.ReactElement {
   const roomCode = useLobbyStore((s) => s.roomCode);
   const initLobby = useLobbyStore((s) => s.initLobby);
   const lobbySlots = useLobbyStore((s) => s.slots);
+  const myPlayerId = useLobbyStore((s) => s.myPlayerId);
+  const localPlayerId = myPlayerId || 'p1';
 
   const setPlayersInfo = useGameStore((state) => state.setPlayersInfo);
   const setCurrentTurnPlayerId = useGameStore((state) => state.setCurrentTurnPlayerId);
@@ -28,6 +30,7 @@ export function App(): React.ReactElement {
   const triggerDiceRoll = useGameStore((state) => state.triggerDiceRoll);
   const startPawnMove = useGameStore((state) => state.startPawnMove);
   const openModal = useGameStore((state) => state.openModal);
+  const triggerEmote = useGameStore((state) => state.triggerEmote);
   const currentTurnPlayerId = useGameStore((state) => state.currentTurnPlayerId);
   const playerPositions = useGameStore((state) => state.playerPositions);
 
@@ -38,11 +41,19 @@ export function App(): React.ReactElement {
     [openModal]
   );
 
-  const { isConnected, sendIntent } = useGameWs({
+  const handleEmote = useCallback(
+    (pid: string, emoteId: string) => {
+      triggerEmote(pid, emoteId);
+    },
+    [triggerEmote]
+  );
+
+  const { isConnected, sendIntent, sendEmote } = useGameWs({
     roomCode: roomCode || 'VT8888',
-    playerId: 'p1',
+    playerId: localPlayerId,
     autoConnect: true,
     onGameOver: handleGameOver,
+    onEmote: handleEmote,
   });
 
   useEffect(() => {
@@ -122,6 +133,13 @@ export function App(): React.ReactElement {
           }
         } else if (ownerEntry[0] !== activeId) {
           AudioEngine.playSfx(SoundEffect.TAX_PENALTY);
+          if (!isConnected) {
+            useGameStore.getState().addFloatingText({
+              text: '-500 Tr.',
+              type: FloatingTextType.Penalty,
+              playerId: activeId,
+            });
+          }
         }
       } else if (tile.type === CellType.Chance) {
         if (isLocal) {
@@ -147,6 +165,26 @@ export function App(): React.ReactElement {
         }
       } else if (tile.type === CellType.Tax || tile.type === CellType.TaxOrder) {
         AudioEngine.playSfx(SoundEffect.TAX_PENALTY);
+        if (!isConnected) {
+          useGameStore.getState().addFloatingText({
+            text: '-1.000 Tr.',
+            type: FloatingTextType.Penalty,
+            playerId: activeId,
+          });
+        }
+      } else if (tile.type === CellType.Go) {
+        AudioEngine.playSfx(SoundEffect.BUY_PROPERTY);
+        if (!isConnected) {
+          useGameStore.getState().addFloatingText({
+            text: '+2.000 Tr.',
+            type: FloatingTextType.Reward,
+            playerId: activeId,
+          });
+          const p = useGameStore.getState().playersInfo[activeId];
+          if (p) {
+            useGameStore.getState().updatePlayerInfo(activeId, { balance: p.balance + 2000 });
+          }
+        }
       }
 
       // Kiểm tra tình trạng nợ / thấu chi âm tiền
@@ -170,10 +208,28 @@ export function App(): React.ReactElement {
     const activeId = currentTurnPlayerId ?? 'p1';
     const currentPos = playerPositions[activeId] ?? 0;
     const targetCell = (currentPos + d1 + d2) % 40;
+    const passedGo = currentPos + d1 + d2 >= 40;
+
     setTimeout(() => {
       startPawnMove(activeId, targetCell);
       AudioEngine.playSfx(SoundEffect.PAWN_STEP);
       AudioEngine.handlePawnLanded(targetCell);
+
+      if (passedGo) {
+        AudioEngine.playSfx(SoundEffect.BUY_PROPERTY);
+        if (!isConnected) {
+          useGameStore.getState().addFloatingText({
+            text: '+2.000 Tr.',
+            type: FloatingTextType.Reward,
+            playerId: activeId,
+          });
+          const p = useGameStore.getState().playersInfo[activeId];
+          if (p) {
+            useGameStore.getState().updatePlayerInfo(activeId, { balance: p.balance + 2000 });
+          }
+        }
+      }
+
       handleCellLanding(activeId, targetCell);
     }, 650);
   };
@@ -189,6 +245,16 @@ export function App(): React.ReactElement {
     setCurrentTurnPlayerId(nextId);
     useGameStore.getState().setTurnTimeRemaining(60);
   };
+
+  const handleSendEmote = useCallback(
+    (emoteId: string) => {
+      triggerEmote(localPlayerId, emoteId);
+      if (isConnected) {
+        sendEmote(emoteId);
+      }
+    },
+    [localPlayerId, isConnected, sendEmote, triggerEmote]
+  );
 
   if (!gameStarted) {
     return <LobbyView />;
@@ -214,6 +280,8 @@ export function App(): React.ReactElement {
         onRollDice={handleRollDice}
         onEndTurn={handleEndTurn}
         onIntent={sendIntent}
+        onSendEmote={handleSendEmote}
+        localPlayerId={localPlayerId}
       />
     </div>
   );

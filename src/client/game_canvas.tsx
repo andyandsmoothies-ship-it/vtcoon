@@ -35,15 +35,15 @@ export function GameCanvas({ players = [] }: { players?: readonly Player[] }): R
     <Canvas
       shadows
       orthographic
-      camera={{ position: [22, 22, 22], zoom: 35, near: -100, far: 200 }}
+      camera={{ position: [22, 22, 22], zoom: 41, near: -100, far: 200 }}
       style={{ width: '100vw', height: '100vh', display: 'block', background: '#0B1120' }}
     >
       <OrbitControls
         enableRotate={false}
         enablePan={true}
         enableZoom={true}
-        minZoom={18}
-        maxZoom={55}
+        minZoom={25}
+        maxZoom={60}
       />
       <ambientLight intensity={0.95} />
       <directionalLight

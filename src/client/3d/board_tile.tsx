@@ -1,10 +1,12 @@
 // [UI-S01/MSS][OPS-02/MSS] LayeredDioramaTile — Diorama-style 3D board tile with standee harmonic animation
-import React, { useRef } from 'react';
+import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Billboard } from '@react-three/drei';
 import type { Group } from 'three';
 import type { BoardCell } from '../../domain/board_config';
 import { COLOR_GROUP_HEX } from '../../domain/theme';
+import { getTileTexture, getStandeeTexture } from './tile_texture_generator';
+import { GoldenGlowVFX } from './golden_glow_vfx';
 
 export interface StandeeElevationOptions {
   readonly omega?: number;
@@ -38,6 +40,7 @@ interface StandeeBillboardProps {
 
 function StandeeBillboard({ cellIndex, groupColor }: StandeeBillboardProps): React.ReactElement {
   const groupRef = useRef<Group>(null);
+  const standeeTexture = useMemo(() => getStandeeTexture(cellIndex), [cellIndex]);
 
   useFrame((state) => {
     if (groupRef.current) {
@@ -59,10 +62,14 @@ function StandeeBillboard({ cellIndex, groupColor }: StandeeBillboardProps): Rea
           <planeGeometry args={[1.0, 1.05]} />
           <meshBasicMaterial color="#FFFFFF" />
         </mesh>
-        {/* Standee graphic preview */}
+        {/* Standee graphic preview with cultural icon */}
         <mesh position={[0, 0, 0.01]}>
           <planeGeometry args={[0.9, 0.95]} />
-          <meshStandardMaterial color={groupColor} roughness={0.3} />
+          {standeeTexture ? (
+            <meshStandardMaterial map={standeeTexture} transparent roughness={0.25} />
+          ) : (
+            <meshStandardMaterial color={groupColor} roughness={0.3} />
+          )}
         </mesh>
       </Billboard>
     </group>
@@ -90,6 +97,8 @@ export function LayeredDioramaTile({
   isCornerTile,
   onClick,
 }: LayeredDioramaTileProps): React.ReactElement {
+  const tileTexture = useMemo(() => getTileTexture(cell.index), [cell.index]);
+
   if (isCornerTile) {
     return (
       <group position={position} rotation={rotation} onClick={onClick}>
@@ -98,10 +107,14 @@ export function LayeredDioramaTile({
           <boxGeometry args={[2.2, 0.22, 2.2]} />
           <meshStandardMaterial color="#334155" roughness={0.4} metalness={0.2} />
         </mesh>
-        {/* Inner corner accent badge */}
+        {/* Inner corner accent badge with texture */}
         <mesh position={[0, 0.115, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[1.6, 1.6]} />
-          <meshBasicMaterial color="#1E293B" />
+          <planeGeometry args={[2.16, 2.16]} />
+          {tileTexture ? (
+            <meshBasicMaterial map={tileTexture} />
+          ) : (
+            <meshBasicMaterial color="#1E293B" />
+          )}
         </mesh>
       </group>
     );
@@ -117,12 +130,20 @@ export function LayeredDioramaTile({
         <meshStandardMaterial color="#E8E2D2" roughness={0.45} />
       </mesh>
 
-      {/* 2. ColorStrip — Identifies region, flat on top surface facing center */}
-      {cell.colorGroup != null && (
-        <mesh position={[0, 0.105, -0.82]} rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[1.68, 0.45]} />
-          <meshBasicMaterial color={COLOR_GROUP_HEX[cell.colorGroup]} />
+      {/* 2. Top surface information texture */}
+      {tileTexture ? (
+        <mesh position={[0, 0.103, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[1.64, 2.16]} />
+          <meshBasicMaterial map={tileTexture} />
         </mesh>
+      ) : (
+        /* Fallback ColorStrip when texture is unavailable */
+        cell.colorGroup != null && (
+          <mesh position={[0, 0.105, -0.82]} rotation={[-Math.PI / 2, 0, 0]}>
+            <planeGeometry args={[1.68, 0.45]} />
+            <meshBasicMaterial color={COLOR_GROUP_HEX[cell.colorGroup]} />
+          </mesh>
+        )
       )}
 
       {/* 3. Standee 2.5D Billboard — Harmonic bobbing sin(omega*t) at 60 FPS */}
@@ -135,6 +156,11 @@ export function LayeredDioramaTile({
           <meshStandardMaterial color={tierColor(currentLevel)} metalness={0.7} roughness={0.2} />
         </mesh>
       ))}
+
+      {/* 5. Hào quang Golden Glow & Micro-VFX nảy hạt khi đạt Khách Sạn Cấp 3 (C3) */}
+      {currentLevel === 3 && (
+        <GoldenGlowVFX position={[0.55, 0.22 + 3 * 0.14, 0.7]} />
+      )}
     </group>
   );
 }
