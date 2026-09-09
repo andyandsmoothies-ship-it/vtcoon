@@ -1,4 +1,4 @@
-// [UI-S01/MSS] GameCanvas — Orthographic 3D viewport, R3F Canvas wrapper
+// [UI-S01/MSS][UI-S03/MSS] GameCanvas — Orthographic 3D viewport, R3F Canvas wrapper
 // Re-exports cellPosition for backward-compat with tests/client/game_canvas.test.ts
 export { cellPosition } from './3d/board_coords';
 
@@ -8,8 +8,29 @@ import { OrbitControls } from '@react-three/drei';
 import type { Player } from '../domain/room';
 import { GameBoard } from './3d/board_layout';
 import { PawnAnimator } from './3d/pawn_animator';
+import { useGameStore } from './store/game_store';
 
-export function GameCanvas({ players = [] }: { players?: Player[] }): React.ReactElement {
+export function GameCanvas({ players = [] }: { players?: readonly Player[] }): React.ReactElement {
+  const playersInfo = useGameStore((s) => s.playersInfo);
+  const playerPositions = useGameStore((s) => s.playerPositions);
+
+  const effectivePlayers: readonly Player[] = players.length > 0
+    ? players
+    : Object.values(playersInfo).map((p) => ({
+        id: p.id,
+        position: playerPositions[p.id] ?? 0,
+        balance: p.balance,
+        skipNextTurn: false,
+        auditTurnsLeft: 0,
+        consecutiveDoubles: 0,
+        hand: [],
+        pendingDebts: [],
+        extraTurns: 0,
+        doubleNextDice: false,
+        mortgagedProperties: [],
+        bankrupt: Boolean(p.bankrupt),
+      }));
+
   return (
     <Canvas
       shadows
@@ -34,7 +55,7 @@ export function GameCanvas({ players = [] }: { players?: Player[] }): React.Reac
       />
       <directionalLight position={[-15, 20, -15]} intensity={0.6} />
       <GameBoard />
-      <PawnAnimator players={players} />
+      <PawnAnimator players={effectivePlayers} />
     </Canvas>
   );
 }

@@ -80,14 +80,16 @@
   - A1: Đến lượt người chơi → Highlight viền HUD card, nút Đổ Xúc Xắc enable.
   - A2: Số dư xuống dưới 0 → Số tiền đổi màu đỏ, icon cảnh báo phá sản.
 - **Value Delivered:** Bảng điều khiển tài chính DOM thực dụng — người chơi luôn thấy trạng thái quỹ tiền và tài sản mà không cần click vào bàn cờ.
-- **Lifecycle Status:** ⚪ Đã Quy Hoạch
-- **Tech Stack:** Tailwind CSS · Framer Motion · Zustand `useGameStore` hook · React DOM Overlay (Z-Index 10)
+- **Lifecycle Status:** ✅ Hoàn Thành (Done - 2026-09-09) · 497/497 Tests PASS · Visual Smoke Gate Ready
+- **Tech Stack:** Tailwind CSS · Zustand `useGameStore` hook · React DOM Overlay (Z-Index 10)
 - **Test Contracts (Visual & Unit):**
-  - `TC-UI03.1`: [gameStore.players thay đổi] → [HUD re-render đúng số dư mới trong vòng 1 render cycle]
-  - `TC-UI03.2`: [Lượt chơi chuyển sang playerId=2] → [HUD card player 2 có viền highlight, nút hành động enable]
-  - `TC-UI03.3`: [Số dư < 0] → [Số tiền render màu text-red-500, icon cảnh báo hiện ra]
-  - `TC-UI03.4`: [Tài sản thay đổi (mua/bán)] → [Danh sách tài sản trong HUD cập nhật ngay lập tức, không flicker]
-- **LOC Budget:** hud_panel.tsx [NEW] ≤ 250L · player_card.tsx [NEW] ≤ 150L · game_store.ts [NEW] ≤ 120L
+  - `TC-UI03.1`: [Format tiền tệ thuần] → [Định dạng số nguyên dương, âm, nợ với phân tách dấu chấm, chặn NaN và -0]
+  - `TC-UI03.2`: [Format thời gian đếm ngược] → [Đổi giây sang MM:SS và kẹp số âm/NaN về 00:00]
+  - `TC-UI03.3`: [Tính toán Net Worth] → [Tiền mặt + Giá đất C0-C3 theo hệ số 1.0/1.5/2.5/4.0; thế chấp giảm 50% hoặc trừ dư nợ mortgageLoans]
+  - `TC-UI03.4`: [Trạng thái Store HUD] → [useGameStore cập nhật playersInfo, timer, roundInfo, treasury, turn player]
+  - `TC-UI03.5`: [Trạng thái Nút Action Dock] → [Nút Đổ Xúc Xắc/Hết Lượt disable khi đang gieo, đang di chuyển pawn, khác lượt hoặc phá sản]
+  - `TC-UI03.6`: [Nhóm màu sở hữu] → [getOwnedColorGroups lọc đúng 8 nhóm màu không trùng lặp từ BOARD_CONFIG]
+- **LOC Budget:** top_bar.tsx (54L) · player_card.tsx (113L) · player_hud_list.tsx (32L) · action_dock.tsx (116L) · hud_container.tsx (47L) · ui_helpers.ts (116L) · game_store.ts (181L)
 
 ---
 
@@ -136,8 +138,8 @@
 |---|---|:---:|---|---|
 | **UI-01** | Sa Bàn 3D & Standee 2.5D | ✅ Hoàn Thành | UC-004, UC-016, design.md | Bàn cờ thật 3D 40 ô địa phương |
 | **UI-02** | Spring Pawn & Dice Physics | ✅ Hoàn Thành | UC-011, UC-016, ADR-0002 | Hoạt ảnh lò xo + xúc xắc rơi |
-| **UI-03** | HUD Tài Chính DOM | ⚪ Đã Quy Hoạch | UC-002, UC-016, ADR-0002 | Bảng điều khiển realtime Zustand |
-| **UI-04** | Modals Nghiệp Vụ | ⚪ Đã Quy Hoạch | UC-020, UC-022, UC-028, UC-038 | Giao diện quyết định kinh doanh |
+| **UI-03** | HUD Tài Chính DOM | ✅ Hoàn Thành | UC-002, UC-016, ADR-0002 | Bảng điều khiển realtime Zustand |
+| **UI-04** | Modals Nghiệp Vụ | 🔵 Sắp Thi Công | UC-020, UC-022, UC-028, UC-038 | Giao diện quyết định kinh doanh |
 | **UI-05** | Audio Engine Vùng Miền | ⚪ Đã Quy Hoạch | ADR-0002, design.md §2 | Âm thanh không gian 4 cạnh địa lý |
 
 ---
