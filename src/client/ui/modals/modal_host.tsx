@@ -14,6 +14,7 @@ import { formatCurrency } from '../ui_helpers';
 import type { PlayerIntent } from '../../../server/intent_dispatcher';
 import { getDeedDisplayInfo } from './modal_helpers';
 import { resolveHoseInvestment } from '../../../domain/event_card_engine';
+import { BOARD_CONFIG } from '../../../domain/board_config';
 
 export interface ModalHostProps {
   readonly activeModal?: ActiveModalType;
@@ -81,6 +82,29 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
         const deed = getDeedDisplayInfo(payload.cellIndex);
         const currentLevel = (useGameStore.getState().levelMap[payload.cellIndex] ?? 0) as 0 | 1 | 2 | 3;
         const upgradeCost = deed && currentLevel < 3 ? deed.upgradeCosts[currentLevel as 0 | 1 | 2] : 0;
+
+        // Monopoly & Even-building calculation
+        const colorGroup = deed?.colorGroup;
+        const groupCells = colorGroup ? BOARD_CONFIG.filter((c) => c.colorGroup === colorGroup).map((c) => c.index) : [];
+        const hasMonopoly = Boolean(owner && groupCells.length > 0 && groupCells.every((idx) => owner.ownedProperties?.includes(idx)));
+
+        let upgradeBlockedReason: string | undefined = undefined;
+        if (isOwner && deed && !isMortgaged) {
+          if (!hasMonopoly) {
+            upgradeBlockedReason = 'Cần sở hữu trọn bộ màu trước khi nâng cấp';
+          } else if (currentLevel < 3 && groupCells.length > 0) {
+            const levelMap = useGameStore.getState().levelMap;
+            const targetLevel = currentLevel + 1;
+            const laggingCells = groupCells
+              .filter((idx) => idx !== payload.cellIndex)
+              .filter((idx) => (levelMap[idx] ?? 0) < targetLevel - 1);
+            if (laggingCells.length > 0) {
+              const names = laggingCells.map((idx) => BOARD_CONFIG[idx]?.name ?? `Ô ${idx}`).join(', ');
+              upgradeBlockedReason = `Quy tắc xây dựng đều tay: Cần nâng cấp ${names} lên C${targetLevel - 1} trước khi xây C${targetLevel}`;
+            }
+          }
+        }
+
         return (
           <TitleDeedModal
             cellIndex={payload.cellIndex}
@@ -91,6 +115,8 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
             ownerName={owner?.name}
             currentLevel={currentLevel}
             upgradeCost={upgradeCost}
+            hasMonopoly={hasMonopoly}
+            upgradeBlockedReason={upgradeBlockedReason}
             onBuy={() => {
               AudioEngine.playSfx(SoundEffect.BUY_PROPERTY);
               onIntent?.({ type: 'INTENT_BUY_PROPERTY' });

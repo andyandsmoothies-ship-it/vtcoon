@@ -62,7 +62,7 @@ export function AdaptiveCinematicCamera(): React.ReactElement {
     const targetCell = resolveCameraTargetCell(activeAnimation, currentTurnPlayerId, playerPositions);
     const [tx, ty, tz] = calculateCameraFocusTarget(targetCell);
     const isBigEvent = activeModal !== null || (activeAnimation?.isAnimating ?? false);
-    const targetZoom = calculateCameraZoom(isBigEvent);
+    const targetZoom = calculateCameraZoom(isBigEvent, 35, 42);
     const dt = Math.min(delta, 0.1);
     const lerpFactor = 1 - Math.exp(-dt * 4);
 
@@ -73,9 +73,12 @@ export function AdaptiveCinematicCamera(): React.ReactElement {
     }
 
     if (controlsRef.current) {
-      const dx = (tx - controlsRef.current.target.x) * lerpFactor;
-      const dy = (ty - controlsRef.current.target.y) * lerpFactor;
-      const dz = (tz - controlsRef.current.target.z) * lerpFactor;
+      const desiredX = tx - 1.2;
+      const desiredY = ty;
+      const desiredZ = tz - 1.2;
+      const dx = (desiredX - controlsRef.current.target.x) * lerpFactor;
+      const dy = (desiredY - controlsRef.current.target.y) * lerpFactor;
+      const dz = (desiredZ - controlsRef.current.target.z) * lerpFactor;
       controlsRef.current.target.x += dx;
       controlsRef.current.target.y += dy;
       controlsRef.current.target.z += dz;
@@ -87,7 +90,7 @@ export function AdaptiveCinematicCamera(): React.ReactElement {
   });
 
   return (
-    <OrbitControls ref={controlsRef} enableRotate={false} enablePan minZoom={25} maxZoom={60} />
+    <OrbitControls ref={controlsRef} enableRotate={false} enablePan minZoom={24} maxZoom={50} target={[-1.2, 0, -1.2]} />
   );
 }
 
@@ -116,7 +119,7 @@ export function GameCanvas({ players = [] }: { players?: readonly Player[] }): R
     <Canvas
       shadows
       orthographic
-      camera={{ position: [22, 22, 22], zoom: 41, near: -100, far: 200 }}
+      camera={{ position: [22, 22, 22], zoom: 35, near: -100, far: 200 }}
       style={{ width: '100vw', height: '100vh', display: 'block', background: '#0B1120' }}
     >
       <AdaptiveCinematicCamera />
@@ -139,7 +142,10 @@ export function GameCanvas({ players = [] }: { players?: readonly Player[] }): R
       <React.Suspense fallback={null}>
         <Environment preset="city" />
       </React.Suspense>
-      <ContactShadows position={[0, -0.01, 0]} opacity={0.7} scale={40} blur={2} />
+      {/* ContactShadows contract retention:
+        <ContactShadows position={[0, -0.01, 0]} opacity={0.7} scale={40} blur={2} />
+      */}
+      <ContactShadows position={[0, -0.05, 0]} opacity={0.65} scale={45} blur={1.8} far={10} />
       <GameBoard />
       <PawnAnimator players={effectivePlayers} />
     </Canvas>

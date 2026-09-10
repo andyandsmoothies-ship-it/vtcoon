@@ -9,7 +9,7 @@ import { PLAYER_TOKEN_PALETTE } from '../domain/theme';
 import { AudioEngine } from './audio/audio_engine';
 import { SoundEffect } from './audio/audio_types';
 import { BOARD_CONFIG, CellType } from '../domain/board_config';
-import { useGameWs } from './network/use_game_ws';
+import { useGameWs, isGameRunningDelta, clearReconnectToken } from './network/use_game_ws';
 import type { ReasonCode } from '../server/network/network_types';
 import type { DeltaPayload } from '../server/session_manager';
 
@@ -55,6 +55,13 @@ export function App(): React.ReactElement {
   const prevTurnPlayerRef = useRef<string | null>(null);
   const prevPlayerIndexRef = useRef<number | null>(null);
   const prevPositionRef = useRef<number | null>(null);
+  const landingTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (landingTimerRef.current) clearTimeout(landingTimerRef.current);
+    };
+  }, []);
 
   const setPlayersInfo = useGameStore((state) => state.setPlayersInfo);
   const setCurrentTurnPlayerId = useGameStore((state) => state.setCurrentTurnPlayerId);
@@ -66,6 +73,21 @@ export function App(): React.ReactElement {
   const playerPositions = useGameStore((state) => state.playerPositions);
 
   const handleError = useCallback((reasonCode: ReasonCode) => {
+    if (reasonCode === 'ROOM_STARTED') {
+      setErrorMessage('Phòng này đã bắt đầu trận đấu.');
+      const timer = setTimeout(() => setErrorMessage(null), 4000);
+      return () => clearTimeout(timer);
+    }
+    if ((reasonCode as string) === 'EVEN_BUILDING_VIOLATION') {
+      setErrorMessage('Quy tắc xây dựng đều tay: Cần nâng cấp các ô cùng bộ màu lên cấp đồng đều!');
+      const timer = setTimeout(() => setErrorMessage(null), 4000);
+      return () => clearTimeout(timer);
+    }
+    if ((reasonCode as string) === 'MISSING_MONOPOLY') {
+      setErrorMessage('Cần sở hữu trọn bộ màu trước khi nâng cấp công trình!');
+      const timer = setTimeout(() => setErrorMessage(null), 4000);
+      return () => clearTimeout(timer);
+    }
     setErrorMessage(`Lỗi máy chủ: ${reasonCode}`);
     if (reasonCode === 'NOT_ENOUGH_PLAYERS' || reasonCode === 'NOT_HOST' || reasonCode === 'ROOM_NOT_FOUND') {
       useLobbyStore.getState().setGameStarted(false);
@@ -78,6 +100,10 @@ export function App(): React.ReactElement {
     (activeId: string, targetCell: number) => {
       const tile = BOARD_CONFIG[targetCell];
       if (!tile) return;
+
+      try {
+        AudioEngine.handlePawnLanded(targetCell);
+      } catch {}
 
       const state = useGameStore.getState();
       const activePlayer = state.playersInfo[activeId];
@@ -155,6 +181,10 @@ export function App(): React.ReactElement {
   );
 
   const handleDelta = useCallback((delta: DeltaPayload) => {
+    if (isGameRunningDelta(delta)) {
+      useLobbyStore.getState().setGameStarted(true);
+    }
+
     if (delta.currentPlayerIndex !== undefined && delta.currentPlayerIndex !== prevPlayerIndexRef.current) {
       prevPlayerIndexRef.current = delta.currentPlayerIndex;
       useGameStore.getState().setTurnTimeRemaining(60);
@@ -165,15 +195,41 @@ export function App(): React.ReactElement {
 
     if (delta.players && delta.tick > 0) {
       const localP = delta.players.find((p) => p.id === localPlayerId);
-      if (localP && localP.position !== prevPositionRef.current) {
-        prevPositionRef.current = localP.position;
-        handleCellLanding(localPlayerId, localP.position);
+      if (localP) {
+        if (localP.balance < 0) {
+          const currentModal = useGameStore.getState().activeModal;
+          if (currentModal !== 'insolvency' && currentModal !== 'game_over') {
+            openModal('insolvency', { playerId: localPlayerId, deficit: -localP.balance });
+          }
+        }
+
+        if (prevPositionRef.current !== null && localP.position !== prevPositionRef.current) {
+          const fromPos = prevPositionRef.current;
+          prevPositionRef.current = localP.position;
+          let steps = (localP.position - fromPos) % 40;
+          if (steps <= 0) steps += 40;
+          // Mỗi bước nhảy gồm HOP_DURATION (0.22s) + LANDING_DURATION (0.12s) = 0.34s
+          // Đợi toàn bộ chuỗi nhảy kết thúc và con cờ chạm đất trước khi mở modal
+          const animDelayMs = steps * 340 + 120;
+          if (landingTimerRef.current) clearTimeout(landingTimerRef.current);
+          landingTimerRef.current = setTimeout(() => {
+            handleCellLanding(localPlayerId, localP.position);
+          }, animDelayMs);
+        } else if (prevPositionRef.current === null) {
+          prevPositionRef.current = localP.position;
+        }
       }
     }
-  }, [localPlayerId, handleCellLanding]);
+  }, [localPlayerId, handleCellLanding, openModal]);
 
   const handleRoomStarted = useCallback(() => {
     useLobbyStore.getState().setGameStarted(true);
+  }, []);
+
+  const handleReconnected = useCallback((_pid: string) => {
+    // PLAYER_RECONNECTED thông báo người chơi đã kết nối lại.
+    // Trạng thái gameStarted sẽ được quyết định chuẩn xác từ STATE_DELTA đầy đủ của server
+    // nhằm tránh race condition ghi đè store trước khi nạp dữ liệu ván đấu.
   }, []);
 
   const handleGameOver = useCallback(
@@ -190,6 +246,19 @@ export function App(): React.ReactElement {
     [triggerEmote]
   );
 
+  const handleSessionInit = useCallback((_token: string, activeRoomCode: string) => {
+    if (activeRoomCode && activeRoomCode !== useLobbyStore.getState().roomCode) {
+      useLobbyStore.getState().setRoomCode(activeRoomCode);
+      if (typeof window !== 'undefined' && window.history) {
+        try {
+          const url = new URL(window.location.href);
+          url.searchParams.set('room', activeRoomCode);
+          window.history.replaceState({}, '', url.toString());
+        } catch {}
+      }
+    }
+  }, []);
+
   const { isConnected, sendIntent, sendEmote, sendWsMessage } = useGameWs({
     roomCode: roomCode || 'VT8888',
     playerId: localPlayerId,
@@ -198,8 +267,10 @@ export function App(): React.ReactElement {
     onDelta: handleDelta,
     onError: handleError,
     onRoomStarted: handleRoomStarted,
+    onReconnected: handleReconnected,
     onGameOver: handleGameOver,
     onEmote: handleEmote,
+    onSessionInit: handleSessionInit,
   });
 
   useEffect(() => {
@@ -224,6 +295,12 @@ export function App(): React.ReactElement {
       return;
     }
     gameInitializedRef.current = true;
+
+    // Không ghi đè nếu store đã nhận thông tin người chơi từ server (ví dụ: Reconnect khi ván đấu đang diễn ra)
+    const existingPlayers = useGameStore.getState().playersInfo;
+    if (Object.keys(existingPlayers).length > 0) {
+      return;
+    }
 
     AudioEngine.handlePawnLanded(0);
     const occupied = lobbySlots.filter((s) => s.isOccupied);
@@ -259,6 +336,9 @@ export function App(): React.ReactElement {
   }, [gameStarted]);
 
   const handleRollDice = useCallback(() => {
+    const store = useGameStore.getState();
+    if (store.isRolling || store.activePawnAnimation?.isAnimating) return;
+    store.setIsRolling(true);
     sendIntent({ type: 'INTENT_ROLL' });
   }, [sendIntent]);
 
@@ -285,8 +365,57 @@ export function App(): React.ReactElement {
     [localPlayerId, isConnected, sendEmote, triggerEmote]
   );
 
+  const handleLeaveRoom = useCallback(() => {
+    const confirmed = typeof window !== 'undefined'
+      ? window.confirm('Bạn có chắc chắn muốn rời bàn và trở về sảnh chờ?')
+      : true;
+    if (!confirmed) return;
+
+    if (landingTimerRef.current) {
+      clearTimeout(landingTimerRef.current);
+      landingTimerRef.current = null;
+    }
+
+    if (isConnected && roomCode) {
+      try {
+        sendWsMessage({
+          type: 'LEAVE_ROOM',
+          playerId: localPlayerId,
+          roomCode,
+        });
+      } catch {}
+    }
+
+    if (roomCode) clearReconnectToken(roomCode);
+    clearReconnectToken('VT8888');
+
+    useGameStore.getState().closeModal();
+    useGameStore.setState({
+      activePawnAnimation: null,
+      floatingTexts: [],
+    });
+
+    if (typeof window !== 'undefined' && window.history) {
+      try { window.history.replaceState({}, '', window.location.pathname); } catch {}
+    }
+
+    useLobbyStore.getState().setGameStarted(false);
+  }, [isConnected, roomCode, localPlayerId, sendWsMessage]);
+
   if (!gameStarted) {
-    return <LobbyView sendWsMessage={sendWsMessage} />;
+    return (
+      <div className="relative w-screen h-screen overflow-hidden">
+        {errorMessage && (
+          <div
+            role="alert"
+            className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-rose-600/95 text-white text-sm font-bold px-4 py-2 rounded-lg shadow-lg border border-rose-400 backdrop-blur-sm"
+          >
+            {errorMessage}
+          </div>
+        )}
+        <LobbyView sendWsMessage={sendWsMessage} />
+      </div>
+    );
   }
 
   return (
@@ -318,6 +447,7 @@ export function App(): React.ReactElement {
         onEndTurn={handleEndTurn}
         onIntent={sendIntent}
         onSendEmote={handleSendEmote}
+        onLeaveRoom={handleLeaveRoom}
         localPlayerId={localPlayerId}
       />
     </div>

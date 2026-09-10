@@ -5,10 +5,10 @@ import type { DeltaPayload } from '../../server/session_manager.js';
 import type { PlayerIntent } from '../../server/intent_dispatcher.js';
 import type { WsClientMessage, WsServerMessage, ReasonCode } from '../../server/network/network_types.js';
 import { saveReconnectToken, getReconnectToken, clearReconnectToken } from './reconnect_token.js';
-import { applyDeltaToStore } from './apply_delta.js';
+import { applyDeltaToStore, isGameRunningDelta } from './apply_delta.js';
 
 export { saveReconnectToken, getReconnectToken, clearReconnectToken };
-export { applyDeltaToStore };
+export { applyDeltaToStore, isGameRunningDelta };
 
 export interface WebSocketLike {
   readyState: number;
@@ -34,6 +34,7 @@ export interface UseGameWsOptions {
   readonly onGameOver?: (leaderboard: ReadonlyArray<{ readonly id: string; readonly netWorth: number }>) => void;
   readonly onEmote?: (playerId: string, emoteId: string, timestamp: number) => void;
   readonly onRoomStarted?: () => void;
+  readonly onSessionInit?: (token: string, roomCode: string) => void;
   readonly webSocketFactory?: (url: string) => WebSocketLike;
 }
 
@@ -73,6 +74,9 @@ export function handleWsMessage(
   if (msg.type === 'STATE_DELTA' || msg.type === 'DELTA') {
     applyDeltaToStore(msg.delta);
     ctx.setLastTick?.(msg.delta.tick);
+    if (isGameRunningDelta(msg.delta)) {
+      ctx.onRoomStarted?.();
+    }
     ctx.onDelta?.(msg.delta);
   } else if (msg.type === 'GAME_OVER') {
     ctx.onGameOver?.(msg.leaderboard);
@@ -98,6 +102,17 @@ export function handleWsMessage(
   } else if (msg.type === 'ERROR' || msg.type === 'INTENT_REJECTED') {
     if (msg.type === 'ERROR' && (msg.reasonCode === 'TOKEN_INVALID' || msg.reasonCode === 'TOKEN_EXPIRED')) {
       clearReconnectToken(ctx.roomCode);
+    }
+    if (msg.reasonCode === 'ROOM_STARTED') {
+      ctx.onRoomStarted?.();
+      try {
+        const resyncMsg: WsClientMessage = {
+          type: 'INTENT_REQUEST_RESYNC',
+          roomCode: ctx.roomCode,
+          playerId: ctx.playerId,
+        };
+        ctx.socket.send(JSON.stringify(resyncMsg));
+      } catch {}
     }
     ctx.setErrorReason?.(msg.reasonCode);
     ctx.onError?.(msg.reasonCode);
@@ -189,6 +204,9 @@ export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
   const onRoomStartedRef = useRef(options.onRoomStarted);
   onRoomStartedRef.current = options.onRoomStarted;
 
+  const onSessionInitRef = useRef(options.onSessionInit);
+  onSessionInitRef.current = options.onSessionInit;
+
   const isHostRef = useRef(options.isHost);
   isHostRef.current = options.isHost;
 
@@ -236,7 +254,10 @@ export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
           onGameOver: onGameOverRef.current,
           onEmote: onEmoteRef.current,
           onRoomStarted: onRoomStartedRef.current,
-          onSessionInit: (_tok, rc) => { if (rc) activeRoomCodeRef.current = rc; },
+          onSessionInit: (tok, rc) => {
+            if (rc) activeRoomCodeRef.current = rc;
+            onSessionInitRef.current?.(tok, rc);
+          },
           setLastTick,
           setErrorReason,
         });
@@ -297,10 +318,12 @@ export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
   const sendWsMessage = useCallback(
     (msg: WsClientMessage): boolean => {
       if (!wsRef.current || wsRef.current.readyState !== 1) return false;
-      wsRef.current.send(JSON.stringify(msg));
+      const targetCode = activeRoomCodeRef.current || ('roomCode' in msg && msg.roomCode ? msg.roomCode : roomCode);
+      const activeMsg = 'roomCode' in msg && msg.roomCode ? { ...msg, roomCode: targetCode } : msg;
+      wsRef.current.send(JSON.stringify(activeMsg));
       return true;
     },
-    [],
+    [roomCode],
   );
 
   const requestResync = useCallback((): boolean => {

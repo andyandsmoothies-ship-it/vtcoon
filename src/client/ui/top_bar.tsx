@@ -4,7 +4,12 @@ import { useGameStore } from '../store/game_store';
 import { useAudioStore } from '../store/audio_store';
 import { formatCurrency, formatTimeRemaining } from './ui_helpers';
 
-export function TopBar(): React.ReactElement {
+export interface TopBarProps {
+  readonly onLeaveRoom?: () => void;
+}
+
+export function TopBar(props: TopBarProps): React.ReactElement {
+  const { onLeaveRoom } = props;
   const roundNumber = useGameStore((state) => state.roundNumber);
   const maxRounds = useGameStore((state) => state.maxRounds);
   const turnTimeRemaining = useGameStore((state) => state.turnTimeRemaining);
@@ -65,6 +70,24 @@ export function TopBar(): React.ReactElement {
           <span className="text-sm" aria-hidden="true">{isMuted ? '🔇' : '🔊'}</span>
           <span className="hidden sm:inline">{isMuted ? 'Tắt' : 'Bật'}</span>
         </button>
+
+        {/* Nút Thoát Bàn / Về Sảnh Chờ */}
+        {onLeaveRoom && (
+          <>
+            <div className="h-4 w-px bg-slate-700" aria-hidden="true" />
+            <button
+              type="button"
+              onClick={onLeaveRoom}
+              className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-rose-950/60 hover:bg-rose-900/80 text-rose-300 hover:text-rose-100 transition-colors cursor-pointer text-xs font-semibold border border-rose-700/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 shadow-md"
+              title="Thoát bàn và trở về sảnh chờ"
+              aria-label="Thoát bàn và trở về sảnh chờ"
+              data-testid="leave-room-button"
+            >
+              <span className="text-sm" aria-hidden="true">🚪</span>
+              <span className="hidden sm:inline">Thoát</span>
+            </button>
+          </>
+        )}
       </div>
     </header>
   );

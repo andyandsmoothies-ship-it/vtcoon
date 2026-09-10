@@ -10,25 +10,15 @@ import { ReconnectManager } from './reconnect_manager.js';
 import { RateLimiter, type RateLimiterOptions } from '../security/rate_limiter.js';
 import { EnvelopeValidator } from '../security/envelope_validator.js';
 import { IntentGuard } from '../security/intent_guard.js';
+import { BotTurnScheduler } from './bot_turn_scheduler.js';
+import { SocketRegistry } from './socket_registry.js';
 import { encodeMsg } from './network_types.js';
 import type { WsServerMessage, WsClientMessage, ReasonCode } from './network_types.js';
 
 const MAX_PLAYERS = 6;
 
-export interface WssServerConfig {
-  readonly port: number;
-  readonly roomManager?: RoomManager;
-  readonly sessionManager?: SessionManager;
-  readonly intentMutex?: IntentMutex;
-  readonly reconnectManager?: ReconnectManager;
-  readonly rateLimiter?: RateLimiter;
-  readonly envelopeValidator?: EnvelopeValidator;
-  readonly intentGuard?: IntentGuard;
-  readonly rateLimiterOptions?: RateLimiterOptions;
-  readonly gracePeriodMs?: number;
-  readonly abandonedTimeoutMs?: number;
-  readonly cleanupIntervalMs?: number;
-}
+import type { WssServerConfig } from './wss_server_config.js';
+export type { WssServerConfig };
 
 export class WssServer {
   private readonly wss: WebSocketServer;
@@ -38,12 +28,11 @@ export class WssServer {
   private readonly broadcaster: DeltaBroadcaster;
   private readonly reconnects: ReconnectManager;
   private readonly cleanupScheduler: RoomCleanupScheduler;
+  private readonly botScheduler: BotTurnScheduler;
   private readonly rateLimiter: RateLimiter;
   private readonly envelopeValidator: EnvelopeValidator;
   private readonly intentGuard: IntentGuard;
-  private readonly roomSockets = new Map<string, Set<WebSocket>>();
-  private readonly socketPlayers = new Map<WebSocket, { playerId: string; roomCode: string }>();
-  private readonly playerSockets = new Map<string, WebSocket>();
+  private readonly sockets = new SocketRegistry();
   private readonly closingRooms = new Set<string>();
   private readonly heartbeatTimer: ReturnType<typeof setInterval>;
   private isClosed = false;
@@ -56,6 +45,10 @@ export class WssServer {
     this.envelopeValidator = config.envelopeValidator ?? new EnvelopeValidator();
     this.intentGuard = config.intentGuard ?? new IntentGuard();
     this.broadcaster = new DeltaBroadcaster(this.rooms, this.sessions, (rc, msg) => this.broadcast(rc, msg));
+    this.botScheduler = new BotTurnScheduler({
+      rooms: this.rooms, intentMutex: this.intentMutex, broadcaster: this.broadcaster,
+      onGameOver: (rc) => this.broadcastGameOver(rc),
+    });
     this.reconnects  = config.reconnectManager ?? new ReconnectManager({
       rooms: this.rooms, sessions: this.sessions, broadcaster: this.broadcaster,
       broadcast: (rc, msg) => this.broadcast(rc, msg), gracePeriodMs: config.gracePeriodMs,
@@ -70,8 +63,9 @@ export class WssServer {
     this.rooms.onCloseRoom((rc) => this.closeRoom(rc));
     this.wss.on('connection', (socket) => this.handleConnection(socket));
     this.heartbeatTimer = setInterval(() => {
+      for (const [s, info] of this.sockets.getAllBoundSockets()) this.sendSafe(s, { type: 'PING', roomCode: info.roomCode });
       this.sessions.checkHeartbeats();
-      for (const [, info] of this.socketPlayers.entries()) {
+      for (const [, info] of this.sockets.getAllBoundSockets()) {
         const s = this.sessions.getSession(info.playerId);
         if (s && s.state === SessionState.GracePeriod && !this.reconnects.isPlayerInGrace(info.roomCode, info.playerId)) {
           this.reconnects.startGracePeriod(info.roomCode, info.playerId);
@@ -90,7 +84,8 @@ export class WssServer {
   getRateLimiter(): RateLimiter { return this.rateLimiter; }
   getEnvelopeValidator(): EnvelopeValidator { return this.envelopeValidator; }
   getIntentGuard(): IntentGuard { return this.intentGuard; }
-  getRoomSockets(roomCode: string): Set<WebSocket> | undefined { return this.roomSockets.get(roomCode); }
+  getRoomSockets(roomCode: string): Set<WebSocket> | undefined { return this.sockets.getRoomSockets(roomCode); }
+  get roomSockets(): Map<string, Set<WebSocket>> { return this.sockets.getRoomSocketsMap(); }
 
   sendSafe(socket: WebSocket, msg: WsServerMessage): void {
     if (socket.readyState === WebSocket.OPEN) socket.send(encodeMsg(msg));
@@ -117,6 +112,12 @@ export class WssServer {
           return;
         }
 
+        const info = this.sockets.getPlayerInfo(socket);
+        if (info) {
+          this.sessions.handlePong(info.playerId);
+          this.reconnects.cancelGracePeriod(info.roomCode, info.playerId);
+        }
+
         await this.route(socket, validation.message);
       } catch (err) {
         console.error('[WssServer] Error handling message:', err);
@@ -125,23 +126,15 @@ export class WssServer {
 
     socket.on('close', () => {
       this.rateLimiter.cleanup(socket);
-      const info = this.socketPlayers.get(socket);
-      this.socketPlayers.delete(socket);
-      this.unregisterSocket(socket);
-      const key = info ? `${info.roomCode}:${info.playerId}` : '';
-      if (key && this.playerSockets.get(key) === socket) {
-        this.playerSockets.delete(key);
-        this.reconnects.startGracePeriod(info!.roomCode, info!.playerId);
+      const info = this.sockets.unregister(socket);
+      if (info) {
+        this.reconnects.startGracePeriod(info.roomCode, info.playerId);
       }
     });
   }
 
   private bindSocket(roomCode: string, playerId: string, socket: WebSocket): void {
-    let group = this.roomSockets.get(roomCode);
-    if (!group) this.roomSockets.set(roomCode, (group = new Set()));
-    group.add(socket);
-    this.socketPlayers.set(socket, { playerId, roomCode });
-    this.playerSockets.set(`${roomCode}:${playerId}`, socket);
+    this.sockets.bind(roomCode, playerId, socket);
   }
 
   private sendSessionInit(socket: WebSocket, playerId: string, roomCode: string): void {
@@ -163,7 +156,7 @@ export class WssServer {
       this.sendSafe(socket, { type: 'ERROR', reasonCode: 'ROOM_STARTED' });
       return;
     }
-    if (!this.rooms.startGame(msg.roomCode)) {
+    if (!this.rooms.startGame(msg.roomCode, msg.bots)) {
       this.sendSafe(socket, { type: 'ERROR', reasonCode: 'NOT_ENOUGH_PLAYERS' });
       return;
     }
@@ -176,6 +169,13 @@ export class WssServer {
   private async route(socket: WebSocket, msg: WsClientMessage): Promise<void> {
     switch (msg.type) {
       case 'CREATE_ROOM': {
+        if (msg.roomCode) {
+          const upper = msg.roomCode.toUpperCase();
+          const existing = this.rooms.getRoom(upper);
+          if (existing && existing.hostId === msg.playerId) {
+            this.closeRoom(upper);
+          }
+        }
         const room = this.rooms.createRoom(msg.playerId, msg.roomCode);
         this.sessions.addSession(msg.playerId);
         this.bindSocket(room.roomCode, msg.playerId, socket);
@@ -197,16 +197,39 @@ export class WssServer {
         break;
       }
       case 'START_GAME': this.handleStartGame(socket, msg); break;
-      case 'PONG': this.sessions.handlePong(msg.playerId); break;
+      case 'PONG':
+        this.sessions.handlePong(msg.playerId);
+        if (msg.roomCode) this.reconnects.cancelGracePeriod(msg.roomCode, msg.playerId);
+        break;
       case 'RECONNECT': this.handleReconnect(socket, msg); break;
       case 'INTENT': await this.handleIntent(socket, msg); break;
       case 'INTENT_REQUEST_RESYNC':
         if (msg.roomCode) {
           this.bindSocket(msg.roomCode, msg.playerId, socket);
           this.broadcaster.resyncClient(msg.roomCode, socket);
+          if (this.rooms.getRoom(msg.roomCode)?.started) this.scheduleBotTurn(msg.roomCode);
         }
         break;
       case 'EMOTE': this.handleEmote(socket, msg); break;
+      case 'LEAVE_ROOM': this.handleLeaveRoom(socket, msg); break;
+    }
+  }
+
+  private handleLeaveRoom(socket: WebSocket, msg: Extract<WsClientMessage, { type: 'LEAVE_ROOM' }>): void {
+    const room = this.rooms.getRoom(msg.roomCode);
+    if (!room) return;
+    this.sockets.unregister(socket);
+    this.reconnects.cancelGracePeriod(msg.roomCode, msg.playerId);
+    if (room.hostId === msg.playerId) {
+      this.closeRoom(msg.roomCode);
+    } else {
+      this.broadcast(msg.roomCode, { type: 'PLAYER_BOT_TAKEOVER', playerId: msg.playerId });
+      const p = room.players.find((pl) => pl.id === msg.playerId);
+      if (p) p.bankrupt = true;
+      if (room.started) {
+        this.broadcaster.broadcastRoomDelta(msg.roomCode);
+        this.scheduleBotTurn(msg.roomCode);
+      }
     }
   }
 
@@ -243,17 +266,14 @@ export class WssServer {
     session.state = SessionState.Connected;
     session.lastPongAt = Date.now();
 
-    const existingKey = `${record.roomCode}:${record.playerId}`;
-    const existingSocket = this.playerSockets.get(existingKey);
-    if (existingSocket && existingSocket !== socket) {
-      this.unregisterSocket(existingSocket);
-      this.socketPlayers.delete(existingSocket);
-      try { existingSocket.close(1000, 'SUPERSEDED_BY_RECONNECT'); } catch {}
-    }
+    this.sockets.replacePlayerSocket(record.roomCode, record.playerId, socket);
 
-    this.bindSocket(record.roomCode, record.playerId, socket);
     this.broadcast(record.roomCode, { type: 'PLAYER_RECONNECTED', playerId: record.playerId });
     this.broadcaster.resyncClient(record.roomCode, socket);
+    if (room.started) {
+      this.sendSafe(socket, { type: 'ROOM_STARTED', roomCode: record.roomCode });
+      this.scheduleBotTurn(record.roomCode);
+    }
   }
 
   private async handleIntent(socket: WebSocket, msg: Extract<WsClientMessage, { type: 'INTENT' }>): Promise<void> {
@@ -308,28 +328,7 @@ export class WssServer {
   }
 
   private scheduleBotTurn(roomCode: string): void {
-    const room = this.rooms.getRoom(roomCode);
-    const current = room?.players[room.currentPlayerIndex];
-    if (!room?.started || !current?.isBot || current.bankrupt) return;
-
-    const timer = setTimeout(() => {
-      void this.intentMutex.runExclusive(roomCode, async () => {
-        const r = this.rooms.getRoom(roomCode);
-        const curr = r?.players[r.currentPlayerIndex];
-        if (!r?.started || !curr?.isBot || curr.bankrupt) return;
-
-        this.rooms.runBotTurn(roomCode);
-        const rAfter = this.rooms.getRoom(roomCode);
-        if (rAfter && rAfter.started && rAfter.players.filter((p) => !p.bankrupt).length <= 1) {
-          this.broadcastGameOver(roomCode);
-        } else {
-          this.broadcaster.broadcastRoomDelta(roomCode);
-          const next = rAfter?.players[rAfter.currentPlayerIndex];
-          if (next?.isBot && !next.bankrupt) this.scheduleBotTurn(roomCode);
-        }
-      });
-    }, 800);
-    this.rooms.registerTimer(roomCode, timer);
+    this.botScheduler.scheduleBotTurn(roomCode);
   }
 
   broadcastGameOver(roomCode: string, leaderboard?: Array<{ id: string; netWorth: number }>): void {
@@ -342,20 +341,7 @@ export class WssServer {
     if (this.closingRooms.has(roomCode)) return;
     this.closingRooms.add(roomCode);
     try {
-      const sockets = this.roomSockets.get(roomCode);
-      if (sockets) {
-        for (const s of sockets) {
-          s.removeAllListeners();
-          s.on('error', () => {});
-          this.socketPlayers.delete(s);
-          try { s.close(1000, 'ROOM_CLOSED'); } catch {}
-        }
-        this.roomSockets.delete(roomCode);
-      }
-      const prefix = `${roomCode}:`;
-      for (const key of Array.from(this.playerSockets.keys())) {
-        if (key.startsWith(prefix)) this.playerSockets.delete(key);
-      }
+      this.sockets.clearRoomSockets(roomCode);
       this.reconnects.clearRoom(roomCode);
       const room = this.rooms.getRoom(roomCode);
       if (room) {
@@ -370,16 +356,10 @@ export class WssServer {
   }
 
   broadcast(roomCode: string, msg: WsServerMessage): void {
-    const sockets = this.roomSockets.get(roomCode);
+    const sockets = this.sockets.getRoomSockets(roomCode);
     if (!sockets) return;
     const encoded = encodeMsg(msg);
     for (const s of sockets) if (s.readyState === WebSocket.OPEN) s.send(encoded);
-  }
-
-  private unregisterSocket(socket: WebSocket): void {
-    for (const [roomCode, group] of this.roomSockets.entries()) {
-      if (group.delete(socket) && group.size === 0) this.roomSockets.delete(roomCode);
-    }
   }
 
   close(): Promise<void> {

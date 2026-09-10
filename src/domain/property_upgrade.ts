@@ -17,9 +17,29 @@ export function hasMonopoly(playerId: string, cellIndex: number, registry: Prope
   return groupCells.every((c) => registry.get(c.index) === playerId);
 }
 
+export function checkEvenBuilding(
+  cellIndex: number,
+  stateMap: PropertyStateMap,
+): { valid: boolean; reason?: string; laggingCells?: number[] } {
+  const cell = BOARD_CONFIG[cellIndex];
+  if (!cell?.colorGroup) return { valid: true };
+  const state = stateMap.get(cellIndex) ?? { level: 0 };
+  if (state.level >= 3) return { valid: false, reason: ActionRejectReason.MAX_LEVEL };
+  const targetLevel = state.level + 1;
+  const groupCells = BOARD_CONFIG.filter((c) => c.colorGroup === cell.colorGroup && c.index !== cellIndex);
+  const laggingCells = groupCells
+    .filter((c) => (stateMap.get(c.index)?.level ?? 0) < targetLevel - 1)
+    .map((c) => c.index);
+  if (laggingCells.length > 0) {
+    return { valid: false, reason: ActionRejectReason.EVEN_BUILDING_VIOLATION, laggingCells };
+  }
+  return { valid: true };
+}
+
 export function upgradeProperty(
   player: Player, cellIndex: number, registry: PropertyRegistry, stateMap: PropertyStateMap,
   modifiers?: readonly MarketModifier[],
+  options?: { enforceEvenBuilding?: boolean },
 ): { success: boolean; reason?: string } {
   if (registry.get(cellIndex) !== player.id) return { success: false, reason: ActionRejectReason.NOT_OWNER };
   if (!hasMonopoly(player.id, cellIndex, registry)) return { success: false, reason: ActionRejectReason.MISSING_MONOPOLY };
@@ -27,6 +47,13 @@ export function upgradeProperty(
   if (!deed?.upgradeCosts) return { success: false, reason: ActionRejectReason.NOT_UPGRADEABLE };
   const state = stateMap.get(cellIndex) ?? { level: 0 };
   if (state.level >= 3) return { success: false, reason: ActionRejectReason.MAX_LEVEL };
+
+  // [UC-GAME-023/MSS] Quy tắc xây dựng đều tay (Even-Building Rule)
+  if (options?.enforceEvenBuilding) {
+    const eb = checkEvenBuilding(cellIndex, stateMap);
+    if (!eb.valid) return { success: false, reason: eb.reason };
+  }
+
   let cost = deed.upgradeCosts[state.level]!;
   if (modifiers?.some((m) => m.type === MarketCardId.MC_CREDIT_STIMULUS && m.remainingRounds > 0)) {
     cost = Math.floor(cost * 0.8);

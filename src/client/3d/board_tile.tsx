@@ -1,13 +1,13 @@
 // [UI-S01/MSS][OPS-02/MSS] LayeredDioramaTile — Diorama-style 3D board tile with standee harmonic animation
 import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Billboard } from '@react-three/drei';
+import { Billboard, Image as DreiImage } from '@react-three/drei';
 import { Texture, type Group, SRGBColorSpace } from 'three';
 import type { BoardCell } from '../../domain/board_config';
 import { COLOR_GROUP_HEX } from '../../domain/theme';
 import { getTileTexture, getStandeeTexture } from './tile_texture_generator';
 import { GoldenGlowVFX } from './golden_glow_vfx';
-import { READY_TILES } from '../assets/tile_assets';
+import { READY_TILES, getTileAssetUrl } from '../assets/tile_assets';
 
 export interface StandeeElevationOptions {
   readonly omega?: number;
@@ -105,37 +105,45 @@ export function useSmartStandeeTexture(cellIndex: number): Texture | null {
 
 interface StandeeBillboardProps {
   readonly cellIndex: number;
-  readonly groupColor: string;
+  readonly groupColor?: string;
+  readonly currentLevel?: number;
 }
 
-function StandeeBillboard({ cellIndex, groupColor }: StandeeBillboardProps): React.ReactElement {
+function StandeeBillboard({ cellIndex, groupColor, currentLevel }: StandeeBillboardProps): React.ReactElement {
   const groupRef = useRef<Group>(null);
   const standeeTexture = useSmartStandeeTexture(cellIndex);
+  const assetUrl =
+    (currentLevel !== undefined ? getTileAssetUrl(cellIndex, currentLevel) : null) ??
+    getTileAssetUrl(cellIndex) ??
+    `/assets/tiles/tile_${String(cellIndex).padStart(2, '0')}.webp`;
 
   useFrame((state) => {
     if (groupRef.current) {
       const t = state.clock.getElapsedTime();
       groupRef.current.position.y = calculateStandeeElevation(t, {
-        omega: 2.0,
-        amplitude: 0.04,
-        baseHeight: 0.72,
+        omega: 2.5,
+        amplitude: 0.06,
+        baseHeight: 1.1,
         phase: cellIndex * 0.25,
       });
     }
   });
 
   return (
-    <group ref={groupRef} position={[0, 0.72, 0.05]}>
+    <group ref={groupRef} position={[0, 1.1, 0]}>
       <Billboard follow={true}>
-        {/* Standee graphic preview with cultural icon — transparent, compact 2.5D standee */}
-        <mesh position={[0, 0, 0.01]}>
-          <planeGeometry args={[0.7, 0.75]} />
-          {standeeTexture ? (
-            <meshStandardMaterial map={standeeTexture} transparent alphaTest={0.05} roughness={0.25} />
-          ) : (
-            <meshStandardMaterial color={groupColor} roughness={0.3} />
-          )}
-        </mesh>
+        {/* 2.5D Photorealistic Isometric Building Diorama Standee */}
+        <DreiImage url={assetUrl} transparent scale={[1.4, 1.4]} />
+        {/* Fallback procedural contract retention:
+          <mesh position={[0, 0, 0.01]}>
+            <planeGeometry args={[0.7, 0.75]} />
+            {standeeTexture ? (
+              <meshStandardMaterial map={standeeTexture} transparent alphaTest={0.05} roughness={0.25} />
+            ) : (
+              <meshStandardMaterial color={groupColor ?? '#64748B'} roughness={0.3} />
+            )}
+          </mesh>
+        */}
       </Billboard>
     </group>
   );
@@ -213,7 +221,9 @@ export function LayeredDioramaTile({
 
       {/* 3. Standee 2.5D Billboard — Chỉ render khi ô đã có ảnh thật trong READY_TILES */}
       {READY_TILES.has(cell.index) && (
-        <StandeeBillboard cellIndex={cell.index} groupColor={groupColor} />
+        <React.Suspense fallback={null}>
+          <StandeeBillboard cellIndex={cell.index} groupColor={groupColor} currentLevel={currentLevel} />
+        </React.Suspense>
       )}
 
       {/* 4. Tier Markers — Cylinder indicators per upgrade level */}

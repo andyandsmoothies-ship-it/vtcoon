@@ -24,13 +24,23 @@ export type ReasonCode =
   | 'RATE_LIMIT_EXCEEDED'
   | 'ABUSE_DETECTED'
   | 'INVALID_ENVELOPE'
-  | 'INVALID_VALUE';
+  | 'INVALID_VALUE'
+  | 'EVEN_BUILDING_VIOLATION';
 
 // ─── Client → Server ────────────────────────────────────────────
 export type WsClientMessage =
   | { readonly type: 'CREATE_ROOM'; readonly playerId: string; readonly roomCode?: string }
   | { readonly type: 'JOIN_ROOM';   readonly playerId: string; readonly roomCode: string }
-  | { readonly type: 'START_GAME';  readonly playerId: string; readonly roomCode: string }
+  | {
+      readonly type: 'START_GAME';
+      readonly playerId: string;
+      readonly roomCode: string;
+      readonly bots?: ReadonlyArray<{
+        readonly id: string;
+        readonly name?: string;
+        readonly personality?: string;
+      }>;
+    }
   | { readonly type: 'PONG';        readonly playerId: string; readonly roomCode: string }
   | { readonly type: 'RECONNECT';   readonly reconnectToken: string; readonly roomCode?: string }
   | {
@@ -49,6 +59,11 @@ export type WsClientMessage =
       readonly roomCode: string;
       readonly playerId: string;
       readonly emoteId: string;
+    }
+  | {
+      readonly type: 'LEAVE_ROOM';
+      readonly playerId: string;
+      readonly roomCode: string;
     };
 
 // ─── Server → Client ────────────────────────────────────────────

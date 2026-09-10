@@ -1,5 +1,5 @@
 // [UI-S03/MSS] ActionDock Component — Player action toolbar (Roll, Manage, Trade, End Turn)
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useGameStore } from '../store/game_store';
 import { isRollActionDisabled, isEndTurnDisabled } from './ui_helpers';
 
@@ -10,6 +10,10 @@ export interface ActionDockProps {
   readonly onOpenUpgrade?: () => void;
   readonly onEndTurn?: () => void;
   readonly localPlayerId?: string;
+  readonly isPawnMoving?: boolean;
+  readonly canRollAgain?: boolean;
+  readonly hasRolledThisTurn?: boolean;
+  readonly isMyTurn?: boolean;
 }
 
 export function ActionDock({
@@ -19,6 +23,10 @@ export function ActionDock({
   onOpenUpgrade,
   onEndTurn,
   localPlayerId,
+  isPawnMoving: isPawnMovingProp,
+  canRollAgain: canRollAgainProp,
+  hasRolledThisTurn: hasRolledThisTurnProp,
+  isMyTurn: isMyTurnProp,
 }: ActionDockProps): React.ReactElement {
   const isRolling = useGameStore((state) => state.isRolling);
   const activePawnAnimation = useGameStore((state) => state.activePawnAnimation);
@@ -26,14 +34,26 @@ export function ActionDock({
   const playersInfo = useGameStore((state) => state.playersInfo);
   const openModal = useGameStore((state) => state.openModal);
   const dice = useGameStore((state) => state.dice);
-  const hasRolledThisTurn = useGameStore((state) => state.hasRolledThisTurn);
+  const storeHasRolledThisTurn = useGameStore((state) => state.hasRolledThisTurn);
 
   const actingPlayerId = localPlayerId ?? currentTurnPlayerId;
-  const isMyTurn = !localPlayerId || currentTurnPlayerId === localPlayerId;
-  const isPawnMoving = Boolean(activePawnAnimation?.isAnimating);
-  const isBankrupt = Boolean(actingPlayerId && playersInfo[actingPlayerId]?.bankrupt);
-  const inAudit = Boolean(actingPlayerId && playersInfo[actingPlayerId]?.inAudit);
-  const canRollAgain = dice[0] === dice[1] && dice[0] > 0 && !inAudit;
+  const isMyTurn = isMyTurnProp !== undefined ? isMyTurnProp : (!localPlayerId || currentTurnPlayerId === localPlayerId);
+  const isPawnMoving = isPawnMovingProp !== undefined ? isPawnMovingProp : Boolean(activePawnAnimation?.isAnimating);
+  const actingPlayer = actingPlayerId ? playersInfo[actingPlayerId] : undefined;
+  const isBankrupt = Boolean(actingPlayer?.bankrupt);
+  const inAudit = Boolean(actingPlayer?.inAudit);
+  const isInsolvent = Boolean(actingPlayer && actingPlayer.balance < 0);
+  const storeConsecutiveDoubles = actingPlayer ? (actingPlayer.consecutiveDoubles ?? 0) : 0;
+  const storeCanRollAgain = ((dice[0] === dice[1] && dice[0] > 0) || storeConsecutiveDoubles > 0) && !inAudit;
+  const canRollAgain = canRollAgainProp !== undefined ? canRollAgainProp : storeCanRollAgain;
+  const hasRolledThisTurn = hasRolledThisTurnProp !== undefined ? hasRolledThisTurnProp : storeHasRolledThisTurn;
+  const [isRollPending, setIsRollPending] = useState(false);
+
+  useEffect(() => {
+    if (hasRolledThisTurn || isRolling || !isMyTurn) {
+      setIsRollPending(false);
+    }
+  }, [hasRolledThisTurn, isRolling, isMyTurn]);
 
   const isRollDisabled = isRollActionDisabled({
     isRolling,
@@ -42,6 +62,7 @@ export function ActionDock({
     isBankrupt,
     hasRolledThisTurn,
     canRollAgain,
+    isRollPending,
   });
 
   const isEndDisabled = isEndTurnDisabled({
@@ -51,11 +72,16 @@ export function ActionDock({
     isBankrupt,
     hasRolledThisTurn,
     canRollAgain,
+    isInsolvent,
   });
 
   const handleRollClick = () => {
-    if (isRollDisabled) return;
+    if (isRollDisabled || isRollPending) return;
+    setIsRollPending(true);
     onRollDice?.();
+    setTimeout(() => {
+      setIsRollPending(false);
+    }, 1500);
   };
 
   const handleOpenProperties = () => {
@@ -117,7 +143,15 @@ export function ActionDock({
       >
         <span className="text-xl" aria-hidden="true">🎲</span>
         <span className="text-sm md:text-base">
-          {isRolling ? 'Đang Đổ...' : isPawnMoving ? 'Đang Đi...' : isBankrupt ? 'Đã Phá Sản' : 'Đổ Xúc Xắc'}
+          {isRollPending || isRolling
+            ? 'Đang Đổ...'
+            : isPawnMoving
+            ? 'Đang Đi...'
+            : isBankrupt
+            ? 'Đã Phá Sản'
+            : canRollAgain && hasRolledThisTurn
+            ? 'Đổ Tiếp (Đôi)'
+            : 'Đổ Xúc Xắc'}
         </span>
       </button>
 
@@ -164,9 +198,18 @@ export function ActionDock({
         type="button"
         onClick={onEndTurn}
         disabled={isEndDisabled}
+        title={
+          isInsolvent
+            ? 'Bạn đang bị âm tiền, hãy thế chấp/hạ cấp BĐS hoặc phá sản trước khi kết thúc lượt'
+            : canRollAgain
+            ? 'Bạn vừa đổ đôi, hãy tung xúc xắc tiếp để hoàn thành lượt'
+            : undefined
+        }
         className={`min-h-[44px] flex items-center gap-1.5 px-3.5 py-2 rounded-xl border transition-all text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 ${
           isEndDisabled
-            ? 'bg-slate-800/40 text-slate-500 border-slate-800 cursor-not-allowed'
+            ? isInsolvent
+              ? 'bg-rose-950/40 text-rose-400 border-rose-800/80 cursor-not-allowed shadow-[0_0_12px_rgba(225,29,72,0.3)]'
+              : 'bg-slate-800/40 text-slate-500 border-slate-800 cursor-not-allowed'
             : 'text-amber-300 hover:text-amber-200 bg-amber-950/30 hover:bg-amber-900/40 border-amber-600/40 border-b-2 border-b-amber-950 active:border-b-0 active:translate-y-0.5'
         }`}
         aria-label="Kết thúc lượt"

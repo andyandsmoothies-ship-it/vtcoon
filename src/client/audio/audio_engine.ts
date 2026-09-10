@@ -40,6 +40,7 @@ class AudioEngineImpl {
       window.addEventListener('pointerdown', unlock, { once: true, capture: true });
       window.addEventListener('keydown', unlock, { once: true, capture: true });
       window.addEventListener('touchstart', unlock, { once: true, capture: true });
+      window.addEventListener('click', unlock, { once: true, capture: true });
     }
 
     // Lắng nghe thay đổi volume/mute từ Zustand store
@@ -140,6 +141,7 @@ class AudioEngineImpl {
 
     const newHowl = this.getOrCreateBgm(track);
     try {
+      this.resumeAudioContext();
       if (crossfade) {
         newHowl.volume(0);
         newHowl.play();
@@ -153,10 +155,21 @@ class AudioEngineImpl {
     }
   }
 
+  public resumeAudioContext(): void {
+    try {
+      if (typeof Howler !== 'undefined' && Howler.ctx && Howler.ctx.state === 'suspended') {
+        void Howler.ctx.resume();
+      }
+    } catch {
+      // Fallback an toàn khi truy cập AudioContext bị hạn chế
+    }
+  }
+
   public playSfx(sfx: SoundEffect, rate?: number): void {
     const volume = this.getEffectiveSfxVolume();
     if (volume <= 0) return;
     try {
+      this.resumeAudioContext();
       const howl = this.getOrCreateSfx(sfx);
       howl.volume(volume);
       const effectiveRate =

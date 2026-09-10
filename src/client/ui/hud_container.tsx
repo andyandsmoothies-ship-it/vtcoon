@@ -12,6 +12,7 @@ export interface HudContainerProps extends ActionDockProps {
   readonly children?: React.ReactNode;
   readonly onIntent?: (intent: PlayerIntent) => void;
   readonly onSendEmote?: (emoteId: string) => void;
+  readonly onLeaveRoom?: () => void;
 }
 
 export function HudContainer({
@@ -23,6 +24,7 @@ export function HudContainer({
   localPlayerId,
   onIntent,
   onSendEmote,
+  onLeaveRoom,
   children,
 }: HudContainerProps): React.ReactElement {
   return (
@@ -32,7 +34,7 @@ export function HudContainer({
       role="presentation"
     >
       {/* Tầng đỉnh: Top Bar thông tin vòng đấu, timer, kho bạc */}
-      <TopBar />
+      <TopBar onLeaveRoom={onLeaveRoom} />
 
       {/* Tầng hiển thị số tiền bay (Floating Text / Numbers) */}
       <FloatingNumbersOverlay />

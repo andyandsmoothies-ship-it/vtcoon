@@ -172,6 +172,29 @@ describe('[TC-UI03.5/MSS] Action Button States & Contract Gates', () => {
     expect(isRollActionDisabled({ isRolling: false, isPawnMoving: false, isMyTurn: true, isBankrupt: false })).toBe(false);
     expect(isEndTurnDisabled({ isRolling: false, isPawnMoving: false, isMyTurn: true, isBankrupt: false })).toBe(false);
   });
+
+  it('[Doubles Rule] Nut Het Luot bi disable khi co the do tiep (canRollAgain = true)', () => {
+    expect(
+      isEndTurnDisabled({
+        isRolling: false,
+        isPawnMoving: false,
+        isMyTurn: true,
+        hasRolledThisTurn: true,
+        canRollAgain: true,
+      })
+    ).toBe(true);
+  });
+
+  it('[Anti-Spam] Nut Do Xuc Xac bi disable ngay lap tuc khi isRollPending = true', () => {
+    expect(
+      isRollActionDisabled({
+        isRolling: false,
+        isPawnMoving: false,
+        isMyTurn: true,
+        isRollPending: true,
+      })
+    ).toBe(true);
+  });
 });
 
 describe('[TC-UI03.6/MSS] Visual Helpers & Owned Color Groups', () => {
@@ -224,6 +247,27 @@ describe('[TC-UI03.7/MSS] ActionDock DOM Markup & Tactile 3D Buttons', () => {
     const html = renderToStaticMarkup(React.createElement(ActionDock, { localPlayerId: 'p1' }));
     expect(html).not.toContain('animate-pulse');
     expect(html).toContain('cursor-not-allowed');
+  });
+
+  it('[Doubles UX] Hien thi Do Tiep (Doi) va vo hieu hoa nut Het Luot khi do doi', () => {
+    useGameStore.setState({
+      currentTurnPlayerId: 'p1',
+      dice: [3, 3],
+      hasRolledThisTurn: true,
+      playersInfo: {
+        p1: { id: 'p1', name: 'P1', balance: 10000, tokenColor: '#fff', ownedProperties: [] },
+      },
+    });
+    const html = renderToStaticMarkup(
+      React.createElement(ActionDock, {
+        localPlayerId: 'p1',
+        isMyTurn: true,
+        canRollAgain: true,
+        hasRolledThisTurn: true,
+      })
+    );
+    expect(html).toContain('Đổ Tiếp (Đôi)');
+    expect(html).toContain('title="Bạn vừa đổ đôi, hãy tung xúc xắc tiếp để hoàn thành lượt"');
   });
 });
 

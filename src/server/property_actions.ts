@@ -55,7 +55,7 @@ export function handleUpgrade(
 ): { success: boolean; reason?: string } {
   if (!current || phase !== TurnPhase.PropertyManagement) return { success: false, reason: ActionRejectReason.INVALID_PHASE };
   if (!registry || !stateMap) return { success: false, reason: ActionRejectReason.INVALID_ROOM };
-  return upgradeProperty(current, cellIndex, registry, stateMap, modifiers);
+  return upgradeProperty(current, cellIndex, registry, stateMap, modifiers, { enforceEvenBuilding: true });
 }
 
 // --- DEBT-02: INTENT_DOWNGRADE (UC-GAME-057) ---

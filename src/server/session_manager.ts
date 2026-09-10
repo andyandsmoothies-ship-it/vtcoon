@@ -57,6 +57,7 @@ export interface DeltaPayload {
   readonly currentTurnPlayerId?: string;
   readonly dice?:                readonly [number, number];
   readonly auction?:             AuctionPayload | null;
+  readonly roomStarted?:         boolean;
 }
 
 export function buildDeltaFromRoom(
@@ -130,6 +131,7 @@ export function buildDeltaFromRoom(
     currentPlayerIndex: room.currentPlayerIndex,
     currentTurnPlayerId: currentTurnPlayer?.id,
     dice: room.lastDice,
+    roomStarted: room.started,
     ...(auction !== undefined ? { auction } : {}),
   });
 }
@@ -142,6 +144,7 @@ export function buildDeltaPayload(options: {
   currentTurnPlayerId?: string;
   dice?: readonly [number, number];
   auction?: AuctionPayload | null;
+  roomStarted?: boolean;
 }): DeltaPayload;
 export function buildDeltaPayload(options: {
   tick: number;
@@ -166,6 +169,7 @@ export function buildDeltaPayload(
         currentTurnPlayerId?: string;
         dice?: readonly [number, number];
         auction?: AuctionPayload | null;
+        roomStarted?: boolean;
       }
     | { tick: number; room: Room; registry: PropertyRegistry; stateMap: PropertyStateMap; auctions?: Map<string, AuctionSession> },
   cells?: ReadonlyArray<CellDelta>,
@@ -189,6 +193,7 @@ export function buildDeltaPayload(
       ...(tickOrOptions.currentTurnPlayerId !== undefined ? { currentTurnPlayerId: tickOrOptions.currentTurnPlayerId } : {}),
       ...(tickOrOptions.dice !== undefined ? { dice: tickOrOptions.dice } : {}),
       ...(tickOrOptions.auction !== undefined ? { auction: tickOrOptions.auction } : {}),
+      ...(tickOrOptions.roomStarted !== undefined ? { roomStarted: tickOrOptions.roomStarted } : {}),
     };
   }
   return {

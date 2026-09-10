@@ -20,8 +20,8 @@ export const READY_TILES = new Set<number>(
     : ALL_28_STAND_TILES
 );
 
-export function getTileAssetUrl(tileIndex: number, level: number): string | null {
-  if (!Number.isInteger(level) || level < 0 || level > 3) {
+export function getTileAssetUrl(tileIndex: number, level?: number): string | null {
+  if (level !== undefined && (!Number.isInteger(level) || level < 0 || level > 3)) {
     throw new Error(`Invalid property level: ${level}. Must be 0, 1, 2, or 3.`);
   }
   if (!PROPERTY_DEEDS.has(tileIndex)) {
@@ -31,7 +31,10 @@ export function getTileAssetUrl(tileIndex: number, level: number): string | null
     return null;
   }
   const paddedId = String(tileIndex).padStart(2, '0');
-  return `/assets/tiles/tile_${paddedId}_lvl${level}.webp`;
+  if (level !== undefined) {
+    return `/assets/tiles/tile_${paddedId}_lvl${level}.webp`;
+  }
+  return `/assets/tiles/tile_${paddedId}.webp`;
 }
 
 export function getAllTileAssetUrls(): string[] {

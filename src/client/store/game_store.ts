@@ -124,6 +124,7 @@ export interface GameState {
   triggerDiceRoll: (dice: [number, number]) => void;
   startPawnMove: (playerId: string, targetCell: number, fromCell?: number) => void;
   completePawnMove: (playerId: string) => void;
+  clearActivePawnAnimation: () => void;
 
   // UI-03 HUD Actions
   setPlayersInfo: (players: Record<string, PlayerHudInfo>) => void;
@@ -236,12 +237,29 @@ export const useGameStore = create<GameState>((set, get) => ({
     });
   },
 
+  clearActivePawnAnimation: () => {
+    set({ activePawnAnimation: null });
+  },
+
   setPlayersInfo: (players) => set({ playersInfo: players }),
 
   updatePlayerInfo: (playerId, partial) => {
     const { playersInfo } = get();
     const existing = playersInfo[playerId];
     if (!existing) return;
+    const oldBalance = existing.balance;
+    const newBalance = partial.balance !== undefined ? partial.balance : oldBalance;
+    if (oldBalance !== undefined && oldBalance < 0 && newBalance >= 0) {
+      const state = get();
+      if (state.activeModal === 'insolvency') {
+        state.closeModal();
+      }
+      state.addFloatingText({
+        text: '🎉 Thoát vỡ nợ thành công! Hãy bấm Hết Lượt.',
+        type: FloatingTextType.Reward,
+        playerId,
+      });
+    }
     set({
       playersInfo: {
         ...playersInfo,
@@ -342,3 +360,14 @@ export const useGameStore = create<GameState>((set, get) => ({
       floatingTexts: state.floatingTexts.filter((t) => now - t.timestamp < FLOATING_TEXT_DURATION_MS),
     })),
 }));
+
+declare global {
+  interface Window {
+    __gameStore?: typeof useGameStore;
+  }
+}
+
+if (typeof window !== 'undefined') {
+  window.__gameStore = useGameStore;
+}
+

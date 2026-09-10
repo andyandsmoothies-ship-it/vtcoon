@@ -1,5 +1,5 @@
 // [UI-S02/MSS] PawnAnimator — Kinetic Squash & Stretch pawn hop with parabolic arc trajectory
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Billboard } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { CanvasTexture, type Group } from 'three';
@@ -96,7 +96,7 @@ export function PawnEmoteBubble({ emoteId }: { readonly emoteId: string }): Reac
   );
 }
 
-interface SingleHopProps {
+export interface SingleHopProps {
   readonly fromCell: number;
   readonly toCell: number;
   readonly offset: readonly [number, number, number];
@@ -105,14 +105,23 @@ interface SingleHopProps {
   readonly emoteId?: string;
 }
 
-function SingleHopPawn({ fromCell, toCell, offset, color, onHopComplete, emoteId }: SingleHopProps): React.ReactElement {
+export function SingleHopPawn({ fromCell, toCell, offset, color, onHopComplete, emoteId }: SingleHopProps): React.ReactElement | null {
   const groupRef = useRef<Group>(null);
   const elapsedRef = useRef(0);
   const soundPlayedRef = useRef(false);
   const completedRef = useRef(false);
+  const onHopCompleteRef = useRef(onHopComplete);
+  onHopCompleteRef.current = onHopComplete;
+
+  useEffect(() => {
+    if (fromCell === toCell && !completedRef.current) {
+      completedRef.current = true;
+      onHopCompleteRef.current();
+    }
+  }, [fromCell, toCell]);
 
   useFrame((_, delta) => {
-    if (completedRef.current || !groupRef.current) return;
+    if (completedRef.current || !groupRef.current || fromCell === toCell) return;
 
     const dt = Math.min(delta, 0.1);
     elapsedRef.current += dt;
@@ -161,26 +170,44 @@ function SingleHopPawn({ fromCell, toCell, offset, color, onHopComplete, emoteId
   );
 }
 
-interface ActivePawnProps extends Pick<SingleHopProps, 'color' | 'offset' | 'emoteId'> {
+export interface ActivePawnProps extends Pick<SingleHopProps, 'color' | 'offset' | 'emoteId'> {
   readonly player: Player;
   readonly animation: PawnAnimationState;
   readonly onComplete: (playerId: string) => void;
 }
 
-function ActiveSpringPawn({ player, color, offset, animation, onComplete, emoteId }: ActivePawnProps): React.ReactElement {
+export function ActiveSpringPawn({ player, color, offset, animation, onComplete, emoteId }: ActivePawnProps): React.ReactElement | null {
   const [stepIndex, setStepIndex] = useState(0);
+  const waypoints = animation.waypoints;
+
+  // Khóa nhận diện hoạt cảnh duy nhất theo quỹ đạo di chuyển (tránh re-trigger khi currentIndex cập nhật từng bước)
+  const animKey = `${animation.playerId}_${animation.fromCell}_${waypoints.join('-')}`;
+  const prevAnimKeyRef = useRef(animKey);
 
   useEffect(() => {
-    setStepIndex(0);
-  }, [animation]);
+    if (prevAnimKeyRef.current !== animKey) {
+      prevAnimKeyRef.current = animKey;
+      setStepIndex(0);
+    }
+  }, [animKey]);
 
-  const waypoints = animation.waypoints;
+  useEffect(() => {
+    if (!waypoints || waypoints.length === 0) {
+      onComplete(player.id);
+      useGameStore.getState().clearActivePawnAnimation();
+    }
+  }, [waypoints, onComplete, player.id]);
+
+  if (!waypoints || waypoints.length === 0 || stepIndex >= waypoints.length) {
+    return null;
+  }
+
   const fromCell = stepIndex === 0 ? animation.fromCell : (waypoints[stepIndex - 1] ?? animation.fromCell);
   const toCell = waypoints[stepIndex] ?? fromCell;
 
-  const handleHopComplete = () => {
-    if (stepIndex + 1 < waypoints.length) {
-      const nextIdx = stepIndex + 1;
+  const handleHopComplete = useCallback(() => {
+    const nextIdx = stepIndex + 1;
+    if (nextIdx < waypoints.length) {
       setStepIndex(nextIdx);
       const anim = useGameStore.getState().activePawnAnimation;
       if (anim && anim.playerId === player.id) {
@@ -190,8 +217,9 @@ function ActiveSpringPawn({ player, color, offset, animation, onComplete, emoteI
       }
     } else {
       onComplete(player.id);
+      useGameStore.getState().clearActivePawnAnimation();
     }
-  };
+  }, [stepIndex, waypoints, player.id, onComplete]);
 
   return (
     <SingleHopPawn
@@ -212,6 +240,14 @@ export function PawnAnimator({ players = [] }: { readonly players?: readonly Pla
   const completePawnMove = useGameStore((s) => s.completePawnMove);
   const activeEmotes = useGameStore((s) => s.activeEmotes);
 
+  // [UI-S02/MSS] Đảm bảo dọn dẹp an toàn nếu hoạt ảnh rỗng không bao giờ kích hoạt ActiveSpringPawn
+  useEffect(() => {
+    if (activeAnimation?.isAnimating && (!activeAnimation.waypoints || activeAnimation.waypoints.length === 0)) {
+      completePawnMove(activeAnimation.playerId);
+      useGameStore.getState().clearActivePawnAnimation();
+    }
+  }, [activeAnimation, completePawnMove]);
+
   return (
     <group>
       {players.map((player, index) => {
@@ -222,9 +258,10 @@ export function PawnAnimator({ players = [] }: { readonly players?: readonly Pla
         const activeEmote = activeEmotes[player.id];
 
         if (isAnimating && activeAnimation.waypoints.length > 0) {
+          const animKey = `${player.id}_${activeAnimation.fromCell}_${activeAnimation.waypoints.join('-')}`;
           return (
             <ActiveSpringPawn
-              key={player.id}
+              key={animKey}
               player={player}
               color={color}
               offset={offset}

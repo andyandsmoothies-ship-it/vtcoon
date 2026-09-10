@@ -19,6 +19,7 @@ const MIME_TYPES: Record<string, string> = {
   '.ico': 'image/x-icon',
   '.wasm': 'application/wasm',
   '.mp3': 'audio/mpeg',
+  '.webp': 'image/webp',
 };
 
 export function createHealthServer(

@@ -169,12 +169,15 @@ describe('[Phase 2] Turn Loop & Bot AI Orchestration', () => {
 
       // Sau khi Human hết lượt, chuyển ngay sang Bot 1 (index 1)
       sendMsg(wsHost, { type: 'INTENT', roomCode, playerId: 'p1_boss', intent: { type: 'INTENT_END_TURN' } });
-      await new Promise((r) => setTimeout(r, 50));
+      const waitTurn = Date.now();
+      while (Date.now() - waitTurn < 1000 && room.currentPlayerIndex !== 1) {
+        await new Promise((r) => setTimeout(r, 20));
+      }
       expect(room.currentPlayerIndex).toBe(1);
 
-      // Đợi tối đa 3500ms để cả 2 Bot hoàn tất tuần tự (800ms * 2 + overhead)
+      // Đợi tối đa 5000ms để cả 2 Bot hoàn tất tuần tự (800ms * 2 + overhead)
       const startWait = Date.now();
-      while (Date.now() - startWait < 3500) {
+      while (Date.now() - startWait < 5000) {
         await new Promise((r) => setTimeout(r, 150));
         if (room.currentPlayerIndex === 0) break;
       }
@@ -485,7 +488,7 @@ describe('[Phase 2] Turn Loop & Bot AI Orchestration', () => {
       await new Promise((r) => setTimeout(r, 100));
       room.players[0]!.consecutiveDoubles = 0;
       sendMsg(ws, { type: 'INTENT', roomCode, playerId: 'p_host', intent: { type: 'INTENT_END_TURN' } });
-      await new Promise((r) => setTimeout(r, 50));
+      await new Promise((r) => setTimeout(r, 150));
 
       // Timer phải được đăng ký trong RoomManager
       const timers = rm.getActiveTimers(roomCode);

@@ -134,6 +134,16 @@ export function handleAuctionClose(
         }
       }
     }
+  } else {
+    // [EC-10] Không ai đấu giá -> Ô đất chuyển sang chế độ phát mãi cưỡng chế Kho Bạc 70%
+    const deed = PROPERTY_DEEDS.get(session.cellIndex);
+    const floorPrice = deed ? Math.floor(deed.price * 0.70) : 0;
+    console.info(JSON.stringify({
+      event: 'AUCTION_FORECLOSED',
+      correlationId: roomCode ?? room.roomCode,
+      timestamp: Date.now(),
+      delta: { cellIndex: session.cellIndex, reason: 'ALL_PLAYERS_PASSED', foreclosureRate: 0.70, foreclosurePrice: floorPrice },
+    }));
   }
   const current = room.players[room.currentPlayerIndex];
   if (current?.bankrupt) {

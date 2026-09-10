@@ -8,7 +8,7 @@ export type EnvelopeValidationResult =
   | { success: false; ignore: true };
 
 const VALID_CLIENT_TYPES = new Set([
-  'CREATE_ROOM', 'JOIN_ROOM', 'START_GAME', 'PONG', 'RECONNECT', 'INTENT', 'INTENT_REQUEST_RESYNC', 'EMOTE',
+  'CREATE_ROOM', 'JOIN_ROOM', 'START_GAME', 'PONG', 'RECONNECT', 'INTENT', 'INTENT_REQUEST_RESYNC', 'EMOTE', 'LEAVE_ROOM',
 ]);
 
 const CELL_INTENTS = new Set([
@@ -83,9 +83,28 @@ export class EnvelopeValidator {
         : { success: false, reasonCode: 'INVALID_ENVELOPE' };
     }
     if (type === 'START_GAME') {
-      return typeof pId === 'string' && typeof rc === 'string' && pId.length > 0 && rc.length > 0
-        ? { success: true, message: { type, playerId: pId, roomCode: rc } }
-        : { success: false, reasonCode: 'INVALID_ENVELOPE' };
+      if (typeof pId !== 'string' || typeof rc !== 'string' || pId.length === 0 || rc.length === 0) {
+        return { success: false, reasonCode: 'INVALID_ENVELOPE' };
+      }
+      const rawBots = obj['bots'];
+      let bots: Array<{ id: string; name?: string; personality?: string }> | undefined;
+      if (Array.isArray(rawBots)) {
+        bots = [];
+        for (const b of rawBots) {
+          if (typeof b === 'object' && b !== null && typeof (b as Record<string, unknown>).id === 'string') {
+            const botObj = b as Record<string, unknown>;
+            const botId = (botObj.id as string).trim();
+            if (botId.length > 0) {
+              bots.push({
+                id: botId,
+                ...(typeof botObj.name === 'string' && botObj.name.trim().length > 0 ? { name: botObj.name.trim() } : {}),
+                ...(typeof botObj.personality === 'string' && botObj.personality.trim().length > 0 ? { personality: botObj.personality.trim() } : {}),
+              });
+            }
+          }
+        }
+      }
+      return { success: true, message: { type, playerId: pId, roomCode: rc, ...(bots ? { bots } : {}) } };
     }
     if (type === 'RECONNECT') {
       const token = obj['reconnectToken'];
@@ -105,6 +124,11 @@ export class EnvelopeValidator {
       const emoteId = obj['emoteId'];
       return typeof pId === 'string' && typeof rc === 'string' && pId.length > 0 && rc.length > 0 && isValidEmoteId(emoteId)
         ? { success: true, message: { type, roomCode: rc, playerId: pId, emoteId } }
+        : { success: false, reasonCode: 'INVALID_ENVELOPE' };
+    }
+    if (type === 'LEAVE_ROOM') {
+      return typeof pId === 'string' && typeof rc === 'string' && pId.length > 0 && rc.length > 0
+        ? { success: true, message: { type, playerId: pId, roomCode: rc } }
         : { success: false, reasonCode: 'INVALID_ENVELOPE' };
     }
     return this.validateIntentEnvelope(obj);

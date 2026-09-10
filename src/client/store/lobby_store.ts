@@ -188,3 +188,13 @@ export const useLobbyStore = create<LobbyState>((set, get) => ({
   resetLobby: () =>
     set({ roomCode: null, myPlayerId: '', isHost: false, isReady: false, gameStarted: false, slots: createDefaultSlots(), errorReason: null }),
 }));
+
+declare global {
+  interface Window {
+    __lobbyStore?: typeof useLobbyStore;
+  }
+}
+
+if (typeof window !== 'undefined') {
+  window.__lobbyStore = useLobbyStore;
+}

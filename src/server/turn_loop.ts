@@ -182,7 +182,11 @@ export function executeTurnEnd(
   turnStartedInAudit.delete(roomCode);
   if (wasInAudit) {
     handleAuditTurnTransition(room, current);
-    if (current.balance < 0) checkInsolvency(room);
+    if (current.balance < 0) {
+      checkInsolvency(room);
+      rolledThisTurnMap.set(roomCode, true);
+      return room;
+    }
   }
   if (current.extraTurns > 0) {
     current.extraTurns -= 1;

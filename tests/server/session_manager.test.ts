@@ -43,4 +43,14 @@ describe('SessionManager — Heartbeat & Grace Period', () => {
     expect(session.state).toBe(SessionState.Disconnected);
     expect(manager.getSession('player-1')).toBeUndefined();
   });
+
+  it('[TC-00.5/MSS] [UC-GAME-004/MSS] bat ky pong nao tu client deu lam moi lastPongAt va duy tri Connected', () => {
+    manager.addSession('player-1');
+    vi.advanceTimersByTime(4_000);
+    manager.handlePong('player-1');
+    // Tien them 4s nua (tong 8s, nhung chi moi 4s ke tu pong gan nhat)
+    vi.advanceTimersByTime(4_000);
+    manager.checkHeartbeats();
+    expect(manager.getSession('player-1')?.state).toBe(SessionState.Connected);
+  });
 });

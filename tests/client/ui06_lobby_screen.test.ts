@@ -134,4 +134,26 @@ describe('[UI-06.3/MSS] LobbyView Full Screen Markup', () => {
     expect(html).toContain('+2.000 Tr. VNĐ');
     expect(html).toContain('Điều kiện thắng');
   });
+
+  it('Render màn hình với 3 Bot AI hiển thị đầy đủ thẻ (4/4) và nút Bắt Đầu sẵn sàng', () => {
+    useLobbyStore.getState().initLobby('VT8888', 'p1', true, 'Đại Gia Chủ Sảnh P1');
+    useLobbyStore.getState().toggleBotSlot(1, BotPersonality.Balanced);
+    useLobbyStore.getState().toggleBotSlot(2, BotPersonality.Aggressive);
+    useLobbyStore.getState().toggleBotSlot(3, BotPersonality.Passive);
+
+    const state = useLobbyStore.getState();
+    const element = React.createElement(LobbyView, {
+      roomCode: state.roomCode ?? undefined,
+      isHost: state.isHost,
+      slots: state.slots,
+    });
+    const html = renderToStaticMarkup(element);
+
+    expect(html).toContain('Danh Sách Người Chơi (4/4)');
+    expect(html).toContain('data-testid="lobby-slot-1-occupied"');
+    expect(html).toContain('data-testid="lobby-slot-2-occupied"');
+    expect(html).toContain('data-testid="lobby-slot-3-occupied"');
+    expect(html).toContain('data-testid="start-game-btn"');
+    expect(html).toContain('BẮT ĐẦU TRẬN ĐẤU');
+  });
 });

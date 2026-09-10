@@ -84,6 +84,7 @@ export function buildSparseDelta(prev: DeltaPayload, next: DeltaPayload): DeltaP
     ...(next.currentTurnPlayerId !== undefined ? { currentTurnPlayerId: next.currentTurnPlayerId } : {}),
     ...(next.dice !== undefined ? { dice: next.dice } : {}),
     ...(next.auction !== undefined ? { auction: next.auction } : {}),
+    ...(next.roomStarted !== undefined ? { roomStarted: next.roomStarted } : {}),
   };
 }
 

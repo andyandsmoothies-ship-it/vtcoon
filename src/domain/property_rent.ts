@@ -8,6 +8,7 @@ import {
   PROPERTY_DEEDS, RAILROAD_CELLS, RAILROAD_FEES, UTILITY_CELLS,
   type PropertyRegistry, type PropertyStateMap,
 } from './property_data';
+import { hasMonopoly } from './property_upgrade';
 
 export const SERVICE_C2_SURCHARGE = 200;
 
@@ -92,7 +93,8 @@ export function resolveRent(
   if (lvl === 3 && deed.rent3 !== undefined) return deed.rent3;
   if (lvl === 2 && deed.rent2 !== undefined) return deed.rent2;
   if (lvl === 1 && deed.rent1 !== undefined) return deed.rent1;
-  return deed.rent0;
+  const base0 = deed.rent0;
+  return hasMonopoly(ownerId, cellIndex, registry) ? base0 * 2 : base0;
 }
 
 export function calcRailroadFee(ownerId: string, registry: PropertyRegistry, stateMap?: PropertyStateMap): number {

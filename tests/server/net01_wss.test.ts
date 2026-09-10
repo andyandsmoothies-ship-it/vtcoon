@@ -195,4 +195,30 @@ describe('[NET-01] WSS Server & Tạo Phòng 6 Ký Tự', () => {
     for (const s of sockets5) s.close();
   });
 
+  it('[TC-NET01.6/MSS] Host tạo lại phòng cũ với mã custom → Server dọn phòng cũ và cấp phòng mới đúng mã', async () => {
+    const ws1 = await openSocket();
+    const p1 = collectN(ws1, 2);
+    ws1.send(JSON.stringify({ type: 'CREATE_ROOM', playerId: 'host-tc6', roomCode: 'VTTEST' }));
+    const [created1] = await p1;
+    expect(created1?.type).toBe('ROOM_CREATED');
+    if (created1?.type !== 'ROOM_CREATED') throw new Error('Expected ROOM_CREATED');
+    expect(created1.roomCode).toBe('VTTEST');
+
+    // Bắt đầu game cho phòng VTTEST
+    const startReply = collectN(ws1, 2);
+    ws1.send(JSON.stringify({ type: 'START_GAME', playerId: 'host-tc6', roomCode: 'VTTEST', bots: [{ id: 'bot_1' }] }));
+    await startReply;
+
+    // Host kết nối socket mới và gửi CREATE_ROOM với cùng mã VTTEST
+    const ws2 = await openSocket();
+    const p2 = collectN(ws2, 2);
+    ws2.send(JSON.stringify({ type: 'CREATE_ROOM', playerId: 'host-tc6', roomCode: 'VTTEST' }));
+    const [created2] = await p2;
+    expect(created2?.type).toBe('ROOM_CREATED');
+    if (created2?.type !== 'ROOM_CREATED') throw new Error('Expected ROOM_CREATED');
+    expect(created2.roomCode).toBe('VTTEST');
+
+    ws1.close();
+    ws2.close();
+  });
 });

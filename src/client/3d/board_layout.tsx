@@ -23,7 +23,7 @@ export function GameBoard(): React.ReactElement {
   const levelMap = useGameStore((s) => s.levelMap);
 
   return (
-    <group>
+    <group position={[0, 0, 0]}>
       {/* 1. Nền hoa viên dập nổi: Sân trung tâm lát gạch hoa cương viền đồng tương phản */}
       <mesh receiveShadow position={[0, -0.042, 0]}>
         <boxGeometry args={[15.85, 0.076, 15.85]} />

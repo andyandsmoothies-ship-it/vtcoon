@@ -3,6 +3,7 @@ import {
   createRoom as domainCreateRoom, createPlayer, TurnPhase, ActionRejectReason,
 } from '../domain/room';
 import { decideBotIntent, BotPersonality, type BotConfig } from '../domain/bot/bot_engine';
+import { initRoomBots, addBotToRoom, removeBotFromRoom, getBotConfig, type RoomBotSpec } from './room_bot_manager.js';
 import type { Room, Player } from '../domain/room';
 import { mulberry32 } from '../domain/dice';
 import {
@@ -51,6 +52,7 @@ export class RoomManager {
   private readonly activeTimersMap = new Map<string, Set<NodeJS.Timeout>>();
   private readonly lastActivity = new Map<string, number>();
   private readonly closeHooks: Array<(roomCode: string, room: Room) => void> = [];
+  private readonly botPersonalities = new Map<string, BotPersonality>();
 
   get roomMap(): Map<string, Room> { return this.rooms; }
   get activeTimers(): Map<string, Set<NodeJS.Timeout>> { return this.activeTimersMap; }
@@ -69,7 +71,7 @@ export class RoomManager {
   createRoom(hostId: string, customRoomCode?: string): Room {
     const upperCode = customRoomCode?.toUpperCase();
     const existing = upperCode ? this.rooms.get(upperCode) : undefined;
-    const canUseCustom = upperCode && (!existing || (!existing.started && existing.hostId === hostId));
+    const canUseCustom = upperCode && (!existing || existing.hostId === hostId);
     const code = canUseCustom ? upperCode : undefined;
     const room = domainCreateRoom(hostId, code);
     room.marketDeck = createMarketDeck(this.deckRng);
@@ -77,6 +79,8 @@ export class RoomManager {
     this.rooms.set(room.roomCode, room);
     this.registries.set(room.roomCode, new Map());
     this.propertyStates.set(room.roomCode, new Map());
+    this.rolledThisTurn.delete(room.roomCode);
+    this.auctions.delete(room.roomCode);
     this.touchActivity(room.roomCode);
     return room;
   }
@@ -89,16 +93,33 @@ export class RoomManager {
     return room;
   }
 
-  startGame(roomCode: string): Room | undefined {
-    const room = this.rooms.get(roomCode);
-    if (!room || room.players.length < 2) return undefined;
+  startGame(roomCode: string, bots?: ReadonlyArray<RoomBotSpec>): Room | undefined {
+    const room = this.rooms.get(roomCode) ?? this.rooms.get(roomCode.toUpperCase());
+    if (!room || room.started) return undefined;
+    initRoomBots(room, bots, this.botPersonalities, room.roomCode);
+    if (room.players.length < 2) return undefined;
     room.started = true;
     room.currentPlayerIndex = 0;
     const first = room.players[0];
     room.phase = first?.skipNextTurn ? TurnPhase.PropertyManagement : TurnPhase.WaitingRoll;
     if (first?.skipNextTurn) first.skipNextTurn = false;
-    this.touchActivity(roomCode);
+    this.touchActivity(room.roomCode);
     return room;
+  }
+
+  addBot(roomCode: string, botId?: string, personality?: BotPersonality): Player | undefined {
+    this.touchActivity(roomCode);
+    return addBotToRoom(this.rooms.get(roomCode), roomCode, botId, personality, this.botPersonalities);
+  }
+  removeBot(roomCode: string, botId: string): boolean {
+    this.touchActivity(roomCode);
+    return removeBotFromRoom(this.rooms.get(roomCode), roomCode, botId, this.botPersonalities);
+  }
+  setBotPersonality(roomCode: string, botId: string, personality: BotPersonality): void {
+    this.botPersonalities.set(`${roomCode}:${botId}`, personality);
+  }
+  getBotPersonality(roomCode: string, botId: string): BotPersonality {
+    return this.botPersonalities.get(`${roomCode}:${botId}`) ?? BotPersonality.Balanced;
   }
 
   private getActivePlayer(room: Room | undefined, playerId: string): Player | undefined {
@@ -148,6 +169,7 @@ export class RoomManager {
   handleAuctionClose(roomCode: string): { winnerId?: string; winningBid: number } {
     return handleAuctionClose(this.rooms.get(roomCode), this.auctions.get(roomCode), this.registries.get(roomCode), this.auctions, roomCode);
   }
+  getAuctionSession(roomCode: string) { return this.auctions.get(roomCode); }
 
   handleUpgradeETC(roomCode: string, playerId: string): { success: boolean; reason?: string } {
     const room = this.rooms.get(roomCode);
@@ -265,10 +287,7 @@ export class RoomManager {
     const current = room.players[room.currentPlayerIndex];
     if (!current?.isBot) return;
 
-    const config: BotConfig = {
-      personality: BotPersonality.Balanced,
-      balanceThresholdMultiplier: 1.20,
-    };
+    const config = getBotConfig(this.getBotPersonality(roomCode, current.id));
 
     let safetyCounter = 0;
     const MAX_INTENTS = 50;
@@ -313,27 +332,18 @@ export class RoomManager {
   }
 
   getRankings(roomCode: string): Array<{ id: string; netWorth: number }> {
-    const room = this.rooms.get(roomCode);
-    const reg  = this.registries.get(roomCode);
-    const sm   = this.propertyStates.get(roomCode);
-    if (!room || !reg || !sm) return [];
-    return calculateRankings(room, reg, sm);
+    const room = this.rooms.get(roomCode), reg = this.registries.get(roomCode), sm = this.propertyStates.get(roomCode);
+    return (!room || !reg || !sm) ? [] : calculateRankings(room, reg, sm);
   }
 
   createDelta(roomCode: string, tick: number): DeltaPayload | undefined {
-    const room = this.rooms.get(roomCode);
-    const reg  = this.registries.get(roomCode);
-    const sm   = this.propertyStates.get(roomCode);
-    if (!room || !reg || !sm) return undefined;
-    return buildDeltaFromRoom(room, reg, sm, tick, this.auctions);
+    const room = this.rooms.get(roomCode), reg = this.registries.get(roomCode), sm = this.propertyStates.get(roomCode);
+    return (!room || !reg || !sm) ? undefined : buildDeltaFromRoom(room, reg, sm, tick, this.auctions);
   }
 
   registerTimer(roomCode: string, timer: NodeJS.Timeout): void {
     let timers = this.activeTimersMap.get(roomCode);
-    if (!timers) {
-      timers = new Set();
-      this.activeTimersMap.set(roomCode, timers);
-    }
+    if (!timers) this.activeTimersMap.set(roomCode, (timers = new Set()));
     timers.add(timer);
   }
 
@@ -350,26 +360,12 @@ export class RoomManager {
   }
 
   touchActivity(roomCode: string, timestamp: number = Date.now()): void {
-    if (this.rooms.has(roomCode)) {
-      this.lastActivity.set(roomCode, timestamp);
-    }
+    if (this.rooms.has(roomCode)) this.lastActivity.set(roomCode, timestamp);
   }
-
-  getLastActivity(roomCode: string): number | undefined {
-    return this.lastActivity.get(roomCode);
-  }
-
-  getAllRoomCodes(): string[] {
-    return Array.from(this.rooms.keys());
-  }
-
-  getRoomCount(): number {
-    return this.rooms.size;
-  }
-
-  hasRoom(roomCode: string): boolean {
-    return this.rooms.has(roomCode);
-  }
+  getLastActivity(roomCode: string): number | undefined { return this.lastActivity.get(roomCode); }
+  getAllRoomCodes(): string[] { return Array.from(this.rooms.keys()); }
+  getRoomCount(): number { return this.rooms.size; }
+  hasRoom(roomCode: string): boolean { return this.rooms.has(roomCode); }
 
   onCloseRoom(hook: (roomCode: string, room: Room) => void): () => void {
     this.closeHooks.push(hook);
@@ -385,6 +381,9 @@ export class RoomManager {
     this.rooms.delete(roomCode);
     this.clearRoomTimers(roomCode);
     for (const hook of this.closeHooks) hook(roomCode, room);
+    for (const k of Array.from(this.botPersonalities.keys())) {
+      if (k.startsWith(`${roomCode}:`)) this.botPersonalities.delete(k);
+    }
     this.registries.delete(roomCode);
     this.propertyStates.delete(roomCode);
     this.auctions.delete(roomCode);

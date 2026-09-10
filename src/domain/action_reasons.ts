@@ -27,6 +27,7 @@ export const ActionRejectReason = {
   NOT_UTILITY:               'NOT_UTILITY',
   INVALID_PLAYER:            'INVALID_PLAYER',
   DECLINED_PLAYER_CANNOT_BID: 'DECLINED_PLAYER_CANNOT_BID',
+  EVEN_BUILDING_VIOLATION:   'EVEN_BUILDING_VIOLATION',
 } as const;
 
 export type ActionRejectReason = (typeof ActionRejectReason)[keyof typeof ActionRejectReason];

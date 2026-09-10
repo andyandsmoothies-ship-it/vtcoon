@@ -4,7 +4,8 @@ import React, { useState } from 'react';
 import { useLobbyStore } from '../../store/lobby_store';
 import { PlayerSlotCard } from './player_slot_card';
 import { QrCodeCard } from './qr_code_card';
-import { type LobbySlot } from '../../store/lobby_types';
+import { BotPersonality, type LobbySlot } from '../../store/lobby_types';
+import { AudioEngine } from '../../audio/audio_engine';
 import type { WsClientMessage } from '../../../server/network/network_types';
 
 export interface LobbyViewProps {
@@ -58,15 +59,39 @@ export function LobbyView({
     }
   };
 
+  const handleToggleBot = (slotIndex: number, personality?: BotPersonality) => {
+    AudioEngine.resumeAudioContext();
+    toggleBotSlot(slotIndex, personality);
+  };
+
+  const handleCycleBotPersonality = (slotIndex: number) => {
+    AudioEngine.resumeAudioContext();
+    cycleBotPersonality(slotIndex);
+  };
+
   const handleStartGame = () => {
-    const res = startGame();
-    if (res.success) {
-      if (sendWsMessage) {
-        sendWsMessage({ type: 'START_GAME', roomCode, playerId });
-      }
-      if (onStartGame) {
-        onStartGame();
-      }
+    AudioEngine.resumeAudioContext();
+    const check = canStartGame();
+    if (!check.canStart) return;
+
+    if (sendWsMessage) {
+      const botSlots = slots.filter((s) => s.isOccupied && s.isBot);
+      const bots = botSlots.map((s) => ({
+        id: s.playerId ?? `bot_${s.slotIndex + 1}`,
+        name: s.playerName,
+        personality: s.botPersonality ?? BotPersonality.Balanced,
+      }));
+      sendWsMessage({
+        type: 'START_GAME',
+        roomCode,
+        playerId,
+        ...(bots.length > 0 ? { bots } : {}),
+      });
+    } else {
+      startGame();
+    }
+    if (onStartGame) {
+      onStartGame();
     }
   };
 
@@ -133,8 +158,8 @@ export function LobbyView({
                 key={slot.slotIndex}
                 slot={slot}
                 isHostViewer={isHost}
-                onToggleBot={toggleBotSlot}
-                onCycleBotPersonality={cycleBotPersonality}
+                onToggleBot={handleToggleBot}
+                onCycleBotPersonality={handleCycleBotPersonality}
               />
             ))}
           </div>
