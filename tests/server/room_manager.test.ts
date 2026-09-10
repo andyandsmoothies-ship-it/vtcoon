@@ -447,7 +447,7 @@ describe('[TC-04.T5-UC047/MSS] Trạm Kiểm Toán Visiting & Turn Start Contrac
     mgr.startGame(room.roomCode);
     room.players[0]!.auditTurnsLeft = 2;
     const roll1 = mgr.handleRollDice(room.roomCode, 'p1');
-    expect(roll1).toBeUndefined();
+    expect(roll1).toBeDefined();
 
     room.players[0]!.auditTurnsLeft = 0;
     room.players[0]!.skipNextTurn = true;

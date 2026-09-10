@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, Suspense, lazy } from 'react';
+import React, { useEffect, useCallback, useState, useRef, Suspense, lazy } from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import { HudContainer } from './ui/hud_container';
@@ -10,10 +10,37 @@ import { AudioEngine } from './audio/audio_engine';
 import { SoundEffect } from './audio/audio_types';
 import { BOARD_CONFIG, CellType } from '../domain/board_config';
 import { useGameWs } from './network/use_game_ws';
+import type { ReasonCode } from '../server/network/network_types';
+import type { DeltaPayload } from '../server/session_manager';
 
 export const GameCanvas = lazy(() =>
   import('./game_canvas').then((m) => ({ default: m.GameCanvas }))
 );
+
+function getInitialLobbyConfig(): { roomCode: string; playerId: string; isHost: boolean; playerName: string } {
+  const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  const roomParam = params?.get('room');
+  if (roomParam && /^[A-Z0-9]{6}$/i.test(roomParam)) {
+    const isGuest = params?.get('host') !== 'true';
+    return {
+      roomCode: roomParam.toUpperCase(),
+      playerId: isGuest ? 'p2' : 'p1',
+      isHost: !isGuest,
+      playerName: isGuest ? 'Khách Mời (P2)' : 'Đại Gia Chủ Sảnh (P1)',
+    };
+  }
+  return {
+    roomCode: 'VT8888',
+    playerId: 'p1',
+    isHost: true,
+    playerName: 'Đại Gia Chủ Sảnh (P1)',
+  };
+}
+
+if (typeof window !== 'undefined' && !useLobbyStore.getState().roomCode) {
+  const initCfg = getInitialLobbyConfig();
+  useLobbyStore.getState().initLobby(initCfg.roomCode, initCfg.playerId, initCfg.isHost, initCfg.playerName);
+}
 
 export function App(): React.ReactElement {
   const gameStarted = useLobbyStore((s) => s.gameStarted);
@@ -21,99 +48,32 @@ export function App(): React.ReactElement {
   const initLobby = useLobbyStore((s) => s.initLobby);
   const lobbySlots = useLobbyStore((s) => s.slots);
   const myPlayerId = useLobbyStore((s) => s.myPlayerId);
+  const isHost = useLobbyStore((s) => s.isHost);
   const localPlayerId = myPlayerId || 'p1';
+
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const prevTurnPlayerRef = useRef<string | null>(null);
+  const prevPlayerIndexRef = useRef<number | null>(null);
+  const prevPositionRef = useRef<number | null>(null);
 
   const setPlayersInfo = useGameStore((state) => state.setPlayersInfo);
   const setCurrentTurnPlayerId = useGameStore((state) => state.setCurrentTurnPlayerId);
   const setTreasuryPool = useGameStore((state) => state.setTreasuryPool);
   const setPlayerPositions = useGameStore((state) => state.setPlayerPositions);
-  const triggerDiceRoll = useGameStore((state) => state.triggerDiceRoll);
-  const startPawnMove = useGameStore((state) => state.startPawnMove);
   const openModal = useGameStore((state) => state.openModal);
   const triggerEmote = useGameStore((state) => state.triggerEmote);
   const currentTurnPlayerId = useGameStore((state) => state.currentTurnPlayerId);
   const playerPositions = useGameStore((state) => state.playerPositions);
 
-  const handleGameOver = useCallback(
-    (leaderboard: ReadonlyArray<{ readonly id: string; readonly netWorth: number }>) => {
-      openModal('game_over', { leaderboard });
-    },
-    [openModal]
-  );
-
-  const handleEmote = useCallback(
-    (pid: string, emoteId: string) => {
-      triggerEmote(pid, emoteId);
-    },
-    [triggerEmote]
-  );
-
-  const { isConnected, sendIntent, sendEmote } = useGameWs({
-    roomCode: roomCode || 'VT8888',
-    playerId: localPlayerId,
-    autoConnect: true,
-    onGameOver: handleGameOver,
-    onEmote: handleEmote,
-  });
-
-  useEffect(() => {
-    AudioEngine.init();
-
-    if (!roomCode) {
-      const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
-      const roomParam = params?.get('room');
-      if (roomParam && /^[A-Z0-9]{6}$/i.test(roomParam)) {
-        initLobby(roomParam.toUpperCase(), 'p2', false, 'Khách Mời (P2)');
-      } else {
-        initLobby('VT8888', 'p1', true, 'Đại Gia Chủ Sảnh (P1)');
-      }
+  const handleError = useCallback((reasonCode: ReasonCode) => {
+    setErrorMessage(`Lỗi máy chủ: ${reasonCode}`);
+    if (reasonCode === 'NOT_ENOUGH_PLAYERS' || reasonCode === 'NOT_HOST' || reasonCode === 'ROOM_NOT_FOUND') {
+      useLobbyStore.getState().setGameStarted(false);
     }
-  }, [roomCode, initLobby]);
+    const timer = setTimeout(() => setErrorMessage(null), 4000);
+    return () => clearTimeout(timer);
+  }, []);
 
-  const gameInitializedRef = React.useRef(false);
-
-  // Đồng bộ người chơi từ Sảnh Chờ sang Bàn Cờ một lần duy nhất khi trận đấu bắt đầu
-  useEffect(() => {
-    if (!gameStarted) {
-      gameInitializedRef.current = false;
-      return;
-    }
-
-    if (gameInitializedRef.current) {
-      return;
-    }
-    gameInitializedRef.current = true;
-
-    AudioEngine.handlePawnLanded(0);
-    const occupied = lobbySlots.filter((s) => s.isOccupied);
-    const playersInfo: Record<string, PlayerHudInfo> = {};
-    const positions: Record<string, number> = {};
-
-    occupied.forEach((s, idx) => {
-      const pid = s.playerId ?? `p${idx + 1}`;
-      playersInfo[pid] = {
-        id: pid,
-        name: s.playerName,
-        balance: 15000,
-        tokenColor: s.tokenColor ?? (PLAYER_TOKEN_PALETTE[idx] ?? '#38BDF8'),
-        ownedProperties: [],
-        isBot: s.isBot,
-      };
-      positions[pid] = 0;
-    });
-
-    setPlayersInfo(playersInfo);
-    setPlayerPositions(positions);
-    setCurrentTurnPlayerId(occupied[0]?.playerId ?? 'p1');
-    setTreasuryPool(2000);
-
-    const timer = setInterval(() => {
-      useGameStore.getState().decrementTurnTimer();
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [gameStarted, lobbySlots, setPlayersInfo, setPlayerPositions, setCurrentTurnPlayerId, setTreasuryPool]);
-
-  // Router xử lý sự kiện khi quân cờ đáp xuống ô [UC-GAME-017]
   const handleCellLanding = useCallback(
     (activeId: string, targetCell: number) => {
       const tile = BOARD_CONFIG[targetCell];
@@ -187,7 +147,6 @@ export function App(): React.ReactElement {
         }
       }
 
-      // Kiểm tra tình trạng nợ / thấu chi âm tiền
       if (activePlayer && activePlayer.balance < 0 && isLocal) {
         openModal('insolvency', { playerId: activeId, deficit: -activePlayer.balance });
       }
@@ -195,55 +154,125 @@ export function App(): React.ReactElement {
     [currentTurnPlayerId, openModal]
   );
 
-  const handleRollDice = () => {
-    const d1 = Math.floor(Math.random() * 6) + 1;
-    const d2 = Math.floor(Math.random() * 6) + 1;
-    triggerDiceRoll([d1, d2]);
-    AudioEngine.playSfx(SoundEffect.DICE_ROLL);
-
-    if (isConnected) {
-      sendIntent({ type: 'INTENT_ROLL' });
+  const handleDelta = useCallback((delta: DeltaPayload) => {
+    if (delta.currentPlayerIndex !== undefined && delta.currentPlayerIndex !== prevPlayerIndexRef.current) {
+      prevPlayerIndexRef.current = delta.currentPlayerIndex;
+      useGameStore.getState().setTurnTimeRemaining(60);
+    } else if (delta.currentTurnPlayerId && delta.currentTurnPlayerId !== prevTurnPlayerRef.current) {
+      prevTurnPlayerRef.current = delta.currentTurnPlayerId;
+      useGameStore.getState().setTurnTimeRemaining(60);
     }
 
-    const activeId = currentTurnPlayerId ?? 'p1';
-    const currentPos = playerPositions[activeId] ?? 0;
-    const targetCell = (currentPos + d1 + d2) % 40;
-    const passedGo = currentPos + d1 + d2 >= 40;
-
-    setTimeout(() => {
-      startPawnMove(activeId, targetCell);
-      AudioEngine.playSfx(SoundEffect.PAWN_STEP);
-      AudioEngine.handlePawnLanded(targetCell);
-
-      if (passedGo) {
-        AudioEngine.playSfx(SoundEffect.BUY_PROPERTY);
-        if (!isConnected) {
-          useGameStore.getState().addFloatingText({
-            text: '+2.000 Tr.',
-            type: FloatingTextType.Reward,
-            playerId: activeId,
-          });
-          const p = useGameStore.getState().playersInfo[activeId];
-          if (p) {
-            useGameStore.getState().updatePlayerInfo(activeId, { balance: p.balance + 2000 });
-          }
-        }
+    if (delta.players && delta.tick > 0) {
+      const localP = delta.players.find((p) => p.id === localPlayerId);
+      if (localP && localP.position !== prevPositionRef.current) {
+        prevPositionRef.current = localP.position;
+        handleCellLanding(localPlayerId, localP.position);
       }
+    }
+  }, [localPlayerId, handleCellLanding]);
 
-      handleCellLanding(activeId, targetCell);
-    }, 650);
-  };
+  const handleRoomStarted = useCallback(() => {
+    useLobbyStore.getState().setGameStarted(true);
+  }, []);
+
+  const handleGameOver = useCallback(
+    (leaderboard: ReadonlyArray<{ readonly id: string; readonly netWorth: number }>) => {
+      openModal('game_over', { leaderboard });
+    },
+    [openModal]
+  );
+
+  const handleEmote = useCallback(
+    (pid: string, emoteId: string) => {
+      triggerEmote(pid, emoteId);
+    },
+    [triggerEmote]
+  );
+
+  const { isConnected, sendIntent, sendEmote, sendWsMessage } = useGameWs({
+    roomCode: roomCode || 'VT8888',
+    playerId: localPlayerId,
+    isHost,
+    autoConnect: true,
+    onDelta: handleDelta,
+    onError: handleError,
+    onRoomStarted: handleRoomStarted,
+    onGameOver: handleGameOver,
+    onEmote: handleEmote,
+  });
+
+  useEffect(() => {
+    AudioEngine.init();
+
+    if (!roomCode) {
+      const initCfg = getInitialLobbyConfig();
+      initLobby(initCfg.roomCode, initCfg.playerId, initCfg.isHost, initCfg.playerName);
+    }
+  }, [roomCode, initLobby]);
+
+  const gameInitializedRef = React.useRef(false);
+
+  // Đồng bộ người chơi từ Sảnh Chờ sang Bàn Cờ một lần duy nhất khi trận đấu bắt đầu
+  useEffect(() => {
+    if (!gameStarted) {
+      gameInitializedRef.current = false;
+      return;
+    }
+
+    if (gameInitializedRef.current) {
+      return;
+    }
+    gameInitializedRef.current = true;
+
+    AudioEngine.handlePawnLanded(0);
+    const occupied = lobbySlots.filter((s) => s.isOccupied);
+    const playersInfo: Record<string, PlayerHudInfo> = {};
+    const positions: Record<string, number> = {};
+
+    occupied.forEach((s, idx) => {
+      const pid = s.playerId ?? `p${idx + 1}`;
+      playersInfo[pid] = {
+        id: pid,
+        name: s.playerName,
+        balance: 15000,
+        tokenColor: s.tokenColor ?? (PLAYER_TOKEN_PALETTE[idx] ?? '#38BDF8'),
+        ownedProperties: [],
+        isBot: s.isBot,
+      };
+      positions[pid] = 0;
+    });
+
+    setPlayersInfo(playersInfo);
+    setPlayerPositions(positions);
+    setCurrentTurnPlayerId(occupied[0]?.playerId ?? 'p1');
+    setTreasuryPool(2000);
+  }, [gameStarted, lobbySlots, setPlayersInfo, setPlayerPositions, setCurrentTurnPlayerId, setTreasuryPool]);
+
+  // [UC-GAME-001] Độc lập bộ đếm thời gian lượt chơi 60 giây khi trận đấu đang diễn ra
+  useEffect(() => {
+    if (!gameStarted) return;
+    const timer = setInterval(() => {
+      useGameStore.getState().decrementTurnTimer();
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [gameStarted]);
+
+  const handleRollDice = useCallback(() => {
+    sendIntent({ type: 'INTENT_ROLL' });
+  }, [sendIntent]);
 
   const handleEndTurn = () => {
     if (isConnected) {
       sendIntent({ type: 'INTENT_END_TURN' });
+    } else {
+      const activeId = currentTurnPlayerId ?? 'p1';
+      const activePlayers = Object.keys(useGameStore.getState().playersInfo);
+      const currentIdx = activePlayers.indexOf(activeId);
+      const nextId = activePlayers[(currentIdx + 1) % (activePlayers.length || 1)] ?? 'p1';
+      setCurrentTurnPlayerId(nextId);
+      useGameStore.getState().setTurnTimeRemaining(60);
     }
-    const activeId = currentTurnPlayerId ?? 'p1';
-    const activePlayers = Object.keys(useGameStore.getState().playersInfo);
-    const currentIdx = activePlayers.indexOf(activeId);
-    const nextId = activePlayers[(currentIdx + 1) % (activePlayers.length || 1)] ?? 'p1';
-    setCurrentTurnPlayerId(nextId);
-    useGameStore.getState().setTurnTimeRemaining(60);
   };
 
   const handleSendEmote = useCallback(
@@ -257,11 +286,19 @@ export function App(): React.ReactElement {
   );
 
   if (!gameStarted) {
-    return <LobbyView />;
+    return <LobbyView sendWsMessage={sendWsMessage} />;
   }
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-slate-950">
+      {errorMessage && (
+        <div
+          role="alert"
+          className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-rose-600/95 text-white text-sm font-bold px-4 py-2 rounded-lg shadow-lg border border-rose-400 backdrop-blur-sm"
+        >
+          {errorMessage}
+        </div>
+      )}
       <Suspense
         fallback={
           <div

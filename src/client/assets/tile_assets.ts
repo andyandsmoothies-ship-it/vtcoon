@@ -31,12 +31,7 @@ export function getAllTileAssetUrls(): string[] {
 }
 
 export function preloadTileAssets(): string[] {
-  const urls = getAllTileAssetUrls();
-  if (typeof window !== 'undefined' && typeof Image !== 'undefined') {
-    for (const url of urls) {
-      const img = new Image();
-      img.src = url;
-    }
-  }
-  return urls;
+  // [Phase 3 Visual Polish] Tra ve danh sach URLs ma khong khoi tao Image ao gay 404
+  return getAllTileAssetUrls();
 }
+

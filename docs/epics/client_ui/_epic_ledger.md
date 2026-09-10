@@ -151,7 +151,7 @@
 | Mã Nợ | Mô tả | Slice Phát Sinh | Slice Nhận | Trạng Thái |
 |---|---|---|---|:---:|
 | DEBT-UI01-01 | Preloading 28 bộ WebP bằng preloadTileAssets() | UI-01 | UI-02 Task 1 | ✅ ĐÃ ĐÓNG |
-| DEBT-UI01-02 | Hoạt ảnh nhấp nhô điều hòa sin(omega*t) trên Standee | UI-01 | UI-02 Task 2 | ⚪ Đang Chờ |
+| DEBT-UI01-02 | Hoạt ảnh nhấp nhô điều hòa sin(omega*t) trên Standee | UI-01 | UI-02 Task 2 | ✅ ĐÃ ĐÓNG |
 
 ---
 

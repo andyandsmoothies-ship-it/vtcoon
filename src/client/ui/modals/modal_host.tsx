@@ -1,5 +1,5 @@
 // [UI-S04/MSS][UI-S05/MSS] ModalHost — Switchboard for business modals with SFX integration
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useGameStore, ModalPayloadMap, type ActiveModalType } from '../../store/game_store';
 import { ModalBackdrop } from './modal_backdrop';
 import { TitleDeedModal } from './title_deed_modal';
@@ -12,6 +12,8 @@ import { AudioEngine } from '../../audio/audio_engine';
 import { SoundEffect } from '../../audio/audio_types';
 import { formatCurrency } from '../ui_helpers';
 import type { PlayerIntent } from '../../../server/intent_dispatcher';
+import { getDeedDisplayInfo } from './modal_helpers';
+import { resolveHoseInvestment } from '../../../domain/event_card_engine';
 
 export interface ModalHostProps {
   readonly activeModal?: ActiveModalType;
@@ -29,6 +31,13 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
   const updateModalPayload = useGameStore((state) => state.updateModalPayload);
   const playersInfo = useGameStore((state) => state.playersInfo);
   const currentTurnPlayerId = useGameStore((state) => state.currentTurnPlayerId);
+  const hoseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (hoseTimerRef.current) clearTimeout(hoseTimerRef.current);
+    };
+  }, []);
 
   // [UC-GAME-022] Đồng hồ đếm ngược 15s sàn đấu giá tự động
   useEffect(() => {
@@ -69,6 +78,9 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
         const owner = ownerId ? playersInfo[ownerId] : undefined;
         const isOwner = ownerId === myId;
         const isMortgaged = Boolean(owner?.mortgagedProperties?.includes(payload.cellIndex));
+        const deed = getDeedDisplayInfo(payload.cellIndex);
+        const currentLevel = (useGameStore.getState().levelMap[payload.cellIndex] ?? 0) as 0 | 1 | 2 | 3;
+        const upgradeCost = deed && currentLevel < 3 ? deed.upgradeCosts[currentLevel as 0 | 1 | 2] : 0;
         return (
           <TitleDeedModal
             cellIndex={payload.cellIndex}
@@ -77,9 +89,19 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
             isOwner={isOwner}
             isMortgaged={isMortgaged}
             ownerName={owner?.name}
+            currentLevel={currentLevel}
+            upgradeCost={upgradeCost}
             onBuy={() => {
               AudioEngine.playSfx(SoundEffect.BUY_PROPERTY);
               onIntent?.({ type: 'INTENT_BUY_PROPERTY' });
+              closeModal();
+            }}
+            onUpgrade={() => {
+              onIntent?.({ type: 'INTENT_UPGRADE', cellIndex: payload.cellIndex });
+              closeModal();
+            }}
+            onDowngrade={() => {
+              onIntent?.({ type: 'INTENT_DOWNGRADE', cellIndex: payload.cellIndex });
               closeModal();
             }}
             onMortgage={() => {
@@ -90,7 +112,10 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
               onIntent?.({ type: 'INTENT_REDEEM', cellIndex: payload.cellIndex });
               closeModal();
             }}
-            onPass={closeModal}
+            onPass={() => {
+              onIntent?.({ type: 'INTENT_DECLINE' });
+              closeModal();
+            }}
             onClose={closeModal}
           />
         );
@@ -102,14 +127,16 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
           currentBid={(modalPayload as ModalPayloadMap['auction']).currentBid}
           highestBidderId={(modalPayload as ModalPayloadMap['auction']).highestBidderId}
           timeRemaining={(modalPayload as ModalPayloadMap['auction']).timeRemaining}
-          hasPassed={(modalPayload as ModalPayloadMap['auction']).hasPassed}
+          hasPassed={(modalPayload as ModalPayloadMap['auction']).hasPassed || (modalPayload as ModalPayloadMap['auction']).declinedPlayerId === myId}
           bidderName={(modalPayload as ModalPayloadMap['auction']).highestBidderId ? playersInfo[(modalPayload as ModalPayloadMap['auction']).highestBidderId!]?.name : undefined}
           myBalance={myPlayer?.balance}
           myId={myId}
           onBid={(amount) => {
             AudioEngine.playSfx(SoundEffect.AUCTION_BID);
             onIntent?.({ type: 'INTENT_BID', amount });
-            updateModalPayload<'auction'>({ currentBid: amount, highestBidderId: myId, timeRemaining: 15 });
+            const curTime = (modalPayload as ModalPayloadMap['auction']).timeRemaining;
+            const nextTime = curTime <= 3 ? curTime + 3 : curTime;
+            updateModalPayload<'auction'>({ currentBid: amount, highestBidderId: myId, timeRemaining: nextTime });
           }}
           onPass={() => {
             onIntent?.({ type: 'INTENT_AUCTION_PASS' });
@@ -170,8 +197,15 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
           lastPayout={(modalPayload as ModalPayloadMap['hose']).lastPayout}
           onInvest={(stake) => {
             AudioEngine.playSfx(SoundEffect.DICE_ROLL);
-            onIntent?.({ type: 'INTENT_INVEST', stake: stake ?? 500 });
-            closeModal();
+            const chosenStake = stake ?? 500;
+            const roll = Math.floor(Math.random() * 6) + 1;
+            const payout = resolveHoseInvestment(chosenStake, roll);
+            updateModalPayload<'hose'>({ lastDiceRoll: roll, lastPayout: payout });
+            onIntent?.({ type: 'INTENT_INVEST', stake: chosenStake });
+            if (hoseTimerRef.current) clearTimeout(hoseTimerRef.current);
+            hoseTimerRef.current = setTimeout(() => {
+              closeModal();
+            }, 1500);
           }}
           onSkip={() => {
             onIntent?.({ type: 'INTENT_SKIP' });

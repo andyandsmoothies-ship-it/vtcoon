@@ -58,6 +58,7 @@ export interface Room {
   chanceDiscard:         ChanceCardId[];
   permanentRentBonus:    Record<number, number>;
   treasury:              number;
+  lastDice?:             readonly [number, number];
 }
 
 
@@ -84,9 +85,9 @@ export function createPlayer(id: string): Player {
   };
 }
 
-export function createRoom(hostId: string): Room {
+export function createRoom(hostId: string, customRoomCode?: string): Room {
   return {
-    roomCode:           generateRoomCode(),
+    roomCode:           customRoomCode && /^[A-Z0-9]{6}$/i.test(customRoomCode) ? customRoomCode.toUpperCase() : generateRoomCode(),
     hostId,
     players:            [createPlayer(hostId)],
     currentPlayerIndex: 0,

@@ -28,8 +28,9 @@ export type ReasonCode =
 
 // ─── Client → Server ────────────────────────────────────────────
 export type WsClientMessage =
-  | { readonly type: 'CREATE_ROOM'; readonly playerId: string }
+  | { readonly type: 'CREATE_ROOM'; readonly playerId: string; readonly roomCode?: string }
   | { readonly type: 'JOIN_ROOM';   readonly playerId: string; readonly roomCode: string }
+  | { readonly type: 'START_GAME';  readonly playerId: string; readonly roomCode: string }
   | { readonly type: 'PONG';        readonly playerId: string; readonly roomCode: string }
   | { readonly type: 'RECONNECT';   readonly reconnectToken: string; readonly roomCode?: string }
   | {
@@ -62,6 +63,10 @@ export type WsServerMessage =
       readonly roomCode: string;
       readonly playerId: string;
       readonly playerCount: number;
+    }
+  | {
+      readonly type: 'ROOM_STARTED';
+      readonly roomCode: string;
     }
   | {
       readonly type: 'ERROR';

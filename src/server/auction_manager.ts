@@ -11,6 +11,7 @@ export interface AuctionSession {
   highestBidder?: string;
   passedPlayers?: Set<string>;
   insolvencyPlayerId?: string;  // [DEBT-S06-04] set when auction is a forced liquidation
+  endTime?: number;
 }
 
 export function handleDecline(
@@ -27,6 +28,7 @@ export function handleDecline(
     declinedPlayerId: current.id,
     highestBid: Math.floor(deed.price * 0.5),
     passedPlayers: new Set<string>(),
+    endTime: Date.now() + 15_000,
   });
   room.phase = TurnPhase.AuctionPhase;
   return { success: true };
@@ -53,6 +55,14 @@ export function handleAuctionBid(
   if (amount < minBid) return { success: false, reason: 'BID_TOO_LOW' };
   session.highestBid = amount;
   session.highestBidder = playerId;
+
+  if (session.endTime !== undefined) {
+    const remainingSec = (session.endTime - Date.now()) / 1000;
+    if (remainingSec <= 0) return { success: false, reason: 'AUCTION_EXPIRED' };
+    if (remainingSec <= 3) {
+      session.endTime += 3_000;
+    }
+  }
 
   const eligiblePlayers = room.players.filter((p) => p.id !== session.declinedPlayerId);
   const otherPlayers = eligiblePlayers.filter((p) => p.id !== playerId);
@@ -113,15 +123,39 @@ export function handleAuctionClose(
       if (session.insolvencyPlayerId) {
         const insolventPlayer = room.players.find((p) => p.id === session.insolvencyPlayerId);
         if (insolventPlayer) {
-          insolventPlayer.balance += winningBid;
-          if (insolventPlayer.balance >= 0) {
-            room.phase = TurnPhase.PropertyManagement;
+          if (!insolventPlayer.bankrupt) {
+            insolventPlayer.balance += winningBid;
+            if (insolventPlayer.balance >= 0) {
+              room.phase = TurnPhase.PropertyManagement;
+            }
+          } else {
+            room.treasury = (room.treasury ?? 0) + winningBid;
           }
         }
       }
     }
   }
-  room.phase = TurnPhase.PropertyManagement;
+  const current = room.players[room.currentPlayerIndex];
+  if (current?.bankrupt) {
+    const total = room.players.length;
+    let next = (room.currentPlayerIndex + 1) % total;
+    let steps = 0;
+    while (steps < total) {
+      if (!room.players[next]?.bankrupt) break;
+      next = (next + 1) % total;
+      steps++;
+    }
+    room.currentPlayerIndex = next;
+    const nextPlayer = room.players[next];
+    if (nextPlayer?.skipNextTurn) {
+      nextPlayer.skipNextTurn = false;
+      room.phase = TurnPhase.PropertyManagement;
+    } else {
+      room.phase = TurnPhase.WaitingRoll;
+    }
+  } else {
+    room.phase = TurnPhase.PropertyManagement;
+  }
   if (auctions && roomCode) {
     auctions.delete(roomCode);
   }

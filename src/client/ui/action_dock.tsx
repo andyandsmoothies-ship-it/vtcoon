@@ -24,19 +24,24 @@ export function ActionDock({
   const activePawnAnimation = useGameStore((state) => state.activePawnAnimation);
   const currentTurnPlayerId = useGameStore((state) => state.currentTurnPlayerId);
   const playersInfo = useGameStore((state) => state.playersInfo);
-  const triggerDiceRoll = useGameStore((state) => state.triggerDiceRoll);
   const openModal = useGameStore((state) => state.openModal);
+  const dice = useGameStore((state) => state.dice);
+  const hasRolledThisTurn = useGameStore((state) => state.hasRolledThisTurn);
 
   const actingPlayerId = localPlayerId ?? currentTurnPlayerId;
   const isMyTurn = !localPlayerId || currentTurnPlayerId === localPlayerId;
   const isPawnMoving = Boolean(activePawnAnimation?.isAnimating);
   const isBankrupt = Boolean(actingPlayerId && playersInfo[actingPlayerId]?.bankrupt);
+  const inAudit = Boolean(actingPlayerId && playersInfo[actingPlayerId]?.inAudit);
+  const canRollAgain = dice[0] === dice[1] && dice[0] > 0 && !inAudit;
 
   const isRollDisabled = isRollActionDisabled({
     isRolling,
     isPawnMoving,
     isMyTurn,
     isBankrupt,
+    hasRolledThisTurn,
+    canRollAgain,
   });
 
   const isEndDisabled = isEndTurnDisabled({
@@ -44,17 +49,13 @@ export function ActionDock({
     isPawnMoving,
     isMyTurn,
     isBankrupt,
+    hasRolledThisTurn,
+    canRollAgain,
   });
 
   const handleRollClick = () => {
     if (isRollDisabled) return;
-    if (onRollDice) {
-      onRollDice();
-    } else {
-      const d1 = Math.floor(Math.random() * 6) + 1;
-      const d2 = Math.floor(Math.random() * 6) + 1;
-      triggerDiceRoll([d1, d2]);
-    }
+    onRollDice?.();
   };
 
   const handleOpenProperties = () => {

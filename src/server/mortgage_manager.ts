@@ -204,6 +204,11 @@ export function redeemProperty(
   const v = validateRedeem(room, playerId, cellIndex, registry);
   if (!v.valid) return { success: false, reason: v.reason };
 
+  const deed = PROPERTY_DEEDS.get(cellIndex);
+  const loan = v.player.mortgageLoans?.[cellIndex] ?? (deed ? Math.floor(deed.price * 0.5) : 0);
+  const fee = Math.floor(loan * 0.10);
+  room.treasury = (room.treasury ?? 0) + fee;
+
   v.player.balance -= v.repay;
   v.player.mortgagedProperties.splice(v.idx, 1);
   if (v.player.mortgageLoans) {
@@ -227,6 +232,7 @@ export function collectMortgageInterest(room: Room, playerId: string): void {
   if (interest === 0) return;
 
   player.balance -= interest;
+  room.treasury = (room.treasury ?? 0) + interest;
 
   console.info(JSON.stringify({
     event: 'MORTGAGE_INTEREST', correlationId: room.roomCode,

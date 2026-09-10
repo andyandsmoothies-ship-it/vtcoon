@@ -66,8 +66,12 @@ export class RoomManager {
     }
   }
 
-  createRoom(hostId: string): Room {
-    const room = domainCreateRoom(hostId);
+  createRoom(hostId: string, customRoomCode?: string): Room {
+    const upperCode = customRoomCode?.toUpperCase();
+    const existing = upperCode ? this.rooms.get(upperCode) : undefined;
+    const canUseCustom = upperCode && (!existing || (!existing.started && existing.hostId === hostId));
+    const code = canUseCustom ? upperCode : undefined;
+    const room = domainCreateRoom(hostId, code);
     room.marketDeck = createMarketDeck(this.deckRng);
     room.chanceDeck = createChanceDeck(this.deckRng);
     this.rooms.set(room.roomCode, room);
@@ -224,15 +228,15 @@ export class RoomManager {
     return executeP2PTrade(room, sellerId, buyerId, cellIndex, price, reg, sm);
   }
 
-  handleBankruptcy(roomCode: string, playerId: string): { gameOver: boolean; rankings?: Array<{ id: string; netWorth: number }> } {
+  handleBankruptcy(roomCode: string, playerId: string, creditorId?: string): { gameOver: boolean; rankings?: Array<{ id: string; netWorth: number }> } {
     this.touchActivity(roomCode);
     const room = this.rooms.get(roomCode);
     const reg  = this.registries.get(roomCode);
     const sm   = this.propertyStates.get(roomCode);
     if (!room || !reg || !sm) return { gameOver: false };
     const isCurrent = room.players[room.currentPlayerIndex]?.id === playerId;
-    const res = declareBankruptcy(room, playerId, reg, sm);
-    if (isCurrent) this.rolledThisTurn.set(roomCode, false);
+    const res = declareBankruptcy(room, playerId, reg, sm, creditorId, this.auctions, roomCode);
+    if (isCurrent && room.phase !== TurnPhase.AuctionPhase) this.rolledThisTurn.set(roomCode, false);
     return res;
   }
 
@@ -296,6 +300,9 @@ export class RoomManager {
   }
 
   getRoom(roomCode: string): Room | undefined { return this.rooms.get(roomCode); }
+  getRegistry(roomCode: string): PropertyRegistry | undefined { return this.registries.get(roomCode); }
+  getPropertyStates(roomCode: string): PropertyStateMap | undefined { return this.propertyStates.get(roomCode); }
+  get auctionsMap(): Map<string, AuctionSession> { return this.auctions; }
   getPropertyOwner(roomCode: string, cellIndex: number): string | undefined { return this.registries.get(roomCode)?.get(cellIndex); }
   getPropertyState(roomCode: string, cellIndex: number): PropertyState | undefined { return this.propertyStates.get(roomCode)?.get(cellIndex); }
   getPropertyRent(roomCode: string, cellIndex: number, diceTotal?: number): number {
@@ -318,7 +325,7 @@ export class RoomManager {
     const reg  = this.registries.get(roomCode);
     const sm   = this.propertyStates.get(roomCode);
     if (!room || !reg || !sm) return undefined;
-    return buildDeltaFromRoom(room, reg, sm, tick);
+    return buildDeltaFromRoom(room, reg, sm, tick, this.auctions);
   }
 
   registerTimer(roomCode: string, timer: NodeJS.Timeout): void {
@@ -333,9 +340,7 @@ export class RoomManager {
   clearRoomTimers(roomCode: string): void {
     const timers = this.activeTimersMap.get(roomCode);
     if (timers) {
-      for (const t of timers) {
-        clearTimeout(t);
-      }
+      for (const t of timers) clearTimeout(t);
       this.activeTimersMap.delete(roomCode);
     }
   }
@@ -379,9 +384,7 @@ export class RoomManager {
     if (!room) return false;
     this.rooms.delete(roomCode);
     this.clearRoomTimers(roomCode);
-    for (const hook of this.closeHooks) {
-      hook(roomCode, room);
-    }
+    for (const hook of this.closeHooks) hook(roomCode, room);
     this.registries.delete(roomCode);
     this.propertyStates.delete(roomCode);
     this.auctions.delete(roomCode);

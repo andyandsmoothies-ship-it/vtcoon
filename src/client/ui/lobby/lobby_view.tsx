@@ -5,9 +5,11 @@ import { useLobbyStore } from '../../store/lobby_store';
 import { PlayerSlotCard } from './player_slot_card';
 import { QrCodeCard } from './qr_code_card';
 import { type LobbySlot } from '../../store/lobby_types';
+import type { WsClientMessage } from '../../../server/network/network_types';
 
 export interface LobbyViewProps {
   readonly onStartGame?: () => void;
+  readonly sendWsMessage?: (msg: WsClientMessage) => void;
   readonly roomCode?: string;
   readonly isHost?: boolean;
   readonly slots?: readonly LobbySlot[];
@@ -15,6 +17,7 @@ export interface LobbyViewProps {
 
 export function LobbyView({
   onStartGame,
+  sendWsMessage,
   roomCode: propRoomCode,
   isHost: propIsHost,
   slots: propSlots,
@@ -23,11 +26,13 @@ export function LobbyView({
   const storeIsHost = useLobbyStore((s) => s.isHost);
   const storeIsReady = useLobbyStore((s) => s.isReady);
   const storeSlots = useLobbyStore((s) => s.slots);
+  const storeMyPlayerId = useLobbyStore((s) => s.myPlayerId);
 
   const roomCode = propRoomCode ?? storeRoomCode ?? 'VTCOON';
   const isHost = propIsHost ?? storeIsHost;
   const isReady = storeIsReady;
   const slots = propSlots ?? storeSlots;
+  const playerId = storeMyPlayerId || 'p1';
 
   const toggleMyReady = useLobbyStore((s) => s.toggleMyReady);
   const toggleBotSlot = useLobbyStore((s) => s.toggleBotSlot);
@@ -55,8 +60,13 @@ export function LobbyView({
 
   const handleStartGame = () => {
     const res = startGame();
-    if (res.success && onStartGame) {
-      onStartGame();
+    if (res.success) {
+      if (sendWsMessage) {
+        sendWsMessage({ type: 'START_GAME', roomCode, playerId });
+      }
+      if (onStartGame) {
+        onStartGame();
+      }
     }
   };
 

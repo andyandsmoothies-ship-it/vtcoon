@@ -24,6 +24,7 @@ export interface UseGameWsOptions {
   readonly url?: string;
   readonly roomCode: string;
   readonly playerId: string;
+  readonly isHost?: boolean;
   readonly autoConnect?: boolean;
   readonly onDelta?: (delta: DeltaPayload) => void;
   readonly onError?: (reasonCode: ReasonCode) => void;
@@ -32,6 +33,7 @@ export interface UseGameWsOptions {
   readonly onReconnected?: (playerId: string) => void;
   readonly onGameOver?: (leaderboard: ReadonlyArray<{ readonly id: string; readonly netWorth: number }>) => void;
   readonly onEmote?: (playerId: string, emoteId: string, timestamp: number) => void;
+  readonly onRoomStarted?: () => void;
   readonly webSocketFactory?: (url: string) => WebSocketLike;
 }
 
@@ -41,6 +43,7 @@ export interface UseGameWsReturn {
   readonly errorReason: ReasonCode | null;
   readonly sendIntent: (intent: PlayerIntent) => boolean;
   readonly sendEmote: (emoteId: string) => boolean;
+  readonly sendWsMessage: (msg: WsClientMessage) => boolean;
   readonly requestResync: () => boolean;
   readonly connect: () => void;
   readonly disconnect: () => void;
@@ -57,6 +60,8 @@ export interface WsMessageHandlerContext {
   readonly onReconnected?: (playerId: string) => void;
   readonly onGameOver?: (leaderboard: ReadonlyArray<{ readonly id: string; readonly netWorth: number }>) => void;
   readonly onEmote?: (playerId: string, emoteId: string, timestamp: number) => void;
+  readonly onRoomStarted?: () => void;
+  readonly onSessionInit?: (token: string, roomCode: string) => void;
   readonly setLastTick?: (tick: number) => void;
   readonly setErrorReason?: (reason: ReasonCode | null) => void;
 }
@@ -71,8 +76,14 @@ export function handleWsMessage(
     ctx.onDelta?.(msg.delta);
   } else if (msg.type === 'GAME_OVER') {
     ctx.onGameOver?.(msg.leaderboard);
+  } else if (msg.type === 'ROOM_STARTED') {
+    ctx.onRoomStarted?.();
+  } else if (msg.type === 'ROOM_CREATED' || msg.type === 'ROOM_JOINED') {
+    ctx.onSessionInit?.('', msg.roomCode);
   } else if (msg.type === 'SESSION_INIT') {
-    saveReconnectToken(msg.roomCode || ctx.roomCode, msg.reconnectToken);
+    const activeCode = msg.roomCode || ctx.roomCode;
+    saveReconnectToken(activeCode, msg.reconnectToken);
+    ctx.onSessionInit?.(msg.reconnectToken, activeCode);
   } else if (msg.type === 'PLAYER_GRACE') {
     ctx.onGrace?.(msg.playerId, msg.secondsLeft);
   } else if (msg.type === 'PLAYER_BOT_TAKEOVER') {
@@ -91,6 +102,51 @@ export function handleWsMessage(
     ctx.setErrorReason?.(msg.reasonCode);
     ctx.onError?.(msg.reasonCode);
   }
+}
+
+export interface HandshakeOptions {
+  readonly roomCode: string;
+  readonly playerId: string;
+  readonly isHost?: boolean;
+}
+
+export function performWsHandshake(
+  socket: { send: (data: string) => void },
+  options: HandshakeOptions,
+): WsClientMessage {
+  const savedToken = getReconnectToken(options.roomCode);
+  if (savedToken) {
+    const reconnectMsg: WsClientMessage = {
+      type: 'RECONNECT',
+      reconnectToken: savedToken,
+      roomCode: options.roomCode,
+    };
+    socket.send(JSON.stringify(reconnectMsg));
+    return reconnectMsg;
+  }
+
+  const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  const hasRoomParam = Boolean(params?.has('room'));
+  const isExplicitGuest = hasRoomParam && params?.get('host') !== 'true';
+  const effectiveIsHost = options.isHost !== undefined ? options.isHost : !isExplicitGuest;
+
+  if (effectiveIsHost) {
+    const createMsg: WsClientMessage = {
+      type: 'CREATE_ROOM',
+      roomCode: options.roomCode,
+      playerId: options.playerId,
+    };
+    socket.send(JSON.stringify(createMsg));
+    return createMsg;
+  }
+
+  const joinMsg: WsClientMessage = {
+    type: 'JOIN_ROOM',
+    roomCode: options.roomCode,
+    playerId: options.playerId,
+  };
+  socket.send(JSON.stringify(joinMsg));
+  return joinMsg;
 }
 
 export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
@@ -130,6 +186,15 @@ export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
   const onEmoteRef = useRef(options.onEmote);
   onEmoteRef.current = options.onEmote;
 
+  const onRoomStartedRef = useRef(options.onRoomStarted);
+  onRoomStartedRef.current = options.onRoomStarted;
+
+  const isHostRef = useRef(options.isHost);
+  isHostRef.current = options.isHost;
+
+  const activeRoomCodeRef = useRef(roomCode);
+  activeRoomCodeRef.current = roomCode;
+
   const connect = useCallback(() => {
     if (wsRef.current && wsRef.current.readyState === 1) return;
 
@@ -145,18 +210,14 @@ export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
       ? webSocketFactory(targetUrl)
       : new WebSocket(targetUrl);
 
-    socket.onopen = (ev) => {
+    socket.onopen = () => {
       setIsConnected(true);
       setErrorReason(null);
-      const savedToken = getReconnectToken(roomCode);
-      if (savedToken) {
-        const reconnectMsg: WsClientMessage = {
-          type: 'RECONNECT',
-          reconnectToken: savedToken,
-          roomCode,
-        };
-        socket.send(JSON.stringify(reconnectMsg));
-      }
+      performWsHandshake(socket, {
+        roomCode,
+        playerId,
+        isHost: isHostRef.current,
+      });
     };
 
     socket.onmessage = (event) => {
@@ -164,7 +225,7 @@ export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
         const raw = typeof event.data === 'string' ? event.data : String(event.data);
         const msg = JSON.parse(raw) as WsServerMessage;
         handleWsMessage(msg, {
-          roomCode,
+          roomCode: activeRoomCodeRef.current || roomCode,
           playerId,
           socket,
           onDelta: onDeltaRef.current,
@@ -174,6 +235,8 @@ export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
           onReconnected: onReconnectedRef.current,
           onGameOver: onGameOverRef.current,
           onEmote: onEmoteRef.current,
+          onRoomStarted: onRoomStartedRef.current,
+          onSessionInit: (_tok, rc) => { if (rc) activeRoomCodeRef.current = rc; },
           setLastTick,
           setErrorReason,
         });
@@ -191,7 +254,7 @@ export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
     };
 
     wsRef.current = socket;
-  }, [url, roomCode, playerId, webSocketFactory]);
+  }, [url, roomCode, playerId, options.isHost, webSocketFactory]);
 
   const disconnect = useCallback(() => {
     if (wsRef.current) {
@@ -206,7 +269,7 @@ export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
       if (!wsRef.current || wsRef.current.readyState !== 1) return false;
       const msg: WsClientMessage = {
         type: 'INTENT',
-        roomCode,
+        roomCode: activeRoomCodeRef.current || roomCode,
         playerId,
         intent,
       };
@@ -221,7 +284,7 @@ export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
       if (!wsRef.current || wsRef.current.readyState !== 1) return false;
       const msg: WsClientMessage = {
         type: 'EMOTE',
-        roomCode,
+        roomCode: activeRoomCodeRef.current || roomCode,
         playerId,
         emoteId,
       };
@@ -231,11 +294,20 @@ export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
     [roomCode, playerId],
   );
 
+  const sendWsMessage = useCallback(
+    (msg: WsClientMessage): boolean => {
+      if (!wsRef.current || wsRef.current.readyState !== 1) return false;
+      wsRef.current.send(JSON.stringify(msg));
+      return true;
+    },
+    [],
+  );
+
   const requestResync = useCallback((): boolean => {
     if (!wsRef.current || wsRef.current.readyState !== 1) return false;
     const msg: WsClientMessage = {
       type: 'INTENT_REQUEST_RESYNC',
-      roomCode,
+      roomCode: activeRoomCodeRef.current || roomCode,
       playerId,
     };
     wsRef.current.send(JSON.stringify(msg));
@@ -257,6 +329,7 @@ export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
     errorReason,
     sendIntent,
     sendEmote,
+    sendWsMessage,
     requestResync,
     connect,
     disconnect,

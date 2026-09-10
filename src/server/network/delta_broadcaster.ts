@@ -37,7 +37,8 @@ export function isPlayerEqual(a: PlayerDelta, b: PlayerDelta): boolean {
     a.balance === b.balance &&
     Boolean(a.bankrupt) === Boolean(b.bankrupt) &&
     Boolean(a.isBot) === Boolean(b.isBot) &&
-    (a.overdraftRoundsLeft ?? 0) === (b.overdraftRoundsLeft ?? 0)
+    (a.overdraftRoundsLeft ?? 0) === (b.overdraftRoundsLeft ?? 0) &&
+    Boolean(a.inAudit) === Boolean(b.inAudit)
   );
 }
 
@@ -79,6 +80,10 @@ export function buildSparseDelta(prev: DeltaPayload, next: DeltaPayload): DeltaP
     tick: next.tick,
     cells: changedCells,
     ...(changedPlayers !== undefined ? { players: changedPlayers } : {}),
+    ...(next.currentPlayerIndex !== undefined ? { currentPlayerIndex: next.currentPlayerIndex } : {}),
+    ...(next.currentTurnPlayerId !== undefined ? { currentTurnPlayerId: next.currentTurnPlayerId } : {}),
+    ...(next.dice !== undefined ? { dice: next.dice } : {}),
+    ...(next.auction !== undefined ? { auction: next.auction } : {}),
   };
 }
 

@@ -8,13 +8,15 @@ import type { PropertyRegistry, PropertyStateMap } from '../domain/property_mana
 import { handleLanding, LandingResult, calculateGoPropertyTax, PROPERTY_DEEDS } from '../domain/property_manager';
 import { BOARD_CONFIG } from '../domain/board_config';
 import { decayModifiers } from '../domain/event_card_engine';
-import { processRollDoubles } from './audit_manager';
+import { processRollDoubles, handleAuditTurnTransition } from './audit_manager';
 import { handleSpecialCell } from './special_cell_handler';
 import { collectMortgageInterest } from './mortgage_manager';
 import { checkInsolvency } from './insolvency_manager';
 import type { RollResult } from './room_manager';
 import type { AuctionSession } from './auction_manager';
 import { ChanceCardId } from '../domain/event_card_types';
+
+const turnStartedInAudit = new Map<string, boolean>();
 
 // [DEBT-S06-01][DEBT-S06-02] Xử lý nợ định kỳ khi player vượt GO (TRƯỚC GO_BONUS)
 function processPendingDebts(room: Room, player: Player): void {
@@ -95,7 +97,10 @@ export function executeTurnRoll(
     current.doubleNextDice = false;
     dice = { ...dice, total: (dice.die1 + dice.die2) * 2 };
   }
+  const inAuditBeforeRoll = current.auditTurnsLeft > 0;
   rolledThisTurn.set(roomCode, true);
+  room.lastDice = [dice.die1, dice.die2];
+  turnStartedInAudit.set(roomCode, inAuditBeforeRoll);
 
   const rollCheck = processRollDoubles(room, current, dice);
   if (rollCheck.stopped) return rollCheck.result;
@@ -106,7 +111,11 @@ export function executeTurnRoll(
 
   if (checkPassedGo(oldPos, newPos)) {
     processPendingDebts(room, current);   // [DEBT-S06-01][DEBT-S06-02] TRƯỚC GO_BONUS
-    current.balance += GO_BONUS - calculateGoPropertyTax(current.id, reg, sm);
+    const goTax = calculateGoPropertyTax(current.id, reg, sm);
+    current.balance += GO_BONUS - goTax;
+    if (goTax > 0) {
+      room.treasury = (room.treasury ?? 0) + goTax;
+    }
     // UC-052: Thu lãi thế chấp khi vượt GO
     collectMortgageInterest(room, current.id);
   }
@@ -149,6 +158,7 @@ export function executeTurnEnd(
   if (!rolledThisTurn && room.phase === TurnPhase.WaitingRoll) return undefined;
 
   if (continueDoubles && current.consecutiveDoubles > 0) {
+    if (current.extraTurns > 0) current.extraTurns -= 1;
     room.phase = TurnPhase.WaitingRoll;
     rolledThisTurnMap.set(roomCode, false);
     return room;
@@ -166,7 +176,14 @@ export function executeTurnEnd(
   }
 
   current.consecutiveDoubles = 0;
-  if (current.auditTurnsLeft > 0) current.auditTurnsLeft -= 1;
+  const wasInAudit = turnStartedInAudit.has(roomCode)
+    ? turnStartedInAudit.get(roomCode)!
+    : current.auditTurnsLeft > 0;
+  turnStartedInAudit.delete(roomCode);
+  if (wasInAudit) {
+    handleAuditTurnTransition(room, current);
+    if (current.balance < 0) checkInsolvency(room);
+  }
   if (current.extraTurns > 0) {
     current.extraTurns -= 1;
     room.phase = TurnPhase.WaitingRoll;

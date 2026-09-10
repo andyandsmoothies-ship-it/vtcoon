@@ -33,6 +33,7 @@ export function handleSpecialCell(
     case CellType.Tax: {
       const tax = Math.min(2000, Math.max(0, Math.floor(cur.balance * 0.1)));
       cur.balance -= tax;
+      room.treasury = (room.treasury ?? 0) + tax;
       room.phase = TurnPhase.PropertyManagement;
       return true;
     }

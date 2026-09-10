@@ -41,6 +41,7 @@ export function handleBailOut(
   if (current.auditTurnsLeft <= 0) return { success: false, reason: 'NOT_IN_AUDIT' };
   if (current.balance < 500) return { success: false, reason: ActionRejectReason.INSUFFICIENT_FUNDS };
   current.balance -= 500;
+  room.treasury = (room.treasury ?? 0) + 500;
   current.auditTurnsLeft = 0;
   room.phase = rolledThisTurn ? TurnPhase.PropertyManagement : TurnPhase.WaitingRoll;
   return { success: true };
@@ -66,7 +67,8 @@ export function processRollDoubles(room: Room, current: Player, dice: DiceResult
   if (current.auditTurnsLeft > 0) {
     if (!dice.isDouble) {
       room.phase = TurnPhase.PropertyManagement;
-      return { stopped: true };
+      const player = { id: current.id, position: current.position, balance: current.balance };
+      return { stopped: true, result: { dice, player, passedGo: false, rentCharged: 0 } };
     }
     current.auditTurnsLeft = 0;
     current.consecutiveDoubles = 0;
@@ -84,3 +86,14 @@ export function processRollDoubles(room: Room, current: Player, dice: DiceResult
   const player = { id: current.id, position: current.position, balance: current.balance };
   return { stopped: true, result: { dice, player, passedGo: false, rentCharged: 0 } };
 }
+
+export function handleAuditTurnTransition(room: Room, player: Player): void {
+  if (player.auditTurnsLeft > 0) {
+    player.auditTurnsLeft -= 1;
+    if (player.auditTurnsLeft === 0) {
+      player.balance -= 500;
+      room.treasury = (room.treasury ?? 0) + 500;
+    }
+  }
+}
+

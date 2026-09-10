@@ -107,15 +107,37 @@ export function applyDeltaToStore(
     if (hasPlayerInfoChange) state.setPlayersInfo(nextPlayersInfo);
   }
 
-  // 2. Cập nhật vị trí, số dư và trạng thái Bot của người chơi [UC-GAME-008/MSS]
+  // 2. Cập nhật xúc xắc từ server
+  if (delta.dice) {
+    state.triggerDiceRoll([delta.dice[0], delta.dice[1]]);
+    try {
+      AudioEngine.playSfx(SoundEffect.DICE_ROLL);
+    } catch {}
+  }
+
+  // 3. Cập nhật lượt chơi hiện tại và đặt lại thời gian 60s
+  if (delta.currentTurnPlayerId && state.currentTurnPlayerId !== delta.currentTurnPlayerId) {
+    state.setCurrentTurnPlayerId(delta.currentTurnPlayerId);
+    state.setTurnTimeRemaining(60);
+  }
+
+  // 4. Cập nhật vị trí, số dư và trạng thái Bot của người chơi [UC-GAME-008/MSS]
   if (delta.players && delta.players.length > 0) {
     const nextPositions = { ...state.playerPositions };
     let hasPositionChange = false;
 
     for (const p of delta.players) {
       if (nextPositions[p.id] !== p.position) {
+        const fromCell = nextPositions[p.id];
         nextPositions[p.id] = p.position;
         hasPositionChange = true;
+        if (!isFullSync && state.startPawnMove) {
+          state.startPawnMove(p.id, p.position, fromCell);
+          try {
+            AudioEngine.playSfx(SoundEffect.PAWN_STEP);
+            AudioEngine.handlePawnLanded(p.position);
+          } catch {}
+        }
       }
 
       if (state.playersInfo[p.id]) {
@@ -142,10 +164,24 @@ export function applyDeltaToStore(
           ...(p.bankrupt !== undefined ? { bankrupt: p.bankrupt } : {}),
           ...(p.isBot !== undefined ? { isBot: p.isBot } : {}),
           ...(p.overdraftRoundsLeft !== undefined ? { overdraftRoundsLeft: p.overdraftRoundsLeft } : {}),
+          ...(p.inAudit !== undefined ? { inAudit: p.inAudit } : {}),
+          ...(p.auditTurnsLeft !== undefined ? { auditTurnsLeft: p.auditTurnsLeft } : {}),
+          ...(p.skipNextTurn !== undefined ? { skipNextTurn: p.skipNextTurn } : {}),
+          ...(p.consecutiveDoubles !== undefined ? { consecutiveDoubles: p.consecutiveDoubles } : {}),
         });
       }
     }
 
     if (hasPositionChange) state.setPlayerPositions(nextPositions);
   }
+
+  // 5. Đồng bộ hóa sàn đấu giá tự động (Auction)
+  if (delta.auction) {
+    state.openModal('auction', delta.auction);
+  } else if (delta.auction === null) {
+    if (state.activeModal === 'auction') {
+      state.closeModal();
+    }
+  }
 }
+

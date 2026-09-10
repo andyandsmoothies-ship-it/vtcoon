@@ -117,7 +117,8 @@ describe('[TC-GAME-001..003/MSS] Doubles Rule & FSM Auto-transition', () => {
     room.players[0]!.auditTurnsLeft = 2;
 
     const roll = mgr.handleRollDice(room.roomCode, 'p1');
-    expect(roll).toBeUndefined();
+    expect(roll).toBeDefined();
+    expect(roll?.player.position).toBe(10);
     expect(room.players[0]!.position).toBe(10);
     expect(room.players[0]!.auditTurnsLeft).toBe(2);
     expect(room.phase).toBe(TurnPhase.PropertyManagement);

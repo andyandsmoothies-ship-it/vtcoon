@@ -244,7 +244,7 @@ describe('[TC-E2E-RESILIENCE/MSS] Production-Grade Resilience & Defensive Testin
       p2.balance += GO_BONUS;
       goBonusGiven += GO_BONUS;
       collectMortgageInterest(room, 'P2');
-      bankSink += 15; // Lãi 5% = 15 Tr. tiêu hủy vào Ngân hàng
+      // Lãi 5% = 15 Tr. nộp vào Kho bạc -> Tổng Cash + Treasury không đổi
       assertConservation();
 
       // T7: P2 chuộc ô 03 (trả gốc 300 + phí hành chính 30 = 330 Tr.)
@@ -252,8 +252,7 @@ describe('[TC-E2E-RESILIENCE/MSS] Production-Grade Resilience & Defensive Testin
         type: 'INTENT_REDEEM', cellIndex: 3,
       });
       expect(redeemRes.success).toBe(true);
-      // Giảm nợ 300, tiền mặt giảm 330 -> chênh lệch 30 Tr. phí nộp Ngân hàng
-      bankSink += 30;
+      // Giảm nợ 300, tiền mặt giảm 330, Kho bạc nhận 30 -> System Money bảo toàn
       assertConservation();
 
       // T8: P1 hạ cấp ô 01 từ C1 về C0 (hoàn 150 Tr., mất 150 Tr.)

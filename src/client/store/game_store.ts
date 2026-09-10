@@ -23,6 +23,9 @@ export interface PlayerHudInfo {
   readonly mortgagedProperties?: readonly number[];
   readonly mortgageLoans?: Record<number, number>;
   readonly inAudit?: boolean;
+  readonly auditTurnsLeft?: number;
+  readonly skipNextTurn?: boolean;
+  readonly consecutiveDoubles?: number;
   readonly bankrupt?: boolean;
   readonly isBot?: boolean;
   readonly overdraftRoundsLeft?: number;
@@ -57,6 +60,7 @@ export interface ModalPayloadMap {
     highestBidderId: string | null;
     timeRemaining: number;
     hasPassed?: boolean;
+    declinedPlayerId?: string;
   };
   trade: {
     targetPlayerId: string;
@@ -93,6 +97,7 @@ export interface GameState {
   readonly playerPositions: Record<string, number>;
   readonly dice: [number, number];
   readonly isRolling: boolean;
+  readonly hasRolledThisTurn: boolean;
   readonly activePawnAnimation: PawnAnimationState | null;
 
   // UI-03 HUD Financial & Turn States
@@ -115,6 +120,7 @@ export interface GameState {
   setPlayerPositions: (positions: Record<string, number>) => void;
   setDice: (dice: [number, number]) => void;
   setIsRolling: (isRolling: boolean) => void;
+  setHasRolledThisTurn: (hasRolled: boolean) => void;
   triggerDiceRoll: (dice: [number, number]) => void;
   startPawnMove: (playerId: string, targetCell: number, fromCell?: number) => void;
   completePawnMove: (playerId: string) => void;
@@ -146,6 +152,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   playerPositions: {},
   dice: [1, 1],
   isRolling: false,
+  hasRolledThisTurn: false,
   activePawnAnimation: null,
 
   playersInfo: {},
@@ -169,10 +176,13 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   setIsRolling: (isRolling) => set({ isRolling }),
 
+  setHasRolledThisTurn: (hasRolled) => set({ hasRolledThisTurn: hasRolled }),
+
   triggerDiceRoll: (dice) =>
     set({
       dice: [clampDiceFace(dice[0]), clampDiceFace(dice[1])],
       isRolling: true,
+      hasRolledThisTurn: true,
     }),
 
   startPawnMove: (playerId, targetCell, fromCell) => {
@@ -242,14 +252,14 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   setCurrentTurnPlayerId: (playerId) => {
     if (playerId === null) {
-      set({ currentTurnPlayerId: null });
+      set({ currentTurnPlayerId: null, hasRolledThisTurn: false });
       return;
     }
     const { playersInfo } = get();
     if (Object.keys(playersInfo).length > 0 && !playersInfo[playerId]) {
       return;
     }
-    set({ currentTurnPlayerId: playerId });
+    set({ currentTurnPlayerId: playerId, hasRolledThisTurn: false });
   },
 
   setTurnTimeRemaining: (seconds) =>

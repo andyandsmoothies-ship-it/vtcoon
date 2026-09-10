@@ -8,7 +8,7 @@ export type EnvelopeValidationResult =
   | { success: false; ignore: true };
 
 const VALID_CLIENT_TYPES = new Set([
-  'CREATE_ROOM', 'JOIN_ROOM', 'PONG', 'RECONNECT', 'INTENT', 'INTENT_REQUEST_RESYNC', 'EMOTE',
+  'CREATE_ROOM', 'JOIN_ROOM', 'START_GAME', 'PONG', 'RECONNECT', 'INTENT', 'INTENT_REQUEST_RESYNC', 'EMOTE',
 ]);
 
 const CELL_INTENTS = new Set([
@@ -74,10 +74,15 @@ export class EnvelopeValidator {
     const pId = obj['playerId'], rc = obj['roomCode'];
     if (type === 'CREATE_ROOM') {
       return typeof pId === 'string' && pId.length > 0
-        ? { success: true, message: { type, playerId: pId } }
+        ? { success: true, message: { type, playerId: pId, ...(typeof rc === 'string' && rc ? { roomCode: rc } : {}) } }
         : { success: false, reasonCode: 'INVALID_ENVELOPE' };
     }
     if (type === 'JOIN_ROOM') {
+      return typeof pId === 'string' && typeof rc === 'string' && pId.length > 0 && rc.length > 0
+        ? { success: true, message: { type, playerId: pId, roomCode: rc } }
+        : { success: false, reasonCode: 'INVALID_ENVELOPE' };
+    }
+    if (type === 'START_GAME') {
       return typeof pId === 'string' && typeof rc === 'string' && pId.length > 0 && rc.length > 0
         ? { success: true, message: { type, playerId: pId, roomCode: rc } }
         : { success: false, reasonCode: 'INVALID_ENVELOPE' };

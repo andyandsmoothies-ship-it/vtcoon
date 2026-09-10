@@ -111,6 +111,9 @@ export function declareBankruptcy(
   playerId: string,
   registry: PropertyRegistry,
   stateMap: PropertyStateMap,
+  creditorId?: string,
+  auctions?: Map<string, AuctionSession>,
+  roomCode?: string,
 ): { gameOver: boolean; rankings?: Array<{ id: string; netWorth: number }> } {
   const player = room.players.find((p) => p.id === playerId);
   if (!player) return { gameOver: false };
@@ -121,10 +124,54 @@ export function declareBankruptcy(
 
   player.bankrupt = true;
 
-  for (const [cellIndex, owner] of Array.from(registry.entries())) {
-    if (owner === playerId) {
-      registry.delete(cellIndex);
-      stateMap.delete(cellIndex);
+  const creditor = creditorId && creditorId !== 'BANK'
+    ? room.players.find((p) => p.id === creditorId)
+    : undefined;
+
+  if (creditor) {
+    // Nhánh 1: Nợ người chơi khác -> sang tên toàn bộ đất và tiền mặt cho chủ nợ
+    if (player.balance > 0) {
+      creditor.balance += player.balance;
+      player.balance = 0;
+    }
+    for (const [cellIndex, owner] of Array.from(registry.entries())) {
+      if (owner === playerId) {
+        registry.set(cellIndex, creditor.id);
+        if (player.mortgagedProperties?.includes(cellIndex)) {
+          creditor.mortgagedProperties ??= [];
+          if (!creditor.mortgagedProperties.includes(cellIndex)) {
+            creditor.mortgagedProperties.push(cellIndex);
+          }
+          if (player.mortgageLoans?.[cellIndex] !== undefined) {
+            creditor.mortgageLoans ??= {};
+            creditor.mortgageLoans[cellIndex] = player.mortgageLoans[cellIndex];
+          }
+        }
+      }
+    }
+  } else if (creditorId === 'BANK') {
+    // Nhánh 2: Nợ ngân hàng -> đưa đất vào đấu giá phát mãi 70% sàn
+    if (player.balance > 0) {
+      room.treasury = (room.treasury ?? 0) + player.balance;
+      player.balance = 0;
+    }
+    const otherPlayers = room.players.filter((p) => p.id !== playerId && !p.bankrupt);
+    if (auctions && roomCode && otherPlayers.length > 0) {
+      liquidateAssets(room, playerId, registry, stateMap, auctions, roomCode);
+    }
+    for (const [cellIndex, owner] of Array.from(registry.entries())) {
+      if (owner === playerId) {
+        registry.delete(cellIndex);
+        stateMap.delete(cellIndex);
+      }
+    }
+  } else {
+    // Mặc định: giải phóng toàn bộ tài sản
+    for (const [cellIndex, owner] of Array.from(registry.entries())) {
+      if (owner === playerId) {
+        registry.delete(cellIndex);
+        stateMap.delete(cellIndex);
+      }
     }
   }
   if (player.mortgagedProperties) player.mortgagedProperties.length = 0;
@@ -132,7 +179,7 @@ export function declareBankruptcy(
 
   console.info(JSON.stringify({
     event: 'BANKRUPTCY_DECLARED', correlationId: room.roomCode,
-    timestamp: Date.now(), delta: { playerId },
+    timestamp: Date.now(), delta: { playerId, creditorId },
   }));
 
   const alive = room.players.filter((p) => !p.bankrupt);
@@ -142,7 +189,7 @@ export function declareBankruptcy(
   }
 
   // Chuyển lượt sang người chơi tiếp theo còn sống nếu người phá sản đang giữ lượt
-  if (room.players[room.currentPlayerIndex]?.id === playerId) {
+  if (room.players[room.currentPlayerIndex]?.id === playerId && room.phase !== TurnPhase.AuctionPhase) {
     advanceTurnAfterBankruptcy(room);
   }
   return { gameOver: false };

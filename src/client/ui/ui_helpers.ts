@@ -87,6 +87,8 @@ export interface ActionDockButtonStateParams {
   readonly isPawnMoving: boolean;
   readonly isMyTurn: boolean;
   readonly isBankrupt?: boolean;
+  readonly hasRolledThisTurn?: boolean;
+  readonly canRollAgain?: boolean;
 }
 
 /**
@@ -97,7 +99,8 @@ export function isRollActionDisabled(params: ActionDockButtonStateParams): boole
     params.isRolling ||
     params.isPawnMoving ||
     !params.isMyTurn ||
-    Boolean(params.isBankrupt)
+    Boolean(params.isBankrupt) ||
+    (Boolean(params.hasRolledThisTurn) && !params.canRollAgain)
   );
 }
 
@@ -109,6 +112,7 @@ export function isEndTurnDisabled(params: ActionDockButtonStateParams): boolean 
     !params.isMyTurn ||
     params.isRolling ||
     params.isPawnMoving ||
-    Boolean(params.isBankrupt)
+    Boolean(params.isBankrupt) ||
+    (params.hasRolledThisTurn !== undefined ? !params.hasRolledThisTurn : false)
   );
 }

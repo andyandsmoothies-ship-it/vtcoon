@@ -57,17 +57,12 @@ export class WssServer {
     this.intentGuard = config.intentGuard ?? new IntentGuard();
     this.broadcaster = new DeltaBroadcaster(this.rooms, this.sessions, (rc, msg) => this.broadcast(rc, msg));
     this.reconnects  = config.reconnectManager ?? new ReconnectManager({
-      rooms: this.rooms,
-      sessions: this.sessions,
-      broadcaster: this.broadcaster,
-      broadcast: (rc, msg) => this.broadcast(rc, msg),
-      gracePeriodMs: config.gracePeriodMs,
+      rooms: this.rooms, sessions: this.sessions, broadcaster: this.broadcaster,
+      broadcast: (rc, msg) => this.broadcast(rc, msg), gracePeriodMs: config.gracePeriodMs,
     });
     this.cleanupScheduler = new RoomCleanupScheduler({
-      roomManager: this.rooms,
-      timeoutMs: config.abandonedTimeoutMs,
-      intervalMs: config.cleanupIntervalMs,
-      onCleanup: (rc) => this.closeRoom(rc),
+      roomManager: this.rooms, timeoutMs: config.abandonedTimeoutMs,
+      intervalMs: config.cleanupIntervalMs, onCleanup: (rc) => this.closeRoom(rc),
     });
     this.wss         = new WebSocketServer({ port: config.port });
 
@@ -98,9 +93,7 @@ export class WssServer {
   getRoomSockets(roomCode: string): Set<WebSocket> | undefined { return this.roomSockets.get(roomCode); }
 
   sendSafe(socket: WebSocket, msg: WsServerMessage): void {
-    if (socket.readyState === WebSocket.OPEN) {
-      socket.send(encodeMsg(msg));
-    }
+    if (socket.readyState === WebSocket.OPEN) socket.send(encodeMsg(msg));
   }
 
   private handleConnection(socket: WebSocket): void {
@@ -109,13 +102,11 @@ export class WssServer {
       try {
         const rateRes = this.rateLimiter.checkLimit(socket);
         if (!rateRes.allowed) {
+          this.sendSafe(socket, { type: 'ERROR', reasonCode: rateRes.kick ? 'ABUSE_DETECTED' : 'RATE_LIMIT_EXCEEDED' });
           if (rateRes.kick) {
-            this.sendSafe(socket, { type: 'ERROR', reasonCode: 'ABUSE_DETECTED' });
             socket.removeAllListeners('message');
             socket.close(1008, 'ABUSE_DETECTED');
-            return;
           }
-          this.sendSafe(socket, { type: 'ERROR', reasonCode: 'RATE_LIMIT_EXCEEDED' });
           return;
         }
 
@@ -137,74 +128,85 @@ export class WssServer {
       const info = this.socketPlayers.get(socket);
       this.socketPlayers.delete(socket);
       this.unregisterSocket(socket);
-      if (info) {
-        const key = `${info.roomCode}:${info.playerId}`;
-        if (this.playerSockets.get(key) === socket) {
-          this.playerSockets.delete(key);
-          this.reconnects.startGracePeriod(info.roomCode, info.playerId);
-        }
+      const key = info ? `${info.roomCode}:${info.playerId}` : '';
+      if (key && this.playerSockets.get(key) === socket) {
+        this.playerSockets.delete(key);
+        this.reconnects.startGracePeriod(info!.roomCode, info!.playerId);
       }
     });
   }
 
   private bindSocket(roomCode: string, playerId: string, socket: WebSocket): void {
     let group = this.roomSockets.get(roomCode);
-    if (!group) {
-      group = new Set();
-      this.roomSockets.set(roomCode, group);
-    }
+    if (!group) this.roomSockets.set(roomCode, (group = new Set()));
     group.add(socket);
     this.socketPlayers.set(socket, { playerId, roomCode });
     this.playerSockets.set(`${roomCode}:${playerId}`, socket);
   }
 
+  private sendSessionInit(socket: WebSocket, playerId: string, roomCode: string): void {
+    const token = this.reconnects.generateToken(playerId, roomCode);
+    this.sendSafe(socket, { type: 'SESSION_INIT', playerId, reconnectToken: token, roomCode });
+  }
+
+  private handleStartGame(socket: WebSocket, msg: Extract<WsClientMessage, { type: 'START_GAME' }>): void {
+    const room = this.rooms.getRoom(msg.roomCode);
+    if (!room || !room.players.some((p) => p.id === msg.playerId)) {
+      this.sendSafe(socket, { type: 'ERROR', reasonCode: 'ROOM_NOT_FOUND' });
+      return;
+    }
+    if (room.hostId !== msg.playerId) {
+      this.sendSafe(socket, { type: 'ERROR', reasonCode: 'NOT_HOST' });
+      return;
+    }
+    if (room.started) {
+      this.sendSafe(socket, { type: 'ERROR', reasonCode: 'ROOM_STARTED' });
+      return;
+    }
+    if (!this.rooms.startGame(msg.roomCode)) {
+      this.sendSafe(socket, { type: 'ERROR', reasonCode: 'NOT_ENOUGH_PLAYERS' });
+      return;
+    }
+    this.bindSocket(msg.roomCode, msg.playerId, socket);
+    this.broadcast(msg.roomCode, { type: 'ROOM_STARTED', roomCode: msg.roomCode });
+    this.broadcaster.broadcastRoomDelta(msg.roomCode, { forceFull: true });
+    this.scheduleBotTurn(msg.roomCode);
+  }
+
   private async route(socket: WebSocket, msg: WsClientMessage): Promise<void> {
     switch (msg.type) {
       case 'CREATE_ROOM': {
-        const room = this.rooms.createRoom(msg.playerId);
+        const room = this.rooms.createRoom(msg.playerId, msg.roomCode);
         this.sessions.addSession(msg.playerId);
         this.bindSocket(room.roomCode, msg.playerId, socket);
         this.sendSafe(socket, { type: 'ROOM_CREATED', roomCode: room.roomCode, playerId: msg.playerId });
-        const token = this.reconnects.generateToken(msg.playerId, room.roomCode);
-        this.sendSafe(socket, { type: 'SESSION_INIT', playerId: msg.playerId, reconnectToken: token, roomCode: room.roomCode });
+        this.sendSessionInit(socket, msg.playerId, room.roomCode);
         break;
       }
       case 'JOIN_ROOM': {
         const joined = this.rooms.joinRoom(msg.roomCode, msg.playerId);
-        if (!joined) {
-          this.sendSafe(socket, { type: 'ERROR', reasonCode: 'ROOM_NOT_FOUND' });
-          return;
-        }
+        if (!joined) return this.sendSafe(socket, { type: 'ERROR', reasonCode: 'ROOM_NOT_FOUND' });
         if (joined.players.length > MAX_PLAYERS) {
           joined.players.pop();
-          this.sendSafe(socket, { type: 'ERROR', reasonCode: 'ROOM_FULL' });
-          return;
+          return this.sendSafe(socket, { type: 'ERROR', reasonCode: 'ROOM_FULL' });
         }
         this.sessions.addSession(msg.playerId);
         this.bindSocket(msg.roomCode, msg.playerId, socket);
         this.sendSafe(socket, { type: 'ROOM_JOINED', roomCode: msg.roomCode, playerId: msg.playerId, playerCount: joined.players.length });
-        const token = this.reconnects.generateToken(msg.playerId, msg.roomCode);
-        this.sendSafe(socket, { type: 'SESSION_INIT', playerId: msg.playerId, reconnectToken: token, roomCode: msg.roomCode });
+        this.sendSessionInit(socket, msg.playerId, msg.roomCode);
         break;
       }
-      case 'PONG':
-        this.sessions.handlePong(msg.playerId);
-        break;
-      case 'RECONNECT':
-        this.handleReconnect(socket, msg);
-        break;
-      case 'INTENT':
-        await this.handleIntent(socket, msg);
-        break;
+      case 'START_GAME': this.handleStartGame(socket, msg); break;
+      case 'PONG': this.sessions.handlePong(msg.playerId); break;
+      case 'RECONNECT': this.handleReconnect(socket, msg); break;
+      case 'INTENT': await this.handleIntent(socket, msg); break;
       case 'INTENT_REQUEST_RESYNC':
         if (msg.roomCode) {
           this.bindSocket(msg.roomCode, msg.playerId, socket);
           this.broadcaster.resyncClient(msg.roomCode, socket);
         }
         break;
-      case 'EMOTE':
-        this.handleEmote(socket, msg);
-        break;
+      case 'EMOTE': this.handleEmote(socket, msg); break;
     }
   }
 
@@ -215,12 +217,7 @@ export class WssServer {
       return;
     }
     this.bindSocket(msg.roomCode, msg.playerId, socket);
-    this.broadcast(msg.roomCode, {
-      type: 'PLAYER_EMOTE',
-      playerId: msg.playerId,
-      emoteId: msg.emoteId,
-      timestamp: Date.now(),
-    });
+    this.broadcast(msg.roomCode, { type: 'PLAYER_EMOTE', playerId: msg.playerId, emoteId: msg.emoteId, timestamp: Date.now() });
   }
 
   private handleReconnect(socket: WebSocket, msg: { reconnectToken: string; roomCode?: string }): void {
@@ -251,9 +248,7 @@ export class WssServer {
     if (existingSocket && existingSocket !== socket) {
       this.unregisterSocket(existingSocket);
       this.socketPlayers.delete(existingSocket);
-      try {
-        existingSocket.close(1000, 'SUPERSEDED_BY_RECONNECT');
-      } catch {}
+      try { existingSocket.close(1000, 'SUPERSEDED_BY_RECONNECT'); } catch {}
     }
 
     this.bindSocket(record.roomCode, record.playerId, socket);
@@ -267,12 +262,8 @@ export class WssServer {
       return;
     }
     const room = this.rooms.getRoom(msg.roomCode);
-    if (!room) {
-      this.sendSafe(socket, { type: 'ERROR', reasonCode: 'ROOM_NOT_FOUND' });
-      return;
-    }
-    const player = room.players.find((p) => p.id === msg.playerId);
-    if (!player) {
+    const player = room?.players.find((p) => p.id === msg.playerId);
+    if (!room || !player) {
       this.sendSafe(socket, { type: 'ERROR', reasonCode: 'ROOM_NOT_FOUND' });
       return;
     }
@@ -283,11 +274,7 @@ export class WssServer {
 
     const guardRes = this.intentGuard.validate(room, msg.playerId, msg.intent);
     if (!guardRes.allowed) {
-      this.sendSafe(socket, {
-        type: 'INTENT_REJECTED',
-        reasonCode: guardRes.reasonCode ?? 'OUT_OF_TURN',
-        playerId: msg.playerId,
-      });
+      this.sendSafe(socket, { type: 'INTENT_REJECTED', reasonCode: guardRes.reasonCode ?? 'OUT_OF_TURN', playerId: msg.playerId });
       return;
     }
 
@@ -315,18 +302,39 @@ export class WssServer {
         this.broadcastGameOver(msg.roomCode);
       } else {
         this.broadcaster.broadcastRoomDelta(msg.roomCode);
+        this.scheduleBotTurn(msg.roomCode);
       }
     });
   }
 
+  private scheduleBotTurn(roomCode: string): void {
+    const room = this.rooms.getRoom(roomCode);
+    const current = room?.players[room.currentPlayerIndex];
+    if (!room?.started || !current?.isBot || current.bankrupt) return;
+
+    const timer = setTimeout(() => {
+      void this.intentMutex.runExclusive(roomCode, async () => {
+        const r = this.rooms.getRoom(roomCode);
+        const curr = r?.players[r.currentPlayerIndex];
+        if (!r?.started || !curr?.isBot || curr.bankrupt) return;
+
+        this.rooms.runBotTurn(roomCode);
+        const rAfter = this.rooms.getRoom(roomCode);
+        if (rAfter && rAfter.started && rAfter.players.filter((p) => !p.bankrupt).length <= 1) {
+          this.broadcastGameOver(roomCode);
+        } else {
+          this.broadcaster.broadcastRoomDelta(roomCode);
+          const next = rAfter?.players[rAfter.currentPlayerIndex];
+          if (next?.isBot && !next.bankrupt) this.scheduleBotTurn(roomCode);
+        }
+      });
+    }, 800);
+    this.rooms.registerTimer(roomCode, timer);
+  }
+
   broadcastGameOver(roomCode: string, leaderboard?: Array<{ id: string; netWorth: number }>): void {
     const rankings = leaderboard ?? this.rooms.getRankings(roomCode);
-    const msg: WsServerMessage = {
-      type: 'GAME_OVER',
-      roomCode,
-      leaderboard: rankings,
-    };
-    this.broadcast(roomCode, msg);
+    this.broadcast(roomCode, { type: 'GAME_OVER', roomCode, leaderboard: rankings });
     this.closeRoom(roomCode);
   }
 
@@ -340,24 +348,18 @@ export class WssServer {
           s.removeAllListeners();
           s.on('error', () => {});
           this.socketPlayers.delete(s);
-          try {
-            s.close(1000, 'ROOM_CLOSED');
-          } catch {}
+          try { s.close(1000, 'ROOM_CLOSED'); } catch {}
         }
         this.roomSockets.delete(roomCode);
       }
       const prefix = `${roomCode}:`;
       for (const key of Array.from(this.playerSockets.keys())) {
-        if (key.startsWith(prefix)) {
-          this.playerSockets.delete(key);
-        }
+        if (key.startsWith(prefix)) this.playerSockets.delete(key);
       }
       this.reconnects.clearRoom(roomCode);
       const room = this.rooms.getRoom(roomCode);
       if (room) {
-        for (const p of room.players) {
-          this.sessions.removeSession(p.id);
-        }
+        for (const p of room.players) this.sessions.removeSession(p.id);
       }
       this.broadcaster.clearRoom(roomCode);
       this.intentMutex.clear(roomCode);
@@ -371,17 +373,12 @@ export class WssServer {
     const sockets = this.roomSockets.get(roomCode);
     if (!sockets) return;
     const encoded = encodeMsg(msg);
-    for (const s of sockets) {
-      if (s.readyState === WebSocket.OPEN) s.send(encoded);
-    }
+    for (const s of sockets) if (s.readyState === WebSocket.OPEN) s.send(encoded);
   }
 
   private unregisterSocket(socket: WebSocket): void {
     for (const [roomCode, group] of this.roomSockets.entries()) {
-      if (group.has(socket)) {
-        group.delete(socket);
-        if (group.size === 0) this.roomSockets.delete(roomCode);
-      }
+      if (group.delete(socket) && group.size === 0) this.roomSockets.delete(roomCode);
     }
   }
 
@@ -390,6 +387,7 @@ export class WssServer {
     clearInterval(this.heartbeatTimer);
     this.cleanupScheduler.stop();
     this.reconnects.clear();
+    for (const rc of this.rooms.getAllRoomCodes()) this.rooms.clearRoomTimers(rc);
     return new Promise((resolve, reject) => {
       this.wss.close((err) => (err ? reject(err) : resolve()));
     });

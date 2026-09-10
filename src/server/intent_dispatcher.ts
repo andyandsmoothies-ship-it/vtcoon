@@ -18,7 +18,7 @@ export type PlayerIntent =
   | { type: 'INTENT_INVEST'; stake: number }
   | { type: 'INTENT_SKIP' }
   | { type: 'INTENT_BAIL_OUT' }
-  | { type: 'INTENT_BANKRUPTCY' }
+  | { type: 'INTENT_BANKRUPTCY'; creditorId?: string }
   | { type: 'INTENT_ROLL' };
 
 type IntentHandler = (mgr: RoomManager, rc: string, p: string, intent: PlayerIntent) => { success: boolean; reason?: string };
@@ -52,12 +52,16 @@ const INTENT_DISPATCH: Record<PlayerIntent['type'], IntentHandler> = {
   INTENT_INVEST: (m, rc, p, i) => m.handleHoseInvest(rc, p, (i as { stake: number }).stake),
   INTENT_SKIP: (m, rc, p) => m.handleHoseSkip(rc, p),
   INTENT_BAIL_OUT: (m, rc, p) => m.handleBailOut(rc, p),
-  INTENT_BANKRUPTCY: (m, rc, p) => {
-    m.handleBankruptcy(rc, p);
+  INTENT_BANKRUPTCY: (m, rc, p, i) => {
+    const ci = i as { creditorId?: string };
+    m.handleBankruptcy(rc, p, ci.creditorId);
     return { success: true };
   },
   INTENT_END_TURN: (m, rc, p) => {
-    const r = m.handleEndTurn(rc, p);
+    const room = m.getRoom(rc);
+    const current = room?.players[room.currentPlayerIndex];
+    const continueDoubles = (current?.consecutiveDoubles ?? 0) > 0;
+    const r = m.handleEndTurn(rc, p, continueDoubles);
     return { success: r !== undefined, reason: r ? undefined : 'INVALID_PHASE' };
   },
 };

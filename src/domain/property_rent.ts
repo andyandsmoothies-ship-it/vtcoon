@@ -46,8 +46,9 @@ export function calculateRent(
 export function applyC2Surcharge(player: Player, owner: Player | undefined, rng: () => number): number {
   const face = Math.floor(rng() * 6) + 1;
   if (face % 2 === 0) {
+    const actualPaid = Math.max(0, player.balance);
     player.balance -= SERVICE_C2_SURCHARGE;
-    if (owner !== undefined) owner.balance += SERVICE_C2_SURCHARGE;
+    if (owner !== undefined) owner.balance += Math.min(SERVICE_C2_SURCHARGE, actualPaid);
     return SERVICE_C2_SURCHARGE;
   }
   return 0;

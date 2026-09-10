@@ -89,16 +89,30 @@ export function handleLanding(
     : undefined;
 
   if (beneficiary !== undefined && !beneficiary.bankrupt) {
-    const half = Math.floor(rentAmount * 0.5);
-    player.balance -= rentAmount;
-    if (owner !== undefined) owner.balance += (rentAmount - half);
-    beneficiary.balance += half;
+    if (player.balance >= rentAmount) {
+      const half = Math.floor(rentAmount * 0.5);
+      player.balance -= rentAmount;
+      if (owner !== undefined) owner.balance += (rentAmount - half);
+      beneficiary.balance += half;
+    } else {
+      const actualPaid = Math.max(0, player.balance);
+      const half = Math.floor(actualPaid * 0.5);
+      player.balance -= rentAmount;
+      if (owner !== undefined) owner.balance += (actualPaid - half);
+      beneficiary.balance += half;
+    }
     const surcharge = applyServiceBonus(cellIndex, stateMap, player, owner, rng);
     return { result: LandingResult.RentPaid, rentAmount: rentAmount + surcharge, landlordId: ownerId };
   }
 
-  player.balance -= rentAmount;
-  if (owner !== undefined) owner.balance += rentAmount;
+  if (player.balance >= rentAmount) {
+    player.balance -= rentAmount;
+    if (owner !== undefined) owner.balance += rentAmount;
+  } else {
+    const actualPaid = Math.max(0, player.balance);
+    player.balance -= rentAmount;
+    if (owner !== undefined) owner.balance += actualPaid;
+  }
   const surcharge = applyServiceBonus(cellIndex, stateMap, player, owner, rng);
   rentAmount += surcharge;
   return { result: LandingResult.RentPaid, rentAmount, landlordId: ownerId };
