@@ -251,24 +251,6 @@ export function getStandeeTexture(index: number): CanvasTexture | null {
   const ctx = canvas.getContext('2d');
   if (!ctx) return null;
 
-  // Thẻ Standee Acrylic bo tròn
-  ctx.fillStyle = '#FFFFFF';
-  ctx.beginPath();
-  ctx.roundRect(8, 8, 240, 240, 24);
-  ctx.fill();
-
-  // Khung viền màu đặc trưng của vùng đất
-  ctx.strokeStyle = meta.bannerColor;
-  ctx.lineWidth = 6;
-  ctx.stroke();
-
-  // Nền chuyển sắc nhẹ
-  const grad = ctx.createLinearGradient(0, 0, 0, 256);
-  grad.addColorStop(0, '#FFFFFF');
-  grad.addColorStop(1, `${meta.bannerColor}15`);
-  ctx.fillStyle = grad;
-  ctx.fill();
-
   // Vẽ biểu tượng văn hóa đặc trưng bản địa
   drawIcon(ctx, meta.icon, 128, 105, meta.bannerColor, 2.2);
 

@@ -5,6 +5,7 @@ import { useGameStore } from '../store/game_store';
 import { cellPosition } from './board_coords';
 import { LayeredDioramaTile } from './board_tile';
 import { DiceTray } from './dice_tray';
+import { CenterpieceWater } from './centerpiece_water';
 
 const CORNER_INDICES = new Set([0, 10, 20, 30]);
 
@@ -33,23 +34,8 @@ export function GameBoard(): React.ReactElement {
         <meshStandardMaterial color="#1E293B" roughness={0.6} metalness={0.2} />
       </mesh>
 
-      {/* 2. Cảnh quan trung tâm: Hồ nước nhân tạo & Bờ kè đá hoa cương */}
-      <group position={[0, -0.02, 0]}>
-        <mesh receiveShadow>
-          <cylinderGeometry args={[7.2, 7.2, 0.12, 64]} />
-          <meshStandardMaterial
-            color="#0284c7"
-            roughness={0.12}
-            metalness={0.75}
-            transparent
-            opacity={0.8}
-          />
-        </mesh>
-        <mesh receiveShadow castShadow rotation={[Math.PI / 2, 0, 0]} position={[0, 0.04, 0]}>
-          <torusGeometry args={[7.2, 0.18, 16, 64]} />
-          <meshStandardMaterial color="#475569" roughness={0.5} metalness={0.3} />
-        </mesh>
-      </group>
+      {/* 2. Cảnh quan trung tâm: Hồ nước nhân tạo & Bờ kè đá sa thạch */}
+      <CenterpieceWater />
 
       {/* 3. Khay xúc xắc 3D trung tâm nằm giữa lòng hồ */}
       <DiceTray />

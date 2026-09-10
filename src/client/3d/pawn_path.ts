@@ -5,6 +5,8 @@ import { cellPosition } from './board_coords';
 export const BOARD_TOTAL_CELLS = 40 as const;
 export const DEFAULT_JUMP_ARC = 0.8 as const;
 export const BASE_PAWN_Y = 0.45 as const;
+export const HOP_DURATION = 0.22 as const;
+export const LANDING_DURATION = 0.12 as const;
 
 export function calculatePathWaypoints(fromIndex: number, toIndex: number): number[] {
   if (
@@ -98,4 +100,78 @@ export function getPawnSquashStretch(
   }
 
   return [scaleXZ, scaleY, scaleXZ];
+}
+
+/**
+ * Biến thiên cao độ ngẫu nhiên nhẹ (pitch từ 0.95 đến 1.10) cho âm thanh bước nhảy
+ */
+export function getStepPitchVariation(randomVal: number = Math.random()): number {
+  const r = Math.max(0, Math.min(1, Number.isFinite(randomVal) ? randomVal : 0));
+  return 0.95 + r * 0.15;
+}
+
+/**
+ * Tính toán tỷ lệ co dãn [scaleX, scaleY, scaleZ] theo nguyên lý Squash & Stretch động lực học:
+ * - Pha lấy đà (Anticipation): Co nén thân quân cờ xuống [1.15, 0.82, 1.15] trong 10% đầu bước nhảy.
+ * - Pha bay cao (In-air Stretch): Thân quân cờ dãn dài theo trục đứng [0.88, 1.18, 0.88] khi đạt đỉnh vòng cung parabol.
+ * - Pha rơi tiếp đất: Nén dần về [1.15, 0.82, 1.15] khi chạm sàn.
+ */
+export function calculateKineticPawnScale(
+  jumpProgress: number,
+  landingProgress: number = 0
+): [number, number, number] {
+  if (!Number.isFinite(jumpProgress)) {
+    return [1, 1, 1];
+  }
+
+  if (landingProgress > 0) {
+    return calculatePawnLandingImpact(landingProgress);
+  }
+
+  const t = Math.max(0, Math.min(1, jumpProgress));
+
+  // Pha 1: Lấy đà (0 -> 10%): [1, 1, 1] -> [1.15, 0.82, 1.15]
+  if (t <= 0.10) {
+    const p = t / 0.10;
+    const sy = 1.0 - 0.18 * p;
+    const sxz = 1.0 + 0.15 * p;
+    return [sxz, sy, sxz];
+  }
+
+  // Pha 2: Bay cao lên đỉnh parabol (10% -> 50%): [1.15, 0.82, 1.15] -> [0.88, 1.18, 0.88]
+  if (t <= 0.50) {
+    const p = (t - 0.10) / 0.40;
+    const sy = 0.82 + 0.36 * p;
+    const sxz = 1.15 - 0.27 * p;
+    return [sxz, sy, sxz];
+  }
+
+  // Pha 3: Rơi xuống chạm sàn (50% -> 100%): [0.88, 1.18, 0.88] -> [1.15, 0.82, 1.15]
+  const p = (t - 0.50) / 0.50;
+  const sy = 1.18 - 0.36 * p;
+  const sxz = 0.88 + 0.27 * p;
+  return [sxz, sy, sxz];
+}
+
+export const calculateKineticSquashStretch = calculateKineticPawnScale;
+
+/**
+ * Pha tiếp đất (Landing Impact): Nhún đàn hồi 2 nhịp giảm chấn trước khi phục hồi về tỉ lệ gốc [1, 1, 1].
+ * Sử dụng dao động điều hòa suy giảm 2 chu kỳ: delta = -0.18 * (1 - u)^2 * cos(4 * PI * u)
+ */
+export function calculatePawnLandingImpact(landingProgress: number): [number, number, number] {
+  if (!Number.isFinite(landingProgress) || landingProgress >= 1.0) {
+    return [1, 1, 1];
+  }
+  if (landingProgress <= 0) {
+    return [1.15, 0.82, 1.15];
+  }
+
+  const u = Math.max(0, Math.min(1, landingProgress));
+  const envelope = (1 - u) * (1 - u);
+  const oscillation = Math.cos(4 * Math.PI * u);
+  const deltaY = -0.18 * envelope * oscillation;
+  const deltaXZ = 0.15 * envelope * oscillation;
+
+  return [1.0 + deltaXZ, 1.0 + deltaY, 1.0 + deltaXZ];
 }

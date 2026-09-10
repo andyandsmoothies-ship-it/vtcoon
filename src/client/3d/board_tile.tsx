@@ -7,6 +7,7 @@ import type { BoardCell } from '../../domain/board_config';
 import { COLOR_GROUP_HEX } from '../../domain/theme';
 import { getTileTexture, getStandeeTexture } from './tile_texture_generator';
 import { GoldenGlowVFX } from './golden_glow_vfx';
+import { READY_TILES } from '../assets/tile_assets';
 
 export interface StandeeElevationOptions {
   readonly omega?: number;
@@ -56,16 +57,13 @@ export function loadStandeeWebp(
     onResolve?.(standeeWebpCache.get(cellIndex) ?? null);
     return () => {};
   }
-  if (skipNetwork || typeof window === 'undefined' || typeof Image === 'undefined') {
+  // Tuyệt đối không gọi new Image() tới các file chưa có trong READY_TILES (triệt tiêu 100% 36 lỗi 404 Console)
+  if (!READY_TILES.has(cellIndex)) {
     standeeWebpCache.set(cellIndex, null);
     onResolve?.(null);
     return () => {};
   }
-
-  // Bỏ qua request ngoại mạng trong môi trường trình duyệt thực để tránh 404 console.
-  // Duy trì cơ chế mock test khi Image là MockImage (bảo toàn 100% suite kiểm thử cũ).
-  const isMockImage = typeof Image === 'function' && Image.name === 'MockImage';
-  if (!isMockImage) {
+  if (skipNetwork || typeof window === 'undefined' || typeof Image === 'undefined') {
     standeeWebpCache.set(cellIndex, null);
     onResolve?.(null);
     return () => {};
@@ -213,8 +211,10 @@ export function LayeredDioramaTile({
         )
       )}
 
-      {/* 3. Standee 2.5D Billboard — Harmonic bobbing sin(omega*t) at 60 FPS */}
-      <StandeeBillboard cellIndex={cell.index} groupColor={groupColor} />
+      {/* 3. Standee 2.5D Billboard — Chỉ render khi ô đã có ảnh thật trong READY_TILES */}
+      {READY_TILES.has(cell.index) && (
+        <StandeeBillboard cellIndex={cell.index} groupColor={groupColor} />
+      )}
 
       {/* 4. Tier Markers — Cylinder indicators per upgrade level */}
       {Array.from({ length: currentLevel }, (_, i) => (

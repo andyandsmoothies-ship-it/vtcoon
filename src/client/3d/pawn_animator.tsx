@@ -1,6 +1,5 @@
-// [UI-S02/MSS] PawnAnimator — Spring-driven pawn hop with parabolic arc trajectory
+// [UI-S02/MSS] PawnAnimator — Kinetic Squash & Stretch pawn hop with parabolic arc trajectory
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { a, useSpring } from '@react-spring/three';
 import { Billboard } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { CanvasTexture, type Group } from 'three';
@@ -9,11 +8,14 @@ import { PLAYER_TOKEN_PALETTE } from '../../domain/theme';
 import { getEmoteDef } from '../../domain/emotes';
 import { useGameStore, type PawnAnimationState } from '../store/game_store';
 import { cellPosition } from './board_coords';
-import { interpolatePawnPosition, BASE_PAWN_Y, getPawnSquashStretch } from './pawn_path';
+import {
+  interpolatePawnPosition, BASE_PAWN_Y, HOP_DURATION, LANDING_DURATION,
+  calculateKineticPawnScale, calculatePawnLandingImpact, getStepPitchVariation,
+} from './pawn_path';
 import { AudioEngine } from '../audio/audio_engine';
 import { SoundEffect } from '../audio/audio_types';
 
-export { getPawnSquashStretch } from './pawn_path';
+export * from './pawn_path';
 
 export const PLAYER_OFFSETS: readonly [number, number, number][] = [
   [-0.2, 0, -0.2], [0.2, 0, -0.2], [-0.2, 0, 0.2], [0.2, 0, 0.2],
@@ -104,64 +106,65 @@ interface SingleHopProps {
 }
 
 function SingleHopPawn({ fromCell, toCell, offset, color, onHopComplete, emoteId }: SingleHopProps): React.ReactElement {
-  const [isRecovered, setIsRecovered] = useState(false);
-  const landedRef = useRef(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const groupRef = useRef<Group>(null);
+  const elapsedRef = useRef(0);
+  const soundPlayedRef = useRef(false);
+  const completedRef = useRef(false);
 
-  useEffect(() => () => {
-    if (timerRef.current) clearTimeout(timerRef.current);
-  }, []);
+  useFrame((_, delta) => {
+    if (completedRef.current || !groupRef.current) return;
 
-  const { t } = useSpring({
-    from: { t: 0 },
-    to: { t: 1 },
-    config: { tension: 170, friction: 12 },
-    onRest: (result) => {
-      if (result && result.finished === false) return;
-      if (landedRef.current) return;
-      landedRef.current = true;
+    const dt = Math.min(delta, 0.1);
+    elapsedRef.current += dt;
+    const t = elapsedRef.current;
 
-      // Kích hoạt âm thanh sfx_pawn_step.mp3 với tốc độ phát biến thiên ngẫu nhiên (playbackRate: 0.95 - 1.05)
-      const randomPitch = 0.95 + Math.random() * 0.10;
-      AudioEngine.playSfx(SoundEffect.PAWN_STEP, randomPitch);
+    if (t <= HOP_DURATION) {
+      const jumpProgress = t / HOP_DURATION;
+      const [x, y, z] = interpolatePawnPosition(fromCell, toCell, jumpProgress);
+      const [sx, sy, sz] = calculateKineticPawnScale(jumpProgress, 0);
+      const groundAdjustment = jumpProgress <= 0.10 ? -0.22 * (1 - sy) * (1 - jumpProgress / 0.10) : 0;
+      groupRef.current.position.set(x + offset[0], y + groundAdjustment, z + offset[2]);
+      groupRef.current.scale.set(sx, sy, sz);
+    } else if (t <= HOP_DURATION + LANDING_DURATION) {
+      if (!soundPlayedRef.current) {
+        soundPlayedRef.current = true;
+        const randomPitch = getStepPitchVariation();
+        AudioEngine.playSfx(SoundEffect.PAWN_STEP, randomPitch);
+      }
 
-      // Sau khi tiếp đất 0.1s: Hồi phục hình dạng tự nhiên [1, 1, 1]
-      timerRef.current = setTimeout(() => {
-        setIsRecovered(true);
-        onHopComplete();
-      }, 100);
-    },
+      const landingProgress = (t - HOP_DURATION) / LANDING_DURATION;
+      const [x, y, z] = interpolatePawnPosition(fromCell, toCell, 1.0);
+      const [sx, sy, sz] = calculatePawnLandingImpact(landingProgress);
+      const groundAdjustment = -0.22 * (1 - sy);
+      groupRef.current.position.set(x + offset[0], y + groundAdjustment, z + offset[2]);
+      groupRef.current.scale.set(sx, sy, sz);
+    } else {
+      completedRef.current = true;
+      const [x, y, z] = interpolatePawnPosition(fromCell, toCell, 1.0);
+      groupRef.current.position.set(x + offset[0], y, z + offset[2]);
+      groupRef.current.scale.set(1, 1, 1);
+      onHopComplete();
+    }
   });
 
-  const posX = t.to((val) => interpolatePawnPosition(fromCell, toCell, val)[0] + offset[0]);
-  const posY = t.to((val) => interpolatePawnPosition(fromCell, toCell, val)[1]);
-  const posZ = t.to((val) => interpolatePawnPosition(fromCell, toCell, val)[2] + offset[2]);
-
-  const scaleXZ = t.to((val) => getPawnSquashStretch(val, isRecovered)[0]);
-  const scaleY = t.to((val) => getPawnSquashStretch(val, isRecovered)[1]);
+  const [startX, startY, startZ] = interpolatePawnPosition(fromCell, toCell, 0);
 
   return (
-    <a.group
-      position-x={posX}
-      position-y={posY}
-      position-z={posZ}
-      scale-x={scaleXZ}
-      scale-y={scaleY}
-      scale-z={scaleXZ}
+    <group
+      ref={groupRef}
+      position={[startX + offset[0], startY, startZ + offset[2]]}
+      scale={[1, 1, 1]}
     >
       <PawnMesh color={color} />
       {emoteId && <PawnEmoteBubble emoteId={emoteId} />}
-    </a.group>
+    </group>
   );
 }
 
-interface ActivePawnProps {
+interface ActivePawnProps extends Pick<SingleHopProps, 'color' | 'offset' | 'emoteId'> {
   readonly player: Player;
-  readonly color: string;
-  readonly offset: readonly [number, number, number];
   readonly animation: PawnAnimationState;
   readonly onComplete: (playerId: string) => void;
-  readonly emoteId?: string;
 }
 
 function ActiveSpringPawn({ player, color, offset, animation, onComplete, emoteId }: ActivePawnProps): React.ReactElement {
@@ -177,7 +180,14 @@ function ActiveSpringPawn({ player, color, offset, animation, onComplete, emoteI
 
   const handleHopComplete = () => {
     if (stepIndex + 1 < waypoints.length) {
-      setStepIndex((idx) => idx + 1);
+      const nextIdx = stepIndex + 1;
+      setStepIndex(nextIdx);
+      const anim = useGameStore.getState().activePawnAnimation;
+      if (anim && anim.playerId === player.id) {
+        useGameStore.setState({
+          activePawnAnimation: { ...anim, currentIndex: nextIdx },
+        });
+      }
     } else {
       onComplete(player.id);
     }

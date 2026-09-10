@@ -8,6 +8,7 @@ import {
   clearStandeeWebpCache,
   getStandeeWebpUrl,
 } from '../../src/client/3d/board_tile';
+import { READY_TILES } from '../../src/client/assets/tile_assets';
 
 describe('[UC-GAME-009/MSS] Game Canvas - Tien dieu kien va Cau truc', () => {
   it('BOARD_CONFIG co du 40 o de dung Canvas', () => {
@@ -63,11 +64,13 @@ describe('[UI-S01/PBR] Smart Standee Asset Loader - Lifecycle & Resilient Fallba
     createdImages = [];
     (globalThis as any).window = {};
     (globalThis as any).Image = MockImage;
+    [1, 2, 5, 7].forEach((id) => READY_TILES.add(id));
   });
 
   afterEach(() => {
     (globalThis as any).window = originalWindow;
     (globalThis as any).Image = originalImage;
+    [1, 2, 5, 7].forEach((id) => READY_TILES.delete(id));
   });
 
   it('nạp ảnh WebP thành công: sinh Texture sRGB, bật needsUpdate và lưu cache', () => {
@@ -135,5 +138,14 @@ describe('[UI-S01/PBR] Smart Standee Asset Loader - Lifecycle & Resilient Fallba
     expect(onResolve).not.toHaveBeenCalled();
     // Cache vẫn được lưu an toàn cho lần mount tiếp theo
     expect(standeeWebpCache.get(7)).toBeInstanceOf(Texture);
+  });
+
+  it('không tải ảnh và không tạo new Image() nếu ô không nằm trong READY_TILES', () => {
+    const onResolve = vi.fn();
+    loadStandeeWebp(3, onResolve);
+
+    expect(createdImages).toHaveLength(0);
+    expect(onResolve).toHaveBeenCalledWith(null);
+    expect(standeeWebpCache.get(3)).toBeNull();
   });
 });

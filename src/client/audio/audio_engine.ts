@@ -159,8 +159,10 @@ class AudioEngineImpl {
     try {
       const howl = this.getOrCreateSfx(sfx);
       howl.volume(volume);
+      const effectiveRate =
+        rate ?? (sfx === SoundEffect.PAWN_STEP ? 0.95 + Math.random() * 0.15 : 1);
       if (typeof howl.rate === 'function') {
-        howl.rate(rate ?? 1);
+        howl.rate(effectiveRate);
       }
       howl.play();
     } catch {

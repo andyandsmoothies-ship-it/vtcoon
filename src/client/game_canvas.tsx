@@ -1,14 +1,95 @@
-// [UI-S01/MSS][UI-S03/MSS] GameCanvas — Orthographic 3D viewport, R3F Canvas wrapper
+// [UI-S01/MSS][UI-S03/MSS] GameCanvas — Orthographic 3D viewport, R3F Canvas wrapper & Cinematic Camera
 // Re-exports cellPosition for backward-compat with tests/client/game_canvas.test.ts
 export { cellPosition } from './3d/board_coords';
 
-import React from 'react';
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls, ContactShadows } from '@react-three/drei';
+import React, { useRef } from 'react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { OrbitControls, ContactShadows, Environment } from '@react-three/drei';
+import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
+import type { OrthographicCamera } from 'three';
 import type { Player } from '../domain/room';
 import { GameBoard } from './3d/board_layout';
 import { PawnAnimator } from './3d/pawn_animator';
-import { useGameStore } from './store/game_store';
+import { cellPosition } from './3d/board_coords';
+import { useGameStore, type PawnAnimationState } from './store/game_store';
+
+export const BASE_CAMERA_ZOOM = 41 as const;
+export const EVENT_CAMERA_ZOOM = 48 as const;
+export const CAMERA_FOCUS_WEIGHT = 0.65 as const;
+
+export function calculateCameraFocusTarget(
+  cellIndex: number | null,
+  weight: number = CAMERA_FOCUS_WEIGHT
+): [number, number, number] {
+  if (cellIndex == null || !Number.isFinite(cellIndex)) {
+    return [0, 0, 0];
+  }
+  const [cx, , cz] = cellPosition(cellIndex);
+  return [cx * weight, 0, cz * weight];
+}
+
+export function calculateCameraZoom(
+  isBigEvent: boolean,
+  baseZoom: number = BASE_CAMERA_ZOOM,
+  eventZoom: number = EVENT_CAMERA_ZOOM
+): number {
+  return isBigEvent ? eventZoom : baseZoom;
+}
+
+export function resolveCameraTargetCell(
+  activeAnimation: PawnAnimationState | null,
+  currentTurnPlayerId: string | null,
+  playerPositions: Record<string, number>
+): number | null {
+  if (activeAnimation?.isAnimating && activeAnimation.waypoints.length > 0) {
+    return activeAnimation.waypoints[activeAnimation.currentIndex] ?? activeAnimation.fromCell;
+  }
+  if (currentTurnPlayerId != null) {
+    return playerPositions[currentTurnPlayerId] ?? 0;
+  }
+  return null;
+}
+
+export function AdaptiveCinematicCamera(): React.ReactElement {
+  const { camera } = useThree();
+  const controlsRef = useRef<OrbitControlsImpl>(null);
+  const currentTurnPlayerId = useGameStore((s) => s.currentTurnPlayerId);
+  const activeAnimation = useGameStore((s) => s.activePawnAnimation);
+  const playerPositions = useGameStore((s) => s.playerPositions);
+  const activeModal = useGameStore((s) => s.activeModal);
+
+  useFrame((_, delta) => {
+    const targetCell = resolveCameraTargetCell(activeAnimation, currentTurnPlayerId, playerPositions);
+    const [tx, ty, tz] = calculateCameraFocusTarget(targetCell);
+    const isBigEvent = activeModal !== null || (activeAnimation?.isAnimating ?? false);
+    const targetZoom = calculateCameraZoom(isBigEvent);
+    const dt = Math.min(delta, 0.1);
+    const lerpFactor = 1 - Math.exp(-dt * 4);
+
+    const orthoCam = camera as OrthographicCamera;
+    if (typeof orthoCam.zoom === 'number') {
+      orthoCam.zoom += (targetZoom - orthoCam.zoom) * lerpFactor;
+      orthoCam.updateProjectionMatrix();
+    }
+
+    if (controlsRef.current) {
+      const dx = (tx - controlsRef.current.target.x) * lerpFactor;
+      const dy = (ty - controlsRef.current.target.y) * lerpFactor;
+      const dz = (tz - controlsRef.current.target.z) * lerpFactor;
+      controlsRef.current.target.x += dx;
+      controlsRef.current.target.y += dy;
+      controlsRef.current.target.z += dz;
+      camera.position.x += dx;
+      camera.position.y += dy;
+      camera.position.z += dz;
+      controlsRef.current.update();
+    }
+  });
+
+  return (
+    <OrbitControls ref={controlsRef} enableRotate={false} enablePan minZoom={25} maxZoom={60} />
+  );
+}
 
 export function GameCanvas({ players = [] }: { players?: readonly Player[] }): React.ReactElement {
   const playersInfo = useGameStore((s) => s.playersInfo);
@@ -38,14 +119,7 @@ export function GameCanvas({ players = [] }: { players?: readonly Player[] }): R
       camera={{ position: [22, 22, 22], zoom: 41, near: -100, far: 200 }}
       style={{ width: '100vw', height: '100vh', display: 'block', background: '#0B1120' }}
     >
-      <OrbitControls
-        enableRotate={false}
-        enablePan={true}
-        enableZoom={true}
-        minZoom={25}
-        maxZoom={60}
-      />
-      {/* Hệ thống chiếu sáng 3 điểm PBR chân thực nội bộ */}
+      <AdaptiveCinematicCamera />
       <ambientLight intensity={0.7} />
       <hemisphereLight color="#E0F2FE" groundColor="#0F172A" intensity={0.5} />
       <directionalLight
@@ -62,14 +136,10 @@ export function GameCanvas({ players = [] }: { players?: readonly Player[] }): R
         shadow-camera-far={60}
         shadow-bias={-0.0001}
       />
-      {/* Bóng tiếp xúc mềm neo vững sa bàn */}
-      <ContactShadows
-        position={[0, -0.15, 0]}
-        opacity={0.65}
-        scale={42}
-        blur={1.5}
-        far={10}
-      />
+      <React.Suspense fallback={null}>
+        <Environment preset="city" />
+      </React.Suspense>
+      <ContactShadows position={[0, -0.01, 0]} opacity={0.7} scale={40} blur={2} />
       <GameBoard />
       <PawnAnimator players={effectivePlayers} />
     </Canvas>

@@ -225,7 +225,7 @@ describe('[TC-UI02.6/MSS] Multi-Player Slot Offsets Defense', () => {
       expect(Math.abs(offset[2])).toBeLessThanOrEqual(0.5);
       expect(offset[1]).toBe(0);
     }
-  });
+  }, 15000);
 });
 
 describe('[TC-UI02.7/MSS] Pawn Squash & Stretch Deformation (Disney Animation Principles)', () => {

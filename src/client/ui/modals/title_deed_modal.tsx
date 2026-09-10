@@ -58,7 +58,7 @@ export function TitleDeedModal({
 
   if (!deed) {
     return (
-      <div className="bg-slate-900 border border-slate-700 p-6 rounded-2xl text-center max-w-sm text-slate-200">
+      <div className="bg-slate-900 border-2 border-amber-400/50 p-6 rounded-2xl text-center max-w-sm text-slate-200 shadow-2xl">
         <p className="text-sm">Không tìm thấy thông tin Sổ Đỏ cho ô #{cellIndex}.</p>
         <button
           type="button"
@@ -79,18 +79,51 @@ export function TitleDeedModal({
 
   return (
     <div
-      className="w-full max-w-sm max-h-[90vh] md:max-h-[85vh] bg-gradient-to-b from-slate-900 via-slate-850 to-slate-950 border-2 border-amber-400/90 rounded-2xl shadow-[0_0_30px_rgba(245,158,11,0.25)] overflow-hidden flex flex-col pointer-events-auto animate-in zoom-in-90 fade-in duration-200 ease-out"
+      className="relative w-full max-w-sm max-h-[90vh] md:max-h-[85vh] bg-gradient-to-b from-slate-900 via-slate-950 to-black border-2 border-amber-400 shadow-[0_0_25px_rgba(245,158,11,0.3)] ring-2 ring-amber-500/40 ring-offset-2 ring-offset-slate-950 rounded-2xl overflow-hidden flex flex-col pointer-events-auto animate-in zoom-in-90 fade-in duration-200 ease-out select-none"
       data-testid="title-deed-modal"
     >
-      {/* Ruy-băng tiêu đề (Ribbon Header) bo cong viền vàng bóng */}
+      {/* Khung viền mạ vàng kép dập nổi bên trong (Double Embossed Metallic Rim) */}
+      <div
+        className="pointer-events-none absolute inset-1.5 rounded-xl border border-amber-400/40 z-10 shadow-[inset_0_0_12px_rgba(245,158,11,0.15)]"
+        aria-hidden="true"
+      />
+
+      {/* Hoa văn dập chìm Trống Đồng Đông Sơn cổ truyền */}
+      <div
+        className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.06] overflow-hidden z-0"
+        aria-hidden="true"
+      >
+        <svg viewBox="0 0 400 400" className="w-[360px] h-[360px] text-amber-300 fill-none stroke-current" strokeWidth="1.5">
+          <circle cx="200" cy="200" r="28" fill="currentColor" fillOpacity="0.3" />
+          <circle cx="200" cy="200" r="14" fill="currentColor" />
+          {Array.from({ length: 14 }).map((_, i) => (
+            <polygon
+              key={i}
+              points="196,160 204,160 200,135"
+              fill="currentColor"
+              transform={`rotate(${(i * 360) / 14} 200 200)`}
+            />
+          ))}
+          <circle cx="200" cy="200" r="75" strokeDasharray="3 3" />
+          <circle cx="200" cy="200" r="95" />
+          <circle cx="200" cy="200" r="120" strokeDasharray="6 4" strokeWidth="2" />
+          <circle cx="200" cy="200" r="145" />
+          <circle cx="200" cy="200" r="165" strokeDasharray="4 2" />
+          <circle cx="200" cy="200" r="185" strokeWidth="2.5" />
+        </svg>
+      </div>
+
+      {/* Ruy-băng tiêu đề (Ribbon Header) bo cong viền vàng dập nổi */}
       <header
-        className="p-4 pr-14 pl-14 text-center relative border-b-2 border-amber-400/90 shadow-lg rounded-b-2xl mx-1.5 mt-1.5 rounded-t-xl shrink-0"
+        className="p-4 pr-14 pl-14 text-center relative border-b-2 border-amber-400 shadow-lg rounded-b-2xl mx-1.5 mt-1.5 rounded-t-xl shrink-0 z-10"
         style={{ backgroundColor: ribbonColor }}
       >
-        <p className="text-[10px] uppercase tracking-widest text-white/90 font-bold drop-shadow">
+        <div className="absolute top-2.5 left-2.5 w-2 h-2 rounded-full bg-amber-300 border border-amber-600 shadow-[0_0_4px_rgba(245,158,11,0.8)]" aria-hidden="true" />
+        <div className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-amber-300 border border-amber-600 shadow-[0_0_4px_rgba(245,158,11,0.8)]" aria-hidden="true" />
+        <p className="text-[10px] uppercase tracking-widest text-white/95 font-black drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
           {isRailroad ? 'Hạ Tầng Giao Thông' : isUtility ? 'Tiện Ích Quốc Gia' : 'Giấy Chứng Nhận Quyền Sở Hữu'}
         </p>
-        <h2 className="text-xl font-black uppercase tracking-wide text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] mt-0.5 break-words">
+        <h2 className="text-xl font-black uppercase tracking-wide text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] mt-0.5 break-words">
           {deed.name}
         </h2>
         {onClose && (
@@ -98,7 +131,7 @@ export function TitleDeedModal({
             type="button"
             onClick={onClose}
             aria-label="Đóng Sổ Đỏ"
-            className="absolute top-2 right-2 min-w-[48px] min-h-[48px] flex items-center justify-center text-white/80 hover:text-white text-xl font-black rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+            className="absolute top-2 right-2 min-w-[48px] min-h-[48px] flex items-center justify-center text-white/80 hover:text-white text-xl font-black rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 transition-colors cursor-pointer"
           >
             ✕
           </button>
@@ -106,7 +139,7 @@ export function TitleDeedModal({
       </header>
 
       {/* Thông tin giá niêm yết & thế chấp */}
-      <div className="flex-1 min-h-0 overflow-y-auto pr-1 p-4 space-y-3 text-xs md:text-sm">
+      <div className="relative z-10 flex-1 min-h-0 overflow-y-auto pr-1 p-4 space-y-3 text-xs md:text-sm">
         <div className="grid grid-cols-2 gap-2.5 bg-slate-950/70 p-2.5 rounded-xl border border-amber-400/30 shadow-inner">
           <div className="bg-slate-900/60 p-2 rounded-lg">
             <span className="text-slate-400 block text-[11px] font-medium">Giá niêm yết</span>
@@ -117,6 +150,13 @@ export function TitleDeedModal({
             <span className="text-amber-400 font-extrabold text-sm">{formatCurrency(deed.mortgageValue)}</span>
           </div>
         </div>
+
+        {isMortgaged && (
+          <div className="p-2 rounded-xl bg-rose-950/70 border border-rose-600/50 text-rose-300 text-xs text-center font-bold flex items-center justify-center gap-1.5 shadow-sm">
+            <span aria-hidden="true">⚠️</span>
+            <span>Tài sản đang thế chấp — Tạm ngưng thu phí thuê</span>
+          </div>
+        )}
 
         {/* Biểu phí dừng chân C0–C3 dạng Badge Cards có icon và chip phân cấp */}
         <div className="bg-slate-950/80 rounded-xl border border-slate-800 p-3 space-y-2">
@@ -179,7 +219,7 @@ export function TitleDeedModal({
       </div>
 
       {/* Nút hành động 3D tactile vật lý */}
-      <footer className="p-4 pt-2 bg-slate-900/90 border-t border-slate-800/90 flex flex-wrap gap-2 shrink-0">
+      <footer className="relative z-10 p-4 pt-2 bg-slate-900/90 border-t border-slate-800/90 flex flex-wrap gap-2 shrink-0">
         {isOwned ? (
           <>
             <div className="flex-1 min-h-[48px] py-2 px-3 rounded-xl font-bold text-emerald-400 bg-emerald-950/50 border border-emerald-600/40 text-xs text-center flex items-center justify-center shadow-inner truncate">
@@ -189,7 +229,7 @@ export function TitleDeedModal({
               <button
                 type="button"
                 onClick={onUpgrade}
-                className="min-h-[48px] whitespace-nowrap px-3.5 py-2 rounded-xl font-bold text-xs bg-gradient-to-b from-teal-500 to-teal-600 hover:from-teal-400 hover:to-teal-500 text-white border-b-4 border-teal-800 active:border-b-0 active:translate-y-1 shadow-lg shadow-teal-950/40 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400"
+                className="min-h-[48px] whitespace-nowrap px-3.5 py-2 rounded-xl font-bold text-xs bg-gradient-to-b from-teal-500 to-teal-600 hover:from-teal-400 hover:to-teal-500 text-white border-b-4 border-teal-800 active:border-b-0 active:translate-y-1 shadow-lg shadow-teal-950/40 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 cursor-pointer"
               >
                 Nâng Cấp (+{formatCurrency(upgradeCost ?? 0)})
               </button>
@@ -198,7 +238,7 @@ export function TitleDeedModal({
               <button
                 type="button"
                 onClick={onDowngrade}
-                className="min-h-[48px] whitespace-nowrap px-3.5 py-2 rounded-xl font-bold text-xs bg-gradient-to-b from-orange-600 to-orange-700 hover:from-orange-500 hover:to-orange-600 text-white border-b-4 border-orange-900 active:border-b-0 active:translate-y-1 shadow-lg shadow-orange-950/40 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400"
+                className="min-h-[48px] whitespace-nowrap px-3.5 py-2 rounded-xl font-bold text-xs bg-gradient-to-b from-orange-600 to-orange-700 hover:from-orange-500 hover:to-orange-600 text-white border-b-4 border-orange-900 active:border-b-0 active:translate-y-1 shadow-lg shadow-orange-950/40 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 cursor-pointer"
               >
                 Hạ Cấp (-50%)
               </button>
@@ -207,7 +247,7 @@ export function TitleDeedModal({
               <button
                 type="button"
                 onClick={isMortgaged ? onRedeem : onMortgage}
-                className="min-h-[48px] whitespace-nowrap px-3.5 py-2 rounded-xl font-bold text-xs bg-amber-600 hover:bg-amber-500 text-white border-b-4 border-amber-900 active:border-b-0 active:translate-y-1 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+                className="min-h-[48px] whitespace-nowrap px-3.5 py-2 rounded-xl font-bold text-xs bg-amber-600 hover:bg-amber-500 text-white border-b-4 border-amber-900 active:border-b-0 active:translate-y-1 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
               >
                 {isMortgaged ? 'Giải Chấp' : 'Thế Chấp'}
               </button>
@@ -215,7 +255,7 @@ export function TitleDeedModal({
             <button
               type="button"
               onClick={onClose}
-              className="min-h-[48px] whitespace-nowrap px-4 py-2 rounded-xl font-bold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border-b-4 border-slate-950 active:border-b-0 active:translate-y-1 text-xs transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+              className="min-h-[48px] whitespace-nowrap px-4 py-2 rounded-xl font-bold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border-b-4 border-slate-950 active:border-b-0 active:translate-y-1 text-xs transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
             >
               Đóng
             </button>
@@ -226,7 +266,7 @@ export function TitleDeedModal({
               type="button"
               onClick={onBuy}
               disabled={!canBuy}
-              className={`flex-1 min-h-[48px] whitespace-nowrap py-2.5 px-3 rounded-xl font-black text-xs sm:text-sm transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 truncate ${
+              className={`flex-1 min-h-[48px] whitespace-nowrap py-2.5 px-3 rounded-xl font-black text-xs sm:text-sm transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 truncate cursor-pointer ${
                 canBuy
                   ? 'bg-gradient-to-b from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 border-b-4 border-emerald-800 active:border-b-0 active:translate-y-1 text-white shadow-lg shadow-emerald-950/50'
                   : 'bg-slate-800 text-slate-500 border-b-4 border-slate-900 cursor-not-allowed'
@@ -238,7 +278,7 @@ export function TitleDeedModal({
             <button
               type="button"
               onClick={onPass ?? onClose}
-              className="min-h-[48px] whitespace-nowrap px-4 py-2.5 rounded-xl font-bold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border-b-4 border-slate-950 active:border-b-0 active:translate-y-1 text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+              className="min-h-[48px] whitespace-nowrap px-4 py-2.5 rounded-xl font-bold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border-b-4 border-slate-950 active:border-b-0 active:translate-y-1 text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
             >
               Bỏ Qua
             </button>

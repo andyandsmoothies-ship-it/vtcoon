@@ -13,7 +13,12 @@ import {
   useSmartStandeeTexture,
 } from '../../src/client/3d/board_tile';
 import { getStandeeTexture } from '../../src/client/3d/tile_texture_generator';
-import { preloadTileAssets, getAllTileAssetUrls } from '../../src/client/assets/tile_assets';
+import {
+  preloadTileAssets,
+  getAllTileAssetUrls,
+  READY_TILES,
+  getTileAssetUrl,
+} from '../../src/client/assets/tile_assets';
 import { CanvasTexture, SRGBColorSpace, type Texture } from 'three';
 
 describe('[TC-P3.1/MSS] TitleDeedModal Layout Polish & Chống Tràn Màn Hình Mobile', () => {
@@ -134,6 +139,10 @@ describe('[TC-P3.2/MSS] StandeeBillboard 3D Mesh Polish — Gỡ Tấm Biển Tr
     expect(boardTileSource).toContain('roughness={0.25}');
   });
 
+  it('StandeeBillboard chỉ được render khi ô nằm trong READY_TILES whitelist', () => {
+    expect(boardTileSource).toContain('READY_TILES.has(cell.index)');
+  });
+
   it('Hoạt ảnh nhấp nhô điều hòa calculateStandeeElevation vẫn được giữ nguyên vẹn', () => {
     const y0 = calculateStandeeElevation(0, { omega: 2.0, amplitude: 0.04, baseHeight: 0.72 });
     expect(y0).toBeCloseTo(0.72, 4);
@@ -252,5 +261,44 @@ describe('[TC-P3.3/MSS] Triệt Tiêu 36 Lỗi 404 Console & Standee Procedural 
     expect(standeeWebpCache.get(99)).toBeNull();
     clearStandeeWebpCache();
     expect(standeeWebpCache.size).toBe(0);
+  });
+
+  it('READY_TILES là Set rỗng, getTileAssetUrl chỉ trả URL khi ô nằm trong whitelist', () => {
+    expect(READY_TILES).toBeInstanceOf(Set);
+    expect(READY_TILES.size).toBe(0);
+    expect(getTileAssetUrl(1, 0)).toBeNull();
+    expect(getTileAssetUrl(39, 3)).toBeNull();
+
+    READY_TILES.add(1);
+    expect(getTileAssetUrl(1, 0)).toBe('/assets/tiles/tile_01_lvl0.webp');
+    READY_TILES.delete(1);
+    expect(getTileAssetUrl(1, 0)).toBeNull();
+  });
+
+  it('tile_texture_generator triệt tiêu hoàn toàn khối tô trắng đục gây che bàn cờ', () => {
+    const genPath = path.resolve(process.cwd(), 'src', 'client', '3d', 'tile_texture_generator.ts');
+    const genSource = fs.readFileSync(genPath, 'utf-8');
+    const standeeFunc = genSource.slice(genSource.indexOf('export function getStandeeTexture'));
+    expect(standeeFunc).not.toContain('roundRect(8, 8, 240, 240, 24)');
+    expect(standeeFunc).not.toContain('#FFFFFF');
+    expect(standeeFunc).not.toContain('createLinearGradient');
+  });
+});
+
+describe('[TC-P3.4/MSS] PBR City Environment & Ground ContactShadows trong GameCanvas', () => {
+  const canvasPath = path.resolve(process.cwd(), 'src', 'client', 'game_canvas.tsx');
+  const canvasSource = fs.readFileSync(canvasPath, 'utf-8');
+
+  it('GameCanvas kích hoạt Environment preset="city" bọc trong React.Suspense', () => {
+    expect(canvasSource).toContain("import { OrbitControls, ContactShadows, Environment } from '@react-three/drei';");
+    expect(canvasSource).toContain('<Environment preset="city" />');
+    expect(canvasSource).toMatch(/<React\.Suspense\s+fallback=\{null\}>\s*<Environment\s+preset="city"\s*\/>\s*<\/React\.Suspense>/);
+  });
+
+  it('ContactShadows được tinh chỉnh neo sa bàn: opacity 0.7, scale 40, blur 2', () => {
+    expect(canvasSource).toContain('position={[0, -0.01, 0]}');
+    expect(canvasSource).toContain('opacity={0.7}');
+    expect(canvasSource).toContain('scale={40}');
+    expect(canvasSource).toContain('blur={2}');
   });
 });
