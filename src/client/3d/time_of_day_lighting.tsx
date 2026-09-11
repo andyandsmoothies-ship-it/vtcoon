@@ -78,15 +78,15 @@ export function TimeOfDayLighting(): React.ReactElement {
 
     // 4. Nội suy ánh sáng phản xạ vịnh biển (Fill Light) & ánh sáng rìa ngọn sóng (Rim Light)
     if (fillRef.current) {
-      const fillIntensity = phase === 'night' ? 0.08 : phase === 'sunset' ? 0.35 : 0.3;
-      const fillColor = phase === 'night' ? '#1E293B' : phase === 'sunset' ? '#FDBA74' : '#CCFBF1';
+      const fillIntensity = phase === 'night' ? 0.22 : phase === 'sunset' ? 0.35 : 0.3;
+      const fillColor = phase === 'night' ? '#38BDF8' : phase === 'sunset' ? '#FDBA74' : '#CCFBF1';
       tempColor.set(fillColor);
       fillRef.current.color.lerp(tempColor, lerpRate);
       fillRef.current.intensity += (fillIntensity - fillRef.current.intensity) * lerpRate;
     }
 
     if (rimRef.current) {
-      const rimIntensity = phase === 'night' ? 0.15 : phase === 'sunset' ? 0.4 : 0.3;
+      const rimIntensity = phase === 'night' ? 0.25 : phase === 'sunset' ? 0.4 : 0.3;
       const rimColor = phase === 'night' ? '#38BDF8' : phase === 'sunset' ? '#EA580C' : '#FEF08A';
       tempColor.set(rimColor);
       rimRef.current.color.lerp(tempColor, lerpRate);
@@ -108,7 +108,7 @@ export function TimeOfDayLighting(): React.ReactElement {
         (state.scene.background as Color).lerp(tempColor, lerpRate);
       }
 
-      const targetEnvIntensity = phase === 'night' ? 0.05 : phase === 'sunset' ? 0.28 : 0.75;
+      const targetEnvIntensity = phase === 'night' ? 0.16 : phase === 'sunset' ? 0.28 : 0.75;
       if (typeof (state.scene as any).environmentIntensity !== 'number') {
         (state.scene as any).environmentIntensity = 1.0;
       }

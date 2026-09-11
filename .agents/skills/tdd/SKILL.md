@@ -183,7 +183,32 @@ When you encounter existing code that lacks tests, do NOT attempt a full rewrite
 3. **Refactor safely** within the characterization perimeter
 4. **Apply TDD** for all new changes going forward
 
+
+## TDD in the Agentic Era (Adam Tornhill 2026 Shift)
+
+Classic micro-TDD (increments of 5-10 lines of code) was optimized for **human working memory**. Forcing an AI agent through micro-increments creates extreme overhead, token bloat, and context fragmentation without leveraging the agent's strength: reasoning across feature boundaries.
+
+In the Agentic Era, TDD evolves:
+
+### 1. Feature-Level Abstraction Boundary
+- **Define the boundary at the Feature/E2E level**: Humans and architects focus on defining the acceptance boundary via high-level integration or End-to-End (E2E) contracts (The Golden Path / Living User Journey).
+- **One-Sweep Implementation**: Once the feature boundary test is locked in and FAILS (RED), let the agent write the complete implementation in **one sweep**. Humans do not micromanage low-level internal helper functions.
+
+### 2. Double-Entry Bookkeeping (Zero Bug-Codification)
+- AI agents frequently attempt to fix a failing test by either:
+  - (a) Modifying or relaxing the test assertion to match buggy implementation behavior.
+  - (b) Deleting or commenting out the failing test case.
+- **Strict Rule**: The test assertion is **immutable** during the implementation pass. Tests represent the SSOT requirement. The code must bend to the test, never the test to the code.
+
+### 3. Purpose of RED: Proving Test Harness Sensitivity
+- In human TDD: RED proved the developer had work left to do.
+- In agentic TDD: RED proves the **test harness has the sensitivity to catch bugs** in AI-generated code. Always execute an **Adversarial Inversion Gate** (deliberately mutate 1 logic line to confirm the test turns RED).
+
+### 4. Machine-Enforced Architecture
+- Architecture boundaries (no DB calls from UI, no circular dependencies) are enforced mechanically by linters and compiler boundary rules (`eslint-plugin-boundaries`, `ArchUnit`, `import_lint`), not manual eyeball inspection.
+
 ## Checklist Per Cycle
+
 
 ```
 [ ] Test describes behavior, not implementation

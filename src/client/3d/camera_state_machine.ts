@@ -27,7 +27,7 @@ export const CAMERA_CONFIG = {
   pawn_chase: {
     fov: 38,
     speed: 5.2,
-    offset: [6.8, 8.5, 6.8] as const,
+    offset: [3.6, 4.2, 3.6] as const,
   },
   tile_focus: {
     fov: 35,

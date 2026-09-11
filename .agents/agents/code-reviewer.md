@@ -34,13 +34,16 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command]
    - **Severity Ranking**:
      - 🔴 **[BLOCKER] / [HIGH]**: Logic bugs, regression breaks, data corruption risk, missing error reasons, or SSOT violations ➔ **MANDATORY REJECT**.
      - 🟡 **[MEDIUM] / [LOW]**: Minor naming ambiguities, non-blocking cleanup suggestions ➔ Non-blocking if no logic hazard.
-6. **Visual UI/UX & Architecture Audit**:
-   - Visual Audit: Verify visual output against `docs/domain/design.md` (no Anti-AI-Tells, adherence to semantic tokens).
-   - NFR Audit: Verify zero queries in loops (N+1), foreign calls have timeouts (max 3s), 60 FPS maintained on render thread.
-   - Test State Isolation Audit: Run test suite with `--randomize` to prove zero order-dependent tests. Verify clean state resets.
-   - Golden Path Living Test Audit: Verify that this slice has extended the project's living E2E flow with the new step(s) and the entire continuous sequence PASSES 100%. MANDATORY REJECT if omitted.
-   - Lean Observability Audit: Verify zero silent error swallowing (empty catch forbidden). Verify domain state transitions emit structured logs with explicit Reason Codes.
-7. **Trajectory Redundancy Purge**:
+37: 6. **Visual UI/UX & Architecture Audit**:
+38:    - Visual Audit: Verify visual output against `docs/domain/design.md` (no Anti-AI-Tells, adherence to semantic tokens).
+39:    - NFR Audit: Verify zero queries in loops (N+1), foreign calls have timeouts (max 3s), 60 FPS maintained on render thread.
+40:    - Test State Isolation Audit: Run test suite with `--randomize` to prove zero order-dependent tests. Verify clean state resets.
+41:    - Golden Path Living Test Audit: Verify that this slice has extended the project's living E2E flow with the new step(s) and the entire continuous sequence PASSES 100%. MANDATORY REJECT if omitted.
+42:    - Lean Observability Audit: Verify zero silent error swallowing (empty catch forbidden). Verify domain state transitions emit structured logs with explicit Reason Codes.
+43:    - **Production Hardening & Blast Radius Audit (The Prototype Trap Filter)**:
+44:      - Check for unhardened code smuggled in as "prototype": hardcoded timeout shortcuts, missing rate limits, unprotected concurrent mutations (missing Mutex), unhandled promise rejections, missing health endpoints (`/healthz`).
+45:      - If preparing for v1.0 release: Ensure all 5 Production Gates (`.agents/skills/production-hardening/SKILL.md`) are satisfied.
+46: 7. **Trajectory Redundancy Purge**:
    - Verify `git status --porcelain` is clean of scratch files, orphan variables, or dead exports.
 8. **Closed-Loop Re-Review**:
    - If findings include any `[BLOCKER]` or `[HIGH]` issue: Issue `[REJECTED]`. Re-review fixed code and re-run tests until 100% clean.

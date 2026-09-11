@@ -114,7 +114,7 @@ export function DioramaFerrisWheel(): React.ReactElement {
             metalness={0.6}
             roughness={0.25}
             emissive="#00F5FF"
-            emissiveIntensity={isNight ? 1.05 : isSunset ? 0.4 : 0.0}
+            emissiveIntensity={isNight ? 2.8 : isSunset ? 0.6 : 0.0}
           />
         </mesh>
         {/* Vòng thép trong (Inner Rim) viền vàng hổ phách */}
@@ -125,7 +125,7 @@ export function DioramaFerrisWheel(): React.ReactElement {
             metalness={0.8}
             roughness={0.2}
             emissive="#F59E0B"
-            emissiveIntensity={isNight ? 0.9 : isSunset ? 0.35 : 0.0}
+            emissiveIntensity={isNight ? 2.6 : isSunset ? 0.5 : 0.0}
           />
         </mesh>
 
@@ -161,7 +161,7 @@ export function DioramaFerrisWheel(): React.ReactElement {
                     color={color}
                     roughness={0.35}
                     emissive={color}
-                    emissiveIntensity={isNight ? 1.0 : isSunset ? 0.45 : 0.0}
+                    emissiveIntensity={isNight ? 2.8 : isSunset ? 0.6 : 0.0}
                   />
                 </mesh>
                 {/* Mái vòm cabin màu trắng sứ viền sáng */}
@@ -171,7 +171,7 @@ export function DioramaFerrisWheel(): React.ReactElement {
                     color="#F8FAFC"
                     roughness={0.2}
                     emissive="#FEF08A"
-                    emissiveIntensity={isNight ? 0.75 : 0.0}
+                    emissiveIntensity={isNight ? 2.5 : 0.0}
                   />
                 </mesh>
               </group>

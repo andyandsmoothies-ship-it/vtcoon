@@ -75,16 +75,21 @@ function SingleDie({
     >
       <mesh castShadow receiveShadow>
         <boxGeometry args={[0.5, 0.5, 0.5]} />
-        <meshStandardMaterial
-          color={highlight ? '#FEF08A' : '#FFFDF0'}
-          roughness={0.25}
-          metalness={0.1}
+        <meshPhysicalMaterial
+          color={highlight ? '#EF4444' : '#DC2626'}
+          roughness={0.06}
+          clearcoat={1.0}
+          clearcoatRoughness={0.08}
         />
       </mesh>
       {DIE_PIPS.map((pip, idx) => (
         <mesh key={idx} position={pip.pos}>
-          <sphereGeometry args={[0.032, 8, 8]} />
-          <meshBasicMaterial color={pip.isRed ? '#DC2626' : '#1E293B'} />
+          <sphereGeometry args={[0.034, 8, 8]} />
+          <meshStandardMaterial
+            color="#F59E0B"
+            metalness={0.9}
+            roughness={0.15}
+          />
         </mesh>
       ))}
     </a.group>

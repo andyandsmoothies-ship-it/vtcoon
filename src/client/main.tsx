@@ -5,6 +5,7 @@ import { HudContainer } from './ui/hud_container';
 import { useGameStore, type PlayerHudInfo, FloatingTextType } from './store/game_store';
 import { useLobbyStore } from './store/lobby_store';
 import { useEnvironmentStore } from './store/environment_store';
+import { useVfxStore } from './store/vfx_store';
 import { LobbyView } from './ui/lobby/lobby_view';
 import { PLAYER_TOKEN_PALETTE } from '../domain/theme';
 import { AudioEngine } from './audio/audio_engine';
@@ -39,9 +40,10 @@ function getInitialLobbyConfig(): { roomCode: string; playerId: string; isHost: 
 }
 
 if (typeof window !== 'undefined') {
-  (window as unknown as { __gameStore?: typeof useGameStore; __lobbyStore?: typeof useLobbyStore; __environmentStore?: typeof useEnvironmentStore }).__gameStore = useGameStore;
-  (window as unknown as { __gameStore?: typeof useGameStore; __lobbyStore?: typeof useLobbyStore; __environmentStore?: typeof useEnvironmentStore }).__lobbyStore = useLobbyStore;
-  (window as unknown as { __gameStore?: typeof useGameStore; __lobbyStore?: typeof useLobbyStore; __environmentStore?: typeof useEnvironmentStore }).__environmentStore = useEnvironmentStore;
+  (window as unknown as { __gameStore?: typeof useGameStore; __lobbyStore?: typeof useLobbyStore; __environmentStore?: typeof useEnvironmentStore; __vfxStore?: typeof useVfxStore }).__gameStore = useGameStore;
+  (window as unknown as { __gameStore?: typeof useGameStore; __lobbyStore?: typeof useLobbyStore; __environmentStore?: typeof useEnvironmentStore; __vfxStore?: typeof useVfxStore }).__lobbyStore = useLobbyStore;
+  (window as unknown as { __gameStore?: typeof useGameStore; __lobbyStore?: typeof useLobbyStore; __environmentStore?: typeof useEnvironmentStore; __vfxStore?: typeof useVfxStore }).__environmentStore = useEnvironmentStore;
+  (window as unknown as { __gameStore?: typeof useGameStore; __lobbyStore?: typeof useLobbyStore; __environmentStore?: typeof useEnvironmentStore; __vfxStore?: typeof useVfxStore }).__vfxStore = useVfxStore;
 
   if (!useLobbyStore.getState().roomCode) {
     const initCfg = getInitialLobbyConfig();

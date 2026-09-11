@@ -178,15 +178,15 @@ export function LayeredDioramaTile({
         {/* Corner tile — larger square base with polished stone PBR */}
         <mesh receiveShadow castShadow>
           <boxGeometry args={[2.2, 0.22, 2.2]} />
-          <meshStandardMaterial color="#334155" roughness={0.22} metalness={0.1} />
+          <meshStandardMaterial color="#1E293B" roughness={0.16} metalness={0.25} />
         </mesh>
         {/* Inner corner accent badge with texture */}
         <mesh position={[0, 0.115, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
           <planeGeometry args={[2.16, 2.16]} />
           {tileTexture ? (
-            <meshStandardMaterial map={tileTexture} roughness={0.88} metalness={0.0} />
+            <meshStandardMaterial map={tileTexture} roughness={0.52} metalness={0.0} />
           ) : (
-            <meshStandardMaterial color="#1E293B" roughness={0.35} metalness={0.05} />
+            <meshStandardMaterial color="#1E293B" roughness={0.25} metalness={0.1} />
           )}
         </mesh>
       </group>
@@ -197,17 +197,17 @@ export function LayeredDioramaTile({
 
   return (
     <group position={position} rotation={rotation} onClick={onClick}>
-      {/* 1. Base tile — Polished ivory cream parchment PBR */}
+      {/* 1. Base tile — Polished ivory cream parchment PBR with glossy tactile toy finish */}
       <mesh receiveShadow castShadow>
         <boxGeometry args={[1.68, 0.2, 2.2]} />
-        <meshStandardMaterial color="#EDE5D8" roughness={0.65} metalness={0.02} />
+        <meshStandardMaterial color="#EDE5D8" roughness={0.35} metalness={0.06} />
       </mesh>
 
-      {/* 2. Top surface information texture */}
+      {/* 2. Top surface information texture with subtle lacquer sheen */}
       {tileTexture ? (
         <mesh position={[0, 0.103, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
           <planeGeometry args={[1.64, 2.16]} />
-          <meshStandardMaterial map={tileTexture} roughness={0.88} metalness={0.0} />
+          <meshStandardMaterial map={tileTexture} roughness={0.52} metalness={0.0} />
         </mesh>
       ) : (
         /* Fallback ColorStrip when texture is unavailable */

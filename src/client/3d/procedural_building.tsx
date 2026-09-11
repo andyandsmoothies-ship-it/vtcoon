@@ -156,7 +156,7 @@ export function ProceduralBuilding({
               color="#FDE68A"
               roughness={0.2}
               emissive="#F59E0B"
-              emissiveIntensity={isNight ? 1.05 : isSunset ? 0.6 : 0.25}
+              emissiveIntensity={isNight ? 2.8 : isSunset ? 0.7 : 0.25}
             />
           </mesh>
 
@@ -166,7 +166,7 @@ export function ProceduralBuilding({
             <meshStandardMaterial
               color="#FDE68A"
               emissive="#FBBF24"
-              emissiveIntensity={isNight ? 0.95 : isSunset ? 0.5 : 0.1}
+              emissiveIntensity={isNight ? 2.6 : isSunset ? 0.6 : 0.1}
             />
           </mesh>
 
@@ -196,7 +196,7 @@ export function ProceduralBuilding({
               roughness={0.3}
               metalness={0.2}
               emissive={groupColor}
-              emissiveIntensity={isNight ? 0.8 : isSunset ? 0.35 : 0.0}
+              emissiveIntensity={isNight ? 2.5 : isSunset ? 0.45 : 0.0}
             />
           </mesh>
         </group>
@@ -221,7 +221,7 @@ export function ProceduralBuilding({
               roughness={0.1}
               metalness={0.9}
               emissive="#38BDF8"
-              emissiveIntensity={isNight ? 0.75 : isSunset ? 0.3 : 0.0}
+              emissiveIntensity={isNight ? 2.6 : isSunset ? 0.45 : 0.0}
             />
           </mesh>
 
@@ -243,7 +243,7 @@ export function ProceduralBuilding({
             <meshStandardMaterial
               color="#FEF08A"
               emissive="#FDE047"
-              emissiveIntensity={isNight ? 1.1 : isSunset ? 0.5 : 0.1}
+              emissiveIntensity={isNight ? 3.0 : isSunset ? 0.7 : 0.1}
             />
           </mesh>
           <mesh position={[0, 0.49, 0.212]}>
@@ -251,7 +251,7 @@ export function ProceduralBuilding({
             <meshStandardMaterial
               color="#38BDF8"
               emissive="#00F5FF"
-              emissiveIntensity={isNight ? 1.0 : isSunset ? 0.4 : 0.1}
+              emissiveIntensity={isNight ? 3.2 : isSunset ? 0.7 : 0.1}
             />
           </mesh>
 
@@ -269,7 +269,7 @@ export function ProceduralBuilding({
             <meshStandardMaterial
               color="#38BDF8"
               emissive="#00F5FF"
-              emissiveIntensity={isNight ? 1.2 : isSunset ? 0.6 : 0.0}
+              emissiveIntensity={isNight ? 3.5 : isSunset ? 0.8 : 0.0}
             />
           </mesh>
 
@@ -311,7 +311,7 @@ export function ProceduralBuilding({
               roughness={0.1}
               metalness={0.9}
               emissive="#38BDF8"
-              emissiveIntensity={isNight ? 0.9 : isSunset ? 0.4 : 0.0}
+              emissiveIntensity={isNight ? 2.8 : isSunset ? 0.55 : 0.0}
             />
           </mesh>
 
@@ -323,7 +323,7 @@ export function ProceduralBuilding({
               roughness={0.2}
               metalness={0.85}
               emissive="#F59E0B"
-              emissiveIntensity={isNight ? 0.8 : isSunset ? 0.4 : 0.0}
+              emissiveIntensity={isNight ? 2.8 : isSunset ? 0.55 : 0.0}
             />
           </mesh>
 
@@ -340,7 +340,7 @@ export function ProceduralBuilding({
               roughness={0.1}
               metalness={0.9}
               emissive="#38BDF8"
-              emissiveIntensity={isNight ? 0.95 : isSunset ? 0.45 : 0.0}
+              emissiveIntensity={isNight ? 3.0 : isSunset ? 0.6 : 0.0}
             />
           </mesh>
 
@@ -352,7 +352,7 @@ export function ProceduralBuilding({
               roughness={0.1}
               metalness={0.85}
               emissive="#00F5FF"
-              emissiveIntensity={isNight ? 1.05 : isSunset ? 0.5 : 0.1}
+              emissiveIntensity={isNight ? 3.2 : isSunset ? 0.7 : 0.1}
             />
           </mesh>
           <mesh position={[0, 0.42, 0]} castShadow>
@@ -362,7 +362,7 @@ export function ProceduralBuilding({
               roughness={0.2}
               metalness={0.8}
               emissive="#F59E0B"
-              emissiveIntensity={isNight ? 0.8 : 0.0}
+              emissiveIntensity={isNight ? 2.8 : 0.0}
             />
           </mesh>
 
@@ -372,7 +372,7 @@ export function ProceduralBuilding({
             <meshStandardMaterial
               color="#F59E0B"
               emissive="#F59E0B"
-              emissiveIntensity={isNight ? 1.2 : isSunset ? 0.6 : 0.0}
+              emissiveIntensity={isNight ? 3.5 : isSunset ? 0.8 : 0.0}
             />
           </mesh>
 
@@ -384,7 +384,7 @@ export function ProceduralBuilding({
               roughness={0.1}
               metalness={0.98}
               emissive="#F59E0B"
-              emissiveIntensity={isNight ? 0.85 : isSunset ? 0.5 : 0.1}
+              emissiveIntensity={isNight ? 2.8 : isSunset ? 0.6 : 0.1}
             />
           </mesh>
 

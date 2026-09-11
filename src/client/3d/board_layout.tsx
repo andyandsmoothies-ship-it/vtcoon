@@ -37,15 +37,15 @@ export function GameBoard(): React.ReactElement {
       {/* 0.2. Hiệu ứng Va Đập Xây Dựng, Sóng Xung Kích & Pháo Hoa Khánh Thành */}
       <ConstructionSlamVFX />
 
-      {/* 0. Khung kè đá phiến sẫm viền bàn cờ nổi 3D bo vát (Dark Slate Promenade Rim: 21.4 x 21.4) */}
+      {/* 0. Khung kè đá phiến sẫm viền bàn cờ nổi 3D bo vát bóng bẩy (Dark Slate Promenade Rim: 21.4 x 21.4) */}
       <mesh receiveShadow castShadow position={[0, -0.06, 0]}>
         <boxGeometry args={[21.4, 0.24, 21.4]} />
-        <meshStandardMaterial color="#334155" roughness={0.6} metalness={0.15} />
+        <meshStandardMaterial color="#1E293B" roughness={0.2} metalness={0.25} />
       </mesh>
-      {/* Đường chỉ kim loại khảm vàng hổ phách ngăn cách khung đá và mép ô cờ */}
+      {/* Đường chỉ kim loại khảm vàng hổ phách sáng bóng ngăn cách khung đá và mép ô cờ */}
       <mesh position={[0, -0.01, 0]}>
         <boxGeometry args={[20.72, 0.04, 20.72]} />
-        <meshStandardMaterial color="#D97706" roughness={0.25} metalness={0.85} />
+        <meshStandardMaterial color="#F59E0B" roughness={0.1} metalness={0.92} />
       </mesh>
 
       {/* 1. Nền hoa viên: Thảm cỏ xanh nhiệt đới trung tâm */}

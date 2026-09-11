@@ -105,7 +105,7 @@ export function DioramaSkyline(): React.ReactElement {
             <meshStandardMaterial
               color="#FEF08A"
               emissive="#FDE047"
-              emissiveIntensity={isNight ? 1.0 : isSunset ? 0.4 : 0.0}
+              emissiveIntensity={isNight ? 2.8 : isSunset ? 0.6 : 0.0}
             />
           </mesh>
           <mesh castShadow position={[0, 0.98, 0]}>
@@ -187,7 +187,7 @@ export function DioramaSkyline(): React.ReactElement {
               <meshStandardMaterial
                 color="#DC2626"
                 emissive="#EF4444"
-                emissiveIntensity={isNight ? 1.2 : isSunset ? 0.6 : 0.1}
+                emissiveIntensity={isNight ? 3.0 : isSunset ? 0.8 : 0.1}
               />
             </mesh>
           </group>
@@ -216,7 +216,7 @@ export function DioramaSkyline(): React.ReactElement {
             roughness={0.1}
             metalness={0.6}
             emissive="#0284C7"
-            emissiveIntensity={isNight ? 0.8 : isSunset ? 0.3 : 0.0}
+            emissiveIntensity={isNight ? 2.5 : isSunset ? 0.5 : 0.0}
           />
         </mesh>
         {/* Tượng đài trung tâm mạ vàng Champagne */}

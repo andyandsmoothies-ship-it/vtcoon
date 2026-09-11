@@ -68,22 +68,22 @@ export function CoastalIslandEnvironment(): React.ReactElement {
         <planeGeometry ref={oceanGeomRef} args={[180, 180, 36, 36]} />
         <meshStandardMaterial
           color="#0284C7"
-          roughness={0.16}
-          metalness={0.35}
+          roughness={0.08}
+          metalness={0.55}
           transparent
           opacity={0.92}
         />
       </mesh>
 
-      {/* 1.2. Tầng nước nông ngọc bích sát bờ đảo (#06B6D4) */}
+      {/* 1.2. Tầng nước nông ngọc bích sát bờ đảo (#06B6D4) ôm theo đường bờ biển hữu cơ */}
       <mesh ref={shallowRef} receiveShadow position={[0, -0.56, 0]}>
-        <boxGeometry args={[82, 0.14, 82]} />
+        <cylinderGeometry args={[38, 44, 0.14, 48]} />
         <meshStandardMaterial
           color="#06B6D4"
-          roughness={0.2}
-          metalness={0.2}
+          roughness={0.08}
+          metalness={0.45}
           transparent
-          opacity={0.86}
+          opacity={0.88}
         />
       </mesh>
 
@@ -93,26 +93,47 @@ export function CoastalIslandEnvironment(): React.ReactElement {
         <meshBasicMaterial color="#FFFFFF" transparent opacity={0.55} />
       </mesh>
 
-      {/* 2. BÃI CÁT VÀNG NHIỆT ĐỚI (Tropical Warm Sand Peninsula: 58 x 58) */}
+      {/* 2. BÃI CÁT VÀNG HỮU CƠ & THỀM BỜ CÁT THOAI THOẢI (Organic Coastline & Sloped Sand Frustums) */}
+      {/* Thềm bờ cát chính uốn lượn tự nhiên vát nghiêng góc thoai thoải */}
       <mesh receiveShadow position={[0, -0.44, 0]}>
-        <boxGeometry args={[56, 0.28, 56]} />
-        <meshStandardMaterial color="#F6D5A8" roughness={0.82} metalness={0.05} />
+        <cylinderGeometry args={[28.5, 34.0, 0.28, 48]} />
+        <meshStandardMaterial color="#F6D5A8" roughness={0.78} metalness={0.05} />
+      </mesh>
+      {/* Thềm cát thoải tiếp xúc với mép sóng đại dương */}
+      <mesh receiveShadow position={[0, -0.55, 0]}>
+        <cylinderGeometry args={[33.5, 39.0, 0.14, 48]} />
+        <meshStandardMaterial color="#EDC99B" roughness={0.75} metalness={0.05} />
+      </mesh>
+      {/* Mũi bãi tắm cong phía Tây Nam ôm lấy khu nghỉ dưỡng */}
+      <mesh receiveShadow position={[-16, -0.42, 13]}>
+        <cylinderGeometry args={[7.5, 9.5, 0.24, 24]} />
+        <meshStandardMaterial color="#F6D5A8" roughness={0.78} metalness={0.05} />
+      </mesh>
+      {/* Mũi cát tự nhiên vươn ra biển phía Đông Nam */}
+      <mesh receiveShadow position={[16, -0.44, 16]}>
+        <cylinderGeometry args={[6.5, 8.5, 0.22, 24]} />
+        <meshStandardMaterial color="#F6D5A8" roughness={0.78} metalness={0.05} />
       </mesh>
 
-      {/* 2.1. Thềm cỏ ngọc lục bảo bao quanh chân bàn cờ (Lush Green Coastal Plateau: 42 x 42) */}
+      {/* 2.1. Thềm cỏ ngọc lục bảo bo vát hữu cơ bao quanh chân bàn cờ (Lush Green Beveled Plateau) */}
       <mesh receiveShadow position={[0, -0.26, 0]}>
-        <boxGeometry args={[42, 0.22, 42]} />
+        <cylinderGeometry args={[21.0, 24.5, 0.22, 48]} />
         <meshStandardMaterial color="#22C55E" roughness={0.75} metalness={0.02} />
       </mesh>
+      {/* Đồi cỏ chuyển tiếp phía Bắc tự nhiên */}
+      <mesh receiveShadow position={[0, -0.24, -7]}>
+        <cylinderGeometry args={[17.5, 20.5, 0.22, 32]} />
+        <meshStandardMaterial color="#16A34A" roughness={0.72} metalness={0.02} />
+      </mesh>
 
-      {/* 2.2. Đại lộ ven biển & Vỉa hè bao quanh bàn cờ (Coastal Boulevard & Promenade) */}
+      {/* 2.2. Đại lộ ven biển & Vỉa hè bo vát bóng bẩy (Coastal Boulevard & Promenade) */}
       <mesh receiveShadow position={[0, -0.14, 0]}>
-        <boxGeometry args={[23.6, 0.2, 23.6]} />
-        <meshStandardMaterial color="#334155" roughness={0.7} metalness={0.1} />
+        <cylinderGeometry args={[14.8, 16.6, 0.2, 48]} />
+        <meshStandardMaterial color="#1E293B" roughness={0.18} metalness={0.25} />
       </mesh>
       <mesh receiveShadow position={[0, -0.06, 0]}>
-        <boxGeometry args={[24.2, 0.08, 24.2]} />
-        <meshStandardMaterial color="#64748B" roughness={0.6} />
+        <cylinderGeometry args={[15.0, 15.8, 0.08, 48]} />
+        <meshStandardMaterial color="#94A3B8" roughness={0.25} metalness={0.1} />
       </mesh>
 
       {/* 3. BỜ BIỂN PHÍA NAM & TÂY (South-West Sandy Beach with Palm Trees) */}

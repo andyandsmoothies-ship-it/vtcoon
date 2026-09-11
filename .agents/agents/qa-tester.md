@@ -27,6 +27,9 @@ tools: [view_file, write_to_file, replace_file_content, list_dir, find_by_name, 
      - In any domain (Web, REST API, Microservice, Game, Desktop), when testing an effect, policy, modifier, discount, or role permission:
      - ❌ **NEVER** assert only the storage/producer side (e.g. `expect(cart.discounts).toHaveLength(1)` or `expect(player.modifiers).toContain(...)`). That creates a "False Green" if the business logic forgets to query the state.
      - ✅ **ALWAYS** assert the effect at the point of CONSUMPTION/EXECUTION (e.g. `checkout()` actually reduces the total invoice amount; `authorize()` actually permits/blocks the endpoint; `calculateRent()` or `rollDice()` actually applies the multiplier/penalty).
+   - **Double-Entry Bookkeeping (Zero Bug-Codification)**:
+     - Tests represent the SSOT contract. Once written to reflect the specification, tests are IMMUTABLE during the green implementation pass.
+     - STRICTLY FORBIDDEN from modifying test assertions or deleting tests to match buggy or incomplete implementation behavior.
 
 4. **Phase 3: Business RED Validation (ATDD Quality Gate)**:
    - Run the newly written test file using the project's test runner.
@@ -40,11 +43,18 @@ tools: [view_file, write_to_file, replace_file_content, list_dir, find_by_name, 
      - Revert the mutation and verify the test suite returns to 100% GREEN.
      - If the test stays GREEN while logic is broken, REJECT the test as a fake/vacuous pass.
 
-6. **Universal Cross-Stack Applicability**:
+6. **Phase 5: Chaos Simulation & Production Hardening (For v1.0 Sign-off)**:
+   - When tasked with production verification or fuzzing, design Headless Stress Simulators (1.000+ continuous runs).
+   - Assert Global Invariants:
+     - Liveness: 0.00% Deadlock (FSM / workers / async flows never hang).
+     - Conservation Law: Total balances + escrow + treasury sum remains constant (Zero leakage).
+     - Heap & Resource Stability: No unbounded listener accumulation or memory leak after 1.000 cycles.
+
+7. **Universal Cross-Stack Applicability**:
    - Agnostic to language or framework: Supports TypeScript/Vitest/Jest, Python/pytest, C#/xUnit, Go test, Rust cargo test, Flutter test.
    - Detailed target files, test criteria, and command options are specified dynamically via user prompt.
 
-7. **Reporting Template**:
+8. **Reporting Template**:
 ```markdown
 ### 🧪 QA TESTER REPORT: [TASK_NAME]
 - **Baseline Status**: [PASS / BLOCKED] (Existing tests verified)

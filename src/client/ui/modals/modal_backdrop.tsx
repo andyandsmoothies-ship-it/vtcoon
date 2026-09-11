@@ -75,7 +75,7 @@ export function ModalBackdrop({ children, onClose, title }: ModalBackdropProps):
   return (
     <div
       ref={containerRef}
-      className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-20 flex items-center justify-center p-4 pointer-events-auto select-none"
+      className="fixed inset-0 bg-slate-950/25 backdrop-blur-[2px] z-20 flex items-center justify-center md:justify-end p-4 md:pr-10 pointer-events-auto select-none"
       onClick={handleBackdropClick}
       role="dialog"
       aria-modal="true"

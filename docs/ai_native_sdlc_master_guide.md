@@ -136,18 +136,38 @@
 │      • Mọi chuyển dịch trạng thái nghiệp vụ (FSM Transitions, Transactions) bắt buộc phát ra Structured Log
 │        ({ event, correlationId, timestamp, delta }) để tua lại hành động khi gặp sự cố ngoài thực tế.
 │
-└── 14. 3 VÒNG PHÒNG VỆ CHỐNG TRÔI DẠT NGHIỆP VỤ & TÍNH NĂNG MỒ CÔI (THE THREE LINES OF DEFENSE):
-       • Triệt tiêu 2 căn bệnh cố hữu của LLM: "Mù ngữ cảnh cục bộ (Context Myopia)" và "Ảo tưởng hoàn thành (Completion Illusion)".
-       • VÒNG 1 (Khóa Ticket SSOT, Sổ Nợ Kỹ Thuật & Cổng Runtime Wire Gate): Mọi ticket bắt buộc map 1-1 danh mục từ `docs/requirements.md`.
-         Nếu hoãn luồng Alternative (A#) vì MSS, BẮT BUỘC đăng ký vào Sổ Nợ Kỹ Thuật (Tech Debt Ledger) trong Sổ Cái với Slice đích tiếp nhận.
-         CẤM tuyệt đối âm thầm hoãn tính năng mà không có địa chỉ nhận nợ. BẮT BUỘC mọi public mutation method phải được đấu nối vào Route/Intent/Dispatcher (Cấm hàm nghiệp vụ mồ côi).
-       • VÒNG 2 (Kiểm Thử Hợp Đồng Thực Thể, Consumer-Side Assertion & Anti-Smuggling Gate):
-         - Viết Fixture Contract Test tự động đối chiếu 100% Config, Schema, Danh mục so với bảng SSOT trong tài liệu gốc.
-         - Consumer-Side Assertion: Kiểm thử hiệu ứng/modifier/discount bắt buộc assert tại hàm TIÊU THỤ (hàm tính tiền, checkout, execute), CẤM chỉ assert mảng trạng thái lưu trữ.
-         - Anti-Smuggling Gate: Cấm tráo ruột test (gắn nhãn Feature A nhưng bên trong chỉ assert kiểm tra của Feature B tầm thường để lừa cổng nghiệm thu).
-       • VÒNG 3 (Kiểm Toán Mốc Định Kỳ - Periodic Milestone Deep Audit): Cứ sau mỗi 2 Slices hoặc trước khi đóng Epic,
-         bắt buộc điều phối subagent độc lập chạy phiên Deep Audit rà soát 1-1 toàn bộ codebase với `docs/requirements.md`
-         để truy tìm và xóa sổ mọi hàm No-Op, mock data hoặc tính năng bị bỏ quên.
+│   14. 3 VÒNG PHÒNG VỆ CHỐNG TRÔI DẠT NGHIỆP VỤ & TÍNH NĂNG MỒ CÔI (THE THREE LINES OF DEFENSE):
+│       • Triệt tiêu 2 căn bệnh cố hữu của LLM: "Mù ngữ cảnh cục bộ (Context Myopia)" và "Ảo tưởng hoàn thành (Completion Illusion)".
+│       • VÒNG 1 (Khóa Ticket SSOT, Sổ Nợ Kỹ Thuật & Cổng Runtime Wire Gate): Mọi ticket bắt buộc map 1-1 danh mục từ `docs/requirements.md`.
+│         Nếu hoãn luồng Alternative (A#) vì MSS, BẮT BUỘC đăng ký vào Sổ Nợ Kỹ Thuật (Tech Debt Ledger) trong Sổ Cái với Slice đích tiếp nhận.
+│         CẤM tuyệt đối âm thầm hoãn tính năng mà không có địa chỉ nhận nợ. BẮT BUỘC mọi public mutation method phải được đấu nối vào Route/Intent/Dispatcher (Cấm hàm nghiệp vụ mồ côi).
+│       • VÒNG 2 (Kiểm Thử Hợp Đồng Thực Thể, Consumer-Side Assertion & Anti-Smuggling Gate):
+│         - Viết Fixture Contract Test tự động đối chiếu 100% Config, Schema, Danh mục so với bảng SSOT trong tài liệu gốc.
+│         - Consumer-Side Assertion: Kiểm thử hiệu ứng/modifier/discount bắt buộc assert tại hàm TIÊU THỤ (hàm tính tiền, checkout, execute), CẤM chỉ assert mảng trạng thái lưu trữ.
+│         - Anti-Smuggling Gate: Cấm tráo ruột test (gắn nhãn Feature A nhưng bên trong chỉ assert kiểm tra của Feature B tầm thường để lừa cổng nghiệm thu).
+│       • VÒNG 3 (Kiểm Toán Mốc Định Kỳ - Periodic Milestone Deep Audit): Cứ sau mỗi 2 Slices hoặc trước khi đóng Epic,
+│         bắt buộc điều phối subagent độc lập chạy phiên Deep Audit rà soát 1-1 toàn bộ codebase với `docs/requirements.md`
+│         để truy tìm và xóa sổ mọi hàm No-Op, mock data hoặc tính năng bị bỏ quên.
+│
+├── 15. TƯ DUY TDD KỶ NGUYÊN AGENT & RANH GIỚI TRỪU TƯỢNG (ADAM TORNHILL 2026):
+│       • "TDD vi mô (5-10 dòng code) được phát minh để phục vụ nhận thức của não người, không phục vụ AI Agent."
+│       • Bắt Agent đi qua 10 vòng lặp Micro-TDD vụn vặt gây lãng phí Token, đứt gãy ngữ cảnh và làm Agent mất khả năng nhìn toàn cục.
+│       • Ranh Giới Hợp Đồng Cấp Tính Năng (Feature-Level Abstraction Boundary): Con người/Junior tập trung thiết lập bài kiểm thử
+│         chấp nhận E2E (Living User Journey) trước để định hình ranh giới.
+│       • Thi Công Một Lượt (One-Sweep Implementation): Khi bài test E2E đã ĐỎ, cho phép Agent thi công trọn vẹn mã nguồn trong 1 lượt.
+│       • Kế Toán Kép Bất Biến (Double-Entry Bookkeeping): Tuyệt đối CẤM Agent sửa bài test assertion để che giấu lỗi mã nguồn (chống Bug-Codification).
+│       • Bản Chất Test Đỏ (RED): Chứng minh bài test có đủ độ nhạy để bắt lỗi mã nguồn do AI sinh ra (Adversarial Inversion).
+│
+└── 16. MÔ HÌNH NÚM VẶN BÁN KÍNH RỦI RO & VAI TRÒ NON-TECH PO (BLAST RADIUS DIAL):
+        • Khử Bẫy Hoang Tưởng Doanh Nghiệp (Enterprise Paranoia) Day-0: Khi mới bắt đầu, Junior tuyên bố vai trò:
+          "Tôi là Product Owner phi kỹ thuật, chỉ tập trung vào hành vi và kết quả của người dùng, giao toàn quyền quyết định kỹ thuật cho AI."
+          ➔ Cắt giảm 90% sự tra khảo boilerplate không cần thiết ở giai đoạn đầu.
+        • Bẫy Prototype (Ricci Research): Gán nhãn "prototype" chỉ hạ thấp ước lượng rủi ro trong prompt, không làm mã nguồn an toàn hơn.
+        • Thang Đo Trưởng Thành 3 Cấp:
+          - Cấp 1 (Spike / Khám phá): Bán kính siêu hẹp, kiểm chứng ý tưởng UI/UX nhanh.
+          - Cấp 2 (MVP Slices): Bán kính lát cắt, TDD E2E, kiến trúc sạch, 0 slop, chạy đúng trong lab.
+          - Cấp 3 (Production Ready 1.0): Mở rộng bán kính rủi ro toàn cầu (Internet), kích hoạt 5 Cổng Production Hardening
+            (Chaos Monkey 1.000 ván, Intent Mutex, Rate Limit, Docker, Healthz, Graceful Exit).
 ```
 
 
@@ -1562,13 +1582,11 @@ Khi bạn chạy lệnh trong Terminal gặp lỗi đỏ, hoặc Subagent báo t
 │    • TUYỆT ĐỐI CẤM code ngay! Bẻ Slice thành danh sách Micro-Tasks tuần tự.       │
 │    • Mỗi Micro-Task: 1 mục tiêu đơn nhất, LOC budget <= 50-80 dòng, 1 test đỏ/xanh.│
 │                                                                                  │
-│ 4. THI CÔNG TDD VI MÔ TỪNG TASK (MICRO-EXECUTION LOOP - executing-plans):        │
-│    • Task 0 (Nếu Greenfield): Dựng Minimal Test Harness (1 test mẫu PASS).       │
-│    • Lặp tuần tự cho từng Task (Task 1 -> Task 2 -> Task N):                     │
-│      - Pass 1 (Make it Work): Viết Test Đỏ trước ➔ Viết Code Xanh tối thiểu.      │
-│      - Pass 2 (Make it Lean): Xóa abstraction 1 lần (YAGNI), de-sloppify.        │
-│      - Pass 3 (Verification): Chạy test cô lập, kiểm chứng Adversarial Inversion. │
-│    • Khi gặp lỗi/Test Đỏ: Gọi diagnosing-bugs (Chẩn đoán khoa học, cấm sửa mò). │
+│ 4. THI CÔNG TDD CẤP TÍNH NĂNG (ONE-SWEEP EXECUTION LOOP - ADAM TORNHILL 2026):   │
+│    • Khóa Hợp đồng Nghiệm thu E2E (Golden Path / Living Flow) trước.            │
+│    • Cho phép Agent thi công trọn vẹn trong 1 lượt (One Sweep), cấm vi mô vụn vặt.│
+│    • Kế toán kép (Double-entry bookkeeping): Test assertion bất biến, cấm sửa test.│
+│    • Inversion Gate: Chứng minh bài test bắt được lỗi khi mutate 1 dòng logic.  │
 │                                                                                  │
 │ 5. HỢP ĐỒNG NGHIỆM THU TÍCH HỢP (ACCEPTANCE SUITE INTEGRATION):                  │
 │    • Chạy toàn bộ các hợp đồng kiểm thử nghiệm thu [TC-xx.x/MSS] & [TC-xx.x/A#]. │
@@ -1589,6 +1607,32 @@ Khi bạn chạy lệnh trong Terminal gặp lỗi đỏ, hoặc Subagent báo t
 │ • Khi gặp ca khó (Concurrency, FSM bug): Gõ `/boost` để deep reasoning 3 pha     │
 │ • Khi tối ưu đại phẫu cuối tuần: Gõ `/goal` để nén độ phức tạp tự hành           │
 │ • Khi kết thúc phiên: Gõ `/handoff` ➔ Bấm New Conversation (Token về 0)          │
+└────────────────────────────────────────┬─────────────────────────────────────────┘
+                                         │
+                                         ▼
+┌──────────────────────────────────────────────────────────────────────────────────┐
+│ CHẶNG 4: PRODUCTION HARDENING & RA MẮT THỊ TRƯỜNG (XUẤT XƯỞNG V1.0)              │
+│ (Vượt qua bẫy Prototype, mở rộng Bán Kính Rủi Ro ra toàn cầu, kiểm toán 5 Cổng)  │
+│                                                                                  │
+│ 1. KIỂM THỬ SỨC BỀN & HỖN LOẠN (CHAOS MONKEY SIMULATOR - P-4.1):                 │
+│    • Dựng headless simulator 0ms, chạy 1.000 ván/phiên ngẫu nhiên liên tục.      │
+│    • Bắt buộc chứng minh 3 Bất Biến: 0.00% Deadlock, Rò rỉ tài chính = 0, no RAM leak.│
+│                                                                                  │
+│ 2. ĐÓNG RÀO CHẮN BẢO MẬT MẠNG & CHỐNG GIAN LẬN (EDGE HARDENING - P-4.2):         │
+│    • Mutex đơn luồng (IntentMutex.runExclusive) cho mọi giao dịch/đấu giá.       │
+│    • Rate-limit chống spam click, khôi phục phiên Reconnect Token 60s, CORS origin.│
+│                                                                                  │
+│ 3. KIỂM TOÁN HIỆU NĂNG XUẤT XƯỞNG (PERFORMANCE & PAYLOAD AUDIT - P-4.3):         │
+│    • Bundle main chunk < 350KB gzip, tải trọng Delta sync WebSocket < 10KB.      │
+│    • Đạt mượt mà 60 FPS trên thiết bị tầm trung, zero logic nặng ở render thread.│
+│                                                                                  │
+│ 4. QUẢN TRỊ CẢI TIẾN ĐỘT XUẤT (AD-HOC IMP CYCLE - P-4.4):                        │
+│    • Mọi đợt polish/juice/bot AI đều có Plan & Report tại docs/plans/ & reports/ │
+│    • Đăng ký mã số IMP-XX vào docs/master_roadmap.md, cập nhật ADR nếu đổi kiến trúc.│
+│                                                                                  │
+│ 5. ĐÓNG GÓI DOCKER, HEALTHCHECK & THOÁT HIỂM AN TOÀN (RELEASE - P-4.5):          │
+│    • Multi-stage Dockerfile tối giản, Endpoint kiểm tra sức khỏe /healthz.       │
+│    • Graceful Shutdown thoát an toàn, sẵn sàng kịch bản Rollback tức thì.        │
 └──────────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -1603,7 +1647,7 @@ Khi bạn chạy lệnh trong Terminal gặp lỗi đỏ, hoặc Subagent báo t
 | **0.2** | Cài hiến pháp | 💬 `[AG 2.0]` Tạo `GEMINI.md` (<50 dòng: nén luật NFRs, DoD, cấm tự ý git commit) | Flash | `GEMINI.md` |
 | **0.3** | Cài rào chắn cơ học | 💬 `[AG 2.0]` Tạo `.agents/hooks.json` và `.agents/scripts/use_case_guard.py` | Flash | Cổng chặn cơ học 0ms, 0-token |
 | **0.4** | Cài 5 Subagents | 💬 `[AG 2.0]` Tạo 5 file trong `.agents/agents/` (`scout`, `implementer`, `qa-tester`, 2 reviewers) | Flash | 5 agent chuyên trách độc lập |
-| **0.5** | Nạp Bộ Kỹ Năng | 💻 `[CMD]` Đồng bộ kỹ năng cốt lõi từ `backup\skills_backup\` vào `.agents/skills/` | - | `.agents/skills/` có đủ 46 skills |
+| **0.5** | Nạp Bộ Kỹ Năng | 💻 `[CMD]` Đồng bộ kỹ năng cốt lõi từ `backup\skills_backup\` vào `.agents/skills/` | - | `.agents/skills/` có đủ skills |
 | **1.1** | Phân loại đầu vào | • Nếu ý tưởng thô: 💬 Gõ `/grill-me + shaping`<br>• Nếu đã có spec chi tiết: 💬 Bỏ qua `/grill-me`, nạp tài liệu vào `docs/` | Sonnet / Flash | Bộ tài liệu SSOT hoàn chỉnh |
 | **1.2** | Dựng bản đồ Use Case | 💬 `[AG 2.0]` Dùng `use-case-creator` lập sơ đồ mục lục `docs/domain/use_cases.puml` | Flash / Sonnet | File PlantUML 3 cột chuẩn |
 | **1.25** | Quy hoạch Master Roadmap | 💬 `[AG 2.0]` Dựng `docs/master_roadmap.md` (Rolling Wave Planning: vạch rõ ranh giới & DoD 100% các Epics trước khi đi sâu) | Flash / Sonnet | File `docs/master_roadmap.md` |
@@ -1612,7 +1656,7 @@ Khi bạn chạy lệnh trong Terminal gặp lỗi đỏ, hoặc Subagent báo t
 | **2.2** | Trinh sát bối cảnh<br>*(Đơn tác nhân)* | 💬 `[AG 2.0]` Gọi `scout` (Read-only) trinh sát hiện trạng mã nguồn:<br>• **Greenfield (S00):** Dùng **[Mẫu P-2.2A]** Target File Map<br>• **Brownfield (S01+):** Dùng **[Mẫu P-2.2B]** Change Impact | Flash | Báo cáo hiện trạng & tọa độ dòng |
 | **2.3a** | Lập Kế Hoạch Bẻ Nhỏ<br>*(Song tác nhân)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3a]**: `architect` bẻ Task DAG <= 80 LOC ➔ `spec-reviewer` thẩm định 5 Tiêu Chuẩn Vàng | Sonnet 4.6 | Kế Hoạch được `[APPROVED]` |
 | **2.3b** | Khởi tạo Test Harness<br>*(Đơn tác nhân - S00)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3b]** gọi `implementer` dựng Test Runner tối thiểu (`package.json`, `tsconfig.json`, `vitest`...) ➔ Chạy smoke test PASS | Flash / Sonnet | Lệnh `npm test` chạy PASS trên CMD |
-| **2.3c** | Thi công TDD Vi Mô<br>*(Song tác nhân đối kháng)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3c]**: **1 prompt duy nhất** điều phối `QA Tester` (viết test ĐỎ) ➔ `Implementer` (viết code XANH) ➔ `Inversion Gate` | Sonnet 4.6 | Test con + Inversion PASS 100% |
+| **2.3c** | Thi công TDD Cấp Tính Năng<br>*(One-Sweep & Inversion)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3c]**: Khóa Hợp đồng E2E ➔ `Implementer` thi công 1 lượt (One-Sweep) ➔ `QA Tester` Inversion Gate | Sonnet 4.6 | Hợp đồng E2E + Inversion PASS 100% |
 | **2.3d** | Chẩn đoán lỗi khoa học<br>*(Song tác nhân)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3d]**: `Investigator` truy nguyên nhân gốc ➔ `Implementer` sửa mã nguồn tối thiểu | Sonnet 4.6 | Báo cáo nguyên nhân & bản sửa tối thiểu |
 | **2.3e** | Nghiệm thu tích hợp<br>*(Đơn tác nhân)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3e]** gọi `implementer` chạy toàn bộ Test Suite với cờ `--randomize` (cách ly trạng thái) | Flash / Sonnet | 100% Test Contracts PASS |
 | **2.4** | Kiểm toán 2 Cổng<br>*(Song tác nhân độc lập)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.4]** gọi `spec-reviewer` + `code-reviewer` thẩm định ➔ Lưu Biên bản nghiệm thu vào `docs/reports/audits/` | Sonnet / Flash | Báo cáo APPROVED + File `docs/reports/audits/[MÃ]_acceptance_report.md` |
@@ -1620,6 +1664,12 @@ Khi bạn chạy lệnh trong Terminal gặp lỗi đỏ, hoặc Subagent báo t
 | **2.6** | Chuyển phiên chat | 💬 `[AG 2.0]` Dùng **[Mẫu Lệnh P-2.6]**: Gõ `/handoff` ➔ Bấm **New Conversation** (Ngữ cảnh về 0, không bị bloat trước khi sang Slice mới) | Flash | Tài liệu bàn giao gọn, sạch |
 | **3.1** | Xử lý bài toán khó | 💬 `[AG 2.0]` Gõ `/boost [bài toán phức tạp]` để kích hoạt deep reasoning 3 pha | Sonnet / Opus | Lời giải FSM / Thuật toán sạch |
 | **3.2** | Đại phẫu cuối tuần | 💬 `[AG 2.0]` Gõ `/goal` để tự động tối ưu hóa nén độ phức tạp toàn bộ dự án | Sonnet / Flash | Codebase tinh gọn, Cyclomatic <= 4 |
+| **4.1** | Thử nghiệm sức bền Chaos | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-4.1]** chạy 1.000 kịch bản mô phỏng headless ➔ Chứng minh 0.00% Deadlock & 0 rò rỉ tài nguyên | Sonnet 4.6 | Báo cáo Chaos Simulation PASS |
+| **4.2** | Đóng rào chắn mạng & Anti-Abuse | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-4.2]** cài IntentMutex, Rate Limiting, Reconnect Token 60s và CORS | Flash / Sonnet | Bộ bảo vệ mạng & Chống gian lận |
+| **4.3** | Kiểm toán hiệu năng xuất xưởng | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-4.3]** đo Bundle Size, Payload Delta < 10KB, và 60 FPS | Flash | Báo cáo Performance Audit PASS |
+| **4.4** | Quản trị cải tiến đột xuất | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-4.4]** lập cặp Plan & Report (`IMP-XX`) và đăng ký Roadmap | Flash | Cặp tệp Plan/Report trong `docs/` |
+| **4.5** | Đóng gói Docker & Healthz | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-4.5]** tạo Multi-stage Dockerfile, `/healthz` và Graceful Shutdown | Flash | Dockerfile + Endpoint `/healthz` |
+
 
 ---
 
@@ -2098,3 +2148,141 @@ Yêu cầu xuất Báo cáo Đối Soát Định Kỳ (Periodic Audit Gap Report
 >    3. Giới hạn ngân sách mã nguồn dự kiến (LOC budget <= 50-100 dòng) và thiết lập 3-5 hợp đồng kiểm thử [TC-xx.x/MSS].
 >    4. CHỈ tạo tệp ticket và DỪNG LẠI để tôi duyệt phạm vi, TUYỆT ĐỐI CHƯA VIẾT CODE lúc này.
 >    ```
+
+---
+
+## 12.2 SỔ TAY PROMPTS THỰC CHIẾN CHẶNG 4: PRODUCTION HARDENING & GO-LIVE
+*(Đưa sản phẩm từ trạng thái MVP trong phòng thí nghiệm lên phiên bản 1.0 thực thụ sẵn sàng ra mắt thị trường, mở rộng bán kính rủi ro toàn diện qua 5 cổng kiểm soát).*
+
+```text
+[5 CỔNG KIỂM SOÁT PRODUCTION HARDENING]
+   ├── Cổng 1 (P-4.1): Thử Nghiệm Sức Bền & Hỗn Loạn (Chaos Monkey 1.000 Ván)
+   ├── Cổng 2 (P-4.2): Đóng Rào Chắn An Toàn Mạng & Anti-Abuse (Edge Hardening)
+   ├── Cổng 3 (P-4.3): Kiểm Toán Hiệu Năng Xuất Xưởng (Bundle, Delta, 60 FPS)
+   ├── Cổng 4 (P-4.4): Quản Trị Cải Tiến Đột Xuất (IMP Cycle: Plan, Report, ADR)
+   └── Cổng 5 (P-4.5): Đóng Gói Docker, Healthcheck & Kịch Bản Rollback
+```
+
+---
+
+### 📋 MẪU P-4.1: THỬ NGHIỆM SỨC BỀN & HỖN LOẠN (CHAOS MONKEY SIMULATOR)
+- **🏷️ CHẾ ĐỘ THỰC THI**: `[SONG TÁC NHÂN ĐỐI KHÁNG]` *(QA Tester thiết kế Simulator ➔ Implementer gỡ nghẽn Deadlock)*.
+- **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Toàn bộ các Slices nghiệp vụ đã hoàn thành, Unit Test và Living Test PASS 100%.
+- **🛡️ RÀO CHẮN GÁC CỔNG**: Bắt buộc chạy trong môi trường headless 0ms (không render UI) để hoàn tất 1.000 ván trong <10 giây.
+- **💬 CÂU LỆNH PROMPT CHUẨN (Model: Sonnet 4.6)**:
+```text
+Sản phẩm đã hoàn tất các lát cắt cơ sở (MVP). Bây giờ chúng ta bước vào CHẶNG 4: PRODUCTION HARDENING.
+Hãy điều phối 2 subagent kích hoạt kỹ năng production-hardening và tdd để xây dựng bài kiểm thử sức bền tests/simulation/chaos_monkey_simulator.test.ts:
+
+1. Subagent QA Tester:
+   - Tạo bộ giả lập Headless Simulator 0ms (chạy in-memory, không qua WebSocket mạng, không UI).
+   - Thiết lập kịch bản 4 Bot AI đa tính cách (Passive, Balanced, Aggressive) tự chơi liên tục 1.000 ván cờ (hoặc 1.000 phiên giao dịch).
+   - Gài bẫy Chaos Monkey: Sinh các sự cố ngẫu nhiên (chập chờn mạng, cược liều, từ chối giao dịch, hết tiền).
+   - BẮT BUỘC kiểm chứng 3 BẤT BIẾN VĨ MÔ (Global Invariants) ở từng lượt đi:
+     (1) Liveness Invariant: Tỷ lệ Deadlock = 0.00% (không có bất kỳ lượt nào bị kẹt vòng lặp hoặc Promise treo).
+     (2) Conservation Law: Tổng số dư người chơi + Tiền Kho Bạc + Tiền Đấu Giá = Hằng số ban đầu (Rò rỉ tài chính Δ = 0).
+     (3) Finite Balances: Không có giá trị NaN, null, hoặc Infinity trong bất kỳ trường dữ liệu nào.
+   - Thống kê chỉ số: Tỷ lệ thoát hiểm phá sản, số công trình nâng cấp, số phiên đấu giá thành công.
+
+2. Subagent Implementer:
+   - Chạy lệnh test trên Terminal CMD và theo dõi kết quả.
+   - Nếu phát hiện Deadlock hoặc rò rỉ trạng thái: Tinh chỉnh ngay FSM State Machine và Solvency Solver để khắc phục triệt để.
+
+Yêu cầu in Báo Cáo Thẩm Định Hiệu Năng Chaos Monkey Simulator ra màn hình chat.
+```
+- **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu)**: Lệnh test hoàn tất 1.000 ván trong <10 giây, in báo cáo xác nhận: `Deadlock: 0.00%`, `Rò rỉ dòng tiền: 0 Tr. VNĐ`.
+
+---
+
+### 📋 MẪU P-4.2: ĐÓNG RÀO CHẮN AN TOÀN MẠNG & CHỐNG GIAN LẬN (EDGE HARDENING)
+- **🏷️ CHẾ ĐỘ THỰC THI**: `[ĐƠN TÁC NHÂN IMPLEMENTER]` *(Gia cố rào chắn mạng, xử lý đồng thời và kiểm soát kết nối)*.
+- **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Chaos test ở bước 4.1 đã PASS 100%.
+- **🛡️ RÀO CHẮN GÁC CỔNG**: Hook `git-safety-gate` bảo vệ. Mọi từ chối intent phải có Reason Code.
+- **💬 CÂU LỆNH PROMPT CHUẨN (Model: Sonnet 4.6)**:
+```text
+Hãy gọi subagent implementer, kích hoạt kỹ năng production-hardening và concurrency-patterns để gia cố an toàn mạng và chống gian lận:
+
+1. ĐƠN LUỒNG HÓA CÁC THAO TÁC CẠNH TRANH (Intent Mutex):
+   - Đảm bảo mọi Intent từ Client (đặc biệt là Đấu giá, Chuyển khoản, Nâng cấp) bắt buộc chạy qua IntentMutex (runExclusive) theo từng Room/Tenant. Triệt tiêu 100% race-condition khi 2 client bấm cùng 1 mili-giây.
+2. CHỐNG SPAM & RATE LIMITING:
+   - Cài đặt rào chắn bóp băng thông (Rate Limiter): Chặn client gửi quá 10 intents/giây.
+   - Trả về lỗi có cấu trúc kèm Reason Code cụ thể: { error: 'RATE_LIMITED' } hoặc { error: 'OUT_OF_TURN' }.
+3. KHÔI PHỤC PHIÊN & ÂN HẠN MẤT MẠNG:
+   - Hỗ trợ Reconnect Token lưu tại LocalStorage: Khi người chơi F5 hoặc mất mạng, kết nối lại trong 60s sẽ khôi phục 100% bàn cờ mà không bị mất lượt.
+4. BẢO VỆ BIẾN MÔI TRƯỜNG & ORIGIN:
+   - Tạo tệp validateEnv kiểm tra toàn bộ biến môi trường bắt buộc (.env.production) khi server khởi động. Cấm hardcode API keys hoặc secrets trong mã nguồn.
+   - Xác thực CORS Origin và WebSocket request headers.
+
+Chạy test kiểm chứng và báo cáo các tệp đã được gia cố.
+```
+- **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu)**: Test đồng thời chạy PASS; test spam click bị chặn với Reason Code; test reconnect thành công.
+
+---
+
+### 📋 MẪU P-4.3: KIỂM TOÁN HIỆU NĂNG XUẤT XƯỞNG & TẢI TRỌNG ASSETS
+- **🏷️ CHẾ ĐỘ THỰC THI**: `[ĐƠN TÁC NHÂN SCOUT / CODE-REVIEWER]` *(Đo lường dung lượng và hiệu năng)*.
+- **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Mã nguồn đã sẵn sàng cho bản build xuất xưởng.
+- **🛡️ RÀO CHẮN GÁC CỔNG**: Cấm vượt quá ngân sách: Bundle main chunk < 350KB gzip, WebSocket Delta < 10KB.
+- **💬 CÂU LỆNH PROMPT CHUẨN (Model: Flash)**:
+```text
+Hãy gọi subagent scout (hoặc code-reviewer), kích hoạt kỹ năng production-hardening và de-sloppify để kiểm toán hiệu năng xuất xưởng:
+
+1. KIỂM TOÁN BUNDLE SIZE:
+   - Chạy lệnh build sản xuất (npm run build hoặc tương đương) và phân tích kích thước các chunks.
+   - Xác nhận: Main bundle gzip < 350KB. Các thư viện nặng (3D Canvas, Audio, Biểu đồ) phải được tách chunk (code-splitting / React.lazy).
+   - Quét dọn các thư viện thừa (Unused dependencies / dead icons).
+2. KIỂM TOÁN TẢI TRỌNG MẠNG (PAYLOAD AUDIT):
+   - Đo lường kích thước gói tin đồng bộ WebSocket (Delta Payload): Bắt buộc < 10KB per tick. Cấm gửi toàn bộ trạng thái lớn ở mỗi khung hình.
+3. KIỂM TOÁN HIỆU NĂNG RENDER:
+   - Đảm bảo zero logic nặng (JSON parse lớn, tính toán mảng phức tạp) chạy trên main render thread. Đạt mục tiêu 60 FPS mượt mà.
+
+Báo cáo bảng chỉ số hiệu năng thực tế đối chiếu với ngân sách NFRs trong GEMINI.md.
+```
+- **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu)**: Báo cáo xác nhận: Bundle hợp lệ, Delta < 10KB, 60 FPS verified.
+
+---
+
+### 📋 MẪU P-4.4: QUẢN TRỊ CẢI TIẾN & TINH CHỈNH ĐỘT XUẤT (IMP CYCLE)
+- **🏷️ CHẾ ĐỘ THỰC THI**: `[ĐƠN TÁC NHÂN TỔNG HỢP]` *(Quy chuẩn hóa tài liệu cải tiến)*.
+- **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Có yêu cầu cải tiến đồ họa (Juice/VFX), nâng cấp Bot AI, hoặc sửa lỗi hệ thống phát sinh ngoài kế hoạch ban đầu.
+- **🛡️ RÀO CHẮN GÁC CỔNG**: Hiến pháp `GEMINI.md` cấm lưu cải tiến trong bộ nhớ tạm/chat. Bắt buộc tạo cặp Plan & Report.
+- **💬 CÂU LỆNH PROMPT CHUẨN (Model: Flash)**:
+```text
+Tôi muốn thực hiện đợt cải tiến đột xuất: [MÔ TẢ CẢI TIẾN, VÍ DỤ: Nâng cấp đồ họa sa bàn 3D và Chu kỳ ngày đêm].
+Hãy áp dụng Quy Chuẩn Cải Tiến Đột Xuất (Continuous Improvement & Ad-hoc Persistence) theo GEMINI.md:
+
+1. Xác định mã số cải tiến tiếp theo: IMP-[ID]-[slug] (đối chiếu trong docs/master_roadmap.md).
+2. Tạo tệp Kế hoạch: docs/plans/improvements/IMP-[ID]-[slug]_plan.md (mục tiêu, kiến trúc đề xuất, ngân sách LOC, kế hoạch kiểm thử).
+3. Thi công cải tiến bám sát kế hoạch, đảm bảo không làm hỏng các bài test cũ.
+4. Tạo tệp Báo cáo Nghiệm thu Thực nghiệm: docs/reports/improvements/IMP-[ID]-[slug]_report.md (số liệu đo đạc thực tế, test PASS, visual review).
+5. Cập nhật Section 4 trong docs/master_roadmap.md và viết ADR mới trong docs/domain/adr/ nếu có thay đổi kiến trúc lớn.
+
+Báo cáo hoàn tất và dẫn link các tệp tài liệu đã lưu trên đĩa.
+```
+- **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu)**: Cặp tệp Plan & Report được lưu trữ tại `docs/plans/improvements/` và `docs/reports/improvements/`. Roadmap cập nhật đầy đủ.
+
+---
+
+### 📋 MẪU P-4.5: ĐÓNG GÓI DOCKER, HEALTHCHECK & KỊCH BẢN ROLLBACK (RELEASE V1.0)
+- **🏷️ CHẾ ĐỘ THỰC THI**: `[ĐƠN TÁC NHÂN IMPLEMENTER]` *(Đóng gói container và hạ tầng vận hành)*.
+- **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Toàn bộ 4 cổng trên đã hoàn tất và PASS 100%.
+- **🛡️ RÀO CHẮN GÁC CỔNG**: Dockerfile bắt buộc là Multi-stage, chạy dưới quyền non-root user, không chứa secrets.
+- **💬 CÂU LỆNH PROMPT CHUẨN (Model: Flash hoặc Sonnet 4.6)**:
+```text
+Hãy gọi subagent implementer, kích hoạt kỹ năng production-hardening để hoàn tất đóng gói và cấu hình xuất xưởng v1.0:
+
+1. DỰNG MULTI-STAGE DOCKERFILE TỐI GIẢN:
+   - Stage 1 (Builder): Cài dependencies, build bundle, chạy test suite xác nhận 100% xanh.
+   - Stage 2 (Runner): Kế thừa image tối giản (Alpine/Distroless), chạy dưới non-root user (node/appuser).
+2. THIẾT LẬP PROBE KIỂM TRA SỨC KHỎE:
+   - Cài đặt endpoint /healthz (Liveness: trả về HTTP 200 nhanh).
+   - Cài đặt endpoint /livez (Readiness: kiểm tra kết nối DB, Redis, WSS socket pool).
+3. CẤU HÌNH THOÁT HIỂM AN TOÀN (GRACEFUL SHUTDOWN):
+   - Bắt tín hiệu SIGTERM và SIGINT: Ngừng nhận phòng chơi mới, duy trì 30 giây để hoàn tất các ván cờ đang dở, đóng kết nối cơ sở dữ liệu sạch sẽ trước khi process thoát.
+4. THIẾT LẬP KỊCH BẢN ROLLBACK:
+   - Ghi lại câu lệnh rollback nhanh 1 dòng (dùng Docker image tag phiên bản trước hoặc commit hash an toàn gần nhất).
+
+Chạy thử nghiệm lệnh build Docker (nếu có môi trường) và báo cáo các tệp hạ tầng đã tạo.
+```
+- **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu)**: `Dockerfile`, `.dockerignore`, Endpoint `/healthz`, và Graceful Shutdown được cài đặt hoàn chỉnh. Sản phẩm chính thức đạt chuẩn **PRODUCTION READY 1.0**.
+

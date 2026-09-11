@@ -39,10 +39,10 @@ export function DioramaBridges(): React.ReactElement {
           Kiến trúc cầu dây văng hiện đại với tháp nghiêng thanh thoát
          ======================================================== */}
       <group position={[0, 0.12, -3.8]}>
-        {/* Mặt cầu bê tông nhựa đen nhẵn & vạch sơn tim đường */}
+        {/* Mặt cầu bê tông nhựa đen nhẵn bóng bẩy & vạch sơn tim đường */}
         <mesh receiveShadow castShadow position={[0, 0, 0]}>
           <boxGeometry args={[5.4, 0.04, 0.52]} />
-          <meshStandardMaterial color="#334155" roughness={0.65} />
+          <meshStandardMaterial color="#1E293B" roughness={0.18} metalness={0.25} />
         </mesh>
         {/* Gờ phân cách vàng kim */}
         <mesh position={[0, 0.022, 0]}>
@@ -66,7 +66,7 @@ export function DioramaBridges(): React.ReactElement {
             ref={basonLedRef1}
             color="#06B6D4"
             emissive="#00F5FF"
-            emissiveIntensity={isNight ? 1.4 : isSunset ? 0.6 : 0.0}
+            emissiveIntensity={isNight ? 3.2 : isSunset ? 0.8 : 0.0}
           />
         </mesh>
         <mesh position={[0, 0.072, -0.24]}>
@@ -75,7 +75,7 @@ export function DioramaBridges(): React.ReactElement {
             ref={basonLedRef2}
             color="#06B6D4"
             emissive="#00F5FF"
-            emissiveIntensity={isNight ? 1.4 : isSunset ? 0.6 : 0.0}
+            emissiveIntensity={isNight ? 3.2 : isSunset ? 0.8 : 0.0}
           />
         </mesh>
 
@@ -121,10 +121,10 @@ export function DioramaBridges(): React.ReactElement {
           Kiến trúc cầu giàn thép nhịp vòm kép di sản cổ kính
          ======================================================== */}
       <group position={[0, 0.12, 3.8]}>
-        {/* Bản mặt cầu đường sắt & đường bộ hỗn hợp */}
+        {/* Bản mặt cầu đường sắt & đường bộ hỗn hợp bóng bẩy */}
         <mesh receiveShadow castShadow position={[0, 0, 0]}>
           <boxGeometry args={[5.4, 0.04, 0.5]} />
-          <meshStandardMaterial color="#475569" roughness={0.75} />
+          <meshStandardMaterial color="#334155" roughness={0.28} metalness={0.3} />
         </mesh>
         {/* Đường ray xe lửa trung tâm */}
         <mesh position={[0, 0.024, -0.04]}>
@@ -176,7 +176,7 @@ export function DioramaBridges(): React.ReactElement {
               <meshStandardMaterial
                 color="#F59E0B"
                 emissive="#F59E0B"
-                emissiveIntensity={isNight ? 1.15 : isSunset ? 0.5 : 0.0}
+                emissiveIntensity={isNight ? 2.8 : isSunset ? 0.7 : 0.0}
               />
             </mesh>
           </group>
