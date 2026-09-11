@@ -28,18 +28,22 @@ export function createHealthServer(
   staticDir?: string,
 ): http.Server {
   return http.createServer((req, res) => {
-    if (req.method === 'GET' && req.url === '/health') {
+    if ((req.method === 'GET' || req.method === 'HEAD') && req.url === '/health') {
       const payload: HealthStatus = {
         status: 'ok',
         activeRooms: getActiveRooms(),
         uptime: Math.floor((Date.now() - startTime) / 1000),
       };
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(payload));
+      if (req.method === 'HEAD') {
+        res.end();
+      } else {
+        res.end(JSON.stringify(payload));
+      }
       return;
     }
 
-    if (req.method === 'GET' && staticDir && fs.existsSync(staticDir)) {
+    if ((req.method === 'GET' || req.method === 'HEAD') && staticDir && fs.existsSync(staticDir)) {
       const rawUrl = req.url ? req.url.split('?')[0] : '/';
       const cleanPath = path.normalize(rawUrl ?? '/').replace(/^(\.\.[/\\])+/, '');
       let filePath = path.join(staticDir, cleanPath === '/' ? 'index.html' : cleanPath);
@@ -54,7 +58,11 @@ export function createHealthServer(
         const ext = path.extname(filePath);
         const contentType = MIME_TYPES[ext] ?? 'application/octet-stream';
         res.writeHead(200, { 'Content-Type': contentType });
-        fs.createReadStream(filePath).pipe(res);
+        if (req.method === 'HEAD') {
+          res.end();
+        } else {
+          fs.createReadStream(filePath).pipe(res);
+        }
         return;
       }
     }

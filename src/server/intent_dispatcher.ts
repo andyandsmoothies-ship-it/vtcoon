@@ -10,7 +10,7 @@ export type PlayerIntent =
   | { type: 'INTENT_UPGRADE'; cellIndex: number }
   | { type: 'INTENT_UPGRADE_ETC' }
   | { type: 'INTENT_UPGRADE_UTILITY'; cellIndex: number }
-  | { type: 'INTENT_DOWNGRADE'; cellIndex: number }
+  | { type: 'INTENT_DOWNGRADE'; cellIndex: number; stepByStep?: boolean; enforceEvenDowngrading?: boolean }
   | { type: 'INTENT_MORTGAGE'; cellIndex: number }
   | { type: 'INTENT_REDEEM'; cellIndex: number }
   | { type: 'INTENT_TRADE_OFFER'; sellerId: string; buyerId: string; cellIndex: number; price: number }
@@ -42,7 +42,13 @@ const INTENT_DISPATCH: Record<PlayerIntent['type'], IntentHandler> = {
   INTENT_UPGRADE: (m, rc, p, i) => m.handleUpgrade(rc, p, (i as { cellIndex: number }).cellIndex),
   INTENT_UPGRADE_ETC: (m, rc, p) => m.handleUpgradeETC(rc, p),
   INTENT_UPGRADE_UTILITY: (m, rc, p, i) => m.handleUpgradeUtility(rc, p, (i as { cellIndex: number }).cellIndex),
-  INTENT_DOWNGRADE: (m, rc, p, i) => m.handleDowngrade(rc, p, (i as { cellIndex: number }).cellIndex),
+  INTENT_DOWNGRADE: (m, rc, p, i) => {
+    const di = i as { cellIndex: number; stepByStep?: boolean; enforceEvenDowngrading?: boolean };
+    return m.handleDowngrade(rc, p, di.cellIndex, {
+      stepByStep: di.stepByStep ?? true,
+      enforceEvenDowngrading: di.enforceEvenDowngrading ?? true,
+    });
+  },
   INTENT_MORTGAGE: (m, rc, p, i) => m.handleMortgage(rc, p, (i as { cellIndex: number }).cellIndex),
   INTENT_REDEEM: (m, rc, p, i) => m.handleRedeem(rc, p, (i as { cellIndex: number }).cellIndex),
   INTENT_TRADE_OFFER: (m, rc, p, i) => {
@@ -60,10 +66,11 @@ const INTENT_DISPATCH: Record<PlayerIntent['type'], IntentHandler> = {
   INTENT_END_TURN: (m, rc, p) => {
     const room = m.getRoom(rc);
     const current = room?.players[room.currentPlayerIndex];
-    const continueDoubles = (current?.consecutiveDoubles ?? 0) > 0;
+    const continueDoubles = (current?.consecutiveDoubles ?? 0) > 0 && !current?.skipNextTurn;
     const r = m.handleEndTurn(rc, p, continueDoubles);
     return { success: r !== undefined, reason: r ? undefined : 'INVALID_PHASE' };
   },
+
 };
 
 export function dispatchPlayerIntent(

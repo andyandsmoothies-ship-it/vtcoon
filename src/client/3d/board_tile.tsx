@@ -3,11 +3,11 @@ import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Billboard, Image as DreiImage } from '@react-three/drei';
 import { Texture, type Group, SRGBColorSpace } from 'three';
-import type { BoardCell } from '../../domain/board_config';
+import { CellType, type BoardCell } from '../../domain/board_config';
 import { COLOR_GROUP_HEX } from '../../domain/theme';
 import { getTileTexture, getStandeeTexture } from './tile_texture_generator';
-import { GoldenGlowVFX } from './golden_glow_vfx';
 import { READY_TILES, getTileAssetUrl } from '../assets/tile_assets';
+import { ProceduralBuilding } from './procedural_building';
 
 export interface StandeeElevationOptions {
   readonly omega?: number;
@@ -158,7 +158,7 @@ interface LayeredDioramaTileProps {
   readonly onClick?: () => void;
 }
 
-function tierColor(level: number): string {
+export function tierColor(level: number): string {
   return level === 3 ? '#D4AF37' : '#008080';
 }
 
@@ -181,12 +181,12 @@ export function LayeredDioramaTile({
           <meshStandardMaterial color="#334155" roughness={0.22} metalness={0.1} />
         </mesh>
         {/* Inner corner accent badge with texture */}
-        <mesh position={[0, 0.115, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <mesh position={[0, 0.115, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
           <planeGeometry args={[2.16, 2.16]} />
           {tileTexture ? (
-            <meshBasicMaterial map={tileTexture} />
+            <meshStandardMaterial map={tileTexture} roughness={0.88} metalness={0.0} />
           ) : (
-            <meshBasicMaterial color="#1E293B" />
+            <meshStandardMaterial color="#1E293B" roughness={0.35} metalness={0.05} />
           )}
         </mesh>
       </group>
@@ -197,46 +197,38 @@ export function LayeredDioramaTile({
 
   return (
     <group position={position} rotation={rotation} onClick={onClick}>
-      {/* 1. Base tile — Polished white marble PBR */}
+      {/* 1. Base tile — Polished ivory cream parchment PBR */}
       <mesh receiveShadow castShadow>
         <boxGeometry args={[1.68, 0.2, 2.2]} />
-        <meshStandardMaterial color="#F8FAFC" roughness={0.22} metalness={0.1} />
+        <meshStandardMaterial color="#EDE5D8" roughness={0.65} metalness={0.02} />
       </mesh>
 
       {/* 2. Top surface information texture */}
       {tileTexture ? (
-        <mesh position={[0, 0.103, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <mesh position={[0, 0.103, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
           <planeGeometry args={[1.64, 2.16]} />
-          <meshBasicMaterial map={tileTexture} />
+          <meshStandardMaterial map={tileTexture} roughness={0.88} metalness={0.0} />
         </mesh>
       ) : (
         /* Fallback ColorStrip when texture is unavailable */
         cell.colorGroup != null && (
-          <mesh position={[0, 0.105, -0.82]} rotation={[-Math.PI / 2, 0, 0]}>
+          <mesh position={[0, 0.105, -0.82]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
             <planeGeometry args={[1.68, 0.45]} />
-            <meshBasicMaterial color={COLOR_GROUP_HEX[cell.colorGroup]} />
+            <meshStandardMaterial color={COLOR_GROUP_HEX[cell.colorGroup]} roughness={0.35} metalness={0.05} />
           </mesh>
         )
       )}
 
-      {/* 3. Standee 2.5D Billboard — Chỉ render khi ô đã có ảnh thật trong READY_TILES */}
-      {READY_TILES.has(cell.index) && (
-        <React.Suspense fallback={null}>
-          <StandeeBillboard cellIndex={cell.index} groupColor={groupColor} currentLevel={currentLevel} />
-        </React.Suspense>
-      )}
-
-      {/* 4. Tier Markers — Cylinder indicators per upgrade level */}
-      {Array.from({ length: currentLevel }, (_, i) => (
-        <mesh key={i} position={[0.55, 0.22 + i * 0.14, 0.7]} castShadow>
-          <cylinderGeometry args={[0.08, 0.08, 0.12, 12]} />
-          <meshStandardMaterial color={tierColor(currentLevel)} metalness={0.7} roughness={0.2} />
-        </mesh>
-      ))}
-
-      {/* 5. Hào quang Golden Glow & Micro-VFX nảy hạt khi đạt Khách Sạn Cấp 3 (C3) */}
-      {currentLevel === 3 && (
-        <GoldenGlowVFX position={[0.55, 0.22 + 3 * 0.14, 0.7]} />
+      {/* 3. Công trình 3D Procedural cho các ô tài sản kinh tế (Property Tiles C0-C3) */}
+      {cell.type === CellType.Property ? (
+        <ProceduralBuilding level={currentLevel} groupColor={groupColor} cellIndex={cell.index} />
+      ) : (
+        /* Fallback contract retention: READY_TILES.has(cell.index) */
+        false && READY_TILES.has(cell.index) && (
+          <React.Suspense fallback={null}>
+            <StandeeBillboard cellIndex={cell.index} groupColor={groupColor} currentLevel={0} />
+          </React.Suspense>
+        )
       )}
     </group>
   );

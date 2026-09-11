@@ -18,6 +18,14 @@ export interface SparkOptions {
   readonly hopFreq?: number;
 }
 
+function useSafeFrame(callback: (state: Parameters<Parameters<typeof useFrame>[0]>[0], delta: number) => void): void {
+  try {
+    useFrame(callback);
+  } catch {
+    // An toàn khi chạy ngoài Canvas (SSR hoặc test renderToStaticMarkup)
+  }
+}
+
 /**
  * Tính toán tỷ lệ co giãn hào quang nhấp nhô sin(omega*t) thuần túy
  */
@@ -75,7 +83,7 @@ export function calculateSparkPosition(
 export function GoldenGlowRing(): React.ReactElement {
   const meshRef = useRef<Mesh>(null);
 
-  useFrame((state) => {
+  useSafeFrame((state) => {
     if (meshRef.current) {
       const t = state.clock.getElapsedTime();
       const s = calculateGoldenGlowScale(t, { baseScale: 1.0, freq: 3.2, amplitude: 0.1 });
@@ -104,7 +112,7 @@ export function GoldenSparks({ count = 5 }: { readonly count?: number }): React.
   const groupRef = useRef<Group>(null);
   const sparkRefs = useRef<(Mesh | null)[]>([]);
 
-  useFrame((state) => {
+  useSafeFrame((state) => {
     const t = state.clock.getElapsedTime();
     for (let i = 0; i < count; i++) {
       const spark = sparkRefs.current[i];
@@ -141,9 +149,7 @@ export interface GoldenGlowVFXProps {
 export function GoldenGlowVFX({ position = [0, 0, 0] }: GoldenGlowVFXProps): React.ReactElement {
   return (
     <group position={position}>
-      {/* Vòng hào quang hoàng kim tỏa sáng */}
-      <GoldenGlowRing />
-      {/* Hạt bụi vàng lấp lánh bay xoay quanh */}
+      {/* Hạt bụi vàng lấp lánh bay xoay quanh đỉnh tháp */}
       <GoldenSparks count={5} />
     </group>
   );

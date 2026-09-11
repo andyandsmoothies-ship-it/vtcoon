@@ -44,6 +44,17 @@ export interface Player {
   overdraftRoundsLeft?: number;
 }
 
+export interface CurrentAuctionState {
+  readonly cellIndex: number;
+  readonly declinedPlayerId: string;
+  highestBid?: number;
+  highestBidder?: string;
+  highestBidderId?: string;
+  startingBid?: number;
+  passedPlayers?: ReadonlySet<string> | Set<string>;
+  bidIncrement?: number;
+}
+
 export interface Room {
   readonly roomCode:      string;
   readonly hostId:        string;
@@ -58,7 +69,10 @@ export interface Room {
   chanceDiscard:         ChanceCardId[];
   permanentRentBonus:    Record<number, number>;
   treasury:              number;
+  roundCount?:           number;
+  round?:                number;
   lastDice?:             readonly [number, number];
+  currentAuction?:       CurrentAuctionState;
 }
 
 
@@ -100,6 +114,7 @@ export function createRoom(hostId: string, customRoomCode?: string): Room {
     chanceDiscard:      [],
     permanentRentBonus: {},
     treasury:           0,
+    roundCount:         1,
   };
 }
 

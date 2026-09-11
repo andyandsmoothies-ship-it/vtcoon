@@ -155,19 +155,31 @@ export class RoomManager {
   }
 
   handleDecline(roomCode: string, playerId: string): { success: boolean; reason?: string } {
-    return handleDecline(this.rooms.get(roomCode), this.getActivePlayer(this.rooms.get(roomCode), playerId), this.auctions, roomCode);
+    const res = handleDecline(this.rooms.get(roomCode), this.getActivePlayer(this.rooms.get(roomCode), playerId), this.auctions, roomCode);
+    const room = this.rooms.get(roomCode);
+    if (room) room.currentAuction = this.auctions.get(roomCode);
+    return res;
   }
 
   handleAuctionBid(roomCode: string, playerId: string, amount: number): { success: boolean; reason?: string } {
-    return handleAuctionBid(this.rooms.get(roomCode), this.auctions.get(roomCode), playerId, amount, this.registries.get(roomCode), this.auctions, roomCode);
+    const res = handleAuctionBid(this.rooms.get(roomCode), this.auctions.get(roomCode), playerId, amount, this.registries.get(roomCode), this.auctions, roomCode);
+    const room = this.rooms.get(roomCode);
+    if (room) room.currentAuction = this.auctions.get(roomCode);
+    return res;
   }
 
   handleAuctionPass(roomCode: string, playerId: string): { success: boolean; reason?: string } {
-    return handleAuctionPass(this.rooms.get(roomCode), this.auctions.get(roomCode), playerId, this.registries.get(roomCode), this.auctions, roomCode);
+    const res = handleAuctionPass(this.rooms.get(roomCode), this.auctions.get(roomCode), playerId, this.registries.get(roomCode), this.auctions, roomCode);
+    const room = this.rooms.get(roomCode);
+    if (room) room.currentAuction = this.auctions.get(roomCode);
+    return res;
   }
 
   handleAuctionClose(roomCode: string): { winnerId?: string; winningBid: number } {
-    return handleAuctionClose(this.rooms.get(roomCode), this.auctions.get(roomCode), this.registries.get(roomCode), this.auctions, roomCode);
+    const res = handleAuctionClose(this.rooms.get(roomCode), this.auctions.get(roomCode), this.registries.get(roomCode), this.auctions, roomCode);
+    const room = this.rooms.get(roomCode);
+    if (room) room.currentAuction = undefined;
+    return res;
   }
   getAuctionSession(roomCode: string) { return this.auctions.get(roomCode); }
 
@@ -221,11 +233,11 @@ export class RoomManager {
     return redeemProperty(room, playerId, cellIndex, reg);
   }
 
-  handleDowngrade(roomCode: string, playerId: string, cellIndex: number): { success: boolean; reason?: string } {
+  handleDowngrade(roomCode: string, playerId: string, cellIndex: number, options?: import('../domain/property_upgrade').DowngradeOptions): { success: boolean; reason?: string } {
     const room = this.rooms.get(roomCode), reg = this.registries.get(roomCode), sm = this.propertyStates.get(roomCode);
     if (!room || !reg || !sm) return { success: false, reason: ActionRejectReason.INVALID_ROOM };
     const player = this.getActivePlayer(room, playerId);
-    const res = handleDowngrade(player, room.phase, cellIndex, reg, sm, roomCode);
+    const res = handleDowngrade(player, room.phase, cellIndex, reg, sm, roomCode, options);
     if (res.success && room.phase === TurnPhase.InsolvencyPhase && player && player.balance >= 0) {
       room.phase = TurnPhase.PropertyManagement;
     }
@@ -280,12 +292,78 @@ export class RoomManager {
     );
   }
 
+  private resolveAuctionBots(roomCode: string): void {
+    const room = this.rooms.get(roomCode);
+    if (!room || room.phase !== TurnPhase.AuctionPhase) return;
+    const auction = this.auctions.get(roomCode);
+    if (!auction) return;
+
+    const registry = this.registries.get(roomCode) ?? new Map();
+    const stateMap = this.propertyStates.get(roomCode) ?? new Map();
+
+    let auctionChanged = true;
+    let iterations = 0;
+    const MAX_AUCTION_ITERATIONS = 30;
+
+    while (auctionChanged && iterations < MAX_AUCTION_ITERATIONS && room.phase === TurnPhase.AuctionPhase) {
+      auctionChanged = false;
+      iterations++;
+
+      const eligible = room.players.filter(
+        (p) => p.isBot && !p.bankrupt && p.id !== auction.declinedPlayerId && !auction.passedPlayers?.has(p.id),
+      );
+      if (eligible.length === 0) break;
+
+      for (const bot of eligible) {
+        if (room.phase !== TurnPhase.AuctionPhase) break;
+        if (auction.passedPlayers?.has(bot.id)) continue;
+        if (auction.highestBidder === bot.id) continue;
+
+        const config = getBotConfig(this.getBotPersonality(roomCode, bot.id));
+        const auctionForBot = {
+          ...auction,
+          bidIncrement: auction.highestBidder !== undefined ? 100 : 50,
+        };
+        const intent = decideBotIntent(bot, room, registry, stateMap, config, auctionForBot);
+
+        if (intent?.type === 'INTENT_BID') {
+          const amount = typeof intent.amount === 'number' ? intent.amount : 0;
+          const res = this.handleAuctionBid(roomCode, bot.id, amount);
+          if (res.success) {
+            auctionChanged = true;
+          } else {
+            this.handleAuctionPass(roomCode, bot.id);
+          }
+        } else if (intent?.type === 'INTENT_AUCTION_PASS') {
+          this.handleAuctionPass(roomCode, bot.id);
+        }
+      }
+    }
+
+    // Nếu chỉ còn highestBidder và mọi người chơi khác đều đã pass hoặc là declinedPlayer
+    if (room.phase === TurnPhase.AuctionPhase && auction.highestBidder) {
+      const remainingContenders = room.players.filter(
+        (p) => !p.bankrupt && p.id !== auction.declinedPlayerId && p.id !== auction.highestBidder,
+      );
+      if (remainingContenders.length === 0 || remainingContenders.every((p) => auction.passedPlayers?.has(p.id))) {
+        this.handleAuctionClose(roomCode);
+      }
+    }
+  }
+
   // [UC-GAME-005/MSS][UC-GAME-008/MSS] Tự động chạy lượt Bot
   runBotTurn(roomCode: string): void {
     const room = this.rooms.get(roomCode);
     if (!room) return;
-    const current = room.players[room.currentPlayerIndex];
-    if (!current?.isBot) return;
+
+    // Nếu đang trong AuctionPhase: Các bot đủ điều kiện giải quyết đấu giá (Bid hoặc Pass)
+    if ((this.rooms.get(roomCode)?.phase as TurnPhase) === TurnPhase.AuctionPhase) {
+      this.resolveAuctionBots(roomCode);
+      if ((this.rooms.get(roomCode)?.phase as TurnPhase) === TurnPhase.AuctionPhase) return;
+    }
+
+    const current = this.rooms.get(roomCode)?.players[this.rooms.get(roomCode)?.currentPlayerIndex ?? 0];
+    if (!current?.isBot || current.bankrupt) return;
 
     const config = getBotConfig(this.getBotPersonality(roomCode, current.id));
 
@@ -293,11 +371,20 @@ export class RoomManager {
     const MAX_INTENTS = 50;
 
     while (safetyCounter < MAX_INTENTS) {
-      const active = room.players[room.currentPlayerIndex];
+      const currentRoom = this.rooms.get(roomCode);
+      if (!currentRoom) break;
+      const active = currentRoom.players[currentRoom.currentPlayerIndex];
       if (!active || !active.isBot || active.id !== current.id) break;
 
+      if ((currentRoom.phase as TurnPhase) === TurnPhase.AuctionPhase) {
+        this.resolveAuctionBots(roomCode);
+        if ((this.rooms.get(roomCode)?.phase as TurnPhase) === TurnPhase.AuctionPhase) break;
+        safetyCounter++;
+        continue;
+      }
+
       const intent = decideBotIntent(
-        active, room,
+        active, currentRoom,
         this.registries.get(roomCode) ?? new Map(),
         this.propertyStates.get(roomCode) ?? new Map(),
         config,
@@ -312,9 +399,33 @@ export class RoomManager {
       }
 
       const result = this.handlePlayerIntent(roomCode, active.id, intent as PlayerIntent);
-      if (!result.success) break;
+      if (!result.success) {
+        if (intent.type === 'INTENT_BUY' || intent.type === 'INTENT_BUY_PROPERTY') {
+          this.handleDecline(roomCode, active.id);
+          this.resolveAuctionBots(roomCode);
+          if ((this.rooms.get(roomCode)?.phase as TurnPhase) === TurnPhase.AuctionPhase) break;
+          safetyCounter++;
+          continue;
+        }
+        break;
+      }
+
+      if (intent.type === 'INTENT_DECLINE' && (this.rooms.get(roomCode)?.phase as TurnPhase) === TurnPhase.AuctionPhase) {
+        this.resolveAuctionBots(roomCode);
+        if ((this.rooms.get(roomCode)?.phase as TurnPhase) === TurnPhase.AuctionPhase) break;
+      }
 
       safetyCounter++;
+    }
+
+    // Bảo vệ phòng vệ: Nếu Bot vẫn bị kẹt ở ActionPhase, cưỡng chế giải phóng lượt
+    const roomEnd = this.rooms.get(roomCode);
+    if (roomEnd && (roomEnd.phase as TurnPhase) === TurnPhase.ActionPhase) {
+      this.handleDecline(roomCode, current.id);
+      this.resolveAuctionBots(roomCode);
+      if ((this.rooms.get(roomCode)?.phase as TurnPhase) !== TurnPhase.AuctionPhase) {
+        this.handleEndTurn(roomCode, current.id);
+      }
     }
   }
 
@@ -336,9 +447,9 @@ export class RoomManager {
     return (!room || !reg || !sm) ? [] : calculateRankings(room, reg, sm);
   }
 
-  createDelta(roomCode: string, tick: number): DeltaPayload | undefined {
+  createDelta(roomCode: string, tick: number, timeRemaining?: number): DeltaPayload | undefined {
     const room = this.rooms.get(roomCode), reg = this.registries.get(roomCode), sm = this.propertyStates.get(roomCode);
-    return (!room || !reg || !sm) ? undefined : buildDeltaFromRoom(room, reg, sm, tick, this.auctions);
+    return (!room || !reg || !sm) ? undefined : buildDeltaFromRoom(room, reg, sm, tick, this.auctions, timeRemaining);
   }
 
   registerTimer(roomCode: string, timer: NodeJS.Timeout): void {

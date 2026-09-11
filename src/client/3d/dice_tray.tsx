@@ -119,30 +119,85 @@ export function DiceTray(): React.ReactElement {
   const trimColor = isDoubles ? '#F59E0B' : '#78350F';
 
   return (
-    <group position={[0, 0.05, 0]}>
-      {/* Tray Floor (Green felt) */}
-      <mesh receiveShadow position={[0, 0, 0]}>
-        <boxGeometry args={[3.8, 0.08, 3.8]} />
-        <meshStandardMaterial color="#14532D" roughness={0.8} />
+    <group position={[0, 0.05, 0]} data-testid="dice-tray">
+      {/* 0. Bậc đá cẩm thạch giật cấp xung quanh (Sunken Plaza Terraced Steps) */}
+      <mesh receiveShadow position={[0, -0.01, 0]}>
+        <boxGeometry args={[4.28, 0.04, 4.28]} />
+        <meshStandardMaterial color="#94A3B8" roughness={0.65} />
+      </mesh>
+      <mesh receiveShadow position={[0, 0.03, 0]}>
+        <boxGeometry args={[4.14, 0.04, 4.14]} />
+        <meshStandardMaterial color="#CBD5E1" roughness={0.55} />
       </mesh>
 
-      {/* Tray Borders (Mahogany wood + Bronze rim) */}
-      <mesh position={[0, 0.12, -1.9]} castShadow>
-        <boxGeometry args={[4.0, 0.24, 0.2]} />
-        <meshStandardMaterial color={trimColor} roughness={0.4} metalness={0.3} />
+      {/* 1. Lòng sàn nỉ xanh hoàng gia & Hoa văn la bàn hoàng kim */}
+      <mesh receiveShadow position={[0, 0.04, 0]}>
+        <boxGeometry args={[3.8, 0.02, 3.8]} />
+        <meshStandardMaterial color="#064E3B" roughness={0.8} />
       </mesh>
-      <mesh position={[0, 0.12, 1.9]} castShadow>
-        <boxGeometry args={[4.0, 0.24, 0.2]} />
-        <meshStandardMaterial color={trimColor} roughness={0.4} metalness={0.3} />
+      {/* Vòng la bàn trung tâm khảm đồng thau */}
+      <mesh position={[0, 0.052, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[0.7, 0.73, 32]} />
+        <meshBasicMaterial color="#F59E0B" />
       </mesh>
-      <mesh position={[1.9, 0.12, 0]} castShadow>
-        <boxGeometry args={[0.2, 0.24, 3.6]} />
-        <meshStandardMaterial color={trimColor} roughness={0.4} metalness={0.3} />
+      <mesh position={[0, 0.052, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[0.35, 0.38, 24]} />
+        <meshBasicMaterial color="#FBBF24" />
       </mesh>
-      <mesh position={[-1.9, 0.12, 0]} castShadow>
-        <boxGeometry args={[0.2, 0.24, 3.6]} />
-        <meshStandardMaterial color={trimColor} roughness={0.4} metalness={0.3} />
-      </mesh>
+      {/* 4 Móc góc đồng thau định vị */}
+      {[-1.65, 1.65].map((cx) =>
+        [-1.65, 1.65].map((cz) => (
+          <mesh key={`tray-corner-${cx}-${cz}`} position={[cx, 0.052, cz]}>
+            <boxGeometry args={[0.16, 0.005, 0.16]} />
+            <meshStandardMaterial color="#F59E0B" metalness={0.8} roughness={0.2} />
+          </mesh>
+        ))
+      )}
+
+      {/* 2. Thành quảng trường: Gỗ gụ hoàng gia & Gờ cẩm thạch trắng bo viền */}
+      <group position={[0, 0.12, -1.9]}>
+        <mesh castShadow>
+          <boxGeometry args={[4.0, 0.24, 0.2]} />
+          <meshStandardMaterial color={trimColor} roughness={0.4} metalness={0.3} />
+        </mesh>
+        <mesh position={[0, 0.125, 0]}>
+          <boxGeometry args={[4.04, 0.015, 0.22]} />
+          <meshStandardMaterial color="#F8FAFC" roughness={0.3} />
+        </mesh>
+      </group>
+
+      <group position={[0, 0.12, 1.9]}>
+        <mesh castShadow>
+          <boxGeometry args={[4.0, 0.24, 0.2]} />
+          <meshStandardMaterial color={trimColor} roughness={0.4} metalness={0.3} />
+        </mesh>
+        <mesh position={[0, 0.125, 0]}>
+          <boxGeometry args={[4.04, 0.015, 0.22]} />
+          <meshStandardMaterial color="#F8FAFC" roughness={0.3} />
+        </mesh>
+      </group>
+
+      <group position={[1.9, 0.12, 0]}>
+        <mesh castShadow>
+          <boxGeometry args={[0.2, 0.24, 3.6]} />
+          <meshStandardMaterial color={trimColor} roughness={0.4} metalness={0.3} />
+        </mesh>
+        <mesh position={[0, 0.125, 0]}>
+          <boxGeometry args={[0.22, 0.015, 3.64]} />
+          <meshStandardMaterial color="#F8FAFC" roughness={0.3} />
+        </mesh>
+      </group>
+
+      <group position={[-1.9, 0.12, 0]}>
+        <mesh castShadow>
+          <boxGeometry args={[0.2, 0.24, 3.6]} />
+          <meshStandardMaterial color={trimColor} roughness={0.4} metalness={0.3} />
+        </mesh>
+        <mesh position={[0, 0.125, 0]}>
+          <boxGeometry args={[0.22, 0.015, 3.64]} />
+          <meshStandardMaterial color="#F8FAFC" roughness={0.3} />
+        </mesh>
+      </group>
 
       {/* 2 Dice with independent tumble spins */}
       <SingleDie

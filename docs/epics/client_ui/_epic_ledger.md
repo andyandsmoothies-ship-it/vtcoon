@@ -163,3 +163,46 @@
 4. **Độ trễ Delta:** Zustand state update từ FSM event đến re-render HUD ≤ 1 render cycle (~16ms).
 5. **Asset Budget:** Tổng tài nguyên mỗi ô ≤ 120KB (3 lớp WebP ≤ 45KB/lớp theo design.md).
 6. **Code Quality:** Cyclomatic Complexity ≤ 5, mỗi file ≤ giới hạn LOC đã quy định, zero TypeScript any.
+
+---
+
+## Mốc Nghiệm Thu Bứt Phá: Bán Đảo Đô Thị Biển Nhiệt Đới (Vietnamese Coastal Island Metropolis)
+- **Căn cứ nghệ thuật:** Chuẩn tham chiếu quốc tế Retropoly (RetroStyle Games).
+- **Hạ tầng hoàn tất:**
+  * Perspective Camera (fov 40) và đường ống hậu kỳ điện ảnh Post-Processing Pipeline (Multisampling 4, N8AO, Champagne Bloom, Macro Tilt-Shift DoF, ACES Filmic ToneMapping).
+  * Môi trường Bán đảo Nhiệt đới: Bờ cát vàng, biển ngọc bích nhấp nhô sóng động, rặng núi 32 phân đoạn mềm mại, vách đá sườn núi, rừng thông chân núi, dải mây xốp tầng cao Y=19-24 và sương mù chân núi.
+  * Sa bàn đô thị trung tâm: Cầu Ba Son & Long Biên, Cảng Cát Lái 2 cần cẩu gantry và bãi container xếp tầng, bến du thuyền và hải đăng, Chợ Bến Thành, Nhà thờ Đông Dương mái ngói đỏ, Sân vận động vát mái lộ sân cỏ kẻ sọc carô, Vòng đu quay đa sắc, tuyến đường sắt hầm đá và tàu hàng 3 toa.
+  * Kiến trúc C0-C3: Cọc mốc trắc địa C0, Shophouse C1, Khu thương mại C2, Quần thể Tháp Đôi Landmark C3 Champagne Gold & Ivory vách kính sapphire (loại bỏ hoàn toàn cọc đen và vòng vàng lơ lửng).
+  * Sảnh chờ Glassmorphism xuyên thấu nền 3D sống động (`bg-sky-950/20 backdrop-blur-[5px]`).
+- **Phán quyết Art Director (`game-3d-visual-critic`):**
+  * Đợt 1: 6.8/10 (Vượt khỏi phòng tối 2000 nhưng còn tồn tại 5 điểm nghẽn).
+  * Đợt 2: 8.2/10 -> Nghiệm thu toàn diện các điểm nghẽn, bổ sung chi tiết sinh thái bãi biển và cảnh quan địa chất.
+- **Gói A: Living Ocean & Autonomous Micro-Traffic (Đã Hoàn Tất - 2026-09-11):**
+  * Sóng Gerstner điều hòa 3 pha (biên độ <= 0.070, tính lại pháp tuyến `computeVertexNormals()` bắt nắng lấp lánh).
+  * Vi giao thông tự hành: 7 xe buýt/ô tô chạy 2 làn đối xứng chuẩn RHT kèm 2 đèn pha LED vi mô rọi sáng mặt đường.
+  * Ca-nô tuần tra vịnh biển phía Nam lướt sóng nhấp nhô, đàn hải âu 5 con bay lượn hướng mỏ chuẩn vận tốc.
+  * Cần cẩu Cát Lái 1 & 2 tự xoay trục và nâng hạ cáp cẩu, khung spreader treo đúng dầm cẩu.
+  * Sửa lỗi deadlock `skipNextTurn` trong `turn_loop.ts`, bảo đảm 1.000 ván Chaos Monkey Simulator chạy mượt mà.
+- **Gói B: Dynamic Time-of-Day & Neon Metropolis Night (Đã Hoàn Tất - 2026-09-11):**
+  * Hệ thống chu kỳ 3 pha: Ban Ngày Nhiệt Đới -> Hoàng Hôn Mật Ong -> Đêm Đô Thị Neon.
+  * Nội suy mượt mà exponential decay lerp `1 - Math.exp(-dt * 3.0)` qua `useFrame`, quản lý Sun/Ambient/Hemi/Sky/Fog qua `environment_store.ts`.
+  * Cửa sổ tòa nhà procedural emissive phát quang vàng/cyan rực rỡ trong đêm.
+  * Đèn LED nghệ thuật dây văng Cầu Ba Son (cyan) & vòm Cầu Long Biên (vàng rực).
+  * Đỉnh tháp Landmark quét laser 360 độ bầu trời đêm kèm đèn cảnh báo an toàn hàng không nhấp nháy chu kỳ xung.
+  * 4 cột đèn pha sân vận động tỏa nón ánh sáng xuống mặt sân cỏ; 8 cabin đu quay phát sáng lung linh.
+  * Tương tác linh hoạt: Nút bấm trên TopBar cho phép chọn cố định hoặc xoay vòng tự động 90s.
+- **Gói C: Cinematic Action Cam & Construction Slam VFX (Đã Hoàn Tất - 2026-09-11):**
+  * Hệ thống Camera State Machine 4 trạng thái (`overview`, `dice_roll`, `pawn_chase`, `tile_focus`) tích hợp vào `AdaptiveCinematicCamera`.
+  * Sà xuống góc nghiêng thấp (low-angle cinematic) khi gieo xúc xắc, bám đuổi quân cờ nhảy từng bước, phóng to ô đất khi mở sổ đỏ/modal, và tự động hồi phục góc nhìn `overview` khi hết lượt.
+  * Cơ chế suy giảm hàm mũ (exponential decay damping) độc lập tốc độ khung hình, triệt tiêu rung giật.
+  * Hiệu ứng khánh thành công trình va đập thể tích (Impact Drop Animation): rơi tự do gia tốc trọng trường từ trên cao cắm mạnh xuống mặt đế ô cờ kèm nén đàn hồi va đập (squash 80ms & rebound 120ms).
+  * Rung chấn màn hình vi mô (Camera Screen Shake 300ms - 400ms) tạo cảm giác đanh chắc chân thật.
+  * Sóng xung kích vành khăn (Shockwave Ring Expansion) phát sáng lan tỏa trên mặt bàn cờ.
+  * Bụi hạt vàng kim và pháo hoa hoàng kim bung tỏa ăn mừng rực rỡ (Celebration Gold Particles & Confetti VFX).
+- **Trạng thái kiểm thử:** 94/94 test files PASS (1.123/1.123 unit/contract/simulation tests passed bao gồm 1.000 ván Chaos Monkey Simulator).
+- **Tối ưu hóa Gói C hoàn thiện:**
+  * Giải quyết xung đột khoảng cách OrbitControls: tinh chỉnh động `minDistance` (3.8 cho chế độ điện ảnh cận cảnh, 14 cho góc nhìn bao quát) giữ vững hợp đồng kiểm thử và loại bỏ triệt để hiện tượng kẹt camera.
+  * Tách biệt Screen Shake cộng dồn trực tiếp lên vị trí máy quay thay vì lọc qua bộ suy giảm hàm mũ, bảo toàn 100% biên độ rung chấn vật lý đanh chắc 42Hz.
+  * Bù trừ chính xác độ lệch 0.42 trục Z theo 4 cạnh bàn cờ (`getBuildingWorldPosition`), đưa tâm chấn sóng xung kích và chùm pháo hoa về đúng chân đế công trình.
+  * Chuẩn hóa hoạt ảnh va đập đàn hồi (harmonic continuous squash), loại bỏ bước nhảy giật gãy 26% tại thời điểm chạm đất.
+- **Trạng thái triển khai Container:** Container Docker `vtcoon-vtcoon-1` đã đồng bộ bản build production và phản hồi HTTP 200 OK.

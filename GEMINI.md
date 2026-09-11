@@ -13,18 +13,21 @@ Any documents, artifacts of this project must be in Vietnamese. This project is 
 - **Test State Isolation**: Zero order-dependent tests. Run test suites with `--randomize`. Isolate test state and use Fixture/Schema Contract Tests to reconcile 100% of static data against SSOT.
 - **Zero-Polling & Background Harness**: Never execute in-loop polling (`sleep`/`while`). Offload long tasks (>10s) to background processes. Terminate processes hanging over 60s without output.
 - **SSOT & Player Intent Integrity**: All player business decisions (buy property, upgrade, trade) must be explicit Intent/Action transitions per ADR-0001. Never execute player choices as implicit side-effects of pawn movement.
-- **Subagent Artifact Persistence (Dual Output Pattern)**: Authoring subagents (planners, slicers) creating large artifacts (`docs/plans/`, `issues/`) MUST write directly to disk files using `write_to_file` in `Workspace: "inherit"` and return only a concise summary (<20 lines) with clickable file links. Read-only reviewers (`spec-reviewer`, `code-reviewer`) remain strictly read-only and report 1-page structured packets directly into chat.
+- **Subagent Artifact Persistence (Dual Output Pattern)**: Authoring subagents (planners, slicers) creating large artifacts (`docs/plans/`, `issues/`) MUST write directly to disk files using `write_to_file` in `Workspace: "inherit"` and return only a concise summary (<20 lines) with clickable file links. Read-only reviewers (`spec-reviewer`, `code-reviewer`, `game-3d-visual-critic`) remain strictly read-only and report 1-page structured packets directly into chat.
 - **Lean Runtime Observability**: Zero silent error swallowing (empty `catch` forbidden). All domain state transitions (FSM, transactions) must emit structured logs (`{ event, correlationId, timestamp, delta }`). Rejection of player actions must return an explicit Reason Code.
 - **Vertical Slice Completeness & Closed-Loop Testing**: Any new state field on `Player` or `PropertyState` (such as `bankrupt`, `isMortgaged`) must be mapped simultaneously to `DeltaPayload` (`CellDelta` / `PlayerDelta`). Strictly forbid test mirroring (Bug-Codification); every emitted event card or modifier (Producer) must have a test proving that the beneficiary or paying consumer changes actual cash flow.
+- **3D Visual Quality Gate (Visionary Art Audit)**: Khi người dùng yêu cầu hoặc tại các mốc nghiệm thu mỹ thuật quan trọng (`src/client/3d/`, `docs/domain/design.md`, R3F Canvas), triệu hồi Subagent chuyên gia độc lập `game-3d-visual-critic` để phản biện không khoan nhượng qua 5 góc chụp thực tế. Art Director tập trung vào 4 tầng thẩm mỹ (Bầu không khí, Cảm giác xúc giác sa bàn, Linh hồn đô thị, UX), tuyệt đối bài trừ lạm phát điểm số và bắt buộc đưa ra các định hướng đột phá vượt mong đợi (Wow-factor) sánh ngang game thương mại quốc tế.
+- **Continuous Improvement & Ad-hoc Persistence (Quy Chuẩn Lưu Trữ Cải Tiến Đột Xuất)**: Mọi đợt tinh chỉnh, sửa lỗi hệ thống (Systemic Fix), nâng cấp trí thông minh Bot AI hoặc tối ưu trải nghiệm (Juice/VFX) phát sinh ngoài các Epic cơ sở TUYỆT ĐỐI KHÔNG chỉ lưu trong bộ nhớ tạm phiên (Session Artifacts / Chat). BẮT BUỘC phải lập kế hoạch tại `docs/plans/improvements/IMP-[ID]-[slug]_plan.md` và lập báo cáo nghiệm thu thực nghiệm tại `docs/reports/improvements/IMP-[ID]-[slug]_report.md`.
 
 ## 2. DEFINITION OF DONE
 A task is COMPLETE only when:
 1. Automated tests pass Adversarial Inversion (deliberate failure verification), carry traceability tags (`[UC-XXX/MSS]` or `[UC-XXX/A#]`), and ensure Fixture Contract Tests match 100% of the SSOT table.
 2. Code passes 6 Slop Red Flags audit (least new structure, cyclomatic complexity <= 5, visual tokens compliance, zero code golf/no-op).
-3. Reviewer gates approve (`spec-reviewer` approves 100% Three-Way Spec Reconciliation against `docs/requirements.md` and checks for orphaned technical debt; `code-reviewer` approves code quality, architecture boundaries, and Lean Observability).
+3. Reviewer gates approve (`spec-reviewer` approves 100% Three-Way Spec Reconciliation against `docs/requirements.md` and checks for orphaned technical debt; `code-reviewer` approves code quality, architecture boundaries, and Lean Observability; `game-3d-visual-critic` approves visual quality gate when visual audit is requested).
 4. Progress is updated in `docs/epics/[epic]/_epic_ledger.md` (including Tech Debt Ledger if flows are deferred) and user commits changes to git.
 5. Domain learnings (if any) are processed via Lean Retrospective Pyramid (Type > Shared Helper > `docs/domain/gotchas.md`).
 6. Production Resilience verified: Defense against out-of-turn/invalid intents, global conservation invariant, and session drop/grace period handled safely.
+7. Ad-hoc Improvements Documented: Mọi cải tiến đột xuất phải có kế hoạch tại `docs/plans/improvements/` và báo cáo nghiệm thu thực nghiệm tại `docs/reports/improvements/`, cập nhật ADR (nếu có thay đổi kiến trúc) và `docs/master_roadmap.md`.
 
 ## 3. PROJECT NFR BASELINE (VTCOON 3D BOARD GAME)
 - **Game Engine & FSM**: Server-authoritative state transitions only. Deterministic PRNG seeded per game session. Turn action timeout <= 60s.
@@ -39,5 +42,9 @@ When deep domain context is required, read the following index files:
 - Visual Design System & Tokens: [`docs/domain/design.md`](file:///C:/Users/HP/Documents/GitHub/vtcoon/docs/domain/design.md)
 - FSM Architecture Decision: [`docs/domain/adr/ADR-0001-fsm-architecture.md`](file:///C:/Users/HP/Documents/GitHub/vtcoon/docs/domain/adr/ADR-0001-fsm-architecture.md)
 - 3D Rendering Architecture Decision: [`docs/domain/adr/ADR-0002-r3f-rendering.md`](file:///C:/Users/HP/Documents/GitHub/vtcoon/docs/domain/adr/ADR-0002-r3f-rendering.md)
+- Architecture Decisions Ledger: `docs/domain/adr/`
 - Active Epic Progress: `docs/epics/[epic]/_epic_ledger.md`
+- Continuous Improvement Plans: `docs/plans/improvements/`
+- Continuous Improvement Reports: `docs/reports/improvements/`
+- Master Roadmap & Evolution Log: [`docs/master_roadmap.md`](file:///C:/Users/HP/Documents/GitHub/vtcoon/docs/master_roadmap.md)
 - Domain Gotchas & Edge Cases: [`docs/domain/gotchas.md`](file:///C:/Users/HP/Documents/GitHub/vtcoon/docs/domain/gotchas.md)

@@ -60,8 +60,12 @@ export function applyChanceCard(
 
 
 export function drawMarketCard(room: Room, reg: PropertyRegistry, sm: PropertyStateMap, rng: () => number): void {
-  if (room.marketDeck.length === 0 && room.marketDiscard.length > 0) {
-    room.marketDeck = shuffle(room.marketDiscard.splice(0), rng);
+  if (room.marketDeck.length === 0) {
+    if (room.marketDiscard.length > 0) {
+      room.marketDeck = shuffle(room.marketDiscard.splice(0), rng);
+    } else {
+      room.marketDeck = createMarketDeck(rng);
+    }
   }
   const card = room.marketDeck.shift();
   if (card) {
@@ -76,8 +80,12 @@ export function drawChanceCard(
   reg?: PropertyRegistry, sm?: PropertyStateMap,
   permanentRentBonus?: Record<number, number>,
 ): void {
-  if (room.chanceDeck.length === 0 && room.chanceDiscard.length > 0) {
-    room.chanceDeck = shuffle(room.chanceDiscard.splice(0), rng);
+  if (room.chanceDeck.length === 0) {
+    if (room.chanceDiscard.length > 0) {
+      room.chanceDeck = shuffle(room.chanceDiscard.splice(0), rng);
+    } else {
+      room.chanceDeck = createChanceDeck(rng);
+    }
   }
   const card = room.chanceDeck.shift();
   if (card) {

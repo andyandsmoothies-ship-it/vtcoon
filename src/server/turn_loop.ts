@@ -86,7 +86,11 @@ export function executeTurnRoll(
   rolledThisTurn: Map<string, boolean>,
   roomCode: string,
 ): RollResult | undefined {
-  if (current.skipNextTurn) return undefined;
+  if (current.skipNextTurn) {
+    current.skipNextTurn = false;
+    room.phase = TurnPhase.PropertyManagement;
+    return undefined;
+  }
 
   const canRoll = room.phase === TurnPhase.WaitingRoll ||
     (current.consecutiveDoubles > 0 && room.phase === TurnPhase.PropertyManagement);
@@ -157,12 +161,13 @@ export function executeTurnEnd(
   if (room.phase === TurnPhase.AuctionPhase || room.phase === TurnPhase.InsolvencyPhase) return undefined;
   if (!rolledThisTurn && room.phase === TurnPhase.WaitingRoll) return undefined;
 
-  if (continueDoubles && current.consecutiveDoubles > 0) {
+  if (continueDoubles && current.consecutiveDoubles > 0 && !current.skipNextTurn) {
     if (current.extraTurns > 0) current.extraTurns -= 1;
     room.phase = TurnPhase.WaitingRoll;
     rolledThisTurnMap.set(roomCode, false);
     return room;
   }
+
 
   // [DEBT-S06-03] Kiểm tra unbuiltRounds TRƯỚC khi chuyển lượt
   if (registry && stateMap && auctions) {
@@ -190,7 +195,12 @@ export function executeTurnEnd(
   }
   if (current.extraTurns > 0) {
     current.extraTurns -= 1;
-    room.phase = TurnPhase.WaitingRoll;
+    if (current.skipNextTurn) {
+      current.skipNextTurn = false;
+      room.phase = TurnPhase.PropertyManagement;
+    } else {
+      room.phase = TurnPhase.WaitingRoll;
+    }
     rolledThisTurnMap.set(roomCode, false);
     return room;
   }
@@ -198,7 +208,10 @@ export function executeTurnEnd(
   let next = (room.currentPlayerIndex + 1) % total;
   let steps = 0;
   while (steps < total) {
-    if (next === 0) room.activeModifiers = decayModifiers(room.activeModifiers);
+    if (next === 0) {
+      room.roundCount = (room.roundCount ?? 1) + 1;
+      room.activeModifiers = decayModifiers(room.activeModifiers);
+    }
     if (!room.players[next]?.bankrupt) break;
     next = (next + 1) % total;
     steps++;

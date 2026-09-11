@@ -10,11 +10,22 @@ import {
 } from './property_data';
 import { ActionRejectReason } from './action_reasons';
 
-export function hasMonopoly(playerId: string, cellIndex: number, registry: PropertyRegistry): boolean {
+export function hasMonopoly(
+  playerId: string,
+  cellIndex: number,
+  registry: PropertyRegistry,
+  stateMap?: PropertyStateMap,
+): boolean {
   const cell = BOARD_CONFIG[cellIndex];
   if (!cell?.colorGroup) return false;
   const groupCells = BOARD_CONFIG.filter((c) => c.colorGroup === cell.colorGroup);
-  return groupCells.every((c) => registry.get(c.index) === playerId);
+  const ownsAll = groupCells.every((c) => registry.get(c.index) === playerId);
+  if (!ownsAll) return false;
+  if (stateMap) {
+    const hasMortgaged = groupCells.some((c) => Boolean(stateMap.get(c.index)?.isMortgaged));
+    if (hasMortgaged) return false;
+  }
+  return true;
 }
 
 export function checkEvenBuilding(
@@ -36,6 +47,24 @@ export function checkEvenBuilding(
   return { valid: true };
 }
 
+export function checkEvenDowngrading(
+  cellIndex: number,
+  stateMap: PropertyStateMap,
+): { valid: boolean; reason?: string; leadingCells?: number[] } {
+  const cell = BOARD_CONFIG[cellIndex];
+  if (!cell?.colorGroup) return { valid: true };
+  const state = stateMap.get(cellIndex) ?? { level: 0 };
+  if (state.level <= 0) return { valid: false, reason: ActionRejectReason.NOT_UPGRADEABLE };
+  const groupCells = BOARD_CONFIG.filter((c) => c.colorGroup === cell.colorGroup && c.index !== cellIndex);
+  const leadingCells = groupCells
+    .filter((c) => (stateMap.get(c.index)?.level ?? 0) > state.level)
+    .map((c) => c.index);
+  if (leadingCells.length > 0) {
+    return { valid: false, reason: ActionRejectReason.EVEN_DOWNGRADE_VIOLATION, leadingCells };
+  }
+  return { valid: true };
+}
+
 export function upgradeProperty(
   player: Player, cellIndex: number, registry: PropertyRegistry, stateMap: PropertyStateMap,
   modifiers?: readonly MarketModifier[],
@@ -43,6 +72,11 @@ export function upgradeProperty(
 ): { success: boolean; reason?: string } {
   if (registry.get(cellIndex) !== player.id) return { success: false, reason: ActionRejectReason.NOT_OWNER };
   if (!hasMonopoly(player.id, cellIndex, registry)) return { success: false, reason: ActionRejectReason.MISSING_MONOPOLY };
+  const cell = BOARD_CONFIG[cellIndex];
+  const groupCells = BOARD_CONFIG.filter((c) => c.colorGroup === cell?.colorGroup);
+  if (groupCells.some((c) => Boolean(stateMap.get(c.index)?.isMortgaged))) {
+    return { success: false, reason: ActionRejectReason.GROUP_MORTGAGED };
+  }
   const deed = PROPERTY_DEEDS.get(cellIndex);
   if (!deed?.upgradeCosts) return { success: false, reason: ActionRejectReason.NOT_UPGRADEABLE };
   const state = stateMap.get(cellIndex) ?? { level: 0 };
@@ -64,16 +98,41 @@ export function upgradeProperty(
   return { success: true };
 }
 
-export function downgradeProperty(cellIndex: number, stateMap: PropertyStateMap): { refund: number } {
+export interface DowngradeOptions {
+  readonly stepByStep?: boolean;
+  readonly enforceEvenDowngrading?: boolean;
+}
+
+export function downgradeProperty(
+  cellIndex: number,
+  stateMap: PropertyStateMap,
+  options?: DowngradeOptions,
+): { refund: number; newLevel: number; success: boolean; reason?: string } {
   const state = stateMap.get(cellIndex);
-  if (!state || state.level === 0) return { refund: 0 };
+  if (!state || state.level === 0) return { refund: 0, newLevel: 0, success: false, reason: ActionRejectReason.NOT_UPGRADEABLE };
   const deed = PROPERTY_DEEDS.get(cellIndex);
-  if (!deed?.upgradeCosts) return { refund: 0 };
+  if (!deed?.upgradeCosts) return { refund: 0, newLevel: state.level, success: false, reason: ActionRejectReason.NOT_UPGRADEABLE };
+
+  if (options?.enforceEvenDowngrading) {
+    const check = checkEvenDowngrading(cellIndex, stateMap);
+    if (!check.valid) {
+      return { refund: 0, newLevel: state.level, success: false, reason: check.reason };
+    }
+  }
+
+  if (options?.stepByStep) {
+    const targetLevel = state.level - 1;
+    const cost = deed.upgradeCosts[targetLevel]!;
+    const refund = Math.floor(cost * 0.5);
+    stateMap.set(cellIndex, { ...state, level: targetLevel });
+    return { refund, newLevel: targetLevel, success: true };
+  }
+
   let totalCost = 0;
   for (let i = 0; i < state.level; i++) totalCost += deed.upgradeCosts[i]!;
   const refund = Math.floor(totalCost * 0.5);
   stateMap.set(cellIndex, { ...state, level: 0 });
-  return { refund };
+  return { refund, newLevel: 0, success: true };
 }
 
 export function upgradeETC(

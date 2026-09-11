@@ -23,7 +23,9 @@ export default defineConfig({
             if (
               id.includes('@react-three') ||
               id.includes('@react-spring') ||
-              id.includes('three-stdlib')
+              id.includes('three-stdlib') ||
+              id.includes('postprocessing') ||
+              id.includes('n8ao')
             ) {
               return 'vendor-r3f';
             }

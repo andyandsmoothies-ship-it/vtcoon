@@ -427,4 +427,14 @@ describe('[Client NET-04] useGameWs Reconnect & LocalStorage Integration', () =>
       unsub();
     }
   });
+
+  it('[TC-NET04-CLI.13/MSS][EC-04] applyDeltaToStore đồng bộ chuẩn xác turnTimeRemaining từ server delta', () => {
+    useGameStore.setState({ turnTimeRemaining: 60 });
+    applyDeltaToStore({
+      tick: 12,
+      cells: [],
+      timeRemaining: 17,
+    });
+    expect(useGameStore.getState().turnTimeRemaining).toBe(17);
+  });
 });

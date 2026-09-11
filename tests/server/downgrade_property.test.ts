@@ -93,6 +93,26 @@ describe('[TC-05.6/MSS] INTENT_DOWNGRADE trong PropertyManagement', () => {
     expect(sm.get(3)?.level).toBe(0);
     expect(room.players[0]!.balance).toBe(initialBalance + expectedRefund);
   });
+
+  it('INTENT_DOWNGRADE mac dinh stepByStep=true: C2 ha ve C1 chi hoan phi cap 2', () => {
+    const { mgr, room, reg, sm } = setup();
+    reg.set(1, 'p1');
+    reg.set(3, 'p1');
+    sm.set(1, { level: 2 });
+    sm.set(3, { level: 2 });
+    room.phase = TurnPhase.PropertyManagement;
+    const initialBalance = room.players[0]!.balance;
+    const deed = PROPERTY_DEEDS.get(1)!;
+    const expectedRefund = Math.floor(deed.upgradeCosts![1]! * 0.5); // 450 * 0.5 = 225
+
+    const res = dispatchPlayerIntent(mgr, room.roomCode, 'p1', {
+      type: 'INTENT_DOWNGRADE',
+      cellIndex: 1,
+    });
+    expect(res.success, String(res.reason)).toBe(true);
+    expect(sm.get(1)?.level).toBe(1);
+    expect(room.players[0]!.balance).toBe(initialBalance + expectedRefund);
+  });
 });
 
 describe('[TC-05.6/MSS] INTENT_DOWNGRADE trong InsolvencyPhase & FSM Reversion', () => {

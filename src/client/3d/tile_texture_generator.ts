@@ -1,5 +1,5 @@
 // [UI-S01/MSS] High-definition procedural Canvas Texture generator for 40 VTCoOn board tiles & Standees
-import { CanvasTexture, SRGBColorSpace } from 'three';
+import { CanvasTexture, SRGBColorSpace, LinearFilter, LinearMipmapLinearFilter } from 'three';
 import { TILE_METADATA_MAP, formatPriceLabel, type TileMetadata } from './tile_texture_data';
 import { drawIcon } from './tile_icons';
 
@@ -7,19 +7,23 @@ const tileTextureCache = new Map<number, CanvasTexture>();
 const standeeTextureCache = new Map<number, CanvasTexture>();
 
 /**
- * Tạo Canvas Texture cho ô cờ thường (256 x 340)
+ * Tạo Canvas Texture cho ô cờ thường với độ phân giải cao HiDPI 4x (1024 x 1360)
  */
 function createStandardTileTexture(index: number, meta: TileMetadata): CanvasTexture | null {
   if (typeof document === 'undefined') return null;
 
+  // HiDPI 4x Resolution (1024 x 1360) cho chữ và vector sắc nét tuyệt đối
   const canvas = document.createElement('canvas');
-  canvas.width = 256;
-  canvas.height = 340;
+  canvas.width = 1024;
+  canvas.height = 1360;
   const ctx = canvas.getContext('2d');
   if (!ctx) return null;
 
-  // 1. Nền phiến đá hoa cương cao cấp
-  ctx.fillStyle = '#FDFCF7';
+  // Tỷ lệ tọa độ 4x giữ nguyên logic vẽ 256x340
+  ctx.scale(4, 4);
+
+  // 1. Nền giấy da ngà thượng hạng (Aged Parchment / Ivory Cream)
+  ctx.fillStyle = '#EDE5D8';
   ctx.fillRect(0, 0, 256, 340);
 
   // 2. Dải màu nhận diện vùng (Top Banner - hướng tâm bàn cờ)
@@ -28,18 +32,18 @@ function createStandardTileTexture(index: number, meta: TileMetadata): CanvasTex
 
   // Nhãn loại hình bất động sản / vùng miền
   ctx.fillStyle = '#FFFFFF';
-  ctx.font = 'bold 15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.font = '900 16px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(meta.category, 128, 34);
 
-  // 3. Tên tỉnh thành / địa danh chính
+  // 3. Tên tỉnh thành / địa danh chính (Tương phản cao)
   ctx.fillStyle = '#0F172A';
   ctx.font = '900 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   ctx.fillText(meta.title, 128, 108);
 
   // Phụ đề (Địa danh chi tiết / Công trình)
-  ctx.fillStyle = '#475569';
+  ctx.fillStyle = '#334155';
   ctx.font = 'bold 15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   ctx.fillText(meta.subtitle, 128, 136);
 
@@ -51,21 +55,25 @@ function createStandardTileTexture(index: number, meta: TileMetadata): CanvasTex
   if (priceText) {
     ctx.fillStyle = '#0F172A';
     ctx.beginPath();
-    ctx.roundRect(24, 280, 208, 44, 10);
+    ctx.roundRect(22, 276, 212, 48, 12);
     ctx.fill();
 
     ctx.fillStyle = '#FBBF24';
-    ctx.font = '900 20px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-    ctx.fillText(priceText, 128, 303);
+    ctx.font = '900 22px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillText(priceText, 128, 300);
   }
 
   // Viền tinh tế bao quanh
-  ctx.strokeStyle = '#E2E8F0';
+  ctx.strokeStyle = '#CBD5E1';
   ctx.lineWidth = 4;
   ctx.strokeRect(2, 2, 252, 336);
 
   const texture = new CanvasTexture(canvas);
   texture.colorSpace = SRGBColorSpace;
+  texture.anisotropy = 16;
+  texture.generateMipmaps = true;
+  texture.minFilter = LinearMipmapLinearFilter;
+  texture.magFilter = LinearFilter;
   texture.needsUpdate = true;
   return texture;
 }
@@ -185,17 +193,18 @@ const CORNER_DRAWERS: Readonly<Record<number, (ctx: CanvasRenderingContext2D) =>
 };
 
 /**
- * Tạo Canvas Texture cho 4 ô góc đặc biệt (384 x 384)
+ * Tạo Canvas Texture cho 4 ô góc đặc biệt với độ phân giải cao HiDPI (1024 x 1024)
  */
 function createCornerTileTexture(index: number): CanvasTexture | null {
   if (typeof document === 'undefined') return null;
 
   const canvas = document.createElement('canvas');
-  canvas.width = 384;
-  canvas.height = 384;
+  canvas.width = 1024;
+  canvas.height = 1024;
   const ctx = canvas.getContext('2d');
   if (!ctx) return null;
 
+  ctx.scale(1024 / 384, 1024 / 384);
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
 
@@ -204,6 +213,10 @@ function createCornerTileTexture(index: number): CanvasTexture | null {
 
   const texture = new CanvasTexture(canvas);
   texture.colorSpace = SRGBColorSpace;
+  texture.anisotropy = 16;
+  texture.generateMipmaps = true;
+  texture.minFilter = LinearMipmapLinearFilter;
+  texture.magFilter = LinearFilter;
   texture.needsUpdate = true;
   return texture;
 }
@@ -234,7 +247,7 @@ export function getTileTexture(index: number): CanvasTexture | null {
 }
 
 /**
- * Lấy hoặc sinh mới Canvas Texture 2.5D cho Standee Billboard
+ * Lấy hoặc sinh mới Canvas Texture 2.5D cho Standee Billboard (512 x 512)
  */
 export function getStandeeTexture(index: number): CanvasTexture | null {
   if (standeeTextureCache.has(index)) {
@@ -246,10 +259,12 @@ export function getStandeeTexture(index: number): CanvasTexture | null {
   if (!meta) return null;
 
   const canvas = document.createElement('canvas');
-  canvas.width = 256;
-  canvas.height = 256;
+  canvas.width = 512;
+  canvas.height = 512;
   const ctx = canvas.getContext('2d');
   if (!ctx) return null;
+
+  ctx.scale(2, 2);
 
   // Vẽ biểu tượng văn hóa đặc trưng bản địa
   drawIcon(ctx, meta.icon, 128, 105, meta.bannerColor, 2.2);
@@ -263,6 +278,10 @@ export function getStandeeTexture(index: number): CanvasTexture | null {
 
   const texture = new CanvasTexture(canvas);
   texture.colorSpace = SRGBColorSpace;
+  texture.anisotropy = 16;
+  texture.generateMipmaps = true;
+  texture.minFilter = LinearMipmapLinearFilter;
+  texture.magFilter = LinearFilter;
   texture.needsUpdate = true;
   standeeTextureCache.set(index, texture);
   return texture;

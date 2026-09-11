@@ -121,17 +121,20 @@ export function handleDowngrade(
   registry: PropertyRegistry | undefined,
   stateMap: PropertyStateMap | undefined,
   roomCode?: string,
-): { success: boolean; reason?: ActionRejectReason } {
+  options?: import('../domain/property_upgrade').DowngradeOptions,
+): { success: boolean; reason?: ActionRejectReason; refund?: number; newLevel?: number } {
   const v = validateDowngrade(current, phase, cellIndex, registry, stateMap);
   if (!v.valid) return { success: false, reason: v.reason };
 
-  const { refund } = downgradeProperty(cellIndex, v.stateMap);
-  v.current.balance += refund;
+  const result = downgradeProperty(cellIndex, v.stateMap, options);
+  if (!result.success) return { success: false, reason: result.reason as ActionRejectReason };
+
+  v.current.balance += result.refund;
   console.info(JSON.stringify({
     event: 'DOWNGRADE_PROPERTY', correlationId: roomCode ?? v.current.id,
-    timestamp: Date.now(), delta: { cellIndex, refund, playerId: v.current.id },
+    timestamp: Date.now(), delta: { cellIndex, refund: result.refund, playerId: v.current.id, newLevel: result.newLevel },
   }));
-  return { success: true };
+  return { success: true, refund: result.refund, newLevel: result.newLevel };
 }
 
 // --- DEBT-01: P2P Trading (UC-GAME-056) ---

@@ -6,6 +6,10 @@ import { cellPosition } from './board_coords';
 import { LayeredDioramaTile } from './board_tile';
 import { DiceTray } from './dice_tray';
 import { CenterpieceWater } from './centerpiece_water';
+import { MiniatureCityDiorama } from './miniature_city_diorama';
+import { CoastalIslandEnvironment } from './coastal_island_environment';
+import { CinematicLightingAccents } from './cinematic_effects';
+import { ConstructionSlamVFX } from './construction_slam_vfx';
 
 const CORNER_INDICES = new Set([0, 10, 20, 30]);
 
@@ -24,18 +28,37 @@ export function GameBoard(): React.ReactElement {
 
   return (
     <group position={[0, 0, 0]}>
-      {/* 1. Nền hoa viên dập nổi: Sân trung tâm lát gạch hoa cương viền đồng tương phản */}
-      <mesh receiveShadow position={[0, -0.042, 0]}>
-        <boxGeometry args={[15.85, 0.076, 15.85]} />
-        <meshStandardMaterial color="#B45309" roughness={0.35} metalness={0.8} />
+      {/* 0. Môi trường Bán đảo Đảo Ngọc nhiệt đới (Vịnh biển, bãi cát, đồi núi & mây trời) */}
+      <CoastalIslandEnvironment />
+
+      {/* 0.1. Điểm nhấn ánh sáng điện ảnh 3D (Hải đăng, Chóp Landmark C3, Sân vận động) */}
+      <CinematicLightingAccents />
+
+      {/* 0.2. Hiệu ứng Va Đập Xây Dựng, Sóng Xung Kích & Pháo Hoa Khánh Thành */}
+      <ConstructionSlamVFX />
+
+      {/* 0. Khung kè đá phiến sẫm viền bàn cờ nổi 3D bo vát (Dark Slate Promenade Rim: 21.4 x 21.4) */}
+      <mesh receiveShadow castShadow position={[0, -0.06, 0]}>
+        <boxGeometry args={[21.4, 0.24, 21.4]} />
+        <meshStandardMaterial color="#334155" roughness={0.6} metalness={0.15} />
       </mesh>
-      <mesh receiveShadow position={[0, -0.04, 0]}>
-        <boxGeometry args={[15.75, 0.08, 15.75]} />
-        <meshStandardMaterial color="#1E293B" roughness={0.6} metalness={0.2} />
+      {/* Đường chỉ kim loại khảm vàng hổ phách ngăn cách khung đá và mép ô cờ */}
+      <mesh position={[0, -0.01, 0]}>
+        <boxGeometry args={[20.72, 0.04, 20.72]} />
+        <meshStandardMaterial color="#D97706" roughness={0.25} metalness={0.85} />
+      </mesh>
+
+      {/* 1. Nền hoa viên: Thảm cỏ xanh nhiệt đới trung tâm */}
+      <mesh receiveShadow position={[0, -0.02, 0]}>
+        <boxGeometry args={[15.75, 0.04, 15.75]} />
+        <meshStandardMaterial color="#22C55E" roughness={0.7} metalness={0.05} />
       </mesh>
 
       {/* 2. Cảnh quan trung tâm: Hồ nước nhân tạo & Bờ kè đá sa thạch */}
       <CenterpieceWater />
+
+      {/* 2.1. Sa bàn đô thị thu nhỏ: Đảo tài chính, cầu vượt, sân vận động & bến du thuyền */}
+      <MiniatureCityDiorama />
 
       {/* 3. Khay xúc xắc 3D trung tâm nằm giữa lòng hồ */}
       <DiceTray />
@@ -43,7 +66,7 @@ export function GameBoard(): React.ReactElement {
       {/* 4. Móng sa bàn giật cấp ngoài cùng (20.6 x 20.6) */}
       <mesh receiveShadow position={[0, -0.12, 0]}>
         <boxGeometry args={[20.6, 0.16, 20.6]} />
-        <meshStandardMaterial color="#0F172A" roughness={0.85} />
+        <meshStandardMaterial color="#CBD5E1" roughness={0.7} />
       </mesh>
 
       {/* 5. 40 ô đất liền mạch khép kín */}

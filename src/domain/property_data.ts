@@ -80,6 +80,7 @@ export interface PropertyState {
   isETC?: boolean;
   isUpgradedUtility?: boolean;
   unbuiltRounds?: number;
+  isMortgaged?: boolean;
 }
 export type PropertyStateMap = Map<number, PropertyState>;
 

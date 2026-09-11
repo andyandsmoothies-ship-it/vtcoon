@@ -3,6 +3,7 @@
 import type { RoomManager } from '../room_manager.js';
 import type { IntentMutex } from './intent_mutex.js';
 import type { DeltaBroadcaster } from './delta_broadcaster.js';
+import { TurnPhase } from '../../domain/room.js';
 
 export interface BotTurnSchedulerOptions {
   readonly rooms: RoomManager;
@@ -27,7 +28,9 @@ export class BotTurnScheduler {
   scheduleBotTurn(roomCode: string): void {
     const room = this.rooms.getRoom(roomCode);
     const current = room?.players[room.currentPlayerIndex];
-    if (!room?.started || !current?.isBot || current.bankrupt) return;
+    const isAuctionWithBots = room?.phase === TurnPhase.AuctionPhase &&
+      room.players.some((p) => p.isBot && !p.bankrupt && p.id !== room.currentAuction?.declinedPlayerId && !room.currentAuction?.passedPlayers?.has(p.id));
+    if (!room?.started || (!current?.isBot && !isAuctionWithBots) || (current?.bankrupt && !isAuctionWithBots)) return;
 
     this.rooms.clearRoomTimers(roomCode);
 
@@ -35,7 +38,9 @@ export class BotTurnScheduler {
       void this.intentMutex.runExclusive(roomCode, async () => {
         const r = this.rooms.getRoom(roomCode);
         const curr = r?.players[r.currentPlayerIndex];
-        if (!r?.started || !curr?.isBot || curr.bankrupt) return;
+        const hasAuctionBots = r?.phase === TurnPhase.AuctionPhase &&
+          r.players.some((p) => p.isBot && !p.bankrupt && p.id !== r.currentAuction?.declinedPlayerId && !r.currentAuction?.passedPlayers?.has(p.id));
+        if (!r?.started || (!curr?.isBot && !hasAuctionBots) || (curr?.bankrupt && !hasAuctionBots)) return;
 
         this.rooms.runBotTurn(roomCode);
         const rAfter = this.rooms.getRoom(roomCode);

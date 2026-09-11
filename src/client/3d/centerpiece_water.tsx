@@ -1,6 +1,6 @@
-// [UI-S02/MSS] CenterpieceWater — 3D Centerpiece water oasis, sandstone embankment & stylized flora
-import React, { useMemo } from 'react';
-import { Shape, Path } from 'three';
+import React, { useMemo, useRef } from 'react';
+import { useFrame } from '@react-three/fiber';
+import { Shape, Path, type Mesh } from 'three';
 
 export const WATER_SURFACE_Y = 0.05;
 
@@ -97,8 +97,24 @@ export const CORNER_BUSHES = [
   { pos: [6.8, 0.08, 6.8] as const, r: 0.34 },
 ];
 
+function useSafeFrame(callback: (state: Parameters<Parameters<typeof useFrame>[0]>[0]) => void): void {
+  try {
+    useFrame(callback);
+  } catch {
+    // Bỏ qua khi chạy trong môi trường SSR hoặc test tĩnh renderToStaticMarkup ngoài Canvas
+  }
+}
+
 export function CenterpieceWater(): React.ReactElement {
+  const waterMeshRef = useRef<Mesh>(null);
   const waterShape = useMemo(() => createWaterOasisShape(15.0, 1.0, 4.4), []);
+
+  useSafeFrame((state) => {
+    if (waterMeshRef.current) {
+      // Sóng nước nhấp nhô nhẹ 0.006 đơn vị theo nhịp thời gian
+      waterMeshRef.current.position.y = WATER_SURFACE_Y + Math.sin(state.clock.elapsedTime * 1.5) * 0.006;
+    }
+  });
 
   return (
     <group data-testid="centerpiece-water">
@@ -110,6 +126,7 @@ export function CenterpieceWater(): React.ReactElement {
 
       {/* 2. Mặt hồ nước nhân tạo phản chiếu môi trường PBR */}
       <mesh
+        ref={waterMeshRef}
         receiveShadow
         position={[0, WATER_SURFACE_Y, 0]}
         rotation={[-Math.PI / 2, 0, 0]}

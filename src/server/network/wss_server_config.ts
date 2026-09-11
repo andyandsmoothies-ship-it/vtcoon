@@ -20,4 +20,5 @@ export interface WssServerConfig {
   readonly gracePeriodMs?: number;
   readonly abandonedTimeoutMs?: number;
   readonly cleanupIntervalMs?: number;
+  readonly turnTimeoutMs?: number;
 }

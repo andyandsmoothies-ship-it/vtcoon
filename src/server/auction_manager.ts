@@ -90,7 +90,7 @@ export function handleAuctionPass(
   if (!session.passedPlayers) session.passedPlayers = new Set<string>();
   session.passedPlayers.add(playerId);
 
-  const eligiblePlayers = room.players.filter((p) => p.id !== session.declinedPlayerId);
+  const eligiblePlayers = room.players.filter((p) => p.id !== session.declinedPlayerId && !p.bankrupt);
   const targetPlayers = session.highestBidder
     ? eligiblePlayers.filter((p) => p.id !== session.highestBidder)
     : eligiblePlayers;

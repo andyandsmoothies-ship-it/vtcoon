@@ -58,6 +58,8 @@ export interface DeltaPayload {
   readonly dice?:                readonly [number, number];
   readonly auction?:             AuctionPayload | null;
   readonly roomStarted?:         boolean;
+  readonly turnPhase?:           TurnPhase;
+  readonly timeRemaining?:       number;
 }
 
 export function buildDeltaFromRoom(
@@ -66,6 +68,7 @@ export function buildDeltaFromRoom(
   stateMap: PropertyStateMap,
   tick: number,
   auctions?: Map<string, AuctionSession>,
+  timeRemaining?: number,
 ): DeltaPayload {
   const mortgagedSet = new Set<number>();
   for (const player of room.players) {
@@ -132,6 +135,8 @@ export function buildDeltaFromRoom(
     currentTurnPlayerId: currentTurnPlayer?.id,
     dice: room.lastDice,
     roomStarted: room.started,
+    turnPhase: room.phase,
+    ...(timeRemaining !== undefined ? { timeRemaining } : {}),
     ...(auction !== undefined ? { auction } : {}),
   });
 }
@@ -145,6 +150,8 @@ export function buildDeltaPayload(options: {
   dice?: readonly [number, number];
   auction?: AuctionPayload | null;
   roomStarted?: boolean;
+  turnPhase?: TurnPhase;
+  timeRemaining?: number;
 }): DeltaPayload;
 export function buildDeltaPayload(options: {
   tick: number;
@@ -170,6 +177,8 @@ export function buildDeltaPayload(
         dice?: readonly [number, number];
         auction?: AuctionPayload | null;
         roomStarted?: boolean;
+        turnPhase?: TurnPhase;
+        timeRemaining?: number;
       }
     | { tick: number; room: Room; registry: PropertyRegistry; stateMap: PropertyStateMap; auctions?: Map<string, AuctionSession> },
   cells?: ReadonlyArray<CellDelta>,
@@ -194,6 +203,8 @@ export function buildDeltaPayload(
       ...(tickOrOptions.dice !== undefined ? { dice: tickOrOptions.dice } : {}),
       ...(tickOrOptions.auction !== undefined ? { auction: tickOrOptions.auction } : {}),
       ...(tickOrOptions.roomStarted !== undefined ? { roomStarted: tickOrOptions.roomStarted } : {}),
+      ...(tickOrOptions.turnPhase !== undefined ? { turnPhase: tickOrOptions.turnPhase } : {}),
+      ...(tickOrOptions.timeRemaining !== undefined ? { timeRemaining: tickOrOptions.timeRemaining } : {}),
     };
   }
   return {
@@ -261,6 +272,9 @@ export class SessionManager {
         : {}),
       ...(payload.dice !== undefined ? { dice: payload.dice } : {}),
       ...(payload.auction !== undefined ? { auction: payload.auction } : {}),
+      ...(payload.roomStarted !== undefined ? { roomStarted: payload.roomStarted } : {}),
+      ...(payload.turnPhase !== undefined ? { turnPhase: payload.turnPhase } : {}),
+      ...(payload.timeRemaining !== undefined ? { timeRemaining: payload.timeRemaining } : {}),
     };
   }
 

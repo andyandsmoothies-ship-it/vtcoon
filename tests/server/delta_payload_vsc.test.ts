@@ -9,6 +9,7 @@ import {
   type PlayerDelta,
 } from '../../src/server/session_manager';
 import { RoomManager } from '../../src/server/room_manager';
+import { TurnPhase } from '../../src/domain/room';
 
 describe('[TC-05.8/MSS] DeltaPayload VSC 3D Synchronization', () => {
   let sessionMgr: SessionManager;
@@ -155,6 +156,19 @@ describe('[TC-05.8/MSS] DeltaPayload VSC 3D Synchronization', () => {
       const payload = buildDeltaPayload(1, sourceCells);
       (sourceCells as any)[0].level = 2;
       expect(payload.cells[0]?.level).toBe(0);
+    });
+
+    it('[TC-05.8/VSC] bảo toàn turnPhase và timeRemaining trong DeltaPayload', () => {
+      const delta: DeltaPayload = {
+        tick: 77,
+        cells: [{ index: 0 }],
+        turnPhase: TurnPhase.ActionPhase,
+        timeRemaining: 18,
+      };
+      sessionMgr.broadcastDelta(delta);
+      const last = sessionMgr.getLastDelta();
+      expect(last?.turnPhase).toBe(TurnPhase.ActionPhase);
+      expect(last?.timeRemaining).toBe(18);
     });
   });
 

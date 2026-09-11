@@ -16,6 +16,7 @@ export interface TitleDeedModalProps {
   readonly upgradeCost?: number;
   readonly hasMonopoly?: boolean;
   readonly upgradeBlockedReason?: string;
+  readonly downgradeBlockedReason?: string;
   readonly onBuy?: () => void;
   readonly onPass?: () => void;
   readonly onClose?: () => void;
@@ -50,6 +51,7 @@ export function TitleDeedModal({
   upgradeCost,
   hasMonopoly = false,
   upgradeBlockedReason,
+  downgradeBlockedReason,
   onBuy,
   onPass,
   onClose,
@@ -255,7 +257,13 @@ export function TitleDeedModal({
               <button
                 type="button"
                 onClick={onDowngrade}
-                className="min-h-[48px] whitespace-nowrap px-3.5 py-2 rounded-xl font-bold text-xs bg-gradient-to-b from-orange-600 to-orange-700 hover:from-orange-500 hover:to-orange-600 text-white border-b-4 border-orange-900 active:border-b-0 active:translate-y-1 shadow-lg shadow-orange-950/40 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 cursor-pointer"
+                disabled={Boolean(downgradeBlockedReason)}
+                title={downgradeBlockedReason}
+                className={`min-h-[48px] whitespace-nowrap px-3.5 py-2 rounded-xl font-bold text-xs border-b-4 transition-all focus-visible:outline-none focus-visible:ring-2 ${
+                  downgradeBlockedReason
+                    ? 'bg-slate-700 text-slate-400 border-slate-900 cursor-not-allowed shadow-none'
+                    : 'bg-gradient-to-b from-orange-600 to-orange-700 hover:from-orange-500 hover:to-orange-600 text-white border-orange-900 active:border-b-0 active:translate-y-1 shadow-lg shadow-orange-950/40 focus-visible:ring-orange-400 cursor-pointer'
+                }`}
               >
                 Hạ Cấp (-50%)
               </button>
@@ -279,6 +287,11 @@ export function TitleDeedModal({
             {upgradeBlockedReason && (
               <div className="w-full p-2 rounded-xl bg-amber-950/50 border border-amber-500/50 text-amber-300 text-[11px] font-bold text-center">
                 ⚠️ {upgradeBlockedReason}
+              </div>
+            )}
+            {downgradeBlockedReason && (
+              <div className="w-full p-2 rounded-xl bg-orange-950/50 border border-orange-500/50 text-orange-300 text-[11px] font-bold text-center">
+                ⚠️ {downgradeBlockedReason}
               </div>
             )}
           </>

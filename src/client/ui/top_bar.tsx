@@ -2,6 +2,7 @@
 import React from 'react';
 import { useGameStore } from '../store/game_store';
 import { useAudioStore } from '../store/audio_store';
+import { useEnvironmentStore } from '../store/environment_store';
 import { formatCurrency, formatTimeRemaining } from './ui_helpers';
 
 export interface TopBarProps {
@@ -16,6 +17,25 @@ export function TopBar(props: TopBarProps): React.ReactElement {
   const treasuryPool = useGameStore((state) => state.treasuryPool);
   const isMuted = useAudioStore((state) => state.isMuted);
   const toggleMute = useAudioStore((state) => state.toggleMute);
+  const timeOfDayMode = useEnvironmentStore((state) => state.mode);
+  const timeOfDayPhase = useEnvironmentStore((state) => state.phase);
+  const toggleNextTimeOfDay = useEnvironmentStore((state) => state.toggleNextMode);
+
+  const timeOfDayIcon = timeOfDayMode === 'auto'
+    ? '⏱️'
+    : timeOfDayPhase === 'night'
+    ? '🌙'
+    : timeOfDayPhase === 'sunset'
+    ? '🌅'
+    : '☀️';
+
+  const timeOfDayLabel = timeOfDayMode === 'auto'
+    ? 'Tự Động'
+    : timeOfDayPhase === 'night'
+    ? 'Đêm'
+    : timeOfDayPhase === 'sunset'
+    ? 'Hoàng Hôn'
+    : 'Ngày';
 
   const isLowTime = turnTimeRemaining <= 10;
   const timerColorClass = isLowTime
@@ -57,6 +77,19 @@ export function TopBar(props: TopBarProps): React.ReactElement {
         </div>
 
         <div className="h-4 w-px bg-slate-700" aria-hidden="true" />
+
+        {/* Nút Chu kỳ Thời gian Ngày - Hoàng Hôn - Đêm */}
+        <button
+          type="button"
+          onClick={toggleNextTimeOfDay}
+          className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors cursor-pointer text-xs font-medium border border-slate-600/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+          title={`Thời gian: ${timeOfDayLabel} (Bấm để đổi)`}
+          aria-label={`Chuyển chu kỳ thời gian (Hiện tại: ${timeOfDayLabel})`}
+          data-testid="time-of-day-toggle-button"
+        >
+          <span className="text-sm" aria-hidden="true">{timeOfDayIcon}</span>
+          <span className="hidden sm:inline">{timeOfDayLabel}</span>
+        </button>
 
         {/* Nút Bật / Tắt âm thanh */}
         <button

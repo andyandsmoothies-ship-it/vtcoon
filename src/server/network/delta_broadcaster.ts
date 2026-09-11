@@ -85,6 +85,8 @@ export function buildSparseDelta(prev: DeltaPayload, next: DeltaPayload): DeltaP
     ...(next.dice !== undefined ? { dice: next.dice } : {}),
     ...(next.auction !== undefined ? { auction: next.auction } : {}),
     ...(next.roomStarted !== undefined ? { roomStarted: next.roomStarted } : {}),
+    ...(next.turnPhase !== undefined ? { turnPhase: next.turnPhase } : {}),
+    ...(next.timeRemaining !== undefined ? { timeRemaining: next.timeRemaining } : {}),
   };
 }
 
@@ -94,6 +96,7 @@ export class DeltaBroadcaster {
   private readonly broadcastFn?: BroadcastFn;
   private readonly lastFullDeltas = new Map<string, DeltaPayload>();
   private readonly ticks = new Map<string, number>();
+  private timeRemainingProvider?: (roomCode: string) => number | undefined;
 
   constructor(
     roomManager: RoomManager,
@@ -103,6 +106,10 @@ export class DeltaBroadcaster {
     this.roomManager = roomManager;
     this.sessionManager = sessionManager;
     this.broadcastFn = broadcastFn;
+  }
+
+  setTimeRemainingProvider(provider: (roomCode: string) => number | undefined): void {
+    this.timeRemainingProvider = provider;
   }
 
   getNextTick(roomCode: string): number {
@@ -125,7 +132,8 @@ export class DeltaBroadcaster {
     options?: { forceFull?: boolean },
   ): BroadcastResult | undefined {
     const tick = this.getNextTick(roomCode);
-    const fullDelta = this.roomManager.createDelta(roomCode, tick);
+    const timeRemaining = this.timeRemainingProvider?.(roomCode);
+    const fullDelta = this.roomManager.createDelta(roomCode, tick, timeRemaining);
     if (!fullDelta) return undefined;
 
     const prevDelta = this.lastFullDeltas.get(roomCode);
@@ -171,7 +179,8 @@ export class DeltaBroadcaster {
     socket: { send: (data: string) => void },
   ): DeltaPayload | undefined {
     const tick = this.getNextTick(roomCode);
-    const fullDelta = this.roomManager.createDelta(roomCode, tick);
+    const timeRemaining = this.timeRemainingProvider?.(roomCode);
+    const fullDelta = this.roomManager.createDelta(roomCode, tick, timeRemaining);
     if (!fullDelta) return undefined;
 
     this.lastFullDeltas.set(roomCode, fullDelta);

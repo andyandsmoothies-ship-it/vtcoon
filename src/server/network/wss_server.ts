@@ -11,6 +11,7 @@ import { RateLimiter, type RateLimiterOptions } from '../security/rate_limiter.j
 import { EnvelopeValidator } from '../security/envelope_validator.js';
 import { IntentGuard } from '../security/intent_guard.js';
 import { BotTurnScheduler } from './bot_turn_scheduler.js';
+import { TurnTimeoutScheduler } from './turn_timeout_scheduler.js';
 import { SocketRegistry } from './socket_registry.js';
 import { encodeMsg } from './network_types.js';
 import type { WsServerMessage, WsClientMessage, ReasonCode } from './network_types.js';
@@ -29,6 +30,7 @@ export class WssServer {
   private readonly reconnects: ReconnectManager;
   private readonly cleanupScheduler: RoomCleanupScheduler;
   private readonly botScheduler: BotTurnScheduler;
+  private readonly turnTimeoutScheduler: TurnTimeoutScheduler;
   private readonly rateLimiter: RateLimiter;
   private readonly envelopeValidator: EnvelopeValidator;
   private readonly intentGuard: IntentGuard;
@@ -49,6 +51,13 @@ export class WssServer {
       rooms: this.rooms, intentMutex: this.intentMutex, broadcaster: this.broadcaster,
       onGameOver: (rc) => this.broadcastGameOver(rc),
     });
+    this.turnTimeoutScheduler = new TurnTimeoutScheduler({
+      rooms: this.rooms, intentMutex: this.intentMutex, broadcaster: this.broadcaster,
+      onGameOver: (rc) => this.broadcastGameOver(rc),
+      onScheduleBotTurn: (rc) => this.scheduleBotTurn(rc),
+      defaultTimeoutMs: config.turnTimeoutMs,
+    });
+    this.broadcaster.setTimeRemainingProvider((rc) => this.turnTimeoutScheduler.getTimeRemaining(rc));
     this.reconnects  = config.reconnectManager ?? new ReconnectManager({
       rooms: this.rooms, sessions: this.sessions, broadcaster: this.broadcaster,
       broadcast: (rc, msg) => this.broadcast(rc, msg), gracePeriodMs: config.gracePeriodMs,
@@ -329,6 +338,7 @@ export class WssServer {
 
   private scheduleBotTurn(roomCode: string): void {
     this.botScheduler.scheduleBotTurn(roomCode);
+    this.turnTimeoutScheduler.scheduleTurnTimeout(roomCode);
   }
 
   broadcastGameOver(roomCode: string, leaderboard?: Array<{ id: string; netWorth: number }>): void {
@@ -341,6 +351,7 @@ export class WssServer {
     if (this.closingRooms.has(roomCode)) return;
     this.closingRooms.add(roomCode);
     try {
+      this.turnTimeoutScheduler.clearTimeout(roomCode);
       this.sockets.clearRoomSockets(roomCode);
       this.reconnects.clearRoom(roomCode);
       const room = this.rooms.getRoom(roomCode);

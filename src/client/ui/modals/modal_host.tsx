@@ -86,12 +86,16 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
         // Monopoly & Even-building calculation
         const colorGroup = deed?.colorGroup;
         const groupCells = colorGroup ? BOARD_CONFIG.filter((c) => c.colorGroup === colorGroup).map((c) => c.index) : [];
-        const hasMonopoly = Boolean(owner && groupCells.length > 0 && groupCells.every((idx) => owner.ownedProperties?.includes(idx)));
+        const hasAllProperties = Boolean(owner && groupCells.length > 0 && groupCells.every((idx) => owner.ownedProperties?.includes(idx)));
+        const hasAnyGroupMortgaged = Boolean(owner && groupCells.some((idx) => owner.mortgagedProperties?.includes(idx)));
+        const hasMonopoly = hasAllProperties && !hasAnyGroupMortgaged;
 
         let upgradeBlockedReason: string | undefined = undefined;
         if (isOwner && deed && !isMortgaged) {
-          if (!hasMonopoly) {
+          if (!hasAllProperties) {
             upgradeBlockedReason = 'Cần sở hữu trọn bộ màu trước khi nâng cấp';
+          } else if (hasAnyGroupMortgaged) {
+            upgradeBlockedReason = 'Không thể nâng cấp khi nhóm có ô thế chấp';
           } else if (currentLevel < 3 && groupCells.length > 0) {
             const levelMap = useGameStore.getState().levelMap;
             const targetLevel = currentLevel + 1;
@@ -102,6 +106,18 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
               const names = laggingCells.map((idx) => BOARD_CONFIG[idx]?.name ?? `Ô ${idx}`).join(', ');
               upgradeBlockedReason = `Quy tắc xây dựng đều tay: Cần nâng cấp ${names} lên C${targetLevel - 1} trước khi xây C${targetLevel}`;
             }
+          }
+        }
+
+        let downgradeBlockedReason: string | undefined = undefined;
+        if (isOwner && !isMortgaged && (currentLevel ?? 0) > 0 && groupCells.length > 0) {
+          const levelMap = useGameStore.getState().levelMap;
+          const higherCells = groupCells
+            .filter((idx) => idx !== payload.cellIndex)
+            .filter((idx) => (levelMap[idx] ?? 0) > (currentLevel ?? 0));
+          if (higherCells.length > 0) {
+            const names = higherCells.map((idx) => BOARD_CONFIG[idx]?.name ?? `Ô ${idx}`).join(', ');
+            downgradeBlockedReason = `Quy tắc hạ cấp đều tay: Cần hạ cấp ${names} trước khi hạ tiếp ô này`;
           }
         }
 
@@ -117,6 +133,7 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
             upgradeCost={upgradeCost}
             hasMonopoly={hasMonopoly}
             upgradeBlockedReason={upgradeBlockedReason}
+            downgradeBlockedReason={downgradeBlockedReason}
             onBuy={() => {
               AudioEngine.playSfx(SoundEffect.BUY_PROPERTY);
               onIntent?.({ type: 'INTENT_BUY_PROPERTY' });

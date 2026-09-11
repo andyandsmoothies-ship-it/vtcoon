@@ -2,6 +2,7 @@
 // Đồng bộ hóa DeltaPayload (kể cả Sparse Diff) vào Zustand useGameStore
 import { useGameStore, type PlayerHudInfo, FloatingTextType } from '../store/game_store.js';
 import { useLobbyStore } from '../store/lobby_store.js';
+import { useVfxStore } from '../store/vfx_store.js';
 import { BOARD_SIZE } from '../../domain/room.js';
 import { BOARD_CONFIG } from '../../domain/board_config.js';
 import { PLAYER_TOKEN_PALETTE } from '../../domain/theme.js';
@@ -146,6 +147,13 @@ export function applyDeltaToStore(
         const targetLevel = Math.max(0, Math.min(3, cell.level)) as 0 | 1 | 2 | 3;
         nextLevelMap[cell.index] = targetLevel;
         hasLevelChange = true;
+        if (!isFullSync && targetLevel > oldLevel && targetLevel >= 1) {
+          try {
+            useVfxStore.getState().triggerConstructionSlam(cell.index, targetLevel as 1 | 2 | 3);
+          } catch {
+            // Fallback im lặng trong môi trường test
+          }
+        }
         if (!isFullSync && targetLevel === 3 && oldLevel < 3) {
           try {
             AudioEngine.playSfx(SoundEffect.UPGRADE_C3);
@@ -255,11 +263,13 @@ export function applyDeltaToStore(
     } catch {}
   }
 
-  // 4. Cập nhật lượt chơi hiện tại và đặt lại thời gian 60s
+  // 4. Cập nhật lượt chơi hiện tại và thời gian từ Server
   const turnPlayerId = delta.currentTurnPlayerId ?? (delta.currentPlayerIndex !== undefined && delta.players ? delta.players[delta.currentPlayerIndex]?.id : undefined);
   if (turnPlayerId && state.currentTurnPlayerId !== turnPlayerId) {
     state.setCurrentTurnPlayerId(turnPlayerId);
-    state.setTurnTimeRemaining(60);
+    state.setTurnTimeRemaining(delta.timeRemaining ?? 60);
+  } else if (delta.timeRemaining !== undefined) {
+    state.setTurnTimeRemaining(delta.timeRemaining);
   }
 
   // 5. Đảm bảo quỹ kho bạc ban đầu nếu đang ở mức 0

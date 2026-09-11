@@ -4,6 +4,7 @@ import './index.css';
 import { HudContainer } from './ui/hud_container';
 import { useGameStore, type PlayerHudInfo, FloatingTextType } from './store/game_store';
 import { useLobbyStore } from './store/lobby_store';
+import { useEnvironmentStore } from './store/environment_store';
 import { LobbyView } from './ui/lobby/lobby_view';
 import { PLAYER_TOKEN_PALETTE } from '../domain/theme';
 import { AudioEngine } from './audio/audio_engine';
@@ -37,9 +38,15 @@ function getInitialLobbyConfig(): { roomCode: string; playerId: string; isHost: 
   };
 }
 
-if (typeof window !== 'undefined' && !useLobbyStore.getState().roomCode) {
-  const initCfg = getInitialLobbyConfig();
-  useLobbyStore.getState().initLobby(initCfg.roomCode, initCfg.playerId, initCfg.isHost, initCfg.playerName);
+if (typeof window !== 'undefined') {
+  (window as unknown as { __gameStore?: typeof useGameStore; __lobbyStore?: typeof useLobbyStore; __environmentStore?: typeof useEnvironmentStore }).__gameStore = useGameStore;
+  (window as unknown as { __gameStore?: typeof useGameStore; __lobbyStore?: typeof useLobbyStore; __environmentStore?: typeof useEnvironmentStore }).__lobbyStore = useLobbyStore;
+  (window as unknown as { __gameStore?: typeof useGameStore; __lobbyStore?: typeof useLobbyStore; __environmentStore?: typeof useEnvironmentStore }).__environmentStore = useEnvironmentStore;
+
+  if (!useLobbyStore.getState().roomCode) {
+    const initCfg = getInitialLobbyConfig();
+    useLobbyStore.getState().initLobby(initCfg.roomCode, initCfg.playerId, initCfg.isHost, initCfg.playerName);
+  }
 }
 
 export function App(): React.ReactElement {
@@ -185,7 +192,9 @@ export function App(): React.ReactElement {
       useLobbyStore.getState().setGameStarted(true);
     }
 
-    if (delta.currentPlayerIndex !== undefined && delta.currentPlayerIndex !== prevPlayerIndexRef.current) {
+    if (delta.timeRemaining !== undefined) {
+      useGameStore.getState().setTurnTimeRemaining(delta.timeRemaining);
+    } else if (delta.currentPlayerIndex !== undefined && delta.currentPlayerIndex !== prevPlayerIndexRef.current) {
       prevPlayerIndexRef.current = delta.currentPlayerIndex;
       useGameStore.getState().setTurnTimeRemaining(60);
     } else if (delta.currentTurnPlayerId && delta.currentTurnPlayerId !== prevTurnPlayerRef.current) {
@@ -404,7 +413,7 @@ export function App(): React.ReactElement {
 
   if (!gameStarted) {
     return (
-      <div className="relative w-screen h-screen overflow-hidden">
+      <div className="relative w-screen h-screen overflow-hidden bg-slate-950">
         {errorMessage && (
           <div
             role="alert"
@@ -413,7 +422,16 @@ export function App(): React.ReactElement {
             {errorMessage}
           </div>
         )}
-        <LobbyView sendWsMessage={sendWsMessage} />
+        {/* Nền sa bàn 3D Bán đảo Biển đảo sống động làm hậu cảnh điện ảnh cho Sảnh Chờ */}
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <Suspense fallback={null}>
+            <GameCanvas />
+          </Suspense>
+        </div>
+        {/* Lớp giao diện Sảnh Chờ bán trong suốt Glassmorphism */}
+        <div className="relative z-10 w-full h-full pointer-events-auto">
+          <LobbyView sendWsMessage={sendWsMessage} />
+        </div>
       </div>
     );
   }

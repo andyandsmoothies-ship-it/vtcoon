@@ -106,9 +106,9 @@ export function LobbyView({
   };
 
   return (
-    <div className="relative w-full h-full min-h-screen bg-slate-950 bg-radial from-slate-900 to-slate-950 text-slate-100 flex flex-col items-center justify-between p-4 md:p-8 select-none overflow-y-auto">
-      {/* Phông nền Skyline Silhouette mờ 15% chiều sâu */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-64 md:h-80 opacity-15 overflow-hidden flex items-end justify-center z-0 text-slate-400" aria-hidden="true">
+    <div className="relative w-full h-full min-h-screen bg-sky-950/20 backdrop-blur-[5px] text-slate-100 flex flex-col items-center justify-between p-4 md:p-8 select-none overflow-y-auto">
+      {/* Phông nền Skyline Silhouette mờ nhẹ hòa cùng chiều sâu 3D */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-64 md:h-80 opacity-10 overflow-hidden flex items-end justify-center z-0 text-slate-400" aria-hidden="true">
         <svg viewBox="0 0 1200 260" className="w-full h-full object-cover" preserveAspectRatio="none" fill="currentColor">
           <path d="M0,260 L0,180 L40,180 L40,130 L70,130 L70,190 L110,190 L110,100 L140,100 L140,80 L150,50 L160,80 L160,100 L180,100 L180,210 L220,210 L220,150 L260,150 L260,260 L310,260 L310,120 L350,120 L350,70 L360,70 L360,30 L370,70 L380,70 L380,120 L410,120 L410,170 L450,170 L450,260 L510,260 L510,130 L550,130 L550,80 L590,80 L590,260 L650,260 L650,150 L690,150 L690,60 L700,30 L710,60 L710,150 L750,150 L750,260 L810,260 L810,110 L850,110 L850,170 L890,170 L890,260 L950,260 L950,120 L990,120 L990,70 L1030,70 L1030,200 L1070,200 L1070,260 L1130,260 L1130,140 L1170,140 L1170,190 L1200,190 L1200,260 Z" />
         </svg>
@@ -231,9 +231,9 @@ export function LobbyView({
               type="button"
               disabled={!canStartCheck.canStart}
               onClick={handleStartGame}
-              className={`min-h-[44px] py-3 px-8 rounded-xl font-bold text-sm tracking-wide transition-all shadow-lg cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+              className={`min-h-[44px] py-3 px-8 rounded-xl font-extrabold text-sm tracking-wide transition-all shadow-xl cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
                 canStartCheck.canStart
-                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 active:scale-95'
+                  ? 'bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 active:scale-95 shadow-amber-500/40 ring-2 ring-amber-300/60'
                   : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700/50'
               }`}
               data-testid="start-game-btn"
