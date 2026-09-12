@@ -98,8 +98,8 @@ export function applyDeltaToStore(
         playersInfoMap[p.id] = {
           ...existing,
           balance: p.balance,
+          isBot: Boolean(p.isBot),
           ...(p.bankrupt !== undefined ? { bankrupt: p.bankrupt } : {}),
-          ...(p.isBot !== undefined ? { isBot: p.isBot } : {}),
           ...(p.overdraftRoundsLeft !== undefined ? { overdraftRoundsLeft: p.overdraftRoundsLeft } : {}),
           ...(p.inAudit !== undefined ? { inAudit: p.inAudit } : {}),
           ...(p.auditTurnsLeft !== undefined ? { auditTurnsLeft: p.auditTurnsLeft } : {}),

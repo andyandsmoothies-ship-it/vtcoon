@@ -44,7 +44,7 @@ export function CoastalIslandEnvironment(): React.ReactElement {
 
     // 3. Tầng nước nông ngọc bích nhấp nhô theo nhịp thở đại dương
     if (shallowRef.current) {
-      shallowRef.current.position.y = -0.56 + Math.sin(t * (Math.PI * 2 / 3.5)) * 0.015;
+      shallowRef.current.position.y = -0.298 + Math.sin(t * (Math.PI * 2 / 3.5)) * 0.012;
     }
   });
 
@@ -55,13 +55,13 @@ export function CoastalIslandEnvironment(): React.ReactElement {
           Phân tầng màu quang học: Ngọc bích (#06B6D4) -> Đại dương (#0369A1 / #0284C7) -> Đáy thẳm (#0C4A6E)
          ======================================================== */}
       {/* 1.0. Tầng đáy vực đại dương thẳm nơi chân trời (#0C4A6E) */}
-      <mesh receiveShadow position={[0, -0.66, 0]}>
+      <mesh receiveShadow position={[0, -0.42, 0]}>
         <boxGeometry args={[260, 0.16, 260]} />
         <meshStandardMaterial color="#0C4A6E" roughness={0.15} metalness={0.4} />
       </mesh>
 
       {/* 1.1. Lưới sóng Gerstner vô cực PlaneGeometry(240, 240, 96, 96) */}
-      <mesh receiveShadow position={[0, -0.60, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+      <mesh receiveShadow position={[0, -0.30, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry ref={oceanGeomRef} args={[240, 240, 96, 96]} />
         <meshStandardMaterial
           color="#0284C7"
@@ -73,7 +73,7 @@ export function CoastalIslandEnvironment(): React.ReactElement {
       </mesh>
 
       {/* 1.2. Tầng chuyển tiếp xanh thẳm đại dương (#0369A1) */}
-      <mesh receiveShadow position={[0, -0.62, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+      <mesh receiveShadow position={[0, -0.31, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[180, 180, 32, 32]} />
         <meshStandardMaterial
           color="#0369A1"
@@ -85,21 +85,21 @@ export function CoastalIslandEnvironment(): React.ReactElement {
       </mesh>
 
       {/* 1.3. Tầng nước nông ngọc bích sát bờ đảo (#06B6D4) ôm đường bờ biển tự nhiên */}
-      <mesh ref={shallowRef} receiveShadow position={[0, -0.56, 0]}>
-        <cylinderGeometry args={[36, 43, 0.14, 48]} />
+      <mesh ref={shallowRef} receiveShadow position={[0, -0.298, 0]}>
+        <cylinderGeometry args={[16.3, 19.5, 0.08, 48]} />
         <meshStandardMaterial
           color="#06B6D4"
           roughness={0.08}
           metalness={0.45}
           transparent
-          opacity={0.88}
+          opacity={0.70}
         />
       </mesh>
 
       {/* 1.4. Dải bọt sóng trắng ven bờ cát dập dềnh (Shoreline Dynamic Foam - chu kỳ 3.5s) */}
-      <mesh ref={waveRef} position={[0, -0.48, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[27.2, 34.2, 64]} />
-        <meshBasicMaterial color="#FFFFFF" transparent opacity={0.58} />
+      <mesh ref={waveRef} position={[0, -0.292, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[16.0, 17.2, 64]} />
+        <meshBasicMaterial color="#FFFFFF" transparent opacity={0.40} />
       </mesh>
 
       {/* ========================================================
@@ -107,32 +107,32 @@ export function CoastalIslandEnvironment(): React.ReactElement {
           Cát vàng biển nhiệt đới (#FDE68A, roughness: 0.85) thay thế hoàn toàn đĩa xám & thảm cỏ phẳng
          ======================================================== */}
       {/* 2.1. Thềm bờ cát chính vát nghiêng bao quanh chân bệ bàn cờ sa bàn */}
-      <mesh receiveShadow position={[0, -0.32, 0]}>
-        <cylinderGeometry args={[16.2, 27.8, 0.32, 64]} />
+      <mesh receiveShadow position={[0, -0.36, 0]}>
+        <cylinderGeometry args={[15.6, 18.5, 0.24, 64]} />
         <meshStandardMaterial color="#FDE68A" roughness={0.85} metalness={0.02} />
       </mesh>
 
       {/* 2.1b. Gờ vát nghiêng bờ cát chuẩn 15 độ tiếp giáp nước biển (15-degree Sloped Sand Shoreline Skirt: tan(15°)=0.2679, Δy=0.28, Δr=1.045) */}
-      <mesh receiveShadow position={[0, -0.46, 0]}>
+      <mesh receiveShadow position={[0, -0.75, 0]}>
         <cylinderGeometry args={[27.8, 28.85, 0.28, 64]} />
         <meshStandardMaterial color="#FDE68A" roughness={0.85} metalness={0.02} />
       </mesh>
 
       {/* 2.2. Thềm cát thoải mép nước biển tiếp xúc triều dâng (cát ẩm nhiệt đới) */}
-      <mesh receiveShadow position={[0, -0.52, 0]}>
-        <cylinderGeometry args={[27.5, 33.8, 0.16, 64]} />
+      <mesh receiveShadow position={[0, -0.38, 0]}>
+        <cylinderGeometry args={[16.2, 17.5, 0.14, 48]} />
         <meshStandardMaterial color="#F6D5A8" roughness={0.85} metalness={0.02} />
       </mesh>
 
       {/* 2.3. Mũi bãi tắm cong phía Tây Nam ôm lấy khu nghỉ dưỡng */}
-      <mesh receiveShadow position={[-16, -0.42, 13]}>
-        <cylinderGeometry args={[7.5, 9.8, 0.24, 32]} />
+      <mesh receiveShadow position={[-11.5, -0.35, 8.5]}>
+        <cylinderGeometry args={[2.5, 3.5, 0.18, 32]} />
         <meshStandardMaterial color="#FDE68A" roughness={0.85} metalness={0.02} />
       </mesh>
 
       {/* 2.4. Mũi cát tự nhiên vươn ra biển phía Đông Nam */}
-      <mesh receiveShadow position={[16, -0.44, 16]}>
-        <cylinderGeometry args={[6.5, 8.8, 0.22, 32]} />
+      <mesh receiveShadow position={[15.0, -0.55, 15.0]}>
+        <cylinderGeometry args={[4.0, 5.8, 0.20, 32]} />
         <meshStandardMaterial color="#FDE68A" roughness={0.85} metalness={0.02} />
       </mesh>
 
@@ -144,12 +144,12 @@ export function CoastalIslandEnvironment(): React.ReactElement {
 
       {/* 2.6. Khu nghỉ dưỡng bãi biển: Dù che nắng đa sắc & ghế nằm */}
       {([
-        [-17.5, 11, '#EF4444'],
-        [-19.0, 13, '#F59E0B'],
-        [-16.0, 16, '#3B82F6'],
-        [-14.5, 12, '#10B981'],
+        [-12.2, 8.2, '#EF4444'],
+        [-13.2, 9.5, '#F59E0B'],
+        [-11.8, 10.5, '#3B82F6'],
+        [-10.8, 9.0, '#10B981'],
       ] as const).map(([bx, bz, color], uIdx) => (
-        <group key={`umbrella-${uIdx}`} position={[bx, -0.36, bz]}>
+        <group key={`umbrella-${uIdx}`} position={[bx, -0.25, bz]}>
           <mesh position={[0, 0.4, 0]}>
             <cylinderGeometry args={[0.02, 0.02, 0.8, 6]} />
             <meshStandardMaterial color="#F8FAFC" metalness={0.7} />
@@ -231,8 +231,8 @@ export function CoastalIslandEnvironment(): React.ReactElement {
       {/* ========================================================
           5. CẢNG BIỂN & TÀU CONTAINER NGOÀI KHƠI (CARGO SHIPS & SEAPORT)
          ======================================================== */}
-      {/* Tàu Container Lớn Số 1 (Vịnh biển Tây Nam: [-28, 0, 26]) */}
-      <group position={[-28, -0.55, 26]} rotation={[0, 0.45, 0]}>
+      {/* Tàu Container Lớn Số 1 (Vịnh biển Tây Nam: [-15.0, -0.30, 9.5]) */}
+      <group position={[-15.0, -0.30, 9.5]} rotation={[0, -0.85, 0]} scale={[0.75, 0.75, 0.75]}>
         <mesh castShadow position={[0, 0.5, 0]}>
           <boxGeometry args={[11.0, 0.9, 2.6]} />
           <meshStandardMaterial color="#DC2626" roughness={0.6} metalness={0.2} />
@@ -259,20 +259,21 @@ export function CoastalIslandEnvironment(): React.ReactElement {
               <boxGeometry args={[1.5, 0.6, 0.9]} />
               <meshStandardMaterial color={i % 3 === 0 ? '#F59E0B' : '#0284C7'} roughness={0.5} />
             </mesh>
-            <mesh castShadow position={[0, 0.6, 0]}>
+            <mesh castShadow position={[0, 0, 0.6]}>
               <boxGeometry args={[1.4, 0.55, 1.6]} />
               <meshStandardMaterial color={i % 2 === 0 ? '#22C55E' : '#E11D48'} roughness={0.5} />
             </mesh>
           </group>
         ))}
-        <mesh position={[-6.2, 0.05, 0]}>
+        {/* Vệt bọt nước rẽ sóng đuôi tàu (Stern Wake) */}
+        <mesh position={[6.2, 0.05, 0]}>
           <planeGeometry args={[4.2, 1.8]} />
           <meshBasicMaterial color="#FFFFFF" transparent opacity={0.4} />
         </mesh>
       </group>
 
-      {/* Tàu Container Số 2 (Phía Nam ngoài khơi: [8, 0, 36]) */}
-      <group position={[8, -0.55, 36]} rotation={[0, -0.2, 0]}>
+      {/* Tàu Container Số 2 (Phía Nam ngoài khơi: [8, -0.35, 36]) */}
+      <group position={[8, -0.35, 36]} rotation={[0, -0.2, 0]}>
         <mesh castShadow position={[0, 0.45, 0]}>
           <boxGeometry args={[9.0, 0.8, 2.2]} />
           <meshStandardMaterial color="#1E3A8A" roughness={0.5} metalness={0.3} />
@@ -294,7 +295,7 @@ export function CoastalIslandEnvironment(): React.ReactElement {
       </group>
 
       {/* Du thuyền sang trọng neo gần bãi tắm */}
-      <group position={[-16, -0.55, 14]} rotation={[0, 1.1, 0]}>
+      <group position={[-11.5, -0.30, 12.0]} rotation={[0, 0.6, 0]}>
         <mesh castShadow position={[0, 0.25, 0]}>
           <boxGeometry args={[3.2, 0.4, 1.0]} />
           <meshStandardMaterial color="#FFFFFF" roughness={0.2} metalness={0.1} />
@@ -309,7 +310,7 @@ export function CoastalIslandEnvironment(): React.ReactElement {
           6. HẠ TẦNG KẾT NỐI: CẦU CẠN & ĐƯỜNG CAO TỐC NGOẠI ĐẢO (CAUSEWAYS)
          ======================================================== */}
       {/* Cầu vượt biển phía Tây Nam */}
-      <group position={[-18, -0.3, 18]} rotation={[0, 0.78, 0]}>
+      <group position={[-18, -0.26, 18]} rotation={[0, 0.78, 0]}>
         <mesh castShadow receiveShadow position={[0, 0.1, 0]}>
           <boxGeometry args={[12, 0.18, 1.4]} />
           <meshStandardMaterial color="#CBD5E1" roughness={0.5} />

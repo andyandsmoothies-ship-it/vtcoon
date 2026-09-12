@@ -21,6 +21,7 @@ export interface ReconnectManagerConfig {
   readonly broadcaster: DeltaBroadcaster;
   readonly broadcast: (roomCode: string, msg: WsServerMessage) => void;
   readonly gracePeriodMs?: number;
+  readonly isSocketConnected?: (roomCode: string, playerId: string) => boolean;
 }
 
 export type VerifyTokenResult =
@@ -33,6 +34,7 @@ export class ReconnectManager {
   private readonly broadcaster: DeltaBroadcaster;
   private readonly broadcast: (roomCode: string, msg: WsServerMessage) => void;
   private readonly gracePeriodMs: number;
+  private readonly isSocketConnected?: (roomCode: string, playerId: string) => boolean;
 
   /** token -> ReconnectTokenRecord */
   private readonly tokens = new Map<string, ReconnectTokenRecord>();
@@ -49,6 +51,7 @@ export class ReconnectManager {
     this.broadcaster = config.broadcaster;
     this.broadcast = config.broadcast;
     this.gracePeriodMs = config.gracePeriodMs ?? GRACE_PERIOD_MS;
+    this.isSocketConnected = config.isSocketConnected;
   }
 
   getGracePeriodMs(): number {
@@ -143,6 +146,16 @@ export class ReconnectManager {
     }
     this.graceStartTimes.delete(key);
 
+    // 1. Nếu socket của người chơi đang mở và kết nối, hủy ân hạn và không takeover
+    if (this.isSocketConnected?.(roomCode, playerId)) {
+      const session = this.sessions.getSession(playerId);
+      if (session) {
+        session.state = SessionState.Connected;
+        session.lastPongAt = Date.now();
+      }
+      return;
+    }
+
     const token = this.playerTokens.get(key);
     if (token) {
       const record = this.tokens.get(token);
@@ -155,10 +168,15 @@ export class ReconnectManager {
     }
 
     const room = this.rooms.getRoom(roomCode);
+    // 2. Nếu phòng chưa bắt đầu và là Host, không bao giờ takeover biến Host thành Bot!
+    if (room && !room.started && room.hostId === playerId) {
+      return;
+    }
+
     if (room) {
       BotEngine.takeover(room, playerId);
       const current = room.players[room.currentPlayerIndex];
-      if (current && current.id === playerId && current.isBot) {
+      if (current && current.id === playerId && current.isBot && room.started) {
         this.rooms.runBotTurn(roomCode);
       }
     }

@@ -25,7 +25,7 @@ Never claim UI work is correct without visual evidence. Browser automation makes
 
 | What to verify | Tool | Output |
 |---------------|------|--------|
-| Visual appearance | Screenshot | `![description](/path/to/screenshot.png)` |
+| Visual appearance | Screenshot | `![description](/path/to/screenshot.jpg)` |
 | DOM structure | Inspect elements | Element presence, attributes, classes |
 | User flow | Recording | Embedded video in artifact |
 | Responsive layout | Screenshot at viewport | Multiple screenshots at different widths |

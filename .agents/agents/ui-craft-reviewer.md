@@ -35,8 +35,8 @@ disposition: recapture | rebuild | fix | ship
 ```
 
 1. **`recapture`**:
-   - **Định nghĩa**: Ý tưởng mỹ thuật đi chệch hướng hoàn toàn ngôn ngữ thiết kế tài phiệt thượng lưu / xúc giác (tactile luxury).
-   - **Hành động**: Dừng việc sửa vặt; lập trình viên phải quay lại bước phác thảo ý tưởng giao diện mới.
+   - **Định nghĩa**: Ý tưởng mỹ thuật đi chệch hướng hoàn toàn ngôn ngữ thiết kế tài phiệt thượng lưu / xúc giác, HOẶC ảnh chụp màn hình nộp thẩm định không đúng chuẩn `.jpg` (nộp file `.png` nặng dung lượng > 1MB thay vì `.jpg` Quality 85–92 theo chuẩn IMP-19).
+   - **Hành động**: Dừng việc sửa vặt; lập trình viên phải chụp lại ảnh dạng `.jpg` hoặc quay lại bước phác thảo ý tưởng giao diện mới.
 
 2. **`rebuild`**:
    - **Định nghĩa**: Cấu trúc phân cấp thị giác hoặc hệ thống bố cục (Flex/Grid/Z-Index) bị vỡ nặng, tràn màn hình trên mobile/desktop.

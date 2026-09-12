@@ -71,11 +71,17 @@ export function resolveCameraTargetCell(
   return null;
 }
 
-export function AdaptiveCinematicCamera(): React.ReactElement {
+export interface AdaptiveCinematicCameraProps {
+  readonly isPreMatch?: boolean;
+}
+
+export function AdaptiveCinematicCamera({
+  isPreMatch = false,
+}: AdaptiveCinematicCameraProps = {}): React.ReactElement {
   const { camera, scene } = useThree();
   const controlsRef = useRef<OrbitControlsImpl>(null);
-  const camBaseRef = useRef<[number, number, number]>([20, 22, 20]);
-  const targetBaseRef = useRef<[number, number, number]>([-1.2, 0, -1.2]);
+  const camBaseRef = useRef<[number, number, number]>(isPreMatch ? [18.5, 19.5, 18.5] : [20, 22, 20]);
+  const targetBaseRef = useRef<[number, number, number]>(isPreMatch ? [-0.8, 0, -0.8] : [-1.2, 0, -1.2]);
   const isUserInteractingRef = useRef<boolean>(false);
   const lastUserInteractionTimeRef = useRef<number>(0);
 
@@ -112,6 +118,7 @@ export function AdaptiveCinematicCamera(): React.ReactElement {
       activeModal,
       hasRolledThisTurn,
       hasTargetTile: (activeModal !== null || hasRolledThisTurn) && targetCell !== null,
+      isPreMatch,
     });
 
     const cellCoords = targetCell !== null ? cellPosition(targetCell) : undefined;
@@ -174,7 +181,7 @@ export function AdaptiveCinematicCamera(): React.ReactElement {
           camBaseRef.current[2] + shakeOffset[2]
         );
 
-        controlsRef.current.minDistance = mode === 'overview' ? 14 : 3.8;
+        controlsRef.current.minDistance = (mode === 'overview' || mode === 'pre_match') ? 14 : 3.8;
         controlsRef.current.update();
       }
     }
@@ -191,7 +198,7 @@ export function AdaptiveCinematicCamera(): React.ReactElement {
       maxDistance={65}
       minZoom={20}
       maxZoom={65}
-      target={[-1.2, 0, -1.2]}
+      target={isPreMatch ? [-0.8, 0, -0.8] : [-1.2, 0, -1.2]}
       onStart={() => {
         isUserInteractingRef.current = true;
       }}
@@ -249,7 +256,7 @@ export function GameCanvas({
           width: '100%',
           height: '100%',
           display: 'block',
-          background: isLobby ? '#38BDF8' : canvasBg,
+          background: canvasBg,
           transition: 'background-color 2.5s ease',
         }}
       >
@@ -259,8 +266,15 @@ export function GameCanvas({
 
         {isLobby ? (
           <>
-            <SunnyIslandLobbyScene />
-            <ContactShadows position={[0, -0.01, 0]} opacity={0.65} scale={20} blur={1.5} far={4} />
+            {/* Tabletop-first Stage 1: Render GameBoard trực tiếp trên sa bàn đảo ngọc thay thế SunnyIslandLobbyScene */}
+            <AdaptiveCinematicCamera isPreMatch={true} />
+            <TimeOfDayLighting />
+            {/* Tầng 1: Bóng tiếp xúc mâm gỗ bàn cờ đặt trên thảm nhung Ba Tư */}
+            <ContactShadows position={[0, -0.05, 0]} opacity={0.75} scale={45} blur={2.0} far={6} />
+            {/* Tầng 2: Bóng tiếp xúc Contact AO đanh chắc khóa chặt chân cọc C0, nhà C1-C3, xúc xắc xuống ô cờ */}
+            <ContactShadows position={[0, 0.104, 0]} opacity={0.92} scale={21.5} blur={0.65} far={1.8} />
+            <GameBoard />
+            <PawnAnimator players={effectivePlayers} />
             <PostProcessingPipeline />
           </>
         ) : (
@@ -286,7 +300,7 @@ export function GameCanvas({
           </>
         )}
       </Canvas>
-      {!isLobby && <CinematicOverlay />}
+      <CinematicOverlay />
     </div>
   );
 }

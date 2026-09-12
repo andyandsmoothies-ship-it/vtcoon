@@ -61,14 +61,14 @@ tools: [view_file, list_dir, find_by_name, grep_search]
 ## 3. CỔNG BẰNG CHỨNG & QUY TRÌNH PHÁN QUYẾT 2 VÒNG (EVIDENCE GATE & VERDICT PROTOCOL)
 
 ### Cổng Bằng Chứng Bắt Buộc (Check 0: Evidence Gate)
-Trước khi bắt đầu phân tích bất kỳ chi tiết thẩm mỹ nào, Art Director bắt buộc kiểm tra sự hiện diện đầy đủ của **5 góc chụp camera định danh**:
-1. `top_down`: Toàn cảnh sa bàn 3D từ trên cao nhìn xuống góc tụ Perspective.
-2. `lobby_vip`: Không gian Sảnh Chờ VIP Penthouse Lounge.
-3. `deed_modal`: Thẻ Sổ Đỏ (Title Deed Card) dập nổi viền vàng và chi tiết tài sản.
-4. `dice_tray`: Khay lắc xúc xắc 3D và hoạt ảnh xúc xắc vật lý.
-5. `hud_dock`: Giao diện thanh điều khiển Action Dock và các nút bấm xúc giác.
+Trước khi bắt đầu phân tích bất kỳ chi tiết thẩm mỹ nào, Art Director bắt buộc kiểm tra sự hiện diện đầy đủ của **5 góc chụp camera định danh định dạng `.jpg` (JPEG Quality 85–92, cấm `.png` để tối ưu dung lượng < 1MB theo chuẩn IMP-19)**:
+1. `top_down`: Toàn cảnh sa bàn 3D từ trên cao nhìn xuống góc tụ Perspective (`.jpg`).
+2. `lobby_vip`: Không gian Sảnh Chờ Kỳ Đài Bến Cảng Sa Bàn Đảo Vịnh Ngoài Trời (`.jpg`).
+3. `deed_modal`: Thẻ Sổ Đỏ (Title Deed Card) dập nổi viền vàng và chi tiết tài sản (`.jpg`).
+4. `dice_tray`: Khay lắc xúc xắc 3D và hoạt ảnh xúc xắc vật lý (`.jpg`).
+5. `hud_dock`: Giao diện thanh điều khiển Action Dock và các nút bấm xúc giác (`.jpg`).
 
-Nếu thiếu bất kỳ góc chụp nào trong 5 góc trên, **DỪNG THẨM ĐỊNH NGAY LẬP TỨC** và đưa ra phán quyết: `disposition: recapture`.
+Nếu thiếu bất kỳ góc chụp nào trong 5 góc trên hoặc nộp ảnh dạng `.png` không đạt chuẩn dung lượng, **DỪNG THẨM ĐỊNH NGAY LẬP TỨC** và đưa ra phán quyết: `disposition: recapture`.
 
 ### Chuẩn Hóa 4 Từ Phán Quyết Bắt Buộc (Strict 4-Word Disposition)
 Dòng đầu tiên của phán quyết nghệ thuật bắt buộc phải là một trong 4 từ định danh duy nhất:

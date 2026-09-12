@@ -63,6 +63,10 @@ export class WssServer {
     this.reconnects  = config.reconnectManager ?? new ReconnectManager({
       rooms: this.rooms, sessions: this.sessions, broadcaster: this.broadcaster,
       broadcast: (rc, msg) => this.broadcast(rc, msg), gracePeriodMs: config.gracePeriodMs,
+      isSocketConnected: (rc, pid) => {
+        const s = this.sockets.getPlayerSocket(rc, pid);
+        return Boolean(s && s.readyState === WebSocket.OPEN);
+      },
     });
     this.cleanupScheduler = new RoomCleanupScheduler({
       roomManager: this.rooms, timeoutMs: config.abandonedTimeoutMs,
@@ -76,10 +80,21 @@ export class WssServer {
     this.heartbeatTimer = setInterval(() => {
       for (const [s, info] of this.sockets.getAllBoundSockets()) this.sendSafe(s, { type: 'PING', roomCode: info.roomCode });
       this.sessions.checkHeartbeats();
-      for (const [, info] of this.sockets.getAllBoundSockets()) {
+      for (const [sock, info] of this.sockets.getAllBoundSockets()) {
         const s = this.sessions.getSession(info.playerId);
-        if (s && s.state === SessionState.GracePeriod && !this.reconnects.isPlayerInGrace(info.roomCode, info.playerId)) {
-          this.reconnects.startGracePeriod(info.roomCode, info.playerId);
+        if (s && s.state === SessionState.GracePeriod) {
+          if (sock.readyState === WebSocket.OPEN) {
+            const elapsed = Date.now() - s.lastPongAt;
+            if (elapsed > 2 * HEARTBEAT_INTERVAL_MS) {
+              try {
+                sock.close(1001, 'HEARTBEAT_TIMEOUT');
+              } catch {
+                /* safe-ignore */
+              }
+            }
+          } else if (!this.reconnects.isPlayerInGrace(info.roomCode, info.playerId)) {
+            this.reconnects.startGracePeriod(info.roomCode, info.playerId);
+          }
         }
       }
     }, HEARTBEAT_INTERVAL_MS);
@@ -146,6 +161,15 @@ export class WssServer {
 
   private bindSocket(roomCode: string, playerId: string, socket: WebSocket): void {
     this.sockets.bind(roomCode, playerId, socket);
+    this.reconnects.cancelGracePeriod(roomCode, playerId);
+    const s = this.sessions.getSession(playerId);
+    if (s) {
+      s.state = SessionState.Connected;
+      s.lastPongAt = Date.now();
+    }
+    const room = this.rooms.getRoom(roomCode);
+    const p = room?.players.find((pl) => pl.id === playerId);
+    if (room && !room.started && p) p.isBot = false;
   }
 
   private sendSessionInit(socket: WebSocket, playerId: string, roomCode: string): void {
@@ -167,7 +191,17 @@ export class WssServer {
       this.sendSafe(socket, { type: 'ERROR', reasonCode: 'ROOM_STARTED' });
       return;
     }
-    if (!this.rooms.startGame(msg.roomCode, msg.bots)) {
+    const normRoomCode = room.roomCode;
+    const hostP = room.players.find((p) => p.id === msg.playerId);
+    if (hostP) hostP.isBot = false;
+    this.reconnects.cancelGracePeriod(normRoomCode, msg.playerId);
+    for (const p of room.players) {
+      if (this.sockets.getPlayerSocket(normRoomCode, p.id)) {
+        p.isBot = false;
+        this.reconnects.cancelGracePeriod(normRoomCode, p.id);
+      }
+    }
+    if (!this.rooms.startGame(normRoomCode, msg.bots)) {
       this.sendSafe(socket, { type: 'ERROR', reasonCode: 'NOT_ENOUGH_PLAYERS' });
       return;
     }
@@ -188,6 +222,7 @@ export class WssServer {
           }
         }
         const room = this.rooms.createRoom(msg.playerId, msg.roomCode);
+        this.reconnects.cancelGracePeriod(room.roomCode, msg.playerId);
         this.sessions.addSession(msg.playerId);
         this.bindSocket(room.roomCode, msg.playerId, socket);
         this.sendSafe(socket, { type: 'ROOM_CREATED', roomCode: room.roomCode, playerId: msg.playerId });
@@ -201,6 +236,7 @@ export class WssServer {
           joined.players.pop();
           return this.sendSafe(socket, { type: 'ERROR', reasonCode: 'ROOM_FULL' });
         }
+        this.reconnects.cancelGracePeriod(msg.roomCode, msg.playerId);
         this.sessions.addSession(msg.playerId);
         this.bindSocket(msg.roomCode, msg.playerId, socket);
         this.sendSafe(socket, { type: 'ROOM_JOINED', roomCode: msg.roomCode, playerId: msg.playerId, playerCount: joined.players.length });
@@ -233,14 +269,16 @@ export class WssServer {
     this.reconnects.cancelGracePeriod(msg.roomCode, msg.playerId);
     if (room.hostId === msg.playerId) {
       this.closeRoom(msg.roomCode);
-    } else {
+    } else if (room.started) {
       this.broadcast(msg.roomCode, { type: 'PLAYER_BOT_TAKEOVER', playerId: msg.playerId });
       const p = room.players.find((pl) => pl.id === msg.playerId);
       if (p) p.bankrupt = true;
-      if (room.started) {
-        this.broadcaster.broadcastRoomDelta(msg.roomCode);
-        this.scheduleBotTurn(msg.roomCode);
-      }
+      this.broadcaster.broadcastRoomDelta(msg.roomCode);
+      this.scheduleBotTurn(msg.roomCode);
+    } else {
+      const idx = room.players.findIndex((pl) => pl.id === msg.playerId);
+      if (idx !== -1) room.players.splice(idx, 1);
+      this.broadcaster.broadcastRoomDelta(msg.roomCode);
     }
   }
 

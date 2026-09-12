@@ -102,10 +102,11 @@ async function main() {
   await sleep(2500);
 
   async function captureShot(filename, description) {
-    console.log(`[CAPTURING] ${filename} — ${description}`);
+    const finalFilename = filename.replace(/\.png$/i, '.jpg');
+    console.log(`[CAPTURING] ${finalFilename} — ${description}`);
     await sleep(1000);
-    const shot = await sendCmd('Page.captureScreenshot', { format: 'png' });
-    const targetPath = `${ARTIFACT_DIR}\\${filename}`;
+    const shot = await sendCmd('Page.captureScreenshot', { format: 'jpeg', quality: 88 });
+    const targetPath = `${ARTIFACT_DIR}\\${finalFilename}`;
     fs.writeFileSync(targetPath, Buffer.from(shot.data, 'base64'));
     console.log(`[SAVED] ${targetPath}`);
   }

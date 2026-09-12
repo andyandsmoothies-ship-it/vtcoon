@@ -11,15 +11,14 @@ export function CoastalPatrolBoat(): React.ReactElement {
   useSafeFrame((state) => {
     const t = state.clock.elapsedTime;
     if (boatRef.current) {
-      // Tuần tra vịnh biển phía Nam (khu vực hải cảng & tàu container ngoài khơi)
       const speed = 0.22;
       const angle = t * speed;
-      const x = Math.sin(angle) * 28;
+      const x = Math.sin(angle) * 12;
       const z = 35 + Math.cos(angle) * 6;
-      const y = -0.52 + Math.sin(t * 3.5) * 0.025; // Nhấp nhô cưỡi sóng
+      const y = -0.30 + Math.sin(t * 3.5) * 0.025; // Nhấp nhô cưỡi sóng
 
       // Hướng di chuyển (tangent)
-      const dx = Math.cos(angle) * 28 * speed;
+      const dx = Math.cos(angle) * 7 * speed;
       const dz = -Math.sin(angle) * 6 * speed;
       const yaw = Math.atan2(dx, dz);
 
@@ -41,7 +40,7 @@ export function CoastalPatrolBoat(): React.ReactElement {
   });
 
   return (
-    <group ref={boatRef} position={[0, -0.52, 41]} data-testid="coastal-patrol-boat">
+    <group ref={boatRef} position={[-16, -0.30, 22]} data-testid="coastal-patrol-boat">
       {/* 1. Thân ca-nô tuần duyên (Coast Guard Deep-V Hull) */}
       <mesh castShadow position={[0, 0.08, 0]}>
         <boxGeometry args={[0.55, 0.2, 1.4]} />

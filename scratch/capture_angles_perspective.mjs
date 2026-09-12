@@ -129,8 +129,8 @@ async function main() {
     returnByValue: true,
   });
   await sleep(3000);
-  const lobbyShot = await sendCmd('Page.captureScreenshot', { format: 'png' });
-  saveArtifact('journey_01_lobby_new.png', Buffer.from(lobbyShot.data, 'base64'));
+  const lobbyShot = await sendCmd('Page.captureScreenshot', { format: 'jpeg', quality: 88 });
+  saveArtifact('journey_01_lobby_new.jpg', Buffer.from(lobbyShot.data, 'base64'));
 
   // 1. Setup in-game state
   console.log('Injecting game state: 4 Players, Buildings, Dice...');
@@ -174,8 +174,9 @@ async function main() {
     });
     console.log('Camera setup status:', JSON.stringify(evalRes.result?.value));
     await sleep(1500);
-    const shot = await sendCmd('Page.captureScreenshot', { format: 'png' });
-    saveArtifact(filename, Buffer.from(shot.data, 'base64'));
+    const finalFilename = filename.replace(/\.png$/i, '.jpg');
+    const shot = await sendCmd('Page.captureScreenshot', { format: 'jpeg', quality: 88 });
+    saveArtifact(finalFilename, Buffer.from(shot.data, 'base64'));
   }
 
   // 1. Isometric Cinematic Overview (Perspective fov=40, zoom=1)

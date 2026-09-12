@@ -133,7 +133,8 @@ async function main() {
   });
 
   async function saveScreenshot(filename) {
-    const shot = await sendCmd('Page.captureScreenshot', { format: 'png' });
+    const finalFilename = filename.replace(/\.png$/i, '.jpg');
+    const shot = await sendCmd('Page.captureScreenshot', { format: 'jpeg', quality: 88 });
     const buf = Buffer.from(shot.data, 'base64');
     const targetDirs = [
       SCRATCH_DIR,
@@ -142,10 +143,10 @@ async function main() {
     ];
     for (const d of targetDirs) {
       if (fs.existsSync(d)) {
-        fs.writeFileSync(path.join(d, filename), buf);
+        fs.writeFileSync(path.join(d, finalFilename), buf);
       }
     }
-    console.log(`Saved screenshot: ${filename} (${buf.length} bytes)`);
+    console.log(`[SAVED] ${finalFilename} (${buf.length} bytes)`);
   }
 
   // Shot 1: Daylight Overview

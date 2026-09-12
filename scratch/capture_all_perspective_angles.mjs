@@ -136,8 +136,9 @@ async function main() {
       });
       await sleep(1500);
     }
-    const shot = await sendCmd('Page.captureScreenshot', { format: 'png' });
-    const targetPath = `${ARTIFACT_DIR}\\${filename}`;
+    const finalFilename = filename.replace(/\.png$/i, '.jpg');
+    const shot = await sendCmd('Page.captureScreenshot', { format: 'jpeg', quality: 88 });
+    const targetPath = `${ARTIFACT_DIR}\\${finalFilename}`;
     fs.writeFileSync(targetPath, Buffer.from(shot.data, 'base64'));
     console.log('Saved:', targetPath);
   }

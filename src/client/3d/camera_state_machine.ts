@@ -1,7 +1,7 @@
 // [UI-S01/MSS][UI-S04/MSS] CameraStateMachine — 2026 Cinematic Action Cam & Dynamic Follow System
 // Hỗ trợ 4 chế độ: Overview, Dice Roll Cinematic, Pawn Chase, và Tile Focus
 
-export type CameraMode = 'overview' | 'dice_roll' | 'pawn_chase' | 'tile_focus' | 'auction_focus';
+export type CameraMode = 'overview' | 'dice_roll' | 'pawn_chase' | 'tile_focus' | 'auction_focus' | 'pre_match';
 
 export interface CameraConfigItem {
   readonly position: readonly [number, number, number];
@@ -14,6 +14,13 @@ export const CAMERA_CONFIG = {
   overview: {
     position: [20, 22, 20] as const,
     target: [-1.2, 0, -1.2] as const,
+    fov: 40,
+    speed: 3.2,
+  },
+  pre_match: {
+    // Góc nhìn Retropoly ~38° Perspective bao quát bán đảo 40 ô, biển ngọc bích & trung tâm đô thị
+    position: [18.5, 19.5, 18.5] as const,
+    target: [-0.8, 0, -0.8] as const,
     fov: 40,
     speed: 3.2,
   },
@@ -50,6 +57,7 @@ export interface CameraResolveParams {
   readonly hasRolledThisTurn?: boolean;
   readonly manualMode?: CameraMode | null;
   readonly hasTargetTile?: boolean;
+  readonly isPreMatch?: boolean;
 }
 
 /**
@@ -58,6 +66,9 @@ export interface CameraResolveParams {
 export function resolveCameraMode(params: CameraResolveParams): CameraMode {
   if (params.manualMode) {
     return params.manualMode;
+  }
+  if (params.isPreMatch) {
+    return 'pre_match';
   }
   if (params.activeModal === 'game_over') {
     return 'overview';
@@ -165,6 +176,13 @@ export function calculateTargetCameraState(
   tilePosition?: readonly [number, number, number]
 ): TargetCameraState {
   switch (mode) {
+    case 'pre_match':
+      return {
+        position: [CAMERA_CONFIG.pre_match.position[0], CAMERA_CONFIG.pre_match.position[1], CAMERA_CONFIG.pre_match.position[2]],
+        target: [CAMERA_CONFIG.pre_match.target[0], CAMERA_CONFIG.pre_match.target[1], CAMERA_CONFIG.pre_match.target[2]],
+        fov: CAMERA_CONFIG.pre_match.fov,
+        speed: CAMERA_CONFIG.pre_match.speed,
+      };
     case 'dice_roll':
       return {
         position: [CAMERA_CONFIG.dice_roll.position[0], CAMERA_CONFIG.dice_roll.position[1], CAMERA_CONFIG.dice_roll.position[2]],

@@ -22,7 +22,7 @@ export interface LightingPreset {
 export const TIME_OF_DAY_PRESETS: Record<TimeOfDayPhase, LightingPreset> = {
   day: {
     sunPosition: [-22, 36, 20],
-    sunColor: '#FFFDF5',
+    sunColor: '#FEF08A',
     sunIntensity: 0.92,
     ambientColor: '#E0F7FA',
     ambientIntensity: 0.22,

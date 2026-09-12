@@ -19,17 +19,17 @@ export function initRoomBots(
   for (const b of bots) {
     if (room.players.length >= 4) break;
     const cleanId = b.id?.trim();
-    if (!cleanId) continue;
+    if (!cleanId || cleanId === room.hostId) continue;
     if (!room.players.some((p) => p.id === cleanId)) {
       const botPlayer = createPlayer(cleanId);
       botPlayer.isBot = true;
       room.players.push(botPlayer);
-      if (b.personality && botPersonalities && roomCode) {
-        const pEnum = Object.values(BotPersonality).includes(b.personality as BotPersonality)
-          ? (b.personality as BotPersonality)
-          : BotPersonality.Balanced;
-        botPersonalities.set(`${roomCode}:${cleanId}`, pEnum);
-      }
+    }
+    if (b.personality && botPersonalities && roomCode) {
+      const pEnum = Object.values(BotPersonality).includes(b.personality as BotPersonality)
+        ? (b.personality as BotPersonality)
+        : BotPersonality.Balanced;
+      botPersonalities.set(`${roomCode}:${cleanId}`, pEnum);
     }
   }
 }

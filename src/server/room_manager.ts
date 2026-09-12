@@ -86,10 +86,10 @@ export class RoomManager {
   }
 
   joinRoom(roomCode: string, playerId: string): Room | undefined {
-    const room = this.rooms.get(roomCode);
+    const room = this.rooms.get(roomCode) ?? this.rooms.get(roomCode.toUpperCase());
     if (!room || room.started) return undefined;
     room.players.push(createPlayer(playerId));
-    this.touchActivity(roomCode);
+    this.touchActivity(room.roomCode);
     return room;
   }
 
@@ -98,6 +98,11 @@ export class RoomManager {
     if (!room || room.started) return undefined;
     initRoomBots(room, bots, this.botPersonalities, room.roomCode);
     if (room.players.length < 2) return undefined;
+    // Đảm bảo Host của phòng luôn luôn có isBot = false khi bắt đầu ván đấu (trừ khi được cấu hình rõ ràng là Bot trong simulation)
+    const hostPlayer = room.players.find((p) => p.id === room.hostId);
+    if (hostPlayer && !this.botPersonalities.has(`${room.roomCode}:${room.hostId}`) && !this.botPersonalities.has(`${roomCode}:${room.hostId}`)) {
+      hostPlayer.isBot = false;
+    }
     room.started = true;
     room.currentPlayerIndex = 0;
     const first = room.players[0];
@@ -429,7 +434,7 @@ export class RoomManager {
     }
   }
 
-  getRoom(roomCode: string): Room | undefined { return this.rooms.get(roomCode); }
+  getRoom(roomCode: string): Room | undefined { return this.rooms.get(roomCode) ?? this.rooms.get(roomCode.toUpperCase()); }
   getRegistry(roomCode: string): PropertyRegistry | undefined { return this.registries.get(roomCode); }
   getPropertyStates(roomCode: string): PropertyStateMap | undefined { return this.propertyStates.get(roomCode); }
   get auctionsMap(): Map<string, AuctionSession> { return this.auctions; }

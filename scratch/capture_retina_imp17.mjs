@@ -129,30 +129,21 @@ class RetinaCdpHarness {
   }
 
   async saveScreenshot(baseName) {
-    // 1. Lossless PNG capture (3840x2160)
-    const pngResult = await this.sendCmd('Page.captureScreenshot', {
-      format: 'png',
-      captureBeyondViewport: false,
-    });
-    const pngBuf = Buffer.from(pngResult.data, 'base64');
-
-    // 2. High Quality JPEG capture (quality 95)
+    // High Quality JPEG capture (quality 92, standard IMP-19)
     const jpgResult = await this.sendCmd('Page.captureScreenshot', {
       format: 'jpeg',
-      quality: 95,
+      quality: 92,
+      captureBeyondViewport: false,
     });
     const jpgBuf = Buffer.from(jpgResult.data, 'base64');
 
     for (const dir of OUTPUT_DIRS) {
       if (fs.existsSync(dir)) {
-        // Save both .png and .jpg to satisfy all consumers
-        fs.writeFileSync(path.join(dir, `${baseName}.png`), pngBuf);
         fs.writeFileSync(path.join(dir, `${baseName}.jpg`), jpgBuf);
-        fs.writeFileSync(path.join(dir, `${baseName}_retina.png`), pngBuf);
       }
     }
 
-    console.log(`[CAPTURE] Saved ${baseName}: PNG (${pngBuf.length} bytes), JPG (${jpgBuf.length} bytes)`);
+    console.log(`[CAPTURE] Saved ${baseName}.jpg (${jpgBuf.length} bytes, JPEG Q92)`);
   }
 
   async close() {

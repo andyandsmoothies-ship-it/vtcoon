@@ -53,6 +53,7 @@ export interface UseGameWsReturn {
 export interface WsMessageHandlerContext {
   readonly roomCode: string;
   readonly playerId: string;
+  readonly isHost?: boolean;
   readonly socket: { send: (data: string) => void };
   readonly onDelta?: (delta: DeltaPayload) => void;
   readonly onError?: (reasonCode: ReasonCode) => void;
@@ -79,6 +80,7 @@ export function handleWsMessage(
     }
     ctx.onDelta?.(msg.delta);
   } else if (msg.type === 'GAME_OVER') {
+    clearReconnectToken(ctx.roomCode);
     ctx.onGameOver?.(msg.leaderboard);
   } else if (msg.type === 'ROOM_STARTED') {
     ctx.onRoomStarted?.();
@@ -97,11 +99,23 @@ export function handleWsMessage(
   } else if (msg.type === 'PLAYER_EMOTE') {
     ctx.onEmote?.(msg.playerId, msg.emoteId, msg.timestamp);
   } else if (msg.type === 'PING') {
-    const pongMsg: WsClientMessage = { type: 'PONG', playerId: ctx.playerId, roomCode: ctx.roomCode };
+    const activeCode = ('roomCode' in msg && msg.roomCode) ? msg.roomCode : ctx.roomCode;
+    const pongMsg: WsClientMessage = { type: 'PONG', playerId: ctx.playerId, roomCode: activeCode };
     ctx.socket.send(JSON.stringify(pongMsg));
   } else if (msg.type === 'ERROR' || msg.type === 'INTENT_REJECTED') {
-    if (msg.type === 'ERROR' && (msg.reasonCode === 'TOKEN_INVALID' || msg.reasonCode === 'TOKEN_EXPIRED')) {
+    if (msg.type === 'ERROR' && (msg.reasonCode === 'TOKEN_INVALID' || msg.reasonCode === 'TOKEN_EXPIRED' || msg.reasonCode === 'ROOM_NOT_FOUND')) {
       clearReconnectToken(ctx.roomCode);
+      const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+      const isExplicitGuest = Boolean(params?.has('room')) && params?.get('host') !== 'true';
+      const isHost = ctx.isHost !== undefined ? ctx.isHost : !isExplicitGuest;
+      const fallbackMsg: WsClientMessage = isHost
+        ? { type: 'CREATE_ROOM', roomCode: ctx.roomCode, playerId: ctx.playerId }
+        : { type: 'JOIN_ROOM', roomCode: ctx.roomCode, playerId: ctx.playerId };
+      try {
+        ctx.socket.send(JSON.stringify(fallbackMsg));
+      } catch {
+        /* safe-ignore: socket may be closing */
+      }
     }
     if (msg.reasonCode === 'ROOM_STARTED') {
       ctx.onRoomStarted?.();
@@ -215,8 +229,17 @@ export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
   const activeRoomCodeRef = useRef(roomCode);
   activeRoomCodeRef.current = roomCode;
 
+  const isManualDisconnectRef = useRef(false);
+  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const reconnectAttemptsRef = useRef(0);
+
   const connect = useCallback(() => {
     if (wsRef.current && wsRef.current.readyState === 1) return;
+    isManualDisconnectRef.current = false;
+    if (reconnectTimerRef.current) {
+      clearTimeout(reconnectTimerRef.current);
+      reconnectTimerRef.current = null;
+    }
 
     const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:';
     const defaultUrl = typeof window !== 'undefined'
@@ -233,6 +256,7 @@ export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
     socket.onopen = () => {
       setIsConnected(true);
       setErrorReason(null);
+      reconnectAttemptsRef.current = 0;
       performWsHandshake(socket, {
         roomCode,
         playerId,
@@ -247,6 +271,7 @@ export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
         handleWsMessage(msg, {
           roomCode: activeRoomCodeRef.current || roomCode,
           playerId,
+          isHost: isHostRef.current,
           socket,
           onDelta: onDeltaRef.current,
           onError: onErrorRef.current,
@@ -274,12 +299,24 @@ export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
 
     socket.onclose = () => {
       setIsConnected(false);
+      if (!isManualDisconnectRef.current) {
+        const delay = Math.min(1000 * Math.pow(1.5, reconnectAttemptsRef.current), 5000);
+        reconnectAttemptsRef.current += 1;
+        reconnectTimerRef.current = setTimeout(() => {
+          connect();
+        }, delay);
+      }
     };
 
     wsRef.current = socket;
   }, [url, roomCode, playerId, options.isHost, webSocketFactory]);
 
   const disconnect = useCallback(() => {
+    isManualDisconnectRef.current = true;
+    if (reconnectTimerRef.current) {
+      clearTimeout(reconnectTimerRef.current);
+      reconnectTimerRef.current = null;
+    }
     if (wsRef.current) {
       wsRef.current.close();
       wsRef.current = null;

@@ -23,7 +23,7 @@ tools: [view_file, write_to_file, replace_file_content, list_dir, find_by_name, 
    - Use concrete, realistic literal test values (e.g., `"Can Tho"`, `600`, player ID `1`). Never use vague placeholder strings (`"test"`, `"valid_user"`).
    - For alternative flows that end with `Use case ends`, write test assertions to verify Failure Postconditions (clean rollback, zero dangling state).
    - Never benchmark NFRs on empty datasets. Create realistic seed datasets to verify zero N+1 queries and turn timeout enforcement.
-7. **Context Offloading**: Run test suites and linters via local scripts; report only concise high-density summaries into chat context.
+7. **Context Offloading & Visual Evidence**: Run test suites and linters via local scripts; report only concise high-density summaries into chat context. Mọi ảnh chụp màn hình minh chứng giao diện (UAT/Visual Verification) BẮT BUỘC lưu định dạng `.jpg` (JPEG Quality 85–92, dung lượng < 1MB theo chuẩn IMP-19), tuyệt đối cấm xuất `.png` toàn cảnh.
 8. **Report Template**:
 ```markdown
 ### 🚀 TICKET IMPLEMENTATION RESULT: [TICKET_ID]

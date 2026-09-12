@@ -175,16 +175,27 @@ export const useGameStore = create<GameState>((set, get) => ({
   setDice: (dice) =>
     set({ dice: [clampDiceFace(dice[0]), clampDiceFace(dice[1])] }),
 
-  setIsRolling: (isRolling) => set({ isRolling }),
+  setIsRolling: (isRolling) => {
+    set({ isRolling });
+    if (isRolling) {
+      setTimeout(() => {
+        if (get().isRolling) set({ isRolling: false });
+      }, 3000);
+    }
+  },
 
   setHasRolledThisTurn: (hasRolled) => set({ hasRolledThisTurn: hasRolled }),
 
-  triggerDiceRoll: (dice) =>
+  triggerDiceRoll: (dice) => {
     set({
       dice: [clampDiceFace(dice[0]), clampDiceFace(dice[1])],
       isRolling: true,
       hasRolledThisTurn: true,
-    }),
+    });
+    setTimeout(() => {
+      if (get().isRolling) set({ isRolling: false });
+    }, 3000);
+  },
 
   startPawnMove: (playerId, targetCell, fromCell) => {
     const state = get();
@@ -215,6 +226,13 @@ export const useGameStore = create<GameState>((set, get) => ({
         isAnimating: true,
       },
     });
+    const timeoutMs = Math.max(3000, waypoints.length * 600);
+    setTimeout(() => {
+      const anim = get().activePawnAnimation;
+      if (anim && anim.playerId === playerId && anim.isAnimating) {
+        get().completePawnMove(playerId);
+      }
+    }, timeoutMs);
   },
 
   completePawnMove: (playerId) => {

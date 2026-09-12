@@ -107,11 +107,12 @@ async function main() {
 
   // Helper save screenshot
   async function saveScreenshot(filename) {
-    const shot = await sendCmd('Page.captureScreenshot', { format: 'png' });
+    const finalFilename = filename.replace(/\.png$/i, '.jpg');
+    const shot = await sendCmd('Page.captureScreenshot', { format: 'jpeg', quality: 88 });
     const buf = Buffer.from(shot.data, 'base64');
-    fs.writeFileSync(path.join(PROJECT_OUTPUT_DIR, filename), buf);
-    fs.writeFileSync(path.join(ARTIFACT_DIR, filename), buf);
-    console.log(`[SAVED] ${filename} (${buf.length} bytes)`);
+    fs.writeFileSync(path.join(PROJECT_OUTPUT_DIR, finalFilename), buf);
+    fs.writeFileSync(path.join(ARTIFACT_DIR, finalFilename), buf);
+    console.log(`[SAVED] ${finalFilename} (${buf.length} bytes)`);
   }
 
   // 1. Khởi tạo trạng thái game đầy đủ 4 người chơi
