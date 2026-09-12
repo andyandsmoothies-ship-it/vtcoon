@@ -5,9 +5,10 @@ export interface ModalBackdropProps {
   readonly children: React.ReactNode;
   readonly onClose?: () => void;
   readonly title?: string;
+  readonly fullScreen?: boolean;
 }
 
-export function ModalBackdrop({ children, onClose, title }: ModalBackdropProps): React.ReactElement {
+export function ModalBackdrop({ children, onClose, title, fullScreen = false }: ModalBackdropProps): React.ReactElement {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleKeyDown = useCallback(
@@ -67,15 +68,19 @@ export function ModalBackdrop({ children, onClose, title }: ModalBackdropProps):
   }, [handleKeyDown]);
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget && onClose) {
+    if (!fullScreen && e.target === e.currentTarget && onClose) {
       onClose();
     }
   };
 
+  const backdropClasses = fullScreen
+    ? 'fixed inset-0 bg-slate-950/20 backdrop-blur-[1px] z-20 flex items-stretch justify-stretch p-0 pointer-events-none select-none'
+    : 'fixed inset-0 bg-slate-950/25 backdrop-blur-[2px] z-20 flex items-center justify-center md:justify-end p-4 md:pr-10 pointer-events-auto select-none';
+
   return (
     <div
       ref={containerRef}
-      className="fixed inset-0 bg-slate-950/25 backdrop-blur-[2px] z-20 flex items-center justify-center md:justify-end p-4 md:pr-10 pointer-events-auto select-none"
+      className={backdropClasses}
       onClick={handleBackdropClick}
       role="dialog"
       aria-modal="true"

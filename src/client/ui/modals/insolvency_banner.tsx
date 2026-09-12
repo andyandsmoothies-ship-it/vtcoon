@@ -74,7 +74,7 @@ export function InsolvencyBanner({
         {onManageProperties && (
           <button
             onClick={onManageProperties}
-            className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-sm cursor-pointer transition-all shadow-md shadow-amber-500/20"
+            className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-amber-950 font-black text-sm cursor-pointer transition-all shadow-md shadow-amber-500/20"
           >
             Quản Lý BĐS / Thế Chấp
           </button>

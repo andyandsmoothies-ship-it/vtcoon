@@ -20,6 +20,7 @@ export function HudContainer({
   onOpenProperties,
   onOpenTrade,
   onOpenUpgrade,
+  onOpenManageProperty,
   onEndTurn,
   localPlayerId,
   onIntent,
@@ -52,6 +53,7 @@ export function HudContainer({
           onOpenProperties={onOpenProperties}
           onOpenTrade={onOpenTrade}
           onOpenUpgrade={onOpenUpgrade}
+          onOpenManageProperty={onOpenManageProperty}
           onEndTurn={onEndTurn}
           localPlayerId={localPlayerId}
         />

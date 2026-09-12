@@ -156,7 +156,7 @@ describe('[NET-01] WSS Server & Tạo Phòng 6 Ký Tự', () => {
     ws.close();
   });
 
-  it('[TC-NET01.5-inv/Adversarial] [UC-GAME-001/A2] phòng đủ 6 người → guest thứ 7 nhận ERROR ROOM_FULL', async () => {
+  it('[TC-NET01.5-inv/Adversarial] [UC-GAME-001/A2] phòng đủ 4 người → guest thứ 5 nhận ERROR ROOM_FULL', async () => {
     // Host (người 1)
     const wsHost = await openSocket();
     const hostPending5 = collectN(wsHost, 2);
@@ -165,9 +165,9 @@ describe('[NET-01] WSS Server & Tạo Phòng 6 Ký Tự', () => {
     if (createdMsg5?.type !== 'ROOM_CREATED') throw new Error('ROOM_CREATED expected');
     const rc5 = createdMsg5.roomCode;
 
-    // Join 5 guest (người 2→6), tổng = 6
+    // Join 3 guest (người 2→4), tổng = 4
     const sockets5: WebSocket[] = [];
-    for (let i = 1; i <= 5; i++) {
+    for (let i = 1; i <= 3; i++) {
       const ws = await openSocket();
       const reply = await sendRecv(ws, {
         type: 'JOIN_ROOM',
@@ -178,7 +178,7 @@ describe('[NET-01] WSS Server & Tạo Phòng 6 Ký Tự', () => {
       sockets5.push(ws);
     }
 
-    // Guest thứ 7 (người thứ 7 vào phòng 6 người) phải bị từ chối
+    // Guest thứ 5 (người thứ 5 vào phòng 4 người) phải bị từ chối
     const wsExtra = await openSocket();
     const replyExtra = await sendRecv(wsExtra, {
       type: 'JOIN_ROOM',

@@ -3,13 +3,14 @@
 import type { RoomManager } from '../room_manager.js';
 import type { IntentMutex } from './intent_mutex.js';
 import type { DeltaBroadcaster } from './delta_broadcaster.js';
-import { TurnPhase } from '../../domain/room.js';
+import { TurnPhase, isRoomGameOver } from '../../domain/room.js';
 
 export interface BotTurnSchedulerOptions {
   readonly rooms: RoomManager;
   readonly intentMutex: IntentMutex;
   readonly broadcaster: DeltaBroadcaster;
   readonly onGameOver: (roomCode: string) => void;
+  readonly onScheduleTurnTimeout?: (roomCode: string) => void;
 }
 
 export class BotTurnScheduler {
@@ -17,12 +18,14 @@ export class BotTurnScheduler {
   private readonly intentMutex: IntentMutex;
   private readonly broadcaster: DeltaBroadcaster;
   private readonly onGameOver: (roomCode: string) => void;
+  private readonly onScheduleTurnTimeout?: (roomCode: string) => void;
 
   constructor(options: BotTurnSchedulerOptions) {
     this.rooms = options.rooms;
     this.intentMutex = options.intentMutex;
     this.broadcaster = options.broadcaster;
     this.onGameOver = options.onGameOver;
+    this.onScheduleTurnTimeout = options.onScheduleTurnTimeout;
   }
 
   scheduleBotTurn(roomCode: string): void {
@@ -44,13 +47,15 @@ export class BotTurnScheduler {
 
         this.rooms.runBotTurn(roomCode);
         const rAfter = this.rooms.getRoom(roomCode);
-        if (rAfter && rAfter.started && rAfter.players.filter((p) => !p.bankrupt).length <= 1) {
+        if (rAfter && isRoomGameOver(rAfter)) {
           this.onGameOver(roomCode);
         } else {
           this.broadcaster.broadcastRoomDelta(roomCode);
           const next = rAfter?.players[rAfter.currentPlayerIndex];
           if (next?.isBot && !next.bankrupt) {
             this.scheduleBotTurn(roomCode);
+          } else if (next && !next.isBot && !next.bankrupt) {
+            this.onScheduleTurnTimeout?.(roomCode);
           }
         }
       });

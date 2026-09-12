@@ -349,8 +349,8 @@ describe('[TC-EC01..25] 25 Kịch Bản Biên Toàn Diện (Edge Cases Hardening
     expect(room.players[1]!.balance).toBe(p2Before - 1000);
   });
 
-  // [TC-EC16] HOSE Casino Loss Solvency: Mặt 1 hệ số 0.50 không gây âm tiền
-  it('[TC-EC16] HOSE Casino Loss Solvency: Mặt 1 hệ số 0.50 không gây âm tiền', () => {
+  // [TC-EC16] HOSE Casino Loss Solvency: Mặt 1 hệ số 0.30 không gây âm tiền
+  it('[TC-EC16] HOSE Casino Loss Solvency: Mặt 1 hệ số 0.30 không gây âm tiền', () => {
     const { mgr, room } = createTestRoom(2);
     room.phase = TurnPhase.HosePhase;
     room.players[0]!.balance = 500;

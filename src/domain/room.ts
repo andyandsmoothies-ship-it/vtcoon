@@ -6,6 +6,7 @@ export const BOARD_SIZE       = 40;
 export const GO_BONUS         = 2_000;
 export const INITIAL_BALANCE  = 15_000;
 export const ROOM_CODE_LENGTH = 6;
+export const MAX_ROUNDS       = 30;
 
 export enum TurnPhase {
   WaitingRoll        = 'WaitingRoll',
@@ -126,3 +127,18 @@ export function createRoom(hostId: string, customRoomCode?: string): Room {
 export function checkPassedGo(oldPos: number, newPos: number): boolean {
   return newPos <= oldPos && oldPos !== newPos;
 }
+
+/**
+  * Kiem tra dieu kien ket thuc van dau tap trung:
+  * - Tat ca nguoi choi ngoai tru 1 da pha san (so nguoi con song <= 1)
+  * - Hoac van dau da vuot qua gioi han 30 vong (roundCount > MAX_ROUNDS)
+  */
+export function isRoomGameOver(room: Room): boolean {
+  if (!room.started) return false;
+  const activePlayers = room.players.filter((p) => !p.bankrupt);
+  if (activePlayers.length <= 1) return true;
+  const currentRound = Math.max(room.roundCount ?? 1, room.round ?? 1);
+  if (currentRound > MAX_ROUNDS) return true;
+  return false;
+}
+

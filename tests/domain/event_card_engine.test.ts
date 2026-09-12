@@ -111,38 +111,38 @@ describe('[TC-04.T1/MSS] Event Card Engine — Decks & Shuffle', () => {
 
 describe('[TC-04.T1/MSS] HOSE Investment Resolver (1D6)', () => {
   it('HOSE_OUTCOMES định nghĩa đủ 6 tỷ lệ hoàn vốn chuẩn', () => {
-    expect(HOSE_OUTCOMES[1]).toBe(0.50);
-    expect(HOSE_OUTCOMES[2]).toBe(0.75);
-    expect(HOSE_OUTCOMES[3]).toBe(1.00);
-    expect(HOSE_OUTCOMES[4]).toBe(1.20);
-    expect(HOSE_OUTCOMES[5]).toBe(1.50);
+    expect(HOSE_OUTCOMES[1]).toBe(0.30);
+    expect(HOSE_OUTCOMES[2]).toBe(0.60);
+    expect(HOSE_OUTCOMES[3]).toBe(0.80);
+    expect(HOSE_OUTCOMES[4]).toBe(1.10);
+    expect(HOSE_OUTCOMES[5]).toBe(1.20);
     expect(HOSE_OUTCOMES[6]).toBe(2.00);
   });
 
   it('resolveHoseInvestment tính đúng 6 trường hợp lời/lỗ 1D6', () => {
-    // Mặt 1: Lỗ 50% (x0.50)
-    expect(resolveHoseInvestment(2000, 1)).toBe(1000);
-    // Mặt 2: Lỗ 25% (x0.75)
-    expect(resolveHoseInvestment(2000, 2)).toBe(1500);
-    // Mặt 3: Hòa vốn (x1.00)
-    expect(resolveHoseInvestment(1000, 3)).toBe(1000);
-    // Mặt 4: Lời 20% (x1.20)
-    expect(resolveHoseInvestment(1000, 4)).toBe(1200);
-    // Mặt 5: Lời 50% (x1.50)
-    expect(resolveHoseInvestment(2000, 5)).toBe(3000);
+    // Mặt 1: Lỗ 70% (x0.30)
+    expect(resolveHoseInvestment(2000, 1)).toBe(600);
+    // Mặt 2: Lỗ 40% (x0.60)
+    expect(resolveHoseInvestment(2000, 2)).toBe(1200);
+    // Mặt 3: Lỗ 20% (x0.80)
+    expect(resolveHoseInvestment(1000, 3)).toBe(800);
+    // Mặt 4: Lời 10% (x1.10)
+    expect(resolveHoseInvestment(1000, 4)).toBe(1100);
+    // Mặt 5: Lời 20% (x1.20)
+    expect(resolveHoseInvestment(2000, 5)).toBe(2400);
     // Mặt 6: Lời 100% (x2.00)
     expect(resolveHoseInvestment(2000, 6)).toBe(4000);
   });
 
   it('resolveHoseInvestment tính chính xác tại các biên vốn cược [500, 3000] và xử lý mặt xúc xắc không hợp lệ', () => {
     // Biên tối thiểu 500
-    expect(resolveHoseInvestment(500, 1)).toBe(250);
-    expect(resolveHoseInvestment(500, 2)).toBe(375);
+    expect(resolveHoseInvestment(500, 1)).toBe(150);
+    expect(resolveHoseInvestment(500, 2)).toBe(300);
     expect(resolveHoseInvestment(500, 6)).toBe(1000);
 
     // Biên tối đa 3000
-    expect(resolveHoseInvestment(3000, 1)).toBe(1500);
-    expect(resolveHoseInvestment(3000, 4)).toBe(3600);
+    expect(resolveHoseInvestment(3000, 1)).toBe(900);
+    expect(resolveHoseInvestment(3000, 4)).toBe(3300);
     expect(resolveHoseInvestment(3000, 6)).toBe(6000);
 
     // Mặt xúc xắc ngoài khoảng 1..6 trả về 0 an toàn

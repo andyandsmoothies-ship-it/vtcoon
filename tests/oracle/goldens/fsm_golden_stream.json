@@ -1,0 +1,523 @@
+[
+  {
+    "stepIndex": 0,
+    "event": "GAME_STARTED",
+    "actor": "SYSTEM",
+    "tick": 1,
+    "turnPhase": "WaitingRoll",
+    "currentPlayerIndex": 0,
+    "currentTurnPlayerId": "P1",
+    "players": [
+      {
+        "id": "P1",
+        "position": 0,
+        "balance": 15000
+      },
+      {
+        "id": "P2",
+        "position": 0,
+        "balance": 15000
+      }
+    ],
+    "auction": null,
+    "ownedCells": []
+  },
+  {
+    "stepIndex": 1,
+    "event": "P1_ROLL_DICE",
+    "actor": "P1",
+    "tick": 2,
+    "turnPhase": "ActionPhase",
+    "currentPlayerIndex": 0,
+    "currentTurnPlayerId": "P1",
+    "dice": [
+      4,
+      3
+    ],
+    "players": [
+      {
+        "id": "P1",
+        "position": 1,
+        "balance": 17000
+      },
+      {
+        "id": "P2",
+        "position": 0,
+        "balance": 15000
+      }
+    ],
+    "auction": null,
+    "ownedCells": []
+  },
+  {
+    "stepIndex": 2,
+    "event": "P1_BUY_CELL_1",
+    "actor": "P1",
+    "tick": 3,
+    "turnPhase": "PropertyManagement",
+    "currentPlayerIndex": 0,
+    "currentTurnPlayerId": "P1",
+    "dice": [
+      4,
+      3
+    ],
+    "players": [
+      {
+        "id": "P1",
+        "position": 1,
+        "balance": 16400
+      },
+      {
+        "id": "P2",
+        "position": 0,
+        "balance": 15000
+      }
+    ],
+    "auction": null,
+    "ownedCells": [
+      {
+        "index": 1,
+        "ownerId": "P1"
+      }
+    ]
+  },
+  {
+    "stepIndex": 3,
+    "event": "P1_END_TURN",
+    "actor": "P1",
+    "tick": 4,
+    "turnPhase": "WaitingRoll",
+    "currentPlayerIndex": 1,
+    "currentTurnPlayerId": "P2",
+    "dice": [
+      4,
+      3
+    ],
+    "players": [
+      {
+        "id": "P1",
+        "position": 1,
+        "balance": 16400
+      },
+      {
+        "id": "P2",
+        "position": 0,
+        "balance": 15000
+      }
+    ],
+    "auction": null,
+    "ownedCells": [
+      {
+        "index": 1,
+        "ownerId": "P1"
+      }
+    ]
+  },
+  {
+    "stepIndex": 4,
+    "event": "P2_ROLL_DICE_PAY_RENT",
+    "actor": "P2",
+    "tick": 5,
+    "turnPhase": "PropertyManagement",
+    "currentPlayerIndex": 1,
+    "currentTurnPlayerId": "P2",
+    "dice": [
+      6,
+      5
+    ],
+    "players": [
+      {
+        "id": "P1",
+        "position": 1,
+        "balance": 16460
+      },
+      {
+        "id": "P2",
+        "position": 1,
+        "balance": 16940
+      }
+    ],
+    "auction": null,
+    "ownedCells": [
+      {
+        "index": 1,
+        "ownerId": "P1"
+      }
+    ]
+  },
+  {
+    "stepIndex": 5,
+    "event": "P2_END_TURN",
+    "actor": "P2",
+    "tick": 6,
+    "turnPhase": "WaitingRoll",
+    "currentPlayerIndex": 0,
+    "currentTurnPlayerId": "P1",
+    "dice": [
+      6,
+      5
+    ],
+    "players": [
+      {
+        "id": "P1",
+        "position": 1,
+        "balance": 16460
+      },
+      {
+        "id": "P2",
+        "position": 1,
+        "balance": 16940
+      }
+    ],
+    "auction": null,
+    "ownedCells": [
+      {
+        "index": 1,
+        "ownerId": "P1"
+      }
+    ]
+  },
+  {
+    "stepIndex": 6,
+    "event": "P1_ROLL_DICE_LAND_CELL_3",
+    "actor": "P1",
+    "tick": 7,
+    "turnPhase": "ActionPhase",
+    "currentPlayerIndex": 0,
+    "currentTurnPlayerId": "P1",
+    "dice": [
+      2,
+      4
+    ],
+    "players": [
+      {
+        "id": "P1",
+        "position": 3,
+        "balance": 18460
+      },
+      {
+        "id": "P2",
+        "position": 1,
+        "balance": 16940
+      }
+    ],
+    "auction": null,
+    "ownedCells": [
+      {
+        "index": 1,
+        "ownerId": "P1"
+      }
+    ]
+  },
+  {
+    "stepIndex": 7,
+    "event": "P1_BUY_CELL_3_MONOPOLY",
+    "actor": "P1",
+    "tick": 8,
+    "turnPhase": "PropertyManagement",
+    "currentPlayerIndex": 0,
+    "currentTurnPlayerId": "P1",
+    "dice": [
+      2,
+      4
+    ],
+    "players": [
+      {
+        "id": "P1",
+        "position": 3,
+        "balance": 17860
+      },
+      {
+        "id": "P2",
+        "position": 1,
+        "balance": 16940
+      }
+    ],
+    "auction": null,
+    "ownedCells": [
+      {
+        "index": 1,
+        "ownerId": "P1"
+      },
+      {
+        "index": 3,
+        "ownerId": "P1"
+      }
+    ]
+  },
+  {
+    "stepIndex": 8,
+    "event": "P1_UPGRADE_CELL_1_C1",
+    "actor": "P1",
+    "tick": 9,
+    "turnPhase": "PropertyManagement",
+    "currentPlayerIndex": 0,
+    "currentTurnPlayerId": "P1",
+    "dice": [
+      2,
+      4
+    ],
+    "players": [
+      {
+        "id": "P1",
+        "position": 3,
+        "balance": 17560
+      },
+      {
+        "id": "P2",
+        "position": 1,
+        "balance": 16940
+      }
+    ],
+    "auction": null,
+    "ownedCells": [
+      {
+        "index": 1,
+        "ownerId": "P1",
+        "level": 1
+      },
+      {
+        "index": 3,
+        "ownerId": "P1"
+      }
+    ]
+  },
+  {
+    "stepIndex": 9,
+    "event": "P1_END_TURN",
+    "actor": "P1",
+    "tick": 10,
+    "turnPhase": "WaitingRoll",
+    "currentPlayerIndex": 1,
+    "currentTurnPlayerId": "P2",
+    "dice": [
+      2,
+      4
+    ],
+    "players": [
+      {
+        "id": "P1",
+        "position": 3,
+        "balance": 17560
+      },
+      {
+        "id": "P2",
+        "position": 1,
+        "balance": 16940
+      }
+    ],
+    "auction": null,
+    "ownedCells": [
+      {
+        "index": 1,
+        "ownerId": "P1",
+        "level": 1
+      },
+      {
+        "index": 3,
+        "ownerId": "P1"
+      }
+    ]
+  },
+  {
+    "stepIndex": 10,
+    "event": "P2_ROLL_DICE_LAND_CELL_5",
+    "actor": "P2",
+    "tick": 11,
+    "turnPhase": "ActionPhase",
+    "currentPlayerIndex": 1,
+    "currentTurnPlayerId": "P2",
+    "dice": [
+      2,
+      4
+    ],
+    "players": [
+      {
+        "id": "P1",
+        "position": 3,
+        "balance": 17560
+      },
+      {
+        "id": "P2",
+        "position": 5,
+        "balance": 18940
+      }
+    ],
+    "auction": null,
+    "ownedCells": [
+      {
+        "index": 1,
+        "ownerId": "P1",
+        "level": 1
+      },
+      {
+        "index": 3,
+        "ownerId": "P1"
+      }
+    ]
+  },
+  {
+    "stepIndex": 11,
+    "event": "P2_DECLINE_TRIGGER_AUCTION",
+    "actor": "P2",
+    "tick": 12,
+    "turnPhase": "AuctionPhase",
+    "currentPlayerIndex": 1,
+    "currentTurnPlayerId": "P2",
+    "dice": [
+      2,
+      4
+    ],
+    "players": [
+      {
+        "id": "P1",
+        "position": 3,
+        "balance": 17560
+      },
+      {
+        "id": "P2",
+        "position": 5,
+        "balance": 18940
+      }
+    ],
+    "auction": {
+      "cellIndex": 5,
+      "currentBid": 1000,
+      "highestBidderId": null
+    },
+    "ownedCells": [
+      {
+        "index": 1,
+        "ownerId": "P1",
+        "level": 1
+      },
+      {
+        "index": 3,
+        "ownerId": "P1"
+      }
+    ]
+  },
+  {
+    "stepIndex": 12,
+    "event": "P1_BID_AUCTION_1200",
+    "actor": "P1",
+    "tick": 13,
+    "turnPhase": "AuctionPhase",
+    "currentPlayerIndex": 1,
+    "currentTurnPlayerId": "P2",
+    "dice": [
+      2,
+      4
+    ],
+    "players": [
+      {
+        "id": "P1",
+        "position": 3,
+        "balance": 17560
+      },
+      {
+        "id": "P2",
+        "position": 5,
+        "balance": 18940
+      }
+    ],
+    "auction": {
+      "cellIndex": 5,
+      "currentBid": 1200,
+      "highestBidderId": "P1"
+    },
+    "ownedCells": [
+      {
+        "index": 1,
+        "ownerId": "P1",
+        "level": 1
+      },
+      {
+        "index": 3,
+        "ownerId": "P1"
+      }
+    ]
+  },
+  {
+    "stepIndex": 13,
+    "event": "AUCTION_CLOSED_P1_WINS",
+    "actor": "SYSTEM",
+    "tick": 14,
+    "turnPhase": "PropertyManagement",
+    "currentPlayerIndex": 1,
+    "currentTurnPlayerId": "P2",
+    "dice": [
+      2,
+      4
+    ],
+    "players": [
+      {
+        "id": "P1",
+        "position": 3,
+        "balance": 16360
+      },
+      {
+        "id": "P2",
+        "position": 5,
+        "balance": 18940
+      }
+    ],
+    "auction": null,
+    "ownedCells": [
+      {
+        "index": 1,
+        "ownerId": "P1",
+        "level": 1
+      },
+      {
+        "index": 3,
+        "ownerId": "P1"
+      },
+      {
+        "index": 5,
+        "ownerId": "P1"
+      }
+    ]
+  },
+  {
+    "stepIndex": 14,
+    "event": "P2_END_TURN",
+    "actor": "P2",
+    "tick": 15,
+    "turnPhase": "WaitingRoll",
+    "currentPlayerIndex": 0,
+    "currentTurnPlayerId": "P1",
+    "dice": [
+      2,
+      4
+    ],
+    "players": [
+      {
+        "id": "P1",
+        "position": 3,
+        "balance": 16360
+      },
+      {
+        "id": "P2",
+        "position": 5,
+        "balance": 18940
+      }
+    ],
+    "auction": null,
+    "ownedCells": [
+      {
+        "index": 1,
+        "ownerId": "P1",
+        "level": 1
+      },
+      {
+        "index": 3,
+        "ownerId": "P1"
+      },
+      {
+        "index": 5,
+        "ownerId": "P1"
+      }
+    ]
+  }
+]

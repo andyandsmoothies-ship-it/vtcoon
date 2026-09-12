@@ -188,11 +188,39 @@ When you encounter existing code that lacks tests, do NOT attempt a full rewrite
 
 Classic micro-TDD (increments of 5-10 lines of code) was optimized for **human working memory**. Forcing an AI agent through micro-increments creates extreme overhead, token bloat, and context fragmentation without leveraging the agent's strength: reasoning across feature boundaries.
 
-In the Agentic Era, TDD evolves:
+### The Mental Model Shift: Human Flow vs. Agentic Flow
 
-### 1. Feature-Level Abstraction Boundary
-- **Define the boundary at the Feature/E2E level**: Humans and architects focus on defining the acceptance boundary via high-level integration or End-to-End (E2E) contracts (The Golden Path / Living User Journey).
-- **One-Sweep Implementation**: Once the feature boundary test is locked in and FAILS (RED), let the agent write the complete implementation in **one sweep**. Humans do not micromanage low-level internal helper functions.
+```
+[ HUMAN FLOW: TDD CỔ ĐIỂN ]                   [ AGENTIC FLOW: TDD KỶ NGUYÊN AGENT ]
+(Tối ưu cho nhận thức não người)              (Lặp ở cấp độ hệ thống - Iterate at system level)
+
+  ┌──────────────┐                              ┌─────────────────────────────┐
+  │ RED ➔ GREEN  │                              │ 1. SPECIFY (XÁC ĐỊNH)       │
+  │     Unit     │                              │ Yêu cầu & E2E Tests ĐỎ      │
+  └──────┬───────┘                              └──────────────┬──────────────┘
+         ▼                                                     ▼
+  ┌──────────────┐                              ┌─────────────────────────────┐
+  │ RED ➔ GREEN  │                              │ 2. DELEGATE (ỦY THÁC)       │
+  │     Unit     │                              │ Agent tự sinh toàn bộ:      │
+  └──────┬───────┘                              │ Code, Unit Tests trên hệ    │
+         ▼                                      │ thống trong 1 lượt duy nhất │
+  ┌──────────────┐                              └──────────────┬──────────────┘
+  │ RED ➔ GREEN  │                                                     ▼
+  │     Unit     │                              ┌─────────────────────────────┐
+  └──────────────┘                              │ 3. VALIDATE (THẨM ĐỊNH)     │
+                                                │ Chạy E2E Tests & nghiệm thu │
+  Vòng lặp vi mô 5-10 dòng code                 └──────────────┬──────────────┘
+  lặp đi lặp lại hàng chục lần.                                │
+                                                Vòng phản hồi Người + Agent
+                                                (Human + Agent feedback loop)
+```
+
+In the Agentic Era, TDD operates as a 3-step system loop:
+
+### 1. Feature-Level Abstraction Boundary (Step 1: Specify)
+- **Define the boundary at the Feature/E2E level**: Humans and architects focus on defining the acceptance boundary via high-level integration or End-to-End (E2E) contracts (The Golden Path / Living User Journey). Tests serve as the human/agent abstraction boundary.
+- **One-Sweep Implementation (Step 2: Delegate)**: Once the feature boundary test is locked in and FAILS (RED), delegate the complete implementation across the system to the agent in **one sweep**. Humans do not micromanage low-level internal helper functions.
+- **System-Level Validation (Step 3: Validate)**: Run the E2E acceptance suite to validate the outcome. If errors occur, provide feedback at the system level (`Human + Agent feedback`).
 
 ### 2. Double-Entry Bookkeeping (Zero Bug-Codification)
 - AI agents frequently attempt to fix a failing test by either:

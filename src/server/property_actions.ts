@@ -205,10 +205,16 @@ function checkTradeProperty(
   stateMap: PropertyStateMap,
   cellIndex: number,
   sellerId: string,
+  price: number,
 ): ActionRejectReason | undefined {
   if (registry.get(cellIndex) !== sellerId) return ActionRejectReason.NOT_OWNER;
-  if (!PROPERTY_DEEDS.has(cellIndex)) return ActionRejectReason.NOT_PURCHASABLE;
+  const deed = PROPERTY_DEEDS.get(cellIndex);
+  if (!deed) return ActionRejectReason.NOT_PURCHASABLE;
   if (hasBuildingOrUpgrade(stateMap.get(cellIndex))) return ActionRejectReason.PROPERTY_HAS_BUILDING;
+  const floorPrice = Math.floor(deed.price * 0.7);
+  if (price < floorPrice) {
+    return ActionRejectReason.PRICE_BELOW_FLOOR;
+  }
   return undefined;
 }
 
@@ -252,7 +258,7 @@ export function validateP2PTrade(
   const basicErr = checkTradeBasics(room, sellerId, buyerId, price);
   if (basicErr) return { valid: false, reason: basicErr };
 
-  const propErr = checkTradeProperty(registry, stateMap, cellIndex, sellerId);
+  const propErr = checkTradeProperty(registry, stateMap, cellIndex, sellerId, price);
   if (propErr) return { valid: false, reason: propErr };
 
   return checkTradeParties(room, sellerId, buyerId, cellIndex, price);

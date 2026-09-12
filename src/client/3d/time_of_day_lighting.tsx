@@ -8,6 +8,8 @@ import {
   AUTO_CYCLE_DURATION_SECONDS,
   calculatePhaseFromProgress,
 } from '../store/environment_store';
+import { useGameStore } from '../store/game_store';
+import { calculateTheatricalAmbientIntensity } from './auction_3d_stage';
 
 function useSafeFrame(callback: (state: Parameters<Parameters<typeof useFrame>[0]>[0], delta: number) => void): void {
   try {
@@ -21,6 +23,8 @@ export function TimeOfDayLighting(): React.ReactElement {
   const phase = useEnvironmentStore((s) => s.phase);
   const isAuto = useEnvironmentStore((s) => s.isAuto);
   const setPhase = useEnvironmentStore((s) => s.setPhase);
+  const activeModal = useGameStore((s) => s.activeModal);
+  const isAuctionActive = activeModal === 'auction';
 
   const sunRef = useRef<DirectionalLight>(null);
   const fillRef = useRef<DirectionalLight>(null);
@@ -51,20 +55,28 @@ export function TimeOfDayLighting(): React.ReactElement {
     const lerpRate = 1 - Math.exp(-dt * 3.0);
 
     // 2. Nội suy quỹ đạo chuyển động mặt trời / mặt trăng
+    // Khi đấu giá mở, hạ 85% ánh sáng mặt trời để bục đấu giá là tâm điểm kịch tính
     if (sunRef.current) {
       tempVec.set(preset.sunPosition[0], preset.sunPosition[1], preset.sunPosition[2]);
       sunRef.current.position.lerp(tempVec, lerpRate);
 
       tempColor.set(preset.sunColor);
       sunRef.current.color.lerp(tempColor, lerpRate);
-      sunRef.current.intensity += (preset.sunIntensity - sunRef.current.intensity) * lerpRate;
+      const targetSunIntensity = isAuctionActive ? preset.sunIntensity * 0.15 : preset.sunIntensity;
+      sunRef.current.intensity += (targetSunIntensity - sunRef.current.intensity) * lerpRate;
     }
 
-    // 3. Nội suy ánh sáng khuếch tán Ambient & Hemisphere
+    // 3. Nội suy ánh sáng khuếch tán Ambient & Hemisphere (Hạ tối 85% xuống 0.15 khi đấu giá)
     if (ambientRef.current) {
       tempColor.set(preset.ambientColor);
       ambientRef.current.color.lerp(tempColor, lerpRate);
-      ambientRef.current.intensity += (preset.ambientIntensity - ambientRef.current.intensity) * lerpRate;
+      ambientRef.current.intensity = calculateTheatricalAmbientIntensity(
+        ambientRef.current.intensity,
+        isAuctionActive,
+        dt,
+        preset.ambientIntensity,
+        0.15
+      );
     }
 
     if (hemiRef.current) {
@@ -73,12 +85,14 @@ export function TimeOfDayLighting(): React.ReactElement {
 
       tempColor.set(preset.hemiGroundColor);
       hemiRef.current.groundColor.lerp(tempColor, lerpRate);
-      hemiRef.current.intensity += (preset.hemiIntensity - hemiRef.current.intensity) * lerpRate;
+      const targetHemi = isAuctionActive ? preset.hemiIntensity * 0.15 : preset.hemiIntensity;
+      hemiRef.current.intensity += (targetHemi - hemiRef.current.intensity) * lerpRate;
     }
 
     // 4. Nội suy ánh sáng phản xạ vịnh biển (Fill Light) & ánh sáng rìa ngọn sóng (Rim Light)
     if (fillRef.current) {
-      const fillIntensity = phase === 'night' ? 0.22 : phase === 'sunset' ? 0.35 : 0.3;
+      const baseFill = phase === 'night' ? 0.22 : phase === 'sunset' ? 0.35 : 0.3;
+      const fillIntensity = isAuctionActive ? baseFill * 0.15 : baseFill;
       const fillColor = phase === 'night' ? '#38BDF8' : phase === 'sunset' ? '#FDBA74' : '#CCFBF1';
       tempColor.set(fillColor);
       fillRef.current.color.lerp(tempColor, lerpRate);
@@ -86,7 +100,8 @@ export function TimeOfDayLighting(): React.ReactElement {
     }
 
     if (rimRef.current) {
-      const rimIntensity = phase === 'night' ? 0.25 : phase === 'sunset' ? 0.4 : 0.3;
+      const baseRim = phase === 'night' ? 0.25 : phase === 'sunset' ? 0.4 : 0.3;
+      const rimIntensity = isAuctionActive ? baseRim * 0.15 : baseRim;
       const rimColor = phase === 'night' ? '#38BDF8' : phase === 'sunset' ? '#EA580C' : '#FEF08A';
       tempColor.set(rimColor);
       rimRef.current.color.lerp(tempColor, lerpRate);
@@ -108,11 +123,12 @@ export function TimeOfDayLighting(): React.ReactElement {
         (state.scene.background as Color).lerp(tempColor, lerpRate);
       }
 
-      const targetEnvIntensity = phase === 'night' ? 0.16 : phase === 'sunset' ? 0.28 : 0.75;
-      if (typeof (state.scene as any).environmentIntensity !== 'number') {
-        (state.scene as any).environmentIntensity = 1.0;
+      const baseEnvIntensity = phase === 'night' ? 0.16 : phase === 'sunset' ? 0.28 : 0.75;
+      const targetEnvIntensity = isAuctionActive ? 0.12 : baseEnvIntensity;
+      if (typeof state.scene.environmentIntensity !== 'number') {
+        state.scene.environmentIntensity = 1.0;
       }
-      (state.scene as any).environmentIntensity += (targetEnvIntensity - (state.scene as any).environmentIntensity) * lerpRate;
+      state.scene.environmentIntensity += (targetEnvIntensity - state.scene.environmentIntensity) * lerpRate;
     }
   });
 

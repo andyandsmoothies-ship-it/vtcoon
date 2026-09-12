@@ -41,7 +41,7 @@ export function EventCardModal({
 
   return (
     <div
-      className={`w-full max-w-xs bg-slate-900 border-2 rounded-2xl shadow-2xl p-5 flex flex-col items-center text-center relative pointer-events-auto transition-all animate-in fade-in zoom-in-95 duration-200 ${borderColor}`}
+      className={`w-full max-w-xs bg-slate-900/90 backdrop-blur-xl border-2 rounded-2xl shadow-2xl p-5 flex flex-col items-center text-center relative pointer-events-auto transition-all animate-in fade-in zoom-in-95 duration-200 mt-auto md:my-auto ${borderColor}`}
       data-testid="event-card-modal"
     >
       {onClose && (
@@ -78,7 +78,7 @@ export function EventCardModal({
       {/* Cash Delta Badge (nếu có biến động tiền tệ) */}
       {hasDelta && (
         <div
-          className={`mb-4 px-3 py-1.5 rounded-xl border text-xs font-bold tracking-wide ${
+          className={`mb-4 px-3 py-1.5 rounded-xl border text-xs font-bold tracking-wide font-mono tabular-nums ${
             isPositiveDelta
               ? 'bg-emerald-950/60 border-emerald-500/50 text-emerald-300'
               : 'bg-rose-950/60 border-rose-500/50 text-rose-300'

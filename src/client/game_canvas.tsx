@@ -13,7 +13,11 @@ import { PawnAnimator } from './3d/pawn_animator';
 import { cellPosition } from './3d/board_coords';
 import { useGameStore, type PawnAnimationState } from './store/game_store';
 import { CinematicOverlay } from './3d/cinematic_effects';
+import { Auction3DStage } from './3d/auction_3d_stage';
+import { EventCard3D } from './3d/event_card_3d';
+import { Coronation3DStage } from './3d/coronation_3d_stage';
 import { PostProcessingPipeline } from './3d/post_processing_pipeline';
+import { PenthouseLobbyScene } from './3d/penthouse_lobby_scene';
 import { TimeOfDayLighting } from './3d/time_of_day_lighting';
 import { useEnvironmentStore, TIME_OF_DAY_PRESETS } from './store/environment_store';
 import { useVfxStore } from './store/vfx_store';
@@ -139,7 +143,7 @@ export function AdaptiveCinematicCamera(): React.ReactElement {
     if (controlsRef.current) {
       const isDragging = isUserInteractingRef.current;
       const timeSinceInteraction = Date.now() - lastUserInteractionTimeRef.current;
-      const isActionOngoing = isRolling || isPawnMoving || activeScreenShake !== null;
+      const isActionOngoing = isRolling || isPawnMoving || activeScreenShake !== null || activeModal !== null;
 
       if (isDragging) {
         camBaseRef.current[0] = camera.position.x;
@@ -198,7 +202,15 @@ export function AdaptiveCinematicCamera(): React.ReactElement {
   );
 }
 
-export function GameCanvas({ players = [] }: { players?: readonly Player[] }): React.ReactElement {
+export interface GameCanvasProps {
+  readonly players?: readonly Player[];
+  readonly isLobby?: boolean;
+}
+
+export function GameCanvas({
+  players = [],
+  isLobby = false,
+}: GameCanvasProps): React.ReactElement {
   const playersInfo = useGameStore((s) => s.playersInfo);
   const playerPositions = useGameStore((s) => s.playerPositions);
   const timeOfDayPhase = useEnvironmentStore((s) => s.phase);
@@ -232,29 +244,44 @@ export function GameCanvas({ players = [] }: { players?: readonly Player[] }): R
           toneMappingExposure: 0.94,
           antialias: true,
         }}
-        style={{ width: '100vw', height: '100vh', display: 'block', background: canvasBg, transition: 'background-color 2.5s ease' }}
+        style={{
+          width: '100vw',
+          height: '100vh',
+          display: 'block',
+          background: isLobby ? '#0F172A' : canvasBg,
+          transition: 'background-color 2.5s ease',
+        }}
       >
-        <AdaptiveCinematicCamera />
-        {/* Hệ thống chiếu sáng động Chu kỳ Ngày - Đêm & Đô thị Neon (Dynamic Time-of-Day Lighting) */}
-        <TimeOfDayLighting />
-
         <React.Suspense fallback={null}>
           <Environment preset="city" />
         </React.Suspense>
 
-        {/* ContactShadows contract retention:
-          <ContactShadows position={[0, -0.01, 0]} opacity={0.7} scale={40} blur={2} />
-        */}
-        {/* Tầng 1: Bóng tiếp xúc mâm gỗ bàn cờ đặt trên thảm nhung Ba Tư */}
-        <ContactShadows position={[0, -0.05, 0]} opacity={0.75} scale={45} blur={2.0} far={6} />
-        {/* Tầng 2: Bóng tiếp xúc Contact AO đanh chắc khóa chặt chân cọc C0, nhà C1-C3, xúc xắc xuống ô cờ */}
-        <ContactShadows position={[0, 0.104, 0]} opacity={0.92} scale={21.5} blur={0.65} far={1.8} />
+        {isLobby ? (
+          <PenthouseLobbyScene />
+        ) : (
+          <>
+            <AdaptiveCinematicCamera />
+            {/* Hệ thống chiếu sáng động Chu kỳ Ngày - Đêm & Đô thị Neon (Dynamic Time-of-Day Lighting) */}
+            <TimeOfDayLighting />
 
-        <GameBoard />
-        <PawnAnimator players={effectivePlayers} />
-        <PostProcessingPipeline />
+            {/* ContactShadows contract retention:
+              <ContactShadows position={[0, -0.01, 0]} opacity={0.7} scale={40} blur={2} />
+            */}
+            {/* Tầng 1: Bóng tiếp xúc mâm gỗ bàn cờ đặt trên thảm nhung Ba Tư */}
+            <ContactShadows position={[0, -0.05, 0]} opacity={0.75} scale={45} blur={2.0} far={6} />
+            {/* Tầng 2: Bóng tiếp xúc Contact AO đanh chắc khóa chặt chân cọc C0, nhà C1-C3, xúc xắc xuống ô cờ */}
+            <ContactShadows position={[0, 0.104, 0]} opacity={0.92} scale={21.5} blur={0.65} far={1.8} />
+
+            <GameBoard />
+            <PawnAnimator players={effectivePlayers} />
+            <Auction3DStage />
+            <EventCard3D />
+            <Coronation3DStage />
+            <PostProcessingPipeline />
+          </>
+        )}
       </Canvas>
-      <CinematicOverlay />
+      {!isLobby && <CinematicOverlay />}
     </div>
   );
 }

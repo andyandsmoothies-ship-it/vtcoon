@@ -1,7 +1,7 @@
 // [UI-S01/MSS][OPS-02/MSS] LayeredDioramaTile — Diorama-style 3D board tile with standee harmonic animation
 import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Billboard, Image as DreiImage } from '@react-three/drei';
+import { Billboard, Image as DreiImage, RoundedBox } from '@react-three/drei';
 import { Texture, type Group, SRGBColorSpace } from 'three';
 import { CellType, type BoardCell } from '../../domain/board_config';
 import { COLOR_GROUP_HEX } from '../../domain/theme';
@@ -175,16 +175,15 @@ export function LayeredDioramaTile({
   if (isCornerTile) {
     return (
       <group position={position} rotation={rotation} onClick={onClick}>
-        {/* Corner tile — larger square base with polished stone PBR */}
-        <mesh receiveShadow castShadow>
-          <boxGeometry args={[2.2, 0.22, 2.2]} />
-          <meshStandardMaterial color="#1E293B" roughness={0.16} metalness={0.25} />
-        </mesh>
+        {/* Corner tile — larger square base with polished stone PBR and rounded beveled edges */}
+        <RoundedBox args={[2.2, 0.22, 2.2]} radius={0.08} smoothness={4} receiveShadow castShadow>
+          <meshStandardMaterial color="#1E293B" roughness={0.16} metalness={0.25} envMapIntensity={1.2} />
+        </RoundedBox>
         {/* Inner corner accent badge with texture */}
         <mesh position={[0, 0.115, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
           <planeGeometry args={[2.16, 2.16]} />
           {tileTexture ? (
-            <meshStandardMaterial map={tileTexture} roughness={0.52} metalness={0.0} />
+            <meshStandardMaterial map={tileTexture} roughness={0.52} metalness={0.0} envMapIntensity={0.8} />
           ) : (
             <meshStandardMaterial color="#1E293B" roughness={0.25} metalness={0.1} />
           )}
@@ -197,11 +196,10 @@ export function LayeredDioramaTile({
 
   return (
     <group position={position} rotation={rotation} onClick={onClick}>
-      {/* 1. Base tile — Polished ivory cream parchment PBR with glossy tactile toy finish */}
-      <mesh receiveShadow castShadow>
-        <boxGeometry args={[1.68, 0.2, 2.2]} />
-        <meshStandardMaterial color="#EDE5D8" roughness={0.35} metalness={0.06} />
-      </mesh>
+      {/* 1. Base tile — Polished ivory cream parchment PBR with rounded beveled edges */}
+      <RoundedBox args={[1.68, 0.2, 2.2]} radius={0.08} smoothness={4} receiveShadow castShadow>
+        <meshStandardMaterial color="#EDE5D8" roughness={0.35} metalness={0.06} envMapIntensity={1.0} />
+      </RoundedBox>
 
       {/* 2. Top surface information texture with subtle lacquer sheen */}
       {tileTexture ? (

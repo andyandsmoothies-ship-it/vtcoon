@@ -8,6 +8,7 @@ import {
   getBgmTrackForCell,
 } from './audio_types';
 import { useAudioStore } from '../store/audio_store';
+import { SoundEngine } from './sound_engine';
 
 class AudioEngineImpl {
   private bgmCache = new Map<BGMTrack, Howl>();
@@ -27,6 +28,7 @@ class AudioEngineImpl {
           if (Howler.ctx && Howler.ctx.state === 'suspended') {
             Howler.ctx.resume().catch(() => {});
           }
+          void SoundEngine.resumeAudioContext();
           if (this.currentTrack) {
             const currentHowl = this.bgmCache.get(this.currentTrack);
             if (currentHowl && !currentHowl.playing()) {
@@ -43,10 +45,21 @@ class AudioEngineImpl {
       window.addEventListener('click', unlock, { once: true, capture: true });
     }
 
+    // Tự động khôi phục AudioContext khi người dùng quay lại tab (Safari iOS / Background freeze)
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          this.resumeAudioContext();
+          void SoundEngine.resumeAudioContext();
+        }
+      });
+    }
+
     // Lắng nghe thay đổi volume/mute từ Zustand store
     useAudioStore.subscribe((state) => {
       Howler.mute(state.isMuted);
       this.syncCurrentBgmVolume();
+      SoundEngine.syncVolumesWithStore();
     });
   }
 
@@ -181,6 +194,59 @@ class AudioEngineImpl {
     } catch {
       // Fallback an toàn khi audio buffer chưa nạp
     }
+
+    // Tích hợp phản hồi xúc giác thời gian thực từ SoundEngine
+    try {
+      if (sfx === SoundEffect.DICE_ROLL) {
+        SoundEngine.playDiceRoll();
+      } else if (sfx === SoundEffect.PAWN_STEP) {
+        SoundEngine.playPawnStep(rate);
+      } else if (sfx === SoundEffect.AUCTION_BID) {
+        SoundEngine.playAuctionGavel();
+      } else if (sfx === SoundEffect.BUY_PROPERTY) {
+        SoundEngine.playMoneyTransfer();
+      } else if (sfx === SoundEffect.UPGRADE_C3) {
+        SoundEngine.playConstructionSlam();
+      } else if (sfx === SoundEffect.CARD_FLIP) {
+        SoundEngine.playCardFlip();
+      } else if (sfx === SoundEffect.VICTORY_CHIME) {
+        SoundEngine.playCoronationChime();
+      }
+    } catch {
+      // An toàn khi WebAudio không khả dụng
+    }
+  }
+
+  public playTactileDiceRoll(): void {
+    SoundEngine.playDiceRoll();
+  }
+
+  public playTactileAuctionGavel(): void {
+    SoundEngine.playAuctionGavel();
+  }
+
+  public playTactileConstructionSlam(): void {
+    SoundEngine.playConstructionSlam();
+  }
+
+  public playTactileMoneyTransfer(): void {
+    SoundEngine.playMoneyTransfer();
+  }
+
+  public playTactilePawnStep(rate?: number): void {
+    SoundEngine.playPawnStep(rate);
+  }
+
+  public startPenthouseOceanAmbient(): void {
+    SoundEngine.playPenthouseOceanAmbient();
+  }
+
+  public stopPenthouseOceanAmbient(): void {
+    SoundEngine.stopPenthouseOceanAmbient();
+  }
+
+  public playJazzLoungeChords(): void {
+    SoundEngine.playJazzLoungeChords();
   }
 
   public handlePawnLanded(cellIndex: number): void {
@@ -195,6 +261,7 @@ class AudioEngineImpl {
     }
     this.bgmCache.forEach((howl) => howl.stop());
     this.sfxCache.forEach((howl) => howl.stop());
+    SoundEngine.stopAll();
     this.currentTrack = null;
     useAudioStore.getState().setCurrentBgmTrack(null);
   }

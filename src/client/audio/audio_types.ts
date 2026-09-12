@@ -16,6 +16,8 @@ export enum SoundEffect {
   CARD_DRAW = 'CARD_DRAW',
   BANKRUPT = 'BANKRUPT',
   TAX_PENALTY = 'TAX_PENALTY',
+  CARD_FLIP = 'CARD_FLIP',
+  VICTORY_CHIME = 'VICTORY_CHIME',
 }
 
 export const BGM_FILE_MAP: Record<BGMTrack, string> = {
@@ -35,6 +37,8 @@ export const SFX_FILE_MAP: Record<SoundEffect, string> = {
   [SoundEffect.CARD_DRAW]: '/assets/audio/sfx_card_draw.mp3',
   [SoundEffect.BANKRUPT]: '/assets/audio/sfx_bankrupt.mp3',
   [SoundEffect.TAX_PENALTY]: '/assets/audio/sfx_tax_penalty.mp3',
+  [SoundEffect.CARD_FLIP]: '/assets/audio/sfx_card_flip.mp3',
+  [SoundEffect.VICTORY_CHIME]: '/assets/audio/sfx_victory_chime.mp3',
 } as const;
 
 /** Ánh xạ chỉ số ô bàn cờ (0..39) sang nhạc nền BGM 4 cạnh địa lý */

@@ -1,7 +1,7 @@
 // [UI-S02/MSS] DioramaSkyline — Stepped financial towers, Indochine villas, Old Quarter shophouses, central fountain & diorama flora
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
-import type { Group, Mesh } from 'three';
+import { type Group, type Mesh, type InstancedMesh, Object3D } from 'three';
 import {
   useEnvironmentStore,
   calculateAviationStrobe,
@@ -29,6 +29,65 @@ const STREETLAMP_LOCATIONS: ReadonlyArray<readonly [number, number]> = [
   [-4.1, -4.0], [-4.1, -2.0], [-4.1, 0], [-4.1, 2.0], [-4.1, 4.0],
   [4.1, -4.0], [4.1, -2.0], [4.1, 0], [4.1, 2.0], [4.1, 4.0],
 ];
+
+export function InstancedDioramaTrees(): React.ReactElement {
+  const trunkRef = useRef<InstancedMesh>(null);
+  const lowerConeRef = useRef<InstancedMesh>(null);
+  const upperConeRef = useRef<InstancedMesh>(null);
+
+  useEffect(() => {
+    const dummy = new Object3D();
+    TREE_LOCATIONS.forEach(([tx, tz], i) => {
+      dummy.position.set(tx, 0.16 + 0.1, tz);
+      dummy.rotation.set(0, 0, 0);
+      dummy.scale.set(1, 1, 1);
+      dummy.updateMatrix();
+      trunkRef.current?.setMatrixAt(i, dummy.matrix);
+
+      dummy.position.set(tx, 0.16 + 0.22, tz);
+      dummy.updateMatrix();
+      lowerConeRef.current?.setMatrixAt(i, dummy.matrix);
+
+      dummy.position.set(tx, 0.16 + 0.32, tz);
+      dummy.updateMatrix();
+      upperConeRef.current?.setMatrixAt(i, dummy.matrix);
+    });
+
+    if (trunkRef.current) trunkRef.current.instanceMatrix.needsUpdate = true;
+    if (lowerConeRef.current) lowerConeRef.current.instanceMatrix.needsUpdate = true;
+    if (upperConeRef.current) upperConeRef.current.instanceMatrix.needsUpdate = true;
+  }, []);
+
+  return (
+    <group data-testid="instanced-diorama-trees">
+      <instancedMesh
+        ref={trunkRef}
+        args={[undefined, undefined, TREE_LOCATIONS.length]}
+        castShadow
+      >
+        <cylinderGeometry args={[0.02, 0.035, 0.2, 6]} />
+        <meshStandardMaterial color="#78350F" roughness={0.8} />
+      </instancedMesh>
+      <instancedMesh
+        ref={lowerConeRef}
+        args={[undefined, undefined, TREE_LOCATIONS.length]}
+        castShadow
+        receiveShadow
+      >
+        <coneGeometry args={[0.16, 0.18, 7]} />
+        <meshStandardMaterial color="#166534" roughness={0.7} />
+      </instancedMesh>
+      <instancedMesh
+        ref={upperConeRef}
+        args={[undefined, undefined, TREE_LOCATIONS.length]}
+        castShadow
+      >
+        <coneGeometry args={[0.12, 0.15, 7]} />
+        <meshStandardMaterial color="#15803D" roughness={0.6} />
+      </instancedMesh>
+    </group>
+  );
+}
 
 export function DioramaSkyline(): React.ReactElement {
   const phase = useEnvironmentStore((s) => s.phase);
@@ -231,24 +290,9 @@ export function DioramaSkyline(): React.ReactElement {
       </group>
 
       {/* ========================================================
-          4. HỆ THỐNG CÂY XANH TỈA TÁN SA BÀN ĐA TẦNG (Sculpted Trees)
+          4. HỆ THỐNG CÂY XANH TỈA TÁN SA BÀN ĐA TẦNG (Instanced Sculpted Trees - 60 FPS Polish)
          ======================================================== */}
-      {TREE_LOCATIONS.map(([tx, tz], i) => (
-        <group key={`tree-${i}`} position={[tx, 0.16, tz]}>
-          <mesh position={[0, 0.1, 0]} castShadow>
-            <cylinderGeometry args={[0.02, 0.035, 0.2, 6]} />
-            <meshStandardMaterial color="#78350F" roughness={0.8} />
-          </mesh>
-          <mesh position={[0, 0.22, 0]} castShadow receiveShadow>
-            <coneGeometry args={[0.16, 0.18, 7]} />
-            <meshStandardMaterial color="#166534" roughness={0.7} />
-          </mesh>
-          <mesh position={[0, 0.32, 0]} castShadow>
-            <coneGeometry args={[0.12, 0.15, 7]} />
-            <meshStandardMaterial color="#15803D" roughness={0.6} />
-          </mesh>
-        </group>
-      ))}
+      <InstancedDioramaTrees />
 
       {/* ========================================================
           5. CỘT ĐÈN ĐƯỜNG ĐÔ THỊ VI MÔ (Micro Streetlamps)

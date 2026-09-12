@@ -295,4 +295,31 @@ describe('[TC-05.5-inv/Adversarial] Tu Choi Giao Dich Bat Hop Le', () => {
     expect(res.success).toBe(false);
     expect(res.reason).toBe('UNAUTHORIZED');
   });
+
+  it('Tu choi khi gia chuyen nhuong duoi 70% gia tri so do -> PRICE_BELOW_FLOOR', () => {
+    const { room, reg, sm } = setup();
+    reg.set(1, 'p1'); // Cell 1 (Pho Hue) deed.price = 600, san 70% = 420
+    const p1Before = room.players[0]!.balance;
+    const p2Before = room.players[1]!.balance;
+
+    // 1. Gia 1 VND (lo hong bom do p2p) -> Tu choi
+    const res1 = executeP2PTrade(room, 'p1', 'p2', 1, 1, reg, sm);
+    expect(res1.success).toBe(false);
+    expect(res1.reason).toBe('PRICE_BELOW_FLOOR');
+    expect(reg.get(1)).toBe('p1');
+    expect(room.players[0]!.balance).toBe(p1Before);
+    expect(room.players[1]!.balance).toBe(p2Before);
+
+    // 2. Gia 419 VND (ngay sat duoi san 420) -> Tu choi
+    const res419 = executeP2PTrade(room, 'p1', 'p2', 1, 419, reg, sm);
+    expect(res419.success).toBe(false);
+    expect(res419.reason).toBe('PRICE_BELOW_FLOOR');
+
+    // 3. Gia dung 420 VND (ngay tai san 70%) -> Chap thuan
+    const res420 = executeP2PTrade(room, 'p1', 'p2', 1, 420, reg, sm);
+    expect(res420.success).toBe(true);
+    expect(reg.get(1)).toBe('p2');
+    expect(room.players[1]!.balance).toBe(p2Before - 420);
+    expect(room.players[0]!.balance).toBe(p1Before + (420 - 21)); // 420 - 5% tax (21)
+  });
 });

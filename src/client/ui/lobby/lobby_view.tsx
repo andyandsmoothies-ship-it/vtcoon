@@ -1,10 +1,11 @@
 // [TC-NET02.1/MSS][TC-NET02.2/MSS] LobbyView — Màn hình Sảnh Chờ chính của VTCoOn
-// Nguồn: docs/epics/networking/_epic_ledger.md § Slice NET-02
+// Nguồn: docs/epics/networking/_epic_ledger.md § Slice NET-02 & Giai đoạn 3: Penthouse Lounge
 import React, { useState } from 'react';
 import { useLobbyStore } from '../../store/lobby_store';
 import { PlayerSlotCard } from './player_slot_card';
 import { QrCodeCard } from './qr_code_card';
 import { BotPersonality, type LobbySlot } from '../../store/lobby_types';
+import { useAudioStore } from '../../store/audio_store';
 import { AudioEngine } from '../../audio/audio_engine';
 import type { WsClientMessage } from '../../../server/network/network_types';
 
@@ -41,9 +42,13 @@ export function LobbyView({
   const startGame = useLobbyStore((s) => s.startGame);
   const canStartGame = useLobbyStore((s) => s.canStartGame);
   const resetLobby = useLobbyStore((s) => s.resetLobby);
+  const isMuted = useAudioStore((s) => s.isMuted);
+  const toggleMute = useAudioStore((s) => s.toggleMute);
 
   const canStartCheck = canStartGame();
   const [copiedCode, setCopiedCode] = useState(false);
+  const [showQr, setShowQr] = useState(false);
+  const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
   const occupiedCount = slots.filter((s) => s.isOccupied).length;
 
   const handleCopyCode = async () => {
@@ -106,53 +111,88 @@ export function LobbyView({
   };
 
   return (
-    <div className="relative w-full h-full min-h-screen bg-sky-950/20 backdrop-blur-[5px] text-slate-100 flex flex-col items-center justify-between p-4 md:p-8 select-none overflow-y-auto">
-      {/* Phông nền Skyline Silhouette mờ nhẹ hòa cùng chiều sâu 3D */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-64 md:h-80 opacity-10 overflow-hidden flex items-end justify-center z-0 text-slate-400" aria-hidden="true">
-        <svg viewBox="0 0 1200 260" className="w-full h-full object-cover" preserveAspectRatio="none" fill="currentColor">
-          <path d="M0,260 L0,180 L40,180 L40,130 L70,130 L70,190 L110,190 L110,100 L140,100 L140,80 L150,50 L160,80 L160,100 L180,100 L180,210 L220,210 L220,150 L260,150 L260,260 L310,260 L310,120 L350,120 L350,70 L360,70 L360,30 L370,70 L380,70 L380,120 L410,120 L410,170 L450,170 L450,260 L510,260 L510,130 L550,130 L550,80 L590,80 L590,260 L650,260 L650,150 L690,150 L690,60 L700,30 L710,60 L710,150 L750,150 L750,260 L810,260 L810,110 L850,110 L850,170 L890,170 L890,260 L950,260 L950,120 L990,120 L990,70 L1030,70 L1030,200 L1070,200 L1070,260 L1130,260 L1130,140 L1170,140 L1170,190 L1200,190 L1200,260 Z" />
-        </svg>
-      </div>
-
-      {/* Header */}
-      <header className="relative z-10 w-full max-w-5xl flex flex-col sm:flex-row items-center justify-between gap-4 py-3 border-b border-slate-800/80">
+    <div className="relative w-full h-full min-h-screen text-slate-100 p-4 md:p-6 select-none pointer-events-none overflow-hidden">
+      {/* Huy hiệu thương hiệu tinh tế góc trên bên trái */}
+      <header className="pointer-events-auto absolute top-4 left-4 md:top-6 md:left-6 z-20 flex items-center gap-3 bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl px-4 py-2.5 shadow-2xl">
+        <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center font-black text-amber-950 text-sm shadow">
+          VT
+        </div>
         <div>
-          <h1 className="text-2xl md:text-3xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-200">
+          <h1 className="text-xl font-black tracking-tight text-amber-300 drop-shadow">
             VTCOON
           </h1>
-          <p className="text-xs text-slate-400">Sảnh Chờ Đại Gia Địa Ốc Việt Nam</p>
+          <p className="text-[10px] text-slate-400 uppercase tracking-wider">
+            Sảnh Chờ VIP Penthouse Lounge • Tầng 80
+          </p>
         </div>
-
-        {/* 6-character room code */}
-        <div className="flex items-center gap-3 bg-slate-900/90 border border-slate-800 rounded-xl px-4 py-2 shadow-inner">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Mã Phòng:</span>
-          <span className="text-xl md:text-2xl font-mono font-extrabold tracking-widest text-amber-400" data-testid="lobby-room-code">
-            {roomCode}
-          </span>
-          <button
-            type="button"
-            onClick={handleCopyCode}
-            className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center text-xs px-3 py-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition-all cursor-pointer border border-slate-700 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
-            data-testid="copy-room-code-btn"
-            aria-label="Sao chép mã phòng"
-          >
-            {copiedCode ? '✓ Đã chép' : 'Sao chép'}
-          </button>
-        </div>
+        {/* Nút Bật / Tắt âm thanh nhanh tại Sảnh Chờ */}
+        <button
+          type="button"
+          onClick={() => {
+            AudioEngine.resumeAudioContext();
+            toggleMute();
+          }}
+          className="min-h-[36px] min-w-[36px] inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700/90 text-slate-200 transition-colors cursor-pointer text-xs font-medium border border-slate-700/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+          title={isMuted ? 'Bật âm thanh sảnh chờ' : 'Tắt âm thanh sảnh chờ'}
+          aria-label={isMuted ? 'Bật âm thanh sảnh chờ' : 'Tắt âm thanh sảnh chờ'}
+          data-testid="lobby-mute-toggle-button"
+        >
+          <span className="text-sm" aria-hidden="true">{isMuted ? '🔇' : '🔊'}</span>
+          <span className="hidden md:inline text-[11px] font-semibold">{isMuted ? 'Tắt âm' : 'Bật âm'}</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setIsPanelCollapsed((prev) => !prev)}
+          className="sm:hidden ml-2 text-[11px] px-2.5 py-1 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold cursor-pointer"
+          data-testid="toggle-lobby-panel-btn"
+          aria-label={isPanelCollapsed ? 'Mở bảng điều khiển' : 'Thu gọn bảng điều khiển'}
+        >
+          {isPanelCollapsed ? '📋 Bảng' : '🏙️ Ngắm 3D'}
+        </button>
       </header>
 
-      {/* Main Grid: Slots (Left) & QR Code + Rules (Right) */}
-      <main className="relative z-10 w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-6 my-auto items-center justify-center flex-1">
-        <section className="lg:col-span-7 flex flex-col gap-3">
-          <div className="flex items-center justify-between px-1">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-300">
-              Danh Sách Người Chơi ({occupiedCount}/4)
-            </h2>
-            <span className="text-xs text-slate-400">Tối đa 4 người/bàn</span>
+      {/* Thẻ Glassmorphism mỏng nổi bên cánh phải theo Chuẩn Ảnh Concept 3 */}
+      <aside className="pointer-events-auto absolute top-4 right-4 bottom-4 w-96 max-w-[calc(100vw-2rem)] z-20 flex flex-col justify-between p-4 md:p-5 bg-slate-900/85 backdrop-blur-2xl border border-white/15 rounded-3xl shadow-2xl text-slate-100 overflow-y-auto gap-3.5 transition-transform duration-300" style={{ transform: isPanelCollapsed ? 'translateX(calc(100% + 2rem))' : undefined }}>
+        {/* Tiêu đề & Mã phòng 6 ký tự */}
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-black tracking-wider uppercase text-amber-400 flex items-center gap-1.5">
+              <span>💎</span> VIP LOBBY: PENTHOUSE LOUNGE
+            </span>
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">
+              {occupiedCount === 4 && slots.every((s) => !s.isOccupied || s.isReady)
+                ? 'ALL READY (4/4)'
+                : `ĐANG CHỜ (${occupiedCount}/4)`}
+            </span>
           </div>
 
-          {/* Căn giữa đối xứng 4 slot người chơi */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 justify-center" data-testid="lobby-slots-grid">
+          <div className="flex items-center justify-between gap-2 bg-slate-950/70 border border-slate-800 rounded-xl px-3 py-2 shadow-inner">
+            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Mã Phòng:</span>
+            <span className="text-xl font-mono font-extrabold tracking-widest text-amber-400" data-testid="lobby-room-code">
+              {roomCode}
+            </span>
+            <button
+              type="button"
+              onClick={handleCopyCode}
+              className="text-xs px-2.5 py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition-all cursor-pointer border border-slate-700 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+              data-testid="copy-room-code-btn"
+              aria-label="Sao chép mã phòng"
+            >
+              {copiedCode ? '✓ Đã chép' : 'Sao chép'}
+            </button>
+          </div>
+        </div>
+
+        {/* Danh sách 4 vị trí người chơi */}
+        <section className="flex flex-col gap-2 flex-1 min-h-0 overflow-y-auto pr-0.5">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-300">
+              Danh Sách Người Chơi ({occupiedCount}/4)
+            </h2>
+            <span className="text-[10px] text-slate-400">Tối đa 4 người/bàn</span>
+          </div>
+
+          <div className="flex flex-col gap-2" data-testid="lobby-slots-grid">
             {slots.map((slot) => (
               <PlayerSlotCard
                 key={slot.slotIndex}
@@ -165,97 +205,106 @@ export function LobbyView({
           </div>
         </section>
 
-        <section className="lg:col-span-5 flex flex-col items-center gap-4">
-          <div className="w-full max-w-sm">
-            <QrCodeCard roomCode={roomCode} />
-          </div>
-
-          {/* Thẻ Thể Lệ Thi Đấu: Cụm 3 huy hiệu đồ họa trực quan nằm ngang */}
-          <div
-            className="w-full max-w-sm bg-slate-900/90 backdrop-blur-sm border border-slate-800/90 rounded-2xl p-4 shadow-xl text-left"
-            data-testid="lobby-rules-card"
-          >
-            <div className="flex items-center gap-2 pb-2 mb-3 border-b border-slate-800">
-              <span className="text-amber-400 text-base font-black" aria-hidden="true">📜</span>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-200">
+        {/* Thẻ Thể Lệ Thi Đấu & Mã QR Mời Bạn Bè */}
+        <div
+          className="w-full bg-slate-950/70 border border-slate-800/80 rounded-2xl p-3 shadow-md text-left"
+          data-testid="lobby-rules-card"
+        >
+          <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-800">
+            <div className="flex items-center gap-1.5">
+              <span className="text-amber-400 text-sm font-black" aria-hidden="true">📜</span>
+              <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-200">
                 Tóm Tắt Thể Lệ Thi Đấu
               </h3>
             </div>
+            <button
+              type="button"
+              onClick={() => setShowQr((prev) => !prev)}
+              className="text-[10px] text-amber-400 hover:text-amber-300 cursor-pointer underline flex items-center gap-1"
+            >
+              📱 {showQr ? 'Ẩn QR' : 'Mã QR Mời'}
+            </button>
+          </div>
 
-            <div className="grid grid-cols-3 gap-2">
-              {/* Huy hiệu 1: Vốn khởi điểm */}
-              <div className="flex flex-col items-center text-center p-2 rounded-xl bg-slate-950/70 border border-slate-800/80 hover:border-amber-400/30 transition-colors">
-                <span className="text-2xl mb-1" aria-hidden="true">💰</span>
-                <span className="text-[11px] font-black text-amber-300">Vốn 15 Tỷ VNĐ</span>
-                <span className="text-[9px] text-slate-400 mt-0.5 leading-tight">15.000 Tr. VNĐ</span>
-                <span className="text-[8px] text-emerald-400 mt-0.5 leading-tight">+2.000 Tr. VNĐ qua GO</span>
-              </div>
+          {showQr && (
+            <div className="mb-2">
+              <QrCodeCard roomCode={roomCode} />
+            </div>
+          )}
 
-              {/* Huy hiệu 2: Thời lượng ván đấu */}
-              <div className="flex flex-col items-center text-center p-2 rounded-xl bg-slate-950/70 border border-slate-800/80 hover:border-amber-400/30 transition-colors">
-                <span className="text-2xl mb-1" aria-hidden="true">⏳</span>
-                <span className="text-[11px] font-black text-amber-300">30 Vòng Đấu</span>
-                <span className="text-[9px] text-slate-400 mt-0.5 leading-tight">Tối đa 30 vòng</span>
-                <span className="text-[8px] text-slate-500 mt-0.5 leading-tight">Bàn cờ 40 ô</span>
-              </div>
+          <div className="grid grid-cols-3 gap-1.5">
+            {/* Huy hiệu 1: Vốn khởi điểm */}
+            <div className="flex flex-col items-center text-center p-1.5 rounded-lg bg-slate-900/80 border border-slate-800">
+              <span className="text-lg mb-0.5" aria-hidden="true">💰</span>
+              <span className="text-[10px] font-black text-amber-300">Vốn 15 Tỷ VNĐ</span>
+              <span className="text-[8px] text-slate-400 mt-0.5 leading-tight">15.000 Tr. VNĐ</span>
+              <span className="text-[7.5px] text-emerald-400 mt-0.5 leading-tight">+2.000 Tr. VNĐ</span>
+            </div>
 
-              {/* Huy hiệu 3: Điều kiện thắng */}
-              <div className="flex flex-col items-center text-center p-2 rounded-xl bg-slate-950/70 border border-slate-800/80 hover:border-amber-400/30 transition-colors">
-                <span className="text-2xl mb-1" aria-hidden="true">🏆</span>
-                <span className="text-[11px] font-black text-amber-300">Đại Gia Vô Địch</span>
-                <span className="text-[9px] text-slate-400 mt-0.5 leading-tight">Điều kiện thắng</span>
-                <span className="text-[8px] text-slate-500 mt-0.5 leading-tight">Tài sản cực đại</span>
-              </div>
+            {/* Huy hiệu 2: Thời lượng ván đấu */}
+            <div className="flex flex-col items-center text-center p-1.5 rounded-lg bg-slate-900/80 border border-slate-800">
+              <span className="text-lg mb-0.5" aria-hidden="true">⏳</span>
+              <span className="text-[10px] font-black text-amber-300">30 Vòng Đấu</span>
+              <span className="text-[8px] text-slate-400 mt-0.5 leading-tight">30 vòng</span>
+              <span className="text-[7.5px] text-slate-500 mt-0.5 leading-tight">Bàn cờ 40 ô</span>
+            </div>
+
+            {/* Huy hiệu 3: Điều kiện thắng */}
+            <div className="flex flex-col items-center text-center p-1.5 rounded-lg bg-slate-900/80 border border-slate-800">
+              <span className="text-lg mb-0.5" aria-hidden="true">🏆</span>
+              <span className="text-[10px] font-black text-amber-300">Đại Gia Vô Địch</span>
+              <span className="text-[8px] text-slate-400 mt-0.5 leading-tight">Điều kiện thắng</span>
+              <span className="text-[7.5px] text-slate-500 mt-0.5 leading-tight">Tài sản cực đại</span>
             </div>
           </div>
-        </section>
-      </main>
-
-      {/* Footer / Action Bar */}
-      <footer className="relative z-10 w-full max-w-5xl pt-4 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <button
-          type="button"
-          onClick={resetLobby}
-          className="min-h-[44px] inline-flex items-center justify-center text-xs text-slate-400 hover:text-rose-400 transition-colors py-2 px-4 rounded-lg hover:bg-slate-900 border border-transparent hover:border-slate-800 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
-          data-testid="leave-lobby-btn"
-          aria-label="Rời phòng chờ"
-        >
-          ← Rời Phòng
-        </button>
-
-        <div className="flex flex-col items-center sm:items-end gap-1">
-          <span className="text-[11px] text-slate-400" aria-live="polite">{getStartButtonHint()}</span>
-
-          {isHost ? (
-            <button
-              type="button"
-              disabled={!canStartCheck.canStart}
-              onClick={handleStartGame}
-              className={`min-h-[44px] py-3 px-8 rounded-xl font-extrabold text-sm tracking-wide transition-all shadow-xl cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
-                canStartCheck.canStart
-                  ? 'bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 active:scale-95 shadow-amber-500/40 ring-2 ring-amber-300/60'
-                  : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700/50'
-              }`}
-              data-testid="start-game-btn"
-            >
-              BẮT ĐẦU TRẬN ĐẤU
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={toggleMyReady}
-              className={`min-h-[44px] py-3 px-8 rounded-xl font-bold text-sm tracking-wide transition-all shadow-lg cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
-                isReady
-                  ? 'bg-emerald-600 hover:bg-emerald-500 text-white active:scale-95'
-                  : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 active:scale-95'
-              }`}
-              data-testid="toggle-ready-btn"
-            >
-              {isReady ? '✓ ĐÃ SẴN SÀNG' : 'SẴN SÀNG'}
-            </button>
-          )}
         </div>
-      </footer>
+
+        {/* Footer / Action Bar */}
+        <footer className="pt-2 border-t border-slate-800/80 flex items-center justify-between gap-2">
+          <button
+            type="button"
+            onClick={resetLobby}
+            className="min-h-[44px] inline-flex items-center justify-center text-xs text-slate-400 hover:text-rose-400 transition-colors py-2 px-3 rounded-lg hover:bg-slate-900 border border-transparent hover:border-slate-800 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
+            data-testid="leave-lobby-btn"
+            aria-label="Rời phòng chờ"
+          >
+            ← Rời Phòng
+          </button>
+
+          <div className="flex flex-col items-end gap-1">
+            <span className="text-[10px] text-slate-400 text-right" aria-live="polite">{getStartButtonHint()}</span>
+
+            {isHost ? (
+              <button
+                type="button"
+                disabled={!canStartCheck.canStart}
+                onClick={handleStartGame}
+                className={`min-h-[44px] py-2.5 px-6 rounded-xl font-extrabold text-xs tracking-wide transition-all shadow-xl cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+                  canStartCheck.canStart
+                    ? 'bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-amber-950 font-black active:scale-95 shadow-amber-500/40 ring-2 ring-amber-300/60'
+                    : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700/50'
+                }`}
+                data-testid="start-game-btn"
+              >
+                BẮT ĐẦU TRẬN ĐẤU
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={toggleMyReady}
+                className={`min-h-[44px] py-2.5 px-6 rounded-xl font-bold text-xs tracking-wide transition-all shadow-lg cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+                  isReady
+                    ? 'bg-emerald-600 hover:bg-emerald-500 text-white active:scale-95'
+                    : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 active:scale-95'
+                }`}
+                data-testid="toggle-ready-btn"
+              >
+                {isReady ? '✓ ĐÃ SẴN SÀNG' : 'SẴN SÀNG'}
+              </button>
+            )}
+          </div>
+        </footer>
+      </aside>
     </div>
   );
 }

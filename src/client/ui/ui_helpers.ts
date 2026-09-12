@@ -121,3 +121,16 @@ export function isEndTurnDisabled(params: ActionDockButtonStateParams): boolean 
     Boolean(params.canRollAgain)
   );
 }
+
+/**
+ * Resolve target cell and purchase eligibility for Manage Property modal
+ * Defaults to first owned property, or falls back to current board position if none owned.
+ */
+export function resolveManagePropertyTarget(
+  ownedProperties?: readonly number[],
+  currentPosition: number = 0
+): { cellIndex: number; canBuy: boolean } {
+  const targetCell = ownedProperties?.[0] ?? currentPosition;
+  const isOwned = Boolean(ownedProperties?.includes(targetCell));
+  return { cellIndex: targetCell, canBuy: !isOwned };
+}

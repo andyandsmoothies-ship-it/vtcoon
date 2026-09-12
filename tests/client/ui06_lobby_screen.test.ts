@@ -95,6 +95,7 @@ describe('[UI-06.3/MSS] LobbyView Full Screen Markup', () => {
     const html = renderToStaticMarkup(element);
 
     expect(html).toContain('VTCOON');
+    expect(html).toContain('data-testid="toggle-lobby-panel-btn"');
     expect(html).toContain('data-testid="lobby-room-code"');
     expect(html).toContain('SG8888');
     expect(html).toContain('data-testid="lobby-slots-grid"');
@@ -155,5 +156,19 @@ describe('[UI-06.3/MSS] LobbyView Full Screen Markup', () => {
     expect(html).toContain('data-testid="lobby-slot-3-occupied"');
     expect(html).toContain('data-testid="start-game-btn"');
     expect(html).toContain('BẮT ĐẦU TRẬN ĐẤU');
+  });
+
+  it('Render nút chuyển/tắt âm thanh sảnh chờ lobby-mute-toggle-button', () => {
+    useLobbyStore.getState().initLobby('VT7777', 'p1', true, 'Chủ Sảnh');
+    const state = useLobbyStore.getState();
+    const element = React.createElement(LobbyView, {
+      roomCode: state.roomCode ?? undefined,
+      isHost: state.isHost,
+      slots: state.slots,
+    });
+    const html = renderToStaticMarkup(element);
+
+    expect(html).toContain('data-testid="lobby-mute-toggle-button"');
+    expect(html).toContain('data-testid="toggle-lobby-panel-btn"');
   });
 });

@@ -138,7 +138,7 @@ export function HoseModal({
       {/* Animation Xúc Xắc Đang Quay Nảy */}
       {isRolling && (
         <div className="p-3 bg-slate-900/90 rounded-xl border border-emerald-500/60 shadow-[0_0_20px_rgba(16,185,129,0.3)] flex items-center justify-center gap-3 animate-pulse">
-          <span className="text-3xl animate-bounce" aria-hidden="true">{DICE_ICONS[animatedFace - 1] ?? '🎲'}</span>
+          <span className="text-3xl animate-dice-shake" aria-hidden="true">{DICE_ICONS[animatedFace - 1] ?? '🎲'}</span>
           <span className="text-xs font-mono font-bold text-emerald-400 tracking-wider">
             ĐANG KHỚP LỆNH 1D6... [MẶT {animatedFace}]
           </span>
@@ -205,13 +205,17 @@ export function HoseModal({
           {STAKE_PRESETS.map((amount) => {
             const isSelected = stake === amount;
             const disabled = !Number.isFinite(myBalance) || myBalance < amount;
-            const btnColor = isSelected ? 'bg-amber-500 text-slate-950 border-amber-700 shadow-lg shadow-amber-500/30 active:border-b-0 active:translate-y-1' : disabled ? 'bg-slate-800 text-slate-600 border-slate-900 cursor-not-allowed' : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border-slate-950 active:border-b-0 active:translate-y-1';
+            const btnColor = isSelected
+              ? 'bg-amber-500 text-amber-950 border border-amber-600 shadow-[0_4px_0_0_#b45309] active:shadow-[0_1px_0_0_#b45309] active:translate-y-[3px]'
+              : disabled
+              ? 'bg-slate-800 text-slate-600 border border-slate-700/40 cursor-not-allowed'
+              : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700 shadow-[0_4px_0_0_#020617] active:shadow-[0_1px_0_0_#020617] active:translate-y-[3px]';
             return (
               <button
                 key={amount}
                 disabled={disabled}
                 onClick={() => setStake(amount)}
-                className={`min-h-[44px] py-2 px-1 rounded-xl text-xs font-bold transition-all cursor-pointer border-b-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${btnColor}`}
+                className={`min-h-[44px] py-2 px-1 rounded-xl text-xs font-bold transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${btnColor}`}
               >
                 {formatCurrency(amount)}
               </button>
@@ -225,7 +229,7 @@ export function HoseModal({
         <button
           onClick={onSkip}
           disabled={isRolling}
-          className={`flex-1 min-h-[44px] py-2.5 rounded-xl border border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-300 font-semibold text-sm transition-colors border-b-4 border-slate-950 active:border-b-0 active:translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+          className={`flex-1 min-h-[44px] py-2.5 rounded-xl border border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-300 font-semibold text-sm transition-all shadow-[0_4px_0_0_#020617] active:shadow-[0_1px_0_0_#020617] active:translate-y-[3px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
             isRolling ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
           }`}
         >
@@ -234,10 +238,10 @@ export function HoseModal({
         <button
           disabled={!canAfford || isRolling}
           onClick={handleInvestClick}
-          className={`flex-1 min-h-[44px] py-2.5 rounded-xl font-black text-sm cursor-pointer transition-all border-b-4 border-amber-700 active:border-b-0 active:translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+          className={`flex-1 min-h-[44px] py-2.5 rounded-xl font-black text-sm cursor-pointer transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
             canAfford && !isRolling
-              ? 'bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 shadow-lg shadow-amber-500/25'
-              : 'bg-slate-800 text-slate-500 border-slate-900 cursor-not-allowed'
+              ? 'bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-amber-950 border border-amber-600 shadow-[0_4px_0_0_#b45309] active:shadow-[0_1px_0_0_#b45309] active:translate-y-[3px]'
+              : 'bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed'
           }`}
         >
           {isRolling ? 'Đang Khớp Lệnh...' : `Đặt Cược ${formatCurrency(stake)}`}

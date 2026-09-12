@@ -69,6 +69,15 @@ describe('[TC-CAM01.1/MSS] resolveCameraMode — State Transition Priority', () 
     expect(mode).toBe('overview');
   });
 
+  it('Tra ve auction_focus khi phien dau gia dang mo (activeModal = auction)', () => {
+    const mode = resolveCameraMode({
+      isRolling: false,
+      isPawnAnimating: false,
+      activeModal: 'auction',
+    });
+    expect(mode).toBe('auction_focus');
+  });
+
   it('Uu tien manualMode ghi de khi co yeu cau can thiep thu cong', () => {
     const mode = resolveCameraMode({
       isRolling: true,
@@ -117,6 +126,14 @@ describe('[TC-CAM01.2/MSS] Camera Positioning & Target Calculation', () => {
     const focus = calculateTargetCameraState('tile_focus', undefined, tilePos);
     expect(focus.fov).toBe(CAMERA_CONFIG.tile_focus.fov);
     expect(focus.target).toEqual([-4, 0.15, 4]);
+
+    const auction = calculateTargetCameraState('auction_focus');
+    expect(auction.fov).toBe(CAMERA_CONFIG.auction_focus.fov);
+    expect(auction.position).toEqual([...CAMERA_CONFIG.auction_focus.position]);
+    expect(auction.target).toEqual([...CAMERA_CONFIG.auction_focus.target]);
+    expect(CAMERA_CONFIG.auction_focus.position).toEqual([0, 6.0, 9.0]);
+    expect(CAMERA_CONFIG.auction_focus.target).toEqual([0, 3.0, 0]);
+    expect(CAMERA_CONFIG.auction_focus.fov).toBe(38);
   });
 });
 

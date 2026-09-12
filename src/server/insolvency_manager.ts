@@ -1,5 +1,5 @@
 // [UC-GAME-053/MSS][UC-GAME-054/MSS][UC-GAME-055/MSS] Insolvency Manager
-import { TurnPhase, type Room, type Player } from '../domain/room';
+import { TurnPhase, type Room, type Player, isRoomGameOver } from '../domain/room';
 import { PROPERTY_DEEDS, type PropertyRegistry, type PropertyStateMap } from '../domain/property_manager';
 import { decayModifiers } from '../domain/event_card_engine';
 import type { AuctionSession } from './auction_manager';
@@ -118,7 +118,7 @@ export function declareBankruptcy(
   const player = room.players.find((p) => p.id === playerId);
   if (!player) return { gameOver: false };
   if (player.bankrupt) {
-    const isOver = room.players.filter((p) => !p.bankrupt).length <= 1;
+    const isOver = isRoomGameOver(room);
     return { gameOver: isOver, rankings: isOver ? calculateRankings(room, registry, stateMap) : undefined };
   }
 
@@ -182,8 +182,7 @@ export function declareBankruptcy(
     timestamp: Date.now(), delta: { playerId, creditorId },
   }));
 
-  const alive = room.players.filter((p) => !p.bankrupt);
-  if (alive.length <= 1) {
+  if (isRoomGameOver(room)) {
     const rankings = calculateRankings(room, registry, stateMap);
     return { gameOver: true, rankings };
   }

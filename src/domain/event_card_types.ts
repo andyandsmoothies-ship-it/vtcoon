@@ -50,5 +50,5 @@ export const HANOI_HCMC_CELLS  = [31, 32, 34, 37, 39] as const;
 export const LAND_FEVER_CELLS  = [6, 8, 31] as const;
 
 export const HOSE_OUTCOMES: Readonly<Record<number, number>> = {
-  1: 0.50, 2: 0.75, 3: 1.00, 4: 1.20, 5: 1.50, 6: 2.00,
+  1: 0.30, 2: 0.60, 3: 0.80, 4: 1.10, 5: 1.20, 6: 2.00,
 };

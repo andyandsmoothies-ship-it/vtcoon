@@ -65,27 +65,82 @@ tools: [view_file, list_dir, find_by_name, grep_search]
 
 ---
 
-## 3. CẤU TRÚC PHÁN QUYẾT NGHỆ THUẬT (EXECUTIVE VERDICT PACKET)
+## 3. CỔNG BẰNG CHỨNG & QUY TRÌNH PHÁN QUYẾT 2 VÒNG (EVIDENCE GATE & VERDICT PROTOCOL)
+
+### Cổng Bằng Chứng Bắt Buộc (Check 0: Evidence Gate)
+Trước khi bắt đầu phân tích bất kỳ chi tiết thẩm mỹ nào, Art Director bắt buộc kiểm tra sự hiện diện đầy đủ của **5 góc chụp camera định danh**:
+1. `top_down`: Toàn cảnh sa bàn 3D từ trên cao nhìn xuống góc tụ Perspective.
+2. `lobby_vip`: Không gian Sảnh Chờ VIP Penthouse Lounge.
+3. `deed_modal`: Thẻ Sổ Đỏ (Title Deed Card) dập nổi viền vàng và chi tiết tài sản.
+4. `dice_tray`: Khay lắc xúc xắc 3D và hoạt ảnh xúc xắc vật lý.
+5. `hud_dock`: Giao diện thanh điều khiển Action Dock và các nút bấm xúc giác.
+
+Nếu thiếu bất kỳ góc chụp nào trong 5 góc trên, **DỪNG THẨM ĐỊNH NGAY LẬP TỨC** và đưa ra phán quyết: `disposition: recapture`.
+
+### Chuẩn Hóa 4 Từ Phán Quyết Bắt Buộc (Strict 4-Word Disposition)
+Dòng đầu tiên của phán quyết nghệ thuật bắt buộc phải là một trong 4 từ định danh duy nhất:
+```
+disposition: recapture | rebuild | fix | ship
+```
+- `recapture`: Thiếu bằng chứng hoặc 5 góc chụp camera định danh không hợp lệ.
+- `rebuild`: Vi phạm kiến trúc thị giác nghiêm trọng, dưới chuẩn nguyên mẫu (< 5.0/10), cần tái cấu trúc.
+- `fix`: Đạt nền tảng (5.0 - 7.5/10), cần khắc phục danh sách lỗi vật lý cụ thể (tối đa 8 lỗi).
+- `ship`: Đạt chuẩn game thương mại cao cấp (>= 8.0/10), sẵn sàng bàn giao xuất xưởng.
+
+### Giới Hạn Tối Đa 8 Lỗi Vật Lý & Giữ Gìn Tinh Hoa (Max 8 Material Fixes & Keep Directive)
+- Danh sách yêu cầu chỉnh sửa giới hạn **tối đa 8 lỗi vật lý then chốt (P1 đến P8)**, sắp xếp theo thứ tự ưu tiên tác động thị giác từ cao xuống thấp. Không dàn trải tiểu tiết vụn vặt gây loãng trọng tâm.
+- Bắt buộc có mục **`keep` (Nét Tinh Hoa Cấm Làm Mất)**: Liệt kê rõ các chi tiết mỹ thuật xuất sắc, vật liệu tốt, hoặc góc máy đắt giá mà Builder TUYỆT ĐỐI KHÔNG ĐƯỢC XÓA BỎ hoặc làm suy hao khi thực hiện chỉnh sửa.
+
+### Quy Chuẩn Đánh Giá Lại (Verdict Pass Protocol)
+Khi Builder đã hoàn thành việc chỉnh sửa và gửi yêu cầu thẩm định lại (Re-review):
+- Reviewer **CHỈ CHẤM ĐIỂM CÁC LỖI CŨ** đã nêu trong danh sách P1-P8 của vòng trước theo đúng 3 trạng thái:
+  * `resolved`: Đã khắc phục hoàn toàn.
+  * `partial`: Đã cải thiện nhưng chưa đạt chuẩn yêu cầu.
+  * `unresolved`: Chưa khắc phục hoặc phát sinh thụt lùi.
+- **Tối đa 2 vòng lặp**: Vòng 1 (Khám nghiệm & Đưa ra P1-P8) -> Builder sửa -> Vòng 2 (Chấm Verdict Pass). Nếu vòng 2 vẫn còn lỗi `unresolved`, kích hoạt cơ chế Escalate lên Kiến trúc sư trưởng hoặc chấp thuận `ship` có điều kiện. Tuyệt đối không phát sinh thêm lỗi mới ngoài danh sách cũ ở vòng 2.
+
+---
+
+## 4. CẤU TRÚC PHÁN QUYẾT NGHỆ THUẬT (EXECUTIVE VERDICT PACKET)
 
 ```markdown
-# 🏛️ PHÁN QUYẾT NGHỆ THUẬT EXECUTIVE ART DIRECTOR: TOÀN BỘ HÀNH TRÌNH GAME VTCOON
+disposition: [recapture | rebuild | fix | ship]
+
+# 🏛️ PHÁN QUYẾT NGHỆ THUẬT EXECUTIVE ART DIRECTOR
 **Chuẩn tham chiếu:** Monopoly Tycoon (2022-2024), Monopoly Plus, Monopoly GO
 
-### 1. PHÁN QUYẾT TỔNG THỂ & ĐIỂM SỐ THỰC TẾ
-- **Điểm số thực tế toàn diện:** [X.X / 10] *(Chấm thực chất, triệt tiêu lạm phát điểm)*
-- **Kết luận:** [ĐẠT CHUẨN THƯƠNG MẠI HIỆN ĐẠI / BÁC BỎ - GIỮ NGUYÊN BẪY THẬP NIÊN 2000]
-- **Nhận định cốt lõi về "Nút Thắt Cổ Chai":** [Chỉ rõ chính xác tại sao ứng dụng bị giam giữ ở thập niên 2000]
+### 1. KIỂM TRA BẰNG CHỨNG (CHECK 0: EVIDENCE GATE)
+- `top_down`: [HỢP LỆ / THIẾU] (đường dẫn hoặc mô tả ảnh)
+- `lobby_vip`: [HỢP LỆ / THIẾU]
+- `deed_modal`: [HỢP LỆ / THIẾU]
+- `dice_tray`: [HỢP LỆ / THIẾU]
+- `hud_dock`: [HỢP LỆ / THIẾU]
+*(Nếu có mục THIẾU -> dừng và kết luận `disposition: recapture`)*
 
-### 2. PHÂN TÍCH ĐỐI KHÁNG CHI TIẾT 12 CHẶNG KHẢO SÁT THỰC TẾ
-[Đánh giá cụ thể từng bức ảnh từ journey_01 đến journey_12 với bằng chứng trực quan]
+### 2. PHÁN QUYẾT TỔNG THỂ & ĐIỂM SỐ THỰC TẾ
+- **Điểm số thực tế toàn diện:** [X.X / 10] *(Chấm thực chất, triệt tiêu lạm phát điểm)*
+- **Kết luận:** [ĐẠT CHUẨN THƯƠNG MẠI HIỆN ĐẠI / CẦN SỬA ĐỔI / TÁI CẤU TRÚC]
+- **Nhận định cốt lõi về "Nút Thắt Cổ Chai":** [Chỉ rõ chính xác tại sao ứng dụng chưa đạt chuẩn 2024]
 
 ### 3. ĐỐI CHIẾU 5 TRỤ CỘT MONOPOLY TYCOON
-- **Trụ cột 1 (Camera & Chiều sâu):** ...
+- **Trụ cột 1 (Camera & Chiều sâu Perspective):** ...
 - **Trụ cột 2 (Sảnh chờ VIP Penthouse):** ...
-- **Trụ cột 3 (Sa bàn 3D & PBR):** ...
+- **Trụ cột 3 (Sa bàn 3D & PBR Beveled):** ...
 - **Trụ cột 4 (Thẻ bài Sổ Đỏ & Modals):** ...
 - **Trụ cột 5 (HUD & Nút bấm xúc giác):** ...
 
-### 4. BẢN THIẾT KẾ ĐỘT PHÁ LỘT XÁC (MONOPOLY TYCOON WOW-FACTOR BLUEPRINT)
-[Lộ trình kỹ thuật và thông số cụ thể để đưa toàn bộ game từ thập niên 2000 bứt phá lên 2024]
+### 4. NÉT TINH HOA CẤM LÀM MẤT (KEEP DIRECTIVES)
+- **K1:** [Ví dụ: Vật liệu phản chiếu kim loại trên viền thẻ bài Sổ Đỏ]
+- **K2:** [Ví dụ: Hiệu ứng ánh sáng hoàng hôn ấm áp của sa bàn]
+
+### 5. DANH SÁCH KHẮC PHỤC VẬT LÝ ƯU TIÊN (MAX 8 MATERIAL FIXES)
+- **P1 (Critical):** [Mô tả cụ thể + Tham số kỹ thuật đề xuất]
+- **P2 (High):** ...
+- **P3 (High):** ...
+- **... (Tối đa P8)**
+
+### 6. TIẾN ĐỘ THẨM ĐỊNH LẠI (DÀNH CHO VERDICT PASS VÒNG 2)
+*(Chỉ điền khi chấm lại các lỗi từ vòng trước)*
+- **P1:** [resolved | partial | unresolved] — [Ghi chú nhận xét]
+- **P2:** [resolved | partial | unresolved] — [Ghi chú nhận xét]
 ```

@@ -1,7 +1,7 @@
 // [UI-S01/MSS][UI-S04/MSS] CameraStateMachine — 2026 Cinematic Action Cam & Dynamic Follow System
 // Hỗ trợ 4 chế độ: Overview, Dice Roll Cinematic, Pawn Chase, và Tile Focus
 
-export type CameraMode = 'overview' | 'dice_roll' | 'pawn_chase' | 'tile_focus';
+export type CameraMode = 'overview' | 'dice_roll' | 'pawn_chase' | 'tile_focus' | 'auction_focus';
 
 export interface CameraConfigItem {
   readonly position: readonly [number, number, number];
@@ -34,6 +34,13 @@ export const CAMERA_CONFIG = {
     speed: 4.0,
     offset: [5.2, 6.4, 5.2] as const,
   },
+  auction_focus: {
+    // Cự ly thanh lịch bao quát sàn đấu giá kịch tính, thẻ bài vàng rực và nền bàn cờ mờ ảo
+    position: [0, 6.0, 9.0] as const,
+    target: [0, 3.0, 0] as const,
+    fov: 38,
+    speed: 4.5,
+  },
 } as const;
 
 export interface CameraResolveParams {
@@ -54,6 +61,10 @@ export function resolveCameraMode(params: CameraResolveParams): CameraMode {
   }
   if (params.activeModal === 'game_over') {
     return 'overview';
+  }
+  // Phiên đấu giá: Sân khấu đấu giá không gian 3D trung tâm
+  if (params.activeModal === 'auction') {
+    return 'auction_focus';
   }
   // 1. Ưu tiên cao nhất: Gieo xúc xắc góc nghiêng thấp
   if (params.isRolling) {
@@ -179,6 +190,13 @@ export function calculateTargetCameraState(
         speed: CAMERA_CONFIG.tile_focus.speed,
       };
     }
+    case 'auction_focus':
+      return {
+        position: [CAMERA_CONFIG.auction_focus.position[0], CAMERA_CONFIG.auction_focus.position[1], CAMERA_CONFIG.auction_focus.position[2]],
+        target: [CAMERA_CONFIG.auction_focus.target[0], CAMERA_CONFIG.auction_focus.target[1], CAMERA_CONFIG.auction_focus.target[2]],
+        fov: CAMERA_CONFIG.auction_focus.fov,
+        speed: CAMERA_CONFIG.auction_focus.speed,
+      };
     case 'overview':
     default:
       return {

@@ -24,7 +24,7 @@ export const SOCIAL_EMOTES: readonly SocialEmoteDef[] = [
 ] as const;
 
 export const EMOTE_DISPLAY_DURATION_MS = 3000;
-export const EMOTE_COOLDOWN_MS = 1000;
+export const EMOTE_COOLDOWN_MS = 2500;
 
 export function isValidEmoteId(id: unknown): id is EmoteId {
   return typeof id === 'string' && Object.values(EmoteId).includes(id as EmoteId);

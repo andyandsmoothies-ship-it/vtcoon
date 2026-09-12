@@ -1,5 +1,6 @@
 // [UI-S01/MSS] GameBoard — 40-tile procedural board layout with 4-side orientation & center oasis
 import React from 'react';
+import { RoundedBox } from '@react-three/drei';
 import { BOARD_CONFIG } from '../../domain/board_config';
 import { useGameStore } from '../store/game_store';
 import { cellPosition } from './board_coords';
@@ -38,14 +39,29 @@ export function GameBoard(): React.ReactElement {
       <ConstructionSlamVFX />
 
       {/* 0. Khung kè đá phiến sẫm viền bàn cờ nổi 3D bo vát bóng bẩy (Dark Slate Promenade Rim: 21.4 x 21.4) */}
-      <mesh receiveShadow castShadow position={[0, -0.06, 0]}>
-        <boxGeometry args={[21.4, 0.24, 21.4]} />
-        <meshStandardMaterial color="#1E293B" roughness={0.2} metalness={0.25} />
-      </mesh>
-      {/* Đường chỉ kim loại khảm vàng hổ phách sáng bóng ngăn cách khung đá và mép ô cờ */}
-      <mesh position={[0, -0.01, 0]}>
-        <boxGeometry args={[20.72, 0.04, 20.72]} />
-        <meshStandardMaterial color="#F59E0B" roughness={0.1} metalness={0.92} />
+      <RoundedBox
+        args={[21.4, 0.24, 21.4]}
+        radius={0.08}
+        smoothness={4}
+        receiveShadow
+        castShadow
+        position={[0, -0.16, 0]}
+      >
+        <meshStandardMaterial color="#1E293B" roughness={0.2} metalness={0.25} envMapIntensity={1.2} />
+      </RoundedBox>
+      {/* Dải nẹp kim loại mạ vàng Champagne bao quanh viền ngoài của 40 ô cờ */}
+      <RoundedBox
+        args={[20.72, 0.04, 20.72]}
+        radius={0.02}
+        smoothness={2}
+        position={[0, -0.045, 0]}
+      >
+        <meshStandardMaterial color="#F59E0B" roughness={0.08} metalness={0.95} envMapIntensity={1.8} />
+      </RoundedBox>
+      {/* Dải nẹp kim loại mạ vàng Champagne viền trong ngăn cách mép trong 40 ô cờ */}
+      <mesh position={[0, -0.045, 0]}>
+        <boxGeometry args={[15.88, 0.042, 15.88]} />
+        <meshStandardMaterial color="#F59E0B" roughness={0.08} metalness={0.95} envMapIntensity={1.8} />
       </mesh>
 
       {/* 1. Nền hoa viên: Thảm cỏ xanh nhiệt đới trung tâm */}

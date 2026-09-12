@@ -69,7 +69,7 @@ export function TitleDeedModal({
         <button
           type="button"
           onClick={onClose}
-          className="mt-4 min-h-[48px] px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-xs border-b-4 border-slate-950 active:border-b-0 active:translate-y-1 transition-all inline-flex items-center justify-center whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+          className="mt-4 min-h-[48px] px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-xs border border-slate-700/60 shadow-[0_4px_0_0_#020617] active:shadow-[0_1px_0_0_#020617] active:translate-y-[3px] transition-all inline-flex items-center justify-center whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
         >
           Đóng
         </button>
@@ -121,7 +121,7 @@ export function TitleDeedModal({
 
       {/* Ruy-băng tiêu đề (Ribbon Header) bo cong viền vàng dập nổi */}
       <header
-        className="p-4 pr-14 pl-14 text-center relative border-b-2 border-amber-400 shadow-lg rounded-b-2xl mx-1.5 mt-1.5 rounded-t-xl shrink-0 z-10"
+        className="p-4 pr-14 pl-14 text-center relative border border-amber-400/60 shadow-[0_3px_0_0_#f59e0b] shadow-lg rounded-b-2xl mx-1.5 mt-1.5 rounded-t-xl shrink-0 z-10"
         style={{ backgroundColor: ribbonColor }}
       >
         <div className="absolute top-2.5 left-2.5 w-2 h-2 rounded-full bg-amber-300 border border-amber-600 shadow-[0_0_4px_rgba(245,158,11,0.8)]" aria-hidden="true" />
@@ -244,10 +244,10 @@ export function TitleDeedModal({
                 onClick={onUpgrade}
                 disabled={Boolean(upgradeBlockedReason)}
                 title={upgradeBlockedReason}
-                className={`min-h-[48px] whitespace-nowrap px-3.5 py-2 rounded-xl font-bold text-xs border-b-4 transition-all focus-visible:outline-none focus-visible:ring-2 ${
+                className={`min-h-[48px] whitespace-nowrap px-3.5 py-2 rounded-xl font-bold text-xs transition-all focus-visible:outline-none focus-visible:ring-2 ${
                   upgradeBlockedReason
-                    ? 'bg-slate-700 text-slate-400 border-slate-900 cursor-not-allowed shadow-none'
-                    : 'bg-gradient-to-b from-teal-500 to-teal-600 hover:from-teal-400 hover:to-teal-500 text-white border-teal-800 active:border-b-0 active:translate-y-1 shadow-lg shadow-teal-950/40 focus-visible:ring-teal-400 cursor-pointer'
+                    ? 'bg-slate-700 text-slate-400 border border-slate-700 cursor-not-allowed shadow-none'
+                    : 'bg-gradient-to-b from-teal-500 to-teal-600 hover:from-teal-400 hover:to-teal-500 text-white border border-teal-800 shadow-[0_4px_0_0_#115e59] active:shadow-[0_1px_0_0_#115e59] active:translate-y-[3px] shadow-teal-950/40 focus-visible:ring-teal-400 cursor-pointer'
                 }`}
               >
                 Nâng Cấp (+{formatCurrency(upgradeCost ?? 0)})
@@ -259,10 +259,10 @@ export function TitleDeedModal({
                 onClick={onDowngrade}
                 disabled={Boolean(downgradeBlockedReason)}
                 title={downgradeBlockedReason}
-                className={`min-h-[48px] whitespace-nowrap px-3.5 py-2 rounded-xl font-bold text-xs border-b-4 transition-all focus-visible:outline-none focus-visible:ring-2 ${
+                className={`min-h-[48px] whitespace-nowrap px-3.5 py-2 rounded-xl font-bold text-xs transition-all focus-visible:outline-none focus-visible:ring-2 ${
                   downgradeBlockedReason
-                    ? 'bg-slate-700 text-slate-400 border-slate-900 cursor-not-allowed shadow-none'
-                    : 'bg-gradient-to-b from-orange-600 to-orange-700 hover:from-orange-500 hover:to-orange-600 text-white border-orange-900 active:border-b-0 active:translate-y-1 shadow-lg shadow-orange-950/40 focus-visible:ring-orange-400 cursor-pointer'
+                    ? 'bg-slate-700 text-slate-400 border border-slate-700 cursor-not-allowed shadow-none'
+                    : 'bg-gradient-to-b from-orange-600 to-orange-700 hover:from-orange-500 hover:to-orange-600 text-white border border-orange-900 shadow-[0_4px_0_0_#7c2d12] active:shadow-[0_1px_0_0_#7c2d12] active:translate-y-[3px] shadow-orange-950/40 focus-visible:ring-orange-400 cursor-pointer'
                 }`}
               >
                 Hạ Cấp (-50%)
@@ -272,7 +272,7 @@ export function TitleDeedModal({
               <button
                 type="button"
                 onClick={isMortgaged ? onRedeem : onMortgage}
-                className="min-h-[48px] whitespace-nowrap px-3.5 py-2 rounded-xl font-bold text-xs bg-amber-600 hover:bg-amber-500 text-white border-b-4 border-amber-900 active:border-b-0 active:translate-y-1 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
+                className="min-h-[48px] whitespace-nowrap px-3.5 py-2 rounded-xl font-bold text-xs bg-amber-600 hover:bg-amber-500 text-white border border-amber-900 shadow-[0_4px_0_0_#78350f] active:shadow-[0_1px_0_0_#78350f] active:translate-y-[3px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
               >
                 {isMortgaged ? 'Giải Chấp' : 'Thế Chấp'}
               </button>
@@ -280,7 +280,7 @@ export function TitleDeedModal({
             <button
               type="button"
               onClick={onClose}
-              className="min-h-[48px] whitespace-nowrap px-4 py-2 rounded-xl font-bold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border-b-4 border-slate-950 active:border-b-0 active:translate-y-1 text-xs transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
+              className="min-h-[48px] whitespace-nowrap px-4 py-2 rounded-xl font-bold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-950 shadow-[0_4px_0_0_#020617] active:shadow-[0_1px_0_0_#020617] active:translate-y-[3px] text-xs transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
             >
               Đóng
             </button>
@@ -301,10 +301,10 @@ export function TitleDeedModal({
               type="button"
               onClick={onBuy}
               disabled={!canBuy}
-              className={`flex-1 min-h-[48px] whitespace-nowrap py-3 px-6 rounded-xl font-black tracking-wide shadow-lg uppercase text-xs sm:text-sm transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 truncate cursor-pointer ${
+              className={`flex-1 min-h-[48px] whitespace-nowrap py-3 px-6 rounded-xl font-black tracking-wide uppercase text-xs sm:text-sm transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 truncate cursor-pointer ${
                 canBuy
-                  ? 'bg-gradient-to-b from-emerald-400 to-emerald-600 hover:from-emerald-300 hover:to-emerald-500 border-b-[5px] border-b-4 border-emerald-800 active:border-b-0 active:translate-y-1 text-white shadow-emerald-950/50'
-                  : 'bg-slate-800 text-slate-500 border-b-[5px] border-b-4 border-slate-900 cursor-not-allowed'
+                  ? 'bg-gradient-to-b from-emerald-400 to-emerald-600 hover:from-emerald-300 hover:to-emerald-500 border border-emerald-800 shadow-[0_4px_0_0_#064e3b] active:shadow-[0_1px_0_0_#064e3b] active:translate-y-[3px] text-white shadow-emerald-950/50'
+                  : 'bg-slate-800 text-slate-500 border border-slate-700/50 cursor-not-allowed'
               }`}
             >
               {canBuy ? `Mua BĐS (${formatCurrency(deed.price)})` : 'Không Đủ Tiền'}
@@ -313,7 +313,7 @@ export function TitleDeedModal({
             <button
               type="button"
               onClick={onPass ?? onClose}
-              className="min-h-[48px] whitespace-nowrap py-3 px-6 rounded-xl font-bold text-slate-300 hover:text-white uppercase bg-slate-700 hover:bg-slate-600 border-b-[5px] border-slate-900 border-b-4 border-slate-950 active:border-b-0 active:translate-y-1 text-xs sm:text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
+              className="min-h-[48px] whitespace-nowrap py-3 px-6 rounded-xl font-bold text-slate-300 hover:text-white uppercase bg-slate-700 hover:bg-slate-600 border border-slate-950 shadow-[0_4px_0_0_#020617] active:shadow-[0_1px_0_0_#020617] active:translate-y-[3px] text-xs sm:text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
             >
               Bỏ Qua
             </button>

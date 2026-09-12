@@ -70,11 +70,11 @@ describe('[TC-04.2/MSS] Ma Trận Ưu Tiên Modifier (Mùa Du Lịch & Bão Duy�
 
 describe('[TC-04.3/MSS] Sàn Giao Dịch Chứng Khoán HOSE (Ô 38)', () => {
   it('Kịch bản A, B, C, D, E: tỷ lệ lời/lỗ và kiểm tra biên cược HOSE', () => {
-    let rngVal = 0.05; // face = 1 (x0.50)
+    let rngVal = 0.05; // face = 1 (x0.30)
     const { mgr, room } = setup(() => rngVal);
     room.phase = TurnPhase.HosePhase; room.players[0]!.balance = 5000;
     mgr.handlePlayerIntent(room.roomCode, 'p1', { type: 'INTENT_INVEST', stake: 2000 });
-    expect(room.players[0]!.balance).toBe(4000); // 5000 - 2000 + 1000
+    expect(room.players[0]!.balance).toBe(3600); // 5000 - 2000 + 600
     rngVal = 0.95; room.phase = TurnPhase.HosePhase; room.players[0]!.balance = 5000; // face = 6 (x2.00)
     mgr.handlePlayerIntent(room.roomCode, 'p1', { type: 'INTENT_INVEST', stake: 2000 });
     expect(room.players[0]!.balance).toBe(7000); // 5000 - 2000 + 4000

@@ -1,13 +1,14 @@
 // [UI-S03/MSS] ActionDock Component — Player action toolbar (Roll, Manage, Trade, End Turn)
 import React, { useState, useEffect } from 'react';
 import { useGameStore } from '../store/game_store';
-import { isRollActionDisabled, isEndTurnDisabled } from './ui_helpers';
+import { isRollActionDisabled, isEndTurnDisabled, resolveManagePropertyTarget } from './ui_helpers';
 
 export interface ActionDockProps {
   readonly onRollDice?: () => void;
   readonly onOpenProperties?: () => void;
   readonly onOpenTrade?: () => void;
   readonly onOpenUpgrade?: () => void;
+  readonly onOpenManageProperty?: () => void;
   readonly onEndTurn?: () => void;
   readonly localPlayerId?: string;
   readonly isPawnMoving?: boolean;
@@ -21,6 +22,7 @@ export function ActionDock({
   onOpenProperties,
   onOpenTrade,
   onOpenUpgrade,
+  onOpenManageProperty,
   onEndTurn,
   localPlayerId,
   isPawnMoving: isPawnMovingProp,
@@ -35,6 +37,7 @@ export function ActionDock({
   const openModal = useGameStore((state) => state.openModal);
   const dice = useGameStore((state) => state.dice);
   const storeHasRolledThisTurn = useGameStore((state) => state.hasRolledThisTurn);
+  const playerPositions = useGameStore((state) => state.playerPositions);
 
   const actingPlayerId = localPlayerId ?? currentTurnPlayerId;
   const isMyTurn = isMyTurnProp !== undefined ? isMyTurnProp : (!localPlayerId || currentTurnPlayerId === localPlayerId);
@@ -84,14 +87,16 @@ export function ActionDock({
     }, 1500);
   };
 
-  const handleOpenProperties = () => {
-    if (onOpenProperties) {
+  const handleOpenManageProperty = () => {
+    if (onOpenManageProperty) {
+      onOpenManageProperty();
+    } else if (onOpenProperties) {
       onOpenProperties();
     } else {
       const activeInfo = actingPlayerId ? playersInfo[actingPlayerId] : undefined;
-      const firstProp = activeInfo?.ownedProperties?.[0] ?? 1;
-      const isOwned = Boolean(activeInfo?.ownedProperties?.includes(firstProp));
-      openModal('deed', { cellIndex: firstProp, canBuy: !isOwned });
+      const currentPos = actingPlayerId ? (playerPositions[actingPlayerId] ?? 0) : 0;
+      const target = resolveManagePropertyTarget(activeInfo?.ownedProperties, currentPos);
+      openModal('deed', target);
     }
   };
 
@@ -110,16 +115,6 @@ export function ActionDock({
     }
   };
 
-  const handleOpenUpgrade = () => {
-    if (onOpenUpgrade) {
-      onOpenUpgrade();
-    } else {
-      const activeInfo = actingPlayerId ? playersInfo[actingPlayerId] : undefined;
-      const firstProp = activeInfo?.ownedProperties?.[0] ?? 1;
-      openModal('deed', { cellIndex: firstProp, canBuy: false });
-    }
-  };
-
   const isGlowActive = isMyTurn && !isRollDisabled;
 
   return (
@@ -134,8 +129,8 @@ export function ActionDock({
         disabled={isRollDisabled}
         className={`min-h-[44px] flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-white shadow-lg transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 ${
           isRollDisabled
-            ? 'bg-slate-700/60 text-slate-400 cursor-not-allowed opacity-60 border-b-4 border-slate-900'
-            : `bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 border-b-4 border-emerald-800 active:border-b-0 active:translate-y-1 shadow-emerald-900/30 ${
+            ? 'bg-slate-700/60 text-slate-400 cursor-not-allowed opacity-60 border border-slate-700/60'
+            : `bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 border border-emerald-800 shadow-[0_4px_0_0_#064e3b] active:shadow-[0_1px_0_0_#064e3b] active:translate-y-[3px] shadow-emerald-900/30 ${
                 isGlowActive ? 'ring-4 ring-amber-400/60 shadow-[0_0_20px_rgba(245,158,11,0.5)] animate-pulse' : ''
               }`
         }`}
@@ -157,28 +152,16 @@ export function ActionDock({
 
       <div className="h-6 w-px bg-slate-700/80" aria-hidden="true" />
 
-      {/* Nút Quản Lý Tài Sản với hiệu ứng nổi 3D */}
+      {/* Nút Quản Lý BĐS (gộp Tài Sản & Xây Dựng) với hiệu ứng nổi 3D */}
       <button
         type="button"
-        onClick={handleOpenProperties}
+        onClick={handleOpenManageProperty}
         disabled={isBankrupt}
-        className="min-h-[44px] flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-slate-200 hover:text-white bg-slate-800/80 hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed border border-slate-700/60 border-b-2 border-b-slate-950 active:border-b-0 active:translate-y-0.5 transition-all text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
-        aria-label="Quản lý tài sản"
+        className="min-h-[44px] flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-slate-200 hover:text-white bg-slate-800/80 hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed border border-slate-700/60 shadow-[0_4px_0_0_#020617] active:shadow-[0_1px_0_0_#020617] active:translate-y-[3px] transition-all text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+        aria-label="Quản lý và nâng cấp bất động sản"
       >
         <span aria-hidden="true">🏛️</span>
-        <span className="hidden sm:inline">Tài Sản</span>
-      </button>
-
-      {/* Nút Xây Dựng / Nâng Cấp với hiệu ứng nổi 3D */}
-      <button
-        type="button"
-        onClick={handleOpenUpgrade}
-        disabled={isBankrupt || !actingPlayerId || !(playersInfo[actingPlayerId]?.ownedProperties?.length)}
-        className="min-h-[44px] flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-slate-200 hover:text-white bg-slate-800/80 hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed border border-slate-700/60 border-b-2 border-b-slate-950 active:border-b-0 active:translate-y-0.5 transition-all text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
-        aria-label="Xây dựng và nâng cấp bất động sản"
-      >
-        <span aria-hidden="true">🏗️</span>
-        <span className="hidden sm:inline">Xây Dựng</span>
+        <span className="hidden sm:inline">Quản Lý BĐS</span>
       </button>
 
       {/* Nút Đàm Phán P2P với hiệu ứng nổi 3D */}
@@ -186,7 +169,7 @@ export function ActionDock({
         type="button"
         onClick={handleOpenTrade}
         disabled={isBankrupt}
-        className="min-h-[44px] flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-slate-200 hover:text-white bg-slate-800/80 hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed border border-slate-700/60 border-b-2 border-b-slate-950 active:border-b-0 active:translate-y-0.5 transition-all text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+        className="min-h-[44px] flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-slate-200 hover:text-white bg-slate-800/80 hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed border border-slate-700/60 shadow-[0_4px_0_0_#020617] active:shadow-[0_1px_0_0_#020617] active:translate-y-[3px] transition-all text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
         aria-label="Đàm phán thương lượng"
       >
         <span aria-hidden="true">🤝</span>
@@ -210,7 +193,7 @@ export function ActionDock({
             ? isInsolvent
               ? 'bg-rose-950/40 text-rose-400 border-rose-800/80 cursor-not-allowed shadow-[0_0_12px_rgba(225,29,72,0.3)]'
               : 'bg-slate-800/40 text-slate-500 border-slate-800 cursor-not-allowed'
-            : 'text-amber-300 hover:text-amber-200 bg-amber-950/30 hover:bg-amber-900/40 border-amber-600/40 border-b-2 border-b-amber-950 active:border-b-0 active:translate-y-0.5'
+            : 'text-amber-300 hover:text-amber-200 bg-amber-950/30 hover:bg-amber-900/40 border-amber-600/40 shadow-[0_4px_0_0_#451a03] active:shadow-[0_1px_0_0_#451a03] active:translate-y-[3px]'
         }`}
         aria-label="Kết thúc lượt"
       >

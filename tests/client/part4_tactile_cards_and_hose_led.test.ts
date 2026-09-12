@@ -34,8 +34,11 @@ describe('[TC-P4.1/MSS] Thẻ Bài Game 3D Kim Loại TitleDeedModal', () => {
     const html = renderToStaticMarkup(
       React.createElement(TitleDeedModal, { cellIndex: 1, canBuy: true, isOwned: false })
     );
-    expect(html).toContain('border-b-4 border-emerald-800 active:border-b-0 active:translate-y-1');
-    expect(html).toContain('border-b-4 border-slate-950 active:border-b-0 active:translate-y-1');
+    expect(html).toContain('border-emerald-800');
+    expect(html).toContain('shadow-[0_4px_0_0_#064e3b]');
+    expect(html).toContain('active:translate-y-[3px]');
+    expect(html).toContain('border-slate-950');
+    expect(html).toContain('shadow-[0_4px_0_0_#020617]');
   });
 
   it('Hỗ trợ đầy đủ các trạng thái Nâng Cấp, Hạ Cấp, Thế Chấp với nút bấm 3D vật lý', () => {
@@ -100,6 +103,12 @@ describe('[TC-P4.2/MSS] Bảng Điện Tử LED Sàn Chứng Khoán HOSE', () =>
       expect(html).toContain(`Mặt ${face}`);
       expect(html).toContain(`${mult.toFixed(2)}x`);
     }
+    expect(html).toContain('-70%');
+    expect(html).toContain('-40%');
+    expect(html).toContain('-20%');
+    expect(html).toContain('+10%');
+    expect(html).toContain('+20%');
+    expect(html).toContain('+100%');
     expect(html).toContain('text-emerald-400');
     expect(html).toContain('text-rose-400');
     expect(html).toContain('text-amber-300');
@@ -164,8 +173,9 @@ describe('[TC-P4.2/MSS] Bảng Điện Tử LED Sàn Chứng Khoán HOSE', () =>
     const html = renderToStaticMarkup(
       React.createElement(HoseModal, { myBalance: 15000, onInvest: () => {}, onSkip: () => {}, onClose: () => {} })
     );
-    expect(html).toContain('border-b-4 border-slate-950 active:border-b-0 active:translate-y-1');
-    expect(html).toContain('border-b-4 border-amber-700 active:border-b-0 active:translate-y-1');
+    expect(html).toContain('shadow-[0_4px_0_0_#020617]');
+    expect(html).toContain('shadow-[0_4px_0_0_#b45309]');
+    expect(html).toContain('active:translate-y-[3px]');
   });
 
   it('[Adversarial Inversion] Khi không đủ tiền đặt cược, nút bấm bị vô hiệu hóa an toàn', () => {

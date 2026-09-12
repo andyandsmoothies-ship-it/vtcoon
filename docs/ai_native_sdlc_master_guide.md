@@ -151,12 +151,20 @@
 │
 ├── 15. TƯ DUY TDD KỶ NGUYÊN AGENT & RANH GIỚI TRỪU TƯỢNG (ADAM TORNHILL 2026):
 │       • "TDD vi mô (5-10 dòng code) được phát minh để phục vụ nhận thức của não người, không phục vụ AI Agent."
-│       • Bắt Agent đi qua 10 vòng lặp Micro-TDD vụn vặt gây lãng phí Token, đứt gãy ngữ cảnh và làm Agent mất khả năng nhìn toàn cục.
-│       • Ranh Giới Hợp Đồng Cấp Tính Năng (Feature-Level Abstraction Boundary): Con người/Junior tập trung thiết lập bài kiểm thử
-│         chấp nhận E2E (Living User Journey) trước để định hình ranh giới.
+│       • Chuyển dịch từ Vòng lặp vi mô cấp hàm (Unit loops) sang Lặp cấp hệ thống (System-level Iteration) qua 3 khối cơ học:
+│         ┌─────────────────────┐      ┌─────────────────────────────┐      ┌─────────────────────────┐
+│         │ 1. SPECIFY          │ ──►  │ 2. DELEGATE                 │ ──►  │ 3. VALIDATE             │
+│         │ Yêu cầu & E2E ĐỎ    │      │ Agent thi công toàn hệ thống│      │ Chạy E2E & Nghiệm thu   │
+│         └─────────────────────┘      └─────────────────────────────┘      └────────────┬────────────┘
+│                    ▲                                                                   │
+│                    └───────────────── Vòng phản hồi Người + Agent ─────────────────────┘
+│       • Ranh Giới Trừu Tượng Người / Agent (Tests as Boundaries): Con người/Junior chỉ tập trung đọc, soát xét và
+│         tinh chỉnh E2E Tests (Hợp đồng nghiệm thu). Toàn bộ mã nguồn cài đặt bên dưới được ủy thác cho Agent tự do thi công.
 │       • Thi Công Một Lượt (One-Sweep Implementation): Khi bài test E2E đã ĐỎ, cho phép Agent thi công trọn vẹn mã nguồn trong 1 lượt.
 │       • Kế Toán Kép Bất Biến (Double-Entry Bookkeeping): Tuyệt đối CẤM Agent sửa bài test assertion để che giấu lỗi mã nguồn (chống Bug-Codification).
 │       • Bản Chất Test Đỏ (RED): Chứng minh bài test có đủ độ nhạy để bắt lỗi mã nguồn do AI sinh ra (Adversarial Inversion).
+│       • Cơ Chế Cưỡng Chế Xác Định (Enforce What You Don't Inspect): Với phần code con người không đọc, bắt buộc dùng
+│         lưới an toàn cơ học (Linters, Type-check, Kiến trúc máy móc) để đảm bảo tính bảo trì lâu dài.
 │
 └── 16. MÔ HÌNH NÚM VẶN BÁN KÍNH RỦI RO & VAI TRÒ NON-TECH PO (BLAST RADIUS DIAL):
         • Khử Bẫy Hoang Tưởng Doanh Nghiệp (Enterprise Paranoia) Day-0: Khi mới bắt đầu, Junior tuyên bố vai trò:
@@ -1582,9 +1590,10 @@ Khi bạn chạy lệnh trong Terminal gặp lỗi đỏ, hoặc Subagent báo t
 │    • TUYỆT ĐỐI CẤM code ngay! Bẻ Slice thành danh sách Micro-Tasks tuần tự.       │
 │    • Mỗi Micro-Task: 1 mục tiêu đơn nhất, LOC budget <= 50-80 dòng, 1 test đỏ/xanh.│
 │                                                                                  │
-│ 4. THI CÔNG TDD CẤP TÍNH NĂNG (ONE-SWEEP EXECUTION LOOP - ADAM TORNHILL 2026):   │
-│    • Khóa Hợp đồng Nghiệm thu E2E (Golden Path / Living Flow) trước.            │
-│    • Cho phép Agent thi công trọn vẹn trong 1 lượt (One Sweep), cấm vi mô vụn vặt.│
+│ 4. THI CÔNG TDD CẤP HỆ THỐNG (SYSTEM-LEVEL TDD - ADAM TORNHILL 2026):             │
+│    • [1. Specify]: qa-tester tạo E2E Tests ĐỎ, Inversion Gate khóa ranh giới.    │
+│    • [2. Delegate]: implementer tự do thi công One-Sweep trên toàn bộ hệ thống.  │
+│    • [3. Validate]: Chạy E2E Tests nghiệm thu, phản hồi cấp hệ thống Người+Agent.│
 │    • Kế toán kép (Double-entry bookkeeping): Test assertion bất biến, cấm sửa test.│
 │    • Inversion Gate: Chứng minh bài test bắt được lỗi khi mutate 1 dòng logic.  │
 │                                                                                  │
@@ -1656,7 +1665,7 @@ Khi bạn chạy lệnh trong Terminal gặp lỗi đỏ, hoặc Subagent báo t
 | **2.2** | Trinh sát bối cảnh<br>*(Đơn tác nhân)* | 💬 `[AG 2.0]` Gọi `scout` (Read-only) trinh sát hiện trạng mã nguồn:<br>• **Greenfield (S00):** Dùng **[Mẫu P-2.2A]** Target File Map<br>• **Brownfield (S01+):** Dùng **[Mẫu P-2.2B]** Change Impact | Flash | Báo cáo hiện trạng & tọa độ dòng |
 | **2.3a** | Lập Kế Hoạch Bẻ Nhỏ<br>*(Song tác nhân)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3a]**: `architect` bẻ Task DAG <= 80 LOC ➔ `spec-reviewer` thẩm định 5 Tiêu Chuẩn Vàng | Sonnet 4.6 | Kế Hoạch được `[APPROVED]` |
 | **2.3b** | Khởi tạo Test Harness<br>*(Đơn tác nhân - S00)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3b]** gọi `implementer` dựng Test Runner tối thiểu (`package.json`, `tsconfig.json`, `vitest`...) ➔ Chạy smoke test PASS | Flash / Sonnet | Lệnh `npm test` chạy PASS trên CMD |
-| **2.3c** | Thi công TDD Cấp Tính Năng<br>*(One-Sweep & Inversion)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3c]**: Khóa Hợp đồng E2E ➔ `Implementer` thi công 1 lượt (One-Sweep) ➔ `QA Tester` Inversion Gate | Sonnet 4.6 | Hợp đồng E2E + Inversion PASS 100% |
+| **2.3c** | Thi công TDD Cấp Hệ Thống<br>*(Specify ➔ Delegate ➔ Validate)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3c]**: Khóa Hợp đồng E2E (Specify) ➔ `Implementer` thi công 1 lượt (Delegate) ➔ Nghiệm thu cấp hệ thống (Validate) | Sonnet 4.6 | Hợp đồng E2E + Inversion PASS 100% |
 | **2.3d** | Chẩn đoán lỗi khoa học<br>*(Song tác nhân)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3d]**: `Investigator` truy nguyên nhân gốc ➔ `Implementer` sửa mã nguồn tối thiểu | Sonnet 4.6 | Báo cáo nguyên nhân & bản sửa tối thiểu |
 | **2.3e** | Nghiệm thu tích hợp<br>*(Đơn tác nhân)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3e]** gọi `implementer` chạy toàn bộ Test Suite với cờ `--randomize` (cách ly trạng thái) | Flash / Sonnet | 100% Test Contracts PASS |
 | **2.4** | Kiểm toán 2 Cổng<br>*(Song tác nhân độc lập)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.4]** gọi `spec-reviewer` + `code-reviewer` thẩm định ➔ Lưu Biên bản nghiệm thu vào `docs/reports/audits/` | Sonnet / Flash | Báo cáo APPROVED + File `docs/reports/audits/[MÃ]_acceptance_report.md` |

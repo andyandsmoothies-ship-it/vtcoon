@@ -54,8 +54,8 @@ describe('[TC-EMOTE01.1/MSS] Social Emotes Enum & Fixture Contract', () => {
     expect(EMOTE_DISPLAY_DURATION_MS).toBe(3000);
   });
 
-  it('Thoi gian hoi chieu (cooldown) tray emote la 1 giay (1000ms)', () => {
-    expect(EMOTE_COOLDOWN_MS).toBe(1000);
+  it('Thoi gian hoi chieu (cooldown) tray emote la 2.5 giay (2500ms)', () => {
+    expect(EMOTE_COOLDOWN_MS).toBe(2500);
   });
 });
 

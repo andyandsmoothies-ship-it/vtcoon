@@ -3,7 +3,7 @@
 import type { RoomManager } from '../room_manager.js';
 import type { IntentMutex } from './intent_mutex.js';
 import type { DeltaBroadcaster } from './delta_broadcaster.js';
-import { TurnPhase } from '../../domain/room.js';
+import { TurnPhase, isRoomGameOver } from '../../domain/room.js';
 
 export const PHASE_TIMEOUTS_MS: Record<TurnPhase, number> = {
   [TurnPhase.WaitingRoll]: 15_000,
@@ -149,7 +149,7 @@ export class TurnTimeoutScheduler {
         }
 
         const rAfter = this.rooms.getRoom(roomCode);
-        if (rAfter && rAfter.started && rAfter.players.filter((p) => !p.bankrupt).length <= 1) {
+        if (rAfter && isRoomGameOver(rAfter)) {
           this.onGameOver(roomCode);
         } else {
           this.broadcaster.broadcastRoomDelta(roomCode);

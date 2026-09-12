@@ -174,8 +174,8 @@ function step8_P1HoseInvestment(mgr: RoomManager, room: Room): void {
   // P1 gửi INTENT_INVEST với stake = 2.000 Tr.
   const investRes = mgr.handlePlayerIntent(room.roomCode, 'P1', { type: 'INTENT_INVEST', stake: 2_000 });
   expect(investRes.success, 'P1 đầu tư sàn HOSE thành công').toBe(true);
-  // Với seed 42, 1D6 HOSE đổ ra mặt 2 (tỷ lệ 0.75) -> payout = 1.500 -> balance = 12.860 - 2.000 + 1.500 = 12.360
-  expect(room.players[0]!.balance, 'Quỹ tiền P1 cập nhật payout HOSE (12.860 - 2.000 + 1.500 = 12.360)').toBe(12_360);
+  // Với seed 42, 1D6 HOSE đổ ra mặt 2 (tỷ lệ 0.60) -> payout = 1.200 -> balance = 12.860 - 2.000 + 1.200 = 12.060
+  expect(room.players[0]!.balance, 'Quỹ tiền P1 cập nhật payout HOSE (12.860 - 2.000 + 1.200 = 12.060)').toBe(12_060);
   expect(room.phase, 'FSM chuyển tiếp sang PropertyManagement').toBe(TurnPhase.PropertyManagement);
 
   const endRes = mgr.handlePlayerIntent(room.roomCode, 'P1', { type: 'INTENT_END_TURN' });
@@ -219,8 +219,8 @@ function step10_P1PassGOWithPropertyTax(mgr: RoomManager, room: Room): void {
   expect(roll9!.player.position, 'P1 dừng chân tại ô 01 (sở hữu của P1)').toBe(1);
   expect(roll9!.passedGo, 'P1 vượt qua ô GO').toBe(true);
   // P1 sở hữu 4 ô (1, 3, 5, 15), ownedCount=4 >= 4 → property_tax = 150×4 = 600
-  // Net GO bonus = 2000 - 600 = 1400 → balance = 12360 + 1400 = 13760
-  expect(room.players[0]!.balance, 'P1 nhận 1400 Tr. (2000 GO - 600 thuế tài sản): 12360 + 1400 = 13760').toBe(13_760);
+  // Net GO bonus = 2000 - 600 = 1400 → balance = 12060 + 1400 = 13460
+  expect(room.players[0]!.balance, 'P1 nhận 1400 Tr. (2000 GO - 600 thuế tài sản): 12060 + 1400 = 13460').toBe(13_460);
   expect(room.phase, 'FSM chuyển sang PropertyManagement (đất đã sở hữu)').toBe(TurnPhase.PropertyManagement);
 
   const endRes = mgr.handlePlayerIntent(room.roomCode, 'P1', { type: 'INTENT_END_TURN' });
@@ -278,7 +278,7 @@ function step12_P1DeclineAutoAuctionNoWinner(mgr: RoomManager, room: Room): void
   // Ô 06 không có chủ sở hữu (phiên không có người đặt giá)
   expect(mgr.getPropertyOwner(room.roomCode, 6), 'Ô 06 không có chủ (phiên đấu giá không có người thắng)').toBeUndefined();
   // Số dư hai bên không thay đổi
-  expect(room.players[0]!.balance, 'Số dư P1 giữ nguyên 13.760').toBe(13_760);
+  expect(room.players[0]!.balance, 'Số dư P1 giữ nguyên 13.460').toBe(13_460);
   expect(room.players[1]!.balance, 'Số dư P2 giữ nguyên 18.940').toBe(18_940);
 
   const endRes = mgr.handlePlayerIntent(room.roomCode, 'P1', { type: 'INTENT_END_TURN' });

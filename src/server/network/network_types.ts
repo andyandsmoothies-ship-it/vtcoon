@@ -25,6 +25,7 @@ export type ReasonCode =
   | 'ABUSE_DETECTED'
   | 'INVALID_ENVELOPE'
   | 'INVALID_VALUE'
+  | 'PRICE_BELOW_FLOOR'
   | 'EVEN_BUILDING_VIOLATION';
 
 // ─── Client → Server ────────────────────────────────────────────

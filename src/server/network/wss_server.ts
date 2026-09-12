@@ -15,8 +15,9 @@ import { TurnTimeoutScheduler } from './turn_timeout_scheduler.js';
 import { SocketRegistry } from './socket_registry.js';
 import { encodeMsg } from './network_types.js';
 import type { WsServerMessage, WsClientMessage, ReasonCode } from './network_types.js';
+import { isRoomGameOver } from '../../domain/room.js';
 
-const MAX_PLAYERS = 6;
+const MAX_PLAYERS = 4;
 
 import type { WssServerConfig } from './wss_server_config.js';
 export type { WssServerConfig };
@@ -50,6 +51,7 @@ export class WssServer {
     this.botScheduler = new BotTurnScheduler({
       rooms: this.rooms, intentMutex: this.intentMutex, broadcaster: this.broadcaster,
       onGameOver: (rc) => this.broadcastGameOver(rc),
+      onScheduleTurnTimeout: (rc) => this.turnTimeoutScheduler.scheduleTurnTimeout(rc),
     });
     this.turnTimeoutScheduler = new TurnTimeoutScheduler({
       rooms: this.rooms, intentMutex: this.intentMutex, broadcaster: this.broadcaster,
@@ -327,7 +329,7 @@ export class WssServer {
       }
 
       const roomAfter = this.rooms.getRoom(msg.roomCode);
-      if (roomAfter && roomAfter.started && roomAfter.players.filter((p) => !p.bankrupt).length <= 1) {
+      if (roomAfter && isRoomGameOver(roomAfter)) {
         this.broadcastGameOver(msg.roomCode);
       } else {
         this.broadcaster.broadcastRoomDelta(msg.roomCode);
@@ -383,4 +385,6 @@ export class WssServer {
       this.wss.close((err) => (err ? reject(err) : resolve()));
     });
   }
+
+  get roomManager(): RoomManager { return this.rooms; }
 }

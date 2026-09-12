@@ -20,6 +20,7 @@ export const ActionRejectReason = {
   UNAUTHORIZED:              'UNAUTHORIZED',
   NOT_UPGRADEABLE:           'NOT_UPGRADEABLE',
   INVALID_ROOM:              'INVALID_ROOM',
+  PRICE_BELOW_FLOOR:         'PRICE_BELOW_FLOOR',
   // Thêm mới (DEBT-S06-09)
   MISSING_MONOPOLY:          'MISSING_MONOPOLY',
   MAX_LEVEL:                 'MAX_LEVEL',

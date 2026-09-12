@@ -424,14 +424,14 @@ export function App(): React.ReactElement {
             {errorMessage}
           </div>
         )}
-        {/* Nền sa bàn 3D Bán đảo Biển đảo sống động làm hậu cảnh điện ảnh cho Sảnh Chờ */}
-        <div className="absolute inset-0 z-0 pointer-events-none">
+        {/* Nền sa bàn 3D Sảnh Chờ Penthouse Lounge ngắm hoàng hôn vịnh biển */}
+        <div className="absolute inset-0 z-0 pointer-events-auto">
           <Suspense fallback={null}>
-            <GameCanvas />
+            <GameCanvas isLobby />
           </Suspense>
         </div>
-        {/* Lớp giao diện Sảnh Chờ bán trong suốt Glassmorphism */}
-        <div className="relative z-10 w-full h-full pointer-events-auto">
+        {/* Lớp giao diện Sảnh Chờ Glassmorphism mỏng nổi bên cánh phải */}
+        <div className="relative z-10 w-full h-full pointer-events-none">
           <LobbyView sendWsMessage={sendWsMessage} />
         </div>
       </div>

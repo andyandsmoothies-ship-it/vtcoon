@@ -8,6 +8,7 @@ import { TradeModal } from './trade_modal';
 import { EventCardModal } from './event_card_modal';
 import { HoseModal } from './hose_modal';
 import { InsolvencyBanner } from './insolvency_banner';
+import { GameOverModal } from './game_over_modal';
 import { AudioEngine } from '../../audio/audio_engine';
 import { SoundEffect } from '../../audio/audio_types';
 import { formatCurrency } from '../ui_helpers';
@@ -72,7 +73,7 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
   const myPlayer = playersInfo[myId];
 
   return (
-    <ModalBackdrop onClose={closeModal}>
+    <ModalBackdrop onClose={closeModal} fullScreen={activeModal === 'auction'}>
       {activeModal === 'deed' && (() => {
         const payload = modalPayload as ModalPayloadMap['deed'];
         const ownerId = Object.keys(playersInfo).find((id) => playersInfo[id]?.ownedProperties?.includes(payload.cellIndex));
@@ -274,36 +275,17 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
       )}
 
       {activeModal === 'game_over' && (
-        <div className="w-full max-w-md bg-slate-900 border border-amber-500/60 rounded-2xl shadow-2xl p-6 text-center" data-testid="game-over-modal">
-          <div className="text-4xl mb-2" aria-hidden="true">🏆</div>
-          <h2 className="text-xl font-black text-amber-400 uppercase tracking-wide">
-            VÁN ĐẤU KẾT THÚC
-          </h2>
-          <p className="text-xs text-slate-400 mt-1 mb-4">Bảng Xếp Hạng Đại Gia Địa Ốc</p>
-          <div className="space-y-2 mb-6">
-            {(modalPayload as ModalPayloadMap['game_over'])?.leaderboard?.map((entry, idx) => (
-              <div key={entry.id} className="flex items-center justify-between p-3 rounded-xl bg-slate-800/80 border border-slate-700 text-sm">
-                <div className="flex items-center gap-2">
-                  <span className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs ${idx === 0 ? 'bg-amber-400 text-slate-950' : 'bg-slate-700 text-slate-200'}`}>
-                    {idx + 1}
-                  </span>
-                  <span className="font-semibold text-slate-100">{playersInfo[entry.id]?.name ?? entry.id}</span>
-                </div>
-                <span className="font-bold text-emerald-400 tabular-nums">{formatCurrency(entry.netWorth)}</span>
-              </div>
-            ))}
-          </div>
-          <button
-            type="button"
-            onClick={() => {
-              closeModal();
-              if (typeof window !== 'undefined') window.location.reload();
-            }}
-            className="w-full min-h-[44px] py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm shadow-lg active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
-          >
-            Về Sảnh Chờ
-          </button>
-        </div>
+        <GameOverModal
+          leaderboard={(modalPayload as ModalPayloadMap['game_over'])?.leaderboard}
+          onClose={() => {
+            closeModal();
+            if (typeof window !== 'undefined') window.location.reload();
+          }}
+          onPlayAgain={() => {
+            closeModal();
+            if (typeof window !== 'undefined') window.location.reload();
+          }}
+        />
       )}
     </ModalBackdrop>
   );

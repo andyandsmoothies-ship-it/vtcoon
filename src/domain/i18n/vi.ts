@@ -70,6 +70,7 @@ export const vi = {
     [ActionRejectReason.UNAUTHORIZED]:               'Không có quyền thực hiện',
     [ActionRejectReason.NOT_UPGRADEABLE]:            'Không thể nâng cấp ô đất này',
     [ActionRejectReason.INVALID_ROOM]:               'Phòng không hợp lệ',
+    [ActionRejectReason.PRICE_BELOW_FLOOR]:          'Giá chuyển nhượng thấp hơn sàn tối thiểu 70%',
     [ActionRejectReason.MISSING_MONOPOLY]:           'Chưa độc quyền nhóm màu',
     [ActionRejectReason.MAX_LEVEL]:                  'Đã đạt cấp độ tối đa',
     [ActionRejectReason.NEED_2_RAILROADS]:           'Cần sở hữu ít nhất 2 hạ tầng',

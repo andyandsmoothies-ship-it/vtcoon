@@ -9,6 +9,7 @@ import {
   getOwnedColorGroups,
   isRollActionDisabled,
   isEndTurnDisabled,
+  resolveManagePropertyTarget,
 } from '../../src/client/ui/ui_helpers';
 import { useGameStore } from '../../src/client/store/game_store';
 import { ColorGroup } from '../../src/domain/board_config';
@@ -230,16 +231,16 @@ describe('[TC-UI03.7/MSS] ActionDock DOM Markup & Tactile 3D Buttons', () => {
     expect(html).toContain('ring-amber-400/60');
     expect(html).toContain('animate-pulse');
     expect(html).toContain('border-emerald-800');
+    expect(html).toContain('shadow-[0_4px_0_0_#064e3b]');
   });
 
-  it('Hien thi cac nut 3D tactile cho Tai San, Xay Dung, Dam Phan va Het Luot', () => {
+  it('Hien thi cac nut 3D tactile cho Quan Ly BDS, Dam Phan va Het Luot', () => {
     const html = renderToStaticMarkup(React.createElement(ActionDock, { localPlayerId: 'p1' }));
-    expect(html).toContain('Tài Sản');
-    expect(html).toContain('Xây Dựng');
+    expect(html).toContain('Quản Lý BĐS');
     expect(html).toContain('Đàm Phán');
     expect(html).toContain('Hết Lượt');
-    expect(html).toContain('border-b-2');
-    expect(html).toContain('active:translate-y-0.5');
+    expect(html).toContain('shadow-[0_4px_0_0_#020617]');
+    expect(html).toContain('active:translate-y-[3px]');
   });
 
   it('Vo hieu hoa hao quang vang kim khi khong phai luot cua minh', () => {
@@ -268,6 +269,19 @@ describe('[TC-UI03.7/MSS] ActionDock DOM Markup & Tactile 3D Buttons', () => {
     );
     expect(html).toContain('Đổ Tiếp (Đôi)');
     expect(html).toContain('title="Bạn vừa đổ đôi, hãy tung xúc xắc tiếp để hoàn thành lượt"');
+  });
+
+  it('resolveManagePropertyTarget tra ve o dau tien so huu neu da co BDS', () => {
+    const target = resolveManagePropertyTarget([7, 14], 12);
+    expect(target).toEqual({ cellIndex: 7, canBuy: false });
+  });
+
+  it('resolveManagePropertyTarget tra ve vi tri hien tai khi chua so huu BDS', () => {
+    const target = resolveManagePropertyTarget([], 15);
+    expect(target).toEqual({ cellIndex: 15, canBuy: true });
+
+    const targetUndefined = resolveManagePropertyTarget(undefined, 23);
+    expect(targetUndefined).toEqual({ cellIndex: 23, canBuy: true });
   });
 });
 

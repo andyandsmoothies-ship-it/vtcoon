@@ -53,19 +53,19 @@ describe('[UC-GAME-052/MSS] MC_RATE_HIKE Lãi Suất Thế Chấp Vĩ Mô', () =
 });
 
 describe('[UC-GAME-045/MSS] Sàn Giao Dịch Chứng Khoán HOSE (Ô 38)', () => {
-  it('Mặt 1: Cú sốc sụp đổ sàn chứng khoán — Giảm sàn kịch biên độ 50% vốn đầu tư', () => {
+  it('Mặt 1: Cú sốc sụp đổ sàn chứng khoán — Giảm sàn kịch biên độ 70% vốn đầu tư (-70%)', () => {
     const { room } = setup();
     const p1 = room.players[0]!;
     p1.balance = 10000;
     room.phase = TurnPhase.HosePhase;
 
-    // rng trả về 0 -> floor(0 * 6) + 1 = Mặt 1 (0.50x)
+    // rng trả về 0 -> floor(0 * 6) + 1 = Mặt 1 (0.30x)
     const rng = () => 0;
     const res = handleHoseInvest(room, p1, rng, 2000);
 
     expect(res.success, 'Khớp lệnh đặt cược thành công').toBe(true);
-    expect(resolveHoseInvestment(2000, 1), 'Mặt 1 thu về 50% vốn = 1000 Tr.').toBe(1000);
-    expect(p1.balance, 'Số dư giảm 1000 Tr. do lỗ sàn: 10000 - 2000 + 1000 = 9000 Tr.').toBe(9000);
+    expect(resolveHoseInvestment(2000, 1), 'Mặt 1 thu về 30% vốn = 600 Tr.').toBe(600);
+    expect(p1.balance, 'Số dư giảm 1400 Tr. do lỗ sàn: 10000 - 2000 + 600 = 8600 Tr.').toBe(8600);
     expect(room.phase, 'FSM hoàn tất đầu tư và chuyển về PropertyManagement').toBe(TurnPhase.PropertyManagement);
   });
 
