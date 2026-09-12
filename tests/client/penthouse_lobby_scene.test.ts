@@ -19,6 +19,7 @@ import {
   PenthouseEnclosure,
   LuxuryPawnModel,
   LUXURY_PAWN_CONFIGS,
+  SunnyIslandLobbyScene,
 } from '../../src/client/3d/penthouse_lobby_scene';
 
 describe('[TC-P3.1/MSS] Thẩm Định Kích Thước Kiến Trúc Penthouse Lounge (PENTHOUSE_DIMENSIONS)', () => {
@@ -42,8 +43,8 @@ describe('[TC-P3.1/MSS] Thẩm Định Kích Thước Kiến Trúc Penthouse Lou
 });
 
 describe('[TC-P3.2/MSS] Bảng Mã Màu PBR & Nhận Diện Sang Trọng Penthouse (PENTHOUSE_COLORS)', () => {
-  it('Mặt sàn đá cẩm thạch trắng Carrara và viền kim loại vàng Champagne', () => {
-    expect(PENTHOUSE_COLORS.marbleFloor).toBe('#F8FAFC');
+  it('Mặt sàn đá cẩm thạch đen hoàng gia Nero Marquina và viền kim loại vàng Champagne', () => {
+    expect(PENTHOUSE_COLORS.marbleFloor).toBe('#0B0F19');
     expect(PENTHOUSE_COLORS.goldBezel).toBe('#F59E0B');
     expect(PENTHOUSE_COLORS.walnutTrim).toBe('#3E2723');
   });
@@ -149,11 +150,11 @@ describe('[TC-P3.5/MSS] Bộ Sinh Texture Thủ Tục (CanvasTexture Generator)'
 });
 
 describe('[TC-P3.6/MSS] Ràng Buộc Kiến Trúc & Hợp Đồng Mỹ Thuật (Contract Audit)', () => {
-  it('penthouse_enclosure.tsx và penthouse_lobby_scene.tsx sử dụng MeshReflectorMaterial cho sàn đá cẩm thạch', () => {
+  it('penthouse_enclosure.tsx và penthouse_lobby_scene.tsx sử dụng MeshReflectorMaterial cho sàn đá cẩm thạch đen Nero Marquina', () => {
     const enclosurePath = path.resolve(process.cwd(), 'src/client/3d/penthouse_enclosure.tsx');
     const source = fs.readFileSync(enclosurePath, 'utf-8');
     expect(source).toContain("MeshReflectorMaterial");
-    expect(source).toContain("mirror={0.45}");
+    expect(source).toContain("mirror={0.6}");
     expect(source).toContain("mixBlur={0.8}");
   });
 
@@ -161,12 +162,12 @@ describe('[TC-P3.6/MSS] Ràng Buộc Kiến Trúc & Hợp Đồng Mỹ Thuật (
     expect(typeof PenthouseLobbyScene).toBe('function');
   });
 
-  it('game_canvas.tsx hỗ trợ isLobby prop và kết xuất PenthouseLobbyScene', () => {
+  it('game_canvas.tsx hỗ trợ isLobby prop và kết xuất SunnyIslandLobbyScene', () => {
     const canvasPath = path.resolve(process.cwd(), 'src/client/game_canvas.tsx');
     const source = fs.readFileSync(canvasPath, 'utf-8');
     expect(source).toContain("import { PenthouseLobbyScene } from './3d/penthouse_lobby_scene';");
     expect(source).toContain('isLobby ? (');
-    expect(source).toContain('<PenthouseLobbyScene />');
+    expect(source).toContain('SunnyIslandLobbyScene');
   });
 
   it('main.tsx kết xuất <GameCanvas isLobby /> khi !gameStarted', () => {
@@ -179,7 +180,11 @@ describe('[TC-P3.6/MSS] Ràng Buộc Kiến Trúc & Hợp Đồng Mỹ Thuật (
     const lobbyPath = path.resolve(process.cwd(), 'src/client/ui/lobby/lobby_view.tsx');
     const source = fs.readFileSync(lobbyPath, 'utf-8');
     expect(source).toContain('<aside className="pointer-events-auto');
-    expect(source).toContain('VIP LOBBY: PENTHOUSE LOUNGE');
+    expect(source).toContain('SẢNH CHỜ: ĐẢO NGỌC NHIỆT ĐỚI');
+  });
+
+  it('sunny_island_lobby_scene.tsx xuất component SunnyIslandLobbyScene dưới dạng React Component', () => {
+    expect(typeof SunnyIslandLobbyScene).toBe('function');
   });
 });
 
@@ -258,8 +263,8 @@ describe('[TC-P3.9/MSS] 4 Linh Vật Cờ Thượng Lưu mạ Kim Loại PBR (Lu
     expect(elNaN.type).toBe('group');
   });
 
-  it('penthouse_lobby_scene.tsx không còn dùng hình nhân người que Lego mà dùng LuxuryPawnModel', () => {
-    const scenePath = path.resolve(process.cwd(), 'src/client/3d/penthouse_lobby_scene.tsx');
+  it('sunny_island_lobby_scene.tsx không còn dùng hình nhân người que Lego mà dùng LuxuryPawnModel', () => {
+    const scenePath = path.resolve(process.cwd(), 'src/client/3d/sunny_island_lobby_scene.tsx');
     const source = fs.readFileSync(scenePath, 'utf-8');
     expect(source).toContain('LuxuryPawnModel');
     expect(source).not.toContain('color="#FCD34D"'); // Bỏ đầu hình cầu người que Lego
@@ -268,23 +273,24 @@ describe('[TC-P3.9/MSS] 4 Linh Vật Cờ Thượng Lưu mạ Kim Loại PBR (Lu
 });
 
 describe('[TC-P3.10/MSS] Kiến Trúc Vách Kính Cong Panorama 180 Độ & Nẹp Khung Căn Khớp', () => {
-  it('penthouse_enclosure.tsx dựng vách kính cong 180 độ, nẹp nhôm và đèn Cove Light', () => {
+  it('penthouse_enclosure.tsx dựng vách kính cong 180 độ, 7 nan mạ vàng Champagne và đèn Cove Light', () => {
     const enclosurePath = path.resolve(process.cwd(), 'src/client/3d/penthouse_enclosure.tsx');
     const source = fs.readFileSync(enclosurePath, 'utf-8');
     expect(source).toContain('PANORAMA_WINDOW_CONFIG');
     expect(source).toContain('thetaLength: Math.PI');
-    expect(source).toContain('#1E293B'); // Nẹp nhôm xước than chì
+    expect(source).toContain('mullionCount: 7');
+    expect(source).toContain('#D97706'); // Nan đồng mạ vàng Champagne thanh mảnh
     expect(source).toContain('#FEF3C7'); // Dải đèn hắt Cove Light vàng ấm
-    expect(source).toContain('Math.sin(angle)'); // Nẹp nhôm căn chuẩn tọa độ cylinder
+    expect(source).toContain('Math.sin(angle)'); // Nẹp đồng căn chuẩn tọa độ cylinder
     expect(source).toContain('scale={[-1, 1, 1]}'); // Vành đai đúc cong khớp bán nguyệt
     expect(typeof PenthouseEnclosure).toBe('function');
   });
 });
 
 describe('[TC-P3.11/MSS] Sa Bàn Mini Phát Quang Cyan Hologram & Bệ Chiếu Ba Chiều (CentralHologram)', () => {
-  it('penthouse_lobby_scene.tsx sử dụng sa bàn mini phát quang Cyan Hologram thay cho bảng đen xì', () => {
-    const scenePath = path.resolve(process.cwd(), 'src/client/3d/penthouse_lobby_scene.tsx');
-    const source = fs.readFileSync(scenePath, 'utf-8');
+  it('penthouse_hologram.tsx sử dụng sa bàn mini phát quang Cyan Hologram thay cho bảng đen xì', () => {
+    const hologramPath = path.resolve(process.cwd(), 'src/client/3d/penthouse_hologram.tsx');
+    const source = fs.readFileSync(hologramPath, 'utf-8');
     expect(source).toContain('color="#06B6D4"');
     expect(source).toContain('emissive="#06B6D4"');
     expect(source).toContain('emissiveIntensity={1.8}');

@@ -425,7 +425,7 @@ export function App(): React.ReactElement {
 
   if (!gameStarted) {
     return (
-      <div className="relative w-screen h-screen overflow-hidden bg-slate-950">
+      <div className="fixed inset-0 w-full h-full overflow-hidden bg-slate-950">
         {errorMessage && (
           <div
             role="alert"
@@ -434,7 +434,7 @@ export function App(): React.ReactElement {
             {errorMessage}
           </div>
         )}
-        {/* Nền sa bàn 3D Sảnh Chờ Penthouse Lounge ngắm hoàng hôn vịnh biển */}
+        {/* Nền sa bàn 3D Sảnh Chờ Đảo Ngọc Nhiệt Đới ngắm toàn cảnh vịnh biển */}
         <div className="absolute inset-0 z-0 pointer-events-auto">
           <Suspense fallback={null}>
             <GameCanvas isLobby />
@@ -449,7 +449,7 @@ export function App(): React.ReactElement {
   }
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden bg-slate-950">
+    <div className="fixed inset-0 w-full h-full overflow-hidden bg-slate-950">
       {errorMessage && (
         <div
           role="alert"

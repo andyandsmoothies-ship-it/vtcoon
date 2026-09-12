@@ -171,4 +171,35 @@ describe('[UI-06.3/MSS] LobbyView Full Screen Markup', () => {
     expect(html).toContain('data-testid="lobby-mute-toggle-button"');
     expect(html).toContain('data-testid="toggle-lobby-panel-btn"');
   });
+
+  it('Nút BẮT ĐẦU TRẬN ĐẤU mang cursor-not-allowed và không có cursor-pointer khi chưa đủ điều kiện', () => {
+    useLobbyStore.getState().initLobby('VT1111', 'p1', true, 'Chủ Phòng Độc Hành');
+    const state = useLobbyStore.getState();
+    const element = React.createElement(LobbyView, {
+      roomCode: state.roomCode ?? undefined,
+      isHost: state.isHost,
+      slots: state.slots,
+    });
+    const html = renderToStaticMarkup(element);
+
+    // Chỉ có 1 người chơi nên chưa đủ điều kiện bắt đầu
+    expect(html).toContain('disabled=""');
+    expect(html).toContain('cursor-not-allowed');
+    expect(html).not.toMatch(/start-game-btn[^>]*cursor-pointer/);
+  });
+
+  it('PlayerSlotCard kháng lỗi an toàn khi playerName rỗng hoặc undefined', () => {
+    const corruptedSlot = {
+      ...createEmptySlot(1),
+      playerName: '',
+      isOccupied: true,
+    };
+    const element = React.createElement(PlayerSlotCard, {
+      slot: corruptedSlot,
+      isHostViewer: true,
+    });
+    const html = renderToStaticMarkup(element);
+    expect(html).toContain('Người chơi 2');
+    expect(html).toContain('>P<');
+  });
 });

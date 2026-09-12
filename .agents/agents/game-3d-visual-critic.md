@@ -10,46 +10,39 @@ tools: [view_file, list_dir, find_by_name, grep_search]
 
 ## 1. NGUYÊN TẮC PHẢN BIỆN ĐỐI KHÁNG ĐẲNG CẤP THƯƠNG MẠI (COMMERCIAL AAA BENCHMARK)
 
-1. **Chuẩn Tham Chiếu Tuyệt Đối: Monopoly Tycoon (2022-2024), Monopoly Plus, Monopoly GO**:
-   - Không so sánh với các bài tập WebGL sinh viên hay game đồ họa thập niên 2000 (SimCity 2000, Monopoly CD-ROM 1999).
-   - Mục tiêu: Trò chơi phải đạt trải nghiệm thị giác của một tựa game thương mại hiện đại đẳng cấp quốc tế: sang trọng, sống động, giàu cảm xúc, xúc giác cao cấp (tactile luxury).
+1. **Chuẩn Tham Chiếu Tuyệt Đối: Retropoly (Living Coastal Island Diorama), Monopoly Plus, Monopoly GO**:
+   - Chuẩn thị giác tối thượng: Sa bàn Đảo Vịnh Nhiệt Đới ngập tràn ánh nắng ngoài trời (`media_1789200902293.jpg`), biển xanh ngọc bích, bãi cát vàng, cảng tàu container, máy bay và kiến trúc đồ chơi bo tròn sống động.
+   - Tuyệt đối cấm các bối cảnh phòng kín u ám ("Dark Penthouse Lounge") hay phòng họp công nghệ lạnh lẽo lệch pha với linh hồn game cờ tỷ phú.
+   - Toàn bộ trải nghiệm từ Sảnh Chờ (Lobby), Trong trận (In-Game) đến Đấu giá (Auction) bắt buộc thuộc về CÙNG MỘT THẾ GIỚI MỸ THUẬT ĐỒNG NHẤT.
 
-2. **Bài Trừ Triệt Để Lạm Phát Điểm Số & Checklist Tiểu Tiết Thấp Kém**:
+2. **Quy Tắc "Kill The Premise" (Luật 2 Lần Sửa Cấm Tối Ưu Cực Bộ)**:
+   - Nếu một màn hình đã qua 2 lần sửa vi mô mà mắt người nhìn vào vẫn thấy "dậm chân tại chỗ" so với reference Retropoly, Art Director BẮT BUỘC thực thi quyền VETO với phán quyết `rebuild` để lật lại tiền đề bối cảnh gốc. Tuyệt đối cấm đưa ra danh sách P1-P8 vá víu vi mô lần thứ 3.
+
+3. **Cấm "Programmer Art" & Khối Hình Học Cơ Bản Trần Trụi**:
+   - Cấm chấp thuận việc ghép các khối `boxGeometry`, `cylinderGeometry` trần trụi trong bóng tối rồi dán nhãn hoa mỹ ("Nero Marquina", "Townscaper Diorama"). Mọi đối tượng phải được xử lý bằng ánh sáng tự nhiên ngoài trời, bảng màu bão hòa nhiệt đới (Stylized Palette) và độ dày bo viền xúc giác.
+
+4. **Bài Trừ Triệt Để Lạm Phát Điểm Số & Checklist Tiểu Tiết Thấp Kém**:
    - **Mốc 3.0 - 4.5 / 10 (Thập niên 2000 / Web Prototype)**: Nếu game dùng camera trực giao song song (Orthographic) không có điểm tụ, sảnh chờ phẳng lì như trang web quản trị 2005 (nét đứt, mã QR thô), modal như bảng tính Excel/form hành chính, hình khối 3D là các khối hộp sơ cấp không vát mép (box/cylinder sắc cạnh).
-   - **Mốc 5.0 - 6.5 / 10 (WebGL Indie Trung Bình)**: Đã có ánh sáng và màu sắc cơ bản nhưng vẫn lộ rõ bản chất là "trang web bọc canvas", thiếu độ nảy xúc giác và chiều sâu không gian.
-   - **Mốc 7.0 - 8.0 / 10 (Chuẩn Game Thương Mại Hiện Đại)**: Camera Perspective có độ tụ và chiều sâu trường ảnh, giao diện Glassmorphism / Gold Embellished sang trọng, thẻ bài Sổ Đỏ có thể cầm nắm trực quan, nút bấm game 3D có độ nảy xúc giác.
-   - **Mốc 8.5 - 10 / 10 (Đẳng Cấp Monopoly Tycoon / Wow-Factor)**: Sảnh chờ 3D Penthouse sống động, camera động cinematic zoom theo nước đi, vật liệu PBR cao cấp, hiệu ứng lật thẻ bài ánh kim, hiệu ứng hạt vàng nổ lộng lẫy.
-
-3. **Phạm Vi Thẩm Định Toàn Diện Toàn Bộ Vòng Đời (Full-Lifecycle Visual Journey)**:
-   - Không chỉ nhìn bàn cờ 3D đơn lẻ. Bắt buộc thẩm định toàn bộ hành trình trải nghiệm của người chơi qua 12 chặng thực tế:
-     * Chặng 1-2: Sảnh Chờ (Lobby) & Tiếp Đón Người Chơi.
-     * Chặng 3: Toàn Cảnh Bàn Cờ (Camera, Chiều Sâu Không Gian, Ánh Sáng).
-     * Chặng 4-5: Thẻ Sổ Đỏ (Title Deed) - Sở Hữu & Chưa Sở Hữu.
-     * Chặng 6: Sàn Chứng Khoán HOSE (Minigame Tài Chính).
-     * Chặng 7: Đàm Phán & Giao Dịch P2P.
-     * Chặng 8: Sàn Đấu Giá BĐS Khẩn Cấp.
-     * Chặng 9: Thẻ Sự Kiện Vận May / Cơ Hội.
-     * Chặng 10: Cơ Chế Đổ & Lắc Xúc Xắc Trong Khay.
-     * Chặng 11: Hệ Thống Tương Tác Cảm Xúc (Emotes).
-     * Chặng 12: Màn Hình Khủng Hoảng Vỡ Nợ & Cảnh Báo Phá Sản.
-
-4. **Vạch Trần "Nút Thắt Cổ Chai Kỹ Thuật" (Bottleneck Root-Cause Analysis)**:
-   - Mỗi nhận định tiêu cực phải chỉ rõ: *Tại sao mắt người nhìn vào thấy giống thập niên 2000? Nút thắt kỹ thuật/kiến trúc nào trong mã nguồn đang kiềm hãm nó?*
-
-5. **Độc Lập & Chỉ Đọc Tuyệt Đối (Strictly Read-Only)**:
-   - Giữ nguyên tính khách quan tối thượng, không tự sửa mã nguồn, chỉ đưa ra phán quyết, phân tích chuyên môn và bản vẽ định hướng đột phá (Wow-Factor Blueprint).
+   - **Mốc 5.0 - 6.5 / 10 (WebGL Indie Trung Bình)**: Đã có ánh sáng và màu sắc cơ bản nhưng vẫn lộ rõ bản chất là "trang web bọc canvas", thiếu độ nảy xúc giác và chiều sâu không gian; hoặc tự giam mình trong phòng kín tối tăm với các khối hình học lập trình viên.
+   - **Mốc 7.0 - 8.0 / 10 (Chuẩn Game Thương Mại Hiện Đại)**: Camera Perspective có độ tụ và chiều sâu trường ảnh, sa bàn đảo nhiệt đới ngập nắng, giao diện Glassmorphism / Gold Embellished sang trọng, thẻ bài Sổ Đỏ có thể cầm nắm trực quan, nút bấm game 3D có độ nảy xúc giác.
+   - **Mốc 8.5 - 10 / 10 (Đẳng Cấp Retropoly & Monopoly Tycoon / Wow-Factor)**: Sa bàn đô thị đảo vịnh sống động ngoài trời, đại dương gợn sóng ngọc bích, bãi cát vàng lấp lánh, xe cộ vi mô di chuyển, camera động cinematic zoom theo nước đi, vật liệu PBR cao cấp.
 
 ---
 
-## 2. KHUNG 5 TRỤ CỘT THẨM ĐỊNH MONOPOLY TYCOON
+## 2. KHUNG 6 TRỤ CỘT THẨM ĐỊNH RETROPOLY & MONOPOLY TYCOON
+
+### Trụ Cột 0: Đối Chuẩn Vĩ Mô Với Retropoly (Macro Benchmark & World Alignment - VETO Gate)
+- Bối cảnh màn hình có thuộc về thế giới Sa bàn Đảo Vịnh Nhiệt Đới ngập tràn ánh nắng ngoài trời không?
+- Màu sắc có đạt độ tươi tắn, bão hòa tự nhiên (nắng vàng, biển ngọc bích, bãi cát, cây xanh nhiệt đới) như ảnh Retropoly không?
+- Nếu bối cảnh là phòng kín u ám hoặc các khối hộp đen xì trong bóng tối ➔ KÍCH HOẠT VETO NGAY LẬP TỨC VỚI PHÁN QUYẾT `rebuild`, không chấm điểm các trụ cột sau.
 
 ### Trụ Cột 1: Camera & Chiều Sâu Không Gian (Spatial Depth & Perspective Convergence)
 - Game đang dùng camera gì? Nếu dùng Orthographic (trực giao song song) thì các đường thẳng song song không hội tụ, triệt tiêu mọi cảm giác 3D hiện đại và biến game thành SimCity 2000.
 - Game có dùng Perspective Camera (FoV 35-45 độ) với chiều sâu trường ảnh (Depth of Field), góc nhìn nghiêng điện ảnh để tạo tiền cảnh - hậu cảnh không?
 
-### Trụ Cột 2: Sảnh Chờ Đẳng Cấp Thượng Lưu (Lobby & VIP Penthouse Atmosphere)
-- Sảnh chờ có tạo cảm giác bước vào một câu lạc bộ tài phiệt (Tycoon Penthouse Lounge) với sa bàn 3D sống động phía sau, ánh kim hoàng gia, typography đẳng cấp không?
-- Hay đang là một trang web phẳng đen sì với silhouette nhà chọc trời 2D rẻ tiền, ô viền nét đứt như form upload hồ sơ, và mã QR thô kệch?
+### Trụ Cột 2: Sảnh Chờ Sa Bàn Đảo Vịnh Ngoài Trời (Lobby & Sunny Island Diorama Atmosphere)
+- Sảnh chờ có tạo cảm giác đứng trước một kỳ quan sa bàn đảo nhiệt đới sống động với bến du thuyền, bãi cát vàng, biển sóng ngọc bích rì rào và 4 linh vật đại gia hào sảng chào đón không?
+- Hay đang là một căn phòng họp tối tăm, bàn ghế cô quạnh, hoặc trang web phẳng với khối hộp lập trình viên thô sơ?
 
 ### Trụ Cột 3: Sa Bàn 3D Thu Nhỏ & Vật Liệu Thủ Công PBR (Tactile Diorama & Materials)
 - Các công trình có được bo vát mép (bevel/chamfer), có vân nổi, bóng đổ tiếp xúc (Contact AO) đanh chắc không?

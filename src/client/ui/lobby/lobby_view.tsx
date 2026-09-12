@@ -1,4 +1,4 @@
-// [TC-NET02.1/MSS][TC-NET02.2/MSS] LobbyView — Màn hình Sảnh Chờ chính của VTCoOn
+// [TC-NET02.1/MSS][TC-NET02.2/MSS][IMP-20] LobbyView — Màn hình Sảnh Chờ chính của VTCoOn
 // Nguồn: docs/epics/networking/_epic_ledger.md § Slice NET-02 & Giai đoạn 3: Penthouse Lounge
 import React, { useState } from 'react';
 import { useLobbyStore } from '../../store/lobby_store';
@@ -111,9 +111,9 @@ export function LobbyView({
   };
 
   return (
-    <div className="relative w-full h-full min-h-screen text-slate-100 p-4 md:p-6 select-none pointer-events-none overflow-hidden">
+    <div className="relative w-full h-full min-h-screen text-slate-100 select-none pointer-events-none overflow-hidden">
       {/* Huy hiệu thương hiệu tinh tế góc trên bên trái */}
-      <header className="pointer-events-auto absolute top-4 left-4 md:top-6 md:left-6 z-20 flex items-center gap-3 bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl px-4 py-2.5 shadow-2xl">
+      <header className="pointer-events-auto absolute top-4 left-4 md:top-6 md:left-6 z-30 flex items-center gap-3 bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl px-4 py-2.5 shadow-2xl">
         <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center font-black text-amber-950 text-sm shadow">
           VT
         </div>
@@ -122,7 +122,7 @@ export function LobbyView({
             VTCOON
           </h1>
           <p className="text-[10px] text-slate-400 uppercase tracking-wider">
-            Sảnh Chờ VIP Penthouse Lounge • Tầng 80
+            Sảnh Chờ Đảo Ngọc Nhiệt Đới • Bến Cảng Du Thuyền
           </p>
         </div>
         {/* Nút Bật / Tắt âm thanh nhanh tại Sảnh Chờ */}
@@ -151,13 +151,13 @@ export function LobbyView({
         </button>
       </header>
 
-      {/* Thẻ Glassmorphism mỏng nổi bên cánh phải theo Chuẩn Ảnh Concept 3 */}
-      <aside className="pointer-events-auto absolute top-4 right-4 bottom-4 w-96 max-w-[calc(100vw-2rem)] z-20 flex flex-col justify-between p-4 md:p-5 bg-slate-900/85 backdrop-blur-2xl border border-white/15 rounded-3xl shadow-2xl text-slate-100 overflow-y-auto gap-3.5 transition-transform duration-300" style={{ transform: isPanelCollapsed ? 'translateX(calc(100% + 2rem))' : undefined }}>
-        {/* Tiêu đề & Mã phòng 6 ký tự */}
+      {/* Thẻ Glassmorphism mỏng nổi bên cánh phải theo Chuẩn Ảnh Concept 3 (Khắc phục P1 & P8) */}
+      <aside className="pointer-events-auto absolute top-[74px] sm:top-6 bottom-6 right-3 md:right-6 w-[calc(100%-1.5rem)] sm:w-[380px] max-w-[380px] z-20 flex flex-col justify-between p-4 md:p-5 bg-slate-900/85 backdrop-blur-2xl border border-white/15 rounded-3xl shadow-2xl text-slate-100 overflow-hidden gap-3.5 transition-transform duration-300" style={{ transform: isPanelCollapsed ? 'translateX(calc(100% + 2rem))' : undefined }}>
+        {/* Tiêu đề & Mã phòng 6 ký tự (Khắc phục P7 & P6) */}
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-black tracking-wider uppercase text-amber-400 flex items-center gap-1.5">
-              <span>💎</span> VIP LOBBY: PENTHOUSE LOUNGE
+              <span>🏝️</span> SẢNH CHỜ: ĐẢO NGỌC NHIỆT ĐỚI
             </span>
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">
               {occupiedCount === 4 && slots.every((s) => !s.isOccupied || s.isReady)
@@ -166,15 +166,19 @@ export function LobbyView({
             </span>
           </div>
 
-          <div className="flex items-center justify-between gap-2 bg-slate-950/70 border border-slate-800 rounded-xl px-3 py-2 shadow-inner">
-            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Mã Phòng:</span>
-            <span className="text-xl font-mono font-extrabold tracking-widest text-amber-400" data-testid="lobby-room-code">
+          <div className="flex items-center justify-between gap-2.5 rounded-2xl border border-amber-500/30 bg-gradient-to-r from-slate-950/90 via-amber-950/20 to-slate-950/90 shadow-[inset_0_1px_0_rgba(251,191,36,0.15)] px-3.5 py-2.5">
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Mã Phòng:</span>
+            <span className="text-2xl font-black font-mono tracking-[0.25em] text-amber-300 drop-shadow-[0_2px_8px_rgba(245,158,11,0.3)]" data-testid="lobby-room-code">
               {roomCode}
             </span>
             <button
               type="button"
               onClick={handleCopyCode}
-              className="text-xs px-2.5 py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition-all cursor-pointer border border-slate-700 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+              className={`min-h-[38px] px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer border active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+                copiedCode
+                  ? 'bg-amber-500/20 text-amber-300 border-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.35)]'
+                  : 'bg-slate-800/90 hover:bg-slate-700/90 text-slate-200 border-slate-700/80'
+              }`}
               data-testid="copy-room-code-btn"
               aria-label="Sao chép mã phòng"
             >
@@ -183,7 +187,7 @@ export function LobbyView({
           </div>
         </div>
 
-        {/* Danh sách 4 vị trí người chơi */}
+        {/* Danh sách 4 vị trí người chơi (Khử bẫy cuộn lồng nhau P8) */}
         <section className="flex flex-col gap-2 flex-1 min-h-0 overflow-y-auto pr-0.5">
           <div className="flex items-center justify-between px-1">
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-300">
@@ -205,7 +209,7 @@ export function LobbyView({
           </div>
         </section>
 
-        {/* Thẻ Thể Lệ Thi Đấu & Mã QR Mời Bạn Bè */}
+        {/* Thẻ Thể Lệ Thi Đấu & Mã QR Mời Bạn Bè (Khắc phục P5) */}
         <div
           className="w-full bg-slate-950/70 border border-slate-800/80 rounded-2xl p-3 shadow-md text-left"
           data-testid="lobby-rules-card"
@@ -234,33 +238,33 @@ export function LobbyView({
 
           <div className="grid grid-cols-3 gap-1.5">
             {/* Huy hiệu 1: Vốn khởi điểm */}
-            <div className="flex flex-col items-center text-center p-1.5 rounded-lg bg-slate-900/80 border border-slate-800">
-              <span className="text-lg mb-0.5" aria-hidden="true">💰</span>
-              <span className="text-[10px] font-black text-amber-300">Vốn 15 Tỷ VNĐ</span>
-              <span className="text-[8px] text-slate-400 mt-0.5 leading-tight">15.000 Tr. VNĐ</span>
-              <span className="text-[7.5px] text-emerald-400 mt-0.5 leading-tight">+2.000 Tr. VNĐ</span>
+            <div className="flex flex-col items-center text-center p-2 rounded-xl bg-slate-900/90 border border-slate-800/90 shadow-sm">
+              <span className="text-xl mb-1" aria-hidden="true">💰</span>
+              <span className="text-[11px] font-bold text-amber-300">15.000 Tr. VNĐ</span>
+              <span className="text-[10px] text-slate-300 mt-0.5 leading-tight">Vốn 15 Tỷ VNĐ</span>
+              <span className="text-[10px] font-semibold text-emerald-400 mt-0.5 leading-tight">+2.000 Tr. VNĐ</span>
             </div>
 
             {/* Huy hiệu 2: Thời lượng ván đấu */}
-            <div className="flex flex-col items-center text-center p-1.5 rounded-lg bg-slate-900/80 border border-slate-800">
-              <span className="text-lg mb-0.5" aria-hidden="true">⏳</span>
-              <span className="text-[10px] font-black text-amber-300">30 Vòng Đấu</span>
-              <span className="text-[8px] text-slate-400 mt-0.5 leading-tight">30 vòng</span>
-              <span className="text-[7.5px] text-slate-500 mt-0.5 leading-tight">Bàn cờ 40 ô</span>
+            <div className="flex flex-col items-center text-center p-2 rounded-xl bg-slate-900/90 border border-slate-800/90 shadow-sm">
+              <span className="text-xl mb-1" aria-hidden="true">⏳</span>
+              <span className="text-[11px] font-bold text-amber-300">30 vòng</span>
+              <span className="text-[10px] text-slate-300 mt-0.5 leading-tight">30 Vòng Đấu</span>
+              <span className="text-[10px] font-medium text-slate-400 mt-0.5 leading-tight">Bàn cờ 40 ô</span>
             </div>
 
             {/* Huy hiệu 3: Điều kiện thắng */}
-            <div className="flex flex-col items-center text-center p-1.5 rounded-lg bg-slate-900/80 border border-slate-800">
-              <span className="text-lg mb-0.5" aria-hidden="true">🏆</span>
-              <span className="text-[10px] font-black text-amber-300">Đại Gia Vô Địch</span>
-              <span className="text-[8px] text-slate-400 mt-0.5 leading-tight">Điều kiện thắng</span>
-              <span className="text-[7.5px] text-slate-500 mt-0.5 leading-tight">Tài sản cực đại</span>
+            <div className="flex flex-col items-center text-center p-2 rounded-xl bg-slate-900/90 border border-slate-800/90 shadow-sm">
+              <span className="text-xl mb-1" aria-hidden="true">🏆</span>
+              <span className="text-[11px] font-bold text-amber-300">Điều kiện thắng</span>
+              <span className="text-[10px] text-slate-300 mt-0.5 leading-tight">Đại Gia Vô Địch</span>
+              <span className="text-[10px] font-medium text-slate-400 mt-0.5 leading-tight">Tài sản cực đại</span>
             </div>
           </div>
         </div>
 
-        {/* Footer / Action Bar */}
-        <footer className="pt-2 border-t border-slate-800/80 flex items-center justify-between gap-2">
+        {/* Footer / Action Bar (Khắc phục P3 Tactile 3D Button) */}
+        <footer className="pt-2 pb-1 border-t border-slate-800/80 flex items-center justify-between gap-2">
           <button
             type="button"
             onClick={resetLobby}
@@ -279,10 +283,10 @@ export function LobbyView({
                 type="button"
                 disabled={!canStartCheck.canStart}
                 onClick={handleStartGame}
-                className={`min-h-[44px] py-2.5 px-6 rounded-xl font-extrabold text-xs tracking-wide transition-all shadow-xl cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+                className={`min-h-[44px] py-2.5 px-6 rounded-xl font-black text-xs tracking-wider transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
                   canStartCheck.canStart
-                    ? 'bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-amber-950 font-black active:scale-95 shadow-amber-500/40 ring-2 ring-amber-300/60'
-                    : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700/50'
+                    ? 'cursor-pointer bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 text-amber-950 shadow-[0_4px_0_0_#b45309,0_8px_16px_rgba(245,158,11,0.25)] hover:shadow-[0_2px_0_0_#b45309] hover:translate-y-[2px] active:shadow-none active:translate-y-[4px] ring-1 ring-amber-300/50'
+                    : 'cursor-not-allowed bg-slate-800 text-slate-500 border border-slate-700/50'
                 }`}
                 data-testid="start-game-btn"
               >
@@ -292,10 +296,10 @@ export function LobbyView({
               <button
                 type="button"
                 onClick={toggleMyReady}
-                className={`min-h-[44px] py-2.5 px-6 rounded-xl font-bold text-xs tracking-wide transition-all shadow-lg cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+                className={`min-h-[44px] py-2.5 px-6 rounded-xl font-bold text-xs tracking-wide transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
                   isReady
-                    ? 'bg-emerald-600 hover:bg-emerald-500 text-white active:scale-95'
-                    : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 active:scale-95'
+                    ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-[0_4px_0_0_#047857,0_8px_16px_rgba(16,185,129,0.25)] hover:shadow-[0_2px_0_0_#047857] hover:translate-y-[2px] active:shadow-none active:translate-y-[4px]'
+                    : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 shadow-[0_4px_0_0_#334155] hover:shadow-[0_2px_0_0_#334155] hover:translate-y-[2px] active:shadow-none active:translate-y-[4px]'
                 }`}
                 data-testid="toggle-ready-btn"
               >

@@ -18,6 +18,7 @@ import { EventCard3D } from './3d/event_card_3d';
 import { Coronation3DStage } from './3d/coronation_3d_stage';
 import { PostProcessingPipeline } from './3d/post_processing_pipeline';
 import { PenthouseLobbyScene } from './3d/penthouse_lobby_scene';
+import { SunnyIslandLobbyScene } from './3d/sunny_island_lobby_scene';
 import { TimeOfDayLighting } from './3d/time_of_day_lighting';
 import { useEnvironmentStore, TIME_OF_DAY_PRESETS } from './store/environment_store';
 import { useVfxStore } from './store/vfx_store';
@@ -234,7 +235,7 @@ export function GameCanvas({
       }));
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden">
+    <div className="relative w-full h-full overflow-hidden">
       <Canvas
         shadows
         dpr={[1, 2]}
@@ -245,10 +246,10 @@ export function GameCanvas({
           antialias: true,
         }}
         style={{
-          width: '100vw',
-          height: '100vh',
+          width: '100%',
+          height: '100%',
           display: 'block',
-          background: isLobby ? '#0F172A' : canvasBg,
+          background: isLobby ? '#38BDF8' : canvasBg,
           transition: 'background-color 2.5s ease',
         }}
       >
@@ -257,7 +258,11 @@ export function GameCanvas({
         </React.Suspense>
 
         {isLobby ? (
-          <PenthouseLobbyScene />
+          <>
+            <SunnyIslandLobbyScene />
+            <ContactShadows position={[0, -0.01, 0]} opacity={0.65} scale={20} blur={1.5} far={4} />
+            <PostProcessingPipeline />
+          </>
         ) : (
           <>
             <AdaptiveCinematicCamera />

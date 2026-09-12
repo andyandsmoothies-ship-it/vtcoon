@@ -12,7 +12,7 @@ export const PANORAMA_WINDOW_CONFIG = {
   thetaStart: 0,
   thetaLength: Math.PI,
   rotationY: 2.51, // Quay 144 độ để bao trọn góc nhìn camera ra vịnh biển hoàng hôn
-  mullionCount: 9,
+  mullionCount: 7,
 } as const;
 
 export function PenthouseEnclosure(): React.ReactElement {
@@ -26,7 +26,7 @@ export function PenthouseEnclosure(): React.ReactElement {
     };
   }, [sunsetTexture]);
 
-  // Góc chia 9 nan nẹp khung nhôm chia 8 ô cửa sổ kịch trần
+  // Góc chia 7 nan nẹp khung đồng mạ vàng Champagne chia 6 ô cửa sổ kịch trần
   const mullionAngles = useMemo(() => {
     return Array.from({ length: PANORAMA_WINDOW_CONFIG.mullionCount }, (_, i) => {
       return (i * Math.PI) / (PANORAMA_WINDOW_CONFIG.mullionCount - 1);
@@ -35,21 +35,21 @@ export function PenthouseEnclosure(): React.ReactElement {
 
   return (
     <group>
-      {/* 1. Sàn đá cẩm thạch trắng Carrara phản chiếu chân thực với MeshReflectorMaterial */}
+      {/* 1. Sàn đá cẩm thạch đen Nero Marquina phản chiếu chân thực với MeshReflectorMaterial */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
         <planeGeometry args={[36, 36]} />
         <MeshReflectorMaterial
           blur={[300, 100]}
           resolution={512}
-          mirror={0.45}
+          mirror={0.6}
           mixBlur={0.8}
           mixStrength={1.4}
-          roughness={0.12}
+          roughness={0.18}
           depthScale={1.2}
           minDepthThreshold={0.4}
           maxDepthThreshold={1.4}
           color={PENTHOUSE_COLORS.marbleFloor}
-          metalness={0.08}
+          metalness={0.15}
         />
       </mesh>
 
@@ -90,34 +90,34 @@ export function PenthouseEnclosure(): React.ReactElement {
           />
         </mesh>
 
-        {/* Nẹp khung nhôm xước mờ màu đen than chì (#1E293B, roughness: 0.3) chia vách kính thành các ô kịch trần */}
+        {/* Nẹp khung hợp kim đồng mạ vàng Champagne thanh mảnh (#D97706, roughness: 0.2, metalness: 0.9) chia vách kính thành các ô kịch trần */}
         {mullionAngles.map((angle, idx) => {
           const x = (PANORAMA_WINDOW_CONFIG.radius - 0.04) * Math.sin(angle);
           const z = (PANORAMA_WINDOW_CONFIG.radius - 0.04) * Math.cos(angle);
           return (
             <mesh key={`mullion-${idx}`} position={[x, 0, z]}>
-              <cylinderGeometry args={[0.06, 0.06, PANORAMA_WINDOW_CONFIG.height, 16]} />
-              <meshStandardMaterial color="#1E293B" roughness={0.3} metalness={0.85} />
+              <cylinderGeometry args={[0.025, 0.025, PANORAMA_WINDOW_CONFIG.height, 16]} />
+              <meshStandardMaterial color="#D97706" roughness={0.2} metalness={0.9} />
             </mesh>
           );
         })}
 
-        {/* Nẹp đai cong trên đỉnh và chân vách kính */}
+        {/* Nẹp đai cong trên đỉnh và chân vách kính mạ vàng Champagne */}
         <mesh
           position={[0, PANORAMA_WINDOW_CONFIG.height / 2 - 0.08, 0]}
           rotation={[Math.PI / 2, 0, -Math.PI / 2]}
           scale={[-1, 1, 1]}
         >
-          <torusGeometry args={[PANORAMA_WINDOW_CONFIG.radius - 0.04, 0.06, 8, 32, Math.PI]} />
-          <meshStandardMaterial color="#1E293B" roughness={0.3} metalness={0.85} />
+          <torusGeometry args={[PANORAMA_WINDOW_CONFIG.radius - 0.04, 0.03, 8, 32, Math.PI]} />
+          <meshStandardMaterial color="#D97706" roughness={0.2} metalness={0.9} />
         </mesh>
         <mesh
           position={[0, -PANORAMA_WINDOW_CONFIG.height / 2 + 0.08, 0]}
           rotation={[Math.PI / 2, 0, -Math.PI / 2]}
           scale={[-1, 1, 1]}
         >
-          <torusGeometry args={[PANORAMA_WINDOW_CONFIG.radius - 0.04, 0.06, 8, 32, Math.PI]} />
-          <meshStandardMaterial color="#1E293B" roughness={0.3} metalness={0.85} />
+          <torusGeometry args={[PANORAMA_WINDOW_CONFIG.radius - 0.04, 0.03, 8, 32, Math.PI]} />
+          <meshStandardMaterial color="#D97706" roughness={0.2} metalness={0.9} />
         </mesh>
 
         {/* Hậu cảnh hoàng hôn bán đảo vịnh biển uốn cong tự nhiên phía sau vách kính */}
