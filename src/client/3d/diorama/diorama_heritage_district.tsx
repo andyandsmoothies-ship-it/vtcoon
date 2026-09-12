@@ -1,5 +1,6 @@
 // [UI-S02/MSS] DioramaHeritageDistrict — Ben Thanh Market clock tower & Red-brick Indochine Cathedral
 import React from 'react';
+import { RoundedBox } from '@react-three/drei';
 import { useEnvironmentStore } from '../../store/environment_store';
 
 export function DioramaHeritageDistrict(): React.ReactElement {
@@ -13,17 +14,21 @@ export function DioramaHeritageDistrict(): React.ReactElement {
           1. CHỢ BẾN THÀNH BIỂU TƯỢNG (Iconic Ben Thanh Market)
          ======================================================== */}
       <group position={[0.2, 0, -0.7]}>
-        {/* Nền móng chợ lát gạch vỉa hè */}
-        <mesh receiveShadow position={[0, 0.02, 0]}>
-          <boxGeometry args={[1.2, 0.04, 1.0]} />
-          <meshStandardMaterial color="#E2E8F0" roughness={0.6} />
+        {/* Tấm tiếp xúc bóng chân chợ (Contact Shadow Plinth) */}
+        <mesh position={[0, 0.002, 0]} receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[1.28, 1.08]} />
+          <meshBasicMaterial color="#0F172A" transparent opacity={0.36} />
         </mesh>
 
-        {/* Khối nhà lồng chợ phía sau mái ngói đất nung đỏ */}
-        <mesh castShadow receiveShadow position={[0, 0.12, 0.2]}>
-          <boxGeometry args={[1.0, 0.18, 0.55]} />
+        {/* Nền móng chợ lát gạch vỉa hè bo viền */}
+        <RoundedBox args={[1.2, 0.04, 1.0]} radius={0.015} smoothness={2} receiveShadow position={[0, 0.02, 0]}>
+          <meshStandardMaterial color="#E2E8F0" roughness={0.6} />
+        </RoundedBox>
+
+        {/* Khối nhà lồng chợ phía sau mái ngói đất nung đỏ bo viền */}
+        <RoundedBox args={[1.0, 0.18, 0.55]} radius={0.012} smoothness={2} castShadow receiveShadow position={[0, 0.12, 0.2]}>
           <meshStandardMaterial color="#FEF3C7" roughness={0.5} />
-        </mesh>
+        </RoundedBox>
         <mesh castShadow position={[0, 0.25, 0.2]}>
           <coneGeometry args={[0.7, 0.14, 4]} />
           <meshStandardMaterial color="#B91C1C" roughness={0.4} />
@@ -31,21 +36,19 @@ export function DioramaHeritageDistrict(): React.ReactElement {
 
         {/* Tháp đồng hồ trung tâm mặt tiền vươn cao */}
         <group position={[0, 0, -0.2]}>
-          {/* Chân tháp vàng kem Indochine */}
-          <mesh castShadow receiveShadow position={[0, 0.22, 0]}>
-            <boxGeometry args={[0.42, 0.4, 0.42]} />
+          {/* Chân tháp vàng kem Indochine bo viền */}
+          <RoundedBox args={[0.42, 0.4, 0.42]} radius={0.015} smoothness={2} castShadow receiveShadow position={[0, 0.22, 0]}>
             <meshStandardMaterial
               color="#FDE047"
               roughness={0.45}
               emissive="#FDE047"
               emissiveIntensity={isNight ? 0.6 : isSunset ? 0.25 : 0.0}
             />
-          </mesh>
-          {/* Cổng vòm chợ phía dưới */}
-          <mesh position={[0, 0.1, -0.215]}>
-            <boxGeometry args={[0.2, 0.18, 0.02]} />
+          </RoundedBox>
+          {/* Cổng vòm chợ phía dưới bo viền */}
+          <RoundedBox args={[0.2, 0.18, 0.02]} radius={0.008} smoothness={2} position={[0, 0.1, -0.215]}>
             <meshStandardMaterial color="#1E293B" roughness={0.8} />
-          </mesh>
+          </RoundedBox>
           {/* Mặt đồng hồ tròn phía trước phát sáng vàng ấm ban đêm */}
           <mesh position={[0, 0.32, -0.215]}>
             <circleGeometry args={[0.08, 16]} />
@@ -81,11 +84,16 @@ export function DioramaHeritageDistrict(): React.ReactElement {
           2. NHÀ THỜ CỔ GẠCH ĐỎ ĐÔNG DƯƠNG (Heritage Cathedral)
          ======================================================== */}
       <group position={[0.2, 0, 0.75]}>
-        {/* Gian thánh đường chính bằng gạch đỏ trần */}
-        <mesh castShadow receiveShadow position={[0, 0.22, 0.1]}>
-          <boxGeometry args={[0.62, 0.4, 0.7]} />
-          <meshStandardMaterial color="#B45309" roughness={0.65} />
+        {/* Tấm tiếp xúc bóng chân nhà thờ (Contact Shadow Plinth) */}
+        <mesh position={[0, 0.002, 0.1]} receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[0.72, 0.8]} />
+          <meshBasicMaterial color="#0F172A" transparent opacity={0.38} />
         </mesh>
+
+        {/* Gian thánh đường chính bằng gạch đỏ trần bo viền */}
+        <RoundedBox args={[0.62, 0.4, 0.7]} radius={0.015} smoothness={2} castShadow receiveShadow position={[0, 0.22, 0.1]}>
+          <meshStandardMaterial color="#B45309" roughness={0.65} />
+        </RoundedBox>
         {/* Mái ngói thánh đường chữ V vát dốc */}
         <mesh castShadow position={[0, 0.48, 0.1]} rotation={[0, 0, 0]}>
           <coneGeometry args={[0.48, 0.2, 4]} />
@@ -111,11 +119,10 @@ export function DioramaHeritageDistrict(): React.ReactElement {
         {/* Hai tháp chuông đối xứng vút cao */}
         {[-0.24, 0.24].map((tx) => (
           <group key={`cathedral-spire-${tx}`} position={[tx, 0, -0.2]}>
-            {/* Thân tháp vuông */}
-            <mesh castShadow receiveShadow position={[0, 0.35, 0]}>
-              <boxGeometry args={[0.2, 0.68, 0.2]} />
+            {/* Thân tháp vuông bo viền */}
+            <RoundedBox args={[0.2, 0.68, 0.2]} radius={0.01} smoothness={2} castShadow receiveShadow position={[0, 0.35, 0]}>
               <meshStandardMaterial color="#B45309" roughness={0.65} />
-            </mesh>
+            </RoundedBox>
             {/* Chóp nhọn Gothic vươn lên bầu trời */}
             <mesh castShadow position={[0, 0.82, 0]}>
               <coneGeometry args={[0.16, 0.32, 4]} />

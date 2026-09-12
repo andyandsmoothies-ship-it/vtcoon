@@ -205,7 +205,7 @@ export function LayeredDioramaTile({
       {tileTexture ? (
         <mesh position={[0, 0.103, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
           <planeGeometry args={[1.64, 2.16]} />
-          <meshStandardMaterial map={tileTexture} roughness={0.52} metalness={0.0} />
+          <meshStandardMaterial map={tileTexture} roughness={0.52} metalness={0.0} envMapIntensity={0.5} />
         </mesh>
       ) : (
         /* Fallback ColorStrip when texture is unavailable */

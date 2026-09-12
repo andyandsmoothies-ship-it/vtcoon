@@ -10,6 +10,7 @@ import type { DeltaPayload } from '../../server/session_manager.js';
 import { formatCurrency } from '../ui/ui_helpers.js';
 import { AudioEngine } from '../audio/audio_engine.js';
 import { SoundEffect } from '../audio/audio_types.js';
+import { trackDeltaActivities } from './activity_tracker.js';
 
 export function isGameRunningDelta(delta: DeltaPayload): boolean {
   if (delta.roomStarted !== undefined) {
@@ -299,6 +300,13 @@ export function applyDeltaToStore(
     } catch {
       /* safe-ignore: lobbyStore uninitialized in isolated test environment */
     }
+  }
+
+  // 8. Trích xuất và ghi nhận nhật ký hoạt động (Activity Feed)
+  try {
+    trackDeltaActivities(delta, state, store.getState());
+  } catch {
+    /* safe-ignore: activity tracker failure should not break game store state sync */
   }
 }
 

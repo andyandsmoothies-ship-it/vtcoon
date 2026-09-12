@@ -6,6 +6,7 @@ import { ActionDock, type ActionDockProps } from './action_dock';
 import { ModalHost } from './modals/modal_host';
 import { SocialEmotesTray } from './social_emotes_tray';
 import { FloatingNumbersOverlay } from './floating_numbers';
+import { ActivityFeedSidebar } from './activity_feed_sidebar';
 import type { PlayerIntent } from '../../server/intent_dispatcher';
 
 export interface HudContainerProps extends ActionDockProps {
@@ -62,6 +63,9 @@ export function HudContainer({
 
       {/* Tầng Modals Tương Tác Nghiệp Vụ (Z-20 Host) */}
       <ModalHost onIntent={onIntent} />
+
+      {/* Tầng Bảng Nhật Ký Hoạt Động Trượt Cạnh Phải (Z-30 Sideboard Drawer) */}
+      <ActivityFeedSidebar />
     </div>
   );
 }

@@ -1,10 +1,11 @@
 // [UI-S02/MSS] DioramaContainerPort — Cat Lai container seaport, gantry cranes & colored intermodal container stacks
 import React, { useRef } from 'react';
+import { RoundedBox } from '@react-three/drei';
 import type { Group, Mesh } from 'three';
 import { useEnvironmentStore, calculateAviationStrobe } from '../../store/environment_store';
 import { useSafeFrame } from '../safe_frame';
 
-// Cụm các container xếp chồng tại bãi cảng Cát Lái (màu sắc, kích thước, vị trí)
+// Cụm các container xếp chồng tại bãi cảng Cát Lái (chuẩn màu sơn công nghiệp hàng hải PBR)
 interface ContainerBlockDef {
   readonly pos: [number, number, number];
   readonly size: [number, number, number];
@@ -13,20 +14,20 @@ interface ContainerBlockDef {
 
 const CONTAINER_BLOCKS: readonly ContainerBlockDef[] = [
   // Hàng 1 (Tầng trệt)
-  { pos: [-0.6, 0.08, -0.4], size: [0.3, 0.14, 0.65], color: '#0284C7' }, // Maersk Blue
-  { pos: [-0.6, 0.08, 0.35], size: [0.3, 0.14, 0.65], color: '#DC2626' }, // Yang Ming Red
-  { pos: [-0.25, 0.08, -0.2], size: [0.3, 0.14, 0.65], color: '#15803D' }, // Evergreen Green
-  { pos: [-0.25, 0.08, 0.5], size: [0.3, 0.14, 0.65], color: '#EA580C' }, // Hapag-Lloyd Orange
-  { pos: [0.1, 0.08, -0.4], size: [0.3, 0.14, 0.65], color: '#EAB308' }, // DHL Yellow
-  { pos: [0.1, 0.08, 0.35], size: [0.3, 0.14, 0.65], color: '#0284C7' }, // Ocean Blue
+  { pos: [-0.6, 0.08, -0.4], size: [0.3, 0.14, 0.65], color: '#0284C7' }, // Maersk Maritime Blue
+  { pos: [-0.6, 0.08, 0.35], size: [0.3, 0.14, 0.65], color: '#991B1B' }, // Yang Ming Brick Red
+  { pos: [-0.25, 0.08, -0.2], size: [0.3, 0.14, 0.65], color: '#15803D' }, // Evergreen Shipping Green
+  { pos: [-0.25, 0.08, 0.5], size: [0.3, 0.14, 0.65], color: '#C2410C' }, // Hapag-Lloyd Rust
+  { pos: [0.1, 0.08, -0.4], size: [0.3, 0.14, 0.65], color: '#D97706' }, // DHL Industrial Amber
+  { pos: [0.1, 0.08, 0.35], size: [0.3, 0.14, 0.65], color: '#334155' }, // Slate Charcoal
 
   // Hàng 2 (Tầng 2 xếp chồng)
   { pos: [-0.6, 0.22, -0.1], size: [0.3, 0.14, 0.65], color: '#15803D' },
   { pos: [-0.25, 0.22, 0.2], size: [0.3, 0.14, 0.65], color: '#0284C7' },
-  { pos: [0.1, 0.22, -0.2], size: [0.3, 0.14, 0.65], color: '#DC2626' },
+  { pos: [0.1, 0.22, -0.2], size: [0.3, 0.14, 0.65], color: '#991B1B' },
 
   // Hàng 3 (Tầng 3 ngẫu nhiên)
-  { pos: [-0.42, 0.36, 0.05], size: [0.3, 0.14, 0.65], color: '#EAB308' },
+  { pos: [-0.42, 0.36, 0.05], size: [0.3, 0.14, 0.65], color: '#D97706' },
 ];
 
 export function DioramaContainerPort(): React.ReactElement {
@@ -69,11 +70,10 @@ export function DioramaContainerPort(): React.ReactElement {
 
   return (
     <group position={[4.5, 0.16, 2.0]} data-testid="diorama-container-port">
-      {/* 1. MẶT BẰNG CẦU CẢNG BÊ TÔNG (Seaport Concrete Apron) */}
-      <mesh receiveShadow position={[0, 0.04, 0]}>
-        <boxGeometry args={[1.8, 0.08, 2.2]} />
-        <meshStandardMaterial color="#475569" roughness={0.7} />
-      </mesh>
+      {/* 1. MẶT BẰNG CẦU CẢNG BÊ TÔNG (Seaport Concrete Apron với Bo Viền) */}
+      <RoundedBox args={[1.8, 0.08, 2.2]} radius={0.016} smoothness={2} receiveShadow position={[0, 0.04, 0]}>
+        <meshStandardMaterial color="#475569" roughness={0.7} envMapIntensity={0.6} />
+      </RoundedBox>
       {/* Vạch sơn cảnh báo an toàn màu vàng ở mép bến */}
       <mesh position={[-0.85, 0.082, 0]}>
         <boxGeometry args={[0.06, 0.005, 2.16]} />
@@ -179,41 +179,58 @@ export function DioramaContainerPort(): React.ReactElement {
         </group>
       </group>
 
-      {/* 3. BÃI CONTAINER XẾP CHỒNG (Intermodal Container Stacks) */}
+      {/* 3. BÃI CONTAINER XẾP CHỒNG (Intermodal Container Stacks với Beveled Edges) */}
       <group position={[0.2, 0.08, 0]}>
+        {/* Đệm mặt sàn bãi tối màu tạo độ sâu và bóng tiếp xúc chân bãi */}
+        <mesh receiveShadow position={[-0.25, 0.003, 0.05]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[1.25, 1.7]} />
+          <meshStandardMaterial color="#1E293B" roughness={0.9} />
+        </mesh>
         {CONTAINER_BLOCKS.map((cb, idx) => (
           <group key={`container-${idx}`} position={cb.pos}>
-            {/* Khối hộp container chính */}
-            <mesh castShadow receiveShadow>
-              <boxGeometry args={cb.size} />
-              <meshStandardMaterial color={cb.color} roughness={0.5} metalness={0.25} />
-            </mesh>
-            {/* Gân viền dập nổi (Corrugated Roof Edge) */}
-            <mesh position={[0, cb.size[1] / 2 + 0.003, 0]}>
-              <boxGeometry args={[cb.size[0] * 0.92, 0.005, cb.size[2] * 0.92]} />
-              <meshStandardMaterial color="#334155" roughness={0.6} />
-            </mesh>
+            {/* Khối hộp container chính bo viền vát cạnh */}
+            <RoundedBox
+              args={cb.size}
+              radius={0.008}
+              smoothness={2}
+              castShadow
+              receiveShadow
+            >
+              <meshStandardMaterial
+                color={cb.color}
+                roughness={0.65}
+                metalness={0.4}
+                envMapIntensity={0.8}
+              />
+            </RoundedBox>
+            {/* Nẹp viền nóc container kim loại */}
+            <RoundedBox
+              args={[cb.size[0] * 0.94, 0.006, cb.size[2] * 0.94]}
+              radius={0.002}
+              smoothness={1}
+              position={[0, cb.size[1] / 2 + 0.002, 0]}
+            >
+              <meshStandardMaterial color="#1E293B" roughness={0.7} metalness={0.5} />
+            </RoundedBox>
           </group>
         ))}
       </group>
 
-      {/* 4. XE ĐẦU KÉO CONTAINER CHỞ HÀNG (Port Container Tractor) */}
+      {/* 4. XE ĐẦU KÉO CONTAINER CHỞ HÀNG (Port Container Tractor với Bo Mép) */}
       <group position={[0.65, 0.11, -0.65]}>
-        {/* Cabin đầu kéo màu vàng */}
-        <mesh castShadow position={[0, 0.06, -0.16]}>
-          <boxGeometry args={[0.12, 0.12, 0.14]} />
-          <meshStandardMaterial color="#EAB308" roughness={0.4} />
-        </mesh>
+        {/* Cabin đầu kéo màu vàng hổ phách bo góc */}
+        <RoundedBox args={[0.12, 0.12, 0.14]} radius={0.012} smoothness={2} castShadow position={[0, 0.06, -0.16]}>
+          <meshStandardMaterial color="#D97706" roughness={0.4} metalness={0.3} />
+        </RoundedBox>
         {/* Rơ-moóc chở container */}
         <mesh castShadow position={[0, 0.04, 0.1]}>
           <boxGeometry args={[0.12, 0.04, 0.36]} />
           <meshStandardMaterial color="#1E293B" roughness={0.7} />
         </mesh>
-        {/* Container trên rơ-moóc */}
-        <mesh castShadow position={[0, 0.12, 0.1]}>
-          <boxGeometry args={[0.14, 0.12, 0.34]} />
-          <meshStandardMaterial color="#DC2626" roughness={0.4} />
-        </mesh>
+        {/* Container trên rơ-moóc bo viền */}
+        <RoundedBox args={[0.14, 0.12, 0.34]} radius={0.008} smoothness={2} castShadow position={[0, 0.12, 0.1]}>
+          <meshStandardMaterial color="#991B1B" roughness={0.65} metalness={0.4} />
+        </RoundedBox>
       </group>
     </group>
   );

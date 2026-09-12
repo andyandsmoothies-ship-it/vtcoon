@@ -23,29 +23,29 @@ function createStandardTileTexture(index: number, meta: TileMetadata): CanvasTex
   ctx.scale(4, 4);
 
   // 1. Nền giấy da ngà thượng hạng (Aged Parchment / Ivory Cream)
-  ctx.fillStyle = '#EDE5D8';
+  ctx.fillStyle = '#E8DFCE';
   ctx.fillRect(0, 0, 256, 340);
 
   // 2. Dải màu nhận diện vùng (Top Banner - hướng tâm bàn cờ)
   ctx.fillStyle = meta.bannerColor;
-  ctx.fillRect(0, 0, 256, 68);
+  ctx.fillRect(0, 0, 256, 70);
 
   // Nhãn loại hình bất động sản / vùng miền
   ctx.fillStyle = '#FFFFFF';
-  ctx.font = '900 16px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.font = '900 17px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(meta.category, 128, 34);
+  ctx.fillText(meta.category, 128, 35);
 
-  // 3. Tên tỉnh thành / địa danh chính (Tương phản cao)
-  ctx.fillStyle = '#0F172A';
-  ctx.font = '900 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  // 3. Tên tỉnh thành / địa danh chính (Tương phản cao tuyệt đối)
+  ctx.fillStyle = '#090D1A';
+  ctx.font = '900 28px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   ctx.fillText(meta.title, 128, 108);
 
   // Phụ đề (Địa danh chi tiết / Công trình)
-  ctx.fillStyle = '#334155';
-  ctx.font = 'bold 15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-  ctx.fillText(meta.subtitle, 128, 136);
+  ctx.fillStyle = '#1E293B';
+  ctx.font = 'bold 17px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.fillText(meta.subtitle, 128, 138);
 
   // 4. Biểu tượng văn hóa bản địa ở trung tâm ô cờ
   drawIcon(ctx, meta.icon, 128, 205, meta.bannerColor, 1.25);
@@ -53,18 +53,18 @@ function createStandardTileTexture(index: number, meta: TileMetadata): CanvasTex
   // 5. Khay giá niêm yết ở cạnh ngoài
   const priceText = meta.priceLabel ?? formatPriceLabel(meta.price);
   if (priceText) {
-    ctx.fillStyle = '#0F172A';
+    ctx.fillStyle = '#090D1A';
     ctx.beginPath();
-    ctx.roundRect(22, 276, 212, 48, 12);
+    ctx.roundRect(22, 274, 212, 50, 12);
     ctx.fill();
 
     ctx.fillStyle = '#FBBF24';
-    ctx.font = '900 22px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.font = '900 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
     ctx.fillText(priceText, 128, 300);
   }
 
   // Viền tinh tế bao quanh
-  ctx.strokeStyle = '#CBD5E1';
+  ctx.strokeStyle = '#94A3B8';
   ctx.lineWidth = 4;
   ctx.strokeRect(2, 2, 252, 336);
 

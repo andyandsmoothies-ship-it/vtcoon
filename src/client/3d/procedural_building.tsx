@@ -62,7 +62,7 @@ export function ProceduralBuilding({
       {level === 0 && (
         <group position={[0, 0, 0]}>
           {/* Bệ sa thạch phẳng viền quanh ô đất */}
-          <mesh receiveShadow position={[0, 0.008, 0]}>
+          <mesh position={[0, 0.008, 0]} receiveShadow>
             <boxGeometry args={[0.58, 0.016, 0.48]} />
             <meshStandardMaterial color="#E2E8F0" roughness={0.7} />
           </mesh>
@@ -125,6 +125,12 @@ export function ProceduralBuilding({
          ======================================================== */}
       {level === 1 && (
         <group>
+          {/* Đệm bóng tiếp xúc chân móng đá (Contact Shadow Plinth) */}
+          <mesh receiveShadow position={[0, 0.002, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+            <planeGeometry args={[0.62, 0.52]} />
+            <meshBasicMaterial color="#0F172A" transparent opacity={0.35} />
+          </mesh>
+
           {/* Chân móng đá bệ xám bo mép */}
           <RoundedBox args={[0.58, 0.05, 0.48]} radius={0.012} smoothness={2} position={[0, 0.025, 0]} castShadow receiveShadow>
             <meshStandardMaterial color="#475569" roughness={0.7} envMapIntensity={0.8} />
@@ -135,15 +141,13 @@ export function ProceduralBuilding({
             <meshStandardMaterial color="#FEF3C7" roughness={0.45} envMapIntensity={0.8} />
           </RoundedBox>
 
-          {/* Mặt tiền: Khung cửa gỗ gụ chính lõm */}
-          <mesh position={[-0.12, 0.14, 0.212]} castShadow receiveShadow>
-            <boxGeometry args={[0.15, 0.19, 0.02]} />
+          {/* Mặt tiền: Khung cửa gỗ gụ chính lõm bo viền */}
+          <RoundedBox args={[0.15, 0.19, 0.02]} radius={0.004} smoothness={1} position={[-0.12, 0.14, 0.212]} castShadow receiveShadow>
             <meshStandardMaterial color="#451A03" roughness={0.5} />
-          </mesh>
+          </RoundedBox>
 
           {/* Mặt tiền: Ô cửa kính ấm trưng bày sản phẩm với chỉ số khúc xạ ior = 1.52 */}
-          <mesh position={[0.12, 0.14, 0.212]}>
-            <boxGeometry args={[0.17, 0.15, 0.02]} />
+          <RoundedBox args={[0.17, 0.15, 0.02]} radius={0.004} smoothness={1} position={[0.12, 0.14, 0.212]}>
             <meshPhysicalMaterial
               color="#FDE68A"
               roughness={0.04}
@@ -154,23 +158,21 @@ export function ProceduralBuilding({
               emissive="#F59E0B"
               emissiveIntensity={isNight ? 2.8 : isSunset ? 0.7 : 0.25}
             />
-          </mesh>
+          </RoundedBox>
 
           {/* Cửa sổ tầng trên phát quang ấm áp trong đêm */}
-          <mesh position={[-0.12, 0.25, 0.212]}>
-            <boxGeometry args={[0.12, 0.07, 0.02]} />
+          <RoundedBox args={[0.12, 0.07, 0.02]} radius={0.003} smoothness={1} position={[-0.12, 0.25, 0.212]}>
             <meshStandardMaterial
               color="#FDE68A"
               emissive="#FBBF24"
               emissiveIntensity={isNight ? 2.6 : isSunset ? 0.6 : 0.1}
             />
-          </mesh>
+          </RoundedBox>
 
-          {/* Gờ phào chỉ trắng sứ phân tầng */}
-          <mesh position={[0, 0.325, 0]} castShadow>
-            <boxGeometry args={[0.55, 0.025, 0.45]} />
+          {/* Gờ phào chỉ trắng sứ phân tầng bo viền */}
+          <RoundedBox args={[0.55, 0.025, 0.45]} radius={0.005} smoothness={1} position={[0, 0.325, 0]} castShadow>
             <meshStandardMaterial color="#F8FAFC" roughness={0.3} />
-          </mesh>
+          </RoundedBox>
 
           {/* Mái ngói đỏ Bát Tràng dốc vươn ra ngoài mép tường */}
           <mesh position={[0, 0.44, 0]} rotation={[0, Math.PI / 4, 0]} castShadow receiveShadow>
@@ -203,14 +205,19 @@ export function ProceduralBuilding({
          ======================================================== */}
       {level === 2 && (
         <group>
+          {/* Tấm tiếp xúc bóng chân đế (Contact Shadow Plinth) */}
+          <mesh position={[0, 0.002, 0]} receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
+            <planeGeometry args={[0.66, 0.56]} />
+            <meshBasicMaterial color="#0F172A" transparent opacity={0.38} />
+          </mesh>
+
           {/* Khối đế thương mại mang màu nhóm đất bo viền vát */}
           <RoundedBox args={[0.6, 0.16, 0.5]} radius={0.02} smoothness={3} position={[0, 0.08, 0]} castShadow receiveShadow>
             <meshStandardMaterial color={groupColor} roughness={0.3} metalness={0.3} envMapIntensity={1.0} />
           </RoundedBox>
 
           {/* Sảnh đón kính Sapphire tầng trệt với chỉ số khúc xạ ior = 1.52 */}
-          <mesh position={[0, 0.07, 0.252]} castShadow receiveShadow>
-            <boxGeometry args={[0.3, 0.12, 0.02]} />
+          <RoundedBox args={[0.3, 0.12, 0.02]} radius={0.006} smoothness={2} position={[0, 0.07, 0.252]} castShadow receiveShadow>
             <meshPhysicalMaterial
               color="#0284C7"
               roughness={0.04}
@@ -223,13 +230,12 @@ export function ProceduralBuilding({
               emissive="#38BDF8"
               emissiveIntensity={isNight ? 2.6 : isSunset ? 0.45 : 0.0}
             />
-          </mesh>
+          </RoundedBox>
 
           {/* Mái hiên đón khách (Canopy) nhô ra phía trước */}
-          <mesh position={[0, 0.14, 0.28]} castShadow>
-            <boxGeometry args={[0.34, 0.02, 0.07]} />
+          <RoundedBox args={[0.34, 0.02, 0.07]} radius={0.005} smoothness={2} position={[0, 0.14, 0.28]} castShadow>
             <meshStandardMaterial color="#F8FAFC" roughness={0.2} metalness={0.5} envMapIntensity={1.2} />
-          </mesh>
+          </RoundedBox>
 
           {/* Thân tháp kính Sapphire PBR bo mép phản chiếu môi trường IBL */}
           <RoundedBox args={[0.52, 0.52, 0.42]} radius={0.025} smoothness={4} position={[0, 0.42, 0]} castShadow receiveShadow>
@@ -246,40 +252,36 @@ export function ProceduralBuilding({
           </RoundedBox>
 
           {/* Dải ô cửa sổ văn phòng sáng đèn phát quang trong đêm (Luminous Office Windows) */}
-          <mesh position={[0, 0.35, 0.212]}>
-            <boxGeometry args={[0.44, 0.05, 0.01]} />
+          <RoundedBox args={[0.44, 0.05, 0.01]} radius={0.004} smoothness={1} position={[0, 0.35, 0.212]}>
             <meshStandardMaterial
               color="#FEF08A"
               emissive="#FDE047"
               emissiveIntensity={isNight ? 3.0 : isSunset ? 0.7 : 0.1}
             />
-          </mesh>
-          <mesh position={[0, 0.49, 0.212]}>
-            <boxGeometry args={[0.44, 0.05, 0.01]} />
+          </RoundedBox>
+          <RoundedBox args={[0.44, 0.05, 0.01]} radius={0.004} smoothness={1} position={[0, 0.49, 0.212]}>
             <meshStandardMaterial
               color="#38BDF8"
               emissive="#00F5FF"
               emissiveIntensity={isNight ? 3.2 : isSunset ? 0.7 : 0.1}
             />
-          </mesh>
+          </RoundedBox>
 
           {/* Các dải lam nhôm chắn nắng Titan chia tầng */}
           {[0.28, 0.42, 0.56].map((ly, idx) => (
-            <mesh key={`louver-${idx}`} position={[0, ly, 0]} castShadow>
-              <boxGeometry args={[0.54, 0.02, 0.44]} />
+            <RoundedBox key={`louver-${idx}`} args={[0.54, 0.018, 0.44]} radius={0.004} smoothness={2} position={[0, ly, 0]} castShadow>
               <meshStandardMaterial color="#CBD5E1" roughness={0.2} metalness={0.75} envMapIntensity={1.6} />
-            </mesh>
+            </RoundedBox>
           ))}
 
           {/* Viền LED Neon nóc tòa nhà Sapphire */}
-          <mesh position={[0, 0.69, 0]}>
-            <boxGeometry args={[0.53, 0.015, 0.43]} />
+          <RoundedBox args={[0.53, 0.015, 0.43]} radius={0.003} smoothness={1} position={[0, 0.69, 0]}>
             <meshStandardMaterial
               color="#38BDF8"
               emissive="#00F5FF"
               emissiveIntensity={isNight ? 3.5 : isSunset ? 0.8 : 0.0}
             />
-          </mesh>
+          </RoundedBox>
 
           {/* Buồng kỹ thuật thang máy trên nóc */}
           <RoundedBox args={[0.2, 0.1, 0.2]} radius={0.01} smoothness={2} position={[-0.08, 0.72, 0]} castShadow receiveShadow>
@@ -299,6 +301,12 @@ export function ProceduralBuilding({
          ======================================================== */}
       {level === 3 && (
         <group>
+          {/* Tấm tiếp xúc bóng chân bệ cảnh quan (Contact Shadow Plinth) */}
+          <mesh position={[0, 0.002, 0]} receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
+            <planeGeometry args={[0.68, 0.56]} />
+            <meshBasicMaterial color="#0F172A" transparent opacity={0.42} />
+          </mesh>
+
           {/* Bệ cảnh quan cẩm thạch đá hoa cương chân tháp bo mép vát */}
           <RoundedBox args={[0.62, 0.06, 0.5]} radius={0.015} smoothness={3} position={[0, 0.03, 0]} castShadow receiveShadow>
             <meshStandardMaterial color="#1E293B" roughness={0.25} metalness={0.3} envMapIntensity={1.2} />
@@ -309,8 +317,7 @@ export function ProceduralBuilding({
             <meshStandardMaterial color="#FEF3C7" roughness={0.25} metalness={0.3} envMapIntensity={1.4} />
           </RoundedBox>
           {/* Cửa sổ kính sapphire tháp phụ với chỉ số khúc xạ ior = 1.52 */}
-          <mesh position={[-0.14, 0.32, 0.185]}>
-            <boxGeometry args={[0.18, 0.42, 0.01]} />
+          <RoundedBox args={[0.18, 0.42, 0.01]} radius={0.005} smoothness={2} position={[-0.14, 0.32, 0.185]}>
             <meshPhysicalMaterial
               color="#0284C7"
               roughness={0.04}
@@ -323,7 +330,7 @@ export function ProceduralBuilding({
               emissive="#38BDF8"
               emissiveIntensity={isNight ? 2.8 : isSunset ? 0.55 : 0.0}
             />
-          </mesh>
+          </RoundedBox>
 
           {/* Vương miện vàng tháp phụ */}
           <RoundedBox args={[0.22, 0.03, 0.34]} radius={0.008} smoothness={2} position={[-0.14, 0.6, 0]} castShadow>
@@ -342,8 +349,7 @@ export function ProceduralBuilding({
             <meshStandardMaterial color="#FDE68A" roughness={0.2} metalness={0.4} envMapIntensity={1.5} />
           </RoundedBox>
           {/* Cửa sổ kính sapphire tháp chính với chỉ số khúc xạ ior = 1.52 */}
-          <mesh position={[0.14, 0.42, 0.185]}>
-            <boxGeometry args={[0.18, 0.58, 0.01]} />
+          <RoundedBox args={[0.18, 0.58, 0.01]} radius={0.005} smoothness={2} position={[0.14, 0.42, 0.185]}>
             <meshPhysicalMaterial
               color="#0284C7"
               roughness={0.04}
@@ -356,11 +362,10 @@ export function ProceduralBuilding({
               emissive="#38BDF8"
               emissiveIntensity={isNight ? 3.0 : isSunset ? 0.6 : 0.0}
             />
-          </mesh>
+          </RoundedBox>
 
           {/* Cầu kính trên không (Skybridge) kết nối 2 tháp ở tầng giữa */}
-          <mesh position={[0, 0.38, 0]} castShadow receiveShadow>
-            <boxGeometry args={[0.1, 0.06, 0.16]} />
+          <RoundedBox args={[0.1, 0.06, 0.16]} radius={0.008} smoothness={2} position={[0, 0.38, 0]} castShadow receiveShadow>
             <meshPhysicalMaterial
               color="#38BDF8"
               roughness={0.04}
@@ -371,7 +376,7 @@ export function ProceduralBuilding({
               emissive="#00F5FF"
               emissiveIntensity={isNight ? 3.2 : isSunset ? 0.7 : 0.1}
             />
-          </mesh>
+          </RoundedBox>
           <RoundedBox args={[0.12, 0.015, 0.18]} radius={0.004} smoothness={2} position={[0, 0.42, 0]} castShadow>
             <meshStandardMaterial
               color="#F59E0B"

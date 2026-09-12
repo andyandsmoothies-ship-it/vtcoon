@@ -85,7 +85,7 @@ export function TimeOfDayLighting(): React.ReactElement {
 
     // 4. Nội suy ánh sáng phản xạ vịnh biển (Fill Light) & ánh sáng rìa ngọn sóng (Rim Light)
     if (fillRef.current) {
-      const baseFill = phase === 'night' ? 0.22 : phase === 'sunset' ? 0.35 : 0.3;
+      const baseFill = phase === 'night' ? 0.22 : phase === 'sunset' ? 0.35 : 0.22;
       const fillIntensity = isAuctionActive ? baseFill * 0.15 : baseFill;
       const fillColor = phase === 'night' ? '#38BDF8' : phase === 'sunset' ? '#FDBA74' : '#CCFBF1';
       tempColor.set(fillColor);
@@ -94,7 +94,7 @@ export function TimeOfDayLighting(): React.ReactElement {
     }
 
     if (rimRef.current) {
-      const baseRim = phase === 'night' ? 0.25 : phase === 'sunset' ? 0.4 : 0.3;
+      const baseRim = phase === 'night' ? 0.25 : phase === 'sunset' ? 0.4 : 0.22;
       const rimIntensity = isAuctionActive ? baseRim * 0.15 : baseRim;
       const rimColor = phase === 'night' ? '#38BDF8' : phase === 'sunset' ? '#EA580C' : '#FEF08A';
       tempColor.set(rimColor);
@@ -154,14 +154,14 @@ export function TimeOfDayLighting(): React.ReactElement {
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
-        shadow-camera-left={-32}
-        shadow-camera-right={32}
-        shadow-camera-top={32}
-        shadow-camera-bottom={-32}
+        shadow-camera-left={-14}
+        shadow-camera-right={14}
+        shadow-camera-top={14}
+        shadow-camera-bottom={-14}
         shadow-camera-near={0.5}
         shadow-camera-far={95}
-        shadow-bias={-0.0001}
-        shadow-normalBias={0.02}
+        shadow-bias={-0.00005}
+        shadow-normalBias={0.003}
       />
 
       {/* 6. Fill Light: Ánh phản chiếu từ vịnh biển ngọc bích */}

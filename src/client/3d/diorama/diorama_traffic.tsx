@@ -1,6 +1,7 @@
 // [UI-S02/MSS] DioramaTraffic — Autonomous micro-traffic on coastal boulevards & iconic bridges
 import React, { useMemo, useRef } from 'react';
 import { Vector3, CatmullRomCurve3, type Group } from 'three';
+import { RoundedBox } from '@react-three/drei';
 import { useEnvironmentStore } from '../../store/environment_store';
 import { useSafeFrame } from '../safe_frame';
 
@@ -110,17 +111,15 @@ export function DioramaTraffic(): React.ReactElement {
               vehicleRefs.current[idx] = el;
             }}
           >
-            {/* 1. Thân vỏ xe chính */}
-            <mesh castShadow position={[0, h / 2, 0]}>
-              <boxGeometry args={[w, h * 0.7, l]} />
+            {/* 1. Thân vỏ xe chính bo cong khí động học */}
+            <RoundedBox args={[w, h * 0.7, l]} radius={0.008} smoothness={2} castShadow position={[0, h / 2, 0]}>
               <meshStandardMaterial color={v.color} roughness={0.35} metalness={0.2} />
-            </mesh>
+            </RoundedBox>
 
-            {/* 2. Cabin kính xe tối màu */}
-            <mesh position={[0, h * 0.72, 0]}>
-              <boxGeometry args={[w * 0.88, h * 0.45, l * 0.6]} />
+            {/* 2. Cabin kính xe tối màu bo góc */}
+            <RoundedBox args={[w * 0.88, h * 0.45, l * 0.6]} radius={0.005} smoothness={2} position={[0, h * 0.72, 0]}>
               <meshStandardMaterial color="#0F172A" roughness={0.2} />
-            </mesh>
+            </RoundedBox>
 
             {/* Bảng hiệu nóc đặc trưng cho Taxi */}
             {v.type === 'taxi' && (
