@@ -33,7 +33,7 @@ describe('[TC-P3.1/MSS] TitleDeedModal Layout Polish & Chống Tràn Màn Hình 
     expect(html).toContain('data-testid="title-deed-modal"');
   });
 
-  it('Thẻ header có pr-14 pl-14 chống đè chữ lên nút đóng ✕ và nút đóng đạt touch target 48px', () => {
+  it('Thẻ header có px-3 py-1 chống ngắt từ ngẫu nhiên và nút đóng đạt touch target 48px', () => {
     const html = renderToStaticMarkup(
       React.createElement(TitleDeedModal, {
         cellIndex: 1,
@@ -42,7 +42,7 @@ describe('[TC-P3.1/MSS] TitleDeedModal Layout Polish & Chống Tràn Màn Hình 
         onClose: () => {},
       })
     );
-    expect(html).toContain('pr-14 pl-14');
+    expect(html).toContain('px-3 py-1');
     expect(html).toContain('shrink-0');
     expect(html).toContain('break-words');
     expect(html).toContain('aria-label="Đóng Sổ Đỏ"');
@@ -82,7 +82,7 @@ describe('[TC-P3.1/MSS] TitleDeedModal Layout Polish & Chống Tràn Màn Hình 
     expect(htmlOwned).toContain('Giải Chấp');
     expect(htmlOwned).toContain('Đóng');
     expect(htmlOwned).toContain('✓ Đã Sở Hữu (Đại Gia Sài Gòn)');
-    expect(htmlOwned).toContain('min-h-[48px] whitespace-nowrap px-3.5 py-2 rounded-xl font-bold text-xs bg-amber-600');
+    expect(htmlOwned).toContain('min-h-[48px] whitespace-nowrap px-3.5 py-2 rounded-xl font-black text-xs');
     expect(htmlOwned).toContain('min-h-[48px] whitespace-nowrap px-4 py-2 rounded-xl font-bold text-slate-300');
   });
 
@@ -114,7 +114,7 @@ describe('[TC-P3.1/MSS] TitleDeedModal Layout Polish & Chống Tràn Màn Hình 
       React.createElement(TitleDeedModal, { cellIndex: 39, canBuy: true, isOwned: false })
     );
     expect(html).toContain('TP.HCM (Quận 1 - Nguyễn Huệ)');
-    expect(html).toContain('pr-14 pl-14');
+    expect(html).toContain('px-3 py-1');
     expect(html).toContain('break-words');
   });
 });

@@ -112,7 +112,9 @@ export function handleWsMessage(
           playerId: ctx.playerId,
         };
         ctx.socket.send(JSON.stringify(resyncMsg));
-      } catch {}
+      } catch {
+        /* safe-ignore: socket may be disconnected or buffered */
+      }
     }
     ctx.setErrorReason?.(msg.reasonCode);
     ctx.onError?.(msg.reasonCode);

@@ -5,7 +5,9 @@ export function saveReconnectToken(roomCode: string, token: string): void {
   if (typeof localStorage !== 'undefined') {
     try {
       localStorage.setItem(`vtcoon_token_${roomCode}`, token);
-    } catch {}
+    } catch {
+      /* safe-ignore: localStorage may be disabled or quota exceeded in private browsing */
+    }
   }
 }
 
@@ -24,6 +26,8 @@ export function clearReconnectToken(roomCode: string): void {
   if (typeof localStorage !== 'undefined') {
     try {
       localStorage.removeItem(`vtcoon_token_${roomCode}`);
-    } catch {}
+    } catch {
+      /* safe-ignore: localStorage may be disabled in private browsing */
+    }
   }
 }

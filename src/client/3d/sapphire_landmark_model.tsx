@@ -1,7 +1,7 @@
 // [UI-S04/MSS] SapphireLandmarkModel — 3D Miniature Landmark Model for Auction Card with District-Aware Architecture
 import React, { useRef, useMemo } from 'react';
-import { useFrame } from '@react-three/fiber';
 import type { Group } from 'three';
+import { useSafeFrame } from './safe_frame';
 import { ColorGroup } from '../../domain/board_config';
 
 export interface SapphireLandmarkModelProps {
@@ -65,13 +65,6 @@ export function resolveLandmarkTheme(colorGroup?: string): LandmarkDistrictTheme
   }
 }
 
-function useSafeFrame(callback: Parameters<typeof useFrame>[0]): void {
-  try {
-    useFrame(callback);
-  } catch {
-    // Safe outside Canvas in headless test environment
-  }
-}
 
 /**
  * Mô hình 3D thu nhỏ của Tòa tháp Landmark bằng kính PBR xoay nhẹ ở trọng tâm thẻ Sổ Đỏ

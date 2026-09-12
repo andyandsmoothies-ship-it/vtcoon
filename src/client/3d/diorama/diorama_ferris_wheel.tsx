@@ -1,16 +1,8 @@
 // [UI-S02/MSS] DioramaFerrisWheel — Rotating theme park Ferris wheel for Northeast Entertainment Hub
 import React, { useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
 import type { Group } from 'three';
 import { useEnvironmentStore } from '../../store/environment_store';
-
-function useSafeFrame(callback: (state: Parameters<Parameters<typeof useFrame>[0]>[0], delta: number) => void): void {
-  try {
-    useFrame(callback);
-  } catch {
-    // Safe when rendering outside Canvas (e.g. tests or SSR)
-  }
-}
+import { useSafeFrame } from '../safe_frame';
 
 const GONDOLA_COLORS = [
   '#EF4444', // Red

@@ -40,10 +40,10 @@ function getInitialLobbyConfig(): { roomCode: string; playerId: string; isHost: 
 }
 
 if (typeof window !== 'undefined') {
-  (window as unknown as { __gameStore?: typeof useGameStore; __lobbyStore?: typeof useLobbyStore; __environmentStore?: typeof useEnvironmentStore; __vfxStore?: typeof useVfxStore }).__gameStore = useGameStore;
-  (window as unknown as { __gameStore?: typeof useGameStore; __lobbyStore?: typeof useLobbyStore; __environmentStore?: typeof useEnvironmentStore; __vfxStore?: typeof useVfxStore }).__lobbyStore = useLobbyStore;
-  (window as unknown as { __gameStore?: typeof useGameStore; __lobbyStore?: typeof useLobbyStore; __environmentStore?: typeof useEnvironmentStore; __vfxStore?: typeof useVfxStore }).__environmentStore = useEnvironmentStore;
-  (window as unknown as { __gameStore?: typeof useGameStore; __lobbyStore?: typeof useLobbyStore; __environmentStore?: typeof useEnvironmentStore; __vfxStore?: typeof useVfxStore }).__vfxStore = useVfxStore;
+  window.__gameStore = useGameStore;
+  window.__lobbyStore = useLobbyStore;
+  window.__environmentStore = useEnvironmentStore;
+  window.__vfxStore = useVfxStore;
 
   if (!useLobbyStore.getState().roomCode) {
     const initCfg = getInitialLobbyConfig();
@@ -112,7 +112,9 @@ export function App(): React.ReactElement {
 
       try {
         AudioEngine.handlePawnLanded(targetCell);
-      } catch {}
+      } catch {
+        /* safe-ignore: audio may be uninitialized or muted in headless environment */
+      }
 
       const state = useGameStore.getState();
       const activePlayer = state.playersInfo[activeId];
@@ -265,7 +267,9 @@ export function App(): React.ReactElement {
           const url = new URL(window.location.href);
           url.searchParams.set('room', activeRoomCode);
           window.history.replaceState({}, '', url.toString());
-        } catch {}
+        } catch {
+          /* safe-ignore: browser environment may restrict history manipulation */
+        }
       }
     }
   }, []);
@@ -394,7 +398,9 @@ export function App(): React.ReactElement {
           playerId: localPlayerId,
           roomCode,
         });
-      } catch {}
+      } catch {
+        /* safe-ignore: socket may already be disconnected */
+      }
     }
 
     if (roomCode) clearReconnectToken(roomCode);
@@ -407,7 +413,11 @@ export function App(): React.ReactElement {
     });
 
     if (typeof window !== 'undefined' && window.history) {
-      try { window.history.replaceState({}, '', window.location.pathname); } catch {}
+      try {
+        window.history.replaceState({}, '', window.location.pathname);
+      } catch {
+        /* safe-ignore: browser environment may restrict history manipulation */
+      }
     }
 
     useLobbyStore.getState().setGameStarted(false);

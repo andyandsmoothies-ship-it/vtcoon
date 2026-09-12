@@ -1,8 +1,8 @@
 // [UI-S05/MSS] GoldenGlowVFX — Micro-VFX for Level 3 (C3 Resort / Hotel) Properties
 // Hào quang Golden Glow & nảy hạt nhẹ ở 60 FPS
 import React, { useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
 import type { Mesh, Group } from 'three';
+import { useSafeFrame } from './safe_frame';
 
 export interface GoldenGlowOptions {
   readonly freq?: number;
@@ -16,14 +16,6 @@ export interface SparkOptions {
   readonly baseHeight?: number;
   readonly hopHeight?: number;
   readonly hopFreq?: number;
-}
-
-function useSafeFrame(callback: (state: Parameters<Parameters<typeof useFrame>[0]>[0], delta: number) => void): void {
-  try {
-    useFrame(callback);
-  } catch {
-    // An toàn khi chạy ngoài Canvas (SSR hoặc test renderToStaticMarkup)
-  }
 }
 
 /**

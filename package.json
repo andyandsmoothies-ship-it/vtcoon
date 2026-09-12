@@ -8,7 +8,12 @@
     "build": "tsc && vite build && vite build --ssr src/server/index.ts --outDir dist/server",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "lint:ui": "node scripts/lint_ui.mjs",
+    "lint:slop": "node scripts/lint_slop.mjs",
+    "lint:dup": "jscpd src/ --config .jscpd.json",
+    "gate:quick": "npm run lint:ui && npm run lint:slop && npm run lint:dup && tsc --noEmit",
+    "gate": "npm run lint:ui && npm run lint:slop && npm run lint:dup && tsc --noEmit && vitest run"
   },
   "devDependencies": {
     "@react-spring/three": "^10.1.2",
@@ -24,6 +29,7 @@
     "@types/ws": "^8.18.1",
     "@vitejs/plugin-react": "^4.3.4",
     "howler": "^2.2.4",
+    "jscpd": "^5.2.0",
     "qrcode": "^1.5.4",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

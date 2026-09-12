@@ -1,7 +1,7 @@
 // [UI-S04/MSS] AuctionGavel3D — Tactile Ceremonial 3D Golden Gavel & Shockwave Ring on Auction Pedestal
 import React, { useRef, useEffect } from 'react';
-import { useFrame } from '@react-three/fiber';
 import { AdditiveBlending, type Group, type Mesh } from 'three';
+import { useSafeFrame } from './safe_frame';
 
 export interface AuctionGavel3DProps {
   readonly position?: [number, number, number];
@@ -17,14 +17,6 @@ export const GAVEL_COLORS = {
   soundBlockStone: '#090D1A',
   shockwaveGlow: '#FDE047',
 } as const;
-
-function useSafeFrame(callback: Parameters<typeof useFrame>[0]): void {
-  try {
-    useFrame(callback);
-  } catch {
-    // Safe outside Canvas in headless test environment
-  }
-}
 
 /**
  * Tính toán góc quay gõ búa dựa trên tiến trình hoạt ảnh [0, 1]

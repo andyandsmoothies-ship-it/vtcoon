@@ -190,7 +190,7 @@ export function GameOverModal({
         <button
           type="button"
           onClick={() => setActiveTab('leaderboard')}
-          className={`flex-1 min-h-[38px] text-xs font-bold rounded-lg transition-all ${
+          className={`flex-1 min-h-[44px] text-xs font-bold rounded-lg transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
             activeTab === 'leaderboard'
               ? 'bg-amber-500 text-amber-950 font-black shadow-md'
               : 'text-slate-400 hover:text-white'
@@ -201,7 +201,7 @@ export function GameOverModal({
         <button
           type="button"
           onClick={() => setActiveTab('fintech')}
-          className={`flex-1 min-h-[38px] text-xs font-bold rounded-lg transition-all ${
+          className={`flex-1 min-h-[44px] text-xs font-bold rounded-lg transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
             activeTab === 'fintech'
               ? 'bg-amber-500 text-amber-950 font-black shadow-md'
               : 'text-slate-400 hover:text-white'
@@ -212,7 +212,7 @@ export function GameOverModal({
         <button
           type="button"
           onClick={() => setActiveTab('portfolio')}
-          className={`flex-1 min-h-[38px] text-xs font-bold rounded-lg transition-all ${
+          className={`flex-1 min-h-[44px] text-xs font-bold rounded-lg transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
             activeTab === 'portfolio'
               ? 'bg-amber-500 text-amber-950 font-black shadow-md'
               : 'text-slate-400 hover:text-white'
@@ -393,7 +393,7 @@ export function GameOverModal({
         <button
           type="button"
           onClick={onPlayAgain ?? onClose}
-          className="flex-1 min-h-[44px] py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-amber-950 font-black text-xs shadow-lg active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+          className="flex-1 min-h-[44px] py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-amber-950 font-black text-xs border border-amber-600 shadow-[0_4px_0_0_#b45309] active:shadow-[0_1px_0_0_#b45309] active:translate-y-[3px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
         >
           Về Sảnh Chờ
         </button>

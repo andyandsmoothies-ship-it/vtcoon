@@ -1,7 +1,8 @@
 // [UI-S01/MSS][UI-S04/MSS] TimeOfDayLighting — Dynamic Day-Sunset-Night Lighting & Atmosphere Coordinator
 import React, { useRef, useMemo } from 'react';
-import { useFrame, useThree } from '@react-three/fiber';
+import { useThree } from '@react-three/fiber';
 import { Color, Vector3, type DirectionalLight, type AmbientLight, type HemisphereLight, type Fog } from 'three';
+import { useSafeFrame } from './safe_frame';
 import {
   useEnvironmentStore,
   TIME_OF_DAY_PRESETS,
@@ -11,13 +12,6 @@ import {
 import { useGameStore } from '../store/game_store';
 import { calculateTheatricalAmbientIntensity } from './auction_3d_stage';
 
-function useSafeFrame(callback: (state: Parameters<Parameters<typeof useFrame>[0]>[0], delta: number) => void): void {
-  try {
-    useFrame(callback);
-  } catch {
-    // Safe outside Canvas in test environment
-  }
-}
 
 export function TimeOfDayLighting(): React.ReactElement {
   const phase = useEnvironmentStore((s) => s.phase);

@@ -1,19 +1,11 @@
 // [UI-S01/MSS][UI-S04/MSS][IMP-13] CoastalIslandEnvironment — Vietnamese Coastal Island Metropolis
 // Endless Living Ocean, 15-degree Sloped Sand Shoreline & Layered Tropical Foliage
 import React, { useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
 import type { Mesh, PlaneGeometry } from 'three';
 import { CoastalPatrolBoat } from './coastal_patrol_boat';
 import { CoastalSeagulls } from './coastal_seagulls';
 import { LayeredTropicalFoliage } from './layered_tropical_foliage';
-
-function useSafeFrame(callback: (state: Parameters<Parameters<typeof useFrame>[0]>[0], delta: number) => void): void {
-  try {
-    useFrame(callback);
-  } catch {
-    // Safe outside Canvas in test environment
-  }
-}
+import { useSafeFrame } from './safe_frame';
 
 export function CoastalIslandEnvironment(): React.ReactElement {
   const waveRef = useRef<Mesh>(null);

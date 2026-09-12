@@ -1,17 +1,9 @@
 // [UI-S04/MSS][UI-S05/MSS] ConstructionSlamVFX — Impact Drop, Shockwave Ring & Confetti Celebration
 import React, { useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
 import type { Group, Mesh } from 'three';
 import { useVfxStore, type ActiveSlam } from '../store/vfx_store';
 import { cellPosition } from './board_coords';
-
-function useSafeFrame(callback: (state: Parameters<Parameters<typeof useFrame>[0]>[0], delta: number) => void): void {
-  try {
-    useFrame(callback);
-  } catch {
-    // An toàn ngoài môi trường Canvas (SSR hoặc test)
-  }
-}
+import { useSafeFrame } from './safe_frame';
 
 export interface ImpactDropResult {
   readonly yOffset: number;

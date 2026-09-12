@@ -131,8 +131,8 @@ export function TradeModal({
   );
 
   return (
-    <div className="w-full max-w-lg bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden flex flex-col pointer-events-auto" data-testid="trade-modal">
-      <header className="p-3.5 bg-slate-800 border-b border-slate-700 flex items-center justify-between">
+    <div className="w-full max-w-md lg:max-w-lg max-h-[90vh] overflow-y-auto bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl flex flex-col pointer-events-auto" data-testid="trade-modal">
+      <header className="p-3.5 bg-slate-800 border-b border-slate-700 flex items-center justify-between sticky top-0 z-10 shrink-0">
         <div className="flex items-center gap-2">
           <span className="text-lg" aria-hidden="true">🤝</span>
           <h2 className="text-sm font-bold uppercase text-white tracking-wide">
@@ -144,7 +144,7 @@ export function TradeModal({
             type="button"
             onClick={onClose}
             aria-label="Đóng đàm phán"
-            className="min-w-[44px] min-h-[44px] inline-flex items-center justify-center text-white/80 hover:text-white text-xl font-bold rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+            className="min-w-[44px] min-h-[44px] inline-flex items-center justify-center text-white/80 hover:text-white text-xl font-bold rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer transition-colors"
           >
             ✕
           </button>
@@ -163,13 +163,15 @@ export function TradeModal({
         </div>
       </div>
 
-      <footer className="p-4 pt-2 bg-slate-900/90 border-t border-slate-800 flex gap-2">
+      <footer className="p-4 pt-2 bg-slate-900/95 border-t border-slate-800 flex gap-2 sticky bottom-0 z-10 shrink-0">
         <button
           type="button"
           onClick={handleSubmit}
           disabled={!isValid}
-          className={`flex-1 min-h-[44px] py-2 px-3 rounded-xl font-bold text-white shadow-md text-xs transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
-            isValid ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 active:scale-95' : 'bg-slate-800 text-slate-400 cursor-not-allowed border border-slate-700'
+          className={`flex-1 min-h-[44px] py-2 px-3 rounded-xl font-bold text-white text-xs transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+            isValid
+              ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 border border-emerald-800 shadow-[0_4px_0_0_#064e3b] active:shadow-[0_1px_0_0_#064e3b] active:translate-y-[3px] cursor-pointer'
+              : 'bg-slate-800 text-slate-400 cursor-not-allowed border border-slate-700'
           }`}
         >
           Gửi Đề Xuất Đàm Phán
@@ -177,7 +179,7 @@ export function TradeModal({
         <button
           type="button"
           onClick={onClose}
-          className="min-h-[44px] px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+          className="min-h-[44px] px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 shadow-[0_4px_0_0_#020617] active:shadow-[0_1px_0_0_#020617] active:translate-y-[3px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
         >
           Hủy
         </button>

@@ -17,13 +17,14 @@ Any documents, artifacts of this project must be in Vietnamese. This project is 
 - **Lean Runtime Observability**: Zero silent error swallowing (empty `catch` forbidden). All domain state transitions (FSM, transactions) must emit structured logs (`{ event, correlationId, timestamp, delta }`). Rejection of player actions must return an explicit Reason Code.
 - **Vertical Slice Completeness & Closed-Loop Testing**: Any new state field on `Player` or `PropertyState` (such as `bankrupt`, `isMortgaged`) must be mapped simultaneously to `DeltaPayload` (`CellDelta` / `PlayerDelta`). Strictly forbid test mirroring (Bug-Codification); every emitted event card or modifier (Producer) must have a test proving that the beneficiary or paying consumer changes actual cash flow.
 - **3D Visual Quality Gate (Visionary Art Audit)**: Khi người dùng yêu cầu hoặc tại các mốc nghiệm thu mỹ thuật quan trọng (`src/client/3d/`, `docs/domain/design.md`, R3F Canvas), triệu hồi Subagent chuyên gia độc lập `game-3d-visual-critic` để phản biện không khoan nhượng qua 5 góc chụp thực tế. Art Director tập trung vào 4 tầng thẩm mỹ (Bầu không khí, Cảm giác xúc giác sa bàn, Linh hồn đô thị, UX), tuyệt đối bài trừ lạm phát điểm số và bắt buộc đưa ra các định hướng đột phá vượt mong đợi (Wow-factor) sánh ngang game thương mại quốc tế.
+- **2D UI Craft Quality Gate (Impeccable Audit)**: Mọi thay đổi UI 2D (`src/client/ui/`, modals, HUD) phải vượt qua `npm run lint:ui` với 0 vi phạm (4 anti-patterns: `border-accent-on-rounded`, `bounce-easing`, `gray-on-color`, `gradient-text`) và được thẩm định bởi Subagent chuyên gia độc lập `ui-craft-reviewer` với phán quyết `ship` hoặc `fix` không có lỗi chặn.
 - **Continuous Improvement & Ad-hoc Persistence (Quy Chuẩn Lưu Trữ Cải Tiến Đột Xuất)**: Mọi đợt tinh chỉnh, sửa lỗi hệ thống (Systemic Fix), nâng cấp trí thông minh Bot AI hoặc tối ưu trải nghiệm (Juice/VFX) phát sinh ngoài các Epic cơ sở TUYỆT ĐỐI KHÔNG chỉ lưu trong bộ nhớ tạm phiên (Session Artifacts / Chat). BẮT BUỘC phải lập kế hoạch tại `docs/plans/improvements/IMP-[ID]-[slug]_plan.md` và lập báo cáo nghiệm thu thực nghiệm tại `docs/reports/improvements/IMP-[ID]-[slug]_report.md`.
 
 ## 2. DEFINITION OF DONE
 A task is COMPLETE only when:
 1. Automated tests pass Adversarial Inversion (deliberate failure verification), carry traceability tags (`[UC-XXX/MSS]` or `[UC-XXX/A#]`), and ensure Fixture Contract Tests match 100% of the SSOT table.
-2. Code passes 6 Slop Red Flags audit (least new structure, cyclomatic complexity <= 5, visual tokens compliance, zero code golf/no-op).
-3. Reviewer gates approve (`spec-reviewer` approves 100% Three-Way Spec Reconciliation against `docs/requirements.md` and checks for orphaned technical debt; `code-reviewer` approves code quality, architecture boundaries, and Lean Observability; `game-3d-visual-critic` approves visual quality gate when visual audit is requested).
+2. Code passes 6 Slop Red Flags audit (least new structure, cyclomatic complexity <= 5, visual tokens compliance, zero code golf/no-op). Mọi thay đổi UI phải vượt qua `npm run lint:ui` với 0 Anti-patterns (`border-accent-on-rounded`, `bounce-easing`, `gray-on-color`, `gradient-text`).
+3. Reviewer gates approve (`spec-reviewer` approves 100% Three-Way Spec Reconciliation against `docs/requirements.md` and checks for orphaned technical debt; `code-reviewer` approves code quality, architecture boundaries, and Lean Observability; `game-3d-visual-critic` approves 3D visual quality gate; `ui-craft-reviewer` approves 2D UI craft quality gate song song với cổng 3D khi có thay đổi giao diện 2D).
 4. Progress is updated in `docs/epics/[epic]/_epic_ledger.md` (including Tech Debt Ledger if flows are deferred) and user commits changes to git.
 5. Domain learnings (if any) are processed via Lean Retrospective Pyramid (Type > Shared Helper > `docs/domain/gotchas.md`).
 6. Production Resilience verified: Defense against out-of-turn/invalid intents, global conservation invariant, and session drop/grace period handled safely.
@@ -39,7 +40,9 @@ A task is COMPLETE only when:
 When deep domain context is required, read the following index files:
 - Project Requirements & Rules: [`docs/requirements.md`](file:///C:/Users/HP/Documents/GitHub/vtcoon/docs/requirements.md)
 - Entity Model & 28 Title Deeds: [`docs/domain/entity_model.md`](file:///C:/Users/HP/Documents/GitHub/vtcoon/docs/domain/entity_model.md)
-- Visual Design System & Tokens: [`docs/domain/design.md`](file:///C:/Users/HP/Documents/GitHub/vtcoon/docs/domain/design.md)
+- Visual Design System & Tokens: [`docs/domain/design.md`](file:///C:/Users/HP/Documents/GitHub/vtcoon/docs/domain/design.md) hoặc [`DESIGN.md`](file:///C:/Users/HP/Documents/GitHub/vtcoon/DESIGN.md)
+- Impeccable 2D Craft Skill & References: [`.agents/skills/impeccable/SKILL.md`](file:///C:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/SKILL.md)
+- 2D Craft Reviewer Subagent: [`.agents/agents/ui-craft-reviewer.md`](file:///C:/Users/HP/Documents/GitHub/vtcoon/.agents/agents/ui-craft-reviewer.md)
 - FSM Architecture Decision: [`docs/domain/adr/ADR-0001-fsm-architecture.md`](file:///C:/Users/HP/Documents/GitHub/vtcoon/docs/domain/adr/ADR-0001-fsm-architecture.md)
 - 3D Rendering Architecture Decision: [`docs/domain/adr/ADR-0002-r3f-rendering.md`](file:///C:/Users/HP/Documents/GitHub/vtcoon/docs/domain/adr/ADR-0002-r3f-rendering.md)
 - Architecture Decisions Ledger: `docs/domain/adr/`

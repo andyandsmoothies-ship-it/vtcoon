@@ -11,9 +11,15 @@
 3. [CƠ CHẾ KỸ NĂNG HẠT GIỐNG (Seed Skill & JIT Dispatcher)](#3-cơ-chế-kỹ-năng-hạt-giống-seed-skill--jit-dispatcher)
 4. [SƠ ĐỒ DÒNG CHẢY KẾT HỢP CÁC KỸ NĂNG (The Artifact Pipeline)](#4-sơ-đồ-dòng-chảy-kết-hợp-các-kỹ-năng-the-artifact-pipeline)
 5. [HỆ THỐNG TRUY XUẤT NGUỒN GỐC ARTIFACTS (3-Bucket Taxonomy, 4D ADR & Universal design.md)](#5-hệ-thống-truy-xuất-nguồn-gốc-artifacts-3-bucket-taxonomy-4d-adr--universal-designmd)
-6. [10 NGUYÊN TẮC KIỂM THỬ ĐỈNH CAO & KHẢ NĂNG SINH TỒN PRODUCTION (Testing Integrity & Resilience)](#6-10-nguyên-tắc-kiểm-thử-đỉnh-cao--khả-năng-sinh-tồn-production-testing-integrity--resilience)
+6. [13 NGUYÊN TẮC KIỂM THỬ ĐỈNH CAO & KHẢ NĂNG SINH TỒN PRODUCTION (Testing Integrity & Resilience)](#6-13-nguyên-tắc-kiểm-thử-đỉnh-cao--khả-năng-sinh-tồn-production-testing-integrity--resilience)
+   - [6.1 Kim Tự Tháp Kiểm Thử Thực Chiến 4 Tầng (The 4-Layer Testing Pyramid)](#61-kim-tự-tháp-kiểm-thử-thực-chiến-4-tầng-the-4-layer-testing-pyramid)
+   - [6.2 Cổng Thẩm Mỹ Hai Tầng: 3D Visual Critic + 2D Tactile Craft](#62-cổng-thẩm-mỹ-hai-tầng-3d-visual-critic--2d-tactile-craft-two-tier-visual-gate)
+   - [6.3 Bộ Công Cụ Local Quality Gates Chuẩn Mực Cho Junior Developer (Solo Harness)](#63-bộ-công-cụ-local-quality-gates-chuẩn-mực-cho-junior-developer-solo-harness)
 7. [GIAI ĐOẠN 1: Khởi Tạo Dự Án & Cài Đặt Cấp Project (Setup 1 Lần)](#giai-đoạn-1-khởi-tạo-dự-án--cài-đặt-cấp-project-setup-1-lần)
-8. [GIAI ĐOẠN 2: Trọn Bộ 4 Subagents Native AG 2.0 Sẵn Sàng Sử Dụng](#giai-đoạn-2-trọn-bộ-4-subagents-native-ag-20-sẵn-sàng-sử-dụng)
+   - [1.0.1 Quy Tắc Bản Địa Hóa Công Cụ Native AG 2.0 & Tiêu Chuẩn Kỹ Năng (Toolchain Mapping, reference/, PRODUCT.md)](#101-quy-tắc-bản-địa-hóa-công-cụ-sang-native-ag-20--tiêu-chuẩn-kỹ-năng-toolchain-mapping)
+8. [GIAI ĐOẠN 2: Trọn Bộ Subagents Chuyên Trách Native AG 2.0 Sẵn Sàng Sử Dụng](#giai-đoạn-2-trọn-bộ-subagents-chuyên-trách-native-ag-20-sẵn-sàng-sử-dụng)
+   - [8.1 Bộ 4 Subagents Cốt Lõi Kiến Trúc (scout, implementer, spec-reviewer, code-reviewer)](#1-file-agentsagentsscoutmd-trinh-sát---định-vị-tọa-độ--nạp-skill-jit)
+   - [8.2 Bộ 5 Subagents Thẩm Mỹ, Đồ Họa & Thủ Công (ui-craft-reviewer, game-3d-visual-critic, asset-producer, documenter, manual-edit)](#5-file-agentsagentsui-craft-reviewermd-chuyên-gia-thẩm-định-thủ-công-2d-uiux)
 9. [KỊCH BẢN THỰC CHIẾN: Greenfield, Feature Slices, Bug/CR (Sign-off Test) & Brownfield](#9-kịch-bản-thực-chiến-từ-số-0-greenfield-đến-từng-tính-năng-feature)
 10. [GIAI ĐOẠN 8: Nén Bộ Nhớ & Chuyển Phiên (Session Handoff & Visual Mining)](#giai-đoạn-8-nén-bộ-nhớ--chuyển-phiên-session-handoff--visual-mining)
 11. [BẢNG TRA CỨU CÂU LỆNH NHANH (Cheat Sheet & Slash Commands)](#bảng-tra-cứu-câu-lệnh-nhanh-cheat-sheet--slash-commands)
@@ -166,16 +172,40 @@
 │       • Cơ Chế Cưỡng Chế Xác Định (Enforce What You Don't Inspect): Với phần code con người không đọc, bắt buộc dùng
 │         lưới an toàn cơ học (Linters, Type-check, Kiến trúc máy móc) để đảm bảo tính bảo trì lâu dài.
 │
-└── 16. MÔ HÌNH NÚM VẶN BÁN KÍNH RỦI RO & VAI TRÒ NON-TECH PO (BLAST RADIUS DIAL):
-        • Khử Bẫy Hoang Tưởng Doanh Nghiệp (Enterprise Paranoia) Day-0: Khi mới bắt đầu, Junior tuyên bố vai trò:
-          "Tôi là Product Owner phi kỹ thuật, chỉ tập trung vào hành vi và kết quả của người dùng, giao toàn quyền quyết định kỹ thuật cho AI."
-          ➔ Cắt giảm 90% sự tra khảo boilerplate không cần thiết ở giai đoạn đầu.
-        • Bẫy Prototype (Ricci Research): Gán nhãn "prototype" chỉ hạ thấp ước lượng rủi ro trong prompt, không làm mã nguồn an toàn hơn.
-        • Thang Đo Trưởng Thành 3 Cấp:
-          - Cấp 1 (Spike / Khám phá): Bán kính siêu hẹp, kiểm chứng ý tưởng UI/UX nhanh.
-          - Cấp 2 (MVP Slices): Bán kính lát cắt, TDD E2E, kiến trúc sạch, 0 slop, chạy đúng trong lab.
-          - Cấp 3 (Production Ready 1.0): Mở rộng bán kính rủi ro toàn cầu (Internet), kích hoạt 5 Cổng Production Hardening
-            (Chaos Monkey 1.000 ván, Intent Mutex, Rate Limit, Docker, Healthz, Graceful Exit).
+├── 16. MÔ HÌNH NÚM VẶN BÁN KÍNH RỦI RO & VAI TRÒ NON-TECH PO (BLAST RADIUS DIAL):
+│       • Khử Bẫy Hoang Tưởng Doanh Nghiệp (Enterprise Paranoia) Day-0: Khi mới bắt đầu, Junior tuyên bố vai trò:
+│         "Tôi là Product Owner phi kỹ thuật, chỉ tập trung vào hành vi và kết quả của người dùng, giao toàn quyền quyết định kỹ thuật cho AI."
+│         ➔ Cắt giảm 90% sự tra khảo boilerplate không cần thiết ở giai đoạn đầu.
+│       • Bẫy Prototype (Ricci Research): Gán nhãn "prototype" chỉ hạ thấp ước lượng rủi ro trong prompt, không làm mã nguồn an toàn hơn.
+│       • Thang Đo Trưởng Thành 3 Cấp:
+│         - Cấp 1 (Spike / Khám phá): Bán kính siêu hẹp, kiểm chứng ý tưởng UI/UX nhanh.
+│         - Cấp 2 (MVP Slices): Bán kính lát cắt, TDD E2E, kiến trúc sạch, 0 slop, chạy đúng trong lab.
+│         - Cấp 3 (Production Ready 1.0): Mở rộng bán kính rủi ro toàn cầu (Internet), kích hoạt 5 Cổng Production Hardening
+│           (Chaos Monkey 1.000 ván, Intent Mutex, Rate Limit, Docker, Healthz, Graceful Exit).
+│
+├── 17. KHUNG TIÊU CHUẨN LOCAL QUALITY GATES CHO LẬP TRÌNH ĐỘC LẬP (SOLO FAST-FEEDBACK HARNESS):
+│       • Bỏ qua gánh nặng CI/CD SaaS/Cloud khi làm việc cá nhân hoặc trong vòng lặp AI Agent nội bộ:
+│         Thay vì chờ hàng đợi GitHub Actions 3-5 phút, đóng gói 100% cổng kiểm soát thành CLI nội bộ chạy <3 giây.
+│       • 3 Trụ Cột Cơ Học Bắt Buộc (Mechanical Triple Gates):
+│         1. Cổng UI Anti-patterns: `npm run lint:ui` (quét 4 lỗi: border-accent-on-rounded, bounce-easing, gray-on-color, gradient-text).
+│         2. Cổng Quét Trùng Lặp: `npm run lint:dup` (`jscpd` khóa trần tỷ lệ lặp mã <= 4%).
+│         3. Cổng Anti-Slop AST: `npm run lint:slop` (chạy TypeScript compiler API quét Zero Swallowed Catch, Zero Dirty Casts, Ngân sách LOC).
+│       • Lệnh Hợp Nhất Một Chạm: `npm run gate:quick` (chạy 4 tầng static checks trong 2 giây) và `npm run gate` (bao gồm toàn bộ Unit/E2E test suites).
+│       • Kỹ Thuật Trích Xuất Helper Môi Trường (Environment Boundary Isolation): Tuyệt đối cấm copy-paste rải rác các khối
+│         mock/try-catch (như Canvas/AudioContext/Storage) vào từng component; bắt buộc trích xuất thành 1 helper dùng chung duy nhất.
+│
+└── 18. THIẾT KẾ BẢO VỆ NGHIỆP VỤ & PHÒNG THỦ KHAI THÁC LỖ HỔNG (BUSINESS HARDENING & ANTI-EXPLOIT PATTERNS):
+        • Rào Chắn Sàn Giá & Chống Thông Đồng (Economic Floor Bounds & Anti-Collusion): Mọi cơ chế chuyển nhượng,
+          trao đổi tài sản ngang hàng (P2P / Asset Transfer) bắt buộc phải kiểm tra ngưỡng sàn tối thiểu (Floor Price Bound)
+          ngay tại tầng Domain để chặn đứng hành vi bán tháo 0 đồng, bòn rút tài nguyên hoặc thông đồng phá vỡ mô hình kinh tế.
+        • Trần Vòng Đời Phiên Tất Định (Authoritative Session Lifecycle & Stalemate Prevention): Mọi phiên làm việc có trạng thái
+          (Stateful Sessions, Game Rooms, Shopping/Bidding Carts) bắt buộc phải có trần số vòng hoặc thời gian tối đa (Max Rounds/Timeout)
+          và hàm kiểm tra kết thúc tập trung phía Server để triệt tiêu nguy cơ kẹt phiên vô tận (Infinite Loop / Deadlock).
+        • Điều Tiết Tần Suất Tương Tác (Client/Server Interaction Throttling & Cooldown): Các hành động người dùng có tần suất cao
+          (gửi reaction, ping, refresh, action burst) bắt buộc phải kiểm soát cooldown/debounce ở cả client và server để bảo vệ băng thông và FPS.
+        • Hợp Nhất Bề Mặt Hành Động (Action Surface Consolidation & Cognitive Load Budget): Tránh phân mảnh quá nhiều nút bấm
+          cùng trỏ vào một thực thể nghiệp vụ. Gom các thao tác liên quan thành một điểm chạm hợp nhất với bộ điều hướng ngữ cảnh
+          để tối ưu hóa tải nhận thức (Cognitive Load) cho người dùng cuối.
 ```
 
 
@@ -246,7 +276,7 @@ Bạn gõ: nạp `use-case-creator` + `openapi`
     │
     ▼ (Sinh ra: docs/epics/[epic]/UC-[EPIC]-[NNN]-[kebab-name].md & docs/domain/adr/ADR-[NNNN]-[kebab-name].md)
 [LƯỢT 3: CẮT LÁT DỌC & PHÂN TÍCH TÁC ĐỘNG THAY ĐỔI (BROWNFIELD / GREENFIELD)]
-Bạn gõ: nạp `use-case-slicing` + `to-tickets`
+Bạn gõ: nạp `use-case-slicing`
     │   ├── Nếu là Brownfield (sửa code cũ): Chạy Change Impact Analysis rà soát ripple effects
     │   └── Bẻ lát cắt Tracer Bullets khép kín (UI -> API -> DB), gắn LOC Budget max +50 LOC
     │
@@ -419,7 +449,7 @@ graph LR
 
 ---
 
-## 6. 10 NGUYÊN TẮC KIỂM THỬ ĐỈNH CAO & KHẢ NĂNG SINH TỒN PRODUCTION (Testing Integrity & Resilience)
+## 6. 13 NGUYÊN TẮC KIỂM THỬ ĐỈNH CAO & KHẢ NĂNG SINH TỒN PRODUCTION (Testing Integrity & Resilience)
 
 1. **Thử Thách Đối Nghịch (Adversarial Inversion - Sharon Y. Barr)**: Trước khi kết luận test pass, `implementer` bắt buộc phải cố tình sửa sai 1 dòng logic để chứng minh bài test **thực sự chuyển sang màu ĐỎ**. Tránh 100% bẫy "Test Xanh Giả Tạo" (False Green).
 2. **Quy Tắc Mock Có Chọn Lọc (Selective Layered Mocking)**:
@@ -437,7 +467,7 @@ graph LR
    - ❌ **CẤM chỉ assert phía Lưu trữ/Producer**: Không chỉ kiểm tra `cart.discounts.add(...)` hoặc `player.modifiers.push(...)` có phần tử. Đây là bẫy "Xanh giả" phổ biến nhất khiến code thực tế bị liệt mà test vẫn pass.
    - ✅ **BẮT BUỘC assert phía Tiêu thụ/Consumer**: Test phải gọi hàm tính toán cuối cùng (như `checkout()`, `calculateTotal()`, `authorizeEndpoint()`, `rollDice()`) để chứng minh hiệu ứng đó thực sự làm biến đổi kết quả đầu ra quan sát được.
 7. **Cổng Chống Tráo Hợp Đồng Kiểm Thử (Anti-Smuggling Contract Gate - Universal Principle)**:
-   - Tuyệt đối cấm hiện tượng "treo đầu dê bán thịt chó" trong viết test: Gắn nhãn tag một Use Case lớn (ví dụ `[TC-AUTH-002: Reset Password]` hoặc `[TC-GAME-023: P2P Trading]`), nhưng bên trong phần thân test chỉ gọi và kiểm tra một assertion tầm thường, không liên quan (như kiểm tra xem user có tồn tại hay kiểm tra số dư cơ bản) để lừa cổng nghiệm thu.
+   - Tuyệt đối cấm hiện tượng "treo đầu dê bán thịt chó" trong viết test: Gắn nhãn tag một Use Case lớn (ví dụ `[TC-AUTH-002: Reset Password]` hoặc `[TC-ORDER-023: Asset Transfer]`), nhưng bên trong phần thân test chỉ gọi và kiểm tra một assertion tầm thường, không liên quan (như kiểm tra xem user có tồn tại hay kiểm tra số dư cơ bản) để lừa cổng nghiệm thu.
    - Cổng nghiệm thu (`spec-reviewer`) bắt buộc đọc ruột `expect()` và biến đầu vào để xác nhận bài test thực thi đúng giao diện và hành vi của Use Case đó.
 8. **Phòng Thủ Tấn Công Trái Lượt & Dữ Liệu Độc Hại (Out-of-Turn & Boundary Exploit Defense - Universal Principle)**:
    - ❌ **CẤM Bẫy "Người dùng ngoan ngoãn" (Cooperative User Bias)**: Không bao giờ chỉ test kịch bản người dùng hành động đúng lượt và nhập dữ liệu chuẩn.
@@ -458,6 +488,65 @@ graph LR
     - *Bảo vệ đồng đội*: Xác nhận luồng của các người dùng khác trong phòng/hệ thống không bị treo hoặc deadlock.
     - *Ân hạn có thời hạn (Grace Period)*: Hệ thống lưu giữ snapshot phiên trong thời gian quy định (ví dụ 60s).
     - *Khôi phục vi sai*: Khi reconnect trong hạn, hệ thống trả về snapshot đầy đủ và cho phép tiếp tục; nếu quá hạn, hệ thống tự động xử lý an toàn (Forfeit/Rollback/Default).
+11. **Khử Nhiễu Tất Định Cho Chuỗi Trạng Thái (Oracle Goldens & Normalization - Universal Principle)**:
+    - Khi kiểm thử FSM / State Machine hoặc luồng đồng bộ sự kiện phân tán:
+    - ❌ **CẤM so sánh trực tiếp payload chứa dữ liệu biến động**: Snapshot chứa UUID ngẫu nhiên, timestamp thực (`Date.now()`), correlation ID hoặc port mạng động sẽ làm bài test bị đỏ giả tạo (Flaky Test) qua các lần chạy.
+    - ✅ **BẮT BUỘC chụp snapshot `DeltaPayload` với PRNG seed cố định & Khử nhiễu (Normalization)**:
+      ```text
+      [Chạy FSM với seed PRNG cố định]
+                     │
+                     ▼
+      [Chuỗi Raw DeltaPayload Stream]
+                     │
+                     ▼ (Hàm Normalization bằng Regex)
+      [Khử nhiễu: Thay UUID -> <UUID>, Timestamp -> <TIMESTAMP>, Port -> :<PORT>]
+                     │
+                     ▼
+      [So sánh byte-for-byte với Oracle Golden: fsm_golden_stream.json] (Khớp 100%)
+      ```
+      *Mẫu hàm khử nhiễu regex thực chiến cho Junior*:
+      ```typescript
+      export function normalizeSnapshot(rawJson: string): string {
+        return rawJson
+          .replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi, '<UUID>')
+          .replace(/"timestamp":\s*\d+/g, '"timestamp": "<TIMESTAMP>"')
+          .replace(/:\d{4,5}\b/g, ':<PORT>');
+      }
+      ```
+      Cùng một PRNG seed và cùng một chuỗi Intent/Action của người dùng bắt buộc sinh ra 100% các giá trị ngẫu nhiên, chuyển dịch pha và kết quả giống hệt nhau byte-for-byte trên mọi môi trường.
+12. **Kiểm Thử Giám Sát Hiến Pháp (Constitution Governance Testing - Automated Invariants)**:
+    - Các rào chắn trong `GEMINI.md` hay tài liệu Markdown chỉ là lời hứa suông nếu không có bài test tự động cưỡng chế thi hành.
+    - BẮT BUỘC xây dựng 1 test suite hợp đồng chuyên trách (`tests/contracts/constitution_governance.test.ts`) để bảo vệ các bất biến hệ thống:
+      * *Vệ sinh thư mục root*: `.gitignore` bắt buộc có `.env`, `.env.local`, `.agents/tmp/`. Cấm tuyệt đối file tạm rác (`temp*`, `test*.js`, `*.tmp`) nằm ở thư mục root.
+      * *An toàn mã nguồn (Source Control Safety)*: Quét toàn bộ scripts trong `package.json`, cấm tuyệt đối chứa lệnh `git` đột biến (`git commit`, `push`, `rebase`, `stash`). Quyền commit luôn thuộc về con người.
+      * *Khóa trần LOC theo 5 tầng kiến trúc*: Tự động đếm dòng từng file: Tier 1 (Core Logic/FSM <= 400 dòng), Tier 2 (UI Components <= 500 dòng), Tier 3 (Static Data <= 800 dòng), Tier 4 (Integration/Living Tests <= 600 dòng), Tier 5 (Schemas/DTOs <= 1000 dòng).
+      * *Diệt Slop & Rào chắn cơ học*: Cấm ép kiểu bẩn (`as any`, `as unknown as`), quét cấm 4 anti-patterns UI (`border-accent-on-rounded`, `bounce-easing`, `gray-on-color`, `gradient-text`).
+      * *Giám sát Lean Observability*: Quét domain/server mutations bắt buộc phát ra structured logs `{ event, correlationId }`, cấm nuốt lỗi im lặng (empty catch).
+13. **Kiểm Toán Cân Bằng Kinh Tế & Triệt Tiêu Lỗ Hổng Bơm Tiền (Zero-Sum EV Auditing & Anti-Money-Pump)**:
+    - Trong bất kỳ hệ thống nào có cơ chế may rủi, đặt cược, minigame tài chính hoặc phân phối tài nguyên (Game/FinTech/E-commerce):
+    - ❌ **CẤM đặt tỷ lệ may rủi cảm tính**: Nếu một trò chơi cược có Giá trị Kỳ vọng (Expected Value - EV) > 1.000x, người chơi sẽ spam thao tác liên tục để in tiền từ hư không (Money Pump Exploit), phá hủy hoàn toàn cân bằng kinh tế chỉ sau vài giờ.
+    - ✅ **BẮT BUỘC kiểm toán Giá trị Kỳ vọng (EV = 1.000x)**:
+      ```text
+      Bảng Tỷ Lệ Hoàn Vốn (Ví dụ 1D6 Sàn Chứng Khoán HOSE):
+      Mặt 1: 0.30x | Mặt 2: 0.60x | Mặt 3: 0.80x | Mặt 4: 1.10x | Mặt 5: 1.20x | Mặt 6: 2.00x
+      -------------------------------------------------------------------------------------
+      EV trung bình = (0.30 + 0.60 + 0.80 + 1.10 + 1.20 + 2.00) / 6 = 6.00 / 6 = 1.000x
+      ```
+      *Mẫu assertion kiểm toán EV chuẩn xác trong Vitest/Jest*:
+      ```typescript
+      const ev = Object.values(HOSE_OUTCOMES).reduce((sum, rate) => sum + rate * (1 / 6), 0);
+      expect(Number(ev.toFixed(4))).toBe(1.0000); // Khóa trần EV = 1.0000x, sai số 0 tuyệt đối
+      ```
+      Bài test unit bắt buộc assert tổng xác suất nhân hệ số hoàn vốn phải bằng đúng 1.000x (sai số 0 tuyệt đối).
+    - **Cân Đối Dòng Tài Nguyên Bơm - Hút (Taps vs Sinks Balance)**:
+      ```text
+      [DÒNG TÀI NGUYÊN BƠM (TAPS)]        [DÒNG TÀI NGUYÊN HÚT (SINKS)]
+      • Lương định kỳ / Điểm danh         • Phí dịch vụ / Thuế giao dịch luỹ tiến
+      • Thưởng nhiệm vụ / Sự kiện    <══> • Lệnh truy thu / Phí quá hạn
+      • Lợi tức đầu tư hệ thống           • Chi phí nâng cấp / Hao mòn tài nguyên
+                                          • Phí phạt vi phạm / Tịch thu bảo chứng
+      ```
+      Cân đối giữa dòng tài nguyên bơm thụ động (Taps) và áp lực thanh lọc tiêu hao (Sinks). Nếu Taps >> Sinks ➔ Siêu lạm phát, tài nguyên vô giá trị. Nếu Sinks >> Taps ➔ Cạn kiệt thanh khoản, luồng nghiệp vụ bế tắc.
 
 ### 6.1 KIM TỰ THÁP KIỂM THỬ THỰC CHIẾN 4 TẦNG (THE 4-LAYER TESTING PYRAMID)
 Để tránh "Ảo tưởng Test Xanh" (The Illusion of False Green), mọi tính năng trước khi xuất xưởng phải phân bổ kiểm thử theo 4 tầng khép kín:
@@ -476,15 +565,203 @@ graph LR
                             /-----------------\     (Khớp 100% tham số, giá trị, schema với tài liệu gốc)
 ```
 
-### 6.2 CHỐT CHẶN THỊ GIÁC & GIAO DIỆN (VISUAL SMOKE GATE — BẮT BUỘC CHO FRONTEND/3D)
-*(Chống bẫy "Virtual Green Trap": Test Vitest/Jest chạy in-memory xanh 100% nhưng màn hình WebGL thực tế bị đen, camera lệch hoặc CSS vỡ nát)*:
-1. **Khởi động Dev Server thực tế**: Chạy `npm run dev` trên Terminal trước khi nghiệm thu lát cắt UI.
-2. **Kiểm chứng trực quan bằng `/browser`**: Dùng Chrome DevTools MCP mở `http://localhost:5173` để:
-   - Chụp ảnh màn hình (screenshot) đối chiếu với `docs/domain/design.md`.
-   - Kiểm tra Console Log của trình duyệt: Không có lỗi WebGL shader crash, React key warning hoặc unhandled exception.
-3. **Quy tắc Kiến trúc 2 Lớp Tương Tác (Z-Index & Pointer-Events)**:
-   - Lớp Canvas 3D (Z-0): Nhận tương tác chuột xoay camera/raycasting (`pointer-events-auto`).
-   - Lớp DOM HUD (Z-10): Khung root bao ngoài phải đặt `pointer-events-none`; chỉ các nút bấm, modal con mới đặt `pointer-events-auto` để không chặn tia chiếu (raycast) vào sa bàn 3D.
+### 6.2 CỔNG THẨM MỸ HAI TẦNG: 3D VISUAL CRITIC + 2D TACTILE CRAFT (TWO-TIER VISUAL GATE)
+*(Triệt tiêu bẫy "Virtual Green Trap": Test Vitest/Jest chạy in-memory xanh 100% nhưng màn hình WebGL thực tế bị đen, camera trực giao phẳng lì như SimCity 2000, nút bấm 2D giật lag méo góc hoặc CSS vỡ nát. Nâng cấp thành cổng thẩm mỹ 2 tầng song song)*:
+
+```text
+                        [CỔNG THẨM MỸ HAI TẦNG CHUYÊN TRÁCH]
+                                          │
+            ┌─────────────────────────────┴─────────────────────────────┐
+            ▼                                                           ▼
+[TẦNG 1: 3D WEBGL / R3F VISUAL GATE]             [TẦNG 2: 2D TACTILE CRAFT UI GATE]
+(Subagent: game-3d-visual-critic)                (Subagent: ui-craft-reviewer)
+• Chuẩn AAA: Monopoly Tycoon, Townscaper         • Chuẩn Tactile Luxury: Hearthstone, Clash
+• Check 0 Evidence Gate: 5 góc camera            • Diệt 4 Anti-patterns (border-accent, bounce...)
+• Khung 4 từ: recapture | rebuild | fix | ship   • Đổ bóng xúc giác shadow-[0_4px_0_0_#...]
+• Giới hạn tối đa 8 lỗi vật lý (P1 - P8)        • Motion Budget: 100ms - 500ms dứt khoát
+• Mục keep: Bảo vệ nét tinh hoa mỹ thuật         • Rào chắn npm run lint:ui (30ms, 0 Token)
+• Verdict Pass vòng 2: resolved/partial/unresolved
+```
+
+#### 1. Cổng Thẩm Mỹ Trực Quan / 3D / Đồ Họa Nâng Cao (Subagent `game-3d-visual-critic` hoặc Visual Critic)
+- **Chuẩn tham chiếu thương mại quốc tế (Commercial AAA Benchmark)**: So sánh trực tiếp với các sản phẩm thương mại cao cấp cùng phân khúc trên thị trường. Triệt tiêu 100% hiện tượng lạm phát điểm số; bản prototype sơ cấp mặc định neo ở mức 5.0/10.
+- **Check 0 Evidence Gate (Cổng Bằng Chứng 5 Góc Nhìn Trực Quan Thực Tế)**:
+  Trước khi chấm điểm, Reviewer bắt buộc kiểm tra sự hiện diện đầy đủ của 5 ảnh chụp màn hình/góc nhìn đại diện cho các trạng thái của hệ thống:
+  1. `scene_overview`: Góc nhìn toàn cảnh không gian/màn hình chính từ xa.
+  2. `primary_interior`: Không gian làm việc chính hoặc dashboard trung tâm.
+  3. `detail_modal`: Modal hoặc giao diện thẻ chi tiết đối tượng trọng điểm.
+  4. `interaction_tray`: Vùng tương tác động, khay công cụ nhập liệu hoặc hoạt ảnh tương tác.
+  5. `hud_dock`: Cụm điều khiển trạng thái (HUD / Action Dock) và các nút bấm điều hướng.
+  *Nếu thiếu bất kỳ góc chụp nào ➔ Dừng thẩm định ngay lập tức với phán quyết `disposition: recapture`.*
+- **Khung 4 từ phán quyết bắt buộc (Strict 4-Word Disposition)**:
+  * `recapture`: Thiếu bằng chứng hoặc 5 góc camera không hợp lệ.
+  * `rebuild`: Vi phạm kiến trúc thị giác nghiêm trọng, dưới chuẩn nguyên mẫu (< 5.0/10).
+  * `fix`: Nền tảng đạt (5.0 - 7.5/10), cần sửa danh sách lỗi vật lý cụ thể (P1 - P8).
+  * `ship`: Đạt chuẩn game thương mại cao cấp (>= 8.0/10), sẵn sàng xuất xưởng.
+- **Giới hạn tối đa 8 lỗi vật lý (P1 - P8) & Mục `keep` bảo vệ nét tinh hoa**:
+  * Chỉ chọn ra tối đa 8 lỗi vật lý có tác động lớn nhất đến trải nghiệm thị giác, xếp theo thứ tự ưu tiên giảm dần (P1 là nặng nhất). Tuyệt đối không dàn trải danh sách tiểu tiết vụn vặt.
+  * Bắt buộc có mục `keep`: Nêu rõ các chi tiết mỹ thuật xuất sắc (ánh kim, góc máy, hiệu ứng hạt) cấm Builder xóa bỏ hay làm suy hao khi chỉnh sửa.
+- **Quy chế Verdict Pass vòng 2**:
+  * Khi Builder hoàn thành chỉnh sửa và yêu cầu kiểm tra lại: Reviewer CHỈ ĐƯỢC CHẤM LẠI các lỗi cũ trong danh sách P1-P8 theo 3 trạng thái: `resolved` (đã sửa), `partial` (đã cải thiện một phần), `unresolved` (chưa sửa hoặc thụt lùi).
+  * Tối đa 2 vòng lặp. Tuyệt đối không đẻ thêm lỗi mới ngoài danh sách ở vòng 2.
+
+#### 2. Cổng Thủ Công 2D UI / HUD (Subagent `ui-craft-reviewer`)
+- **Triệt tiêu 4 Anti-patterns cấm kỵ (Zero-Tolerance UI Flaws)**:
+  1. `border-accent-on-rounded`: Dùng viền đơn hướng (`border-b-4`) trên thẻ hoặc nút bo tròn (`rounded-xl`) làm méo hình học CSS.
+  2. `bounce-easing`: Chuyển động nảy lò xo hoạt họa rẻ tiền hoặc easing có overshoot > 1.0.
+  3. `gray-on-color`: Dùng chữ màu xám/đen (`text-slate-950`) đè trên nền màu sặc sỡ (`amber-500`, `emerald-500`).
+  4. `gradient-text`: Tiêu đề cắt dải màu (`bg-clip-text text-transparent`) làm mờ mép chữ và suy hao độ tương phản.
+- **Kỹ thuật Đổ Bóng Xúc Giác (Tactile Physical Shadows)**:
+  * *Vì sao `border-b-4` gây méo góc trên `rounded-xl`?*: Thuật toán CSS bo góc tạo đường chuyển tiếp cong elip bất đối xứng giữa viền 0px ở cạnh bên và viền 4px ở đáy, tạo thành gờ lồi dị dạng ở hai góc dưới.
+  * *Thay thế hoàn toàn bằng đổ bóng đa tầng bảo toàn 100% bán kính bo góc*:
+    - ❌ Cũ (Méo góc): `<button className="rounded-xl border-b-4 border-amber-800 ...">`
+    - ✅ Mới (Chuẩn xúc giác): `<button className="rounded-xl shadow-[0_4px_0_0_#b45309] active:shadow-[0_1px_0_0_#b45309] active:translate-y-[3px] transition-all ...">`
+  * Mang lại cảm giác nút bấm vật lý cơ học đầm chắc, nảy xúc giác khi click/tap.
+- **Chuẩn hóa Ngân Sách Chuyển Động (Motion Budget & Reduced Motion)**:
+  * Thời lượng chuyển động (Duration): 100ms - 200ms cho tương tác vi mô (hover, click); tối đa 300ms - 500ms cho mở Modal / Drawer. Cấm animation kéo dài lê thê > 500ms gây sốt ruột cho người dùng.
+  * Đường cong Easing: Dùng easing gia tốc dứt khoát `cubic-bezier(0.16, 1, 0.3, 1)` (nhanh ở đầu, hãm êm ở đuôi).
+  * Khả năng tiếp cận: Bắt buộc bọc chuyển động với `@media (prefers-reduced-motion: reduce)` để người dùng nhạy cảm tiền đình có thể tắt hiệu ứng chuyển động.
+- **Rào chắn cơ học diệt AI Slop 30ms (`npm run lint:ui`)**:
+  * Tích hợp script Node.js quét tĩnh AST và Regex toàn bộ thư mục `src/client/ui/`.
+  * Phát hiện ngay lập tức 4 anti-patterns chỉ trong 30ms, tốn 0 token LLM. Build báo đỏ trước khi gửi code đến Subagent Reviewer.
+- **Quy tắc Kiến trúc 2 Lớp Tương Tác (Z-Index & Pointer-Events)**:
+  * Lớp Canvas 3D (Z-0): Nhận tương tác chuột xoay camera/raycasting (`pointer-events-auto`).
+  * Lớp DOM HUD (Z-10): Khung root bao ngoài phải đặt `pointer-events-none`; chỉ các nút bấm, modal con mới đặt `pointer-events-auto` để không chặn sự kiện chuột/raycast vào canvas/không gian nền bên dưới.
+
+### 6.3 BỘ CÔNG CỤ LOCAL QUALITY GATES CHUẨN MỰC CHO JUNIOR DEVELOPER (SOLO HARNESS)
+
+*(Giải quyết triệt để vấn đề: Lập trình độc lập hoặc làm việc cùng AI không cần thiết lập pipeline CI/CD GitHub Actions rườm rà nhưng vẫn đảm bảo 100% kỷ luật kỹ thuật và chống suy thoái kiến trúc)*:
+
+#### 1. Kiến Trúc 4 Cổng Kiểm Soát Cục Bộ Siêu Tốc (<3 Giây)
+Thay vì đẩy code lên GitHub và chờ đợi 3-5 phút trong hàng đợi CI/CD, Junior developer đóng gói toàn bộ Khung Tiêu Chuẩn Quality Gates thành các script cục bộ:
+
+```text
+[Mã nguồn src/]
+       │
+       ├──> [npm run lint:ui]   ──> Quét 4 Anti-patterns 2D UI (0 vi phạm)
+       │
+       ├──> [npm run lint:dup]  ──> jscpd quét trùng lặp mã (Khóa trần <= 4%)
+       │
+       ├──> [npm run lint:slop] ──> TypeScript AST linter (0 dependency ngoài):
+       │                             ├── Zero Swallowed Exceptions (empty catch)
+       │                             ├── Zero Dirty Casts (as any / as unknown as)
+       │                             ├── Categorized LOC (Logic <= 400, UI <= 500)
+       │                             └── Function SLOC (Cảnh báo > 50, Chặn > 80)
+       │
+       ├──> [npx tsc --noEmit]  ──> TypeScript Strict Mode Check (0 lỗi)
+       │
+       └──> [npm test]          ──> Vitest Suites (PASS 100%, Randomize)
+       
+                              ▲
+                              │
+     Lệnh nhanh trước commit (2s): [npm run gate:quick]
+     Lệnh đầy đủ trước handoff:    [npm run gate]
+```
+
+#### 2. Cài Đặt và Cấu Hình Trong `package.json`
+```json
+{
+  "scripts": {
+    "lint:ui": "node scripts/lint_ui.mjs",
+    "lint:slop": "node scripts/lint_slop.mjs",
+    "lint:dup": "jscpd src/ --config .jscpd.json",
+    "gate:quick": "npm run lint:ui && npm run lint:slop && npm run lint:dup && tsc --noEmit",
+    "gate": "npm run lint:ui && npm run lint:slop && npm run lint:dup && tsc --noEmit && vitest run"
+  },
+  "devDependencies": {
+    "jscpd": "^5.2.0"
+  }
+}
+```
+
+#### 3. Tệp Cấu Hình Trùng Lặp Mã `.jscpd.json`
+```json
+{
+  "threshold": 4,
+  "minLines": 5,
+  "minTokens": 50,
+  "path": ["src/"],
+  "ignore": ["**/node_modules/**", "**/*.d.ts", "**/fixtures/**"],
+  "reporters": ["console"],
+  "silent": false
+}
+```
+
+#### 3.1 Mẫu Script Anti-Slop AST Linter Tự Động (`scripts/lint_slop.mjs`)
+Để kiểm soát Zero Swallowed Catch, Zero Dirty Casts và Giới Hạn 5 Tầng LOC mà không cần phụ thuộc các dịch vụ CI/CD đắt tiền, Junior developer chỉ cần một script Node.js siêu nhẹ dùng trực tiếp TypeScript Compiler API (`typescript` có sẵn trong dự án):
+
+```javascript
+#!/usr/bin/env node
+import fs from 'node:fs';
+import path from 'node:path';
+import ts from 'typescript';
+
+// 1. Ngân sách LOC theo 5 tầng kiến trúc
+const TIER_BUDGETS = {
+  TIER1_LOGIC: { maxWarn: 300, maxError: 550 },
+  TIER2_UI: { maxWarn: 400, maxError: 500 },
+  TIER3_STATIC: { maxWarn: 650, maxError: 800 },
+};
+
+function categorizeFile(filePath) {
+  const norm = filePath.replace(/\\/g, '/');
+  if (norm.includes('config') || norm.includes('data')) return 'TIER3_STATIC';
+  if (norm.includes('ui') || norm.endsWith('.tsx')) return 'TIER2_UI';
+  return 'TIER1_LOGIC';
+}
+
+// 2. Quét AST tìm lỗi nuốt ngoại lệ và ép kiểu bẩn
+export function lintSlopContent(content, filePath = 'anonymous.ts') {
+  const sf = ts.createSourceFile(filePath, content, ts.ScriptTarget.Latest, true);
+  const errors = [];
+
+  function visit(node) {
+    // Chặn catch block rỗng nuốt lỗi âm thầm
+    if (ts.isCatchClause(node)) {
+      const hasStatements = node.block.statements.length > 0;
+      const blockText = content.substring(node.block.getStart(sf), node.block.getEnd());
+      const hasComment = /(safe|ignore|test|fallback|expected)/i.test(blockText);
+      if (!hasStatements && !hasComment) {
+        errors.push(`[zero-swallowed-catch] Catch block rỗng tại dòng ${sf.getLineAndCharacterOfPosition(node.getStart(sf)).line + 1}`);
+      }
+    }
+    // Chặn dirty casts: as any hoặc as unknown as T
+    if (ts.isAsExpression(node)) {
+      const typeText = node.type.getText(sf);
+      if (typeText === 'any' || (typeText === 'unknown' && node.parent && ts.isAsExpression(node.parent))) {
+        errors.push(`[zero-dirty-casts] Ép kiểu bẩn (${node.getText(sf)}) tại dòng ${sf.getLineAndCharacterOfPosition(node.getStart(sf)).line + 1}`);
+      }
+    }
+    ts.forEachChild(node, visit);
+  }
+
+  visit(sf);
+  return errors;
+}
+```
+*Script quét toàn bộ mã nguồn trong 0.3 giây, trả về mã lỗi `process.exit(1)` khi phát hiện vi phạm để chặn đứng commit.*
+
+#### 4. 5 Bài Học Xương Máu (Universal Gotchas) Cho Junior Khi Lập Trình Cùng AI
+1. **Bẫy Nhân Bản Khối Bọc Ngoại Lệ & Môi Trường (The Environment Wrapper Duplication Trap)**:
+   - *Hiện tượng*: Khi viết nhiều module/component phụ thuộc vào môi trường runtime cụ thể (WebGL Canvas, WebAudio, LocalStorage, Device Sensors), AI thường copy-paste cùng một khối `try { ... } catch {}` phòng thủ vào hàng chục file.
+   - *Hậu quả*: Tỷ lệ trùng lặp mã tăng vọt và sinh ra hàng chục khối `catch` rỗng nuốt lỗi âm thầm (Swallowed Exceptions), vi phạm nguyên tắc Lean Observability.
+   - *Khắc phục*: Bắt buộc trích xuất thành 1 helper dùng chung duy nhất (ví dụ `safe_runtime.ts` hoặc custom hook chuyên trách), có log cảnh báo hoặc chú thích rõ lý do xử lý fallback cho môi trường test headless.
+2. **Bẫy Ép Kiểu Bẩn & Compiler Bypass (Dirty Casting Trap)**:
+   - *Hiện tượng*: Khi gắn thuộc tính lên đối tượng toàn cục (`window`, `globalThis`) hoặc ép kiểu các đối tượng không khớp interface, AI lạm dụng `(target as unknown as DesiredType)` hoặc `as any`.
+   - *Hậu quả*: Phá hủy hệ thống Type-safety của TypeScript, che giấu lỗi suy thoái mô hình dữ liệu (Type Drift) và gây sập ứng dụng ở runtime.
+   - *Khắc phục*: Tạo tệp ambient type mở rộng interface chuẩn (`src/types/global.d.ts`), cập nhật Union Types hoặc cấu trúc lại Domain Entity/DTO đúng nguyên tắc DDD.
+3. **Bẫy Thiếu Rào Chắn Sàn/Trần Nghiệp Vụ (Economic Floor Bounds & Anti-Collusion Trap)**:
+   - *Hiện tượng*: Trong các tính năng giao dịch, chuyển nhượng tài sản ngang hàng (P2P), định giá hoặc đặt cọc, AI chỉ kiểm tra kiểu dữ liệu (`typeof price === 'number'`) mà bỏ qua điều kiện biên giá trị nghiệp vụ.
+   - *Hậu quả*: Người dùng có thể nhập giá trị 0 hoặc 1 đồng để tẩu tán tài nguyên, thông đồng phá hoại tính toàn vẹn kinh tế hoặc trục lợi lỗ hổng.
+   - *Khắc phục*: Luôn thiết lập các rào chắn sàn/trần bất biến (Floor/Ceiling Bounds) tại tầng Domain Entity/FSM (ví dụ kiểm tra tỷ lệ sàn tối thiểu theo giá trị gốc), từ chối ngay với Reason Code cụ thể (`TRANSACTION_BELOW_MINIMUM` hoặc `VALUE_OUT_OF_BOUNDS`).
+4. **Bẫy Vòng Lặp Vô Hạn & Rò Rỉ Phiên (Unbounded Session & Stalemate Trap)**:
+   - *Hiện tượng*: Các phiên tương tác có trạng thái (Stateful Sessions, Multi-step Wizards, Bidding Rooms, Game Rooms) không có cơ chế chặn số lượt/thời gian tối đa từ phía máy chủ.
+   - *Hậu quả*: Các bên tham gia có thể kéo dài phiên vô tận (Deadlock/Stalemate), làm rò rỉ bộ nhớ, giữ socket mở và gây cạn kiệt tài nguyên server.
+   - *Khắc phục*: Bắt buộc thiết lập trần vòng đời tất định có thẩm quyền phía Server (Server-Authoritative Lifecycle: Max Rounds, Turn Timeout, Grace Period) và hàm kiểm tra kết thúc tập trung (`isSessionTerminated()`) để tự động đóng phiên và giải phóng tài nguyên.
+5. **Bẫy Phân Mảnh Điểm Chạm & Quá Tải Nhận Thức (Action Surface Proliferation & Cognitive Overload Trap)**:
+   - *Hiện tượng*: Khi có nhiều thao tác nghiệp vụ trên cùng một nhóm đối tượng, AI có xu hướng tạo ra một nút bấm riêng lẻ cho từng thao tác trên thanh công cụ chính.
+   - *Hậu quả*: Giao diện người dùng bị phân mảnh, xuất hiện quá nhiều nút bấm cạnh tranh sự chú ý, làm tăng tải nhận thức và gây nhầm lẫn khi thao tác.
+   - *Khắc phục*: Gom các nút bấm có cùng miền đối tượng thành 1 điểm chạm quản lý tổng hợp duy nhất kèm menu ngữ cảnh thông minh, giữ giao diện chính luôn tối giản và rõ ràng.
 
 ---
 ---
@@ -514,6 +791,41 @@ Trước khi gõ bất kỳ prompt nào, bạn kiểm tra 4 setting hệ điều
 2. **Setting Workspace**: Mở đúng thư mục dự án trong Antigravity IDE (ví dụ: `C:\Projects\my-app`) để IDE gán làm Active Workspace gốc.
 3. **Setting MCP Servers**: Bật MCP Server `context7` để Agent luôn tra cứu tài liệu thư viện mới nhất (thay vì hallucinate từ training weights).
 4. **Setting Kho Kỹ Năng Gốc**: Đảm bảo đường dẫn `%USERPROFILE%\Documents\GitHub\backup\skills_backup\` (hoặc thư mục lưu trữ kỹ năng thực tế trên máy bạn) tồn tại để `skill-dispatcher` tự động copy kỹ năng JIT khi cần.
+
+---
+
+### 1.0.1 QUY TẮC BẢN ĐỊA HÓA CÔNG CỤ SANG NATIVE AG 2.0 & TIÊU CHUẨN KỸ NĂNG (TOOLCHAIN MAPPING)
+
+#### 1. Ánh Xạ Công Cụ Sang Hệ Thống Bản Địa Antigravity 2.0
+Khi đọc các tài liệu bên ngoài (Claude Code, Cursor cũ), bạn thường thấy các tên công cụ chung chung như `Read`, `Write`, `Edit`, `Bash`. Trong môi trường Google Antigravity 2.0, bạn BẮT BUỘC phải sử dụng đúng danh mục công cụ bản địa (Native Tools):
+
+| Công Cụ Chung Cũ | Công Cụ Bản Địa AG 2.0 | Hành Vi & Lưu Ý Thực Chiến Cho Junior |
+| :--- | :--- | :--- |
+| **`Read`** | `view_file` | Xem nội dung file (text, image, audio, pdf). Dùng `StartLine` và `EndLine` để xem phân đoạn, tránh vượt trần 800 dòng. |
+| **`Write`** | `write_to_file` | Tạo file mới hoặc ghi đè toàn bộ file (`Overwrite: true`). Bắt buộc cung cấp `ArtifactMetadata`. |
+| **`Edit`** | `replace_file_content` | Sửa 1 khối văn bản liền mạch (contiguous block). Bắt buộc chỉ định `StartLine`, `EndLine`, `TargetContent` (khớp từng ký tự), `ReplacementContent`. |
+| **`Bash`** | `run_command` | Chạy lệnh Terminal qua Windows Shell (`cmd /c`). CẤM dùng `cd` và cấm bash wrapper. |
+| *(Duyệt file)* | `list_dir` | Liệt kê danh sách file/thư mục con trực tiếp. |
+| *(Tìm kiếm file)*| `find_by_name` | Tìm file nhanh bằng regex/glob qua engine `fd` cực nhanh (thay thế lệnh `dir /s`). |
+| *(Tìm kiếm chuỗi)*| `grep_search` | Tìm mẫu chính xác hoặc regex xuyên cây thư mục bằng `ripgrep` (nhanh hơn lệnh `findstr`). |
+| *(Điều phối)* | `send_message` | Giao tiếp giữa Agent mẹ và Subagents con hoặc nhận kết quả bàn giao. |
+| *(Tác vụ ngầm)*| `manage_task` | Giám sát trạng thái (`status`), gửi input (`send_input`), hủy tác vụ (`kill`). |
+| *(Hẹn giờ)* | `schedule` | Lên lịch một lần (timer) hoặc định kỳ (cron), tận dụng Reactive Wakeup không tốn token. |
+
+#### 2. Quy Tắc Thư Mục Tham Chiếu Kỹ Năng: Bắt Buộc `reference/` (Số Ít)
+> [!IMPORTANT]
+> **Quy Tắc Đặt Tên Thư Mục Tham Chiếu (Skill Reference Directory)**:
+> Khi xây dựng tài liệu kỹ năng phức tạp (`.agents/skills/[tên_skill]/`), thư mục con chứa các tài liệu tra cứu chuyên sâu BẮT BUỘC phải đặt tên là `reference/` (danh từ số ít, KHÔNG dùng `references/`).
+> - *Nguyên nhân kỹ thuật*: Engine phân giải ngữ cảnh và các sentinel file matcher của Antigravity 2.0 quét chính xác đường dẫn số ít này (ví dụ `.agents/skills/impeccable/reference/*.md`). Nếu đặt là `references/`, hệ thống sẽ không tự động lập chỉ mục và nạp tài liệu tra cứu khi cần.
+
+#### 3. Chuẩn Hóa Khai Báo Sản Phẩm `PRODUCT.md` (`<!-- impeccable:product-schema 1 -->`)
+> [!TIP]
+> **Chuẩn Hóa Hợp Đồng Sản Phẩm Cho Giao Diện Thẩm Mỹ**:
+> Mọi dự án có đầu ra thị giác 2D/3D bắt buộc duy trì tệp `PRODUCT.md` ở thư mục root với dòng định danh schema đầu tiên:
+> ```markdown
+> <!-- impeccable:product-schema 1 -->
+> ```
+> Tệp này định nghĩa rõ: Thể loại sản phẩm (Product Kind: game, web app, mobile), Tông giọng (Voice), Vật liệu thương hiệu (Brand Materials: kim loại vàng dập nổi, kính mờ, gỗ mun), và Bảng màu chuẩn (Palette). Tệp này là hợp đồng đầu vào chuẩn mực (Ground Truth) để các Subagent mỹ thuật (`ui-craft-reviewer`, `game-3d-visual-critic`, `impeccable-asset-producer`) căn cứ đối chiếu.
 
 ---
 
@@ -912,7 +1224,7 @@ Khi bắt đầu bất kỳ dự án nào, bạn chỉ cần nhìn vào bản đ
 | | **Lượt 5: Chốt nền** | 💬 `[CHAT AG 2.0]` Gõ: `Gọi code-reviewer kiểm toán nền móng`<br>➔ 💻 `[TERMINAL CMD]` Bạn tự gõ `git commit`. | `code-reviewer` + Bạn | Initial commit an toàn trên Git |
 | **3. TÍNH NĂNG MỚI**<br>*(Feature Slices)* | **Lượt 1: Bounded Context**| 💬 `[CHAT AG 2.0]` Gõ: `/grill-me Tôi muốn làm tính năng [Epic]. Hãy phỏng vấn chốt ranh giới & NFRs.` | `shaping`, `risk-assessment` | `docs/epics/[epic]/shaping_boundaries.md` |
 | | **Lượt 2: Use Case 3.0** | 💬 `[CHAT AG 2.0]` Gõ: `Viết spec chi tiết UC-[EPIC]-NNN, BR-[EPIC]-NNN, tuân thủ 3 Zones, Blocklist và 4D ADR.` | `use-case-creator`, `openapi` | `docs/epics/[epic]/UC-[EPIC]-[NNN]-[kebab-name].md`, `docs/domain/adr/ADR-[NNNN]-[kebab-name].md` |
-| | **Lượt 3: Cắt Lát Ticket** | 💬 `[CHAT AG 2.0]` Gõ: `Bẻ spec thành tickets: Slice 1 LUÔN LÀ MSS alone; gom Alt flows vào các slice sau; LOC max +50.` | `use-case-slicing`, `to-tickets` | `docs/epics/[epic]/_epic_ledger.md` + `issues/[EPIC]-S[NN]-[kebab-name].md` |
+| | **Lượt 3: Cắt Lát Ticket** | 💬 `[CHAT AG 2.0]` Gõ: `Bẻ spec thành tickets: Slice 1 LUÔN LÀ MSS alone; gom Alt flows vào các slice sau; LOC max +50.` | `use-case-slicing` | `docs/epics/[epic]/_epic_ledger.md` + `issues/[EPIC]-S[NN]-[kebab-name].md` |
 | | **Lượt 4: Thi Công TDD** | 💬 `[CHAT AG 2.0]` Gõ: `Gọi implementer thi công ticket issues/[EPIC]-S[NN]-[kebab-name].md trong Workspace: 'branch' (Literal data, DB rollback).` | `implementer` | Code + Unit/Integration test pass 100% |
 | | **Lượt 5: Kiểm Toán 2 Cổng**| 💬 `[CHAT AG 2.0]` Gõ: `Gọi spec-reviewer (đối chiếu spec, 0 anti-patterns) và code-reviewer (6 cờ đỏ slop, --randomize).` | `spec-reviewer` + `code-reviewer` | Báo cáo 2 cổng APPROVED 100% |
 | | **Lượt 6: Nghiệm Thu** | 💻 `[SMOKE CHECK & COMMIT]` Bấm thử tính năng thực tế 30s (chống bẫy test xanh nhưng sai thế giới thực) ➔ Tự gõ `git commit -m "feat([epic]): ..."` ➔ Đánh dấu `DONE` trong ledger. | Bạn (Human Gate) | Tính năng chạy thật chuẩn xác, Git commit sạch |
@@ -942,9 +1254,9 @@ Nếu bạn là Fresher hoặc lần đầu tiếp xúc với các thuật ngữ
 
 ---
 
-## GIAI ĐOẠN 2: Trọn Bộ 4 Subagents Native AG 2.0 Sẵn Sàng Sử Dụng
+## GIAI ĐOẠN 2: Trọn Bộ Subagents Chuyên Trách Native AG 2.0 Sẵn Sàng Sử Dụng
 
-Tạo 4 file sau trong thư mục `.agents/agents/`:
+Tạo 9 file subagents chuyên trách sau trong thư mục `.agents/agents/` (4 subagents cốt lõi kiến trúc và 5 subagents chuyên biệt về đồ họa, thẩm định 2D/3D và thủ công):
 
 ### 1. File `.agents/agents/scout.md` (Trinh Sát - Định Vị Tọa Độ & Nạp Skill JIT)
 ```markdown
@@ -993,12 +1305,12 @@ tools: [view_file, write_to_file, replace_file_content, list_dir, find_by_name, 
    - *Pass 1 (Make it Work - Adversarial TDD)*: Viết test trước (Red) ➔ Viết code tối thiểu để test chuyển sang màu XANH (Green) ➔ Inversion Test (sửa sai 1 dòng xem test có ĐỎ không). Mọi test bắt buộc gắn nhãn truy xuất nguồn gốc `[UC-XXX/MSS]` hoặc `[UC-XXX/A#]` và `[BR-XXX]`.
    - *Pass 2 (Make it Lean - Prune & Simplify)*: Rà soát lại diff vừa viết: Xóa bỏ các helper/interface chỉ dùng 1 lần (YAGNI), nén LOC lại 15–20% mà toàn bộ test suite vẫn PASS 100%.
    - *Pass 3 (Quality & Anti-Code-Golf Gate)*: Đo lường Cyclomatic Complexity (<= 5). CẤM BẪY CODE GOLF: Giữ code rõ ràng, không viết one-liner ma thuật, không viết dòng quá dài, không gộp tắt mắt. Tests được miễn trừ khỏi áp lực giảm LOC.
-7. **Literal Test Data & Failure Postconditions**:
+6. **Literal Test Data & Failure Postconditions**:
    - Dữ liệu test bắt buộc là dữ liệu thực tế cụ thể (Literal Data: `"Acme Corp"`, `"ISBN 978-0-13-235088-4"`, số nguyên 5). CẤM dùng string mơ hồ (`"test"`, `"valid_user"`).
    - Với các test của Alternative Flow kết thúc bằng `Use case ends`, BẮT BUỘC viết assertion kiểm tra Failure Postconditions (giao dịch DB rollback sạch sẽ, không có bản ghi dở dang).
    - CẤM kiểm thử NFR trên database rỗng. Bắt buộc tạo mock dataset có hình thái thực tế (tối thiểu 20-50 records) để đo lường số lượng query (chống lỗi N+1) và độ trễ.
-8. **Context Offloading**: Chạy test và linter qua script Terminal; chỉ nạp kết quả lỗi tóm tắt vào ngữ cảnh chat.
-9. **Mẫu báo cáo**:
+7. **Context Offloading**: Chạy test và linter qua script Terminal; chỉ nạp kết quả lỗi tóm tắt vào ngữ cảnh chat.
+8. **Mẫu báo cáo**:
 ```markdown
 ### 🚀 KẾT QUẢ THI CÔNG TICKET: [MÃ_TICKET]
 | File thao tác | Hành động | LOC Thêm | Cyclomatic | Trạng thái |
@@ -1132,6 +1444,135 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command]
 ```
 ```
 
+### 5. File `.agents/agents/ui-craft-reviewer.md` (Chuyên Gia Thẩm Định Thủ Công 2D UI/UX)
+```markdown
+---
+name: ui-craft-reviewer
+description: Chuyên gia thẩm định thủ công UI/UX 2D độc lập chuẩn Antigravity 2.0 & Impeccable. Phản biện không khoan nhượng các lỗi giao diện, viền bo góc, đổ bóng xúc giác, phân bổ thời động, và 4 anti-patterns. Đưa ra phán quyết disposition (recapture/rebuild/fix/ship), danh sách tối đa 8 lỗi vật lý P1-P8, mục keep nét tinh hoa và quy chế Verdict Pass vòng 2. Strictly READ-ONLY.
+subagent: true
+mainAgent: false
+model: inherit
+tools: [view_file, list_dir, find_by_name, grep_search]
+---
+# QUY TRÌNH THẨM ĐỊNH THỦ CÔNG UI/UX 2D (UI-CRAFT-REVIEWER PROTOCOL)
+1. **Quyền hạn**: CHỈ ĐỌC (Strictly READ-ONLY). CẤM sửa mã nguồn dự án.
+2. **4 Cấm Kỵ Cốt Lõi (Zero-Tolerance Anti-Patterns)**:
+   - `border-accent-on-rounded`: Viền directional (`border-b-4`) trên nút/thẻ bo góc làm méo hình học CSS.
+   - `bounce-easing`: Chuyển động nảy lò xo hoạt họa rẻ tiền hoặc cubic-bezier có overshoot > 1.0.
+   - `gray-on-color`: Chữ xám/đen (`text-slate-950`) đè trên nền màu sặc sỡ (`amber`, `emerald`).
+   - `gradient-text`: Tiêu đề chữ cắt dải màu làm giảm tương phản và răng cưa mép chữ.
+3. **Khung 4 Từ Phán Quyết Bắt Buộc**:
+   - `disposition: recapture | rebuild | fix | ship`
+4. **Giới Hạn Tối Đa 8 Lỗi Vật Lý (P1 - P8) & Mục `keep`**:
+   - Chỉ nêu tối đa 8 lỗi vật lý ảnh hưởng lớn nhất đến trải nghiệm thị giác.
+   - Bắt buộc có mục `keep` bảo vệ các nét tinh hoa mỹ thuật cấm Builder làm mất khi sửa.
+5. **Quy Chế Verdict Pass Vòng 2**:
+   - Khi thẩm định lại, CHỈ CHẤM LẠI các lỗi cũ theo 3 trạng thái: `resolved`, `partial`, `unresolved`. Tối đa 2 vòng lặp, cấm sinh lỗi mới ngoài danh sách.
+6. **Mẫu Báo Cáo**:
+```markdown
+disposition: [recapture | rebuild | fix | ship]
+### 🎨 BÁO CÁO THẨM ĐỊNH THỦ CÔNG 2D UI/UX
+- **Anti-patterns**: 0 vi phạm (hoặc phát hiện cụ thể tại File:Dòng).
+- **Đổ bóng xúc giác**: [Đạt chuẩn tactile shadow / Còn viền méo].
+- **Thời động (Motion Budget)**: [100ms-500ms dứt khoát / Kéo dài lê thê].
+- **Mục keep**: [K1, K2 giữ gìn].
+- **Danh sách lỗi vật lý (P1 - P8)**: [Mô tả chi tiết kèm tọa độ file:dòng].
+```
+```
+
+### 6. File `.agents/agents/game-3d-visual-critic.md` (Giám Đốc Nghệ Thuật 3D Phản Biện Đối Kháng)
+```markdown
+---
+name: game-3d-visual-critic
+description: Senior Adversarial 3D Game Art Director & Creative Visionary. Benchmarks strictly against AAA commercial titles (Monopoly Plus, Townscaper). Enforces ruthless visual critique, anchors baseline prototypes at 5.0/10, exercises VETO power on mediocre renders, and mandates concrete engineering directives to exceed expectations (Wow-Factor). Strictly READ-ONLY.
+subagent: true
+mainAgent: false
+model: inherit
+tools: [view_file, list_dir, find_by_name, grep_search]
+---
+# QUY TRÌNH PHẢN BIỆN ĐỐI KHÁNG 3D GAME (GAME-3D-VISUAL-CRITIC PROTOCOL)
+1. **Quyền hạn**: CHỈ ĐỌC (Strictly READ-ONLY). CẤM sửa mã nguồn.
+2. **Chuẩn Tham Chiếu Thương Mại AAA**: So sánh với Monopoly Tycoon, Monopoly Plus, Townscaper. Triệt tiêu lạm phát điểm số (nguyên mẫu sơ khai neo ở 5.0/10).
+3. **Cổng Bằng Chứng Bắt Buộc (Check 0: Evidence Gate)**:
+   - Bắt buộc kiểm tra đủ 5 góc camera định danh: `top_down`, `lobby_vip`, `deed_modal`, `dice_tray`, `hud_dock`.
+   - Nếu thiếu bất kỳ góc nào ➔ DỪNG THẨM ĐỊNH NGAY, kết luận `disposition: recapture`.
+4. **Khung 4 Từ Phán Quyết Bắt Buộc**:
+   - `disposition: recapture | rebuild | fix | ship`
+5. **Giới Hạn Tối Đa 8 Lỗi Vật Lý (P1 - P8) & Mục `keep`**:
+   - Danh sách tối đa 8 lỗi vật lý ưu tiên cao nhất, kèm mục `keep` bảo vệ chi tiết mỹ thuật xuất sắc.
+6. **Quy Chuẩn Đánh Giá Lại (Verdict Pass Vòng 2)**:
+   - Chỉ chấm lại danh sách P1-P8 cũ theo: `resolved`, `partial`, `unresolved`. Tối đa 2 vòng lặp, cấm sinh thêm lỗi mới ngoài danh sách ở vòng 2.
+7. **Mẫu Báo Cáo**:
+```markdown
+disposition: [recapture | rebuild | fix | ship]
+### 🏛️ PHÁN QUYẾT NGHỆ THUẬT 3D ART DIRECTOR
+- **Check 0 Evidence Gate**: Đủ 5 góc camera [HỢP LỆ / THIẾU].
+- **Điểm số thực tế:** [X.X / 10] (triệt tiêu lạm phát điểm).
+- **Nét tinh hoa cấm làm mất (keep):** [K1, K2...].
+- **Danh sách khắc phục vật lý (tối đa P8):** [P1 (Critical), P2 (High)...].
+- **Verdict Pass vòng 2 (nếu có):** [P1: resolved | P2: partial...].
+```
+```
+
+### 7. File `.agents/agents/impeccable-asset-producer.md` (Sản Xuất Asset Đồ Họa Raster Chuẩn)
+```markdown
+---
+name: impeccable-asset-producer
+description: Chuyên gia sản xuất asset đồ họa raster sạch từ mock Impeccable đã duyệt mà không thay đổi định hướng mỹ thuật chuẩn Antigravity 2.0.
+subagent: true
+mainAgent: false
+model: inherit
+tools: [view_file, write_to_file, replace_file_content, run_command, list_dir, find_by_name, grep_search]
+---
+# QUY TRÌNH SẢN XUẤT ASSET RASTER (IMPECCABLE-ASSET-PRODUCER PROTOCOL)
+1. **Nhiệm vụ cốt lõi**: Sản xuất hình ảnh raster sạch từ mock comp đã duyệt. Không tự ý thiết kế lại (Do not redesign); bảo tồn toàn vẹn vai trò thị giác, silhouette, palette, lighting, vật liệu và góc camera.
+2. **Hợp đồng đầu vào (Input Contract)**: Nhận spec đo đạc từ `.impeccable/build/spec.json` và mock comp đã duyệt. Mọi asset sinh ra đều đối chiếu theo `PRODUCT.md` (`<!-- impeccable:product-schema 1 -->`).
+3. **Phân biệt nền (Cutout vs Opaque)**:
+   - Đối tượng đơn lẻ trên nền trang (figure, icon vật thể, line drawing) ➔ Transparent cutout (PNG alpha trong suốt).
+   - Ảnh chụp, minh họa tràn khung, texture chất liệu ➔ Nền mờ đục (Opaque).
+4. **Quy chuẩn xuất xưởng**: Kích thước pixel tối thiểu 1.5x so với kích thước render thực tế, khử hoàn toàn viền halo, kiểm tra tương thích trên cả nền sáng lẫn nền tối.
+```
+
+### 8. File `.agents/agents/impeccable-documenter.md` (Ghi Nhận & Đồng Bộ Hệ Thống Thiết Kế DESIGN.md)
+```markdown
+---
+name: impeccable-documenter
+description: Ghi nhận DESIGN.md và sidecar json từ sản phẩm Impeccable đã hoàn thành, chuẩn hóa hệ thống thiết kế từ mã nguồn thực tế chuẩn Antigravity 2.0.
+subagent: true
+mainAgent: false
+model: inherit
+tools: [view_file, write_to_file, replace_file_content, run_command, list_dir, find_by_name, grep_search]
+---
+# QUY TRÌNH ĐỒNG BỘ THIẾT KẾ (IMPECCABLE-DOCUMENTER PROTOCOL)
+1. **Chân Lý Thuộc Về Mã Nguồn Thực Tế (Ground Truth In Shipped Code)**:
+   - Chỉ ghi nhận các token, quy tắc và giá trị thực sự tồn tại trong mã nguồn đã hoàn thành, không ghi nhận từ kế hoạch lý thuyết chưa thi công.
+2. **Tài Liệu Vận Hành Chuẩn**:
+   - Đọc và tuân thủ định dạng chuẩn tại `.agents/skills/impeccable/reference/document.md` (lưu ý thư mục `reference/` số ít).
+3. **Bảo Vệ Tính Toàn Vẹn Của Hệ Thống Thiết Kế**:
+   - Tuyệt đối không đưa các thiết kế vi phạm (defect) vào `DESIGN.md` để hợp thức hóa lỗi (ví dụ: cấm hợp thức hóa chữ xám trên nền màu hoặc gradient text thành token chuẩn).
+   - Xuất tóm tắt 5 dòng về bảng màu (Palette), thang chữ (Type Ramp), và danh mục quy tắc thiết kế kế thừa cho các tính năng tiếp theo.
+```
+
+### 9. File `.agents/agents/impeccable-manual-edit-applier.md` (Áp Dụng Chỉnh Sửa Trực Tiếp Live Manual Edit)
+```markdown
+---
+name: impeccable-manual-edit-applier
+description: Áp dụng các đợt chỉnh sửa trực tiếp (live manual copy-edit) vào mã nguồn và trả về kết quả Apply chuẩn xác cho Impeccable trong Antigravity 2.0.
+subagent: true
+mainAgent: false
+model: inherit
+tools: [view_file, write_to_file, replace_file_content, run_command, list_dir, find_by_name, grep_search]
+---
+# QUY TRÌNH ÁP DỤNG CHỈNH SỬA TRỰC TIẾP (MANUAL-EDIT-APPLIER PROTOCOL)
+1. **Nhiệm vụ đơn lẻ (Single-purpose Execution)**:
+   - Chỉ thực hiện áp dụng các thay đổi văn bản/giao diện từ sự kiện `manual_edit_apply` mà người dùng đã bấm xác nhận Apply trên trình duyệt live.
+2. **Nguyên tắc an toàn mã nguồn**:
+   - CẤM chạy các lệnh git stage/commit.
+   - Không tự ý viết lại cấu trúc container bao ngoài hoặc thay đổi định dạng code xung quanh; chỉ sửa chính xác chuỗi ký tự được chỉ định.
+3. **Đối khớp vị trí nguyên tử**:
+   - Sử dụng gợi ý tọa độ (`sourceHint.file` + `sourceHint.line`) và chuỗi con gốc (`op.originalText`) để thay thế bằng `op.newText` nguyên tử, bảo toàn 100% các thẻ HTML/JSX con liền kề.
+```
+
 ---
 
 ## 9. KỊCH BẢN THỰC CHIẾN: TỪ SỐ 0 (GREENFIELD) ĐẾN TỪNG TÍNH NĂNG (FEATURE)
@@ -1157,7 +1598,7 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command]
 
 #### 🟢 LƯỢT 3: Tạo Ticket Cài Đặt Môi Trường & Giàn Giáo (Scaffold Tickets)
 - **Bạn gõ vào chat**:
-  > *"Đọc file spec vừa tạo. Dùng `to-tickets` tạo các ticket kỹ thuật khởi tạo vào `issues/`:
+  > *"Đọc file spec vừa tạo. Dùng skill `use-case-slicing` tạo các ticket kỹ thuật khởi tạo vào `issues/`:
   > - Ticket INFRA-S00: Khởi tạo mã nguồn dự án (package.json / go.mod / pubspec...), cài đặt linter boundary cơ học (Nick Tune), và tạo file `GEMINI.md`.
   > - Ticket INFRA-S01: Dựng luồng Walking Skeleton (Endpoint `/health` + Test kết nối DB test thật).
   > Ghi nhận tiến độ vào `docs/epics/infrastructure/_epic_ledger.md`."*
@@ -1201,7 +1642,7 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command]
 - **Bạn gõ vào chat**:
   > *"Hãy đọc file spec vừa tạo. 
   > - Nếu đây là sửa đổi logic trên hệ thống đang chạy (Brownfield), hãy chạy Phân tích tác động thay đổi (Change Impact Analysis) để rà soát ripple effects lên các module/API hiện có.
-  > - Sau đó dùng skill `use-case-slicing` kết hợp `to-tickets` để bẻ bản spec thành các Lát Cắt Dọc khép kín (UI -> API -> DB). Đảm bảo Slice 01 LUÔN LÀ Basic Flow (Happy path) đơn lẻ để nghiệm thu sớm; các Slice tiếp theo mới gom các Alternative Flows theo độ ưu tiên nghiệp vụ. Mỗi ticket đặt Ngân sách dòng code tối đa linh hoạt (LOC Budget max +50 dòng, cấm Code Golf) và ghi nhận vào Sổ Cái `docs/epics/auth/_epic_ledger.md`."*
+  > - Sau đó dùng skill `use-case-slicing` để bẻ bản spec thành các Lát Cắt Dọc khép kín (UI -> API -> DB). Đảm bảo Slice 01 LUÔN LÀ Basic Flow (Happy path) đơn lẻ để nghiệm thu sớm; các Slice tiếp theo mới gom các Alternative Flows theo độ ưu tiên nghiệp vụ. Mỗi ticket đặt Ngân sách dòng code tối đa linh hoạt (LOC Budget max +50 dòng, cấm Code Golf) và ghi nhận vào Sổ Cái `docs/epics/auth/_epic_ledger.md`."*
 - **Sản phẩm xuất ra**: `docs/epics/auth/_epic_ledger.md` và các file `issues/AUTH-S01-mss-registration.md`, `issues/AUTH-S02-rate-limiting.md`.
 
 ---
@@ -1238,10 +1679,10 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command]
    - Nghiêm cấm tuyên bố hoàn thành Slice UI chỉ dựa trên Unit/Snapshot test.
    - Bắt buộc kích hoạt máy chủ dev (`npm run dev`) và dùng lệnh `/browser` (hoặc DevTools) để chụp ảnh màn hình nghiệm thu trực quan bằng mắt người.
 2. **Quy tắc Phân Tầng Z-Index & Cô Lập Sự Kiện (Pointer-Events Isolation)**:
-   - *Layer 1 (3D WebGL Canvas - Z-Index 0)*: Phải nhận sự kiện tương tác sa bàn, xoay camera, click ô đất.
-   - *Layer 2 (DOM UI Overlay - Z-Index 10)*: Container bao ngoài bắt buộc đặt `pointer-events-none`; chỉ các nút bấm, input, modal con mới đặt `pointer-events-auto` để tránh che liệt chuột của lớp 3D bên dưới.
+   - *Layer 1 (3D WebGL / Canvas Background - Z-Index 0)*: Phải nhận sự kiện tương tác không gian nền, xoay camera, click phần tử đồ họa.
+   - *Layer 2 (DOM UI Overlay - Z-Index 10)*: Container bao ngoài bắt buộc đặt `pointer-events-none`; chỉ các nút bấm, input, modal con mới đặt `pointer-events-auto` để tránh che liệt chuột của lớp đồ họa bên dưới.
 3. **Hiệu Năng Khung Hình (60 FPS Guard)**:
-   - Không bind toàn bộ State store vào render loop của Canvas; bắt buộc dùng selective selectors (Zustand) để chống re-render toàn bàn cờ khi số dư người chơi thay đổi.
+   - Không bind toàn bộ State store vào render loop của Canvas; bắt buộc dùng selective selectors (Zustand/Redux) để chống re-render toàn bộ scene khi dữ liệu người dùng thay đổi.
 
 ---
 
@@ -1564,7 +2005,7 @@ Khi bạn chạy lệnh trong Terminal gặp lỗi đỏ, hoặc Subagent báo t
 │ │   • Gõ: /grill-me + shaping + risk-assessment để chốt ranh giới & NFRs         │
 │ │   • Xuất ra: docs/domain/CONTEXT.md, design.md, 4D ADR                         │
 │ │                                                                                │
-│ └── NHÁNH B (Đã có sẵn tài liệu thiết kế/specs chi tiết như VTCoOn):             │
+│ └── NHÁNH B (Đã có sẵn tài liệu thiết kế/specs chi tiết từ trước):              │
 │     • BỎ QUA HOÀN TOÀN /grill-me (Tránh đốt token và lặp lại câu hỏi thừa)       │
 │     • Ingestion & Chuẩn hóa vào 3 Thùng: requirements.md, entity_model.md        │
 │                                                                                  │
@@ -2006,7 +2447,7 @@ Báo cáo kết quả tổng kết: Số lượng test PASS, độ phủ, log ch
 - **💬 CÂU LỆNH PROMPT CHUẨN (Model: Flash)**:
 ```text
 Hãy gọi subagent implementer, kích hoạt kỹ năng tdd để tạo hoặc cập nhật bài test hợp đồng thực thể tests/contracts/[TÊN_MODULE]_fixture.test.ts:
-1. Đối chiếu 100% dữ liệu tĩnh trong src/domain/ với bảng SSOT trong docs/requirements.md (ví dụ: đúng 40 tên ô bàn cờ tiếng Việt, đủ 36 enum thẻ sự kiện, đủ 28 Title Deeds).
+1. Đối chiếu 100% dữ liệu tĩnh trong src/domain/ với bảng SSOT trong docs/requirements.md (ví dụ: đủ 100% mã phân loại sản phẩm, đúng danh mục tiền tệ/đơn vị tính, chuẩn hóa nhãn localization tiếng Việt).
 2. Viết các assertion trực diện khóa cứng giá trị hiển thị và thuộc tính (khóa index, tên tiếng Việt, nhóm phân loại, giá niêm yết).
 3. Chạy test chứng minh PASS. Bất kỳ sự thiếu sót, tên tiếng Anh tạm thời hay enum rỗng đều phải làm bài test BÁO ĐỎ ngay lập tức.
 ```
@@ -2061,22 +2502,31 @@ Yêu cầu xuất biên bản thẩm định:
 - **🛡️ RÀO CHẮN GÁC CỔNG**: AI tuyệt đối bị cấm gõ lệnh `git commit`. Con người là chốt chặn duy nhất kiểm soát kho mã nguồn.
 - **💻 THAO TÁC TRÊN TERMINAL CMD WINDOWS**:
 ```cmd
-REM 1. Chạy lại toàn bộ test suite để kiểm chứng độc lập lần cuối
-npm test
+REM 1. Chạy cổng kiểm soát chất lượng cục bộ siêu tốc (UI + Slop + Trùng lặp + Typecheck - 2 giây)
+npm run gate:quick
 
-REM 2. Xem lại danh sách các file thay đổi (hoặc mở GitHub Desktop)
+REM 2. Chạy toàn bộ kiểm thử và kiểm soát hợp nhất (Full Quality Gate)
+npm run gate
+
+REM 3. Xem lại danh sách các file thay đổi (hoặc mở GitHub Desktop)
 git status
 
-REM 3. Tự tay gõ lệnh commit an toàn
+REM 4. Tự tay gõ lệnh commit an toàn
 git add .
 git commit -m "feat([tên_epic]): hoàn thành [MÃ_TICKET] - [TÊN_TÍNH_NĂNG]"
 ```
 - **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu - TRẠM 3B: HUMAN GATE)**: Lệnh commit thành công trên Git, thư mục làm việc sạch sẽ (Working tree clean).
 - **💡 BỘ LỌC AN TÂM TUYỆT ĐỐI TRƯỚC KHI COMMIT (SANITY VERIFICATION GATE)**:
-  - *Tâm lý Junior*: Thường cảm thấy bất an, sợ rằng việc sửa code ở lát cắt hiện tại vô tình làm hỏng ngầm các lát cắt trước mà không biết.
-  - *2 Tuyệt chiêu giải tỏa bất an (Kiểm chứng bằng bằng chứng thực tế)*:
-    1. **Kiểm thử Hồi quy Xáo trộn (Shuffled Regression)**: Chạy test suite với cờ ngẫu nhiên (`npm test -- --sequence.shuffle` hoặc `--randomize`). Nếu 100% bài test vẫn xanh trong điều kiện xáo trộn thứ tự ➔ Chứng minh zero state-leakage, các test hoàn toàn độc lập.
-    2. **Kịch bản Tích hợp Liên hoàn (E2E Golden Gameplay/User Flow)**: Khi chuẩn bị kết thúc một giai đoạn nền tảng quan trọng, hãy yêu cầu Agent viết 1 bài test tích hợp mô phỏng toàn bộ hành trình người dùng thực tế từ Slice 00 đến hiện tại (`tests/integration/golden_flow.test.ts`). Khi ván đấu mẫu chạy thông suốt từ đầu đến cuối ➔ Đạt độ an tâm tuyệt đối 100% để gõ lệnh `git commit`.
+  - *Tâm lý Junior*: Thường cảm thấy bất an, sợ rằng việc sửa code ở lát cắt hiện tại vô tình làm hỏng ngầm các lát cắt trước mà không biết, hoặc code sinh ra bị thừa thãi/trùng lặp.
+  - *3 Tuyệt chiêu giải tỏa bất an (Kiểm chứng bằng bằng chứng thực tế)*:
+    1. **Cổng Kiểm Soát Chất Lượng Cục Bộ Một Chạm (`npm run gate:quick` & `npm run gate`)**: Tự động rà soát 5 tầng cơ học trong vài giây:
+       - `lint:ui`: 0 anti-patterns giao diện 2D.
+       - `lint:slop`: Zero swallowed exceptions (empty catch), zero dirty casts (`as any`), ngân sách dòng code theo phân loại 5 tầng.
+       - `lint:dup`: Tỷ lệ trùng lặp mã qua `jscpd` khóa cứng dưới ngưỡng trần (<= 4%).
+       - `tsc --noEmit`: Type-check nghiêm ngặt 100% không lỗi.
+       - `vitest run`: Toàn bộ test suites chạy pass không suy thoái.
+    2. **Kiểm thử Hồi quy Xáo trộn (Shuffled Regression)**: Chạy test suite với cờ ngẫu nhiên (`npm test -- --sequence.shuffle` hoặc `--randomize`). Nếu 100% bài test vẫn xanh trong điều kiện xáo trộn thứ tự ➔ Chứng minh zero state-leakage, các test hoàn toàn độc lập.
+    3. **Kịch bản Tích hợp Liên hoàn (E2E Golden Gameplay/User Flow)**: Khi chuẩn bị kết thúc một giai đoạn nền tảng quan trọng, hãy yêu cầu Agent viết 1 bài test tích hợp mô phỏng toàn bộ hành trình người dùng thực tế từ Slice 00 đến hiện tại (`tests/integration/golden_flow.test.ts`). Khi ván đấu mẫu chạy thông suốt từ đầu đến cuối ➔ Đạt độ an tâm tuyệt đối 100% để gõ lệnh `git commit`.
 
 ---
 
@@ -2137,8 +2587,9 @@ Yêu cầu xuất Báo cáo Đối Soát Định Kỳ (Periodic Audit Gap Report
 
 > 3. **Làm MSS là làm gì? (Nguyên tắc Slice 1 - Basic Flow Alone):**
 >    - **MSS (Main Success Scenario - Kịch bản thành công chính / Đường hạnh phúc - Happy Path):** Là chuỗi hành động mà mọi việc diễn ra hoàn hảo từ đầu đến cuối, không gặp bất kỳ lỗi lầm, rẽ nhánh hay ngoại lệ nào.
->      - *Ví dụ:* Đến lượt ➔ Lắc xúc xắc ra 8 ➔ Quân cờ đi 8 ô ➔ Dừng chân an toàn.
->    - **Alternative Flows (A# - Kịch bản rẽ nhánh / Ngoại lệ):** Là các tình huống bất thường (Đổ ra đôi được đi tiếp; Đổ đôi 3 lần bị bắt vào tù; Hết giờ 60s biến thành Bot; Mất mạng rớt kết nối...).
+>      - *Ví dụ Hệ Thống Thương Mại:* Chọn sản phẩm ➔ Thêm vào giỏ ➔ Thanh toán thành công ➔ Tạo đơn hàng hoàn tất.
+>      - *Ví dụ Ứng Dụng Tương Tác/Game:* Đến lượt ➔ Nhận sự kiện ➔ Cập nhật vị trí hợp lệ ➔ Kết thúc lượt an toàn.
+>    - **Alternative Flows (A# - Kịch bản rẽ nhánh / Ngoại lệ):** Là các tình huống bất thường (Thẻ hết số dư; Hàng tồn kho không đủ; Hết hạn thời gian chờ; Mất kết nối mạng giữa chừng...).
 >    - **Tại sao Slice 1 CHỈ LÀM MSS?**
 >      - Nếu ngay từ lát cắt đầu tiên đã cố gắng nhồi nhét cả 10 tình huống lỗi, mã nguồn sẽ phình to gấp 5 lần, sinh ra vô số cờ rác (flag), khó viết test và dễ gãy kiến trúc.
 >      - Làm MSS trước giúp hệ thống "chạy thông suốt một mạch" từ đầu đến cuối. Khi con đường chính đã vững chắc, các Slice sau chỉ việc đắp thêm các nhánh rẽ A# vào mà không sợ gãy móng.
@@ -2146,10 +2597,10 @@ Yêu cầu xuất Báo cáo Đối Soát Định Kỳ (Periodic Audit Gap Report
 > 4. **Mẫu Prompt Chuẩn Hóa Khi Gửi Lệnh Cắt Slice Tiếp Theo (Slice 01, Slice 02...):**
 >    *(Sử dụng mẫu này mỗi khi chuyển sang lát cắt mới để đảm bảo AI không sinh mã rác và khóa chặt phạm vi):*
 >    ```text
->    Hãy đọc Sổ Cái docs/epics/gameplay/_epic_ledger.md và các file mã nguồn hiện có trong src/ vừa hoàn thành ở Slice trước.
+>    Hãy đọc Sổ Cái docs/epics/[EPIC_NAME]/_epic_ledger.md và các file mã nguồn hiện có trong src/ vừa hoàn thành ở Slice trước.
 >    
 >    Kích hoạt skill use-case-slicing để lập ticket thi công cho [SLICE TIẾP THEO, VD: Slice 01] tại đường dẫn:
->    issues/[MÃ TICKET, VD: GAME-S01-turn-loop.md]
+>    issues/[MÃ TICKET, VD: ORDER-S01-checkout.md]
 >    
 >    Yêu cầu kỹ thuật bắt buộc:
 >    1. Kế thừa chính xác cấu trúc thư mục, kiểu dữ liệu và WebSocket interface hiện hữu, không tự phát sinh cấu trúc mới.
@@ -2217,7 +2668,7 @@ Hãy gọi subagent implementer, kích hoạt kỹ năng production-hardening v�
    - Cài đặt rào chắn bóp băng thông (Rate Limiter): Chặn client gửi quá 10 intents/giây.
    - Trả về lỗi có cấu trúc kèm Reason Code cụ thể: { error: 'RATE_LIMITED' } hoặc { error: 'OUT_OF_TURN' }.
 3. KHÔI PHỤC PHIÊN & ÂN HẠN MẤT MẠNG:
-   - Hỗ trợ Reconnect Token lưu tại LocalStorage: Khi người chơi F5 hoặc mất mạng, kết nối lại trong 60s sẽ khôi phục 100% bàn cờ mà không bị mất lượt.
+   - Hỗ trợ Reconnect Token lưu tại LocalStorage: Khi người dùng F5 hoặc rớt mạng tạm thời, kết nối lại trong 60s sẽ khôi phục 100% phiên làm việc/trạng thái mà không bị mất dữ liệu.
 4. BẢO VỆ BIẾN MÔI TRƯỜNG & ORIGIN:
    - Tạo tệp validateEnv kiểm tra toàn bộ biến môi trường bắt buộc (.env.production) khi server khởi động. Cấm hardcode API keys hoặc secrets trong mã nguồn.
    - Xác thực CORS Origin và WebSocket request headers.
@@ -2257,7 +2708,7 @@ Báo cáo bảng chỉ số hiệu năng thực tế đối chiếu với ngân 
 - **🛡️ RÀO CHẮN GÁC CỔNG**: Hiến pháp `GEMINI.md` cấm lưu cải tiến trong bộ nhớ tạm/chat. Bắt buộc tạo cặp Plan & Report.
 - **💬 CÂU LỆNH PROMPT CHUẨN (Model: Flash)**:
 ```text
-Tôi muốn thực hiện đợt cải tiến đột xuất: [MÔ TẢ CẢI TIẾN, VÍ DỤ: Nâng cấp đồ họa sa bàn 3D và Chu kỳ ngày đêm].
+Tôi muốn thực hiện đợt cải tiến đột xuất: [MÔ TẢ CẢI TIẾN, VÍ DỤ: Tối ưu hiệu năng tải trang / Nâng cấp giao diện người dùng].
 Hãy áp dụng Quy Chuẩn Cải Tiến Đột Xuất (Continuous Improvement & Ad-hoc Persistence) theo GEMINI.md:
 
 1. Xác định mã số cải tiến tiếp theo: IMP-[ID]-[slug] (đối chiếu trong docs/master_roadmap.md).
@@ -2287,11 +2738,49 @@ Hãy gọi subagent implementer, kích hoạt kỹ năng production-hardening đ
    - Cài đặt endpoint /healthz (Liveness: trả về HTTP 200 nhanh).
    - Cài đặt endpoint /livez (Readiness: kiểm tra kết nối DB, Redis, WSS socket pool).
 3. CẤU HÌNH THOÁT HIỂM AN TOÀN (GRACEFUL SHUTDOWN):
-   - Bắt tín hiệu SIGTERM và SIGINT: Ngừng nhận phòng chơi mới, duy trì 30 giây để hoàn tất các ván cờ đang dở, đóng kết nối cơ sở dữ liệu sạch sẽ trước khi process thoát.
+   - Bắt tín hiệu SIGTERM và SIGINT: Ngừng nhận yêu cầu/phiên mới, duy trì 30 giây để hoàn tất các giao dịch/phiên đang dở dang, đóng kết nối cơ sở dữ liệu sạch sẽ trước khi process thoát.
 4. THIẾT LẬP KỊCH BẢN ROLLBACK:
    - Ghi lại câu lệnh rollback nhanh 1 dòng (dùng Docker image tag phiên bản trước hoặc commit hash an toàn gần nhất).
 
 Chạy thử nghiệm lệnh build Docker (nếu có môi trường) và báo cáo các tệp hạ tầng đã tạo.
 ```
 - **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu)**: `Dockerfile`, `.dockerignore`, Endpoint `/healthz`, và Graceful Shutdown được cài đặt hoàn chỉnh. Sản phẩm chính thức đạt chuẩn **PRODUCTION READY 1.0**.
+
+---
+
+## 11. BẢNG TRA CỨU CÂU LỆNH NHANH & LOCAL QUALITY GATES (CHEAT SHEET)
+
+### 11.1 Bảng Lệnh Kiểm Soát Chất Lượng Cục Bộ (Local Quality Gates)
+
+| Lệnh Thực Thi | Mục Đích & Phạm Vi Kiểm Tra | Thời Gian Chạy | Khi Nào Sử Dụng? |
+| :--- | :--- | :--- | :--- |
+| `npm run lint:ui` | Quét 4 anti-patterns 2D UI (bo góc, easing, màu chữ, text gradient) | ~0.5s | Khi sửa mã CSS / Tailwind / UI Components |
+| `npm run lint:slop` | Quét TypeScript AST (Nuốt ngoại lệ empty catch, dirty casts `as any`, ngân sách dòng code, độ dài hàm) | ~1.0s | Sau mỗi lần code xong một lát cắt |
+| `npm run lint:dup` | Chạy `jscpd` quét trùng lặp mã nguồn (ngưỡng tối đa 4%) | ~0.1s | Kiểm tra chống bẫy Copy-Paste của AI |
+| `npx tsc --noEmit` | Kiểm tra Type-safety nghiêm ngặt theo `tsconfig.json` | ~2.5s | Đảm bảo 100% không có lỗi kiểu dữ liệu |
+| **`npm run gate:quick`** | **Chạy liên hoàn: UI + Slop + Trùng lặp + Typecheck** | **~2.0s** | **Chạy trước mỗi lần `git add` & `git commit`** |
+| **`npm run gate`** | **Chạy toàn diện: 4 Cổng Tĩnh + Toàn bộ Unit & E2E Test Suites** | **~30-60s** | **Cổng nghiệm thu cuối cùng trước khi bàn giao** |
+| `npm test` | Chạy toàn bộ test suites với Vitest | ~10-40s | Sau khi hoàn tất kịch bản TDD |
+| `npm run build` | Build thử nghiệm bundle production (Client + SSR Server) | ~7.0s | Trước khi đóng gói v1.0 |
+
+---
+
+### 11.2 Bảng Tra Cứu 5-Tier File LOC Budget Cho Junior Developer
+
+| Phân Loại (Tier) | Thư Mục Mục Tiêu | Ngưỡng Cảnh Báo (Soft Gate) | Ngưỡng Chặn Lỗi (Hard Gate) | Biện Pháp Khi Vượt Ngưỡng |
+| :--- | :--- | :--- | :--- | :--- |
+| **Tier 1: Core Logic / FSM / Server** | `src/domain/`, `src/server/`, `src/services/` | > 300 LOC (75%) | > 550 LOC | Bắt buộc tách Sub-manager (Decomposition) |
+| **Tier 2: UI Components / Layouts** | `src/ui/`, `src/components/`, `src/views/` | > 400 LOC | > 500 LOC | Rút Custom Hook / Tách Component con |
+| **Tier 3: Dữ Liệu Tĩnh / Lookup Tables** | `src/**/data*`, `config.ts`, `constants.ts` | > 650 LOC | > 800 LOC | Chia nhỏ bảng cấu hình phẳng |
+| **Tier 4: E2E Living Tests** | `tests/integration/`, `tests/e2e/` | > 450 LOC | > 600 LOC | Rút Fixture Helpers dùng chung |
+| **Function SLOC** | Hàm logic trong Tier 1 | > 50 dòng | > 80-120 dòng | Tách hàm con đơn nhiệm vụ (SRP) |
+
+---
+
+### 11.3 5 Quy Tắc Vàng Giúp Junior Tránh Bẫy Suy Thoái Mã Nguồn Khi Code Với AI
+1. **Không Chạy Git Tự Động**: AI tuyệt đối không chạy `git commit` hay `git push`. Con người tự review diff và tự gõ commit.
+2. **Không Viết Test Và Code Cùng Một Lượt**: Luôn viết bài test trước (TDD RED), chạy thử thất bại, sau đó mới cho AI viết code để xanh (GREEN).
+3. **Không Nuốt Ngoại Lệ Âm Thầm**: Không bao giờ viết `catch {}` rỗng. Bắt buộc ghi chú thích giải trình `/* safe: ... */` hoặc ghi log có cấu trúc.
+4. **Không Dùng Ép Kiểu Bẩn (`as any`, `as unknown as`)**: Mở rộng `src/types/global.d.ts` hoặc cập nhật union types đúng chuẩn.
+5. **Chạy `npm run gate` Trước Khi Nghỉ**: Biến việc chạy cổng chất lượng thành phản xạ tự nhiên. 1 lệnh xanh 100% mang lại sự an tâm tuyệt đối.
 

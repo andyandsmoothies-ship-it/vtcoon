@@ -19,7 +19,7 @@ let sharedAudioCtx: AudioContext | null = null;
 function playFloorBellSound(): void {
   if (typeof window === 'undefined') return;
   try {
-    const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
     if (!AudioCtx) return;
     if (!sharedAudioCtx || sharedAudioCtx.state === 'closed') sharedAudioCtx = new AudioCtx();
     if (sharedAudioCtx.state === 'suspended') sharedAudioCtx.resume().catch(() => {});

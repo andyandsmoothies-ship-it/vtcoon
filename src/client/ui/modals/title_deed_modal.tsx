@@ -83,6 +83,12 @@ export function TitleDeedModal({
   const isUtility = deed.cellType === CellType.Utility;
   const tiers = isRailroad ? RAILROAD_TIERS : PROPERTY_TIERS;
 
+  const showUpgrade = Boolean(isOwner && !isMortgaged && hasUpgrades && (currentLevel ?? 0) < 3 && onUpgrade);
+  const showDowngrade = Boolean(isOwner && !isMortgaged && hasUpgrades && (currentLevel ?? 0) > 0 && onDowngrade);
+  const showMortgage = Boolean(isOwner && (isMortgaged ? onRedeem : onMortgage));
+  const actionCount = (showUpgrade ? 1 : 0) + (showDowngrade ? 1 : 0) + (showMortgage ? 1 : 0);
+  const closeButtonSpan = (!isOwner || actionCount === 0 || actionCount === 2) ? 'col-span-2' : '';
+
   return (
     <div
       className="relative w-full max-w-md max-h-[90vh] md:max-h-[85vh] bg-gradient-to-b from-slate-900 via-slate-800 to-slate-950 border-2 border-amber-400/90 border-amber-400 rounded-2xl shadow-[0_0_30px_rgba(245,158,11,0.3)] shadow-[0_0_25px_rgba(245,158,11,0.3)] ring-2 ring-amber-500/40 ring-offset-2 ring-offset-slate-950 overflow-hidden flex flex-col pointer-events-auto animate-in zoom-in-90 fade-in duration-200 ease-out select-none p-5 text-white"
@@ -121,7 +127,7 @@ export function TitleDeedModal({
 
       {/* Ruy-băng tiêu đề (Ribbon Header) bo cong viền vàng dập nổi */}
       <header
-        className="p-4 pr-14 pl-14 text-center relative border border-amber-400/60 shadow-[0_3px_0_0_#f59e0b] shadow-lg rounded-b-2xl mx-1.5 mt-1.5 rounded-t-xl shrink-0 z-10"
+        className="px-3 py-1 text-center relative border border-amber-400/60 shadow-[0_3px_0_0_#f59e0b] shadow-lg rounded-b-2xl mx-1.5 mt-1.5 rounded-t-xl shrink-0 z-10"
         style={{ backgroundColor: ribbonColor }}
       >
         <div className="absolute top-2.5 left-2.5 w-2 h-2 rounded-full bg-amber-300 border border-amber-600 shadow-[0_0_4px_rgba(245,158,11,0.8)]" aria-hidden="true" />
@@ -131,7 +137,7 @@ export function TitleDeedModal({
         <p className="text-[10px] uppercase tracking-widest text-white/95 font-black drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
           {isRailroad ? 'Hạ Tầng Giao Thông' : isUtility ? 'Tiện Ích Quốc Gia' : 'Giấy Chứng Nhận Quyền Sở Hữu'}
         </p>
-        <h2 className="text-base sm:text-lg md:text-xl font-black uppercase tracking-wide text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] mt-0.5 break-words px-2 leading-tight max-w-[280px] sm:max-w-[310px] mx-auto">
+        <h2 className="tracking-wide text-xs sm:text-sm font-black uppercase text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] mt-0.5 px-3 py-1 leading-snug break-words mx-auto">
           {deed.name}
         </h2>
         {onClose && (
@@ -232,10 +238,10 @@ export function TitleDeedModal({
       </div>
 
       {/* Nút hành động 3D tactile vật lý */}
-      <footer className="relative z-10 p-4 pt-2 bg-slate-900/90 border-t border-slate-800/90 flex flex-wrap gap-2 shrink-0">
+      <footer className="relative z-10 p-4 pt-2 bg-slate-900/90 border-t border-slate-800/90 grid grid-cols-2 gap-2 shrink-0">
         {isOwned ? (
           <>
-            <div className="flex-1 min-h-[48px] py-2 px-3 rounded-xl font-bold text-emerald-400 bg-emerald-950/50 border border-emerald-600/40 text-xs text-center flex items-center justify-center shadow-inner truncate">
+            <div className="col-span-2 min-h-[48px] py-2 px-3 rounded-xl font-bold text-emerald-400 bg-emerald-950/50 border border-emerald-600/40 text-xs text-center flex items-center justify-center shadow-inner truncate">
               ✓ Đã Sở Hữu {ownerName ? `(${ownerName})` : ''}
             </div>
             {isOwner && !isMortgaged && hasUpgrades && (currentLevel ?? 0) < 3 && onUpgrade && (
@@ -272,7 +278,7 @@ export function TitleDeedModal({
               <button
                 type="button"
                 onClick={isMortgaged ? onRedeem : onMortgage}
-                className="min-h-[48px] whitespace-nowrap px-3.5 py-2 rounded-xl font-bold text-xs bg-amber-600 hover:bg-amber-500 text-white border border-amber-900 shadow-[0_4px_0_0_#78350f] active:shadow-[0_1px_0_0_#78350f] active:translate-y-[3px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
+                className="min-h-[48px] whitespace-nowrap px-3.5 py-2 rounded-xl font-black text-xs bg-gradient-to-b from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-amber-950 border border-amber-900 shadow-[0_4px_0_0_#b45309] active:shadow-[0_1px_0_0_#b45309] active:translate-y-[3px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
               >
                 {isMortgaged ? 'Giải Chấp' : 'Thế Chấp'}
               </button>
@@ -280,17 +286,17 @@ export function TitleDeedModal({
             <button
               type="button"
               onClick={onClose}
-              className="min-h-[48px] whitespace-nowrap px-4 py-2 rounded-xl font-bold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-950 shadow-[0_4px_0_0_#020617] active:shadow-[0_1px_0_0_#020617] active:translate-y-[3px] text-xs transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
+              className={`${closeButtonSpan} min-h-[48px] whitespace-nowrap px-4 py-2 rounded-xl font-bold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-950 shadow-[0_4px_0_0_#020617] active:shadow-[0_1px_0_0_#020617] active:translate-y-[3px] text-xs transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer`}
             >
               Đóng
             </button>
             {upgradeBlockedReason && (
-              <div className="w-full p-2 rounded-xl bg-amber-950/50 border border-amber-500/50 text-amber-300 text-[11px] font-bold text-center">
+              <div className="col-span-2 w-full p-2 rounded-xl bg-amber-950/50 border border-amber-500/50 text-amber-300 text-[11px] font-bold text-center">
                 ⚠️ {upgradeBlockedReason}
               </div>
             )}
             {downgradeBlockedReason && (
-              <div className="w-full p-2 rounded-xl bg-orange-950/50 border border-orange-500/50 text-orange-300 text-[11px] font-bold text-center">
+              <div className="col-span-2 w-full p-2 rounded-xl bg-orange-950/50 border border-orange-500/50 text-orange-300 text-[11px] font-bold text-center">
                 ⚠️ {downgradeBlockedReason}
               </div>
             )}
@@ -301,7 +307,7 @@ export function TitleDeedModal({
               type="button"
               onClick={onBuy}
               disabled={!canBuy}
-              className={`flex-1 min-h-[48px] whitespace-nowrap py-3 px-6 rounded-xl font-black tracking-wide uppercase text-xs sm:text-sm transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 truncate cursor-pointer ${
+              className={`min-h-[48px] whitespace-nowrap py-3 px-3.5 sm:px-6 rounded-xl font-black tracking-wide uppercase text-xs sm:text-sm transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 truncate cursor-pointer ${
                 canBuy
                   ? 'bg-gradient-to-b from-emerald-400 to-emerald-600 hover:from-emerald-300 hover:to-emerald-500 border border-emerald-800 shadow-[0_4px_0_0_#064e3b] active:shadow-[0_1px_0_0_#064e3b] active:translate-y-[3px] text-white shadow-emerald-950/50'
                   : 'bg-slate-800 text-slate-500 border border-slate-700/50 cursor-not-allowed'
@@ -313,7 +319,7 @@ export function TitleDeedModal({
             <button
               type="button"
               onClick={onPass ?? onClose}
-              className="min-h-[48px] whitespace-nowrap py-3 px-6 rounded-xl font-bold text-slate-300 hover:text-white uppercase bg-slate-700 hover:bg-slate-600 border border-slate-950 shadow-[0_4px_0_0_#020617] active:shadow-[0_1px_0_0_#020617] active:translate-y-[3px] text-xs sm:text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
+              className="min-h-[48px] whitespace-nowrap py-3 px-3.5 sm:px-6 rounded-xl font-bold text-slate-300 hover:text-white uppercase bg-slate-700 hover:bg-slate-600 border border-slate-950 shadow-[0_4px_0_0_#020617] active:shadow-[0_1px_0_0_#020617] active:translate-y-[3px] text-xs sm:text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
             >
               Bỏ Qua
             </button>

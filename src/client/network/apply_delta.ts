@@ -58,7 +58,9 @@ export function applyDeltaToStore(
           state.startPawnMove(p.id, p.position, fromCell);
           try {
             AudioEngine.playSfx(SoundEffect.PAWN_STEP);
-          } catch {}
+          } catch {
+            /* safe-ignore: audio uninitialized in unit test environment */
+          }
         }
       }
 
@@ -109,7 +111,9 @@ export function applyDeltaToStore(
         let lobbySlot: { playerName?: string; tokenColor?: string } | undefined;
         try {
           lobbySlot = useLobbyStore.getState().slots?.find((s) => s.playerId === p.id);
-        } catch {}
+        } catch {
+          /* safe-ignore: lobbyStore uninitialized in isolated test environment */
+        }
 
         const tokenColor = lobbySlot?.tokenColor ?? (PLAYER_TOKEN_PALETTE[pIdx % PLAYER_TOKEN_PALETTE.length] ?? '#38BDF8');
         const playerName = lobbySlot?.playerName || (p.isBot ? `Bot AI ${p.id.replace(/\D/g, '') || pIdx + 1}` : `Người Chơi (${p.id.toUpperCase()})`);
@@ -260,7 +264,9 @@ export function applyDeltaToStore(
     state.triggerDiceRoll([delta.dice[0], delta.dice[1]]);
     try {
       AudioEngine.playSfx(SoundEffect.DICE_ROLL);
-    } catch {}
+    } catch {
+      /* safe-ignore: audio uninitialized in unit test environment */
+    }
   }
 
   // 4. Cập nhật lượt chơi hiện tại và thời gian từ Server
@@ -290,7 +296,9 @@ export function applyDeltaToStore(
   if (isGameRunningDelta(delta)) {
     try {
       useLobbyStore.getState().setGameStarted(true);
-    } catch {}
+    } catch {
+      /* safe-ignore: lobbyStore uninitialized in isolated test environment */
+    }
   }
 }
 

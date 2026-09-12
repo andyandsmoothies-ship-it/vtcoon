@@ -1,15 +1,7 @@
 // [UI-S02/MSS] DioramaMicroLife — Miniature vehicles, leisure boat & tabletop micro-details
 import React, { useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
 import type { Group } from 'three';
-
-function useSafeFrame(callback: (state: Parameters<Parameters<typeof useFrame>[0]>[0]) => void): void {
-  try {
-    useFrame(callback);
-  } catch {
-    // An toàn khi chạy ngoài Canvas (SSR hoặc test renderToStaticMarkup)
-  }
-}
+import { useSafeFrame } from '../safe_frame';
 
 export function DioramaMicroLife(): React.ReactElement {
   const boatRef = useRef<Group>(null);

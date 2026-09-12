@@ -1,15 +1,7 @@
 // [UI-S01/MSS] CoastalPatrolBoat — Coast Guard patrol boat cruising coastal bay with wave wakes
 import React, { useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
 import type { Group, Mesh } from 'three';
-
-function useSafeFrame(callback: (state: Parameters<Parameters<typeof useFrame>[0]>[0]) => void): void {
-  try {
-    useFrame(callback);
-  } catch {
-    // Safe outside Canvas in test environment
-  }
-}
+import { useSafeFrame } from './safe_frame';
 
 export function CoastalPatrolBoat(): React.ReactElement {
   const boatRef = useRef<Group>(null);

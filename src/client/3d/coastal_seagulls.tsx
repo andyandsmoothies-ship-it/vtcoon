@@ -1,15 +1,7 @@
 // [UI-S01/MSS] CoastalSeagulls — Flock of 5 animated seagulls circling the coastal bay
 import React, { useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
 import type { Group } from 'three';
-
-function useSafeFrame(callback: (state: Parameters<Parameters<typeof useFrame>[0]>[0]) => void): void {
-  try {
-    useFrame(callback);
-  } catch {
-    // Safe outside Canvas in test environment
-  }
-}
+import { useSafeFrame } from './safe_frame';
 
 interface SeagullFlightConfig {
   readonly radius: number;

@@ -1,16 +1,8 @@
 // [UI-S02/MSS] DioramaBridges — Cầu Ba Son (Cable-stayed) & Cầu Long Biên (Steel truss)
 import React, { useRef, useMemo } from 'react';
-import { useFrame } from '@react-three/fiber';
 import { Color, type MeshStandardMaterial as ThreeMeshStandardMaterial } from 'three';
 import { useEnvironmentStore } from '../../store/environment_store';
-
-function useSafeFrame(callback: (state: Parameters<Parameters<typeof useFrame>[0]>[0], delta: number) => void): void {
-  try {
-    useFrame(callback);
-  } catch {
-    // Safe outside Canvas in test environment
-  }
-}
+import { useSafeFrame } from '../safe_frame';
 
 export function DioramaBridges(): React.ReactElement {
   const phase = useEnvironmentStore((s) => s.phase);

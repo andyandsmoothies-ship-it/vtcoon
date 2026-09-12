@@ -1,20 +1,12 @@
 // [UI-S02/MSS] DioramaSkyline — Stepped financial towers, Indochine villas, Old Quarter shophouses, central fountain & diorama flora
 import React, { useRef, useEffect } from 'react';
-import { useFrame } from '@react-three/fiber';
 import { type Group, type Mesh, type InstancedMesh, Object3D } from 'three';
 import {
   useEnvironmentStore,
   calculateAviationStrobe,
   calculateLaserRotation,
 } from '../../store/environment_store';
-
-function useSafeFrame(callback: (state: Parameters<Parameters<typeof useFrame>[0]>[0], delta: number) => void): void {
-  try {
-    useFrame(callback);
-  } catch {
-    // Safe outside Canvas
-  }
-}
+import { useSafeFrame } from '../safe_frame';
 
 // Toạ độ cây xanh sa bàn tỉa tán đa tầng (20 vị trí phủ xanh mật độ đô thị)
 const TREE_LOCATIONS: ReadonlyArray<readonly [number, number]> = [

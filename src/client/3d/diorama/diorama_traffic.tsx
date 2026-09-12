@@ -1,16 +1,8 @@
 // [UI-S02/MSS] DioramaTraffic — Autonomous micro-traffic on coastal boulevards & iconic bridges
 import React, { useMemo, useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
 import { Vector3, CatmullRomCurve3, type Group } from 'three';
 import { useEnvironmentStore } from '../../store/environment_store';
-
-function useSafeFrame(callback: (state: Parameters<Parameters<typeof useFrame>[0]>[0]) => void): void {
-  try {
-    useFrame(callback);
-  } catch {
-    // Safe outside Canvas in test environment
-  }
-}
+import { useSafeFrame } from '../safe_frame';
 
 export interface MicroVehicleDef {
   readonly id: string;

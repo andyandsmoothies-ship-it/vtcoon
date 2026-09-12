@@ -41,9 +41,10 @@ export function InsolvencyBanner({
         </div>
         {onClose && (
           <button
+            type="button"
             onClick={onClose}
             aria-label="Đóng cảnh báo"
-            className="text-slate-400 hover:text-white text-lg font-bold p-1 cursor-pointer transition-colors"
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-400 hover:text-white text-lg font-bold p-1 rounded-lg cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:outline-none"
           >
             ✕
           </button>
@@ -73,16 +74,18 @@ export function InsolvencyBanner({
       <div className="flex flex-col gap-2 pt-1">
         {onManageProperties && (
           <button
+            type="button"
             onClick={onManageProperties}
-            className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-amber-950 font-black text-sm cursor-pointer transition-all shadow-md shadow-amber-500/20"
+            className="w-full min-h-[44px] py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-amber-950 font-black text-sm cursor-pointer transition-all border border-amber-600 shadow-[0_4px_0_0_#b45309] active:shadow-[0_1px_0_0_#b45309] active:translate-y-[3px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
           >
             Quản Lý BĐS / Thế Chấp
           </button>
         )}
         {onDeclareBankruptcy && (
           <button
+            type="button"
             onClick={onDeclareBankruptcy}
-            className="w-full py-2.5 rounded-xl border border-rose-700/60 hover:bg-rose-950/50 text-rose-400 font-semibold text-xs cursor-pointer transition-colors"
+            className="w-full min-h-[44px] py-2.5 rounded-xl border border-rose-800/80 bg-rose-950/40 hover:bg-rose-900/50 text-rose-300 font-bold text-xs cursor-pointer transition-all shadow-[0_4px_0_0_#4c0519] active:shadow-[0_1px_0_0_#4c0519] active:translate-y-[3px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
           >
             Tuyên Bố Phá Sản (Rời Bàn)
           </button>

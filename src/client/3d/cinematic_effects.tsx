@@ -1,15 +1,7 @@
 import React, { useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
 import type { Group, Mesh } from 'three';
 import { useEnvironmentStore } from '../store/environment_store';
-
-function useSafeFrame(callback: (state: Parameters<Parameters<typeof useFrame>[0]>[0], delta: number) => void): void {
-  try {
-    useFrame(callback);
-  } catch {
-    // An toàn khi chạy ngoài Canvas trong môi trường kiểm thử
-  }
-}
+import { useSafeFrame } from './safe_frame';
 
 /**
  * Tính toán góc xoay đèn quét hải đăng theo thời gian

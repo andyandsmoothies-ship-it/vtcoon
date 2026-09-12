@@ -17,16 +17,11 @@ type AudioContextClass = typeof AudioContext;
 
 function resolveAudioContext(): AudioContextClass | null {
   if (typeof window !== 'undefined') {
-    const ctx =
-      window.AudioContext ||
-      (window as unknown as { webkitAudioContext?: AudioContextClass }).webkitAudioContext;
+    const ctx = window.AudioContext || window.webkitAudioContext;
     if (ctx) return ctx;
   }
-  if (
-    typeof globalThis !== 'undefined' &&
-    (globalThis as unknown as { AudioContext?: AudioContextClass }).AudioContext
-  ) {
-    return (globalThis as unknown as { AudioContext: AudioContextClass }).AudioContext;
+  if (typeof globalThis !== 'undefined' && 'AudioContext' in globalThis) {
+    return globalThis.AudioContext;
   }
   return null;
 }

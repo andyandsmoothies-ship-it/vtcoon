@@ -23,3 +23,14 @@ yarn-debug.log*
 # OS / Editor
 .DS_Store
 Thumbs.db
+
+# Impeccable (Caches, Reviews & Screenshots)
+.impeccable/cache/
+.impeccable/review/
+.impeccable/mocks/
+.impeccable/build/
+.impeccable/screenshots/
+.impeccable/live/sessions/
+.impeccable/config.local.json
+
+

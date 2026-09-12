@@ -67,7 +67,9 @@ export class SocketRegistry {
       this.unregister(existing);
       try {
         existing.close(1000, 'SUPERSEDED_BY_RECONNECT');
-      } catch {}
+      } catch {
+        /* safe-ignore: socket may already be closing or terminated */
+      }
     }
     this.bind(roomCode, playerId, newSocket);
   }
@@ -81,7 +83,9 @@ export class SocketRegistry {
         this.socketPlayers.delete(s);
         try {
           s.close(1000, 'ROOM_CLOSED');
-        } catch {}
+        } catch {
+          /* safe-ignore: socket may already be closing or terminated */
+        }
       }
       this.roomSockets.delete(roomCode);
     }

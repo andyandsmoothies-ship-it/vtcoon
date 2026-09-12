@@ -1,6 +1,6 @@
 import React, { useMemo, useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
 import { Shape, Path, type Mesh } from 'three';
+import { useSafeFrame } from './safe_frame';
 
 export const WATER_SURFACE_Y = 0.05;
 
@@ -97,13 +97,6 @@ export const CORNER_BUSHES = [
   { pos: [6.8, 0.08, 6.8] as const, r: 0.34 },
 ];
 
-function useSafeFrame(callback: (state: Parameters<Parameters<typeof useFrame>[0]>[0]) => void): void {
-  try {
-    useFrame(callback);
-  } catch {
-    // Bỏ qua khi chạy trong môi trường SSR hoặc test tĩnh renderToStaticMarkup ngoài Canvas
-  }
-}
 
 export function CenterpieceWater(): React.ReactElement {
   const waterMeshRef = useRef<Mesh>(null);

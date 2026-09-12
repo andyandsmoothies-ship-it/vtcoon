@@ -89,10 +89,10 @@ export function AdaptiveCinematicCamera(): React.ReactElement {
 
   useFrame((_, delta) => {
     if (typeof window !== 'undefined') {
-      (window as unknown as { __threeScene?: unknown; __threeCamera?: unknown; __orbitControls?: unknown; __debugCameraManual?: boolean }).__threeScene = scene;
-      (window as unknown as { __threeScene?: unknown; __threeCamera?: unknown; __orbitControls?: unknown; __debugCameraManual?: boolean }).__threeCamera = camera;
-      (window as unknown as { __threeScene?: unknown; __threeCamera?: unknown; __orbitControls?: unknown; __debugCameraManual?: boolean }).__orbitControls = controlsRef.current;
-      if ((window as unknown as { __debugCameraManual?: boolean }).__debugCameraManual) {
+      window.__threeScene = scene;
+      window.__threeCamera = camera;
+      window.__orbitControls = controlsRef.current;
+      if (window.__debugCameraManual) {
         return;
       }
     }

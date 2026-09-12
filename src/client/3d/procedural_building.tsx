@@ -1,9 +1,9 @@
 // [UI-S03/MSS] ProceduralBuilding — High-Fidelity 3D procedural architecture for tiers C0-C3
 // Stylized Tabletop Miniature: Surveyor pegs, Indochine shophouse, Sapphire complex & Golden Landmark
 import React, { useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
 import { RoundedBox } from '@react-three/drei';
 import type { Mesh, Group } from 'three';
+import { useSafeFrame } from './safe_frame';
 import { GoldenGlowVFX } from './golden_glow_vfx';
 import { useEnvironmentStore } from '../store/environment_store';
 import { useVfxStore } from '../store/vfx_store';
@@ -15,13 +15,6 @@ export interface ProceduralBuildingProps {
   readonly cellIndex?: number;
 }
 
-function useSafeFrame(callback: (state: Parameters<Parameters<typeof useFrame>[0]>[0], delta: number) => void): void {
-  try {
-    useFrame(callback);
-  } catch {
-    // An toàn khi chạy ngoài Canvas (SSR hoặc test renderToStaticMarkup)
-  }
-}
 
 const BOUNDARY_PEG_OFFSETS: ReadonlyArray<readonly [number, number]> = [
   [-0.24, -0.19],

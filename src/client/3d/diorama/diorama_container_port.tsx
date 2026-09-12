@@ -1,16 +1,8 @@
 // [UI-S02/MSS] DioramaContainerPort — Cat Lai container seaport, gantry cranes & colored intermodal container stacks
 import React, { useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
 import type { Group, Mesh } from 'three';
 import { useEnvironmentStore, calculateAviationStrobe } from '../../store/environment_store';
-
-function useSafeFrame(callback: (state: Parameters<Parameters<typeof useFrame>[0]>[0]) => void): void {
-  try {
-    useFrame(callback);
-  } catch {
-    // Safe outside Canvas in test environment
-  }
-}
+import { useSafeFrame } from '../safe_frame';
 
 // Cụm các container xếp chồng tại bãi cảng Cát Lái (màu sắc, kích thước, vị trí)
 interface ContainerBlockDef {
