@@ -32,7 +32,7 @@ Chúng tôi quyết định đại phẫu toàn diện hệ thống hiển thị
   │
   ├── [2. Thủy Động Học Sóng Biển Gerstner]
   │     ├── Hàm sóng điều hòa 3 pha: w1(0.032) + w2(0.024) + w3(0.014) <= 0.070 đơn vị
-  │     ├── Tính lại pháp tuyến computeVertexNormals() thời gian thực tạo mặt nước lấp lánh
+  │     ├── Lưới sóng tối ưu 24x24 segments (IMP-27: loại bỏ computeVertexNormals để giữ vững 60 FPS)
   │     └── Dải bọt sóng trắng dạt bờ cát theo chu kỳ thủy triều 3.5 giây
   │
   ├── [3. Vi Giao Thông Tự Hành & Sinh Thái Biển (Spline Kinetics)]

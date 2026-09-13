@@ -274,11 +274,31 @@ export function LuxuryPawnModel({ slotIndex }: { slotIndex: number }): React.Rea
   const config = LUXURY_PAWN_CONFIGS[safeIdx] ?? LUXURY_PAWN_CONFIGS[0]!;
 
   return (
-    <group position={[0, 0, 0]}>
-      {safeIdx === 0 && <LandmarkTowerPawn config={config} />}
-      {safeIdx === 1 && <BayYachtPawn config={config} />}
-      {safeIdx === 2 && <ClassicCarPawn config={config} />}
-      {safeIdx === 3 && <WarhorsePawn config={config} />}
+    <group position={[0, -0.28, 0]} scale={[1.25, 1.25, 1.25]}>
+      {/* 1. Bệ cờ mạ kim loại có rãnh viền ánh vàng tiếp xúc mặt ô bàn cờ */}
+      <mesh position={[0, 0.015, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[0.22, 0.25, 0.03, 32]} />
+        <meshStandardMaterial
+          color={config.color}
+          metalness={0.85}
+          roughness={0.18}
+          emissive={config.color}
+          emissiveIntensity={0.15}
+        />
+      </mesh>
+      {/* Vòng kim loại sáng bóng định vị chân tượng */}
+      <mesh position={[0, 0.032, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[0.17, 0.21, 32]} />
+        <meshBasicMaterial color="#FEF08A" />
+      </mesh>
+
+      {/* 2. Mô hình linh vật 3D chi tiết */}
+      <group position={[0, 0.03, 0]}>
+        {safeIdx === 0 && <LandmarkTowerPawn config={config} />}
+        {safeIdx === 1 && <BayYachtPawn config={config} />}
+        {safeIdx === 2 && <ClassicCarPawn config={config} />}
+        {safeIdx === 3 && <WarhorsePawn config={config} />}
+      </group>
     </group>
   );
 }

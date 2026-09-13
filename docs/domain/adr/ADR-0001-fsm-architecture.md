@@ -49,11 +49,11 @@ Hệ thống điều phối phòng đấu (Matchmaking & Lobby) ưu tiên tính 
 * **Giai đoạn Sảnh (Lobby):**  
   * Chủ phòng (Host) khởi tạo phòng, máy chủ cấp phát một **Mã phòng 6 ký tự** ngẫu nhiên không trùng lặp (ví dụ: VN7982).  
   * Hệ thống sinh một chuỗi **URL định danh** duy nhất và mã **QR Code**. Người tham gia chỉ cần truy cập đường dẫn là tự động gia nhập sảnh chờ mà không cần đăng ký tài khoản rườm rà.  
-  * Chủ phòng có thẩm quyền cấu hình tham số: Giới hạn thời gian (15 vòng hoặc 60 phút), cấp quyền thêm/bớt vị trí Bot AI, hoặc kích người chơi mất kết nối.  
+  * Chủ phòng có thẩm quyền cấu hình tham số: Giới hạn thời gian (chuẩn hóa tối đa 30 vòng theo IMP-16 hoặc 60 phút), cấp quyền thêm/bớt vị trí Bot AI, hoặc kích người chơi mất kết nối.  
 * **Giai đoạn Đang đấu (In-Game):**  
   * Hạn chế tối đa lưu lượng mạng bằng cơ chế truyền tin Delta (chỉ gửi sự thay đổi dữ liệu thay vì gửi lại toàn bộ bàn cờ sau mỗi hành động).  
 * **Giai đoạn Kết thúc (Post-Game):**  
-  * Tổng hợp bảng cân đối tài sản ròng, xuất biểu đồ biến động dòng tiền qua 15 vòng và tự động giải phóng vùng nhớ phòng sau 10 phút không hoạt động.
+  * Tổng hợp bảng cân đối tài sản ròng, xuất biểu đồ biến động dòng tiền qua 30 vòng và tự động giải phóng vùng nhớ phòng sau 10 phút không hoạt động.
 
 #### **Cơ chế Xử lý Mất kết nối (Heartbeat & Grace Period)**
 

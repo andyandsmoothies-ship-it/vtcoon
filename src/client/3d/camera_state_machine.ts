@@ -58,6 +58,7 @@ export interface CameraResolveParams {
   readonly manualMode?: CameraMode | null;
   readonly hasTargetTile?: boolean;
   readonly isPreMatch?: boolean;
+  readonly isBotTurn?: boolean;
 }
 
 /**
@@ -76,6 +77,10 @@ export function resolveCameraMode(params: CameraResolveParams): CameraMode {
   // Phiên đấu giá: Sân khấu đấu giá không gian 3D trung tâm
   if (params.activeModal === 'auction') {
     return 'auction_focus';
+  }
+  // [3D/CAM] Khi đang trong lượt của Bot, giữ góc nhìn bao quát bán đảo êm dịu, không giật vào khay xúc xắc
+  if (params.isBotTurn) {
+    return 'overview';
   }
   // 1. Ưu tiên cao nhất: Gieo xúc xắc góc nghiêng thấp
   if (params.isRolling) {

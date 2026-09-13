@@ -55,7 +55,7 @@ export function TopBar(props: TopBarProps): React.ReactElement {
 
   return (
     <header className="w-full flex justify-center items-center pointer-events-none">
-      <div className="pointer-events-auto flex items-center gap-6 bg-slate-900/85 backdrop-blur-md border border-slate-700/60 rounded-2xl px-6 py-2.5 shadow-2xl text-slate-100 text-sm md:text-base font-medium">
+      <div className="pointer-events-auto flex items-center gap-6 bg-slate-900/90 backdrop-blur-md border border-amber-500/30 ring-1 ring-amber-400/10 rounded-2xl px-6 py-2.5 shadow-2xl text-slate-100 text-sm md:text-base font-medium">
         {/* Vòng đấu */}
         <div className="flex items-center gap-2">
           <span className="text-slate-400 text-xs uppercase tracking-wider">Vòng</span>
@@ -93,7 +93,7 @@ export function TopBar(props: TopBarProps): React.ReactElement {
         <button
           type="button"
           onClick={toggleNextTimeOfDay}
-          className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors cursor-pointer text-xs font-medium border border-slate-600/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+          className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors cursor-pointer text-xs font-medium border border-amber-500/20 hover:border-amber-400/50 shadow-[0_2px_0_0_#0f172a] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
           title={`Thời gian: ${timeOfDayLabel} (Bấm để đổi)`}
           aria-label={`Chuyển chu kỳ thời gian (Hiện tại: ${timeOfDayLabel})`}
           data-testid="time-of-day-toggle-button"
@@ -102,11 +102,11 @@ export function TopBar(props: TopBarProps): React.ReactElement {
           <span className="hidden sm:inline">{timeOfDayLabel}</span>
         </button>
 
-        {/* Nút Bật / Tắt âm thanh */}
+        {/* Nút Bật / Tắt âm thanh đạt chuẩn công thái học >= 44px */}
         <button
           type="button"
           onClick={toggleMute}
-          className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors cursor-pointer text-xs font-medium border border-slate-600/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+          className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors cursor-pointer text-xs font-medium border border-amber-500/30 hover:border-amber-400/60 shadow-[0_2px_0_0_#0f172a] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
           title={isMuted ? 'Bật âm thanh' : 'Tắt âm thanh'}
           aria-label={isMuted ? 'Bật âm thanh trò chơi' : 'Tắt âm thanh trò chơi'}
           data-testid="mute-toggle-button"
@@ -119,7 +119,7 @@ export function TopBar(props: TopBarProps): React.ReactElement {
         <button
           type="button"
           onClick={toggleActivityFeed}
-          className="relative min-h-[44px] min-w-[44px] inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors cursor-pointer text-xs font-medium border border-slate-600/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+          className="relative min-h-[44px] min-w-[44px] inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors cursor-pointer text-xs font-medium border border-amber-500/20 hover:border-amber-400/50 shadow-[0_2px_0_0_#0f172a] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
           title={isActivityFeedOpen ? 'Đóng nhật ký' : 'Mở nhật ký hoạt động'}
           aria-label={`Nhật ký hoạt động${unreadCount > 0 ? ` (${unreadCount} mới)` : ''}`}
           data-testid="activity-feed-toggle-button"

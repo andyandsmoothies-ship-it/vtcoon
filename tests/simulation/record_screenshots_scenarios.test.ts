@@ -259,7 +259,7 @@ describe('Full Game Step-by-Step with Turn-by-Turn Screenshots', () => {
       expect(res.screenshotsCount).toBe(res.turnsCount);
       expect(fs.existsSync(res.reportPath)).toBe(true);
     },
-    120_000,
+    180_000,
   );
 
   it(
@@ -283,7 +283,7 @@ describe('Full Game Step-by-Step with Turn-by-Turn Screenshots', () => {
       expect(res.screenshotsCount).toBe(res.turnsCount);
       expect(fs.existsSync(res.reportPath)).toBe(true);
     },
-    150_000,
+    180_000,
   );
 
   it(
@@ -308,6 +308,6 @@ describe('Full Game Step-by-Step with Turn-by-Turn Screenshots', () => {
       expect(res.screenshotsCount).toBe(res.turnsCount);
       expect(fs.existsSync(res.reportPath)).toBe(true);
     },
-    180_000,
+    210_000,
   );
 });

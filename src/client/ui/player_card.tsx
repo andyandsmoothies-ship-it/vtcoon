@@ -34,10 +34,10 @@ export function PlayerCard({
 
   return (
     <div
-      className={`pointer-events-auto relative flex flex-col gap-1.5 p-3 rounded-xl border backdrop-blur-md transition-all duration-200 shadow-lg ${
+      className={`pointer-events-auto relative flex flex-col gap-1.5 p-3 rounded-2xl border backdrop-blur-md transition-all duration-200 shadow-xl w-[220px] sm:w-[240px] ${
         isCurrentTurn
-          ? 'bg-slate-900/95 border-amber-400/80 ring-2 ring-amber-400 shadow-amber-500/20'
-          : 'bg-slate-900/75 border-slate-700/50 hover:border-slate-600/80'
+          ? 'bg-slate-900/95 border-amber-400/80 ring-2 ring-amber-400/30 shadow-[0_4px_20px_rgba(245,158,11,0.25)]'
+          : 'bg-slate-900/80 border-slate-700/60 hover:border-amber-500/30'
       } ${player.bankrupt ? 'opacity-50 grayscale' : ''}`}
       role="region"
       aria-label={`Thông tin ${player.name}`}

@@ -1,8 +1,7 @@
 // [UI-S01/MSS][OPS-02/MSS] LayeredDioramaTile — Diorama-style 3D board tile with standee harmonic animation
-import React, { useRef, useMemo } from 'react';
-import { useFrame } from '@react-three/fiber';
+import React, { useMemo } from 'react';
 import { Billboard, Image as DreiImage, RoundedBox } from '@react-three/drei';
-import { Texture, type Group, SRGBColorSpace } from 'three';
+import { Texture, SRGBColorSpace } from 'three';
 import { CellType, type BoardCell } from '../../domain/board_config';
 import { COLOR_GROUP_HEX } from '../../domain/theme';
 import { getTileTexture, getStandeeTexture } from './tile_texture_generator';
@@ -110,27 +109,14 @@ interface StandeeBillboardProps {
 }
 
 function StandeeBillboard({ cellIndex, groupColor, currentLevel }: StandeeBillboardProps): React.ReactElement {
-  const groupRef = useRef<Group>(null);
   const standeeTexture = useSmartStandeeTexture(cellIndex);
   const assetUrl =
     (currentLevel !== undefined ? getTileAssetUrl(cellIndex, currentLevel) : null) ??
     getTileAssetUrl(cellIndex) ??
     `/assets/tiles/tile_${String(cellIndex).padStart(2, '0')}.webp`;
 
-  useFrame((state) => {
-    if (groupRef.current) {
-      const t = state.clock.getElapsedTime();
-      groupRef.current.position.y = calculateStandeeElevation(t, {
-        omega: 2.5,
-        amplitude: 0.06,
-        baseHeight: 1.1,
-        phase: cellIndex * 0.25,
-      });
-    }
-  });
-
   return (
-    <group ref={groupRef} position={[0, 1.1, 0]}>
+    <group position={[0, 1.1, 0]}>
       <Billboard follow={true}>
         {/* 2.5D Photorealistic Isometric Building Diorama Standee */}
         <DreiImage url={assetUrl} transparent scale={[1.4, 1.4]} />

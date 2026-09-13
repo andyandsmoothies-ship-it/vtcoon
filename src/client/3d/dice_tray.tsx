@@ -51,7 +51,7 @@ function SingleDie({
     to: { t: 1 },
     reset: isRolling,
     immediate: !isRolling,
-    config: { duration: 1400 },
+    config: { duration: 1100 },
     onRest: (result) => {
       if (isRolling && onRest && (!result || result.finished !== false)) {
         onRest();
@@ -84,10 +84,9 @@ function SingleDie({
       </mesh>
       {DIE_PIPS.map((pip, idx) => (
         <mesh key={idx} position={pip.pos}>
-          <sphereGeometry args={[0.034, 8, 8]} />
+          <sphereGeometry args={[0.038, 12, 12]} />
           <meshStandardMaterial
-            color="#F59E0B"
-            metalness={0.9}
+            color={pip.isRed ? '#EF4444' : '#FFFFFF'}
             roughness={0.15}
           />
         </mesh>

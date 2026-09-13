@@ -16,6 +16,7 @@ import { SocketRegistry } from './socket_registry.js';
 import { encodeMsg } from './network_types.js';
 import type { WsServerMessage, WsClientMessage, ReasonCode } from './network_types.js';
 import { isRoomGameOver } from '../../domain/room.js';
+import { AdminManager } from './admin_manager.js';
 
 const MAX_PLAYERS = 4;
 
@@ -35,6 +36,7 @@ export class WssServer {
   private readonly rateLimiter: RateLimiter;
   private readonly envelopeValidator: EnvelopeValidator;
   private readonly intentGuard: IntentGuard;
+  private readonly adminManager: AdminManager;
   private readonly sockets = new SocketRegistry();
   private readonly closingRooms = new Set<string>();
   private readonly heartbeatTimer: ReturnType<typeof setInterval>;
@@ -43,6 +45,11 @@ export class WssServer {
   constructor(config: WssServerConfig) {
     this.rooms       = config.roomManager ?? new RoomManager();
     this.sessions    = config.sessionManager ?? new SessionManager();
+    this.adminManager = config.adminManager ?? new AdminManager({
+      roomManager: this.rooms,
+      secret: config.adminSecret,
+      onTerminateRoom: (rc) => this.closeRoom(rc),
+    });
     this.intentMutex = config.intentMutex ?? new IntentMutex();
     this.rateLimiter = config.rateLimiter ?? new RateLimiter(config.rateLimiterOptions);
     this.envelopeValidator = config.envelopeValidator ?? new EnvelopeValidator();
@@ -52,6 +59,7 @@ export class WssServer {
       rooms: this.rooms, intentMutex: this.intentMutex, broadcaster: this.broadcaster,
       onGameOver: (rc) => this.broadcastGameOver(rc),
       onScheduleTurnTimeout: (rc) => this.turnTimeoutScheduler.scheduleTurnTimeout(rc),
+      botTurnDelayMs: config.botTurnDelayMs ?? 2000,
     });
     this.turnTimeoutScheduler = new TurnTimeoutScheduler({
       rooms: this.rooms, intentMutex: this.intentMutex, broadcaster: this.broadcaster,
@@ -110,6 +118,8 @@ export class WssServer {
   getRateLimiter(): RateLimiter { return this.rateLimiter; }
   getEnvelopeValidator(): EnvelopeValidator { return this.envelopeValidator; }
   getIntentGuard(): IntentGuard { return this.intentGuard; }
+  getAdminManager(): AdminManager { return this.adminManager; }
+  get admin(): AdminManager { return this.adminManager; }
   getRoomSockets(roomCode: string): Set<WebSocket> | undefined { return this.sockets.getRoomSockets(roomCode); }
   get roomSockets(): Map<string, Set<WebSocket>> { return this.sockets.getRoomSocketsMap(); }
 
@@ -151,6 +161,7 @@ export class WssServer {
     });
 
     socket.on('close', () => {
+      this.adminManager.handleDisconnect(socket);
       this.rateLimiter.cleanup(socket);
       const info = this.sockets.unregister(socket);
       if (info) {
@@ -206,12 +217,21 @@ export class WssServer {
       return;
     }
     this.bindSocket(msg.roomCode, msg.playerId, socket);
+    this.adminManager.recordRoomEvent(normRoomCode, {
+      source: 'PLAYER',
+      action: 'START_GAME',
+      payloadSummary: `Ván đấu bắt đầu với ${room.players.length} người chơi`,
+    });
     this.broadcast(msg.roomCode, { type: 'ROOM_STARTED', roomCode: msg.roomCode });
     this.broadcaster.broadcastRoomDelta(msg.roomCode, { forceFull: true });
     this.scheduleBotTurn(msg.roomCode);
+    this.adminManager.broadcastRoomListToAdmins();
   }
 
   private async route(socket: WebSocket, msg: WsClientMessage): Promise<void> {
+    if (this.adminManager.handleClientMessage(socket, msg, (s, m) => this.sendSafe(s, m))) {
+      return;
+    }
     switch (msg.type) {
       case 'CREATE_ROOM': {
         if (msg.roomCode) {
@@ -225,6 +245,12 @@ export class WssServer {
         this.reconnects.cancelGracePeriod(room.roomCode, msg.playerId);
         this.sessions.addSession(msg.playerId);
         this.bindSocket(room.roomCode, msg.playerId, socket);
+        this.adminManager.recordRoomEvent(room.roomCode, {
+          source: 'PLAYER',
+          action: 'CREATE_ROOM',
+          payloadSummary: `Chủ phòng ${msg.playerId} đã tạo phòng`,
+        });
+        this.adminManager.broadcastRoomListToAdmins();
         this.sendSafe(socket, { type: 'ROOM_CREATED', roomCode: room.roomCode, playerId: msg.playerId });
         this.sendSessionInit(socket, msg.playerId, room.roomCode);
         break;
@@ -239,6 +265,12 @@ export class WssServer {
         this.reconnects.cancelGracePeriod(msg.roomCode, msg.playerId);
         this.sessions.addSession(msg.playerId);
         this.bindSocket(msg.roomCode, msg.playerId, socket);
+        this.adminManager.recordRoomEvent(msg.roomCode, {
+          source: 'PLAYER',
+          action: 'JOIN_ROOM',
+          payloadSummary: `Người chơi ${msg.playerId} đã vào phòng (${joined.players.length} người)`,
+        });
+        this.adminManager.broadcastRoomListToAdmins();
         this.sendSafe(socket, { type: 'ROOM_JOINED', roomCode: msg.roomCode, playerId: msg.playerId, playerCount: joined.players.length });
         this.sendSessionInit(socket, msg.playerId, msg.roomCode);
         break;
@@ -366,6 +398,12 @@ export class WssServer {
         return;
       }
 
+      this.adminManager.recordRoomEvent(msg.roomCode, {
+        source: player.isBot ? 'BOT' : 'PLAYER',
+        action: msg.intent.type,
+        payloadSummary: `Người chơi ${msg.playerId}: ${msg.intent.type}`,
+      });
+
       const roomAfter = this.rooms.getRoom(msg.roomCode);
       if (roomAfter && isRoomGameOver(roomAfter)) {
         this.broadcastGameOver(msg.roomCode);
@@ -401,6 +439,7 @@ export class WssServer {
       this.broadcaster.clearRoom(roomCode);
       this.intentMutex.clear(roomCode);
       this.rooms.closeRoom(roomCode);
+      this.adminManager.handleRoomClosed(roomCode);
     } finally {
       this.closingRooms.delete(roomCode);
     }

@@ -4,6 +4,7 @@
 
 import type { DeltaPayload } from '../session_manager.js';
 import type { PlayerIntent } from '../intent_dispatcher.js';
+import type { AdminRoomSummary, AdminRoomDetail, AdminRoomLogEntry } from './admin_manager.js';
 
 export type ReasonCode =
   | 'ROOM_CODE_COLLISION'
@@ -26,12 +27,19 @@ export type ReasonCode =
   | 'INVALID_ENVELOPE'
   | 'INVALID_VALUE'
   | 'PRICE_BELOW_FLOOR'
-  | 'EVEN_BUILDING_VIOLATION';
+  | 'EVEN_BUILDING_VIOLATION'
+  | 'ADMIN_UNAUTHORIZED'
+  | 'ADMIN_ROOM_NOT_FOUND';
 
 // ─── Client → Server ────────────────────────────────────────────
 export type WsClientMessage =
   | { readonly type: 'CREATE_ROOM'; readonly playerId: string; readonly roomCode?: string }
   | { readonly type: 'JOIN_ROOM';   readonly playerId: string; readonly roomCode: string }
+  | { readonly type: 'ADMIN_AUTH';  readonly secret: string }
+  | { readonly type: 'ADMIN_GET_ROOMS' }
+  | { readonly type: 'ADMIN_SUBSCRIBE_ROOM'; readonly roomCode: string }
+  | { readonly type: 'ADMIN_UNSUBSCRIBE_ROOM'; readonly roomCode?: string }
+  | { readonly type: 'ADMIN_TERMINATE_ROOM'; readonly roomCode: string; readonly reason?: string }
   | {
       readonly type: 'START_GAME';
       readonly playerId: string;
@@ -134,7 +142,23 @@ export type WsServerMessage =
       readonly type: 'GAME_OVER';
       readonly roomCode: string;
       readonly leaderboard: ReadonlyArray<{ readonly id: string; readonly netWorth: number }>;
-    };
+    }
+  | { readonly type: 'ADMIN_AUTH_SUCCESS'; readonly message: string }
+  | { readonly type: 'ADMIN_AUTH_FAILED'; readonly reason: string }
+  | { readonly type: 'ADMIN_ROOM_LIST'; readonly rooms: readonly AdminRoomSummary[] }
+  | {
+      readonly type: 'ADMIN_ROOM_DETAIL';
+      readonly roomCode: string;
+      readonly detail: AdminRoomDetail;
+      readonly recentLogs: readonly AdminRoomLogEntry[];
+    }
+  | {
+      readonly type: 'ADMIN_ROOM_LOG';
+      readonly roomCode: string;
+      readonly log: AdminRoomLogEntry;
+    }
+  | { readonly type: 'ADMIN_ACTION_SUCCESS'; readonly action: string; readonly roomCode: string }
+  | { readonly type: 'ADMIN_ERROR'; readonly reasonCode: string; readonly message: string };
 
 // Hàm helper: serialize message thành JSON string
 export function encodeMsg(msg: WsServerMessage): string {

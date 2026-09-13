@@ -4,14 +4,14 @@ Kiến trúc kỹ thuật cho trò chơi cờ tỷ phú sử dụng giải pháp
 
 | Tầng kiến trúc | Công nghệ sử dụng | Chức năng chi tiết |
 | :---- | :---- | :---- |
-| **Framework nền** | Next.js hoặc Vite + React (TypeScript) | Quản lý vòng đời ứng dụng, state management và routing. |
+| **Framework nền** | Vite + React (TypeScript) | Quản lý vòng đời ứng dụng, state management và routing. |
 | **3D Rendering Engine** | React Three Fiber (@react-three/fiber) | Cầu nối Declarative giữa React và WebGL/Three.js. |
-| **3D Helpers** | @react-three/drei, @react-spring/three | Cung cấp component `<Billboard>`, `<OrthographicCamera>`, `<Image>`. Điều khiển chuyển động lò xo nảy đàn hồi (Spring Animation) khi sa bàn trồi lên từ mặt đế, loại bỏ việc phải tự viết keyframe thủ công. |
-| **Physics Xúc xắc** | @react-three/rapier hoặc dice-box | Tính toán va chạm vật lý xúc xắc độc lập, trả về kết quả số chấm. |
+| **3D Helpers** | @react-three/drei, @react-spring/three | Cung cấp component `<Billboard>`, `<PerspectiveCamera>`, `<Image>`. Điều khiển chuyển động lò xo nảy đàn hồi (Spring Animation) của quân cờ và xúc xắc. |
+| **Physics Xúc xắc** | Mô phỏng quỹ đạo nảy 3D thủ tục (@react-spring/three) | Tính toán quỹ đạo rơi vật lý 3D, khớp kết quả chính xác từ Cryptographic PRNG máy chủ. |
 | **UI & Layout Overlay** | Tailwind CSS + Framer Motion | Hiển thị HUD, Thẻ bài Title Deed, bảng điều khiển, hoạt ảnh lật thẻ. |
 | **State Management** | Zustand | Đồng bộ trạng thái bàn cờ, số dư tài khoản, vị trí người chơi theo thời gian thực. |
-| **Realtime Networking**  | `socket.io-client` / WebSockets  | Kết nối truyền tin hai chiều độ trễ thấp, quản lý phiên đấu giá và đồng bộ phòng chơi.  |
-| **Audio Engine**  | `howler.js` (Web Audio API)  | Quản lý phát âm thanh không gian (Spatial Audio), nhạc nền thích ứng theo vùng miền và tối ưu hóa bộ nhớ audio buffer.  |
+| **Realtime Networking**  | Native WebSockets (`ws` server, `WebSocket` client) | Kết nối truyền tin hai chiều độ trễ thấp, quản lý phiên đấu giá và đồng bộ phòng chơi qua state delta. |
+| **Audio Engine**  | Web Audio API Synth thuần (`audio_synthesizer.ts`) | Quản lý âm thanh xúc giác, hiệu ứng nâng cấp, xúc xắc và không gian môi trường mà không phụ thuộc thư viện ngoài. |
 
 ### **2. PHÂN TẦNG GIAO DIỆN HYBRID (CANVAS VS. DOM OVERLAY)**
 

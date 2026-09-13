@@ -33,6 +33,7 @@
 - **Anti-Programmer-Art Primitive Ban**: FORBID raw unlit geometric primitives (`boxGeometry`, `cylinderGeometry`) in dark space. Use outdoor sunlight, stylized saturated palette, and toy-like beveled diorama geometry.
 - **Verification Screenshot Invariant**: All UAT and verification screenshots must be saved as `.jpg` (JPEG Quality 85–92).
 - **Continuous Improvement Persistence**: All ad-hoc fixes, systemic refactors, bot upgrades, or VFX juice must have plan in `docs/plans/improvements/IMP-[ID]-[slug]_plan.md` and report in `docs/reports/improvements/IMP-[ID]-[slug]_report.md`, updating ADRs and `docs/master_roadmap.md`.
+- **Active Domain Memory & Reflexion Loop**: Before planning or modifying code in any domain (`[FSM]`, `[3D]`, `[UI]`, `[NET]`, `[BOT]`, `[UAT]`), agents must execute a pre-flight inspection of `docs/domain/gotchas.md`. Agents must not violate documented invariants. When detecting errors or poor practices, agents must self-correct until all gates pass. Every resolved defect must yield a numbered invariant in `docs/domain/gotchas.md`.
 
 ## 2. DEFINITION OF DONE
 
@@ -41,7 +42,7 @@ A task is COMPLETE only when:
 2. Code passes 6 Slop Red Flags audit (least new structure, complexity <= 5, visual token compliance, zero code golf). UI passes `npm run lint:ui` with 0 violations.
 3. Reviewer gates approve (`spec-reviewer` verifies 100% spec reconciliation; `code-reviewer` verifies code quality and observability; `game-3d-visual-critic` verifies 3D visual gate; `ui-craft-reviewer` verifies 2D craft gate).
 4. Progress updated in `docs/epics/[epic]/_epic_ledger.md` (including Tech Debt Ledger).
-5. Domain learnings recorded in `docs/domain/gotchas.md`.
+5. Domain learnings and invariants recorded in `docs/domain/gotchas.md` with domain tags and traceability.
 6. Production resilience verified: defense against invalid intents, treasury conservation invariant, safe disconnection grace period.
 7. Ad-hoc improvements documented in `docs/plans/improvements/` and `docs/reports/improvements/`, with roadmap update.
 

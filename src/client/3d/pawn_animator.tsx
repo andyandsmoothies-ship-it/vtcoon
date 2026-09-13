@@ -10,10 +10,12 @@ import { useGameStore, type PawnAnimationState } from '../store/game_store';
 import { cellPosition } from './board_coords';
 import {
   interpolatePawnPosition, BASE_PAWN_Y, HOP_DURATION, LANDING_DURATION,
+  BOT_HOP_DURATION, BOT_LANDING_DURATION,
   calculateKineticPawnScale, calculatePawnLandingImpact, getStepPitchVariation,
 } from './pawn_path';
 import { AudioEngine } from '../audio/audio_engine';
 import { SoundEffect } from '../audio/audio_types';
+import { LuxuryPawnModel } from './luxury_pawn_models';
 
 export * from './pawn_path';
 
@@ -103,15 +105,20 @@ export interface SingleHopProps {
   readonly color: string;
   readonly onHopComplete: () => void;
   readonly emoteId?: string;
+  readonly slotIndex?: number;
+  readonly isBot?: boolean;
 }
 
-export function SingleHopPawn({ fromCell, toCell, offset, color, onHopComplete, emoteId }: SingleHopProps): React.ReactElement | null {
+export function SingleHopPawn({ fromCell, toCell, offset, color, onHopComplete, emoteId, slotIndex, isBot }: SingleHopProps): React.ReactElement | null {
   const groupRef = useRef<Group>(null);
   const elapsedRef = useRef(0);
   const soundPlayedRef = useRef(false);
   const completedRef = useRef(false);
   const onHopCompleteRef = useRef(onHopComplete);
   onHopCompleteRef.current = onHopComplete;
+
+  const hopDuration = isBot ? BOT_HOP_DURATION : HOP_DURATION;
+  const landingDuration = isBot ? BOT_LANDING_DURATION : LANDING_DURATION;
 
   useEffect(() => {
     if (fromCell === toCell && !completedRef.current) {
@@ -127,21 +134,21 @@ export function SingleHopPawn({ fromCell, toCell, offset, color, onHopComplete, 
     elapsedRef.current += dt;
     const t = elapsedRef.current;
 
-    if (t <= HOP_DURATION) {
-      const jumpProgress = t / HOP_DURATION;
+    if (t <= hopDuration) {
+      const jumpProgress = t / hopDuration;
       const [x, y, z] = interpolatePawnPosition(fromCell, toCell, jumpProgress);
       const [sx, sy, sz] = calculateKineticPawnScale(jumpProgress, 0);
       const groundAdjustment = jumpProgress <= 0.10 ? -0.22 * (1 - sy) * (1 - jumpProgress / 0.10) : 0;
       groupRef.current.position.set(x + offset[0], y + groundAdjustment, z + offset[2]);
       groupRef.current.scale.set(sx, sy, sz);
-    } else if (t <= HOP_DURATION + LANDING_DURATION) {
+    } else if (t <= hopDuration + landingDuration) {
       if (!soundPlayedRef.current) {
         soundPlayedRef.current = true;
         const randomPitch = getStepPitchVariation();
         AudioEngine.playSfx(SoundEffect.PAWN_STEP, randomPitch);
       }
 
-      const landingProgress = (t - HOP_DURATION) / LANDING_DURATION;
+      const landingProgress = (t - hopDuration) / landingDuration;
       const [x, y, z] = interpolatePawnPosition(fromCell, toCell, 1.0);
       const [sx, sy, sz] = calculatePawnLandingImpact(landingProgress);
       const groundAdjustment = -0.22 * (1 - sy);
@@ -164,21 +171,23 @@ export function SingleHopPawn({ fromCell, toCell, offset, color, onHopComplete, 
       position={[startX + offset[0], startY, startZ + offset[2]]}
       scale={[1, 1, 1]}
     >
-      <PawnMesh color={color} />
+      {slotIndex !== undefined ? <LuxuryPawnModel slotIndex={slotIndex} /> : <PawnMesh color={color} />}
       {emoteId && <PawnEmoteBubble emoteId={emoteId} />}
     </group>
   );
 }
 
-export interface ActivePawnProps extends Pick<SingleHopProps, 'color' | 'offset' | 'emoteId'> {
+export interface ActivePawnProps extends Pick<SingleHopProps, 'color' | 'offset' | 'emoteId' | 'slotIndex'> {
   readonly player: Player;
   readonly animation: PawnAnimationState;
   readonly onComplete: (playerId: string) => void;
+  readonly isBot?: boolean;
 }
 
-export function ActiveSpringPawn({ player, color, offset, animation, onComplete, emoteId }: ActivePawnProps): React.ReactElement | null {
+export function ActiveSpringPawn({ player, color, offset, animation, onComplete, emoteId, slotIndex, isBot: isBotProp }: ActivePawnProps): React.ReactElement | null {
   const [stepIndex, setStepIndex] = useState(0);
   const waypoints = animation.waypoints;
+  const isBot = isBotProp !== undefined ? isBotProp : Boolean(animation.isBot || player.isBot);
 
   // Khóa nhận diện hoạt cảnh duy nhất theo quỹ đạo di chuyển (tránh re-trigger khi currentIndex cập nhật từng bước)
   const animKey = `${animation.playerId}_${animation.fromCell}_${waypoints.join('-')}`;
@@ -194,7 +203,6 @@ export function ActiveSpringPawn({ player, color, offset, animation, onComplete,
   useEffect(() => {
     if (!waypoints || waypoints.length === 0) {
       onComplete(player.id);
-      useGameStore.getState().clearActivePawnAnimation();
     }
   }, [waypoints, onComplete, player.id]);
 
@@ -217,7 +225,6 @@ export function ActiveSpringPawn({ player, color, offset, animation, onComplete,
       }
     } else {
       onComplete(player.id);
-      useGameStore.getState().clearActivePawnAnimation();
     }
   }, [stepIndex, waypoints, player.id, onComplete]);
 
@@ -230,13 +237,17 @@ export function ActiveSpringPawn({ player, color, offset, animation, onComplete,
       color={color}
       onHopComplete={handleHopComplete}
       emoteId={emoteId}
+      slotIndex={slotIndex}
+      isBot={isBot}
     />
   );
 }
 
 export function PawnAnimator({ players = [] }: { readonly players?: readonly Player[] }): React.ReactElement {
   const activeAnimation = useGameStore((s) => s.activePawnAnimation);
+  const pendingPawnMove = useGameStore((s) => s.pendingPawnMove);
   const playerPositions = useGameStore((s) => s.playerPositions);
+  const visualPositions = useGameStore((s) => s.visualPositions);
   const completePawnMove = useGameStore((s) => s.completePawnMove);
   const activeEmotes = useGameStore((s) => s.activeEmotes);
 
@@ -244,7 +255,6 @@ export function PawnAnimator({ players = [] }: { readonly players?: readonly Pla
   useEffect(() => {
     if (activeAnimation?.isAnimating && (!activeAnimation.waypoints || activeAnimation.waypoints.length === 0)) {
       completePawnMove(activeAnimation.playerId);
-      useGameStore.getState().clearActivePawnAnimation();
     }
   }, [activeAnimation, completePawnMove]);
 
@@ -254,7 +264,10 @@ export function PawnAnimator({ players = [] }: { readonly players?: readonly Pla
         const color = PLAYER_TOKEN_PALETTE[index % PLAYER_TOKEN_PALETTE.length] ?? '#38BDF8';
         const offset = PLAYER_OFFSETS[index % PLAYER_OFFSETS.length] ?? [0, 0, 0];
         const isAnimating = activeAnimation != null && activeAnimation.playerId === player.id && activeAnimation.isAnimating;
-        const currentPos = playerPositions[player.id] ?? player.position;
+        const isPendingMove = pendingPawnMove != null && pendingPawnMove.playerId === player.id;
+        const currentPos = isPendingMove
+          ? pendingPawnMove.fromCell
+          : (visualPositions?.[player.id] ?? playerPositions[player.id] ?? player.position);
         const activeEmote = activeEmotes[player.id];
 
         if (isAnimating && activeAnimation.waypoints.length > 0) {
@@ -268,6 +281,8 @@ export function PawnAnimator({ players = [] }: { readonly players?: readonly Pla
               animation={activeAnimation}
               onComplete={completePawnMove}
               emoteId={activeEmote?.emoteId}
+              slotIndex={index}
+              isBot={Boolean(activeAnimation.isBot || player.isBot)}
             />
           );
         }
@@ -275,7 +290,7 @@ export function PawnAnimator({ players = [] }: { readonly players?: readonly Pla
         const [x, , z] = cellPosition(currentPos);
         return (
           <group key={player.id} position={[x + offset[0], BASE_PAWN_Y, z + offset[2]]}>
-            <PawnMesh color={color} />
+            <LuxuryPawnModel slotIndex={index} />
             {activeEmote && <PawnEmoteBubble emoteId={activeEmote.emoteId} />}
           </group>
         );

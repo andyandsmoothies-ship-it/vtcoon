@@ -128,6 +128,8 @@ describe('[TC-UI02.4/MSS] Game Store Pawn Movement & Animation Lock', () => {
     useGameStore.setState({
       playerPositions: { p1: 0 },
       activePawnAnimation: null,
+      isRolling: false,
+      pawnAnimationQueue: [],
     });
   });
 

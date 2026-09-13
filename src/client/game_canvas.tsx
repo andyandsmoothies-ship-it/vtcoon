@@ -22,6 +22,9 @@ import { SunnyIslandLobbyScene } from './3d/sunny_island_lobby_scene';
 import { TimeOfDayLighting } from './3d/time_of_day_lighting';
 import { useEnvironmentStore, TIME_OF_DAY_PRESETS } from './store/environment_store';
 import { useVfxStore } from './store/vfx_store';
+import { perfBudget } from './3d/perf_budget';
+import { useTelemetryStore } from './telemetry/telemetry_store';
+import { watchdogMonitor } from './telemetry/watchdog_monitor';
 import {
   resolveCameraMode,
   calculateTargetCameraState,
@@ -93,6 +96,7 @@ export function AdaptiveCinematicCamera({
   const activeModal = useGameStore((s) => s.activeModal);
   const modalPayload = useGameStore((s) => s.modalPayload);
   const activeScreenShake = useVfxStore((s) => s.activeScreenShake);
+  const playersInfo = useGameStore((s) => s.playersInfo);
 
   useFrame((_, delta) => {
     if (typeof window !== 'undefined') {
@@ -105,6 +109,8 @@ export function AdaptiveCinematicCamera({
     }
 
     const isPawnMoving = activeAnimation?.isAnimating ?? false;
+    const currentTurnPlayer = currentTurnPlayerId ? playersInfo[currentTurnPlayerId] : undefined;
+    const isBotTurn = Boolean(currentTurnPlayer?.isBot);
     const targetCell = resolveCameraTargetCell(
       activeAnimation,
       currentTurnPlayerId,
@@ -119,6 +125,7 @@ export function AdaptiveCinematicCamera({
       hasRolledThisTurn,
       hasTargetTile: (activeModal !== null || hasRolledThisTurn) && targetCell !== null,
       isPreMatch,
+      isBotTurn,
     });
 
     const cellCoords = targetCell !== null ? cellPosition(targetCell) : undefined;
@@ -210,6 +217,43 @@ export function AdaptiveCinematicCamera({
   );
 }
 
+function PerfTelemetryTracker(): null {
+  const { gl } = useThree();
+  const lastUpdateRef = useRef(0);
+  const animStartRef = useRef<number | null>(null);
+
+  useFrame((_, delta) => {
+    perfBudget.recordFrameTime(delta * 1000);
+    const now = performance.now();
+    if (now - lastUpdateRef.current >= 250) {
+      lastUpdateRef.current = now;
+      const report = perfBudget.getBudgetReport(gl.info);
+      useTelemetryStore.getState().updateMetrics({
+        fps: report.averageFps,
+        frameTimeMs: delta * 1000,
+        drawCalls: report.drawCalls,
+        triangles: report.triangles,
+      });
+
+      const activeAnim = useGameStore.getState().activePawnAnimation;
+      if (activeAnim?.isAnimating) {
+        if (animStartRef.current === null) animStartRef.current = Date.now();
+        const duration = Date.now() - animStartRef.current;
+        const v = watchdogMonitor.checkFsmAnimationStall({
+          isAnimating: true,
+          animatingDurationMs: duration,
+          tick: 0,
+        });
+        if (v) useTelemetryStore.getState().reportViolation(v);
+      } else {
+        animStartRef.current = null;
+      }
+    }
+  });
+
+  return null;
+}
+
 export interface GameCanvasProps {
   readonly players?: readonly Player[];
   readonly isLobby?: boolean;
@@ -263,6 +307,7 @@ export function GameCanvas({
         <React.Suspense fallback={null}>
           <Environment preset="city" />
         </React.Suspense>
+        <PerfTelemetryTracker />
 
         {isLobby ? (
           <>

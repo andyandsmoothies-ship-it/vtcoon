@@ -12,6 +12,15 @@ export interface PawnAnimationState {
   readonly waypoints: readonly number[];
   readonly currentIndex: number;
   readonly isAnimating: boolean;
+  readonly isBot?: boolean;
+}
+
+export interface PawnMoveTask {
+  readonly playerId: string;
+  readonly fromCell: number;
+  readonly targetCell: number;
+  readonly waypoints: readonly number[];
+  readonly isBot?: boolean;
 }
 
 export interface PlayerHudInfo {
@@ -92,13 +101,29 @@ export interface ModalPayloadMap {
   };
 }
 
+export interface PendingPawnMove {
+  readonly playerId: string;
+  readonly targetCell: number;
+  readonly fromCell: number;
+}
+
+export interface LastLandedPawn {
+  readonly playerId: string;
+  readonly cellIndex: number;
+  readonly timestamp: number;
+}
+
 export interface GameState {
   readonly levelMap: Record<number, 0 | 1 | 2 | 3>;
   readonly playerPositions: Record<string, number>;
+  readonly visualPositions: Record<string, number>;
   readonly dice: [number, number];
   readonly isRolling: boolean;
   readonly hasRolledThisTurn: boolean;
   readonly activePawnAnimation: PawnAnimationState | null;
+  readonly pawnAnimationQueue: readonly PawnMoveTask[];
+  readonly pendingPawnMove: PendingPawnMove | null;
+  readonly lastLandedPawn: LastLandedPawn | null;
 
   // UI-03 HUD Financial & Turn States
   readonly playersInfo: Record<string, PlayerHudInfo>;
@@ -118,11 +143,15 @@ export interface GameState {
 
   setLevelMap: (map: Record<number, 0 | 1 | 2 | 3>) => void;
   setPlayerPositions: (positions: Record<string, number>) => void;
+  setVisualPositions: (positions: Record<string, number>) => void;
   setDice: (dice: [number, number]) => void;
   setIsRolling: (isRolling: boolean) => void;
   setHasRolledThisTurn: (hasRolled: boolean) => void;
   triggerDiceRoll: (dice: [number, number]) => void;
-  startPawnMove: (playerId: string, targetCell: number, fromCell?: number) => void;
+  setPendingPawnMove: (move: PendingPawnMove | null) => void;
+  enqueuePawnMove: (task: PawnMoveTask) => void;
+  processPawnQueue: () => void;
+  startPawnMove: (playerId: string, targetCell: number, fromCell?: number, isBot?: boolean) => void;
   completePawnMove: (playerId: string) => void;
   clearActivePawnAnimation: () => void;
 
@@ -151,10 +180,14 @@ export interface GameState {
 export const useGameStore = create<GameState>((set, get) => ({
   levelMap: {},
   playerPositions: {},
+  visualPositions: {},
   dice: [1, 1],
   isRolling: false,
   hasRolledThisTurn: false,
   activePawnAnimation: null,
+  pawnAnimationQueue: [],
+  pendingPawnMove: null,
+  lastLandedPawn: null,
 
   playersInfo: {},
   currentTurnPlayerId: null,
@@ -170,17 +203,91 @@ export const useGameStore = create<GameState>((set, get) => ({
   floatingTexts: [],
 
   setLevelMap: (map) => set({ levelMap: map }),
-  setPlayerPositions: (positions) => set({ playerPositions: positions }),
+  setPlayerPositions: (positions) => {
+    const state = get();
+    const isBusy = Boolean(state.activePawnAnimation?.isAnimating) || (state.pawnAnimationQueue?.length ?? 0) > 0;
+    const visualPositions = isBusy ? { ...state.visualPositions } : { ...positions };
+    if (isBusy) {
+      for (const [id, pos] of Object.entries(positions)) {
+        if (visualPositions[id] === undefined) {
+          visualPositions[id] = pos;
+        }
+      }
+    }
+    set({ playerPositions: positions, visualPositions });
+  },
+  setVisualPositions: (positions) => set({ visualPositions: positions }),
 
   setDice: (dice) =>
     set({ dice: [clampDiceFace(dice[0]), clampDiceFace(dice[1])] }),
 
+  setPendingPawnMove: (move) => set({ pendingPawnMove: move }),
+
+  enqueuePawnMove: (task) => {
+    const state = get();
+    if (!Number.isInteger(task.targetCell) || task.targetCell < 0 || task.targetCell >= BOARD_TOTAL_CELLS) {
+      return;
+    }
+    if (task.fromCell === task.targetCell) {
+      return;
+    }
+    const currentQueue = state.pawnAnimationQueue ?? [];
+    set({ pawnAnimationQueue: [...currentQueue, task] });
+    if (!state.activePawnAnimation?.isAnimating && !state.isRolling) {
+      get().processPawnQueue();
+    }
+  },
+
+  processPawnQueue: () => {
+    const state = get();
+    if (state.activePawnAnimation?.isAnimating || state.isRolling) {
+      return;
+    }
+    const queue = state.pawnAnimationQueue;
+    if (!queue || queue.length === 0) {
+      return;
+    }
+    const [nextTask, ...remaining] = queue;
+    if (!nextTask) return;
+
+    set({
+      pawnAnimationQueue: remaining,
+      activePawnAnimation: {
+        playerId: nextTask.playerId,
+        fromCell: nextTask.fromCell,
+        waypoints: nextTask.waypoints,
+        currentIndex: 0,
+        isAnimating: true,
+        isBot: nextTask.isBot,
+      },
+    });
+
+    const isBot = Boolean(nextTask.isBot);
+    const stepDuration = isBot ? 200 : 340;
+    const timeoutMs = Math.max(2000, nextTask.waypoints.length * stepDuration + 500);
+    setTimeout(() => {
+      const anim = get().activePawnAnimation;
+      if (anim && anim.playerId === nextTask.playerId && anim.isAnimating) {
+        get().completePawnMove(nextTask.playerId);
+      }
+    }, timeoutMs);
+  },
+
   setIsRolling: (isRolling) => {
     set({ isRolling });
-    if (isRolling) {
+    if (!isRolling) {
+      const pending = get().pendingPawnMove;
+      if (pending) {
+        set({ pendingPawnMove: null });
+        get().startPawnMove(pending.playerId, pending.targetCell, pending.fromCell);
+      }
+      get().processPawnQueue();
+    } else {
       setTimeout(() => {
-        if (get().isRolling) set({ isRolling: false });
-      }, 3000);
+        if (get().isRolling) {
+          get().setIsRolling(false);
+        }
+      }, 2500);
     }
   },
 
@@ -193,15 +300,14 @@ export const useGameStore = create<GameState>((set, get) => ({
       hasRolledThisTurn: true,
     });
     setTimeout(() => {
-      if (get().isRolling) set({ isRolling: false });
-    }, 3000);
+      if (get().isRolling) {
+        get().setIsRolling(false);
+      }
+    }, 2500);
   },
 
-  startPawnMove: (playerId, targetCell, fromCell) => {
+  startPawnMove: (playerId, targetCell, fromCell, isBot) => {
     const state = get();
-    if (state.activePawnAnimation?.isAnimating) {
-      return;
-    }
     if (
       !Number.isInteger(targetCell) ||
       targetCell < 0 ||
@@ -209,7 +315,8 @@ export const useGameStore = create<GameState>((set, get) => ({
     ) {
       return;
     }
-    const currentPos = fromCell ?? state.playerPositions[playerId] ?? 0;
+    const isBusy = Boolean(state.activePawnAnimation?.isAnimating) || (state.pawnAnimationQueue?.length ?? 0) > 0;
+    const currentPos = fromCell ?? (isBusy ? state.visualPositions?.[playerId] : undefined) ?? state.playerPositions?.[playerId] ?? state.visualPositions?.[playerId] ?? 0;
     if (currentPos === targetCell) {
       return;
     }
@@ -217,22 +324,13 @@ export const useGameStore = create<GameState>((set, get) => ({
     if (waypoints.length === 0) {
       return;
     }
-    set({
-      activePawnAnimation: {
-        playerId,
-        fromCell: currentPos,
-        waypoints,
-        currentIndex: 0,
-        isAnimating: true,
-      },
+    get().enqueuePawnMove({
+      playerId,
+      fromCell: currentPos,
+      targetCell,
+      waypoints,
+      isBot,
     });
-    const timeoutMs = Math.max(3000, waypoints.length * 600);
-    setTimeout(() => {
-      const anim = get().activePawnAnimation;
-      if (anim && anim.playerId === playerId && anim.isAnimating) {
-        get().completePawnMove(playerId);
-      }
-    }, timeoutMs);
   },
 
   completePawnMove: (playerId) => {
@@ -251,12 +349,27 @@ export const useGameStore = create<GameState>((set, get) => ({
         ...state.playerPositions,
         [playerId]: finalPos,
       },
+      visualPositions: {
+        ...state.visualPositions,
+        [playerId]: finalPos,
+      },
       activePawnAnimation: null,
+      lastLandedPawn: {
+        playerId,
+        cellIndex: finalPos,
+        timestamp: Date.now(),
+      },
     });
+    get().processPawnQueue();
   },
 
   clearActivePawnAnimation: () => {
-    set({ activePawnAnimation: null });
+    set({
+      activePawnAnimation: null,
+      pendingPawnMove: null,
+      pawnAnimationQueue: [],
+      visualPositions: { ...get().playerPositions },
+    });
   },
 
   setPlayersInfo: (players) => set({ playersInfo: players }),

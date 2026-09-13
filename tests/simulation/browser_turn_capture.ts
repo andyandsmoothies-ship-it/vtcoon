@@ -197,7 +197,24 @@ export class BrowserTurnCapture {
 
     const shot = await this.sendCmd('Page.captureScreenshot', { format: 'jpeg', quality: 85 });
     const buf = Buffer.from(shot.data, 'base64');
-    fs.writeFileSync(outputFilePath, buf);
+    const dir = path.dirname(outputFilePath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    let writeErr: unknown = null;
+    for (let attempt = 0; attempt < 10; attempt++) {
+      try {
+        fs.writeFileSync(outputFilePath, buf);
+        writeErr = null;
+        break;
+      } catch (err) {
+        writeErr = err;
+        await sleep(100 * (attempt + 1));
+      }
+    }
+    if (writeErr) {
+      console.warn(`[BrowserTurnCapture] Persistent OS lock on screenshot file ${outputFilePath}:`, writeErr);
+    }
   }
 
   async close(): Promise<void> {

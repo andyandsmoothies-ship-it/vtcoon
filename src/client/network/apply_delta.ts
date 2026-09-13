@@ -1,6 +1,7 @@
 // [UC-GAME-009/MSS][TC-NET03.1/MSS][TC-NET03.2/MSS][UC-GAME-008/MSS]
 // Đồng bộ hóa DeltaPayload (kể cả Sparse Diff) vào Zustand useGameStore
-import { useGameStore, type PlayerHudInfo, FloatingTextType } from '../store/game_store.js';
+import { useGameStore, type PlayerHudInfo, type PawnMoveTask, FloatingTextType } from '../store/game_store.js';
+import { calculatePathWaypoints } from '../3d/pawn_path.js';
 import { useLobbyStore } from '../store/lobby_store.js';
 import { useVfxStore } from '../store/vfx_store.js';
 import { BOARD_SIZE } from '../../domain/room.js';
@@ -11,6 +12,7 @@ import { formatCurrency } from '../ui/ui_helpers.js';
 import { AudioEngine } from '../audio/audio_engine.js';
 import { SoundEffect } from '../audio/audio_types.js';
 import { trackDeltaActivities } from './activity_tracker.js';
+import { handleDeltaTelemetry } from '../telemetry/telemetry_delta_hook.js';
 
 export function isGameRunningDelta(delta: DeltaPayload): boolean {
   if (delta.roomStarted !== undefined) {
@@ -50,17 +52,45 @@ export function applyDeltaToStore(
     const nextPositions = { ...state.playerPositions };
     let hasPositionChange = false;
 
+    const isBusy = Boolean(state.activePawnAnimation?.isAnimating) || (state.pawnAnimationQueue?.length ?? 0) > 0;
+
     for (const p of delta.players) {
       if (nextPositions[p.id] !== p.position) {
-        const fromCell = nextPositions[p.id];
+        const queueTasksForPlayer = (state.pawnAnimationQueue ?? []).filter((t) => t.playerId === p.id);
+        const lastQueuedTarget = queueTasksForPlayer.length > 0
+          ? queueTasksForPlayer[queueTasksForPlayer.length - 1]?.targetCell
+          : undefined;
+        const activeAnimTarget = (state.activePawnAnimation?.playerId === p.id && state.activePawnAnimation.waypoints.length > 0)
+          ? state.activePawnAnimation.waypoints[state.activePawnAnimation.waypoints.length - 1]
+          : undefined;
+        const visualPos = state.visualPositions?.[p.id];
+        const currentPos = nextPositions[p.id];
+        const fromCell: number = lastQueuedTarget !== undefined
+          ? lastQueuedTarget
+          : activeAnimTarget !== undefined
+          ? activeAnimTarget
+          : (isBusy && visualPos !== undefined)
+          ? visualPos
+          : (currentPos ?? 0);
         nextPositions[p.id] = p.position;
         hasPositionChange = true;
-        if (!isFullSync && state.startPawnMove && fromCell !== undefined && fromCell !== p.position) {
-          state.startPawnMove(p.id, p.position, fromCell);
-          try {
-            AudioEngine.playSfx(SoundEffect.PAWN_STEP);
-          } catch {
-            /* safe-ignore: audio uninitialized in unit test environment */
+        if (!isFullSync && fromCell !== p.position) {
+          const waypoints = calculatePathWaypoints(fromCell, p.position);
+          if (waypoints.length > 0) {
+            const task: PawnMoveTask = {
+              playerId: p.id,
+              fromCell,
+              targetCell: p.position,
+              waypoints,
+              isBot: Boolean(p.isBot),
+            };
+            if (state.isRolling && state.setPendingPawnMove && !p.isBot) {
+              state.setPendingPawnMove({ playerId: p.id, targetCell: p.position, fromCell });
+            } else if (state.enqueuePawnMove) {
+              state.enqueuePawnMove(task);
+            } else if (state.startPawnMove) {
+              state.startPawnMove(p.id, p.position, fromCell, Boolean(p.isBot));
+            }
           }
         }
       }
@@ -138,7 +168,12 @@ export function applyDeltaToStore(
       }
     }
 
-    if (hasPositionChange) state.setPlayerPositions(nextPositions);
+    if (hasPositionChange) {
+      state.setPlayerPositions(nextPositions);
+      if (isFullSync && state.setVisualPositions) {
+        state.setVisualPositions(nextPositions);
+      }
+    }
   }
 
   // 2. Cập nhật các ô biến động và gán quyền sở hữu, thế chấp vào playersInfoMap
@@ -307,6 +342,13 @@ export function applyDeltaToStore(
     trackDeltaActivities(delta, state, store.getState());
   } catch {
     /* safe-ignore: activity tracker failure should not break game store state sync */
+  }
+
+  // 9. Giám sát bất biến và ghi nhận Hộp Đen (Telemetry & Invariant Watchdog)
+  try {
+    handleDeltaTelemetry(delta, state, store.getState());
+  } catch {
+    /* safe-ignore: telemetry failure should not break game store state sync */
   }
 }
 

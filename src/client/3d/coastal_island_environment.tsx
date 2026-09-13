@@ -5,6 +5,7 @@ import type { Mesh, PlaneGeometry } from 'three';
 import { CoastalPatrolBoat } from './coastal_patrol_boat';
 import { CoastalSeagulls } from './coastal_seagulls';
 import { LayeredTropicalFoliage } from './layered_tropical_foliage';
+import { RollingEmeraldMountains, AirportLandmark, TrainStationLandmark } from './coastal_island_landmarks';
 import { useSafeFrame } from './safe_frame';
 
 export function CoastalIslandEnvironment(): React.ReactElement {
@@ -31,7 +32,7 @@ export function CoastalIslandEnvironment(): React.ReactElement {
           arr[k + 2] = w1 + w2 + w3;
         }
         pos.needsUpdate = true;
-        oceanGeomRef.current.computeVertexNormals();
+        // [PERF] computeVertexNormals() removed to eliminate 5-7ms CPU bottleneck
       }
     }
 
@@ -60,9 +61,9 @@ export function CoastalIslandEnvironment(): React.ReactElement {
         <meshStandardMaterial color="#0C4A6E" roughness={0.15} metalness={0.4} />
       </mesh>
 
-      {/* 1.1. Lưới sóng Gerstner vô cực PlaneGeometry(240, 240, 96, 96) */}
+      {/* 1.1. Lưới sóng Gerstner vô cực PlaneGeometry tối ưu từ args={[240, 240, 96, 96]} sang (240, 240, 24, 24) */}
       <mesh receiveShadow position={[0, -0.30, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry ref={oceanGeomRef} args={[240, 240, 96, 96]} />
+        <planeGeometry ref={oceanGeomRef} args={[240, 240, 24, 24]} />
         <meshStandardMaterial
           color="#0284C7"
           roughness={0.08}
@@ -173,60 +174,9 @@ export function CoastalIslandEnvironment(): React.ReactElement {
 
       {/* ========================================================
           4. RẶNG ĐỒI NÚI XANH MAJESTIC PHÍA BẮC & ĐÔNG (ROLLING EMERALD MOUNTAINS)
+          Hậu cảnh núi xanh hùng vĩ chuẩn Retropoly: #166534 (Núi chính), #15803D (Núi phụ), #22C55E (Đồi thoai thoải)
          ======================================================== */}
-      {/* Núi chính Đông Bắc 1 */}
-      <mesh castShadow receiveShadow position={[42, 8.5, -42]}>
-        <coneGeometry args={[26, 22, 32]} />
-        <meshStandardMaterial color="#166534" roughness={0.85} />
-      </mesh>
-      {/* Núi phụ Đông Bắc 2 */}
-      <mesh castShadow receiveShadow position={[54, 7.0, -22]}>
-        <coneGeometry args={[22, 18, 32]} />
-        <meshStandardMaterial color="#15803D" roughness={0.82} />
-      </mesh>
-      {/* Núi trung tâm phía Bắc */}
-      <mesh castShadow receiveShadow position={[-8, 9.5, -52]}>
-        <coneGeometry args={[30, 24, 32]} />
-        <meshStandardMaterial color="#14532D" roughness={0.88} />
-      </mesh>
-      {/* Núi Tây Bắc 1 */}
-      <mesh castShadow receiveShadow position={[-46, 8.0, -44]}>
-        <coneGeometry args={[26, 20, 32]} />
-        <meshStandardMaterial color="#166534" roughness={0.85} />
-      </mesh>
-      {/* Núi Tây Bắc 2 */}
-      <mesh castShadow receiveShadow position={[-48, 6.5, -18]}>
-        <coneGeometry args={[22, 17, 32]} />
-        <meshStandardMaterial color="#15803D" roughness={0.85} />
-      </mesh>
-      {/* Đồi xanh thoai thoải phía Đông Nam */}
-      <mesh castShadow receiveShadow position={[48, 4.5, 18]}>
-        <coneGeometry args={[18, 12, 32]} />
-        <meshStandardMaterial color="#22C55E" roughness={0.8} />
-      </mesh>
-
-      {/* 4.1. Vách đá xám sườn núi */}
-      {([
-        [-12, 3.5, -42, 0.3, 0.5],
-        [36, 3.0, -35, -0.2, 0.4],
-        [-38, 2.8, -25, 0.15, -0.3],
-      ] as const).map(([rx, ry, rz, rotX, rotY], idx) => (
-        <mesh key={`rock-${idx}`} position={[rx, ry, rz]} rotation={[rotX, rotY, 0.1]}>
-          <boxGeometry args={[4.5, 6.0, 2.5]} />
-          <meshStandardMaterial color="#64748B" roughness={0.9} />
-        </mesh>
-      ))}
-
-      {/* 4.2. Dải sương mù chân núi thấp */}
-      {([
-        [-20, 3.2, -32, 14, 1.5, 5],
-        [15, 3.6, -28, 16, 1.8, 6],
-      ] as const).map(([fx, fy, fz, sx, sy, sz], fIdx) => (
-        <mesh key={`fog-${fIdx}`} position={[fx, fy, fz]}>
-          <boxGeometry args={[sx, sy, sz]} />
-          <meshStandardMaterial color="#E0F2FE" roughness={1.0} transparent opacity={0.4} />
-        </mesh>
-      ))}
+      <RollingEmeraldMountains />
 
       {/* ========================================================
           5. CẢNG BIỂN & TÀU CONTAINER NGOÀI KHƠI (CARGO SHIPS & SEAPORT)
@@ -324,65 +274,11 @@ export function CoastalIslandEnvironment(): React.ReactElement {
         ))}
       </group>
 
-      {/* Tuyến đường ray xe lửa nối về núi phía Bắc */}
-      <group position={[14, -0.3, -18]} rotation={[0, -0.55, 0]}>
-        <mesh receiveShadow position={[0, 0.08, 0]}>
-          <boxGeometry args={[16, 0.12, 1.2]} />
-          <meshStandardMaterial color="#64748B" roughness={0.6} />
-        </mesh>
-        <mesh position={[0, 0.16, -0.25]}>
-          <boxGeometry args={[16, 0.04, 0.08]} />
-          <meshStandardMaterial color="#334155" metalness={0.8} />
-        </mesh>
-        <mesh position={[0, 0.16, 0.25]}>
-          <boxGeometry args={[16, 0.04, 0.08]} />
-          <meshStandardMaterial color="#334155" metalness={0.8} />
-        </mesh>
+      {/* Tuyến đường sắt và Nhà ga trung tâm mái vòm kính & Tàu cao tốc */}
+      <TrainStationLandmark />
 
-        {/* Cổng hầm đường sắt xuyên núi */}
-        <group position={[7.6, 0.5, 0]}>
-          <mesh position={[0, 0.35, 0]}>
-            <boxGeometry args={[1.6, 1.3, 1.8]} />
-            <meshStandardMaterial color="#475569" roughness={0.8} />
-          </mesh>
-          <mesh position={[-0.05, 0.28, 0]}>
-            <boxGeometry args={[1.52, 1.1, 1.1]} />
-            <meshStandardMaterial color="#0F172A" roughness={0.9} />
-          </mesh>
-          <mesh position={[0.4, 0.9, 0]}>
-            <coneGeometry args={[1.6, 0.9, 12]} />
-            <meshStandardMaterial color="#166534" roughness={0.85} />
-          </mesh>
-        </group>
-
-        {/* Đoàn tàu chở hàng mini 3 toa */}
-        <group position={[-1.2, 0.28, -0.25]}>
-          <mesh castShadow position={[1.6, 0.16, 0]}>
-            <boxGeometry args={[1.0, 0.3, 0.26]} />
-            <meshStandardMaterial color="#EA580C" roughness={0.3} metalness={0.5} />
-          </mesh>
-          <mesh position={[1.85, 0.36, 0]}>
-            <boxGeometry args={[0.35, 0.18, 0.24]} />
-            <meshStandardMaterial color="#F8FAFC" roughness={0.2} />
-          </mesh>
-          <mesh position={[1.3, 0.38, 0]}>
-            <cylinderGeometry args={[0.035, 0.035, 0.16, 6]} />
-            <meshStandardMaterial color="#334155" metalness={0.8} />
-          </mesh>
-          <mesh castShadow position={[0.3, 0.15, 0]}>
-            <boxGeometry args={[1.1, 0.26, 0.24]} />
-            <meshStandardMaterial color="#0284C7" roughness={0.4} />
-          </mesh>
-          <mesh castShadow position={[-0.9, 0.15, 0]}>
-            <boxGeometry args={[1.1, 0.26, 0.24]} />
-            <meshStandardMaterial color="#EAB308" roughness={0.4} />
-          </mesh>
-          <mesh castShadow position={[-2.1, 0.15, 0]}>
-            <boxGeometry args={[1.1, 0.26, 0.24]} />
-            <meshStandardMaterial color="#15803D" roughness={0.4} />
-          </mesh>
-        </group>
-      </group>
+      {/* Bán đảo Sân bay Quốc tế Tây Bắc & Máy bay đậu tại bãi */}
+      <AirportLandmark />
 
       {/* ========================================================
           7. MÂY TRẮNG XỐP BỒNG BỀNH VEN TRỜI & MÁY BAY DÂN DỤNG

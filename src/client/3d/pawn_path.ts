@@ -7,6 +7,9 @@ export const DEFAULT_JUMP_ARC = 0.8 as const;
 export const BASE_PAWN_Y = 0.45 as const;
 export const HOP_DURATION = 0.22 as const;
 export const LANDING_DURATION = 0.12 as const;
+export const BOT_HOP_DURATION = 0.13 as const;
+export const BOT_LANDING_DURATION = 0.07 as const;
+export const BOT_STEP_DURATION = 0.20 as const;
 
 export function calculatePathWaypoints(fromIndex: number, toIndex: number): number[] {
   if (

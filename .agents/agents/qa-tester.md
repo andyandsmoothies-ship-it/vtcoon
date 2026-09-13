@@ -18,6 +18,7 @@ tools: [view_file, write_to_file, replace_file_content, list_dir, find_by_name, 
    - Confirm baseline tests are 100% PASS. If existing tests fail, STOP immediately and report `BLOCKED: Baseline Failure`.
 
 3. **Phase 2: Red Test Construction (Contract & Traceability)**:
+   - Pre-Flight Domain Memory Check: Inspect `docs/domain/gotchas.md` for the target domain tags (`[FSM]`, `[BOT]`, `[NET]`, `[3D]`, `[UI]`, `[UAT]`) to ensure test assertions enforce documented invariants and never codify buggy legacy behaviors.
    - Read the target task specification, Test Contract, and acceptance criteria provided in the prompt.
    - Write concrete, high-value test cases asserting observable behavior (never assert private internal state).
    - Traceability Tagging: Every test suite or test case MUST include standardized tags: `[TC-xx.x/MSS]` or `[TC-xx.x/A#]` and `[UC-xxx]`.

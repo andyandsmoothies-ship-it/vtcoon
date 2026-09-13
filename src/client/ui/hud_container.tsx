@@ -7,6 +7,8 @@ import { ModalHost } from './modals/modal_host';
 import { SocialEmotesTray } from './social_emotes_tray';
 import { FloatingNumbersOverlay } from './floating_numbers';
 import { ActivityFeedSidebar } from './activity_feed_sidebar';
+import { TelemetryBadge } from './telemetry/telemetry_badge';
+import { TelemetryConsoleModal } from './telemetry/telemetry_console_modal';
 import type { PlayerIntent } from '../../server/intent_dispatcher';
 
 export interface HudContainerProps extends ActionDockProps {
@@ -38,6 +40,11 @@ export function HudContainer({
       {/* Tầng đỉnh: Top Bar thông tin vòng đấu, timer, kho bạc */}
       <TopBar onLeaveRoom={onLeaveRoom} />
 
+      {/* Huy hiệu Giám Sát Thời Gian Thực & Sức Khỏe Bất Biến (Top-Right) */}
+      <div className="absolute top-4 right-4 z-20 pointer-events-auto hidden sm:block">
+        <TelemetryBadge />
+      </div>
+
       {/* Tầng hiển thị số tiền bay (Floating Text / Numbers) */}
       <FloatingNumbersOverlay />
 
@@ -66,6 +73,9 @@ export function HudContainer({
 
       {/* Tầng Bảng Nhật Ký Hoạt Động Trượt Cạnh Phải (Z-30 Sideboard Drawer) */}
       <ActivityFeedSidebar />
+
+      {/* Tầng Bảng Điều Khiển Hộp Đen Giám Sát (Z-40 Modal) */}
+      <TelemetryConsoleModal />
     </div>
   );
 }

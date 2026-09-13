@@ -5,7 +5,8 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { useGameStore } from '../../src/client/store/game_store';
 import { applyDeltaToStore } from '../../src/client/network/apply_delta';
 import { ActionDock } from '../../src/client/ui/action_dock';
-import { calculatePathWaypoints } from '../../src/client/3d/pawn_path';
+import { calculatePathWaypoints, BOT_HOP_DURATION, BOT_LANDING_DURATION, BOT_STEP_DURATION } from '../../src/client/3d/pawn_path';
+import { resolveCameraMode } from '../../src/client/3d/camera_state_machine';
 import { SingleHopPawn, ActiveSpringPawn, PawnAnimator } from '../../src/client/3d/pawn_animator';
 import type { DeltaPayload } from '../../src/server/session_manager';
 import { createPlayer } from '../../src/domain/room';
@@ -92,24 +93,27 @@ describe('[TC-PAWN-LIFECYCLE/MSS] Pawn Animation Lifecycle & Clear Mechanism', (
     expect(useGameStore.getState().playerPositions['bot_2']).toBe(0);
   });
 
-  it('TC-PAWN-06: startPawnMove khoa hoat anh khi dang co quan co khac di chuyen va hoat dong ngay khi quan truoc hoan tat', () => {
+  it('TC-PAWN-06: startPawnMove khong drop hoat anh ma tu dong nap vao hang doi khi co quan co khac dang di chuyen', () => {
     // Bot 2 dang di chuyen tu 0 -> 5
     useGameStore.getState().startPawnMove('bot_2', 5, 0);
     expect(useGameStore.getState().activePawnAnimation?.playerId).toBe('bot_2');
 
-    // Bot 3 goi startPawnMove khi Bot 2 dang di chuyen -> bi khoa (animation lock)
+    // Bot 3 goi startPawnMove khi Bot 2 dang di chuyen -> khong bi drop ma duoc nap vao hang doi
     useGameStore.getState().startPawnMove('bot_3', 4, 0);
     expect(useGameStore.getState().activePawnAnimation?.playerId).toBe('bot_2');
+    expect(useGameStore.getState().pawnAnimationQueue.length).toBe(1);
+    expect(useGameStore.getState().pawnAnimationQueue[0]?.playerId).toBe('bot_3');
 
-    // Bot 2 hoan tat di chuyen
+    // Bot 2 hoan tat di chuyen -> Bot 3 tu dong duoc lay tu hang doi va bat dau hoat anh
     useGameStore.getState().completePawnMove('bot_2');
     expect(useGameStore.getState().playerPositions['bot_2']).toBe(5);
-    expect(useGameStore.getState().activePawnAnimation).toBeNull();
-
-    // Bot 3 bay gio bat dau di chuyen hop le
-    useGameStore.getState().startPawnMove('bot_3', 4, 0);
     expect(useGameStore.getState().activePawnAnimation?.playerId).toBe('bot_3');
     expect(useGameStore.getState().activePawnAnimation?.waypoints).toEqual([1, 2, 3, 4]);
+
+    // Bot 3 hoan tat di chuyen
+    useGameStore.getState().completePawnMove('bot_3');
+    expect(useGameStore.getState().playerPositions['bot_3']).toBe(4);
+    expect(useGameStore.getState().activePawnAnimation).toBeNull();
   });
 
   it('TC-PAWN-07: Delta Full Sync (dong bo toan phan) xoa sach hoat anh do dang', () => {
@@ -296,3 +300,165 @@ describe('[TC-BOT-MOVE-DELTA/MSS] Bot Turn Sync via applyDeltaToStore', () => {
     expect(useGameStore.getState().playerPositions['bot_2']).toBe(4);
   });
 });
+
+describe('[TC-PRESENTATION-QUEUE/MSS] Client Presentation Queue & Bot Turbo Pacing Verification', () => {
+  beforeEach(() => {
+    useGameStore.setState({
+      playerPositions: { p1: 0, bot_2: 0, bot_3: 0 },
+      visualPositions: { p1: 0, bot_2: 0, bot_3: 0 },
+      pawnAnimationQueue: [],
+      playersInfo: {
+        p1: { id: 'p1', name: 'Human P1', balance: 15000, tokenColor: '#38BDF8', ownedProperties: [] },
+        bot_2: { id: 'bot_2', name: 'Bot AI 2', balance: 15000, tokenColor: '#F59E0B', ownedProperties: [], isBot: true },
+        bot_3: { id: 'bot_3', name: 'Bot AI 3', balance: 15000, tokenColor: '#10B981', ownedProperties: [], isBot: true },
+      },
+      currentTurnPlayerId: 'p1',
+      isRolling: false,
+      hasRolledThisTurn: false,
+      activePawnAnimation: null,
+    });
+  });
+
+  it('TC-QUEUE-01: enqueuePawnMove hoat dong tuan tu giua cac quan co Bot va tranh teleport', () => {
+    // 1. Enqueue buoc di dau tien cua Bot 2 (0 -> 5)
+    useGameStore.getState().enqueuePawnMove({
+      playerId: 'bot_2',
+      fromCell: 0,
+      targetCell: 5,
+      waypoints: [1, 2, 3, 4, 5],
+      isBot: true,
+    });
+
+    expect(useGameStore.getState().activePawnAnimation?.playerId).toBe('bot_2');
+    expect(useGameStore.getState().pawnAnimationQueue.length).toBe(0);
+    expect(useGameStore.getState().visualPositions['bot_2']).toBe(0);
+
+    // 2. Enqueue buoc di tiep theo cua Bot 3 (0 -> 4) khi Bot 2 dang nhay
+    useGameStore.getState().enqueuePawnMove({
+      playerId: 'bot_3',
+      fromCell: 0,
+      targetCell: 4,
+      waypoints: [1, 2, 3, 4],
+      isBot: true,
+    });
+
+    // Bot 3 nam trong hang doi, khong cuop hoat anh cua Bot 2
+    expect(useGameStore.getState().activePawnAnimation?.playerId).toBe('bot_2');
+    expect(useGameStore.getState().pawnAnimationQueue.length).toBe(1);
+    expect(useGameStore.getState().visualPositions['bot_3']).toBe(0);
+
+    // 3. Bot 2 cham dat: completePawnMove cap nhat visualPositions[bot_2] = 5 va tu dong chay Bot 3
+    useGameStore.getState().completePawnMove('bot_2');
+    expect(useGameStore.getState().visualPositions['bot_2']).toBe(5);
+    expect(useGameStore.getState().activePawnAnimation?.playerId).toBe('bot_3');
+    expect(useGameStore.getState().pawnAnimationQueue.length).toBe(0);
+
+    // 4. Bot 3 cham dat: completePawnMove cap nhat visualPositions[bot_3] = 4 va giai phong hoat anh
+    useGameStore.getState().completePawnMove('bot_3');
+    expect(useGameStore.getState().visualPositions['bot_3']).toBe(4);
+    expect(useGameStore.getState().activePawnAnimation).toBeNull();
+  });
+
+  it('TC-QUEUE-02: ActionDock disabled khi pawnAnimationQueue con task cho du activePawnAnimation tam thoi null', () => {
+    // Nạp task vào hàng đợi nhưng không kích hoạt ngay
+    useGameStore.setState({
+      pawnAnimationQueue: [{
+        playerId: 'bot_2',
+        fromCell: 0,
+        targetCell: 3,
+        waypoints: [1, 2, 3],
+        isBot: true,
+      }],
+      activePawnAnimation: null,
+    });
+
+    const markup = renderToStaticMarkup(React.createElement(ActionDock, { localPlayerId: 'p1' }));
+    expect(markup).toContain('disabled');
+    expect(markup).toContain('Đang Đi...');
+  });
+
+  it('TC-QUEUE-03: completePawnMove chuyen tiep hoat anh ke tiep ma khong lam mat state trong queue', () => {
+    useGameStore.getState().enqueuePawnMove({
+      playerId: 'bot_2',
+      fromCell: 0,
+      targetCell: 3,
+      waypoints: [1, 2, 3],
+      isBot: true,
+    });
+    useGameStore.getState().enqueuePawnMove({
+      playerId: 'bot_3',
+      fromCell: 0,
+      targetCell: 2,
+      waypoints: [1, 2],
+      isBot: true,
+    });
+
+    expect(useGameStore.getState().activePawnAnimation?.playerId).toBe('bot_2');
+    expect(useGameStore.getState().pawnAnimationQueue.length).toBe(1);
+
+    // Bot 2 hoan tat -> Bot 3 tu dong duoc kich hoat
+    useGameStore.getState().completePawnMove('bot_2');
+    expect(useGameStore.getState().visualPositions['bot_2']).toBe(3);
+    expect(useGameStore.getState().activePawnAnimation?.playerId).toBe('bot_3');
+    expect(useGameStore.getState().activePawnAnimation?.waypoints).toEqual([1, 2]);
+    expect(useGameStore.getState().pawnAnimationQueue.length).toBe(0);
+
+    // Bot 3 hoan tat -> khong con task nao trong queue
+    useGameStore.getState().completePawnMove('bot_3');
+    expect(useGameStore.getState().visualPositions['bot_3']).toBe(2);
+    expect(useGameStore.getState().activePawnAnimation).toBeNull();
+  });
+
+  it('TC-QUEUE-04: Nhan lien tiep 2 delta di chuyen cho cung mot bot noi chuoi tu diem den truoc do', () => {
+    // Delta 1: Bot 2 di tu 0 -> 5
+    const delta1: DeltaPayload = {
+      tick: 1,
+      cells: [],
+      players: [{ id: 'bot_2', position: 5, balance: 15000, isBot: true }],
+    };
+    applyDeltaToStore(delta1, useGameStore);
+    expect(useGameStore.getState().activePawnAnimation?.playerId).toBe('bot_2');
+    expect(useGameStore.getState().activePawnAnimation?.fromCell).toBe(0);
+    expect(useGameStore.getState().activePawnAnimation?.waypoints).toEqual([1, 2, 3, 4, 5]);
+
+    // Delta 2 den ngay sau do (khi hoat anh delta 1 dang chay): Bot 2 di tiep den 8
+    const delta2: DeltaPayload = {
+      tick: 2,
+      cells: [],
+      players: [{ id: 'bot_2', position: 8, balance: 15000, isBot: true }],
+    };
+    applyDeltaToStore(delta2, useGameStore);
+
+    // Task 2 duoc dua vao queue voi fromCell = 5 (chu khong phai 0)
+    expect(useGameStore.getState().pawnAnimationQueue.length).toBe(1);
+    const queuedTask = useGameStore.getState().pawnAnimationQueue[0];
+    expect(queuedTask?.playerId).toBe('bot_2');
+    expect(queuedTask?.fromCell).toBe(5);
+    expect(queuedTask?.targetCell).toBe(8);
+    expect(queuedTask?.waypoints).toEqual([6, 7, 8]);
+  });
+
+  it('TC-TURBO-01: Toc do buoc nhay Turbo cho Bot dat 0.20s/step', () => {
+    expect(BOT_STEP_DURATION).toBe(0.20);
+    expect(Number((BOT_HOP_DURATION + BOT_LANDING_DURATION).toFixed(2))).toBe(0.20);
+  });
+
+  it('TC-CAM-01: resolveCameraMode tra ve overview khi isBotTurn = true ke ca khi isRolling = true', () => {
+    const botRollMode = resolveCameraMode({
+      isRolling: true,
+      isPawnAnimating: false,
+      activeModal: null,
+      isBotTurn: true,
+    });
+    expect(botRollMode).toBe('overview');
+
+    const humanRollMode = resolveCameraMode({
+      isRolling: true,
+      isPawnAnimating: false,
+      activeModal: null,
+      isBotTurn: false,
+    });
+    expect(humanRollMode).toBe('dice_roll');
+  });
+});
+

@@ -6,6 +6,7 @@ import type { ReconnectManager } from './reconnect_manager.js';
 import type { RateLimiter, RateLimiterOptions } from '../security/rate_limiter.js';
 import type { EnvelopeValidator } from '../security/envelope_validator.js';
 import type { IntentGuard } from '../security/intent_guard.js';
+import type { AdminManager } from './admin_manager.js';
 
 export interface WssServerConfig {
   readonly port: number;
@@ -16,9 +17,12 @@ export interface WssServerConfig {
   readonly rateLimiter?: RateLimiter;
   readonly envelopeValidator?: EnvelopeValidator;
   readonly intentGuard?: IntentGuard;
+  readonly adminManager?: AdminManager;
+  readonly adminSecret?: string;
   readonly rateLimiterOptions?: RateLimiterOptions;
   readonly gracePeriodMs?: number;
   readonly abandonedTimeoutMs?: number;
   readonly cleanupIntervalMs?: number;
   readonly turnTimeoutMs?: number;
+  readonly botTurnDelayMs?: number;
 }

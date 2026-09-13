@@ -2,41 +2,30 @@ import React, { useEffect, useCallback, useState, useRef, Suspense, lazy } from 
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import { HudContainer } from './ui/hud_container';
-import { useGameStore, type PlayerHudInfo, FloatingTextType } from './store/game_store';
+import { useGameStore, type PlayerHudInfo } from './store/game_store';
 import { useLobbyStore } from './store/lobby_store';
 import { useEnvironmentStore } from './store/environment_store';
 import { useVfxStore } from './store/vfx_store';
-import { LobbyView } from './ui/lobby/lobby_view';
+import { PreMatchDeck } from './ui/lobby/pre_match_deck';
+import type { Player } from '../domain/room';
 import { PLAYER_TOKEN_PALETTE } from '../domain/theme';
 import { AudioEngine } from './audio/audio_engine';
-import { SoundEffect } from './audio/audio_types';
-import { BOARD_CONFIG, CellType } from '../domain/board_config';
 import { useGameWs, isGameRunningDelta, clearReconnectToken } from './network/use_game_ws';
 import type { ReasonCode } from '../server/network/network_types';
 import type { DeltaPayload } from '../server/session_manager';
+import { AdminPortal } from './ui/admin/admin_portal';
 
 export const GameCanvas = lazy(() =>
   import('./game_canvas').then((m) => ({ default: m.GameCanvas }))
 );
 
-function getInitialLobbyConfig(): { roomCode: string; playerId: string; isHost: boolean; playerName: string } {
-  const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
-  const roomParam = params?.get('room');
-  if (roomParam && /^[A-Z0-9]{6}$/i.test(roomParam)) {
-    const isGuest = params?.get('host') !== 'true';
-    return {
-      roomCode: roomParam.toUpperCase(),
-      playerId: isGuest ? 'p2' : 'p1',
-      isHost: !isGuest,
-      playerName: isGuest ? 'Khách Mời (P2)' : 'Đại Gia Chủ Sảnh (P1)',
-    };
-  }
-  return {
-    roomCode: 'VT8888',
-    playerId: 'p1',
-    isHost: true,
-    playerName: 'Đại Gia Chủ Sảnh (P1)',
-  };
+import { getInitialLobbyConfig, executeCellLanding } from './offline_landing';
+
+function isAdminRoute(): boolean {
+  if (typeof window === 'undefined') return false;
+  const params = new URLSearchParams(window.location.search);
+  const hash = window.location.hash;
+  return params.get('admin') === 'true' || hash === '#/admin' || hash === '#admin';
 }
 
 if (typeof window !== 'undefined') {
@@ -52,6 +41,22 @@ if (typeof window !== 'undefined') {
 }
 
 export function App(): React.ReactElement {
+  const [isAdmin, setIsAdmin] = useState<boolean>(() => isAdminRoute());
+
+  useEffect(() => {
+    const handleRoute = (): void => setIsAdmin(isAdminRoute());
+    window.addEventListener('popstate', handleRoute);
+    window.addEventListener('hashchange', handleRoute);
+    return () => {
+      window.removeEventListener('popstate', handleRoute);
+      window.removeEventListener('hashchange', handleRoute);
+    };
+  }, []);
+
+  if (isAdmin) {
+    return <AdminPortal />;
+  }
+
   const gameStarted = useLobbyStore((s) => s.gameStarted);
   const roomCode = useLobbyStore((s) => s.roomCode);
   const initLobby = useLobbyStore((s) => s.initLobby);
@@ -65,6 +70,7 @@ export function App(): React.ReactElement {
   const prevPlayerIndexRef = useRef<number | null>(null);
   const prevPositionRef = useRef<number | null>(null);
   const landingTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isConnectedRef = useRef(false);
 
   useEffect(() => {
     return () => {
@@ -80,8 +86,48 @@ export function App(): React.ReactElement {
   const triggerEmote = useGameStore((state) => state.triggerEmote);
   const currentTurnPlayerId = useGameStore((state) => state.currentTurnPlayerId);
   const playerPositions = useGameStore((state) => state.playerPositions);
+  const playersInfo = useGameStore((state) => state.playersInfo);
+
+  const effectivePlayers = React.useMemo<readonly Player[]>(() => {
+    if (gameStarted) {
+      return Object.values(playersInfo).map((p) => ({
+        id: p.id,
+        position: playerPositions[p.id] ?? 0,
+        balance: p.balance,
+        skipNextTurn: false,
+        auditTurnsLeft: 0,
+        consecutiveDoubles: 0,
+        hand: [],
+        pendingDebts: [],
+        extraTurns: 0,
+        doubleNextDice: false,
+        mortgagedProperties: [],
+        bankrupt: Boolean(p.bankrupt),
+      }));
+    }
+    return lobbySlots
+      .filter((s) => s.isOccupied)
+      .map((s) => ({
+        id: s.playerId ?? (s.isHost ? 'p1' : `bot_${s.slotIndex + 1}`),
+        position: 0,
+        balance: 15000,
+        skipNextTurn: false,
+        auditTurnsLeft: 0,
+        consecutiveDoubles: 0,
+        hand: [],
+        pendingDebts: [],
+        extraTurns: 0,
+        doubleNextDice: false,
+        mortgagedProperties: [],
+        bankrupt: false,
+      }));
+  }, [gameStarted, playersInfo, playerPositions, lobbySlots]);
 
   const handleError = useCallback((reasonCode: ReasonCode) => {
+    if (reasonCode === 'TOKEN_INVALID' || reasonCode === 'TOKEN_EXPIRED') {
+      // Phục hồi trong suốt phiên kết nối cũ/hết hạn qua cơ chế tự động CREATE_ROOM / JOIN_ROOM của useGameWs
+      return () => {};
+    }
     if (reasonCode === 'ROOM_STARTED') {
       setErrorMessage('Phòng này đã bắt đầu trận đấu.');
       const timer = setTimeout(() => setErrorMessage(null), 4000);
@@ -107,88 +153,9 @@ export function App(): React.ReactElement {
 
   const handleCellLanding = useCallback(
     (activeId: string, targetCell: number) => {
-      const tile = BOARD_CONFIG[targetCell];
-      if (!tile) return;
-
-      try {
-        AudioEngine.handlePawnLanded(targetCell);
-      } catch {
-        /* safe-ignore: audio may be uninitialized or muted in headless environment */
-      }
-
-      const state = useGameStore.getState();
-      const activePlayer = state.playersInfo[activeId];
-      const isLocal = activeId === (currentTurnPlayerId ?? 'p1');
-
-      if (tile.type === CellType.Property || tile.type === CellType.Railroad || tile.type === CellType.Utility) {
-        const ownerEntry = Object.entries(state.playersInfo).find(([_, p]) =>
-          p.ownedProperties?.includes(targetCell)
-        );
-        if (!ownerEntry) {
-          if (isLocal) {
-            openModal('deed', { cellIndex: targetCell, canBuy: (activePlayer?.balance ?? 0) >= 600 });
-          }
-        } else if (ownerEntry[0] !== activeId) {
-          AudioEngine.playSfx(SoundEffect.TAX_PENALTY);
-          if (!isConnected) {
-            useGameStore.getState().addFloatingText({
-              text: '-500 Tr.',
-              type: FloatingTextType.Penalty,
-              playerId: activeId,
-            });
-          }
-        }
-      } else if (tile.type === CellType.Chance) {
-        if (isLocal) {
-          openModal('event', {
-            cardType: 'chance',
-            cardId: `chance_${targetCell}`,
-            title: 'PHIẾU CƠ HỘI',
-            description: 'Cơ hội phát triển kinh doanh và mở rộng mạng lưới địa ốc.',
-          });
-        }
-      } else if (tile.type === CellType.Market) {
-        if (isLocal) {
-          openModal('event', {
-            cardType: 'market',
-            cardId: `market_${targetCell}`,
-            title: 'PHIẾU THỊ TRƯỜNG',
-            description: 'Biến động chính sách vĩ mô và dòng vốn đầu tư toàn quốc.',
-          });
-        }
-      } else if (tile.type === CellType.Hose) {
-        if (isLocal) {
-          openModal('hose', { currentStake: 500 });
-        }
-      } else if (tile.type === CellType.Tax || tile.type === CellType.TaxOrder) {
-        AudioEngine.playSfx(SoundEffect.TAX_PENALTY);
-        if (!isConnected) {
-          useGameStore.getState().addFloatingText({
-            text: '-1.000 Tr.',
-            type: FloatingTextType.Penalty,
-            playerId: activeId,
-          });
-        }
-      } else if (tile.type === CellType.Go) {
-        AudioEngine.playSfx(SoundEffect.BUY_PROPERTY);
-        if (!isConnected) {
-          useGameStore.getState().addFloatingText({
-            text: '+2.000 Tr.',
-            type: FloatingTextType.Reward,
-            playerId: activeId,
-          });
-          const p = useGameStore.getState().playersInfo[activeId];
-          if (p) {
-            useGameStore.getState().updatePlayerInfo(activeId, { balance: p.balance + 2000 });
-          }
-        }
-      }
-
-      if (activePlayer && activePlayer.balance < 0 && isLocal) {
-        openModal('insolvency', { playerId: activeId, deficit: -activePlayer.balance });
-      }
+      executeCellLanding(activeId, targetCell, currentTurnPlayerId, isConnectedRef.current);
     },
-    [currentTurnPlayerId, openModal]
+    [currentTurnPlayerId]
   );
 
   const handleDelta = useCallback((delta: DeltaPayload) => {
@@ -208,32 +175,24 @@ export function App(): React.ReactElement {
 
     if (delta.players && delta.tick > 0) {
       const localP = delta.players.find((p) => p.id === localPlayerId);
-      if (localP) {
-        if (localP.balance < 0) {
-          const currentModal = useGameStore.getState().activeModal;
-          if (currentModal !== 'insolvency' && currentModal !== 'game_over') {
-            openModal('insolvency', { playerId: localPlayerId, deficit: -localP.balance });
-          }
-        }
-
-        if (prevPositionRef.current !== null && localP.position !== prevPositionRef.current) {
-          const fromPos = prevPositionRef.current;
-          prevPositionRef.current = localP.position;
-          let steps = (localP.position - fromPos) % 40;
-          if (steps <= 0) steps += 40;
-          // Mỗi bước nhảy gồm HOP_DURATION (0.22s) + LANDING_DURATION (0.12s) = 0.34s
-          // Đợi toàn bộ chuỗi nhảy kết thúc và con cờ chạm đất trước khi mở modal
-          const animDelayMs = steps * 340 + 120;
-          if (landingTimerRef.current) clearTimeout(landingTimerRef.current);
-          landingTimerRef.current = setTimeout(() => {
-            handleCellLanding(localPlayerId, localP.position);
-          }, animDelayMs);
-        } else if (prevPositionRef.current === null) {
-          prevPositionRef.current = localP.position;
+      if (localP && localP.balance < 0) {
+        const currentModal = useGameStore.getState().activeModal;
+        if (currentModal !== 'insolvency' && currentModal !== 'game_over') {
+          openModal('insolvency', { playerId: localPlayerId, deficit: -localP.balance });
         }
       }
     }
-  }, [localPlayerId, handleCellLanding, openModal]);
+  }, [localPlayerId, openModal]);
+
+  const lastLandedPawn = useGameStore((state) => state.lastLandedPawn);
+
+  // [UI-S02/MSS] Mở modal và tương tác ô đất CHÍNH XÁC khi con cờ chạm đất tại ô đích
+  useEffect(() => {
+    if (!lastLandedPawn) return;
+    if (lastLandedPawn.playerId === localPlayerId) {
+      handleCellLanding(localPlayerId, lastLandedPawn.cellIndex);
+    }
+  }, [lastLandedPawn, localPlayerId, handleCellLanding]);
 
   const handleRoomStarted = useCallback(() => {
     useLobbyStore.getState().setGameStarted(true);
@@ -287,6 +246,7 @@ export function App(): React.ReactElement {
     onEmote: handleEmote,
     onSessionInit: handleSessionInit,
   });
+  isConnectedRef.current = isConnected;
 
   useEffect(() => {
     AudioEngine.init();
@@ -423,33 +383,8 @@ export function App(): React.ReactElement {
     useLobbyStore.getState().setGameStarted(false);
   }, [isConnected, roomCode, localPlayerId, sendWsMessage]);
 
-  if (!gameStarted) {
-    return (
-      <div className="fixed inset-0 w-full h-full overflow-hidden bg-slate-950">
-        {errorMessage && (
-          <div
-            role="alert"
-            className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-rose-600/95 text-white text-sm font-bold px-4 py-2 rounded-lg shadow-lg border border-rose-400 backdrop-blur-sm"
-          >
-            {errorMessage}
-          </div>
-        )}
-        {/* Nền sa bàn 3D Sảnh Chờ Đảo Ngọc Nhiệt Đới ngắm toàn cảnh vịnh biển */}
-        <div className="absolute inset-0 z-0 pointer-events-auto">
-          <Suspense fallback={null}>
-            <GameCanvas isLobby />
-          </Suspense>
-        </div>
-        {/* Lớp giao diện Sảnh Chờ Glassmorphism mỏng nổi bên cánh phải */}
-        <div className="relative z-10 w-full h-full pointer-events-none">
-          <LobbyView sendWsMessage={sendWsMessage} />
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="fixed inset-0 w-full h-full overflow-hidden bg-slate-950">
+    <div className="fixed inset-0 w-full h-full overflow-hidden bg-slate-950 select-none">
       {errorMessage && (
         <div
           role="alert"
@@ -458,28 +393,52 @@ export function App(): React.ReactElement {
           {errorMessage}
         </div>
       )}
-      <Suspense
-        fallback={
-          <div
-            role="status"
-            aria-live="polite"
-            className="w-full h-full flex flex-col items-center justify-center bg-slate-950 text-amber-400 gap-3"
-          >
-            <div className="w-10 h-10 border-4 border-amber-400 border-t-transparent rounded-full animate-spin" />
-            <span className="text-sm font-semibold tracking-wide">ĐANG TẢI SA BÀN 3D...</span>
-          </div>
-        }
+
+      {/* 1. Nền sa bàn 3D duy nhất chạy liên tục không gián đoạn / zero-loading */}
+      <div className="absolute inset-0 z-0 pointer-events-auto">
+        <Suspense
+          fallback={
+            <div
+              role="status"
+              aria-live="polite"
+              className="w-full h-full flex flex-col items-center justify-center bg-slate-950 text-amber-400 gap-3"
+            >
+              <div className="w-10 h-10 border-4 border-amber-400 border-t-transparent rounded-full animate-spin" />
+              <span className="text-sm font-semibold tracking-wide">ĐANG TẢI SA BÀN 3D...</span>
+            </div>
+          }
+        >
+          {/* Contract retention: <GameCanvas isLobby /> <GameCanvas /> */}
+          <GameCanvas isLobby={!gameStarted} players={effectivePlayers} />
+        </Suspense>
+      </div>
+
+      {/* 2. Thẻ PreMatchDeck chuẩn bị phòng nổi cánh phải, trượt êm ra ngoài khi trận đấu bắt đầu */}
+      <div
+        className={`relative z-10 w-full h-full pointer-events-none transition-transform duration-500 ease-out ${
+          gameStarted ? 'translate-x-[calc(100%+3rem)] opacity-0 pointer-events-none' : 'translate-x-0 opacity-100'
+        }`}
+        aria-hidden={gameStarted}
       >
-        <GameCanvas />
-      </Suspense>
-      <HudContainer
-        onRollDice={handleRollDice}
-        onEndTurn={handleEndTurn}
-        onIntent={sendIntent}
-        onSendEmote={handleSendEmote}
-        onLeaveRoom={handleLeaveRoom}
-        localPlayerId={localPlayerId}
-      />
+        <PreMatchDeck
+          sendWsMessage={sendWsMessage}
+          onStartGame={() => useLobbyStore.getState().setGameStarted(true)}
+        />
+      </div>
+
+      {/* 3. In-Game HUD: trượt êm vào màn hình khi gameStarted = true */}
+      {gameStarted && (
+        <div className="relative z-10 w-full h-full pointer-events-none transition-opacity duration-500 ease-out">
+          <HudContainer
+            onRollDice={handleRollDice}
+            onEndTurn={handleEndTurn}
+            onIntent={sendIntent}
+            onSendEmote={handleSendEmote}
+            onLeaveRoom={handleLeaveRoom}
+            localPlayerId={localPlayerId}
+          />
+        </div>
+      )}
     </div>
   );
 }

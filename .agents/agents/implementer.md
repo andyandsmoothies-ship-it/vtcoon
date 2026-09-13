@@ -8,6 +8,7 @@ tools: [view_file, write_to_file, replace_file_content, list_dir, find_by_name, 
 ---
 # IMPLEMENTER PROTOCOL
 
+0. **Pre-Flight Domain Memory Check**: Before modifying or proposing code in any domain (`[FSM]`, `[3D]`, `[UI]`, `[NET]`, `[BOT]`, `[UAT]`), MUST inspect `docs/domain/gotchas.md` for matching domain entries. Adhere strictly to all documented Hard Invariants.
 1. **Workspace Isolation**: ALWAYS execute within `Workspace: "branch"` (isolated Git worktree). Never mutate the main workspace directly.
 2. **Atomic Multi-file Edits**: Before editing multiple files, verify target chunk match count. If a failure occurs, halt immediately to avoid leaving partial or dirty changes.
 3. **Slice Scope Confinement**: Implement ONLY the flows authorized in the current ticket (e.g., Slice 1 implements Main Success Scenario only). FORBIDDEN from writing logic or UI elements for future alternative flows belonging to subsequent slices.
@@ -24,7 +25,8 @@ tools: [view_file, write_to_file, replace_file_content, list_dir, find_by_name, 
    - For alternative flows that end with `Use case ends`, write test assertions to verify Failure Postconditions (clean rollback, zero dangling state).
    - Never benchmark NFRs on empty datasets. Create realistic seed datasets to verify zero N+1 queries and turn timeout enforcement.
 7. **Context Offloading & Visual Evidence**: Run test suites and linters via local scripts; report only concise high-density summaries into chat context. Mọi ảnh chụp màn hình minh chứng giao diện (UAT/Visual Verification) BẮT BUỘC lưu định dạng `.jpg` (JPEG Quality 85–92, dung lượng < 1MB theo chuẩn IMP-19), tuyệt đối cấm xuất `.png` toàn cảnh.
-8. **Report Template**:
+8. **Autonomous Reflexion & Self-Correction**: Whenever an error, bug, test failure, or flawed practice is detected during analysis or execution, autonomously diagnose root causes and self-correct until all quality gates pass. Do not stop halfway. Record any newly resolved edge-case trap or hard invariant into `docs/domain/gotchas.md` with domain tag and ticket traceability.
+9. **Report Template**:
 ```markdown
 ### 🚀 TICKET IMPLEMENTATION RESULT: [TICKET_ID]
 | Target File | Action | LOC Added | Cyclomatic | Status |
@@ -33,8 +35,10 @@ tools: [view_file, write_to_file, replace_file_content, list_dir, find_by_name, 
 | `[tests/unit/turn_fsm.test.ts#L1-L30]` | NEW | +30 lines | 2 | 4 tests pass |
 
 ### 🧪 TEST & VERIFICATION EVIDENCE
+- **Pre-Flight Domain Check**: Verified against `docs/domain/gotchas.md` (Domain tags: `[NET]`, `[BOT]`).
 - **Atomic Edit**: All target files updated cleanly in 1 pass.
 - **Architecture Boundary**: Verified (Domain logic does not import UI or database drivers).
 - **Visual UI/UX Compliance**: Conforms to `docs/domain/design.md` tokens.
 - **Adversarial Inversion**: PASS (Deliberate fault flips test to RED).
+- **Reflexion Invariant Extracted**: Gotcha #[ID] recorded in `docs/domain/gotchas.md`.
 ```

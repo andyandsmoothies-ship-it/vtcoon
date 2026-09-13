@@ -10,15 +10,15 @@ NGÀY THỰC HIỆN: 11/09/2026 | SEED: 8820263 | TỔNG SỐ ẢNH CHỤP: 80 �
 - **Tổng số lượt đi (Turns):** 80 lượt.
 - **Tổng số ảnh chụp màn hình sau mỗi lượt:** 80 ảnh JPEG chất lượng cao.
 - **Thư mục lưu ảnh:** `docs/reports/uat/screenshots/case_3p/`.
-- **Nhà Vô Địch:** **Cô Tư (Thận trọng)** (Tài sản ròng: **20.306 Tr. VNĐ**).
+- **Nhà Vô Địch:** **Cô Tư (Thận trọng)** (Tài sản ròng: **24.306 Tr. VNĐ**).
 
 ### Bảng Xếp Hạng (Leaderboard)
 
 | Hạng | Người chơi | Tính cách | Tiền mặt còn lại | Tài sản ròng (Net Worth) | Số BĐS | Trạng thái |
 | :---: | :--- | :--- | :---: | :---: | :---: | :---: |
-| 1 | Cô Tư (Thận trọng) | Passive | 20.306 Tr. VNĐ | 20.306 Tr. VNĐ | 0 ô | 🏆 Vô địch |
-| 2 | Bác Ba (Thực dụng) | Aggressive | 1.035 Tr. VNĐ | 16.285 Tr. VNĐ | 9 ô | ✓ Hoàn thành |
-| 3 | Chú Sáu (Cân bằng) | Balanced | 2.105 Tr. VNĐ | 15.905 Tr. VNĐ | 12 ô | ✓ Hoàn thành |
+| 1 | Cô Tư (Thận trọng) | Passive | 24.306 Tr. VNĐ | 24.306 Tr. VNĐ | 0 ô | 🏆 Vô địch |
+| 2 | Bác Ba (Thực dụng) | Aggressive | 208 Tr. VNĐ | 14.658 Tr. VNĐ | 10 ô | ✓ Hoàn thành |
+| 3 | Chú Sáu (Cân bằng) | Balanced | -760 Tr. VNĐ | -760 Tr. VNĐ | 0 ô | ❌ Phá sản |
 
 ---
 
@@ -69,7 +69,7 @@ NGÀY THỰC HIỆN: 11/09/2026 | SEED: 8820263 | TỔNG SỐ ẢNH CHỤP: 80 �
 #### Lượt #7 | Vòng #3 — Bác Ba (Thực dụng) (Aggressive)
 - **Xúc xắc:** [1, 4] (Tổng: 5)
 - **Di chuyển:** Ô 20 ➔ Ô 25 (**Tuyến Cao Tốc Bắc - Nam**)
-- **Tài chính sau lượt:** Tiền mặt: 10.650 Tr. VNĐ | Tài sản ròng: 13.850 Tr. VNĐ
+- **Tài chính sau lượt:** Tiền mặt: 10.950 Tr. VNĐ | Tài sản ròng: 14.150 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_007.jpg)
 
 #### Lượt #8 | Vòng #3 — Chú Sáu (Cân bằng) (Balanced)
@@ -89,7 +89,7 @@ NGÀY THỰC HIỆN: 11/09/2026 | SEED: 8820263 | TỔNG SỐ ẢNH CHỤP: 80 �
 #### Lượt #10 | Vòng #4 — Bác Ba (Thực dụng) (Aggressive)
 - **Xúc xắc:** [5, 4] (Tổng: 9)
 - **Di chuyển:** Ô 25 ➔ Ô 2 (**Phiếu Thị Trường**)
-- **Tài chính sau lượt:** Tiền mặt: 13.150 Tr. VNĐ | Tài sản ròng: 16.350 Tr. VNĐ
+- **Tài chính sau lượt:** Tiền mặt: 12.950 Tr. VNĐ | Tài sản ròng: 16.150 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_010.jpg)
 
 #### Lượt #11 | Vòng #4 — Chú Sáu (Cân bằng) (Balanced)
@@ -135,7 +135,7 @@ NGÀY THỰC HIỆN: 11/09/2026 | SEED: 8820263 | TỔNG SỐ ẢNH CHỤP: 80 �
 #### Lượt #17 | Vòng #6 — Chú Sáu (Cân bằng) (Balanced)
 - **Xúc xắc:** [1, 3] (Tổng: 4)
 - **Di chuyển:** Ô 28 ➔ Ô 32 (**Hà Nội (Cầu Giấy)**)
-- **Tài chính sau lượt:** Tiền mặt: 2.610 Tr. VNĐ | Tài sản ròng: 13.110 Tr. VNĐ
+- **Tài chính sau lượt:** Tiền mặt: 2.410 Tr. VNĐ | Tài sản ròng: 12.910 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_017.jpg)
 
 #### Lượt #18 | Vòng #6 — Cô Tư (Thận trọng) (Passive)
@@ -155,7 +155,7 @@ NGÀY THỰC HIỆN: 11/09/2026 | SEED: 8820263 | TỔNG SỐ ẢNH CHỤP: 80 �
 #### Lượt #20 | Vòng #7 — Chú Sáu (Cân bằng) (Balanced)
 - **Xúc xắc:** [3, 4] (Tổng: 7)
 - **Di chuyển:** Ô 32 ➔ Ô 39 (**TP.HCM (Quận 1 - Nguyễn Huệ)**)
-- **Tài chính sau lượt:** Tiền mặt: 2.610 Tr. VNĐ | Tài sản ròng: 13.110 Tr. VNĐ
+- **Tài chính sau lượt:** Tiền mặt: 2.410 Tr. VNĐ | Tài sản ròng: 12.910 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_020.jpg)
 
 #### Lượt #21 | Vòng #7 — Cô Tư (Thận trọng) (Passive)
@@ -175,7 +175,7 @@ NGÀY THỰC HIỆN: 11/09/2026 | SEED: 8820263 | TỔNG SỐ ẢNH CHỤP: 80 �
 #### Lượt #23 | Vòng #8 — Chú Sáu (Cân bằng) (Balanced)
 - **Xúc xắc:** [4, 3] (Tổng: 7)
 - **Di chuyển:** Ô 39 ➔ Ô 6 (**Bình Dương (Tổ Hợp Thể Thao & Golf)**)
-- **Tài chính sau lượt:** Tiền mặt: 2.710 Tr. VNĐ | Tài sản ròng: 14.210 Tr. VNĐ
+- **Tài chính sau lượt:** Tiền mặt: 2.510 Tr. VNĐ | Tài sản ròng: 14.010 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_023.jpg)
 
 #### Lượt #24 | Vòng #8 — Cô Tư (Thận trọng) (Passive)
@@ -195,7 +195,7 @@ NGÀY THỰC HIỆN: 11/09/2026 | SEED: 8820263 | TỔNG SỐ ẢNH CHỤP: 80 �
 #### Lượt #26 | Vòng #9 — Chú Sáu (Cân bằng) (Balanced)
 - **Xúc xắc:** [1, 3] (Tổng: 4)
 - **Di chuyển:** Ô 6 ➔ Ô 10 (**Trạm Kiểm Toán & Thanh Tra**)
-- **Tài chính sau lượt:** Tiền mặt: 2.080 Tr. VNĐ | Tài sản ròng: 15.180 Tr. VNĐ
+- **Tài chính sau lượt:** Tiền mặt: 1.880 Tr. VNĐ | Tài sản ròng: 14.980 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_026.jpg)
 
 #### Lượt #27 | Vòng #9 — Cô Tư (Thận trọng) (Passive)
@@ -215,7 +215,7 @@ NGÀY THỰC HIỆN: 11/09/2026 | SEED: 8820263 | TỔNG SỐ ẢNH CHỤP: 80 �
 #### Lượt #29 | Vòng #10 — Chú Sáu (Cân bằng) (Balanced)
 - **Xúc xắc:** [5, 3] (Tổng: 8)
 - **Di chuyển:** Ô 10 ➔ Ô 18 (**Thừa Thiên Huế**)
-- **Tài chính sau lượt:** Tiền mặt: 530 Tr. VNĐ | Tài sản ròng: 15.430 Tr. VNĐ
+- **Tài chính sau lượt:** Tiền mặt: 2.130 Tr. VNĐ | Tài sản ròng: 15.230 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_029.jpg)
 
 #### Lượt #30 | Vòng #10 — Cô Tư (Thận trọng) (Passive)
@@ -235,7 +235,7 @@ NGÀY THỰC HIỆN: 11/09/2026 | SEED: 8820263 | TỔNG SỐ ẢNH CHỤP: 80 �
 #### Lượt #32 | Vòng #11 — Chú Sáu (Cân bằng) (Balanced)
 - **Xúc xắc:** [1, 3] (Tổng: 4)
 - **Di chuyển:** Ô 18 ➔ Ô 22 (**Phiếu Cơ Hội**)
-- **Tài chính sau lượt:** Tiền mặt: 750 Tr. VNĐ | Tài sản ròng: 15.850 Tr. VNĐ
+- **Tài chính sau lượt:** Tiền mặt: 2.350 Tr. VNĐ | Tài sản ròng: 15.650 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_032.jpg)
 
 #### Lượt #33 | Vòng #11 — Cô Tư (Thận trọng) (Passive)
@@ -255,7 +255,7 @@ NGÀY THỰC HIỆN: 11/09/2026 | SEED: 8820263 | TỔNG SỐ ẢNH CHỤP: 80 �
 #### Lượt #35 | Vòng #12 — Chú Sáu (Cân bằng) (Balanced)
 - **Xúc xắc:** [1, 6] (Tổng: 7)
 - **Di chuyển:** Ô 22 ➔ Ô 29 (**Quảng Ninh (Hạ Long)**)
-- **Tài chính sau lượt:** Tiền mặt: 810 Tr. VNĐ | Tài sản ròng: 15.910 Tr. VNĐ
+- **Tài chính sau lượt:** Tiền mặt: 2.410 Tr. VNĐ | Tài sản ròng: 15.710 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_035.jpg)
 
 #### Lượt #36 | Vòng #12 — Cô Tư (Thận trọng) (Passive)
@@ -275,7 +275,7 @@ NGÀY THỰC HIỆN: 11/09/2026 | SEED: 8820263 | TỔNG SỐ ẢNH CHỤP: 80 �
 #### Lượt #38 | Vòng #13 — Chú Sáu (Cân bằng) (Balanced)
 - **Xúc xắc:** [5, 6] (Tổng: 11)
 - **Di chuyển:** Ô 29 ➔ Ô 0 (**Khởi Hành (GO)**)
-- **Tài chính sau lượt:** Tiền mặt: 10 Tr. VNĐ | Tài sản ròng: 14.310 Tr. VNĐ
+- **Tài chính sau lượt:** Tiền mặt: 1.210 Tr. VNĐ | Tài sản ròng: 14.510 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_038.jpg)
 
 #### Lượt #39 | Vòng #13 — Cô Tư (Thận trọng) (Passive)
@@ -289,13 +289,13 @@ NGÀY THỰC HIỆN: 11/09/2026 | SEED: 8820263 | TỔNG SỐ ẢNH CHỤP: 80 �
 #### Lượt #40 | Vòng #14 — Bác Ba (Thực dụng) (Aggressive)
 - **Xúc xắc:** [1, 6] (Tổng: 7)
 - **Di chuyển:** Ô 39 ➔ Ô 6 (**Bình Dương (Tổ Hợp Thể Thao & Golf)**)
-- **Tài chính sau lượt:** Tiền mặt: 245 Tr. VNĐ | Tài sản ròng: 17.745 Tr. VNĐ
+- **Tài chính sau lượt:** Tiền mặt: 125 Tr. VNĐ | Tài sản ròng: 17.625 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_040.jpg)
 
 #### Lượt #41 | Vòng #14 — Chú Sáu (Cân bằng) (Balanced)
 - **Xúc xắc:** [1, 6] (Tổng: 7)
 - **Di chuyển:** Ô 0 ➔ Ô 7 (**Phiếu Cơ Hội**)
-- **Tài chính sau lượt:** Tiền mặt: 410 Tr. VNĐ | Tài sản ròng: 13.910 Tr. VNĐ
+- **Tài chính sau lượt:** Tiền mặt: 810 Tr. VNĐ | Tài sản ròng: 14.110 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_041.jpg)
 
 #### Lượt #42 | Vòng #14 — Cô Tư (Thận trọng) (Passive)
@@ -309,13 +309,13 @@ NGÀY THỰC HIỆN: 11/09/2026 | SEED: 8820263 | TỔNG SỐ ẢNH CHỤP: 80 �
 #### Lượt #43 | Vòng #15 — Bác Ba (Thực dụng) (Aggressive)
 - **Xúc xắc:** [6, 2] (Tổng: 8)
 - **Di chuyển:** Ô 6 ➔ Ô 14 (**Khánh Hòa (Nha Trang)**)
-- **Tài chính sau lượt:** Tiền mặt: 245 Tr. VNĐ | Tài sản ròng: 17.745 Tr. VNĐ
+- **Tài chính sau lượt:** Tiền mặt: 965 Tr. VNĐ | Tài sản ròng: 18.465 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_043.jpg)
 
 #### Lượt #44 | Vòng #15 — Chú Sáu (Cân bằng) (Balanced)
 - **Xúc xắc:** [1, 4] (Tổng: 5)
 - **Di chuyển:** Ô 7 ➔ Ô 14 (**Khánh Hòa (Nha Trang)**)
-- **Tài chính sau lượt:** Tiền mặt: 1.410 Tr. VNĐ | Tài sản ròng: 14.910 Tr. VNĐ
+- **Tài chính sau lượt:** Tiền mặt: 970 Tr. VNĐ | Tài sản ròng: 14.270 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_044.jpg)
 
 #### Lượt #45 | Vòng #15 — Cô Tư (Thận trọng) (Passive)
@@ -329,13 +329,13 @@ NGÀY THỰC HIỆN: 11/09/2026 | SEED: 8820263 | TỔNG SỐ ẢNH CHỤP: 80 �
 #### Lượt #46 | Vòng #16 — Bác Ba (Thực dụng) (Aggressive)
 - **Xúc xắc:** [1, 6] (Tổng: 7)
 - **Di chuyển:** Ô 14 ➔ Ô 21 (**Thanh Hóa (Sầm Sơn)**)
-- **Tài chính sau lượt:** Tiền mặt: 325 Tr. VNĐ | Tài sản ròng: 17.825 Tr. VNĐ
+- **Tài chính sau lượt:** Tiền mặt: 1.045 Tr. VNĐ | Tài sản ròng: 18.545 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_046.jpg)
 
 #### Lượt #47 | Vòng #16 — Chú Sáu (Cân bằng) (Balanced)
 - **Xúc xắc:** [3, 2] (Tổng: 5)
 - **Di chuyển:** Ô 14 ➔ Ô 19 (**Đà Nẵng (Hải Châu - Sơn Trà)**)
-- **Tài chính sau lượt:** Tiền mặt: 1.630 Tr. VNĐ | Tài sản ròng: 15.130 Tr. VNĐ
+- **Tài chính sau lượt:** Tiền mặt: 1.190 Tr. VNĐ | Tài sản ròng: 14.490 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_047.jpg)
 
 #### Lượt #48 | Vòng #16 — Cô Tư (Thận trọng) (Passive)
@@ -349,13 +349,13 @@ NGÀY THỰC HIỆN: 11/09/2026 | SEED: 8820263 | TỔNG SỐ ẢNH CHỤP: 80 �
 #### Lượt #49 | Vòng #17 — Bác Ba (Thực dụng) (Aggressive)
 - **Xúc xắc:** [2, 1] (Tổng: 3)
 - **Di chuyển:** Ô 21 ➔ Ô 24 (**Ninh Bình (Tràng An)**)
-- **Tài chính sau lượt:** Tiền mặt: 85 Tr. VNĐ | Tài sản ròng: 17.585 Tr. VNĐ
+- **Tài chính sau lượt:** Tiền mặt: 805 Tr. VNĐ | Tài sản ròng: 18.305 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_049.jpg)
 
 #### Lượt #50 | Vòng #17 — Chú Sáu (Cân bằng) (Balanced)
 - **Xúc xắc:** [3, 2] (Tổng: 5)
 - **Di chuyển:** Ô 19 ➔ Ô 24 (**Ninh Bình (Tràng An)**)
-- **Tài chính sau lượt:** Tiền mặt: 1.870 Tr. VNĐ | Tài sản ròng: 15.370 Tr. VNĐ
+- **Tài chính sau lượt:** Tiền mặt: 1.430 Tr. VNĐ | Tài sản ròng: 14.730 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_050.jpg)
 
 #### Lượt #51 | Vòng #17 — Cô Tư (Thận trọng) (Passive)
@@ -369,13 +369,13 @@ NGÀY THỰC HIỆN: 11/09/2026 | SEED: 8820263 | TỔNG SỐ ẢNH CHỤP: 80 �
 #### Lượt #52 | Vòng #18 — Bác Ba (Thực dụng) (Aggressive)
 - **Xúc xắc:** [3, 6] (Tổng: 9)
 - **Di chuyển:** Ô 24 ➔ Ô 6 (**Bình Dương (Tổ Hợp Thể Thao & Golf)**)
-- **Tài chính sau lượt:** Tiền mặt: 165 Tr. VNĐ | Tài sản ròng: 17.665 Tr. VNĐ
+- **Tài chính sau lượt:** Tiền mặt: 885 Tr. VNĐ | Tài sản ròng: 18.385 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_052.jpg)
 
 #### Lượt #53 | Vòng #18 — Chú Sáu (Cân bằng) (Balanced)
 - **Xúc xắc:** [5, 2] (Tổng: 7)
 - **Di chuyển:** Ô 6 ➔ Ô 13 (**Lâm Đồng (Đà Lạt)**)
-- **Tài chính sau lượt:** Tiền mặt: 710 Tr. VNĐ | Tài sản ròng: 15.610 Tr. VNĐ
+- **Tài chính sau lượt:** Tiền mặt: 1.670 Tr. VNĐ | Tài sản ròng: 14.970 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_053.jpg)
 
 #### Lượt #54 | Vòng #18 — Cô Tư (Thận trọng) (Passive)
@@ -389,13 +389,13 @@ NGÀY THỰC HIỆN: 11/09/2026 | SEED: 8820263 | TỔNG SỐ ẢNH CHỤP: 80 �
 #### Lượt #55 | Vòng #19 — Bác Ba (Thực dụng) (Aggressive)
 - **Xúc xắc:** [1, 5] (Tổng: 6)
 - **Di chuyển:** Ô 6 ➔ Ô 20 (**Nghỉ Dưỡng Miễn Phí**)
-- **Tài chính sau lượt:** Tiền mặt: 165 Tr. VNĐ | Tài sản ròng: 17.665 Tr. VNĐ
+- **Tài chính sau lượt:** Tiền mặt: 725 Tr. VNĐ | Tài sản ròng: 18.225 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_055.jpg)
 
 #### Lượt #56 | Vòng #19 — Chú Sáu (Cân bằng) (Balanced)
 - **Xúc xắc:** [6, 5] (Tổng: 11)
 - **Di chuyển:** Ô 13 ➔ Ô 24 (**Ninh Bình (Tràng An)**)
-- **Tài chính sau lượt:** Tiền mặt: 710 Tr. VNĐ | Tài sản ròng: 15.610 Tr. VNĐ
+- **Tài chính sau lượt:** Tiền mặt: 1.830 Tr. VNĐ | Tài sản ròng: 15.130 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_056.jpg)
 
 #### Lượt #57 | Vòng #19 — Cô Tư (Thận trọng) (Passive)
@@ -409,13 +409,13 @@ NGÀY THỰC HIỆN: 11/09/2026 | SEED: 8820263 | TỔNG SỐ ẢNH CHỤP: 80 �
 #### Lượt #58 | Vòng #20 — Bác Ba (Thực dụng) (Aggressive)
 - **Xúc xắc:** [3, 2] (Tổng: 5)
 - **Di chuyển:** Ô 20 ➔ Ô 25 (**Tuyến Cao Tốc Bắc - Nam**)
-- **Tài chính sau lượt:** Tiền mặt: 165 Tr. VNĐ | Tài sản ròng: 17.665 Tr. VNĐ
+- **Tài chính sau lượt:** Tiền mặt: 725 Tr. VNĐ | Tài sản ròng: 18.225 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_058.jpg)
 
 #### Lượt #59 | Vòng #20 — Chú Sáu (Cân bằng) (Balanced)
 - **Xúc xắc:** [6, 2] (Tổng: 8)
 - **Di chuyển:** Ô 24 ➔ Ô 32 (**Hà Nội (Cầu Giấy)**)
-- **Tài chính sau lượt:** Tiền mặt: 1.410 Tr. VNĐ | Tài sản ròng: 16.310 Tr. VNĐ
+- **Tài chính sau lượt:** Tiền mặt: 2.530 Tr. VNĐ | Tài sản ròng: 15.830 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_059.jpg)
 
 #### Lượt #60 | Vòng #20 — Cô Tư (Thận trọng) (Passive)
@@ -429,13 +429,13 @@ NGÀY THỰC HIỆN: 11/09/2026 | SEED: 8820263 | TỔNG SỐ ẢNH CHỤP: 80 �
 #### Lượt #61 | Vòng #21 — Bác Ba (Thực dụng) (Aggressive)
 - **Xúc xắc:** [2, 6] (Tổng: 8)
 - **Di chuyển:** Ô 25 ➔ Ô 33 (**Phiếu Thị Trường**)
-- **Tài chính sau lượt:** Tiền mặt: 465 Tr. VNĐ | Tài sản ròng: 17.965 Tr. VNĐ
+- **Tài chính sau lượt:** Tiền mặt: 1.025 Tr. VNĐ | Tài sản ròng: 18.525 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_061.jpg)
 
 #### Lượt #62 | Vòng #21 — Chú Sáu (Cân bằng) (Balanced)
 - **Xúc xắc:** [6, 3] (Tổng: 9)
 - **Di chuyển:** Ô 32 ➔ Ô 1 (**Cần Thơ (Cái Răng)**)
-- **Tài chính sau lượt:** Tiền mặt: 270 Tr. VNĐ | Tài sản ròng: 14.470 Tr. VNĐ
+- **Tài chính sau lượt:** Tiền mặt: 370 Tr. VNĐ | Tài sản ròng: 14.870 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_062.jpg)
 
 #### Lượt #63 | Vòng #21 — Cô Tư (Thận trọng) (Passive)
@@ -449,113 +449,115 @@ NGÀY THỰC HIỆN: 11/09/2026 | SEED: 8820263 | TỔNG SỐ ẢNH CHỤP: 80 �
 #### Lượt #64 | Vòng #22 — Bác Ba (Thực dụng) (Aggressive)
 - **Xúc xắc:** [4, 1] (Tổng: 5)
 - **Di chuyển:** Ô 33 ➔ Ô 38 (**Sàn Giao Dịch Chứng Khoán (HOSE)**)
-- **Tài chính sau lượt:** Tiền mặt: 765 Tr. VNĐ | Tài sản ròng: 18.265 Tr. VNĐ
+- **Tài chính sau lượt:** Tiền mặt: 1.425 Tr. VNĐ | Tài sản ròng: 18.925 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_064.jpg)
 
 #### Lượt #65 | Vòng #22 — Chú Sáu (Cân bằng) (Balanced)
-- **Xúc xắc:** [4, 2] (Tổng: 6)
-- **Di chuyển:** Ô 1 ➔ Ô 7 (**Phiếu Cơ Hội**)
-- **Tài chính sau lượt:** Tiền mặt: 3.270 Tr. VNĐ | Tài sản ròng: 17.470 Tr. VNĐ
+- **Xúc xắc:** [2, 3] (Tổng: 5)
+- **Di chuyển:** Ô 1 ➔ Ô 6 (**Bình Dương (Tổ Hợp Thể Thao & Golf)**)
+- **Tài chính sau lượt:** Tiền mặt: 370 Tr. VNĐ | Tài sản ròng: 14.870 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_065.jpg)
 
 #### Lượt #66 | Vòng #22 — Cô Tư (Thận trọng) (Passive)
-- **Xúc xắc:** [3, 6] (Tổng: 9)
-- **Di chuyển:** Ô 32 ➔ Ô 1 (**Cần Thơ (Cái Răng)**)
-- **Tài chính sau lượt:** Tiền mặt: 20.306 Tr. VNĐ | Tài sản ròng: 20.306 Tr. VNĐ
+- **Xúc xắc:** [1, 3] (Tổng: 4)
+- **Di chuyển:** Ô 32 ➔ Ô 8 (**Đồng Nai (Đại Công Viên Chủ Đề)**)
+- **Tài chính sau lượt:** Tiền mặt: 18.306 Tr. VNĐ | Tài sản ròng: 18.306 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_066.jpg)
 
 ### === VÒNG ĐẤU #23 ===
 
 #### Lượt #67 | Vòng #23 — Bác Ba (Thực dụng) (Aggressive)
-- **Xúc xắc:** [6, 1] (Tổng: 7)
-- **Di chuyển:** Ô 38 ➔ Ô 5 (**Cảng HKQT Long Thành**)
-- **Tài chính sau lượt:** Tiền mặt: 235 Tr. VNĐ | Tài sản ròng: 15.485 Tr. VNĐ
+- **Xúc xắc:** [1, 2] (Tổng: 3)
+- **Di chuyển:** Ô 38 ➔ Ô 13 (**Lâm Đồng (Đà Lạt)**)
+- **Tài chính sau lượt:** Tiền mặt: 1.445 Tr. VNĐ | Tài sản ròng: 17.195 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_067.jpg)
 
 #### Lượt #68 | Vòng #23 — Chú Sáu (Cân bằng) (Balanced)
-- **Xúc xắc:** [3, 1] (Tổng: 4)
-- **Di chuyển:** Ô 7 ➔ Ô 23 (**Nghệ An (TP. Vinh)**)
-- **Tài chính sau lượt:** Tiền mặt: 820 Tr. VNĐ | Tài sản ròng: 17.620 Tr. VNĐ
+- **Xúc xắc:** [4, 2] (Tổng: 6)
+- **Di chuyển:** Ô 6 ➔ Ô 12 (**Tập Đoàn Điện Lực (EVN)**)
+- **Tài chính sau lượt:** Tiền mặt: 370 Tr. VNĐ | Tài sản ròng: 14.870 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_068.jpg)
 
 #### Lượt #69 | Vòng #23 — Cô Tư (Thận trọng) (Passive)
-- **Xúc xắc:** [2, 4] (Tổng: 6)
-- **Di chuyển:** Ô 1 ➔ Ô 7 (**Phiếu Cơ Hội**)
-- **Tài chính sau lượt:** Tiền mặt: 22.306 Tr. VNĐ | Tài sản ròng: 22.306 Tr. VNĐ
+- **Xúc xắc:** [3, 4] (Tổng: 7)
+- **Di chuyển:** Ô 8 ➔ Ô 15 (**Cảng Nước Sâu Cái Mép**)
+- **Tài chính sau lượt:** Tiền mặt: 17.306 Tr. VNĐ | Tài sản ròng: 17.306 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_069.jpg)
 
 ### === VÒNG ĐẤU #24 ===
 
 #### Lượt #70 | Vòng #24 — Bác Ba (Thực dụng) (Aggressive)
-- **Xúc xắc:** [2, 3] (Tổng: 5)
-- **Di chuyển:** Ô 5 ➔ Ô 10 (**Trạm Kiểm Toán & Thanh Tra**)
-- **Tài chính sau lượt:** Tiền mặt: 235 Tr. VNĐ | Tài sản ròng: 15.485 Tr. VNĐ
+- **Xúc xắc:** [5, 3] (Tổng: 8)
+- **Di chuyển:** Ô 13 ➔ Ô 21 (**Thanh Hóa (Sầm Sơn)**)
+- **Tài chính sau lượt:** Tiền mặt: 1.225 Tr. VNĐ | Tài sản ròng: 16.975 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_070.jpg)
 
 #### Lượt #71 | Vòng #24 — Chú Sáu (Cân bằng) (Balanced)
-- **Xúc xắc:** [4, 5] (Tổng: 9)
-- **Di chuyển:** Ô 23 ➔ Ô 32 (**Hà Nội (Cầu Giấy)**)
-- **Tài chính sau lượt:** Tiền mặt: 820 Tr. VNĐ | Tài sản ròng: 17.620 Tr. VNĐ
+- **Xúc xắc:** [5, 2] (Tổng: 7)
+- **Di chuyển:** Ô 12 ➔ Ô 19 (**Đà Nẵng (Hải Châu - Sơn Trà)**)
+- **Tài chính sau lượt:** Tiền mặt: 690 Tr. VNĐ | Tài sản ròng: 16.390 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_071.jpg)
 
 #### Lượt #72 | Vòng #24 — Cô Tư (Thận trọng) (Passive)
-- **Xúc xắc:** [3, 5] (Tổng: 8)
-- **Di chuyển:** Ô 7 ➔ Ô 15 (**Cảng Nước Sâu Cái Mép**)
-- **Tài chính sau lượt:** Tiền mặt: 21.306 Tr. VNĐ | Tài sản ròng: 21.306 Tr. VNĐ
+- **Xúc xắc:** [4, 3] (Tổng: 7)
+- **Di chuyển:** Ô 15 ➔ Ô 22 (**Phiếu Cơ Hội**)
+- **Tài chính sau lượt:** Tiền mặt: 20.306 Tr. VNĐ | Tài sản ròng: 20.306 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_072.jpg)
 
 ### === VÒNG ĐẤU #25 ===
 
 #### Lượt #73 | Vòng #25 — Bác Ba (Thực dụng) (Aggressive)
-- **Xúc xắc:** [2, 4] (Tổng: 6)
-- **Di chuyển:** Ô 10 ➔ Ô 16 (**Bình Định (Quy Nhơn)**)
-- **Tài chính sau lượt:** Tiền mặt: 1.235 Tr. VNĐ | Tài sản ròng: 16.485 Tr. VNĐ
+- **Xúc xắc:** [4, 2] (Tổng: 6)
+- **Di chuyển:** Ô 21 ➔ Ô 33 (**Phiếu Thị Trường**)
+- **Tài chính sau lượt:** Tiền mặt: 1.225 Tr. VNĐ | Tài sản ròng: 16.975 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_073.jpg)
 
 #### Lượt #74 | Vòng #25 — Chú Sáu (Cân bằng) (Balanced)
-- **Xúc xắc:** [3, 4] (Tổng: 7)
-- **Di chuyển:** Ô 32 ➔ Ô 5 (**Cảng HKQT Long Thành**)
-- **Tài chính sau lượt:** Tiền mặt: 905 Tr. VNĐ | Tài sản ròng: 14.705 Tr. VNĐ
+- **Xúc xắc:** [3, 6] (Tổng: 9)
+- **Di chuyển:** Ô 19 ➔ Ô 2 (**Phiếu Thị Trường**)
+- **Tài chính sau lượt:** Tiền mặt: -760 Tr. VNĐ | Tài sản ròng: -760 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_074.jpg)
 
 #### Lượt #75 | Vòng #25 — Cô Tư (Thận trọng) (Passive)
-- **Xúc xắc:** [2, 1] (Tổng: 3)
-- **Di chuyển:** Ô 15 ➔ Ô 18 (**Thừa Thiên Huế**)
-- **Tài chính sau lượt:** Tiền mặt: 21.306 Tr. VNĐ | Tài sản ròng: 21.306 Tr. VNĐ
+- **Xúc xắc:** [1, 3] (Tổng: 4)
+- **Di chuyển:** Ô 22 ➔ Ô 26 (**Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm)**)
+- **Tài chính sau lượt:** Tiền mặt: 20.306 Tr. VNĐ | Tài sản ròng: 20.306 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_075.jpg)
 
 ### === VÒNG ĐẤU #26 ===
 
 #### Lượt #76 | Vòng #26 — Bác Ba (Thực dụng) (Aggressive)
-- **Xúc xắc:** [1, 6] (Tổng: 7)
-- **Di chuyển:** Ô 16 ➔ Ô 23 (**Nghệ An (TP. Vinh)**)
-- **Tài chính sau lượt:** Tiền mặt: 1.235 Tr. VNĐ | Tài sản ròng: 16.485 Tr. VNĐ
+- **Xúc xắc:** [2, 5] (Tổng: 7)
+- **Di chuyển:** Ô 33 ➔ Ô 0 (**Khởi Hành (GO)**)
+- **Tài chính sau lượt:** Tiền mặt: 208 Tr. VNĐ | Tài sản ròng: 14.658 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_076.jpg)
 
-#### Lượt #77 | Vòng #26 — Chú Sáu (Cân bằng) (Balanced)
-- **Xúc xắc:** [6, 3] (Tổng: 9)
-- **Di chuyển:** Ô 5 ➔ Ô 14 (**Khánh Hòa (Nha Trang)**)
-- **Tài chính sau lượt:** Tiền mặt: 905 Tr. VNĐ | Tài sản ròng: 14.705 Tr. VNĐ
-- 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_077.jpg)
-
-#### Lượt #78 | Vòng #26 — Cô Tư (Thận trọng) (Passive)
-- **Xúc xắc:** [6, 1] (Tổng: 7)
-- **Di chuyển:** Ô 18 ➔ Ô 25 (**Tuyến Cao Tốc Bắc - Nam**)
+#### Lượt #77 | Vòng #26 — Cô Tư (Thận trọng) (Passive)
+- **Xúc xắc:** [6, 5] (Tổng: 11)
+- **Di chuyển:** Ô 26 ➔ Ô 37 (**TP.HCM (TP. Thủ Đức)**)
 - **Tài chính sau lượt:** Tiền mặt: 20.306 Tr. VNĐ | Tài sản ròng: 20.306 Tr. VNĐ
-- 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_078.jpg)
+- 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_077.jpg)
 
 ### === VÒNG ĐẤU #27 ===
 
-#### Lượt #79 | Vòng #27 — Bác Ba (Thực dụng) (Aggressive)
-- **Xúc xắc:** [3, 2] (Tổng: 5)
-- **Di chuyển:** Ô 23 ➔ Ô 28 (**Tập Đoàn Viễn Thông (Viettel)**)
-- **Tài chính sau lượt:** Tiền mặt: 1.035 Tr. VNĐ | Tài sản ròng: 16.285 Tr. VNĐ
+#### Lượt #78 | Vòng #27 — Bác Ba (Thực dụng) (Aggressive)
+- **Xúc xắc:** [2, 6] (Tổng: 8)
+- **Di chuyển:** Ô 0 ➔ Ô 8 (**Đồng Nai (Đại Công Viên Chủ Đề)**)
+- **Tài chính sau lượt:** Tiền mặt: 208 Tr. VNĐ | Tài sản ròng: 14.658 Tr. VNĐ
+- 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_078.jpg)
+
+#### Lượt #79 | Vòng #27 — Cô Tư (Thận trọng) (Passive)
+- **Xúc xắc:** [6, 4] (Tổng: 10)
+- **Di chuyển:** Ô 37 ➔ Ô 7 (**Phiếu Cơ Hội**)
+- **Tài chính sau lượt:** Tiền mặt: 24.306 Tr. VNĐ | Tài sản ròng: 24.306 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_079.jpg)
 
-#### Lượt #80 | Vòng #27 — Chú Sáu (Cân bằng) (Balanced)
-- **Xúc xắc:** [5, 6] (Tổng: 11)
-- **Di chuyển:** Ô 14 ➔ Ô 25 (**Tuyến Cao Tốc Bắc - Nam**)
-- **Tài chính sau lượt:** Tiền mặt: 2.105 Tr. VNĐ | Tài sản ròng: 15.905 Tr. VNĐ
+### === VÒNG ĐẤU #28 ===
+
+#### Lượt #80 | Vòng #28 — Bác Ba (Thực dụng) (Aggressive)
+- **Xúc xắc:** [1, 4] (Tổng: 5)
+- **Di chuyển:** Ô 8 ➔ Ô 13 (**Lâm Đồng (Đà Lạt)**)
+- **Tài chính sau lượt:** Tiền mặt: 208 Tr. VNĐ | Tài sản ròng: 14.658 Tr. VNĐ
 - 📸 **Ảnh chụp màn hình sau lượt:** [Xem ảnh minh chứng](screenshots/case_3p/turn_080.jpg)
 
 ---

@@ -9,6 +9,7 @@ export type EnvelopeValidationResult =
 
 const VALID_CLIENT_TYPES = new Set([
   'CREATE_ROOM', 'JOIN_ROOM', 'START_GAME', 'PONG', 'RECONNECT', 'INTENT', 'INTENT_REQUEST_RESYNC', 'EMOTE', 'LEAVE_ROOM',
+  'ADMIN_AUTH', 'ADMIN_GET_ROOMS', 'ADMIN_SUBSCRIBE_ROOM', 'ADMIN_UNSUBSCRIBE_ROOM', 'ADMIN_TERMINATE_ROOM',
 ]);
 
 const CELL_INTENTS = new Set([
@@ -129,6 +130,29 @@ export class EnvelopeValidator {
     if (type === 'LEAVE_ROOM') {
       return typeof pId === 'string' && typeof rc === 'string' && pId.length > 0 && rc.length > 0
         ? { success: true, message: { type, playerId: pId, roomCode: rc } }
+        : { success: false, reasonCode: 'INVALID_ENVELOPE' };
+    }
+    if (type === 'ADMIN_AUTH') {
+      const secret = obj['secret'];
+      return typeof secret === 'string' && secret.length > 0
+        ? { success: true, message: { type, secret } }
+        : { success: false, reasonCode: 'INVALID_ENVELOPE' };
+    }
+    if (type === 'ADMIN_GET_ROOMS') {
+      return { success: true, message: { type } };
+    }
+    if (type === 'ADMIN_SUBSCRIBE_ROOM') {
+      return typeof rc === 'string' && rc.length > 0
+        ? { success: true, message: { type, roomCode: rc } }
+        : { success: false, reasonCode: 'INVALID_ENVELOPE' };
+    }
+    if (type === 'ADMIN_UNSUBSCRIBE_ROOM') {
+      return { success: true, message: { type, ...(typeof rc === 'string' && rc.length > 0 ? { roomCode: rc } : {}) } };
+    }
+    if (type === 'ADMIN_TERMINATE_ROOM') {
+      const reason = obj['reason'];
+      return typeof rc === 'string' && rc.length > 0
+        ? { success: true, message: { type, roomCode: rc, ...(typeof reason === 'string' ? { reason } : {}) } }
         : { success: false, reasonCode: 'INVALID_ENVELOPE' };
     }
     return this.validateIntentEnvelope(obj);

@@ -3,7 +3,7 @@
 * **Định dạng & Dung lượng:** File .webp tách nền trong suốt (Transparent Alpha), kích thước chuẩn 512x512px, dung lượng tối đa <= 45KB/lớp để đảm bảo tổng tài nguyên 1 ô không vượt quá 120KB.  
 * **Phân lớp thị giác:**  
   * *Lớp 1 (Nền - Background):* Cảnh quan không gian, đặt ở trục Z = -0.4, không chuyển động.  
-  * *Lớp 2 (Linh hồn - Core Subject):* Thực thể nhận diện bản địa, đặt ở trục Z = 0.0, có chuyển động nhấp nhô.  
+  * *Lớp 2 (Linh hồn - Core Subject):* Thực thể nhận diện bản địa, đặt ở trục Z = 0.0 (chuẩn hóa cao độ tĩnh y = 1.1 theo IMP-27 để tối ưu 60 FPS, loại bỏ hook nhấp nhô lặp lại).  
   * *Lớp 3 (Tiền cảnh - Foreground):* Chi tiết phụ trợ mặt nước hoặc rào chắn, đặt ở trục Z = +0.3.
 
 Quy chuẩn thiết kế mỹ thuật và giao diện trực quan cho toàn bộ 28 ô tài sản kinh tế trên bàn cờ được đồng bộ theo 4 cấp độ phát triển đô thị.  

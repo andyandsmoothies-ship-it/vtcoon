@@ -11,6 +11,7 @@ export interface BotTurnSchedulerOptions {
   readonly broadcaster: DeltaBroadcaster;
   readonly onGameOver: (roomCode: string) => void;
   readonly onScheduleTurnTimeout?: (roomCode: string) => void;
+  readonly botTurnDelayMs?: number;
 }
 
 export class BotTurnScheduler {
@@ -19,6 +20,7 @@ export class BotTurnScheduler {
   private readonly broadcaster: DeltaBroadcaster;
   private readonly onGameOver: (roomCode: string) => void;
   private readonly onScheduleTurnTimeout?: (roomCode: string) => void;
+  private readonly botTurnDelayMs: number;
 
   constructor(options: BotTurnSchedulerOptions) {
     this.rooms = options.rooms;
@@ -26,6 +28,7 @@ export class BotTurnScheduler {
     this.broadcaster = options.broadcaster;
     this.onGameOver = options.onGameOver;
     this.onScheduleTurnTimeout = options.onScheduleTurnTimeout;
+    this.botTurnDelayMs = options.botTurnDelayMs ?? 800;
   }
 
   scheduleBotTurn(roomCode: string): void {
@@ -59,7 +62,7 @@ export class BotTurnScheduler {
           }
         }
       });
-    }, 800);
+    }, this.botTurnDelayMs);
 
     this.rooms.registerTimer(roomCode, timer);
   }

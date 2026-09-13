@@ -476,7 +476,10 @@ describe('[Slice NET-03] Đồng Bộ Delta Payload (< 10KB) & Khóa Tuần Tự
 
       // Đóng socket và đợi sự kiện close được kích hoạt
       ws.close();
-      await new Promise((r) => setTimeout(r, 50));
+      const deadline = Date.now() + 1000;
+      while (roomSockets.get(roomCode) !== undefined && Date.now() < deadline) {
+        await new Promise((r) => setTimeout(r, 20));
+      }
 
       // Không còn socket nào rò rỉ trong roomSockets
       expect(roomSockets.get(roomCode)).toBeUndefined();

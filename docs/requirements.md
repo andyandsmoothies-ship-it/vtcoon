@@ -2,25 +2,28 @@ Bản tài liệu thiết kế hoàn chỉnh của trò chơi **"Đại Gia Đ�
 
 ### **I. THÔNG SỐ VẬN HÀNH CHUẨN**
 
-* **Quy mô người chơi:** 2 – 6 người.  
-* **Vốn khả dụng ban đầu:** $15.000$ Tr. VNĐ/người chơi (tương đương 15 tỷ đồng).  
-* **Tiền thưởng qua ô Khởi Hành (GO):** $+2.000$ Tr. VNĐ/vòng.  
-* **Cơ chế di chuyển:** Lắc 2 xúc xắc ($2D6$). Đổ đôi được đi tiếp; đổ đôi 3 lần liên tiếp bị đưa vào **Ô 10 (Trạm Kiểm Toán & Thanh Tra)**.  
+* **Quy mô người chơi:** 2 – 4 người (chuẩn hóa tối đa 4 người theo IMP-16).  
+* **Vốn khả dụng ban đầu:** 15.000 Tr. VNĐ/người chơi (tương đương 15 tỷ đồng).  
+* **Tiền thưởng qua ô Khởi Hành (GO):** +2.000 Tr. VNĐ/vòng.  
+* **Cơ chế di chuyển:** Lắc 2 xúc xắc (2D6). Đổ đôi được đi tiếp; đổ đôi 3 lần liên tiếp bị đưa vào **Ô 10 (Trạm Kiểm Toán & Thanh Tra)**.  
 * **Quy tắc Trạm Kiểm Toán & Thanh Tra (Ô 10):**  
   * Người chơi bị đưa vào ô 10 do: đổ đôi 3 lần liên tiếp hoặc dừng tại ô 30 (Lệnh Thanh Tra Thuế). Khi đang bị tạm giữ (tối đa 3 lượt), người chơi bị phong tỏa di chuyển.  
-  * Cơ chế rời Trạm Kiểm Toán: (1) Nộp bảo lãnh $500$ Tr. VNĐ vào đầu lượt để rời trạm ngay; (2) Đổ xúc xắc ra đôi để được tự do di chuyển ngay theo điểm xúc xắc; (3) Chờ hết 3 lượt thụ án thụ động, tự động rời trạm ở lượt tiếp theo.  
+  * Cơ chế rời Trạm Kiểm Toán: (1) Nộp bảo lãnh 500 Tr. VNĐ vào đầu lượt để rời trạm ngay; (2) Đổ xúc xắc ra đôi để được tự do di chuyển ngay theo điểm xúc xắc; (3) Chờ hết 3 lượt thụ án thụ động, tự động rời trạm ở lượt tiếp theo.  
   * Dừng chân bình thường tại ô 10 (chỉ ghé thăm) không bị tạm giữ hay phạt tiền.  
 * **Điều kiện kết thúc & Thắng cuộc:**  
-  * *Theo thời gian/vòng đấu:* Kết thúc sau 15 vòng hoặc 60 phút. Người có **Tổng tài sản ròng** lớn nhất (Tiền mặt + Giá trị định giá BĐS & Công trình - Dư nợ ngân hàng) chiến thắng.  
+  * *Theo thời gian/vòng đấu:* Kết thúc sau 30 vòng (Server Round Cap theo IMP-16) hoặc 60 phút. Người có **Tổng tài sản ròng** lớn nhất (Tiền mặt + Giá trị định giá BĐS & Công trình - Dư nợ ngân hàng) chiến thắng.  
   * *Theo thanh khoản:* Nếu có người chơi phá sản (âm tiền mặt sau khi đã thế chấp/bán toàn bộ tài sản), trận đấu dừng lại và chốt kết quả ngay lập tức.  
 * **Quy tắc Đấu giá Bất động sản Tự động (Auto-Auction Rule):**  
   * Khi người chơi dừng tại một ô đất chưa có chủ nhưng quyết định Bỏ qua, ô đất này không được giữ nguyên mà lập tức đưa vào phiên đấu giá công khai.  
-  * Mọi người chơi khác (ngoại trừ người vừa bỏ qua) đều có quyền đặt giá. Giá khởi điểm: 50% giá niêm yết. Bước giá: $+100$ Tr. VNĐ. Người chơi không được đặt vượt quá số tiền mặt khả dụng hiện có.  
+  * Mọi người chơi khác (ngoại trừ người vừa bỏ qua) đều có quyền đặt giá. Giá khởi điểm: 50% giá niêm yết. Bước giá: +100 Tr. VNĐ. Người chơi không được đặt vượt quá số tiền mặt khả dụng hiện có.  
 * **Quy tắc Thương lượng & Giao dịch Song phương (P2P Trading Rule):**  
   * Người chơi chỉ được mở giao dịch trong lượt của mình (giai đoạn Quản lý tài sản).  
   * Đối tượng giao dịch hợp lệ: Đất trống (Cấp 0), Thẻ Miễn Trừ Ngoại Giao, tiền mặt. Không được phép giao dịch các ô đất đã xây dựng công trình (phải thanh lý công trình về Cấp 0 trước khi chuyển nhượng).  
-  * Áp dụng thuế chuyển nhượng bất động sản: Bên nhận tiền phải đóng thuế giao dịch 5% trên tổng giá trị nhận được vào Kho bạc Nhà nước.
-* **Mức Bảo Lãnh Trạm Kiểm Toán (Ô 10):** Người chơi đang bị phong tỏa tại Trạm Kiểm Toán có thể nộp khoản bảo lãnh $500$ Tr. VNĐ để thoát ngay lập tức. Nếu số dư tiền mặt không đủ 500 Tr. VNĐ, yêu cầu bị từ chối và người chơi tiếp tục thụ án.
+  * Áp dụng thuế chuyển nhượng bất động sản: Bên nhận tiền phải đóng thuế giao dịch 5% trên tổng giá trị nhận được vào Kho bạc Nhà nước.  
+  * Áp dụng quy tắc giá sàn chống gian lận (IMP-16): Mức giá chuyển nhượng tối thiểu phải bằng 70% giá niêm yết của ô đất (mã lỗi: PRICE_BELOW_FLOOR), ngăn chặn hoàn toàn việc bán 1 VNĐ để tuồn tài sản lậu.  
+* **Mức Bảo Lãnh Trạm Kiểm Toán (Ô 10):** Người chơi đang bị phong tỏa tại Trạm Kiểm Toán có thể nộp khoản bảo lãnh 500 Tr. VNĐ để thoát ngay lập tức. Nếu số dư tiền mặt không đủ 500 Tr. VNĐ, yêu cầu bị từ chối và người chơi tiếp tục thụ án.  
+* **Bố cục Điều Khiển (Action Dock theo IMP-16):** Tinh gọn giao diện đáy màn hình bằng cách gộp hai nút "Tài Sản" và "Xây Dựng" thành nút duy nhất **"Quản Lý BĐS" 🏛️**.  
+* **Thời Gian Hồi Biểu Cảm (Emote Cooldown theo IMP-16):** Giới hạn tần suất gửi biểu cảm tương tác giữa người chơi tối thiểu 2.5 giây/lần (EMOTE_COOLDOWN_MS = 2500) để chống spam giao diện.
 
 ### **II. BẢNG DANH MỤC 40 Ô BÀN CỜ VIỆT NAM (MASTER LAYOUT)**
 

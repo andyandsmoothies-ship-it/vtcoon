@@ -25,6 +25,7 @@ NODE_ENV=production
 PORT=3000
 WSS_PORT=3001
 GRACE_PERIOD_MS=60000
+ADMIN_SECRET=vtcoon-admin-2026
 ```
 
 ### 1.3 Quy Trình Khởi Chạy Hệ Thống
@@ -181,6 +182,7 @@ Hệ thống VTCoOn tuân thủ nguyên tắc Thiết kế Phòng Thủ (Fail-Fa
 | `WSS_PORT` | **Có** | `3001` | Cổng mạng mở socket lắng nghe kết nối WebSocket Server. Nginx upstream `app_wss` sẽ proxy các yêu cầu `/rooms/` vào cổng này. |
 | `GRACE_PERIOD_MS` | **Có** | `60000` | Thời gian ân hạn mất kết nối tính bằng mili-giây (chuẩn 60000ms = 60 giây). Sau thời gian này nếu người chơi không khôi phục phiên (F5/Reconnect Token), Bot AI sẽ tự động tiếp quản lượt chơi. |
 | `PORT` | Không (Mặc định 3000) | `3000` | Cổng dịch vụ HTTP phục vụ endpoint `/health` kiểm tra sức khỏe container và điều phối qua Nginx upstream `app_http`. |
+| `ADMIN_SECRET` | Không (Mặc định `vtcoon-admin-2026`) | `vtcoon-admin-2026` | Khóa bí mật bảo vệ Trang Quản Trị Admin Tập Trung (IMP-25) để giám sát đa phòng và cưỡng chế đóng bàn chơi. |
 
 ### 5.1 Kiểm Chứng Cơ Chế Bắt Lỗi Môi Trường
 Nếu thiếu biến `NODE_ENV`:
@@ -195,3 +197,20 @@ Nếu thiếu biến `GRACE_PERIOD_MS`:
 ```
 [Server] Fatal bootstrap error: Error: GRACE_PERIOD_MS is required
 ```
+
+---
+
+## 6. CÔNG CỤ GIÁM SÁT VẬN HÀNH & ĐIỀU TRA LỖI (MONITORING & FORENSICS)
+
+### 6.1 Trang Quản Trị Admin Tập Trung (Admin Central Portal — IMP-25)
+- **Đường dẫn truy cập:** `https://<DOMAIN>/?admin=true` hoặc `https://<DOMAIN>/#/admin`
+- **Xác thực:** Nhập mã bí mật tương ứng với biến môi trường `ADMIN_SECRET` (mặc định: `vtcoon-admin-2026`).
+- **Chức năng:**
+  * Giám sát trạng thái toàn bộ các phòng chơi (bình thường 🟢 / cảnh báo lỗi 🔴).
+  * Xem trực tiếp luồng log sự kiện, số dư người chơi và danh mục BĐS của từng phòng.
+  * Tải file Hộp Đen JSON và sao chép mã test Vitest tái hiện lỗi 1-click.
+  * Cưỡng chế đóng bàn chơi khẩn cấp (Force Terminate).
+
+### 6.2 Bảng Điều Khiển Invariant Watchdog & Flight Recorder (IMP-24)
+- **Phím tắt kích hoạt:** Bấm phím `~` (Tilde) hoặc click vào huy hiệu Telemetry `[60 FPS | 14ms | 🛡️ OK]` trên góc màn hình in-game.
+- **Chức năng:** Soi vi phạm 4 bất biến (Bảo toàn tiền tệ, Tọa độ di chuyển, Số dư, Cấp BĐS 0-3), cảnh báo Bot loop burst hoặc Turn stall > 45s.
