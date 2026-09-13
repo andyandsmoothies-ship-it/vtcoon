@@ -60,25 +60,7 @@ describe('[TC-P1.1/MSS] ProceduralBuilding — Sapphire Glass PBR & Beveled Roun
   });
 });
 
-describe('[TC-P1.2/MSS] Board Layout & Tile Base — Beveled RoundedBox & Champagne Gold Bezels', () => {
-  it('board_layout.tsx sử dụng RoundedBox radius=0.08 smoothness=4 cho kè đá promenade', () => {
-    const boardPath = path.resolve(process.cwd(), 'src/client/3d/board_layout.tsx');
-    const source = fs.readFileSync(boardPath, 'utf-8');
-    expect(source).toContain("import { RoundedBox } from '@react-three/drei';");
-    expect(source).toContain('radius={0.08}');
-    expect(source).toContain('smoothness={4}');
-    expect(source).toContain('args={[21.4, 0.24, 21.4]}');
-  });
-
-  it('board_layout.tsx bổ sung nẹp kim loại vàng Champagne viền ngoài và viền trong của 40 ô cờ', () => {
-    const boardPath = path.resolve(process.cwd(), 'src/client/3d/board_layout.tsx');
-    const source = fs.readFileSync(boardPath, 'utf-8');
-    expect(source).toContain('args={[20.72, 0.04, 20.72]}');
-    expect(source).toContain('args={[15.88, 0.042, 15.88]}');
-    expect(source).toContain('metalness={0.95}');
-    expect(source).toContain('envMapIntensity={1.8}');
-  });
-
+describe('[TC-P1.2/MSS] Board Layout & Tile Base — Beveled RoundedBox & Terrain-Flush Depth Stack', () => {
   it('board_tile.tsx sử dụng RoundedBox radius=0.08 smoothness=4 cho cả ô góc và ô thường', () => {
     const tilePath = path.resolve(process.cwd(), 'src/client/3d/board_tile.tsx');
     const source = fs.readFileSync(tilePath, 'utf-8');
@@ -89,13 +71,13 @@ describe('[TC-P1.2/MSS] Board Layout & Tile Base — Beveled RoundedBox & Champa
     expect(source).toContain('envMapIntensity={1.0}');
   });
 
-  it('[Architecture & Safety] Khung kè promenade và nẹp kim loại không được che lấp mặt hồ và thảm cỏ trung tâm', () => {
+  it('[Architecture & Safety: IMP-30 Terrain Flush] board_layout.tsx tích hợp DEPTH_LAYER_STACK và loại bỏ bệ kè nổi tách lìa', () => {
     const boardPath = path.resolve(process.cwd(), 'src/client/3d/board_layout.tsx');
     const source = fs.readFileSync(boardPath, 'utf-8');
-    // Promenade rim top = Y + height/2 = -0.16 + 0.12 = -0.04 (phải thấp hơn mặt cỏ Y=0.00 và mặt nước Y=0.05)
-    expect(source).toContain('position={[0, -0.16, 0]}');
-    // Bezels top = -0.045 + 0.02 = -0.025 (phải nằm dưới mặt cỏ Y=0.00)
-    expect(source).toContain('position={[0, -0.045, 0]}');
+    expect(source).toContain('DEPTH_LAYER_STACK');
+    expect(source).toContain('TERRAIN_BASE_Y');
+    expect(source).not.toContain('args={[21.4, 0.24, 21.4]}');
+    expect(source).not.toContain('args={[20.72, 0.04, 20.72]}');
   });
 });
 

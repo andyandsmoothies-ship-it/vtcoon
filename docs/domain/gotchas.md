@@ -10,7 +10,7 @@
 | `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21 |
 | `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40 |
 | `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40 |
-| `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #38, #40, #46, #47, #48 |
+| `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #38, #40, #46, #47, #48, #49 |
 | `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #36, #37, #40 |
 | `[UAT/TEST]` | Nghiệm Thu, Adversarial TDD, Ảnh Chụp Màn Hình (.jpg), Shell Escaping, File I/O Lock | #5, #28, #29, #31, #35 |
 | `[TELEMETRY]` | Giám Sát Hiệu Năng Thời Gian Thực, Chó Canh Phòng Bất Biến, Hộp Đen Tái Hiện Lỗi | #39 |
@@ -515,7 +515,18 @@
   2. *Tạo mới Texture lặp lại gây cạn kiệt tài nguyên*: Việc gọi lại hàm tạo CanvasTexture trong mỗi chu kỳ re-render của component 3D sinh ra nhiều đối tượng texture dư thừa trên GPU, vi phạm nguyên tắc Zero-Garbage Render Loop.
 - **Ràng buộc cứng & Giải pháp bất biến**:
   1. **Direct Coordinate Geometry Invariant**: Mọi thuật toán vẽ hình học hoa văn thủ tục (như gạch bông Đông Dương đối xứng 4 cánh) BẮT BUỘC tính toán trực tiếp tọa độ đỉnh bằng công thức lượng giác (`Math.cos`, `Math.sin`) và các hàm vẽ cơ bản (`moveTo`, `lineTo`), hoặc kiểm tra `typeof ctx.method === 'function'` trước khi gọi các hàm biến đổi tọa độ tùy chọn.
-  2. **Memoized Texture Cache (`getHeritageEncausticTileTexture`)**: Texture thủ tục tạo sinh bắt buộc đi qua hàm truy xuất có cơ chế caching cấp module (`cachedEncausticTexture`), bảo đảm chỉ khởi tạo duy nhất 1 lần và trả về `null` an toàn khi chạy trong môi trường headless/SSR không có DOM.
+---
+
+### 49. [3D/DEPTH] Bất Biến Phân Tầng Cao Độ Bàn Cờ Hòa Tan Địa Hình (Terrain Flush & Depth Layer Stack Invariant - IMP-30)
+- **Hiện tượng & Bẫy thực tế**:
+  1. *Bàn cờ mâm nổi tách lìa hòn đảo*: Đặt bàn cờ trên mâm nổi cao 0.24m (`RoundedBox [21.4, 0.24, 21.4]`) nẹp viền kim loại vàng tạo gờ cắt sắc lạnh, biến sa bàn thành một chiếc đĩa bay lơ lửng ngắt kết nối với cảnh quan nhiệt đới.
+  2. *Hố nước và khay gỗ rỗng ruột chiếm đất trung tâm*: Khay xúc xắc thành hộp gỗ gụ cao 0.24m kết hợp hồ nước vuông `CenterpieceWater` chiếm hơn 50% lõi bàn cờ, biến trung tâm thành hố trũng tối tăm, cản trở hoàn toàn việc quy hoạch đại đô thị nén.
+  3. *Lệch tâm máy quay khi xúc xắc đổi vị trí*: Khi chuyển sàn diễn xúc xắc ra Đại Lộ Sài Gòn `[0.0, 0.020, 3.8]`, nếu không cập nhật `CAMERA_CONFIG.dice_roll`, camera sẽ ngắm vào khoảng không giữa bàn cờ `[0, 0.35, 0]`.
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **Depth Layer Stack Triệt Tiêu Z-Fighting**: Cố định 4 cao độ phân tầng: `TERRAIN_BASE_Y = 0.000` (Nền địa hình chính), `TILE_BORDER_Y = 0.015` (Viền móng ô cờ), `TILE_SURFACE_Y = 0.020` (Mặt 40 ô cờ & đại lộ), `STANDEE_BASE_Y = 0.025` (Thềm Standee/Shophouse).
+  2. **Terrain Flush Invariant**: Bàn cờ phẳng hòa tan vào mặt đất; loại bỏ vĩnh viễn bệ kè hộp xám `args={[21.4, 0.24, 21.4]}`, nẹp kim loại cũ và `<CenterpieceWater />` khỏi bàn cờ.
+  3. **Transient Ruby Dice Runway**: Xúc xắc đỏ ruby PBR (`roughness: 0.12`, `metalness: 0.10`, `transparent: true`, `opacity: 0.88`) nảy đàn hồi trên Đại Lộ Sài Gòn `[0.0, 0.020, 3.8]`, tự động mờ dần sau 1.5s khi dừng quay; camera `dice_roll` cập nhật `target: [0.0, 0.25, 3.8]`, `position: [2.5, 2.8, 7.2]`.
+  4. **Modular Coastline Decomposition**: Tách rặng núi chân trời thành `horizon_mountain_range.tsx` (< 120 LOC) và rừng dừa 60 cây vào `tropical_palms_cluster.tsx` (< 100 LOC gom qua `InstancedMesh`), khống chế `coastal_island_environment.tsx` <= 300 LOC.
 
 
 

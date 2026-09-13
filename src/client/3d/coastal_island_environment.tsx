@@ -1,11 +1,13 @@
-// [UI-S01/MSS][UI-S04/MSS][IMP-13] CoastalIslandEnvironment — Vietnamese Coastal Island Metropolis
-// Endless Living Ocean, 15-degree Sloped Sand Shoreline & Layered Tropical Foliage
+// [UI-S01/MSS][UI-S04/MSS][IMP-13][IMP-30] CoastalIslandEnvironment — Vietnamese Coastal Island Metropolis
+// Endless Living Ocean, 15-degree Sloped Sand Shoreline, Tropical Palms & Horizon Mountain Range
 import React, { useRef } from 'react';
 import type { Mesh, PlaneGeometry } from 'three';
 import { CoastalPatrolBoat } from './coastal_patrol_boat';
 import { CoastalSeagulls } from './coastal_seagulls';
 import { LayeredTropicalFoliage } from './layered_tropical_foliage';
-import { RollingEmeraldMountains, AirportLandmark, TrainStationLandmark } from './coastal_island_landmarks';
+import { HorizonMountainRange } from './horizon_mountain_range';
+import { TropicalPalmsCluster } from './tropical_palms_cluster';
+import { AirportLandmark, TrainStationLandmark } from './coastal_island_landmarks';
 import { useSafeFrame } from './safe_frame';
 import { SafeGLTFModel } from './asset_loader/safe_gltf_model';
 import { VEHICLE_MODEL_URLS } from './diorama/diorama_traffic';
@@ -66,7 +68,6 @@ export function CoastalIslandEnvironment(): React.ReactElement {
         for (let k = 0; k < len; k += 3) {
           const u = arr[k]!;
           const v = arr[k + 1]!;
-          // Sóng Gerstner đa hài kết hợp chu kỳ sóng điều hòa (độ cao kiểm soát tránh ngập thềm cát)
           const w1 = Math.sin(u * 0.055 + t * 1.4) * 0.034;
           const w2 = Math.cos(v * 0.065 + t * 1.1) * 0.026;
           const w3 = Math.sin((u + v) * 0.038 + t * 1.8) * 0.015;
@@ -92,99 +93,66 @@ export function CoastalIslandEnvironment(): React.ReactElement {
 
   return (
     <group position={[0, 0, 0]}>
-      {/* ========================================================
-          1. ĐẠI DƯƠNG NHIỆT ĐỚI VÔ CỰC (ENDLESS LIVING OCEAN)
-          Phân tầng màu quang học: Ngọc bích (#06B6D4) -> Đại dương (#0369A1 / #0284C7) -> Đáy thẳm (#0C4A6E)
-         ======================================================== */}
-      {/* 1.0. Tầng đáy vực đại dương thẳm nơi chân trời (#0C4A6E) */}
+      {/* 1. Đại dương nhiệt đới vô cực (Endless Living Ocean): #06B6D4 -> #0369A1 / #0284C7 -> #0C4A6E */}
       <mesh receiveShadow position={[0, -0.42, 0]}>
         <boxGeometry args={[260, 0.16, 260]} />
         <meshStandardMaterial color="#0C4A6E" roughness={0.15} metalness={0.4} />
       </mesh>
 
-      {/* 1.1. Lưới sóng Gerstner vô cực PlaneGeometry tối ưu từ args={[240, 240, 96, 96]} sang (240, 240, 24, 24) */}
+      {/* Lưới sóng Gerstner vô cực PlaneGeometry tối ưu từ args={[240, 240, 96, 96]} sang (240, 240, 24, 24) */}
       <mesh receiveShadow position={[0, -0.30, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry ref={oceanGeomRef} args={[240, 240, 24, 24]} />
-        <meshStandardMaterial
-          color="#0284C7"
-          roughness={0.08}
-          metalness={0.55}
-          transparent
-          opacity={0.92}
-        />
+        <meshStandardMaterial color="#0284C7" roughness={0.08} metalness={0.55} transparent opacity={0.92} />
       </mesh>
 
-      {/* 1.2. Tầng chuyển tiếp xanh thẳm đại dương (#0369A1) */}
       <mesh receiveShadow position={[0, -0.31, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[180, 180, 32, 32]} />
-        <meshStandardMaterial
-          color="#0369A1"
-          roughness={0.1}
-          metalness={0.5}
-          transparent
-          opacity={0.88}
-        />
+        <meshStandardMaterial color="#0369A1" roughness={0.1} metalness={0.5} transparent opacity={0.88} />
       </mesh>
 
-      {/* 1.3. Tầng nước nông ngọc bích sát bờ đảo (#06B6D4) ôm đường bờ biển tự nhiên */}
       <mesh ref={shallowRef} receiveShadow position={[0, -0.298, 0]}>
         <cylinderGeometry args={[16.3, 19.5, 0.08, 48]} />
-        <meshStandardMaterial
-          color="#06B6D4"
-          roughness={0.08}
-          metalness={0.45}
-          transparent
-          opacity={0.70}
-        />
+        <meshStandardMaterial color="#06B6D4" roughness={0.08} metalness={0.45} transparent opacity={0.70} />
       </mesh>
 
-      {/* 1.4. Dải bọt sóng trắng ven bờ cát dập dềnh (Shoreline Dynamic Foam - chu kỳ 3.5s) */}
+      {/* Dải bọt sóng trắng ven bờ cát dập dềnh (Shoreline Dynamic Foam - chu kỳ 3.5s) */}
       <mesh ref={waveRef} position={[0, -0.292, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <ringGeometry args={[16.0, 17.2, 64]} />
         <meshBasicMaterial color="#FFFFFF" transparent opacity={0.40} />
       </mesh>
 
-      {/* ========================================================
-          2. BỜ BIỂN CÁT VÁT NGHIÊNG TỰ NHIÊN 15 ĐỘ (SLOPED SAND SHORELINE)
-          Cát vàng biển nhiệt đới (#FDE68A, roughness: 0.85) thay thế hoàn toàn đĩa xám & thảm cỏ phẳng
-         ======================================================== */}
-      {/* 2.1. Thềm bờ cát chính vát nghiêng bao quanh chân bệ bàn cờ sa bàn */}
+      {/* 2. Bờ biển cát vát nghiêng tự nhiên 15 độ (Sloped Sand Shoreline, #FDE68A, roughness: 0.85) */}
       <mesh receiveShadow position={[0, -0.36, 0]}>
         <cylinderGeometry args={[15.6, 18.5, 0.24, 64]} />
         <meshStandardMaterial color="#FDE68A" roughness={0.85} metalness={0.02} />
       </mesh>
 
-      {/* 2.1b. Gờ vát nghiêng bờ cát chuẩn 15 độ tiếp giáp nước biển (15-degree Sloped Sand Shoreline Skirt: tan(15°)=0.2679, Δy=0.28, Δr=1.045) */}
+      {/* Gờ vát nghiêng bờ cát chuẩn 15 độ tiếp giáp nước biển */}
       <mesh receiveShadow position={[0, -0.75, 0]}>
         <cylinderGeometry args={[27.8, 28.85, 0.28, 64]} />
         <meshStandardMaterial color="#FDE68A" roughness={0.85} metalness={0.02} />
       </mesh>
 
-      {/* 2.2. Thềm cát thoải mép nước biển tiếp xúc triều dâng (cát ẩm nhiệt đới) */}
       <mesh receiveShadow position={[0, -0.38, 0]}>
         <cylinderGeometry args={[16.2, 17.5, 0.14, 48]} />
         <meshStandardMaterial color="#F6D5A8" roughness={0.85} metalness={0.02} />
       </mesh>
 
-      {/* 2.3. Mũi bãi tắm cong phía Tây Nam ôm lấy khu nghỉ dưỡng */}
+      {/* Mũi bãi tắm cong Tây Nam & Đông Nam */}
       <mesh receiveShadow position={[-11.5, -0.35, 8.5]}>
         <cylinderGeometry args={[2.5, 3.5, 0.18, 32]} />
         <meshStandardMaterial color="#FDE68A" roughness={0.85} metalness={0.02} />
       </mesh>
-
-      {/* 2.4. Mũi cát tự nhiên vươn ra biển phía Đông Nam */}
       <mesh receiveShadow position={[15.0, -0.55, 15.0]}>
         <cylinderGeometry args={[4.0, 5.8, 0.20, 32]} />
         <meshStandardMaterial color="#FDE68A" roughness={0.85} metalness={0.02} />
       </mesh>
-
-      {/* 2.5. Đồi cát thoải phía Tây Bắc tạo đường cong bờ biển hữu cơ */}
       <mesh receiveShadow position={[-18, -0.40, -14]}>
         <cylinderGeometry args={[8.0, 10.5, 0.22, 32]} />
         <meshStandardMaterial color="#FDE68A" roughness={0.85} metalness={0.02} />
       </mesh>
 
-      {/* 2.6. Khu nghỉ dưỡng bãi biển: Dù che nắng đa sắc & ghế nằm */}
+      {/* Dù che nắng bãi biển đa sắc */}
       {([
         [-12.2, 8.2, '#EF4444'],
         [-13.2, 9.5, '#F59E0B'],
@@ -207,37 +175,22 @@ export function CoastalIslandEnvironment(): React.ReactElement {
         </group>
       ))}
 
-      {/* ========================================================
-          3. CÂY NHIỆT ĐỚI ĐA TẦNG (LAYERED TROPICAL FOLIAGE)
-          Thân cong tự nhiên, 3 tầng nón lệch góc (#15803D, #4ADE80), gom vào InstancedMesh (<85 calls)
-         ======================================================== */}
+      {/* 3. Thảm thực vật nhiệt đới đa tầng & rừng dừa 60 cây (IMP-30) */}
       <LayeredTropicalFoliage />
+      <TropicalPalmsCluster />
 
-      {/* ========================================================
-          4. RẶNG ĐỒI NÚI XANH MAJESTIC PHÍA BẮC & ĐÔNG (ROLLING EMERALD MOUNTAINS)
-          Hậu cảnh núi xanh hùng vĩ chuẩn Retropoly: #166534 (Núi chính), #15803D (Núi phụ), #22C55E (Đồi thoai thoải)
-         ======================================================== */}
-      <RollingEmeraldMountains />
+      {/* 4. Rặng núi chân trời phía Bắc với tháp radar vi mô (#166534, #15803D, #22C55E) */}
+      <HorizonMountainRange />
 
-      {/* ========================================================
-          5. CẢNG BIỂN & TÀU CONTAINER NGOÀI KHƠI (CARGO SHIPS & SEAPORT)
-         ======================================================== */}
-      {/* Tàu Container Lớn Số 1 (Vịnh biển Tây Nam: [-15.0, -0.30, 9.5]) */}
+      {/* 5. Tàu Container Tây Nam & Nam ngoài khơi */}
       <group position={[-15.0, -0.30, 9.5]} rotation={[0, -0.85, 0]} scale={[0.75, 0.75, 0.75]}>
-        <SafeGLTFModel
-          url={VEHICLE_MODEL_URLS.container}
-          fallback={<ContainerShipProceduralFallback />}
-          castShadow
-          receiveShadow
-        />
-        {/* Vệt bọt nước rẽ sóng đuôi tàu (Stern Wake) */}
+        <SafeGLTFModel url={VEHICLE_MODEL_URLS.container} fallback={<ContainerShipProceduralFallback />} castShadow receiveShadow />
         <mesh position={[6.2, 0.05, 0]}>
           <planeGeometry args={[4.2, 1.8]} />
           <meshBasicMaterial color="#FFFFFF" transparent opacity={0.4} />
         </mesh>
       </group>
 
-      {/* Tàu Container Số 2 (Phía Nam ngoài khơi: [8, -0.35, 36]) */}
       <group position={[8, -0.35, 36]} rotation={[0, -0.2, 0]}>
         <mesh castShadow position={[0, 0.45, 0]}>
           <boxGeometry args={[9.0, 0.8, 2.2]} />
@@ -271,16 +224,12 @@ export function CoastalIslandEnvironment(): React.ReactElement {
         </mesh>
       </group>
 
-      {/* ========================================================
-          6. HẠ TẦNG KẾT NỐI: CẦU CẠN & ĐƯỜNG CAO TỐC NGOẠI ĐẢO (CAUSEWAYS)
-         ======================================================== */}
-      {/* Cầu vượt biển phía Tây Nam */}
+      {/* 6. Hạ tầng kết nối: Cầu cạn, Ga xe lửa Đông Nam & Sân bay Tây Bắc */}
       <group position={[-18, -0.26, 18]} rotation={[0, 0.78, 0]}>
         <mesh castShadow receiveShadow position={[0, 0.1, 0]}>
           <boxGeometry args={[12, 0.18, 1.4]} />
           <meshStandardMaterial color="#CBD5E1" roughness={0.5} />
         </mesh>
-        {/* Trụ cầu cắm xuống biển */}
         {[-4, 0, 4].map((px) => (
           <mesh key={`pier-${px}`} position={[px, -0.2, 0]}>
             <cylinderGeometry args={[0.25, 0.3, 0.6, 8]} />
@@ -288,16 +237,10 @@ export function CoastalIslandEnvironment(): React.ReactElement {
           </mesh>
         ))}
       </group>
-
-      {/* Tuyến đường sắt và Nhà ga trung tâm mái vòm kính & Tàu cao tốc */}
       <TrainStationLandmark />
-
-      {/* Bán đảo Sân bay Quốc tế Tây Bắc & Máy bay đậu tại bãi */}
       <AirportLandmark />
 
-      {/* ========================================================
-          7. MÂY TRẮNG XỐP BỒNG BỀNH VEN TRỜI & MÁY BAY DÂN DỤNG
-         ======================================================== */}
+      {/* 7. Mây trắng xốp bồng bềnh chân trời & Máy bay dân dụng */}
       {([
         [-34, 22, -38, 1.4],
         [16, 24, -45, 1.6],
@@ -308,19 +251,15 @@ export function CoastalIslandEnvironment(): React.ReactElement {
       ] as const).map(([cx, cy, cz, scale], cIdx) => (
         <group key={`cloud-${cIdx}`} position={[cx, cy, cz]} scale={scale}>
           <mesh>
-            <sphereGeometry args={[2.2, 16, 16]} />
+            <sphereGeometry args={[2.2, 14, 14]} />
             <meshStandardMaterial color="#FFFFFF" roughness={0.95} transparent opacity={0.82} />
           </mesh>
           <mesh position={[1.5, -0.2, 0.4]}>
-            <sphereGeometry args={[1.7, 16, 16]} />
+            <sphereGeometry args={[1.7, 14, 14]} />
             <meshStandardMaterial color="#FFFFFF" roughness={0.95} transparent opacity={0.82} />
           </mesh>
           <mesh position={[-1.4, -0.2, -0.4]}>
-            <sphereGeometry args={[1.8, 16, 16]} />
-            <meshStandardMaterial color="#FFFFFF" roughness={0.95} transparent opacity={0.82} />
-          </mesh>
-          <mesh position={[0.3, 0.8, 0]}>
-            <sphereGeometry args={[1.5, 16, 16]} />
+            <sphereGeometry args={[1.8, 14, 14]} />
             <meshStandardMaterial color="#FFFFFF" roughness={0.95} transparent opacity={0.82} />
           </mesh>
         </group>
@@ -342,9 +281,7 @@ export function CoastalIslandEnvironment(): React.ReactElement {
         </mesh>
       </group>
 
-      {/* ========================================================
-          8. HOẠT CẢNH HÀNG HẢI: CA-NÔ TUẦN DUYÊN LƯỚT SÓNG & ĐÀN HẢI ÂU BAY LƯỢN
-         ======================================================== */}
+      {/* 8. Hoạt cảnh hàng hải */}
       <CoastalPatrolBoat />
       <CoastalSeagulls />
     </group>

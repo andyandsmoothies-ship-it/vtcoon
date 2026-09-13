@@ -1,5 +1,5 @@
-// [UI-S02/MSS] DiceTray — 3D Central dice tray & spring physics falling dice
-import React, { useRef, useEffect } from 'react';
+// [UI-S02/MSS][IMP-30] DiceTray — Transient Ruby PBR Falling Dice on Saigon Boulevard Runway
+import React, { useRef, useEffect, useState } from 'react';
 import { a, useSpring } from '@react-spring/three';
 import { useGameStore } from '../store/game_store';
 import {
@@ -36,6 +36,7 @@ function SingleDie({
   spinOffset,
   onRest,
   highlight,
+  fadeOpacity = 0.88,
 }: {
   readonly face: number;
   readonly targetX: number;
@@ -43,6 +44,7 @@ function SingleDie({
   readonly spinOffset: readonly [number, number, number];
   readonly onRest?: () => void;
   readonly highlight?: boolean;
+  readonly fadeOpacity?: number;
 }): React.ReactElement {
   const targetRot = getDiceFaceRotation(clampDiceFace(face));
 
@@ -77,7 +79,10 @@ function SingleDie({
         <boxGeometry args={[0.5, 0.5, 0.5]} />
         <meshPhysicalMaterial
           color={highlight ? '#EF4444' : '#DC2626'}
-          roughness={0.06}
+          roughness={0.12}
+          metalness={0.10}
+          transparent={true}
+          opacity={fadeOpacity}
           clearcoat={1.0}
           clearcoatRoughness={0.08}
         />
@@ -88,6 +93,8 @@ function SingleDie({
           <meshStandardMaterial
             color={pip.isRed ? '#EF4444' : '#FFFFFF'}
             roughness={0.15}
+            transparent={true}
+            opacity={fadeOpacity}
           />
         </mesh>
       ))}
@@ -101,6 +108,9 @@ export function DiceTray(): React.ReactElement {
   const setIsRolling = useGameStore((s) => s.setIsRolling);
 
   const prevRollingRef = useRef(false);
+  const [fadeOpacity, setFadeOpacity] = useState(0.88);
+  const [isVisible, setIsVisible] = useState(true);
+
   const spinOffsetsRef = useRef<
     readonly [readonly [number, number, number], readonly [number, number, number]]
   >([
@@ -113,112 +123,66 @@ export function DiceTray(): React.ReactElement {
   }
 
   useEffect(() => {
-    if (isRolling && !prevRollingRef.current) {
+    if (isRolling) {
+      setIsVisible(true);
+      setFadeOpacity(0.88);
       AudioEngine.playSfx(SoundEffect.DICE_ROLL);
+    } else if (!isRolling && prevRollingRef.current) {
+      // Dừng quay -> chờ 1.5s rồi mờ dần trong 300ms (Phương án A)
+      const timer = setTimeout(() => {
+        setFadeOpacity(0);
+        const hideTimer = setTimeout(() => {
+          setIsVisible(false);
+        }, 300);
+        return () => clearTimeout(hideTimer);
+      }, 1500);
+      return () => clearTimeout(timer);
     }
     prevRollingRef.current = isRolling;
   }, [isRolling]);
 
   const isDoubles = dice[0] === dice[1];
-  const trimColor = isDoubles ? '#F59E0B' : '#78350F';
 
   return (
-    <group position={[0, 0.05, 0]} data-testid="dice-tray">
-      {/* 0. Bậc đá cẩm thạch giật cấp xung quanh (Sunken Plaza Terraced Steps) */}
+    <group position={[0.0, 0.020, 3.8]} data-testid="dice-tray">
+      {/* Sàn diễn xúc xắc phẳng trên Đại Lộ Sài Gòn với hoa văn la bàn đồng thau */}
       <mesh receiveShadow position={[0, -0.01, 0]}>
-        <boxGeometry args={[4.28, 0.04, 4.28]} />
+        <boxGeometry args={[3.2, 0.015, 2.4]} />
         <meshStandardMaterial color="#94A3B8" roughness={0.65} />
       </mesh>
-      <mesh receiveShadow position={[0, 0.03, 0]}>
-        <boxGeometry args={[4.14, 0.04, 4.14]} />
+      <mesh receiveShadow position={[0, -0.005, 0]}>
+        <boxGeometry args={[3.0, 0.015, 2.2]} />
         <meshStandardMaterial color="#CBD5E1" roughness={0.55} />
       </mesh>
-
-      {/* 1. Lòng sàn nỉ xanh hoàng gia & Hoa văn la bàn hoàng kim */}
-      <mesh receiveShadow position={[0, 0.04, 0]}>
-        <boxGeometry args={[3.8, 0.02, 3.8]} />
+      <mesh receiveShadow position={[0, 0.001, 0]}>
+        <boxGeometry args={[2.8, 0.015, 2.0]} />
         <meshStandardMaterial color="#064E3B" roughness={0.8} />
       </mesh>
-      {/* Vòng la bàn trung tâm khảm đồng thau */}
-      <mesh position={[0, 0.052, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[0.7, 0.73, 32]} />
+      <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[0.45, 0.48, 32]} />
         <meshBasicMaterial color="#F59E0B" />
       </mesh>
-      <mesh position={[0, 0.052, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[0.35, 0.38, 24]} />
-        <meshBasicMaterial color="#FBBF24" />
-      </mesh>
-      {/* 4 Móc góc đồng thau định vị */}
-      {[-1.65, 1.65].map((cx) =>
-        [-1.65, 1.65].map((cz) => (
-          <mesh key={`tray-corner-${cx}-${cz}`} position={[cx, 0.052, cz]}>
-            <boxGeometry args={[0.16, 0.005, 0.16]} />
-            <meshStandardMaterial color="#F59E0B" metalness={0.8} roughness={0.2} />
-          </mesh>
-        ))
-      )}
 
-      {/* 2. Thành quảng trường: Gỗ gụ hoàng gia & Gờ cẩm thạch trắng bo viền */}
-      <group position={[0, 0.12, -1.9]}>
-        <mesh castShadow>
-          <boxGeometry args={[4.0, 0.24, 0.2]} />
-          <meshStandardMaterial color={trimColor} roughness={0.4} metalness={0.3} />
-        </mesh>
-        <mesh position={[0, 0.125, 0]}>
-          <boxGeometry args={[4.04, 0.015, 0.22]} />
-          <meshStandardMaterial color="#F8FAFC" roughness={0.3} />
-        </mesh>
+      {/* 2 Xúc xắc 3D đỏ Ruby trong suốt với chuyển động vật lý đàn hồi */}
+      <group visible={isVisible}>
+        <SingleDie
+          face={dice[0]}
+          targetX={-0.6}
+          isRolling={isRolling}
+          spinOffset={spinOffsetsRef.current[0]}
+          highlight={isDoubles}
+          fadeOpacity={fadeOpacity}
+        />
+        <SingleDie
+          face={dice[1]}
+          targetX={0.6}
+          isRolling={isRolling}
+          spinOffset={spinOffsetsRef.current[1]}
+          highlight={isDoubles}
+          fadeOpacity={fadeOpacity}
+          onRest={() => setIsRolling(false)}
+        />
       </group>
-
-      <group position={[0, 0.12, 1.9]}>
-        <mesh castShadow>
-          <boxGeometry args={[4.0, 0.24, 0.2]} />
-          <meshStandardMaterial color={trimColor} roughness={0.4} metalness={0.3} />
-        </mesh>
-        <mesh position={[0, 0.125, 0]}>
-          <boxGeometry args={[4.04, 0.015, 0.22]} />
-          <meshStandardMaterial color="#F8FAFC" roughness={0.3} />
-        </mesh>
-      </group>
-
-      <group position={[1.9, 0.12, 0]}>
-        <mesh castShadow>
-          <boxGeometry args={[0.2, 0.24, 3.6]} />
-          <meshStandardMaterial color={trimColor} roughness={0.4} metalness={0.3} />
-        </mesh>
-        <mesh position={[0, 0.125, 0]}>
-          <boxGeometry args={[0.22, 0.015, 3.64]} />
-          <meshStandardMaterial color="#F8FAFC" roughness={0.3} />
-        </mesh>
-      </group>
-
-      <group position={[-1.9, 0.12, 0]}>
-        <mesh castShadow>
-          <boxGeometry args={[0.2, 0.24, 3.6]} />
-          <meshStandardMaterial color={trimColor} roughness={0.4} metalness={0.3} />
-        </mesh>
-        <mesh position={[0, 0.125, 0]}>
-          <boxGeometry args={[0.22, 0.015, 3.64]} />
-          <meshStandardMaterial color="#F8FAFC" roughness={0.3} />
-        </mesh>
-      </group>
-
-      {/* 2 Dice with independent tumble spins */}
-      <SingleDie
-        face={dice[0]}
-        targetX={-0.6}
-        isRolling={isRolling}
-        spinOffset={spinOffsetsRef.current[0]}
-        highlight={isDoubles}
-      />
-      <SingleDie
-        face={dice[1]}
-        targetX={0.6}
-        isRolling={isRolling}
-        spinOffset={spinOffsetsRef.current[1]}
-        highlight={isDoubles}
-        onRest={() => setIsRolling(false)}
-      />
     </group>
   );
 }
