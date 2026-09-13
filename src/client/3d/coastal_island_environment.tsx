@@ -7,6 +7,47 @@ import { CoastalSeagulls } from './coastal_seagulls';
 import { LayeredTropicalFoliage } from './layered_tropical_foliage';
 import { RollingEmeraldMountains, AirportLandmark, TrainStationLandmark } from './coastal_island_landmarks';
 import { useSafeFrame } from './safe_frame';
+import { SafeGLTFModel } from './asset_loader/safe_gltf_model';
+import { VEHICLE_MODEL_URLS } from './diorama/diorama_traffic';
+
+export function ContainerShipProceduralFallback(): React.ReactElement {
+  return (
+    <group>
+      <mesh castShadow position={[0, 0.5, 0]}>
+        <boxGeometry args={[11.0, 0.9, 2.6]} />
+        <meshStandardMaterial color="#DC2626" roughness={0.6} metalness={0.2} />
+      </mesh>
+      <mesh castShadow position={[0, 0.96, 0]}>
+        <boxGeometry args={[10.6, 0.15, 2.4]} />
+        <meshStandardMaterial color="#F8FAFC" roughness={0.4} />
+      </mesh>
+      <mesh castShadow position={[4.0, 1.5, 0]}>
+        <boxGeometry args={[1.8, 1.1, 2.0]} />
+        <meshStandardMaterial color="#F1F5F9" roughness={0.3} />
+      </mesh>
+      <mesh position={[4.3, 2.2, 0]}>
+        <cylinderGeometry args={[0.2, 0.25, 0.6, 8]} />
+        <meshStandardMaterial color="#EF4444" roughness={0.5} />
+      </mesh>
+      {[-3.6, -1.8, 0.0, 1.8].map((cx, i) => (
+        <group key={`container-stack-${i}`} position={[cx, 1.3, 0]}>
+          <mesh castShadow position={[0, 0, -0.5]}>
+            <boxGeometry args={[1.5, 0.6, 0.9]} />
+            <meshStandardMaterial color={i % 2 === 0 ? '#10B981' : '#3B82F6'} roughness={0.5} />
+          </mesh>
+          <mesh castShadow position={[0, 0, 0.5]}>
+            <boxGeometry args={[1.5, 0.6, 0.9]} />
+            <meshStandardMaterial color={i % 3 === 0 ? '#F59E0B' : '#0284C7'} roughness={0.5} />
+          </mesh>
+          <mesh castShadow position={[0, 0, 0.6]}>
+            <boxGeometry args={[1.4, 0.55, 1.6]} />
+            <meshStandardMaterial color={i % 2 === 0 ? '#22C55E' : '#E11D48'} roughness={0.5} />
+          </mesh>
+        </group>
+      ))}
+    </group>
+  );
+}
 
 export function CoastalIslandEnvironment(): React.ReactElement {
   const waveRef = useRef<Mesh>(null);
@@ -183,38 +224,12 @@ export function CoastalIslandEnvironment(): React.ReactElement {
          ======================================================== */}
       {/* Tàu Container Lớn Số 1 (Vịnh biển Tây Nam: [-15.0, -0.30, 9.5]) */}
       <group position={[-15.0, -0.30, 9.5]} rotation={[0, -0.85, 0]} scale={[0.75, 0.75, 0.75]}>
-        <mesh castShadow position={[0, 0.5, 0]}>
-          <boxGeometry args={[11.0, 0.9, 2.6]} />
-          <meshStandardMaterial color="#DC2626" roughness={0.6} metalness={0.2} />
-        </mesh>
-        <mesh castShadow position={[0, 0.96, 0]}>
-          <boxGeometry args={[10.6, 0.15, 2.4]} />
-          <meshStandardMaterial color="#F8FAFC" roughness={0.4} />
-        </mesh>
-        <mesh castShadow position={[4.0, 1.5, 0]}>
-          <boxGeometry args={[1.8, 1.1, 2.0]} />
-          <meshStandardMaterial color="#F1F5F9" roughness={0.3} />
-        </mesh>
-        <mesh position={[4.3, 2.2, 0]}>
-          <cylinderGeometry args={[0.2, 0.25, 0.6, 8]} />
-          <meshStandardMaterial color="#EF4444" roughness={0.5} />
-        </mesh>
-        {[-3.6, -1.8, 0.0, 1.8].map((cx, i) => (
-          <group key={`container-stack-${i}`} position={[cx, 1.3, 0]}>
-            <mesh castShadow position={[0, 0, -0.5]}>
-              <boxGeometry args={[1.5, 0.6, 0.9]} />
-              <meshStandardMaterial color={i % 2 === 0 ? '#10B981' : '#3B82F6'} roughness={0.5} />
-            </mesh>
-            <mesh castShadow position={[0, 0, 0.5]}>
-              <boxGeometry args={[1.5, 0.6, 0.9]} />
-              <meshStandardMaterial color={i % 3 === 0 ? '#F59E0B' : '#0284C7'} roughness={0.5} />
-            </mesh>
-            <mesh castShadow position={[0, 0, 0.6]}>
-              <boxGeometry args={[1.4, 0.55, 1.6]} />
-              <meshStandardMaterial color={i % 2 === 0 ? '#22C55E' : '#E11D48'} roughness={0.5} />
-            </mesh>
-          </group>
-        ))}
+        <SafeGLTFModel
+          url={VEHICLE_MODEL_URLS.container}
+          fallback={<ContainerShipProceduralFallback />}
+          castShadow
+          receiveShadow
+        />
         {/* Vệt bọt nước rẽ sóng đuôi tàu (Stern Wake) */}
         <mesh position={[6.2, 0.05, 0]}>
           <planeGeometry args={[4.2, 1.8]} />

@@ -12,8 +12,9 @@
     "lint:ui": "node scripts/lint_ui.mjs",
     "lint:slop": "node scripts/lint_slop.mjs",
     "lint:dup": "jscpd src/ --config .jscpd.json",
-    "gate:quick": "npm run lint:ui && npm run lint:slop && npm run lint:dup && tsc --noEmit",
-    "gate": "npm run lint:ui && npm run lint:slop && npm run lint:dup && tsc --noEmit && vitest run"
+    "lint:assets": "node scripts/optimize_assets.mjs",
+    "gate:quick": "npm run lint:ui && npm run lint:slop && npm run lint:dup && npm run lint:assets && tsc --noEmit",
+    "gate": "npm run lint:ui && npm run lint:slop && npm run lint:dup && npm run lint:assets && tsc --noEmit && vitest run"
   },
   "devDependencies": {
     "@react-spring/three": "^10.1.2",

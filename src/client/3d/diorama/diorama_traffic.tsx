@@ -4,6 +4,34 @@ import { Vector3, CatmullRomCurve3, type Group } from 'three';
 import { RoundedBox } from '@react-three/drei';
 import { useEnvironmentStore } from '../../store/environment_store';
 import { useSafeFrame } from '../safe_frame';
+import { SafeGLTFModel } from '../asset_loader/safe_gltf_model';
+
+export const VEHICLE_MODEL_URLS = {
+  sedan: '/models/vehicles/vehicle_sedan.glb',
+  taxi: '/models/vehicles/vehicle_taxi.glb',
+  bus: '/models/vehicles/vehicle_bus.glb',
+  van: '/models/vehicles/vehicle_van.glb',
+  boat: '/models/vehicles/vehicle_boat.glb',
+  container: '/models/vehicles/vehicle_container.glb',
+} as const;
+
+export type VehicleModelKey = keyof typeof VEHICLE_MODEL_URLS;
+
+export function getVehicleModelUrl(type: MicroVehicleDef['type']): string {
+  switch (type) {
+    case 'bus':
+      return VEHICLE_MODEL_URLS.bus;
+    case 'taxi':
+      return VEHICLE_MODEL_URLS.taxi;
+    case 'van':
+      return VEHICLE_MODEL_URLS.van;
+    case 'sedan':
+    case 'suv':
+    case 'sports':
+    default:
+      return VEHICLE_MODEL_URLS.sedan;
+  }
+}
 
 export interface MicroVehicleDef {
   readonly id: string;
@@ -28,6 +56,52 @@ export const MICRO_VEHICLES: readonly MicroVehicleDef[] = [
   { id: 'taxi-green', name: 'Taxi Xanh Mai Linh', type: 'taxi', color: '#10B981', track: 'inner', speed: 0.032, offset: 0.48, size: [0.09, 0.06, 0.19] },
   { id: 'van-yellow', name: 'Xe Vận Tải DHL', type: 'van', color: '#EAB308', track: 'inner', speed: 0.032, offset: 0.81, size: [0.10, 0.08, 0.23] },
 ];
+
+const tempVec = new Vector3();
+const tempTangent = new Vector3();
+
+export interface MicroVehicleFallbackProps {
+  readonly v: MicroVehicleDef;
+}
+
+export function MicroVehicleProceduralFallback({ v }: MicroVehicleFallbackProps): React.ReactElement {
+  const [w, h, l] = v.size;
+  return (
+    <group>
+      {/* 1. Thân vỏ xe chính bo cong khí động học */}
+      <RoundedBox args={[w, h * 0.7, l]} radius={0.008} smoothness={2} castShadow position={[0, h / 2, 0]}>
+        <meshStandardMaterial color={v.color} roughness={0.35} metalness={0.2} />
+      </RoundedBox>
+
+      {/* 2. Cabin kính xe tối màu bo góc */}
+      <RoundedBox args={[w * 0.88, h * 0.45, l * 0.6]} radius={0.005} smoothness={2} position={[0, h * 0.72, 0]}>
+        <meshStandardMaterial color="#0F172A" roughness={0.2} />
+      </RoundedBox>
+
+      {/* Bảng hiệu nóc đặc trưng cho Taxi */}
+      {v.type === 'taxi' && (
+        <mesh position={[0, h + 0.015, 0]}>
+          <boxGeometry args={[0.04, 0.02, 0.03]} />
+          <meshBasicMaterial color="#FEF08A" />
+        </mesh>
+      )}
+
+      {/* 3. Bốn bánh xe cao su */}
+      {([-1, 1] as const).map((sideX) =>
+        ([-1, 1] as const).map((sideZ) => (
+          <mesh
+            key={`wheel-${sideX}-${sideZ}`}
+            position={[sideX * (w / 2 + 0.004), 0.018, sideZ * (l * 0.28)]}
+            rotation={[0, 0, Math.PI / 2]}
+          >
+            <cylinderGeometry args={[0.018, 0.018, 0.014, 6]} />
+            <meshStandardMaterial color="#1E293B" roughness={0.9} />
+          </mesh>
+        ))
+      )}
+    </group>
+  );
+}
 
 export function DioramaTraffic(): React.ReactElement {
   const phase = useEnvironmentStore((s) => s.phase);
@@ -91,11 +165,11 @@ export function DioramaTraffic(): React.ReactElement {
       const curve = v.track === 'outer' ? outerCurve : innerCurve;
       const progress = ((t * v.speed + v.offset) % 1 + 1) % 1;
 
-      const pt = curve.getPointAt(progress);
-      const tangent = curve.getTangentAt(progress);
-      const yaw = Math.atan2(tangent.x, tangent.z);
+      curve.getPointAt(progress, tempVec);
+      curve.getTangentAt(progress, tempTangent);
+      const yaw = Math.atan2(tempTangent.x, tempTangent.z);
 
-      grp.position.set(pt.x, pt.y, pt.z);
+      grp.position.copy(tempVec);
       grp.rotation.set(0, yaw, 0);
     });
   });
@@ -111,37 +185,13 @@ export function DioramaTraffic(): React.ReactElement {
               vehicleRefs.current[idx] = el;
             }}
           >
-            {/* 1. Thân vỏ xe chính bo cong khí động học */}
-            <RoundedBox args={[w, h * 0.7, l]} radius={0.008} smoothness={2} castShadow position={[0, h / 2, 0]}>
-              <meshStandardMaterial color={v.color} roughness={0.35} metalness={0.2} />
-            </RoundedBox>
-
-            {/* 2. Cabin kính xe tối màu bo góc */}
-            <RoundedBox args={[w * 0.88, h * 0.45, l * 0.6]} radius={0.005} smoothness={2} position={[0, h * 0.72, 0]}>
-              <meshStandardMaterial color="#0F172A" roughness={0.2} />
-            </RoundedBox>
-
-            {/* Bảng hiệu nóc đặc trưng cho Taxi */}
-            {v.type === 'taxi' && (
-              <mesh position={[0, h + 0.015, 0]}>
-                <boxGeometry args={[0.04, 0.02, 0.03]} />
-                <meshBasicMaterial color="#FEF08A" />
-              </mesh>
-            )}
-
-            {/* 3. Bốn bánh xe cao su */}
-            {([-1, 1] as const).map((sideX) =>
-              ([-1, 1] as const).map((sideZ) => (
-                <mesh
-                  key={`wheel-${sideX}-${sideZ}`}
-                  position={[sideX * (w / 2 + 0.004), 0.018, sideZ * (l * 0.28)]}
-                  rotation={[0, 0, Math.PI / 2]}
-                >
-                  <cylinderGeometry args={[0.018, 0.018, 0.014, 6]} />
-                  <meshStandardMaterial color="#1E293B" roughness={0.9} />
-                </mesh>
-              ))
-            )}
+            {/* 1-3. Nạp mô hình 3D nhị phân qua SafeGLTFModel với Fallback thủ tục Zero-Crash */}
+            <SafeGLTFModel
+              url={getVehicleModelUrl(v.type)}
+              fallback={<MicroVehicleProceduralFallback v={v} />}
+              castShadow
+              receiveShadow
+            />
 
             {/* 4. Đèn pha LED vi mô rọi sáng mặt đường phía trước */}
             {/* Bóng đèn LED trái */}

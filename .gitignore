@@ -14,6 +14,7 @@ coverage/
 *.log
 npm-debug.log*
 yarn-debug.log*
+server_logs/
 
 # Environment & Temp
 .env

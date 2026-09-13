@@ -10,7 +10,7 @@
 | `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21 |
 | `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40 |
 | `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40 |
-| `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera | #20, #22, #23, #24, #25, #26, #30, #38, #40 |
+| `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #38, #40, #46, #47, #48 |
 | `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #36, #37, #40 |
 | `[UAT/TEST]` | Nghiệm Thu, Adversarial TDD, Ảnh Chụp Màn Hình (.jpg), Shell Escaping, File I/O Lock | #5, #28, #29, #31, #35 |
 | `[TELEMETRY]` | Giám Sát Hiệu Năng Thời Gian Thực, Chó Canh Phòng Bất Biến, Hộp Đen Tái Hiện Lỗi | #39 |
@@ -427,3 +427,96 @@
   2. **Server-Wide Room Teardown Hook**: Mọi luồng đóng phòng (`WssServer.closeRoom`) BẮT BUỘC gọi `adminManager.handleRoomClosed(roomCode)` để dọn dẹp sạch sẽ `roomLogs`, `roomViolations` và `subscribedRooms`.
   3. **Dedicated Test Ports**: Các bài test integration WebSocket BẮT BUỘC sử dụng cổng riêng biệt không trùng lặp (ví dụ `3205` cho Admin Portal).
   4. **Executable Forensic Repro Generator**: Bộ sinh mã test tái hiện tự động BẮT BUỘC cấu hình đầy đủ tối thiểu 2 người chơi (Host + người chơi khác hoặc Bot dự phòng) để đảm bảo mã test có thể chạy thành công ngay lập tức khi copy vào Vitest.
+
+---
+
+### 43. [PERF/FSM/STORE] Tối Ưu Cấp Phát Render Loop & Phân Rã Module Core Logic <= 400 LOC (Zero-Garbage Render Loop & Modular Core Logic Budget Invariant)
+- **Hiện tượng**:
+  1. *Cấp phát rác trong Render Loop 60 FPS*: `diorama_traffic.tsx` gọi `curve.getPointAt()` và `curve.getTangentAt()` không truyền vector tham chiếu, sinh ra 16 đối tượng `Vector3` mỗi khung hình (960 allocations/giây), gây áp lực Garbage Collection liên tục làm giật vi mô khung hình WebGL.
+  2. *Mảng tích lũy không trần trong Zustand Stores*: `telemetry_store.ts` (`violations`) và `game_store.ts` (`floatingTexts`) không áp trần Ring Buffer, tích lũy vô hạn qua các ván đấu dài gây phình to bộ nhớ Client > 500KB.
+  3. *File Core Logic vượt ngưỡng 400 LOC & Hàm nguyên khối CC > 100*: `room_manager.ts` (511 LOC), `wss_server.ts` (468 LOC), `game_store.ts` (505 LOC) và `apply_delta.ts` (419 LOC, CC = 119) phình to theo thời gian, vi phạm trần độ phức tạp và giới hạn dòng mã của Hiến pháp `GEMINI.md`.
+  4. *Ghi đè thuộc tính dư thừa trong useFrame*: `game_canvas.tsx` gán đè biến toàn cục `window.__threeScene` và `window.__threeCamera` liên tục 60 lần/giây thay vì chỉ gán 1 lần khi mount qua `useEffect`.
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **Pre-allocated Vector Pattern**: Mọi phép toán hình học trong vòng lặp render 60 FPS (`useFrame`/`useSafeFrame`) BẮT BUỘC sử dụng đối tượng khởi tạo sẵn ở phạm vi module (`tempVec = new Vector3()`), đột biến in-place thay vì khởi tạo instance mới mỗi frame.
+  2. **Bounded Ring Buffer O(1)**: Mọi mảng nhật ký hoặc hiệu ứng trong Zustand BẮT BUỘC có trần kích thước cố định (`MAX_VIOLATIONS = 50`, `MAX_FLOATING_TEXTS = 15`) và áp dụng `slice(-MAX)` hoặc `slice(0, MAX)` khi thêm phần tử mới.
+  3. **Strict 400 LOC Modular Decomposition**: Khi file Core Logic / FSM / Domain Services vượt 300 LOC (ngưỡng 75%), BẮT BUỘC phân rã thành các coordinator chuyên biệt (`room_bot_coordinator.ts`, `room_property_coordinator.ts`, `wss_lobby_handlers.ts`, `game_store_types.ts`). Tuyệt đối cấm "code golf" (gộp dòng) hoặc xóa chú thích để lách giới hạn.
+  4. **Subroutine Decomposition with CC <= 5**: Mọi hàm biến đổi trạng thái phức tạp BẮT BUỘC phân rã thành các hàm con độc lập (`applyPlayerDeltas`, `applyCellDeltas`, `applyPhaseAndTimerDeltas`), mỗi hàm có độ dài <= 30 LOC và độ phức tạp Cyclomatic Complexity CC <= 5.
+
+---
+
+### 44. [ADMIN/LOG/NFR] Ghi Nhật Ký Thời Gian Thực Nối Dòng (Append-Only JSONL) & Bảo Tồn Lịch Sử Trận Đấu Khi Đóng Phòng (Persistent Real-Time Admin Logging Invariant)
+- **Hiện tượng**:
+  1. *Mất ngữ cảnh đầu trận do giới hạn RAM*: Cơ chế lưu trữ RAM giới hạn 100 log (`MAX_ROOM_LOGS = 100`) khiến các trận đấu dài qua nhiều vòng (10-30 vòng) bị đẩy mất các sự kiện tạo phòng, đấu giá, mua đất quan trọng ban đầu.
+  2. *Mất toàn bộ lịch sử khi phòng đóng*: Khi trận kết thúc bình thường (`broadcastGameOver`) hoặc bị đóng (`closeRoom`), phương thức `handleRoomClosed` xóa sạch log trên RAM, khiến Quản trị viên vào sau không thể truy cứu lịch sử ván đấu.
+  3. *Lỗi INVALID_ENVELOPE khi thêm thông điệp mạng*: Khi bổ sung các gói tin WebSocket mới (`ADMIN_GET_ARCHIVED_ROOMS`, `ADMIN_GET_ARCHIVED_LOGS`), nếu quên đăng ký vào `VALID_CLIENT_TYPES` và `validateFieldsByType` trong `EnvelopeValidator`, toàn bộ yêu cầu từ client sẽ bị tường lửa bảo mật chặn lại với mã lỗi `INVALID_ENVELOPE`.
+  4. *Trùng lặp mã AST Token (JSCPD)*: Việc hiển thị danh sách dòng log ở cả màn hình Live Stream và Archive View dễ tạo ra bản sao token trùng lặp nếu render JSX trực tiếp trong 2 view.
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **Zero-Crash Append-Only Stream**: Mọi sự kiện phát sinh ghi trực tiếp 1 dòng JSON nối tiếp (`fs.appendFileSync` bọc trong `try/catch` có chú thích `/* safe-ignore */`) vào tệp `server_logs/rooms/<ROOM_CODE>_<TIMESTAMP>.jsonl`. Không bao giờ xóa tệp này khi phòng đóng hoặc kết thúc.
+  2. **Manifest Sổ Cái Tập Trung**: Máy chủ duy trì tệp chỉ mục `server_logs/rooms/rooms_manifest.json` ghi nhận trạng thái (`ACTIVE`, `FINISHED`, `TERMINATED`), thời gian bắt đầu, kết thúc, số người chơi, người thắng và dung lượng tệp.
+  3. **Envelope Validator Alignment**: Mọi loại thông điệp WebSocket mới từ client BẮT BUỘC được khai báo trong `VALID_CLIENT_TYPES` và ánh xạ trường trong `validateFieldsByType`.
+  4. **UI Deduplication Pattern**: Tách riêng component hiển thị dòng log (`AdminLogRow`) để tái sử dụng giữa Live View và Archive View, triệt tiêu 100% mã trùng lặp AST token (JSCPD).
+
+---
+
+### 45. [ADMIN/PERF/CRASH] Bất Biến Chống Nghẽn Đĩa Khi Ghi Sự Kiện & Phục Hồi Dòng Nhật Ký Bị Vỡ Sau Sự Cố Sập Nguồn (Zero-Blocking Manifest & Per-Line Crash Resilience Invariant)
+- **Hiện tượng**:
+  1. *Nghẽn đĩa I/O nghiêm trọng do ghi đè toàn bộ Manifest trên từng sự kiện*: Trong triển khai ban đầu của Persistent Logger, mỗi lần gọi `appendEvent`, hệ thống lại gọi `fs.writeFileSync(manifestFile, JSON.stringify(list, null, 2))` đồng bộ để cập nhật `totalEvents`. Khi trận đấu có 1.000 sự kiện hoặc 10 phòng chạy song song, việc ghi đè liên tục tệp JSON làm nghẽn Event Loop của Node.js, phá vỡ ngân sách 60 FPS và độ trễ dưới 60ms.
+  2. *Mất toàn bộ nhật ký ván đấu khi có 1 dòng bị vỡ (All-or-Nothing Crash)*: `getRoomFullLog` dùng `lines.map(l => JSON.parse(l))` bọc trong một khối `try/catch` duy nhất. Nếu máy chủ bị tắt nguồn đột ngột tạo ra 1 dòng JSON bị đứt đoạn ở cuối tệp, toàn bộ hàm quăng ngoại lệ và trả về mảng rỗng `[]`, khiến Quản trị viên nhìn thấy 0 dòng log dù 999 dòng trước đó hoàn toàn hợp lệ.
+  3. *Sai lệch số lượng người chơi (Player Count) sau khi kết thúc ván*: `RoomFinishSummary` không lưu trữ `playerCount`, khiến tệp chỉ mục `rooms_manifest.json` luôn ghi nhận `playerCount: 1` của lúc tạo phòng ban đầu dù ván đấu thực tế có 4 người chơi.
+  4. *Cắt gọt nhật ký Live Stream xuống 100 dòng*: Client hook `useAdminPortal` sử dụng `slice(-99)` trong luồng `ADMIN_ROOM_LOG`, tự ý cắt bỏ sự kiện từ vòng 1 đến vòng 15 khi trận đấu bước sang vòng 30.
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **Zero-Blocking Manifest Catalog**: CẤM gọi `saveManifest()` đồng bộ trong `appendEvent`. Số liệu thống kê `totalEvents` và `fileSizeBytes` phải được cập nhật tức thì trên RAM (`this.manifest`). Thao tác ghi đĩa `saveManifest()` chỉ được phép thực thi tại 2 ranh giới vòng đời: Khởi tạo phòng (`initRoomLog`) và Đóng/Kết thúc phòng (`finishRoomLog`).
+  2. **Per-Line Safe Parse Recovery**: Đọc tệp `.jsonl` BẮT BUỘC bọc `JSON.parse` riêng lẻ cho từng dòng độc lập trong vòng lặp. Dòng lỗi/corrupted do ngắt nguồn phải được bỏ qua an toàn để bảo toàn 100% các bản ghi hợp lệ khác.
+  3. **Accurate Player Count Invariant**: Khi phòng đóng (`closeRoom` / `finishRoomLog`), BẮT BUỘC truyền số lượng người chơi thực tế (`room.players.length`) vào `RoomFinishSummary` để cập nhật chính xác số người tham gia vào Manifest.
+  4. **Extended Live Log Buffer**: Mảng log trực tiếp trên Client phải duy trì dung lượng tối thiểu 2.000 sự kiện để bảo đảm Quản trị viên xem trọn vẹn toàn bộ diễn biến từ vòng 1 đến vòng 30.
+
+---
+
+### 46. [3D/ASSET/LOADER] Bất Biến Nạp Mô Hình 3D An Toàn (SafeGLTFModel), Chặn Treo Headless Guard & Kiểm Soát Ngân Sách Asset (Zero-Crash GLTF & Asset Budget Invariant)
+- **Hiện tượng & Bẫy thực tế**:
+  1. *Gãy đổ toàn bộ Test Suites khi import Drei useGLTF*: Khi các component 3D gọi `useGLTF` từ `@react-three/drei` trực tiếp, môi trường kiểm thử Vitest / Node.js (vốn không có WebGL context thật) sẽ crash ngay lập tức hoặc treo vô tận ở trạng thái React Suspense Promise, làm tê liệt 122+ bộ test của dự án.
+  2. *Cạn kiệt WebGL Context (Context Exhaustion) do kiểm tra lặp lại*: Hàm kiểm tra môi trường nếu tạo mới canvas (`document.createElement('canvas').getContext('webgl2')`) ở mỗi lần render component sẽ nhanh chóng chạm trần 8–16 contexts của trình duyệt, gây sập WebGL context và rớt FPS nghiêm trọng.
+  3. *Vi phạm React Rules of Hooks*: Đặt các hook như `useRef` sau câu lệnh rẽ nhánh điều kiện `if (isHeadless) return <>{effectiveFallback}</>;` vi phạm quy tắc Hooks của React, dẫn đến crash ứng dụng khi render qua lại giữa các môi trường hoặc SSR.
+  4. *Khóa cứng trạng thái lỗi vĩnh viễn (Error Boundary Lock)*: Khi tải mô hình thất bại (ví dụ lỗi mạng 404), `SafeModelErrorBoundary` bắt lỗi và chuyển `hasError = true`. Nếu component cha truyền vào một `url` mới đã sửa đúng, Error Boundary vẫn giữ `hasError = true` nếu không có cơ chế reset trạng thái theo vòng đời React.
+  5. *Định dạng glTF không chuẩn & Primitive Strip/Fan*: Mô hình xuất từ Blockbench hoặc MagicaVoxel có thể dùng `TRIANGLE_STRIP` (mode 5) hoặc `TRIANGLE_FAN` (mode 6) thay vì chỉ `TRIANGLES` (mode 4), khiến các thuật toán đếm tam giác chia 3 bị sai lệch hoặc bỏ qua.
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **Headless Guard Tuyệt Đối (`isHeadlessOrTestEnv`)**: Mọi lệnh nạp tài nguyên ngoài qua Drei `useGLTF` BẮT BUỘC phải đi qua lớp bảo vệ `isHeadlessOrTestEnv()`. Trong môi trường Node / Vitest / SSR, component tự động trả về Procedural Fallback mà không bao giờ kích hoạt hook WebGL thật.
+  2. **Bộ Đệm WebGL Context Caching (`cachedHasWebGL`)**: Kết quả kiểm tra WebGL context BẮT BUỘC được lưu cache ở cấp module (`cachedHasWebGL`) và chỉ được xóa khi gọi `setHeadlessGuardOverride(null)`.
+  3. **Strict Rules of Hooks Invariant**: Mọi React Hooks (`useRef`, `useMemo`) BẮT BUỘC khai báo ở dòng đầu tiên của functional component trước bất kỳ câu lệnh rẽ nhánh `return` nào.
+  4. **Dynamic Error Recovery via `getDerivedStateFromProps`**: `SafeModelErrorBoundary` BẮT BUỘC lưu trữ `prevUrl` trong state và triển khai `static getDerivedStateFromProps` để tự động dọn dẹp `{ hasError: false, error: undefined }` ngay khi prop `url` thay đổi.
+  5. **Ngân Sách Kỹ Thuật Bắt Buộc (Asset Budget Invariant)**:
+     - Tổng dung lượng tải ban đầu toàn bộ mô hình: `<= 2.5 MB`.
+     - Quân cờ (Pawns): `<= 150 KB`, `<= 1.200 triangles`.
+     - Công trình (Buildings): `<= 100 KB`, `<= 800 triangles`.
+     - Vi giao thông (Vehicles): `<= 30 KB`, `<= 400 triangles`.
+     - Danh thắng (Landmarks): `<= 200 KB`, `<= 1.500 triangles`.
+     - Quy tắc đếm tam giác: Mode 4 (`count / 3`), Mode 5 & 6 (`Math.max(0, count - 2)`).
+     - Kiểm soát tự động qua `npm run lint:assets` tích hợp trong `gate:quick` và `gate`.
+
+---
+
+### 47. [3D/VEHICLES/TRAFFIC] Bất Biến Phân Tách Chủng Loại Mô Hình Vi Giao Thông & Chống Xung Đột Chiều Sâu Đèn Chiếu Sáng (Discrete Vehicle Model Archetypes & Z-Fighting Immunity Invariant)
+- **Hiện tượng & Bẫy thực tế**:
+  1. *Ô nhiễm nhận diện thị giác (Sedan Roof Sign Glitch)*: Gắn cố định bảng hiệu nóc taxi vào mô hình sedan khiến toàn bộ xe cá nhân (sedan, SUV, coupe thể thao) khi tải mô hình `.glb` đều biến thành xe taxi, phá vỡ tính đa dạng thị giác của sa bàn đô thị.
+  2. *Bỏ sót xe thùng và tàu container*: Quy định kỹ thuật yêu cầu đủ 3 cặp phương tiện (xe hơi sedan/taxi, xe bus/thùng, tàu thuyền tuần tra/container) nhưng việc chỉ xuất 3 mô hình cơ bản và bỏ qua xe thùng vận tải và tàu container hàng hải làm đứt gãy tính hoàn thiện của lát cắt dọc.
+  3. *Xung đột chiều sâu đèn pha/hậu (Z-Fighting Light Fixture)*: Khi component cha `DioramaTraffic` điều khiển vệt sáng đèn pha LED và đèn hậu ban đêm kèm các khối bóng đèn, nếu tệp `.glb` nhị phân cũng chứa các khối đèn ở tọa độ tương đương, hai bề mặt sẽ tranh chấp buffer chiều sâu (Z-fighting) gây nhấp nháy khó chịu trên WebGL.
+  4. *Gãy kiểm thử tĩnh nếu không đồng bộ Procedural Fallback*: Các test suite môi trường headless (`diorama_traffic.test.ts`, `coastal_dynamics.test.ts`) kiểm tra các chuỗi mã màu hex tĩnh (`#0284C7`, `#10B981`, `#EAB308`, `#DC2626`). Nếu xóa bỏ hoặc làm sai lệch `MicroVehicleProceduralFallback` hay `ContainerShipProceduralFallback`, test headless sẽ fail lập tức.
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **Tách biệt mô hình độc lập (Discrete GLTF Archetypes)**: Xuất đầy đủ 6 tệp mô hình `.glb` độc lập (`vehicle_sedan.glb` không biển taxi, `vehicle_taxi.glb` có biển nóc phát sáng, `vehicle_bus.glb`, `vehicle_van.glb` thùng xe hàng hóa, `vehicle_boat.glb`, `vehicle_container.glb`).
+  2. **Hàm phân giải chuẩn loại (`getVehicleModelUrl`)**: Mọi xe vi mô trên đường nội bộ hoặc ngoài khơi đều được phân giải URL mô hình xác định theo `v.type` qua `getVehicleModelUrl`.
+  3. **Zero Z-Fighting Light Separation**: Thân vỏ mô hình glTF giữ bề mặt tinh gọn; toàn bộ các nguồn sáng phát quang, vệt đèn pha rọi mặt đường và bọt rẽ sóng do component cha quản lý để dễ dàng điều khiển theo chu kỳ Ngày/Đêm (`useEnvironmentStore`) và hoạt cảnh sóng nước (`useSafeFrame`).
+  4. **Preserved Procedural Fallback**: Mọi component tích hợp `SafeGLTFModel` cho phương tiện vi mô BẮT BUỘC giữ nguyên cấu trúc hình học và bảng mã màu trong procedural fallback để đảm bảo 100% tương thích ngược với môi trường kiểm thử không có WebGL.
+
+---
+
+### 48. [3D/TEXTURE/MOCK] Khả Năng Tương Thích Canvas 2D Mock Context & Bất Biến Hình Học Tọa Độ Trực Tiếp (Headless Canvas Context Resilience & Direct Coordinate Geometry Invariant - IMP-29.5)
+- **Hiện tượng & Bẫy thực tế**:
+  1. *Sập kiểm thử vì thiếu phương thức biến đổi Canvas trong môi trường mock*: Khi viết hàm sinh texture thủ tục (`createHeritageEncausticTileTexture`), các bộ mock context 2D trong kiểm thử headless (như Vitest) thường chỉ cung cấp các hàm vẽ cơ bản (`save`, `restore`, `beginPath`, `arc`, `stroke`, `fill`, `moveTo`, `lineTo`, `strokeRect`, `fillRect`) mà không mock `ctx.translate`, `ctx.rotate` hay `ctx.closePath`. Việc gọi trực tiếp các hàm này gây lỗi nghiêm trọng `TypeError: ctx.translate is not a function` làm gãy bộ kiểm thử tự động.
+  2. *Tạo mới Texture lặp lại gây cạn kiệt tài nguyên*: Việc gọi lại hàm tạo CanvasTexture trong mỗi chu kỳ re-render của component 3D sinh ra nhiều đối tượng texture dư thừa trên GPU, vi phạm nguyên tắc Zero-Garbage Render Loop.
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **Direct Coordinate Geometry Invariant**: Mọi thuật toán vẽ hình học hoa văn thủ tục (như gạch bông Đông Dương đối xứng 4 cánh) BẮT BUỘC tính toán trực tiếp tọa độ đỉnh bằng công thức lượng giác (`Math.cos`, `Math.sin`) và các hàm vẽ cơ bản (`moveTo`, `lineTo`), hoặc kiểm tra `typeof ctx.method === 'function'` trước khi gọi các hàm biến đổi tọa độ tùy chọn.
+  2. **Memoized Texture Cache (`getHeritageEncausticTileTexture`)**: Texture thủ tục tạo sinh bắt buộc đi qua hàm truy xuất có cơ chế caching cấp module (`cachedEncausticTexture`), bảo đảm chỉ khởi tạo duy nhất 1 lần và trả về `null` an toàn khi chạy trong môi trường headless/SSR không có DOM.
+
+
+
+

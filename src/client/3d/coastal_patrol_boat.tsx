@@ -1,46 +1,12 @@
-// [UI-S01/MSS] CoastalPatrolBoat — Coast Guard patrol boat cruising coastal bay with wave wakes
 import React, { useRef } from 'react';
 import type { Group, Mesh } from 'three';
 import { useSafeFrame } from './safe_frame';
+import { SafeGLTFModel } from './asset_loader/safe_gltf_model';
+import { VEHICLE_MODEL_URLS } from './diorama/diorama_traffic';
 
-export function CoastalPatrolBoat(): React.ReactElement {
-  const boatRef = useRef<Group>(null);
-  const wakeLeftRef = useRef<Mesh>(null);
-  const wakeRightRef = useRef<Mesh>(null);
-
-  useSafeFrame((state) => {
-    const t = state.clock.elapsedTime;
-    if (boatRef.current) {
-      const speed = 0.22;
-      const angle = t * speed;
-      const x = Math.sin(angle) * 12;
-      const z = 35 + Math.cos(angle) * 6;
-      const y = -0.30 + Math.sin(t * 3.5) * 0.025; // Nhấp nhô cưỡi sóng
-
-      // Hướng di chuyển (tangent)
-      const dx = Math.cos(angle) * 7 * speed;
-      const dz = -Math.sin(angle) * 6 * speed;
-      const yaw = Math.atan2(dx, dz);
-
-      boatRef.current.position.set(x, y, z);
-      boatRef.current.rotation.y = yaw;
-      // Lắc lư nghiêng mạn theo nhịp sóng rẽ nước
-      boatRef.current.rotation.z = Math.sin(t * 3.2) * 0.05;
-      boatRef.current.rotation.x = -0.04 + Math.sin(t * 3.8) * 0.04;
-    }
-
-    // Bọt nước rẽ sóng co giãn theo tốc độ lướt
-    const wakeScale = 1.0 + Math.sin(t * 6.0) * 0.15;
-    if (wakeLeftRef.current) {
-      wakeLeftRef.current.scale.set(wakeScale, 1, wakeScale);
-    }
-    if (wakeRightRef.current) {
-      wakeRightRef.current.scale.set(wakeScale, 1, wakeScale);
-    }
-  });
-
+export function CoastalPatrolBoatProceduralFallback(): React.ReactElement {
   return (
-    <group ref={boatRef} position={[-16, -0.30, 22]} data-testid="coastal-patrol-boat">
+    <group>
       {/* 1. Thân ca-nô tuần duyên (Coast Guard Deep-V Hull) */}
       <mesh castShadow position={[0, 0.08, 0]}>
         <boxGeometry args={[0.55, 0.2, 1.4]} />
@@ -104,6 +70,55 @@ export function CoastalPatrolBoat(): React.ReactElement {
         <boxGeometry args={[0.1, 0.18, 0.14]} />
         <meshStandardMaterial color="#334155" metalness={0.8} roughness={0.3} />
       </mesh>
+    </group>
+  );
+}
+
+export function CoastalPatrolBoat(): React.ReactElement {
+  const boatRef = useRef<Group>(null);
+  const wakeLeftRef = useRef<Mesh>(null);
+  const wakeRightRef = useRef<Mesh>(null);
+
+  useSafeFrame((state) => {
+    const t = state.clock.elapsedTime;
+    if (boatRef.current) {
+      const speed = 0.22;
+      const angle = t * speed;
+      const x = Math.sin(angle) * 12;
+      const z = 35 + Math.cos(angle) * 6;
+      const y = -0.30 + Math.sin(t * 3.5) * 0.025; // Nhấp nhô cưỡi sóng
+
+      // Hướng di chuyển (tangent)
+      const dx = Math.cos(angle) * 7 * speed;
+      const dz = -Math.sin(angle) * 6 * speed;
+      const yaw = Math.atan2(dx, dz);
+
+      boatRef.current.position.set(x, y, z);
+      boatRef.current.rotation.y = yaw;
+      // Lắc lư nghiêng mạn theo nhịp sóng rẽ nước
+      boatRef.current.rotation.z = Math.sin(t * 3.2) * 0.05;
+      boatRef.current.rotation.x = -0.04 + Math.sin(t * 3.8) * 0.04;
+    }
+
+    // Bọt nước rẽ sóng co giãn theo tốc độ lướt
+    const wakeScale = 1.0 + Math.sin(t * 6.0) * 0.15;
+    if (wakeLeftRef.current) {
+      wakeLeftRef.current.scale.set(wakeScale, 1, wakeScale);
+    }
+    if (wakeRightRef.current) {
+      wakeRightRef.current.scale.set(wakeScale, 1, wakeScale);
+    }
+  });
+
+  return (
+    <group ref={boatRef} position={[-16, -0.30, 22]} data-testid="coastal-patrol-boat">
+      {/* Nạp mô hình 3D ca-nô tuần duyên qua SafeGLTFModel với Fallback thủ tục Zero-Crash */}
+      <SafeGLTFModel
+        url={VEHICLE_MODEL_URLS.boat}
+        fallback={<CoastalPatrolBoatProceduralFallback />}
+        castShadow
+        receiveShadow
+      />
 
       {/* 5. VỆT BỌT NƯỚC RẼ SÓNG ĐUÔI TÀU (Dynamic Foam Wake V-Trails) */}
       <group position={[0, -0.01, -0.8]}>

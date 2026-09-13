@@ -20,6 +20,11 @@
   - Forbidden: Code golf, line stripping, fake no-op stubs. Files under 300 LOC must remain intact without premature helper splitting.
 - **Slice Scope Confinement**: Implement only flows in current ticket. Register deferred alternative flows in Tech Debt Ledger with target slice.
 - **Test State Isolation**: Zero order-dependent tests. Run test suites with `--randomize`. Reconcile 100% of static data with fixture contract tests.
+- **Mandatory 3-Station Implementation Pipeline**: Applies to all feature/bugfix implementations (with or without `/boost`). Enforce 3 isolated stations:
+  - *Pre-Flight Visual Banner*: Before dispatching stations for any feature or bugfix, the agent MUST render the 3-Station Status Banner (`🚦 [KÍCH HOẠT QUY TRÌNH 3 TRẠM]`) directly into chat output so the user immediately observes pipeline enforcement without needing to prompt or remember it.
+  1. Trạm 1 (RED Contract Test): `qa-tester` writes contract/edge tests in `tests/**` and proves test failure (RED / Adversarial Inversion). FORBIDDEN from editing `src/**`.
+  2. Trạm 2 (GREEN Implementation): `implementer` writes minimum code in `src/**` to pass tests (GREEN). FORBIDDEN from relaxing assertions to mask bugs (Zero Bug-Codification).
+  3. Trạm 3 (Independent Review & Physical Disk Verification): Read-only reviewers (`spec-reviewer`, `code-reviewer`, `game-3d-visual-critic`, `ui-craft-reviewer`) audit independently. FORBIDDEN: implementer approving own code. FORBIDDEN: approving based solely on textual agent reports. Reviewers MUST invoke physical disk verification tools (`view_file`, `list_dir`, terminal execution) to confirm physical asset/code existence and genuine passing state before signing off.
 - **Zero-Polling & Background Harness**: Never execute in-loop polling (`sleep`/`while`). Offload tasks > 10s to background. Terminate processes hanging > 60s.
 - **SSOT & Player Intent Integrity**: All player business decisions (buy, upgrade, trade) must be explicit Intent/Action transitions (ADR-0001). Never execute player choices as implicit side-effects of movement.
 - **Subagent Artifact Persistence (Dual Output Pattern)**: Authoring subagents write large artifacts directly to disk files (`docs/plans/`, `docs/reports/`) and return concise summaries (<20 lines) with clickable links. Read-only reviewers (`spec-reviewer`, `code-reviewer`, `game-3d-visual-critic`, `ui-craft-reviewer`) report structured packets directly into chat.
@@ -40,7 +45,7 @@
 A task is COMPLETE only when:
 1. Automated tests pass Adversarial Inversion (deliberate failure verification), include traceability tags (`[UC-XXX/MSS]` or `[UC-XXX/A#]`), and pass fixture contract tests against SSOT.
 2. Code passes 6 Slop Red Flags audit (least new structure, complexity <= 5, visual token compliance, zero code golf). UI passes `npm run lint:ui` with 0 violations.
-3. Reviewer gates approve (`spec-reviewer` verifies 100% spec reconciliation; `code-reviewer` verifies code quality and observability; `game-3d-visual-critic` verifies 3D visual gate; `ui-craft-reviewer` verifies 2D craft gate).
+3. Reviewer gates approve via physical disk inspection (`spec-reviewer` verifies 100% spec reconciliation; `code-reviewer` verifies code quality and observability; `game-3d-visual-critic` verifies 3D visual gate; `ui-craft-reviewer` verifies 2D craft gate; implementer never approves own code; zero approvals on conversational claims without disk evidence).
 4. Progress updated in `docs/epics/[epic]/_epic_ledger.md` (including Tech Debt Ledger).
 5. Domain learnings and invariants recorded in `docs/domain/gotchas.md` with domain tags and traceability.
 6. Production resilience verified: defense against invalid intents, treasury conservation invariant, safe disconnection grace period.

@@ -4,7 +4,7 @@
 
 import type { DeltaPayload } from '../session_manager.js';
 import type { PlayerIntent } from '../intent_dispatcher.js';
-import type { AdminRoomSummary, AdminRoomDetail, AdminRoomLogEntry } from './admin_manager.js';
+import type { AdminRoomSummary, AdminRoomDetail, AdminRoomLogEntry, AdminArchivedRoomSummary } from './admin_types.js';
 
 export type ReasonCode =
   | 'ROOM_CODE_COLLISION'
@@ -37,6 +37,8 @@ export type WsClientMessage =
   | { readonly type: 'JOIN_ROOM';   readonly playerId: string; readonly roomCode: string }
   | { readonly type: 'ADMIN_AUTH';  readonly secret: string }
   | { readonly type: 'ADMIN_GET_ROOMS' }
+  | { readonly type: 'ADMIN_GET_ARCHIVED_ROOMS' }
+  | { readonly type: 'ADMIN_GET_ARCHIVED_LOGS'; readonly roomCode: string; readonly timestamp?: number }
   | { readonly type: 'ADMIN_SUBSCRIBE_ROOM'; readonly roomCode: string }
   | { readonly type: 'ADMIN_UNSUBSCRIBE_ROOM'; readonly roomCode?: string }
   | { readonly type: 'ADMIN_TERMINATE_ROOM'; readonly roomCode: string; readonly reason?: string }
@@ -146,6 +148,13 @@ export type WsServerMessage =
   | { readonly type: 'ADMIN_AUTH_SUCCESS'; readonly message: string }
   | { readonly type: 'ADMIN_AUTH_FAILED'; readonly reason: string }
   | { readonly type: 'ADMIN_ROOM_LIST'; readonly rooms: readonly AdminRoomSummary[] }
+  | { readonly type: 'ADMIN_ARCHIVED_ROOM_LIST'; readonly rooms: readonly AdminArchivedRoomSummary[] }
+  | {
+      readonly type: 'ADMIN_ARCHIVED_LOG_DATA';
+      readonly roomCode: string;
+      readonly logs: readonly AdminRoomLogEntry[];
+      readonly rawJsonl?: string;
+    }
   | {
       readonly type: 'ADMIN_ROOM_DETAIL';
       readonly roomCode: string;

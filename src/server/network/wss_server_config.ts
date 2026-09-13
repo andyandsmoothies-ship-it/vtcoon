@@ -19,6 +19,7 @@ export interface WssServerConfig {
   readonly intentGuard?: IntentGuard;
   readonly adminManager?: AdminManager;
   readonly adminSecret?: string;
+  readonly adminLoggerDir?: string;
   readonly rateLimiterOptions?: RateLimiterOptions;
   readonly gracePeriodMs?: number;
   readonly abandonedTimeoutMs?: number;

@@ -36,6 +36,26 @@ export function downloadBlackBox(room: AdminRoomDetail, logs: AdminRoomLogEntry[
   URL.revokeObjectURL(url);
 }
 
+export function downloadLogFile(
+  roomCode: string,
+  logs: AdminRoomLogEntry[],
+  format: 'jsonl' | 'json' = 'jsonl',
+): void {
+  const content = format === 'jsonl'
+    ? logs.map((l) => JSON.stringify(l)).join('\n')
+    : JSON.stringify(logs, null, 2);
+  const mime = format === 'jsonl' ? 'application/x-jsonlines;charset=utf-8;' : 'application/json;charset=utf-8;';
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `vtcoon_logs_${roomCode}_${Date.now()}.${format}`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 export function buildReproCode(room: AdminRoomDetail, logs: AdminRoomLogEntry[]): string {
   const safeRoom = room.roomCode.replace(/[^a-zA-Z0-9]/g, '_');
   const warningComment = room.warningReason ? `// Cảnh báo: ${room.warningReason}\n` : '';

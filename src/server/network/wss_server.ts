@@ -17,8 +17,19 @@ import { encodeMsg } from './network_types.js';
 import type { WsServerMessage, WsClientMessage, ReasonCode } from './network_types.js';
 import { isRoomGameOver } from '../../domain/room.js';
 import { AdminManager } from './admin_manager.js';
-
-const MAX_PLAYERS = 4;
+import type { RoomFinishSummary } from '../logging/persistent_room_logger.js';
+import {
+  handleCreateRoom,
+  handleJoinRoom,
+  handleStartGame,
+  handleLeaveRoom,
+  handlePong,
+  handleEmote,
+  handleResync,
+  validateIntentRequest,
+  executeIntentAction,
+  type WssLobbyContext,
+} from './wss_lobby_handlers.js';
 
 import type { WssServerConfig } from './wss_server_config.js';
 export type { WssServerConfig };
@@ -49,6 +60,7 @@ export class WssServer {
       roomManager: this.rooms,
       secret: config.adminSecret,
       onTerminateRoom: (rc) => this.closeRoom(rc),
+      loggerDir: config.adminLoggerDir,
     });
     this.intentMutex = config.intentMutex ?? new IntentMutex();
     this.rateLimiter = config.rateLimiter ?? new RateLimiter(config.rateLimiterOptions);
@@ -59,7 +71,7 @@ export class WssServer {
       rooms: this.rooms, intentMutex: this.intentMutex, broadcaster: this.broadcaster,
       onGameOver: (rc) => this.broadcastGameOver(rc),
       onScheduleTurnTimeout: (rc) => this.turnTimeoutScheduler.scheduleTurnTimeout(rc),
-      botTurnDelayMs: config.botTurnDelayMs ?? 2000,
+      botTurnDelayMs: config.botTurnDelayMs ?? 800,
     });
     this.turnTimeoutScheduler = new TurnTimeoutScheduler({
       rooms: this.rooms, intentMutex: this.intentMutex, broadcaster: this.broadcaster,
@@ -188,140 +200,57 @@ export class WssServer {
     this.sendSafe(socket, { type: 'SESSION_INIT', playerId, reconnectToken: token, roomCode });
   }
 
-  private handleStartGame(socket: WebSocket, msg: Extract<WsClientMessage, { type: 'START_GAME' }>): void {
-    const room = this.rooms.getRoom(msg.roomCode);
-    if (!room || !room.players.some((p) => p.id === msg.playerId)) {
-      this.sendSafe(socket, { type: 'ERROR', reasonCode: 'ROOM_NOT_FOUND' });
-      return;
-    }
-    if (room.hostId !== msg.playerId) {
-      this.sendSafe(socket, { type: 'ERROR', reasonCode: 'NOT_HOST' });
-      return;
-    }
-    if (room.started) {
-      this.sendSafe(socket, { type: 'ERROR', reasonCode: 'ROOM_STARTED' });
-      return;
-    }
-    const normRoomCode = room.roomCode;
-    const hostP = room.players.find((p) => p.id === msg.playerId);
-    if (hostP) hostP.isBot = false;
-    this.reconnects.cancelGracePeriod(normRoomCode, msg.playerId);
-    for (const p of room.players) {
-      if (this.sockets.getPlayerSocket(normRoomCode, p.id)) {
-        p.isBot = false;
-        this.reconnects.cancelGracePeriod(normRoomCode, p.id);
-      }
-    }
-    if (!this.rooms.startGame(normRoomCode, msg.bots)) {
-      this.sendSafe(socket, { type: 'ERROR', reasonCode: 'NOT_ENOUGH_PLAYERS' });
-      return;
-    }
-    this.bindSocket(msg.roomCode, msg.playerId, socket);
-    this.adminManager.recordRoomEvent(normRoomCode, {
-      source: 'PLAYER',
-      action: 'START_GAME',
-      payloadSummary: `Ván đấu bắt đầu với ${room.players.length} người chơi`,
-    });
-    this.broadcast(msg.roomCode, { type: 'ROOM_STARTED', roomCode: msg.roomCode });
-    this.broadcaster.broadcastRoomDelta(msg.roomCode, { forceFull: true });
-    this.scheduleBotTurn(msg.roomCode);
-    this.adminManager.broadcastRoomListToAdmins();
+  private get lobbyContext(): WssLobbyContext {
+    return {
+      rooms: this.rooms,
+      sessions: this.sessions,
+      reconnects: this.reconnects,
+      sockets: this.sockets,
+      broadcaster: this.broadcaster,
+      adminManager: this.adminManager,
+      sendSafe: (s, m) => this.sendSafe(s, m),
+      broadcast: (rc, m) => this.broadcast(rc, m),
+      sendSessionInit: (s, pid, rc) => this.sendSessionInit(s, pid, rc),
+      bindSocket: (rc, pid, s) => this.bindSocket(rc, pid, s),
+      scheduleBotTurn: (rc) => this.scheduleBotTurn(rc),
+      closeRoom: (rc) => this.closeRoom(rc),
+    };
   }
 
   private async route(socket: WebSocket, msg: WsClientMessage): Promise<void> {
     if (this.adminManager.handleClientMessage(socket, msg, (s, m) => this.sendSafe(s, m))) {
       return;
     }
+    const ctx = this.lobbyContext;
     switch (msg.type) {
-      case 'CREATE_ROOM': {
-        if (msg.roomCode) {
-          const upper = msg.roomCode.toUpperCase();
-          const existing = this.rooms.getRoom(upper);
-          if (existing && existing.hostId === msg.playerId) {
-            this.closeRoom(upper);
-          }
-        }
-        const room = this.rooms.createRoom(msg.playerId, msg.roomCode);
-        this.reconnects.cancelGracePeriod(room.roomCode, msg.playerId);
-        this.sessions.addSession(msg.playerId);
-        this.bindSocket(room.roomCode, msg.playerId, socket);
-        this.adminManager.recordRoomEvent(room.roomCode, {
-          source: 'PLAYER',
-          action: 'CREATE_ROOM',
-          payloadSummary: `Chủ phòng ${msg.playerId} đã tạo phòng`,
-        });
-        this.adminManager.broadcastRoomListToAdmins();
-        this.sendSafe(socket, { type: 'ROOM_CREATED', roomCode: room.roomCode, playerId: msg.playerId });
-        this.sendSessionInit(socket, msg.playerId, room.roomCode);
+      case 'CREATE_ROOM':
+        handleCreateRoom(ctx, socket, msg);
         break;
-      }
-      case 'JOIN_ROOM': {
-        const joined = this.rooms.joinRoom(msg.roomCode, msg.playerId);
-        if (!joined) return this.sendSafe(socket, { type: 'ERROR', reasonCode: 'ROOM_NOT_FOUND' });
-        if (joined.players.length > MAX_PLAYERS) {
-          joined.players.pop();
-          return this.sendSafe(socket, { type: 'ERROR', reasonCode: 'ROOM_FULL' });
-        }
-        this.reconnects.cancelGracePeriod(msg.roomCode, msg.playerId);
-        this.sessions.addSession(msg.playerId);
-        this.bindSocket(msg.roomCode, msg.playerId, socket);
-        this.adminManager.recordRoomEvent(msg.roomCode, {
-          source: 'PLAYER',
-          action: 'JOIN_ROOM',
-          payloadSummary: `Người chơi ${msg.playerId} đã vào phòng (${joined.players.length} người)`,
-        });
-        this.adminManager.broadcastRoomListToAdmins();
-        this.sendSafe(socket, { type: 'ROOM_JOINED', roomCode: msg.roomCode, playerId: msg.playerId, playerCount: joined.players.length });
-        this.sendSessionInit(socket, msg.playerId, msg.roomCode);
+      case 'JOIN_ROOM':
+        handleJoinRoom(ctx, socket, msg);
         break;
-      }
-      case 'START_GAME': this.handleStartGame(socket, msg); break;
+      case 'START_GAME':
+        handleStartGame(ctx, socket, msg);
+        break;
       case 'PONG':
-        this.sessions.handlePong(msg.playerId);
-        if (msg.roomCode) this.reconnects.cancelGracePeriod(msg.roomCode, msg.playerId);
+        handlePong(ctx, msg);
         break;
-      case 'RECONNECT': this.handleReconnect(socket, msg); break;
-      case 'INTENT': await this.handleIntent(socket, msg); break;
+      case 'RECONNECT':
+        this.handleReconnect(socket, msg);
+        break;
+      case 'INTENT':
+        await this.handleIntent(socket, msg);
+        break;
       case 'INTENT_REQUEST_RESYNC':
-        if (msg.roomCode) {
-          this.bindSocket(msg.roomCode, msg.playerId, socket);
-          this.broadcaster.resyncClient(msg.roomCode, socket);
-          if (this.rooms.getRoom(msg.roomCode)?.started) this.scheduleBotTurn(msg.roomCode);
-        }
+        handleResync(ctx, socket, msg);
         break;
-      case 'EMOTE': this.handleEmote(socket, msg); break;
-      case 'LEAVE_ROOM': this.handleLeaveRoom(socket, msg); break;
+      case 'EMOTE':
+        handleEmote(ctx, socket, msg);
+        break;
+      case 'LEAVE_ROOM':
+        handleLeaveRoom(ctx, socket, msg);
+        break;
     }
-  }
-
-  private handleLeaveRoom(socket: WebSocket, msg: Extract<WsClientMessage, { type: 'LEAVE_ROOM' }>): void {
-    const room = this.rooms.getRoom(msg.roomCode);
-    if (!room) return;
-    this.sockets.unregister(socket);
-    this.reconnects.cancelGracePeriod(msg.roomCode, msg.playerId);
-    if (room.hostId === msg.playerId) {
-      this.closeRoom(msg.roomCode);
-    } else if (room.started) {
-      this.broadcast(msg.roomCode, { type: 'PLAYER_BOT_TAKEOVER', playerId: msg.playerId });
-      const p = room.players.find((pl) => pl.id === msg.playerId);
-      if (p) p.bankrupt = true;
-      this.broadcaster.broadcastRoomDelta(msg.roomCode);
-      this.scheduleBotTurn(msg.roomCode);
-    } else {
-      const idx = room.players.findIndex((pl) => pl.id === msg.playerId);
-      if (idx !== -1) room.players.splice(idx, 1);
-      this.broadcaster.broadcastRoomDelta(msg.roomCode);
-    }
-  }
-
-  private handleEmote(socket: WebSocket, msg: Extract<WsClientMessage, { type: 'EMOTE' }>): void {
-    const room = this.rooms.getRoom(msg.roomCode);
-    if (!room || !room.players.some((p) => p.id === msg.playerId)) {
-      this.sendSafe(socket, { type: 'ERROR', reasonCode: 'ROOM_NOT_FOUND' });
-      return;
-    }
-    this.bindSocket(msg.roomCode, msg.playerId, socket);
-    this.broadcast(msg.roomCode, { type: 'PLAYER_EMOTE', playerId: msg.playerId, emoteId: msg.emoteId, timestamp: Date.now() });
   }
 
   private handleReconnect(socket: WebSocket, msg: { reconnectToken: string; roomCode?: string }): void {
@@ -358,60 +287,42 @@ export class WssServer {
   }
 
   private async handleIntent(socket: WebSocket, msg: Extract<WsClientMessage, { type: 'INTENT' }>): Promise<void> {
-    if (!msg.roomCode || !msg.intent || typeof msg.intent.type !== 'string') {
-      this.sendSafe(socket, { type: 'ERROR', reasonCode: 'INVALID_INTENT' });
-      return;
-    }
     const room = this.rooms.getRoom(msg.roomCode);
     const player = room?.players.find((p) => p.id === msg.playerId);
-    if (!room || !player) {
-      this.sendSafe(socket, { type: 'ERROR', reasonCode: 'ROOM_NOT_FOUND' });
-      return;
-    }
-    if (player.isBot) {
-      this.sendSafe(socket, { type: 'ERROR', reasonCode: 'TOKEN_EXPIRED' });
-      return;
-    }
-
-    const guardRes = this.intentGuard.validate(room, msg.playerId, msg.intent);
-    if (!guardRes.allowed) {
-      this.sendSafe(socket, { type: 'INTENT_REJECTED', reasonCode: guardRes.reasonCode ?? 'OUT_OF_TURN', playerId: msg.playerId });
+    const validation = validateIntentRequest(room, player, msg, this.intentGuard);
+    if (!validation.valid) {
+      if (validation.isRejection) {
+        this.sendSafe(socket, { type: 'INTENT_REJECTED', reasonCode: validation.reasonCode, playerId: msg.playerId });
+      } else {
+        this.sendSafe(socket, { type: 'ERROR', reasonCode: validation.reasonCode });
+      }
       return;
     }
 
     this.bindSocket(msg.roomCode, msg.playerId, socket);
-
     await this.intentMutex.runExclusive(msg.roomCode, async () => {
-      let success = false;
-      let reason: string | undefined;
-      if (msg.intent.type === 'INTENT_ROLL') {
-        const rollRes = this.rooms.handleRollDice(msg.roomCode, msg.playerId);
-        success = rollRes !== undefined;
-        reason = success ? undefined : 'CANNOT_ROLL';
-      } else {
-        const res = this.rooms.handlePlayerIntent(msg.roomCode, msg.playerId, msg.intent);
-        success = res.success;
-        reason = res.reason;
-      }
-      if (!success) {
-        this.sendSafe(socket, { type: 'ERROR', reasonCode: (reason as ReasonCode) || 'INTENT_REJECTED' });
+      const res = executeIntentAction(this.rooms, msg.roomCode, msg.playerId, msg.intent);
+      if (!res.success) {
+        this.sendSafe(socket, { type: 'ERROR', reasonCode: (res.reason as ReasonCode) || 'INTENT_REJECTED' });
         return;
       }
-
       this.adminManager.recordRoomEvent(msg.roomCode, {
-        source: player.isBot ? 'BOT' : 'PLAYER',
+        source: player?.isBot ? 'BOT' : 'PLAYER',
         action: msg.intent.type,
         payloadSummary: `Người chơi ${msg.playerId}: ${msg.intent.type}`,
       });
-
-      const roomAfter = this.rooms.getRoom(msg.roomCode);
-      if (roomAfter && isRoomGameOver(roomAfter)) {
-        this.broadcastGameOver(msg.roomCode);
-      } else {
-        this.broadcaster.broadcastRoomDelta(msg.roomCode);
-        this.scheduleBotTurn(msg.roomCode);
-      }
+      this.syncRoomStateAfterIntent(msg.roomCode);
     });
+  }
+
+  private syncRoomStateAfterIntent(roomCode: string): void {
+    const roomAfter = this.rooms.getRoom(roomCode);
+    if (roomAfter && isRoomGameOver(roomAfter)) {
+      this.broadcastGameOver(roomCode);
+    } else {
+      this.broadcaster.broadcastRoomDelta(roomCode);
+      this.scheduleBotTurn(roomCode);
+    }
   }
 
   private scheduleBotTurn(roomCode: string): void {
@@ -422,10 +333,15 @@ export class WssServer {
   broadcastGameOver(roomCode: string, leaderboard?: Array<{ id: string; netWorth: number }>): void {
     const rankings = leaderboard ?? this.rooms.getRankings(roomCode);
     this.broadcast(roomCode, { type: 'GAME_OVER', roomCode, leaderboard: rankings });
-    this.closeRoom(roomCode);
+    this.adminManager.recordRoomEvent(roomCode, {
+      source: 'SYSTEM',
+      action: 'GAME_OVER_SUMMARY',
+      payloadSummary: `Ván đấu kết thúc. Người thắng: ${rankings[0]?.id ?? 'Không xác định'}`,
+    });
+    this.closeRoom(roomCode, { status: 'FINISHED', winner: rankings[0]?.id });
   }
 
-  closeRoom(roomCode: string): void {
+  closeRoom(roomCode: string, summary?: RoomFinishSummary): void {
     if (this.closingRooms.has(roomCode)) return;
     this.closingRooms.add(roomCode);
     try {
@@ -436,10 +352,16 @@ export class WssServer {
       if (room) {
         for (const p of room.players) this.sessions.removeSession(p.id);
       }
+      const playerCount = room?.players.length ?? 1;
       this.broadcaster.clearRoom(roomCode);
       this.intentMutex.clear(roomCode);
       this.rooms.closeRoom(roomCode);
-      this.adminManager.handleRoomClosed(roomCode);
+      this.adminManager.handleRoomClosed(roomCode, {
+        status: summary?.status ?? 'TERMINATED',
+        winner: summary?.winner,
+        endTime: summary?.endTime ?? Date.now(),
+        playerCount: summary?.playerCount ?? playerCount,
+      });
     } finally {
       this.closingRooms.delete(roomCode);
     }

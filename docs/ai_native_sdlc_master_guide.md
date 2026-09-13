@@ -1863,6 +1863,10 @@ tools: [view_file, write_to_file, replace_file_content, run_command, list_dir, f
 - **Quy tắc 1: Một Hội Thoại Chính = Một Mô Hình Ổn Định**. Khi đã bắt đầu Slice bằng model nào (ví dụ Sonnet 4.6), giữ nguyên model đó làm Orchestrator cho đến khi commit xong Slice.
 - **Quy tắc 2: Phân chia nhiệm vụ bằng Subagents thay vì đổi model thủ công**. Mỗi Subagent bắt đầu bằng một ngữ cảnh mới tinh (Clean Scoped Context), mang model phù hợp nhất cho tác vụ đó, và chỉ trả về bản tóm tắt súc tích (~15 dòng).
 - **Quy tắc 3: Bàn giao có cấu trúc (Structured Handoff)**. Khi chuyển Slice, không sao chép toàn bộ đoạn chat cũ mà dùng lệnh `/handoff` để nén trạng thái thành một bản tóm tắt ngắn gọn và bấm **New Conversation**.
+- **Quy tắc 4: Phối Hợp `/boost` Và Lệnh Thường (Độ Sâu vs Tốc Độ)**:
+  - *Lệnh thường + 3 Trạm cơ học*: Dành cho tác vụ vi mô, sửa lỗi cục bộ (1-2 tệp, logic hẹp). Tối ưu tốc độ phản hồi, zero overhead.
+  - *`/boost` + Kiểm chứng đĩa vật lý (Physical Disk Verification)*: Dành cho bài toán kiến trúc sâu, tính năng phức tạp hoặc tái cấu trúc đa tầng. Kích hoạt tư duy đa chiều và phản biện gắt gao, nhưng trạm Reviewer bắt buộc dùng công cụ đọc đĩa (`view_file`, `list_dir`, lệnh terminal thực tế) để nghiệm thu vật lý, triệt tiêu bẫy ảo tưởng hoàn thành.
+  - *Pre-Flight Visual Banner*: Trước khi điều phối các trạm thi công tính năng hoặc sửa lỗi, Agent BẮT BUỘC in biểu ngữ trạng thái (`🚦 [KÍCH HOẠT QUY TRÌNH 3 TRẠM]`) lên giao diện chat để người dùng giám sát minh bạch mà không cần phải nhớ nhắc lệnh.
 
 | Vai Trò | Model Khuyên Dùng | Lý Do Kỹ Thuật |
 | :--- | :--- | :--- |
@@ -1895,7 +1899,7 @@ tools: [view_file, write_to_file, replace_file_content, run_command, list_dir, f
 | :--- | :---: | :--- | :--- |
 | **`/wait-what`** | `mattpocock_skills` | Thấy AI bắt đầu nói lan man, hiểu sai ý hoặc đề xuất giải pháp quá phức tạp. | Phanh dừng khẩn cấp: Hủy bỏ lập luận sai, yêu cầu bạn giải thích lại và trình bày phương án đơn giản hơn. |
 | **`/grill-me`** | `mattpocock_skills` | Trước khi làm tính năng mới, khi ý tưởng còn mơ hồ hoặc sợ bị sót yêu cầu. | Bắt AI phỏng vấn ngược lại bạn (Socratic Grilling) để bóc trần 100% giả định ngầm và chốt ranh giới No-gos. |
-| **`/boost [vấn đề]`** | `Native AG 2.0` | Gặp bài toán kiến trúc phân tán khó, thuật toán FSM/PRNG, hoặc bug bế tắc không rõ nguyên nhân. | Kích hoạt chế độ Deep Reasoning 3 pha (Đa chiều ➔ Lập mô hình ➔ Thẩm định phản biện). |
+| **`/boost [vấn đề]`** | `Native AG 2.0` | Gặp bài toán kiến trúc phân tán khó, thuật toán FSM/PRNG, hoặc bug bế tắc không rõ nguyên nhân. | Kích hoạt chế độ Deep Reasoning 3 pha (Đa chiều ➔ Lập mô hình ➔ Thẩm định phản biện). Bắt buộc kết hợp kiểm chứng đĩa vật lý ở trạm Reviewer. |
 | **`/brainstorming`** | `superpowers` | Cần tìm các giải pháp kỹ thuật khác nhau trước khi chốt phương án thi công. | Đưa ra 2-3 phương án kiến trúc kèm bảng so sánh ưu/nhược điểm (Trade-offs). |
 | **`/ask-matt`** | `mattpocock_skills` | Đang phân vân không biết bước tiếp theo nên làm gì hoặc nên dùng công cụ nào. | Đóng vai trò Router phân tích tình huống và gợi ý chính xác skill/lệnh tiếp theo. |
 | **`/writing-plans`** | `superpowers` | Bắt đầu Bước 2.3a, muốn bẻ nhỏ Slice thành các Task tuần tự <= 50-80 dòng code. | Xuất bản Kế hoạch thi công chi tiết (Task DAG) kèm tệp test và tiêu chuẩn hoàn thành. |

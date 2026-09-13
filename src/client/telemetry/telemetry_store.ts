@@ -12,6 +12,7 @@ import type {
 export const MAX_AUDIT_ENTRIES = 100;
 export const MAX_SNAPSHOT_ENTRIES = 20;
 export const MAX_RECORDED_INTENTS = 100;
+export const MAX_VIOLATIONS = 50;
 
 export type TelemetryConsoleTab = 'perf' | 'audit' | 'invariants' | 'trace';
 
@@ -117,7 +118,7 @@ export const useTelemetryStore = create<TelemetryState>((set, get) => ({
     set((state) => {
       const shouldFreeze = state.autoFreezeEnabled && fullViolation.severity === 'CRITICAL';
       return {
-        violations: [fullViolation, ...state.violations],
+        violations: [fullViolation, ...state.violations].slice(0, MAX_VIOLATIONS),
         isFrozen: shouldFreeze ? true : state.isFrozen,
       };
     });

@@ -1,6 +1,6 @@
 // [UC-GAME-009/MSS][TC-NET03.1/MSS][TC-NET03.2/MSS][UC-GAME-008/MSS]
 // Đồng bộ hóa DeltaPayload (kể cả Sparse Diff) vào Zustand useGameStore
-import { useGameStore, type PlayerHudInfo, type PawnMoveTask, FloatingTextType } from '../store/game_store.js';
+import { useGameStore, type PlayerHudInfo, type PawnMoveTask, FloatingTextType, type GameState } from '../store/game_store.js';
 import { calculatePathWaypoints } from '../3d/pawn_path.js';
 import { useLobbyStore } from '../store/lobby_store.js';
 import { useVfxStore } from '../store/vfx_store.js';
@@ -15,9 +15,7 @@ import { trackDeltaActivities } from './activity_tracker.js';
 import { handleDeltaTelemetry } from '../telemetry/telemetry_delta_hook.js';
 
 export function isGameRunningDelta(delta: DeltaPayload): boolean {
-  if (delta.roomStarted !== undefined) {
-    return delta.roomStarted;
-  }
+  if (delta.roomStarted !== undefined) return delta.roomStarted;
   return (
     delta.tick > 0 ||
     Boolean(delta.players?.some((p) => p.position > 0 || p.balance !== 15000)) ||
@@ -25,330 +23,367 @@ export function isGameRunningDelta(delta: DeltaPayload): boolean {
   );
 }
 
-export function applyDeltaToStore(
-  delta: DeltaPayload,
-  store: typeof useGameStore = useGameStore,
-): void {
-  const state = store.getState();
-  const isFullSync = Boolean(delta.cells && delta.cells.length === BOARD_SIZE);
-
-  if (isFullSync && state.activePawnAnimation) {
-    state.clearActivePawnAnimation();
-  }
-
-  const playersInfoMap: Record<string, PlayerHudInfo> = {};
+function initPlayersInfoMap(state: GameState, isFullSync: boolean): Record<string, PlayerHudInfo> {
+  const map: Record<string, PlayerHudInfo> = {};
   for (const [id, info] of Object.entries(state.playersInfo)) {
-    playersInfoMap[id] = {
+    map[id] = {
       ...info,
       ownedProperties: isFullSync ? [] : [...info.ownedProperties],
       mortgagedProperties: isFullSync ? [] : (info.mortgagedProperties ? [...info.mortgagedProperties] : []),
     };
   }
-  let hasPlayerInfoChange = isFullSync && Object.keys(playersInfoMap).length > 0;
+  return map;
+}
 
-  // 1. Cập nhật vị trí, số dư và trạng thái người chơi từ delta.players TRƯỚC
-  // Để khi duyệt delta.cells, playersInfoMap đã có đầy đủ hồ sơ người chơi để nạp quyền sở hữu tài sản
-  if (delta.players && delta.players.length > 0) {
-    const nextPositions = { ...state.playerPositions };
-    let hasPositionChange = false;
+function determineFromCell(state: GameState, playerId: string, currentPos: number): number {
+  const queue = state.pawnAnimationQueue ?? [];
+  const pTasks = queue.filter((t) => t.playerId === playerId);
+  if (pTasks.length > 0) return pTasks[pTasks.length - 1]!.targetCell;
 
-    const isBusy = Boolean(state.activePawnAnimation?.isAnimating) || (state.pawnAnimationQueue?.length ?? 0) > 0;
+  const anim = state.activePawnAnimation;
+  if (anim?.playerId === playerId && anim.waypoints.length > 0) {
+    return anim.waypoints[anim.waypoints.length - 1]!;
+  }
+  const isBusy = Boolean(anim?.isAnimating) || queue.length > 0;
+  const visualPos = state.visualPositions?.[playerId];
+  return (isBusy && visualPos !== undefined) ? visualPos : currentPos;
+}
 
-    for (const p of delta.players) {
-      if (nextPositions[p.id] !== p.position) {
-        const queueTasksForPlayer = (state.pawnAnimationQueue ?? []).filter((t) => t.playerId === p.id);
-        const lastQueuedTarget = queueTasksForPlayer.length > 0
-          ? queueTasksForPlayer[queueTasksForPlayer.length - 1]?.targetCell
-          : undefined;
-        const activeAnimTarget = (state.activePawnAnimation?.playerId === p.id && state.activePawnAnimation.waypoints.length > 0)
-          ? state.activePawnAnimation.waypoints[state.activePawnAnimation.waypoints.length - 1]
-          : undefined;
-        const visualPos = state.visualPositions?.[p.id];
-        const currentPos = nextPositions[p.id];
-        const fromCell: number = lastQueuedTarget !== undefined
-          ? lastQueuedTarget
-          : activeAnimTarget !== undefined
-          ? activeAnimTarget
-          : (isBusy && visualPos !== undefined)
-          ? visualPos
-          : (currentPos ?? 0);
-        nextPositions[p.id] = p.position;
-        hasPositionChange = true;
-        if (!isFullSync && fromCell !== p.position) {
-          const waypoints = calculatePathWaypoints(fromCell, p.position);
-          if (waypoints.length > 0) {
-            const task: PawnMoveTask = {
-              playerId: p.id,
-              fromCell,
-              targetCell: p.position,
-              waypoints,
-              isBot: Boolean(p.isBot),
-            };
-            if (state.isRolling && state.setPendingPawnMove && !p.isBot) {
-              state.setPendingPawnMove({ playerId: p.id, targetCell: p.position, fromCell });
-            } else if (state.enqueuePawnMove) {
-              state.enqueuePawnMove(task);
-            } else if (state.startPawnMove) {
-              state.startPawnMove(p.id, p.position, fromCell, Boolean(p.isBot));
-            }
-          }
-        }
-      }
+function dispatchPawnMove(state: GameState, task: PawnMoveTask, isRolling: boolean): void {
+  if (isRolling && state.setPendingPawnMove && !task.isBot) {
+    state.setPendingPawnMove({ playerId: task.playerId, targetCell: task.targetCell, fromCell: task.fromCell });
+  } else if (state.enqueuePawnMove) {
+    state.enqueuePawnMove(task);
+  } else {
+    state.startPawnMove?.(task.playerId, task.targetCell, task.fromCell, Boolean(task.isBot));
+  }
+}
 
-      const existing = playersInfoMap[p.id];
-      if (existing) {
-        const oldBalance = existing.balance;
-        if (!isFullSync && oldBalance !== undefined && oldBalance !== p.balance) {
-          const diff = p.balance - oldBalance;
-          if (diff > 0) {
-            state.addFloatingText({
-              text: `+${formatCurrency(diff)}`,
-              type: FloatingTextType.Reward,
-              playerId: p.id,
-            });
-            if (oldBalance < 0 && p.balance >= 0) {
-              if (state.activeModal === 'insolvency') {
-                state.closeModal();
-              }
-              state.addFloatingText({
-                text: '🎉 Thoát vỡ nợ thành công! Hãy bấm Hết Lượt.',
-                type: FloatingTextType.Reward,
-                playerId: p.id,
-              });
-            }
-          } else if (diff < 0) {
-            state.addFloatingText({
-              text: formatCurrency(diff),
-              type: FloatingTextType.Penalty,
-              playerId: p.id,
-            });
-          }
-        }
-
-        playersInfoMap[p.id] = {
-          ...existing,
-          balance: p.balance,
-          isBot: Boolean(p.isBot),
-          ...(p.bankrupt !== undefined ? { bankrupt: p.bankrupt } : {}),
-          ...(p.overdraftRoundsLeft !== undefined ? { overdraftRoundsLeft: p.overdraftRoundsLeft } : {}),
-          ...(p.inAudit !== undefined ? { inAudit: p.inAudit } : {}),
-          ...(p.auditTurnsLeft !== undefined ? { auditTurnsLeft: p.auditTurnsLeft } : {}),
-          ...(p.skipNextTurn !== undefined ? { skipNextTurn: p.skipNextTurn } : {}),
-          ...(p.consecutiveDoubles !== undefined ? { consecutiveDoubles: p.consecutiveDoubles } : {}),
-        };
-        hasPlayerInfoChange = true;
-      } else {
-        const pIdx = delta.players.indexOf(p);
-        let lobbySlot: { playerName?: string; tokenColor?: string } | undefined;
-        try {
-          lobbySlot = useLobbyStore.getState().slots?.find((s) => s.playerId === p.id);
-        } catch {
-          /* safe-ignore: lobbyStore uninitialized in isolated test environment */
-        }
-
-        const tokenColor = lobbySlot?.tokenColor ?? (PLAYER_TOKEN_PALETTE[pIdx % PLAYER_TOKEN_PALETTE.length] ?? '#38BDF8');
-        const playerName = lobbySlot?.playerName || (p.isBot ? `Bot AI ${p.id.replace(/\D/g, '') || pIdx + 1}` : `Người Chơi (${p.id.toUpperCase()})`);
-
-        playersInfoMap[p.id] = {
-          id: p.id,
-          name: playerName,
-          balance: p.balance,
-          tokenColor,
-          ownedProperties: [],
-          mortgagedProperties: [],
-          isBot: Boolean(p.isBot),
-          ...(p.bankrupt !== undefined ? { bankrupt: p.bankrupt } : {}),
-          ...(p.overdraftRoundsLeft !== undefined ? { overdraftRoundsLeft: p.overdraftRoundsLeft } : {}),
-          ...(p.inAudit !== undefined ? { inAudit: p.inAudit } : {}),
-          ...(p.auditTurnsLeft !== undefined ? { auditTurnsLeft: p.auditTurnsLeft } : {}),
-          ...(p.skipNextTurn !== undefined ? { skipNextTurn: p.skipNextTurn } : {}),
-          ...(p.consecutiveDoubles !== undefined ? { consecutiveDoubles: p.consecutiveDoubles } : {}),
-        };
-        hasPlayerInfoChange = true;
-      }
+function notifyBalanceChange(state: GameState, playerId: string, diff: number, oldBalance: number, newBalance: number): void {
+  if (diff > 0) {
+    state.addFloatingText({ text: `+${formatCurrency(diff)}`, type: FloatingTextType.Reward, playerId });
+    if (oldBalance < 0 && newBalance >= 0) {
+      if (state.activeModal === 'insolvency') state.closeModal();
+      state.addFloatingText({ text: '🎉 Thoát vỡ nợ thành công! Hãy bấm Hết Lượt.', type: FloatingTextType.Reward, playerId });
     }
+  } else if (diff < 0) {
+    state.addFloatingText({ text: formatCurrency(diff), type: FloatingTextType.Penalty, playerId });
+  }
+}
 
-    if (hasPositionChange) {
-      state.setPlayerPositions(nextPositions);
-      if (isFullSync && state.setVisualPositions) {
-        state.setVisualPositions(nextPositions);
-      }
+type DeltaPlayer = NonNullable<DeltaPayload['players']>[number];
+type DeltaCell = NonNullable<DeltaPayload['cells']>[number];
+
+const OPTIONAL_PLAYER_KEYS = [
+  'bankrupt', 'overdraftRoundsLeft', 'inAudit',
+  'auditTurnsLeft', 'skipNextTurn', 'consecutiveDoubles',
+] as const;
+
+function assignPlayerOptionalFlags(target: PlayerHudInfo, p: DeltaPlayer): PlayerHudInfo {
+  const patch: Record<string, unknown> = {};
+  for (const key of OPTIONAL_PLAYER_KEYS) {
+    if (p[key] !== undefined) patch[key] = p[key];
+  }
+  return { ...target, ...patch };
+}
+
+function resolvePlayerName(p: DeltaPlayer, pIdx: number, lobbyName?: string): string {
+  if (lobbyName) return lobbyName;
+  if (p.isBot) {
+    const num = p.id.replace(/\D/g, '');
+    return `Bot AI ${num || pIdx + 1}`;
+  }
+  return `Người Chơi (${p.id.toUpperCase()})`;
+}
+
+function resolvePlayerColor(pIdx: number, lobbyColor?: string): string {
+  if (lobbyColor) return lobbyColor;
+  return PLAYER_TOKEN_PALETTE[pIdx % PLAYER_TOKEN_PALETTE.length] ?? '#38BDF8';
+}
+
+function getLobbySlot(playerId: string): { playerName?: string; tokenColor?: string } | undefined {
+  try {
+    return useLobbyStore.getState().slots?.find((s) => s.playerId === playerId);
+  } catch {
+    /* safe-ignore: test fallback */
+    return undefined;
+  }
+}
+
+function updatePlayerHudRecord(existing: PlayerHudInfo | undefined, p: DeltaPlayer, pIdx: number): PlayerHudInfo {
+  if (existing) {
+    const updated: PlayerHudInfo = { ...existing, balance: p.balance, isBot: Boolean(p.isBot) };
+    return assignPlayerOptionalFlags(updated, p);
+  }
+  const slot = getLobbySlot(p.id);
+  const created: PlayerHudInfo = {
+    id: p.id,
+    name: resolvePlayerName(p, pIdx, slot?.playerName),
+    balance: p.balance,
+    tokenColor: resolvePlayerColor(pIdx, slot?.tokenColor),
+    ownedProperties: [],
+    mortgagedProperties: [],
+    isBot: Boolean(p.isBot),
+  };
+  return assignPlayerOptionalFlags(created, p);
+}
+
+function processSinglePlayerPosition(
+  state: GameState,
+  p: DeltaPlayer,
+  nextPositions: Record<string, number>,
+  isFullSync: boolean,
+): boolean {
+  if (nextPositions[p.id] === p.position) return false;
+  const fromCell = determineFromCell(state, p.id, nextPositions[p.id] ?? 0);
+  nextPositions[p.id] = p.position;
+  if (!isFullSync && fromCell !== p.position) {
+    const waypoints = calculatePathWaypoints(fromCell, p.position);
+    if (waypoints.length > 0) {
+      dispatchPawnMove(state, { playerId: p.id, fromCell, targetCell: p.position, waypoints, isBot: Boolean(p.isBot) }, state.isRolling);
     }
   }
+  return true;
+}
 
-  // 2. Cập nhật các ô biến động và gán quyền sở hữu, thế chấp vào playersInfoMap
-  if (delta.cells && delta.cells.length > 0) {
-    const nextLevelMap = { ...state.levelMap };
-    let hasLevelChange = false;
+function syncPlayerBalanceDiff(
+  state: GameState,
+  p: DeltaPlayer,
+  existing: PlayerHudInfo | undefined,
+  isFullSync: boolean,
+): void {
+  if (isFullSync || !existing || existing.balance === p.balance) return;
+  notifyBalanceChange(state, p.id, p.balance - existing.balance, existing.balance, p.balance);
+}
 
-    for (const cell of delta.cells) {
-      if (cell.level !== undefined) {
-        const oldLevel = state.levelMap[cell.index] ?? 0;
-        const targetLevel = Math.max(0, Math.min(3, cell.level)) as 0 | 1 | 2 | 3;
-        nextLevelMap[cell.index] = targetLevel;
-        hasLevelChange = true;
-        if (!isFullSync && targetLevel > oldLevel && targetLevel >= 1) {
-          try {
-            useVfxStore.getState().triggerConstructionSlam(cell.index, targetLevel as 1 | 2 | 3);
-          } catch {
-            // Fallback im lặng trong môi trường test
-          }
-        }
-        if (!isFullSync && targetLevel === 3 && oldLevel < 3) {
-          try {
-            AudioEngine.playSfx(SoundEffect.UPGRADE_C3);
-          } catch {
-            // Fallback im lặng trong môi trường test
-          }
-        }
-      }
+function syncFinalPositions(state: GameState, nextPositions: Record<string, number>, hasPosChange: boolean, isFullSync: boolean): void {
+  if (!hasPosChange) return;
+  state.setPlayerPositions(nextPositions);
+  if (isFullSync && state.setVisualPositions) {
+    state.setVisualPositions(nextPositions);
+  }
+}
 
-      if (cell.ownerId !== undefined) {
-        for (const [id, pInfo] of Object.entries(playersInfoMap)) {
-          if (id !== cell.ownerId) {
-            const hasOwned = pInfo.ownedProperties.includes(cell.index);
-            const hasMortgaged = Boolean(pInfo.mortgagedProperties?.includes(cell.index));
-            if (hasOwned || hasMortgaged) {
-              playersInfoMap[id] = {
-                ...pInfo,
-                ownedProperties: hasOwned
-                  ? pInfo.ownedProperties.filter((idx) => idx !== cell.index)
-                  : pInfo.ownedProperties,
-                mortgagedProperties: hasMortgaged
-                  ? (pInfo.mortgagedProperties ?? []).filter((idx) => idx !== cell.index)
-                  : pInfo.mortgagedProperties,
-              };
-              hasPlayerInfoChange = true;
-            }
-          }
-        }
-        if (cell.ownerId) {
-          if (!playersInfoMap[cell.ownerId]) {
-            playersInfoMap[cell.ownerId] = {
-              id: cell.ownerId,
-              name: `Người Chơi (${cell.ownerId.toUpperCase()})`,
-              balance: 15000,
-              tokenColor: '#38BDF8',
-              ownedProperties: [],
-              mortgagedProperties: [],
-              isBot: false,
-            };
-            hasPlayerInfoChange = true;
-          }
-          const owner = playersInfoMap[cell.ownerId]!;
-          if (!owner.ownedProperties.includes(cell.index)) {
-            const nextOwned = [...owner.ownedProperties, cell.index];
-            playersInfoMap[cell.ownerId] = {
-              ...owner,
-              ownedProperties: nextOwned,
-            };
-            hasPlayerInfoChange = true;
-            if (!isFullSync) {
-              const bCell = BOARD_CONFIG[cell.index];
-              if (bCell?.colorGroup) {
-                const groupCells = BOARD_CONFIG.filter((c) => c.colorGroup === bCell.colorGroup).map((c) => c.index);
-                const hadAllBefore = groupCells.every((idx) => owner.ownedProperties.includes(idx));
-                const hasAllNow = groupCells.every((idx) => nextOwned.includes(idx));
-                if (!hadAllBefore && hasAllNow) {
-                  state.addFloatingText({
-                    text: `🎉 ĐỘC QUYỀN ${bCell.colorGroup.toUpperCase()}! Phí thuê cơ bản x2!`,
-                    type: FloatingTextType.Reward,
-                    playerId: cell.ownerId,
-                  });
-                }
-              }
-            }
-          }
-        }
-      }
+export function applyPlayerDeltas(
+  delta: DeltaPayload, state: GameState, playersInfoMap: Record<string, PlayerHudInfo>, isFullSync: boolean,
+): boolean {
+  const players = delta.players;
+  if (!players || players.length === 0) return false;
+  const nextPositions = { ...state.playerPositions };
+  let hasPosChange = false;
 
-      if (cell.isMortgaged === true) {
-        const ownerId = cell.ownerId ?? Object.keys(playersInfoMap).find((id) =>
-          playersInfoMap[id]?.ownedProperties.includes(cell.index),
-        );
-        if (ownerId && playersInfoMap[ownerId]) {
-          const owner = playersInfoMap[ownerId]!;
-          const mortgaged = owner.mortgagedProperties ?? [];
-          if (!mortgaged.includes(cell.index)) {
-            playersInfoMap[ownerId] = {
-              ...owner,
-              mortgagedProperties: [...mortgaged, cell.index],
-            };
-            hasPlayerInfoChange = true;
-          }
-        }
-      } else if (cell.isMortgaged === false || isFullSync) {
-        for (const [id, pInfo] of Object.entries(playersInfoMap)) {
-          if (pInfo.mortgagedProperties?.includes(cell.index)) {
-            playersInfoMap[id] = {
-              ...pInfo,
-              mortgagedProperties: pInfo.mortgagedProperties.filter((idx) => idx !== cell.index),
-            };
-            hasPlayerInfoChange = true;
-          }
-        }
-      }
+  players.forEach((p, pIdx) => {
+    if (processSinglePlayerPosition(state, p, nextPositions, isFullSync)) hasPosChange = true;
+    const existing = playersInfoMap[p.id];
+    syncPlayerBalanceDiff(state, p, existing, isFullSync);
+    playersInfoMap[p.id] = updatePlayerHudRecord(existing, p, pIdx);
+  });
+
+  syncFinalPositions(state, nextPositions, hasPosChange, isFullSync);
+  return true;
+}
+
+function triggerCellLevelEffects(cellIndex: number, targetLevel: number, oldLevel: number): void {
+  try {
+    if (targetLevel > oldLevel && targetLevel >= 1) {
+      useVfxStore.getState().triggerConstructionSlam(cellIndex, targetLevel as 1 | 2 | 3);
     }
+    if (targetLevel === 3 && oldLevel < 3) {
+      AudioEngine.playSfx(SoundEffect.UPGRADE_C3);
+    }
+  } catch {
+    /* safe-ignore: test fallback */
+  }
+}
 
-    if (hasLevelChange) state.setLevelMap(nextLevelMap);
+function updateCellLevel(
+  cell: DeltaCell,
+  state: GameState,
+  nextLevelMap: Record<number, 0 | 1 | 2 | 3>,
+  isFullSync: boolean,
+): boolean {
+  if (cell.level === undefined) return false;
+  const oldLevel = state.levelMap[cell.index] ?? 0;
+  const targetLevel = Math.max(0, Math.min(3, cell.level)) as 0 | 1 | 2 | 3;
+  nextLevelMap[cell.index] = targetLevel;
+  if (!isFullSync) triggerCellLevelEffects(cell.index, targetLevel, oldLevel);
+  return true;
+}
+
+function checkMonopolyReward(cellIndex: number, ownerId: string, owner: PlayerHudInfo, state: GameState): void {
+  const bCell = BOARD_CONFIG[cellIndex];
+  if (!bCell?.colorGroup) return;
+  const group = BOARD_CONFIG.filter((c) => c.colorGroup === bCell.colorGroup).map((c) => c.index);
+  const hadAllBefore = group.every((idx) => owner.ownedProperties.includes(idx));
+  const hasAllNow = group.every((idx) => owner.ownedProperties.includes(idx) || idx === cellIndex);
+  if (!hadAllBefore && hasAllNow) {
+    state.addFloatingText({
+      text: `🎉 ĐỘC QUYỀN ${bCell.colorGroup.toUpperCase()}! Phí thuê cơ bản x2!`,
+      type: FloatingTextType.Reward,
+      playerId: ownerId,
+    });
+  }
+}
+
+function ensurePlayerRecord(playerId: string, playersInfoMap: Record<string, PlayerHudInfo>): void {
+  if (playersInfoMap[playerId]) return;
+  playersInfoMap[playerId] = {
+    id: playerId,
+    name: `Người Chơi (${playerId.toUpperCase()})`,
+    balance: 15000,
+    tokenColor: '#38BDF8',
+    ownedProperties: [],
+    mortgagedProperties: [],
+    isBot: false,
+  };
+}
+
+function removeCellFromPreviousOwners(cellIndex: number, newOwnerId: string | null | undefined, playersInfoMap: Record<string, PlayerHudInfo>): void {
+  for (const [id, pInfo] of Object.entries(playersInfoMap)) {
+    if (id === newOwnerId) continue;
+    const owned = pInfo.ownedProperties.includes(cellIndex);
+    const mortgaged = Boolean(pInfo.mortgagedProperties?.includes(cellIndex));
+    if (!owned && !mortgaged) continue;
+    playersInfoMap[id] = {
+      ...pInfo,
+      ownedProperties: owned ? pInfo.ownedProperties.filter((i) => i !== cellIndex) : pInfo.ownedProperties,
+      mortgagedProperties: mortgaged ? (pInfo.mortgagedProperties ?? []).filter((i) => i !== cellIndex) : pInfo.mortgagedProperties,
+    };
+  }
+}
+
+function transferCellOwnership(
+  cellIndex: number,
+  newOwnerId: string | null | undefined,
+  playersInfoMap: Record<string, PlayerHudInfo>,
+  state: GameState,
+  isFullSync: boolean,
+): boolean {
+  if (newOwnerId === undefined) return false;
+  removeCellFromPreviousOwners(cellIndex, newOwnerId, playersInfoMap);
+  if (!newOwnerId) return true;
+  ensurePlayerRecord(newOwnerId, playersInfoMap);
+  const owner = playersInfoMap[newOwnerId]!;
+  if (!owner.ownedProperties.includes(cellIndex)) {
+    if (!isFullSync) checkMonopolyReward(cellIndex, newOwnerId, owner, state);
+    playersInfoMap[newOwnerId] = { ...owner, ownedProperties: [...owner.ownedProperties, cellIndex] };
+  }
+  return true;
+}
+
+function applyMortgageFlag(cellIndex: number, ownerId: string | undefined, playersInfoMap: Record<string, PlayerHudInfo>): boolean {
+  const resolved = ownerId ?? Object.keys(playersInfoMap).find((id) => playersInfoMap[id]?.ownedProperties.includes(cellIndex));
+  const owner = resolved ? playersInfoMap[resolved] : undefined;
+  if (!owner || owner.mortgagedProperties?.includes(cellIndex)) return false;
+  playersInfoMap[resolved!] = { ...owner, mortgagedProperties: [...(owner.mortgagedProperties ?? []), cellIndex] };
+  return true;
+}
+
+function clearMortgageFlag(cellIndex: number, playersInfoMap: Record<string, PlayerHudInfo>): boolean {
+  let changed = false;
+  for (const [id, pInfo] of Object.entries(playersInfoMap)) {
+    if (pInfo.mortgagedProperties?.includes(cellIndex)) {
+      playersInfoMap[id] = { ...pInfo, mortgagedProperties: pInfo.mortgagedProperties.filter((idx) => idx !== cellIndex) };
+      changed = true;
+    }
+  }
+  return changed;
+}
+
+function updateCellMortgage(cell: DeltaCell, playersInfoMap: Record<string, PlayerHudInfo>, isFullSync: boolean): boolean {
+  if (cell.isMortgaged === true) return applyMortgageFlag(cell.index, cell.ownerId ?? undefined, playersInfoMap);
+  if (cell.isMortgaged === false || isFullSync) return clearMortgageFlag(cell.index, playersInfoMap);
+  return false;
+}
+
+export function applyCellDeltas(
+  delta: DeltaPayload,
+  state: GameState,
+  playersInfoMap: Record<string, PlayerHudInfo>,
+  isFullSync: boolean,
+): boolean {
+  if (!delta.cells || delta.cells.length === 0) return false;
+  const nextLevelMap = { ...state.levelMap };
+  let hasLevelChange = false;
+  let hasInfoChange = false;
+
+  for (const cell of delta.cells) {
+    if (updateCellLevel(cell, state, nextLevelMap, isFullSync)) hasLevelChange = true;
+    if (transferCellOwnership(cell.index, cell.ownerId, playersInfoMap, state, isFullSync)) hasInfoChange = true;
+    if (updateCellMortgage(cell, playersInfoMap, isFullSync)) hasInfoChange = true;
   }
 
-  if (hasPlayerInfoChange) state.setPlayersInfo(playersInfoMap);
+  if (hasLevelChange) state.setLevelMap(nextLevelMap);
+  return hasInfoChange;
+}
 
-  // 3. Cập nhật xúc xắc từ server
-  if (delta.dice) {
-    state.triggerDiceRoll([delta.dice[0], delta.dice[1]]);
-    try {
-      AudioEngine.playSfx(SoundEffect.DICE_ROLL);
-    } catch {
-      /* safe-ignore: audio uninitialized in unit test environment */
-    }
-  }
+function syncDiceRoll(dice: DeltaPayload['dice'], state: GameState): void {
+  if (!dice) return;
+  state.triggerDiceRoll([dice[0], dice[1]]);
+  try { AudioEngine.playSfx(SoundEffect.DICE_ROLL); } catch { /* safe-ignore: test fallback */ }
+}
 
-  // 4. Cập nhật lượt chơi hiện tại và thời gian từ Server
-  const turnPlayerId = delta.currentTurnPlayerId ?? (delta.currentPlayerIndex !== undefined && delta.players ? delta.players[delta.currentPlayerIndex]?.id : undefined);
+function resolveTurnPlayerId(delta: DeltaPayload): string | undefined {
+  if (delta.currentTurnPlayerId) return delta.currentTurnPlayerId;
+  return delta.currentPlayerIndex !== undefined ? delta.players?.[delta.currentPlayerIndex]?.id : undefined;
+}
+
+function syncTurnAndTimer(delta: DeltaPayload, state: GameState): void {
+  const turnPlayerId = resolveTurnPlayerId(delta);
   if (turnPlayerId && state.currentTurnPlayerId !== turnPlayerId) {
     state.setCurrentTurnPlayerId(turnPlayerId);
     state.setTurnTimeRemaining(delta.timeRemaining ?? 60);
   } else if (delta.timeRemaining !== undefined) {
     state.setTurnTimeRemaining(delta.timeRemaining);
   }
+}
 
-  // 5. Đảm bảo quỹ kho bạc ban đầu nếu đang ở mức 0
-  if (state.treasuryPool === 0) {
-    state.setTreasuryPool(2000);
-  }
+function syncTreasuryPool(state: GameState): void {
+  if (state.treasuryPool === 0) state.setTreasuryPool(2000);
+}
 
-  // 6. Đồng bộ hóa sàn đấu giá tự động (Auction)
-  if (delta.auction) {
-    state.openModal('auction', delta.auction);
-  } else if (delta.auction === null) {
-    if (state.activeModal === 'auction') {
-      state.closeModal();
-    }
-  }
-
-  // 7. Kích hoạt chuyển sang Sa Bàn 3D khi ván đấu đang diễn ra sau khi đã nạp đầy đủ dữ liệu vào useGameStore
-  if (isGameRunningDelta(delta)) {
-    try {
-      useLobbyStore.getState().setGameStarted(true);
-    } catch {
-      /* safe-ignore: lobbyStore uninitialized in isolated test environment */
-    }
-  }
-
-  // 8. Trích xuất và ghi nhận nhật ký hoạt động (Activity Feed)
-  try {
-    trackDeltaActivities(delta, state, store.getState());
-  } catch {
-    /* safe-ignore: activity tracker failure should not break game store state sync */
-  }
-
-  // 9. Giám sát bất biến và ghi nhận Hộp Đen (Telemetry & Invariant Watchdog)
-  try {
-    handleDeltaTelemetry(delta, state, store.getState());
-  } catch {
-    /* safe-ignore: telemetry failure should not break game store state sync */
+function syncAuctionModal(auction: DeltaPayload['auction'], state: GameState): void {
+  if (auction) {
+    state.openModal('auction', auction);
+  } else if (auction === null && state.activeModal === 'auction') {
+    state.closeModal();
   }
 }
 
+function syncGameStarted(delta: DeltaPayload): void {
+  if (!isGameRunningDelta(delta)) return;
+  try { useLobbyStore.getState().setGameStarted(true); } catch { /* safe-ignore: test fallback */ }
+}
+
+function syncTelemetryAndActivities(delta: DeltaPayload, state: GameState, store: typeof useGameStore): void {
+  try {
+    trackDeltaActivities(delta, state, store.getState());
+    handleDeltaTelemetry(delta, state, store.getState());
+  } catch {
+    /* safe-ignore: test fallback */
+  }
+}
+
+export function applyPhaseAndTimerDeltas(delta: DeltaPayload, state: GameState, store: typeof useGameStore): void {
+  syncDiceRoll(delta.dice, state);
+  syncTurnAndTimer(delta, state);
+  syncTreasuryPool(state);
+  syncAuctionModal(delta.auction, state);
+  syncGameStarted(delta);
+  syncTelemetryAndActivities(delta, state, store);
+}
+
+export function applyDeltaToStore(delta: DeltaPayload, store: typeof useGameStore = useGameStore): void {
+  const state = store.getState();
+  const isFullSync = Boolean(delta.cells && delta.cells.length === BOARD_SIZE);
+  if (isFullSync && state.activePawnAnimation) state.clearActivePawnAnimation();
+
+  const playersInfoMap = initPlayersInfoMap(state, isFullSync);
+  let hasPlayerInfoChange = isFullSync && Object.keys(playersInfoMap).length > 0;
+
+  if (applyPlayerDeltas(delta, state, playersInfoMap, isFullSync)) hasPlayerInfoChange = true;
+  if (applyCellDeltas(delta, state, playersInfoMap, isFullSync)) hasPlayerInfoChange = true;
+
+  if (hasPlayerInfoChange) state.setPlayersInfo(playersInfoMap);
+  applyPhaseAndTimerDeltas(delta, state, store);
+}

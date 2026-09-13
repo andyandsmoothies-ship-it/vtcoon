@@ -2,7 +2,7 @@
 // Re-exports cellPosition for backward-compat with tests/client/game_canvas.test.ts
 export { cellPosition } from './3d/board_coords';
 
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, ContactShadows, Environment } from '@react-three/drei';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
@@ -98,14 +98,16 @@ export function AdaptiveCinematicCamera({
   const activeScreenShake = useVfxStore((s) => s.activeScreenShake);
   const playersInfo = useGameStore((s) => s.playersInfo);
 
-  useFrame((_, delta) => {
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       window.__threeScene = scene;
       window.__threeCamera = camera;
-      window.__orbitControls = controlsRef.current;
-      if (window.__debugCameraManual) {
-        return;
-      }
+    }
+  }, [scene, camera]);
+
+  useFrame((_, delta) => {
+    if (typeof window !== 'undefined' && window.__debugCameraManual) {
+      return;
     }
 
     const isPawnMoving = activeAnimation?.isAnimating ?? false;
@@ -196,7 +198,12 @@ export function AdaptiveCinematicCamera({
 
   return (
     <OrbitControls
-      ref={controlsRef}
+      ref={(node) => {
+        controlsRef.current = node;
+        if (typeof window !== 'undefined') {
+          window.__orbitControls = node;
+        }
+      }}
       enableRotate
       enablePan
       minPolarAngle={Math.PI / 6}

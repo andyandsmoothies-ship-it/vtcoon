@@ -47,8 +47,23 @@ export interface AdminRoomLogEntry {
   readonly payloadSummary: string;
 }
 
+export type ArchivedRoomStatus = 'ACTIVE' | 'FINISHED' | 'TERMINATED';
+
+export interface AdminArchivedRoomSummary {
+  readonly roomCode: string;
+  readonly startTime: number;
+  readonly endTime?: number;
+  readonly playerCount: number;
+  readonly winner?: string;
+  readonly logFilePath: string;
+  readonly status: ArchivedRoomStatus;
+  readonly totalEvents: number;
+  readonly fileSizeBytes?: number;
+}
+
 export interface AdminManagerOptions {
   readonly roomManager: RoomManager;
   readonly secret?: string;
   readonly onTerminateRoom?: (roomCode: string, reason?: string) => void;
+  readonly loggerDir?: string;
 }

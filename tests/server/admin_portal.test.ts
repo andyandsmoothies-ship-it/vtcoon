@@ -4,12 +4,27 @@ import { WebSocket } from 'ws';
 import { WssServer } from '../../src/server/network/wss_server.js';
 import type { WsServerMessage } from '../../src/server/network/network_types.js';
 
+import fs from 'node:fs';
+import path from 'node:path';
+
 const TEST_PORT = 3205;
+const TEST_ADMIN_LOG_DIR = path.resolve(process.cwd(), 'server_logs', 'test_admin_portal_logs');
 let server: WssServer;
 const activeSockets: WebSocket[] = [];
 
+function cleanAdminTestDir(): void {
+  try {
+    if (fs.existsSync(TEST_ADMIN_LOG_DIR)) {
+      fs.rmSync(TEST_ADMIN_LOG_DIR, { recursive: true, force: true });
+    }
+  } catch {
+    /* safe-ignore */
+  }
+}
+
 beforeAll(() => {
-  server = new WssServer({ port: TEST_PORT });
+  cleanAdminTestDir();
+  server = new WssServer({ port: TEST_PORT, adminLoggerDir: TEST_ADMIN_LOG_DIR });
 });
 
 afterEach(() => {
@@ -23,6 +38,7 @@ afterEach(() => {
 
 afterAll(async () => {
   await server.close();
+  cleanAdminTestDir();
 });
 
 function openSocket(): Promise<WebSocket> {
@@ -238,6 +254,78 @@ describe('[IMP-25/MSS] Admin Central Portal Tests', () => {
 
     expect(server.admin.getRecentLogs('TEMP99').length).toBe(0);
     expect(server.admin.getDiagnosticDump('TEMP99')).toBeUndefined();
+    ws.close();
+  });
+
+  it('[TC-ADM01.10/MSS] ADMIN_GET_ARCHIVED_ROOMS trả về danh sách ván đấu đã kết thúc từ persistent manifest', async () => {
+    const ws = await openSocket();
+    const authPending = collectN(ws, 2);
+    ws.send(JSON.stringify({ type: 'ADMIN_AUTH', secret: 'vtcoon-admin-2026' }));
+    await authPending;
+
+    const res = await sendRecv(ws, { type: 'ADMIN_GET_ARCHIVED_ROOMS' });
+    expect(res.type).toBe('ADMIN_ARCHIVED_ROOM_LIST');
+    if (res.type === 'ADMIN_ARCHIVED_ROOM_LIST') {
+      expect(Array.isArray(res.rooms)).toBe(true);
+      const archivedTemp = res.rooms.find((r) => r.roomCode === 'TEMP99');
+      expect(archivedTemp).toBeDefined();
+      expect(archivedTemp?.status).toBe('TERMINATED');
+      expect(archivedTemp?.totalEvents).toBeGreaterThan(0);
+    }
+    ws.close();
+  });
+
+  it('[TC-ADM01.11/MSS] ADMIN_GET_ARCHIVED_LOGS trả về 100% bản ghi log từ tệp .jsonl của phòng đã đóng', async () => {
+    const ws = await openSocket();
+    const authPending = collectN(ws, 2);
+    ws.send(JSON.stringify({ type: 'ADMIN_AUTH', secret: 'vtcoon-admin-2026' }));
+    await authPending;
+
+    const res = await sendRecv(ws, { type: 'ADMIN_GET_ARCHIVED_LOGS', roomCode: 'TEMP99' });
+    expect(res.type).toBe('ADMIN_ARCHIVED_LOG_DATA');
+    if (res.type === 'ADMIN_ARCHIVED_LOG_DATA') {
+      expect(res.roomCode).toBe('TEMP99');
+      expect(Array.isArray(res.logs)).toBe(true);
+      expect(res.logs.length).toBeGreaterThan(0);
+      expect(res.logs[0]?.action).toBe('INIT');
+    }
+    ws.close();
+  });
+
+  it('[TC-ADM01.12-inv/Adversarial] ADMIN_GET_ARCHIVED_ROOMS từ chối khi socket chưa xác thực', async () => {
+    const ws = await openSocket();
+    const res = await sendRecv(ws, { type: 'ADMIN_GET_ARCHIVED_ROOMS' });
+    expect(res.type).toBe('ERROR');
+    if (res.type === 'ERROR') {
+      expect(res.reasonCode).toBe('ADMIN_UNAUTHORIZED');
+    }
+    ws.close();
+  });
+
+  it('[TC-ADM01.13/MSS] broadcastGameOver chốt ván đấu trạng thái FINISHED và lưu danh tính người thắng', async () => {
+    const roomMgr = server.getRoomManager();
+    const rFin = roomMgr.createRoom('host_winner', 'FINI88');
+    server.admin.recordRoomEvent('FINI88', {
+      source: 'SYSTEM',
+      action: 'INIT',
+      payloadSummary: 'Tạo phòng hoàn tất',
+    });
+
+    server.broadcastGameOver(rFin.roomCode, [{ id: 'host_winner', netWorth: 50000 }]);
+
+    const ws = await openSocket();
+    const authPending = collectN(ws, 2);
+    ws.send(JSON.stringify({ type: 'ADMIN_AUTH', secret: 'vtcoon-admin-2026' }));
+    await authPending;
+
+    const res = await sendRecv(ws, { type: 'ADMIN_GET_ARCHIVED_ROOMS' });
+    expect(res.type).toBe('ADMIN_ARCHIVED_ROOM_LIST');
+    if (res.type === 'ADMIN_ARCHIVED_ROOM_LIST') {
+      const finRoom = res.rooms.find((r) => r.roomCode === 'FINI88');
+      expect(finRoom).toBeDefined();
+      expect(finRoom?.status).toBe('FINISHED');
+      expect(finRoom?.winner).toBe('host_winner');
+    }
     ws.close();
   });
 });

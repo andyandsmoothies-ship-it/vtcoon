@@ -1,8 +1,16 @@
-// [IMP-25/MSS] Admin Manager — Hệ Thống Quản Trị Trung Tâm Đa Bàn Chơi
+// [IMP-25/MSS][IMP-28/MSS] Admin Manager — Hệ Thống Quản Trị Trung Tâm Đa Bàn Chơi
 import type { WebSocket } from 'ws';
 import type { RoomManager } from '../room_manager.js';
-import { TurnPhase, type Room, type Player } from '../../domain/room.js';
-import { encodeMsg, type WsServerMessage, type WsClientMessage, type ReasonCode } from './network_types.js';
+import type { Room } from '../../domain/room.js';
+import { encodeMsg, type WsServerMessage, type WsClientMessage } from './network_types.js';
+import { PersistentRoomLogger, type RoomLogMeta, type RoomFinishSummary } from '../logging/persistent_room_logger.js';
+import {
+  evaluateRoomHealth,
+  buildRoomSummary,
+  buildRoomDetail,
+  buildDiagnosticDump,
+} from './admin_inspector.js';
+import { handleAdminMessage } from './admin_message_handler.js';
 
 import {
   DEFAULT_ADMIN_SECRET,
@@ -12,6 +20,7 @@ import {
   type AdminRoomSummary,
   type AdminRoomDetail,
   type AdminRoomLogEntry,
+  type AdminArchivedRoomSummary,
   type AdminManagerOptions,
 } from './admin_types.js';
 
@@ -23,6 +32,7 @@ export {
   type AdminRoomSummary,
   type AdminRoomDetail,
   type AdminRoomLogEntry,
+  type AdminArchivedRoomSummary,
   type AdminManagerOptions,
 };
 
@@ -34,15 +44,25 @@ export class AdminManager {
   private readonly subscribedRooms = new Map<WebSocket, string>();
   private readonly roomLogs = new Map<string, AdminRoomLogEntry[]>();
   private readonly roomViolations = new Map<string, Array<{ type: string; message: string; timestamp: number }>>();
+  private readonly roomLogger: PersistentRoomLogger;
 
   constructor(options: AdminManagerOptions) {
     this.rooms = options.roomManager;
     this.secret = options.secret ?? process.env['VTCOON_ADMIN_SECRET'] ?? DEFAULT_ADMIN_SECRET;
     this.onTerminateRoom = options.onTerminateRoom;
+    this.roomLogger = new PersistentRoomLogger({ logDir: options.loggerDir });
+  }
+
+  get logger(): PersistentRoomLogger {
+    return this.roomLogger;
   }
 
   get authenticatedCount(): number {
     return this.authenticatedSockets.size;
+  }
+
+  hasRoom(roomCode: string): boolean {
+    return this.rooms.hasRoom(roomCode);
   }
 
   authenticate(socket: WebSocket, secret: string): boolean {
@@ -62,6 +82,10 @@ export class AdminManager {
     this.subscribedRooms.delete(socket);
   }
 
+  initRoomLog(roomCode: string, meta?: RoomLogMeta): string {
+    return this.roomLogger.initRoomLog(roomCode, meta);
+  }
+
   subscribeRoom(socket: WebSocket, rawRoomCode: string): {
     success: boolean;
     detail?: AdminRoomDetail;
@@ -71,19 +95,20 @@ export class AdminManager {
     if (!this.isAuthenticated(socket)) {
       return { success: false, reason: 'ADMIN_UNAUTHORIZED' };
     }
-    const roomCode = rawRoomCode.toUpperCase();
+    const roomCode = rawRoomCode.trim().toUpperCase();
     if (!this.rooms.hasRoom(roomCode)) {
       return { success: false, reason: 'ADMIN_ROOM_NOT_FOUND' };
     }
     this.subscribedRooms.set(socket, roomCode);
     const detail = this.getRoomDetail(roomCode);
-    const recentLogs = this.getRecentLogs(roomCode);
+    const fullLogs = this.roomLogger.getRoomFullLog(roomCode);
+    const recentLogs = fullLogs.length > 0 ? fullLogs : this.getRecentLogs(roomCode);
     return { success: true, detail, recentLogs };
   }
 
   unsubscribeRoom(socket: WebSocket, rawRoomCode?: string): void {
     if (rawRoomCode) {
-      const roomCode = rawRoomCode.toUpperCase();
+      const roomCode = rawRoomCode.trim().toUpperCase();
       if (this.subscribedRooms.get(socket) === roomCode) this.subscribedRooms.delete(socket);
     } else {
       this.subscribedRooms.delete(socket);
@@ -105,6 +130,8 @@ export class AdminManager {
       action: entry.action,
       payloadSummary: entry.payloadSummary,
     };
+
+    this.roomLogger.appendEvent(norm, fullEntry);
 
     let list = this.roomLogs.get(norm);
     if (!list) {
@@ -136,125 +163,44 @@ export class AdminManager {
   }
 
   evaluateRoomHealth(room: Room): { status: RoomHealthStatus; warningReason?: string } {
-    const norm = room.roomCode;
-    const violations = this.roomViolations.get(norm);
-    if (violations && violations.length > 0) {
-      const latest = violations[violations.length - 1];
-      return { status: 'CRITICAL', warningReason: `[${latest?.type}] ${latest?.message}` };
-    }
-    for (const p of room.players) {
-      if (p.balance < 0 && !p.bankrupt && room.phase !== TurnPhase.InsolvencyPhase) {
-        return { status: 'CRITICAL', warningReason: `Số dư âm ngoài vỡ nợ (Người chơi ${p.id}: ${p.balance} Tr)` };
-      }
-      if (p.consecutiveDoubles > 2) {
-        return { status: 'WARNING', warningReason: `Đổ đôi liên tiếp > 2 lần (Người chơi ${p.id})` };
-      }
-    }
-    const reg = this.rooms.getRegistry(norm);
-    if (reg && reg.size > 28) {
-      return { status: 'CRITICAL', warningReason: `Số lượng BĐS vượt trần quy định: ${reg.size}/28` };
-    }
-    if (room.started && !room.players.every((p) => p.bankrupt)) {
-      const lastAct = this.rooms.getLastActivity(norm);
-      if (lastAct && Date.now() - lastAct > 60_000) {
-        return { status: 'WARNING', warningReason: `Bàn chơi không có thao tác > 60s (Nghi ngờ kẹt lượt)` };
-      }
-    }
-    return { status: 'NORMAL' };
-  }
-
-  private mapPlayers(room: Room, norm: string): AdminPlayerSummary[] {
-    const reg = this.rooms.getRegistry(norm);
-    const rankings = this.rooms.getRankings(norm);
-    const netWorthMap = new Map(rankings.map((r) => [r.id, r.netWorth]));
-    return room.players.map((p: Player) => {
-      let propCount = 0;
-      if (reg) {
-        for (const ownerId of reg.values()) {
-          if (ownerId === p.id) propCount++;
-        }
-      }
-      return {
-        id: p.id,
-        balance: p.balance,
-        position: p.position,
-        isBot: Boolean(p.isBot),
-        bankrupt: Boolean(p.bankrupt),
-        propertyCount: propCount,
-        netWorth: netWorthMap.get(p.id) ?? p.balance,
-      };
-    });
+    return evaluateRoomHealth(room, this.roomViolations.get(room.roomCode), this.rooms);
   }
 
   getRoomsSummary(): AdminRoomSummary[] {
     const result: AdminRoomSummary[] = [];
     for (const room of this.rooms.roomMap.values()) {
-      const norm = room.roomCode;
-      const health = this.evaluateRoomHealth(room);
-      result.push({
-        roomCode: norm,
-        hostId: room.hostId,
-        started: room.started,
-        phase: room.phase,
-        round: room.round ?? 1,
-        playerCount: room.players.length,
-        players: this.mapPlayers(room, norm),
-        treasuryPool: room.treasury,
-        status: health.status,
-        warningReason: health.warningReason,
-        lastActivity: this.rooms.getLastActivity(norm) ?? Date.now(),
-        activeTimersCount: this.rooms.getActiveTimers(norm)?.size ?? 0,
-        hasAuction: Boolean(room.currentAuction),
-      });
+      result.push(buildRoomSummary(room, this.rooms, this.roomViolations.get(room.roomCode)));
     }
     return result;
   }
 
   getRoomDetail(rawRoomCode: string): AdminRoomDetail | undefined {
-    const room = this.rooms.getRoom(rawRoomCode);
-    if (!room) return undefined;
-    const norm = room.roomCode;
-    const health = this.evaluateRoomHealth(room);
-    const reg = this.rooms.getRegistry(norm);
-    const sm = this.rooms.getPropertyStates(norm);
-    const propertyStates: Record<number, { ownerId?: string; level: number; isMortgaged: boolean }> = {};
-
-    if (reg || sm) {
-      for (let i = 0; i < 40; i++) {
-        const ownerId = reg?.get(i);
-        const st = sm?.get(i);
-        if (ownerId || st) {
-          propertyStates[i] = { ownerId, level: st?.level ?? 0, isMortgaged: Boolean(st?.isMortgaged) };
-        }
-      }
-    }
-
-    return {
-      roomCode: norm,
-      hostId: room.hostId,
-      started: room.started,
-      phase: room.phase,
-      round: room.round ?? 1,
-      playerCount: room.players.length,
-      players: this.mapPlayers(room, norm),
-      treasuryPool: room.treasury,
-      status: health.status,
-      warningReason: health.warningReason,
-      lastActivity: this.rooms.getLastActivity(norm) ?? Date.now(),
-      activeTimersCount: this.rooms.getActiveTimers(norm)?.size ?? 0,
-      hasAuction: Boolean(room.currentAuction),
-      propertyStates,
-      chanceDiscardCount: room.chanceDiscard?.length ?? 0,
-      marketDiscardCount: room.marketDiscard?.length ?? 0,
-    };
+    const norm = rawRoomCode.toUpperCase();
+    return buildRoomDetail(rawRoomCode, this.rooms, this.roomViolations.get(norm));
   }
 
   getRecentLogs(rawRoomCode: string): AdminRoomLogEntry[] {
     return this.roomLogs.get(rawRoomCode.toUpperCase()) ?? [];
   }
 
-  handleRoomClosed(rawRoomCode: string): void {
-    const norm = rawRoomCode.toUpperCase();
+  getArchivedRoomsList(): AdminArchivedRoomSummary[] {
+    return this.roomLogger.getArchivedRoomsList();
+  }
+
+  getRoomFullLog(roomCode: string, timestamp?: number): AdminRoomLogEntry[] {
+    return this.roomLogger.getRoomFullLog(roomCode, timestamp);
+  }
+
+  handleRoomClosed(rawRoomCode: string, summary?: RoomFinishSummary): void {
+    const norm = rawRoomCode.trim().toUpperCase();
+    const existingRoom = this.rooms.getRoom(norm);
+    const finalSummary: RoomFinishSummary = {
+      status: summary?.status ?? 'TERMINATED',
+      winner: summary?.winner,
+      endTime: summary?.endTime ?? Date.now(),
+      playerCount: summary?.playerCount ?? existingRoom?.players.length ?? 1,
+    };
+    this.roomLogger.finishRoomLog(norm, finalSummary);
     this.roomLogs.delete(norm);
     this.roomViolations.delete(norm);
     for (const [sock, target] of this.subscribedRooms.entries()) {
@@ -275,30 +221,19 @@ export class AdminManager {
       this.onTerminateRoom(norm, reason);
     } else {
       this.rooms.closeRoom(norm);
-      this.handleRoomClosed(norm);
+      this.handleRoomClosed(norm, { status: 'TERMINATED' });
     }
     return true;
   }
 
   getDiagnosticDump(rawRoomCode: string): Record<string, unknown> | undefined {
-    const detail = this.getRoomDetail(rawRoomCode);
-    if (!detail) return undefined;
-    return {
-      exportedAt: Date.now(),
-      roomCode: detail.roomCode,
-      seed: 12345,
-      metrics: {
-        playerCount: detail.playerCount,
-        round: detail.round,
-        phase: detail.phase,
-        treasuryPool: detail.treasuryPool,
-        status: detail.status,
-      },
-      violations: this.roomViolations.get(detail.roomCode) ?? [],
-      players: detail.players,
-      propertyStates: detail.propertyStates,
-      auditLogs: this.getRecentLogs(rawRoomCode),
-    };
+    const norm = rawRoomCode.toUpperCase();
+    return buildDiagnosticDump(
+      rawRoomCode,
+      this.rooms,
+      this.roomViolations.get(norm),
+      this.getRecentLogs(rawRoomCode),
+    );
   }
 
   handleClientMessage(
@@ -306,60 +241,7 @@ export class AdminManager {
     msg: WsClientMessage,
     sendSafe: (s: WebSocket, m: WsServerMessage) => void,
   ): boolean {
-    switch (msg.type) {
-      case 'ADMIN_AUTH': {
-        const ok = this.authenticate(socket, msg.secret);
-        if (ok) {
-          sendSafe(socket, { type: 'ADMIN_AUTH_SUCCESS', message: 'Xác thực Quản trị viên thành công' });
-          sendSafe(socket, { type: 'ADMIN_ROOM_LIST', rooms: this.getRoomsSummary() });
-        } else {
-          sendSafe(socket, { type: 'ADMIN_AUTH_FAILED', reason: 'Sai mã bí mật quản trị (Secret Key)' });
-        }
-        return true;
-      }
-      case 'ADMIN_GET_ROOMS': {
-        if (!this.isAuthenticated(socket)) {
-          sendSafe(socket, { type: 'ERROR', reasonCode: 'ADMIN_UNAUTHORIZED' });
-        } else {
-          sendSafe(socket, { type: 'ADMIN_ROOM_LIST', rooms: this.getRoomsSummary() });
-        }
-        return true;
-      }
-      case 'ADMIN_SUBSCRIBE_ROOM': {
-        const res = this.subscribeRoom(socket, msg.roomCode);
-        if (!res.success) {
-          sendSafe(socket, { type: 'ERROR', reasonCode: (res.reason as ReasonCode) ?? 'ADMIN_UNAUTHORIZED' });
-        } else if (res.detail) {
-          sendSafe(socket, {
-            type: 'ADMIN_ROOM_DETAIL',
-            roomCode: msg.roomCode.toUpperCase(),
-            detail: res.detail,
-            recentLogs: res.recentLogs ?? [],
-          });
-        }
-        return true;
-      }
-      case 'ADMIN_UNSUBSCRIBE_ROOM': {
-        this.unsubscribeRoom(socket, msg.roomCode);
-        return true;
-      }
-      case 'ADMIN_TERMINATE_ROOM': {
-        if (!this.isAuthenticated(socket)) {
-          sendSafe(socket, { type: 'ERROR', reasonCode: 'ADMIN_UNAUTHORIZED' });
-          return true;
-        }
-        const norm = msg.roomCode.toUpperCase();
-        if (!this.rooms.hasRoom(norm)) {
-          sendSafe(socket, { type: 'ADMIN_ERROR', reasonCode: 'ADMIN_ROOM_NOT_FOUND', message: 'Phòng không tồn tại' });
-          return true;
-        }
-        sendSafe(socket, { type: 'ADMIN_ACTION_SUCCESS', action: 'TERMINATE_ROOM', roomCode: norm });
-        this.terminateRoom(norm, msg.reason);
-        return true;
-      }
-      default:
-        return false;
-    }
+    return handleAdminMessage(this, socket, msg, sendSafe);
   }
 
   broadcastToAdmins(msg: WsServerMessage): void {
