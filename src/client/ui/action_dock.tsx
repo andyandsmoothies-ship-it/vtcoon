@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useGameStore } from '../store/game_store';
 import { isRollActionDisabled, isEndTurnDisabled, resolveManagePropertyTarget } from './ui_helpers';
+import { BOARD_CONFIG, CellType } from '../../domain/board_config';
 
 export interface ActionDockProps {
   readonly onRollDice?: () => void;
@@ -101,6 +102,12 @@ export function ActionDock({
     }, 1500);
   };
 
+  const currentPos = actingPlayerId ? (playerPositions[actingPlayerId] ?? 0) : 0;
+  const currentCell = BOARD_CONFIG[currentPos];
+  const isPropertyCell = currentCell && (currentCell.type === CellType.Property || currentCell.type === CellType.Railroad);
+  const isOwnedByAnyone = Object.values(playersInfo).some((p) => p.ownedProperties?.includes(currentPos));
+  const isStandingOnBuyable = Boolean(isMyTurn && hasRolledThisTurn && isPropertyCell && !isOwnedByAnyone);
+
   const handleOpenManageProperty = () => {
     if (onOpenManageProperty) {
       onOpenManageProperty();
@@ -108,8 +115,7 @@ export function ActionDock({
       onOpenProperties();
     } else {
       const activeInfo = actingPlayerId ? playersInfo[actingPlayerId] : undefined;
-      const currentPos = actingPlayerId ? (playerPositions[actingPlayerId] ?? 0) : 0;
-      const target = resolveManagePropertyTarget(activeInfo?.ownedProperties, currentPos);
+      const target = resolveManagePropertyTarget(activeInfo?.ownedProperties, currentPos, isStandingOnBuyable);
       openModal('deed', target);
     }
   };
@@ -166,6 +172,19 @@ export function ActionDock({
       </button>
 
       <div className="h-6 w-px bg-slate-700/80" aria-hidden="true" />
+
+      {/* Nút Mua Đất nhanh khi đang đứng trên ô chưa có chủ trong lượt mình */}
+      {isStandingOnBuyable && (
+        <button
+          type="button"
+          onClick={() => openModal('deed', { cellIndex: currentPos, canBuy: true })}
+          className="min-h-[44px] flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-amber-950 font-black bg-amber-500 hover:bg-amber-400 border border-amber-400 shadow-[0_4px_0_0_#b45309] active:shadow-none active:translate-y-[3px] transition-all text-sm animate-pulse focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+          aria-label={`Mua ô đất số ${currentPos}`}
+        >
+          <span aria-hidden="true">🏷️</span>
+          <span>Mua Đất (#{currentPos})</span>
+        </button>
+      )}
 
       {/* Nút Quản Lý BĐS (gộp Tài Sản & Xây Dựng) với hiệu ứng nổi 3D và viền vàng */}
       <button

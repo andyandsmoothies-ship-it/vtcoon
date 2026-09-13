@@ -123,12 +123,13 @@ describe('[TC-GAME-038..041/MSS] Market Cards Handlers', () => {
 });
 
 describe('[TC-GAME-038..041/MSS] Chance Cards Handlers', () => {
-  it('CC_PLATE_AUCTION trừ 500 Tr. VNĐ và tăng consecutiveDoubles thêm 1', () => {
+  it('CC_PLATE_AUCTION trừ 500 Tr. VNĐ và tăng extraTurns thêm 1', () => {
     const p1 = createPlayer('p1');
     const startBal = p1.balance;
     executeChanceCard(ChanceCardId.CC_PLATE_AUCTION, 'p1', [p1]);
     expect(p1.balance).toBe(startBal - 500);
-    expect(p1.consecutiveDoubles).toBe(1);
+    expect(p1.extraTurns).toBe(1);
+    expect(p1.consecutiveDoubles).toBe(0);
   });
 
   it('CC_FRANCHISE thu 300 Tr. VNĐ từ mỗi đối thủ', () => {

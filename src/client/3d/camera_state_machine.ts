@@ -12,15 +12,15 @@ export interface CameraConfigItem {
 
 export const CAMERA_CONFIG = {
   overview: {
-    position: [20, 22, 20] as const,
-    target: [-1.2, 0, -1.2] as const,
+    position: [11.2, 15.6, 11.2] as const,
+    target: [-0.6, 0.0, -0.6] as const,
     fov: 40,
     speed: 3.2,
   },
   pre_match: {
-    // Góc nhìn Retropoly ~38° Perspective bao quát bán đảo 40 ô, biển ngọc bích & trung tâm đô thị
-    position: [18.5, 19.5, 18.5] as const,
-    target: [-0.8, 0, -0.8] as const,
+    // Góc nhìn Retropoly ~48° Perspective bao quát bán đảo 40 ô, biển ngọc bích & trung tâm đô thị
+    position: [11.2, 15.6, 11.2] as const,
+    target: [-0.8, 0.0, -0.8] as const,
     fov: 40,
     speed: 3.2,
   },
@@ -82,9 +82,9 @@ export function resolveCameraMode(params: CameraResolveParams): CameraMode {
   if (params.isBotTurn) {
     return 'overview';
   }
-  // 1. Ưu tiên cao nhất: Gieo xúc xắc góc nghiêng thấp
+  // [IMP-42] Bỏ hiệu ứng zoom vào khay xúc xắc khi quay xúc xắc để triệt tiêu giật lag
   if (params.isRolling) {
-    return 'dice_roll';
+    return 'overview';
   }
   // 2. Quân cờ đang di chuyển: Bám đuổi theo quân cờ
   if (params.isPawnAnimating) {

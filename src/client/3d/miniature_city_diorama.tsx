@@ -11,38 +11,30 @@ import { DioramaSkyline } from './diorama/diorama_skyline';
 import { DioramaHeritageDistrict } from './diorama/diorama_heritage_district';
 import { DioramaMicroLife } from './diorama/diorama_microlife';
 import { DioramaTraffic } from './diorama/diorama_traffic';
+import { DioramaShophouseBlocks } from './diorama/diorama_shophouse_blocks';
+import { DioramaHighriseBlocks } from './diorama/diorama_highrise_blocks';
 
 export function MiniatureCityDiorama(): React.ReactElement {
   return (
     <group position={[0, 0, 0]} data-testid="miniature-city-diorama">
       {/* 1. Bán đảo đôi liền khối & Bậc thềm kết nối quảng trường trung tâm */}
       <DioramaTerrain />
-
       {/* 2. Cầu Ba Son (Bắc) và Cầu Long Biên (Nam) nối liền hai bờ sông */}
       <DioramaBridges />
-
-      {/* 3. Đấu trường thể thao oval hiện đại (Đông Bắc) */}
+      {/* 3. Đấu trường thể thao oval hiện đại (Đông Bắc) & Đu quay */}
       <DioramaStadium />
-
-      {/* 3.1. Vòng đu quay khổng lồ sắc màu (Đông Bắc - Khu vui chơi giải trí) */}
       <DioramaFerrisWheel />
-
-      {/* 4. Cảng Container Cát Lái & Cần cẩu giàn gantry bốc dỡ hàng hải (Đông Nam) */}
+      {/* 4. Cảng Container Cát Lái & Bến du thuyền (Đông Nam) */}
       <DioramaContainerPort />
-
-      {/* 4.1. Bến du thuyền siêu sang, cầu cảng gỗ & ngọn hải đăng di sản (Đông Nam) */}
       <DioramaMarina />
-
-      {/* 5. Cụm cao ốc tài chính Landmark Skyline & Phố cổ Hội An (Tây Bắc & Tây) */}
+      {/* 5. Cụm cao ốc tài chính Landmark Skyline & Tháp cao ốc nén */}
       <DioramaSkyline />
-
-      {/* 5.1. Khu di sản văn hóa: Chợ Bến Thành & Nhà Thờ Đức Bà mái ngói đỏ (Tây Nam) */}
+      <DioramaHighriseBlocks />
+      {/* 5.1. Khu di sản văn hóa Chợ Lớn & Shophouse phố cổ */}
       <DioramaHeritageDistrict />
-
-      {/* 6. Nhịp sống đô thị vi mô: Xe buýt tí hon, xe hơi ven đường & ca-nô lướt sóng */}
+      <DioramaShophouseBlocks />
+      {/* 6. Nhịp sống đô thị vi mô & Giao thông tự hành */}
       <DioramaMicroLife />
-
-      {/* 7. Hệ thống giao thông tự hành vi mô: Xe buýt & ô tô di chuyển tuần hoàn hai làn */}
       <DioramaTraffic />
     </group>
   );

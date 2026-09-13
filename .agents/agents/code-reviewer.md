@@ -39,6 +39,7 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command]
    - NFR Audit: Verify zero queries in loops (N+1), foreign calls have timeouts (max 3s), 60 FPS maintained on render thread.
    - Test State Isolation Audit: Run test suite with `--randomize` to prove zero order-dependent tests. Verify clean state resets.
    - Golden Path Living Test Audit: Verify that this slice has extended the project's living E2E flow with the new step(s) and the entire continuous sequence PASSES 100%. MANDATORY REJECT if omitted.
+   - Test Behavioral Invariants Audit: Verify that test suites cover all 4 facets of the Universal 4-Facet Behavioral Matrix (Boundary, State Reactivity, Resource Disposal, Error Defense). MANDATORY REJECT if tests are purely static assertions omitting runtime state reactivity or resource disposal.
    - Lean Observability Audit: Verify zero silent error swallowing (empty catch forbidden). Verify domain state transitions emit structured logs with explicit Reason Codes.
    - **Production Hardening & Blast Radius Audit (The Prototype Trap Filter)**:
      - Check for unhardened code smuggled in as "prototype": hardcoded timeout shortcuts, missing rate limits, unprotected concurrent mutations (missing Mutex), unhandled promise rejections, missing health endpoints (`/healthz`).

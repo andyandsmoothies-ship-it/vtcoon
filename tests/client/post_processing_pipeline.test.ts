@@ -20,27 +20,28 @@ describe('[UI-S04/MSS] PostProcessingPipeline — Configuration & Component Stru
 
   it('DEFAULT_PIPELINE_CONFIG bao gom day du 5 hieu ung hau ky dien anh', () => {
     expect(DEFAULT_PIPELINE_CONFIG.enabled).toBe(true);
-    // 1. Depth of Field (Tilt-Shift Macro sa ban)
-    expect(DEFAULT_PIPELINE_CONFIG.enableDof).toBe(true);
+    // 1. Depth of Field (Tilt-Shift Macro sa ban duoc tat mac dinh de khong mo vien the co)
+    expect(DEFAULT_PIPELINE_CONFIG.enableDof).toBe(false);
     expect(DEFAULT_PIPELINE_CONFIG.dofTarget).toEqual([0, 0, 0]);
-    expect(DEFAULT_PIPELINE_CONFIG.dofFocusRange).toBeGreaterThanOrEqual(10.0);
-    expect(DEFAULT_PIPELINE_CONFIG.dofBokehScale).toBeGreaterThan(1.0);
-    expect(DEFAULT_PIPELINE_CONFIG.dofBokehScale).toBeLessThanOrEqual(3.0);
+    expect(DEFAULT_PIPELINE_CONFIG.dofFocusRange).toBeGreaterThanOrEqual(150.0);
+    expect(DEFAULT_PIPELINE_CONFIG.dofBokehScale).toBe(0.0);
 
-    // 2. Bloom (Anh kim vang champagne & den chop thap, tranh lóa bệt mặt bàn trắng)
+    // 2. Bloom (Ánh kim tinh tế, triệt tiêu lóa bệt mặt bàn cờ)
     expect(DEFAULT_PIPELINE_CONFIG.enableBloom).toBe(true);
-    expect(DEFAULT_PIPELINE_CONFIG.bloomIntensity).toBeGreaterThan(0.5);
-    expect(DEFAULT_PIPELINE_CONFIG.bloomThreshold).toBeGreaterThanOrEqual(0.9);
+    expect(DEFAULT_PIPELINE_CONFIG.bloomIntensity).toBeGreaterThan(0.15);
+    expect(DEFAULT_PIPELINE_CONFIG.bloomIntensity).toBeLessThanOrEqual(0.30);
+    expect(DEFAULT_PIPELINE_CONFIG.bloomThreshold).toBeGreaterThanOrEqual(2.0);
+
 
     // 3. SSAO / Contact Crevice Shadows (N8AO)
     expect(DEFAULT_PIPELINE_CONFIG.enableAo).toBe(true);
-    expect(DEFAULT_PIPELINE_CONFIG.aoIntensity).toBeGreaterThan(1.0);
+    expect(DEFAULT_PIPELINE_CONFIG.aoIntensity).toBeLessThanOrEqual(0.80);
     expect(DEFAULT_PIPELINE_CONFIG.aoRadius).toBeGreaterThan(0.5);
     expect(DEFAULT_PIPELINE_CONFIG.aoRadius).toBeLessThanOrEqual(2.0);
 
     // 4. Lens Vignette
     expect(DEFAULT_PIPELINE_CONFIG.enableVignette).toBe(true);
-    expect(DEFAULT_PIPELINE_CONFIG.vignetteDarkness).toBeCloseTo(0.48, 2);
+    expect(DEFAULT_PIPELINE_CONFIG.vignetteDarkness).toBeLessThanOrEqual(0.20);
 
     // 5. Tone Mapping
     expect(DEFAULT_PIPELINE_CONFIG.enableToneMapping).toBe(true);
@@ -64,7 +65,7 @@ describe('[UI-S04/MSS] GameCanvas — Dai phau Perspective Camera & Post-Process
   it('GameCanvas su dung Perspective Camera voi fov=40 va near/far hop ly', () => {
     expect(canvasSource).toContain('fov: 40');
     expect(canvasSource).toContain('near: 0.5');
-    expect(canvasSource).toContain('position: [20, 22, 20]');
+    expect(canvasSource).toContain('position: [11.2, 15.6, 11.2]');
   });
 
   it('Hang so goc nhin Perspective Camera hop le: 40 do goc thuong, 35 do su kien', () => {

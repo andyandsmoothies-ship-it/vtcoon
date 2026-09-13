@@ -33,8 +33,10 @@ export interface ActivityStoreState {
   readonly isActivityFeedOpen: boolean;
   readonly unreadCount: number;
   readonly activeFilter: ActivityFilterType;
+  readonly lastDiceSeq?: number;
 
   addActivityLog: (entry: Omit<ActivityLogEntry, 'id' | 'timestamp'> & { id?: string; timestamp?: number }) => void;
+  setLastDiceSeq: (seq: number) => void;
   toggleOpen: () => void;
   setOpen: (open: boolean) => void;
   setFilter: (filter: ActivityFilterType) => void;
@@ -48,6 +50,9 @@ export const useActivityStore = create<ActivityStoreState>((set) => ({
   isActivityFeedOpen: false,
   unreadCount: 0,
   activeFilter: 'all',
+  lastDiceSeq: undefined,
+
+  setLastDiceSeq: (seq) => set({ lastDiceSeq: seq }),
 
   addActivityLog: (entryInput) => {
     const entry: ActivityLogEntry = {
@@ -97,7 +102,7 @@ export const useActivityStore = create<ActivityStoreState>((set) => ({
   },
 
   clearLogs: () => {
-    set({ activityLogs: [], unreadCount: 0 });
+    set({ activityLogs: [], unreadCount: 0, lastDiceSeq: undefined });
   },
 }));
 

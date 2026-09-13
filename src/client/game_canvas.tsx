@@ -6,14 +6,13 @@ import React, { useRef, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, ContactShadows, Environment } from '@react-three/drei';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
-import { ACESFilmicToneMapping, type OrthographicCamera, type PerspectiveCamera } from 'three';
+import { NoToneMapping, type OrthographicCamera, type PerspectiveCamera } from 'three';
 import type { Player } from '../domain/room';
 import { GameBoard } from './3d/board_layout';
 import { PawnAnimator } from './3d/pawn_animator';
 import { cellPosition } from './3d/board_coords';
 import { useGameStore, type PawnAnimationState } from './store/game_store';
 import { CinematicOverlay } from './3d/cinematic_effects';
-import { Auction3DStage } from './3d/auction_3d_stage';
 import { EventCard3D } from './3d/event_card_3d';
 import { Coronation3DStage } from './3d/coronation_3d_stage';
 import { PostProcessingPipeline } from './3d/post_processing_pipeline';
@@ -83,8 +82,8 @@ export function AdaptiveCinematicCamera({
 }: AdaptiveCinematicCameraProps = {}): React.ReactElement {
   const { camera, scene } = useThree();
   const controlsRef = useRef<OrbitControlsImpl>(null);
-  const camBaseRef = useRef<[number, number, number]>(isPreMatch ? [18.5, 19.5, 18.5] : [20, 22, 20]);
-  const targetBaseRef = useRef<[number, number, number]>(isPreMatch ? [-0.8, 0, -0.8] : [-1.2, 0, -1.2]);
+  const camBaseRef = useRef<[number, number, number]>(isPreMatch ? [11.2, 15.6, 11.2] : [11.2, 15.6, 11.2]);
+  const targetBaseRef = useRef<[number, number, number]>(isPreMatch ? [-0.6, 0, -0.6] : [-0.6, 0, -0.6]);
   const isUserInteractingRef = useRef<boolean>(false);
   const lastUserInteractionTimeRef = useRef<number>(0);
 
@@ -212,7 +211,7 @@ export function AdaptiveCinematicCamera({
       maxDistance={65}
       minZoom={20}
       maxZoom={65}
-      target={isPreMatch ? [-0.8, 0, -0.8] : [-1.2, 0, -1.2]}
+      target={isPreMatch ? [-0.8, 0, -0.8] : [-0.8, 0, -0.8]}
       onStart={() => {
         isUserInteractingRef.current = true;
       }}
@@ -295,12 +294,13 @@ export function GameCanvas({
   return (
     <div className="relative w-full h-full overflow-hidden">
       <Canvas
-        shadows
-        dpr={[1, 2]}
-        camera={{ position: [20, 22, 20], fov: 40, near: 0.5, far: 200 }}
+        shadows="soft"
+        dpr={[1.25, 2]}
+        camera={{ position: [11.2, 15.6, 11.2], fov: 40, near: 0.5, far: 200 }}
         gl={{
-          toneMapping: ACESFilmicToneMapping,
+          toneMapping: NoToneMapping,
           toneMappingExposure: 0.94,
+
           antialias: true,
         }}
         style={{
@@ -321,10 +321,8 @@ export function GameCanvas({
             {/* Tabletop-first Stage 1: Render GameBoard trực tiếp trên sa bàn đảo ngọc thay thế SunnyIslandLobbyScene */}
             <AdaptiveCinematicCamera isPreMatch={true} />
             <TimeOfDayLighting />
-            {/* Tầng 1: Bóng tiếp xúc mâm gỗ bàn cờ đặt trên thảm nhung Ba Tư */}
+            {/* Bóng tiếp xúc mâm gỗ bàn cờ đặt trên thảm nhung Ba Tư */}
             <ContactShadows position={[0, -0.05, 0]} opacity={0.75} scale={45} blur={2.0} far={6} />
-            {/* Tầng 2: Bóng tiếp xúc Contact AO đanh chắc khóa chặt chân cọc C0, nhà C1-C3, xúc xắc xuống ô cờ */}
-            <ContactShadows position={[0, 0.104, 0]} opacity={0.92} scale={21.5} blur={0.65} far={1.8} />
             <GameBoard />
             <PawnAnimator players={effectivePlayers} />
             <PostProcessingPipeline />
@@ -338,14 +336,11 @@ export function GameCanvas({
             {/* ContactShadows contract retention:
               <ContactShadows position={[0, -0.01, 0]} opacity={0.7} scale={40} blur={2} />
             */}
-            {/* Tầng 1: Bóng tiếp xúc mâm gỗ bàn cờ đặt trên thảm nhung Ba Tư */}
+            {/* Bóng tiếp xúc mâm gỗ bàn cờ đặt trên thảm nhung Ba Tư */}
             <ContactShadows position={[0, -0.05, 0]} opacity={0.75} scale={45} blur={2.0} far={6} />
-            {/* Tầng 2: Bóng tiếp xúc Contact AO đanh chắc khóa chặt chân cọc C0, nhà C1-C3, xúc xắc xuống ô cờ */}
-            <ContactShadows position={[0, 0.104, 0]} opacity={0.92} scale={21.5} blur={0.65} far={1.8} />
 
             <GameBoard />
             <PawnAnimator players={effectivePlayers} />
-            <Auction3DStage />
             <EventCard3D />
             <Coronation3DStage />
             <PostProcessingPipeline />

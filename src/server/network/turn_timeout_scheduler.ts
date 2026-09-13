@@ -3,7 +3,7 @@
 import type { RoomManager } from '../room_manager.js';
 import type { IntentMutex } from './intent_mutex.js';
 import type { DeltaBroadcaster } from './delta_broadcaster.js';
-import { TurnPhase, isRoomGameOver } from '../../domain/room.js';
+import { TurnPhase, isRoomGameOver, type Room } from '../../domain/room.js';
 
 export const PHASE_TIMEOUTS_MS: Record<TurnPhase, number> = {
   [TurnPhase.WaitingRoll]: 15_000,
@@ -61,14 +61,24 @@ export class TurnTimeoutScheduler {
     this.deadlines.delete(roomCode);
   }
 
+  private hasEligibleAuctionBot(room: Room): boolean {
+    const declinedId = room.currentAuction?.declinedPlayerId;
+    const passed = room.currentAuction?.passedPlayers;
+    return room.players.some((p) => p.isBot && !p.bankrupt && p.id !== declinedId && !passed?.has(p.id));
+  }
+
   scheduleTurnTimeout(roomCode: string, customTimeoutMs?: number): void {
     this.clearTimeout(roomCode);
 
     const room = this.rooms.getRoom(roomCode);
     if (!room?.started) return;
 
-    const current = room.players[room.currentPlayerIndex];
-    if (room.phase !== TurnPhase.AuctionPhase) {
+    if (room.phase === TurnPhase.AuctionPhase) {
+      if (this.hasEligibleAuctionBot(room)) {
+        this.onScheduleBotTurn(roomCode);
+      }
+    } else {
+      const current = room.players[room.currentPlayerIndex];
       if (!current || current.isBot || current.bankrupt) return;
     }
 
@@ -153,11 +163,15 @@ export class TurnTimeoutScheduler {
           this.onGameOver(roomCode);
         } else {
           this.broadcaster.broadcastRoomDelta(roomCode);
-          const next = rAfter?.players[rAfter.currentPlayerIndex];
-          if (next?.isBot && !next.bankrupt) {
-            this.onScheduleBotTurn(roomCode);
-          } else if (next && !next.isBot && !next.bankrupt) {
+          if (rAfter?.phase === TurnPhase.AuctionPhase) {
             this.scheduleTurnTimeout(roomCode);
+          } else {
+            const next = rAfter?.players[rAfter.currentPlayerIndex];
+            if (next?.isBot && !next.bankrupt) {
+              this.onScheduleBotTurn(roomCode);
+            } else if (next && !next.isBot && !next.bankrupt) {
+              this.scheduleTurnTimeout(roomCode);
+            }
           }
         }
       });

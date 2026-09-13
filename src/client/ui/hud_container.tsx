@@ -69,7 +69,7 @@ export function HudContainer({
       </footer>
 
       {/* Tầng Modals Tương Tác Nghiệp Vụ (Z-20 Host) */}
-      <ModalHost onIntent={onIntent} />
+      <ModalHost onIntent={onIntent} localPlayerId={localPlayerId} />
 
       {/* Tầng Bảng Nhật Ký Hoạt Động Trượt Cạnh Phải (Z-30 Sideboard Drawer) */}
       <ActivityFeedSidebar />

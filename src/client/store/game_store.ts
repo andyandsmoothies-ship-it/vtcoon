@@ -31,6 +31,7 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   activeModal: null,
   modalPayload: null,
+  lastEventCard: null,
 
   activeEmotes: {},
   floatingTexts: [],
@@ -96,8 +97,9 @@ export const useGameStore = create<GameState>((set, get) => ({
     });
 
     const isBot = Boolean(nextTask.isBot);
-    const stepDuration = isBot ? 200 : 340;
-    const timeoutMs = Math.max(2000, nextTask.waypoints.length * stepDuration + 500);
+    const stepDuration = isBot ? 200 : 230;
+    // [IMP-42] Thời gian chờ an toàn rộng rãi để không bao giờ cắt ngang các bước nhảy bình thường khi đi xa
+    const timeoutMs = Math.max(10000, nextTask.waypoints.length * 1500 + 8000);
     setTimeout(() => {
       const anim = get().activePawnAnimation;
       if (anim && anim.playerId === nextTask.playerId && anim.isAnimating) {
@@ -263,6 +265,7 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   openModal: (type, payload) => set({ activeModal: type, modalPayload: payload }),
   closeModal: () => set({ activeModal: null, modalPayload: null }),
+  setLastEventCard: (card) => set({ lastEventCard: card }),
   updateModalPayload: (patch) =>
     set((state) => ({
       modalPayload: state.modalPayload ? { ...state.modalPayload, ...patch } : state.modalPayload,

@@ -3,7 +3,7 @@
 - **Trạng Thái**: Chấp Nhận (Accepted / Implemented)
 - **Ngày Quyết Định**: 2026-09-11
 - **Phạm Vi**: `src/client/3d/`, `src/client/store/environment_store.ts`
-- **Kế Hoạch & Báo Cáo Liên Quan**: `docs/plans/improvements/IMP-04*`, `IMP-05*`, `IMP-06*`, `docs/reports/improvements/IMP-04*`, `IMP-05*`, `IMP-06*`
+- **Kế Hoạch & Báo Cáo Liên Quan**: `docs/plans/improvements/IMP-04*`, `IMP-05*`, `IMP-06*`, `IMP-30*`, `IMP-31*`, `docs/reports/improvements/IMP-04*`, `IMP-05*`, `IMP-06*`, `IMP-30*`, `IMP-31*`
 
 ---
 
@@ -68,3 +68,27 @@ Chúng tôi quyết định đại phẫu toàn diện hệ thống hiển thị
 
 ### Đánh đổi:
 - Kích thước bundle 3D tăng thêm khoảng ~18KB do bổ sung các mô hình hình học procedural và shader sóng biển (hoàn toàn nằm trong ngân sách tải trang WebGL < 200KB gzip).
+
+---
+
+## 4. TIẾN HÓA KIẾN TRÚC: SA BÀN PHẲNG HÒA TAN & LÕI ĐÔ THỊ NÉN (IMP-30 & IMP-31)
+
+### 4.1. Bối cảnh nâng cấp (Benchmark Retropoly & Monopoly Plus):
+- Sa bàn phiên bản cũ vẫn dùng bệ mâm nổi cao 0.24m tạo cảm giác "đĩa bay" tách rời cảnh quan thiên nhiên.
+- Trung tâm bàn cờ có hố nước rỗng và khay gỗ che khuất hơn 50% diện tích lõi.
+- Mật độ công trình thấp, chưa lột tả được vẻ tráng lệ của các đại đô thị Việt Nam (Hà Nội, TP.HCM, Đà Nẵng).
+
+### 4.2. Quyết định bổ sung:
+1. **Áp dụng nguyên tắc "Kill The Premise" (IMP-30)**:
+   - Phẳng hóa bàn cờ về cao độ chuẩn `y = 0.020` (Terrain Flush Invariant), giải phóng 100% không gian lõi trung tâm.
+   - Triệt tiêu hoàn toàn hố nước và khay gỗ gụ. Xúc xắc đỏ ruby nảy trực tiếp trên Đại Lộ Sài Gòn `[0.0, 0.020, 3.8]`.
+2. **Khắc sâu dòng Sông Sài Gòn nội đô & Cầu nối đôi bờ (IMP-31)**:
+   - Sông Sài Gòn đặt tại `y = -0.050`, rộng 1.8m, dài 15.0m cắt đôi bán đảo Đông - Tây, chui qua gầm Cầu Ba Son (Bắc) và Cầu Long Biên (Nam).
+   - Thiết lập **Extended Depth Layer Stack** (7 phân tầng) triệt tiêu 100% Z-fighting.
+3. **Mật độ đô thị cực cao qua gom nhóm InstancedMesh**:
+   - 32 Shophouse Đông Dương (`diorama_shophouse_blocks.tsx`, h <= 0.8m, 2 Draw Calls).
+   - 16 Cao ốc kính Sapphire giật cấp (`diorama_highrise_blocks.tsx`, h <= 3.2m, 2 Draw Calls).
+   - 60 Cây dừa nghiêng bóng bờ cát (`tropical_palms_cluster.tsx`, 3 Draw Calls), bán kính tán 0.42m, lùi ra bãi cát vàng bờ Nam [12.2, 14.0] và bờ Đông Nam [12.4, 14.8], giải phóng 100% tầm nhìn ô cờ tiền cảnh (Khắc phục lỗi P1).
+4. **Hiệu năng & Điểm số kiểm định**:
+   - Khống chế toàn sa bàn chỉ tiêu tốn 65 - 68 Draw Calls (dưới trần <= 75), duy trì 60 FPS.
+   - Điểm số thẩm mỹ được nâng lên **9.6 / 10** theo đánh giá của `game-3d-visual-critic`.

@@ -177,10 +177,10 @@ describe('[TC-JUICE.6/MSS] Adaptive Cinematic Camera Math (Toán Lia & Zoom Came
     expect(EVENT_CAMERA_ZOOM).toBe(48);
   });
 
-  it('TC-JUICE.6d: Hằng số thời lượng bước nhảy đạt chuẩn 60 FPS mượt mà', () => {
-    expect(HOP_DURATION).toBe(0.22);
-    expect(LANDING_DURATION).toBe(0.12);
-    expect(HOP_DURATION + LANDING_DURATION).toBeCloseTo(0.34, 4);
+  it('TC-JUICE.6d: Hằng số thời lượng bước nhảy đạt chuẩn 60 FPS mượt mà (1.5x speed)', () => {
+    expect(HOP_DURATION).toBe(0.15);
+    expect(LANDING_DURATION).toBe(0.08);
+    expect(HOP_DURATION + LANDING_DURATION).toBeCloseTo(0.23, 4);
   });
 
   it('TC-JUICE.6e: resolveCameraTargetCell bám sát tiến độ waypoints khi quân cờ đang nhảy', () => {

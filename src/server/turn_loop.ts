@@ -104,6 +104,8 @@ export function executeTurnRoll(
   const inAuditBeforeRoll = current.auditTurnsLeft > 0;
   rolledThisTurn.set(roomCode, true);
   room.lastDice = [dice.die1, dice.die2];
+  room.lastDiceRollerId = current.id;
+  room.diceSeq = (room.diceSeq ?? 0) + 1;
   turnStartedInAudit.set(roomCode, inAuditBeforeRoll);
 
   const rollCheck = processRollDoubles(room, current, dice);
@@ -162,7 +164,6 @@ export function executeTurnEnd(
   if (!rolledThisTurn && room.phase === TurnPhase.WaitingRoll) return undefined;
 
   if (continueDoubles && current.consecutiveDoubles > 0 && !current.skipNextTurn) {
-    if (current.extraTurns > 0) current.extraTurns -= 1;
     room.phase = TurnPhase.WaitingRoll;
     rolledThisTurnMap.set(roomCode, false);
     return room;

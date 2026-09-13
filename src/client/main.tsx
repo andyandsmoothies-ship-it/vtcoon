@@ -185,11 +185,16 @@ export function App(): React.ReactElement {
   }, [localPlayerId, openModal]);
 
   const lastLandedPawn = useGameStore((state) => state.lastLandedPawn);
+  const lastHandledLandingTimestampRef = useRef<number | null>(null);
 
   // [UI-S02/MSS] Mở modal và tương tác ô đất CHÍNH XÁC khi con cờ chạm đất tại ô đích
   useEffect(() => {
     if (!lastLandedPawn) return;
     if (lastLandedPawn.playerId === localPlayerId) {
+      if (lastHandledLandingTimestampRef.current === lastLandedPawn.timestamp) {
+        return;
+      }
+      lastHandledLandingTimestampRef.current = lastLandedPawn.timestamp;
       handleCellLanding(localPlayerId, lastLandedPawn.cellIndex);
     }
   }, [lastLandedPawn, localPlayerId, handleCellLanding]);
@@ -317,7 +322,7 @@ export function App(): React.ReactElement {
     sendIntent({ type: 'INTENT_ROLL' });
   }, [sendIntent]);
 
-  const handleEndTurn = () => {
+  const handleEndTurn = useCallback(() => {
     if (isConnected) {
       sendIntent({ type: 'INTENT_END_TURN' });
     } else {
@@ -328,7 +333,22 @@ export function App(): React.ReactElement {
       setCurrentTurnPlayerId(nextId);
       useGameStore.getState().setTurnTimeRemaining(60);
     }
-  };
+  }, [isConnected, currentTurnPlayerId, sendIntent, setCurrentTurnPlayerId]);
+
+  const turnTimeRemaining = useGameStore((state) => state.turnTimeRemaining);
+
+  // [UC-GAME-001] Tự động thực hiện hành động khi đồng hồ về 00:00 và đang trong lượt của người chơi
+  useEffect(() => {
+    if (!gameStarted || currentTurnPlayerId !== localPlayerId) return;
+    if (turnTimeRemaining === 0) {
+      const store = useGameStore.getState();
+      if (store.hasRolledThisTurn) {
+        handleEndTurn();
+      } else if (!store.isRolling && !store.activePawnAnimation?.isAnimating) {
+        handleRollDice();
+      }
+    }
+  }, [gameStarted, currentTurnPlayerId, localPlayerId, turnTimeRemaining, handleEndTurn, handleRollDice]);
 
   const handleSendEmote = useCallback(
     (emoteId: string) => {

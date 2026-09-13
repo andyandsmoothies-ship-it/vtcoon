@@ -1,7 +1,8 @@
 // [UI-S01/MSS][IMP-30] GameBoard — 40-tile procedural board layout with terrain-flush Depth Layer Stack
-import React from 'react';
-import { BOARD_CONFIG } from '../../domain/board_config';
+import React, { useCallback } from 'react';
+import { BOARD_CONFIG, CellType } from '../../domain/board_config';
 import { useGameStore } from '../store/game_store';
+import { useLobbyStore } from '../store/lobby_store';
 import { cellPosition } from './board_coords';
 import { LayeredDioramaTile } from './board_tile';
 import { DiceTray } from './dice_tray';
@@ -10,15 +11,28 @@ import { CoastalIslandEnvironment } from './coastal_island_environment';
 import { CinematicLightingAccents } from './cinematic_effects';
 import { ConstructionSlamVFX } from './construction_slam_vfx';
 
-// Depth Layer Stack triệt tiêu Z-Fighting (IMP-30 Terrain Flush Invariant)
+// Depth Layer Stack triệt tiêu Z-Fighting (IMP-30 Terrain Flush & IMP-32 Executive Tabletop Master Plan)
+export const WALNUT_TABLE_Y = -0.350;
+export const LAGOON_WATER_Y = -0.150;
+export const OCEAN_Y = -0.150;
+export const SHORELINE_SAND_Y = -0.060;
+export const RIVER_BED_Y = -0.060;
 export const TERRAIN_BASE_Y = 0.000;
-export const TILE_BORDER_Y = 0.015;
-export const TILE_SURFACE_Y = 0.020;
+export const TILE_BORDER_Y = 0.012;
+export const TILE_SURFACE_Y = 0.018;
+export const PAWN_HALO_Y = 0.020;
 export const STANDEE_BASE_Y = 0.025;
+
 export const DEPTH_LAYER_STACK = {
+  WALNUT_TABLE_Y,
+  LAGOON_WATER_Y,
+  OCEAN_Y,
+  SHORELINE_SAND_Y,
+  RIVER_BED_Y,
   TERRAIN_BASE_Y,
   TILE_BORDER_Y,
   TILE_SURFACE_Y,
+  PAWN_HALO_Y,
   STANDEE_BASE_Y,
 } as const;
 
@@ -36,9 +50,38 @@ export function tileRotation(index: number): [number, number, number] {
 
 export function GameBoard(): React.ReactElement {
   const levelMap = useGameStore((s) => s.levelMap);
+  const openModal = useGameStore((s) => s.openModal);
+  const currentTurnPlayerId = useGameStore((s) => s.currentTurnPlayerId);
+  const playerPositions = useGameStore((s) => s.playerPositions);
+  const playersInfo = useGameStore((s) => s.playersInfo);
+  const hasRolledThisTurn = useGameStore((s) => s.hasRolledThisTurn);
+  const localPlayerId = useLobbyStore((s) => s.myPlayerId) || 'p1';
+
+  const handleTileClick = useCallback(
+    (cellIndex: number) => {
+      const cell = BOARD_CONFIG[cellIndex];
+      if (!cell || (cell.type !== CellType.Property && cell.type !== CellType.Railroad)) {
+        return;
+      }
+      const isOwned = Object.values(playersInfo).some((p) => p.ownedProperties?.includes(cellIndex));
+      const isMyTurn = currentTurnPlayerId === localPlayerId;
+      const myPos = playerPositions[localPlayerId] ?? 0;
+      const isStandingHere = myPos === cellIndex;
+      const myBalance = playersInfo[localPlayerId]?.balance ?? 0;
+      const canBuy = Boolean(isMyTurn && isStandingHere && !isOwned && hasRolledThisTurn && myBalance >= 600);
+      openModal('deed', { cellIndex, canBuy });
+    },
+    [openModal, currentTurnPlayerId, localPlayerId, playerPositions, playersInfo, hasRolledThisTurn]
+  );
 
   return (
     <group position={[0, 0, 0]}>
+      {/* Khung Bàn Gỗ Óc Chó Thượng Lưu (Walnut Tabletop) y = -0.350 */}
+      <mesh receiveShadow position={[0, WALNUT_TABLE_Y, 0]}>
+        <boxGeometry args={[32, 0.2, 32]} />
+        <meshStandardMaterial color="#2B1D14" roughness={0.35} metalness={0.08} />
+      </mesh>
+
       {/* 0. Môi trường Bán đảo Đảo Ngọc nhiệt đới (Vịnh biển, bãi cát, đồi núi & mây trời) */}
       <CoastalIslandEnvironment />
 
@@ -47,12 +90,6 @@ export function GameBoard(): React.ReactElement {
 
       {/* 0.2. Hiệu ứng Va Đập Xây Dựng, Sóng Xung Kích & Pháo Hoa Khánh Thành */}
       <ConstructionSlamVFX />
-
-      {/* 1. Nền hoa viên: Thảm cỏ xanh nhiệt đới trung tâm tại cao độ phẳng TERRAIN_BASE_Y */}
-      <mesh receiveShadow position={[0, TERRAIN_BASE_Y, 0]}>
-        <boxGeometry args={[15.75, 0.02, 15.75]} />
-        <meshStandardMaterial color="#22C55E" roughness={0.7} metalness={0.05} />
-      </mesh>
 
       {/* 2. Sa bàn đô thị thu nhỏ: Đảo tài chính, cầu vượt, sân vận động & bến du thuyền */}
       <MiniatureCityDiorama />
@@ -69,6 +106,8 @@ export function GameBoard(): React.ReactElement {
           rotation={tileRotation(cell.index)}
           currentLevel={(levelMap[cell.index] ?? 0) as 0 | 1 | 2 | 3}
           isCornerTile={CORNER_INDICES.has(cell.index)}
+          enableStandee={false}
+          onClick={() => handleTileClick(cell.index)}
         />
       ))}
     </group>

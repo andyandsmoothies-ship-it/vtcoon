@@ -140,7 +140,6 @@ const CHANCE_HANDLERS: Partial<Record<ChanceCardId, ChanceHandler>> = {
   [ChanceCardId.CC_PLATE_AUCTION]: (player) => {
     player.balance -= 500;
     player.extraTurns += 1;
-    player.consecutiveDoubles += 1;
   },
   [ChanceCardId.CC_CONTRACT_PENALTY]: (player, players) => handleContractPenalty(player, players),
   [ChanceCardId.CC_LAND_CHANGE]: (player, _players, _id, _mods, registry, stateMap, permanentRentBonus) => {

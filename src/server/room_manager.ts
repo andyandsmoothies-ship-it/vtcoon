@@ -4,7 +4,7 @@ import {
 } from '../domain/room';
 import { BotPersonality } from '../domain/bot/bot_engine';
 import { initRoomBots, addBotToRoom, removeBotFromRoom, type RoomBotSpec } from './room_bot_manager.js';
-import { resolveAuctionBots as coordResolveAuctionBots, runBotTurn as coordRunBotTurn } from './room_bot_coordinator.js';
+import { resolveAuctionBots as coordResolveAuctionBots, runBotTurn as coordRunBotTurn, stepBotTurn as coordStepBotTurn } from './room_bot_coordinator.js';
 import type { Room, Player } from '../domain/room';
 import { mulberry32 } from '../domain/dice';
 import {
@@ -282,6 +282,11 @@ export class RoomManager {
   // [UC-GAME-005/MSS][UC-GAME-008/MSS] Tự động chạy lượt Bot
   runBotTurn(roomCode: string): void {
     coordRunBotTurn(this, roomCode);
+  }
+
+  // [UC-GAME-005/MSS] Chạy từng bước lượt Bot có phân nhịp
+  stepBotTurn(roomCode: string): boolean {
+    return coordStepBotTurn(this, roomCode);
   }
 
   getRoom(roomCode: string): Room | undefined {

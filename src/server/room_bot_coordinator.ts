@@ -199,6 +199,22 @@ export function runBotTurn(roomManager: RoomManager, roomCode: string): void {
   releaseStuckBotTurn(roomManager, roomCode, current.id);
 }
 
+export function stepBotTurn(roomManager: RoomManager, roomCode: string): boolean {
+  const room = roomManager.getRoom(roomCode);
+  if (!room || !room.started) return false;
+  if (isAuctionPhaseStuck(roomManager, roomCode)) return false;
+
+  const current = room.players[room.currentPlayerIndex];
+  if (!current?.isBot || current.bankrupt) return false;
+
+  const config = getBotConfig(roomManager.getBotPersonality(roomCode, current.id));
+  const progressed = executeBotIntentStep(roomManager, roomCode, current.id, config);
+  if (!progressed) {
+    releaseStuckBotTurn(roomManager, roomCode, current.id);
+  }
+  return progressed;
+}
+
 function releaseStuckBotTurn(roomManager: RoomManager, roomCode: string, botPlayerId: string): void {
   const roomEnd = roomManager.getRoom(roomCode);
   if (roomEnd && (roomEnd.phase as TurnPhase) === TurnPhase.ActionPhase) {

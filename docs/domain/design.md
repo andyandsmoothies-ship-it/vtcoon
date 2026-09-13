@@ -1,4 +1,26 @@
-### **QUY CHUẨN TÀI NGUYÊN HÌNH ẢNH SA BÀN ĐA LỚP (DIORAMA ASSET SPECIFICATION)**
+### **I. QUY CHUẨN ĐỊA HÌNH & SA BÀN ĐÔ THỊ NÉN 3D (3D DIORAMA & TERRAIN ELEVATION SPECIFICATION - IMP-30/IMP-31)**
+
+1. **Thang phân tầng cao độ mở rộng (Extended Depth Layer Stack - Triệt tiêu 100% Z-Fighting)**:
+   - `OCEAN_Y = -0.150`: Mặt biển xanh ngọc lam (Gerstner Waves ngoài khơi).
+   - `RIVER_BED_Y = -0.050`: Lòng kênh sông Sài Gòn nội đô (rộng 1.8m, dài 15.0m, chui qua gầm Cầu Ba Son và Cầu Long Biên).
+   - `TERRAIN_BASE_Y = 0.000`: Nền địa hình chính (thảm cỏ hoa viên và bãi cát vàng).
+   - `TILE_BORDER_Y = 0.015`: Viền chỉ móng 40 ô cờ và vỉa hè đá granite xám sáng.
+   - `TILE_SURFACE_Y = 0.020`: Bề mặt 40 ô cờ và mặt đường nhựa asphalt Đại Lộ Sài Gòn (phẳng hòa tan với địa hình).
+   - `PAWN_HALO_Y = 0.021`: Đĩa hào quang chỉ thị vị trí quân cờ (`depthWrite: false`).
+   - `STANDEE_BASE_Y = 0.025`: Thềm móng công trình và chân standee billboard.
+
+2. **Quy hoạch phân vùng cao độ (Stepped Height Zoning Invariant)**:
+   - **Shophouse Đông Dương ven ô cờ**: Chiều cao công trình h <= 0.8m (dải chuẩn 0.38m - 0.68m), đảm bảo không che khuất chữ trên mặt ô đất và quân cờ ở camera 38 độ. Gom 32 căn qua `InstancedMesh` (2 Draw Calls).
+   - **Cao ốc tài chính lõi trung tâm**: Lùi sâu về phía Bắc (Z <= -2.4), chiều cao giật cấp bậc thang h <= 3.2m (dải chuẩn 1.2m - 2.8m). Gom 16 tháp qua `InstancedMesh` (2 Draw Calls).
+   - **Hàng dừa nhiệt đới bờ biển**: 60 cây dừa gom qua `InstancedMesh` (3 Draw Calls). Bán kính tán dừa r <= 0.42m, thân dừa cao 1.4m. 40 cây bờ Nam lùi sâu ra bãi cát Z trong khoảng [12.2, 14.0] (cách mép ô cờ >= 2.1m), 20 cây bờ Đông Nam X trong khoảng [12.4, 14.8]. Bảo đảm 100% không che khuất ô cờ.
+
+3. **Ngân sách GPU & WebGL**:
+   - Tổng Draw Calls toàn sa bàn: <= 75 Draw Calls (thực tế 65 - 68 Draw Calls).
+   - Duy trì ổn định 60 FPS trên màn hình di động và máy tính để bàn.
+
+---
+
+### **II. QUY CHUẨN TÀI NGUYÊN HÌNH ẢNH STANDEE 2.5D (DIORAMA ASSET SPECIFICATION)**
 
 * **Định dạng & Dung lượng:** File .webp tách nền trong suốt (Transparent Alpha), kích thước chuẩn 512x512px, dung lượng tối đa <= 45KB/lớp để đảm bảo tổng tài nguyên 1 ô không vượt quá 120KB.  
 * **Phân lớp thị giác:**  

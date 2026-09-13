@@ -1,4 +1,5 @@
 // [UI-S01/MSS][UI-S03/MSS][UI-S04/MSS] Game Store Types, Interfaces & Payloads
+import type { EventCardInfo } from '../../domain/room';
 
 export interface PawnAnimationState {
   readonly playerId: string;
@@ -130,11 +131,13 @@ export interface GameState {
   // UI-04 Business Modals State
   readonly activeModal: ActiveModalType;
   readonly modalPayload: ModalPayloadMap[keyof ModalPayloadMap] | null;
+  readonly lastEventCard: EventCardInfo | null;
 
   // UI-05 Social Emotes & Micro-VFX
   readonly activeEmotes: Record<string, ActiveEmote>;
   readonly floatingTexts: readonly FloatingTextItem[];
 
+  setLastEventCard: (card: EventCardInfo | null) => void;
   setLevelMap: (map: Record<number, 0 | 1 | 2 | 3>) => void;
   setPlayerPositions: (positions: Record<string, number>) => void;
   setVisualPositions: (positions: Record<string, number>) => void;

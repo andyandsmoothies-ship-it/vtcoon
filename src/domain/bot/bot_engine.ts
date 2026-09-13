@@ -136,6 +136,53 @@ function findEligibleUpgradeCell(
   return null;
 }
 
+function calculateAuctionStep(
+  auction: CurrentAuctionState,
+  personality: BotPersonality,
+  balance: number,
+): number {
+  const highestBidder = auction.highestBidderId ?? auction.highestBidder;
+  const minStep = auction.bidIncrement ?? (highestBidder ? 100 : 50);
+  if (personality === BotPersonality.Aggressive && balance > 10_000 && Boolean(highestBidder)) {
+    return Math.max(minStep, 100);
+  }
+  return minStep;
+}
+
+function calculateAuctionMaxBid(
+  bot: Player,
+  room: Room,
+  personality: BotPersonality,
+  valEstimated: number,
+  safetyBuffer: number,
+): number {
+  const valMultiplier = personality === BotPersonality.Aggressive ? 1.5 : 1.0;
+  const safeRatio = personality === BotPersonality.Aggressive
+    ? 0.25
+    : personality === BotPersonality.Balanced
+    ? 0.6
+    : 1.0;
+  const effectiveBuffer = personality === BotPersonality.Passive
+    ? Math.max(safetyBuffer, (room.round ?? 1) * 100)
+    : safetyBuffer;
+
+  return Math.min(
+    Math.round(valEstimated * valMultiplier),
+    Math.max(0, bot.balance - Math.round(effectiveBuffer * safeRatio)),
+  );
+}
+
+function isPassiveAuctionAllowed(
+  auction: CurrentAuctionState,
+  basePrice: number,
+  monopolyScore: number,
+  nextBid: number,
+): boolean {
+  if (monopolyScore >= 2.5) return true;
+  if ((auction.highestBid ?? 0) > basePrice * 0.85) return false;
+  return nextBid <= basePrice * 0.70;
+}
+
 function decideAuctionPhaseIntent(
   bot: Player,
   room: Room,
@@ -144,47 +191,30 @@ function decideAuctionPhaseIntent(
   personality: BotPersonality,
   auction?: CurrentAuctionState,
 ): BotIntent {
-  const currentAuction = auction ?? room.currentAuction;
-  if (!currentAuction || bot.bankrupt || personality === BotPersonality.Passive || currentAuction.passedPlayers?.has(bot.id)) {
+  const cur = auction ?? room.currentAuction;
+  if (!cur || bot.bankrupt || cur.passedPlayers?.has(bot.id) || bot.id === cur.declinedPlayerId) {
     return { type: 'INTENT_AUCTION_PASS' };
   }
+  const highestBidder = cur.highestBidderId ?? cur.highestBidder;
+  if (highestBidder === bot.id) return { type: 'INTENT_AUCTION_PASS' };
 
-  // Neu Bot la nguoi vua tu choi mua: Luat game cam tham gia dau gia o do
-  if (bot.id === currentAuction.declinedPlayerId) {
-    return { type: 'INTENT_AUCTION_PASS' };
+  const val = evaluateTileValuation(cur.cellIndex, bot, room, registry, stateMap, personality);
+  const step = calculateAuctionStep(cur, personality, bot.balance);
+  const nextBid = (cur.highestBid ?? 0) > 0 ? cur.highestBid! + step : (cur.startingBid ?? 50);
+
+  if (personality === BotPersonality.Passive) {
+    const basePrice = PROPERTY_DEEDS.get(cur.cellIndex)?.price ?? val.basePrice;
+    if (!isPassiveAuctionAllowed(cur, basePrice, val.monopolyScore ?? 1.0, nextBid)) {
+      return { type: 'INTENT_AUCTION_PASS' };
+    }
   }
 
-  // Neu Bot dang la nguoi tra gia cao nhat: Khong tu dau gia de chinh minh
-  const highestBidder = currentAuction.highestBidderId ?? currentAuction.highestBidder;
-  if (highestBidder === bot.id) {
-    return { type: 'INTENT_AUCTION_PASS' };
-  }
-
-  const val = evaluateTileValuation(
-    currentAuction.cellIndex,
-    bot,
-    room,
-    registry,
-    stateMap,
-    personality,
-  );
   const threat = calculateThreatHorizon(bot, room, registry, stateMap, personality);
-  const safetyBuffer = threat.safetyBuffer;
-
-  const maxBid = Math.min(
-    val.estimatedValue,
-    Math.max(0, bot.balance - Math.round(safetyBuffer * 0.5)),
-  );
-
-  const step = currentAuction.bidIncrement ?? (highestBidder ? 100 : 50);
-  const nextBid = (currentAuction.highestBid ?? 0) > 0
-    ? currentAuction.highestBid! + step
-    : (currentAuction.startingBid ?? 50);
+  const maxBid = calculateAuctionMaxBid(bot, room, personality, val.estimatedValue, threat.safetyBuffer);
 
   if (nextBid <= maxBid && bot.balance >= nextBid) {
     return { type: 'INTENT_BID', amount: nextBid };
   }
-
   return { type: 'INTENT_AUCTION_PASS' };
 }
 

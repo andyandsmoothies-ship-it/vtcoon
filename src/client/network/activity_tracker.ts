@@ -29,10 +29,43 @@ export {
   detectCellMortgage,
 };
 
+function isDiceDuplicate(
+  delta: DeltaPayload,
+  playerId: string,
+  d1: number,
+  d2: number,
+  prevState?: GameState,
+  nextState?: GameState,
+  activityStore: typeof useActivityStore = useActivityStore,
+): boolean {
+  if (delta.diceSeq !== undefined) {
+    const currentSeq = activityStore.getState().lastDiceSeq;
+    return currentSeq !== undefined && currentSeq >= delta.diceSeq;
+  }
+  if (delta.turnPhase === 'WaitingRoll') {
+    const moved = delta.players?.some(
+      (p) => p.id === playerId && prevState && prevState.playerPositions[p.id] !== p.position,
+    );
+    if (!moved) return true;
+  }
+  const prevP = playerId && prevState ? prevState.playersInfo[playerId] : undefined;
+  const nextP = playerId && nextState ? nextState.playersInfo[playerId] : undefined;
+  const doublesChanged = (prevP?.consecutiveDoubles ?? 0) !== (nextP?.consecutiveDoubles ?? 0);
+  return Boolean(
+    prevState &&
+      !doublesChanged &&
+      prevState.currentTurnPlayerId === playerId &&
+      prevState.hasRolledThisTurn &&
+      prevState.dice[0] === d1 &&
+      prevState.dice[1] === d2,
+  );
+}
+
 export function detectDiceActivity(
   delta: DeltaPayload,
   prevStateOrNextState: GameState,
   maybeNextState?: GameState,
+  activityStore: typeof useActivityStore = useActivityStore,
 ): ActivityLogEntry | null {
   if (!delta.dice) return null;
   const [d1, d2] = delta.dice;
@@ -40,21 +73,14 @@ export function detectDiceActivity(
 
   const nextState = maybeNextState ?? prevStateOrNextState;
   const prevState = maybeNextState ? prevStateOrNextState : undefined;
+  const playerId = delta.diceRollerId ?? delta.currentTurnPlayerId ?? nextState.currentTurnPlayerId ?? '';
 
-  const playerId = delta.currentTurnPlayerId ?? nextState.currentTurnPlayerId ?? '';
-  const prevP = playerId && prevState ? prevState.playersInfo[playerId] : undefined;
-  const nextP = playerId ? nextState.playersInfo[playerId] : undefined;
-  const doublesChanged = (prevP?.consecutiveDoubles ?? 0) !== (nextP?.consecutiveDoubles ?? 0);
-
-  if (
-    prevState &&
-    !doublesChanged &&
-    prevState.currentTurnPlayerId === playerId &&
-    prevState.hasRolledThisTurn &&
-    prevState.dice[0] === d1 &&
-    prevState.dice[1] === d2
-  ) {
+  if (isDiceDuplicate(delta, playerId, d1, d2, prevState, nextState, activityStore)) {
     return null;
+  }
+
+  if (delta.diceSeq !== undefined) {
+    activityStore.getState().setLastDiceSeq(delta.diceSeq);
   }
 
   const pInfo = playerId ? nextState.playersInfo[playerId] : undefined;
@@ -147,7 +173,7 @@ export function trackDeltaActivities(
   if (Boolean(delta.cells && delta.cells.length === BOARD_SIZE)) return;
 
   const activities: ActivityLogEntry[] = [];
-  const diceEntry = detectDiceActivity(delta, prevState, nextState);
+  const diceEntry = detectDiceActivity(delta, prevState, nextState, activityStore);
   if (diceEntry) activities.push(diceEntry);
 
   activities.push(...detectMoveActivities(delta, prevState, nextState));

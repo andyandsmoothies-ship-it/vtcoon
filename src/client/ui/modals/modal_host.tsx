@@ -16,11 +16,13 @@ import type { PlayerIntent } from '../../../server/intent_dispatcher';
 import { getDeedDisplayInfo } from './modal_helpers';
 import { resolveHoseInvestment } from '../../../domain/event_card_engine';
 import { BOARD_CONFIG } from '../../../domain/board_config';
+import { useLobbyStore } from '../../store/lobby_store';
 
 export interface ModalHostProps {
   readonly activeModal?: ActiveModalType;
   readonly modalPayload?: ModalPayloadMap[keyof ModalPayloadMap] | null;
   readonly onIntent?: (intent: PlayerIntent) => void;
+  readonly localPlayerId?: string;
 }
 
 export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
@@ -69,11 +71,19 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
     return null;
   }
 
-  const myId = currentTurnPlayerId ?? Object.keys(playersInfo)[0] ?? 'p1';
+  const lobbyPid = useLobbyStore.getState().myPlayerId;
+  const myId = props.localPlayerId || (lobbyPid && lobbyPid.length > 0 ? lobbyPid : undefined) || 'p1';
   const myPlayer = playersInfo[myId];
 
+  const isBuyModal = activeModal === 'deed' && Boolean((modalPayload as ModalPayloadMap['deed'])?.canBuy);
+  const isCriticalDecision = isBuyModal || activeModal === 'auction' || activeModal === 'insolvency';
+
   return (
-    <ModalBackdrop onClose={closeModal} fullScreen={activeModal === 'auction'}>
+    <ModalBackdrop
+      onClose={closeModal}
+      center={activeModal === 'auction' || activeModal === 'event'}
+      dismissible={!isCriticalDecision}
+    >
       {activeModal === 'deed' && (() => {
         const payload = modalPayload as ModalPayloadMap['deed'];
         const ownerId = Object.keys(playersInfo).find((id) => playersInfo[id]?.ownedProperties?.includes(payload.cellIndex));
@@ -171,7 +181,8 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
           currentBid={(modalPayload as ModalPayloadMap['auction']).currentBid}
           highestBidderId={(modalPayload as ModalPayloadMap['auction']).highestBidderId}
           timeRemaining={(modalPayload as ModalPayloadMap['auction']).timeRemaining}
-          hasPassed={(modalPayload as ModalPayloadMap['auction']).hasPassed || (modalPayload as ModalPayloadMap['auction']).declinedPlayerId === myId}
+          hasPassed={(modalPayload as ModalPayloadMap['auction']).hasPassed}
+          isDeclinedPlayer={(modalPayload as ModalPayloadMap['auction']).declinedPlayerId === myId}
           bidderName={(modalPayload as ModalPayloadMap['auction']).highestBidderId ? playersInfo[(modalPayload as ModalPayloadMap['auction']).highestBidderId!]?.name : undefined}
           myBalance={myPlayer?.balance}
           myId={myId}

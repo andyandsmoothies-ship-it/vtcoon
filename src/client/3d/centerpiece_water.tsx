@@ -6,11 +6,12 @@ export const WATER_SURFACE_Y = 0.05;
 
 export const WATER_MATERIAL_PROPS = {
   color: '#0284C7',
-  roughness: 0.1,
-  metalness: 0.2,
+  roughness: 0.75,
+  metalness: 0.02,
   transparent: true,
   opacity: 0.85,
 } as const;
+
 
 export const EMBANKMENT_MATERIAL_PROPS = {
   color: '#78716C',

@@ -68,20 +68,24 @@ export function executeCellLanding(
     }
   } else if (tile.type === CellType.Chance) {
     if (isLocal) {
+      const card = state.lastEventCard?.cardType === 'chance' ? state.lastEventCard : null;
       state.openModal('event', {
         cardType: 'chance',
-        cardId: `chance_${targetCell}`,
-        title: 'PHIẾU CƠ HỘI',
-        description: 'Cơ hội phát triển kinh doanh và mở rộng mạng lưới địa ốc.',
+        cardId: card?.cardId ?? `chance_${targetCell}`,
+        title: card?.title ?? 'PHIẾU CƠ HỘI',
+        description: card?.description ?? 'Cơ hội phát triển kinh doanh và mở rộng mạng lưới địa ốc.',
+        ...(card?.effectDelta !== undefined ? { effectDelta: card.effectDelta } : {}),
       });
     }
   } else if (tile.type === CellType.Market) {
     if (isLocal) {
+      const card = state.lastEventCard?.cardType === 'market' ? state.lastEventCard : null;
       state.openModal('event', {
         cardType: 'market',
-        cardId: `market_${targetCell}`,
-        title: 'PHIẾU THỊ TRƯỜNG',
-        description: 'Biến động chính sách vĩ mô và dòng vốn đầu tư toàn quốc.',
+        cardId: card?.cardId ?? `market_${targetCell}`,
+        title: card?.title ?? 'PHIẾU THỊ TRƯỜNG',
+        description: card?.description ?? 'Biến động chính sách vĩ mô và dòng vốn đầu tư toàn quốc.',
+        ...(card?.effectDelta !== undefined ? { effectDelta: card.effectDelta } : {}),
       });
     }
   } else if (tile.type === CellType.Hose) {

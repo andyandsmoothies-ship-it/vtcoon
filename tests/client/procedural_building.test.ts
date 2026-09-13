@@ -27,7 +27,7 @@ describe('[TC-PB01.1/MSS] 4 Cấp Độ Kiến Trúc 3D Thể Tích (Tiers C0-C3
   });
 
   it('Cấp 0 (Đất trống / Quy hoạch) kết xuất đủ 4 cọc mốc sọc đỏ trắng và dây mạ vàng', () => {
-    const markup = renderToStaticMarkup(React.createElement(ProceduralBuilding, { level: 0, groupColor: '#DC2626' }));
+    const markup = renderToStaticMarkup(React.createElement(ProceduralBuilding, { level: 0, groupColor: '#DC2626', showEmptyPlotBoundary: true }));
     expect(markup).toContain('#DC2626'); // Sọc sơn đỏ phản quang
     expect(markup).toContain('#F8FAFC'); // Cọc bê tông trắng
     expect(markup).toContain('#F59E0B'); // Dây mạ vàng mốc chỉ giới

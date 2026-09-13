@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:uat": "vitest run --config vitest.uat.config.ts",
     "lint:ui": "node scripts/lint_ui.mjs",
     "lint:slop": "node scripts/lint_slop.mjs",
     "lint:dup": "jscpd src/ --config .jscpd.json",

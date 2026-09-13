@@ -24,6 +24,19 @@ tools: [view_file, write_to_file, replace_file_content, list_dir, find_by_name, 
    - Traceability Tagging: Every test suite or test case MUST include standardized tags: `[TC-xx.x/MSS]` or `[TC-xx.x/A#]` and `[UC-xxx]`.
    - Failure Postcondition Tests: If testing error or alternative flows ending in failure, assert clean rollback and zero dangling state.
    - Realistic Literal Test Data: Use realistic domain values, never lazy placeholder strings like `"foo"`, `"bar"`, or `"test"`.
+   - **Atomic Test Mandate & Parameterized Testing**:
+     - Each `it()` / `test()` verifies exactly ONE observable behavior or invariant. Maximum 1-4 `expect()` assertions per test.
+     - STRICTLY FORBIDDEN: `for`, `while`, or `.forEach()` inside `it()` body. Use parameterized table testing (`it.each`, `@pytest.mark.parametrize`, `[Theory]`, Table-driven).
+   - **Banned Static Checklist Anti-Patterns**:
+     - NEVER write tests merely asserting `fs.existsSync`, `typeof fn === 'function'`, or file LOC limits. Those belong to static linters (`npm run lint:slop`, `tsc --noEmit`). Tests must verify runtime observable behavior (inputs ➔ processing ➔ outputs).
+   - **Universal 4-Facet Behavioral Matrix (Mandatory 4-Group Coverage)**:
+     - Every feature slice test suite must assert across 4 facets:
+       1. *Boundary & Range*: Input/model bounds, range constraints, format validity.
+       2. *State Reactivity*: Lifecycle transitions, reactive updates, events emitted/received.
+       3. *Resource Disposal*: Memory/resource cleanup, unmount `.dispose()`, no listener leaks.
+       4. *Error Defense*: Edge values (negative, NaN, overflow), idempotency, invalid intents.
+   - **Test Density Floor**:
+     - Minimum 15-30 atomic tests per feature slice. Ratio of `expect()` / `it()` must stay between 1.0 and 3.5 (ratios > 4.0 indicate monolithic anti-pattern).
    - **Consumer-Side Assertion (Universal Rule - Assert Effect at Point of Consumption)**:
      - In any domain (Web, REST API, Microservice, Game, Desktop), when testing an effect, policy, modifier, discount, or role permission:
      - ❌ **NEVER** assert only the storage/producer side (e.g. `expect(cart.discounts).toHaveLength(1)` or `expect(player.modifiers).toContain(...)`). That creates a "False Green" if the business logic forgets to query the state.

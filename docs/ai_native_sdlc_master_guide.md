@@ -15,6 +15,7 @@
    - [6.1 Kim Tự Tháp Kiểm Thử Thực Chiến 4 Tầng (The 4-Layer Testing Pyramid)](#61-kim-tự-tháp-kiểm-thử-thực-chiến-4-tầng-the-4-layer-testing-pyramid)
    - [6.2 Cổng Thẩm Mỹ Hai Tầng: 3D Visual Critic + 2D Tactile Craft](#62-cổng-thẩm-mỹ-hai-tầng-3d-visual-critic--2d-tactile-craft-two-tier-visual-gate)
    - [6.3 Bộ Công Cụ Local Quality Gates Chuẩn Mực Cho Junior Developer (Solo Harness)](#63-bộ-công-cụ-local-quality-gates-chuẩn-mực-cho-junior-developer-solo-harness)
+   - [6.4 Quy Chuẩn Test Nguyên Tử & Ma Trận 4 Khía Cạnh Hành Vi Đa Năng Cho Mọi Dự Án](#64-quy-chuẩn-test-nguyên-tử--ma-trận-4-khía-cạnh-hành-vi-đa-năng-cho-mọi-dự-án)
 7. [GIAI ĐOẠN 1: Khởi Tạo Dự Án & Cài Đặt Cấp Project (Setup 1 Lần)](#giai-đoạn-1-khởi-tạo-dự-án--cài-đặt-cấp-project-setup-1-lần)
    - [1.0.1 Quy Tắc Bản Địa Hóa Công Cụ Native AG 2.0 & Tiêu Chuẩn Kỹ Năng (Toolchain Mapping, reference/, PRODUCT.md)](#101-quy-tắc-bản-địa-hóa-công-cụ-sang-native-ag-20--tiêu-chuẩn-kỹ-năng-toolchain-mapping)
 8. [GIAI ĐOẠN 2: Trọn Bộ Subagents Chuyên Trách Native AG 2.0 Sẵn Sàng Sử Dụng](#giai-đoạn-2-trọn-bộ-subagents-chuyên-trách-native-ag-20-sẵn-sàng-sử-dụng)
@@ -565,6 +566,11 @@ graph LR
                             /-----------------\     (Khớp 100% tham số, giá trị, schema với tài liệu gốc)
 ```
 
+> [!IMPORTANT]
+> **Quy Tắc Phân Tầng Thực Thi & Ranh Giới Kích Hoạt (Test Tiering Execution Boundary)**:
+> 1. **Vòng lặp phát triển hàng ngày (`npm test`)**: Bao gồm Tầng 1, 2, 3 và Tầng 4.1 (Headless Chaos Simulator 1.000 ván in-memory không mở browser). Toàn bộ phải hoàn thành trong <= 5 giây.
+> 2. **Nghiệm thu UAT & Chụp ảnh trình duyệt (`npm run test:uat`)**: Kịch bản chạy 100 lượt có chụp ảnh màn hình bằng trình duyệt (`record_screenshots_scenarios.test.ts`). **CHỈ kích hoạt** khi có thay đổi trong `src/domain/` (FSM, luật chơi), `src/server/` (Network, RoomManager) hoặc khi nghiệm thu xuất xưởng v1.0. **TUYỆT ĐỐI CẤM chạy** khi chỉ sửa UI/CSS, 3D Assets hoặc tài liệu để tránh lãng phí I/O đĩa và thời gian.
+
 ### 6.2 CỔNG THẨM MỸ HAI TẦNG: 3D VISUAL CRITIC + 2D TACTILE CRAFT (TWO-TIER VISUAL GATE)
 *(Triệt tiêu bẫy "Virtual Green Trap": Test Vitest/Jest chạy in-memory xanh 100% nhưng màn hình WebGL thực tế bị đen, camera trực giao phẳng lì như SimCity 2000, nút bấm 2D giật lag méo góc hoặc CSS vỡ nát. Nâng cấp thành cổng thẩm mỹ 2 tầng song song)*:
 
@@ -762,6 +768,45 @@ export function lintSlopContent(content, filePath = 'anonymous.ts') {
    - *Hiện tượng*: Khi có nhiều thao tác nghiệp vụ trên cùng một nhóm đối tượng, AI có xu hướng tạo ra một nút bấm riêng lẻ cho từng thao tác trên thanh công cụ chính.
    - *Hậu quả*: Giao diện người dùng bị phân mảnh, xuất hiện quá nhiều nút bấm cạnh tranh sự chú ý, làm tăng tải nhận thức và gây nhầm lẫn khi thao tác.
    - *Khắc phục*: Gom các nút bấm có cùng miền đối tượng thành 1 điểm chạm quản lý tổng hợp duy nhất kèm menu ngữ cảnh thông minh, giữ giao diện chính luôn tối giản và rõ ràng.
+
+### 6.4 QUY CHUẨN TEST NGUYÊN TỬ & MA TRẬN 4 KHÍA CẠNH HÀNH VI ĐA NĂNG CHO MỌI DỰ ÁN
+
+*(Khắc phục triệt để 2 phản mẫu: Bệnh nhồi nhét Monolithic Test và Bẫy kiểm tra tồn tại tĩnh Checklist Fallacy. Áp dụng cho mọi loại dự án từ Backend, Frontend, 3D Game đến FinTech)*:
+
+#### 1. Ba Quy Chuẩn Kiểm Thử Bất Biến Chung (Universal Test Core)
+
+1. **Kiểm Thử Nguyên Tử (Atomic Test Mandate) & Tham Số Hóa (Parameterized Testing)**:
+   - Mỗi câu lệnh `it()` hoặc `test()` chỉ kiểm chứng **1 hành vi quan sát được hoặc 1 bất biến duy nhất**.
+   - Giới hạn: Tối đa **1 đến 4 lệnh `expect()`** trong một bài test.
+   - **Tuyệt đối CẤM** dùng vòng lặp `for`, `while`, hoặc `.forEach()` bên trong thân hàm `it()`.
+   - Bắt buộc dùng cú pháp bảng tham số hóa của từng ngôn ngữ:
+     * TypeScript/JavaScript: `it.each(CASES)('Hành vi %s', (c) => { ... })`
+     * Python: `@pytest.mark.parametrize('input,expected', CASES)`
+     * C# (.NET): `[Theory] [InlineData(...)]`
+     * Go: Table-driven tests `for _, tc := range testCases { t.Run(...) }`
+     * Flutter: `for (final tc in testCases) { testWidgets(...) }`
+
+2. **Phân Định Rạch Ròi Test Runner vs Linter (Cấm Bẫy Checklist Tĩnh)**:
+   - ❌ **CẤM** viết test chỉ để `expect(fs.existsSync(...)).toBe(true)`.
+   - ❌ **CẤM** viết test chỉ để `expect(typeof fn).toBe('function')`.
+   - ❌ **CẤM** viết test đếm số dòng mã nguồn (LOC <= 300) trong tệp test nghiệp vụ.
+   - Toàn bộ kiểm tra tĩnh trên phải do Linter cơ học (`tsc`, AST script `lint_slop.mjs`, ArchUnit) gác cổng trong 30ms với 0 token.
+   - Test runner chỉ kiểm chứng: **Đầu vào hợp lệ/không hợp lệ ➔ Xử lý runtime ➔ Kết quả đầu ra quan sát được (Observable Output)**.
+
+3. **Sàn Mật Độ Kiểm Thử (Test Density Floor)**:
+   - Mỗi lát cắt tính năng (Feature Slice) bắt buộc sinh ra tối thiểu **15 đến 30 atomic test cases**.
+   - Tỷ lệ `expect()` / `it()` đạt chuẩn trong khoảng **1.0 đến 3.5**. Vượt quá 4.0 là dấu hiệu nhồi nhét Monolithic Test.
+
+#### 2. Ma Trận 4 Khía Cạnh Hành Vi Đa Năng Theo Dòng Dự Án (Universal 4-Facet Matrix)
+
+Khi viết test ở Trạm 1 (RED Contract Tests), người lập trình đối chiếu với dòng dự án tương ứng để bao phủ đủ 4 khía cạnh:
+
+| Khía Cạnh Hành Vi | Dòng 1: Backend API & Microservices | Dòng 2: Web & Mobile Frontend (React/Flutter) | Dòng 3: Đồ Họa 3D & Game Engine | Dòng 4: FinTech, E-Commerce & Ledger |
+| :--- | :--- | :--- | :--- | :--- |
+| **1. Biên Độ Dữ Liệu (Boundary & Range)** | • Validate Schema DTO<br>• Phân trang page/limit hợp lệ<br>• Ràng buộc độ dài chuỗi | • Giới hạn ký tự input<br>• Tỷ lệ co giãn viewport/DPR<br>• Format tiền tệ/ngày tháng | • Tham số PBR roughness, metalness in [0, 1]<br>• Tọa độ mesh nằm trong bàn cờ | • Số dư tài khoản không âm<br>• Trần đơn giá và hạn mức<br>• Tỷ lệ chiết khấu từ 0% đến 100% |
+| **2. Phản Ứng Trạng Thái (State Reactivity)** | • Chu kỳ đơn: CREATED ➔ PAID<br>• Phát Domain Event qua Bus<br>• Broadcast DeltaPayload | • Chuyển Theme sáng/tối<br>• Vòng đời UI: Idle ➔ Loading ➔ Error ➔ Success | • Chu kỳ Ngày/Hoàng hôn/Đêm (isNight đổi emissive)<br>• Cờ nhảy theo tọa độ ô | • Chu kỳ: PENDING ➔ HOLD ➔ SETTLED<br>• Cập nhật số dư sổ kép (Nợ/Có) |
+| **3. Thu Dọn Tài Nguyên (Resource Disposal)** | • Đóng DB Pool/Client an toàn<br>• Giải phóng Buffer/Stream<br>• Clear interval/cron khi dừng | • Hủy AbortController mạng<br>• Tháo eventListener khi unmount<br>• Clear timer trong useEffect | • Gọi .dispose() trên Geometry, Material, Texture khi unmount<br>• Hủy requestAnimationFrame | • Rollback Transaction khi lỗi<br>• Giải phóng Distributed Lock (Redis/Mutex)<br>• Khôi phục trạng thái Escrow |
+| **4. Phòng Thủ Ngoại Lệ (Error Defense)** | • Trả mã lỗi chuẩn (400, 401, 404)<br>• Chặn SQL injection / Payload độc<br>• Khóa Mutex chống Race-condition | • Xử lý mất kết nối mạng (Offline)<br>• Chống XSS input<br>• Chống Double-click (Throttle) | • Xử lý slotIndex ngoại lệ (âm, NaN, vượt trần)<br>• Vật thể ngoài camera frustum | • Chống chi tiêu kép (Double spend)<br>• Chống giao dịch lặp (Idempotent)<br>• Chặn rút tiền vượt số dư khả dụng |
 
 ---
 ---

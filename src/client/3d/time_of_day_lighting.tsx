@@ -13,7 +13,24 @@ import { useGameStore } from '../store/game_store';
 import { calculateTheatricalAmbientIntensity } from './auction_3d_stage';
 
 
+export function calculateBaseFill(phase: 'day' | 'sunset' | 'night'): number {
+  switch (phase) {
+    case 'day': return 0.12;
+    case 'sunset': return 0.35;
+    case 'night': return 0.22;
+  }
+}
+
+export function calculateBaseRim(phase: 'day' | 'sunset' | 'night'): number {
+  switch (phase) {
+    case 'day': return 0.12;
+    case 'sunset': return 0.40;
+    case 'night': return 0.25;
+  }
+}
+
 export function TimeOfDayLighting(): React.ReactElement {
+
   const phase = useEnvironmentStore((s) => s.phase);
   const isAuto = useEnvironmentStore((s) => s.isAuto);
   const setPhase = useEnvironmentStore((s) => s.setPhase);
@@ -84,8 +101,9 @@ export function TimeOfDayLighting(): React.ReactElement {
     }
 
     // 4. Nội suy ánh sáng phản xạ vịnh biển (Fill Light) & ánh sáng rìa ngọn sóng (Rim Light)
+
     if (fillRef.current) {
-      const baseFill = phase === 'night' ? 0.22 : phase === 'sunset' ? 0.35 : 0.22;
+      const baseFill = calculateBaseFill(phase);
       const fillIntensity = isAuctionActive ? baseFill * 0.15 : baseFill;
       const fillColor = phase === 'night' ? '#38BDF8' : phase === 'sunset' ? '#FDBA74' : '#CCFBF1';
       tempColor.set(fillColor);
@@ -94,13 +112,14 @@ export function TimeOfDayLighting(): React.ReactElement {
     }
 
     if (rimRef.current) {
-      const baseRim = phase === 'night' ? 0.25 : phase === 'sunset' ? 0.4 : 0.22;
+      const baseRim = calculateBaseRim(phase);
       const rimIntensity = isAuctionActive ? baseRim * 0.15 : baseRim;
       const rimColor = phase === 'night' ? '#38BDF8' : phase === 'sunset' ? '#EA580C' : '#FEF08A';
       tempColor.set(rimColor);
       rimRef.current.color.lerp(tempColor, lerpRate);
       rimRef.current.intensity += (rimIntensity - rimRef.current.intensity) * lerpRate;
     }
+
 
     // 5. Nội suy màu sắc vòm trời, sương mù khí quyển và cường độ IBL môi trường
     if (state.scene) {
@@ -169,7 +188,7 @@ export function TimeOfDayLighting(): React.ReactElement {
         ref={fillRef}
         position={[20, 16, -18]}
         color="#CCFBF1"
-        intensity={0.3}
+        intensity={0.12}
       />
 
       {/* 7. Rim Light: Ánh nắng viền trên chóp tháp và ngọn sóng */}
@@ -177,8 +196,9 @@ export function TimeOfDayLighting(): React.ReactElement {
         ref={rimRef}
         position={[-10, 18, -24]}
         color="#FEF08A"
-        intensity={0.3}
+        intensity={0.12}
       />
+
     </group>
   );
 }

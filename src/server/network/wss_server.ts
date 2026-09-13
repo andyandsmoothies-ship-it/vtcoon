@@ -76,7 +76,7 @@ export class WssServer {
     this.turnTimeoutScheduler = new TurnTimeoutScheduler({
       rooms: this.rooms, intentMutex: this.intentMutex, broadcaster: this.broadcaster,
       onGameOver: (rc) => this.broadcastGameOver(rc),
-      onScheduleBotTurn: (rc) => this.scheduleBotTurn(rc),
+      onScheduleBotTurn: (rc) => this.botScheduler.scheduleBotTurn(rc),
       defaultTimeoutMs: config.turnTimeoutMs,
     });
     this.broadcaster.setTimeRemainingProvider((rc) => this.turnTimeoutScheduler.getTimeRemaining(rc));
@@ -320,8 +320,8 @@ export class WssServer {
     if (roomAfter && isRoomGameOver(roomAfter)) {
       this.broadcastGameOver(roomCode);
     } else {
-      this.broadcaster.broadcastRoomDelta(roomCode);
       this.scheduleBotTurn(roomCode);
+      this.broadcaster.broadcastRoomDelta(roomCode);
     }
   }
 

@@ -69,8 +69,8 @@ describe('[TC-IMP30/MSS] [UC-IMP30] Retropoly Metropolis & Living Coastal Archit
 
     // Khẳng định giá trị chuẩn xác của 4 mốc phân tầng vật lý
     expect(terrainBaseY, 'TERRAIN_BASE_Y (Nền địa hình chính) phải được định nghĩa bằng 0.000').toBe(0.000);
-    expect(tileBorderY, 'TILE_BORDER_Y (Viền móng ô cờ) phải được định nghĩa bằng 0.015').toBe(0.015);
-    expect(tileSurfaceY, 'TILE_SURFACE_Y (Mặt trên 40 ô cờ & đại lộ) phải được định nghĩa bằng 0.020').toBe(0.020);
+    expect(tileBorderY, 'TILE_BORDER_Y (Viền móng ô cờ) phải được định nghĩa bằng 0.012').toBe(0.012);
+    expect(tileSurfaceY, 'TILE_SURFACE_Y (Mặt trên 40 ô cờ & đại lộ) phải được định nghĩa bằng 0.018').toBe(0.018);
     expect(standeeBaseY, 'STANDEE_BASE_Y (Thềm móng Standee / Shophouse) phải được định nghĩa bằng 0.025').toBe(0.025);
 
     // Consumer-Side Assertion: Khẳng định phân tầng cao độ tăng dần đều không có xung đột Z-buffer (Zero Z-Fighting)
@@ -121,13 +121,13 @@ describe('[TC-IMP30/MSS] [UC-IMP30] Retropoly Metropolis & Living Coastal Archit
     expect(targetState.target, 'Target state target phải bám theo tọa độ sàn diễn xúc xắc mới').toEqual([0.0, 0.25, 3.8]);
     expect(targetState.fov).toBe(36);
 
-    // 3. Khẳng định FSM kích hoạt đúng mode dice_roll khi xúc xắc đang gieo
+    // 3. Khẳng định FSM giữ mode overview khi xúc xắc đang gieo (triệt tiêu zoom giật lag)
     const resolved = resolveCameraMode({
       isRolling: true,
       isPawnAnimating: false,
       activeModal: null,
     });
-    expect(resolved).toBe('dice_roll');
+    expect(resolved).toBe('overview');
   });
 
   it('[TC-IMP30/MSS-05] [UC-IMP30] MiniatureCityDiorama render an toàn trong test/headless qua renderToStaticMarkup và tích hợp mã màu kiến trúc Retropoly', () => {

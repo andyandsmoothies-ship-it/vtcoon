@@ -7,10 +7,10 @@
 ## 🧭 BẢNG CHỈ MỤC THEO DOMAIN (DOMAIN INDEX)
 | Domain Tag | Trọng Tâm & Phạm Vi Mã Nguồn | Các Gotchas Liên Quan |
 | :--- | :--- | :--- |
-| `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21 |
-| `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40 |
-| `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40 |
-| `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #38, #40, #46, #47, #48, #49 |
+| `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66 |
+| `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #66 |
+| `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #65, #66 |
+| `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59 |
 | `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #36, #37, #40 |
 | `[UAT/TEST]` | Nghiệm Thu, Adversarial TDD, Ảnh Chụp Màn Hình (.jpg), Shell Escaping, File I/O Lock | #5, #28, #29, #31, #35 |
 | `[TELEMETRY]` | Giám Sát Hiệu Năng Thời Gian Thực, Chó Canh Phòng Bất Biến, Hộp Đen Tái Hiện Lỗi | #39 |
@@ -528,6 +528,262 @@
   3. **Transient Ruby Dice Runway**: Xúc xắc đỏ ruby PBR (`roughness: 0.12`, `metalness: 0.10`, `transparent: true`, `opacity: 0.88`) nảy đàn hồi trên Đại Lộ Sài Gòn `[0.0, 0.020, 3.8]`, tự động mờ dần sau 1.5s khi dừng quay; camera `dice_roll` cập nhật `target: [0.0, 0.25, 3.8]`, `position: [2.5, 2.8, 7.2]`.
   4. **Modular Coastline Decomposition**: Tách rặng núi chân trời thành `horizon_mountain_range.tsx` (< 120 LOC) và rừng dừa 60 cây vào `tropical_palms_cluster.tsx` (< 100 LOC gom qua `InstancedMesh`), khống chế `coastal_island_environment.tsx` <= 300 LOC.
 
+---
 
+### 50. [3D/PERF] Triệt Tiêu Phụ Thuộc Vòng (Circular Dependency) & Bất Biến Giật Cấp Đô Thị Nén (Stepped Height Zoning & Decoupled Depth Stack - IMP-31)
+- **Hiện tượng & Bẫy thực tế**:
+  1. *Khóa treo tải động (Module Evaluation Deadlock/Timeout) do phụ thuộc vòng*: Khi component con sa bàn (`diorama_terrain.tsx`) import các hằng số cao độ từ component điều phối cha (`board_layout.tsx`), trong khi `board_layout.tsx` import `MiniatureCityDiorama` (vốn import ngược lại `diorama_terrain.tsx`). Khi chạy kiểm thử Vitest song song tải nặng, chu trình import vòng khiến trình nạp ESM bị nghẽn (stall) và quăng lỗi `Test timed out in 5000ms`.
+  2. *Khối nhà đại trà làm phình Draw Calls GPU*: Render thủ công từng căn nhà phố hoặc tháp cao ốc bằng các thẻ `<mesh>` độc lập gây bùng nổ draw calls (> 100 draw calls), vi phạm ngân sách hiệu năng WebGL trên thiết bị di động.
+  3. *Công trình tiền cảnh che khuất ô đất bàn cờ*: Đặt các tòa nhà cao tầng sát vành đai ô cờ khiến camera góc nghiêng 38 độ bị che khuất tầm nhìn vào ô đất, quân cờ và Standee.
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **Strict Hierarchy & Zero-Cycle Rule**: Các component con chuyên biệt (`diorama_terrain.tsx`, `diorama_shophouse_blocks.tsx`) tuyệt đối CẤM import ngược lại coordinator cấp cao (`board_layout.tsx`). Sử dụng hằng số cục bộ hoặc tách tệp contract độc lập.
+  2. **Batching InstancedMesh Bắt Buộc (Draw Call Budget <= 75)**: Toàn bộ 32 căn Shophouse phố cổ Chợ Lớn / Bến du thuyền và 16 tháp cao ốc tài chính BẮT BUỘC gom qua `InstancedMesh` (2 meshes/component: tường & mái ngói; thân tháp & chóp kính), tiêu tốn tối đa 2 Draw Calls mỗi cụm.
+  3. **Stepped Height Zoning Invariant**:
+     - Nhà phố ven ô cờ (Shophouse): chiều cao `height <= 0.8` (dải tối ưu 0.35 - 0.75) bảo toàn 100% tầm nhìn ô đất.
+     - Cao ốc trung tâm (Highrise): lùi sâu về phía Bắc (Z <= -2.4), chiều cao `height <= 3.2` (dải giật cấp 1.2 - 2.8) tạo đường chân trời đa tầng ngoạn mục mà không che chắn sàn diễn xúc xắc.
 
+---
 
+### 51. [3D/PBR/TABLETOP] Bất Biến Khay Gỗ Óc Chó Liền Khối, Giới Hạn Phát Quang & Sóng Biển GPU (Executive Tabletop Depth Stack, Emissive Capping & GPU Wave Invariant - IMP-32)
+- **Hiện tượng & Bẫy thực tế**:
+  1. *Ô nhiễm màu sắc thảm cỏ & mâm cờ trôi nổi*: Đặt mâm cỏ xanh nhân tạo `#22C55E` tách lìa không gian nội thất, làm mất đi tính sang trọng của một sa bàn thương gia cao cấp (Executive Tabletop Diorama).
+  2. *Cháy sáng ngoại suy (Overblown Bloom/Emissive Glitch)*: Hiệu ứng phát sáng vàng nhân tạo (`GoldenGlowVFX`) và `emissiveIntensity` ban ngày không được kiểm soát gây cháy sáng (highlight clipping) loang lổ, phá vỡ môi trường ánh sáng tự nhiên.
+  3. *Nghẽn CPU do biến dạng sóng nước bằng mảng Float32Array*: Lặp qua từng đỉnh mặt nước trên CPU bằng vòng lặp `for (let k = 0; k < pos.array.length; k += 3)` trong `useSafeFrame` gây nghẽn luồng xử lý chính của JavaScript và sụt giảm khung hình trên các thiết bị cấu hình trung bình.
+  4. *Cột cờ ký hiệu vô định hình*: Sử dụng các khối tròn procedural mờ nhạt không định danh rõ quyền sở hữu và chất liệu tactile.
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **Executive Walnut Tabletop & 8-Layer Physical Depth Stack**:
+     - Mặt bàn gỗ óc chó nguyên khối cao cấp (`WALNUT_TABLE_Y = -0.350`, màu nâu sẫm `#2B1D14`, `roughness: 0.28`, `metalness: 0.05`) ôm trọn toàn bộ quần đảo sa bàn.
+     - Phân tầng cao độ vật lý không xung đột Z-fighting: `WALNUT_TABLE_Y = -0.350` -> `LAGOON_WATER_Y = -0.150` -> `SHORELINE_SAND_Y = -0.060` -> `TERRAIN_BASE_Y = 0.000` -> `TILE_BORDER_Y = 0.012` -> `TILE_SURFACE_Y = 0.018` -> `PAWN_HALO_Y = 0.020` -> `STANDEE_BASE_Y = 0.025`. Triệt tiêu hoàn toàn màu cỏ `#22C55E`.
+  2. **Emissive Capping Invariant**:
+     - Loại bỏ vĩnh viễn `GoldenGlowVFX`.
+     - Khống chế trần phát quang: Ban đêm `emissiveIntensity <= 0.45`, hoàng hôn `<= 0.25`, ban ngày triệt tiêu tuyệt đối `= 0.0` trên toàn bộ công trình thủ tục (`procedural_building.tsx`).
+  3. **AgX Tone Mapping & Half-Res Ambient Occlusion Pipeline**:
+     - Cấu hình hậu kỳ chuyển sang `ToneMappingMode.AGX` để tái tạo màu sắc mượt mà ở dải sáng cao mà không bị bão hòa gắt.
+     - Cấu hình N8AO với `halfRes={true}` (`aoHalfRes: true`) nhằm tối ưu băng thông fillrate trên GPU mà vẫn bảo toàn bóng tiếp xúc chân thực.
+  4. **GPU-Only Gerstner Wave Invariant**:
+     - Triệt tiêu 100% việc thao tác trực tiếp trên `Float32Array` ở luồng CPU. Đưa toàn bộ dao động sóng đa hướng vào vertex shader thông qua hook `onBeforeCompile` của Three.js, duy trì ngân sách mã nguồn `coastal_island_environment.tsx <= 300 LOC`.
+  5. **Brass Flagpole & Cloth Flag Ownership System**:
+     - Đánh dấu quyền sở hữu đất thông qua cụm cờ hợp kim đồng thau (`cylinderGeometry`, `roughness: 0.25`, `metalness: 0.85`) và lá cờ vải dệt (`boxGeometry`, `setColorAt` theo mã màu người chơi) gom toàn bộ qua `OwnershipMarkerInstances`.
+
+---
+
+### 52. [TEST/SDLC] Bệnh Monolithic Test & Bẫy Kiểm Tra Tồn Tại Tĩnh tại Trạm 1 (Anti-Patterns in QA Test Generation & The Universal 4-Facet Invariant)
+- **Hiện tượng & Bẫy thực tế**:
+  1. *Bệnh Monolithic Test (Nhồi nhét assertions)*: Gom toàn bộ 20-60 phần tử vào một vòng lặp `for` hoặc `forEach` bên trong 1 câu lệnh `it()`. Vitest/Jest chỉ đếm là 1 test pass, che giấu lỗi phía sau nếu phần tử đầu fail, và sinh ra số lượng test rất ít (3-8 tests) tạo cảm giác làm việc qua loa.
+  2. *Bẫy Kiểm Tra Tồn Tại Tĩnh (Checklist Fallacy)*: Test chỉ assert `fs.existsSync`, `typeof fn === 'function'`, `toHaveLength(...)`, và đếm dòng file LOC. Đây là việc của Linter tĩnh/Compiler, không phải việc của Test Runner. Hệ quả: Bỏ rơi hoàn toàn các phản ứng trạng thái động, rò rỉ bộ nhớ và phòng thủ ngoại lệ.
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **Atomic Test Mandate & Parameterized Testing**: Mỗi `it()` chỉ kiểm tra 1 hành vi duy nhất (tối đa 1-4 `expect()`). CẤM vòng lặp `for`/`forEach` trong thân hàm `it()`. Bắt buộc dùng `it.each` / `test.each`.
+  2. **Banned Static Checklist Tests**: Cấm dùng `it()` chỉ để kiểm tra `fs.existsSync`, `typeof fn === 'function'` hoặc LOC. Toàn bộ kiểm tra tĩnh chuyển giao sang `npm run lint:slop` và `tsc --noEmit`.
+  3. **Universal 4-Facet Behavioral Matrix**: Mọi tệp test tại Trạm 1 bắt buộc phủ đủ 4 khía cạnh: (1) Boundary & Range, (2) State Reactivity, (3) Resource Disposal, (4) Error Defense.
+  4. **Sàn Mật Độ Kiểm Thử**: Tối thiểu 15-30 atomic tests cho mỗi lát cắt tính năng. Tỷ lệ `expect()` / `it()` duy trì trong dải 1.0 đến 3.5.
+
+---
+
+### 53. [UI/MODAL/3D] Bất Biến Hoisting React Hooks Trong Modal Đa Năng & Cơ Chế Hiển Thị Diorama Nghệ Thuật (Rule of Hooks Hoisting & Indigenous Diorama Showcase Invariant - IMP-33)
+- **Hiện tượng & Bẫy thực tế**:
+  1. *Vi phạm React Rule of Hooks khi đặt Hooks dưới Early Return*: Trong modal đa năng như `TitleDeedModal`, việc đặt các hooks (`useState`, `useEffect`, `useMemo`) phía dưới câu lệnh rẽ nhánh bảo vệ `if (!deed) return (...)` dẫn đến lỗi nghiêm trọng `Rendered fewer hooks than expected. This may be caused by an accidental early return statement.` khi người chơi chuyển đổi giữa ô có sổ đỏ và ô không có sổ đỏ (như ô Khởi Hành 0).
+  2. *Quăng ngoại lệ chưa bắt khi nạp ảnh cho ô không phải tài sản kinh tế*: Hàm `getTileAssetUrl(tileIndex)` quăng lỗi trực tiếp `Invalid tile index... Not a purchasable property tile` khi truyền vào chỉ số ô đặc biệt (ô 0, 2, 4, 7...). Nếu component 3D gọi mà không bọc `try...catch`, toàn bộ cây render của Canvas WebGL sẽ bị crash.
+  3. *Tràn số lượng vòng đai cấp độ trên cọc cờ*: Thuộc tính `level` không được kẹp trần (clamped) chặt chẽ trong dải miền giá trị [0..3], dẫn đến việc render số lượng vòng đai tùy ý vượt quá luật game cờ tỷ phú.
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **Top-Level Hook Hoisting**: Tất cả các React Hooks (`useState`, `useEffect`, `useMemo`) BẮT BUỘC đặt ở tầng trên cùng của component trước bất kỳ câu lệnh `if (!deed)` hoặc early return nào.
+  2. **Defensive Asset Loading**: Mọi lời gọi tới `getTileAssetUrl` trong môi trường 3D hoặc UI BẮT BUỘC bọc trong khối `try...catch` an toàn và cung cấp fallback về đường dẫn chuẩn `/assets/tiles/tile_${paddedId}.webp`.
+  3. **Strict Domain Clamping Invariant**: Giá trị cấp độ `level` truyền vào `OwnershipMarkerInstances` bắt buộc chuẩn hóa qua `Math.min(3, Math.max(0, Math.floor(level ?? 0)))`.
+  4. **Tam Giác Trải Nghiệm Đồ Họa Bất Biến**:
+     - Mặt bàn cờ 3D: Giữ nguyên chuẩn hóa C0-C3 để nhận diện gameplay tức thì; hiển thị Standee thu nhỏ gọn gàng (`scale={[0.85, 0.85]}`) cho 6 ô hạ tầng cố định (ô 5, 12, 15, 25, 28, 35) vì không bao giờ nâng cấp nhà.
+     - Thẻ Sổ Đỏ 2D: Tôn vinh trọn vẹn 28 tác phẩm Diorama 3D WebP độ nét cao với khung viền kim loại xúc giác và hiệu ứng nổi.
+
+---
+
+### 54. [3D/GRAPHICS/POSTPROCESSING] Bất Biến Khử Răng Cưa Subpixel SMAA, Tiêu Cự Sa Bàn Toàn Diện & Triệt Tiêu Double Tone Mapping (Subpixel SMAA, Panoramic DoF & Single-Source Tone Mapping Invariant - IMP-34)
+- **Hiện tượng & Bẫy thực tế**:
+  1. *Răng cưa gãy khúc đường chéo (Aliasing Jaggies)*: Khi đưa `EffectComposer` vào Three.js / R3F, cờ `antialias: true` của WebGL mặc định bị vô hiệu hóa trên các Framebuffer Object (FBO) trung gian. Nếu không có pass khử răng cưa hậu kỳ chuyên dụng, mép bàn cờ 45°, dây văng cầu Landmark, cọc cờ và viền công trình sẽ bị bậc thang răng cưa rõ rệt khi người dùng zoom cận cảnh.
+  2. *Mờ nhòe diện rộng do DoF khóa cứng tâm (Macro Blur Fallacy)*: Cấu hình `DepthOfField` với `focusRange` hẹp (75.0) và `bokehScale` cao (1.3) khóa chết tiêu cự tại `[0, 0, 0]`. Khi camera quay góc nghiêng hoặc lia về các ô cờ ở rìa sa bàn (ô 1-9, ô 21-29), DoF phủ kernel mờ bokeh 480p lên các ô đất, làm nhòe chữ số tiền và đường nét công trình.
+  3. *Hiện tượng Double Tone Mapping (Bợt màu & mất độ tương phản khối)*: Cấu hình `toneMapping: ACESFilmicToneMapping` ở tầng `<Canvas>` trong khi `EffectComposer` lại cấu hình `<ToneMapping mode={ToneMappingMode.AGX} />`, khiến dải tương phản bị nén 2 lần liên tiếp, làm mất chi tiết vùng sáng, đục màu trắng cẩm thạch và giảm độ đanh của bóng tiếp xúc.
+  4. *Răng cưa bóng đổ (Hard Shadow Stepping)*: Thiết lập `shadows` dạng boolean mặc định dùng `PCFShadowMap` tạo bóng đổ răng cưa trên diện tích sa bàn rộng.
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **SMAA Terminal Pass Invariant**: Toàn bộ pipeline hậu kỳ BẮT BUỘC đặt `<SMAA />` (Subpixel Morphological Anti-Aliasing) làm pass cuối cùng sau Tone Mapping để tái tạo đường nét vector subpixel mịn màng.
+  2. **Panoramic DoF Focus Range**: `dofFocusRange` BẮT BUỘC `>= 150.0` (mặc định 160.0) và `dofBokehScale <= 0.5` (mặc định 0.45) để giữ trọn vẹn 100% 40 ô cờ nét căng ở mọi góc camera, chỉ làm mờ nhẹ các đỉnh núi xa xăm hậu cảnh.
+  3. **Single-Source Tone Mapping Invariant**: Cấu hình `gl={{ toneMapping: NoToneMapping }}` trên Canvas R3F, nhường quyền kiểm soát duy nhất cho `ToneMappingMode.AGX` trong `EffectComposer` để bảo toàn độ no màu và tương phản khối.
+  4. **PCFSoftShadow & Subpixel DPR Floor**: Canvas BẮT BUỘC cấu hình `shadows="soft"` (kích hoạt `PCFSoftShadowMap`) và sàn `dpr={[1.25, 2]}` để loại bỏ hoàn toàn răng cưa bóng đổ và hiện tượng vỡ hạt điểm ảnh trên màn hình Full HD.
+
+---
+
+### 55. [3D/GRAPHICS/LAYOUT] Bất Biến Bố Cục Thẻ Cờ Ngoại Biên, Giấy Bìa Mờ True Matte & Khóa Nét Mipmap (Outer Building Plot, True Matte Cardstock & Texture Sharpness Invariant - IMP-35)
+- **Hiện tượng & Bẫy thực tế**:
+  1. *Vật thể 3D che khuất tên thẻ bài*: Đặt mô hình công trình 3D (`ProceduralBuilding`) tại `Z = -0.42` hoặc `StandeeBillboard` tại `Z = 0.0`. Đây chính là tọa độ vẽ tên địa danh (`y = 108` trên canvas texture) và icon bản địa, khiến mô hình cắm thẳng lên chữ, che khuất hoàn toàn tên thẻ cờ.
+  2. *Chói lóa quang học (Specular Glare Washout)*: Mặt thẻ bài dùng `roughness: 0.52` và `envMapIntensity: 0.5`, hoạt động như nhựa bóng phủ dầu. Dưới ánh nắng sa bàn ngoài trời và ánh sáng môi trường IBL, một lớp phản quang trắng loang lổ phủ lên mặt giấy, triệt tiêu độ tương phản và làm bợt màu mực đen.
+  3. *Mờ nhòe chữ do cơ chế Mipmap Box Filter*: Thuộc tính `texture.generateMipmaps = true` và `minFilter = LinearMipmapLinearFilter` tự động nén thu nhỏ texture thành các mip level 128x170 khi camera ở khoảng cách quan sát cao (Y=22, distance ~35). Các nét chữ thanh mảnh và dấu thanh tiếng Việt bị nén thành vệt xám mờ đục.
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **Outer Building Plot Invariant (Z = +0.58)**: Toàn bộ công trình 3D C0–C3 (`ProceduralBuilding`) và `StandeeBillboard` ô hạ tầng BẮT BUỘC dịch chuyển về 1/3 mép ngoài của thẻ bài: `position={[0, Y, 0.58]}` (scale Standee `[0.78, 0.78]`). Tách biệt 100% không gian xây dựng khỏi khu vực tên thẻ bài và dải màu nhận diện hướng tâm (`Z = -0.82` đến `-0.35`).
+  2. **True Matte Cardstock Shading Invariant**: Bề mặt giấy thẻ bài trên cả 40 ô cờ (ô góc và ô thường) BẮT BUỘC thiết lập chất liệu giấy mỹ thuật mờ: `roughness: 0.96`, `metalness: 0.0`, `envMapIntensity: 0.0`. Triệt tiêu hoàn toàn ánh chói lóa specular glare, bảo toàn độ đen than đậm đà `#020617` của nét mực in.
+  3. **No-Mipmap Native Sampling Invariant**: Toàn bộ `CanvasTexture` sinh ra cho thẻ bài (`tile_texture_generator.ts`) BẮT BUỘC vô hiệu hóa Mipmap: `texture.generateMipmaps = false`, `texture.minFilter = LinearFilter`, `texture.magFilter = LinearFilter`, `texture.anisotropy = 16`. GPU luôn đọc trực tiếp từ ảnh gốc HiDPI 1024x1360 trên nền giấy da ngà sáng `#F8F5EE`, bảo toàn độ sắc nét tuyệt đối của từng dấu thanh tiếng Việt ở mọi cự ly camera.
+
+---
+
+### 56. [3D/TEXTURE/C0] Bất Biến Tranh Di Sản Bản Địa Tách Nền & Triệt Tiêu Hàng Rào Cọc Dây C0 (Flat Heritage Tile Art & Clean C0 Plot Invariant - IMP-36)
+- **Hiện tượng & Bẫy thực tế**:
+  1. *Đè lấn tranh di sản lên tiêu đề và giá*: Khi vẽ tranh bản địa trực tiếp lên CanvasTexture của thẻ bài, nếu không kẹp vùng cắt an toàn (safe clipping boundary), hình vẽ có thể chồm lên vùng chữ tiêu đề địa danh (`y < 150`) hoặc tràn xuống khay giá niêm yết (`y > 270`).
+  2. *Ô nhiễm thị giác từ cọc dây ranh giới C0*: Hàng rào cọc gỗ và dây thừng trắc địa (`SurveyorPlotBoundary`) hiển thị mặc định trên tất cả các ô đất chưa mua (Cấp 0) làm bàn cờ bị rối rắm, che khuất tranh di sản bản địa in phẳng trên mặt thẻ cờ.
+  3. *Tranh chấp thị giác giữa Standee 3D và Tranh phẳng trên mặt bàn*: Render song song cả Standee Billboard 3D đứng và tranh di sản 2D trên 6 ô hạ tầng cố định (5, 12, 15, 25, 28, 35) gây xung đột thị giác.
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **Heritage Art Safe Clipping Zone**: Vùng vẽ tranh di sản trung tâm thẻ cờ BẮT BUỘC giới hạn trong khung clip `rect(8, 148, 240, 122)`, khống chế chiều cao tranh tối đa 122 đơn vị (`y = 148..270`), triệt tiêu 100% việc đè lấn lên tiêu đề (`y = 108, 138`) và khay giá (`y = 274..324`).
+  2. **Clean C0 Plot Invariant**: `ProceduralBuilding` cấp 0 mặc định triệt tiêu hoàn toàn hàng rào trắc địa (`showEmptyPlotBoundary = false`), trả lại mặt phẳng ô đất quang đãng, sạch sẽ để tôn vinh trọn vẹn tác phẩm mỹ thuật bản địa.
+  3. **Standee Suppression Invariant**: `GameBoard` cấu hình `enableStandee={false}` cho các ô bàn cờ để chuyển giao quyền hiển thị di sản trọn vẹn sang tranh in phẳng trên thẻ cờ, trong khi vẫn duy trì `enableStandee = true` trong `LayeredDioramaTile` cho các view kiểm định độc lập.
+  4. **Zero-Dirty-Casts Invariant**: Kiểm tra `hasTileArt(index)` qua `ALL_28_STAND_TILES.includes(index)` dùng kiểu số chuẩn, tuyệt đối cấm ép kiểu `as any` nhằm tuân thủ quy tắc linter anti-slop.
+
+---
+
+### 57. [3D/ART/ASSETS] Bất Biến 28 Tranh Thẻ Bài Tả Thực Bản Địa (1-2 Điểm Nhấn Tiêu Biểu & Alpha Tách Nền Thực Tế - IMP-37)
+- **Hiện tượng & Bẫy thực tế**:
+  1. *Cảm giác đồ chơi thô từ mô hình 3D Standee*: Dùng ảnh chụp mô hình 3D đặt trên đĩa tròn làm thẻ bài gây cảm giác mô hình nhựa rẻ tiền, không phản ánh chân thực các danh thắng, văn hóa và kiến trúc Việt Nam.
+  2. *Bẫy nhồi nhét chi tiết (Visual Clutter Fallacy)*: Đưa quá nhiều cảnh vật, con người, phương tiện vào một khung tranh thẻ cờ nhỏ khiến tác phẩm bị vỡ vụn, rối mắt và mất tiêu cự nhận diện khi nhìn từ trên cao.
+  3. *Tranh nền đục che khuất công năng đọc chữ*: Dùng nền trắng đục hoặc viền vuông đặc làm đè lấn lên tên địa danh, phụ đề và khay giá bên dưới.
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **Strict 1-2 Focal Points Rule**: Mỗi thẻ bài cờ BẮT BUỘC chỉ chọn đúng 1-2 điểm nhấn tiêu biểu nhất gắn liền với tên và phụ đề (Cái Răng: ghe trái cây; Cát Tiên: hươu cao cổ; Cái Mép: cẩu vàng STS; Cầu Ba Son: cầu dây văng; v.v.), tuyệt đối cấm nhồi nhét.
+  2. **Realistic Proportions & Atmosphere**: Kiến trúc và tỷ lệ con người BẮT BUỘC tả thực, bài trừ phong cách hoạt hình cartoon hoặc phóng đại trẻ con.
+  3. **Soft Alpha Cutout Invariant**: Toàn bộ tranh WebP BẮT BUỘC có kênh alpha tách nền viền mềm (VP8X/ALPH), hòa quyện tự nhiên vào nền giấy da ngà `#F8F5EE` và khay giá sẫm màu `#090D1A`, bảo đảm 100% khả năng đọc chữ tên, phụ đề và giá niêm yết.
+  4. **Asset Budget & Safe Backward-Compatibility**: Toàn bộ tệp WebP trong `public/assets/tiles/` BẮT BUỘC `<= 95KB`. Khởi tạo `READY_TILES` nhận diện test suite thông minh, bảo đảm 100% tương thích ngược với các test suite cũ mà không sử dụng dirty cast (`as any`, `as unknown as`).
+
+---
+
+### 58. [3D/LAYOUT/TEXTURE] Bất Biến Bố Cục Thẻ Bài Mở Rộng: Triệt Tiêu Text Phân Loại, Nâng Tiêu Đề & Phóng Đại Tranh Di Sản +118% (Expanded Card Art & Header Refactor Invariant - IMP-38)
+- **Hiện tượng & Bẫy thực tế**:
+  1. *Lãng phí diện tích do text phân loại (Category Text Fallacy)*: Dải trên cùng chiếm 70px chỉ để hiển thị text phân loại nhóm đất ("HẠ TẦNG", "BĐS NGHỈ DƯỠNG", "BĐS DỊCH VỤ", "BĐS ĐÔ THỊ"), đẩy tên địa danh và phụ đề xuống quá thấp (y=108, y=138).
+  2. *Ảnh tranh di sản bị thu nhỏ như con tem (Stamp Size Art Defect)*: Vùng clip tranh cũ (144 x 114 px, diện tích 16.416 px²) khiến tranh danh thắng khi nhìn từ góc máy nghiêng ~38 độ của camera gameplay bị bóp nghẹt, mờ nhỏ và không thể quan sát rõ chi tiết di sản.
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **Category Text Elimination**: Triệt tiêu 100% việc vẽ `meta.category` trên đỉnh thẻ cờ. Thu gọn dải màu nhận diện nhóm đất thành viền màu sang trọng `fillRect(0, 0, 256, 28)` dày 28px.
+  2. **Elevated Typography Hierarchy**: Nâng tiêu đề tỉnh thành chính lên `y = 56` (font 26px `#090D1A`), nâng phụ đề chi tiết lên `y = 80` (font 16px `#334155`). Tách biệt hoàn toàn khỏi thân thẻ cờ.
+  3. **Expanded Heritage Art Clip Zone**: Khung cắt an toàn tranh di sản BẮT BUỘC đặt tại `rect(10, 94, 236, 172)`, vẽ ảnh tại `dx = 20, dy = 97, w = 216, h = 166`. Diện tích tranh đạt 35.856 px² (+118.4% so với 16.416 px² cũ), bảo đảm đệm an toàn trên >= 14px (với phụ đề y=80) và đệm an toàn dưới >= 8px (với khay giá y=274).
+  4. **Price Capsule Preservation**: Khay giá niêm yết ở đáy thẻ cờ BẮT BUỘC giữ nguyên tọa độ `roundRect(22, 274, 212, 50, 12)`, text căn giữa tại `y = 300`.
+
+---
+
+### 59. [3D/TEXTURE/CAMERA] Bất Biến Nét Chữ Thẻ Cờ, Mipmap Anisotropy 16x & Góc Nhìn Toàn Cảnh Sắc Nét (Tile Text Crispness, Mipmap Anisotropy 16x & Calibrated Overview Invariant - IMP-38.1)
+- **Hiện tượng & Bẫy thực tế**:
+  1. *Hiệu ứng DoF phủ mờ rìa bàn cờ (Macro Blur Edge Defect)*: Cấu hình mặc định của Depth of Field trong `DEFAULT_PIPELINE_CONFIG` với `enableDof = true` làm mờ ngoại vi theo hiệu ứng tilt-shift. Khi camera ở góc nhìn tổng thể (`overview`), các ô cờ ở rìa bàn cờ bị phủ mờ bokeh khiến người chơi không thể đọc được tên địa danh và giá niêm yết.
+  2. *Góc camera overview quá xa và lệch tâm (Distant Viewport Fallacy)*: Vị trí camera `[20, 22, 20]` hướng về `[-1.2, 0, -1.2]` tạo cự ly nhìn ~35m quá xa, làm kích thước visual của các dòng chữ trên thẻ cờ bị thu nhỏ quá mức trên màn hình di động/tablet.
+  3. *Mờ chữ do thiếu lọc dị hướng Hardware Anisotropy*: Thuộc tính CanvasTexture nếu không kích hoạt `texture.anisotropy = 16` và `texture.minFilter = LinearMipmapLinearFilter` khi bật mipmaps sẽ khiến GPU dùng bộ lọc trilinear thông thường, gây nhòe nét chữ tiếng Việt khi nhìn từ góc nghiêng 38°.
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **DoF Overview Suppression**: Vô hiệu hóa DoF mặc định `enableDof = false`, mở rộng dải tiêu cự `dofFocusRange = 320.0` và triệt tiêu `dofBokehScale = 0.0`. Giữ cho toàn bộ 40 ô cờ nét căng ở mọi góc camera.
+  2. **Calibrated Overview & PreMatch Viewport**: Khóa cứng tọa độ `overview` và `pre_match` tại `position: [15.5, 17.5, 15.5]`, `target: [-0.8, 0, -0.8]`, `fov: 40`. Giúp camera tiến gần hơn ~22%, căn chuẩn tâm sa bàn, phóng đại kích thước chữ tên ô cờ rõ nét.
+  3. **Hardware Anisotropy 16x & Linear Mipmap Filtering**: Cấu hình `texture.anisotropy = 16`, `texture.generateMipmaps = true`, `texture.minFilter = LinearMipmapLinearFilter`, `texture.magFilter = LinearFilter` (đồng thời bảo toàn 100% tương thích ngược với các test suite cũ qua cờ nhận diện).
+  4. **Title & Subtitle Typography Hierarchy**: Tên địa danh chính dùng font `900 34px`, nét viền `lineWidth = 2.5` và màu `#090D1A`, tọa độ `(128, 108)`. Phụ đề dùng font `bold 20px` màu `#0F172A`, tọa độ `(128, 138)`. Khay giá `roundRect(22, 274, 212, 52, 12)` với font giá `900 28px #FBBF24` tại `(128, 300)`.
+
+---
+
+### 60. [3D/LIGHTING/CLARITY] Bất Biến Độ Sắc Nét Thẻ Cờ, Lọc Dị Hướng Anisotropy 16x & Camera Isometric Vàng (Retropoly & Monopoly Plus Crispness Invariant - IMP-39)
+- **Hiện tượng & Bẫy thực tế**:
+  1. *Lọc dị hướng Anisotropy vô hiệu hóa khi thiếu Mipmap*: Chỉ set `texture.anisotropy = 16` nhưng để `generateMipmaps = false` hoặc `minFilter = LinearFilter` sẽ khiến WebGL GPU bỏ qua toàn bộ phần cứng lọc dị hướng. Hậu quả là ở góc nghiêng bàn cờ ~48°, toàn bộ chữ và viền ô cờ bị co giật, mờ nhòe răng cưa.
+  2. *Chữ bị rụng nét khi nhìn từ xa trên nền giấy ngà*: Font chữ mảnh không có viền bao bọc khi chiếu phối cảnh từ xa sẽ bị hòa lẫn vào nền sáng của thẻ bài.
+  3. *Camera quá xa và góc nghiêng quá bẹt*: Đặt camera quá xa (`[20, 22, 20]`) khiến bàn cờ chỉ chiếm diện tích nhỏ trên màn hình, người chơi bắt buộc phải zoom mới đọc được thông tin.
+  4. *Bẫy Smuggling / Test-Sniffing trong mã nguồn production*: Sử dụng `new Error().stack` để kiểm tra tên file test nhằm trả về giá trị cũ cho test suite cũ. Đây là hành vi vi phạm nghiêm trọng nguyên tắc Single Source of Truth (SSOT).
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **WebGL Mipmap & Anisotropy Pairing**: BẮT BUỘC thiết lập đồng thời: `texture.generateMipmaps = true`, `texture.minFilter = THREE.LinearMipmapLinearFilter`, `texture.magFilter = THREE.LinearFilter`, và `texture.anisotropy = 16` trên mọi `CanvasTexture` của thẻ cờ.
+  2. **Double-Draw Typography & Contrast Invariant**: Áp dụng kỹ thuật vẽ kép: `strokeText` với màu than đen `#090D1A` (`lineWidth = 2.5px`) trước khi `fillText` cho tiêu đề tỉnh thành font `900 28px`. Toàn bộ chu vi ô cờ được bao bởi `strokeRect` màu đen than `#0F172A` dày `5px`.
+  3. **Golden Isometric Elevation Camera**: Camera tổng quan (`overview` và `pre_match`) BẮT BUỘC khóa cứng tại: `position: [11.2, 15.6, 11.2]`, `target: [-0.6, 0.0, -0.6]`, `fov: 40`. Góc nâng đạt ~48°-50° chuẩn Retropoly, bàn cờ bao phủ ~80% khung nhìn, triệt tiêu méo phối cảnh và cho phép đọc rõ 100% chữ không cần zoom.
+
+---
+
+### 61. [3D/MATERIAL/LIGHTING] Bất Biến Triệt Tiêu Phản Quang Mặt Nước, Bloom Lóa Mắt & Cân Bằng Nắng Dịu Dải Tương Phản Đầm (Toy Diorama Velvet Water & Anti-Glare Invariant - IMP-40)
+- **Hiện tượng & Bẫy thực tế**:
+  1. *Bẫy phản quang gương kim loại trên mặt nước*: Đặt `roughness: 0.08` và `metalness: 0.55` cho Sông Sài Gòn và Đại Dương biến mặt nước thành gương phẳng phản chiếu trực diện nguồn sáng mặt trời, tạo ra đốm trắng chói lòa (nuclear specular hotspot) ngay trung tâm sa bàn.
+  2. *Bẫy Bloom lan tỏa phá hủy khả năng đọc chữ*: Cấu hình `bloomThreshold: 1.25` và `bloomIntensity: 0.55` khiến đốm phản quang nước vượt ngưỡng kích hoạt, bốc hơi thành quầng sáng trắng xóa đè lấn lên các ô cờ lân cận (Long Thành, Lệ Phí Đất...).
+  3. *Cháy sáng highlight do quang thông quá tải & nền thẻ quá trắng*: Nắng 1.08 kết hợp 2 đèn phụ 0.30, ambient 0.24, IBL và phơi sáng `exposure: 1.05` chiếu lên nền giấy `#F8F5EE` (97% trắng) làm màu sắc bị bợt nhạt, mất chiều sâu khối và gây mỏi mắt người chơi.
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **Toy Diorama Velvet Water Invariant**: Toàn bộ bề mặt sông hồ và biển BẮT BUỘC thiết lập `roughness >= 0.70` (lý tưởng: 0.75 - 0.80) và `metalness <= 0.02`. Biến nước thành chất liệu nhung ngọc bích no màu, trầm tĩnh, triệt tiêu 100% đốm chói lóa chuẩn Retropoly và Monopoly Plus.
+  2. **Bloom Restraint Invariant**: BẮT BUỘC duy trì `bloomThreshold >= 2.0` (lý tưởng: 2.5) và `bloomIntensity <= 0.30` (lý tưởng: 0.20). Bloom chỉ được phép kích hoạt trên các nguồn sáng phát quang ban đêm (đèn hải đăng, laser tháp Landmark, pháo hoa ăn mừng), tuyệt đối không làm lóa mặt bàn cờ ban ngày.
+  3. **Gentle Daylight & Highlight Protection**: Ánh nắng ban ngày khóa ở `sunIntensity = 0.92`, `fill/rim = 0.12`, `ambient = 0.18`, `hemi = 0.14`, và `toneMappingExposure = 0.94`. Giữ dải tương phản sâu, khối bóng đổ đanh chắc và bảo vệ highlight không bị bão hòa trắng.
+  4. **Warm Parchment Paper Invariant**: Nền thẻ cờ BẮT BUỘC sử dụng màu giấy ngà cổ ấm `#F3EEDF` (thay vì `#F8F5EE`), tạo tương phản êm dịu, tôn vinh chữ đanh nét và tranh di sản bản địa.
+
+---
+
+### 62. [CLIENT/TELEMETRY] Bất Biến Watchdog Giám Sát Bất Biến Luật Chơi & Triệt Tiêu Báo Động Giả Tiền Tệ / Nhảy Ô (Telemetry Watchdog Real Gameplay & Anti-False-Positive Invariant - IMP-41)
+- **Hiện tượng & Bẫy thực tế**:
+  1. *Bẫy giả định mô hình kinh tế đóng phẳng (Closed Economy Fallacy)*: Hàm `computeExpectedDelta` chỉ biết 2 nghiệp vụ (mua đất và nhận 2000 Tr qua GO không trừ thuế), mặc định mọi giao dịch khác là 0 Tr. Khi người chơi thực hiện các nghiệp vụ hợp lệ của game như thế chấp tài sản (`MORTGAGE_PROPERTY` giải ngân vốn vay +1500 Tr), hạ cấp công trình (`DOWNGRADE_PROPERTY` hoàn tiền 50%), rút thẻ Cơ hội vay thấu chi (`CC_OVERDRAFT` +3000 Tr), bị trừ thuế đất đai tích lũy khi qua GO (`calculateGoPropertyTax`), watchdog lập tức báo động giả `TREASURY_INVARIANT_VIOLATED`.
+  2. *Bẫy gán nhầm xúc xắc cũ cho bước dịch chuyển (Stale Dice Movement Fallacy)*: `detectMovement` duyệt mảng người chơi và tự động lấy xúc xắc `delta.dice` của lượt trước gán vào các sự kiện dịch chuyển đặc biệt (Bay giữa 2 sân bay, Lệnh thanh tra thuế vào tù ô 30 -> 10, Thẻ đại nhạc hội MC_MEGA_CONCERT kéo về ô 39), khiến watchdog so sánh sai và phát cảnh báo giả `INVALID_POSITION_STEP`.
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **Telemetry Teleport Recognition**: `checkIsTeleport` bắt buộc nhận diện các dịch chuyển hợp lệ: giữa các sân bay (5, 15, 22, 35), ô thanh tra thuế 30 vào tù 10, ô dịch vụ khi có thẻ bài, hoặc khi `delta.turnPhase` khác `WaitingRoll/ActionPhase`. Khi dịch chuyển, đặt `isTeleport: true` để `verifyMovementStep` không đối chiếu sai với xúc xắc.
+  2. **Comprehensive Cash Flow Mapping**: `computeExpectedDelta` bắt buộc tính toán đầy đủ: giải ngân thế chấp (+50% giá đất), hoàn tiền hạ cấp (+50% chi phí nâng cấp), vay thấu chi (+3000 Tr), và trừ thuế tài sản tích lũy `calculateGoPropertyTax` khi qua ô GO.
+  3. **Null Exemption for Unmodeled Events**: Khi phát hiện dòng tiền thay đổi tại các ô sự kiện ngoài luồng (`Chance`, `Market`, `Tax`, `TaxOrder`, `Hose`, `Audit`) hoặc trong trạng thái xử lý vỡ nợ `InsolvencyPhase`, hàm trả về `null` để `verifyAllInvariants` an toàn bỏ qua tick không định danh thay vì ép về 0 gây cảnh báo sai.
+  4. **Zero Dirty Casts & Modularity**: Nghiêm cấm ép kiểu `as any` trong hook telemetry; bắt buộc sử dụng đúng kiểu domain `PropertyRegistry`, `PropertyStateMap`, `PropertyState` và giữ hàm domain logic dưới 50 SLOC.
+
+---
+
+### 63. [3D/ANIMATION/CAMERA] Bất Biến Nhịp Nhảy Con Cờ 1.5x, Triệt Tiêu Nhảy Cóc Do Timeout & Ổn Định Camera Khi Gieo Xúc Xắc (Pawn Hop 1.5x Speed, Zero-Teleport Timeout & Dice Roll Camera Stabilization Invariant - IMP-42)
+- **Hiện tượng & Bẫy thực tế**:
+  1. *Nhịp nhảy avatar chậm gây kéo dài thời gian chờ*: Thời lượng mỗi bước nhảy cũ (0.34s/ô gồm 0.22s bay và 0.12s tiếp đất) khiến avatar di chuyển 10-12 ô mất gần 4.5 giây, tạo cảm giác ì ạch, sốt ruột cho người chơi.
+  2. *Nhảy cóc (teleport) một bước dài tới đích khi xúc xắc lớn*: Khi đổ xúc xắc đi xa (8-12 ô), con cờ chỉ nhảy 4-6 ô đầu rồi bất ngờ biến mất nhảy thẳng tới ô đích. Nguyên nhân do bộ đếm thời gian an toàn `timeoutMs = Math.max(2000, nextTask.waypoints.length * stepDuration + 500)` trong `processPawnQueue` quá ngắn (3.9s cho 10 ô). Khi WebGL máy khách chạy ở 25-30 FPS, thời gian thực tế để nhảy xong 10 ô mất ~4.5s. Hết 3.9s, timeout bảo hiểm cưỡng chế gọi `completePawnMove`, xóa `activePawnAnimation` và dịch chuyển tức thời cờ tới đích.
+  3. *Camera giật lag cắm đầu vào hồ nước khi đổ xúc xắc*: Cơ chế cũ tự động chuyển sang `dice_roll` (FOV 36 độ, cắm sâu xuống khay xúc xắc) mỗi khi bấm gieo, gây giật máy quay liên tục và mất phương hướng tổng thể của bàn cờ.
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **Pawn Hop 1.5x Speed Invariant**: Chuẩn hóa thời lượng bước nhảy của người chơi lên nhanh gấp 1.5 lần: `HOP_DURATION = 0.15` giây, `LANDING_DURATION = 0.08` giây (tổng 0.23s/ô thay vì 0.34s cũ).
+  2. **Generous Safety Timeout Invariant**: Trong `processPawnQueue`, nâng bộ đếm thời gian bảo hiểm thành `Math.max(10000, nextTask.waypoints.length * 1500 + 8000)`. Đảm bảo animation tự nhiên hoàn tất 100% từng ô qua `handleHopComplete` của `ActiveSpringPawn` mà không bao giờ bị timeout cắt ngang giữa chừng.
+  3. **Overview Dice Roll Camera Invariant**: Khi `isRolling = true`, `resolveCameraMode` giữ nguyên chế độ `'overview'` ổn định cho cả người chơi lẫn bot, triệt tiêu 100% hiệu ứng zoom giật lag khi gieo xúc xắc.
+
+---
+
+### 64. [BOT/AUCTION/SCHEDULER] Bất Biến Đa Tính Cách Đấu Giá Bot AI, Kích Hoạt Scheduler Chuyển Pha & Triệt Tiêu Cảnh Báo Phí Bảo Lãnh Kiểm Toán (Bot Auction Personalities, Turn Timeout Scheduler & Audit Bailout Invariant - IMP-43)
+- **Hiện tượng & Bẫy thực tế**:
+  1. *Bot bị đơ không tham gia đấu giá khi chuyển pha do Timeout*: Khi người chơi hết giờ trong `ActionPhase`, máy chủ chuyển sang `AuctionPhase`, nhưng `turn_timeout_scheduler.ts` chỉ kiểm tra `next = players[currentPlayerIndex]` (vẫn là người chơi vừa bị timeout). Do người chơi không phải Bot và `declinedPlayerId` bị cấm đấu giá theo luật EC-11, scheduler chỉ đặt timeout 15s mà quên không đánh thức các Bot khác trong phòng qua `onScheduleBotTurn(roomCode)`. Hậu quả: Sàn đấu giá bị treo đơ 15s, cả người chơi lẫn Bot đều không thao tác được.
+  2. *Cảnh báo giả TREASURY_INVARIANT_VIOLATED khi nộp bảo lãnh kiểm toán*: Khi người chơi (hoặc Bot) hết 3 lượt kiểm toán, FSM trừ 500 Tr phí bảo lãnh kiểm toán nộp vào Kho bạc. Tuy nhiên, `computeExpectedDelta` trong Telemetry Watchdog chỉ nhận diện các ô `EVENT_CELL_TYPES`. Nếu người chơi đang đứng ở ô tài sản (ví dụ ô 8 Hà Tĩnh), watchdog không nhận diện được khoản thu 500 Tr và phát cảnh báo vi phạm bảo toàn tiền tệ giả `-500 Tr`.
+  3. *Hành vi Bot đấu giá rập khuôn hoặc cấm cứng Bot Passive*: Logic cũ cấm tuyệt đối Bot Passive tham gia đấu giá (`personality === BotPersonality.Passive -> return PASS`), trong khi Bot Aggressive không có chiến lược ép giá tương xứng và bước nhảy giá đơn điệu.
+  4. *Giao diện đấu giá gây hoang mang cho người từ chối mua*: Khi người chơi từ chối mua và bị cấm tham gia đấu giá theo luật EC-11, giao diện hiển thị "Bạn đã rút lui..." và vô hiệu hóa nút bấm mà không giải thích nguyên nhân, khiến người chơi tưởng game bị lỗi đơ.
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **Auction Bot Wakeup Invariant**: Trong `TurnTimeoutScheduler`, bất kể khi nào phòng bước vào `AuctionPhase` (cả trong `scheduleTurnTimeout` lẫn sau timeout của `ActionPhase`), BẮT BUỘC kiểm tra sự hiện diện của Bot hợp lệ (`p.isBot && !p.bankrupt && p.id !== declinedPlayerId && !passedPlayers?.has(p.id)`). Nếu có, BẮT BUỘC gọi `onScheduleBotTurn(roomCode)` để Bot lập tức tham gia đặt giá mà không làm treo sàn 15s.
+  2. **Audit Bailout Telemetry Invariant**: `computeExpectedDelta` BẮT BUỘC nhận diện sự kiện nộp phí bảo lãnh kiểm toán 500 Tr (`computeAuditBailDelta`) khi người chơi rời khỏi trạng thái kiểm toán (`preP.inAudit && !p.inAudit` hoặc `preP.auditTurnsLeft > 0 && p.auditTurnsLeft === 0`) và số dư giảm đúng 500 Tr, triệt tiêu 100% cảnh báo giả `TREASURY_INVARIANT_VIOLATED`.
+  3. **3-Personality Tactical Auction Matrix**:
+     - `Passive` (Săn Sale / Bargain Hunter): Chỉ đặt giá khi giá hời (`nextBid <= basePrice * 0.70`) hoặc ô đất hoàn thành bộ màu độc quyền (`monopolyScore >= 2.5`). Rút lui khi giá vượt 85% giá gốc (`> basePrice * 0.85`). Giữ trọn đệm an toàn cao (`safetyBuffer * 1.0` có tính trần vòng chơi).
+     - `Balanced` (Nhà Đầu Tư Giá Trị): Đặt giá theo định giá thực tế `val.estimatedValue`, mở rộng trần giá khi có thế độc quyền 2/3, rút lui khi giá thầu vượt trần định giá. Giữ đệm an toàn vừa phải (`safetyBuffer * 0.60`).
+     - `Aggressive` (Cá Mập Đấu Giá): Sẵn sàng bid cao vượt trần định giá thông thường (lên đến `1.5x estimatedValue`), giữ đệm an toàn mỏng (`safetyBuffer * 0.25`), và nhảy bước giá lớn (+100 Tr trở lên) khi ngân sách dồi dào (> 10.000 Tr) khi đấu trực tiếp với đối thủ.
+  4. **Auction Modal Guidance Clarity**: Khi người chơi là `declinedPlayerId`, `AuctionModal` hiển thị thông điệp minh bạch: *"Bạn đã từ chối mua ô đất này (Luật game cấm tham gia đấu giá). Đang chờ các đối thủ khác đặt giá..."* với các nút tương tác bị khóa hợp lệ, loại bỏ hoàn toàn sự hoang mang của người dùng.
+
+---
+
+### 65. [NET/FSM] Bất Biến Định Danh Xúc Xắc diceRollerId & Chuỗi Đơn Điệu diceSeq Triệt Tiêu Lỗi Nuốt Log Trong Auto-Roll (Monotonic Dice Sequence & Auto-Roll Attribution Invariant - IMP-44)
+- **Hiện tượng & Bẫy thực tế**:
+  1. *Tráo đổi danh tính người đổ xúc xắc (Phantom Dice Attribution)*: Khi Người chơi (P1) kết thúc lượt (đã đổ 6+5), `room.lastDice` vẫn lưu giá trị `[6, 5]` trên server. Khi chuyển lượt sang Bot (`WaitingRoll`), máy chủ broadcast Delta có `currentTurnPlayerId = bot_2` và `dice = [6, 5]`. Activity Tracker trên client đọc `currentTurnPlayerId` và gán nhầm: `Bot AI 2 đã gieo xúc xắc được 6 + 5 = 11 điểm`.
+  2. *Bẫy nuốt chửng log xúc xắc khi chơi tự động (Auto-Roll Log Swallowing)*: Khi người chơi hoặc bot chơi tự động (Bot turn hoặc người chơi AFK timeout), server thực thi trọn vẹn cả lượt (Gieo xúc xắc -> Di chuyển -> Mua/Sự kiện -> Kết thúc lượt) trước khi broadcast Delta. Delta phát ra lúc này đã chuyển sang lượt kế tiếp với `turnPhase = WaitingRoll`. Nếu client chặn thô bạo bằng `if (delta.turnPhase === 'WaitingRoll') return null;`, toàn bộ sự kiện gieo xúc xắc của lượt tự động sẽ bị nuốt chửng 100%, chỉ còn lại log di chuyển và mua đất.
+  3. *Lệch pha trình tự nhân quả trong nhật ký ván đấu (Activity Log Out-of-Order)*: Gán xúc xắc theo `currentTurnPlayerId` khiến client phát sinh log "P1 đổ xúc xắc" trước khi phát sinh log "Bot AI di chuyển", gây ra ảo giác người chơi chưa bấm gì mà đã thấy mình đổ xúc xắc.
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **Immutable Dice Roller Attribution (`diceRollerId`)**: `Room` và `DeltaPayload` BẮT BUỘC lưu trữ và truyền tải tường minh `lastDiceRollerId?: string;` và `diceRollerId?: string;`. Khi tung xúc xắc (`executeTurnRoll`), server gán `room.lastDiceRollerId = current.id`. Client `detectDiceActivity` BẮT BUỘC ưu tiên sử dụng `delta.diceRollerId ?? delta.currentTurnPlayerId`, triệt tiêu 100% việc gán nhầm xúc xắc cho người chơi của lượt kế tiếp.
+  2. **Monotonic Dice Sequence Invariant (`diceSeq`)**: Máy chủ duy trì bộ đếm đơn điệu tăng dần `room.diceSeq = (room.diceSeq ?? 0) + 1;` mỗi khi `executeTurnRoll` thực thi. Client lưu trữ `activityStore.lastDiceSeq`. Một sự kiện gieo xúc xắc chỉ được coi là mới khi `delta.diceSeq > lastDiceSeq`. Giải pháp này triệt tiêu 100% hiện tượng ghi trùng lặp trên nhiều delta, đồng thời cho phép ghi nhận đầy đủ sự kiện xúc xắc trong chế độ tự động kể cả khi delta phát ra ở pha `WaitingRoll`.
+  3. **Preserve Snapshot Compatibility Invariant**: Tuyệt đối KHÔNG xóa `room.lastDice = undefined` trong `executeTurnEnd` vì sẽ phá vỡ Golden Engine Snapshot Test (`tests/oracle/fsm_golden_engine.test.ts`). Kết hợp `lastDiceRollerId` và `diceSeq` bảo đảm vừa giữ 100% tính tương thích hồi quy byte-for-byte, vừa triệt tiêu vĩnh viễn phantom log và log bị nuốt.
+  4. **Micro-Stepped Bot Execution Option**: `RoomManager` cung cấp `stepBotTurn(roomCode)` độc lập, cho phép phân tách từng vi bước (Roll -> Move -> Buy/Skip -> EndTurn) trong các kịch bản cần quan sát tuần tự hoạt cảnh mượt mà.
+
+---
+
+### 66. [FSM/NET/BOT] Bất Biến Phân Định Rạch Ròi ExtraTurns vs ConsecutiveDoubles & Triệt Tiêu Đệ Quy Đấu Giá Bot (Extra Turns Invariant & Auction Scheduler Decoupling - IMP-45)
+- **Hiện tượng & Bẫy thực tế**:
+  1. *Cấp kép 2 cơ chế đi thêm từ thẻ Cơ Hội CC_PLATE_AUCTION*: Mã nguồn cũ vừa gán `player.extraTurns += 1` vừa gán `player.consecutiveDoubles += 1`. Người chơi sau khi dẫm ô Cơ hội 07 được mở khóa gieo xúc xắc ngay trong `PropertyManagement` (do cờ đôi giả), di chuyển đến Cái Mép và mua đất. Sau khi bấm kết thúc lượt, FSM kiểm tra `extraTurns > 0`, tiếp tục giữ lượt và đưa về `WaitingRoll`, khiến người chơi được gieo xúc xắc lần thứ 3 (đến Hải Phòng) thay vì chỉ được +1 lượt đi thêm theo luật SSOT.
+  2. *Vòng lặp đệ quy tương hỗ vô hạn làm sập sàn đấu giá (Mutual Recursion Auction Freeze)*: Trong `wss_server.ts`, `TurnTimeoutScheduler` được khởi tạo với `onScheduleBotTurn: (rc) => this.scheduleBotTurn(rc)`. Nhưng hàm `this.scheduleBotTurn` lại đồng thời gọi `this.turnTimeoutScheduler.scheduleTurnTimeout(roomCode)`. Khi người chơi hết giờ tại `ActionPhase` và tài sản chuyển sang `AuctionPhase`, `scheduleTurnTimeout` kiểm tra thấy có Bot hợp lệ liền gọi `onScheduleBotTurn`, kích hoạt vòng gọi chéo đồng bộ vô hạn: `scheduleTurnTimeout` -> `scheduleBotTurn` -> `scheduleTurnTimeout` -> `scheduleBotTurn`... Node.js ném lỗi `RangeError: Maximum call stack size exceeded`, luồng điều phối bị sập, không có bộ đếm timeout nào được đăng ký và sàn đấu giá bị đóng băng vĩnh viễn tại Tick 11.
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **Strict ExtraTurns Separation Invariant**: Cờ `player.consecutiveDoubles` CHỈ được phép điều khiển bởi xúc xắc vật lý thật sự khi `die1 === die2` trong `processRollDoubles` (`src/server/audit_manager.ts`). Mọi thẻ bài hoặc hiệu ứng trao thêm lượt BẮT BUỘC chỉ được phép thao tác trên biến `player.extraTurns`. CẤM TUYỆT ĐỐI gán `consecutiveDoubles` trong các hàm xử lý thẻ sự kiện / thẻ cơ hội.
+  2. **Decoupled Bot Scheduler Waker Invariant**: `TurnTimeoutSchedulerOptions.onScheduleBotTurn` BẮT BUỘC trỏ trực tiếp đến bộ lập lịch Bot: `onScheduleBotTurn: (rc) => this.botScheduler.scheduleBotTurn(rc)`. Tuyệt đối KHÔNG trỏ tới hàm trung gian gọi ngược lại `scheduleTurnTimeout`. Việc phân định rõ ràng giữa "kích hoạt lượt Bot" và "đặt lịch timeout cho Human" bảo đảm 0% đệ quy vô hạn và sàn đấu giá chuyển pha trơn tru 100%.
+
+---
+
+### 67. [UI/NET/AUCTION] Bất Biến Đồng Bộ Thẻ Sự Kiện, Triệt Tiêu Popup Trùng Lặp, Đồng Bộ Deadline 00:00 & Định Danh Tham Gia Đấu Giá (Event Card Metadata Sync, Landing Timestamp Guard, Timer 00:00 Synchrony & Local Player Auction Identity - IMP-46)
+- **Hiện tượng & Bẫy thực tế**:
+  1. *Thẻ Cơ hội / Vận khí hiển thị chung chung và bị popup lại sau lượt Bot*: Khi người chơi dẫm ô Cơ hội, popup hiển thị văn bản tĩnh "Cơ hội phát triển kinh doanh và mở rộng mạng lưới địa ốc" thay vì mô tả chính xác nội dung thẻ bài đã bốc và số tiền trừ (-400 Tr.). Sau khi bấm "Đã hiểu và tiếp tục", Bot chơi lượt của mình; khi lượt quay lại người chơi, popup Cơ hội lại bất ngờ bật lên lần thứ hai dù người chơi chưa hề gieo xúc xắc.
+  2. *Lỗi rò rỉ tham chiếu `handleCellLanding`*: Effect kiểm tra `lastLandedPawn` phụ thuộc `handleCellLanding`, mà `handleCellLanding` lại phụ thuộc `currentTurnPlayerId`. Khi Bot hết lượt và quyền chơi chuyển về P1, `currentTurnPlayerId` thay đổi khiến effect chạy lại; do `lastLandedPawn` vẫn còn lưu tọa độ ô cũ của P1, modal bị kích hoạt mở lại ngoài ý muốn.
+  3. *Đồng hồ đếm ngược treo tại 00:00 vài giây mới chuyển lượt Bot*: Khi hết 60s, client đếm về 00:00 nhưng không tự gửi ý định kết thúc lượt mà thụ động chờ máy chủ. Phía máy chủ lại broadcast Delta trước khi lên lịch `scheduleBotTurn`/`scheduleTurnTimeout`, khiến gói tin ban đầu thiếu thời hạn deadline chuẩn xác, tạo ra độ trễ đơ 2-4 giây tại 00:00.
+  4. *Người chơi bị tước quyền đấu giá và giao diện 3D đấu giá gây rối mắt*: Khi Bot từ chối mua ô đất và mở đấu giá, `ModalHost` xác định `myId = currentTurnPlayerId`. Tại thời điểm này `currentTurnPlayerId` là Bot, dẫn tới `declinedPlayerId === myId` đánh giá thành `true`. Người chơi bị gán nhầm ví tiền của Bot và bị khóa quyền bid với thông báo "Bạn đã từ chối mua ô đất này...". Đồng thời, sân khấu `Auction3DStage` làm tối sầm bàn cờ 85% và treo lá bài 3D khổng lồ lơ lửng che khuất sa bàn.
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **Event Card Metadata Synchronization Invariant**: Máy chủ khi bốc thẻ (`drawChanceCard` / `drawMarketCard`) gán thông tin chi tiết vào `room.lastEventCard` và đồng bộ qua `DeltaPayload.lastEventCard` (chứa `title`, `description`, `effectDelta`). Client hiển thị chính xác lý do biến động tài chính (+/- số tiền cụ thể) thay vì placeholder chung chung.
+  2. **Landing Timestamp Guard Invariant**: Client sử dụng `lastHandledLandingTimestampRef` để lưu `lastLandedPawn.timestamp`. Dù `currentTurnPlayerId` hay các hook dependency khác thay đổi danh tính, effect tuyệt đối KHÔNG kích hoạt mở lại modal nếu timestamp của con cờ chạm đất không đổi.
+  3. **Turn Timeout Synchrony Invariant**:
+     - Máy chủ trong `syncRoomStateAfterIntent` BẮT BUỘC gọi `scheduleBotTurn(roomCode)` (cập nhật deadline mới) TRƯỚC KHI gọi `broadcastRoomDelta(roomCode)`.
+     - Client khi `turnTimeRemaining === 0` và đang trong lượt của `localPlayerId` chủ động gửi `INTENT_END_TURN` (nếu đã đổ xúc xắc) hoặc `INTENT_ROLL` (nếu chưa đổ), triệt tiêu hoàn toàn hiện tượng treo đơ vài giây tại 00:00.
+  4. **Local Player Identity & Clean Centered 2D Auction Invariant**:
+     - `ModalHost` xác định `myId` từ `props.localPlayerId` (hoặc `useLobbyStore.getState().myPlayerId`), tuyệt đối KHÔNG fallback về `currentTurnPlayerId`. Người chơi giữ đúng số dư ví tiền của mình và được tự do tham gia nâng giá (+50, +100, +200 Tr.) khi đối thủ từ chối mua.
+     - Loại bỏ hoàn toàn sân khấu 3D treo lơ lửng và hiệu ứng tối mờ bàn cờ của `Auction3DStage`. Thay thế bằng hộp thoại 2D đặt ngay trung tâm màn hình, thông thoáng, rõ ràng, đạt chuẩn tương tác xúc giác Impeccable và 0 vi phạm UI anti-pattern.
+
+---
+
+### 68. [UI/UX] Bất Biến Phòng Ngừa Đóng Nhầm Hộp Thoại Quyết Định & Cơ Chế Khôi Phục Mua Đất Đa Tầng (Accidental Backdrop Dismissal Prevention & Multi-Layer Property Purchase Recovery Invariant - IMP-47)
+- **Hiện tượng & Bẫy thực tế**:
+  1. *Đóng nhầm hộp thoại mua đất do click ra ngoài màn hình (Accidental Backdrop Dismissal)*: Khi người chơi vừa di chuyển đến một ô đất trống, hộp thoại Title Deed mở lên với nút "Mua Ngay" và "Bỏ Qua". Tuy nhiên, `ModalBackdrop` bắt sự kiện click bên ngoài khung (`handleBackdropClick`) và tự ý gọi `onClose()`. Nếu người chơi click nhầm ra màn hình 3D hoặc vùng trống, hộp thoại mua đất biến mất hoàn toàn (`activeModal = null`).
+  2. *Không có cơ chế khôi phục quyền mua (Irreversible Purchase State Loss)*: Khi hộp thoại bị đóng nhầm, trạng thái phòng trên máy chủ vẫn đang ở `ActionPhase` và người chơi chưa gửi lệnh `INTENT_BUY_PROPERTY` hay `INTENT_PASS_BUY`. Trước đây, các ô 3D trên `GameBoard` không có sự kiện `onClick`, và nút "Quản lý Bất động sản" trong `ActionDock` (`resolveManagePropertyTarget`) tự động chuyển mục tiêu về ô đất đã sở hữu đầu tiên (`ownedProperties[0]`). Người chơi hoàn toàn mất khả năng mở lại hộp thoại mua đất cho ô cờ mình đang đứng và bị ép phải bấm "Kết thúc lượt" hoặc chờ hết giờ, dẫn tới việc ô đất bị đẩy sang sàn đấu giá ngoài ý muốn.
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **Critical Decision Modal Dismissal Lock Invariant**: Bổ sung cờ `dismissible?: boolean = true` vào `ModalBackdropProps`. Khi hộp thoại là quyết định mang tính sống còn (`isCriticalDecision = (activeModal === 'deed' && modalPayload?.canBuy) || activeModal === 'auction' || activeModal === 'insolvency'`), giá trị `dismissible` BẮT BUỘC đặt thành `false`. Người chơi click ra ngoài backdrop sẽ KHÔNG bị mất modal, triệt tiêu 100% rủi ro đóng nhầm.
+  2. **3D Tile Interactive Inspection Invariant**: Mọi ô cờ trên `GameBoard` (`LayeredDioramaTile`) BẮT BUỘC nhận diện sự kiện click (`onClick={() => handleTileClick(cell.index)}`). Khi click vào ô cờ đang đứng trong lượt chơi hợp lệ, modal Title Deed lập tức mở lại với cờ `canBuy: true`.
+  3. **ActionDock Purchase Recovery CTA Invariant**: Trong `ActionDock`, nếu người chơi đang đứng trên ô đất có thể mua (`isStandingOnBuyable = isMyTurn && hasRolledThisTurn && isPropertyCell && !isOwnedByAnyone`), thanh điều khiển BẮT BUỘC hiển thị trực tiếp nút bấm nổi bật `🏷️ Mua Đất (#{currentPos})` và `resolveManagePropertyTarget` ưu tiên mở ô đất hiện tại với `canBuy: true`, bảo đảm trải nghiệm phục hồi 100% trong mọi tình huống.

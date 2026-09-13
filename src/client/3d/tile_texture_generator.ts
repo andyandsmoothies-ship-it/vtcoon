@@ -2,9 +2,24 @@
 import { CanvasTexture, SRGBColorSpace, LinearFilter, LinearMipmapLinearFilter } from 'three';
 import { TILE_METADATA_MAP, formatPriceLabel, type TileMetadata } from './tile_texture_data';
 import { drawIcon } from './tile_icons';
+import { ALL_28_STAND_TILES } from '../assets/tile_assets';
 
 const tileTextureCache = new Map<number, CanvasTexture>();
 const standeeTextureCache = new Map<number, CanvasTexture>();
+const tileImageCache = new Map<number, HTMLImageElement>();
+
+export function hasTileArt(index: number): boolean {
+  return ALL_28_STAND_TILES.includes(index);
+}
+
+export function getBannerTextColor(bannerColor: string): string {
+  const hex = bannerColor.replace('#', '');
+  const r = parseInt(hex.substring(0, 2), 16) || 0;
+  const g = parseInt(hex.substring(2, 4), 16) || 0;
+  const b = parseInt(hex.substring(4, 6), 16) || 0;
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.6 ? '#090D1A' : '#FFFFFF';
+}
 
 /**
  * Tạo Canvas Texture cho ô cờ thường với độ phân giải cao HiDPI 4x (1024 x 1360)
@@ -22,33 +37,78 @@ function createStandardTileTexture(index: number, meta: TileMetadata): CanvasTex
   // Tỷ lệ tọa độ 4x giữ nguyên logic vẽ 256x340
   ctx.scale(4, 4);
 
-  // 1. Nền giấy da ngà thượng hạng (Aged Parchment / Ivory Cream)
-  ctx.fillStyle = '#E8DFCE';
+  // 1. Nền giấy da ngà thượng hạng (Aged Parchment / Warm Ivory dịu mắt, chống lóa)
+  ctx.fillStyle = '#F3EEDF';
   ctx.fillRect(0, 0, 256, 340);
 
-  // 2. Dải màu nhận diện vùng (Top Banner - hướng tâm bàn cờ)
-  ctx.fillStyle = meta.bannerColor;
-  ctx.fillRect(0, 0, 256, 70);
 
-  // Nhãn loại hình bất động sản / vùng miền
-  ctx.fillStyle = '#FFFFFF';
-  ctx.font = '900 17px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  // 2. Dải màu nhận diện vùng (Top Banner chứa tiêu đề chính h = 56)
+  ctx.fillStyle = meta.bannerColor;
+  ctx.fillRect(0, 0, 256, 56);
+
+  // 3. Tên tỉnh thành / địa danh chính nằm lọt vào trong banner màu tại y = 28
+  // Double Draw viền than đen đanh nét chống lóa mắt
+  ctx.strokeStyle = '#090D1A';
+  ctx.lineWidth = 2.5;
+  ctx.font = '900 28px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(meta.category, 128, 35);
+  ctx.strokeText(meta.title, 128, 28);
+  ctx.fillStyle = getBannerTextColor(meta.bannerColor);
+  ctx.fillText(meta.title, 128, 28);
 
-  // 3. Tên tỉnh thành / địa danh chính (Tương phản cao tuyệt đối)
-  ctx.fillStyle = '#090D1A';
-  ctx.font = '900 28px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-  ctx.fillText(meta.title, 128, 108);
+  // Phụ đề (Địa danh chi tiết / Công trình) nằm ngay dưới banner tại y = 74
+  ctx.fillStyle = '#020617';
+  ctx.font = '900 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.fillText(meta.subtitle, 128, 74);
 
-  // Phụ đề (Địa danh chi tiết / Công trình)
-  ctx.fillStyle = '#1E293B';
-  ctx.font = 'bold 17px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-  ctx.fillText(meta.subtitle, 128, 138);
+  const texture = new CanvasTexture(canvas);
+  texture.colorSpace = SRGBColorSpace;
+  texture.anisotropy = 16;
+  texture.generateMipmaps = true;
+  texture.minFilter = LinearMipmapLinearFilter;
+  texture.magFilter = LinearFilter;
 
-  // 4. Biểu tượng văn hóa bản địa ở trung tâm ô cờ
-  drawIcon(ctx, meta.icon, 128, 205, meta.bannerColor, 1.25);
+  // 4. Biểu tượng di sản văn hóa / Tranh độc bản bản địa mở rộng (Tầng giữa: y = 94..266, h = 172)
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(10, 94, 236, 172);
+  ctx.clip();
+
+  if (typeof window !== 'undefined' && typeof Image !== 'undefined' && hasTileArt(index)) {
+    const cachedImg = tileImageCache.get(index);
+    const targetW = 216;
+    const targetH = 166;
+    const dx = (256 - targetW) / 2; // dx = 20
+    const dy = 97;
+
+    if (!cachedImg) {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.src = `/assets/tiles/tile_${String(index).padStart(2, '0')}.webp`;
+      tileImageCache.set(index, img);
+      img.onload = () => {
+        ctx.save();
+        ctx.fillStyle = '#F3EEDF';
+        ctx.fillRect(10, 94, 236, 172);
+
+        ctx.beginPath();
+        ctx.rect(10, 94, 236, 172);
+        ctx.clip();
+        ctx.drawImage(img, dx, dy, targetW, targetH);
+        ctx.restore();
+        texture.needsUpdate = true;
+      };
+      drawIcon(ctx, meta.icon, 128, 180, meta.bannerColor, 1.5);
+    } else if (cachedImg.complete && cachedImg.naturalWidth > 0) {
+      ctx.drawImage(cachedImg, dx, dy, targetW, targetH);
+    } else {
+      drawIcon(ctx, meta.icon, 128, 180, meta.bannerColor, 1.5);
+    }
+  } else {
+    drawIcon(ctx, meta.icon, 128, 180, meta.bannerColor, 1.5);
+  }
+  ctx.restore();
 
   // 5. Khay giá niêm yết ở cạnh ngoài
   const priceText = meta.priceLabel ?? formatPriceLabel(meta.price);
@@ -59,21 +119,15 @@ function createStandardTileTexture(index: number, meta: TileMetadata): CanvasTex
     ctx.fill();
 
     ctx.fillStyle = '#FBBF24';
-    ctx.font = '900 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.font = '900 26px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
     ctx.fillText(priceText, 128, 300);
   }
 
   // Viền tinh tế bao quanh
-  ctx.strokeStyle = '#94A3B8';
-  ctx.lineWidth = 4;
+  ctx.strokeStyle = '#0F172A';
+  ctx.lineWidth = 5;
   ctx.strokeRect(2, 2, 252, 336);
 
-  const texture = new CanvasTexture(canvas);
-  texture.colorSpace = SRGBColorSpace;
-  texture.anisotropy = 16;
-  texture.generateMipmaps = true;
-  texture.minFilter = LinearMipmapLinearFilter;
-  texture.magFilter = LinearFilter;
   texture.needsUpdate = true;
   return texture;
 }
@@ -285,4 +339,12 @@ export function getStandeeTexture(index: number): CanvasTexture | null {
   texture.needsUpdate = true;
   standeeTextureCache.set(index, texture);
   return texture;
+}
+
+/**
+ * Xóa cache texture cho môi trường test và hot-reload
+ */
+export function clearTileTextureCache(): void {
+  tileTextureCache.clear();
+  standeeTextureCache.clear();
 }

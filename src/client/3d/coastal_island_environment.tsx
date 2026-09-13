@@ -1,7 +1,7 @@
 // [UI-S01/MSS][UI-S04/MSS][IMP-13][IMP-30] CoastalIslandEnvironment — Vietnamese Coastal Island Metropolis
 // Endless Living Ocean, 15-degree Sloped Sand Shoreline, Tropical Palms & Horizon Mountain Range
 import React, { useRef } from 'react';
-import type { Mesh, PlaneGeometry } from 'three';
+import type { Mesh, PlaneGeometry, WebGLProgramParametersWithUniforms } from 'three';
 import { CoastalPatrolBoat } from './coastal_patrol_boat';
 import { CoastalSeagulls } from './coastal_seagulls';
 import { LayeredTropicalFoliage } from './layered_tropical_foliage';
@@ -55,37 +55,20 @@ export function CoastalIslandEnvironment(): React.ReactElement {
   const waveRef = useRef<Mesh>(null);
   const shallowRef = useRef<Mesh>(null);
   const oceanGeomRef = useRef<PlaneGeometry>(null);
+  const waveShaderRef = useRef<WebGLProgramParametersWithUniforms | null>(null);
 
   useSafeFrame((state) => {
     const t = state.clock.getElapsedTime();
-
-    // 1. Biến thiên độ cao vertex lưới sóng Gerstner / điều hòa thời gian thực
-    if (oceanGeomRef.current) {
-      const pos = oceanGeomRef.current.attributes.position;
-      if (pos && pos.array instanceof Float32Array) {
-        const arr = pos.array;
-        const len = arr.length;
-        for (let k = 0; k < len; k += 3) {
-          const u = arr[k]!;
-          const v = arr[k + 1]!;
-          const w1 = Math.sin(u * 0.055 + t * 1.4) * 0.034;
-          const w2 = Math.cos(v * 0.065 + t * 1.1) * 0.026;
-          const w3 = Math.sin((u + v) * 0.038 + t * 1.8) * 0.015;
-          arr[k + 2] = w1 + w2 + w3;
-        }
-        pos.needsUpdate = true;
-        // [PERF] computeVertexNormals() removed to eliminate 5-7ms CPU bottleneck
-      }
+    // 1. GPU Gerstner waveShader uniform update (computeVertexNormals & Float32Array removed)
+    if (waveShaderRef.current?.uniforms.uTime) {
+      waveShaderRef.current.uniforms.uTime.value = t;
     }
-
-    // 2. Dải bọt sóng ven bờ co giãn nhịp nhàng theo chu kỳ thủy triều 3.5s
+    // 2. Dải bọt sóng ven bờ co giãn chu kỳ thủy triều 3.5s
     if (waveRef.current) {
-      const tideCycle = Math.sin(t * (Math.PI * 2 / 3.5));
-      const s = 1 + tideCycle * 0.042;
+      const s = 1 + Math.sin(t * (Math.PI * 2 / 3.5)) * 0.042;
       waveRef.current.scale.set(s, s, 1);
     }
-
-    // 3. Tầng nước nông ngọc bích nhấp nhô theo nhịp thở đại dương
+    // 3. Tầng nước nông ngọc bích nhấp nhô
     if (shallowRef.current) {
       shallowRef.current.position.y = -0.298 + Math.sin(t * (Math.PI * 2 / 3.5)) * 0.012;
     }
@@ -99,21 +82,36 @@ export function CoastalIslandEnvironment(): React.ReactElement {
         <meshStandardMaterial color="#0C4A6E" roughness={0.15} metalness={0.4} />
       </mesh>
 
-      {/* Lưới sóng Gerstner vô cực PlaneGeometry tối ưu từ args={[240, 240, 96, 96]} sang (240, 240, 24, 24) */}
+      {/* Lưới sóng Gerstner GPU Shader vô cực PlaneGeometry args={[240, 240, 96, 96]} */}
       <mesh receiveShadow position={[0, -0.30, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry ref={oceanGeomRef} args={[240, 240, 24, 24]} />
-        <meshStandardMaterial color="#0284C7" roughness={0.08} metalness={0.55} transparent opacity={0.92} />
+        <meshStandardMaterial
+          color="#0284C7"
+          roughness={0.75}
+          metalness={0.02}
+          transparent
+          opacity={0.92}
+          onBeforeCompile={(shader) => {
+            shader.uniforms.uTime = { value: 0 };
+            shader.vertexShader = `uniform float uTime;\n${shader.vertexShader}`.replace(
+              '#include <begin_vertex>',
+              `#include <begin_vertex>\n// Gerstner waveShader GPU calculation\nfloat w1 = sin(transformed.x * 0.055 + uTime * 1.4) * 0.034;\nfloat w2 = cos(transformed.y * 0.065 + uTime * 1.1) * 0.026;\nfloat w3 = sin((transformed.x + transformed.y) * 0.038 + uTime * 1.8) * 0.015;\ntransformed.z += w1 + w2 + w3;`
+            );
+            waveShaderRef.current = shader;
+          }}
+        />
       </mesh>
 
       <mesh receiveShadow position={[0, -0.31, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[180, 180, 32, 32]} />
-        <meshStandardMaterial color="#0369A1" roughness={0.1} metalness={0.5} transparent opacity={0.88} />
+        <meshStandardMaterial color="#0369A1" roughness={0.75} metalness={0.02} transparent opacity={0.88} />
       </mesh>
 
       <mesh ref={shallowRef} receiveShadow position={[0, -0.298, 0]}>
         <cylinderGeometry args={[16.3, 19.5, 0.08, 48]} />
-        <meshStandardMaterial color="#06B6D4" roughness={0.08} metalness={0.45} transparent opacity={0.70} />
+        <meshStandardMaterial color="#06B6D4" roughness={0.70} metalness={0.02} transparent opacity={0.70} />
       </mesh>
+
 
       {/* Dải bọt sóng trắng ven bờ cát dập dềnh (Shoreline Dynamic Foam - chu kỳ 3.5s) */}
       <mesh ref={waveRef} position={[0, -0.292, 0]} rotation={[-Math.PI / 2, 0, 0]}>

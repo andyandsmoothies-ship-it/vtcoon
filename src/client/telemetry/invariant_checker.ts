@@ -131,7 +131,7 @@ export function verifyAllInvariants(params: {
   readonly postBalances?: Record<string, number>;
   readonly preTreasury?: number;
   readonly postTreasury?: number;
-  readonly expectedMoneyDelta?: number;
+  readonly expectedMoneyDelta?: number | null;
   readonly movement?: { readonly fromPosition: number; readonly toPosition: number; readonly dice?: readonly [number, number]; readonly isTeleport?: boolean };
   readonly players?: ReadonlyArray<{ readonly id: string; readonly balance: number; readonly bankrupt?: boolean; readonly overdraftRoundsLeft?: number }>;
   readonly isInInsolvency?: boolean;
@@ -141,15 +141,17 @@ export function verifyAllInvariants(params: {
   const violations: InvariantViolation[] = [];
 
   if (params.preBalances && params.postBalances && params.preTreasury !== undefined && params.postTreasury !== undefined) {
-    const v = verifyTreasuryConservation({
-      preBalances: params.preBalances,
-      postBalances: params.postBalances,
-      preTreasury: params.preTreasury,
-      postTreasury: params.postTreasury,
-      tick: params.tick,
-      expectedDelta: params.expectedMoneyDelta,
-    });
-    if (v) violations.push(v);
+    if (params.expectedMoneyDelta !== null) {
+      const v = verifyTreasuryConservation({
+        preBalances: params.preBalances,
+        postBalances: params.postBalances,
+        preTreasury: params.preTreasury,
+        postTreasury: params.postTreasury,
+        tick: params.tick,
+        expectedDelta: params.expectedMoneyDelta ?? undefined,
+      });
+      if (v) violations.push(v);
+    }
   }
 
   if (params.movement) {

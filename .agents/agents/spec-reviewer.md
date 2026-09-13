@@ -31,6 +31,10 @@ tools: [view_file, list_dir, find_by_name, grep_search]
      - BẮT BUỘC inspect test payload and assertions (`expect(...)`): Assertions MUST verify the semantic intent of the tagged Use Case.
      - *Smuggled Test Fraud*: Tagging a test as `[TC-xx.x: Feature A]` but asserting trivial logic from `Feature B` because Feature A is not implemented yet.
      - Any test swapping real domain logic for unrelated trivial assertions to fake green status ➔ **MANDATORY REJECT (Smuggled Contract Fraud)**.
+   - **Test Architecture Gate (Anti-Monolithic & Anti-Checklist Verification)**:
+     - MANDATORY REJECT if test cases contain monolithic anti-patterns: > 4 `expect()` per test, or loops (`for`/`forEach`) inside `it()` body.
+     - MANDATORY REJECT if test cases merely assert static checklist conditions (`fs.existsSync`, `typeof fn === 'function'`, file LOC limits).
+     - MANDATORY REJECT if test suite has fewer than 15 atomic tests for the feature slice (Test Density Deficit).
    - Slice Scope Confinement: If the ticket is Slice 1 (MSS), but the diff introduces alternative flow logic or UI, mark as **REJECTED (Slice Scope Breach)**.
    - Failure Postcondition Guarantee: Alternative flows ending in `Use case ends` must have assertions proving clean rollback.
 6. **Report Template**:

@@ -4,6 +4,7 @@ import { getDeedDisplayInfo } from './modal_helpers';
 import { formatCurrency } from '../ui_helpers';
 import { COLOR_GROUP_HEX } from '../../../domain/theme';
 import { CellType } from '../../../domain/board_config';
+import { getTileAssetUrl } from '../../assets/tile_assets';
 
 export interface TitleDeedModalProps {
   readonly cellIndex: number;
@@ -62,6 +63,21 @@ export function TitleDeedModal({
 }: TitleDeedModalProps): React.ReactElement {
   const deed = getDeedDisplayInfo(cellIndex);
 
+  const [imageError, setImageError] = React.useState(false);
+
+  React.useEffect(() => {
+    setImageError(false);
+  }, [cellIndex]);
+
+  const tileAssetUrl = React.useMemo(() => {
+    if (!deed) return null;
+    try {
+      return getTileAssetUrl(cellIndex);
+    } catch {
+      return null;
+    }
+  }, [cellIndex, deed]);
+
   if (!deed) {
     return (
       <div className="bg-slate-900 border-2 border-amber-400/50 p-6 rounded-2xl text-center max-w-sm text-slate-200 shadow-2xl">
@@ -82,6 +98,8 @@ export function TitleDeedModal({
   const isRailroad = deed.cellType === CellType.Railroad;
   const isUtility = deed.cellType === CellType.Utility;
   const tiers = isRailroad ? RAILROAD_TIERS : PROPERTY_TIERS;
+
+  const showImage = Boolean(tileAssetUrl) && !imageError;
 
   const showUpgrade = Boolean(isOwner && !isMortgaged && hasUpgrades && (currentLevel ?? 0) < 3 && onUpgrade);
   const showDowngrade = Boolean(isOwner && !isMortgaged && hasUpgrades && (currentLevel ?? 0) > 0 && onDowngrade);
@@ -154,6 +172,35 @@ export function TitleDeedModal({
 
       {/* Thông tin giá niêm yết & thế chấp */}
       <div className="relative z-10 flex-1 min-h-0 overflow-y-auto pr-1 p-4 space-y-3 text-xs md:text-sm">
+        {/* Diorama Art Showcase Banner (IMP-33) */}
+        <div
+          className="relative w-full h-32 sm:h-36 rounded-xl bg-slate-950/60 border border-amber-400/25 overflow-hidden flex items-center justify-center p-2 shadow-inner"
+          data-testid="diorama-art-banner"
+        >
+          {showImage && tileAssetUrl ? (
+            <img
+              src={tileAssetUrl}
+              alt={deed.name}
+              onError={() => setImageError(true)}
+              className="max-h-full max-w-full object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.6)]"
+              loading="lazy"
+            />
+          ) : (
+            <div
+              className="w-full h-full rounded-lg flex flex-col items-center justify-center gap-1.5 opacity-90 border border-white/10"
+              style={{ backgroundColor: `${ribbonColor}33` }}
+              data-testid="diorama-fallback"
+            >
+              <span className="text-3xl sm:text-4xl drop-shadow-md" aria-hidden="true">
+                {isRailroad ? '🚊' : isUtility ? '⚡' : '🏛️'}
+              </span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-300/80">
+                {isRailroad ? 'Hạ Tầng Giao Thông' : isUtility ? 'Tiện Ích Quốc Gia' : 'Di Sản & Bất Động Sản'}
+              </span>
+            </div>
+          )}
+        </div>
+
         <div className="grid grid-cols-2 gap-2.5 bg-slate-950/70 p-2.5 rounded-xl border border-amber-400/30 shadow-inner">
           <div className="bg-slate-900/60 p-2 rounded-lg">
             <span className="text-slate-400 block text-[11px] font-medium">Giá niêm yết</span>

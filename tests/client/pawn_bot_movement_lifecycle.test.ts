@@ -458,7 +458,7 @@ describe('[TC-PRESENTATION-QUEUE/MSS] Client Presentation Queue & Bot Turbo Paci
       activeModal: null,
       isBotTurn: false,
     });
-    expect(humanRollMode).toBe('dice_roll');
+    expect(humanRollMode).toBe('overview');
   });
 });
 

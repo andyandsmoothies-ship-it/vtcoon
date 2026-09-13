@@ -53,7 +53,7 @@ describe('[TC-P1.1/MSS] ProceduralBuilding — Sapphire Glass PBR & Beveled Roun
   });
 
   it('[Adversarial] Cấp 0 (Đất trống) không kết xuất RoundedBox extrudeGeometry hay kính Sapphire', () => {
-    const html = renderToStaticMarkup(React.createElement(ProceduralBuilding, { level: 0 }));
+    const html = renderToStaticMarkup(React.createElement(ProceduralBuilding, { level: 0, showEmptyPlotBoundary: true }));
     expect(html).not.toContain('ior="1.52"');
     expect(html).not.toContain('extrudeGeometry');
     expect(html).toContain('#DC2626');

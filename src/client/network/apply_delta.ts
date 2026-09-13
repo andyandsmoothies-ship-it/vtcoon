@@ -318,7 +318,7 @@ export function applyCellDeltas(
 }
 
 function syncDiceRoll(dice: DeltaPayload['dice'], state: GameState): void {
-  if (!dice) return;
+  if (!dice || (dice[0] === 0 && dice[1] === 0)) return;
   state.triggerDiceRoll([dice[0], dice[1]]);
   try { AudioEngine.playSfx(SoundEffect.DICE_ROLL); } catch { /* safe-ignore: test fallback */ }
 }
@@ -364,11 +364,18 @@ function syncTelemetryAndActivities(delta: DeltaPayload, state: GameState, store
   }
 }
 
+function syncEventCard(card: DeltaPayload['lastEventCard'], state: GameState): void {
+  if (card !== undefined) {
+    state.setLastEventCard(card ?? null);
+  }
+}
+
 export function applyPhaseAndTimerDeltas(delta: DeltaPayload, state: GameState, store: typeof useGameStore): void {
   syncDiceRoll(delta.dice, state);
   syncTurnAndTimer(delta, state);
   syncTreasuryPool(state);
   syncAuctionModal(delta.auction, state);
+  syncEventCard(delta.lastEventCard, state);
   syncGameStarted(delta);
   syncTelemetryAndActivities(delta, state, store);
 }

@@ -83,10 +83,13 @@ export function buildSparseDelta(prev: DeltaPayload, next: DeltaPayload): DeltaP
     ...(next.currentPlayerIndex !== undefined ? { currentPlayerIndex: next.currentPlayerIndex } : {}),
     ...(next.currentTurnPlayerId !== undefined ? { currentTurnPlayerId: next.currentTurnPlayerId } : {}),
     ...(next.dice !== undefined ? { dice: next.dice } : {}),
+    ...(next.diceRollerId !== undefined ? { diceRollerId: next.diceRollerId } : {}),
+    ...(next.diceSeq !== undefined ? { diceSeq: next.diceSeq } : {}),
     ...(next.auction !== undefined ? { auction: next.auction } : {}),
     ...(next.roomStarted !== undefined ? { roomStarted: next.roomStarted } : {}),
     ...(next.turnPhase !== undefined ? { turnPhase: next.turnPhase } : {}),
     ...(next.timeRemaining !== undefined ? { timeRemaining: next.timeRemaining } : {}),
+    ...(next.lastEventCard !== undefined ? { lastEventCard: next.lastEventCard } : {}),
   };
 }
 

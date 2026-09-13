@@ -11,13 +11,13 @@ import {
 } from '../../src/client/3d/camera_state_machine';
 
 describe('[TC-CAM01.1/MSS] resolveCameraMode — State Transition Priority', () => {
-  it('Tra ve dice_roll khi nguoi choi dang gieo xuc xac (isRolling = true)', () => {
+  it('Tra ve overview khi nguoi choi dang gieo xuc xac (isRolling = true, da bo hieu ung zoom giat lag)', () => {
     const mode = resolveCameraMode({
       isRolling: true,
       isPawnAnimating: false,
       activeModal: null,
     });
-    expect(mode).toBe('dice_roll');
+    expect(mode).toBe('overview');
   });
 
   it('Tra ve pawn_chase khi quan co dang nhay buoc tren ban co (isPawnAnimating = true)', () => {
@@ -149,7 +149,7 @@ describe('[TC-CAM01.2/MSS] Camera Positioning & Target Calculation', () => {
     expect(preMatch.fov).toBe(CAMERA_CONFIG.pre_match.fov);
     expect(preMatch.position).toEqual([...CAMERA_CONFIG.pre_match.position]);
     expect(preMatch.target).toEqual([...CAMERA_CONFIG.pre_match.target]);
-    expect(CAMERA_CONFIG.pre_match.position).toEqual([18.5, 19.5, 18.5]);
+    expect(CAMERA_CONFIG.pre_match.position).toEqual([11.2, 15.6, 11.2]);
     expect(CAMERA_CONFIG.pre_match.target).toEqual([-0.8, 0, -0.8]);
     expect(CAMERA_CONFIG.pre_match.fov).toBe(40);
   });

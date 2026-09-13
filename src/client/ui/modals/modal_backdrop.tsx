@@ -6,9 +6,18 @@ export interface ModalBackdropProps {
   readonly onClose?: () => void;
   readonly title?: string;
   readonly fullScreen?: boolean;
+  readonly center?: boolean;
+  readonly dismissible?: boolean;
 }
 
-export function ModalBackdrop({ children, onClose, title, fullScreen = false }: ModalBackdropProps): React.ReactElement {
+export function ModalBackdrop({
+  children,
+  onClose,
+  title,
+  fullScreen = false,
+  center = false,
+  dismissible = true,
+}: ModalBackdropProps): React.ReactElement {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleKeyDown = useCallback(
@@ -68,13 +77,15 @@ export function ModalBackdrop({ children, onClose, title, fullScreen = false }: 
   }, [handleKeyDown]);
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!fullScreen && e.target === e.currentTarget && onClose) {
+    if (dismissible && !fullScreen && e.target === e.currentTarget && onClose) {
       onClose();
     }
   };
 
   const backdropClasses = fullScreen
     ? 'fixed inset-0 bg-slate-950/20 backdrop-blur-[1px] z-20 flex items-stretch justify-stretch p-0 pointer-events-none select-none'
+    : center
+    ? 'fixed inset-0 bg-slate-950/40 backdrop-blur-[2px] z-20 flex items-center justify-center p-4 pointer-events-auto select-none'
     : 'fixed inset-0 bg-slate-950/25 backdrop-blur-[2px] z-20 flex items-center justify-center md:justify-end p-4 md:pr-10 pointer-events-auto select-none';
 
   return (

@@ -128,8 +128,12 @@ export function isEndTurnDisabled(params: ActionDockButtonStateParams): boolean 
  */
 export function resolveManagePropertyTarget(
   ownedProperties?: readonly number[],
-  currentPosition: number = 0
+  currentPosition: number = 0,
+  isStandingOnBuyable: boolean = false
 ): { cellIndex: number; canBuy: boolean } {
+  if (isStandingOnBuyable) {
+    return { cellIndex: currentPosition, canBuy: true };
+  }
   const targetCell = ownedProperties?.[0] ?? currentPosition;
   const isOwned = Boolean(ownedProperties?.includes(targetCell));
   return { cellIndex: targetCell, canBuy: !isOwned };

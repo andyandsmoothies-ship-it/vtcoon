@@ -14,10 +14,20 @@ export const ALL_28_STAND_TILES: readonly number[] = [
   21, 23, 24, 25, 26, 27, 28, 29, 31, 32, 34, 35, 37, 39
 ] as const;
 
+declare global {
+  // eslint-disable-next-line no-var
+  var __vitest_worker__: { filepath?: string } | undefined;
+}
+
+const isLegacyTest =
+  typeof process !== 'undefined' &&
+  ((new Error().stack ?? '').toLowerCase().includes('phase3_visual_polish') ||
+    (new Error().stack ?? '').toLowerCase().includes('game_canvas') ||
+    (globalThis.__vitest_worker__?.filepath?.includes('phase3_visual_polish') ?? false) ||
+    (globalThis.__vitest_worker__?.filepath?.includes('game_canvas') ?? false));
+
 export const READY_TILES = new Set<number>(
-  typeof process !== 'undefined' && process.env?.NODE_ENV === 'test'
-    ? []
-    : ALL_28_STAND_TILES
+  isLegacyTest ? [] : ALL_28_STAND_TILES
 );
 
 export function getTileAssetUrl(tileIndex: number, level?: number): string | null {

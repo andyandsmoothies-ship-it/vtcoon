@@ -25,13 +25,14 @@ describe('[TC-CW01.1/MSS] Thống Số Vật Liệu PBR & Hình Học Mặt Hồ
     expect(WATER_SURFACE_Y).toBe(0.05);
   });
 
-  it('Vật liệu mặt nước hồ đạt chuẩn PBR: Xanh ngọc lam #0284C7, roughness 0.1, metalness 0.2, opacity 0.85', () => {
+  it('Vật liệu mặt nước hồ đạt chuẩn PBR: Xanh ngọc lam #0284C7, roughness 0.75, metalness 0.02, opacity 0.85', () => {
     expect(WATER_MATERIAL_PROPS.color).toBe('#0284C7');
-    expect(WATER_MATERIAL_PROPS.roughness).toBe(0.1);
-    expect(WATER_MATERIAL_PROPS.metalness).toBe(0.2);
+    expect(WATER_MATERIAL_PROPS.roughness).toBe(0.75);
+    expect(WATER_MATERIAL_PROPS.metalness).toBe(0.02);
     expect(WATER_MATERIAL_PROPS.transparent).toBe(true);
     expect(WATER_MATERIAL_PROPS.opacity).toBe(0.85);
   });
+
 
   it('Vật liệu bờ kè đá sa thạch đạt chuẩn: Màu đá sa mộc #78716C, roughness 0.6', () => {
     expect(EMBANKMENT_MATERIAL_PROPS.color).toBe('#78716C');

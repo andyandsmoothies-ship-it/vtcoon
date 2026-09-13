@@ -212,3 +212,69 @@
   * **KẾT LUẬN:** **CHẤP THUẬN TOÀN DIỆN — ĐẠT CHUẨN PHÁT HÀNH THƯƠNG MẠI QUỐC TẾ (COMMERCIAL RELEASE READY)** sánh ngang Monopoly Plus.
 - **Trạng thái triển khai Container:** Container Docker `vtcoon-vtcoon-1` đã đồng bộ bản build production và phản hồi HTTP 200 OK.
 
+---
+
+### [IMP-39] Tối Ưu Độ Sắc Nét, Ánh Sáng & Khả Năng Đọc Thẻ Cờ (Retropoly & Monopoly Plus Reference)
+- **Mục tiêu**: Khắc phục dứt điểm hiện tượng thẻ cờ bị mờ nhòe, chữ không rõ ràng khi nhìn từ góc nhìn tổng thể.
+- **Hạ tầng hoàn tất**:
+  * Bật Texture Mipmaps + LinearMipmapLinearFilter + Anisotropy 16x trên Three.js CanvasTexture.
+  * Kỹ thuật Double-Draw Typography: Viền than đen `#090D1A` nét 2.5px cho tiêu đề, viền khung thẻ `#0F172A` dày 5px.
+  * Camera cự ly vàng Isometric ~48°-50°: Tọa độ `[11.2, 15.6, 11.2]`, fov 40, target `[-0.6, 0.0, -0.6]`, bao phủ 80% viewport.
+  * Ánh sáng ban ngày trung tính: `sunColor: '#FFFDF5'`, `sunIntensity: 1.08`, `ambientColor: '#E0F2FE'`, `ambientIntensity: 0.24`.
+  * Hậu kỳ điện ảnh tinh chỉnh: `bloomThreshold = 1.25`, `toneMappingExposure = 1.05`, `enableDof = false`, `dofBokehScale = 0.0`.
+  * Xóa bỏ hoàn toàn logic test-sniffing trong mã nguồn production, đồng bộ hóa 137 test suites.
+- **Kiểm thử & Review**: 17/17 tests PASS (`imp39_visual_crispness_and_lighting.test.ts`), 137/137 suites PASS (1.948 tests).
+- **Phê chuẩn**: `spec-reviewer` APPROVED (100%), `game-3d-visual-critic` DISPOSITION: ship (8.4/10).
+- **Trạng thái**: ✅ Hoàn thành (2026-09-13).
+
+---
+
+### [IMP-40] Triệt Tiêu Đốm Lóa Mặt Nước & Cân Bằng Ánh Sáng Tự Nhiên Dịu Mắt
+- **Mục tiêu**: Xóa bỏ đốm phản xạ gương chói lóa trên mặt nước (giữa Long Thành và Cầu Ba Son), loại bỏ hiện tượng quá sáng/chói mắt và quầng mờ Bloom ban ngày, nâng cao độ tương phản chữ thẻ cờ.
+- **Hạ tầng hoàn tất**:
+  * Chuyển đổi vật liệu mặt nước sang PBR Tán xạ Nhung Diorama (Toy Diorama Velvet Water): `roughness: 0.80` (Sông Sài Gòn) / `0.75` (Biển & Centerpiece), `metalness: 0.02` (xóa bỏ `0.08 / 0.55`), triệt tiêu 100% đốm specular phản chiếu mặt trời.
+  * Tinh chỉnh khống chế quầng sáng Bloom ban ngày: `bloomThreshold: 2.5`, `bloomIntensity: 0.20` (ngăn bốc hơi/mờ viền thẻ cờ).
+  * Cân bằng ánh sáng dịu mắt (Gentle Daylight): `sunIntensity: 0.92`, `ambientIntensity: 0.18`, `hemiIntensity: 0.14`, `toneMappingExposure: 0.94`, `fill/rim light: 0.12`.
+  * Xuất xưởng và kiểm thử hàm nội suy ánh sáng runtime `calculateBaseFill`, `calculateBaseRim` trong `time_of_day_lighting.tsx`.
+  * Đổi nền thẻ cờ sang màu giấy ngà cổ ấm `#F3EEDF` (thay vì `#F8F5EE`), tăng tương phản với chữ than đen và tranh di sản.
+- **Kiểm thử & Review**: 17/17 tests PASS (`imp40_anti_glare_and_gentle_daylight.test.ts`), 138/138 suites PASS (1.965 tests), `npm run gate:quick` 0 lỗi.
+- **Phê chuẩn**: `game-3d-visual-critic` DISPOSITION: ship (9.2/10), `spec-reviewer` tái thẩm định Cổng 1 đạt chuẩn.
+- **Trạng thái**: ✅ Hoàn thành (2026-09-13).
+
+---
+
+### [IMP-42] Tăng Tốc Nhịp Nhảy Avatar 1.5x & Ổn Định Camera Khi Gieo Xúc Xắc
+- **Mục tiêu**: Khắc phục nhịp nhảy avatar chậm gây kéo dài lượt chơi, triệt tiêu lỗi nhảy cóc (teleport) do timeout bảo hiểm quá ngắn và giữ camera overview ổn định khi bấm gieo xúc xắc.
+- **Hạ tầng hoàn tất**:
+  * Tăng tốc nhịp nhảy: `HOP_DURATION = 0.15s`, `LANDING_DURATION = 0.08s` (tổng 0.23s/ô thay vì 0.34s).
+  * Nâng timeout bảo hiểm trong `processPawnQueue`: `Math.max(10000, nextTask.waypoints.length * 1500 + 8000)`.
+  * Giữ nguyên chế độ `'overview'` ổn định khi `isRolling = true`, xóa rung lắc giật cục.
+- **Kiểm thử & Bất biến**: Gotcha #63, 140/140 test suites PASS.
+- **Trạng thái**: ✅ Hoàn thành.
+
+---
+
+### [IMP-46] Đồng Bộ Metadata Thẻ Sự Kiện, Timestamp Guard, Deadline 00:00 & Đấu Giá 2D Impeccable
+- **Mục tiêu**: Khắc phục lỗi thẻ sự kiện hiển thị chung chung, popup lặp lại sau lượt Bot, đồng hồ 00:00 treo đơ và tước quyền đấu giá của người chơi.
+- **Hạ tầng hoàn tất**:
+  * Đồng bộ `lastEventCard` qua `DeltaPayload` hiển thị chi tiết số tiền biến động.
+  * Landing Timestamp Guard `lastHandledLandingTimestampRef` triệt tiêu 100% popup trùng lặp.
+  * Server tính deadline trước broadcast, Client chủ động gửi intent khi hết giờ 00:00.
+  * `ModalHost` định danh đúng `localPlayerId`, chuyển sàn đấu giá sang Modal 2D căn giữa Impeccable.
+- **Kiểm thử & Bất biến**: `gameplay_ux_fixes_contract.test.ts`, Gotcha #67, 147/147 test suites PASS.
+- **Trạng thái**: ✅ Hoàn thành.
+
+---
+
+### [IMP-47] Phòng Ngừa Đóng Nhầm Hộp Thoại Quyết Định & Cơ Chế Khôi Phục Mua Đất Đa Tầng
+- **Mục tiêu**: Ngăn chặn click nhầm ngoài màn hình làm mất hộp thoại mua đất và khôi phục quyền mua đất khi FSM còn ở ActionPhase.
+- **Hạ tầng hoàn tất**:
+  * `ModalBackdrop`: Bổ sung `dismissible = false` cho các modal quyết định sinh tử (mua đất `canBuy: true`, đấu giá, vỡ nợ).
+  * 3D Tile Click: Kích hoạt `onClick` trên 40 ô cờ sa bàn, click ô đang đứng mở lại Title Deed với `canBuy: true`.
+  * ActionDock CTA: Hiển thị nút `🏷️ Mua Đất (#{currentPos})` phát sáng khi đang đứng ở ô mua được, `resolveManagePropertyTarget` ưu tiên ô đang đứng.
+- **Kiểm thử & Bất biến**: `property_purchase_recovery_contract.test.ts`, Gotcha #68, 148/148 test suites PASS (2.041 tests).
+- **Trạng thái**: ✅ Hoàn thành.
+
+
+
+

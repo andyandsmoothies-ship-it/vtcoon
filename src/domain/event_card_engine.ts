@@ -3,6 +3,7 @@ import type { Player, MarketModifier, Room } from './room';
 import { TurnPhase } from './room';
 import type { PropertyRegistry, PropertyStateMap } from './property_manager';
 import { executeMarketCard, executeChanceCard } from './card_handlers';
+import { getChanceCardInfo, getMarketCardInfo } from './event_card_metadata.js';
 import {
   MarketCardId, ChanceCardId, HOSE_OUTCOMES,
 } from './event_card_types';
@@ -69,6 +70,7 @@ export function drawMarketCard(room: Room, reg: PropertyRegistry, sm: PropertySt
   }
   const card = room.marketDeck.shift();
   if (card) {
+    room.lastEventCard = getMarketCardInfo(card);
     applyMarketCard(card, room.activeModifiers, room.players, reg, sm);
     room.marketDiscard.push(card);
   }
@@ -89,6 +91,7 @@ export function drawChanceCard(
   }
   const card = room.chanceDeck.shift();
   if (card) {
+    room.lastEventCard = getChanceCardInfo(card, current.id);
     applyChanceCard(card, current.id, room.players, room.activeModifiers, reg, sm, permanentRentBonus ?? room.permanentRentBonus);
     if (card !== ChanceCardId.CC_DIPLOMATIC) room.chanceDiscard.push(card);
   }

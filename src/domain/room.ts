@@ -56,6 +56,15 @@ export interface CurrentAuctionState {
   bidIncrement?: number;
 }
 
+export interface EventCardInfo {
+  readonly cardType: 'chance' | 'market';
+  readonly cardId: string;
+  readonly title: string;
+  readonly description: string;
+  readonly effectDelta?: number;
+  readonly playerId?: string;
+}
+
 export interface Room {
   readonly roomCode:      string;
   readonly hostId:        string;
@@ -73,7 +82,10 @@ export interface Room {
   roundCount?:           number;
   round?:                number;
   lastDice?:             readonly [number, number];
+  lastDiceRollerId?:     string;
+  diceSeq?:              number;
   currentAuction?:       CurrentAuctionState;
+  lastEventCard?:        EventCardInfo;
 }
 
 

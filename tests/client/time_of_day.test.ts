@@ -125,6 +125,12 @@ describe('[UI-S04/MSS] Environment Store — Time-of-Day State Machine & Presets
       expect(preset.sunPosition).toHaveLength(3);
     }
 
+    // Ban ngay phai co nang diu mat, chong chay sang loa mat (sunIntensity <= 1.10, ambient <= 0.25)
+    expect(TIME_OF_DAY_PRESETS.day.sunIntensity).toBeLessThanOrEqual(1.10);
+    expect(TIME_OF_DAY_PRESETS.day.sunIntensity).toBeGreaterThanOrEqual(0.90);
+    expect(TIME_OF_DAY_PRESETS.day.ambientIntensity).toBeLessThanOrEqual(0.25);
+    expect(TIME_OF_DAY_PRESETS.day.hemiIntensity).toBeLessThanOrEqual(0.25);
+
     // Ban dem phai co anh sang moonlight xanh diu va suong mu dem toi dam
     expect(TIME_OF_DAY_PRESETS.night.sunColor).toBe('#60A5FA');
     expect(TIME_OF_DAY_PRESETS.night.fogColor).toBe('#090D1A');

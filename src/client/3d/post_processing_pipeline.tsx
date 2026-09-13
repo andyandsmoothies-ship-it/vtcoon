@@ -7,6 +7,7 @@ import {
   N8AO,
   Vignette,
   ToneMapping,
+  SMAA,
 } from '@react-three/postprocessing';
 import { Vector3 } from 'three';
 import { ToneMappingMode } from 'postprocessing';
@@ -18,6 +19,7 @@ export interface PostProcessingPipelineProps {
   enableAo?: boolean;
   enableVignette?: boolean;
   enableToneMapping?: boolean;
+  enableSmaa?: boolean;
   dofTarget?: [number, number, number];
   dofFocusRange?: number;
   dofFocalLength?: number;
@@ -26,28 +28,32 @@ export interface PostProcessingPipelineProps {
   bloomThreshold?: number;
   aoIntensity?: number;
   aoRadius?: number;
+  aoHalfRes?: boolean;
 }
 
 export const DEFAULT_PIPELINE_CONFIG = {
   enabled: true,
-  enableDof: true,
+  enableDof: false,
   enableBloom: true,
   enableAo: true,
   enableVignette: true,
   enableToneMapping: true,
+  enableSmaa: true,
   dofTarget: [0, 0, 0] as [number, number, number],
-  dofFocusRange: 75.0,
+  dofFocusRange: 320.0,
   dofFocalLength: 34.0,
-  dofBokehScale: 1.3,
-  bloomIntensity: 0.55,
-  bloomThreshold: 1.15,
+  dofBokehScale: 0.0,
+  bloomIntensity: 0.20,
+  bloomThreshold: 2.5,
+
   bloomSmoothing: 0.25,
   bloomRadius: 0.65,
-  aoIntensity: 1.25,
-  aoRadius: 1.0,
+  aoIntensity: 0.60,
+  aoRadius: 0.85,
   aoDistanceFalloff: 2.0,
-  vignetteOffset: 0.32,
-  vignetteDarkness: 0.48,
+  aoHalfRes: true,
+  vignetteOffset: 0.45,
+  vignetteDarkness: 0.15,
 } as const;
 
 export function PostProcessingPipeline({
@@ -57,6 +63,7 @@ export function PostProcessingPipeline({
   enableAo = DEFAULT_PIPELINE_CONFIG.enableAo,
   enableVignette = DEFAULT_PIPELINE_CONFIG.enableVignette,
   enableToneMapping = DEFAULT_PIPELINE_CONFIG.enableToneMapping,
+  enableSmaa = DEFAULT_PIPELINE_CONFIG.enableSmaa,
   dofTarget = DEFAULT_PIPELINE_CONFIG.dofTarget,
   dofFocusRange = DEFAULT_PIPELINE_CONFIG.dofFocusRange,
   dofBokehScale = DEFAULT_PIPELINE_CONFIG.dofBokehScale,
@@ -64,6 +71,7 @@ export function PostProcessingPipeline({
   bloomThreshold = DEFAULT_PIPELINE_CONFIG.bloomThreshold,
   aoIntensity = DEFAULT_PIPELINE_CONFIG.aoIntensity,
   aoRadius = DEFAULT_PIPELINE_CONFIG.aoRadius,
+  aoHalfRes = DEFAULT_PIPELINE_CONFIG.aoHalfRes,
 }: PostProcessingPipelineProps): React.ReactElement | null {
   if (!enabled) {
     return null;
@@ -79,6 +87,7 @@ export function PostProcessingPipeline({
           aoRadius={aoRadius}
           intensity={aoIntensity}
           distanceFalloff={DEFAULT_PIPELINE_CONFIG.aoDistanceFalloff}
+          halfRes={aoHalfRes}
           quality="medium"
           color="#0B0F19"
         />
@@ -113,9 +122,14 @@ export function PostProcessingPipeline({
         />
       )}
 
-      {/* 5. Tone Mapping: Chuẩn ACES Filmic dải tương phản điện ảnh cao cấp */}
+      {/* 5. Tone Mapping: Chuẩn AgX dải tương phản điện ảnh cao cấp, chống cháy sáng highlight */}
       {enableToneMapping && (
-        <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
+        <ToneMapping mode={ToneMappingMode.AGX} />
+      )}
+
+      {/* 6. Anti-Aliasing (SMAA): Khử răng cưa vector subpixel mép bàn cờ, dây văng, góc khối */}
+      {enableSmaa && (
+        <SMAA />
       )}
     </EffectComposer>
   );
