@@ -45,13 +45,6 @@ export function AuctionModal({
   const playersInfo = useGameStore((s) => s.playersInfo);
   const [autoBid, setAutoBid] = useState<boolean>(false);
 
-  // [UC-GAME-022] Sàn tự đóng khi hết thời gian
-  useEffect(() => {
-    if (timeRemaining <= 0) {
-      onClose?.();
-    }
-  }, [timeRemaining, onClose]);
-
   // Xử lý tự động đặt giá nếu bật Auto-Bid
   useEffect(() => {
     if (autoBid && !isLeading && !hasPassed && !isDeclinedPlayer && onBid) {

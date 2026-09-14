@@ -115,6 +115,7 @@ export interface GameState {
   readonly dice: [number, number];
   readonly isRolling: boolean;
   readonly hasRolledThisTurn: boolean;
+  readonly lastDiceSeq?: number;
   readonly activePawnAnimation: PawnAnimationState | null;
   readonly pawnAnimationQueue: readonly PawnMoveTask[];
   readonly pendingPawnMove: PendingPawnMove | null;
@@ -144,7 +145,8 @@ export interface GameState {
   setDice: (dice: [number, number]) => void;
   setIsRolling: (isRolling: boolean) => void;
   setHasRolledThisTurn: (hasRolled: boolean) => void;
-  triggerDiceRoll: (dice: [number, number]) => void;
+  setLastDiceSeq: (seq: number | undefined) => void;
+  triggerDiceRoll: (dice: [number, number], diceSeq?: number) => void;
   setPendingPawnMove: (move: PendingPawnMove | null) => void;
   enqueuePawnMove: (task: PawnMoveTask) => void;
   processPawnQueue: () => void;

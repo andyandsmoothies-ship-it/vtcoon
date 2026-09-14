@@ -275,6 +275,19 @@
 - **Kiểm thử & Bất biến**: `property_purchase_recovery_contract.test.ts`, Gotcha #68, 148/148 test suites PASS (2.041 tests).
 - **Trạng thái**: ✅ Hoàn thành.
 
+---
+
+### [IMP-48] Lọc Trùng Lặp Chuỗi Đơn Điệu diceSeq & Triệt Tiêu Cú Giật Camera Khi Mua Nhà
+- **Mục tiêu**: Khắc phục lỗi chuyển cảnh giật cục: khi mua nhà/nâng cấp, camera bị giật nhảy về nhìn 2 con xúc xắc ('overview') rồi sau đó mới quay lại ô đất vừa mua.
+- **Hạ tầng hoàn tất**:
+  * Bổ sung trường `lastDiceSeq` và action `setLastDiceSeq` trong Zustand `GameStore`.
+  * Xây dựng hàm vị từ `isDiceRollDuplicate(delta, state)` trong `apply_delta.ts` kiểm tra điều kiện `delta.diceSeq <= state.lastDiceSeq`.
+  * Triệt tiêu lệnh gọi lại `triggerDiceRoll` khi nhận gói tin Delta tài sản (mua nhà, nâng cấp, thế chấp), giữ `isRolling = false`.
+  * Bảo toàn góc nhìn máy quay `CameraStateMachine` ở chế độ `'tile_focus'` tại ô đất, chuyển cảnh êm dịu, không nảy lại khay xúc xắc 3D.
+- **Kiểm thử & Bất biến**: `imp48_monotonic_dice_sync.test.ts`, Gotcha #69, 149/149 test suites PASS (2.057 tests).
+- **Trạng thái**: ✅ Hoàn thành.
+
+
 
 
 

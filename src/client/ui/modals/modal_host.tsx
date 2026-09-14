@@ -51,9 +51,7 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
       if (state.activeModal !== 'auction') return;
       const payload = state.modalPayload as ModalPayloadMap['auction'] | null;
       if (!payload) return;
-      if (payload.timeRemaining <= 1) {
-        state.closeModal();
-      } else {
+      if (payload.timeRemaining > 0) {
         state.updateModalPayload<'auction'>({ timeRemaining: payload.timeRemaining - 1 });
       }
     }, 1000);
@@ -197,7 +195,6 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
             onIntent?.({ type: 'INTENT_AUCTION_PASS' });
             updateModalPayload<'auction'>({ hasPassed: true });
           }}
-          onClose={closeModal}
         />
       )}
 

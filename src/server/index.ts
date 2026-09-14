@@ -12,6 +12,7 @@ export interface ServerConfig {
   readonly wssPort?: number;
   readonly gracePeriodMs?: number;
   readonly staticDir?: string;
+  readonly botTurnDelayMs?: number;
 }
 
 export interface RunningServer {
@@ -51,6 +52,7 @@ export async function startServer(config?: ServerConfig): Promise<RunningServer>
   const wssServer = new WssServer({
     port: wssPort,
     gracePeriodMs,
+    botTurnDelayMs: config?.botTurnDelayMs ?? 1500,
   });
 
   const distDir = path.resolve(process.cwd(), 'dist');

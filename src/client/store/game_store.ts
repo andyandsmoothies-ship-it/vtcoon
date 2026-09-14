@@ -17,6 +17,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   dice: [1, 1],
   isRolling: false,
   hasRolledThisTurn: false,
+  lastDiceSeq: undefined,
   activePawnAnimation: null,
   pawnAnimationQueue: [],
   pendingPawnMove: null,
@@ -128,11 +129,14 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   setHasRolledThisTurn: (hasRolled) => set({ hasRolledThisTurn: hasRolled }),
 
-  triggerDiceRoll: (dice) => {
+  setLastDiceSeq: (lastDiceSeq) => set({ lastDiceSeq }),
+
+  triggerDiceRoll: (dice, diceSeq) => {
     set({
       dice: [clampDiceFace(dice[0]), clampDiceFace(dice[1])],
       isRolling: true,
       hasRolledThisTurn: true,
+      ...(diceSeq !== undefined ? { lastDiceSeq: diceSeq } : {}),
     });
     setTimeout(() => {
       if (get().isRolling) {

@@ -107,9 +107,9 @@ describe('[Server][UAT-44] TurnTimeoutScheduler', () => {
     room.players[0]!.balance = -1000;
 
     scheduler.scheduleTurnTimeout(room.roomCode, 30);
-    await new Promise((resolve) => setTimeout(resolve, 60));
-
-    expect(room.players[0]!.bankrupt).toBe(true);
+    await vi.waitFor(() => {
+      expect(room.players[0]!.bankrupt).toBe(true);
+    }, { timeout: 500 });
   });
 
   it('[EC-04] Khi human player AFK ở ActionPhase, Server tự động từ chối mua và kích hoạt đấu giá', async () => {
@@ -118,11 +118,10 @@ describe('[Server][UAT-44] TurnTimeoutScheduler', () => {
     room.players[0]!.position = 1; // Ô 1 là đất mua được
 
     scheduler.scheduleTurnTimeout(room.roomCode, 30);
-    await new Promise((resolve) => setTimeout(resolve, 60));
-
-    // Server đã xử lý decline, phòng chuyển sang AuctionPhase hoặc kết thúc lượt
-    const currentPhase = rooms.getRoom(room.roomCode)?.phase;
-    expect(currentPhase === TurnPhase.AuctionPhase || room.currentPlayerIndex === 1).toBe(true);
+    await vi.waitFor(() => {
+      const currentPhase = rooms.getRoom(room.roomCode)?.phase;
+      expect(currentPhase === TurnPhase.AuctionPhase || room.currentPlayerIndex === 1).toBe(true);
+    }, { timeout: 500 });
   });
 
   it('[EC-04] DeltaBroadcaster truyền timeRemaining và turnPhase qua State Delta', () => {

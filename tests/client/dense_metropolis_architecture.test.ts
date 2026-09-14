@@ -111,14 +111,14 @@ describe('[TC-IMP30/MSS] [UC-IMP30] Retropoly Metropolis & Living Coastal Archit
 
   it('[TC-IMP30/MSS-04] [UC-IMP30] Cấu hình Camera dice_roll trong camera_state_machine.ts ngắm chính xác tọa độ sàn diễn xúc xắc mới', () => {
     // 1. Kiểm tra thông số bất biến trong CAMERA_CONFIG.dice_roll
-    expect(CAMERA_CONFIG.dice_roll.position, 'CAMERA_CONFIG.dice_roll.position phải khớp [2.5, 2.8, 7.2]').toEqual([2.5, 2.8, 7.2]);
-    expect(CAMERA_CONFIG.dice_roll.target, 'CAMERA_CONFIG.dice_roll.target phải khớp [0.0, 0.25, 3.8]').toEqual([0.0, 0.25, 3.8]);
+    expect(CAMERA_CONFIG.dice_roll.position, 'CAMERA_CONFIG.dice_roll.position phải khớp [2.5, 2.8, 3.4]').toEqual([2.5, 2.8, 3.4]);
+    expect(CAMERA_CONFIG.dice_roll.target, 'CAMERA_CONFIG.dice_roll.target phải khớp [0.0, 0.25, 0.0]').toEqual([0.0, 0.25, 0.0]);
     expect(CAMERA_CONFIG.dice_roll.fov, 'CAMERA_CONFIG.dice_roll.fov phải là 36').toBe(36);
 
     // 2. Consumer-Side Assertion: Kiểm tra tính toán vị trí camera khi máy quay ở chế độ dice_roll
     const targetState = calculateTargetCameraState('dice_roll');
-    expect(targetState.position, 'Target state position phải khớp tọa độ cấu hình mới').toEqual([2.5, 2.8, 7.2]);
-    expect(targetState.target, 'Target state target phải bám theo tọa độ sàn diễn xúc xắc mới').toEqual([0.0, 0.25, 3.8]);
+    expect(targetState.position, 'Target state position phải khớp tọa độ cấu hình mới').toEqual([2.5, 2.8, 3.4]);
+    expect(targetState.target, 'Target state target phải bám theo tọa độ sàn diễn xúc xắc mới').toEqual([0.0, 0.25, 0.0]);
     expect(targetState.fov).toBe(36);
 
     // 3. Khẳng định FSM giữ mode overview khi xúc xắc đang gieo (triệt tiêu zoom giật lag)

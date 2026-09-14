@@ -4,7 +4,7 @@ import { useGameStore, type PlayerHudInfo, type PawnMoveTask, FloatingTextType, 
 import { calculatePathWaypoints } from '../3d/pawn_path.js';
 import { useLobbyStore } from '../store/lobby_store.js';
 import { useVfxStore } from '../store/vfx_store.js';
-import { BOARD_SIZE } from '../../domain/room.js';
+import { BOARD_SIZE, TurnPhase } from '../../domain/room.js';
 import { BOARD_CONFIG } from '../../domain/board_config.js';
 import { PLAYER_TOKEN_PALETTE } from '../../domain/theme.js';
 import type { DeltaPayload } from '../../server/session_manager.js';
@@ -317,9 +317,22 @@ export function applyCellDeltas(
   return hasInfoChange;
 }
 
-function syncDiceRoll(dice: DeltaPayload['dice'], state: GameState): void {
+function isDiceRollDuplicate(delta: DeltaPayload, state: GameState): boolean {
+  if (delta.diceSeq !== undefined) {
+    return state.lastDiceSeq !== undefined && delta.diceSeq <= state.lastDiceSeq;
+  }
+  if (state.hasRolledThisTurn && state.dice[0] === delta.dice?.[0] && state.dice[1] === delta.dice?.[1]) {
+    return true;
+  }
+  return false;
+}
+
+function syncDiceRoll(delta: DeltaPayload, state: GameState): void {
+  const dice = delta.dice;
   if (!dice || (dice[0] === 0 && dice[1] === 0)) return;
-  state.triggerDiceRoll([dice[0], dice[1]]);
+  if (isDiceRollDuplicate(delta, state)) return;
+
+  state.triggerDiceRoll([dice[0], dice[1]], delta.diceSeq);
   try { AudioEngine.playSfx(SoundEffect.DICE_ROLL); } catch { /* safe-ignore: test fallback */ }
 }
 
@@ -342,11 +355,29 @@ function syncTreasuryPool(state: GameState): void {
   if (state.treasuryPool === 0) state.setTreasuryPool(2000);
 }
 
-function syncAuctionModal(auction: DeltaPayload['auction'], state: GameState): void {
-  if (auction) {
-    state.openModal('auction', auction);
-  } else if (auction === null && state.activeModal === 'auction') {
+function syncBusinessModals(delta: DeltaPayload, state: GameState): void {
+  // [IMP-50] Trụ Cột 3: UI as Pure Projection — Modal chỉ đóng khi server phát delta.auction === null hoặc phase thay đổi
+  if (delta.auction) {
+    state.openModal('auction', delta.auction);
+  } else if (
+    (delta.auction === null || (delta.turnPhase !== undefined && delta.turnPhase !== TurnPhase.AuctionPhase)) &&
+    state.activeModal === 'auction'
+  ) {
     state.closeModal();
+  }
+
+  if (delta.turnPhase !== undefined) {
+    if (
+      state.activeModal === 'deed' &&
+      delta.turnPhase !== TurnPhase.ActionPhase &&
+      delta.turnPhase !== TurnPhase.PropertyManagement
+    ) {
+      state.closeModal();
+    } else if (state.activeModal === 'insolvency' && delta.turnPhase !== TurnPhase.InsolvencyPhase) {
+      state.closeModal();
+    } else if (state.activeModal === 'hose' && delta.turnPhase !== TurnPhase.HosePhase) {
+      state.closeModal();
+    }
   }
 }
 
@@ -371,10 +402,10 @@ function syncEventCard(card: DeltaPayload['lastEventCard'], state: GameState): v
 }
 
 export function applyPhaseAndTimerDeltas(delta: DeltaPayload, state: GameState, store: typeof useGameStore): void {
-  syncDiceRoll(delta.dice, state);
+  syncDiceRoll(delta, state);
   syncTurnAndTimer(delta, state);
   syncTreasuryPool(state);
-  syncAuctionModal(delta.auction, state);
+  syncBusinessModals(delta, state);
   syncEventCard(delta.lastEventCard, state);
   syncGameStarted(delta);
   syncTelemetryAndActivities(delta, state, store);
@@ -384,6 +415,7 @@ export function applyDeltaToStore(delta: DeltaPayload, store: typeof useGameStor
   const state = store.getState();
   const isFullSync = Boolean(delta.cells && delta.cells.length === BOARD_SIZE);
   if (isFullSync && state.activePawnAnimation) state.clearActivePawnAnimation();
+  if (isFullSync && delta.diceSeq !== undefined) state.setLastDiceSeq(delta.diceSeq);
 
   const playersInfoMap = initPlayersInfoMap(state, isFullSync);
   let hasPlayerInfoChange = isFullSync && Object.keys(playersInfoMap).length > 0;

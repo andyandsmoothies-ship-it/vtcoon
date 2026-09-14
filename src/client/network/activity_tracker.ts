@@ -123,42 +123,50 @@ export function detectMoveActivities(delta: DeltaPayload, prevState: GameState, 
   return entries;
 }
 
+export function resetAuctionActivityTracker(activityStore: typeof useActivityStore = useActivityStore): void {
+  activityStore.getState().setLastAuctionBid(undefined);
+}
+
 export function detectAuctionActivities(
   delta: DeltaPayload,
   prevStateOrNextState: GameState,
   maybeNextState?: GameState,
+  activityStore: typeof useActivityStore = useActivityStore,
 ): ActivityLogEntry[] {
+  if (delta.auction === null) {
+    activityStore.getState().setLastAuctionBid(undefined);
+    return [];
+  }
   if (!delta.auction || !delta.auction.highestBidderId) return [];
 
-  const nextState = maybeNextState ?? prevStateOrNextState;
-  const prevState = maybeNextState ? prevStateOrNextState : undefined;
-
-  const prevAuction =
-    prevState && prevState.activeModal === 'auction'
-      ? (prevState.modalPayload as { highestBidderId?: string | null; currentBid?: number } | undefined)
-      : undefined;
+  const { cellIndex, currentBid, highestBidderId } = delta.auction;
+  const lastAuction = activityStore.getState().lastAuctionBid;
 
   if (
-    prevAuction &&
-    prevAuction.highestBidderId === delta.auction.highestBidderId &&
-    prevAuction.currentBid === delta.auction.currentBid
+    lastAuction &&
+    lastAuction.cellIndex === cellIndex &&
+    lastAuction.currentBid === currentBid &&
+    lastAuction.highestBidderId === highestBidderId
   ) {
     return [];
   }
 
-  const bidder = nextState.playersInfo[delta.auction.highestBidderId];
-  const bidderName = getPlayerName(bidder, delta.auction.highestBidderId);
+  activityStore.getState().setLastAuctionBid({ cellIndex, currentBid, highestBidderId });
+
+  const nextState = maybeNextState ?? prevStateOrNextState;
+  const bidder = nextState.playersInfo[highestBidderId];
+  const bidderName = getPlayerName(bidder, highestBidderId);
 
   return [
     {
-      id: `auction_${Date.now()}_${delta.auction.cellIndex}_${delta.auction.currentBid}`,
+      id: `auction_${Date.now()}_${cellIndex}_${currentBid}`,
       timestamp: Date.now(),
       type: 'auction',
-      message: `${bidderName} đã đặt giá ${formatCurrency(delta.auction.currentBid)} cho ${getCellName(delta.auction.cellIndex)}`,
-      playerId: delta.auction.highestBidderId,
+      message: `${bidderName} đã đặt giá ${formatCurrency(currentBid)} cho ${getCellName(cellIndex)}`,
+      playerId: highestBidderId,
       playerName: bidderName,
-      amount: -delta.auction.currentBid,
-      cellIndex: delta.auction.cellIndex,
+      amount: -currentBid,
+      cellIndex: cellIndex,
       ...(bidder?.tokenColor ? { playerTokenColor: bidder.tokenColor } : {}),
     },
   ];
@@ -181,7 +189,7 @@ export function trackDeltaActivities(
   const { entries: propEntries, context } = detectPropertyAndLevelActivities(delta, prevState, nextState);
   activities.push(...propEntries);
   activities.push(...detectFinancialAndStatusActivities(delta, prevState, nextState, context));
-  activities.push(...detectAuctionActivities(delta, prevState, nextState));
+  activities.push(...detectAuctionActivities(delta, prevState, nextState, activityStore));
 
   const store = activityStore.getState();
   for (const entry of activities) {

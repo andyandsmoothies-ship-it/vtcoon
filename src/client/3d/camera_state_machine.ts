@@ -25,9 +25,9 @@ export const CAMERA_CONFIG = {
     speed: 3.2,
   },
   dice_roll: {
-    // Sà xuống góc nghiêng thấp tập trung vào sàn diễn xúc xắc trên Đại Lộ Sài Gòn
-    position: [2.5, 2.8, 7.2] as const,
-    target: [0.0, 0.25, 3.8] as const,
+    // Sà xuống góc nghiêng thấp tập trung vào sàn diễn xúc xắc trên sông Sài Gòn
+    position: [2.5, 2.8, 3.4] as const,
+    target: [0.0, 0.25, 0.0] as const,
     fov: 36,
     speed: 4.8,
   },

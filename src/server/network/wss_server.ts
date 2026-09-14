@@ -12,6 +12,8 @@ import { EnvelopeValidator } from '../security/envelope_validator.js';
 import { IntentGuard } from '../security/intent_guard.js';
 import { BotTurnScheduler } from './bot_turn_scheduler.js';
 import { TurnTimeoutScheduler } from './turn_timeout_scheduler.js';
+import { TurnOrchestrator } from './turn_orchestrator.js';
+import { TurnWatchdog } from './turn_watchdog.js';
 import { SocketRegistry } from './socket_registry.js';
 import { encodeMsg } from './network_types.js';
 import type { WsServerMessage, WsClientMessage, ReasonCode } from './network_types.js';
@@ -42,6 +44,8 @@ export class WssServer {
   private readonly broadcaster: DeltaBroadcaster;
   private readonly reconnects: ReconnectManager;
   private readonly cleanupScheduler: RoomCleanupScheduler;
+  private readonly turnOrchestrator: TurnOrchestrator;
+  private readonly turnWatchdog: TurnWatchdog;
   private readonly botScheduler: BotTurnScheduler;
   private readonly turnTimeoutScheduler: TurnTimeoutScheduler;
   private readonly rateLimiter: RateLimiter;
@@ -67,19 +71,32 @@ export class WssServer {
     this.envelopeValidator = config.envelopeValidator ?? new EnvelopeValidator();
     this.intentGuard = config.intentGuard ?? new IntentGuard();
     this.broadcaster = new DeltaBroadcaster(this.rooms, this.sessions, (rc, msg) => this.broadcast(rc, msg));
-    this.botScheduler = new BotTurnScheduler({
-      rooms: this.rooms, intentMutex: this.intentMutex, broadcaster: this.broadcaster,
+    this.turnOrchestrator = new TurnOrchestrator({
+      rooms: this.rooms,
+      intentMutex: this.intentMutex,
+      broadcaster: this.broadcaster,
       onGameOver: (rc) => this.broadcastGameOver(rc),
-      onScheduleTurnTimeout: (rc) => this.turnTimeoutScheduler.scheduleTurnTimeout(rc),
-      botTurnDelayMs: config.botTurnDelayMs ?? 800,
-    });
-    this.turnTimeoutScheduler = new TurnTimeoutScheduler({
-      rooms: this.rooms, intentMutex: this.intentMutex, broadcaster: this.broadcaster,
-      onGameOver: (rc) => this.broadcastGameOver(rc),
-      onScheduleBotTurn: (rc) => this.botScheduler.scheduleBotTurn(rc),
+      botTurnDelayMs: config.botTurnDelayMs ?? 250,
       defaultTimeoutMs: config.turnTimeoutMs,
     });
-    this.broadcaster.setTimeRemainingProvider((rc) => this.turnTimeoutScheduler.getTimeRemaining(rc));
+    this.turnWatchdog = new TurnWatchdog({
+      rooms: this.rooms,
+      intentMutex: this.intentMutex,
+      broadcaster: this.broadcaster,
+      onEmergencyRecovery: (rc, reason) => {
+        this.adminManager.recordRoomEvent(rc, {
+          source: 'SYSTEM',
+          action: 'WATCHDOG_EMERGENCY_RECOVERY',
+          payloadSummary: `Watchdog tự giải cứu lượt chơi: ${reason}`,
+        });
+      },
+      onGameOver: (rc) => this.broadcastGameOver(rc),
+      onScheduleNextTurn: (rc) => this.scheduleBotTurn(rc),
+    });
+    this.turnWatchdog.start();
+    this.botScheduler = new BotTurnScheduler(this.turnOrchestrator);
+    this.turnTimeoutScheduler = new TurnTimeoutScheduler(this.turnOrchestrator);
+    this.broadcaster.setTimeRemainingProvider((rc) => this.turnOrchestrator.getTimeRemaining(rc));
     this.reconnects  = config.reconnectManager ?? new ReconnectManager({
       rooms: this.rooms, sessions: this.sessions, broadcaster: this.broadcaster,
       broadcast: (rc, msg) => this.broadcast(rc, msg), gracePeriodMs: config.gracePeriodMs,
@@ -127,6 +144,10 @@ export class WssServer {
   getDeltaBroadcaster(): DeltaBroadcaster { return this.broadcaster; }
   getReconnectManager(): ReconnectManager { return this.reconnects; }
   getCleanupScheduler(): RoomCleanupScheduler { return this.cleanupScheduler; }
+  getTurnOrchestrator(): TurnOrchestrator { return this.turnOrchestrator; }
+  getTurnWatchdog(): TurnWatchdog { return this.turnWatchdog; }
+  get orchestrator(): TurnOrchestrator { return this.turnOrchestrator; }
+  get watchdog(): TurnWatchdog { return this.turnWatchdog; }
   getRateLimiter(): RateLimiter { return this.rateLimiter; }
   getEnvelopeValidator(): EnvelopeValidator { return this.envelopeValidator; }
   getIntentGuard(): IntentGuard { return this.intentGuard; }
@@ -326,8 +347,8 @@ export class WssServer {
   }
 
   private scheduleBotTurn(roomCode: string): void {
-    this.botScheduler.scheduleBotTurn(roomCode);
-    this.turnTimeoutScheduler.scheduleTurnTimeout(roomCode);
+    this.turnOrchestrator.orchestrate(roomCode);
+    this.turnWatchdog.notifyProgress(roomCode);
   }
 
   broadcastGameOver(roomCode: string, leaderboard?: Array<{ id: string; netWorth: number }>): void {
@@ -345,7 +366,8 @@ export class WssServer {
     if (this.closingRooms.has(roomCode)) return;
     this.closingRooms.add(roomCode);
     try {
-      this.turnTimeoutScheduler.clearTimeout(roomCode);
+      this.turnOrchestrator.clearRoom(roomCode);
+      this.turnWatchdog.clearRoom(roomCode);
       this.sockets.clearRoomSockets(roomCode);
       this.reconnects.clearRoom(roomCode);
       const room = this.rooms.getRoom(roomCode);
@@ -378,6 +400,7 @@ export class WssServer {
     this.isClosed = true;
     clearInterval(this.heartbeatTimer);
     this.cleanupScheduler.stop();
+    this.turnWatchdog.stop();
     this.reconnects.clear();
     for (const rc of this.rooms.getAllRoomCodes()) this.rooms.clearRoomTimers(rc);
     return new Promise((resolve, reject) => {

@@ -17,16 +17,19 @@ interface PipDef {
   readonly isRed?: boolean;
 }
 
+const FACE_OFFSET = 0.292;
+const PIP_GAP = 0.11;
+
 const DIE_PIPS: readonly PipDef[] = [
-  { pos: [0, 0.252, 0], isRed: true }, // Face 1 (+Y)
-  { pos: [-0.1, -0.252, -0.1] }, { pos: [-0.1, -0.252, 0] }, { pos: [-0.1, -0.252, 0.1] }, // Face 6 (-Y)
-  { pos: [0.1, -0.252, -0.1] }, { pos: [0.1, -0.252, 0] }, { pos: [0.1, -0.252, 0.1] },
-  { pos: [-0.1, -0.1, 0.252] }, { pos: [0.1, 0.1, 0.252] }, // Face 2 (+Z)
-  { pos: [-0.1, -0.1, -0.252] }, { pos: [0.1, 0.1, -0.252] }, { pos: [-0.1, 0.1, -0.252] }, // Face 5 (-Z)
-  { pos: [0.1, -0.1, -0.252] }, { pos: [0, 0, -0.252] },
-  { pos: [0.252, -0.1, -0.1] }, { pos: [0.252, 0, 0] }, { pos: [0.252, 0.1, 0.1] }, // Face 3 (+X)
-  { pos: [-0.252, -0.1, -0.1] }, { pos: [-0.252, 0.1, 0.1] }, // Face 4 (-X)
-  { pos: [-0.252, -0.1, 0.1] }, { pos: [-0.252, 0.1, -0.1] },
+  { pos: [0, FACE_OFFSET, 0], isRed: true }, // Face 1 (+Y)
+  { pos: [-PIP_GAP, -FACE_OFFSET, -PIP_GAP] }, { pos: [-PIP_GAP, -FACE_OFFSET, 0] }, { pos: [-PIP_GAP, -FACE_OFFSET, PIP_GAP] }, // Face 6 (-Y)
+  { pos: [PIP_GAP, -FACE_OFFSET, -PIP_GAP] }, { pos: [PIP_GAP, -FACE_OFFSET, 0] }, { pos: [PIP_GAP, -FACE_OFFSET, PIP_GAP] },
+  { pos: [-PIP_GAP, -PIP_GAP, FACE_OFFSET] }, { pos: [PIP_GAP, PIP_GAP, FACE_OFFSET] }, // Face 2 (+Z)
+  { pos: [-PIP_GAP, -PIP_GAP, -FACE_OFFSET] }, { pos: [PIP_GAP, PIP_GAP, -FACE_OFFSET] }, { pos: [-PIP_GAP, PIP_GAP, -FACE_OFFSET] }, // Face 5 (-Z)
+  { pos: [PIP_GAP, -PIP_GAP, -FACE_OFFSET] }, { pos: [0, 0, -FACE_OFFSET] },
+  { pos: [FACE_OFFSET, -PIP_GAP, -PIP_GAP] }, { pos: [FACE_OFFSET, 0, 0] }, { pos: [FACE_OFFSET, PIP_GAP, PIP_GAP] }, // Face 3 (+X)
+  { pos: [-FACE_OFFSET, -PIP_GAP, -PIP_GAP] }, { pos: [-FACE_OFFSET, PIP_GAP, PIP_GAP] }, // Face 4 (-X)
+  { pos: [-FACE_OFFSET, -PIP_GAP, PIP_GAP] }, { pos: [-FACE_OFFSET, PIP_GAP, -PIP_GAP] },
 ];
 
 function SingleDie({
@@ -36,7 +39,7 @@ function SingleDie({
   spinOffset,
   onRest,
   highlight,
-  fadeOpacity = 0.88,
+  fadeOpacity = 1.0,
 }: {
   readonly face: number;
   readonly targetX: number;
@@ -66,6 +69,8 @@ function SingleDie({
   const rotY = t.to((val) => targetRot[1] + spinOffset[1] * calculateDiceRotationFactor(val));
   const rotZ = t.to((val) => targetRot[2] + spinOffset[2] * calculateDiceRotationFactor(val));
 
+  const isFadeActive = fadeOpacity < 1.0;
+
   return (
     <a.group
       position-x={targetX}
@@ -76,24 +81,26 @@ function SingleDie({
       rotation-z={rotZ}
     >
       <mesh castShadow receiveShadow>
-        <boxGeometry args={[0.5, 0.5, 0.5]} />
+        <boxGeometry args={[0.58, 0.58, 0.58]} />
         <meshPhysicalMaterial
           color={highlight ? '#EF4444' : '#DC2626'}
-          roughness={0.12}
-          metalness={0.10}
-          transparent={true}
+          roughness={0.18}
+          metalness={0.05}
+          transparent={isFadeActive}
           opacity={fadeOpacity}
-          clearcoat={1.0}
-          clearcoatRoughness={0.08}
+          clearcoat={0.6}
+          clearcoatRoughness={0.12}
         />
       </mesh>
       {DIE_PIPS.map((pip, idx) => (
         <mesh key={idx} position={pip.pos}>
-          <sphereGeometry args={[0.038, 12, 12]} />
+          <sphereGeometry args={[pip.isRed ? 0.065 : 0.050, 12, 12]} />
           <meshStandardMaterial
             color={pip.isRed ? '#EF4444' : '#FFFFFF'}
+            emissive={pip.isRed ? '#EF4444' : '#FFFFFF'}
+            emissiveIntensity={0.25}
             roughness={0.15}
-            transparent={true}
+            transparent={isFadeActive}
             opacity={fadeOpacity}
           />
         </mesh>
@@ -103,13 +110,21 @@ function SingleDie({
 }
 
 export function DiceTray(): React.ReactElement {
-  const dice = useGameStore((s) => s.dice);
-  const isRolling = useGameStore((s) => s.isRolling);
+  const isSSR = typeof window === 'undefined';
+  const ssrState = isSSR ? useGameStore.getState() : null;
+
+  const diceStore = useGameStore((s) => s.dice);
+  const isRollingStore = useGameStore((s) => s.isRolling);
+  const currentTurnPlayerIdStore = useGameStore((s) => s.currentTurnPlayerId);
   const setIsRolling = useGameStore((s) => s.setIsRolling);
 
+  const dice = ssrState ? ssrState.dice : diceStore;
+  const isRolling = ssrState ? ssrState.isRolling : isRollingStore;
+  const currentTurnPlayerId = ssrState ? ssrState.currentTurnPlayerId : currentTurnPlayerIdStore;
+
   const prevRollingRef = useRef(false);
-  const [fadeOpacity, setFadeOpacity] = useState(0.88);
-  const [isVisible, setIsVisible] = useState(true);
+  const [fadeOpacity, setFadeOpacity] = useState(1.0);
+  const [isVisible, setIsVisible] = useState(currentTurnPlayerId === null || isRolling);
 
   const spinOffsetsRef = useRef<
     readonly [readonly [number, number, number], readonly [number, number, number]]
@@ -125,10 +140,10 @@ export function DiceTray(): React.ReactElement {
   useEffect(() => {
     if (isRolling) {
       setIsVisible(true);
-      setFadeOpacity(0.88);
+      setFadeOpacity(1.0);
       AudioEngine.playSfx(SoundEffect.DICE_ROLL);
     } else if (!isRolling && prevRollingRef.current) {
-      // Dừng quay -> chờ 1.5s rồi mờ dần trong 300ms (Phương án A)
+      // Dừng quay -> chờ 1.5s rồi mờ dần trong 300ms
       const timer = setTimeout(() => {
         setFadeOpacity(0);
         const hideTimer = setTimeout(() => {
@@ -142,47 +157,52 @@ export function DiceTray(): React.ReactElement {
   }, [isRolling]);
 
   const isDoubles = dice[0] === dice[1];
+  const shouldShowTray = currentTurnPlayerId === null ? true : (isSSR ? isRolling : (isRolling || isVisible));
 
   return (
-    <group position={[0.0, 0.020, 3.8]} data-testid="dice-tray">
-      {/* Sàn diễn xúc xắc phẳng trên Đại Lộ Sài Gòn với hoa văn la bàn đồng thau */}
-      <mesh receiveShadow position={[0, -0.01, 0]}>
-        <boxGeometry args={[3.2, 0.015, 2.4]} />
-        <meshStandardMaterial color="#94A3B8" roughness={0.65} />
-      </mesh>
-      <mesh receiveShadow position={[0, -0.005, 0]}>
-        <boxGeometry args={[3.0, 0.015, 2.2]} />
-        <meshStandardMaterial color="#CBD5E1" roughness={0.55} />
-      </mesh>
-      <mesh receiveShadow position={[0, 0.001, 0]}>
-        <boxGeometry args={[2.8, 0.015, 2.0]} />
-        <meshStandardMaterial color="#064E3B" roughness={0.8} />
-      </mesh>
-      <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[0.45, 0.48, 32]} />
-        <meshBasicMaterial color="#F59E0B" />
-      </mesh>
+    <group position={[0.0, 0.020, 0.0]} data-testid="dice-tray">
+      {shouldShowTray && (
+        <>
+          {/* Sàn diễn xúc xắc phẳng trên sông Sài Gòn với hoa văn la bàn đồng thau */}
+          <mesh receiveShadow position={[0, -0.01, 0]}>
+            <boxGeometry args={[3.2, 0.015, 2.4]} />
+            <meshStandardMaterial color="#94A3B8" roughness={0.65} />
+          </mesh>
+          <mesh receiveShadow position={[0, -0.005, 0]}>
+            <boxGeometry args={[3.0, 0.015, 2.2]} />
+            <meshStandardMaterial color="#CBD5E1" roughness={0.55} />
+          </mesh>
+          <mesh receiveShadow position={[0, 0.001, 0]}>
+            <boxGeometry args={[2.8, 0.015, 2.0]} />
+            <meshStandardMaterial color="#064E3B" roughness={0.8} />
+          </mesh>
+          <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[0.45, 0.48, 32]} />
+            <meshBasicMaterial color="#F59E0B" />
+          </mesh>
 
-      {/* 2 Xúc xắc 3D đỏ Ruby trong suốt với chuyển động vật lý đàn hồi */}
-      <group visible={isVisible}>
-        <SingleDie
-          face={dice[0]}
-          targetX={-0.6}
-          isRolling={isRolling}
-          spinOffset={spinOffsetsRef.current[0]}
-          highlight={isDoubles}
-          fadeOpacity={fadeOpacity}
-        />
-        <SingleDie
-          face={dice[1]}
-          targetX={0.6}
-          isRolling={isRolling}
-          spinOffset={spinOffsetsRef.current[1]}
-          highlight={isDoubles}
-          fadeOpacity={fadeOpacity}
-          onRest={() => setIsRolling(false)}
-        />
-      </group>
+          {/* 2 Xúc xắc 3D đỏ Ruby */}
+          <group>
+            <SingleDie
+              face={dice[0]}
+              targetX={-0.65}
+              isRolling={isRolling}
+              spinOffset={spinOffsetsRef.current[0]}
+              highlight={isDoubles}
+              fadeOpacity={fadeOpacity}
+            />
+            <SingleDie
+              face={dice[1]}
+              targetX={0.65}
+              isRolling={isRolling}
+              spinOffset={spinOffsetsRef.current[1]}
+              highlight={isDoubles}
+              fadeOpacity={fadeOpacity}
+              onRest={() => setIsRolling(false)}
+            />
+          </group>
+        </>
+      )}
     </group>
   );
 }
