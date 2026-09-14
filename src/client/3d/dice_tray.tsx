@@ -40,6 +40,7 @@ function SingleDie({
   onRest,
   highlight,
   fadeOpacity = 1.0,
+  diceSeq,
 }: {
   readonly face: number;
   readonly targetX: number;
@@ -48,13 +49,30 @@ function SingleDie({
   readonly onRest?: () => void;
   readonly highlight?: boolean;
   readonly fadeOpacity?: number;
+  readonly diceSeq?: number;
 }): React.ReactElement {
+  const lastAnimatedSeqRef = useRef<number | undefined>(undefined);
+  const prevRollingRef = useRef(false);
+
+  let shouldReset = false;
+  if (isRolling) {
+    if (diceSeq !== undefined) {
+      if (diceSeq !== lastAnimatedSeqRef.current) {
+        shouldReset = true;
+        lastAnimatedSeqRef.current = diceSeq;
+      }
+    } else if (!prevRollingRef.current) {
+      shouldReset = true;
+    }
+  }
+  prevRollingRef.current = isRolling;
+
   const targetRot = getDiceFaceRotation(clampDiceFace(face));
 
   const { t } = useSpring({
     from: { t: 0 },
     to: { t: 1 },
-    reset: isRolling,
+    reset: shouldReset,
     immediate: !isRolling,
     config: { duration: 1100 },
     onRest: (result) => {
@@ -83,7 +101,7 @@ function SingleDie({
       <mesh castShadow receiveShadow>
         <boxGeometry args={[0.58, 0.58, 0.58]} />
         <meshPhysicalMaterial
-          color={highlight ? '#EF4444' : '#DC2626'}
+          color={highlight ? '#B91C1C' : '#DC2626'}
           roughness={0.18}
           metalness={0.05}
           transparent={isFadeActive}
@@ -156,8 +174,11 @@ export function DiceTray(): React.ReactElement {
     prevRollingRef.current = isRolling;
   }, [isRolling]);
 
+  const lastDiceSeqStore = useGameStore((s) => s.lastDiceSeq);
+  const lastDiceSeq = ssrState ? ssrState.lastDiceSeq : lastDiceSeqStore;
+
   const isDoubles = dice[0] === dice[1];
-  const shouldShowTray = currentTurnPlayerId === null ? true : (isSSR ? isRolling : (isRolling || isVisible));
+  const shouldShowTray = currentTurnPlayerId === null ? true : (isRolling || isVisible);
 
   return (
     <group position={[0.0, 0.020, 0.0]} data-testid="dice-tray">
@@ -180,29 +201,31 @@ export function DiceTray(): React.ReactElement {
             <ringGeometry args={[0.45, 0.48, 32]} />
             <meshBasicMaterial color="#F59E0B" />
           </mesh>
-
-          {/* 2 Xúc xắc 3D đỏ Ruby */}
-          <group>
-            <SingleDie
-              face={dice[0]}
-              targetX={-0.65}
-              isRolling={isRolling}
-              spinOffset={spinOffsetsRef.current[0]}
-              highlight={isDoubles}
-              fadeOpacity={fadeOpacity}
-            />
-            <SingleDie
-              face={dice[1]}
-              targetX={0.65}
-              isRolling={isRolling}
-              spinOffset={spinOffsetsRef.current[1]}
-              highlight={isDoubles}
-              fadeOpacity={fadeOpacity}
-              onRest={() => setIsRolling(false)}
-            />
-          </group>
         </>
       )}
+
+      {/* 2 Xúc xắc 3D đỏ Ruby luôn hiện diện trong render tree */}
+      <group>
+        <SingleDie
+          face={dice[0]}
+          targetX={-0.65}
+          isRolling={isRolling}
+          spinOffset={spinOffsetsRef.current[0]}
+          highlight={isDoubles}
+          fadeOpacity={fadeOpacity}
+          diceSeq={lastDiceSeq}
+        />
+        <SingleDie
+          face={dice[1]}
+          targetX={0.65}
+          isRolling={isRolling}
+          spinOffset={spinOffsetsRef.current[1]}
+          highlight={isDoubles}
+          fadeOpacity={fadeOpacity}
+          diceSeq={lastDiceSeq}
+          onRest={() => setIsRolling(false)}
+        />
+      </group>
     </group>
   );
 }

@@ -15,7 +15,7 @@ Bản tài liệu thiết kế hoàn chỉnh của trò chơi **"Đại Gia Đ�
   * *Theo thanh khoản:* Nếu có người chơi phá sản (âm tiền mặt sau khi đã thế chấp/bán toàn bộ tài sản), trận đấu dừng lại và chốt kết quả ngay lập tức.  
 * **Quy tắc Đấu giá Bất động sản Tự động (Auto-Auction Rule):**  
   * Khi người chơi dừng tại một ô đất chưa có chủ nhưng quyết định Bỏ qua, ô đất này không được giữ nguyên mà lập tức đưa vào phiên đấu giá công khai.  
-  * Mọi người chơi khác (ngoại trừ người vừa bỏ qua) đều có quyền đặt giá. Giá khởi điểm: 50% giá niêm yết. Bước giá: +100 Tr. VNĐ. Người chơi không được đặt vượt quá số tiền mặt khả dụng hiện có.  
+  * Mọi người chơi khác (ngoại trừ người vừa bỏ qua) đều có quyền đặt giá. Giá khởi điểm: 50% giá niêm yết. Bước giá tối thiểu: +50 Tr. VNĐ (hỗ trợ các mức nâng giá +50, +100, +200 Tr. VNĐ theo IMP-49). Người chơi không được đặt vượt quá số tiền mặt khả dụng hiện có.  
 * **Quy tắc Thương lượng & Giao dịch Song phương (P2P Trading Rule):**  
   * Người chơi chỉ được mở giao dịch trong lượt của mình (giai đoạn Quản lý tài sản).  
   * Đối tượng giao dịch hợp lệ: Đất trống (Cấp 0), Thẻ Miễn Trừ Ngoại Giao, tiền mặt. Không được phép giao dịch các ô đất đã xây dựng công trình (phải thanh lý công trình về Cấp 0 trước khi chuyển nhượng).  

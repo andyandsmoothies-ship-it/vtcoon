@@ -60,8 +60,16 @@ export function matchRentTransactions(
 function processPayerFee(
   payer: BalanceDelta,
   context: PropertyFinancialContext,
+  delta?: DeltaPayload,
 ): ActivityLogEntry | null {
   const absDiff = Math.abs(payer.diff);
+  if (
+    context.boughtCellIndices.length > 0 &&
+    delta?.cells?.some((c) => c.ownerId === payer.id && context.boughtCellIndices.includes(c.index))
+  ) {
+    return null;
+  }
+
   const isPurchase = context.boughtCellIndices.some((idx) => PROPERTY_DEEDS.get(idx)?.price === absDiff);
   if (isPurchase) return null;
 
@@ -114,11 +122,12 @@ export function extractMiscellaneousBalances(
   handledPayerIds: Set<string>,
   handledReceiverIds: Set<string>,
   context: PropertyFinancialContext,
+  delta?: DeltaPayload,
 ): ActivityLogEntry[] {
   const logs: ActivityLogEntry[] = [];
   for (const payer of payers) {
     if (handledPayerIds.has(payer.id)) continue;
-    const feeLog = processPayerFee(payer, context);
+    const feeLog = processPayerFee(payer, context, delta);
     if (feeLog) logs.push(feeLog);
   }
   for (const receiver of receivers) {
@@ -171,6 +180,6 @@ export function detectFinancialAndStatusActivities(
 
   const { rentLogs, handledPayerIds, handledReceiverIds } = matchRentTransactions(payers, receivers);
   entries.push(...rentLogs);
-  entries.push(...extractMiscellaneousBalances(payers, receivers, handledPayerIds, handledReceiverIds, context));
+  entries.push(...extractMiscellaneousBalances(payers, receivers, handledPayerIds, handledReceiverIds, context, delta));
   return entries;
 }

@@ -16,6 +16,7 @@
    - [6.2 Cổng Thẩm Mỹ Hai Tầng: 3D Visual Critic + 2D Tactile Craft](#62-cổng-thẩm-mỹ-hai-tầng-3d-visual-critic--2d-tactile-craft-two-tier-visual-gate)
    - [6.3 Bộ Công Cụ Local Quality Gates Chuẩn Mực Cho Junior Developer (Solo Harness)](#63-bộ-công-cụ-local-quality-gates-chuẩn-mực-cho-junior-developer-solo-harness)
    - [6.4 Quy Chuẩn Test Nguyên Tử & Ma Trận 4 Khía Cạnh Hành Vi Đa Năng Cho Mọi Dự Án](#64-quy-chuẩn-test-nguyên-tử--ma-trận-4-khía-cạnh-hành-vi-đa-năng-cho-mọi-dự-án)
+   - [6.5 Ma Trận Sẵn Sàng Xuất Xưởng Theo Hình Thái Dự Án (Archetype-Based Production Ship Readiness Matrix)](#65-ma-trận-sẵn-sàng-xuất-xưởng-theo-hình-thái-dự-án-archetype-based-production-ship-readiness-matrix)
 7. [GIAI ĐOẠN 1: Khởi Tạo Dự Án & Cài Đặt Cấp Project (Setup 1 Lần)](#giai-đoạn-1-khởi-tạo-dự-án--cài-đặt-cấp-project-setup-1-lần)
    - [1.0.1 Quy Tắc Bản Địa Hóa Công Cụ Native AG 2.0 & Tiêu Chuẩn Kỹ Năng (Toolchain Mapping, reference/, PRODUCT.md)](#101-quy-tắc-bản-địa-hóa-công-cụ-sang-native-ag-20--tiêu-chuẩn-kỹ-năng-toolchain-mapping)
 8. [GIAI ĐOẠN 2: Trọn Bộ Subagents Chuyên Trách Native AG 2.0 Sẵn Sàng Sử Dụng](#giai-đoạn-2-trọn-bộ-subagents-chuyên-trách-native-ag-20-sẵn-sàng-sử-dụng)
@@ -207,6 +208,37 @@
         • Hợp Nhất Bề Mặt Hành Động (Action Surface Consolidation & Cognitive Load Budget): Tránh phân mảnh quá nhiều nút bấm
           cùng trỏ vào một thực thể nghiệp vụ. Gom các thao tác liên quan thành một điểm chạm hợp nhất với bộ điều hướng ngữ cảnh
           để tối ưu hóa tải nhận thức (Cognitive Load) cho người dùng cuối.
+│
+├── 19. QUY TRÌNH TRIỂN KHAI 3 TRẠM BẮT BUỘC & KIỂM CHỨNG ĐĨA VẬT LÝ (MANDATORY 3-STATION PIPELINE):
+│       • Triệt tiêu bẫy "AI tự viết test rồi tự duyệt code" (Conversational Approval Hallucination).
+│       • Pre-Flight Visual Banner: Agent bắt buộc in biểu ngữ `🚦 [KÍCH HOẠT QUY TRÌNH 3 TRẠM]` lên chat trước khi dispatch.
+│       • Trạm 1 (RED Contract Test): `qa-tester` viết contract test trong `tests/**`, chứng minh Adversarial Inversion (test đỏ thật sự).
+│         CẤM sửa `src/**`. Atomic test (1-4 asserts/test, `it.each`, cấm vòng lặp trong `it()`). Sàn mật độ >= 15 atomic tests/slice.
+│       • Trạm 2 (GREEN Implementation): `implementer` viết mã tối thiểu trong `src/**` để pass test. CẤM nới lỏng assertion (Zero Bug-Codification).
+│       • Trạm 3 (Thẩm Định Độc Lập & Kiểm Chứng Đĩa Vật Lý): Read-only reviewers (`spec-reviewer`, `code-reviewer`...).
+│         CẤM implementer tự duyệt code mình. CẤM duyệt dựa trên lời nói trong chat. Reviewers BẮT BUỘC dùng công cụ đọc đĩa vật lý
+│         (`view_file`, `list_dir`, lệnh terminal thực tế) để xác minh code thật và test thật đang PASS trên đĩa cứng trước khi ký [APPROVED].
+│
+├── 20. 4 TRỤ CỘT KIẾN TRÚC PHÒNG THỦ TOÀN DIỆN CHO HỆ THỐNG BẤT ĐỒNG BỘ (FOUR PILLARS OF ARCHITECTURE DEFENSE):
+│       • Áp dụng cho mọi hệ thống phân tán, event-driven, multi-user, stateful hoặc async:
+│       • Trụ Cột 1 (Unified Orchestrator): Hợp nhất bộ điều phối tập trung. CẤM nhiều timer/scheduler độc lập gọi chéo nhau gây race condition và đệ quy.
+│       • Trụ Cột 2 (Living Chaos Suite & Virtual Clock): Kiểm thử mô phỏng sống in-memory với đồng hồ ảo (`vi.useFakeTimers()`).
+│         Chốt chặn 2 Invariants tự động: Loop Detection (>5 intents lặp không đổi state ➔ Báo đỏ) và Stall Detection (>45s không đổi pha ➔ Báo đỏ).
+│       • Trụ Cột 3 (UI as Pure Projection): Khóa cứng công thức UI = f(State). CẤM UI tự ý đóng/mở state nghiệp vụ bằng setInterval cục bộ.
+│         Mọi modal/dialog chỉ đóng/mở đồng bộ theo tín hiệu từ State nguồn.
+│       • Trụ Cột 4 (Fail-Safe Watchdog Auto-Recovery): Chó canh phòng cấp máy chủ tự động giải cứu khi luồng kẹt > 45s (cưỡng chế chuyển lượt / timeout an toàn).
+│
+└── 21. KIỂM SOÁT TRẦN TÀI NGUYÊN KIỂM THỬ & PHÂN TẦNG TEST SUITES (TEST RESOURCE CEILING & TIERED EXECUTION):
+        • Trần Luồng An Toàn (Thread Pool Ceiling): Cấu hình Test Runner (Vitest/Jest) `maxThreads <= 4` hoặc `<= 50% CPU logic`.
+          Không bao giờ cho phép Test Runner vắt kiệt 100% CPU làm đơ giật máy tính người dùng.
+        • Triệt Tiêu Log Spam (Stdout Silence Invariant): Mute `console.info/warn` trong vòng lặp test mô phỏng bằng khối `try/finally`.
+          Chỉ xuất bảng ASCII tổng kết ở cuối. Triệt tiêu nghẽn IPC và tràn bộ đệm terminal.
+        • Phân Tầng 3 Cấp:
+          - Tầng 1: `npm test` (Fast In-Memory): Unit, Contract, FSM, 100 ván mô phỏng nhẹ (<0.4s). Toàn bộ hoàn thành trong <= 5-10s.
+          - Tầng 2: `npm run test:chaos` (Release Audit): Chạy riêng 1.000 ván Monte Carlo hoặc stress test nặng khi chuẩn bị xuất xưởng.
+          - Tầng 3: `npm run test:uat` (Heavy Browser Screenshots): Chỉ chạy khi sửa core logic ở domain/server, CẤM chạy khi sửa UI/CSS/docs.
+        • Kiểm Toán Bộ Nhớ Tất Định: CẤM assert `heapUsed` của V8 (`heapAfter - heapBefore > 0`) trong unit test vì GC ngầm không tất định.
+          Kiểm toán rò rỉ BẮT BUỘC assert trên số lượng object/resource tham chiếu thực tế (`activeResources === N`, `retainedReferences.length > 0`).
 ```
 
 
@@ -314,13 +346,17 @@ docs/
 │       └── BR-[EPIC]-[NNN].md       <── Quy tắc nghiệp vụ độc lập (nếu tách rời)
 ├── domain/                         <── Bucket 2: Từ điển nghiệp vụ & Quyết định kiến trúc & Visual UI/UX
 │   ├── CONTEXT.md                   <── Từ điển thuật ngữ miền (Ubiquitous Language)
+│   ├── gotchas.md                   <── Bộ nhớ miền phản tư động & Bất biến đánh số (Active Domain Memory & Reflexion Loop)
 │   ├── use_cases.puml               <── Sơ đồ Use Case tổng thể toàn hệ thống
 │   ├── entity_model.md              <── Mô hình thực thể DUY NHẤT (Single Source of Truth)
 │   ├── design.md                    <── Chuẩn Quản trị Visual UI/UX (Web, Mobile, PDF, CLI)
 │   └── adr/                         <── Nhật ký quyết định kiến trúc 4 chiều (ADR-0001-use-postgres.md)
+├── plans/                          <── Kế hoạch thi công chi tiết
+│   └── improvements/                <── Kế hoạch cải tiến đột xuất (IMP-[ID]-[slug]_plan.md)
 └── reports/                        <── Bucket 3: Báo cáo kiểm định, chẩn đoán & bàn giao
     ├── audits/                      <── Báo cáo audit kiến trúc, bảo mật (audit_[TIMESTAMP].md)
     ├── diagnostics/                 <── Báo cáo phân tích bug (diag_[TIMESTAMP].md)
+    ├── improvements/                <── Báo cáo nghiệm thu cải tiến đột xuất (IMP-[ID]-[slug]_report.md)
     └── handoff/                     <── Báo cáo nén trạng thái bàn giao phiên (handoff_[TIMESTAMP].md)
 issues/                             <── Thư mục chứa ticket thi công từng lát cắt
 └── [EPIC]-S[NN]-[kebab-name].md     <── Ticket thi công lát cắt khép kín (Ví dụ: AUTH-S01-mss-registration.md)
@@ -568,8 +604,12 @@ graph LR
 
 > [!IMPORTANT]
 > **Quy Tắc Phân Tầng Thực Thi & Ranh Giới Kích Hoạt (Test Tiering Execution Boundary)**:
-> 1. **Vòng lặp phát triển hàng ngày (`npm test`)**: Bao gồm Tầng 1, 2, 3 và Tầng 4.1 (Headless Chaos Simulator 1.000 ván in-memory không mở browser). Toàn bộ phải hoàn thành trong <= 5 giây.
-> 2. **Nghiệm thu UAT & Chụp ảnh trình duyệt (`npm run test:uat`)**: Kịch bản chạy 100 lượt có chụp ảnh màn hình bằng trình duyệt (`record_screenshots_scenarios.test.ts`). **CHỈ kích hoạt** khi có thay đổi trong `src/domain/` (FSM, luật chơi), `src/server/` (Network, RoomManager) hoặc khi nghiệm thu xuất xưởng v1.0. **TUYỆT ĐỐI CẤM chạy** khi chỉ sửa UI/CSS, 3D Assets hoặc tài liệu để tránh lãng phí I/O đĩa và thời gian.
+> 1. **Vòng lặp phát triển hàng ngày (`npm test`)**: Bao gồm Tầng 1 (Contract), Tầng 2 (Unit), Tầng 3 (E2E) và mô phỏng nhẹ 100 ván in-memory (<0.4s). Toàn bộ test suite phải hoàn thành trong <= 5–10 giây.
+> 2. **Kiểm tra tải chuyên sâu xuất xưởng (`npm run test:chaos`)**: Kịch bản mô phỏng 1.000 ván Monte Carlo hoặc stress test nặng. **CHỈ kích hoạt** khi chuẩn bị xuất xưởng (Release Audit) hoặc kiểm tra sức bền định kỳ, tách biệt khỏi `npm test` hàng ngày.
+> 3. **Nghiệm thu UAT & Chụp ảnh trình duyệt (`npm run test:uat`)**: Kịch bản chạy 100 lượt có chụp ảnh màn hình bằng trình duyệt (`record_screenshots_scenarios.test.ts`). **CHỈ kích hoạt** khi có thay đổi trong `src/domain/` (FSM, luật chơi), `src/server/` (Network, RoomManager) hoặc khi nghiệm thu xuất xưởng v1.0. **TUYỆT ĐỐI CẤM chạy** khi chỉ sửa UI/CSS, 3D Assets hoặc tài liệu để tránh lãng phí I/O đĩa và thời gian.
+> 4. **Trần Luồng An Toàn & Triệt Tiêu Log Spam**:
+>    - *Thread Pool Ceiling*: Test runner BẮT BUỘC cấu hình `maxThreads <= 4` hoặc `<= 50% CPU logic` (`Math.min(4, cpus/2)`). Cấm để Test Runner vắt kiệt 100% CPU máy của Junior.
+>    - *Stdout Silence*: Mute `console.info/warn` trong vòng lặp test mô phỏng bằng khối `try/finally`. Chỉ xuất bảng ASCII tổng kết ở cuối để tránh nghẽn I/O terminal.
 
 ### 6.2 CỔNG THẨM MỸ HAI TẦNG: 3D VISUAL CRITIC + 2D TACTILE CRAFT (TWO-TIER VISUAL GATE)
 *(Triệt tiêu bẫy "Virtual Green Trap": Test Vitest/Jest chạy in-memory xanh 100% nhưng màn hình WebGL thực tế bị đen, camera trực giao phẳng lì như SimCity 2000, nút bấm 2D giật lag méo góc hoặc CSS vỡ nát. Nâng cấp thành cổng thẩm mỹ 2 tầng song song)*:
@@ -773,7 +813,7 @@ export function lintSlopContent(content, filePath = 'anonymous.ts') {
 
 *(Khắc phục triệt để 2 phản mẫu: Bệnh nhồi nhét Monolithic Test và Bẫy kiểm tra tồn tại tĩnh Checklist Fallacy. Áp dụng cho mọi loại dự án từ Backend, Frontend, 3D Game đến FinTech)*:
 
-#### 1. Ba Quy Chuẩn Kiểm Thử Bất Biến Chung (Universal Test Core)
+#### 1. Bốn Quy Chuẩn Kiểm Thử Bất Biến Chung (Universal Test Core)
 
 1. **Kiểm Thử Nguyên Tử (Atomic Test Mandate) & Tham Số Hóa (Parameterized Testing)**:
    - Mỗi câu lệnh `it()` hoặc `test()` chỉ kiểm chứng **1 hành vi quan sát được hoặc 1 bất biến duy nhất**.
@@ -797,6 +837,14 @@ export function lintSlopContent(content, filePath = 'anonymous.ts') {
    - Mỗi lát cắt tính năng (Feature Slice) bắt buộc sinh ra tối thiểu **15 đến 30 atomic test cases**.
    - Tỷ lệ `expect()` / `it()` đạt chuẩn trong khoảng **1.0 đến 3.5**. Vượt quá 4.0 là dấu hiệu nhồi nhét Monolithic Test.
 
+4. **Kiểm Toán Rò Rỉ Tài Nguyên & Bộ Nhớ Tất Định (Deterministic Resource & Memory Retention Invariant)**:
+   - ❌ **CẤM** viết test assertion dựa vào biến thiên heap runtime ngẫu nhiên như `expect(process.memoryUsage().heapUsed).toBeLessThan(...)` hoặc `expect(deltaHeap).toBeGreaterThan(0)`. Cơ chế Garbage Collection (GC) của V8, .NET, JVM, Python chạy không tất định theo chu kỳ ngẫu nhiên của OS, gây ra lỗi flaky test (lúc đỗ lúc trượt giả).
+   - ✅ **BẮT BUỘC** kiểm thử rò rỉ bộ nhớ và tài nguyên bằng cấu trúc tham chiếu cụ thể (Structural Reference & Retention Counting):
+     * Kiểm tra số thực thể hoặc kết nối còn giữ trong Pool/Registry: `expect(activePool.size).toBe(0)` sau khi đóng phiên; hoặc `expect(retainedReferences.length).toBeGreaterThan(0)` khi mô phỏng rò rỉ chủ đích.
+     * Kiểm tra tháo gỡ sự kiện/listener: `expect(eventEmitter.listenerCount('event')).toBe(0)`.
+     * Kiểm tra cờ giải phóng hoặc hàm hủy: `expect(resource.isDisposed).toBe(true)` hoặc `expect(timer.hasRef()).toBe(false)`.
+   - Đảm bảo kiểm thử chạy 1.000 lần ở mọi môi trường CI/CD đều cho kết quả tất định 100%, không bị ảnh hưởng bởi chu kỳ dọn rác của môi trường.
+
 #### 2. Ma Trận 4 Khía Cạnh Hành Vi Đa Năng Theo Dòng Dự Án (Universal 4-Facet Matrix)
 
 Khi viết test ở Trạm 1 (RED Contract Tests), người lập trình đối chiếu với dòng dự án tương ứng để bao phủ đủ 4 khía cạnh:
@@ -809,9 +857,76 @@ Khi viết test ở Trạm 1 (RED Contract Tests), người lập trình đối 
 | **4. Phòng Thủ Ngoại Lệ (Error Defense)** | • Trả mã lỗi chuẩn (400, 401, 404)<br>• Chặn SQL injection / Payload độc<br>• Khóa Mutex chống Race-condition | • Xử lý mất kết nối mạng (Offline)<br>• Chống XSS input<br>• Chống Double-click (Throttle) | • Xử lý slotIndex ngoại lệ (âm, NaN, vượt trần)<br>• Vật thể ngoài camera frustum | • Chống chi tiêu kép (Double spend)<br>• Chống giao dịch lặp (Idempotent)<br>• Chặn rút tiền vượt số dư khả dụng |
 
 ---
+
+### 6.5 MA TRẬN SẴN SÀNG XUẤT XƯỞNG THEO HÌNH THÁI DỰ ÁN (ARCHETYPE-BASED PRODUCTION SHIP READINESS MATRIX)
+
+> "Đẹp thì dễ, xuất xưởng an toàn mới khó (Pretty is easy. This list is what actually ships)."
+
+#### 1. Bẫy Tư Duy Của Junior: "Copy-Paste Checklist Tiếp Thị Vào Mọi Dự Án" (The Generic Checklist Fallacy)
+Trong thực tế, các lập trình viên mới (Junior) hoặc các AI Agent thường hay tìm kiếm hoặc copy các danh sách kiểm tra lan truyền trên mạng (viral checklists, ví dụ: *"20 things missing before your website ships: custom 404, sitemap.xml, robots.txt, sticky mobile CTA, thank-you page..."*).
+
+Việc áp dụng mù quáng danh sách này vào mọi dự án dẫn đến 2 sai lầm nghiêm trọng:
+1. **Rác Kiến Trúc (Architectural Slop & Security Leak)**: Cố tình tạo file `sitemap.xml`, `robots.txt`, `Thank-you page` cho một ứng dụng Game 3D toàn màn hình hoặc một trang Quản trị Nội bộ (Internal Admin Portal). Hậu quả là làm lộ các đường dẫn bảo mật nội bộ cho crawler hoặc sinh mã vô nghĩa không bao giờ dùng tới.
+2. **Bỏ Sót Bất Biến Sống Còn Của Miền Nghiệp Vụ (Domain Blind Spot)**: Chăm chút các thẻ tiếp thị nhưng bỏ quên cơ chế khóa Viewport di động (`100dvh`), chống pull-to-refresh trên màn hình Canvas, bỏ quên cơ chế ân hạn ngắt kết nối WebSocket (Grace Period), hoặc cơ chế xử lý lỗi khi vào phòng không tồn tại.
+
+#### 2. Phân Định 5 Hình Thái Dự Án Thực Tế (The 5 Core Project Archetypes)
+
+```text
+                                 [HÌNH THÁI DỰ ÁN (PROJECT ARCHETYPE)]
+                                                   │
+         ┌──────────────────┬──────────────────────┼─────────────────────┬──────────────────┐
+         ▼                  ▼                      ▼                     ▼                  ▼
+   [ARCHETYPE A]      [ARCHETYPE B]          [ARCHETYPE C]         [ARCHETYPE D]      [ARCHETYPE E]
+  Marketing SaaS /    Real-time WebGL /      B2B Enterprise /      Mobile Native /    Developer Tool /
+  E-commerce Web      Canvas Web Game        Internal Portal       Cross-Platform     CLI / Backend API
+  (Nhiều trang tĩnh,  (1 trang SPA kín,      (Sau lớp đăng nhập,   (iOS / Android,    (Headless, stdout,
+   Google SEO, Lead)   WebSocket, Canvas)     RBAC, Audit Trail)    App Store review)  POSIX exit codes)
+```
+
+#### 3. Ma Trận Đối Chiếu Chi Tiết 20 Hạng Mục Xuất Xưởng (The Ship-Readiness Matrix)
+
+Quy ước:
+- ✅ **BẮT BUỘC (Critical)**: Phải có trước khi bấm deploy production.
+- ⚡ **TÙY CHỌN (Contextual)**: Triển khai nếu có tính năng liên quan.
+- ❌ **CẤM KỴ / SLOP (Anti-pattern)**: Thừa thãi, làm bẩn mã nguồn hoặc gây lỗ hổng bảo mật nếu đưa vào hình thái này.
+
+| # | Hạng Mục Kiểm Tra | Archetype A: Marketing / E-Com | Archetype B: WebGL / Web Game (như VTCoOn) | Archetype C: B2B Internal Portal | Archetype D: Mobile App (Flutter/RN) | Archetype E: CLI / Microservice |
+|:---:|:---|:---:|:---:|:---:|:---:|:---:|
+| 1 | **Custom 404 / Error Screen** | ✅ Trang 404 SEO thân thiện | ✅ Màn hình Phòng Không Tồn Tại / Đã Kết Thúc | ✅ Trang 404/403 (Forbidden) kèm nút Back | ⚡ Màn hình Deep link không hợp lệ | ❌ Không dùng (Trả mã lỗi 404 / Exit Code 1) |
+| 2 | **Meta Title per Page** | ✅ Mỗi bài viết/sản phẩm 1 title riêng | ❌ Chỉ cần 1 title duy nhất tại index.html | ⚡ Title động theo chức năng tab làm việc | ❌ Không dùng (Mobile có App Name native) | ❌ Không dùng |
+| 3 | **Meta Description per Page** | ✅ Tối ưu cho Google SERP snippet | ❌ Chỉ cần 1 description tổng thể | ❌ Cấm lộ mô tả nghiệp vụ nội bộ | ❌ Không dùng | ❌ Không dùng |
+| 4 | **CTA Above the Fold** | ✅ Nút Đăng Ký / Mua Hàng đập vào mắt ngay | ❌ Game không cuộn dọc; nút nằm ở Action Dock | ❌ Nút thao tác bố trí theo luồng công việc | ❌ Bố trí theo UX chuẩn iOS/Android HIG | ❌ Không dùng |
+| 5 | **Favicon Set** | ✅ Đủ ico, 32x32, 192x192, apple-touch | ✅ Đủ bộ icon tab trình duyệt và PWA | ✅ Icon nhận diện thương hiệu công ty | ❌ Dùng App Icon native (xcassets / res) | ❌ Không dùng |
+| 6 | **robots.txt** | ✅ Cho phép index trang công khai | ❌ Không cần (hoặc Disallow: / nếu game kín) | ❌ BẮT BUỘC: `User-agent: * Disallow: /` | ❌ Không dùng | ❌ Không dùng |
+| 7 | **sitemap.xml** | ✅ Bắt buộc để Google lập chỉ mục đầy đủ | ❌ SLOP: Phòng chơi sinh ngẫu nhiên, cấm sitemap | ❌ CẤM: Tránh lộ cấu trúc API/đường dẫn nội bộ | ❌ Không dùng | ❌ Không dùng |
+| 8 | **Open Graph Image (1200x630)** | ✅ Ảnh thumbnail đại diện khi share link | ✅ BẮT BUỘC: Thumbnail hấp dẫn khi share link phòng | ❌ Không share mạng xã hội | ⚡ Khi có tính năng chia sẻ giới thiệu app | ❌ Không dùng |
+| 9 | **Alt Text On Images** | ✅ Bắt buộc cho SEO và chuẩn tiếp cận a11y | ⚡ Cho icon 2D UI; Canvas 3D dùng ARIA canvas | ⚡ Cho avatar, chứng từ đính kèm | ✅ ContentDescription / Semantics label | ❌ Không dùng |
+| 10 | **Mobile Breakpoints / Viewport** | ✅ Co giãn layout đa màn hình (Responsive) | ✅ Khóa Viewport `100dvh`, chặn pull-to-refresh | ⚡ Ưu tiên Desktop/Tablet; co giãn bảng biểu | ✅ Tương thích Safe Area (Tai thỏ, Home bar) | ❌ Chuẩn hóa kích thước Terminal (COLUMNS) |
+| 11 | **Sticky Mobile CTA** | ✅ Nút mua dính đáy màn hình khi cuộn | ❌ SLOP: Game toàn màn hình, không có cuộn trang | ⚡ Action Bar dính đáy form dài | ⚡ Bottom Action Bar nổi | ❌ Không dùng |
+| 12 | **Loading States** | ✅ Skeleton screens, spinners khi fetch API | ✅ Suspense 3D, thanh đếm ngược lượt chơi | ✅ Skeleton table, nút bấm disable có spinner | ✅ Shimmer loading, pull-to-refresh indicator | ⚡ Progress bar (cli-spinners) khi tải lâu |
+| 13 | **Form Error States** | ✅ Báo đỏ từng ô input (inline validation) | ✅ Toast thông báo lỗi WebSocket (VD: BID_TOO_LOW) | ✅ Inline error, Toast tổng hợp lỗi từ Backend | ✅ Helper text đỏ dưới TextField native | ✅ Ghi rõ lỗi ra stderr kèm mã thoát |
+| 14 | **Thank You Page** | ✅ Trang xác nhận thanh toán/thu thập lead | ❌ SLOP: Game dùng màn hình Bục Vinh Danh | ❌ Dùng Toast "Cập nhật dữ liệu thành công" | ❌ Dùng màn hình Success dialog | ❌ In ra thông điệp hoàn tất trên stdout |
+| 15 | **Privacy Policy Page** | ✅ Bắt buộc cho Google Ads / Stripe / GDPR | ⚡ Hộp thoại "Điều Khoản & Bảo Mật" tại Sảnh | ⚡ Thỏa thuận bảo mật nội bộ công ty (NDA) | ✅ Bắt buộc nộp lên App Store / Google Play | ❌ Không dùng |
+| 16 | **Terms & Conditions** | ✅ Điều khoản sử dụng dịch vụ thương mại | ⚡ Hộp thoại "Luật Chơi & Thể Lệ" tại Sảnh | ⚡ Quy chế sử dụng hạ tầng CNTT | ✅ EULA bắt buộc khi người dùng mở app | ❌ License file (MIT, Apache 2.0) |
+| 17 | **Cookie Banner** | ✅ Bắt buộc nếu có cookie theo dõi tại EU/VN | ❌ Game dùng WebSocket/LocalStorage, không track | ❌ Không dùng (Cookie nội bộ xác thực HttpOnly) | ❌ Không dùng | ❌ Không dùng |
+| 18 | **Analytics Installed** | ✅ Google Analytics, Meta Pixel, PostHog | ⚡ Đo số người online, tỷ lệ rớt mạng WS | ⚡ Log hành vi người dùng vào Audit Log nội bộ | ✅ Firebase Analytics, Mixpanel | ⚡ Telemetry ẩn danh (OpenTelemetry) |
+| 19 | **Real Contact Address** | ✅ Địa chỉ pháp lý công ty ở Footer | ⚡ Email hỗ trợ / Link Discord tại Settings | ⚡ Kênh IT Helpdesk nội bộ | ⚡ Email hỗ trợ nhà phát triển trên Store | ⚡ URL báo lỗi GitHub Issues |
+| 20 | **Compressed Media / Assets** | ✅ WebP/AVIF < 100KB, tối ưu LCP | ✅ Kiểm soát GLB 3D (< 2.5MB), Audio nén Opus | ⚡ Nén ảnh đại diện, chứng từ tải lên | ✅ Nén sprite sheet, SVG vector native | ❌ Binary size nhỏ gọn (< 50MB) |
+
+#### 4. Quy Tắc 3 Bước Phân Biệt Cho Junior Developer Khi Nhận Checklist
+Khi đọc bất kỳ checklist nào trên mạng hoặc tài liệu của bên thứ ba, bạn thực hiện 3 bước rà soát trước khi gõ phím:
+1. **Bước 1 (Xác định Hình thái Archetype)**: Dự án này người dùng tương tác như thế nào? (Bằng cuộn trang? Bằng click bàn cờ 3D? Bằng màn hình cảm ứng? Hay bằng dòng lệnh?). Đường dẫn tiếp cận là gì? (Google tìm kiếm? Link chia sẻ Zalo? Hay tài khoản nội bộ công ty cấp?).
+2. **Bước 2 (Lọc Bỏ Rác Kiến Trúc - Anti-Slop Filter)**: Đánh dấu gạch bỏ ngay lập tức các hạng mục không thuộc hành vi người dùng của Archetype đó. *Ví dụ: Nếu là Web Game, tuyệt đối không tạo sitemap.xml hay Thank-you page.*
+3. **Bước 3 (Bản Địa Hóa Cho Đúng Miền Nghiệp Vụ - Domain Adaptation)**: Chuyển hóa các yêu cầu chung chung thành giải pháp đúng bản chất kỹ thuật:
+   - "404 Page" ➔ Chuyển thành "Màn hình Phòng không tồn tại hoặc đã bị giải phóng" với nút [Về Sảnh Chờ].
+   - "Mobile Breakpoint" ➔ Chuyển thành "CSS `height: 100dvh` + `overscroll-behavior: none` + `touch-action: none` trên WebGL Canvas".
+   - "Open Graph Image" ➔ Chuyển thành "Ảnh bìa 3D kích thước 1200x630 đại diện bàn cờ để link mời bạn bè trên mạng xã hội hiển thị bắt mắt".
+
+---
 ---
 
 ## GIAI ĐOẠN 1: Khởi Tạo Dự Án & Cài Đặt Cấp Project (Setup 1 Lần)
+
 
 ### 0. CHECKLIST MÔI TRƯỜNG TIÊN QUYẾT (PRE-PROJECT PREREQUISITES FOR FRESHERS)
 Trước khi khởi tạo bất kỳ dự án nào, bạn (người lập trình) mở cửa sổ **Command Prompt (cmd)** trên máy tính và chạy các lệnh kiểm tra sau để chắc chắn máy tính đã cài đặt đủ công cụ nền tảng:
@@ -2401,6 +2516,51 @@ Báo cáo kết quả lệnh test và dừng lại để tôi kiểm tra.
 
 ---
 
+### 📋 MẪU P-2.3-STATIONS: QUY TRÌNH 3 TRẠM THỰC THI BẮT BUỘC CHO TÍNH NĂNG & BUGFIX (MANDATORY 3-STATION PIPELINE)
+- **🏷️ CHẾ ĐỘ THỰC THI**: `[3 TRẠM CÔ LẬP NGUYÊN TỬ]` *(Trạm 1: QA Tester ĐỎ ➔ Trạm 2: Implementer XANH ➔ Trạm 3: Reviewer Thẩm Định Đĩa Vật Lý)*.
+- **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Kế hoạch (`docs/plans/[MÃ_TICKET]_plan.md`) đã được duyệt `[APPROVED]`. Agent bắt buộc in biểu ngữ `🚦 [KÍCH HOẠT QUY TRÌNH 3 TRẠM]` ra cửa sổ chat.
+- **🛡️ RÀO CHẮN GÁC CỔNG**:
+  * Trạm 1: `qa-tester` CHỈ được viết test trong `tests/**`, TUYỆT ĐỐI CẤM sửa `src/**`. Phải chứng minh test ĐỎ (Adversarial Inversion).
+  * Trạm 2: `implementer` CHỈ viết mã trong `src/**`, TUYỆT ĐỐI CẤM nới lỏng assertion để test pass giả tạo (Zero Bug-Codification).
+  * Trạm 3: `spec-reviewer` + `code-reviewer` (và Visual Critic nếu có UI/3D) hoàn toàn Read-Only. CẤM implementer tự duyệt code của chính mình. CẤM duyệt dựa trên lời nói trong chat. Reviewer BẮT BUỘC dùng công cụ đọc đĩa vật lý (`view_file`, `list_dir`, lệnh terminal thực tế) để xác minh code thật và test thật đang PASS trên đĩa cứng trước khi ký `[APPROVED]`.
+- **💬 CÂU LỆNH PROMPT CHUẨN KÍCH HOẠT 3 TRẠM (Model: Sonnet 4.6 hoặc Flash)**:
+```text
+Kế hoạch [ĐƯỜNG_DẪN_TỆP_PLAN] đã được duyệt. Hãy kích hoạt Quy Trình 3 Trạm Bắt Buộc (Mandatory 3-Station Pipeline) để thi công [MÃ_TICKET]:
+
+🚦 [KÍCH HOẠT QUY TRÌNH 3 TRẠM]
+
+TRẠM 1 (RED CONTRACT TEST - Subagent qa-tester, Read-only src/):
+1. Đọc đặc tả và hợp đồng kiểm thử trong [ĐƯỜNG_DẪN_TỆP_PLAN].
+2. Viết bộ kiểm thử hợp đồng mới tại tests/contracts/[TÊN_CONTRACT].test.ts.
+3. Tuân thủ 4 quy chuẩn Universal Test Core: Atomic test (1-4 asserts/test, it.each, cấm for/while trong it()), cấm checklist tĩnh (existsSync, typeof, LOC count), sàn mật độ >= 15 atomic tests/slice, và assert rò rỉ bộ nhớ tất định.
+4. Bao phủ đủ Ma Trận 4 Khía Cạnh Hành Vi: Boundary & Range, State Reactivity, Resource Disposal, Error Defense.
+5. VÙNG CÔ LẬP: TUYỆT ĐỐI CẤM sửa mã nguồn trong src/.
+6. Chạy lệnh kiểm thử trên Terminal CMD và chứng minh bài test BỊ LỖI (RED / Adversarial Inversion) trên nền mã nguồn hiện tại.
+
+TRẠM 2 (GREEN IMPLEMENTATION - Subagent implementer, Read-only tests/):
+1. Đọc kết quả test ĐỎ từ Trạm 1 và bản kế hoạch.
+2. VÙNG CÔ LẬP: TUYỆT ĐỐI CẤM sửa tệp test trong tests/ để che giấu lỗi (Zero Bug-Codification).
+3. Viết mã nguồn tối thiểu vào src/ để chuyển toàn bộ bài test sang XANH (PASS 100%).
+4. Kiểm soát chất lượng: Hàm <= 30 dòng, Cyclomatic Complexity <= 5, đúng trần 5-Tier LOC, zero dirty casts, zero nuốt lỗi âm thầm.
+5. Chạy lại lệnh test và chứng minh PASS 100%.
+
+TRẠM 3 (INDEPENDENT REVIEW & PHYSICAL DISK VERIFICATION - Subagent spec-reviewer + code-reviewer, Read-only):
+1. CẤM implementer tự phê duyệt code của chính mình.
+2. CẤM chấp thuận dựa trên báo cáo bằng lời nói của agent trước. BẮT BUỘC dùng công cụ đọc đĩa vật lý (view_file, list_dir, terminal command) để xác minh trực tiếp trên ổ cứng:
+   - spec-reviewer: Đọc diff thực tế trên đĩa, đối chiếu 1-1 với kế hoạch và requirements.md, xác nhận 0% Scope Drift.
+   - code-reviewer: Đọc mã nguồn thực tế trên đĩa, chạy lệnh kiểm tra chất lượng (npm run gate:quick), xác nhận 0 cờ đỏ slop, đúng chuẩn kiến trúc.
+3. Cấp chữ ký [APPROVED] hoặc [REJECTED] kèm báo cáo ngắn gọn (<20 dòng).
+```
+- **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu - 3 TRẠM HOÀN TẤT)**:
+  - Trạm 1 có log test ĐỎ thật sự.
+  - Trạm 2 có mã nguồn sạch và test XANH 100%.
+  - Trạm 3 có biên bản thẩm định đĩa vật lý độc lập với chữ ký `[APPROVED]`.
+- **📌 CHỈ DẪN VẠN NĂNG CHO JUNIOR**:
+  - *Biến số cần thay thế*: `[ĐƯỜNG_DẪN_TỆP_PLAN]` (VD: `docs/plans/improvements/IMP-51_plan.md`), `[MÃ_TICKET]`, và `[TÊN_CONTRACT]`.
+  - *Giá trị cốt lõi*: 3 Trạm loại bỏ hoàn toàn tình trạng AI "vừa đá bóng vừa thổi còi", đảm bảo mọi tính năng hay bugfix dù lớn hay nhỏ đều có test hợp đồng bảo vệ và được thẩm định khách quan trên đĩa vật lý.
+
+---
+
 ### 📋 MẪU P-2.3c: THI CÔNG TDD TỪNG MICRO-TASK (SONG TÁC NHÂN ĐỐI KHÁNG - PING-PONG TDD)
 - **🏷️ CHẾ ĐỘ THỰC THI**: `[SONG TÁC NHÂN ĐỐI KHÁNG BẮT BUỘC]` *(QA Tester viết test Đỏ ➔ Implementer viết code Xanh ➔ QA Inversion Gate)*.
 - **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Task trước đó đã hoàn thành và test xanh trên máy thật (nếu là Task 1 thì Task 0 Harness đã chạy được trên CMD).
@@ -2507,7 +2667,7 @@ Hãy gọi subagent implementer, kích hoạt kỹ năng tdd để tạo hoặc 
 ### 📋 MẪU P-2.4: KIỂM TOÁN 2 CỔNG ĐỘC LẬP (ACCEPTANCE GATE)
 - **🏷️ CHẾ ĐỘ THỰC THI**: `[SONG TÁC NHÂN ĐỘC LẬP BẮT BUỘC - 2 CỔNG]` *(Spec-Reviewer + Code-Reviewer chạy song song, Read-only)*.
 - **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Toàn bộ test suite ở bước 2.3e đã XANH 100%.
-- **🛡️ RÀO CHẮN GÁC CỔNG**: Cả 2 subagent đều ở chế độ Read-Only, không thể tự sửa code để "chữa cháy".
+- **🛡️ RÀO CHẮN GÁC CỔNG**: Cả 2 subagent đều ở chế độ Read-Only, không thể tự sửa code để "chữa cháy". BẮT BUỘC kiểm chứng đĩa vật lý (Physical Disk Verification): CẤM chấp thuận dựa trên báo cáo text trong chat; Reviewer bắt buộc dùng công cụ đọc đĩa (`view_file`, lệnh terminal) để kiểm tra mã nguồn và kết quả test thực tế trên đĩa cứng trước khi ký [APPROVED].
 - **💬 CÂU LỆNH PROMPT CHUẨN (Model: Sonnet 4.6)**:
 ```text
 Hãy gọi đồng thời 2 subagent spec-reviewer và code-reviewer, kích hoạt kỹ năng code-review, vertical-slice-completeness và de-sloppify để kiểm toán toàn diện lát cắt issues/[MÃ_TICKET].md:

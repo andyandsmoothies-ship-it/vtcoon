@@ -16,6 +16,23 @@ export const PHASE_TIMEOUTS_MS: Record<TurnPhase, number> = {
   [TurnPhase.TurnEnd]: 5_000,
 };
 
+export function calculateBotStepDelay(
+  room: Room | undefined,
+  baseDelayMs: number = 1500
+): number {
+  if (!room || baseDelayMs <= 500) return baseDelayMs;
+  if (
+    (room.phase === TurnPhase.PropertyManagement || room.phase === TurnPhase.ActionPhase) &&
+    room.lastDice &&
+    (room.lastDice[0] > 0 || room.lastDice[1] > 0)
+  ) {
+    const steps = (room.lastDice[0] ?? 0) + (room.lastDice[1] ?? 0);
+    const dynamicDelay = 1100 + steps * 200 + 800;
+    return Math.max(baseDelayMs, dynamicDelay);
+  }
+  return baseDelayMs;
+}
+
 export interface TurnOrchestratorOptions {
   readonly rooms: RoomManager;
   readonly intentMutex: IntentMutex;
@@ -122,6 +139,8 @@ export class TurnOrchestrator {
 
   private scheduleBotStep(roomCode: string): void {
     this.onScheduleBotTurn?.(roomCode);
+    const room = this.rooms.getRoom(roomCode);
+    const delayMs = calculateBotStepDelay(room, this.botTurnDelayMs);
     const timer = setTimeout(() => {
       this.activeTimers.delete(roomCode);
       void this.intentMutex.runExclusive(roomCode, async () => {
@@ -150,7 +169,7 @@ export class TurnOrchestrator {
           this.orchestrate(roomCode);
         }
       });
-    }, this.botTurnDelayMs);
+    }, delayMs);
 
     this.activeTimers.set(roomCode, timer);
     this.rooms.registerTimer(roomCode, timer);

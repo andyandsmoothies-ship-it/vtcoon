@@ -30,7 +30,7 @@ function evaluateSingleBotBid(
   stateMap: PropertyStateMap,
 ): boolean {
   const config = getBotConfig(roomManager.getBotPersonality(roomCode, bot.id));
-  const inc = auction.highestBidder !== undefined ? 100 : 50;
+  const inc = 50;
   const room = roomManager.getRoom(roomCode);
   if (!room) return false;
   const intent = decideBotIntent(bot, room, registry, stateMap, config, { ...auction, bidIncrement: inc });

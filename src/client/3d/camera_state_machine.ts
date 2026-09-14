@@ -59,6 +59,7 @@ export interface CameraResolveParams {
   readonly hasTargetTile?: boolean;
   readonly isPreMatch?: boolean;
   readonly isBotTurn?: boolean;
+  readonly isAnimatingPawnBot?: boolean;
 }
 
 /**
@@ -78,8 +79,8 @@ export function resolveCameraMode(params: CameraResolveParams): CameraMode {
   if (params.activeModal === 'auction') {
     return 'auction_focus';
   }
-  // [3D/CAM] Khi đang trong lượt của Bot, giữ góc nhìn bao quát bán đảo êm dịu, không giật vào khay xúc xắc
-  if (params.isBotTurn) {
+  // [3D/CAM] Khi đang trong lượt của Bot hoặc quân cờ đang nhảy thuộc về Bot, giữ góc nhìn bao quát bán đảo êm dịu, không giật camera
+  if (params.isBotTurn || params.isAnimatingPawnBot) {
     return 'overview';
   }
   // [IMP-42] Bỏ hiệu ứng zoom vào khay xúc xắc khi quay xúc xắc để triệt tiêu giật lag

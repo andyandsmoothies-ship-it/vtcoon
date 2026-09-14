@@ -15,7 +15,7 @@ import { watchdogMonitor } from './watchdog_monitor.js';
 import { useTelemetryStore } from './telemetry_store.js';
 import type { InvariantViolation } from './telemetry_types.js';
 
-const AIRPORT_CELLS = new Set<number>([5, 15, 22, 35]);
+export const AIRPORT_CELLS = new Set<number>([5, 15, 25, 35]);
 const JAIL_CELL = 10;
 const TAX_ORDER_CELL = 30;
 const SERVICE_CELLS = new Set<number>([12, 28, 39]);
@@ -36,12 +36,26 @@ function extractBalances(playersInfo: Record<string, PlayerHudInfo>): Record<str
   return map;
 }
 
-function checkIsTeleport(fromPos: number, toPos: number, isTurnPlayer: boolean, phase?: TurnPhase): boolean {
-  if (AIRPORT_CELLS.has(fromPos) && AIRPORT_CELLS.has(toPos)) return true;
-  if (fromPos === TAX_ORDER_CELL && toPos === JAIL_CELL) return true;
-  if (SERVICE_CELLS.has(toPos) && phase !== TurnPhase.WaitingRoll && phase !== TurnPhase.ActionPhase) return true;
-  if (phase && phase !== TurnPhase.WaitingRoll && phase !== TurnPhase.ActionPhase) return true;
+export function checkIsTeleport(fromPos: number, toPos: number, isTurnPlayer: boolean, phase?: TurnPhase): boolean {
   if (!isTurnPlayer) return true;
+  if ((AIRPORT_CELLS.has(fromPos) || fromPos === 22) && AIRPORT_CELLS.has(toPos)) return true;
+  if (fromPos === TAX_ORDER_CELL && toPos === JAIL_CELL) return true;
+  if (
+    SERVICE_CELLS.has(toPos) &&
+    phase !== TurnPhase.WaitingRoll &&
+    phase !== TurnPhase.ActionPhase &&
+    phase !== TurnPhase.PropertyManagement
+  ) {
+    return true;
+  }
+  if (
+    phase &&
+    phase !== TurnPhase.WaitingRoll &&
+    phase !== TurnPhase.ActionPhase &&
+    phase !== TurnPhase.PropertyManagement
+  ) {
+    return true;
+  }
   return false;
 }
 
@@ -57,6 +71,7 @@ function detectMovement(
       const isMovementPhase =
         delta.turnPhase === TurnPhase.WaitingRoll ||
         delta.turnPhase === TurnPhase.ActionPhase ||
+        delta.turnPhase === TurnPhase.PropertyManagement ||
         delta.turnPhase === undefined;
       const isTeleport = checkIsTeleport(fromPos, p.position, isTurnPlayer, delta.turnPhase);
 
@@ -106,7 +121,17 @@ function computeCellDelta(cells: readonly CellDelta[], preState: GameState): num
     }
     const prevOwner = Object.values(preState.playersInfo).find((p) => p.ownedProperties.includes(cell.index));
     if (cell.ownerId && !prevOwner) {
-      deltaSum -= deed.price;
+      const preAuction = preState.auction;
+      const auctionPayload =
+        preState.activeModal === 'auction' && preState.modalPayload && 'cellIndex' in preState.modalPayload
+          ? (preState.modalPayload as { cellIndex?: number; currentBid?: number; highestBid?: number })
+          : undefined;
+      const isAuction = preAuction?.cellIndex === cell.index || auctionPayload?.cellIndex === cell.index;
+      const highestBid = isAuction
+        ? (preAuction?.highestBid ?? preAuction?.currentBid ?? auctionPayload?.highestBid ?? auctionPayload?.currentBid)
+        : undefined;
+
+      deltaSum -= highestBid !== undefined ? highestBid : deed.price;
     }
     if (cell.isMortgaged === true) {
       deltaSum += Math.floor(deed.price * 0.5);

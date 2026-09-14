@@ -16,7 +16,7 @@ let server: WssServer;
 const activeSockets: WebSocket[] = [];
 
 beforeAll(() => {
-  server = new WssServer({ port: TEST_PORT });
+  server = new WssServer({ port: TEST_PORT, botTurnDelayMs: 250 });
 });
 
 afterEach(() => {

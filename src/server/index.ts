@@ -6,6 +6,8 @@ import { fileURLToPath } from 'node:url';
 import { WssServer } from './network/wss_server.js';
 import { createHealthServer } from './health_check.js';
 
+export const DEFAULT_BOT_TURN_DELAY_MS = 1500;
+
 export interface ServerConfig {
   readonly nodeEnv?: string;
   readonly port?: number;
@@ -52,7 +54,7 @@ export async function startServer(config?: ServerConfig): Promise<RunningServer>
   const wssServer = new WssServer({
     port: wssPort,
     gracePeriodMs,
-    botTurnDelayMs: config?.botTurnDelayMs ?? 1500,
+    botTurnDelayMs: config?.botTurnDelayMs ?? DEFAULT_BOT_TURN_DELAY_MS,
   });
 
   const distDir = path.resolve(process.cwd(), 'dist');

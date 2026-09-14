@@ -76,7 +76,7 @@ export class WssServer {
       intentMutex: this.intentMutex,
       broadcaster: this.broadcaster,
       onGameOver: (rc) => this.broadcastGameOver(rc),
-      botTurnDelayMs: config.botTurnDelayMs ?? 250,
+      botTurnDelayMs: config.botTurnDelayMs ?? 1500,
       defaultTimeoutMs: config.turnTimeoutMs,
     });
     this.turnWatchdog = new TurnWatchdog({
@@ -325,6 +325,7 @@ export class WssServer {
       const res = executeIntentAction(this.rooms, msg.roomCode, msg.playerId, msg.intent);
       if (!res.success) {
         this.sendSafe(socket, { type: 'ERROR', reasonCode: (res.reason as ReasonCode) || 'INTENT_REJECTED' });
+        this.broadcaster.broadcastRoomDelta(msg.roomCode);
         return;
       }
       this.adminManager.recordRoomEvent(msg.roomCode, {

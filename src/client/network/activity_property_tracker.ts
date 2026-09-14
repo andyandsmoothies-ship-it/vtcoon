@@ -17,21 +17,38 @@ export function getCellName(cellIndex: number): string {
   return BOARD_CONFIG[cellIndex]?.name ?? `Ô #${cellIndex}`;
 }
 
-export function detectCellTrade(cell: CellDelta, prevOwnerId: string | undefined, buyerName: string, buyerColor?: string): ActivityLogEntry {
+export function detectCellTrade(
+  cell: CellDelta,
+  prevOwnerId: string | undefined,
+  buyerName: string,
+  buyerColor?: string,
+  winningBid?: number,
+): ActivityLogEntry {
   const cellName = getCellName(cell.index);
   const price = PROPERTY_DEEDS.get(cell.index)?.price;
   const isDirectBuy = !prevOwnerId;
+
+  let message: string;
+  let amount: number | undefined;
+
+  if (winningBid !== undefined) {
+    message = `${buyerName} đã thắng đấu giá ${cellName} với giá ${formatCurrency(winningBid)}`;
+    amount = -winningBid;
+  } else if (isDirectBuy) {
+    message = `${buyerName} đã mua ${cellName}${price ? ` với giá ${formatCurrency(price)}` : ''}`;
+    if (price) amount = -price;
+  } else {
+    message = `${buyerName} đã nhận quyền sở hữu ${cellName}`;
+  }
 
   return {
     id: `buy_${Date.now()}_${cell.index}_${cell.ownerId}`,
     timestamp: Date.now(),
     type: 'buy',
-    message: isDirectBuy
-      ? `${buyerName} đã mua ${cellName}${price ? ` với giá ${formatCurrency(price)}` : ''}`
-      : `${buyerName} đã nhận quyền sở hữu ${cellName}`,
+    message,
     playerId: cell.ownerId ?? undefined,
     playerName: buyerName,
-    ...(isDirectBuy && price ? { amount: -price } : {}),
+    ...(amount !== undefined ? { amount } : {}),
     cellIndex: cell.index,
     ...(buyerColor ? { playerTokenColor: buyerColor } : {}),
   };
@@ -118,7 +135,15 @@ function processCellOwnerDiff(
   );
   if (cell.ownerId && cell.ownerId !== prevOwnerId) {
     const buyer = nextState.playersInfo[cell.ownerId] ?? prevState.playersInfo[cell.ownerId];
-    entries.push(detectCellTrade(cell, prevOwnerId, getPlayerName(buyer, cell.ownerId), buyer?.tokenColor));
+    const modalAuction =
+      prevState.activeModal === 'auction' && prevState.modalPayload && 'cellIndex' in prevState.modalPayload
+        ? (prevState.modalPayload as { cellIndex?: number; currentBid?: number; highestBid?: number })
+        : undefined;
+    const auction = prevState.auction ?? modalAuction;
+    const isAuctionForThisCell = auction?.cellIndex === cell.index;
+    const winningBid = isAuctionForThisCell ? (auction.highestBid ?? auction.currentBid) : undefined;
+
+    entries.push(detectCellTrade(cell, prevOwnerId, getPlayerName(buyer, cell.ownerId), buyer?.tokenColor, winningBid));
     boughtCellIndices.push(cell.index);
   }
 }

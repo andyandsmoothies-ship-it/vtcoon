@@ -287,6 +287,19 @@
 - **Kiểm thử & Bất biến**: `imp48_monotonic_dice_sync.test.ts`, Gotcha #69, 149/149 test suites PASS (2.057 tests).
 - **Trạng thái**: ✅ Hoàn thành.
 
+---
+
+### [IMP-49 / IMP-55] Thống Nhất Bước Giá Đấu Giá (+50 Tr.), Khử Lỗi BID_TOO_LOW & Tự Động Re-Sync Delta Sau Reject
+- **Mục tiêu**: Loại bỏ lỗi máy chủ `BID_TOO_LOW` khi người chơi bấm nút `+50 Tr.` hoặc bật `AUTO-BID`, xóa sổ trạng thái ảo "DẪN ĐẦU: Bạn" khi intent bị từ chối và bảo đảm trao đất đúng người chiến thắng thực tế.
+- **Hạ tầng hoàn tất**:
+  * `auction_manager.ts`: Hạ bước giá tối thiểu của Server từ `+100 Tr.` xuống `+50 Tr.` khi đã có người đặt giá (`minBid = highestBid + 50`), đồng bộ 100% với 3 nút nâng giá Client (`+50, +100, +200 Tr.`) và nút Auto-Bid.
+  * `wss_server.ts`: Tự động kích hoạt `broadcastRoomDelta(msg.roomCode)` khi `executeIntentAction` trả về `!res.success`, ép Client nhận lại trạng thái thật, triệt tiêu triệt để hiện tượng kẹt Optimistic Update.
+  * `room_bot_coordinator.ts` & `bot_engine.ts`: Chuẩn hóa bước giá nâng thầu Bot AI (`inc = 50`, `minStep = 50`).
+  * `docs/requirements.md`: Đồng bộ Ground Truth SSOT quy định bước giá tối thiểu `+50 Tr. VNĐ`.
+- **Kiểm thử & Bất biến**: `imp49_auction_step_and_sync.test.ts` (19 atomic tests PASS, Adversarial Inversion PASS), Gotcha #76, 157/157 test suites PASS (2.205 tests).
+- **Trạng thái**: ✅ Hoàn thành.
+
+
 
 
 

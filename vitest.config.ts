@@ -1,7 +1,20 @@
 import { defineConfig } from 'vitest/config';
+import os from 'node:os';
+
+const cpuHalf = Math.max(1, Math.floor(os.cpus().length / 2));
+const maxThreads = Math.min(4, cpuHalf);
 
 export default defineConfig({
   test: {
+    pool: 'threads',
+    maxThreads: maxThreads,
+    minThreads: 1,
+    poolOptions: {
+      threads: {
+        maxThreads: maxThreads,
+        minThreads: 1,
+      },
+    },
     include: ['tests/**/*.test.ts'],
     exclude: [
       '**/node_modules/**',
@@ -10,7 +23,7 @@ export default defineConfig({
     ],
     environment: 'node',
     globals: false,
-  },
+  } as any,
   resolve: {
     alias: {
       '@domain': new URL('./src/domain', import.meta.url).pathname,

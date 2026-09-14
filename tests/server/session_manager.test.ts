@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { SessionManager, SessionState } from '../../src/server/session_manager';
 
 describe('SessionManager — Heartbeat & Grace Period', () => {
@@ -7,6 +7,10 @@ describe('SessionManager — Heartbeat & Grace Period', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     manager = new SessionManager();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('[TC-00.1/MSS] [UC-GAME-004/MSS] them phien → trang thai Connected', () => {

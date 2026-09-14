@@ -1,4 +1,4 @@
-﻿import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   SessionManager,
   SessionState,
@@ -13,6 +13,10 @@ describe('Walking Skeleton - 4 Hop Dong Kiem Thu Tich Hop', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     manager = new SessionManager();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('[TC-00.1/MSS] [UC-GAME-004/MSS] Client ket noi -> Server chap thuan, heartbeat 5s duy tri', () => {

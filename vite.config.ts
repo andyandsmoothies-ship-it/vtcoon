@@ -8,7 +8,7 @@ export default defineConfig({
     port: 5173,
     open: false,
     watch: {
-      ignored: ['**/src/server/**', '**/docs/**', '**/issues/**', '**/tests/**', '**/.agents/**'],
+      ignored: ['**/src/server/**', '**/docs/**', '**/issues/**', '**/tests/**', '**/.agents/**', '**/public/**'],
     },
   },
   build: {

@@ -8,12 +8,12 @@
 | Domain Tag | Trọng Tâm & Phạm Vi Mã Nguồn | Các Gotchas Liên Quan |
 | :--- | :--- | :--- |
 | `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70 |
-| `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #66, #70 |
-| `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #65, #66, #70 |
-| `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59 |
-| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #36, #37, #40, #70 |
-| `[UAT/TEST]` | Nghiệm Thu, Adversarial TDD, Ảnh Chụp Màn Hình (.jpg), Shell Escaping, File I/O Lock | #5, #28, #29, #31, #35 |
-| `[TELEMETRY]` | Giám Sát Hiệu Năng Thời Gian Thực, Chó Canh Phòng Bất Biến, Hộp Đen Tái Hiện Lỗi | #39 |
+| `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #66, #70, #77 |
+| `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #65, #66, #70, #74, #77 |
+| `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #74, #77 |
+| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #36, #37, #40, #70, #74 |
+| `[UAT/TEST]` | Nghiệm Thu, Adversarial TDD, Ảnh Chụp Màn Hình (.jpg), Shell Escaping, File I/O Lock | #5, #28, #29, #31, #35, #73 |
+| `[TELEMETRY]` | Giám Sát Hiệu Năng Thời Gian Thực, Chó Canh Phòng Bất Biến, Hộp Đen Tái Hiện Lỗi | #39, #62, #75 |
 
 ---
 
@@ -846,3 +846,98 @@
   3. **Vibrant Ruby Red & Emissive Pips Invariant**: Xúc xắc được nâng cấp kích thước lên 0.58m, khoác sắc đỏ Ruby sang trọng `#DC2626` với `roughness = 0.22`, `metalness = 0.10`, và chỉ kích hoạt `transparent={fadeOpacity < 1.0}` khi đang trong hoạt cảnh mờ dần (giữ độ đanh đặc 100% khi dừng tĩnh). Các chấm pips tròn sứ trắng `#FFFFFF` được phóng to (bán kính 0.050m, mặt Ách 0.065m) tích hợp phát quang nhẹ `emissive="#FFFFFF"` (`emissiveIntensity=0.25`), giúp mặt xúc xắc luôn tương phản sắc nét và nổi bật dưới ánh sáng chói chang.
   4. **Transient Zero-Footprint Felt Tray Invariant**: Khối đế khay nỉ xanh viền đồng thau chỉ xuất hiện trong quá trình gieo xúc xắc (`isRolling = true`). Khi xúc xắc dừng chuyển động, khay nỉ tự động ẩn hoàn toàn khỏi không gian 3D, trả lại mặt nước sông phẳng lặng và thông thoáng.
   5. **Fast Unit Test Scheduler Compatibility Invariant**: Bộ điều phối `TurnOrchestrator` cho phép cấu hình `botTurnDelayMs` linh hoạt: mặc định 1.500ms trong môi trường production thực tế, nhưng adapter tương thích ngược `BotTurnScheduler` và cấu hình test của `WssServer` sử dụng độ trễ vi mô (100ms - 250ms) giúp toàn bộ 153 test files (hơn 2.100 unit/integration tests) hoàn thành thần tốc trong chưa đầy 18 giây.
+
+---
+
+### 73. [UAT/TEST] Bất Biến Khống Chế Luồng Vitest maxThreads, Mute Log IPC Simulator & Kiểm Toán Rò Rỉ Tham Chiếu Tất Định (Test Resource Ceiling, Stdout Log Muting & Deterministic Memory Leak Audit - IMP-52)
+- **Hiện tượng & Bẫy thực tế**:
+  1. *Vitest vắt kiệt 100% CPU do thread allocation không giới hạn*: Mặc định Vitest sử dụng số luồng bằng tổng số core logic (`os.cpus().length` = 8–16 threads). Mỗi thread khởi động một Node environment, nạp Three.js, React 19 và JSDOM, đẩy CPU máy người dùng lên 100% gây đơ giật giao diện và quá nhiệt.
+  2. *Nghẽn IPC & tràn Terminal do 27.800 dòng JSON domain logs*: Tệp `tests/simulation/chaos_monkey_simulator.test.ts` phát sinh hơn 27.800 dòng log `console.info` khi mô phỏng 1.000 ván cờ. Cơ chế IPC của Vitest bị quá tải dẫn đến test suite bị chậm và tràn màn hình console.
+  3. *Flaky test do Garbage Collection không tất định của V8 Heap*: Trong `tests/stress/ops01_concurrent_rooms.test.ts`, kiểm tra rò rỉ bộ nhớ bằng `expect(heapAfter - heapBefore).toBeGreaterThan(0)` bị fail ngẫu nhiên khi V8 engine kích hoạt GC ngầm thu hồi heap đúng thời điểm đo.
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **Thread Pool Ceiling Invariant**: `vitest.config.ts` BẮT BUỘC cấu hình trần luồng an toàn: `maxThreads = Math.min(4, Math.max(1, Math.floor(os.cpus().length / 2)))`, `minThreads = 1`, `pool = 'threads'`. Không bao giờ cho phép Vitest sử dụng quá 4 threads hoặc quá 50% CPU logic của máy người dùng.
+  2. **Simulator Stdout Silence Invariant**: `runChaosSimulation` BẮT BUỘC tắt tiếng tạm thời (`console.info` và `console.warn`) trong suốt vòng lặp mô phỏng lượt cờ khi `silent === true`. Sau khi xong toàn bộ các ván, mới phục hồi `console.info` để xuất bảng tóm tắt ASCII tiêu chuẩn (`asciiSummary`), đảm bảo 0 dòng log rác lọt ra terminal.
+  3. **Tiered Simulation Execution Invariant**: Simulator mặc định chạy 100 ván (~11.400 turns) đủ để kiểm chứng 3 Bất Biến Vĩ Mô (Liveness 0% Deadlock, Cash Conservation Δ = 0, Finite Balances) chỉ trong < 0.4s khi chạy `npm test`. Kịch bản 1.000 ván chuyên sâu được phân tầng sang script riêng `npm run test:chaos` (thông qua `cross-env CHAOS_GAMES=1000`) phục vụ kiểm định phát hành (Release Audit).
+  4. **Deterministic Reference Retention Invariant**: Kiểm thử rò rỉ bộ nhớ không phụ thuộc vào `process.memoryUsage().heapUsed` của V8. Thay vào đó, kiểm chứng tính tất định 100% thông qua việc xác minh số phòng tồn đọng `activeRooms === 10`, cờ `isLeakRetained === true`, và mảng tham chiếu `getRetainedLeakedManagers().length > 0`.
+
+---
+
+### 74. [3D/NET/CRAFT] Bất Biến Điêu Khắc Cầu Dây Văng Ba Son, Mố Cầu Bevel & Triệt Tiêu Hoạt Cảnh Xúc Xắc Nhảy Nhịp Đôi (Sculpted Ba Son Cable-Stayed Bridge, Beveled Abutments & Monotonic Dice Settle Animation Invariant - IMP-53)
+- **Hiện tượng & Bẫy thực tế**:
+  1. *Dây văng Cầu Ba Son lơ lửng và lệch góc không gian 3D*: Tại vị trí Z = -3.8, các dây văng cũ tính toán bằng hàm lượng giác góc phẳng 2D `Math.atan2(...) - Math.PI / 2`, khiến đầu cáp lơ lửng không chạm đỉnh tháp và đâm xiên qua mặt đường nhựa xuống lòng sông. Tháp cầu chỉ là khối hộp sơ khai trần trụi thiếu bệ trụ dưới lòng kênh, và hai đầu cầu tại X = +-2.7 bị cắt ngang đột ngột thiếu mố cầu bê tông (abutments).
+  2. *Xúc xắc nhảy nhịp đôi khi quân cờ vừa chạm đất (Double Bounce Glitch)*: Khi xúc xắc vừa settle xong và quân cờ nhảy tới ô đích, xúc xắc bất ngờ kích hoạt lại hoạt cảnh nảy tung lên trời lần 2. Nguyên nhân do:
+     - `SingleDie` dùng thuộc tính `reset: isRolling` vô điều kiện: Mỗi khi re-render (do cập nhật vị trí cờ hoặc mở modal ô đất), spring bị reset về `t: 0`.
+     - Server trước đó đặt `botTurnDelayMs: 250ms`, lượt bot kế tiếp ập tới quá nhanh khi cờ người trước chưa chạm đất, kích hoạt `triggerDiceRoll` mới.
+     - `triggerDiceRoll` thiếu chốt chặn đơn điệu `diceSeq <= lastDiceSeq`.
+  3. *Unmount xúc xắc gây gián đoạn render tree*: Xúc xắc bị ẩn khi `isRolling = false` trong môi trường SSR/static markup khiến các bài kiểm tra hợp đồng hoặc re-render bị giật khung hình.
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **Euclidean Cable Transform Invariant**: Mọi dây văng Ba Son BẮT BUỘC tính toán qua `calculateCableTransform(pylonAnchor, deckAnchor)`:
+     - Chiều dài Euclid `L = Math.hypot(dx, dy, dz)` và vị trí đặt tại trung điểm `(pylon + deck) / 2`.
+     - Vector đơn vị `v = (pylon - deck).normalize()`, góc quay quaternion chuẩn `new Quaternion().setFromUnitVectors(new Vector3(0, 1, 0), v)`. Sai số đầu mút cáp kết nối vào đỉnh tháp và mặt cầu tuyệt đối `< 0.01m`.
+  2. **Sculpted Landmark & Beveled Abutments Invariant**: Tháp Ba Son gồm bệ trụ bê tông dưới lòng sông tại `[-0.8, 0.0, 0]`, thân tháp nghiêng titan `#F8FAFC`, cổ vòng neo cáp mạ vàng `#F59E0B` tại `[-0.8, 0.95, 0]` và 2 khối mố cầu bê tông vát beveled tại bờ Tây `[-2.7, 0.04, 0]` (`data-bason-abutment="west"`) và bờ Đông `[2.7, 0.04, 0]` (`data-bason-abutment="east"`).
+  3. **Monotonic Roll Sequencing Guard**: `triggerDiceRoll` BẮT BUỘC kiểm tra: nếu `diceSeq !== undefined && state.lastDiceSeq !== undefined && diceSeq <= state.lastDiceSeq`, lập tức return để bỏ qua mọi kích hoạt trùng lặp hoặc đi lùi.
+  4. **State-Locked SingleDie Spring Invariant**: `SingleDie` duy trì `lastAnimatedSeqRef`. Chỉ cho phép `shouldReset = true` khi có `diceSeq` mới thực sự (`diceSeq !== lastAnimatedSeqRef.current`) hoặc chuyển đổi từ nghỉ sang lăn lần đầu. Khi tĩnh, khóa cứng tại `t = 1.0` với cao độ nghỉ bất biến `DICE_REST_Y = 0.26` và hệ số xoay bằng 0.
+  5. **Persistent Ruby Dice Presence Invariant**: 2 khối xúc xắc ruby `#DC2626` / `#B91C1C` luôn hiện diện trong render tree (không bị unmount khi dừng tĩnh), nằm nghỉ trang nghiêm trên thềm nỉ sông Sài Gòn.
+  6. **Server Bot Turn Pacing Invariant**: `WssServer` và `server/index.ts` chuẩn hóa độ trễ `DEFAULT_BOT_TURN_DELAY_MS = 1500ms`, bảo đảm Bot di chuyển thong thả, đồng bộ hoàn hảo với chu kỳ diễn hoạt 1.5s–2.5s của quân cờ.
+
+---
+
+### 75. [TELEMETRY/NET/AUCTION] Bất Biến Watchdog Định Danh Sân Bay AIRPORT_CELLS, Tự Giải Cứu FSM Animation Stall & Khử Báo Động Giả Thuế Đấu Giá (Airport Recognition, FSM Stall Auto-Recovery & Auction Tax Suppression Invariant - IMP-54)
+- **Hiện tượng & Bẫy thực tế**:
+  1. *Nhầm ô sân bay với ô Cơ hội*: Hằng số `AIRPORT_CELLS` cũ chứa ô 22 (Phiếu Cơ Hội) thay vì ô 25 (Tuyến Cao Tốc Bắc - Nam). Đồng thời hàm `checkIsTeleport` tự động coi mọi di chuyển trong pha `PropertyManagement` là teleport khiến bước nhảy qua GO (ví dụ 36 -> 5) bị watchdog đối chiếu sai và phát cảnh báo giả `INVALID_POSITION_STEP`.
+  2. *Treo FSM do kẹt hoạt cảnh quân cờ 3D*: Khi con cờ bị kẹt hoạt cảnh kéo dài quá `MAX_ANIMATION_DURATION_MS (10_000ms)`, hệ thống chỉ ghi nhận cảnh báo mà không tự giải cứu, khiến cờ `activePawnAnimation` và hàng đợi `pawnAnimationQueue` bị khóa cứng.
+  3. *Báo động giả bảo toàn tiền tệ & spam log thuế khi thắng đấu giá*: `computeCellDelta` trừ tiền theo giá niêm yết của sổ đỏ (`deed.price`) thay vì giá thầu thực tế (`highestBid` / `currentBid`), làm chênh lệch kỳ vọng dòng tiền sinh ra vi phạm `TREASURY_INVARIANT_VIOLATED`. Song song đó, `processPayerFee` coi khoản trừ tiền đấu giá là thuế/phí và bắn thêm log `tax` thừa thãi.
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **Airport Cells & Teleport Recognition Invariant**:
+     - `AIRPORT_CELLS` chuẩn hóa gồm đúng 4 ô hạ tầng: `Set([5, 15, 25, 35])`. Tuyệt đối không chứa ô 22.
+     - `checkIsTeleport` duy trì tương thích cho các bước dịch chuyển hợp lệ; trong pha `PropertyManagement`, di chuyển thông thường của turn player không bị coi là teleport.
+  2. **Auto-Recovery FSM Stall Invariant**:
+     - `watchdogMonitor.recoverFsmAnimationStall` và `checkFsmAnimationStall` tự động kích hoạt `useGameStore.getState().clearActivePawnAnimation()` khi `animatingDurationMs > 10_000ms`, đưa `activePawnAnimation` về null và xóa sạch `pawnAnimationQueue`.
+     - `PerfTelemetryTracker` trong `game_canvas.tsx` gọi `recoverFsmAnimationStall` và reset `animStartRef.current = null`.
+  3. **Auction Financial Integrity Invariant**:
+     - `computeCellDelta` trích xuất `highestBid` từ `preState.auction` hoặc `modalPayload`, tính toán chính xác biến động dòng tiền thắng đấu giá, triệt tiêu 100% cảnh báo giả `TREASURY_INVARIANT_VIOLATED`.
+     - `detectCellTrade` định dạng thông điệp `đã thắng đấu giá` với `amount: -winningBid`.
+     - `processPayerFee` kiểm tra `context.boughtCellIndices` và `delta.cells` để bỏ qua 100% các khoản trừ tiền mua đất (cả mua thẳng lẫn đấu giá), không sinh log `tax`.
+   4. **Zero Dirty Casts AST Rule**: Tuyệt đối không dùng `as any` hay `as unknown as`; khai báo thuộc tính `auction` trên `GameState` và kiểm tra kiểu an toàn.
+
+---
+
+### 76. [SERVER/NET/AUCTION] Bất Biến Thống Nhất Bước Giá Đấu Giá (+50 Tr.) & Tự Động Re-Sync Delta Khi Intent Bị Từ Chối (Auction Min-Bid Step Harmonization & Re-Sync Invariant - IMP-49)
+- **Hiện tượng & Bẫy thực tế**:
+  1. *Lệch bước giá Server (+100 Tr.) và Client (+50 Tr.)*: `src/server/auction_manager.ts` cũ quy định cứng: khi đã có người đặt giá (`highestBidder !== undefined`), mức giá tiếp theo bắt buộc phải tăng `>= highestBid + 100`. Trong khi đó, Client (`modal_helpers.ts`) sinh ra 3 nút bấm `+50 Tr.`, `+100 Tr.`, `+200 Tr.` và nút `AUTO-BID` tự động chọn `+50 Tr.`. Khi đối thủ đặt 2.050 Tr., người chơi bấm `+50 Tr.` gửi lên 2.100 Tr. (< 2.150 Tr.) liền bị Server từ chối `BID_TOO_LOW`.
+  2. *Optimistic Update kẹt hiển thị ảo (Ghost State)*: Khi người chơi nhấn nút đặt giá, Client lập tức cập nhật cục bộ (`updateModalPayload`) hiển thị "DẪN ĐẦU: Bạn" (2.100 Tr.). Khi Server từ chối `BID_TOO_LOW`, Server chỉ gửi message lỗi mà không broadcast lại delta; Client chỉ hiện toast mà không hoàn tác modal payload, làm người chơi tưởng mình đang dẫn đầu. Sau 15s đếm ngược, Server đóng phiên và trao đất cho người đặt giá hợp lệ trước đó (Bot AI 3 - 2.050 Tr.).
+  3. *Bot tính toán bước giá không đồng bộ*: `room_bot_coordinator.ts` và `bot_engine.ts` tính toán bước giá cũ hoặc thiếu fallback `auction.bidIncrement ?? 50`.
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **Auction Minimum Bid Step Invariant**:
+     - `src/server/auction_manager.ts`: Bước giá tối thiểu khi đã có người đặt giá BẮT BUỘC là `+50 Tr.` (`minBid = session.highestBidder !== undefined ? session.highestBid + 50 : session.highestBid`).
+     - Nghiêm cấm nâng giá dưới bước giá tối thiểu (`amount < minBid` trả về `{ success: false, reason: 'BID_TOO_LOW' }`).
+     - Khi chưa có ai đặt giá (`highestBidder === undefined`), mức giá tối thiểu bằng đúng giá khởi điểm `startingBid`.
+  2. **Bot AI Incremental Harmonization Invariant**:
+     - `room_bot_coordinator.ts` chuẩn hóa bước giá cơ sở `inc = 50`.
+     - `bot_engine.ts` hỗ trợ `minStep = auction.bidIncrement ?? 50`.
+  3. **Server-Authoritative Intent Rejection Delta Re-Sync Invariant**:
+     - `src/server/network/wss_server.ts`: Trong hàm `handleIntentMessage`, nếu `executeIntentAction` trả về `!res.success`, Server BẮT BUỘC gửi thông báo lỗi `ERROR` cho socket người chơi VÀ ngay lập tức kích hoạt `this.broadcaster.broadcastRoomDelta(msg.roomCode)`.
+     - Gói tin Delta mới nhất từ Server ép Client xóa sạch mọi Optimistic Update sai lệch, đồng bộ hóa tuyệt đối trạng thái sàn đấu giá và tài chính trên toàn bộ thiết bị tham gia.
+
+---
+
+### 77. [3D/BOT/NET] Bất Biến Đồng Bộ Nhịp Độ Bot (calculateBotStepDelay), Khóa Góc Quay Máy Ảnh ('overview') & Đồng Bộ Chu Kỳ Dừng Chân Trả Phí Xúc Xắc (Bot Pacing, Camera Lock & Landing Settlement Invariant - IMP-55)
+- **Hiện tượng & Bẫy thực tế**:
+  1. *Ảo giác xúc xắc "nhảy thêm một nhịp" khi Bot trả phí*: Khi Bot kết thúc lượt gieo và nhảy tới ô người chơi mua, Bot nộp tiền thuê đồng thời xúc xắc bị nhảy giật thêm một nhịp.
+  2. *Lệch pha nhịp độ Server vs Client (Timing Desync)*:
+     - Trên Client: Hoạt cảnh xúc xắc mất 1.1s; bước nhảy của Bot mất steps * 200ms (ví dụ 7 ô = 1.4s) + thời gian tiếp đất 0.8s -> Tổng thời gian thị giác là ~3.3s.
+     - Trên Server: `TurnOrchestrator` trước đó chỉ dùng `botTurnDelayMs = 1500ms` cố định. Khi Bot mới nhảy được nửa đường, Server đã phát sinh lượt tiếp theo ở 1.5s; Bot sau tung xúc xắc ở 3.0s khiến xúc xắc văng lên ngay khi Bot 1 vừa chạm đất.
+  3. *Giật góc quay máy ảnh (Camera Snapping)*: Khi Server chuyển lượt khỏi Bot (`isBotTurn: false`) trong lúc con cờ Bot còn đang nhảy dở (`isPawnMoving: true`), `resolveCameraMode` đột ngột chuyển từ `'overview'` sang `'pawn_chase'`. Khi Bot chạm đất (200ms sau), camera lại giật ngược về `'overview'`. Cú giật camera 200ms làm thay đổi phối cảnh góc nhìn, khiến khay xúc xắc trên sông Sài Gòn bị trượt mạnh trên màn hình tạo cảm giác xúc xắc nhảy lần 2.
+  4. *Quân cờ Bot nhảy ngay khi xúc xắc còn đang lăn*: Trong `apply_delta.ts`, điều kiện `!task.isBot` khiến Bot không chờ xúc xắc tiếp đất (`isRolling`) mà nhảy ngay.
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **Dynamic Bot Step Delay Invariant**:
+     - `src/server/network/turn_orchestrator.ts`: Export hàm `calculateBotStepDelay(room, baseDelayMs = 1500)`:
+       delayMs = Math.max(baseDelayMs, 1100 + steps * 200 + 800)
+     - Áp dụng khi phòng ở pha `PropertyManagement` hoặc `ActionPhase` và có `lastDice`.
+     - *Accelerated Test Guard*: Khi `baseDelayMs <= 500`, giữ nguyên `baseDelayMs` để không làm chậm hoặc gây timeout cho các bài kiểm tra gia tốc.
+  2. **Camera Overview Lock for Bot Movement Invariant**:
+     - `src/client/3d/camera_state_machine.ts`: Bổ sung `isAnimatingPawnBot?: boolean` vào `CameraResolveParams`.
+     - Khi `params.isBotTurn || params.isAnimatingPawnBot`, `resolveCameraMode` LUÔN trả về `'overview'`.
+     - `src/client/game_canvas.tsx`: Xác định `isAnimatingPawnBot = Boolean(playersInfo[activeAnimation.playerId]?.isBot)` và truyền vào máy ảnh, triệt tiêu 100% hiện tượng giật góc quay khi lượt chuyển giao trong lúc Bot đang nhảy.
+  3. **Universal Movement Queue Synchronization Invariant**:
+     - `src/client/network/apply_delta.ts`: `dispatchPawnMove` loại bỏ điều kiện loại trừ Bot `!task.isBot`. Cả Bot và Người chơi đều được đưa vào `pendingPawnMove` khi `isRolling === true`, chỉ bắt đầu nhảy quân cờ sau khi xúc xắc hoàn tất tiếp đất (`setIsRolling(false)`).

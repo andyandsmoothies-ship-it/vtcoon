@@ -65,7 +65,7 @@ export function resolveCameraTargetCell(
     return modalPayload.cellIndex;
   }
   if (activeAnimation?.isAnimating && activeAnimation.waypoints.length > 0) {
-    return activeAnimation.waypoints[activeAnimation.currentIndex] ?? activeAnimation.fromCell;
+    return activeAnimation.waypoints[activeAnimation.currentIndex ?? 0] ?? activeAnimation.fromCell;
   }
   if (currentTurnPlayerId != null) {
     return playerPositions[currentTurnPlayerId] ?? 0;
@@ -112,6 +112,8 @@ export function AdaptiveCinematicCamera({
     const isPawnMoving = activeAnimation?.isAnimating ?? false;
     const currentTurnPlayer = currentTurnPlayerId ? playersInfo[currentTurnPlayerId] : undefined;
     const isBotTurn = Boolean(currentTurnPlayer?.isBot);
+    const animatingPlayer = activeAnimation?.playerId ? playersInfo[activeAnimation.playerId] : undefined;
+    const isAnimatingPawnBot = Boolean(animatingPlayer?.isBot);
     const targetCell = resolveCameraTargetCell(
       activeAnimation,
       currentTurnPlayerId,
@@ -127,6 +129,7 @@ export function AdaptiveCinematicCamera({
       hasTargetTile: (activeModal !== null || hasRolledThisTurn) && targetCell !== null,
       isPreMatch,
       isBotTurn,
+      isAnimatingPawnBot,
     });
 
     const cellCoords = targetCell !== null ? cellPosition(targetCell) : undefined;
@@ -240,17 +243,25 @@ function PerfTelemetryTracker(): null {
         drawCalls: report.drawCalls,
         triangles: report.triangles,
       });
+      if (typeof gl?.info?.reset === 'function') {
+        gl.info.reset();
+      }
 
       const activeAnim = useGameStore.getState().activePawnAnimation;
       if (activeAnim?.isAnimating) {
         if (animStartRef.current === null) animStartRef.current = Date.now();
         const duration = Date.now() - animStartRef.current;
-        const v = watchdogMonitor.checkFsmAnimationStall({
+        const params = {
           isAnimating: true,
           animatingDurationMs: duration,
           tick: 0,
-        });
-        if (v) useTelemetryStore.getState().reportViolation(v);
+        };
+        const v = watchdogMonitor.checkFsmAnimationStall(params);
+        if (v) {
+          watchdogMonitor.recoverFsmAnimationStall(params);
+          animStartRef.current = null;
+          useTelemetryStore.getState().reportViolation(v);
+        }
       } else {
         animStartRef.current = null;
       }
@@ -302,6 +313,11 @@ export function GameCanvas({
           toneMappingExposure: 0.94,
 
           antialias: true,
+        }}
+        onCreated={({ gl }) => {
+          if (gl?.info) {
+            gl.info.autoReset = false;
+          }
         }}
         style={{
           width: '100%',

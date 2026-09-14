@@ -51,7 +51,7 @@ export function handleAuctionBid(
   if (!player) return { success: false, reason: 'PLAYER_NOT_FOUND' };
   if (session.highestBidder === playerId) return { success: false, reason: 'ALREADY_HIGHEST_BIDDER' };
   if (player.balance < amount) return { success: false, reason: 'INSUFFICIENT_FUNDS' };
-  const minBid = session.highestBidder !== undefined ? session.highestBid + 100 : session.highestBid;
+  const minBid = session.highestBidder !== undefined ? session.highestBid + 50 : session.highestBid;
   if (amount < minBid) return { success: false, reason: 'BID_TOO_LOW' };
   session.highestBid = amount;
   session.highestBidder = playerId;

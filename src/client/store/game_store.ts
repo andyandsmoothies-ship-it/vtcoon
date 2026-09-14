@@ -33,6 +33,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   activeModal: null,
   modalPayload: null,
   lastEventCard: null,
+  auction: null,
 
   activeEmotes: {},
   floatingTexts: [],
@@ -132,6 +133,10 @@ export const useGameStore = create<GameState>((set, get) => ({
   setLastDiceSeq: (lastDiceSeq) => set({ lastDiceSeq }),
 
   triggerDiceRoll: (dice, diceSeq) => {
+    const state = get();
+    if (diceSeq !== undefined && state.lastDiceSeq !== undefined && diceSeq <= state.lastDiceSeq) {
+      return;
+    }
     set({
       dice: [clampDiceFace(dice[0]), clampDiceFace(dice[1])],
       isRolling: true,

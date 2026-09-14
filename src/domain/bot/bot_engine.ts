@@ -142,7 +142,7 @@ function calculateAuctionStep(
   balance: number,
 ): number {
   const highestBidder = auction.highestBidderId ?? auction.highestBidder;
-  const minStep = auction.bidIncrement ?? (highestBidder ? 100 : 50);
+  const minStep = auction.bidIncrement ?? 50;
   if (personality === BotPersonality.Aggressive && balance > 10_000 && Boolean(highestBidder)) {
     return Math.max(minStep, 100);
   }

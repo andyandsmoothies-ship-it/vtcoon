@@ -4,8 +4,9 @@ import type { EventCardInfo } from '../../domain/room';
 export interface PawnAnimationState {
   readonly playerId: string;
   readonly fromCell: number;
+  readonly targetCell?: number;
   readonly waypoints: readonly number[];
-  readonly currentIndex: number;
+  readonly currentIndex?: number;
   readonly isAnimating: boolean;
   readonly isBot?: boolean;
 }
@@ -133,6 +134,13 @@ export interface GameState {
   readonly activeModal: ActiveModalType;
   readonly modalPayload: ModalPayloadMap[keyof ModalPayloadMap] | null;
   readonly lastEventCard: EventCardInfo | null;
+  readonly auction?: {
+    readonly cellIndex: number;
+    readonly highestBid?: number;
+    readonly currentBid?: number;
+    readonly highestBidder?: string;
+    readonly highestBidderId?: string | null;
+  } | null;
 
   // UI-05 Social Emotes & Micro-VFX
   readonly activeEmotes: Record<string, ActiveEmote>;

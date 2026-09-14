@@ -50,7 +50,7 @@ function determineFromCell(state: GameState, playerId: string, currentPos: numbe
 }
 
 function dispatchPawnMove(state: GameState, task: PawnMoveTask, isRolling: boolean): void {
-  if (isRolling && state.setPendingPawnMove && !task.isBot) {
+  if (isRolling && state.setPendingPawnMove) {
     state.setPendingPawnMove({ playerId: task.playerId, targetCell: task.targetCell, fromCell: task.fromCell });
   } else if (state.enqueuePawnMove) {
     state.enqueuePawnMove(task);
@@ -416,6 +416,9 @@ export function applyDeltaToStore(delta: DeltaPayload, store: typeof useGameStor
   const isFullSync = Boolean(delta.cells && delta.cells.length === BOARD_SIZE);
   if (isFullSync && state.activePawnAnimation) state.clearActivePawnAnimation();
   if (isFullSync && delta.diceSeq !== undefined) state.setLastDiceSeq(delta.diceSeq);
+  if (isFullSync && delta.dice && delta.dice[0] > 0 && delta.dice[1] > 0) {
+    state.setDice([delta.dice[0], delta.dice[1]]);
+  }
 
   const playersInfoMap = initPlayersInfoMap(state, isFullSync);
   let hasPlayerInfoChange = isFullSync && Object.keys(playersInfoMap).length > 0;

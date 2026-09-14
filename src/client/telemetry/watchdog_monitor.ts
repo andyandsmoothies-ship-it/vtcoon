@@ -1,11 +1,12 @@
 // [IMP-24/MSS] Watchdog Monitor — Stall & Infinite Loop Detection
 import type { InvariantViolation } from './telemetry_types.js';
+import { useGameStore } from '../store/game_store.js';
 
 export const WATCHDOG_LIMITS = {
   MAX_TURN_STALL_MS: 45_000,
   BOT_BURST_WINDOW_MS: 300,
   BOT_BURST_MAX_ACTIONS: 8,
-  MAX_ANIMATION_DURATION_MS: 15_000,
+  MAX_ANIMATION_DURATION_MS: 10_000,
 } as const;
 
 export class WatchdogMonitor {
@@ -95,6 +96,7 @@ export class WatchdogMonitor {
     readonly tick: number;
   }): InvariantViolation | null {
     if (params.isAnimating && params.animatingDurationMs > WATCHDOG_LIMITS.MAX_ANIMATION_DURATION_MS) {
+      useGameStore.getState().clearActivePawnAnimation();
       return {
         id: `watchdog_fsm_anim_${params.tick}_${Date.now()}`,
         timestamp: Date.now(),
@@ -104,6 +106,18 @@ export class WatchdogMonitor {
         message: `Hoạt ảnh FSM đang diễn ra quá thời hạn cho phép (${Math.round(params.animatingDurationMs / 1000)}s).`,
         details: { durationMs: params.animatingDurationMs },
       };
+    }
+    return null;
+  }
+
+  public recoverFsmAnimationStall(params: {
+    readonly isAnimating: boolean;
+    readonly animatingDurationMs: number;
+    readonly tick: number;
+  }): InvariantViolation | null {
+    if (params.isAnimating && params.animatingDurationMs > WATCHDOG_LIMITS.MAX_ANIMATION_DURATION_MS) {
+      useGameStore.getState().clearActivePawnAnimation();
+      return this.checkFsmAnimationStall(params);
     }
     return null;
   }
