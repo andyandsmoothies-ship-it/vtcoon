@@ -32,8 +32,8 @@ describe('RoomManager — Property Integration [TC-02.2/MSS]', () => {
     ).toBe(BuyResult.Success);
     expect(
       room.players[0]!.balance,
-      `balance sau mua phải là 14_400 nhưng nhận: ${room.players[0]!.balance}`
-    ).toBe(15_000 - 600);
+      `balance sau mua phải là 24_400 nhưng nhận: ${room.players[0]!.balance}`
+    ).toBe(25_000 - 600);
     expect(room.phase).toBe(TurnPhase.PropertyManagement);
   });
 

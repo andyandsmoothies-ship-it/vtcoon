@@ -172,7 +172,7 @@ export function SunnyIslandLobbyPedestals({ slots }: { slots: readonly LobbySlot
                 <LuxuryPawnModel slotIndex={idx} />
 
                 {/* Bảng tên 3D dùng Billboard chống lộn ngược chữ ĐNOЯT 100% */}
-                <group position={[0, 1.05, 0]}>
+                <group position={[0, 0.85, 0]}>
                   <Billboard follow lockX={false} lockY={false} lockZ={false}>
                     <RoundedBox args={[1.2, 0.28, 0.02]} radius={0.04} smoothness={3}>
                       <meshStandardMaterial color="#0F172A" transparent opacity={0.9} />

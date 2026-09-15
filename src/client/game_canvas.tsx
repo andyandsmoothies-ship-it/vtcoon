@@ -82,10 +82,11 @@ export function AdaptiveCinematicCamera({
 }: AdaptiveCinematicCameraProps = {}): React.ReactElement {
   const { camera, scene } = useThree();
   const controlsRef = useRef<OrbitControlsImpl>(null);
-  const camBaseRef = useRef<[number, number, number]>(isPreMatch ? [11.2, 15.6, 11.2] : [11.2, 15.6, 11.2]);
-  const targetBaseRef = useRef<[number, number, number]>(isPreMatch ? [-0.6, 0, -0.6] : [-0.6, 0, -0.6]);
+  const camBaseRef = useRef<[number, number, number]>([30.0, 33.0, 30.0]);
+  const targetBaseRef = useRef<[number, number, number]>([1.5, 0.0, 1.5]);
   const isUserInteractingRef = useRef<boolean>(false);
   const lastUserInteractionTimeRef = useRef<number>(0);
+  const isResettingRef = useRef<boolean>(false);
 
   const isRolling = useGameStore((s) => s.isRolling);
   const hasRolledThisTurn = useGameStore((s) => s.hasRolledThisTurn);
@@ -101,7 +102,24 @@ export function AdaptiveCinematicCamera({
     if (typeof window !== 'undefined') {
       window.__threeScene = scene;
       window.__threeCamera = camera;
+      window.__resetCameraToDefault = () => {
+        isUserInteractingRef.current = false;
+        lastUserInteractionTimeRef.current = 0;
+        isResettingRef.current = true;
+        camBaseRef.current = [30.0, 33.0, 30.0];
+        targetBaseRef.current = [1.5, 0.0, 1.5];
+        if (controlsRef.current) {
+          controlsRef.current.target.set(1.5, 0.0, 1.5);
+        }
+        camera.position.set(30.0, 33.0, 30.0);
+        controlsRef.current?.update();
+      };
     }
+    return () => {
+      if (typeof window !== 'undefined') {
+        delete window.__resetCameraToDefault;
+      }
+    };
   }, [scene, camera]);
 
   useFrame((_, delta) => {
@@ -161,7 +179,6 @@ export function AdaptiveCinematicCamera({
 
     if (controlsRef.current) {
       const isDragging = isUserInteractingRef.current;
-      const timeSinceInteraction = Date.now() - lastUserInteractionTimeRef.current;
       const isActionOngoing = isRolling || isPawnMoving || activeScreenShake !== null || activeModal !== null;
 
       if (isDragging) {
@@ -171,7 +188,7 @@ export function AdaptiveCinematicCamera({
         targetBaseRef.current[0] = controlsRef.current.target.x;
         targetBaseRef.current[1] = controlsRef.current.target.y;
         targetBaseRef.current[2] = controlsRef.current.target.z;
-      } else if (isActionOngoing || timeSinceInteraction > 1500) {
+      } else if (isActionOngoing || isResettingRef.current) {
         targetBaseRef.current[0] += (targetState.target[0] - targetBaseRef.current[0]) * lerpFactor;
         targetBaseRef.current[1] += (targetState.target[1] - targetBaseRef.current[1]) * lerpFactor;
         targetBaseRef.current[2] += (targetState.target[2] - targetBaseRef.current[2]) * lerpFactor;
@@ -194,6 +211,14 @@ export function AdaptiveCinematicCamera({
 
         controlsRef.current.minDistance = (mode === 'overview' || mode === 'pre_match') ? 14 : 3.8;
         controlsRef.current.update();
+
+        if (
+          Math.abs(camBaseRef.current[0] - targetState.position[0]) < 0.05 &&
+          Math.abs(camBaseRef.current[1] - targetState.position[1]) < 0.05 &&
+          Math.abs(camBaseRef.current[2] - targetState.position[2]) < 0.05
+        ) {
+          isResettingRef.current = false;
+        }
       }
     }
   });
@@ -214,7 +239,7 @@ export function AdaptiveCinematicCamera({
       maxDistance={65}
       minZoom={20}
       maxZoom={65}
-      target={isPreMatch ? [-0.8, 0, -0.8] : [-0.8, 0, -0.8]}
+      target={[1.5, 0.0, 1.5]}
       onStart={() => {
         isUserInteractingRef.current = true;
       }}
@@ -307,7 +332,7 @@ export function GameCanvas({
       <Canvas
         shadows="soft"
         dpr={[1.25, 2]}
-        camera={{ position: [11.2, 15.6, 11.2], fov: 40, near: 0.5, far: 200 }}
+        camera={{ position: [30.0, 33.0, 30.0], fov: 24, near: 0.5, far: 300 }}
         gl={{
           toneMapping: NoToneMapping,
           toneMappingExposure: 0.94,

@@ -8,7 +8,7 @@ import {
   type PropertyState,
 } from '../../domain/property_data.js';
 import { BOARD_CONFIG, CellType } from '../../domain/board_config.js';
-import { calculateGoPropertyTax } from '../../domain/property_rent.js';
+import { calculateGoPropertyTax, GO_PROPERTY_TAX_CAP } from '../../domain/property_rent.js';
 import { TurnPhase } from '../../domain/room.js';
 import { verifyAllInvariants } from './invariant_checker.js';
 import { watchdogMonitor } from './watchdog_monitor.js';
@@ -95,7 +95,8 @@ function calculateGoSalary(preState: GameState, activeId: string): number {
   for (const [c, lvl] of Object.entries(preState.levelMap)) {
     stateMap.set(Number(c), { level: lvl });
   }
-  const tax = calculateGoPropertyTax(activeId, registry, stateMap);
+  const rawTax = calculateGoPropertyTax(activeId, registry, stateMap);
+  const tax = Math.min(rawTax, GO_PROPERTY_TAX_CAP);
   return 2000 - tax;
 }
 

@@ -185,20 +185,20 @@ describe('[TC-IMP36/MSS][UC-IMP36] Flat Tile Art & Clean C0 Plot Contract Suite'
   // FACET 1: ART PLACEMENT & ANTI-OVERLAP ZONING (tile_texture_generator.ts)
   // =========================================================================
 
-  it('[TC-IMP36.01/MSS][UC-IMP36] Upper text tier: Title text baseline is positioned at y = 28 within banner zone [0..56]', () => {
+  it('[TC-IMP36.01/MSS][UC-IMP36] Upper text tier: Title text baseline is positioned at y = 28 within unobstructed zone [16..40]', () => {
     tileTextureGen.getTileTexture(1);
     const titleEntry = recordedFillText.find((t) => t.y === 28);
     expect(titleEntry).toBeDefined();
-    expect(titleEntry!.y).toBeGreaterThanOrEqual(0);
-    expect(titleEntry!.y).toBeLessThanOrEqual(56);
+    expect(titleEntry!.y).toBeGreaterThanOrEqual(16);
+    expect(titleEntry!.y).toBeLessThanOrEqual(40);
   });
 
-  it('[TC-IMP36.02/MSS][UC-IMP36] Upper text tier: Subtitle text baseline is positioned at y = 74 within text zone [56..90]', () => {
+  it('[TC-IMP36.02/MSS][UC-IMP36] Upper text tier: Subtitle text baseline is positioned at y = 74 within text zone [60..85]', () => {
     tileTextureGen.getTileTexture(3);
     const subtitleEntry = recordedFillText.find((t) => t.y === 74);
     expect(subtitleEntry).toBeDefined();
-    expect(subtitleEntry!.y).toBeGreaterThanOrEqual(56);
-    expect(subtitleEntry!.y).toBeLessThanOrEqual(90);
+    expect(subtitleEntry!.y).toBeGreaterThanOrEqual(60);
+    expect(subtitleEntry!.y).toBeLessThanOrEqual(85);
   });
 
   it('[TC-IMP36.03/MSS][UC-IMP36] Bottom price tier: Price tray capsule is rendered as roundRect(22, 274, 212, 50, 12)', () => {
@@ -218,21 +218,21 @@ describe('[TC-IMP36/MSS][UC-IMP36] Flat Tile Art & Clean C0 Plot Contract Suite'
     expect(priceText!.y).toBeLessThanOrEqual(324);
   });
 
-  it('[TC-IMP36.05/MSS][UC-IMP36] Heritage art tier: Safe clipping boundary rect(10, 94, 236, 172) expands art to middle zone [94..270]', () => {
+  it('[TC-IMP36.05/MSS][UC-IMP36] Heritage art tier: Safe clipping boundary rect(10, 94, 236, 172) expands art to middle zone [90..270]', () => {
     tileTextureGen.getTileTexture(9);
     const artClip = recordedRects.find(
-      (r) => r.x === 10 && r.y >= 90 && r.y <= 95 && r.w === 236
+      (r) => r.x === 10 && r.y >= 90 && r.y <= 98 && r.w === 236
     );
     expect(artClip).toBeDefined();
     expect(recordedClips).toBeGreaterThan(0);
   });
 
-  it('[TC-IMP36.06/MSS][UC-IMP36] Heritage art tier: Expanded art height is clamped to 172 units with zero overlap into text (< 90) or price (> 270)', () => {
+  it('[TC-IMP36.06/MSS][UC-IMP36] Heritage art tier: Expanded art height is clamped to 172 units with zero overlap into text (< 90) or price (> 274)', () => {
     tileTextureGen.getTileTexture(11);
-    const artClip = recordedRects.find((r) => r.y >= 90 && r.y <= 95);
+    const artClip = recordedRects.find((r) => r.y >= 90 && r.y <= 98);
     expect(artClip).toBeDefined();
     expect(artClip!.h).toBeLessThanOrEqual(172);
-    expect(artClip!.y + artClip!.h).toBeLessThanOrEqual(272);
+    expect(artClip!.y + artClip!.h).toBeLessThanOrEqual(274);
   });
 
   it.each([1, 5, 12, 15, 25, 28, 35, 39])(
@@ -243,7 +243,14 @@ describe('[TC-IMP36/MSS][UC-IMP36] Flat Tile Art & Clean C0 Plot Contract Suite'
   );
 
   it.each([0, 2, 4, 10, 20, 30])(
-    '[TC-IMP36.08/MSS][UC-IMP36] hasTileArt(%i) returns false for non-art corner or special event tile',
+    '[TC-IMP36.08/MSS][UC-IMP36] hasTileArt(%i) returns true for special/corner tile with art (IMP-71)',
+    (tileIndex) => {
+      expect(hasTileArt?.(tileIndex)).toBe(true);
+    }
+  );
+
+  it.each([-1, 40, 99])(
+    '[TC-IMP36.08b/MSS][UC-IMP36] hasTileArt(%i) returns false for invalid tile index',
     (tileIndex) => {
       expect(hasTileArt?.(tileIndex)).toBe(false);
     }
@@ -273,12 +280,12 @@ describe('[TC-IMP36/MSS][UC-IMP36] Flat Tile Art & Clean C0 Plot Contract Suite'
     expect(markup).not.toContain('args="0.18,0.12,0.012"');
   });
 
-  it('[TC-IMP36.11/MSS][UC-IMP36] Clean C0 plot: ProceduralBuilding level 0 maintains standard root position [0, 0.22, 0.58]', () => {
+  it('[TC-IMP36.11/MSS][UC-IMP36] Clean C0 plot: ProceduralBuilding level 0 maintains standard root position [0, 0.16, -1.38]', () => {
     const markup = renderToStaticMarkup(
       React.createElement(ProceduralBuilding, { level: 0, groupColor: '#DC2626' })
     );
     const pos = extractRootGroupPosition(markup);
-    expect(pos).toEqual([0, 0.22, 0.58]);
+    expect(pos).toEqual([0, 0.16, -1.38]);
   });
 
   it('[TC-IMP36.12/MSS][UC-IMP36] Clean C0 plot: ProceduralBuilding level 0 with showEmptyPlotBoundary=true conditionally renders surveyor boundary', () => {
@@ -351,42 +358,42 @@ describe('[TC-IMP36/MSS][UC-IMP36] Flat Tile Art & Clean C0 Plot Contract Suite'
   // FACET 4: STATE REACTIVITY & UPGRADE PROGRESSION (levels 1, 2, 3)
   // =========================================================================
 
-  it('[TC-IMP36.17/MSS][UC-IMP36] ProceduralBuilding level 1 renders C1 Indochine Shophouse architecture at [0, 0.22, 0.58]', () => {
+  it('[TC-IMP36.17/MSS][UC-IMP36] ProceduralBuilding level 1 renders C1 Indochine Shophouse architecture at [0, 0.16, -1.38]', () => {
     const markup = renderToStaticMarkup(
       React.createElement(ProceduralBuilding, { level: 1, groupColor: '#16A34A' })
     );
     const pos = extractRootGroupPosition(markup);
-    expect(pos).toEqual([0, 0.22, 0.58]);
+    expect(pos).toEqual([0, 0.16, -1.38]);
     expect(markup).toContain('args="0,0.46,0.22,4"'); // Indochine tiled hip roof
   });
 
-  it('[TC-IMP36.18/MSS][UC-IMP36] ProceduralBuilding level 2 renders C2 Sapphire Complex architecture at [0, 0.22, 0.58]', () => {
+  it('[TC-IMP36.18/MSS][UC-IMP36] ProceduralBuilding level 2 renders C2 Sapphire Complex architecture at [0, 0.16, -1.38]', () => {
     const markup = renderToStaticMarkup(
       React.createElement(ProceduralBuilding, { level: 2, groupColor: '#2563EB' })
     );
     const pos = extractRootGroupPosition(markup);
-    expect(pos).toEqual([0, 0.22, 0.58]);
+    expect(pos).toEqual([0, 0.16, -1.38]);
     expect(markup).toContain('color="#0284C7"'); // Sapphire glass facade
   });
 
-  it('[TC-IMP36.19/MSS][UC-IMP36] ProceduralBuilding level 3 renders C3 Landmark Skyscraper architecture at [0, 0.22, 0.58]', () => {
+  it('[TC-IMP36.19/MSS][UC-IMP36] ProceduralBuilding level 3 renders C3 Landmark Skyscraper architecture at [0, 0.16, -1.38]', () => {
     const markup = renderToStaticMarkup(
       React.createElement(ProceduralBuilding, { level: 3, groupColor: '#D97706' })
     );
     const pos = extractRootGroupPosition(markup);
-    expect(pos).toEqual([0, 0.22, 0.58]);
+    expect(pos).toEqual([0, 0.16, -1.38]);
     expect(markup).toContain('args="0.005,0.012,0.12,6"'); // Spire needle tip
   });
 
-  it('[TC-IMP36.20/MSS][UC-IMP36] Reactive upgrade: transitioning level 0 to level 1 replaces empty plot with building at [0, 0.22, 0.58]', () => {
+  it('[TC-IMP36.20/MSS][UC-IMP36] Reactive upgrade: transitioning level 0 to level 1 replaces empty plot with building at [0, 0.16, -1.38]', () => {
     const markupC0 = renderToStaticMarkup(
       React.createElement(ProceduralBuilding, { level: 0, groupColor: '#16A34A' })
     );
     const markupC1 = renderToStaticMarkup(
       React.createElement(ProceduralBuilding, { level: 1, groupColor: '#16A34A' })
     );
-    expect(extractRootGroupPosition(markupC0)).toEqual([0, 0.22, 0.58]);
-    expect(extractRootGroupPosition(markupC1)).toEqual([0, 0.22, 0.58]);
+    expect(extractRootGroupPosition(markupC0)).toEqual([0, 0.16, -1.38]);
+    expect(extractRootGroupPosition(markupC1)).toEqual([0, 0.16, -1.38]);
     expect(markupC1).toContain('args="0,0.46,0.22,4"');
   });
 

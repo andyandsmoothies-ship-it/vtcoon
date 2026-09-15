@@ -43,28 +43,23 @@ export function CinematicLightingAccents(): React.ReactElement {
 
   return (
     <group position={[0, 0, 0]}>
-      {/* 1. Hào quang chóp tháp Landmark Bitexco [-4.3, 1.45, -4.2] */}
+      {/* 1. Đèn cảnh báo hàng không đỏ tinh tế trên đỉnh Bitexco [-4.3, 1.45, -4.2] */}
       <mesh ref={spireGlowRef} position={[-4.3, 1.45, -4.2]}>
-        <sphereGeometry args={[0.22, 12, 12]} />
-        <meshBasicMaterial color="#FDE68A" transparent opacity={0.65} />
+        <sphereGeometry args={[0.03, 8, 8]} />
+        <meshBasicMaterial color="#EF4444" />
       </mesh>
 
-      {/* 2. Đèn quét ngọn hải đăng Vịnh Du Thuyền [4.5, 0.9, 4.2] */}
+      {/* 2. Đèn xoay pha lê ngọn hải đăng Vịnh Du Thuyền [4.5, 0.9, 4.2] */}
       <group ref={beaconRef} position={[4.5, 0.9, 4.2]}>
-        {/* Đèn tâm phát sáng */}
+        {/* Tâm đèn pha lê phát sáng trắng tự nhiên */}
         <mesh>
-          <sphereGeometry args={[0.1, 8, 8]} />
-          <meshBasicMaterial color="#FEF08A" />
+          <sphereGeometry args={[0.08, 8, 8]} />
+          <meshBasicMaterial color="#FFFFFF" />
         </mesh>
-        {/* Vệt quét ánh sáng hình nón xiên (translucent light beam cone) */}
-        <mesh position={[0.7, 0, 0]} rotation={[0, 0, -Math.PI / 2]}>
-          <coneGeometry args={[0.3, 1.4, 8, 1, true]} />
-          <meshBasicMaterial
-            color="#FEF08A"
-            transparent
-            opacity={isNight ? 0.42 : isSunset ? 0.3 : 0.22}
-            depthWrite={false}
-          />
+        {/* Chóp vòm lồng đèn hải đăng thanh lịch */}
+        <mesh position={[0, 0.08, 0]}>
+          <coneGeometry args={[0.09, 0.07, 8]} />
+          <meshBasicMaterial color="#94A3B8" />
         </mesh>
       </group>
 

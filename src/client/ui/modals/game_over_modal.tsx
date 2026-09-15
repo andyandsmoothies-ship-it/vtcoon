@@ -154,30 +154,30 @@ export function GameOverModal({
 
   return (
     <div
-      className="w-full max-w-xl bg-slate-900/95 backdrop-blur-xl border border-amber-500/50 rounded-2xl shadow-2xl p-6 text-slate-100 flex flex-col relative animate-in fade-in zoom-in-95 duration-200"
+      className="w-full max-w-xl bg-[#FFFDF8] border-2 border-slate-900 rounded-2xl shadow-[0_6px_0_0_#0f172a] p-6 text-slate-900 flex flex-col relative animate-in fade-in zoom-in-95 duration-200 select-none"
       data-testid="game-over-modal"
     >
       {/* Header Vinh Danh Quán Quân */}
-      <div className="text-center pb-4 border-b border-slate-800">
-        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 border border-amber-400/50 mb-2 shadow-inner">
+      <div className="text-center pb-4 border-b border-amber-300">
+        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-amber-100 border border-amber-400 mb-2 shadow-sm">
           <span className="text-2xl" aria-hidden="true">🏆</span>
         </div>
-        <span className="block text-[11px] font-extrabold uppercase tracking-widest text-amber-400">
+        <span className="block text-[11px] font-black uppercase tracking-widest text-amber-800">
           VÔ ĐỊCH ĐẠI GIA ĐỊA ỐC
         </span>
-        <h1 className="text-2xl font-black text-white tracking-wide mt-0.5">
+        <h1 className="text-2xl font-black text-slate-900 tracking-wide mt-0.5">
           {winnerInfo?.name ?? winner?.id ?? 'ĐẠI GIA VTCOON'}
         </h1>
         <div className="flex items-center justify-center gap-3 mt-2 text-xs">
-          <span className="text-slate-400">Tài sản ròng:</span>
-          <span className="font-mono font-bold text-emerald-400 text-sm">
+          <span className="text-slate-600 font-medium">Tài sản ròng:</span>
+          <span className="font-mono font-black text-emerald-700 text-sm">
             {formatCurrency(winnerNetWorth)}
           </span>
           <span
             className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
               winnerRoi >= 0
-                ? 'bg-emerald-950/80 border-emerald-500/40 text-emerald-300'
-                : 'bg-rose-950/80 border-rose-500/40 text-rose-300'
+                ? 'bg-emerald-100 border-emerald-400 text-emerald-800'
+                : 'bg-rose-100 border-rose-400 text-rose-800'
             }`}
           >
             ROI: {winnerRoi >= 0 ? `+${winnerRoi}%` : `${winnerRoi}%`}
@@ -186,14 +186,14 @@ export function GameOverModal({
       </div>
 
       {/* Thanh chuyển Tab FinTech */}
-      <div className="flex p-1 bg-slate-800/80 rounded-xl my-4 border border-slate-700/60">
+      <div className="flex p-1 bg-[#F7F2E7] rounded-xl my-4 border border-slate-300">
         <button
           type="button"
           onClick={() => setActiveTab('leaderboard')}
           className={`flex-1 min-h-[44px] text-xs font-bold rounded-lg transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
             activeTab === 'leaderboard'
-              ? 'bg-amber-500 text-amber-950 font-black shadow-md'
-              : 'text-slate-400 hover:text-white'
+              ? 'bg-amber-500 text-slate-900 font-black shadow-sm'
+              : 'text-slate-700 hover:text-slate-900'
           }`}
         >
           Bảng Xếp Hạng
@@ -203,8 +203,8 @@ export function GameOverModal({
           onClick={() => setActiveTab('fintech')}
           className={`flex-1 min-h-[44px] text-xs font-bold rounded-lg transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
             activeTab === 'fintech'
-              ? 'bg-amber-500 text-amber-950 font-black shadow-md'
-              : 'text-slate-400 hover:text-white'
+              ? 'bg-amber-500 text-slate-900 font-black shadow-sm'
+              : 'text-slate-700 hover:text-slate-900'
           }`}
         >
           Báo Cáo FinTech
@@ -214,8 +214,8 @@ export function GameOverModal({
           onClick={() => setActiveTab('portfolio')}
           className={`flex-1 min-h-[44px] text-xs font-bold rounded-lg transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
             activeTab === 'portfolio'
-              ? 'bg-amber-500 text-amber-950 font-black shadow-md'
-              : 'text-slate-400 hover:text-white'
+              ? 'bg-amber-500 text-slate-900 font-black shadow-sm'
+              : 'text-slate-700 hover:text-slate-900'
           }`}
         >
           Danh Mục Sổ Đỏ
@@ -235,38 +235,38 @@ export function GameOverModal({
                 key={entry.id}
                 className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
                   isTopRank
-                    ? 'bg-amber-950/40 border-amber-500/60 shadow-md'
-                    : 'bg-slate-800/60 border-slate-700/80'
+                    ? 'bg-amber-100 border-amber-400 shadow-sm'
+                    : 'bg-[#F7F2E7] border-slate-300'
                 }`}
               >
                 <div className="flex items-center gap-3">
                   <span
                     className={`w-7 h-7 rounded-full flex items-center justify-center font-black text-xs ${
                       isTopRank
-                        ? 'bg-amber-400 text-amber-950 font-black shadow'
+                        ? 'bg-amber-500 text-slate-900 shadow'
                         : rank === 2
-                        ? 'bg-slate-300 text-slate-950'
+                        ? 'bg-slate-300 text-slate-900'
                         : rank === 3
                         ? 'bg-amber-700 text-white'
-                        : 'bg-slate-700 text-slate-300'
+                        : 'bg-slate-200 text-slate-700'
                     }`}
                   >
                     {rank}
                   </span>
                   <div>
-                    <span className="font-bold text-sm text-white block leading-tight">
+                    <span className="font-bold text-sm text-slate-900 block leading-tight">
                       {pInfo?.name ?? entry.id}
                     </span>
-                    <span className="text-[10px] text-slate-400">
+                    <span className="text-[10px] text-slate-600 font-medium">
                       Sở hữu: {pInfo?.ownedProperties?.length ?? 0} BĐS
                     </span>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="font-mono font-bold text-emerald-400 text-sm">
+                  <div className="font-mono font-black text-emerald-700 text-sm">
                     {formatCurrency(entry.netWorth)}
                   </div>
-                  <div className="text-[10px] text-slate-400 font-mono">
+                  <div className="text-[10px] text-slate-600 font-mono font-bold">
                     ROI: {roi >= 0 ? `+${roi}%` : `${roi}%`}
                   </div>
                 </div>
@@ -280,19 +280,19 @@ export function GameOverModal({
       {activeTab === 'fintech' && (
         <div className="space-y-4 mb-6">
           {/* Biểu đồ đường tài sản SVG phong cách TradingView */}
-          <div className="p-3 bg-slate-950/60 rounded-xl border border-slate-800">
-            <div className="flex justify-between items-center text-[10px] text-slate-400 mb-2">
-              <span className="font-bold uppercase tracking-wider text-amber-400">
+          <div className="p-3 bg-[#F7F2E7] rounded-xl border border-slate-300">
+            <div className="flex justify-between items-center text-[10px] text-slate-600 mb-2">
+              <span className="font-bold uppercase tracking-wider text-amber-800">
                 Xu Hướng Tăng Trưởng Tài Sản
               </span>
-              <span className={chartData.isPositive ? 'text-emerald-400 font-mono font-bold' : 'text-rose-400 font-mono font-bold'}>
+              <span className={chartData.isPositive ? 'text-emerald-700 font-mono font-bold' : 'text-rose-700 font-mono font-bold'}>
                 15.000k ➔ {formatCurrency(winnerNetWorth)}
               </span>
             </div>
             <svg viewBox="0 0 400 80" className="w-full h-20 overflow-visible">
               <defs>
                 <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={chartData.stopColor} stopOpacity="0.4" />
+                  <stop offset="0%" stopColor={chartData.stopColor} stopOpacity="0.3" />
                   <stop offset="100%" stopColor={chartData.stopColor} stopOpacity="0.0" />
                 </linearGradient>
               </defs>
@@ -317,27 +317,27 @@ export function GameOverModal({
 
           {/* Phân rã cơ cấu tài sản FinTech 4 chiều */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
-            <div className="p-2.5 rounded-xl bg-slate-800/80 border border-slate-700/60">
-              <span className="text-[10px] text-slate-400 block mb-1">Tiền Mặt Khả Dụng</span>
-              <span className="font-mono font-bold text-sky-400 block text-xs">
+            <div className="p-2.5 rounded-xl bg-white border border-slate-200">
+              <span className="text-[10px] text-slate-600 block mb-1 font-medium">Tiền Mặt Khả Dụng</span>
+              <span className="font-mono font-bold text-sky-700 block text-xs">
                 {formatCurrency(winnerBreakdown.cash)}
               </span>
             </div>
-            <div className="p-2.5 rounded-xl bg-slate-800/80 border border-slate-700/60">
-              <span className="text-[10px] text-slate-400 block mb-1">Giá Trị Đất Nền</span>
-              <span className="font-mono font-bold text-amber-400 block text-xs">
+            <div className="p-2.5 rounded-xl bg-white border border-slate-200">
+              <span className="text-[10px] text-slate-600 block mb-1 font-medium">Giá Trị Đất Nền</span>
+              <span className="font-mono font-bold text-amber-700 block text-xs">
                 {formatCurrency(winnerBreakdown.propertyValue)}
               </span>
             </div>
-            <div className="p-2.5 rounded-xl bg-slate-800/80 border border-slate-700/60">
-              <span className="text-[10px] text-slate-400 block mb-1">Công Trình Xây Dựng</span>
-              <span className="font-mono font-bold text-emerald-400 block text-xs">
+            <div className="p-2.5 rounded-xl bg-white border border-slate-200">
+              <span className="text-[10px] text-slate-600 block mb-1 font-medium">Công Trình Xây Dựng</span>
+              <span className="font-mono font-bold text-emerald-700 block text-xs">
                 {formatCurrency(winnerBreakdown.buildingValue)}
               </span>
             </div>
-            <div className="p-2.5 rounded-xl bg-slate-800/80 border border-slate-700/60">
-              <span className="text-[10px] text-slate-400 block mb-1">Thị Phần Địa Ốc</span>
-              <span className="font-mono font-bold text-cyan-400 block text-xs">
+            <div className="p-2.5 rounded-xl bg-white border border-slate-200">
+              <span className="text-[10px] text-slate-600 block mb-1 font-medium">Thị Phần Địa Ốc</span>
+              <span className="font-mono font-bold text-cyan-700 block text-xs">
                 {portfolioMetrics.ownershipPercentage}%
               </span>
             </div>
@@ -348,9 +348,9 @@ export function GameOverModal({
       {/* Nội dung Tab 3: Danh Mục Sổ Đỏ Sở Hữu */}
       {activeTab === 'portfolio' && (
         <div className="mb-6">
-          <div className="flex justify-between items-center text-xs text-slate-400 mb-3">
+          <div className="flex justify-between items-center text-xs text-slate-600 mb-3">
             <span>Danh mục sổ đỏ của {winnerInfo?.name ?? 'Quán quân'}:</span>
-            <span className="font-bold text-amber-400">
+            <span className="font-bold text-amber-800">
               {winnerInfo?.ownedProperties?.length ?? 0}/{TOTAL_PURCHASABLE_PROPERTIES} Sổ Đỏ ({portfolioMetrics.ownershipPercentage}% thị phần)
             </span>
           </div>
@@ -362,17 +362,17 @@ export function GameOverModal({
               return (
                 <div
                   key={cellIdx}
-                  className="flex items-center gap-2 p-2 rounded-lg bg-slate-800/80 border border-slate-700 text-xs"
+                  className="flex items-center gap-2 p-2 rounded-lg bg-white border border-slate-200 text-xs shadow-sm"
                 >
                   <span
-                    className="w-3 h-3 rounded-full flex-shrink-0"
+                    className="w-3 h-3 rounded-full flex-shrink-0 border border-slate-900"
                     style={{ backgroundColor: colorHex }}
                   />
-                  <span className="font-semibold text-slate-200 truncate flex-1">
+                  <span className="font-bold text-slate-900 truncate flex-1">
                     {tile?.name ?? `Ô ${cellIdx}`}
                   </span>
                   {lvl > 0 && (
-                    <span className="text-[10px] px-1 rounded bg-amber-500/20 text-amber-300 font-bold">
+                    <span className="text-[10px] px-1 rounded bg-amber-100 text-amber-800 font-bold border border-amber-300">
                       {lvl === 3 ? '★ C3' : `C${lvl}`}
                     </span>
                   )}
@@ -393,7 +393,7 @@ export function GameOverModal({
         <button
           type="button"
           onClick={onPlayAgain ?? onClose}
-          className="flex-1 min-h-[44px] py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-amber-950 font-black text-xs border border-amber-600 shadow-[0_4px_0_0_#b45309] active:shadow-[0_1px_0_0_#b45309] active:translate-y-[3px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
+          className="flex-1 min-h-[44px] py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-900 font-black text-xs border-2 border-amber-700 shadow-[0_4px_0_0_#b45309] active:shadow-[0_1px_0_0_#b45309] active:translate-y-[3px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
         >
           Về Sảnh Chờ
         </button>

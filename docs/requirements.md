@@ -3,8 +3,8 @@ Bản tài liệu thiết kế hoàn chỉnh của trò chơi **"Đại Gia Đ�
 ### **I. THÔNG SỐ VẬN HÀNH CHUẨN**
 
 * **Quy mô người chơi:** 2 – 4 người (chuẩn hóa tối đa 4 người theo IMP-16).  
-* **Vốn khả dụng ban đầu:** 15.000 Tr. VNĐ/người chơi (tương đương 15 tỷ đồng).  
-* **Tiền thưởng qua ô Khởi Hành (GO):** +2.000 Tr. VNĐ/vòng.  
+* **Vốn khả dụng ban đầu (Quy mô kinh tế động - IMP-60):** Cấp vốn linh hoạt theo số người chơi để tối ưu thanh khoản bàn cờ 40 ô: 2 người chơi = 25.000 Tr. VNĐ; 3 người chơi = 20.000 Tr. VNĐ; 4 người chơi = 18.000 Tr. VNĐ/người chơi.  
+* **Tiền thưởng qua ô Khởi Hành (GO):** +2.000 Tr. VNĐ/vòng (Khóa trần thuế tài sản tối đa 1.000 Tr. VNĐ theo IMP-60 để bảo đảm thực nhận tối thiểu +1.000 Tr. VNĐ).  
 * **Cơ chế di chuyển:** Lắc 2 xúc xắc (2D6). Đổ đôi được đi tiếp; đổ đôi 3 lần liên tiếp bị đưa vào **Ô 10 (Trạm Kiểm Toán & Thanh Tra)**.  
 * **Quy tắc Trạm Kiểm Toán & Thanh Tra (Ô 10):**  
   * Người chơi bị đưa vào ô 10 do: đổ đôi 3 lần liên tiếp hoặc dừng tại ô 30 (Lệnh Thanh Tra Thuế). Khi đang bị tạm giữ (tối đa 3 lượt), người chơi bị phong tỏa di chuyển.  
@@ -12,7 +12,8 @@ Bản tài liệu thiết kế hoàn chỉnh của trò chơi **"Đại Gia Đ�
   * Dừng chân bình thường tại ô 10 (chỉ ghé thăm) không bị tạm giữ hay phạt tiền.  
 * **Điều kiện kết thúc & Thắng cuộc:**  
   * *Theo thời gian/vòng đấu:* Kết thúc sau 30 vòng (Server Round Cap theo IMP-16) hoặc 60 phút. Người có **Tổng tài sản ròng** lớn nhất (Tiền mặt + Giá trị định giá BĐS & Công trình - Dư nợ ngân hàng) chiến thắng.  
-  * *Theo thanh khoản:* Nếu có người chơi phá sản (âm tiền mặt sau khi đã thế chấp/bán toàn bộ tài sản), trận đấu dừng lại và chốt kết quả ngay lập tức.  
+  * *Theo thanh khoản & Cứu nguy AFK (IMP-60):* Khi người chơi bị âm tiền mặt, bắt buộc giải cứu dòng tiền theo 2 bước: (1) Hạ cấp công trình đều nhau (Even-Downgrade) nhận lại 50% chi phí xây; (2) Thế chấp đất từ rẻ nhất đến đắt nhất nhận 50% giá đất. Chỉ tuyên bố phá sản khi đã thanh lý toàn bộ tài sản mà vẫn âm tiền.  
+* **Chuẩn Hóa Nhịp Thở Thời Gian (Pacing Timers - IMP-60):** WaitingRoll: 25s, ActionPhase: 35s, HosePhase: 25s, PropertyManagement: 30s, AuctionPhase: 20s, InsolvencyPhase: 45s; TurnWatchdog tự giải cứu khẩn cấp: 60s.  
 * **Quy tắc Đấu giá Bất động sản Tự động (Auto-Auction Rule):**  
   * Khi người chơi dừng tại một ô đất chưa có chủ nhưng quyết định Bỏ qua, ô đất này không được giữ nguyên mà lập tức đưa vào phiên đấu giá công khai.  
   * Mọi người chơi khác (ngoại trừ người vừa bỏ qua) đều có quyền đặt giá. Giá khởi điểm: 50% giá niêm yết. Bước giá tối thiểu: +50 Tr. VNĐ (hỗ trợ các mức nâng giá +50, +100, +200 Tr. VNĐ theo IMP-49). Người chơi không được đặt vượt quá số tiền mặt khả dụng hiện có.  
@@ -155,7 +156,8 @@ Khi người chơi đi qua hoặc dừng tại ô GO, sau khi nhận trợ cấp
 
 * *Sở hữu từ 1 đến 3 ô BĐS:* Miễn thuế (Bảo hộ tích lũy ban đầu).  
 * *Sở hữu từ 4 đến 6 ô BĐS:* Nộp $150$ Tr. VNĐ/mỗi ô đất.  
-* *Sở hữu từ 7 ô BĐS trở lên (Diện điều tiết đầu cơ):* Nộp $400$ Tr. VNĐ/mỗi ô đất $+ 300$ Tr. VNĐ/mỗi công trình cấp 2 và cấp 3.
+* *Sở hữu từ 7 ô BĐS trở lên (Diện điều tiết đầu cơ):* Nộp $400$ Tr. VNĐ/mỗi ô đất $+ 300$ Tr. VNĐ/mỗi công trình cấp 2 và cấp 3.  
+* *Khóa trần thuế tài sản (GO_PROPERTY_TAX_CAP - IMP-60):* Giới hạn tổng thuế tài sản tối đa 1.000 Tr. VNĐ/vòng để bảo đảm người chơi luôn nhận tối thiểu +1.000 Tr. VNĐ tiền lương ròng khi qua ô GO.
 
 #### **2. Tín Dụng & Đòn Bẩy Ngân Hàng**
 

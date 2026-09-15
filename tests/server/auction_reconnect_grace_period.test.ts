@@ -68,8 +68,8 @@ describe('[UC-GAME-006/MSS][UC-GAME-028/MSS] Rớt Mạng Đấu Giá 3s Cuối 
     expect(closeRes.winnerId).toBe('p1');
     expect(closeRes.winningBid).toBe(2_500);
 
-    // Số dư P1 bị trừ chuẩn xác: 15.000 - 2.500 = 12.500 Tr.
-    expect(room.players[0]!.balance).toBe(12_500);
+    // Số dư P1 bị trừ chuẩn xác: 20.000 - 2.500 = 17.500 Tr.
+    expect(room.players[0]!.balance).toBe(17_500);
     // Quyền sở hữu Ô 37 sang tên hợp pháp cho P1 trong registry
     expect(mgr.getPropertyOwner(room.roomCode, 37)).toBe('p1');
 

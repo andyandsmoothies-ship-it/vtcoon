@@ -57,7 +57,7 @@ export function AuctionModal({
 
   return (
     <div
-      className="w-full max-w-lg bg-slate-900/95 backdrop-blur-xl border border-amber-500/40 rounded-3xl p-5 md:p-6 shadow-2xl space-y-4 pointer-events-auto relative select-none"
+      className="w-full max-w-lg bg-[#FFFBEB] border-2 border-slate-900 rounded-3xl p-5 md:p-6 shadow-[0_6px_0_0_#0f172a] space-y-4 pointer-events-auto relative select-none text-slate-900"
       data-testid="auction-modal"
     >
       {/* Vùng Live Region cho Trình Đọc Màn Hình [WCAG 4.1.3] */}
@@ -66,18 +66,18 @@ export function AuctionModal({
       </div>
 
       {/* Header phiên đấu giá */}
-      <div className="flex items-center justify-between border-b border-slate-700/60 pb-3">
+      <div className="flex items-center justify-between border-b border-amber-300/80 pb-3">
         <div className="flex items-center gap-2.5">
           <span className="text-2xl" aria-hidden="true">🔨</span>
           <div>
-            <h2 className="text-sm font-black uppercase tracking-wider text-amber-400">
+            <h2 className="text-sm font-black uppercase tracking-wider text-slate-900">
               SÀN ĐẤU GIÁ TRỰC TUYẾN
             </h2>
-            <p className="text-[10px] text-slate-400 font-mono">LIVE 3D ARENA</p>
+            <p className="text-[10px] text-amber-800 font-mono font-bold">LIVE TABLETOP ARENA</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-400">
             ĐANG MỞ
           </span>
           {onClose && (
@@ -85,7 +85,7 @@ export function AuctionModal({
               type="button"
               onClick={onClose}
               aria-label="Đóng sàn đấu giá"
-              className="w-7 h-7 inline-flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+              className="w-7 h-7 inline-flex items-center justify-center text-slate-500 hover:text-slate-900 hover:bg-amber-100 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
             >
               ✕
             </button>
@@ -94,40 +94,45 @@ export function AuctionModal({
       </div>
 
       {/* Tên BĐS & Phân khu quy hoạch */}
-      <div className="flex items-center gap-3 bg-slate-950/60 p-3 rounded-2xl border border-slate-800">
-        <div className="w-3.5 h-10 rounded-md shrink-0 shadow" style={{ backgroundColor: ribbonColor }} />
+      <div className="flex items-center gap-3 bg-[#F7F2E7] p-3 rounded-2xl border border-slate-300">
+        <div className="w-3.5 h-10 rounded-md shrink-0 shadow border border-slate-900" style={{ backgroundColor: ribbonColor }} />
         <div className="flex-1 min-w-0">
-          <h3 className="font-bold text-slate-100 text-sm truncate">{deed?.name ?? `Ô #${cellIndex}`}</h3>
-          <p className="text-xs text-slate-400 truncate">
-            Giá khởi điểm: <span className="text-slate-200 font-semibold">{formatCurrency(deed?.price ?? currentBid)}</span>
+          <h3 className="font-bold text-slate-900 text-sm truncate">{deed?.name ?? `Ô #${cellIndex}`}</h3>
+          <p className="text-xs text-slate-600 truncate">
+            Giá khởi điểm: <span className="text-slate-900 font-bold">{formatCurrency(deed?.price ?? currentBid)}</span>
           </p>
         </div>
       </div>
 
       {/* Bảng giá hiện tại & Người dẫn đầu */}
       <div className="grid grid-cols-2 gap-2.5 text-center">
-        <div className="bg-slate-950/70 p-2.5 rounded-xl border border-slate-800/80">
-          <span className="text-[10px] text-slate-400 block font-medium">GIÁ THẦU HIỆN TẠI</span>
-          <span className="text-base font-black text-amber-400 font-mono block mt-0.5">
+        <div className="bg-[#F7F2E7] p-2.5 rounded-xl border border-slate-300 flex flex-col justify-between">
+          <span className="text-[10px] text-slate-600 block font-bold">GIÁ THẦU HIỆN TẠI</span>
+          <div
+            data-testid="flip-counter"
+            className="tracking-widest font-mono font-black text-2xl md:text-3xl text-amber-400 bg-slate-900 py-1 px-3 rounded-lg shadow-inner border border-slate-700 mt-1"
+          >
             {formatCurrency(currentBid)}
-          </span>
+          </div>
         </div>
-        <div className="bg-slate-950/70 p-2.5 rounded-xl border border-slate-800/80">
-          <span className="text-[10px] text-slate-400 block font-medium">DẪN ĐẦU</span>
-          <span className={`text-xs font-bold truncate block mt-1 ${isLeading ? 'text-emerald-400' : 'text-slate-200'}`}>
-            {displayName}
-          </span>
+        <div className="bg-[#F7F2E7] p-2.5 rounded-xl border border-slate-300 flex flex-col justify-between">
+          <span className="text-[10px] text-slate-600 block font-bold">DẪN ĐẦU</span>
+          <div className="p-2 rounded-lg bg-white/90 border border-slate-200 mt-1">
+            <span className={`text-xs font-black truncate block ${isLeading ? 'text-emerald-700' : 'text-slate-900'}`}>
+              {displayName}
+            </span>
+          </div>
         </div>
       </div>
 
       {/* Danh sách đại gia & Ví tiền */}
-      <div className="space-y-1.5 bg-slate-950/40 p-3 rounded-2xl border border-slate-800/60">
-        <div className="flex items-center justify-between text-[11px] pb-1 border-b border-slate-800/60">
-          <span className="font-semibold text-slate-400 uppercase tracking-wider">
+      <div className="space-y-1.5 bg-[#F7F2E7] p-3 rounded-2xl border border-slate-300">
+        <div className="flex items-center justify-between text-[11px] pb-1 border-b border-slate-300">
+          <span className="font-bold text-slate-700 uppercase tracking-wider">
             ĐẠI GIA THAM GIA
           </span>
-          <span className="font-medium text-slate-300">
-            Ví của bạn: <span className="font-mono font-bold text-emerald-400">{myBalance !== undefined ? formatCurrency(myBalance) : '---'}</span>
+          <span className="font-medium text-slate-700">
+            Ví của bạn: <span className="font-mono font-bold text-emerald-700">{myBalance !== undefined ? formatCurrency(myBalance) : '---'}</span>
           </span>
         </div>
         <div className="space-y-1 max-h-24 overflow-y-auto pr-1">
@@ -139,23 +144,23 @@ export function AuctionModal({
                   key={p.id}
                   className={`flex items-center justify-between text-xs px-2.5 py-1 rounded-lg border ${
                     isBidder
-                      ? 'bg-amber-500/20 border-amber-500/40 text-amber-300 font-bold'
-                      : 'bg-slate-950/40 border-slate-800/60 text-slate-300'
+                      ? 'bg-amber-200 border-amber-400 text-amber-950 font-bold'
+                      : 'bg-white/80 border-slate-200 text-slate-800'
                   }`}
                 >
                   <div className="flex items-center gap-2 truncate">
                     <span
-                      className="w-2 h-2 rounded-full shrink-0"
+                      className="w-2 h-2 rounded-full shrink-0 border border-slate-900"
                       style={{ backgroundColor: p.tokenColor ?? '#F59E0B' }}
                     />
-                    <span className="truncate max-w-[140px]">{p.name}</span>
+                    <span className="truncate max-w-[140px] font-medium">{p.name}</span>
                   </div>
-                  <span className="font-mono text-[11px]">{formatCurrency(p.balance)}</span>
+                  <span className="font-mono text-[11px] font-bold">{formatCurrency(p.balance)}</span>
                 </div>
               );
             })
           ) : (
-            <div className="text-[11px] text-slate-400 text-center py-1">
+            <div className="text-[11px] text-slate-600 text-center py-1">
               {displayName ? `Dẫn đầu: ${displayName}` : 'Chưa có người chơi kết nối'}
             </div>
           )}
@@ -166,16 +171,16 @@ export function AuctionModal({
       <div className="space-y-1.5 pt-1">
         <div className="flex items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-2">
-            <span className={`w-2.5 h-2.5 rounded-full ${isUrgent ? 'bg-rose-500 animate-ping' : 'bg-amber-400'}`} />
-            <span className="text-slate-300 font-medium">THỜI GIAN CÒN LẠI:</span>
+            <span className={`w-2.5 h-2.5 rounded-full ${isUrgent ? 'bg-rose-500 animate-ping' : 'bg-amber-500'}`} />
+            <span className="text-slate-700 font-bold">THỜI GIAN CÒN LẠI:</span>
           </div>
-          <span className={`font-mono font-black text-base ${isUrgent ? 'text-rose-400 animate-pulse' : 'text-amber-400'}`}>
+          <span className={`font-mono font-black text-base ${isUrgent ? 'text-rose-600 animate-pulse' : 'text-amber-800'}`}>
             {timeRemaining.toString().padStart(2, '0')} GIÂY
           </span>
         </div>
-        <div className="w-full h-1.5 bg-slate-950 rounded-full overflow-hidden">
+        <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden border border-slate-300">
           <div
-            className={`h-full transition-all duration-300 ${isUrgent ? 'bg-rose-500' : 'bg-amber-400'}`}
+            className={`h-full transition-all duration-300 ${isUrgent ? 'bg-rose-500' : 'bg-amber-500'}`}
             style={{ width: `${timerPercent}%` }}
           />
         </div>
@@ -183,19 +188,19 @@ export function AuctionModal({
 
       {/* Trạng thái & Các nút nâng giá nhanh */}
       {isDeclinedPlayer ? (
-        <div className="p-3 bg-amber-950/40 rounded-xl text-center border border-amber-600/40">
-          <p className="text-xs font-semibold text-amber-200">
+        <div className="p-3 bg-amber-100 rounded-xl text-center border border-amber-300">
+          <p className="text-xs font-bold text-amber-900">
             Bạn đã từ chối mua ô đất này (Luật game cấm tham gia đấu giá). Đang chờ các đối thủ khác đặt giá...
           </p>
         </div>
       ) : hasPassed ? (
-        <div className="p-3 bg-slate-800/60 rounded-xl text-center border border-slate-700">
-          <p className="text-xs font-semibold text-rose-300">Bạn đã rút lui khỏi phiên đấu giá này.</p>
+        <div className="p-3 bg-slate-200 rounded-xl text-center border border-slate-300">
+          <p className="text-xs font-bold text-rose-700">Bạn đã rút lui khỏi phiên đấu giá này.</p>
         </div>
       ) : isLeading ? (
-        <div className="p-3 bg-emerald-950/40 rounded-xl text-center border border-emerald-600/40 flex items-center justify-center gap-2">
-          <span className="text-emerald-400 font-bold text-sm">✓</span>
-          <p className="text-xs font-bold text-emerald-300">Bạn đang dẫn đầu mức giá cao nhất!</p>
+        <div className="p-3 bg-emerald-100 rounded-xl text-center border border-emerald-400 flex items-center justify-center gap-2">
+          <span className="text-emerald-700 font-bold text-sm">✓</span>
+          <p className="text-xs font-bold text-emerald-800">Bạn đang dẫn đầu mức giá cao nhất!</p>
         </div>
       ) : (
         <div className="grid grid-cols-3 gap-2">
@@ -208,14 +213,14 @@ export function AuctionModal({
                 type="button"
                 onClick={() => onBid?.(targetBid)}
                 disabled={!canAfford}
-                className={`min-h-[48px] py-2 px-2 font-bold text-xs rounded-xl shadow-lg border flex flex-col items-center justify-center transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+                className={`min-h-[48px] py-2 px-2 font-bold text-xs rounded-xl border-2 flex flex-col items-center justify-center transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
                   canAfford
-                    ? 'bg-amber-500 hover:bg-amber-400 active:scale-95 text-amber-950 border-amber-400 font-black cursor-pointer'
-                    : 'bg-slate-800/70 text-slate-500 border-slate-700/60 cursor-not-allowed opacity-50'
+                    ? 'bg-amber-500 hover:bg-amber-400 text-slate-900 border-amber-700 font-black shadow-[0_4px_0_0_#b45309] active:shadow-[0_1px_0_0_#b45309] active:translate-y-[3px] cursor-pointer'
+                    : 'bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed opacity-50'
                 }`}
               >
                 <span className="text-xs md:text-sm font-black tracking-wide">+{step} Tr.</span>
-                <span className={`text-[10px] font-semibold mt-0.5 ${canAfford ? 'text-amber-900' : 'text-slate-500'}`}>
+                <span className={`text-[10px] font-semibold mt-0.5 ${canAfford ? 'text-amber-950' : 'text-slate-400'}`}>
                   ({formatCurrency(targetBid)})
                 </span>
               </button>
@@ -225,18 +230,18 @@ export function AuctionModal({
       )}
 
       {/* Footer: Công tắc Auto-Bid & Nút Rút lui */}
-      <div className="flex items-center justify-between gap-3 pt-2 border-t border-slate-800/80">
+      <div className="flex items-center justify-between gap-3 pt-2 border-t border-amber-300/80">
         <button
           type="button"
           onClick={() => setAutoBid((prev) => !prev)}
           disabled={hasPassed || isDeclinedPlayer}
-          className={`px-3 py-2 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1.5 ${
+          className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 cursor-pointer ${
             autoBid
-              ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-              : 'bg-slate-800/50 text-slate-400 border-slate-700/50 hover:text-slate-200'
+              ? 'bg-amber-500 text-slate-900 border-amber-700 shadow-[0_2px_0_0_#b45309]'
+              : 'bg-slate-200 text-slate-700 border-slate-400 hover:bg-slate-300'
           }`}
         >
-          <span className={`w-2 h-2 rounded-full ${autoBid ? 'bg-amber-400' : 'bg-slate-500'}`} />
+          <span className={`w-2 h-2 rounded-full ${autoBid ? 'bg-amber-900' : 'bg-slate-400'}`} />
           <span>AUTO-BID</span>
         </button>
 
@@ -244,7 +249,7 @@ export function AuctionModal({
           type="button"
           onClick={onPass ?? onClose}
           disabled={hasPassed || isDeclinedPlayer}
-          className="min-h-[38px] px-4 py-1.5 rounded-xl text-xs font-bold text-rose-300 hover:text-rose-200 bg-rose-950/30 hover:bg-rose-900/40 border border-rose-800/40 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
+          className="min-h-[38px] px-4 py-1.5 rounded-xl text-xs font-bold text-rose-700 hover:text-rose-800 bg-rose-100 hover:bg-rose-200 border-2 border-rose-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 cursor-pointer"
         >
           {isDeclinedPlayer ? 'Không Thể Tham Gia' : hasPassed ? 'Đã Rút Lui' : 'Rút Lui / Bỏ Cuộc'}
         </button>

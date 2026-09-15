@@ -150,9 +150,9 @@ describe('[TC-UI-ACT01/MSS] ActivityFeedSidebar Component Tests', () => {
       }),
     );
     expect(html).toContain('+2.000 Tr.');
-    expect(html).toContain('text-emerald-400');
+    expect(html).toContain('text-emerald-700');
     expect(html).toContain('-500 Tr.');
-    expect(html).toContain('text-rose-400');
+    expect(html).toContain('text-rose-700');
   });
 });
 

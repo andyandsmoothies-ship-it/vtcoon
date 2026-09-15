@@ -149,9 +149,9 @@ describe('[TC-CAM01.2/MSS] Camera Positioning & Target Calculation', () => {
     expect(preMatch.fov).toBe(CAMERA_CONFIG.pre_match.fov);
     expect(preMatch.position).toEqual([...CAMERA_CONFIG.pre_match.position]);
     expect(preMatch.target).toEqual([...CAMERA_CONFIG.pre_match.target]);
-    expect(CAMERA_CONFIG.pre_match.position).toEqual([11.2, 15.6, 11.2]);
-    expect(CAMERA_CONFIG.pre_match.target).toEqual([-0.8, 0, -0.8]);
-    expect(CAMERA_CONFIG.pre_match.fov).toBe(40);
+    expect(CAMERA_CONFIG.pre_match.position).toEqual([30.0, 33.0, 30.0]);
+    expect(CAMERA_CONFIG.pre_match.target).toEqual([1.5, 0.0, 1.5]);
+    expect(CAMERA_CONFIG.pre_match.fov).toBe(24);
   });
 });
 

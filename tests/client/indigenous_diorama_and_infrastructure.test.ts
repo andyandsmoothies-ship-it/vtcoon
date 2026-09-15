@@ -73,8 +73,8 @@ describe('[TC-IMP33/MSS] Nhóm 1: Thẻ Sổ Đỏ (TitleDeedModal) — Diorama 
         isOwned: false,
       })
     );
-    expect(html).toContain('bg-slate-950/60');
-    expect(html).toContain('border-amber-400/25');
+    expect(html).toContain('bg-[#F7F2E7]');
+    expect(html).toContain('border-slate-300');
   });
 
   it('[TC-IMP33/MSS-05] Khung Diorama Art Banner áp dụng chiều cao xúc giác responsive h-32 sm:h-36', () => {

@@ -158,7 +158,7 @@ describe('[TC-IMP38/MSS][UC-IMP38] Tile Text Crispness & Overview Legibility Sui
   // FACET 1: TILE TEXT CRISPNESS & POSITIONING (tile_texture_generator.ts)
   // =========================================================================
 
-  it('[TC-IMP38.01/MSS][UC-IMP38] Standard tile renders title with fillStyle #FFFFFF for dark banner', () => {
+  it('[TC-IMP38.01/MSS][UC-IMP38] Standard tile renders title with fillStyle #FFFFFF on dark banner', () => {
     getTileTexture(1); // Cần Thơ (nâu đậm)
     const titleEntry = recordedFillText.find((t) => t.y === 28);
     expect(titleEntry).toBeDefined();
@@ -314,33 +314,33 @@ describe('[TC-IMP38/MSS][UC-IMP38] Tile Text Crispness & Overview Legibility Sui
   // FACET 4: OVERVIEW & PRE-MATCH CAMERA CALIBRATION (CLOSER 20% FOR RETROPOLY SCALE)
   // =========================================================================
 
-  it('[TC-IMP38.24/MSS][UC-IMP38] CAMERA_CONFIG overview position is calibrated to [11.2, 15.6, 11.2]', () => {
-    expect(CAMERA_CONFIG.overview.position).toEqual([11.2, 15.6, 11.2]);
+  it('[TC-IMP38.24/MSS][UC-IMP38] CAMERA_CONFIG overview position is calibrated to [30.0, 33.0, 30.0]', () => {
+    expect(CAMERA_CONFIG.overview.position).toEqual([30.0, 33.0, 30.0]);
   });
 
-  it('[TC-IMP38.25/MSS][UC-IMP38] CAMERA_CONFIG overview target is calibrated to [-0.6, 0.0, -0.6]', () => {
-    expect(CAMERA_CONFIG.overview.target).toEqual([-0.6, 0.0, -0.6]);
+  it('[TC-IMP38.25/MSS][UC-IMP38] CAMERA_CONFIG overview target is calibrated to [1.5, 0.0, 1.5]', () => {
+    expect(CAMERA_CONFIG.overview.target).toEqual([1.5, 0.0, 1.5]);
   });
 
-  it('[TC-IMP38.26/MSS][UC-IMP38] CAMERA_CONFIG pre_match position is calibrated to [11.2, 15.6, 11.2]', () => {
-    expect(CAMERA_CONFIG.pre_match.position).toEqual([11.2, 15.6, 11.2]);
+  it('[TC-IMP38.26/MSS][UC-IMP38] CAMERA_CONFIG pre_match position is calibrated to [30.0, 33.0, 30.0]', () => {
+    expect(CAMERA_CONFIG.pre_match.position).toEqual([30.0, 33.0, 30.0]);
   });
 
-  it('[TC-IMP38.27/MSS][UC-IMP38] CAMERA_CONFIG pre_match target is calibrated to [-0.8, 0.0, -0.8]', () => {
-    expect(CAMERA_CONFIG.pre_match.target).toEqual([-0.8, 0.0, -0.8]);
+  it('[TC-IMP38.27/MSS][UC-IMP38] CAMERA_CONFIG pre_match target is calibrated to [1.5, 0.0, 1.5]', () => {
+    expect(CAMERA_CONFIG.pre_match.target).toEqual([1.5, 0.0, 1.5]);
   });
 
-  it('[TC-IMP38.28/MSS][UC-IMP38] calculateTargetCameraState overview returns position [11.2, 15.6, 11.2] and fov 40', () => {
+  it('[TC-IMP38.28/MSS][UC-IMP38] calculateTargetCameraState overview returns position [30.0, 33.0, 30.0] and fov 24', () => {
     const state = calculateTargetCameraState('overview');
-    expect(state.position).toEqual([11.2, 15.6, 11.2]);
-    expect(state.target).toEqual([-0.6, 0.0, -0.6]);
-    expect(state.fov).toBe(40);
+    expect(state.position).toEqual([30.0, 33.0, 30.0]);
+    expect(state.target).toEqual([1.5, 0.0, 1.5]);
+    expect(state.fov).toBe(24);
   });
 
-  it('[TC-IMP38.29/MSS][UC-IMP38] calculateTargetCameraState pre_match returns position [11.2, 15.6, 11.2] and fov 40', () => {
+  it('[TC-IMP38.29/MSS][UC-IMP38] calculateTargetCameraState pre_match returns position [30.0, 33.0, 30.0] and fov 24', () => {
     const state = calculateTargetCameraState('pre_match');
-    expect(state.position).toEqual([11.2, 15.6, 11.2]);
-    expect(state.target).toEqual([-0.8, 0.0, -0.8]);
-    expect(state.fov).toBe(40);
+    expect(state.position).toEqual([30.0, 33.0, 30.0]);
+    expect(state.target).toEqual([1.5, 0.0, 1.5]);
+    expect(state.fov).toBe(24);
   });
 });

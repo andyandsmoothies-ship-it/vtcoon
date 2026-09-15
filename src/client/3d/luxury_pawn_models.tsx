@@ -69,7 +69,7 @@ export function LuxuryPawnModel({ slotIndex }: { readonly slotIndex: number }): 
   const config = LUXURY_PAWN_CONFIGS[safeIdx] ?? LUXURY_PAWN_CONFIGS[0]!;
 
   return (
-    <group position={[0, -0.28, 0]} scale={[1.25, 1.25, 1.25]}>
+    <group position={[0, -0.28, 0]} scale={[0.625, 0.625, 0.625]}>
       {/* 1. Bệ cờ mạ kim loại có rãnh viền ánh vàng tiếp xúc mặt ô bàn cờ */}
       <mesh position={[0, 0.015, 0]} castShadow receiveShadow>
         <cylinderGeometry args={[0.22, 0.25, 0.03, 32]} />

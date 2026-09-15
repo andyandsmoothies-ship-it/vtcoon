@@ -82,6 +82,20 @@ export const DEFAULT_PERSONALITY_WEIGHTS: Readonly<Record<BotPersonality, Person
   }),
 });
 
+export const SOFTMAX_TEMPERATURE: Readonly<Record<BotPersonality, number>> = Object.freeze({
+  [BotPersonality.Passive]: 0.8,
+  [BotPersonality.Balanced]: 1.0,
+  [BotPersonality.Aggressive]: 1.4,
+});
+
+export const PERSONALITY_BUY_BIAS: Readonly<Record<BotPersonality, number>> = Object.freeze({
+  [BotPersonality.Passive]: -0.5,
+  [BotPersonality.Balanced]: 0.3,
+  [BotPersonality.Aggressive]: 1.2,
+});
+
+export const AUCTION_BAIT_PROBABILITY = 0.6;
+
 export interface TileValuation {
   readonly cellIndex: number;
   readonly estimatedValue: number;
@@ -92,6 +106,8 @@ export interface TileValuation {
   readonly liquidityMultiplier?: number;
   readonly jitterMultiplier?: number;
   readonly strategicMultiplier?: number;
+  readonly valuePreferenceMultiplier?: number;
+  readonly buyProbability?: number;
 }
 
 export enum SolvencyActionType {
@@ -108,6 +124,15 @@ export interface SolvencyAction {
 export interface BotIntent {
   type: string;
   [key: string]: unknown;
+}
+
+export interface BotConfig {
+  personality: BotPersonality;
+  /** Balanced: 1.20, Aggressive: 1.00 */
+  balanceThresholdMultiplier: number;
+  seed?: number;
+  rng?: () => number;
+  manualRoll?: number;
 }
 
 export type { CurrentAuctionState } from '../room';

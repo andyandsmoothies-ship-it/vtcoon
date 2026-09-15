@@ -2,7 +2,7 @@
 // Valuation Engine — Dynamic Property Valuation & Pacing
 // Domain-only module: does not import Server or Client
 import type { Player, Room } from '../room';
-import { BOARD_CONFIG } from '../board_config';
+import { BOARD_CONFIG, CellType } from '../board_config';
 import {
   PROPERTY_DEEDS,
   isPurchasable,
@@ -14,6 +14,7 @@ import {
   type TileValuation,
 } from './bot_types';
 import { calculateThreatHorizon } from './threat_forecaster';
+import { calculateBuyProbability, resolveSeededJitter } from './bot_softmax';
 
 export const PACING_STAGE_MULTIPLIERS = Object.freeze({
   EARLY: 1.4, // Round 1..8: Expansion phase
@@ -121,11 +122,32 @@ export function calculateLiquidityMultiplier(remainingBalance: number, safetyBuf
   return Math.max(MIN_LIQUIDITY_MULTIPLIER, Number(ratio.toFixed(2)));
 }
 
-export function resolveJitter(manualJitter?: number): number {
-  if (typeof manualJitter === 'number' && Number.isFinite(manualJitter)) {
-    return manualJitter;
+export function calculateValuePreferenceMultiplier(
+  cellIndex: number,
+  personality?: BotPersonality,
+): number {
+  if (personality !== BotPersonality.Passive) return 1.0;
+  const cell = BOARD_CONFIG[cellIndex];
+  if (!cell) return 1.0;
+  if (cell.type === CellType.Railroad || cell.type === CellType.Utility) {
+    return 1.3;
   }
-  return Math.random() * (JITTER_BOUNDS.MAX - JITTER_BOUNDS.MIN) + JITTER_BOUNDS.MIN;
+  const deed = PROPERTY_DEEDS.get(cellIndex);
+  const basePrice = deed?.price ?? 0;
+  if (basePrice > 0 && basePrice <= 1500) {
+    return 1.2;
+  }
+  if (basePrice > 2500) {
+    return 0.85;
+  }
+  return 1.0;
+}
+
+export function resolveJitter(
+  manualJitter?: number,
+  seedOrRng?: number | (() => number),
+): number {
+  return resolveSeededJitter(seedOrRng, manualJitter);
 }
 
 /**
@@ -139,6 +161,7 @@ export function evaluateTileValuation(
   stateMap: PropertyStateMap,
   personality?: BotPersonality,
   manualJitter?: number,
+  seedOrRng?: number | (() => number),
 ): TileValuation {
   const basePrice = PROPERTY_DEEDS.get(cellIndex)?.price ?? 0;
   const roundNumber = room?.round ?? room?.roundCount;
@@ -153,6 +176,8 @@ export function evaluateTileValuation(
       liquidityMultiplier: 1.0,
       jitterMultiplier: 1.0,
       strategicMultiplier: 1.0,
+      valuePreferenceMultiplier: 1.0,
+      buyProbability: 0,
     };
   }
 
@@ -160,6 +185,7 @@ export function evaluateTileValuation(
   const monopolyMultiplier = calculateMonopolyMultiplier(cellIndex, bot.id, registry, personality);
   const denialMultiplier = calculateDenialMultiplier(cellIndex, bot.id, room, registry, personality);
   const strategicMultiplier = Math.max(monopolyMultiplier, denialMultiplier);
+  const valuePrefMultiplier = calculateValuePreferenceMultiplier(cellIndex, personality);
 
   const threat = calculateThreatHorizon(bot, room, registry, stateMap, personality);
   const safetyBuffer = Number.isFinite(threat?.safetyBuffer) ? threat.safetyBuffer : 300;
@@ -167,14 +193,21 @@ export function evaluateTileValuation(
   const remaining = currentBalance - basePrice;
   const liquidityMultiplier = calculateLiquidityMultiplier(remaining, safetyBuffer);
 
-  const jitter = resolveJitter(manualJitter);
+  const jitter = resolveJitter(manualJitter, seedOrRng);
   const jitterMultiplier = 1 + jitter;
 
   const rawEstimatedValue =
-    basePrice * stageMultiplier * strategicMultiplier * liquidityMultiplier * jitterMultiplier;
+    basePrice * stageMultiplier * strategicMultiplier * valuePrefMultiplier * liquidityMultiplier * jitterMultiplier;
   const estimatedValue = Number.isFinite(rawEstimatedValue)
     ? Math.max(0, Math.round(rawEstimatedValue))
     : 0;
+
+  const buyProb = calculateBuyProbability(
+    estimatedValue,
+    basePrice,
+    personality ?? BotPersonality.Balanced,
+    valuePrefMultiplier,
+  );
 
   return {
     cellIndex,
@@ -186,5 +219,7 @@ export function evaluateTileValuation(
     liquidityMultiplier,
     jitterMultiplier,
     strategicMultiplier,
+    valuePreferenceMultiplier: valuePrefMultiplier,
+    buyProbability: buyProb,
   };
 }

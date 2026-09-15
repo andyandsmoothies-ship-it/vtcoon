@@ -1,55 +1,48 @@
-// [TC-06.8a/MSS][TC-06.8b/MSS][TC-06.8c/MSS] Bot AI Engine — 3 Personality Decision Tests
-// [UC-GAME-005/MSS][UC-GAME-008/MSS]
-// Traceability: GAME-S06 TASK 5 · bot_engine.ts [NEW]
-//
-// NOTE: src/domain/bot/bot_engine.ts DOES NOT EXIST YET.
-// These tests MUST FAIL with: Cannot find module '../../src/domain/bot/bot_engine'
-// That is the expected RED phase for TDD.
+// [TC-06.8a/MSS][TC-06.8b/MSS][TC-06.8c/MSS] Bot AI Engine â€” 3 Personality Decision Tests
+// [UC-GAME-005/MSS][UC-GAME-008/MSS][IMP-58/MSS]
+// Traceability: GAME-S06 TASK 5 Â· bot_engine.ts Â· IMP-58 Phase 1
 
 import { describe, it, expect } from 'vitest';
-// Bot engine chua ton tai — test se FAIL do import error (module not found)
 import { decideBotIntent, BotPersonality } from '../../src/domain/bot/bot_engine';
 import { createPlayer, createRoom, TurnPhase } from '../../src/domain/room';
 import type { PropertyRegistry, PropertyStateMap } from '../../src/domain/property_data';
 
 // ============================================================
-// TC-06.8a — Bot THU DONG (PASSIVE)
-// Spec: Khong bao gio emit INTENT_BUY hoac INTENT_UPGRADE.
-// Luong: WaitingRoll -> INTENT_ROLL | ActionPhase -> INTENT_DECLINE | PropertyManagement -> INTENT_END_TURN
-// [UC-GAME-005/MSS][UC-GAME-008/MSS]
+// TC-06.8a â€” Bot THU DONG (PASSIVE) â€” IMP-58 Value Investor
+// Spec: Mua co chon loc (o re, ha tang, monopoly), tu choi o dat do khi chua co phao dai tien mat.
+// [UC-GAME-005/MSS][UC-GAME-008/MSS][IMP-58/MSS]
 // ============================================================
-describe('TC-06.8a Bot PASSIVE — chi ROLL -> DECLINE -> END_TURN', () => {
-  it('[TC-06.8a-1] PASSIVE khong bao gio tra ve INTENT_BUY du balance du da', () => {
-    // Arrange: Bot PASSIVE voi balance 20.000 (du mua bat ky o nao tren ban co)
+describe('TC-06.8a Bot PASSIVE â€” Value Investor', () => {
+  it('[TC-06.8a-1] PASSIVE tu choi mua o dat do khi chua co phao dai tien mat', () => {
+    // Arrange: Bot PASSIVE voi balance 4.500 tai o 39 (Landmark 81 gia 4.000 Tr., khong co phao dai)
     const room = createRoom('host-1');
     const bot = createPlayer('bot-passive-1');
     bot.isBot = true;
-    bot.balance = 20_000;
-    bot.position = 6; // O Xanh Da Troi gia 1.000 Tr.
+    bot.balance = 4_500;
+    bot.position = 39; // Landmark 81 gia 4.000 Tr.
     room.players = [bot];
     room.phase = TurnPhase.ActionPhase;
 
-    const registry: PropertyRegistry = new Map(); // O 6 chua co chu
+    const registry: PropertyRegistry = new Map();
     const stateMap: PropertyStateMap = new Map();
 
     // Act
     const intent = decideBotIntent(bot, room, registry, stateMap, {
       personality: BotPersonality.Passive,
-      balanceThresholdMultiplier: 1.20,
+      balanceThresholdMultiplier: 1.5,
     });
 
-    // Assert — Consumer-side: phai khong phai INTENT_BUY hoac INTENT_UPGRADE
+    // Assert â€” Consumer-side: phai tu choi mua o dat do khi khong co phao dai tien mat
     expect(intent).not.toBeNull();
-    expect(intent?.type).not.toBe('INTENT_BUY');
-    expect(intent?.type).not.toBe('INTENT_UPGRADE');
+    expect(intent?.type).toBe('INTENT_DECLINE');
   });
 
-  it('[TC-06.8a-2] PASSIVE phase=ActionPhase tra ve INTENT_DECLINE (bo qua mua dat)', () => {
+  it('[TC-06.8a-2] PASSIVE phase=ActionPhase tra ve INTENT_BUY khi gap o gia re va du da tien mat', () => {
     const room = createRoom('host-2');
     const bot = createPlayer('bot-passive-2');
     bot.isBot = true;
     bot.balance = 15_000;
-    bot.position = 6;
+    bot.position = 6; // O gia 1.000 Tr. <= 1.500 Tr.
     room.phase = TurnPhase.ActionPhase;
     room.players = [bot];
 
@@ -59,11 +52,11 @@ describe('TC-06.8a Bot PASSIVE — chi ROLL -> DECLINE -> END_TURN', () => {
     // Act
     const intent = decideBotIntent(bot, room, registry, stateMap, {
       personality: BotPersonality.Passive,
-      balanceThresholdMultiplier: 1.20,
+      balanceThresholdMultiplier: 1.5,
     });
 
-    // Assert — Consumer: Bot PASSIVE phai tu choi mua (INTENT_DECLINE)
-    expect(intent?.type).toBe('INTENT_DECLINE');
+    // Assert â€” Consumer: Bot PASSIVE (Value Investor) mua o gia re khi du da tien mat
+    expect(intent?.type).toBe('INTENT_BUY');
   });
 
   it('[TC-06.8a-3] PASSIVE phase=WaitingRoll tra ve INTENT_ROLL (tung xuc xac)', () => {
@@ -77,14 +70,14 @@ describe('TC-06.8a Bot PASSIVE — chi ROLL -> DECLINE -> END_TURN', () => {
     // Act
     const intent = decideBotIntent(bot, room, new Map(), new Map(), {
       personality: BotPersonality.Passive,
-      balanceThresholdMultiplier: 1.20,
+      balanceThresholdMultiplier: 1.5,
     });
 
-    // Assert — Consumer: Bot PASSIVE phai tung xuc xac khi den luot
+    // Assert â€” Consumer: Bot PASSIVE phai tung xuc xac khi den luot
     expect(intent?.type).toBe('INTENT_ROLL');
   });
 
-  it('[TC-06.8a-4] PASSIVE phase=PropertyManagement tra ve INTENT_END_TURN (ket thuc luot)', () => {
+  it('[TC-06.8a-4] PASSIVE phase=PropertyManagement tra ve INTENT_END_TURN (ket thuc luot khi khong co nha de nang hoac chuoc)', () => {
     const room = createRoom('host-4');
     const bot = createPlayer('bot-passive-4');
     bot.isBot = true;
@@ -95,29 +88,29 @@ describe('TC-06.8a Bot PASSIVE — chi ROLL -> DECLINE -> END_TURN', () => {
     // Act
     const intent = decideBotIntent(bot, room, new Map(), new Map(), {
       personality: BotPersonality.Passive,
-      balanceThresholdMultiplier: 1.20,
+      balanceThresholdMultiplier: 1.5,
     });
 
-    // Assert — Consumer: Bot PASSIVE phai ket thuc luot ngay (khong nang cap)
+    // Assert â€” Consumer: Bot PASSIVE ket thuc luot khi khong co bat dong san
     expect(intent?.type).toBe('INTENT_END_TURN');
   });
 });
 
 // ============================================================
-// TC-06.8b — Bot CAN BANG (BALANCED)
+// TC-06.8b â€” Bot CAN BANG (BALANCED)
 // Spec: Mua neu balance >= price x 1.20 (dem 20% an toan).
-// O vi tri 6 (Xanh Da Troi — Dich vu): price = 1.000 Tr.
+// O vi tri 6 (Xanh Da Troi â€” Dich vu): price = 1.000 Tr.
 // Nguong mua: balance >= 1.000 x 1.20 = 1.200 Tr.
 // [UC-GAME-005/MSS]
 // ============================================================
-describe('TC-06.8b Bot BALANCED — mua neu balance >= price * 1.20', () => {
+describe('TC-06.8b Bot BALANCED â€” mua neu balance >= price * 1.20', () => {
   it('[TC-06.8b-1] balance = 1.200 (dung nguong 120% gia 1.000): tra ve INTENT_BUY', () => {
     // Arrange: O 6 gia 1.000 Tr. -> nguong = 1.000 x 1.20 = 1.200 Tr.
     const room = createRoom('host-5');
     const bot = createPlayer('bot-balanced-1');
     bot.isBot = true;
     bot.balance = 1_200; // Dung nguong 120% gia 1.000
-    bot.position = 6;    // O Xanh Da Troi — Dich vu, price = 1.000 Tr.
+    bot.position = 6;    // O Xanh Da Troi â€” Dich vu, price = 1.000 Tr.
     room.phase = TurnPhase.ActionPhase;
     room.players = [bot];
 
@@ -130,7 +123,7 @@ describe('TC-06.8b Bot BALANCED — mua neu balance >= price * 1.20', () => {
       balanceThresholdMultiplier: 1.20,
     });
 
-    // Assert — Consumer: balance du nguong -> phai mua (INTENT_BUY)
+    // Assert â€” Consumer: balance du nguong -> phai mua (INTENT_BUY)
     expect(intent?.type).toBe('INTENT_BUY');
   });
 
@@ -153,7 +146,7 @@ describe('TC-06.8b Bot BALANCED — mua neu balance >= price * 1.20', () => {
       balanceThresholdMultiplier: 1.20,
     });
 
-    // Assert — Consumer: balance duoi nguong -> phai tu choi (INTENT_DECLINE)
+    // Assert â€” Consumer: balance duoi nguong -> phai tu choi (INTENT_DECLINE)
     expect(intent?.type).toBe('INTENT_DECLINE');
   });
 
@@ -174,26 +167,26 @@ describe('TC-06.8b Bot BALANCED — mua neu balance >= price * 1.20', () => {
       balanceThresholdMultiplier: 1.20,
     });
 
-    // Assert — balance 1.000 < price x 1.20 = 1.200 -> phai la DECLINE (khong phai BUY)
+    // Assert â€” balance 1.000 < price x 1.20 = 1.200 -> phai la DECLINE (khong phai BUY)
     expect(intent?.type).toBe('INTENT_DECLINE');
   });
 });
 
 // ============================================================
-// TC-06.8c — Bot QUYET DOAN (AGGRESSIVE)
+// TC-06.8c â€” Bot QUYET DOAN (AGGRESSIVE)
 // Spec: Mua ngay khi balance >= price x 1.00 (khong dem an toan).
-// O vi tri 6 (Xanh Da Troi — Dich vu): price = 1.000 Tr.
+// O vi tri 6 (Xanh Da Troi â€” Dich vu): price = 1.000 Tr.
 // Nguong mua: balance >= 1.000 x 1.00 = 1.000 Tr.
 // [UC-GAME-008/MSS]
 // ============================================================
-describe('TC-06.8c Bot AGGRESSIVE — mua ngay, nang cap toi da', () => {
+describe('TC-06.8c Bot AGGRESSIVE â€” mua ngay, nang cap toi da', () => {
   it('[TC-06.8c-1] AGGRESSIVE phase=ActionPhase balance=1.000 (dung gia): tra ve INTENT_BUY', () => {
     // Arrange: AGGRESSIVE nguong 1.00 -> balance = price la du
     const room = createRoom('host-8');
     const bot = createPlayer('bot-aggressive-1');
     bot.isBot = true;
-    bot.balance = 1_000; // Dung gia o 6 (1.000 Tr.) — nguong AGGRESSIVE = 1.00
-    bot.position = 6;    // O Xanh Da Troi — Dich vu, price = 1.000 Tr.
+    bot.balance = 1_000; // Dung gia o 6 (1.000 Tr.) â€” nguong AGGRESSIVE = 1.00
+    bot.position = 6;    // O Xanh Da Troi â€” Dich vu, price = 1.000 Tr.
     room.phase = TurnPhase.ActionPhase;
     room.players = [bot];
 
@@ -206,7 +199,7 @@ describe('TC-06.8c Bot AGGRESSIVE — mua ngay, nang cap toi da', () => {
       balanceThresholdMultiplier: 1.00,
     });
 
-    // Assert — Consumer: balance du voi nguong AGGRESSIVE -> phai mua (INTENT_BUY)
+    // Assert â€” Consumer: balance du voi nguong AGGRESSIVE -> phai mua (INTENT_BUY)
     expect(intent?.type).toBe('INTENT_BUY');
   });
 
@@ -215,7 +208,7 @@ describe('TC-06.8c Bot AGGRESSIVE — mua ngay, nang cap toi da', () => {
     const room = createRoom('host-9');
     const bot = createPlayer('bot-aggressive-2');
     bot.isBot = true;
-    bot.balance = 500;   // Chi 500 Tr. — thieu tien (gia 1.000 Tr.)
+    bot.balance = 500;   // Chi 500 Tr. â€” thieu tien (gia 1.000 Tr.)
     bot.position = 6;    // O gia 1.000 Tr.
     room.phase = TurnPhase.ActionPhase;
     room.players = [bot];
@@ -225,7 +218,7 @@ describe('TC-06.8c Bot AGGRESSIVE — mua ngay, nang cap toi da', () => {
       balanceThresholdMultiplier: 1.00,
     });
 
-    // Assert — Consumer: balance khong du -> DECLINE du AGGRESSIVE
+    // Assert â€” Consumer: balance khong du -> DECLINE du AGGRESSIVE
     expect(intent?.type).toBe('INTENT_DECLINE');
   });
 

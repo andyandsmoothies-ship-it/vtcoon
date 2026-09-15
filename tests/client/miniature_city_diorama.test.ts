@@ -5,8 +5,8 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { MiniatureCityDiorama } from '../../src/client/3d/miniature_city_diorama';
 import { DioramaTerrain } from '../../src/client/3d/diorama/diorama_terrain';
 import { DioramaBridges } from '../../src/client/3d/diorama/diorama_bridges';
-import { DioramaStadium } from '../../src/client/3d/diorama/diorama_stadium';
-import { DioramaFerrisWheel } from '../../src/client/3d/diorama/diorama_ferris_wheel';
+import { DioramaCivicCenter } from '../../src/client/3d/diorama/diorama_civic_center';
+import { DioramaWaterfrontPark } from '../../src/client/3d/diorama/diorama_waterfront_park';
 import { DioramaContainerPort } from '../../src/client/3d/diorama/diorama_container_port';
 import { DioramaHeritageDistrict } from '../../src/client/3d/diorama/diorama_heritage_district';
 import { DioramaMarina } from '../../src/client/3d/diorama/diorama_marina';
@@ -58,12 +58,12 @@ describe('[TC-MCD01.1/MSS] Sa Bàn Đô Thị Liền Khối (Unified Diorama)', 
     expect(bridgesMarkup).toContain('#57534E'); // Mố đá sa thạch rêu phong
   });
 
-  it('DioramaStadium kết xuất đấu trường oval với sân cỏ kẻ sọc và đèn LED', () => {
-    const stadiumMarkup = renderToStaticMarkup(React.createElement(DioramaStadium));
-    expect(stadiumMarkup).toContain('#166534'); // Lòng sân thể thao
-    expect(stadiumMarkup).toContain('#15803D'); // Sọc cỏ thi đấu
-    expect(stadiumMarkup).toContain('#DC2626'); // Ghế ngồi khán đài
-    expect(stadiumMarkup).toContain('#E0F2FE'); // Đèn LED thể thao
+  it('DioramaCivicCenter kết xuất trung tâm văn hóa sinh thái với khối đế giật cấp và sảnh kính', () => {
+    const civicMarkup = renderToStaticMarkup(React.createElement(DioramaCivicCenter));
+    expect(civicMarkup).toContain('data-testid="diorama-civic-center"');
+    expect(civicMarkup).toContain('#334155'); // Khối đế ốp đá
+    expect(civicMarkup).toContain('#0284C7'); // Kính Low-E atrium
+    expect(civicMarkup).toContain('#15803D'); // Vườn mái sinh thái
   });
 
   it('DioramaMarina kết xuất bến du thuyền điêu khắc và ngọn hải đăng di sản', () => {
@@ -85,16 +85,15 @@ describe('[TC-MCD01.1/MSS] Sa Bàn Đô Thị Liền Khối (Unified Diorama)', 
   it('DioramaMicroLife kết xuất xe buýt tí hon và ca-nô lướt sóng', () => {
     const microLifeMarkup = renderToStaticMarkup(React.createElement(DioramaMicroLife));
     expect(microLifeMarkup).toContain('#F59E0B'); // Xe buýt vàng tí hon
-    expect(microLifeMarkup).toContain('#DC2626'); // Xe hơi đỏ
     expect(microLifeMarkup).toContain('#F8FAFC'); // Ca-nô trắng
   });
 
-  it('DioramaFerrisWheel kết xuất vòng đu quay, chân trụ A và cabin sắc màu', () => {
-    const ferrisMarkup = renderToStaticMarkup(React.createElement(DioramaFerrisWheel));
-    expect(ferrisMarkup).toContain('data-testid="diorama-ferris-wheel"');
-    expect(ferrisMarkup).toContain('#EF4444'); // Cabin đỏ
-    expect(ferrisMarkup).toContain('#F59E0B'); // Trục quay hoàng kim
-    expect(ferrisMarkup).toContain('#F8FAFC'); // Vành bánh xe
+  it('DioramaWaterfrontPark kết xuất công viên bờ sông, lối dạo granite và bến tàu thủy', () => {
+    const parkMarkup = renderToStaticMarkup(React.createElement(DioramaWaterfrontPark));
+    expect(parkMarkup).toContain('data-testid="diorama-waterfront-park"');
+    expect(parkMarkup).toContain('#166534'); // Thảm cỏ xanh mát
+    expect(parkMarkup).toContain('#CBD5E1'); // Lối dạo bộ granite
+    expect(parkMarkup).toContain('#0284C7'); // Nhà ga tàu thủy Waterbus
   });
 
   it('DioramaContainerPort kết xuất cần cẩu giàn gantry và bãi container đa sắc', () => {

@@ -33,7 +33,7 @@ export function coordRedeem(
   cellIndex: number,
 ): { success: boolean; reason?: string } {
   if (!ctx) return { success: false, reason: ActionRejectReason.INVALID_ROOM };
-  return redeemProperty(ctx.room, playerId, cellIndex, ctx.reg);
+  return redeemProperty(ctx.room, playerId, cellIndex, ctx.reg, ctx.sm);
 }
 
 export function coordDowngrade(

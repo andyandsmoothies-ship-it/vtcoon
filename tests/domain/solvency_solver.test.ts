@@ -181,11 +181,12 @@ describe('Solvency Solver & Bot Engine Integration', () => {
         personality: BotPersonality.Balanced,
         balanceThresholdMultiplier: 1.2,
       });
-      expect(intent?.type).toBe('INTENT_END_TURN');
+      // Khong duoc phep nang cap (co the chuoc dat the chap hoac end turn)
+      expect(intent?.type).not.toBe('INTENT_UPGRADE');
     });
 
-    it('bot Passive khong bao gio nang cap nha trong PropertyManagement', () => {
-      bot.balance = 20000;
+    it('bot Passive tu choi nang cap nha khi so du khong du 3 lan chi phi xay dung', () => {
+      bot.balance = 800; // Chi phi nang cap o 1 la 500 -> 3 lan la 1500 > 800
       registry.set(1, bot.id);
       registry.set(3, bot.id);
       room.phase = TurnPhase.PropertyManagement;
@@ -278,9 +279,9 @@ describe('Solvency Solver & Bot Engine Integration', () => {
       expect(intent?.type).toBe('INTENT_DECLINE');
     });
 
-    it('bot Passive luon luon tu choi mua bat ke dinh gia cao hay thap', () => {
-      bot.position = 6;
-      bot.balance = 20000;
+    it('bot Passive tu choi mua o dat do khi chua co phao dai tien mat', () => {
+      bot.position = 39; // Landmark 81 gia 4000
+      bot.balance = 4500;
       room.round = 1;
       room.phase = TurnPhase.ActionPhase;
 

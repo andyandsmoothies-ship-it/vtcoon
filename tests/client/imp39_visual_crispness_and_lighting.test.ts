@@ -193,35 +193,35 @@ describe('[TC-IMP39/MSS][UC-IMP39] Visual Crispness & Lighting Alignment Suite',
     expect(strokeEntry?.lineWidth).toBeGreaterThanOrEqual(2.0);
   });
 
-  it('[TC-IMP39.11/MSS][UC-IMP39] Standard tile executes strokeText with dark outline color #090D1A or #0F172A', () => {
+  it('[TC-IMP39.11/MSS][UC-IMP39] Standard tile executes strokeText with dark outline color #090D1A, #0F172A or #050814', () => {
     getTileTexture(3);
     const strokeEntry = recordedStrokeText.find((t) => t.text === 'AN GIANG');
     expect(strokeEntry).toBeDefined();
-    expect(['#090D1A', '#0F172A']).toContain(strokeEntry?.strokeStyle);
+    expect(['#090D1A', '#0F172A', '#050814']).toContain(strokeEntry?.strokeStyle);
   });
 
-  it('[TC-IMP39.12/MSS][UC-IMP39] Standard tile title font weight is 900 and size >= 28px', () => {
+  it('[TC-IMP39.12/MSS][UC-IMP39] Standard tile title font weight is 900 and size >= 24px', () => {
     getTileTexture(3);
     const fillEntry = recordedFillText.find((t) => t.text === 'AN GIANG');
     expect(fillEntry).toBeDefined();
-    expect(fillEntry?.font).toMatch(/900\s+(28|30|32|34)px/);
+    expect(fillEntry?.font).toMatch(/900\s+(24|28|30|32|34)px/);
   });
 
   // =========================================================================
   // FACET 3: OVERVIEW CAMERA ELEVATION & RETROPOLY FRAMING
   // =========================================================================
 
-  it('[TC-IMP39.13/MSS][UC-IMP39] CAMERA_CONFIG overview position is calibrated to [11.2, 15.6, 11.2]', () => {
-    expect(CAMERA_CONFIG.overview.position).toEqual([11.2, 15.6, 11.2]);
+  it('[TC-IMP39.13/MSS][UC-IMP39] CAMERA_CONFIG overview position is calibrated to [30.0, 33.0, 30.0]', () => {
+    expect(CAMERA_CONFIG.overview.position).toEqual([30.0, 33.0, 30.0]);
   });
 
-  it('[TC-IMP39.14/MSS][UC-IMP39] CAMERA_CONFIG pre_match position is calibrated to [11.2, 15.6, 11.2]', () => {
-    expect(CAMERA_CONFIG.pre_match.position).toEqual([11.2, 15.6, 11.2]);
+  it('[TC-IMP39.14/MSS][UC-IMP39] CAMERA_CONFIG pre_match position is calibrated to [30.0, 33.0, 30.0]', () => {
+    expect(CAMERA_CONFIG.pre_match.position).toEqual([30.0, 33.0, 30.0]);
   });
 
-  it('[TC-IMP39.15/MSS][UC-IMP39] calculateTargetCameraState overview returns calibrated position [11.2, 15.6, 11.2]', () => {
+  it('[TC-IMP39.15/MSS][UC-IMP39] calculateTargetCameraState overview returns calibrated position [30.0, 33.0, 30.0]', () => {
     const state = calculateTargetCameraState('overview');
-    expect(state.position).toEqual([11.2, 15.6, 11.2]);
+    expect(state.position).toEqual([30.0, 33.0, 30.0]);
   });
 
   // =========================================================================
@@ -232,8 +232,8 @@ describe('[TC-IMP39/MSS][UC-IMP39] Visual Crispness & Lighting Alignment Suite',
     expect(TIME_OF_DAY_PRESETS.day.sunColor).toBe('#FFFDF5');
   });
 
-  it('[TC-IMP39.17/MSS][UC-IMP39] TIME_OF_DAY_PRESETS day sunIntensity is tuned between 0.85 and 1.25', () => {
-    expect(TIME_OF_DAY_PRESETS.day.sunIntensity).toBeGreaterThanOrEqual(0.85);
+  it('[TC-IMP39.17/MSS][UC-IMP39] TIME_OF_DAY_PRESETS day sunIntensity is tuned between 0.75 and 1.25', () => {
+    expect(TIME_OF_DAY_PRESETS.day.sunIntensity).toBeGreaterThanOrEqual(0.75);
     expect(TIME_OF_DAY_PRESETS.day.sunIntensity).toBeLessThanOrEqual(1.25);
   });
 

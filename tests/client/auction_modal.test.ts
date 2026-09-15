@@ -21,7 +21,7 @@ describe('[TC-AUC-MODAL.1/MSS] Cấu Trúc Giao Diện 2 Cánh Glassmorphism (Du
     expect(html).toContain('GIÁ THẦU HIỆN TẠI');
     expect(html).toContain('Cần Thơ (Cái Răng)');
     expect(html).toContain('600 Tr.');
-    expect(html).toContain('LIVE 3D ARENA');
+    expect(html).toContain('LIVE TABLETOP ARENA');
 
     // Cánh phải: Đại gia tham gia
     expect(html).toContain('ĐẠI GIA THAM GIA');
@@ -78,7 +78,7 @@ describe('[TC-AUC-MODAL.1/MSS] Cấu Trúc Giao Diện 2 Cánh Glassmorphism (Du
     );
 
     expect(html).toContain('03 GIÂY');
-    expect(html).toContain('text-rose-400');
+    expect(html).toContain('text-rose-600');
     expect(html).toContain('bg-rose-500');
   });
 

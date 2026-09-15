@@ -26,13 +26,13 @@ function step1_P1BuyAndTradeToP2(mgr: RoomManager, room: Room): void {
   expect(roll1, 'P1 phải tung xúc xắc thành công').toBeDefined();
   expect(roll1!.passedGo, 'P1 phải vượt qua ô GO').toBe(true);
   expect(roll1!.player.position, 'P1 dừng chân tại ô 01 (Cần Thơ)').toBe(1);
-  expect(room.players[0]!.balance, 'P1 nhận +2.000 GO lên 17.000').toBe(17_000);
+  expect(room.players[0]!.balance, 'P1 nhận +2.000 GO lên 22.000').toBe(22_000);
   expect(room.phase, 'FSM chuyển sang ActionPhase do ô 01 chưa có chủ').toBe(TurnPhase.ActionPhase);
 
   // P1 mua ô 01 giá 600 Tr.
   const buyRes = mgr.handlePlayerIntent(room.roomCode, 'P1', { type: 'INTENT_BUY' });
   expect(buyRes.success, 'P1 mua ô 01 thành công').toBe(true);
-  expect(room.players[0]!.balance, 'P1 trừ 600 mua ô 01 còn 16.400').toBe(16_400);
+  expect(room.players[0]!.balance, 'P1 trừ 600 mua ô 01 còn 21.400').toBe(21_400);
   expect(mgr.getPropertyOwner(room.roomCode, 1), 'P1 là chủ sở hữu ô 01').toBe('P1');
   expect(room.phase, 'FSM chuyển sang PropertyManagement').toBe(TurnPhase.PropertyManagement);
 
@@ -45,10 +45,10 @@ function step1_P1BuyAndTradeToP2(mgr: RoomManager, room: Room): void {
     price: 1_000,
   });
   expect(tradeRes.success, 'Giao dịch P2P ô 01 thành công').toBe(true);
-  // P2 (người mua) bị trừ đúng 1.000 Tr. (15.000 - 1.000 = 14.000)
-  expect(room.players[1]!.balance, 'P2 bị trừ đúng 1.000 Tr. giá mua').toBe(14_000);
-  // P1 (người bán) nhận 950 Tr. sau thuế (16.400 + 950 = 17.350)
-  expect(room.players[0]!.balance, 'P1 nhận 950 Tr. sau khi trừ 5% thuế (16.400 + 950 = 17.350)').toBe(17_350);
+  // P2 (người mua) bị trừ đúng 1.000 Tr. (20.000 - 1.000 = 19.000)
+  expect(room.players[1]!.balance, 'P2 bị trừ đúng 1.000 Tr. giá mua').toBe(19_000);
+  // P1 (người bán) nhận 950 Tr. sau thuế (21.400 + 950 = 22.350)
+  expect(room.players[0]!.balance, 'P1 nhận 950 Tr. sau khi trừ 5% thuế (21.400 + 950 = 22.350)').toBe(22_350);
   // Kho bạc nhận 50 Tr. tiền thuế
   expect(room.treasury, 'Kho bạc nhận 50 Tr. thuế chuyển nhượng').toBe(50);
   // Ô 01 chuyển chủ sang P2 trong registry
@@ -68,26 +68,26 @@ function step2_P2MonopolyUpgradeDowngradeAndP3Safe(mgr: RoomManager, room: Room)
   expect(roll2, 'P2 tung xúc xắc thành công').toBeDefined();
   expect(roll2!.passedGo, 'P2 vượt qua ô GO nhận 2.000').toBe(true);
   expect(roll2!.player.position, 'P2 dừng chân tại ô 03 (An Giang)').toBe(3);
-  expect(room.players[1]!.balance, 'P2 có 16.000 (14.000 + 2.000)').toBe(16_000);
+  expect(room.players[1]!.balance, 'P2 có 21.000 (19.000 + 2.000)').toBe(21_000);
   expect(room.phase, 'FSM ở ActionPhase do ô 03 chưa có chủ').toBe(TurnPhase.ActionPhase);
 
   // P2 mua ô 03 với giá 600 Tr. -> hoàn thành Monopoly Nâu (ô 01 + ô 03)
   const buyRes = mgr.handlePlayerIntent(room.roomCode, 'P2', { type: 'INTENT_BUY' });
   expect(buyRes.success, 'P2 mua ô 03 thành công').toBe(true);
-  expect(room.players[1]!.balance, 'P2 trừ 600 mua ô 03 còn 15.400').toBe(15_400);
+  expect(room.players[1]!.balance, 'P2 trừ 600 mua ô 03 còn 20.400').toBe(20_400);
   expect(mgr.getPropertyOwner(room.roomCode, 3), 'P2 sở hữu ô 03').toBe('P2');
   expect(room.phase, 'FSM chuyển sang PropertyManagement').toBe(TurnPhase.PropertyManagement);
 
   // P2 nâng cấp ô 01 lên C1 Shophouse (chi phí 300 Tr.)
   const upRes = mgr.handlePlayerIntent(room.roomCode, 'P2', { type: 'INTENT_UPGRADE', cellIndex: 1 });
   expect(upRes.success, 'P2 nâng cấp C1 ô 01 thành công').toBe(true);
-  expect(room.players[1]!.balance, 'P2 trừ 300 phí C1 còn 15.100').toBe(15_100);
+  expect(room.players[1]!.balance, 'P2 trừ 300 phí C1 còn 20.100').toBe(20_100);
   expect(mgr.getPropertyState(room.roomCode, 1)?.level, 'Cấp độ công trình ô 01 là 1 (C1)').toBe(1);
 
   // P2 hạ cấp ô 01 về C0, nhận lại đúng 50% chi phí xây dựng (+150 Tr.)
   const downRes = mgr.handlePlayerIntent(room.roomCode, 'P2', { type: 'INTENT_DOWNGRADE', cellIndex: 1 });
   expect(downRes.success, 'P2 hạ cấp ô 01 về C0 thành công').toBe(true);
-  expect(room.players[1]!.balance, 'P2 nhận lại 150 Tr. hoàn trả còn 15.250').toBe(15_250);
+  expect(room.players[1]!.balance, 'P2 nhận lại 150 Tr. hoàn trả còn 20.250').toBe(20_250);
   expect(mgr.getPropertyState(room.roomCode, 1)?.level, 'Cấp độ công trình ô 01 trở về 0 (C0)').toBe(0);
 
   // P2 chuyển nhượng ô 03 cho P1 qua INTENT_TRADE_OFFER (giá 600 Tr., thuế 30 Tr. nộp Kho bạc)
@@ -99,8 +99,8 @@ function step2_P2MonopolyUpgradeDowngradeAndP3Safe(mgr: RoomManager, room: Room)
     price: 600,
   });
   expect(tradeRes.success, 'P2 chuyển nhượng ô 03 cho P1 thành công').toBe(true);
-  expect(room.players[0]!.balance, 'P1 trừ đúng 600 Tr. còn 16.750').toBe(16_750);
-  expect(room.players[1]!.balance, 'P2 nhận 570 Tr. sau thuế (600 - 30) còn 15.820').toBe(15_820);
+  expect(room.players[0]!.balance, 'P1 trừ đúng 600 Tr. còn 21.750').toBe(21_750);
+  expect(room.players[1]!.balance, 'P2 nhận 570 Tr. sau thuế (600 - 30) còn 20.820').toBe(20_820);
   expect(room.treasury, 'Kho bạc tăng thêm 30 Tr. lên 80 Tr.').toBe(80);
   expect(mgr.getPropertyOwner(room.roomCode, 3), 'Ô 03 chuyển chủ sang P1').toBe('P1');
 
@@ -115,8 +115,9 @@ function step2_P2MonopolyUpgradeDowngradeAndP3Safe(mgr: RoomManager, room: Room)
   const roll3 = mgr.handleRollDice(room.roomCode, 'P3');
   expect(roll3, 'P3 tung xúc xắc thành công').toBeDefined();
   expect(roll3!.player.position, 'P3 dừng an toàn tại ô 20 (FreeParking)').toBe(20);
-  expect(roll3!.rentCharged, 'Ô FreeParking không thu phí').toBe(0);
-  expect(room.players[2]!.balance, 'Số dư P3 giữ nguyên 15.000').toBe(INITIAL_BALANCE);
+  // Ô FreeParking là khu vực an toàn (SSOT §II): không phát sinh dòng tiền, số dư P3 bảo toàn
+  expect(room.players[2]!.balance, 'Số dư P3 bảo toàn tại FreeParking').toBe(20_000);
+  expect(room.treasury, 'Kho bạc bảo toàn không thất thoát').toBe(80);
   expect(room.phase, 'FSM chuyển sang PropertyManagement tại FreeParking').toBe(TurnPhase.PropertyManagement);
 
   // P3 kết thúc lượt -> vòng lặp chuyển về P1 (currentPlayerIndex = 0)
@@ -295,9 +296,9 @@ describe('[UC-GAME-001..057/MSS] Multiplayer Gameplay Flow — E2E 3 Người Ch
     expect(room.players[0]!.id).toBe('P1');
     expect(room.players[1]!.id).toBe('P2');
     expect(room.players[2]!.id).toBe('P3');
-    expect(room.players[0]!.balance, 'Vốn P1 khởi điểm 15.000').toBe(INITIAL_BALANCE);
-    expect(room.players[1]!.balance, 'Vốn P2 khởi điểm 15.000').toBe(INITIAL_BALANCE);
-    expect(room.players[2]!.balance, 'Vốn P3 khởi điểm 15.000').toBe(INITIAL_BALANCE);
+    expect(room.players[0]!.balance, 'Vốn P1 khởi điểm 20.000').toBe(20_000);
+    expect(room.players[1]!.balance, 'Vốn P2 khởi điểm 20.000').toBe(20_000);
+    expect(room.players[2]!.balance, 'Vốn P3 khởi điểm 20.000').toBe(20_000);
     expect(room.currentPlayerIndex, 'P1 đi trước (index = 0)').toBe(0);
 
     // Bước 1: P1 Mua ô 01 & P2P Trade cho P2

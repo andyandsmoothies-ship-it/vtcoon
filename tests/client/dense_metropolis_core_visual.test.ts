@@ -122,8 +122,8 @@ describe('[TC-IMP31/MSS] [UC-IMP31] Dense Metropolis Core & Living Coastal Align
       expect(SHOPHOUSE_CONFIGS).toHaveLength(32);
     });
 
-    it('Cụm cao ốc tài chính Tây Bắc có đúng 16 tháp', () => {
-      expect(HIGHRISE_CONFIGS).toHaveLength(16);
+    it('Cụm cao ốc tài chính Tây Bắc có đúng 10 tháp', () => {
+      expect(HIGHRISE_CONFIGS).toHaveLength(10);
     });
 
     it('Quần đảo nhiệt đới có đúng 60 cây dừa', () => {

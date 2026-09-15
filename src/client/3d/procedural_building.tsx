@@ -16,11 +16,49 @@ export interface ProceduralBuildingProps {
   readonly showEmptyPlotBoundary?: boolean;
 }
 
-export const BUILDING_MODEL_URLS: Readonly<Record<1 | 2 | 3, string>> = {
-  1: '/models/buildings/building_c1.glb',
-  2: '/models/buildings/building_c2.glb',
-  3: '/models/buildings/building_c3.glb',
-} as const;
+import {
+  BUILDING_MODEL_URLS,
+  getBuildingModelUrl,
+  BUILDING_BASE_PLINTH_WIDTH,
+} from './building_typology';
+
+export { BUILDING_MODEL_URLS, BUILDING_BASE_PLINTH_WIDTH };
+
+export interface BuildingLotTransform {
+  readonly position: [number, number, number];
+  readonly rotation: [number, number, number];
+  readonly scale: [number, number, number];
+  readonly baseWidth?: number;
+}
+
+const STANDARD_LOT_TRANSFORM: BuildingLotTransform = {
+  position: [0, 0.16, -1.38],
+  rotation: [0, 0, 0],
+  scale: [0.975, 0.975, 0.975],
+  baseWidth: BUILDING_BASE_PLINTH_WIDTH,
+};
+
+const CORNER_SPLAY_TRANSFORMS: Readonly<Record<number, BuildingLotTransform>> = {
+  // Corner 0 (GO):
+  1: { position: [-0.24, 0.16, -1.38], rotation: [0, 0, 0], scale: [0.975, 0.975, 0.975], baseWidth: BUILDING_BASE_PLINTH_WIDTH },
+  39: { position: [0.24, 0.16, -1.38], rotation: [0, 0, 0], scale: [0.975, 0.975, 0.975], baseWidth: BUILDING_BASE_PLINTH_WIDTH },
+  // Corner 10 (Audit):
+  9: { position: [0.24, 0.16, -1.38], rotation: [0, 0, 0], scale: [0.975, 0.975, 0.975], baseWidth: BUILDING_BASE_PLINTH_WIDTH },
+  11: { position: [-0.24, 0.16, -1.38], rotation: [0, 0, 0], scale: [0.975, 0.975, 0.975], baseWidth: BUILDING_BASE_PLINTH_WIDTH },
+  // Corner 20 (Vacation):
+  19: { position: [0.24, 0.16, -1.38], rotation: [0, 0, 0], scale: [0.975, 0.975, 0.975], baseWidth: BUILDING_BASE_PLINTH_WIDTH },
+  21: { position: [-0.24, 0.16, -1.38], rotation: [0, 0, 0], scale: [0.975, 0.975, 0.975], baseWidth: BUILDING_BASE_PLINTH_WIDTH },
+  // Corner 30 (Police):
+  29: { position: [0.24, 0.16, -1.38], rotation: [0, 0, 0], scale: [0.975, 0.975, 0.975], baseWidth: BUILDING_BASE_PLINTH_WIDTH },
+  31: { position: [-0.24, 0.16, -1.38], rotation: [0, 0, 0], scale: [0.975, 0.975, 0.975], baseWidth: BUILDING_BASE_PLINTH_WIDTH },
+};
+
+export function getBuildingLotTransform(cellIndex?: number): BuildingLotTransform {
+  if (cellIndex !== undefined && CORNER_SPLAY_TRANSFORMS[cellIndex]) {
+    return CORNER_SPLAY_TRANSFORMS[cellIndex];
+  }
+  return STANDARD_LOT_TRANSFORM;
+}
 
 interface FallbackProps {
   readonly groupColor?: string;
@@ -296,6 +334,7 @@ export function ProceduralBuilding({
   const isNight = phase === 'night';
   const isSunset = phase === 'sunset';
   const activeSlam = useVfxStore((s) => (cellIndex !== undefined ? s.activeSlams[cellIndex] : undefined));
+  const lotTransform = getBuildingLotTransform(cellIndex);
 
   useSafeFrame((_, delta) => {
     if (level === 3 && crownRef.current) {
@@ -306,11 +345,15 @@ export function ProceduralBuilding({
         wasSlammingRef.current = true;
         const elapsed = Date.now() - activeSlam.startTime;
         const drop = calculateImpactDrop(elapsed, activeSlam.impactTimeMs);
-        rootGroupRef.current.position.y = 0.22 + drop.yOffset;
-        rootGroupRef.current.scale.set(drop.scaleXZ, drop.scaleY, drop.scaleXZ);
+        rootGroupRef.current.position.y = lotTransform.position[1] + drop.yOffset;
+        rootGroupRef.current.scale.set(
+          lotTransform.scale[0] * drop.scaleXZ,
+          lotTransform.scale[1] * drop.scaleY,
+          lotTransform.scale[2] * drop.scaleXZ
+        );
       } else if (wasSlammingRef.current) {
-        rootGroupRef.current.position.y = 0.22;
-        rootGroupRef.current.scale.set(1, 1, 1);
+        rootGroupRef.current.position.y = lotTransform.position[1];
+        rootGroupRef.current.scale.set(...lotTransform.scale);
         wasSlammingRef.current = false;
       }
     }
@@ -318,16 +361,30 @@ export function ProceduralBuilding({
 
   if (level === 0) {
     return (
-      <group ref={rootGroupRef} position={[0, 0.22, 0.58]}>
+      <group
+        ref={rootGroupRef}
+        position={lotTransform.position}
+        rotation={lotTransform.rotation}
+        scale={lotTransform.scale}
+      >
         {showEmptyPlotBoundary ? <SurveyorPlotBoundary groupColor={groupColor} /> : null}
       </group>
     );
   }
 
+  const modelUrl =
+    (cellIndex !== undefined ? getBuildingModelUrl(cellIndex, level) : null) ??
+    BUILDING_MODEL_URLS[level];
+
   return (
-    <group ref={rootGroupRef} position={[0, 0.22, 0.58]}>
+    <group
+      ref={rootGroupRef}
+      position={lotTransform.position}
+      rotation={lotTransform.rotation}
+      scale={lotTransform.scale}
+    >
       <SafeGLTFModel
-        url={BUILDING_MODEL_URLS[level]}
+        url={modelUrl}
         fallback={
           <>
             {level === 1 && <ShophouseFallback groupColor={groupColor} isNight={isNight} isSunset={isSunset} />}

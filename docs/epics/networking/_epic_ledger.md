@@ -492,6 +492,9 @@ Toàn bộ Epic 3 được coi là Hoàn tất khi đáp ứng 100% các tiêu c
 | 2026-09-09 | **NET-03 Sign-off** — 13 tests Delta Sync & Intent Mutex PASS (kèm Adversarial malformed payload, unmortgage sparse diff, socket leak cleanup). Tổng: 574/574. |
 | 2026-09-09 | NET-04 bắt đầu — ReconnectManager, wss_server, use_game_ws, net04_reconnect.test.ts, net04_client_reconnect.test.ts |
 | 2026-09-09 | **NET-04 Sign-off** — 15 tests Reconnect Token & 60s Grace Period PASS. Tổng: 589/589 tests PASS. **EPIC 3 HOÀN TẤT**. |
+| 2026-09-15 | **IMP-72 Sign-off** — 30 tests Framing & Clean Lobby PASS. Tổng: 175/175 suites, 2.996/2.996 tests PASS. |
+| 2026-09-15 | **IMP-73 Sign-off** — 30 tests Telephoto 24°, Auto-Fit & Reset CTA PASS. Tổng: 176/176 suites, 3.026/3.026 tests PASS. |
+| 2026-09-15 | **IMP-74 Sign-off** — 18 tests Purge Leave Lobby Button PASS. Tổng: 177/177 suites, 3.044/3.044 tests PASS. |
 
 
 ---

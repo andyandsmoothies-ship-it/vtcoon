@@ -198,7 +198,7 @@ describe('[AUDIT-HOTFIX-04] Đấu Giá: Khắc phục bế tắc Runtime (INTEN
     const passC = mgr.handlePlayerIntent(room.roomCode, 'pC', { type: 'INTENT_AUCTION_PASS' });
     expect(passC.success).toBe(true);
     expect(room.phase).toBe(TurnPhase.PropertyManagement);
-    expect(room.players[1]!.balance).toBe(15_000 - 400);
+    expect(room.players[1]!.balance).toBe(20_000 - 400);
     expect((mgr as any).registries.get(room.roomCode).get(3)).toBe('pB');
   });
 
@@ -228,7 +228,7 @@ describe('[AUDIT-HOTFIX-04] Đấu Giá: Khắc phục bế tắc Runtime (INTEN
     const bidC = mgr.handlePlayerIntent(room.roomCode, 'pC', { type: 'INTENT_BID', amount: 400 });
     expect(bidC.success).toBe(true);
     expect(room.phase).toBe(TurnPhase.PropertyManagement);
-    expect(room.players[2]!.balance).toBe(15_000 - 400);
+    expect(room.players[2]!.balance).toBe(20_000 - 400);
     expect((mgr as any).registries.get(room.roomCode).get(3)).toBe('pC');
   });
 });
@@ -308,8 +308,8 @@ describe('[AUDIT-HOTFIX-06] Thẻ MC_CREDIT_STIMULUS giảm 20% chi phí xây d�
 
     const upRes = mgr.handlePlayerIntent(room.roomCode, 'pA', { type: 'INTENT_UPGRADE', cellIndex: 1 });
     expect(upRes.success).toBe(true);
-    // Chi phí C1 gốc là 300 -> giảm 20% còn 240 -> 15.000 - 240 = 14.760
-    expect(room.players[0]!.balance).toBe(15_000 - 240);
+    // Chi phí C1 gốc là 300 -> giảm 20% còn 240 -> 25.000 - 240 = 24.760
+    expect(room.players[0]!.balance).toBe(25_000 - 240);
   });
 });
 
@@ -322,7 +322,7 @@ describe('[AUDIT-HOTFIX-07] Thẻ CC_PLATE_AUCTION (+1 lượt) & CC_CONCERT_SPO
 
     const cur = room.players[0]!;
     executeChanceCard(ChanceCardId.CC_PLATE_AUCTION, 'pA', [cur]);
-    expect(cur.balance).toBe(15_000 - 500);
+    expect(cur.balance).toBe(25_000 - 500);
     expect(cur.extraTurns).toBe(1);
 
     // Roll dice rồi end turn
@@ -351,7 +351,7 @@ describe('[AUDIT-HOTFIX-07] Thẻ CC_PLATE_AUCTION (+1 lượt) & CC_CONCERT_SPO
     const cur = room.players[0]!;
     cur.position = 0;
     executeChanceCard(ChanceCardId.CC_CONCERT_SPONSOR, 'pA', [cur]);
-    expect(cur.balance).toBe(15_000 - 600);
+    expect(cur.balance).toBe(25_000 - 600);
     expect(cur.doubleNextDice).toBe(true);
 
     const res = mgr.handleRollDice(room.roomCode, 'pA');

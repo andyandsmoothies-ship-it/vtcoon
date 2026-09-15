@@ -4,14 +4,15 @@ import type { RoomManager } from '../room_manager.js';
 import type { IntentMutex } from './intent_mutex.js';
 import type { DeltaBroadcaster } from './delta_broadcaster.js';
 import { TurnPhase, isRoomGameOver, type Room } from '../../domain/room.js';
+import { executeInsolvencyAfkRecovery } from './afk_recovery.js';
 
 export const PHASE_TIMEOUTS_MS: Record<TurnPhase, number> = {
-  [TurnPhase.WaitingRoll]: 15_000,
-  [TurnPhase.ActionPhase]: 20_000,
-  [TurnPhase.AuctionPhase]: 15_000,
-  [TurnPhase.PropertyManagement]: 20_000,
-  [TurnPhase.InsolvencyPhase]: 25_000,
-  [TurnPhase.HosePhase]: 15_000,
+  [TurnPhase.WaitingRoll]: 25_000,
+  [TurnPhase.ActionPhase]: 35_000,
+  [TurnPhase.AuctionPhase]: 20_000,
+  [TurnPhase.PropertyManagement]: 30_000,
+  [TurnPhase.InsolvencyPhase]: 45_000,
+  [TurnPhase.HosePhase]: 25_000,
   [TurnPhase.BankruptcyCheck]: 10_000,
   [TurnPhase.TurnEnd]: 5_000,
 };
@@ -293,7 +294,11 @@ export class TurnOrchestrator {
         break;
       }
       case TurnPhase.InsolvencyPhase: {
-        this.rooms.handlePlayerIntent(roomCode, playerId, { type: 'INTENT_BANKRUPTCY' });
+        executeInsolvencyAfkRecovery(this.rooms, roomCode, playerId);
+        const rMid = this.rooms.getRoom(roomCode);
+        if (rMid?.phase === TurnPhase.PropertyManagement) {
+          this.rooms.handleEndTurn(roomCode, playerId);
+        }
         break;
       }
       case TurnPhase.HosePhase: {

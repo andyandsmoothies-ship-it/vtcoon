@@ -1,6 +1,7 @@
 // [UC-GAME-001..003,005,007,008/MSS][UC-GAME-051..057/MSS] Room Manager & FSM Turn Loop
 import {
   createRoom as domainCreateRoom, createPlayer, TurnPhase, ActionRejectReason,
+  getInitialBalanceForPlayerCount,
 } from '../domain/room';
 import { BotPersonality } from '../domain/bot/bot_engine';
 import { initRoomBots, addBotToRoom, removeBotFromRoom, type RoomBotSpec } from './room_bot_manager.js';
@@ -57,6 +58,7 @@ export class RoomManager {
 
   get roomMap(): Map<string, Room> { return this.rooms; }
   get activeTimers(): Map<string, Set<NodeJS.Timeout>> { return this.activeTimersMap; }
+  getRng(): () => number { return this.rng; }
 
   constructor(seed?: number | (() => number)) {
     if (typeof seed === 'function') {
@@ -105,6 +107,10 @@ export class RoomManager {
       hostPlayer.isBot = false;
     }
     room.started = true;
+    const initialBalance = getInitialBalanceForPlayerCount(room.players.length);
+    for (const player of room.players) {
+      player.balance = initialBalance;
+    }
     room.currentPlayerIndex = 0;
     const first = room.players[0];
     room.phase = first?.skipNextTurn ? TurnPhase.PropertyManagement : TurnPhase.WaitingRoll;

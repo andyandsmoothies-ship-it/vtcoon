@@ -120,11 +120,11 @@ describe('[IMP-50] Unified TurnOrchestrator & TurnWatchdog Contracts', () => {
       // bot_2 đã tham gia hoặc pass
       expect(room.currentAuction?.highestBidder === 'bot_2' || Boolean(room.currentAuction?.passedPlayers?.has('bot_2'))).toBe(true);
 
-      // Bây giờ bot_2 là highestBidder -> không còn bot nào khác cần bid -> orchestrate chạy timeout 15s
+      // Bây giờ bot_2 là highestBidder -> không còn bot nào khác cần bid -> orchestrate chạy timeout 20s (AuctionPhase normalized)
       orchestrator.orchestrate(room.roomCode);
       const remaining = orchestrator.getTimeRemaining(room.roomCode);
       expect(remaining).toBeGreaterThan(0);
-      expect(remaining).toBeLessThanOrEqual(15);
+      expect(remaining).toBeLessThanOrEqual(20);
 
       orchestrator.clearRoom(room.roomCode);
       vi.useRealTimers();

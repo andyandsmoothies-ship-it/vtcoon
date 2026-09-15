@@ -11,10 +11,10 @@ export function FloatingBadge({ item }: { readonly item: FloatingTextItem }): Re
     <div
       role="status"
       aria-live="polite"
-      className={`animate-float-up-fade pointer-events-none flex items-center gap-2 px-4 py-2 rounded-2xl border backdrop-blur-md shadow-2xl select-none ${
+      className={`animate-float-up-fade pointer-events-none flex items-center gap-2 px-4 py-2 rounded-2xl border-2 border-slate-900 bg-[#FFFDF8] select-none ${
         isReward
-          ? 'bg-emerald-950/90 border-emerald-400/80 text-emerald-300 shadow-emerald-500/40 ring-1 ring-emerald-400/50'
-          : 'bg-rose-950/90 border-rose-500/80 text-rose-300 shadow-rose-500/40 ring-1 ring-rose-400/50'
+          ? 'text-emerald-800 shadow-[0_4px_0_0_#047857]'
+          : 'text-rose-800 shadow-[0_4px_0_0_#b91c1c]'
       }`}
     >
       <span className="text-xl" aria-hidden="true">
@@ -22,7 +22,7 @@ export function FloatingBadge({ item }: { readonly item: FloatingTextItem }): Re
       </span>
       {player && (
         <span
-          className="text-xs font-bold px-2 py-0.5 rounded-full text-white/95 border border-white/20 shadow-xs"
+          className="text-xs font-bold px-2 py-0.5 rounded-full text-white/95 border border-slate-900/30 shadow-xs"
           style={{ backgroundColor: player.tokenColor || '#64748B' }}
         >
           {player.name}

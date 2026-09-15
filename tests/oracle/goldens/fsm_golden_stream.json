@@ -11,12 +11,12 @@
       {
         "id": "P1",
         "position": 0,
-        "balance": 15000
+        "balance": 25000
       },
       {
         "id": "P2",
         "position": 0,
-        "balance": 15000
+        "balance": 25000
       }
     ],
     "auction": null,
@@ -38,12 +38,12 @@
       {
         "id": "P1",
         "position": 1,
-        "balance": 17000
+        "balance": 27000
       },
       {
         "id": "P2",
         "position": 0,
-        "balance": 15000
+        "balance": 25000
       }
     ],
     "auction": null,
@@ -65,12 +65,12 @@
       {
         "id": "P1",
         "position": 1,
-        "balance": 16400
+        "balance": 26400
       },
       {
         "id": "P2",
         "position": 0,
-        "balance": 15000
+        "balance": 25000
       }
     ],
     "auction": null,
@@ -97,12 +97,12 @@
       {
         "id": "P1",
         "position": 1,
-        "balance": 16400
+        "balance": 26400
       },
       {
         "id": "P2",
         "position": 0,
-        "balance": 15000
+        "balance": 25000
       }
     ],
     "auction": null,
@@ -129,12 +129,12 @@
       {
         "id": "P1",
         "position": 1,
-        "balance": 16460
+        "balance": 26460
       },
       {
         "id": "P2",
         "position": 1,
-        "balance": 16940
+        "balance": 26940
       }
     ],
     "auction": null,
@@ -161,12 +161,12 @@
       {
         "id": "P1",
         "position": 1,
-        "balance": 16460
+        "balance": 26460
       },
       {
         "id": "P2",
         "position": 1,
-        "balance": 16940
+        "balance": 26940
       }
     ],
     "auction": null,
@@ -193,12 +193,12 @@
       {
         "id": "P1",
         "position": 3,
-        "balance": 18460
+        "balance": 28460
       },
       {
         "id": "P2",
         "position": 1,
-        "balance": 16940
+        "balance": 26940
       }
     ],
     "auction": null,
@@ -225,12 +225,12 @@
       {
         "id": "P1",
         "position": 3,
-        "balance": 17860
+        "balance": 27860
       },
       {
         "id": "P2",
         "position": 1,
-        "balance": 16940
+        "balance": 26940
       }
     ],
     "auction": null,
@@ -261,12 +261,12 @@
       {
         "id": "P1",
         "position": 3,
-        "balance": 17560
+        "balance": 27560
       },
       {
         "id": "P2",
         "position": 1,
-        "balance": 16940
+        "balance": 26940
       }
     ],
     "auction": null,
@@ -298,12 +298,12 @@
       {
         "id": "P1",
         "position": 3,
-        "balance": 17560
+        "balance": 27560
       },
       {
         "id": "P2",
         "position": 1,
-        "balance": 16940
+        "balance": 26940
       }
     ],
     "auction": null,
@@ -335,12 +335,12 @@
       {
         "id": "P1",
         "position": 3,
-        "balance": 17560
+        "balance": 27560
       },
       {
         "id": "P2",
         "position": 5,
-        "balance": 18940
+        "balance": 28940
       }
     ],
     "auction": null,
@@ -372,12 +372,12 @@
       {
         "id": "P1",
         "position": 3,
-        "balance": 17560
+        "balance": 27560
       },
       {
         "id": "P2",
         "position": 5,
-        "balance": 18940
+        "balance": 28940
       }
     ],
     "auction": {
@@ -413,12 +413,12 @@
       {
         "id": "P1",
         "position": 3,
-        "balance": 17560
+        "balance": 27560
       },
       {
         "id": "P2",
         "position": 5,
-        "balance": 18940
+        "balance": 28940
       }
     ],
     "auction": {
@@ -454,12 +454,12 @@
       {
         "id": "P1",
         "position": 3,
-        "balance": 16360
+        "balance": 26360
       },
       {
         "id": "P2",
         "position": 5,
-        "balance": 18940
+        "balance": 28940
       }
     ],
     "auction": null,
@@ -495,12 +495,12 @@
       {
         "id": "P1",
         "position": 3,
-        "balance": 16360
+        "balance": 26360
       },
       {
         "id": "P2",
         "position": 5,
-        "balance": 18940
+        "balance": 28940
       }
     ],
     "auction": null,

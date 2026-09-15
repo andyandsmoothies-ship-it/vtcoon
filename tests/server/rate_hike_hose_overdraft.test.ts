@@ -64,8 +64,8 @@ describe('[UC-GAME-045/MSS] Sàn Giao Dịch Chứng Khoán HOSE (Ô 38)', () =>
     const res = handleHoseInvest(room, p1, rng, 2000);
 
     expect(res.success, 'Khớp lệnh đặt cược thành công').toBe(true);
-    expect(resolveHoseInvestment(2000, 1), 'Mặt 1 thu về 30% vốn = 600 Tr.').toBe(600);
-    expect(p1.balance, 'Số dư giảm 1400 Tr. do lỗ sàn: 10000 - 2000 + 600 = 8600 Tr.').toBe(8600);
+    expect(resolveHoseInvestment(2000, 1), 'Mặt 1 thu về 50% vốn = 1000 Tr.').toBe(1000);
+    expect(p1.balance, 'Số dư giảm 1000 Tr. do lỗ sàn: 10000 - 2000 + 1000 = 9000 Tr.').toBe(9000);
     expect(room.phase, 'FSM hoàn tất đầu tư và chuyển về PropertyManagement').toBe(TurnPhase.PropertyManagement);
   });
 

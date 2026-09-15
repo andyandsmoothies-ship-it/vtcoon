@@ -25,19 +25,21 @@ export const PLAYER_OFFSETS: readonly [number, number, number][] = [
 
 export function PawnMesh({ color }: { readonly color: string }): React.ReactElement {
   return (
-    <group castShadow>
-      <mesh position={[0, -0.18, 0]} castShadow>
-        <cylinderGeometry args={[0.22, 0.25, 0.08, 16]} />
-        <meshStandardMaterial color={color} roughness={0.3} metalness={0.3} />
-      </mesh>
-      <mesh position={[0, -0.02, 0]} castShadow>
-        <coneGeometry args={[0.18, 0.26, 16]} />
-        <meshStandardMaterial color={color} roughness={0.3} metalness={0.3} />
-      </mesh>
-      <mesh position={[0, 0.16, 0]} castShadow>
-        <sphereGeometry args={[0.12, 16, 16]} />
-        <meshStandardMaterial color={color} roughness={0.2} metalness={0.4} />
-      </mesh>
+    <group scale={[0.625, 0.625, 0.625]}>
+      <group castShadow>
+        <mesh position={[0, -0.18, 0]} castShadow>
+          <cylinderGeometry args={[0.22, 0.25, 0.08, 16]} />
+          <meshStandardMaterial color={color} roughness={0.3} metalness={0.3} />
+        </mesh>
+        <mesh position={[0, -0.02, 0]} castShadow>
+          <coneGeometry args={[0.18, 0.26, 16]} />
+          <meshStandardMaterial color={color} roughness={0.3} metalness={0.3} />
+        </mesh>
+        <mesh position={[0, 0.16, 0]} castShadow>
+          <sphereGeometry args={[0.12, 16, 16]} />
+          <meshStandardMaterial color={color} roughness={0.2} metalness={0.4} />
+        </mesh>
+      </group>
     </group>
   );
 }

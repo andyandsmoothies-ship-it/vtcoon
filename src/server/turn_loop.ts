@@ -5,7 +5,7 @@ import type { Room, Player } from '../domain/room';
 import { checkPassedGo, GO_BONUS, BOARD_SIZE, TurnPhase } from '../domain/room';
 import { rollDice } from '../domain/dice';
 import type { PropertyRegistry, PropertyStateMap } from '../domain/property_manager';
-import { handleLanding, LandingResult, calculateGoPropertyTax, PROPERTY_DEEDS } from '../domain/property_manager';
+import { handleLanding, LandingResult, calculateGoPropertyTax, PROPERTY_DEEDS, GO_PROPERTY_TAX_CAP } from '../domain/property_manager';
 import { BOARD_CONFIG } from '../domain/board_config';
 import { decayModifiers } from '../domain/event_card_engine';
 import { processRollDoubles, handleAuditTurnTransition } from './audit_manager';
@@ -117,7 +117,8 @@ export function executeTurnRoll(
 
   if (checkPassedGo(oldPos, newPos)) {
     processPendingDebts(room, current);   // [DEBT-S06-01][DEBT-S06-02] TRƯỚC GO_BONUS
-    const goTax = calculateGoPropertyTax(current.id, reg, sm);
+    const rawGoTax = calculateGoPropertyTax(current.id, reg, sm);
+    const goTax = Math.min(rawGoTax, GO_PROPERTY_TAX_CAP);
     current.balance += GO_BONUS - goTax;
     if (goTax > 0) {
       room.treasury = (room.treasury ?? 0) + goTax;

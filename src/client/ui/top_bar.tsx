@@ -33,7 +33,7 @@ export function TopBar(props: TopBarProps): React.ReactElement {
   const toggleActivityFeed = props.onToggleActivityFeed ?? storeToggleActivityFeed;
 
   const timeOfDayIcon = timeOfDayMode === 'auto'
-    ? '⏱️'
+    ? '🌤️'
     : timeOfDayPhase === 'night'
     ? '🌙'
     : timeOfDayPhase === 'sunset'
@@ -41,7 +41,7 @@ export function TopBar(props: TopBarProps): React.ReactElement {
     : '☀️';
 
   const timeOfDayLabel = timeOfDayMode === 'auto'
-    ? 'Tự Động'
+    ? 'Ánh Sáng: Tự Động'
     : timeOfDayPhase === 'night'
     ? 'Đêm'
     : timeOfDayPhase === 'sunset'
@@ -50,50 +50,50 @@ export function TopBar(props: TopBarProps): React.ReactElement {
 
   const isLowTime = turnTimeRemaining <= 10;
   const timerColorClass = isLowTime
-    ? 'text-rose-400 font-extrabold animate-pulse'
-    : 'text-emerald-400 font-semibold';
+    ? 'text-rose-600 font-extrabold animate-pulse'
+    : 'text-emerald-700 font-bold';
 
   return (
     <header className="w-full flex justify-center items-center pointer-events-none">
-      <div className="pointer-events-auto flex items-center gap-6 bg-slate-900/90 backdrop-blur-md border border-amber-500/30 ring-1 ring-amber-400/10 rounded-2xl px-6 py-2.5 shadow-2xl text-slate-100 text-sm md:text-base font-medium">
+      <div className="pointer-events-auto flex items-center gap-6 bg-[#FFFDF8] border-2 border-slate-900 rounded-2xl px-6 py-2.5 shadow-[0_4px_0_0_#0f172a] text-slate-900 text-sm md:text-base font-medium">
         {/* Vòng đấu */}
         <div className="flex items-center gap-2">
-          <span className="text-slate-400 text-xs uppercase tracking-wider">Vòng</span>
-          <span className="font-bold text-amber-300">
+          <span className="text-slate-600 text-xs uppercase tracking-wider font-bold">Vòng</span>
+          <span className="font-bold text-amber-700">
             {roundNumber}
-            <span className="text-slate-400 text-xs font-normal">/{maxRounds}</span>
+            <span className="text-slate-500 text-xs font-normal">/{maxRounds}</span>
           </span>
         </div>
 
-        <div className="h-4 w-px bg-slate-700" aria-hidden="true" />
+        <div className="h-4 w-px bg-slate-300" aria-hidden="true" />
 
         {/* Đồng hồ đếm ngược */}
         <div className="flex items-center gap-2" role="timer" aria-live="polite">
           <span className="text-base" aria-hidden="true">⏱️</span>
-          <span className="text-xs text-slate-400">Thời gian:</span>
+          <span className="text-xs text-slate-600 font-semibold">Thời gian:</span>
           <span className={`tabular-nums font-mono text-base ${timerColorClass}`}>
             {formatTimeRemaining(turnTimeRemaining)}
           </span>
         </div>
 
-        <div className="h-4 w-px bg-slate-700" aria-hidden="true" />
+        <div className="h-4 w-px bg-slate-300" aria-hidden="true" />
 
         {/* Quỹ Kho Bạc */}
         <div className="flex items-center gap-2">
           <span className="text-base" aria-hidden="true">🏦</span>
-          <span className="text-xs text-slate-400">Kho Bạc:</span>
-          <span className="font-bold text-amber-400">
+          <span className="text-xs text-slate-600 font-semibold">Kho Bạc:</span>
+          <span className="font-bold text-amber-700">
             {formatCurrency(treasuryPool)}
           </span>
         </div>
 
-        <div className="h-4 w-px bg-slate-700" aria-hidden="true" />
+        <div className="h-4 w-px bg-slate-300" aria-hidden="true" />
 
         {/* Nút Chu kỳ Thời gian Ngày - Hoàng Hôn - Đêm */}
         <button
           type="button"
           onClick={toggleNextTimeOfDay}
-          className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors cursor-pointer text-xs font-medium border border-amber-500/20 hover:border-amber-400/50 shadow-[0_2px_0_0_#0f172a] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+          className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-colors cursor-pointer text-xs font-semibold border border-slate-900 shadow-[0_2px_0_0_#0f172a] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
           title={`Thời gian: ${timeOfDayLabel} (Bấm để đổi)`}
           aria-label={`Chuyển chu kỳ thời gian (Hiện tại: ${timeOfDayLabel})`}
           data-testid="time-of-day-toggle-button"
@@ -106,7 +106,7 @@ export function TopBar(props: TopBarProps): React.ReactElement {
         <button
           type="button"
           onClick={toggleMute}
-          className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors cursor-pointer text-xs font-medium border border-amber-500/30 hover:border-amber-400/60 shadow-[0_2px_0_0_#0f172a] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+          className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-colors cursor-pointer text-xs font-semibold border border-slate-900 shadow-[0_2px_0_0_#0f172a] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
           title={isMuted ? 'Bật âm thanh' : 'Tắt âm thanh'}
           aria-label={isMuted ? 'Bật âm thanh trò chơi' : 'Tắt âm thanh trò chơi'}
           data-testid="mute-toggle-button"
@@ -119,7 +119,7 @@ export function TopBar(props: TopBarProps): React.ReactElement {
         <button
           type="button"
           onClick={toggleActivityFeed}
-          className="relative min-h-[44px] min-w-[44px] inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors cursor-pointer text-xs font-medium border border-amber-500/20 hover:border-amber-400/50 shadow-[0_2px_0_0_#0f172a] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+          className="relative min-h-[44px] min-w-[44px] inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-colors cursor-pointer text-xs font-semibold border border-slate-900 shadow-[0_2px_0_0_#0f172a] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
           title={isActivityFeedOpen ? 'Đóng nhật ký' : 'Mở nhật ký hoạt động'}
           aria-label={`Nhật ký hoạt động${unreadCount > 0 ? ` (${unreadCount} mới)` : ''}`}
           data-testid="activity-feed-toggle-button"
@@ -128,7 +128,7 @@ export function TopBar(props: TopBarProps): React.ReactElement {
           <span className="hidden sm:inline">Nhật Ký</span>
           {unreadCount > 0 && (
             <span
-              className="absolute -top-1.5 -right-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white shadow-lg border border-slate-900"
+              className="absolute -top-1.5 -right-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-600 px-1 text-[10px] font-bold text-white shadow-md border border-slate-900"
               data-testid="activity-unread-badge"
             >
               {unreadCount > 99 ? '99+' : unreadCount}
@@ -139,11 +139,11 @@ export function TopBar(props: TopBarProps): React.ReactElement {
         {/* Nút Thoát Bàn / Về Sảnh Chờ */}
         {onLeaveRoom && (
           <>
-            <div className="h-4 w-px bg-slate-700" aria-hidden="true" />
+            <div className="h-4 w-px bg-slate-300" aria-hidden="true" />
             <button
               type="button"
               onClick={onLeaveRoom}
-              className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-rose-950/60 hover:bg-rose-900/80 text-rose-300 hover:text-rose-100 transition-colors cursor-pointer text-xs font-semibold border border-rose-700/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 shadow-md"
+              className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-rose-100 hover:bg-rose-200 text-rose-900 transition-colors cursor-pointer text-xs font-bold border border-rose-400 shadow-[0_2px_0_0_#9f1239] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
               title="Thoát bàn và trở về sảnh chờ"
               aria-label="Thoát bàn và trở về sảnh chờ"
               data-testid="leave-room-button"

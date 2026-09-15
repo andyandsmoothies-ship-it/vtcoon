@@ -31,3 +31,37 @@ export const COLOR_GROUP_HEX: Record<ColorGroup, string> = {
   [ColorGroup.Tim]:        '#8E44AD',
 } as const;
 
+/**
+ * [IMP-61] Bảng thiết kế đồ chơi cờ bàn xúc xắc cổ điển (Tabletop Theme SSOT)
+ * Nguồn: Retropoly & Monopoly Plus Tabletop reference.
+ * Tone giấy ngà sáng cổ điển, mực in đen đậm, thảm nỉ cờ bàn, nút bấm đồ chơi xúc giác.
+ */
+export const TABLETOP_THEME = {
+  cardBg: '#FFFDF8',
+  cardBgWarm: '#F7F2E7',
+  cardBorder: '#1E293B',
+  cardShadow: 'shadow-[0_6px_0_0_#0f172a]',
+  textInkDark: '#0F172A',
+  textInkMuted: '#475569',
+  feltMatBlue: 'bg-blue-950/80 border-2 border-blue-500/60',
+  feltMatRed: 'bg-rose-950/80 border-2 border-rose-500/60',
+  btnEmerald: {
+    bg: 'bg-emerald-500 hover:bg-emerald-600',
+    text: 'text-white font-bold',
+    shadow: 'shadow-[0_4px_0_0_#065f46]',
+    border: 'border-2 border-emerald-700',
+  },
+  btnAmber: {
+    bg: 'bg-amber-500 hover:bg-amber-600',
+    text: 'text-white font-bold',
+    shadow: 'shadow-[0_4px_0_0_#b45309]',
+    border: 'border-2 border-amber-700',
+  },
+  btnPaper: {
+    bg: 'bg-[#FFFDF8] hover:bg-[#F7F2E7]',
+    text: 'text-slate-900 font-bold',
+    shadow: 'shadow-[0_4px_0_0_#0f172a]',
+    border: 'border-2 border-slate-900',
+  },
+} as const;
+

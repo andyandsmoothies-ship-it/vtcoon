@@ -8,6 +8,18 @@ export const INITIAL_BALANCE  = 15_000;
 export const ROOM_CODE_LENGTH = 6;
 export const MAX_ROUNDS       = 30;
 
+export const INITIAL_BALANCE_BY_PLAYERS: Readonly<Record<number, number>> = {
+  2: 25_000,
+  3: 20_000,
+  4: 18_000,
+};
+
+export function getInitialBalanceForPlayerCount(playerCount: number): number {
+  if (playerCount <= 2) return INITIAL_BALANCE_BY_PLAYERS[2]!;
+  if (playerCount === 3) return INITIAL_BALANCE_BY_PLAYERS[3]!;
+  return INITIAL_BALANCE_BY_PLAYERS[4]!;
+}
+
 export enum TurnPhase {
   WaitingRoll        = 'WaitingRoll',
   ActionPhase        = 'ActionPhase',
@@ -57,11 +69,18 @@ export interface CurrentAuctionState {
 }
 
 export interface EventCardInfo {
-  readonly cardType: 'chance' | 'market';
-  readonly cardId: string;
+  readonly id: string;
+  readonly type: 'Market' | 'Chance';
   readonly title: string;
   readonly description: string;
+  readonly targetScope?: string;
+  readonly effectDetail?: string;
+  readonly duration?: string;
+  readonly destination?: string;
   readonly effectDelta?: number;
+  readonly drawnBy?: string;
+  readonly cardType?: 'chance' | 'market';
+  readonly cardId?: string;
   readonly playerId?: string;
 }
 

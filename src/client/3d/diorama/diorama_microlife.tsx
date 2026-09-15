@@ -23,7 +23,7 @@ export function DioramaMicroLife(): React.ReactElement {
   return (
     <group position={[0, 0, 0]}>
       {/* ========================================================
-          1. XE HƠI & XE BUÝT TÍ HON ĐẬU VEN VỈA HÈ ĐẠI LỘ TÂY
+          1. XE BUÝT TÍ HON ĐẬU VEN VỈA HÈ ĐẠI LỘ TÂY
          ======================================================== */}
       {/* Xe buýt vàng hai tầng mini tại trạm đón khách ven đường */}
       <group ref={carRef} position={[-5.32, 0.145, 0.2]}>
@@ -35,30 +35,6 @@ export function DioramaMicroLife(): React.ReactElement {
         <mesh position={[0, 0.045, 0.04]}>
           <boxGeometry args={[0.102, 0.03, 0.12]} />
           <meshStandardMaterial color="#0F172A" roughness={0.2} />
-        </mesh>
-      </group>
-
-      {/* Xe hơi đỏ thể thao tí hon đậu ven vỉa hè Đại lộ Tây */}
-      <group position={[-5.32, 0.145, -1.2]}>
-        <mesh castShadow position={[0, 0.02, 0]}>
-          <boxGeometry args={[0.08, 0.04, 0.15]} />
-          <meshStandardMaterial color="#DC2626" roughness={0.2} />
-        </mesh>
-        <mesh position={[0, 0.032, -0.01]}>
-          <boxGeometry args={[0.076, 0.025, 0.08]} />
-          <meshStandardMaterial color="#0284C7" roughness={0.1} />
-        </mesh>
-      </group>
-
-      {/* Xe hơi xanh lục đậu ven vỉa hè Đại lộ Tây */}
-      <group position={[-5.32, 0.145, 1.4]}>
-        <mesh castShadow position={[0, 0.02, 0]}>
-          <boxGeometry args={[0.08, 0.04, 0.15]} />
-          <meshStandardMaterial color="#16A34A" roughness={0.2} />
-        </mesh>
-        <mesh position={[0, 0.032, -0.01]}>
-          <boxGeometry args={[0.076, 0.025, 0.08]} />
-          <meshStandardMaterial color="#0284C7" roughness={0.1} />
         </mesh>
       </group>
 

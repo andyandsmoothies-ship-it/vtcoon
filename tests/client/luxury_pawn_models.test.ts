@@ -55,7 +55,7 @@ describe('[TC-IMP29.2/MSS] Luxury Pawns Overhaul & SafeGLTFModel Integration', (
       const element = React.createElement(LuxuryPawnModel, { slotIndex: slot });
       const html = renderToStaticMarkup(element);
       expect(html).toBeDefined();
-      expect(html).toContain('scale="1.25,1.25,1.25"');
+      expect(html).toContain('scale="0.625,0.625,0.625"');
     }
   });
 

@@ -5,7 +5,7 @@ import type { RoomManager } from './room_manager';
 
 export type PlayerIntent =
   | { type: 'INTENT_BUY' } | { type: 'INTENT_BUY_PROPERTY' } | { type: 'INTENT_DECLINE' }
-  | { type: 'INTENT_BID'; amount: number }
+  | { type: 'INTENT_BID'; amount: number; isBait?: boolean }
   | { type: 'INTENT_AUCTION_PASS' }
   | { type: 'INTENT_UPGRADE'; cellIndex: number }
   | { type: 'INTENT_UPGRADE_ETC' }

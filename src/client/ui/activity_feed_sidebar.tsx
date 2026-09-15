@@ -125,20 +125,20 @@ export function ActivityFeedSidebar(props: ActivityFeedSidebarProps): React.Reac
     <aside
       aria-label="Nhật ký ván đấu"
       aria-hidden={!isActivityFeedOpen}
-      className={`fixed top-0 right-0 h-full w-80 md:w-96 z-30 bg-slate-900/95 backdrop-blur-xl border-l border-slate-700/80 shadow-2xl flex flex-col transition-transform duration-300 ease-out ${
+      className={`fixed top-0 right-0 h-full w-80 md:w-96 z-30 bg-[#FBF7EE] border-l-2 border-slate-900 shadow-2xl flex flex-col transition-transform duration-300 ease-out text-slate-900 select-none ${
         isActivityFeedOpen ? 'translate-x-0 pointer-events-auto' : 'translate-x-full pointer-events-none'
       } ${className}`}
       data-testid="activity-feed-sidebar"
     >
       {/* 1. Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700/80 bg-slate-900/90">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-amber-200 bg-[#F7F2E7]">
         <div className="flex items-center gap-2">
           <span className="text-lg" aria-hidden="true">📜</span>
-          <h2 className="text-sm font-bold tracking-wider text-slate-100 uppercase">
+          <h2 className="text-sm font-black tracking-wider text-slate-900 uppercase">
             Nhật Ký Ván Đấu
           </h2>
           <span
-            className="px-2 py-0.5 text-xs font-mono rounded-full bg-slate-800 text-amber-300 border border-slate-700"
+            className="px-2 py-0.5 text-xs font-mono rounded-full bg-white text-slate-900 font-bold border border-slate-300 shadow-sm"
             data-testid="activity-count"
           >
             {filteredLogs.length}
@@ -147,7 +147,7 @@ export function ActivityFeedSidebar(props: ActivityFeedSidebarProps): React.Reac
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-slate-100 transition-colors border border-slate-700 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+          className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center rounded-xl bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 transition-colors border border-slate-300 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
           aria-label="Đóng nhật ký"
           data-testid="close-activity-feed"
         >
@@ -156,14 +156,14 @@ export function ActivityFeedSidebar(props: ActivityFeedSidebarProps): React.Reac
       </div>
 
       {/* 2. Filter Chips */}
-      <div className="flex items-center gap-1.5 px-4 py-2 border-b border-slate-800/80 bg-slate-950/40">
+      <div className="flex items-center gap-1.5 px-4 py-2 border-b border-amber-200 bg-[#FBF7EE]">
         <button
           type="button"
           onClick={() => setFilter('all')}
-          className={`min-h-[36px] px-3 py-1 rounded-lg text-xs font-medium transition-colors border cursor-pointer ${
+          className={`min-h-[36px] px-3 py-1 rounded-lg text-xs font-bold transition-colors border cursor-pointer ${
             activeFilter === 'all'
-              ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-              : 'bg-slate-800/60 text-slate-400 hover:text-slate-200 border-slate-700/40'
+              ? 'bg-amber-500 text-slate-900 border-amber-600 shadow-sm'
+              : 'bg-white text-slate-700 hover:text-slate-900 border-slate-300'
           }`}
           data-testid="filter-all"
         >
@@ -172,10 +172,10 @@ export function ActivityFeedSidebar(props: ActivityFeedSidebarProps): React.Reac
         <button
           type="button"
           onClick={() => setFilter('money')}
-          className={`min-h-[36px] px-3 py-1 rounded-lg text-xs font-medium transition-colors border cursor-pointer ${
+          className={`min-h-[36px] px-3 py-1 rounded-lg text-xs font-bold transition-colors border cursor-pointer ${
             activeFilter === 'money'
-              ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-              : 'bg-slate-800/60 text-slate-400 hover:text-slate-200 border-slate-700/40'
+              ? 'bg-amber-500 text-slate-900 border-amber-600 shadow-sm'
+              : 'bg-white text-slate-700 hover:text-slate-900 border-slate-300'
           }`}
           data-testid="filter-money"
         >
@@ -184,10 +184,10 @@ export function ActivityFeedSidebar(props: ActivityFeedSidebarProps): React.Reac
         <button
           type="button"
           onClick={() => setFilter('property')}
-          className={`min-h-[36px] px-3 py-1 rounded-lg text-xs font-medium transition-colors border cursor-pointer ${
+          className={`min-h-[36px] px-3 py-1 rounded-lg text-xs font-bold transition-colors border cursor-pointer ${
             activeFilter === 'property'
-              ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-              : 'bg-slate-800/60 text-slate-400 hover:text-slate-200 border-slate-700/40'
+              ? 'bg-amber-500 text-slate-900 border-amber-600 shadow-sm'
+              : 'bg-white text-slate-700 hover:text-slate-900 border-slate-300'
           }`}
           data-testid="filter-property"
         >
@@ -198,7 +198,7 @@ export function ActivityFeedSidebar(props: ActivityFeedSidebarProps): React.Reac
       {/* 3. Danh sách nhật ký */}
       <div className="flex-1 overflow-y-auto p-3 space-y-2" data-testid="activity-log-list">
         {filteredLogs.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-48 text-slate-500 text-xs text-center px-4">
+          <div className="flex flex-col items-center justify-center h-48 text-slate-600 text-xs text-center px-4 font-medium">
             <span className="text-2xl mb-2" aria-hidden="true">📭</span>
             <span>Chưa có hoạt động nào được ghi nhận.</span>
           </div>
@@ -206,7 +206,7 @@ export function ActivityFeedSidebar(props: ActivityFeedSidebarProps): React.Reac
           filteredLogs.map((entry) => (
             <div
               key={entry.id}
-              className="flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:bg-slate-800/80 transition-colors"
+              className="flex items-start gap-2.5 p-2.5 rounded-xl bg-white border border-amber-200/80 hover:border-amber-400 transition-colors shadow-sm"
               data-testid={`activity-entry-${entry.id}`}
             >
               <div
@@ -219,18 +219,18 @@ export function ActivityFeedSidebar(props: ActivityFeedSidebarProps): React.Reac
                   <span className="text-sm flex-shrink-0" aria-hidden="true">
                     {getActivityIcon(entry.type)}
                   </span>
-                  <span className="text-[11px] font-mono text-slate-400">
+                  <span className="text-[11px] font-mono text-slate-500 font-semibold">
                     {formatLogTime(entry.timestamp)}
                   </span>
                 </div>
-                <p className="text-xs text-slate-200 leading-snug break-words">
+                <p className="text-xs text-slate-900 leading-snug break-words font-medium">
                   {entry.message}
                 </p>
                 {entry.amount !== undefined && (
                   <div className="mt-1 flex justify-end">
                     <span
-                      className={`text-xs font-mono font-semibold ${
-                        entry.amount > 0 ? 'text-emerald-400' : 'text-rose-400'
+                      className={`text-xs font-mono font-bold ${
+                        entry.amount > 0 ? 'text-emerald-700' : 'text-rose-700'
                       }`}
                       data-testid={`activity-amount-${entry.id}`}
                     >
@@ -246,12 +246,12 @@ export function ActivityFeedSidebar(props: ActivityFeedSidebarProps): React.Reac
       </div>
 
       {/* 4. Footer */}
-      <div className="p-3 border-t border-slate-800/80 bg-slate-950/30 flex items-center justify-between">
-        <span className="text-[11px] text-slate-500">Tối đa 50 sự kiện gần nhất</span>
+      <div className="p-3 border-t border-amber-200 bg-[#F7F2E7] flex items-center justify-between">
+        <span className="text-[11px] text-slate-600 font-medium">Tối đa 50 sự kiện gần nhất</span>
         <button
           type="button"
           onClick={clearLogs}
-          className="min-h-[36px] px-2.5 py-1 text-xs text-slate-400 hover:text-slate-200 transition-colors rounded-lg hover:bg-slate-800 cursor-pointer"
+          className="min-h-[36px] px-2.5 py-1 text-xs text-slate-700 hover:text-slate-900 font-bold transition-colors rounded-lg bg-white hover:bg-slate-100 border border-slate-300 cursor-pointer shadow-sm"
           data-testid="clear-activity-logs"
         >
           Xóa nhật ký

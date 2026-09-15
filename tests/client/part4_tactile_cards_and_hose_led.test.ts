@@ -13,9 +13,9 @@ describe('[TC-P4.1/MSS] Thẻ Bài Game 3D Kim Loại TitleDeedModal', () => {
     const html = renderToStaticMarkup(
       React.createElement(TitleDeedModal, { cellIndex: 1, canBuy: true, isOwned: false })
     );
-    expect(html).toContain('border-amber-400');
-    expect(html).toContain('shadow-[0_0_25px_rgba(245,158,11,0.3)]');
-    expect(html).toContain('border-amber-400/40');
+    expect(html).toContain('border-2 border-slate-900');
+    expect(html).toContain('shadow-[0_6px_0_0_#0f172a]');
+    expect(html).toContain('border-slate-300/80');
     expect(html).toContain('data-testid="title-deed-modal"');
   });
 
@@ -27,18 +27,18 @@ describe('[TC-P4.1/MSS] Thẻ Bài Game 3D Kim Loại TitleDeedModal', () => {
     expect(html).toContain('viewBox="0 0 400 400"');
     expect(html).toContain('polygon');
     expect(html).toContain('stroke-dasharray="3 3"');
-    expect(html).toContain('opacity-[0.06]');
+    expect(html).toContain('opacity-[0.04]');
   });
 
   it('Các nút bấm hành động có độ dày vật lý 4px kèm độ lún cơ học khi bấm', () => {
     const html = renderToStaticMarkup(
       React.createElement(TitleDeedModal, { cellIndex: 1, canBuy: true, isOwned: false })
     );
-    expect(html).toContain('border-emerald-800');
-    expect(html).toContain('shadow-[0_4px_0_0_#064e3b]');
+    expect(html).toContain('border-emerald-700');
+    expect(html).toContain('shadow-[0_4px_0_0_#065f46]');
     expect(html).toContain('active:translate-y-[3px]');
-    expect(html).toContain('border-slate-950');
-    expect(html).toContain('shadow-[0_4px_0_0_#020617]');
+    expect(html).toContain('border-slate-400');
+    expect(html).toContain('shadow-[0_4px_0_0_#64748b]');
   });
 
   it('Hỗ trợ đầy đủ các trạng thái Nâng Cấp, Hạ Cấp, Thế Chấp với nút bấm 3D vật lý', () => {
@@ -61,8 +61,8 @@ describe('[TC-P4.1/MSS] Thẻ Bài Game 3D Kim Loại TitleDeedModal', () => {
     expect(html).toContain('Hạ Cấp (-50%)');
     expect(html).toContain('Thế Chấp');
     expect(html).toContain('border-teal-800');
-    expect(html).toContain('border-orange-900');
-    expect(html).toContain('border-amber-900');
+    expect(html).toContain('border-orange-800');
+    expect(html).toContain('border-amber-700');
   });
 
   it('Hiển thị thông báo cảnh báo thế chấp rõ ràng khi isMortgaged là true', () => {
@@ -109,9 +109,9 @@ describe('[TC-P4.2/MSS] Bảng Điện Tử LED Sàn Chứng Khoán HOSE', () =>
     expect(html).toContain('+10%');
     expect(html).toContain('+20%');
     expect(html).toContain('+100%');
-    expect(html).toContain('text-emerald-400');
-    expect(html).toContain('text-rose-400');
-    expect(html).toContain('text-amber-300');
+    expect(html).toContain('text-emerald-800');
+    expect(html).toContain('text-rose-800');
+    expect(html).toContain('text-amber-800');
   });
 
   it('Hiển thị kết quả xúc xắc 1D6 và số tiền thu về kèm icon xúc xắc trực quan', () => {
@@ -125,10 +125,10 @@ describe('[TC-P4.2/MSS] Bảng Điện Tử LED Sàn Chứng Khoán HOSE', () =>
         onClose: () => {},
       })
     );
-    expect(html).toContain('Điểm xúc xắc 1D6: <strong class="text-amber-400">5</strong>');
+    expect(html).toContain('Điểm xúc xắc 1D6: <strong class="text-slate-900 font-black">5</strong>');
     expect(html).toContain('Tiền thu về: 1.500 Tr.');
     expect(html).toContain('Khớp Lệnh Lãi');
-    expect(html).toContain('text-emerald-400');
+    expect(html).toContain('text-emerald-800');
   });
 
   it('Kết quả khớp lệnh lỗ hiển thị mã màu đỏ sàn (rose) và badge Khớp Lệnh Lỗ', () => {
@@ -143,11 +143,11 @@ describe('[TC-P4.2/MSS] Bảng Điện Tử LED Sàn Chứng Khoán HOSE', () =>
         onClose: () => {},
       })
     );
-    expect(html).toContain('Điểm xúc xắc 1D6: <strong class="text-amber-400">1</strong>');
+    expect(html).toContain('Điểm xúc xắc 1D6: <strong class="text-slate-900 font-black">1</strong>');
     expect(html).toContain('Tiền thu về: 250 Tr.');
     expect(html).toContain('Khớp Lệnh Lỗ');
-    expect(html).toContain('text-rose-400');
-    expect(html).toContain('bg-rose-950/80');
+    expect(html).toContain('text-rose-800');
+    expect(html).toContain('bg-rose-50');
   });
 
   it('Kết quả khớp lệnh hòa vốn hiển thị mã màu vàng tham chiếu và badge Khớp Lệnh Hòa', () => {
@@ -162,18 +162,18 @@ describe('[TC-P4.2/MSS] Bảng Điện Tử LED Sàn Chứng Khoán HOSE', () =>
         onClose: () => {},
       })
     );
-    expect(html).toContain('Điểm xúc xắc 1D6: <strong class="text-amber-400">3</strong>');
+    expect(html).toContain('Điểm xúc xắc 1D6: <strong class="text-slate-900 font-black">3</strong>');
     expect(html).toContain('Tiền thu về: 500 Tr.');
     expect(html).toContain('Khớp Lệnh Hòa');
-    expect(html).toContain('text-amber-300');
-    expect(html).toContain('bg-amber-950/80');
+    expect(html).toContain('text-amber-800');
+    expect(html).toContain('bg-amber-50');
   });
 
   it('Nút bấm đặt cược và bỏ qua có thiết kế cơ học vật lý 3D 4px', () => {
     const html = renderToStaticMarkup(
       React.createElement(HoseModal, { myBalance: 15000, onInvest: () => {}, onSkip: () => {}, onClose: () => {} })
     );
-    expect(html).toContain('shadow-[0_4px_0_0_#020617]');
+    expect(html).toContain('shadow-[0_4px_0_0_#64748b]');
     expect(html).toContain('shadow-[0_4px_0_0_#b45309]');
     expect(html).toContain('active:translate-y-[3px]');
   });

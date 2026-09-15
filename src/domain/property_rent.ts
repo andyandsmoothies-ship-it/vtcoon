@@ -11,6 +11,7 @@ import {
 import { hasMonopoly } from './property_upgrade';
 
 export const SERVICE_C2_SURCHARGE = 200;
+export const GO_PROPERTY_TAX_CAP = 1_000;
 
 /** @see docs/domain/gotchas.md#1-market-modifiers-lifecycle--scope-slice-04 */
 export function hasZeroRent(cellIndex: number, modifiers?: readonly MarketModifier[]): boolean {

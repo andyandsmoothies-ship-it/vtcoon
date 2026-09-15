@@ -67,9 +67,9 @@ describe('[TC-E2E-STRESS/MSS] Living E2E Test: Multiplayer Stress Flow (3 Player
 
     // --- KHOI TAO PHONG DAU 3 NGUOI ---
     expect(room.players.length, 'Phai co du 3 nguoi choi').toBe(3);
-    expect(room.players[0]!.balance, 'P1 khoi diem 15.000').toBe(INITIAL_BALANCE);
-    expect(room.players[1]!.balance, 'P2 khoi diem 15.000').toBe(INITIAL_BALANCE);
-    expect(room.players[2]!.balance, 'P3 khoi diem 15.000').toBe(INITIAL_BALANCE);
+    expect(room.players[0]!.balance, 'P1 khoi diem 20.000').toBe(20_000);
+    expect(room.players[1]!.balance, 'P2 khoi diem 20.000').toBe(20_000);
+    expect(room.players[2]!.balance, 'P3 khoi diem 20.000').toBe(20_000);
     expect(room.phase, 'FSM khoi diem WaitingRoll').toBe(TurnPhase.WaitingRoll);
     expect(room.currentPlayerIndex, 'Luot dau tien thuoc ve P1').toBe(0);
 

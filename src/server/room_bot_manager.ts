@@ -69,7 +69,11 @@ export function removeBotFromRoom(
   return true;
 }
 
-export function getBotConfig(personality: BotPersonality): BotConfig {
+export function getBotConfig(
+  personality: BotPersonality,
+  rng?: () => number,
+  seed?: number,
+): BotConfig {
   return {
     personality,
     balanceThresholdMultiplier:
@@ -78,5 +82,7 @@ export function getBotConfig(personality: BotPersonality): BotConfig {
         : personality === BotPersonality.Passive
           ? 1.5
           : 1.20,
+    rng,
+    seed,
   };
 }

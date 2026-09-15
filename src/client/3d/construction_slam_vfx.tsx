@@ -4,6 +4,7 @@ import type { Group, Mesh } from 'three';
 import { useVfxStore, type ActiveSlam } from '../store/vfx_store';
 import { cellPosition } from './board_coords';
 import { useSafeFrame } from './safe_frame';
+import { getBuildingLotTransform } from './procedural_building';
 
 export interface ImpactDropResult {
   readonly yOffset: number;
@@ -14,17 +15,19 @@ export interface ImpactDropResult {
 
 /**
  * Tính toán tọa độ không gian thế giới chính xác của công trình trên ô cờ
- * bù trừ độ lệch 0.42 trên trục Z cục bộ theo góc xoay của từng cạnh bàn cờ.
+ * bù trừ vị trí cục bộ và xoay theo từng cạnh bàn cờ.
  */
 export function getBuildingWorldPosition(cellIndex: number): [number, number, number] {
+  if (!Number.isFinite(cellIndex)) return [0, 0.12, 0];
   const [cx, , cz] = cellPosition(cellIndex);
   const side = Math.floor(cellIndex / 10);
-  const offset = 0.42;
+  const lot = getBuildingLotTransform(cellIndex);
+  const [lx, , lz] = lot.position;
   switch (side) {
-    case 0: return [cx, 0.12, cz - offset];
-    case 1: return [cx + offset, 0.12, cz];
-    case 2: return [cx, 0.12, cz + offset];
-    default: return [cx - offset, 0.12, cz];
+    case 0: return [cx + lx, 0.12, cz + lz];
+    case 1: return [cx - lz, 0.12, cz + lx];
+    case 2: return [cx - lx, 0.12, cz - lz];
+    default: return [cx + lz, 0.12, cz - lx];
   }
 }
 

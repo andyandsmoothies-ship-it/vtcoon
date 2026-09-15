@@ -37,6 +37,9 @@ export function handleSpecialCell(
       room.phase = TurnPhase.PropertyManagement;
       return true;
     }
+    case CellType.FreeParking:
+      room.phase = TurnPhase.PropertyManagement;
+      return true;
     default:
       return false;
   }

@@ -213,6 +213,11 @@ export function DioramaBridges(): React.ReactElement {
           <boxGeometry args={[5.4, 0.04, 0.5]} />
           <meshStandardMaterial color="#334155" roughness={0.28} metalness={0.3} />
         </mesh>
+        {/* Tà vẹt gỗ sồi sẫm đỡ thanh ray đường sắt */}
+        <mesh position={[0, 0.016, 0]} receiveShadow>
+          <boxGeometry args={[5.2, 0.008, 0.16]} />
+          <meshStandardMaterial color="#78350F" roughness={0.7} />
+        </mesh>
         {/* Đường ray xe lửa trung tâm */}
         <mesh position={[0, 0.024, -0.04]}>
           <boxGeometry args={[5.2, 0.008, 0.015]} />
@@ -226,45 +231,35 @@ export function DioramaBridges(): React.ReactElement {
         {/* Khung giàn thép nhịp vòm đôi biểu tượng (Double Steel Truss Arches) */}
         {[-1.3, 1.3].map((spanX, idx) => (
           <group key={`longbien-span-${idx}`} position={[spanX, 0.16, 0]}>
-            {/* Giàn thép vòm cong phía trước */}
+            {/* Giàn thép vòm cong phía trước màu thép than tự nhiên */}
             <mesh position={[0, 0.08, 0.23]} castShadow>
               <boxGeometry args={[2.2, 0.03, 0.02]} />
-              <meshStandardMaterial color="#78350F" roughness={0.6} metalness={0.4} />
+              <meshStandardMaterial color="#334155" roughness={0.5} metalness={0.6} />
             </mesh>
             {/* Các thanh chéo giàn thép */}
             {[-0.8, -0.4, 0, 0.4, 0.8].map((tx, ti) => (
               <mesh key={`truss-strut-f-${ti}`} position={[tx, 0.04, 0.23]} rotation={[0, 0, (ti % 2 === 0 ? 1 : -1) * 0.45]} castShadow>
                 <boxGeometry args={[0.02, 0.16, 0.02]} />
-                <meshStandardMaterial color="#78350F" roughness={0.6} metalness={0.4} />
+                <meshStandardMaterial color="#475569" roughness={0.5} metalness={0.6} />
               </mesh>
             ))}
 
-            {/* Giàn thép vòm cong phía sau */}
+            {/* Giàn thép vòm cong phía sau màu thép than tự nhiên */}
             <mesh position={[0, 0.08, -0.23]} castShadow>
               <boxGeometry args={[2.2, 0.03, 0.02]} />
-              <meshStandardMaterial color="#78350F" roughness={0.6} metalness={0.4} />
+              <meshStandardMaterial color="#334155" roughness={0.5} metalness={0.6} />
             </mesh>
             {[-0.8, -0.4, 0, 0.4, 0.8].map((tx, ti) => (
               <mesh key={`truss-strut-b-${ti}`} position={[tx, 0.04, -0.23]} rotation={[0, 0, (ti % 2 === 0 ? 1 : -1) * 0.45]} castShadow>
                 <boxGeometry args={[0.02, 0.16, 0.02]} />
-                <meshStandardMaterial color="#78350F" roughness={0.6} metalness={0.4} />
+                <meshStandardMaterial color="#475569" roughness={0.5} metalness={0.6} />
               </mesh>
             ))}
 
             {/* Giàn thanh ngang kết nối đỉnh vòm */}
             <mesh position={[0, 0.15, 0]}>
               <boxGeometry args={[2.0, 0.02, 0.46]} />
-              <meshStandardMaterial color="#78350F" roughness={0.6} metalness={0.4} />
-            </mesh>
-
-            {/* Dải đèn LED vàng hoài niệm thắp sáng đỉnh vòm cầu Long Biên trong đêm */}
-            <mesh position={[0, 0.165, 0]}>
-              <boxGeometry args={[1.98, 0.01, 0.44]} />
-              <meshStandardMaterial
-                color="#F59E0B"
-                emissive="#F59E0B"
-                emissiveIntensity={isNight ? 2.8 : isSunset ? 0.7 : 0.0}
-              />
+              <meshStandardMaterial color="#334155" roughness={0.5} metalness={0.6} />
             </mesh>
           </group>
         ))}

@@ -7,12 +7,12 @@
 ## 🧭 BẢNG CHỈ MỤC THEO DOMAIN (DOMAIN INDEX)
 | Domain Tag | Trọng Tâm & Phạm Vi Mã Nguồn | Các Gotchas Liên Quan |
 | :--- | :--- | :--- |
-| `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70 |
-| `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #66, #70, #77 |
+| `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78 |
+| `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #66, #70, #77, #78, #79, #81 |
 | `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #65, #66, #70, #74, #77 |
-| `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #74, #77 |
-| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #36, #37, #40, #70, #74 |
-| `[UAT/TEST]` | Nghiệm Thu, Adversarial TDD, Ảnh Chụp Màn Hình (.jpg), Shell Escaping, File I/O Lock | #5, #28, #29, #31, #35, #73 |
+| `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #74, #77, #80, #85, #86, #88, #89, #90, #91, #92, #93, #94, #95, #96 |
+| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #36, #37, #40, #70, #74, #80, #95, #96, #97 |
+| `[UAT/TEST]` | Nghiệm Thu, Adversarial TDD, Ảnh Chụp Màn Hình (.jpg), Shell Escaping, File I/O Lock, Docker Healthcheck Timeout | #5, #28, #29, #31, #35, #73, #83 |
 | `[TELEMETRY]` | Giám Sát Hiệu Năng Thời Gian Thực, Chó Canh Phòng Bất Biến, Hộp Đen Tái Hiện Lỗi | #39, #62, #75 |
 
 ---
@@ -941,3 +941,468 @@
      - `src/client/game_canvas.tsx`: Xác định `isAnimatingPawnBot = Boolean(playersInfo[activeAnimation.playerId]?.isBot)` và truyền vào máy ảnh, triệt tiêu 100% hiện tượng giật góc quay khi lượt chuyển giao trong lúc Bot đang nhảy.
   3. **Universal Movement Queue Synchronization Invariant**:
      - `src/client/network/apply_delta.ts`: `dispatchPawnMove` loại bỏ điều kiện loại trừ Bot `!task.isBot`. Cả Bot và Người chơi đều được đưa vào `pendingPawnMove` khi `isRolling === true`, chỉ bắt đầu nhảy quân cờ sau khi xúc xắc hoàn tất tiếp đất (`setIsRolling(false)`).
+
+---
+
+### 78. [FSM/BOT/ECONOMY] Bất Biến Bảo Toàn Ô 20 Nghỉ Dưỡng Miễn Phí (SSOT Cell 20 Free Parking Safe Zone), Bảo Tồn Mô Hình Rủi Ro Bot 2D6 (minBuffer 300 Tr.) & Thấu Suốt 100% Siêu Dữ Liệu Thẻ Sự Kiện (IMP-57)
+- **Hiện tượng & Bẫy thực tế**:
+  1. *Lỗi Kiến Trúc Khi Biến Ô 20 Thành Kho Bạc (Treasury Payout)*:
+     - Từng có đề xuất giải ngân toàn bộ quỹ Kho Bạc (`room.treasury`) cho người chơi dẫm ô 20 Nghỉ Dưỡng Miễn Phí. Tuy nhiên, thay đổi này làm rách kiến trúc:
+       - `DeltaPayload` không chứa trường `treasury`, khiến Client (`top_bar.tsx`) bị kẹt cứng số dư Kho Bạc 2.000 Tr. ảo (desync).
+       - Hệ thống giám sát tài chính `audit_telemetry.ts` kích hoạt báo động nghiêm trọng `CRITICAL: TREASURY_INVARIANT_VIOLATED` vì coi việc giải ngân này là thất thoát quỹ.
+       - Trải nghiệm Chơi Đơn (Offline Mode) không đồng bộ và vi phạm trực tiếp SSOT gốc `docs/requirements.md §II`.
+  2. *Bẫy Ép Cứng Đệm An Toàn Bot (minBuffer = 1.500 Tr.) Phá Vỡ Mô Hình 2D6*:
+     - Khi nâng ép cứng `DEFAULT_MIN_SAFETY_BUFFER` từ 300 Tr. lên 1.500 Tr., mô hình dự báo rủi ro 2D6 (`threat_forecaster.ts`) và bản sắc tính cách 3 loại Bot (Aggressive, Balanced, Passive) bị triệt tiêu hoàn toàn. Bot Aggressive trở nên nhút nhát như Bot Passive, làm gãy hàng loạt 11 ca kiểm thử toán học kinh tế và đấu giá.
+  3. *Lệch Chuẩn Tỷ Lệ Sàn HOSE & Lệch Siêu Dữ Liệu Thẻ Sự Kiện*:
+     - Sàn HOSE có kết quả đổ xúc xắc mặt 1 là 0.30x (lệch so với SSOT 0.50x, kỳ vọng E < 1.0 làm người chơi luôn thua).
+     - 6 thẻ bài sự kiện bị lệch số liệu giữa mô tả metadata và mã xử lý logic thực tế (`MC_FIRE_INSPECTION`, `MC_PUBLIC_INVEST`, `MC_CASINO_PILOT`, `MC_ALCOHOL_CHECK`, `CC_CONTRACT_PENALTY`, `CC_TAX_AUDIT`).
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **SSOT Free Parking Safe Zone Invariant**:
+     - `src/server/special_cell_handler.ts`: Trả ô 20 về đúng SSOT gốc `docs/requirements.md §II`:
+       ```ts
+       case CellType.FreeParking:
+         room.phase = TurnPhase.PropertyManagement;
+         return true;
+       ```
+     - Tuyệt đối không tự ý phát sinh dòng tiền chi trả tại Ô 20 khi chưa mở rộng `DeltaPayload` và tái cấu trúc telemetry kho bạc.
+  2. **Bot 2D6 Threat Horizon & Dynamic Safety Buffer Invariant**:
+     - `src/domain/bot/bot_types.ts`: Khóa cứng `DEFAULT_MIN_SAFETY_BUFFER = 300;` và `weights.minBuffer = 300;`.
+     - `src/domain/bot/bot_engine.ts`: Đệm an toàn tài chính của Bot phụ thuộc động vào mô hình xác suất xúc xắc 2D6 (`threat.safetyBuffer = Math.max(minBuffer, Math.round(expectedLoss * riskMultiplier))`).
+     - Bot chỉ từ chối mua hoặc nâng cấp nhà khi phía trước thực sự có ô nguy hiểm đối thủ (`dangerTilesCount > 0 && bot.balance - cost < threat.safetyBuffer`), bảo toàn trọn vẹn bản sắc 3 phong cách Bot và tính chiến thuật của game.
+  3. **HOSE Multiplier SSOT (E = +15.83%)**:
+     - `src/domain/event_card_types.ts`: Khóa cứng `HOSE_OUTCOMES = { 1: 0.50, 2: 0.75, 3: 1.00, 4: 1.20, 5: 1.50, 6: 2.00 }`.
+  4. **Universal Card Clarity Matrix & 100% Code-Metadata Reconciliation Invariant**:
+     - 100% 36 thẻ Thị trường và Cơ hội khai báo đầy đủ 4 trường minh bạch (`targetScope`, `effectDetail`, `duration`, `destination`).
+     - Chuẩn hóa chính xác số liệu metadata khớp 100% với handler mã nguồn:
+       - `MC_FIRE_INSPECTION`: Phạt C1: 200 Tr., C2: 400 Tr., C3: 800 Tr. Đất trống: Miễn phạt.
+       - `MC_PUBLIC_INVEST`: Chi trả 1.000 Tr. cho mỗi ô Hạ tầng giao thông sở hữu.
+       - `MC_CASINO_PILOT`: Thưởng 2.000 Tr. cho chủ ô 27 nếu đạt Cấp 3.
+       - `MC_ALCOHOL_CHECK`: Thời lượng 2 vòng chơi, giảm 50% tiền thuê ô Dịch vụ.
+       - `CC_CONTRACT_PENALTY`: Nộp phạt 1.000 Tr. chuyển cho người nghèo nhất bàn cờ.
+        - `CC_TAX_AUDIT`: Nộp phạt 200 Tr. cho mỗi ô đất trống Cấp 0 chưa xây dựng.
+      - Giao diện `EventCardModal` hiển thị bảng Impact Specs Matrix với fallback an toàn, tuân thủ nghiêm ngặt 0 UI anti-pattern.
+
+---
+
+### 79. [BOT/AI] Human-like Bot Intelligence & Tactical Capabilities (IMP-58 Phase 1)
+- **Bối cảnh & Sự cố**:
+  1. *Bot Passive 0% cơ hội thắng*: Thiết kế cũ ép cứng Bot Passive luôn `INTENT_DECLINE` ở pha mua đất và `INTENT_END_TURN` ở pha quản lý tài sản. Khiến Bot Passive hoàn toàn không có tài sản và 100% thua cuộc.
+  2. *Đóng băng tài sản thế chấp*: Bot không có cơ chế chuộc lại tài sản đã thế chấp (`INTENT_REDEEM`), khiến tài sản bị vô hiệu hóa quyền thu tiền thuê suốt phần còn lại của ván đấu dù Bot rất dư dả tiền mặt.
+  3. *Trạm Kiểm Toán thụ động*: Bot không có chiến thuật bảo lãnh (`INTENT_BAIL_OUT`), đầu trận cần đua gom đất lại nằm chờ trong tù, cuối trận bản đồ đầy nhà cao tầng nguy hiểm lại không biết tận dụng tù làm nơi trú ẩn an toàn.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Bot Passive Value Investor Invariant**:
+     - Bot Passive giải ngân chọn lọc: Mua ô Hạ tầng Giao thông (`CellType.Railroad`), Tiện ích (`CellType.Utility`), ô đất giá rẻ (`basePrice <= 1500 Tr.`), hoặc ô giúp tạo độc quyền / chặn đối thủ (`monopolyScore >= 1.6` hoặc `denialScore > 1.0`).
+     - Ô đắt đỏ (`basePrice > 1500 Tr.`) mà không có tiềm năng độc quyền: Chỉ mua khi có "pháo đài tiền mặt" (`balance >= basePrice * 3`).
+     - Điều kiện đệm an toàn: `bot.balance >= basePrice * 1.5` và `bot.balance - basePrice >= threat.safetyBuffer`.
+     - Nâng cấp nhà: Chỉ nâng khi `balance >= upgradeCost * 3` và không có nguy hiểm phía trước (`threat.dangerTilesCount === 0`).
+  2. **Autonomous Mortgage Redemption Priority Invariant**:
+     - Khi vào pha `PropertyManagement`, nếu không có ô nâng cấp hợp lệ, Bot quét tài sản thế chấp (`findEligibleRedeemCell` trong `bot_redeem.ts`).
+     - Chi phí chuộc: `cost = Math.floor(loan * 1.1)`. Điều kiện chuộc: `bot.balance - cost >= safetyBuffer * bufferMultiplier`.
+     - 3 tầng ưu tiên chuẩn mực:
+       1. Ô thuộc bộ màu độc quyền (khôi phục quyền thu tiền thuê x2/x3).
+       2. Ô có tiền thuê cao nhất.
+       3. Ô có chi phí chuộc thấp nhất.
+  3. **Stage-Aware Tactical Audit Bailout Invariant**:
+     - Khi ở pha `WaitingRoll` và `bot.auditTurnsLeft > 0` (`bot_audit.ts`):
+        - Đầu trận (`unclaimedCount >= 8`): Cả 3 tính cách Bot chủ động nộp 500 Tr. bảo lãnh ngay (`INTENT_BAIL_OUT`) để giành quyền mua đất trống nếu `bot.balance - 500 >= DEFAULT_MIN_SAFETY_BUFFER`.
+        - Tàn cuộc (`unclaimedCount < 8`): Quét 2-12 bước phía trước Ô 10. Nếu có bất kỳ ô đất đối thủ gây nguy hiểm nào -> Ở lại trong tù làm nơi trú ẩn an toàn (tung xúc xắc tìm cặp đôi); nếu hoàn toàn an toàn và đủ đệm dự phòng -> Nộp bảo lãnh ra ngoài.
+
+---
+
+### 80. [3D/UI/OWNERSHIP] Bất Biến Nhận Diện Chủ Quyền Bàn Cờ 3D & Con Dấu Sổ Đỏ 2D (Tile Ownership Markers & Deed Seal Invariant - IMP-58)
+- **Bối cảnh & Vấn đề**:
+  1. *Thiếu trực quan hóa quyền sở hữu trên sa bàn 3D*: Trước đây người chơi không thể nhận biết nhanh ô đất nào đã có chủ và thuộc về ai nếu không zoom vào từng ô hoặc click mở modal.
+  2. *Lỗi gán sai màu cờ theo màu nhóm đất (`groupColor`)*: Trong mã nguồn cũ, cọc cờ lấy nhầm màu quy hoạch đất thay vì màu người chơi (`tokenColor`), và ô chưa mua vẫn hiển thị cọc cờ nếu là `CellType.Property`.
+  3. *Bỏ sót ô Hạ tầng và Tiện ích*: Ô Bến bãi (`Railroad`) và Năng lượng/Điện lực (`Utility`) là tài sản mua được nhưng hoàn toàn thiếu cọc cờ và viền nhận diện.
+  4. *Thẻ Sổ Đỏ 2D thiếu con dấu danh dự*: Thẻ bài `TitleDeedModal` không hiển thị con dấu chứng nhận chủ quyền khi đã mua.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Sa Bàn 3D - Dải Viền Chân Đế (`OwnerBaseTrim`) & Cọc Cờ (`OwnershipMarkerInstances`)**:
+     - `src/client/3d/board_tile.tsx`: Chỉ render `OwnerBaseTrim` và `OwnershipMarkerInstances` khi `isPurchasable && ownerColor && ownerColor.length > 0`.
+     - `isPurchasable = cell.type === CellType.Property || cell.type === CellType.Railroad || cell.type === CellType.Utility`.
+     - Tuyệt đối không hiển thị cờ/viền trên 7 ô chức năng phi thương mại (`Go`, `Jail`, `FreeParking`, `Audit`, `Chance`, `Market`, `Tax`, `TaxOrder`).
+     - Cọc cờ vải (`FlagCloth`) lấy đúng `ownerColor` (màu token người chơi: Đỏ Ruby, Xanh Dương, Xanh Lục, Vàng Hổ Phách).
+     - Thân cọc cờ đồng thau PBR tích hợp các vòng đai chỉ thị cấp độ `TierIndicatorRings` (C0: 0 vòng, C1: 1 vòng, C2: 2 vòng, C3: 3 vòng vàng kim `#F59E0B`).
+     - Dải viền `OwnerBaseTrim` đặt tại `[0, 0.01, 0]` kích thước `[1.72, 0.04, 2.24]`, ôm sát khối đế đá ivory cream (`#EDE5D8`) triệt tiêu 100% Z-fighting.
+  2. **Trích Xuất Chủ Quyền Phía Client (`computeOwnerMap`)**:
+     - `src/client/3d/board_layout.tsx`: Export `computeOwnerMap(playersInfo)`, biến đổi mảng `player.ownedProperties` thành bản đồ tra cứu nhanh `Record<number, { ownerId, ownerName, tokenColor }>`.
+     - Hỗ trợ fallback SSR an toàn (`useGameStore.getState()`) khi selector chưa kịp hydrate trong kiểm thử tĩnh.
+  3. **Thẻ Bài Sổ Đỏ 2D - Con Dấu Hoàng Gia (`ownership-certificate-seal`)**:
+     - `src/client/ui/modals/title_deed_modal.tsx`: Khi `isOwned === true`, render huy hiệu cuộn giấy 📜 `CHỨNG NHẬN QUYỀN SỞ HỮU`, hiển thị tên chủ sở hữu `ownerName` và badge ngọc bích `SỔ ĐỎ CHÍNH CHỦ`.
+     - Khi `isOwned === false`, khối con dấu ẩn hoàn toàn, không gây layout shift và tuân thủ 0 UI anti-pattern.
+
+---
+
+### 81. [BOT/AI] Softmax Decision Distribution, Seeded Jitter & Tactical Auction Baiting (IMP-59 Phase 2)
+- **Bối cảnh & Vấn đề**:
+  1. *Hành vi nhị phân cứng nhắc (Binary Threshold Fragility)*: Các quyết định mua đất và đấu giá cũ mang tính quy tắc cứng (`balance >= price * threshold`), khiến Bot dễ bị người chơi bắt bài sau vài vòng đấu.
+  2. *Thiếu tính nghi binh và tâm lý con người trong đấu giá*: Bot chỉ đặt giá thuần túy theo định giá thực tế, không có chiến thuật nghi binh kích giá đối thủ (Baiting / Trap Bids) và bất ngờ rút lui để gài đối thủ trả giá đắt.
+  3. *Nguy cơ làm gãy Turn Pacing & Test Liveness khi thêm tính ngẫu nhiên*: Nếu phủ Softmax ngẫu nhiên thuần túy (`Math.random()`) mà không kiểm soát điều kiện an toàn, Bot có thể vô cớ từ chối mua đất khi tiền mặt dư dả ở đầu trận, làm bùng phát các phiên đấu giá không mong muốn khiến luồng chơi bị treo chờ người chơi human thao tác.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Hàm Phân Phối Softmax & Nhiệt Độ Tính Cách (`SOFTMAX_TEMPERATURE`)**:
+     - `src/domain/bot/bot_types.ts` & `src/domain/bot/bot_softmax.ts`:
+       - `BotPersonality.Passive`: T = 0.8 (quyết đoán, kỷ luật cao, chỉ giải ngân theo giá trị an toàn).
+       - `BotPersonality.Balanced`: T = 1.0 (chuẩn mực, cân bằng).
+       - `BotPersonality.Aggressive`: T = 1.4 (khám phá, sẵn sàng chấp nhận rủi ro).
+     - Hằng số `PERSONALITY_BUY_BIAS` (-0.5 / 0.3 / 1.2) tích hợp trực tiếp vào hàm tiện ích, loại bỏ dead code và magic numbers.
+     - Hàm tính xác suất mua: `calculateBuyProbability(estimatedValue, basePrice, personality, valuePreference)`.
+     - Phân phối mượt mà (Sigmoidal non-binary), tự động ưu tiên các nhóm đất chiến lược (Hạ tầng, Tiện ích, Nhóm giá rẻ cho Bot Passive).
+  2. **Seeded Jitter & Khả Năng Tái Lập 100% (Reproducibility Invariant)**:
+     - `resolveSeededJitter(seedOrRng, manualJitter)`: Dao động ngẫu nhiên tâm lý trong biên độ an toàn `[-0.12, 0.12]`. Khi thiếu tham số hoặc gặp roll bất thường, tự động kẹp giá trị về vùng an toàn [0, 1] hoặc fallback về điểm trung tính 0.5 (jitter = 0.00).
+     - `getTurnSeed(bot, room, extra)`: Sinh seed xác định từ trạng thái phòng (`roomCode:botId:round:diceSeq:position:extra`), an toàn trước thuộc tính phòng/bot chưa khởi tạo, đảm bảo cùng một trạng thái ván cờ luôn tái lập quyết định 100% tất định (Zero Test Flakiness).
+     - `calculateSoftmaxProbability` & `calculateBuyProbability`: Miễn nhiễm hoàn toàn với `NaN` / `Infinity`, luôn trả về xác suất hợp lệ trong [0, 1].
+     - `room_bot_coordinator.ts` truyền session PRNG `roomManager.getRng()` vào `getBotConfig`, kích hoạt đầy đủ Softmax và Seeded Jitter trong runtime thực tế.
+  3. **Chiến Thuật Nghi Binh Đấu Giá (Auction Baiting & Trap Bids)**:
+     - `src/domain/bot/bot_auction.ts`:
+     - Hành lang nghi binh (`isBaitCorridor`): Giá đấu nằm trong khoảng 70% < bid <= 75% giá niêm yết.
+     - Xác suất nghi binh sử dụng hằng số tĩnh `AUCTION_BAIT_PROBABILITY = 0.6`.
+     - Bot Passive tham gia kích giá đối thủ nếu có người dẫn đầu là đối thủ (`highestBidder !== bot.id`) và bảo toàn trọn vẹn `safetyBuffer`.
+     - Khi giá đấu vượt qua 75% giá gốc và không phải ô độc quyền, Bot Passive lập tức bất ngờ bấm Pass (`INTENT_AUCTION_PASS`), hoàn tất việc bẫy đối thủ ôm tài sản giá cao.
+     - `calculateAuctionMaxBid`: Đồng bộ `room?.round ?? room?.roundCount ?? 1`, bảo đảm đệm an toàn tính đúng theo vòng chơi thực tế tại server.
+     - `finalizeAuctionIfFinished`: Cho phép đóng phiên đấu giá an toàn kể cả khi không có người chơi nào đặt giá (`!auction.highestBidder`) để kích hoạt cơ chế phát mãi cưỡng chế Kho Bạc 70%.
+     - `PlayerIntent` union khai báo đầy đủ `isBait?: boolean` cho `INTENT_BID`.
+     - Bot Aggressive nâng giá quyết liệt (+100 Tr.) khi số dư > 10.000 Tr. và sẵn sàng đẩy trần giá lên 150% - 160% định giá nếu là ô chặn độc quyền đối thủ (`denialScore >= 2.0`).
+     - Bot Balanced duy trì kỷ luật dòng tiền, chặn trần đấu giá nghiêm ngặt tại 120% định giá chiến lược.
+  4. **Bảo Toàn Giới Hạn Tệp Kiến Trúc (Architecture File Limits)**:
+     - Tách module `bot_auction.ts` (180 LOC) và `bot_softmax.ts` (115 LOC), giữ `bot_engine.ts` ở mức 337 LOC (tuyệt đối không vượt trần 400 LOC của Domain Services). Bộ contract test `imp59_human_like_bot_intelligence_phase2.test.ts` đạt 269 LOC với 25/25 atomic tests (dưới trần 300 LOC của Unit Test).
+
+---
+
+### 82. [ECONOMY/PACING/AFK] Bất Biến Kinh Tế Động, Trần Thuế GO & Cứu Nguy AFK Bằng Thế Chấp (IMP-60)
+- **Bối cảnh & Vấn đề**:
+  1. *Thiếu hụt thanh khoản do vốn cào bằng 15.000 Tr.*: Với bàn 2 người chơi, mỗi người cần mua ~14 ô đất (chi phí ~28.450 Tr.), khiến ván đấu bị nghẽn thanh khoản nghiêm trọng từ vòng 4-5, người chơi cạn sạch tiền không thể xây nhà C1-C3.
+  2. *Nghịch lý Thuế Tài Sản qua GO nuốt trọn tiền thưởng*: Người sở hữu từ 7 ô đất trở lên bị trừ thuế tài sản > 2.800 Tr. khi vượt GO, vượt quá tiền thưởng GO (+2.000 Tr.), gây nghịch lý càng mua nhiều đất càng bị âm tiền mặt.
+  3. *Hết giờ Insolvency cưỡng chế phá sản người chơi còn nhiều đất*: Khi người chơi âm tiền tạm thời và bị AFK/idle 25 giây, bộ lập lịch phát lệnh `INTENT_BANKRUPTCY` xóa sổ người chơi dù tài sản ròng còn rất lớn, vi phạm quyền lợi người chơi.
+  4. *Xung đột phát lệnh Client & Server ở 00:00*: Client tự phát intent khi đếm ngược về 00:00 đồng thời với Server Timeout Scheduler, gây race condition và cảnh báo lỗi trên mạng.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Quy Mô Vốn Khởi Điểm Động (`INITIAL_BALANCE_BY_PLAYERS`)**:
+     - `src/domain/room.ts` & `src/server/room_manager.ts`:
+     - 2 người chơi: Cấp vốn **25.000 Tr.** / người.
+     - 3 người chơi: Cấp vốn **20.000 Tr.** / người.
+     - 4 người chơi: Cấp vốn **18.000 Tr.** / người.
+     - Fallback an toàn `INITIAL_BALANCE = 15_000 Tr.` được giữ nguyên cho các thực thể người chơi chưa bắt đầu ván hoặc kiểm thử đơn vị độc lập. Hàm `getInitialBalanceForPlayerCount(playerCount)` là điểm truy cập duy nhất để lấy vốn theo số người chơi.
+  2. **Khóa Trần Thuế Tài Sản Vượt GO (`GO_PROPERTY_TAX_CAP`)**:
+     - `src/domain/property_rent.ts`: Khai báo `export const GO_PROPERTY_TAX_CAP = 1_000;` (50% của `GO_BONUS = 2.000 Tr.`).
+     - `src/server/turn_loop.ts` & `src/client/telemetry/telemetry_delta_hook.ts`: Áp trần `Math.min(rawTax, GO_PROPERTY_TAX_CAP)`.
+     - Đảm bảo lương thực nhận khi qua ô GO luôn dương tối thiểu **`+1.000 Tr.`** (`2.000 - 1.000 = +1.000 Tr.`).
+  3. **Chuẩn Hóa Nhịp Thở Thời Gian (Pacing Normalization)**:
+     - `src/server/network/turn_orchestrator.ts`:
+       - `WaitingRoll`: 25.000ms (25s).
+       - `ActionPhase`: 35.000ms (35s).
+       - `HosePhase`: 25.000ms (25s).
+       - `PropertyManagement`: 30.000ms (30s).
+       - `AuctionPhase`: 20.000ms (20s).
+       - `InsolvencyPhase`: 45.000ms (45s).
+     - `src/server/network/turn_watchdog.ts`: Nâng trần `maxTurnStallMs` lên **60.000ms** (60s), tương thích với `InsolvencyPhase` 45s.
+  4. **Thuật Toán Cứu Nguy AFK An Toàn Trong Insolvency (`executeInsolvencyAfkRecovery`)**:
+     - `src/server/network/afk_recovery.ts`:
+     - Khi hết giờ ở `InsolvencyPhase`, thay vì ép phá sản ngay, quy trình cứu nguy 2 bước được kích hoạt:
+       * *Bước 1 (Hạ cấp công trình)*: Tự động tìm các ô có công trình (`level > 0`), ưu tiên cấp cao hơn và tuân thủ quy tắc hạ cấp đều tay (`enforceEvenDowngrading: true`), hoàn lại 50% chi phí xây dựng vào số dư. Nếu số dư phục hồi `>= 0`, bảo toàn quyền sở hữu và không cần thế chấp.
+       * *Bước 2 (Thế chấp ô đất thô)*: Nếu sau khi hạ cấp toàn bộ công trình về C0 mà số dư vẫn `< 0`, server tự động sắp xếp các ô đất chưa thế chấp theo giá niêm yết rẻ nhất tăng dần và lần lượt thế chấp nhận 50% tiền vay đến khi `balance >= 0`.
+     - Nếu số dư đã phục hồi (`balance >= 0`), chuyển pha sang `PropertyManagement` để `TurnOrchestrator` / `TurnWatchdog` tự động gọi `handleEndTurn` kết thúc lượt an toàn.
+     - Chỉ khi toàn bộ công trình đã hạ cấp về 0 VÀ toàn bộ tài sản đã thế chấp hết mà số dư vẫn âm (`balance < 0`), server mới gửi lệnh cưỡng chế phá sản `INTENT_BANKRUPTCY`.
+  5. **TopBar & Chống Race Condition Khi 00:00**:
+     - `src/client/ui/top_bar.tsx`: Đổi nhãn nút chiếu sáng từ `[⏱️ Tự Động]` thành `[🌤️ Ánh Sáng: Tự Động]` để phân biệt rạch ròi với bot đánh hộ.
+     - `src/client/main.tsx`: Bổ sung điều kiện kiểm tra kết nối `if (!isConnected)` khi đếm ngược về 00:00. Nếu socket đang kết nối bình thường, client nhường 100% quyền xử lý hết giờ cho máy chủ, triệt tiêu xung đột gửi trùng intent.
+
+---
+
+### 83. [OPS/DOCKER/UAT] Bẫy Treo Terminal Khi Kiểm Tra Health Check Docker (start_period & cờ -m khống chế timeout)
+- **Bối cảnh & Vấn đề**:
+  - Khi thực thi lệnh kiểm tra Docker sau khi deploy: `docker compose ps ; curl -s http://127.0.0.1:3000/health`, terminal bị đứng hình/treo con trỏ vô hạn mà không in thêm bất kỳ thông báo lỗi nào.
+  - *Nguyên nhân*: Container `vtcoon-vtcoon-1` vừa khởi động được 4-5s (`Up 4 seconds (health: starting)`). Node.js cần 5-8s trong `start_period` để khởi tạo WebSocket Server và bind `httpServer.listen(3000)`. `docker-proxy` đã mở cổng ở tầng Host nhưng Node.js bên trong chưa kịp accept kết nối HTTP. Đồng thời, lệnh `curl -s` (silent) chạy trần mà KHÔNG khai báo cờ timeout (`-m` hoặc `--connect-timeout`), khiến curl kiên nhẫn chờ TCP socket theo timeout mặc định của hệ điều hành (60-120 giây) trong im lặng tuyệt đối.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Khống chế Timeout Bắt Buộc Khi Curl (`-m 5 --connect-timeout 3`)**:
+     - Mọi lệnh kiểm tra API / Healthcheck trong UAT hoặc vận hành terminal BẮT BUỘC phải kèm cờ khống chế thời gian tối đa:
+       `curl -m 5 --connect-timeout 3 http://127.0.0.1:3000/health`
+     - Tuyệt đối cấm chạy `curl` trần không timeout trên terminal Windows. Nếu server chưa sẵn sàng, curl sẽ tự thoát sau 3-5 giây kèm mã lỗi rõ ràng thay vì treo phiên làm việc.
+  2. **Đệm An Toàn Vượt Qua `start_period` Container (Tối Thiểu 6s)**:
+     - Khi chạy chuỗi lệnh kiểm tra ngay sau khi khởi động container, BẮT BUỘC chèn lệnh chờ tối thiểu 6 giây (`timeout /t 6 /nobreak >nul`) để Node.js kịp hoàn tất bootstrap và chuyển container sang trạng thái `(healthy)`:
+       `timeout /t 6 /nobreak >nul ; docker compose ps ; curl -m 5 --connect-timeout 3 http://127.0.0.1:3000/health`
+  3. **Không Dùng Cờ `-s` Đơn Độc Khi Debug Mạng**:
+     - Cờ `-s` triệt tiêu toàn bộ thông tin tiến trình và lỗi mạng. Khi kiểm tra thủ công hoặc debug, dùng cờ `-fsS` (fail fast, show errors) hoặc cờ mặc định để luôn quan sát được phản hồi hoặc mã lỗi HTTP.
+
+---
+
+### 84. [UI/TABLETOP/CDP] Bất Biến Giao Diện Cờ Bàn Thẻ Ngà & Cổng Kiểm Thử Trực Quan Qua Edge CDP (IMP-61)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy FinTech/Crypto Dark Mode*: Thiết kế modal với tông nền tối đen (`bg-slate-950`), viền neon vàng/xanh phát sáng tạo cảm giác ứng dụng giao dịch tiền điện tử hiện đại, đối chọi gay gắt với sa bàn 3D rực rỡ nắng nhiệt đới và không khí cờ bàn ấm cúng.
+  2. *Bẫy Checkbox thô kệch trong Đàm Phán*: Dùng checkbox đen xì HTML thô (`<input type="checkbox">`) trong modal đàm phán P2P biến trải nghiệm gameboard thành biểu mẫu hành chính khảo sát tẻ nhạt.
+  3. *Bẫy Chụp Nhầm Cổng Docker Container Cũ*: Khi dev server chạy tại `localhost:5173` nhưng kịch bản chụp ảnh CDP trỏ vào `127.0.0.1:3000` (được Docker container chiếm giữ với bản build cũ), ảnh chụp ra vẫn hiển thị giao diện tối cũ dù mã nguồn trong repo đã sửa xong.
+  4. *Bẫy Monolithic Assertions trong Test Hợp Đồng*: Viết > 4 lệnh `expect()` trong 1 bài test vi phạm tính nguyên tử của Test Architecture Gate.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Tabletop Theme SSOT (`TABLETOP_THEME`)**:
+     - Thẻ Sổ Đỏ và modal BẮT BUỘC dùng tone giấy ngà `#FFFDF8` hoặc kem ấm `#F7F2E7`.
+     - Viền mực in đen 2px `border-2 border-slate-900` kết hợp đổ bóng carton đồ chơi `shadow-[0_6px_0_0_#0f172a]`.
+     - Chữ thông số, phí C0-C3 in mực đen đậm `text-slate-900` (`#0F172A`), triệt tiêu 100% chữ neon phát sáng trên nền tối.
+     - Nút hành động đồ chơi (Mua đất, Đặt cược, Nâng cấp) BẮT BUỘC có đế phím dày 4px `shadow-[0_4px_0_0_...]` và phản hồi lún vật lý `active:translate-y-[3px]`.
+  2. **Thảm Nỉ Đàm Phán & Thẻ Sổ Đỏ Mini (Trade Felt Mats)**:
+     - Modal Đàm Phán BẮT BUỘC phân định 2 thảm nỉ riêng: Thảm xanh cho Người chơi, Thảm đỏ cho Bot AI đối tác.
+     - BĐS BẮT BUỘC hiển thị dạng thẻ Sổ Đỏ mini có dải màu địa phương và checkbox tùy biến, bãi bỏ vĩnh viễn thẻ `<input type="checkbox">` thô đen.
+     - Bổ sung các nút bấm tăng giảm tiền nhanh `+100` và `+500` phong cách cọc tiền giấy.
+  3. **Cổng Chụp Trực Quan CDP (`localhost:5173`)**:
+     - Mọi kịch bản CDP chụp màn hình nghiệm thu BẮT BUỘC trỏ vào cổng của Vite Dev Server (`localhost:5173`) để ghi nhận mã nguồn nóng mới nhất, không trỏ vào cổng Docker `3000` trừ khi vừa chạy `docker compose build`.
+  4. **Kiểm Thử Hợp Đồng Nguyên Tử (Atomic Test Mandate)**:
+     - Mọi bài test trong `tests/contracts/` BẮT BUỘC giới hạn 1–4 assertions/test. Dùng `toMatchObject(...)` để gom cụm kiểm tra token thay vì chuỗi `expect()` rời rạc vượt trần.
+
+---
+
+### 85. [3D/ASSET/PBR] Bất Biến Tối Ưu Hóa Ngân Sách Hình Học GLB & Bảo Vệ SSR Headless Cho Procedural Texture (IMP-62)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Vỡ Ngân Sách Kỹ Thuật (Blast Radius Regression)*: Khi tăng chi tiết hình học để đạt chuẩn sa bàn thương mại diorama, nếu nâng trần ngân sách quá mức quy định trong `optimize_assets.mjs` (chuẩn IMP-29: pawns <= 1200, buildings <= 800, landmarks <= 1500, vehicles <= 400 tris, total <= 2.5MB), các bộ kiểm thử tự động của CI/CD và toàn bộ 5 bài test client regression sẽ gãy hàng loạt.
+  2. *Bẫy Crash SSR Headless Khi Sinh Texture Procedural*: Khi sinh texture bằng `document.createElement('canvas')`, môi trường kiểm thử Node.js / JSDOM / Vitest thiếu Canvas 2D context hoàn chỉnh hoặc không có đối tượng `document`, dẫn đến việc quăng ngoại lệ `ReferenceError: document is not defined`.
+  3. *Bẫy Rò Rỉ VRAM Bộ Nhớ Đồ Họa Do Tái Cấp Phát Texture*: Khi các component React R3F (`InstancedMesh`, `GameBoard`) render lại theo state, nếu hàm sinh texture trả về đối tượng mới ở mỗi lần gọi mà không có cơ chế Singleton Cache, GPU sẽ phải nạp hàng chục texture trùng lặp gây giật lag và rò rỉ bộ nhớ.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Tối Ưu Hóa Trong Headroom Ngân Sách Hiện Hữu (Geometric Headroom Invariant)**:
+     - Toàn bộ 15 mô hình `.glb` được điêu khắc tinh xảo (350 - 1100 tris) nằm gọn hoàn toàn trong giới hạn ngân sách ban đầu:
+       * Buildings C1-C3: 400 - 560 tris (Trần: 800 tris).
+       * Luxury Pawns: 590 - 860 tris (Trần: 1200 tris).
+       * Landmarks: 750 - 850 tris (Trần: 1500 tris).
+       * Vehicles: 180 - 340 tris (Trần: 400 tris).
+       * Tổng tải trọng toàn bộ 15 mô hình: **0.63 MB** (đạt 25% trần ngân sách 2.5 MB).
+  2. **Bảo Vệ SSR Bằng DataTexture Fallback (SSR Headless Guard Invariant)**:
+     - Mọi generator texture procedural (`facade_texture_generator.ts`, `tabletop_texture_generator.ts`) BẮT BUỘC có chốt chặn an toàn `if (typeof document === 'undefined') return createDataFallbackTexture(...)`.
+     - DataTexture fallback khởi tạo bằng `new THREE.DataTexture(new Uint8Array(16 * 16 * 4), 16, 16, THREE.RGBAFormat)` với `wrapS = THREE.RepeatWrapping`, `wrapT = THREE.RepeatWrapping` và `repeat.set(...)` tương thích 100% với giao diện Texture chuẩn.
+  3. **Bộ Nhớ Đệm Đơn Kỷ Lục (Singleton Texture Cache Invariant)**:
+     - Duy trì cache module-level cho toàn bộ các texture (Highrise, Shophouse, Walnut Diffuse, Walnut Roughness). Mọi lời gọi liên tiếp đều trả về đúng tham chiếu ban đầu (`t1 === t2`), triệt tiêu 100% rác bộ nhớ GPU và draw calls dư thừa.
+     - Cung cấp hàm giải phóng chuẩn `clearTextureCaches()` / `clearFacadeTextureCache()` / `clearTabletopTextureCache()` gọi `.dispose()` an toàn khi kết thúc vòng đời ứng dụng.
+
+---
+
+### 86. [3D/TEXTURE] Bất Biến Vị Trí Công Trình C1-C3 Ngoài Card & Hoàn Nguyên Mặt Thẻ Nguyên Bản (IMP-63)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Công trình 3D đè lên khay giá/quân cờ hoặc che tên card khi đặt bên trong card*: Khi công trình đặt ở `Z = 0.58` (đáy ô) hoặc `Z = -0.58` (đỉnh ô nhưng vẫn trên card), công trình 3D hoặc khối móng sẽ che khuất các phần của thẻ bài và cản trở góc nhìn camera nghiêng 38°.
+  2. *Giải pháp triệt để: Dời công trình C0-C3 hoàn toàn ra ngoài đỉnh card*: Bằng cách đặt công trình tại `position={[0, 0.22, -1.58]}` (nằm ngoài mép trên `Z = -1.08` của card), toàn bộ bề mặt card được giải phóng 100% và hoàn nguyên về trạng thái nguyên bản.
+  3. *Đồng bộ tâm chấn hiệu ứng ConstructionSlamVFX*: Hàm `getBuildingWorldPosition` bắt buộc đổi `offset = 1.58;` để sóng xung kích, chấn động rơi và chùm pháo hoa nổ ăn khớp chính xác với chân đế công trình nằm ngoài card.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Tọa Độ Chân Đế Hoàn Toàn Ngoài Card (`Top Outside Building Plot Invariant`)**:
+     - `src/client/3d/procedural_building.tsx`: Cả cấp 0 (`SurveyorPlotBoundary`) và cấp 1-3 (`SafeGLTFModel`) BẮT BUỘC đặt tại `position={[0, 0.22, -1.58]}` (`Z <= -1.40`), giải phóng hoàn toàn toàn bộ bề mặt ô cờ cho quân cờ di chuyển và hiển thị đầy đủ thông tin.
+     - `src/client/3d/construction_slam_vfx.tsx`: `getBuildingWorldPosition(cellIndex)` sử dụng `const offset = 1.58;` để sóng xung kích và pháo hoa ăn khớp 100% với chân đế nhà tại mọi cạnh bàn cờ.
+  2. **Hoàn Nguyên Mặt Thẻ Nguyên Bản Đầy Đủ Chi Tiết (`Restored Pristine Card Texture Invariant`)**:
+     - `src/client/3d/tile_texture_generator.ts` (`createStandardTileTexture`):
+       * *Dải màu nhận diện vùng*: `ctx.fillRect(0, 0, 256, 56);`
+       * *Tên tỉnh/thành*: `strokeText(meta.title, 128, 28); fillText(meta.title, 128, 28);` (font `'900 28px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'`)
+       * *Phụ đề*: `fillText(meta.subtitle, 128, 74);` (font `'900 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'`)
+       * *Tranh di sản / Icon*: `ctx.rect(10, 94, 236, 172);`, ảnh `dx = 20, dy = 97, targetW = 216, targetH = 166`, fallback `drawIcon(ctx, meta.icon, 128, 180, meta.bannerColor, 1.5);`
+       * *Khay giá niêm yết*: Capsule `ctx.roundRect(22, 274, 212, 50, 12);` với `fillText(priceText, 128, 300);` (font `'900 26px ...'`)
+       * *Viền ngoài*: `ctx.strokeRect(2, 2, 252, 336);`
+
+---
+
+### 87. [UI/PERF/TABLETOP] Bất Biến Triệt Tiêu Backdrop Blur & Tinh Giản HUD Khay Cờ Bàn (IMP-63)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy GPU Fill-Rate Drain do CSS Backdrop Filter*: Sử dụng `backdrop-blur-md` hoặc `backdrop-blur-2xl` trên các lớp DOM UI nằm đè trực tiếp lên WebGL 3D Canvas (60 FPS) buộc GPU phải copy Framebuffer của WebGL sang texture phụ và chạy bộ lọc Gaussian Blur đa tầng mỗi khung hình, làm sụt giảm FPS nghiêm trọng trên GPU tích hợp và thiết bị di động.
+  2. *Bẫy Tô Vẽ Rườm Rà (Decorative Slop)*: Sa đà vào việc tự vẽ thêm các hiệu ứng và họa tiết giả lập thừa thãi (vé tàu du thuyền, ghế mây đan, tem đục lỗ) làm tăng độ phức tạp DOM, phình to bundle CSS và làm phân tán sự tập trung của người chơi vào ván cờ.
+  3. *Bẫy Lệch Tông Dark Mode & Light Tabletop*: Khi các modal đã chuyển sang phong cách Giấy Ngà (`IMP-61`), nhưng HUD (`TopBar`, `ActionDock`, `PlayerCard`) vẫn dùng nền đen tối kính mờ kiểu Crypto/Sci-Fi (`bg-slate-900/950`), gây ra sự đứt gãy thẩm mỹ toàn diện.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Triệt Tiêu 100% `backdrop-blur` Trên HUD & Sảnh Chờ (Zero Blur Invariant)**:
+     - Toàn bộ các thành phần in-game HUD (`TopBar`, `ActionDock`, `PlayerCard`, `SocialEmotesTray`, `FloatingBadge`, `ModalBackdrop`) và Sảnh chờ (`PreMatchDeck`, `PlayerSlotCard`, `QrCodeCard`) CẤM TUYỆT ĐỐI sử dụng bất kỳ class `backdrop-blur` nào.
+     - `ModalBackdrop` sử dụng lớp phủ phẳng trong suốt nhẹ `bg-slate-900/15`, vừa định hình rõ nét modal trung tâm vừa giữ cho thế giới sa bàn 3D ngoài trời luôn ngập tràn ánh nắng và giải phóng 100% chi phí xử lý bộ nhớ đồ họa.
+  2. **Bảng Màu Giấy Ngà Đặc & Chữ Mực Đen (Tabletop Solid Ivory SSOT)**:
+     - Mọi container HUD chuyển sang nền giấy ngà đặc `#FFFDF8` hoặc kem ấm `#F7F2E7`, viền mực đen 2px `border-slate-900`, bóng dập phẳng đồ chơi `shadow-[0_4px_0_0_#0f172a]`.
+     - Toàn bộ chữ số tài chính sử dụng mực in đen đậm `#0F172A` với font `tabular-nums font-mono` chuẩn công thái học điều khiển (touch target >= 44px).
+  3. **Bảo Toàn 100% Hợp Đồng Tương Thích & A11y (Zero Regression Invariant)**:
+     - Giữ nguyên vẹn 100% `data-testid`, các vai trò trợ năng (`role="timer"`, `role="toolbar"`, `role="region"`, `role="status"`), nhãn `aria-label`, và thuộc tính `data-legacy-style`.
+
+---
+
+### 88. [3D/LAYOUT/TYPOLOGY] Bất Biến Tỷ Lệ Sa Bàn Scale 0.65x, Chân Đế 0.55m, Triệt Tiêu Va Chạm Góc Vuông (Corner Splay) & Đa Dạng Hóa Kiến Trúc 4 Vùng Miền (IMP-65)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Va chạm hình học góc vuông (Corner Collision & Clipping Trap)*: Khi đưa công trình C1-C3 ra mép ngoài ô cờ (`Z = -1.35m`), các cặp ô đất tiếp giáp góc 90° quanh 4 góc bàn cờ (ví dụ Ô 1 & Ô 39 quanh GO, Ô 9 & Ô 11 quanh Audit) có khoảng cách tâm hình học chỉ ~0.55m. Nếu giữ nguyên hướng đặt vuông góc phẳng chuẩn `[0, 0, 0]`, hai công trình sẽ va quệt, lồng ghép vào nhau (mesh clipping), làm mất tính chân thực của sa bàn diorama.
+  2. *Lệch tâm chấn Slam VFX khi hardcode offset*: Hàm tính tọa độ nổ hiệu ứng `getBuildingWorldPosition` trong các phiên bản trước hardcode `offset = 1.58m` hoặc `1.35m` cố định dọc theo trục chính, khiến các ô đất có dịch chuyển ngang hoặc xoay bị lệch tâm chấn nổ và chấn động rơi khỏi chân đế công trình.
+  3. *Nguy cơ vỡ ngân sách GLB khi nhân 4 lần số lượng mô hình*: Tăng từ 3 mô hình fallback lên 12 mô hình kiến trúc vùng miền chuyên biệt (`bld_{riverine,resort,heritage,metropolis}_c{1..3}.glb`) nếu không kiểm soát số đa giác và dung lượng có thể khiến tổng tài nguyên đồ họa vượt trần 2.5 MB.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Corner Splay Geometry & Zero-Collision Invariant (Khoảng cách >= 0.60m)**:
+     - `src/client/3d/procedural_building.tsx`: Khai báo `getBuildingLotTransform(cellIndex)` với cấu trúc chuẩn `STANDARD_LOT_TRANSFORM: position: [0, 0.16, -1.35], scale: [0.65, 0.65, 0.65]`.
+     - 8 ô đất góc tiếp giáp (`1, 9, 11, 19, 21, 29, 31, 39`) áp dụng `CORNER_SPLAY_TRANSFORMS`:
+       * Dịch ngang: `lx = ±0.18m` (hướng ra xa góc bàn cờ).
+       * Góc xoay: `rotationY = ±0.22 rad` (~12.6° hướng mặt tiền ra góc nhìn rộng).
+     - Khoảng cách Euclid giữa chân đế hai ô góc (như Cell 1 & Cell 39) đạt **0.891m**, vượt xa ngưỡng tối thiểu 0.60m và tạo vùng đệm an toàn `0.34m` so với khổ đế `0.55m`.
+  2. **Dynamic World Position Alignment Invariant**:
+     - `src/client/3d/construction_slam_vfx.tsx`: `getBuildingWorldPosition(cellIndex)` tính toán động dựa trên `cellPosition(cellIndex)` kết hợp ma trận xoay 4 cạnh và tọa độ cục bộ `getBuildingLotTransform(cellIndex).position`, triệt tiêu hoàn toàn độ lệch tâm chấn nổ.
+  3. **Đa Dạng Hóa Kiến Trúc 4 Vùng Miền & Ngân Sách Diorama**:
+     - `src/client/3d/building_typology.ts`: Phân bổ 22 ô đất BĐS vào 4 vùng kiến trúc đặc trưng:
+       * `riverine` (Sông Nước Nam Bộ - Nhà sàn gỗ, mái lá dừa nước, cọc cừ tràm): Ô 1, 3, 27.
+       * `resort` (Nghỉ Dưỡng Biển & Núi - Villa mái dốc nhiệt đới, bể bơi vô cực, kính tràn viền): Ô 9, 11, 13, 14, 16, 21, 29.
+       * `heritage` (Phố Cổ & Di Sản - Mái ngói âm dương, cửa lá sách xanh ngọc, lồng đèn đỏ): Ô 18, 23, 24, 31, 34.
+       * `metropolis` (Siêu Đô Thị Tài Chính - Shophouse hiện đại, tháp kính sapphire vát góc, đỉnh kim cương): Ô 6, 8, 19, 26, 32, 37, 39.
+     - Toàn bộ 12 mô hình vùng miền + 3 fallback C1-C3 chuẩn hóa chân đế `BUILDING_BASE_PLINTH_WIDTH = 0.55m`.
+     - Tổng ngân sách 27 mô hình: **1.11 MB / 2.5 MB** (đạt 44% dung lượng trần), toàn bộ 15 mô hình nhà đều nằm trong khoảng 300–604 tris và < 55 KB.
+
+---
+
+### 89. [3D/SCALE] Tái Cân Bằng Tỷ Lệ Trực Quan Bàn Cờ, Triệt Tiêu Xung Đột Con Cờ & Khoảng Hở An Toàn Góc Vuông 0.397m (IMP-66)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Kích Thước Con Cờ Quá Khổ (Oversized Pawn Occlusion)*: Với `scale = [1.25, 1.25, 1.25]`, chân đế linh vật đạt đường kính ~1.05m (chiếm 60% bề ngang ô cờ 1.64m), gây va chạm lồng ghép giữa các người chơi cùng đứng 1 ô và che khuất thông tin thẻ cờ.
+  2. *Bẫy Công Trình C1-C3 Thu Nhỏ Quá Mức (Undersized Building Scale)*: Ở đợt cập nhật trước, hệ số `0.65x` khiến khổ đế thực tế thu hẹp còn ~0.358m x 0.358m, quá nhỏ so với tỷ lệ sa bàn diorama thương mại.
+  3. *Bẫy Va Chạm Góc Khi Phóng To Công Trình*: Khi tăng tỷ lệ công trình lên +50% (`0.975x`), nếu giữ nguyên thông số trượt bên cũ (`0.18m`), hai công trình tại góc 90° sẽ bị giảm khoảng hở an toàn và có nguy cơ va chạm hình học.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **50% Pawn Scale Reduction (`scale = [0.625, 0.625, 0.625]`)**:
+     - `src/client/3d/luxury_pawn_models.tsx` & `src/client/3d/pawn_animator.tsx`: Cả linh vật cờ thượng lưu và pawn fallback bọc chuẩn `scale={[0.625, 0.625, 0.625]}` (đường kính đế thu về ~0.52m, đế tiếp xúc ~0.31m), cho phép 4 linh vật đứng cùng ô với các điểm offset `[-0.2, 0.2]` mà không va chạm.
+     - `src/client/3d/sunny_island_lobby_scene.tsx`: Hạ bảng tên 3D Billboard từ `[0, 1.05, 0]` xuống `[0, 0.85, 0]` áp sát đỉnh đầu con cờ cân đối thị giác.
+  2. **50% Building Scale Increase (`scale = [0.975, 0.975, 0.975]`) & Safe Outer Position Z = -1.38m**:
+     - `src/client/3d/procedural_building.tsx`: `STANDARD_LOT_TRANSFORM` đặt `position: [0, 0.16, -1.38]`, `scale: [0.975, 0.975, 0.975]`.
+     - Mép trong chân đế công trình tại `-1.38 + (0.55 * 0.975) / 2 = -1.112m`, đảm bảo nằm hoàn toàn 100% ngoài mép trên thẻ cờ `Z = -1.08m` (khoảng lùi an toàn 3.2cm trên thềm promenade).
+  3. **Smart Corner Splay Rebalance (Khoảng cách D >= 0.85m, Corridor >= 0.35m)**:
+     - 8 ô giáp góc (`1, 9, 11, 19, 21, 29, 31, 39`) áp dụng độ trượt ngang `lx = ±0.24m` và góc xoay `rotationY = ±0.25 rad` (~14.3°).
+     - Khoảng cách Euclid giữa chân đế 2 ô góc đạt D >= 0.85m, khoảng hở an toàn thực tế đạt Clearance = 0.397m >= 0.35m, triệt tiêu 100% va quệt hình học tại 4 góc vuông.
+
+---
+
+### 90. [3D/RENDER/LAYOUT] Bất Biến Góc Vuông Thẳng Trực Giao 90° (Zero Rotation Tilt) & Tái Cấu Trúc Hoạt Cảnh Sa Bàn Chuẩn Cảnh Quan Đời Thực (IMP-67)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Xoay Nghiêng Góc Thừa Thãi (Unnecessary Corner Rotation Tilt)*: Trong IMP-65 và IMP-66, 8 ô giáp góc (1, 9, 11, 19, 21, 29, 31, 39) được gán góc xoay splay ~14.3° (`rotationY = ±0.25 rad`) với giả định là cần nghiêng để tránh va chạm. Tuy nhiên, góc xoay này làm các tòa nhà bị xiên xẹo, mất đi vẻ đẹp quy hoạch đường phố trực giao vuông vắn tự nhiên của đô thị hiện đại.
+  2. *Toán Học Định Vị Trực Giao Vừa Vặn Không Nghiêng*: Khi kiểm tra toán học với khổ đế 0.536m x 0.536m (scale 0.975x), vị trí Z = -1.38m và độ trượt ngang lx = ±0.24m, việc đặt góc xoay thẳng góc **`rotation = [0, 0, 0]`** vẫn giữ cho:
+     - Biên X của Cell 1: [6.692, 7.228]
+     - Biên X của Cell 39: [7.352, 7.888]
+     - Khoảng cách mép trực giao: 7.352 - 7.228 = 0.124m = 12.4cm > 10cm khoảng trống an toàn.
+     - Khoảng cách Euclid giữa 2 tâm: 0.933m > 0.85m, hành lang chéo: 0.397m > 0.35m.
+     - Hai tòa nhà hoàn toàn vừa vặn, đứng thẳng tắp song song với mặt đường mà 0% va chạm hình học (zero mesh clipping).
+  3. *Bẫy Hoạt Cảnh Khu Trò Chơi (Carnival / Playground Slop Trap)*: Chi tiết vòng đu quay hội chợ (Ferris Wheel) với các cabin nhiều màu sắc sặc sỡ, sân vận động đồ chơi với cột đèn pha, và tia laser vũ trường quét trên tháp Bitexco đã biến trung tâm sa bàn thành một khu vui chơi tẻ nhạt, làm mất dáng dấp của cảnh quan sông nước đô thị ngoài đời thật.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Bất Biến Thẳng Góc Trực Giao 90° (`rotation: [0, 0, 0]`)**:
+     - Toàn bộ 8 ô tiếp giáp góc (`1, 9, 11, 19, 21, 29, 31, 39`) trong `src/client/3d/procedural_building.tsx` (`CORNER_SPLAY_TRANSFORMS`) BẮT BUỘC đặt `rotation: [0, 0, 0]`.
+     - Tuyệt đối không xoay nghiêng công trình ở các góc 90°. Duy trì độ trượt ngang lx = ±0.24m để giữ khoảng đệm trực giao >= 10cm và không che lấp tầm nhìn.
+  2. **Cảnh Quan Sông Nước & Đô Thị Đương Đại Đời Thực (`DioramaWaterfrontPark` & `DioramaCivicCenter`)**:
+     - Triệt tiêu 100% các yếu tố hội chợ/vui chơi trẻ em (`diorama_ferris_wheel.tsx`, `diorama_stadium.tsx`, tia laser Bitexco).
+     - Triển khai `DioramaWaterfrontPark` (Công viên cảnh quan ven sông Bến Bạch Đằng): Lối đi dạo lát đá granite xám `#CBD5E1`/`#94A3B8`, thảm cỏ xanh mướt `#166534`/`#15803D`, ghế đá công viên, cây xanh nhiệt đới và bến tàu thủy Saigon Waterbus `#0284C7`/`#F8FAFC`.
+     - Triển khai `DioramaCivicCenter` (Trung tâm Văn hóa - Triển lãm đương đại): Khối đế giật cấp đá travertine `#334155`/`#E2E8F0`, đại sảnh kính Low-E sapphire `#0284C7`, vườn thượng uyển trên mái và hồ nước phản chiếu (reflecting pool).
+
+---
+
+### 91. [3D/LAYOUT/URBAN] Bất Biến Khoảng Đệm Di Sản Nhà Thờ Đức Bà (Breathing Room >= 1.0m) & Triệt Tiêu Khối Xanh Đậm Cao Ốc Tài Chính (IMP-68)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Bủa Vây Di Sản (Cathedral Spatial Congestion Trap)*: Cụm 24 nhà phố Chợ Lớn (`CHO_LON_SHOPHOUSES`) và biệt thự vườn trước đây xếp thành lưới bao vây sát sạt Nhà Thờ Đức Bà (`[-4.3, 3.65]`), khiến không gian di sản bị nghẹt thở, mất đi tính trang nghiêm và tương phản hoàn toàn với cảnh quan thực tế của Quảng trường Công xã Paris.
+  2. *Bẫy Khối Xanh Đậm Đơn Điệu (Monolithic Blue Wash Anti-Pattern)*: 16 tháp cao ốc tài chính Tây Bắc bị phủ một lớp vật liệu `color="#0284C7"` solid wash kết hợp hoa văn gradient xanh dương đậm, biến cả cụm cao ốc thành các khối chữ nhật xanh lè đặc quánh như pin ắc quy hoặc domino đồ chơi, làm hỏng cảm nhận chân thực của sa bàn đô thị.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Bán Kính Giải Phóng Di Sản >= 1.0m & Quần Thể Công Xã Paris (`Cathedral Breathing Clearance Invariant`)**:
+     - Toàn bộ 24 căn shophouse Chợ Lớn dời ra 2 phân khu di sản chuyên biệt: Phố Nam (16 căn tại `Z = 4.85` & `5.55`) và Phố Tây (8 căn tại `X = -5.5`). Khoảng cách Euclid tới tâm Nhà Thờ Đức Bà luôn đạt `D >= 1.20m > 1.0m`.
+     - Xóa bỏ hoàn toàn căn biệt thự vườn cũ tại `[-4.5, 0.025, 4.2]`.
+     - Bổ sung Quảng trường Công xã Paris (`cong-xa-paris-plaza`) với vườn hoa tròn, thảm cỏ xanh `#166534`/`#15803D`, bệ đá cẩm thạch Tượng Đức Mẹ Hòa Bình `#CBD5E1`/`#F8FAFC`.
+     - Bổ sung Bưu điện Trung tâm Sài Gòn (`saigon-central-post-office`) tại `[0.72, 0, 0.75]` với tường vàng Pháp cổ kính `#FDE047`/`#FEF3C7`, mái ngói đất nung `#B45309`, cửa chớp xanh ngọc Indochine `#065F46`.
+  2. **Vật Liệu Kiến Trúc Đương Đại Trung Tính (Zero Blue Wash SSOT)**:
+     - Triệt tiêu 100% `color="#0284C7"` trên thân 16 tháp cao ốc, thay bằng vật liệu trung tính `color="#FFFFFF"`, roughness 0.2, metalness 0.3.
+     - Nền texture chuyển sang đá travertine / khung nhôm pearl gray `#F8FAFC`, `#E2E8F0`, `#CBD5E1` và kính Low-E phản quang bầu trời thiên thanh `#93C5FD`, `#BAE6FD`, `#E0F2FE` kèm nan mullions mảnh `#475569`.
+     - Bổ sung tầng giật cấp vườn chân mây `#15803D` và đỉnh chóp kim loại mạ champagne `#F59E0B` tạo nhịp điệu skyline sang trọng.
+
+---
+
+### 92. [3D/LAYOUT/URBAN] Bất Biến Độc Lập Di Sản Nhà Thờ Đức Bà & Quy Hoạch 10 Tòa Tháp Bao Quanh Tháp Bitexco Landmark (IMP-69)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Tiền Cảnh Che Chắn Di Sản (Heritage Frontal Occlusion Trap)*: Đặt Bưu điện Trung tâm Sài Gòn tại `[0.72, 0, 0.75]` ngay trước mặt tiền Nhà Thờ Đức Bà làm che chắn tầm nhìn, gây xung đột không gian và mất đi tính trang nghiêm, khoáng đạt của cụm di sản Công xã Paris.
+  2. *Bẫy Ma Trận Cao Ốc Dày Đặc (Dense Monolithic Block Trap)*: Cụm 16 tòa cao ốc xếp lưới hộp vuông phẳng chật chội, thiếu chiều sâu thị giác và làm lu mờ Tháp Tài chính Bitexco – biểu tượng skyline hiện đại của thành phố.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Tôn Vinh Độc Lập Nhà Thờ Đức Bà & Quảng Trường Công Xã Paris (`Cathedral Standout Invariant`)**:
+     - Gỡ bỏ hoàn toàn component `SaigonCentralPostOfficeFallback` và thẻ DOM `data-testid="saigon-central-post-office"`.
+     - Nhà Thờ Đức Bà đứng uy nghiêm, độc lập giữa thềm đá di sản lát gạch bông Đông Dương và Quảng trường Công xã Paris (`cong-xa-paris-plaza`) với Tượng Đức Mẹ Hòa Bình bằng cẩm thạch trắng.
+  2. **Tháp Bitexco Financial Landmark Trung Tâm (`Bitexco Hero Centerpiece Invariant`)**:
+     - Tọa độ root group: `position={[-4.5, 0.16, -4.4]}` (inner group `[0, 0, 0]`).
+     - Tôn vóc dáng bề thế vươn cao: Thân tháp kính sapphire `radiusTop: 0.30, radiusBottom: 0.48, height: 2.2`, đài quan sát Saigon Skydeck `Y = 1.48`, sân đỗ trực thăng Helipad `(x: 0.38, y: 1.68, z: 0, r: 0.22)`, đỉnh tháp búp sen & kim thu lôi `Y = 2.45..2.85`, đèn chớp cảnh báo hàng không đỏ `Y = 2.95`.
+  3. **Quy Hoạch Cụm 10 Tòa Tháp Giật Cấp Hình Chữ U Bao Quanh Bitexco (`Framed Skyline Invariant`)**:
+     - Giảm số lượng từ 16 tháp xuống đúng 10 tháp (`HIGHRISE_CONFIGS.length === 10`).
+     - Bố cục hình chữ U mở về hướng sông Sài Gòn: Hàng 1 Bắc (2.3m - 2.6m) làm phông nền -> Cánh Tây & Cánh Đông (1.6m - 2.0m) -> Hàng Nam tiền cảnh (1.3m - 1.5m).
+     - Khoảng cách từ Bitexco đến toàn bộ 10 tòa xung quanh đạt `D >= 1.0m > 0.85m`, tạo quảng trường tài chính nội khu thông thoáng, mở rộng tầm nhìn cho camera từ mọi góc quan sát sa bàn.
+
+---
+
+### 93. [3D/URBAN/TEXTURE] Bất Biến Quy Hoạch Đô Thị Đời Thực TP.HCM, Triệt Tiêu Chiếu Sáng Kính Vàng, Đại Tu Tranh Nền Ô Cờ & Hành Lang Đông Thoáng Đãng (IMP-70)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Bến Thành Xâm Lấn Mặt Tiền Nhà Thờ Đức Bà*: Đặt mô hình Chợ Bến Thành ngay trước Nhà Thờ Đức Bà (`position={[0.2, 0, -0.7]}`) gây phi lý về địa lý TP.HCM đời thực (ngoài đời Chợ Bến Thành cách Nhà Thờ Đức Bà ~1.2km) và che khuất mặt tiền chính diện của Thánh đường cổ kính.
+  2. *Bẫy Chiếu Sáng Kính Vàng & Nón Đèn Phát Quang (Yellow Glow Cone Slop)*: Dùng nón ánh sáng vàng `coneGeometry` (`#FEF08A`) và cầu phát sáng vàng trên đỉnh Bitexco cùng mái tôn vàng `#F59E0B` trên cầu đường sắt khiến cảnh quan đô thị bị giả tạo, biến thành đồ họa hoạt hình rẻ tiền.
+  3. *Bẫy Chặn Hành Lang Đông Hướng Sông Sài Gòn*: Các tòa tháp tài chính (tower-6, tower-7) nằm trong dải `X >= -3.8` và `Z >= -4.8 && Z <= -3.6` chắn mất luồng gió và tầm nhìn thông thoáng từ trung tâm tài chính ra sông Sài Gòn.
+  4. *Bẫy Mờ Nhạt Tranh Nền Ô Cờ & Mock Canvas Context*: 4 ô góc (GO, Audit, Resort, Tax Order) và các ô thẻ bài sự kiện thiếu tranh minh họa bản địa đặc sắc. Đồng thời, khi vẽ hoa văn Đông Sơn với `ctx.arc`, các bộ mock canvas 2D trong kiểm thử nếu thiếu phương thức `arc` sẽ gây sập toàn bộ test suite.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Quy Hoạch Mặt Tiền Nhà Thờ Đức Bà Đời Thực (`Cathedral Plaza SSOT`)**:
+     - Gỡ bỏ hoàn toàn Chợ Bến Thành (`BenThanhProceduralFallback` và `SafeGLTFModel` benThanh) khỏi cụm Nhà Thờ Đức Bà.
+     - Giữ nguyên vẹn Nhà Thờ Đức Bà và mở rộng Quảng trường Công xã Paris (`cong-xa-paris-plaza`) với thảm cỏ hoa viên tròn và Tượng Đức Mẹ Hòa Bình bằng cẩm thạch trắng.
+  2. **Triệt Tiêu Hoàn Toàn Vệt Sáng Vàng & Đèn Nón Nhân Tạo**:
+     - Gỡ bỏ nón ánh sáng vàng `coneGeometry args={[0.3, 1.4, 8, 1, true]}` và cầu phát quang đỉnh tháp Bitexco (`spireGlowRef`). Giữ lại đèn pha lê tinh tế và đèn cảnh báo hàng không đỏ `#EF4444`.
+     - Thay thế mái kim loại vàng `#F59E0B` trên cầu đường sắt bằng giàn thép nhám xám tự nhiên `#334155`/`#475569` và bổ sung tà vẹt gỗ óc chó đậm `#78350F`.
+  3. **Hành Lang Đông Mở Rộng Hướng Sông Sài Gòn (`East River Corridor Clearance Invariant`)**:
+     - Điều chỉnh vị trí các tòa tháp phía Đông (tower-6 dời về Z = -5.2, tower-7 dời về Z = -3.0) để toàn bộ vùng không gian `X >= -3.8 && Z >= -4.8 && Z <= -3.6` hoàn toàn không có tòa nhà nào án ngữ, mở toang tầm nhìn ra sông Sài Gòn.
+  4. **Đại Tu Tranh Nền 4 Ô Góc & Thẻ Bài Đặc Biệt (`Corner & Special Tile Canvas Art`)**:
+     - Ô 0 (Khởi Hành): Nền giấy ngà hoàng gia `#FAF6ED`, họa tiết Trống Đồng Đông Sơn, khung viền mạ vàng kép, dải ruy băng và khay thưởng ngọc lục bảo.
+     - Ô 10 (Kiểm Toán): Sảnh kiểm toán đá hoa cương trang nghiêm `#141E33`, hàng cột Ionic, khiên bảo an và cán cân công lý, phân định rõ khu Vào Thăm và Tạm Giam.
+     - Ô 20 (Nghỉ Dưỡng): Vịnh biển ngọc Phú Quốc `#0D9488`, bãi cát san hô trắng, hàng dừa nghiêng bóng và bungalow sàn gỗ.
+     - Ô 30 (Lệnh Thu Thuế): Chiếu thư thanh tra hoàng gia nền cẩm thạch đen `#1E1B4B`, viền son chu sa `#E11D48`, con dấu triện đỏ, cuộn sắc lệnh và trát điều tra thuế.
+     - Thẻ sự kiện Cơ Hội, Thị Trường, Lệ Phí Đất, Sàn HOSE bổ sung huy hiệu minh họa và viền thẻ nhận diện xúc giác.
+  5. **Mã Nguồn Tách Module Dưới 500 LOC & Mock Canvas Resilience**:
+     - Tách toàn bộ hàm vẽ 4 góc vào `src/client/3d/corner_tile_art.ts` để khống chế `tile_texture_generator.ts` ở ~280 LOC (ngưỡng an toàn < 500 LOC).
+     - Sử dụng toán tử tùy chọn `ctx.arc?.(...)` phòng thủ khi chạy trên môi trường test headless có Canvas Context mock bán phần.
+
+---
+
+### 94. [3D/LIGHTING/SKYLINE] Bất Biến Chống Lóa Ban Ngày, Khối Đế Bitexco Plaza, 4 Trường Phái Cao Ốc & Giảm 50% Lưu Lượng Xe (IMP-71)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Chói Lóa Quang Học Ban Ngày (Daytime Specular Bleach)*: `sunIntensity = 0.92` kết hợp `roughness = 0.96` và viền chữ mỏng (2.5px) gây lóa mạnh trên bề mặt ngà, làm mờ tên các ô cờ khi nhìn từ camera tổng quan sa bàn.
+  2. *Cao Ốc Xếp Hộp Đồng Dạng (Monolithic Domino Box Slop)*: 10 tòa cao ốc xung quanh Bitexco dùng chung một hình học `boxGeometry` trơn tuột, thiếu vóc dáng quy hoạch của kiến trúc sư đô thị. Chân tháp Bitexco cắm thẳng xuống đất mà không có khối đế thương mại (Podium) và quảng trường đón tiếp (Plaza).
+  3. *Ùn Tắc Sa Bàn Vi Giao Thông (Micro-Traffic Visual Clutter)*: Đội xe 7 chiếc trên hai làn đường và các xe tĩnh đậu dọc vỉa hè chiếm dụng không gian thị giác, gây bão hòa chuyển động trên bàn cờ.
+  4. *Tranh Nền Ô Đặc Biệt & 4 Góc*: Các ô sự kiện và 4 góc cờ cần tranh minh họa WebP độc bản kết hợp với lớp phủ canvas thủ công có chiều sâu, thay cho các khối màu phẳng đơn điệu.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Triệt Tiêu Hoàn Toàn Lóa Mắt (`Anti-Glare Daylight Invariant`)**:
+     - `TIME_OF_DAY_PRESETS.day`: `sunIntensity: 0.78` (<= 0.80), `ambientColor: '#F0F9FF'`, `ambientIntensity: 0.18`, `hemiIntensity: 0.12`.
+     - `board_tile.tsx`: Bề mặt ô cờ đạt `roughness: 0.98` và `metalness: 0.0`.
+     - `tile_texture_generator.ts`: Stroke text viền than đen `#050814` với `lineWidth: 3.5`, đảm bảo độ tương phản WCAG AAA.
+  2. **Quy Hoạch Khối Đế Bitexco Podium & Quảng Trường Bitexco Plaza (`Bitexco Civic Base Invariant`)**:
+     - `diorama_skyline.tsx`: Bổ sung `data-testid="bitexco-podium"` (khối đế thương mại vát cong 5 tầng, mái đón canopy) và `data-testid="bitexco-plaza"` (quảng trường đá granite xám `#CBD5E1`, bồn cây hoa viên đối xứng, đài phun nước mini).
+  3. **4 Trường Phái Cao Ốc Quy Hoạch Framing Bitexco (`4 Highrise Typologies Invariant`)**:
+     - `diorama_highrise_blocks.tsx`: Phân bổ 10 tháp vào 4 trường phái kiến trúc:
+       * `highrise-prismatic`: Tháp lăng kính vát góc Vietcombank (tower-1, 5, 10).
+       * `highrise-stepped`: Tháp đôi giật cấp vườn treo Keppel / Saigon Centre (tower-3, 7, 8).
+       * `highrise-curved`: Tháp mặt kính uốn cong Marina (tower-4, 6).
+       * `highrise-crowned`: Tháp chóp vương miện Art Deco Times Square (tower-2, 9).
+     - Vật liệu trung tính `#FFFFFF`, vườn chân mây `#15803D`, kim loại champagne `#F59E0B`, triệt tiêu 100% màu xanh dương `#0284C7` trên cao ốc tài chính.
+  4. **Giảm 50% Lưu Lượng Xe Sa Bàn (`Micro-Traffic Fleet Decoupling`)**:
+     - `MICRO_VEHICLES`: Cắt giảm xuống đúng 3 xe (tối đa 4 xe): Làn ngoài gồm `bus-yellow` (offset 0.10) và `sedan-blue` (offset 0.65, khoảng cách 0.55 >= 0.20); Làn trong gồm `taxi-green` (offset 0.40).
+     - `diorama_microlife.tsx`: Gỡ bỏ 2 xe hơi cá nhân tĩnh ven vỉa hè (`#DC2626` và `#16A34A`), chỉ giữ lại xe buýt vàng tại trạm dừng và ca-nô trên sông.
+  5. **Đại Tu Tranh Nền Nghệ Thuật Cho Toàn Bộ 4 Góc & Ô Đặc Biệt**:
+     - `tile_assets.ts`: `READY_TILES` kích hoạt đầy đủ 12 ô đặc biệt `0, 2, 4, 7, 10, 17, 20, 22, 30, 33, 36, 38`.
+     - `tile_texture_generator.ts` & `corner_tile_art.ts`: `hasTileArt` trả về `true` cho toàn bộ 12 ô này, nạp ảnh WebP `tile_XX.webp` đồng thời duy trì fallback canvas 2.5D có chiều sâu.
+
+---
+
+### 95. [3D/RENDER/UI] Bất Biến Máy Quay Framing Offset Desktop Chống Che Khuất Bàn Cờ, Đại Tu Panel Sảnh Chờ Chuẩn Clean & Modern & Modal Hướng Dẫn Chơi Toàn Diện (IMP-72)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Che Khuất Bàn Cờ Trên Desktop (Desktop Board Occlusion Trap)*: Bàn cờ khi hiển thị trên màn hình Desktop (tỷ lệ 16:9) với camera pre_match cũ căn giữa tâm (0,0,0) khiến góc Đông Nam (các ô 18–22) bị Panel Sảnh Chờ (`PreMatchDeck`) cánh phải che khuất một phần, làm giảm tính trực quan của sa bàn 3D.
+  2. *Bẫy Quá Tải Thông Tin & Màu Sắc Cũ Kỹ (Lobby Clutter & Visual Heaviness Trap)*: Panel sảnh chờ cũ nhồi nhét khối tóm tắt thể lệ thi đấu tĩnh (`lobby-rules-card`) chiếm diện tích chiều dọc, dùng màu cyan/vàng bóng baroque không ăn nhập với phong cách tối giản, hiện đại của game cờ bàn số.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Desktop Camera Framing Offset Invariant**:
+     - `CAMERA_CONFIG.pre_match` BẮT BUỘC đặt tại: `position: [13.8, 16.2, 8.6]`, `target: [1.8, 0.0, -3.4]`, `fov: 41`, `speed: 3.2`.
+     - Duy trì véc-tơ đối xứng đẳng cự 45° (`deltaX = deltaZ = 12.0`).
+     - Bàn cờ được căn chuẩn lọt trọn vẹn vào 65% khoảng trống bên trái màn hình, hiển thị 100% cả 40 ô cờ, góc Đông cách mép Panel > 150px.
+  2. **Giao Diện Sảnh Chờ Sạch & Hiện Đại (Clean & Modern Lobby Invariant)**:
+     - Panel `PreMatchDeck` thu gọn bề rộng từ 400px về `350px` (`sm:w-[350px] max-w-[350px]`). Nền trắng mờ `bg-white/95 backdrop-blur-md border border-slate-200/80 shadow-xl rounded-2xl p-4`.
+     - Gỡ bỏ hoàn toàn thẻ `lobby-rules-card` khỏi DOM. Nút chính `start-game-btn` hoặc `toggle-ready-btn` chiếm trọn 100% bề ngang footer (`bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-sm text-sm uppercase tracking-wide`).
+     - Nút thoát sảnh bố trí tinh tế ở góc phải tiêu đề (`data-testid="leave-lobby-btn"`).
+     - Thẻ `PlayerSlotCard` loại bỏ 100% màu cyan (`bg-cyan-600`, `border-cyan-800`, `bg-cyan-100`), thay bằng nút xanh cobalt phẳng `bg-blue-600` và badge xám trung tính `bg-slate-100 text-slate-700`.
+  3. **Modal Hướng Dẫn & Thể Lệ Game Chuyên Biệt (`GameRulesModal`)**:
+     - Tạo component `GameRulesModal` (`src/client/ui/modals/game_rules_modal.tsx`) với 3 tab: Quy Tắc Cốt Lõi, Danh Mục Thẻ & Ô Cờ, và Cơ Chế Đặc Biệt.
+     - Đầy đủ thông tin về vốn khởi điểm (15.000 Tr.), lương GO (+2.000 Tr.), xúc xắc đôi, 30 vòng, 28 BĐS, 4 trạm giao thông, 2 tiện ích, HOSE, Kiểm Toán, Đấu Giá 50%, Thế Chấp 50%, Phá Sản.
+
+---
+
+### 96. [3D/CAMERA/RESPONSIVE] Bất Biến Ống Kính Telephoto Kiến Trúc 24°, Thích Ứng Tự Động Theo Tỷ Lệ Màn Hình & Tự Do Điều Khiển Góc Nhìn Sa Bàn (IMP-73)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Méo Quang Học Phối Cảnh & Cắt Đáy Bàn Cờ (Perspective Fisheye & Bottom Clipping Trap)*: Khi sử dụng góc mở ống kính rộng (FOV 40°/41°), hiệu ứng phối cảnh góc rộng làm phình to các ô gần camera (Ô 00 GO, Ô 39 TP.HCM, Ô 01 Cần Thơ) và thu nhỏ các ô xa (Ô 20 Đảo Quân Sự), khiến cạnh đáy bàn cờ bị tràn ra ngoài màn hình ở tỷ lệ 16:9 và trên các độ phân giải hạn chế chiều cao (1024x554, 1440x900).
+  2. *Bẫy Cưỡng Bức Kéo Lùi Camera (Snapback Frustration Trap)*: Logic cũ tự động ép camera lerp trở về góc nhìn mặc định sau 1.5s không tương tác (`timeSinceInteraction > 1500`), tước đoạt quyền tự do ngắm nhìn sa bàn của người chơi và gây giật hình khó chịu khi đang quan sát tiểu cảnh kiến trúc.
+  3. *Bẫy Khuyết Điểm Thích Ứng Đa Tỷ Lệ (Fixed Aspect Frustum Blindness)*: Không có cơ chế tự động bù trừ khoảng cách khi khung nhìn bị co hẹp tỷ lệ chiều ngang so với chiều dọc (`aspect < 1.77`).
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Architectural Telephoto 24° & Optical Center Offset Invariant**:
+     - Cả hai chế độ `CAMERA_CONFIG.overview` và `CAMERA_CONFIG.pre_match` chuyển đổi sang ống kính telephoto tiêu cự dài chuyên dụng: `fov: 24`, `position: [30.0, 33.0, 30.0]`, `target: [1.5, 0.0, 1.5]`.
+     - Cự ly xa gấp đôi dọc theo véc-tơ chéo đẳng cự 45° kết hợp bù điểm nhìn +1.5 đơn vị về góc Đông Nam giúp triệt tiêu méo quang học, bảo đảm cả 4 góc (00, 10, 20, 30) nằm trọn trong vùng an toàn NDC `[-0.85, 0.85]`.
+  2. **Responsive Aspect-Ratio Frustum Fit Invariant**:
+     - Hàm `calculateResponsiveCameraDistance(aspect: number, baseDistance = 32): number` tự động điều chỉnh cự ly lùi camera khi tỷ lệ khung hình `aspect < 1.77` theo tỷ lệ nghịch `safeBase * (1.77 / safeAspect)` (với floor an toàn 0.75), bảo đảm bàn cờ không bao giờ bị cắt viền bất kể kích thước cửa sổ.
+  3. **Free Orbit & One-Touch Reset Control Invariant**:
+     - Loại bỏ hoàn toàn điều kiện snapback `timeSinceInteraction > 1500`. Khi người dùng kéo chuột xoay bàn cờ, camera giữ nguyên góc nhìn tĩnh. Chỉ tự động lerp khi có hành động game (`isActionOngoing`) hoặc người dùng kích hoạt reset.
+     - Cung cấp phương thức `window.__resetCameraToDefault()` và nút `data-testid="reset-camera-btn"` (`🎯 Góc Chuẩn`) trên header thanh công cụ sảnh chờ, cho phép người chơi khôi phục góc nhìn chuẩn 4 góc tức thì chỉ với 1 chạm.
+
+---
+
+### 97. [UI/CRAFT/LOBBY] Bất Biến Triệt Tiêu Nút Rời Sảnh Khỏi Bảng Sảnh Chờ PreMatchDeck (IMP-74)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Thao Tác Nhầm Thoát Sảnh Đột Ngột (Accidental Lobby Exit Trap)*: Việc bố trí nút bấm "✕ Rời Sảnh" ngay sát góc phải tiêu đề của thẻ `PreMatchDeck` khiến người chơi hoặc host dễ chạm nhầm khi đang điều chỉnh góc nhìn hoặc quan sát trạng thái phòng.
+  2. *Bẫy Phân Rã Luồng Trải Nghiệm (Fragmented Session Disconnect)*: Nút "✕ Rời Sảnh" kích hoạt `resetLobby()` đột ngột mà không có modal xác nhận hay đồng bộ trạng thái socket mềm dẻo, gây ngắt kết nối session ngoài ý muốn. Khi người dùng muốn rời phòng, việc điều hướng trình duyệt hoặc thoát qua flow chủ động chuẩn bảo đảm tính toàn vẹn trạng thái tốt hơn nhiều so với nút đóng chắp vá trên header thẻ chờ.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Purge Leave Lobby Button SSOT**: Gỡ bỏ 100% phần tử `data-testid="leave-lobby-btn"`, nhãn "Rời Sảnh" / "✕ Rời Sảnh" và `aria-label="Rời sảnh chờ"` khỏi component `PreMatchDeck`.
+  2. **Clean Header & Badge Balance**: Phần đầu thẻ `PreMatchDeck` chỉ giữ nguyên khối định danh tiêu đề `🏝️ Sảnh Chờ` và huy hiệu trạng thái slot `SẴN SÀNG (4/4)` / `ĐANG CHỜ (x/4)` sạch đẹp, trực quan, không bị phân tâm bởi nút thoát.
+  3. **YAGNI Selector Cleanliness**: Xóa bỏ hoàn toàn khai báo và selector `resetLobby = useLobbyStore((s) => s.resetLobby)` khỏi `pre_match_deck.tsx` khi không còn sử dụng.
+

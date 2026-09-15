@@ -337,7 +337,7 @@ export function recordAdvancedGameSession(
 
     // [Interactive Feature 3] Giải quyết mua đất / Đấu giá (ActionPhase)
     if (room.phase === TurnPhase.ActionPhase) {
-      const config = getBotConfig(mgr.getBotPersonality(room.roomCode, current.id));
+      const config = getBotConfig(mgr.getBotPersonality(room.roomCode, current.id), mgr.getRng());
       const intent = decideBotIntent(current, room, mgr.getRegistry(room.roomCode) ?? new Map(), mgr.getPropertyStates(room.roomCode) ?? new Map(), config);
       if (intent?.type === 'INTENT_BUY' || intent?.type === 'INTENT_BUY_PROPERTY') {
         const buyRes = mgr.handleBuyProperty(room.roomCode, current.id);

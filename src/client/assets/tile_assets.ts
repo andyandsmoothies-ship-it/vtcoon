@@ -14,6 +14,10 @@ export const ALL_28_STAND_TILES: readonly number[] = [
   21, 23, 24, 25, 26, 27, 28, 29, 31, 32, 34, 35, 37, 39
 ] as const;
 
+export const SPECIAL_TILES: readonly number[] = [
+  0, 2, 4, 7, 10, 17, 20, 22, 30, 33, 36, 38
+] as const;
+
 declare global {
   // eslint-disable-next-line no-var
   var __vitest_worker__: { filepath?: string } | undefined;
@@ -27,7 +31,7 @@ const isLegacyTest =
     (globalThis.__vitest_worker__?.filepath?.includes('game_canvas') ?? false));
 
 export const READY_TILES = new Set<number>(
-  isLegacyTest ? [] : ALL_28_STAND_TILES
+  isLegacyTest ? [] : [...ALL_28_STAND_TILES, ...SPECIAL_TILES]
 );
 
 export function getTileAssetUrl(tileIndex: number, level?: number): string | null {

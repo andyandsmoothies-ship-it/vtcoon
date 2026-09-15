@@ -7,6 +7,7 @@ import { useLobbyStore } from '../../src/client/store/lobby_store';
 import { PlayerSlotCard } from '../../src/client/ui/lobby/player_slot_card';
 import { QrCodeCard } from '../../src/client/ui/lobby/qr_code_card';
 import { LobbyView } from '../../src/client/ui/lobby/lobby_view';
+import { GameRulesModal } from '../../src/client/ui/modals/game_rules_modal';
 import { createEmptySlot } from '../../src/client/store/lobby_types';
 import { BotPersonality } from '../../src/domain/bot/bot_engine';
 
@@ -100,7 +101,7 @@ describe('[UI-06.3/MSS] LobbyView Full Screen Markup', () => {
     expect(html).toContain('SG8888');
     expect(html).toContain('data-testid="lobby-slots-grid"');
     expect(html).toContain('data-testid="start-game-btn"');
-    expect(html).toContain('data-testid="leave-lobby-btn"');
+    expect(html).not.toContain('data-testid="leave-lobby-btn"');
   });
 
   it('Render màn hình Guest hiển thị nút Sẵn Sàng thay vì Bắt Đầu', () => {
@@ -118,7 +119,7 @@ describe('[UI-06.3/MSS] LobbyView Full Screen Markup', () => {
     expect(html).not.toContain('data-testid="start-game-btn"');
   });
 
-  it('Render thẻ Tóm Tắt Thể Lệ Thi Đấu với vốn 15.000 Tr., 30 vòng và điều kiện thắng', () => {
+  it('Render nút Mở Hướng Dẫn Chơi và GameRulesModal với vốn 15.000 Tr., 30 vòng và điều kiện thắng', () => {
     useLobbyStore.getState().initLobby('HN1234', 'h1', true, 'Host');
     const state = useLobbyStore.getState();
     const element = React.createElement(LobbyView, {
@@ -128,12 +129,15 @@ describe('[UI-06.3/MSS] LobbyView Full Screen Markup', () => {
     });
     const html = renderToStaticMarkup(element);
 
-    expect(html).toContain('data-testid="lobby-rules-card"');
-    expect(html).toContain('Tóm Tắt Thể Lệ Thi Đấu');
-    expect(html).toContain('15.000 Tr. VNĐ');
-    expect(html).toContain('30 vòng');
-    expect(html).toContain('+2.000 Tr. VNĐ');
-    expect(html).toContain('Điều kiện thắng');
+    expect(html).toContain('data-testid="open-game-rules-btn"');
+    expect(html).toContain('Hướng Dẫn');
+
+    const modalHtml = renderToStaticMarkup(React.createElement(GameRulesModal, { isOpen: true, initialTab: 'core' }));
+    expect(modalHtml).toContain('data-testid="game-rules-modal"');
+    expect(modalHtml).toContain('15.000 Tr.');
+    expect(modalHtml).toContain('30 vòng');
+    expect(modalHtml).toContain('+2.000 Tr.');
+    expect(modalHtml).toContain('điều kiện thắng');
   });
 
   it('Render màn hình với 3 Bot AI hiển thị đầy đủ thẻ (4/4) và nút Bắt Đầu sẵn sàng', () => {

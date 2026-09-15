@@ -141,7 +141,7 @@ export function StandeeBillboard({ cellIndex, groupColor, currentLevel }: Stande
   );
 }
 
-interface LayeredDioramaTileProps {
+export interface LayeredDioramaTileProps {
   readonly cell: BoardCell;
   readonly position: [number, number, number];
   readonly rotation?: [number, number, number];
@@ -149,6 +149,7 @@ interface LayeredDioramaTileProps {
   readonly isCornerTile: boolean;
   readonly onClick?: () => void;
   readonly enableStandee?: boolean;
+  readonly ownerColor?: string;
 }
 
 export function tierColor(level: number): string {
@@ -163,6 +164,7 @@ export function LayeredDioramaTile({
   isCornerTile,
   onClick,
   enableStandee = true,
+  ownerColor,
 }: LayeredDioramaTileProps): React.ReactElement {
   const tileTexture = useMemo(() => getTileTexture(cell.index), [cell.index]);
 
@@ -177,7 +179,7 @@ export function LayeredDioramaTile({
         <mesh position={[0, 0.115, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
           <planeGeometry args={[2.16, 2.16]} />
           {tileTexture ? (
-            <meshStandardMaterial map={tileTexture} roughness={0.96} metalness={0.0} envMapIntensity={0.0} />
+            <meshStandardMaterial map={tileTexture} roughness={0.98} metalness={0.0} envMapIntensity={0.0} />
           ) : (
             <meshStandardMaterial color="#1E293B" roughness={0.25} metalness={0.1} />
           )}
@@ -186,6 +188,7 @@ export function LayeredDioramaTile({
     );
   }
 
+  const isPurchasable = cell.type === CellType.Property || cell.type === CellType.Railroad || cell.type === CellType.Utility;
   const groupColor = cell.colorGroup ? COLOR_GROUP_HEX[cell.colorGroup] : '#64748B';
   const isFixedInfrastructure = cell.type === CellType.Railroad || cell.type === CellType.Utility;
 
@@ -196,11 +199,19 @@ export function LayeredDioramaTile({
         <meshStandardMaterial color="#EDE5D8" roughness={0.35} metalness={0.06} envMapIntensity={1.0} />
       </RoundedBox>
 
+      {/* Viền chân đế màu sở hữu (OwnerBaseTrim) khi đã có chủ */}
+      {isPurchasable && ownerColor && ownerColor.length > 0 && (
+        <mesh position={[0, 0.01, 0]} name="OwnerBaseTrim" data-testid="owner-base-trim" receiveShadow>
+          <boxGeometry args={[1.72, 0.04, 2.24]} />
+          <meshStandardMaterial color={ownerColor} roughness={0.3} metalness={0.4} />
+        </mesh>
+      )}
+
       {/* 2. Top surface information texture with subtle lacquer sheen */}
       {tileTexture ? (
         <mesh position={[0, 0.103, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
           <planeGeometry args={[1.64, 2.16]} />
-          <meshStandardMaterial map={tileTexture} roughness={0.96} metalness={0.0} envMapIntensity={0.0} />
+          <meshStandardMaterial map={tileTexture} roughness={0.98} metalness={0.0} envMapIntensity={0.0} />
         </mesh>
       ) : (
         /* Fallback ColorStrip when texture is unavailable */
@@ -224,10 +235,12 @@ export function LayeredDioramaTile({
         )
       )}
 
-      {/* 4. Cọc cờ sở hữu vật lý (Ownership Marker) gắn kết trên ô đất */}
-      {cell.type === CellType.Property && (
+      {/* 4. Cọc cờ sở hữu vật lý (Ownership Marker) gắn kết trên ô đất khi đã có chủ */}
+      {isPurchasable && (ownerColor && ownerColor.length > 0 ? (
+        <OwnershipMarkerInstances ownerColor={ownerColor} level={cell.type === CellType.Property ? currentLevel : 0} />
+      ) : (cell.type === CellType.Property && currentLevel > 0) ? (
         <OwnershipMarkerInstances ownerColor={groupColor} level={currentLevel} />
-      )}
+      ) : null)}
     </group>
   );
 }

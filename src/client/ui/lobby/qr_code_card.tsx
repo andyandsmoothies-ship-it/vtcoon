@@ -52,14 +52,14 @@ export function QrCodeCard({ roomCode }: QrCodeCardProps): React.ReactElement {
   };
 
   return (
-    <div className="flex flex-col items-center bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-2xl backdrop-blur-md">
-      <h3 className="text-sm font-semibold tracking-wider uppercase text-slate-400 mb-2">
+    <div className="flex flex-col items-center bg-[#FFFDF8] border-2 border-slate-900 rounded-2xl p-6 shadow-xl text-slate-900">
+      <h3 className="text-sm font-bold tracking-wider uppercase text-slate-700 mb-2">
         Mã QR Mời Bạn Bè
       </h3>
 
-      <div className="p-3 bg-white rounded-xl shadow-inner my-2 flex items-center justify-center min-w-[200px] min-h-[200px]">
+      <div className="p-3 bg-white rounded-xl border border-slate-300 shadow-inner my-2 flex items-center justify-center min-w-[200px] min-h-[200px]">
         {hasError ? (
-          <div className="w-48 h-48 flex items-center justify-center text-xs text-rose-500 text-center px-4" data-testid="lobby-qr-error">
+          <div className="w-48 h-48 flex items-center justify-center text-xs text-rose-600 text-center px-4" data-testid="lobby-qr-error">
             Không thể tạo mã QR cho phòng này.
           </div>
         ) : qrDataUrl ? (
@@ -76,12 +76,12 @@ export function QrCodeCard({ roomCode }: QrCodeCardProps): React.ReactElement {
         )}
       </div>
 
-      <p className="text-xs text-slate-400 text-center mt-2 max-w-[240px]">
+      <p className="text-xs text-slate-600 text-center mt-2 max-w-[240px]">
         Quét mã bằng camera điện thoại hoặc thiết bị khác để gia nhập ngay.
       </p>
 
-      <div className="w-full mt-4 pt-4 border-t border-slate-800/80 flex flex-col gap-2">
-        <div className="text-[11px] text-slate-500 truncate px-2 py-1 bg-slate-950/60 rounded border border-slate-800 text-center select-all">
+      <div className="w-full mt-4 pt-4 border-t border-slate-300 flex flex-col gap-2">
+        <div className="text-[11px] text-slate-600 truncate px-2 py-1 bg-[#F7F2E7] rounded border border-slate-300 text-center select-all">
           {inviteUrl}
         </div>
         <button
@@ -89,8 +89,8 @@ export function QrCodeCard({ roomCode }: QrCodeCardProps): React.ReactElement {
           onClick={handleCopyLink}
           className={`w-full py-2 px-4 rounded-xl font-medium text-xs transition-all flex items-center justify-center gap-2 shadow-md cursor-pointer ${
             isCopied
-              ? 'bg-emerald-600 text-white border border-emerald-500'
-              : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 active:scale-95'
+              ? 'bg-emerald-600 text-white border border-emerald-700'
+              : 'bg-amber-500 hover:bg-amber-600 text-white font-bold border border-amber-700 shadow-[0_2px_0_0_#b45309] active:translate-y-0.5'
           }`}
           data-testid="copy-invite-link-btn"
         >

@@ -214,8 +214,8 @@ describe('[TC-UI04.6/MSS] Thẻ Bài Game Vật Lý TitleDeedModal Markup', () =
     expect(html).toContain('Quần thể Resort/TTTM');
     expect(html).toContain('Mua BĐS');
     expect(html).toContain('Bỏ Qua');
-    expect(html).toContain('border-emerald-800');
-    expect(html).toContain('border-slate-950');
+    expect(html).toContain('border-slate-900');
+    expect(html).toContain('bg-[#FFFDF8]');
   });
 
   it('Render TitleDeedModal o trang thai da so huu va cho phep The Chap / Giai Chap', () => {

@@ -44,7 +44,7 @@ export function SocialEmotesTray({
 
   return (
     <nav
-      className="pointer-events-auto flex items-center gap-1 sm:gap-1.5 bg-slate-900/90 backdrop-blur-md border border-slate-700/70 rounded-2xl p-1.5 px-2.5 shadow-xl select-none"
+      className="pointer-events-auto flex items-center gap-1 sm:gap-1.5 bg-[#FFFDF8] border-2 border-slate-900 shadow-[0_4px_0_0_#0f172a] rounded-2xl p-1.5 px-2.5 select-none"
       role="toolbar"
       aria-label="Khay biểu cảm tương tác nhanh"
     >
@@ -54,10 +54,10 @@ export function SocialEmotesTray({
           type="button"
           disabled={disabled || isOnCooldown}
           onClick={() => handleClick(emote.id)}
-          className={`relative w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center text-xl transition-all duration-150 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+          className={`relative w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center text-xl transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
             disabled || isOnCooldown
               ? 'opacity-40 cursor-not-allowed grayscale'
-              : 'hover:bg-slate-800/80 hover:scale-110 active:scale-90 hover:shadow-lg'
+              : 'hover:bg-[#F7F2E7] active:scale-95'
           }`}
           title={emote.label}
           aria-label={emote.label}

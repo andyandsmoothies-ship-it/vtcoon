@@ -7,7 +7,7 @@ import { useLobbyStore } from './store/lobby_store';
 import { useEnvironmentStore } from './store/environment_store';
 import { useVfxStore } from './store/vfx_store';
 import { PreMatchDeck } from './ui/lobby/pre_match_deck';
-import type { Player } from '../domain/room';
+import { getInitialBalanceForPlayerCount, type Player } from '../domain/room';
 import { PLAYER_TOKEN_PALETTE } from '../domain/theme';
 import { AudioEngine } from './audio/audio_engine';
 import { useGameWs, isGameRunningDelta, clearReconnectToken } from './network/use_game_ws';
@@ -105,12 +105,13 @@ export function App(): React.ReactElement {
         bankrupt: Boolean(p.bankrupt),
       }));
     }
-    return lobbySlots
-      .filter((s) => s.isOccupied)
+    const occupiedSlots = lobbySlots.filter((s) => s.isOccupied);
+    const initialBalance = getInitialBalanceForPlayerCount(occupiedSlots.length || 2);
+    return occupiedSlots
       .map((s) => ({
         id: s.playerId ?? (s.isHost ? 'p1' : `bot_${s.slotIndex + 1}`),
         position: 0,
-        balance: 15000,
+        balance: initialBalance,
         skipNextTurn: false,
         auditTurnsLeft: 0,
         consecutiveDoubles: 0,
@@ -284,6 +285,7 @@ export function App(): React.ReactElement {
 
     AudioEngine.handlePawnLanded(0);
     const occupied = lobbySlots.filter((s) => s.isOccupied);
+    const initialBalance = getInitialBalanceForPlayerCount(occupied.length || 2);
     const playersInfo: Record<string, PlayerHudInfo> = {};
     const positions: Record<string, number> = {};
 
@@ -292,7 +294,7 @@ export function App(): React.ReactElement {
       playersInfo[pid] = {
         id: pid,
         name: s.playerName,
-        balance: 15000,
+        balance: initialBalance,
         tokenColor: s.tokenColor ?? (PLAYER_TOKEN_PALETTE[idx] ?? '#38BDF8'),
         ownedProperties: [],
         isBot: s.isBot,
@@ -340,6 +342,8 @@ export function App(): React.ReactElement {
   // [UC-GAME-001] Tự động thực hiện hành động khi đồng hồ về 00:00 và đang trong lượt của người chơi
   useEffect(() => {
     if (!gameStarted || currentTurnPlayerId !== localPlayerId) return;
+    // Khi kết nối WebSocket, TurnOrchestrator trên Server là nguồn chân lý duy nhất điều phối AFK; Client không gửi intent kép
+    if (isConnected) return;
     if (turnTimeRemaining === 0) {
       const store = useGameStore.getState();
       if (store.hasRolledThisTurn) {
@@ -348,7 +352,7 @@ export function App(): React.ReactElement {
         handleRollDice();
       }
     }
-  }, [gameStarted, currentTurnPlayerId, localPlayerId, turnTimeRemaining, handleEndTurn, handleRollDice]);
+  }, [gameStarted, currentTurnPlayerId, localPlayerId, turnTimeRemaining, isConnected, handleEndTurn, handleRollDice]);
 
   const handleSendEmote = useCallback(
     (emoteId: string) => {

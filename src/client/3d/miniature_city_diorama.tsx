@@ -3,8 +3,8 @@
 import React from 'react';
 import { DioramaTerrain } from './diorama/diorama_terrain';
 import { DioramaBridges } from './diorama/diorama_bridges';
-import { DioramaStadium } from './diorama/diorama_stadium';
-import { DioramaFerrisWheel } from './diorama/diorama_ferris_wheel';
+import { DioramaCivicCenter } from './diorama/diorama_civic_center';
+import { DioramaWaterfrontPark } from './diorama/diorama_waterfront_park';
 import { DioramaContainerPort } from './diorama/diorama_container_port';
 import { DioramaMarina } from './diorama/diorama_marina';
 import { DioramaSkyline } from './diorama/diorama_skyline';
@@ -21,9 +21,9 @@ export function MiniatureCityDiorama(): React.ReactElement {
       <DioramaTerrain />
       {/* 2. Cầu Ba Son (Bắc) và Cầu Long Biên (Nam) nối liền hai bờ sông */}
       <DioramaBridges />
-      {/* 3. Đấu trường thể thao oval hiện đại (Đông Bắc) & Đu quay */}
-      <DioramaStadium />
-      <DioramaFerrisWheel />
+      {/* 3. Trung tâm Văn hóa Triển lãm & Công viên Cảnh quan Bờ sông */}
+      <DioramaCivicCenter />
+      <DioramaWaterfrontPark />
       {/* 4. Cảng Container Cát Lái & Bến du thuyền (Đông Nam) */}
       <DioramaContainerPort />
       <DioramaMarina />

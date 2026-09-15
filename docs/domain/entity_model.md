@@ -16,8 +16,10 @@ Toàn bộ 28 ô tài sản kinh tế trên bàn cờ được phân chia thành
 4. **Nhóm Hạ tầng Giao thông (4 thẻ):** Hệ thống cảng hàng không, cảng biển nước sâu và đại lộ cao tốc. Không cần gom theo nhóm màu, mức thu phí tăng lũy tiến theo số lượng ô hạ tầng sở hữu ($1$ đến $4$ ô), tích hợp gói nâng cấp công nghệ ETC (+50% mức thu phí).
 5. **Nhóm Tiện ích Năng lượng & Số hóa (2 thẻ):** Tập đoàn Điện lực (EVN) và Tập đoàn Viễn thông (Viettel). Mức thu phí tính biến thiên theo điểm đổ xúc xắc $2D6$ nhân hệ số tương ứng (40x, 100x, hoặc 150x khi nâng cấp Full).
 
-### 1.2. Quy Chuẩn Cấp Bậc & Thế Chấp
+### 1.2. Quy Chuẩn Cấp Bậc, Thế Chấp & Dòng Tiền Vận Hành
+- **Vốn khả dụng ban đầu (Kinh tế động - IMP-60):** 2 người = 25.000 Tr. VNĐ; 3 người = 20.000 Tr. VNĐ; 4 người = 18.000 Tr. VNĐ/người chơi.
 - **Giá trị thế chấp (Mortgage Value):** Cố định bằng 50% giá mua gốc ban đầu cho toàn bộ 28 thẻ tài sản.
+- **Khóa trần thuế tài sản qua GO (GO_PROPERTY_TAX_CAP - IMP-60):** Tối đa 1.000 Tr. VNĐ/vòng, bảo đảm lương thực nhận tối thiểu +1.000 Tr. VNĐ.
 - **Biểu tỷ lệ thu phí chuẩn theo giá đất:**
   - **BĐS Đô thị & Thương mại:** Cấp 0: 10% | Cấp 1: 35% | Cấp 2: 90% | Cấp 3: 220%.
   - **BĐS Dịch vụ & Giải trí:** Cấp 0: 12% | Cấp 1: 40% | Cấp 2: 100% (+ Phụ thu $1D6$) | Cấp 3: 250% (+ Mất lượt).
@@ -323,3 +325,14 @@ Toàn bộ 28 ô tài sản kinh tế trên bàn cờ được phân chia thành
 - **Nhóm Nghỉ dưỡng (09, 11, 13, 14, 16, 18, 21, 24, 29):** Trong đó 6 ô trọng điểm (11, 13, 14, 21, 24, 29 theo requirements.md §V.1.11) hưởng x2 tiền thuê khi trúng thẻ "Mùa Du Lịch"; các ô duyên hải miền Trung (11, 14, 16, 18, 19) được miễn tiền thuê khi gặp thiên tai miền Trung (Zero-rent rule có độ ưu tiên tuyệt đối khi xảy ra xung đột).  
 - **Nhóm Hạ tầng Giao thông (05, 15, 25, 35):** Không cần gom theo màu, tăng lũy tiến theo số lượng sở hữu, nâng cấp công nghệ ETC (+50%).  
 - **Nhóm Tiện ích (12, 28):** Phí tính biến thiên bằng điểm xúc xắc x 40 / 100 / 150 Tr. VNĐ.
+
+---
+
+## 5. THỰC THỂ THẺ BÀI SỰ KIỆN & MA TRẬN 4 THÔNG SỐ (IMP-57)
+
+Mỗi thẻ bài trong 36 Thẻ Sự Kiện (16 Phiếu Thị Trường + 20 Phiếu Cơ Hội) được mô hình hóa với 4 thông số minh bạch (`EventCardInfo`):
+- `targetScope`: Phạm vi đối tượng/địa bàn chịu tác động (Tỉnh thành cụ thể, Toàn bàn cờ, Nhóm BĐS).
+- `effectDetail`: Chi tiết quy tắc toán học/kinh tế thực thi (tỷ lệ tăng giảm phí, số tiền phạt/thưởng cụ thể).
+- `duration`: Thời hạn hiệu lực (Tức thì, 1 vòng, 2 vòng, hoặc Vĩnh viễn).
+- `destination`: Dòng tiền luân chuyển (Kho bạc Nhà nước, Người chơi khác, Ngân hàng).
+

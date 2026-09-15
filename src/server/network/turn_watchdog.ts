@@ -4,6 +4,7 @@ import type { RoomManager } from '../room_manager.js';
 import type { IntentMutex } from './intent_mutex.js';
 import type { DeltaBroadcaster } from './delta_broadcaster.js';
 import { TurnPhase, isRoomGameOver } from '../../domain/room.js';
+import { executeInsolvencyAfkRecovery } from './afk_recovery.js';
 
 export interface TurnWatchdogOptions {
   readonly rooms: RoomManager;
@@ -44,7 +45,7 @@ export class TurnWatchdog {
     this.onEmergencyRecovery = options.onEmergencyRecovery;
     this.onGameOver = options.onGameOver;
     this.onScheduleNextTurn = options.onScheduleNextTurn;
-    this.maxTurnStallMs = options.maxTurnStallMs ?? 45_000;
+    this.maxTurnStallMs = options.maxTurnStallMs ?? 60_000;
     this.checkIntervalMs = options.checkIntervalMs ?? 5_000;
   }
 
@@ -221,7 +222,11 @@ export class TurnWatchdog {
         const r = this.rooms.getRoom(roomCode);
         const curr = r?.players[r.currentPlayerIndex];
         if (curr) {
-          this.rooms.handlePlayerIntent(roomCode, curr.id, { type: 'INTENT_BANKRUPTCY' });
+          executeInsolvencyAfkRecovery(this.rooms, roomCode, curr.id);
+          const rMid = this.rooms.getRoom(roomCode);
+          if (rMid?.phase === TurnPhase.PropertyManagement) {
+            this.rooms.handleEndTurn(roomCode, curr.id);
+          }
         }
         break;
       }

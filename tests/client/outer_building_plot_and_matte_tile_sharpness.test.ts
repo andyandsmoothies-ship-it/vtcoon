@@ -1,6 +1,6 @@
 // [TC-IMP35/MSS][UC-IMP35] Contract Test Suite: Outer Building Plot & Matte Tile Sharpness (IMP-35)
 // Universal 4-Facet Behavioral Matrix Verification:
-// Facet 1: Building Plot Outer Zone (Z >= 0.50, standard 0.58)
+// Facet 1: Building Plot Top Zone (Z <= -1.40, standard -1.58)
 // Facet 2: Standee Outer Zone (Z >= 0.50, scale [0.78, 0.78])
 // Facet 3: True Matte Cardstock Shading (roughness >= 0.90, envMapIntensity <= 0.05)
 // Facet 4: Texture Sharpness & No Mipmap Blur (generateMipmaps = false, minFilter = LinearFilter)
@@ -169,54 +169,54 @@ describe('[TC-IMP35/MSS][UC-IMP35] Outer Building Plot & Matte Tile Sharpness Co
   });
 
   // =========================================================================
-  // FACET 1: BUILDING PLOT OUTER ZONE (procedural_building.tsx Z >= 0.50, Std: 0.58)
+  // FACET 1: BUILDING PLOT TOP ZONE (procedural_building.tsx Z <= -1.30, Std: -1.35)
   // =========================================================================
-  it('[TC-IMP35.01/MSS][UC-IMP35] ProceduralBuilding C0 (SurveyorPlotBoundary) shifts root group to outer boundary Z >= 0.50', () => {
+  it('[TC-IMP35.01/MSS][UC-IMP35] ProceduralBuilding C0 (SurveyorPlotBoundary) shifts root group to top boundary Z <= -1.30', () => {
     const markup = renderToStaticMarkup(
       React.createElement(ProceduralBuilding, { level: 0, groupColor: '#DC2626' })
     );
     const pos = extractRootGroupPosition(markup);
-    expect(pos[2]).toBeGreaterThanOrEqual(0.50);
+    expect(pos[2]).toBeLessThanOrEqual(-1.30);
   });
 
-  it('[TC-IMP35.02/MSS][UC-IMP35] ProceduralBuilding C0 conforms precisely to standard root position [0, 0.22, 0.58]', () => {
+  it('[TC-IMP35.02/MSS][UC-IMP35] ProceduralBuilding C0 conforms precisely to standard root position [0, 0.16, -1.38]', () => {
     const markup = renderToStaticMarkup(
       React.createElement(ProceduralBuilding, { level: 0, groupColor: '#DC2626' })
     );
     const pos = extractRootGroupPosition(markup);
-    expect(pos).toEqual([0, 0.22, 0.58]);
+    expect(pos).toEqual([0, 0.16, -1.38]);
   });
 
-  it('[TC-IMP35.03/MSS][UC-IMP35] ProceduralBuilding C1 (Indochine Shophouse) shifts foundation to outer boundary Z >= 0.50', () => {
+  it('[TC-IMP35.03/MSS][UC-IMP35] ProceduralBuilding C1 (Indochine Shophouse) shifts foundation to top boundary Z <= -1.30', () => {
     const markup = renderToStaticMarkup(
       React.createElement(ProceduralBuilding, { level: 1, groupColor: '#16A34A' })
     );
     const pos = extractRootGroupPosition(markup);
-    expect(pos[2]).toBeGreaterThanOrEqual(0.50);
+    expect(pos[2]).toBeLessThanOrEqual(-1.30);
   });
 
-  it('[TC-IMP35.04/MSS][UC-IMP35] ProceduralBuilding C1 conforms precisely to standard root position [0, 0.22, 0.58]', () => {
+  it('[TC-IMP35.04/MSS][UC-IMP35] ProceduralBuilding C1 conforms precisely to standard root position [0, 0.16, -1.38]', () => {
     const markup = renderToStaticMarkup(
       React.createElement(ProceduralBuilding, { level: 1, groupColor: '#16A34A' })
     );
     const pos = extractRootGroupPosition(markup);
-    expect(pos).toEqual([0, 0.22, 0.58]);
+    expect(pos).toEqual([0, 0.16, -1.38]);
   });
 
-  it('[TC-IMP35.05/MSS][UC-IMP35] ProceduralBuilding C2 (Sapphire Complex) conforms precisely to standard root position [0, 0.22, 0.58]', () => {
+  it('[TC-IMP35.05/MSS][UC-IMP35] ProceduralBuilding C2 (Sapphire Complex) conforms precisely to standard root position [0, 0.16, -1.38]', () => {
     const markup = renderToStaticMarkup(
       React.createElement(ProceduralBuilding, { level: 2, groupColor: '#2563EB' })
     );
     const pos = extractRootGroupPosition(markup);
-    expect(pos).toEqual([0, 0.22, 0.58]);
+    expect(pos).toEqual([0, 0.16, -1.38]);
   });
 
-  it('[TC-IMP35.06/MSS][UC-IMP35] ProceduralBuilding C3 (Golden Landmark) conforms precisely to standard root position [0, 0.22, 0.58]', () => {
+  it('[TC-IMP35.06/MSS][UC-IMP35] ProceduralBuilding C3 (Golden Landmark) conforms precisely to standard root position [0, 0.16, -1.38]', () => {
     const markup = renderToStaticMarkup(
       React.createElement(ProceduralBuilding, { level: 3, groupColor: '#D97706' })
     );
     const pos = extractRootGroupPosition(markup);
-    expect(pos).toEqual([0, 0.22, 0.58]);
+    expect(pos).toEqual([0, 0.16, -1.38]);
   });
 
   it.each([0, 1, 2, 3])(
@@ -420,16 +420,16 @@ describe('[TC-IMP35/MSS][UC-IMP35] Outer Building Plot & Matte Tile Sharpness Co
     expect(standardMarkup).toContain('args="1.64,2.16"');
   });
 
-  it('[TC-IMP35.26/MSS][UC-IMP35] ProceduralBuilding reactive tier upgrades preserve outer boundary clearance across all levels', () => {
+  it('[TC-IMP35.26/MSS][UC-IMP35] ProceduralBuilding reactive tier upgrades preserve top boundary clearance across all levels', () => {
     const markup0 = renderToStaticMarkup(React.createElement(ProceduralBuilding, { level: 0 }));
     const markup1 = renderToStaticMarkup(React.createElement(ProceduralBuilding, { level: 1 }));
     const markup2 = renderToStaticMarkup(React.createElement(ProceduralBuilding, { level: 2 }));
     const markup3 = renderToStaticMarkup(React.createElement(ProceduralBuilding, { level: 3 }));
 
-    expect(extractRootGroupPosition(markup0)[2]).toBeGreaterThanOrEqual(0.50);
-    expect(extractRootGroupPosition(markup1)[2]).toBeGreaterThanOrEqual(0.50);
-    expect(extractRootGroupPosition(markup2)[2]).toBeGreaterThanOrEqual(0.50);
-    expect(extractRootGroupPosition(markup3)[2]).toBeGreaterThanOrEqual(0.50);
+    expect(extractRootGroupPosition(markup0)[2]).toBeLessThanOrEqual(-1.30);
+    expect(extractRootGroupPosition(markup1)[2]).toBeLessThanOrEqual(-1.30);
+    expect(extractRootGroupPosition(markup2)[2]).toBeLessThanOrEqual(-1.30);
+    expect(extractRootGroupPosition(markup3)[2]).toBeLessThanOrEqual(-1.30);
   });
 
   it('[TC-IMP35.27/MSS][UC-IMP35] Resource disposal: clearStandeeWebpCache purges cache cleanly with zero dangling entries', () => {

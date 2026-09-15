@@ -190,8 +190,8 @@ export function DioramaHeritageDistrict(): React.ReactElement {
       {/* ========================================================
           THỀM QUẢNG TRƯỜNG GẠCH BÔNG ĐÔNG DƯƠNG (Heritage Plaza)
          ======================================================== */}
-      <mesh position={[0.2, 0.003, 0.02]} receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[1.4, 2.5]} />
+      <mesh position={[0.35, 0.003, 0.02]} receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[1.7, 2.6]} />
         <meshStandardMaterial
           color="#FAF5EE"
           roughness={0.6}
@@ -200,27 +200,85 @@ export function DioramaHeritageDistrict(): React.ReactElement {
       </mesh>
 
       {/* ========================================================
-          1. CHỢ BẾN THÀNH BIỂU TƯỢNG (Iconic Ben Thanh Market)
+          1. NHÀ THỜ ĐỨC BÀ CỔ GẠCH ĐỎ ĐÔNG DƯƠNG (Heritage Cathedral)
+             Đứng độc tôn, uy nghi, tráng lệ trên trục di sản
          ======================================================== */}
-      <group position={[0.2, 0, -0.7]}>
-        <SafeGLTFModel
-          url={LANDMARK_MODEL_URLS.benThanh}
-          fallback={<BenThanhProceduralFallback isNight={isNight} isSunset={isSunset} />}
-          castShadow
-          receiveShadow
-        />
-      </group>
-
-      {/* ========================================================
-          2. NHÀ THỜ CỔ GẠCH ĐỎ ĐÔNG DƯƠNG (Heritage Cathedral)
-         ======================================================== */}
-      <group position={[0.2, 0, 0.75]}>
+      <group position={[0.2, 0, 0.75]} data-model-url={LANDMARK_MODEL_URLS.cathedral}>
         <SafeGLTFModel
           url={LANDMARK_MODEL_URLS.cathedral}
           fallback={<CathedralProceduralFallback isNight={isNight} isSunset={isSunset} />}
           castShadow
           receiveShadow
         />
+      </group>
+
+      {/* ========================================================
+          2. ĐẠI CÔNG VIÊN 30/4 & QUẢNG TRƯỜNG CÔNG XÃ PARIS
+             Mặt tiền mở toang với hoa viên tròn, thảm hoa đỏ vàng & Tượng Đức Mẹ
+         ======================================================== */}
+      <group position={[0.2, 0, 0.15]} data-testid="cong-xa-paris-plaza">
+        {/* Thềm đá hoa viên tròn trung tâm */}
+        <mesh position={[0, 0.004, 0]} receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
+          <circleGeometry args={[0.55, 32]} />
+          <meshStandardMaterial color="#E2E8F0" roughness={0.6} />
+        </mesh>
+        {/* Thảm cỏ xanh đại công viên */}
+        <mesh position={[0, 0.005, 0]} receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[0.26, 0.52, 32]} />
+          <meshStandardMaterial color="#166534" roughness={0.7} />
+        </mesh>
+        {/* Thảm hoa đỏ rực rỡ (Salvia) biểu trưng di sản Sài Gòn (#DC2626) */}
+        <mesh position={[0, 0.006, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[0.20, 0.25, 24]} />
+          <meshStandardMaterial color="#DC2626" roughness={0.5} />
+        </mesh>
+        {/* Vành hoa cúc vạn thọ vàng hoàng gia (#FDE047 / #FEF3C7) */}
+        <mesh position={[0, 0.007, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[0.15, 0.19, 24]} />
+          <meshStandardMaterial color="#FDE047" roughness={0.45} />
+        </mesh>
+        {/* Vòng cỏ điểm xuyết tươi mát */}
+        <mesh position={[0, 0.008, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[0.10, 0.14, 24]} />
+          <meshStandardMaterial color="#15803D" roughness={0.65} />
+        </mesh>
+
+        {/* 4 Cột đèn đường cổ điển Indochine với chụp đèn vàng ấm (#FDE047) */}
+        {([
+          [-0.32, -0.32],
+          [0.32, -0.32],
+          [-0.32, 0.32],
+          [0.32, 0.32],
+        ] as const).map(([lx, lz], li) => (
+          <group key={`heritage-lamp-${li}`} position={[lx, 0, lz]}>
+            <mesh position={[0, 0.08, 0]} castShadow>
+              <cylinderGeometry args={[0.006, 0.01, 0.16, 6]} />
+              <meshStandardMaterial color="#334155" roughness={0.4} />
+            </mesh>
+            <mesh position={[0, 0.17, 0]}>
+              <sphereGeometry args={[0.016, 8, 8]} />
+              <meshStandardMaterial
+                color="#FDE047"
+                emissive="#FDE047"
+                emissiveIntensity={isNight ? 1.5 : isSunset ? 0.6 : 0.0}
+              />
+            </mesh>
+          </group>
+        ))}
+
+        {/* Bệ đá cẩm thạch Tượng Đức Mẹ Hòa Bình */}
+        <RoundedBox args={[0.10, 0.09, 0.10]} radius={0.01} smoothness={2} castShadow receiveShadow position={[0, 0.045, 0]}>
+          <meshStandardMaterial color="#CBD5E1" roughness={0.35} />
+        </RoundedBox>
+        {/* Tượng điêu khắc cẩm thạch trắng */}
+        <mesh castShadow position={[0, 0.14, 0]}>
+          <cylinderGeometry args={[0.022, 0.038, 0.11, 8]} />
+          <meshStandardMaterial color="#F8FAFC" roughness={0.25} />
+        </mesh>
+        <mesh position={[0, 0.20, 0]}>
+          <sphereGeometry args={[0.024, 10, 10]} />
+          <meshStandardMaterial color="#F8FAFC" roughness={0.2} />
+        </mesh>
       </group>
     </group>
   );

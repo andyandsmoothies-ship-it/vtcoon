@@ -1,6 +1,5 @@
-// [IMP-31] DioramaHighriseBlocks — 16 Financial Towers Batched via InstancedMesh (2 Draw Calls)
-import React, { useRef, useEffect, useMemo } from 'react';
-import { Object3D, type InstancedMesh } from 'three';
+import React, { useMemo } from 'react';
+import { createHighriseFacadeTexture } from '../facade_texture_generator';
 
 export interface HighriseConfig {
   id: string;
@@ -11,80 +10,134 @@ export interface HighriseConfig {
   height: number;
   depth: number;
   rotationY: number;
+  typology?: 'prismatic' | 'stepped' | 'curved' | 'crowned';
 }
 
-// 16 Tháp cao ốc tài chính Tây Bắc lùi sâu về phía Bắc (X in [-5.8, -3.2], Z in [-6.4, -2.4])
+// 10 Tháp cao ốc tài chính Tây Bắc thiết kế giật cấp bao bọc quanh tháp Bitexco
+// Quy hoạch mở toang hành lang hướng Đông ra sông Sài Gòn (X >= -3.8, Z: -4.8 .. -3.6)
 export const HIGHRISE_CONFIGS: ReadonlyArray<HighriseConfig> = [
-  // Hàng 1 (Hậu cảnh sâu Z = -5.8, cao nhất 2.3 - 2.8)
-  { id: 'tower-1', x: -5.4, y: 0.025, z: -5.8, width: 0.55, height: 2.7, depth: 0.55, rotationY: 0 },
-  { id: 'tower-2', x: -4.7, y: 0.025, z: -5.8, width: 0.50, height: 2.8, depth: 0.50, rotationY: 0 },
-  { id: 'tower-3', x: -3.9, y: 0.025, z: -5.8, width: 0.52, height: 2.5, depth: 0.52, rotationY: 0 },
-  { id: 'tower-4', x: -3.2, y: 0.025, z: -5.8, width: 0.48, height: 2.3, depth: 0.48, rotationY: 0 },
+  // Hàng 1 Bắc (Hậu cảnh sâu Z = -5.8 .. -5.9, cao 2.3 - 2.6m)
+  { id: 'tower-1', x: -5.4, y: 0.025, z: -5.8, width: 0.52, height: 2.4, depth: 0.52, rotationY: 0, typology: 'prismatic' },
+  { id: 'tower-2', x: -4.5, y: 0.025, z: -5.9, width: 0.50, height: 2.6, depth: 0.50, rotationY: 0, typology: 'crowned' },
+  { id: 'tower-3', x: -3.5, y: 0.025, z: -5.8, width: 0.50, height: 2.3, depth: 0.50, rotationY: 0, typology: 'stepped' },
 
-  // Hàng 2 (Tầm trung sâu Z = -4.8, cao 1.9 - 2.4)
-  { id: 'tower-5', x: -5.5, y: 0.025, z: -4.8, width: 0.52, height: 2.2, depth: 0.52, rotationY: 0 },
-  { id: 'tower-6', x: -4.7, y: 0.025, z: -4.8, width: 0.56, height: 2.4, depth: 0.56, rotationY: 0 },
-  { id: 'tower-7', x: -3.9, y: 0.025, z: -4.8, width: 0.50, height: 2.1, depth: 0.50, rotationY: 0 },
-  { id: 'tower-8', x: -3.2, y: 0.025, z: -4.8, width: 0.46, height: 1.9, depth: 0.46, rotationY: 0 },
+  // Cánh Tây (Z = -4.7 .. -3.7, cao 1.7 - 2.0m)
+  { id: 'tower-4', x: -5.5, y: 0.025, z: -4.7, width: 0.48, height: 2.0, depth: 0.48, rotationY: 0, typology: 'curved' },
+  { id: 'tower-5', x: -5.5, y: 0.025, z: -3.7, width: 0.46, height: 1.7, depth: 0.46, rotationY: 0, typology: 'prismatic' },
 
-  // Hàng 3 (Tầm trung cận Z = -3.8, cao 1.5 - 2.0)
-  { id: 'tower-9', x: -5.4, y: 0.025, z: -3.8, width: 0.48, height: 1.8, depth: 0.48, rotationY: 0 },
-  { id: 'tower-10', x: -4.6, y: 0.025, z: -3.8, width: 0.52, height: 2.0, depth: 0.52, rotationY: 0 },
-  { id: 'tower-11', x: -3.8, y: 0.025, z: -3.8, width: 0.48, height: 1.7, depth: 0.48, rotationY: 0 },
-  { id: 'tower-12', x: -3.2, y: 0.025, z: -3.8, width: 0.45, height: 1.5, depth: 0.45, rotationY: 0 },
+  // Cánh Đông Bắc & Đông Nam (Hành lang Đông mở toang đón gió sông, Z <= -5.0 hoặc Z >= -3.2)
+  { id: 'tower-6', x: -3.5, y: 0.025, z: -5.2, width: 0.48, height: 1.9, depth: 0.48, rotationY: 0, typology: 'curved' },
+  { id: 'tower-7', x: -3.5, y: 0.025, z: -3.0, width: 0.46, height: 1.6, depth: 0.46, rotationY: 0, typology: 'stepped' },
 
-  // Hàng 4 (Tiền cảnh tiến về trung tâm Z = -2.8, hạ dần 1.2 - 1.6)
-  { id: 'tower-13', x: -5.3, y: 0.025, z: -2.8, width: 0.46, height: 1.4, depth: 0.46, rotationY: 0 },
-  { id: 'tower-14', x: -4.6, y: 0.025, z: -2.8, width: 0.50, height: 1.6, depth: 0.50, rotationY: 0 },
-  { id: 'tower-15', x: -3.9, y: 0.025, z: -2.8, width: 0.45, height: 1.3, depth: 0.45, rotationY: 0 },
-  { id: 'tower-16', x: -3.2, y: 0.025, z: -2.8, width: 0.42, height: 1.2, depth: 0.42, rotationY: 0 },
+  // Hàng Nam (Tiền cảnh Z = -2.8 .. -2.9, cao 1.3 - 1.5m)
+  { id: 'tower-8', x: -5.3, y: 0.025, z: -2.8, width: 0.44, height: 1.4, depth: 0.44, rotationY: 0, typology: 'stepped' },
+  { id: 'tower-9', x: -4.5, y: 0.025, z: -2.9, width: 0.46, height: 1.5, depth: 0.46, rotationY: 0, typology: 'crowned' },
+  { id: 'tower-10', x: -3.7, y: 0.025, z: -2.8, width: 0.42, height: 1.3, depth: 0.42, rotationY: 0, typology: 'prismatic' },
 ];
 
 export const HIGHRISE_TOWERS = HIGHRISE_CONFIGS;
 
 export function DioramaHighriseBlocks(): React.ReactElement {
-  const dummy = useMemo(() => new Object3D(), []);
-  const bodyRef = useRef<InstancedMesh>(null);
-  const crownRef = useRef<InstancedMesh>(null);
+  const facadeTexture = useMemo(() => createHighriseFacadeTexture(), []);
 
-  useEffect(() => {
-    const body = bodyRef.current;
-    const crown = crownRef.current;
-    if (!body || !crown) return;
-
-    HIGHRISE_CONFIGS.forEach((tower, i) => {
-      // 1. Thân tháp kính sapphire (#0284C7)
-      dummy.position.set(tower.x, tower.y + (tower.height * 0.9) / 2, tower.z);
-      dummy.rotation.set(0, tower.rotationY, 0);
-      dummy.scale.set(tower.width, tower.height * 0.9, tower.depth);
-      dummy.updateMatrix();
-      body.setMatrixAt(i, dummy.matrix);
-
-      // 2. Đỉnh tháp chóp kính sapphire phản quang bầu trời (#38BDF8)
-      dummy.position.set(tower.x, tower.y + tower.height * 0.95, tower.z);
-      dummy.rotation.set(0, tower.rotationY, 0);
-      dummy.scale.set(tower.width * 0.82, tower.height * 0.1, tower.depth * 0.82);
-      dummy.updateMatrix();
-      crown.setMatrixAt(i, dummy.matrix);
-    });
-
-    body.instanceMatrix.needsUpdate = true;
-    crown.instanceMatrix.needsUpdate = true;
-  }, [dummy]);
+  const prismaticTowers = useMemo(() => HIGHRISE_CONFIGS.filter((t) => t.typology === 'prismatic'), []);
+  const steppedTowers = useMemo(() => HIGHRISE_CONFIGS.filter((t) => t.typology === 'stepped'), []);
+  const curvedTowers = useMemo(() => HIGHRISE_CONFIGS.filter((t) => t.typology === 'curved'), []);
+  const crownedTowers = useMemo(() => HIGHRISE_CONFIGS.filter((t) => t.typology === 'crowned'), []);
 
   return (
     <group data-testid="diorama-highrise-blocks">
-      {/* Khung thân tháp kính sapphire biển (#0284C7) */}
-      <instancedMesh ref={bodyRef} args={[undefined, undefined, HIGHRISE_CONFIGS.length]} castShadow receiveShadow>
-        <boxGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial color="#0284C7" roughness={0.15} metalness={0.7} />
-      </instancedMesh>
+      {/* 1. Trường phái Tháp Lăng Kính Vát Góc (Vietcombank style prismatic faceted towers) */}
+      <group data-testid="highrise-prismatic">
+        {prismaticTowers.map((tower) => (
+          <group key={tower.id} position={[tower.x, tower.y, tower.z]} rotation={[0, tower.rotationY, 0]}>
+            <mesh castShadow receiveShadow position={[0, (tower.height * 0.84) / 2, 0]}>
+              <cylinderGeometry args={[tower.width * 0.48, tower.width * 0.54, tower.height * 0.84, 8]} />
+              <meshStandardMaterial map={facadeTexture} color="#FFFFFF" roughness={0.2} metalness={0.3} />
+            </mesh>
+            <mesh castShadow receiveShadow position={[0, tower.height * 0.84 + 0.02, 0]}>
+              <cylinderGeometry args={[tower.width * 0.44, tower.width * 0.46, 0.04, 8]} />
+              <meshStandardMaterial color="#15803D" roughness={0.7} />
+            </mesh>
+            <mesh castShadow position={[0, tower.height * 0.84 + 0.04 + (tower.height * 0.14) / 2, 0]}>
+              <coneGeometry args={[tower.width * 0.35, tower.height * 0.14, 8]} />
+              <meshStandardMaterial color="#F59E0B" roughness={0.2} metalness={0.8} />
+            </mesh>
+          </group>
+        ))}
+      </group>
 
-      {/* Đỉnh chóp sapphire phản quang rực rỡ (#38BDF8) */}
-      <instancedMesh ref={crownRef} args={[undefined, undefined, HIGHRISE_CONFIGS.length]} castShadow>
-        <boxGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial color="#38BDF8" roughness={0.1} metalness={0.9} />
-      </instancedMesh>
+      {/* 2. Trường phái Tháp Đôi Giật Cấp Vườn Treo (Keppel / Saigon Centre stepped terraces) */}
+      <group data-testid="highrise-stepped">
+        {steppedTowers.map((tower) => (
+          <group key={tower.id} position={[tower.x, tower.y, tower.z]} rotation={[0, tower.rotationY, 0]}>
+            <mesh castShadow receiveShadow position={[0, (tower.height * 0.48) / 2, 0]}>
+              <boxGeometry args={[tower.width, tower.height * 0.48, tower.depth]} />
+              <meshStandardMaterial map={facadeTexture} color="#FFFFFF" roughness={0.2} metalness={0.3} />
+            </mesh>
+            <mesh position={[0, tower.height * 0.48 + 0.015, 0]}>
+              <boxGeometry args={[tower.width * 0.96, 0.03, tower.depth * 0.96]} />
+              <meshStandardMaterial color="#15803D" roughness={0.7} />
+            </mesh>
+            <mesh castShadow receiveShadow position={[0, tower.height * 0.48 + 0.03 + (tower.height * 0.36) / 2, 0]}>
+              <boxGeometry args={[tower.width * 0.78, tower.height * 0.36, tower.depth * 0.78]} />
+              <meshStandardMaterial map={facadeTexture} color="#FFFFFF" roughness={0.2} metalness={0.3} />
+            </mesh>
+            <mesh position={[0, tower.height * 0.84 + 0.045, 0]}>
+              <boxGeometry args={[tower.width * 0.75, 0.03, tower.depth * 0.75]} />
+              <meshStandardMaterial color="#15803D" roughness={0.7} />
+            </mesh>
+            <mesh castShadow position={[0, tower.height * 0.87 + (tower.height * 0.13) / 2, 0]}>
+              <boxGeometry args={[tower.width * 0.54, tower.height * 0.13, tower.depth * 0.54]} />
+              <meshStandardMaterial color="#F59E0B" roughness={0.2} metalness={0.8} />
+            </mesh>
+          </group>
+        ))}
+      </group>
+
+      {/* 3. Trường phái Tháp Mặt Kính Uốn Cong Ven Sông (Marina curved riverfront towers) */}
+      <group data-testid="highrise-curved">
+        {curvedTowers.map((tower) => (
+          <group key={tower.id} position={[tower.x, tower.y, tower.z]} rotation={[0, tower.rotationY, 0]}>
+            <mesh castShadow receiveShadow position={[0, (tower.height * 0.86) / 2, 0]}>
+              <cylinderGeometry args={[tower.width * 0.46, tower.width * 0.52, tower.height * 0.86, 24]} />
+              <meshStandardMaterial map={facadeTexture} color="#FFFFFF" roughness={0.2} metalness={0.3} />
+            </mesh>
+            <mesh position={[0, tower.height * 0.86 + 0.015, 0]}>
+              <cylinderGeometry args={[tower.width * 0.52, tower.width * 0.52, 0.03, 24]} />
+              <meshStandardMaterial color="#15803D" roughness={0.7} />
+            </mesh>
+            <mesh castShadow position={[0, tower.height * 0.86 + 0.03 + (tower.height * 0.12) / 2, 0]}>
+              <cylinderGeometry args={[tower.width * 0.36, tower.width * 0.44, tower.height * 0.12, 24]} />
+              <meshStandardMaterial color="#F59E0B" roughness={0.2} metalness={0.8} />
+            </mesh>
+          </group>
+        ))}
+      </group>
+
+      {/* 4. Trường phái Tháp Chóp Vương Miện Art Deco (Times Square crowned towers) */}
+      <group data-testid="highrise-crowned">
+        {crownedTowers.map((tower) => (
+          <group key={tower.id} position={[tower.x, tower.y, tower.z]} rotation={[0, tower.rotationY, 0]}>
+            <mesh castShadow receiveShadow position={[0, (tower.height * 0.82) / 2, 0]}>
+              <boxGeometry args={[tower.width, tower.height * 0.82, tower.depth]} />
+              <meshStandardMaterial map={facadeTexture} color="#FFFFFF" roughness={0.2} metalness={0.3} />
+            </mesh>
+            <mesh position={[0, tower.height * 0.82 + 0.02, 0]}>
+              <boxGeometry args={[tower.width * 0.88, 0.04, tower.depth * 0.88]} />
+              <meshStandardMaterial color="#15803D" roughness={0.7} />
+            </mesh>
+            <mesh castShadow position={[0, tower.height * 0.82 + 0.04 + (tower.height * 0.08) / 2, 0]}>
+              <boxGeometry args={[tower.width * 0.72, tower.height * 0.08, tower.depth * 0.72]} />
+              <meshStandardMaterial color="#F59E0B" roughness={0.2} metalness={0.8} />
+            </mesh>
+            <mesh castShadow position={[0, tower.height * 0.90 + (tower.height * 0.10) / 2, 0]}>
+              <coneGeometry args={[tower.width * 0.32, tower.height * 0.10, 4]} />
+              <meshStandardMaterial color="#F59E0B" roughness={0.2} metalness={0.8} />
+            </mesh>
+          </group>
+        ))}
+      </group>
     </group>
   );
 }

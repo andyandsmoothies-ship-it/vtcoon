@@ -4,7 +4,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { RoomManager } from '../../src/server/room_manager';
-import { TurnPhase, INITIAL_BALANCE, GO_BONUS } from '../../src/domain/room';
+import { TurnPhase, INITIAL_BALANCE, GO_BONUS, getInitialBalanceForPlayerCount } from '../../src/domain/room';
 import { dispatchPlayerIntent } from '../../src/server/intent_dispatcher';
 import { ActionRejectReason } from '../../src/domain/action_reasons';
 import { PROPERTY_DEEDS } from '../../src/domain/property_manager';
@@ -165,7 +165,7 @@ describe('[TC-E2E-RESILIENCE/MSS] Production-Grade Resilience & Defensive Testin
       mgr.joinRoom(room.roomCode, 'P3');
       mgr.startGame(room.roomCode);
 
-      const initialTotal = 3 * INITIAL_BALANCE; // 45.000 Tr.
+      const initialTotal = 3 * getInitialBalanceForPlayerCount(3); // 60.000 Tr.
       let bankSink = 0;       // Tiền nộp/hủy vào Ngân hàng
       let goBonusGiven = 0;   // Tiền bơm từ ô GO
 

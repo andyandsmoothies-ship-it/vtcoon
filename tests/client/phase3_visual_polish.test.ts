@@ -81,9 +81,9 @@ describe('[TC-P3.1/MSS] TitleDeedModal Layout Polish & Chống Tràn Màn Hình 
     );
     expect(htmlOwned).toContain('Giải Chấp');
     expect(htmlOwned).toContain('Đóng');
-    expect(htmlOwned).toContain('✓ Đã Sở Hữu (Đại Gia Sài Gòn)');
+    expect(htmlOwned).toContain('Chủ sở hữu: Đại Gia Sài Gòn');
     expect(htmlOwned).toContain('min-h-[48px] whitespace-nowrap px-3.5 py-2 rounded-xl font-black text-xs');
-    expect(htmlOwned).toContain('min-h-[48px] whitespace-nowrap px-4 py-2 rounded-xl font-bold text-slate-300');
+    expect(htmlOwned).toContain('min-h-[48px] whitespace-nowrap px-4 py-2 rounded-xl font-bold text-slate-900');
   });
 
   it('Nút Giải Chấp hiển thị khi có onRedeem mà không cần truyền onMortgage', () => {

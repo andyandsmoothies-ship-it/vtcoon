@@ -9,6 +9,7 @@ import { EventCardModal } from './event_card_modal';
 import { HoseModal } from './hose_modal';
 import { InsolvencyBanner } from './insolvency_banner';
 import { GameOverModal } from './game_over_modal';
+import { GameRulesModal } from './game_rules_modal';
 import { AudioEngine } from '../../audio/audio_engine';
 import { SoundEffect } from '../../audio/audio_types';
 import { formatCurrency } from '../ui_helpers';
@@ -65,7 +66,21 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
     }
   }, [activeModal]);
 
-  if (!activeModal || !modalPayload) {
+  if (!activeModal) {
+    return null;
+  }
+
+  if (activeModal === 'rules') {
+    return (
+      <GameRulesModal
+        isOpen={true}
+        onClose={closeModal}
+        initialTab={(modalPayload as ModalPayloadMap['rules'])?.initialTab}
+      />
+    );
+  }
+
+  if (!modalPayload) {
     return null;
   }
 
@@ -236,6 +251,10 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
           title={(modalPayload as ModalPayloadMap['event']).title}
           description={(modalPayload as ModalPayloadMap['event']).description}
           effectDelta={(modalPayload as ModalPayloadMap['event']).effectDelta}
+          targetScope={(modalPayload as ModalPayloadMap['event']).targetScope}
+          effectDetail={(modalPayload as ModalPayloadMap['event']).effectDetail}
+          duration={(modalPayload as ModalPayloadMap['event']).duration}
+          destination={(modalPayload as ModalPayloadMap['event']).destination}
           onConfirm={closeModal}
           onClose={closeModal}
         />

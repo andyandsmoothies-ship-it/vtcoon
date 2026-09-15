@@ -55,7 +55,7 @@ export interface FloatingTextItem {
   readonly timestamp: number;
 }
 
-export type ActiveModalType = 'deed' | 'auction' | 'trade' | 'event' | 'hose' | 'insolvency' | 'game_over' | null;
+export type ActiveModalType = 'deed' | 'auction' | 'trade' | 'event' | 'hose' | 'insolvency' | 'game_over' | 'rules' | null;
 
 export interface ModalPayloadMap {
   deed: { cellIndex: number; canBuy?: boolean };
@@ -80,6 +80,10 @@ export interface ModalPayloadMap {
     title: string;
     description: string;
     effectDelta?: number;
+    targetScope?: string;
+    effectDetail?: string;
+    duration?: string;
+    destination?: string;
   };
   hose: {
     minStake?: number;
@@ -94,6 +98,9 @@ export interface ModalPayloadMap {
   };
   game_over: {
     leaderboard: ReadonlyArray<{ readonly id: string; readonly netWorth: number }>;
+  };
+  rules: {
+    initialTab?: 'core' | 'cards' | 'mechanics';
   };
 }
 

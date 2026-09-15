@@ -46,15 +46,11 @@ export interface MicroVehicleDef {
 
 export const MICRO_VEHICLES: readonly MicroVehicleDef[] = [
   // Làn ngoài (Outer Track - Chiều thuận kim đồng hồ, chuẩn quy tắc giao thông bên phải Việt Nam)
-  { id: 'bus-yellow', name: 'Xe Buýt Vàng Sài Gòn', type: 'bus', color: '#F59E0B', track: 'outer', speed: 0.035, offset: 0.05, size: [0.11, 0.11, 0.32] },
-  { id: 'sedan-blue', name: 'Sedan Sapphire', type: 'sedan', color: '#0284C7', track: 'outer', speed: 0.035, offset: 0.30, size: [0.09, 0.06, 0.19] },
-  { id: 'suv-white', name: 'SUV Bạch Kim', type: 'suv', color: '#F8FAFC', track: 'outer', speed: 0.035, offset: 0.55, size: [0.10, 0.07, 0.22] },
-  { id: 'sports-orange', name: 'Coupe Thể Thao Cam', type: 'sports', color: '#EA580C', track: 'outer', speed: 0.035, offset: 0.80, size: [0.09, 0.05, 0.18] },
+  { id: 'bus-yellow', name: 'Xe Buýt Vàng Sài Gòn', type: 'bus', color: '#F59E0B', track: 'outer', speed: 0.035, offset: 0.10, size: [0.11, 0.11, 0.32] },
+  { id: 'sedan-blue', name: 'Sedan Sapphire', type: 'sedan', color: '#0284C7', track: 'outer', speed: 0.035, offset: 0.65, size: [0.09, 0.06, 0.19] },
 
   // Làn trong (Inner Track - Chiều ngược kim đồng hồ đối ứng, chuẩn quy tắc giao thông bên phải)
-  { id: 'bus-red', name: 'Xe Buýt Đỏ VinBus', type: 'bus', color: '#DC2626', track: 'inner', speed: 0.032, offset: 0.15, size: [0.11, 0.11, 0.30] },
-  { id: 'taxi-green', name: 'Taxi Xanh Mai Linh', type: 'taxi', color: '#10B981', track: 'inner', speed: 0.032, offset: 0.48, size: [0.09, 0.06, 0.19] },
-  { id: 'van-yellow', name: 'Xe Vận Tải DHL', type: 'van', color: '#EAB308', track: 'inner', speed: 0.032, offset: 0.81, size: [0.10, 0.08, 0.23] },
+  { id: 'taxi-green', name: 'Taxi Xanh Mai Linh', type: 'taxi', color: '#10B981', track: 'inner', speed: 0.032, offset: 0.40, size: [0.09, 0.06, 0.19] },
 ];
 
 const tempVec = new Vector3();

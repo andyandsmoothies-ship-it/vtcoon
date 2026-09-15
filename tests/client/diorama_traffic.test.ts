@@ -33,35 +33,30 @@ describe('[UI-S02/MSS] DioramaTraffic — Autonomous Micro-Traffic System', () =
     expect(trafficMarkup).toContain('data-testid="diorama-traffic"');
   });
 
-  it('Quản lý danh sách 7 xe tí hon gồm xe buýt vàng/đỏ, ô tô cá nhân nhiều màu và taxi', () => {
-    expect(MICRO_VEHICLES.length).toBeGreaterThanOrEqual(6);
-    expect(MICRO_VEHICLES.length).toBeLessThanOrEqual(8);
+  it('Quản lý danh sách xe tí hon tinh giản theo chuẩn IMP-71 (tối đa 4 xe)', () => {
+    expect(MICRO_VEHICLES.length).toBeLessThanOrEqual(4);
+    expect(MICRO_VEHICLES.length).toBeGreaterThanOrEqual(3);
 
     const vehicleTypes = MICRO_VEHICLES.map((v) => v.type);
     expect(vehicleTypes).toContain('bus');
     expect(vehicleTypes).toContain('sedan');
-    expect(vehicleTypes).toContain('suv');
-    expect(vehicleTypes).toContain('sports');
     expect(vehicleTypes).toContain('taxi');
-    expect(vehicleTypes).toContain('van');
   });
 
   it('Phân bổ đủ 2 làn di chuyển đối ứng: làn ngoài và làn trong', () => {
     const outerVehicles = MICRO_VEHICLES.filter((v) => v.track === 'outer');
     const innerVehicles = MICRO_VEHICLES.filter((v) => v.track === 'inner');
-    expect(outerVehicles.length).toBeGreaterThanOrEqual(3);
-    expect(innerVehicles.length).toBeGreaterThanOrEqual(3);
+    expect(outerVehicles.length).toBeLessThanOrEqual(2);
+    expect(outerVehicles.length).toBeGreaterThanOrEqual(1);
+    expect(innerVehicles.length).toBeLessThanOrEqual(2);
+    expect(innerVehicles.length).toBeGreaterThanOrEqual(1);
   });
 
   it('Mỗi xe có đầy đủ thân vỏ đặc trưng màu sắc và đèn pha LED vi mô rọi sáng mặt đường', () => {
     // Màu các phương tiện
     expect(trafficMarkup).toContain('#F59E0B'); // Xe buýt vàng Sài Gòn
-    expect(trafficMarkup).toContain('#DC2626'); // Xe buýt đỏ VinBus
     expect(trafficMarkup).toContain('#0284C7'); // Sedan Sapphire
-    expect(trafficMarkup).toContain('#F8FAFC'); // SUV Bạch Kim
-    expect(trafficMarkup).toContain('#EA580C'); // Coupe Cam
     expect(trafficMarkup).toContain('#10B981'); // Taxi Xanh Mai Linh
-    expect(trafficMarkup).toContain('#EAB308'); // Xe tải vàng DHL
 
     // Đèn pha LED vàng vi mô rọi mặt đường & đèn hậu đỏ
     expect(trafficMarkup).toContain('#FEF08A'); // LED headlight

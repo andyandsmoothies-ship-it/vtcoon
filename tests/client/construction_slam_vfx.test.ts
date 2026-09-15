@@ -18,12 +18,12 @@ describe('[TC-VFX02.0/MSS] getBuildingWorldPosition — 4-Side Board Footprint A
     const pos = getBuildingWorldPosition(5);
     expect(pos[0]).toBeCloseTo(0);
     expect(pos[1]).toBe(0.12);
-    expect(pos[2]).toBeCloseTo(9 - 0.42);
+    expect(pos[2]).toBeCloseTo(9 - 1.38);
   });
 
   it('tinh dung toa do cong trinh cho Canh 1 (duoi len tren, lech +X)', () => {
     const pos = getBuildingWorldPosition(15);
-    expect(pos[0]).toBeCloseTo(-9 + 0.42);
+    expect(pos[0]).toBeCloseTo(-9 + 1.38);
     expect(pos[1]).toBe(0.12);
     expect(pos[2]).toBeCloseTo(0);
   });
@@ -32,12 +32,12 @@ describe('[TC-VFX02.0/MSS] getBuildingWorldPosition — 4-Side Board Footprint A
     const pos = getBuildingWorldPosition(25);
     expect(pos[0]).toBeCloseTo(0);
     expect(pos[1]).toBe(0.12);
-    expect(pos[2]).toBeCloseTo(-9 + 0.42);
+    expect(pos[2]).toBeCloseTo(-9 + 1.38);
   });
 
   it('tinh dung toa do cong trinh cho Canh 3 (tren xuong duoi, lech -X)', () => {
     const pos = getBuildingWorldPosition(35);
-    expect(pos[0]).toBeCloseTo(9 - 0.42);
+    expect(pos[0]).toBeCloseTo(9 - 1.38);
     expect(pos[1]).toBe(0.12);
     expect(pos[2]).toBeCloseTo(0);
   });

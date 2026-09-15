@@ -22,8 +22,8 @@ describe('[TC-04.1/MSS] MC_FIRE_INSPECTION (Thanh Tra PCCC)', () => {
     mgr.handleRollDice(room.roomCode, 'p1');
     expect(room.marketDeck).toHaveLength(15);
     expect(room.marketDiscard).toContain(MarketCardId.MC_FIRE_INSPECTION);
-    expect(room.players[0]!.balance).toBe(15000); expect(room.players[2]!.balance).toBe(15000);
-    expect(room.players[1]!.balance).toBe(15000 - 800); // 2*200 + 1*400 = 800
+    expect(room.players[0]!.balance).toBe(20000); expect(room.players[2]!.balance).toBe(20000);
+    expect(room.players[1]!.balance).toBe(20000 - 800); // 2*200 + 1*400 = 800
     expect(room.phase).toBe(TurnPhase.PropertyManagement);
   });
 });
@@ -53,7 +53,7 @@ describe('[TC-04.2/MSS] Ma Trận Ưu Tiên Modifier (Mùa Du Lịch & Bão Duy�
     room.activeModifiers = [{ type: MarketCardId.MC_COASTAL_STORM, remainingRounds: 1, affectedCells: COASTAL_CELLS, multiplier: 0 }];
     room.currentPlayerIndex = 1; room.players[1]!.position = 12; room.players[1]!.balance = 8000;
     mgr.handleRollDice(room.roomCode, 'p2');
-    expect(room.players[1]!.balance).toBe(8000); expect(room.players[0]!.balance).toBe(15000);
+    expect(room.players[1]!.balance).toBe(8000); expect(room.players[0]!.balance).toBe(20000);
   });
   it('Kịch bản C: xung đột đồng thời tại ô 11 -> Zero-rent thắng tuyệt đối', () => {
     const { mgr, room, reg, sm } = setup();
@@ -64,17 +64,17 @@ describe('[TC-04.2/MSS] Ma Trận Ưu Tiên Modifier (Mùa Du Lịch & Bão Duy�
     ];
     room.currentPlayerIndex = 1; room.players[1]!.position = 9; room.players[1]!.balance = 10000;
     mgr.handleRollDice(room.roomCode, 'p2');
-    expect(room.players[1]!.balance).toBe(10000); expect(room.players[0]!.balance).toBe(15000);
+    expect(room.players[1]!.balance).toBe(10000); expect(room.players[0]!.balance).toBe(20000);
   });
 });
 
 describe('[TC-04.3/MSS] Sàn Giao Dịch Chứng Khoán HOSE (Ô 38)', () => {
   it('Kịch bản A, B, C, D, E: tỷ lệ lời/lỗ và kiểm tra biên cược HOSE', () => {
-    let rngVal = 0.05; // face = 1 (x0.30)
+    let rngVal = 0.05; // face = 1 (x0.50)
     const { mgr, room } = setup(() => rngVal);
     room.phase = TurnPhase.HosePhase; room.players[0]!.balance = 5000;
     mgr.handlePlayerIntent(room.roomCode, 'p1', { type: 'INTENT_INVEST', stake: 2000 });
-    expect(room.players[0]!.balance).toBe(3600); // 5000 - 2000 + 600
+    expect(room.players[0]!.balance).toBe(4000); // 5000 - 2000 + 1000
     rngVal = 0.95; room.phase = TurnPhase.HosePhase; room.players[0]!.balance = 5000; // face = 6 (x2.00)
     mgr.handlePlayerIntent(room.roomCode, 'p1', { type: 'INTENT_INVEST', stake: 2000 });
     expect(room.players[0]!.balance).toBe(7000); // 5000 - 2000 + 4000

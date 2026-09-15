@@ -1,6 +1,7 @@
 ### **I. QUY CHUẨN ĐỊA HÌNH & SA BÀN ĐÔ THỊ NÉN 3D (3D DIORAMA & TERRAIN ELEVATION SPECIFICATION - IMP-30/IMP-31)**
 
 1. **Thang phân tầng cao độ mở rộng (Extended Depth Layer Stack - Triệt tiêu 100% Z-Fighting)**:
+   - `WALNUT_TABLE_Y = -0.350`: Mặt bàn cờ gỗ óc chó tự nhiên PBR 2K (IMP-62).
    - `OCEAN_Y = -0.150`: Mặt biển xanh ngọc lam (Gerstner Waves ngoài khơi).
    - `RIVER_BED_Y = -0.050`: Lòng kênh sông Sài Gòn nội đô (rộng 1.8m, dài 15.0m, chui qua gầm Cầu Ba Son và Cầu Long Biên).
    - `TERRAIN_BASE_Y = 0.000`: Nền địa hình chính (thảm cỏ hoa viên và bãi cát vàng).
@@ -10,23 +11,28 @@
    - `STANDEE_BASE_Y = 0.025`: Thềm móng công trình và chân standee billboard.
 
 2. **Quy hoạch phân vùng cao độ (Stepped Height Zoning Invariant)**:
+   - **Tọa độ chân đế công trình đỉnh ô cờ (`Top Building Plot Invariant - Gotcha #86`)**: Cả Cấp 0 (`SurveyorPlotBoundary`) và Cấp 1-3 (`SafeGLTFModel`) đặt tại `position={[0, 0.22, -0.58]}` (`Z <= -0.50`), giải phóng hoàn toàn nửa dưới ô cờ cho quân cờ di chuyển và khay giá; bố cục thẻ 4 tầng chống che tên card.
    - **Shophouse Đông Dương ven ô cờ**: Chiều cao công trình h <= 0.8m (dải chuẩn 0.38m - 0.68m), đảm bảo không che khuất chữ trên mặt ô đất và quân cờ ở camera 38 độ. Gom 32 căn qua `InstancedMesh` (2 Draw Calls).
    - **Cao ốc tài chính lõi trung tâm**: Lùi sâu về phía Bắc (Z <= -2.4), chiều cao giật cấp bậc thang h <= 3.2m (dải chuẩn 1.2m - 2.8m). Gom 16 tháp qua `InstancedMesh` (2 Draw Calls).
    - **Hàng dừa nhiệt đới bờ biển**: 60 cây dừa gom qua `InstancedMesh` (3 Draw Calls). Bán kính tán dừa r <= 0.42m, thân dừa cao 1.4m. 40 cây bờ Nam lùi sâu ra bãi cát Z trong khoảng [12.2, 14.0] (cách mép ô cờ >= 2.1m), 20 cây bờ Đông Nam X trong khoảng [12.4, 14.8]. Bảo đảm 100% không che khuất ô cờ.
 
-3. **Ngân sách GPU & WebGL**:
+3. **Ngân sách GPU, WebGL & Triệt tiêu Backdrop Blur (IMP-63)**:
    - Tổng Draw Calls toàn sa bàn: <= 75 Draw Calls (thực tế 65 - 68 Draw Calls).
-   - Duy trì ổn định 60 FPS trên màn hình di động và máy tính để bàn.
+   - **Bất biến Triệt tiêu 100% `backdrop-blur` trên HUD**: Cấm dùng `backdrop-blur` trên mọi lớp DOM UI nổi trên Canvas 3D. Dùng lớp phủ phẳng trong suốt nhẹ `bg-slate-900/15` cho ModalBackdrop để giải phóng GPU fill-rate, duy trì ổn định 60 FPS trên màn hình di động và máy tính để bàn.
 
 ---
 
-### **II. QUY CHUẨN TÀI NGUYÊN HÌNH ẢNH STANDEE 2.5D (DIORAMA ASSET SPECIFICATION)**
+### **II. QUY CHUẨN MÔ HÌNH 3D PBR & TÀI NGUYÊN SA BÀN (3D ASSET SPECIFICATION - IMP-62)**
 
-* **Định dạng & Dung lượng:** File .webp tách nền trong suốt (Transparent Alpha), kích thước chuẩn 512x512px, dung lượng tối đa <= 45KB/lớp để đảm bảo tổng tài nguyên 1 ô không vượt quá 120KB.  
-* **Phân lớp thị giác:**  
-  * *Lớp 1 (Nền - Background):* Cảnh quan không gian, đặt ở trục Z = -0.4, không chuyển động.  
-  * *Lớp 2 (Linh hồn - Core Subject):* Thực thể nhận diện bản địa, đặt ở trục Z = 0.0 (chuẩn hóa cao độ tĩnh y = 1.1 theo IMP-27 để tối ưu 60 FPS, loại bỏ hook nhấp nhô lặp lại).  
-  * *Lớp 3 (Tiền cảnh - Foreground):* Chi tiết phụ trợ mặt nước hoặc rào chắn, đặt ở trục Z = +0.3.
+* **15 Mô Hình Điêu Khắc Tinh Xảo (.glb PBR):** Thay thế toàn bộ hình khối voxel thô sơ bằng các asset điêu khắc thu nhỏ chuẩn commercial diorama (`public/models/`, tổng tải trọng 0.63 MB / trần 2.5 MB):
+  * **Công trình C1 - C3:** Nhà phố Indochine C1 (`404 tris`), Cao ốc Sapphire C2 (`444 tris`), Đại TTTM & Resort C3 (`556 tris`).
+  * **Quân cờ VIP:** 4 quân cờ kim loại đúc die-cast nguyên khối (`pawns/`, 590 - 860 tris).
+  * **Kỳ quan biểu tượng:** Chợ Bến Thành (`844 tris`), Nhà Thờ Đức Bà (`756 tris`).
+  * **Phương tiện vi mô:** 6 loại xe hơi, container, ca nô (`vehicles/`, 180 - 340 tris).
+* **Hệ Thống Procedural Facade Texture & Gỗ Óc Chó:**
+  * Ma trận kính cao ốc và tường vàng Indochine sinh động qua `CanvasTexture` lặp (`RepeatWrapping`), giữ vững kiến trúc `InstancedMesh` (16 cao ốc = 2 draw calls; 32 nhà phố = 2 draw calls).
+  * Mặt bàn cờ gỗ óc chó 2K véc-ni tự nhiên (`tabletop_texture_generator.ts`) và thảm nỉ nhung xanh rừng già `#064E3B` (`sheen: 1.0`) cho khay xúc xắc.
+  * Tích hợp DataTexture fallback chống crash SSR headless và Singleton Cache chống rò rỉ GPU VRAM.
 
 Quy chuẩn thiết kế mỹ thuật và giao diện trực quan cho toàn bộ 28 ô tài sản kinh tế trên bàn cờ được đồng bộ theo 4 cấp độ phát triển đô thị.  
 Mỗi ô bao gồm:
@@ -297,3 +303,27 @@ Hệ thống âm thanh tự động chuyển đổi nhạc nền (Crossfade 1,5 
   * **Tàu container mini:** Biểu tượng ngành logistics và cảng biển.
 
 **Hệ thống Biểu cảm Nhanh (Social Emotes):** Tích hợp bảng icon động 2D xuất hiện trên đầu avatar người chơi để tương tác xã hội (Cười, Bắn tim, Lo sợ khi vào Trạm Kiểm Toán, Kêu cứu khi sắp phá sản).
+
+---
+
+### **IV. QUY CHUẨN GIAO DIỆN 2D CỜ BÀN & CHỈ BÁO SỞ HỮU 3D (IMP-58, IMP-61, IMP-63)**
+
+1. **Tabletop Bright Theme SSOT (`TABLETOP_THEME`):**
+   - **Chất liệu & Màu sắc:** Chuyển đổi toàn diện từ Dark Mode sang phong cách cờ bàn truyền thống giấy ngà `#FFFDF8` và bìa kem ấm `#F7F2E7`, viền mực đen 2px `border-slate-900`.
+   - **Đổ bóng xúc giác phẳng (Tactile Shadows):** Nút bấm và thẻ bài dùng bóng dập nổi cứng `shadow-[0_4px_0_0_#...]`, lún vật lý khi nhấn `active:translate-y-[3px]` / `active:translate-y-[4px]`.
+   - **Độ tương phản cao:** Toàn bộ chữ số tài chính in mực đen đậm `#0F172A` (`tabular-nums font-mono`), loại bỏ hoàn toàn chữ xám mờ trên nền tối.
+   - **Các bố cục cờ bàn chuyên biệt:**
+     * *Thẻ Sổ Đỏ (TitleDeedModal):* Bố cục Monopoly cổ điển (dải ribbon màu địa phương, bảng phí C0-C3 mực đen, con dấu danh dự "SỔ ĐỎ CHÍNH CHỦ" khi đã có chủ).
+     * *Đàm phán (TradeModal):* 2 thảm nỉ riêng biệt (Thảm xanh Bạn vs Thảm đỏ Đối thủ), thẻ BĐS mini nhấc nổi, cọc tiền giấy đồ chơi nút nạp nhanh (+100, +500).
+     * *Đấu giá (AuctionModal):* Bục hội chợ cờ bàn vàng kem `#FFFBEB` và bảng lật số retro lớn `data-testid="flip-counter"`.
+     * *Nhật ký hành trình (ActivityFeedSidebar):* Cuốn sổ ký sự giấy kraft `#FBF7EE` gáy may chỉ.
+     * *Cảnh báo vỡ nợ (InsolvencyBanner):* Phong bì ngân hàng viền sọc bưu điện đỏ-trắng.
+
+2. **Chỉ Báo Sở Hữu Trên Sa Bàn 3D (IMP-58):**
+   - **Cọc cờ vải PBR (`FlagCloth`):** Render tại góc ô cờ đã có chủ, nhận đúng màu quân cờ (`tokenColor`) của chủ sở hữu.
+   - **Vòng đai hoàng kim (`TierIndicatorRings`):** Thân cọc cờ đồng thau gắn các vòng đai chỉ báo cấp độ công trình C0-C3 từ xa.
+   - **Viền chân đế kim loại (`OwnerBaseTrim`):** Ôm sát chân đế đá ngà voi của ô cờ để nhận diện phân khu sở hữu.
+
+3. **Nguyên Tắc Hiệu Năng HUD Nổi (Zero Blur Invariant - IMP-63):**
+   - Triệt tiêu 100% `backdrop-blur` trên các lớp HUD DOM nổi trên WebGL Canvas (`TopBar`, `ActionDock`, `PlayerCard`, `SocialEmotesTray`, `ModalBackdrop`).
+   - `ModalBackdrop` dùng lớp phủ phẳng trong suốt nhẹ `bg-slate-900/15`, vừa phân tách rõ nét vừa giữ cho sa bàn 3D ngoài trời luôn ngập tràn ánh nắng và giải phóng tài nguyên GPU duy trì ổn định 60 FPS.

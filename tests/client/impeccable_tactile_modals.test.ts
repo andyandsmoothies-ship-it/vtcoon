@@ -38,10 +38,10 @@ describe('[IMP-P1/P2] TradeModal Responsive Bounds & Tactile Shadows', () => {
       })
     );
     expect(html).not.toContain('active:scale-95');
-    expect(html).toContain('shadow-[0_4px_0_0_#064e3b]');
-    expect(html).toContain('active:shadow-[0_1px_0_0_#064e3b]');
+    expect(html).toContain('shadow-[0_4px_0_0_#065f46]');
+    expect(html).toContain('active:shadow-[0_1px_0_0_#065f46]');
     expect(html).toContain('active:translate-y-[3px]');
-    expect(html).toContain('shadow-[0_4px_0_0_#020617]');
+    expect(html).toContain('shadow-[0_4px_0_0_#64748b]');
   });
 });
 
@@ -55,8 +55,8 @@ describe('[IMP-P2/P7] EventCardModal Tactile Shadows & Dong Son Drum Vector', ()
       })
     );
     expect(htmlMarket).not.toContain('active:scale-95');
-    expect(htmlMarket).toContain('shadow-[0_4px_0_0_#78350f]');
-    expect(htmlMarket).toContain('active:shadow-[0_1px_0_0_#78350f]');
+    expect(htmlMarket).toContain('shadow-[0_4px_0_0_#065f46]');
+    expect(htmlMarket).toContain('active:shadow-[0_1px_0_0_#065f46]');
     expect(htmlMarket).toContain('active:translate-y-[3px]');
 
     const htmlChance = renderToStaticMarkup(
@@ -67,11 +67,11 @@ describe('[IMP-P2/P7] EventCardModal Tactile Shadows & Dong Son Drum Vector', ()
       })
     );
     expect(htmlChance).not.toContain('active:scale-95');
-    expect(htmlChance).toContain('shadow-[0_4px_0_0_#155e75]');
-    expect(htmlChance).toContain('active:shadow-[0_1px_0_0_#155e75]');
+    expect(htmlChance).toContain('shadow-[0_4px_0_0_#065f46]');
+    expect(htmlChance).toContain('active:shadow-[0_1px_0_0_#065f46]');
   });
 
-  it('P7: EventCardModal renders sunken Dong Son drum vector overlay with opacity-10', () => {
+  it('P7: EventCardModal renders sunken Dong Son drum vector overlay with opacity-[0.05]', () => {
     const html = renderToStaticMarkup(
       React.createElement(EventCardModal, {
         cardType: 'chance',
@@ -79,10 +79,10 @@ describe('[IMP-P2/P7] EventCardModal Tactile Shadows & Dong Son Drum Vector', ()
         description: 'Thử nghiệm hoa văn Trống Đồng',
       })
     );
-    expect(html).toContain('opacity-10');
+    expect(html).toContain('opacity-[0.05]');
     expect(html).toContain('pointer-events-none');
     expect(html).toContain('viewBox="0 0 400 400"');
-    expect(html).toContain('text-amber-300');
+    expect(html).toContain('text-slate-900');
   });
 });
 
@@ -138,8 +138,8 @@ describe('[IMP-P3] InsolvencyBanner Touch Target & Focus Ring', () => {
     expect(html).toContain('w-full min-h-[44px]');
     expect(html).toContain('shadow-[0_4px_0_0_#b45309]');
     expect(html).toContain('active:shadow-[0_1px_0_0_#b45309]');
-    expect(html).toContain('shadow-[0_4px_0_0_#4c0519]');
-    expect(html).toContain('active:shadow-[0_1px_0_0_#4c0519]');
+    expect(html).toContain('shadow-[0_4px_0_0_#fda4af]');
+    expect(html).toContain('active:shadow-[0_1px_0_0_#fda4af]');
   });
 });
 
@@ -156,7 +156,7 @@ describe('[IMP-P4/P5/P6] TitleDeedModal Grid, High-Contrast Mortgage & Compact H
     expect(html).toContain('px-3.5 sm:px-6');
   });
 
-  it('P5: Mortgage button uses text-amber-950 font-black with amber tactile shadow', () => {
+  it('P5: Mortgage button uses text-slate-900 font-black with amber tactile shadow', () => {
     const html = renderToStaticMarkup(
       React.createElement(TitleDeedModal, {
         cellIndex: 1,
@@ -166,13 +166,13 @@ describe('[IMP-P4/P5/P6] TitleDeedModal Grid, High-Contrast Mortgage & Compact H
         onMortgage: () => {},
       })
     );
-    expect(html).toContain('text-amber-950');
+    expect(html).toContain('text-slate-900');
     expect(html).toContain('font-black');
     expect(html).toContain('shadow-[0_4px_0_0_#b45309]');
     expect(html).toContain('active:shadow-[0_1px_0_0_#b45309]');
   });
 
-  it('P6: Ribbon header uses compact px-3 py-1 padding and h2 tracking-wide text-xs sm:text-sm font-black', () => {
+  it('P6: Ribbon header uses compact px-3 py-2 padding and h2 tracking-wide text-xs sm:text-sm font-black', () => {
     const html = renderToStaticMarkup(
       React.createElement(TitleDeedModal, {
         cellIndex: 1,
@@ -180,7 +180,7 @@ describe('[IMP-P4/P5/P6] TitleDeedModal Grid, High-Contrast Mortgage & Compact H
         isOwned: false,
       })
     );
-    expect(html).toContain('px-3 py-1 text-center relative border border-amber-400/60');
+    expect(html).toContain('px-3 py-2 text-center relative border-2 border-slate-900 shadow-[0_3px_0_0_#0f172a]');
     expect(html).toContain('tracking-wide text-xs sm:text-sm font-black uppercase text-white');
   });
 });

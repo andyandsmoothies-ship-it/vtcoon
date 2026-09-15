@@ -34,7 +34,7 @@ describe('[E2E-AUTOMATION] Kiểm thử Logic Toàn Trình (Headless Simulation)
     executeChanceCard(ChanceCardId.CC_PLATE_AUCTION, 'p1', [room.players[0]!]);
     room.phase = TurnPhase.PropertyManagement;
 
-    expect(room.players[0]!.balance, 'P1 bị trừ 500 Tr. tiền đấu giá biển số').toBe(14_500);
+    expect(room.players[0]!.balance, 'P1 bị trừ 500 Tr. tiền đấu giá biển số').toBe(24_500);
     expect(room.players[0]!.extraTurns, 'P1 nhận đúng +1 lượt đi thêm').toBe(1);
     expect(room.players[0]!.consecutiveDoubles, 'consecutiveDoubles tuyệt đối KHÔNG bị tăng').toBe(0);
     expect(room.phase, 'FSM ở PropertyManagement sau khi dẫm ô Cơ Hội').toBe(TurnPhase.PropertyManagement);
@@ -63,7 +63,7 @@ describe('[E2E-AUTOMATION] Kiểm thử Logic Toàn Trình (Headless Simulation)
     // P1 mua ô 15 (Cảng Cái Mép) giá 2.000 Tr.
     const buyRes = mgr.handlePlayerIntent(room.roomCode, 'p1', { type: 'INTENT_BUY' });
     expect(buyRes.success).toBe(true);
-    expect(room.players[0]!.balance).toBe(12_500);
+    expect(room.players[0]!.balance).toBe(22_500);
     expect(room.phase).toBe(TurnPhase.PropertyManagement);
 
     // P1 kết thúc lượt -> BẮT BUỘC CHUYỂN SANG BOT 2 (Không còn lượt thứ ba!)

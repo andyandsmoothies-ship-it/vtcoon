@@ -80,6 +80,12 @@ argues from the spec, so the spec travels with it; executors read both]
 
 [Project-wide requirements — version floors, dependency limits, naming rules, platform requirements — one line each, exact values from the spec.]
 
+## System Impact & Blast Radius
+- **Risk Dial**: [Isolated (Level 1) | Slice-Bound (Level 2) | Systemic/Global (Level 3)]
+- **Direct Touch**: [Files/modules modified]
+- **Downstream Consumers**: [Components, stores, or schedulers observing or calling this]
+- **Worst-Case Defense**: [Failure mode and fallback isolation]
+
 ---
 ```
 

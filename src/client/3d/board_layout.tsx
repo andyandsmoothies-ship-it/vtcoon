@@ -1,7 +1,8 @@
 // [UI-S01/MSS][IMP-30] GameBoard — 40-tile procedural board layout with terrain-flush Depth Layer Stack
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { BOARD_CONFIG, CellType } from '../../domain/board_config';
 import { useGameStore } from '../store/game_store';
+import type { PlayerHudInfo } from '../store/game_store_types';
 import { useLobbyStore } from '../store/lobby_store';
 import { cellPosition } from './board_coords';
 import { LayeredDioramaTile } from './board_tile';
@@ -10,6 +11,10 @@ import { MiniatureCityDiorama } from './miniature_city_diorama';
 import { CoastalIslandEnvironment } from './coastal_island_environment';
 import { CinematicLightingAccents } from './cinematic_effects';
 import { ConstructionSlamVFX } from './construction_slam_vfx';
+import {
+  createWalnutTabletopTexture,
+  createWalnutRoughnessTexture,
+} from './tabletop_texture_generator';
 
 // Depth Layer Stack triệt tiêu Z-Fighting (IMP-30 Terrain Flush & IMP-32 Executive Tabletop Master Plan)
 export const WALNUT_TABLE_Y = -0.350;
@@ -48,14 +53,36 @@ export function tileRotation(index: number): [number, number, number] {
   }
 }
 
+export function computeOwnerMap(
+  playersInfo: Record<string, PlayerHudInfo>
+): Record<number, { ownerId: string; ownerName: string; tokenColor: string }> {
+  const map: Record<number, { ownerId: string; ownerName: string; tokenColor: string }> = {};
+  for (const player of Object.values(playersInfo ?? {})) {
+    for (const cellIndex of player.ownedProperties ?? []) {
+      map[cellIndex] = {
+        ownerId: player.id,
+        ownerName: player.name,
+        tokenColor: player.tokenColor ?? '#DC2626',
+      };
+    }
+  }
+  return map;
+}
+
 export function GameBoard(): React.ReactElement {
-  const levelMap = useGameStore((s) => s.levelMap);
+  const storeLevelMap = useGameStore((s) => s.levelMap);
+  const levelMap = Object.keys(storeLevelMap ?? {}).length > 0 ? storeLevelMap : (useGameStore.getState()?.levelMap ?? storeLevelMap);
   const openModal = useGameStore((s) => s.openModal);
   const currentTurnPlayerId = useGameStore((s) => s.currentTurnPlayerId);
   const playerPositions = useGameStore((s) => s.playerPositions);
-  const playersInfo = useGameStore((s) => s.playersInfo);
+  const storePlayersInfo = useGameStore((s) => s.playersInfo);
+  const playersInfo = Object.keys(storePlayersInfo ?? {}).length > 0 ? storePlayersInfo : (useGameStore.getState()?.playersInfo ?? storePlayersInfo);
   const hasRolledThisTurn = useGameStore((s) => s.hasRolledThisTurn);
   const localPlayerId = useLobbyStore((s) => s.myPlayerId) || 'p1';
+
+  const ownerInfoMap = useMemo(() => computeOwnerMap(playersInfo), [playersInfo]);
+  const walnutDiffuse = useMemo(() => createWalnutTabletopTexture(), []);
+  const walnutRoughness = useMemo(() => createWalnutRoughnessTexture(), []);
 
   const handleTileClick = useCallback(
     (cellIndex: number) => {
@@ -79,7 +106,13 @@ export function GameBoard(): React.ReactElement {
       {/* Khung Bàn Gỗ Óc Chó Thượng Lưu (Walnut Tabletop) y = -0.350 */}
       <mesh receiveShadow position={[0, WALNUT_TABLE_Y, 0]}>
         <boxGeometry args={[32, 0.2, 32]} />
-        <meshStandardMaterial color="#2B1D14" roughness={0.35} metalness={0.08} />
+        <meshStandardMaterial
+          map={walnutDiffuse}
+          roughnessMap={walnutRoughness}
+          color="#2B1D14"
+          roughness={0.28}
+          metalness={0.05}
+        />
       </mesh>
 
       {/* 0. Môi trường Bán đảo Đảo Ngọc nhiệt đới (Vịnh biển, bãi cát, đồi núi & mây trời) */}
@@ -107,6 +140,7 @@ export function GameBoard(): React.ReactElement {
           currentLevel={(levelMap[cell.index] ?? 0) as 0 | 1 | 2 | 3}
           isCornerTile={CORNER_INDICES.has(cell.index)}
           enableStandee={false}
+          ownerColor={ownerInfoMap[cell.index]?.tokenColor}
           onClick={() => handleTileClick(cell.index)}
         />
       ))}

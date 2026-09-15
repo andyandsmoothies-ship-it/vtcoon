@@ -3,7 +3,7 @@
 
 import { describe, test, expect } from 'vitest';
 import { RoomManager } from '../../src/server/room_manager';
-import { TurnPhase, BOARD_SIZE, GO_BONUS, INITIAL_BALANCE } from '../../src/domain/room';
+import { TurnPhase, BOARD_SIZE, GO_BONUS, INITIAL_BALANCE, INITIAL_BALANCE_BY_PLAYERS, getInitialBalanceForPlayerCount } from '../../src/domain/room';
 import { MarketCardId, ChanceCardId, RESORT_CELLS } from '../../src/domain/event_card_engine';
 
 describe('[UC-GAME-001/MSS] TC-01.1 createRoom', () => {
@@ -128,7 +128,7 @@ describe('[UC-GAME-008/MSS] TC-01.4 handleRollDice — vuot o GO', () => {
     expect(result).toBeDefined();
     if (result === undefined) return;
     expect(result.passedGo).toBe(true);
-    expect(result.player.balance).toBe(INITIAL_BALANCE + GO_BONUS);
+    expect(result.player.balance).toBe(getInitialBalanceForPlayerCount(2) + GO_BONUS);
   });
 
   test('di chuyen binh thuong, khong vuot GO → passedGo = false, balance khong doi', () => {
@@ -140,7 +140,7 @@ describe('[UC-GAME-008/MSS] TC-01.4 handleRollDice — vuot o GO', () => {
     expect(result).toBeDefined();
     if (result === undefined) return;
     expect(result.passedGo).toBe(false);
-    expect(result.player.balance).toBe(INITIAL_BALANCE);
+    expect(result.player.balance).toBe(getInitialBalanceForPlayerCount(2));
   });
 });
 

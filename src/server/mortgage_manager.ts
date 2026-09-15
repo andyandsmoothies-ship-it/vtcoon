@@ -142,6 +142,10 @@ export function mortgageProperty(
   v.player.mortgageLoans ??= {};
   v.player.mortgageLoans[cellIndex] = v.loan;
 
+  const st = stateMap.get(cellIndex) ?? { level: 0 };
+  st.isMortgaged = true;
+  stateMap.set(cellIndex, st);
+
   console.info(JSON.stringify({
     event: 'MORTGAGE_PROPERTY', correlationId: room.roomCode,
     timestamp: Date.now(), delta: { cellIndex, loan: v.loan, playerId },
@@ -200,6 +204,7 @@ export function redeemProperty(
   playerId: string,
   cellIndex: number,
   registry: PropertyRegistry,
+  stateMap?: PropertyStateMap,
 ): { success: boolean; reason?: ActionRejectReason } {
   const v = validateRedeem(room, playerId, cellIndex, registry);
   if (!v.valid) return { success: false, reason: v.reason };
@@ -213,6 +218,12 @@ export function redeemProperty(
   v.player.mortgagedProperties.splice(v.idx, 1);
   if (v.player.mortgageLoans) {
     delete v.player.mortgageLoans[cellIndex];
+  }
+  if (stateMap) {
+    const st = stateMap.get(cellIndex);
+    if (st) {
+      st.isMortgaged = false;
+    }
   }
 
   console.info(JSON.stringify({

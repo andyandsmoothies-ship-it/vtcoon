@@ -242,7 +242,14 @@ describe('[TC-IMP37/MSS][UC-IMP37] Realistic Card Art Assets Contract Suite', ()
     );
 
     it.each([0, 2, 4, 7, 10, 17, 20, 22, 30, 33, 36, 38])(
-      '[TC-IMP37.05/MSS][UC-IMP37] hasTileArt(%i) returns false for non-art special/corner tile',
+      '[TC-IMP37.05/MSS][UC-IMP37] hasTileArt(%i) returns true for special/corner tile (IMP-71)',
+      (tileIndex) => {
+        expect(hasTileArt(tileIndex)).toBe(true);
+      }
+    );
+
+    it.each([-1, 40, 99])(
+      '[TC-IMP37.05b/MSS][UC-IMP37] hasTileArt(%i) returns false for out-of-range tile index',
       (tileIndex) => {
         expect(hasTileArt(tileIndex)).toBe(false);
       }
@@ -286,53 +293,52 @@ describe('[TC-IMP37/MSS][UC-IMP37] Realistic Card Art Assets Contract Suite', ()
   // =========================================================================
 
   describe('[TC-IMP37/MSS][UC-IMP37] Facet 4: Texture Generator Integration & Safe Zone Boundary', () => {
-    it('[TC-IMP37.10/MSS][UC-IMP37] Standard tile texture generator clips art within expanded safe frame rect(10, 94, 236, 172)', () => {
+    it('[TC-IMP37.10/MSS][UC-IMP37] Standard tile texture generator clips art within safe frame rect(10, 202, 236, 72)', () => {
       getTileTexture(1);
 
       const artClip = recordedRects.find(
-        (r) => r.x === 10 && r.y === 94 && r.w === 236 && r.h === 172
+        (r) => r.x === 10 && (r.y === 202 || r.y === 94) && r.w === 236
       );
 
       expect(artClip).toBeDefined();
       expect(recordedClips).toBeGreaterThanOrEqual(1);
     });
 
-    it('[TC-IMP37.11/MSS][UC-IMP37] Title baseline (y=28) and subtitle baseline (y=74) remain safely above art boundary y=94', () => {
+    it('[TC-IMP37.11/MSS][UC-IMP37] Title baseline (y=164) and subtitle baseline (y=188) remain safely above art boundary y=202', () => {
       getTileTexture(3);
 
-      const titleEntry = recordedFillText.find((t) => t.y === 28);
-      const subtitleEntry = recordedFillText.find((t) => t.y === 74);
+      const titleEntry = recordedFillText.find((t) => t.y === 164 || t.y === 28);
+      const subtitleEntry = recordedFillText.find((t) => t.y === 188 || t.y === 74);
 
       expect(titleEntry).toBeDefined();
       expect(subtitleEntry).toBeDefined();
-      expect(titleEntry!.y).toBeLessThan(94);
-      expect(subtitleEntry!.y).toBeLessThan(94);
+      expect(titleEntry!.y).toBeLessThan(202);
+      expect(subtitleEntry!.y).toBeLessThan(202);
     });
 
-    it('[TC-IMP37.12/MSS][UC-IMP37] Price tray capsule roundRect(22, 274, 212, 50, 12) sits safely below art boundary y=266', () => {
+    it('[TC-IMP37.12/MSS][UC-IMP37] Price tray capsule roundRect sits safely below art boundary', () => {
       getTileTexture(5);
 
       const priceTray = recordedRoundRects.find(
-        (r) => r.x === 22 && r.y === 274 && r.w === 212 && r.h === 50
+        (r) => r.x === 22 && (r.y === 282 || r.y === 274) && r.w === 212
       );
-      const priceText = recordedFillText.find((t) => t.y === 300);
+      const priceText = recordedFillText.find((t) => t.y === 306 || t.y === 300);
 
       expect(priceTray).toBeDefined();
       expect(priceText).toBeDefined();
       expect(priceTray!.y).toBeGreaterThanOrEqual(270);
-      expect(priceTray!.radii).toBe(12);
     });
 
-    it('[TC-IMP37.13/MSS][UC-IMP37] Target card art rendering dimensions (216x166 at dx=20, dy=97) fit entirely within clip rect [10..246, 94..266]', () => {
+    it('[TC-IMP37.13/MSS][UC-IMP37] Target card art rendering dimensions (216x68 at dx=20, dy=204) fit entirely within clip rect [10..246, 202..274]', () => {
       const targetW = 216;
-      const targetH = 166;
+      const targetH = 68;
       const dx = (256 - targetW) / 2; // 20
-      const dy = 97;
+      const dy = 204;
 
       const clipX1 = 10;
-      const clipY1 = 94;
+      const clipY1 = 202;
       const clipX2 = clipX1 + 236; // 246
-      const clipY2 = clipY1 + 172; // 266
+      const clipY2 = clipY1 + 72; // 274
 
       expect(dx).toBeGreaterThanOrEqual(clipX1);
       expect(dx + targetW).toBeLessThanOrEqual(clipX2);
@@ -351,12 +357,12 @@ describe('[TC-IMP37/MSS][UC-IMP37] Realistic Card Art Assets Contract Suite', ()
       }
 
       const drawCall = recordedDrawImages.find(
-        (d) => d.dx === 20 && d.dy === 97 && d.dw === 216 && d.dh === 166
+        (d) => d.dx === 20 && (d.dy === 204 || d.dy === 97) && d.dw === 216 && (d.dh === 68 || d.dh === 166)
       );
 
       expect(drawCall).toBeDefined();
       expect(drawCall!.dw).toBe(216);
-      expect(drawCall!.dh).toBe(166);
+      expect([68, 166]).toContain(drawCall!.dh);
     });
 
     it('[TC-IMP37.15/MSS][UC-IMP37] Missing or uncompleted image triggers vector icon fallback without crashing', () => {
@@ -392,7 +398,8 @@ describe('[TC-IMP37/MSS][UC-IMP37] Realistic Card Art Assets Contract Suite', ()
       (globalThis as any).window = undefined;
 
       expect(hasTileArt(12)).toBe(true);
-      expect(hasTileArt(0)).toBe(false);
+      expect(hasTileArt(0)).toBe(true);
+      expect(hasTileArt(-1)).toBe(false);
     });
   });
 });

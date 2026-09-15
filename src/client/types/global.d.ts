@@ -13,6 +13,7 @@ declare global {
     __threeCamera?: unknown;
     __orbitControls?: unknown;
     __debugCameraManual?: boolean;
+    __resetCameraToDefault?: () => void;
     webkitAudioContext?: typeof AudioContext;
   }
 

@@ -3,13 +3,16 @@ import { CanvasTexture, SRGBColorSpace, LinearFilter, LinearMipmapLinearFilter }
 import { TILE_METADATA_MAP, formatPriceLabel, type TileMetadata } from './tile_texture_data';
 import { drawIcon } from './tile_icons';
 import { ALL_28_STAND_TILES } from '../assets/tile_assets';
+import { CORNER_DRAWERS, drawGoCorner } from './corner_tile_art';
 
 const tileTextureCache = new Map<number, CanvasTexture>();
 const standeeTextureCache = new Map<number, CanvasTexture>();
 const tileImageCache = new Map<number, HTMLImageElement>();
 
+const SPECIAL_TILE_INDICES: readonly number[] = [0, 2, 4, 7, 10, 17, 20, 22, 30, 33, 36, 38] as const;
+
 export function hasTileArt(index: number): boolean {
-  return ALL_28_STAND_TILES.includes(index);
+  return ALL_28_STAND_TILES.includes(index) || SPECIAL_TILE_INDICES.includes(index);
 }
 
 export function getBannerTextColor(bannerColor: string): string {
@@ -42,14 +45,14 @@ function createStandardTileTexture(index: number, meta: TileMetadata): CanvasTex
   ctx.fillRect(0, 0, 256, 340);
 
 
-  // 2. Dải màu nhận diện vùng (Top Banner chứa tiêu đề chính h = 56)
+  // 2. Dải màu nhận diện vùng
   ctx.fillStyle = meta.bannerColor;
   ctx.fillRect(0, 0, 256, 56);
 
-  // 3. Tên tỉnh thành / địa danh chính nằm lọt vào trong banner màu tại y = 28
+  // 3. Tên tỉnh thành / địa danh chính nằm tại y = 28
   // Double Draw viền than đen đanh nét chống lóa mắt
-  ctx.strokeStyle = '#090D1A';
-  ctx.lineWidth = 2.5;
+  ctx.strokeStyle = '#050814';
+  ctx.lineWidth = 3.5;
   ctx.font = '900 28px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
@@ -57,7 +60,7 @@ function createStandardTileTexture(index: number, meta: TileMetadata): CanvasTex
   ctx.fillStyle = getBannerTextColor(meta.bannerColor);
   ctx.fillText(meta.title, 128, 28);
 
-  // Phụ đề (Địa danh chi tiết / Công trình) nằm ngay dưới banner tại y = 74
+  // Phụ đề (Địa danh chi tiết / Công trình) nằm tại y = 74
   ctx.fillStyle = '#020617';
   ctx.font = '900 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   ctx.fillText(meta.subtitle, 128, 74);
@@ -69,7 +72,7 @@ function createStandardTileTexture(index: number, meta: TileMetadata): CanvasTex
   texture.minFilter = LinearMipmapLinearFilter;
   texture.magFilter = LinearFilter;
 
-  // 4. Biểu tượng di sản văn hóa / Tranh độc bản bản địa mở rộng (Tầng giữa: y = 94..266, h = 172)
+  // 4. Biểu tượng di sản văn hóa / Tranh độc bản bản địa (Khung: y = 94..266, h = 172)
   ctx.save();
   ctx.beginPath();
   ctx.rect(10, 94, 236, 172);
@@ -106,11 +109,46 @@ function createStandardTileTexture(index: number, meta: TileMetadata): CanvasTex
       drawIcon(ctx, meta.icon, 128, 180, meta.bannerColor, 1.5);
     }
   } else {
-    drawIcon(ctx, meta.icon, 128, 180, meta.bannerColor, 1.5);
+    // Nền nghệ thuật danh mục cho ô đặc biệt không phải BĐS
+    if (meta.category === 'VẬN MAY') {
+      // Ô Cơ Hội: Thẻ bài vận khí với viền cam hoàng gia
+      ctx.fillStyle = '#FFF7ED';
+      ctx.fillRect(10, 94, 236, 172);
+      ctx.strokeStyle = '#FDBA74';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(18, 102, 220, 156);
+      drawIcon(ctx, meta.icon, 128, 180, meta.bannerColor, 2.0);
+    } else if (meta.category === 'CƠ CHẾ') {
+      // Ô Thị Trường: Rương cơ chế trên nền ngọc bích dịu mắt
+      ctx.fillStyle = '#F0FDFA';
+      ctx.fillRect(10, 94, 236, 172);
+      ctx.strokeStyle = '#5EEAD4';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(18, 102, 220, 156);
+      drawIcon(ctx, meta.icon, 128, 180, meta.bannerColor, 2.0);
+    } else if (meta.category === 'NGÂN SÁCH') {
+      // Ô Lệ Phí Đất: Khung công chứng sắc son hành chính
+      ctx.fillStyle = '#FFF1F2';
+      ctx.fillRect(10, 94, 236, 172);
+      ctx.strokeStyle = '#FDA4AF';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(18, 102, 220, 156);
+      drawIcon(ctx, meta.icon, 128, 180, meta.bannerColor, 2.0);
+    } else if (meta.category === 'TÀI CHÍNH') {
+      // Ô Sàn HOSE: Sàn giao dịch sắc lam tài chính hiện đại
+      ctx.fillStyle = '#F0F9FF';
+      ctx.fillRect(10, 94, 236, 172);
+      ctx.strokeStyle = '#7DD3FC';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(18, 102, 220, 156);
+      drawIcon(ctx, meta.icon, 128, 180, meta.bannerColor, 2.0);
+    } else {
+      drawIcon(ctx, meta.icon, 128, 180, meta.bannerColor, 1.5);
+    }
   }
   ctx.restore();
 
-  // 5. Khay giá niêm yết ở cạnh ngoài
+  // 5. Khay giá niêm yết ở cạnh ngoài (y = 274..324, h = 50)
   const priceText = meta.priceLabel ?? formatPriceLabel(meta.price);
   if (priceText) {
     ctx.fillStyle = '#090D1A';
@@ -132,119 +170,7 @@ function createStandardTileTexture(index: number, meta: TileMetadata): CanvasTex
   return texture;
 }
 
-function drawGoCorner(ctx: CanvasRenderingContext2D): void {
-  // Ô 0: Khởi Hành (GO)
-  ctx.fillStyle = '#0F172A';
-  ctx.fillRect(0, 0, 384, 384);
-  ctx.fillStyle = '#94A3B8';
-  ctx.font = 'bold 20px sans-serif';
-  ctx.fillText('XUẤT PHÁT', 192, 60);
 
-  ctx.fillStyle = '#FBBF24';
-  ctx.font = '900 42px sans-serif';
-  ctx.fillText('KHỞI HÀNH (GO)', 192, 130);
-
-  // Mũi tên vàng chỉ hướng đi (hướng sang trái dọc bàn cờ về phía Cần Thơ)
-  ctx.fillStyle = '#F59E0B';
-  ctx.beginPath();
-  ctx.moveTo(274, 200);
-  ctx.lineTo(144, 200);
-  ctx.lineTo(144, 180);
-  ctx.lineTo(100, 215);
-  ctx.lineTo(144, 250);
-  ctx.lineTo(144, 230);
-  ctx.lineTo(274, 230);
-  ctx.closePath();
-  ctx.fill();
-
-  ctx.fillStyle = '#34D399';
-  ctx.font = '900 32px sans-serif';
-  ctx.fillText('+2.000 Tr.', 192, 295);
-
-  ctx.fillStyle = '#94A3B8';
-  ctx.font = 'bold 18px sans-serif';
-  ctx.fillText('KHI QUA Ô', 192, 335);
-
-  ctx.strokeStyle = '#F59E0B';
-  ctx.lineWidth = 8;
-  ctx.strokeRect(4, 4, 376, 376);
-}
-
-function drawAuditCorner(ctx: CanvasRenderingContext2D): void {
-  // Ô 10: Trạm Kiểm Toán & Thanh Tra
-  ctx.fillStyle = '#1E1B4B';
-  ctx.fillRect(0, 0, 384, 384);
-  ctx.fillStyle = '#FCA5A5';
-  ctx.font = 'bold 22px sans-serif';
-  ctx.fillText('TRẠM KIỂM TOÁN', 192, 65);
-
-  ctx.fillStyle = '#EF4444';
-  ctx.font = '900 38px sans-serif';
-  ctx.fillText('THANH TRA', 192, 140);
-
-  drawIcon(ctx, 'shield', 192, 220, '#F87171', 2.0);
-
-  ctx.fillStyle = '#E2E8F0';
-  ctx.font = 'bold 22px sans-serif';
-  ctx.fillText('VÀO THĂM / TẠM GIAM', 192, 310);
-
-  ctx.strokeStyle = '#EF4444';
-  ctx.lineWidth = 8;
-  ctx.strokeRect(4, 4, 376, 376);
-}
-
-function drawResortCorner(ctx: CanvasRenderingContext2D): void {
-  // Ô 20: Nghỉ Dưỡng Miễn Phí
-  ctx.fillStyle = '#064E3B';
-  ctx.fillRect(0, 0, 384, 384);
-  ctx.fillStyle = '#6EE7B7';
-  ctx.font = 'bold 22px sans-serif';
-  ctx.fillText('BẾN DỪNG CHÂN', 192, 65);
-
-  ctx.fillStyle = '#FDE68A';
-  ctx.font = '900 38px sans-serif';
-  ctx.fillText('NGHỈ DƯỠNG', 192, 140);
-
-  drawIcon(ctx, 'sun', 192, 220, '#FCD34D', 2.0);
-
-  ctx.fillStyle = '#A7F3D0';
-  ctx.font = '900 24px sans-serif';
-  ctx.fillText('MIỄN PHÍ DỪNG BƯỚC', 192, 310);
-
-  ctx.strokeStyle = '#10B981';
-  ctx.lineWidth = 8;
-  ctx.strokeRect(4, 4, 376, 376);
-}
-
-function drawTaxOrderCorner(ctx: CanvasRenderingContext2D): void {
-  // Ô 30: Lệnh Thanh Tra Thuế
-  ctx.fillStyle = '#450A0A';
-  ctx.fillRect(0, 0, 384, 384);
-  ctx.fillStyle = '#FECACA';
-  ctx.font = 'bold 22px sans-serif';
-  ctx.fillText('LỆNH TÒA ÁN', 192, 65);
-
-  ctx.fillStyle = '#EF4444';
-  ctx.font = '900 38px sans-serif';
-  ctx.fillText('THANH TRA THUẾ', 192, 140);
-
-  drawIcon(ctx, 'gavel', 192, 220, '#FCA5A5', 2.0);
-
-  ctx.fillStyle = '#FCA5A5';
-  ctx.font = '900 22px sans-serif';
-  ctx.fillText('ĐẾN Ô KIỂM TOÁN (10)', 192, 310);
-
-  ctx.strokeStyle = '#DC2626';
-  ctx.lineWidth = 8;
-  ctx.strokeRect(4, 4, 376, 376);
-}
-
-const CORNER_DRAWERS: Readonly<Record<number, (ctx: CanvasRenderingContext2D) => void>> = {
-  0: drawGoCorner,
-  10: drawAuditCorner,
-  20: drawResortCorner,
-  30: drawTaxOrderCorner,
-};
 
 /**
  * Tạo Canvas Texture cho 4 ô góc đặc biệt với độ phân giải cao HiDPI (1024 x 1024)
@@ -263,7 +189,6 @@ function createCornerTileTexture(index: number): CanvasTexture | null {
   ctx.textBaseline = 'middle';
 
   const drawer = CORNER_DRAWERS[index] ?? drawGoCorner;
-  drawer(ctx);
 
   const texture = new CanvasTexture(canvas);
   texture.colorSpace = SRGBColorSpace;
@@ -271,6 +196,35 @@ function createCornerTileTexture(index: number): CanvasTexture | null {
   texture.generateMipmaps = true;
   texture.minFilter = LinearMipmapLinearFilter;
   texture.magFilter = LinearFilter;
+
+  if (typeof window !== 'undefined' && typeof Image !== 'undefined') {
+    const cachedImg = tileImageCache.get(index);
+    if (!cachedImg) {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.src = `/assets/tiles/tile_${String(index).padStart(2, '0')}.webp`;
+      tileImageCache.set(index, img);
+      drawer(ctx);
+      img.onload = () => {
+        ctx.save();
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, 1024, 1024);
+        ctx.scale(1024 / 384, 1024 / 384);
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        drawer(ctx, img);
+        ctx.restore();
+        texture.needsUpdate = true;
+      };
+    } else if (cachedImg.complete && cachedImg.naturalWidth > 0) {
+      drawer(ctx, cachedImg);
+    } else {
+      drawer(ctx);
+    }
+  } else {
+    drawer(ctx);
+  }
+
   texture.needsUpdate = true;
   return texture;
 }
@@ -323,12 +277,18 @@ export function getStandeeTexture(index: number): CanvasTexture | null {
   // Vẽ biểu tượng văn hóa đặc trưng bản địa
   drawIcon(ctx, meta.icon, 128, 105, meta.bannerColor, 2.2);
 
-  // Tên công trình / văn hóa dưới chân Standee
+  // Tên công trình / danh mục trên Standee
   ctx.fillStyle = '#0F172A';
   ctx.font = '900 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(meta.subtitle || meta.title, 128, 205);
+  ctx.fillText(meta.title, 128, 195);
+
+  if (meta.subtitle) {
+    ctx.fillStyle = '#475569';
+    ctx.font = 'bold 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillText(meta.subtitle, 128, 218);
+  }
 
   const texture = new CanvasTexture(canvas);
   texture.colorSpace = SRGBColorSpace;

@@ -12,16 +12,16 @@ export interface CameraConfigItem {
 
 export const CAMERA_CONFIG = {
   overview: {
-    position: [11.2, 15.6, 11.2] as const,
-    target: [-0.6, 0.0, -0.6] as const,
-    fov: 40,
+    position: [30.0, 33.0, 30.0] as const,
+    target: [1.5, 0.0, 1.5] as const,
+    fov: 24,
     speed: 3.2,
   },
   pre_match: {
-    // Góc nhìn Retropoly ~48° Perspective bao quát bán đảo 40 ô, biển ngọc bích & trung tâm đô thị
-    position: [11.2, 15.6, 11.2] as const,
-    target: [-0.8, 0.0, -0.8] as const,
-    fov: 40,
+    // [IMP-73] Ống kính Telephoto Kiến Trúc 24° triệt tiêu méo quang học, cân đối 4 góc sa bàn
+    position: [30.0, 33.0, 30.0] as const,
+    target: [1.5, 0.0, 1.5] as const,
+    fov: 24,
     speed: 3.2,
   },
   dice_roll: {
@@ -231,3 +231,17 @@ export function calculateTargetCameraState(
       };
   }
 }
+
+/**
+ * [IMP-73] Tính toán cự ly camera thích ứng theo tỷ lệ khung hình (Aspect-Ratio Frustum Fit)
+ * Đảm bảo 4 góc sa bàn luôn nằm trong vùng an toàn, không bị cắt mép đáy hoặc mép bên.
+ */
+export function calculateResponsiveCameraDistance(aspect: number, baseDistance = 32): number {
+  const safeAspect = Number.isFinite(aspect) && aspect > 0 ? aspect : 1.77;
+  const safeBase = Number.isFinite(baseDistance) && baseDistance > 0 ? baseDistance : 32;
+  if (safeAspect < 1.77) {
+    return safeBase * Math.max(1.0, 1.77 / Math.max(safeAspect, 0.75));
+  }
+  return safeBase;
+}
+

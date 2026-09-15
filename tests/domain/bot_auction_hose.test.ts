@@ -279,6 +279,7 @@ describe('Bot Tactical Auction & Adaptive HOSE Investment', () => {
       mgr.startGame(room.roomCode);
 
       bot1.position = 3;
+      bot1.balance = 500;
       room.phase = TurnPhase.ActionPhase;
 
       mgr.runBotTurn(room.roomCode);

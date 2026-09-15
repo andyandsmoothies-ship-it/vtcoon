@@ -44,7 +44,7 @@ describe('[TC-03.1/MSS] FSM ACTION_PHASE → Đấu Giá', () => {
     const close = mgr.handleAuctionClose(room.roomCode);
     expect(close.winnerId).toBe('pC');
     expect(close.winningBid).toBe(500);
-    expect(room.players[2]!.balance).toBe(14_500);
+    expect(room.players[2]!.balance).toBe(19_500);
     expect(room.phase).toBe(TurnPhase.PropertyManagement);
 
     // pA không sở hữu ô 3 nên không thể nâng cấp

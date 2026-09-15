@@ -81,12 +81,12 @@ describe('[Server][UAT-44] TurnTimeoutScheduler', () => {
   });
 
   it('[EC-04] Cấu hình PHASE_TIMEOUTS_MS khớp 100% đặc tả thiết kế phân đoạn vi pha', () => {
-    expect(PHASE_TIMEOUTS_MS[TurnPhase.WaitingRoll]).toBe(15_000);
-    expect(PHASE_TIMEOUTS_MS[TurnPhase.ActionPhase]).toBe(20_000);
-    expect(PHASE_TIMEOUTS_MS[TurnPhase.AuctionPhase]).toBe(15_000);
-    expect(PHASE_TIMEOUTS_MS[TurnPhase.PropertyManagement]).toBe(20_000);
-    expect(PHASE_TIMEOUTS_MS[TurnPhase.InsolvencyPhase]).toBe(25_000);
-    expect(PHASE_TIMEOUTS_MS[TurnPhase.HosePhase]).toBe(15_000);
+    expect(PHASE_TIMEOUTS_MS[TurnPhase.WaitingRoll]).toBe(25_000);
+    expect(PHASE_TIMEOUTS_MS[TurnPhase.ActionPhase]).toBe(35_000);
+    expect(PHASE_TIMEOUTS_MS[TurnPhase.AuctionPhase]).toBe(20_000);
+    expect(PHASE_TIMEOUTS_MS[TurnPhase.PropertyManagement]).toBe(30_000);
+    expect(PHASE_TIMEOUTS_MS[TurnPhase.InsolvencyPhase]).toBe(45_000);
+    expect(PHASE_TIMEOUTS_MS[TurnPhase.HosePhase]).toBe(25_000);
   });
 
   it('[EC-04] getTimeRemaining trả về số giây còn lại chính xác và về 0 khi clearTimeout', () => {

@@ -195,7 +195,7 @@ export function DiceTray(): React.ReactElement {
           </mesh>
           <mesh receiveShadow position={[0, 0.001, 0]}>
             <boxGeometry args={[2.8, 0.015, 2.0]} />
-            <meshStandardMaterial color="#064E3B" roughness={0.8} />
+            <meshStandardMaterial color="#064E3B" roughness={0.85} />
           </mesh>
           <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]}>
             <ringGeometry args={[0.45, 0.48, 32]} />

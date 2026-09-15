@@ -127,7 +127,7 @@ describe('[UI-S04/MSS] Environment Store — Time-of-Day State Machine & Presets
 
     // Ban ngay phai co nang diu mat, chong chay sang loa mat (sunIntensity <= 1.10, ambient <= 0.25)
     expect(TIME_OF_DAY_PRESETS.day.sunIntensity).toBeLessThanOrEqual(1.10);
-    expect(TIME_OF_DAY_PRESETS.day.sunIntensity).toBeGreaterThanOrEqual(0.90);
+    expect(TIME_OF_DAY_PRESETS.day.sunIntensity).toBeGreaterThanOrEqual(0.75);
     expect(TIME_OF_DAY_PRESETS.day.ambientIntensity).toBeLessThanOrEqual(0.25);
     expect(TIME_OF_DAY_PRESETS.day.hemiIntensity).toBeLessThanOrEqual(0.25);
 

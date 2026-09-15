@@ -80,12 +80,12 @@ export function TitleDeedModal({
 
   if (!deed) {
     return (
-      <div className="bg-slate-900 border-2 border-amber-400/50 p-6 rounded-2xl text-center max-w-sm text-slate-200 shadow-2xl">
-        <p className="text-sm">Không tìm thấy thông tin Sổ Đỏ cho ô #{cellIndex}.</p>
+      <div className="bg-[#FFFDF8] border-2 border-slate-900 p-6 rounded-2xl text-center max-w-sm text-slate-900 shadow-[0_6px_0_0_#0f172a]">
+        <p className="text-sm font-bold">Không tìm thấy thông tin Sổ Đỏ cho ô #{cellIndex}.</p>
         <button
           type="button"
           onClick={onClose}
-          className="mt-4 min-h-[48px] px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-xs border border-slate-700/60 shadow-[0_4px_0_0_#020617] active:shadow-[0_1px_0_0_#020617] active:translate-y-[3px] transition-all inline-flex items-center justify-center whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+          className="mt-4 min-h-[48px] px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold rounded-xl text-xs border-2 border-slate-900 shadow-[0_4px_0_0_#0f172a] active:shadow-[0_1px_0_0_#0f172a] active:translate-y-[3px] transition-all inline-flex items-center justify-center whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
         >
           Đóng
         </button>
@@ -109,21 +109,21 @@ export function TitleDeedModal({
 
   return (
     <div
-      className="relative w-full max-w-md max-h-[90vh] md:max-h-[85vh] bg-gradient-to-b from-slate-900 via-slate-800 to-slate-950 border-2 border-amber-400/90 border-amber-400 rounded-2xl shadow-[0_0_30px_rgba(245,158,11,0.3)] shadow-[0_0_25px_rgba(245,158,11,0.3)] ring-2 ring-amber-500/40 ring-offset-2 ring-offset-slate-950 overflow-hidden flex flex-col pointer-events-auto animate-in zoom-in-90 fade-in duration-200 ease-out select-none p-5 text-white"
+      className="relative w-full max-w-md max-h-[90vh] md:max-h-[85vh] bg-[#FFFDF8] border-2 border-slate-900 rounded-2xl shadow-[0_6px_0_0_#0f172a] ring-2 ring-slate-900/10 overflow-hidden flex flex-col pointer-events-auto animate-in zoom-in-90 fade-in duration-200 ease-out select-none p-5 text-slate-900"
       data-testid="title-deed-modal"
     >
-      {/* Khung viền mạ vàng kép dập nổi bên trong (Double Embossed Metallic Rim) */}
+      {/* Khung viền chỉ mực kép bên trong */}
       <div
-        className="pointer-events-none absolute inset-1.5 rounded-xl border border-amber-400/40 z-10 shadow-[inset_0_0_12px_rgba(245,158,11,0.15)]"
+        className="pointer-events-none absolute inset-1.5 rounded-xl border border-slate-300/80 z-10"
         aria-hidden="true"
       />
 
       {/* Hoa văn dập chìm Trống Đồng Đông Sơn cổ truyền */}
       <div
-        className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.06] overflow-hidden z-0"
+        className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.04] overflow-hidden z-0"
         aria-hidden="true"
       >
-        <svg viewBox="0 0 400 400" className="w-[360px] h-[360px] text-amber-300 fill-none stroke-current" strokeWidth="1.5">
+        <svg viewBox="0 0 400 400" className="w-[360px] h-[360px] text-slate-900 fill-none stroke-current" strokeWidth="1.5">
           <circle cx="200" cy="200" r="28" fill="currentColor" fillOpacity="0.3" />
           <circle cx="200" cy="200" r="14" fill="currentColor" />
           {Array.from({ length: 14 }).map((_, i) => (
@@ -143,19 +143,19 @@ export function TitleDeedModal({
         </svg>
       </div>
 
-      {/* Ruy-băng tiêu đề (Ribbon Header) bo cong viền vàng dập nổi */}
+      {/* Ruy-băng tiêu đề (Ribbon Header) cờ bàn */}
       <header
-        className="px-3 py-1 text-center relative border border-amber-400/60 shadow-[0_3px_0_0_#f59e0b] shadow-lg rounded-b-2xl mx-1.5 mt-1.5 rounded-t-xl shrink-0 z-10"
+        className="px-3 py-2 text-center relative border-2 border-slate-900 shadow-[0_3px_0_0_#0f172a] rounded-b-xl mx-1 mt-1 rounded-t-lg shrink-0 z-10"
         style={{ backgroundColor: ribbonColor }}
       >
-        <div className="absolute top-2.5 left-2.5 w-2 h-2 rounded-full bg-amber-300 border border-amber-600 shadow-[0_0_4px_rgba(245,158,11,0.8)]" aria-hidden="true" />
+        <div className="absolute top-2.5 left-2.5 w-2 h-2 rounded-full bg-white/80 border border-slate-900" aria-hidden="true" />
         {!onClose && (
-          <div className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-amber-300 border border-amber-600 shadow-[0_0_4px_rgba(245,158,11,0.8)]" aria-hidden="true" />
+          <div className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-white/80 border border-slate-900" aria-hidden="true" />
         )}
         <p className="text-[10px] uppercase tracking-widest text-white/95 font-black drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
           {isRailroad ? 'Hạ Tầng Giao Thông' : isUtility ? 'Tiện Ích Quốc Gia' : 'Giấy Chứng Nhận Quyền Sở Hữu'}
         </p>
-        <h2 className="tracking-wide text-xs sm:text-sm font-black uppercase text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] mt-0.5 px-3 py-1 leading-snug break-words mx-auto">
+        <h2 className="tracking-wide text-xs sm:text-sm font-black uppercase text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] mt-0.5 px-3 py-1 leading-snug break-words mx-auto">
           {deed.name}
         </h2>
         {onClose && (
@@ -163,18 +163,41 @@ export function TitleDeedModal({
             type="button"
             onClick={onClose}
             aria-label="Đóng Sổ Đỏ"
-            className="absolute top-2.5 right-2.5 min-w-[48px] min-h-[48px] w-9 h-9 rounded-full bg-slate-800/80 hover:bg-slate-700/90 border border-slate-600 flex items-center justify-center text-slate-300 hover:text-white text-sm font-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 transition-colors cursor-pointer z-20 shadow-md"
+            className="absolute top-2.5 right-2.5 min-w-[48px] min-h-[48px] w-8 h-8 rounded-full bg-slate-900/80 hover:bg-slate-900 border border-white/40 flex items-center justify-center text-white text-sm font-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 transition-colors cursor-pointer z-20 shadow-md"
           >
             ✕
           </button>
         )}
       </header>
 
+      {/* Huy hiệu chứng nhận chủ quyền và con dấu Sổ Đỏ (IMP-58) */}
+      {isOwned && (
+        <div
+          className="mx-1 mt-2 py-1.5 px-3 rounded-xl border border-amber-600/40 bg-amber-100/70 flex items-center justify-between shadow-sm text-xs shrink-0 z-10 text-slate-900"
+          data-testid="ownership-certificate-seal"
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-base" aria-hidden="true">📜</span>
+            <div className="flex flex-col">
+              <span className="text-[10px] font-black text-amber-900 tracking-wider uppercase">
+                CHỨNG NHẬN QUYỀN SỞ HỮU
+              </span>
+              <span className="font-bold text-slate-900 text-xs truncate">
+                Chủ sở hữu: {ownerName || 'Đã có chủ'}
+              </span>
+            </div>
+          </div>
+          <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-600 text-white uppercase tracking-wider">
+            SỔ ĐỎ CHÍNH CHỦ
+          </span>
+        </div>
+      )}
+
       {/* Thông tin giá niêm yết & thế chấp */}
-      <div className="relative z-10 flex-1 min-h-0 overflow-y-auto pr-1 p-4 space-y-3 text-xs md:text-sm">
+      <div className="relative z-10 flex-1 min-h-0 overflow-y-auto pr-1 p-4 space-y-3 text-xs md:text-sm text-slate-900">
         {/* Diorama Art Showcase Banner (IMP-33) */}
         <div
-          className="relative w-full h-32 sm:h-36 rounded-xl bg-slate-950/60 border border-amber-400/25 overflow-hidden flex items-center justify-center p-2 shadow-inner"
+          className="relative w-full h-32 sm:h-36 rounded-xl bg-[#F7F2E7] border border-slate-300 overflow-hidden flex items-center justify-center p-2 shadow-inner"
           data-testid="diorama-art-banner"
         >
           {showImage && tileAssetUrl ? (
@@ -201,43 +224,43 @@ export function TitleDeedModal({
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-2.5 bg-slate-950/70 p-2.5 rounded-xl border border-amber-400/30 shadow-inner">
-          <div className="bg-slate-900/60 p-2 rounded-lg">
-            <span className="text-slate-400 block text-[11px] font-medium">Giá niêm yết</span>
-            <span className="text-emerald-400 font-extrabold text-sm">{formatCurrency(deed.price)}</span>
+        <div className="grid grid-cols-2 gap-2.5 bg-[#F7F2E7] p-2.5 rounded-xl border border-slate-300">
+          <div className="bg-white/90 p-2 rounded-lg border border-slate-200">
+            <span className="text-slate-600 block text-[11px] font-medium">Giá niêm yết</span>
+            <span className="text-emerald-700 font-extrabold text-sm">{formatCurrency(deed.price)}</span>
           </div>
-          <div className="bg-slate-900/60 p-2 rounded-lg">
-            <span className="text-slate-400 block text-[11px] font-medium">Giá trị thế chấp</span>
-            <span className="text-amber-400 font-extrabold text-sm">{formatCurrency(deed.mortgageValue)}</span>
+          <div className="bg-white/90 p-2 rounded-lg border border-slate-200">
+            <span className="text-slate-600 block text-[11px] font-medium">Giá trị thế chấp</span>
+            <span className="text-amber-700 font-extrabold text-sm">{formatCurrency(deed.mortgageValue)}</span>
           </div>
         </div>
 
         {isMortgaged && (
-          <div className="p-2 rounded-xl bg-rose-950/70 border border-rose-600/50 text-rose-300 text-xs text-center font-bold flex items-center justify-center gap-1.5 shadow-sm">
+          <div className="p-2 rounded-xl bg-rose-100 border border-rose-400 text-rose-800 text-xs text-center font-bold flex items-center justify-center gap-1.5 shadow-sm">
             <span aria-hidden="true">⚠️</span>
             <span>Tài sản đang thế chấp — Tạm ngưng thu phí thuê</span>
           </div>
         )}
 
         {/* Biểu phí dừng chân C0–C3 dạng Badge Cards có icon và chip phân cấp */}
-        <div className="bg-slate-950/80 rounded-xl border border-slate-800 p-3 space-y-2">
+        <div className="bg-[#F7F2E7] rounded-xl border border-slate-300 p-3 space-y-2">
           <div className="flex items-center justify-between">
-            <p className="text-[11px] font-bold text-amber-300 uppercase tracking-wider">
+            <p className="text-[11px] font-bold text-slate-900 uppercase tracking-wider">
               {isRailroad ? 'Biểu Phí Theo Số Ga Sở Hữu' : isUtility ? 'Phí Dịch Vụ Cơ Bản' : 'Biểu Phí Dừng Chân'}
             </p>
-            <span className="text-[10px] text-slate-400">VNĐ</span>
+            <span className="text-[10px] text-slate-600 font-bold">VNĐ</span>
           </div>
 
           {isUtility ? (
-            <div className="space-y-2 text-xs text-slate-300">
-              <div className="flex justify-between items-center p-2 rounded-lg bg-slate-900/80 border border-slate-800">
+            <div className="space-y-2 text-xs text-slate-900">
+              <div className="flex justify-between items-center p-2 rounded-lg bg-white/90 border border-slate-200">
                 <div className="flex items-center gap-2">
                   <span className="text-base" aria-hidden="true">⚡</span>
-                  <span className="font-semibold text-slate-200">Phí cơ sở (1 trạm):</span>
+                  <span className="font-semibold text-slate-900">Phí cơ sở (1 trạm):</span>
                 </div>
-                <span className="font-bold text-amber-300">{formatCurrency(deed.rents[0])}</span>
+                <span className="font-bold text-slate-900">{formatCurrency(deed.rents[0])}</span>
               </div>
-              <p className="text-[10px] text-slate-400 italic px-1">
+              <p className="text-[10px] text-slate-600 italic px-1">
                 * Thu 4× điểm xúc xắc (1 trạm) hoặc 10× điểm xúc xắc (khi sở hữu cả 2 trạm).
               </p>
             </div>
@@ -247,33 +270,33 @@ export function TitleDeedModal({
                 const tier = tiers[idx];
                 const isMax = idx === 3;
                 const cost = hasUpgrades && idx > 0 ? deed.upgradeCosts[idx - 1] : undefined;
-                const tierClass = isMax ? 'bg-amber-950/25 border-amber-500/50 shadow-[0_0_12px_rgba(245,158,11,0.15)]' : 'bg-slate-900/70 border-slate-800/80';
+                const tierClass = isMax ? 'bg-amber-100/70 border-amber-400' : 'bg-white/90 border-slate-200';
                 return (
                   <div key={tier ? tier.chip : idx} className={`flex justify-between items-center p-2 rounded-xl border transition-all ${tierClass}`}>
                     <div className="flex items-center gap-2">
-                      <span className={`text-base ${isMax ? 'drop-shadow-[0_0_8px_rgba(245,158,11,0.9)]' : ''}`} aria-hidden="true">
+                      <span className="text-base" aria-hidden="true">
                         {tier?.icon}
                       </span>
                       <span className={`text-[10px] font-black px-1.5 py-0.5 rounded border ${
-                        isMax ? 'bg-amber-500/20 text-amber-300 border-amber-400/50' : 'bg-slate-800 text-slate-300 border-slate-700'
+                        isMax ? 'bg-amber-200 text-amber-900 border-amber-400' : 'bg-slate-100 text-slate-900 border-slate-300'
                       }`}>
                         {tier?.chip}
                       </span>
                       <div className="flex flex-col">
-                        <span className={`font-bold text-xs ${isMax ? 'text-amber-300' : 'text-slate-200'}`}>
+                        <span className="font-bold text-xs text-slate-900">
                           {tier?.label}
                         </span>
-                        <span className="text-[10px] text-slate-400">
+                        <span className="text-[10px] text-slate-600 font-medium">
                           {cost && cost > 0 ? `Nâng cấp: +${formatCurrency(cost)}` : tier?.sub}
                         </span>
                       </div>
                     </div>
                     <div className="flex flex-col items-end">
-                      <span className={`font-black text-xs ${isMax ? 'text-amber-400 drop-shadow-[0_1px_4px_rgba(245,158,11,0.5)]' : 'text-slate-100'}`}>
+                      <span className="font-black text-xs text-slate-900">
                         {formatCurrency(idx === 0 && hasMonopoly && !isRailroad && !isUtility ? rent * 2 : rent)}
                       </span>
                       {idx === 0 && hasMonopoly && !isRailroad && !isUtility && (
-                        <span className="text-[9px] font-extrabold text-emerald-400">x2 ĐỘC QUYỀN</span>
+                        <span className="text-[9px] font-extrabold text-emerald-700">x2 ĐỘC QUYỀN</span>
                       )}
                     </div>
                   </div>
@@ -285,10 +308,10 @@ export function TitleDeedModal({
       </div>
 
       {/* Nút hành động 3D tactile vật lý */}
-      <footer className="relative z-10 p-4 pt-2 bg-slate-900/90 border-t border-slate-800/90 grid grid-cols-2 gap-2 shrink-0">
+      <footer className="relative z-10 p-4 pt-2 bg-[#F7F2E7] border-t border-slate-300 grid grid-cols-2 gap-2 shrink-0">
         {isOwned ? (
           <>
-            <div className="col-span-2 min-h-[48px] py-2 px-3 rounded-xl font-bold text-emerald-400 bg-emerald-950/50 border border-emerald-600/40 text-xs text-center flex items-center justify-center shadow-inner truncate">
+            <div className="col-span-2 min-h-[48px] py-2 px-3 rounded-xl font-bold text-emerald-800 bg-emerald-100/80 border border-emerald-400 text-xs text-center flex items-center justify-center shadow-sm truncate">
               ✓ Đã Sở Hữu {ownerName ? `(${ownerName})` : ''}
             </div>
             {isOwner && !isMortgaged && hasUpgrades && (currentLevel ?? 0) < 3 && onUpgrade && (
@@ -299,8 +322,8 @@ export function TitleDeedModal({
                 title={upgradeBlockedReason}
                 className={`min-h-[48px] whitespace-nowrap px-3.5 py-2 rounded-xl font-bold text-xs transition-all focus-visible:outline-none focus-visible:ring-2 ${
                   upgradeBlockedReason
-                    ? 'bg-slate-700 text-slate-400 border border-slate-700 cursor-not-allowed shadow-none'
-                    : 'bg-gradient-to-b from-teal-500 to-teal-600 hover:from-teal-400 hover:to-teal-500 text-white border border-teal-800 shadow-[0_4px_0_0_#115e59] active:shadow-[0_1px_0_0_#115e59] active:translate-y-[3px] shadow-teal-950/40 focus-visible:ring-teal-400 cursor-pointer'
+                    ? 'bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed shadow-none'
+                    : 'bg-teal-600 hover:bg-teal-500 text-white border-2 border-teal-800 shadow-[0_4px_0_0_#115e59] active:shadow-[0_1px_0_0_#115e59] active:translate-y-[3px] focus-visible:ring-teal-400 cursor-pointer'
                 }`}
               >
                 Nâng Cấp (+{formatCurrency(upgradeCost ?? 0)})
@@ -314,8 +337,8 @@ export function TitleDeedModal({
                 title={downgradeBlockedReason}
                 className={`min-h-[48px] whitespace-nowrap px-3.5 py-2 rounded-xl font-bold text-xs transition-all focus-visible:outline-none focus-visible:ring-2 ${
                   downgradeBlockedReason
-                    ? 'bg-slate-700 text-slate-400 border border-slate-700 cursor-not-allowed shadow-none'
-                    : 'bg-gradient-to-b from-orange-600 to-orange-700 hover:from-orange-500 hover:to-orange-600 text-white border border-orange-900 shadow-[0_4px_0_0_#7c2d12] active:shadow-[0_1px_0_0_#7c2d12] active:translate-y-[3px] shadow-orange-950/40 focus-visible:ring-orange-400 cursor-pointer'
+                    ? 'bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed shadow-none'
+                    : 'bg-orange-600 hover:bg-orange-500 text-white border-2 border-orange-800 shadow-[0_4px_0_0_#7c2d12] active:shadow-[0_1px_0_0_#7c2d12] active:translate-y-[3px] focus-visible:ring-orange-400 cursor-pointer'
                 }`}
               >
                 Hạ Cấp (-50%)
@@ -325,7 +348,7 @@ export function TitleDeedModal({
               <button
                 type="button"
                 onClick={isMortgaged ? onRedeem : onMortgage}
-                className="min-h-[48px] whitespace-nowrap px-3.5 py-2 rounded-xl font-black text-xs bg-gradient-to-b from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-amber-950 border border-amber-900 shadow-[0_4px_0_0_#b45309] active:shadow-[0_1px_0_0_#b45309] active:translate-y-[3px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
+                className="min-h-[48px] whitespace-nowrap px-3.5 py-2 rounded-xl font-black text-xs bg-amber-500 hover:bg-amber-400 text-slate-900 border-2 border-amber-700 shadow-[0_4px_0_0_#b45309] active:shadow-[0_1px_0_0_#b45309] active:translate-y-[3px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
               >
                 {isMortgaged ? 'Giải Chấp' : 'Thế Chấp'}
               </button>
@@ -333,17 +356,17 @@ export function TitleDeedModal({
             <button
               type="button"
               onClick={onClose}
-              className={`${closeButtonSpan} min-h-[48px] whitespace-nowrap px-4 py-2 rounded-xl font-bold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-950 shadow-[0_4px_0_0_#020617] active:shadow-[0_1px_0_0_#020617] active:translate-y-[3px] text-xs transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer`}
+              className={`${closeButtonSpan} min-h-[48px] whitespace-nowrap px-4 py-2 rounded-xl font-bold text-slate-900 bg-slate-200 hover:bg-slate-300 border-2 border-slate-400 shadow-[0_4px_0_0_#64748b] active:shadow-[0_1px_0_0_#64748b] active:translate-y-[3px] text-xs transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer`}
             >
               Đóng
             </button>
             {upgradeBlockedReason && (
-              <div className="col-span-2 w-full p-2 rounded-xl bg-amber-950/50 border border-amber-500/50 text-amber-300 text-[11px] font-bold text-center">
+              <div className="col-span-2 w-full p-2 rounded-xl bg-amber-100 border border-amber-400 text-amber-900 text-[11px] font-bold text-center">
                 ⚠️ {upgradeBlockedReason}
               </div>
             )}
             {downgradeBlockedReason && (
-              <div className="col-span-2 w-full p-2 rounded-xl bg-orange-950/50 border border-orange-500/50 text-orange-300 text-[11px] font-bold text-center">
+              <div className="col-span-2 w-full p-2 rounded-xl bg-orange-100 border border-orange-400 text-orange-900 text-[11px] font-bold text-center">
                 ⚠️ {downgradeBlockedReason}
               </div>
             )}
@@ -356,8 +379,8 @@ export function TitleDeedModal({
               disabled={!canBuy}
               className={`min-h-[48px] whitespace-nowrap py-3 px-3.5 sm:px-6 rounded-xl font-black tracking-wide uppercase text-xs sm:text-sm transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 truncate cursor-pointer ${
                 canBuy
-                  ? 'bg-gradient-to-b from-emerald-400 to-emerald-600 hover:from-emerald-300 hover:to-emerald-500 border border-emerald-800 shadow-[0_4px_0_0_#064e3b] active:shadow-[0_1px_0_0_#064e3b] active:translate-y-[3px] text-white shadow-emerald-950/50'
-                  : 'bg-slate-800 text-slate-500 border border-slate-700/50 cursor-not-allowed'
+                  ? 'bg-emerald-500 hover:bg-emerald-600 border-2 border-emerald-700 shadow-[0_4px_0_0_#065f46] active:shadow-[0_1px_0_0_#065f46] active:translate-y-[3px] text-white'
+                  : 'bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed'
               }`}
             >
               {canBuy ? `Mua BĐS (${formatCurrency(deed.price)})` : 'Không Đủ Tiền'}
@@ -366,7 +389,7 @@ export function TitleDeedModal({
             <button
               type="button"
               onClick={onPass ?? onClose}
-              className="min-h-[48px] whitespace-nowrap py-3 px-3.5 sm:px-6 rounded-xl font-bold text-slate-300 hover:text-white uppercase bg-slate-700 hover:bg-slate-600 border border-slate-950 shadow-[0_4px_0_0_#020617] active:shadow-[0_1px_0_0_#020617] active:translate-y-[3px] text-xs sm:text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
+              className="min-h-[48px] whitespace-nowrap py-3 px-3.5 sm:px-6 rounded-xl font-bold text-slate-900 uppercase bg-slate-200 hover:bg-slate-300 border-2 border-slate-400 shadow-[0_4px_0_0_#64748b] active:shadow-[0_1px_0_0_#64748b] active:translate-y-[3px] text-xs sm:text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
             >
               Bỏ Qua
             </button>

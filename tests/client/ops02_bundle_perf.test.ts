@@ -189,7 +189,7 @@ describe('[TC-OPS02.3/MSS] Logic Toan Hoc Hoat Anh sin(wt) & Business Modals', (
       const html = renderToStaticMarkup(
         React.createElement(HoseModal, { myBalance: 15000, lastDiceRoll: 5, lastPayout: 1500, onInvest: () => {}, onSkip: () => {}, onClose: () => {} })
       );
-      expect(html).toContain('Điểm xúc xắc 1D6: <strong class="text-amber-400">5</strong>');
+      expect(html).toContain('Điểm xúc xắc 1D6: <strong class="text-slate-900 font-black">5</strong>');
       expect(html).toContain('Tiền thu về: 1.500 Tr.');
     });
 

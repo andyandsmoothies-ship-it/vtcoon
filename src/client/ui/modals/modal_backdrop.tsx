@@ -83,10 +83,10 @@ export function ModalBackdrop({
   };
 
   const backdropClasses = fullScreen
-    ? 'fixed inset-0 bg-slate-950/20 backdrop-blur-[1px] z-20 flex items-stretch justify-stretch p-0 pointer-events-none select-none'
+    ? 'fixed inset-0 bg-slate-900/15 z-20 flex items-stretch justify-stretch p-0 pointer-events-none select-none'
     : center
-    ? 'fixed inset-0 bg-slate-950/40 backdrop-blur-[2px] z-20 flex items-center justify-center p-4 pointer-events-auto select-none'
-    : 'fixed inset-0 bg-slate-950/25 backdrop-blur-[2px] z-20 flex items-center justify-center md:justify-end p-4 md:pr-10 pointer-events-auto select-none';
+    ? 'fixed inset-0 bg-slate-900/15 z-20 flex items-center justify-center p-4 pointer-events-auto select-none'
+    : 'fixed inset-0 bg-slate-900/15 z-20 flex items-center justify-center md:justify-end p-4 md:pr-10 pointer-events-auto select-none';
 
   return (
     <div

@@ -44,7 +44,7 @@ describe('[TC-IMP29.3/MSS] 3D Building Models Overhaul (C1-C3) & SafeGLTFModel I
       const element = React.createElement(ProceduralBuilding, { level: lvl, groupColor: '#3B82F6' });
       const html = renderToStaticMarkup(element);
       expect(html).toBeDefined();
-      expect(html).toMatch(/position="0,0\.22,(?:-0\.42|0\.58)"/);
+      expect(html).toMatch(/position="0,(?:0\.22|0\.16),(?:-0\.42|0\.58|-0\.58|-1\.58|-1\.35|-1\.38)"/);
     }
   });
 
