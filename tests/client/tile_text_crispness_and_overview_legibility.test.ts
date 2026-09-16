@@ -205,39 +205,39 @@ describe('[TC-IMP38/MSS][UC-IMP38] Tile Text Crispness & Overview Legibility Sui
     expect(subEntry).toBeDefined();
   });
 
-  it('[TC-IMP38.09/MSS][UC-IMP38] Standard tile renders price tray roundRect with coordinates (22, 274, 212, 50, 12)', () => {
+  it('[TC-IMP38.09/MSS][UC-IMP38] Purchasable tile eliminates 2D price tray roundRect (22, 274, 212, 50, 12)', () => {
     getTileTexture(1);
     const tray = recordedRoundRects.find(
       (r) => r.x === 22 && r.y === 274 && r.w === 212 && r.h === 50
     );
-    expect(tray).toBeDefined();
-    expect(tray?.radii).toBe(12);
+    expect(tray).toBeUndefined();
   });
 
-  it('[TC-IMP38.10/MSS][UC-IMP38] Standard tile renders price tray with fillStyle #090D1A', () => {
+  it('[TC-IMP38.10/MSS][UC-IMP38] Purchasable tile renders pure ivory price fillText at y = 300 in charcoal #0F172A (IMP-104)', () => {
     getTileTexture(1);
     const trayFill = recordedFillText.find((t) => t.y === 300);
     expect(trayFill).toBeDefined();
+    expect(trayFill?.fillStyle).toBe('#0F172A');
   });
 
-  it('[TC-IMP38.11/MSS][UC-IMP38] Standard tile renders price text with fillStyle #FBBF24', () => {
-    getTileTexture(1);
-    const priceText = recordedFillText.find((t) => t.y === 300);
-    expect(priceText).toBeDefined();
-    expect(priceText?.fillStyle).toBe('#FBBF24');
+  it('[TC-IMP38.11/MSS][UC-IMP38] Non-property action tile renders action text with fillStyle #FFFFFF', () => {
+    getTileTexture(7);
+    const actionText = recordedFillText.find((t) => t.y === 300);
+    expect(actionText).toBeDefined();
+    expect(actionText?.fillStyle).toBe('#FFFFFF');
   });
 
-  it('[TC-IMP38.12/MSS][UC-IMP38] Standard tile renders price text with font 900 26px', () => {
-    getTileTexture(1);
-    const priceText = recordedFillText.find((t) => t.y === 300);
-    expect(priceText).toBeDefined();
-    expect(priceText?.font).toContain('900 26px');
+  it('[TC-IMP38.12/MSS][UC-IMP38] Non-property action tile renders action text with font 900 20px', () => {
+    getTileTexture(7);
+    const actionText = recordedFillText.find((t) => t.y === 300);
+    expect(actionText).toBeDefined();
+    expect(actionText?.font).toContain('900 20px');
   });
 
-  it('[TC-IMP38.13/MSS][UC-IMP38] Standard tile renders price text centered at coordinates (128, 300)', () => {
-    getTileTexture(3);
-    const priceText = recordedFillText.find((t) => t.x === 128 && t.y === 300);
-    expect(priceText).toBeDefined();
+  it('[TC-IMP38.13/MSS][UC-IMP38] Non-property action tile renders action text centered at coordinates (128, 300)', () => {
+    getTileTexture(2);
+    const actionText = recordedFillText.find((t) => t.x === 128 && t.y === 300);
+    expect(actionText).toBeDefined();
   });
 
   // =========================================================================
@@ -314,12 +314,12 @@ describe('[TC-IMP38/MSS][UC-IMP38] Tile Text Crispness & Overview Legibility Sui
   // FACET 4: OVERVIEW & PRE-MATCH CAMERA CALIBRATION (CLOSER 20% FOR RETROPOLY SCALE)
   // =========================================================================
 
-  it('[TC-IMP38.24/MSS][UC-IMP38] CAMERA_CONFIG overview position is calibrated to [30.0, 33.0, 30.0]', () => {
-    expect(CAMERA_CONFIG.overview.position).toEqual([30.0, 33.0, 30.0]);
+  it('[TC-IMP38.24/MSS][UC-IMP38] CAMERA_CONFIG overview position is calibrated to [24.6, 25.3, 24.6]', () => {
+    expect(CAMERA_CONFIG.overview.position).toEqual([24.6, 25.3, 24.6]);
   });
 
-  it('[TC-IMP38.25/MSS][UC-IMP38] CAMERA_CONFIG overview target is calibrated to [1.5, 0.0, 1.5]', () => {
-    expect(CAMERA_CONFIG.overview.target).toEqual([1.5, 0.0, 1.5]);
+  it('[TC-IMP38.25/MSS][UC-IMP38] CAMERA_CONFIG overview target is calibrated to [2.2, 0.0, 2.2]', () => {
+    expect(CAMERA_CONFIG.overview.target).toEqual([2.2, 0.0, 2.2]);
   });
 
   it('[TC-IMP38.26/MSS][UC-IMP38] CAMERA_CONFIG pre_match position is calibrated to [30.0, 33.0, 30.0]', () => {
@@ -330,10 +330,10 @@ describe('[TC-IMP38/MSS][UC-IMP38] Tile Text Crispness & Overview Legibility Sui
     expect(CAMERA_CONFIG.pre_match.target).toEqual([1.5, 0.0, 1.5]);
   });
 
-  it('[TC-IMP38.28/MSS][UC-IMP38] calculateTargetCameraState overview returns position [30.0, 33.0, 30.0] and fov 24', () => {
+  it('[TC-IMP38.28/MSS][UC-IMP38] calculateTargetCameraState overview returns position [24.6, 25.3, 24.6] and fov 24', () => {
     const state = calculateTargetCameraState('overview');
-    expect(state.position).toEqual([30.0, 33.0, 30.0]);
-    expect(state.target).toEqual([1.5, 0.0, 1.5]);
+    expect(state.position).toEqual([24.6, 25.3, 24.6]);
+    expect(state.target).toEqual([2.2, 0.0, 2.2]);
     expect(state.fov).toBe(24);
   });
 

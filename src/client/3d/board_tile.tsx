@@ -325,8 +325,8 @@ export function OwnershipMarkerInstances({
   const resolvedMascotIcon =
     mascotIcon ||
     (ownerSlot !== undefined && ownerSlot >= 0 && ownerSlot < LUXURY_PAWN_CONFIGS.length
-      ? (LUXURY_PAWN_CONFIGS[ownerSlot]?.icon ?? '🐕')
-      : '🐕');
+      ? (LUXURY_PAWN_CONFIGS[ownerSlot]?.icon ?? '🏰')
+      : '🏰');
   const mascotTexture = getMascotCanvasTexture(resolvedMascotIcon);
 
   return (

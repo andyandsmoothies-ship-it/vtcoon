@@ -220,7 +220,7 @@ describe('Bot Tactical Auction & Adaptive HOSE Investment', () => {
       const makeBot = (id: string) => {
         const p = createPlayer(id);
         p.isBot = true;
-        p.balance = 1_500; // freeCash = 1500 - 300 = 1200
+        p.balance = 1_800; // freeCash: Aggressive/Balanced 1800-300=1500; Passive 1800-600=1200
         return p;
       };
 

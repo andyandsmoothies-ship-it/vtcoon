@@ -46,7 +46,7 @@ describe('[UI-S04/MSS] Cinematic Effects — Mathematical Helpers & Rendering St
   });
 
   it('CoastalIslandEnvironment render dai duong, bai cat vang va rang doi nui xanh nhiet doi', () => {
-    const html = renderToStaticMarkup(React.createElement(CoastalIslandEnvironment));
+    const html = renderToStaticMarkup(React.createElement(CoastalIslandEnvironment, { streamlined: false }));
     expect(html).toContain('boxGeometry');
     expect(html).toContain('cylinderGeometry');
     // Khảo sát các mã màu bối cảnh Retropoly

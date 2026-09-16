@@ -316,7 +316,7 @@ describe('[TC-IMP37/MSS][UC-IMP37] Realistic Card Art Assets Contract Suite', ()
       expect(subtitleEntry!.y).toBeLessThan(202);
     });
 
-    it('[TC-IMP37.12/MSS][UC-IMP37] Price tray capsule roundRect sits safely below art boundary', () => {
+    it('[TC-IMP37.12/MSS][UC-IMP37] Infrastructure tile eliminates 2D price tray capsule roundRect and prints pure ivory price text at y = 300 (IMP-104)', () => {
       getTileTexture(5);
 
       const priceTray = recordedRoundRects.find(
@@ -324,9 +324,9 @@ describe('[TC-IMP37/MSS][UC-IMP37] Realistic Card Art Assets Contract Suite', ()
       );
       const priceText = recordedFillText.find((t) => t.y === 306 || t.y === 300);
 
-      expect(priceTray).toBeDefined();
+      expect(priceTray).toBeUndefined();
       expect(priceText).toBeDefined();
-      expect(priceTray!.y).toBeGreaterThanOrEqual(270);
+      expect(priceText?.text).toBe('2.000 Tr.');
     });
 
     it('[TC-IMP37.13/MSS][UC-IMP37] Target card art rendering dimensions (216x68 at dx=20, dy=204) fit entirely within clip rect [10..246, 202..274]', () => {

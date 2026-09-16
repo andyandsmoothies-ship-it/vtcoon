@@ -211,17 +211,17 @@ describe('[TC-IMP39/MSS][UC-IMP39] Visual Crispness & Lighting Alignment Suite',
   // FACET 3: OVERVIEW CAMERA ELEVATION & RETROPOLY FRAMING
   // =========================================================================
 
-  it('[TC-IMP39.13/MSS][UC-IMP39] CAMERA_CONFIG overview position is calibrated to [30.0, 33.0, 30.0]', () => {
-    expect(CAMERA_CONFIG.overview.position).toEqual([30.0, 33.0, 30.0]);
+  it('[TC-IMP39.13/MSS][UC-IMP39] CAMERA_CONFIG overview position is calibrated to [24.6, 25.3, 24.6]', () => {
+    expect(CAMERA_CONFIG.overview.position).toEqual([24.6, 25.3, 24.6]);
   });
 
   it('[TC-IMP39.14/MSS][UC-IMP39] CAMERA_CONFIG pre_match position is calibrated to [30.0, 33.0, 30.0]', () => {
     expect(CAMERA_CONFIG.pre_match.position).toEqual([30.0, 33.0, 30.0]);
   });
 
-  it('[TC-IMP39.15/MSS][UC-IMP39] calculateTargetCameraState overview returns calibrated position [30.0, 33.0, 30.0]', () => {
+  it('[TC-IMP39.15/MSS][UC-IMP39] calculateTargetCameraState overview returns calibrated position [24.6, 25.3, 24.6]', () => {
     const state = calculateTargetCameraState('overview');
-    expect(state.position).toEqual([30.0, 33.0, 30.0]);
+    expect(state.position).toEqual([24.6, 25.3, 24.6]);
   });
 
   // =========================================================================

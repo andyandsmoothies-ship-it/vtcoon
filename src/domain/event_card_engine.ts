@@ -56,8 +56,9 @@ export function applyChanceCard(
   registry?: PropertyRegistry,
   stateMap?: PropertyStateMap,
   permanentRentBonus?: Record<number, number>,
+  room?: Room,
 ): Record<string, never> {
-  return executeChanceCard(card, playerId, players, activeModifiers, registry, stateMap, permanentRentBonus);
+  return executeChanceCard(card, playerId, players, activeModifiers, registry, stateMap, permanentRentBonus, room);
 }
 
 
@@ -93,7 +94,7 @@ export function drawChanceCard(
   const card = room.chanceDeck.shift();
   if (card) {
     room.lastEventCard = getChanceCardInfo(card, current.id);
-    applyChanceCard(card, current.id, room.players, room.activeModifiers, reg, sm, permanentRentBonus ?? room.permanentRentBonus);
+    applyChanceCard(card, current.id, room.players, room.activeModifiers, reg, sm, permanentRentBonus ?? room.permanentRentBonus, room);
     if (card !== ChanceCardId.CC_DIPLOMATIC) room.chanceDiscard.push(card);
   }
   room.phase = TurnPhase.PropertyManagement;

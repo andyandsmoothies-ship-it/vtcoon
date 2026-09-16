@@ -175,7 +175,7 @@ function drawActionBadgeFooter(ctx: CanvasRenderingContext2D, meta: TileMetadata
   ctx.fillText(actionText, 128, 300);
 }
 
-function drawPriceTrayFooter(ctx: CanvasRenderingContext2D, price?: number): void {
+export function drawPriceTrayFooter(ctx: CanvasRenderingContext2D, price?: number): void {
   const priceText = formatPriceLabel(price);
   if (!priceText) return;
 
@@ -191,11 +191,22 @@ function drawPriceTrayFooter(ctx: CanvasRenderingContext2D, price?: number): voi
   ctx.fillText(priceText, 128, 300);
 }
 
+function drawTilePriceText(ctx: CanvasRenderingContext2D, meta: TileMetadata): void {
+  const priceText = formatPriceLabel(meta.price);
+  if (!priceText) return;
+
+  ctx.fillStyle = '#0F172A';
+  ctx.font = '900 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(priceText, 128, 300);
+}
+
 function drawTileFooter(ctx: CanvasRenderingContext2D, meta: TileMetadata, index: number): void {
-  if (isPropertyTile(index) || isInfrastructureTile(index)) {
-    drawPriceTrayFooter(ctx, meta.price);
-  } else {
+  if (!isPropertyTile(index) && !isInfrastructureTile(index)) {
     drawActionBadgeFooter(ctx, meta);
+  } else {
+    drawTilePriceText(ctx, meta);
   }
 
   ctx.strokeStyle = '#0F172A';

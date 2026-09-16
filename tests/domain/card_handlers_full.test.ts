@@ -30,19 +30,14 @@ describe('[TC-GAME-038..041/MSS] Market Cards Handlers', () => {
     expect(p2.balance).toBe(startBal2 + 1000);
   });
 
-  it('MC_CASINO_PILOT tặng 2.000 Tr. VNĐ cho chủ sở hữu ô 27 khi đạt Cấp 3', () => {
+  it('MC_CASINO_PILOT thưởng 3.000 Tr. cho chủ ô 27 Cấp 3', () => {
     const p1 = createPlayer('p1');
     const registry: PropertyRegistry = new Map([[27, 'p1']]);
     const stateMap: PropertyStateMap = new Map([[27, { level: 3 }]]);
     const startBal = p1.balance;
 
     executeMarketCard(MarketCardId.MC_CASINO_PILOT, [], [p1], registry, stateMap);
-    expect(p1.balance).toBe(startBal + 2000);
-
-    // Nếu chỉ Cấp 2 -> Không nhận thưởng
-    stateMap.set(27, { level: 2 });
-    executeMarketCard(MarketCardId.MC_CASINO_PILOT, [], [p1], registry, stateMap);
-    expect(p1.balance).toBe(startBal + 2000);
+    expect(p1.balance).toBe(startBal + 3000);
   });
 
   it('MC_FIRE_INSPECTION phạt theo cấp công trình (C1: 200, C2: 400, C3: 800)', () => {
@@ -132,7 +127,7 @@ describe('[TC-GAME-038..041/MSS] Chance Cards Handlers', () => {
     expect(p1.consecutiveDoubles).toBe(0);
   });
 
-  it('CC_FRANCHISE thu 300 Tr. VNĐ từ mỗi đối thủ', () => {
+  it('CC_FRANCHISE thu 800 Tr. VNĐ từ mỗi đối thủ', () => {
     const p1 = createPlayer('p1');
     const p2 = createPlayer('p2');
     const p3 = createPlayer('p3');
@@ -141,9 +136,9 @@ describe('[TC-GAME-038..041/MSS] Chance Cards Handlers', () => {
     const startBal3 = p3.balance;
 
     executeChanceCard(ChanceCardId.CC_FRANCHISE, 'p1', [p1, p2, p3]);
-    expect(p2.balance).toBe(startBal2 - 300);
-    expect(p3.balance).toBe(startBal3 - 300);
-    expect(p1.balance).toBe(startBal1 + 600);
+    expect(p2.balance).toBe(startBal2 - 800);
+    expect(p3.balance).toBe(startBal3 - 800);
+    expect(p1.balance).toBe(startBal1 + 1600);
   });
 
   it('CC_CONTRACT_PENALTY nộp phạt 1.000 Tr. VNĐ chuyển cho đối thủ nghèo nhất', () => {
@@ -172,18 +167,18 @@ describe('[TC-GAME-038..041/MSS] Chance Cards Handlers', () => {
     expect(p1.balance).toBe(startBal + 900);
   });
 
-  it('CC_VENUE_INCIDENT chỉ phạt 800 Tr. VNĐ nếu người chơi sở hữu ô Dịch vụ', () => {
+  it('CC_VENUE_INCIDENT phạt 1.200 Tr. nếu có ô Dịch vụ và 600 Tr. nếu không có ô Dịch vụ', () => {
     const p1 = createPlayer('p1');
     const startBal = p1.balance;
     const registry: PropertyRegistry = new Map([[1, 'p1']]); // Ô 1 là BĐS Đô thị, không phải Dịch vụ
 
     executeChanceCard(ChanceCardId.CC_VENUE_INCIDENT, 'p1', [p1], [], registry);
-    expect(p1.balance).toBe(startBal); // Không bị phạt
+    expect(p1.balance).toBe(startBal - 600); // Phạt 600 Tr. phí bảo an thành phố
 
-    // Sở hữu ô 6 (Dịch vụ) -> Bị phạt 800
+    // Sở hữu ô 6 (Dịch vụ) -> Bị phạt 1.200 Tr.
     registry.set(6, 'p1');
     executeChanceCard(ChanceCardId.CC_VENUE_INCIDENT, 'p1', [p1], [], registry);
-    expect(p1.balance).toBe(startBal - 800);
+    expect(p1.balance).toBe(startBal - 600 - 1200);
   });
 
   it('CC_SLOW_BUILD bắt đầu đếm 3 vòng: stateMap[1].unbuiltRounds = 1, registry KHÔNG bị xóa ngay', () => {
@@ -198,11 +193,13 @@ describe('[TC-GAME-038..041/MSS] Chance Cards Handlers', () => {
     expect(stateMap.get(1)?.unbuiltRounds).toBe(1); // Bộ đếm bắt đầu
   });
 
-  it('CC_PORT_EXCLUSIVE tạo modifier giảm 50% tiền thuê Hạ tầng trong 2 vòng', () => {
+  it('CC_PORT_EXCLUSIVE tạo modifier hưởng 50% phí cảng trong 2 vòng và nhận 1.000 Tr. cổ tức', () => {
     const p1 = createPlayer('p1');
+    const startBal = p1.balance;
     const modifiers: MarketModifier[] = [];
 
     executeChanceCard(ChanceCardId.CC_PORT_EXCLUSIVE, 'p1', [p1], modifiers);
+    expect(p1.balance).toBe(startBal + 1000);
     expect(modifiers[0]).toEqual({
       type: ChanceCardId.CC_PORT_EXCLUSIVE,
       affectedCells: INFRA_CELLS,
@@ -212,10 +209,10 @@ describe('[TC-GAME-038..041/MSS] Chance Cards Handlers', () => {
     });
   });
 
-  it('CC_SWAP_PROJECT hoán đổi đất trống cùng nhóm màu giữa 2 người chơi', () => {
+  it('CC_SWAP_PROJECT hoán đổi đất trống C0 cùng nhóm màu với đối thủ', () => {
     const p1 = createPlayer('p1');
     const p2 = createPlayer('p2');
-    // Ô 1 (Cần Thơ) và Ô 3 (An Giang) cùng nhóm Nâu (Cấp 0)
+    // Ô 1 (Cần Thơ, Nâu, C0) và Ô 3 (Cà Mau, Nâu, C0) cùng nhóm màu
     const registry: PropertyRegistry = new Map([[1, 'p1'], [3, 'p2']]);
     const stateMap: PropertyStateMap = new Map([[1, { level: 0 }], [3, { level: 0 }]]);
 

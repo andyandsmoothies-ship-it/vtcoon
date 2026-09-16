@@ -73,8 +73,8 @@ export function isPassiveAuctionAllowed(
   nextBid: number,
 ): boolean {
   if (monopolyScore >= 2.5) return true;
-  if ((auction.highestBid ?? 0) > basePrice * 0.85) return false;
-  return nextBid <= basePrice * 0.70;
+  if ((auction.highestBid ?? 0) > basePrice * 1.15) return false;
+  return nextBid <= basePrice * 1.15;
 }
 
 function decidePassiveAuctionIntent(

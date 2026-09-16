@@ -156,26 +156,26 @@ describe('[TC-CPTB01/MSS][UI-S02/MSS][BR-UI-002] Chrome Pawns, Toy Buildings & D
   // FACET 1: BOUNDARY & RANGE (PBR SPECS, TỈ LỆ SCALE & TỌA ĐỘ CAO ĐỘ)
   // =========================================================================
   describe('Facet 1: Boundary & Range — Kích Thước, Tỉ Lệ PBR & Cao Độ Tọa Độ', () => {
-    it('[TC-CPTB01.01/MSS][UI-S02/MSS][BR-UI-002][Facet1-Boundary] LUXURY_PAWN_CONFIGS cấu hình chất liệu chrome bạc #F8FAFC cho slot 0', () => {
+    it('[TC-CPTB01.01/MSS][UI-S02/MSS][BR-UI-002][Facet1-Boundary] LUXURY_PAWN_CONFIGS cấu hình chất liệu sơn men màu #DC2626 cho slot 0', () => {
       const cfg = LUXURY_PAWN_CONFIGS[0];
       expect(cfg).toBeDefined();
-      expect(cfg?.color).toBe('#F8FAFC');
+      expect(cfg?.color).toBe('#DC2626');
     });
 
-    it('[TC-CPTB01.02/MSS][UI-S02/MSS][BR-UI-002][Facet1-Boundary] LUXURY_PAWN_CONFIGS cấu hình chất liệu chrome bạc #F8FAFC cho slot 1, 2 và 3', () => {
-      expect(LUXURY_PAWN_CONFIGS[1]?.color).toBe('#F8FAFC');
-      expect(LUXURY_PAWN_CONFIGS[2]?.color).toBe('#F8FAFC');
-      expect(LUXURY_PAWN_CONFIGS[3]?.color).toBe('#F8FAFC');
+    it('[TC-CPTB01.02/MSS][UI-S02/MSS][BR-UI-002][Facet1-Boundary] LUXURY_PAWN_CONFIGS cấu hình chất liệu sơn men màu sắc riêng cho slot 1, 2 và 3', () => {
+      expect(LUXURY_PAWN_CONFIGS[1]?.color).toBe('#27AE60');
+      expect(LUXURY_PAWN_CONFIGS[2]?.color).toBe('#E67E22');
+      expect(LUXURY_PAWN_CONFIGS[3]?.color).toBe('#10B981');
     });
 
-    it('[TC-CPTB01.03/MSS][UI-S02/MSS][BR-UI-002][Facet1-Boundary] LUXURY_PAWN_CONFIGS đạt độ phản xạ kim loại cao metalness >= 0.90 (chuẩn 0.96)', () => {
-      expect(LUXURY_PAWN_CONFIGS[0]?.metalness).toBeGreaterThanOrEqual(0.90);
-      expect(LUXURY_PAWN_CONFIGS[0]?.metalness).toBe(0.96);
+    it('[TC-CPTB01.03/MSS][UI-S02/MSS][BR-UI-002][Facet1-Boundary] LUXURY_PAWN_CONFIGS đạt độ phản xạ men bóng metalness <= 0.40 (chuẩn 0.25)', () => {
+      expect(LUXURY_PAWN_CONFIGS[0]?.metalness).toBeLessThanOrEqual(0.40);
+      expect(LUXURY_PAWN_CONFIGS[0]?.metalness).toBe(0.25);
     });
 
-    it('[TC-CPTB01.04/MSS][UI-S02/MSS][BR-UI-002][Facet1-Boundary] LUXURY_PAWN_CONFIGS đạt độ nhám siêu mịn roughness <= 0.12 (chuẩn 0.08)', () => {
-      expect(LUXURY_PAWN_CONFIGS[0]?.roughness).toBeLessThanOrEqual(0.12);
-      expect(LUXURY_PAWN_CONFIGS[0]?.roughness).toBe(0.08);
+    it('[TC-CPTB01.04/MSS][UI-S02/MSS][BR-UI-002][Facet1-Boundary] LUXURY_PAWN_CONFIGS đạt độ nhám sơn men roughness <= 0.45 (chuẩn 0.28)', () => {
+      expect(LUXURY_PAWN_CONFIGS[0]?.roughness).toBeLessThanOrEqual(0.45);
+      expect(LUXURY_PAWN_CONFIGS[0]?.roughness).toBe(0.28);
     });
 
     it('[TC-CPTB01.05/MSS][UI-S02/MSS][BR-UI-002][Facet1-Boundary] LuxuryPawnModel có tỉ lệ phóng to bề thế với scale tối thiểu >= 0.85 (thay vì 0.625 cũ)', () => {

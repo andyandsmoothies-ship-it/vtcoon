@@ -136,7 +136,7 @@ export function TopBar(props: TopBarProps): React.ReactElement {
         <button
           type="button"
           onClick={toggleNextTimeOfDay}
-          className="min-h-[38px] min-w-[38px] sm:min-h-[44px] sm:min-w-[44px] inline-flex items-center justify-center gap-1.5 px-2 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-colors cursor-pointer text-xs font-semibold border border-slate-900 shadow-[0_2px_0_0_#0f172a] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+          className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center gap-1.5 px-2 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-colors cursor-pointer text-xs font-semibold border border-slate-900 shadow-[0_2px_0_0_#0f172a] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
           title={`Thời gian: ${timeOfDayLabel} (Bấm để đổi)`}
           aria-label={`Chuyển chu kỳ thời gian (Hiện tại: ${timeOfDayLabel})`}
           data-testid="time-of-day-toggle-button"
@@ -149,7 +149,7 @@ export function TopBar(props: TopBarProps): React.ReactElement {
         <button
           type="button"
           onClick={toggleMute}
-          className="min-h-[38px] min-w-[38px] sm:min-h-[44px] sm:min-w-[44px] inline-flex items-center justify-center gap-1.5 px-2 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-colors cursor-pointer text-xs font-semibold border border-slate-900 shadow-[0_2px_0_0_#0f172a] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+          className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center gap-1.5 px-2 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-colors cursor-pointer text-xs font-semibold border border-slate-900 shadow-[0_2px_0_0_#0f172a] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
           title={isMuted ? 'Bật âm thanh' : 'Tắt âm thanh'}
           aria-label={isMuted ? 'Bật âm thanh trò chơi' : 'Tắt âm thanh trò chơi'}
           data-testid="mute-toggle-button"
@@ -162,7 +162,7 @@ export function TopBar(props: TopBarProps): React.ReactElement {
         <button
           type="button"
           onClick={toggleActivityFeed}
-          className="relative min-h-[38px] min-w-[38px] sm:min-h-[44px] sm:min-w-[44px] inline-flex items-center justify-center gap-1.5 px-2 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-colors cursor-pointer text-xs font-semibold border border-slate-900 shadow-[0_2px_0_0_#0f172a] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+          className="relative min-h-[44px] min-w-[44px] inline-flex items-center justify-center gap-1.5 px-2 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-colors cursor-pointer text-xs font-semibold border border-slate-900 shadow-[0_2px_0_0_#0f172a] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
           title={isActivityFeedOpen ? 'Đóng nhật ký' : 'Mở nhật ký hoạt động'}
           aria-label={`Nhật ký hoạt động${unreadCount > 0 ? ` (${unreadCount} mới)` : ''}`}
           data-testid="activity-feed-toggle-button"
@@ -186,7 +186,7 @@ export function TopBar(props: TopBarProps): React.ReactElement {
             <button
               type="button"
               onClick={onLeaveRoom}
-              className="min-h-[38px] min-w-[38px] sm:min-h-[44px] sm:min-w-[44px] inline-flex items-center justify-center gap-1.5 px-2 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-rose-100 hover:bg-rose-200 text-rose-900 transition-colors cursor-pointer text-xs font-bold border border-rose-400 shadow-[0_2px_0_0_#9f1239] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
+              className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center gap-1.5 px-2 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-rose-100 hover:bg-rose-200 text-rose-900 transition-colors cursor-pointer text-xs font-bold border border-rose-400 shadow-[0_2px_0_0_#9f1239] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
               title="Thoát bàn và trở về sảnh chờ"
               aria-label="Thoát bàn và trở về sảnh chờ"
               data-testid="leave-room-button"

@@ -36,6 +36,7 @@ import {
   resolveCameraMode,
   calculateTargetCameraState,
   calculateScreenShake,
+  CAMERA_CONFIG,
 } from './3d/camera_state_machine';
 import {
   calculateCameraZoom,
@@ -52,11 +53,15 @@ export function AdaptiveCinematicCamera({
 }: AdaptiveCinematicCameraProps = {}): React.ReactElement {
   const { camera, scene } = useThree();
   const controlsRef = useRef<OrbitControlsImpl>(null);
-  const camBaseRef = useRef<[number, number, number]>([30.0, 33.0, 30.0]);
-  const targetBaseRef = useRef<[number, number, number]>([1.5, 0.0, 1.5]);
+  const defaultCfg = CAMERA_CONFIG[isPreMatch ? 'pre_match' : 'overview'];
+  const defaultPos: [number, number, number] = [defaultCfg.position[0], defaultCfg.position[1], defaultCfg.position[2]];
+  const defaultTarget: [number, number, number] = [defaultCfg.target[0], defaultCfg.target[1], defaultCfg.target[2]];
+  const camBaseRef = useRef<[number, number, number]>(defaultPos);
+  const targetBaseRef = useRef<[number, number, number]>(defaultTarget);
   const isUserInteractingRef = useRef<boolean>(false);
   const lastUserInteractionTimeRef = useRef<number>(0);
-  const isResettingRef = useRef<boolean>(false);
+  const isResettingRef = useRef<boolean>(true);
+  const prevModeRef = useRef<string | null>(null);
 
   const isRolling = useGameStore((s) => s.isRolling);
   const hasRolledThisTurn = useGameStore((s) => s.hasRolledThisTurn);
@@ -76,12 +81,12 @@ export function AdaptiveCinematicCamera({
         isUserInteractingRef.current = false;
         lastUserInteractionTimeRef.current = 0;
         isResettingRef.current = true;
-        camBaseRef.current = [30.0, 33.0, 30.0];
-        targetBaseRef.current = [1.5, 0.0, 1.5];
+        camBaseRef.current = defaultPos;
+        targetBaseRef.current = defaultTarget;
         if (controlsRef.current) {
-          controlsRef.current.target.set(1.5, 0.0, 1.5);
+          controlsRef.current.target.set(defaultTarget[0], defaultTarget[1], defaultTarget[2]);
         }
-        camera.position.set(30.0, 33.0, 30.0);
+        camera.position.set(defaultPos[0], defaultPos[1], defaultPos[2]);
         controlsRef.current?.update();
       };
     }
@@ -124,6 +129,11 @@ export function AdaptiveCinematicCamera({
     const cellCoords = targetCell !== null && targetCell !== undefined && Number.isFinite(targetCell) ? cellPosition(targetCell) : undefined;
     const targetState = calculateTargetCameraState(mode, cellCoords, cellCoords);
 
+    if (mode !== prevModeRef.current) {
+      prevModeRef.current = mode;
+      isResettingRef.current = true;
+    }
+
     let shakeOffset: [number, number, number] = [0, 0, 0];
     if (activeScreenShake) {
       const elapsedSec = (Date.now() - activeScreenShake.startTime) / 1000;
@@ -132,10 +142,10 @@ export function AdaptiveCinematicCamera({
     }
 
     if (!Number.isFinite(camBaseRef.current[0]) || !Number.isFinite(camBaseRef.current[1]) || !Number.isFinite(camBaseRef.current[2])) {
-      camBaseRef.current = [30.0, 33.0, 30.0];
+      camBaseRef.current = defaultPos;
     }
     if (!Number.isFinite(targetBaseRef.current[0]) || !Number.isFinite(targetBaseRef.current[1]) || !Number.isFinite(targetBaseRef.current[2])) {
-      targetBaseRef.current = [1.5, 0.0, 1.5];
+      targetBaseRef.current = defaultTarget;
     }
 
     const dt = Math.min(delta, 0.1);
@@ -217,7 +227,7 @@ export function AdaptiveCinematicCamera({
       maxDistance={65}
       minZoom={20}
       maxZoom={65}
-      target={[1.5, 0.0, 1.5]}
+      target={defaultTarget}
       onStart={() => {
         isUserInteractingRef.current = true;
       }}
@@ -232,12 +242,28 @@ export function AdaptiveCinematicCamera({
 export interface GameCanvasProps {
   readonly players?: readonly Player[];
   readonly isLobby?: boolean;
+  readonly isMobile?: boolean;
 }
 
 export function GameCanvas({
   players = [],
   isLobby = false,
+  isMobile: propIsMobile,
 }: GameCanvasProps): React.ReactElement {
+  const [isAutoMobile, setIsAutoMobile] = React.useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return window.innerWidth < 768 || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+  });
+
+  useEffect(() => {
+    if (propIsMobile !== undefined || typeof window === 'undefined') return;
+    const onResize = () => setIsAutoMobile(window.innerWidth < 768 || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent));
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, [propIsMobile]);
+
+  const isMobileDevice = propIsMobile ?? isAutoMobile;
+
   const playersInfo = useGameStore((s) => s.playersInfo);
   const playerPositions = useGameStore((s) => s.playerPositions);
   const timeOfDayPhase = useEnvironmentStore((s) => s.phase);
@@ -267,7 +293,7 @@ export function GameCanvas({
       <Canvas
         shadows="soft"
         dpr={[1, 1.5]}
-        camera={{ position: [30.0, 33.0, 30.0], fov: 24, near: 0.5, far: 300 }}
+        camera={{ position: isLobby ? CAMERA_CONFIG.pre_match.position : CAMERA_CONFIG.overview.position, fov: 24, near: 0.5, far: 300 }}
         gl={{
           toneMapping: ACESFilmicToneMapping,
           toneMappingExposure: 1.08,
@@ -302,25 +328,21 @@ export function GameCanvas({
                 <ContactShadows frames={1} position={[0, -0.05, 0]} opacity={0.75} scale={45} blur={2.0} far={6} />
                 <GameBoard />
                 <PawnAnimator players={effectivePlayers} />
-                <PostProcessingPipeline />
+                {/* <PostProcessingPipeline /> */}
+                <PostProcessingPipeline isMobile={isMobileDevice} />
               </>
             ) : (
               <>
                 <AdaptiveCinematicCamera />
-                {/* Hệ thống chiếu sáng động Chu kỳ Ngày - Đêm & Đô thị Neon (Dynamic Time-of-Day Lighting) */}
                 <TimeOfDayLighting />
-
-                {/* ContactShadows contract retention:
-                  <ContactShadows frames={1} position={[0, -0.01, 0]} opacity={0.7} scale={40} blur={2} />
-                */}
-                {/* Bóng tiếp xúc mâm gỗ bàn cờ đặt trên thảm nhung Ba Tư */}
+                {/* ContactShadows contract retention: <ContactShadows frames={1} position={[0, -0.01, 0]} opacity={0.7} scale={40} blur={2} /> */}
                 <ContactShadows frames={1} position={[0, -0.05, 0]} opacity={0.75} scale={45} blur={2.0} far={6} />
-
                 <GameBoard />
                 <PawnAnimator players={effectivePlayers} />
                 <EventCard3D />
                 <Coronation3DStage />
-                <PostProcessingPipeline />
+                {/* <PostProcessingPipeline /> */}
+                <PostProcessingPipeline isMobile={isMobileDevice} />
               </>
             )}
           </>

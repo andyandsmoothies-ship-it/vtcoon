@@ -54,7 +54,7 @@ export function SocialEmotesTray({
           type="button"
           disabled={disabled || isOnCooldown}
           onClick={() => handleClick(emote.id)}
-          className={`relative w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center text-xl transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+          className={`relative min-w-[44px] min-h-[44px] w-11 h-11 rounded-xl flex items-center justify-center text-xl transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer ${
             disabled || isOnCooldown
               ? 'opacity-40 cursor-not-allowed grayscale'
               : 'hover:bg-[#F7F2E7] active:scale-95'

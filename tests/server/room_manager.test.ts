@@ -136,6 +136,7 @@ describe('[UC-GAME-008/MSS] TC-01.4 handleRollDice — vuot o GO', () => {
     const room = mgr.createRoom('p1');
     mgr.joinRoom(room.roomCode, 'p2');
     mgr.startGame(room.roomCode);
+    room.chanceDeck = [ChanceCardId.CC_DIPLOMATIC, ...room.chanceDeck.filter((c) => c !== ChanceCardId.CC_DIPLOMATIC)];
     const result = mgr.handleRollDice(room.roomCode, 'p1');
     expect(result).toBeDefined();
     if (result === undefined) return;

@@ -73,21 +73,38 @@ export function calculateTradeOfferPrice(
   bot: Player,
   personality: BotPersonality,
   customSafetyBuffer?: number,
+  roundCount?: number,
+  isMonopolyGap?: boolean,
+  playerCount?: number,
 ): number | null {
   const deed = PROPERTY_DEEDS.get(cellIndex);
   const basePrice = deed?.price ?? 1000;
+  const currentRound = roundCount ?? 1;
+  const roundThreshold = (typeof playerCount === 'number' && playerCount >= 4) ? 4 : 6;
 
   let multiplier = 1.25;
-  if (personality === BotPersonality.Aggressive) {
-    multiplier = 1.4;
-  } else if (personality === BotPersonality.Balanced) {
-    multiplier = 1.25;
-  } else if (personality === BotPersonality.Passive) {
-    multiplier = 1.1;
+  if (currentRound >= roundThreshold) {
+    if (personality === BotPersonality.Aggressive) {
+      multiplier = 1.75;
+    } else if (personality === BotPersonality.Balanced) {
+      multiplier = 1.55;
+    } else if (personality === BotPersonality.Passive) {
+      multiplier = 1.35;
+    }
+  } else {
+    if (personality === BotPersonality.Aggressive) {
+      multiplier = 1.4;
+    } else if (personality === BotPersonality.Balanced) {
+      multiplier = 1.25;
+    } else if (personality === BotPersonality.Passive) {
+      multiplier = 1.1;
+    }
   }
 
   const offerPrice = Math.round(basePrice * multiplier);
-  const safetyBuffer = customSafetyBuffer !== undefined ? customSafetyBuffer : DEFAULT_MIN_SAFETY_BUFFER;
+  const safetyBuffer = isMonopolyGap
+    ? Math.max(customSafetyBuffer ?? DEFAULT_MIN_SAFETY_BUFFER, 1000)
+    : (customSafetyBuffer !== undefined ? customSafetyBuffer : DEFAULT_MIN_SAFETY_BUFFER);
 
   if (bot.balance - offerPrice < safetyBuffer) {
     return null;
@@ -138,11 +155,14 @@ export function evaluateBotTradeAcceptance(
   }
 
   if (pers === BotPersonality.Balanced) {
-    if (buyer.balance >= 30_000 || buyer.balance > sellerBot.balance * 3) {
+    if (sellerBot.balance >= 2000 && (buyer.balance >= 30_000 || buyer.balance > sellerBot.balance * 3)) {
       return { accept: false, reason: 'KINGMAKING_DEFENSE' };
     }
     if (givesMonopolyToBuyer) {
-      if (offerPrice >= Math.round(1.8 * basePrice)) {
+      if (offerPrice >= Math.round(1.5 * basePrice)) {
+        return { accept: true };
+      }
+      if (sellerBot.balance < 2000 && offerPrice >= Math.round(1.3 * basePrice)) {
         return { accept: true };
       }
       return { accept: false, reason: 'PREVENT_MONOPOLY' };
@@ -178,7 +198,8 @@ export function findEligibleBotTrade(
   roundCount?: number,
 ): BotTradeIntent | null {
   const currentRound = roundCount ?? room.roundCount ?? room.round ?? 1;
-  if (bot.lastTradeOfferRound && currentRound - bot.lastTradeOfferRound < 2) {
+  const cooldownRounds = currentRound >= 10 ? 1 : 2;
+  if (bot.lastTradeOfferRound && currentRound - bot.lastTradeOfferRound < cooldownRounds) {
     return null;
   }
 
@@ -188,7 +209,15 @@ export function findEligibleBotTrade(
   const targetOwner = room.players.find((p) => p.id === gap.targetOwnerId);
   if (!targetOwner || targetOwner.bankrupt) return null;
 
-  const price = calculateTradeOfferPrice(gap.cellIndex, bot, personality);
+  const price = calculateTradeOfferPrice(
+    gap.cellIndex,
+    bot,
+    personality,
+    undefined,
+    currentRound,
+    true,
+    room.players.length,
+  );
   if (price === null) return null;
 
   return {

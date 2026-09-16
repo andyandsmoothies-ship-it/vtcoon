@@ -157,12 +157,12 @@ describe('[IMP-59] Facet 3: Auction Baiting & Tactical Bluffing (Nghi Binh / Tra
     expect(intent?.amount).toBe(750);
   });
 
-  it('[IMP59-F3-03] Bot Passive bat ngo bam Pass khi gia dau vuot qua 75% gia goc (khong tiep tuc om hang)', () => {
+  it('[IMP59-F3-03] Bot Passive bat ngo bam Pass khi gia dau vuot qua 115% gia goc (khong tiep tuc om hang) [IMP-115]', () => {
     const { room, bot } = makeTestSetup({ balance: 10_000, phase: TurnPhase.AuctionPhase });
     const opp = createPlayer('opp_auc');
     room.players.push(opp);
     const auction: CurrentAuctionState = {
-      cellIndex: 6, declinedPlayerId: 'p_declined', highestBid: 750, highestBidder: opp.id, bidIncrement: 50,
+      cellIndex: 6, declinedPlayerId: 'p_declined', highestBid: 1200, highestBidder: opp.id, bidIncrement: 50,
     };
     const intent = decideBotIntent(bot, room, new Map(), new Map(), {
       personality: BotPersonality.Passive, balanceThresholdMultiplier: 1.5,

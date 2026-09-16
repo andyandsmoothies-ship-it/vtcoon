@@ -155,7 +155,7 @@ export function PreMatchDeck({
             </span>
           </div>
           <p className="text-[11px] font-bold text-amber-200 uppercase tracking-widest drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] mt-1">
-            Sảnh Chờ Đảo Ngọc • Bến Cảng Du Thuyền
+            Sảnh Chờ Đảo Ngọc 🏝️ • Bến Cảng Du Thuyền
           </p>
         </div>
 
@@ -210,21 +210,8 @@ export function PreMatchDeck({
         style={{ transform: isPanelCollapsed ? 'translateX(calc(100% + 2rem))' : undefined }}
         data-testid="pre-match-deck"
       >
-        {/* Tiêu đề & Trạng thái phòng */}
+        {/* Tiêu đề & Hộp Mã phòng */}
         <div className="flex flex-col gap-2.5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-1.5">
-                <span>🏝️</span> Sảnh Chờ
-              </span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 font-bold tracking-wide">
-                {occupiedCount === 4 && slots.every((s) => !s.isOccupied || s.isReady)
-                  ? 'SẴN SÀNG (4/4)'
-                  : `ĐANG CHỜ (${occupiedCount}/4)`}
-              </span>
-            </div>
-          </div>
-
           {/* Hộp Mã phòng & Nút Thao tác */}
           <div className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-slate-50/80 p-2.5">
             <div className="flex items-center justify-between">
@@ -233,14 +220,19 @@ export function PreMatchDeck({
                 <span className="text-lg font-black font-mono tracking-widest text-slate-900" data-testid="lobby-room-code">
                   {roomCode}
                 </span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold tracking-wide ml-1">
+                  {occupiedCount === 4 && slots.every((s) => !s.isOccupied || s.isReady)
+                    ? 'SẴN SÀNG (4/4)'
+                    : `ĐANG CHỜ (${occupiedCount}/4)`}
+                </span>
               </div>
               <button
                 type="button"
                 onClick={handleCopyCode}
-                className={`min-h-[40px] px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer border ${
+                className={`min-h-[40px] px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer border shadow-[0_2px_0_0_#78350f] active:translate-y-0.5 ${
                   copiedCode
                     ? 'bg-emerald-600 text-white border-emerald-700 shadow-xs'
-                    : 'bg-slate-900 hover:bg-slate-800 text-white border-slate-900 shadow-xs'
+                    : 'bg-gradient-to-b from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-amber-950 border-amber-200'
                 }`}
                 data-testid="copy-room-code-btn"
                 aria-label="Sao chép mã phòng"
@@ -250,11 +242,11 @@ export function PreMatchDeck({
             </div>
 
             {/* Thao tác Nhanh: Hướng Dẫn & Mã QR */}
-            <div className="flex items-center gap-2 pt-1 border-t border-slate-200/80">
+            <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-200/80">
               <button
                 type="button"
                 onClick={() => setShowRulesModal(true)}
-                className="flex-1 inline-flex items-center justify-center gap-1 min-h-[42px] px-2.5 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
+                className="inline-flex items-center justify-center gap-1 min-h-[42px] px-2.5 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
                 data-testid="open-game-rules-btn"
                 aria-label="Xem hướng dẫn game"
               >
@@ -320,7 +312,7 @@ export function PreMatchDeck({
               onClick={handleStartGame}
               className={`w-full min-h-[44px] py-3 px-4 rounded-xl font-bold text-sm tracking-wide uppercase transition-all ${
                 canStartCheck.canStart
-                  ? 'cursor-pointer bg-gradient-to-b from-red-500 via-red-600 to-red-700 text-white border-2 border-amber-300 shadow-[0_4px_0_0_#7f1d1d] active:translate-y-[2px]'
+                  ? 'cursor-pointer bg-gradient-to-b from-emerald-400 via-emerald-500 to-emerald-600 text-white border-2 border-emerald-300 shadow-[0_5px_0_0_#064e3b] active:translate-y-[2px] active:shadow-[0_2px_0_0_#064e3b]'
                   : 'cursor-not-allowed bg-slate-100 text-slate-500 border-2 border-slate-300 shadow-inner'
               }`}
               data-testid="start-game-btn"

@@ -63,7 +63,7 @@ export function computeOwnerMap(
     const player = playersList[pIdx];
     if (!player) continue;
     const slot = player.ownerSlot ?? player.pawnSlot ?? (pIdx % LUXURY_PAWN_CONFIGS.length);
-    const mascot = player.mascotIcon ?? LUXURY_PAWN_CONFIGS[slot]?.icon ?? '🐕';
+    const mascot = player.mascotIcon ?? LUXURY_PAWN_CONFIGS[slot]?.icon ?? '🏰';
     const tokenColor = player.tokenColor ?? '#DC2626';
     for (const cellIndex of player.ownedProperties ?? []) {
       map[cellIndex] = {
@@ -114,7 +114,7 @@ export function GameBoard(): React.ReactElement {
     <group position={[0, 0, 0]}>
       {/* Khung Bàn Gỗ Óc Chó Thượng Lưu (Walnut Tabletop) y = -0.350 */}
       <mesh receiveShadow position={[0, WALNUT_TABLE_Y, 0]}>
-        <boxGeometry args={[32, 0.2, 32]} />
+        <boxGeometry args={[19.2, 0.2, 19.2]} />
         <meshStandardMaterial
           map={walnutDiffuse}
           roughnessMap={walnutRoughness}

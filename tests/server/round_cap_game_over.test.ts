@@ -1,4 +1,4 @@
-// [UC-GAME-001/MSS][UC-GAME-008/MSS][TC-RCAP/MSS] Round Cap 30 & Game Over Integration Tests
+// [UC-GAME-001/MSS][UC-GAME-008/MSS][TC-RCAP/MSS] Round Cap 40 & Game Over Integration Tests
 import { describe, it, expect, beforeAll, afterAll, afterEach, vi } from 'vitest';
 import { WebSocket } from 'ws';
 import {
@@ -17,41 +17,41 @@ import { SessionManager } from '../../src/server/session_manager';
 import type { WsServerMessage } from '../../src/server/network/network_types';
 
 describe('[TC-RCAP.1/Domain] isRoomGameOver Unit & Boundary Contract', () => {
-  it('Tra ve false khi phong chua bat dau ke ca khi roundCount > 30 hoac con 1 nguoi', () => {
+  it('Tra ve false khi phong chua bat dau ke ca khi roundCount > 40 hoac con 1 nguoi', () => {
     const room = createRoom('p1');
     room.started = false;
-    room.roundCount = 35;
+    room.roundCount = 45;
     expect(isRoomGameOver(room)).toBe(false);
 
     room.players = [createPlayer('p1')];
     expect(isRoomGameOver(room)).toBe(false);
   });
 
-  it('Tra ve false khi phong dang choi, du 2 nguoi con song va roundCount <= 30', () => {
+  it('Tra ve false khi phong dang choi, du 2 nguoi con song va roundCount <= 40', () => {
     const room = createRoom('p1');
     room.players.push(createPlayer('p2'));
     room.started = true;
     room.roundCount = 1;
     expect(isRoomGameOver(room)).toBe(false);
 
-    // Kiem tra gia tri bien tai roundCount = 30
-    room.roundCount = 30;
+    // Kiem tra gia tri bien tai roundCount = 40
+    room.roundCount = 40;
     expect(isRoomGameOver(room)).toBe(false);
   });
 
-  it('Tra ve true khi phong dang choi va roundCount vuot qua 30 (roundCount = 31)', () => {
+  it('Tra ve true khi phong dang choi va roundCount vuot qua 40 (roundCount = 41)', () => {
     const room = createRoom('p1');
     room.players.push(createPlayer('p2'), createPlayer('p3'), createPlayer('p4'));
     room.started = true;
 
-    // Tai roundCount = 30: Chua ket thuc
-    room.roundCount = 30;
+    // Tai roundCount = 40: Chua ket thuc
+    room.roundCount = 40;
     expect(isRoomGameOver(room)).toBe(false);
 
-    // Tai roundCount = 31: Ket thuc van dau do cham gioi han Max Rounds
-    room.roundCount = 31;
+    // Tai roundCount = 41: Ket thuc van dau do cham gioi han Max Rounds
+    room.roundCount = 41;
     expect(isRoomGameOver(room)).toBe(true);
-    expect(MAX_ROUNDS).toBe(30);
+    expect(MAX_ROUNDS).toBe(40);
   });
 
   it('Tra ve true khi chi con 1 nguoi chua pha san ke ca khi moi o round 1', () => {
@@ -73,12 +73,12 @@ describe('[TC-RCAP.1/Domain] isRoomGameOver Unit & Boundary Contract', () => {
     expect(isRoomGameOver(room)).toBe(false);
   });
 
-  it('Nhan dien roundCount hoac round dat 31 deu ket thuc van dau', () => {
+  it('Nhan dien roundCount hoac round dat 41 deu ket thuc van dau', () => {
     const room = createRoom('p1');
     room.players.push(createPlayer('p2'));
     room.started = true;
     delete room.roundCount;
-    room.round = 31;
+    room.round = 41;
     expect(isRoomGameOver(room)).toBe(true);
   });
 });
@@ -135,7 +135,7 @@ describe('[TC-RCAP.2/Integration] WssServer Game Over Trigger at Round Cap', () 
     });
   }
 
-  it('WssServer phat thong bao GAME_OVER va dong phong khi roundCount vuot qua 30', async () => {
+  it('WssServer phat thong bao GAME_OVER va dong phong khi roundCount vuot qua 40', async () => {
     const wsHost = await openSocket();
     const pHost = collectN(wsHost, 2);
     wsHost.send(JSON.stringify({ type: 'CREATE_ROOM', playerId: 'host-rcap' }));
@@ -153,11 +153,11 @@ describe('[TC-RCAP.2/Integration] WssServer Game Over Trigger at Round Cap', () 
     wsHost.send(JSON.stringify({ type: 'START_GAME', playerId: 'host-rcap', roomCode }));
     await pStart;
 
-    // Lay room tu roomManager cua server va can thiep roundCount = 31 (Zero Dirty Cast)
+    // Lay room tu roomManager cua server va can thiep roundCount = 41 (Zero Dirty Cast)
     const rm = server.roomManager;
     const room = rm.getRoom(roomCode);
     expect(room).toBeDefined();
-    room!.roundCount = 31;
+    room!.roundCount = 41;
 
     // Khi mot nguoi choi thuc hien hanh dong ket thuc luot
     const pOver = collectN(wsHost, 1);
@@ -182,7 +182,7 @@ describe('[TC-RCAP.2/Integration] WssServer Game Over Trigger at Round Cap', () 
 });
 
 describe('[TC-RCAP.3/Integration] Bot & Timeout Schedulers Handle Round Cap', () => {
-  it('BotTurnScheduler goi onGameOver khi roundCount vuot qua 30', async () => {
+  it('BotTurnScheduler goi onGameOver khi roundCount vuot qua 40', async () => {
     const rm = new RoomManager();
     const intentMutex = new IntentMutex();
     const sessionManager = new SessionManager();
@@ -200,9 +200,9 @@ describe('[TC-RCAP.3/Integration] Bot & Timeout Schedulers Handle Round Cap', ()
     rm.joinRoom(room.roomCode, 'bot-p2');
     rm.startGame(room.roomCode);
 
-    // Bien bot-host thanh Bot va set roundCount = 31
+    // Bien bot-host thanh Bot va set roundCount = 41
     room.players[0]!.isBot = true;
-    room.roundCount = 31;
+    room.roundCount = 41;
 
     scheduler.scheduleBotTurn(room.roomCode);
 
@@ -212,7 +212,7 @@ describe('[TC-RCAP.3/Integration] Bot & Timeout Schedulers Handle Round Cap', ()
     expect(onGameOverMock).toHaveBeenCalledWith(room.roomCode);
   });
 
-  it('TurnTimeoutScheduler goi onGameOver khi roundCount vuot qua 30 sau khi timeout xu ly', async () => {
+  it('TurnTimeoutScheduler goi onGameOver khi roundCount vuot qua 40 sau khi timeout xu ly', async () => {
     const rm = new RoomManager();
     const intentMutex = new IntentMutex();
     const sessionManager = new SessionManager();
@@ -232,8 +232,8 @@ describe('[TC-RCAP.3/Integration] Bot & Timeout Schedulers Handle Round Cap', ()
     rm.joinRoom(room.roomCode, 'human-p2');
     rm.startGame(room.roomCode);
 
-    // Dat roundCount = 31
-    room.roundCount = 31;
+    // Dat roundCount = 41
+    room.roundCount = 41;
     scheduler.scheduleTurnTimeout(room.roomCode, 50);
 
     // Doi timeout chay

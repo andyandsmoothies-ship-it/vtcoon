@@ -64,12 +64,12 @@ export function getDeedDisplayInfo(cellIndex: number): DeedDisplayInfo | null {
 }
 
 /**
- * Tính 3 bước giá tăng dần (+50, +100, +200 Tr.) từ mức giá hiện tại.
+ * Tính 3 bước giá tăng dần (+100, +200, +500 Tr.) từ mức giá hiện tại (IMP-102).
  * Tự động chuẩn hóa giá âm hoặc không hợp lệ về 0.
  */
 export function calculateAuctionIncrements(currentBid: number): [number, number, number] {
   const safeBid = Number.isFinite(currentBid) && currentBid >= 0 ? Math.floor(currentBid) : 0;
-  return [safeBid + 50, safeBid + 100, safeBid + 200];
+  return [safeBid + 100, safeBid + 200, safeBid + 500];
 }
 
 /**

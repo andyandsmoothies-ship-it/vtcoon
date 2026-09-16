@@ -17,6 +17,8 @@ export interface PostProcessingPipelineProps {
   enableDof?: boolean;
   enableBloom?: boolean;
   enableAo?: boolean;
+  isMobile?: boolean;
+  disableAoOnMobile?: boolean;
   enableVignette?: boolean;
   enableToneMapping?: boolean;
   enableSmaa?: boolean;
@@ -63,6 +65,8 @@ export function PostProcessingPipeline({
   enableDof = DEFAULT_PIPELINE_CONFIG.enableDof,
   enableBloom = DEFAULT_PIPELINE_CONFIG.enableBloom,
   enableAo = DEFAULT_PIPELINE_CONFIG.enableAo,
+  isMobile = false,
+  disableAoOnMobile = false,
   enableVignette = DEFAULT_PIPELINE_CONFIG.enableVignette,
   enableToneMapping = DEFAULT_PIPELINE_CONFIG.enableToneMapping,
   enableSmaa = DEFAULT_PIPELINE_CONFIG.enableSmaa,
@@ -75,17 +79,18 @@ export function PostProcessingPipeline({
   aoIntensity = DEFAULT_PIPELINE_CONFIG.aoIntensity,
   aoRadius = DEFAULT_PIPELINE_CONFIG.aoRadius,
   aoHalfRes = DEFAULT_PIPELINE_CONFIG.aoHalfRes,
-}: PostProcessingPipelineProps): React.ReactElement | null {
+}: PostProcessingPipelineProps): React.ReactElement<{ children?: any }> | null {
   if (!enabled) {
     return null;
   }
 
+  const resolvedEnableAo = enableAo && !isMobile && !disableAoOnMobile;
   const targetVector = new Vector3(dofTarget[0], dofTarget[1], dofTarget[2]);
 
   return (
     <EffectComposer multisampling={multisampling} autoClear={false}>
       {/* 1. SSAO / Contact AO: Khóa chặt chân cọc C0, nhà C1-C3, xúc xắc và viền sa bàn */}
-      {enableAo && (
+      {resolvedEnableAo && (
         <N8AO
           aoRadius={aoRadius}
           intensity={aoIntensity}

@@ -92,8 +92,8 @@ describe('[IMP-76] Round Counter & Treasury Conservation Contract Tests', () => 
       expect(delta.roundNumber).toBe(30);
     });
 
-    it('[TC-76.04/MSS][UC-GAME-041] isRoomGameOver tra ve true khi roundCount > MAX_ROUNDS (vong 31)', () => {
-      const room = createMockRoom({ roundCount: 31, round: 31 });
+    it('[TC-76.04/MSS][UC-GAME-041] isRoomGameOver tra ve true khi roundCount > MAX_ROUNDS (vong 41)', () => {
+      const room = createMockRoom({ roundCount: 41, round: 41 });
       expect(isRoomGameOver(room)).toBe(true);
     });
 

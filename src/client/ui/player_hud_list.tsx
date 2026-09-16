@@ -22,7 +22,7 @@ export function PlayerHudList(): React.ReactElement | null {
       <button
         type="button"
         onClick={() => setIsCollapsed((prev) => !prev)}
-        className="pointer-events-auto sm:hidden min-h-[36px] min-w-[36px] inline-flex items-center justify-center p-1.5 rounded-xl bg-[#FFFDF8] border-2 border-slate-900 shadow-[0_2px_0_0_#0f172a] text-slate-800 text-xs font-bold active:translate-y-0.5 cursor-pointer self-end"
+        className="pointer-events-auto sm:hidden min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-1.5 rounded-xl bg-[#FFFDF8] border-2 border-slate-900 shadow-[0_2px_0_0_#0f172a] text-slate-800 text-xs font-bold active:translate-y-0.5 cursor-pointer self-end"
         data-testid="toggle-player-hud-btn"
         aria-label={isCollapsed ? 'Mở danh sách người chơi' : 'Thu gọn danh sách người chơi'}
         title={isCollapsed ? 'Hiện người chơi' : 'Thu gọn'}

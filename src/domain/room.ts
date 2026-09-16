@@ -6,7 +6,7 @@ export const BOARD_SIZE       = 40;
 export const GO_BONUS         = 2_000;
 export const INITIAL_BALANCE  = 15_000;
 export const ROOM_CODE_LENGTH = 6;
-export const MAX_ROUNDS       = 30;
+export const MAX_ROUNDS       = 40;
 
 export const INITIAL_BALANCE_BY_PLAYERS: Readonly<Record<number, number>> = {
   2: 25_000,
@@ -103,6 +103,7 @@ export interface HoseResultInfo {
 
 export interface Room {
   readonly roomCode:      string;
+  readonly code?:         string;
   readonly hostId:        string;
   players:               Player[];
   currentPlayerIndex:    number;
@@ -151,8 +152,10 @@ export function createPlayer(id: string): Player {
 }
 
 export function createRoom(hostId: string, customRoomCode?: string): Room {
+  const code = customRoomCode && /^[A-Z0-9]{6}$/i.test(customRoomCode) ? customRoomCode.toUpperCase() : generateRoomCode();
   return {
-    roomCode:           customRoomCode && /^[A-Z0-9]{6}$/i.test(customRoomCode) ? customRoomCode.toUpperCase() : generateRoomCode(),
+    roomCode:           code,
+    get code() { return this.roomCode; },
     hostId,
     players:            [createPlayer(hostId)],
     currentPlayerIndex: 0,

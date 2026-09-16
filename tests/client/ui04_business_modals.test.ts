@@ -54,19 +54,19 @@ describe('[TC-UI04.1/MSS] Tra Cuu Thong Tin So Do (getDeedDisplayInfo)', () => {
 });
 
 describe('[TC-UI04.2/MSS] Tinh Toan Buoc Gia Dau Gia (calculateAuctionIncrements)', () => {
-  it('Sinh dung 3 buoc gia tang dan [+50, +100, +200 Tr.] tu muc gia hop le', () => {
-    expect(calculateAuctionIncrements(600)).toEqual([650, 700, 800]);
-    expect(calculateAuctionIncrements(0)).toEqual([50, 100, 200]);
+  it('Sinh dung 3 buoc gia tang dan [+100, +200, +500 Tr.] tu muc gia hop le', () => {
+    expect(calculateAuctionIncrements(600)).toEqual([700, 800, 1100]);
+    expect(calculateAuctionIncrements(0)).toEqual([100, 200, 500]);
   });
 
   it('Lam tron gia tri le va chuan hoa an toan', () => {
-    expect(calculateAuctionIncrements(450.8)).toEqual([500, 550, 650]);
+    expect(calculateAuctionIncrements(450.8)).toEqual([550, 650, 950]);
   });
 
   it('[TC-UI04.2-inv/Adversarial] Gia am hoac NaN bi chuan hoa ve 0', () => {
-    expect(calculateAuctionIncrements(-100)).toEqual([50, 100, 200]);
-    expect(calculateAuctionIncrements(Number.NaN)).toEqual([50, 100, 200]);
-    expect(calculateAuctionIncrements(Number.POSITIVE_INFINITY)).toEqual([50, 100, 200]);
+    expect(calculateAuctionIncrements(-100)).toEqual([100, 200, 500]);
+    expect(calculateAuctionIncrements(Number.NaN)).toEqual([100, 200, 500]);
+    expect(calculateAuctionIncrements(Number.POSITIVE_INFINITY)).toEqual([100, 200, 500]);
   });
 });
 

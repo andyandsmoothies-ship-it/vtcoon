@@ -67,8 +67,8 @@ export function assignRandomPlayerPawns(
       slotIndex,
       pawnConfig,
       tokenColor,
-      mascotIcon: pawnConfig?.icon ?? '🐕',
-      mascotName: pawnConfig?.name ?? 'Tượng Bạc Phú Quý',
+      mascotIcon: pawnConfig?.icon ?? '🏰',
+      mascotName: pawnConfig?.name ?? 'Quân Cờ',
     };
   });
 }

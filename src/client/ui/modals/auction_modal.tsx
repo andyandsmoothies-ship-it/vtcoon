@@ -114,7 +114,7 @@ export function AuctionModal({
               type="button"
               onClick={onClose}
               aria-label="Đóng sàn đấu giá"
-              className="w-7 h-7 inline-flex items-center justify-center text-slate-500 hover:text-slate-900 hover:bg-amber-100 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+              className="min-w-[44px] min-h-[44px] inline-flex items-center justify-center text-slate-500 hover:text-slate-900 hover:bg-amber-100 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
             >
               ✕
             </button>
@@ -233,7 +233,7 @@ export function AuctionModal({
         </div>
       ) : (
         <div className="grid grid-cols-3 gap-2">
-          {([50, 100, 200] as const).map((step, idx) => {
+          {([100, 200, 500] as const).map((step, idx) => {
             const targetBid = increments[idx]!;
             const canAfford = myBalance === undefined || targetBid <= myBalance;
             return (
@@ -264,7 +264,7 @@ export function AuctionModal({
           type="button"
           onClick={() => setAutoBid((prev) => !prev)}
           disabled={hasPassed || isDeclinedPlayer}
-          className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 cursor-pointer ${
+          className={`min-h-[44px] px-3.5 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 cursor-pointer ${
             autoBid
               ? 'bg-amber-500 text-slate-900 border-amber-700 shadow-[0_2px_0_0_#b45309]'
               : 'bg-slate-200 text-slate-700 border-slate-400 hover:bg-slate-300'
@@ -278,7 +278,7 @@ export function AuctionModal({
           type="button"
           onClick={onPass ?? onClose}
           disabled={hasPassed || isDeclinedPlayer}
-          className="min-h-[38px] px-4 py-1.5 rounded-xl text-xs font-bold text-rose-700 hover:text-rose-800 bg-rose-100 hover:bg-rose-200 border-2 border-rose-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 cursor-pointer"
+          className="min-h-[44px] px-4 py-2 rounded-xl text-xs font-bold text-rose-700 hover:text-rose-800 bg-rose-100 hover:bg-rose-200 border-2 border-rose-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 cursor-pointer"
         >
           {isDeclinedPlayer ? 'Không Thể Tham Gia' : hasPassed ? 'Đã Rút Lui' : 'Rút Lui / Bỏ Cuộc'}
         </button>

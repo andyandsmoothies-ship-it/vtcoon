@@ -142,22 +142,22 @@ describe('[TC-APCO01/MSS][UI-S02/MSS][BR-UI-002] Animal Pawns & Custom Ownership
       expect([...slots].sort((a, b) => a - b)).toEqual([0, 1, 2, 3]);
     });
 
-    it('[TC-APCO01.04/MSS][UI-S02/MSS][BR-UI-002][Facet1-Boundary] Mỗi slotIndex liên kết với mascotIcon tương ứng (0: 🐕, 1: 🐈, 2: 🐎, 3: 🐘)', () => {
+    it('[TC-APCO01.04/MSS][UI-S02/MSS][BR-UI-002][Facet1-Boundary] Mỗi slotIndex liên kết với mascotIcon tương ứng (0: 🏰, 1: 💣, 2: 🐎, 3: 👑)', () => {
       const results = assignRandomPlayerPawns(fourPlayers, 'ROOM_SAIGON_88');
       const slotMap = new Map(results.map((r: any) => [r.slotIndex, r.mascotIcon]));
-      expect(slotMap.get(0)).toBe('🐕');
-      expect(slotMap.get(1)).toBe('🐈');
+      expect(slotMap.get(0)).toBe('🏰');
+      expect(slotMap.get(1)).toBe('💣');
       expect(slotMap.get(2)).toBe('🐎');
-      expect(slotMap.get(3)).toBe('🐘');
+      expect(slotMap.get(3)).toBe('👑');
     });
 
-    it('[TC-APCO01.05/MSS][UI-S02/MSS][BR-UI-002][Facet1-Boundary] Mỗi phần tử chứa mascotName tương ứng với loài vật linh vật (chứa Chó, Mèo, Ngựa, Voi)', () => {
+    it('[TC-APCO01.05/MSS][UI-S02/MSS][BR-UI-002][Facet1-Boundary] Mỗi phần tử chứa mascotName tương ứng với quân cờ (chứa Xe, Pháo, Mã, Hậu)', () => {
       const results = assignRandomPlayerPawns(fourPlayers, 'ROOM_SAIGON_88');
       const nameMap = new Map(results.map((r: any) => [r.slotIndex, r.mascotName]));
-      expect(nameMap.get(0)).toMatch(/Chó/);
-      expect(nameMap.get(1)).toMatch(/Mèo/);
-      expect(nameMap.get(2)).toMatch(/Ngựa/);
-      expect(nameMap.get(3)).toMatch(/Voi/);
+      expect(nameMap.get(0)).toMatch(/Xe/);
+      expect(nameMap.get(1)).toMatch(/Pháo/);
+      expect(nameMap.get(2)).toMatch(/Mã/);
+      expect(nameMap.get(3)).toMatch(/Hậu/);
     });
 
     it('[TC-APCO01.06/MSS][UI-S02/MSS][BR-UI-002][Facet1-Boundary] 4 người chơi nhận 4 màu sắc tokenColor độc nhất không trùng lặp từ PLAYER_TOKEN_PALETTE', () => {

@@ -324,12 +324,12 @@ describe('[TC-IMP90/MSS][UC-IMP90] Non-Property Tiles Distinct Format & Semantic
   // =========================================================================
 
   it.each(INFRASTRUCTURE_INDICES)(
-    '[TC-90.09/MSS][Facet3-Footer] Ô hạ tầng & tiện ích %i bảo toàn khay giá tiền mua đất ở đáy',
+    '[TC-90.09/MSS][Facet3-Footer] Ô hạ tầng & tiện ích %i in chữ giá tiền trực tiếp lên nền giấy ngà (IMP-104)',
     (idx) => {
       getTileTexture(idx);
       const priceEntry = recordedFillTexts.find((t) => t.y >= 270 && t.y <= 315);
       expect(priceEntry).toBeDefined();
-      expect(priceEntry?.fillStyle).toBe('#FBBF24');
+      expect(priceEntry?.fillStyle).toBe('#0F172A');
       expect(priceEntry?.text).toMatch(/(1\.500|2\.000)\s+Tr\./);
     }
   );

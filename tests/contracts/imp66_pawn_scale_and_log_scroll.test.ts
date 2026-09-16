@@ -18,7 +18,7 @@ describe('[TC-IMP66.1/MSS] 3D Luxury Pawn Stature & Icon Normalization', () => {
   it('LUXURY_PAWN_CONFIGS định nghĩa đầy đủ 4 quân cờ với icon emoji và cấu hình scale', () => {
     expect(LUXURY_PAWN_CONFIGS).toHaveLength(4);
 
-    const expectedIcons = ['🐕', '🐈', '🐎', '🐘'];
+    const expectedIcons = ['🏰', '💣', '🐎', '👑'];
     for (let i = 0; i < 4; i++) {
       const cfg = LUXURY_PAWN_CONFIGS[i];
       expect(cfg).toBeDefined();
@@ -28,7 +28,7 @@ describe('[TC-IMP66.1/MSS] 3D Luxury Pawn Stature & Icon Normalization', () => {
     }
   });
 
-  it('Các quân cờ bạc có cấu hình scale đồng bộ [1.0, 1.0, 1.0]', () => {
+  it('Các quân cờ có cấu hình scale đồng bộ [1.0, 1.0, 1.0]', () => {
     for (let i = 0; i < 4; i++) {
       const cfg = LUXURY_PAWN_CONFIGS[i]!;
       expect(Array.from(cfg.scale)).toEqual([1.0, 1.0, 1.0]);
@@ -36,11 +36,11 @@ describe('[TC-IMP66.1/MSS] 3D Luxury Pawn Stature & Icon Normalization', () => {
   });
 
   it('getPawnConfigBySlot trả về đúng cấu hình hoặc fallback an toàn', () => {
-    expect(getPawnConfigBySlot(0).name).toBe('Tượng Chó Bạc Phú Quý');
-    expect(getPawnConfigBySlot(1).icon).toBe('🐈');
+    expect(getPawnConfigBySlot(0).name).toContain('Xe');
+    expect(getPawnConfigBySlot(1).icon).toBe('💣');
     expect(getPawnConfigBySlot(2).icon).toBe('🐎');
-    expect(getPawnConfigBySlot(3).icon).toBe('🐘');
-    expect(getPawnConfigBySlot(99).icon).toBe('🐕'); // Fallback slot 0
+    expect(getPawnConfigBySlot(3).icon).toBe('👑');
+    expect(getPawnConfigBySlot(99).icon).toBe('🏰'); // Fallback slot 0
   });
 
   it('LuxuryPawnModel render an toàn với scale mới cho toàn bộ 4 slots', () => {
@@ -80,7 +80,7 @@ describe('[TC-IMP66.2/MSS] 2D PlayerCard Tactile Pawn Avatars', () => {
     );
 
     expect(html).toContain('data-testid="player-pawn-badge-p1"');
-    expect(html).toContain('🐕'); // Host pawn icon (Chó bạc)
+    expect(html).toContain('🏰'); // Host pawn icon (Xe chiến)
     expect(html).toContain('w-8 h-8'); // Kích thước lớn 32px
   });
 

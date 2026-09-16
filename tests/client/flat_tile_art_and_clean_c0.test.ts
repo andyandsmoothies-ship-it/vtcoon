@@ -201,21 +201,19 @@ describe('[TC-IMP36/MSS][UC-IMP36] Flat Tile Art & Clean C0 Plot Contract Suite'
     expect(subtitleEntry!.y).toBeLessThanOrEqual(85);
   });
 
-  it('[TC-IMP36.03/MSS][UC-IMP36] Bottom price tier: Price tray capsule is rendered as roundRect(22, 274, 212, 50, 12)', () => {
+  it('[TC-IMP36.03/MSS][UC-IMP36] Bottom price tier: 2D price tray capsule is eliminated on property tiles (e.g. cell 6)', () => {
     tileTextureGen.getTileTexture(6);
     const priceTray = recordedRoundRects.find(
       (r) => r.x === 22 && r.y === 274 && r.w === 212 && r.h === 50
     );
-    expect(priceTray).toBeDefined();
-    expect(priceTray!.radii).toBe(12);
+    expect(priceTray).toBeUndefined();
   });
 
-  it('[TC-IMP36.04/MSS][UC-IMP36] Bottom price tier: Price text baseline is centered at y = 300 inside price capsule [274..324]', () => {
+  it('[TC-IMP36.04/MSS][UC-IMP36] Bottom price tier: 2D price text is printed directly on ivory paper at y = 300 in charcoal #0F172A (IMP-104)', () => {
     tileTextureGen.getTileTexture(8);
     const priceText = recordedFillText.find((t) => t.y === 300);
     expect(priceText).toBeDefined();
-    expect(priceText!.y).toBeGreaterThanOrEqual(274);
-    expect(priceText!.y).toBeLessThanOrEqual(324);
+    expect(priceText?.text).toBe('1.000 Tr.');
   });
 
   it('[TC-IMP36.05/MSS][UC-IMP36] Heritage art tier: Safe clipping boundary rect(10, 94, 236, 172) expands art to middle zone [90..270]', () => {

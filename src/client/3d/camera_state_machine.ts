@@ -12,8 +12,9 @@ interface CameraConfigItem {
 
 export const CAMERA_CONFIG = {
   overview: {
-    position: [30.0, 33.0, 30.0] as const,
-    target: [1.5, 0.0, 1.5] as const,
+    // [IMP-107] Cự ly cận 37m và bù trừ tâm [2.2, 0.0, 2.2] lấp đầy ~88% màn hình, bảo toàn góc 6h và 12h
+    position: [24.6, 25.3, 24.6] as const,
+    target: [2.2, 0.0, 2.2] as const,
     fov: 24,
     speed: 3.2,
   },
@@ -79,8 +80,9 @@ export function resolveCameraMode(params: CameraResolveParams): CameraMode {
   if (params.activeModal === 'auction') {
     return 'auction_focus';
   }
-  // [3D/CAM] Khi đang trong lượt của Bot hoặc quân cờ đang nhảy thuộc về Bot, giữ góc nhìn bao quát bán đảo êm dịu, không giật camera
-  if (params.isBotTurn || params.isAnimatingPawnBot) {
+  // [IMP-103] Cho phép camera bám đuổi theo quân cờ Bot khi đang nhảy và zoom vào ô đất khi Bot hạ cánh
+  // Chỉ giữ góc nhìn overview khi Bot chưa gieo xúc xắc hoặc khi lượt chơi đang chờ
+  if ((params.isBotTurn || params.isAnimatingPawnBot) && !params.isPawnAnimating && !params.hasTargetTile && !params.hasRolledThisTurn) {
     return 'overview';
   }
   // [IMP-42] Bỏ hiệu ứng zoom vào khay xúc xắc khi quay xúc xắc để triệt tiêu giật lag

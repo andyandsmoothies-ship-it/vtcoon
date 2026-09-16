@@ -105,17 +105,17 @@ describe('[TC-04.4/MSS] Rút Phiếu Cơ Hội & Hiệu Ứng Cá Nhân', () => 
     expect(room.chanceDiscard).not.toContain(ChanceCardId.CC_DIPLOMATIC);
   });
 
-  it('Kịch bản C (CC_TAX_AUDIT): Phạt 200 Tr./ô đất trống Cấp 0, không bắt vào Trạm Kiểm Toán', () => {
+  it('Kịch bản C (CC_TAX_AUDIT): Phạt 500 Tr./ô đất trống Cấp 0, không bắt vào Trạm Kiểm Toán', () => {
     const { mgr, room, reg, sm } = setup();
     reg.set(1, 'p1'); // ô 1 Cấp 0
     reg.set(3, 'p1'); sm.set(3, { level: 1 }); // ô 3 Cấp 1 (đã xây, không phạt)
-    reg.set(6, 'p1'); // ô 6 Cấp 0 -> tổng 2 ô Cấp 0 phạt 400 Tr.
+    reg.set(6, 'p1'); // ô 6 Cấp 0 -> tổng 2 ô Cấp 0 phạt 1000 Tr. (2 * 500)
     room.chanceDeck = [ChanceCardId.CC_TAX_AUDIT, ...room.chanceDeck.filter((c) => c !== ChanceCardId.CC_TAX_AUDIT)];
     room.players[0]!.position = 5; room.players[0]!.balance = 10000;
     mgr.handleRollDice(room.roomCode, 'p1');
     expect(room.players[0]!.position).toBe(7); // Dừng tại ô 7 (Chance)
     expect(room.players[0]!.auditTurnsLeft).toBe(0); // Không bị tống giam
-    expect(room.players[0]!.balance).toBe(10000 - 400);
+    expect(room.players[0]!.balance).toBe(10000 - 1000);
     expect(room.phase).toBe(TurnPhase.PropertyManagement);
   });
 

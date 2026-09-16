@@ -51,11 +51,11 @@ describe('Bot Auction Personalities (Trạm 1 - Contract & Behavioral Tests)', (
     room.players = [bot];
     room.phase = TurnPhase.AuctionPhase;
 
-    // Ô 1 (Đồ Sơn - giá gốc 600 Tr), giá thầu đã lên 550 Tr (> 85% của 600 = 510)
+    // Ô 1 (Đồ Sơn - giá gốc 600 Tr), giá thầu đã lên 700 Tr (> 115% của 600 = 690) [IMP-115]
     const auction: CurrentAuctionState = {
       cellIndex: 1,
       declinedPlayerId: 'p1',
-      highestBid: 550,
+      highestBid: 700,
       highestBidder: 'p2',
     };
 

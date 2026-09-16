@@ -158,14 +158,23 @@ export function ActivityFeedSidebar(props: ActivityFeedSidebarProps): React.Reac
   }, [isActivityFeedOpen, filteredLogs.length, isScrolledUp, scrollToBottom]);
 
   return (
-    <aside
-      aria-label="Nhật ký ván đấu"
-      aria-hidden={!isActivityFeedOpen}
-      className={`fixed top-0 right-0 h-full w-80 md:w-96 z-30 bg-[#FBF7EE] border-l-2 border-slate-900 shadow-2xl flex flex-col transition-transform duration-300 ease-out text-slate-900 select-none ${
-        isActivityFeedOpen ? 'translate-x-0 pointer-events-auto' : 'translate-x-full pointer-events-none'
-      } ${className}`}
-      data-testid="activity-feed-sidebar"
-    >
+    <>
+      {isActivityFeedOpen && (
+        <div
+          data-testid="activity-feed-backdrop"
+          onClick={() => setOpen(false)}
+          className="fixed inset-0 bg-black/50 backdrop-blur-xs z-20 md:hidden pointer-events-auto"
+          aria-hidden="true"
+        />
+      )}
+      <aside
+        aria-label="Nhật ký ván đấu"
+        aria-hidden={!isActivityFeedOpen}
+        className={`fixed top-0 right-0 h-full w-80 md:w-96 z-30 bg-[#FBF7EE] border-l-2 border-slate-900 shadow-2xl flex flex-col transition-transform duration-300 ease-out text-slate-900 select-none ${
+          isActivityFeedOpen ? 'translate-x-0 pointer-events-auto' : 'translate-x-full pointer-events-none'
+        } ${className}`}
+        data-testid="activity-feed-sidebar"
+      >
       {/* 1. Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-amber-200 bg-[#F7F2E7]">
         <div className="flex items-center gap-2">
@@ -318,5 +327,6 @@ export function ActivityFeedSidebar(props: ActivityFeedSidebarProps): React.Reac
         </button>
       </div>
     </aside>
+  </>
   );
 }

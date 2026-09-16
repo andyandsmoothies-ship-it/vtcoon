@@ -210,12 +210,12 @@ describe('[TC-IMP40/MSS][UC-IMP40] Anti-Glare Specular & Gentle Daylight Suite',
     expect(borderEntry?.style).toBe('#0F172A');
   });
 
-  it('[TC-IMP40.17/MSS][UC-IMP40] Standard tile renders gold price text on dark pill background', () => {
+  it('[TC-IMP40.17/MSS][UC-IMP40] Purchasable tile eliminates dark pill background and renders crisp charcoal price text (IMP-104)', () => {
     getTileTexture(3);
     const pricePill = recordedRoundRects.find((r) => (r.y === 282 || r.y === 274) && (r.h === 48 || r.h === 50));
-    expect(pricePill).toBeDefined();
+    expect(pricePill).toBeUndefined();
     const priceText = recordedFillTexts.find((f) => f.text === '600 Tr.');
     expect(priceText).toBeDefined();
-    expect(priceText?.style).toBe('#FBBF24');
+    expect(priceText?.style).toBe('#0F172A');
   });
 });

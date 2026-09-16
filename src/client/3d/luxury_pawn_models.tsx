@@ -1,16 +1,20 @@
-// [TC-P3.9/MSS][IMP-29.2] luxury_pawn_models.tsx — 4 Linh Vật Cờ Thượng Lưu nạp qua SafeGLTFModel
+// [TC-P3.9/MSS][IMP-29.2][IMP-105] luxury_pawn_models.tsx — 4 Quân Cờ Thượng Lưu nạp qua SafeGLTFModel
 import React from 'react';
 import './r3f_fiber_shield';
 import { SafeGLTFModel } from './asset_loader/safe_gltf_model';
 import {
   LuxuryPawnProceduralFallback,
-  LandmarkTowerPawnFallback as LandmarkTowerPawn,
-  BayYachtPawnFallback as BayYachtPawn,
-  ClassicCarPawnFallback as ClassicCarPawn,
-  WarhorsePawnFallback as WarhorsePawn,
+  RookPawnFallback,
+  CannonPawnFallback,
+  KnightPawnFallback,
+  QueenPawnFallback,
   DogPawnFallback as DogPawn,
   CatPawnFallback as CatPawn,
   ElephantPawnFallback as ElephantPawn,
+  WarhorsePawnFallback as WarhorsePawn,
+  LandmarkTowerPawnFallback as LandmarkTowerPawn,
+  BayYachtPawnFallback as BayYachtPawn,
+  ClassicCarPawnFallback as ClassicCarPawn,
 } from './luxury_pawn_fallbacks';
 import {
   assignRandomPlayerPawns,
@@ -19,13 +23,17 @@ import {
 } from '../../domain/pawn_assignment';
 
 export {
-  LandmarkTowerPawn,
-  BayYachtPawn,
-  ClassicCarPawn,
-  WarhorsePawn,
+  RookPawnFallback as RookPawn,
+  CannonPawnFallback as CannonPawn,
+  KnightPawnFallback as KnightPawn,
+  QueenPawnFallback as QueenPawn,
   DogPawn,
   CatPawn,
   ElephantPawn,
+  WarhorsePawn,
+  LandmarkTowerPawn,
+  BayYachtPawn,
+  ClassicCarPawn,
   assignRandomPlayerPawns,
   hashSeed,
 };
@@ -43,48 +51,38 @@ export interface LuxuryPawnConfig {
   readonly yOffset?: number;
 }
 
-function getPawnColor(): string {
-  return new Error().stack?.includes('chrome_pawns') ? '#F8FAFC' : '#E2E8F0';
-}
-
 export const LUXURY_PAWN_CONFIGS: readonly LuxuryPawnConfig[] = [
   {
     slot: 0,
-    name: 'Tượng Chó Bạc Phú Quý',
+    name: 'Quân Xe Chiến Hoàng Gia',
     title: 'Đại Gia Sài Gòn (Host)',
-    get color(): string {
-      return getPawnColor();
-    },
-    metalness: 0.96,
-    roughness: 0.08,
-    modelUrl: '/models/pawns/pawn_dog.glb',
-    icon: '🐕',
+    color: '#DC2626',
+    metalness: 0.25,
+    roughness: 0.28,
+    modelUrl: '/models/pawns/pawn_rook.glb',
+    icon: '🏰',
     scale: [1.0, 1.0, 1.0],
     yOffset: 0.03,
   },
   {
     slot: 1,
-    name: 'Tượng Mèo Bạc May Mắn',
+    name: 'Quân Pháo Thần Công Cổ Điển',
     title: 'Chú Sáu',
-    get color(): string {
-      return getPawnColor();
-    },
-    metalness: 0.96,
-    roughness: 0.08,
-    modelUrl: '/models/pawns/pawn_cat.glb',
-    icon: '🐈',
+    color: '#27AE60',
+    metalness: 0.25,
+    roughness: 0.28,
+    modelUrl: '/models/pawns/pawn_cannon.glb',
+    icon: '💣',
     scale: [1.0, 1.0, 1.0],
     yOffset: 0.03,
   },
   {
     slot: 2,
-    name: 'Tượng Ngựa Bạc Phong Vân',
+    name: 'Quân Mã Phong Vân Thượng Lưu',
     title: 'Cô Tư',
-    get color(): string {
-      return getPawnColor();
-    },
-    metalness: 0.96,
-    roughness: 0.08,
+    color: '#E67E22',
+    metalness: 0.25,
+    roughness: 0.28,
     modelUrl: '/models/pawns/pawn_horse.glb',
     icon: '🐎',
     scale: [1.0, 1.0, 1.0],
@@ -92,15 +90,13 @@ export const LUXURY_PAWN_CONFIGS: readonly LuxuryPawnConfig[] = [
   },
   {
     slot: 3,
-    name: 'Tượng Voi Bạc Thịnh Vượng',
+    name: 'Quân Hậu Quyền Quý Indochine',
     title: 'Bé Bo',
-    get color(): string {
-      return getPawnColor();
-    },
-    metalness: 0.96,
-    roughness: 0.08,
-    modelUrl: '/models/pawns/pawn_elephant.glb',
-    icon: '🐘',
+    color: '#10B981',
+    metalness: 0.25,
+    roughness: 0.28,
+    modelUrl: '/models/pawns/pawn_queen.glb',
+    icon: '👑',
     scale: [1.0, 1.0, 1.0],
     yOffset: 0.03,
   },
@@ -126,10 +122,11 @@ export interface LuxuryPawnModelProps {
  */
 export function LuxuryPawnModel({ slotIndex, playerColor }: LuxuryPawnModelProps): React.ReactElement {
   const config = getPawnConfigBySlot(slotIndex);
+  const activeColor = playerColor || config.color;
 
   return (
     <group position={[0, -0.28, 0]} scale={[0.92, 0.92, 0.92]} name={`LuxuryPawn_${config.name}`} data-model-url={config.modelUrl}>
-      {/* Đĩa hào quang phát sáng màu người chơi ôm sát chân thú Chibi */}
+      {/* Đĩa hào quang phát sáng màu người chơi ôm sát chân quân cờ */}
       <mesh
         position={[0, 0.005, 0]}
         rotation={[-Math.PI / 2, 0, 0]}
@@ -138,15 +135,15 @@ export function LuxuryPawnModel({ slotIndex, playerColor }: LuxuryPawnModelProps
       >
         <ringGeometry args={[0.12, 0.18, 32]} />
         <meshStandardMaterial
-          color={playerColor || config.color}
-          emissive={playerColor || config.color}
+          color={activeColor}
+          emissive={activeColor}
           emissiveIntensity={0.5}
           roughness={0.2}
           metalness={0.5}
         />
       </mesh>
 
-      {/* Vòng men màu đại diện người chơi (Enamel Ring) ôm sát chân thú */}
+      {/* Vòng men màu đại diện người chơi (Enamel Ring) ôm sát chân quân cờ */}
       <mesh
         position={[0, 0.008, 0]}
         rotation={[-Math.PI / 2, 0, 0]}
@@ -155,7 +152,7 @@ export function LuxuryPawnModel({ slotIndex, playerColor }: LuxuryPawnModelProps
       >
         <ringGeometry args={[0.10, 0.15, 32]} />
         <meshStandardMaterial
-          color={playerColor || config.color}
+          color={activeColor}
           roughness={0.15}
           metalness={0.4}
         />
@@ -164,7 +161,7 @@ export function LuxuryPawnModel({ slotIndex, playerColor }: LuxuryPawnModelProps
       {/* 2. Mô hình 3D nạp qua SafeGLTFModel, tự động chuyển về Fallback khi lỗi/SSR */}
       <SafeGLTFModel
         url={config.modelUrl}
-        fallback={<LuxuryPawnProceduralFallback slotIndex={config.slot} config={config} playerColor={playerColor} />}
+        fallback={<LuxuryPawnProceduralFallback slotIndex={config.slot} config={config} playerColor={activeColor} />}
         position={[0, config.yOffset ?? 0.03, 0]}
         scale={[...config.scale]}
         castShadow

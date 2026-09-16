@@ -69,13 +69,89 @@ export function handlePublicInvest(players: Player[], registry?: PropertyRegistr
   }
 }
 
-function handleCasinoPilot(players: Player[], registry?: PropertyRegistry, stateMap?: PropertyStateMap): void {
-  if (!registry || !stateMap) return;
-  const ownerId = registry.get(27);
-  if (!ownerId) return;
-  if ((stateMap.get(27)?.level ?? 0) >= 3) {
-    const owner = players.find((p) => p.id === ownerId);
-    if (owner) owner.balance += 2000;
+function awardServiceBonus(
+  cellIndex: number,
+  players: Player[],
+  registry: PropertyRegistry,
+  stateMap: PropertyStateMap,
+): number {
+  const ownerId = registry.get(cellIndex);
+  if (!ownerId) return 0;
+  const level = stateMap.get(cellIndex)?.level ?? 0;
+  const owner = players.find((p) => p.id === ownerId);
+  if (!owner) return 0;
+  if (cellIndex === 27 && level >= 3) {
+    owner.balance += 3000;
+    return 3000;
+  }
+  if (level >= 2) {
+    owner.balance += 1500;
+    return 1500;
+  }
+  return 0;
+}
+
+function handleCasinoPilot(
+  players: Player[],
+  registry?: PropertyRegistry,
+  stateMap?: PropertyStateMap,
+  room?: Room,
+): void {
+  if (players.length === 0) return;
+  let totalBonus = 0;
+  let c2Count = 0;
+  if (registry && stateMap) {
+    for (const cell of SERVICE_CELLS) {
+      const bonus = awardServiceBonus(cell, players, registry, stateMap);
+      if (bonus > 0) {
+        totalBonus += bonus;
+        c2Count++;
+      }
+    }
+  }
+  if (c2Count === 0) {
+    const poorest = players.reduce((p, c) => (c.balance < p.balance ? c : p), players[0]!);
+    poorest.balance += 1000;
+    totalBonus += 1000;
+  }
+  if (room && totalBonus > 0) {
+    room.treasury = Math.max(0, (room.treasury ?? 0) - totalBonus);
+  }
+}
+
+function distributeCellPool(
+  cells: readonly number[],
+  perPlayerFee: number,
+  cellDividend: number,
+  players?: Player[],
+  registry?: PropertyRegistry,
+  room?: Room,
+): void {
+  if (!players || players.length === 0) return;
+  for (const p of players) p.balance -= perPlayerFee;
+  const poolPerCell = cellDividend * players.length;
+  for (const cell of cells) {
+    const ownerId = registry?.get(cell);
+    const owner = ownerId ? players.find((p) => p.id === ownerId) : undefined;
+    if (owner) {
+      owner.balance += poolPerCell;
+    } else if (room) {
+      room.treasury = (room.treasury ?? 0) + poolPerCell;
+    }
+  }
+}
+
+function handleAntiSpeculate(players?: Player[], registry?: PropertyRegistry, room?: Room): void {
+  if (!players || !registry) return;
+  for (const player of players) {
+    let count = 0;
+    for (const ownerId of registry.values()) {
+      if (ownerId === player.id) count++;
+    }
+    if (count >= 4) {
+      player.balance -= 1000;
+      if (room) room.treasury = (room.treasury ?? 0) + 1000;
+    }
   }
 }
 
@@ -109,19 +185,28 @@ const MARKET_HANDLERS: Partial<Record<MarketCardId, MarketHandler>> = {
   [MarketCardId.MC_LAND_FEVER]:      (mods) => mods.push({ type: MarketCardId.MC_LAND_FEVER, affectedCells: LAND_FEVER_CELLS, remainingRounds: 1, multiplier: 2 }),
   [MarketCardId.MC_RATE_HIKE]:       (mods) => mods.push({ type: MarketCardId.MC_RATE_HIKE, affectedCells: BOARD_CONFIG.map((c) => c.index), remainingRounds: 1, multiplier: 0.8 }),
   [MarketCardId.MC_CREDIT_STIMULUS]: (mods) => mods.push({ type: MarketCardId.MC_CREDIT_STIMULUS, affectedCells: [], remainingRounds: 2 }),
-  [MarketCardId.MC_ANTI_SPECULATE]:  (mods) => mods.push({ type: MarketCardId.MC_ANTI_SPECULATE, affectedCells: [], remainingRounds: 1 }),
+  [MarketCardId.MC_ANTI_SPECULATE]:  (mods, players, registry, _stateMap, room) => {
+    mods.push({ type: MarketCardId.MC_ANTI_SPECULATE, affectedCells: [], remainingRounds: 1 });
+    handleAntiSpeculate(players, registry, room);
+  },
   [MarketCardId.MC_FREEZE_TRADE]:    (mods) => mods.push({ type: MarketCardId.MC_FREEZE_TRADE, affectedCells: [], remainingRounds: 1 }),
-  [MarketCardId.MC_FUEL_SURGE]:      (mods) => mods.push({ type: MarketCardId.MC_FUEL_SURGE, affectedCells: INFRA_CELLS, remainingRounds: 1 }),
+  [MarketCardId.MC_FUEL_SURGE]:      (mods, players, registry, _stateMap, room) => {
+    mods.push({ type: MarketCardId.MC_FUEL_SURGE, affectedCells: INFRA_CELLS, remainingRounds: 2 });
+    distributeCellPool(INFRA_CELLS, 500, 125, players, registry, room);
+  },
   [MarketCardId.MC_URBAN_PLANNING]:  (mods) => mods.push({ type: MarketCardId.MC_URBAN_PLANNING, affectedCells: HANOI_HCMC_CELLS, remainingRounds: 1 }),
-  [MarketCardId.MC_UTILITY_DOUBLE]:  (mods) => mods.push({ type: MarketCardId.MC_UTILITY_DOUBLE, affectedCells: UTILITY_CELLS, remainingRounds: 1, multiplier: 2 }),
+  [MarketCardId.MC_UTILITY_DOUBLE]:  (mods, players, registry, _stateMap, room) => {
+    mods.push({ type: MarketCardId.MC_UTILITY_DOUBLE, affectedCells: UTILITY_CELLS, remainingRounds: 2, multiplier: 2 });
+    distributeCellPool(UTILITY_CELLS, 400, 200, players, registry, room);
+  },
   [MarketCardId.MC_FIRE_INSPECTION]: (_mods, players, registry, stateMap) => {
     if (players && registry && stateMap) handleFireInspection(players, registry, stateMap);
   },
   [MarketCardId.MC_PUBLIC_INVEST]:   (_mods, players, registry, _stateMap, room) => {
     if (players) handlePublicInvest(players, registry, room);
   },
-  [MarketCardId.MC_CASINO_PILOT]:    (_mods, players, registry, stateMap) => {
-    if (players) handleCasinoPilot(players, registry, stateMap);
+  [MarketCardId.MC_CASINO_PILOT]:    (_mods, players, registry, stateMap, room) => {
+    if (players) handleCasinoPilot(players, registry, stateMap, room);
   },
   [MarketCardId.MC_MEGA_CONCERT]:    (_mods, players, registry, stateMap) => {
     if (players) handleMegaConcert(players, registry, stateMap);

@@ -16,7 +16,7 @@ Bản tài liệu thiết kế hoàn chỉnh của trò chơi **"Đại Gia Đ�
 * **Chuẩn Hóa Nhịp Thở Thời Gian (Pacing Timers - IMP-60):** WaitingRoll: 25s, ActionPhase: 35s, HosePhase: 25s, PropertyManagement: 30s, AuctionPhase: 20s, InsolvencyPhase: 45s; TurnWatchdog tự giải cứu khẩn cấp: 60s.  
 * **Quy tắc Đấu giá Bất động sản Tự động (Auto-Auction Rule):**  
   * Khi người chơi dừng tại một ô đất chưa có chủ nhưng quyết định Bỏ qua, ô đất này không được giữ nguyên mà lập tức đưa vào phiên đấu giá công khai.  
-  * Mọi người chơi khác (ngoại trừ người vừa bỏ qua) đều có quyền đặt giá. Giá khởi điểm: 50% giá niêm yết. Bước giá tối thiểu: +50 Tr. VNĐ (hỗ trợ các mức nâng giá +50, +100, +200 Tr. VNĐ theo IMP-49). Người chơi không được đặt vượt quá số tiền mặt khả dụng hiện có.  
+  * Mọi người chơi khác (ngoại trừ người vừa bỏ qua) đều có quyền đặt giá. Giá khởi điểm: 50% giá niêm yết. Bước giá tối thiểu: +50 Tr. VNĐ (hỗ trợ các mức nâng giá nhanh +100, +200, +500 Tr. VNĐ theo IMP-108). Người chơi không được đặt vượt quá số tiền mặt khả dụng hiện có.  
 * **Quy tắc Thương lượng & Giao dịch Song phương (P2P Trading Rule):**  
   * Người chơi chỉ được mở giao dịch trong lượt của mình (giai đoạn Quản lý tài sản).  
   * Đối tượng giao dịch hợp lệ: Đất trống (Cấp 0), Thẻ Miễn Trừ Ngoại Giao, tiền mặt. Không được phép giao dịch các ô đất đã xây dựng công trình (phải thanh lý công trình về Cấp 0 trước khi chuyển nhượng).  
@@ -26,9 +26,9 @@ Bản tài liệu thiết kế hoàn chỉnh của trò chơi **"Đại Gia Đ�
 * **Mức Bảo Lãnh Trạm Kiểm Toán (Ô 10):** Người chơi đang bị phong tỏa tại Trạm Kiểm Toán có thể nộp khoản bảo lãnh 500 Tr. VNĐ để thoát ngay lập tức. Nếu số dư tiền mặt không đủ 500 Tr. VNĐ, yêu cầu bị từ chối và người chơi tiếp tục thụ án.  
 * **Bố cục Điều Khiển (Action Dock - IMP-89):** Đặt tại góc dưới bên phải màn hình (Bottom-Right) tối ưu công thái học (Fitts's Law), đối xứng với TelemetryBadge ở góc dưới bên trái; gộp hai nút "Tài Sản" và "Xây Dựng" thành nút duy nhất **"Quản Lý BĐS" 🏛️**.  
 * **Loại Bỏ Biểu Cảm Cảm Xúc (Emotes Purge - IMP-89):** Bãi bỏ hoàn toàn khay biểu cảm cảm xúc (SocialEmotesTray) khỏi HUD để triệt tiêu bấm nhầm, giữ giao diện trong trận đấu tối giản, sạch sẽ và tập trung tối đa vào chiến thuật.  
-* **Quy Chuẩn Quân Cờ 3D & Chủ Quyền Ô Đất (IMP-94, IMP-96, IMP-98):**  
-  * **Quân cờ Chibi đúc bạc (Zero-Pedestal):** 4 linh vật con vật (🐕 Chó, 🐈 Mèo, 🐎 Ngựa, 🐘 Voi) đúc bạc PBR đồng bộ (`#E2E8F0`), đứng trực tiếp trên mặt ô cờ (triệt tiêu 100% bệ tròn cờ vua), chân đế gắn đĩa hào quang phát quang mang màu thương hiệu người chơi (`PawnAuraPedestal`).  
-  * **Tô màu chủ quyền thuần túy (Pure Color Ownership):** Triệt tiêu hoàn toàn cọc cờ và con dấu 3D che tranh; nhận diện ô đất có chủ từ xa qua khay giá chân ô `OwnerPricePill` đổi màu theo chủ sở hữu (P1 Đỏ, P2 Xanh, P3 Cam, P4 Xanh Lục) căn giữa trung tâm, viền chân đế `OwnerBaseTrim` dày 0.10m và khối nhà đồ chơi `ToyPropertyBuildings`.  
+* **Quy Chuẩn Quân Cờ 3D & Chủ Quyền Ô Đất (IMP-105, IMP-96, IMP-98, IMP-104):**  
+  * **4 Quân Cờ Thượng Lưu Toàn Màu Sắc (Zero-Inox & Zero-Pedestal):** 4 quân cờ đặc trưng (🏰 Quân Xe, 💣 Quân Pháo, 🐎 Quân Mã, 👑 Quân Hậu) phủ 100% màu sắc thương hiệu của người chơi (`playerColor`), triệt tiêu hoàn toàn chất liệu inox/bạc xám (`#F8FAFC`, `#E2E8F0`). Sơn men bóng đồ chơi diorama cao cấp (`metalness: 0.25`, `roughness: 0.28`). Đứng trực tiếp trên mặt ô cờ (Zero-Pedestal, bán kính chân đế <= 0.15m), chân đế gắn đĩa hào quang phát quang mang màu thương hiệu người chơi (`PawnAuraPedestal`).  
+  * **Tô màu chủ quyền thuần túy (Pure Color Ownership & Zero Black Pill):** Triệt tiêu hoàn toàn cọc cờ, con dấu 3D và khối than đen khi chưa mua; in chữ giá tiền sắc nét `#0F172A` trực tiếp lên giấy ngà `#F3EEDF`; khi có chủ khay 3D `OwnerPricePill` nổi lên đổi màu theo chủ sở hữu (P1 Đỏ, P2 Xanh, P3 Cam, P4 Xanh Lục) căn giữa trung tâm, viền chân đế `OwnerBaseTrim` dày 0.10m và khối nhà đồ chơi `ToyPropertyBuildings`.  
 
 ### **II. BẢNG DANH MỤC 40 Ô BÀN CỜ VIỆT NAM (MASTER LAYOUT)**
 
@@ -184,48 +184,48 @@ Người chơi khi dừng chân tại ô này có quyền lựa chọn bỏ qua 
 Đặc tả tham số quản trị tài chính: Kỳ vọng toán học E = (1/6) * (-50% - 25% + 0% + 20% + 50% + 100%) = +95%/6 ≈ +15.83%  
 *Ý nghĩa vận hành: Tỷ suất sinh lời kỳ vọng dương (+15.83%) duy trì động lực tham gia kênh đầu tư rủi ro, đồng thời biên độ tổn thất tối đa được giới hạn ở mức 50% giúp bảo vệ thanh khoản người chơi, triệt tiêu nguy cơ phá sản tức thời do biến số ngẫu nhiên.*
 
-### **V. DANH MỤC CHI TIẾT CÁC THẺ SỰ KIỆN**
+### **V. DANH MỤC CHI TIẾT CÁC THẺ SỰ KIỆN (CHUẨN HÓA TÁI CÂN BẰNG IMP-111)**
 
 #### **1. Bộ 16 Thẻ "Phiếu Thị Trường" (Tác Động Vĩ Mô Toàn Sàn)**
 
 > 1. **Chính Sách Phát Triển Kinh Tế Đêm:** Tăng 100% doanh thu thu phí cho tất cả công trình từ Cấp 1 trở lên thuộc nhóm BĐS Dịch vụ & Giải trí.  
 > 2. **Đại Nhạc Hội Quốc Tế (Mega Concert):** Toàn bộ người chơi lập tức di chuyển đến ô Dịch vụ & Giải trí có cấp độ cao nhất trên bàn cờ và trả phí dịch vụ cho chủ ô đó.  
 > 3. **Chiến Dịch Kiểm Tra Nồng Độ Cồn & TTATGT:** Tiền thu phí của nhóm BĐS Dịch vụ & Giải trí giảm 50% trong 2 vòng xoay bàn cờ.  
-> 4. **Thí Điểm Mô Hình Casino Dành Cho Người Việt:** Chủ sở hữu công trình Cấp 3 tại Kiên Giang (Phú Quốc) nhận ngay khoản cổ tức $2.000$ Tr. VNĐ từ Ngân sách.  
+> 4. **Thí Điểm Mô Hình Casino Dành Cho Người Việt (IMP-112):** Mọi ô Dịch Vụ Cấp 2 trở lên nhận ngay 1.500 Tr. VNĐ cổ tức du lịch; riêng ô 27 (Kiên Giang - Phú Quốc) Cấp 3 nhận 3.000 Tr. VNĐ từ Kho Bạc. Trường hợp chưa có ai đạt Cấp 2, Kho Bạc giải ngân 1.000 Tr. VNĐ gói kích cầu hỗ trợ người nghèo nhất bàn cờ.  
 > 5. **Ngân Hàng Nhà Nước Tăng Lãi Suất:** Toàn bộ dư nợ vay thế chấp tăng lãi suất lên 10%/vòng. Tiền phạt thuê đất trên toàn bàn cờ giảm 20%.  
 > 6. **Gói Kích Cầu Tín Dụng Bất Động Sản:** Miễn toàn bộ lãi vay thế chấp trong 2 vòng. Giảm 20% chi phí xây dựng công trình trên toàn bàn cờ.  
-> 7. **Sốt Đất Quy Hoạch Đô Thị Vệ Tinh:** Nhân đôi ($x2$) tiền thuê đất tại các ô Hưng Yên, Bình Dương, Đồng Nai cho đến khi lật thẻ thị trường mới.  
-> 8. **Thanh Tra PCCC Toàn Diện:** Mọi người chơi phải nộp phí nâng cấp thiết bị: $200$ Tr. VNĐ/công trình Cấp 1; $400$ Tr. VNĐ/công trình Cấp 2; $800$ Tr. VNĐ/công trình Cấp 3.  
-> 9. **Đẩy Mạnh Vốn Đầu Tư Công:** Ngân sách chi trả thưởng $1.000$ Tr. VNĐ cho mỗi ô Hạ tầng Giao thông mà người chơi sở hữu.  
-> 10. **Áp Thuế Chống Đầu Cơ Sang Nhượng:** Mọi giao dịch chuyển nhượng bất động sản giữa các người chơi phải nộp thuế 20% giá trị hợp đồng vào Ngân khố.  
+> 7. **Sốt Đất Quy Hoạch Đô Thị Vệ Tinh:** Nhân đôi (x2) tiền thuê đất tại các ô Hưng Yên, Bình Dương, Đồng Nai cho đến khi lật thẻ thị trường mới.  
+> 8. **Thanh Tra PCCC Toàn Diện:** Mọi người chơi phải nộp phí nâng cấp thiết bị: 200 Tr. VNĐ/công trình Cấp 1; 400 Tr. VNĐ/công trình Cấp 2; 800 Tr. VNĐ/công trình Cấp 3.  
+> 9. **Đẩy Mạnh Vốn Đầu Tư Công:** Ngân sách chi trả thưởng 1.000 Tr. VNĐ cho mỗi ô Hạ tầng Giao thông mà người chơi sở hữu.  
+> 10. **Áp Thuế Chống Đầu Cơ Sang Nhượng (IMP-112):** Mọi giao dịch chuyển nhượng bất động sản P2P phải nộp thuế 20% giá trị hợp đồng vào Kho Bạc; đồng thời phạt ngay 1.000 Tr. VNĐ thuế điều tiết tài sản cho người chơi sở hữu từ 4 ô đất trở lên.  
 > 11. **Mùa Cao Điểm Du Lịch Quốc Tế:** Toàn bộ BĐS Nghỉ dưỡng & Du lịch (Bình Thuận, Lâm Đồng, Khánh Hòa, Sầm Sơn, Ninh Bình, Quảng Ninh) tăng tiền thuê thêm 100%.  
 > 12. **Đóng Băng Giao Dịch Bất Động Sản:** Cấm toàn bộ hoạt động mua bán, chuyển nhượng hoặc thế chấp tài sản cho đến khi có thẻ thị trường tiếp theo.  
-> 13. **Biến Động Tỷ Giá & Giá Xăng Dầu:** Chi phí lưu thông tăng; tất cả người chơi dừng tại các ô Hạ tầng Giao thông phải trả thêm $500$ Tr. VNĐ phụ phí vận tải.  
+> 13. **Biến Động Tỷ Giá & Giá Xăng Dầu (IMP-112):** Phụ thu thêm 500 Tr. VNĐ cước vận tải tại 4 ô Hạ tầng Giao thông trong 2 vòng; đồng thời tất cả người chơi lập tức nộp 500 Tr. VNĐ phụ phí nhiên liệu (chia đều cho chủ các ô Hạ tầng hoặc nộp vào Kho Bạc).  
 > 14. **Phê Duyệt Quy Hoạch Đô Thị Đặc Biệt:** Định giá đất của các ô thuộc nhóm Xanh Lá (Hà Nội) và Tím (TP.HCM) tăng thêm 20% giá trị khi thế chấp.  
-> 15. **Tăng Khung Giá Bán Lẻ Điện & Viễn Thông:** Doanh thu thu phí của EVN và Viettel nhân đôi ($x2$) từ người chơi dẫm vào.  
+> 15. **Tăng Khung Giá Bán Lẻ Điện & Viễn Thông (IMP-112):** Nhân đôi (x2) phí dịch vụ tiện ích công cộng trong 2 vòng; đồng thời tất cả người chơi lập tức nộp 400 Tr. VNĐ tiền điện và cước viễn thông (chia đều 200 Tr./người cho chủ ô EVN 12 và Viettel 28 hoặc nộp vào Kho Bạc).  
 > 16. **Thời Tiết Cực Đoan Duyên Hải:** Miễn toàn bộ tiền thuê đất tại các ô thuộc dải miền Trung (Bình Thuận, Khánh Hòa, Bình Định, Huế, Đà Nẵng) trong 1 vòng.  
 > 
 > * **Quy tắc Giải Quyết Xung Đột Thẻ Thị Trường (Conflict Resolution):** Khi có nhiều thẻ thị trường tác động đồng thời lên cùng một ô đất (ví dụ: Thẻ 11 tăng 100% tiền thuê du lịch và Thẻ 16 bão lũ miền Trung tại ô 11 Mũi Né, ô 14 Nha Trang), hiệu ứng bất khả kháng (Thiên tai / Miễn phí thuê = 0) luôn có độ ưu tiên cao nhất (Zero-rent rule).
 
 #### **2. Bộ 20 Thẻ "Phiếu Cơ Hội" (Quyết Định & Rủi Ro Cá Nhân)**
 
-> 1. **Đấu Giá Biển Số Xe Định Danh:** Nộp $500$ Tr. VNĐ phí cấp quyền; nhận đặc quyền lắc xúc xắc và đi thêm một lượt ngay lập tức.  
-> 2. **Thanh Tra Thuế Doanh Nghiệp Đột Xuất:** Nộp phạt $200$ Tr. VNĐ cho mỗi ô đất trống bạn đang sở hữu mà chưa xây dựng công trình.  
-> 3. **Chốt Lời Danh Mục Đầu Tư Chứng Khoán:** Nhận ngay $2.500$ Tr. VNĐ tiền mặt từ Kho bạc Nhà nước.  
+> 1. **Đấu Giá Biển Số Xe Định Danh:** Nộp 500 Tr. VNĐ phí cấp quyền; nhận đặc quyền lắc xúc xắc và đi thêm một lượt ngay lập tức.  
+> 2. **Thanh Tra Thuế Doanh Nghiệp Đột Xuất (IMP-112):** Nộp phạt 500 Tr. VNĐ cho mỗi ô đất trống Cấp 0 bạn đang sở hữu mà chưa xây dựng công trình vào Kho Bạc Nhà Nước.  
+> 3. **Chốt Lời Danh Mục Đầu Tư Chứng Khoán:** Nhận ngay 2.500 Tr. VNĐ tiền mặt từ Kho Bạc Nhà Nước.  
 > 4. **Thẻ Miễn Trừ Ngoại Giao:** Giữ thẻ này. Được sử dụng để miễn 100% chi phí một lần khi dừng chân tại BĐS của đối thủ (hủy thẻ sau khi dùng).  
-> 5. **Bồi Thường Hợp Đồng Chậm Bàn Giao:** Trả $1.000$ Tr. VNĐ tiền phạt hợp đồng cho người chơi có số dư tiền mặt thấp nhất bàn cờ.  
-> 6. **Chuyển Mục Đích Sử Dụng Đất Thành Công:** Nộp $800$ Tr. VNĐ lệ phí. Tăng vĩnh viễn 50% giá trị thu phí của một ô đất trống tùy chọn của bạn.  
-> 7. **Đình Chỉ Xây Dựng Để Hoàn Thiện Pháp Lý:** Đặt biển tạm dừng lên 1 BĐS của bạn; ô này không được thu phí trong 2 vòng tiếp theo.  
+> 5. **Bồi Thường Hợp Đồng Chậm Bàn Giao:** Trả 1.000 Tr. VNĐ tiền phạt hợp đồng cho người chơi có số dư tiền mặt thấp nhất bàn cờ.  
+> 6. **Chuyển Mục Đích Sử Dụng Đất Thành Công:** Nộp 800 Tr. VNĐ lệ phí. Tăng vĩnh viễn 50% giá trị thu phí của một ô đất trống tùy chọn của bạn.  
+> 7. **Đình Chỉ Xây Dựng Để Hoàn Thiện Pháp Lý (IMP-112):** Phạt ngay 800 Tr. VNĐ chi phí thanh tra hoàn thiện pháp lý vào Kho Bạc và tạm ngưng thu tiền thuê tại 1 ô đất trong 2 vòng.  
 > 8. **Thương Vụ M&A Bắt Buộc:** Chọn 1 ô đất trống của đối thủ có tiền mặt ít hơn bạn; bạn có quyền mua lại với giá bằng 120% giá niêm yết.  
-> 9. **Vi Phạm Bản Quyền Chương Trình Nghệ Thuật:** Nộp phạt vi phạm hành chính $400$ Tr. VNĐ vào Kho bạc Nhà nước.  
-> 10. **Hạn Mức Thấu Chi Doanh Nghiệp:** Vay khẩn cấp $3.000$ Tr. VNĐ từ Ngân hàng, cam kết hoàn trả gốc và lãi $3.300$ Tr. VNĐ sau 3 vòng.  
-> 11. **Kẹp Thanh Khoản Cổ Phiếu Rác:** Lỗ đầu tư ngoài ngành; nộp phạt $1.500$ Tr. VNĐ vào Kho bạc Nhà nước.  
-> 12. **Nhượng Quyền Thương Hiệu Ẩm Thực:** Ký hợp đồng chuỗi F&B; thu của TẤT CẢ những người chơi khác mỗi người $300$ Tr. VNĐ.  
+> 9. **Vi Phạm Bản Quyền Chương Trình Nghệ Thuật (IMP-112):** Nộp phạt vi phạm hành chính 1.200 Tr. VNĐ vào Kho Bạc Nhà Nước.  
+> 10. **Hạn Mức Thấu Chi Doanh Nghiệp:** Vay khẩn cấp 3.000 Tr. VNĐ từ Ngân hàng, cam kết hoàn trả gốc và lãi 3.300 Tr. VNĐ sau 3 vòng.  
+> 11. **Kẹp Thanh Khoản Cổ Phiếu Rác:** Lỗ đầu tư ngoài ngành; nộp phạt 1.500 Tr. VNĐ vào Kho Bạc Nhà Nước.  
+> 12. **Nhượng Quyền Thương Hiệu Ẩm Thực (IMP-112):** Ký hợp đồng nhượng quyền chuỗi F&B; thu của TẤT CẢ những người chơi đối thủ mỗi người 800 Tr. VNĐ.  
 > 13. **Thu Hồi Đất Phục Vụ Dự Án Công Cộng:** Nhà nước giải tỏa 1 ô đất trống của bạn; nhận tiền đền bù bằng 150% giá niêm yết trên bàn cờ.  
-> 14. **Sự Cố An Ninh Khu Giải Trí:** Một cơ sở dịch vụ của bạn bị niêm phong kiểm tra; tốn $800$ Tr. VNĐ khắc phục sự cố trước khi được kinh doanh lại.  
-> 15. **Tài Trợ Đại Nhạc Hội Countdown:** Chi trả $600$ Tr. VNĐ làm truyền thông. Điểm xúc xắc ở lượt tiếp theo của bạn được nhân đôi.  
-> 16. **Huy Động Vốn Tín Dụng Tự Do:** Nhận ngay $2.000$ Tr. VNĐ tiền mặt; chấp nhận nộp lãi $400$ Tr. VNĐ mỗi khi qua ô GO cho đến hết trận đấu.  
-> 17. **Hợp Tác Độc Quyền Cảng Quốc Tế:** Yêu cầu người sở hữu Cảng Biển/Sân bay chia sẻ cho bạn 50% tiền phí họ thu được trong 2 vòng.  
+> 14. **Sự Cố An Ninh Khu Giải Trí (IMP-112):** Nếu sở hữu ô Dịch Vụ nộp phạt 1.200 Tr. VNĐ khắc phục sự cố vào Kho Bạc; nếu không sở hữu vẫn nộp 600 Tr. VNĐ phí bảo an thành phố.  
+> 15. **Tài Trợ Đại Nhạc Hội Countdown:** Chi trả 600 Tr. VNĐ làm truyền thông. Điểm xúc xắc ở lượt tiếp theo của bạn được nhân đôi.  
+> 16. **Huy Động Vốn Tín Dụng Tự Do:** Nhận ngay 2.000 Tr. VNĐ tiền mặt; chấp nhận nộp lãi 400 Tr. VNĐ mỗi khi qua ô GO cho đến hết trận đấu.  
+> 17. **Hợp Tác Độc Quyền Cảng Quốc Tế (IMP-112):** Nhận ngay 1.000 Tr. VNĐ cổ tức logistics từ Kho Bạc và trích nhận 50% tiền phí cảng khi đối thủ dừng chân tại ô Cảng Biển/Sân bay trong 2 vòng.  
 > 18. **Thu Hồi Do Chậm Triển Khai 24 Tháng:** Nếu bạn sở hữu đất trống quá 2 vòng xoay bàn cờ mà không xây dựng, Ngân hàng tịch thu để đấu giá.  
-> 19. **Khủng Hoảng Truyền Thông Dịch Vụ Khách Hàng:** Quán bar/nhà hàng của bạn nhận bão đánh giá 1 sao; đóng băng thu phí cơ sở này trong 1 vòng.  
-> 20. **Quyền Ưu Tiên Hoán Đổi Dự Án:** Bạn được quyền hoán đổi vị trí sở hữu giữa 2 ô đất trống bất kỳ trên bàn cờ thuộc cùng một nhóm màu.
+> 19. **Khủng Hoảng Truyền Thông Dịch Vụ Khách Hàng (IMP-112):** Phạt ngay 800 Tr. VNĐ chi phí xử lý khủng hoảng truyền thông vào Kho Bạc và tạm đình chỉ thu phí tại 1 ô Dịch Vụ trong 2 vòng.  
+> 20. **Quyền Ưu Tiên Hoán Đổi Dự Án (IMP-112):** Bạn được quyền hoán đổi 1 ô đất Cấp 0 bất kỳ của đối thủ lấy 1 ô đất Cấp 0 của bạn (không bị giới hạn cùng nhóm màu).

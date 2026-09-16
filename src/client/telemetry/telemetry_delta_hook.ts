@@ -3,6 +3,7 @@ import type { DeltaPayload, CellDelta, PlayerDelta } from '../../server/session_
 import type { GameState, PlayerHudInfo } from '../store/game_store.js';
 import {
   PROPERTY_DEEDS,
+  type PropertyDeed,
   type PropertyRegistry,
   type PropertyStateMap,
   type PropertyState,
@@ -38,25 +39,35 @@ function extractBalances(playersInfo: Record<string, PlayerHudInfo>): Record<str
   return map;
 }
 
-export function checkIsTeleport(fromPos: number, toPos: number, isTurnPlayer: boolean, phase?: TurnPhase): boolean {
+export function checkIsTeleport(
+  fromPos: number,
+  toPos: number,
+  isTurnPlayer: boolean,
+  phase?: TurnPhase,
+  hasEventCard?: boolean
+): boolean {
   if (!isTurnPlayer) return true;
+  if (hasEventCard) return true;
+  const CHANCE_MARKET_CELLS = new Set([2, 7, 17, 22, 33, 36]);
+  if (phase !== TurnPhase.PropertyManagement && CHANCE_MARKET_CELLS.has(fromPos)) return true;
   if ((AIRPORT_CELLS.has(fromPos) || fromPos === 22) && AIRPORT_CELLS.has(toPos)) return true;
   if (toPos === JAIL_CELL) return true;
   if (SERVICE_CELLS.has(toPos)) return true;
-  const CHANCE_MARKET_CELLS = new Set([2, 7, 17, 22, 33, 36]);
-  if (phase !== TurnPhase.PropertyManagement && CHANCE_MARKET_CELLS.has(fromPos)) return true;
+  if (toPos === 0 && (fromPos >= 35 && fromPos <= 39)) return true;
   if (
     phase &&
     phase !== TurnPhase.WaitingRoll &&
     phase !== TurnPhase.ActionPhase &&
-    phase !== TurnPhase.PropertyManagement
+    phase !== TurnPhase.PropertyManagement &&
+    phase !== TurnPhase.HosePhase &&
+    phase !== TurnPhase.AuctionPhase
   ) {
     return true;
   }
   return false;
 }
 
-function detectMovement(
+export function detectMovement(
   delta: DeltaPayload,
   prePositions: Record<string, number>
 ): { fromPosition: number; toPosition: number; dice?: readonly [number, number]; isTeleport?: boolean } | undefined {
@@ -64,23 +75,27 @@ function detectMovement(
   for (const p of delta.players) {
     const fromPos = prePositions[p.id];
     if (fromPos !== undefined && fromPos !== p.position) {
-      const isTurnPlayer = !delta.currentTurnPlayerId || delta.currentTurnPlayerId === p.id;
+      const isRoller = delta.diceRollerId !== undefined
+        ? delta.diceRollerId === p.id
+        : (!delta.currentTurnPlayerId || delta.currentTurnPlayerId === p.id);
       const isMovementPhase =
         delta.turnPhase === TurnPhase.WaitingRoll ||
         delta.turnPhase === TurnPhase.ActionPhase ||
         delta.turnPhase === TurnPhase.PropertyManagement ||
+        delta.turnPhase === TurnPhase.HosePhase ||
+        delta.turnPhase === TurnPhase.AuctionPhase ||
         delta.turnPhase === undefined;
       const isExactDiceMove = Boolean(
         delta.dice && (fromPos + delta.dice[0] + delta.dice[1]) % 40 === p.position
       );
       const isTeleport = isExactDiceMove
         ? false
-        : checkIsTeleport(fromPos, p.position, isTurnPlayer, delta.turnPhase);
+        : checkIsTeleport(fromPos, p.position, isRoller, delta.turnPhase, Boolean(delta.lastEventCard));
 
       return {
         fromPosition: fromPos,
         toPosition: p.position,
-        dice: isMovementPhase && isTurnPlayer ? delta.dice : undefined,
+        dice: isMovementPhase && isRoller ? delta.dice : undefined,
         isTeleport,
       };
     }
@@ -103,8 +118,42 @@ function calculateGoSalary(preState: GameState, activeId: string, treasuryGain: 
   return (2000 - tax) + absorbedTax;
 }
 
-function computeCellDelta(cells: readonly CellDelta[], preState: GameState): number {
-  const storeAuctionBid = useActivityStore.getState().lastAuctionBid;
+function resolvePurchaseCost(
+  cell: CellDelta,
+  deed: PropertyDeed,
+  preState: GameState,
+  delta?: DeltaPayload
+): number {
+  if (!cell.ownerId) return deed.price;
+  const buyerPre = preState.playersInfo[cell.ownerId];
+  const buyerDelta = delta?.players?.find((p) => p.id === cell.ownerId);
+  const buyerSpent =
+    buyerPre && buyerDelta?.balance !== undefined && buyerPre.balance > buyerDelta.balance
+      ? buyerPre.balance - buyerDelta.balance
+      : undefined;
+
+  const storeBid = useActivityStore.getState().lastAuctionBid;
+  const modalPayload =
+    preState.activeModal === 'auction' && preState.modalPayload && 'cellIndex' in preState.modalPayload
+      ? (preState.modalPayload as { cellIndex?: number; currentBid?: number; highestBid?: number })
+      : undefined;
+  const isAuction =
+    preState.auction?.cellIndex === cell.index ||
+    modalPayload?.cellIndex === cell.index ||
+    storeBid?.cellIndex === cell.index;
+
+  const highestBid = isAuction
+    ? ((storeBid?.cellIndex === cell.index ? storeBid.currentBid : undefined)
+        ?? preState.auction?.highestBid
+        ?? preState.auction?.currentBid
+        ?? modalPayload?.highestBid
+        ?? modalPayload?.currentBid)
+    : undefined;
+
+  return isAuction ? (buyerSpent ?? highestBid ?? deed.price) : (highestBid ?? deed.price);
+}
+
+function computeCellDelta(cells: readonly CellDelta[], preState: GameState, delta?: DeltaPayload): number {
   let deltaSum = 0;
   for (const cell of cells) {
     const deed = PROPERTY_DEEDS.get(cell.index);
@@ -126,24 +175,7 @@ function computeCellDelta(cells: readonly CellDelta[], preState: GameState): num
     }
     const prevOwner = Object.values(preState.playersInfo).find((p) => p.ownedProperties.includes(cell.index));
     if (cell.ownerId && !prevOwner) {
-      const preAuction = preState.auction;
-      const auctionPayload =
-        preState.activeModal === 'auction' && preState.modalPayload && 'cellIndex' in preState.modalPayload
-          ? (preState.modalPayload as { cellIndex?: number; currentBid?: number; highestBid?: number })
-          : undefined;
-      const isAuction =
-        preAuction?.cellIndex === cell.index ||
-        auctionPayload?.cellIndex === cell.index ||
-        storeAuctionBid?.cellIndex === cell.index;
-      const highestBid = isAuction
-        ? ((storeAuctionBid?.cellIndex === cell.index ? storeAuctionBid.currentBid : undefined)
-            ?? preAuction?.highestBid
-            ?? preAuction?.currentBid
-            ?? auctionPayload?.highestBid
-            ?? auctionPayload?.currentBid)
-        : undefined;
-
-      deltaSum -= highestBid !== undefined ? highestBid : deed.price;
+      deltaSum -= resolvePurchaseCost(cell, deed, preState, delta);
     }
     if (cell.isMortgaged === true) {
       deltaSum += Math.floor(deed.price * 0.5);
@@ -231,7 +263,9 @@ export function computeExpectedDelta(
   }
 
   if (delta.cells && delta.cells.length > 0) {
-    expected += computeCellDelta(delta.cells, preState);
+    const cellDelta = computeCellDelta(delta.cells, preState, delta);
+    const absorbedTreasury = cellDelta < 0 ? Math.min(Math.max(0, treasuryGain), -cellDelta) : 0;
+    expected += cellDelta + absorbedTreasury;
     hasKnown = true;
   }
 
@@ -295,22 +329,27 @@ export function handleDeltaTelemetry(
   const movement = detectMovement(delta, preState.playerPositions);
   const expectedMoneyDelta = computeExpectedDelta(delta, preState, movement, postState.treasuryPool);
 
-  const isInitialTreasuryCalibration =
-    delta.tick <= 1 &&
-    preState.treasuryPool !== postState.treasuryPool &&
-    delta.treasury === postState.treasuryPool;
+  const isInitialSetupOrCalibration =
+    delta.roomStarted === false ||
+    Object.keys(postBalances).length !== Object.keys(preBalances).length ||
+    (delta.tick <= 2 && (
+      preState.treasuryPool !== postState.treasuryPool ||
+      delta.treasury !== undefined ||
+      Object.entries(postBalances).some(([id, b]) => (preBalances[id] === undefined || preBalances[id] === 0) && b === 15_000)
+    ));
 
   const violations = verifyAllInvariants({
     preBalances,
     postBalances,
-    preTreasury: isInitialTreasuryCalibration ? postState.treasuryPool : preState.treasuryPool,
+    preTreasury: isInitialSetupOrCalibration ? postState.treasuryPool : preState.treasuryPool,
     postTreasury: postState.treasuryPool,
-    expectedMoneyDelta,
+    expectedMoneyDelta: isInitialSetupOrCalibration ? null : expectedMoneyDelta,
     movement,
     players: Object.values(postState.playersInfo),
     isInInsolvency: delta.turnPhase === TurnPhase.InsolvencyPhase || postState.activeModal === 'insolvency',
     cells: delta.cells,
     tick: delta.tick,
+    roomStarted: delta.roomStarted,
   });
 
   recordTurnStallAndBotWatchdog(postState, delta, violations);

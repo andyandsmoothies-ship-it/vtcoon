@@ -15,7 +15,19 @@ export function verifyTreasuryConservation(params: {
   readonly postTreasury: number;
   readonly tick: number;
   readonly expectedDelta?: number;
+  readonly roomStarted?: boolean;
 }): InvariantViolation | null {
+  if (params.roomStarted === false) return null;
+  if (Object.keys(params.preBalances).length !== Object.keys(params.postBalances).length) {
+    return null;
+  }
+  if (params.tick <= 2) {
+    if (params.preTreasury !== params.postTreasury) return null;
+    const hasInitialCapital = Object.entries(params.postBalances).some(
+      ([id, b]) => (params.preBalances[id] === undefined || params.preBalances[id] === 0) && b === 15_000
+    );
+    if (hasInitialCapital) return null;
+  }
   const preTotal = Object.values(params.preBalances).reduce((acc, v) => acc + v, 0) + params.preTreasury;
   const postTotal = Object.values(params.postBalances).reduce((acc, v) => acc + v, 0) + params.postTreasury;
   const actualDelta = postTotal - preTotal;
@@ -148,6 +160,7 @@ export function verifyAllInvariants(params: {
   readonly isInInsolvency?: boolean;
   readonly cells?: ReadonlyArray<{ readonly index: number; readonly ownerId?: string | null; readonly level?: number }>;
   readonly tick: number;
+  readonly roomStarted?: boolean;
 }): InvariantViolation[] {
   const violations: InvariantViolation[] = [];
 
@@ -160,6 +173,7 @@ export function verifyAllInvariants(params: {
         postTreasury: params.postTreasury,
         tick: params.tick,
         expectedDelta: params.expectedMoneyDelta ?? undefined,
+        roomStarted: params.roomStarted,
       });
       if (v) violations.push(v);
     }

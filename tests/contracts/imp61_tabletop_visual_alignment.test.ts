@@ -344,9 +344,9 @@ describe('[IMP-61] Tabletop Visual Alignment Contract Test Suite', () => {
           timeRemaining: 15,
         })
       );
-      expect(markup).toContain('+50 Tr.');
       expect(markup).toContain('+100 Tr.');
       expect(markup).toContain('+200 Tr.');
+      expect(markup).toContain('+500 Tr.');
       expect(markup).toMatch(/shadow-\[0_4px_0_0_#[0-9a-fA-F]{6}\]|shadow-\[0_3px_0_0_#[0-9a-fA-F]{6}\]/);
     });
 

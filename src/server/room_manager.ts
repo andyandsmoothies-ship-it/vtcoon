@@ -249,7 +249,7 @@ export class RoomManager {
   }
 
   getRoom(roomCode: string): Room | undefined {
-    return this.rooms.get(roomCode) ?? this.rooms.get(roomCode.toUpperCase());
+    return roomCode ? (this.rooms.get(roomCode) ?? this.rooms.get(roomCode.toUpperCase())) : undefined;
   }
 
   getRegistry(roomCode: string): PropertyRegistry | undefined {

@@ -140,7 +140,7 @@ export class DeltaBroadcaster {
   ): BroadcastResult | undefined {
     const tick = this.getNextTick(roomCode);
     const timeRemaining = this.timeRemainingProvider?.(roomCode);
-    const fullDelta = this.roomManager.createDelta(roomCode, tick, timeRemaining);
+    const fullDelta = this.roomManager?.createDelta?.(roomCode, tick, timeRemaining);
     if (!fullDelta) return undefined;
 
     const prevDelta = this.lastFullDeltas.get(roomCode);

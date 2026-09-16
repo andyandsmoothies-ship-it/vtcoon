@@ -48,10 +48,14 @@ export function PerfTelemetryTracker(): null {
       if (activeAnim?.isAnimating) {
         if (animStartRef.current === null) animStartRef.current = Date.now();
         const duration = Date.now() - animStartRef.current;
+        const queue = useGameStore.getState().pawnAnimationQueue;
+        const totalWaypoints = (activeAnim.waypoints?.length ?? 0) + (queue?.reduce((acc, q) => acc + (q.waypoints?.length ?? 0), 0) ?? 0);
+        const maxAllowedMs = Math.max(10_000, totalWaypoints * 1200 + 5000);
         const params = {
           isAnimating: true,
           animatingDurationMs: duration,
           tick: 0,
+          maxAllowedMs,
         };
         const v = watchdogMonitor.checkFsmAnimationStall(params);
         if (v) {

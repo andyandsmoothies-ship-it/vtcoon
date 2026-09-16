@@ -46,7 +46,7 @@ export function GameRulesModal({
           <button
             type="button"
             onClick={onClose}
-            className="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 font-bold transition-colors cursor-pointer text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 font-bold transition-colors cursor-pointer text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             data-testid="close-rules-modal-btn"
             aria-label="Đóng hướng dẫn"
           >
@@ -59,38 +59,41 @@ export function GameRulesModal({
           <button
             type="button"
             onClick={() => setActiveTab('core')}
-            className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer text-center ${
+            className={`flex-1 min-h-[44px] py-2 px-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer text-center flex items-center justify-center gap-1 ${
               activeTab === 'core'
                 ? 'bg-white text-blue-600 shadow-xs border border-slate-200'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
             }`}
             data-testid="rules-tab-core"
           >
-            🏆 Quy Tắc Cốt Lõi
+            <span>🏆</span>
+            <span>Quy Tắc<span className="hidden sm:inline"> Cốt Lõi</span></span>
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('cards')}
-            className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer text-center ${
+            className={`flex-1 min-h-[44px] py-2 px-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer text-center flex items-center justify-center gap-1 ${
               activeTab === 'cards'
                 ? 'bg-white text-blue-600 shadow-xs border border-slate-200'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
             }`}
             data-testid="rules-tab-cards"
           >
-            🃏 Danh Mục Thẻ & Ô Cờ
+            <span>🃏</span>
+            <span><span className="sm:hidden">Thẻ &amp; Ô Cờ</span><span className="hidden sm:inline">Danh Mục Thẻ &amp; Ô Cờ</span></span>
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('mechanics')}
-            className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer text-center ${
+            className={`flex-1 min-h-[44px] py-2 px-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer text-center flex items-center justify-center gap-1 ${
               activeTab === 'mechanics'
                 ? 'bg-white text-blue-600 shadow-xs border border-slate-200'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
             }`}
             data-testid="rules-tab-mechanics"
           >
-            ⚖️ Cơ Chế Đặc Biệt
+            <span>⚖️</span>
+            <span>Cơ Chế<span className="hidden sm:inline"> Đặc Biệt</span></span>
           </button>
         </nav>
 

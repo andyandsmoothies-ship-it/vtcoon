@@ -262,12 +262,13 @@ describe('[TC-82][UC-IMP82] IMP-82 Die-Cast Pawns and 3D Ownership Totem Contrac
     });
 
     it.each(MASCOT_SLOT_CASES)(
-      '[TC-82.14/MSS][UC-IMP82] LUXURY_PAWN_CONFIGS slot %s meets die-cast PBR standard (metalness >= 0.8, roughness <= 0.2)',
+      '[TC-82.14/MSS][UC-IMP82] LUXURY_PAWN_CONFIGS slot %s meets toy lacquer PBR standard (metalness <= 0.40, roughness in [0.15, 0.45])',
       ({ slot }) => {
         const config = LUXURY_PAWN_CONFIGS[slot];
         expect(config).toBeDefined();
-        expect(config?.metalness).toBeGreaterThanOrEqual(0.8);
-        expect(config?.roughness).toBeLessThanOrEqual(0.2);
+        expect(config?.metalness).toBeLessThanOrEqual(0.40);
+        expect(config?.roughness).toBeGreaterThanOrEqual(0.15);
+        expect(config?.roughness).toBeLessThanOrEqual(0.45);
       }
     );
 

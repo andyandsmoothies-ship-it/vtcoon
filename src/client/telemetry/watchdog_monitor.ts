@@ -120,8 +120,10 @@ export class WatchdogMonitor {
     readonly isAnimating: boolean;
     readonly animatingDurationMs: number;
     readonly tick: number;
+    readonly maxAllowedMs?: number;
   }): InvariantViolation | null {
-    if (params.isAnimating && params.animatingDurationMs > WATCHDOG_LIMITS.MAX_ANIMATION_DURATION_MS) {
+    const limit = params.maxAllowedMs ?? WATCHDOG_LIMITS.MAX_ANIMATION_DURATION_MS;
+    if (params.isAnimating && params.animatingDurationMs > limit) {
       useGameStore.getState().clearActivePawnAnimation();
       return {
         id: `watchdog_fsm_anim_${params.tick}_${Date.now()}`,
@@ -140,8 +142,10 @@ export class WatchdogMonitor {
     readonly isAnimating: boolean;
     readonly animatingDurationMs: number;
     readonly tick: number;
+    readonly maxAllowedMs?: number;
   }): InvariantViolation | null {
-    if (params.isAnimating && params.animatingDurationMs > WATCHDOG_LIMITS.MAX_ANIMATION_DURATION_MS) {
+    const limit = params.maxAllowedMs ?? WATCHDOG_LIMITS.MAX_ANIMATION_DURATION_MS;
+    if (params.isAnimating && params.animatingDurationMs > limit) {
       useGameStore.getState().clearActivePawnAnimation();
       return this.checkFsmAnimationStall(params);
     }

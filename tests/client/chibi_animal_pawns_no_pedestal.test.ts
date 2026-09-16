@@ -479,14 +479,14 @@ describe('[TC-CAP01/MSS..TC-CAP04/A8][UI-S02/MSS][BR-UI-002] Chibi Animal Pawns 
         React.createElement(LuxuryPawnModel, { slotIndex: 0 })
       );
       expect(markup).toContain('data-testid="pawn-aura-pedestal"');
-      expect(markup).toContain('data-model-url="/models/pawns/pawn_dog.glb"');
+      expect(markup).toContain('data-model-url="/models/pawns/pawn_rook.glb"');
     });
 
-    it('[TC-CAP04.06/MSS][UI-S02/MSS][BR-UI-002][Facet4-Preservation] Preserves 4 animal mascot configs with icons 🐕 🐈 🐎 🐘 and names', () => {
+    it('[TC-CAP04.06/MSS][UI-S02/MSS][BR-UI-002][Facet4-Preservation] Preserves 4 chess pawn configs with icons 🏰 💣 🐎 👑 and names', () => {
       expect(LUXURY_PAWN_CONFIGS).toHaveLength(4);
-      expect(LUXURY_PAWN_CONFIGS.map((c) => c.icon)).toEqual(['🐕', '🐈', '🐎', '🐘']);
-      expect(LUXURY_PAWN_CONFIGS[0]?.name).toContain('Chó');
-      expect(LUXURY_PAWN_CONFIGS[1]?.name).toContain('Mèo');
+      expect(LUXURY_PAWN_CONFIGS.map((c) => c.icon)).toEqual(['🏰', '💣', '🐎', '👑']);
+      expect(LUXURY_PAWN_CONFIGS[0]?.name).toContain('Xe');
+      expect(LUXURY_PAWN_CONFIGS[1]?.name).toContain('Pháo');
     });
   });
 });

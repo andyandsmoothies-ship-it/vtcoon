@@ -49,8 +49,11 @@ export function OwnerPricePill({
   cellIndex,
   isPurchasable: _isPurchasable = true,
   position = [0, 0.115, 0.70],
-}: OwnerPricePillProps): React.ReactElement {
+}: OwnerPricePillProps): React.ReactElement | null {
   const hasOwner = Boolean(ownerColor && ownerColor.length > 0);
+  if (!hasOwner) {
+    return null;
+  }
   const resolvedPrice =
     price ??
     (cellIndex !== undefined
@@ -142,7 +145,7 @@ export interface TactileDeedWaxSealProps {
 
 export function TactileDeedWaxSeal({
   ownerColor = '#DC2626',
-  mascotIcon = '🐕',
+  mascotIcon = '🏰',
   level = 0,
   position = [0.42, 0.125, 0.12],
   rotation = [-Math.PI / 2, 0, -0.20],

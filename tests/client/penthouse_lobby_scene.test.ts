@@ -223,15 +223,15 @@ describe('[TC-P3.8/MSS] Bố Trí Hình Học 4 Ghế VIP Bảo Đảm Không Ba
 });
 
 describe('[TC-P3.9/MSS] 4 Linh Vật Cờ Thượng Lưu mạ Kim Loại PBR (Luxury Pawns)', () => {
-  it('4 tượng linh vật cờ tuân thủ đúng bảng màu và thông số PBR kim loại hoàng gia', () => {
+  it('4 tượng quân cờ tuân thủ đúng bảng màu và thông số PBR sơn men bóng', () => {
     expect(LUXURY_PAWN_CONFIGS).toHaveLength(4);
 
-    // Toàn bộ 4 tượng linh vật cờ bạc đồng bộ màu #E2E8F0 và specular PBR
+    const expectedColors = ['#DC2626', '#27AE60', '#E67E22', '#10B981'];
     for (let slot = 0; slot < 4; slot++) {
       const cfg = LUXURY_PAWN_CONFIGS[slot]!;
-      expect(cfg.color.toUpperCase()).toBe('#E2E8F0');
-      expect(cfg.metalness).toBeGreaterThanOrEqual(0.9);
-      expect(cfg.roughness).toBeLessThanOrEqual(0.15);
+      expect(cfg.color.toUpperCase()).toBe(expectedColors[slot]);
+      expect(cfg.metalness).toBeLessThanOrEqual(0.40);
+      expect(cfg.roughness).toBeGreaterThanOrEqual(0.15);
     }
   });
 

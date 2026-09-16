@@ -85,6 +85,7 @@ export function resolveRent(
   cellIndex: number, ownerId: string,
   registry: PropertyRegistry, stateMap?: PropertyStateMap, diceTotal?: number,
   modifiers?: readonly MarketModifier[],
+  roundCount?: number,
 ): number {
   if (!cell) return 0;
   let rent = 0;
@@ -102,6 +103,13 @@ export function resolveRent(
     else {
       const base0 = deed.rent0;
       rent = hasMonopoly(ownerId, cellIndex, registry, stateMap) ? base0 * 2 : base0;
+    }
+    if (cell.type === CellType.Property && typeof roundCount === 'number' && roundCount > 0) {
+      if (roundCount >= 30) {
+        rent = Math.floor(rent * 1.5);
+      } else if (roundCount >= 20) {
+        rent = Math.floor(rent * 1.2);
+      }
     }
   }
   if (modifiers && modifiers.length > 0) {

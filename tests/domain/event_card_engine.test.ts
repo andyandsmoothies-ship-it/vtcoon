@@ -334,13 +334,13 @@ describe('[TC-04.T4/MSS] Market Modifier System & apply/decay Functions', () => 
     applyChanceCard(ChanceCardId.CC_DIPLOMATIC, player.id, [player], []);
     expect(player.hand).toContain(ChanceCardId.CC_DIPLOMATIC);
 
-    // CC_TAX_AUDIT: Phạt 200 Tr. mỗi ô đất trống (Cấp 0). Ô 1 (Cấp 0) và Ô 3 (Cấp 1); Ô 5 (Hạ tầng), Ô 12 (Tiện ích) không bị tính -> phạt đúng 200
+    // CC_TAX_AUDIT: Phạt 500 Tr. mỗi ô đất trống (Cấp 0). Ô 1 (Cấp 0) và Ô 3 (Cấp 1); Ô 5 (Hạ tầng), Ô 12 (Tiện ích) không bị tính -> phạt đúng 500
     const registry: PropertyRegistry = new Map([[1, player.id], [3, player.id], [5, player.id], [12, player.id]]);
     const stateMap: PropertyStateMap = new Map([[3, { level: 1 }]]);
     const beforeTax = player.balance;
     const auditRes = applyChanceCard(ChanceCardId.CC_TAX_AUDIT, player.id, [player], [], registry, stateMap);
     expect(auditRes).toEqual({});
-    expect(player.balance).toBe(beforeTax - 200);
+    expect(player.balance).toBe(beforeTax - 500);
   });
 });
 

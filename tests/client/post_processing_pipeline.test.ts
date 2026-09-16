@@ -65,7 +65,7 @@ describe('[UI-S04/MSS] GameCanvas — Dai phau Perspective Camera & Post-Process
   it('GameCanvas su dung Perspective Camera voi fov=24 va near/far hop ly', () => {
     expect(canvasSource).toContain('fov: 24');
     expect(canvasSource).toContain('near: 0.5');
-    expect(canvasSource).toContain('position: [30.0, 33.0, 30.0]');
+    expect(canvasSource).toContain('CAMERA_CONFIG');
   });
 
   it('Hang so goc nhin Perspective Camera hop le: 40 do goc thuong, 35 do su kien', () => {

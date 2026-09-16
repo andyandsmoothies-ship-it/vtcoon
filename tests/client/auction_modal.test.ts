@@ -29,9 +29,9 @@ describe('[TC-AUC-MODAL.1/MSS] Cấu Trúc Giao Diện 2 Cánh Glassmorphism (Du
     // Băng chuyền dưới chân: Đồng hồ đếm ngược & nút đặt giá
     expect(html).toContain('THỜI GIAN CÒN LẠI');
     expect(html).toContain('15 GIÂY');
-    expect(html).toContain('+50 Tr.');
     expect(html).toContain('+100 Tr.');
     expect(html).toContain('+200 Tr.');
+    expect(html).toContain('+500 Tr.');
     expect(html).toContain('AUTO-BID');
     expect(html).toContain('Rút Lui / Bỏ Cuộc');
   });
@@ -48,7 +48,7 @@ describe('[TC-AUC-MODAL.1/MSS] Cấu Trúc Giao Diện 2 Cánh Glassmorphism (Du
     );
 
     expect(html).toContain('Bạn đang dẫn đầu mức giá cao nhất!');
-    expect(html).not.toContain('+50 Tr.'); // Khi đang dẫn đầu, các nút bid được ẩn để tránh tự đấu với chính mình
+    expect(html).not.toContain('+100 Tr.'); // Khi đang dẫn đầu, các nút bid được ẩn để tránh tự đấu với chính mình
   });
 
   it('Hiển thị thông báo khi người chơi đã rút lui khỏi sàn đấu giá', () => {

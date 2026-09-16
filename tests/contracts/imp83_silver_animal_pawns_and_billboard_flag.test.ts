@@ -68,46 +68,46 @@ if (!assignRandomPlayerPawns) {
   }
 }
 
-// 4 Silver Animal Pawn Definitions (IMP-83 Spec)
+// 4 Chess Pawn Definitions (IMP-105 Reconciled Spec)
 const SILVER_ANIMAL_CASES = [
   {
     slot: 0,
-    name: 'Tượng Chó Bạc Phú Quý',
-    animal: 'Chó',
-    icon: '🐕',
-    expectedColor: '#E2E8F0',
-    minMetalness: 0.9,
-    maxRoughness: 0.15,
+    name: 'Quân Xe Chiến Hoàng Gia',
+    animal: 'Xe',
+    icon: '🏰',
+    expectedColor: '#DC2626',
+    maxMetalness: 0.40,
+    minRoughness: 0.15,
     expectedScale: [1.0, 1.0, 1.0] as const,
   },
   {
     slot: 1,
-    name: 'Tượng Mèo Bạc May Mắn',
-    animal: 'Mèo',
-    icon: '🐈',
-    expectedColor: '#E2E8F0',
-    minMetalness: 0.9,
-    maxRoughness: 0.15,
+    name: 'Quân Pháo Thần Công Cổ Điển',
+    animal: 'Pháo',
+    icon: '💣',
+    expectedColor: '#27AE60',
+    maxMetalness: 0.40,
+    minRoughness: 0.15,
     expectedScale: [1.0, 1.0, 1.0] as const,
   },
   {
     slot: 2,
-    name: 'Tượng Ngựa Bạc Phong Vân',
-    animal: 'Ngựa',
+    name: 'Quân Mã Phong Vân Thượng Lưu',
+    animal: 'Mã',
     icon: '🐎',
-    expectedColor: '#E2E8F0',
-    minMetalness: 0.9,
-    maxRoughness: 0.15,
+    expectedColor: '#E67E22',
+    maxMetalness: 0.40,
+    minRoughness: 0.15,
     expectedScale: [1.0, 1.0, 1.0] as const,
   },
   {
     slot: 3,
-    name: 'Tượng Voi Bạc Thịnh Vượng',
-    animal: 'Voi',
-    icon: '🐘',
-    expectedColor: '#E2E8F0',
-    minMetalness: 0.9,
-    maxRoughness: 0.15,
+    name: 'Quân Hậu Quyền Quý Indochine',
+    animal: 'Hậu',
+    icon: '👑',
+    expectedColor: '#10B981',
+    maxMetalness: 0.40,
+    minRoughness: 0.15,
     expectedScale: [1.0, 1.0, 1.0] as const,
   },
 ] as const;
@@ -169,12 +169,12 @@ describe('[TC-83][UC-IMP83] IMP-83 Silver Animal Pawns and Billboard Flag Contra
     );
 
     it.each(SILVER_ANIMAL_CASES)(
-      '[TC-83.06..09/MSS][UC-IMP83] LUXURY_PAWN_CONFIGS slot %s (%s) satisfies silver PBR specular properties (metalness >= 0.9, roughness <= 0.15)',
-      ({ slot, minMetalness, maxRoughness }) => {
+      '[TC-83.06..09/MSS][UC-IMP83] LUXURY_PAWN_CONFIGS slot %s (%s) satisfies toy lacquer specular properties (metalness <= 0.40, roughness >= 0.15)',
+      ({ slot, maxMetalness, minRoughness }) => {
         const config = LUXURY_PAWN_CONFIGS[slot];
         expect(config).toBeDefined();
-        expect(config?.metalness).toBeGreaterThanOrEqual(minMetalness);
-        expect(config?.roughness).toBeLessThanOrEqual(maxRoughness);
+        expect(config?.metalness).toBeLessThanOrEqual(maxMetalness);
+        expect(config?.roughness).toBeGreaterThanOrEqual(minRoughness);
       }
     );
 
@@ -331,30 +331,30 @@ describe('[TC-83][UC-IMP83] IMP-83 Silver Animal Pawns and Billboard Flag Contra
   // FACET 4: ERROR DEFENSE & FALLBACK BOUNDARY
   // =========================================================================
   describe('Facet 4: Error Defense & Fallback Boundary', () => {
-    it('[TC-83.31/A1][UC-IMP83] getPawnConfigBySlot with negative slotIndex (-1) safely defaults to slot 0 (🐕 Chó)', () => {
+    it('[TC-83.31/A1][UC-IMP83] getPawnConfigBySlot with negative slotIndex (-1) safely defaults to slot 0 (🏰 Xe)', () => {
       const fallbackConfig = getPawnConfigBySlot(-1);
       expect(fallbackConfig).toBeDefined();
       expect(fallbackConfig.slot).toBe(0);
-      expect(fallbackConfig.icon).toBe('🐕');
+      expect(fallbackConfig.icon).toBe('🏰');
     });
 
     it.each([4, 99, 1000])(
-      '[TC-83.32/A2][UC-IMP83] getPawnConfigBySlot with out-of-range slotIndex (%s) safely defaults to slot 0 (🐕 Chó)',
+      '[TC-83.32/A2][UC-IMP83] getPawnConfigBySlot with out-of-range slotIndex (%s) safely defaults to slot 0 (🏰 Xe)',
       (outSlot) => {
         const fallbackConfig = getPawnConfigBySlot(outSlot);
         expect(fallbackConfig).toBeDefined();
         expect(fallbackConfig.slot).toBe(0);
-        expect(fallbackConfig.icon).toBe('🐕');
+        expect(fallbackConfig.icon).toBe('🏰');
       }
     );
 
     it.each([NaN, Infinity, -Infinity])(
-      '[TC-83.33/A3][UC-IMP83] getPawnConfigBySlot with non-finite slotIndex (%s) safely defaults to slot 0 (🐕 Chó)',
+      '[TC-83.33/A3][UC-IMP83] getPawnConfigBySlot with non-finite slotIndex (%s) safely defaults to slot 0 (🏰 Xe)',
       (invalidSlot) => {
         const fallbackConfig = getPawnConfigBySlot(invalidSlot);
         expect(fallbackConfig).toBeDefined();
         expect(fallbackConfig.slot).toBe(0);
-        expect(fallbackConfig.icon).toBe('🐕');
+        expect(fallbackConfig.icon).toBe('🏰');
       }
     );
 

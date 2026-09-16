@@ -400,12 +400,8 @@ describe('[TC-OPWS01/MSS..TC-OPWS04/A4][UI-S02/MSS][BR-UI-002] Pure Color Owner 
       expect(pos![1]).toBeCloseTo(0.008, 3);
     });
 
-    it('[TC-OPWS01.06/MSS][UI-S02/MSS][BR-UI-002][Facet1-Boundary] owner-price-label nhãn giá tiền khi chưa mua cũng được căn giữa tuyệt đối tại tọa độ X = 0 ([0, 0.008, 0])', () => {
-      expect(unownedTileCanThoMarkup).toContain('data-testid="owner-price-label"');
-      const pos = extractPosition(unownedTileCanThoMarkup, 'owner-price-label');
-      expect(pos).not.toBeNull();
-      expect(pos![0]).toBe(0);
-      expect(pos![1]).toBeCloseTo(0.008, 3);
+    it('[TC-OPWS01.06/MSS][UI-S02/MSS][BR-UI-002][Facet1-Boundary] owner-price-label nhãn giá tiền khi chưa mua không render trên 3D (Zero Black Pill Invariant)', () => {
+      expect(unownedTileCanThoMarkup).not.toContain('data-testid="owner-price-label"');
     });
 
     it('[TC-OPWS01.07/MSS][UI-S02/MSS][BR-UI-002][Facet1-Boundary] Kích thước planeGeometry của nhãn giá tiền trên khay giá đạt chuẩn hiển thị (width >= 0.7m, height >= 0.15m)', () => {
@@ -488,12 +484,10 @@ describe('[TC-OPWS01/MSS..TC-OPWS04/A4][UI-S02/MSS][BR-UI-002] Pure Color Owner 
       expect(hasPrice).toBe(true);
     });
 
-    it('[TC-OPWS02.10/MSS][UI-S02/MSS][BR-UI-002][Facet2-Reactivity] Khi ô đất chưa mua, owner-price-pill giữ nguyên nền than đen #090D1A, số vàng #FBBF24 và viền than sẫm #1E293B', () => {
-      expect(unownedTileCanThoMarkup).toContain('data-testid="owner-price-pill"');
+    it('[TC-OPWS02.10/MSS][UI-S02/MSS][BR-UI-002][Facet2-Reactivity] Khi ô đất chưa mua, không render nền than đen #090D1A hay viền than #1E293B', () => {
       const pillSection = extractElementSection(unownedTileCanThoMarkup, 'owner-price-pill', 800);
-      expect(pillSection).toContain('#090D1A');
-      expect(pillSection).toContain('#FBBF24');
-      expect(pillSection).toContain('#1E293B');
+      expect(pillSection).not.toContain('#090D1A');
+      expect(pillSection).not.toContain('#1E293B');
     });
 
     it('[TC-OPWS02.11/MSS][UI-S02/MSS][BR-UI-002][Facet2-Reactivity] Chuyển đổi chủ sở hữu giữa các lượt chơi cập nhật phản ứng màu nền tức thì và không tạo ra bất kỳ icon linh vật nào', () => {

@@ -8,6 +8,7 @@ import type { PropertyRegistry, PropertyStateMap } from '../domain/property_mana
 import { handleLanding, LandingResult, calculateGoPropertyTax, PROPERTY_DEEDS, GO_PROPERTY_TAX_CAP } from '../domain/property_manager';
 import { BOARD_CONFIG } from '../domain/board_config';
 import { decayModifiers } from '../domain/event_card_engine';
+import { processTreasuryStimulus } from '../domain/treasury_stimulus';
 import { processRollDoubles, handleAuditTurnTransition } from './audit_manager';
 import { handleSpecialCell } from './special_cell_handler';
 import { collectMortgageInterest } from './mortgage_manager';
@@ -134,6 +135,7 @@ export function executeTurnRoll(
     const landing = handleLanding(
       current, newPos, reg, room.players, sm, dice.total,
       room.activeModifiers, rng, room.chanceDiscard, room.permanentRentBonus,
+      room.roundCount,
     );
     room.phase = landing.result === LandingResult.Unowned ? TurnPhase.ActionPhase : TurnPhase.PropertyManagement;
     rentCharged = landing.rentAmount;
@@ -213,6 +215,7 @@ export function executeTurnEnd(
     if (next === 0) {
       room.roundCount = (room.roundCount ?? 1) + 1;
       room.activeModifiers = decayModifiers(room.activeModifiers);
+      processTreasuryStimulus(room);
     }
     if (!room.players[next]?.bankrupt) break;
     next = (next + 1) % total;

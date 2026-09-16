@@ -1,7 +1,7 @@
 // [UC-GAME-038..041/MSS] Chance Card Handlers — 20 Chance Cards
 // Extracted from card_handlers.ts — Slice 06 refactor (DEBT-S06-06)
 
-import type { Player, MarketModifier } from './room';
+import type { Player, MarketModifier, Room } from './room';
 import type { PropertyRegistry, PropertyStateMap } from './property_data';
 import { PROPERTY_DEEDS } from './property_data';
 import { BOARD_CONFIG, CellType } from './board_config';
@@ -17,7 +17,7 @@ const DEBT_AMOUNTS: Readonly<Record<string, number>> = {
   [ChanceCardId.CC_FREE_CREDIT]: 2000,
 };
 
-function handleTaxAudit(player: Player, registry?: PropertyRegistry, stateMap?: PropertyStateMap): void {
+function handleTaxAudit(player: Player, registry?: PropertyRegistry, stateMap?: PropertyStateMap, room?: Room): void {
   if (!registry) return;
   let unbuiltCount = 0;
   for (const [cellIndex, ownerId] of registry) {
@@ -26,7 +26,9 @@ function handleTaxAudit(player: Player, registry?: PropertyRegistry, stateMap?: 
       if (isProperty && (stateMap?.get(cellIndex)?.level ?? 0) === 0) unbuiltCount++;
     }
   }
-  player.balance -= unbuiltCount * 200;
+  const penalty = unbuiltCount * 500;
+  player.balance -= penalty;
+  if (room) room.treasury = (room.treasury ?? 0) + penalty;
 }
 
 function handleContractPenalty(player: Player, players: Player[]): void {
@@ -43,8 +45,8 @@ function handleContractPenalty(player: Player, players: Player[]): void {
 function handleFranchise(player: Player, players: Player[]): void {
   for (const p of players) {
     if (p.id !== player.id) {
-      p.balance -= 300;
-      player.balance += 300;
+      p.balance -= 800;
+      player.balance += 800;
     }
   }
 }
@@ -88,23 +90,80 @@ function handleMaForce(player: Player, players: Player[], registry?: PropertyReg
   }
 }
 
-function handleSwapProject(player: Player, registry?: PropertyRegistry, stateMap?: PropertyStateMap): void {
+function handleSwapProject(
+  player: Player,
+  registry?: PropertyRegistry,
+  stateMap?: PropertyStateMap,
+  room?: Room,
+  players?: Player[],
+): void {
   if (!registry) return;
-  for (const [cell1, owner1] of registry) {
-    if (owner1 === player.id && (stateMap?.get(cell1)?.level ?? 0) === 0) {
-      const colorGroup = BOARD_CONFIG[cell1]?.colorGroup;
-      if (!colorGroup) continue;
-      for (const [cell2, owner2] of registry) {
-        if (cell1 !== cell2 && owner2 !== player.id && BOARD_CONFIG[cell2]?.colorGroup === colorGroup) {
-          if ((stateMap?.get(cell2)?.level ?? 0) === 0) {
-            registry.set(cell1, owner2);
-            registry.set(cell2, player.id);
-            return;
-          }
-        }
-      }
+
+  const isCellMortgaged = (cell: number, ownerId: string): boolean => {
+    if (stateMap?.get(cell)?.isMortgaged) return true;
+    const p = room?.players.find((pl) => pl.id === ownerId) ?? players?.find((pl) => pl.id === ownerId);
+    return Boolean(p?.mortgagedProperties?.includes(cell));
+  };
+
+  // 1. Tìm ô C0 của player (chưa thế chấp)
+  const playerC0Cells: number[] = [];
+  for (const [cell, owner] of registry.entries()) {
+    if (owner === player.id && (stateMap?.get(cell)?.level ?? 0) === 0 && !isCellMortgaged(cell, owner)) {
+      playerC0Cells.push(cell);
     }
   }
+
+  // 2. Tìm ô C0 của đối thủ (chưa thế chấp)
+  const oppC0Cells: { cell: number; owner: string }[] = [];
+  for (const [cell, owner] of registry.entries()) {
+    if (owner !== player.id && (stateMap?.get(cell)?.level ?? 0) === 0 && !isCellMortgaged(cell, owner)) {
+      oppC0Cells.push({ cell, owner });
+    }
+  }
+
+  // Trường hợp 1: Hoán đổi chuẩn (cả 2 đều có C0 chưa thế chấp)
+  if (playerC0Cells.length > 0 && oppC0Cells.length > 0) {
+    const c1 = playerC0Cells[0]!;
+    const c2 = oppC0Cells[0]!;
+    registry.set(c1, c2.owner);
+    registry.set(c2.cell, player.id);
+    return;
+  }
+
+  // Fallback A: Người rút có C0, nhưng đối thủ không có C0
+  if (playerC0Cells.length > 0 && oppC0Cells.length === 0) {
+    const targetCell = playerC0Cells[0]!;
+    const state = stateMap?.get(targetCell);
+    if (state) {
+      state.level = 1;
+    }
+    return;
+  }
+
+  // Fallback B: Đối thủ có C0, nhưng người rút không có C0
+  if (playerC0Cells.length === 0 && oppC0Cells.length > 0) {
+    const target = oppC0Cells[0]!;
+    const deed = PROPERTY_DEEDS.get(target.cell);
+    const basePrice = deed?.price ?? 1000;
+    const compulsoryCost = Math.floor(basePrice * 1.3);
+
+    if (player.balance >= compulsoryCost) {
+      player.balance -= compulsoryCost;
+      const seller = room?.players.find((p) => p.id === target.owner) ?? players?.find((p) => p.id === target.owner);
+      if (seller) {
+        seller.balance += compulsoryCost;
+      }
+      registry.set(target.cell, player.id);
+    } else {
+      player.balance += 800;
+      if (room) room.treasury = Math.max(0, (room.treasury ?? 0) - 800);
+    }
+    return;
+  }
+
+  // Fallback C: Cả 2 đều không có C0 hợp lệ
+  player.balance += 1000;
+  if (room) room.treasury = Math.max(0, (room.treasury ?? 0) - 1000);
 }
 
 // Command Dispatcher — giảm CC từ 22 xuống ≤ 5
@@ -116,13 +175,14 @@ type ChanceHandler = (
   registry?: PropertyRegistry,
   stateMap?: PropertyStateMap,
   permanentRentBonus?: Record<number, number>,
+  room?: Room,
 ) => void;
 
 const CHANCE_HANDLERS: Partial<Record<ChanceCardId, ChanceHandler>> = {
   [ChanceCardId.CC_STOCK_PROFIT]: (player) => { player.balance += 2500; },
-  [ChanceCardId.CC_DIPLOMATIC]:   (player, _players, _id, _mods, _reg, _sm) => { player.hand.push(ChanceCardId.CC_DIPLOMATIC); },
-  [ChanceCardId.CC_TAX_AUDIT]:    (player, _players, _id, _mods, registry, stateMap) => handleTaxAudit(player, registry, stateMap),
-  [ChanceCardId.CC_OVERDRAFT]: (player, _players, _id, _mods, _reg, _sm) => {
+  [ChanceCardId.CC_DIPLOMATIC]:   (player) => { player.hand.push(ChanceCardId.CC_DIPLOMATIC); },
+  [ChanceCardId.CC_TAX_AUDIT]:    (player, _players, _id, _mods, registry, stateMap, _bonus, room) => handleTaxAudit(player, registry, stateMap, room),
+  [ChanceCardId.CC_OVERDRAFT]: (player) => {
     // [DEBT-S06-01] +3.000 Tr., bộ đếm 3 vòng, ghi vào pendingDebts
     player.balance += 3_000;
     player.overdraftRoundsLeft = 3;
@@ -130,7 +190,7 @@ const CHANCE_HANDLERS: Partial<Record<ChanceCardId, ChanceHandler>> = {
       player.pendingDebts.push(ChanceCardId.CC_OVERDRAFT);
     }
   },
-  [ChanceCardId.CC_FREE_CREDIT]: (player, _players, _id, _mods, _reg, _sm) => {
+  [ChanceCardId.CC_FREE_CREDIT]: (player) => {
     // [DEBT-S06-02] +2.000 Tr., thẻ vào hand[] (KHÔNG vào pendingDebts)
     player.balance += 2_000;
     if (!player.hand.includes(ChanceCardId.CC_FREE_CREDIT)) {
@@ -155,31 +215,43 @@ const CHANCE_HANDLERS: Partial<Record<ChanceCardId, ChanceHandler>> = {
       if (ownedEmpty) permanentRentBonus[ownedEmpty[0]] = 0.5;
     }
   },
-  [ChanceCardId.CC_BUILD_HALT]: (player, _players, _id, activeModifiers, registry) => {
+  [ChanceCardId.CC_BUILD_HALT]: (player, _players, _id, activeModifiers, registry, _sm, _bonus, room) => {
+    player.balance -= 800;
+    if (room) room.treasury = (room.treasury ?? 0) + 800;
     if (registry && activeModifiers) {
       const owned = Array.from(registry.entries()).find(([c, o]) => o === player.id && BOARD_CONFIG[c]?.type === CellType.Property);
       if (owned) activeModifiers.push({ type: MarketCardId.MC_COASTAL_STORM, affectedCells: [owned[0]], remainingRounds: 2, multiplier: 0 });
     }
   },
   [ChanceCardId.CC_MA_FORCE]: (player, players, _id, _mods, registry, stateMap) => handleMaForce(player, players, registry, stateMap),
-  [ChanceCardId.CC_COPYRIGHT]:  (player) => { player.balance -= 400; },
+  [ChanceCardId.CC_COPYRIGHT]:  (player, _players, _id, _mods, _reg, _sm, _bonus, room) => {
+    player.balance -= 1200;
+    if (room) room.treasury = (room.treasury ?? 0) + 1200;
+  },
   [ChanceCardId.CC_JUNK_STOCK]: (player) => { player.balance -= 1500; },
   [ChanceCardId.CC_FRANCHISE]: (player, players) => handleFranchise(player, players),
   [ChanceCardId.CC_LAND_RECLAIM]: (player, _players, _id, _mods, registry, stateMap) => handleLandReclaim(player, registry, stateMap),
-  [ChanceCardId.CC_VENUE_INCIDENT]: (player, _players, _id, _mods, registry) => {
-    if (registry) {
-      const ownsService = Array.from(registry.entries()).some(
-        ([c, o]) => o === player.id && (SERVICE_CELLS as readonly number[]).includes(c),
-      );
-      if (ownsService) player.balance -= 800;
+  [ChanceCardId.CC_VENUE_INCIDENT]: (player, _players, _id, _mods, registry, _sm, _bonus, room) => {
+    const ownsService = registry
+      ? Array.from(registry.entries()).some(
+          ([c, o]) => o === player.id && (SERVICE_CELLS as readonly number[]).includes(c),
+        )
+      : false;
+    if (ownsService) {
+      player.balance -= 1200;
+      if (room) room.treasury = (room.treasury ?? 0) + 1200;
+    } else {
+      player.balance -= 600;
+      if (room) room.treasury = (room.treasury ?? 0) + 600;
     }
   },
   [ChanceCardId.CC_CONCERT_SPONSOR]: (player) => {
     player.balance -= 600;
     player.doubleNextDice = true;
   },
-  [ChanceCardId.CC_PORT_EXCLUSIVE]: (player, _players, playerId, activeModifiers) => {
-    // Người rút thẻ nhận 50% phí cảng từ mỗi chuyến tàu của đối thủ × 2 vòng
+  [ChanceCardId.CC_PORT_EXCLUSIVE]: (player, _players, playerId, activeModifiers, _reg, _sm, _bonus, room) => {
+    player.balance += 1000;
+    if (room) room.treasury = Math.max(0, (room.treasury ?? 0) - 1000);
     if (activeModifiers) {
       activeModifiers.push({
         type: ChanceCardId.CC_PORT_EXCLUSIVE,
@@ -201,13 +273,17 @@ const CHANCE_HANDLERS: Partial<Record<ChanceCardId, ChanceHandler>> = {
       break;
     }
   },
-  [ChanceCardId.CC_MEDIA_CRISIS]: (player, _players, _id, activeModifiers, registry) => {
+  [ChanceCardId.CC_MEDIA_CRISIS]: (player, _players, _id, activeModifiers, registry, _sm, _bonus, room) => {
+    player.balance -= 800;
+    if (room) room.treasury = (room.treasury ?? 0) + 800;
     if (registry && activeModifiers) {
-      const sCell = Array.from(registry.entries()).find(([c, o]) => o === player.id && (SERVICE_CELLS as readonly number[]).includes(c));
-      if (sCell) activeModifiers.push({ type: MarketCardId.MC_COASTAL_STORM, affectedCells: [sCell[0]], remainingRounds: 1, multiplier: 0 });
+      const sCell = Array.from(registry.entries()).find(([c, o]) => o === player.id && (SERVICE_CELLS as readonly number[]).includes(c))
+        ?? Array.from(registry.entries()).find(([c, o]) => o === player.id && BOARD_CONFIG[c]?.type === CellType.Property);
+      if (sCell) activeModifiers.push({ type: MarketCardId.MC_COASTAL_STORM, affectedCells: [sCell[0]], remainingRounds: 2, multiplier: 0 });
     }
   },
-  [ChanceCardId.CC_SWAP_PROJECT]: (player, _players, _id, _mods, registry, stateMap) => handleSwapProject(player, registry, stateMap),
+  [ChanceCardId.CC_SWAP_PROJECT]: (player, players, _id, _mods, registry, stateMap, _bonus, room) =>
+    handleSwapProject(player, registry, stateMap, room, players),
 };
 
 export function executeChanceCard(
@@ -218,10 +294,11 @@ export function executeChanceCard(
   registry?: PropertyRegistry,
   stateMap?: PropertyStateMap,
   permanentRentBonus?: Record<number, number>,
+  room?: Room,
 ): Record<string, never> {
   const player = players.find((p) => p.id === playerId);
   if (!player) return {};
   const handler = CHANCE_HANDLERS[card];
-  if (handler) handler(player, players, playerId, activeModifiers, registry, stateMap, permanentRentBonus);
+  if (handler) handler(player, players, playerId, activeModifiers, registry, stateMap, permanentRentBonus, room);
   return {};
 }

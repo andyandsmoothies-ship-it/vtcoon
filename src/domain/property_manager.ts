@@ -54,6 +54,7 @@ export function handleLanding(
   player: Player, cellIndex: number, registry: PropertyRegistry, players: Player[],
   stateMap?: PropertyStateMap, diceTotal?: number, modifiers?: readonly MarketModifier[], rng?: () => number,
   chanceDiscard?: ChanceCardId[], permanentRentBonus?: Readonly<Record<number, number>>,
+  roundCount?: number,
 ): { result: LandingResult; rentAmount: number; landlordId: string | undefined } {
   if (!isPurchasable(cellIndex)) return { result: LandingResult.NotPurchasable, rentAmount: 0, landlordId: undefined };
   const ownerId = registry.get(cellIndex);
@@ -71,7 +72,10 @@ export function handleLanding(
     return { result: LandingResult.RentPaid, rentAmount: 0, landlordId: ownerId };
   }
   const cell = BOARD_CONFIG[cellIndex];
-  let baseRent = resolveRent(cell, cellIndex, ownerId, registry, stateMap, diceTotal);
+  let baseRent = resolveRent(cell, cellIndex, ownerId, registry, stateMap, diceTotal, undefined, roundCount);
+  if (cell?.type === CellType.Utility && modifiers?.some((m) => m.type === MarketCardId.MC_UTILITY_DOUBLE && m.remainingRounds > 0)) {
+    baseRent = (diceTotal ?? 7) * 100;
+  }
 
   // Áp dụng permanentRentBonus (CC_LAND_CHANGE)
   const bonusPct = permanentRentBonus?.[cellIndex] ?? 0;

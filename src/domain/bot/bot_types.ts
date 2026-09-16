@@ -59,7 +59,7 @@ export interface PersonalityWeights {
 export const DEFAULT_PERSONALITY_WEIGHTS: Readonly<Record<BotPersonality, PersonalityWeights>> = Object.freeze({
   [BotPersonality.Passive]: Object.freeze({
     riskMultiplier: 1.5,
-    minBuffer: DEFAULT_MIN_SAFETY_BUFFER,
+    minBuffer: 600,
     monopolyWeight: 1.2,
     denialWeight: 1.3,
     pacingMultiplier: 0.8,

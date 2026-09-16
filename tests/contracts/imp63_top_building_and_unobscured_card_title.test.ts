@@ -226,34 +226,34 @@ describe('[TC-63/MSS][IMP-63] Top Building Outside Card & Pristine Card Layout C
     expect(artClip?.h).toBe(172);
   });
 
-  it('[TC-63.21/MSS][IMP-63] Price tray capsule roundRect is restored to pristine rect [22, 274, 212, 50] with radius 12', () => {
+  it('[TC-63.21/MSS][IMP-63] Price tray capsule roundRect is eliminated on property tile 1 under IMP-102', () => {
     getTileTexture(1);
     const priceTray = recordedRoundRects.find((r) => r.w === 212);
-    expect(priceTray).toEqual({ x: 22, y: 274, w: 212, h: 50, r: 12 });
+    expect(priceTray).toBeUndefined();
   });
 
-  it('[TC-63.22/MSS][IMP-63] Price text baseline is restored to y = 300 centered in price capsule [274..324]', () => {
+  it('[TC-63.22/MSS][IMP-63] Price text is printed directly on ivory paper at y = 300 on property tile 1 under IMP-104', () => {
     getTileTexture(1);
+    const priceEntry = recordedFillText.find((t) => t.text.includes('Tr.'));
+    expect(priceEntry?.y).toBe(300);
+    expect(priceEntry?.text).toBe('600 Tr.');
+  });
+
+  it.each([6, 9, 39])('[TC-63.23/MSS][IMP-63] Property tile %i consistently eliminates 2D price capsule at y = 274', (cellIndex) => {
+    clearTileTextureCache();
+    getTileTexture(cellIndex);
+    const priceTray = recordedRoundRects.find((r) => r.w === 212);
+    expect(priceTray).toBeUndefined();
+  });
+
+  it.each([6, 9, 39])('[TC-63.24/MSS][IMP-63] Property tile %i consistently prints price text directly on ivory paper at y = 300 under IMP-104', (cellIndex) => {
+    clearTileTextureCache();
+    getTileTexture(cellIndex);
     const priceEntry = recordedFillText.find((t) => t.text.includes('Tr.'));
     expect(priceEntry?.y).toBe(300);
   });
 
-  it.each([6, 9, 39])('[TC-63.23/MSS][IMP-63] Property tile %i consistently restores price capsule at y = 274 with height 50', (cellIndex) => {
-    clearTileTextureCache();
-    getTileTexture(cellIndex);
-    const priceTray = recordedRoundRects.find((r) => r.w === 212);
-    expect(priceTray?.y).toBe(274);
-    expect(priceTray?.h).toBe(50);
-  });
-
-  it.each([6, 9, 39])('[TC-63.24/MSS][IMP-63] Property tile %i consistently restores price text baseline at y = 300', (cellIndex) => {
-    clearTileTextureCache();
-    getTileTexture(cellIndex);
-    const priceEntry = recordedFillText.find((t) => t.text.includes('Tr.'));
-    expect(priceEntry?.y).toBe(300);
-  });
-
-  it('[TC-63.25/MSS][IMP-63] Pristine card vertical layout invariant enforces non-overlapping order Banner < Subtitle < Art < Price Tray', () => {
+  it('[TC-63.25/MSS][IMP-63] Pristine card vertical layout invariant enforces non-overlapping order Banner < Subtitle < Art with clean footer', () => {
     getTileTexture(1);
     const banner = recordedFillRect.find((r) => r.y === 0 && r.w === 256 && r.h !== 340);
     const subEntry = recordedFillText.find((t) => t.text === TILE_METADATA_MAP[1]?.subtitle);
@@ -261,7 +261,7 @@ describe('[TC-63/MSS][IMP-63] Top Building Outside Card & Pristine Card Layout C
     const priceTray = recordedRoundRects.find((r) => r.w === 212);
     expect(banner!.h).toBeLessThan(subEntry!.y);
     expect(subEntry!.y).toBeLessThan(artClip!.y);
-    expect(artClip!.y + artClip!.h).toBeLessThanOrEqual(priceTray!.y);
-    expect(priceTray!.y + priceTray!.h).toBeLessThanOrEqual(340);
+    expect(artClip!.y + artClip!.h).toBeLessThanOrEqual(340);
+    expect(priceTray).toBeUndefined();
   });
 });

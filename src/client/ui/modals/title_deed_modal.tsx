@@ -458,7 +458,7 @@ export function TitleDeedModal({
               disabled={!canBuy}
               className={`min-h-[48px] whitespace-nowrap py-3 px-3.5 sm:px-6 rounded-xl font-black tracking-wide uppercase text-xs sm:text-sm transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 truncate cursor-pointer ${
                 canBuy
-                  ? 'bg-emerald-500 hover:bg-emerald-600 border-2 border-emerald-700 shadow-[0_4px_0_0_#065f46] active:shadow-[0_1px_0_0_#065f46] active:translate-y-[3px] text-white'
+                  ? 'bg-emerald-700 hover:bg-emerald-600 border-2 border-emerald-700 shadow-[0_4px_0_0_#065f46] active:shadow-[0_1px_0_0_#065f46] active:translate-y-[3px] text-white'
                   : 'bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed'
               }`}
             >
