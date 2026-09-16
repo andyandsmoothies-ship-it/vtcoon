@@ -32,9 +32,9 @@ describe('[UI-S01/MSS][IMP-13] CoastalIslandEnvironment — Structure & Visual A
     expect(envSource).toContain('Math.PI * 2 / 3.5'); // Chu ky thuy trieu boi song 3.5s
   });
 
-  it('Sloped Sand Shoreline: Bo bien cat vang vat nghieng 15 do va loai bo hoan toan dia xam', () => {
-    // 1. Chat lieu cat vang bien nhiet doi (#FDE68A, roughness: 0.85)
-    expect(envSource).toContain('#FDE68A'); // Warm tropical sand tone
+  it('Sloped Sand Shoreline: Bo bien cat nga min tu nhien vat nghieng 15 do va loai bo hoan toan dia xam', () => {
+    // 1. Chat lieu cat nga bien nhiet doi (#EFE5D8, roughness: 0.85) [IMP-80]
+    expect(envSource).toContain('#EFE5D8'); // Natural fine ivory sand tone
     expect(envSource).toContain('roughness={0.85}');
 
     // 2. Dai bot bien trang ven bo co gian chu ky 3.5s

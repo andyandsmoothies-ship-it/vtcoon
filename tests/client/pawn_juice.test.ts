@@ -1,7 +1,6 @@
 // [UI-S02/MSS][BOOST-P3] Pawn Kinetic Juice & Dynamic Camera Math Verification
 import { describe, it, expect, vi } from 'vitest';
 import {
-  calculateKineticPawnScale,
   calculateKineticSquashStretch,
   calculatePawnLandingImpact,
   getStepPitchVariation,
@@ -20,19 +19,19 @@ import { SoundEffect } from '../../src/client/audio/audio_types';
 
 describe('[TC-JUICE.1/MSS] Pawn Kinetic Juice — Anticipation Phase (Pha Lấy Đà)', () => {
   it('TC-JUICE.1a: Tại t=0 (bắt đầu): Thân quân cờ ở kích thước chuẩn [1, 1, 1]', () => {
-    const scale = calculateKineticPawnScale(0);
+    const scale = calculateKineticSquashStretch(0);
     expect(scale).toEqual([1.0, 1.0, 1.0]);
   });
 
   it('TC-JUICE.1b: Tại t=0.10 (10% đầu bước nhảy): Thân quân cờ co nén lấy đà chuẩn [1.15, 0.82, 1.15]', () => {
-    const scale = calculateKineticPawnScale(0.10);
+    const scale = calculateKineticSquashStretch(0.10);
     expect(scale[0]).toBeCloseTo(1.15, 4);
     expect(scale[1]).toBeCloseTo(0.82, 4);
     expect(scale[2]).toBeCloseTo(1.15, 4);
   });
 
   it('TC-JUICE.1c: Tại t=0.05 (giữa pha lấy đà): Co nén chuyển tiếp tuyến tính [1.075, 0.91, 1.075]', () => {
-    const scale = calculateKineticPawnScale(0.05);
+    const scale = calculateKineticSquashStretch(0.05);
     expect(scale[0]).toBeCloseTo(1.075, 4);
     expect(scale[1]).toBeCloseTo(0.91, 4);
     expect(scale[2]).toBeCloseTo(1.075, 4);
@@ -41,21 +40,24 @@ describe('[TC-JUICE.1/MSS] Pawn Kinetic Juice — Anticipation Phase (Pha Lấy 
 
 describe('[TC-JUICE.2/MSS] Pawn Kinetic Juice — In-Air Stretch Phase (Pha Bay Cao)', () => {
   it('TC-JUICE.2a: Tại t=0.50 (đỉnh parabol): Thân quân cờ dãn dài theo trục đứng [0.88, 1.18, 0.88]', () => {
-    const scale = calculateKineticPawnScale(0.50);
+    const scale = calculateKineticSquashStretch(0.50);
     expect(scale[0]).toBeCloseTo(0.88, 4);
     expect(scale[1]).toBeCloseTo(1.18, 4);
     expect(scale[2]).toBeCloseTo(0.88, 4);
   });
 
   it('TC-JUICE.2b: Tại t=0.30 (lên dốc): Chuyển tiếp mượt từ co nén sang dãn đứng', () => {
-    const scale = calculateKineticPawnScale(0.30);
+    const scale = calculateKineticSquashStretch(0.30);
     expect(scale[1]).toBeGreaterThan(0.82);
     expect(scale[1]).toBeLessThan(1.18);
     expect(scale[0]).toBeLessThan(1.15);
   });
 
-  it('TC-JUICE.2c: calculateKineticSquashStretch là alias tương đương hoàn toàn', () => {
-    expect(calculateKineticSquashStretch(0.5)).toEqual(calculateKineticPawnScale(0.5));
+  it('TC-JUICE.2c: calculateKineticSquashStretch tại đỉnh parabol đạt [0.88, 1.18, 0.88]', () => {
+    const scale = calculateKineticSquashStretch(0.5);
+    expect(scale[0]).toBeCloseTo(0.88, 4);
+    expect(scale[1]).toBeCloseTo(1.18, 4);
+    expect(scale[2]).toBeCloseTo(0.88, 4);
   });
 });
 
@@ -91,8 +93,8 @@ describe('[TC-JUICE.3/MSS] Pawn Kinetic Juice — Landing Impact 2 Damped Cycles
     expect(scale).toEqual([1.0, 1.0, 1.0]);
   });
 
-  it('TC-JUICE.3f: calculateKineticPawnScale ủy quyền chính xác cho landing khi landingProgress > 0', () => {
-    const scale = calculateKineticPawnScale(1.0, 0.25);
+  it('TC-JUICE.3f: calculateKineticSquashStretch ủy quyền chính xác cho landing khi landingProgress > 0', () => {
+    const scale = calculateKineticSquashStretch(1.0, 0.25);
     expect(scale).toEqual(calculatePawnLandingImpact(0.25));
   });
 });
@@ -101,7 +103,7 @@ describe('[TC-JUICE.4/MSS] Physical Volume Preservation (Bảo Toàn Thể Tích
   it('Bảo toàn thể tích tương đối scaleX * scaleY * scaleZ ~ 1.0 (+-15%) qua toàn chu trình', () => {
     const jumpCheckpoints = [0, 0.05, 0.10, 0.25, 0.50, 0.75, 1.0];
     for (const t of jumpCheckpoints) {
-      const [sx, sy, sz] = calculateKineticPawnScale(t);
+      const [sx, sy, sz] = calculateKineticSquashStretch(t);
       const vol = sx * sy * sz;
       expect(vol).toBeGreaterThan(0.85);
       expect(vol).toBeLessThan(1.15);
@@ -193,11 +195,11 @@ describe('[TC-JUICE.6/MSS] Adaptive Cinematic Camera Math (Toán Lia & Zoom Came
 });
 
 describe('[TC-JUICE.7/Adversarial] Adversarial Inversion & Boundary Defense', () => {
-  it('calculateKineticPawnScale xử lý an toàn NaN, Infinity, số âm, overflow', () => {
-    expect(calculateKineticPawnScale(Number.NaN)).toEqual([1, 1, 1]);
-    expect(calculateKineticPawnScale(Number.POSITIVE_INFINITY)).toEqual([1, 1, 1]);
-    expect(calculateKineticPawnScale(-1)).toEqual([1, 1, 1]);
-    expect(calculateKineticPawnScale(1.5)).toEqual([1.15, 0.82, 1.15]);
+  it('calculateKineticSquashStretch xử lý an toàn NaN, Infinity, số âm, overflow', () => {
+    expect(calculateKineticSquashStretch(Number.NaN)).toEqual([1, 1, 1]);
+    expect(calculateKineticSquashStretch(Number.POSITIVE_INFINITY)).toEqual([1, 1, 1]);
+    expect(calculateKineticSquashStretch(-1)).toEqual([1, 1, 1]);
+    expect(calculateKineticSquashStretch(1.5)).toEqual([1.15, 0.82, 1.15]);
   });
 
   it('calculatePawnLandingImpact xử lý an toàn NaN, số âm, số > 1', () => {

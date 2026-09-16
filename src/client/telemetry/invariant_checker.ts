@@ -42,7 +42,18 @@ export function verifyMovementStep(params: {
   readonly tick: number;
   readonly isTeleport?: boolean;
 }): InvariantViolation | null {
-  if (params.fromPosition === params.toPosition || params.isTeleport || !params.dice) return null;
+  if (params.fromPosition === params.toPosition || params.isTeleport) return null;
+  if (!params.dice || (params.dice[0] === 0 && params.dice[1] === 0)) {
+    return {
+      id: `viol_move_${params.tick}_${Date.now()}`,
+      timestamp: Date.now(),
+      tick: params.tick,
+      type: 'INVALID_POSITION_STEP',
+      severity: 'CRITICAL',
+      message: `Quân cờ nhảy ô không có xúc xắc: từ ô ${params.fromPosition} tới ô ${params.toPosition} mà không có sự kiện xúc xắc hay dịch chuyển.`,
+      details: { from: params.fromPosition, to: params.toPosition },
+    };
+  }
   const diceSum = params.dice[0] + params.dice[1];
   const expectedPosition = (params.fromPosition + diceSum) % 40;
 

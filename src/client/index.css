@@ -1,5 +1,25 @@
 @import "tailwindcss";
 
+/* Base reset — moved from index.html inline <style> to fix Vite 6 html-inline-proxy bug with @tailwindcss/vite */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  overscroll-behavior: none;
+  background-color: #0f172a;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
 @keyframes floatUpFade {
   0% {
     opacity: 0;

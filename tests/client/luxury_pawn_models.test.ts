@@ -36,10 +36,10 @@ describe('[TC-IMP29.2/MSS] Luxury Pawns Overhaul & SafeGLTFModel Integration', (
     expect(LUXURY_PAWN_CONFIGS).toHaveLength(4);
 
     const expectedUrls = [
-      '/models/pawns/pawn_tower.glb',
-      '/models/pawns/pawn_yacht.glb',
-      '/models/pawns/pawn_car.glb',
+      '/models/pawns/pawn_dog.glb',
+      '/models/pawns/pawn_cat.glb',
       '/models/pawns/pawn_horse.glb',
+      '/models/pawns/pawn_elephant.glb',
     ];
 
     for (let i = 0; i < 4; i++) {

@@ -6,6 +6,13 @@ import { COLOR_GROUP_HEX } from '../../domain/theme';
 import { getTileTexture, getStandeeTexture } from './tile_texture_generator';
 import { READY_TILES, getTileAssetUrl } from '../assets/tile_assets';
 import { ProceduralBuilding } from './procedural_building';
+import { LUXURY_PAWN_CONFIGS } from './luxury_pawn_models';
+import { ToyPropertyBuildings } from './toy_property_buildings';
+import { getMascotCanvasTexture } from './mascot_canvas_texture';
+import { OwnerPricePill, TactileDeedWaxSeal } from './owner_property_markers';
+import { PROPERTY_DEEDS } from '../../domain/property_data';
+
+export { ToyPropertyBuildings, OwnerPricePill, TactileDeedWaxSeal };
 
 export interface StandeeElevationOptions {
   readonly omega?: number;
@@ -150,6 +157,8 @@ export interface LayeredDioramaTileProps {
   readonly onClick?: () => void;
   readonly enableStandee?: boolean;
   readonly ownerColor?: string;
+  readonly ownerSlot?: number;
+  readonly mascotIcon?: string;
 }
 
 export function tierColor(level: number): string {
@@ -165,6 +174,8 @@ export function LayeredDioramaTile({
   onClick,
   enableStandee = true,
   ownerColor,
+  ownerSlot: _ownerSlot,
+  mascotIcon: _mascotIcon,
 }: LayeredDioramaTileProps): React.ReactElement {
   const tileTexture = useMemo(() => getTileTexture(cell.index), [cell.index]);
 
@@ -191,6 +202,7 @@ export function LayeredDioramaTile({
   const isPurchasable = cell.type === CellType.Property || cell.type === CellType.Railroad || cell.type === CellType.Utility;
   const groupColor = cell.colorGroup ? COLOR_GROUP_HEX[cell.colorGroup] : '#64748B';
   const isFixedInfrastructure = cell.type === CellType.Railroad || cell.type === CellType.Utility;
+  const deedPrice = PROPERTY_DEEDS.get(cell.index)?.price;
 
   return (
     <group position={position} rotation={rotation} onClick={onClick}>
@@ -201,10 +213,16 @@ export function LayeredDioramaTile({
 
       {/* Viền chân đế màu sở hữu (OwnerBaseTrim) khi đã có chủ */}
       {isPurchasable && ownerColor && ownerColor.length > 0 && (
-        <mesh position={[0, 0.01, 0]} name="OwnerBaseTrim" data-testid="owner-base-trim" receiveShadow>
-          <boxGeometry args={[1.72, 0.04, 2.24]} />
-          <meshStandardMaterial color={ownerColor} roughness={0.3} metalness={0.4} />
-        </mesh>
+        <group name="OwnerBaseGroup">
+          <mesh position={[0, 0.035, 0]} name="OwnerBaseTrimBorder" data-testid="owner-base-trim-border" receiveShadow>
+            <boxGeometry args={[1.78, 0.10, 2.30]} />
+            <meshStandardMaterial color="#0F172A" roughness={0.7} metalness={0.2} />
+          </mesh>
+          <mesh position={[0, 0.04, 0]} name="OwnerBaseTrim" data-testid="owner-base-trim" receiveShadow>
+            <boxGeometry args={[1.74, 0.10, 2.26]} />
+            <meshStandardMaterial color={ownerColor} roughness={0.3} metalness={0.4} />
+          </mesh>
+        </group>
       )}
 
       {/* 2. Top surface information texture with subtle lacquer sheen */}
@@ -225,7 +243,10 @@ export function LayeredDioramaTile({
 
       {/* 3. Công trình 3D Procedural cho các ô tài sản kinh tế (Property Tiles C0-C3) hoặc Standee cho 6 ô hạ tầng cố định */}
       {cell.type === CellType.Property ? (
-        <ProceduralBuilding level={currentLevel} groupColor={groupColor} cellIndex={cell.index} />
+        <>
+          <ProceduralBuilding level={currentLevel} groupColor={groupColor} cellIndex={cell.index} />
+          <ToyPropertyBuildings level={currentLevel} groupColor={groupColor} cellIndex={cell.index} />
+        </>
       ) : (
         /* Fallback contract retention: READY_TILES.has(cell.index) */
         isFixedInfrastructure && READY_TILES.has(cell.index) && enableStandee && (
@@ -235,12 +256,16 @@ export function LayeredDioramaTile({
         )
       )}
 
-      {/* 4. Cọc cờ sở hữu vật lý (Ownership Marker) gắn kết trên ô đất khi đã có chủ */}
-      {isPurchasable && (ownerColor && ownerColor.length > 0 ? (
-        <OwnershipMarkerInstances ownerColor={ownerColor} level={cell.type === CellType.Property ? currentLevel : 0} />
-      ) : (cell.type === CellType.Property && currentLevel > 0) ? (
-        <OwnershipMarkerInstances ownerColor={groupColor} level={currentLevel} />
-      ) : null)}
+      {/* 4. Khay giá sở hữu (OwnerPricePill) cho các ô có thể mua */}
+      {isPurchasable && (
+        <group name="DioramaPricePillIsolationAnchor_BufferSpacing_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789">
+          <OwnerPricePill
+            ownerColor={ownerColor}
+            price={deedPrice}
+            cellIndex={cell.index}
+          />
+        </group>
+      )}
     </group>
   );
 }
@@ -249,18 +274,41 @@ export interface OwnershipMarkerInstancesProps {
   readonly ownerColor?: string;
   readonly position?: [number, number, number];
   readonly level?: number;
+  readonly ownerSlot?: number;
+  readonly mascotIcon?: string;
 }
 
 /**
- * Cọc Cờ Sở Hữu Vật Lý (Ownership Marker / Flag Pole)
- * Cột cờ kim loại FlagPole (cylinderGeometry, Brass PBR: roughness 0.25, metalness 0.85)
- * Lá cờ vải FlagCloth (instancedMesh với setColorAt gán màu người chơi)
- * Vòng đai kim loại chỉ thị cấp độ (Tier Level Indicator Rings C0..C3)
+ * Cọc Cờ Sở Hữu Vật Lý (Ownership Marker / 3D Totem Pillar)
+ * Trụ cọc kim loại FlagPole (height >= 0.4m, Brass PBR: roughness 0.25, metalness 0.85)
+ * Khiên linh vật MascotCrestShield hiển thị icon 🏰/⛵/🚗/🐎 & viền vàng
+ * Lá cờ phướn FlagCloth (instancedMesh với setColorAt gán màu người chơi)
+ * Vòng đai kim loại chỉ thị cấp độ (Tier Level Indicator Rings C1..C3)
  */
+/**
+ * Safe wrapper cho Billboard tránh crash khi render trong môi trường SSR/Node test không có Canvas
+ */
+export function SafeBillboard({
+  follow = true,
+  children,
+  ...props
+}: React.ComponentProps<typeof Billboard>): React.ReactElement {
+  if (typeof window === 'undefined') {
+    return React.createElement('billboard', { follow: String(follow), ...props }, children);
+  }
+  return (
+    <Billboard follow={follow} {...props}>
+      {children}
+    </Billboard>
+  );
+}
+
 export function OwnershipMarkerInstances({
   ownerColor = '#DC2626',
   position = [0.62, 0.11, 0.72],
   level = 0,
+  ownerSlot,
+  mascotIcon,
 }: OwnershipMarkerInstancesProps): React.ReactElement {
   const clothRef = React.useRef<InstancedMesh>(null);
 
@@ -274,24 +322,75 @@ export function OwnershipMarkerInstances({
   }, [ownerColor]);
 
   const clampedLevel = Math.min(3, Math.max(0, Math.floor(level ?? 0)));
+  const resolvedMascotIcon =
+    mascotIcon ||
+    (ownerSlot !== undefined && ownerSlot >= 0 && ownerSlot < LUXURY_PAWN_CONFIGS.length
+      ? (LUXURY_PAWN_CONFIGS[ownerSlot]?.icon ?? '🐕')
+      : '🐕');
+  const mascotTexture = getMascotCanvasTexture(resolvedMascotIcon);
 
   return (
     <group position={position} name="OwnershipMarkerInstances">
-      {/* 1. Cột cờ kim loại FlagPole Brass PBR (InstancedMesh) */}
-      <instancedMesh args={[undefined, undefined, 1]} castShadow position={[0, 0.15, 0]} name="FlagPole">
-        <cylinderGeometry args={[0.012, 0.016, 0.3, 12]} />
+      {/* 1. Trụ cọc FlagPole (Totem Pillar) */}
+      <instancedMesh args={[undefined, undefined, 1]} castShadow position={[0, 0.225, 0]} name="FlagPole">
+        <cylinderGeometry args={[0.016, 0.022, 0.45, 12]} />
         <meshStandardMaterial color="#D97706" roughness={0.25} metalness={0.85} />
       </instancedMesh>
-      {/* 2. Lá cờ vải FlagCloth (InstancedMesh với setColorAt đổi màu người chơi) */}
-      <instancedMesh ref={clothRef} args={[undefined, undefined, 1]} castShadow position={[0.075, 0.24, 0]} name="FlagCloth">
-        <boxGeometry args={[0.14, 0.08, 0.01]} />
+
+      {/* 2. Khiên gia huy linh vật người chơi (Mascot Crest Shield) */}
+      <group name="MascotCrestShield" data-testid="mascot-crest-shield" position={[0, 0.38, 0]}>
+        {/* Vành khiên mạ vàng */}
+        <mesh position={[0, 0, 0]}>
+          <cylinderGeometry args={[0.075, 0.075, 0.02, 16]} />
+          <meshStandardMaterial color="#F59E0B" roughness={0.2} metalness={0.9} />
+        </mesh>
+        {/* Mặt khiên màu chủ sở hữu */}
+        <mesh position={[0, 0, 0.012]}>
+          <cylinderGeometry args={[0.065, 0.065, 0.01, 16]} />
+          <meshStandardMaterial color={ownerColor} roughness={0.4} metalness={0.2} />
+        </mesh>
+        {/* Icon linh vật */}
+        <mesh position={[0, 0, 0.02]} data-mascot-icon={resolvedMascotIcon} name={`MascotIcon_${resolvedMascotIcon}`}>
+          <planeGeometry args={[0.08, 0.08]} />
+          <meshBasicMaterial map={mascotTexture ?? undefined} transparent opacity={0.95} />
+        </mesh>
+      </group>
+
+      {/* 3. Cờ phướn FlagCloth */}
+      <instancedMesh ref={clothRef} args={[undefined, undefined, 1]} castShadow position={[0.10, 0.28, 0]} name="FlagCloth">
+        <boxGeometry args={[0.18, 0.10, 0.01]} />
         <meshStandardMaterial color={ownerColor} roughness={0.65} metalness={0.1} />
       </instancedMesh>
-      {/* 3. Vòng đai kim loại chỉ thị cấp độ (Tier Level Indicator Rings C0..C3) */}
+
+      {/* 4. Huy Hiệu Ghim 2.5D Billboard (OwnershipBillboardPin) — Tự động xoay trực diện camera */}
+      <SafeBillboard follow={true} position={[0, 0.52, 0]} name="OwnershipBillboardPin" data-testid="ownership-billboard-pin">
+        {/* Viền ngoài than đen */}
+        <mesh position={[0, 0, 0]}>
+          <planeGeometry args={[0.26, 0.26]} />
+          <meshBasicMaterial color="#0F172A" />
+        </mesh>
+        {/* Viền trong vàng kim loại */}
+        <mesh position={[0, 0, 0.002]}>
+          <planeGeometry args={[0.23, 0.23]} />
+          <meshBasicMaterial color="#F59E0B" />
+        </mesh>
+        {/* Nền mang màu người chơi */}
+        <mesh position={[0, 0, 0.004]}>
+          <planeGeometry args={[0.20, 0.20]} />
+          <meshBasicMaterial color={ownerColor} />
+        </mesh>
+        {/* Icon linh vật con vật */}
+        <mesh position={[0, 0, 0.006]} data-mascot-icon={resolvedMascotIcon} name={`BillboardMascotIcon_${resolvedMascotIcon}`}>
+          <planeGeometry args={[0.15, 0.15]} />
+          <meshBasicMaterial map={mascotTexture ?? undefined} transparent opacity={0.98} />
+        </mesh>
+      </SafeBillboard>
+
+      {/* 5. Vòng đai kim loại chỉ thị cấp độ (Tier Level Indicator Rings C1..C3) */}
       {clampedLevel > 0 && (
         <group name="TierIndicatorRings">
           {Array.from({ length: clampedLevel }).map((_, idx) => (
-            <mesh key={idx} position={[0, 0.08 + idx * 0.035, 0]} castShadow name={`TierRing_${idx + 1}`}>
+            <mesh key={idx} position={[0, 0.08 + idx * 0.035, 0]} name={`TierRing_${idx + 1}`}>
               <cylinderGeometry args={[0.022, 0.022, 0.014, 12]} />
               <meshStandardMaterial color="#F59E0B" roughness={0.2} metalness={0.9} />
             </mesh>

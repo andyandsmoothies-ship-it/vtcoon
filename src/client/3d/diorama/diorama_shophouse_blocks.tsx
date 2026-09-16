@@ -47,8 +47,6 @@ export const SHOPHOUSE_CONFIGS: ReadonlyArray<ShophouseConfig> = [
   ...MARINA_SHOPHOUSES,
 ];
 
-export const SHOPHOUSES = SHOPHOUSE_CONFIGS;
-
 export function DioramaShophouseBlocks(): React.ReactElement {
   const dummy = useMemo(() => new Object3D(), []);
   const wallsRef = useRef<InstancedMesh>(null);
@@ -93,6 +91,45 @@ export function DioramaShophouseBlocks(): React.ReactElement {
         <coneGeometry args={[0.36, 0.2, 4]} />
         <meshStandardMaterial color="#EA580C" roughness={0.45} />
       </instancedMesh>
+
+      {/* Cụm biển hiệu nóc nhà 3D thương mại đặc trưng (Rooftop Signs) */}
+      <group data-testid="diorama-rooftop-signs">
+        {/* Biển 3D Ly cà phê màu #F59E0B */}
+        <group position={[-5.35, 0.72, 5.35]} name="Biển cà phê ☕">
+          <mesh castShadow>
+            <cylinderGeometry args={[0.06, 0.045, 0.10, 12]} />
+            <meshStandardMaterial color="#F59E0B" roughness={0.25} metalness={0.6} />
+          </mesh>
+          <mesh position={[0, 0.05, 0]}>
+            <torusGeometry args={[0.04, 0.01, 8, 16]} />
+            <meshStandardMaterial color="#FDE68A" roughness={0.3} />
+          </mesh>
+        </group>
+
+        {/* Biển 3D Bánh donut màu #EC4899 */}
+        <group position={[-4.51, 0.78, 5.35]} name="Biển bánh donut 🍩">
+          <mesh rotation={[Math.PI / 2, 0, 0]} castShadow>
+            <torusGeometry args={[0.07, 0.035, 12, 24]} />
+            <meshStandardMaterial color="#EC4899" roughness={0.3} metalness={0.2} />
+          </mesh>
+          <mesh position={[0, 0, 0.02]}>
+            <sphereGeometry args={[0.015, 6, 6]} />
+            <meshStandardMaterial color="#FEF08A" />
+          </mesh>
+        </group>
+
+        {/* Biển 3D Sàn chứng khoán HOSE màu #10B981 */}
+        <group position={[-5.6, 0.75, 2.56]} name="Biển Sàn HOSE">
+          <mesh castShadow>
+            <boxGeometry args={[0.22, 0.08, 0.04]} />
+            <meshStandardMaterial color="#10B981" roughness={0.2} metalness={0.7} />
+          </mesh>
+          <mesh position={[0, 0, 0.022]}>
+            <planeGeometry args={[0.18, 0.05]} />
+            <meshBasicMaterial color="#FFFFFF" />
+          </mesh>
+        </group>
+      </group>
     </group>
   );
 }

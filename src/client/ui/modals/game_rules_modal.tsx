@@ -1,7 +1,7 @@
 // [IMP-72] GameRulesModal — Hướng Dẫn & Thể Lệ Game Toàn Diện (Clean & Modern Style)
 import React, { useState } from 'react';
 
-export type GameRulesTab = 'core' | 'cards' | 'mechanics';
+type GameRulesTab = 'core' | 'cards' | 'mechanics';
 
 export interface GameRulesModalProps {
   readonly isOpen: boolean;

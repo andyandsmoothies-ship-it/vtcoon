@@ -28,7 +28,6 @@ export {
   DEFAULT_ADMIN_SECRET,
   MAX_ROOM_LOGS,
   type RoomHealthStatus,
-  type AdminPlayerSummary,
   type AdminRoomSummary,
   type AdminRoomDetail,
   type AdminRoomLogEntry,

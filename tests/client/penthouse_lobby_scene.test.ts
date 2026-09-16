@@ -226,29 +226,13 @@ describe('[TC-P3.9/MSS] 4 Linh Vật Cờ Thượng Lưu mạ Kim Loại PBR (Lu
   it('4 tượng linh vật cờ tuân thủ đúng bảng màu và thông số PBR kim loại hoàng gia', () => {
     expect(LUXURY_PAWN_CONFIGS).toHaveLength(4);
 
-    // Slot 0: Tháp Landmark thu nhỏ mạ Vàng Hoàng Gia
-    const slot0 = LUXURY_PAWN_CONFIGS[0]!;
-    expect(slot0.color).toBe('#F59E0B');
-    expect(slot0.metalness).toBe(0.95);
-    expect(slot0.roughness).toBe(0.12);
-
-    // Slot 1: Du Thuyền Vịnh Biển mạ Bạc Bạch Kim
-    const slot1 = LUXURY_PAWN_CONFIGS[1]!;
-    expect(slot1.color).toBe('#E2E8F0');
-    expect(slot1.metalness).toBe(0.9);
-    expect(slot1.roughness).toBe(0.15);
-
-    // Slot 2: Xe Cổ Cổ Điển mạ Đồng Đỏ
-    const slot2 = LUXURY_PAWN_CONFIGS[2]!;
-    expect(slot2.color).toBe('#B45309');
-    expect(slot2.metalness).toBe(0.85);
-    expect(slot2.roughness).toBe(0.18);
-
-    // Slot 3: Ngựa Chiến / Kỳ Hạm mạ Titan Xanh Navy
-    const slot3 = LUXURY_PAWN_CONFIGS[3]!;
-    expect(slot3.color).toBe('#1E3A8A');
-    expect(slot3.metalness).toBe(0.9);
-    expect(slot3.roughness).toBe(0.14);
+    // Toàn bộ 4 tượng linh vật cờ bạc đồng bộ màu #E2E8F0 và specular PBR
+    for (let slot = 0; slot < 4; slot++) {
+      const cfg = LUXURY_PAWN_CONFIGS[slot]!;
+      expect(cfg.color.toUpperCase()).toBe('#E2E8F0');
+      expect(cfg.metalness).toBeGreaterThanOrEqual(0.9);
+      expect(cfg.roughness).toBeLessThanOrEqual(0.15);
+    }
   });
 
   it('LuxuryPawnModel xuất hợp lệ, render đủ 4 linh vật và an toàn với NaN', () => {

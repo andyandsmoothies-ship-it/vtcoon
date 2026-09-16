@@ -22,8 +22,6 @@ export const DICE_2D6_COMBINATIONS: Readonly<Record<number, number>> = Object.fr
   12: 1,
 });
 
-export const TOTAL_2D6_COMBINATIONS = 36;
-
 /** Exact 2d6 probability distribution table for steps 2 to 12 */
 export const DICE_2D6_PROBABILITIES: Readonly<Record<number, number>> = Object.freeze({
   2:  1 / 36,
@@ -116,11 +114,6 @@ export enum SolvencyActionType {
   Bankruptcy = 'INTENT_BANKRUPTCY',
 }
 
-export interface SolvencyAction {
-  readonly type: SolvencyActionType;
-  readonly cellIndex?: number;
-}
-
 export interface BotIntent {
   type: string;
   [key: string]: unknown;
@@ -134,6 +127,4 @@ export interface BotConfig {
   rng?: () => number;
   manualRoll?: number;
 }
-
-export type { CurrentAuctionState } from '../room';
 

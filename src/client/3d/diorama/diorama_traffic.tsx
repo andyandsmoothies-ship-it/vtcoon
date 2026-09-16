@@ -15,7 +15,7 @@ export const VEHICLE_MODEL_URLS = {
   container: '/models/vehicles/vehicle_container.glb',
 } as const;
 
-export type VehicleModelKey = keyof typeof VEHICLE_MODEL_URLS;
+type VehicleModelKey = keyof typeof VEHICLE_MODEL_URLS;
 
 export function getVehicleModelUrl(type: MicroVehicleDef['type']): string {
   switch (type) {
@@ -56,7 +56,7 @@ export const MICRO_VEHICLES: readonly MicroVehicleDef[] = [
 const tempVec = new Vector3();
 const tempTangent = new Vector3();
 
-export interface MicroVehicleFallbackProps {
+interface MicroVehicleFallbackProps {
   readonly v: MicroVehicleDef;
 }
 

@@ -13,6 +13,7 @@ import { DioramaMarina } from '../../src/client/3d/diorama/diorama_marina';
 import { DioramaSkyline } from '../../src/client/3d/diorama/diorama_skyline';
 import { DioramaMicroLife } from '../../src/client/3d/diorama/diorama_microlife';
 import { DiceTray } from '../../src/client/3d/dice_tray';
+import { useGameStore } from '../../src/client/store/game_store';
 
 describe('[TC-MCD01.1/MSS] Sa Bàn Đô Thị Liền Khối (Unified Diorama)', () => {
   let originalConsoleError: typeof console.error;
@@ -45,7 +46,7 @@ describe('[TC-MCD01.1/MSS] Sa Bàn Đô Thị Liền Khối (Unified Diorama)', 
   it('DioramaTerrain kết xuất đủ 2 bán đảo Đông/Tây và 4 lối cầu thang quảng trường', () => {
     const terrainMarkup = renderToStaticMarkup(React.createElement(DioramaTerrain));
     expect(terrainMarkup).toContain('#D4C5A3'); // Sa thạch ngà
-    expect(terrainMarkup).toContain('#2D5A27'); // Thảm cỏ rêu tự nhiên
+    expect(terrainMarkup).toContain('#15803D'); // Thảm cỏ tươi sáng tự nhiên
     expect(terrainMarkup).toContain('#334155'); // Nhựa đường Đại lộ Trục Tây
     expect(terrainMarkup).toContain('#CBD5E1'); // Bậc thềm đá hoa cương
   });
@@ -117,6 +118,7 @@ describe('[TC-MCD01.1/MSS] Sa Bàn Đô Thị Liền Khối (Unified Diorama)', 
 
 describe('[TC-MCD01.2/MSS] Quảng Trường Trung Tâm Chìm (Central Sunken Plaza - DiceTray)', () => {
   it('DiceTray render bậc đá cẩm thạch giật cấp và họa tiết la bàn hoàng kim', () => {
+    useGameStore.setState({ isRolling: true });
     const trayMarkup = renderToStaticMarkup(React.createElement(DiceTray));
     expect(trayMarkup).toContain('data-testid="dice-tray"');
     expect(trayMarkup).toContain('#94A3B8'); // Bậc đá cẩm thạch tầng 1

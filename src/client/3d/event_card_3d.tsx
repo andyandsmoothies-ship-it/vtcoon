@@ -22,7 +22,7 @@ export const MAX_CARD_PARTICLES = 36 as const;
 
 export type EventCardVfxType = 'golden_dust' | 'warning_sparks';
 
-export interface CardParticle {
+interface CardParticle {
   x: number;
   y: number;
   z: number;

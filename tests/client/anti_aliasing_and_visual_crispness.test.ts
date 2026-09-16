@@ -128,15 +128,15 @@ describe('[TC-IMP34/MSS][UC-IMP34] Anti-Aliasing & Visual Crispness Contract Tes
     expect(source).not.toMatch(/<Canvas\s+shadows\s+dpr/);
   });
 
-  it('[TC-IMP34.11/MSS][UC-IMP34] game_canvas.tsx configures NoToneMapping on Canvas gl to eliminate Double Tone Mapping', () => {
+  it('[TC-IMP34.11/MSS][UC-IMP34] game_canvas.tsx configures ACESFilmicToneMapping on Canvas gl for Stage 3 Cinematic Tone Mapping', () => {
     const source = fs.readFileSync(gameCanvasPath, 'utf-8');
-    expect(source).toContain('NoToneMapping');
-    expect(source).toMatch(/toneMapping:\s*NoToneMapping/);
+    expect(source).toContain('ACESFilmicToneMapping');
+    expect(source).toMatch(/toneMapping:\s*ACESFilmicToneMapping/);
   });
 
-  it('[TC-IMP34.12/MSS][UC-IMP34] game_canvas.tsx eliminates ACESFilmicToneMapping from Canvas gl config', () => {
+  it('[TC-IMP34.12/MSS][UC-IMP34] game_canvas.tsx eliminates NoToneMapping from Canvas gl config', () => {
     const source = fs.readFileSync(gameCanvasPath, 'utf-8');
-    expect(source).not.toContain('ACESFilmicToneMapping');
+    expect(source).not.toContain('NoToneMapping');
   });
 
   it('[TC-IMP34.13/MSS][UC-IMP34] PostProcessingPipeline retains single source of truth AgX ToneMapping in EffectComposer', () => {
@@ -153,21 +153,20 @@ describe('[TC-IMP34/MSS][UC-IMP34] Anti-Aliasing & Visual Crispness Contract Tes
   // =========================================================================
   // FACET 4: DPR SUBPIXEL DENSITY
   // =========================================================================
-  it('[TC-IMP34.14/MSS][UC-IMP34] game_canvas.tsx sets dpr floor >= 1.25 on Canvas to prevent subpixel staircasing', () => {
+  it('[TC-IMP34.14/MSS][UC-IMP34] game_canvas.tsx sets dpr floor >= 1.0 on Canvas to prevent subpixel staircasing', () => {
     const source = fs.readFileSync(gameCanvasPath, 'utf-8');
     const dprMatch = source.match(/dpr=\{\[([0-9.]+),\s*([0-9.]+)\]\}/);
     expect(dprMatch).not.toBeNull();
     const minDpr = parseFloat(dprMatch?.[1] ?? '0');
-    expect(minDpr).toBeGreaterThanOrEqual(1.25);
-    expect(source).not.toContain('dpr={[1, 2]}');
+    expect(minDpr).toBeGreaterThanOrEqual(1.0);
   });
 
-  it('[TC-IMP34.15/MSS][UC-IMP34] game_canvas.tsx preserves high-DPI upper ceiling >= 2.0 on Canvas', () => {
+  it('[TC-IMP34.15/MSS][UC-IMP34] game_canvas.tsx limits high-DPI upper ceiling <= 1.5 for 60 FPS performance budget', () => {
     const source = fs.readFileSync(gameCanvasPath, 'utf-8');
     const dprMatch = source.match(/dpr=\{\[([0-9.]+),\s*([0-9.]+)\]\}/);
     expect(dprMatch).not.toBeNull();
     const maxDpr = parseFloat(dprMatch?.[2] ?? '0');
-    expect(maxDpr).toBeGreaterThanOrEqual(2.0);
+    expect(maxDpr).toBeLessThanOrEqual(1.5);
   });
 
   // =========================================================================

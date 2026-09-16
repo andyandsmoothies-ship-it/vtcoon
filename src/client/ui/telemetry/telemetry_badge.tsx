@@ -3,9 +3,13 @@ import React, { useEffect } from 'react';
 import { useTelemetryStore } from '../../telemetry/telemetry_store.js';
 
 export function TelemetryBadge(): React.ReactElement {
-  const metrics = useTelemetryStore((state) => state.metrics);
-  const violations = useTelemetryStore((state) => state.violations);
+  const storeMetrics = useTelemetryStore((state) => state.metrics);
+  const storeViolations = useTelemetryStore((state) => state.violations);
   const toggleConsole = useTelemetryStore((state) => state.toggleConsole);
+
+  const isSSR = typeof window === 'undefined';
+  const metrics = isSSR ? useTelemetryStore.getState().metrics : storeMetrics;
+  const violations = isSSR ? useTelemetryStore.getState().violations : storeViolations;
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -29,20 +33,20 @@ export function TelemetryBadge(): React.ReactElement {
     ? {
         indicator: '🔴',
         label: `Lỗi (${violations.length})`,
-        containerClass: 'bg-rose-950/90 border-rose-500/80 text-rose-200 hover:border-rose-400',
+        containerClass: 'bg-rose-950/95 border-rose-500/80 text-rose-200 hover:border-rose-400',
         pingClass: 'text-rose-300',
       }
     : hasWarning
     ? {
         indicator: '🟡',
         label: violations.length > 0 ? `Cảnh Báo (${violations.length})` : 'Chậm',
-        containerClass: 'bg-amber-950/90 border-amber-500/80 text-amber-200 hover:border-amber-400',
+        containerClass: 'bg-amber-950/95 border-amber-500/80 text-amber-200 hover:border-amber-400',
         pingClass: 'text-amber-300',
       }
     : {
         indicator: '🟢',
         label: 'OK',
-        containerClass: 'bg-slate-950/90 border-emerald-500/50 text-emerald-200 hover:border-emerald-400',
+        containerClass: 'bg-slate-950/95 border-emerald-500/50 text-emerald-200 hover:border-emerald-400',
         pingClass: 'text-emerald-300',
       };
 
@@ -53,17 +57,17 @@ export function TelemetryBadge(): React.ReactElement {
     <button
       type="button"
       onClick={() => toggleConsole()}
-      className={`pointer-events-auto inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border backdrop-blur-md shadow-lg transition-colors cursor-pointer text-xs font-mono font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${statusConfig.containerClass}`}
+      className={`pointer-events-auto inline-flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl border shadow-lg transition-colors cursor-pointer text-xs font-mono font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${statusConfig.containerClass}`}
       title="Bật/Tắt Hộp Đen Giám Sát VTCOON (Phím tắt ` hoặc ~)"
       aria-label={`Trạng thái hiệu năng: ${formattedFps} FPS, Ping ${formattedPing}ms, Kiểm tra bất biến: ${statusConfig.label}`}
       data-testid="telemetry-badge"
     >
       <span className="text-xs" aria-hidden="true">{statusConfig.indicator}</span>
       <span className="font-semibold text-slate-100">{formattedFps} FPS</span>
-      <span className="text-slate-500" aria-hidden="true">|</span>
-      <span className={statusConfig.pingClass}>{formattedPing}ms</span>
-      <span className="text-slate-500" aria-hidden="true">|</span>
-      <span className="font-semibold">🛡️ {statusConfig.label}</span>
+      <span className="text-slate-500 hidden sm:inline" aria-hidden="true">|</span>
+      <span className={`hidden sm:inline ${statusConfig.pingClass}`}>{formattedPing}ms</span>
+      <span className="text-slate-500 hidden sm:inline" aria-hidden="true">|</span>
+      <span className="font-semibold hidden sm:inline">🛡️ {statusConfig.label}</span>
     </button>
   );
 }

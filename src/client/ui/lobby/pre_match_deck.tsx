@@ -135,7 +135,7 @@ export function PreMatchDeck({
   return (
     <div className="relative w-full h-full min-h-screen text-slate-100 select-none pointer-events-none overflow-hidden">
       {/* Huy hiệu thương hiệu 3D dập nổi đỏ - vàng hoàng gia chuẩn Retropoly */}
-      <header className="pointer-events-auto absolute top-4 left-4 md:top-6 md:left-6 z-30 inline-flex items-center gap-3.5 bg-gradient-to-b from-[#B91C1C] via-[#991B1B] to-[#700A0A] border-[2.5px] border-amber-300 ring-2 ring-amber-500/50 rounded-2xl px-5 py-3 shadow-[0_6px_0_0_#450a0a,0_12px_28px_rgba(0,0,0,0.65),inset_0_1px_2px_rgba(255,255,255,0.45)] overflow-hidden w-fit">
+      <header className="pointer-events-auto absolute top-3 left-3 right-3 sm:right-auto md:top-6 md:left-6 z-30 inline-flex items-center gap-3.5 bg-gradient-to-b from-[#B91C1C] via-[#991B1B] to-[#700A0A] border-[2.5px] border-amber-300 ring-2 ring-amber-500/50 rounded-2xl px-3.5 py-2 md:px-5 md:py-3 shadow-[0_6px_0_0_#450a0a,0_12px_28px_rgba(0,0,0,0.65),inset_0_1px_2px_rgba(255,255,255,0.45)] overflow-hidden w-fit">
         {/* Lớp phủ vệt bóng bề mặt (Juicy Gloss Specular Highlight) */}
         <div className="absolute top-0 left-0 right-0 h-[45%] bg-gradient-to-b from-white/30 via-white/10 to-transparent pointer-events-none rounded-t-2xl" />
 
@@ -206,7 +206,7 @@ export function PreMatchDeck({
 
       {/* Thẻ PreMatchDeck Clean & Modern nổi bên cánh phải */}
       <aside
-        className="pointer-events-auto absolute top-4 md:top-6 right-3 md:right-6 w-[calc(100%-1.5rem)] sm:w-[350px] max-w-[350px] max-h-[calc(100vh-3rem)] z-20 flex flex-col justify-between p-4 bg-white/95 backdrop-blur-md border border-slate-200/80 shadow-xl rounded-2xl text-slate-900 overflow-hidden gap-3 transition-transform duration-300"
+        className="pointer-events-auto absolute top-24 md:top-6 right-3 md:right-6 w-[calc(100%-1.5rem)] sm:w-[360px] max-w-[360px] max-h-[calc(100vh-7rem)] md:max-h-[calc(100vh-3rem)] z-20 flex flex-col justify-between p-4 bg-[#FFFDF8] border-2 border-slate-900 shadow-[0_6px_0_0_#0f172a] rounded-3xl text-slate-900 overflow-hidden gap-3 transition-transform duration-300"
         style={{ transform: isPanelCollapsed ? 'translateX(calc(100% + 2rem))' : undefined }}
         data-testid="pre-match-deck"
       >
@@ -237,7 +237,7 @@ export function PreMatchDeck({
               <button
                 type="button"
                 onClick={handleCopyCode}
-                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer border ${
+                className={`min-h-[40px] px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer border ${
                   copiedCode
                     ? 'bg-emerald-600 text-white border-emerald-700 shadow-xs'
                     : 'bg-slate-900 hover:bg-slate-800 text-white border-slate-900 shadow-xs'
@@ -254,7 +254,7 @@ export function PreMatchDeck({
               <button
                 type="button"
                 onClick={() => setShowRulesModal(true)}
-                className="flex-1 inline-flex items-center justify-center gap-1 py-1.5 px-2.5 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
+                className="flex-1 inline-flex items-center justify-center gap-1 min-h-[42px] px-2.5 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
                 data-testid="open-game-rules-btn"
                 aria-label="Xem hướng dẫn game"
               >
@@ -263,7 +263,7 @@ export function PreMatchDeck({
               <button
                 type="button"
                 onClick={() => setShowQr((prev) => !prev)}
-                className="inline-flex items-center justify-center gap-1 py-1.5 px-2.5 rounded-lg bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
+                className="inline-flex items-center justify-center gap-1 min-h-[42px] px-2.5 rounded-lg bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
                 aria-label={showQr ? 'Ẩn mã QR' : 'Hiện mã QR'}
               >
                 <span>📱</span> {showQr ? 'Ẩn QR' : 'Mã QR'}
@@ -318,10 +318,10 @@ export function PreMatchDeck({
               type="button"
               disabled={!canStartCheck.canStart}
               onClick={handleStartGame}
-              className={`w-full min-h-[44px] py-3 px-4 rounded-xl font-bold text-sm tracking-wide uppercase transition-all shadow-sm ${
+              className={`w-full min-h-[44px] py-3 px-4 rounded-xl font-bold text-sm tracking-wide uppercase transition-all ${
                 canStartCheck.canStart
-                  ? 'cursor-pointer bg-blue-600 hover:bg-blue-700 text-white active:translate-y-px'
-                  : 'cursor-not-allowed bg-slate-200 text-slate-400'
+                  ? 'cursor-pointer bg-gradient-to-b from-red-500 via-red-600 to-red-700 text-white border-2 border-amber-300 shadow-[0_4px_0_0_#7f1d1d] active:translate-y-[2px]'
+                  : 'cursor-not-allowed bg-slate-100 text-slate-500 border-2 border-slate-300 shadow-inner'
               }`}
               data-testid="start-game-btn"
             >

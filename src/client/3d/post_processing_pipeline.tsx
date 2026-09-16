@@ -29,6 +29,7 @@ export interface PostProcessingPipelineProps {
   aoIntensity?: number;
   aoRadius?: number;
   aoHalfRes?: boolean;
+  multisampling?: number;
 }
 
 export const DEFAULT_PIPELINE_CONFIG = {
@@ -39,6 +40,7 @@ export const DEFAULT_PIPELINE_CONFIG = {
   enableVignette: true,
   enableToneMapping: true,
   enableSmaa: true,
+  multisampling: 0,
   dofTarget: [0, 0, 0] as [number, number, number],
   dofFocusRange: 320.0,
   dofFocalLength: 34.0,
@@ -48,7 +50,7 @@ export const DEFAULT_PIPELINE_CONFIG = {
 
   bloomSmoothing: 0.25,
   bloomRadius: 0.65,
-  aoIntensity: 0.60,
+  aoIntensity: 0.38,
   aoRadius: 0.85,
   aoDistanceFalloff: 2.0,
   aoHalfRes: true,
@@ -64,6 +66,7 @@ export function PostProcessingPipeline({
   enableVignette = DEFAULT_PIPELINE_CONFIG.enableVignette,
   enableToneMapping = DEFAULT_PIPELINE_CONFIG.enableToneMapping,
   enableSmaa = DEFAULT_PIPELINE_CONFIG.enableSmaa,
+  multisampling = DEFAULT_PIPELINE_CONFIG.multisampling,
   dofTarget = DEFAULT_PIPELINE_CONFIG.dofTarget,
   dofFocusRange = DEFAULT_PIPELINE_CONFIG.dofFocusRange,
   dofBokehScale = DEFAULT_PIPELINE_CONFIG.dofBokehScale,
@@ -80,7 +83,7 @@ export function PostProcessingPipeline({
   const targetVector = new Vector3(dofTarget[0], dofTarget[1], dofTarget[2]);
 
   return (
-    <EffectComposer multisampling={4} autoClear={false}>
+    <EffectComposer multisampling={multisampling} autoClear={false}>
       {/* 1. SSAO / Contact AO: Khóa chặt chân cọc C0, nhà C1-C3, xúc xắc và viền sa bàn */}
       {enableAo && (
         <N8AO
@@ -89,7 +92,7 @@ export function PostProcessingPipeline({
           distanceFalloff={DEFAULT_PIPELINE_CONFIG.aoDistanceFalloff}
           halfRes={aoHalfRes}
           quality="medium"
-          color="#0B0F19"
+          color="#1E293B"
         />
       )}
 

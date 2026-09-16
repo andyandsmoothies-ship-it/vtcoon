@@ -33,6 +33,21 @@ describe('[TC-OPS04.1/MSS] Health Check & Static Assets Endpoint', () => {
       await new Promise<void>((resolve) => server.close(() => resolve()));
     }
   });
+
+  it('phuc vu 3D model .glb voi dung mime model/gltf-binary', async () => {
+    const distDir = path.resolve(process.cwd(), 'dist');
+    const server = createHealthServer(() => 1, Date.now(), distDir);
+    await new Promise<void>((resolve) => server.listen(3198, () => resolve()));
+    try {
+      const resModel = await fetch('http://127.0.0.1:3198/models/pawns/pawn_dog.glb');
+      expect(resModel.status).toBe(200);
+      expect(resModel.headers.get('content-type')).toBe('model/gltf-binary');
+      await resModel.arrayBuffer();
+    } finally {
+      server.closeAllConnections?.();
+      await new Promise<void>((resolve) => server.close(() => resolve()));
+    }
+  });
 });
 
 describe('[TC-OPS04.2/MSS] Server Tu Choi Khoi Dong Neu Thieu Bien Moi Truong', () => {

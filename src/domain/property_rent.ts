@@ -10,7 +10,7 @@ import {
 } from './property_data';
 import { hasMonopoly } from './property_upgrade';
 
-export const SERVICE_C2_SURCHARGE = 200;
+const SERVICE_C2_SURCHARGE = 200;
 export const GO_PROPERTY_TAX_CAP = 1_000;
 
 /** @see docs/domain/gotchas.md#1-market-modifiers-lifecycle--scope-slice-04 */
@@ -45,7 +45,7 @@ export function calculateRent(
   return rent;
 }
 
-export function applyC2Surcharge(player: Player, owner: Player | undefined, rng: () => number): number {
+function applyC2Surcharge(player: Player, owner: Player | undefined, rng: () => number): number {
   const face = Math.floor(rng() * 6) + 1;
   if (face % 2 === 0) {
     const actualPaid = Math.max(0, player.balance);
@@ -84,18 +84,30 @@ export function resolveRent(
   cell: (typeof BOARD_CONFIG)[number] | undefined,
   cellIndex: number, ownerId: string,
   registry: PropertyRegistry, stateMap?: PropertyStateMap, diceTotal?: number,
+  modifiers?: readonly MarketModifier[],
 ): number {
   if (!cell) return 0;
-  if (cell.type === CellType.Railroad) return calcRailroadFee(ownerId, registry, stateMap);
-  if (cell.type === CellType.Utility) return calcUtilityFee(ownerId, diceTotal ?? 7, registry, stateMap, cellIndex);
-  const deed = PROPERTY_DEEDS.get(cellIndex);
-  if (!deed) return 0;
-  const lvl = stateMap?.get(cellIndex)?.level ?? 0;
-  if (lvl === 3 && deed.rent3 !== undefined) return deed.rent3;
-  if (lvl === 2 && deed.rent2 !== undefined) return deed.rent2;
-  if (lvl === 1 && deed.rent1 !== undefined) return deed.rent1;
-  const base0 = deed.rent0;
-  return hasMonopoly(ownerId, cellIndex, registry, stateMap) ? base0 * 2 : base0;
+  let rent = 0;
+  if (cell.type === CellType.Railroad) {
+    rent = calcRailroadFee(ownerId, registry, stateMap);
+  } else if (cell.type === CellType.Utility) {
+    rent = calcUtilityFee(ownerId, diceTotal ?? 7, registry, stateMap, cellIndex);
+  } else {
+    const deed = PROPERTY_DEEDS.get(cellIndex);
+    if (!deed) return 0;
+    const lvl = stateMap?.get(cellIndex)?.level ?? 0;
+    if (lvl === 3 && deed.rent3 !== undefined) rent = deed.rent3;
+    else if (lvl === 2 && deed.rent2 !== undefined) rent = deed.rent2;
+    else if (lvl === 1 && deed.rent1 !== undefined) rent = deed.rent1;
+    else {
+      const base0 = deed.rent0;
+      rent = hasMonopoly(ownerId, cellIndex, registry, stateMap) ? base0 * 2 : base0;
+    }
+  }
+  if (modifiers && modifiers.length > 0) {
+    rent = calculateRent(rent, cellIndex, modifiers, stateMap);
+  }
+  return rent;
 }
 
 export function calcRailroadFee(ownerId: string, registry: PropertyRegistry, stateMap?: PropertyStateMap): number {

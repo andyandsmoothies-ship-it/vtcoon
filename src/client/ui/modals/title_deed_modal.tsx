@@ -1,10 +1,12 @@
-// [UI-S04/MSS] TitleDeedModal — Thẻ bài Game Vật Lý Sổ Đỏ (Tactile Game Card Title Deed)
 import React from 'react';
 import { getDeedDisplayInfo } from './modal_helpers';
 import { formatCurrency } from '../ui_helpers';
 import { COLOR_GROUP_HEX } from '../../../domain/theme';
 import { CellType } from '../../../domain/board_config';
 import { getTileAssetUrl } from '../../assets/tile_assets';
+import { useGameStore } from '../../store/game_store';
+import { MarketCardId } from '../../../domain/event_card_types';
+import type { MarketModifier } from '../../../domain/room';
 
 export interface TitleDeedModalProps {
   readonly cellIndex: number;
@@ -25,6 +27,9 @@ export interface TitleDeedModalProps {
   readonly onRedeem?: () => void;
   readonly onUpgrade?: () => void;
   readonly onDowngrade?: () => void;
+  readonly ownedProperties?: readonly number[];
+  readonly onSelectCell?: (cellIndex: number) => void;
+  readonly activeModifiers?: ReadonlyArray<MarketModifier>;
 }
 
 const PROPERTY_TIERS = [
@@ -60,8 +65,36 @@ export function TitleDeedModal({
   onRedeem,
   onUpgrade,
   onDowngrade,
+  ownedProperties,
+  onSelectCell,
+  activeModifiers: propsActiveModifiers,
 }: TitleDeedModalProps): React.ReactElement {
   const deed = getDeedDisplayInfo(cellIndex);
+  const currentIndex = ownedProperties ? ownedProperties.indexOf(cellIndex) : -1;
+  const showCarousel = Boolean(isOwner && ownedProperties && ownedProperties.length > 1 && currentIndex !== -1);
+
+  const storeModifiers = useGameStore((state) => state.activeModifiers);
+  const effectiveModifiers = propsActiveModifiers ?? storeModifiers ?? [];
+
+  const activeModifierBadges = React.useMemo(() => {
+    const badges: Array<{ icon: string; text: string }> = [];
+    for (const m of effectiveModifiers) {
+      if (m.remainingRounds > 0 && (m.affectedCells ?? []).includes(cellIndex)) {
+        if (m.type === MarketCardId.MC_FUEL_SURGE) {
+          badges.push({ icon: '⚡', text: 'Biến Động Xăng Dầu: Phụ thu +500 Tr. cước vận tải' });
+        } else if (m.type === MarketCardId.MC_PEAK_TOURISM) {
+          badges.push({ icon: '🌊', text: 'Mùa Du Lịch: Nhân đôi phí thuê (x2)' });
+        } else if (m.type === MarketCardId.MC_UTILITY_DOUBLE) {
+          badges.push({ icon: '💡', text: 'Giá Điện & Viễn Thông: Nhân đôi phí dịch vụ (x2)' });
+        } else if (m.type === MarketCardId.MC_COASTAL_STORM) {
+          badges.push({ icon: '🌀', text: 'Thời Tiết Duyên Hải: Miễn 100% tiền thuê' });
+        } else if (m.type === MarketCardId.MC_NIGHT_ECONOMY) {
+          badges.push({ icon: '🌙', text: 'Kinh Tế Đêm: Nhân đôi phí dịch vụ (x2)' });
+        }
+      }
+    }
+    return badges;
+  }, [cellIndex, effectiveModifiers]);
 
   const [imageError, setImageError] = React.useState(false);
 
@@ -169,6 +202,40 @@ export function TitleDeedModal({
           </button>
         )}
       </header>
+      {showCarousel && ownedProperties && (
+        <div
+          className="title-deed-carousel mx-1 mt-2 px-3 py-1 bg-slate-100 border border-slate-300 rounded-lg flex items-center justify-between text-xs z-10 shrink-0 font-bold"
+          data-testid="title-deed-carousel"
+        >
+          <button
+            type="button"
+            onClick={() => {
+              const prevIdx = (currentIndex - 1 + ownedProperties.length) % ownedProperties.length;
+              const target = ownedProperties[prevIdx];
+              if (target !== undefined) onSelectCell?.(target);
+            }}
+            aria-label="Sổ đỏ trước"
+            className="min-h-[36px] min-w-[68px] px-2.5 py-1 bg-white hover:bg-slate-100 border-2 border-slate-300 rounded-lg text-slate-800 text-xs font-bold shadow-[0_2px_0_0_#cbd5e1] active:shadow-none active:translate-y-[2px] transition-all cursor-pointer inline-flex items-center justify-center"
+          >
+            ◀ Trước
+          </button>
+          <span className="text-[11px] text-slate-600 font-mono">
+            {currentIndex + 1} / {ownedProperties.length}
+          </span>
+          <button
+            type="button"
+            onClick={() => {
+              const nextIdx = (currentIndex + 1) % ownedProperties.length;
+              const target = ownedProperties[nextIdx];
+              if (target !== undefined) onSelectCell?.(target);
+            }}
+            aria-label="Sổ đỏ tiếp theo"
+            className="min-h-[36px] min-w-[68px] px-2.5 py-1 bg-white hover:bg-slate-100 border-2 border-slate-300 rounded-lg text-slate-800 text-xs font-bold shadow-[0_2px_0_0_#cbd5e1] active:shadow-none active:translate-y-[2px] transition-all cursor-pointer inline-flex items-center justify-center"
+          >
+            Sau ▶
+          </button>
+        </div>
+      )}
 
       {/* Huy hiệu chứng nhận chủ quyền và con dấu Sổ Đỏ (IMP-58) */}
       {isOwned && (
@@ -192,6 +259,18 @@ export function TitleDeedModal({
           </span>
         </div>
       )}
+
+      {/* Huy hiệu Thẻ Thị Trường đang tác động (IMP-76) */}
+      {activeModifierBadges.map((badge, idx) => (
+        <div
+          key={idx}
+          className="mx-1 mt-2 py-1.5 px-3 rounded-xl border-2 border-slate-900 bg-amber-100 flex items-center justify-center gap-2 shadow-[0_2px_0_0_#0f172a] text-xs font-bold text-slate-900 shrink-0 z-10"
+          data-testid="market-modifier-badge"
+        >
+          <span className="text-sm" aria-hidden="true">{badge.icon}</span>
+          <span>{badge.text}</span>
+        </div>
+      ))}
 
       {/* Thông tin giá niêm yết & thế chấp */}
       <div className="relative z-10 flex-1 min-h-0 overflow-y-auto pr-1 p-4 space-y-3 text-xs md:text-sm text-slate-900">
@@ -389,7 +468,7 @@ export function TitleDeedModal({
             <button
               type="button"
               onClick={onPass ?? onClose}
-              className="min-h-[48px] whitespace-nowrap py-3 px-3.5 sm:px-6 rounded-xl font-bold text-slate-900 uppercase bg-slate-200 hover:bg-slate-300 border-2 border-slate-400 shadow-[0_4px_0_0_#64748b] active:shadow-[0_1px_0_0_#64748b] active:translate-y-[3px] text-xs sm:text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
+              className="min-h-[48px] whitespace-nowrap py-3 px-3.5 sm:px-6 rounded-xl uppercase text-xs sm:text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer bg-[#FFFDF8] hover:bg-slate-100 text-slate-800 font-black border-2 border-slate-800 shadow-[0_4px_0_0_#1e293b] active:shadow-none active:translate-y-[3px]"
             >
               Bỏ Qua
             </button>

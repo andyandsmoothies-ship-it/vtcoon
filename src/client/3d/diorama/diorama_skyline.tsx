@@ -153,37 +153,166 @@ export function DioramaSkyline(): React.ReactElement {
         <group position={[0, 0, 0]}>
           {/* Thân tháp kính sapphire phản quang vươn cao bề thế */}
           <mesh castShadow receiveShadow position={[0, 1.1, 0]}>
-            <cylinderGeometry args={[0.30, 0.48, 2.2, 16]} />
+            <cylinderGeometry args={[0.28, 0.46, 2.2, 16]} />
             <meshStandardMaterial color="#0284C7" roughness={0.15} metalness={0.85} />
           </mesh>
+
+          {/* Lớp vỏ cánh sen khí động học ôm lấy thân tháp (Lotus Sheath) */}
+          <group data-testid="bitexco-lotus-sheath">
+            {/* Vỏ kính cyan băng tuyết uốn lượn ôm trọn thân tháp */}
+            <mesh position={[0, 1.15, 0]} castShadow receiveShadow>
+              <cylinderGeometry args={[0.31, 0.49, 1.95, 16, 1, true, 0, Math.PI * 1.6]} />
+              <meshStandardMaterial color="#7DD3FC" roughness={0.12} metalness={0.85} />
+            </mesh>
+            {/* Gân chỉ viền bạc kim loại sang trọng dọc mép cánh sen */}
+            <mesh position={[0.16, 1.15, 0.22]}>
+              <cylinderGeometry args={[0.012, 0.016, 1.95, 8]} />
+              <meshStandardMaterial color="#E2E8F0" roughness={0.25} metalness={0.85} />
+            </mesh>
+            <mesh position={[-0.16, 1.15, 0.22]}>
+              <cylinderGeometry args={[0.012, 0.016, 1.95, 8]} />
+              <meshStandardMaterial color="#E2E8F0" roughness={0.25} metalness={0.85} />
+            </mesh>
+          </group>
+
           {/* Tầng quan sát Saigon Skydeck kính Sapphire */}
           <mesh position={[0, 1.48, 0]}>
             <cylinderGeometry args={[0.34, 0.34, 0.12, 16]} />
             <meshStandardMaterial color="#38BDF8" roughness={0.1} metalness={0.9} />
           </mesh>
-          {/* Sân đỗ trực thăng Helipad chìa ra hướng sông Sài Gòn */}
-          <mesh position={[0.38, 1.68, 0]} castShadow>
-            <cylinderGeometry args={[0.22, 0.22, 0.04, 16]} />
-            <meshStandardMaterial color="#E2E8F0" roughness={0.4} metalness={0.6} />
+
+          {/* Sân đỗ trực thăng Helipad Cantilever vươn ra hướng sông Sài Gòn */}
+          <group data-testid="bitexco-helipad" position={[0.38, 1.68, 0]}>
+            {/* Kết cấu khung đỡ hình nón cụt / dầm giàn xiên bên dưới */}
+            <mesh data-testid="helipad-truss" position={[0, -0.06, 0]} castShadow>
+              <cylinderGeometry args={[0.20, 0.08, 0.10, 16]} />
+              <meshStandardMaterial color="#64748B" roughness={0.4} metalness={0.7} />
+            </mesh>
+            {/* Vành sàn đĩa tròn cantilever */}
+            <mesh castShadow position={[0, 0, 0]}>
+              <cylinderGeometry args={[0.22, 0.22, 0.03, 16]} />
+              <meshStandardMaterial color="#E2E8F0" roughness={0.4} metalness={0.6} />
+            </mesh>
+            {/* Vòng tròn đỗ trực thăng vàng cam phản quang */}
+            <mesh position={[0, 0.016, 0]}>
+              <ringGeometry args={[0.13, 0.17, 16]} />
+              <meshBasicMaterial color="#F59E0B" />
+            </mesh>
+            {/* Vạch kẻ chữ H tiếp đất phản quang */}
+            <mesh position={[0, 0.016, 0]}>
+              <boxGeometry args={[0.02, 0.001, 0.09]} />
+              <meshBasicMaterial color="#F8FAFC" />
+            </mesh>
+
+            {/* Trực thăng siêu vi mô đậu trên bãi đỗ */}
+            <group data-testid="micro-helicopter" position={[0, 0.03, 0]}>
+              {/* Càng đáp */}
+              <mesh position={[0, 0.005, 0]}>
+                <boxGeometry args={[0.06, 0.006, 0.08]} />
+                <meshStandardMaterial color="#334155" roughness={0.5} />
+              </mesh>
+              {/* Thân máy bay trực thăng */}
+              <mesh position={[0, 0.025, 0]} castShadow>
+                <boxGeometry args={[0.05, 0.03, 0.09]} />
+                <meshStandardMaterial color="#EF4444" roughness={0.3} />
+              </mesh>
+              {/* Cabin kính và mui trắng */}
+              <mesh position={[0, 0.032, 0.02]}>
+                <boxGeometry args={[0.04, 0.018, 0.04]} />
+                <meshStandardMaterial color="#F8FAFC" roughness={0.2} />
+              </mesh>
+              {/* Đuôi máy bay */}
+              <mesh position={[0, 0.028, -0.06]}>
+                <boxGeometry args={[0.015, 0.015, 0.06]} />
+                <meshStandardMaterial color="#EF4444" />
+              </mesh>
+              {/* Cánh quạt chính */}
+              <mesh position={[0, 0.045, 0]} rotation={[0, 0.4, 0]}>
+                <boxGeometry args={[0.14, 0.004, 0.015]} />
+                <meshStandardMaterial color="#334155" roughness={0.4} />
+              </mesh>
+            </group>
+          </group>
+
+          {/* Đỉnh tháp cắt vát chéo cánh sen hé nở (Bitexco Crown) */}
+          <group data-testid="bitexco-crown" position={[0, 0, 0]}>
+            {/* Chóp tháp búp sen vút nhọn vát xiên */}
+            <mesh position={[0, 2.45, 0]} castShadow rotation={[0.06, 0, 0.04]}>
+              <coneGeometry args={[0.24, 0.5, 16]} />
+              <meshStandardMaterial color="#0284C7" roughness={0.15} metalness={0.85} />
+            </mesh>
+            {/* Lớp viền vát chóp tháp kính băng tuyết */}
+            <mesh position={[0, 2.52, 0]} rotation={[-0.12, 0, 0]}>
+              <cylinderGeometry args={[0.18, 0.22, 0.16, 16]} />
+              <meshStandardMaterial color="#7DD3FC" roughness={0.1} metalness={0.8} />
+            </mesh>
+            {/* Kim thu lôi mạ vàng */}
+            <mesh position={[0, 2.85, 0]} castShadow>
+              <cylinderGeometry args={[0.01, 0.02, 0.3, 6]} />
+              <meshStandardMaterial color="#F59E0B" metalness={0.95} roughness={0.1} />
+            </mesh>
+            {/* Đèn cảnh báo tĩnh không đỏ nhấp nháy trên đỉnh tháp */}
+            <mesh ref={beaconRef} position={[0, 2.95, 0]}>
+              <sphereGeometry args={[0.03, 8, 8]} />
+              <meshBasicMaterial color="#EF4444" />
+            </mesh>
+          </group>
+        </group>
+      </group>
+
+      {/* 2. Tòa Nhà Di Sản Bờ Sông Phong Cách Pháp Cổ (Colonial Waterfront Heritage) */}
+      <group data-testid="colonial-waterfront-heritage" position={[-3.7, 0.16, -3.7]}>
+        {/* Khối thân nhà 2 tầng tường vàng kem Indochine */}
+        <mesh castShadow receiveShadow position={[0, 0.14, 0]}>
+          <boxGeometry args={[0.68, 0.28, 0.38]} />
+          <meshStandardMaterial color="#FEF08A" roughness={0.7} />
+        </mesh>
+        {/* Dãy cửa vòm cuốn cổ điển màu trắng sáng */}
+        {[-0.22, 0, 0.22].map((cx, i) => (
+          <group key={`arch-window-${i}`} position={[cx, 0.15, 0.195]}>
+            <mesh>
+              <boxGeometry args={[0.08, 0.12, 0.01]} />
+              <meshStandardMaterial color="#F8FAFC" roughness={0.4} />
+            </mesh>
+            <mesh position={[0, 0.06, 0]}>
+              <cylinderGeometry args={[0.04, 0.04, 0.01, 8, 1, false, 0, Math.PI]} />
+              <meshStandardMaterial color="#F8FAFC" roughness={0.4} />
+            </mesh>
+          </group>
+        ))}
+        {/* Mái ngói dốc 4 phía đỏ đất nung Terracotta */}
+        <mesh castShadow position={[0, 0.35, 0]} rotation={[0, Math.PI / 4, 0]}>
+          <coneGeometry args={[0.48, 0.18, 4]} />
+          <meshStandardMaterial color="#EA580C" roughness={0.6} />
+        </mesh>
+      </group>
+
+      {/* 3. Bến tàu thủy buýt Saigon Waterbus (Waterfront Waterbus Station) */}
+      <group data-testid="waterfront-waterbus" position={[-3.3, 0.14, -3.4]}>
+        {/* Cầu tàu nổi lát đá/gỗ cập mạn sông */}
+        <mesh receiveShadow position={[0, 0.02, 0]}>
+          <boxGeometry args={[0.42, 0.03, 0.26]} />
+          <meshStandardMaterial color="#94A3B8" roughness={0.6} />
+        </mesh>
+        {/* Mái che bến tàu màu trắng sáng */}
+        <mesh position={[0, 0.09, 0.04]}>
+          <boxGeometry args={[0.28, 0.015, 0.16]} />
+          <meshStandardMaterial color="#F8FAFC" roughness={0.3} />
+        </mesh>
+        {/* Tàu khách Saigon Waterbus thân trắng viền xanh đại dương */}
+        <group position={[0.22, 0.01, -0.05]}>
+          <mesh castShadow position={[0, 0.015, 0]}>
+            <boxGeometry args={[0.12, 0.025, 0.28]} />
+            <meshStandardMaterial color="#F8FAFC" roughness={0.3} />
           </mesh>
-          <mesh position={[0.38, 1.705, 0]}>
-            <ringGeometry args={[0.14, 0.18, 16]} />
-            <meshBasicMaterial color="#F59E0B" />
+          <mesh position={[0, 0.01, 0]}>
+            <boxGeometry args={[0.122, 0.008, 0.282]} />
+            <meshStandardMaterial color="#0284C7" roughness={0.2} />
           </mesh>
-          {/* Đỉnh tháp búp sen vút nhọn */}
-          <mesh position={[0, 2.45, 0]} castShadow>
-            <coneGeometry args={[0.24, 0.5, 16]} />
-            <meshStandardMaterial color="#0284C7" roughness={0.15} metalness={0.85} />
-          </mesh>
-          {/* Kim thu lôi mạ vàng */}
-          <mesh position={[0, 2.85, 0]} castShadow>
-            <cylinderGeometry args={[0.01, 0.02, 0.3, 6]} />
-            <meshStandardMaterial color="#F59E0B" metalness={0.95} roughness={0.1} />
-          </mesh>
-          {/* Đèn cảnh báo tĩnh không đỏ nhấp nháy trên đỉnh tháp */}
-          <mesh ref={beaconRef} position={[0, 2.95, 0]}>
-            <sphereGeometry args={[0.03, 8, 8]} />
-            <meshBasicMaterial color="#EF4444" />
+          {/* Cabin đón khách */}
+          <mesh position={[0, 0.035, -0.02]}>
+            <boxGeometry args={[0.09, 0.02, 0.16]} />
+            <meshStandardMaterial color="#38BDF8" roughness={0.1} metalness={0.7} />
           </mesh>
         </group>
       </group>

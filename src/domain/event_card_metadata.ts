@@ -12,8 +12,8 @@ export interface CardDetail {
   readonly effectDelta?: number;
 }
 
-export type ChanceCardDetail = CardDetail;
-export type MarketCardDetail = Omit<CardDetail, 'effectDelta'>;
+type ChanceCardDetail = CardDetail;
+type MarketCardDetail = Omit<CardDetail, 'effectDelta'>;
 
 export const CHANCE_CARD_DETAILS: Readonly<Record<ChanceCardId, CardDetail>> = {
   [ChanceCardId.CC_PLATE_AUCTION]: {

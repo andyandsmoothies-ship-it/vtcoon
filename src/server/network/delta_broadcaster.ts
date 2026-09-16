@@ -19,7 +19,7 @@ export function getPayloadByteLength(payload: unknown): number {
   return new TextEncoder().encode(json).byteLength;
 }
 
-export function isCellEqual(a: CellDelta, b: CellDelta): boolean {
+function isCellEqual(a: CellDelta, b: CellDelta): boolean {
   return (
     a.index === b.index &&
     (a.ownerId ?? null) === (b.ownerId ?? null) &&
@@ -30,7 +30,7 @@ export function isCellEqual(a: CellDelta, b: CellDelta): boolean {
   );
 }
 
-export function isPlayerEqual(a: PlayerDelta, b: PlayerDelta): boolean {
+function isPlayerEqual(a: PlayerDelta, b: PlayerDelta): boolean {
   return (
     a.id === b.id &&
     a.position === b.position &&
@@ -90,6 +90,10 @@ export function buildSparseDelta(prev: DeltaPayload, next: DeltaPayload): DeltaP
     ...(next.turnPhase !== undefined ? { turnPhase: next.turnPhase } : {}),
     ...(next.timeRemaining !== undefined ? { timeRemaining: next.timeRemaining } : {}),
     ...(next.lastEventCard !== undefined ? { lastEventCard: next.lastEventCard } : {}),
+    ...(next.lastHoseResult !== undefined ? { lastHoseResult: next.lastHoseResult } : {}),
+    ...(next.roundNumber !== undefined ? { roundNumber: next.roundNumber } : {}),
+    ...(next.treasury !== undefined ? { treasury: next.treasury } : {}),
+    ...(next.activeModifiers !== undefined ? { activeModifiers: next.activeModifiers } : {}),
   };
 }
 

@@ -119,35 +119,41 @@ export function CoastalIslandEnvironment(): React.ReactElement {
         <meshBasicMaterial color="#FFFFFF" transparent opacity={0.40} />
       </mesh>
 
-      {/* 2. Bờ biển cát vát nghiêng tự nhiên 15 độ (Sloped Sand Shoreline, #FDE68A, roughness: 0.85) */}
+      {/* 2. Cao nguyên cỏ xanh nhiệt đới viền quanh bàn cờ (Lush Tropical Lawn Plateau, #22C55E) */}
+      <mesh receiveShadow position={[0, -0.34, 0]}>
+        <cylinderGeometry args={[15.6, 17.6, 0.26, 64]} />
+        <meshStandardMaterial color="#22C55E" roughness={0.78} metalness={0.02} />
+      </mesh>
+
+      {/* Bờ biển cát vát nghiêng ngà mịn tự nhiên (Sloped Fine Ivory Shoreline, #EFE5D8, roughness: 0.85) */}
       <mesh receiveShadow position={[0, -0.36, 0]}>
-        <cylinderGeometry args={[15.6, 18.5, 0.24, 64]} />
-        <meshStandardMaterial color="#FDE68A" roughness={0.85} metalness={0.02} />
+        <cylinderGeometry args={[17.4, 21.0, 0.24, 64]} />
+        <meshStandardMaterial color="#EFE5D8" roughness={0.85} metalness={0.02} />
       </mesh>
 
       {/* Gờ vát nghiêng bờ cát chuẩn 15 độ tiếp giáp nước biển */}
       <mesh receiveShadow position={[0, -0.75, 0]}>
         <cylinderGeometry args={[27.8, 28.85, 0.28, 64]} />
-        <meshStandardMaterial color="#FDE68A" roughness={0.85} metalness={0.02} />
+        <meshStandardMaterial color="#EFE5D8" roughness={0.85} metalness={0.02} />
       </mesh>
 
       <mesh receiveShadow position={[0, -0.38, 0]}>
         <cylinderGeometry args={[16.2, 17.5, 0.14, 48]} />
-        <meshStandardMaterial color="#F6D5A8" roughness={0.85} metalness={0.02} />
+        <meshStandardMaterial color="#F3EBE1" roughness={0.85} metalness={0.02} />
       </mesh>
 
       {/* Mũi bãi tắm cong Tây Nam & Đông Nam */}
       <mesh receiveShadow position={[-11.5, -0.35, 8.5]}>
         <cylinderGeometry args={[2.5, 3.5, 0.18, 32]} />
-        <meshStandardMaterial color="#FDE68A" roughness={0.85} metalness={0.02} />
+        <meshStandardMaterial color="#EFE5D8" roughness={0.85} metalness={0.02} />
       </mesh>
       <mesh receiveShadow position={[15.0, -0.55, 15.0]}>
         <cylinderGeometry args={[4.0, 5.8, 0.20, 32]} />
-        <meshStandardMaterial color="#FDE68A" roughness={0.85} metalness={0.02} />
+        <meshStandardMaterial color="#EFE5D8" roughness={0.85} metalness={0.02} />
       </mesh>
       <mesh receiveShadow position={[-18, -0.40, -14]}>
         <cylinderGeometry args={[8.0, 10.5, 0.22, 32]} />
-        <meshStandardMaterial color="#FDE68A" roughness={0.85} metalness={0.02} />
+        <meshStandardMaterial color="#EFE5D8" roughness={0.85} metalness={0.02} />
       </mesh>
 
       {/* Dù che nắng bãi biển đa sắc */}

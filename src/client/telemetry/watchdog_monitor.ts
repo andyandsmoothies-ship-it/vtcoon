@@ -9,33 +9,59 @@ export const WATCHDOG_LIMITS = {
   MAX_ANIMATION_DURATION_MS: 10_000,
 } as const;
 
+interface CheckTurnStallParams {
+  readonly currentTurnPlayerId: string | null;
+  readonly timeRemaining: number;
+  readonly elapsedTurnMs?: number;
+  readonly tick: number;
+  readonly isInAuction?: boolean;
+  readonly turnPhase?: string;
+  readonly hasProgress?: boolean;
+}
+
 export class WatchdogMonitor {
   private botActionHistory: Map<string, number[]> = new Map();
   private lastTurnPlayerId: string | null = null;
+  private lastPhase: string | null = null;
   private turnStartTimeMs: number = Date.now();
 
   /**
    * Giám sát tình trạng kẹt lượt chơi (> 45 giây hoặc timer âm)
    */
-  public checkTurnStall(params: {
-    readonly currentTurnPlayerId: string | null;
-    readonly timeRemaining: number;
-    readonly elapsedTurnMs?: number;
-    readonly tick: number;
-  }): InvariantViolation | null {
+  public checkTurnStall(params: CheckTurnStallParams): InvariantViolation | null {
     if (!params.currentTurnPlayerId) {
       this.lastTurnPlayerId = null;
+      this.lastPhase = null;
       return null;
     }
 
     const now = Date.now();
     if (this.lastTurnPlayerId !== params.currentTurnPlayerId) {
       this.lastTurnPlayerId = params.currentTurnPlayerId;
+      this.lastPhase = params.turnPhase ?? null;
+      this.turnStartTimeMs = now;
+    } else if (params.turnPhase && this.lastPhase !== params.turnPhase) {
+      this.lastPhase = params.turnPhase;
+      this.turnStartTimeMs = now;
+    } else if (params.hasProgress === true) {
       this.turnStartTimeMs = now;
     }
 
-    const elapsed = params.elapsedTurnMs ?? (now - this.turnStartTimeMs);
-    const isStalled = elapsed > WATCHDOG_LIMITS.MAX_TURN_STALL_MS || params.timeRemaining <= -5;
+    if (params.elapsedTurnMs !== undefined) {
+      if (!Number.isFinite(params.elapsedTurnMs) || params.elapsedTurnMs <= 0) {
+        return null;
+      }
+    }
+
+    if (params.timeRemaining > 0) {
+      return null;
+    }
+
+    const elapsed = params.elapsedTurnMs ?? Math.max(0, now - this.turnStartTimeMs);
+    const stallThreshold = params.isInAuction ? 90_000 : WATCHDOG_LIMITS.MAX_TURN_STALL_MS;
+    const isTimeStalled = params.isInAuction ? false : params.timeRemaining <= -5;
+    const isElapsedStalled = params.timeRemaining <= 0 && elapsed >= stallThreshold;
+    const isStalled = isTimeStalled || isElapsedStalled;
 
     if (isStalled) {
       return {
@@ -125,6 +151,7 @@ export class WatchdogMonitor {
   public reset(): void {
     this.botActionHistory.clear();
     this.lastTurnPlayerId = null;
+    this.lastPhase = null;
     this.turnStartTimeMs = Date.now();
   }
 }

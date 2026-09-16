@@ -1,17 +1,28 @@
 // [UI-S01/MSS][UI-S03/MSS][UI-S04/MSS] GameCanvas — 3D Cinematic Perspective Viewport & Post-Processing Pipeline
 // Re-exports cellPosition for backward-compat with tests/client/game_canvas.test.ts
 export { cellPosition } from './3d/board_coords';
+export {
+  BASE_PERSPECTIVE_FOV,
+  EVENT_PERSPECTIVE_FOV,
+  BASE_CAMERA_ZOOM,
+  EVENT_CAMERA_ZOOM,
+  CAMERA_FOCUS_WEIGHT,
+  calculateCameraFocusTarget,
+  calculateCameraZoom,
+  resolveCameraTargetCell,
+} from './3d/use_game_camera';
 
 import React, { useRef, useEffect } from 'react';
+import './3d/r3f_fiber_shield';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, ContactShadows, Environment } from '@react-three/drei';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
-import { NoToneMapping, type OrthographicCamera, type PerspectiveCamera } from 'three';
+import { ACESFilmicToneMapping, type OrthographicCamera, type PerspectiveCamera } from 'three';
 import type { Player } from '../domain/room';
 import { GameBoard } from './3d/board_layout';
 import { PawnAnimator } from './3d/pawn_animator';
 import { cellPosition } from './3d/board_coords';
-import { useGameStore, type PawnAnimationState } from './store/game_store';
+import { useGameStore } from './store/game_store';
 import { CinematicOverlay } from './3d/cinematic_effects';
 import { EventCard3D } from './3d/event_card_3d';
 import { Coronation3DStage } from './3d/coronation_3d_stage';
@@ -21,57 +32,16 @@ import { SunnyIslandLobbyScene } from './3d/sunny_island_lobby_scene';
 import { TimeOfDayLighting } from './3d/time_of_day_lighting';
 import { useEnvironmentStore, TIME_OF_DAY_PRESETS } from './store/environment_store';
 import { useVfxStore } from './store/vfx_store';
-import { perfBudget } from './3d/perf_budget';
-import { useTelemetryStore } from './telemetry/telemetry_store';
-import { watchdogMonitor } from './telemetry/watchdog_monitor';
 import {
   resolveCameraMode,
   calculateTargetCameraState,
   calculateScreenShake,
 } from './3d/camera_state_machine';
-
-export const BASE_PERSPECTIVE_FOV = 40 as const;
-export const EVENT_PERSPECTIVE_FOV = 35 as const;
-export const BASE_CAMERA_ZOOM = 41 as const;
-export const EVENT_CAMERA_ZOOM = 48 as const;
-export const CAMERA_FOCUS_WEIGHT = 0.65 as const;
-
-export function calculateCameraFocusTarget(
-  cellIndex: number | null,
-  weight: number = CAMERA_FOCUS_WEIGHT
-): [number, number, number] {
-  if (cellIndex == null || !Number.isFinite(cellIndex)) {
-    return [0, 0, 0];
-  }
-  const [cx, , cz] = cellPosition(cellIndex);
-  return [cx * weight, 0, cz * weight];
-}
-
-export function calculateCameraZoom(
-  isBigEvent: boolean,
-  baseZoom: number = BASE_CAMERA_ZOOM,
-  eventZoom: number = EVENT_CAMERA_ZOOM
-): number {
-  return isBigEvent ? eventZoom : baseZoom;
-}
-
-export function resolveCameraTargetCell(
-  activeAnimation: PawnAnimationState | null,
-  currentTurnPlayerId: string | null,
-  playerPositions: Record<string, number>,
-  modalPayload?: { cellIndex?: number } | null
-): number | null {
-  if (modalPayload && typeof modalPayload.cellIndex === 'number' && Number.isInteger(modalPayload.cellIndex)) {
-    return modalPayload.cellIndex;
-  }
-  if (activeAnimation?.isAnimating && activeAnimation.waypoints.length > 0) {
-    return activeAnimation.waypoints[activeAnimation.currentIndex ?? 0] ?? activeAnimation.fromCell;
-  }
-  if (currentTurnPlayerId != null) {
-    return playerPositions[currentTurnPlayerId] ?? 0;
-  }
-  return null;
-}
+import {
+  calculateCameraZoom,
+  resolveCameraTargetCell,
+} from './3d/use_game_camera';
+import { PerfTelemetryTracker } from './telemetry/perf_telemetry_tracker';
 
 export interface AdaptiveCinematicCameraProps {
   readonly isPreMatch?: boolean;
@@ -139,18 +109,19 @@ export function AdaptiveCinematicCamera({
       modalPayload as { cellIndex?: number } | null
     );
 
+    const hasTargetTile = (activeModal !== null || hasRolledThisTurn) && targetCell !== null && targetCell !== undefined && Number.isFinite(targetCell);
     const mode = resolveCameraMode({
       isRolling,
       isPawnAnimating: isPawnMoving,
       activeModal,
       hasRolledThisTurn,
-      hasTargetTile: (activeModal !== null || hasRolledThisTurn) && targetCell !== null,
+      hasTargetTile,
       isPreMatch,
       isBotTurn,
       isAnimatingPawnBot,
     });
 
-    const cellCoords = targetCell !== null ? cellPosition(targetCell) : undefined;
+    const cellCoords = targetCell !== null && targetCell !== undefined && Number.isFinite(targetCell) ? cellPosition(targetCell) : undefined;
     const targetState = calculateTargetCameraState(mode, cellCoords, cellCoords);
 
     let shakeOffset: [number, number, number] = [0, 0, 0];
@@ -158,6 +129,13 @@ export function AdaptiveCinematicCamera({
       const elapsedSec = (Date.now() - activeScreenShake.startTime) / 1000;
       const durSec = activeScreenShake.durationMs / 1000;
       shakeOffset = calculateScreenShake(elapsedSec, durSec, activeScreenShake.intensity);
+    }
+
+    if (!Number.isFinite(camBaseRef.current[0]) || !Number.isFinite(camBaseRef.current[1]) || !Number.isFinite(camBaseRef.current[2])) {
+      camBaseRef.current = [30.0, 33.0, 30.0];
+    }
+    if (!Number.isFinite(targetBaseRef.current[0]) || !Number.isFinite(targetBaseRef.current[1]) || !Number.isFinite(targetBaseRef.current[2])) {
+      targetBaseRef.current = [1.5, 0.0, 1.5];
     }
 
     const dt = Math.min(delta, 0.1);
@@ -251,51 +229,6 @@ export function AdaptiveCinematicCamera({
   );
 }
 
-function PerfTelemetryTracker(): null {
-  const { gl } = useThree();
-  const lastUpdateRef = useRef(0);
-  const animStartRef = useRef<number | null>(null);
-
-  useFrame((_, delta) => {
-    perfBudget.recordFrameTime(delta * 1000);
-    const now = performance.now();
-    if (now - lastUpdateRef.current >= 250) {
-      lastUpdateRef.current = now;
-      const report = perfBudget.getBudgetReport(gl.info);
-      useTelemetryStore.getState().updateMetrics({
-        fps: report.averageFps,
-        frameTimeMs: delta * 1000,
-        drawCalls: report.drawCalls,
-        triangles: report.triangles,
-      });
-      if (typeof gl?.info?.reset === 'function') {
-        gl.info.reset();
-      }
-
-      const activeAnim = useGameStore.getState().activePawnAnimation;
-      if (activeAnim?.isAnimating) {
-        if (animStartRef.current === null) animStartRef.current = Date.now();
-        const duration = Date.now() - animStartRef.current;
-        const params = {
-          isAnimating: true,
-          animatingDurationMs: duration,
-          tick: 0,
-        };
-        const v = watchdogMonitor.checkFsmAnimationStall(params);
-        if (v) {
-          watchdogMonitor.recoverFsmAnimationStall(params);
-          animStartRef.current = null;
-          useTelemetryStore.getState().reportViolation(v);
-        }
-      } else {
-        animStartRef.current = null;
-      }
-    }
-  });
-
-  return null;
-}
-
 export interface GameCanvasProps {
   readonly players?: readonly Player[];
   readonly isLobby?: boolean;
@@ -327,16 +260,17 @@ export function GameCanvas({
         bankrupt: Boolean(p.bankrupt),
       }));
 
+  const isSSR = typeof window === 'undefined';
+
   return (
     <div className="relative w-full h-full overflow-hidden">
       <Canvas
         shadows="soft"
-        dpr={[1.25, 2]}
+        dpr={[1, 1.5]}
         camera={{ position: [30.0, 33.0, 30.0], fov: 24, near: 0.5, far: 300 }}
         gl={{
-          toneMapping: NoToneMapping,
-          toneMappingExposure: 0.94,
-
+          toneMapping: ACESFilmicToneMapping,
+          toneMappingExposure: 1.08,
           antialias: true,
         }}
         onCreated={({ gl }) => {
@@ -352,39 +286,43 @@ export function GameCanvas({
           transition: 'background-color 2.5s ease',
         }}
       >
-        <React.Suspense fallback={null}>
-          <Environment preset="city" />
-        </React.Suspense>
-        <PerfTelemetryTracker />
-
-        {isLobby ? (
+        {!isSSR && (
           <>
-            {/* Tabletop-first Stage 1: Render GameBoard trực tiếp trên sa bàn đảo ngọc thay thế SunnyIslandLobbyScene */}
-            <AdaptiveCinematicCamera isPreMatch={true} />
-            <TimeOfDayLighting />
-            {/* Bóng tiếp xúc mâm gỗ bàn cờ đặt trên thảm nhung Ba Tư */}
-            <ContactShadows position={[0, -0.05, 0]} opacity={0.75} scale={45} blur={2.0} far={6} />
-            <GameBoard />
-            <PawnAnimator players={effectivePlayers} />
-            <PostProcessingPipeline />
-          </>
-        ) : (
-          <>
-            <AdaptiveCinematicCamera />
-            {/* Hệ thống chiếu sáng động Chu kỳ Ngày - Đêm & Đô thị Neon (Dynamic Time-of-Day Lighting) */}
-            <TimeOfDayLighting />
+            <React.Suspense fallback={null}>
+              <Environment preset="city" />
+            </React.Suspense>
+            <PerfTelemetryTracker />
 
-            {/* ContactShadows contract retention:
-              <ContactShadows position={[0, -0.01, 0]} opacity={0.7} scale={40} blur={2} />
-            */}
-            {/* Bóng tiếp xúc mâm gỗ bàn cờ đặt trên thảm nhung Ba Tư */}
-            <ContactShadows position={[0, -0.05, 0]} opacity={0.75} scale={45} blur={2.0} far={6} />
+            {isLobby ? (
+              <>
+                {/* Tabletop-first Stage 1: Render GameBoard trực tiếp trên sa bàn đảo ngọc thay thế SunnyIslandLobbyScene */}
+                <AdaptiveCinematicCamera isPreMatch={true} />
+                <TimeOfDayLighting />
+                {/* Bóng tiếp xúc mâm gỗ bàn cờ đặt trên thảm nhung Ba Tư */}
+                <ContactShadows frames={1} position={[0, -0.05, 0]} opacity={0.75} scale={45} blur={2.0} far={6} />
+                <GameBoard />
+                <PawnAnimator players={effectivePlayers} />
+                <PostProcessingPipeline />
+              </>
+            ) : (
+              <>
+                <AdaptiveCinematicCamera />
+                {/* Hệ thống chiếu sáng động Chu kỳ Ngày - Đêm & Đô thị Neon (Dynamic Time-of-Day Lighting) */}
+                <TimeOfDayLighting />
 
-            <GameBoard />
-            <PawnAnimator players={effectivePlayers} />
-            <EventCard3D />
-            <Coronation3DStage />
-            <PostProcessingPipeline />
+                {/* ContactShadows contract retention:
+                  <ContactShadows frames={1} position={[0, -0.01, 0]} opacity={0.7} scale={40} blur={2} />
+                */}
+                {/* Bóng tiếp xúc mâm gỗ bàn cờ đặt trên thảm nhung Ba Tư */}
+                <ContactShadows frames={1} position={[0, -0.05, 0]} opacity={0.75} scale={45} blur={2.0} far={6} />
+
+                <GameBoard />
+                <PawnAnimator players={effectivePlayers} />
+                <EventCard3D />
+                <Coronation3DStage />
+                <PostProcessingPipeline />
+              </>
+            )}
           </>
         )}
       </Canvas>

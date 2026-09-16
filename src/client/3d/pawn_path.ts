@@ -12,31 +12,21 @@ export const BOT_LANDING_DURATION = 0.07 as const;
 export const BOT_STEP_DURATION = 0.20 as const;
 
 export function calculatePathWaypoints(fromIndex: number, toIndex: number): number[] {
-  if (
-    !Number.isInteger(fromIndex) ||
-    !Number.isInteger(toIndex) ||
-    fromIndex < 0 ||
-    fromIndex >= BOARD_TOTAL_CELLS ||
-    toIndex < 0 ||
-    toIndex >= BOARD_TOTAL_CELLS
-  ) {
-    throw new Error(
-      `Invalid cell index: from=${fromIndex}, to=${toIndex}. Must be integers between 0 and 39.`
-    );
-  }
-
-  if (fromIndex === toIndex) {
+  if (!Number.isFinite(fromIndex) || !Number.isFinite(toIndex)) {
     return [];
   }
-
-  let steps = (toIndex - fromIndex) % BOARD_TOTAL_CELLS;
+  const safeFrom = Math.min(BOARD_TOTAL_CELLS - 1, Math.max(0, Math.floor(fromIndex)));
+  const safeTo = Math.min(BOARD_TOTAL_CELLS - 1, Math.max(0, Math.floor(toIndex)));
+  if (safeFrom === safeTo) {
+    return [];
+  }
+  let steps = (safeTo - safeFrom) % BOARD_TOTAL_CELLS;
   if (steps <= 0) {
     steps += BOARD_TOTAL_CELLS;
   }
-
   const waypoints: number[] = [];
   for (let i = 1; i <= steps; i++) {
-    waypoints.push((fromIndex + i) % BOARD_TOTAL_CELLS);
+    waypoints.push((safeFrom + i) % BOARD_TOTAL_CELLS);
   }
   return waypoints;
 }
@@ -119,7 +109,7 @@ export function getStepPitchVariation(randomVal: number = Math.random()): number
  * - Pha bay cao (In-air Stretch): Thân quân cờ dãn dài theo trục đứng [0.88, 1.18, 0.88] khi đạt đỉnh vòng cung parabol.
  * - Pha rơi tiếp đất: Nén dần về [1.15, 0.82, 1.15] khi chạm sàn.
  */
-export function calculateKineticPawnScale(
+export function calculateKineticSquashStretch(
   jumpProgress: number,
   landingProgress: number = 0
 ): [number, number, number] {
@@ -155,8 +145,6 @@ export function calculateKineticPawnScale(
   const sxz = 0.88 + 0.27 * p;
   return [sxz, sy, sxz];
 }
-
-export const calculateKineticSquashStretch = calculateKineticPawnScale;
 
 /**
  * Pha tiếp đất (Landing Impact): Nhún đàn hồi 2 nhịp giảm chấn trước khi phục hồi về tỉ lệ gốc [1, 1, 1].

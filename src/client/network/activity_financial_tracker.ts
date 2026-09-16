@@ -57,10 +57,11 @@ export function matchRentTransactions(
   return { rentLogs, handledPayerIds, handledReceiverIds };
 }
 
-function processPayerFee(
+export function processPayerFee(
   payer: BalanceDelta,
   context: PropertyFinancialContext,
   delta?: DeltaPayload,
+  prevState?: GameState,
 ): ActivityLogEntry | null {
   const absDiff = Math.abs(payer.diff);
   if (
@@ -82,6 +83,39 @@ function processPayerFee(
   if (isUnmortgage) return null;
 
   const pName = getPlayerName(payer.pInfo, payer.id);
+
+  // [IMP-79] Nhận diện Lệ Phí Đăng Ký Đất Đai (Ô 04)
+  const deltaP = delta?.players?.find((p) => p.id === payer.id);
+  const currentPos = deltaP?.position ?? prevState?.playerPositions[payer.id];
+  if (currentPos === 4) {
+    return {
+      id: `tax_${Date.now()}_${payer.id}`,
+      timestamp: Date.now(),
+      type: 'tax',
+      message: `🏛️ ${pName} đã nộp phí / nộp thuế ${formatCurrency(absDiff)} (Lệ Phí Đăng Ký Đất Đai)`,
+      playerId: payer.id,
+      playerName: pName,
+      amount: payer.diff,
+      ...(payer.pInfo?.tokenColor ? { playerTokenColor: payer.pInfo.tokenColor } : {}),
+    };
+  }
+
+  // [IMP-79] Nhận diện Tiền Bảo Lãnh Kiểm Toán (Ô 10)
+  const prevP = prevState?.playersInfo[payer.id];
+  const wasInAudit = Boolean(prevP?.inAudit || (prevP?.auditTurnsLeft && prevP.auditTurnsLeft > 0));
+  if (wasInAudit && absDiff === 500) {
+    return {
+      id: `bail_${Date.now()}_${payer.id}`,
+      timestamp: Date.now(),
+      type: 'tax',
+      message: `⚖️ ${pName} đã nộp phí / nộp thuế ${formatCurrency(absDiff)} (Bảo Lãnh Kiểm Toán để rời Trạm)`,
+      playerId: payer.id,
+      playerName: pName,
+      amount: payer.diff,
+      ...(payer.pInfo?.tokenColor ? { playerTokenColor: payer.pInfo.tokenColor } : {}),
+    };
+  }
+
   return {
     id: `tax_${Date.now()}_${payer.id}`,
     timestamp: Date.now(),
@@ -123,11 +157,12 @@ export function extractMiscellaneousBalances(
   handledReceiverIds: Set<string>,
   context: PropertyFinancialContext,
   delta?: DeltaPayload,
+  prevState?: GameState,
 ): ActivityLogEntry[] {
   const logs: ActivityLogEntry[] = [];
   for (const payer of payers) {
     if (handledPayerIds.has(payer.id)) continue;
-    const feeLog = processPayerFee(payer, context, delta);
+    const feeLog = processPayerFee(payer, context, delta, prevState);
     if (feeLog) logs.push(feeLog);
   }
   for (const receiver of receivers) {
@@ -180,6 +215,35 @@ export function detectFinancialAndStatusActivities(
 
   const { rentLogs, handledPayerIds, handledReceiverIds } = matchRentTransactions(payers, receivers);
   entries.push(...rentLogs);
-  entries.push(...extractMiscellaneousBalances(payers, receivers, handledPayerIds, handledReceiverIds, context, delta));
+
+  if (delta.lastHoseResult) {
+    const hr = delta.lastHoseResult;
+    const pInfo = nextState.playersInfo[hr.playerId] ?? prevState.playersInfo[hr.playerId];
+    const pName = hr.playerName ?? getPlayerName(pInfo, hr.playerId);
+    const multiplierPct = Math.round((hr.multiplier - 1) * 100);
+    const sign = multiplierPct > 0 ? `+${multiplierPct}%` : multiplierPct < 0 ? `${multiplierPct}%` : 'Hòa vốn';
+    const outcomeLabel =
+      hr.profit > 0
+        ? `Lãi +${formatCurrency(hr.profit)}`
+        : hr.profit < 0
+        ? `Lỗ -${formatCurrency(Math.abs(hr.profit))}`
+        : 'Hòa vốn';
+    const icon = hr.profit > 0 ? '📈' : hr.profit < 0 ? '📉' : '⚖️';
+
+    entries.push({
+      id: `hose_${hr.timestamp}_${hr.playerId}`,
+      timestamp: hr.timestamp,
+      type: 'system',
+      message: `${icon} [HOSE] ${pName} đầu tư ${formatCurrency(hr.stake)} ➔ Khớp lệnh Mặt ${hr.roll} (${sign}): Thu về ${formatCurrency(hr.payout)} (${outcomeLabel})`,
+      playerId: hr.playerId,
+      playerName: pName,
+      amount: hr.profit,
+      ...(pInfo?.tokenColor ? { playerTokenColor: pInfo.tokenColor } : {}),
+    });
+    handledPayerIds.add(hr.playerId);
+    handledReceiverIds.add(hr.playerId);
+  }
+
+  entries.push(...extractMiscellaneousBalances(payers, receivers, handledPayerIds, handledReceiverIds, context, delta, prevState));
   return entries;
 }

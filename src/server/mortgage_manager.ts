@@ -41,10 +41,6 @@ export function calcTotalMortgageDebt(player: Player): number {
   }, 0);
 }
 
-export function isMortgaged(player: Player, cellIndex: number): boolean {
-  return (player.mortgagedProperties ?? []).includes(cellIndex);
-}
-
 function isTradeFrozen(room: Room): boolean {
   return (room.activeModifiers ?? []).some(
     (m) => m.type === MarketCardId.MC_FREEZE_TRADE && m.remainingRounds > 0,
@@ -78,7 +74,7 @@ function checkMortgageProperty(
   return undefined;
 }
 
-export type MortgageValidation =
+type MortgageValidation =
   | { valid: false; reason: ActionRejectReason }
   | { valid: true; reason?: undefined; player: Player; loan: number };
 
@@ -111,7 +107,7 @@ function checkMortgagePlayer(
   return { valid: true, player, loan };
 }
 
-export function validateMortgage(
+function validateMortgage(
   room: Room,
   playerId: string,
   cellIndex: number,
@@ -160,7 +156,7 @@ function checkRedeemRoomState(room: Room, playerId: string): ActionRejectReason 
   return undefined;
 }
 
-export type RedeemValidation =
+type RedeemValidation =
   | { valid: false; reason: ActionRejectReason }
   | { valid: true; reason?: undefined; player: Player; repay: number; idx: number };
 
@@ -186,7 +182,7 @@ function checkRedeemPlayerFunds(
   return { valid: true, player, repay, idx };
 }
 
-export function validateRedeem(
+function validateRedeem(
   room: Room,
   playerId: string,
   cellIndex: number,

@@ -8,7 +8,7 @@ import { resolveRent } from '../property_rent';
 import { BotPersonality } from './bot_types';
 import { calculateThreatHorizon } from './threat_forecaster';
 
-export interface RedeemCandidate {
+interface RedeemCandidate {
   readonly cellIndex: number;
   readonly isMonopoly: boolean;
   readonly rent: number;

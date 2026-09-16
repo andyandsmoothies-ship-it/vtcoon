@@ -10,7 +10,7 @@ export interface TelemetryMetric {
   readonly tickRate: number;
 }
 
-export type AuditLogSource = 'SERVER' | 'PLAYER' | 'BOT' | 'SYSTEM';
+type AuditLogSource = 'SERVER' | 'PLAYER' | 'BOT' | 'SYSTEM';
 
 export interface AuditLogEntry {
   readonly id: string;
@@ -22,7 +22,7 @@ export interface AuditLogEntry {
   readonly deltaBytes?: number;
 }
 
-export type InvariantViolationType =
+type InvariantViolationType =
   | 'TREASURY_INVARIANT_VIOLATED'
   | 'INVALID_POSITION_STEP'
   | 'NEGATIVE_BALANCE_OUTSIDE_INSOLVENCY'
@@ -31,7 +31,7 @@ export type InvariantViolationType =
   | 'BOT_INFINITE_LOOP'
   | 'FSM_ANIMATION_STALLED';
 
-export type InvariantSeverity = 'WARNING' | 'CRITICAL';
+type InvariantSeverity = 'WARNING' | 'CRITICAL';
 
 export interface InvariantViolation {
   readonly id: string;

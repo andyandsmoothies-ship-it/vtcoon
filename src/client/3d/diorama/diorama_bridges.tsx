@@ -4,7 +4,7 @@ import { Color, Vector3, Quaternion, type MeshStandardMaterial as ThreeMeshStand
 import { useEnvironmentStore } from '../../store/environment_store';
 import { useSafeFrame } from '../safe_frame';
 
-export interface CableTransformResult {
+interface CableTransformResult {
   readonly position: [number, number, number];
   readonly length: number;
   readonly rotation?: [number, number, number];

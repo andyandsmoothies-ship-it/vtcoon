@@ -1,7 +1,6 @@
 // [UI-S01/MSS][UI-S04/MSS] TimeOfDayLighting — Dynamic Day-Sunset-Night Lighting & Atmosphere Coordinator
 import React, { useRef, useMemo } from 'react';
-import { useThree } from '@react-three/fiber';
-import { Color, Vector3, type DirectionalLight, type AmbientLight, type HemisphereLight, type Fog } from 'three';
+import { Color, Vector3, type DirectionalLight, type AmbientLight, type HemisphereLight, type Fog, type Scene } from 'three';
 import { useSafeFrame } from './safe_frame';
 import {
   useEnvironmentStore,
@@ -29,8 +28,96 @@ export function calculateBaseRim(phase: 'day' | 'sunset' | 'night'): number {
   }
 }
 
-export function TimeOfDayLighting(): React.ReactElement {
+function isThreeFog(fog: unknown): fog is Fog {
+  return typeof fog === 'object' && fog !== null && 'isFog' in fog;
+}
 
+function isThreeColor(bg: unknown): bg is Color {
+  return typeof bg === 'object' && bg !== null && 'isColor' in bg;
+}
+
+function updateDirectLights(
+  sun: DirectionalLight | null,
+  fill: DirectionalLight | null,
+  rim: DirectionalLight | null,
+  preset: typeof TIME_OF_DAY_PRESETS['day'],
+  phase: 'day' | 'sunset' | 'night',
+  isAuctionActive: boolean,
+  lerpRate: number,
+  tempVec: Vector3,
+  tempColor: Color,
+): void {
+  if (sun) {
+    tempVec.set(preset.sunPosition[0], preset.sunPosition[1], preset.sunPosition[2]);
+    sun.position.lerp(tempVec, lerpRate);
+    tempColor.set(preset.sunColor);
+    sun.color.lerp(tempColor, lerpRate);
+    const targetSun = isAuctionActive ? preset.sunIntensity * 0.15 : preset.sunIntensity;
+    sun.intensity += (targetSun - sun.intensity) * lerpRate;
+  }
+  if (fill) {
+    const baseFill = calculateBaseFill(phase);
+    const targetFill = isAuctionActive ? baseFill * 0.15 : baseFill;
+    const fillColor = phase === 'night' ? '#38BDF8' : phase === 'sunset' ? '#FDBA74' : '#CCFBF1';
+    tempColor.set(fillColor);
+    fill.color.lerp(tempColor, lerpRate);
+    fill.intensity += (targetFill - fill.intensity) * lerpRate;
+  }
+  if (rim) {
+    const baseRim = calculateBaseRim(phase);
+    const targetRim = isAuctionActive ? baseRim * 0.15 : baseRim;
+    const rimColor = phase === 'night' ? '#38BDF8' : phase === 'sunset' ? '#EA580C' : '#F8FAFC';
+    tempColor.set(rimColor);
+    rim.color.lerp(tempColor, lerpRate);
+    rim.intensity += (targetRim - rim.intensity) * lerpRate;
+  }
+}
+
+function updateDiffuseAndAtmosphere(
+  ambient: AmbientLight | null,
+  hemi: HemisphereLight | null,
+  scene: (Scene & { environmentIntensity?: number }) | undefined,
+  preset: typeof TIME_OF_DAY_PRESETS['day'],
+  phase: 'day' | 'sunset' | 'night',
+  isAuctionActive: boolean,
+  dt: number,
+  lerpRate: number,
+  tempColor: Color,
+): void {
+  if (ambient) {
+    tempColor.set(preset.ambientColor);
+    ambient.color.lerp(tempColor, lerpRate);
+    ambient.intensity = calculateTheatricalAmbientIntensity(ambient.intensity, isAuctionActive, dt, preset.ambientIntensity, 0.15);
+  }
+  if (hemi) {
+    tempColor.set(preset.hemiSkyColor);
+    hemi.color.lerp(tempColor, lerpRate);
+    tempColor.set(preset.hemiGroundColor);
+    hemi.groundColor.lerp(tempColor, lerpRate);
+    const targetHemi = isAuctionActive ? preset.hemiIntensity * 0.15 : preset.hemiIntensity;
+    hemi.intensity += (targetHemi - hemi.intensity) * lerpRate;
+  }
+  if (scene) {
+    if (isThreeFog(scene.fog)) {
+      tempColor.set(preset.fogColor);
+      scene.fog.color.lerp(tempColor, lerpRate);
+      scene.fog.near += (preset.fogNear - scene.fog.near) * lerpRate;
+      scene.fog.far += (preset.fogFar - scene.fog.far) * lerpRate;
+    }
+    if (isThreeColor(scene.background)) {
+      tempColor.set(preset.skyColor);
+      scene.background.lerp(tempColor, lerpRate);
+    }
+    const baseEnv = phase === 'night' ? 0.16 : phase === 'sunset' ? 0.28 : 0.75;
+    const targetEnv = isAuctionActive ? 0.12 : baseEnv;
+    if (typeof scene.environmentIntensity !== 'number') {
+      scene.environmentIntensity = 1.0;
+    }
+    scene.environmentIntensity += (targetEnv - scene.environmentIntensity) * lerpRate;
+  }
+}
+
+export function TimeOfDayLighting(): React.ReactElement {
   const phase = useEnvironmentStore((s) => s.phase);
   const isAuto = useEnvironmentStore((s) => s.isAuto);
   const setPhase = useEnvironmentStore((s) => s.setPhase);
@@ -52,8 +139,6 @@ export function TimeOfDayLighting(): React.ReactElement {
 
   useSafeFrame((state, delta) => {
     const t = state.clock.getElapsedTime();
-
-    // 1. Quản lý chu kỳ tự động chuyển tiếp êm dịu nếu mode là 'auto'
     if (isAuto) {
       const progress = (t % AUTO_CYCLE_DURATION_SECONDS) / AUTO_CYCLE_DURATION_SECONDS;
       const computedPhase = calculatePhaseFromProgress(progress);
@@ -61,88 +146,10 @@ export function TimeOfDayLighting(): React.ReactElement {
         setPhase(computedPhase);
       }
     }
-
     const dt = Math.min(delta, 0.1);
     const lerpRate = 1 - Math.exp(-dt * 3.0);
-
-    // 2. Nội suy quỹ đạo chuyển động mặt trời / mặt trăng
-    // Khi đấu giá mở, hạ 85% ánh sáng mặt trời để bục đấu giá là tâm điểm kịch tính
-    if (sunRef.current) {
-      tempVec.set(preset.sunPosition[0], preset.sunPosition[1], preset.sunPosition[2]);
-      sunRef.current.position.lerp(tempVec, lerpRate);
-
-      tempColor.set(preset.sunColor);
-      sunRef.current.color.lerp(tempColor, lerpRate);
-      const targetSunIntensity = isAuctionActive ? preset.sunIntensity * 0.15 : preset.sunIntensity;
-      sunRef.current.intensity += (targetSunIntensity - sunRef.current.intensity) * lerpRate;
-    }
-
-    // 3. Nội suy ánh sáng khuếch tán Ambient & Hemisphere (Hạ tối 85% xuống 0.15 khi đấu giá)
-    if (ambientRef.current) {
-      tempColor.set(preset.ambientColor);
-      ambientRef.current.color.lerp(tempColor, lerpRate);
-      ambientRef.current.intensity = calculateTheatricalAmbientIntensity(
-        ambientRef.current.intensity,
-        isAuctionActive,
-        dt,
-        preset.ambientIntensity,
-        0.15
-      );
-    }
-
-    if (hemiRef.current) {
-      tempColor.set(preset.hemiSkyColor);
-      hemiRef.current.color.lerp(tempColor, lerpRate);
-
-      tempColor.set(preset.hemiGroundColor);
-      hemiRef.current.groundColor.lerp(tempColor, lerpRate);
-      const targetHemi = isAuctionActive ? preset.hemiIntensity * 0.15 : preset.hemiIntensity;
-      hemiRef.current.intensity += (targetHemi - hemiRef.current.intensity) * lerpRate;
-    }
-
-    // 4. Nội suy ánh sáng phản xạ vịnh biển (Fill Light) & ánh sáng rìa ngọn sóng (Rim Light)
-
-    if (fillRef.current) {
-      const baseFill = calculateBaseFill(phase);
-      const fillIntensity = isAuctionActive ? baseFill * 0.15 : baseFill;
-      const fillColor = phase === 'night' ? '#38BDF8' : phase === 'sunset' ? '#FDBA74' : '#CCFBF1';
-      tempColor.set(fillColor);
-      fillRef.current.color.lerp(tempColor, lerpRate);
-      fillRef.current.intensity += (fillIntensity - fillRef.current.intensity) * lerpRate;
-    }
-
-    if (rimRef.current) {
-      const baseRim = calculateBaseRim(phase);
-      const rimIntensity = isAuctionActive ? baseRim * 0.15 : baseRim;
-      const rimColor = phase === 'night' ? '#38BDF8' : phase === 'sunset' ? '#EA580C' : '#FEF08A';
-      tempColor.set(rimColor);
-      rimRef.current.color.lerp(tempColor, lerpRate);
-      rimRef.current.intensity += (rimIntensity - rimRef.current.intensity) * lerpRate;
-    }
-
-
-    // 5. Nội suy màu sắc vòm trời, sương mù khí quyển và cường độ IBL môi trường
-    if (state.scene) {
-      if (state.scene.fog && 'isFog' in state.scene.fog) {
-        const fog = state.scene.fog as Fog;
-        tempColor.set(preset.fogColor);
-        fog.color.lerp(tempColor, lerpRate);
-        fog.near += (preset.fogNear - fog.near) * lerpRate;
-        fog.far += (preset.fogFar - fog.far) * lerpRate;
-      }
-
-      if (state.scene.background && 'isColor' in state.scene.background) {
-        tempColor.set(preset.skyColor);
-        (state.scene.background as Color).lerp(tempColor, lerpRate);
-      }
-
-      const baseEnvIntensity = phase === 'night' ? 0.16 : phase === 'sunset' ? 0.28 : 0.75;
-      const targetEnvIntensity = isAuctionActive ? 0.12 : baseEnvIntensity;
-      if (typeof state.scene.environmentIntensity !== 'number') {
-        state.scene.environmentIntensity = 1.0;
-      }
-      state.scene.environmentIntensity += (targetEnvIntensity - state.scene.environmentIntensity) * lerpRate;
-    }
+    updateDirectLights(sunRef.current, fillRef.current, rimRef.current, preset, phase, isAuctionActive, lerpRate, tempVec, tempColor);
+    updateDiffuseAndAtmosphere(ambientRef.current, hemiRef.current, state.scene, preset, phase, isAuctionActive, dt, lerpRate, tempColor);
   });
 
   return (
@@ -195,10 +202,16 @@ export function TimeOfDayLighting(): React.ReactElement {
       <directionalLight
         ref={rimRef}
         position={[-10, 18, -24]}
-        color="#FEF08A"
+        color="#F8FAFC"
         intensity={0.12}
       />
 
+      {/* 8. Daylight Top-down Fill Light: Khử triệt để bóng tối sầm khi zoom cận cảnh vào bàn cờ */}
+      <directionalLight
+        position={[0, 30, 0]}
+        intensity={phase === 'day' ? (isAuctionActive ? 0.05 : 0.25) : 0}
+        color="#F8FAFC"
+      />
     </group>
   );
 }

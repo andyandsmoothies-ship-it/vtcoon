@@ -230,13 +230,18 @@ describe('[CONTRACT-TEST][TC-IMP53/MSS][UC-IMP53] Cầu Ba Son Sa Bàn & Xúc X�
     expect(useGameStore.getState().isRolling).toBe(false);
   });
 
-  it('[TC-IMP53.10/MSS][Facet2-Reactivity] DiceTray duy trì sự hiện diện của xúc xắc ruby trong render tree kể cả khi isRolling = false', () => {
+  it('[TC-IMP53.10/MSS][Facet2-Reactivity] DiceTray ẩn xúc xắc khi isRolling = false (idle) và chỉ kết xuất xúc xắc ruby khi isRolling = true', () => {
     useGameStore.setState({ isRolling: false, currentTurnPlayerId: 'p1' });
 
-    const markup = renderToStaticMarkup(React.createElement(DiceTray));
-    const hasRubyDie = markup.includes('#DC2626') || markup.includes('#B91C1C');
+    const idleMarkup = renderToStaticMarkup(React.createElement(DiceTray));
+    const hasRubyDieWhenIdle = idleMarkup.includes('#DC2626') || idleMarkup.includes('#B91C1C');
+    expect(hasRubyDieWhenIdle).toBe(false);
 
-    expect(hasRubyDie).toBe(true);
+    useGameStore.setState({ isRolling: true, currentTurnPlayerId: 'p1' });
+
+    const rollingMarkup = renderToStaticMarkup(React.createElement(DiceTray));
+    const hasRubyDieWhenRolling = rollingMarkup.includes('#DC2626') || rollingMarkup.includes('#B91C1C');
+    expect(hasRubyDieWhenRolling).toBe(true);
   });
 
   it('[TC-IMP53.11/MSS][Facet2-Reactivity] Khi quân cờ chạm đất completePawnMove, trạng thái isRolling không bị thay đổi và cao độ xúc xắc giữ nguyên', () => {

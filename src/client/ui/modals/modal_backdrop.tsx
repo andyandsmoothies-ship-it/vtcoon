@@ -2,7 +2,7 @@
 import React, { useEffect, useCallback, useRef } from 'react';
 
 export interface ModalBackdropProps {
-  readonly children: React.ReactNode;
+  readonly children?: React.ReactNode;
   readonly onClose?: () => void;
   readonly title?: string;
   readonly fullScreen?: boolean;
@@ -83,10 +83,10 @@ export function ModalBackdrop({
   };
 
   const backdropClasses = fullScreen
-    ? 'fixed inset-0 bg-slate-900/15 z-20 flex items-stretch justify-stretch p-0 pointer-events-none select-none'
+    ? 'fixed inset-0 bg-slate-950/60 z-30 flex items-stretch justify-stretch p-0 pointer-events-none select-none'
     : center
-    ? 'fixed inset-0 bg-slate-900/15 z-20 flex items-center justify-center p-4 pointer-events-auto select-none'
-    : 'fixed inset-0 bg-slate-900/15 z-20 flex items-center justify-center md:justify-end p-4 md:pr-10 pointer-events-auto select-none';
+    ? 'fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-30 flex items-center justify-center p-4 pointer-events-auto select-none'
+    : 'fixed inset-0 bg-slate-950/60 z-30 flex items-center justify-center md:justify-end p-4 md:pr-10 pointer-events-auto select-none';
 
   return (
     <div

@@ -98,7 +98,7 @@ function handleWsError(
   ctx.onError?.(msg.reasonCode);
 }
 
-export interface HandshakeOptions {
+interface HandshakeOptions {
   readonly roomCode: string;
   readonly playerId: string;
   readonly isHost?: boolean;

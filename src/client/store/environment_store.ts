@@ -23,12 +23,12 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayPhase, LightingPreset> = {
   day: {
     sunPosition: [-22, 36, 20],
     sunColor: '#FFFDF5',
-    sunIntensity: 0.78,
+    sunIntensity: 0.80,
     ambientColor: '#F0F9FF',
-    ambientIntensity: 0.18,
+    ambientIntensity: 0.20,
     hemiSkyColor: '#BAE6FD',
-    hemiGroundColor: '#FEF3C7',
-    hemiIntensity: 0.12,
+    hemiGroundColor: '#DCFCE7',
+    hemiIntensity: 0.14,
 
     skyColor: '#7DD3FC',
     fogColor: '#BAE6FD',

@@ -1066,66 +1066,93 @@ function buildPawnYacht() {
   const root = new THREE.Group();
   root.name = 'Pawn_Yacht_Superyacht';
 
-  const hullMat = new THREE.MeshStandardMaterial({ color: 0xF8FAFC, roughness: 0.15, metalness: 0.2 });
-  const bottomMat = new THREE.MeshStandardMaterial({ color: 0x0F172A, roughness: 0.3, metalness: 0.1 });
-  const teakMat = new THREE.MeshStandardMaterial({ color: 0x92400E, roughness: 0.6, metalness: 0.05 });
-  const glassMat = new THREE.MeshStandardMaterial({ color: 0x0284C7, roughness: 0.1, metalness: 0.8 });
-  const chromeMat = new THREE.MeshStandardMaterial({ color: 0xE2E8F0, metalness: 0.95, roughness: 0.1 });
+  const platinumMat = new THREE.MeshStandardMaterial({
+    color: 0xF1F5F9,
+    roughness: 0.15,
+    metalness: 0.92,
+    name: 'Mat_DieCastPlatinum',
+  });
+  const darkPlatinumMat = new THREE.MeshStandardMaterial({
+    color: 0x94A3B8,
+    roughness: 0.18,
+    metalness: 0.90,
+    name: 'Mat_DieCastPlatinumDark',
+  });
+  const goldTrimMat = new THREE.MeshStandardMaterial({
+    color: 0xF59E0B,
+    roughness: 0.18,
+    metalness: 0.90,
+    name: 'Mat_DieCastGoldTrim',
+  });
 
-  // Weighted display pedestal base (Cylinder 24 segs = 96 tris)
-  const pedestal = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.40, 0.06, 24), chromeMat);
-  pedestal.position.y = 0.03;
-  root.add(pedestal);
+  // Stepped weighted base (2 x Cylinder 24 segs = 192 tris)
+  const base1 = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.40, 0.08, 24), platinumMat);
+  base1.position.y = 0.04;
+  root.add(base1);
+
+  const base2 = new THREE.Mesh(new THREE.CylinderGeometry(0.30, 0.36, 0.08, 24), darkPlatinumMat);
+  base2.position.y = 0.12;
+  root.add(base2);
+
+  // Base collar ring (Cylinder 24 segs = 96 tris)
+  const collar = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.30, 0.06, 24), goldTrimMat);
+  collar.position.y = 0.19;
+  root.add(collar);
 
   // Lower hull wedge (Cone 4 segs = 24 tris)
-  const bowKeel = new THREE.Mesh(new THREE.ConeGeometry(0.24, 0.65, 4), bottomMat);
-  bowKeel.position.set(0, 0.14, 0.38);
+  const bowKeel = new THREE.Mesh(new THREE.ConeGeometry(0.24, 0.65, 4), darkPlatinumMat);
+  bowKeel.position.set(0, 0.30, 0.38);
   bowKeel.rotation.x = Math.PI / 2;
   bowKeel.rotation.y = Math.PI / 4;
   root.add(bowKeel);
 
   // Main hull body (Box 12 tris)
-  const mainHull = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.14, 0.70), hullMat);
-  mainHull.position.set(0, 0.14, -0.05);
+  const mainHull = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.14, 0.70), platinumMat);
+  mainHull.position.set(0, 0.30, -0.05);
   root.add(mainHull);
 
+  // Gold waterline accent trim (12 tris)
+  const waterlineTrim = new THREE.Mesh(new THREE.BoxGeometry(0.365, 0.02, 0.705), goldTrimMat);
+  waterlineTrim.position.set(0, 0.30, -0.05);
+  root.add(waterlineTrim);
+
   // Transom swim platform (12 tris)
-  const transom = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.04, 0.16), teakMat);
-  transom.position.set(0, 0.10, -0.45);
+  const transom = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.04, 0.16), goldTrimMat);
+  transom.position.set(0, 0.26, -0.45);
   root.add(transom);
 
-  // Teak main deck (12 tris)
-  const mainDeck = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.03, 0.65), teakMat);
-  mainDeck.position.set(0, 0.22, -0.05);
+  // Platinum main deck (12 tris)
+  const mainDeck = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.03, 0.65), darkPlatinumMat);
+  mainDeck.position.set(0, 0.38, -0.05);
   root.add(mainDeck);
 
-  // Salon superstructure tier 1 (Box 12 tris + 8 windows = 60 tris)
-  const salon1 = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.12, 0.48), hullMat);
-  salon1.position.set(0, 0.29, -0.02);
+  // Salon superstructure tier 1 (Box 12 tris + gold trim 12 tris)
+  const salon1 = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.12, 0.48), platinumMat);
+  salon1.position.set(0, 0.45, -0.02);
   root.add(salon1);
 
-  const salonGlass = new THREE.Mesh(new THREE.BoxGeometry(0.29, 0.07, 0.44), glassMat);
-  salonGlass.position.set(0, 0.30, -0.02);
-  root.add(salonGlass);
+  const salonTrim = new THREE.Mesh(new THREE.BoxGeometry(0.285, 0.04, 0.44), goldTrimMat);
+  salonTrim.position.set(0, 0.46, -0.02);
+  root.add(salonTrim);
 
   // Flybridge tier 2 (Box 12 tris)
-  const bridge = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.10, 0.32), hullMat);
-  bridge.position.set(0, 0.40, -0.04);
+  const bridge = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.10, 0.32), platinumMat);
+  bridge.position.set(0, 0.56, -0.04);
   root.add(bridge);
 
-  const bridgeGlass = new THREE.Mesh(new THREE.BoxGeometry(0.23, 0.06, 0.26), glassMat);
-  bridgeGlass.position.set(0, 0.41, -0.02);
-  root.add(bridgeGlass);
+  const bridgeTrim = new THREE.Mesh(new THREE.BoxGeometry(0.225, 0.03, 0.26), goldTrimMat);
+  bridgeTrim.position.set(0, 0.57, -0.02);
+  root.add(bridgeTrim);
 
   // Radar arch / Mast (Cylinder 12 segs = 48 tris)
-  const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.02, 0.25, 12), chromeMat);
-  mast.position.set(0, 0.56, -0.12);
+  const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.02, 0.25, 12), goldTrimMat);
+  mast.position.set(0, 0.72, -0.12);
   root.add(mast);
 
   // Satellite radar domes (2 x Sphere 10x10 = 360 tris)
   [-0.06, 0.06].forEach((sx) => {
-    const radome = new THREE.Mesh(new THREE.SphereGeometry(0.04, 10, 10), hullMat);
-    radome.position.set(sx, 0.52, -0.15);
+    const radome = new THREE.Mesh(new THREE.SphereGeometry(0.04, 10, 10), platinumMat);
+    radome.position.set(sx, 0.68, -0.15);
     root.add(radome);
   });
 
@@ -1136,44 +1163,65 @@ function buildPawnCar() {
   const root = new THREE.Group();
   root.name = 'Pawn_Car_Roadster';
 
-  const bodyMat = new THREE.MeshStandardMaterial({ color: 0xDC2626, roughness: 0.18, metalness: 0.1 });
-  const chromeMat = new THREE.MeshStandardMaterial({ color: 0xF1F5F9, metalness: 0.95, roughness: 0.1 });
-  const tireMat = new THREE.MeshStandardMaterial({ color: 0x1E293B, roughness: 0.8, metalness: 0.05 });
-  const seatMat = new THREE.MeshStandardMaterial({ color: 0x78350F, roughness: 0.6, metalness: 0.1 });
-  const glassMat = new THREE.MeshStandardMaterial({ color: 0xBAE6FD, roughness: 0.1, metalness: 0.9 });
+  const brassMat = new THREE.MeshStandardMaterial({
+    color: 0xF59E0B,
+    metalness: 0.9,
+    roughness: 0.18,
+    name: 'Mat_BrassCar',
+  });
+  const darkBrassMat = new THREE.MeshStandardMaterial({
+    color: 0xB45309,
+    metalness: 0.9,
+    roughness: 0.2,
+    name: 'Mat_DarkBrassCar',
+  });
+  const chromeMat = new THREE.MeshStandardMaterial({
+    color: 0xE2E8F0,
+    metalness: 0.92,
+    roughness: 0.15,
+    name: 'Mat_ChromeCar',
+  });
 
-  // Display pedestal (Cylinder 24 segs = 96 tris)
-  const pedestal = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.42, 0.05, 24), chromeMat);
-  pedestal.position.y = 0.025;
-  root.add(pedestal);
+  // Stepped weighted base (2 x Cylinder 24 segs = 192 tris)
+  const base1 = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.40, 0.08, 24), brassMat);
+  base1.position.y = 0.04;
+  root.add(base1);
+
+  const base2 = new THREE.Mesh(new THREE.CylinderGeometry(0.30, 0.36, 0.08, 24), darkBrassMat);
+  base2.position.y = 0.12;
+  root.add(base2);
+
+  // Base collar ring (Cylinder 24 segs = 96 tris)
+  const collar = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.30, 0.06, 24), brassMat);
+  collar.position.y = 0.19;
+  root.add(collar);
 
   // Car chassis & main body (Box 12 tris)
-  const chassis = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.14, 0.62), bodyMat);
-  chassis.position.set(0, 0.16, 0);
+  const chassis = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.14, 0.62), brassMat);
+  chassis.position.set(0, 0.31, 0);
   root.add(chassis);
 
   // Engine hood torpedo taper (Cone 4 segs = 24 tris)
-  const hood = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.32, 4), bodyMat);
-  hood.position.set(0, 0.17, 0.38);
+  const hood = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.32, 4), brassMat);
+  hood.position.set(0, 0.32, 0.38);
   hood.rotation.x = Math.PI / 2;
   hood.rotation.y = Math.PI / 4;
   root.add(hood);
 
   // Chrome Radiator grille (Box 12 tris)
   const grille = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.15, 0.04), chromeMat);
-  grille.position.set(0, 0.17, 0.52);
+  grille.position.set(0, 0.32, 0.52);
   root.add(grille);
 
-  // 4 Wheels: each wheel is tire Cylinder 16 segs (64 tris) + chrome rim (64 tris) = 128 tris x 4 = 512 tris!
-  // With 12 segs: 48 tris x 4 = 192 tris for tires, plus chrome hubcaps 192 tris = 384 tris!
+  // 4 Wheels: die-cast wire-spoke metal wheels (Cylinders 12 segs)
   const wheelPositions = [
-    [-0.16, 0.12, 0.22],
-    [0.16, 0.12, 0.22],
-    [-0.16, 0.12, -0.22],
-    [0.16, 0.12, -0.22],
+    [-0.16, 0.27, 0.22],
+    [0.16, 0.27, 0.22],
+    [-0.16, 0.27, -0.22],
+    [0.16, 0.27, -0.22],
   ];
   wheelPositions.forEach(([wx, wy, wz]) => {
-    const tire = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.05, 12), tireMat);
+    const tire = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.05, 12), darkBrassMat);
     tire.rotation.z = Math.PI / 2;
     tire.position.set(wx, wy, wz);
     root.add(tire);
@@ -1184,14 +1232,14 @@ function buildPawnCar() {
     root.add(rim);
   });
 
-  // Cockpit interior & seat (24 tris)
-  const seat = new THREE.Mesh(new THREE.BoxGeometry(0.20, 0.10, 0.16), seatMat);
-  seat.position.set(0, 0.22, -0.06);
+  // Cockpit interior & seat (cast metal, no leather)
+  const seat = new THREE.Mesh(new THREE.BoxGeometry(0.20, 0.10, 0.16), darkBrassMat);
+  seat.position.set(0, 0.37, -0.06);
   root.add(seat);
 
-  // Windshield (Box 12 tris)
-  const windshield = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.08, 0.02), glassMat);
-  windshield.position.set(0, 0.26, 0.06);
+  // Windshield (cast metal, no glass)
+  const windshield = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.08, 0.02), chromeMat);
+  windshield.position.set(0, 0.41, 0.06);
   windshield.rotation.x = -Math.PI / 6;
   root.add(windshield);
 
@@ -1199,9 +1247,207 @@ function buildPawnCar() {
   [-0.09, 0.09].forEach((hx) => {
     const lamp = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.03, 10), chromeMat);
     lamp.rotation.x = Math.PI / 2;
-    lamp.position.set(hx, 0.18, 0.51);
+    lamp.position.set(hx, 0.33, 0.51);
     root.add(lamp);
   });
+
+  return root;
+}
+
+function buildPawnDog() {
+  const root = new THREE.Group();
+  root.name = 'Pawn_Dog_Corgi';
+
+  const silverMat = new THREE.MeshStandardMaterial({
+    color: 0xE2E8F0,
+    metalness: 0.95,
+    roughness: 0.12,
+    name: 'Mat_SilverDog',
+  });
+  const darkSilverMat = new THREE.MeshStandardMaterial({
+    color: 0xCBD5E1,
+    metalness: 0.92,
+    roughness: 0.15,
+    name: 'Mat_DarkSilverDog',
+  });
+  const darkMat = new THREE.MeshStandardMaterial({
+    color: 0x0F172A,
+    roughness: 0.2,
+    metalness: 0.8,
+    name: 'Mat_DarkEyeNose',
+  });
+  const redMat = new THREE.MeshStandardMaterial({
+    color: 0xDC2626,
+    roughness: 0.3,
+    metalness: 0.3,
+    name: 'Mat_RedCollar',
+  });
+  const goldMat = new THREE.MeshStandardMaterial({
+    color: 0xF59E0B,
+    metalness: 0.9,
+    roughness: 0.15,
+    name: 'Mat_GoldBell',
+  });
+
+  // NO PEDESTAL BASE (Zero-Pedestal Invariant)
+
+  // 4 Short Chubby Legs (4 x Cylinder 6 segs = 96 tris)
+  [-0.065, 0.065].forEach((lx) => {
+    [-0.07, 0.07].forEach((lz) => {
+      const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.024, 0.028, 0.08, 6), darkSilverMat);
+      leg.position.set(lx, 0.04, lz);
+      root.add(leg);
+    });
+  });
+
+  // Plump Round Body (Sphere 10x10 = 180 tris)
+  const body = new THREE.Mesh(new THREE.SphereGeometry(0.13, 10, 10), silverMat);
+  body.position.set(0, 0.13, 0);
+  root.add(body);
+
+  // Big Cute Head with Chubby Cheeks (Sphere 10x10 = 180 tris)
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.11, 10, 10), silverMat);
+  head.position.set(0, 0.23, 0.07);
+  root.add(head);
+
+  // Snout (Sphere 6x6 = 60 tris)
+  const snout = new THREE.Mesh(new THREE.SphereGeometry(0.035, 6, 6), darkSilverMat);
+  snout.position.set(0, 0.21, 0.14);
+  root.add(snout);
+
+  // Button Nose (Sphere 4x4 = 24 tris)
+  const nose = new THREE.Mesh(new THREE.SphereGeometry(0.015, 4, 4), darkMat);
+  nose.position.set(0, 0.22, 0.17);
+  root.add(nose);
+
+  // Expressive Dark Eyes (2 x Sphere 4x4 = 48 tris)
+  [-0.04, 0.04].forEach((ex) => {
+    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.015, 4, 4), darkMat);
+    eye.position.set(ex, 0.25, 0.15);
+    root.add(eye);
+  });
+
+  // Upright Rounded Corgi Ears (2 x Cone 6 segs = 24 tris)
+  [-0.06, 0.06].forEach((ex) => {
+    const ear = new THREE.Mesh(new THREE.ConeGeometry(0.035, 0.08, 6), darkSilverMat);
+    ear.position.set(ex, 0.33, 0.04);
+    ear.rotation.z = ex > 0 ? -0.15 : 0.15;
+    root.add(ear);
+  });
+
+  // Player Accent Collar (Torus 6x12 = 72 tris)
+  const collar = new THREE.Mesh(new THREE.TorusGeometry(0.08, 0.014, 6, 12), redMat);
+  collar.position.set(0, 0.18, 0.04);
+  collar.rotation.x = Math.PI / 2;
+  root.add(collar);
+
+  // Golden Bell (Sphere 6x6 = 60 tris)
+  const bell = new THREE.Mesh(new THREE.SphereGeometry(0.022, 6, 6), goldMat);
+  bell.position.set(0, 0.17, 0.12);
+  root.add(bell);
+
+  // Wagging Tail (Cylinder 6 segs = 24 tris)
+  const tail = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.025, 0.07, 6), darkSilverMat);
+  tail.position.set(0, 0.15, -0.12);
+  tail.rotation.x = -Math.PI / 4;
+  root.add(tail);
+
+  return root;
+}
+
+function buildPawnCat() {
+  const root = new THREE.Group();
+  root.name = 'Pawn_Cat_Fortune';
+
+  const silverMat = new THREE.MeshStandardMaterial({
+    color: 0xE2E8F0,
+    metalness: 0.95,
+    roughness: 0.12,
+    name: 'Mat_SilverCat',
+  });
+  const darkSilverMat = new THREE.MeshStandardMaterial({
+    color: 0xCBD5E1,
+    metalness: 0.92,
+    roughness: 0.15,
+    name: 'Mat_DarkSilverCat',
+  });
+  const darkMat = new THREE.MeshStandardMaterial({
+    color: 0x0F172A,
+    roughness: 0.2,
+    metalness: 0.8,
+    name: 'Mat_DarkEyeNose',
+  });
+  const pinkMat = new THREE.MeshStandardMaterial({
+    color: 0xF43F5E,
+    roughness: 0.3,
+    metalness: 0.2,
+    name: 'Mat_PinkNose',
+  });
+  const blueMat = new THREE.MeshStandardMaterial({
+    color: 0x3B82F6,
+    roughness: 0.3,
+    metalness: 0.3,
+    name: 'Mat_BlueBib',
+  });
+  const goldMat = new THREE.MeshStandardMaterial({
+    color: 0xF59E0B,
+    metalness: 0.9,
+    roughness: 0.15,
+    name: 'Mat_GoldCoin',
+  });
+
+  // NO PEDESTAL BASE (Zero-Pedestal Invariant)
+
+  // Plump Sitting Body (Sphere 10x10 = 180 tris)
+  const body = new THREE.Mesh(new THREE.SphereGeometry(0.14, 10, 10), silverMat);
+  body.position.set(0, 0.13, 0);
+  root.add(body);
+
+  // Head (Sphere 10x10 = 180 tris)
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.11, 10, 10), silverMat);
+  head.position.set(0, 0.25, 0.02);
+  root.add(head);
+
+  // Pointed Cat Ears (2 x Cone 6 segs = 24 tris)
+  [-0.06, 0.06].forEach((ex) => {
+    const ear = new THREE.Mesh(new THREE.ConeGeometry(0.03, 0.065, 6), darkSilverMat);
+    ear.position.set(ex, 0.34, 0.02);
+    ear.rotation.z = ex > 0 ? -0.18 : 0.18;
+    root.add(ear);
+  });
+
+  // Expressive Eyes (2 x Sphere 4x4 = 48 tris)
+  [-0.045, 0.045].forEach((ex) => {
+    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.015, 4, 4), darkMat);
+    eye.position.set(ex, 0.26, 0.11);
+    root.add(eye);
+  });
+
+  // Cute Pink Nose (Sphere 4x4 = 24 tris)
+  const nose = new THREE.Mesh(new THREE.SphereGeometry(0.012, 4, 4), pinkMat);
+  nose.position.set(0, 0.24, 0.12);
+  root.add(nose);
+
+  // Waving Right Arm (Cylinder 6 segs + Sphere 6x6 = 24 + 60 = 84 tris)
+  const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.024, 0.03, 0.11, 6), silverMat);
+  arm.position.set(0.085, 0.23, 0.05);
+  arm.rotation.set(0.4, 0, -0.3);
+  root.add(arm);
+
+  const paw = new THREE.Mesh(new THREE.SphereGeometry(0.028, 6, 6), silverMat);
+  paw.position.set(0.115, 0.29, 0.08);
+  root.add(paw);
+
+  // Left Paw with Golden Koban Coin (Cylinder 10 segs = 40 tris)
+  const coin = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.015, 10), goldMat);
+  coin.position.set(-0.05, 0.14, 0.11);
+  coin.rotation.set(Math.PI / 4, 0, -Math.PI / 6);
+  root.add(coin);
+
+  // Player Accent Bib (Cylinder 8 segs = 32 tris)
+  const bib = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.075, 0.025, 8), blueMat);
+  bib.position.set(0, 0.19, 0.08);
+  root.add(bib);
 
   return root;
 }
@@ -1210,77 +1456,161 @@ function buildPawnHorse() {
   const root = new THREE.Group();
   root.name = 'Pawn_Horse_Knight';
 
-  const goldMat = new THREE.MeshStandardMaterial({
-    color: 0xF59E0B,
-    metalness: 0.88,
-    roughness: 0.22,
-    name: 'Mat_KnightGold',
+  const silverMat = new THREE.MeshStandardMaterial({
+    color: 0xE2E8F0,
+    metalness: 0.95,
+    roughness: 0.12,
+    name: 'Mat_SilverHorse',
   });
-  const darkGoldMat = new THREE.MeshStandardMaterial({
-    color: 0xB45309,
-    metalness: 0.82,
+  const darkSilverMat = new THREE.MeshStandardMaterial({
+    color: 0xCBD5E1,
+    metalness: 0.92,
+    roughness: 0.15,
+    name: 'Mat_DarkSilverHorse',
+  });
+  const darkMat = new THREE.MeshStandardMaterial({
+    color: 0x0F172A,
+    roughness: 0.2,
+    metalness: 0.8,
+    name: 'Mat_DarkEyeNose',
+  });
+  const greenMat = new THREE.MeshStandardMaterial({
+    color: 0x10B981,
     roughness: 0.3,
-    name: 'Mat_KnightDarkGold',
+    metalness: 0.2,
+    name: 'Mat_GreenSaddle',
   });
 
-  // Stepped weighted base (2 x Cylinder 24 segs = 192 tris)
-  const b1 = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.40, 0.08, 24), goldMat);
-  b1.position.y = 0.04;
-  root.add(b1);
+  // NO PEDESTAL BASE (Zero-Pedestal Invariant)
 
-  const b2 = new THREE.Mesh(new THREE.CylinderGeometry(0.30, 0.36, 0.08, 24), darkGoldMat);
-  b2.position.y = 0.12;
-  root.add(b2);
+  // 4 Short Sturdy Legs (4 x Cylinder 6 segs = 96 tris)
+  [-0.065, 0.065].forEach((lx) => {
+    [-0.07, 0.07].forEach((lz) => {
+      const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.028, 0.08, 6), darkSilverMat);
+      leg.position.set(lx, 0.04, lz);
+      root.add(leg);
+    });
+  });
 
-  // Pedestal collar ring (Cylinder 24 segs = 96 tris)
-  const collar = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.30, 0.06, 24), goldMat);
-  collar.position.y = 0.19;
-  root.add(collar);
+  // Round Chubby Body (Sphere 10x10 = 180 tris)
+  const body = new THREE.Mesh(new THREE.SphereGeometry(0.13, 10, 10), silverMat);
+  body.position.set(0, 0.13, -0.01);
+  root.add(body);
 
-  // Chest & Torso (Cylinder 16 segs = 64 tris)
-  const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.24, 0.45, 16), goldMat);
-  torso.position.set(0, 0.42, -0.04);
-  torso.rotation.x = Math.PI / 16;
-  root.add(torso);
+  // Saddle Blanket (Box 12 tris)
+  const saddle = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.035, 0.13), greenMat);
+  saddle.position.set(0, 0.19, -0.01);
+  root.add(saddle);
 
-  // Arched neck (Box 12 tris)
-  const neck = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.38, 0.24), goldMat);
-  neck.position.set(0, 0.68, 0.04);
-  neck.rotation.x = -Math.PI / 10;
-  root.add(neck);
-
-  // Sculpted head & muzzle (Box 12 tris)
-  const head = new THREE.Mesh(new THREE.BoxGeometry(0.17, 0.22, 0.34), goldMat);
-  head.position.set(0, 0.88, 0.15);
-  head.rotation.x = Math.PI / 8;
+  // Head (Sphere 10x10 = 180 tris)
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.09, 10, 10), silverMat);
+  head.position.set(0, 0.25, 0.08);
   root.add(head);
 
-  // Muzzle nose (Cone 8 segs = 24 tris)
-  const muzzle = new THREE.Mesh(new THREE.ConeGeometry(0.10, 0.18, 8), darkGoldMat);
-  muzzle.position.set(0, 0.81, 0.34);
-  muzzle.rotation.x = Math.PI / 3;
+  // Muzzle (Box 12 tris)
+  const muzzle = new THREE.Mesh(new THREE.BoxGeometry(0.075, 0.065, 0.08), silverMat);
+  muzzle.position.set(0, 0.21, 0.14);
   root.add(muzzle);
 
-  // Pointed ears (2 x Cone 8 segs = 48 tris)
-  [-0.06, 0.06].forEach((ex) => {
-    const ear = new THREE.Mesh(new THREE.ConeGeometry(0.04, 0.14, 8), darkGoldMat);
-    ear.position.set(ex, 1.05, 0.06);
-    ear.rotation.x = -Math.PI / 12;
+  // Friendly Dark Eyes (2 x Sphere 4x4 = 48 tris)
+  [-0.045, 0.045].forEach((ex) => {
+    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.015, 4, 4), darkMat);
+    eye.position.set(ex, 0.26, 0.13);
+    root.add(eye);
+  });
+
+  // Pointed Ears (2 x Cone 4 segs = 16 tris)
+  [-0.035, 0.035].forEach((ex) => {
+    const ear = new THREE.Mesh(new THREE.ConeGeometry(0.02, 0.06, 4), darkSilverMat);
+    ear.position.set(ex, 0.33, 0.06);
+    ear.rotation.z = ex > 0 ? -0.15 : 0.15;
     root.add(ear);
   });
 
-  // Mane ridges (4 stacked boxes = 48 tris)
-  for (let i = 0; i < 4; i++) {
-    const mane = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.10, 0.12), darkGoldMat);
-    mane.position.set(0, 0.60 + i * 0.09, -0.10 - i * 0.02);
-    mane.rotation.x = Math.PI / 8;
+  // Mane ridges (3 stacked boxes = 36 tris)
+  [-0.03, 0.01, 0.05].forEach((z, i) => {
+    const mane = new THREE.Mesh(new THREE.BoxGeometry(0.025, 0.035, 0.035), darkSilverMat);
+    mane.position.set(0, 0.22 + i * 0.04, z - 0.04);
+    mane.rotation.x = 0.2;
     root.add(mane);
-  }
+  });
 
-  // Eyes (2 x Sphere 8x8 = 112 tris)
-  [-0.09, 0.09].forEach((ex) => {
-    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.025, 8, 8), darkGoldMat);
-    eye.position.set(ex, 0.90, 0.18);
+  return root;
+}
+
+function buildPawnElephant() {
+  const root = new THREE.Group();
+  root.name = 'Pawn_Elephant_Royal';
+
+  const silverMat = new THREE.MeshStandardMaterial({
+    color: 0xE2E8F0,
+    metalness: 0.95,
+    roughness: 0.12,
+    name: 'Mat_SilverElephant',
+  });
+  const darkSilverMat = new THREE.MeshStandardMaterial({
+    color: 0xCBD5E1,
+    metalness: 0.92,
+    roughness: 0.15,
+    name: 'Mat_DarkSilverElephant',
+  });
+  const darkMat = new THREE.MeshStandardMaterial({
+    color: 0x0F172A,
+    roughness: 0.2,
+    metalness: 0.8,
+    name: 'Mat_DarkEyeNose',
+  });
+  const purpleMat = new THREE.MeshStandardMaterial({
+    color: 0xA855F7,
+    roughness: 0.3,
+    metalness: 0.2,
+    name: 'Mat_PurpleBlanket',
+  });
+
+  // NO PEDESTAL BASE (Zero-Pedestal Invariant)
+
+  // 4 Pillared Legs (4 x Cylinder 6 segs = 96 tris)
+  [-0.07, 0.07].forEach((lx) => {
+    [-0.07, 0.07].forEach((lz) => {
+      const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.035, 0.08, 6), darkSilverMat);
+      leg.position.set(lx, 0.04, lz);
+      root.add(leg);
+    });
+  });
+
+  // Plump Round Body (Sphere 10x10 = 180 tris)
+  const body = new THREE.Mesh(new THREE.SphereGeometry(0.14, 10, 10), silverMat);
+  body.position.set(0, 0.14, -0.02);
+  root.add(body);
+
+  // Royal Blanket (Box 12 tris)
+  const blanket = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.035, 0.14), purpleMat);
+  blanket.position.set(0, 0.22, -0.02);
+  root.add(blanket);
+
+  // Head (Sphere 10x10 = 180 tris)
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.10, 10, 10), silverMat);
+  head.position.set(0, 0.23, 0.07);
+  root.add(head);
+
+  // Upraised Trunk (Cylinder 8 segs = 32 tris)
+  const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.035, 0.16, 8), darkSilverMat);
+  trunk.position.set(0, 0.28, 0.17);
+  trunk.rotation.x = 0.8;
+  root.add(trunk);
+
+  // Soft Flapping Ears (2 x Box 12 tris = 24 tris)
+  [-0.10, 0.10].forEach((ex) => {
+    const ear = new THREE.Mesh(new THREE.BoxGeometry(0.015, 0.09, 0.07), darkSilverMat);
+    ear.position.set(ex, 0.24, 0.07);
+    ear.rotation.y = ex > 0 ? -0.4 : 0.4;
+    root.add(ear);
+  });
+
+  // Friendly Dark Eyes (2 x Sphere 4x4 = 48 tris)
+  [-0.05, 0.05].forEach((ex) => {
+    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.015, 4, 4), darkMat);
+    eye.position.set(ex, 0.25, 0.13);
     root.add(eye);
   });
 
@@ -1846,11 +2176,16 @@ async function generateAllModels() {
     { scene: buildBuildingC2(), path: 'public/models/buildings/building_c2.glb' },
     { scene: buildBuildingC3(), path: 'public/models/buildings/building_c3.glb' },
 
-    // Luxury Pawns
+    // Luxury Pawns (IMP-83 Silver Animals)
+    { scene: buildPawnDog(), path: 'public/models/pawns/pawn_dog.glb' },
+    { scene: buildPawnCat(), path: 'public/models/pawns/pawn_cat.glb' },
+    { scene: buildPawnHorse(), path: 'public/models/pawns/pawn_horse.glb' },
+    { scene: buildPawnElephant(), path: 'public/models/pawns/pawn_elephant.glb' },
+
+    // Legacy Luxury Pawns (Retained for Contract & Backward-Compatibility)
     { scene: buildPawnTower(), path: 'public/models/pawns/pawn_tower.glb' },
     { scene: buildPawnYacht(), path: 'public/models/pawns/pawn_yacht.glb' },
     { scene: buildPawnCar(), path: 'public/models/pawns/pawn_car.glb' },
-    { scene: buildPawnHorse(), path: 'public/models/pawns/pawn_horse.glb' },
 
     // Landmarks
     { scene: buildBenThanhLandmark(), path: 'public/models/landmarks/landmark_ben_thanh.glb' },

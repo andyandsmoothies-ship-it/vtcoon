@@ -173,8 +173,3 @@ export type WsServerMessage =
 export function encodeMsg(msg: WsServerMessage): string {
   return JSON.stringify(msg);
 }
-
-// Hàm helper: parse JSON string thành WsClientMessage (throws nếu malformed)
-export function decodeMsg(raw: string): WsClientMessage {
-  return JSON.parse(raw) as WsClientMessage;
-}

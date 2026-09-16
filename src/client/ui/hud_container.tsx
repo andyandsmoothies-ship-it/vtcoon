@@ -4,7 +4,6 @@ import { TopBar } from './top_bar';
 import { PlayerHudList } from './player_hud_list';
 import { ActionDock, type ActionDockProps } from './action_dock';
 import { ModalHost } from './modals/modal_host';
-import { SocialEmotesTray } from './social_emotes_tray';
 import { FloatingNumbersOverlay } from './floating_numbers';
 import { ActivityFeedSidebar } from './activity_feed_sidebar';
 import { TelemetryBadge } from './telemetry/telemetry_badge';
@@ -27,45 +26,50 @@ export function HudContainer({
   onEndTurn,
   localPlayerId,
   onIntent,
-  onSendEmote,
+  onSendEmote: _onSendEmote,
   onLeaveRoom,
   children,
+  onBailOut: onBailOutProp,
 }: HudContainerProps): React.ReactElement {
+  const handleBailOut = onBailOutProp ?? (() => onIntent?.({ type: 'INTENT_BAIL_OUT' }));
+
   return (
     <div
-      className="fixed inset-0 pointer-events-none z-10 select-none flex flex-col justify-between p-4 overflow-hidden"
-      id="vtcoon-hud-overlay"
-      role="presentation"
+      className="fixed inset-0 pointer-events-none flex flex-col justify-between p-3 md:p-6 z-10 select-none font-sans"
+      data-testid="hud-container"
     >
       {/* Tầng đỉnh: Top Bar thông tin vòng đấu, timer, kho bạc */}
       <TopBar onLeaveRoom={onLeaveRoom} />
 
-      {/* Huy hiệu Giám Sát Thời Gian Thực & Sức Khỏe Bất Biến (Top-Right) */}
-      <div className="absolute top-4 right-4 z-20 pointer-events-auto hidden sm:block">
-        <TelemetryBadge />
-      </div>
-
       {/* Tầng hiển thị số tiền bay (Floating Text / Numbers) */}
       <FloatingNumbersOverlay />
 
-      {/* Tầng giữa: Danh sách thẻ người chơi bên trái & custom modal / overlays */}
-      <div className="flex-1 flex justify-between items-start pointer-events-none my-2 overflow-hidden">
-        <PlayerHudList />
+      {/* Tầng giữa: Trục giữa thông thoáng, PlayerHudList ở cạnh phải */}
+      <div className="flex-1 flex justify-end items-start pointer-events-none my-2 overflow-hidden">
         {children}
+        <PlayerHudList />
       </div>
 
-      {/* Tầng đáy: Action Dock trung tâm điều khiển thao tác & Khay Social Emotes */}
-      <footer className="w-full flex flex-col md:flex-row justify-center items-center gap-2 md:gap-3 pointer-events-none pb-2">
-        <ActionDock
-          onRollDice={onRollDice}
-          onOpenProperties={onOpenProperties}
-          onOpenTrade={onOpenTrade}
-          onOpenUpgrade={onOpenUpgrade}
-          onOpenManageProperty={onOpenManageProperty}
-          onEndTurn={onEndTurn}
-          localPlayerId={localPlayerId}
-        />
-        <SocialEmotesTray onSendEmote={onSendEmote} />
+      {/* Tầng đáy: Telemetry Badge ở góc dưới bên trái, Action Dock ở góc dưới bên phải */}
+      <footer className="w-full flex flex-row justify-center sm:justify-between items-end gap-2 md:gap-3 pointer-events-none pb-2">
+        {/* Huy hiệu Giám Sát Thời Gian Thực & Sức Khỏe Bất Biến (Bottom-Left, không che khuất ActionDock hay Player Cards) */}
+        <div className="pointer-events-auto hidden sm:block">
+          <TelemetryBadge />
+        </div>
+
+        {/* Thanh Điều Khiển Tác Vụ Cốt Lõi (Bottom-Right, thuận tay thao tác công thái học) */}
+        <div className="pointer-events-auto">
+          <ActionDock
+            onRollDice={onRollDice}
+            onOpenProperties={onOpenProperties}
+            onOpenTrade={onOpenTrade}
+            onOpenUpgrade={onOpenUpgrade}
+            onOpenManageProperty={onOpenManageProperty}
+            onEndTurn={onEndTurn}
+            onBailOut={handleBailOut}
+            localPlayerId={localPlayerId}
+          />
+        </div>
       </footer>
 
       {/* Tầng Modals Tương Tác Nghiệp Vụ (Z-20 Host) */}

@@ -2,6 +2,7 @@
 // Nguồn: docs/epics/networking/_epic_ledger.md § Slice NET-02
 import { create } from 'zustand';
 import { BotPersonality } from '../../domain/bot/bot_engine';
+import { assignRandomPlayerPawns } from '../../domain/pawn_assignment';
 import {
   MAX_LOBBY_SLOTS,
   ROOM_CODE_REGEX,
@@ -35,16 +36,21 @@ export const useLobbyStore = create<LobbyState>((set, get) => ({
       return false;
     }
 
+    const assignments = assignRandomPlayerPawns(['slot_0', 'slot_1', 'slot_2', 'slot_3'], trimmedCode);
     const slots = createDefaultSlots().map((s, i) => {
+      const assignment = assignments[i];
+      const tokenColor = assignment?.tokenColor ?? s.tokenColor;
+      const pawnSlot = assignment?.slotIndex;
+      const mascotIcon = assignment?.mascotIcon;
       if (i === 0) {
         return isHost
-          ? { ...s, playerId: pid, playerName: playerName ?? 'Chủ Phòng (P1)', isHost: true, isReady: true, isOccupied: true }
-          : { ...s, playerId: 'host_player', playerName: 'Chủ Phòng (Host)', isHost: true, isReady: true, isOccupied: true };
+          ? { ...s, playerId: pid, playerName: playerName ?? 'Chủ Phòng (P1)', isHost: true, isReady: true, isOccupied: true, tokenColor, pawnSlot, mascotIcon }
+          : { ...s, playerId: 'host_player', playerName: 'Chủ Phòng (Host)', isHost: true, isReady: true, isOccupied: true, tokenColor, pawnSlot, mascotIcon };
       }
       if (i === 1 && !isHost) {
-        return { ...s, playerId: pid, playerName: playerName ?? 'Khách Mời (P2)', isHost: false, isReady: false, isOccupied: true };
+        return { ...s, playerId: pid, playerName: playerName ?? 'Khách Mời (P2)', isHost: false, isReady: false, isOccupied: true, tokenColor, pawnSlot, mascotIcon };
       }
-      return s;
+      return { ...s, tokenColor, pawnSlot, mascotIcon };
     });
 
     set({ roomCode: trimmedCode, myPlayerId: pid, isHost, isReady: isHost, gameStarted: false, slots, errorReason: null });

@@ -32,6 +32,14 @@ import {
   executeIntentAction,
   type WssLobbyContext,
 } from './wss_lobby_handlers.js';
+import {
+  attachConnectionHandlers, bindSocketTo, sendSessionInitMsg,
+  type ConnectionHandlerDeps,
+} from './wss_connection_handler.js';
+import {
+  handleIntentMsg, handleReconnectMsg, syncRoomAfterIntent,
+  type IntentHandlerDeps, type ReconnectHandlerDeps,
+} from './wss_intent_handler.js';
 
 import type { WssServerConfig } from './wss_server_config.js';
 export type { WssServerConfig };
@@ -160,65 +168,48 @@ export class WssServer {
     if (socket.readyState === WebSocket.OPEN) socket.send(encodeMsg(msg));
   }
 
+  private get connDeps(): ConnectionHandlerDeps {
+    return {
+      rateLimiter: this.rateLimiter,
+      envelopeValidator: this.envelopeValidator,
+      sockets: this.sockets,
+      sessions: this.sessions,
+      reconnects: this.reconnects,
+      adminManager: this.adminManager,
+      rooms: this.rooms,
+      sendSafe: (s, m) => this.sendSafe(s, m),
+      route: (s, m) => this.route(s, m),
+    };
+  }
+
+  private get intentDeps(): ReconnectHandlerDeps {
+    return {
+      rooms: this.rooms,
+      intentGuard: this.intentGuard,
+      intentMutex: this.intentMutex,
+      broadcaster: this.broadcaster,
+      adminManager: this.adminManager,
+      reconnects: this.reconnects,
+      sessions: this.sessions,
+      sockets: this.sockets,
+      sendSafe: (s, m) => this.sendSafe(s, m),
+      bindSocket: (rc, pid, s) => this.bindSocket(rc, pid, s),
+      scheduleBotTurn: (rc) => this.scheduleBotTurn(rc),
+      broadcastGameOver: (rc, lb) => this.broadcastGameOver(rc, lb),
+      broadcast: (rc, m) => this.broadcast(rc, m),
+    };
+  }
+
   private handleConnection(socket: WebSocket): void {
-    socket.on('message', async (data) => {
-      if (socket.readyState !== WebSocket.OPEN) return;
-      try {
-        const rateRes = this.rateLimiter.checkLimit(socket);
-        if (!rateRes.allowed) {
-          this.sendSafe(socket, { type: 'ERROR', reasonCode: rateRes.kick ? 'ABUSE_DETECTED' : 'RATE_LIMIT_EXCEEDED' });
-          if (rateRes.kick) {
-            socket.removeAllListeners('message');
-            socket.close(1008, 'ABUSE_DETECTED');
-          }
-          return;
-        }
-
-        const validation = this.envelopeValidator.parseAndValidate(data.toString());
-        if (!validation.success) {
-          if (validation.ignore) return;
-          this.sendSafe(socket, { type: 'ERROR', reasonCode: validation.reasonCode });
-          return;
-        }
-
-        const info = this.sockets.getPlayerInfo(socket);
-        if (info) {
-          this.sessions.handlePong(info.playerId);
-          this.reconnects.cancelGracePeriod(info.roomCode, info.playerId);
-        }
-
-        await this.route(socket, validation.message);
-      } catch (err) {
-        console.error('[WssServer] Error handling message:', err);
-      }
-    });
-
-    socket.on('close', () => {
-      this.adminManager.handleDisconnect(socket);
-      this.rateLimiter.cleanup(socket);
-      const info = this.sockets.unregister(socket);
-      if (info) {
-        this.reconnects.startGracePeriod(info.roomCode, info.playerId);
-      }
-    });
+    attachConnectionHandlers(this.connDeps, socket);
   }
 
   private bindSocket(roomCode: string, playerId: string, socket: WebSocket): void {
-    this.sockets.bind(roomCode, playerId, socket);
-    this.reconnects.cancelGracePeriod(roomCode, playerId);
-    const s = this.sessions.getSession(playerId);
-    if (s) {
-      s.state = SessionState.Connected;
-      s.lastPongAt = Date.now();
-    }
-    const room = this.rooms.getRoom(roomCode);
-    const p = room?.players.find((pl) => pl.id === playerId);
-    if (room && !room.started && p) p.isBot = false;
+    bindSocketTo({ sockets: this.sockets, reconnects: this.reconnects, sessions: this.sessions, rooms: this.rooms }, roomCode, playerId, socket);
   }
 
   private sendSessionInit(socket: WebSocket, playerId: string, roomCode: string): void {
-    const token = this.reconnects.generateToken(playerId, roomCode);
-    this.sendSafe(socket, { type: 'SESSION_INIT', playerId, reconnectToken: token, roomCode });
+    sendSessionInitMsg({ reconnects: this.reconnects, sendSafe: (s, m) => this.sendSafe(s, m) }, socket, playerId, roomCode);
   }
 
   private get lobbyContext(): WssLobbyContext {
@@ -275,76 +266,11 @@ export class WssServer {
   }
 
   private handleReconnect(socket: WebSocket, msg: { reconnectToken: string; roomCode?: string }): void {
-    const verified = this.reconnects.verifyToken(msg.reconnectToken, msg.roomCode);
-    if (!verified.success) {
-      this.sendSafe(socket, { type: 'ERROR', reasonCode: verified.reasonCode });
-      return;
-    }
-    const { record } = verified;
-    const room = this.rooms.getRoom(record.roomCode);
-    if (!room) {
-      this.sendSafe(socket, { type: 'ERROR', reasonCode: 'ROOM_NOT_FOUND' });
-      return;
-    }
-    const player = room.players.find((p) => p.id === record.playerId);
-    if (!player || player.isBot) {
-      this.sendSafe(socket, { type: 'ERROR', reasonCode: 'TOKEN_EXPIRED' });
-      return;
-    }
-
-    this.reconnects.cancelGracePeriod(record.roomCode, record.playerId);
-    const session = this.sessions.getSession(record.playerId) ?? this.sessions.addSession(record.playerId);
-    session.state = SessionState.Connected;
-    session.lastPongAt = Date.now();
-
-    this.sockets.replacePlayerSocket(record.roomCode, record.playerId, socket);
-
-    this.broadcast(record.roomCode, { type: 'PLAYER_RECONNECTED', playerId: record.playerId });
-    this.broadcaster.resyncClient(record.roomCode, socket);
-    if (room.started) {
-      this.sendSafe(socket, { type: 'ROOM_STARTED', roomCode: record.roomCode });
-      this.scheduleBotTurn(record.roomCode);
-    }
+    handleReconnectMsg(this.intentDeps, socket, msg);
   }
 
   private async handleIntent(socket: WebSocket, msg: Extract<WsClientMessage, { type: 'INTENT' }>): Promise<void> {
-    const room = this.rooms.getRoom(msg.roomCode);
-    const player = room?.players.find((p) => p.id === msg.playerId);
-    const validation = validateIntentRequest(room, player, msg, this.intentGuard);
-    if (!validation.valid) {
-      if (validation.isRejection) {
-        this.sendSafe(socket, { type: 'INTENT_REJECTED', reasonCode: validation.reasonCode, playerId: msg.playerId });
-      } else {
-        this.sendSafe(socket, { type: 'ERROR', reasonCode: validation.reasonCode });
-      }
-      return;
-    }
-
-    this.bindSocket(msg.roomCode, msg.playerId, socket);
-    await this.intentMutex.runExclusive(msg.roomCode, async () => {
-      const res = executeIntentAction(this.rooms, msg.roomCode, msg.playerId, msg.intent);
-      if (!res.success) {
-        this.sendSafe(socket, { type: 'ERROR', reasonCode: (res.reason as ReasonCode) || 'INTENT_REJECTED' });
-        this.broadcaster.broadcastRoomDelta(msg.roomCode);
-        return;
-      }
-      this.adminManager.recordRoomEvent(msg.roomCode, {
-        source: player?.isBot ? 'BOT' : 'PLAYER',
-        action: msg.intent.type,
-        payloadSummary: `Người chơi ${msg.playerId}: ${msg.intent.type}`,
-      });
-      this.syncRoomStateAfterIntent(msg.roomCode);
-    });
-  }
-
-  private syncRoomStateAfterIntent(roomCode: string): void {
-    const roomAfter = this.rooms.getRoom(roomCode);
-    if (roomAfter && isRoomGameOver(roomAfter)) {
-      this.broadcastGameOver(roomCode);
-    } else {
-      this.scheduleBotTurn(roomCode);
-      this.broadcaster.broadcastRoomDelta(roomCode);
-    }
+    await handleIntentMsg(this.intentDeps, socket, msg);
   }
 
   private scheduleBotTurn(roomCode: string): void {

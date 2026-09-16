@@ -10,7 +10,7 @@ import { applyDeltaToStore, isGameRunningDelta } from './apply_delta.js';
 export { saveReconnectToken, getReconnectToken, clearReconnectToken };
 export { applyDeltaToStore, isGameRunningDelta };
 
-export interface WebSocketLike {
+interface WebSocketLike {
   readyState: number;
   send(data: string): void;
   close(): void;
@@ -54,12 +54,11 @@ import {
   handleWsMessage,
   performWsHandshake,
   type WsMessageHandlerContext,
-  type HandshakeOptions,
 } from './ws_message_handler.js';
 import { useTelemetryStore } from '../telemetry/telemetry_store.js';
 
 export { handleWsMessage, performWsHandshake };
-export type { WsMessageHandlerContext, HandshakeOptions };
+export type { WsMessageHandlerContext };
 
 export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
   const {

@@ -2,7 +2,7 @@
 // Manages standard 512x512 WebP URLs for all 28 property tiles x 4 levels
 import { PROPERTY_DEEDS } from '../../domain/property_data';
 
-export type PropertyLevel = 0 | 1 | 2 | 3;
+type PropertyLevel = 0 | 1 | 2 | 3;
 export const PROPERTY_LEVELS: readonly PropertyLevel[] = [0, 1, 2, 3] as const;
 
 export const PURCHASABLE_TILE_INDICES: readonly number[] = Array.from(

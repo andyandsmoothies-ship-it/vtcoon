@@ -1,6 +1,12 @@
 // [UI-S01/MSS] High-definition procedural Canvas Texture generator for 40 VTCoOn board tiles & Standees
 import { CanvasTexture, SRGBColorSpace, LinearFilter, LinearMipmapLinearFilter } from 'three';
-import { TILE_METADATA_MAP, formatPriceLabel, type TileMetadata } from './tile_texture_data';
+import {
+  TILE_METADATA_MAP,
+  formatPriceLabel,
+  isPropertyTile,
+  isInfrastructureTile,
+  type TileMetadata,
+} from './tile_texture_data';
 import { drawIcon } from './tile_icons';
 import { ALL_28_STAND_TILES } from '../assets/tile_assets';
 import { CORNER_DRAWERS, drawGoCorner } from './corner_tile_art';
@@ -21,58 +27,89 @@ export function getBannerTextColor(bannerColor: string): string {
   const g = parseInt(hex.substring(2, 4), 16) || 0;
   const b = parseInt(hex.substring(4, 6), 16) || 0;
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return luminance > 0.6 ? '#090D1A' : '#FFFFFF';
+  return luminance > 0.85 ? '#090D1A' : '#FFFFFF';
 }
 
-/**
- * Tạo Canvas Texture cho ô cờ thường với độ phân giải cao HiDPI 4x (1024 x 1360)
- */
-function createStandardTileTexture(index: number, meta: TileMetadata): CanvasTexture | null {
-  if (typeof document === 'undefined') return null;
-
-  // HiDPI 4x Resolution (1024 x 1360) cho chữ và vector sắc nét tuyệt đối
-  const canvas = document.createElement('canvas');
-  canvas.width = 1024;
-  canvas.height = 1360;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return null;
-
-  // Tỷ lệ tọa độ 4x giữ nguyên logic vẽ 256x340
-  ctx.scale(4, 4);
-
-  // 1. Nền giấy da ngà thượng hạng (Aged Parchment / Warm Ivory dịu mắt, chống lóa)
-  ctx.fillStyle = '#F3EEDF';
-  ctx.fillRect(0, 0, 256, 340);
-
-
-  // 2. Dải màu nhận diện vùng
+function drawPropertyHeader(ctx: CanvasRenderingContext2D, meta: TileMetadata): void {
   ctx.fillStyle = meta.bannerColor;
   ctx.fillRect(0, 0, 256, 56);
 
-  // 3. Tên tỉnh thành / địa danh chính nằm tại y = 28
-  // Double Draw viền than đen đanh nét chống lóa mắt
-  ctx.strokeStyle = '#050814';
-  ctx.lineWidth = 3.5;
+  const textColor = getBannerTextColor(meta.bannerColor);
   ctx.font = '900 28px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
+  ctx.strokeStyle = '#0F172A';
+  ctx.lineWidth = 3.0;
   ctx.strokeText(meta.title, 128, 28);
-  ctx.fillStyle = getBannerTextColor(meta.bannerColor);
+  ctx.fillStyle = textColor;
   ctx.fillText(meta.title, 128, 28);
 
-  // Phụ đề (Địa danh chi tiết / Công trình) nằm tại y = 74
   ctx.fillStyle = '#020617';
   ctx.font = '900 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   ctx.fillText(meta.subtitle, 128, 74);
+}
 
-  const texture = new CanvasTexture(canvas);
-  texture.colorSpace = SRGBColorSpace;
-  texture.anisotropy = 16;
-  texture.generateMipmaps = true;
-  texture.minFilter = LinearMipmapLinearFilter;
-  texture.magFilter = LinearFilter;
+function drawNonPropertyHeader(ctx: CanvasRenderingContext2D, meta: TileMetadata, index: number): void {
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#0F172A';
+  ctx.font = '900 26px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.fillText(meta.title, 128, 30);
 
-  // 4. Biểu tượng di sản văn hóa / Tranh độc bản bản địa (Khung: y = 94..266, h = 172)
+  ctx.fillStyle = '#475569';
+  ctx.font = '900 16px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.fillText(meta.subtitle, 128, 62);
+
+  if (isInfrastructureTile(index)) {
+    ctx.strokeStyle = '#CBD5E1';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(32, 82);
+    ctx.lineTo(224, 82);
+    ctx.stroke();
+  }
+}
+
+/**
+ * Tạo Header cho ô cờ: 22 ô nhà đất có dải băng màu, 14 ô phi nhà đất nền ngà chữ than đen
+ */
+function drawTileHeader(ctx: CanvasRenderingContext2D, meta: TileMetadata, index: number): void {
+  ctx.fillStyle = '#F3EEDF';
+  ctx.fillRect(0, 0, 256, 340);
+
+  if (isPropertyTile(index)) {
+    drawPropertyHeader(ctx, meta);
+  } else {
+    drawNonPropertyHeader(ctx, meta, index);
+  }
+}
+
+function drawSpecialCategoryFrame(ctx: CanvasRenderingContext2D, meta: TileMetadata): void {
+  const styles: Record<string, { bg: string; stroke: string }> = {
+    'VẬN MAY': { bg: '#FFF7ED', stroke: '#FDBA74' },
+    'CƠ CHẾ': { bg: '#F0FDFA', stroke: '#5EEAD4' },
+    'NGÂN SÁCH': { bg: '#FFF1F2', stroke: '#FDA4AF' },
+    'TÀI CHÍNH': { bg: '#F0F9FF', stroke: '#7DD3FC' },
+  };
+  const config = meta.category ? styles[meta.category] : undefined;
+  if (config) {
+    ctx.fillStyle = config.bg;
+    ctx.fillRect(10, 94, 236, 172);
+    ctx.strokeStyle = config.stroke;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(18, 102, 220, 156);
+    drawIcon(ctx, meta.icon, 128, 180, meta.bannerColor, 2.0);
+  } else {
+    drawIcon(ctx, meta.icon, 128, 180, meta.bannerColor, 1.5);
+  }
+}
+
+function drawTileArt(
+  ctx: CanvasRenderingContext2D,
+  index: number,
+  meta: TileMetadata,
+  texture: CanvasTexture
+): void {
   ctx.save();
   ctx.beginPath();
   ctx.rect(10, 94, 236, 172);
@@ -80,11 +117,6 @@ function createStandardTileTexture(index: number, meta: TileMetadata): CanvasTex
 
   if (typeof window !== 'undefined' && typeof Image !== 'undefined' && hasTileArt(index)) {
     const cachedImg = tileImageCache.get(index);
-    const targetW = 216;
-    const targetH = 166;
-    const dx = (256 - targetW) / 2; // dx = 20
-    const dy = 97;
-
     if (!cachedImg) {
       const img = new Image();
       img.crossOrigin = 'anonymous';
@@ -94,77 +126,108 @@ function createStandardTileTexture(index: number, meta: TileMetadata): CanvasTex
         ctx.save();
         ctx.fillStyle = '#F3EEDF';
         ctx.fillRect(10, 94, 236, 172);
-
         ctx.beginPath();
         ctx.rect(10, 94, 236, 172);
         ctx.clip();
-        ctx.drawImage(img, dx, dy, targetW, targetH);
+        ctx.drawImage(img, 20, 97, 216, 166);
         ctx.restore();
         texture.needsUpdate = true;
       };
+      img.onerror = () => {
+        drawIcon(ctx, meta.icon, 128, 180, meta.bannerColor, 1.5);
+      };
       drawIcon(ctx, meta.icon, 128, 180, meta.bannerColor, 1.5);
     } else if (cachedImg.complete && cachedImg.naturalWidth > 0) {
-      ctx.drawImage(cachedImg, dx, dy, targetW, targetH);
+      ctx.drawImage(cachedImg, 20, 97, 216, 166);
     } else {
       drawIcon(ctx, meta.icon, 128, 180, meta.bannerColor, 1.5);
     }
   } else {
-    // Nền nghệ thuật danh mục cho ô đặc biệt không phải BĐS
-    if (meta.category === 'VẬN MAY') {
-      // Ô Cơ Hội: Thẻ bài vận khí với viền cam hoàng gia
-      ctx.fillStyle = '#FFF7ED';
-      ctx.fillRect(10, 94, 236, 172);
-      ctx.strokeStyle = '#FDBA74';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(18, 102, 220, 156);
-      drawIcon(ctx, meta.icon, 128, 180, meta.bannerColor, 2.0);
-    } else if (meta.category === 'CƠ CHẾ') {
-      // Ô Thị Trường: Rương cơ chế trên nền ngọc bích dịu mắt
-      ctx.fillStyle = '#F0FDFA';
-      ctx.fillRect(10, 94, 236, 172);
-      ctx.strokeStyle = '#5EEAD4';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(18, 102, 220, 156);
-      drawIcon(ctx, meta.icon, 128, 180, meta.bannerColor, 2.0);
-    } else if (meta.category === 'NGÂN SÁCH') {
-      // Ô Lệ Phí Đất: Khung công chứng sắc son hành chính
-      ctx.fillStyle = '#FFF1F2';
-      ctx.fillRect(10, 94, 236, 172);
-      ctx.strokeStyle = '#FDA4AF';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(18, 102, 220, 156);
-      drawIcon(ctx, meta.icon, 128, 180, meta.bannerColor, 2.0);
-    } else if (meta.category === 'TÀI CHÍNH') {
-      // Ô Sàn HOSE: Sàn giao dịch sắc lam tài chính hiện đại
-      ctx.fillStyle = '#F0F9FF';
-      ctx.fillRect(10, 94, 236, 172);
-      ctx.strokeStyle = '#7DD3FC';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(18, 102, 220, 156);
-      drawIcon(ctx, meta.icon, 128, 180, meta.bannerColor, 2.0);
-    } else {
-      drawIcon(ctx, meta.icon, 128, 180, meta.bannerColor, 1.5);
-    }
+    drawSpecialCategoryFrame(ctx, meta);
   }
   ctx.restore();
+}
 
-  // 5. Khay giá niêm yết ở cạnh ngoài (y = 274..324, h = 50)
-  const priceText = meta.priceLabel ?? formatPriceLabel(meta.price);
-  if (priceText) {
-    ctx.fillStyle = '#090D1A';
-    ctx.beginPath();
-    ctx.roundRect(22, 274, 212, 50, 12);
-    ctx.fill();
+function getActionBadgeTheme(category?: string): { bg: string; text: string } {
+  switch (category) {
+    case 'VẬN MAY': return { bg: '#EA580C', text: '#FFFFFF' };
+    case 'CƠ CHẾ': return { bg: '#0D9488', text: '#FFFFFF' };
+    case 'NGÂN SÁCH': return { bg: '#E11D48', text: '#FFFFFF' };
+    case 'TÀI CHÍNH': return { bg: '#0284C7', text: '#FFFFFF' };
+    default: return { bg: '#090D1A', text: '#FBBF24' };
+  }
+}
 
-    ctx.fillStyle = '#FBBF24';
-    ctx.font = '900 26px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-    ctx.fillText(priceText, 128, 300);
+function drawActionBadgeFooter(ctx: CanvasRenderingContext2D, meta: TileMetadata): void {
+  const actionText = meta.actionLabel ?? meta.priceLabel;
+  if (!actionText) return;
+
+  const theme = getActionBadgeTheme(meta.category);
+  ctx.fillStyle = theme.bg;
+  ctx.beginPath();
+  ctx.roundRect(20, 274, 216, 50, 12);
+  ctx.fill();
+
+  ctx.fillStyle = theme.text;
+  ctx.font = '900 20px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(actionText, 128, 300);
+}
+
+function drawPriceTrayFooter(ctx: CanvasRenderingContext2D, price?: number): void {
+  const priceText = formatPriceLabel(price);
+  if (!priceText) return;
+
+  ctx.fillStyle = '#090D1A';
+  ctx.beginPath();
+  ctx.roundRect(22, 274, 212, 50, 12);
+  ctx.fill();
+
+  ctx.fillStyle = '#FBBF24';
+  ctx.font = '900 26px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(priceText, 128, 300);
+}
+
+function drawTileFooter(ctx: CanvasRenderingContext2D, meta: TileMetadata, index: number): void {
+  if (isPropertyTile(index) || isInfrastructureTile(index)) {
+    drawPriceTrayFooter(ctx, meta.price);
+  } else {
+    drawActionBadgeFooter(ctx, meta);
   }
 
-  // Viền tinh tế bao quanh
   ctx.strokeStyle = '#0F172A';
   ctx.lineWidth = 5;
   ctx.strokeRect(2, 2, 252, 336);
+}
+
+/**
+ * Tạo Canvas Texture cho ô cờ thường với độ phân giải cao HiDPI 4x (1024 x 1360)
+ */
+function createStandardTileTexture(index: number, meta: TileMetadata): CanvasTexture | null {
+  if (typeof document === 'undefined') return null;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = 1024;
+  canvas.height = 1360;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
+
+  ctx.scale(4, 4);
+
+  drawTileHeader(ctx, meta, index);
+
+  const texture = new CanvasTexture(canvas);
+  texture.colorSpace = SRGBColorSpace;
+  texture.anisotropy = 16;
+  texture.generateMipmaps = true;
+  texture.minFilter = LinearMipmapLinearFilter;
+  texture.magFilter = LinearFilter;
+
+  drawTileArt(ctx, index, meta, texture);
+  drawTileFooter(ctx, meta, index);
 
   texture.needsUpdate = true;
   return texture;
@@ -215,6 +278,9 @@ function createCornerTileTexture(index: number): CanvasTexture | null {
         drawer(ctx, img);
         ctx.restore();
         texture.needsUpdate = true;
+      };
+      img.onerror = () => {
+        drawer(ctx);
       };
     } else if (cachedImg.complete && cachedImg.naturalWidth > 0) {
       drawer(ctx, cachedImg);

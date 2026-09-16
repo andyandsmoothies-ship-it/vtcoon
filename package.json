@@ -7,6 +7,8 @@
     "dev": "vite",
     "build": "tsc && vite build && vite build --ssr src/server/index.ts --outDir dist/server",
     "preview": "vite preview",
+    "start": "cross-env NODE_ENV=production node dist/server/index.js",
+    "tunnel": "docker run --rm -it --name vtcoon_tunnel --network vtcoon_internal cloudflare/cloudflared:latest tunnel --no-autoupdate --url http://nginx:80",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:chaos": "cross-env CHAOS_GAMES=1000 vitest run tests/simulation/chaos_monkey_simulator.test.ts",

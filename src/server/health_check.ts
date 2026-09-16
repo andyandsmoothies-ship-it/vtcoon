@@ -3,7 +3,7 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 
-export interface HealthStatus {
+interface HealthStatus {
   readonly status: 'ok';
   readonly activeRooms: number;
   readonly uptime: number;
@@ -20,6 +20,8 @@ const MIME_TYPES: Record<string, string> = {
   '.wasm': 'application/wasm',
   '.mp3': 'audio/mpeg',
   '.webp': 'image/webp',
+  '.glb': 'model/gltf-binary',
+  '.gltf': 'model/gltf+json',
 };
 
 export function createHealthServer(

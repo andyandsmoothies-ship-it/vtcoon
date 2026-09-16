@@ -89,7 +89,7 @@ function checkDowngradeTarget(
   return undefined;
 }
 
-export type DowngradeValidation =
+type DowngradeValidation =
   | { valid: false; reason: ActionRejectReason }
   | {
       valid: true;
@@ -98,7 +98,7 @@ export type DowngradeValidation =
       stateMap: PropertyStateMap;
     };
 
-export function validateDowngrade(
+function validateDowngrade(
   current: Player | undefined,
   phase: TurnPhase | undefined,
   cellIndex: number,
@@ -142,7 +142,7 @@ export function handleDowngrade(
 const P2P_TAX_RATE          = 0.05;
 const P2P_ANTI_SPECULATE_TAX = 0.20;
 
-export type P2PTradeValidation =
+type P2PTradeValidation =
   | {
       valid: false;
       reason: ActionRejectReason;
@@ -246,7 +246,7 @@ function checkTradeParties(
   return { valid: true, taxRate, totalCost, taxAmount, sellerNet, buyer: buyer!, seller: seller! };
 }
 
-export function validateP2PTrade(
+function validateP2PTrade(
   room: Room,
   sellerId: string,
   buyerId: string,

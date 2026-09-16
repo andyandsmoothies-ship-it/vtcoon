@@ -133,16 +133,14 @@ export function DiceTray(): React.ReactElement {
 
   const diceStore = useGameStore((s) => s.dice);
   const isRollingStore = useGameStore((s) => s.isRolling);
-  const currentTurnPlayerIdStore = useGameStore((s) => s.currentTurnPlayerId);
   const setIsRolling = useGameStore((s) => s.setIsRolling);
 
   const dice = ssrState ? ssrState.dice : diceStore;
   const isRolling = ssrState ? ssrState.isRolling : isRollingStore;
-  const currentTurnPlayerId = ssrState ? ssrState.currentTurnPlayerId : currentTurnPlayerIdStore;
 
   const prevRollingRef = useRef(false);
   const [fadeOpacity, setFadeOpacity] = useState(1.0);
-  const [isVisible, setIsVisible] = useState(currentTurnPlayerId === null || isRolling);
+  const [isVisible, setIsVisible] = useState(Boolean(isRolling));
 
   const spinOffsetsRef = useRef<
     readonly [readonly [number, number, number], readonly [number, number, number]]
@@ -178,21 +176,20 @@ export function DiceTray(): React.ReactElement {
   const lastDiceSeq = ssrState ? ssrState.lastDiceSeq : lastDiceSeqStore;
 
   const isDoubles = dice[0] === dice[1];
-  const shouldShowTray = currentTurnPlayerId === null ? true : (isRolling || isVisible);
 
   return (
     <group position={[0.0, 0.020, 0.0]} data-testid="dice-tray">
-      {shouldShowTray && (
+      {/* Sàn diễn xúc xắc phẳng trên sông Sài Gòn với hoa văn la bàn đồng thau */}
+      <mesh receiveShadow position={[0, -0.01, 0]}>
+        <boxGeometry args={[3.2, 0.015, 2.4]} />
+        <meshStandardMaterial color="#94A3B8" roughness={0.65} />
+      </mesh>
+      <mesh receiveShadow position={[0, -0.005, 0]}>
+        <boxGeometry args={[3.0, 0.015, 2.2]} />
+        <meshStandardMaterial color="#CBD5E1" roughness={0.55} />
+      </mesh>
+      {Boolean(isRolling || (isVisible && fadeOpacity > 0)) && (
         <>
-          {/* Sàn diễn xúc xắc phẳng trên sông Sài Gòn với hoa văn la bàn đồng thau */}
-          <mesh receiveShadow position={[0, -0.01, 0]}>
-            <boxGeometry args={[3.2, 0.015, 2.4]} />
-            <meshStandardMaterial color="#94A3B8" roughness={0.65} />
-          </mesh>
-          <mesh receiveShadow position={[0, -0.005, 0]}>
-            <boxGeometry args={[3.0, 0.015, 2.2]} />
-            <meshStandardMaterial color="#CBD5E1" roughness={0.55} />
-          </mesh>
           <mesh receiveShadow position={[0, 0.001, 0]}>
             <boxGeometry args={[2.8, 0.015, 2.0]} />
             <meshStandardMaterial color="#064E3B" roughness={0.85} />
@@ -204,28 +201,30 @@ export function DiceTray(): React.ReactElement {
         </>
       )}
 
-      {/* 2 Xúc xắc 3D đỏ Ruby luôn hiện diện trong render tree */}
-      <group>
-        <SingleDie
-          face={dice[0]}
-          targetX={-0.65}
-          isRolling={isRolling}
-          spinOffset={spinOffsetsRef.current[0]}
-          highlight={isDoubles}
-          fadeOpacity={fadeOpacity}
-          diceSeq={lastDiceSeq}
-        />
-        <SingleDie
-          face={dice[1]}
-          targetX={0.65}
-          isRolling={isRolling}
-          spinOffset={spinOffsetsRef.current[1]}
-          highlight={isDoubles}
-          fadeOpacity={fadeOpacity}
-          diceSeq={lastDiceSeq}
-          onRest={() => setIsRolling(false)}
-        />
-      </group>
+      {/* 2 Xúc xắc 3D đỏ Ruby chỉ render khi đang quay hoặc mờ dần */}
+      {Boolean(isRolling || (isVisible && fadeOpacity > 0)) && (
+        <group>
+          <SingleDie
+            face={dice[0]}
+            targetX={-0.65}
+            isRolling={isRolling}
+            spinOffset={spinOffsetsRef.current[0]}
+            highlight={isDoubles}
+            fadeOpacity={fadeOpacity}
+            diceSeq={lastDiceSeq}
+          />
+          <SingleDie
+            face={dice[1]}
+            targetX={0.65}
+            isRolling={isRolling}
+            spinOffset={spinOffsetsRef.current[1]}
+            highlight={isDoubles}
+            fadeOpacity={fadeOpacity}
+            diceSeq={lastDiceSeq}
+            onRest={() => setIsRolling(false)}
+          />
+        </group>
+      )}
     </group>
   );
 }

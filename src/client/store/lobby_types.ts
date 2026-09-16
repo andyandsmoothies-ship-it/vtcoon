@@ -43,6 +43,8 @@ export interface LobbySlot {
   readonly isBot: boolean;
   readonly botPersonality?: BotPersonality;
   readonly isOccupied: boolean;
+  readonly pawnSlot?: number;
+  readonly mascotIcon?: string;
 }
 
 export function createEmptySlot(index: number): LobbySlot {

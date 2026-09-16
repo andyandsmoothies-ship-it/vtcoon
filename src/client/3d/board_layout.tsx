@@ -6,6 +6,7 @@ import type { PlayerHudInfo } from '../store/game_store_types';
 import { useLobbyStore } from '../store/lobby_store';
 import { cellPosition } from './board_coords';
 import { LayeredDioramaTile } from './board_tile';
+import { LUXURY_PAWN_CONFIGS } from './luxury_pawn_models';
 import { DiceTray } from './dice_tray';
 import { MiniatureCityDiorama } from './miniature_city_diorama';
 import { CoastalIslandEnvironment } from './coastal_island_environment';
@@ -55,14 +56,22 @@ export function tileRotation(index: number): [number, number, number] {
 
 export function computeOwnerMap(
   playersInfo: Record<string, PlayerHudInfo>
-): Record<number, { ownerId: string; ownerName: string; tokenColor: string }> {
-  const map: Record<number, { ownerId: string; ownerName: string; tokenColor: string }> = {};
-  for (const player of Object.values(playersInfo ?? {})) {
+): Record<number, { ownerId: string; ownerName: string; tokenColor: string; ownerSlot: number; mascotIcon: string }> {
+  const map: Record<number, { ownerId: string; ownerName: string; tokenColor: string; ownerSlot: number; mascotIcon: string }> = {};
+  const playersList = Object.values(playersInfo ?? {});
+  for (let pIdx = 0; pIdx < playersList.length; pIdx++) {
+    const player = playersList[pIdx];
+    if (!player) continue;
+    const slot = player.ownerSlot ?? player.pawnSlot ?? (pIdx % LUXURY_PAWN_CONFIGS.length);
+    const mascot = player.mascotIcon ?? LUXURY_PAWN_CONFIGS[slot]?.icon ?? '🐕';
+    const tokenColor = player.tokenColor ?? '#DC2626';
     for (const cellIndex of player.ownedProperties ?? []) {
       map[cellIndex] = {
         ownerId: player.id,
         ownerName: player.name,
-        tokenColor: player.tokenColor ?? '#DC2626',
+        tokenColor,
+        ownerSlot: slot,
+        mascotIcon: mascot,
       };
     }
   }
@@ -141,6 +150,8 @@ export function GameBoard(): React.ReactElement {
           isCornerTile={CORNER_INDICES.has(cell.index)}
           enableStandee={false}
           ownerColor={ownerInfoMap[cell.index]?.tokenColor}
+          ownerSlot={ownerInfoMap[cell.index]?.ownerSlot}
+          mascotIcon={ownerInfoMap[cell.index]?.mascotIcon}
           onClick={() => handleTileClick(cell.index)}
         />
       ))}

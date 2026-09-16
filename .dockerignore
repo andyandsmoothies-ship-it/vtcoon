@@ -5,3 +5,7 @@ dist
 tests
 docs
 *.md
+scratch
+server_logs
+.impeccable
+issues

@@ -21,7 +21,7 @@ export {
   HOSE_OUTCOMES,
 } from './event_card_types';
 
-export function shuffle<T>(deck: T[], rng: () => number): T[] {
+function shuffle<T>(deck: T[], rng: () => number): T[] {
   const arr = [...deck];
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(rng() * (i + 1));
@@ -43,8 +43,9 @@ export function applyMarketCard(
   players?: Player[],
   registry?: PropertyRegistry,
   stateMap?: PropertyStateMap,
+  room?: Room,
 ): void {
-  executeMarketCard(card, activeModifiers, players, registry, stateMap);
+  executeMarketCard(card, activeModifiers, players, registry, stateMap, room);
 }
 
 export function applyChanceCard(
@@ -71,7 +72,7 @@ export function drawMarketCard(room: Room, reg: PropertyRegistry, sm: PropertySt
   const card = room.marketDeck.shift();
   if (card) {
     room.lastEventCard = getMarketCardInfo(card);
-    applyMarketCard(card, room.activeModifiers, room.players, reg, sm);
+    applyMarketCard(card, room.activeModifiers, room.players, reg, sm, room);
     room.marketDiscard.push(card);
   }
   room.phase = TurnPhase.PropertyManagement;

@@ -39,7 +39,7 @@ export function evaluateRoomHealth(
   return { status: 'NORMAL' };
 }
 
-export function mapPlayers(room: Room, norm: string, rooms: RoomManager): AdminPlayerSummary[] {
+function mapPlayers(room: Room, norm: string, rooms: RoomManager): AdminPlayerSummary[] {
   const reg = rooms.getRegistry(norm);
   const rankings = rooms.getRankings(norm);
   const netWorthMap = new Map(rankings.map((r) => [r.id, r.netWorth]));
@@ -86,7 +86,7 @@ export function buildRoomSummary(
   };
 }
 
-export function buildPropertyStates(
+function buildPropertyStates(
   norm: string,
   rooms: RoomManager,
 ): Record<number, { ownerId?: string; level: number; isMortgaged: boolean }> {

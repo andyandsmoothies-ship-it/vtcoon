@@ -303,7 +303,7 @@ describe('[TC-IMP33/MSS] Nhóm 3: Cọc Cờ Sở Hữu (OwnershipMarkerInstance
     expect(html).toContain('metalness="0.9"');
   });
 
-  it('[TC-IMP33/MSS-18] LayeredDioramaTile chuyển prop currentLevel tới OwnershipMarkerInstances', () => {
+  it('[TC-IMP33/MSS-18] LayeredDioramaTile chuyển prop currentLevel tới công trình 3D (level 2 kết xuất 2 ngôi nhà)', () => {
     const cell = BOARD_CONFIG[1]!; // Property cell
     const html = renderToStaticMarkup(
       React.createElement(LayeredDioramaTile, {
@@ -313,8 +313,8 @@ describe('[TC-IMP33/MSS] Nhóm 3: Cọc Cờ Sở Hữu (OwnershipMarkerInstance
         isCornerTile: false,
       })
     );
-    expect(html).toContain('name="TierRing_1"');
-    expect(html).toContain('name="TierRing_2"');
+    const houses = html.match(/data-testid="toy-house"/g);
+    expect(houses).toHaveLength(2);
   });
 
   it('[TC-IMP33/MSS-19] OwnershipMarkerInstances kẹp chặt ngưỡng an toàn cấp độ (level > 3 tối đa 3 vòng đai)', () => {

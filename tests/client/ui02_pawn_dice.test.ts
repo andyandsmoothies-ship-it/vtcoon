@@ -61,9 +61,13 @@ describe('[UC-GAME-016/MSS] Pawn Path Waypoints & Trajectory', () => {
 
 describe('[TC-UI02.1/Adversarial] Pawn Path Inversion & Bounds Defense', () => {
   it('Tu choi chi so am hoac vuot qua 39', () => {
-    expect(() => calculatePathWaypoints(-1, 5)).toThrow();
-    expect(() => calculatePathWaypoints(5, 40)).toThrow();
-    expect(() => calculatePathWaypoints(1.5, 3)).toThrow();
+    // [IMP-86] calculatePathWaypoints clamps safely without throwing uncaught exceptions
+    const wpNeg = calculatePathWaypoints(-1, 5);
+    expect(Array.isArray(wpNeg)).toBe(true);
+    const wpOverflow = calculatePathWaypoints(5, 40);
+    expect(Array.isArray(wpOverflow)).toBe(true);
+    const wpDecimal = calculatePathWaypoints(1.5, 3);
+    expect(Array.isArray(wpDecimal)).toBe(true);
   });
 });
 

@@ -55,6 +55,11 @@ export interface Player {
   mortgageLoans?:       Record<number, number>;
   isBot?:               boolean;
   overdraftRoundsLeft?: number;
+  lastTradeOfferRound?: number;
+  pawnSlot?:            number;
+  ownerSlot?:           number;
+  mascotIcon?:          string;
+  mascotName?:          string;
 }
 
 export interface CurrentAuctionState {
@@ -84,6 +89,18 @@ export interface EventCardInfo {
   readonly playerId?: string;
 }
 
+export interface HoseResultInfo {
+  readonly playerId:    string;
+  readonly playerName?: string;
+  readonly stake:       number;
+  readonly roll:        number;
+  readonly payout:      number;
+  readonly multiplier:  number;
+  readonly profit:      number;
+  readonly timestamp:   number;
+  readonly diceSeq?:    number;
+}
+
 export interface Room {
   readonly roomCode:      string;
   readonly hostId:        string;
@@ -105,6 +122,7 @@ export interface Room {
   diceSeq?:              number;
   currentAuction?:       CurrentAuctionState;
   lastEventCard?:        EventCardInfo;
+  lastHoseResult?:       HoseResultInfo;
 }
 
 
@@ -128,6 +146,7 @@ export function createPlayer(id: string): Player {
     mortgageLoans: {},
     isBot: false,
     overdraftRoundsLeft: 0,
+    lastTradeOfferRound: 0,
   };
 }
 

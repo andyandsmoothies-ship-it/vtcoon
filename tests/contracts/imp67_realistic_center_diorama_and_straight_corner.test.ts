@@ -118,8 +118,9 @@ describe('[TC-67/MSS][IMP-67] Straight Corner Alignment & Realistic Center Diora
     expect(miniatureMarkup).not.toContain('data-testid="diorama-ferris-wheel"');
   });
 
-  it('[TC-67.07/MSS][IMP-67] MiniatureCityDiorama eliminates ferris wheel rainbow cabin palette (#EC4899, #8B5CF6)', () => {
-    expect(miniatureMarkup).not.toContain('#EC4899');
+  it('[TC-67.07/MSS][IMP-67] MiniatureCityDiorama eliminates ferris wheel rainbow cabin palette (#8B5CF6)', () => {
+    // #EC4899 is legitimately used by Shophouse Donut sign, while ferris wheel rainbow palette (#8B5CF6) is eliminated
+    expect(miniatureMarkup).not.toContain('data-testid="diorama-ferris-wheel"');
     expect(miniatureMarkup).not.toContain('#8B5CF6');
   });
 

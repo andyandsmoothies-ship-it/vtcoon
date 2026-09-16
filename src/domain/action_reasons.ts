@@ -31,6 +31,7 @@ export const ActionRejectReason = {
   EVEN_BUILDING_VIOLATION:   'EVEN_BUILDING_VIOLATION',
   EVEN_DOWNGRADE_VIOLATION:  'EVEN_DOWNGRADE_VIOLATION',
   GROUP_MORTGAGED:           'GROUP_MORTGAGED',
+  TRADE_REJECTED:            'TRADE_REJECTED',
 } as const;
 
 export type ActionRejectReason = (typeof ActionRejectReason)[keyof typeof ActionRejectReason];

@@ -51,7 +51,7 @@ describe('[UI-S04/MSS] Cinematic Effects — Mathematical Helpers & Rendering St
     expect(html).toContain('cylinderGeometry');
     // Khảo sát các mã màu bối cảnh Retropoly
     expect(html).toContain('#0284C7'); // Đại dương ngọc bích
-    expect(html).toContain('#F6D5A8'); // Bãi cát nhiệt đới
+    expect(html).toContain('#EFE5D8'); // Bãi cát nhiệt đới ngà mịn
     expect(html).toContain('#22C55E'); // Thảm cỏ xanh
   });
 });

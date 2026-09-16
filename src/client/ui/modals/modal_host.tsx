@@ -3,6 +3,7 @@ import React, { useEffect, useRef } from 'react';
 import { useGameStore, ModalPayloadMap, type ActiveModalType } from '../../store/game_store';
 import { ModalBackdrop } from './modal_backdrop';
 import { TitleDeedModal } from './title_deed_modal';
+import { PropertyPortfolioModal } from './property_portfolio_modal';
 import { AuctionModal } from './auction_modal';
 import { TradeModal } from './trade_modal';
 import { EventCardModal } from './event_card_modal';
@@ -183,10 +184,48 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
               onIntent?.({ type: 'INTENT_DECLINE' });
               closeModal();
             }}
+            ownedProperties={myPlayer?.ownedProperties}
+            onSelectCell={(nextIdx) => updateModalPayload<'deed'>({ cellIndex: nextIdx })}
             onClose={closeModal}
           />
         );
       })()}
+
+      {activeModal === 'portfolio' && (
+        <PropertyPortfolioModal
+          ownedProperties={myPlayer?.ownedProperties ?? []}
+          propertyStates={Object.fromEntries(
+            (myPlayer?.ownedProperties ?? []).map((idx) => [
+              idx,
+              {
+                ownerId: myId,
+                level: useGameStore.getState().levelMap[idx] ?? 0,
+                isMortgaged: Boolean(myPlayer?.mortgagedProperties?.includes(idx)),
+              },
+            ])
+          )}
+          currentBalance={myPlayer?.balance ?? 0}
+          isInInsolvency={useGameStore.getState().activeModal === 'insolvency' || (myPlayer?.balance ?? 0) < 0}
+          onSelectDeed={(cellIndex) => {
+            closeModal();
+            useGameStore.getState().openModal('deed', {
+              cellIndex,
+              canBuy: false,
+              ownedProperties: myPlayer?.ownedProperties,
+            });
+          }}
+          onMortgage={(cellIndex) => {
+            onIntent?.({ type: 'INTENT_MORTGAGE', cellIndex });
+          }}
+          onRedeem={(cellIndex) => {
+            onIntent?.({ type: 'INTENT_REDEEM', cellIndex });
+          }}
+          onDowngrade={(cellIndex) => {
+            onIntent?.({ type: 'INTENT_DOWNGRADE', cellIndex });
+          }}
+          onClose={closeModal}
+        />
+      )}
 
       {activeModal === 'auction' && (
         <AuctionModal
@@ -199,6 +238,10 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
           bidderName={(modalPayload as ModalPayloadMap['auction']).highestBidderId ? playersInfo[(modalPayload as ModalPayloadMap['auction']).highestBidderId!]?.name : undefined}
           myBalance={myPlayer?.balance}
           myId={myId}
+          isConcluded={(modalPayload as ModalPayloadMap['auction']).isConcluded}
+          winnerId={(modalPayload as ModalPayloadMap['auction']).winnerId}
+          finalPrice={(modalPayload as ModalPayloadMap['auction']).finalPrice}
+          onClose={closeModal}
           onBid={(amount) => {
             AudioEngine.playSfx(SoundEffect.AUCTION_BID);
             onIntent?.({ type: 'INTENT_BID', amount });
@@ -213,36 +256,58 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
         />
       )}
 
-      {activeModal === 'trade' && (
-        <TradeModal
-          targetPlayerId={(modalPayload as ModalPayloadMap['trade']).targetPlayerId}
-          myProperties={myPlayer?.ownedProperties ?? []}
-          targetProperties={playersInfo[(modalPayload as ModalPayloadMap['trade']).targetPlayerId]?.ownedProperties ?? []}
-          myMortgagedProperties={myPlayer?.mortgagedProperties ?? []}
-          targetMortgagedProperties={playersInfo[(modalPayload as ModalPayloadMap['trade']).targetPlayerId]?.mortgagedProperties ?? []}
-          myBalance={myPlayer?.balance ?? 0}
-          targetPlayerName={playersInfo[(modalPayload as ModalPayloadMap['trade']).targetPlayerId]?.name}
-          initialOffered={(modalPayload as ModalPayloadMap['trade']).offeredProperties}
-          initialRequested={(modalPayload as ModalPayloadMap['trade']).requestedProperties}
-          initialCashOffer={(modalPayload as ModalPayloadMap['trade']).cashOffer}
-          initialCashRequest={(modalPayload as ModalPayloadMap['trade']).cashRequest}
-          onSubmitTrade={() => {
-            AudioEngine.playSfx(SoundEffect.TRADE_SUCCESS);
-            const tradePayload = modalPayload as ModalPayloadMap['trade'];
-            if (tradePayload.offeredProperties[0] !== undefined) {
-              onIntent?.({
-                type: 'INTENT_TRADE_OFFER',
-                sellerId: myId,
-                buyerId: tradePayload.targetPlayerId,
-                cellIndex: tradePayload.offeredProperties[0],
-                price: tradePayload.cashRequest || 1000,
+      {activeModal === 'trade' && (() => {
+        const tradePayload = modalPayload as ModalPayloadMap['trade'];
+        const currentTargetId = tradePayload.targetPlayerId;
+        const availablePartners = Object.keys(playersInfo)
+          .filter((id) => id !== myId)
+          .map((id) => ({
+            id,
+            name: playersInfo[id]?.name ?? id,
+            balance: playersInfo[id]?.balance ?? 0,
+            isBot: Boolean(playersInfo[id]?.isBot),
+          }));
+        const targetPlayer = playersInfo[currentTargetId];
+
+        return (
+          <TradeModal
+            targetPlayerId={currentTargetId}
+            myProperties={myPlayer?.ownedProperties ?? []}
+            targetProperties={targetPlayer?.ownedProperties ?? []}
+            myMortgagedProperties={myPlayer?.mortgagedProperties ?? []}
+            targetMortgagedProperties={targetPlayer?.mortgagedProperties ?? []}
+            myBalance={myPlayer?.balance ?? 0}
+            targetPlayerName={targetPlayer?.name}
+            targetBalance={targetPlayer?.balance ?? 0}
+            availablePartners={availablePartners}
+            onSelectPartner={(partnerId) => {
+              updateModalPayload<'trade'>({
+                targetPlayerId: partnerId,
+                requestedProperties: [],
+                cashRequest: 0,
               });
-            }
-            closeModal();
-          }}
-          onClose={closeModal}
-        />
-      )}
+            }}
+            initialOffered={tradePayload.offeredProperties}
+            initialRequested={tradePayload.requestedProperties}
+            initialCashOffer={tradePayload.cashOffer}
+            initialCashRequest={tradePayload.cashRequest}
+            onSubmitTrade={(tradeData) => {
+              AudioEngine.playSfx(SoundEffect.TRADE_SUCCESS);
+              if (tradeData && tradeData.offeredProperties[0] !== undefined) {
+                onIntent?.({
+                  type: 'INTENT_TRADE_OFFER',
+                  sellerId: myId,
+                  buyerId: tradeData.targetPlayerId,
+                  cellIndex: tradeData.offeredProperties[0],
+                  price: tradeData.cashRequest || 1000,
+                });
+              }
+              closeModal();
+            }}
+            onClose={closeModal}
+          />
+        );
+      })()}
 
       {activeModal === 'event' && (
         <EventCardModal
@@ -266,18 +331,18 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
           defaultStake={(modalPayload as ModalPayloadMap['hose']).currentStake ?? 500}
           lastDiceRoll={(modalPayload as ModalPayloadMap['hose']).lastDiceRoll}
           lastPayout={(modalPayload as ModalPayloadMap['hose']).lastPayout}
+          isReviewingResult={(modalPayload as ModalPayloadMap['hose']).isReviewingResult}
           onInvest={(stake) => {
             AudioEngine.playSfx(SoundEffect.DICE_ROLL);
             const chosenStake = stake ?? 500;
-            const roll = Math.floor(Math.random() * 6) + 1;
-            const payout = resolveHoseInvestment(chosenStake, roll);
-            updateModalPayload<'hose'>({ lastDiceRoll: roll, lastPayout: payout });
+            updateModalPayload<'hose'>({ isReviewingResult: true });
             onIntent?.({ type: 'INTENT_INVEST', stake: chosenStake });
             if (hoseTimerRef.current) clearTimeout(hoseTimerRef.current);
             hoseTimerRef.current = setTimeout(() => {
               closeModal();
-            }, 1500);
+            }, 6000);
           }}
+          onConfirm={closeModal}
           onSkip={() => {
             onIntent?.({ type: 'INTENT_SKIP' });
             closeModal();
@@ -291,7 +356,7 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
           playerId={(modalPayload as ModalPayloadMap['insolvency']).playerId}
           playerName={playersInfo[(modalPayload as ModalPayloadMap['insolvency']).playerId]?.name}
           deficit={(modalPayload as ModalPayloadMap['insolvency']).deficit}
-          onManageProperties={closeModal}
+          onManageProperties={() => useGameStore.getState().openModal('portfolio', {})}
           onDeclareBankruptcy={() => {
             AudioEngine.playSfx(SoundEffect.BANKRUPT);
             onIntent?.({ type: 'INTENT_BANKRUPTCY' });

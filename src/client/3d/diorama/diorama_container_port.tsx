@@ -69,7 +69,7 @@ export function DioramaContainerPort(): React.ReactElement {
   });
 
   return (
-    <group position={[4.5, 0.16, 2.0]} data-testid="diorama-container-port">
+    <group position={[4.8, 0.16, 4.5]} data-testid="diorama-container-port">
       {/* 1. MẶT BẰNG CẦU CẢNG BÊ TÔNG (Seaport Concrete Apron với Bo Viền) */}
       <RoundedBox args={[1.8, 0.08, 2.2]} radius={0.016} smoothness={2} receiveShadow position={[0, 0.04, 0]}>
         <meshStandardMaterial color="#475569" roughness={0.7} envMapIntensity={0.6} />

@@ -24,7 +24,7 @@ export function InsolvencyBanner({
     <div
       role="alert"
       aria-label="Cảnh báo thanh lý cưỡng chế"
-      className="bg-[#FFFDF8] border-4 border-dashed border-red-500 rounded-2xl shadow-[0_6px_0_0_#0f172a] p-6 w-full max-w-md text-slate-900 select-none flex flex-col gap-4 animate-pulse-subtle"
+      className="bg-[#FFFDF8] border-4 border-red-500 rounded-2xl shadow-[0_6px_0_0_#0f172a] p-6 w-full max-w-md text-slate-900 select-none flex flex-col gap-4 animate-pulse-subtle"
     >
       {/* Tiêu đề cảnh báo khẩn cấp */}
       <div className="flex items-center justify-between border-b border-rose-300 pb-3">
@@ -59,7 +59,7 @@ export function InsolvencyBanner({
         </div>
         <div className="flex justify-between items-center mt-1">
           <span className="text-xs text-slate-700 font-bold">Số tiền thâm hụt:</span>
-          <span className="text-lg font-black text-rose-700 tracking-tight">
+          <span className="text-2xl sm:text-3xl font-black text-rose-700 tracking-tight font-mono">
             {formattedDeficit}
           </span>
         </div>

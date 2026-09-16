@@ -134,7 +134,26 @@ export function detectAuctionActivities(
   activityStore: typeof useActivityStore = useActivityStore,
 ): ActivityLogEntry[] {
   if (delta.auction === null) {
+    const lastAuction = activityStore.getState().lastAuctionBid;
     activityStore.getState().setLastAuctionBid(undefined);
+    if (lastAuction && lastAuction.highestBidderId) {
+      const nextState = maybeNextState ?? prevStateOrNextState;
+      const winner = nextState.playersInfo[lastAuction.highestBidderId];
+      const winnerName = getPlayerName(winner, lastAuction.highestBidderId);
+      return [
+        {
+          id: `auction_win_${Date.now()}_${lastAuction.cellIndex}_${lastAuction.currentBid}`,
+          timestamp: Date.now(),
+          type: 'auction',
+          message: `🔨 [Đấu Giá] Búa gõ thành công! ${winnerName} đã trúng đấu giá ${getCellName(lastAuction.cellIndex)} với giá ${formatCurrency(lastAuction.currentBid)}!`,
+          playerId: lastAuction.highestBidderId,
+          playerName: winnerName,
+          amount: -lastAuction.currentBid,
+          cellIndex: lastAuction.cellIndex,
+          ...(winner?.tokenColor ? { playerTokenColor: winner.tokenColor } : {}),
+        },
+      ];
+    }
     return [];
   }
   if (!delta.auction || !delta.auction.highestBidderId) return [];
@@ -172,6 +191,55 @@ export function detectAuctionActivities(
   ];
 }
 
+let lastProcessedEventCardKey: string | null = null;
+
+export function resetEventCardActivityTracker(): void {
+  lastProcessedEventCardKey = null;
+}
+
+export function detectEventCardActivities(
+  delta: DeltaPayload,
+  prevStateOrNextState: GameState,
+  maybeNextState?: GameState,
+  activityStore: typeof useActivityStore = useActivityStore,
+): ActivityLogEntry[] {
+  if (!delta.lastEventCard) return [];
+  const card = delta.lastEventCard;
+  const cardId = card.id || card.cardId || `${card.type}_${card.title}`;
+  const isMarket = card.type === 'Market' || card.cardType === 'market';
+  const eventKey = `${cardId}_${card.drawnBy ?? ''}`;
+
+  if (lastProcessedEventCardKey === eventKey) {
+    return [];
+  }
+  lastProcessedEventCardKey = eventKey;
+
+  const nextState = maybeNextState ?? prevStateOrNextState;
+  const playerId = card.drawnBy ?? card.playerId ?? delta.currentTurnPlayerId ?? nextState.currentTurnPlayerId ?? '';
+  const pInfo = playerId ? nextState.playersInfo[playerId] : undefined;
+  const pName = getPlayerName(pInfo, playerId);
+
+  const title = card.title;
+  const description = card.description;
+
+  const message = isMarket
+    ? `🎴 [Thị Trường] ${title}: ${description}`
+    : `⚡ [Cơ Hội] ${pName ? pName + ': ' : ''}${title} - ${description}`;
+
+  return [
+    {
+      id: `card_${Date.now()}_${cardId}`,
+      timestamp: Date.now(),
+      type: 'card',
+      message,
+      ...(playerId ? { playerId } : {}),
+      ...(pName ? { playerName: pName } : {}),
+      ...(pInfo?.tokenColor ? { playerTokenColor: pInfo.tokenColor } : {}),
+      ...(typeof card.effectDelta === 'number' ? { amount: card.effectDelta } : {}),
+    },
+  ];
+}
+
 export function trackDeltaActivities(
   delta: DeltaPayload,
   prevState: GameState,
@@ -190,6 +258,7 @@ export function trackDeltaActivities(
   activities.push(...propEntries);
   activities.push(...detectFinancialAndStatusActivities(delta, prevState, nextState, context));
   activities.push(...detectAuctionActivities(delta, prevState, nextState, activityStore));
+  activities.push(...detectEventCardActivities(delta, prevState, nextState, activityStore));
 
   const store = activityStore.getState();
   for (const entry of activities) {

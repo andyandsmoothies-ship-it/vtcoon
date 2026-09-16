@@ -131,6 +131,11 @@ function extractOwnerBaseTrimColor(markup: string): string | undefined {
   return match?.[1];
 }
 
+function extractOwnerPricePillColor(markup: string): string | undefined {
+  const match = markup.match(/(?:name="OwnerPricePill"|data-testid="owner-price-pill")[\s\S]*?<meshstandardmaterial[^>]*\bcolor="([^"]+)"/i);
+  return match?.[1];
+}
+
 describe('[IMP-58] Property Ownership Marker 3D & 2D Title Deed Seal Contract Suite', () => {
   beforeEach(() => {
     useGameStore.setState({
@@ -213,7 +218,7 @@ describe('[IMP-58] Property Ownership Marker 3D & 2D Title Deed Seal Contract Su
   // =========================================================================
   describe('Facet 2: State Reactivity & Dynamic Color Mapping', () => {
     it.each(PLAYER_COLOR_CASES)(
-      '[TC-58.05/MSS][UC-IMP58] When owned by %s, LayeredDioramaTile renders OwnershipMarkerInstances flag cloth with matching color',
+      '[TC-58.05/MSS][UC-IMP58] When owned by %s, LayeredDioramaTile renders OwnerPricePill and OwnerBaseTrim with matching color',
       ({ color }) => {
         const markup = renderToStaticMarkup(
           React.createElement(LayeredDioramaTile as any, {
@@ -224,9 +229,11 @@ describe('[IMP-58] Property Ownership Marker 3D & 2D Title Deed Seal Contract Su
             ownerColor: color,
           })
         );
-        expect(markup).toContain('name="OwnershipMarkerInstances"');
-        const clothColor = extractFlagClothColor(markup);
-        expect(clothColor?.toLowerCase()).toBe(color.toLowerCase());
+        expect(markup).toContain('data-testid="owner-price-pill"');
+        const pillColor = extractOwnerPricePillColor(markup);
+        expect(pillColor?.toLowerCase()).toBe(color.toLowerCase());
+        const trimColor = extractOwnerBaseTrimColor(markup);
+        expect(trimColor?.toLowerCase()).toBe(color.toLowerCase());
       }
     );
 
@@ -266,8 +273,10 @@ describe('[IMP-58] Property Ownership Marker 3D & 2D Title Deed Seal Contract Su
           ownerColor: '#2563EB',
         })
       );
-      expect(extractFlagClothColor(markupP1)?.toLowerCase()).toBe('#dc2626');
-      expect(extractFlagClothColor(markupP2)?.toLowerCase()).toBe('#2563eb');
+      expect(extractOwnerPricePillColor(markupP1)?.toLowerCase()).toBe('#dc2626');
+      expect(extractOwnerPricePillColor(markupP2)?.toLowerCase()).toBe('#2563eb');
+      expect(extractOwnerBaseTrimColor(markupP1)?.toLowerCase()).toBe('#dc2626');
+      expect(extractOwnerBaseTrimColor(markupP2)?.toLowerCase()).toBe('#2563eb');
     });
   });
 
@@ -275,7 +284,7 @@ describe('[IMP-58] Property Ownership Marker 3D & 2D Title Deed Seal Contract Su
   // FACET 3: CROSS-CELL-TYPE COVERAGE
   // =========================================================================
   describe('Facet 3: Cross-Cell-Type Coverage', () => {
-    it('[TC-58.08/MSS][UC-IMP58] CellType.Property renders OwnershipMarkerInstances and OwnerBaseTrim when owned', () => {
+    it('[TC-58.08/MSS][UC-IMP58] CellType.Property renders OwnerPricePill and OwnerBaseTrim when owned', () => {
       const markup = renderToStaticMarkup(
         React.createElement(LayeredDioramaTile as any, {
           cell: samplePropertyCell,
@@ -285,12 +294,12 @@ describe('[IMP-58] Property Ownership Marker 3D & 2D Title Deed Seal Contract Su
           ownerColor: '#DC2626',
         })
       );
-      expect(markup).toContain('name="OwnershipMarkerInstances"');
-      expect(extractFlagClothColor(markup)?.toLowerCase()).toBe('#dc2626');
+      expect(markup).toContain('data-testid="owner-price-pill"');
+      expect(extractOwnerPricePillColor(markup)?.toLowerCase()).toBe('#dc2626');
       expect(extractOwnerBaseTrimColor(markup)?.toLowerCase()).toBe('#dc2626');
     });
 
-    it('[TC-58.09/MSS][UC-IMP58] CellType.Railroad (transit infrastructure) renders OwnershipMarkerInstances when owned', () => {
+    it('[TC-58.09/MSS][UC-IMP58] CellType.Railroad (transit infrastructure) renders OwnerPricePill and OwnerBaseTrim when owned', () => {
       const markup = renderToStaticMarkup(
         React.createElement(LayeredDioramaTile as any, {
           cell: sampleRailroadCell,
@@ -300,11 +309,12 @@ describe('[IMP-58] Property Ownership Marker 3D & 2D Title Deed Seal Contract Su
           ownerColor: '#2563EB',
         })
       );
-      expect(markup).toContain('name="OwnershipMarkerInstances"');
-      expect(extractFlagClothColor(markup)?.toLowerCase()).toBe('#2563eb');
+      expect(markup).toContain('data-testid="owner-price-pill"');
+      expect(extractOwnerPricePillColor(markup)?.toLowerCase()).toBe('#2563eb');
+      expect(extractOwnerBaseTrimColor(markup)?.toLowerCase()).toBe('#2563eb');
     });
 
-    it('[TC-58.10/MSS][UC-IMP58] CellType.Utility (national utility) renders OwnershipMarkerInstances when owned', () => {
+    it('[TC-58.10/MSS][UC-IMP58] CellType.Utility (national utility) renders OwnerPricePill and OwnerBaseTrim when owned', () => {
       const markup = renderToStaticMarkup(
         React.createElement(LayeredDioramaTile as any, {
           cell: sampleUtilityCell,
@@ -314,8 +324,9 @@ describe('[IMP-58] Property Ownership Marker 3D & 2D Title Deed Seal Contract Su
           ownerColor: '#059669',
         })
       );
-      expect(markup).toContain('name="OwnershipMarkerInstances"');
-      expect(extractFlagClothColor(markup)?.toLowerCase()).toBe('#059669');
+      expect(markup).toContain('data-testid="owner-price-pill"');
+      expect(extractOwnerPricePillColor(markup)?.toLowerCase()).toBe('#059669');
+      expect(extractOwnerBaseTrimColor(markup)?.toLowerCase()).toBe('#059669');
     });
 
     it.each(NON_PURCHASABLE_CELL_CASES)(

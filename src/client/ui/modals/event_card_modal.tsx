@@ -48,7 +48,8 @@ export function EventCardModal({
       : vi.chanceCards[cardId as ChanceCardId]) ||
     cardId;
 
-  const resolvedTargetScope = targetScope || detail?.targetScope || (isMarket ? 'Toàn bộ thị trường' : 'Người chơi rút thẻ');
+  const resolvedDenseScope = targetScope || detail?.targetScope || (isMarket ? 'Toàn bộ thị trường' : 'Người chơi rút thẻ');
+  const resolvedTargetScope = targetScope || (isMarket ? 'Toàn bộ thị trường' : (detail?.targetScope || 'Người chơi rút thẻ'));
   const resolvedEffectDetail = effectDetail || detail?.effectDetail || description;
   const resolvedDuration = duration || detail?.duration || (isMarket ? '1 vòng chơi' : 'Tức thì');
   const resolvedDestination = destination || detail?.destination || (isMarket ? 'Toàn thị trường' : 'Kho Bạc Nhà Nước');
@@ -117,8 +118,31 @@ export function EventCardModal({
         {description}
       </p>
 
+      {/* Khối Tóm Tắt Tác Động Nhanh 1 Giây — Mobile Only */}
+      <div
+        data-testid="event-impact-summary"
+        className="relative z-10 w-full bg-[#F7F2E7] border border-slate-300 rounded-xl p-3 mb-3 text-left sm:hidden flex flex-col gap-2"
+      >
+        <div className="flex items-center justify-between gap-2">
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+            <span>🎯</span>
+            <span>{resolvedTargetScope}</span>
+          </span>
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-800 border border-slate-300">
+            <span>⏳</span>
+            <span>{resolvedDuration}</span>
+          </span>
+        </div>
+        <p className="text-xs text-slate-800 font-medium leading-relaxed">
+          {resolvedEffectDetail}
+        </p>
+      </div>
+
       {/* Bảng thông số minh bạch (Impact Specs Matrix) */}
-      <div className="relative z-10 w-full bg-[#F7F2E7] border border-slate-300 rounded-xl p-3 mb-3 text-left flex flex-col gap-2">
+      <div
+        data-testid="event-specs-table"
+        className="relative z-10 w-full bg-[#F7F2E7] border border-slate-300 rounded-xl p-3 mb-3 text-left hidden sm:flex flex-col gap-2"
+      >
         <div className="text-[10px] font-mono uppercase tracking-wider text-slate-600 font-bold border-b border-slate-300 pb-1.5 flex items-center justify-between">
           <span>Thông Số Minh Bạch</span>
           <span className="text-amber-800 font-mono font-bold">SSOT §IV</span>
@@ -126,7 +150,7 @@ export function EventCardModal({
         <div className="grid grid-cols-1 gap-1.5 text-xs text-slate-900">
           <div className="flex items-start justify-between gap-2">
             <span className="text-[11px] text-slate-600 font-medium shrink-0">Phạm vi:</span>
-            <span className="text-slate-900 font-bold text-right">{resolvedTargetScope}</span>
+            <span className="text-slate-900 font-bold text-right">{resolvedDenseScope}</span>
           </div>
           <div className="flex items-start justify-between gap-2">
             <span className="text-[11px] text-slate-600 font-medium shrink-0">Thời hạn:</span>

@@ -1,4 +1,4 @@
-import type { Room, EventCardInfo } from '../domain/room';
+import type { Room, EventCardInfo, HoseResultInfo, MarketModifier } from '../domain/room';
 import { BOARD_SIZE, TurnPhase } from '../domain/room';
 import type { PropertyRegistry, PropertyStateMap } from '../domain/property_manager';
 import type { AuctionSession } from './auction_manager';
@@ -63,6 +63,10 @@ export interface DeltaPayload {
   readonly turnPhase?:           TurnPhase;
   readonly timeRemaining?:       number;
   readonly lastEventCard?:       EventCardInfo | null;
+  readonly lastHoseResult?:      HoseResultInfo | null;
+  readonly roundNumber?:         number;
+  readonly treasury?:            number;
+  readonly activeModifiers?:     ReadonlyArray<MarketModifier>;
 }
 
 export function buildDeltaFromRoom(
@@ -144,6 +148,10 @@ export function buildDeltaFromRoom(
     ...(timeRemaining !== undefined ? { timeRemaining } : {}),
     ...(auction !== undefined ? { auction } : {}),
     ...(room.lastEventCard !== undefined ? { lastEventCard: room.lastEventCard } : {}),
+    ...(room.lastHoseResult !== undefined ? { lastHoseResult: room.lastHoseResult } : {}),
+    roundNumber: Math.max(room.roundCount ?? 1, room.round ?? 1),
+    treasury: room.treasury ?? 0,
+    ...(room.activeModifiers !== undefined ? { activeModifiers: room.activeModifiers.map((m) => ({ ...m })) } : {}),
   });
 }
 
@@ -161,6 +169,10 @@ export function buildDeltaPayload(options: {
   turnPhase?: TurnPhase;
   timeRemaining?: number;
   lastEventCard?: EventCardInfo | null;
+  lastHoseResult?: HoseResultInfo | null;
+  roundNumber?: number;
+  treasury?: number;
+  activeModifiers?: ReadonlyArray<MarketModifier>;
 }): DeltaPayload;
 export function buildDeltaPayload(options: {
   tick: number;
@@ -191,6 +203,10 @@ export function buildDeltaPayload(
         turnPhase?: TurnPhase;
         timeRemaining?: number;
         lastEventCard?: EventCardInfo | null;
+        lastHoseResult?: HoseResultInfo | null;
+        roundNumber?: number;
+        treasury?: number;
+        activeModifiers?: ReadonlyArray<MarketModifier>;
       }
     | { tick: number; room: Room; registry: PropertyRegistry; stateMap: PropertyStateMap; auctions?: Map<string, AuctionSession> },
   cells?: ReadonlyArray<CellDelta>,
@@ -220,6 +236,10 @@ export function buildDeltaPayload(
       ...(tickOrOptions.turnPhase !== undefined ? { turnPhase: tickOrOptions.turnPhase } : {}),
       ...(tickOrOptions.timeRemaining !== undefined ? { timeRemaining: tickOrOptions.timeRemaining } : {}),
       ...(tickOrOptions.lastEventCard !== undefined ? { lastEventCard: tickOrOptions.lastEventCard } : {}),
+      ...(tickOrOptions.lastHoseResult !== undefined ? { lastHoseResult: tickOrOptions.lastHoseResult } : {}),
+      ...(tickOrOptions.roundNumber !== undefined ? { roundNumber: tickOrOptions.roundNumber } : {}),
+      ...(tickOrOptions.treasury !== undefined ? { treasury: tickOrOptions.treasury } : {}),
+      ...(tickOrOptions.activeModifiers !== undefined ? { activeModifiers: tickOrOptions.activeModifiers.map((m) => ({ ...m })) } : {}),
     };
   }
   return {
@@ -286,10 +306,17 @@ export class SessionManager {
         ? { currentTurnPlayerId: payload.currentTurnPlayerId }
         : {}),
       ...(payload.dice !== undefined ? { dice: payload.dice } : {}),
+      ...(payload.diceRollerId !== undefined ? { diceRollerId: payload.diceRollerId } : {}),
+      ...(payload.diceSeq !== undefined ? { diceSeq: payload.diceSeq } : {}),
       ...(payload.auction !== undefined ? { auction: payload.auction } : {}),
       ...(payload.roomStarted !== undefined ? { roomStarted: payload.roomStarted } : {}),
       ...(payload.turnPhase !== undefined ? { turnPhase: payload.turnPhase } : {}),
       ...(payload.timeRemaining !== undefined ? { timeRemaining: payload.timeRemaining } : {}),
+      ...(payload.lastEventCard !== undefined ? { lastEventCard: payload.lastEventCard } : {}),
+      ...(payload.lastHoseResult !== undefined ? { lastHoseResult: payload.lastHoseResult } : {}),
+      ...(payload.roundNumber !== undefined ? { roundNumber: payload.roundNumber } : {}),
+      ...(payload.treasury !== undefined ? { treasury: payload.treasury } : {}),
+      ...(payload.activeModifiers !== undefined ? { activeModifiers: payload.activeModifiers } : {}),
     };
   }
 

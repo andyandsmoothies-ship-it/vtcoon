@@ -9,16 +9,18 @@ import {
 } from '../../domain/property_data.js';
 import { BOARD_CONFIG, CellType } from '../../domain/board_config.js';
 import { calculateGoPropertyTax, GO_PROPERTY_TAX_CAP } from '../../domain/property_rent.js';
+import { SERVICE_CELLS as DOMAIN_SERVICE_CELLS } from '../../domain/event_card_types.js';
 import { TurnPhase } from '../../domain/room.js';
 import { verifyAllInvariants } from './invariant_checker.js';
 import { watchdogMonitor } from './watchdog_monitor.js';
 import { useTelemetryStore } from './telemetry_store.js';
+import { useActivityStore } from '../store/activity_store.js';
 import type { InvariantViolation } from './telemetry_types.js';
 
 export const AIRPORT_CELLS = new Set<number>([5, 15, 25, 35]);
 const JAIL_CELL = 10;
 const TAX_ORDER_CELL = 30;
-const SERVICE_CELLS = new Set<number>([12, 28, 39]);
+export const SERVICE_CELLS = new Set<number>(DOMAIN_SERVICE_CELLS);
 const EVENT_CELL_TYPES = new Set<CellType>([
   CellType.Chance,
   CellType.Market,
@@ -39,15 +41,10 @@ function extractBalances(playersInfo: Record<string, PlayerHudInfo>): Record<str
 export function checkIsTeleport(fromPos: number, toPos: number, isTurnPlayer: boolean, phase?: TurnPhase): boolean {
   if (!isTurnPlayer) return true;
   if ((AIRPORT_CELLS.has(fromPos) || fromPos === 22) && AIRPORT_CELLS.has(toPos)) return true;
-  if (fromPos === TAX_ORDER_CELL && toPos === JAIL_CELL) return true;
-  if (
-    SERVICE_CELLS.has(toPos) &&
-    phase !== TurnPhase.WaitingRoll &&
-    phase !== TurnPhase.ActionPhase &&
-    phase !== TurnPhase.PropertyManagement
-  ) {
-    return true;
-  }
+  if (toPos === JAIL_CELL) return true;
+  if (SERVICE_CELLS.has(toPos)) return true;
+  const CHANCE_MARKET_CELLS = new Set([2, 7, 17, 22, 33, 36]);
+  if (phase !== TurnPhase.PropertyManagement && CHANCE_MARKET_CELLS.has(fromPos)) return true;
   if (
     phase &&
     phase !== TurnPhase.WaitingRoll &&
@@ -73,7 +70,12 @@ function detectMovement(
         delta.turnPhase === TurnPhase.ActionPhase ||
         delta.turnPhase === TurnPhase.PropertyManagement ||
         delta.turnPhase === undefined;
-      const isTeleport = checkIsTeleport(fromPos, p.position, isTurnPlayer, delta.turnPhase);
+      const isExactDiceMove = Boolean(
+        delta.dice && (fromPos + delta.dice[0] + delta.dice[1]) % 40 === p.position
+      );
+      const isTeleport = isExactDiceMove
+        ? false
+        : checkIsTeleport(fromPos, p.position, isTurnPlayer, delta.turnPhase);
 
       return {
         fromPosition: fromPos,
@@ -86,7 +88,7 @@ function detectMovement(
   return undefined;
 }
 
-function calculateGoSalary(preState: GameState, activeId: string): number {
+function calculateGoSalary(preState: GameState, activeId: string, treasuryGain: number = 0): number {
   const registry: PropertyRegistry = new Map<number, string>();
   for (const [id, info] of Object.entries(preState.playersInfo)) {
     for (const c of info.ownedProperties) registry.set(c, id);
@@ -97,10 +99,12 @@ function calculateGoSalary(preState: GameState, activeId: string): number {
   }
   const rawTax = calculateGoPropertyTax(activeId, registry, stateMap);
   const tax = Math.min(rawTax, GO_PROPERTY_TAX_CAP);
-  return 2000 - tax;
+  const absorbedTax = Math.min(Math.max(0, treasuryGain), tax);
+  return (2000 - tax) + absorbedTax;
 }
 
 function computeCellDelta(cells: readonly CellDelta[], preState: GameState): number {
+  const storeAuctionBid = useActivityStore.getState().lastAuctionBid;
   let deltaSum = 0;
   for (const cell of cells) {
     const deed = PROPERTY_DEEDS.get(cell.index);
@@ -127,9 +131,16 @@ function computeCellDelta(cells: readonly CellDelta[], preState: GameState): num
         preState.activeModal === 'auction' && preState.modalPayload && 'cellIndex' in preState.modalPayload
           ? (preState.modalPayload as { cellIndex?: number; currentBid?: number; highestBid?: number })
           : undefined;
-      const isAuction = preAuction?.cellIndex === cell.index || auctionPayload?.cellIndex === cell.index;
+      const isAuction =
+        preAuction?.cellIndex === cell.index ||
+        auctionPayload?.cellIndex === cell.index ||
+        storeAuctionBid?.cellIndex === cell.index;
       const highestBid = isAuction
-        ? (preAuction?.highestBid ?? preAuction?.currentBid ?? auctionPayload?.highestBid ?? auctionPayload?.currentBid)
+        ? ((storeAuctionBid?.cellIndex === cell.index ? storeAuctionBid.currentBid : undefined)
+            ?? preAuction?.highestBid
+            ?? preAuction?.currentBid
+            ?? auctionPayload?.highestBid
+            ?? auctionPayload?.currentBid)
         : undefined;
 
       deltaSum -= highestBid !== undefined ? highestBid : deed.price;
@@ -160,6 +171,9 @@ function isUnmodeledEvent(delta: DeltaPayload, preState: GameState): boolean {
   for (const p of delta.players) {
     const preP = preState.playersInfo[p.id];
     if (preP && preP.balance !== p.balance) {
+      if (preP.inAudit && p.inAudit === false && preP.balance - p.balance === 500) {
+        continue;
+      }
       const cell = BOARD_CONFIG[p.position];
       if (cell && EVENT_CELL_TYPES.has(cell.type)) return true;
     }
@@ -167,14 +181,19 @@ function isUnmodeledEvent(delta: DeltaPayload, preState: GameState): boolean {
   return false;
 }
 
-function computeAuditBailDelta(players: readonly PlayerDelta[], preState: GameState): number {
-  let bail = 0;
+function computeAuditBailDelta(
+  players: readonly PlayerDelta[],
+  preState: GameState,
+  treasuryGain: number = 0
+): number | null {
+  let bail: number | null = null;
   for (const p of players) {
     const preP = preState.playersInfo[p.id];
     if (preP && (preP.inAudit || (preP.auditTurnsLeft && preP.auditTurnsLeft > 0))) {
       const leftAudit = p.inAudit === false || p.auditTurnsLeft === 0;
       if (leftAudit && p.balance !== undefined && preP.balance - p.balance === 500) {
-        bail -= 500;
+        const absorbed = Math.min(Math.max(0, treasuryGain), 500);
+        bail = (bail ?? 0) + (-500 + absorbed);
       }
     }
   }
@@ -184,17 +203,30 @@ function computeAuditBailDelta(players: readonly PlayerDelta[], preState: GameSt
 export function computeExpectedDelta(
   delta: DeltaPayload,
   preState: GameState,
-  movement?: { fromPosition: number; toPosition: number; dice?: readonly [number, number]; isTeleport?: boolean }
+  movement?: { fromPosition: number; toPosition: number; dice?: readonly [number, number]; isTeleport?: boolean },
+  postTreasury?: number
 ): number | null {
+  if (delta.lastHoseResult || delta.lastEventCard) {
+    return null;
+  }
+
+  const treasuryGain =
+    postTreasury !== undefined
+      ? Math.max(0, postTreasury - preState.treasuryPool)
+      : (delta.treasury !== undefined ? Math.max(0, delta.treasury - preState.treasuryPool) : 0);
+
   let expected = 0;
   let hasKnown = false;
 
-  if (movement?.dice && !movement.isTeleport) {
+  if (movement?.dice) {
     const diceSum = movement.dice[0] + movement.dice[1];
-    if (movement.fromPosition + diceSum >= 40) {
-      const activeId = delta.currentTurnPlayerId ?? Object.keys(preState.playersInfo)[0] ?? '';
-      expected += calculateGoSalary(preState, activeId);
-      hasKnown = true;
+    const isExactDiceMove = (movement.fromPosition + diceSum) % 40 === movement.toPosition;
+    if (!movement.isTeleport || isExactDiceMove) {
+      if (movement.fromPosition + diceSum >= 40) {
+        const activeId = delta.currentTurnPlayerId ?? Object.keys(preState.playersInfo)[0] ?? '';
+        expected += calculateGoSalary(preState, activeId, treasuryGain);
+        hasKnown = true;
+      }
     }
   }
 
@@ -209,8 +241,8 @@ export function computeExpectedDelta(
       expected += overdraft;
       hasKnown = true;
     }
-    const auditBail = computeAuditBailDelta(delta.players, preState);
-    if (auditBail !== 0) {
+    const auditBail = computeAuditBailDelta(delta.players, preState, treasuryGain);
+    if (auditBail !== null) {
       expected += auditBail;
       hasKnown = true;
     }
@@ -229,9 +261,16 @@ function recordTurnStallAndBotWatchdog(
   violations: InvariantViolation[]
 ): void {
   if (postState.currentTurnPlayerId) {
+    const hasProgress = Boolean(
+      (delta.cells && delta.cells.length > 0) ||
+      (delta.players && delta.players.length > 0) ||
+      delta.auction !== undefined
+    );
     const stallViolation = watchdogMonitor.checkTurnStall({
       currentTurnPlayerId: postState.currentTurnPlayerId,
       timeRemaining: postState.turnTimeRemaining,
+      turnPhase: delta.turnPhase ?? postState.turnPhase,
+      hasProgress,
       tick: delta.tick,
     });
     if (stallViolation) violations.push(stallViolation);
@@ -254,17 +293,22 @@ export function handleDeltaTelemetry(
   const preBalances = extractBalances(preState.playersInfo);
   const postBalances = extractBalances(postState.playersInfo);
   const movement = detectMovement(delta, preState.playerPositions);
-  const expectedMoneyDelta = computeExpectedDelta(delta, preState, movement);
+  const expectedMoneyDelta = computeExpectedDelta(delta, preState, movement, postState.treasuryPool);
+
+  const isInitialTreasuryCalibration =
+    delta.tick <= 1 &&
+    preState.treasuryPool !== postState.treasuryPool &&
+    delta.treasury === postState.treasuryPool;
 
   const violations = verifyAllInvariants({
     preBalances,
     postBalances,
-    preTreasury: preState.treasuryPool,
+    preTreasury: isInitialTreasuryCalibration ? postState.treasuryPool : preState.treasuryPool,
     postTreasury: postState.treasuryPool,
     expectedMoneyDelta,
     movement,
     players: Object.values(postState.playersInfo),
-    isInInsolvency: postState.activeModal === 'insolvency',
+    isInInsolvency: delta.turnPhase === TurnPhase.InsolvencyPhase || postState.activeModal === 'insolvency',
     cells: delta.cells,
     tick: delta.tick,
   });

@@ -11,7 +11,7 @@ export const LANDMARK_MODEL_URLS = {
   cathedral: '/models/landmarks/landmark_cathedral.glb',
 } as const;
 
-export interface LandmarkFallbackProps {
+interface LandmarkFallbackProps {
   readonly isNight: boolean;
   readonly isSunset: boolean;
 }
@@ -203,7 +203,7 @@ export function DioramaHeritageDistrict(): React.ReactElement {
           1. NHÀ THỜ ĐỨC BÀ CỔ GẠCH ĐỎ ĐÔNG DƯƠNG (Heritage Cathedral)
              Đứng độc tôn, uy nghi, tráng lệ trên trục di sản
          ======================================================== */}
-      <group position={[0.2, 0, 0.75]} data-model-url={LANDMARK_MODEL_URLS.cathedral}>
+      <group position={[0.2, 0, 0.75]} name="HeritageCathedralGroup" data-model-url={LANDMARK_MODEL_URLS.cathedral}>
         <SafeGLTFModel
           url={LANDMARK_MODEL_URLS.cathedral}
           fallback={<CathedralProceduralFallback isNight={isNight} isSunset={isSunset} />}

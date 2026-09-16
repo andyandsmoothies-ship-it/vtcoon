@@ -1,7 +1,7 @@
 // [UC-GAME-038..041/MSS] Market Card Handlers — 16 Market Cards
 // Extracted from card_handlers.ts — Slice 06 refactor (DEBT-S06-06)
 
-import type { Player, MarketModifier } from './room';
+import type { Player, MarketModifier, Room } from './room';
 import type { PropertyRegistry, PropertyStateMap } from './property_data';
 import { resolveRent } from './property_rent';
 import { BOARD_CONFIG } from './board_config';
@@ -48,14 +48,24 @@ function handleMegaConcert(
   }
 }
 
-function handlePublicInvest(players: Player[], registry?: PropertyRegistry): void {
+function countPlayerInfra(registry: PropertyRegistry, playerId: string): number {
+  let count = 0;
+  for (const cellIndex of INFRA_CELLS) {
+    if (registry.get(cellIndex) === playerId) count++;
+  }
+  return count;
+}
+
+export function handlePublicInvest(players: Player[], registry?: PropertyRegistry, room?: Room): void {
   if (!registry) return;
+  let totalDisbursed = 0;
   for (const player of players) {
-    let infraCount = 0;
-    for (const cellIndex of INFRA_CELLS) {
-      if (registry.get(cellIndex) === player.id) infraCount++;
-    }
-    player.balance += infraCount * 1000;
+    const amount = countPlayerInfra(registry, player.id) * 1000;
+    player.balance += amount;
+    totalDisbursed += amount;
+  }
+  if (room && totalDisbursed > 0) {
+    room.treasury = Math.max(0, (room.treasury ?? 0) - totalDisbursed);
   }
 }
 
@@ -88,6 +98,7 @@ type MarketHandler = (
   players?: Player[],
   registry?: PropertyRegistry,
   stateMap?: PropertyStateMap,
+  room?: Room,
 ) => void;
 
 const MARKET_HANDLERS: Partial<Record<MarketCardId, MarketHandler>> = {
@@ -106,8 +117,8 @@ const MARKET_HANDLERS: Partial<Record<MarketCardId, MarketHandler>> = {
   [MarketCardId.MC_FIRE_INSPECTION]: (_mods, players, registry, stateMap) => {
     if (players && registry && stateMap) handleFireInspection(players, registry, stateMap);
   },
-  [MarketCardId.MC_PUBLIC_INVEST]:   (_mods, players, registry) => {
-    if (players) handlePublicInvest(players, registry);
+  [MarketCardId.MC_PUBLIC_INVEST]:   (_mods, players, registry, _stateMap, room) => {
+    if (players) handlePublicInvest(players, registry, room);
   },
   [MarketCardId.MC_CASINO_PILOT]:    (_mods, players, registry, stateMap) => {
     if (players) handleCasinoPilot(players, registry, stateMap);
@@ -123,7 +134,8 @@ export function executeMarketCard(
   players?: Player[],
   registry?: PropertyRegistry,
   stateMap?: PropertyStateMap,
+  room?: Room,
 ): void {
   const handler = MARKET_HANDLERS[card];
-  if (handler) handler(activeModifiers, players, registry, stateMap);
+  if (handler) handler(activeModifiers, players, registry, stateMap, room);
 }

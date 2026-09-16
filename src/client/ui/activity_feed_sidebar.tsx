@@ -54,6 +54,14 @@ export interface ActivityFeedSidebarProps {
   readonly onClearLogs?: () => void;
 }
 
+export function shouldShowScrollBottom(
+  scrollTop: number,
+  scrollHeight: number,
+  clientHeight: number,
+): boolean {
+  return scrollHeight - (scrollTop + clientHeight) > 60;
+}
+
 export function handleActivityFeedKeyDown(
   event: { key: string },
   setOpen: (open: boolean) => void,
@@ -81,7 +89,30 @@ export function ActivityFeedSidebar(props: ActivityFeedSidebarProps): React.Reac
   const setFilter = props.onSetFilter ?? storeSetFilter;
   const clearLogs = props.onClearLogs ?? storeClearLogs;
 
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const listEndRef = useRef<HTMLDivElement>(null);
+  const [isScrolledUp, setIsScrolledUp] = React.useState(false);
+
+  const scrollToBottom = React.useCallback((smooth = true) => {
+    if (scrollContainerRef.current) {
+      if (typeof scrollContainerRef.current.scrollTo === 'function') {
+        scrollContainerRef.current.scrollTo({
+          top: scrollContainerRef.current.scrollHeight,
+          behavior: smooth ? 'smooth' : 'auto',
+        });
+      } else {
+        scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+      }
+    } else if (listEndRef.current?.scrollIntoView) {
+      listEndRef.current.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
+    }
+  }, []);
+
+  const handleScroll = React.useCallback(() => {
+    if (!scrollContainerRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
+    setIsScrolledUp(shouldShowScrollBottom(scrollTop, scrollHeight, clientHeight));
+  }, []);
 
   const filteredLogs = useMemo<readonly ActivityLogEntry[]>(() => {
     if (activeFilter === 'money') {
@@ -116,10 +147,15 @@ export function ActivityFeedSidebar(props: ActivityFeedSidebarProps): React.Reac
   }, [isActivityFeedOpen, setOpen]);
 
   useEffect(() => {
-    if (isActivityFeedOpen && listEndRef.current) {
-      listEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (isActivityFeedOpen) {
+      const timer = setTimeout(() => {
+        if (!isScrolledUp) {
+          scrollToBottom(false);
+        }
+      }, 50);
+      return () => clearTimeout(timer);
     }
-  }, [isActivityFeedOpen, filteredLogs.length]);
+  }, [isActivityFeedOpen, filteredLogs.length, isScrolledUp, scrollToBottom]);
 
   return (
     <aside
@@ -196,7 +232,12 @@ export function ActivityFeedSidebar(props: ActivityFeedSidebarProps): React.Reac
       </div>
 
       {/* 3. Danh sách nhật ký */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-2" data-testid="activity-log-list">
+      <div
+        ref={scrollContainerRef}
+        onScroll={handleScroll}
+        className="flex-1 overflow-y-auto p-3 space-y-2 relative"
+        data-testid="activity-log-list"
+      >
         {filteredLogs.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-48 text-slate-600 text-xs text-center px-4 font-medium">
             <span className="text-2xl mb-2" aria-hidden="true">📭</span>
@@ -242,8 +283,27 @@ export function ActivityFeedSidebar(props: ActivityFeedSidebarProps): React.Reac
             </div>
           ))
         )}
-        <div ref={listEndRef} />
+        <div ref={listEndRef} data-testid="activity-log-bottom-anchor" />
       </div>
+
+      {/* Nút nổi cuộn xuống dòng mới nhất khi người dùng cuộn xem lịch sử */}
+      {isScrolledUp && (
+        <div className="absolute bottom-16 right-4 z-20">
+          <button
+            type="button"
+            onClick={() => {
+              scrollToBottom(true);
+              setIsScrolledUp(false);
+            }}
+            className="px-3 py-1.5 rounded-full bg-amber-400 text-slate-900 font-bold text-xs shadow-lg border-2 border-slate-900 flex items-center gap-1.5 hover:bg-amber-300 transition-transform active:scale-95 cursor-pointer"
+            data-testid="scroll-to-bottom-btn"
+            aria-label="Cuộn xuống dòng mới nhất"
+          >
+            <span aria-hidden="true">⬇</span>
+            <span>Dòng mới nhất</span>
+          </button>
+        </div>
+      )}
 
       {/* 4. Footer */}
       <div className="p-3 border-t border-amber-200 bg-[#F7F2E7] flex items-center justify-between">

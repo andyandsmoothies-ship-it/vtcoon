@@ -91,6 +91,7 @@ export interface ActionDockButtonStateParams {
   readonly canRollAgain?: boolean;
   readonly isRollPending?: boolean;
   readonly isInsolvent?: boolean;
+  readonly inAudit?: boolean;
 }
 
 /**
@@ -99,8 +100,9 @@ export interface ActionDockButtonStateParams {
 export function isRollActionDisabled(params: ActionDockButtonStateParams): boolean {
   return (
     Boolean(params.isRollPending) ||
-    params.isRolling ||
-    params.isPawnMoving ||
+    Boolean(params.inAudit) ||
+    Boolean(params.isRolling) ||
+    Boolean(params.isPawnMoving) ||
     !params.isMyTurn ||
     Boolean(params.isBankrupt) ||
     (Boolean(params.hasRolledThisTurn) && !params.canRollAgain)
@@ -111,12 +113,20 @@ export function isRollActionDisabled(params: ActionDockButtonStateParams): boole
  * Pure logic checking whether end turn action is disabled
  */
 export function isEndTurnDisabled(params: ActionDockButtonStateParams): boolean {
-  return (
+  if (
     !params.isMyTurn ||
     params.isRolling ||
     params.isPawnMoving ||
     Boolean(params.isBankrupt) ||
-    Boolean(params.isInsolvent) ||
+    Boolean(params.isInsolvent)
+  ) {
+    return true;
+  }
+  // [IMP-79] Khi đang trong Trạm Kiểm Toán, người chơi được phép kết thúc lượt để chấp hành lượt kiểm toán
+  if (params.inAudit) {
+    return false;
+  }
+  return (
     (params.hasRolledThisTurn !== undefined ? !params.hasRolledThisTurn : false) ||
     Boolean(params.canRollAgain)
   );

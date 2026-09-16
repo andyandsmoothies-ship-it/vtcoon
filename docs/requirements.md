@@ -22,9 +22,13 @@ Bản tài liệu thiết kế hoàn chỉnh của trò chơi **"Đại Gia Đ�
   * Đối tượng giao dịch hợp lệ: Đất trống (Cấp 0), Thẻ Miễn Trừ Ngoại Giao, tiền mặt. Không được phép giao dịch các ô đất đã xây dựng công trình (phải thanh lý công trình về Cấp 0 trước khi chuyển nhượng).  
   * Áp dụng thuế chuyển nhượng bất động sản: Bên nhận tiền phải đóng thuế giao dịch 5% trên tổng giá trị nhận được vào Kho bạc Nhà nước.  
   * Áp dụng quy tắc giá sàn chống gian lận (IMP-16): Mức giá chuyển nhượng tối thiểu phải bằng 70% giá niêm yết của ô đất (mã lỗi: PRICE_BELOW_FLOOR), ngăn chặn hoàn toàn việc bán 1 VNĐ để tuồn tài sản lậu.  
+  * Trí tuệ đàm phán Bot P2P (IMP-83): Bot nhận diện khoảng trống độc quyền (Monopoly Gap: N-1 ô) và chủ động gửi đề xuất đàm phán mua đất trong giai đoạn Quản Lý BĐS; định giá theo 3 tính cách (Quyết đoán 1.4x, Cân bằng 1.25x, Cẩn trọng 1.1x), bảo toàn đệm an toàn vốn (safetyBuffer), ngăn chặn đối thủ độc quyền (PREVENT_MONOPOLY) và chống thiên vị (KINGMAKING_DEFENSE); giãn cách tối thiểu 1 đề xuất/2 vòng.  
 * **Mức Bảo Lãnh Trạm Kiểm Toán (Ô 10):** Người chơi đang bị phong tỏa tại Trạm Kiểm Toán có thể nộp khoản bảo lãnh 500 Tr. VNĐ để thoát ngay lập tức. Nếu số dư tiền mặt không đủ 500 Tr. VNĐ, yêu cầu bị từ chối và người chơi tiếp tục thụ án.  
-* **Bố cục Điều Khiển (Action Dock theo IMP-16):** Tinh gọn giao diện đáy màn hình bằng cách gộp hai nút "Tài Sản" và "Xây Dựng" thành nút duy nhất **"Quản Lý BĐS" 🏛️**.  
-* **Thời Gian Hồi Biểu Cảm (Emote Cooldown theo IMP-16):** Giới hạn tần suất gửi biểu cảm tương tác giữa người chơi tối thiểu 2.5 giây/lần (EMOTE_COOLDOWN_MS = 2500) để chống spam giao diện.
+* **Bố cục Điều Khiển (Action Dock - IMP-89):** Đặt tại góc dưới bên phải màn hình (Bottom-Right) tối ưu công thái học (Fitts's Law), đối xứng với TelemetryBadge ở góc dưới bên trái; gộp hai nút "Tài Sản" và "Xây Dựng" thành nút duy nhất **"Quản Lý BĐS" 🏛️**.  
+* **Loại Bỏ Biểu Cảm Cảm Xúc (Emotes Purge - IMP-89):** Bãi bỏ hoàn toàn khay biểu cảm cảm xúc (SocialEmotesTray) khỏi HUD để triệt tiêu bấm nhầm, giữ giao diện trong trận đấu tối giản, sạch sẽ và tập trung tối đa vào chiến thuật.  
+* **Quy Chuẩn Quân Cờ 3D & Chủ Quyền Ô Đất (IMP-94, IMP-96, IMP-98):**  
+  * **Quân cờ Chibi đúc bạc (Zero-Pedestal):** 4 linh vật con vật (🐕 Chó, 🐈 Mèo, 🐎 Ngựa, 🐘 Voi) đúc bạc PBR đồng bộ (`#E2E8F0`), đứng trực tiếp trên mặt ô cờ (triệt tiêu 100% bệ tròn cờ vua), chân đế gắn đĩa hào quang phát quang mang màu thương hiệu người chơi (`PawnAuraPedestal`).  
+  * **Tô màu chủ quyền thuần túy (Pure Color Ownership):** Triệt tiêu hoàn toàn cọc cờ và con dấu 3D che tranh; nhận diện ô đất có chủ từ xa qua khay giá chân ô `OwnerPricePill` đổi màu theo chủ sở hữu (P1 Đỏ, P2 Xanh, P3 Cam, P4 Xanh Lục) căn giữa trung tâm, viền chân đế `OwnerBaseTrim` dày 0.10m và khối nhà đồ chơi `ToyPropertyBuildings`.  
 
 ### **II. BẢNG DANH MỤC 40 Ô BÀN CỜ VIỆT NAM (MASTER LAYOUT)**
 
@@ -36,7 +40,7 @@ Bản tài liệu thiết kế hoàn chỉnh của trò chơi **"Đại Gia Đ�
 | **01** | Cần Thơ (Cái Răng) | BĐS Đô thị (Nâu) | $600$ | Trung tâm thương mại & dịch vụ miền Tây. |
 | **02** | **PHIẾU THỊ TRƯỜNG** | Sự kiện vĩ mô | — | Lật thẻ biến động kinh tế tác động toàn bàn cờ. |
 | **03** | An Giang (Châu Đốc) | BĐS Đô thị (Nâu) | $600$ | Thương mại biên mậu và dịch vụ tâm linh. |
-| **04** | **Lệ Phí Đăng Ký Đất Đai** | Thuế Nhà nước | — | Nộp $2.000$ Tr. VNĐ hoặc 10% tổng tiền mặt hiện có. |
+| **04** | **Lệ Phí Đăng Ký Đất Đai** | Thuế Nhà nước | — | Nộp 1.000 Tr. VNĐ (Thanh Nhãn Hành Động: [NỘP 1.000 TR.] đỏ hồng). |
 | **05** | **Cảng HKQT Long Thành** | Hạ tầng Giao thông 1 | $2.000$ | Đầu mối hàng không quốc tế; thu phí lưu thông. |
 | **06** | Bình Dương (Tổ Hợp Thể Thao & Golf) | BĐS Dịch vụ & Giải trí (Xanh Da Trời) | $1.000$ | Thể thao cao cấp, ẩm thực dịch vụ ven sông. |
 | **07** | **PHIẾU CƠ HỘI** | Sự kiện cá nhân | — | Rút thẻ rủi ro, đầu tư hoặc tương tác đối kháng. |

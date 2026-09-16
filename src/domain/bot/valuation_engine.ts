@@ -35,8 +35,8 @@ export const DENIAL_MULTIPLIERS: Readonly<Record<BotPersonality, number>> = Obje
   [BotPersonality.Aggressive]: 2.2,
 });
 
-export const DENIAL_MULTIPLIER_NONE = 1.0;
-export const MIN_LIQUIDITY_MULTIPLIER = 0.25;
+const DENIAL_MULTIPLIER_NONE = 1.0;
+const MIN_LIQUIDITY_MULTIPLIER = 0.25;
 
 export const JITTER_BOUNDS = Object.freeze({
   MIN: -0.12,
@@ -143,7 +143,7 @@ export function calculateValuePreferenceMultiplier(
   return 1.0;
 }
 
-export function resolveJitter(
+function resolveJitter(
   manualJitter?: number,
   seedOrRng?: number | (() => number),
 ): number {

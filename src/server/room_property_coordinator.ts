@@ -6,11 +6,14 @@ import { mortgageProperty, redeemProperty } from './mortgage_manager.js';
 import { handleDowngrade, executeP2PTrade } from './property_actions.js';
 import { liquidateAssets, declareBankruptcy } from './insolvency_manager.js';
 import type { AuctionSession } from './auction_manager.js';
+import { evaluateBotTradeAcceptance } from '../domain/bot/bot_trade.js';
+import { BotPersonality } from '../domain/bot/bot_types.js';
 
 export interface RoomContext {
   readonly room: Room;
   readonly reg: PropertyRegistry;
   readonly sm: PropertyStateMap;
+  readonly botPersonalities?: Map<string, BotPersonality>;
 }
 
 export function coordMortgage(
@@ -73,6 +76,17 @@ export function coordTrade(
   if (!ctx) return { success: false, reason: ActionRejectReason.INVALID_ROOM };
   if (requesterId !== sellerId && requesterId !== buyerId) {
     return { success: false, reason: ActionRejectReason.UNAUTHORIZED };
+  }
+  const seller = ctx.room.players.find((p) => p.id === sellerId);
+  const buyer = ctx.room.players.find((p) => p.id === buyerId);
+  if (seller?.isBot && buyer) {
+    const botPers = ctx.botPersonalities?.get(sellerId) ?? BotPersonality.Aggressive;
+    const decision = evaluateBotTradeAcceptance(
+      cellIndex, price, seller, buyer, ctx.room, ctx.reg, ctx.sm, botPers
+    );
+    if (!decision.accept) {
+      return { success: false, reason: ActionRejectReason.TRADE_REJECTED };
+    }
   }
   return executeP2PTrade(ctx.room, sellerId, buyerId, cellIndex, price, ctx.reg, ctx.sm);
 }

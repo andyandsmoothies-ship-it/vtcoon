@@ -1,5 +1,5 @@
 // [UI-S01/MSS][UI-S03/MSS][UI-S04/MSS] Game Store Types, Interfaces & Payloads
-import type { EventCardInfo } from '../../domain/room';
+import type { EventCardInfo, MarketModifier } from '../../domain/room';
 
 export interface PawnAnimationState {
   readonly playerId: string;
@@ -34,6 +34,10 @@ export interface PlayerHudInfo {
   readonly bankrupt?: boolean;
   readonly isBot?: boolean;
   readonly overdraftRoundsLeft?: number;
+  readonly pawnSlot?: number;
+  readonly ownerSlot?: number;
+  readonly mascotIcon?: string;
+  readonly mascotName?: string;
 }
 
 export interface ActiveEmote {
@@ -55,10 +59,13 @@ export interface FloatingTextItem {
   readonly timestamp: number;
 }
 
-export type ActiveModalType = 'deed' | 'auction' | 'trade' | 'event' | 'hose' | 'insolvency' | 'game_over' | 'rules' | null;
+export type ActiveModalType = 'deed' | 'portfolio' | 'auction' | 'trade' | 'event' | 'hose' | 'insolvency' | 'game_over' | 'rules' | null;
 
 export interface ModalPayloadMap {
-  deed: { cellIndex: number; canBuy?: boolean };
+  deed: { cellIndex: number; canBuy?: boolean; ownedProperties?: readonly number[] };
+  portfolio: {
+    playerId?: string;
+  };
   auction: {
     cellIndex: number;
     currentBid: number;
@@ -66,6 +73,9 @@ export interface ModalPayloadMap {
     timeRemaining: number;
     hasPassed?: boolean;
     declinedPlayerId?: string;
+    isConcluded?: boolean;
+    winnerId?: string | null;
+    finalPrice?: number;
   };
   trade: {
     targetPlayerId: string;
@@ -91,6 +101,9 @@ export interface ModalPayloadMap {
     currentStake?: number;
     lastDiceRoll?: number;
     lastPayout?: number;
+    lastMultiplier?: number;
+    lastProfit?: number;
+    isReviewingResult?: boolean;
   };
   insolvency: {
     playerId: string;
@@ -133,9 +146,11 @@ export interface GameState {
   readonly playersInfo: Record<string, PlayerHudInfo>;
   readonly currentTurnPlayerId: string | null;
   readonly turnTimeRemaining: number;
+  readonly turnPhase?: string;
   readonly treasuryPool: number;
   readonly roundNumber: number;
   readonly maxRounds: number;
+  readonly activeModifiers: ReadonlyArray<MarketModifier>;
 
   // UI-04 Business Modals State
   readonly activeModal: ActiveModalType;
@@ -177,6 +192,8 @@ export interface GameState {
   decrementTurnTimer: () => void;
   setTreasuryPool: (amount: number) => void;
   setRoundInfo: (round: number, maxRounds?: number) => void;
+  setRoundNumber: (round: number) => void;
+  setActiveModifiers: (modifiers: ReadonlyArray<MarketModifier>) => void;
 
   // UI-04 Business Modals Actions
   openModal: <T extends keyof ModalPayloadMap>(type: T, payload: ModalPayloadMap[T]) => void;

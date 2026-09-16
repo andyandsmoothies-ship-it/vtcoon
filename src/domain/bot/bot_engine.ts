@@ -21,6 +21,12 @@ import {
   decideAuctionPhaseIntent,
 } from './bot_auction';
 import { sampleDecision, createDeterministicRng, getTurnSeed } from './bot_softmax';
+import {
+  findMonopolyGap,
+  calculateTradeOfferPrice,
+  evaluateBotTradeAcceptance,
+  findEligibleBotTrade,
+} from './bot_trade.js';
 
 export {
   BotPersonality,
@@ -32,6 +38,10 @@ export {
   calculateAuctionMaxBid,
   isPassiveAuctionAllowed,
   decideAuctionPhaseIntent,
+  findMonopolyGap,
+  calculateTradeOfferPrice,
+  evaluateBotTradeAcceptance,
+  findEligibleBotTrade,
 };
 
 /** Tra ve gia niem yet cua o tai position; 0 neu khong phai o tai san. */
@@ -296,6 +306,12 @@ export function decideBotIntent(
       const redeemCell = findEligibleRedeemCell(bot, room, registry, stateMap, personality);
       if (redeemCell !== null) {
         return { type: 'INTENT_REDEEM', cellIndex: redeemCell };
+      }
+      const currentRound = room.roundCount ?? room.round ?? 1;
+      const tradeIntent = findEligibleBotTrade(bot, room, registry, stateMap, personality, currentRound);
+      if (tradeIntent !== null) {
+        bot.lastTradeOfferRound = currentRound;
+        return tradeIntent;
       }
       return { type: 'INTENT_END_TURN' };
     }

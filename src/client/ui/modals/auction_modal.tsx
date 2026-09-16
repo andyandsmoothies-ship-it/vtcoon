@@ -15,6 +15,9 @@ export interface AuctionModalProps {
   readonly bidderName?: string;
   readonly myBalance?: number;
   readonly myId?: string;
+  readonly isConcluded?: boolean;
+  readonly winnerId?: string | null;
+  readonly finalPrice?: number;
   readonly onBid?: (newAmount: number) => void;
   readonly onPass?: () => void;
   readonly onClose?: () => void;
@@ -30,6 +33,9 @@ export function AuctionModal({
   bidderName,
   myBalance,
   myId,
+  isConcluded = false,
+  winnerId,
+  finalPrice,
   onBid,
   onPass,
   onClose,
@@ -55,6 +61,16 @@ export function AuctionModal({
     }
   }, [autoBid, isLeading, hasPassed, isDeclinedPlayer, currentBid, increments, myBalance, onBid]);
 
+  // Tự động đóng modal sau 2.5s khi phiên đấu giá gõ búa thành công
+  useEffect(() => {
+    if (isConcluded && onClose) {
+      const timer = setTimeout(() => {
+        onClose();
+      }, 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [isConcluded, onClose]);
+
   return (
     <div
       className="w-full max-w-lg bg-[#FFFBEB] border-2 border-slate-900 rounded-3xl p-5 md:p-6 shadow-[0_6px_0_0_#0f172a] space-y-4 pointer-events-auto relative select-none text-slate-900"
@@ -64,6 +80,19 @@ export function AuctionModal({
       <div aria-live="polite" aria-atomic="true" className="sr-only">
         {`Giá thầu cao nhất hiện tại: ${formatCurrency(currentBid)}, người dẫn đầu: ${displayName}, thời gian còn lại: ${timeRemaining} giây`}
       </div>
+
+      {/* Banner Gõ Búa Thành Công khi phiên đấu giá kết thúc */}
+      {isConcluded && (
+        <div className="bg-amber-100 border-2 border-amber-500 rounded-2xl p-4 text-center shadow-md animate-pulse">
+          <div className="text-2xl mb-1" aria-hidden="true">🔨🎉</div>
+          <h3 className="font-black text-amber-950 text-base uppercase tracking-wider">
+            BÚA GÕ THÀNH CÔNG!
+          </h3>
+          <p className="text-xs font-bold text-amber-900 mt-1">
+            {displayName} đã trúng đấu giá {deed?.name ?? `Ô #${cellIndex}`} với giá {formatCurrency(finalPrice ?? currentBid)}!
+          </p>
+        </div>
+      )}
 
       {/* Header phiên đấu giá */}
       <div className="flex items-center justify-between border-b border-amber-300/80 pb-3">

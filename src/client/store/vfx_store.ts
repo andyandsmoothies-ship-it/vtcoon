@@ -10,7 +10,7 @@ export interface ActiveSlam {
   readonly impactTimeMs: number;
 }
 
-export interface ScreenShakeState {
+interface ScreenShakeState {
   readonly startTime: number;
   readonly durationMs: number;
   readonly intensity: number;

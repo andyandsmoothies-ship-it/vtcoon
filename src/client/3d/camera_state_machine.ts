@@ -3,7 +3,7 @@
 
 export type CameraMode = 'overview' | 'dice_roll' | 'pawn_chase' | 'tile_focus' | 'auction_focus' | 'pre_match';
 
-export interface CameraConfigItem {
+interface CameraConfigItem {
   readonly position: readonly [number, number, number];
   readonly target: readonly [number, number, number];
   readonly fov: number;
@@ -198,18 +198,22 @@ export function calculateTargetCameraState(
       };
     case 'pawn_chase': {
       const p = pawnPosition ?? [0, 0, 0];
+      const safePx = Number.isFinite(p[0]) ? p[0] : 0;
+      const safePz = Number.isFinite(p[2]) ? p[2] : 0;
       return {
         position: calculateChaseCameraPosition(p),
-        target: [p[0], 0.2, p[2]],
+        target: [safePx, 0.2, safePz],
         fov: CAMERA_CONFIG.pawn_chase.fov,
         speed: CAMERA_CONFIG.pawn_chase.speed,
       };
     }
     case 'tile_focus': {
       const t = tilePosition ?? [0, 0, 0];
+      const safeTx = Number.isFinite(t[0]) ? t[0] : 0;
+      const safeTz = Number.isFinite(t[2]) ? t[2] : 0;
       return {
         position: calculateTileFocusCameraPosition(t),
-        target: [t[0], 0.15, t[2]],
+        target: [safeTx, 0.15, safeTz],
         fov: CAMERA_CONFIG.tile_focus.fov,
         speed: CAMERA_CONFIG.tile_focus.speed,
       };

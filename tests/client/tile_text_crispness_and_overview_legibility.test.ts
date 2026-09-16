@@ -165,11 +165,11 @@ describe('[TC-IMP38/MSS][UC-IMP38] Tile Text Crispness & Overview Legibility Sui
     expect(titleEntry?.fillStyle).toBe('#FFFFFF');
   });
 
-  it('[TC-IMP38.01b/MSS][UC-IMP38] Standard tile renders title with fillStyle #090D1A for bright yellow banner', () => {
+  it('[TC-IMP38.01b/MSS][UC-IMP38][IMP-80] Standard tile renders title with unified fillStyle #FFFFFF even for bright yellow banner', () => {
     getTileTexture(26); // Hải Phòng (vàng tươi)
     const titleEntry = recordedFillText.find((t) => t.y === 28);
     expect(titleEntry).toBeDefined();
-    expect(titleEntry?.fillStyle).toBe('#090D1A');
+    expect(titleEntry?.fillStyle).toBe('#FFFFFF');
   });
 
   it('[TC-IMP38.02/MSS][UC-IMP38] Standard tile renders title with bold heavy font 900 28px', () => {

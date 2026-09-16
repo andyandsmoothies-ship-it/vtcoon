@@ -29,6 +29,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   treasuryPool: 0,
   roundNumber: 1,
   maxRounds: 30,
+  activeModifiers: [],
 
   activeModal: null,
   modalPayload: null,
@@ -188,11 +189,20 @@ export const useGameStore = create<GameState>((set, get) => ({
         ? anim.waypoints[anim.waypoints.length - 1]!
         : (state.playerPositions[playerId] ?? 0);
 
+    const currentStorePos = state.playerPositions[playerId];
+    const animTarget = anim?.waypoints && anim.waypoints.length > 0 ? anim.waypoints[anim.waypoints.length - 1]! : anim?.fromCell;
+    const shouldUpdatePlayerPosition =
+      currentStorePos === undefined ||
+      currentStorePos === animTarget ||
+      (anim?.fromCell !== undefined && currentStorePos === anim.fromCell);
+
     set({
-      playerPositions: {
-        ...state.playerPositions,
-        [playerId]: finalPos,
-      },
+      playerPositions: shouldUpdatePlayerPosition
+        ? {
+            ...state.playerPositions,
+            [playerId]: finalPos,
+          }
+        : state.playerPositions,
       visualPositions: {
         ...state.visualPositions,
         [playerId]: finalPos,
@@ -271,6 +281,12 @@ export const useGameStore = create<GameState>((set, get) => ({
       roundNumber: Math.max(1, round),
       maxRounds: maxRounds ?? state.maxRounds,
     })),
+
+  setRoundNumber: (round) =>
+    set({ roundNumber: Math.max(1, round) }),
+
+  setActiveModifiers: (modifiers) =>
+    set({ activeModifiers: modifiers ? [...modifiers] : [] }),
 
   openModal: (type, payload) => set({ activeModal: type, modalPayload: payload }),
   closeModal: () => set({ activeModal: null, modalPayload: null }),
