@@ -135,7 +135,7 @@ describe('[UI-06.3/MSS] LobbyView Full Screen Markup', () => {
     const modalHtml = renderToStaticMarkup(React.createElement(GameRulesModal, { isOpen: true, initialTab: 'core' }));
     expect(modalHtml).toContain('data-testid="game-rules-modal"');
     expect(modalHtml).toContain('15.000 Tr.');
-    expect(modalHtml).toContain('30 vòng');
+    expect(modalHtml).toContain('40 vòng');
     expect(modalHtml).toContain('+2.000 Tr.');
     expect(modalHtml).toContain('điều kiện thắng');
   });

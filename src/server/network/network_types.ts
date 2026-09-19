@@ -29,7 +29,10 @@ export type ReasonCode =
   | 'PRICE_BELOW_FLOOR'
   | 'EVEN_BUILDING_VIOLATION'
   | 'ADMIN_UNAUTHORIZED'
-  | 'ADMIN_ROOM_NOT_FOUND';
+  | 'ADMIN_ROOM_NOT_FOUND'
+  | 'TradeFrozen'
+  | 'FREEZE_ACTIVE'
+  | 'ACTION_REJECTED';
 
 // ─── Client → Server ────────────────────────────────────────────
 export type WsClientMessage =

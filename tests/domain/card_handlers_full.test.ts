@@ -26,8 +26,8 @@ describe('[TC-GAME-038..041/MSS] Market Cards Handlers', () => {
     const startBal2 = p2.balance;
 
     executeMarketCard(MarketCardId.MC_PUBLIC_INVEST, [], [p1, p2], registry);
-    expect(p1.balance).toBe(startBal1 + 2000);
-    expect(p2.balance).toBe(startBal2 + 1000);
+    expect(p1.balance).toBe(startBal1 + 2400); // 400 Tr. kích cầu + 2.000 Tr. (2 trạm)
+    expect(p2.balance).toBe(startBal2 + 1400); // 400 Tr. kích cầu + 1.000 Tr. (1 trạm)
   });
 
   it('MC_CASINO_PILOT thưởng 3.000 Tr. cho chủ ô 27 Cấp 3', () => {
@@ -85,7 +85,7 @@ describe('[TC-GAME-038..041/MSS] Market Cards Handlers', () => {
     expect(modifiers[1]).toEqual({
       type: MarketCardId.MC_NIGHT_ECONOMY,
       affectedCells: SERVICE_CELLS,
-      remainingRounds: 1,
+      remainingRounds: 2,
       multiplier: 2,
     });
   });
@@ -221,11 +221,11 @@ describe('[TC-GAME-038..041/MSS] Chance Cards Handlers', () => {
     expect(registry.get(3)).toBe('p1');
   });
 
-  it('CC_MA_FORCE mua lại đất trống từ đối thủ yếu thế hơn ở mức 120% giá niêm yết', () => {
+  it('CC_MA_FORCE mua lại đất trống từ đối thủ ở mức 120% giá niêm yết ngay cả khi đối thủ giàu hơn', () => {
     const p1 = createPlayer('p1');
     p1.balance = 20000;
     const p2 = createPlayer('p2');
-    p2.balance = 5000; // Yếu hơn p1
+    p2.balance = 50000; // Giàu hơn p1 nhưng vẫn bị M&A bắt buộc
     // Ô 1 (giá 600) -> 120% là 720
     const registry: PropertyRegistry = new Map([[1, 'p2']]);
     const stateMap: PropertyStateMap = new Map([[1, { level: 0 }]]);
@@ -233,6 +233,51 @@ describe('[TC-GAME-038..041/MSS] Chance Cards Handlers', () => {
     executeChanceCard(ChanceCardId.CC_MA_FORCE, 'p1', [p1, p2], [], registry, stateMap);
     expect(registry.get(1)).toBe('p1');
     expect(p1.balance).toBe(20000 - 720);
-    expect(p2.balance).toBe(5000 + 720);
+    expect(p2.balance).toBe(50000 + 720);
+  });
+
+  it('CC_MA_FORCE fallback nhận 800 Tr. trợ cấp từ Kho Bạc khi đối thủ không có ô C0', () => {
+    const p1 = createPlayer('p1');
+    p1.balance = 2000;
+    const p2 = createPlayer('p2');
+    p2.balance = 5000;
+    const room = { treasury: 3000, players: [p1, p2] } as unknown as import('../../src/domain/room').Room;
+    // p2 chỉ có ô cấp 1 (không có C0)
+    const registry: PropertyRegistry = new Map([[1, 'p2']]);
+    const stateMap: PropertyStateMap = new Map([[1, { level: 1 }]]);
+
+    executeChanceCard(ChanceCardId.CC_MA_FORCE, 'p1', [p1, p2], [], registry, stateMap, undefined, room);
+    expect(p1.balance).toBe(2000 + 800);
+    expect(room.treasury).toBe(3000 - 800);
+    expect(registry.get(1)).toBe('p2');
+  });
+
+  it('CC_MA_FORCE fallback nhận 800 Tr. khi người chơi không đủ tiền trả 120%', () => {
+    const p1 = createPlayer('p1');
+    p1.balance = 500; // Cần 720 để mua ô 1 (giá 600 * 1.2), không đủ
+    const p2 = createPlayer('p2');
+    p2.balance = 5000;
+    const room = { treasury: 2000, players: [p1, p2] } as unknown as import('../../src/domain/room').Room;
+    const registry: PropertyRegistry = new Map([[1, 'p2']]);
+    const stateMap: PropertyStateMap = new Map([[1, { level: 0 }]]);
+
+    executeChanceCard(ChanceCardId.CC_MA_FORCE, 'p1', [p1, p2], [], registry, stateMap, undefined, room);
+    expect(p1.balance).toBe(500 + 800);
+    expect(room.treasury).toBe(2000 - 800);
+    expect(registry.get(1)).toBe('p2');
+  });
+
+  it('CC_MA_FORCE bỏ qua ô C0 đã bị thế chấp và kích hoạt fallback trợ cấp', () => {
+    const p1 = createPlayer('p1');
+    p1.balance = 10000;
+    const p2 = createPlayer('p2');
+    p2.balance = 5000;
+    const room = { treasury: 2000, players: [p1, p2] } as unknown as import('../../src/domain/room').Room;
+    const registry: PropertyRegistry = new Map([[1, 'p2']]);
+    const stateMap: PropertyStateMap = new Map([[1, { level: 0, isMortgaged: true }]]);
+
+    executeChanceCard(ChanceCardId.CC_MA_FORCE, 'p1', [p1, p2], [], registry, stateMap, undefined, room);
+    expect(p1.balance).toBe(10000 + 800);
+    expect(registry.get(1)).toBe('p2');
   });
 });

@@ -8,6 +8,8 @@ export interface AuctionSession {
   readonly cellIndex: number;
   readonly declinedPlayerId: string;
   highestBid: number;
+  startingBid?: number;
+  currentBid?: number;
   highestBidder?: string;
   passedPlayers?: Set<string>;
   insolvencyPlayerId?: string;  // [DEBT-S06-04] set when auction is a forced liquidation
@@ -23,10 +25,13 @@ export function handleDecline(
   if (!current || room?.phase !== TurnPhase.ActionPhase) return { success: false, reason: 'INVALID_PHASE' };
   const deed = PROPERTY_DEEDS.get(current.position);
   if (!deed) return { success: false, reason: 'NOT_PURCHASABLE' };
+  const startingBid = Math.floor(deed.price * 0.50);
   auctions.set(roomCode, {
     cellIndex: current.position,
     declinedPlayerId: current.id,
-    highestBid: Math.floor(deed.price * 0.5),
+    highestBid: startingBid,
+    startingBid,
+    currentBid: startingBid,
     passedPlayers: new Set<string>(),
     endTime: Date.now() + 15_000,
   });
@@ -54,6 +59,7 @@ export function handleAuctionBid(
   const minBid = session.highestBidder !== undefined ? session.highestBid + 50 : session.highestBid;
   if (amount < minBid) return { success: false, reason: 'BID_TOO_LOW' };
   session.highestBid = amount;
+  session.currentBid = amount;
   session.highestBidder = playerId;
 
   if (session.endTime !== undefined) {

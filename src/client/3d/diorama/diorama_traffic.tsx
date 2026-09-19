@@ -5,6 +5,7 @@ import { RoundedBox } from '@react-three/drei';
 import { useEnvironmentStore } from '../../store/environment_store';
 import { useSafeFrame } from '../safe_frame';
 import { SafeGLTFModel } from '../asset_loader/safe_gltf_model';
+import { SoundEngine } from '../../audio/sound_engine';
 
 export const VEHICLE_MODEL_URLS = {
   sedan: '/models/vehicles/vehicle_sedan.glb',
@@ -171,66 +172,76 @@ export function DioramaTraffic(): React.ReactElement {
   });
 
   return (
-    <group data-testid="diorama-traffic">
-      {MICRO_VEHICLES.map((v, idx) => {
-        const [w, h, l] = v.size;
-        return (
-          <group
-            key={v.id}
-            ref={(el) => {
-              vehicleRefs.current[idx] = el;
-            }}
-          >
-            {/* 1-3. Nạp mô hình 3D nhị phân qua SafeGLTFModel với Fallback thủ tục Zero-Crash */}
-            <SafeGLTFModel
-              url={getVehicleModelUrl(v.type)}
-              fallback={<MicroVehicleProceduralFallback v={v} />}
-              castShadow
-              receiveShadow
-            />
-
-            {/* 4. Đèn pha LED vi mô rọi sáng mặt đường phía trước */}
-            {/* Bóng đèn LED trái */}
-            <mesh position={[-w * 0.32, h * 0.3, l / 2 + 0.002]}>
-              <boxGeometry args={[0.02, 0.016, 0.006]} />
-              <meshBasicMaterial color="#FEF08A" />
-            </mesh>
-            {/* Bóng đèn LED phải */}
-            <mesh position={[w * 0.32, h * 0.3, l / 2 + 0.002]}>
-              <boxGeometry args={[0.02, 0.016, 0.006]} />
-              <meshBasicMaterial color="#FEF08A" />
-            </mesh>
-
-            {/* Vệt sáng quạt đèn LED rọi xuống mặt đường nhựa */}
-            <mesh position={[0, 0.004, l / 2 + 0.2]} rotation={[-Math.PI / 2, 0, 0]}>
-              <planeGeometry args={[w * 2.2, 0.38]} />
-              <meshBasicMaterial
-                color="#FEF08A"
-                transparent
-                opacity={isNight ? 0.65 : isSunset ? 0.42 : 0.28}
+    <group
+      data-testid="diorama-traffic"
+      onClick={() => SoundEngine.playCarHorn()}
+      onPointerDown={() => SoundEngine.playCarHorn()}
+    >
+      <group
+        data-testid="micro-traffic-group"
+        onClick={() => SoundEngine.playCarHorn()}
+        onPointerDown={() => SoundEngine.playCarHorn()}
+      >
+        {MICRO_VEHICLES.map((v, idx) => {
+          const [w, h, l] = v.size;
+          return (
+            <group
+              key={v.id}
+              ref={(el) => {
+                vehicleRefs.current[idx] = el;
+              }}
+            >
+              {/* 1-3. Nạp mô hình 3D nhị phân qua SafeGLTFModel với Fallback thủ tục Zero-Crash */}
+              <SafeGLTFModel
+                url={getVehicleModelUrl(v.type)}
+                fallback={<MicroVehicleProceduralFallback v={v} />}
+                castShadow
+                receiveShadow
               />
-            </mesh>
 
-            {/* 5. Đèn hậu đỏ phía đuôi */}
-            <mesh position={[-w * 0.32, h * 0.3, -l / 2 - 0.002]}>
-              <boxGeometry args={[0.02, 0.014, 0.006]} />
-              <meshBasicMaterial color="#EF4444" />
-            </mesh>
-            <mesh position={[w * 0.32, h * 0.3, -l / 2 - 0.002]}>
-              <boxGeometry args={[0.02, 0.014, 0.006]} />
-              <meshBasicMaterial color="#EF4444" />
-            </mesh>
-
-            {/* Vệt sáng đỏ đèn hậu chiếu xuống mặt đường ban đêm */}
-            {isNight && (
-              <mesh position={[0, 0.004, -l / 2 - 0.08]} rotation={[-Math.PI / 2, 0, 0]}>
-                <planeGeometry args={[w * 1.6, 0.16]} />
-                <meshBasicMaterial color="#EF4444" transparent opacity={0.35} depthWrite={false} />
+              {/* 4. Đèn pha LED vi mô rọi sáng mặt đường phía trước */}
+              {/* Bóng đèn LED trái */}
+              <mesh position={[-w * 0.32, h * 0.3, l / 2 + 0.002]}>
+                <boxGeometry args={[0.02, 0.016, 0.006]} />
+                <meshBasicMaterial color="#FEF08A" />
               </mesh>
-            )}
-          </group>
-        );
-      })}
+              {/* Bóng đèn LED phải */}
+              <mesh position={[w * 0.32, h * 0.3, l / 2 + 0.002]}>
+                <boxGeometry args={[0.02, 0.016, 0.006]} />
+                <meshBasicMaterial color="#FEF08A" />
+              </mesh>
+
+              {/* Vệt sáng quạt đèn LED rọi xuống mặt đường nhựa */}
+              <mesh position={[0, 0.004, l / 2 + 0.2]} rotation={[-Math.PI / 2, 0, 0]}>
+                <planeGeometry args={[w * 2.2, 0.38]} />
+                <meshBasicMaterial
+                  color="#FEF08A"
+                  transparent
+                  opacity={isNight ? 0.65 : isSunset ? 0.42 : 0.28}
+                />
+              </mesh>
+
+              {/* 5. Đèn hậu đỏ phía đuôi */}
+              <mesh position={[-w * 0.32, h * 0.3, -l / 2 - 0.002]}>
+                <boxGeometry args={[0.02, 0.014, 0.006]} />
+                <meshBasicMaterial color="#EF4444" />
+              </mesh>
+              <mesh position={[w * 0.32, h * 0.3, -l / 2 - 0.002]}>
+                <boxGeometry args={[0.02, 0.014, 0.006]} />
+                <meshBasicMaterial color="#EF4444" />
+              </mesh>
+
+              {/* Vệt sáng đỏ đèn hậu chiếu xuống mặt đường ban đêm */}
+              {isNight && (
+                <mesh position={[0, 0.004, -l / 2 - 0.08]} rotation={[-Math.PI / 2, 0, 0]}>
+                  <planeGeometry args={[w * 1.6, 0.16]} />
+                  <meshBasicMaterial color="#EF4444" transparent opacity={0.35} depthWrite={false} />
+                </mesh>
+              )}
+            </group>
+          );
+        })}
+      </group>
     </group>
   );
 }

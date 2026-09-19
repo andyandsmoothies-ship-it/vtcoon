@@ -19,7 +19,7 @@ tools: [view_file, write_to_file, replace_file_content, list_dir, find_by_name, 
 5. **Three-Pass Implementation Loop (Anti-Slop)**:
    - *Pass 1 (Make it Work - Adversarial TDD)*: Write failing test first (Red) -> Write minimum code to pass test (Green) -> Perform Adversarial Inversion (deliberately invert one logic line to verify test flips RED). Every test must carry traceability tags: `[UC-XXX/MSS]` or `[UC-XXX/A#]` and `[BR-XXX]`.
    - *Pass 2 (Make it Lean - Prune & Simplify)*: Audit newly written diff. Remove single-use helpers/interfaces (YAGNI). Compress LOC by 15-20% while 100% of test suite remains green.
-   - *Pass 3 (Quality & Anti-Code-Golf Gate)*: Ensure Cyclomatic Complexity <= 5. Anti-Code-Golf Directive: Keep code explicit and readable. No unreadable one-liners, no lines > 120 chars. Tests are exempt from LOC compression.
+   - *Pass 3 (Quality & Automated Evidence Gate)*: Ensure Cyclomatic Complexity <= 5. Anti-Code-Golf Directive: Keep code explicit and readable. Zero-Memorization Automation: Autonomous Evidence Snapshot generation: MUST run `node scripts/collect_evidence.mjs` before sign-off to produce `.agents/evidence/` snapshot for Station 3 Reviewers. The human user NEVER executes manual evidence commands.
 6. **Literal Test Data & Failure Postconditions**:
    - Use concrete, realistic literal test values (e.g., `"Can Tho"`, `600`, player ID `1`). Never use vague placeholder strings (`"test"`, `"valid_user"`).
    - For alternative flows that end with `Use case ends`, write test assertions to verify Failure Postconditions (clean rollback, zero dangling state).

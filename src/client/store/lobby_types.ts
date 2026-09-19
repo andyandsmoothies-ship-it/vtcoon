@@ -57,6 +57,7 @@ export function createEmptySlot(index: number): LobbySlot {
     isReady: false,
     isBot: false,
     isOccupied: false,
+    pawnSlot: index % MAX_LOBBY_SLOTS,
   };
 }
 

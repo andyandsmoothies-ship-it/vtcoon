@@ -8,6 +8,12 @@ export const INITIAL_BALANCE  = 15_000;
 export const ROOM_CODE_LENGTH = 6;
 export const MAX_ROUNDS       = 40;
 
+export function calculateGoSalary(roundCount: number = 1): number {
+  if (roundCount >= 31) return 1_000;
+  if (roundCount >= 21) return 1_500;
+  return GO_BONUS;
+}
+
 export const INITIAL_BALANCE_BY_PLAYERS: Readonly<Record<number, number>> = {
   2: 25_000,
   3: 20_000,

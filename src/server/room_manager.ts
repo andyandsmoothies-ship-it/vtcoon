@@ -137,12 +137,12 @@ export class RoomManager {
     if (room) room.currentAuction = this.auctions.get(roomCode);
   }
 
-  private getContext(roomCode: string): { room: Room; reg: PropertyRegistry; sm: PropertyStateMap } | undefined {
+  private getContext(roomCode: string): { room: Room; reg: PropertyRegistry; sm: PropertyStateMap; botPersonalities: Map<string, BotPersonality> } | undefined {
     const room = this.rooms.get(roomCode);
     const reg = this.registries.get(roomCode);
     const sm = this.propertyStates.get(roomCode);
     if (!room || !reg || !sm) return undefined;
-    return { room, reg, sm };
+    return { room, reg, sm, botPersonalities: this.botPersonalities };
   }
 
   handleDecline(roomCode: string, playerId: string): { success: boolean; reason?: string } {

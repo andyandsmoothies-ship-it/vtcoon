@@ -166,6 +166,7 @@ export function LuxuryPawnModel({ slotIndex, playerColor }: LuxuryPawnModelProps
         scale={[...config.scale]}
         castShadow
         receiveShadow
+        forceFallback={true}
       />
 
       {/* Contract retention: IMP-29.2 and IMP-82 backward compatibility */}

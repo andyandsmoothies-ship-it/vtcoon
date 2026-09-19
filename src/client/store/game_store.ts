@@ -4,8 +4,8 @@ import { clampDiceFace } from '../3d/dice_math';
 import { calculatePathWaypoints, BOARD_TOTAL_CELLS } from '../3d/pawn_path';
 import { EMOTE_DISPLAY_DURATION_MS } from '../../domain/emotes';
 
-export const FLOATING_TEXT_DURATION_MS = 2000;
-export const MAX_FLOATING_TEXTS = 15;
+export const FLOATING_TEXT_DURATION_MS = 2200;
+export const MAX_FLOATING_TEXTS = 6;
 
 export * from './game_store_types.js';
 import { type GameState, type FloatingTextItem, FloatingTextType } from './game_store_types.js';
@@ -26,10 +26,12 @@ export const useGameStore = create<GameState>((set, get) => ({
   playersInfo: {},
   currentTurnPlayerId: null,
   turnTimeRemaining: 60,
+  turnPhase: 'WaitingRoll',
   treasuryPool: 0,
   roundNumber: 1,
-  maxRounds: 30,
+  maxRounds: 40,
   activeModifiers: [],
+  isHeatmapActive: false,
 
   activeModal: null,
   modalPayload: null,
@@ -96,6 +98,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         currentIndex: 0,
         isAnimating: true,
         isBot: nextTask.isBot,
+        ...(nextTask.isJailFlight ? { isJailFlight: true } : {}),
       },
     });
 
@@ -117,7 +120,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       const pending = get().pendingPawnMove;
       if (pending) {
         set({ pendingPawnMove: null });
-        get().startPawnMove(pending.playerId, pending.targetCell, pending.fromCell);
+        get().startPawnMove(pending.playerId, pending.targetCell, pending.fromCell, pending.isBot, pending.isJailFlight);
       }
       get().processPawnQueue();
     } else {
@@ -151,7 +154,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     }, 2500);
   },
 
-  startPawnMove: (playerId, targetCell, fromCell, isBot) => {
+  startPawnMove: (playerId, targetCell, fromCell, isBot, isJailFlight) => {
     const state = get();
     if (
       !Number.isInteger(targetCell) ||
@@ -165,7 +168,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     if (currentPos === targetCell) {
       return;
     }
-    const waypoints = calculatePathWaypoints(currentPos, targetCell);
+    const waypoints = isJailFlight ? [targetCell] : calculatePathWaypoints(currentPos, targetCell);
     if (waypoints.length === 0) {
       return;
     }
@@ -175,6 +178,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       targetCell,
       waypoints,
       isBot,
+      ...(isJailFlight ? { isJailFlight: true } : {}),
     });
   },
 
@@ -273,6 +277,8 @@ export const useGameStore = create<GameState>((set, get) => ({
       turnTimeRemaining: Math.max(0, state.turnTimeRemaining - 1),
     })),
 
+  setTurnPhase: (turnPhase) => set({ turnPhase }),
+
   setTreasuryPool: (amount) =>
     set({ treasuryPool: Math.max(0, Math.floor(amount)) }),
 
@@ -287,6 +293,9 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   setActiveModifiers: (modifiers) =>
     set({ activeModifiers: modifiers ? [...modifiers] : [] }),
+
+  toggleHeatmap: () => set((state) => ({ isHeatmapActive: !state.isHeatmapActive })),
+  setHeatmapActive: (active) => set({ isHeatmapActive: active }),
 
   openModal: (type, payload) => set({ activeModal: type, modalPayload: payload }),
   closeModal: () => set({ activeModal: null, modalPayload: null }),
@@ -331,6 +340,10 @@ export const useGameStore = create<GameState>((set, get) => ({
       type: item.type,
       playerId: item.playerId,
       timestamp,
+      ...(item.actionType ? { actionType: item.actionType } : {}),
+      ...(item.title ? { title: item.title } : {}),
+      ...(item.cellIndex !== undefined ? { cellIndex: item.cellIndex } : {}),
+      ...(item.targetPlayerName ? { targetPlayerName: item.targetPlayerName } : {}),
     };
     set((state) => ({
       floatingTexts: [...state.floatingTexts, newItem].slice(-MAX_FLOATING_TEXTS),

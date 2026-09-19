@@ -3,6 +3,7 @@
 
 import type { Player, Room, CurrentAuctionState } from '../room';
 import { PROPERTY_DEEDS, type PropertyRegistry, type PropertyStateMap } from '../property_data';
+import { BOARD_CONFIG, CellType } from '../board_config';
 import {
   BotPersonality,
   type BotIntent,
@@ -48,7 +49,7 @@ export function calculateAuctionMaxBid(
   } else if (personality === BotPersonality.Balanced) {
     valMultiplier = 1.2;
   } else {
-    valMultiplier = 1.0;
+    valMultiplier = (denialScore >= 1.5 || valEstimated > 1500) ? 1.15 : 1.0;
   }
 
   const safeRatio = personality === BotPersonality.Aggressive
@@ -73,8 +74,18 @@ export function isPassiveAuctionAllowed(
   nextBid: number,
 ): boolean {
   if (monopolyScore >= 2.5) return true;
-  if ((auction.highestBid ?? 0) > basePrice * 1.15) return false;
-  return nextBid <= basePrice * 1.15;
+  const cell = BOARD_CONFIG[auction.cellIndex];
+  const isInfraOrUtility = cell?.type === CellType.Railroad || cell?.type === CellType.Utility;
+  const isMonopolyTarget = monopolyScore >= 1.6;
+
+  const maxThreshold = isMonopolyTarget
+    ? 1.50
+    : isInfraOrUtility
+    ? 1.35
+    : 1.15;
+
+  if ((auction.highestBid ?? 0) > basePrice * maxThreshold) return false;
+  return nextBid <= basePrice * maxThreshold;
 }
 
 function decidePassiveAuctionIntent(
@@ -161,6 +172,26 @@ export function decideAuctionPhaseIntent(
       config,
     );
     if (passiveIntent) return passiveIntent;
+  }
+
+  const cellConfig = BOARD_CONFIG[cur.cellIndex];
+  let isOpponentMonopolyTarget = false;
+  if (cellConfig?.colorGroup && highestBidder && highestBidder !== bot.id) {
+    const groupCells = BOARD_CONFIG.filter((c) => c.colorGroup === cellConfig.colorGroup);
+    const otherCells = groupCells.filter((c) => c.index !== cur.cellIndex);
+    if (otherCells.length > 0 && otherCells.every((c) => registry.get(c.index) === highestBidder)) {
+      isOpponentMonopolyTarget = true;
+    }
+  }
+
+  if (isOpponentMonopolyTarget) {
+    if ((cur.highestBid ?? 0) >= Math.round(basePrice * 1.40)) {
+      return { type: 'INTENT_AUCTION_PASS' };
+    }
+    if (bot.balance >= nextBid + Math.round(threat.safetyBuffer * 0.5) && nextBid <= Math.round(basePrice * 1.40)) {
+      return { type: 'INTENT_BID', amount: nextBid };
+    }
+    return { type: 'INTENT_AUCTION_PASS' };
   }
 
   const maxBid = calculateAuctionMaxBid(

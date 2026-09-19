@@ -245,15 +245,15 @@ describe('[TC-05.6-inv/Adversarial] Tu choi ha cap bat hop le', () => {
     expect(res.reason).toBe('INVALID_PHASE');
   });
 
-  it('Tu choi khi sai pha FSM: ActionPhase -> INVALID_PHASE', () => {
+  it('[IMP-127] Cho phep ha cap trong ActionPhase', () => {
     const { mgr, room, reg, sm } = setup();
     reg.set(1, 'p1');
     sm.set(1, { level: 1 });
     room.phase = TurnPhase.ActionPhase;
 
     const res = mgr.handleDowngrade(room.roomCode, 'p1', 1);
-    expect(res.success).toBe(false);
-    expect(res.reason).toBe('INVALID_PHASE');
+    expect(res.success).toBe(true);
+    expect(res.reason).toBeUndefined();
   });
 
   it('Tu choi khi sai pha FSM: AuctionPhase -> INVALID_PHASE', () => {

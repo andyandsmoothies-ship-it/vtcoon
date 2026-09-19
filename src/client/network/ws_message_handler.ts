@@ -5,6 +5,7 @@ import type { WsClientMessage, WsServerMessage, ReasonCode } from '../../server/
 import { saveReconnectToken, getReconnectToken, clearReconnectToken } from './reconnect_token.js';
 import { applyDeltaToStore, isGameRunningDelta } from './apply_delta.js';
 import { useTelemetryStore } from '../telemetry/telemetry_store.js';
+import { useGameStore, FloatingTextType } from '../store/game_store.js';
 
 export interface WsMessageHandlerContext {
   readonly roomCode: string;
@@ -93,6 +94,14 @@ function handleWsError(
     } catch {
       /* safe-ignore: socket may be disconnected or buffered */
     }
+  }
+  if (msg.reasonCode === 'TradeFrozen' || msg.reasonCode === 'FREEZE_ACTIVE') {
+    useGameStore.getState().addFloatingText({
+      playerId: ctx.playerId,
+      text: 'Thị trường đang đóng băng: Tạm ngưng mua bán, thế chấp & chuyển nhượng!',
+      type: FloatingTextType.Penalty,
+      title: '❄️ Đóng Băng Giao Dịch',
+    });
   }
   ctx.setErrorReason?.(msg.reasonCode);
   ctx.onError?.(msg.reasonCode);

@@ -30,6 +30,7 @@ export interface TitleDeedModalProps {
   readonly ownedProperties?: readonly number[];
   readonly onSelectCell?: (cellIndex: number) => void;
   readonly activeModifiers?: ReadonlyArray<MarketModifier>;
+  readonly isTradeFrozen?: boolean;
 }
 
 const PROPERTY_TIERS = [
@@ -68,13 +69,17 @@ export function TitleDeedModal({
   ownedProperties,
   onSelectCell,
   activeModifiers: propsActiveModifiers,
+  isTradeFrozen: propsIsTradeFrozen,
 }: TitleDeedModalProps): React.ReactElement {
   const deed = getDeedDisplayInfo(cellIndex);
   const currentIndex = ownedProperties ? ownedProperties.indexOf(cellIndex) : -1;
   const showCarousel = Boolean(isOwner && ownedProperties && ownedProperties.length > 1 && currentIndex !== -1);
 
+  const isSSR = typeof window === 'undefined';
   const storeModifiers = useGameStore((state) => state.activeModifiers);
-  const effectiveModifiers = propsActiveModifiers ?? storeModifiers ?? [];
+  const effectiveModifiers = propsActiveModifiers ?? (isSSR ? useGameStore.getState().activeModifiers : storeModifiers) ?? [];
+  const isTradeFrozen = propsIsTradeFrozen ??
+    effectiveModifiers.some((m) => m.type === MarketCardId.MC_FREEZE_TRADE && m.remainingRounds > 0);
 
   const activeModifierBadges = React.useMemo(() => {
     const badges: Array<{ icon: string; text: string }> = [];
@@ -87,9 +92,13 @@ export function TitleDeedModal({
         } else if (m.type === MarketCardId.MC_UTILITY_DOUBLE) {
           badges.push({ icon: '💡', text: 'Giá Điện & Viễn Thông: Nhân đôi phí dịch vụ (x2)' });
         } else if (m.type === MarketCardId.MC_COASTAL_STORM) {
-          badges.push({ icon: '🌀', text: 'Thời Tiết Duyên Hải: Miễn 100% tiền thuê' });
+          badges.push({ icon: '🌀', text: 'Bão Lũ Duyên Hải: Miễn 100% tiền thuê & cô lập giao thông' });
         } else if (m.type === MarketCardId.MC_NIGHT_ECONOMY) {
-          badges.push({ icon: '🌙', text: 'Kinh Tế Đêm: Nhân đôi phí dịch vụ (x2)' });
+          badges.push({ icon: '🌙', text: 'Kinh Tế Ban Đêm: Nhân đôi phí dịch vụ (x2)' });
+        } else if (m.type === MarketCardId.MC_ALCOHOL_CHECK) {
+          badges.push({ icon: '🚨', text: 'Nghị Định 100: Giảm 50% tiền thuê; chốt phạt 800 Tr. & giữ xe' });
+        } else if (m.type === MarketCardId.MC_PUBLIC_INVEST) {
+          badges.push({ icon: '🏗️', text: 'Vốn Đầu Tư Công: Nhân đôi cước phí vận tải (x2)' });
         }
       }
     }
@@ -426,8 +435,14 @@ export function TitleDeedModal({
             {isOwner && (isMortgaged ? onRedeem : onMortgage) && (
               <button
                 type="button"
-                onClick={isMortgaged ? onRedeem : onMortgage}
-                className="min-h-[48px] whitespace-nowrap px-3.5 py-2 rounded-xl font-black text-xs bg-amber-500 hover:bg-amber-400 text-slate-900 border-2 border-amber-700 shadow-[0_4px_0_0_#b45309] active:shadow-[0_1px_0_0_#b45309] active:translate-y-[3px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
+                onClick={isTradeFrozen && !isMortgaged ? undefined : (isMortgaged ? onRedeem : onMortgage)}
+                disabled={Boolean(isTradeFrozen && !isMortgaged)}
+                title={isTradeFrozen && !isMortgaged ? 'Thị trường đang đóng băng giao dịch' : undefined}
+                className={`min-h-[48px] whitespace-nowrap px-3.5 py-2 rounded-xl font-black text-xs border-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+                  isTradeFrozen && !isMortgaged
+                    ? 'bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed opacity-60'
+                    : 'bg-amber-500 hover:bg-amber-400 text-slate-900 border-amber-700 shadow-[0_4px_0_0_#b45309] active:shadow-[0_1px_0_0_#b45309] active:translate-y-[3px] cursor-pointer'
+                }`}
               >
                 {isMortgaged ? 'Giải Chấp' : 'Thế Chấp'}
               </button>
@@ -454,23 +469,25 @@ export function TitleDeedModal({
           <>
             <button
               type="button"
-              onClick={onBuy}
-              disabled={!canBuy}
-              className={`min-h-[48px] whitespace-nowrap py-3 px-3.5 sm:px-6 rounded-xl font-black tracking-wide uppercase text-xs sm:text-sm transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 truncate cursor-pointer ${
-                canBuy
-                  ? 'bg-emerald-700 hover:bg-emerald-600 border-2 border-emerald-700 shadow-[0_4px_0_0_#065f46] active:shadow-[0_1px_0_0_#065f46] active:translate-y-[3px] text-white'
+              onClick={isTradeFrozen ? undefined : onBuy}
+              disabled={isTradeFrozen || !canBuy}
+              className={`min-h-[48px] whitespace-nowrap py-3 px-3.5 sm:px-6 rounded-xl font-black tracking-wide uppercase text-xs sm:text-sm transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 truncate ${
+                isTradeFrozen
+                  ? 'bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed'
+                  : canBuy
+                  ? 'bg-emerald-700 hover:bg-emerald-600 border-2 border-emerald-700 shadow-[0_4px_0_0_#065f46] active:shadow-[0_1px_0_0_#065f46] active:translate-y-[3px] text-white cursor-pointer'
                   : 'bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed'
               }`}
             >
-              {canBuy ? `Mua BĐS (${formatCurrency(deed.price)})` : 'Không Đủ Tiền'}
+              {isTradeFrozen ? 'Thị Trường Đóng Băng' : canBuy ? `Mua BĐS (${formatCurrency(deed.price)})` : 'Không Đủ Tiền'}
             </button>
 
             <button
               type="button"
-              onClick={onPass ?? onClose}
+              onClick={isTradeFrozen ? onClose : (onPass ?? onClose)}
               className="min-h-[48px] whitespace-nowrap py-3 px-3.5 sm:px-6 rounded-xl uppercase text-xs sm:text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer bg-[#FFFDF8] hover:bg-slate-100 text-slate-800 font-black border-2 border-slate-800 shadow-[0_4px_0_0_#1e293b] active:shadow-none active:translate-y-[3px]"
             >
-              Bỏ Qua
+              {isTradeFrozen ? 'Đóng' : 'Bỏ Qua'}
             </button>
           </>
         )}

@@ -42,6 +42,41 @@ if (typeof window !== 'undefined') {
   }
 }
 
+export interface ServerToastProps {
+  readonly message: string | null;
+}
+
+export function formatServerErrorMessage(reasonCode: string): string {
+  switch (reasonCode) {
+    case 'CANNOT_ROLL':
+      return 'Chưa tới lượt đổ xúc xắc hoặc đang trong bước di chuyển';
+    case 'ROOM_NOT_FOUND':
+      return 'Không tìm thấy phòng thi đấu';
+    case 'NOT_ENOUGH_PLAYERS':
+      return 'Chưa đủ người chơi để bắt đầu';
+    case 'NOT_HOST':
+      return 'Chỉ chủ phòng mới có quyền thực hiện thao tác';
+    case 'EVEN_BUILDING_VIOLATION':
+      return 'Quy tắc xây dựng đều tay: Cần nâng cấp các ô cùng bộ màu lên cấp đồng đều!';
+    case 'MISSING_MONOPOLY':
+      return 'Cần sở hữu trọn bộ màu trước khi nâng cấp công trình!';
+    default:
+      return `Thông báo máy chủ: ${reasonCode}`;
+  }
+}
+
+export function ServerToast({ message }: ServerToastProps): React.ReactElement | null {
+  if (!message) return null;
+  return (
+    <div
+      role="alert"
+      className="fixed top-18 sm:top-20 left-1/2 -translate-x-1/2 z-50 bg-rose-600/95 text-white text-sm font-bold px-4 py-2 rounded-lg shadow-lg border border-rose-400 backdrop-blur-sm"
+    >
+      {message}
+    </div>
+  );
+}
+
 export function App(): React.ReactElement {
   const [isAdmin, setIsAdmin] = useState<boolean>(() => isAdminRoute());
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -156,14 +191,7 @@ export function App(): React.ReactElement {
 
   return (
     <div className="fixed inset-0 w-full h-full overflow-hidden bg-slate-950 select-none">
-      {errorMessage && (
-        <div
-          role="alert"
-          className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-rose-600/95 text-white text-sm font-bold px-4 py-2 rounded-lg shadow-lg border border-rose-400 backdrop-blur-sm"
-        >
-          {errorMessage}
-        </div>
-      )}
+      <ServerToast message={errorMessage} />
 
       {/* 1. Nền sa bàn 3D duy nhất chạy liên tục không gián đoạn / zero-loading */}
       <div className="absolute inset-0 z-0 pointer-events-auto">

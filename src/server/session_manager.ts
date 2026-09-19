@@ -50,6 +50,7 @@ export interface AuctionPayload {
 }
 
 export interface DeltaPayload {
+  readonly roomCode?:            string;
   readonly tick:                 number;
   readonly cells:                ReadonlyArray<CellDelta>;
   readonly players?:             ReadonlyArray<PlayerDelta>;

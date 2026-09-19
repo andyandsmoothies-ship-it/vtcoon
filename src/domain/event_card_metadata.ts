@@ -55,12 +55,12 @@ export const CHANCE_CARD_DETAILS: Readonly<Record<ChanceCardId, CardDetail>> = {
     effectDelta: -1000,
   },
   [ChanceCardId.CC_LAND_CHANGE]: {
-    description: 'Chuyển mục đích sử dụng đất thành công. Nộp 800 Tr., tăng vĩnh viễn +50% tiền thuê ô đất trống.',
-    targetScope: 'Người chơi rút thẻ (các ô đất đang sở hữu)',
-    effectDetail: 'Nộp phí chuyển đổi 800 Tr., tăng vĩnh viễn +50% tiền thuê cho các ô đất trống',
-    duration: 'Vĩnh viễn suốt trận đấu',
-    destination: 'Nộp 800 Tr. vào Kho Bạc Nhà Nước',
-    effectDelta: -800,
+    description: 'Chuyển mục đích sử dụng đất lên thổ cư: Nộp 500 Tr. nâng thẳng 1 ô C0 lên Cấp 1 không cần đủ bộ màu (hoặc nhận 600 Tr. hỗ trợ quy hoạch).',
+    targetScope: 'Người chơi rút thẻ (các ô đất Cấp 0)',
+    effectDetail: 'Nộp lệ phí 500 Tr. vào Kho Bạc, nâng cấp ngay 1 ô đất Cấp 0 lên Cấp 1 không cần hoàn thành nhóm màu. Nếu không có ô Cấp 0, nhận 600 Tr. hỗ trợ từ Kho Bạc',
+    duration: 'Tức thì',
+    destination: 'Kho Bạc Nhà Nước hoặc Ngân sách người chơi',
+    effectDelta: -500,
   },
   [ChanceCardId.CC_BUILD_HALT]: {
     description: 'Đình chỉ xây dựng để hoàn thiện pháp lý. Phạt 800 Tr. và 1 ô đất bị phong tỏa thu tiền trong 2 vòng.',
@@ -71,11 +71,11 @@ export const CHANCE_CARD_DETAILS: Readonly<Record<ChanceCardId, CardDetail>> = {
     effectDelta: -800,
   },
   [ChanceCardId.CC_MA_FORCE]: {
-    description: 'Thương vụ M&A bắt buộc. Thôn tính ô đất cấp 0 của đối thủ theo giá thị trường.',
+    description: 'Thương vụ M&A bắt buộc. Thôn tính ô đất cấp 0 của đối thủ theo giá 120% (hoặc nhận 800 Tr. trợ cấp M&A từ Kho Bạc nếu không thể thâu tóm).',
     targetScope: '1 ô đất Cấp 0 thuộc quyền sở hữu đối thủ',
-    effectDetail: 'Thực hiện thương vụ M&A bắt buộc mua lại 1 ô đất cấp 0 của đối thủ theo giá niêm yết',
+    effectDetail: 'Mua lại 1 ô đất cấp 0 của đối thủ theo giá 120%, hoặc nhận 800 Tr. trợ cấp từ Kho Bạc nếu không có mục tiêu hợp lệ',
     duration: 'Tức thì',
-    destination: 'Thanh toán trực tiếp cho người chơi sở hữu',
+    destination: 'Thanh toán trực tiếp cho người chơi sở hữu hoặc nhận từ Kho Bạc',
   },
   [ChanceCardId.CC_COPYRIGHT]: {
     description: 'Vi phạm bản quyền chương trình nghệ thuật. Nộp phạt vi phạm hành chính 1.200 Tr. vào Kho Bạc Nhà Nước.',
@@ -148,11 +148,12 @@ export const CHANCE_CARD_DETAILS: Readonly<Record<ChanceCardId, CardDetail>> = {
     effectDelta: 1000,
   },
   [ChanceCardId.CC_SLOW_BUILD]: {
-    description: 'Dự án chậm triển khai 24 tháng. Đất trống bị cảnh báo thu hồi nếu không khởi công.',
-    targetScope: 'Các ô đất Cấp 0 của người chơi rút thẻ',
-    effectDetail: 'Cảnh báo thu hồi tài sản nếu không khởi công xây dựng công trình trong 3 vòng kế tiếp',
-    duration: '3 vòng chơi',
-    destination: 'Kho Bạc Nhà Nước áp đặt chế tài',
+    description: 'Tối hậu thư xử lý dự án chậm tiến độ: Phạt 600 Tr. vào Kho Bạc và cảnh báo thu hồi ô C0 (thu hồi ngay nếu âm tiền). Không có C0 nộp phí 300 Tr.',
+    targetScope: 'Người chơi rút thẻ và các ô đất Cấp 0',
+    effectDetail: 'Phạt 600 Tr. nộp Kho Bạc cho ô đất Cấp 0 và bắt đầu đếm hạn thu hồi; nếu mất khả năng thanh toán (số dư âm), ô đất bị thu hồi tức thì. Không có ô C0 nộp phí hành chính 300 Tr.',
+    duration: 'Tức thì & 3 vòng chơi',
+    destination: 'Nộp phạt vào Kho Bạc Nhà Nước',
+    effectDelta: -600,
   },
   [ChanceCardId.CC_MEDIA_CRISIS]: {
     description: 'Khủng hoảng truyền thông dịch vụ. Phạt 800 Tr. và tạm đình chỉ hoạt động 1 ô dịch vụ trong 2 vòng.',
@@ -173,11 +174,11 @@ export const CHANCE_CARD_DETAILS: Readonly<Record<ChanceCardId, CardDetail>> = {
 
 export const MARKET_CARD_DETAILS: Readonly<Record<MarketCardId, MarketCardDetail>> = {
   [MarketCardId.MC_NIGHT_ECONOMY]: {
-    description: 'Phát triển kinh tế đêm: Nhân đôi tiền thuê tại các ô đất có công trình C1-C3.',
-    targetScope: 'Toàn bộ bất động sản Dịch vụ (Ô 6, 8, 26, 27)',
-    effectDetail: 'Nhân đôi doanh thu tiền thuê tại các ô dịch vụ có công trình xây dựng Cấp 1 trở lên',
-    duration: '1 vòng chơi',
-    destination: 'Tài khoản chủ sở hữu bất động sản',
+    description: 'Phát triển kinh tế ban đêm: Mọi người chơi chi tiêu ngay 400 Tr. chia cho chủ ô Dịch vụ (hoặc Kho Bạc). Nhân đôi tiền thuê ô Dịch vụ C1-C3 trong 2 vòng.',
+    targetScope: 'Tất cả người chơi và BĐS Dịch vụ (Ô 6, 8, 26, 27)',
+    effectDetail: 'Tất cả người chơi chi tiêu 400 Tr. kích cầu (chia đều cho các chủ ô Dịch vụ hoặc nộp Kho Bạc) và nhân đôi tiền thuê ô Dịch vụ Cấp 1 trở lên trong 2 vòng',
+    duration: '2 vòng chơi',
+    destination: 'Chủ sở hữu ô Dịch vụ hoặc Kho Bạc Nhà Nước',
   },
   [MarketCardId.MC_MEGA_CONCERT]: {
     description: 'Đại nhạc hội quốc tế quy tụ mọi người chơi đổ về ô dịch vụ cao cấp nhất.',
@@ -187,11 +188,11 @@ export const MARKET_CARD_DETAILS: Readonly<Record<MarketCardId, MarketCardDetail
     destination: 'Chủ sở hữu ô Dịch vụ đón khách',
   },
   [MarketCardId.MC_ALCOHOL_CHECK]: {
-    description: 'Tăng cường kiểm tra nồng độ cồn: Giảm 50% doanh thu các điểm vui chơi giải trí trong 2 vòng.',
-    targetScope: 'Tất cả các ô bất động sản Dịch vụ (Ô 6, 8, 26, 27)',
-    effectDetail: 'Giảm 50% mức phí thuê thu được tại các điểm dịch vụ vui chơi giải trí (kéo dài 2 vòng)',
+    description: 'Chiến dịch kiểm tra nồng độ cồn (Nghị Định 100): Giảm 50% tiền thuê ô Dịch vụ trong 2 vòng; khách dừng chân bị phạt 800 Tr. nộp Kho Bạc và tạm giữ xe (mất lượt).',
+    targetScope: 'Tất cả các ô BĐS Dịch vụ (Ô 6, 8, 26, 27)',
+    effectDetail: 'Giảm 50% tiền thuê ô Dịch vụ trong 2 vòng; người dừng chân bị phạt 800 Tr. nộp Kho Bạc Nhà Nước và bị tạm giữ xe (mất lượt kế tiếp)',
     duration: '2 vòng chơi',
-    destination: 'Khách dừng chân (giảm trừ chi phí)',
+    destination: 'Nộp phạt 800 Tr. vào Kho Bạc Nhà Nước',
   },
   [MarketCardId.MC_CASINO_PILOT]: {
     description: 'Thí điểm Casino: Thưởng 1.500 Tr. cho ô Dịch vụ C2+, 3.000 Tr. cho ô 27 C3, hoặc kích cầu 1.000 Tr. cho người nghèo nhất.',
@@ -229,10 +230,10 @@ export const MARKET_CARD_DETAILS: Readonly<Record<MarketCardId, MarketCardDetail
     destination: 'Nộp phạt vào Kho Bạc Nhà Nước',
   },
   [MarketCardId.MC_PUBLIC_INVEST]: {
-    description: 'Đẩy mạnh giải ngân vốn đầu tư công: Chi trả 1.000 Tr. cho mỗi ô Hạ tầng giao thông sở hữu.',
-    targetScope: 'Chủ sở hữu 4 ô Hạ tầng giao thông (Ô 5, 15, 25, 35)',
-    effectDetail: 'Chi trả hỗ trợ 1.000 Tr. cho mỗi ô Hạ tầng giao thông (Cảng/Sân bay/Cao tốc)',
-    duration: 'Tức thì',
+    description: 'Đẩy mạnh giải ngân vốn đầu tư công: Kho Bạc chi trả ngay 400 Tr. cho mọi người chơi; thưởng 1.000 Tr./trạm hạ tầng và nhân đôi cước phí vận tải trong 2 vòng.',
+    targetScope: 'Toàn bộ người chơi và 4 trạm Hạ tầng Giao thông (Ô 5, 15, 25, 35)',
+    effectDetail: 'Kho Bạc chi trả ngay 400 Tr. cho mỗi người chơi; thưởng 1.000 Tr. cho mỗi ô Hạ tầng sở hữu và nhân đôi cước phí vận tải trong 2 vòng',
+    duration: '2 vòng chơi',
     destination: 'Kho Bạc Nhà Nước chi trả về tài khoản nhà đầu tư',
   },
   [MarketCardId.MC_ANTI_SPECULATE]: {
@@ -250,10 +251,10 @@ export const MARKET_CARD_DETAILS: Readonly<Record<MarketCardId, MarketCardDetail
     destination: 'Chủ sở hữu BĐS Nghỉ Dưỡng',
   },
   [MarketCardId.MC_FREEZE_TRADE]: {
-    description: 'Đóng băng thị trường bất động sản: Tạm ngừng toàn bộ giao dịch mua bán và chuyển nhượng.',
+    description: 'Đóng băng thị trường & siết tín dụng BĐS: Tạm ngừng mua bán, cấm thế chấp đất mới và phong tỏa chuyển nhượng P2P trong 2 vòng.',
     targetScope: 'Toàn bộ thị trường bất động sản',
-    effectDetail: 'Tạm ngưng toàn bộ các hoạt động mua ô đất mới, đấu giá và giao dịch chuyển nhượng P2P',
-    duration: '1 vòng chơi',
+    effectDetail: 'Tạm ngưng mua ô đất mới, đóng băng đấu giá, cấm thế chấp đất mới và phong tỏa giao dịch chuyển nhượng P2P trong 2 vòng',
+    duration: '2 vòng chơi',
     destination: 'Đóng băng các kênh thanh khoản thị trường',
   },
   [MarketCardId.MC_FUEL_SURGE]: {
@@ -278,11 +279,11 @@ export const MARKET_CARD_DETAILS: Readonly<Record<MarketCardId, MarketCardDetail
     destination: 'Chủ sở hữu ô Tiện ích công cộng',
   },
   [MarketCardId.MC_COASTAL_STORM]: {
-    description: 'Thời tiết cực đoan duyên hải: Miễn phí tiền thuê đất tại toàn bộ dải bờ biển.',
+    description: 'Bão lũ đổ bộ dải duyên hải: Chủ nhà C1-C3 nộp 400 Tr./cấp nhà vào Kho Bạc. Miễn 100% tiền thuê và cô lập giao thông (mất lượt) tại ô ven biển trong 2 vòng.',
     targetScope: 'Các ô BĐS Duyên Hải ven biển (Ô 11, 14, 16, 18, 19)',
-    effectDetail: 'Miễn 100% tiền thuê đất (Zero-rent) cho mọi người chơi khi dừng chân tại ô duyên hải',
-    duration: '1 vòng chơi',
-    destination: 'Khách dừng chân (tiết kiệm 100% phí thuê)',
+    effectDetail: 'Chủ sở hữu nộp 400 Tr./cấp nhà vào Kho Bạc khắc phục bão lũ; miễn 100% tiền thuê và người dừng chân bị cô lập giao thông (mất lượt kế tiếp) trong 2 vòng',
+    duration: '2 vòng chơi',
+    destination: 'Kho Bạc Nhà Nước khắc phục bão lũ',
   },
 };
 

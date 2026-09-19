@@ -250,6 +250,16 @@ describe('[TC-BOT-MOVE-DELTA/MSS] Bot Turn Sync via applyDeltaToStore', () => {
 
     applyDeltaToStore(botMoveDelta, useGameStore);
 
+    // [IMP-112/Gotcha #38] Khi có xúc xắc quay, bước nhảy được giữ an toàn ở pendingPawnMove
+    expect(useGameStore.getState().pendingPawnMove).toEqual({
+      playerId: 'bot_2',
+      targetCell: 5,
+      fromCell: 0,
+    });
+
+    // Khi xúc xắc dừng quay (setIsRolling(false)), giải phóng vào activePawnAnimation
+    useGameStore.getState().setIsRolling(false);
+
     const anim = useGameStore.getState().activePawnAnimation;
     expect(anim).not.toBeNull();
     expect(anim?.playerId).toBe('bot_2');

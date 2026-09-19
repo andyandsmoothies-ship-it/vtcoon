@@ -161,17 +161,17 @@ describe('[IMP-76] Round Counter & Treasury Conservation Contract Tests', () => 
   // FACET 3: Resource & Treasury Conservation Facet
   // =========================================================================
   describe('[TC-76-FACET-3] Resource & Treasury Conservation Facet', () => {
-    it('[TC-76.11/MSS][UC-GAME-038] handlePublicInvest tang so du nguoi choi so huu 1 o ha tang len 1.000 Tr.', () => {
+    it('[TC-76.11/MSS][UC-GAME-038] handlePublicInvest tang so du nguoi choi so huu 1 o ha tang len 1.400 Tr. (400 kích cầu + 1.000 hạ tầng)', () => {
       const p1 = createMockPlayer('p1', 15_000);
       const room = createMockRoom({ treasury: 10_000, players: [p1] });
       const registry: PropertyRegistry = new Map([[5, 'p1']]); // 1 infra (Long Thành)
 
       expect(handlePublicInvest).toBeDefined();
       handlePublicInvest!(room.players, registry, room);
-      expect(p1.balance).toBe(16_000);
+      expect(p1.balance).toBe(16_400);
     });
 
-    it('[TC-76.12/MSS][UC-GAME-038] handlePublicInvest tang so du nguoi choi so huu 3 o ha tang len 3.000 Tr.', () => {
+    it('[TC-76.12/MSS][UC-GAME-038] handlePublicInvest tang so du nguoi choi so huu 3 o ha tang len 3.400 Tr.', () => {
       const p1 = createMockPlayer('p1', 15_000);
       const room = createMockRoom({ treasury: 10_000, players: [p1] });
       const registry: PropertyRegistry = new Map([
@@ -182,7 +182,7 @@ describe('[IMP-76] Round Counter & Treasury Conservation Contract Tests', () => 
 
       expect(handlePublicInvest).toBeDefined();
       handlePublicInvest!(room.players, registry, room);
-      expect(p1.balance).toBe(18_000);
+      expect(p1.balance).toBe(18_400);
     });
 
     it('[TC-76.13/MSS][UC-GAME-041] handlePublicInvest khau tru dung tong so tien giai ngan tu room.treasury', () => {
@@ -193,11 +193,11 @@ describe('[IMP-76] Round Counter & Treasury Conservation Contract Tests', () => 
         [5, 'p1'],  // 1.000 Tr. cho p1
         [15, 'p1'], // 1.000 Tr. cho p1
         [25, 'p2'], // 1.000 Tr. cho p2
-      ]); // Tổng giải ngân = 3.000 Tr.
+      ]); // Tổng giải ngân = 2 người * 400 + 3.000 Tr. = 3.800 Tr.
 
       expect(handlePublicInvest).toBeDefined();
       handlePublicInvest!(room.players, registry, room);
-      expect(room.treasury).toBe(7_000);
+      expect(room.treasury).toBe(6_200);
     });
 
     it('[TC-76.14/MSS][UC-GAME-041] Tong tien te (Nguoi choi + Kho Bac) bao toan nguyen ven 100% truoc va sau khi giai ngan MC_PUBLIC_INVEST', () => {
@@ -219,15 +219,15 @@ describe('[IMP-76] Round Counter & Treasury Conservation Contract Tests', () => 
       expect(totalMoneyAfter).toBe(23_000);
     });
 
-    it('[TC-76.20/MSS][UC-GAME-038] handlePublicInvest khong tang tien cho nguoi choi khong so huu o ha tang nao', () => {
+    it('[TC-76.20/MSS][UC-GAME-038] handlePublicInvest chi giai ngan goi kich cau 400 Tr. cho nguoi khong co ha tang', () => {
       const p1 = createMockPlayer('p1', 10_000);
       const room = createMockRoom({ treasury: 5_000, players: [p1] });
       const registry: PropertyRegistry = new Map([[1, 'p1']]); // ô 1 là BĐS thông thường, không phải hạ tầng
 
       expect(handlePublicInvest).toBeDefined();
       handlePublicInvest!(room.players, registry, room);
-      expect(p1.balance).toBe(10_000);
-      expect(room.treasury).toBe(5_000);
+      expect(p1.balance).toBe(10_400); // 400 Tr. kích cầu
+      expect(room.treasury).toBe(4_600);
     });
   });
 

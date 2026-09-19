@@ -102,6 +102,15 @@ export function TradeModal({
   const price100 = offeredBaseCost;
   const price120 = Math.round(offeredBaseCost * 1.2);
 
+  const requestedBaseCost = requested.reduce((sum, id) => {
+    const deed = getDeedDisplayInfo(id);
+    return sum + (deed?.price ?? 1000);
+  }, 0);
+
+  const reqPrice100 = requestedBaseCost;
+  const reqPrice130 = Math.round(requestedBaseCost * 1.3);
+  const reqPrice150 = Math.round(requestedBaseCost * 1.5);
+
   const renderCol = (
     title: string,
     isMine: boolean,
@@ -143,6 +152,7 @@ export function TradeModal({
                   key={id}
                   type="button"
                   disabled={isMort}
+                  data-selected={checked ? 'true' : undefined}
                   onClick={() => toggleProperty(id, isMine)}
                   className={`w-full text-left rounded-lg border transition-all overflow-hidden flex flex-col text-[11px] ${
                     isMort
@@ -159,7 +169,7 @@ export function TradeModal({
                   <div className="p-1.5 flex items-center justify-between gap-1">
                     <span className="truncate flex-1 font-semibold">{deed?.name ?? `Ô #${id}`}</span>
                     <span className="text-[10px] text-slate-500 font-mono font-medium">{deed ? formatCurrency(deed.price) : ''}</span>
-                    {checked && <span className="text-amber-800 font-black ml-1">✓</span>}
+                    {checked && <span className="text-amber-800 font-black ml-1">✓ [ĐÃ CHỌN]</span>}
                     {isMort && <span className="text-[9px] text-rose-600 font-medium ml-1">Thế chấp</span>}
                   </div>
                 </button>
@@ -212,7 +222,7 @@ export function TradeModal({
           {/* Gợi ý giá nhanh theo tỷ lệ sàn & gốc khi bán BĐS */}
           {!isMine && offered.length > 0 && (
             <div className="mt-1.5 pt-1.5 border-t border-amber-200/60 flex items-center gap-1 flex-wrap text-[10px]">
-              <span className="text-slate-500 font-medium">Gợi ý giá:</span>
+              <span className="text-slate-500 font-medium">Gợi ý giá bán:</span>
               <button
                 type="button"
                 onClick={() => onCash(price70)}
@@ -237,9 +247,42 @@ export function TradeModal({
             </div>
           )}
 
+          {/* Gợi ý giá nhanh khi mua BĐS của đối tác */}
+          {isMine && requested.length > 0 && (
+            <div className="mt-1.5 pt-1.5 border-t border-blue-200/60 flex items-center gap-1 flex-wrap text-[10px]">
+              <span className="text-slate-500 font-medium">Gợi ý giá mua:</span>
+              <button
+                type="button"
+                onClick={() => onCash(reqPrice100)}
+                className="px-1.5 py-0.5 bg-white hover:bg-blue-100 border border-blue-300 rounded text-blue-900 font-bold cursor-pointer"
+              >
+                100% Gốc ({formatCurrency(reqPrice100)})
+              </button>
+              <button
+                type="button"
+                onClick={() => onCash(reqPrice130)}
+                className="px-1.5 py-0.5 bg-white hover:bg-blue-100 border border-blue-300 rounded text-blue-900 font-bold cursor-pointer"
+              >
+                130% ({formatCurrency(reqPrice130)})
+              </button>
+              <button
+                type="button"
+                onClick={() => onCash(reqPrice150)}
+                className="px-1.5 py-0.5 bg-white hover:bg-blue-100 border border-blue-300 rounded text-blue-900 font-bold cursor-pointer"
+              >
+                150% ({formatCurrency(reqPrice150)})
+              </button>
+            </div>
+          )}
+
           {!isMine && !partnerCanAfford && (
             <p className="text-[10px] text-rose-600 font-bold mt-1">
               Đối tác không đủ tiền mặt (hiện chỉ có {formatCurrency(effectiveTargetBalance)})
+            </p>
+          )}
+          {isMine && cashVal > myBalance && (
+            <p className="text-[10px] text-rose-600 font-bold mt-1">
+              Số dư không đủ (bạn hiện có {formatCurrency(myBalance)})
             </p>
           )}
         </div>
@@ -338,7 +381,7 @@ export function TradeModal({
           className={`flex-1 min-h-[44px] py-2 px-3 rounded-xl font-bold text-xs transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
             isValid
               ? 'bg-emerald-500 hover:bg-emerald-600 text-white border-2 border-emerald-700 shadow-[0_4px_0_0_#065f46] active:shadow-[0_1px_0_0_#065f46] active:translate-y-[3px] cursor-pointer font-black'
-              : 'bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-300'
+              : 'bg-slate-200 text-slate-600 cursor-not-allowed border border-slate-300'
           }`}
         >
           Gửi Đề Xuất Đàm Phán

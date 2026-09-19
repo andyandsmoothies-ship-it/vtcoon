@@ -1,7 +1,8 @@
 // [UI-S01/MSS][UI-S04/MSS] CameraStateMachine — 2026 Cinematic Action Cam & Dynamic Follow System
-// Hỗ trợ 4 chế độ: Overview, Dice Roll Cinematic, Pawn Chase, và Tile Focus
+// Hỗ trợ các chế độ: Overview, Dice Roll Cinematic, Dynamic Tension Roll, Pawn Chase, và Tile Focus
+import { PROPERTY_DEEDS } from '../../domain/property_data';
 
-export type CameraMode = 'overview' | 'dice_roll' | 'pawn_chase' | 'tile_focus' | 'auction_focus' | 'pre_match';
+export type CameraMode = 'overview' | 'dice_roll' | 'tension_roll' | 'pawn_chase' | 'tile_focus' | 'auction_focus' | 'pre_match';
 
 interface CameraConfigItem {
   readonly position: readonly [number, number, number];
@@ -32,6 +33,13 @@ export const CAMERA_CONFIG = {
     fov: 36,
     speed: 4.8,
   },
+  tension_roll: {
+    // [IMP-125-P2] Cận cảnh khay xúc xắc kịch tính khi đối mặt nguy cơ tử thần (High-Stakes)
+    position: [2.0, 2.2, 2.8] as const,
+    target: [0.0, 0.2, 0.0] as const,
+    fov: 34,
+    speed: 6.0,
+  },
   pawn_chase: {
     fov: 38,
     speed: 5.2,
@@ -53,6 +61,7 @@ export const CAMERA_CONFIG = {
 
 export interface CameraResolveParams {
   readonly isRolling: boolean;
+  readonly isHighStakesRoll?: boolean;
   readonly isPawnAnimating: boolean;
   readonly activeModal: string | null;
   readonly hasRolledThisTurn?: boolean;
@@ -85,7 +94,11 @@ export function resolveCameraMode(params: CameraResolveParams): CameraMode {
   if ((params.isBotTurn || params.isAnimatingPawnBot) && !params.isPawnAnimating && !params.hasTargetTile && !params.hasRolledThisTurn) {
     return 'overview';
   }
-  // [IMP-42] Bỏ hiệu ứng zoom vào khay xúc xắc khi quay xúc xắc để triệt tiêu giật lag
+  // [IMP-125-P2] Khi gieo xúc xắc ở thế cờ kịch tính (High-Stakes): chuyển sang góc máy căng thẳng
+  if (params.isRolling && params.isHighStakesRoll) {
+    return 'tension_roll';
+  }
+  // [IMP-42] Bỏ hiệu ứng zoom vào khay xúc xắc khi quay xúc xắc để triệt tiêu giật lag (chỉ áp dụng cho lượt thường)
   if (params.isRolling) {
     return 'overview';
   }
@@ -115,16 +128,56 @@ export function calculateChaseCameraPosition(
 }
 
 /**
+ * [IMP-126] Tính toán Camera Offset theo 4 cạnh bàn cờ (Side-Aware Orientation)
+ * Đảm bảo Camera luôn đứng từ phía ngoài nhìn vào cạnh của ô cờ đó,
+ * giúp toàn bộ chữ tên địa danh và tranh di sản luôn hiển thị thuận mắt 100% (không lộn ngược 180°).
+ */
+export function resolveSideAwareCameraOffset(
+  tileCoords: readonly [number, number, number],
+  baseOffset: readonly [number, number, number] = CAMERA_CONFIG.tile_focus.offset
+): [number, number, number] {
+  const tx = Number.isFinite(tileCoords[0]) ? tileCoords[0] : 0;
+  const tz = Number.isFinite(tileCoords[2]) ? tileCoords[2] : 0;
+  const height = Number.isFinite(baseOffset[1]) ? baseOffset[1] : 6.4;
+
+  // Bàn cờ vuông 18x18 (chu vi tâm = 9.0).
+  // Phân chia 4 cạnh dựa trên tọa độ cực đại của hình vuông (|z| vs |x|):
+  const absX = Math.abs(tx);
+  const absZ = Math.abs(tz);
+
+  if (absZ >= absX) {
+    if (tz < 0) {
+      // Cạnh Bắc (Side 2, e.g. Đà Lạt, Cao Tốc, Hải Phòng: z = -9):
+      // Camera nằm ở phía Bắc (Z < -9) nhìn về phía Nam (+Z) để chữ thuận mắt người xem
+      return [-1.8, height, -6.8];
+    }
+    // Cạnh Nam (Side 0, e.g. Bến Thành, Cần Thơ: z = +9):
+    // Camera nằm ở phía Nam (Z > 9) nhìn về phía Bắc (-Z). Giữ nguyên baseOffset để bảo toàn 100% test cũ.
+    return [Number.isFinite(baseOffset[0]) ? baseOffset[0] : 5.2, height, Number.isFinite(baseOffset[2]) ? baseOffset[2] : 5.2];
+  } else {
+    if (tx < 0) {
+      // Cạnh Tây (Side 1, e.g. Điện Lực EVN: x = -9):
+      // Camera nằm ở phía Tây (X < -9) nhìn về phía Đông (+X) để chữ thuận mắt người xem
+      return [-6.8, height, 1.8];
+    }
+    // Cạnh Đông (Side 3, e.g. Hoàn Kiếm, Ba Đình: x = +9):
+    // Camera nằm ở phía Đông (X > 9) nhìn về phía Tây (-X) để chữ thuận mắt người xem
+    return [6.8, height, -1.8];
+  }
+}
+
+/**
  * Tính toán tọa độ vị trí Camera tập trung vào ô đất mục tiêu
  */
 export function calculateTileFocusCameraPosition(
   tileCoords: readonly [number, number, number],
-  offset: readonly [number, number, number] = CAMERA_CONFIG.tile_focus.offset
+  offset?: readonly [number, number, number]
 ): [number, number, number] {
   const tx = Number.isFinite(tileCoords[0]) ? tileCoords[0] : 0;
   const ty = Number.isFinite(tileCoords[1]) ? tileCoords[1] : 0;
   const tz = Number.isFinite(tileCoords[2]) ? tileCoords[2] : 0;
-  return [tx + offset[0], ty + offset[1], tz + offset[2]];
+  const finalOffset = offset ?? resolveSideAwareCameraOffset(tileCoords);
+  return [tx + finalOffset[0], ty + finalOffset[1], tz + finalOffset[2]];
 }
 
 /**
@@ -198,6 +251,13 @@ export function calculateTargetCameraState(
         fov: CAMERA_CONFIG.dice_roll.fov,
         speed: CAMERA_CONFIG.dice_roll.speed,
       };
+    case 'tension_roll':
+      return {
+        position: [CAMERA_CONFIG.tension_roll.position[0], CAMERA_CONFIG.tension_roll.position[1], CAMERA_CONFIG.tension_roll.position[2]],
+        target: [CAMERA_CONFIG.tension_roll.target[0], CAMERA_CONFIG.tension_roll.target[1], CAMERA_CONFIG.tension_roll.target[2]],
+        fov: CAMERA_CONFIG.tension_roll.fov,
+        speed: CAMERA_CONFIG.tension_roll.speed,
+      };
     case 'pawn_chase': {
       const p = pawnPosition ?? [0, 0, 0];
       const safePx = Number.isFinite(p[0]) ? p[0] : 0;
@@ -249,5 +309,63 @@ export function calculateResponsiveCameraDistance(aspect: number, baseDistance =
     return safeBase * Math.max(1.0, 1.77 / Math.max(safeAspect, 0.75));
   }
   return safeBase;
+}
+
+export interface HighStakesResult {
+  readonly isHighStakes: boolean;
+  readonly dangerousCellIndex?: number;
+  readonly dangerousRent?: number;
+}
+
+/**
+ * [IMP-125-P2] Quét 11 ô phía trước [2..12] tìm kiếm rủi ro tử thần (phí thuê >= 80% số dư hoặc số dư <= 0)
+ */
+export function checkHighStakesRoll(
+  currentPos: number,
+  playerBalance: number,
+  playersInfo: Record<string, {
+    id: string;
+    balance?: number;
+    ownedProperties?: readonly number[];
+    mortgagedProperties?: readonly number[];
+  }>,
+  levelMap?: Record<number, 0 | 1 | 2 | 3 | number>,
+  currentPlayerId?: string
+): HighStakesResult {
+  const safePos = Number.isFinite(currentPos) ? Math.floor(currentPos) : 0;
+  const safeBalance = Number.isFinite(playerBalance) ? playerBalance : 0;
+  const playersList = Object.values(playersInfo || {});
+  const hasLevelFilter = Boolean(levelMap && Object.keys(levelMap).length > 0);
+
+  for (let step = 2; step <= 12; step++) {
+    const cellIndex = (safePos + step) % 40;
+    const owner = playersList.find((p) => p.ownedProperties?.includes(cellIndex));
+
+    if (!owner) continue;
+    if (currentPlayerId && owner.id === currentPlayerId) continue;
+    if (owner.mortgagedProperties?.includes(cellIndex)) continue;
+    if (hasLevelFilter && !(cellIndex in levelMap!)) continue;
+
+    const deed = PROPERTY_DEEDS.get(cellIndex);
+    if (!deed) continue;
+
+    const level = levelMap?.[cellIndex] ?? 0;
+    let rent = deed.rent0;
+    if (level === 1) rent = deed.rent1 ?? deed.rent0;
+    else if (level === 2) rent = deed.rent2 ?? deed.rent0;
+    else if (level >= 3) rent = deed.rent3 ?? deed.rent0;
+
+    if (rent <= 0) continue;
+
+    if (safeBalance <= 0 || rent >= 0.8 * safeBalance) {
+      return {
+        isHighStakes: true,
+        dangerousCellIndex: cellIndex,
+        dangerousRent: rent,
+      };
+    }
+  }
+
+  return { isHighStakes: false };
 }
 

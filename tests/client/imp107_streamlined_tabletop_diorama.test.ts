@@ -122,6 +122,12 @@ describe('[UC-IMP107/MSS] Streamlined Tabletop Diorama & Zero Outer Ring Clutter
       // Pier viaduct args="12,0.18,1.4"
       expect(html).not.toContain('args="12,0.18,1.4"');
     });
+
+    it('[UC-IMP107/MSS-F2.6] CoastalIslandEnvironment streamlined mode purges nearshore 9h yacht and container ship', () => {
+      const html = renderToStaticMarkup(React.createElement(CoastalIslandEnvironment, { streamlined: true }));
+      expect(html).not.toContain('position="-11.5,-0.3,12"');
+      expect(html).not.toContain('position="-15,-0.3,9.5"');
+    });
   });
 
   // =========================================================================

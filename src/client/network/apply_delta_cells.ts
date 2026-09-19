@@ -22,7 +22,7 @@ function triggerCellLevelEffects(cellIndex: number, targetLevel: number, oldLeve
   }
 }
 
-function updateCellLevel(
+export function updateCellLevel(
   cell: DeltaCell,
   state: GameState,
   nextLevelMap: Record<number, 0 | 1 | 2 | 3>,
@@ -36,7 +36,7 @@ function updateCellLevel(
   return true;
 }
 
-function checkMonopolyReward(cellIndex: number, ownerId: string, owner: PlayerHudInfo, state: GameState): void {
+export function checkMonopolyReward(cellIndex: number, ownerId: string, owner: PlayerHudInfo, state: GameState): void {
   const bCell = BOARD_CONFIG[cellIndex];
   if (!bCell?.colorGroup) return;
   const group = BOARD_CONFIG.filter((c) => c.colorGroup === bCell.colorGroup).map((c) => c.index);
@@ -44,9 +44,12 @@ function checkMonopolyReward(cellIndex: number, ownerId: string, owner: PlayerHu
   const hasAllNow = group.every((idx) => owner.ownedProperties.includes(idx) || idx === cellIndex);
   if (!hadAllBefore && hasAllNow) {
     state.addFloatingText({
-      text: `🎉 ĐỘC QUYỀN ${bCell.colorGroup.toUpperCase()}! Phí thuê cơ bản x2!`,
+      text: `🎉 ĐỘC QUYỀN ${bCell.colorGroup.toUpperCase()}!`,
+      title: 'Phí thuê cơ bản x2!',
       type: FloatingTextType.Reward,
       playerId: ownerId,
+      actionType: 'monopoly',
+      cellIndex,
     });
   }
 }

@@ -1,7 +1,7 @@
 // [UC-GAME-020/MSS][UC-GAME-027/MSS][UC-GAME-028/MSS] Property Manager — Slice 02
 // Barrel re-export — bảo toàn 100% import paths cho 12 test files
 
-import type { Player, MarketModifier } from './room';
+import type { Player, MarketModifier, Room } from './room';
 import { MarketCardId, ChanceCardId, COASTAL_CELLS, RESORT_CELLS, SERVICE_CELLS } from './event_card_engine';
 import {
   PROPERTY_DEEDS, isPurchasable,
@@ -25,8 +25,8 @@ export enum LandingResult {
 
 export enum BuyResult {
   Success           = 'Success',
-  InsufficientFunds = 'InsufficientFunds',
   AlreadyOwned      = 'AlreadyOwned',
+  InsufficientFunds = 'InsufficientFunds',
   NotPurchasable    = 'NotPurchasable',
   TradeFrozen       = 'TradeFrozen',
 }
@@ -55,8 +55,19 @@ export function handleLanding(
   stateMap?: PropertyStateMap, diceTotal?: number, modifiers?: readonly MarketModifier[], rng?: () => number,
   chanceDiscard?: ChanceCardId[], permanentRentBonus?: Readonly<Record<number, number>>,
   roundCount?: number,
+  room?: Room,
 ): { result: LandingResult; rentAmount: number; landlordId: string | undefined } {
   if (!isPurchasable(cellIndex)) return { result: LandingResult.NotPurchasable, rentAmount: 0, landlordId: undefined };
+
+  // [IMP-116] Hiệu ứng dừng chân sự kiện: Nghị Định 100 nồng độ cồn & Bão duyên hải
+  if (modifiers?.some((m) => m.type === MarketCardId.MC_ALCOHOL_CHECK && m.remainingRounds > 0 && (m.affectedCells ?? SERVICE_CELLS).includes(cellIndex))) {
+    player.balance -= 800;
+    if (room) room.treasury = (room.treasury ?? 0) + 800;
+    player.skipNextTurn = true;
+  }
+  if (modifiers?.some((m) => m.type === MarketCardId.MC_COASTAL_STORM && m.remainingRounds > 0 && (m.affectedCells ?? COASTAL_CELLS).includes(cellIndex))) {
+    player.skipNextTurn = true;
+  }
   const ownerId = registry.get(cellIndex);
   if (ownerId === undefined) return { result: LandingResult.Unowned, rentAmount: 0, landlordId: undefined };
   if (ownerId === player.id) return { result: LandingResult.OwnProperty, rentAmount: 0, landlordId: ownerId };

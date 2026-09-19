@@ -188,11 +188,13 @@ describe('[UC-GAME-047/MSS] Chu Trình 3 Vòng Tại Trạm Kiểm Toán Ô 10 (
     const roll3 = mgr.handlePlayerIntent(room.roomCode, 'p1', { type: 'INTENT_ROLL' });
     expect(roll3.success).toBe(true);
     expect(room.players[0]!.position).toBe(10);
+    const balanceBeforeExit = room.players[0]!.balance;
+    const treasuryBeforeExit = room.treasury ?? 0;
     mgr.handleEndTurn(room.roomCode, 'p1');
     // Hết 3 vòng: auditTurnsLeft = 0, nộp 500 Tr. bảo lãnh vào Kho Bạc
     expect(room.players[0]!.auditTurnsLeft).toBe(0);
-    expect(room.players[0]!.balance).toBe(initialBalance - 500);
-    expect(room.treasury).toBe(500);
+    expect(room.players[0]!.balance).toBe(balanceBeforeExit - 500);
+    expect(room.treasury).toBe(treasuryBeforeExit + 500);
 
     // p2 chơi
     mgr.handleRollDice(room.roomCode, 'p2');

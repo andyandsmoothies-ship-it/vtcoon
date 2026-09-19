@@ -48,7 +48,11 @@ function isTradeFrozen(room: Room): boolean {
 }
 
 function isMortgagePhaseValid(phase: TurnPhase): boolean {
-  return phase === TurnPhase.PropertyManagement || phase === TurnPhase.InsolvencyPhase;
+  return (
+    phase === TurnPhase.PropertyManagement ||
+    phase === TurnPhase.InsolvencyPhase ||
+    phase === TurnPhase.ActionPhase
+  );
 }
 
 function checkMortgageRoomState(room: Room, playerId: string): ActionRejectReason | undefined {

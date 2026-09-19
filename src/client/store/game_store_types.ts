@@ -9,6 +9,7 @@ export interface PawnAnimationState {
   readonly currentIndex?: number;
   readonly isAnimating: boolean;
   readonly isBot?: boolean;
+  readonly isJailFlight?: boolean;
 }
 
 export interface PawnMoveTask {
@@ -17,6 +18,7 @@ export interface PawnMoveTask {
   readonly targetCell: number;
   readonly waypoints: readonly number[];
   readonly isBot?: boolean;
+  readonly isJailFlight?: boolean;
 }
 
 export interface PlayerHudInfo {
@@ -51,12 +53,35 @@ export enum FloatingTextType {
   Penalty = 'penalty',
 }
 
+export type FloatingActionType =
+  | 'buy'
+  | 'upgrade'
+  | 'rent_pay'
+  | 'rent_receive'
+  | 'tax'
+  | 'bail'
+  | 'salary'
+  | 'monopoly'
+  | 'debt_relief'
+  | 'stimulus'
+  | 'chance'
+  | 'market'
+  | 'auction_win'
+  | 'hose'
+  | 'teleport'
+  | 'audit_jail'
+  | 'general';
+
 export interface FloatingTextItem {
   readonly id: string;
   readonly text: string;
   readonly type: FloatingTextType;
   readonly playerId: string;
   readonly timestamp: number;
+  readonly actionType?: FloatingActionType;
+  readonly title?: string;
+  readonly cellIndex?: number;
+  readonly targetPlayerName?: string;
 }
 
 export type ActiveModalType = 'deed' | 'portfolio' | 'auction' | 'trade' | 'event' | 'hose' | 'insolvency' | 'game_over' | 'rules' | null;
@@ -121,6 +146,8 @@ export interface PendingPawnMove {
   readonly playerId: string;
   readonly targetCell: number;
   readonly fromCell: number;
+  readonly isBot?: boolean;
+  readonly isJailFlight?: boolean;
 }
 
 export interface LastLandedPawn {
@@ -128,6 +155,14 @@ export interface LastLandedPawn {
   readonly cellIndex: number;
   readonly timestamp: number;
 }
+
+export type ClientMarketModifier = MarketModifier | {
+  readonly type: MarketModifier['type'] | string;
+  readonly remainingRounds: number;
+  readonly affectedCells?: readonly number[];
+  readonly multiplier?: number;
+  readonly beneficiaryId?: string;
+};
 
 export interface GameState {
   readonly levelMap: Record<number, 0 | 1 | 2 | 3>;
@@ -145,12 +180,14 @@ export interface GameState {
   // UI-03 HUD Financial & Turn States
   readonly playersInfo: Record<string, PlayerHudInfo>;
   readonly currentTurnPlayerId: string | null;
+
   readonly turnTimeRemaining: number;
   readonly turnPhase?: string;
   readonly treasuryPool: number;
   readonly roundNumber: number;
   readonly maxRounds: number;
-  readonly activeModifiers: ReadonlyArray<MarketModifier>;
+  readonly activeModifiers: ReadonlyArray<ClientMarketModifier>;
+  readonly isHeatmapActive: boolean;
 
   // UI-04 Business Modals State
   readonly activeModal: ActiveModalType;
@@ -180,7 +217,7 @@ export interface GameState {
   setPendingPawnMove: (move: PendingPawnMove | null) => void;
   enqueuePawnMove: (task: PawnMoveTask) => void;
   processPawnQueue: () => void;
-  startPawnMove: (playerId: string, targetCell: number, fromCell?: number, isBot?: boolean) => void;
+  startPawnMove: (playerId: string, targetCell: number, fromCell?: number, isBot?: boolean, isJailFlight?: boolean) => void;
   completePawnMove: (playerId: string) => void;
   clearActivePawnAnimation: () => void;
 
@@ -190,10 +227,13 @@ export interface GameState {
   setCurrentTurnPlayerId: (playerId: string | null) => void;
   setTurnTimeRemaining: (seconds: number) => void;
   decrementTurnTimer: () => void;
+  setTurnPhase: (turnPhase?: string) => void;
   setTreasuryPool: (amount: number) => void;
   setRoundInfo: (round: number, maxRounds?: number) => void;
   setRoundNumber: (round: number) => void;
-  setActiveModifiers: (modifiers: ReadonlyArray<MarketModifier>) => void;
+  setActiveModifiers: (modifiers: ReadonlyArray<ClientMarketModifier>) => void;
+  toggleHeatmap: () => void;
+  setHeatmapActive: (active: boolean) => void;
 
   // UI-04 Business Modals Actions
   openModal: <T extends keyof ModalPayloadMap>(type: T, payload: ModalPayloadMap[T]) => void;

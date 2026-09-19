@@ -53,16 +53,24 @@ function SingleDie({
 }): React.ReactElement {
   const lastAnimatedSeqRef = useRef<number | undefined>(undefined);
   const prevRollingRef = useRef(false);
+  const settleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (settleTimerRef.current) {
+        clearTimeout(settleTimerRef.current);
+      }
+    };
+  }, []);
 
   let shouldReset = false;
   if (isRolling) {
-    if (diceSeq !== undefined) {
-      if (diceSeq !== lastAnimatedSeqRef.current) {
-        shouldReset = true;
-        lastAnimatedSeqRef.current = diceSeq;
-      }
-    } else if (!prevRollingRef.current) {
+    if (!prevRollingRef.current) {
       shouldReset = true;
+      lastAnimatedSeqRef.current = diceSeq;
+    } else if (diceSeq !== undefined && diceSeq !== lastAnimatedSeqRef.current) {
+      shouldReset = true;
+      lastAnimatedSeqRef.current = diceSeq;
     }
   }
   prevRollingRef.current = isRolling;
@@ -76,8 +84,15 @@ function SingleDie({
     immediate: !isRolling,
     config: { duration: 1100 },
     onRest: (result) => {
-      if (isRolling && onRest && (!result || result.finished !== false)) {
-        onRest();
+      if (isRolling && onRest && result?.finished === true) {
+        if (settleTimerRef.current) {
+          clearTimeout(settleTimerRef.current);
+        }
+        settleTimerRef.current = setTimeout(() => {
+          if (useGameStore.getState().isRolling) {
+            onRest();
+          }
+        }, 250);
       }
     },
   });

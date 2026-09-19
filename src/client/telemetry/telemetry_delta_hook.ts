@@ -60,7 +60,8 @@ export function checkIsTeleport(
     phase !== TurnPhase.ActionPhase &&
     phase !== TurnPhase.PropertyManagement &&
     phase !== TurnPhase.HosePhase &&
-    phase !== TurnPhase.AuctionPhase
+    phase !== TurnPhase.AuctionPhase &&
+    phase !== TurnPhase.InsolvencyPhase
   ) {
     return true;
   }
@@ -84,6 +85,7 @@ export function detectMovement(
         delta.turnPhase === TurnPhase.PropertyManagement ||
         delta.turnPhase === TurnPhase.HosePhase ||
         delta.turnPhase === TurnPhase.AuctionPhase ||
+        delta.turnPhase === TurnPhase.InsolvencyPhase ||
         delta.turnPhase === undefined;
       const isExactDiceMove = Boolean(
         delta.dice && (fromPos + delta.dice[0] + delta.dice[1]) % 40 === p.position

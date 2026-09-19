@@ -95,3 +95,26 @@ export function findEligibleRedeemCell(
   candidates.sort(compareRedeemCandidates);
   return candidates[0]!.cellIndex;
 }
+
+/**
+ * Lựa chọn ô đất thế chấp để chuộc lại, ưu tiên hàng đầu cho ô thuộc bộ màu độc quyền.
+ */
+export function selectMortgageToRedeem(
+  bot: Player,
+  stateMap: PropertyStateMap,
+  registry: PropertyRegistry,
+  minBuffer: number = 300,
+): number | undefined {
+  const mortgaged = collectMortgagedCells(bot, registry, stateMap);
+  if (mortgaged.length === 0) return undefined;
+
+  const candidates: RedeemCandidate[] = [];
+  for (const cellIndex of mortgaged) {
+    const candidate = toRedeemCandidate(cellIndex, bot, registry, stateMap, minBuffer);
+    if (candidate) candidates.push(candidate);
+  }
+
+  if (candidates.length === 0) return undefined;
+  candidates.sort(compareRedeemCandidates);
+  return candidates[0]?.cellIndex;
+}

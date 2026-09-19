@@ -9,8 +9,8 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command]
 # ACCEPTANCE GATE & DE-SLOP AUDIT PROTOCOL
 
 1. **Permissions**: STRICTLY READ-ONLY + Test Runner. FORBIDDEN from creating or modifying project source files.
-2. **Core Directive (Full Diff, Nearby Code & Nash Least New Structure)**:
-   > *"Review the full diff and surrounding code context (nearby code, callers, lifecycle). Identify real bugs, regression risks, and unnecessary complexity. Remove maximum new structure without violating the behavior required in the Specification. Reuse existing patterns, apply DRY/KISS, rank issues by severity, filter false positives, and verify closed-loop fixes."*
+2. **Core Directive & Zero-Trust Adversarial Mandate**:
+   > *"Review the full diff, surrounding code context, and physical Evidence Snapshot on disk. Maintain an uncompromising Zero-Trust posture: assume AI-generated code and plans contain hidden bugs, runtime desyncs, or unproven assumptions until verified by empirical tests and physical disk artifacts. Never indulge in polite rubber-stamping (No Sycophancy). Identify real bugs, regression risks, and unnecessary complexity. Remove maximum new structure without violating the behavior required in the Specification. Reuse existing patterns, apply DRY/KISS, rank issues by severity, filter false positives, and verify closed-loop fixes."*
 3. **The 6 Slop Red Flags Filter**:
    - 🚩 **Flag 1: Single-use Abstraction**: Interface, class, or helper used only once (YAGNI).
    - 🚩 **Flag 2: Duplicated Capability**: Re-implementing existing utilities or standard library functions.
@@ -69,15 +69,15 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command]
 | :--- | :---: | :--- |
 | `[src/fsm/turn_machine.ts#L25-L45]` | MODIFY | Implement deterministic dice roll transition |
 
-#### 4. Slop Red Flags Audit
-- Flag 1 (Single-use Abstractions): 0 detected.
-- Flag 2 (Duplicated Capability): 0 detected.
-- Flag 3 (Speculative Extensibility): 0 detected.
-- Flag 4 (Unnecessary Dependencies): 0 detected.
-- Flag 5 (Outside Causal Path): 0 detected.
-- Flag 6 (Self-introduced Complexity): 0 detected.
-- Runtime Wire Gate: PASS (All public domain mutations wired to Dispatcher/Routes/Handlers).
-- Lean Observability: PASS (Structured logging on transitions, zero silent catches).
+#### 4. Structured Verification Matrix (Bảng Ma Trận Định Lượng Bắt Buộc)
+| Tiêu Chí Kiểm Tra | Tọa Độ Kiểm Tra (File:Line) | Ngưỡng Cho Phép | Số Liệu Thực Tế (Từ Snapshot) | Vi Phạm | Phán Quyết |
+| :--- | :--- | :--- | :--- | :---: | :---: |
+| 1. File LOC Budget | `[File coordinates]` | <= 300 LOC (Core) / 500 (UI) | `[LOC từ snapshot]` | 0 | APPROVED |
+| 2. Function Complexity | `[File:Line]` | Max 30 LOC, CC <= 5 | `[Max LOC & CC]` | 0 | APPROVED |
+| 3. 6 Slop Red Flags | `[Toàn bộ diff]` | 0 vi phạm (Anti-Slop) | 0 flags phát hiện | 0 | APPROVED |
+| 4. Zero Dirty Cast | `[Toàn bộ diff]` | 0 `as any` / dirty cast | 0 dirty cast | 0 | APPROVED |
+| 5. Runtime Wire Gate | `[Entry -> Logic]` | 100% wired invocation | All mutations wired | 0 | APPROVED |
+| 6. Evidence Snapshot | `.agents/evidence/latest_snapshot.json` | Tồn tại & Đã đọc trên đĩa | Đọc qua view_file | 0 | APPROVED |
 
 #### 5. Severity Findings & False Positive Filter
 - [BLOCKER]: 0 detected.

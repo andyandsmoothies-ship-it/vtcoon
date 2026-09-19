@@ -6,6 +6,7 @@ import type {
   InvariantViolation,
   ForensicSnapshot,
   RecordedIntent,
+  RecordedIntentContext,
   FlightRecorderDump,
 } from './telemetry_types.js';
 
@@ -32,7 +33,7 @@ export interface TelemetryState {
   updateMetrics: (partial: Partial<TelemetryMetric>) => void;
   addAuditLog: (entry: Omit<AuditLogEntry, 'id' | 'timestamp'> & { id?: string; timestamp?: number }) => void;
   addSnapshot: (snapshot: ForensicSnapshot) => void;
-  recordIntent: (playerId: string, intent: unknown) => void;
+  recordIntent: (playerId: string, intent: unknown, context?: RecordedIntentContext) => void;
   reportViolation: (violation: Omit<InvariantViolation, 'id' | 'timestamp'> & { id?: string; timestamp?: number }) => void;
   clearViolations: () => void;
   setAutoFreezeEnabled: (enabled: boolean) => void;
@@ -94,11 +95,12 @@ export const useTelemetryStore = create<TelemetryState>((set, get) => ({
     }));
   },
 
-  recordIntent: (playerId, intent) => {
+  recordIntent: (playerId, intent, context) => {
     const record: RecordedIntent = {
       playerId,
       intent,
       timestamp: Date.now(),
+      ...(context ? { context } : {}),
     };
     set((state) => ({
       recordedIntents: [...state.recordedIntents.slice(-(MAX_RECORDED_INTENTS - 1)), record],

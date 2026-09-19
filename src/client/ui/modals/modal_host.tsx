@@ -293,14 +293,24 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
             initialCashRequest={tradePayload.cashRequest}
             onSubmitTrade={(tradeData) => {
               AudioEngine.playSfx(SoundEffect.TRADE_SUCCESS);
-              if (tradeData && tradeData.offeredProperties[0] !== undefined) {
-                onIntent?.({
-                  type: 'INTENT_TRADE_OFFER',
-                  sellerId: myId,
-                  buyerId: tradeData.targetPlayerId,
-                  cellIndex: tradeData.offeredProperties[0],
-                  price: tradeData.cashRequest || 1000,
-                });
+              if (tradeData) {
+                if (tradeData.offeredProperties[0] !== undefined) {
+                  onIntent?.({
+                    type: 'INTENT_TRADE_OFFER',
+                    sellerId: myId,
+                    buyerId: tradeData.targetPlayerId,
+                    cellIndex: tradeData.offeredProperties[0],
+                    price: tradeData.cashRequest || tradeData.cashOffer || 1000,
+                  });
+                } else if (tradeData.requestedProperties[0] !== undefined) {
+                  onIntent?.({
+                    type: 'INTENT_TRADE_OFFER',
+                    sellerId: tradeData.targetPlayerId,
+                    buyerId: myId,
+                    cellIndex: tradeData.requestedProperties[0],
+                    price: tradeData.cashOffer || tradeData.cashRequest || 1000,
+                  });
+                }
               }
               closeModal();
             }}

@@ -2,7 +2,7 @@
 // Extracted from room_manager.ts — Slice 06 refactor (DEBT-S06-06)
 
 import type { Room, Player } from '../domain/room';
-import { checkPassedGo, GO_BONUS, BOARD_SIZE, TurnPhase } from '../domain/room';
+import { checkPassedGo, GO_BONUS, calculateGoSalary, BOARD_SIZE, TurnPhase } from '../domain/room';
 import { rollDice } from '../domain/dice';
 import type { PropertyRegistry, PropertyStateMap } from '../domain/property_manager';
 import { handleLanding, LandingResult, calculateGoPropertyTax, PROPERTY_DEEDS, GO_PROPERTY_TAX_CAP } from '../domain/property_manager';
@@ -120,7 +120,8 @@ export function executeTurnRoll(
     processPendingDebts(room, current);   // [DEBT-S06-01][DEBT-S06-02] TRƯỚC GO_BONUS
     const rawGoTax = calculateGoPropertyTax(current.id, reg, sm);
     const goTax = Math.min(rawGoTax, GO_PROPERTY_TAX_CAP);
-    current.balance += GO_BONUS - goTax;
+    const salary = calculateGoSalary(room.roundCount ?? 1);
+    current.balance += salary - goTax;
     if (goTax > 0) {
       room.treasury = (room.treasury ?? 0) + goTax;
     }
@@ -136,6 +137,7 @@ export function executeTurnRoll(
       current, newPos, reg, room.players, sm, dice.total,
       room.activeModifiers, rng, room.chanceDiscard, room.permanentRentBonus,
       room.roundCount,
+      room,
     );
     room.phase = landing.result === LandingResult.Unowned ? TurnPhase.ActionPhase : TurnPhase.PropertyManagement;
     rentCharged = landing.rentAmount;

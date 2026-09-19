@@ -7,11 +7,14 @@ import type { Player } from '../../domain/room';
 import { PLAYER_TOKEN_PALETTE } from '../../domain/theme';
 import { getEmoteDef } from '../../domain/emotes';
 import { useGameStore, type PawnAnimationState } from '../store/game_store';
+import { useVfxStore, type PawnReactionState } from '../store/vfx_store';
 import { cellPosition } from './board_coords';
 import {
   interpolatePawnPosition, BASE_PAWN_Y, HOP_DURATION, LANDING_DURATION,
-  BOT_HOP_DURATION, BOT_LANDING_DURATION,
+  BOT_HOP_DURATION, BOT_LANDING_DURATION, DEFAULT_JUMP_ARC,
+  JAIL_FLIGHT_ARC, JAIL_FLIGHT_DURATION, BOT_JAIL_FLIGHT_DURATION, JAIL_LANDING_DURATION,
   calculateKineticSquashStretch, calculatePawnLandingImpact, getStepPitchVariation,
+  calculateVictorySpin, calculateSlumpRecoil,
 } from './pawn_path';
 import { AudioEngine } from '../audio/audio_engine';
 import { SoundEffect } from '../audio/audio_types';
@@ -109,18 +112,24 @@ export interface SingleHopProps {
   readonly emoteId?: string;
   readonly slotIndex?: number;
   readonly isBot?: boolean;
+  readonly isJailFlight?: boolean;
 }
 
-export function SingleHopPawn({ fromCell, toCell, offset, color, onHopComplete, emoteId, slotIndex, isBot }: SingleHopProps): React.ReactElement | null {
-  const groupRef = useRef<Group>(null);
-  const elapsedRef = useRef(0);
-  const soundPlayedRef = useRef(false);
-  const completedRef = useRef(false);
-  const onHopCompleteRef = useRef(onHopComplete);
+export function SingleHopPawn({ fromCell, toCell, offset, color, onHopComplete, emoteId, slotIndex, isBot, isJailFlight }: SingleHopProps): React.ReactElement | null {
+  const groupRef = React.useRef<Group>(null);
+  const elapsedRef = React.useRef(0);
+  const soundPlayedRef = React.useRef(false);
+  const completedRef = React.useRef(false);
+  const onHopCompleteRef = React.useRef(onHopComplete);
   onHopCompleteRef.current = onHopComplete;
 
-  const hopDuration = isBot ? BOT_HOP_DURATION : HOP_DURATION;
-  const landingDuration = isBot ? BOT_LANDING_DURATION : LANDING_DURATION;
+  const hopDuration = isJailFlight
+    ? (isBot ? BOT_JAIL_FLIGHT_DURATION : JAIL_FLIGHT_DURATION)
+    : (isBot ? BOT_HOP_DURATION : HOP_DURATION);
+  const landingDuration = isJailFlight
+    ? JAIL_LANDING_DURATION
+    : (isBot ? BOT_LANDING_DURATION : LANDING_DURATION);
+  const arcHeight = isJailFlight ? JAIL_FLIGHT_ARC : DEFAULT_JUMP_ARC;
 
   useEffect(() => {
     if (fromCell === toCell && !completedRef.current) {
@@ -138,7 +147,7 @@ export function SingleHopPawn({ fromCell, toCell, offset, color, onHopComplete, 
 
     if (t <= hopDuration) {
       const jumpProgress = t / hopDuration;
-      const [x, y, z] = interpolatePawnPosition(fromCell, toCell, jumpProgress);
+      const [x, y, z] = interpolatePawnPosition(fromCell, toCell, jumpProgress, arcHeight);
       const [sx, sy, sz] = calculateKineticSquashStretch(jumpProgress, 0);
       const groundAdjustment = jumpProgress <= 0.10 ? -0.22 * (1 - sy) * (1 - jumpProgress / 0.10) : 0;
       groupRef.current.position.set(x + offset[0], y + groundAdjustment, z + offset[2]);
@@ -146,26 +155,30 @@ export function SingleHopPawn({ fromCell, toCell, offset, color, onHopComplete, 
     } else if (t <= hopDuration + landingDuration) {
       if (!soundPlayedRef.current) {
         soundPlayedRef.current = true;
-        const randomPitch = getStepPitchVariation();
-        AudioEngine.playSfx(SoundEffect.PAWN_STEP, randomPitch);
+        if (isJailFlight) {
+          AudioEngine.playSfx(SoundEffect.TAX_PENALTY);
+        } else {
+          const randomPitch = getStepPitchVariation();
+          AudioEngine.playSfx(SoundEffect.PAWN_STEP, randomPitch);
+        }
       }
 
       const landingProgress = (t - hopDuration) / landingDuration;
-      const [x, y, z] = interpolatePawnPosition(fromCell, toCell, 1.0);
+      const [x, y, z] = interpolatePawnPosition(fromCell, toCell, 1.0, arcHeight);
       const [sx, sy, sz] = calculatePawnLandingImpact(landingProgress);
       const groundAdjustment = -0.22 * (1 - sy);
       groupRef.current.position.set(x + offset[0], y + groundAdjustment, z + offset[2]);
       groupRef.current.scale.set(sx, sy, sz);
     } else {
       completedRef.current = true;
-      const [x, y, z] = interpolatePawnPosition(fromCell, toCell, 1.0);
+      const [x, y, z] = interpolatePawnPosition(fromCell, toCell, 1.0, arcHeight);
       groupRef.current.position.set(x + offset[0], y, z + offset[2]);
       groupRef.current.scale.set(1, 1, 1);
       onHopComplete();
     }
   });
 
-  const [startX, startY, startZ] = interpolatePawnPosition(fromCell, toCell, 0);
+  const [startX, startY, startZ] = interpolatePawnPosition(fromCell, toCell, 0, arcHeight);
 
   return (
     <group
@@ -245,7 +258,91 @@ export function ActiveSpringPawn({ player, color, offset, animation, onComplete,
       emoteId={emoteId}
       slotIndex={slotIndex}
       isBot={isBot}
+      isJailFlight={Boolean(animation.isJailFlight)}
     />
+  );
+}
+
+function PawnReactionFrameUpdater({
+  groupRef,
+  offset,
+  currentPos,
+  reaction,
+}: {
+  readonly groupRef: React.RefObject<Group | null>;
+  readonly offset: readonly [number, number, number];
+  readonly currentPos: number;
+  readonly reaction?: PawnReactionState;
+}): null {
+  const [x, , z] = cellPosition(currentPos);
+
+  useFrame(() => {
+    if (!groupRef.current) return;
+    if (!reaction) {
+      groupRef.current.position.set(x + offset[0], BASE_PAWN_Y, z + offset[2]);
+      groupRef.current.rotation.set(0, 0, 0);
+      groupRef.current.scale.set(1, 1, 1);
+      return;
+    }
+
+    const elapsed = Date.now() - reaction.startTime;
+    const progress = Math.max(0, Math.min(1, elapsed / reaction.durationMs));
+
+    if (reaction.type === 'victory_spin') {
+      const spin = calculateVictorySpin(progress);
+      groupRef.current.position.set(x + offset[0], BASE_PAWN_Y + spin.heightOffset, z + offset[2]);
+      groupRef.current.rotation.set(0, spin.rotationY, 0);
+      groupRef.current.scale.set(1, 1, 1);
+    } else if (reaction.type === 'slump_recoil') {
+      const recoil = calculateSlumpRecoil(progress);
+      groupRef.current.position.set(x + offset[0], BASE_PAWN_Y, z + offset[2]);
+      groupRef.current.rotation.set(0, 0, 0);
+      groupRef.current.scale.set(recoil.scaleXZ, recoil.scaleY, recoil.scaleXZ);
+    }
+  });
+
+  return null;
+}
+
+function StaticPawnWithReaction({
+  player,
+  assignedSlot,
+  color,
+  offset,
+  currentPos,
+  activeEmote,
+  reaction,
+}: {
+  readonly player: Player;
+  readonly assignedSlot: number;
+  readonly color: string;
+  readonly offset: readonly [number, number, number];
+  readonly currentPos: number;
+  readonly activeEmote?: { emoteId: string };
+  readonly reaction?: PawnReactionState;
+}): React.ReactElement {
+  const groupRef = useRef<Group>(null);
+  const [x, , z] = cellPosition(currentPos);
+  const isSSR = typeof window === 'undefined';
+
+  return (
+    <group
+      ref={groupRef}
+      key={player.id}
+      position={[x + offset[0], BASE_PAWN_Y, z + offset[2]]}
+      data-pawn-reaction={reaction?.type}
+    >
+      {!isSSR && (
+        <PawnReactionFrameUpdater
+          groupRef={groupRef}
+          offset={offset}
+          currentPos={currentPos}
+          reaction={reaction}
+        />
+      )}
+      <LuxuryPawnModel slotIndex={assignedSlot} playerColor={color} />
+      {activeEmote && <PawnEmoteBubble emoteId={activeEmote.emoteId} />}
+    </group>
   );
 }
 
@@ -257,6 +354,7 @@ export function PawnAnimator({ players = [] }: { readonly players?: readonly Pla
   const storeCompletePawnMove = useGameStore((s) => s.completePawnMove);
   const storeActiveEmotes = useGameStore((s) => s.activeEmotes);
   const storePlayersInfo = useGameStore((s) => s.playersInfo);
+  const storeActivePawnReactions = useVfxStore((s) => s.activePawnReactions);
 
   const isSSR = typeof window === 'undefined';
   const activeAnimation = isSSR ? useGameStore.getState().activePawnAnimation : storeActiveAnimation;
@@ -266,6 +364,7 @@ export function PawnAnimator({ players = [] }: { readonly players?: readonly Pla
   const completePawnMove = isSSR ? useGameStore.getState().completePawnMove : storeCompletePawnMove;
   const activeEmotes = isSSR ? useGameStore.getState().activeEmotes : storeActiveEmotes;
   const playersInfo = isSSR ? useGameStore.getState().playersInfo : storePlayersInfo;
+  const activePawnReactions = isSSR ? useVfxStore.getState().activePawnReactions : storeActivePawnReactions;
 
   // [UI-S02/MSS] Đảm bảo dọn dẹp an toàn nếu hoạt ảnh rỗng không bao giờ kích hoạt ActiveSpringPawn
   useEffect(() => {
@@ -291,6 +390,7 @@ export function PawnAnimator({ players = [] }: { readonly players?: readonly Pla
           ? pendingPawnMove.fromCell
           : (visualPositions?.[player.id] ?? playerPositions[player.id] ?? player.position);
         const activeEmote = activeEmotes[player.id];
+        const reaction = activePawnReactions?.[player.id];
 
         if (isAnimating && activeAnimation.waypoints.length > 0) {
           const animKey = `${player.id}_${activeAnimation.fromCell}_${activeAnimation.waypoints.join('-')}`;
@@ -309,12 +409,17 @@ export function PawnAnimator({ players = [] }: { readonly players?: readonly Pla
           );
         }
 
-        const [x, , z] = cellPosition(currentPos);
         return (
-          <group key={player.id} position={[x + offset[0], BASE_PAWN_Y, z + offset[2]]}>
-            <LuxuryPawnModel slotIndex={assignedSlot} playerColor={color} />
-            {activeEmote && <PawnEmoteBubble emoteId={activeEmote.emoteId} />}
-          </group>
+          <StaticPawnWithReaction
+            key={player.id}
+            player={player}
+            assignedSlot={assignedSlot}
+            color={color}
+            offset={offset}
+            currentPos={currentPos}
+            activeEmote={activeEmote}
+            reaction={reaction}
+          />
         );
       })}
     </group>

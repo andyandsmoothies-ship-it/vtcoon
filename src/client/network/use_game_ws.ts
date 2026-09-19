@@ -56,6 +56,8 @@ import {
   type WsMessageHandlerContext,
 } from './ws_message_handler.js';
 import { useTelemetryStore } from '../telemetry/telemetry_store.js';
+import { useGameStore } from '../store/game_store.js';
+import { buildIntentTelemetryContext } from '../ui/ui_helpers.js';
 
 export { handleWsMessage, performWsHandshake };
 export type { WsMessageHandlerContext };
@@ -221,12 +223,23 @@ export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
         playerId,
         intent,
       };
-      useTelemetryStore.getState().recordIntent(playerId, intent);
+      const gameState = useGameStore.getState();
+      const player = gameState.playersInfo[playerId];
+      const telemetryContext = buildIntentTelemetryContext({
+        intentType: intent.type,
+        dice: gameState.dice,
+        consecutiveDoubles: player?.consecutiveDoubles,
+        balance: player?.balance,
+        position: gameState.playerPositions[playerId],
+        currentTurnPlayerId: gameState.currentTurnPlayerId,
+        localPlayerId: playerId,
+      });
+      useTelemetryStore.getState().recordIntent(playerId, intent, telemetryContext);
       useTelemetryStore.getState().addAuditLog({
         tick: 0,
         source: 'PLAYER',
         action: intent.type,
-        payloadSummary: JSON.stringify(intent),
+        payloadSummary: JSON.stringify({ ...intent, ...telemetryContext }),
       });
       lastActionTimeRef.current = Date.now();
       wsRef.current.send(JSON.stringify(msg));

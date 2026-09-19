@@ -10,6 +10,7 @@ import {
 } from '../store/environment_store';
 import { useGameStore } from '../store/game_store';
 import { calculateTheatricalAmbientIntensity } from './auction_3d_stage';
+import { resolveShadowMapSize } from '../ui/ui_helpers';
 
 
 export function calculateBaseFill(phase: 'day' | 'sunset' | 'night'): number {
@@ -117,12 +118,18 @@ function updateDiffuseAndAtmosphere(
   }
 }
 
-export function TimeOfDayLighting(): React.ReactElement {
+export interface TimeOfDayLightingProps {
+  readonly isMobile?: boolean;
+}
+
+export function TimeOfDayLighting({ isMobile = false }: TimeOfDayLightingProps = {}): React.ReactElement {
   const phase = useEnvironmentStore((s) => s.phase);
   const isAuto = useEnvironmentStore((s) => s.isAuto);
   const setPhase = useEnvironmentStore((s) => s.setPhase);
   const activeModal = useGameStore((s) => s.activeModal);
   const isAuctionActive = activeModal === 'auction';
+
+  const shadowMapSize = resolveShadowMapSize(isMobile);
 
   const sunRef = useRef<DirectionalLight>(null);
   const fillRef = useRef<DirectionalLight>(null);
@@ -178,8 +185,8 @@ export function TimeOfDayLighting(): React.ReactElement {
         color={initialPreset.sunColor}
         intensity={initialPreset.sunIntensity}
         castShadow
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
+        shadow-mapSize-width={shadowMapSize}
+        shadow-mapSize-height={shadowMapSize}
         shadow-camera-left={-14}
         shadow-camera-right={14}
         shadow-camera-top={14}

@@ -3,6 +3,8 @@ import { BOARD_CONFIG, CellType } from '../domain/board_config';
 import { AudioEngine } from './audio/audio_engine';
 import { SoundEffect } from './audio/audio_types';
 import { useGameStore, FloatingTextType } from './store/game_store';
+import { useVfxStore } from './store/vfx_store';
+import { SoundEngine } from './audio/sound_engine';
 
 export function getInitialLobbyConfig(): {
   roomCode: string;
@@ -58,11 +60,19 @@ export function executeCellLanding(
       }
     } else if (ownerEntry[0] !== activeId) {
       AudioEngine.playSfx(SoundEffect.TAX_PENALTY);
+      // [IMP-125-P2] Kích hoạt hoạt cảnh biểu cảm quân cờ & âm thanh xúc giác
+      useVfxStore.getState().triggerPawnReaction(ownerEntry[0], 'victory_spin', 600);
+      useVfxStore.getState().triggerPawnReaction(activeId, 'slump_recoil', 400);
+      SoundEngine.playVictoryChime();
+      SoundEngine.playSlumpThud();
+
       if (!isConnected) {
         state.addFloatingText({
           text: '-500 Tr.',
           type: FloatingTextType.Penalty,
           playerId: activeId,
+          actionType: 'rent_pay',
+          title: `Tiền thuê ${tile.name}`,
         });
       }
     }
@@ -99,6 +109,8 @@ export function executeCellLanding(
         text: '-1.000 Tr.',
         type: FloatingTextType.Penalty,
         playerId: activeId,
+        actionType: 'tax',
+        title: tile.name,
       });
     }
   } else if (tile.type === CellType.Go) {
@@ -108,6 +120,8 @@ export function executeCellLanding(
         text: '+2.000 Tr.',
         type: FloatingTextType.Reward,
         playerId: activeId,
+        actionType: 'salary',
+        title: 'Lương Vượt GO',
       });
       const p = state.playersInfo[activeId];
       if (p) {

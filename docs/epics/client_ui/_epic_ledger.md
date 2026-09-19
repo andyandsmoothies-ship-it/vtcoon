@@ -299,6 +299,31 @@
 - **Kiểm thử & Bất biến**: `imp49_auction_step_and_sync.test.ts` (19 atomic tests PASS, Adversarial Inversion PASS), Gotcha #76, 157/157 test suites PASS (2.205 tests).
 - **Trạng thái**: ✅ Hoàn thành.
 
+---
+
+### [IMP-123] Đồng Bộ Giao Diện & Công Thái Học Di Động 3 Gói (Mobile UI/UX Tri-Package Polish)
+- **Mục tiêu**: Hoàn thiện toàn diện 3 gói giao diện người dùng (UI/UX) trên thiết bị di động: sửa lỗi hiển thị & layout, tái cấu trúc trực quan danh mục BĐS & đàm phán, đồng bộ thẩm mỹ thanh điều khiển Action Dock.
+- **Hạ tầng hoàn tất**:
+  * Gói 1: Tách `ServerToast` thành component riêng định vị `fixed top-18 sm:top-20`, bản địa hóa 100% mã lỗi sang tiếng Việt; ẩn mô tả `<p>` trên mobile tránh lặp với `event-impact-summary`; thêm `whitespace-nowrap` chống gãy dòng capsule khi bot tính; kẹp trần mẫu số 40 vòng đấu (`displayMaxRounds`).
+  * Gói 2: Nâng cấp nút Thế Chấp sang phong cách nút phụ tinh tế viền cảnh báo `bg-rose-50 border-rose-300`, bổ sung hiển thị Tiền Thuê (`property-rent-val`) và Giá BĐS; đảm bảo diện tích chạm công thái học tối thiểu `min-w-[44px] min-h-[44px]`; bổ sung nhãn `✓ [ĐÃ CHỌN]` và nâng độ tương phản WCAG AA `text-slate-600` cho nút gửi đàm phán khi disabled.
+  * Gói 3: Đồng bộ 100% nút bấm `ActionDock` sang bo góc Retropoly `rounded-2xl` và đổ bóng xúc giác `shadow-[0_4px_0_0_#0f172a]`; tách `bot-pacing-chip` nổi phía trên dock (`absolute -top-10`) tránh xô lệch hàng nút.
+- **Kiểm thử & Bất biến**: `tests/client/mobile_ui_ux_tri_package_polish.test.ts` (35 atomic contract tests PASS 100%, Adversarial Inversion PASS), Gotcha #157, 233/233 test suites PASS (4.673 tests).
+- **Phê chuẩn**: `spec-reviewer` APPROVED (0 Scope Drift), `npm run lint:ui` 0 lỗi, `npx tsc --noEmit` 0 lỗi.
+- **Trạng thái**: ✅ Hoàn thành (2026-09-19).
+
+---
+
+### [IMP-124] Giải Cứu Kẹt Lượt Mất Lượt (SkipNextTurn Unfreeze) & Tối Ưu Thích Ứng Chuỗi Hậu Kỳ WebGL
+- **Mục tiêu**: Khắc phục dứt điểm bẫy kẹt lượt người chơi khi bị phạt mất lượt (`skipNextTurn`) từ Bão Duyên Hải / Kiểm Tra Nồng Độ Cồn, đồng bộ `turnPhase` xuống Client Store, và tối ưu thích ứng N8AO / Draw Calls theo FPS.
+- **Hạ tầng hoàn tất**:
+  * Gói 1: Bổ sung `turnPhase` và `setTurnPhase` vào `game_store.ts` (mặc định `'WaitingRoll'`); `apply_delta.ts` trong `syncTurnAndTimer` cập nhật `state.setTurnPhase(delta.turnPhase)`; `isRollActionDisabled` khóa nút Đổ xúc xắc khi `turnPhase === 'PropertyManagement' && (!canRollAgain || !hasRolledThisTurn)`; `isEndTurnDisabled` mở khóa nút Kết thúc lượt khi `turnPhase === 'PropertyManagement' && !hasRolledThisTurn`; `action_dock.tsx` hiển thị chip cảnh báo `skip-turn-notice-chip` (`🌪️ Bạn bị hoãn gieo xúc xắc lượt này...`), gán nhãn `⏩ Mất Lượt (Hết Lượt)` và chuyển hiệu ứng sáng nổi bật `isGlowActive` sang nút Kết Thúc Lượt.
+  * Gói 2: `resolveAdaptivePostProcessing` trong `post_processing_pipeline.tsx` tự động ngắt N8AO khi FPS < 35 hoặc Mobile tier, hạ cấp N8AO quality khi FPS < 45, giải phóng 600–800 draw calls/frame.
+- **Kiểm thử & Bất biến**: `tests/client/skip_next_turn_unfreeze_and_adaptive_perf.test.ts` (34 atomic contract tests PASS 100%, Adversarial Inversion PASS), Gotcha #159, 234/234 test suites PASS (4.728 tests).
+- **Phê chuẩn**: `spec-reviewer` APPROVED (0 Scope Drift), `npm run lint:ui` 0 lỗi, `npx tsc --noEmit` 0 lỗi.
+- **Trạng thái**: ✅ Hoàn thành (2026-09-19).
+
+
+
 
 
 

@@ -67,27 +67,43 @@ function handleLandReclaim(player: Player, registry?: PropertyRegistry, stateMap
   }
 }
 
-function handleMaForce(player: Player, players: Player[], registry?: PropertyRegistry, stateMap?: PropertyStateMap): void {
+function handleMaForce(
+  player: Player,
+  players: Player[],
+  registry?: PropertyRegistry,
+  stateMap?: PropertyStateMap,
+  room?: Room,
+): void {
   if (!registry) return;
-  const opponents = players.filter((p) => p.id !== player.id && p.balance < player.balance);
-  for (const opp of opponents) {
-    for (const [cellIndex, ownerId] of registry) {
-      if (ownerId === opp.id) {
-        const isProperty = BOARD_CONFIG[cellIndex]?.type === CellType.Property;
-        const level = stateMap?.get(cellIndex)?.level ?? 0;
-        if (isProperty && level === 0) {
-          const deed = PROPERTY_DEEDS.get(cellIndex);
-          const cost = deed ? Math.floor(deed.price * 1.2) : 0;
-          if (player.balance >= cost) {
-            player.balance -= cost;
-            opp.balance += cost;
-            registry.set(cellIndex, player.id);
-            return;
-          }
+
+  const isCellMortgaged = (cell: number, ownerId: string): boolean => {
+    if (stateMap?.get(cell)?.isMortgaged) return true;
+    const p = room?.players.find((pl) => pl.id === ownerId) ?? players.find((pl) => pl.id === ownerId);
+    return Boolean(p?.mortgagedProperties?.includes(cell));
+  };
+
+  for (const [cellIndex, ownerId] of registry) {
+    if (ownerId !== player.id && !isCellMortgaged(cellIndex, ownerId)) {
+      const isProperty = BOARD_CONFIG[cellIndex]?.type === CellType.Property;
+      const level = stateMap?.get(cellIndex)?.level ?? 0;
+      if (isProperty && level === 0) {
+        const deed = PROPERTY_DEEDS.get(cellIndex);
+        const cost = deed ? Math.floor(deed.price * 1.2) : 0;
+        if (player.balance >= cost) {
+          const seller = room?.players.find((p) => p.id === ownerId) ?? players.find((p) => p.id === ownerId);
+          player.balance -= cost;
+          if (seller) seller.balance += cost;
+          registry.set(cellIndex, player.id);
+          return;
         }
       }
     }
   }
+
+  // Fallback: Không có ô C0 đối thủ hoặc người chơi không đủ tiền mua lại
+  // Nhận trợ cấp M&A từ Kho Bạc Nhà Nước: 800 Tr.
+  player.balance += 800;
+  if (room) room.treasury = Math.max(0, (room.treasury ?? 0) - 800);
 }
 
 function handleSwapProject(
@@ -202,17 +218,28 @@ const CHANCE_HANDLERS: Partial<Record<ChanceCardId, ChanceHandler>> = {
     player.extraTurns += 1;
   },
   [ChanceCardId.CC_CONTRACT_PENALTY]: (player, players) => handleContractPenalty(player, players),
-  [ChanceCardId.CC_LAND_CHANGE]: (player, _players, _id, _mods, registry, stateMap, permanentRentBonus) => {
-    // Trừ 800 Tr và tăng vĩnh viễn +50% thu phí của 1 ô đất trống tùy chọn đang sở hữu
-    player.balance -= 800;
-    if (registry && permanentRentBonus) {
-      const ownedEmpty = Array.from(registry.entries()).find(
-        ([c, o]) => o === player.id &&
-          BOARD_CONFIG[c]?.type === CellType.Property &&
-          (stateMap?.get(c)?.level ?? 0) === 0 &&
-          !(permanentRentBonus[c]),
-      );
-      if (ownedEmpty) permanentRentBonus[ownedEmpty[0]] = 0.5;
+  [ChanceCardId.CC_LAND_CHANGE]: (player, _players, _id, _mods, registry, stateMap, _bonus, room) => {
+    let targetC0: number | undefined;
+    if (registry) {
+      for (const [cellIndex, ownerId] of registry.entries()) {
+        if (ownerId === player.id && BOARD_CONFIG[cellIndex]?.type === CellType.Property) {
+          const state = stateMap?.get(cellIndex);
+          if (!state || state.level === 0) {
+            targetC0 = cellIndex;
+            break;
+          }
+        }
+      }
+    }
+
+    if (targetC0 !== undefined && stateMap) {
+      player.balance -= 500;
+      if (room) room.treasury = (room.treasury ?? 0) + 500;
+      const existing = stateMap.get(targetC0) ?? { level: 0 };
+      stateMap.set(targetC0, { ...existing, level: 1 });
+    } else {
+      player.balance += 600;
+      if (room) room.treasury = Math.max(0, (room.treasury ?? 0) - 600);
     }
   },
   [ChanceCardId.CC_BUILD_HALT]: (player, _players, _id, activeModifiers, registry, _sm, _bonus, room) => {
@@ -223,7 +250,8 @@ const CHANCE_HANDLERS: Partial<Record<ChanceCardId, ChanceHandler>> = {
       if (owned) activeModifiers.push({ type: MarketCardId.MC_COASTAL_STORM, affectedCells: [owned[0]], remainingRounds: 2, multiplier: 0 });
     }
   },
-  [ChanceCardId.CC_MA_FORCE]: (player, players, _id, _mods, registry, stateMap) => handleMaForce(player, players, registry, stateMap),
+  [ChanceCardId.CC_MA_FORCE]: (player, players, _id, _mods, registry, stateMap, _bonus, room) =>
+    handleMaForce(player, players, registry, stateMap, room),
   [ChanceCardId.CC_COPYRIGHT]:  (player, _players, _id, _mods, _reg, _sm, _bonus, room) => {
     player.balance -= 1200;
     if (room) room.treasury = (room.treasury ?? 0) + 1200;
@@ -262,15 +290,34 @@ const CHANCE_HANDLERS: Partial<Record<ChanceCardId, ChanceHandler>> = {
       });
     }
   },
-  [ChanceCardId.CC_SLOW_BUILD]: (player, _players, _id, _mods, registry, stateMap) => {
-    // [DEBT-S06-03] Bắt đầu đếm 3 vòng — KHÔNG xóa registry ngay
-    if (!registry || !stateMap) return;
-    for (const [cellIndex, ownerId] of registry.entries()) {
-      if (ownerId !== player.id) continue;
-      const state = stateMap.get(cellIndex);
-      if (!state || state.level !== 0) continue;
-      stateMap.set(cellIndex, { ...state, unbuiltRounds: 1 });
-      break;
+  [ChanceCardId.CC_SLOW_BUILD]: (player, _players, _id, _mods, registry, stateMap, _bonus, room) => {
+    let targetC0: number | undefined;
+    if (registry) {
+      for (const [cellIndex, ownerId] of registry.entries()) {
+        if (ownerId === player.id && BOARD_CONFIG[cellIndex]?.type === CellType.Property) {
+          const state = stateMap?.get(cellIndex);
+          if (!state || state.level === 0) {
+            targetC0 = cellIndex;
+            break;
+          }
+        }
+      }
+    }
+
+    if (targetC0 !== undefined) {
+      player.balance -= 600;
+      if (room) room.treasury = (room.treasury ?? 0) + 600;
+      if (stateMap) {
+        const state = stateMap.get(targetC0) ?? { level: 0 };
+        stateMap.set(targetC0, { ...state, unbuiltRounds: 1 });
+      }
+      if (player.balance < 0 && registry) {
+        registry.delete(targetC0);
+        if (stateMap) stateMap.delete(targetC0);
+      }
+    } else {
+      player.balance -= 300;
+      if (room) room.treasury = (room.treasury ?? 0) + 300;
     }
   },
   [ChanceCardId.CC_MEDIA_CRISIS]: (player, _players, _id, activeModifiers, registry, _sm, _bonus, room) => {

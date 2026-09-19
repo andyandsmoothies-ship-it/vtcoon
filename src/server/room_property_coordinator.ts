@@ -80,7 +80,9 @@ export function coordTrade(
   const seller = ctx.room.players.find((p) => p.id === sellerId);
   const buyer = ctx.room.players.find((p) => p.id === buyerId);
   if (seller?.isBot && buyer) {
-    const botPers = ctx.botPersonalities?.get(sellerId) ?? BotPersonality.Aggressive;
+    const botPers = ctx.botPersonalities?.get(`${ctx.room.roomCode}:${sellerId}`)
+      ?? ctx.botPersonalities?.get(sellerId)
+      ?? BotPersonality.Balanced;
     const decision = evaluateBotTradeAcceptance(
       cellIndex, price, seller, buyer, ctx.room, ctx.reg, ctx.sm, botPers
     );

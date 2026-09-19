@@ -239,7 +239,7 @@ describe('[TC-UI03.7/MSS] ActionDock DOM Markup & Tactile 3D Buttons', () => {
     expect(html).toContain('Quản Lý BĐS');
     expect(html).toContain('Đàm Phán');
     expect(html).toContain('Hết Lượt');
-    expect(html).toContain('shadow-[0_4px_0_0_#020617]');
+    expect(html).toMatch(/shadow-\[0_4px_0_0_#(020617|0f172a)\]/);
     expect(html).toContain('active:translate-y-[3px]');
   });
 

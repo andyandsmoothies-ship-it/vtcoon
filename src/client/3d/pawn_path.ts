@@ -11,6 +11,15 @@ export const BOT_HOP_DURATION = 0.13 as const;
 export const BOT_LANDING_DURATION = 0.07 as const;
 export const BOT_STEP_DURATION = 0.20 as const;
 
+export const JAIL_FLIGHT_ARC = 2.8 as const;
+export const JAIL_FLIGHT_DURATION = 0.55 as const;
+export const BOT_JAIL_FLIGHT_DURATION = 0.45 as const;
+export const JAIL_LANDING_DURATION = 0.12 as const;
+
+export function calculateJailFlightWaypoints(targetCell: number = 10): number[] {
+  return [targetCell];
+}
+
 export function calculatePathWaypoints(fromIndex: number, toIndex: number): number[] {
   if (!Number.isFinite(fromIndex) || !Number.isFinite(toIndex)) {
     return [];
@@ -166,3 +175,36 @@ export function calculatePawnLandingImpact(landingProgress: number): [number, nu
 
   return [1.0 + deltaXZ, 1.0 + deltaY, 1.0 + deltaXZ];
 }
+
+export interface VictorySpinResult {
+  readonly rotationY: number;
+  readonly heightOffset: number;
+}
+
+/**
+ * [IMP-125-P2] Hoạt cảnh xoay mừng chiến thắng 360 độ kết hợp bay vút lên cao (Victory Spin)
+ */
+export function calculateVictorySpin(progress: number): VictorySpinResult {
+  const p = Math.max(0, Math.min(1, Number.isFinite(progress) ? progress : 0));
+  const rotationY = p * Math.PI * 2;
+  const heightOffset = Math.sin(p * Math.PI) * 0.35;
+  return { rotationY, heightOffset };
+}
+
+export interface SlumpRecoilResult {
+  readonly scaleY: number;
+  readonly scaleXZ: number;
+}
+
+/**
+ * [IMP-125-P2] Hoạt cảnh nhún bẹp lò xo hồi phục (Slump Recoil) khi trả tiền thuê
+ */
+export function calculateSlumpRecoil(progress: number): SlumpRecoilResult {
+  const p = Math.max(0, Math.min(1, Number.isFinite(progress) ? progress : 0));
+  const envelope = (1 - p) * (1 - p);
+  const oscillation = Math.cos(p * Math.PI * 4);
+  const scaleY = 1.0 - 0.45 * envelope * oscillation;
+  const scaleXZ = 1.0 + (1.0 - scaleY) * 0.5;
+  return { scaleY, scaleXZ };
+}
+

@@ -222,10 +222,11 @@ describe('[TC-UI01.6] Tile Metadata & Cultural Identifiers — 40 Tiles Legibili
   });
 });
 
-// TC-UI01.7: 4-Side Perpendicular Tile Rotations
+// TC-UI01.7: 4-Side Perpendicular Tile Rotations (Reconciled with IMP-125 Overview Camera Readability)
 describe('[TC-UI01.7] tileRotation — 4-Side Perpendicular Board Orientation', () => {
-  it('Side 0 (cells 0..9) rotates [0, 0, 0] facing camera', () => {
-    for (let i = 0; i <= 9; i++) {
+  it('Side 0: cell 0 rotates [0, Math.PI / 4, 0], cells 1..9 rotate [0, 0, 0] facing camera', () => {
+    expect(tileRotation(0)).toEqual([0, Math.PI / 4, 0]);
+    for (let i = 1; i <= 9; i++) {
       expect(tileRotation(i)).toEqual([0, 0, 0]);
     }
   });
@@ -249,7 +250,7 @@ describe('[TC-UI01.7] tileRotation — 4-Side Perpendicular Board Orientation', 
   });
 
   it('4 corner tiles (0, 10, 20, 30) align squarely with their sides with 0 protrusion', () => {
-    expect(tileRotation(0)).toEqual([0, 0, 0]);
+    expect(tileRotation(0)).toEqual([0, Math.PI / 4, 0]);
     expect(tileRotation(10)).toEqual([0, -Math.PI / 2, 0]);
     expect(tileRotation(20)).toEqual([0, Math.PI, 0]);
     expect(tileRotation(30)).toEqual([0, Math.PI / 2, 0]);

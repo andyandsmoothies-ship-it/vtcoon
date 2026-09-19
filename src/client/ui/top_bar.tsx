@@ -74,8 +74,10 @@ export function TopBar(props: TopBarProps): React.ReactElement {
     ? 'text-rose-600 font-extrabold animate-pulse'
     : 'text-emerald-700 font-bold';
 
+  const displayMaxRounds = roundNumber > maxRounds ? (roundNumber <= 40 ? 40 : roundNumber) : maxRounds;
+
   return (
-    <header className="w-full flex justify-between items-center pointer-events-none">
+    <header className="w-full max-w-full overflow-hidden flex justify-between items-center pointer-events-none px-1.5 sm:px-4">
       {/* Cụm bên trái: Thông tin trận đấu */}
       <div
         data-testid="match-info-capsule"
@@ -86,7 +88,7 @@ export function TopBar(props: TopBarProps): React.ReactElement {
           <span className="text-slate-600 text-xs uppercase tracking-wider font-bold hidden sm:inline">Vòng</span>
           <span className="font-bold text-amber-700">
             {roundNumber}
-            <span className="text-slate-500 text-xs font-normal">/{maxRounds}</span>
+            <span className="text-slate-500 text-xs font-normal">/{displayMaxRounds}</span>
           </span>
         </div>
 
@@ -96,8 +98,15 @@ export function TopBar(props: TopBarProps): React.ReactElement {
         <div className="flex items-center gap-1 sm:gap-2" role="timer" aria-live="polite">
           <span className="text-base" aria-hidden="true">⏱️</span>
           <span className="hidden sm:inline text-xs text-slate-600 font-semibold">Thời gian:</span>
-          <span className={`tabular-nums font-mono text-base ${timerColorClass}`}>
-            {isBotTurn ? '🤖 Đang tính...' : formatTimeRemaining(turnTimeRemaining)}
+          <span className={`tabular-nums font-mono text-base whitespace-nowrap ${timerColorClass}`}>
+            {isBotTurn ? (
+              <>
+                <span className="sm:hidden" aria-hidden="true">🤖</span>
+                <span className="hidden sm:inline">🤖 Đang tính...</span>
+              </>
+            ) : (
+              formatTimeRemaining(turnTimeRemaining)
+            )}
           </span>
         </div>
 
@@ -136,7 +145,7 @@ export function TopBar(props: TopBarProps): React.ReactElement {
         <button
           type="button"
           onClick={toggleNextTimeOfDay}
-          className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center gap-1.5 px-2 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-colors cursor-pointer text-xs font-semibold border border-slate-900 shadow-[0_2px_0_0_#0f172a] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+          className="min-h-[36px] min-w-[36px] sm:min-h-[44px] sm:min-w-[44px] inline-flex items-center justify-center gap-1.5 px-2 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-colors cursor-pointer text-xs font-semibold border border-slate-900 shadow-[0_2px_0_0_#0f172a] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
           title={`Thời gian: ${timeOfDayLabel} (Bấm để đổi)`}
           aria-label={`Chuyển chu kỳ thời gian (Hiện tại: ${timeOfDayLabel})`}
           data-testid="time-of-day-toggle-button"
@@ -149,7 +158,7 @@ export function TopBar(props: TopBarProps): React.ReactElement {
         <button
           type="button"
           onClick={toggleMute}
-          className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center gap-1.5 px-2 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-colors cursor-pointer text-xs font-semibold border border-slate-900 shadow-[0_2px_0_0_#0f172a] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+          className="min-h-[36px] min-w-[36px] sm:min-h-[44px] sm:min-w-[44px] inline-flex items-center justify-center gap-1.5 px-2 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-colors cursor-pointer text-xs font-semibold border border-slate-900 shadow-[0_2px_0_0_#0f172a] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
           title={isMuted ? 'Bật âm thanh' : 'Tắt âm thanh'}
           aria-label={isMuted ? 'Bật âm thanh trò chơi' : 'Tắt âm thanh trò chơi'}
           data-testid="mute-toggle-button"
@@ -162,7 +171,7 @@ export function TopBar(props: TopBarProps): React.ReactElement {
         <button
           type="button"
           onClick={toggleActivityFeed}
-          className="relative min-h-[44px] min-w-[44px] inline-flex items-center justify-center gap-1.5 px-2 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-colors cursor-pointer text-xs font-semibold border border-slate-900 shadow-[0_2px_0_0_#0f172a] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+          className="relative min-h-[36px] min-w-[36px] sm:min-h-[44px] sm:min-w-[44px] inline-flex items-center justify-center gap-1.5 px-2 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-colors cursor-pointer text-xs font-semibold border border-slate-900 shadow-[0_2px_0_0_#0f172a] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
           title={isActivityFeedOpen ? 'Đóng nhật ký' : 'Mở nhật ký hoạt động'}
           aria-label={`Nhật ký hoạt động${unreadCount > 0 ? ` (${unreadCount} mới)` : ''}`}
           data-testid="activity-feed-toggle-button"

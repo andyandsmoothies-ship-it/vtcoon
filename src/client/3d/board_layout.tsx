@@ -6,6 +6,8 @@ import type { PlayerHudInfo } from '../store/game_store_types';
 import { useLobbyStore } from '../store/lobby_store';
 import { cellPosition } from './board_coords';
 import { LayeredDioramaTile } from './board_tile';
+import { detectPlayerMonopolies, isCellInMonopolyGroup } from './monopoly_plaza_math';
+import { MonopolyPlazaFusion } from './monopoly_plaza_fusion';
 import { LUXURY_PAWN_CONFIGS } from './luxury_pawn_models';
 import { DiceTray } from './dice_tray';
 import { MiniatureCityDiorama } from './miniature_city_diorama';
@@ -45,6 +47,12 @@ export const DEPTH_LAYER_STACK = {
 const CORNER_INDICES = new Set([0, 10, 20, 30]);
 
 export function tileRotation(index: number): [number, number, number] {
+  if (typeof index !== 'number' || Number.isNaN(index) || index < 0 || index > 39) {
+    return [0, 0, 0];
+  }
+  if (index === 0) {
+    return [0, Math.PI / 4, 0];
+  }
   const side = Math.floor(index / 10);
   switch (side) {
     case 0: return [0, 0, 0];
@@ -88,8 +96,10 @@ export function GameBoard(): React.ReactElement {
   const playersInfo = Object.keys(storePlayersInfo ?? {}).length > 0 ? storePlayersInfo : (useGameStore.getState()?.playersInfo ?? storePlayersInfo);
   const hasRolledThisTurn = useGameStore((s) => s.hasRolledThisTurn);
   const localPlayerId = useLobbyStore((s) => s.myPlayerId) || 'p1';
+  const isHeatmapActive = useGameStore((s) => s.isHeatmapActive);
 
   const ownerInfoMap = useMemo(() => computeOwnerMap(playersInfo), [playersInfo]);
+  const monopolyGroups = useMemo(() => detectPlayerMonopolies(playersInfo), [playersInfo]);
   const walnutDiffuse = useMemo(() => createWalnutTabletopTexture(), []);
   const walnutRoughness = useMemo(() => createWalnutRoughnessTexture(), []);
 
@@ -153,8 +163,13 @@ export function GameBoard(): React.ReactElement {
           ownerSlot={ownerInfoMap[cell.index]?.ownerSlot}
           mascotIcon={ownerInfoMap[cell.index]?.mascotIcon}
           onClick={() => handleTileClick(cell.index)}
+          isHeatmapActive={isHeatmapActive}
+          isMonopolyGroup={isCellInMonopolyGroup(cell.index, monopolyGroups)}
         />
       ))}
+
+      {/* 5. Dải cờ hoa vỉa hè cho các cụm độc quyền Monopoly Plaza */}
+      <MonopolyPlazaFusion monopolyGroups={monopolyGroups} isHeatmapActive={isHeatmapActive} />
     </group>
   );
 }

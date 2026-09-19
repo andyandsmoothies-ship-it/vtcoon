@@ -144,88 +144,89 @@ describe('[TC-05.7/MSS & Adversarial] Advanced Chance Cards (CC_PORT_EXCLUSIVE &
   });
 
   describe('Thẻ CC_LAND_CHANGE (Quy Hoạch Lại Đất Đai)', () => {
-    it('[MSS] trừ 800 Tr và gán permanentRentBonus = 0.5 cho 1 BĐS Cấp 0 đang sở hữu', () => {
+    it('[MSS] nộp 500 Tr và nâng cấp thẳng 1 BĐS Cấp 0 đang sở hữu lên Cấp 1 (C1)', () => {
       registry.set(1, 'p1'); // Ô 1 (Cần Thơ, Cấp 0)
       const p1B = p1.balance;
 
-      executeChanceCard(ChanceCardId.CC_LAND_CHANGE, 'p1', players, undefined, registry, stateMap, permanentRentBonus);
-      expect(p1.balance).toBe(p1B - 800);
-      expect(permanentRentBonus[1]).toBe(0.5);
+      executeChanceCard(ChanceCardId.CC_LAND_CHANGE, 'p1', players, undefined, registry, stateMap);
+      expect(p1.balance).toBe(p1B - 500);
+      expect(stateMap.get(1)?.level).toBe(1);
     });
 
-    it('[rent increase] đối thủ dẫm vào ô có bonus: tiền thuê tăng 1.5 lần vĩnh viễn (rent0 * 1.5)', () => {
+    it('[rent increase] đối thủ dẫm vào ô vừa được nâng cấp lên C1: trả tiền thuê C1', () => {
       registry.set(1, 'p1');
-      permanentRentBonus[1] = 0.5;
+      stateMap.set(1, { level: 1 });
       const [p1B, p2B] = [p1.balance, p2.balance];
 
-      const res = handleLanding(p2, 1, registry, players, stateMap, 7, undefined, undefined, undefined, permanentRentBonus);
+      const res = handleLanding(p2, 1, registry, players, stateMap, 7);
       expect(res.result).toBe(LandingResult.RentPaid);
-      expect(res.rentAmount, '60 * 1.5 = 90').toBe(90);
-      expect(p2.balance).toBe(p2B - 90);
-      expect(p1.balance).toBe(p1B + 90);
+      expect(res.rentAmount).toBe(210); // Cần Thơ C1 rent1 = 210 (35% của 600)
+      expect(p2.balance).toBe(p2B - 210);
+      expect(p1.balance).toBe(p1B + 210);
     });
 
-    it('[no stack] không cộng dồn trên ô đã có bonus; ưu tiên ô C0 chưa có bonus', () => {
+    it('[no stack] chỉ nâng cấp 1 ô C0 đầu tiên, ô C0 còn lại giữ nguyên C0', () => {
       registry.set(1, 'p1');
       registry.set(3, 'p1');
-      permanentRentBonus[1] = 0.5;
 
-      executeChanceCard(ChanceCardId.CC_LAND_CHANGE, 'p1', players, undefined, registry, stateMap, permanentRentBonus);
-      expect(permanentRentBonus[1], 'Ô 1 giữ nguyên 0.5').toBe(0.5);
-      expect(permanentRentBonus[3], 'Ô 3 nhận bonus 0.5').toBe(0.5);
+      executeChanceCard(ChanceCardId.CC_LAND_CHANGE, 'p1', players, undefined, registry, stateMap);
+      expect(stateMap.get(1)?.level, 'Ô 1 lên level 1').toBe(1);
+      expect(stateMap.get(3)?.level ?? 0, 'Ô 3 giữ nguyên level 0').toBe(0);
     });
 
-    it('[all assigned] nếu tất cả BĐS C0 đều đã có bonus: trừ tiền nhưng không cộng dồn đè', () => {
+    it('[all assigned] nếu tất cả BĐS C0 đều đã lên C1: nhận 600 Tr hỗ trợ quy hoạch', () => {
       registry.set(1, 'p1');
-      permanentRentBonus[1] = 0.5;
+      stateMap.set(1, { level: 1 });
       const p1B = p1.balance;
 
-      executeChanceCard(ChanceCardId.CC_LAND_CHANGE, 'p1', players, undefined, registry, stateMap, permanentRentBonus);
-      expect(p1.balance).toBe(p1B - 800);
-      expect(permanentRentBonus[1]).toBe(0.5);
+      executeChanceCard(ChanceCardId.CC_LAND_CHANGE, 'p1', players, undefined, registry, stateMap);
+      expect(p1.balance).toBe(p1B + 600);
+      expect(stateMap.get(1)?.level).toBe(1);
     });
 
-    it('[no land owned] người rút không sở hữu đất C0: bị trừ 800 Tr nhưng không tăng bonus ô người khác', () => {
+    it('[no land owned] người rút không sở hữu đất C0: nhận 600 Tr hỗ trợ quy hoạch', () => {
       registry.set(1, 'p1');
       const p2B = p2.balance;
 
-      executeChanceCard(ChanceCardId.CC_LAND_CHANGE, 'p2', players, undefined, registry, stateMap, permanentRentBonus);
-      expect(p2.balance).toBe(p2B - 800);
-      expect(permanentRentBonus[1]).toBeUndefined();
+      executeChanceCard(ChanceCardId.CC_LAND_CHANGE, 'p2', players, undefined, registry, stateMap);
+      expect(p2.balance).toBe(p2B + 600);
+      expect(stateMap.get(1)?.level ?? 0).toBe(0);
 
-      const res = handleLanding(p2, 1, registry, players, stateMap, 7, undefined, undefined, undefined, permanentRentBonus);
+      const res = handleLanding(p2, 1, registry, players, stateMap, 7);
       expect(res.rentAmount).toBe(60);
     });
 
-    it('[upgraded property] bỏ qua BĐS đã xây dựng C1-C3, không gán bonus', () => {
+    it('[upgraded property] bỏ qua BĐS đã xây dựng C1-C3, không nâng thêm', () => {
       registry.set(1, 'p1');
-      stateMap.set(1, { level: 1 });
-
-      executeChanceCard(ChanceCardId.CC_LAND_CHANGE, 'p1', players, undefined, registry, stateMap, permanentRentBonus);
-      expect(permanentRentBonus[1]).toBeUndefined();
-    });
-
-    it('[non-property] không gán bonus cho Hạ tầng Railroad hoặc Utility', () => {
-      registry.set(5, 'p1');
-      registry.set(12, 'p1');
-
-      executeChanceCard(ChanceCardId.CC_LAND_CHANGE, 'p1', players, undefined, registry, stateMap, permanentRentBonus);
-      expect(permanentRentBonus[5]).toBeUndefined();
-      expect(permanentRentBonus[12]).toBeUndefined();
-    });
-
-    it('[own property with bonus] chủ dừng chân tại ô có permanentRentBonus: không mất phí', () => {
-      registry.set(1, 'p1');
-      permanentRentBonus[1] = 0.5;
+      stateMap.set(1, { level: 2 });
       const p1B = p1.balance;
 
-      const res = handleLanding(p1, 1, registry, players, stateMap, 7, undefined, undefined, undefined, permanentRentBonus);
+      executeChanceCard(ChanceCardId.CC_LAND_CHANGE, 'p1', players, undefined, registry, stateMap);
+      expect(p1.balance).toBe(p1B + 600);
+      expect(stateMap.get(1)?.level).toBe(2);
+    });
+
+    it('[non-property] không nâng cấp cho Hạ tầng Railroad hoặc Utility', () => {
+      registry.set(5, 'p1');
+      registry.set(12, 'p1');
+      const p1B = p1.balance;
+
+      executeChanceCard(ChanceCardId.CC_LAND_CHANGE, 'p1', players, undefined, registry, stateMap);
+      expect(p1.balance).toBe(p1B + 600);
+    });
+
+    it('[own property] chủ dừng chân tại ô mình sở hữu: không mất phí', () => {
+      registry.set(1, 'p1');
+      stateMap.set(1, { level: 1 });
+      const p1B = p1.balance;
+
+      const res = handleLanding(p1, 1, registry, players, stateMap, 7);
       expect(res.result).toBe(LandingResult.OwnProperty);
       expect(res.rentAmount).toBe(0);
       expect(p1.balance).toBe(p1B);
     });
 
-    it('[integration drawChanceCard] rút CC_LAND_CHANGE tự động gắn bonus vào room.permanentRentBonus', () => {
+    it('[integration drawChanceCard] rút CC_LAND_CHANGE tự động nâng cấp C0 lên C1 và trừ 500 Tr', () => {
       const room: Room = createRoom('p1');
       room.players = [p1, p2];
       room.chanceDeck = [ChanceCardId.CC_LAND_CHANGE];
@@ -233,8 +234,8 @@ describe('[TC-05.7/MSS & Adversarial] Advanced Chance Cards (CC_PORT_EXCLUSIVE &
       const p1B = p1.balance;
 
       drawChanceCard(room, p1, () => 0.5, registry, stateMap);
-      expect(p1.balance).toBe(p1B - 800);
-      expect(room.permanentRentBonus[1], 'room.permanentRentBonus phải nhận 0.5').toBe(0.5);
+      expect(p1.balance).toBe(p1B - 500);
+      expect(stateMap.get(1)?.level).toBe(1);
     });
   });
 });

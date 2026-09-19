@@ -4,6 +4,7 @@ import { TopBar } from './top_bar';
 import { PlayerHudList } from './player_hud_list';
 import { ActionDock, type ActionDockProps } from './action_dock';
 import { ModalHost } from './modals/modal_host';
+import { MarketEventTicker } from './market_event_ticker';
 import { FloatingNumbersOverlay } from './floating_numbers';
 import { ActivityFeedSidebar } from './activity_feed_sidebar';
 import { TelemetryBadge } from './telemetry/telemetry_badge';
@@ -35,11 +36,14 @@ export function HudContainer({
 
   return (
     <div
-      className="fixed inset-0 pointer-events-none flex flex-col justify-between p-3 md:p-6 z-10 select-none font-sans"
+      className="fixed inset-0 pointer-events-none flex flex-col justify-between p-1.5 sm:p-3 md:p-6 z-10 select-none font-sans"
       data-testid="hud-container"
     >
       {/* Tầng đỉnh: Top Bar thông tin vòng đấu, timer, kho bạc */}
       <TopBar onLeaveRoom={onLeaveRoom} />
+
+      {/* Tầng hiển thị Sự kiện thị trường vĩ mô */}
+      <MarketEventTicker />
 
       {/* Tầng hiển thị số tiền bay (Floating Text / Numbers) */}
       <FloatingNumbersOverlay />

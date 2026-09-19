@@ -184,9 +184,9 @@ describe('[TC-72/MSS][IMP-72] Desktop Framing, Clean Lobby & Game Rules Contract
       expect(html).toContain('2.000 Tr.');
     });
 
-    it('[TC-72.22/MSS][IMP-72] GameRulesModal core rules tab specifies 30 vòng, xúc xắc đôi, điều kiện thắng', () => {
+    it('[TC-72.22/MSS][IMP-72] GameRulesModal core rules tab specifies 40 vòng, xúc xắc đôi, điều kiện thắng', () => {
       const html = renderRulesModal({ initialTab: 'core' });
-      expect(html).toContain('30 vòng');
+      expect(html).toContain('40 vòng');
       expect(html).toContain('xúc xắc đôi');
       expect(html).toContain('điều kiện thắng');
     });

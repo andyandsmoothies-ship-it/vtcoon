@@ -124,9 +124,9 @@ export function GameRulesModal({
               <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-start gap-3">
                 <span className="text-xl" aria-hidden="true">⏳</span>
                 <div>
-                  <h3 className="font-bold text-slate-900 text-sm mb-0.5">Thời Lượng Ván Đấu</h3>
+                  <h3 className="font-bold text-slate-900 text-sm mb-0.5">Thời Lượng Ván Đấu &amp; Lạm Phát Về Đích</h3>
                   <p>
-                    Cuộc đua tài phiệt kéo dài tối đa <strong className="text-slate-900 font-semibold">30 vòng</strong> thi đấu quanh bàn cờ 40 ô.
+                    Cuộc đua tài phiệt kéo dài tối đa <strong className="text-slate-900 font-semibold">40 vòng</strong> quanh bàn cờ. Để đẩy nhanh tốc độ phân định tài chính: từ <strong className="text-blue-700 font-semibold">vòng 20–29</strong>, tiền thuê BĐS tự động tăng <strong className="text-blue-700 font-semibold">20%</strong>; từ <strong className="text-rose-700 font-semibold">vòng 30 trở đi</strong>, tiền thuê BĐS tăng vọt <strong className="text-rose-700 font-semibold">50%</strong>.
                   </p>
                 </div>
               </div>
@@ -140,7 +140,7 @@ export function GameRulesModal({
                       <strong className="text-slate-900 font-semibold">Thắng Tuyệt Đối:</strong> Là người chơi duy nhất còn trụ lại mà không bị phá sản sau khi tất cả đối thủ vỡ nợ.
                     </li>
                     <li>
-                      <strong className="text-slate-900 font-semibold">Thắng Điểm Tài Sản:</strong> Sau khi hoàn thành <strong className="text-slate-900 font-semibold">30 vòng</strong>, người chơi có tổng tài sản ròng (tiền mặt + giá trị BĐS + cổ phiếu) cao nhất sẽ giành chiến thắng chung cuộc theo <strong className="text-slate-900 font-semibold">điều kiện thắng</strong>.
+                      <strong className="text-slate-900 font-semibold">Thắng Điểm Tài Sản:</strong> Sau khi hoàn thành <strong className="text-slate-900 font-semibold">40 vòng</strong>, người chơi có tổng tài sản ròng (tiền mặt + giá trị BĐS + cổ phiếu) cao nhất sẽ giành chiến thắng chung cuộc theo <strong className="text-slate-900 font-semibold">điều kiện thắng</strong>.
                     </li>
                   </ul>
                 </div>
@@ -190,18 +190,18 @@ export function GameRulesModal({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 <div className="p-3 rounded-xl bg-sky-50/70 border border-sky-100">
                   <h4 className="font-bold text-sky-900 text-xs flex items-center gap-1.5 mb-1">
-                    <span>⚡</span> Phiếu Cơ Hội
+                    <span>⚡</span> 20 Phiếu Cơ Hội
                   </h4>
                   <p className="text-[11px] text-sky-800 leading-normal">
-                    Rút thẻ <strong className="font-semibold">Cơ Hội</strong> mang lại các cơ hội kinh doanh bất ngờ, thưởng cổ tức hoặc di chuyển thần tốc đến các địa điểm quan trọng.
+                    Quyền Lên Thổ Cư nâng cấp thẳng C1 không cần đủ bộ màu, hoán đổi dự án chiến lược, chốt lời cổ phiếu hoặc chế tài dự án chậm tiến độ (thu hồi nếu mất thanh khoản).
                   </p>
                 </div>
                 <div className="p-3 rounded-xl bg-amber-50/70 border border-amber-100">
                   <h4 className="font-bold text-amber-900 text-xs flex items-center gap-1.5 mb-1">
-                    <span>📰</span> Phiếu Thị Trường
+                    <span>📰</span> 16 Phiếu Thị Trường
                   </h4>
                   <p className="text-[11px] text-amber-800 leading-normal">
-                    Biến động kinh tế vĩ mô ảnh hưởng toàn bộ người chơi: Bão lũ ven biển, Gói kích cầu tín dụng, hay Thanh tra đất đai.
+                    Biến động vĩ mô thực tế: Chốt nồng độ cồn Nghị Định 100 (phạt 800 Tr. &amp; giữ xe), Bão duyên hải cô lập, Siết tín dụng đóng băng BĐS 2 vòng, hay Kích cầu kinh tế đêm.
                   </p>
                 </div>
               </div>
@@ -239,7 +239,19 @@ export function GameRulesModal({
                   <span>🔨</span> Đấu Giá Công Khai (Public Auction)
                 </h3>
                 <p>
-                  Khi người chơi dừng tại bất động sản chưa có chủ nhưng quyết định bỏ qua không mua, quyền mua sẽ được đưa ra phiên <strong className="text-blue-700 font-semibold">Đấu Giá</strong> công khai cho toàn thể người chơi. Giá khởi điểm bằng <strong className="text-slate-900 font-semibold">50%</strong> giá niêm yết, bước giá tối thiểu 50 Tr. VNĐ.
+                  Khi người chơi dừng tại bất động sản chưa có chủ nhưng quyết định bỏ qua không mua, quyền mua sẽ được đưa ra phiên <strong className="text-blue-700 font-semibold">Đấu Giá</strong> công khai cho toàn thể người chơi. Giá khởi điểm bằng <strong className="text-slate-900 font-semibold">50%</strong> giá niêm yết, bước giá đặt nhanh linh hoạt <strong className="text-slate-900 font-semibold">+100, +200, +500 Tr.</strong> VNĐ.
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-100">
+                <h3 className="font-bold text-emerald-900 text-sm flex items-center gap-2 mb-1">
+                  <span>🏦</span> Gói Kích Cầu Quỹ Kho Bạc &amp; Siết Tín Dụng BĐS
+                </h3>
+                <p className="text-emerald-800 mb-1">
+                  Khi Quỹ Kho Bạc tích lũy đạt từ <strong className="font-semibold text-emerald-900">10.000 Tr.</strong> trở lên, đầu vòng mới Nhà Nước tự động giải ngân <strong className="font-semibold text-emerald-900">20% quỹ</strong> chia đều cứu trợ người chơi có số dư thấp nhất bàn cờ.
+                </p>
+                <p className="text-emerald-800 text-[11px]">
+                  Ngược lại, khi thẻ <strong className="font-semibold text-emerald-900">Đóng Băng Giao Dịch</strong> kích hoạt, toàn bộ hoạt động mua đất, chuyển nhượng P2P và <strong className="font-semibold text-emerald-900">Thế Chấp mới</strong> bị cấm hoàn toàn trong 2 vòng.
                 </p>
               </div>
 
@@ -254,7 +266,7 @@ export function GameRulesModal({
 
               <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
                 <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2 mb-1">
-                  <span>⚠️</span> Cơ Chế Phá Sản & Thanh Lý Nợ
+                  <span>⚠️</span> Cơ Chế Phá Sản &amp; Thanh Lý Nợ
                 </h3>
                 <p>
                   Nếu số dư tiền mặt bị âm và sau khi đã thế chấp toàn bộ tài sản hoặc bán nhà vẫn không đủ thanh toán khoản nợ, người chơi sẽ chính thức <strong className="text-rose-700 font-semibold">Phá Sản</strong>. Toàn bộ tài sản sẽ được chuyển giao cho chủ nợ hoặc hoàn về Ngân sách.

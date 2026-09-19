@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useGameStore, type GameState } from '../store/game_store';
-import { isRollActionDisabled, isEndTurnDisabled, resolveManagePropertyTarget } from './ui_helpers';
+import {
+  isRollActionDisabled,
+  isEndTurnDisabled,
+  resolveManagePropertyTarget,
+  resolveBotPacingStatus,
+  resolveEndTurnButtonLabel,
+  shouldShowSkipTurnNotice,
+} from './ui_helpers';
 import { BOARD_CONFIG, CellType } from '../../domain/board_config';
+import { MarketCardId } from '../../domain/event_card_types';
 
 export interface ActionDockProps {
   readonly onRollDice?: () => void;
@@ -17,6 +25,7 @@ export interface ActionDockProps {
   readonly hasRolledThisTurn?: boolean;
   readonly isMyTurn?: boolean;
   readonly ssrState?: GameState | null;
+  readonly isTradeFrozen?: boolean;
 }
 
 export function ActionDock({
@@ -33,6 +42,7 @@ export function ActionDock({
   hasRolledThisTurn: hasRolledThisTurnProp,
   isMyTurn: isMyTurnProp,
   ssrState: ssrStateProp,
+  isTradeFrozen: isTradeFrozenProp,
 }: ActionDockProps): React.ReactElement {
   const isRollingStore = useGameStore((state) => state.isRolling);
   const activePawnAnimationStore = useGameStore((state) => state.activePawnAnimation);
@@ -43,6 +53,9 @@ export function ActionDock({
   const diceStore = useGameStore((state) => state.dice);
   const storeHasRolledThisTurnStore = useGameStore((state) => state.hasRolledThisTurn);
   const playerPositionsStore = useGameStore((state) => state.playerPositions);
+  const turnPhaseStore = useGameStore((state) => state.turnPhase);
+  const storeIsHeatmapActive = useGameStore((state) => state.isHeatmapActive);
+  const toggleHeatmap = useGameStore((state) => state.toggleHeatmap);
 
   const isSSR = typeof window === 'undefined';
   const ssrState = ssrStateProp ?? (isSSR ? useGameStore.getState() : null);
@@ -55,6 +68,14 @@ export function ActionDock({
   const dice = ssrState ? ssrState.dice : diceStore;
   const storeHasRolledThisTurn = ssrState ? ssrState.hasRolledThisTurn : storeHasRolledThisTurnStore;
   const playerPositions = ssrState ? ssrState.playerPositions : playerPositionsStore;
+  const turnPhase = ssrState ? ssrState.turnPhase : turnPhaseStore;
+  const isHeatmapActive = ssrState ? (ssrState.isHeatmapActive ?? false) : storeIsHeatmapActive;
+  const storeActiveModifiers = useGameStore((state) => state.activeModifiers);
+  const activeModifiers = ssrState ? (ssrState.activeModifiers ?? []) : (isSSR ? useGameStore.getState().activeModifiers : storeActiveModifiers);
+  const isTradeFrozen = isTradeFrozenProp ??
+    (activeModifiers ?? []).some(
+      (m) => m.type === MarketCardId.MC_FREEZE_TRADE && m.remainingRounds > 0
+    );
 
   const queueHasTasks = Boolean(pawnAnimationQueue && pawnAnimationQueue.length > 0);
   const actingPlayerId = localPlayerId ?? currentTurnPlayerId;
@@ -64,11 +85,16 @@ export function ActionDock({
   const isBankrupt = Boolean(actingPlayer?.bankrupt);
   const inAudit = Boolean(actingPlayer?.inAudit);
   const isInsolvent = Boolean(actingPlayer && actingPlayer.balance < 0);
-  const storeConsecutiveDoubles = actingPlayer ? (actingPlayer.consecutiveDoubles ?? 0) : 0;
-  const storeCanRollAgain = ((dice[0] === dice[1] && dice[0] > 0) || storeConsecutiveDoubles > 0) && !inAudit;
+  const storeConsecutiveDoubles = actingPlayer ? actingPlayer.consecutiveDoubles : undefined;
+  const storeCanRollAgain = (
+    storeConsecutiveDoubles !== undefined
+      ? storeConsecutiveDoubles > 0
+      : (dice[0] === dice[1] && dice[0] > 0)
+  ) && !inAudit && !actingPlayer?.skipNextTurn;
   const canRollAgain = canRollAgainProp !== undefined ? canRollAgainProp : storeCanRollAgain;
   const hasRolledThisTurn = hasRolledThisTurnProp !== undefined ? hasRolledThisTurnProp : storeHasRolledThisTurn;
   const [isRollPending, setIsRollPending] = useState(false);
+  const botPacing = resolveBotPacingStatus(currentTurnPlayerId, localPlayerId ?? 'p1', playersInfo);
 
   useEffect(() => {
     if (hasRolledThisTurn || isRolling || !isMyTurn) {
@@ -85,6 +111,7 @@ export function ActionDock({
     canRollAgain,
     isRollPending,
     inAudit,
+    turnPhase,
   });
 
   const isEndDisabled = isEndTurnDisabled({
@@ -96,6 +123,7 @@ export function ActionDock({
     canRollAgain,
     isInsolvent,
     inAudit,
+    turnPhase,
   });
 
   const handleRollClick = () => {
@@ -138,19 +166,43 @@ export function ActionDock({
     }
   };
 
-  const isGlowActive = isMyTurn && !isRollDisabled;
+  const isSkippedTurn = Boolean(isMyTurn && turnPhase === 'PropertyManagement' && !hasRolledThisTurn && !inAudit);
+  const isGlowActive = (isMyTurn && !isRollDisabled) || isSkippedTurn;
 
   return (
     <nav
-      className="pointer-events-auto flex items-center gap-2 md:gap-3 bg-[#FFFDF8] border-2 border-slate-900 shadow-[0_4px_0_0_#0f172a] rounded-2xl p-2 px-4"
+      className="relative pointer-events-auto flex items-center gap-2 md:gap-3 bg-[#FFFDF8] border-2 border-slate-900 shadow-[0_4px_0_0_#0f172a] rounded-2xl p-2 px-4"
       aria-label="Thanh điều khiển tác vụ"
     >
+      {/* Chip Cảnh Báo Mất Lượt khi bị bão duyên hải hoặc kiểm tra nồng độ cồn */}
+      {shouldShowSkipTurnNotice(turnPhase, hasRolledThisTurn, inAudit, isMyTurn) && (
+        <div
+          data-testid="skip-turn-notice-chip"
+          className="absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-950 text-amber-300 border border-amber-500/60 text-xs font-bold shadow-md animate-pulse select-none"
+        >
+          <span aria-hidden="true">🌪️</span>
+          <span>Bạn bị hoãn gieo xúc xắc lượt này (Bão duyên hải / Kiểm tra cồn)</span>
+        </div>
+      )}
+
+      {/* Chip Tiến Độ Lượt Bot khi đối thủ máy đang hành động */}
+      {botPacing && (
+        <div
+          data-testid="bot-pacing-chip"
+          className="absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-850 text-amber-300 border border-amber-500/40 text-xs font-bold animate-pulse select-none"
+        >
+          <span aria-hidden="true">🤖</span>
+          <span>{botPacing.displayText}</span>
+        </div>
+      )}
+
       {/* Nút Đổ Xúc Xắc (CTA chính mang sắc đỏ/cam rực rỡ phong cách Retropoly với viền vàng & nút bấm nổi 3D) */}
       <button
         type="button"
         onClick={handleRollClick}
         disabled={isRollDisabled}
-        className={`min-h-[44px] flex items-center gap-2 px-5 py-2.5 rounded-full font-black text-white shadow-lg transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 ${
+        data-testid="roll-dice-btn"
+        className={`min-h-[44px] flex items-center gap-2 px-5 py-2.5 rounded-2xl font-black text-white shadow-lg transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 ${
           isRollDisabled
             ? 'bg-slate-200 text-slate-600 cursor-not-allowed border-2 border-slate-400 shadow-none'
             : `bg-gradient-to-b from-rose-500 via-red-600 to-red-700 hover:from-rose-400 hover:to-red-600 border-2 border-emerald-800 shadow-[0_4px_0_0_#064e3b] active:shadow-none active:translate-y-[3px] ${
@@ -173,7 +225,7 @@ export function ActionDock({
         </span>
       </button>
 
-      <div className="h-6 w-px bg-slate-300" aria-hidden="true" />
+      <div className="h-6 w-px bg-slate-300 rounded-full" aria-hidden="true" />
 
       {/* Nút Nộp Bảo Lãnh Kiểm Toán khi đang ở trong Trạm Kiểm Toán */}
       {inAudit && isMyTurn && !isBankrupt && (
@@ -181,7 +233,7 @@ export function ActionDock({
           type="button"
           onClick={() => onBailOut?.()}
           disabled={Boolean((actingPlayer?.balance ?? 0) < 500)}
-          className="min-h-[44px] flex items-center gap-1.5 px-3.5 py-2 rounded-full text-white font-bold bg-amber-600 hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-amber-800 shadow-[0_4px_0_0_#78350f] active:shadow-none active:translate-y-[3px] transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+          className="min-h-[44px] flex items-center gap-1.5 px-3.5 py-2 rounded-2xl text-white font-bold bg-amber-600 hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-amber-800 shadow-[0_4px_0_0_#0f172a] active:shadow-none active:translate-y-[3px] transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
           aria-label="Nộp 500 Tr. bảo lãnh kiểm toán để rời trạm ngay"
         >
           <span aria-hidden="true">⚖️</span>
@@ -196,22 +248,27 @@ export function ActionDock({
       {isStandingOnBuyable && (
         <button
           type="button"
-          onClick={() => openModal('deed', { cellIndex: currentPos, canBuy: true })}
-          className="min-h-[44px] flex items-center gap-1.5 px-3.5 py-2 rounded-full text-white font-bold bg-amber-500 hover:bg-amber-600 border-2 border-amber-700 shadow-[0_4px_0_0_#b45309] active:shadow-none active:translate-y-[3px] transition-all text-sm animate-pulse focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
-          aria-label={`Mua ô đất số ${currentPos}`}
+          onClick={isTradeFrozen ? undefined : () => openModal('deed', { cellIndex: currentPos, canBuy: true })}
+          disabled={isTradeFrozen}
+          className={`min-h-[44px] flex items-center gap-1.5 px-3.5 py-2 rounded-2xl font-bold border-2 transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+            isTradeFrozen
+              ? 'bg-slate-200 text-slate-500 border-slate-400 cursor-not-allowed'
+              : 'text-white bg-amber-500 hover:bg-amber-600 border-amber-700 shadow-[0_4px_0_0_#0f172a] active:shadow-none active:translate-y-[3px] animate-pulse'
+          }`}
+          aria-label={isTradeFrozen ? `Thị trường đóng băng (#${currentPos})` : `Mua ô đất số ${currentPos}`}
         >
-          <span aria-hidden="true">🏷️</span>
-          <span>Mua Đất (#{currentPos})</span>
+          <span aria-hidden="true">{isTradeFrozen ? '🔒' : '🏷️'}</span>
+          <span>{isTradeFrozen ? `🔒 Đóng Băng (#${currentPos})` : `Mua Đất (#${currentPos})`}</span>
         </button>
       )}
 
       {/* Nút Quản Lý BĐS (gộp Tài Sản & Xây Dựng) với hiệu ứng nổi 3D và viền xanh */}
       <button
         type="button"
+        aria-label="Quản lý và nâng cấp bất động sản"
         onClick={handleOpenManageProperty}
         disabled={isBankrupt}
-        className="min-w-[44px] min-h-[44px] flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold border-2 border-blue-800 shadow-[0_4px_0_0_#0f172a] active:translate-y-[3px] disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
-        aria-label="Quản lý và nâng cấp bất động sản"
+        className="min-w-[44px] min-h-[44px] flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold border-2 border-blue-800 shadow-[0_4px_0_0_#0f172a] active:translate-y-[3px] disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
       >
         <span aria-hidden="true">🏛️</span>
         <span className="hidden sm:inline">Quản Lý BĐS</span>
@@ -220,18 +277,39 @@ export function ActionDock({
       {/* Nút Đàm Phán P2P với hiệu ứng nổi 3D và viền cam */}
       <button
         type="button"
-        onClick={handleOpenTrade}
-        disabled={isBankrupt}
-        className="min-w-[44px] min-h-[44px] flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-full bg-amber-500 hover:bg-amber-600 text-white font-bold border-2 border-amber-700 shadow-[0_4px_0_0_#020617] active:translate-y-[3px] disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
         aria-label="Đàm phán thương lượng"
+        onClick={handleOpenTrade}
+        disabled={isBankrupt || isTradeFrozen}
+        title={isTradeFrozen ? 'Thị trường đang đóng băng giao dịch' : undefined}
+        className={`min-w-[44px] min-h-[44px] flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-2xl font-bold border-2 transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+          isBankrupt || isTradeFrozen
+            ? 'bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed opacity-50'
+            : 'bg-amber-500 hover:bg-amber-600 text-white border-amber-700 shadow-[0_4px_0_0_#0f172a] active:translate-y-[3px]'
+        }`}
       >
         <span aria-hidden="true">🤝</span>
         <span className="hidden sm:inline">Đàm Phán</span>
       </button>
 
+      {/* Nút Bản Đồ Nhiệt Quy Hoạch Đô Thị */}
+      <button
+        type="button"
+        data-testid="heatmap-toggle-btn"
+        aria-label="Quy Hoạch"
+        title="Bản Đồ Nhiệt Quy Hoạch Đô Thị"
+        onClick={() => toggleHeatmap?.()}
+        className={`min-w-[44px] min-h-[44px] flex items-center justify-center gap-1.5 px-3 py-2 rounded-2xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 font-bold border-2 border-slate-900 shadow-[0_4px_0_0_#0f172a] active:translate-y-[3px] transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+          isHeatmapActive ? 'ring-2 ring-amber-400 bg-amber-100 shadow-[0_0_12px_rgba(245,158,11,0.5)]' : ''
+        }`}
+      >
+        <span aria-hidden="true">🗺️</span>
+        <span className="hidden sm:inline">Quy Hoạch</span>
+      </button>
+
       {/* Nút Kết Thúc Lượt với hiệu ứng nổi 3D */}
       <button
         type="button"
+        aria-label="Kết thúc lượt"
         onClick={onEndTurn}
         disabled={isEndDisabled}
         title={
@@ -241,17 +319,20 @@ export function ActionDock({
             ? 'Bạn vừa đổ đôi, hãy tung xúc xắc tiếp để hoàn thành lượt'
             : undefined
         }
-        className={`min-w-[44px] min-h-[44px] flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-full transition-all text-sm font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
+        className={`min-w-[44px] min-h-[44px] flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-2xl transition-all text-sm font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
           isEndDisabled
             ? isInsolvent
               ? 'bg-rose-100 text-rose-500 border-2 border-rose-300 cursor-not-allowed'
               : 'bg-slate-200 text-slate-400 border-2 border-slate-300 cursor-not-allowed'
-            : 'bg-emerald-600 hover:bg-emerald-700 text-white font-bold border-2 border-emerald-800 shadow-[0_4px_0_0_#020617] active:translate-y-[3px]'
+            : `bg-emerald-600 hover:bg-emerald-700 text-white font-bold border-2 border-emerald-800 shadow-[0_4px_0_0_#0f172a] active:translate-y-[3px] ${
+                isSkippedTurn ? 'ring-4 ring-amber-400/80 shadow-[0_0_24px_rgba(245,158,11,0.55)] animate-pulse' : ''
+              }`
         }`}
-        aria-label="Kết thúc lượt"
       >
         <span aria-hidden="true">⏭️</span>
-        <span className="hidden sm:inline">Hết Lượt</span>
+        <span className="hidden sm:inline">
+          {resolveEndTurnButtonLabel(turnPhase, hasRolledThisTurn, inAudit)}
+        </span>
       </button>
     </nav>
   );

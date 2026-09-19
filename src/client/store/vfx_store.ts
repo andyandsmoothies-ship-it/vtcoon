@@ -16,15 +16,24 @@ interface ScreenShakeState {
   readonly intensity: number;
 }
 
+export interface PawnReactionState {
+  readonly type: 'victory_spin' | 'slump_recoil';
+  readonly startTime: number;
+  readonly durationMs: number;
+}
+
 export interface VfxState {
   readonly activeSlams: Record<number, ActiveSlam>;
   readonly activeScreenShake: ScreenShakeState | null;
+  readonly activePawnReactions: Record<string, PawnReactionState>;
 
   triggerConstructionSlam: (cellIndex: number, level?: 1 | 2 | 3) => void;
   removeSlam: (cellIndex: number) => void;
   clearAllSlams: () => void;
   triggerScreenShake: (intensity?: number, durationMs?: number) => void;
   clearScreenShake: () => void;
+  triggerPawnReaction: (playerId: string, type: 'victory_spin' | 'slump_recoil', durationMs?: number) => void;
+  clearPawnReaction: (playerId: string) => void;
 }
 
 export const SLAM_DEFAULT_DURATION_MS = 1500;
@@ -106,6 +115,35 @@ export const useVfxStore = create<VfxState>((set, get) => ({
   },
 
   clearScreenShake: () => set({ activeScreenShake: null }),
+
+  activePawnReactions: {},
+
+  triggerPawnReaction: (playerId, type, durationMs = 600) => {
+    const startTime = Date.now();
+    set((state) => ({
+      activePawnReactions: {
+        ...state.activePawnReactions,
+        [playerId]: { type, startTime, durationMs },
+      },
+    }));
+
+    if (typeof setTimeout !== 'undefined') {
+      setTimeout(() => {
+        const cur = get().activePawnReactions[playerId];
+        if (cur && cur.startTime === startTime) {
+          get().clearPawnReaction(playerId);
+        }
+      }, durationMs);
+    }
+  },
+
+  clearPawnReaction: (playerId) =>
+    set((state) => {
+      if (!state.activePawnReactions[playerId]) return state;
+      const next = { ...state.activePawnReactions };
+      delete next[playerId];
+      return { activePawnReactions: next };
+    }),
 }));
 
 declare global {

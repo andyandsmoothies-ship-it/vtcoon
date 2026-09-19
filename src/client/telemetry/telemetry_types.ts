@@ -51,10 +51,22 @@ export interface ForensicSnapshot {
   readonly triggerDelta?: unknown;
 }
 
+export interface RecordedIntentContext {
+  readonly buttonLabel?: string;
+  readonly isDoublesRoll?: boolean;
+  readonly consecutiveDoubles?: number;
+  readonly currentTurnPlayerId?: string;
+  readonly dice?: readonly [number, number];
+  readonly position?: number;
+  readonly balance?: number;
+  readonly note?: string;
+}
+
 export interface RecordedIntent {
   readonly playerId: string;
   readonly intent: unknown;
   readonly timestamp: number;
+  readonly context?: RecordedIntentContext;
 }
 
 export interface FlightRecorderDump {

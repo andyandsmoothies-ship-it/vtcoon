@@ -64,6 +64,20 @@ export interface ScenarioMetrics {
   auctionWonRate: number;
   auctionsForeclosed: number;
   auctionForeclosureRate: number;
+  // Phiếu / Thẻ sự kiện & Sàn HOSE
+  totalChanceCards: number;
+  totalMarketCards: number;
+  totalHoseInvestments: number;
+  avgCardsPerGame: number;
+  avgHosePerGame: number;
+  uniqueCardsCoverage: number;
+  // Giao dịch P2P & Chuộc đất
+  totalTradesProposed: number;
+  totalTradesAccepted: number;
+  tradeAcceptRate: number;
+  totalMortgages: number;
+  totalRedeems: number;
+  redeemRate: number;
   // Invariants
   deadlockCount: number;
   treasuryLeakCount: number;
@@ -151,6 +165,18 @@ export function runSingleScenario(scenario: ScenarioDef, gamesToRun: number, see
     auctionWonRate: 0,
     auctionsForeclosed: 0,
     auctionForeclosureRate: 0,
+    totalChanceCards: 0,
+    totalMarketCards: 0,
+    totalHoseInvestments: 0,
+    avgCardsPerGame: 0,
+    avgHosePerGame: 0,
+    uniqueCardsCoverage: 0,
+    totalTradesProposed: 0,
+    totalTradesAccepted: 0,
+    tradeAcceptRate: 0,
+    totalMortgages: 0,
+    totalRedeems: 0,
+    redeemRate: 0,
     deadlockCount: 0,
     treasuryLeakCount: 0,
     avgFinalTreasury: 0,
@@ -167,6 +193,7 @@ export function runSingleScenario(scenario: ScenarioDef, gamesToRun: number, see
   let cumulativeFinalTreasury = 0;
   let gamesWithMonopoly = 0;
   let sumFirstMonopolyRound = 0;
+  const uniqueCardsDrawn = new Set<string>();
 
   const origInfo = console.info;
   const origWarn = console.warn;
@@ -188,7 +215,24 @@ export function runSingleScenario(scenario: ScenarioDef, gamesToRun: number, see
       let activeInsolvencyPlayerId: string | null = null;
       let activeAuctionSession: AuctionSession | null = null;
 
-      // Hook player intent to track upgrades and solvency
+      // Hook rolls to track card draws (phiếu Cơ Hội / Khí Vận)
+      const origHandleRoll = mgr.handleRollDice.bind(mgr);
+      mgr.handleRollDice = (rc, pid) => {
+        const prevCard = room.lastEventCard;
+        const res = origHandleRoll(rc, pid);
+        if (room.lastEventCard && room.lastEventCard !== prevCard) {
+          if (room.lastEventCard.cardType === 'market' || room.lastEventCard.type === 'Market') {
+            m.totalMarketCards++;
+            uniqueCardsDrawn.add(room.lastEventCard.id);
+          } else if (room.lastEventCard.cardType === 'chance' || room.lastEventCard.type === 'Chance') {
+            m.totalChanceCards++;
+            uniqueCardsDrawn.add(room.lastEventCard.id);
+          }
+        }
+        return res;
+      };
+
+      // Hook player intent to track upgrades, solvency, trades, redeems, hose
       const origHandleIntent = mgr.handlePlayerIntent.bind(mgr);
       mgr.handlePlayerIntent = (rc, pid, intent) => {
         const player = room.players.find((pl) => pl.id === pid);
@@ -198,6 +242,12 @@ export function runSingleScenario(scenario: ScenarioDef, gamesToRun: number, see
           m.totalInsolvencies++;
         }
 
+        if (intent.type === 'INTENT_TRADE_OFFER' || intent.type === 'INTENT_P2P_TRADE_OFFER') {
+          m.totalTradesProposed++;
+        } else if (intent.type === 'INTENT_MORTGAGE') {
+          m.totalMortgages++;
+        }
+
         let prevLevel = 0;
         if (intent.type === 'INTENT_UPGRADE' && 'cellIndex' in intent && typeof intent.cellIndex === 'number') {
           prevLevel = mgr.getPropertyState(rc, intent.cellIndex)?.level ?? 0;
@@ -205,7 +255,13 @@ export function runSingleScenario(scenario: ScenarioDef, gamesToRun: number, see
 
         const res = origHandleIntent(rc, pid, intent);
         if (res.success) {
-          if (intent.type === 'INTENT_UPGRADE' && 'cellIndex' in intent && typeof intent.cellIndex === 'number') {
+          if (intent.type === 'INTENT_TRADE_OFFER' || intent.type === 'INTENT_P2P_TRADE_OFFER') {
+            m.totalTradesAccepted++;
+          } else if (intent.type === 'INTENT_REDEEM') {
+            m.totalRedeems++;
+          } else if (intent.type === 'INTENT_INVEST' || intent.type === 'INTENT_HOSE_INVEST') {
+            m.totalHoseInvestments++;
+          } else if (intent.type === 'INTENT_UPGRADE' && 'cellIndex' in intent && typeof intent.cellIndex === 'number') {
             const newLevel = mgr.getPropertyState(rc, intent.cellIndex)?.level ?? 0;
             if (newLevel > prevLevel) {
               m.totalUpgrades++;
@@ -364,6 +420,12 @@ export function runSingleScenario(scenario: ScenarioDef, gamesToRun: number, see
   m.avgFinalTreasury = Math.round(cumulativeFinalTreasury / m.completedGames);
   m.avgWinnerNetWorth = Math.round(cumulativeWinnerNetWorth / m.completedGames);
 
+  m.tradeAcceptRate = m.totalTradesProposed > 0 ? parseFloat(((m.totalTradesAccepted / m.totalTradesProposed) * 100).toFixed(1)) : 0;
+  m.redeemRate = m.totalMortgages > 0 ? parseFloat(((m.totalRedeems / m.totalMortgages) * 100).toFixed(1)) : 0;
+  m.avgCardsPerGame = parseFloat(((m.totalChanceCards + m.totalMarketCards) / m.completedGames).toFixed(2));
+  m.avgHosePerGame = parseFloat((m.totalHoseInvestments / m.completedGames).toFixed(2));
+  m.uniqueCardsCoverage = uniqueCardsDrawn.size;
+
   return m;
 }
 
@@ -437,6 +499,16 @@ function printSummaryTables(results: ScenarioMetrics[]): void {
   process.stdout.write('| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |\n');
   for (const r of results) {
     process.stdout.write(`| ${r.name.padEnd(30)} | ${String(r.avgInsolvenciesPerGame).padStart(5)} | ${String(r.solvencyRecoveryRate).padStart(6)}% | ${String(r.avgAuctionsPerGame).padStart(8)} | ${String(r.auctionWonRate).padStart(8)}% | ${String(r.auctionForeclosureRate).padStart(7)}% | ${String(r.avgFinalTreasury).padStart(8)} Tr. | ${String(r.deadlockCount).padStart(5)} |\n`);
+  }
+
+  process.stdout.write('\n--- BẢNG 4: MỞ PHIẾU, SÀN HOSE, ĐÀM PHÁN P2P BOT & CHUỘC ĐẤT ---\n');
+  process.stdout.write('| Kịch Bản | Thẻ Rút/Ván (Cơ Hội+Khí Vận) | Độ Phủ Thẻ | Lượt HOSE/Ván | Đề Xuất P2P | Thành Công | Tỷ Lệ Nhất Trí | Chuộc/Cầm (%) |\n');
+  process.stdout.write('| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |\n');
+  for (const r of results) {
+    const cardStr = `${r.avgCardsPerGame} thẻ`;
+    const coverageStr = `${r.uniqueCardsCoverage}/36`;
+    const redeemStr = `${r.totalRedeems}/${r.totalMortgages} (${r.redeemRate}%)`;
+    process.stdout.write(`| ${r.name.padEnd(30)} | ${cardStr.padStart(28)} | ${coverageStr.padStart(10)} | ${String(r.avgHosePerGame).padStart(13)} | ${String(r.totalTradesProposed).padStart(11)} | ${String(r.totalTradesAccepted).padStart(10)} | ${String(r.tradeAcceptRate).padStart(14)}% | ${redeemStr.padStart(15)} |\n`);
   }
 }
 

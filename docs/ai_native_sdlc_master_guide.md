@@ -127,16 +127,25 @@
 │        - Spike / Prototype Mode: Kích hoạt `prototype` code nháp trên giao diện khi ý tưởng chưa rõ, sau đó Agent tự trích xuất ngược ra Use Case 3.0.
 │        - Kill & Prune: Xóa dứt khoát tính năng khỏi Ledger và codebase khi không còn giá trị sử dụng.
 │
-├── 12. PHÂN LOẠI RỦI RO (2-BUCKET APPROACH) & CONTRACT-FIRST CODEGEN (ANTI-SLOP 2026):
-│      • Phân loại rủi ro 2 xô (Risk-Based 2-Bucket Approach):
-│        - Bucket 1 (Low-Stakes / Khám phá): Script migrate 1 lần, internal tool nhỏ, demo prototype ➔ Tối đa tốc độ,
-│          cho phép AI tự do thi công nhanh, miễn là test chạy qua, không bắt viết spec hay rào cản nặng nề.
-│        - Bucket 2 (High-Stakes / Lõi nghiệp vụ): Auth, Payment, Ledger tiền, DB Schema, Data Integrity ➔ Bắt buộc
-│          áp dụng 100% Use Case 3.0, 3 Zones, Transaction Rollback, 2-Tier Defense và con người duyệt từng dòng diff.
-│      • Contract-First Codegen (Triệt tiêu bẫy AI tự bịa shape dữ liệu): OpenAPI / Protobuf / JSON Schema là SSOT duy nhất.
-│        Chạy công cụ sinh code tự động ra Types/DTOs/Zod schemas. AI chỉ được nối logic, CẤM tự gõ interface dữ liệu thủ công.
-│      • Khóa cứng Trình biên dịch (Strict Compiler Flags): Bật `strict: true`, `noUncheckedIndexedAccess`, `<Nullable>enable</Nullable>`.
-│        Khi compiler đã bảo đảm biến không thể null/undefined, CẤM Agent viết code phòng thủ rác (`if (x != null)`) làm tăng độ phức tạp.
+├── 12. PHÂN TẦNG RỦI RO TỰ ĐỘNG & ĐIỀU PHỐI ĐA TÁC NHÂN (RISK-BASED AUTONOMOUS TIERING - 2026):
+│      • Triệt tiêu gánh nặng quy trình (Anti-Process Overhead): Không dùng búa tạ đập hạt điều.
+│        Mọi tác vụ trước khi thực thi phải tự động chạy qua Bộ lọc 4 câu hỏi để xác định cấp độ:
+│        1. Có sửa Database / Schema / Network Protocol không?
+│        2. Có sửa Logic cốt lõi (Auth, Tiền tệ, FSM, Core Algorithms) không?
+│        3. Có sửa thư viện dùng chung (> 3 module phụ thuộc) không?
+│        4. Ước lượng mã nguồn thay đổi có > 50 dòng code (LOC) không?
+│      • TIER 1: FAST-TRACK (Tiểu Phẫu / Tinh Chỉnh / Visual Juice) - Nếu cả 4 câu là KHÔNG:
+│        - Tác vụ: UI/CSS/Spacing, animation/3D math, audio, text copy, fix bug cục bộ 1-2 hàm độc lập.
+│        - Điều phối: ĐƠN TÁC NHÂN (0 Subagent, 0 Plan file riêng). Agent chính tự viết 1-3 test nhanh +
+│          sửa mã nguồn tối thiểu + chạy test xác minh trực tiếp. Hoàn tất trong 1–2 phút, tiết kiệm 90% token.
+│      • TIER 2: FULL RIGOR (Đại Phẫu / Feature Slice / Systemic) - Nếu có ít nhất 1 câu là CÓ:
+│        - Tác vụ: Nghiệp vụ tài chính, state machine, DB migration, network protocol, slice mới > 50 LOC.
+│        - Điều phối: KÍCH HOẠT TOÀN DIỆN (Plan Grilling đối kháng qua `plan-griller` + Quy trình 3 Trạm
+│          `qa-tester` RED ➔ `implementer` GREEN ➔ `spec-reviewer` Trạm 3 Independent Physical Verification + Snapshot).
+│      • Ngưỡng Tự Động Nâng Cấp (Auto-Escalation Gate): Nếu bắt đầu ở Tier 1 mà phát hiện mã nguồn vượt 50 LOC,
+│        chạm Schema/FSM hoặc gây regression test hỏng các test suites khác, AI BẮT BUỘC DỪNG LẠI và nâng cấp lên Tier 2.
+│      • Contract-First Codegen: OpenAPI / Protobuf / JSON Schema là SSOT duy nhất. AI chỉ nối logic, CẤM tự gõ interface.
+│      • Khóa cứng Trình biên dịch: Bật `strict: true`, `noUncheckedIndexedAccess`. CẤM code phòng thủ rác (`if (x != null)`).
 │
 ├── 13. KHẢ NĂNG QUAN SÁT TINH GỌN (LEAN RUNTIME OBSERVABILITY - CHARITY MAJORS):
 │      • "Testing chứng minh lỗi đã biết trong phòng thí nghiệm; Observability giải thích sự cố bất ngờ ngoài đời thực."
@@ -217,7 +226,8 @@
 │       • Trạm 2 (GREEN Implementation): `implementer` viết mã tối thiểu trong `src/**` để pass test. CẤM nới lỏng assertion (Zero Bug-Codification).
 │       • Trạm 3 (Thẩm Định Độc Lập & Kiểm Chứng Đĩa Vật Lý): Read-only reviewers (`spec-reviewer`, `code-reviewer`...).
 │         CẤM implementer tự duyệt code mình. CẤM duyệt dựa trên lời nói trong chat. Reviewers BẮT BUỘC dùng công cụ đọc đĩa vật lý
-│         (`view_file`, `list_dir`, lệnh terminal thực tế) để xác minh code thật và test thật đang PASS trên đĩa cứng trước khi ký [APPROVED].
+│         (`view_file`, `list_dir`, terminal execution) và kiểm tra tệp `Evidence Snapshot` vật lý trên đĩa để xác minh code thật,
+│         blast radius thật và test thật đang PASS trên đĩa cứng trước khi ký [APPROVED].
 │
 ├── 20. 4 TRỤ CỘT KIẾN TRÚC PHÒNG THỦ TOÀN DIỆN CHO HỆ THỐNG BẤT ĐỒNG BỘ (FOUR PILLARS OF ARCHITECTURE DEFENSE):
 │       • Áp dụng cho mọi hệ thống phân tán, event-driven, multi-user, stateful hoặc async:
@@ -228,17 +238,47 @@
 │         Mọi modal/dialog chỉ đóng/mở đồng bộ theo tín hiệu từ State nguồn.
 │       • Trụ Cột 4 (Fail-Safe Watchdog Auto-Recovery): Chó canh phòng cấp máy chủ tự động giải cứu khi luồng kẹt > 45s (cưỡng chế chuyển lượt / timeout an toàn).
 │
-└── 21. KIỂM SOÁT TRẦN TÀI NGUYÊN KIỂM THỬ & PHÂN TẦNG TEST SUITES (TEST RESOURCE CEILING & TIERED EXECUTION):
-        • Trần Luồng An Toàn (Thread Pool Ceiling): Cấu hình Test Runner (Vitest/Jest) `maxThreads <= 4` hoặc `<= 50% CPU logic`.
-          Không bao giờ cho phép Test Runner vắt kiệt 100% CPU làm đơ giật máy tính người dùng.
-        • Triệt Tiêu Log Spam (Stdout Silence Invariant): Mute `console.info/warn` trong vòng lặp test mô phỏng bằng khối `try/finally`.
-          Chỉ xuất bảng ASCII tổng kết ở cuối. Triệt tiêu nghẽn IPC và tràn bộ đệm terminal.
-        • Phân Tầng 3 Cấp:
-          - Tầng 1: `npm test` (Fast In-Memory): Unit, Contract, FSM, 100 ván mô phỏng nhẹ (<0.4s). Toàn bộ hoàn thành trong <= 5-10s.
-          - Tầng 2: `npm run test:chaos` (Release Audit): Chạy riêng 1.000 ván Monte Carlo hoặc stress test nặng khi chuẩn bị xuất xưởng.
-          - Tầng 3: `npm run test:uat` (Heavy Browser Screenshots): Chỉ chạy khi sửa core logic ở domain/server, CẤM chạy khi sửa UI/CSS/docs.
-        • Kiểm Toán Bộ Nhớ Tất Định: CẤM assert `heapUsed` của V8 (`heapAfter - heapBefore > 0`) trong unit test vì GC ngầm không tất định.
-          Kiểm toán rò rỉ BẮT BUỘC assert trên số lượng object/resource tham chiếu thực tế (`activeResources === N`, `retainedReferences.length > 0`).
+├── 21. KIỂM SOÁT TRẦN TÀI NGUYÊN KIỂM THỬ & PHÂN TẦNG TEST SUITES (TEST RESOURCE CEILING & TIERED EXECUTION):
+│       • Trần Luồng An Toàn (Thread Pool Ceiling): Cấu hình Test Runner (Vitest/Jest) `maxThreads <= 4` hoặc `<= 50% CPU logic`.
+│         Không bao giờ cho phép Test Runner vắt kiệt 100% CPU làm đơ giật máy tính người dùng.
+│       • Triệt Tiêu Log Spam (Stdout Silence Invariant): Mute `console.info/warn` trong vòng lặp test mô phỏng bằng khối `try/finally`.
+│         Chỉ xuất bảng ASCII tổng kết ở cuối. Triệt tiêu nghẽn IPC và tràn bộ đệm terminal.
+│       • Phân Tầng 3 Cấp:
+│         - Tầng 1: `npm test` (Fast In-Memory): Unit, Contract, FSM, 100 ván mô phỏng nhẹ (<0.4s). Toàn bộ hoàn thành trong <= 5-10s.
+│         - Tầng 2: `npm run test:chaos` (Release Audit): Chạy riêng 1.000 ván Monte Carlo hoặc stress test nặng khi chuẩn bị xuất xưởng.
+│         - Tầng 3: `npm run test:uat` (Heavy Browser Screenshots): Chỉ chạy khi sửa core logic ở domain/server, CẤM chạy khi sửa UI/CSS/docs.
+│       • Kiểm Toán Bộ Nhớ Tất Định: CẤM assert `heapUsed` của V8 (`heapAfter - heapBefore > 0`) trong unit test vì GC ngầm không tất định.
+│         Kiểm toán rò rỉ BẮT BUỘC assert trên số lượng object/resource tham chiếu thực tế (`activeResources === N`, `retainedReferences.length > 0`).
+│
+├── 22. BẰNG CHỨNG SỐ BẤT BIẾN & THU THẬP TỰ ĐỘNG (AUTOMATED IMMUTABLE EVIDENCE SNAPSHOT):
+│       • Tiếp thu từ mô hình Visual Supervision (Jake 2026): Chấm dứt việc Reviewer phải chạy rà soát phân mảnh tốn thời gian.
+│       • Script Collector tự động (`scripts/collect_evidence.mjs` hoặc tích hợp trong test gate) kết xuất tệp `Evidence Snapshot`
+│         dạng JSON/Markdown lưu trực tiếp vào đĩa cứng (`.agents/evidence/[TICKET]_snapshot.json`):
+│         - Blast Radius định lượng: Danh sách file bị chạm, số lượng downstream consumers, kiểm tra broken imports.
+│         - Chỉ số mã nguồn: Delta LOC, Cyclomatic Complexity cao nhất, 0 vi phạm Slop/UI Linters.
+│         - Trạng thái hợp đồng: Minh chứng Adversarial RED (thất bại đối kháng) ➔ GREEN (100% assertions PASS).
+│       • Trạm 3 dùng tệp Snapshot này làm căn cứ pháp chứng ký duyệt độc lập (0ms độ trễ, 0 token lặp lại).
+│
+└── 23. CỔNG PHẢN BIỆN ĐỐI KHÁNG ZERO-TRUST & KHỬ THIÊN KIẾN AI (ZERO-TRUST ADVERSARIAL GRILLING & ANTI-AI-BIAS MANDATE):
+        • Triệt tiêu hoàn toàn căn bệnh "Echo Chamber" (tác nhân này lập kế hoạch, tác nhân kia đồng thuận dễ dãi, khen ngợi sáo rỗng
+          hoặc bỏ qua các bẫy runtime/vật lý ngầm).
+        • MỌI Kế hoạch (Plan) hoặc Thiết kế kiến trúc do AI soạn thảo BẮT BUỘC phải chịu sự phản biện đối kháng Zero-Trust trước khi phê duyệt:
+          - Giả định mặc định: Mọi plan của AI đều chứa lỗi ngầm (Flawed by Default), điểm mù kỹ thuật (AI Blind Spots) hoặc ảo tưởng
+            tính khả thi (Hallucinated Feasibility).
+          - Bắt buộc vạch trần tối thiểu 1–3 điểm bất hợp lý / giả định ngầm chưa được chứng minh:
+            + Bất khả thi vật lý & Runtime: Sai số dấu phẩy động gây desync Server-Client (như Rapier WebAssembly vs Node.js),
+              quá tải Draw Calls GPU (nhân bội qua N8AO/Shadows), độ trễ IPC, rò rỉ bộ nhớ heap.
+            + Vi phạm ranh giới kiến trúc: Phá vỡ tính Server-Authoritative FSM, bòn rút/rò rỉ Kho Bạc, vi phạm Invariant đã lưu trong gotchas.
+            + Tải nhận thức người dùng (Cognitive Overload): Nhồi nhét thao tác dư thừa, bẫy cụt chữ trên màn hình nhỏ.
+          - CẤM ĐỒNG THUẬN LỊCH SỰ (Zero Polite Rubber-Stamping / No Sycophancy): Nghiêm cấm Subagent đồng ý 100% dễ dãi.
+            Reviewer nào duyệt plan phức tạp mà không chỉ ra phản biện hay rủi ro kỹ thuật nào bị coi là vi phạm kỷ luật kiểm toán (bản duyệt bị vô hiệu hóa).
+          - VÒNG LẶP PHẢN BIỆN TỰ ĐỘNG HÓA 2 CHIỀU (Autonomous Ping-Pong Plan Hardening Loop - Zero-Memorization):
+            Trước khi Agent chính trình bản Plan cho Người Dùng phê duyệt (Planning Mode Approval), Agent chính BẮT BUỘC
+            phải tự động kích hoạt subagent `plan-griller` qua `invoke_subagent`. Subagent `plan-griller` (Read-only) dùng
+            công cụ đọc đĩa cứng đối chiếu mã nguồn thực tế và vạch trần 1–3 điểm mù (Ghost files, đứt gãy chuỗi nghiệp vụ,
+            sai số biên, desync consumer). Agent chính BẮT BUỘC phải đọc báo cáo đối kháng này và tự động cập nhật lại tệp
+            `implementation_plan.md` để giải quyết dứt điểm các điểm mù đó TRƯỚC KHI xin người dùng phê duyệt. Người dùng
+            TUYỆT ĐỐI KHÔNG PHẢI copy-paste plan sang conversation khác để hỏi.
 ```
 
 
@@ -711,8 +751,9 @@ Thay vì đẩy code lên GitHub và chờ đợi 3-5 phút trong hàng đợi C
     "lint:ui": "node scripts/lint_ui.mjs",
     "lint:slop": "node scripts/lint_slop.mjs",
     "lint:dup": "jscpd src/ --config .jscpd.json",
-    "gate:quick": "npm run lint:ui && npm run lint:slop && npm run lint:dup && tsc --noEmit",
-    "gate": "npm run lint:ui && npm run lint:slop && npm run lint:dup && tsc --noEmit && vitest run"
+    "evidence": "node scripts/collect_evidence.mjs",
+    "gate:quick": "npm run lint:ui && npm run lint:slop && npm run lint:dup && tsc --noEmit && npm run evidence",
+    "gate": "npm run lint:ui && npm run lint:slop && npm run lint:dup && tsc --noEmit && vitest run && npm run evidence"
   },
   "devDependencies": {
     "jscpd": "^5.2.0"
@@ -786,6 +827,47 @@ export function lintSlopContent(content, filePath = 'anonymous.ts') {
 }
 ```
 *Script quét toàn bộ mã nguồn trong 0.3 giây, trả về mã lỗi `process.exit(1)` khi phát hiện vi phạm để chặn đứng commit.*
+
+#### 3.2 Mẫu Script Thu Thập Bằng Chứng Số Tự Động (`scripts/collect_evidence.mjs`) & Chuẩn Zero-Memorization
+Tiếp thu từ mô hình Visual Supervision (Jake 2026): Để Junior developer và AI tuyệt đối KHÔNG cần phải nhớ bất kỳ câu lệnh manual nào, script này tự động gom bằng chứng số (Blast radius, delta LOC, Consumers, Matching Contract Tests) lưu vào `.agents/evidence/` làm căn cứ pháp chứng cho Trạm 3:
+- **Tự động quét Delta**: Quét `git status --porcelain` và mtime để phát hiện chính xác danh sách file vừa chỉnh sửa trong `src/` và `tests/`.
+- **Tự động liên kết Test Hợp Đồng**: Tìm test suite tương ứng trong `tests/contracts/` và trích xuất Slice ID (ví dụ `IMP-126`).
+- **Đóng gói Snapshot Bất Biến**: Xuất tệp `.agents/evidence/[sliceId]_snapshot.json` và `latest_snapshot.json` ghi nhận định lượng: số file, LOC, số export/import, downstream consumers, và danh sách contract tests.
+- **Tự động 100% (Zero-Memorization)**: Móc nối tự động vào `npm run gate:quick`, `npm run gate` và được Subagent `implementer` tự động chạy ở Pass 3 trước khi báo cáo hoàn tất. Junior developer KHÔNG PHẢI chạy lệnh thủ công!
+
+```javascript
+#!/usr/bin/env node
+import fs from 'node:fs';
+import path from 'node:path';
+import { execSync } from 'node:child_process';
+
+const repoRoot = process.cwd();
+const evidenceDir = path.join(repoRoot, '.agents', 'evidence');
+if (!fs.existsSync(evidenceDir)) fs.mkdirSync(evidenceDir, { recursive: true });
+
+// 1. Tự động phát hiện file thay đổi qua git status
+let filesToAudit = [];
+try {
+  const gitOut = execSync('git status --porcelain', { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
+  for (const line of gitOut.split('\n')) {
+    const filePart = line.trim().slice(2).trim().replace(/^"|"$/g, '');
+    if (filePart.startsWith('src/') && (filePart.endsWith('.ts') || filePart.endsWith('.tsx'))) {
+      const full = path.resolve(repoRoot, filePart);
+      if (fs.existsSync(full) && !filesToAudit.includes(full)) filesToAudit.push(full);
+    }
+  }
+} catch {}
+
+// 2. Thu thập định lượng và đóng gói Snapshot JSON vào .agents/evidence/
+const snapshot = {
+  timestamp: new Date().toISOString(),
+  filesCount: filesToAudit.length,
+  files: filesToAudit.map(f => ({ path: path.relative(repoRoot, f).replace(/\\/g, '/'), loc: fs.readFileSync(f, 'utf8').split('\n').length })),
+  status: 'READY FOR TRẠM 3 VERIFICATION'
+};
+fs.writeFileSync(path.join(evidenceDir, 'latest_snapshot.json'), JSON.stringify(snapshot, null, 2), 'utf8');
+console.log('📸 [EVIDENCE SNAPSHOT GENERATED] -> .agents/evidence/latest_snapshot.json');
+```
 
 #### 4. 5 Bài Học Xương Máu (Universal Gotchas) Cho Junior Khi Lập Trình Cùng AI
 1. **Bẫy Nhân Bản Khối Bọc Ngoại Lệ & Môi Trường (The Environment Wrapper Duplication Trap)**:
@@ -993,7 +1075,7 @@ Khi đọc các tài liệu bên ngoài (Claude Code, Cursor cũ), bạn thườ
 ```cmd
 mkdir C:\Projects\my-app
 cd /d C:\Projects\my-app
-mkdir .agents\agents .agents\skills .agents\scripts docs\epics docs\domain docs\domain\adr docs\reports\audits docs\reports\diagnostics docs\reports\handoff tests\regressions issues
+mkdir .agents\agents .agents\skills .agents\scripts .agents\evidence docs\epics docs\domain docs\domain\adr docs\reports\audits docs\reports\diagnostics docs\reports\handoff tests\regressions tests\contracts issues
 ```
 
 **Cấu hình Compiler nghiêm ngặt (Chống AI sinh code phòng thủ rác - Null Checks vô nghĩa)**:
@@ -1441,6 +1523,34 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command]
 | 1 | `[src/services/auth.ts#L25-L42]` | MODIFY | Bổ sung kiểm tra hết hạn token |
 ### 📦 KỸ NĂNG CHUYÊN SÂU ĐÃ NẠP (JIT SKILLS)
 - Đã nạp: `.agents/skills/postgresql-best-practices/` (từ kho backup nội bộ).
+```
+
+### 1b. File `.agents/agents/plan-griller.md` (Kiểm Toán Viên Phản Biện Đối Kháng Kế Hoạch - Zero-Trust Plan Auditor)
+```markdown
+---
+name: plan-griller
+description: Adversarial Plan Auditor & Architectural Stress-Tester. Reads implementation plans, audits physical disk code, detects ghost files, broken dependencies, boundary flaws, and mandates 1-3 concrete blind spots. READ-ONLY.
+subagent: true
+mainAgent: false
+model: flash
+tools: [view_file, list_dir, find_by_name, grep_search, run_command]
+---
+# QUY TRÌNH PHẢN BIỆN ĐỐI KHÁNG KẾ HOẠCH (PLAN-GRILLER PROTOCOL)
+1. **Quyền hạn**: CHỈ ĐỌC (Strictly READ-ONLY). CẤM sửa đổi mã nguồn.
+2. **Mệnh lệnh cốt lõi**: Mặc định coi mọi plan do AI soạn thảo đều có lỗi ngầm (Flawed by Default). Nghiêm cấm đồng thuận lịch sự (Zero Sycophancy). Bắt buộc vạch trần 1–3 điểm mù kỹ thuật cụ thể bằng cách đối chiếu trực tiếp mã nguồn trên đĩa vật lý.
+3. **Ma Trận Kiểm Tra 4 Mặt**:
+   - Facet 1 (Ghost File Verification): Quét xem từng file/hàm được đề xuất sửa có thực sự tồn tại trên đĩa không.
+   - Facet 2 (Broken Causality): Kiểm tra tính toàn vẹn nghiệp vụ và chuỗi nhân quả (VD: thế chấp có đòi hỏi hạ cấp trước không?).
+   - Facet 3 (Boundary & Corner Invariants): Kiểm tra ô góc (0, 10, 20, 30), chia 0, số âm, timeout, race conditions.
+   - Facet 4 (Downstream Consumer Desync): Kiểm tra tính đồng bộ của shared helpers, telemetry, network delta.
+4. **Mẫu Báo Cáo**:
+```markdown
+### 🛡️ ZERO-TRUST PLAN GRILLING REPORT: [SLICE_OR_TICKET_ID]
+| Mã Lỗi | Loại Điểm Mù | Tệp & Dòng Thực Tế | Mô Tả Rủi Ro Kỹ Thuật | Chỉ Định Khắc Phục Bắt Buộc |
+| :---: | :--- | :--- | :--- | :--- |
+| **P1** | [Ghost File / Broken Causality] | `[file.ts#L...]` | [Mô tả chi tiết tại sao plan bị lỗi] | [Chỉ định hành động sửa plan] |
+| **P2** | [Boundary Flaw] | `[file.ts#L...]` | [Mô tả chi tiết sai số/ngoại lệ] | [Chỉ định hành động sửa plan] |
+| **P3** | [Consumer Desync] | `[file.ts#L...]` | [Mô tả desync telemetry/downstream] | [Chỉ định hành động sửa plan] |
 ```
 ```
 
@@ -2257,10 +2367,10 @@ Khi bạn chạy lệnh trong Terminal gặp lỗi đỏ, hoặc Subagent báo t
 
 | Bước | Tên Công Việc | Thao Tác Chi Tiết & Mẫu Prompt Copy-Paste | Model | Sản Phẩm Nghiệm Thu |
 | :---: | :--- | :--- | :---: | :--- |
-| **0.1** | Tạo thư mục chuẩn & .gitignore | 💻 `[CMD]` `mkdir .agents\agents .agents\scripts docs\epics docs\domain docs\domain\adr docs\reports\audits issues tests` ➔ Tạo tệp `.gitignore` chặn `node_modules/`, `dist/`, `.agents/tmp/` | - | Khung thư mục & .gitignore chuẩn |
-| **0.2** | Cài hiến pháp | 💬 `[AG 2.0]` Tạo `GEMINI.md` (<50 dòng: nén luật NFRs, DoD, cấm tự ý git commit) | Flash | `GEMINI.md` |
+| **0.1** | Tạo thư mục chuẩn & .gitignore | 💻 `[CMD]` `mkdir .agents\agents .agents\scripts .agents\evidence docs\epics docs\domain docs\domain\adr docs\reports\audits issues tests\contracts` ➔ Tạo tệp `.gitignore` chặn `node_modules/`, `dist/`, `.agents/tmp/` | - | Khung thư mục & .gitignore chuẩn |
+| **0.2** | Cài hiến pháp & Evidence Collector | 💬 `[AG 2.0]` Tạo `GEMINI.md` (<50 dòng: nén luật NFRs, DoD, cấm tự ý git commit) + script `scripts/collect_evidence.mjs` | Flash | `GEMINI.md` + Evidence Collector |
 | **0.3** | Cài rào chắn cơ học | 💬 `[AG 2.0]` Tạo `.agents/hooks.json` và `.agents/scripts/use_case_guard.py` | Flash | Cổng chặn cơ học 0ms, 0-token |
-| **0.4** | Cài 5 Subagents | 💬 `[AG 2.0]` Tạo 5 file trong `.agents/agents/` (`scout`, `implementer`, `qa-tester`, 2 reviewers) | Flash | 5 agent chuyên trách độc lập |
+| **0.4** | Cài 5 Subagents | 💬 `[AG 2.0]` Tạo 5 file trong `.agents/agents/` (`scout`, `implementer`, `qa-tester`, 2 reviewers mang tâm thế Zero-Trust) | Flash | 5 agent chuyên trách độc lập |
 | **0.5** | Nạp Bộ Kỹ Năng | 💻 `[CMD]` Đồng bộ kỹ năng cốt lõi từ `backup\skills_backup\` vào `.agents/skills/` | - | `.agents/skills/` có đủ skills |
 | **1.1** | Phân loại đầu vào | • Nếu ý tưởng thô: 💬 Gõ `/grill-me + shaping`<br>• Nếu đã có spec chi tiết: 💬 Bỏ qua `/grill-me`, nạp tài liệu vào `docs/` | Sonnet / Flash | Bộ tài liệu SSOT hoàn chỉnh |
 | **1.2** | Dựng bản đồ Use Case | 💬 `[AG 2.0]` Dùng `use-case-creator` lập sơ đồ mục lục `docs/domain/use_cases.puml` | Flash / Sonnet | File PlantUML 3 cột chuẩn |
@@ -2268,12 +2378,12 @@ Khi bạn chạy lệnh trong Terminal gặp lỗi đỏ, hoặc Subagent báo t
 | **1.3** | Lập Sổ Cái Tiến Độ | 💬 `[AG 2.0]` Dựng `docs/epics/[epic]/_epic_ledger.md` (phân bổ Use Cases vào Slices) | Flash | Sổ Cái tiến độ theo dõi |
 | **2.1** | Cắt Lát Cắt (JIT)<br>*(Song tác nhân)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.1]**: `slicer` soạn thảo ticket ➔ `spec-reviewer` quét rò rỉ Zone 3 trước khi lưu | Flash | File `issues/[TICKET].md` sạch |
 | **2.2** | Trinh sát bối cảnh<br>*(Đơn tác nhân)* | 💬 `[AG 2.0]` Gọi `scout` (Read-only) trinh sát hiện trạng mã nguồn:<br>• **Greenfield (S00):** Dùng **[Mẫu P-2.2A]** Target File Map<br>• **Brownfield (S01+):** Dùng **[Mẫu P-2.2B]** Change Impact | Flash | Báo cáo hiện trạng & tọa độ dòng |
-| **2.3a** | Lập Kế Hoạch Bẻ Nhỏ<br>*(Song tác nhân)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3a]**: `architect` bẻ Task DAG <= 80 LOC ➔ `spec-reviewer` thẩm định 5 Tiêu Chuẩn Vàng | Sonnet 4.6 | Kế Hoạch được `[APPROVED]` |
+| **2.3a** | Lập Plan & Phản Biện Zero-Trust<br>*(Song tác nhân đối kháng)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3a]**: `architect` bẻ Task DAG <= 80 LOC ➔ `spec-reviewer` phản biện Zero-Trust vạch trần 1–3 điểm bất hợp lý / rủi ro runtime | Sonnet 4.6 | Kế Hoạch qua Cổng Zero-Trust `[APPROVED]` |
 | **2.3b** | Khởi tạo Test Harness<br>*(Đơn tác nhân - S00)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3b]** gọi `implementer` dựng Test Runner tối thiểu (`package.json`, `tsconfig.json`, `vitest`...) ➔ Chạy smoke test PASS | Flash / Sonnet | Lệnh `npm test` chạy PASS trên CMD |
-| **2.3c** | Thi công TDD Cấp Hệ Thống<br>*(Specify ➔ Delegate ➔ Validate)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3c]**: Khóa Hợp đồng E2E (Specify) ➔ `Implementer` thi công 1 lượt (Delegate) ➔ Nghiệm thu cấp hệ thống (Validate) | Sonnet 4.6 | Hợp đồng E2E + Inversion PASS 100% |
+| **2.3c** | Quy Trình 3 Trạm Tự Động<br>*(RED ➔ GREEN ➔ Snapshot ➔ Review)* | 💬 `[AG 2.0]` Dùng **[Mẫu P-2.3-STATIONS]**: QA viết test ĐỎ ➔ Implementer code XANH và TỰ ĐỘNG sinh `Evidence Snapshot` ➔ Reviewer đối chiếu đĩa vật lý | Sonnet 4.6 | 100% Contract PASS + File Snapshot đĩa |
 | **2.3d** | Chẩn đoán lỗi khoa học<br>*(Song tác nhân)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3d]**: `Investigator` truy nguyên nhân gốc ➔ `Implementer` sửa mã nguồn tối thiểu | Sonnet 4.6 | Báo cáo nguyên nhân & bản sửa tối thiểu |
 | **2.3e** | Nghiệm thu tích hợp<br>*(Đơn tác nhân)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3e]** gọi `implementer` chạy toàn bộ Test Suite với cờ `--randomize` (cách ly trạng thái) | Flash / Sonnet | 100% Test Contracts PASS |
-| **2.4** | Kiểm toán 2 Cổng<br>*(Song tác nhân độc lập)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.4]** gọi `spec-reviewer` + `code-reviewer` thẩm định ➔ Lưu Biên bản nghiệm thu vào `docs/reports/audits/` | Sonnet / Flash | Báo cáo APPROVED + File `docs/reports/audits/[MÃ]_acceptance_report.md` |
+| **2.4** | Kiểm toán 2 Cổng Pháp Chứng<br>*(Song tác nhân độc lập)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.4]** gọi `spec-reviewer` + `code-reviewer` thẩm định tệp `Evidence Snapshot` vật lý ➔ Xuất Biên bản nghiệm thu | Sonnet / Flash | Báo cáo APPROVED + File `docs/reports/audits/[MÃ]_acceptance_report.md` |
 | **2.5** | Nghiệm thu & Commit | 💻 `[CMD]` Chạy lệnh **[Lệnh Terminal P-2.5]**: Smoke test 30s ➔ Tự gõ `git commit` trên CMD ➔ Đánh dấu `[x]` vào Sổ Cái `_epic_ledger.md` | Bạn (Human) | Git commit sạch, không lỗi |
 | **2.6** | Chuyển phiên chat | 💬 `[AG 2.0]` Dùng **[Mẫu Lệnh P-2.6]**: Gõ `/handoff` ➔ Bấm **New Conversation** (Ngữ cảnh về 0, không bị bloat trước khi sang Slice mới) | Flash | Tài liệu bàn giao gọn, sạch |
 | **3.1** | Xử lý bài toán khó | 💬 `[AG 2.0]` Gõ `/boost [bài toán phức tạp]` để kích hoạt deep reasoning 3 pha | Sonnet / Opus | Lời giải FSM / Thuật toán sạch |
@@ -2466,13 +2576,17 @@ Báo cáo ngắn gọn dưới 15 dòng, TUYỆT ĐỐI KHÔNG sửa mã nguồn
 
 ---
 
-### 📋 MẪU P-2.3a: LẬP KẾ HOẠCH BẺ NHỎ (MICRO-TASK BREAKDOWN DAG)
-- **🏷️ CHẾ ĐỘ THỰC THI**: `[SONG TÁC NHÂN TỰ DUYỆT CỔNG 1]` *(Architect bẻ nhỏ ➔ Spec-Reviewer thẩm định 5 Tiêu Chuẩn Vàng)*.
+> ⚡ **CHỐT CHẶN PHÂN CẤP TIER 1 (FAST-TRACK) vs TIER 2 (FULL RIGOR)**:
+> - **Nếu là task Tiểu phẫu (Tier 1)**: Thay đổi < 50 LOC, chỉ sửa UI/CSS, hoạt cảnh/3D math, âm thanh, hoặc fix bug cục bộ 1-2 hàm (0 Schema, 0 FSM/Server, 0 Network) ➔ **BỎ QUA BƯỚC P-2.3a và P-2.4 (3 Trạm)**. Agent chính tự viết 1-3 test nhanh + sửa mã nguồn trực tiếp trong 1 lượt duy nhất (Zero Subagent, không tạo file plan/report riêng).
+> - **Nếu là task Đại phẫu (Tier 2)**: Chạm Database/Schema, Network Protocol, Logic FSM/Tài chính/Auth, hoặc tính năng mới > 50 LOC ➔ **BẮT BUỘC CHẠY ĐẦY ĐỦ P-2.3a dưới đây**.
+
+### 📋 MẪU P-2.3a: LẬP KẾ HOẠCH BẺ NHỎ & CỔNG PHẢN BIỆN ĐỐI KHÁNG ZERO-TRUST (ANTI-AI-BIAS PLAN GRILLING)
+- **🏷️ CHẾ ĐỘ THỰC THI**: `[SONG TÁC NHÂN ĐỐI KHÁNG - ZERO-TRUST PLAN GRILLING]` *(Architect bẻ nhỏ ➔ Spec-Reviewer phản biện đối kháng Zero-Trust khử bẫy ảo tưởng & thiên kiến AI)*.
 - **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Đã có báo cáo của Scout ở Bước 2.2.
-- **🛡️ RÀO CHẮN GÁC CỔNG**: Bắt buộc dùng `writing-plans`. Kế hoạch bắt buộc lưu vào `docs/plans/[MÃ_TICKET]_plan.md` để chống bị ghi đè. Áp dụng Dual Output Pattern: Architect chạy `Workspace: "inherit"`, ghi đĩa trực tiếp và chỉ xuất tóm tắt <20 dòng ra chat.
+- **🛡️ RÀO CHẮN GÁC CỔNG**: Bắt buộc dùng `writing-plans` và `grilling`. Kế hoạch bắt buộc lưu vào `docs/plans/[MÃ_TICKET]_plan.md` để chống bị ghi đè. Cổng Zero-Trust Anti-AI-Bias: Triệt tiêu hiện tượng "Echo Chamber". Reviewer bắt buộc vạch trần 1–3 điểm bất hợp lý trước khi duyệt.
 - **💬 CÂU LỆNH PROMPT CHUẨN (Model: Sonnet 4.6)**:
 ```text
-Hãy điều phối 2 subagent phối hợp để thiết lập bản kế hoạch thi công docs/plans/[MÃ_TICKET]_plan.md:
+Hãy điều phối 2 subagent phối hợp đối kháng để thiết lập bản kế hoạch thi công docs/plans/[MÃ_TICKET]_plan.md:
 
 1. Subagent Architect (Kỹ năng writing-plans):
    - Đọc ticket issues/[MÃ_TICKET].md và báo cáo của scout.
@@ -2481,18 +2595,22 @@ Hãy điều phối 2 subagent phối hợp để thiết lập bản kế hoạ
    - [Nếu là Slice 00]: Bắt buộc đưa "Task 0: Khởi tạo Test Runner Harness" lên đầu tiên.
    - Mỗi Task phải chỉ rõ: Tệp tác động (theo Target File Map & 5-Tier Archetypes), Test Contract tương ứng, DoD.
 
-2. Subagent Spec-Reviewer (Read-only, Kỹ năng vertical-slice-completeness):
-   - Thẩm định bản nháp kế hoạch dựa trên 5 Tiêu Chuẩn Vàng (DAG thứ tự đúng, đủ Test Contracts, LOC <= 80, không lấn scope, tuân thủ GEMINI.md).
-   - Nếu chưa đạt: Yêu cầu Architect điều chỉnh lại.
-   - Khi đạt 100%: Cho phép lưu vào docs/plans/[MÃ_TICKET]_plan.md và xuất chữ [APPROVED].
+2. Subagent plan-griller (Read-only, Zero-Trust Adversarial Plan Auditor):
+   - TỰ ĐỘNG HÓA PHẢN BIỆN 2 CHIỀU (Autonomous Ping-Pong Loop - Zero-Memorization): Agent chính tự động gọi subagent plan-griller qua invoke_subagent để đối chiếu mã nguồn thực tế trên đĩa vật lý (view_file, grep_search) TRƯỚC KHI trình bản plan cho người dùng phê duyệt.
+   - BẮT BUỘC VẠCH TRẦN 1–3 ĐIỂM MÙ KỸ THUẬT:
+     * Facet 1 (Ghost File Verification): Quét xem từng file/hàm trong plan có thực sự tồn tại trên đĩa không.
+     * Facet 2 (Broken Domain Causality): Kiểm tra các điều kiện tiên quyết (VD: mở Mortgage thì có mở Downgrade không?).
+     * Facet 3 (Boundary & Corner Invariants): Kiểm tra ô góc (0, 10, 20, 30), chia cho 0, số âm, timeout.
+     * Facet 4 (Downstream Consumer Desync): Kiểm tra telemetry, shared helpers, delta sync.
+   - CẤM ĐỒNG THUẬN LỊCH SỰ (No Sycophancy & Zero Blind Compliance): Phải xuất báo cáo P1-P3 cụ thể. Agent chính BẮT BUỘC phải dùng công cụ đọc đĩa (view_file, grep_search) kiểm chứng lại từng luận điểm P1-P3 trước khi sửa plan; chỉ cập nhật implementation_plan.md khi khớp 100% với mã nguồn thực tế (nếu subagent ảo giác thì bác bỏ). Người dùng TUYỆT ĐỐI KHÔNG CẦN copy-paste plan sang conversation khác để hỏi.
 
 DỪNG LẠI sau khi lưu kế hoạch, TUYỆT ĐỐI CHƯA VIẾT CODE lúc này. Subagent chỉ trả về bản tóm tắt danh sách Micro-Tasks (<20 dòng) kèm link file docs/plans/[MÃ_TICKET]_plan.md.
 ```
 - **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu - TRẠM 1: PLAN GATE)**:
-  - Bản kế hoạch đã được lưu tại `docs/plans/[MÃ_TICKET]_plan.md` với xác nhận **`[APPROVED]`** từ Spec-Reviewer.
+  - Bản kế hoạch đã được lưu tại `docs/plans/[MÃ_TICKET]_plan.md` với xác nhận **`[APPROVED]`** từ Spec-Reviewer sau khi đã vạch trần và khắc phục 100% rủi ro phản biện Zero-Trust.
 - **📌 CHỈ DẪN VẠN NĂNG CHO JUNIOR**:
   - *Biến số cần thay thế*: `[MÃ_TICKET]` (VD: `issues/GAME-S01-turn-loop.md`).
-  - *Dữ liệu AI tự động đọc*: Architect đọc Ticket + Báo cáo Scout ➔ Tự bẻ nhỏ Task DAG <= 80 LOC ➔ Ghi ra `docs/plans/[MÃ_TICKET]_plan.md`. Tệp này chính là "Bộ Não" duy nhất cho toàn bộ các bước thi công tiếp theo.
+  - *Giá trị sống còn*: Giúp Junior chặn đứng 90% lỗi thiết kế ngớ ngẩn do AI tưởng tượng ra trước khi bước vào gõ code. Kế hoạch đã qua cổng Zero-Trust là bản kế hoạch có tính khả thi kỹ thuật thực tế cao nhất.
 
 ---
 
@@ -2543,21 +2661,23 @@ TRẠM 2 (GREEN IMPLEMENTATION - Subagent implementer, Read-only tests/):
 3. Viết mã nguồn tối thiểu vào src/ để chuyển toàn bộ bài test sang XANH (PASS 100%).
 4. Kiểm soát chất lượng: Hàm <= 30 dòng, Cyclomatic Complexity <= 5, đúng trần 5-Tier LOC, zero dirty casts, zero nuốt lỗi âm thầm.
 5. Chạy lại lệnh test và chứng minh PASS 100%.
+6. TỰ ĐỘNG HÓA BẰNG CHỨNG SỐ (Zero-Memorization): Tự động thực thi `node scripts/collect_evidence.mjs` để đóng gói tệp `.agents/evidence/[MÃ_TICKET]_snapshot.json` trước khi báo cáo hoàn tất. Người dùng KHÔNG PHẢI gõ lệnh thủ công.
 
 TRẠM 3 (INDEPENDENT REVIEW & PHYSICAL DISK VERIFICATION - Subagent spec-reviewer + code-reviewer, Read-only):
 1. CẤM implementer tự phê duyệt code của chính mình.
 2. CẤM chấp thuận dựa trên báo cáo bằng lời nói của agent trước. BẮT BUỘC dùng công cụ đọc đĩa vật lý (view_file, list_dir, terminal command) để xác minh trực tiếp trên ổ cứng:
    - spec-reviewer: Đọc diff thực tế trên đĩa, đối chiếu 1-1 với kế hoạch và requirements.md, xác nhận 0% Scope Drift.
    - code-reviewer: Đọc mã nguồn thực tế trên đĩa, chạy lệnh kiểm tra chất lượng (npm run gate:quick), xác nhận 0 cờ đỏ slop, đúng chuẩn kiến trúc.
+   - ĐỐI CHIẾU EVIDENCE SNAPSHOT: Đọc tệp `.agents/evidence/[MÃ_TICKET]_snapshot.json` trên đĩa vật lý để xác nhận bằng chứng định lượng (blast radius, delta LOC, downstream consumers, contract tests PASS).
 3. Cấp chữ ký [APPROVED] hoặc [REJECTED] kèm báo cáo ngắn gọn (<20 dòng).
 ```
 - **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu - 3 TRẠM HOÀN TẤT)**:
   - Trạm 1 có log test ĐỎ thật sự.
-  - Trạm 2 có mã nguồn sạch và test XANH 100%.
+  - Trạm 2 có mã nguồn sạch, test XANH 100%, và tệp `.agents/evidence/[MÃ_TICKET]_snapshot.json` đã được sinh tự động.
   - Trạm 3 có biên bản thẩm định đĩa vật lý độc lập với chữ ký `[APPROVED]`.
 - **📌 CHỈ DẪN VẠN NĂNG CHO JUNIOR**:
   - *Biến số cần thay thế*: `[ĐƯỜNG_DẪN_TỆP_PLAN]` (VD: `docs/plans/improvements/IMP-51_plan.md`), `[MÃ_TICKET]`, và `[TÊN_CONTRACT]`.
-  - *Giá trị cốt lõi*: 3 Trạm loại bỏ hoàn toàn tình trạng AI "vừa đá bóng vừa thổi còi", đảm bảo mọi tính năng hay bugfix dù lớn hay nhỏ đều có test hợp đồng bảo vệ và được thẩm định khách quan trên đĩa vật lý.
+  - *Giá trị cốt lõi*: 3 Trạm loại bỏ hoàn toàn tình trạng AI "vừa đá bóng vừa thổi còi", đảm bảo mọi tính năng hay bugfix dù lớn hay nhỏ đều có test hợp đồng bảo vệ, bằng chứng số bất biến được lưu tự động trên đĩa, và được thẩm định khách quan trên đĩa vật lý.
 
 ---
 

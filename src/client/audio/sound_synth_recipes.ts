@@ -15,23 +15,18 @@ export function synthesizeDiceRoll(
     const osc = context.createOscillator();
     const gain = context.createGain();
     const filter = context.createBiquadFilter();
-
     filter.type = 'bandpass';
     filter.frequency.setValueAtTime(2200 + Math.random() * 800, hitTime);
     filter.Q.setValueAtTime(5, hitTime);
-
     osc.type = 'triangle';
     osc.frequency.setValueAtTime(1400 + Math.random() * 600, hitTime);
     osc.frequency.exponentialRampToValueAtTime(300, hitTime + 0.04);
-
     const hitGain = volume * (0.35 + Math.random() * 0.25) * (1 - i * 0.15);
     gain.gain.setValueAtTime(hitGain, hitTime);
     gain.gain.exponentialRampToValueAtTime(0.001, hitTime + 0.045);
-
     osc.connect(filter);
     filter.connect(gain);
     gain.connect(destination);
-
     osc.start(hitTime);
     osc.stop(hitTime + 0.05);
   }
@@ -49,32 +44,26 @@ export function synthesizeAuctionGavel(
   strikes.forEach((offset, idx) => {
     const strikeTime = now + offset;
     const gainScale = idx === 0 ? 0.85 : 1.0;
-
     // Tiếng đanh vang (Transient crack)
     const oscCrack = context.createOscillator();
     const gainCrack = context.createGain();
     oscCrack.type = 'sine';
     oscCrack.frequency.setValueAtTime(680, strikeTime);
     oscCrack.frequency.exponentialRampToValueAtTime(180, strikeTime + 0.06);
-
     gainCrack.gain.setValueAtTime(volume * 0.9 * gainScale, strikeTime);
     gainCrack.gain.exponentialRampToValueAtTime(0.001, strikeTime + 0.08);
-
     oscCrack.connect(gainCrack);
     gainCrack.connect(destination);
     oscCrack.start(strikeTime);
     oscCrack.stop(strikeTime + 0.09);
-
     // Tiếng dội trầm của thớ gỗ (Wood resonance body)
     const oscRes = context.createOscillator();
     const gainRes = context.createGain();
     oscRes.type = 'triangle';
     oscRes.frequency.setValueAtTime(240, strikeTime);
     oscRes.frequency.exponentialRampToValueAtTime(120, strikeTime + 0.22);
-
     gainRes.gain.setValueAtTime(volume * 0.6 * gainScale, strikeTime);
     gainRes.gain.exponentialRampToValueAtTime(0.001, strikeTime + 0.25);
-
     oscRes.connect(gainRes);
     gainRes.connect(destination);
     oscRes.start(strikeTime);
@@ -89,7 +78,6 @@ export function synthesizeConstructionSlam(
 ): void {
   if (volume <= 0) return;
   const now = context.currentTime;
-
   // Sóng trầm Sub-bass 42Hz
   const subOsc = context.createOscillator();
   const subGain = context.createGain();
@@ -97,25 +85,20 @@ export function synthesizeConstructionSlam(
   subOsc.frequency.setValueAtTime(130, now);
   subOsc.frequency.exponentialRampToValueAtTime(42, now + 0.09);
   subOsc.frequency.setValueAtTime(42, now + 0.35);
-
   subGain.gain.setValueAtTime(volume * 1.0, now);
   subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
-
   subOsc.connect(subGain);
   subGain.connect(destination);
   subOsc.start(now);
   subOsc.stop(now + 0.56);
-
   // Tiếng đập nén bề mặt (Punch impact)
   const punchOsc = context.createOscillator();
   const punchGain = context.createGain();
   punchOsc.type = 'triangle';
   punchOsc.frequency.setValueAtTime(320, now);
   punchOsc.frequency.exponentialRampToValueAtTime(80, now + 0.08);
-
   punchGain.gain.setValueAtTime(volume * 0.7, now);
   punchGain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-
   punchOsc.connect(punchGain);
   punchGain.connect(destination);
   punchOsc.start(now);
@@ -136,14 +119,11 @@ export function synthesizeMoneyTransfer(
     const noteTime = now + i * 0.045;
     const osc = context.createOscillator();
     const gain = context.createGain();
-
     osc.type = 'sine';
     osc.frequency.setValueAtTime(freq, noteTime);
-
     const noteGain = volume * 0.45 * (1 + i * 0.1);
     gain.gain.setValueAtTime(noteGain, noteTime);
     gain.gain.exponentialRampToValueAtTime(0.001, noteTime + 0.32);
-
     osc.connect(gain);
     gain.connect(destination);
     osc.start(noteTime);
@@ -161,15 +141,12 @@ export function synthesizePawnStep(
   const now = context.currentTime;
   const osc = context.createOscillator();
   const gain = context.createGain();
-
   osc.type = 'triangle';
   const baseFreq = 380 * pitchVariation;
   osc.frequency.setValueAtTime(baseFreq, now);
   osc.frequency.exponentialRampToValueAtTime(140 * pitchVariation, now + 0.038);
-
   gain.gain.setValueAtTime(volume * 0.4, now);
   gain.gain.exponentialRampToValueAtTime(0.001, now + 0.042);
-
   osc.connect(gain);
   gain.connect(destination);
   osc.start(now);
@@ -202,7 +179,6 @@ export function createOceanAmbientGraph(
   const noiseSource = context.createBufferSource();
   noiseSource.buffer = noiseBuffer;
   noiseSource.loop = true;
-
   const filter = context.createBiquadFilter();
   filter.type = 'lowpass';
   filter.frequency.setValueAtTime(320, context.currentTime);
@@ -218,14 +194,11 @@ export function createOceanAmbientGraph(
   const targetGain = Math.max(0.001, volume * 0.28);
   gain.gain.setValueAtTime(0.001, context.currentTime);
   gain.gain.exponentialRampToValueAtTime(targetGain, context.currentTime + 1.5);
-
   noiseSource.connect(filter);
   filter.connect(gain);
   gain.connect(destination);
-
   noiseSource.start();
   lfo.start();
-
   return { source: noiseSource, filter, gain, lfo };
 }
 
@@ -242,10 +215,8 @@ export function synthesizeJazzLoungeChords(
     const osc = context.createOscillator();
     const gain = context.createGain();
     const filter = context.createBiquadFilter();
-
     filter.type = 'lowpass';
     filter.frequency.setValueAtTime(950, now);
-
     osc.type = 'sine';
     osc.frequency.setValueAtTime(freq, now);
 
@@ -253,11 +224,9 @@ export function synthesizeJazzLoungeChords(
     gain.gain.setValueAtTime(0.001, now);
     gain.gain.linearRampToValueAtTime(noteGain, now + 0.3);
     gain.gain.exponentialRampToValueAtTime(0.001, now + 2.8);
-
     osc.connect(filter);
     filter.connect(gain);
     gain.connect(destination);
-
     osc.start(now);
     osc.stop(now + 2.9);
   });
@@ -281,37 +250,29 @@ export function synthesizeCardFlip(
 
   const noise = context.createBufferSource();
   noise.buffer = buffer;
-
   const bandpass = context.createBiquadFilter();
   bandpass.type = 'bandpass';
   bandpass.frequency.setValueAtTime(2400, now);
   bandpass.frequency.exponentialRampToValueAtTime(750, now + 0.11);
   bandpass.Q.setValueAtTime(3.5, now);
-
   const noiseGain = context.createGain();
   noiseGain.gain.setValueAtTime(volume * 0.55, now);
   noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
-
   noise.connect(bandpass);
   bandpass.connect(noiseGain);
   noiseGain.connect(destination);
-
   noise.start(now);
-
   // 2. Tiếng đanh nảy vi mô khi thẻ bẻ cong và lật mặt (Tactile snap click)
   const snapOsc = context.createOscillator();
   const snapGain = context.createGain();
   snapOsc.type = 'triangle';
   snapOsc.frequency.setValueAtTime(1600, now + 0.03);
   snapOsc.frequency.exponentialRampToValueAtTime(350, now + 0.08);
-
   snapGain.gain.setValueAtTime(0.001, now);
   snapGain.gain.setValueAtTime(volume * 0.45, now + 0.03);
   snapGain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-
   snapOsc.connect(snapGain);
   snapGain.connect(destination);
-
   snapOsc.start(now + 0.03);
   snapOsc.stop(now + 0.09);
 }
@@ -328,7 +289,6 @@ export function synthesizeCoronationChime(
 
   notes.forEach((freq, idx) => {
     const noteTime = now + idx * 0.075;
-
     // Âm cơ bản (Fundamental bell sine)
     const osc = context.createOscillator();
     const gain = context.createGain();
@@ -352,15 +312,88 @@ export function synthesizeCoronationChime(
 
     osc.connect(gain);
     gain.connect(destination);
-
     overtone.connect(overtoneGain);
     overtoneGain.connect(destination);
-
     osc.start(noteTime);
     osc.stop(noteTime + 2.7);
-
     overtone.start(noteTime);
     overtone.stop(noteTime + 1.3);
   });
 }
 
+export function synthesizeLighthouseFoghorn(
+  context: AudioContext,
+  destination: AudioNode,
+  volume = 0.7
+): void {
+  if (volume <= 0) return;
+  const now = context.currentTime;
+  const osc = context.createOscillator();
+  const gain = context.createGain();
+  const filter = context.createBiquadFilter();
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(110, now);
+  osc.frequency.linearRampToValueAtTime(105, now + 0.8);
+  filter.type = 'bandpass';
+  filter.frequency.setValueAtTime(220, now);
+  filter.Q.setValueAtTime(3, now);
+  gain.gain.setValueAtTime(0.001, now);
+  gain.gain.linearRampToValueAtTime(volume * 0.7, now + 0.1);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+  osc.connect(filter);
+  filter.connect(gain);
+  gain.connect(destination);
+  osc.start(now);
+  osc.stop(now + 0.82);
+}
+
+export function synthesizeCarHorn(
+  context: AudioContext,
+  destination: AudioNode,
+  volume = 0.5
+): void {
+  if (volume <= 0) return;
+  const now = context.currentTime;
+  [440, 554].forEach((freq) => {
+    const osc = context.createOscillator();
+    const gain = context.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(freq, now);
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.linearRampToValueAtTime(volume * 0.4, now + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+    osc.connect(gain);
+    gain.connect(destination);
+    osc.start(now);
+    osc.stop(now + 0.19);
+  });
+}
+
+export function synthesizeWaterSplash(
+  context: AudioContext,
+  destination: AudioNode,
+  volume = 0.6
+): void {
+  if (volume <= 0) return;
+  const now = context.currentTime;
+  const bufferSize = Math.floor(context.sampleRate * 0.35);
+  const buffer = context.createBuffer(1, bufferSize, context.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+  const noise = context.createBufferSource();
+  noise.buffer = buffer;
+  const filter = context.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(800, now);
+  filter.frequency.exponentialRampToValueAtTime(200, now + 0.35);
+  filter.Q.setValueAtTime(4, now);
+  const gain = context.createGain();
+  gain.gain.setValueAtTime(0.001, now);
+  gain.gain.linearRampToValueAtTime(volume * 0.5, now + 0.04);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+  noise.connect(filter);
+  filter.connect(gain);
+  gain.connect(destination);
+  noise.start(now);
+  noise.stop(now + 0.36);
+}

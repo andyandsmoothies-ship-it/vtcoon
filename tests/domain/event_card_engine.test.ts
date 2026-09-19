@@ -164,14 +164,14 @@ describe('[TC-04.T4/MSS] Market Modifier System & apply/decay Functions', () => 
     });
   });
 
-  test('[TC-04.T4/MSS] applyMarketCard(MC_COASTAL_STORM) thêm modifier affectedCells=COASTAL_CELLS, remainingRounds=1, multiplier=0', () => {
+  test('[TC-04.T4/MSS] applyMarketCard(MC_COASTAL_STORM) thêm modifier affectedCells=COASTAL_CELLS, remainingRounds=2, multiplier=0', () => {
     const modifiers: MarketModifier[] = [];
     applyMarketCard(MarketCardId.MC_COASTAL_STORM, modifiers, [], new Map(), new Map());
     expect(modifiers).toHaveLength(1);
     expect(modifiers[0]).toEqual({
       type: MarketCardId.MC_COASTAL_STORM,
       affectedCells: COASTAL_CELLS,
-      remainingRounds: 1,
+      remainingRounds: 2,
       multiplier: 0,
     });
   });

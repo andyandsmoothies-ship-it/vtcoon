@@ -1,5 +1,6 @@
 // [UI-S02/MSS] DioramaMarina — Luxury yacht harbor, wooden piers, sculpted motorboats & heritage lighthouse
 import React from 'react';
+import { SoundEngine } from '../../audio/sound_engine';
 
 export function DioramaMarina(): React.ReactElement {
   return (
@@ -83,7 +84,12 @@ export function DioramaMarina(): React.ReactElement {
       {/* ========================================================
           3. NGỌN HẢI ĐĂNG CỔ ĐIỂN BIỂU TƯỢNG (Heritage Lighthouse)
          ======================================================== */}
-      <group position={[0.6, 0.06, 0.5]}>
+      <group
+        position={[0.6, 0.06, 0.5]}
+        data-testid="heritage-lighthouse"
+        onClick={() => SoundEngine.playLighthouseHorn()}
+        onPointerDown={() => SoundEngine.playLighthouseHorn()}
+      >
         {/* Móng đá tròn vững chãi trên mũi vịnh */}
         <mesh castShadow receiveShadow position={[0, 0.04, 0]}>
           <cylinderGeometry args={[0.32, 0.38, 0.08, 16]} />

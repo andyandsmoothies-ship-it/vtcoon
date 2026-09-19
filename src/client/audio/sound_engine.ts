@@ -11,7 +11,16 @@ import {
   synthesizeJazzLoungeChords,
   synthesizeCardFlip,
   synthesizeCoronationChime,
+  synthesizeLighthouseFoghorn,
+  synthesizeCarHorn,
+  synthesizeWaterSplash,
 } from './sound_synth_recipes';
+import {
+  synthesizeHeartbeatPulse,
+  synthesizeVictoryChime,
+  synthesizeSlumpThud,
+  synthesizeMonopolyFanfare,
+} from './pawn_tension_sound_recipes';
 
 type AudioContextClass = typeof AudioContext;
 
@@ -33,6 +42,7 @@ export class SoundEngineImpl {
   public bgmBus: GainNode | null = null;
   private unsubscribeStore: (() => void) | null = null;
   private lastGavelTime = 0;
+  private heartbeatInterval: ReturnType<typeof setInterval> | null = null;
   private oceanAmbientNodes: {
     source: AudioBufferSourceNode;
     filter: BiquadFilterNode;
@@ -239,8 +249,122 @@ export class SoundEngineImpl {
     synthesizeCoronationChime(context, dest, volume);
   }
 
+  public playLighthouseHorn(): void {
+    try {
+      const context = this.getContext();
+      const volume = this.getEffectiveSfxVolume();
+      if (!context || volume <= 0) return;
+      void this.resumeAudioContext();
+      const dest = this.sfxBus ?? context.destination;
+      synthesizeLighthouseFoghorn(context, dest, volume);
+    } catch {
+      // Safe fallback
+    }
+  }
+
+  public playCarHorn(): void {
+    try {
+      const context = this.getContext();
+      const volume = this.getEffectiveSfxVolume();
+      if (!context || volume <= 0) return;
+      void this.resumeAudioContext();
+      const dest = this.sfxBus ?? context.destination;
+      synthesizeCarHorn(context, dest, volume);
+    } catch {
+      // Safe fallback
+    }
+  }
+
+  public playWaterRipple(): void {
+    try {
+      const context = this.getContext();
+      const volume = this.getEffectiveSfxVolume();
+      if (!context || volume <= 0) return;
+      void this.resumeAudioContext();
+      const dest = this.sfxBus ?? context.destination;
+      synthesizeWaterSplash(context, dest, volume);
+    } catch {
+      // Safe fallback
+    }
+  }
+
+  public playHeartbeatPulse(): void {
+    try {
+      const context = this.getContext();
+      const volume = this.getEffectiveSfxVolume();
+      if (!context || volume <= 0) return;
+      void this.resumeAudioContext();
+      const dest = this.sfxBus ?? context.destination;
+      synthesizeHeartbeatPulse(context, dest, volume);
+
+      if (this.heartbeatInterval) return;
+      this.heartbeatInterval = setInterval(() => {
+        try {
+          const ctx = this.getContext();
+          const curVol = this.getEffectiveSfxVolume();
+          if (!ctx || curVol <= 0) {
+            this.stopHeartbeatPulse();
+            return;
+          }
+          const d = this.sfxBus ?? ctx.destination;
+          synthesizeHeartbeatPulse(ctx, d, curVol);
+        } catch {
+          this.stopHeartbeatPulse();
+        }
+      }, 400);
+    } catch {
+      // Safe fallback
+    }
+  }
+
+  public stopHeartbeatPulse(): void {
+    if (this.heartbeatInterval) {
+      clearInterval(this.heartbeatInterval);
+      this.heartbeatInterval = null;
+    }
+  }
+
+  public playVictoryChime(): void {
+    try {
+      const context = this.getContext();
+      const volume = this.getEffectiveSfxVolume();
+      if (!context || volume <= 0) return;
+      void this.resumeAudioContext();
+      const dest = this.sfxBus ?? context.destination;
+      synthesizeVictoryChime(context, dest, volume);
+    } catch {
+      // Safe fallback
+    }
+  }
+
+  public playSlumpThud(): void {
+    try {
+      const context = this.getContext();
+      const volume = this.getEffectiveSfxVolume();
+      if (!context || volume <= 0) return;
+      void this.resumeAudioContext();
+      const dest = this.sfxBus ?? context.destination;
+      synthesizeSlumpThud(context, dest, volume);
+    } catch {
+      // Safe fallback
+    }
+  }
+
+  public playMonopolyFanfare(): void {
+    try {
+      if (useAudioStore.getState().isMuted) return;
+      const context = this.getContext();
+      if (!context) return;
+      void this.resumeAudioContext();
+      synthesizeMonopolyFanfare(context, this.masterGain ?? context.destination, 0.8);
+    } catch {
+      // Safe fallback
+    }
+  }
+
   public stopAll(): void {
     this.stopPenthouseOceanAmbient();
+    this.stopHeartbeatPulse();
   }
 
   public dispose(): void {

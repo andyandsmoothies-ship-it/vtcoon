@@ -114,7 +114,7 @@ export function EventCardModal({
       </h2>
 
       {/* Description */}
-      <p className="relative z-10 text-xs text-slate-700 mb-3 leading-relaxed px-1 font-medium">
+      <p className="relative z-10 text-xs text-slate-700 mb-3 leading-relaxed px-1 font-medium hidden sm:block">
         {description}
       </p>
 

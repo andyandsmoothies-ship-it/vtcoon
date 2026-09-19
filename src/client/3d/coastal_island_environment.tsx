@@ -11,37 +11,20 @@ import { AirportLandmark, TrainStationLandmark } from './coastal_island_landmark
 import { useSafeFrame } from './safe_frame';
 import { SafeGLTFModel } from './asset_loader/safe_gltf_model';
 import { VEHICLE_MODEL_URLS } from './diorama/diorama_traffic';
+import { SoundEngine } from '../audio/sound_engine';
 
 export function ContainerShipProceduralFallback(): React.ReactElement {
   return (
     <group>
-      <mesh castShadow position={[0, 0.5, 0]}>
-        <boxGeometry args={[11.0, 0.9, 2.6]} />
-        <meshStandardMaterial color="#DC2626" roughness={0.6} metalness={0.2} />
-      </mesh>
-      <mesh castShadow position={[0, 0.96, 0]}>
-        <boxGeometry args={[10.6, 0.15, 2.4]} />
-        <meshStandardMaterial color="#F8FAFC" roughness={0.4} />
-      </mesh>
-      <mesh castShadow position={[4.0, 1.5, 0]}>
-        <boxGeometry args={[1.8, 1.1, 2.0]} />
-        <meshStandardMaterial color="#F1F5F9" roughness={0.3} />
-      </mesh>
-      <mesh position={[4.3, 2.2, 0]}>
-        <cylinderGeometry args={[0.2, 0.25, 0.6, 8]} />
-        <meshStandardMaterial color="#EF4444" roughness={0.5} />
-      </mesh>
+      <mesh castShadow position={[0, 0.5, 0]}><boxGeometry args={[11.0, 0.9, 2.6]} /><meshStandardMaterial color="#DC2626" roughness={0.6} metalness={0.2} /></mesh>
+      <mesh castShadow position={[0, 0.96, 0]}><boxGeometry args={[10.6, 0.15, 2.4]} /><meshStandardMaterial color="#F8FAFC" roughness={0.4} /></mesh>
+      <mesh castShadow position={[4.0, 1.5, 0]}><boxGeometry args={[1.8, 1.1, 2.0]} /><meshStandardMaterial color="#F1F5F9" roughness={0.3} /></mesh>
+      <mesh position={[4.3, 2.2, 0]}><cylinderGeometry args={[0.2, 0.25, 0.6, 8]} /><meshStandardMaterial color="#EF4444" roughness={0.5} /></mesh>
       {[-3.6, -1.8, 0.0, 1.8].map((cx, i) => (
         <group key={`container-stack-${i}`} position={[cx, 1.3, 0]}>
-          <mesh castShadow position={[0, 0, -0.5]}>
-            <boxGeometry args={[1.5, 0.6, 0.9]} /><meshStandardMaterial color={i % 2 === 0 ? '#10B981' : '#3B82F6'} roughness={0.5} />
-          </mesh>
-          <mesh castShadow position={[0, 0, 0.5]}>
-            <boxGeometry args={[1.5, 0.6, 0.9]} /><meshStandardMaterial color={i % 3 === 0 ? '#F59E0B' : '#0284C7'} roughness={0.5} />
-          </mesh>
-          <mesh castShadow position={[0, 0, 0.6]}>
-            <boxGeometry args={[1.4, 0.55, 1.6]} /><meshStandardMaterial color={i % 2 === 0 ? '#22C55E' : '#E11D48'} roughness={0.5} />
-          </mesh>
+          <mesh castShadow position={[0, 0, -0.5]}><boxGeometry args={[1.5, 0.6, 0.9]} /><meshStandardMaterial color={i % 2 === 0 ? '#10B981' : '#3B82F6'} roughness={0.5} /></mesh>
+          <mesh castShadow position={[0, 0, 0.5]}><boxGeometry args={[1.5, 0.6, 0.9]} /><meshStandardMaterial color={i % 3 === 0 ? '#F59E0B' : '#0284C7'} roughness={0.5} /></mesh>
+          <mesh castShadow position={[0, 0, 0.6]}><boxGeometry args={[1.4, 0.55, 1.6]} /><meshStandardMaterial color={i % 2 === 0 ? '#22C55E' : '#E11D48'} roughness={0.5} /></mesh>
         </group>
       ))}
     </group>
@@ -87,7 +70,13 @@ export const CoastalIslandEnvironment: React.FC<CoastalIslandEnvironmentProps> =
       </mesh>
 
       {/* Lưới sóng Gerstner GPU Shader vô cực PlaneGeometry args={[240, 240, 96, 96]} */}
-      <mesh receiveShadow position={[0, -0.30, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+      <mesh
+        receiveShadow
+        position={[0, -0.30, 0]}
+        rotation={[-Math.PI / 2, 0, 0]}
+        data-testid="living-ocean-water"
+        onPointerDown={() => SoundEngine.playWaterRipple()}
+      >
         <planeGeometry ref={oceanGeomRef} args={[240, 240, 24, 24]} />
         <meshStandardMaterial
           color="#0284C7"
@@ -216,51 +205,38 @@ export const CoastalIslandEnvironment: React.FC<CoastalIslandEnvironmentProps> =
           </group>
           <TrainStationLandmark />
           <AirportLandmark />
+
+          {/* Tàu Container Tây Nam & Du thuyền ven bãi tắm (Ngoại vi bãi cát Tây - chỉ hiện khi streamlined=false) */}
+          <group position={[-15.0, -0.30, 9.5]} rotation={[0, -0.85, 0]} scale={[0.75, 0.75, 0.75]}>
+            <SafeGLTFModel url={VEHICLE_MODEL_URLS.container} fallback={<ContainerShipProceduralFallback />} castShadow receiveShadow />
+            <mesh position={[6.2, 0.05, 0]}>
+              <planeGeometry args={[4.2, 1.8]} />
+              <meshBasicMaterial color="#FFFFFF" transparent opacity={0.4} />
+            </mesh>
+          </group>
+
+          <group position={[-11.5, -0.30, 12.0]} rotation={[0, 0.6, 0]}>
+            <mesh castShadow position={[0, 0.25, 0]}>
+              <boxGeometry args={[3.2, 0.4, 1.0]} />
+              <meshStandardMaterial color="#FFFFFF" roughness={0.2} metalness={0.1} />
+            </mesh>
+            <mesh castShadow position={[0.2, 0.55, 0]}>
+              <boxGeometry args={[1.6, 0.35, 0.7]} />
+              <meshStandardMaterial color="#0284C7" roughness={0.2} />
+            </mesh>
+          </group>
         </>
       )}
 
       {/* 4. Rặng núi chân trời phía Bắc với tháp radar vi mô (#166534, #15803D, #22C55E) */}
       <HorizonMountainRange />
 
-      {/* 5. Tàu Container Tây Nam & Nam ngoài khơi */}
-      <group position={[-15.0, -0.30, 9.5]} rotation={[0, -0.85, 0]} scale={[0.75, 0.75, 0.75]}>
-        <SafeGLTFModel url={VEHICLE_MODEL_URLS.container} fallback={<ContainerShipProceduralFallback />} castShadow receiveShadow />
-        <mesh position={[6.2, 0.05, 0]}>
-          <planeGeometry args={[4.2, 1.8]} />
-          <meshBasicMaterial color="#FFFFFF" transparent opacity={0.4} />
-        </mesh>
-      </group>
-
+      {/* 5. Tàu Container Nam ngoài khơi xa (Deep Ocean, Z = 36) */}
       <group position={[8, -0.35, 36]} rotation={[0, -0.2, 0]}>
-        <mesh castShadow position={[0, 0.45, 0]}>
-          <boxGeometry args={[9.0, 0.8, 2.2]} />
-          <meshStandardMaterial color="#1E3A8A" roughness={0.5} metalness={0.3} />
-        </mesh>
-        <mesh castShadow position={[3.2, 1.3, 0]}>
-          <boxGeometry args={[1.5, 1.0, 1.8]} />
-          <meshStandardMaterial color="#FFFFFF" roughness={0.3} />
-        </mesh>
-        {[-2.5, -0.8, 0.9].map((cx, idx) => (
-          <mesh key={`c2-${idx}`} castShadow position={[cx, 1.1, 0]}>
-            <boxGeometry args={[1.4, 0.55, 1.5]} />
-            <meshStandardMaterial color={idx === 0 ? '#F59E0B' : idx === 1 ? '#10B981' : '#EF4444'} />
-          </mesh>
-        ))}
+        <SafeGLTFModel url={VEHICLE_MODEL_URLS.container} fallback={<ContainerShipProceduralFallback />} castShadow receiveShadow />
         <mesh position={[-5.2, 0.05, 0]}>
           <planeGeometry args={[3.8, 1.6]} />
           <meshBasicMaterial color="#FFFFFF" transparent opacity={0.38} />
-        </mesh>
-      </group>
-
-      {/* Du thuyền sang trọng neo gần bãi tắm */}
-      <group position={[-11.5, -0.30, 12.0]} rotation={[0, 0.6, 0]}>
-        <mesh castShadow position={[0, 0.25, 0]}>
-          <boxGeometry args={[3.2, 0.4, 1.0]} />
-          <meshStandardMaterial color="#FFFFFF" roughness={0.2} metalness={0.1} />
-        </mesh>
-        <mesh castShadow position={[0.2, 0.55, 0]}>
-          <boxGeometry args={[1.6, 0.35, 0.7]} />
-          <meshStandardMaterial color="#0284C7" roughness={0.2} />
         </mesh>
       </group>
 

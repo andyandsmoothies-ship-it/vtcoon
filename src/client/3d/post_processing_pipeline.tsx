@@ -11,6 +11,8 @@ import {
 } from '@react-three/postprocessing';
 import { Vector3 } from 'three';
 import { ToneMappingMode } from 'postprocessing';
+import { resolveAdaptivePostProcessing } from '../ui/ui_helpers';
+import { useTelemetryStore } from '../telemetry/telemetry_store';
 
 export interface PostProcessingPipelineProps {
   enabled?: boolean;
@@ -32,6 +34,7 @@ export interface PostProcessingPipelineProps {
   aoRadius?: number;
   aoHalfRes?: boolean;
   multisampling?: number;
+  fps?: number;
 }
 
 export const DEFAULT_PIPELINE_CONFIG = {
@@ -79,12 +82,22 @@ export function PostProcessingPipeline({
   aoIntensity = DEFAULT_PIPELINE_CONFIG.aoIntensity,
   aoRadius = DEFAULT_PIPELINE_CONFIG.aoRadius,
   aoHalfRes = DEFAULT_PIPELINE_CONFIG.aoHalfRes,
+  fps,
 }: PostProcessingPipelineProps): React.ReactElement<{ children?: any }> | null {
   if (!enabled) {
     return null;
   }
 
-  const resolvedEnableAo = enableAo && !isMobile && !disableAoOnMobile;
+  const telemetryFps = typeof window !== 'undefined' ? useTelemetryStore.getState().metrics.fps : 60;
+  const currentFps = fps !== undefined ? fps : telemetryFps;
+  const adaptiveAo = resolveAdaptivePostProcessing({
+    fps: currentFps,
+    isMobile: Boolean(isMobile || disableAoOnMobile),
+    enableAo,
+  });
+  const resolvedEnableAo = adaptiveAo.enableAo;
+  const resolvedAoQuality = adaptiveAo.aoQuality;
+  const resolvedAoHalfRes = aoHalfRes !== undefined ? aoHalfRes : adaptiveAo.aoHalfRes;
   const targetVector = new Vector3(dofTarget[0], dofTarget[1], dofTarget[2]);
 
   return (
@@ -95,8 +108,8 @@ export function PostProcessingPipeline({
           aoRadius={aoRadius}
           intensity={aoIntensity}
           distanceFalloff={DEFAULT_PIPELINE_CONFIG.aoDistanceFalloff}
-          halfRes={aoHalfRes}
-          quality="medium"
+          halfRes={resolvedAoHalfRes}
+          quality={resolvedAoQuality}
           color="#1E293B"
         />
       )}

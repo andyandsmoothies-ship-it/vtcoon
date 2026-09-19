@@ -7,6 +7,12 @@ export enum BotPersonality {
   Aggressive = 'Aggressive',
 }
 
+export enum BotPosture {
+  Leading  = 'Leading',
+  Parity   = 'Parity',
+  Trailing = 'Trailing',
+}
+
 /** Number of combinations for each sum in 2d6 dice rolls */
 export const DICE_2D6_COMBINATIONS: Readonly<Record<number, number>> = Object.freeze({
   2:  1,

@@ -56,6 +56,9 @@ function syncTurnAndTimer(delta: DeltaPayload, state: GameState): void {
   } else if (delta.timeRemaining !== undefined) {
     state.setTurnTimeRemaining(delta.timeRemaining);
   }
+  if (delta.turnPhase !== undefined) {
+    state.setTurnPhase(delta.turnPhase);
+  }
 }
 
 function syncTreasuryPool(delta: DeltaPayload, state: GameState): void {
@@ -142,7 +145,6 @@ function syncEventCard(card: DeltaPayload['lastEventCard'], state: GameState): v
 }
 
 export function applyPhaseAndTimerDeltas(delta: DeltaPayload, state: GameState, store: typeof useGameStore): void {
-  syncDiceRoll(delta, state);
   syncTurnAndTimer(delta, state);
   syncTreasuryPool(delta, state);
   syncRoundAndModifiers(delta, state);
@@ -161,12 +163,18 @@ export function applyDeltaToStore(delta: DeltaPayload, store: typeof useGameStor
     state.setDice([delta.dice[0], delta.dice[1]]);
   }
 
-  const playersInfoMap = initPlayersInfoMap(state, isFullSync);
+  // [IMP-112] Đồng bộ xúc xắc TRƯỚC KHI xử lý di chuyển quân cờ.
+  // Nếu delta mang kết quả xúc xắc mới, triggerDiceRoll sẽ kích hoạt isRolling: true.
+  // Nhờ đó applyPlayerDeltas sẽ đưa bước di chuyển vào pendingPawnMove thay vì chạy trước xúc xắc.
+  syncDiceRoll(delta, state);
+
+  const currentState = store.getState();
+  const playersInfoMap = initPlayersInfoMap(currentState, isFullSync);
   let hasPlayerInfoChange = isFullSync && Object.keys(playersInfoMap).length > 0;
 
-  if (applyPlayerDeltas(delta, state, playersInfoMap, isFullSync)) hasPlayerInfoChange = true;
-  if (applyCellDeltas(delta, state, playersInfoMap, isFullSync)) hasPlayerInfoChange = true;
+  if (applyPlayerDeltas(delta, currentState, playersInfoMap, isFullSync)) hasPlayerInfoChange = true;
+  if (applyCellDeltas(delta, currentState, playersInfoMap, isFullSync)) hasPlayerInfoChange = true;
 
-  if (hasPlayerInfoChange) state.setPlayersInfo(playersInfoMap);
+  if (hasPlayerInfoChange) currentState.setPlayersInfo(playersInfoMap);
   applyPhaseAndTimerDeltas(delta, state, store);
 }

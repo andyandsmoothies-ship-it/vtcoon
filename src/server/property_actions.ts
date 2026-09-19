@@ -61,7 +61,11 @@ export function handleUpgrade(
 // --- DEBT-02: INTENT_DOWNGRADE (UC-GAME-057) ---
 
 function isDowngradePhaseValid(phase?: TurnPhase): boolean {
-  return phase === TurnPhase.PropertyManagement || phase === TurnPhase.InsolvencyPhase;
+  return (
+    phase === TurnPhase.PropertyManagement ||
+    phase === TurnPhase.InsolvencyPhase ||
+    phase === TurnPhase.ActionPhase
+  );
 }
 
 function checkDowngradeContext(

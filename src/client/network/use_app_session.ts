@@ -94,6 +94,11 @@ export function useAppSession(
       const timer = setTimeout(() => setErrorMessage(null), 4000);
       return () => clearTimeout(timer);
     }
+    if ((reasonCode as string) === 'TRADE_REJECTED') {
+      setErrorMessage('Đối tác đã từ chối đề xuất đàm phán mua/bán đất!');
+      const timer = setTimeout(() => setErrorMessage(null), 4000);
+      return () => clearTimeout(timer);
+    }
     setErrorMessage(`Lỗi máy chủ: ${reasonCode}`);
     if (reasonCode === 'NOT_ENOUGH_PLAYERS' || reasonCode === 'NOT_HOST' || reasonCode === 'ROOM_NOT_FOUND') {
       useLobbyStore.getState().setGameStarted(false);
@@ -120,9 +125,12 @@ export function useAppSession(
     if (delta.players && delta.tick > 0) {
       const localP = delta.players.find((p) => p.id === localPlayerId);
       if (localP && localP.balance < 0) {
-        const currentModal = useGameStore.getState().activeModal;
-        if (currentModal !== 'insolvency' && currentModal !== 'game_over') {
-          openModal('insolvency', { playerId: localPlayerId, deficit: -localP.balance });
+        const isBankrupt = Boolean(localP.bankrupt ?? useGameStore.getState().playersInfo[localPlayerId]?.bankrupt);
+        if (!isBankrupt) {
+          const currentModal = useGameStore.getState().activeModal;
+          if (currentModal !== 'insolvency' && currentModal !== 'game_over') {
+            openModal('insolvency', { playerId: localPlayerId, deficit: -localP.balance });
+          }
         }
       }
     }

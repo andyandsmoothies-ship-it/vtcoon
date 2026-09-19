@@ -1,7 +1,7 @@
 // [IMP-64] Extracted player delta functions from apply_delta.ts
 // ZERO LOGIC CHANGE — code moved verbatim from apply_delta.ts L26–L184
-import { type GameState, type PlayerHudInfo, type PawnMoveTask, FloatingTextType } from '../store/game_store.js';
-import { calculatePathWaypoints } from '../3d/pawn_path.js';
+import { type GameState, type PlayerHudInfo, type PawnMoveTask, FloatingTextType, type FloatingActionType } from '../store/game_store.js';
+import { calculatePathWaypoints, calculateJailFlightWaypoints } from '../3d/pawn_path.js';
 import { useLobbyStore } from '../store/lobby_store.js';
 import { PLAYER_TOKEN_PALETTE } from '../../domain/theme.js';
 import type { DeltaPayload } from '../../server/session_manager.js';
@@ -35,23 +35,74 @@ function determineFromCell(state: GameState, playerId: string, currentPos: numbe
 
 function dispatchPawnMove(state: GameState, task: PawnMoveTask, isRolling: boolean): void {
   if (isRolling && state.setPendingPawnMove) {
-    state.setPendingPawnMove({ playerId: task.playerId, targetCell: task.targetCell, fromCell: task.fromCell });
+    state.setPendingPawnMove({
+      playerId: task.playerId,
+      targetCell: task.targetCell,
+      fromCell: task.fromCell,
+      ...(task.isJailFlight ? { isJailFlight: true, isBot: Boolean(task.isBot) } : {}),
+    });
   } else if (state.enqueuePawnMove) {
     state.enqueuePawnMove(task);
   } else {
-    state.startPawnMove?.(task.playerId, task.targetCell, task.fromCell, Boolean(task.isBot));
+    state.startPawnMove?.(task.playerId, task.targetCell, task.fromCell, Boolean(task.isBot), task.isJailFlight);
   }
 }
 
-function notifyBalanceChange(state: GameState, playerId: string, diff: number, oldBalance: number, newBalance: number): void {
+export interface BalanceChangeContext {
+  readonly isPassingGo?: boolean;
+  readonly cellIndex?: number;
+  readonly isBail?: boolean;
+  readonly targetPlayerName?: string;
+  readonly actionType?: FloatingActionType;
+  readonly title?: string;
+}
+
+export function notifyBalanceChange(
+  state: GameState,
+  playerId: string,
+  diff: number,
+  oldBalance: number,
+  newBalance: number,
+  context?: BalanceChangeContext,
+): void {
   if (diff > 0) {
-    state.addFloatingText({ text: `+${formatCurrency(diff)}`, type: FloatingTextType.Reward, playerId });
     if (oldBalance < 0 && newBalance >= 0) {
       if (state.activeModal === 'insolvency') state.closeModal();
-      state.addFloatingText({ text: '🎉 Thoát vỡ nợ thành công! Hãy bấm Hết Lượt.', type: FloatingTextType.Reward, playerId });
+      state.addFloatingText({
+        text: `+${formatCurrency(diff)}`,
+        type: FloatingTextType.Reward,
+        playerId,
+        actionType: 'debt_relief',
+        title: 'Thoát vỡ nợ thành công! Hãy bấm Hết Lượt.',
+      });
+      return;
     }
+    const isSalary = context?.isPassingGo || context?.actionType === 'salary' || diff === 2000;
+    const actionType: FloatingActionType = context?.actionType ?? (isSalary ? 'salary' : 'general');
+    const title = context?.title ?? (isSalary ? 'Lương Vượt GO' : undefined);
+    state.addFloatingText({
+      text: `+${formatCurrency(diff)}`,
+      type: FloatingTextType.Reward,
+      playerId,
+      actionType,
+      title,
+      cellIndex: context?.cellIndex,
+      targetPlayerName: context?.targetPlayerName,
+    });
   } else if (diff < 0) {
-    state.addFloatingText({ text: formatCurrency(diff), type: FloatingTextType.Penalty, playerId });
+    const isBail = context?.isBail || (context?.cellIndex === 10 && Math.abs(diff) === 500);
+    const isTax = context?.cellIndex === 4;
+    const actionType: FloatingActionType = context?.actionType ?? (isBail ? 'bail' : isTax ? 'tax' : 'general');
+    const title = context?.title ?? (isBail ? 'Bảo Lãnh Kiểm Toán' : isTax ? 'Lệ Phí Đất Đai' : undefined);
+    state.addFloatingText({
+      text: formatCurrency(diff),
+      type: FloatingTextType.Penalty,
+      playerId,
+      actionType,
+      title,
+      cellIndex: context?.cellIndex,
+      targetPlayerName: context?.targetPlayerName,
+    });
   }
 }
 
@@ -122,10 +173,23 @@ function processSinglePlayerPosition(
   if (nextPositions[p.id] === p.position) return false;
   const fromCell = determineFromCell(state, p.id, nextPositions[p.id] ?? 0);
   nextPositions[p.id] = p.position;
+
+  const existingInfo = state.playersInfo[p.id];
+  const existingWasInAudit = Boolean(existingInfo?.inAudit || (existingInfo?.auditTurnsLeft && existingInfo.auditTurnsLeft > 0));
+  const isGoingToAudit = p.position === 10 && Boolean(p.inAudit || (p.auditTurnsLeft && p.auditTurnsLeft > 0)) && !existingWasInAudit;
+
   if (!isFullSync && fromCell !== p.position) {
-    const waypoints = calculatePathWaypoints(fromCell, p.position);
+    const isJailFlight = isGoingToAudit && p.position === 10;
+    const waypoints = isJailFlight ? calculateJailFlightWaypoints(p.position) : calculatePathWaypoints(fromCell, p.position);
     if (waypoints.length > 0) {
-      dispatchPawnMove(state, { playerId: p.id, fromCell, targetCell: p.position, waypoints, isBot: Boolean(p.isBot) }, state.isRolling);
+      dispatchPawnMove(state, {
+        playerId: p.id,
+        fromCell,
+        targetCell: p.position,
+        waypoints,
+        isBot: Boolean(p.isBot),
+        ...(isJailFlight ? { isJailFlight: true } : {}),
+      }, state.isRolling);
     }
   }
   return true;
@@ -138,7 +202,24 @@ function syncPlayerBalanceDiff(
   isFullSync: boolean,
 ): void {
   if (isFullSync || !existing || existing.balance === p.balance) return;
-  notifyBalanceChange(state, p.id, p.balance - existing.balance, existing.balance, p.balance);
+  const diff = p.balance - existing.balance;
+  const prevPos = state.playerPositions[p.id] ?? 0;
+  const isPassingGo = prevPos > (p.position ?? prevPos) || p.position === 0;
+  const isBail = (p.position === 10 || prevPos === 10) && existing.balance - p.balance === 500;
+  const isDebtRelief = existing.balance < 0 && p.balance >= 0;
+  const isSalary = isPassingGo || diff === 2000;
+
+  // [IMP-122] Không sinh badge generic trùng lặp khi biến động tài chính đã được
+  // activity_tracker (rent, buy, upgrade, tax, auction) gắn pop-up ngữ cảnh chuyên biệt.
+  if (!isDebtRelief && !isSalary && !isBail) {
+    return;
+  }
+
+  notifyBalanceChange(state, p.id, diff, existing.balance, p.balance, {
+    cellIndex: p.position,
+    isPassingGo,
+    isBail,
+  });
 }
 
 function syncFinalPositions(state: GameState, nextPositions: Record<string, number>, hasPosChange: boolean, isFullSync: boolean): void {
@@ -163,6 +244,12 @@ export function applyPlayerDeltas(
     if (processSinglePlayerPosition(state, p, nextPositions, isFullSync)) hasPosChange = true;
     const existing = playersInfoMap[p.id];
     syncPlayerBalanceDiff(state, p, existing, isFullSync);
+    if (p.bankrupt === true && state.activeModal === 'insolvency') {
+      const modalPayload = state.modalPayload as Record<string, unknown> | undefined;
+      if (!modalPayload?.playerId || modalPayload.playerId === p.id) {
+        state.closeModal();
+      }
+    }
     playersInfoMap[p.id] = updatePlayerHudRecord(existing, p, pIdx);
   });
 

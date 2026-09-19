@@ -8,7 +8,12 @@ import type { PropertyRegistry, PropertyStateMap } from '../property_data';
 import { PROPERTY_DEEDS } from '../property_data';
 import { hasMonopoly, checkEvenBuilding } from '../property_upgrade';
 
-import { BotPersonality, type BotIntent, type TileValuation, type BotConfig, DEFAULT_MIN_SAFETY_BUFFER } from './bot_types';
+import { BotPersonality, BotPosture, type BotIntent, type TileValuation, type BotConfig, DEFAULT_MIN_SAFETY_BUFFER } from './bot_types';
+import {
+  evaluateBotPosture,
+  calculateAmbushScore,
+  findEligibleProactiveMortgage,
+} from './bot_posture.js';
 import { calculateThreatHorizon } from './threat_forecaster';
 import { evaluateTileValuation } from './valuation_engine';
 import { resolveInsolvencyStep } from './solvency_solver';
@@ -81,22 +86,22 @@ function decidePassiveActionIntent(
   const cell = BOARD_CONFIG[bot.position];
   const isInfraOrUtility = cell?.type === CellType.Railroad || cell?.type === CellType.Utility;
   const isMonopolyOrStrategic = (valuation.monopolyScore ?? 1.0) >= 1.6 || (valuation.denialScore ?? 1.0) > 1.0;
-  const isCheap = basePrice <= 1500;
-  const hasCashFortress = bot.balance >= basePrice * 3;
+  const hasSufficientCash = bot.balance - basePrice >= safetyBuffer;
 
-  if (!isCheap && !isInfraOrUtility && !isMonopolyOrStrategic && !hasCashFortress) {
+  if (!hasSufficientCash) {
     return { type: 'INTENT_DECLINE' };
   }
 
-  const effectiveThreshold = balanceThresholdMultiplier ?? 1.5;
-  if (bot.balance < basePrice * effectiveThreshold || bot.balance - basePrice < safetyBuffer) {
+  if (isInfraOrUtility || isMonopolyOrStrategic) {
+    return { type: 'INTENT_BUY' };
+  }
+
+  const effectiveThreshold = balanceThresholdMultiplier ?? 1.25;
+  if (bot.balance < basePrice * effectiveThreshold) {
     return { type: 'INTENT_DECLINE' };
   }
 
   if (config?.manualRoll !== undefined || config?.rng !== undefined || config?.seed !== undefined) {
-    if (isMonopolyOrStrategic) return { type: 'INTENT_BUY' };
-    const hasAbundantEarlyCash = config?.manualRoll === undefined && hasCashFortress && (room?.round ?? room?.roundCount ?? 1) <= 2;
-    if (hasAbundantEarlyCash) return { type: 'INTENT_BUY' };
     const rng = actionRng ?? config.rng ?? createDeterministicRng(config.seed ?? (room ? getTurnSeed(bot, room, bot.position) : 42));
     const buy = sampleDecision(valuation.buyProbability ?? 0.8, rng, config.manualRoll);
     return buy ? { type: 'INTENT_BUY' } : { type: 'INTENT_DECLINE' };
@@ -195,9 +200,22 @@ function canUpgradeCell(
   dangerTilesCount: number,
   upgradeCost: number,
   personality: BotPersonality,
+  posture?: BotPosture,
+  round?: number,
 ): boolean {
   if (personality === BotPersonality.Passive) {
-    return bot.balance >= upgradeCost * 3 && dangerTilesCount === 0 && bot.balance - upgradeCost >= safetyBuffer;
+    if (bot.balance < upgradeCost * 3) return false;
+    const isUnderdog = posture === BotPosture.Trailing || (round !== undefined && round >= 20);
+    if (isUnderdog) {
+      return bot.balance - upgradeCost >= safetyBuffer * 1.8;
+    }
+    if (dangerTilesCount > 0) {
+      return bot.balance - upgradeCost >= safetyBuffer * 3 && bot.balance >= upgradeCost * 5;
+    }
+    return bot.balance - upgradeCost >= safetyBuffer * 1.2;
+  }
+  if (personality === BotPersonality.Aggressive && posture === BotPosture.Leading) {
+    return bot.balance - upgradeCost >= safetyBuffer * 1.45;
   }
   return bot.balance - upgradeCost >= safetyBuffer;
 }
@@ -208,6 +226,7 @@ function findEligibleUpgradeCell(
   registry: PropertyRegistry,
   stateMap: PropertyStateMap,
   personality: BotPersonality,
+  posture?: BotPosture,
 ): number | null {
   const ownedGroups = getBuildableGroups(bot.id, bot.mortgagedProperties, registry, stateMap);
   if (ownedGroups.size === 0) return null;
@@ -215,6 +234,9 @@ function findEligibleUpgradeCell(
   const threat = calculateThreatHorizon(bot, room, registry, stateMap, personality);
   const isMortgaged = (idx: number) =>
     Boolean(bot.mortgagedProperties?.includes(idx) || stateMap.get(idx)?.isMortgaged);
+  const currentRound = room.roundCount ?? room.round ?? 1;
+
+  const candidates: Array<{ cellIndex: number; ambushScore: number }> = [];
 
   for (const group of ownedGroups) {
     const groupCells = BOARD_CONFIG.filter((c) => c.colorGroup === group);
@@ -226,12 +248,17 @@ function findEligibleUpgradeCell(
       const upgradeCost = getUpgradeCost(cell.index, stateMap, room.activeModifiers);
       if (upgradeCost <= 0) continue;
 
-      if (canUpgradeCell(cell.index, bot, threat.safetyBuffer, threat.dangerTilesCount, upgradeCost, personality)) {
-        return cell.index;
+      if (canUpgradeCell(cell.index, bot, threat.safetyBuffer, threat.dangerTilesCount, upgradeCost, personality, posture, currentRound)) {
+        const ambush = calculateAmbushScore(cell.index, room.players, bot.id);
+        candidates.push({ cellIndex: cell.index, ambushScore: ambush });
       }
     }
   }
-  return null;
+
+  if (candidates.length === 0) return null;
+
+  candidates.sort((a, b) => b.ambushScore - a.ambushScore);
+  return candidates[0]!.cellIndex;
 }
 
 function decideHosePhaseIntent(
@@ -299,15 +326,28 @@ export function decideBotIntent(
       return decideActionPhaseIntent(bot, room, registry, stateMap, config);
 
     case TurnPhase.PropertyManagement: {
-      const upgradeCell = findEligibleUpgradeCell(bot, room, registry, stateMap, personality);
+      const currentRound = room.roundCount ?? room.round ?? 1;
+      const posture = evaluateBotPosture(bot.id, room.players, registry, stateMap, currentRound);
+
+      const upgradeCell = findEligibleUpgradeCell(bot, room, registry, stateMap, personality, posture);
       if (upgradeCell !== null) {
         return { type: 'INTENT_UPGRADE', cellIndex: upgradeCell };
       }
+
+      const proactiveMortgage = findEligibleProactiveMortgage(bot, room, registry, stateMap);
+      if (proactiveMortgage !== null) {
+        const deed = PROPERTY_DEEDS.get(proactiveMortgage);
+        const gain = Math.floor((deed?.price ?? 0) * 0.5);
+        const hypotheticalBot = { ...bot, balance: bot.balance + gain };
+        if (findEligibleUpgradeCell(hypotheticalBot, room, registry, stateMap, personality, posture) !== null) {
+          return { type: 'INTENT_MORTGAGE', cellIndex: proactiveMortgage };
+        }
+      }
+
       const redeemCell = findEligibleRedeemCell(bot, room, registry, stateMap, personality);
       if (redeemCell !== null) {
         return { type: 'INTENT_REDEEM', cellIndex: redeemCell };
       }
-      const currentRound = room.roundCount ?? room.round ?? 1;
       const tradeIntent = findEligibleBotTrade(bot, room, registry, stateMap, personality, currentRound);
       if (tradeIntent !== null) {
         bot.lastTradeOfferRound = currentRound;

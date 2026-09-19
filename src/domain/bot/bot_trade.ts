@@ -3,6 +3,7 @@ import { BOARD_CONFIG, ColorGroup } from '../board_config.js';
 import { PROPERTY_DEEDS, type PropertyRegistry, type PropertyStateMap } from '../property_data.js';
 import { BotPersonality, DEFAULT_MIN_SAFETY_BUFFER, type BotIntent } from './bot_types.js';
 import type { Player, Room } from '../room.js';
+import { isLeadingPlayer } from './bot_posture.js';
 
 export interface MonopolyGap {
   readonly cellIndex: number;
@@ -89,7 +90,7 @@ export function calculateTradeOfferPrice(
     } else if (personality === BotPersonality.Balanced) {
       multiplier = 1.55;
     } else if (personality === BotPersonality.Passive) {
-      multiplier = 1.35;
+      multiplier = isMonopolyGap ? 1.60 : 1.35;
     }
   } else {
     if (personality === BotPersonality.Aggressive) {
@@ -132,6 +133,13 @@ export function evaluateBotTradeAcceptance(
   const basePrice = deed?.price ?? 1000;
   const pers = personality ?? BotPersonality.Balanced;
 
+  if (isLeadingPlayer(buyer.id, room?.players ?? [buyer, sellerBot], registry, stateMap)) {
+    if (pers === BotPersonality.Balanced && (room?.players?.length ?? 0) >= 3 && buyer.balance > 30000) {
+      return { accept: false, reason: 'KINGMAKING_DEFENSE' };
+    }
+    return { accept: false, reason: 'EMBARGO_LEADER' };
+  }
+
   let givesMonopolyToBuyer = false;
   if (cellConfig?.colorGroup) {
     const groupCells = BOARD_CONFIG.filter((c) => c.colorGroup === cellConfig.colorGroup);
@@ -143,7 +151,10 @@ export function evaluateBotTradeAcceptance(
 
   if (pers === BotPersonality.Aggressive) {
     if (givesMonopolyToBuyer) {
-      if (offerPrice >= Math.round(2.5 * basePrice) && sellerBot.balance < 500) {
+      if (offerPrice >= Math.round(1.75 * basePrice)) {
+        return { accept: true };
+      }
+      if (sellerBot.balance < 2000 && offerPrice >= Math.round(1.55 * basePrice)) {
         return { accept: true };
       }
       return { accept: false, reason: 'PREVENT_MONOPOLY' };
@@ -173,14 +184,17 @@ export function evaluateBotTradeAcceptance(
     return { accept: false, reason: 'PRICE_TOO_LOW' };
   }
 
-  // BotPersonality.Passive
+  // BotPersonality.Passive: Phòng thủ kiên cố, tuyệt đối không bán rẻ độc quyền
+  if (givesMonopolyToBuyer) {
+    if (sellerBot.balance < 500 && offerPrice >= Math.round(2.0 * basePrice)) {
+      return { accept: true };
+    }
+    return { accept: false, reason: 'PREVENT_MONOPOLY' };
+  }
   if (offerPrice >= Math.round(1.25 * basePrice) && sellerBot.balance < 500) {
     return { accept: true };
   }
-  if (!givesMonopolyToBuyer && offerPrice >= Math.round(1.25 * basePrice)) {
-    return { accept: true };
-  }
-  if (offerPrice >= Math.round(1.4 * basePrice)) {
+  if (offerPrice >= Math.round(1.40 * basePrice)) {
     return { accept: true };
   }
   return { accept: false, reason: 'PRICE_TOO_LOW' };

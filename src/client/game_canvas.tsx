@@ -36,12 +36,14 @@ import {
   resolveCameraMode,
   calculateTargetCameraState,
   calculateScreenShake,
+  checkHighStakesRoll,
   CAMERA_CONFIG,
 } from './3d/camera_state_machine';
 import {
   calculateCameraZoom,
   resolveCameraTargetCell,
 } from './3d/use_game_camera';
+import { SoundEngine } from './audio/sound_engine';
 import { PerfTelemetryTracker } from './telemetry/perf_telemetry_tracker';
 
 export interface AdaptiveCinematicCameraProps {
@@ -72,6 +74,32 @@ export function AdaptiveCinematicCamera({
   const modalPayload = useGameStore((s) => s.modalPayload);
   const activeScreenShake = useVfxStore((s) => s.activeScreenShake);
   const playersInfo = useGameStore((s) => s.playersInfo);
+  const levelMap = useGameStore((s) => s.levelMap);
+
+  const rollingPlayerId = currentTurnPlayerId ?? 'p1';
+  const rollingPlayer = playersInfo[rollingPlayerId];
+  const rollingPos = playerPositions[rollingPlayerId] ?? 0;
+  const rollingBalance = rollingPlayer?.balance ?? 0;
+  const highStakesResult = checkHighStakesRoll(
+    rollingPos,
+    rollingBalance,
+    playersInfo,
+    levelMap,
+    rollingPlayerId
+  );
+  const isHighStakesRoll = highStakesResult.isHighStakes;
+
+  // [IMP-125-P2] Đồng bộ nhịp tim WebAudio Synth trong thời gian gieo xúc xắc nguy cơ tử thần
+  useEffect(() => {
+    if (isRolling && isHighStakesRoll) {
+      SoundEngine.playHeartbeatPulse();
+    } else {
+      SoundEngine.stopHeartbeatPulse();
+    }
+    return () => {
+      SoundEngine.stopHeartbeatPulse();
+    };
+  }, [isRolling, isHighStakesRoll]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -117,6 +145,7 @@ export function AdaptiveCinematicCamera({
     const hasTargetTile = (activeModal !== null || hasRolledThisTurn) && targetCell !== null && targetCell !== undefined && Number.isFinite(targetCell);
     const mode = resolveCameraMode({
       isRolling,
+      isHighStakesRoll,
       isPawnAnimating: isPawnMoving,
       activeModal,
       hasRolledThisTurn,
@@ -323,7 +352,7 @@ export function GameCanvas({
               <>
                 {/* Tabletop-first Stage 1: Render GameBoard trực tiếp trên sa bàn đảo ngọc thay thế SunnyIslandLobbyScene */}
                 <AdaptiveCinematicCamera isPreMatch={true} />
-                <TimeOfDayLighting />
+                <TimeOfDayLighting isMobile={isMobileDevice} />
                 {/* Bóng tiếp xúc mâm gỗ bàn cờ đặt trên thảm nhung Ba Tư */}
                 <ContactShadows frames={1} position={[0, -0.05, 0]} opacity={0.75} scale={45} blur={2.0} far={6} />
                 <GameBoard />
@@ -334,7 +363,7 @@ export function GameCanvas({
             ) : (
               <>
                 <AdaptiveCinematicCamera />
-                <TimeOfDayLighting />
+                <TimeOfDayLighting isMobile={isMobileDevice} />
                 {/* ContactShadows contract retention: <ContactShadows frames={1} position={[0, -0.01, 0]} opacity={0.7} scale={40} blur={2} /> */}
                 <ContactShadows frames={1} position={[0, -0.05, 0]} opacity={0.75} scale={45} blur={2.0} far={6} />
                 <GameBoard />

@@ -37,13 +37,25 @@ tools: [view_file, list_dir, find_by_name, grep_search]
      - MANDATORY REJECT if test suite has fewer than 15 atomic tests for the feature slice (Test Density Deficit).
    - Slice Scope Confinement: If the ticket is Slice 1 (MSS), but the diff introduces alternative flow logic or UI, mark as **REJECTED (Slice Scope Breach)**.
    - Failure Postcondition Guarantee: Alternative flows ending in `Use case ends` must have assertions proving clean rollback.
-6. **Report Template**:
+6. **Zero-Trust Adversarial Stance & Anti-AI-Bias Mandate**:
+   - **Zero-Trust Mindset**: Assume every AI-generated plan, specification, or code change contains subtle hallucinations, scope creep, or unproven assumptions until proven otherwise with physical disk evidence.
+   - **Zero Polite Rubber-Stamping (Cấm đồng thuận lịch sự)**: Never grant approval based on conversational claims. In complex plans or architectural proposals, you MUST actively interrogate and identify at least 1–3 unproven assumptions, runtime limits (desync, latency, resource ceilings), or cognitive burdens.
+   - **Evidence Snapshot Grounding**: Before issuing `[APPROVED]`, inspect the physical `Evidence Snapshot` on disk (`.agents/evidence/` or artifact logs) to confirm contract test results, scope boundary, and zero broken imports.
+7. **Report Template (Bảng Ma Trận Đối Chiếu SSOT Bắt Buộc)**:
 ```markdown
-### 📋 SPECIFICATION INTEGRITY REPORT
-| Specification Criterion | Implementation Status | Evaluation | Notes |
-| :--- | :--- | :---: | :--- |
-| 1. Turn timeout after 60s (BR-001) | `[src/fsm/turn.ts#L32]` | ✔️ PASS | Timeout is set to 60000ms |
-| 2. Bankruptcy on negative cash (A1) | `[src/fsm/turn.ts#L55]` | ✔️ PASS | Includes bankruptcy transition test |
+### 📋 SPECIFICATION INTEGRITY REPORT: [TICKET_ID]
+
+#### 1. Scope & SSOT Reconciliation Matrix
+| Tiêu Chí Spec / Business Rule | Nguồn SSOT | File:Line Triển Khai | Test Hợp Đồng (Traceability) | Phán Quyết |
+| :--- | :--- | :--- | :--- | :---: |
+| 1. [BR-XXX / Main Success Flow] | `docs/requirements.md#L...` | `[src/...ts#L...]` | `[tests/contracts/...test.ts#L...]` | ✔️ PASS |
+| 2. [BR-YYY / Boundary Invariant] | `docs/requirements.md#L...` | `[src/...ts#L...]` | `[tests/contracts/...test.ts#L...]` | ✔️ PASS |
+| 3. [BR-ZZZ / Error / Rollback] | `docs/requirements.md#L...` | `[src/...ts#L...]` | `[tests/contracts/...test.ts#L...]` | ✔️ PASS |
+
+#### 2. Physical Disk Evidence Check
+| Tệp Evidence Snapshot | Đã Kiểm Tra Bằng `view_file` | Khớp Số Liệu Code / Test | Phán Quyết |
+| :--- | :---: | :---: | :---: |
+| `.agents/evidence/latest_snapshot.json` | CÓ | 100% Khớp | APPROVED |
 
 ### 🎯 VERDICT: [APPROVED / REJECTED]
 ```

@@ -151,6 +151,16 @@ export function PropertyPortfolioModal({
                         </span>
                       )}
                     </div>
+
+                    {/* Thông tin Tiền Thuê & Giá */}
+                    <div className="flex items-center justify-between text-[11px] text-slate-600 mb-2">
+                      <span>
+                        Tiền Thuê: <strong data-testid="property-rent-val" className="font-mono text-slate-900 font-bold">{deed ? formatCurrency(deed.rents[level] ?? deed.rents[0] ?? 0) : '0 Tr.'}</strong>
+                      </span>
+                      <span>
+                        Giá: <strong className="font-mono text-slate-900 font-bold">{deed ? formatCurrency(deed.price) : '0 Tr.'}</strong>
+                      </span>
+                    </div>
                   </div>
 
                   {/* Nút hành động */}
@@ -159,7 +169,7 @@ export function PropertyPortfolioModal({
                       <button
                         type="button"
                         onClick={() => onMortgage?.(cellIndex)}
-                        className="flex-1 min-h-[40px] sm:min-h-[44px] px-2.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-amber-950 font-black rounded-lg border-2 border-amber-700 shadow-[0_3px_0_0_#b45309] active:shadow-[0_1px_0_0_#b45309] active:translate-y-[2px] transition-all text-xs cursor-pointer inline-flex items-center justify-center"
+                        className="flex-1 min-h-[40px] sm:min-h-[44px] px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold rounded-lg border-2 border-rose-300 shadow-[0_2px_0_0_#fecdd3] active:shadow-none active:translate-y-[1px] transition-all text-xs cursor-pointer inline-flex items-center justify-center"
                       >
                         Thế Chấp (+{mortgageVal} Tr.)
                       </button>
@@ -190,7 +200,7 @@ export function PropertyPortfolioModal({
                       <button
                         type="button"
                         onClick={() => onSelectDeed(cellIndex)}
-                        className="min-h-[44px] px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-lg border-2 border-slate-300 shadow-[0_2px_0_0_#cbd5e1] active:shadow-none active:translate-y-[1px] text-xs cursor-pointer inline-flex items-center justify-center"
+                        className="min-w-[44px] min-h-[44px] px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-lg border-2 border-slate-300 shadow-[0_2px_0_0_#cbd5e1] active:shadow-none active:translate-y-[1px] text-xs cursor-pointer inline-flex items-center justify-center"
                       >
                         Sổ Đỏ ↗
                       </button>
