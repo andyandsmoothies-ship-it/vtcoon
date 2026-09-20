@@ -7,13 +7,13 @@
 ## 🧭 BẢNG CHỈ MỤC THEO DOMAIN (DOMAIN INDEX)
 | Domain Tag | Trọng Tâm & Phạm Vi Mã Nguồn | Các Gotchas Liên Quan |
 | :--- | :--- | :--- |
-| `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78, #82, #104, #105, #106, #145, #146, #147, #159, #164 |
+| `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78, #82, #104, #105, #106, #145, #146, #147, #159, #164, #174, #180 |
 | `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147 |
 | `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168 |
-| `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #32, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #60, #61, #63, #69, #72, #74, #77, #80, #85, #86, #88, #89, #90, #91, #92, #93, #94, #95, #96, #101, #103, #109, #110, #114, #115, #116, #117, #120, #122, #123, #124, #125, #126, #127, #128, #129, #130, #133, #134, #135, #136, #140, #141, #144, #148, #159, #160, #161, #162, #163, #164, #165, #169 |
-| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168 |
+| `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #32, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #60, #61, #63, #69, #72, #74, #77, #80, #85, #86, #88, #89, #90, #91, #92, #93, #94, #95, #96, #101, #103, #109, #110, #114, #115, #116, #117, #120, #122, #123, #124, #125, #126, #127, #128, #129, #130, #133, #134, #135, #136, #140, #141, #144, #148, #159, #160, #161, #162, #163, #164, #165, #169, #175, #177 |
+| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182 |
 | `[UAT/TEST]` | Nghiệm Thu, Adversarial TDD, Ảnh Chụp Màn Hình (.jpg), Shell Escaping, File I/O Lock, Docker Healthcheck Timeout | #5, #28, #29, #31, #35, #52, #71, #73, #83, #84, #99, #100, #117, #124, #125, #130 |
-| `[TELEMETRY]` | Giám Sát Hiệu Năng Thời Gian Thực, Chó Canh Phòng Bất Biến, Hộp Đen Tái Hiện Lỗi | #39, #62, #71, #75, #104, #114, #115, #135 |
+| `[TELEMETRY]` | Giám Sát Hiệu Năng Thời Gian Thực, Chó Canh Phòng Bất Biến, Hộp Đen Tái Hiện Lỗi | #39, #62, #71, #75, #104, #114, #115, #135, #174 |
 | `[ARCH/REFACTOR]` | Tách Module Facade, Ngân Sách Render Loop, Chuẩn Hóa Môi Trường Build | #43, #98, #99 |
 
 ---
@@ -2613,3 +2613,333 @@
   2. **Deep Ocean Vessel Preservation Invariant**:
      - Các tàu hàng vi mô ở đại dương vô cực phía Nam (`position={[8, -0.35, 36]}`) được giữ nguyên vị trí nước sâu an toàn, tích hợp `SafeGLTFModel` và fallback chứa màu `#DC2626` cùng bọt sóng `#FFFFFF` để bảo toàn hợp đồng thẩm mỹ và test contract IMP-107.
 
+---
+
+### 170. [UI/MOBILE] Khử Chèn Đè Toast Biến Động Tài Chính & Ticker Sự Kiện Thị Trường Trên Mobile (IMP-130)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Ép Cứng Tọa Độ Mobile Toast (Mobile Hardcoded Top Trap)*:
+     - Trong `FloatingNumbersOverlay`, container mobile (`flex md:hidden`) bị gán cứng tọa độ `fixed top-[4.25rem] left-1/2 -translate-x-1/2`.
+     - Tọa độ này tương ứng 68px từ đỉnh màn hình, hoạt động tốt khi chỉ có `TopBar`.
+     - Khi có Sự Kiện Thị Trường vĩ mô (`MarketEventTicker`), ticker chiếm không gian từ ~50px đến 100px. Kết quả là toast thông báo biến động tài sản/tiền tệ ("Xây C3 Đồng Nai", "Thu thuê BĐS") nhảy thẳng lên chính giữa banner sự kiện thị trường, che khuất hoàn toàn nội dung và tạo cảm giác giao diện bị lỗi chồng lấn nghiêm trọng.
+  2. *Bẫy Chèn Đè Giữa Milestone Banner & Toast Thường*:
+     - `MilestoneBanner` (thẻ Cơ Hội, Thị Trường, Độc Quyền) được neo tại `fixed top-20` (80px). Khi xuất hiện đồng thời với sự kiện thị trường hoặc toast thường trên mobile, các banner chèn đè lên nhau do thiếu cơ chế tính toán khoảng cách động.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Dynamic Mobile Offsets Invariant (`FloatingNumbersOverlay`)**:
+     - `FloatingNumbersOverlay` đọc `activeModifiers` từ store để tính toán số sự kiện vĩ mô đang hiệu lực (`activeMarketCount`).
+     - Tự động điều chỉnh `mobileTopClass`:
+       + Không có sự kiện thị trường: `top-[4.25rem]` (68px).
+       + Có 1 sự kiện thị trường: dịch chuyển xuống `top-28` (112px), nằm cách đáy ticker 11px an toàn.
+       + Có >= 2 sự kiện thị trường: dịch chuyển xuống `top-40` (160px).
+       + Nếu có `latestMilestone` đồng thời xuất hiện: dịch chuyển sâu hơn (`top-36`, `top-[11rem]` hoặc `top-[13.5rem]`) để xếp chồng dọc hoàn hảo, triệt tiêu 100% va chạm thị giác.
+  2. **Milestone Banner Adaptive Spacing Invariant**:
+     - `MilestoneBanner` tự động chuyển từ `top-20` xuống `top-28` (hoặc `top-40`) khi có sự kiện thị trường, đảm bảo hiển thị liền mạch dưới `MarketEventTicker` mà không đè lên bất kỳ phần tử nào.
+
+---
+
+### 171. [UI/MODAL] Tinh Giản Giao Diện Thẻ Bài Sự Kiện & Chuẩn Hóa Tỷ Lệ Diện Tích Thẻ (IMP-131)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Rò Rỉ Thuật Ngữ Kiểm Thử Nội Bộ & Bảng Biểu Hành Chính*:
+     - `EventCardModal` trước đây hiển thị bảng thông số dày đặc với nhãn kỹ thuật `THÔNG SỐ MINH BẠCH` và mã điều khoản `SSOT §IV` dạng font mono in hoa ngay giữa thẻ.
+     - Cấu trúc bảng chia 4 hàng với các nhãn hành chính thô ráp (`Phạm vi:`, `Thời hạn:`, `Quy tắc hiệu ứng:`, `Dòng tiền tác động:`) khiến một chiếc thẻ bài board game biến thành biên bản xử phạt hoặc tờ khai thuế.
+  2. *Bẫy Trùng Lặp Thông Tin 3 Lần (3x Redundancy Trap)*:
+     - Thẻ lặp lại nội dung ở 3 vị trí: Tiêu đề thẻ $\rightarrow$ Miêu tả phụ $\rightarrow$ Quy tắc hiệu ứng trong bảng. Người chơi bị quá tải thị giác và phải đọc cùng 1 nội dung tới 3 lần trên một diện tích nhỏ.
+  3. *Bẫy Tỷ Lệ Thẻ Bị Bẹp & Thụt Đáy Màn Hình Mobile*:
+     - Tỷ lệ khung hình thẻ trước đây là 1 : 1.1 (gần như vuông bẹt), làm mất phom dáng thanh thoát của thẻ bài cao cấp (Tarot/Playing Card ~ 1 : 1.45).
+     - Trên mobile, cờ `mt-auto` đẩy thẻ tụt xuống đáy màn hình như thông báo lỗi hệ thống thay vì được "rút" lên chính giữa sa bàn 3D.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Zero Text Duplication & Zero Developer Slop Invariant**:
+     - Xóa bỏ vĩnh viễn dòng chữ `THÔNG SỐ MINH BẠCH` và `SSOT §IV`. Nhãn danh mục chuẩn hóa thành `SỰ KIỆN THỊ TRƯỜNG` hoặc `CƠ HỘI ĐẦU TƯ`.
+     - Giữ duy nhất 1 câu tóm tắt hiệu ứng gãy gọn, giàu ngữ cảnh trong khối capsule nền giấy ngà mềm mại (`#F7F2E7`).
+  2. **1-Second Stat Chips Invariant**:
+     - Thay thế bảng 4 dòng bằng các thẻ Chip bo tròn trực quan xếp hàng ngang: `🎯 [Phạm vi]`, `⏳ [Thời hạn]`, `🏛️ [Đối tượng]` và pill biến động tiền tệ font monospace to rõ.
+  3. **Golden Ratio & Responsive Centering Invariant**:
+     - Căn giữa hoàn hảo (`my-auto`) trên cả Mobile (`max-w-[340px]`) và Desktop (`max-w-[370px]`), bảo toàn tỷ lệ hoàng kim thẻ bài ~ 1 : 1.45.
+     - Tích hợp viền chỉ mực kép hoài cổ (`inset-1.5 sm:inset-2 border-amber-700/20`), khung Hero Icon 64px nổi khối và nút bấm xúc giác 3D với đổ bóng `#065f46`.
+
+---
+
+### 172. [UI/MODAL] Khử Trùng Lặp Ticker Sự Kiện 1 Dòng, Chống Cắt Cụt Destination Chip & Đồng Nhất Dữ Liệu Thẻ Quy Hoạch Đô Thị (IMP-132)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Mâu Thuẫn Văn Bản Thẻ Quy Hoạch MC_URBAN_PLANNING (Negative Contradiction Trap)*:
+     - Thẻ `MC_URBAN_PLANNING` trong `event_card_metadata.ts` trước đây mang câu văn mâu thuẫn "Cấm thế chấp đất dọc hành lang quy hoạch" trong khi bản chất cơ chế kinh tế của thẻ là ưu đãi tăng định giá thế chấp từ 50% lên 60% (+20% giá trị).
+     - Trường `targetScope` liệt kê thô kệch các số ô bàn cờ `(Ô 31, 32, 34, 37, 39)` làm mất tính thẩm mỹ board game.
+  2. *Bẫy Ticker 2 Dòng Chồng Chéo & Pill Kém Tương Phản (Ticker Vertical Clutter Trap)*:
+     - `MarketEventTicker` trước đây render cả tiêu đề và dòng miêu tả phụ (`text-[11px] text-slate-600 truncate`) tạo ra layout 2 dòng chật chội, chữ đè chữ trên màn hình nhỏ.
+     - Badge đếm vòng dùng nền nhạt `bg-amber-50 text-amber-900 border-amber-300` thiếu độ tương phản xúc giác.
+  3. *Bẫy Cắt Cụt Chữ Chip Điểm Đến (Destination Chip Truncation `t...` Trap)*:
+     - Trong `EventCardModal`, chip điểm đến dùng `truncate max-w-[140px]` đối với các chuỗi dài như "Ngân sách người chơi thực hiện thế chấp", khiến chữ bị cắt cụt thành `Ngân sách người t...`. Ngoài ra, điểm đến là ngân sách nội bộ của người chơi không cần thiết phải hiển thị dạng chip công cộng `🏛️`.
+  4. *Bẫy Cấn Mép Chữ VÒNG Trên TopBar (TopBar Capsule Left-Edge Collision Trap)*:
+     - `match-info-capsule` trước đây có lề trái quá hẹp `px-2 sm:px-4`, làm chữ "VÒNG" chạm sát mép bo cong `rounded-xl` bên trái của thanh trạng thái.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **SSOT Data Alignment Invariant (`event_card_metadata.ts`)**:
+     - `MC_URBAN_PLANNING` mô tả chuẩn: "Quy hoạch trục đô thị mới: Tăng 20% giá trị khi thế chấp BĐS trung tâm Hà Nội & TP.HCM.", loại bỏ 100% cụm từ "Cấm thế chấp".
+     - `targetScope` thân thiện: "Bất động sản trung tâm Hà Nội và TP.HCM (Nhóm Xanh Lá & Tím)".
+     - `destination: 'Ngân sách người chơi'` bảo vệ tính toàn vẹn cho contract tests `imp57`.
+  2. **Streamlined 1-Line Ticker Invariant (`market_event_ticker.tsx`)**:
+     - Ticker hiển thị gọn gàng trên đúng 1 dòng thanh mảnh: loại bỏ đoạn mô tả phụ, giữ `font-black text-xs sm:text-sm truncate text-slate-900 leading-none`.
+     - Countdown pill nổi bật: `bg-amber-100 text-amber-900 border-amber-400 font-extrabold shrink-0`.
+  3. **Third-Party Destination Filter & Whitespace-Nowrap Invariant (`event_card_modal.tsx`)**:
+     - Chip `🏛️` chỉ hiển thị khi điểm đến thực sự mang tính bên thứ ba (`!resolvedDestination.toLowerCase().includes('người chơi') && !resolvedDestination.toLowerCase().includes('thực hiện')` và khác `'Toàn thị trường'`).
+     - Khi hiển thị, sử dụng `whitespace-nowrap` mà không gò bó `truncate max-w-[140px]`.
+     - Bảo tồn nguyên vẹn các wrapper responsive `hidden sm:block`, `event-impact-summary (sm:hidden)`, `event-specs-table (hidden sm:flex)`.
+  4. **TopBar Capsule Edge Padding Invariant (`top_bar.tsx`)**:
+     - Container `match-info-capsule` sử dụng `px-3 sm:px-4`, triệt tiêu hoàn toàn `px-2` để chữ "VÒNG" cách mép bo cong an toàn tối thiểu 12px.
+
+---
+
+### 173. [UI/MINIMAP] Bất Biến Lưới Sa Bàn 40 Ô Chu Vi 11x11, Khử Bẫy Văng Single-Slot Modal & Ma Trận 8 Phân Khu Độc Quyền (Urban Masterplan Minimap Invariant - IMP-132)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Văng Modal Do Single-Slot ActiveModal (Modal Ejection / Navigation Trap)*:
+     - Trong kiến trúc `game_store`, `activeModal` chỉ lưu 1 modal duy nhất tại 1 thời điểm (`deed | portfolio | auction | ... | masterplan`).
+     - Nếu từ trong `MasterplanModal` mà gọi `openModal('deed')` để xem Sổ Đỏ, `MasterplanModal` sẽ bị unmount ngay lập tức; khi người chơi bấm đóng Sổ Đỏ, họ bị văng hẳn ra bàn cờ 3D thay vì quay lại sa bàn quy hoạch đô thị.
+  2. *Bẫy Trùng Lặp 4 Ô Góc Trên Lưới CSS Grid (11x11 Corner Duplication 44 vs 40 Cells Trap)*:
+     - Một bàn cờ có 40 ô chạy dọc 4 cạnh, mỗi cạnh gồm 11 ô (bao gồm 2 góc). Nếu cộng thô $11 \times 4 = 44$ ô sẽ bị lặp 4 góc 2 lần (ô 0, 10, 20, 30).
+     - Nếu lặp ô, các bài test hợp đồng tìm kiếm `masterplan-cell-0` hay `masterplan-cell-10` sẽ phát hiện trùng lặp và vỡ cấu trúc chu vi.
+  3. *Bẫy Vượt Trần Độ Phức Tạp Mã Nguồn UI (UI Component > 500 LOC Trap)*:
+     - Khi nhúng trực tiếp bảng tọa độ 40 ô `GRID_TILE_COORDS`, danh mục 8 nhóm màu `DISTRICT_GROUPS` và các thẻ card nội bộ vào cùng 1 tệp `masterplan_modal.tsx`, dung lượng tệp phình lên 584 dòng, vi phạm trần 500 dòng của quy chế `constitution_governance`.
+  4. *Bẫy Ép Khung Màn Hình Nhỏ & Xung Đột Tương Phản Màu Sắc (Mobile Touch Target & Contrast Trap)*:
+     - Trên màn hình hẹp (< 640px), lưới 11x11 bị nén nhỏ khiến touch target mỗi ô < 30px, khó chạm bằng ngón tay cái. Đồng thời nếu tô toàn bộ ô bằng màu sắc của người chơi sẽ che khuất dải màu phân khu `colorGroup`.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Inspector Card Nội Bộ Khép Kín Invariant (`MasterplanInspectorCard`)**:
+     - `MasterplanModal` tuyệt đối KHÔNG gọi `openModal('deed')`. Khi người chơi chạm vào bất kỳ ô nào, modal tự động render `MasterplanInspectorCard` (sử dụng hàm thuần `getDeedDisplayInfo`) ngay tại vùng trung tâm của lưới sa bàn (grid-row: 2/11, grid-col: 2/11) mà không thay đổi `activeModal` của game store.
+  2. **Tọa Độ Chu Vi 11x11 Khép Kín 40 Ô Invariant (`GRID_TILE_COORDS`)**:
+     - Cố định bảng ánh xạ tọa độ tĩnh 40 ô duy nhất:
+       - Cạnh Nam (Row 11): Ô 0 (Col 11 - GO) $\rightarrow$ Ô 1..9 (Col 10..2) $\rightarrow$ Ô 10 (Col 1 - Trạm Kiểm Toán).
+       - Cạnh Tây (Col 1): Ô 10 (Row 11) $\rightarrow$ Ô 11..19 (Row 10..2) $\rightarrow$ Ô 20 (Row 1 - Nghỉ Dưỡng).
+       - Cạnh Bắc (Row 1): Ô 20 (Col 1) $\rightarrow$ Ô 21..29 (Col 2..10) $\rightarrow$ Ô 30 (Col 11 - Lệnh Thanh Tra).
+       - Cạnh Đông (Col 11): Ô 30 (Row 1) $\rightarrow$ Ô 31..39 (Row 2..10) $\rightarrow$ Ô 0 (Row 11).
+       $\rightarrow$ Đảm bảo chính xác $11 + 9 + 11 + 9 = 40$ ô khép kín, 4 ô góc xuất hiện duy nhất 1 lần.
+  3. **Module Phân Tách Bền Vững (Architectural LOC Ceiling Invariant)**:
+     - Tách dữ liệu tĩnh sang `masterplan_constants.ts` (73 LOC).
+     - Tách các sub-component sang `masterplan_components.tsx` (189 LOC).
+     - Giữ `masterplan_modal.tsx` gọn gàng ở mức ~279 LOC, vượt qua 100% bài kiểm tra `constitution_governance`.
+  4. **Phân Tách Màu Nhóm Đất vs Màu Chủ Đất (Color Hierarchy Invariant)**:
+     - Dải màu nhóm đất `colorGroup` luôn nằm trên thanh viền đỉnh của ô (`w-full h-1 sm:h-1.5`).
+     - Quyền sở hữu của người chơi được thể hiện qua chấm tròn `tokenColor` + icon Avatar ở giữa ô.
+     - Cấp công trình hiển thị bằng chip `C1`, `C2`, `C3` màu vàng hổ phách nổi bật ở chân ô; ô thế chấp hiển thị icon `🔒` và `data-mortgaged="true"`.
+  5. **Smart Responsive Default View Invariant**:
+     - Trên thiết bị di động (< 640px), modal tự động ưu tiên mở Tab 2 (`8 Phân Khu`) với touch target rộng rãi $\ge 44$px và hiển thị tức thì tiến trình độc quyền (vd: `2/3`, `👑 Độc Quyền`) để phục vụ đàm phán P2P Trade nhanh. Trên desktop ($\ge 640$px), mở mặc định Tab 1 (`Sa Bàn 40 Ô`).
+
+---
+
+### 174. [FSM/TELEMETRY] Triệt Tiêu Lỗi INVALID_PHASE Tại Ô 10 (Trạm Kiểm Toán) & Bất Biến Miễn Trừ Nợ Thụ Động Ngoài Lượt (IMP-133)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Kẹt Lượt Tại Ô 10 Trạm Kiểm Toán (Audit Turn End Rejection Trap)*:
+     - Tại đầu lượt của người chơi đang ở Ô 10, FSM đặt `room.phase = TurnPhase.WaitingRoll`. Nếu người chơi không gieo xúc xắc (chấp nhận giam giữ) hoặc hệ thống gửi `INTENT_END_TURN`, hàm `executeTurnEnd` chặn cứng bằng điều kiện `if (!rolledThisTurn && room.phase === TurnPhase.WaitingRoll) return undefined;`.
+     - Hậu quả: `dispatchPlayerIntent` trả về lỗi `INVALID_PHASE`, người chơi bị kẹt cứng không thể kết thúc lượt.
+  2. *Bẫy Bỏ Quên Nợ Âm Khi Chuyển Lượt Hoặc Lượt Bổ Sung (Insolvency Handover Priority Trap)*:
+     - Khi người chơi kế tiếp (`nextPlayer`) hoặc người có lượt bổ sung (`extraTurns > 0`) bị âm tiền thụ động do sự kiện ngoài lượt (ví dụ bão, thuế, rút thẻ), `executeTurnEnd` vô điều kiện gán `room.phase = TurnPhase.WaitingRoll` (hoặc `PropertyManagement` nếu `skipNextTurn`), bỏ qua hoàn toàn trạng thái âm tiền (`balance < 0`).
+  3. *Bẫy Cảnh Báo Sai Trong Telemetry Invariant Watchdog (Passive Debt False Positive Trap)*:
+     - Chó canh phòng bất biến `verifyNonNegativeBalance` quét mọi người chơi trong phòng; nếu một người chơi bị trừ tiền ngoài lượt khiến `balance < 0` trong khi đang ở lượt của người khác, Telemetry lập tức quăng vi phạm `CRITICAL: NEGATIVE_BALANCE_OUTSIDE_INSOLVENCY` dù người đó chưa đến lượt để kích hoạt `InsolvencyPhase`.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Audit Turn Depletion Invariant (`turn_loop.ts`)**:
+     - Cho phép kết thúc lượt tại `WaitingRoll` nếu đang thụ án kiểm toán:
+       `if (!rolledThisTurn && room.phase === TurnPhase.WaitingRoll && (current.auditTurnsLeft ?? 0) <= 0) return undefined;`
+     - Khi người chơi kết thúc lượt ở đầu turn tại Ô 10 mà không gieo xúc xắc, `auditTurnsLeft` tự động suy giảm 1 lượt (3 -> 2 -> 1 -> 0) và phạt 500 Tr. nộp Kho Bạc khi về 0.
+  2. **Insolvency Handover Priority Invariant (`turn_loop.ts`)**:
+     - Khi xử lý `extraTurns > 0` hoặc chuyển lượt sang `nextPlayer`, ưu tiên số 1 TUYỆT ĐỐI là kiểm tra `(balance ?? 0) < 0`. Nếu âm tiền, lập tức gán `room.phase = TurnPhase.InsolvencyPhase` và gọi `checkInsolvency(room)`, chiếm quyền ưu tiên so với `skipNextTurn` hay `WaitingRoll`.
+  3. **Passive Debt Telemetry Exemption Invariant (`invariant_checker.ts`)**:
+     - Trong `verifyNonNegativeBalance`, người chơi bị âm tiền ngoài lượt (`currentTurnPlayerId !== undefined && currentTurnPlayerId !== null && currentTurnPlayerId !== '' && currentTurnPlayerId !== p.id`) được miễn trừ vi phạm (`isExempt = true`). Nợ sẽ được giải quyết khi lượt chơi chính thức chuyển giao cho người đó.
+
+---
+
+### 175. [3D/UI/TEST] Chuỗi Ưu Tiên Camera Sticky Focus, Bẫy React SSR Static Markup Với Sự Kiện DOM & Tối Ưu UX Nâng Cấp Nhanh (IMP-133)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Xung Đột Camera Target Khi Quân Cờ Di Chuyển Hoặc Gieo Xúc Xắc (Sticky Focus Collision Trap)*:
+     - Khi người chơi mở danh mục BĐS và rê chuột qua các ô cờ (`cameraFocusCell`), nếu không có cơ chế reset khi gieo xúc xắc (`isRolling = true`) hoặc khi quân cờ đang nhảy trên đường đua (`activeAnimation.isAnimating = true`), camera sẽ bị giữ chặt (sticky) vào ô đất cũ, làm mất góc máy cinematic bám đuổi quân cờ hoặc đè lên góc máy mở sổ đỏ (`modalPayload.cellIndex`).
+  2. *Bẫy React Server SSR Stripping Event Handlers Trong Contract Test (React renderToStaticMarkup Trap)*:
+     - Khi kiểm thử hợp đồng bằng `renderToStaticMarkup(React.createElement(...))`, React tự động loại bỏ các thuộc tính event handler dạng hàm (`onMouseEnter={() => ...}`). Nếu cố tình truyền `onmouseenter="true"`, React sẽ ném cảnh báo `Invalid event handler property` và vẫn tiếp tục loại bỏ thuộc tính khỏi chuỗi HTML đầu ra.
+  3. *Bẫy Bỏ Quên Đồng Bộ Nút Recenter Với Trạng Thái Modal*:
+     - Nút nổi `[♟️ Về Quân Cờ]` (`RecenterPawnPill`) nếu render đè lên các popup toàn màn hình (ModalBackdrop, TitleDeedModal, Portfolio) sẽ gây vỡ layout và cản trở tương tác người dùng.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Chuỗi Ưu Tiên 4 Tầng Của Camera Target Invariant (`use_game_camera.ts`)**:
+     - Cố định thứ tự ưu tiên tuyệt đối:
+       `1. modalPayload.cellIndex` (Mở modal sổ đỏ / sự kiện cụ thể) $\rightarrow$
+       `2. activeAnimation.waypoints[idx]` (Quân cờ đang hoạt cảnh nhảy ô) $\rightarrow$
+       `3. cameraFocusCell` (Người chơi chủ động soi ô cờ từ Portfolio) $\rightarrow$
+       `4. playerPositions[currentTurnPlayerId]` (Vị trí mặc định của người chơi hiện tại).
+     - Bắt buộc tự động xóa rỗng `cameraFocusCell: null` ngay khi gieo xúc xắc (`isRolling = true`) và khi đóng modal danh mục.
+  2. **Data-Attribute Bridge Invariant Cho SSR Contract Test (`property_portfolio_modal.tsx`)**:
+     - Để bộ kiểm thử static markup nhận diện được khả năng lắng nghe sự kiện mà không gây cảnh báo console cho React 18/19, gắn song song `data-onmouseenter="true"` cùng với `onMouseEnter={() => onHoverCell?.(cellIndex)}`.
+  3. **Recenter Pill Triệt Tiêu Hiển Thị Invariant (`recenter_pawn_pill.tsx`)**:
+     - `RecenterPawnPill` bắt buộc trả về `null` (không render bất kỳ markup nào) khi:
+       `activeModal !== null || cameraFocusCell === null || cameraFocusCell === pawnPosition`.
+
+---
+
+### 176. [UI/UX/CRAFT] Hệ Thống Gợi Ý Thao Tác Ngữ Cảnh, Chống Va Chạm Chip ActionDock & Chuẩn Hóa WCAG Touch Target 44px (IMP-134)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Chuỗi Lỗi Kỹ Thuật Gây Hoang Mang (Raw Error Code Trap)*:
+     - Trước IMP-134, FSM từ chối thao tác gửi các chuỗi tiếng Anh kỹ thuật (`INVALID_PHASE`, `INSUFFICIENT_FUNDS`, `EVEN_BUILDING_VIOLATION`), client hiển thị banner đỏ thô `Lỗi máy chủ: ...`. Người chơi không hiểu nguyên nhân nghiệp vụ và không biết bước tiếp theo phải làm gì.
+  2. *Bẫy Chồng Lấn Nhiều Chip Thông Báo Ở Tọa Độ Trung Tâm ActionDock (Chip Collision Trap)*:
+     - Trước IMP-134, các thông báo trạng thái (Bão mất lượt, Bot pacing) đều render song song tại `absolute -top-10 left-1/2 -translate-x-1/2`. Khi người chơi vừa bị âm tiền vừa ở Trạm Kiểm Toán hoặc bị mất lượt, các chip đè chữ nát lên nhau (Z-fighting / Text overlapping) trên mobile.
+  3. *Bẫy Tràn Màn Hình Di Động Do Chuỗi Văn Bản Quá Dài (Mobile String Overflow Trap)*:
+     - Chuỗi hướng dẫn chi tiết dài > 60 ký tự kết hợp `whitespace-nowrap` khiến chip bị tràn khỏi 2 mép màn hình điện thoại (< 390px).
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **SSOT Actionable Notification Engine (`actionable_notification.ts`)**:
+     - Áp dụng 100% 28+ ReasonCode thành thông điệp tiếng Việt thân thiện gồm Icon, Tiêu đề dễ hiểu, và Lời khuyên hành động (Action Hint) giúp người chơi biết cách tiếp tục.
+     - Triệt tiêu hoàn toàn tiền tố "Lỗi máy chủ:"; fallback an toàn cho mã lạ/rỗng/null.
+     - Bảo toàn 100% tương thích ngược regex cho các test suite hợp đồng cũ.
+  2. **Chuỗi Ưu Tiên Độc Quyền Chip ActionDock Invariant (`resolveActionDockNotice`)**:
+     - Áp dụng thứ tự ưu tiên độc quyền nghiêm ngặt:
+       `1. Insolvent (🚨 Âm ngân sách)` $\rightarrow$
+       `2. InAudit (⚖️ Trạm Kiểm Toán)` $\rightarrow$
+       `3. SkipTurn (🌪️ Bão mất lượt)` $\rightarrow$
+       `4. BotPacing (🤖 Đối thủ máy tính)`.
+     - Tại mọi thời điểm chỉ có DUY NHẤT 1 chip thông tin hiển thị tại trung tâm ActionDock, triệt tiêu 100% lỗi chồng lấn.
+  3. **Responsive Text Pair & WCAG Touch Target Invariant**:
+     - Cung cấp `mobileText` ngắn gọn (trần $\le 45$ ký tự, không lặp emoji với icon chip) kết hợp `desktopText` đầy đủ.
+     - Nút đóng ServerToast bắt buộc đạt chuẩn WCAG Mobile Touch Target: `min-w-[44px] min-h-[44px] inline-flex items-center justify-center cursor-pointer`.
+
+---
+
+### 177. [3D/KINEMATICS] Chu Kỳ Đoàn Tàu Sa Bàn Khép Kín, Góc Cua Bo Rắn Tránh Lệch Tim Ray & Phân Rã Toa Xe Chuẩn Trục +X (IMP-134)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Quỹ Đạo Đứt Gãy & Chu Vi Ray Lệch Tiêu Chuẩn (Non-Closed Spline & Perimeter Drift Trap)*:
+     - Khi dùng CatmullRomCurve3 cho tuyến ray bao quanh chu vi sa bàn, nếu không chốt `closed: true`, tension 0.15 và cấu hình điểm đối xứng bám viền $X, Z = \pm 6.9\text{m}$ với 4 góc bo cong ($R \approx 0.8\text{m}$), chu vi $L$ có thể trôi ra ngoài dải quy chuẩn $[50.0\text{m}, 58.0\text{m}]$ hoặc đầu/đuôi curve không khép kín gây hiện tượng giật góc (corner snapping).
+  2. *Bẫy Xoay Khớp Nối Toa Xe Lệch Trục Tọa Độ (Coordinate Yaw Inversion Trap)*:
+     - Các mô hình toa xe Three.js thường có hướng chuyển động chuẩn theo trục $+X$. Nếu tính yaw bằng `Math.atan2(tangent.x, tangent.z)` (chuẩn trục $+Z$ của ô tô) thì đầu tàu bị quay ngang $90^\circ$ cày xéo mặt ray. Phải áp dụng chuẩn trục $+X$: `Math.atan2(-tangent.z, tangent.x)`.
+  3. *Bẫy Dừng Ga Không Triệt Tiêu Vận Tốc Tức Thời & Rò Rỉ Object Trong useFrame (Station Dwell Velocity & GC Leak Trap)*:
+     - Khi tàu dừng tại Ga Nam (`Waterfront Central`, 0.12) và Ga Bắc (`Landmark Metro`, 0.62) trong $3.5\text{s}$, nếu không khóa cứng `speed = 0` và `isStopped = true`, nhịp rung lắc pitch `Math.sin(t * 12)` vẫn tiếp tục rung khi đứng yên. Đồng thời nếu tạo mới `new Vector3()` trong `useSafeFrame` sẽ gây rác bộ nhớ làm tụt FPS WebGL.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Closed Fillet Spline Invariant (`diorama_train_kinematics.ts`)**:
+     - Cố định 19 điểm kiểm soát CatmullRomCurve3 khép kín bám viền $\pm 6.9\text{m}$, 4 góc bo tại $|X, Z| = 6.8\text{m}$, bảo đảm chu vi $L = 54.49\text{m} \in [50.0, 58.0\text{m}]$ và $|x|, |z| \le 7.15\text{m}$.
+  2. **+X Axis Carriage Yaw Invariant (`computeTrainYaw`)**:
+     - Bắt buộc áp dụng công thức thuần: `Math.atan2(-tangent.z, tangent.x)`. Toa khách 1 và Toa khách 2 lùi độc lập theo khoảng cách cố định $0.85\text{m}$ và $1.70\text{m}$ qua hàm `computeCarriageProgress`, bảo đảm khớp nối uốn lượn độc lập từng toa khi vào góc rẽ.
+  3. **Station Dwell & In-Place Vector Invariant (`DioramaModelRailroad`)**:
+     - Tàu dừng hẳn $3.5\text{s}$ tại mỗi ga với `speed = 0`, `isStopped = true`, chỉ kích hoạt nhịp pitch khi `speed > 0.01`.
+     - Tái sử dụng `tempVec` và `tempTangent` toàn cục ngoài React component để triệt tiêu 100% GC pressure.
+
+---
+
+### 178. [UI/UX/TIMING] Minh Bạch Hóa Sự Kiện Thị Trường Hai Tầng & Ràng Buộc Thời Lượng Pop-up Đa Phân Đoạn (IMP-135)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Banner Thị Trường Khuyết Thiếu Thông Tin Hiệu Lực (Opaque Market Banner Trap)*:
+     - Trước IMP-135, `MarketEventTicker` chỉ render Icon, Tiêu đề thẻ và badge `Còn X vòng` (ví dụ: "🏖️ Mùa Cao Điểm Du Lịch Quốc Tế [Còn 1 vòng]"). Người chơi hoàn toàn không hiểu sự kiện này tác động gì đến tài chính hay bàn cờ (ví dụ: nhân đôi tiền thuê resort ven biển).
+  2. *Bẫy Thời Lượng Hiển Thị Quá Ngắn Khiến Người Chơi Đọc Không Kịp (Premature Dismissal Trap)*:
+     - Trước IMP-135, toàn bộ pop-up biến động tiền tệ, mốc thẻ bài quan trọng chỉ hiển thị `2200ms` (`FLOATING_TEXT_DURATION_MS = 2200`), và Toast chỉ `4000ms`. Các câu thông điệp dài như "Trả thuê Bến Thành cho Hoàng Nam -2.500 Tr." hay thẻ Cơ Hội vừa hiện lên đã biến mất tức thì, gây ức chế tâm lý cho người chơi.
+  3. *Bẫy Cụ Cột Mô Tả Bằng Truncate Trên Giao Diện Mobile (Truncate Clipping Trap)*:
+     - `MilestoneBanner` dùng class `truncate` cứng khiến các câu mô tả thẻ bài Cơ Hội / Thị Trường bị cắt cụt lửng lơ trên màn hình hẹp của điện thoại.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Two-Tier Market Event Ticker Invariant (`market_event_ticker.tsx`)**:
+     - Bắt buộc render bố cục 2 tầng: Dòng 1 gồm `{icon}` + **{title}** + Badge vòng còn lại; Dòng 2 là Subtitle `{effectSummary}` trích xuất trực diện từ `MARKET_CARD_DETAILS` qua `resolveMarketEffectSummary`.
+     - Áp dụng `line-clamp-2 pl-6 sm:pl-7 leading-tight` để căn thẳng hàng với tiêu đề và hỗ trợ hiển thị tối đa 2 dòng không vỡ layout trên mobile.
+  2. **Multi-Tier Duration & Backward-Compatibility Contract Invariant (`game_store.ts`)**:
+     - Bảo tồn 100% hằng số `FLOATING_TEXT_DURATION_MS = 2200` theo hợp đồng cũ `[TC-117.01]`.
+     - Phân tầng thời lượng hiển thị mới:
+       + Thẻ sự kiện & Cột mốc (`chance`, `market`, `monopoly`, `debt_relief`): $4.500\text{ms}$ (`EVENT_BANNER_DURATION_MS = 4500`).
+       + Giao dịch thông thường (`buy`, `rent_pay`, `upgrade`, `tax`...): $3.600\text{ms}$ (`TRANSACTION_POPUP_DURATION_MS = 3600`).
+       + Cho phép ghi đè linh hoạt qua thuộc tính `durationMs?: number` trên `FloatingTextItem`.
+       + `ServerToast` thông báo máy chủ nâng lên $6.000\text{ms}$ (`SERVER_ERROR_TOAST_TIMEOUT_MS = 6000`), bảo toàn nút đóng nhanh $\ge 44\text{px}$.
+  3. **Milestone Banner Non-Clipping Invariant (`floating_numbers.tsx`)**:
+     - Cấm dùng `truncate` đơn dòng trên mô tả thẻ sự kiện của `MilestoneBanner`. Bắt buộc dùng `line-clamp-2 break-words` để hiển thị trọn vẹn ngữ nghĩa tác động.
+
+---
+
+### 179. [UI/CRAFT] Thẻ Bài Fintech "Hiểu Ngay Trong 1 Giây", Khử Số Ô Thô Kệch & Bất Biến Thứ Tự TestId Trước ClassName (IMP-134)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Liệt Kê Số Ô Thô Kệch (Tile Indices Clutter Trap)*:
+     - Trước IMP-134, các thẻ sự kiện hiển thị chuỗi danh sách ô dạng `(Ô 5, 15, 25, 35)` hoặc `(Ô 6, 8, 26, 27)` trong các chip tóm tắt phạm vi (`targetScope`), gây chật chội, kém tinh tế và làm hẹp không gian hiển thị trên mobile.
+  2. *Bẫy Nhãn Cấm 'Thu Nhập:' / 'Khoản Chi:' (Forbidden Cash Delta Label Trap)*:
+     - Trước IMP-134, khối cash delta badge cũ hiển thị tiền tố `Thu Nhập:` hoặc `Khoản Chi:` gây vi phạm hợp đồng hồi quy `TC-IMP132.20` và `TC-MCH01.24` khi effectDelta là undefined, đồng thời lặp lại số liệu gây phân tán thị giác.
+  3. *Bẫy Thứ Tự Thuộc Tính DOM Trong Kiểm Thử Tĩnh (Data-TestId vs ClassName Precedence Trap)*:
+     - Khi kiểm thử hợp đồng bằng biểu thức chính quy `/data-testid="event-card-modal"[^>]*\bpt-7\b/`, nếu đặt `className` trước `data-testid`, toán tử `[^>]*` sau `data-testid` không thể quét ngược lại các utility class phía trước, dẫn đến kiểm thử thất bại giả định dù class vẫn tồn tại trong thẻ.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Fintech Hero Stat Box Invariant (`event_card_visuals.ts`)**:
+     - Hiển thị khối `data-testid="event-hero-stat"` to bản với font-mono, số liệu nổi bật (`+500 Tr.`, `-800 Tr.`, `10% QUA GO`, `+20% THẾ CHẤP`, `+2.500 Tr.`, `MIỄN 100% THUÊ`, `ĐỔI 1 Ô C0`).
+     - Tuyệt đối cấm chứa chuỗi `'Thu Nhập:'` hay `'Khoản Chi:'`. Dùng các nhãn hành động đanh thép: `PHỤ THU CƯỚC`, `PHẠT NỒNG ĐỘ CỒN`, `LÃI SUẤT VAY`, `QUY HOẠCH ĐÔ THỊ`, `CHỐT LỜI CỔ PHIẾU`, `THANH TRA THUẾ`, `MIỄN TRỪ NGOẠI GIAO`, `HOÁN ĐỔI DỰ ÁN`.
+     - Phân định icon chuyên đề qua `getCardThemedEmoji(cardId, cardType)` (`⛽`, `🚨`, `🏖️`, `🚘`), fallback về `📰` cho Market và `⚡` cho Chance.
+  2. **Tile List Sanitization Invariant (`sanitizeTargetScope`)**:
+     - Bắt buộc lọc sạch các dãy số ô thô kệch bằng regex `/\s*\([ÔO0-9,\s]+\)/gi` trên cả nội dung hiển thị lẫn thuộc tính tooltip `title` của chip phạm vi.
+  3. **Data-TestId Precedence Invariant (`event_card_modal.tsx`)**:
+     - Luôn khai báo `data-testid="..."` trước `className="..."` trên các thẻ root và container chính để bảo đảm tính tương thích tuyệt đối với các bộ kiểm thử tĩnh dùng biểu thức chính quy xuôi dòng.
+
+---
+
+### 180. [FSM/AUDIT] Bất Biến Cho Phép Gieo Đôi Thoát Án Kiểm Toán & Triệt Tiêu Lỗi INVALID_PHASE (IMP-135)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Khóa Cứng Nút Gieo Xúc Xắc Trong Trạm Kiểm Toán (Audit Softlock Trap)*:
+     - Trước IMP-135, hàm `isRollActionDisabled` sử dụng điều kiện `Boolean(params.inAudit)` cứng nhắc để khóa nút Đổ xúc xắc khi người chơi đang thụ án kiểm toán (`inAudit = true`). Điều này tước đoạt hoàn toàn cơ chế luật chơi cơ bản SSOT §I.2: người chơi trong Trạm Kiểm Toán được quyền gieo xúc xắc đầu lượt tìm cơ hội ra đôi (Doubles) để được phóng thích tự do và di chuyển tức thì.
+  2. *Bẫy Cho Phép Kết Thúc Lượt Khi Ra Đôi (Doubles End Turn Exploit Trap)*:
+     - Trong `isEndTurnDisabled`, nhánh kiểm tra `if (params.inAudit ...) return false` áp đảo logic trò chơi, dẫn đến khi người chơi vừa gieo ra đôi trong Trạm Kiểm Toán (`canRollAgain = true`), nút Kết Thúc Lượt vẫn sáng (`disabled = false`). Người chơi có thể vô tình bấm kết thúc lượt, đánh mất lượt di chuyển tiếp theo hoặc gây xung đột trạng thái FSM giữa client và server.
+  3. *Bẫy Sai Lệch Pha PropertyManagement Khi Đang Thụ Án (PropertyManagement Phase Trap)*:
+     - Khi người chơi bắt đầu lượt trong Trạm Kiểm Toán nhưng trạng thái phòng hoặc FSM rơi vào pha `PropertyManagement`, điều kiện `turnPhase === 'PropertyManagement' && !hasRolledThisTurn` khóa nút gieo xúc xắc, khiến người chơi không thể thực hiện quyền gieo đôi đầu lượt và phát sinh lỗi từ chối `INVALID_PHASE`.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Audit Roll Doubles Eligibility Invariant (`ui_helpers.ts`)**:
+     - `isRollActionDisabled` thay thế `Boolean(params.inAudit)` thành `Boolean(params.inAudit && params.hasRolledThisTurn && !params.canRollAgain)`. Khi `inAudit = true`, nếu `hasRolledThisTurn = false` (hoặc `undefined`) hoặc `canRollAgain = true`, nút gieo xúc xắc luôn ở trạng thái khả dụng (`disabled = false`).
+     - Bổ sung chốt chặn `!params.inAudit` vào nhánh kiểm tra `PropertyManagement` (`!params.inAudit && params.turnPhase === 'PropertyManagement' && (!params.canRollAgain || !params.hasRolledThisTurn)`), bảo đảm người chơi đang thụ án luôn được phép gieo xúc xắc đầu lượt.
+  2. **Audit Mandatory Continuation Invariant (`isEndTurnDisabled`)**:
+     - Bắt buộc kiểm tra `!params.canRollAgain` trước khi cho phép kết thúc lượt: `if (!params.canRollAgain && (params.inAudit || (params.turnPhase === 'PropertyManagement' && !params.hasRolledThisTurn))) { return false; }`.
+     - Khi `canRollAgain: true` (kể cả khi `inAudit: true`), `isEndTurnDisabled` bắt buộc trả về `true`, ép buộc người chơi phải gieo tiếp lượt di chuyển được thưởng và chống triệt để tình trạng bỏ sót lượt đi.
+  3. **Anti Double-Roll Exploit Invariant**:
+     - Khi đã gieo xúc xắc một lần mà không ra đôi (`inAudit = true, hasRolledThisTurn = true, canRollAgain = false`), nút gieo xúc xắc lập tức bị khóa cứng (`disabled = true`) để ngăn chặn việc spam gieo nhiều lần trong cùng một lượt.
+
+---
+
+### 181. [UI/CRAFT] Radar Phân Khu Độc Quyền, Thanh Tiến Độ Phân Đoạn & Khử Bẫy Văng Inspector Khi Mở Sa Bàn (IMP-137)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Mặc Định Sai Tab Làm Trống Rỗng Inspector Card (SelectedCellIndex Default Tab Trap)*:
+     - Khi người dùng muốn xem bản đồ quy hoạch thì tab "Phân Khu & Độc Quyền" là trọng tâm trực quan nhất. Tuy nhiên nếu đổi mặc định mù quáng thành `'districts'` mà không kiểm tra `selectedCellIndex`, các lời gọi mở modal kèm chỉ số ô đất (`selectedCellIndex`) sẽ không mở được `MasterplanInspectorCard` (vốn nằm trong tab `blueprint`), gây gãy hợp đồng `[TC-132.11]` & `[TC-132.12]`.
+  2. *Bẫy Cắt Cụt Tên Người Chơi & Bảng Tính Khô Cứng (Name Truncation & Monochrome Trap)*:
+     - Giới hạn cứng `max-w-[50px]` làm cắt cụt tên người chơi thành `Bot AI ...` và `Đại Gia...`. Đồng thời ô có chủ và ô trống có cùng màu nền xám nhờ nhạt, làm mất cảm giác "bản đồ nhiệt độc quyền" của Monopoly.
+  3. *Bẫy Thiếu Trường Khi Kích Hoạt Đàm Phán Nhanh (Trade Payload Schema Collision Trap)*:
+     - Khi mở nhanh modal đàm phán P2P từ thẻ ô đất đối thủ, nếu không truyền đủ 5 trường bắt buộc (`targetPlayerId`, `offeredProperties`, `requestedProperties`, `cashOffer`, `cashRequest`), hệ thống sẽ lỗi kiểu dữ liệu hoặc nuốt intent.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Smart Contextual Default Tab Invariant (`masterplan_modal.tsx`)**:
+     - Mặc định mở `'districts'` khi mở tự do từ ActionDock; tự động fallback mở `'blueprint'` khi có `selectedCellIndex` để bảo vệ 100% Inspector Card nội bộ.
+  2. **Segmented Progress Bar & Tint Invariant (`masterplan_components.tsx`)**:
+     - Bắt buộc render thanh tiến độ phân đoạn `district-progress-bar-{id}` với đúng $N$ vạch màu token của chủ sở hữu hoặc màu xám `bg-slate-200` cho đất trống.
+     - Ô có chủ phủ tint nhẹ `owner.tokenColor` (18% alpha) và viền 50% alpha, mở rộng trần hiển thị tên `max-w-[80px] sm:max-w-[120px] truncate` không bao giờ bị cắt cụt.
+  3. **Strict 5-Field P2P Trade & Camera Glide Invariant**:
+     - Nút `[🤝]` chỉ hiển thị khi `owner.id !== myPlayerId` và truyền đủ 5 trường schema với `requestedProperties: [cellIndex]`. Nút `[👁️]` gọi `setCameraFocusCell` và kích hoạt `onClose?.()` để giải phóng modal lộ sa bàn 3D.
+
+---
+
+### 182. [UI/AUCTION] Bất Biến Thẻ Tình Báo Phân Khu & Cục Diện Độc Quyền Sàn Đấu Giá (IMP-138)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Thiếu Ngữ Cảnh Chiến Lược Sàn Đấu Giá (Auction Strategy Blindspot Trap)*:
+     - Trước IMP-138, người chơi tham gia sàn đấu giá chỉ nhìn thấy tên ô đất và giá khởi điểm. Người chơi không biết ô đất thuộc phân khu nào, bản thân hoặc đối thủ đã sở hữu bao nhiêu ô trong phân khu, liệu việc để rơi ô đất này vào tay đối thủ có kích hoạt độc quyền (x2 tiền thuê đất & mở quyền xây nhà) hay không.
+  2. *Bẫy Tràn Khung Màn Hình Di Động Khi Bổ Sung Thẻ Thông Tin (Mobile Viewport Overflow Trap)*:
+     - Khung sàn đấu giá vốn có nhiều thành phần (tiêu đề, bảng giá hiện tại, người dẫn đầu, danh sách đại gia, đồng hồ đếm ngược, cụm 3 nút nâng giá nhanh, nút Auto-Bid và nút Rút lui). Khi chèn thêm Thẻ Tình Báo Phân Khu (`AuctionDistrictCard`), nếu container modal không có `max-h-[90vh] overflow-y-auto pr-1`, các nút hành động cốt lõi sẽ bị đẩy tụt ra ngoài đáy màn hình điện thoại (< 667px), khiến người chơi không thể bấm đặt giá hoặc rút lui.
+  3. *Bẫy Xung Đột Dữ Liệu Props vs Zustand Store Trong Kiểm Thử Hợp Đồng (Dual-Source State Collision Trap)*:
+     - Trong môi trường runtime thực tế, danh sách người chơi (`playersInfo`) và cấp công trình (`levelMap`) được cấp nguồn từ Zustand store `useGameStore`. Tuy nhiên trong các bài kiểm thử tĩnh SSR (`renderToStaticMarkup`), store là rỗng và mock fixtures được truyền trực tiếp qua props. Nếu component chỉ đọc từ Zustand store mà bỏ qua props, kiểm thử sẽ nhận diện sai trạng thái sở hữu (0 ô sở hữu).
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Dual-Source Invariant (Props Fallback Zustand)**:
+     - Mọi component con và hàm resolve trên sàn đấu giá (`AuctionModal`, `AuctionDistrictCard`) bắt buộc ưu tiên props `propPlayersInfo ?? storePlayersInfo` và `propLevelMap ?? storeLevelMap`. Bảo đảm an toàn tuyệt đối 100% cho cả SSR Contract Test lẫn Client Runtime.
+  2. **Safe Fallback Null-Guard Invariant (`resolveAuctionDistrictInfo`)**:
+     - Hàm thuần `resolveAuctionDistrictInfo` bắt buộc trả về `null` cho mọi ô ngoài biên bàn cờ (`< 0`, `\ge 40`, `NaN`), ô không thuộc danh mục sổ đỏ `PROPERTY_DEEDS` (GO 0, Thị Trường 2, Thuế 4, Kiểm Toán 10...) hoặc ô không thuộc `DISTRICT_GROUPS`.
+     - `AuctionDistrictCard` khi nhận `null` bắt buộc trả về `null` (không render bất kỳ markup nào), triệt tiêu 100% lỗi crash runtime và tương thích ngược với các tình huống ô đặc biệt.
+  3. **Monopoly Radar & Reactive Tone Invariant**:
+     - Hệ thống phân loại chính xác 6 loại gợi ý chiến thuật:
+       + `my_monopoly`: Khi người chơi đã sở hữu $N - 1$ ô trong phân khu; tone `emerald`, huy hiệu bắt buộc chứa từ khóa `'ĐỘC QUYỀN'`.
+       + `block_opponent`: Khi có đối thủ đã gom $N - 1$ ô trong phân khu; tone `rose`, huy hiệu bắt buộc chứa từ khóa `'CHẶN ĐỐI THỦ'`.
+       + `first_piece`: Khi chưa ai sở hữu ô nào trong phân khu; tone `blue`, huy hiệu `'🚩 KHAI MỞ PHÂN KHU'`.
+       + `contested`: Khi phân khu bị phân mảnh sở hữu; tone `amber`, huy hiệu `'⚔️ TRANH CHẤP CHIẾN LƯỢC'`.
+       + `railroad` / `utility`: Chuyên biệt cho 4 ga tàu (`Hạ Tầng Cảng & Giao Thông`) và 2 trạm điện nước (`Tiện Ích & Năng Lượng Quốc Gia`) kèm bảng cước 4 bậc `[500, 1000, 2000, 4000]` hoặc công thức xúc xắc 2D6.
+  4. **Data-TestId Precedence & Mobile Scroll Invariant**:
+     - Cố định thuộc tính `data-testid="auction-modal"` trước `className` trên container chính của modal và bổ sung `max-h-[90vh] overflow-y-auto pr-1` để bảo vệ tầm nhìn touch target của người dùng trên mọi kích cỡ thiết bị di động.
+
+---
+
+### 183. [UI/PORTFOLIO] Bất Biến Phân Tích Độc Quyền, Mảnh Ghép Còn Thiếu & Triệt Tiêu Ngộ Nhận Quyền Xây Dựng (IMP-136)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Ngộ Nhận Quyền Xây Dựng (Misleading Turn-Wait Build Trap)*:
+     - Trước IMP-136, trong `checkPropertyUpgradeEligibility`, việc kiểm tra `isMyTurn === false || turnPhase !== 'PropertyManagement'` được đặt lên đầu tiên trước điều kiện `hasMonopoly`. Do đó, với mọi ô đất mà người chơi chưa đủ bộ màu Monopoly (chỉ có 1/3 hay 2/3), component vẫn hiển thị thông điệp "Chờ đến lượt xây dựng". Điều này khiến người chơi lầm tưởng rằng chỉ cần đến lượt mình là sẽ được phép nâng cấp công trình, trong khi luật chơi bắt buộc phải sở hữu trọn bộ màu độc quyền mới đủ điều kiện xây nhà!
+  2. *Bẫy Danh Mục BĐS Kê Khai Tĩnh & Mù Thông Tin Chiến Lược (Static Inventory Blindspot Trap)*:
+     - Giao diện `PropertyPortfolioModal` chỉ liệt kê các ô người chơi đang sở hữu mà không cung cấp insight: nhóm màu còn thiếu những ô nào, ô còn thiếu là đất trống sàn F1 hay đang nằm trong tay đối thủ nào (kèm màu sắc đại diện và giá bán/chuyển nhượng), và không có lối tắt đàm phán tức thì.
+  3. *Bẫy Tràn Filter Bar Trên Màn Hình Nhỏ (< 390px) (Mobile Filter Overflow Trap)*:
+     - Khi bổ sung tab lọc mới "Sắp Đủ Bộ 🔥", nếu thanh filter bar dùng `flex` với `flex-1` cứng nhắc sẽ gây tràn viền, vỡ dòng hoặc che khuất các tab quan trọng trên màn hình điện thoại di động nhỏ.
+  4. *Bẫy Hiển Thị Filter Bar Khi Không Sở Hữu Tài Sản Nào (Zero-Property Empty State Trap)*:
+     - Khi người chơi chưa sở hữu bất động sản nào (`ownedProperties.length === 0`), việc render thanh filter bar chứa tab "Đang Thế Chấp" vi phạm hợp đồng kiểm thử `TC-MCH01.15` (vốn yêu cầu empty state sạch sẽ không chứa từ khóa Thế Chấp/Giải Chấp).
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Monopoly Priority Over Turn Invariant (`checkPropertyUpgradeEligibility`)**:
+     - Điều kiện kiểm tra tính hợp lệ ô BĐS, cấp độ tối đa (`level >= 3`) và sở hữu trọn bộ màu (`hasMonopoly`) bắt buộc phải được thẩm định TRƯỚC điều kiện lượt chơi (`isMyTurn` và `turnPhase`).
+     - Khi `!hasMonopoly`, lý do khóa nút luôn là `'Cần sở hữu trọn bộ màu trước khi nâng cấp'`. Chỉ khi `hasMonopoly && !isMyTurn` mới hiển thị `'Chờ đến lượt xây dựng'` (bảo toàn 100% hợp đồng `TC-IMP133.18`).
+  2. **Dedicated Monopoly Analytics Module (`portfolio_monopoly_analytics.ts`)**:
+     - Tách riêng hàm thuần `analyzePropertyMonopolyInsight(params)` xử lý triệt để các nhóm màu thông thường lẫn các phân khúc đặc thù như 4 ô Cảng/Ga tàu (`CellType.Railroad`) và 2 ô Tiện ích (`CellType.Utility`).
+     - Xác định `missingPieces` kèm chủ quyền: gắn nhãn `'Đất trống'` và nút `[🔍 Xem Ô]` (`data-testid="view-vacant-cell-btn-{id}"`) khi ô chưa có chủ; hiển thị tên đối thủ, màu token và nút `[🤝 Đàm Phán]` (`data-testid="quick-trade-btn-{id}"`) khi ô do đối thủ sở hữu.
+     - Khi đã đủ bộ màu độc quyền trọn bộ, hiển thị huy hiệu vinh danh `👑 Độc Quyền Trọn Bộ` và triệt tiêu khối `property-missing-pieces`.
+  3. **1-Click Quick Trade Bridge Invariant**:
+     - Nút `[🤝 Đàm Phán]` liên kết trực tiếp tới modal trao đổi P2P qua `onQuickTrade(targetPlayerId, targetPropertyIndex)`, tự động nạp sẵn đối tác mục tiêu và đưa ô đất cần thâu tóm vào `requestedProperties`, với đầy đủ 5 trường schema của `ModalPayloadMap['trade']`.
+  4. **Responsive Horizontal Scroll & Conditional Filter Bar Invariant**:
+     - Thanh filter bar chỉ được render khi `ownedProperties.length > 0` và sử dụng `overflow-x-auto no-scrollbar whitespace-nowrap` kết hợp với các nút bấm có kích thước chạm chuẩn (`min-h-[40px] sm:min-h-[44px]`), bảo đảm hiển thị mượt mà trên cả desktop và mobile.

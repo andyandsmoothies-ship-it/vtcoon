@@ -9,6 +9,9 @@ import { FloatingNumbersOverlay } from './floating_numbers';
 import { ActivityFeedSidebar } from './activity_feed_sidebar';
 import { TelemetryBadge } from './telemetry/telemetry_badge';
 import { TelemetryConsoleModal } from './telemetry/telemetry_console_modal';
+import { RecenterPawnPill } from './recenter_pawn_pill';
+import { useGameStore } from '../store/game_store';
+import { useLobbyStore } from '../store/lobby_store';
 import type { PlayerIntent } from '../../server/intent_dispatcher';
 
 export interface HudContainerProps extends ActionDockProps {
@@ -33,6 +36,14 @@ export function HudContainer({
   onBailOut: onBailOutProp,
 }: HudContainerProps): React.ReactElement {
   const handleBailOut = onBailOutProp ?? (() => onIntent?.({ type: 'INTENT_BAIL_OUT' }));
+  const activeModal = useGameStore((s) => s.activeModal);
+  const cameraFocusCell = useGameStore((s) => s.cameraFocusCell);
+  const setCameraFocusCell = useGameStore((s) => s.setCameraFocusCell);
+  const playerPositions = useGameStore((s) => s.playerPositions);
+  const currentTurnPlayerId = useGameStore((s) => s.currentTurnPlayerId);
+  const lobbyPid = useLobbyStore((s) => s.myPlayerId);
+  const myId = localPlayerId || (lobbyPid && lobbyPid.length > 0 ? lobbyPid : undefined) || currentTurnPlayerId || 'p1';
+  const pawnPos = playerPositions[myId] ?? 0;
 
   return (
     <div
@@ -52,6 +63,16 @@ export function HudContainer({
       <div className="flex-1 flex justify-end items-start pointer-events-none my-2 overflow-hidden">
         {children}
         <PlayerHudList />
+      </div>
+
+      {/* Nút Nổi Recenter Camera Về Quân Cờ */}
+      <div className="pointer-events-auto fixed bottom-24 left-1/2 -translate-x-1/2 z-20">
+        <RecenterPawnPill
+          activeModal={activeModal}
+          cameraFocusCell={cameraFocusCell}
+          pawnPosition={pawnPos}
+          onRecenter={() => setCameraFocusCell(null)}
+        />
       </div>
 
       {/* Tầng đáy: Telemetry Badge ở góc dưới bên trái, Action Dock ở góc dưới bên phải */}

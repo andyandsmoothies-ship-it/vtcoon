@@ -78,13 +78,14 @@ export interface FloatingTextItem {
   readonly type: FloatingTextType;
   readonly playerId: string;
   readonly timestamp: number;
+  readonly durationMs?: number;
   readonly actionType?: FloatingActionType;
   readonly title?: string;
   readonly cellIndex?: number;
   readonly targetPlayerName?: string;
 }
 
-export type ActiveModalType = 'deed' | 'portfolio' | 'auction' | 'trade' | 'event' | 'hose' | 'insolvency' | 'game_over' | 'rules' | null;
+export type ActiveModalType = 'deed' | 'portfolio' | 'auction' | 'trade' | 'event' | 'hose' | 'insolvency' | 'game_over' | 'rules' | 'masterplan' | null;
 
 export interface ModalPayloadMap {
   deed: { cellIndex: number; canBuy?: boolean; ownedProperties?: readonly number[] };
@@ -139,6 +140,10 @@ export interface ModalPayloadMap {
   };
   rules: {
     initialTab?: 'core' | 'cards' | 'mechanics';
+  };
+  masterplan: {
+    initialTab?: 'blueprint' | 'districts';
+    selectedCellIndex?: number;
   };
 }
 
@@ -204,6 +209,11 @@ export interface GameState {
   // UI-05 Social Emotes & Micro-VFX
   readonly activeEmotes: Record<string, ActiveEmote>;
   readonly floatingTexts: readonly FloatingTextItem[];
+
+  // IMP-133 Camera Sticky Focus
+  readonly cameraFocusCell: number | null;
+  setCameraFocusCell: (cellIndex: number | null) => void;
+  resetGameState?: () => void;
 
   setLastEventCard: (card: EventCardInfo | null) => void;
   setLevelMap: (map: Record<number, 0 | 1 | 2 | 3>) => void;

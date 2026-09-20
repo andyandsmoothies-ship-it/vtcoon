@@ -352,6 +352,7 @@ export function handleDeltaTelemetry(
     cells: delta.cells,
     tick: delta.tick,
     roomStarted: delta.roomStarted,
+    currentTurnPlayerId: delta.currentTurnPlayerId ?? postState.currentTurnPlayerId,
   });
 
   recordTurnStallAndBotWatchdog(postState, delta, violations);

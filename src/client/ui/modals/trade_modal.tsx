@@ -1,4 +1,4 @@
-// [UI-S04/MSS][IMP-75] TradeModal — Two-column P2P property and cash trade table with multi-partner tabs & transparent diorama styling
+// [UI-S04/MSS][IMP-75][IMP-133] TradeModal — Two-column P2P property and cash trade table with mobile segmented tabs & deal balance meter
 import React, { useState } from 'react';
 import { getDeedDisplayInfo, calculateTradeTax, validateTradeOffer } from './modal_helpers';
 import { formatCurrency } from '../ui_helpers';
@@ -39,18 +39,29 @@ export interface TradeModalProps {
 }
 
 export function TradeModal({
-  targetPlayerId, myProperties, targetProperties,
-  myMortgagedProperties = [], targetMortgagedProperties = [],
-  myBalance, targetPlayerName, targetBalance,
-  availablePartners = [], onSelectPartner,
-  initialOffered = [], initialRequested = [],
-  initialCashOffer = 0, initialCashRequest = 0, onSubmitTrade, onClose,
+  targetPlayerId,
+  myProperties,
+  targetProperties,
+  myMortgagedProperties = [],
+  targetMortgagedProperties = [],
+  myBalance,
+  targetPlayerName,
+  targetBalance,
+  availablePartners = [],
+  onSelectPartner,
+  initialOffered = [],
+  initialRequested = [],
+  initialCashOffer = 0,
+  initialCashRequest = 0,
+  onSubmitTrade,
+  onClose,
 }: TradeModalProps): React.ReactElement {
   const [selectedPartnerId, setSelectedPartnerId] = useState<string>(targetPlayerId);
   const [offered, setOffered] = useState<number[]>([...initialOffered]);
   const [requested, setRequested] = useState<number[]>([...initialRequested]);
   const [cashOffer, setCashOffer] = useState<number>(initialCashOffer);
   const [cashRequest, setCashRequest] = useState<number>(initialCashRequest);
+  const [mobileTab, setMobileTab] = useState<'mine' | 'partner'>('mine');
 
   const currentPartner = availablePartners.find((p) => p.id === selectedPartnerId);
   const effectiveTargetBalance = currentPartner?.balance ?? targetBalance ?? 0;
@@ -77,7 +88,6 @@ export function TradeModal({
     targetMortgagedProperties,
   });
 
-  // Kiểm tra đối tác có đủ tiền mặt đáp ứng yêu cầu không
   const partnerCanAfford = cashRequest <= effectiveTargetBalance;
   const isValid = baseValid && partnerCanAfford;
 
@@ -92,7 +102,6 @@ export function TradeModal({
     });
   };
 
-  // Tính giá niêm yết của các BĐS được đề xuất để hiển thị gợi ý giá nhanh
   const offeredBaseCost = offered.reduce((sum, id) => {
     const deed = getDeedDisplayInfo(id);
     return sum + (deed?.price ?? 1000);
@@ -110,6 +119,12 @@ export function TradeModal({
   const reqPrice100 = requestedBaseCost;
   const reqPrice130 = Math.round(requestedBaseCost * 1.3);
   const reqPrice150 = Math.round(requestedBaseCost * 1.5);
+
+  // [IMP-133] Cán Cân Thương Vụ: So sánh tổng giá trị tài sản (BĐS + Tiền) 2 bên
+  const myTotalValue = offeredBaseCost + cashOffer;
+  const partnerTotalValue = requestedBaseCost + cashRequest;
+  const totalDealValue = myTotalValue + partnerTotalValue;
+  const myPercent = totalDealValue > 0 ? Math.round((myTotalValue / totalDealValue) * 100) : 50;
 
   const renderCol = (
     title: string,
@@ -182,7 +197,21 @@ export function TradeModal({
           <label className="text-[10px] text-slate-700 block mb-1 font-semibold">
             {isMine ? `Bù tiền mặt (Tối đa ${formatCurrency(myBalance)})` : 'Yêu cầu đối tác trả tiền:'}
           </label>
+          {/* Cụm Stepper tiền mặt chuẩn min-h-[44px] min-w-[44px] */}
           <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              data-testid="cash-stepper-decrement"
+              disabled={cashVal <= 0}
+              onClick={() => {
+                const next = Math.max(0, cashVal - 100);
+                onCash(next);
+              }}
+              className="min-h-[44px] min-w-[44px] px-3 py-1.5 bg-slate-200 hover:bg-slate-300 disabled:opacity-40 disabled:cursor-not-allowed text-slate-900 font-mono text-base font-black rounded-lg border-2 border-slate-400 shadow-[0_2px_0_0_#94a3b8] active:shadow-none active:translate-y-[2px] transition-all cursor-pointer inline-flex items-center justify-center"
+              aria-label="Giảm tiền"
+            >
+              -
+            </button>
             <input
               type="number"
               min={0}
@@ -193,18 +222,20 @@ export function TradeModal({
                 const val = Math.max(0, maxCash !== undefined ? Math.min(maxCash, Number(e.target.value) || 0) : Number(e.target.value) || 0);
                 onCash(val);
               }}
-              className="flex-1 bg-white border border-slate-300 rounded-lg p-1.5 text-xs text-slate-900 font-bold focus:outline-none focus:ring-2 focus:ring-amber-400"
+              className="flex-1 min-h-[44px] bg-white border border-slate-300 rounded-lg p-2 text-xs text-slate-900 font-bold focus:outline-none focus:ring-2 focus:ring-amber-400 text-center"
             />
             <button
               type="button"
+              data-testid="cash-stepper-increment"
               onClick={() => {
                 const next = cashVal + 100;
                 const val = maxCash !== undefined ? Math.min(maxCash, next) : next;
                 onCash(val);
               }}
-              className="min-h-[44px] min-w-[44px] px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-900 font-mono text-[11px] font-black rounded-lg border-2 border-slate-400 shadow-[0_2px_0_0_#94a3b8] active:shadow-none active:translate-y-[2px] transition-all cursor-pointer inline-flex items-center justify-center"
+              className="min-h-[44px] min-w-[44px] px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-900 font-mono text-base font-black rounded-lg border-2 border-slate-400 shadow-[0_2px_0_0_#94a3b8] active:shadow-none active:translate-y-[2px] transition-all cursor-pointer inline-flex items-center justify-center"
+              aria-label="Tăng tiền"
             >
-              +100
+              +
             </button>
             <button
               type="button"
@@ -213,7 +244,7 @@ export function TradeModal({
                 const val = maxCash !== undefined ? Math.min(maxCash, next) : next;
                 onCash(val);
               }}
-              className="min-h-[44px] min-w-[44px] px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-900 font-mono text-[11px] font-black rounded-lg border-2 border-slate-400 shadow-[0_2px_0_0_#94a3b8] active:shadow-none active:translate-y-[2px] transition-all cursor-pointer inline-flex items-center justify-center"
+              className="min-h-[44px] min-w-[44px] px-2 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-900 font-mono text-[11px] font-black rounded-lg border-2 border-slate-400 shadow-[0_2px_0_0_#94a3b8] active:shadow-none active:translate-y-[2px] transition-all cursor-pointer inline-flex items-center justify-center"
             >
               +500
             </button>
@@ -291,7 +322,7 @@ export function TradeModal({
   };
 
   return (
-    <div className="w-full max-w-md lg:max-w-lg max-h-[90vh] overflow-y-auto bg-[#FFFDF8] border-2 border-slate-900 rounded-2xl shadow-[0_6px_0_0_#0f172a] flex flex-col pointer-events-auto text-slate-900 select-none" data-testid="trade-modal">
+    <div className="w-full max-w-md lg:max-w-xl max-h-[90vh] overflow-y-auto bg-[#FFFDF8] border-2 border-slate-900 rounded-2xl shadow-[0_6px_0_0_#0f172a] flex flex-col pointer-events-auto text-slate-900 select-none" data-testid="trade-modal">
       {/* Header */}
       <header className="p-3.5 bg-[#F7F2E7] border-b border-slate-300 flex items-center justify-between sticky top-0 z-10 shrink-0">
         <div className="flex items-center gap-2">
@@ -350,10 +381,58 @@ export function TradeModal({
         </div>
       )}
 
-      {/* Hai cột giao dịch */}
-      <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-        {renderCol('Tài Sản Bạn Đề Xuất', true, myProperties, myMortgagedProperties, offered, cashOffer, (v) => { setCashOffer(v); if (v > 0) setCashRequest(0); }, myBalance)}
-        {renderCol(`Tài Sản Của ${effectiveTargetName}`, false, targetProperties, targetMortgagedProperties, requested, cashRequest, (v) => { setCashRequest(v); if (v > 0) setCashOffer(0); })}
+      {/* Tab phân đoạn Mobile */}
+      <div className="px-4 pt-2 sm:hidden">
+        <div data-testid="trade-mobile-segmented-tabs" className="flex p-1 bg-slate-200/80 rounded-xl">
+          <button
+            type="button"
+            onClick={() => setMobileTab('mine')}
+            className={`flex-1 min-h-[44px] py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+              mobileTab === 'mine' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            Bạn Đưa
+          </button>
+          <button
+            type="button"
+            onClick={() => setMobileTab('partner')}
+            className={`flex-1 min-h-[44px] py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+              mobileTab === 'partner' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            Đối Tác
+          </button>
+        </div>
+      </div>
+
+      {/* Hai cột giao dịch (Desktop: 2 cột song song sm:grid sm:grid-cols-2; Mobile: theo tab phân đoạn) */}
+      <div className="p-4 sm:grid sm:grid-cols-2 gap-3 text-xs">
+        <div className={mobileTab === 'mine' ? 'block' : 'hidden sm:block'}>
+          {renderCol('Tài Sản Bạn Đề Xuất', true, myProperties, myMortgagedProperties, offered, cashOffer, (v) => { setCashOffer(v); if (v > 0) setCashRequest(0); }, myBalance)}
+        </div>
+        <div className={mobileTab === 'partner' ? 'block' : 'hidden sm:block'}>
+          {renderCol(`Tài Sản Của ${effectiveTargetName}`, false, targetProperties, targetMortgagedProperties, requested, cashRequest, (v) => { setCashRequest(v); if (v > 0) setCashOffer(0); })}
+        </div>
+      </div>
+
+      {/* [IMP-133] Thanh Cán Cân Thương Vụ */}
+      <div className="px-4 pb-2">
+        <div data-testid="deal-balance-meter" className="p-3 bg-[#F7F2E7] border border-slate-300 rounded-xl flex flex-col gap-1.5 text-xs text-slate-800">
+          <div className="flex justify-between items-center font-bold">
+            <span>⚖️ Cán Cân Thương Vụ</span>
+            <span className="text-[11px] font-mono text-slate-600 font-semibold">
+              {formatCurrency(myTotalValue)} vs {formatCurrency(partnerTotalValue)}
+            </span>
+          </div>
+          <div className="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden flex border border-slate-300">
+            <div className="bg-blue-500 h-full transition-all duration-300" style={{ width: `${myPercent}%` }} />
+            <div className="bg-amber-500 h-full transition-all duration-300" style={{ width: `${100 - myPercent}%` }} />
+          </div>
+          <div className="flex justify-between text-[10px] font-semibold text-slate-500">
+            <span>Bạn đưa: {myPercent}%</span>
+            <span>Đối tác: {100 - myPercent}%</span>
+          </div>
+        </div>
       </div>
 
       {/* Tóm tắt thỏa thuận & Thuế kho bạc */}
@@ -386,13 +465,15 @@ export function TradeModal({
         >
           Gửi Đề Xuất Đàm Phán
         </button>
-        <button
-          type="button"
-          onClick={onClose}
-          className="min-h-[44px] px-4 py-2 rounded-xl text-xs font-bold text-slate-900 bg-slate-200 hover:bg-slate-300 border-2 border-slate-400 shadow-[0_4px_0_0_#64748b] active:shadow-[0_1px_0_0_#64748b] active:translate-y-[3px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
-        >
-          Hủy
-        </button>
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            className="min-h-[44px] px-4 py-2 rounded-xl text-xs font-bold text-slate-900 bg-slate-200 hover:bg-slate-300 border-2 border-slate-400 shadow-[0_4px_0_0_#64748b] active:shadow-[0_1px_0_0_#64748b] active:translate-y-[3px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
+          >
+            Hủy
+          </button>
+        )}
       </footer>
     </div>
   );

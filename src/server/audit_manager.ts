@@ -5,6 +5,24 @@ import type { DiceResult } from '../domain/dice';
 import { ChanceCardId } from '../domain/event_card_types';
 import { ActionRejectReason } from '../domain/action_reasons';
 
+const turnStartedInAudit = new Map<string, boolean>();
+
+export function setTurnStartedInAudit(roomCode: string, value: boolean): void {
+  turnStartedInAudit.set(roomCode, value);
+}
+
+export function getTurnStartedInAudit(roomCode: string): boolean | undefined {
+  return turnStartedInAudit.get(roomCode);
+}
+
+export function hasTurnStartedInAudit(roomCode: string): boolean {
+  return turnStartedInAudit.has(roomCode);
+}
+
+export function deleteTurnStartedInAudit(roomCode: string): void {
+  turnStartedInAudit.delete(roomCode);
+}
+
 export function sendToAudit(room: Room, playerId: string): void {
   const player = room.players.find((p) => p.id === playerId);
   if (!player) return;
@@ -12,6 +30,9 @@ export function sendToAudit(room: Room, playerId: string): void {
   player.auditTurnsLeft = 3;
   player.consecutiveDoubles = 0;
   room.phase = TurnPhase.PropertyManagement;
+  if (room.roomCode) {
+    turnStartedInAudit.set(room.roomCode, false);
+  }
 }
 
 export function handleTurnStart(room: Room | undefined, playerId: string): { canRoll: boolean; reason?: string } {

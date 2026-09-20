@@ -72,6 +72,7 @@ export function AdaptiveCinematicCamera({
   const playerPositions = useGameStore((s) => s.playerPositions);
   const activeModal = useGameStore((s) => s.activeModal);
   const modalPayload = useGameStore((s) => s.modalPayload);
+  const cameraFocusCell = useGameStore((s) => s.cameraFocusCell);
   const activeScreenShake = useVfxStore((s) => s.activeScreenShake);
   const playersInfo = useGameStore((s) => s.playersInfo);
   const levelMap = useGameStore((s) => s.levelMap);
@@ -139,10 +140,11 @@ export function AdaptiveCinematicCamera({
       activeAnimation,
       currentTurnPlayerId,
       playerPositions,
-      modalPayload as { cellIndex?: number } | null
+      modalPayload as { cellIndex?: number } | null,
+      cameraFocusCell
     );
 
-    const hasTargetTile = (activeModal !== null || hasRolledThisTurn) && targetCell !== null && targetCell !== undefined && Number.isFinite(targetCell);
+    const hasTargetTile = (activeModal !== null || hasRolledThisTurn || cameraFocusCell !== null) && targetCell !== null && targetCell !== undefined && Number.isFinite(targetCell);
     const mode = resolveCameraMode({
       isRolling,
       isHighStakesRoll,
@@ -196,7 +198,7 @@ export function AdaptiveCinematicCamera({
 
     if (controlsRef.current) {
       const isDragging = isUserInteractingRef.current;
-      const isActionOngoing = isRolling || isPawnMoving || activeScreenShake !== null || activeModal !== null;
+      const isActionOngoing = isRolling || isPawnMoving || activeScreenShake !== null || activeModal !== null || cameraFocusCell !== null;
 
       if (isDragging) {
         camBaseRef.current[0] = camera.position.x;

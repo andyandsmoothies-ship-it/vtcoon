@@ -7,6 +7,7 @@ import {
   resolveBotPacingStatus,
   resolveEndTurnButtonLabel,
   shouldShowSkipTurnNotice,
+  resolveActionDockNotice,
 } from './ui_helpers';
 import { BOARD_CONFIG, CellType } from '../../domain/board_config';
 import { MarketCardId } from '../../domain/event_card_types';
@@ -26,6 +27,7 @@ export interface ActionDockProps {
   readonly isMyTurn?: boolean;
   readonly ssrState?: GameState | null;
   readonly isTradeFrozen?: boolean;
+  readonly onOpenMasterplan?: () => void;
 }
 
 export function ActionDock({
@@ -43,6 +45,7 @@ export function ActionDock({
   isMyTurn: isMyTurnProp,
   ssrState: ssrStateProp,
   isTradeFrozen: isTradeFrozenProp,
+  onOpenMasterplan,
 }: ActionDockProps): React.ReactElement {
   const isRollingStore = useGameStore((state) => state.isRolling);
   const activePawnAnimationStore = useGameStore((state) => state.activePawnAnimation);
@@ -168,31 +171,38 @@ export function ActionDock({
 
   const isSkippedTurn = Boolean(isMyTurn && turnPhase === 'PropertyManagement' && !hasRolledThisTurn && !inAudit);
   const isGlowActive = (isMyTurn && !isRollDisabled) || isSkippedTurn;
+  const actionDockNotice = resolveActionDockNotice({
+    isMyTurn,
+    isInsolvent,
+    inAudit,
+    auditTurnsLeft: actingPlayer?.auditTurnsLeft,
+    balance: actingPlayer?.balance,
+    turnPhase,
+    hasRolledThisTurn,
+    isSkippedTurn: Boolean(actingPlayer?.skipNextTurn),
+    botPacing,
+  });
 
   return (
     <nav
       className="relative pointer-events-auto flex items-center gap-2 md:gap-3 bg-[#FFFDF8] border-2 border-slate-900 shadow-[0_4px_0_0_#0f172a] rounded-2xl p-2 px-4"
       aria-label="Thanh điều khiển tác vụ"
     >
-      {/* Chip Cảnh Báo Mất Lượt khi bị bão duyên hải hoặc kiểm tra nồng độ cồn */}
-      {shouldShowSkipTurnNotice(turnPhase, hasRolledThisTurn, inAudit, isMyTurn) && (
+      {/* Chip Thông Báo Ngữ Cảnh Độc Quyền (Actionable Guidance Chip) */}
+      {actionDockNotice && (
         <div
-          data-testid="skip-turn-notice-chip"
-          className="absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-950 text-amber-300 border border-amber-500/60 text-xs font-bold shadow-md animate-pulse select-none"
+          data-testid={actionDockNotice.type === 'bot_pacing' ? 'bot-pacing-chip' : `${actionDockNotice.type === 'skip_turn' ? 'skip-turn-notice-chip' : `${actionDockNotice.type}-notice-chip`}`}
+          className={`absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold shadow-md animate-pulse select-none ${
+            actionDockNotice.tone === 'error'
+              ? 'bg-rose-950 text-rose-300 border border-rose-500/60'
+              : actionDockNotice.tone === 'warning'
+              ? 'bg-amber-950 text-amber-300 border border-amber-500/60'
+              : 'bg-slate-850 text-amber-300 border border-amber-500/40'
+          }`}
         >
-          <span aria-hidden="true">🌪️</span>
-          <span>Bạn bị hoãn gieo xúc xắc lượt này (Bão duyên hải / Kiểm tra cồn)</span>
-        </div>
-      )}
-
-      {/* Chip Tiến Độ Lượt Bot khi đối thủ máy đang hành động */}
-      {botPacing && (
-        <div
-          data-testid="bot-pacing-chip"
-          className="absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-850 text-amber-300 border border-amber-500/40 text-xs font-bold animate-pulse select-none"
-        >
-          <span aria-hidden="true">🤖</span>
-          <span>{botPacing.displayText}</span>
+          <span aria-hidden="true">{actionDockNotice.icon}</span>
+          <span className="sm:hidden">{actionDockNotice.mobileText}</span>
+          <span className="hidden sm:inline">{actionDockNotice.desktopText}</span>
         </div>
       )}
 
@@ -291,13 +301,20 @@ export function ActionDock({
         <span className="hidden sm:inline">Đàm Phán</span>
       </button>
 
-      {/* Nút Bản Đồ Nhiệt Quy Hoạch Đô Thị */}
+      {/* Nút Sa Bàn & Bản Đồ Quy Hoạch Đô Thị */}
       <button
         type="button"
         data-testid="heatmap-toggle-btn"
         aria-label="Quy Hoạch"
-        title="Bản Đồ Nhiệt Quy Hoạch Đô Thị"
-        onClick={() => toggleHeatmap?.()}
+        title="Bản Đồ Quy Hoạch Đô Thị"
+        onClick={() => {
+          toggleHeatmap?.();
+          if (onOpenMasterplan) {
+            onOpenMasterplan();
+          } else {
+            useGameStore.getState().openModal('masterplan', {});
+          }
+        }}
         className={`min-w-[44px] min-h-[44px] flex items-center justify-center gap-1.5 px-3 py-2 rounded-2xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 font-bold border-2 border-slate-900 shadow-[0_4px_0_0_#0f172a] active:translate-y-[3px] transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
           isHeatmapActive ? 'ring-2 ring-amber-400 bg-amber-100 shadow-[0_0_12px_rgba(245,158,11,0.5)]' : ''
         }`}

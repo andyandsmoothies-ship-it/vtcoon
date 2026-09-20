@@ -5,7 +5,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { RoomManager } from '../../src/server/room_manager';
 import { TurnPhase, createRoom, createPlayer } from '../../src/domain/room';
 import { handleAuctionBid, type AuctionSession } from '../../src/server/auction_manager';
-import { handleAuditTurnTransition } from '../../src/server/audit_manager';
+import { sendToAudit, handleAuditTurnTransition } from '../../src/server/audit_manager';
 import { SessionManager, type AuctionPayload, type DeltaPayload } from '../../src/server/session_manager';
 import { buildSparseDelta } from '../../src/server/network/delta_broadcaster';
 import { applyDeltaToStore } from '../../src/client/network/apply_delta';
@@ -146,8 +146,7 @@ describe('[UC-GAME-047/MSS] Chu Trình 3 Vòng Tại Trạm Kiểm Toán Ô 10 (
     room.treasury = 0;
 
     // Giả lập p1 vừa bị tống vào tù trong lượt này (Vòng 0)
-    room.players[0]!.position = 10;
-    room.players[0]!.auditTurnsLeft = 3;
+    sendToAudit(room, 'p1');
     const initialBalance = room.players[0]!.balance;
 
     // Vòng 0 kết thúc lượt -> auditTurnsLeft VẪN GIỮ NGUYÊN là 3 (vì lượt này vào tù, chưa thụ án)

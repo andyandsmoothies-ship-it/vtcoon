@@ -10,6 +10,9 @@ import { PLAYER_TOKEN_PALETTE } from '../../domain/theme';
 import { getInitialLobbyConfig, executeCellLanding } from '../offline_landing';
 import type { ReasonCode } from '../../server/network/network_types';
 import type { DeltaPayload } from '../../server/session_manager';
+import { formatServerErrorMessage } from '../ui/actionable_notification';
+
+export const SERVER_ERROR_TOAST_TIMEOUT_MS = 6000;
 
 export interface AppSessionHandlers {
   isConnected: boolean;
@@ -79,31 +82,12 @@ export function useAppSession(
       // Phục hồi trong suốt phiên kết nối cũ/hết hạn qua cơ chế tự động CREATE_ROOM / JOIN_ROOM của useGameWs
       return () => {};
     }
-    if (reasonCode === 'ROOM_STARTED') {
-      setErrorMessage('Phòng này đã bắt đầu trận đấu.');
-      const timer = setTimeout(() => setErrorMessage(null), 4000);
-      return () => clearTimeout(timer);
-    }
-    if ((reasonCode as string) === 'EVEN_BUILDING_VIOLATION') {
-      setErrorMessage('Quy tắc xây dựng đều tay: Cần nâng cấp các ô cùng bộ màu lên cấp đồng đều!');
-      const timer = setTimeout(() => setErrorMessage(null), 4000);
-      return () => clearTimeout(timer);
-    }
-    if ((reasonCode as string) === 'MISSING_MONOPOLY') {
-      setErrorMessage('Cần sở hữu trọn bộ màu trước khi nâng cấp công trình!');
-      const timer = setTimeout(() => setErrorMessage(null), 4000);
-      return () => clearTimeout(timer);
-    }
-    if ((reasonCode as string) === 'TRADE_REJECTED') {
-      setErrorMessage('Đối tác đã từ chối đề xuất đàm phán mua/bán đất!');
-      const timer = setTimeout(() => setErrorMessage(null), 4000);
-      return () => clearTimeout(timer);
-    }
-    setErrorMessage(`Lỗi máy chủ: ${reasonCode}`);
+    const formatted = formatServerErrorMessage(reasonCode as string);
+    setErrorMessage(formatted);
     if (reasonCode === 'NOT_ENOUGH_PLAYERS' || reasonCode === 'NOT_HOST' || reasonCode === 'ROOM_NOT_FOUND') {
       useLobbyStore.getState().setGameStarted(false);
     }
-    const timer = setTimeout(() => setErrorMessage(null), 4000);
+    const timer = setTimeout(() => setErrorMessage(null), SERVER_ERROR_TOAST_TIMEOUT_MS);
     return () => clearTimeout(timer);
   }, [setErrorMessage]);
 

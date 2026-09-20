@@ -1,8 +1,10 @@
-// [UI-IMP75/MSS] PropertyPortfolioModal — Danh Mục Bất Động Sản Toàn Diện & Cứu Nợ Khẩn Cấp
-import React from 'react';
-import { getDeedDisplayInfo } from './modal_helpers';
+// [UI-IMP75/MSS][IMP-133][IMP-136] PropertyPortfolioModal — Danh Mục Bất Động Sản Toàn Diện, 1-Click Quick Build & Strategic Insights
+import React, { useState } from 'react';
+import { getDeedDisplayInfo, checkPropertyUpgradeEligibility } from './modal_helpers';
 import { formatCurrency } from '../ui_helpers';
 import { COLOR_GROUP_HEX } from '../../../domain/theme';
+import { BOARD_CONFIG } from '../../../domain/board_config';
+import { analyzePropertyMonopolyInsight } from './portfolio_monopoly_analytics';
 
 export interface PropertyPortfolioModalProps {
   readonly ownedProperties: readonly number[];
@@ -13,6 +15,20 @@ export interface PropertyPortfolioModalProps {
   }>;
   readonly currentBalance?: number;
   readonly isInInsolvency?: boolean;
+  readonly isMyTurn?: boolean;
+  readonly turnPhase?: string;
+  readonly allPlayers?: Record<string, {
+    readonly id: string;
+    readonly name?: string;
+    readonly balance?: number;
+    readonly tokenColor?: string;
+    readonly isBot?: boolean;
+    readonly ownedProperties?: readonly number[];
+  }>;
+  readonly onQuickTrade?: (targetPlayerId: string, targetPropertyIndex: number) => void;
+  readonly onViewVacantCell?: (cellIndex: number) => void;
+  readonly onUpgrade?: (cellIndex: number) => void;
+  readonly onHoverCell?: (cellIndex: number | null) => void;
   readonly onSelectDeed?: (cellIndex: number) => void;
   readonly onMortgage?: (cellIndex: number) => void;
   readonly onRedeem?: (cellIndex: number) => void;
@@ -27,6 +43,13 @@ export function PropertyPortfolioModal({
   propertyStates = {},
   currentBalance = 0,
   isInInsolvency = false,
+  isMyTurn,
+  turnPhase,
+  allPlayers,
+  onQuickTrade,
+  onViewVacantCell,
+  onUpgrade,
+  onHoverCell,
   onSelectDeed,
   onMortgage,
   onRedeem,
@@ -35,6 +58,33 @@ export function PropertyPortfolioModal({
 }: PropertyPortfolioModalProps): React.ReactElement {
   const isNegative = currentBalance < 0 || isInInsolvency;
   const deficitAmount = currentBalance < 0 ? Math.abs(currentBalance) : 0;
+  const [filter, setFilter] = useState<'all' | 'nearMonopoly' | 'upgradeable' | 'mortgaged'>('all');
+
+  const filteredProperties = ownedProperties.filter((cellIndex) => {
+    if (filter === 'mortgaged') {
+      return Boolean(propertyStates[cellIndex]?.isMortgaged);
+    }
+    if (filter === 'upgradeable') {
+      const eligibility = checkPropertyUpgradeEligibility({
+        cellIndex,
+        ownedProperties,
+        propertyStates,
+        balance: currentBalance,
+        isMyTurn,
+        turnPhase,
+      });
+      return eligibility.canUpgrade;
+    }
+    if (filter === 'nearMonopoly') {
+      const insight = analyzePropertyMonopolyInsight({
+        cellIndex,
+        ownedProperties,
+        allPlayers,
+      });
+      return insight.isNearMonopoly;
+    }
+    return true;
+  });
 
   return (
     <div
@@ -52,7 +102,7 @@ export function PropertyPortfolioModal({
               DANH MỤC BẤT ĐỘNG SẢN
             </h2>
             <p className="text-xs text-slate-600 font-semibold">
-              Quản lý tài sản, thế chấp &amp; hạ cấp công trình
+              Quản lý tài sản, thế chấp &amp; nâng cấp nhanh 1-click
             </p>
           </div>
         </div>
@@ -92,15 +142,61 @@ export function PropertyPortfolioModal({
         </div>
       )}
 
+      {/* Filter bar */}
+      {ownedProperties.length > 0 && (
+        <div className="px-4 pt-3 shrink-0">
+          <div data-testid="portfolio-filter-bar" className="flex items-center gap-1.5 p-1 bg-slate-200/80 rounded-xl overflow-x-auto no-scrollbar whitespace-nowrap">
+            <button
+              type="button"
+              onClick={() => setFilter('all')}
+              className={`min-h-[44px] px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                filter === 'all' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Tất Cả
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilter('nearMonopoly')}
+              className={`min-h-[44px] px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                filter === 'nearMonopoly' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Sắp Đủ Bộ 🔥
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilter('upgradeable')}
+              className={`min-h-[44px] px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                filter === 'upgradeable' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Có Thể Xây
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilter('mortgaged')}
+              className={`min-h-[44px] px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                filter === 'mortgaged' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Đang Thế Chấp
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Danh sách BĐS */}
       <div className="p-4 pb-8 overflow-y-auto flex-1 space-y-3">
-        {ownedProperties.length === 0 ? (
+        {filteredProperties.length === 0 ? (
           <div className="py-12 text-center text-slate-500 italic text-sm">
-            Chưa sở hữu bất động sản nào trên bàn cờ.
+            {ownedProperties.length === 0
+              ? 'Chưa sở hữu bất động sản nào trên bàn cờ.'
+              : 'Không có bất động sản nào phù hợp với bộ lọc.'}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {ownedProperties.map((cellIndex) => {
+            {filteredProperties.map((cellIndex) => {
               const deed = getDeedDisplayInfo(cellIndex);
               const state = propertyStates[cellIndex];
               const isMort = Boolean(state?.isMortgaged);
@@ -109,27 +205,64 @@ export function PropertyPortfolioModal({
               const mortgageVal = deed?.mortgageValue ?? 0;
               const redeemCost = Math.round(mortgageVal * 1.1);
 
+              const insight = analyzePropertyMonopolyInsight({
+                cellIndex,
+                ownedProperties,
+                allPlayers,
+              });
+              const isMonopoly = insight.isMonopoly;
+              const ownedCount = insight.ownedCount;
+              const totalInGroup = insight.totalCells;
+
+              const upgradeInfo = checkPropertyUpgradeEligibility({
+                cellIndex,
+                ownedProperties,
+                propertyStates,
+                balance: currentBalance,
+                isMyTurn,
+                turnPhase,
+              });
+
               return (
                 <div
                   key={cellIndex}
                   data-testid={`property-portfolio-item-${cellIndex}`}
+                  data-onmouseenter="true"
+                  onMouseEnter={() => onHoverCell?.(cellIndex)}
+                  onMouseLeave={() => onHoverCell?.(null)}
+                  onFocus={() => onHoverCell?.(cellIndex)}
+                  onBlur={() => onHoverCell?.(null)}
                   className={`border-2 rounded-xl p-3 flex flex-col justify-between transition-all ${
                     isMort
                       ? 'bg-slate-100/80 border-slate-300 opacity-90'
                       : 'bg-white border-slate-300 shadow-sm hover:border-slate-400'
                   }`}
                 >
-                  {/* Ruy băng & Thông tin cơ bản */}
+                  {/* Dải ruy băng màu trên đỉnh thẻ */}
+                  <div
+                    data-testid="property-color-ribbon"
+                    className="h-2 w-full rounded-t-md mb-2.5"
+                    style={{ backgroundColor: ribbonColor }}
+                  />
+
+                  {/* Thông tin cơ bản */}
                   <div>
                     <div className="flex items-center justify-between gap-1 mb-2">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <div
-                          className="w-3.5 h-3.5 rounded-full shrink-0 border border-slate-900/30"
-                          style={{ backgroundColor: ribbonColor }}
-                        />
+                      <div className="flex items-center gap-1.5 min-w-0">
                         <span className="font-bold text-xs text-slate-900 truncate">
                           {deed?.name ?? `Ô #${cellIndex}`}
                         </span>
+                        {totalInGroup > 0 && (
+                          <span
+                            className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold shrink-0 ${
+                              isMonopoly
+                                ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                                : 'bg-slate-100 text-slate-600 border border-slate-200'
+                            }`}
+                          >
+                            {isMonopoly ? `[${ownedCount}/${totalInGroup}] ★` : `[${ownedCount}/${totalInGroup}]`}
+                          </span>
+                        )}
                       </div>
                       <span className="text-[10px] font-mono text-slate-500 shrink-0">
                         #{cellIndex}
@@ -163,7 +296,99 @@ export function PropertyPortfolioModal({
                     </div>
                   </div>
 
-                  {/* Nút hành động */}
+                  {/* Huy hiệu Độc Quyền hoặc Khối Mảnh Ghép Còn Thiếu */}
+                  {isMonopoly ? (
+                    <div className="my-2 p-2 bg-amber-50/90 border border-amber-200 rounded-xl flex items-center gap-1.5 text-xs font-bold text-amber-900">
+                      <span className="text-base" aria-hidden="true">👑</span>
+                      <span>Độc Quyền Trọn Bộ</span>
+                    </div>
+                  ) : (
+                    insight.missingPieces.length > 0 && (
+                      <div data-testid="property-missing-pieces" className="my-2 p-2 bg-slate-50 border border-slate-200 rounded-xl space-y-1.5">
+                        <div className="flex items-center justify-between text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                          <span>Mảnh Ghép Còn Thiếu ({insight.missingPieces.length})</span>
+                          <span className="font-mono">{insight.ownedCount}/{insight.totalCells}</span>
+                        </div>
+                        {insight.missingPieces.map((piece) => (
+                          <div key={piece.cellIndex} className="flex items-center justify-between gap-2 p-1.5 bg-white border border-slate-200 rounded-lg text-xs">
+                            <div className="flex items-center gap-1.5 min-w-0">
+                              <span className="text-[10px] font-mono text-slate-400">#{piece.cellIndex}</span>
+                              <span className="font-bold text-slate-800 truncate">{piece.name}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              {piece.isVacant ? (
+                                <span className="text-[11px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded font-medium">
+                                  Đất trống {piece.price ? `(${formatCurrency(piece.price)})` : ''}
+                                </span>
+                              ) : (
+                                <div className="flex items-center gap-1 text-[11px] text-slate-700 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded">
+                                  {piece.ownerTokenColor && (
+                                    <span className="w-2 h-2 rounded-full inline-block shrink-0" style={{ backgroundColor: piece.ownerTokenColor }} />
+                                  )}
+                                  <span className="truncate max-w-[90px] font-semibold">{piece.ownerName ?? piece.ownerId}</span>
+                                </div>
+                              )}
+
+                              {piece.isVacant ? (
+                                <button
+                                  type="button"
+                                  data-testid={`view-vacant-cell-btn-${piece.cellIndex}`}
+                                  onClick={() => onViewVacantCell ? onViewVacantCell(piece.cellIndex) : onSelectDeed?.(piece.cellIndex)}
+                                  className="min-h-[32px] px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold rounded-md border border-slate-300 transition-all cursor-pointer"
+                                >
+                                  🔍 Xem Ô
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  data-testid={`quick-trade-btn-${piece.cellIndex}`}
+                                  onClick={() => piece.ownerId && onQuickTrade?.(piece.ownerId, piece.cellIndex)}
+                                  className="min-h-[32px] px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 text-[11px] font-bold rounded-md border border-blue-300 shadow-[0_1px_0_0_#93c5fd] active:translate-y-[1px] transition-all cursor-pointer"
+                                >
+                                  🤝 Đàm Phán
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )
+                  )}
+
+                  {/* Cụm Nút Nâng Cấp Nhanh 1-Click */}
+                  {deed?.upgradeCosts && !isMort && (
+                    <div className="my-2">
+                      <button
+                        type="button"
+                        data-testid="property-quick-build-btn"
+                        disabled={!upgradeInfo.canUpgrade}
+                        title={upgradeInfo.blockedReason ?? upgradeInfo.reason}
+                        onClick={() => {
+                          if (upgradeInfo.canUpgrade) {
+                            onUpgrade?.(cellIndex);
+                          }
+                        }}
+                        className={`w-full min-h-[44px] px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                          upgradeInfo.canUpgrade
+                            ? 'bg-amber-400 hover:bg-amber-300 text-amber-950 border-2 border-amber-600 shadow-[0_3px_0_0_#d97706] active:translate-y-[2px] cursor-pointer'
+                            : 'bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed opacity-70'
+                        }`}
+                      >
+                        <span>
+                          {upgradeInfo.canUpgrade
+                            ? `🏗️ Xây C${upgradeInfo.nextLevel} (${upgradeInfo.upgradeCost} Tr.)`
+                            : (level >= 3 ? 'Cấp Tối Đa' : `🏗️ Xây C${upgradeInfo.nextLevel ?? (level + 1)}`)}
+                        </span>
+                      </button>
+                      {!upgradeInfo.canUpgrade && (upgradeInfo.blockedReason ?? upgradeInfo.reason) && (
+                        <span className="text-[10px] text-slate-500 italic mt-1 block text-center truncate" title={upgradeInfo.blockedReason ?? upgradeInfo.reason}>
+                          {upgradeInfo.blockedReason ?? upgradeInfo.reason}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Nút hành động khác */}
                   <div className="pt-2 border-t border-slate-200 flex flex-wrap gap-1.5 text-xs">
                     {!isMort && (
                       <button
@@ -190,7 +415,7 @@ export function PropertyPortfolioModal({
                       <button
                         type="button"
                         onClick={() => onDowngrade(cellIndex)}
-                        className="min-h-[40px] sm:min-h-[44px] px-2.5 py-1.5 bg-rose-100 hover:bg-rose-200 text-rose-800 font-bold rounded-lg border-2 border-rose-300 shadow-[0_2px_0_0_#fecdd3] active:shadow-[0_1px_0_0_#fecdd3] active:translate-y-[1px] text-xs cursor-pointer inline-flex items-center justify-center"
+                        className="min-h-[44px] px-2.5 py-1.5 bg-rose-100 hover:bg-rose-200 text-rose-800 font-bold rounded-lg border-2 border-rose-300 shadow-[0_2px_0_0_#fecdd3] active:shadow-[0_1px_0_0_#fecdd3] active:translate-y-[1px] text-xs cursor-pointer inline-flex items-center justify-center"
                       >
                         Hạ Cấp
                       </button>

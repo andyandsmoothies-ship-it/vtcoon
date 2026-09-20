@@ -5,6 +5,8 @@ import { calculatePathWaypoints, BOARD_TOTAL_CELLS } from '../3d/pawn_path';
 import { EMOTE_DISPLAY_DURATION_MS } from '../../domain/emotes';
 
 export const FLOATING_TEXT_DURATION_MS = 2200;
+export const EVENT_BANNER_DURATION_MS = 4500;
+export const TRANSACTION_POPUP_DURATION_MS = 3600;
 export const MAX_FLOATING_TEXTS = 6;
 
 export * from './game_store_types.js';
@@ -40,6 +42,11 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   activeEmotes: {},
   floatingTexts: [],
+
+  // IMP-133 Camera Sticky Focus
+  cameraFocusCell: null,
+  setCameraFocusCell: (cellIndex) => set({ cameraFocusCell: cellIndex }),
+  resetGameState: () => set({ cameraFocusCell: null, activeModal: null, modalPayload: null, isRolling: false, hasRolledThisTurn: false }),
 
   setLevelMap: (map) => set({ levelMap: map }),
   setPlayerPositions: (positions) => {
@@ -115,7 +122,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   setIsRolling: (isRolling) => {
-    set({ isRolling });
+    set({ isRolling, ...(isRolling ? { cameraFocusCell: null } : {}) });
     if (!isRolling) {
       const pending = get().pendingPawnMove;
       if (pending) {
@@ -145,6 +152,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       dice: [clampDiceFace(dice[0]), clampDiceFace(dice[1])],
       isRolling: true,
       hasRolledThisTurn: true,
+      cameraFocusCell: null,
       ...(diceSeq !== undefined ? { lastDiceSeq: diceSeq } : {}),
     });
     setTimeout(() => {
@@ -334,12 +342,19 @@ export const useGameStore = create<GameState>((set, get) => ({
   addFloatingText: (item) => {
     const id = item.id ?? `ft_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
     const timestamp = Date.now();
+    const isMilestone =
+      item.actionType === 'chance' ||
+      item.actionType === 'market' ||
+      item.actionType === 'monopoly' ||
+      item.actionType === 'debt_relief';
+    const duration = item.durationMs ?? (isMilestone ? EVENT_BANNER_DURATION_MS : TRANSACTION_POPUP_DURATION_MS);
     const newItem: FloatingTextItem = {
       id,
       text: item.text,
       type: item.type,
       playerId: item.playerId,
       timestamp,
+      durationMs: duration,
       ...(item.actionType ? { actionType: item.actionType } : {}),
       ...(item.title ? { title: item.title } : {}),
       ...(item.cellIndex !== undefined ? { cellIndex: item.cellIndex } : {}),
@@ -351,7 +366,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     if (typeof setTimeout !== 'undefined') {
       setTimeout(() => {
         get().removeFloatingText(id);
-      }, FLOATING_TEXT_DURATION_MS);
+      }, duration);
     }
   },
 
@@ -362,7 +377,9 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   clearExpiredFloatingTexts: (now = Date.now()) =>
     set((state) => ({
-      floatingTexts: state.floatingTexts.filter((t) => now - t.timestamp < FLOATING_TEXT_DURATION_MS),
+      floatingTexts: state.floatingTexts.filter(
+        (t) => now - t.timestamp < (t.durationMs ?? TRANSACTION_POPUP_DURATION_MS),
+      ),
     })),
 }));
 

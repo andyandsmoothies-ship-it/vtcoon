@@ -1,20 +1,21 @@
-// [IMP-128] MarketEventTicker — Real-time Active Market Events Banner
-// Displays macro policy, economic events, and remaining round countdowns below TopBar
+// [IMP-128][IMP-135] MarketEventTicker — Real-time Active Market Events Banner
+// Displays macro policy, economic events, remaining round countdowns and clear effect summary below TopBar
 import React from 'react';
 import { useGameStore } from '../store/game_store.js';
-import { MarketCardId } from '../../domain/event_card_types.js';
-import { MARKET_CARD_DETAILS } from '../../domain/event_card_metadata.js';
+import { MarketCardId, ChanceCardId } from '../../domain/event_card_types.js';
+import { MARKET_CARD_DETAILS, CHANCE_CARD_DETAILS } from '../../domain/event_card_metadata.js';
 import { vi as viTranslations } from '../../domain/i18n/vi.js';
 
 export interface MarketEventTickerProps {
   readonly activeModifiers?: ReadonlyArray<{
-    readonly type: MarketCardId | string;
+    readonly type: MarketCardId | ChanceCardId | string;
     readonly remainingRounds: number;
     readonly affectedCells?: readonly number[];
+    readonly beneficiaryId?: string;
   }>;
 }
 
-function resolveMarketIcon(type: string): string {
+export function resolveMarketIcon(type: string): string {
   switch (type) {
     case MarketCardId.MC_FREEZE_TRADE: return '❄️';
     case MarketCardId.MC_COASTAL_STORM: return '🌀';
@@ -31,23 +32,37 @@ function resolveMarketIcon(type: string): string {
     case MarketCardId.MC_FUEL_SURGE: return '⛽';
     case MarketCardId.MC_URBAN_PLANNING: return '📐';
     case MarketCardId.MC_UTILITY_DOUBLE: return '⚡';
+    case ChanceCardId.CC_PORT_EXCLUSIVE: return '🚢';
     default: return '🎴';
   }
 }
 
-function resolveMarketTitle(type: string): string {
-  const dict = viTranslations.marketCards as Record<string, string | undefined>;
-  const translated = dict[type];
-  if (translated) {
-    return translated;
+export function resolveMarketTitle(type: string): string {
+  const marketDict = viTranslations.marketCards as Record<string, string | undefined>;
+  const marketTranslated = marketDict[type];
+  if (marketTranslated) {
+    return marketTranslated;
+  }
+  const chanceDict = viTranslations.chanceCards as Record<string, string | undefined>;
+  const chanceTranslated = chanceDict[type];
+  if (chanceTranslated) {
+    return chanceTranslated;
   }
   return type || 'Sự Kiện Thị Trường';
 }
 
-function resolveMarketDescription(type: string): string {
-  const dict = MARKET_CARD_DETAILS as Record<string, { readonly description?: string } | undefined>;
-  const detail = dict[type];
-  return detail?.description ?? '';
+export function resolveMarketEffectSummary(type: string): string {
+  const detail =
+    MARKET_CARD_DETAILS[type as MarketCardId] ??
+    CHANCE_CARD_DETAILS[type as ChanceCardId];
+  if (!detail) {
+    return 'Chính sách vĩ mô tác động toàn bộ thị trường';
+  }
+  const colonIndex = detail.description.indexOf(': ');
+  if (colonIndex !== -1 && colonIndex < detail.description.length - 2) {
+    return detail.description.slice(colonIndex + 2).trim();
+  }
+  return detail.description || detail.effectDetail || 'Chính sách vĩ mô tác động toàn bộ thị trường';
 }
 
 export const MarketEventTicker: React.FC<MarketEventTickerProps> = ({
@@ -74,35 +89,35 @@ export const MarketEventTicker: React.FC<MarketEventTickerProps> = ({
         const cardType = String(modifier.type ?? '');
         const icon = resolveMarketIcon(cardType);
         const title = resolveMarketTitle(cardType);
-        const desc = resolveMarketDescription(cardType);
+        const effectSummary = resolveMarketEffectSummary(cardType);
 
         return (
           <div
             key={`${cardType}_${index}`}
             data-testid={`market-ticker-item-${cardType}`}
-            className="w-full pointer-events-auto flex items-center justify-between gap-2 px-3 py-1.5 bg-[#FFFDF8] border-2 border-slate-900 rounded-xl shadow-[0_3px_0_0_#0f172a] text-slate-900 transition-all duration-150 animate-in fade-in slide-in-from-top-1"
+            className="w-full pointer-events-auto flex flex-col gap-1 px-3 py-2 bg-[#FFFDF8] border-2 border-slate-900 rounded-xl shadow-[0_3px_0_0_#0f172a] text-slate-900 transition-all duration-150 animate-in fade-in slide-in-from-top-1"
           >
-            <div className="flex items-center gap-2 min-w-0 flex-1">
-              <span className="text-base sm:text-lg shrink-0" aria-hidden="true">
-                {icon}
-              </span>
-              <div className="flex flex-col min-w-0">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 min-w-0 flex-1">
+                <span className="text-base sm:text-lg shrink-0" aria-hidden="true">
+                  {icon}
+                </span>
                 <span className="font-black text-xs sm:text-sm truncate text-slate-900 leading-tight">
                   {title}
                 </span>
-                {desc ? (
-                  <span className="text-[11px] text-slate-600 truncate leading-tight mt-0.5">
-                    {desc}
-                  </span>
-                ) : null}
               </div>
-            </div>
 
-            <div className="shrink-0 flex items-center gap-1">
-              <span className="px-2 py-0.5 rounded-lg text-[11px] font-extrabold border bg-amber-50 text-amber-900 border-amber-300">
+              <span className="px-2.5 py-0.5 rounded-lg text-[11px] font-extrabold border bg-amber-100 text-amber-900 border-amber-400 shrink-0">
                 Còn {modifier.remainingRounds} vòng
               </span>
             </div>
+
+            <p
+              data-testid="market-ticker-effect-summary"
+              className="text-[11px] sm:text-xs text-slate-600 font-semibold leading-tight line-clamp-2 pl-6 sm:pl-7 text-left"
+            >
+              {effectSummary}
+            </p>
           </div>
         );
       })}

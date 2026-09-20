@@ -31,7 +31,8 @@ export function resolveCameraTargetCell(
   activeAnimation: PawnAnimationState | null,
   currentTurnPlayerId: string | null,
   playerPositions: Record<string, number>,
-  modalPayload?: { cellIndex?: number } | null
+  modalPayload?: { cellIndex?: number } | null,
+  cameraFocusCell?: number | null
 ): number | null {
   if (modalPayload && typeof modalPayload.cellIndex === 'number' && Number.isInteger(modalPayload.cellIndex)) {
     return modalPayload.cellIndex;
@@ -41,6 +42,9 @@ export function resolveCameraTargetCell(
     const wp = activeAnimation.waypoints[idx];
     if (wp !== undefined && Number.isFinite(wp)) return wp;
     if (activeAnimation.fromCell !== undefined && Number.isFinite(activeAnimation.fromCell)) return activeAnimation.fromCell;
+  }
+  if (cameraFocusCell !== null && cameraFocusCell !== undefined && Number.isInteger(cameraFocusCell)) {
+    return cameraFocusCell;
   }
   if (currentTurnPlayerId != null) {
     const pos = playerPositions[currentTurnPlayerId];

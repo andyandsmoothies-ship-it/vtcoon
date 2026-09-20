@@ -92,11 +92,21 @@ export function verifyNonNegativeBalance(params: {
   }>;
   readonly isInInsolvency?: boolean;
   readonly tick: number;
+  readonly currentTurnPlayerId?: string | null;
 }): InvariantViolation | null {
   for (const p of params.players) {
     if (p.balance < 0) {
+      const isPassiveDebtOutsideTurn =
+        params.currentTurnPlayerId !== undefined &&
+        params.currentTurnPlayerId !== null &&
+        params.currentTurnPlayerId !== '' &&
+        params.currentTurnPlayerId !== p.id;
+
       const isExempt = Boolean(
-        p.bankrupt || params.isInInsolvency || (p.overdraftRoundsLeft !== undefined && p.overdraftRoundsLeft > 0)
+        p.bankrupt ||
+        params.isInInsolvency ||
+        (p.overdraftRoundsLeft !== undefined && p.overdraftRoundsLeft > 0) ||
+        isPassiveDebtOutsideTurn
       );
       if (!isExempt) {
         return {
@@ -161,6 +171,7 @@ export function verifyAllInvariants(params: {
   readonly cells?: ReadonlyArray<{ readonly index: number; readonly ownerId?: string | null; readonly level?: number }>;
   readonly tick: number;
   readonly roomStarted?: boolean;
+  readonly currentTurnPlayerId?: string | null;
 }): InvariantViolation[] {
   const violations: InvariantViolation[] = [];
 
@@ -195,6 +206,7 @@ export function verifyAllInvariants(params: {
       players: params.players,
       isInInsolvency: params.isInInsolvency,
       tick: params.tick,
+      currentTurnPlayerId: params.currentTurnPlayerId,
     });
     if (v) violations.push(v);
   }

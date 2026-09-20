@@ -1,5 +1,17 @@
-// [UI-S02/MSS][IMP-92] Diorama Railroad Infrastructure, Waterfront Station & Tropical Flora
-import React from 'react';
+// [UI-S02/MSS][IMP-92][IMP-134] Diorama Railroad Infrastructure, Stations & Model Train
+import React, { useRef, useMemo } from 'react';
+import { Vector3, type Group } from 'three';
+import { useSafeFrame } from '../safe_frame';
+import {
+  computeTrainKinematics,
+  computeCarriageProgress,
+  computeTrainYaw,
+  getRailroadTrackCurve,
+  getRailroadTrackPerimeter,
+  TRAIN_CARRIAGE_OFFSETS,
+} from './diorama_train_kinematics';
+
+export * from './diorama_train_kinematics';
 
 function SafeBoxGeometry({ args }: { readonly args: readonly number[] }): React.ReactElement {
   if (typeof window === 'undefined') {
@@ -89,6 +101,52 @@ export function DioramaWaterfrontStation(): React.ReactElement {
   );
 }
 
+export function DioramaLandmarkNorthStation(): React.ReactElement {
+  return (
+    <group position={[1.6, 0.025, -6.55]} data-testid="diorama-landmark-north-station">
+      {/* 1. Thềm ga granite sáng màu dọc bờ Bắc */}
+      <mesh receiveShadow position={[0, 0, 0]}>
+        <SafeBoxGeometry args={[2.2, 0.03, 0.38]} />
+        <meshStandardMaterial color="#E2E8F0" roughness={0.3} metalness={0.1} />
+      </mesh>
+
+      {/* 2. Mái vòm kính xanh lơ che phủ ke ga */}
+      <mesh position={[0, 0.16, 0]}>
+        <SafeBoxGeometry args={[2.1, 0.015, 0.42]} />
+        <meshStandardMaterial color="#0284C7" metalness={0.4} roughness={0.2} transparent opacity={0.85} />
+      </mesh>
+
+      {/* 3. Cột thép chịu lực đỡ kết cấu mái */}
+      <mesh position={[-0.8, 0.08, 0]}>
+        <SafeCylinderGeometry args={[0.015, 0.015, 0.13, 8]} />
+        <meshStandardMaterial color="#64748B" metalness={0.7} roughness={0.3} />
+      </mesh>
+      <mesh position={[0.8, 0.08, 0]}>
+        <SafeCylinderGeometry args={[0.015, 0.015, 0.13, 8]} />
+        <meshStandardMaterial color="#64748B" metalness={0.7} roughness={0.3} />
+      </mesh>
+
+      {/* 4. Biển hiệu LED vàng hoàng kim Landmark Metro */}
+      <mesh position={[0, 0.19, 0]}>
+        <SafeBoxGeometry args={[0.6, 0.03, 0.04]} />
+        <meshStandardMaterial color="#FEF08A" emissive="#FEF08A" emissiveIntensity={0.8} />
+      </mesh>
+
+      {/* 5. Ghế chờ hành khách */}
+      <mesh receiveShadow position={[0, 0.03, 0]}>
+        <SafeBoxGeometry args={[0.5, 0.02, 0.12]} />
+        <meshStandardMaterial color="#78350F" roughness={0.5} />
+      </mesh>
+
+      {/* 6. Chao đèn tín hiệu phía Bắc */}
+      <mesh position={[0.95, 0.12, 0]}>
+        <SafeSphereGeometry args={[0.025, 8, 8]} />
+        <meshStandardMaterial color="#FEF08A" emissive="#FEF08A" emissiveIntensity={0.8} />
+      </mesh>
+    </group>
+  );
+}
+
 interface FloraBedConfig {
   readonly x: number;
   readonly z: number;
@@ -133,7 +191,42 @@ export function DioramaTropicalFlora(): React.ReactElement {
   );
 }
 
+const tempVec = new Vector3();
+const tempTangent = new Vector3();
+
 export function DioramaModelRailroad(): React.ReactElement {
+  const leadRef = useRef<Group>(null);
+  const coach1Ref = useRef<Group>(null);
+  const coach2Ref = useRef<Group>(null);
+
+  const trackCurve = useMemo(() => getRailroadTrackCurve(), []);
+  const trackLength = useMemo(() => getRailroadTrackPerimeter(), []);
+
+  useSafeFrame((state) => {
+    const t = state.clock.elapsedTime;
+    const kinematics = computeTrainKinematics(t);
+    const leadProgress = kinematics.progress;
+
+    const carItems = [
+      { ref: leadRef, offset: TRAIN_CARRIAGE_OFFSETS[0] },
+      { ref: coach1Ref, offset: TRAIN_CARRIAGE_OFFSETS[1] },
+      { ref: coach2Ref, offset: TRAIN_CARRIAGE_OFFSETS[2] },
+    ] as const;
+
+    for (const item of carItems) {
+      const grp = item.ref.current;
+      if (!grp) continue;
+      const p = computeCarriageProgress(leadProgress, item.offset, trackLength);
+      trackCurve.getPointAt(p, tempVec);
+      trackCurve.getTangentAt(p, tempTangent);
+      const yaw = computeTrainYaw(tempTangent);
+      const pitch = kinematics.speed > 0.01 ? Math.sin(t * 12) * 0.005 : 0;
+
+      grp.position.set(tempVec.x, 0.062, tempVec.z);
+      grp.rotation.set(pitch, yaw, 0);
+    }
+  });
+
   return (
     <group position={[0, 0, 0]} data-testid="diorama-model-railroad">
       {/* 0. Lớp nền đá ba-lát ôm trọn 4 cạnh */}
@@ -154,6 +247,24 @@ export function DioramaModelRailroad(): React.ReactElement {
       </mesh>
       <mesh receiveShadow position={[6.9, 0.022, 0]}>
         <SafeBoxGeometry args={[0.22, 0.012, 13.8]} />
+        <meshStandardMaterial color="#451A03" roughness={0.85} />
+      </mesh>
+
+      {/* 1.1 Cung ray cua góc (Corner Rails) tại 4 góc nối liền mạch khép kín */}
+      <mesh receiveShadow position={[-6.85, 0.022, 6.85]} rotation={[0, Math.PI / 4, 0]}>
+        <SafeBoxGeometry args={[0.32, 0.012, 0.22]} />
+        <meshStandardMaterial color="#451A03" roughness={0.85} />
+      </mesh>
+      <mesh receiveShadow position={[6.85, 0.022, 6.85]} rotation={[0, -Math.PI / 4, 0]}>
+        <SafeBoxGeometry args={[0.32, 0.012, 0.22]} />
+        <meshStandardMaterial color="#451A03" roughness={0.85} />
+      </mesh>
+      <mesh receiveShadow position={[6.85, 0.022, -6.85]} rotation={[0, Math.PI / 4, 0]}>
+        <SafeBoxGeometry args={[0.32, 0.012, 0.22]} />
+        <meshStandardMaterial color="#451A03" roughness={0.85} />
+      </mesh>
+      <mesh receiveShadow position={[-6.85, 0.022, -6.85]} rotation={[0, -Math.PI / 4, 0]}>
+        <SafeBoxGeometry args={[0.32, 0.012, 0.22]} />
         <meshStandardMaterial color="#451A03" roughness={0.85} />
       </mesh>
 
@@ -197,7 +308,7 @@ export function DioramaModelRailroad(): React.ReactElement {
 
       {/* 3. Đoàn tàu mini đỗ trên ray tại ga Metro Trung Tâm (Nam bàn cờ) */}
       {/* Đầu tàu đỏ Ruby #DC2626 */}
-      <group position={[-2.2, 0.062, 6.9]}>
+      <group ref={leadRef} position={[-2.2, 0.062, 6.9]}>
         <mesh castShadow position={[0, 0, 0]}>
           <SafeBoxGeometry args={[0.65, 0.07, 0.14]} />
           <meshStandardMaterial color="#DC2626" roughness={0.3} metalness={0.4} />
@@ -214,7 +325,7 @@ export function DioramaModelRailroad(): React.ReactElement {
       </group>
 
       {/* Toa khách 1: Xanh dương #0284C7 */}
-      <group position={[-1.4, 0.062, 6.9]}>
+      <group ref={coach1Ref} position={[-1.4, 0.062, 6.9]}>
         <mesh castShadow position={[0, 0, 0]}>
           <SafeBoxGeometry args={[0.75, 0.07, 0.14]} />
           <meshStandardMaterial color="#0284C7" roughness={0.3} metalness={0.4} />
@@ -226,7 +337,7 @@ export function DioramaModelRailroad(): React.ReactElement {
       </group>
 
       {/* Toa khách 2: Xanh dương #0284C7 */}
-      <group position={[-0.55, 0.062, 6.9]}>
+      <group ref={coach2Ref} position={[-0.55, 0.062, 6.9]}>
         <mesh castShadow position={[0, 0, 0]}>
           <SafeBoxGeometry args={[0.75, 0.07, 0.14]} />
           <meshStandardMaterial color="#0284C7" roughness={0.3} metalness={0.4} />

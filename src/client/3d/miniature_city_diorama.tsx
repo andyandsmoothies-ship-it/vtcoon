@@ -16,12 +16,14 @@ import { DioramaHighriseBlocks } from './diorama/diorama_highrise_blocks';
 import {
   DioramaModelRailroad,
   DioramaWaterfrontStation,
+  DioramaLandmarkNorthStation,
   DioramaTropicalFlora,
 } from './diorama/diorama_railroad';
 
 export {
   DioramaModelRailroad,
   DioramaWaterfrontStation,
+  DioramaLandmarkNorthStation,
   DioramaTropicalFlora,
 } from './diorama/diorama_railroad';
 
@@ -217,6 +219,8 @@ export function MiniatureCityDiorama(): React.ReactElement {
       <DioramaModelRailroad />
       {/* 0.2. Ke ga xe lửa bến sông ven tuyến đường sắt */}
       <DioramaWaterfrontStation />
+      {/* 0.25. Ke ga xe lửa Landmark Metro bờ Bắc */}
+      <DioramaLandmarkNorthStation />
       {/* 0.3. Dải luống hoa và bụi cây cảnh nhiệt đới ven bờ kênh */}
       <DioramaTropicalFlora />
       {/* 1. Bán đảo đôi liền khối & Bậc thềm kết nối quảng trường trung tâm */}

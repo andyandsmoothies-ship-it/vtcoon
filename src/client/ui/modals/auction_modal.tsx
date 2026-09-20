@@ -4,6 +4,7 @@ import { getDeedDisplayInfo, calculateAuctionIncrements } from './modal_helpers'
 import { formatCurrency } from '../ui_helpers';
 import { COLOR_GROUP_HEX } from '../../../domain/theme';
 import { useGameStore } from '../../store/game_store';
+import { AuctionDistrictCard } from './auction_district_card';
 
 export interface AuctionModalProps {
   readonly cellIndex: number;
@@ -18,6 +19,8 @@ export interface AuctionModalProps {
   readonly isConcluded?: boolean;
   readonly winnerId?: string | null;
   readonly finalPrice?: number;
+  readonly playersInfo?: Record<string, any>;
+  readonly levelMap?: Record<number, number>;
   readonly onBid?: (newAmount: number) => void;
   readonly onPass?: () => void;
   readonly onClose?: () => void;
@@ -36,6 +39,8 @@ export function AuctionModal({
   isConcluded = false,
   winnerId,
   finalPrice,
+  playersInfo: propPlayersInfo,
+  levelMap: propLevelMap,
   onBid,
   onPass,
   onClose,
@@ -48,7 +53,8 @@ export function AuctionModal({
   const isLeading = Boolean(myId && highestBidderId === myId);
   const displayName = isLeading ? 'Bạn' : (bidderName ?? (highestBidderId ? `Người Chơi (${highestBidderId})` : 'Chưa có ai'));
 
-  const playersInfo = useGameStore((s) => s.playersInfo);
+  const storePlayersInfo = useGameStore((s) => s.playersInfo);
+  const playersInfo = propPlayersInfo ?? storePlayersInfo;
   const [autoBid, setAutoBid] = useState<boolean>(false);
 
   // Xử lý tự động đặt giá nếu bật Auto-Bid
@@ -73,8 +79,8 @@ export function AuctionModal({
 
   return (
     <div
-      className="w-full max-w-lg bg-[#FFFBEB] border-2 border-slate-900 rounded-3xl p-5 md:p-6 shadow-[0_6px_0_0_#0f172a] space-y-4 pointer-events-auto relative select-none text-slate-900"
       data-testid="auction-modal"
+      className="w-full max-w-lg bg-[#FFFBEB] border-2 border-slate-900 rounded-3xl p-5 md:p-6 shadow-[0_6px_0_0_#0f172a] space-y-4 pointer-events-auto relative select-none text-slate-900 max-h-[90vh] overflow-y-auto pr-1"
     >
       {/* Vùng Live Region cho Trình Đọc Màn Hình [WCAG 4.1.3] */}
       <div aria-live="polite" aria-atomic="true" className="sr-only">
@@ -132,6 +138,15 @@ export function AuctionModal({
           </p>
         </div>
       </div>
+
+      {/* Tình báo phân khu & Radar độc quyền [IMP-138] */}
+      <AuctionDistrictCard
+        cellIndex={cellIndex}
+        currentBid={currentBid}
+        myId={myId}
+        playersInfo={playersInfo}
+        levelMap={propLevelMap}
+      />
 
       {/* Bảng giá hiện tại & Người dẫn đầu */}
       <div className="grid grid-cols-2 gap-2.5 text-center">
@@ -244,7 +259,7 @@ export function AuctionModal({
                 disabled={!canAfford}
                 className={`min-h-[48px] py-2 px-2 font-bold text-xs rounded-xl border-2 flex flex-col items-center justify-center transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
                   canAfford
-                    ? 'bg-amber-500 hover:bg-amber-400 text-slate-900 border-amber-700 font-black shadow-[0_4px_0_0_#b45309] active:shadow-[0_1px_0_0_#b45309] active:translate-y-[3px] cursor-pointer'
+                    ? 'bg-amber-500 hover:bg-amber-400 text-amber-950 border-amber-700 font-black shadow-[0_4px_0_0_#b45309] active:shadow-[0_1px_0_0_#b45309] active:translate-y-[3px] cursor-pointer'
                     : 'bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed opacity-50'
                 }`}
               >
@@ -266,7 +281,7 @@ export function AuctionModal({
           disabled={hasPassed || isDeclinedPlayer}
           className={`min-h-[44px] px-3.5 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 cursor-pointer ${
             autoBid
-              ? 'bg-amber-500 text-slate-900 border-amber-700 shadow-[0_2px_0_0_#b45309]'
+              ? 'bg-amber-500 text-amber-950 font-black border-amber-700 shadow-[0_2px_0_0_#b45309]'
               : 'bg-slate-200 text-slate-700 border-slate-400 hover:bg-slate-300'
           }`}
         >

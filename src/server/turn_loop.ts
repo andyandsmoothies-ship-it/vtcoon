@@ -9,15 +9,20 @@ import { handleLanding, LandingResult, calculateGoPropertyTax, PROPERTY_DEEDS, G
 import { BOARD_CONFIG } from '../domain/board_config';
 import { decayModifiers } from '../domain/event_card_engine';
 import { processTreasuryStimulus } from '../domain/treasury_stimulus';
-import { processRollDoubles, handleAuditTurnTransition } from './audit_manager';
+import {
+  processRollDoubles,
+  handleAuditTurnTransition,
+  setTurnStartedInAudit,
+  getTurnStartedInAudit,
+  hasTurnStartedInAudit,
+  deleteTurnStartedInAudit,
+} from './audit_manager';
 import { handleSpecialCell } from './special_cell_handler';
 import { collectMortgageInterest } from './mortgage_manager';
 import { checkInsolvency } from './insolvency_manager';
 import type { RollResult } from './room_manager';
 import type { AuctionSession } from './auction_manager';
 import { ChanceCardId } from '../domain/event_card_types';
-
-const turnStartedInAudit = new Map<string, boolean>();
 
 // [DEBT-S06-01][DEBT-S06-02] Xử lý nợ định kỳ khi player vượt GO (TRƯỚC GO_BONUS)
 function processPendingDebts(room: Room, player: Player): void {
@@ -107,7 +112,7 @@ export function executeTurnRoll(
   room.lastDice = [dice.die1, dice.die2];
   room.lastDiceRollerId = current.id;
   room.diceSeq = (room.diceSeq ?? 0) + 1;
-  turnStartedInAudit.set(roomCode, inAuditBeforeRoll);
+  setTurnStartedInAudit(roomCode, inAuditBeforeRoll);
 
   const rollCheck = processRollDoubles(room, current, dice);
   if (rollCheck.stopped) return rollCheck.result;
@@ -166,7 +171,7 @@ export function executeTurnEnd(
   auctions?: Map<string, AuctionSession>,
 ): Room | undefined {
   if (room.phase === TurnPhase.AuctionPhase || room.phase === TurnPhase.InsolvencyPhase) return undefined;
-  if (!rolledThisTurn && room.phase === TurnPhase.WaitingRoll) return undefined;
+  if (!rolledThisTurn && room.phase === TurnPhase.WaitingRoll && (current.auditTurnsLeft ?? 0) <= 0) return undefined;
 
   if (continueDoubles && current.consecutiveDoubles > 0 && !current.skipNextTurn) {
     room.phase = TurnPhase.WaitingRoll;
@@ -187,10 +192,10 @@ export function executeTurnEnd(
   }
 
   current.consecutiveDoubles = 0;
-  const wasInAudit = turnStartedInAudit.has(roomCode)
-    ? turnStartedInAudit.get(roomCode)!
+  const wasInAudit = hasTurnStartedInAudit(roomCode)
+    ? getTurnStartedInAudit(roomCode)!
     : current.auditTurnsLeft > 0;
-  turnStartedInAudit.delete(roomCode);
+  deleteTurnStartedInAudit(roomCode);
   if (wasInAudit) {
     handleAuditTurnTransition(room, current);
     if (current.balance < 0) {
@@ -201,7 +206,10 @@ export function executeTurnEnd(
   }
   if (current.extraTurns > 0) {
     current.extraTurns -= 1;
-    if (current.skipNextTurn) {
+    if ((current.balance ?? 0) < 0) {
+      room.phase = TurnPhase.InsolvencyPhase;
+      checkInsolvency(room);
+    } else if (current.skipNextTurn) {
       current.skipNextTurn = false;
       room.phase = TurnPhase.PropertyManagement;
     } else {
@@ -226,7 +234,10 @@ export function executeTurnEnd(
   room.currentPlayerIndex = next;
 
   const nextPlayer = room.players[room.currentPlayerIndex];
-  if (nextPlayer?.skipNextTurn) {
+  if ((nextPlayer?.balance ?? 0) < 0) {
+    room.phase = TurnPhase.InsolvencyPhase;
+    checkInsolvency(room);
+  } else if (nextPlayer?.skipNextTurn) {
     nextPlayer.skipNextTurn = false;
     room.phase = TurnPhase.PropertyManagement;
   } else {

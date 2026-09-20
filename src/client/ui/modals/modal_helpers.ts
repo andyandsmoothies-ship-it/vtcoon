@@ -164,3 +164,128 @@ export function validateTradeOffer(params: TradeValidationParams): boolean {
 
   return true;
 }
+
+// [IMP-133] Pure function checking 1-Click Quick Build upgrade eligibility
+export interface CheckUpgradeParams {
+  readonly cellIndex: number;
+  readonly ownerProperties?: readonly number[];
+  readonly ownedProperties?: readonly number[];
+  readonly mortgagedProperties?: readonly number[];
+  readonly levelMap?: Record<number, number>;
+  readonly propertyStates?: Record<number, {
+    readonly level?: number;
+    readonly isMortgaged?: boolean;
+    readonly ownerId?: string | null;
+  }>;
+  readonly balance: number;
+  readonly isMyTurn?: boolean;
+  readonly turnPhase?: string;
+}
+
+export interface UpgradeEligibility {
+  readonly canUpgrade: boolean;
+  readonly nextLevel?: 1 | 2 | 3;
+  readonly upgradeCost?: number;
+  readonly reason?: string;
+  readonly blockedReason?: string;
+  readonly hasMonopoly: boolean;
+}
+
+export function checkPropertyUpgradeEligibility(params: CheckUpgradeParams): UpgradeEligibility {
+  const { cellIndex, balance, isMyTurn, turnPhase } = params;
+
+  const cell = BOARD_CONFIG[cellIndex];
+  const deed = PROPERTY_DEEDS.get(cellIndex);
+  if (!cell || cell.type !== CellType.Property || !cell.colorGroup || !deed?.upgradeCosts) {
+    return {
+      canUpgrade: false,
+      reason: 'Không thể nâng cấp ô này',
+      blockedReason: 'Không thể nâng cấp ô này',
+      hasMonopoly: false,
+    };
+  }
+
+  const currentLevel = params.propertyStates?.[cellIndex]?.level ?? params.levelMap?.[cellIndex] ?? 0;
+  if (currentLevel >= 3) {
+    return {
+      canUpgrade: false,
+      reason: 'Đã đạt cấp tối đa',
+      blockedReason: 'Đã đạt cấp tối đa',
+      hasMonopoly: true,
+    };
+  }
+
+  const groupCells = BOARD_CONFIG.filter((c) => c.colorGroup === cell.colorGroup);
+  const owned = params.ownedProperties ?? params.ownerProperties ?? [];
+  const hasMonopoly = groupCells.length > 0 && groupCells.every((c) => owned.includes(c.index));
+
+  if (!hasMonopoly) {
+    return {
+      canUpgrade: false,
+      reason: 'Cần sở hữu trọn bộ màu trước khi nâng cấp',
+      blockedReason: 'Cần sở hữu trọn bộ màu trước khi nâng cấp',
+      hasMonopoly: false,
+    };
+  }
+
+  if (isMyTurn === false || (turnPhase !== undefined && turnPhase !== 'PropertyManagement')) {
+    return {
+      canUpgrade: false,
+      reason: 'Chờ đến lượt xây dựng',
+      blockedReason: 'Chờ đến lượt xây dựng',
+      hasMonopoly: true,
+    };
+  }
+
+  const hasMortgaged = groupCells.some((c) =>
+    (params.mortgagedProperties?.includes(c.index) ?? false) ||
+    Boolean(params.propertyStates?.[c.index]?.isMortgaged)
+  );
+  if (hasMortgaged) {
+    return {
+      canUpgrade: false,
+      reason: 'Không thể nâng cấp khi nhóm có ô thế chấp',
+      blockedReason: 'Không thể nâng cấp khi nhóm có ô thế chấp',
+      hasMonopoly: true,
+    };
+  }
+
+  const targetLevel = currentLevel + 1;
+  const otherCells = groupCells.filter((c) => c.index !== cellIndex);
+  const laggingCells = otherCells.filter((c) => {
+    const lvl = params.propertyStates?.[c.index]?.level ?? params.levelMap?.[c.index] ?? 0;
+    return lvl < currentLevel;
+  });
+
+  if (laggingCells.length > 0) {
+    const names = laggingCells.map((c) => c.name).join(', ');
+    const reason = `Quy tắc xây dựng đều tay: Cần nâng cấp ${names} trước khi xây C${targetLevel}`;
+    return {
+      canUpgrade: false,
+      reason,
+      blockedReason: reason,
+      hasMonopoly: true,
+    };
+  }
+
+  const upgradeCost = deed.upgradeCosts[currentLevel] ?? 0;
+  const nextLevel = targetLevel as 1 | 2 | 3;
+
+  if (balance < upgradeCost) {
+    return {
+      canUpgrade: false,
+      reason: 'Số dư không đủ',
+      blockedReason: 'Số dư không đủ',
+      upgradeCost,
+      nextLevel,
+      hasMonopoly: true,
+    };
+  }
+
+  return {
+    canUpgrade: true,
+    nextLevel,
+    upgradeCost,
+    hasMonopoly: true,
+  };
+}

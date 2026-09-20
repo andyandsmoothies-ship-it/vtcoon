@@ -11,6 +11,7 @@ import { HoseModal } from './hose_modal';
 import { InsolvencyBanner } from './insolvency_banner';
 import { GameOverModal } from './game_over_modal';
 import { GameRulesModal } from './game_rules_modal';
+import { MasterplanModal } from './masterplan_modal';
 import { AudioEngine } from '../../audio/audio_engine';
 import { SoundEffect } from '../../audio/audio_types';
 import { formatCurrency } from '../ui_helpers';
@@ -78,6 +79,23 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
         onClose={closeModal}
         initialTab={(modalPayload as ModalPayloadMap['rules'])?.initialTab}
       />
+    );
+  }
+
+  if (activeModal === 'masterplan') {
+    const payload = (modalPayload as ModalPayloadMap['masterplan']) || {};
+    return (
+      <ModalBackdrop
+        onClose={closeModal}
+        center={true}
+        dismissible={true}
+      >
+        <MasterplanModal
+          initialTab={payload.initialTab}
+          selectedCellIndex={payload.selectedCellIndex}
+          onClose={closeModal}
+        />
+      </ModalBackdrop>
     );
   }
 
@@ -206,6 +224,34 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
           )}
           currentBalance={myPlayer?.balance ?? 0}
           isInInsolvency={useGameStore.getState().activeModal === 'insolvency' || (myPlayer?.balance ?? 0) < 0}
+          isMyTurn={currentTurnPlayerId === myId}
+          turnPhase={useGameStore.getState().turnPhase}
+          allPlayers={playersInfo}
+          onQuickTrade={(targetPlayerId, targetPropertyIndex) => {
+            closeModal();
+            useGameStore.getState().openModal('trade', {
+              targetPlayerId,
+              offeredProperties: [],
+              requestedProperties: [targetPropertyIndex],
+              cashOffer: 0,
+              cashRequest: 0,
+            });
+          }}
+          onViewVacantCell={(cellIndex) => {
+            closeModal();
+            useGameStore.getState().setCameraFocusCell(cellIndex);
+            useGameStore.getState().openModal('deed', {
+              cellIndex,
+              canBuy: false,
+              ownedProperties: myPlayer?.ownedProperties,
+            });
+          }}
+          onUpgrade={(cellIndex) => {
+            onIntent?.({ type: 'INTENT_UPGRADE', cellIndex });
+          }}
+          onHoverCell={(cellIndex) => {
+            useGameStore.getState().setCameraFocusCell(cellIndex);
+          }}
           onSelectDeed={(cellIndex) => {
             closeModal();
             useGameStore.getState().openModal('deed', {
@@ -223,7 +269,10 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
           onDowngrade={(cellIndex) => {
             onIntent?.({ type: 'INTENT_DOWNGRADE', cellIndex });
           }}
-          onClose={closeModal}
+          onClose={() => {
+            useGameStore.getState().setCameraFocusCell(null);
+            closeModal();
+          }}
         />
       )}
 

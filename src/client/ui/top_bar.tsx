@@ -81,7 +81,7 @@ export function TopBar(props: TopBarProps): React.ReactElement {
       {/* Cụm bên trái: Thông tin trận đấu */}
       <div
         data-testid="match-info-capsule"
-        className="pointer-events-auto flex items-center gap-1.5 sm:gap-3 md:gap-4 bg-[#FFFDF8] border-2 border-slate-900 rounded-xl sm:rounded-2xl px-2 sm:px-4 py-1 sm:py-2 shadow-[0_4px_0_0_#0f172a] text-slate-900 text-xs md:text-sm font-medium"
+        className="pointer-events-auto flex items-center gap-1.5 sm:gap-3 md:gap-4 bg-[#FFFDF8] border-2 border-slate-900 rounded-xl sm:rounded-2xl px-3 sm:px-4 py-1 sm:py-2 shadow-[0_4px_0_0_#0f172a] text-slate-900 text-xs md:text-sm font-medium"
       >
         {/* Vòng đấu */}
         <div className="flex items-center gap-1 sm:gap-2">

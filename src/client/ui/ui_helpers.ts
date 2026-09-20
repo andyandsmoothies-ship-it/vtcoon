@@ -101,6 +101,7 @@ export interface ActionDockButtonStateParams {
  */
 export function isRollActionDisabled(params: ActionDockButtonStateParams): boolean {
   if (
+    !params.inAudit &&
     params.turnPhase === 'PropertyManagement' &&
     (!params.canRollAgain || !params.hasRolledThisTurn)
   ) {
@@ -108,7 +109,7 @@ export function isRollActionDisabled(params: ActionDockButtonStateParams): boole
   }
   return (
     Boolean(params.isRollPending) ||
-    Boolean(params.inAudit) ||
+    Boolean(params.inAudit && params.hasRolledThisTurn && !params.canRollAgain) ||
     Boolean(params.isRolling) ||
     Boolean(params.isPawnMoving) ||
     !params.isMyTurn ||
@@ -130,7 +131,7 @@ export function isEndTurnDisabled(params: ActionDockButtonStateParams): boolean 
   ) {
     return true;
   }
-  if (params.inAudit || (params.turnPhase === 'PropertyManagement' && !params.hasRolledThisTurn)) {
+  if (!params.canRollAgain && (params.inAudit || (params.turnPhase === 'PropertyManagement' && !params.hasRolledThisTurn))) {
     return false;
   }
   return (
@@ -299,4 +300,76 @@ export function resolveAdaptivePostProcessing(
   };
 }
 
+export interface ActionDockNotice {
+  readonly type: 'insolvent' | 'audit' | 'skip_turn' | 'bot_pacing';
+  readonly icon: string;
+  readonly desktopText: string;
+  readonly mobileText: string;
+  readonly tone: 'error' | 'warning' | 'info';
+}
 
+export interface ActionDockNoticeParams {
+  readonly isMyTurn?: boolean;
+  readonly isInsolvent?: boolean;
+  readonly inAudit?: boolean;
+  readonly auditTurnsLeft?: number;
+  readonly balance?: number;
+  readonly turnPhase?: string;
+  readonly hasRolledThisTurn?: boolean;
+  readonly isSkippedTurn?: boolean;
+  readonly botPacing?: { readonly displayText: string } | null;
+}
+
+export function resolveActionDockNotice(params: ActionDockNoticeParams): ActionDockNotice | null {
+  if (params.isInsolvent) {
+    const bal = params.balance ?? 0;
+    return {
+      type: 'insolvent',
+      icon: '🚨',
+      desktopText: `Ngân sách âm (${bal} Tr.): Hãy thế chấp hoặc thanh lý tài sản để cứu nợ!`,
+      mobileText: `Âm vốn (${bal} Tr.): Cần thế chấp cứu nợ`,
+      tone: 'error',
+    };
+  }
+
+  if (params.inAudit) {
+    const turns = params.auditTurnsLeft ?? 0;
+    return {
+      type: 'audit',
+      icon: '⚖️',
+      desktopText: `Đang thụ án kiểm toán (còn ${turns} lượt): Gieo đôi để tự do, nộp bảo lãnh hoặc chấp hành án.`,
+      mobileText: `Ô 10 (còn ${turns} lượt): Gieo đôi hoặc bảo lãnh`,
+      tone: 'warning',
+    };
+  }
+
+  const isSkipped = Boolean(
+    params.isSkippedTurn ||
+      (params.isMyTurn &&
+        params.turnPhase === 'PropertyManagement' &&
+        !params.hasRolledThisTurn &&
+        !params.inAudit)
+  );
+  if (isSkipped) {
+    return {
+      type: 'skip_turn',
+      icon: '🌪️',
+      desktopText: 'Bạn bị hoãn gieo xúc xắc lượt này (Bão duyên hải / Kiểm tra cồn)',
+      mobileText: 'Hoãn gieo xúc xắc lượt này',
+      tone: 'warning',
+    };
+  }
+
+  if (!params.isMyTurn && params.botPacing) {
+    const text = params.botPacing.displayText;
+    return {
+      type: 'bot_pacing',
+      icon: '🤖',
+      desktopText: text,
+      mobileText: text.slice(0, 45),
+      tone: 'info',
+    };
+  }
+
+  return null;
+}

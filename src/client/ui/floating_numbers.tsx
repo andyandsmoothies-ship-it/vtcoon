@@ -180,7 +180,7 @@ export function MilestoneBanner({ item }: { readonly item: FloatingTextItem }): 
           </span>
         </div>
         {descText && (
-          <span className="text-[11px] sm:text-xs text-slate-600 font-semibold truncate mt-0.5">
+          <span className="text-[11px] sm:text-xs text-slate-600 font-semibold leading-tight line-clamp-2 break-words mt-0.5">
             {descText}
           </span>
         )}
@@ -255,6 +255,10 @@ export function FloatingNumbersOverlay(): React.ReactElement | null {
   const storeFloatingTexts = useGameStore((state) => state.floatingTexts);
   const floatingTexts = isSSR ? useGameStore.getState().floatingTexts : storeFloatingTexts;
 
+  const storeModifiers = useGameStore((state) => state.activeModifiers);
+  const activeModifiers = isSSR ? useGameStore.getState().activeModifiers : storeModifiers;
+  const activeMarketCount = (activeModifiers ?? []).filter((m) => Boolean(m && m.remainingRounds > 0)).length;
+
   if (floatingTexts.length === 0) {
     return null;
   }
@@ -276,10 +280,30 @@ export function FloatingNumbersOverlay(): React.ReactElement | null {
       t.actionType !== 'market',
   );
 
-  // Desktop: hiển thị tối đa 2 toasts gần nhất ở góc trên bên phải
+  // Desktop: hiển thị tối đa 2 toasts gần nhất ở giữa dưới Market Ticker
   const desktopTexts = regularTexts.slice(-2);
   // Mobile: hiển thị duy nhất 1 toast mới nhất ở giữa đỉnh màn hình
   const mobileTexts = regularTexts.slice(-1);
+
+  // Vị trí an toàn cho MilestoneBanner tránh chèn đè MarketEventTicker
+  const milestoneTopClass =
+    activeMarketCount >= 2 ? 'top-40' : activeMarketCount === 1 ? 'top-28' : 'top-20';
+
+  // Vị trí an toàn cho toast giao dịch thường trên mobile:
+  // Tự động đẩy xuống dưới MarketEventTicker và MilestoneBanner nếu đang hiển thị
+  let mobileTopClass = 'top-[4.25rem]';
+  if (latestMilestone) {
+    mobileTopClass =
+      activeMarketCount >= 2
+        ? 'top-[13.5rem]'
+        : activeMarketCount === 1
+        ? 'top-[11rem]'
+        : 'top-36';
+  } else if (activeMarketCount >= 2) {
+    mobileTopClass = 'top-40';
+  } else if (activeMarketCount === 1) {
+    mobileTopClass = 'top-28';
+  }
 
   return (
     <aside
@@ -290,7 +314,7 @@ export function FloatingNumbersOverlay(): React.ReactElement | null {
     >
       {/* Cột mốc đặc biệt (Milestone Banner) luôn căn giữa màn hình */}
       {latestMilestone && (
-        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center">
+        <div className={`fixed ${milestoneTopClass} left-1/2 -translate-x-1/2 z-50 flex flex-col items-center`}>
           <MilestoneBanner item={latestMilestone} />
         </div>
       )}
@@ -302,8 +326,8 @@ export function FloatingNumbersOverlay(): React.ReactElement | null {
         ))}
       </div>
 
-      {/* Giao diện Mobile (< 768px): Nằm giữa đỉnh màn hình dưới TopBar, duy nhất 1 thẻ */}
-      <div className="flex md:hidden fixed top-[4.25rem] left-1/2 -translate-x-1/2 flex-col items-center w-full px-2">
+      {/* Giao diện Mobile (< 768px): Nằm an toàn dưới TopBar & MarketEventTicker, duy nhất 1 thẻ */}
+      <div className={`flex md:hidden fixed ${mobileTopClass} left-1/2 -translate-x-1/2 flex-col items-center w-full px-2 pointer-events-none`}>
         {mobileTexts.map((item) => (
           <FloatingBadge key={item.id} item={item} />
         ))}

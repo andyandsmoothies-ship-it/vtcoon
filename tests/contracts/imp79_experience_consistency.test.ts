@@ -237,8 +237,9 @@ describe('[TC-79.2/MSS] Event Card Activity Logger (Edge Case: Swallowed Card Lo
 });
 
 describe('[TC-79.3/MSS] Audit Mechanics & Bail Out UI (Edge Case: In-Jail Softlock)', () => {
-  it('TC-79.3.1: isRollActionDisabled trả về true khi inAudit = true ngay cả khi chưa đổ xúc xắc', () => {
-    const disabled = isRollActionDisabled({
+  it('TC-79.3.1: isRollActionDisabled cho phép gieo xúc xắc đầu turn tìm cơ hội ra đôi và khóa nút sau khi đã gieo không đôi', () => {
+    // Khi inAudit = true, hasRolledThisTurn = false: isRollActionDisabled trả về false
+    const initialRollDisabled = isRollActionDisabled({
       isRolling: false,
       isPawnMoving: false,
       isMyTurn: true,
@@ -247,8 +248,19 @@ describe('[TC-79.3/MSS] Audit Mechanics & Bail Out UI (Edge Case: In-Jail Softlo
       canRollAgain: false,
       inAudit: true,
     } as any);
+    expect(initialRollDisabled).toBe(false);
 
-    expect(disabled).toBe(true);
+    // Khi inAudit = true, hasRolledThisTurn = true, canRollAgain = false: isRollActionDisabled trả về true
+    const secondRollDisabled = isRollActionDisabled({
+      isRolling: false,
+      isPawnMoving: false,
+      isMyTurn: true,
+      isBankrupt: false,
+      hasRolledThisTurn: true,
+      canRollAgain: false,
+      inAudit: true,
+    } as any);
+    expect(secondRollDisabled).toBe(true);
   });
 
   it('TC-79.3.2: isEndTurnDisabled trả về false khi inAudit = true và isMyTurn = true (cho phép kết thúc lượt)', () => {

@@ -174,7 +174,7 @@ export const CHANCE_CARD_DETAILS: Readonly<Record<ChanceCardId, CardDetail>> = {
 
 export const MARKET_CARD_DETAILS: Readonly<Record<MarketCardId, MarketCardDetail>> = {
   [MarketCardId.MC_NIGHT_ECONOMY]: {
-    description: 'Phát triển kinh tế ban đêm: Mọi người chơi chi tiêu ngay 400 Tr. chia cho chủ ô Dịch vụ (hoặc Kho Bạc). Nhân đôi tiền thuê ô Dịch vụ C1-C3 trong 2 vòng.',
+    description: 'Phát triển kinh tế ban đêm kích cầu du lịch, ẩm thực và dịch vụ giải trí.',
     targetScope: 'Tất cả người chơi và BĐS Dịch vụ (Ô 6, 8, 26, 27)',
     effectDetail: 'Tất cả người chơi chi tiêu 400 Tr. kích cầu (chia đều cho các chủ ô Dịch vụ hoặc nộp Kho Bạc) và nhân đôi tiền thuê ô Dịch vụ Cấp 1 trở lên trong 2 vòng',
     duration: '2 vòng chơi',
@@ -188,7 +188,7 @@ export const MARKET_CARD_DETAILS: Readonly<Record<MarketCardId, MarketCardDetail
     destination: 'Chủ sở hữu ô Dịch vụ đón khách',
   },
   [MarketCardId.MC_ALCOHOL_CHECK]: {
-    description: 'Chiến dịch kiểm tra nồng độ cồn (Nghị Định 100): Giảm 50% tiền thuê ô Dịch vụ trong 2 vòng; khách dừng chân bị phạt 800 Tr. nộp Kho Bạc và tạm giữ xe (mất lượt).',
+    description: 'Chiến dịch kiểm tra nồng độ cồn diện rộng theo Nghị Định 100 tại các tuyến phố kinh doanh dịch vụ.',
     targetScope: 'Tất cả các ô BĐS Dịch vụ (Ô 6, 8, 26, 27)',
     effectDetail: 'Giảm 50% tiền thuê ô Dịch vụ trong 2 vòng; người dừng chân bị phạt 800 Tr. nộp Kho Bạc Nhà Nước và bị tạm giữ xe (mất lượt kế tiếp)',
     duration: '2 vòng chơi',
@@ -230,7 +230,7 @@ export const MARKET_CARD_DETAILS: Readonly<Record<MarketCardId, MarketCardDetail
     destination: 'Nộp phạt vào Kho Bạc Nhà Nước',
   },
   [MarketCardId.MC_PUBLIC_INVEST]: {
-    description: 'Đẩy mạnh giải ngân vốn đầu tư công: Kho Bạc chi trả ngay 400 Tr. cho mọi người chơi; thưởng 1.000 Tr./trạm hạ tầng và nhân đôi cước phí vận tải trong 2 vòng.',
+    description: 'Đẩy mạnh giải ngân các gói vốn đầu tư công phát triển hạ tầng giao thông trọng điểm.',
     targetScope: 'Toàn bộ người chơi và 4 trạm Hạ tầng Giao thông (Ô 5, 15, 25, 35)',
     effectDetail: 'Kho Bạc chi trả ngay 400 Tr. cho mỗi người chơi; thưởng 1.000 Tr. cho mỗi ô Hạ tầng sở hữu và nhân đôi cước phí vận tải trong 2 vòng',
     duration: '2 vòng chơi',
@@ -265,11 +265,11 @@ export const MARKET_CARD_DETAILS: Readonly<Record<MarketCardId, MarketCardDetail
     destination: 'Chủ sở hữu ô Hạ tầng giao thông',
   },
   [MarketCardId.MC_URBAN_PLANNING]: {
-    description: 'Phê duyệt quy hoạch trục giao thông mới: Cấm thế chấp đất dọc hành lang quy hoạch.',
-    targetScope: 'Bất động sản trung tâm Hà Nội và TP.HCM (Ô 31, 32, 34, 37, 39)',
-    effectDetail: 'Định giá thế chấp tăng thêm 20% giá niêm yết (nhận 60% thay vì 50% thông thường)',
+    description: 'Quy hoạch trục đô thị mới: Tăng 20% giá trị khi thế chấp BĐS trung tâm Hà Nội & TP.HCM.',
+    targetScope: 'Bất động sản trung tâm Hà Nội và TP.HCM (Nhóm Xanh Lá & Tím)',
+    effectDetail: 'Tăng 20% giá trị khi thế chấp (nhận 60% thay vì 50% giá niêm yết)',
     duration: '1 vòng chơi',
-    destination: 'Ngân sách người chơi thực hiện thế chấp',
+    destination: 'Ngân sách người chơi',
   },
   [MarketCardId.MC_UTILITY_DOUBLE]: {
     description: 'Tăng khung giá bán lẻ điện & viễn thông: Nhân đôi phí dịch vụ tiện ích công cộng.',
@@ -279,7 +279,7 @@ export const MARKET_CARD_DETAILS: Readonly<Record<MarketCardId, MarketCardDetail
     destination: 'Chủ sở hữu ô Tiện ích công cộng',
   },
   [MarketCardId.MC_COASTAL_STORM]: {
-    description: 'Bão lũ đổ bộ dải duyên hải: Chủ nhà C1-C3 nộp 400 Tr./cấp nhà vào Kho Bạc. Miễn 100% tiền thuê và cô lập giao thông (mất lượt) tại ô ven biển trong 2 vòng.',
+    description: 'Bão lũ đổ bộ diện rộng dải duyên hải gây ngập lụt và cô lập giao thông ven biển.',
     targetScope: 'Các ô BĐS Duyên Hải ven biển (Ô 11, 14, 16, 18, 19)',
     effectDetail: 'Chủ sở hữu nộp 400 Tr./cấp nhà vào Kho Bạc khắc phục bão lũ; miễn 100% tiền thuê và người dừng chân bị cô lập giao thông (mất lượt kế tiếp) trong 2 vòng',
     duration: '2 vòng chơi',

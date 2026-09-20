@@ -42,37 +42,32 @@ if (typeof window !== 'undefined') {
   }
 }
 
+export { formatServerErrorMessage } from './ui/actionable_notification';
+
 export interface ServerToastProps {
   readonly message: string | null;
+  readonly onClose?: () => void;
 }
 
-export function formatServerErrorMessage(reasonCode: string): string {
-  switch (reasonCode) {
-    case 'CANNOT_ROLL':
-      return 'Chưa tới lượt đổ xúc xắc hoặc đang trong bước di chuyển';
-    case 'ROOM_NOT_FOUND':
-      return 'Không tìm thấy phòng thi đấu';
-    case 'NOT_ENOUGH_PLAYERS':
-      return 'Chưa đủ người chơi để bắt đầu';
-    case 'NOT_HOST':
-      return 'Chỉ chủ phòng mới có quyền thực hiện thao tác';
-    case 'EVEN_BUILDING_VIOLATION':
-      return 'Quy tắc xây dựng đều tay: Cần nâng cấp các ô cùng bộ màu lên cấp đồng đều!';
-    case 'MISSING_MONOPOLY':
-      return 'Cần sở hữu trọn bộ màu trước khi nâng cấp công trình!';
-    default:
-      return `Thông báo máy chủ: ${reasonCode}`;
-  }
-}
-
-export function ServerToast({ message }: ServerToastProps): React.ReactElement | null {
+export function ServerToast({ message, onClose }: ServerToastProps): React.ReactElement | null {
   if (!message) return null;
   return (
     <div
       role="alert"
-      className="fixed top-18 sm:top-20 left-1/2 -translate-x-1/2 z-50 bg-rose-600/95 text-white text-sm font-bold px-4 py-2 rounded-lg shadow-lg border border-rose-400 backdrop-blur-sm"
+      className="fixed top-18 sm:top-20 left-1/2 -translate-x-1/2 z-50 w-[92vw] max-w-[360px] sm:max-w-md bg-slate-900/95 text-white rounded-2xl shadow-xl border-2 border-amber-400/80 px-3.5 py-2.5 sm:px-4 sm:py-3 backdrop-blur-md flex items-center justify-between gap-2.5"
     >
-      {message}
+      <div className="flex items-center gap-2 min-w-0 flex-1">
+        <span className="text-base sm:text-lg select-none shrink-0" aria-hidden="true">⚠️</span>
+        <span className="text-xs sm:text-sm font-semibold leading-snug break-words">{message}</span>
+      </div>
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Đóng thông báo"
+        className="min-w-[44px] min-h-[44px] inline-flex items-center justify-center cursor-pointer text-slate-400 hover:text-white text-base font-bold p-1 rounded-lg transition-colors shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+      >
+        ✕
+      </button>
     </div>
   );
 }
@@ -191,7 +186,7 @@ export function App(): React.ReactElement {
 
   return (
     <div className="fixed inset-0 w-full h-full overflow-hidden bg-slate-950 select-none">
-      <ServerToast message={errorMessage} />
+      <ServerToast message={errorMessage} onClose={() => setErrorMessage(null)} />
 
       {/* 1. Nền sa bàn 3D duy nhất chạy liên tục không gián đoạn / zero-loading */}
       <div className="absolute inset-0 z-0 pointer-events-auto">
