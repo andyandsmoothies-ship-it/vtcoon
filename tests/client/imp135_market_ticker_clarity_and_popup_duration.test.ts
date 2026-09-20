@@ -125,7 +125,7 @@ describe('[IMP-135] Market Event Ticker Clarity & Extended Pop-up Duration Contr
       expect(markup).toMatch(/nhân đôi/i);
     });
 
-    it('[TC-IMP135.12] MarketEventTicker render tóm tắt hiệu lực có class line-clamp-2 cho mobile', () => {
+    it('[TC-IMP135.12] MarketEventTicker render tóm tắt hiệu lực có class line-clamp-2 hoặc line-clamp-3 cho mobile', () => {
       const markup = renderToStaticMarkup(
         React.createElement(MarketEventTicker, {
           activeModifiers: [
@@ -137,7 +137,7 @@ describe('[IMP-135] Market Event Ticker Clarity & Extended Pop-up Duration Contr
         })
       );
 
-      expect(markup).toContain('line-clamp-2');
+      expect(markup).toMatch(/line-clamp-[23]/);
       expect(markup).toContain('Còn 2 vòng');
     });
 

@@ -7,11 +7,11 @@
 ## 🧭 BẢNG CHỈ MỤC THEO DOMAIN (DOMAIN INDEX)
 | Domain Tag | Trọng Tâm & Phạm Vi Mã Nguồn | Các Gotchas Liên Quan |
 | :--- | :--- | :--- |
-| `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78, #82, #104, #105, #106, #145, #146, #147, #159, #164, #174, #180 |
+| `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78, #82, #104, #105, #106, #145, #146, #147, #159, #164, #174, #180, #188 |
 | `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147 |
 | `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184 |
-| `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #32, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #60, #61, #63, #69, #72, #74, #77, #80, #85, #86, #88, #89, #90, #91, #92, #93, #94, #95, #96, #101, #103, #109, #110, #114, #115, #116, #117, #120, #122, #123, #124, #125, #126, #127, #128, #129, #130, #133, #134, #135, #136, #140, #141, #144, #148, #159, #160, #161, #162, #163, #164, #165, #169, #175, #177 |
-| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185 |
+| `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #32, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #60, #61, #63, #69, #72, #74, #77, #80, #85, #86, #88, #89, #90, #91, #92, #93, #94, #95, #96, #101, #103, #109, #110, #114, #115, #116, #117, #120, #122, #123, #124, #125, #126, #127, #128, #129, #130, #133, #134, #135, #136, #140, #141, #144, #148, #159, #160, #161, #162, #163, #164, #165, #169, #175, #177, #189 |
+| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188 |
 | `[UAT/TEST]` | Nghiệm Thu, Adversarial TDD, Ảnh Chụp Màn Hình (.jpg), Shell Escaping, File I/O Lock, Docker Healthcheck Timeout | #5, #28, #29, #31, #35, #52, #71, #73, #83, #84, #99, #100, #117, #124, #125, #130 |
 | `[TELEMETRY]` | Giám Sát Hiệu Năng Thời Gian Thực, Chó Canh Phòng Bất Biến, Hộp Đen Tái Hiện Lỗi | #39, #62, #71, #75, #104, #114, #115, #135, #174 |
 | `[ARCH/REFACTOR]` | Tách Module Facade, Ngân Sách Render Loop, Chuẩn Hóa Môi Trường Build | #43, #98, #99 |
@@ -3049,3 +3049,55 @@
   4. **Mobile Typography & Defend Against Flex Blowout**:
      - Header phân khu dùng `flex-wrap gap-1.5`, chip đếm số ô sở hữu mang `shrink-0 ml-auto`, badge chiến lược có `max-w-[140px] truncate sm:max-w-none`.
      - Chip ô đất mang `min-w-0` trên mọi cấp độ container, font chữ responsive `text-[10px] sm:text-[11px]` cho tên ô và `text-[9px] sm:text-[10px]` cho badge trạng thái, bảo đảm hiển thị trọn vẹn tên địa danh không bị tràn viền trên thiết bị hẹp (< 390px).
+
+---
+
+### 188. [UI/MARKET-TICKER] Chuẩn Hóa Toàn Diện Nội Dung & Quy Tắc Luật Chơi Các Thông Báo Sự Kiện Thị Trường (IMP-141)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Ngữ Nghĩa Chung Chung & Văn Học Hóa Trong Thông Báo Thị Trường (Vague Literary Event Descriptions Trap)*:
+     - Trước IMP-141, `resolveMarketEffectSummary` trích xuất chuỗi tóm tắt trực tiếp từ `MARKET_CARD_DETAILS.description` bằng cách cắt sau dấu hai chấm `: `. Đối với các thẻ không có dấu hai chấm hoặc mô tả mang tính văn phong báo chí/chung chung (ví dụ `MC_PUBLIC_INVEST`: *"Đẩy mạnh giải ngân các gói vốn đầu tư công..."*, `MC_COASTAL_STORM`: *"Bão lũ đổ bộ diện rộng..."*), banner hiển thị những dòng chữ thiếu cụ thể, không chỉ rõ cơ chế luật chơi cốt lõi (nhân đôi cước 4 Ga Tàu, miễn 100% tiền thuê ô ven biển và mất lượt).
+  2. *Bẫy Xung Đột Từ Ngữ Giữa Các Đợt Kiểm Thử Hồi Quy (Test Phrase Collision Trap)*:
+     - Thẻ `MC_FREEZE_TRADE` từng chứa cụm từ *"Tạm ngừng mua bán, cấm thế chấp đất mới..."*, vi phạm hợp đồng kiểm thử tinh giản `TC-IMP132.09`. Khi không có bảng ánh xạ SSOT độc lập, việc sửa mô tả thẻ bài dễ dẫn đến va chạm hồi quy với các suite kiểm thử khác.
+  3. *Bẫy Cắt Cụt Chữ Trên Màn Hình Di Động Với Line Clamp 2 (Mobile 2-Line Truncation Trap)*:
+     - Với giới hạn `line-clamp-2`, các sự kiện có hiệu ứng đa chiều (như `MC_COASTAL_STORM` vừa miễn tiền thuê vừa mất lượt, hoặc `MC_CASINO_PILOT` vừa thưởng cấp 2 vừa thưởng ô 27) bị trình duyệt cắt mất phần điều kiện quan trọng ở dòng thứ 3 khi hiển thị trên màn hình hẹp (< 390px).
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **SSOT Bảng Ánh Xạ Hiệu Lực Thẻ Thị Trường (`ACTIVE_MARKET_EFFECT_SUMMARIES`)**:
+     - `src/client/ui/market_event_ticker.tsx`: Xuất khẩu bảng hằng số `ACTIVE_MARKET_EFFECT_SUMMARIES: Readonly<Record<string, string>>` làm nguồn chân lý duy nhất (SSOT) cho toàn bộ 16 thẻ Thị Trường và các thẻ Cơ Hội có modifier kéo dài (`CC_PORT_EXCLUSIVE`).
+     - 100% nội dung tóm tắt tập trung trực diện vào luật chơi định lượng (tỷ lệ %, định mức tiền Tr., số hiệu ô cờ cụ thể), loại bỏ hoàn toàn câu chữ hoa mỹ, văn học hoặc suy diễn.
+     - Giới hạn độ dài mỗi câu tóm tắt $\le 85$ ký tự để bảo đảm hiển thị trọn vẹn và súc tích.
+  2. **Ưu Tiên Ánh Xạ & Cơ Chế Fallback An Toàn (`resolveMarketEffectSummary`)**:
+     - Hàm `resolveMarketEffectSummary(type: string)` luôn tra cứu `ACTIVE_MARKET_EFFECT_SUMMARIES[type]` trước tiên.
+     - Nếu không có trong từ điển, hàm fallback an toàn về `MARKET_CARD_DETAILS` / `CHANCE_CARD_DETAILS`, ưu tiên cắt sau dấu `: `, hoặc dùng `description`/`effectDetail`, và cuối cùng là chuỗi mặc định an toàn, không bao giờ ném ngoại lệ (`throw`) hay trả về chuỗi rỗng.
+  3. **Mở Rộng Không Gian Hiển Thị 3 Dòng (`line-clamp-3`)**:
+     - `MarketEventTicker`: Áp dụng class `line-clamp-3` thay cho `line-clamp-2` tại khối `<p data-testid="market-ticker-effect-summary">`, tạo đủ không gian cho các câu tóm tắt 2-3 dòng trên thiết bị di động mà không làm vỡ layout hay che khuất TopBar.
+  4. **Bảo Toàn Toàn Bộ Hợp Đồng Hồi Quy (`imp135`, `imp132`, `imp57`, `imp140`)**:
+     - Chuẩn hóa đồng bộ trường `description` trong `src/domain/event_card_metadata.ts` theo cấu trúc `'Tiêu Đề: Nội dung luật chơi định lượng.'`, giúp cả hệ thống Modal lẫn Ticker đều đồng nhất và thỏa mãn tất cả 151 contract tests.
+
+---
+
+### 189. [3D/RENDER] Tối Ưu Hóa Draw Calls Sa Bàn, Gom Instancing & Kiểm Soát Shadow Caster Budget (IMP-142)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Bùng Nổ Draw Calls Cây Xanh Sa Bàn (Diorama Foliage Draw Call Explosion Trap)*:
+     - Trước IMP-142, cụm cây xanh cảnh quan đô thị `DioramaUrbanCanopy` lặp qua 18 cây bằng `URBAN_TREES.map()`, mỗi cây gồm 3 mesh riêng biệt (thân cây cylinder, tầng tán dưới sphere, tầng tán trên sphere). Điều này tạo ra $18 \times 3 = 54$ draw calls độc lập trong main pass, cộng thêm 54 draw calls tương ứng trong shadow map pass, làm nghẽn cổ chai CPU và tụt FPS xuống 34.2 FPS (vượt trần ngân sách 85 calls).
+  2. *Bẫy Lãng Phí Ngân Sách Bóng Đổ Trên Vi Chi Tiết (Sub-Pixel Shadow Caster Waste Trap)*:
+     - Lạm dụng thuộc tính `castShadow` trên các hình học vi mô có kích thước chỉ 5mm–8cm (dây văng cáp cầu Ba Son 5mm `basonCables`, rơ-moóc xe kéo bến cảng container, ống khói tí hon trên mái nhà đồ chơi `ToyHouseMesh`, bụi cây cảnh luống hoa ven ray `DioramaTropicalFlora`). Ở góc nhìn camera sa bàn bao quát toàn bàn cờ, bóng của các chi tiết này gần như biến mất hoặc hòa lẫn vào khối mẹ, nhưng khiến GPU phải thực hiện hàng trăm draw calls vô ích vào shadow map pass.
+  3. *Bẫy Hồi Quy Kiểm Thử SSR Khi Gom InstancedMesh (SSR Static Markup Color Loss Trap)*:
+     - Khi chuyển sang `instancedMesh`, việc gán màu riêng lẻ cho từng instance qua Three.js `instancedMesh.setColorAt(i, color)` chỉ xảy ra tại runtime trong `useEffect`. Ở phía SSR (`renderToStaticMarkup`), `useEffect` không được kích hoạt; nếu `meshStandardMaterial` không mang thuộc tính `color="#15803D"` tĩnh, static markup sẽ thiếu mã màu hệ sinh thái sa bàn, gây gãy hàng loạt contract tests kiểm tra nhận diện màu xanh đô thị (`TC-MRL02.02`, `TC-IMP142.24`).
+  4. *Bẫy Xóa Nhầm Bóng Đổ Của Các Phần Tử Chiến Lược (Strategic Shadow Caster Regression Trap)*:
+     - Khi kiểm toán bóng đổ, nếu tắt nhầm `castShadow` trên cọc cờ `FlagPole` và cờ phướn `FlagCloth` (`board_tile.tsx`), quân cờ người chơi hoặc tháp biểu tượng, sẽ vi phạm các hợp đồng bất biến hiệu năng hiển thị (`TC-87.10b`).
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Tập Trung Hóa 3 InstancedMesh Cho Cây Xanh Đô Thị (`DioramaUrbanCanopy`)**:
+     - `src/client/3d/miniature_city_diorama.tsx`: Gom toàn bộ 18 cây xanh đô thị thành đúng 3 `instancedMesh` có `args={[undefined, undefined, URBAN_TREES.length]}` đại diện cho: thân gỗ cylinder, tán dưới sphere và tán trên sphere.
+     - Giảm từ 54 calls xuống đúng 3 draw calls cho toàn bộ thảm thực vật trung tâm sa bàn (tiết kiệm 51 calls trong main pass).
+     - Luôn bọc trong `<group position={[0, 0.02, 0]} data-testid="diorama-urban-canopy">`.
+  2. **Bảo Tồn Màu Sắc Tĩnh Cho SSR (`SSR Baseline Material Color`)**:
+     - Thẻ `meshStandardMaterial` của tán dưới và tán trên bắt buộc phải gán tĩnh thuộc tính `color="#15803D"`.
+     - Phối hợp `useEffect` duyệt qua mảng cấu hình để tính toán ma trận tọa độ `setMatrixAt` và gán sắc độ riêng biệt cho từng cây bằng `setColorAt`, kết hợp bật cờ `instanceMatrix.needsUpdate = true` và `instanceColor.needsUpdate = true`.
+  3. **Thắt Chặt Ngân Sách Bóng Đổ Trên Vi Chi Tiết (Targeted Shadow Caster Stripping)**:
+     - `diorama_bridges.tsx`: Triệt tiêu hoàn toàn `castShadow` trên 12 dây văng rẻ quạt 5mm của Cầu Ba Son (`basonCables`).
+     - `diorama_railroad.tsx`: Tắt `castShadow` trên các khối cầu bụi hoa cây cảnh `DioramaTropicalFlora`. Bảo toàn nguyên vẹn chuỗi màu hoa SSR `#F43F5E`, `#F59E0B`, `#A855F7`.
+     - `diorama_container_port.tsx`: Tắt `castShadow` trên rơ-moóc xe kéo chở container.
+     - `toy_property_buildings.tsx`: Tắt `castShadow` trên ống khói tí hon `ToyHouseMesh`, bảo toàn tuyệt đối `castShadow receiveShadow` trên thân nhà và mái dốc.
+  4. **Bảo Toàn Nghiêm Ngặt Hợp Đồng Bóng Đổ Chủ Lực**:
+     - Nghiêm cấm tắt `castShadow` trên `FlagPole` và `FlagCloth` thuộc `OwnershipMarkerInstances` (`board_tile.tsx`) theo yêu cầu bất biến của `TC-87.10b`.
+     - Giữ nguyên bóng đổ trên tháp chính Bitexco, trụ vòm Cầu Long Biên, trụ tháp Cầu Ba Son, thân đầu tàu hỏa mini và 4 quân cờ đại diện người chơi.

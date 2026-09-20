@@ -178,7 +178,6 @@ export function DioramaBridges(): React.ReactElement {
             <mesh
               position={cable.west.position}
               quaternion={cable.west.quaternion}
-              castShadow
             >
               <cylinderGeometry args={[0.005, 0.005, cable.west.length, 6]} />
               <meshStandardMaterial color="#E2E8F0" metalness={0.9} roughness={0.2} />
@@ -186,7 +185,6 @@ export function DioramaBridges(): React.ReactElement {
             <mesh
               position={cable.east.position}
               quaternion={cable.east.quaternion}
-              castShadow
             >
               <cylinderGeometry args={[0.005, 0.005, cable.east.length, 6]} />
               <meshStandardMaterial color="#E2E8F0" metalness={0.9} roughness={0.2} />

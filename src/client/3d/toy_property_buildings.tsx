@@ -35,7 +35,7 @@ export function ToyHouseMesh({ position = [0, 0, 0] }: ToyHouseMeshProps): React
       </mesh>
 
       {/* Ống khói tí hon */}
-      <mesh position={[0.06, 0.16, 0.04]} castShadow>
+      <mesh position={[0.06, 0.16, 0.04]}>
         <boxGeometry args={[0.035, 0.06, 0.035]} />
         <meshStandardMaterial color="#059669" roughness={0.25} metalness={0.05} />
       </mesh>

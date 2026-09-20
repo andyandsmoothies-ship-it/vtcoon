@@ -1,6 +1,7 @@
 // [UI-S02/MSS] MiniatureCityDiorama — Unified Sculpted Tabletop Diorama Root Coordinator
 // Assembles terrain, iconic bridges, modern stadium, marina, skyline & micro-life
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import { Color, InstancedMesh, Object3D } from 'three';
 import { DioramaTerrain } from './diorama/diorama_terrain';
 import { DioramaBridges } from './diorama/diorama_bridges';
 import { DioramaCivicCenter } from './diorama/diorama_civic_center';
@@ -181,31 +182,86 @@ const URBAN_TREES = [
   // Phân khu shophouse bến du thuyền & ẩm thực (Đông Nam, X = 3.6)
   { x: 3.6, z: 3.2, color: '#F59E0B', height: 0.29, radius: 0.15 },
   { x: 3.6, z: 4.4, color: '#15803D', height: 0.33, radius: 0.16 },
-  { x: 3.6, z: 5.4, color: '#22C55E', height: 0.27, radius: 0.14 },
 ];
 
 export function DioramaUrbanCanopy(): React.ReactElement {
+  const trunkRef = useRef<InstancedMesh>(null);
+  const lowerCanopyRef = useRef<InstancedMesh>(null);
+  const upperCanopyRef = useRef<InstancedMesh>(null);
+
+  useEffect(() => {
+    const dummy = new Object3D();
+    const color = new Color();
+
+    URBAN_TREES.forEach((tree, i) => {
+      // 1. Thân cây gỗ tự nhiên
+      dummy.position.set(tree.x, tree.height * 0.4, tree.z);
+      dummy.rotation.set(0, 0, 0);
+      dummy.scale.set(1, 1, 1);
+      dummy.updateMatrix();
+      trunkRef.current?.setMatrixAt(i, dummy.matrix);
+
+      // 2. Tầng tán dưới
+      dummy.position.set(tree.x, tree.height * 0.85, tree.z);
+      const sLower = tree.radius / 0.15;
+      dummy.scale.set(sLower, sLower, sLower);
+      dummy.updateMatrix();
+      lowerCanopyRef.current?.setMatrixAt(i, dummy.matrix);
+      color.set(tree.color);
+      lowerCanopyRef.current?.setColorAt(i, color);
+
+      // 3. Tầng tán trên đan xen đa tầng
+      dummy.position.set(tree.x, tree.height * 1.08, tree.z);
+      const sUpper = (tree.radius * 0.75) / 0.11;
+      dummy.scale.set(sUpper, sUpper, sUpper);
+      dummy.updateMatrix();
+      upperCanopyRef.current?.setMatrixAt(i, dummy.matrix);
+      upperCanopyRef.current?.setColorAt(i, color);
+    });
+
+    if (trunkRef.current) trunkRef.current.instanceMatrix.needsUpdate = true;
+    if (lowerCanopyRef.current) {
+      lowerCanopyRef.current.instanceMatrix.needsUpdate = true;
+      if (lowerCanopyRef.current.instanceColor) lowerCanopyRef.current.instanceColor.needsUpdate = true;
+    }
+    if (upperCanopyRef.current) {
+      upperCanopyRef.current.instanceMatrix.needsUpdate = true;
+      if (upperCanopyRef.current.instanceColor) upperCanopyRef.current.instanceColor.needsUpdate = true;
+    }
+  }, []);
+
   return (
     <group position={[0, 0.02, 0]} data-testid="diorama-urban-canopy">
-      {URBAN_TREES.map((tree, i) => (
-        <group key={`urban-tree-${i}`} position={[tree.x, 0, tree.z]}>
-          {/* Thân cây gỗ tự nhiên */}
-          <mesh castShadow receiveShadow position={[0, tree.height * 0.4, 0]}>
-            <cylinderGeometry args={[0.025, 0.04, tree.height * 0.8, 8]} />
-            <meshStandardMaterial color="#78350F" roughness={0.8} />
-          </mesh>
-          {/* Tầng tán dưới */}
-          <mesh castShadow position={[0, tree.height * 0.85, 0]}>
-            <sphereGeometry args={[tree.radius, 12, 12]} />
-            <meshStandardMaterial color={tree.color} roughness={0.65} />
-          </mesh>
-          {/* Tầng tán trên đan xen đa tầng */}
-          <mesh castShadow position={[0, tree.height * 1.08, 0]}>
-            <sphereGeometry args={[tree.radius * 0.75, 10, 10]} />
-            <meshStandardMaterial color={tree.color} roughness={0.6} />
-          </mesh>
-        </group>
-      ))}
+      {/* Thân cây gỗ tự nhiên */}
+      <instancedMesh
+        ref={trunkRef}
+        args={[undefined, undefined, URBAN_TREES.length]}
+        castShadow
+        receiveShadow
+      >
+        <cylinderGeometry args={[0.025, 0.04, 0.24, 8]} />
+        <meshStandardMaterial color="#78350F" roughness={0.8} />
+      </instancedMesh>
+
+      {/* Tầng tán dưới */}
+      <instancedMesh
+        ref={lowerCanopyRef}
+        args={[undefined, undefined, URBAN_TREES.length]}
+        castShadow
+      >
+        <sphereGeometry args={[0.15, 12, 12]} />
+        <meshStandardMaterial color="#15803D" roughness={0.65} />
+      </instancedMesh>
+
+      {/* Tầng tán trên đan xen đa tầng */}
+      <instancedMesh
+        ref={upperCanopyRef}
+        args={[undefined, undefined, URBAN_TREES.length]}
+        castShadow
+      >
+        <sphereGeometry args={[0.11, 10, 10]} />
+        <meshStandardMaterial color="#15803D" roughness={0.6} />
+      </instancedMesh>
     </group>
   );
 }

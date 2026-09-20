@@ -51,7 +51,48 @@ export function resolveMarketTitle(type: string): string {
   return type || 'Sự Kiện Thị Trường';
 }
 
+export const ACTIVE_MARKET_EFFECT_SUMMARIES: Readonly<Record<string, string>> = {
+  [MarketCardId.MC_PUBLIC_INVEST]:
+    'Nhân đôi cước vận tải tại 4 Ga Tàu (Ô 5, 15, 25, 35).',
+  [MarketCardId.MC_COASTAL_STORM]:
+    'Miễn 100% tiền thuê ô ven biển (Ô 11, 14, 16, 18, 19); dừng chân mất lượt.',
+  [MarketCardId.MC_NIGHT_ECONOMY]:
+    'Nhân đôi tiền thuê tại các ô Dịch Vụ Cấp 1 trở lên (Ô 6, 8, 26, 27).',
+  [MarketCardId.MC_ALCOHOL_CHECK]:
+    'Giảm 50% tiền thuê ô Dịch Vụ; dừng chân phạt 800 Tr. và mất lượt.',
+  [MarketCardId.MC_MEGA_CONCERT]:
+    'Mọi người chơi lập tức di chuyển đến ô Dịch Vụ có cấp nhà cao nhất.',
+  [MarketCardId.MC_RATE_HIKE]:
+    'Thu lãi vay thế chấp 10% khi người chơi đi qua ô Khởi Hành (GO).',
+  [MarketCardId.MC_CREDIT_STIMULUS]:
+    'Giảm 20% chi phí xây nhà C1-C3 và miễn 100% lãi suất vay thế chấp.',
+  [MarketCardId.MC_LAND_FEVER]:
+    'Tăng 50% tiền thuê & giá chuyển nhượng (Bình Dương, Đồng Nai, Hưng Yên).',
+  [MarketCardId.MC_FIRE_INSPECTION]:
+    'Phạt 200 Tr./C1, 400 Tr./C2, 800 Tr./C3 nộp Kho Bạc. Đất C0 miễn phạt.',
+  [MarketCardId.MC_ANTI_SPECULATE]:
+    'Áp thuế chuyển nhượng bất động sản P2P 20% nộp vào Kho Bạc.',
+  [MarketCardId.MC_PEAK_TOURISM]:
+    'Nhân đôi doanh thu tiền thuê tại toàn bộ các ô BĐS Nghỉ Dưỡng.',
+  [MarketCardId.MC_FREEZE_TRADE]:
+    'Tạm ngưng mua ô đất mới, đóng băng đấu giá và cấm chuyển nhượng P2P.',
+  [MarketCardId.MC_FUEL_SURGE]:
+    'Phụ thu thêm 500 Tr. cước vận tải tại 4 Ga Tàu (Ô 5, 15, 25, 35).',
+  [MarketCardId.MC_URBAN_PLANNING]:
+    'Tăng 20% giá trị khi thế chấp BĐS Hà Nội & TP.HCM (nhận 60% giá gốc).',
+  [MarketCardId.MC_UTILITY_DOUBLE]:
+    'Nhân đôi phí dịch vụ tiện ích công cộng (Ô 12 EVN và Ô 28 Viettel).',
+  [MarketCardId.MC_CASINO_PILOT]:
+    'Thưởng 1.500 Tr./ô Dịch Vụ C2+, 3.000 Tr./ô 27 C3 (hoặc trợ cấp 1.000 Tr.).',
+  [ChanceCardId.CC_PORT_EXCLUSIVE]:
+    'Trích nhận 50% phí cảng từ người chơi dừng chân tại các ô Cảng biển.',
+};
+
 export function resolveMarketEffectSummary(type: string): string {
+  const explicit = ACTIVE_MARKET_EFFECT_SUMMARIES[type];
+  if (explicit) {
+    return explicit;
+  }
   const detail =
     MARKET_CARD_DETAILS[type as MarketCardId] ??
     CHANCE_CARD_DETAILS[type as ChanceCardId];
@@ -114,7 +155,7 @@ export const MarketEventTicker: React.FC<MarketEventTickerProps> = ({
 
             <p
               data-testid="market-ticker-effect-summary"
-              className="text-[11px] sm:text-xs text-slate-600 font-semibold leading-tight line-clamp-2 pl-6 sm:pl-7 text-left"
+              className="text-[11px] sm:text-xs text-slate-600 font-semibold leading-tight line-clamp-3 pl-6 sm:pl-7 text-left"
             >
               {effectSummary}
             </p>

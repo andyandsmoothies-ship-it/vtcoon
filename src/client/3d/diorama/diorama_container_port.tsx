@@ -223,7 +223,7 @@ export function DioramaContainerPort(): React.ReactElement {
           <meshStandardMaterial color="#D97706" roughness={0.4} metalness={0.3} />
         </RoundedBox>
         {/* Rơ-moóc chở container */}
-        <mesh castShadow position={[0, 0.04, 0.1]}>
+        <mesh position={[0, 0.04, 0.1]}>
           <boxGeometry args={[0.12, 0.04, 0.36]} />
           <meshStandardMaterial color="#1E293B" roughness={0.7} />
         </mesh>

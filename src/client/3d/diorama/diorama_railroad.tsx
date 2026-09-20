@@ -176,7 +176,7 @@ export function DioramaTropicalFlora(): React.ReactElement {
       {TROPICAL_FLORA_BEDS.map((bed, index) => (
         <group key={`flora-bed-${index}`} position={[bed.x, 0, bed.z]}>
           {/* Bụi cây cảnh nhiệt đới xanh cốm hoặc ngọc lục bảo */}
-          <mesh castShadow position={[0, 0.035, 0]}>
+          <mesh position={[0, 0.035, 0]}>
             <SafeSphereGeometry args={[0.075, 8, 8]} />
             <meshStandardMaterial color={bed.bushColor} roughness={0.7} />
           </mesh>
