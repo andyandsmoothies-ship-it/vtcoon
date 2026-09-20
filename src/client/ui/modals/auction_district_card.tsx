@@ -63,11 +63,11 @@ function renderCellChip(cell: DistrictCellChip): React.ReactElement {
     <div
       key={cell.cellIndex}
       data-testid={`district-cell-chip-${cell.cellIndex}`}
-      className={`px-2 py-1.5 rounded-xl border text-[11px] flex flex-col justify-between transition-all ${
+      className={`px-1.5 sm:px-2 py-1.5 rounded-xl border text-[10px] sm:text-[11px] min-w-0 flex flex-col justify-between transition-all ${
         cell.isTarget ? 'ring-2 ring-amber-400 bg-amber-50/80 border-amber-400' : 'bg-[#FAF6EC] border-slate-300'
       }`}
     >
-      <div className="flex items-center justify-between gap-1 mb-1">
+      <div className="flex items-center justify-between gap-1 mb-1 min-w-0">
         <span className="font-bold text-slate-900 truncate" title={cell.name}>
           {cell.name}
         </span>
@@ -77,7 +77,7 @@ function renderCellChip(cell: DistrictCellChip): React.ReactElement {
           </span>
         )}
       </div>
-      <div className={`px-1.5 py-0.5 rounded-lg text-[10px] text-center truncate border ${badgeClasses}`}>
+      <div className={`px-1 py-0.5 rounded-lg text-[9px] sm:text-[10px] text-center truncate border ${badgeClasses}`}>
         {badgeLabel}
       </div>
     </div>
@@ -110,14 +110,21 @@ export function AuctionDistrictCard({
 
   const toneTheme = getToneTheme(info.strategicHint.tone);
 
+  const gridColsClass =
+    info.totalCells === 2
+      ? 'grid-cols-2'
+      : info.totalCells === 3
+        ? 'grid-cols-3'
+        : 'grid-cols-2 sm:grid-cols-4';
+
   return (
     <div
       data-testid="auction-district-intelligence"
       className="bg-[#F7F2E7] p-3 rounded-2xl border border-slate-300 space-y-2.5 shadow-sm"
     >
       {/* Header phân khu */}
-      <div className="flex items-center justify-between border-b border-slate-200/80 pb-2">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between flex-wrap gap-1.5 border-b border-slate-200/80 pb-2">
+        <div className="flex items-center gap-1.5 min-w-0">
           <span
             className="w-3 h-3 rounded-full border border-slate-800 shrink-0"
             style={{ backgroundColor: info.hexColor }}
@@ -125,30 +132,21 @@ export function AuctionDistrictCard({
           <h4 className="text-xs font-black uppercase tracking-wider text-slate-900 truncate">
             {info.districtName}
           </h4>
+          <span
+            data-testid="auction-strategic-hint"
+            className={`px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wide border shrink-0 max-w-[140px] truncate sm:max-w-none ${toneTheme.badge}`}
+          >
+            {info.strategicHint.badgeText}
+          </span>
         </div>
-        <span className="text-[10px] font-mono font-bold text-slate-600 bg-white/80 px-2 py-0.5 rounded-full border border-slate-300">
+        <span className="text-[10px] font-mono font-bold text-slate-600 bg-white/80 px-2 py-0.5 rounded-full border border-slate-300 shrink-0 ml-auto">
           {info.ownedByMeCount}/{info.totalCells} Ô CỦA BẠN
         </span>
       </div>
 
       {/* Lưới chips các ô trong phân khu */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+      <div className={`grid ${gridColsClass} gap-1.5`}>
         {info.cells.map((cell) => renderCellChip(cell))}
-      </div>
-
-      {/* Banner mách nước chiến thuật */}
-      <div
-        data-testid="auction-strategic-hint"
-        className={`p-2.5 rounded-xl border flex items-start gap-2 ${toneTheme.container}`}
-      >
-        <span
-          className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wide border shrink-0 ${toneTheme.badge}`}
-        >
-          {info.strategicHint.badgeText}
-        </span>
-        <p className="text-[11px] leading-snug font-medium flex-1">
-          {info.strategicHint.description}
-        </p>
       </div>
 
       {/* Thanh tiền thuê mini (Mini Rent Bar) */}

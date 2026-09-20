@@ -104,7 +104,7 @@ describe('[IMP-129] Mobile Toast & Market Event Ticker De-Collision', () => {
       ],
     });
     const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
-    const milestoneMatch = html.match(/<div[^>]*class="[^"]*z-50[^"]*"[^>]*>/);
+    const milestoneMatch = html.match(/<div[^>]*class="[^"]*z-30[^"]*"[^>]*>/);
     expect(milestoneMatch).not.toBeNull();
     expect(milestoneMatch![0]).toContain('top-28');
 

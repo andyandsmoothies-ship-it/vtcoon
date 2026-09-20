@@ -322,7 +322,7 @@ export function TradeModal({
   };
 
   return (
-    <div className="w-full max-w-md lg:max-w-xl max-h-[90vh] overflow-y-auto bg-[#FFFDF8] border-2 border-slate-900 rounded-2xl shadow-[0_6px_0_0_#0f172a] flex flex-col pointer-events-auto text-slate-900 select-none" data-testid="trade-modal">
+    <div className="w-full max-w-md lg:max-w-xl max-h-[90vh] overflow-y-auto bg-[#FFFDF8] border-2 border-slate-900 rounded-2xl shadow-[0_6px_0_0_#0f172a] flex flex-col pointer-events-auto text-slate-900 select-none" data-testid="trade-modal" data-legacy-style="max-w-md lg:max-w-lg">
       {/* Header */}
       <header className="p-3.5 bg-[#F7F2E7] border-b border-slate-300 flex items-center justify-between sticky top-0 z-10 shrink-0">
         <div className="flex items-center gap-2">

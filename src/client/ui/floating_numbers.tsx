@@ -255,11 +255,14 @@ export function FloatingNumbersOverlay(): React.ReactElement | null {
   const storeFloatingTexts = useGameStore((state) => state.floatingTexts);
   const floatingTexts = isSSR ? useGameStore.getState().floatingTexts : storeFloatingTexts;
 
+  const storeActiveModal = useGameStore((state) => state.activeModal);
+  const activeModal = isSSR ? useGameStore.getState().activeModal : storeActiveModal;
+
   const storeModifiers = useGameStore((state) => state.activeModifiers);
   const activeModifiers = isSSR ? useGameStore.getState().activeModifiers : storeModifiers;
   const activeMarketCount = (activeModifiers ?? []).filter((m) => Boolean(m && m.remainingRounds > 0)).length;
 
-  if (floatingTexts.length === 0) {
+  if (floatingTexts.length === 0 || activeModal !== null) {
     return null;
   }
 
@@ -298,29 +301,34 @@ export function FloatingNumbersOverlay(): React.ReactElement | null {
         ? 'top-[13.5rem]'
         : activeMarketCount === 1
         ? 'top-[11rem]'
-        : 'top-36';
+        : 'top-[11.5rem]';
   } else if (activeMarketCount >= 2) {
     mobileTopClass = 'top-40';
   } else if (activeMarketCount === 1) {
     mobileTopClass = 'top-28';
   }
 
+  const desktopTopClass = latestMilestone ? 'top-[12rem] md:top-[12rem]' : 'top-28 md:top-32';
+
   return (
     <aside
       id="vtcoon-floating-numbers"
       data-testid="floating-numbers-overlay"
       aria-label="Thông báo biến động tài chính"
-      className="pointer-events-none select-none z-40"
+      className="pointer-events-none select-none z-30"
     >
       {/* Cột mốc đặc biệt (Milestone Banner) luôn căn giữa màn hình */}
       {latestMilestone && (
-        <div className={`fixed ${milestoneTopClass} left-1/2 -translate-x-1/2 z-50 flex flex-col items-center`}>
+        <div
+          data-testid="milestone-banner-container"
+          className={`fixed ${milestoneTopClass} left-1/2 -translate-x-1/2 z-30 flex flex-col items-center`}
+        >
           <MilestoneBanner item={latestMilestone} />
         </div>
       )}
 
       {/* Giao diện Desktop (>= 768px): Căn giữa an toàn dưới Market Event Ticker */}
-      <div className="hidden md:flex fixed top-28 md:top-32 left-1/2 -translate-x-1/2 flex-col items-center gap-2 max-w-md z-40 pointer-events-none">
+      <div className={`hidden md:flex fixed ${desktopTopClass} left-1/2 -translate-x-1/2 flex-col items-center gap-2 max-w-md z-30 pointer-events-none`}>
         {desktopTexts.map((item) => (
           <FloatingBadge key={item.id} item={item} />
         ))}

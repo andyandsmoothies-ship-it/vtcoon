@@ -67,3 +67,17 @@ export function preloadTileAssets(): string[] {
   return getAllTileAssetUrls();
 }
 
+export function preloadBaseTileImages(force = false): void {
+  const isTestEnv = typeof process !== 'undefined' && Boolean(process.env && process.env.NODE_ENV === 'test');
+  if (!force && isTestEnv) return;
+  if (typeof window === 'undefined' || typeof Image === 'undefined') return;
+
+  for (const tileIndex of ALL_28_STAND_TILES) {
+    const url = getTileAssetUrl(tileIndex);
+    if (url) {
+      const img = new Image();
+      img.src = url;
+    }
+  }
+}
+

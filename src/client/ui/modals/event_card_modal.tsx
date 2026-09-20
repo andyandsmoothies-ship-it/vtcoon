@@ -15,7 +15,7 @@ export interface EventCardModalProps {
   readonly cardType: 'chance' | 'market';
   readonly cardId: string;
   readonly title?: string;
-  readonly description: string;
+  readonly description?: string;
   readonly effectDelta?: number;
   readonly targetScope?: string;
   readonly effectDetail?: string;
@@ -60,7 +60,8 @@ export function EventCardModal({
   const resolvedDenseScope = sanitizeTargetScope(rawDenseScope);
   const resolvedTargetScope = sanitizeTargetScope(rawTargetScope);
 
-  const resolvedEffectDetail = effectDetail || detail?.effectDetail || description;
+  const resolvedDescription = description || detail?.description || '';
+  const resolvedEffectDetail = effectDetail || detail?.effectDetail || resolvedDescription;
   const resolvedDuration = duration || detail?.duration || (isMarket ? '1 vòng chơi' : 'Tức thì');
   const rawDestination = destination || detail?.destination || (isMarket ? 'Toàn thị trường' : 'Kho Bạc Nhà Nước');
   const resolvedDestination = sanitizeDestination(rawDestination);
@@ -153,7 +154,7 @@ export function EventCardModal({
 
       {/* Description text — Giữ hidden sm:block cho test contract & hiển thị mô tả gọn gàng */}
       <p className="relative z-10 text-xs text-slate-600 mb-3 leading-relaxed px-1 font-semibold hidden sm:block">
-        {description}
+        {resolvedDescription}
       </p>
 
       {/* Khối Tóm Tắt Tác Động Nhanh 1 Giây — Mobile (< 640px) */}

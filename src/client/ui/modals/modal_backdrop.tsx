@@ -1,4 +1,4 @@
-// [UI-S04/MSS] ModalBackdrop — Reusable modal overlay backdrop (Z-20, click outside & Escape to close, Focus Trap)
+// [UI-S04/MSS] ModalBackdrop — Reusable modal overlay backdrop (Z-50, click outside & Escape to close, Focus Trap)
 import React, { useEffect, useCallback, useRef } from 'react';
 
 export interface ModalBackdropProps {
@@ -83,10 +83,10 @@ export function ModalBackdrop({
   };
 
   const backdropClasses = fullScreen
-    ? 'fixed inset-0 bg-slate-950/60 z-30 flex items-stretch justify-stretch p-0 pointer-events-none select-none'
+    ? 'fixed inset-0 bg-slate-950/60 z-50 flex items-stretch justify-stretch p-0 pointer-events-none select-none'
     : center
-    ? 'fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-30 flex items-center justify-center p-4 pointer-events-auto select-none'
-    : 'fixed inset-0 bg-slate-950/60 z-30 flex items-center justify-center md:justify-end p-4 md:pr-10 pointer-events-auto select-none';
+    ? 'fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 pointer-events-auto select-none'
+    : 'fixed inset-0 bg-slate-950/60 z-50 flex items-center justify-center md:justify-end p-4 md:pr-10 pointer-events-auto select-none';
 
   return (
     <div

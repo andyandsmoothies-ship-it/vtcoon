@@ -11,7 +11,7 @@
 | `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147 |
 | `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184 |
 | `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #32, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #60, #61, #63, #69, #72, #74, #77, #80, #85, #86, #88, #89, #90, #91, #92, #93, #94, #95, #96, #101, #103, #109, #110, #114, #115, #116, #117, #120, #122, #123, #124, #125, #126, #127, #128, #129, #130, #133, #134, #135, #136, #140, #141, #144, #148, #159, #160, #161, #162, #163, #164, #165, #169, #175, #177 |
-| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182 |
+| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185 |
 | `[UAT/TEST]` | Nghiệm Thu, Adversarial TDD, Ảnh Chụp Màn Hình (.jpg), Shell Escaping, File I/O Lock, Docker Healthcheck Timeout | #5, #28, #29, #31, #35, #52, #71, #73, #83, #84, #99, #100, #117, #124, #125, #130 |
 | `[TELEMETRY]` | Giám Sát Hiệu Năng Thời Gian Thực, Chó Canh Phòng Bất Biến, Hộp Đen Tái Hiện Lỗi | #39, #62, #71, #75, #104, #114, #115, #135, #174 |
 | `[ARCH/REFACTOR]` | Tách Module Facade, Ngân Sách Render Loop, Chuẩn Hóa Môi Trường Build | #43, #98, #99 |
@@ -2967,3 +2967,85 @@
   4. **Multi-Port Container EXPOSE Standard**:
      - `Dockerfile` khai báo `EXPOSE 3000 3001 8000 10000` tương thích đồng thời cả cụm Dual-Port (Docker Compose / Nginx reverse proxy) và Cloud PaaS (Render single-port).
 
+---
+
+### 185. [UI/Z-INDEX] Phân Tầng Z-Index Độc Lập Giữa Popup Biến Động Và Modal/Page Nghiệp Vụ (IMP-139)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Xung Đột Phân Tầng Z-Index Giữa Popups Tài Chính Và Modal Nghiệp Vụ*:
+     - Trước IMP-139, `ModalBackdrop` được định vị tại `z-30`, trong khi `FloatingNumbersOverlay` và `MilestoneBanner` được đặt ở `z-40` và `z-50`. Khi người chơi đang mở modal nghiệp vụ (như xem sổ đỏ `TitleDeedModal`, quản lý danh mục BĐS `PropertyPortfolioModal`, hoặc tham gia sàn đấu giá `AuctionModal`), các thông báo biến động tài chính (toasts) và huy hiệu sự kiện vẫn hiển thị và chèn đè lên trên nội dung modal, gây phân tán chú ý và cản trở tương tác.
+  2. *Bẫy Chèn Đè Giữa Toast Giao Dịch Và Milestone Banner Trên Mobile*:
+     - Khi xuất hiện đồng thời cả `MilestoneBanner` (thẻ Cơ Hội, Thị Trường, Độc Quyền) và toast giao dịch thường trên màn hình di động, nếu không tính toán khoảng cách thụt lề (`top-[11.5rem]`), toast sẽ bị chèn đè trực tiếp lên banner cao 90px tại `top-20`.
+  3. *Bẫy Chèn Đè Toast Trên Màn Hình Desktop Dưới Milestone Banner*:
+     - Trên desktop, cụm toast thường căn giữa ở `top-28 md:top-32`. Khi có `latestMilestone` xuất hiện, nếu không chủ động dịch chuyển desktop container xuống `top-[12rem] md:top-[12rem]`, toast thường sẽ che khuất phần chân của MilestoneBanner.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **SSOT Z-Index Hierarchy Invariant**:
+     - `FloatingNumbersOverlay`: Hoạt động tại tầng biến động nền `z-30` (bao gồm container chính `<aside>` `z-30`, `MilestoneBanner` container wrapper `z-30` gắn `data-testid="milestone-banner-container"`, và cụm `desktopTexts` container `z-30`).
+     - `ModalBackdrop`: Hoạt động tại tầng tương tác nghiệp vụ `z-50` cho cả 3 chế độ (`fullScreen`, `center`, và mặc định), bảo đảm mọi modal che phủ hoàn toàn các popup nền.
+     - `TelemetryConsoleModal`: Hoạt động tại tầng chẩn đoán tối cao `z-[60]`, luôn nổi trên tất cả các modal và overlay khi cần giám sát hiệu năng hoặc điều tra lỗi khẩn cấp.
+  2. **Active Modal Nullification & DOM Disposal Invariant**:
+     - `FloatingNumbersOverlay` bắt buộc lắng nghe trạng thái `activeModal` từ `useGameStore`.
+     - Khi `activeModal !== null`, `FloatingNumbersOverlay` lập tức tự thu hồi và trả về `null` (giải phóng hoàn toàn DOM), triệt tiêu 100% hiện tượng xao nhãng và va chạm sự kiện chuột/chạm khi người chơi đang tương tác modal.
+  3. **Mobile Dynamic De-collision Invariant**:
+     - Khi có `latestMilestone` và 0 market card (`activeMarketCount === 0`), `mobileTopClass` được gán chính xác `top-[11.5rem]` (184px), tạo vùng đệm an toàn dưới `MilestoneBanner` (cao 90px tại `top-20`).
+     - Khi có 1 market card: `top-[11rem]`. Khi có $\ge 2$ market cards: `top-[13.5rem]`.
+     - Khi không có milestone: hoàn nguyên `top-[4.25rem]` (0 market) và `top-28` (1 market).
+  4. **Desktop Milestone Shifting Invariant**:
+     - Khi có `latestMilestone`, container desktop dịch chuyển xuống `top-[12rem] md:top-[12rem]`. Khi không có milestone, giữ nguyên vị trí chuẩn `top-28 md:top-32`.
+
+---
+
+### 186. [UI/ASSET] Bất Biến Nạp Ngầm Ảnh Nền BĐS (Preload Base Tiles), Shimmer Skeleton & Căn Chỉnh Nút Đóng Thẻ Sổ Đỏ (IMP-140)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Hoãn Tải Ảnh Nền WebP & Vỡ Dải Decode (Lazy Load Lag & Progressive Decoding Artifact)*:
+     - Trước IMP-140, thẻ `<img>` trong `TitleDeedModal` dùng thuộc tính `loading="lazy"`. Trên trình duyệt di động, bên trong container cuộn flex modal, `loading="lazy"` trì hoãn gửi request HTTP cho đến khi tính toán xong layout, gây độ trễ 1–2 giây khi người chơi mở Sổ Đỏ.
+     - Khi tải qua mạng di động có độ trễ, WebP được giải mã tuần tự theo từng khối. Do không có khung kích thước cố định hoặc shimmer skeleton, chỉ có một vệt mỏng 24px lơ lửng ở đỉnh kèm drop-shadow hiển thị trong lúc tải, tạo cảm giác thẻ bị rách hoặc lỗi đồ họa.
+  2. *Bẫy Xung Đột Spy Test Khi Nạp Trước Ảnh (Test Image Spy Collision Trap)*:
+     - Trong test `TC-P3.3/MSS` (`phase3_visual_polish.test.ts`), Vitest mock `(globalThis as any).Image = SpyImage` và assert rằng `preloadTileAssets()` trả về 112 URLs nhưng không được tạo bất kỳ instance `new Image()` nào (`createdImages.length === 0`). Nếu hàm preload ảnh mới gọi `new Image()` trong môi trường test không có guard chặn, test này sẽ gãy lập tức.
+  3. *Bẫy Nút Đóng Đè Viền Ruy-Băng & Cụt Chữ Tiêu Đề (Close Button Border Overlap & Title Truncation)*:
+     - Header ruy-băng cao ~42px, nhưng nút đóng tròn 48px được định vị tại `top-2.5 right-2.5`, khiến đáy nút thò ra ngoài 15px cắt ngang viền ruy-băng cam và đè lên phần thân thẻ bên dưới.
+     - Tiêu đề `<h2>` chỉ có padding `px-3`, khi tên địa phương dài trên màn hình hẹp có nguy cơ bị nút đóng 48px che lấp các ký tự bên phải.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Preload Base Tile Images Invariant (`preloadBaseTileImages`)**:
+     - `src/client/assets/tile_assets.ts`: Khai báo `preloadBaseTileImages(force = false): void`.
+     - Bắt buộc kiểm tra guard môi trường test: `const isTestEnv = typeof process !== 'undefined' && Boolean(process.env && process.env.NODE_ENV === 'test'); if (!force && isTestEnv) return;`.
+     - Chỉ thực thi `new Image().src = url` khi chạy trên trình duyệt thực tế (`typeof window !== 'undefined' && typeof Image !== 'undefined'`), prewarm toàn bộ 28 base tiles vào browser cache ngay khi mount session (`use_app_session.ts`).
+     - Giữ nguyên 100% hàm thuần `preloadTileAssets(): string[]` không có side-effect.
+  2. **Eager Decode & Shimmer Skeleton Underlay (`TitleDeedArtShowcase`)**:
+     - `src/client/ui/modals/title_deed_art_showcase.tsx`: Thẻ `<img>` dùng `loading="eager"` và `decoding="async"` kết hợp `max-h-full max-w-full object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.6)]`.
+     - Luôn render thẻ `<img>` trong SSR markup (`renderToStaticMarkup`) để bảo vệ các test contract kiểm thử thuộc tính ảnh.
+     - Underlay `data-testid="art-shimmer-skeleton"` tự động hiển thị hiệu ứng gradient mờ nhấp nhô và mờ dần khi ảnh kích hoạt sự kiện `onLoad`. Reset `isLoaded = false` qua `useEffect([tileAssetUrl])` khi chuyển đổi BĐS.
+  3. **Vertical Center Close Button & Safe Title Clearance**:
+     - `title_deed_modal.tsx`: Nút đóng Sổ Đỏ định vị bằng `top-1/2 -translate-y-1/2 right-2 sm:right-2.5`, bảo toàn kích thước chuẩn `min-w-[48px] min-h-[48px]`, nhãn `aria-label="Đóng Sổ Đỏ"` và ký tự `✕`.
+     - Tiêu đề `<h2>` bổ sung vùng đệm an toàn `pr-12 sm:pr-14` bảo đảm không bao giờ bị nút đóng che khuất chữ.
+  4. **Modular LOC Decomposition & 44px Secondary Touch Targets**:
+     - Tách nhỏ thành 3 subcomponents độc lập: `title_deed_art_showcase.tsx` (74 LOC), `title_deed_rent_table.tsx` (118 LOC), `title_deed_action_footer.tsx` (152 LOC).
+     - Đưa `title_deed_modal.tsx` từ 498 LOC xuống **291 LOC** (dưới trần cảnh báo 300 LOC).
+     - Nút điều hướng Carousel nâng lên `min-h-[44px]` đạt chuẩn WCAG AA touch target cho thiết bị di động.
+
+---
+
+### 187. [UI/UX] Làm Rõ Thẻ Xăng Dầu MC_FUEL_SURGE & Tinh Giản Sàn Đấu Giá Đa Nền Tảng (IMP-141)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Ngộ Nhận Cộng Tiền Thẻ Phụ Thu Xăng Dầu (MC_FUEL_SURGE Financial Sign Inversion Trap)*:
+     - Thẻ `MC_FUEL_SURGE` mang Hero Stat `PHỤ THU CƯỚC +500 Tr.` với tone vàng cảnh báo. Người chơi khi bốc thẻ nhìn thấy dấu `+500 Tr.` liền ngộ nhận là mình được cộng tiền vào ví, trong khi thực tế mỗi người chơi lập tức bị trừ 500 Tr. tiền phụ phí xăng dầu và phải trả thêm cước vận tải khi giẫm vào ô Cảng/Ga trong 2 vòng.
+  2. *Bẫy Chiếm Dụng Không Gian Của Banner Mách Nước Chiến Lược Trên Sàn Đấu Giá (Auction Hint Bloat Trap)*:
+     - Khối `data-testid="auction-strategic-hint"` trước đây là một khung banner độc lập chứa đoạn văn `<p>` dài dòng, chiếm ~50px chiều cao dọc. Trên các thiết bị di động có chiều cao màn hình hẹp (< 667px), banner này đẩy cụm nút đấu giá và đặt giá tự động xuống sát mép dưới hoặc tràn khỏi viewport.
+  3. *Bẫy Lưới Ô Đất Cứng Nhắc Khiến Ô Thứ 3 Rớt Hàng Lẻ Loi (Auction District Dangling Cell Trap)*:
+     - Trước IMP-141, lưới các ô trong phân khu (`renderCellChip`) được gán cứng `grid-cols-2 sm:grid-cols-3`. Với 6/8 nhóm màu BĐS trên bàn cờ sở hữu đúng 3 ô (Đông Nam Bộ, Hà Nội, TP.HCM, Hải Phòng, Cần Thơ, Vùng Núi), trên mobile (< 640px) ô thứ 3 luôn bị rớt xuống hàng 2 trơ trọi một mình, vừa mất đối xứng vừa làm tăng gấp đôi chiều cao danh sách.
+  4. *Bẫy Tràn Dòng Header Phân Khu Khi Tên Dài Ghép Badge Trên Mobile (Header Flex Wrap Trap)*:
+     - Khi đưa badge chiến lược lên thanh tiêu đề phân khu cạnh `districtName`, nếu container không có `flex-wrap` và bộ đếm thiếu `shrink-0`, các phân khu tên dài như "ĐỒNG BẰNG SÔNG CỬU LONG" (~190px) sẽ đè bẹp tên địa danh còn vài chữ ("ĐỒNG B...").
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Deduction Hero Stat Invariant (`event_card_visuals.ts`)**:
+     - `MC_FUEL_SURGE` bắt buộc hiển thị Hero Stat `value: '-500 Tr.'`, `label: 'PHỤ PHÍ NHIÊN LIỆU'`, và `variant: 'negative'` (sử dụng styling rose `bg-rose-50 border-rose-400 text-rose-700`), phản ánh trực diện bản chất tài chính là khoản chi trừ tiền tức thì của người chơi.
+     - Metadata `event_card_metadata.ts` mô tả rõ ràng: *"Mỗi người nộp ngay 500 Tr. phụ phí nhiên liệu... Trong 2 vòng tới, cước giẫm vào ô Hạ tầng tăng thêm +500 Tr."*
+     - Scope Confinement: Tuyệt đối không đảo dấu số dương trong `title_deed_modal.tsx` (khoản tăng thu cho chủ cảng) và không sửa logic nghiệp vụ dòng tiền `market_card_handlers.ts`.
+  2. **Streamlined Header Badge & 50px Height Recovery Invariant (`auction_district_card.tsx`)**:
+     - Xóa bỏ 100% khối banner đoạn văn `<p>` dài dòng, thu nhỏ huy hiệu chiến lược thành badge pill gắn trực tiếp lên Header phân khu cạnh tên địa danh (`data-testid="auction-strategic-hint"`), giữ trọn vẹn chuỗi gốc `'👑 CƠ HỘI ĐỘC QUYỀN'` bảo toàn test contract `TC-IMP138.25`.
+     - Tiết kiệm 50px chiều cao cho modal sàn đấu giá, giúp các nút bấm nâng giá luôn nằm trong tầm với công thái học của ngón cái trên mobile.
+  3. **Dynamic Responsive Grid Invariant (`gridColsClass`)**:
+     - Nhóm 2 ô (`info.totalCells === 2`): Gán `grid-cols-2` (1 hàng ngang 2 ô cho cả desktop và mobile).
+     - Nhóm 3 ô (`info.totalCells === 3`): Bắt buộc gán `grid-cols-3` trên CẢ mobile và desktop, bảo đảm cả 3 ô nằm trên 1 hàng duy nhất, triệt tiêu vĩnh viễn lỗi ô thứ 3 rớt hàng lẻ loi.
+     - Nhóm 4 ô (`info.totalCells === 4`): Gán `grid-cols-2 sm:grid-cols-4` (lưới 2x2 cân đối trên mobile, 1x4 trên desktop).
+  4. **Mobile Typography & Defend Against Flex Blowout**:
+     - Header phân khu dùng `flex-wrap gap-1.5`, chip đếm số ô sở hữu mang `shrink-0 ml-auto`, badge chiến lược có `max-w-[140px] truncate sm:max-w-none`.
+     - Chip ô đất mang `min-w-0` trên mọi cấp độ container, font chữ responsive `text-[10px] sm:text-[11px]` cho tên ô và `text-[9px] sm:text-[10px]` cho badge trạng thái, bảo đảm hiển thị trọn vẹn tên địa danh không bị tràn viền trên thiết bị hẹp (< 390px).

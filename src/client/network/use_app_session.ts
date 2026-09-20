@@ -11,6 +11,7 @@ import { getInitialLobbyConfig, executeCellLanding } from '../offline_landing';
 import type { ReasonCode } from '../../server/network/network_types';
 import type { DeltaPayload } from '../../server/session_manager';
 import { formatServerErrorMessage } from '../ui/actionable_notification';
+import { preloadBaseTileImages } from '../assets/tile_assets';
 
 export const SERVER_ERROR_TOAST_TIMEOUT_MS = 6000;
 
@@ -51,6 +52,7 @@ export function useAppSession(
   const lastHandledLandingTimestampRef = useRef<number | null>(null);
 
   useEffect(() => {
+    preloadBaseTileImages();
     return () => {
       if (landingTimerRef.current) clearTimeout(landingTimerRef.current);
     };

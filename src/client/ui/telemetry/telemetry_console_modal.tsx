@@ -4,14 +4,27 @@ import { useTelemetryStore, type TelemetryConsoleTab } from '../../telemetry/tel
 import { generateVitestReproCode, downloadDiagnosticDump, copyToClipboard } from '../../telemetry/repro_generator.js';
 
 export function TelemetryConsoleModal(): React.ReactElement | null {
-  const isOpen = useTelemetryStore((state) => state.isConsoleOpen);
+  const isSSR = typeof window === 'undefined';
+  const storeIsOpen = useTelemetryStore((state) => state.isConsoleOpen);
+  const isOpen = isSSR ? useTelemetryStore.getState().isConsoleOpen : storeIsOpen;
+
   const toggleConsole = useTelemetryStore((state) => state.toggleConsole);
-  const activeTab = useTelemetryStore((state) => state.activeTab);
+  const storeActiveTab = useTelemetryStore((state) => state.activeTab);
+  const activeTab = isSSR ? useTelemetryStore.getState().activeTab : storeActiveTab;
+
   const setActiveTab = useTelemetryStore((state) => state.setActiveTab);
-  const metrics = useTelemetryStore((state) => state.metrics);
-  const auditLogs = useTelemetryStore((state) => state.auditLogs);
-  const snapshots = useTelemetryStore((state) => state.snapshots);
-  const violations = useTelemetryStore((state) => state.violations);
+  const storeMetrics = useTelemetryStore((state) => state.metrics);
+  const metrics = isSSR ? useTelemetryStore.getState().metrics : storeMetrics;
+
+  const storeAuditLogs = useTelemetryStore((state) => state.auditLogs);
+  const auditLogs = isSSR ? useTelemetryStore.getState().auditLogs : storeAuditLogs;
+
+  const storeSnapshots = useTelemetryStore((state) => state.snapshots);
+  const snapshots = isSSR ? useTelemetryStore.getState().snapshots : storeSnapshots;
+
+  const storeViolations = useTelemetryStore((state) => state.violations);
+  const violations = isSSR ? useTelemetryStore.getState().violations : storeViolations;
+
   const autoFreezeEnabled = useTelemetryStore((state) => state.autoFreezeEnabled);
   const setAutoFreezeEnabled = useTelemetryStore((state) => state.setAutoFreezeEnabled);
   const isFrozen = useTelemetryStore((state) => state.isFrozen);
@@ -52,7 +65,7 @@ export function TelemetryConsoleModal(): React.ReactElement | null {
 
   return (
     <div
-      className="fixed inset-0 z-40 flex items-center justify-center p-3 sm:p-6 bg-slate-950/75 backdrop-blur-sm pointer-events-auto select-none"
+      className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-6 bg-slate-950/75 backdrop-blur-sm pointer-events-auto select-none"
       role="dialog"
       aria-modal="true"
       aria-label="Hộp Đen & Giám Sát Thời Gian Thực"

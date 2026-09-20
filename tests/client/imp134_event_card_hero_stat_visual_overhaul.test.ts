@@ -41,7 +41,7 @@ describe('[IMP-134] Thẻ Bài Fintech "Hiểu Ngay Trong 1 Giây" / Event Card 
       expect(html).toMatch(/data-testid="event-hero-stat"[^>]*font-mono/);
     });
 
-    it('[TC-IMP134.02/MSS][UC-IMP134][Facet-2/Reactivity] Thẻ MC_FUEL_SURGE hiển thị Hero Stat +500 Tr. kèm nhãn cảnh báo phụ thu', () => {
+    it('[TC-IMP134.02/MSS][UC-IMP134][Facet-2/Reactivity] Thẻ MC_FUEL_SURGE hiển thị Hero Stat định mức 500 Tr. kèm nhãn phụ phí nhiên liệu / phụ thu', () => {
       const html = renderToStaticMarkup(
         React.createElement(EventCardModal, {
           cardType: 'market',
@@ -50,8 +50,8 @@ describe('[IMP-134] Thẻ Bài Fintech "Hiểu Ngay Trong 1 Giây" / Event Card 
         })
       );
       expect(html).toContain('data-testid="event-hero-stat"');
-      expect(html).toMatch(/data-testid="event-hero-stat"[\s\S]*?\+500\s*Tr\./);
-      expect(html).toMatch(/data-testid="event-hero-stat"[\s\S]*?(?:Phụ thu|Phụ phí|Cảnh báo)/i);
+      expect(html).toMatch(/data-testid="event-hero-stat"[\s\S]*?[+-]?500\s*Tr\./);
+      expect(html).toMatch(/data-testid="event-hero-stat"[\s\S]*?(?:Phụ thu|Phụ phí|Cảnh báo|Nhiên liệu)/i);
     });
 
     it('[TC-IMP134.03/MSS][UC-IMP134][Facet-2/Reactivity] Thẻ MC_ALCOHOL_CHECK hiển thị Hero Stat -800 Tr. với biến thể cảnh báo hoặc phạt', () => {

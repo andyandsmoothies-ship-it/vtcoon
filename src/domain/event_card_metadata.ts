@@ -258,11 +258,11 @@ export const MARKET_CARD_DETAILS: Readonly<Record<MarketCardId, MarketCardDetail
     destination: 'Đóng băng các kênh thanh khoản thị trường',
   },
   [MarketCardId.MC_FUEL_SURGE]: {
-    description: 'Biến động giá xăng dầu: Phụ thu thêm 500 Tr. cước vận tải tại mọi ô hạ tầng.',
-    targetScope: '4 ô Hạ tầng Giao thông (Ô 5, 15, 25, 35)',
-    effectDetail: 'Phụ thu thêm 500 Tr. cước logistics trong 2 vòng và tất cả người chơi lập tức nộp 500 Tr. phụ phí nhiên liệu (chia cho chủ ô Hạ tầng hoặc nộp Kho Bạc)',
+    description: 'Biến động giá xăng dầu: Mỗi người nộp 500 Tr. phụ phí nhiên liệu và cước vận tải tại ô hạ tầng tăng 500 Tr.',
+    targetScope: '4 ô Hạ tầng Giao thông (Long Thành, Hải Phòng, Đà Nẵng, Nội Bài)',
+    effectDetail: 'Mỗi người nộp ngay 500 Tr. phụ phí nhiên liệu (chủ ô Hạ tầng được nhận, hoặc nộp Kho Bạc nếu chưa ai sở hữu). Trong 2 vòng tới, cước giẫm vào ô Hạ tầng tăng thêm 500 Tr.',
     duration: '2 vòng chơi',
-    destination: 'Chủ sở hữu ô Hạ tầng giao thông',
+    destination: 'Chủ sở hữu ô Hạ tầng giao thông / Kho Bạc',
   },
   [MarketCardId.MC_URBAN_PLANNING]: {
     description: 'Quy hoạch trục đô thị mới: Tăng 20% giá trị khi thế chấp BĐS trung tâm Hà Nội & TP.HCM.',
