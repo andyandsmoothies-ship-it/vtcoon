@@ -89,6 +89,16 @@ function syncBusinessModals(delta: DeltaPayload, state: GameState): void {
     state.closeModal();
   }
 
+  // [IMP-142] Bot Trade Offer Modal — mở khi offer gửi cho mình, đóng khi offer là null
+  if (delta.pendingTradeOffer) {
+    const myPid = useLobbyStore.getState().myPlayerId;
+    if (delta.pendingTradeOffer.sellerId === myPid) {
+      state.openModal('bot_trade_offer', delta.pendingTradeOffer);
+    }
+  } else if (delta.pendingTradeOffer === null && state.activeModal === 'bot_trade_offer') {
+    state.closeModal();
+  }
+
   if (delta.lastHoseResult && state.activeModal === 'hose') {
     const hr = delta.lastHoseResult;
     const myPid = useLobbyStore.getState().myPlayerId;

@@ -85,7 +85,7 @@ export interface FloatingTextItem {
   readonly targetPlayerName?: string;
 }
 
-export type ActiveModalType = 'deed' | 'portfolio' | 'auction' | 'trade' | 'event' | 'hose' | 'insolvency' | 'game_over' | 'rules' | 'masterplan' | null;
+export type ActiveModalType = 'deed' | 'portfolio' | 'auction' | 'trade' | 'event' | 'hose' | 'insolvency' | 'game_over' | 'rules' | 'masterplan' | 'bot_trade_offer' | null;
 
 export interface ModalPayloadMap {
   deed: { cellIndex: number; canBuy?: boolean; ownedProperties?: readonly number[] };
@@ -144,6 +144,14 @@ export interface ModalPayloadMap {
   masterplan: {
     initialTab?: 'blueprint' | 'districts';
     selectedCellIndex?: number;
+  };
+  bot_trade_offer: {
+    offerId: string;
+    cellIndex: number;
+    price: number;
+    buyerId: string;
+    sellerId: string;
+    expiresAt: number;
   };
 }
 

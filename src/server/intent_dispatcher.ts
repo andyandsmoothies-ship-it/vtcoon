@@ -14,6 +14,7 @@ export type PlayerIntent =
   | { type: 'INTENT_MORTGAGE'; cellIndex: number }
   | { type: 'INTENT_REDEEM'; cellIndex: number }
   | { type: 'INTENT_TRADE_OFFER'; sellerId: string; buyerId: string; cellIndex: number; price: number }
+  | { type: 'INTENT_RESPOND_TRADE_OFFER'; offerId: string; accept: boolean }
   | { type: 'INTENT_END_TURN' }
   | { type: 'INTENT_INVEST'; stake: number }
   | { type: 'INTENT_SKIP' }
@@ -54,6 +55,10 @@ const INTENT_DISPATCH: Record<PlayerIntent['type'], IntentHandler> = {
   INTENT_TRADE_OFFER: (m, rc, p, i) => {
     const ti = i as { sellerId: string; buyerId: string; cellIndex: number; price: number };
     return m.handleTradeOffer(rc, p, ti.sellerId, ti.buyerId, ti.cellIndex, ti.price);
+  },
+  INTENT_RESPOND_TRADE_OFFER: (m, rc, p, i) => {
+    const ri = i as { offerId: string; accept: boolean };
+    return m.handleRespondTradeOffer(rc, p, ri.offerId, ri.accept);
   },
   INTENT_INVEST: (m, rc, p, i) => m.handleHoseInvest(rc, p, (i as { stake: number }).stake),
   INTENT_SKIP: (m, rc, p) => m.handleHoseSkip(rc, p),

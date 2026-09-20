@@ -54,6 +54,9 @@ export class IntentGuard {
         return true;
       }
     }
+    if (intent.type === 'INTENT_RESPOND_TRADE_OFFER') {
+      return true;
+    }
     return false;
   }
 

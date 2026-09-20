@@ -41,7 +41,7 @@ export function addBotToRoom(
   personality?: BotPersonality,
   botPersonalities?: Map<string, BotPersonality>,
 ): Player | undefined {
-  if (!room || room.started || room.players.length >= 4) return undefined;
+  if (!room || room.players.length >= 4) return undefined;
   const nextIdx = room.players.length + 1;
   const id = botId || `bot_${nextIdx}`;
   if (room.players.some((p) => p.id === id)) return undefined;

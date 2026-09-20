@@ -76,7 +76,7 @@ function captureRenderedTree<P = Record<string, unknown>>(
 ): any {
   let rendered: any = null;
   function SpyComponent() {
-    rendered = Component((props ?? {}) as P);
+    rendered = (Component as React.FC<P>)((props ?? {}) as P);
     return rendered;
   }
   renderToStaticMarkup(React.createElement(SpyComponent));

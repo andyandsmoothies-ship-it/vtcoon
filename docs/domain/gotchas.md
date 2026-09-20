@@ -8,8 +8,8 @@
 | Domain Tag | Trọng Tâm & Phạm Vi Mã Nguồn | Các Gotchas Liên Quan |
 | :--- | :--- | :--- |
 | `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78, #82, #104, #105, #106, #145, #146, #147, #159, #164, #174, #180, #188 |
-| `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147 |
-| `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184 |
+| `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147, #190 |
+| `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190 |
 | `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #32, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #60, #61, #63, #69, #72, #74, #77, #80, #85, #86, #88, #89, #90, #91, #92, #93, #94, #95, #96, #101, #103, #109, #110, #114, #115, #116, #117, #120, #122, #123, #124, #125, #126, #127, #128, #129, #130, #133, #134, #135, #136, #140, #141, #144, #148, #159, #160, #161, #162, #163, #164, #165, #169, #175, #177, #189 |
 | `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188 |
 | `[UAT/TEST]` | Nghiệm Thu, Adversarial TDD, Ảnh Chụp Màn Hình (.jpg), Shell Escaping, File I/O Lock, Docker Healthcheck Timeout | #5, #28, #29, #31, #35, #52, #71, #73, #83, #84, #99, #100, #117, #124, #125, #130 |
@@ -3101,3 +3101,31 @@
   4. **Bảo Toàn Nghiêm Ngặt Hợp Đồng Bóng Đổ Chủ Lực**:
      - Nghiêm cấm tắt `castShadow` trên `FlagPole` và `FlagCloth` thuộc `OwnershipMarkerInstances` (`board_tile.tsx`) theo yêu cầu bất biến của `TC-87.10b`.
      - Giữ nguyên bóng đổ trên tháp chính Bitexco, trụ vòm Cầu Long Biên, trụ tháp Cầu Ba Son, thân đầu tàu hỏa mini và 4 quân cờ đại diện người chơi.
+
+---
+
+### 190. [BOT/NET] Quản Lý Phiên Đàm Phán Bot-to-Human 15 Giây, Ngăn Chặn Chuyển Quyền Sớm & Bảo Toàn Đàm Phán Bot-to-Bot Đồng Bộ (IMP-142)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Chuyển Quyền Sớm Trước Khi Người Chơi Phản Hồi (Premature Trade Execution Trap)*:
+     - Trước IMP-142, mọi lệnh P2P Trade đều xử lý chuyển quyền sở hữu và khấu trừ số dư ngay tức thì (`executeP2PTrade`). Khi Bot AI chủ động chào mua ô đất Monopoly Gap từ người chơi, nếu hệ thống lập tức sang tên đổi chủ sẽ tước đoạt hoàn toàn quyền tự quyết của người chơi, vi phạm nghiêm trọng tính công bằng và luật bảo hộ tài sản.
+  2. *Bẫy Bỏ Rơi Lượt Đi Bot Trong Thời Gian 15 Giây Đàm Phán (Premature Turn Handover Trap)*:
+     - Bot Coordinator có cơ chế chống kẹt (`releaseStuckBotTurn`, `stepBotTurn`). Nếu phòng có phiên đàm phán 15 giây đang chờ người chơi (`hasPendingTrade === true`), việc Bot tự động chuyển lượt sang người chơi tiếp theo sẽ gây mất đồng bộ FSM và phá vỡ bối cảnh của hộp thoại.
+  3. *Bẫy Xung Đột Ngưỡng Đàm Phán Passive Bot Giữa Bot-to-Human và Bot-to-Bot (Bot Negotiation Parity Trap)*:
+     - Thẩm định `evaluateBotTradeAcceptance` cho tính cách `Passive` kiên quyết chặn bán ô độc quyền (`PREVENT_MONOPOLY`) trừ khi số dư $< 500$ Tr. và giá $\ge 2.0\times$ (IMP-119). Tuy nhiên trong giao dịch tự động Bot-to-Bot (IMP-82/IMP-118/IMP-142 TC-142.04), khi một Bot chào mua với giá cạnh tranh đạt ngưỡng độc quyền $\ge 1.60\times$, giao dịch phải hoàn tất đồng bộ 0ms mà không được làm suy yếu cơ chế phòng thủ độc quyền độc lập của hàm thẩm định đơn vị.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **PendingTradeManager Độc Lập & Thời Hạn Đúng 15.000ms (`pendingTradeManager`)**:
+     - `src/server/pending_trade_manager.ts`: Tạo phiên đàm phán `PendingTradeSession` lưu `offerId`, `roomCode`, `buyerId`, `sellerId`, `cellIndex`, `price`, `basePrice`, `createdAt`, `expiresAt = createdAt + 15_000`.
+     - Chỉ cho phép đúng 1 phiên pending duy nhất trên mỗi phòng cờ tại một thời điểm (`sessionsByRoom`).
+     - Tuyệt đối không chuyển quyền sở hữu hoặc trừ tiền người chơi khi tạo phiên (`Zero Premature Trade`).
+  2. **Tái Thẩm Định Nguyên Tử Khi Người Chơi Phản Hồi (`coordRespondTradeOffer`)**:
+     - Khi nhận `INTENT_RESPOND_TRADE_OFFER`, server bắt buộc kiểm tra: `offerId` hợp lệ, phiên ở trạng thái `pending`, chưa quá hạn `expiresAt`, đúng người bán `playerId === session.sellerId`.
+     - Nếu `accept: true`: Tái thẩm định ví tiền Bot `buyer.balance >= price`, quyền sở hữu `registry.get(cell) === sellerId`, ô đất chưa thế chấp và chưa xây dựng (`level === 0`).
+     - Khấu trừ 5% thuế chuyển nhượng nộp vào Kho bạc Nhà nước (`room.treasury`), người bán nhận 95% giá trị ròng.
+     - Nếu từ chối hoặc quá hạn 15s (`accept: false` / `timeout`): Hoàn nguyên trạng thái sạch sẽ, hủy phiên pending, ghi nhận cooldown `buyer.lastTradeOfferRound`.
+  3. **Đóng Băng Lượt Đi Bot Trong Suốt Thời Gian Chờ (Bot Pacing Freeze)**:
+     - `room_bot_coordinator.ts`: Kiểm tra `roomManager.hasPendingTrade(roomCode)` tại `stepBotTurn`, `releaseStuckBotTurn`, `runBotTurn`, `runBotIntentLoop`. Nếu có phiên pending, lập tức tạm dừng luồng quyết định Bot, giữ nguyên pha `PropertyManagement` để người chơi tương tác trọn vẹn 15s.
+  4. **Phân Định Rõ Ràng Cơ Chế Bot-to-Bot vs Bot-to-Human Trong `coordTrade`**:
+     - Khi `buyer.isBot && !seller.isBot`: Bắt buộc đi vào luồng tạo phiên pending 15s.
+     - Khi `buyer.isBot && seller.isBot`: Thực thi đồng bộ tức thì 0ms, không tạo pending trade. Nếu thẩm định thường từ chối nhưng giá đạt $\ge 1.60\times$ giá gốc, cho phép chấp thuận giao dịch giữa 2 Bot để giữ tính tương thích toàn diện IMP-82, IMP-118 và IMP-119.
+  5. **Hộp Thoại Đàm Phán Xúc Giác & Đếm Ngược 15 Giây (`BotTradeOfferModal`)**:
+     - `src/client/ui/modals/bot_trade_offer_modal.tsx`: Thiết kế theo phong cách tactile boardgame, đồng hồ đếm ngược trực quan với thanh tiến trình gradient `amber -> emerald`, nút bấm WCAG AA $\ge 44$px (`[TỪ CHỐI BÁN]`, `[ĐỒNG Ý BÁN]`), hiển thị cảnh báo độc quyền và tính toán minh bạch thuế 5% nộp Kho bạc.

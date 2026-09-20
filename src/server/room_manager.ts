@@ -21,8 +21,9 @@ import { handleHoseInvest, handleHoseSkip } from './hose_actions.js';
 import { dispatchPlayerIntent, type PlayerIntent } from './intent_dispatcher.js';
 import {
   coordMortgage, coordRedeem, coordDowngrade,
-  coordLiquidate, coordTrade, coordBankruptcy,
+  coordLiquidate, coordTrade, coordRespondTradeOffer, coordBankruptcy,
 } from './room_property_coordinator.js';
+import { pendingTradeManager, type PendingTradeSession } from './pending_trade_manager.js';
 import { executeTurnRoll } from './turn_loop.js';
 import type { DiceResult } from '../domain/dice.js';
 import {
@@ -35,7 +36,7 @@ import { calcPropertyRent, calcRankings, buildRoomDelta } from './room_manager_q
 import type { DeltaPayload } from './session_manager.js';
 import type { RoomBotSpec } from './room_bot_manager.js';
 
-export type { AuctionSession, PlayerIntent };
+export type { AuctionSession, PlayerIntent, PendingTradeSession };
 
 export interface RollResult {
   readonly dice:        DiceResult;
@@ -221,8 +222,51 @@ export class RoomManager {
 
   handleTradeOffer(
     roomCode: string, requesterId: string, sellerId: string, buyerId: string, cellIndex: number, price: number,
-  ): { success: boolean; reason?: string } {
+  ): { success: boolean; reason?: string; pending?: boolean; offerId?: string } {
     return coordTrade(this.getContext(roomCode), requesterId, sellerId, buyerId, cellIndex, price);
+  }
+
+  handleRespondTradeOffer(
+    roomCode: string,
+    playerId: string,
+    offerId: string,
+    accept: boolean,
+  ): { success: boolean; reason?: string } {
+    return coordRespondTradeOffer(this.getContext(roomCode), playerId, offerId, accept);
+  }
+
+  hasPendingTrade(roomCode: string): boolean {
+    return pendingTradeManager.hasSession(roomCode);
+  }
+
+  getPendingTrade(roomCode: string): PendingTradeSession | undefined {
+    return pendingTradeManager.getSession(roomCode);
+  }
+
+  checkPendingTradeTimeout(roomCode: string, currentTime?: number): { timeout: boolean; session?: PendingTradeSession } {
+    const res = pendingTradeManager.checkTimeout(roomCode, currentTime);
+    if (res.timeout && res.session) {
+      const room = this.rooms.get(roomCode);
+      if (room) {
+        (room as any).pendingTradeOffer = null;
+        const buyer = room.players.find((p) => p.id === res.session?.buyerId);
+        if (buyer) {
+          buyer.lastTradeOfferRound = room.roundCount ?? room.round ?? 1;
+        }
+      }
+    }
+    return res;
+  }
+
+  cancelPendingTrade(roomCode: string, playerId?: string): boolean {
+    const cancelled = pendingTradeManager.cancelSession(roomCode, playerId);
+    if (cancelled) {
+      const room = this.rooms.get(roomCode);
+      if (room) {
+        (room as any).pendingTradeOffer = null;
+      }
+    }
+    return cancelled;
   }
 
   handleBankruptcy(roomCode: string, playerId: string, creditorId?: string): { gameOver: boolean; rankings?: Array<{ id: string; netWorth: number }> } {

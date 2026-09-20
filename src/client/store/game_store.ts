@@ -378,7 +378,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   clearExpiredFloatingTexts: (now = Date.now()) =>
     set((state) => ({
       floatingTexts: state.floatingTexts.filter(
-        (t) => now - t.timestamp < (t.durationMs ?? TRANSACTION_POPUP_DURATION_MS),
+        (t) => now - t.timestamp < (t.durationMs ?? FLOATING_TEXT_DURATION_MS),
       ),
     })),
 }));

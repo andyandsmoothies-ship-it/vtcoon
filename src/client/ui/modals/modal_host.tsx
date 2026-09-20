@@ -12,6 +12,7 @@ import { InsolvencyBanner } from './insolvency_banner';
 import { GameOverModal } from './game_over_modal';
 import { GameRulesModal } from './game_rules_modal';
 import { MasterplanModal } from './masterplan_modal';
+import { BotTradeOfferModal } from './bot_trade_offer_modal';
 import { AudioEngine } from '../../audio/audio_engine';
 import { SoundEffect } from '../../audio/audio_types';
 import { formatCurrency } from '../ui_helpers';
@@ -61,9 +62,9 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
     return () => clearInterval(timer);
   }, [activeModal]);
 
-  // SFX khi mở thẻ sự kiện
+  // SFX khi mở thẻ sự kiện hoặc đề xuất mua đất từ Bot
   useEffect(() => {
-    if (activeModal === 'event') {
+    if (activeModal === 'event' || activeModal === 'bot_trade_offer') {
       AudioEngine.playSfx(SoundEffect.CARD_DRAW);
     }
   }, [activeModal]);
@@ -435,6 +436,32 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
           onPlayAgain={() => {
             closeModal();
             if (typeof window !== 'undefined') window.location.reload();
+          }}
+        />
+      )}
+
+      {activeModal === 'bot_trade_offer' && modalPayload && (
+        <BotTradeOfferModal
+          offerId={(modalPayload as ModalPayloadMap['bot_trade_offer']).offerId}
+          cellIndex={(modalPayload as ModalPayloadMap['bot_trade_offer']).cellIndex}
+          price={(modalPayload as ModalPayloadMap['bot_trade_offer']).price}
+          buyerId={(modalPayload as ModalPayloadMap['bot_trade_offer']).buyerId}
+          sellerId={(modalPayload as ModalPayloadMap['bot_trade_offer']).sellerId}
+          expiresAt={(modalPayload as ModalPayloadMap['bot_trade_offer']).expiresAt}
+          onAccept={(offerId) => {
+            AudioEngine.playSfx(SoundEffect.BUY_PROPERTY);
+            onIntent?.({ type: 'INTENT_RESPOND_TRADE_OFFER', offerId, accept: true });
+            closeModal();
+          }}
+          onReject={(offerId) => {
+            AudioEngine.playSfx(SoundEffect.CARD_FLIP);
+            onIntent?.({ type: 'INTENT_RESPOND_TRADE_OFFER', offerId, accept: false });
+            closeModal();
+          }}
+          onClose={() => {
+            const payload = modalPayload as ModalPayloadMap['bot_trade_offer'];
+            onIntent?.({ type: 'INTENT_RESPOND_TRADE_OFFER', offerId: payload.offerId, accept: false });
+            closeModal();
           }}
         />
       )}

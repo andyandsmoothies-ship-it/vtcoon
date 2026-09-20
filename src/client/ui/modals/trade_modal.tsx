@@ -235,7 +235,7 @@ export function TradeModal({
               className="min-h-[44px] min-w-[44px] px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-900 font-mono text-base font-black rounded-lg border-2 border-slate-400 shadow-[0_2px_0_0_#94a3b8] active:shadow-none active:translate-y-[2px] transition-all cursor-pointer inline-flex items-center justify-center"
               aria-label="Tăng tiền"
             >
-              +
+              +100
             </button>
             <button
               type="button"
@@ -406,7 +406,7 @@ export function TradeModal({
       </div>
 
       {/* Hai cột giao dịch (Desktop: 2 cột song song sm:grid sm:grid-cols-2; Mobile: theo tab phân đoạn) */}
-      <div className="p-4 sm:grid sm:grid-cols-2 gap-3 text-xs">
+      <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
         <div className={mobileTab === 'mine' ? 'block' : 'hidden sm:block'}>
           {renderCol('Tài Sản Bạn Đề Xuất', true, myProperties, myMortgagedProperties, offered, cashOffer, (v) => { setCashOffer(v); if (v > 0) setCashRequest(0); }, myBalance)}
         </div>

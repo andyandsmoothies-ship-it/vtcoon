@@ -8,6 +8,9 @@ import { liquidateAssets, declareBankruptcy } from './insolvency_manager.js';
 import type { AuctionSession } from './auction_manager.js';
 import { evaluateBotTradeAcceptance } from '../domain/bot/bot_trade.js';
 import { BotPersonality } from '../domain/bot/bot_types.js';
+import { BOARD_CONFIG } from '../domain/board_config.js';
+import { PROPERTY_DEEDS } from '../domain/property_data.js';
+import { pendingTradeManager } from './pending_trade_manager.js';
 
 export interface RoomContext {
   readonly room: Room;
@@ -72,25 +75,140 @@ export function coordTrade(
   buyerId: string,
   cellIndex: number,
   price: number,
-): { success: boolean; reason?: string } {
+): { success: boolean; reason?: string; pending?: boolean; offerId?: string } {
   if (!ctx) return { success: false, reason: ActionRejectReason.INVALID_ROOM };
   if (requesterId !== sellerId && requesterId !== buyerId) {
     return { success: false, reason: ActionRejectReason.UNAUTHORIZED };
   }
   const seller = ctx.room.players.find((p) => p.id === sellerId);
   const buyer = ctx.room.players.find((p) => p.id === buyerId);
+  if (!seller || !buyer) {
+    return { success: false, reason: ActionRejectReason.INVALID_ROOM };
+  }
+
+  // [IMP-142] If buyer is Bot and seller is Human: initiate 15s Pending Trade Session (Zero Premature Trade)
+  if (buyer.isBot && !seller.isBot) {
+    if (ctx.reg.get(cellIndex) !== sellerId) {
+      return { success: false, reason: ActionRejectReason.NOT_OWNER };
+    }
+    const propState = ctx.sm.get(cellIndex);
+    if (propState?.isMortgaged) {
+      return { success: false, reason: ActionRejectReason.PROPERTY_MORTGAGED };
+    }
+    if ((propState?.level ?? 0) > 0) {
+      return { success: false, reason: ActionRejectReason.PROPERTY_HAS_BUILDING };
+    }
+    if (buyer.balance < price) {
+      return { success: false, reason: ActionRejectReason.INSUFFICIENT_FUNDS };
+    }
+
+    const basePrice = PROPERTY_DEEDS.get(cellIndex)?.price ?? price;
+    const session = pendingTradeManager.createSession(
+      ctx.room.roomCode,
+      buyerId,
+      sellerId,
+      cellIndex,
+      price,
+      basePrice,
+      15_000,
+    );
+
+    (ctx.room as any).pendingTradeOffer = {
+      offerId: session.offerId,
+      cellIndex: session.cellIndex,
+      price: session.price,
+      buyerId: session.buyerId,
+      sellerId: session.sellerId,
+      expiresAt: session.expiresAt,
+    };
+
+    return { success: true, pending: true, offerId: session.offerId };
+  }
+
   if (seller?.isBot && buyer) {
     const botPers = ctx.botPersonalities?.get(`${ctx.room.roomCode}:${sellerId}`)
       ?? ctx.botPersonalities?.get(sellerId)
       ?? BotPersonality.Balanced;
-    const decision = evaluateBotTradeAcceptance(
+    let decision = evaluateBotTradeAcceptance(
       cellIndex, price, seller, buyer, ctx.room, ctx.reg, ctx.sm, botPers
     );
+    // [IMP-142] Bot-to-Bot negotiation parity: if buyer is Bot and price meets monopoly gap threshold (>= 1.60x)
+    if (!decision.accept && buyer.isBot && price >= Math.round(1.60 * (PROPERTY_DEEDS.get(cellIndex)?.price ?? 1000))) {
+      decision = { accept: true };
+    }
     if (!decision.accept) {
       return { success: false, reason: ActionRejectReason.TRADE_REJECTED };
     }
   }
   return executeP2PTrade(ctx.room, sellerId, buyerId, cellIndex, price, ctx.reg, ctx.sm);
+}
+
+export function coordRespondTradeOffer(
+  ctx: RoomContext | undefined,
+  playerId: string,
+  offerId: string,
+  accept: boolean,
+): { success: boolean; reason?: string } {
+  if (!ctx) return { success: false, reason: ActionRejectReason.INVALID_ROOM };
+
+  const session = pendingTradeManager.getSessionByOfferId(offerId);
+  if (!session || session.roomCode !== ctx.room.roomCode) {
+    return { success: false, reason: 'INVALID_OFFER_ID' };
+  }
+
+  if (session.status !== 'pending') {
+    return { success: false, reason: 'OFFER_ALREADY_RESOLVED' };
+  }
+
+  if (playerId !== session.sellerId) {
+    return { success: false, reason: 'NOT_TARGET_PLAYER' };
+  }
+
+  if (Date.now() > session.expiresAt) {
+    session.status = 'timeout';
+    pendingTradeManager.clearSession(ctx.room.roomCode);
+    (ctx.room as any).pendingTradeOffer = null;
+    return { success: false, reason: 'INVALID_OFFER_ID' };
+  }
+
+  const buyer = ctx.room.players.find((p) => p.id === session.buyerId);
+  const seller = ctx.room.players.find((p) => p.id === session.sellerId);
+  if (!buyer || !seller) {
+    return { success: false, reason: ActionRejectReason.INVALID_ROOM };
+  }
+
+  if (accept) {
+    // Atomic re-validation
+    if (buyer.balance < session.price) {
+      return { success: false, reason: 'INSUFFICIENT_FUNDS' };
+    }
+    if (ctx.reg.get(session.cellIndex) !== session.sellerId) {
+      return { success: false, reason: 'INVALID_OWNERSHIP' };
+    }
+    const propState = ctx.sm.get(session.cellIndex);
+    if (propState?.isMortgaged || (propState?.level ?? 0) > 0) {
+      return { success: false, reason: 'INVALID_PROPERTY_STATE' };
+    }
+
+    const price = session.price;
+    const tax = Math.round(price * 0.05);
+    const netReceived = price - tax;
+
+    buyer.balance -= price;
+    seller.balance += netReceived;
+    ctx.room.treasury = (ctx.room.treasury ?? 0) + tax;
+    ctx.reg.set(session.cellIndex, buyer.id);
+
+    buyer.lastTradeOfferRound = ctx.room.roundCount ?? ctx.room.round ?? 1;
+    pendingTradeManager.resolveSession(ctx.room.roomCode, offerId, true);
+    (ctx.room as any).pendingTradeOffer = null;
+    return { success: true };
+  } else {
+    buyer.lastTradeOfferRound = ctx.room.roundCount ?? ctx.room.round ?? 1;
+    pendingTradeManager.resolveSession(ctx.room.roomCode, offerId, false);
+    (ctx.room as any).pendingTradeOffer = null;
+    return { success: true };
+  }
 }
 
 export function coordBankruptcy(

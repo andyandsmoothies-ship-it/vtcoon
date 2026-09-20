@@ -2,6 +2,7 @@ import type { Room, EventCardInfo, HoseResultInfo, MarketModifier } from '../dom
 import { BOARD_SIZE, TurnPhase } from '../domain/room';
 import type { PropertyRegistry, PropertyStateMap } from '../domain/property_manager';
 import type { AuctionSession } from './auction_manager';
+import { pendingTradeManager } from './pending_trade_manager.js';
 
 export const HEARTBEAT_INTERVAL_MS = 5_000;
 export const GRACE_PERIOD_MS       = 60_000;
@@ -49,6 +50,15 @@ export interface AuctionPayload {
   readonly hasPassed?: boolean;
 }
 
+export interface PendingTradeOfferDelta {
+  readonly offerId: string;
+  readonly cellIndex: number;
+  readonly price: number;
+  readonly buyerId: string;
+  readonly sellerId: string;
+  readonly expiresAt: number;
+}
+
 export interface DeltaPayload {
   readonly roomCode?:            string;
   readonly tick:                 number;
@@ -60,6 +70,7 @@ export interface DeltaPayload {
   readonly diceRollerId?:        string;
   readonly diceSeq?:             number;
   readonly auction?:             AuctionPayload | null;
+  readonly pendingTradeOffer?:   PendingTradeOfferDelta | null;
   readonly roomStarted?:         boolean;
   readonly turnPhase?:           TurnPhase;
   readonly timeRemaining?:       number;
@@ -134,6 +145,23 @@ export function buildDeltaFromRoom(
     auction = null;
   }
 
+  let pendingTradeOffer: PendingTradeOfferDelta | null | undefined = undefined;
+  const pendingSession = pendingTradeManager.getSession(room.roomCode);
+  if (pendingSession && pendingSession.status === 'pending') {
+    pendingTradeOffer = {
+      offerId: pendingSession.offerId,
+      cellIndex: pendingSession.cellIndex,
+      price: pendingSession.price,
+      buyerId: pendingSession.buyerId,
+      sellerId: pendingSession.sellerId,
+      expiresAt: pendingSession.expiresAt,
+    };
+  } else if ((room as any).pendingTradeOffer) {
+    pendingTradeOffer = (room as any).pendingTradeOffer;
+  } else {
+    pendingTradeOffer = null;
+  }
+
   const currentTurnPlayer = room.players[room.currentPlayerIndex];
   return buildDeltaPayload({
     tick,
@@ -148,6 +176,7 @@ export function buildDeltaFromRoom(
     turnPhase: room.phase,
     ...(timeRemaining !== undefined ? { timeRemaining } : {}),
     ...(auction !== undefined ? { auction } : {}),
+    ...(pendingTradeOffer !== undefined ? { pendingTradeOffer } : {}),
     ...(room.lastEventCard !== undefined ? { lastEventCard: room.lastEventCard } : {}),
     ...(room.lastHoseResult !== undefined ? { lastHoseResult: room.lastHoseResult } : {}),
     roundNumber: Math.max(room.roundCount ?? 1, room.round ?? 1),
@@ -166,6 +195,7 @@ export function buildDeltaPayload(options: {
   diceRollerId?: string;
   diceSeq?: number;
   auction?: AuctionPayload | null;
+  pendingTradeOffer?: PendingTradeOfferDelta | null;
   roomStarted?: boolean;
   turnPhase?: TurnPhase;
   timeRemaining?: number;
@@ -200,6 +230,7 @@ export function buildDeltaPayload(
         diceRollerId?: string;
         diceSeq?: number;
         auction?: AuctionPayload | null;
+        pendingTradeOffer?: PendingTradeOfferDelta | null;
         roomStarted?: boolean;
         turnPhase?: TurnPhase;
         timeRemaining?: number;
@@ -233,6 +264,7 @@ export function buildDeltaPayload(
       ...(tickOrOptions.diceRollerId !== undefined ? { diceRollerId: tickOrOptions.diceRollerId } : {}),
       ...(tickOrOptions.diceSeq !== undefined ? { diceSeq: tickOrOptions.diceSeq } : {}),
       ...(tickOrOptions.auction !== undefined ? { auction: tickOrOptions.auction } : {}),
+      ...(tickOrOptions.pendingTradeOffer !== undefined ? { pendingTradeOffer: tickOrOptions.pendingTradeOffer } : {}),
       ...(tickOrOptions.roomStarted !== undefined ? { roomStarted: tickOrOptions.roomStarted } : {}),
       ...(tickOrOptions.turnPhase !== undefined ? { turnPhase: tickOrOptions.turnPhase } : {}),
       ...(tickOrOptions.timeRemaining !== undefined ? { timeRemaining: tickOrOptions.timeRemaining } : {}),
