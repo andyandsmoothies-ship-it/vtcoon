@@ -9,7 +9,7 @@
 | :--- | :--- | :--- |
 | `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78, #82, #104, #105, #106, #145, #146, #147, #159, #164, #174, #180 |
 | `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147 |
-| `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168 |
+| `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184 |
 | `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #32, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #60, #61, #63, #69, #72, #74, #77, #80, #85, #86, #88, #89, #90, #91, #92, #93, #94, #95, #96, #101, #103, #109, #110, #114, #115, #116, #117, #120, #122, #123, #124, #125, #126, #127, #128, #129, #130, #133, #134, #135, #136, #140, #141, #144, #148, #159, #160, #161, #162, #163, #164, #165, #169, #175, #177 |
 | `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182 |
 | `[UAT/TEST]` | Nghiệm Thu, Adversarial TDD, Ảnh Chụp Màn Hình (.jpg), Shell Escaping, File I/O Lock, Docker Healthcheck Timeout | #5, #28, #29, #31, #35, #52, #71, #73, #83, #84, #99, #100, #117, #124, #125, #130 |
@@ -2943,3 +2943,27 @@
      - Nút `[🤝 Đàm Phán]` liên kết trực tiếp tới modal trao đổi P2P qua `onQuickTrade(targetPlayerId, targetPropertyIndex)`, tự động nạp sẵn đối tác mục tiêu và đưa ô đất cần thâu tóm vào `requestedProperties`, với đầy đủ 5 trường schema của `ModalPayloadMap['trade']`.
   4. **Responsive Horizontal Scroll & Conditional Filter Bar Invariant**:
      - Thanh filter bar chỉ được render khi `ownedProperties.length > 0` và sử dụng `overflow-x-auto no-scrollbar whitespace-nowrap` kết hợp với các nút bấm có kích thước chạm chuẩn (`min-h-[40px] sm:min-h-[44px]`), bảo đảm hiển thị mượt mà trên cả desktop và mobile.
+
+---
+
+### 184. [NET/OPS] Kiến Trúc Cổng Đơn Single-Port (HTTP + WebSocket Upgrade) & Thứ Tự Hủy Đóng Server (IMP-139)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Xung Đột Cổng EADDRINUSE Trên Cloud PaaS (Render / Fly / Heroku)*:
+     - Các nền tảng Cloud PaaS chỉ cấp phát duy nhất 1 cổng qua biến môi trường `PORT` (mặc định 10000 trên Render, 8000/3000 trên các môi trường khác).
+     - Trong kiến trúc cũ (Dual-Port), `startServer` lắng nghe HTTP trên `PORT` (3000) và WebSocket trên `WSS_PORT` (3001). Khi cấu hình chạy chung `PORT === WSS_PORT` trên PaaS, cả `httpServer` lẫn `wssServer` cùng gọi lệnh `listen()` trên cùng 1 cổng dẫn đến lỗi nghiêm trọng `listen EADDRINUSE`.
+  2. *Bẫy Treo Tiến Trình Khi Hủy Server Theo Sai Thứ Tự (Shutdown Deadlock Trap)*:
+     - Khi `wss` dùng chung `http.Server` (`new WebSocketServer({ server: httpServer })`), nếu đóng `httpServer.close()` trước khi đóng `wssServer`, kết nối HTTP giữ (keep-alive) hoặc socket WebSocket đang mở sẽ giữ chặt connection pool khiến callback `httpServer.close()` bị treo vô tận không bao giờ kích hoạt.
+  3. *Bẫy Hardcode Cổng :3001 Trên Client WebSocket*:
+     - Client Hook (`use_game_ws.ts` và `use_admin_portal.ts`) từng hardcode trỏ về `:3001` khi không dùng giao thức HTTPS, khiến triển khai PaaS trên HTTP nội bộ hoặc domain tùy biến bị rớt kết nối WebSocket.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Single-Port Upgrade Invariant**:
+     - Khi `(config?.port ?? env.port) === (config?.wssPort ?? env.wssPort)`, máy chủ hoạt động ở chế độ Single-Port.
+     - Khởi tạo `httpServer` qua `createHealthServer(...)` trước, sau đó truyền thể hiện `httpServer` vào `new WssServer({ server: httpServer, ... })`. `WebSocketServer` lắng nghe sự kiện `'upgrade'` trên `httpServer` thay vì tự mở port riêng.
+  2. **Critical Shutdown Sequence Invariant**:
+     - Trong chế độ Single-Port, thứ tự đóng bắt buộc phải tuân thủ: `await wssServer.close()` TRƯỚC, sau đó mới gọi `await closeHttp(httpServer)` (bao gồm `httpServer.close()` và `httpServer.closeAllConnections?.()`).
+     - Đóng `wssServer` trước bảo đảm toàn bộ kết nối WebSocket gửi mã `1001 (Going Away)` và kết thúc hoàn toàn trước khi socket TCP của HTTP server bị giải phóng.
+  3. **Adaptive Client WS URL Invariant**:
+     - Trên môi trường production/cloud (`host !== 'localhost:3000'`), client bắt buộc dùng `window.location.host` kết hợp tiền tố `ws:` hoặc `wss:` tương ứng (`${wsProto}//${window.location.host}/rooms/${roomCode}`), loại bỏ triệt để hardcode `:3001`.
+  4. **Multi-Port Container EXPOSE Standard**:
+     - `Dockerfile` khai báo `EXPOSE 3000 3001 8000 10000` tương thích đồng thời cả cụm Dual-Port (Docker Compose / Nginx reverse proxy) và Cloud PaaS (Render single-port).
+

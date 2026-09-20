@@ -45,24 +45,34 @@ export function validateEnv(): {
   return { nodeEnv, port, wssPort, gracePeriodMs };
 }
 
+function closeHttp(server: http.Server): Promise<void> {
+  return new Promise<void>((resolve) => {
+    server.close(() => resolve());
+    server.closeAllConnections?.();
+  });
+}
+
 export async function startServer(config?: ServerConfig): Promise<RunningServer> {
   const env = validateEnv();
   const port = config?.port ?? env.port;
   const wssPort = config?.wssPort ?? env.wssPort;
   const gracePeriodMs = config?.gracePeriodMs ?? env.gracePeriodMs;
-
-  const wssServer = new WssServer({
-    port: wssPort,
-    gracePeriodMs,
-    botTurnDelayMs: config?.botTurnDelayMs ?? DEFAULT_BOT_TURN_DELAY_MS,
-  });
+  const botTurnDelayMs = config?.botTurnDelayMs ?? DEFAULT_BOT_TURN_DELAY_MS;
+  const isSinglePort = (config?.port ?? env.port) === (config?.wssPort ?? env.wssPort);
 
   const distDir = path.resolve(process.cwd(), 'dist');
   const staticDir = config?.staticDir ?? (fs.existsSync(distDir) ? distDir : undefined);
+  let wssServer: WssServer;
   const httpServer = createHealthServer(
-    () => wssServer.getRoomManager().roomMap.size,
+    () => wssServer?.getRoomManager().roomMap.size ?? 0,
     Date.now(),
     staticDir,
+  );
+
+  wssServer = new WssServer(
+    isSinglePort
+      ? { server: httpServer, gracePeriodMs, botTurnDelayMs }
+      : { port: wssPort, gracePeriodMs, botTurnDelayMs },
   );
 
   await new Promise<void>((resolve, reject) => {
@@ -70,16 +80,19 @@ export async function startServer(config?: ServerConfig): Promise<RunningServer>
     httpServer.once('error', reject);
   });
 
-  const runningServer: RunningServer = {
+  return {
     httpServer,
     wssServer,
     close: async () => {
-      await new Promise<void>((resolve) => httpServer.close(() => resolve()));
-      await wssServer.close();
+      if (isSinglePort) {
+        await wssServer.close();
+        await closeHttp(httpServer);
+      } else {
+        await closeHttp(httpServer);
+        await wssServer.close();
+      }
     },
   };
-
-  return runningServer;
 }
 
 const isDirectExecution =

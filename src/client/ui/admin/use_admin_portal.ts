@@ -46,9 +46,15 @@ export function useAdminPortal() {
     if (wsRef.current) {
       try { wsRef.current.close(); } catch { /* safe-ignore */ }
     }
-    const protocol = typeof window !== 'undefined' && window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const host = typeof window !== 'undefined' ? (window.location.hostname || 'localhost') : 'localhost';
-    const ws = new WebSocket(`${protocol}//${host}:3001`);
+    const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:';
+    const isLocalDev =
+      typeof window !== 'undefined' &&
+      (window.location.host === 'localhost:3000' || window.location.host === '127.0.0.1:3000');
+    const protocol = isHttps ? 'wss:' : 'ws:';
+    const host = typeof window !== 'undefined'
+      ? (isLocalDev ? `${window.location.hostname || 'localhost'}:3001` : window.location.host)
+      : 'localhost:3001';
+    const ws = new WebSocket(`${protocol}//${host}`);
     wsRef.current = ws;
 
     ws.onopen = () => {

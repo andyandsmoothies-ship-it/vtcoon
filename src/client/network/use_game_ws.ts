@@ -125,10 +125,14 @@ export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
     }
 
     const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:';
+    const isLocalDev =
+      typeof window !== 'undefined' &&
+      (window.location.host === 'localhost:3000' || window.location.host === '127.0.0.1:3000');
+    const wsProto = isHttps ? 'wss:' : 'ws:';
     const defaultUrl = typeof window !== 'undefined'
-      ? (isHttps
-          ? `wss://${window.location.host}/rooms/${roomCode}`
-          : `ws://${window.location.hostname || 'localhost'}:3001`)
+      ? (isLocalDev
+          ? `ws://${window.location.hostname || 'localhost'}:3001`
+          : `${wsProto}//${window.location.host}/rooms/${roomCode}`)
       : 'ws://localhost:3001';
     const targetUrl = url ?? defaultUrl;
 

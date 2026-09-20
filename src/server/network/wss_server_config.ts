@@ -1,4 +1,5 @@
 // Configuration interface for WssServer
+import type http from 'node:http';
 import type { RoomManager } from '../room_manager.js';
 import type { SessionManager } from '../session_manager.js';
 import type { IntentMutex } from './intent_mutex.js';
@@ -9,7 +10,8 @@ import type { IntentGuard } from '../security/intent_guard.js';
 import type { AdminManager } from './admin_manager.js';
 
 export interface WssServerConfig {
-  readonly port: number;
+  readonly server?: http.Server;
+  readonly port?: number;
   readonly roomManager?: RoomManager;
   readonly sessionManager?: SessionManager;
   readonly intentMutex?: IntentMutex;

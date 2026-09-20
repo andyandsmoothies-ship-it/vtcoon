@@ -117,7 +117,7 @@ export class WssServer {
       roomManager: this.rooms, timeoutMs: config.abandonedTimeoutMs,
       intervalMs: config.cleanupIntervalMs, onCleanup: (rc) => this.closeRoom(rc),
     });
-    this.wss         = new WebSocketServer({ port: config.port });
+    this.wss         = config.server ? new WebSocketServer({ server: config.server }) : new WebSocketServer({ port: config.port });
 
     this.cleanupScheduler.start();
     this.rooms.onCloseRoom((rc) => this.closeRoom(rc));
@@ -324,14 +324,30 @@ export class WssServer {
   }
 
   close(): Promise<void> {
+    if (this.isClosed) return Promise.resolve();
     this.isClosed = true;
     clearInterval(this.heartbeatTimer);
     this.cleanupScheduler.stop();
     this.turnWatchdog.stop();
     this.reconnects.clear();
     for (const rc of this.rooms.getAllRoomCodes()) this.rooms.clearRoomTimers(rc);
+    for (const client of this.wss.clients) {
+      try {
+        client.close(1001, 'SERVER_SHUTDOWN');
+      } catch {
+        /* safe-ignore */
+      }
+    }
     return new Promise((resolve, reject) => {
-      this.wss.close((err) => (err ? reject(err) : resolve()));
+      this.wss.close((err) => {
+        if (err && (err.message?.includes('not running') || err.message?.includes('closed'))) {
+          resolve();
+        } else if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
     });
   }
 
