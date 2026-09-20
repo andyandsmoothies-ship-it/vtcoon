@@ -13,6 +13,7 @@ import { GameOverModal } from './game_over_modal';
 import { GameRulesModal } from './game_rules_modal';
 import { MasterplanModal } from './masterplan_modal';
 import { BotTradeOfferModal } from './bot_trade_offer_modal';
+import { CompulsoryBuyoutModal } from './compulsory_buyout_modal';
 import { AudioEngine } from '../../audio/audio_engine';
 import { SoundEffect } from '../../audio/audio_types';
 import { formatCurrency } from '../ui_helpers';
@@ -62,9 +63,9 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
     return () => clearInterval(timer);
   }, [activeModal]);
 
-  // SFX khi mở thẻ sự kiện hoặc đề xuất mua đất từ Bot
+  // SFX khi mở thẻ sự kiện hoặc đề xuất mua đất từ Bot / mua lại C0
   useEffect(() => {
-    if (activeModal === 'event' || activeModal === 'bot_trade_offer') {
+    if (activeModal === 'event' || activeModal === 'bot_trade_offer' || activeModal === 'compulsory_buyout') {
       AudioEngine.playSfx(SoundEffect.CARD_DRAW);
     }
   }, [activeModal]);
@@ -109,7 +110,7 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
   const myPlayer = playersInfo[myId];
 
   const isBuyModal = activeModal === 'deed' && Boolean((modalPayload as ModalPayloadMap['deed'])?.canBuy);
-  const isCriticalDecision = isBuyModal || activeModal === 'auction' || activeModal === 'insolvency';
+  const isCriticalDecision = isBuyModal || activeModal === 'auction' || activeModal === 'insolvency' || activeModal === 'compulsory_buyout';
 
   return (
     <ModalBackdrop
@@ -461,6 +462,31 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
           onClose={() => {
             const payload = modalPayload as ModalPayloadMap['bot_trade_offer'];
             onIntent?.({ type: 'INTENT_RESPOND_TRADE_OFFER', offerId: payload.offerId, accept: false });
+            closeModal();
+          }}
+        />
+      )}
+
+      {activeModal === 'compulsory_buyout' && modalPayload && (
+        <CompulsoryBuyoutModal
+          buyerId={(modalPayload as ModalPayloadMap['compulsory_buyout']).buyerId}
+          sellerId={(modalPayload as ModalPayloadMap['compulsory_buyout']).sellerId}
+          cellIndex={(modalPayload as ModalPayloadMap['compulsory_buyout']).cellIndex}
+          cost={(modalPayload as ModalPayloadMap['compulsory_buyout']).cost}
+          basePrice={(modalPayload as ModalPayloadMap['compulsory_buyout']).basePrice}
+          expiresAt={(modalPayload as ModalPayloadMap['compulsory_buyout']).expiresAt}
+          onBuyout={(cellIndex) => {
+            AudioEngine.playSfx(SoundEffect.BUY_PROPERTY);
+            onIntent?.({ type: 'INTENT_EXECUTE_COMPULSORY_BUYOUT', cellIndex });
+            closeModal();
+          }}
+          onDecline={() => {
+            AudioEngine.playSfx(SoundEffect.CARD_FLIP);
+            onIntent?.({ type: 'INTENT_DECLINE_COMPULSORY_BUYOUT' });
+            closeModal();
+          }}
+          onClose={() => {
+            onIntent?.({ type: 'INTENT_DECLINE_COMPULSORY_BUYOUT' });
             closeModal();
           }}
         />

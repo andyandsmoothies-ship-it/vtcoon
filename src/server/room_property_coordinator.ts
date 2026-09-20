@@ -238,3 +238,43 @@ export function coordBankruptcy(
   }
   return res;
 }
+
+export function coordExecuteCompulsoryBuyout(
+  ctx: RoomContext | undefined,
+  playerId: string,
+  cellIndex: number,
+): { success: boolean; reason?: string } {
+  if (!ctx) return { success: false, reason: ActionRejectReason.INVALID_ROOM };
+  const session = ctx.room.pendingBuyout;
+  if (!session) return { success: false, reason: 'NO_PENDING_BUYOUT' };
+  if (session.buyerId !== playerId || session.cellIndex !== cellIndex) {
+    return { success: false, reason: 'INVALID_BUYOUT_SESSION' };
+  }
+  const buyer = ctx.room.players.find((p) => p.id === session.buyerId);
+  const seller = ctx.room.players.find((p) => p.id === session.sellerId);
+  if (!buyer || !seller) return { success: false, reason: 'PLAYER_NOT_FOUND' };
+  if (buyer.balance < session.cost) return { success: false, reason: 'INSUFFICIENT_FUNDS' };
+
+  buyer.balance -= session.cost;
+  seller.balance += session.cost;
+  ctx.reg.set(cellIndex, buyer.id);
+  ctx.room.pendingBuyout = null;
+  ctx.room.phase = TurnPhase.PropertyManagement;
+  return { success: true };
+}
+
+export function coordDeclineCompulsoryBuyout(
+  ctx: RoomContext | undefined,
+  playerId: string,
+): { success: boolean; reason?: string } {
+  if (!ctx) return { success: false, reason: ActionRejectReason.INVALID_ROOM };
+  const session = ctx.room.pendingBuyout;
+  if (!session) return { success: false, reason: 'NO_PENDING_BUYOUT' };
+  if (session.buyerId !== playerId) {
+    return { success: false, reason: 'INVALID_BUYOUT_SESSION' };
+  }
+  ctx.room.pendingBuyout = null;
+  ctx.room.phase = TurnPhase.PropertyManagement;
+  return { success: true };
+}
+

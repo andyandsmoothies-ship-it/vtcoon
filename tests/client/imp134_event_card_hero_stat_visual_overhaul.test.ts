@@ -127,16 +127,16 @@ describe('[IMP-134] Thẻ Bài Fintech "Hiểu Ngay Trong 1 Giây" / Event Card 
       expect(html).toMatch(/data-testid="event-hero-stat"[\s\S]*?MIỄN\s*100%\s*THUÊ/i);
     });
 
-    it('[TC-IMP134.09/MSS][UC-IMP134][Facet-2/Reactivity] Thẻ CC_SWAP_PROJECT hiển thị Hero Stat ĐỔI 1 Ô C0', () => {
+    it('[TC-IMP134.09/MSS][UC-IMP134][Facet-2/Reactivity] Thẻ CC_SWAP_PROJECT hiển thị Hero Stat ĐỀN BÙ 130%', () => {
       const html = renderToStaticMarkup(
         React.createElement(EventCardModal, {
           cardType: 'chance',
           cardId: ChanceCardId.CC_SWAP_PROJECT,
-          description: 'Quyền ưu tiên hoán đổi vị trí dự án chiến lược với người chơi khác.',
+          description: 'Quyền ưu tiên mua lại dự án C0 đền bù 130% giá gốc từ đối thủ.',
         })
       );
       expect(html).toContain('data-testid="event-hero-stat"');
-      expect(html).toMatch(/data-testid="event-hero-stat"[\s\S]*?ĐỔI\s*1\s*Ô\s*C0/i);
+      expect(html).toMatch(/data-testid="event-hero-stat"[\s\S]*?ĐỀN\s*BÙ\s*130%/i);
     });
 
     it('[TC-IMP134.10/MSS][UC-IMP134][Facet-2/Reactivity] Thẻ có effectDelta tùy biến tự động phản ánh số liệu vào event-hero-stat', () => {

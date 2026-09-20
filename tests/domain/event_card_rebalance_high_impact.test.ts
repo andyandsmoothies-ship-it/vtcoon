@@ -254,24 +254,24 @@ describe('[CONTRACT-TEST] IMP-111: Event Card Rebalance & High-Impact Overhaul',
     });
 
     // --- Chốt B4: CC_SWAP_PROJECT ---
-    it('[TC-IMP111.22/MSS][UC-039] CC_SWAP_PROJECT: Hoán đổi ô C0 của đối thủ mà KHÔNG còn bị chặn bởi cùng nhóm màu', () => {
+    it('[TC-IMP111.22/MSS][UC-039] CC_SWAP_PROJECT: Mua lại ô C0 của đối thủ đền bù 130%', () => {
       registry.set(1, p1.id); // Ô 1: Nhóm Nâu, Cấp 0
       registry.set(6, p2.id); // Ô 6: Nhóm Đỏ/Dịch vụ, Cấp 0 (Khác màu)
       stateMap.set(1, { level: 0 });
       stateMap.set(6, { level: 0 });
 
-      runChanceCard(ChanceCardId.CC_SWAP_PROJECT, p1.id, room.players, modifiers, registry, stateMap, {}, room);
-      expect(registry.get(1)).toBe(p2.id);
+      runChanceCard(ChanceCardId.CC_SWAP_PROJECT, p1.id, room.players, modifiers, registry, stateMap, {});
+      expect(registry.get(1)).toBe(p1.id);
       expect(registry.get(6)).toBe(p1.id);
     });
 
-    it('[TC-IMP111.23/MSS][UC-039] CC_SWAP_PROJECT: Từ chối hoán đổi nếu ô đất đối thủ đã nâng cấp lên Cấp 1 trở lên (chỉ hoán đổi C0)', () => {
+    it('[TC-IMP111.23/MSS][UC-039] CC_SWAP_PROJECT: Từ chối mua lại nếu ô đất đối thủ đã nâng cấp lên Cấp 1 trở lên (chỉ mua lại C0)', () => {
       registry.set(1, p1.id);
       registry.set(6, p2.id);
       stateMap.set(1, { level: 0 });
       stateMap.set(6, { level: 1 }); // Đã xây C1 -> Không được hoán đổi
 
-      runChanceCard(ChanceCardId.CC_SWAP_PROJECT, p1.id, room.players, modifiers, registry, stateMap, {}, room);
+      runChanceCard(ChanceCardId.CC_SWAP_PROJECT, p1.id, room.players, modifiers, registry, stateMap, {});
       expect(registry.get(1)).toBe(p1.id);
       expect(registry.get(6)).toBe(p2.id);
     });

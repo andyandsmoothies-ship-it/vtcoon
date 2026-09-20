@@ -1,4 +1,4 @@
-import type { Room, EventCardInfo, HoseResultInfo, MarketModifier } from '../domain/room';
+import type { Room, EventCardInfo, HoseResultInfo, MarketModifier, PendingBuyoutSession } from '../domain/room';
 import { BOARD_SIZE, TurnPhase } from '../domain/room';
 import type { PropertyRegistry, PropertyStateMap } from '../domain/property_manager';
 import type { AuctionSession } from './auction_manager';
@@ -71,6 +71,7 @@ export interface DeltaPayload {
   readonly diceSeq?:             number;
   readonly auction?:             AuctionPayload | null;
   readonly pendingTradeOffer?:   PendingTradeOfferDelta | null;
+  readonly pendingBuyout?:       PendingBuyoutSession | null;
   readonly roomStarted?:         boolean;
   readonly turnPhase?:           TurnPhase;
   readonly timeRemaining?:       number;
@@ -162,6 +163,13 @@ export function buildDeltaFromRoom(
     pendingTradeOffer = null;
   }
 
+  let pendingBuyout: PendingBuyoutSession | null | undefined = undefined;
+  if (room.pendingBuyout) {
+    pendingBuyout = { ...room.pendingBuyout };
+  } else if (room.pendingBuyout === null) {
+    pendingBuyout = null;
+  }
+
   const currentTurnPlayer = room.players[room.currentPlayerIndex];
   return buildDeltaPayload({
     tick,
@@ -177,6 +185,7 @@ export function buildDeltaFromRoom(
     ...(timeRemaining !== undefined ? { timeRemaining } : {}),
     ...(auction !== undefined ? { auction } : {}),
     ...(pendingTradeOffer !== undefined ? { pendingTradeOffer } : {}),
+    ...(pendingBuyout !== undefined ? { pendingBuyout } : {}),
     ...(room.lastEventCard !== undefined ? { lastEventCard: room.lastEventCard } : {}),
     ...(room.lastHoseResult !== undefined ? { lastHoseResult: room.lastHoseResult } : {}),
     roundNumber: Math.max(room.roundCount ?? 1, room.round ?? 1),
@@ -196,6 +205,7 @@ export function buildDeltaPayload(options: {
   diceSeq?: number;
   auction?: AuctionPayload | null;
   pendingTradeOffer?: PendingTradeOfferDelta | null;
+  pendingBuyout?: PendingBuyoutSession | null;
   roomStarted?: boolean;
   turnPhase?: TurnPhase;
   timeRemaining?: number;
@@ -231,6 +241,7 @@ export function buildDeltaPayload(
         diceSeq?: number;
         auction?: AuctionPayload | null;
         pendingTradeOffer?: PendingTradeOfferDelta | null;
+        pendingBuyout?: PendingBuyoutSession | null;
         roomStarted?: boolean;
         turnPhase?: TurnPhase;
         timeRemaining?: number;
@@ -265,6 +276,7 @@ export function buildDeltaPayload(
       ...(tickOrOptions.diceSeq !== undefined ? { diceSeq: tickOrOptions.diceSeq } : {}),
       ...(tickOrOptions.auction !== undefined ? { auction: tickOrOptions.auction } : {}),
       ...(tickOrOptions.pendingTradeOffer !== undefined ? { pendingTradeOffer: tickOrOptions.pendingTradeOffer } : {}),
+      ...(tickOrOptions.pendingBuyout !== undefined ? { pendingBuyout: tickOrOptions.pendingBuyout } : {}),
       ...(tickOrOptions.roomStarted !== undefined ? { roomStarted: tickOrOptions.roomStarted } : {}),
       ...(tickOrOptions.turnPhase !== undefined ? { turnPhase: tickOrOptions.turnPhase } : {}),
       ...(tickOrOptions.timeRemaining !== undefined ? { timeRemaining: tickOrOptions.timeRemaining } : {}),

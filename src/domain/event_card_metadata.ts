@@ -164,11 +164,11 @@ export const CHANCE_CARD_DETAILS: Readonly<Record<ChanceCardId, CardDetail>> = {
     effectDelta: -800,
   },
   [ChanceCardId.CC_SWAP_PROJECT]: {
-    description: 'Hoán đổi dự án chiến lược: Đổi 1 ô đất Cấp 0 của bạn lấy 1 ô đất Cấp 0 của đối thủ.',
-    targetScope: '1 ô đất Cấp 0 của người chơi và 1 ô đất Cấp 0 của đối thủ',
-    effectDetail: 'Kích hoạt quyền hoán đổi quyền sở hữu 1 ô đất Cấp 0 của đối thủ',
-    duration: 'Tức thì',
-    destination: 'Chuyển đổi quyền sở hữu tài sản tương hỗ',
+    description: 'Quyền ưu tiên mua lại dự án: Trả 130% giá gốc để mua lại 1 ô đất Cấp 0 của đối thủ (đền bù +30% lợi nhuận).',
+    targetScope: '1 ô đất Cấp 0 của đối thủ (không thuộc nhóm độc quyền)',
+    effectDetail: 'Kích hoạt quyền mua lại dự án đền bù 130% giá gốc từ đối thủ',
+    duration: '15 giây đàm phán',
+    destination: 'Đền bù 130% giá đất cho đối thủ',
   },
 };
 

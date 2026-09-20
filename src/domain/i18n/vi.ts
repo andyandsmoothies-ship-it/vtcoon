@@ -46,7 +46,7 @@ export const vi = {
     [ChanceCardId.CC_PORT_EXCLUSIVE]:   'Hợp Tác Độc Quyền Cảng Quốc Tế',
     [ChanceCardId.CC_SLOW_BUILD]:       'Thu Hồi Do Chậm Triển Khai 24 Tháng',
     [ChanceCardId.CC_MEDIA_CRISIS]:     'Khủng Hoảng Truyền Thông Dịch Vụ Khách Hàng',
-    [ChanceCardId.CC_SWAP_PROJECT]:     'Quyền Ưu Tiên Hoán Đổi Dự Án',
+    [ChanceCardId.CC_SWAP_PROJECT]:     'Quyền Ưu Tiên Mua Lại Dự Án',
   } as Record<ChanceCardId, string>,
 
   rejectReasons: {

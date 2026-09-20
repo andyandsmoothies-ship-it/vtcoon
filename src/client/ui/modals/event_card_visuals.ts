@@ -81,7 +81,7 @@ const KNOWN_HERO_STATS: Readonly<Record<string, HeroStat>> = {
   [ChanceCardId.CC_STOCK_PROFIT]: { label: 'CHỐT LỜI CỔ PHIẾU', value: '+2.500 Tr.', variant: 'positive' },
   [ChanceCardId.CC_TAX_AUDIT]: { label: 'THANH TRA THUẾ', value: '-500 Tr. / ĐẤT TRỐNG', variant: 'negative' },
   [ChanceCardId.CC_DIPLOMATIC]: { label: 'MIỄN TRỪ NGOẠI GIAO', value: 'MIỄN 100% THUÊ', variant: 'positive' },
-  [ChanceCardId.CC_SWAP_PROJECT]: { label: 'HOÁN ĐỔI DỰ ÁN', value: 'ĐỔI 1 Ô C0', variant: 'info' },
+  [ChanceCardId.CC_SWAP_PROJECT]: { label: 'MUA LẠI DỰ ÁN', value: 'ĐỀN BÙ 130%', variant: 'info' },
   [ChanceCardId.CC_PLATE_AUCTION]: { label: 'ĐẤU GIÁ BIỂN SỐ', value: '+1 LƯỢT ĐI', variant: 'positive' },
   [ChanceCardId.CC_CONTRACT_PENALTY]: { label: 'BỒI THƯỜNG HỢP ĐỒNG', value: '-1.000 Tr.', variant: 'negative' },
   [ChanceCardId.CC_LAND_CHANGE]: { label: 'CHUYỂN MỤC ĐÍCH ĐẤT', value: 'LÊN THỔ CƯ', variant: 'positive' },

@@ -87,6 +87,7 @@ export function buildSparseDelta(prev: DeltaPayload, next: DeltaPayload): DeltaP
     ...(next.diceSeq !== undefined ? { diceSeq: next.diceSeq } : {}),
     ...(next.auction !== undefined ? { auction: next.auction } : {}),
     ...(next.pendingTradeOffer !== undefined ? { pendingTradeOffer: next.pendingTradeOffer } : {}),
+    ...(next.pendingBuyout !== undefined ? { pendingBuyout: next.pendingBuyout } : {}),
     ...(next.roomStarted !== undefined ? { roomStarted: next.roomStarted } : {}),
     ...(next.turnPhase !== undefined ? { turnPhase: next.turnPhase } : {}),
     ...(next.timeRemaining !== undefined ? { timeRemaining: next.timeRemaining } : {}),

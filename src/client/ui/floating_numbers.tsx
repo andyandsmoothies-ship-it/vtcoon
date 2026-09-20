@@ -288,9 +288,9 @@ export function FloatingNumbersOverlay(): React.ReactElement | null {
   // Mobile: hiển thị duy nhất 1 toast mới nhất ở giữa đỉnh màn hình
   const mobileTexts = regularTexts.slice(-1);
 
-  // Vị trí an toàn cho MilestoneBanner tránh chèn đè MarketEventTicker
+  // Vị trí an toàn cho MilestoneBanner tránh chèn đè MarketEventTicker (chiều cao ticker 3 dòng ~ 144-150px)
   const milestoneTopClass =
-    activeMarketCount >= 2 ? 'top-40' : activeMarketCount === 1 ? 'top-28' : 'top-20';
+    activeMarketCount >= 2 ? 'top-[15.5rem]' : activeMarketCount === 1 ? 'top-[10.5rem]' : 'top-20';
 
   // Vị trí an toàn cho toast giao dịch thường trên mobile:
   // Tự động đẩy xuống dưới MarketEventTicker và MilestoneBanner nếu đang hiển thị
@@ -298,17 +298,27 @@ export function FloatingNumbersOverlay(): React.ReactElement | null {
   if (latestMilestone) {
     mobileTopClass =
       activeMarketCount >= 2
-        ? 'top-[13.5rem]'
+        ? 'top-[21.5rem]'
         : activeMarketCount === 1
-        ? 'top-[11rem]'
+        ? 'top-[16.5rem]'
         : 'top-[11.5rem]';
   } else if (activeMarketCount >= 2) {
-    mobileTopClass = 'top-40';
+    mobileTopClass = 'top-[15.5rem]';
   } else if (activeMarketCount === 1) {
-    mobileTopClass = 'top-28';
+    mobileTopClass = 'top-[10.5rem]';
   }
 
-  const desktopTopClass = latestMilestone ? 'top-[12rem] md:top-[12rem]' : 'top-28 md:top-32';
+  const desktopTopClass = latestMilestone
+    ? activeMarketCount >= 2
+      ? 'top-[22rem] md:top-[22rem]'
+      : activeMarketCount === 1
+      ? 'top-[17rem] md:top-[17rem]'
+      : 'top-[12rem] md:top-[12rem]'
+    : activeMarketCount >= 2
+    ? 'top-[16rem] md:top-[16.5rem]'
+    : activeMarketCount === 1
+    ? 'top-[11rem] md:top-[11.5rem]'
+    : 'top-28 md:top-32';
 
   return (
     <aside

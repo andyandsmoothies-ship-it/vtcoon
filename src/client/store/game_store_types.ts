@@ -1,5 +1,5 @@
 // [UI-S01/MSS][UI-S03/MSS][UI-S04/MSS] Game Store Types, Interfaces & Payloads
-import type { EventCardInfo, MarketModifier } from '../../domain/room';
+import type { EventCardInfo, MarketModifier, PendingBuyoutSession } from '../../domain/room';
 
 export interface PawnAnimationState {
   readonly playerId: string;
@@ -85,7 +85,7 @@ export interface FloatingTextItem {
   readonly targetPlayerName?: string;
 }
 
-export type ActiveModalType = 'deed' | 'portfolio' | 'auction' | 'trade' | 'event' | 'hose' | 'insolvency' | 'game_over' | 'rules' | 'masterplan' | 'bot_trade_offer' | null;
+export type ActiveModalType = 'deed' | 'portfolio' | 'auction' | 'trade' | 'event' | 'hose' | 'insolvency' | 'game_over' | 'rules' | 'masterplan' | 'bot_trade_offer' | 'compulsory_buyout' | null;
 
 export interface ModalPayloadMap {
   deed: { cellIndex: number; canBuy?: boolean; ownedProperties?: readonly number[] };
@@ -153,6 +153,7 @@ export interface ModalPayloadMap {
     sellerId: string;
     expiresAt: number;
   };
+  compulsory_buyout: PendingBuyoutSession;
 }
 
 export interface PendingPawnMove {
@@ -206,6 +207,7 @@ export interface GameState {
   readonly activeModal: ActiveModalType;
   readonly modalPayload: ModalPayloadMap[keyof ModalPayloadMap] | null;
   readonly lastEventCard: EventCardInfo | null;
+  readonly pendingBuyout?: PendingBuyoutSession | null;
   readonly auction?: {
     readonly cellIndex: number;
     readonly highestBid?: number;
@@ -257,6 +259,7 @@ export interface GameState {
   openModal: <T extends keyof ModalPayloadMap>(type: T, payload: ModalPayloadMap[T]) => void;
   closeModal: () => void;
   updateModalPayload: <T extends keyof ModalPayloadMap>(patch: Partial<ModalPayloadMap[T]>) => void;
+  setPendingBuyout: (pendingBuyout: PendingBuyoutSession | null) => void;
 
   // UI-05 Social Emotes & Micro-VFX Actions
   triggerEmote: (playerId: string, emoteId: string) => void;

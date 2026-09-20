@@ -109,6 +109,16 @@ export interface HoseResultInfo {
   readonly diceSeq?:    number;
 }
 
+export interface PendingBuyoutSession {
+  readonly buyerId: string;
+  readonly sellerId: string;
+  readonly cellIndex: number;
+  readonly cost: number;
+  readonly basePrice: number;
+  readonly createdAt: number;
+  readonly expiresAt: number;
+}
+
 export interface Room {
   readonly roomCode:      string;
   readonly code?:         string;
@@ -132,6 +142,7 @@ export interface Room {
   currentAuction?:       CurrentAuctionState;
   lastEventCard?:        EventCardInfo;
   lastHoseResult?:       HoseResultInfo;
+  pendingBuyout?:        PendingBuyoutSession | null;
 }
 
 

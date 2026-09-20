@@ -11,7 +11,7 @@
 | `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147, #190, #191 |
 | `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190 |
 | `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #32, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #60, #61, #63, #69, #72, #74, #77, #80, #85, #86, #88, #89, #90, #91, #92, #93, #94, #95, #96, #101, #103, #109, #110, #114, #115, #116, #117, #120, #122, #123, #124, #125, #126, #127, #128, #129, #130, #133, #134, #135, #136, #140, #141, #144, #148, #159, #160, #161, #162, #163, #164, #165, #169, #175, #177, #189 |
-| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188 |
+| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192 |
 | `[UAT/TEST]` | Nghiệm Thu, Adversarial TDD, Ảnh Chụp Màn Hình (.jpg), Shell Escaping, File I/O Lock, Docker Healthcheck Timeout | #5, #28, #29, #31, #35, #52, #71, #73, #83, #84, #99, #100, #117, #124, #125, #130 |
 | `[TELEMETRY]` | Giám Sát Hiệu Năng Thời Gian Thực, Chó Canh Phòng Bất Biến, Hộp Đen Tái Hiện Lỗi | #39, #62, #71, #75, #104, #114, #115, #135, #174 |
 | `[ARCH/REFACTOR]` | Tách Module Facade, Ngân Sách Render Loop, Chuẩn Hóa Môi Trường Build | #43, #98, #99 |
@@ -3155,3 +3155,56 @@
   4. **Dọn Sạch Lịch Sử Khi Giao Dịch Thành Công (Zero Dangling State)**:
      - Trong `executeP2PTrade` và `coordRespondTradeOffer` (nhánh `accept: true`): `delete buyer.cellTradeRejections?.[cellIndex]` và `delete buyer.cellLastRejectedRound?.[cellIndex]`.
      - Trong trường hợp từ chối chủ động hoặc quá hạn 15s timeout (`checkPendingTradeTimeout`): tự động tăng số lần từ chối lên 1 và ghi nhận `cellLastRejectedRound = currentRound` an toàn với Safe Init (`??= {}`).
+
+---
+
+### 192. [UI/POPUP-COLLISION] Triệt Tiêu Chồng Đè Pop-up Bằng Tọa Độ Đa Tầng An Toàn Dưới MarketEventTicker (IMP-143)
+*(Kế thừa Gotcha #190 theo kế hoạch đề xuất IMP-143, gán chỉ mục chuẩn #192 tiếp nối sau #190 và #191)*
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Chèn Đè Giữa MarketEventTicker và MilestoneBanner*:
+     - Trên màn hình mobile hẹp (360-390px), `MarketEventTicker` khi hiển thị thẻ biến cố thị trường có tiêu đề + badge đếm vòng + 3 dòng mô tả (`line-clamp-3`) có thể chạm tới cao độ $Y = 148\text{px} - 152\text{px}$.
+     - Nếu gán cứng `milestoneTopClass` tại `top-28` (112px), đỉnh thẻ `MilestoneBanner` ("Đại Nhạc Hội Quốc Tế" / "Độc Quyền Nhóm Đất") bị thụt vào trong và che khuất dưới mép đáy của Ticker.
+  2. *Bẫy Chèn Đè Giữa MilestoneBanner và Toast Giao Dịch Thường (FloatingBadge)*:
+     - Khi đồng thời xuất hiện thẻ mốc đặc biệt (`MilestoneBanner` cao ~80px, chạm tới $Y \approx 192\text{px}$) và toast giao dịch thường (`FloatingBadge`), việc gán cứng `mobileTopClass = 'top-[11rem]'` (176px) khiến toast giao dịch (ví dụ: trừ tiền nộp thuế hoặc trả tiền thuê) đè trực tiếp lên nửa dưới của thông báo thẻ sự kiện, che lấp toàn bộ mô tả chi tiết.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Bảng Tọa Độ Đa Tầng Chuẩn SSOT (Safe Offsets Matrix)**:
+     - **MilestoneBanner (`milestoneTopClass`)**:
+       * $\ge 2$ sự kiện thị trường: `top-[15.5rem]` (248px)
+       * $1$ sự kiện thị trường: `top-[10.5rem]` (168px)
+       * $0$ sự kiện thị trường: `top-20` (80px)
+     - **Toast Giao Dịch Mobile (`mobileTopClass`)**:
+       * Có `latestMilestone`: $\ge 2$ sự kiện `top-[21.5rem]` (344px); 1 sự kiện `top-[16.5rem]` (264px); 0 sự kiện `top-[11.5rem]` (184px).
+       * Không có `latestMilestone`: $\ge 2$ sự kiện `top-[15.5rem]` (248px); 1 sự kiện `top-[10.5rem]` (168px); 0 sự kiện `top-[4.25rem]` (68px).
+     - **Toast Giao Dịch Desktop (`desktopTopClass`)**:
+       * Có `latestMilestone`: $\ge 2$ sự kiện `top-[22rem] md:top-[22rem]`; 1 sự kiện `top-[17rem] md:top-[17rem]`; 0 sự kiện `top-[12rem] md:top-[12rem]`.
+       * Không có `latestMilestone`: $\ge 2$ sự kiện `top-[16rem] md:top-[16.5rem]`; 1 sự kiện `top-[11rem] md:top-[11.5rem]`; 0 sự kiện `top-28 md:top-32` (bảo toàn hợp đồng hồi quy `IMP-128`).
+  2. **Khoảng Đệm An Toàn Tối Thiểu (Safe Margin > 16px)**:
+     - Toàn bộ khoảng cách giữa đáy của phần tử tầng trên và đỉnh của phần tử tầng dưới duy trì tối thiểu 16px - 24px ở mọi kích cỡ màn hình và mọi tổ hợp trạng thái.
+  3. **Bảo Toàn Trọn Vẹn Cấu Trúc DOM & A11y Contract**:
+     - Bảo tồn 100% testids (`data-testid="milestone-banner-container"`, `floating-numbers-overlay`, `contextual-transaction-badge`, `event-card-notification-banner`).
+     - Tuyệt đối không gom chung wrapper hay nhân bản DOM làm nhiễu loạn vùng thông báo động `aria-live="polite"`.
+
+---
+
+### 193. [FSM/RULE][BOT/AI][NET/SYNC] Quyền Ưu Tiên Mua Lại Dự Án C0 (Compulsory Buyout Đền Bù 130% & Quyền Tự Quyết) (IMP-145)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Tước Đoạt Đất Dự Án Tự Động & Thiếu Quyền Tự Quyết Người Chơi*:
+     - Trước IMP-145, thẻ Cơ Hội Hoán Đổi Dự Án (`CC_SWAP_PROJECT`) cưỡng bức hoán đổi hoặc mua lại ngay lập tức mà không có sự đồng thuận hay quyền lựa chọn của người rút thẻ, đặc biệt khi người rút thẻ là con người đang trong trận đấu nhiều người chơi.
+  2. *Bẫy Vi Phàm Độc Quyền Màu Sắc Khi Đất Đang Thế Chấp (Mortgage Trap in Monopoly Immunity)*:
+     - Khi kiểm tra quyền miễn trừ mua lại cưỡng chế của đối thủ (`isEligibleForCompulsoryBuyout`), nhóm đất đã sở hữu độc quyền (`hasMonopoly`) bắt buộc phải được bảo vệ toàn bộ. Nếu truyền nhầm `stateMap` vào `hasMonopoly(ownerId, cellIndex, registry, stateMap)`, khi một ô trong nhóm bị thế chấp (`isMortgaged === true`), hàm sẽ trả về `false`, làm mất miễn trừ của cả bộ màu và cho phép người chơi khác cưỡng chế mua lại ô đất C0 thuộc bộ màu đó.
+  3. *Bẫy Kẹt Lượt & Desync Khi Tạo Phiên Chờ Buyout 15 Giây*:
+     - Người chơi người thật khi rút thẻ cần 15s để suy nghĩ hoặc chọn mục tiêu mua lại. Nếu FSM không quản lý phiên chờ (`pendingBuyout`) và không đóng băng luồng quyết định của Bot (`hasPendingBuyout`), Bot có thể bước tiếp lượt (`stepBotTurn`) hoặc kết thúc lượt (`executeTurnEnd`), dẫn đến FSM softlock hoặc race condition.
+  4. *Bẫy Đền Bù 130% Làm Thâm Hụt Tài Chính Của Bot (Bot Safety Buffer Trap)*:
+     - Bot khi rút thẻ không được mù quáng mua lại nếu chi phí 130% giá gốc khiến số dư giảm xuống dưới đệm an toàn `safetyBuffer` (800 Tr. VNĐ).
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Công Thức Đền Bù 130% & Miễn Trừ Độc Quyền Tuyệt Đối**:
+     - `calculateCompulsoryBuyoutCost(cellIndexOrPrice)`: `Math.floor(basePrice * 1.30)`.
+     - `isEligibleForCompulsoryBuyout`: Chỉ nhắm vào ô đất C0 (`level === 0`), không thế chấp (`!stateMap[cellIndex]?.isMortgaged`), thuộc quyền sở hữu của người chơi khác (chưa phá sản), và BẮT BUỘC KHÔNG THUỘC BỘ MÀU ĐỘC QUYỀN (`!hasMonopoly(ownerId, cellIndex, registry)` - KHÔNG truyền `stateMap`).
+  2. **Phiên Chờ Buyout 15 Giây Độc Quyền Cho Người Thật (`PendingBuyoutSession`)**:
+     - Khi người chơi thật rút thẻ có ô đất hợp lệ: Tạo phiên `room.pendingBuyout` với `expiresAt = Date.now() + 15_000`. Modal `compulsory_buyout` mở ra hiển thị 15s đếm ngược, cho phép người chơi chọn ô đất mục tiêu và quyết định `[Mua Lại]` (`INTENT_EXECUTE_COMPULSORY_BUYOUT`) hoặc `[Bỏ Qua]` (`INTENT_DECLINE_COMPULSORY_BUYOUT`).
+     - Hết hạn 15s (`checkPendingBuyoutTimeout`) hoặc bấm bỏ qua: Tự động dọn sạch session, hoàn trả quyền FSM chuyển sang `PropertyManagement`.
+  3. **Đóng Băng Lượt Đi & Turn End Protection**:
+     - `hasPendingBuyout` được kiểm tra cùng `hasPendingTrade` trong `room_bot_coordinator.ts` và `turn_loop.ts` để phong tỏa mọi hành vi Bot bước lượt hoặc ép kết thúc lượt sớm khi đang có phiên buyout.
+  4. **Quyết Định Hợp Lý Của Bot & Fallback Tài Chính Minh Bạch**:
+     - Bot chỉ thực hiện buyout khi số dư `bot.balance - buyoutCost >= safetyBuffer` (800 Tr. VNĐ) và ưu tiên ô đất giúp chặn chuỗi độc quyền của đối thủ hoặc bổ sung nhóm màu tiềm năng.
+     - Nếu bàn cờ không có ô C0 hợp lệ nào hoặc không ai mua lại: Ngân sách nhà nước (Kho Bạc / Ngân Hàng) chi trả tiền đền bù/trợ cấp +800 Tr. hoặc +1.000 Tr. VNĐ cho người chơi rút thẻ theo đúng quy tắc thẻ Cơ Hội.

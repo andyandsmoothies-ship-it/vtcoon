@@ -11,6 +11,12 @@ import {
   SERVICE_CELLS,
   INFRA_CELLS,
 } from './event_card_types';
+import {
+  calculateCompulsoryBuyoutCost,
+  isEligibleForCompulsoryBuyout,
+} from './compulsory_buyout.js';
+
+export { calculateCompulsoryBuyoutCost, isEligibleForCompulsoryBuyout };
 
 const DEBT_AMOUNTS: Readonly<Record<string, number>> = {
   [ChanceCardId.CC_OVERDRAFT]: 3000,
@@ -115,71 +121,57 @@ function handleSwapProject(
 ): void {
   if (!registry) return;
 
-  const isCellMortgaged = (cell: number, ownerId: string): boolean => {
-    if (stateMap?.get(cell)?.isMortgaged) return true;
-    const p = room?.players.find((pl) => pl.id === ownerId) ?? players?.find((pl) => pl.id === ownerId);
-    return Boolean(p?.mortgagedProperties?.includes(cell));
-  };
-
-  // 1. Tìm ô C0 của player (chưa thế chấp)
-  const playerC0Cells: number[] = [];
-  for (const [cell, owner] of registry.entries()) {
-    if (owner === player.id && (stateMap?.get(cell)?.level ?? 0) === 0 && !isCellMortgaged(cell, owner)) {
-      playerC0Cells.push(cell);
-    }
-  }
-
-  // 2. Tìm ô C0 của đối thủ (chưa thế chấp)
   const oppC0Cells: { cell: number; owner: string }[] = [];
   for (const [cell, owner] of registry.entries()) {
-    if (owner !== player.id && (stateMap?.get(cell)?.level ?? 0) === 0 && !isCellMortgaged(cell, owner)) {
+    if (owner !== player.id && isEligibleForCompulsoryBuyout(cell, owner, registry, stateMap, room, players)) {
       oppC0Cells.push({ cell, owner });
     }
   }
 
-  // Trường hợp 1: Hoán đổi chuẩn (cả 2 đều có C0 chưa thế chấp)
-  if (playerC0Cells.length > 0 && oppC0Cells.length > 0) {
-    const c1 = playerC0Cells[0]!;
-    const c2 = oppC0Cells[0]!;
-    registry.set(c1, c2.owner);
-    registry.set(c2.cell, player.id);
+  if (oppC0Cells.length === 0) {
+    player.balance += 1000;
+    if (room) room.treasury = Math.max(0, (room.treasury ?? 0) - 1000);
     return;
   }
 
-  // Fallback A: Người rút có C0, nhưng đối thủ không có C0
-  if (playerC0Cells.length > 0 && oppC0Cells.length === 0) {
-    const targetCell = playerC0Cells[0]!;
-    const state = stateMap?.get(targetCell);
-    if (state) {
-      state.level = 1;
-    }
-    return;
-  }
+  const target = oppC0Cells[0]!;
+  const cost = calculateCompulsoryBuyoutCost(target.cell);
 
-  // Fallback B: Đối thủ có C0, nhưng người rút không có C0
-  if (playerC0Cells.length === 0 && oppC0Cells.length > 0) {
-    const target = oppC0Cells[0]!;
-    const deed = PROPERTY_DEEDS.get(target.cell);
-    const basePrice = deed?.price ?? 1000;
-    const compulsoryCost = Math.floor(basePrice * 1.3);
-
-    if (player.balance >= compulsoryCost) {
-      player.balance -= compulsoryCost;
-      const seller = room?.players.find((p) => p.id === target.owner) ?? players?.find((p) => p.id === target.owner);
-      if (seller) {
-        seller.balance += compulsoryCost;
-      }
-      registry.set(target.cell, player.id);
-    } else {
+  if (!player.isBot) {
+    if (player.balance < cost) {
       player.balance += 800;
       if (room) room.treasury = Math.max(0, (room.treasury ?? 0) - 800);
+      return;
     }
+    if (!room) {
+      player.balance -= cost;
+      const seller = players?.find((p) => p.id === target.owner);
+      if (seller) seller.balance += cost;
+      registry.set(target.cell, player.id);
+      return;
+    }
+    room.pendingBuyout = {
+      buyerId: player.id,
+      sellerId: target.owner,
+      cellIndex: target.cell,
+      cost,
+      basePrice: PROPERTY_DEEDS.get(target.cell)?.price ?? 1000,
+      createdAt: Date.now(),
+      expiresAt: Date.now() + 15_000,
+    };
     return;
   }
 
-  // Fallback C: Cả 2 đều không có C0 hợp lệ
-  player.balance += 1000;
-  if (room) room.treasury = Math.max(0, (room.treasury ?? 0) - 1000);
+  if (player.balance - cost < 1000) {
+    player.balance += 800;
+    if (room) room.treasury = Math.max(0, (room.treasury ?? 0) - 800);
+    return;
+  }
+  player.balance -= cost;
+  const seller = room?.players.find((p) => p.id === target.owner) ?? players?.find((p) => p.id === target.owner);
+  if (seller) seller.balance += cost;
+  registry.set(target.cell, player.id);
+  if (room) room.pendingBuyout = null;
 }
 
 // Command Dispatcher — giảm CC từ 22 xuống ≤ 5

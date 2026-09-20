@@ -209,16 +209,18 @@ describe('[TC-GAME-038..041/MSS] Chance Cards Handlers', () => {
     });
   });
 
-  it('CC_SWAP_PROJECT hoán đổi đất trống C0 cùng nhóm màu với đối thủ', () => {
+  it('CC_SWAP_PROJECT mua lại đất trống C0 của đối thủ đền bù 130% giá gốc', () => {
     const p1 = createPlayer('p1');
     const p2 = createPlayer('p2');
-    // Ô 1 (Cần Thơ, Nâu, C0) và Ô 3 (Cà Mau, Nâu, C0) cùng nhóm màu
+    // Ô 1 (Cần Thơ, Nâu, C0) của p1 và Ô 3 (Cà Mau, Nâu, C0) của p2
     const registry: PropertyRegistry = new Map([[1, 'p1'], [3, 'p2']]);
     const stateMap: PropertyStateMap = new Map([[1, { level: 0 }], [3, { level: 0 }]]);
 
     executeChanceCard(ChanceCardId.CC_SWAP_PROJECT, 'p1', [p1, p2], [], registry, stateMap);
-    expect(registry.get(1)).toBe('p2');
+    expect(registry.get(1)).toBe('p1');
     expect(registry.get(3)).toBe('p1');
+    expect(p1.balance).toBe(15_000 - Math.floor(600 * 1.3));
+    expect(p2.balance).toBe(15_000 + Math.floor(600 * 1.3));
   });
 
   it('CC_MA_FORCE mua lại đất trống từ đối thủ ở mức 120% giá niêm yết ngay cả khi đối thủ giàu hơn', () => {

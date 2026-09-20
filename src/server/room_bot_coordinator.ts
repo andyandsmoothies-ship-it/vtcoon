@@ -188,7 +188,7 @@ function runBotIntentLoop(
 ): void {
   let counter = 0;
   while (counter < MAX_BOT_INTENTS) {
-    if (roomManager.hasPendingTrade?.(roomCode)) break;
+    if (roomManager.hasPendingTrade?.(roomCode) || roomManager.hasPendingBuyout?.(roomCode)) break;
     if (!executeBotIntentStep(roomManager, roomCode, botId, config)) break;
     counter++;
   }
@@ -198,14 +198,14 @@ export function runBotTurn(roomManager: RoomManager, roomCode: string): void {
   const room = roomManager.getRoom(roomCode);
   if (!room) return;
   if (isAuctionPhaseStuck(roomManager, roomCode)) return;
-  if (roomManager.hasPendingTrade?.(roomCode)) return;
+  if (roomManager.hasPendingTrade?.(roomCode) || roomManager.hasPendingBuyout?.(roomCode)) return;
 
   const current = room.players[room.currentPlayerIndex];
   if (!current?.isBot || current.bankrupt) return;
 
   const config = getBotConfig(roomManager.getBotPersonality(roomCode, current.id), roomManager.getRng());
   runBotIntentLoop(roomManager, roomCode, current.id, config);
-  if (roomManager.hasPendingTrade?.(roomCode)) return;
+  if (roomManager.hasPendingTrade?.(roomCode) || roomManager.hasPendingBuyout?.(roomCode)) return;
   releaseStuckBotTurn(roomManager, roomCode, current.id);
 }
 
@@ -213,14 +213,14 @@ export function stepBotTurn(roomManager: RoomManager, roomCode: string): boolean
   const room = roomManager.getRoom(roomCode);
   if (!room || !room.started) return false;
   if (isAuctionPhaseStuck(roomManager, roomCode)) return false;
-  if (roomManager.hasPendingTrade?.(roomCode)) return false;
+  if (roomManager.hasPendingTrade?.(roomCode) || roomManager.hasPendingBuyout?.(roomCode)) return false;
 
   const current = room.players[room.currentPlayerIndex];
   if (!current?.isBot || current.bankrupt) return false;
 
   const config = getBotConfig(roomManager.getBotPersonality(roomCode, current.id), roomManager.getRng());
   const progressed = executeBotIntentStep(roomManager, roomCode, current.id, config);
-  if (roomManager.hasPendingTrade?.(roomCode)) return false;
+  if (roomManager.hasPendingTrade?.(roomCode) || roomManager.hasPendingBuyout?.(roomCode)) return false;
   if (!progressed) {
     releaseStuckBotTurn(roomManager, roomCode, current.id);
   }
@@ -228,7 +228,7 @@ export function stepBotTurn(roomManager: RoomManager, roomCode: string): boolean
 }
 
 function releaseStuckBotTurn(roomManager: RoomManager, roomCode: string, botPlayerId: string): void {
-  if (roomManager.hasPendingTrade?.(roomCode)) return;
+  if (roomManager.hasPendingTrade?.(roomCode) || roomManager.hasPendingBuyout?.(roomCode)) return;
   const roomEnd = roomManager.getRoom(roomCode);
   if (!roomEnd) return;
   if ((roomEnd.phase as TurnPhase) === TurnPhase.ActionPhase) {

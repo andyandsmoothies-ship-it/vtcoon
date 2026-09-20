@@ -170,7 +170,7 @@ export function executeTurnEnd(
   stateMap?: PropertyStateMap,
   auctions?: Map<string, AuctionSession>,
 ): Room | undefined {
-  if (room.phase === TurnPhase.AuctionPhase || room.phase === TurnPhase.InsolvencyPhase) return undefined;
+  if (room.phase === TurnPhase.AuctionPhase || room.phase === TurnPhase.InsolvencyPhase || room.pendingBuyout) return undefined;
   if (!rolledThisTurn && room.phase === TurnPhase.WaitingRoll && (current.auditTurnsLeft ?? 0) <= 0) return undefined;
 
   if (continueDoubles && current.consecutiveDoubles > 0 && !current.skipNextTurn) {

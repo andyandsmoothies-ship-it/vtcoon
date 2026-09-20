@@ -15,6 +15,8 @@ export type PlayerIntent =
   | { type: 'INTENT_REDEEM'; cellIndex: number }
   | { type: 'INTENT_TRADE_OFFER'; sellerId: string; buyerId: string; cellIndex: number; price: number }
   | { type: 'INTENT_RESPOND_TRADE_OFFER'; offerId: string; accept: boolean }
+  | { type: 'INTENT_EXECUTE_COMPULSORY_BUYOUT'; cellIndex: number }
+  | { type: 'INTENT_DECLINE_COMPULSORY_BUYOUT' }
   | { type: 'INTENT_END_TURN' }
   | { type: 'INTENT_INVEST'; stake: number }
   | { type: 'INTENT_SKIP' }
@@ -60,6 +62,11 @@ const INTENT_DISPATCH: Record<PlayerIntent['type'], IntentHandler> = {
     const ri = i as { offerId: string; accept: boolean };
     return m.handleRespondTradeOffer(rc, p, ri.offerId, ri.accept);
   },
+  INTENT_EXECUTE_COMPULSORY_BUYOUT: (m, rc, p, i) => {
+    const bi = i as { cellIndex: number };
+    return m.executeCompulsoryBuyout(rc, p, bi.cellIndex);
+  },
+  INTENT_DECLINE_COMPULSORY_BUYOUT: (m, rc, p) => m.declineCompulsoryBuyout(rc, p),
   INTENT_INVEST: (m, rc, p, i) => m.handleHoseInvest(rc, p, (i as { stake: number }).stake),
   INTENT_SKIP: (m, rc, p) => m.handleHoseSkip(rc, p),
   INTENT_BAIL_OUT: (m, rc, p) => m.handleBailOut(rc, p),

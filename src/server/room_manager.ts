@@ -4,7 +4,7 @@ import {
 } from '../domain/room.js';
 import { BotPersonality } from '../domain/bot/bot_engine.js';
 import { resolveAuctionBots as coordResolveAuctionBots, runBotTurn as coordRunBotTurn, stepBotTurn as coordStepBotTurn } from './room_bot_coordinator.js';
-import type { Room, Player } from '../domain/room.js';
+import type { Room, Player, PendingBuyoutSession } from '../domain/room.js';
 import { mulberry32 } from '../domain/dice.js';
 import {
   BuyResult,
@@ -22,6 +22,7 @@ import { dispatchPlayerIntent, type PlayerIntent } from './intent_dispatcher.js'
 import {
   coordMortgage, coordRedeem, coordDowngrade,
   coordLiquidate, coordTrade, coordRespondTradeOffer, coordBankruptcy,
+  coordExecuteCompulsoryBuyout, coordDeclineCompulsoryBuyout,
 } from './room_property_coordinator.js';
 import { pendingTradeManager, type PendingTradeSession } from './pending_trade_manager.js';
 import { executeTurnRoll } from './turn_loop.js';
@@ -36,7 +37,7 @@ import { calcPropertyRent, calcRankings, buildRoomDelta } from './room_manager_q
 import type { DeltaPayload } from './session_manager.js';
 import type { RoomBotSpec } from './room_bot_manager.js';
 
-export type { AuctionSession, PlayerIntent, PendingTradeSession };
+export type { AuctionSession, PlayerIntent, PendingTradeSession, PendingBuyoutSession };
 
 export interface RollResult {
   readonly dice:        DiceResult;
@@ -138,7 +139,7 @@ export class RoomManager {
     if (room) room.currentAuction = this.auctions.get(roomCode);
   }
 
-  private getContext(roomCode: string): { room: Room; reg: PropertyRegistry; sm: PropertyStateMap; botPersonalities: Map<string, BotPersonality> } | undefined {
+  getContext(roomCode: string): { room: Room; reg: PropertyRegistry; sm: PropertyStateMap; botPersonalities: Map<string, BotPersonality> } | undefined {
     const room = this.rooms.get(roomCode);
     const reg = this.registries.get(roomCode);
     const sm = this.propertyStates.get(roomCode);
@@ -270,6 +271,50 @@ export class RoomManager {
       }
     }
     return cancelled;
+  }
+
+  hasPendingBuyout(roomCode: string): boolean {
+    const room = this.rooms.get(roomCode);
+    return Boolean(room?.pendingBuyout);
+  }
+
+  getPendingBuyout(roomCode: string): PendingBuyoutSession | undefined {
+    const room = this.rooms.get(roomCode);
+    return room?.pendingBuyout ?? undefined;
+  }
+
+  checkPendingBuyoutTimeout(
+    roomCode: string,
+    currentTime?: number,
+  ): { timeout: boolean; session?: PendingBuyoutSession } {
+    const room = this.rooms.get(roomCode);
+    if (!room?.pendingBuyout) {
+      return { timeout: false };
+    }
+    const now = currentTime ?? Date.now();
+    if (now >= room.pendingBuyout.expiresAt) {
+      const session = room.pendingBuyout;
+      room.pendingBuyout = null;
+      return { timeout: true, session };
+    }
+    return { timeout: false, session: room.pendingBuyout };
+  }
+
+  executeCompulsoryBuyout(
+    roomCode: string,
+    playerId: string,
+    cellIndex: number,
+  ): { success: boolean; reason?: string } {
+    this.touchActivity(roomCode);
+    return coordExecuteCompulsoryBuyout(this.getContext(roomCode), playerId, cellIndex);
+  }
+
+  declineCompulsoryBuyout(
+    roomCode: string,
+    playerId: string,
+  ): { success: boolean; reason?: string } {
+    this.touchActivity(roomCode);
+    return coordDeclineCompulsoryBuyout(this.getContext(roomCode), playerId);
   }
 
   handleBankruptcy(roomCode: string, playerId: string, creditorId?: string): { gameOver: boolean; rankings?: Array<{ id: string; netWorth: number }> } {

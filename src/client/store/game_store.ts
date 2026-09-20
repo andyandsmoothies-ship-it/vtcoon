@@ -38,6 +38,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   activeModal: null,
   modalPayload: null,
   lastEventCard: null,
+  pendingBuyout: null,
   auction: null,
 
   activeEmotes: {},
@@ -46,7 +47,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   // IMP-133 Camera Sticky Focus
   cameraFocusCell: null,
   setCameraFocusCell: (cellIndex) => set({ cameraFocusCell: cellIndex }),
-  resetGameState: () => set({ cameraFocusCell: null, activeModal: null, modalPayload: null, isRolling: false, hasRolledThisTurn: false }),
+  resetGameState: () => set({ cameraFocusCell: null, activeModal: null, modalPayload: null, isRolling: false, hasRolledThisTurn: false, pendingBuyout: null }),
 
   setLevelMap: (map) => set({ levelMap: map }),
   setPlayerPositions: (positions) => {
@@ -308,6 +309,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   openModal: (type, payload) => set({ activeModal: type, modalPayload: payload }),
   closeModal: () => set({ activeModal: null, modalPayload: null }),
   setLastEventCard: (card) => set({ lastEventCard: card }),
+  setPendingBuyout: (pendingBuyout) => set({ pendingBuyout }),
   updateModalPayload: (patch) =>
     set((state) => ({
       modalPayload: state.modalPayload ? { ...state.modalPayload, ...patch } : state.modalPayload,

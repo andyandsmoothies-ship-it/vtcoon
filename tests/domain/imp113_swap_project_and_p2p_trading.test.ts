@@ -79,34 +79,36 @@ describe('[CONTRACT-TEST] IMP-113: Swap Project & P2P Trading AI Overhaul', () =
   });
 
   // ===========================================================================
-  // FACET 1: Boundary & Range (Chốt 1: Swap Chuẩn, Chốt 2: Fallback A)
+  // FACET 1: Boundary & Range (Chốt 1: Mua lại C0 Đền Bù 130%, Chốt 2: Trợ cấp khi đối thủ không có C0)
   // ===========================================================================
-  describe('Facet 1: Boundary & Range — Standard Swap & Fallback A', () => {
-    it('[TC-IMP113.01/MSS][UC-039] Chốt 1: Swap chuẩn khi người rút và đối thủ đều có C0 chưa thế chấp -> Hoán đổi quyền sở hữu trong registry', () => {
+  describe('Facet 1: Boundary & Range — Compulsory Buyout C0 & Treasury Subsidy', () => {
+    it('[TC-IMP113.01/MSS][UC-039] Chốt 1: Mua lại C0 khi người rút và đối thủ đều có C0 chưa thế chấp -> Người rút mua lại ô C0 của đối thủ (đền bù 130%)', () => {
       registry.set(1, p1.id); // Cell 1: Can Tho, C0
       registry.set(6, p2.id); // Cell 6: Binh Duong, C0
       stateMap.set(1, { level: 0 });
       stateMap.set(6, { level: 0 });
 
-      runChanceCard(ChanceCardId.CC_SWAP_PROJECT, p1.id, room.players, room.activeModifiers, registry, stateMap, room.permanentRentBonus, room);
+      runChanceCard(ChanceCardId.CC_SWAP_PROJECT, p1.id, room.players, room.activeModifiers, registry, stateMap, room.permanentRentBonus);
 
-      expect(registry.get(1)).toBe(p2.id);
+      expect(registry.get(1)).toBe(p1.id);
       expect(registry.get(6)).toBe(p1.id);
+      expect(p1.balance).toBe(5_000 - 1_300);
+      expect(p2.balance).toBe(5_000 + 1_300);
     });
 
-    it('[TC-IMP113.02/MSS][UC-039] Chốt 1: Swap chuẩn giữ nguyên cấp công trình level = 0 cho cả 2 ô đất sau hoán đổi', () => {
+    it('[TC-IMP113.02/MSS][UC-039] Chốt 1: Mua lại giữ nguyên cấp công trình level = 0 cho cả 2 ô đất sau giao dịch', () => {
       registry.set(1, p1.id);
       registry.set(6, p2.id);
       stateMap.set(1, { level: 0 });
       stateMap.set(6, { level: 0 });
 
-      runChanceCard(ChanceCardId.CC_SWAP_PROJECT, p1.id, room.players, room.activeModifiers, registry, stateMap, room.permanentRentBonus, room);
+      runChanceCard(ChanceCardId.CC_SWAP_PROJECT, p1.id, room.players, room.activeModifiers, registry, stateMap, room.permanentRentBonus);
 
       expect(stateMap.get(1)?.level).toBe(0);
       expect(stateMap.get(6)?.level).toBe(0);
     });
 
-    it('[TC-IMP113.03/MSS][UC-039] Chốt 1: Từ chối hoán đổi nếu ô C0 của đối thủ đang bị thế chấp (state.isMortgaged === true) và kích hoạt Fallback A', () => {
+    it('[TC-IMP113.03/MSS][UC-039] Chốt 1: Từ chối mua lại nếu ô C0 của đối thủ đang bị thế chấp (state.isMortgaged === true) và nhận trợ cấp +1.000 Tr.', () => {
       registry.set(1, p1.id);
       registry.set(6, p2.id);
       stateMap.set(1, { level: 0 });
@@ -115,10 +117,11 @@ describe('[CONTRACT-TEST] IMP-113: Swap Project & P2P Trading AI Overhaul', () =
       runChanceCard(ChanceCardId.CC_SWAP_PROJECT, p1.id, room.players, room.activeModifiers, registry, stateMap, room.permanentRentBonus, room);
 
       expect(registry.get(6)).toBe(p2.id);
-      expect(stateMap.get(1)?.level).toBe(1);
+      expect(p1.balance).toBe(5_000 + 1_000);
+      expect(room.treasury).toBe(10_000 - 1_000);
     });
 
-    it('[TC-IMP113.04/MSS][UC-039] Chốt 1: Từ chối hoán đổi nếu ô C0 của đối thủ nằm trong mortgagedProperties và kích hoạt Fallback A', () => {
+    it('[TC-IMP113.04/MSS][UC-039] Chốt 1: Từ chối mua lại nếu ô C0 của đối thủ nằm trong mortgagedProperties và nhận trợ cấp +1.000 Tr.', () => {
       registry.set(1, p1.id);
       registry.set(6, p2.id);
       stateMap.set(1, { level: 0 });
@@ -128,20 +131,22 @@ describe('[CONTRACT-TEST] IMP-113: Swap Project & P2P Trading AI Overhaul', () =
       runChanceCard(ChanceCardId.CC_SWAP_PROJECT, p1.id, room.players, room.activeModifiers, registry, stateMap, room.permanentRentBonus, room);
 
       expect(registry.get(6)).toBe(p2.id);
-      expect(stateMap.get(1)?.level).toBe(1);
+      expect(p1.balance).toBe(5_000 + 1_000);
+      expect(room.treasury).toBe(10_000 - 1_000);
     });
 
-    it('[TC-IMP113.05/MSS][UC-039] Chốt 2: Fallback A khi người rút có C0 còn đối thủ không có C0 -> C0 của người rút được nâng cấp miễn phí lên C1 (level = 1)', () => {
+    it('[TC-IMP113.05/MSS][UC-039] Chốt 2: Khi người rút có C0 còn đối thủ không có C0 hợp lệ -> Người rút nhận trợ cấp +1.000 Tr. từ Kho Bạc', () => {
       registry.set(1, p1.id);
       stateMap.set(1, { level: 0 }); // P2 khong co dat C0
 
       runChanceCard(ChanceCardId.CC_SWAP_PROJECT, p1.id, room.players, room.activeModifiers, registry, stateMap, room.permanentRentBonus, room);
 
-      expect(stateMap.get(1)?.level).toBe(1);
-      expect(registry.get(1)).toBe(p1.id);
+      expect(stateMap.get(1)?.level).toBe(0);
+      expect(p1.balance).toBe(5_000 + 1_000);
+      expect(room.treasury).toBe(10_000 - 1_000);
     });
 
-    it('[TC-IMP113.06/MSS][UC-039] Chốt 2: Fallback A chỉ nâng cấp đúng 1 ô C0 đầu tiên nếu người rút sở hữu nhiều ô C0', () => {
+    it('[TC-IMP113.06/MSS][UC-039] Chốt 2: Khi đối thủ không có C0 hợp lệ, các ô đất của người rút giữ nguyên cấp C0', () => {
       registry.set(1, p1.id);
       registry.set(3, p1.id);
       stateMap.set(1, { level: 0 });
@@ -149,8 +154,9 @@ describe('[CONTRACT-TEST] IMP-113: Swap Project & P2P Trading AI Overhaul', () =
 
       runChanceCard(ChanceCardId.CC_SWAP_PROJECT, p1.id, room.players, room.activeModifiers, registry, stateMap, room.permanentRentBonus, room);
 
-      expect(stateMap.get(1)?.level).toBe(1);
+      expect(stateMap.get(1)?.level).toBe(0);
       expect(stateMap.get(3)?.level).toBe(0);
+      expect(p1.balance).toBe(5_000 + 1_000);
     });
   });
 
@@ -163,7 +169,7 @@ describe('[CONTRACT-TEST] IMP-113: Swap Project & P2P Trading AI Overhaul', () =
       stateMap.set(6, { level: 0 });
       p1.balance = 5_000;
 
-      runChanceCard(ChanceCardId.CC_SWAP_PROJECT, p1.id, room.players, room.activeModifiers, registry, stateMap, room.permanentRentBonus, room);
+      runChanceCard(ChanceCardId.CC_SWAP_PROJECT, p1.id, room.players, room.activeModifiers, registry, stateMap, room.permanentRentBonus);
 
       expect(p1.balance).toBe(3_700); // 5000 - 1300
     });
@@ -173,7 +179,7 @@ describe('[CONTRACT-TEST] IMP-113: Swap Project & P2P Trading AI Overhaul', () =
       stateMap.set(6, { level: 0 });
       p1.balance = 5_000;
 
-      runChanceCard(ChanceCardId.CC_SWAP_PROJECT, p1.id, room.players, room.activeModifiers, registry, stateMap, room.permanentRentBonus, room);
+      runChanceCard(ChanceCardId.CC_SWAP_PROJECT, p1.id, room.players, room.activeModifiers, registry, stateMap, room.permanentRentBonus);
 
       expect(registry.get(6)).toBe(p1.id);
     });
@@ -184,7 +190,7 @@ describe('[CONTRACT-TEST] IMP-113: Swap Project & P2P Trading AI Overhaul', () =
       p1.balance = 5_000;
       p2.balance = 2_000;
 
-      runChanceCard(ChanceCardId.CC_SWAP_PROJECT, p1.id, room.players, room.activeModifiers, registry, stateMap, room.permanentRentBonus, room);
+      runChanceCard(ChanceCardId.CC_SWAP_PROJECT, p1.id, room.players, room.activeModifiers, registry, stateMap, room.permanentRentBonus);
 
       expect(p2.balance).toBe(3_300); // 2000 + 1300
     });
@@ -195,7 +201,7 @@ describe('[CONTRACT-TEST] IMP-113: Swap Project & P2P Trading AI Overhaul', () =
       p1.balance = 5_000;
       p2.balance = 2_000;
 
-      runChanceCard(ChanceCardId.CC_SWAP_PROJECT, p1.id, room.players, room.activeModifiers, registry, stateMap, room.permanentRentBonus, room);
+      runChanceCard(ChanceCardId.CC_SWAP_PROJECT, p1.id, room.players, room.activeModifiers, registry, stateMap, room.permanentRentBonus);
 
       expect(p1.balance).toBe(3_180); // 5000 - 1820
       expect(p2.balance).toBe(3_820); // 2000 + 1820
@@ -257,7 +263,7 @@ describe('[CONTRACT-TEST] IMP-113: Swap Project & P2P Trading AI Overhaul', () =
       stateMap.set(6, { level: 0 });
       const initialTotalCash = p1.balance + p2.balance;
 
-      runChanceCard(ChanceCardId.CC_SWAP_PROJECT, p1.id, room.players, room.activeModifiers, registry, stateMap, room.permanentRentBonus, room);
+      runChanceCard(ChanceCardId.CC_SWAP_PROJECT, p1.id, room.players, room.activeModifiers, registry, stateMap, room.permanentRentBonus);
 
       const finalTotalCash = p1.balance + p2.balance;
       expect(finalTotalCash).toBe(initialTotalCash);
@@ -287,7 +293,7 @@ describe('[CONTRACT-TEST] IMP-113: Swap Project & P2P Trading AI Overhaul', () =
       registry.set(6, p2.id);
       stateMap.set(6, { level: 0 });
 
-      runChanceCard(ChanceCardId.CC_SWAP_PROJECT, p1.id, room.players, room.activeModifiers, registry, stateMap, room.permanentRentBonus, room);
+      runChanceCard(ChanceCardId.CC_SWAP_PROJECT, p1.id, room.players, room.activeModifiers, registry, stateMap, room.permanentRentBonus);
 
       expect(registry.get(6)).toBe(p1.id);
       expect(Array.from(registry.values()).filter((owner) => owner === p2.id)).toHaveLength(0);

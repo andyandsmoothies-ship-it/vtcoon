@@ -99,6 +99,19 @@ function syncBusinessModals(delta: DeltaPayload, state: GameState): void {
     state.closeModal();
   }
 
+  // [IMP-145] Compulsory Buyout Modal — mở khi người chơi là bên mua (buyerId), đóng khi pendingBuyout là null
+  if (delta.pendingBuyout !== undefined) {
+    state.setPendingBuyout(delta.pendingBuyout);
+    if (delta.pendingBuyout) {
+      const myPid = useLobbyStore.getState().myPlayerId;
+      if (delta.pendingBuyout.buyerId === myPid) {
+        state.openModal('compulsory_buyout', delta.pendingBuyout);
+      }
+    } else if (delta.pendingBuyout === null && state.activeModal === 'compulsory_buyout') {
+      state.closeModal();
+    }
+  }
+
   if (delta.lastHoseResult && state.activeModal === 'hose') {
     const hr = delta.lastHoseResult;
     const myPid = useLobbyStore.getState().myPlayerId;
