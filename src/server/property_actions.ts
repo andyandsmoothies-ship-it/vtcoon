@@ -284,6 +284,8 @@ export function executeP2PTrade(
   v.seller.balance += v.sellerNet;
   room.treasury += v.taxAmount;
   registry.set(cellIndex, buyerId);
+  delete v.buyer.cellTradeRejections?.[cellIndex];
+  delete v.buyer.cellLastRejectedRound?.[cellIndex];
 
   console.info(JSON.stringify({
     event: 'P2P_TRADE', correlationId: room.roomCode,

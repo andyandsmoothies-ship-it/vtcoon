@@ -28,12 +28,13 @@ export interface BotTradeIntent extends BotIntent {
  * Quét các nhóm màu có khả năng xây dựng, phát hiện nhóm màu mà Bot đang sở hữu N-1 ô.
  * Ô còn thiếu (gapCell) phải thuộc người chơi khác, không cầm cố và chưa có công trình.
  */
-export function findMonopolyGap(
+export function findAllMonopolyGaps(
   bot: Player,
   room: Room,
   registry: PropertyRegistry,
   stateMap: PropertyStateMap,
-): MonopolyGap | null {
+): MonopolyGap[] {
+  const gaps: MonopolyGap[] = [];
   for (const group of Object.values(ColorGroup)) {
     const groupCells = BOARD_CONFIG.filter((c) => c.colorGroup === group);
     const totalCount = groupCells.length;
@@ -58,11 +59,20 @@ export function findMonopolyGap(
       );
       if (isMortgaged) continue; // Ô đất đang bị cầm cố
 
-      return { cellIndex: gapCell.index, targetOwnerId };
+      gaps.push({ cellIndex: gapCell.index, targetOwnerId });
     }
   }
 
-  return null;
+  return gaps;
+}
+
+export function findMonopolyGap(
+  bot: Player,
+  room: Room,
+  registry: PropertyRegistry,
+  stateMap: PropertyStateMap,
+): MonopolyGap | null {
+  return findAllMonopolyGaps(bot, room, registry, stateMap)[0] ?? null;
 }
 
 /**
@@ -101,6 +111,18 @@ export function calculateTradeOfferPrice(
       multiplier = 1.1;
     }
   }
+
+  const rejections = bot.cellTradeRejections?.[cellIndex] ?? 0;
+  let maxEscalation = 0.30;
+  if (personality === BotPersonality.Aggressive) {
+    maxEscalation = 0.40;
+  } else if (personality === BotPersonality.Balanced) {
+    maxEscalation = 0.30;
+  } else if (personality === BotPersonality.Passive) {
+    maxEscalation = 0.15;
+  }
+  const escalation = Math.min(maxEscalation, rejections * 0.10);
+  multiplier += escalation;
 
   const offerPrice = Math.round(basePrice * multiplier);
   const safetyBuffer = isMonopolyGap
@@ -217,29 +239,38 @@ export function findEligibleBotTrade(
     return null;
   }
 
-  const gap = findMonopolyGap(bot, room, registry, stateMap);
-  if (!gap) return null;
+  const gaps = findAllMonopolyGaps(bot, room, registry, stateMap);
+  if (gaps.length === 0) return null;
 
-  const targetOwner = room.players.find((p) => p.id === gap.targetOwnerId);
-  if (!targetOwner || targetOwner.bankrupt) return null;
+  for (const gap of gaps) {
+    const lastRejected = bot.cellLastRejectedRound?.[gap.cellIndex];
+    if (lastRejected !== undefined && currentRound - lastRejected <= 1) {
+      continue; // Cooldown 1 lượt cho ô đất này, xét gap tiếp theo (Anti-Gap Starvation)
+    }
 
-  const price = calculateTradeOfferPrice(
-    gap.cellIndex,
-    bot,
-    personality,
-    undefined,
-    currentRound,
-    true,
-    room.players.length,
-  );
-  if (price === null) return null;
+    const targetOwner = room.players.find((p) => p.id === gap.targetOwnerId);
+    if (!targetOwner || targetOwner.bankrupt) continue;
 
-  return {
-    type: 'INTENT_TRADE_OFFER',
-    cellIndex: gap.cellIndex,
-    sellerId: gap.targetOwnerId,
-    targetPlayerId: gap.targetOwnerId,
-    buyerId: bot.id,
-    price,
-  };
+    const price = calculateTradeOfferPrice(
+      gap.cellIndex,
+      bot,
+      personality,
+      undefined,
+      currentRound,
+      true,
+      room.players.length,
+    );
+    if (price === null) continue;
+
+    return {
+      type: 'INTENT_TRADE_OFFER',
+      cellIndex: gap.cellIndex,
+      sellerId: gap.targetOwnerId,
+      targetPlayerId: gap.targetOwnerId,
+      buyerId: bot.id,
+      price,
+    };
+  }
+
+  return null;
 }

@@ -137,6 +137,12 @@ export function coordTrade(
       decision = { accept: true };
     }
     if (!decision.accept) {
+      if (buyer.isBot) {
+        const round = ctx.room.roundCount ?? ctx.room.round ?? 1;
+        buyer.lastTradeOfferRound = round;
+        (buyer.cellTradeRejections ??= {})[cellIndex] = ((buyer.cellTradeRejections ??= {})[cellIndex] ?? 0) + 1;
+        (buyer.cellLastRejectedRound ??= {})[cellIndex] = round;
+      }
       return { success: false, reason: ActionRejectReason.TRADE_REJECTED };
     }
   }
@@ -200,11 +206,16 @@ export function coordRespondTradeOffer(
     ctx.reg.set(session.cellIndex, buyer.id);
 
     buyer.lastTradeOfferRound = ctx.room.roundCount ?? ctx.room.round ?? 1;
+    delete buyer.cellTradeRejections?.[session.cellIndex];
+    delete buyer.cellLastRejectedRound?.[session.cellIndex];
     pendingTradeManager.resolveSession(ctx.room.roomCode, offerId, true);
     (ctx.room as any).pendingTradeOffer = null;
     return { success: true };
   } else {
-    buyer.lastTradeOfferRound = ctx.room.roundCount ?? ctx.room.round ?? 1;
+    const round = ctx.room.roundCount ?? ctx.room.round ?? 1;
+    buyer.lastTradeOfferRound = round;
+    (buyer.cellTradeRejections ??= {})[session.cellIndex] = ((buyer.cellTradeRejections ??= {})[session.cellIndex] ?? 0) + 1;
+    (buyer.cellLastRejectedRound ??= {})[session.cellIndex] = round;
     pendingTradeManager.resolveSession(ctx.room.roomCode, offerId, false);
     (ctx.room as any).pendingTradeOffer = null;
     return { success: true };

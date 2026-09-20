@@ -251,7 +251,10 @@ export class RoomManager {
         (room as any).pendingTradeOffer = null;
         const buyer = room.players.find((p) => p.id === res.session?.buyerId);
         if (buyer) {
-          buyer.lastTradeOfferRound = room.roundCount ?? room.round ?? 1;
+          const round = room.roundCount ?? room.round ?? 1;
+          buyer.lastTradeOfferRound = round;
+          (buyer.cellTradeRejections ??= {})[res.session.cellIndex] = ((buyer.cellTradeRejections ??= {})[res.session.cellIndex] ?? 0) + 1;
+          (buyer.cellLastRejectedRound ??= {})[res.session.cellIndex] = round;
         }
       }
     }

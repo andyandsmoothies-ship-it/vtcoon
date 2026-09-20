@@ -62,6 +62,8 @@ export interface Player {
   isBot?:               boolean;
   overdraftRoundsLeft?: number;
   lastTradeOfferRound?: number;
+  cellTradeRejections?: Record<number, number>;
+  cellLastRejectedRound?: Record<number, number>;
   pawnSlot?:            number;
   ownerSlot?:           number;
   mascotIcon?:          string;

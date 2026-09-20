@@ -8,7 +8,7 @@
 | Domain Tag | Trọng Tâm & Phạm Vi Mã Nguồn | Các Gotchas Liên Quan |
 | :--- | :--- | :--- |
 | `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78, #82, #104, #105, #106, #145, #146, #147, #159, #164, #174, #180, #188 |
-| `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147, #190 |
+| `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147, #190, #191 |
 | `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190 |
 | `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #32, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #60, #61, #63, #69, #72, #74, #77, #80, #85, #86, #88, #89, #90, #91, #92, #93, #94, #95, #96, #101, #103, #109, #110, #114, #115, #116, #117, #120, #122, #123, #124, #125, #126, #127, #128, #129, #130, #133, #134, #135, #136, #140, #141, #144, #148, #159, #160, #161, #162, #163, #164, #165, #169, #175, #177, #189 |
 | `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188 |
@@ -3129,3 +3129,29 @@
      - Khi `buyer.isBot && seller.isBot`: Thực thi đồng bộ tức thì 0ms, không tạo pending trade. Nếu thẩm định thường từ chối nhưng giá đạt $\ge 1.60\times$ giá gốc, cho phép chấp thuận giao dịch giữa 2 Bot để giữ tính tương thích toàn diện IMP-82, IMP-118 và IMP-119.
   5. **Hộp Thoại Đàm Phán Xúc Giác & Đếm Ngược 15 Giây (`BotTradeOfferModal`)**:
      - `src/client/ui/modals/bot_trade_offer_modal.tsx`: Thiết kế theo phong cách tactile boardgame, đồng hồ đếm ngược trực quan với thanh tiến trình gradient `amber -> emerald`, nút bấm WCAG AA $\ge 44$px (`[TỪ CHỐI BÁN]`, `[ĐỒNG Ý BÁN]`), hiển thị cảnh báo độc quyền và tính toán minh bạch thuế 5% nộp Kho bạc.
+
+---
+
+### 191. [BOT/AI] Tối Ưu Nhịp Độ Đàm Phán Bot: Target Cell Cooldown 1 Lượt, Anti-Gap Starvation & Tăng Giá Bậc Thang Phân Tầng Tính Cách (IMP-144)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Đề Xuất Lặp Lại Ô Đất Vừa Bị Từ Chối (Target Cell Trade Spam Trap)*:
+     - Trước IMP-144, khi Bot bị từ chối mua một ô đất độc quyền (Monopoly Gap), ở các lượt sau Bot có thể liên tục đề xuất lại chính ô đất đó mà không có khoảng đệm thời gian suy ngẫm cho từng ô mục tiêu, gây cảm giác quấy rối và spam đề xuất đàm phán tới người chơi.
+  2. *Bẫy Chết Đói Độc Quyền Khi Một Ô Bị Cooldown (Gap Starvation Trap)*:
+     - Khi Bot thiếu nhiều hơn 1 ô độc quyền ở các nhóm màu khác nhau (ví dụ thiếu ô X nhóm Nâu và ô Y nhóm Xanh Da Trời), nếu chỉ dùng `findMonopolyGap` (trả về gap đầu tiên), khi ô X đang trong thời gian cooldown sau từ chối, Bot sẽ bị nghẽn và không bao giờ xem xét đến ô Y, bỏ lỡ cơ hội hoàn thành bộ màu hợp lệ khác trong cùng lượt.
+  3. *Bẫy Định Giá Đàm Phán Tĩnh (Static Price Negotiation Trap)*:
+     - Khi đề xuất bị người chơi từ chối nhiều lần, Bot nếu không có cơ chế tăng giá leo thang (price escalation) sẽ tiếp tục chào mua với mức giá cũ. Ngược lại, nếu tăng giá vô tội vạ mà không có trần phân tầng theo tính cách (Aggressive +40%, Balanced +30%, Passive +15%), Bot sẽ dễ bị thâm hụt tài chính và vi phạm ngân sách đệm an toàn `safetyBuffer` (1.000 Tr. VNĐ).
+  4. *Bẫy Rò Rỉ Trạng Thái Từ Chối Khi Đã Sở Hữu Thành Công (Stale Rejection History Trap)*:
+     - Nếu không xóa sạch bản ghi `cellTradeRejections` và `cellLastRejectedRound` khi ô đất được giao dịch thành công (qua `coordRespondTradeOffer` hoặc `executeP2PTrade`), các lần giao dịch trong tương lai đối với ô đất này sẽ mang lịch sử cũ sai lệch.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Cooldown Ô Đất Mục Tiêu Đúng 1 Lượt (`Target Cell Cooldown 1 Round`)**:
+     - `src/domain/bot/bot_trade.ts`: Khi ô đất X bị từ chối ở Vòng R (`bot.cellLastRejectedRound[X] = R`), Bot không được đề xuất lại ô X ở vòng R và vòng R + 1 (`currentRound - lastRejected <= 1`). Chỉ từ vòng R + 2 trở đi, Bot mới được phép đề xuất lại ô X nếu đủ điều kiện tài chính.
+  2. **Quét Đa Độc Quyền & Chống Chết Đói Ô Đất (`findAllMonopolyGaps` & Anti-Gap Starvation)**:
+     - Triển khai `findAllMonopolyGaps(bot, room, registry, stateMap): MonopolyGap[]` quét toàn bộ bàn cờ.
+     - `findEligibleBotTrade` duyệt qua từng gap: nếu một gap đang cooldown 1 lượt thì tiếp tục `continue` xét gap tiếp theo, bảo đảm Bot luôn tìm được ô độc quyền khả thi khác trong cùng lượt.
+  3. **Tăng Giá Bậc Thang Phân Tầng Tính Cách (+10% Mỗi Lần Từ Chối Kèm Trần Tuyệt Đối)**:
+     - `calculateTradeOfferPrice`: Mỗi lần bị từ chối (`rejections`), hệ số giá tăng thêm `+0.10 * rejections`.
+     - Trần tăng giá thặng dư tối đa (`maxEscalation`): Bot Aggressive tối đa `+0.40` (+40%), Bot Balanced tối đa `+0.30` (+30%), Bot Passive tối đa `+0.15` (+15%).
+     - Luôn tôn trọng `safetyBuffer >= 1.000` Tr. VNĐ; nếu `bot.balance - offerPrice < safetyBuffer`, trả về `null` chống vỡ nợ.
+  4. **Dọn Sạch Lịch Sử Khi Giao Dịch Thành Công (Zero Dangling State)**:
+     - Trong `executeP2PTrade` và `coordRespondTradeOffer` (nhánh `accept: true`): `delete buyer.cellTradeRejections?.[cellIndex]` và `delete buyer.cellLastRejectedRound?.[cellIndex]`.
+     - Trong trường hợp từ chối chủ động hoặc quá hạn 15s timeout (`checkPendingTradeTimeout`): tự động tăng số lần từ chối lên 1 và ghi nhận `cellLastRejectedRound = currentRound` an toàn với Safe Init (`??= {}`).
