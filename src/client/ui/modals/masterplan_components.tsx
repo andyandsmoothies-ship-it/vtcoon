@@ -427,7 +427,7 @@ export function MasterplanEmptyState(props: MasterplanEmptyStateProps): React.Re
   return (
     <div
       data-testid="masterplan-empty-state"
-      className="col-span-full border-2 border-dashed border-amber-900/20 bg-[#FDFBF7] rounded-3xl p-6 sm:p-8 text-center flex flex-col items-center justify-center min-h-[260px] shadow-inner"
+      className="col-span-full border-2 border-dashed border-amber-900/20 bg-[#FDFBF7] rounded-3xl p-6 sm:p-8 text-center flex flex-col items-center justify-center min-h-[260px] md:min-h-[340px] h-full shadow-inner my-auto"
     >
       <div
         className="w-16 h-16 rounded-2xl bg-amber-100/70 border border-amber-900/15 flex items-center justify-center text-3xl mb-3 shadow-xs"

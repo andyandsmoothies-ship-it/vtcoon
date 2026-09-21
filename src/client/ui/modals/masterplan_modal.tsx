@@ -231,7 +231,7 @@ export function MasterplanModal({
       role="dialog"
       aria-label="Bản đồ quy hoạch đô thị"
       data-testid="masterplan-modal"
-      className="relative w-full max-w-4xl bg-[#FFFDF9] border-2 border-slate-900 rounded-3xl shadow-[0_8px_0_0_#0f172a] shadow-[0_8px_0_0_#0f172a,0_16px_36px_rgba(15,23,42,0.18)] max-h-[92vh] flex flex-col overflow-hidden text-slate-800 animate-in fade-in zoom-in-95 duration-200 pointer-events-auto select-none"
+      className="relative w-full max-w-4xl h-[88vh] max-h-[92vh] min-h-[520px] bg-[#FFFDF9] border-2 border-slate-900 rounded-3xl shadow-[0_8px_0_0_#0f172a] shadow-[0_8px_0_0_#0f172a,0_16px_36px_rgba(15,23,42,0.18)] flex flex-col overflow-hidden text-slate-800 animate-in fade-in zoom-in-95 duration-200 pointer-events-auto select-none"
     >
       {/* Header */}
       <header className="px-4 py-3 bg-[#FBF8F1] border-b border-amber-900/10 flex items-center justify-between shrink-0">
@@ -429,11 +429,11 @@ export function MasterplanModal({
         {/* TAB 2: 8 PHÂN KHU ĐỘC QUYỀN (DISTRICT MONOPOLY MATRIX) */}
         {/* ================================================================= */}
         {activeTab === 'districts' && (
-          <div className="flex flex-col">
+          <div className="flex flex-col min-h-full">
             {/* Filter Bar */}
             <div
               data-testid="district-filter-bar"
-              className="flex items-center gap-1.5 p-1.5 bg-amber-950/5 border border-amber-900/10 rounded-2xl mb-3 overflow-x-auto no-scrollbar"
+              className="flex items-center gap-1.5 p-1.5 bg-amber-950/5 border border-amber-900/10 rounded-2xl mb-3 overflow-x-auto no-scrollbar shrink-0"
             >
               {FILTER_OPTIONS.map((opt) => {
                 const isActive = activeFilter === opt.id;
@@ -467,7 +467,7 @@ export function MasterplanModal({
 
             <div
               data-testid="masterplan-districts-grid"
-              className="grid grid-cols-1 md:grid-cols-2 gap-3"
+              className="grid grid-cols-1 md:grid-cols-2 gap-3 flex-1"
             >
               {filteredDistricts.length > 0 ? (
                 filteredDistricts.map((district) => (

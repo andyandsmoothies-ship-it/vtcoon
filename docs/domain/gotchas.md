@@ -3406,3 +3406,19 @@
      - Định nghĩa chuẩn: `isMonopoly` khi `maxOwned === totalCells`; `isNearMonopoly` khi `totalCells > 1 && maxOwned === totalCells - 1 && !isMonopoly`; `hasVacant` khi `vacantCells > 0`.
      - Tái sử dụng 100% trong cả tính nhãn đếm `filterCounts` lẫn lọc hiển thị `filteredDistricts` và component `MasterplanEmptyState`.
 
+---
+
+### 202. [UI/CRAFT][MODAL] Cố Định Chiều Cao Khung Hình Modal Đa Tab & Triệt Tiêu Nhảy Giật Chiều Dọc (IMP-152 Follow-up)
+- **Bối cảnh & Bẫy thực tế**:
+  - Khi modal có nhiều tab hoặc các tab lọc có số lượng phần tử biến thiên lớn (ví dụ: Tab "Tất Cả" có 10 phân khu cao ~750px, trong khi Tab "Sắp Độc Quyền" rỗng cao ~300px), việc chỉ đặt `max-h-[92vh]` kết hợp với backdrop căn giữa `flex items-center` sẽ gây ra hiện tượng **nhảy giật chiều dọc nghiêm trọng (Vertical Layout Jitter / CLS)**.
+  - Cụ thể: Khi nội dung co ngắn lại, vị trí trọng tâm của modal bị kéo tụt xuống dưới ~200-250px; khi bấm quay lại tab nhiều nội dung, modal lại giật nảy ngược lên trên, gây mỏi mắt và cảm giác thiếu vững chắc cho người chơi.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Locked Modal Frame Budget**:
+     - Mọi modal đa tab phức tạp (`MasterplanModal`, `PropertyPortfolioModal`) bắt buộc phải khóa chiều cao cơ sở ổn định trên vỏ bọc ngoài:
+       `className="... h-[88vh] max-h-[92vh] min-h-[520px] ..."`
+     - Giúp Header, Tab Switcher, Nút Đóng và Filter Bar luôn nằm yên 100% tại tọa độ tĩnh (Stationary Shell).
+  2. **Full-Height Container & Centered Empty State**:
+     - Vùng chứa tab phải dùng `min-h-full flex flex-col` và grid `flex-1`.
+     - Khi rơi vào Empty State, thẻ trống mang `col-span-full h-full min-h-[260px] md:min-h-[340px] my-auto`, lấp đầy và căn giữa tự nhiên trong lòng khung modal tĩnh mà không làm co bóp kích thước của hộp thoại.
+
+
