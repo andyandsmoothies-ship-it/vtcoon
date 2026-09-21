@@ -9,7 +9,7 @@ import {
   MasterplanDistrictCard,
   type MasterplanDistrictCardProps,
 } from '../../src/client/ui/modals/masterplan_components';
-import { DISTRICT_GROUPS } from '../../src/client/ui/modals/masterplan_constants';
+import { DISTRICT_GROUPS, classifyDistrict } from '../../src/client/ui/modals/masterplan_constants';
 
 /**
  * Extended props interface for MasterplanModal anticipating IMP-137 capabilities
@@ -52,6 +52,32 @@ function renderMasterplan(props: ExtendedMasterplanModalProps = {}): string {
   );
 }
 
+function renderDistrictCard(
+  districtId: string,
+  players = MOCK_PLAYERS_INFO,
+  myPlayerId?: string,
+  customOwnership?: any
+): string {
+  const district = DISTRICT_GROUPS.find((d) => d.id === districtId)!;
+  return renderToStaticMarkup(
+    React.createElement(MasterplanDistrictCard, {
+      district,
+      players,
+      myPlayerId,
+      getCellOwnership: customOwnership ?? ((cellIndex: number) => {
+        let owner: any = null;
+        for (const p of Object.values(players)) {
+          if ((p as any)?.ownedProperties?.includes(cellIndex)) {
+            owner = p;
+            break;
+          }
+        }
+        return { owner, isMortgaged: false, level: 0 };
+      }),
+    })
+  );
+}
+
 // Realistic test fixtures adhering to Saigon / Hanoi investor themes
 const MOCK_PLAYERS_INFO: Record<string, any> = {
   p1: {
@@ -86,11 +112,11 @@ describe('[IMP-137: Trạm 1 RED] Urban Masterplan District Monopoly Radar Overh
   // Facet 1: Boundary & Layout (Mặc định phân khu, fallback sa bàn, filter bar, progress bar)
   // =========================================================================
   describe('Facet 1: Boundary & Layout', () => {
-    it('[TC-IMP137.01/MSS][UC-GAME-009][IMP-137][Facet-1/Boundary] Mặc định mở tab "districts" khi không truyền initialTab và không có selectedCellIndex', () => {
+    it('[TC-IMP137.01/MSS][UC-GAME-009][IMP-137][Facet-1/Boundary] MasterplanModal mặc định mở Sa Bàn 40 Ô trực quan', () => {
       const html = renderMasterplan({ playersInfo: MOCK_PLAYERS_INFO });
 
-      expect(html).toContain('data-testid="masterplan-districts-grid"');
-      expect(html).not.toContain('data-testid="masterplan-blueprint-grid"');
+      expect(html).toContain('data-testid="masterplan-blueprint-grid"');
+      expect(html).not.toContain('data-testid="masterplan-districts-grid"');
     });
 
     it('[TC-IMP137.02/A1][UC-GAME-009][IMP-137][Facet-1/Boundary] Fallback mở tab "blueprint" khi có selectedCellIndex để bảo toàn Inspector Card', () => {
@@ -103,21 +129,14 @@ describe('[IMP-137: Trạm 1 RED] Urban Masterplan District Monopoly Radar Overh
       expect(html).toContain('data-testid="masterplan-cell-inspector"');
     });
 
-    it('[TC-IMP137.03/MSS][UC-GAME-009][IMP-137][Facet-1/Boundary] Hiển thị thanh lọc phân loại (Filter Bar) với 4 bộ lọc: Tất Cả, Sắp Độc Quyền, Đã Độc Quyền, Còn Đất Trống', () => {
-      const html = renderMasterplan({
-        initialTab: 'districts',
-        playersInfo: MOCK_PLAYERS_INFO,
-      });
+    it('[TC-IMP137.03/MSS][UC-GAME-009][IMP-137][Facet-1/Boundary] MasterplanModal tinh giản không còn render thanh lọc phân loại (Filter Bar)', () => {
+      const html = renderMasterplan({ playersInfo: MOCK_PLAYERS_INFO });
 
-      expect(html).toContain('data-testid="district-filter-bar"');
-      expect(html).toMatch(/Tất Cả.*Sắp Độc Quyền.*Đã Độc Quyền.*Còn Đất Trống/s);
+      expect(html).not.toContain('data-testid="district-filter-bar"');
     });
 
     it('[TC-IMP137.04/MSS][UC-GAME-009][IMP-137][Facet-1/Boundary] Mỗi phân khu render thanh tiến độ phân đoạn data-testid="district-progress-bar" với số phân đoạn bằng đúng district.cellIndices.length', () => {
-      const html = renderMasterplan({
-        initialTab: 'districts',
-        playersInfo: MOCK_PLAYERS_INFO,
-      });
+      const html = renderDistrictCard('XanhDaTroi');
 
       expect(html).toContain('data-testid="district-progress-bar-XanhDaTroi"');
       expect(html).toContain('data-testid="district-progress-segment-6"');
@@ -131,20 +150,14 @@ describe('[IMP-137: Trạm 1 RED] Urban Masterplan District Monopoly Radar Overh
   // =========================================================================
   describe('Facet 2: State Reactivity & Monopoly Radar', () => {
     it('[TC-IMP137.05/MSS][UC-GAME-009][IMP-137][Facet-2/Reactivity] Phân đoạn tiến độ hiển thị đúng màu tokenColor của chủ sở hữu hoặc màu xám nhạt khi còn trống', () => {
-      const html = renderMasterplan({
-        initialTab: 'districts',
-        playersInfo: MOCK_PLAYERS_INFO,
-      });
+      const html = renderDistrictCard('Hong');
 
       expect(html).toMatch(/data-testid="district-progress-segment-11"[^>]*#2980b9/);
       expect(html).toMatch(/data-testid="district-progress-segment-13"[^>]*(bg-slate-200|#e2e8f0|data-vacant)/);
     });
 
     it('[TC-IMP137.06/MSS][UC-GAME-009][IMP-137][Facet-2/Reactivity] Khi một người chơi sở hữu N-1 ô (ví dụ 2/3 ô Đông Nam Bộ), hiển thị huy hiệu ⚡ Sắp Độc Quyền', () => {
-      const html = renderMasterplan({
-        initialTab: 'districts',
-        playersInfo: MOCK_PLAYERS_INFO,
-      });
+      const html = renderDistrictCard('XanhDaTroi');
 
       expect(html).toContain('⚡ Sắp Độc Quyền');
       expect(html).toContain('data-near-monopoly="true"');
@@ -153,69 +166,65 @@ describe('[IMP-137: Trạm 1 RED] Urban Masterplan District Monopoly Radar Overh
     it('[TC-IMP137.07/MSS][UC-GAME-009][IMP-137][Facet-2/Reactivity] Khi phân khu đã trọn bộ độc quyền, hiển thị huy hiệu 👑 Độc Quyền kèm tên chủ sở hữu', () => {
       const monopolyPlayers = {
         ...MOCK_PLAYERS_INFO,
-        p1: { ...MOCK_PLAYERS_INFO.p1, ownedProperties: [1, 3, 6, 8] },
+        p1: { ...MOCK_PLAYERS_INFO.p1, ownedProperties: [1, 3, 6, 8, 9] },
       };
-      const html = renderMasterplan({
-        initialTab: 'districts',
-        playersInfo: monopolyPlayers,
-      });
+      const html = renderDistrictCard('XanhDaTroi', monopolyPlayers);
 
       expect(html).toContain('data-monopoly="true"');
       expect(html).toMatch(/👑\s*Độc Quyền.*Đại Gia Sài Gòn/);
     });
 
     it('[TC-IMP137.08/MSS][UC-GAME-009][IMP-137][Facet-2/Reactivity] Khi phân khu chưa ai mua ô nào, hiển thị nhãn trạng thái đất trống', () => {
-      const html = renderMasterplan({
-        initialTab: 'districts',
-        playersInfo: MOCK_PLAYERS_INFO,
-      });
+      const html = renderDistrictCard('Cam');
 
       expect(html).toContain('data-testid="district-status-vacant-Cam"');
       expect(html).toMatch(/Đất Trống|Chưa Có Chủ/i);
     });
 
     it('[TC-IMP137.09/MSS][UC-GAME-009][IMP-137][Facet-2/Reactivity] Thẻ ô BĐS đã có chủ được phủ nhẹ màu nhận diện của chủ sở hữu qua style background/border', () => {
-      const html = renderMasterplan({
-        initialTab: 'districts',
-        playersInfo: MOCK_PLAYERS_INFO,
-      });
+      const html = renderDistrictCard('XanhDaTroi');
 
       expect(html).toMatch(/data-testid="district-cell-6"[^>]*style="[^"]*#c0392b/);
     });
 
     it('[TC-IMP137.10/MSS][UC-GAME-009][IMP-137][Facet-2/Reactivity] Tên chủ sở hữu trên thẻ ô BĐS không bị giới hạn cứng max-w-[50px]', () => {
-      const html = renderMasterplan({
-        initialTab: 'districts',
-        playersInfo: MOCK_PLAYERS_INFO,
-      });
+      const html = renderDistrictCard('XanhDaTroi');
 
       expect(html).not.toContain('max-w-[50px]');
     });
 
-    it('[TC-IMP137.11/MSS][UC-GAME-009][IMP-137][Facet-2/Reactivity] Lọc theo tab Sắp Độc Quyền chỉ hiển thị các phân khu thỏa mãn điều kiện gần độc quyền', () => {
-      const html = renderMasterplan({
-        initialTab: 'districts',
-        playersInfo: MOCK_PLAYERS_INFO,
-        districtFilter: 'near-monopoly',
-      });
+    it('[TC-IMP137.11/MSS][UC-GAME-009][IMP-137][Facet-2/Reactivity] Hàm classifyDistrict phân loại chính xác phân khu Sắp Độc Quyền', () => {
+      const xanhDaTroi = DISTRICT_GROUPS.find((d) => d.id === 'XanhDaTroi')!;
+      const cam = DISTRICT_GROUPS.find((d) => d.id === 'Cam')!;
+      const getOwnership = (cellIndex: number) => {
+        const owner = MOCK_PLAYERS_INFO.p1.ownedProperties.includes(cellIndex) ? MOCK_PLAYERS_INFO.p1 : null;
+        return { owner, isMortgaged: false, level: 0 };
+      };
 
-      expect(html).toContain('data-district="XanhDaTroi"');
-      expect(html).not.toContain('data-district="Cam"');
+      const resXdt = classifyDistrict(xanhDaTroi, getOwnership);
+      const resCam = classifyDistrict(cam, getOwnership);
+
+      expect(resXdt.isNearMonopoly).toBe(true);
+      expect(resCam.isNearMonopoly).toBe(false);
     });
 
-    it('[TC-IMP137.12/MSS][UC-GAME-009][IMP-137][Facet-2/Reactivity] Lọc theo tab Còn Đất Trống chỉ hiển thị các phân khu còn ô chưa bán', () => {
+    it('[TC-IMP137.12/MSS][UC-GAME-009][IMP-137][Facet-2/Reactivity] Hàm classifyDistrict phân loại chính xác phân khu Còn Đất Trống', () => {
       const monopolyPlayers = {
         ...MOCK_PLAYERS_INFO,
         p1: { ...MOCK_PLAYERS_INFO.p1, ownedProperties: [1, 3] },
       };
-      const html = renderMasterplan({
-        initialTab: 'districts',
-        playersInfo: monopolyPlayers,
-        districtFilter: 'vacant',
-      });
+      const nau = DISTRICT_GROUPS.find((d) => d.id === 'Nau')!;
+      const cam = DISTRICT_GROUPS.find((d) => d.id === 'Cam')!;
+      const getOwnership = (cellIndex: number) => {
+        const owner = monopolyPlayers.p1.ownedProperties.includes(cellIndex) ? monopolyPlayers.p1 : null;
+        return { owner, isMortgaged: false, level: 0 };
+      };
 
-      expect(html).toContain('data-district="Cam"');
-      expect(html).not.toContain('data-district="Nau"');
+      const resNau = classifyDistrict(nau, getOwnership);
+      const resCam = classifyDistrict(cam, getOwnership);
+
+      expect(resCam.hasVacant).toBe(true);
+      expect(resNau.hasVacant).toBe(false);
     });
   });
 
@@ -224,11 +233,7 @@ describe('[IMP-137: Trạm 1 RED] Urban Masterplan District Monopoly Radar Overh
   // =========================================================================
   describe('Facet 3: Disposal & Actionability', () => {
     it('[TC-IMP137.13/MSS][UC-GAME-009][IMP-137][Facet-3/Disposal] Nút [🤝] hoặc data-testid="quick-trade-btn-{cellIndex}" chỉ hiển thị cho ô của đối thủ (owner.id !== myPlayerId)', () => {
-      const html = renderMasterplan({
-        initialTab: 'districts',
-        playersInfo: MOCK_PLAYERS_INFO,
-        myPlayerId: 'p1',
-      });
+      const html = renderDistrictCard('XanhDaTroi', MOCK_PLAYERS_INFO, 'p1');
 
       expect(html).not.toContain('data-testid="quick-trade-btn-6"');
       expect(html).toContain('data-testid="quick-trade-btn-9"');
@@ -298,23 +303,24 @@ describe('[IMP-137: Trạm 1 RED] Urban Masterplan District Monopoly Radar Overh
       });
 
       expect(html).toContain('data-testid="masterplan-modal"');
-      expect(html).toContain('data-testid="masterplan-districts-grid"');
+      expect(html).toContain('data-testid="masterplan-blueprint-grid"');
     });
 
-    it('[TC-IMP137.17/MSS][UC-GAME-009][IMP-137][Facet-4/ErrorDefense] Bảo toàn các selector kế thừa: data-testid="tab-districts", data-testid="masterplan-districts-grid", data-district="Nau", data-district="Railroad", data-district="Utility"', () => {
-      const html = renderMasterplan({ initialTab: 'districts' });
+    it('[TC-IMP137.17/MSS][UC-GAME-009][IMP-137][Facet-4/ErrorDefense] Bảo toàn các selector kế thừa: data-district="Nau", data-district="Railroad", data-district="Utility"', () => {
+      const htmlNau = renderDistrictCard('Nau');
+      const htmlRailroad = renderDistrictCard('Railroad');
+      const htmlUtility = renderDistrictCard('Utility');
 
-      expect(html).toContain('data-testid="tab-districts"');
-      expect(html).toContain('data-testid="masterplan-districts-grid"');
-      expect(html).toContain('data-district="Nau"');
-      expect(html).toMatch(/data-district="Railroad".*data-district="Utility"/s);
+      expect(htmlNau).toContain('data-district="Nau"');
+      expect(htmlRailroad).toContain('data-district="Railroad"');
+      expect(htmlUtility).toContain('data-district="Utility"');
     });
 
     it('[TC-IMP137.18/MSS][UC-GAME-009][IMP-137][Facet-4/ErrorDefense] Các nút hành động [👁️] và [🤝] đạt chuẩn touch target tối thiểu min-h-[36px] min-w-[36px] kèm tooltip title', () => {
-      const html = renderMasterplan({
-        initialTab: 'districts',
-        playersInfo: MOCK_PLAYERS_INFO,
-        myPlayerId: 'p1',
+      const html = renderDistrictCard('XanhDaTroi', MOCK_PLAYERS_INFO, 'p1', (cellIndex: number) => {
+        if (cellIndex === 6) return { owner: MOCK_PLAYERS_INFO.p1, isMortgaged: false, level: 0 };
+        if (cellIndex === 9) return { owner: MOCK_PLAYERS_INFO.p2, isMortgaged: false, level: 0 };
+        return { owner: null, isMortgaged: false, level: 0 };
       });
 
       expect(html).toMatch(/data-testid="view-cell-btn-6"[^>]*min-h-\[36px\]/);

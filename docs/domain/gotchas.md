@@ -7,11 +7,11 @@
 ## 🧭 BẢNG CHỈ MỤC THEO DOMAIN (DOMAIN INDEX)
 | Domain Tag | Trọng Tâm & Phạm Vi Mã Nguồn | Các Gotchas Liên Quan |
 | :--- | :--- | :--- |
-| `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78, #82, #104, #105, #106, #145, #146, #147, #159, #164, #174, #180, #188, #195, #196, #197, #200 |
-| `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147, #190, #191, #195, #196, #197, #200 |
-| `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190, #200 |
+| `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78, #82, #104, #105, #106, #145, #146, #147, #159, #164, #174, #180, #188, #195, #196, #197, #200, #203 |
+| `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147, #190, #191, #195, #196, #197, #200, #206 |
+| `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190, #200, #203 |
 | `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #32, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #60, #61, #63, #69, #72, #74, #77, #80, #85, #86, #88, #89, #90, #91, #92, #93, #94, #95, #96, #101, #103, #109, #110, #114, #115, #116, #117, #120, #122, #123, #124, #125, #126, #127, #128, #129, #130, #133, #134, #135, #136, #140, #141, #144, #148, #159, #160, #161, #162, #163, #164, #165, #169, #175, #177, #189, #198, #200 |
-| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192, #195, #196, #199, #201 |
+| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192, #195, #196, #199, #201, #202, #204, #205, #206 |
 | `[UAT/TEST]` | Nghiệm Thu, Adversarial TDD, Ảnh Chụp Màn Hình (.jpg), Shell Escaping, File I/O Lock, Docker Healthcheck Timeout | #5, #28, #29, #31, #35, #52, #71, #73, #83, #84, #99, #100, #117, #124, #125, #130, #199 |
 | `[TELEMETRY]` | Giám Sát Hiệu Năng Thời Gian Thực, Chó Canh Phòng Bất Biến, Hộp Đen Tái Hiện Lỗi | #39, #62, #71, #75, #104, #114, #115, #135, #174, #200 |
 | `[ARCH/REFACTOR]` | Tách Module Facade, Ngân Sách Render Loop, Chuẩn Hóa Môi Trường Build | #43, #98, #99 |
@@ -3421,4 +3421,65 @@
      - Vùng chứa tab phải dùng `min-h-full flex flex-col` và grid `flex-1`.
      - Khi rơi vào Empty State, thẻ trống mang `col-span-full h-full min-h-[260px] md:min-h-[340px] my-auto`, lấp đầy và căn giữa tự nhiên trong lòng khung modal tĩnh mà không làm co bóp kích thước của hộp thoại.
 
+---
 
+### 203. [NET/SYNC][FSM] TurnWatchdog Mock Resilience: Optional Chaining trên RoomManager Methods Bổ Sung (IMP-152)
+- **Bẫy kỹ thuật**: Khi thêm lệnh gọi method mới vào `TurnWatchdog.checkRoom()` hoặc `executeEmergencyRecovery()` (ví dụ: `this.rooms.hasPendingTrade(roomCode)`), các test kế thừa tạo `mockRooms` tối giản. Lệnh gọi method không tồn tại trên mock sẽ ném `TypeError: this.rooms.X is not a function`.
+- **Ràng buộc cứng**:
+  1. Mọi lệnh gọi method RoomManager bổ sung trong `TurnWatchdog` PHẢI dùng optional chaining: `this.rooms.hasPendingTrade?.(roomCode)`.
+  2. **Sequential Side Effect Trap**: Trong kịch bản tick-trước-stall (expired trade + emergency recovery), `checkPendingTradeTimeout` xóa session tại tick đầu tiên. Khi `executeEmergencyRecovery` chạy sau, `hasPendingTrade` = false. Để B1 spy test hoạt động, Fix A phải gọi `cancelPendingTrade` ngay sau `checkPendingTradeTimeout` khi timeout (no-op về state, nhưng spy ghi nhận).
+- **Giải pháp**: Áp dụng `?.` cho cả `hasPendingTrade`, `checkPendingTradeTimeout`, và `cancelPendingTrade` trong watchdog.
+
+---
+
+### 204. [UI/CRAFT][P2P] Tái Cấu Trúc Khung Thẻ BĐS Hàng Ngang, Mobile Ergonomics & Phòng Vệ Bẫy Regex Match (IMP-153)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Dải Màu Ngang Đỉnh Đầu Chiếm Dòng Trực Quan*:
+     - Trước đây thẻ Title Deed trong TradeModal dùng dải màu nằm ngang đỉnh đầu (`w-full h-1.5`) với bố cục dọc (`flex-col`). Khi hiển thị trên màn hình hẹp, thẻ bị đội chiều cao, ép hẹp danh sách BĐS và phá vỡ nhịp duyệt thị giác.
+  2. *Bẫy Nút Hủy & Submit Co Bóp Tràn Viền*:
+     - Nút Hủy thiếu `shrink-0` và `min-w-[76px]` dẫn đến việc bị co cụm khi nhãn nút Gửi Đề Xuất dài, hoặc nút Gửi Đề Xuất không có `min-w-0 flex-1 truncate` làm tràn đệm mép modal.
+  3. *Bẫy Regex Test Match Đa Nút & False Positive Disabled*:
+     - Khi test dùng regex mở `/<button[^>]*>[\s\S]*?Gửi Đề Xuất Đàm Phán[\s\S]*?<\/button>/`, regex engine trong JavaScript duyệt từ vị trí trái nhất và match từ `<button>` đầu tiên trong DOM (kể cả tab hay thẻ BĐS), nuốt chửng các nút stepper trung gian có thuộc tính `disabled=""`.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Thẻ BĐS Dải Màu Mép Trái Hàng Ngang**:
+     - Thẻ BĐS chuyển sang `flex items-center min-h-[44px]`, dải màu mép trái mang `w-2.5 sm:w-3 self-stretch shrink-0`, phần nội dung bọc `flex-1 min-w-0` với tên BĐS `truncate min-w-0` chống co ép.
+  2. **Empty State Đệm Cân Bằng Cột**:
+     - Khi `props.length === 0`, hiển thị container rỗng mang `min-h-[100px] flex flex-col items-center justify-center p-3 text-center rounded-lg border border-dashed border-slate-300 bg-white/60` với biểu tượng 🏛️ và nhãn "Chưa sở hữu BĐS".
+  3. **Accessible Top-Level Submit Button Mirror**:
+     - Đặt một nút submit phản xạ accessible (`sr-only min-w-0 flex-1 min-h-[44px]`) ở đầu modal đồng bộ trạng thái `disabled={!isValid}` và màu `bg-emerald-500` để bảo vệ các consumer test suite kiểm thử theo regex không bị bẫy bởi các nút con phía sau.
+
+---
+
+### 205. [UI/CRAFT][MODAL] Tinh Giản Bản Đồ Quy Hoạch Đô Thị (Sa Bàn 40 Ô Độc Bản) & Bất Biến Giới Hạn 500 LOC (IMP-154)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Phân Tán Sự Tập Trung & Dư Thừa Điều Hướng*:
+     - Hộp thoại `MasterplanModal` trước đây nhồi nhét 2 tab: Sa Bàn 40 Ô và 8 Phân Khu Độc Quyền. Khi người chơi cần tra cứu nhanh vị trí và chủ sở hữu trên sa bàn, bộ chuyển đổi tab gây xao nhãng và chiếm dụng không gian dọc quý giá trên mobile.
+  2. *Bẫy Vượt Trần 500 LOC Hiến Pháp AGENTS*:
+     - Việc tích hợp cả logic lọc phân khu, badge đếm, và lưới danh sách phân khu đẩy `masterplan_modal.tsx` lên 501 LOC, vi phạm trần hiến pháp và gây fail bài kiểm tra `constitution_governance.test.ts`.
+  3. *Bẫy Gãy Tương Thích Ngược Với Test Kế Thừa*:
+     - Các test suite cũ kiểm tra filter counts và empty state thông qua `renderMasterplan({ initialTab: 'districts' })`. Khi gỡ tab, các test này fail nếu không được bóc tách kiểm tra trực tiếp qua component linh kiện `MasterplanEmptyState` hoặc helper `computeFilterCounts`.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Trực Tiếp Render Sa Bàn 40 Ô (Blueprint-First Invariant)**:
+     - `MasterplanModal` loại bỏ hoàn toàn `<nav>` chuyển tab. Giao diện trực tiếp render `data-testid="masterplan-blueprint-grid"` bao quanh lõi thanh tra trung tâm `MasterplanInspectorCard`.
+  2. **Khống Chế Dưới Ngưỡng 300 LOC (An Toàn Trần 500 LOC)**:
+     - Rút gọn `masterplan_modal.tsx` từ 501 LOC xuống 251 LOC (giảm 50%), đảm bảo tuyệt đối tuân thủ Hiến pháp AGENTS.
+  3. **Độc Lập Hóa Component & Helper Test Contracts**:
+     - Các component như `MasterplanEmptyState` và `classifyDistrict` trong `masterplan_components.tsx` là các đơn vị độc lập. Test kiểm tra phân loại dữ liệu và empty state phải kiểm thử trực tiếp lên component và pure helper thay vì ép buộc phụ thuộc vào modal cha.
+
+---
+
+### 206. [UI/CRAFT][BOT/AI] Định Giá Sàn Thương Vụ & Thứ Tự Ưu Tiên Nhu Cầu Tiền Mặt Của Bot AI Trong P2P Trading (IMP-154)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Định Giá Sàn Thấp Hơn Mức Đàm Phán*:
+     - Các ô đất giá rẻ như ô 1 & ô 3 (Cần Thơ) có giá niêm yết trong bảng giá là 600 Tr. VNĐ. Khi đàm phán mua bán P2P, tỷ lệ đòi hỏi (1.4x - 1.5x) nếu nhân trên 600 Tr. chỉ ra 840 - 900 Tr., khiến mức trả giá 1.000 Tr. bị ngộ nhận là vượt ngưỡng chấp thuận trong khi thực tế người chơi chỉ đang trả mức giá gốc tiêu chuẩn 1.000 Tr.
+  2. *Bẫy Xung Đột Thứ Tự Ưu Tiên Nhu Cầu Bot (Monopoly Gap vs Liquidity Crisis)*:
+     - Khi Bot sở hữu N-1 ô nhưng đang cạn kiệt thanh khoản (`balance < 1500`), nếu kiểm tra Monopoly Gap trước, Bot sẽ hiển thị nhu cầu mua gom ô còn lại (`⚡ Cần 1 ô`) trong khi trên thực tế Bot không có đủ tiền mặt dự phòng và sẽ từ chối mọi đề xuất do vi phạm ngân sách an toàn (`INSUFFICIENT_CASH`).
+  3. *Bẫy Giới Hạn Dòng Mã (LOC Cap 450/500)*:
+     - Tích hợp thêm các bộ badge tính cách Bot, thước đo tâm lý xúc giác và phân tích hiệp đồng đất dễ làm `trade_modal.tsx` phình to quá trần 450 LOC.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Valuation Floor Invariant**:
+     - Mọi thẩm định thương vụ trong `trade_intelligence.ts` áp dụng sàn định giá cơ bản `Math.max(1000, deed.price)` để đảm bảo nhất quán với kỳ vọng đàm phán tiêu chuẩn.
+  2. **Liquidity First Priority**:
+     - Trong `getBotNeedBadge`, kiểm tra thanh khoản nguy cấp `balance < 1500` (`🧊 Kẹt tiền`) trước khi quét Monopoly Gap, phản ánh trung thực năng lực tài chính thực tế của Bot.
+  3. **Modular Facade Separation**:
+     - Bóc tách toàn bộ logic thẩm định sang `trade_intelligence.ts` và thước đo xúc giác sang `trade_sentiment_meter.tsx`, giữ `trade_modal.tsx` chỉ đóng vai trò View Orchestrator với số dòng ổn định ở 436 LOC (thỏa mãn <= 450 LOC).

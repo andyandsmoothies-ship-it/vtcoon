@@ -13,6 +13,7 @@ import { executeTurnEnd } from './turn_loop.js';
 import type { Room, Player } from '../domain/room.js';
 import type { PropertyRegistry, PropertyStateMap } from '../domain/property_manager.js';
 import type { AuctionSession } from './auction_manager.js';
+import { pendingTradeManager } from './pending_trade_manager.js';
 
 export function getActivePlayerFn(room: Room | undefined, playerId: string): Player | undefined {
   if (!room?.started) return undefined;
@@ -43,6 +44,7 @@ export function doCreateRoom(
   propertyStates.set(room.roomCode, new Map());
   rolledThisTurn.delete(room.roomCode);
   auctions.delete(room.roomCode);
+  pendingTradeManager.clearSession(room.roomCode);
   touchActivityFn(room.roomCode);
   return room;
 }
@@ -182,6 +184,7 @@ export function doCloseRoom(
   auctions.delete(roomCode);
   rolledThisTurn.delete(roomCode);
   lastActivity.delete(roomCode);
+  pendingTradeManager.clearSession(roomCode);
   return true;
 }
 

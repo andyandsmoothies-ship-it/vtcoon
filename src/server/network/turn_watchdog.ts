@@ -109,6 +109,16 @@ export class TurnWatchdog {
       return false;
     }
 
+    // [IMP-152/A] Auto-clear expired pending trade offers (every Watchdog tick ~5s)
+    if (this.rooms.hasPendingTrade?.(roomCode)) {
+      const tradeTimeout = this.rooms.checkPendingTradeTimeout(roomCode, Date.now());
+      if (tradeTimeout.timeout) {
+        this.rooms.cancelPendingTrade?.(roomCode);
+        this.broadcaster.broadcastRoomDelta(roomCode);
+        console.log(`[TurnWatchdog] Pending trade expired and auto-cleared for room ${roomCode}`);
+      }
+    }
+
     const curr = room.players[room.currentPlayerIndex];
     const currId = curr?.id ?? '';
     const currentTick = this.broadcaster.getCurrentTick(roomCode);
@@ -170,6 +180,11 @@ export class TurnWatchdog {
   }
 
   private executeEmergencyRecovery(roomCode: string, phase: TurnPhase): void {
+    // [IMP-152/B] Guard: cancel any pending trade session before force-advancing turn
+    if (this.rooms.hasPendingTrade?.(roomCode)) {
+      this.rooms.cancelPendingTrade?.(roomCode);
+      console.warn(`[TurnWatchdog] Emergency recovery: force-cancelled pending trade for room ${roomCode}`);
+    }
     switch (phase) {
       case TurnPhase.AuctionPhase: {
         this.rooms.handleAuctionClose(roomCode);

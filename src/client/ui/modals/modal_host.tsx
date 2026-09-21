@@ -313,14 +313,19 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
       {activeModal === 'trade' && (() => {
         const tradePayload = modalPayload as ModalPayloadMap['trade'];
         const currentTargetId = tradePayload.targetPlayerId;
+        const slots = useLobbyStore.getState().slots;
         const availablePartners = Object.keys(playersInfo)
           .filter((id) => id !== myId)
-          .map((id) => ({
-            id,
-            name: playersInfo[id]?.name ?? id,
-            balance: playersInfo[id]?.balance ?? 0,
-            isBot: Boolean(playersInfo[id]?.isBot),
-          }));
+          .map((id) => {
+            const slot = slots?.find((s) => s.playerId === id);
+            return {
+              id,
+              name: playersInfo[id]?.name ?? id,
+              balance: playersInfo[id]?.balance ?? 0,
+              isBot: Boolean(playersInfo[id]?.isBot),
+              personality: (playersInfo[id] as any)?.personality ?? slot?.botPersonality,
+            };
+          });
         const targetPlayer = playersInfo[currentTargetId];
 
         return (

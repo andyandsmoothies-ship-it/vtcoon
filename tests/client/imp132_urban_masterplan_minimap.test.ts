@@ -4,6 +4,8 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { getDeedDisplayInfo } from '../../src/client/ui/modals/modal_helpers';
+import { DISTRICT_GROUPS } from '../../src/client/ui/modals/masterplan_constants';
+import { MasterplanDistrictCard } from '../../src/client/ui/modals/masterplan_components';
 
 let MasterplanModal: React.ComponentType<any> | null = null;
 let importError: Error | null = null;
@@ -95,22 +97,19 @@ describe('[IMP-132: Trạm 1 RED] Urban Masterplan Minimap Contract Tests', () =
       expect(matches?.length).toBe(1);
     });
 
-    it('[TC-132.03/MSS][UC-GAME-009] Tab 8 Phân Khu render đầy đủ 8 nhóm màu BĐS với data-testid="masterplan-districts-grid"', () => {
-      const html = renderMasterplan({ initialTab: 'districts' });
+    it('[TC-132.03/MSS][UC-GAME-009][IMP-154] MasterplanModal tinh giản chỉ tập trung Sa Bàn 40 Ô, không render masterplan-districts-grid', () => {
+      const html = renderMasterplan();
 
-      expect(html).toContain('data-testid="masterplan-districts-grid"');
-      expect(html).toContain('data-district="Nau"');
-      expect(html).toContain('data-district="XanhDaTroi"');
-      expect(html).toContain('data-district="Tim"');
+      expect(html).not.toContain('data-testid="masterplan-districts-grid"');
+      expect(html).toContain('data-testid="masterplan-blueprint-grid"');
     });
 
-    it('[TC-132.04/MSS][UC-GAME-009] Tab 8 Phân Khu bao gồm cả mục Hạ Tầng Giao Thông (4 Ga) và Tiện Ích Quốc Gia (2 Nhà máy)', () => {
-      const html = renderMasterplan({ initialTab: 'districts' });
+    it('[TC-132.04/MSS][UC-GAME-009] Hằng số DISTRICT_GROUPS bao gồm cả mục Hạ Tầng Giao Thông (4 Ga) và Tiện Ích Quốc Gia (2 Nhà máy)', () => {
+      const railroad = DISTRICT_GROUPS.find((d) => d.id === 'Railroad');
+      const utility = DISTRICT_GROUPS.find((d) => d.id === 'Utility');
 
-      expect(html).toContain('data-district="Railroad"');
-      expect(html).toContain('data-district="Utility"');
-      expect(html).toContain('Long Thành');
-      expect(html).toContain('EVN');
+      expect(railroad).toBeDefined();
+      expect(utility).toBeDefined();
     });
   });
 
@@ -163,10 +162,21 @@ describe('[IMP-132: Trạm 1 RED] Urban Masterplan Minimap Contract Tests', () =
     });
 
     it('[TC-132.09/MSS][UC-GAME-009] Tính toán chính xác tiến trình độc quyền nhóm màu 2/3 cho P1 giữ Bình Dương và Đồng Nai', () => {
-      const html = renderMasterplan({
-        initialTab: 'districts',
-        playersInfo: MOCK_PLAYERS_INFO, // P1 owns 6, 8 (2/3 of XanhDaTroi: 6, 8, 9)
-      });
+      const xanhDaTroi = DISTRICT_GROUPS.find((d) => d.id === 'XanhDaTroi')!;
+      const html = renderToStaticMarkup(
+        React.createElement(MasterplanDistrictCard, {
+          district: xanhDaTroi,
+          players: MOCK_PLAYERS_INFO,
+          getCellOwnership: (cellIndex: number) => {
+            const isOwned = MOCK_PLAYERS_INFO.p1.ownedProperties.includes(cellIndex);
+            return {
+              owner: isOwned ? MOCK_PLAYERS_INFO.p1 : null,
+              isMortgaged: false,
+              level: 0,
+            };
+          },
+        })
+      );
 
       expect(html).toContain('2/3');
     });
@@ -178,10 +188,21 @@ describe('[IMP-132: Trạm 1 RED] Urban Masterplan Minimap Contract Tests', () =
           ownedProperties: [6, 8, 9], // full XanhDaTroi monopoly
         },
       };
-      const html = renderMasterplan({
-        initialTab: 'districts',
-        playersInfo: monopolyPlayers,
-      });
+      const xanhDaTroi = DISTRICT_GROUPS.find((d) => d.id === 'XanhDaTroi')!;
+      const html = renderToStaticMarkup(
+        React.createElement(MasterplanDistrictCard, {
+          district: xanhDaTroi,
+          players: monopolyPlayers,
+          getCellOwnership: (cellIndex: number) => {
+            const isOwned = monopolyPlayers.p1.ownedProperties.includes(cellIndex);
+            return {
+              owner: isOwned ? monopolyPlayers.p1 : null,
+              isMortgaged: false,
+              level: 0,
+            };
+          },
+        })
+      );
 
       expect(html).toMatch(/Độc Quyền|Monopoly|👑|data-monopoly="true"/);
     });
@@ -212,20 +233,18 @@ describe('[IMP-132: Trạm 1 RED] Urban Masterplan Minimap Contract Tests', () =
       expect(html).toContain(String(deedInfo?.rents[0]));
     });
 
-    it('[TC-132.13/MSS][UC-GAME-009] Nút chuyển đổi Tab giữa Sa Bàn 40 Ô và 8 Phân Khu hiển thị đầy đủ bộ điều hướng', () => {
-      const html = renderMasterplan();
+    it('[TC-132.13/MSS][UC-GAME-009][IMP-154] Header tinh giản chỉ giữ nút đóng, loại bỏ hoàn toàn nút tab-districts', () => {
+      const html = renderMasterplan({ onClose: () => {} });
 
-      expect(html).toContain('data-testid="tab-blueprint"');
-      expect(html).toContain('data-testid="tab-districts"');
-      expect(html).toMatch(/Sa Bàn|Blueprint/i);
-      expect(html).toMatch(/8 Phân Khu|Districts/i);
+      expect(html).not.toContain('data-testid="tab-districts"');
+      expect(html).toContain('data-testid="masterplan-close-btn"');
     });
 
-    it('[TC-132.14/MSS][UC-GAME-009] MasterplanModal hỗ trợ prop initialTab districts để mở trực tiếp tab 8 Phân Khu', () => {
+    it('[TC-132.14/MSS][UC-GAME-009][IMP-154] MasterplanModal luôn hiển thị Sa Bàn 40 Ô bảo toàn dữ liệu', () => {
       const html = renderMasterplan({ initialTab: 'districts' });
 
-      expect(html).toContain('data-testid="masterplan-districts-grid"');
-      expect(html).not.toContain('data-testid="masterplan-blueprint-grid"');
+      expect(html).toContain('data-testid="masterplan-blueprint-grid"');
+      expect(html).not.toContain('data-testid="masterplan-districts-grid"');
     });
 
     it('[TC-132.15/MSS][UC-GAME-009] Nút đóng modal render data-testid="masterplan-close-btn" và aria-label="Đóng"', () => {

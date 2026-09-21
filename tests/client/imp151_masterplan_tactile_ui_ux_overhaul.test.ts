@@ -79,6 +79,32 @@ const MOCK_PLAYERS_INFO: Record<string, any> = {
   },
 };
 
+function renderDistrictCard(
+  districtId: string,
+  players = MOCK_PLAYERS_INFO,
+  myPlayerId?: string,
+  customOwnership?: any
+): string {
+  const district = DISTRICT_GROUPS.find((d) => d.id === districtId)!;
+  return renderToStaticMarkup(
+    React.createElement(MasterplanDistrictCard, {
+      district,
+      players,
+      myPlayerId,
+      getCellOwnership: customOwnership ?? ((cellIndex: number) => {
+        let owner: any = null;
+        for (const p of Object.values(players)) {
+          if ((p as any)?.ownedProperties?.includes(cellIndex)) {
+            owner = p;
+            break;
+          }
+        }
+        return { owner, isMortgaged: false, level: 0 };
+      }),
+    })
+  );
+}
+
 describe('[IMP-151: Trạm 1 RED] Urban Masterplan Tactile UI/UX Overhaul & 8-District Monopoly Radar', () => {
 
   // =========================================================================
@@ -116,26 +142,20 @@ describe('[IMP-151: Trạm 1 RED] Urban Masterplan Tactile UI/UX Overhaul & 8-Di
       expect(ribbon?.props?.style?.backgroundColor).toBe(districtXanhDaTroi.hexColor);
     });
 
-    it('[TC-IMP151.04/MSS][UC-GAME-009][IMP-151][Facet-1/Boundary] Tab switcher sử dụng kiểu dáng capsule switcher bo cong rounded-2xl với viền hổ phách mờ', () => {
+    it('[TC-IMP151.04/MSS][UC-GAME-009][IMP-151][Facet-1/Boundary] Header modal sở hữu nền kem ngà bg-[#FBF8F1] với viền hổ phách mờ border-amber-900/10', () => {
       const html = renderMasterplan({ playersInfo: MOCK_PLAYERS_INFO });
-      const navMatch = html.match(/<nav[^>]*class="([^"]*)"/)?.[1] ?? '';
+      const headerMatch = html.match(/<header[^>]*class="([^"]*)"/)?.[1] ?? '';
 
-      expect(navMatch).toContain('rounded-2xl');
-      expect(navMatch).toMatch(/border-amber/);
+      expect(headerMatch).toContain('bg-[#FBF8F1]');
+      expect(headerMatch).toMatch(/border-amber/);
     });
 
-    it('[TC-IMP151.05/MSS][UC-GAME-009][IMP-151][Facet-1/Boundary] Thanh lọc filter bar hỗ trợ cuộn ngang với nút active nền vàng hổ phách và text không dùng slate-950 (text-amber-950)', () => {
+    it('[TC-IMP151.05/MSS][UC-GAME-009][IMP-151][Facet-1/Boundary] MasterplanModal tinh giản không còn render thanh lọc phân loại (Filter Bar)', () => {
       const html = renderMasterplan({
-        initialTab: 'districts',
         playersInfo: MOCK_PLAYERS_INFO,
       });
-      const filterBarMatch = html.match(/<div[^>]*data-testid="district-filter-bar"[^>]*class="([^"]*)"/)?.[1] ?? '';
-      expect(filterBarMatch).toMatch(/overflow-x-auto|overflow-x-scroll/);
 
-      const activeBtnMatch = html.match(/<button[^>]*data-testid="district-filter-all"[^>]*class="([^"]*)"/)?.[1] ?? '';
-      expect(activeBtnMatch).toMatch(/bg-amber/);
-      expect(activeBtnMatch).toContain('text-amber-950');
-      expect(activeBtnMatch).not.toContain('text-slate-950');
+      expect(html).not.toContain('data-testid="district-filter-bar"');
     });
   });
 
@@ -144,10 +164,7 @@ describe('[IMP-151: Trạm 1 RED] Urban Masterplan Tactile UI/UX Overhaul & 8-Di
   // =========================================================================
   describe('Facet 2: State Reactivity & Natural Language', () => {
     it('[TC-IMP151.06/MSS][UC-GAME-009][IMP-151][Facet-2/Reactivity] Thanh tiến độ phân đoạn district-progress-bar-{id} sử dụng các slot pills cách nhau (gap-1.5 hoặc gap-1), chiều cao đồng bộ', () => {
-      const html = renderMasterplan({
-        initialTab: 'districts',
-        playersInfo: MOCK_PLAYERS_INFO,
-      });
+      const html = renderDistrictCard('XanhDaTroi');
       const progressBarMatch = html.match(/<div[^>]*data-testid="district-progress-bar-XanhDaTroi"[^>]*class="([^"]*)"/)?.[1] ?? '';
 
       expect(progressBarMatch).toMatch(/gap-(1|1\.5)/);
@@ -155,10 +172,7 @@ describe('[IMP-151: Trạm 1 RED] Urban Masterplan Tactile UI/UX Overhaul & 8-Di
     });
 
     it('[TC-IMP151.07/MSS][UC-GAME-009][IMP-151][Facet-2/Reactivity] Slot trống trong thanh tiến độ mang thuộc tính data-vacant="true" và viền nét đứt', () => {
-      const html = renderMasterplan({
-        initialTab: 'districts',
-        playersInfo: MOCK_PLAYERS_INFO,
-      });
+      const html = renderDistrictCard('Hong');
       const vacantSegment = html.match(/<div[^>]*data-testid="district-progress-segment-13"[^>]*class="([^"]*)"[^>]*>/)?.[0] ?? '';
 
       expect(vacantSegment).toContain('data-vacant="true"');
@@ -166,10 +180,7 @@ describe('[IMP-151: Trạm 1 RED] Urban Masterplan Tactile UI/UX Overhaul & 8-Di
     });
 
     it('[TC-IMP151.08/MSS][UC-GAME-009][IMP-151][Facet-2/Reactivity] Khi phân khu sắp độc quyền, huy hiệu trạng thái hiển thị ⚡ Sắp Độc Quyền VÀ bảo tồn chuỗi tỉ lệ 2/3 (khớp TC-132.09)', () => {
-      const html = renderMasterplan({
-        initialTab: 'districts',
-        playersInfo: MOCK_PLAYERS_INFO,
-      });
+      const html = renderDistrictCard('XanhDaTroi');
 
       expect(html).toContain('⚡ Sắp Độc Quyền');
       expect(html).toMatch(/data-near-monopoly="true"[^>]*>[\s\S]*?2\/3[\s\S]*?<\/span>/);
@@ -178,30 +189,24 @@ describe('[IMP-151: Trạm 1 RED] Urban Masterplan Tactile UI/UX Overhaul & 8-Di
     it('[TC-IMP151.09/MSS][UC-GAME-009][IMP-151][Facet-2/Reactivity] Khi phân khu độc quyền, hiển thị huy hiệu 👑 Độc Quyền kèm tên chủ sở hữu', () => {
       const monopolyPlayers = {
         ...MOCK_PLAYERS_INFO,
-        p1: { ...MOCK_PLAYERS_INFO.p1, ownedProperties: [1, 3, 6, 8] },
+        p1: { ...MOCK_PLAYERS_INFO.p1, ownedProperties: [1, 3, 6, 8, 9] },
       };
-      const html = renderMasterplan({
-        initialTab: 'districts',
-        playersInfo: monopolyPlayers,
-      });
+      const html = renderDistrictCard('XanhDaTroi', monopolyPlayers);
 
       expect(html).toContain('data-monopoly="true"');
       expect(html).toMatch(/👑\s*Độc Quyền.*Đại Gia Sài Gòn/);
     });
 
     it('[TC-IMP151.10/MSS][UC-GAME-009][IMP-151][Facet-2/Reactivity] Container hàng BĐS data-testid="district-cell-{cellIndex}" giữ thuộc tính style chứa owner.tokenColor (khớp TC-137.09)', () => {
-      const html = renderMasterplan({
-        initialTab: 'districts',
-        playersInfo: MOCK_PLAYERS_INFO,
-      });
+      const html = renderDistrictCard('XanhDaTroi');
 
       expect(html).toMatch(/data-testid="district-cell-6"[^>]*style="[^"]*#c0392b/);
     });
 
     it('[TC-IMP151.11/MSS][UC-GAME-009][IMP-151][Facet-2/Reactivity] Hàng BĐS đang thế chấp hiển thị rõ nhãn thế chấp 🔒 Thế Chấp và data-mortgaged="true"', () => {
-      const html = renderMasterplan({
-        initialTab: 'districts',
-        playersInfo: MOCK_PLAYERS_INFO,
+      const html = renderDistrictCard('Hong', MOCK_PLAYERS_INFO, undefined, (cellIndex: number) => {
+        if (cellIndex === 11) return { owner: MOCK_PLAYERS_INFO.p2, isMortgaged: true, level: 0 };
+        return { owner: null, isMortgaged: false, level: 0 };
       });
       const mortgagedCell = html.match(/<div[^>]*data-testid="district-cell-11"[^>]*>[\s\S]*?<\/div>\s*<\/div>/)?.[0] ?? '';
 
@@ -287,10 +292,10 @@ describe('[IMP-151: Trạm 1 RED] Urban Masterplan Tactile UI/UX Overhaul & 8-Di
     });
 
     it('[TC-IMP151.15/MSS][UC-GAME-009][IMP-151][Facet-3/Disposal] Nút [👁️] và nút [🤝] đạt chuẩn touch target tối thiểu min-h-[36px] min-w-[36px] kèm tooltip title', () => {
-      const html = renderMasterplan({
-        initialTab: 'districts',
-        playersInfo: MOCK_PLAYERS_INFO,
-        myPlayerId: 'p1',
+      const html = renderDistrictCard('XanhDaTroi', MOCK_PLAYERS_INFO, 'p1', (cellIndex: number) => {
+        if (cellIndex === 6) return { owner: MOCK_PLAYERS_INFO.p1, isMortgaged: false, level: 0 };
+        if (cellIndex === 9) return { owner: MOCK_PLAYERS_INFO.p2, isMortgaged: false, level: 0 };
+        return { owner: null, isMortgaged: false, level: 0 };
       });
 
       expect(html).toMatch(/data-testid="view-cell-btn-6"[^>]*min-h-\[36px\]/);
@@ -327,24 +332,18 @@ describe('[IMP-151: Trạm 1 RED] Urban Masterplan Tactile UI/UX Overhaul & 8-Di
   // Facet 4: Error Defense & Contract Integrity (Kế thừa testids, 0 exception, fallback ô trống)
   // =========================================================================
   describe('Facet 4: Error Defense & Contract Integrity', () => {
-    it('[TC-IMP151.16a/MSS][UC-GAME-009][IMP-151][Facet-4/ErrorDefense] Bảo toàn các testids cấp modal và phân khu kế thừa: masterplan-modal, tab-districts, masterplan-districts-grid, data-district', () => {
+    it('[TC-IMP151.16a/MSS][UC-GAME-009][IMP-151][Facet-4/ErrorDefense] Bảo toàn các testids cấp modal: masterplan-modal, masterplan-blueprint-grid', () => {
       const html = renderMasterplan({
-        initialTab: 'districts',
         playersInfo: MOCK_PLAYERS_INFO,
       });
 
       expect(html).toContain('data-testid="masterplan-modal"');
-      expect(html).toContain('data-testid="tab-districts"');
-      expect(html).toContain('data-testid="masterplan-districts-grid"');
-      expect(html).toContain('data-district="XanhDaTroi"');
+      expect(html).toContain('data-testid="masterplan-blueprint-grid"');
+      expect(html).not.toContain('data-testid="tab-districts"');
     });
 
     it('[TC-IMP151.16b/MSS][UC-GAME-009][IMP-151][Facet-4/ErrorDefense] Bảo toàn các testids cấp ô và hành động kế thừa: district-progress-bar-{id}, district-cell-{cellIndex}, view-cell-btn-{cellIndex}, quick-trade-btn-{cellIndex}', () => {
-      const html = renderMasterplan({
-        initialTab: 'districts',
-        playersInfo: MOCK_PLAYERS_INFO,
-        myPlayerId: 'p1',
-      });
+      const html = renderDistrictCard('XanhDaTroi', MOCK_PLAYERS_INFO, 'p1');
 
       expect(html).toContain('data-testid="district-progress-bar-XanhDaTroi"');
       expect(html).toContain('data-testid="district-cell-6"');
@@ -378,12 +377,9 @@ describe('[IMP-151: Trạm 1 RED] Urban Masterplan Tactile UI/UX Overhaul & 8-Di
     it('[TC-IMP151.20/MSS][UC-GAME-009][IMP-151][Facet-4/ErrorDefense] Thẻ phân khu an toàn khi propertyStates tham chiếu ownerId không tồn tại trong playersInfo', () => {
       let markup = '';
       expect(() => {
-        markup = renderMasterplan({
-          initialTab: 'districts',
-          playersInfo: {},
-          propertyStates: {
-            6: { ownerId: 'ghost_player_99', level: 0, isMortgaged: false },
-          },
+        markup = renderDistrictCard('XanhDaTroi', {}, undefined, (cellIndex: number) => {
+          if (cellIndex === 6) return { owner: { id: 'ghost_player_99', name: 'Ghost', tokenColor: '#fff' }, isMortgaged: false, level: 0 };
+          return { owner: null, isMortgaged: false, level: 0 };
         });
       }).not.toThrow();
       expect(markup).toContain('data-testid="district-cell-6"');

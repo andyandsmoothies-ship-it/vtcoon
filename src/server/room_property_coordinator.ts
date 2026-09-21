@@ -87,6 +87,13 @@ export function coordTrade(
     return { success: false, reason: ActionRejectReason.INVALID_ROOM };
   }
 
+  // [IMP-152/C] Turn-order guard: only allow when requester is current turn player OR is a bot
+  const currentTurnPlayer = ctx.room.players[ctx.room.currentPlayerIndex];
+  const requester = ctx.room.players.find((p) => p.id === requesterId);
+  if (currentTurnPlayer?.id !== requesterId && !(requester?.isBot ?? false)) {
+    return { success: false, reason: ActionRejectReason.NOT_YOUR_TURN };
+  }
+
   const isBotHuman = (buyer.isBot && !seller.isBot) || (!buyer.isBot && seller.isBot && offeredCellIndex !== undefined) || (seller.isBot && !buyer.isBot && offeredCellIndex !== undefined);
 
   if (isBotHuman) {

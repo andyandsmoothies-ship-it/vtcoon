@@ -92,7 +92,7 @@ if (specifiedFiles.length > 0) {
 }
 
 // 2. Autonomous Slice ID Detection
-const allContractTests = walkDir(path.join(repoRoot, 'tests', 'contracts'));
+const allContractTests = walkDir(path.join(repoRoot, 'tests'));
 if (!sliceId || sliceId === 'LATEST' || sliceId === 'ADHOC') {
   // Try to find from most recently modified contract test
   let latestTest = null;
