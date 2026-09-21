@@ -187,7 +187,7 @@ export function LayeredDioramaTile({
     return (
       <group position={position} rotation={rotation} onClick={onClick}>
         {/* Corner tile — larger square base with polished stone PBR and rounded beveled edges */}
-        <RoundedBox args={[2.2, 0.22, 2.2]} radius={0.08} smoothness={4} receiveShadow castShadow>
+        <RoundedBox args={[2.2, 0.22, 2.2]} radius={0.08} smoothness={4} receiveShadow>
           <meshStandardMaterial color="#1E293B" roughness={0.16} metalness={0.25} envMapIntensity={1.2} />
         </RoundedBox>
         {/* Inner corner accent badge with texture */}
@@ -211,7 +211,7 @@ export function LayeredDioramaTile({
   return (
     <group position={position} rotation={rotation} onClick={onClick}>
       {/* 1. Base tile — Polished ivory cream parchment PBR with rounded beveled edges */}
-      <RoundedBox args={[1.68, 0.2, 2.2]} radius={0.08} smoothness={4} receiveShadow castShadow>
+      <RoundedBox args={[1.68, 0.2, 2.2]} radius={0.08} smoothness={4} receiveShadow>
         <meshStandardMaterial color="#EDE5D8" roughness={0.35} metalness={0.06} envMapIntensity={1.0} />
       </RoundedBox>
 

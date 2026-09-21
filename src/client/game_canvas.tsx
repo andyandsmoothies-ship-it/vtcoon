@@ -322,7 +322,7 @@ export function GameCanvas({
   return (
     <div className="relative w-full h-full overflow-hidden">
       <Canvas
-        shadows="soft"
+        shadows={isMobileDevice ? false : "soft"} /* shadows="soft" */
         dpr={[1, 1.5]}
         camera={{ position: isLobby ? CAMERA_CONFIG.pre_match.position : CAMERA_CONFIG.overview.position, fov: 24, near: 0.5, far: 300 }}
         gl={{

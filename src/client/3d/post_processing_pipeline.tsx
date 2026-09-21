@@ -63,6 +63,14 @@ export const DEFAULT_PIPELINE_CONFIG = {
   vignetteDarkness: 0.15,
 } as const;
 
+function useSafeTelemetryFps(): number {
+  try {
+    return useTelemetryStore((s) => s.metrics.fps);
+  } catch {
+    return typeof window !== 'undefined' ? useTelemetryStore.getState().metrics.fps : 60;
+  }
+}
+
 export function PostProcessingPipeline({
   enabled = DEFAULT_PIPELINE_CONFIG.enabled,
   enableDof = DEFAULT_PIPELINE_CONFIG.enableDof,
@@ -88,8 +96,7 @@ export function PostProcessingPipeline({
     return null;
   }
 
-  const telemetryFps = typeof window !== 'undefined' ? useTelemetryStore.getState().metrics.fps : 60;
-  const currentFps = fps !== undefined ? fps : telemetryFps;
+  const currentFps = fps !== undefined ? fps : useSafeTelemetryFps();
   const adaptiveAo = resolveAdaptivePostProcessing({
     fps: currentFps,
     isMobile: Boolean(isMobile || disableAoOnMobile),
@@ -99,6 +106,7 @@ export function PostProcessingPipeline({
   const resolvedAoQuality = adaptiveAo.aoQuality;
   const resolvedAoHalfRes = aoHalfRes !== undefined ? aoHalfRes : adaptiveAo.aoHalfRes;
   const targetVector = new Vector3(dofTarget[0], dofTarget[1], dofTarget[2]);
+  const resolvedEnableSmaa = enableSmaa && !isMobile;
 
   return (
     <EffectComposer multisampling={multisampling} autoClear={false}>
@@ -119,8 +127,8 @@ export function PostProcessingPipeline({
         <Bloom
           luminanceThreshold={bloomThreshold}
           luminanceSmoothing={DEFAULT_PIPELINE_CONFIG.bloomSmoothing}
-          intensity={bloomIntensity}
-          mipmapBlur
+          intensity={isMobile ? 0.12 : bloomIntensity}
+          mipmapBlur={!isMobile}
           radius={DEFAULT_PIPELINE_CONFIG.bloomRadius}
         />
       )}
@@ -149,7 +157,7 @@ export function PostProcessingPipeline({
       )}
 
       {/* 6. Anti-Aliasing (SMAA): Khử răng cưa vector subpixel mép bàn cờ, dây văng, góc khối */}
-      {enableSmaa && (
+      {resolvedEnableSmaa && (
         <SMAA />
       )}
     </EffectComposer>

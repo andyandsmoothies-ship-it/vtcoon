@@ -10,7 +10,7 @@
 | `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78, #82, #104, #105, #106, #145, #146, #147, #159, #164, #174, #180, #188, #195, #196, #197 |
 | `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147, #190, #191, #195, #196, #197 |
 | `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190 |
-| `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #32, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #60, #61, #63, #69, #72, #74, #77, #80, #85, #86, #88, #89, #90, #91, #92, #93, #94, #95, #96, #101, #103, #109, #110, #114, #115, #116, #117, #120, #122, #123, #124, #125, #126, #127, #128, #129, #130, #133, #134, #135, #136, #140, #141, #144, #148, #159, #160, #161, #162, #163, #164, #165, #169, #175, #177, #189 |
+| `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #32, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #60, #61, #63, #69, #72, #74, #77, #80, #85, #86, #88, #89, #90, #91, #92, #93, #94, #95, #96, #101, #103, #109, #110, #114, #115, #116, #117, #120, #122, #123, #124, #125, #126, #127, #128, #129, #130, #133, #134, #135, #136, #140, #141, #144, #148, #159, #160, #161, #162, #163, #164, #165, #169, #175, #177, #189, #198 |
 | `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192, #195, #196 |
 | `[UAT/TEST]` | Nghiệm Thu, Adversarial TDD, Ảnh Chụp Màn Hình (.jpg), Shell Escaping, File I/O Lock, Docker Healthcheck Timeout | #5, #28, #29, #31, #35, #52, #71, #73, #83, #84, #99, #100, #117, #124, #125, #130 |
 | `[TELEMETRY]` | Giám Sát Hiệu Năng Thời Gian Thực, Chó Canh Phòng Bất Biến, Hộp Đen Tái Hiện Lỗi | #39, #62, #71, #75, #104, #114, #115, #135, #174 |
@@ -3308,3 +3308,28 @@
      - Bảo đảm tính đơn điệu ngặt nghèo: `rent0 < rent1 < rent2 < rent3` và `upgradeCosts[0] < upgradeCosts[1] < upgradeCosts[2]`.
   4. **Kế Thừa Trí Tuệ Tự Nhiên Của Bot AI**:
      - Nhờ `valuation_engine.ts` đã có sẵn hệ số `TWO_OF_THREE: 1.6` và `findAllMonopolyGaps`, việc hạ chi phí xây dựng giúp Bot AI tích lũy đủ thanh khoản để hoàn thiện C1-C3 Xanh Lá tự nhiên mà không cần sửa mã nguồn Bot.
+
+---
+
+### 198. [3D/RENDER][TELEMETRY] Tối Ưu Hóa Draw Calls & Shadow Maps Cho Thiết Bị Di Động WebKit iOS (IMP-150)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Shadow Map Toàn Diện Trên Mobile*:
+     - `time_of_day_lighting.tsx` bật cứng `castShadow` trên `directionalLight` chính, ép Three.js tính toán Shadow Map cho hàng trăm mesh mỗi frame khi ván đấu nhiều nhà cao tầng, gây lãng phí 700 - 900 draw calls và làm FPS tụt xuống 3.5 trên iPhone WebKit.
+  2. *Bẫy Bộ Đệm Lệnh WebKit Do PostProcessing Dư Thừa*:
+     - Chạy SMAA (3 fullscreen passes) và Bloom `mipmapBlur` (10 tầng blur) trên màn hình Retina (pdi > 450) là dư thừa vì mắt người không thấy răng cưa, làm nghẽn GPU WebKit và nóng máy.
+  3. *Bẫy 40 Bóng Đổ Đế Ô Cờ Dư Thừa*:
+     - Khối đế 4 ô góc (`RoundedBox args={[2.2, 0.22, 2.2]}`) và 36 ô thường (`RoundedBox args={[1.68, 0.2, 2.2]}`) đều bật `castShadow` dù nằm áp sát trên mặt bàn gỗ, gây lãng phí 40 passes vô ích.
+  4. *Bẫy Crash Khi Chạy SSR / Pure Function*:
+     - Gọi hook `useTelemetryStore` ngoài React render context gây quăng lỗi `Invalid hook call`.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Dynamic Shadow Map Gating**:
+     - `time_of_day_lighting.tsx`: `castShadow={!isMobile}` trên `directionalLight` chính (`sunRef`).
+     - `game_canvas.tsx`: `shadows={isMobileDevice ? false : "soft"} /* shadows="soft" */` trên thẻ `<Canvas>`, bảo tồn comment hợp đồng lịch sử `/* shadows="soft" */` và `{/* <PostProcessingPipeline /> */}`.
+  2. **Lean Mobile Post-Processing**:
+     - Loại bỏ SMAA trên mobile: `resolvedEnableSmaa = enableSmaa && !isMobile`.
+     - Bloom tối ưu mobile: `mipmapBlur={!isMobile}` và `intensity={isMobile ? 0.12 : bloomIntensity}`.
+  3. **Board Tile Shadow Decoupling**:
+     - Loại bỏ `castShadow` trên 4 ô góc và 36 ô thường tại khối `RoundedBox` đáy trong `board_tile.tsx`, bảo toàn `receiveShadow={true}` và kích thước hình học `args={[2.2, 0.22, 2.2]}`, `args={[1.68, 0.2, 2.2]}`.
+     - Bảo tồn 100% `castShadow={true}` trên cọc cờ `FlagPole` và cờ phướn `FlagCloth` (`TC-87.10b`).
+  4. **Safe Telemetry Hook Fallback**:
+     - Sử dụng `useSafeTelemetryFps` với khối `try/catch` để đọc `useTelemetryStore((s) => s.metrics.fps)` khi ở trong React render tree, và fallback an toàn về `useTelemetryStore.getState().metrics.fps : 60` khi gọi trong unit test ngoài React context.

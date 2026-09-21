@@ -184,7 +184,7 @@ export function TimeOfDayLighting({ isMobile = false }: TimeOfDayLightingProps =
         position={initialPreset.sunPosition}
         color={initialPreset.sunColor}
         intensity={initialPreset.sunIntensity}
-        castShadow
+        castShadow={!isMobile}
         shadow-mapSize-width={shadowMapSize}
         shadow-mapSize-height={shadowMapSize}
         shadow-camera-left={-14}
