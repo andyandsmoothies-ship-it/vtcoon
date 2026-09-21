@@ -101,10 +101,19 @@ export function TitleDeedRentTable({
                 </div>
                 <div className="flex flex-col items-end">
                   <span className="font-black text-xs text-slate-900">
-                    {formatCurrency(idx === 0 && hasMonopoly && !isRailroad && !isUtility ? rent * 2 : rent)}
+                    {formatCurrency(
+                      idx === 0 && hasMonopoly && !isRailroad && !isUtility
+                        ? rent * 2
+                        : idx === 3 && hasMonopoly && !isRailroad && !isUtility
+                        ? Math.floor(rent * 1.5)
+                        : rent
+                    )}
                   </span>
                   {idx === 0 && hasMonopoly && !isRailroad && !isUtility && (
                     <span className="text-[9px] font-extrabold text-emerald-700">x2 ĐỘC QUYỀN</span>
+                  )}
+                  {idx === 3 && hasMonopoly && !isRailroad && !isUtility && (
+                    <span className="text-[9px] font-extrabold text-amber-700">x1.5 ĐỘC QUYỀN</span>
                   )}
                 </div>
               </div>

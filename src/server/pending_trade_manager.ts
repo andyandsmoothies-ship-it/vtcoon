@@ -9,6 +9,8 @@ export interface PendingTradeSession {
   readonly basePrice: number;
   readonly createdAt: number;
   readonly expiresAt: number;
+  readonly offeredCellIndex?: number;
+  readonly targetPlayerId?: string;
   status: 'pending' | 'accepted' | 'rejected' | 'timeout' | 'cancelled';
 }
 
@@ -24,6 +26,8 @@ export class PendingTradeManager {
     price: number,
     basePrice: number,
     durationMs: number = 15_000,
+    offeredCellIndex?: number,
+    targetPlayerId?: string,
   ): PendingTradeSession {
     const now = Date.now();
     const offerId = `trade_${roomCode}_${now}_${Math.random().toString(36).slice(2, 7)}`;
@@ -38,6 +42,8 @@ export class PendingTradeManager {
       createdAt: now,
       expiresAt: now + durationMs,
       status: 'pending',
+      ...(offeredCellIndex !== undefined ? { offeredCellIndex } : {}),
+      ...(targetPlayerId !== undefined ? { targetPlayerId } : {}),
     };
     this.sessionsByRoom.set(roomCode, session);
     this.sessionsByOfferId.set(offerId, session);

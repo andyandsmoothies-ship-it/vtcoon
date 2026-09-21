@@ -64,6 +64,7 @@ export interface Player {
   lastTradeOfferRound?: number;
   cellTradeRejections?: Record<number, number>;
   cellLastRejectedRound?: Record<number, number>;
+  swapPairLastRejectedRound?: Record<string, number>;
   pawnSlot?:            number;
   ownerSlot?:           number;
   mascotIcon?:          string;
@@ -119,6 +120,16 @@ export interface PendingBuyoutSession {
   readonly expiresAt: number;
 }
 
+export interface PendingTradeOfferInfo {
+  readonly offerId: string;
+  readonly cellIndex: number;
+  readonly price: number;
+  readonly buyerId: string;
+  readonly sellerId: string;
+  readonly expiresAt: number;
+  readonly offeredCellIndex?: number;
+}
+
 export interface Room {
   readonly roomCode:      string;
   readonly code?:         string;
@@ -143,6 +154,7 @@ export interface Room {
   lastEventCard?:        EventCardInfo;
   lastHoseResult?:       HoseResultInfo;
   pendingBuyout?:        PendingBuyoutSession | null;
+  pendingTradeOffer?:    PendingTradeOfferInfo | null;
 }
 
 

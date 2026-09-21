@@ -24,6 +24,16 @@ export interface BotTradeIntent extends BotIntent {
   readonly price: number;
 }
 
+export interface BotSwapTradeIntent extends BotIntent {
+  readonly type: 'INTENT_TRADE_OFFER';
+  readonly cellIndex: number;
+  readonly offeredCellIndex: number;
+  readonly sellerId: string;
+  readonly targetPlayerId: string;
+  readonly buyerId: string;
+  readonly price: number;
+}
+
 /**
  * Quét các nhóm màu có khả năng xây dựng, phát hiện nhóm màu mà Bot đang sở hữu N-1 ô.
  * Ô còn thiếu (gapCell) phải thuộc người chơi khác, không cầm cố và chưa có công trình.
@@ -93,36 +103,13 @@ export function calculateTradeOfferPrice(
   const currentRound = roundCount ?? 1;
   const roundThreshold = (typeof playerCount === 'number' && playerCount >= 4) ? 4 : 6;
 
-  let multiplier = 1.25;
-  if (currentRound >= roundThreshold) {
-    if (personality === BotPersonality.Aggressive) {
-      multiplier = 1.75;
-    } else if (personality === BotPersonality.Balanced) {
-      multiplier = 1.55;
-    } else if (personality === BotPersonality.Passive) {
-      multiplier = isMonopolyGap ? 1.60 : 1.35;
-    }
-  } else {
-    if (personality === BotPersonality.Aggressive) {
-      multiplier = 1.4;
-    } else if (personality === BotPersonality.Balanced) {
-      multiplier = 1.25;
-    } else if (personality === BotPersonality.Passive) {
-      multiplier = 1.1;
-    }
-  }
+  let multiplier = currentRound >= roundThreshold
+    ? (personality === BotPersonality.Aggressive ? 1.75 : personality === BotPersonality.Balanced ? 1.55 : isMonopolyGap ? 1.60 : 1.35)
+    : (personality === BotPersonality.Aggressive ? 1.4 : personality === BotPersonality.Balanced ? 1.25 : 1.1);
 
   const rejections = bot.cellTradeRejections?.[cellIndex] ?? 0;
-  let maxEscalation = 0.30;
-  if (personality === BotPersonality.Aggressive) {
-    maxEscalation = 0.40;
-  } else if (personality === BotPersonality.Balanced) {
-    maxEscalation = 0.30;
-  } else if (personality === BotPersonality.Passive) {
-    maxEscalation = 0.15;
-  }
-  const escalation = Math.min(maxEscalation, rejections * 0.10);
-  multiplier += escalation;
+  const maxEsc = personality === BotPersonality.Aggressive ? 0.40 : personality === BotPersonality.Balanced ? 0.30 : 0.15;
+  multiplier += Math.min(maxEsc, rejections * 0.10);
 
   const offerPrice = Math.round(basePrice * multiplier);
   const safetyBuffer = isMonopolyGap
@@ -273,4 +260,126 @@ export function findEligibleBotTrade(
   }
 
   return null;
+}
+
+export function findBotSwapTrade(
+  bot: Player,
+  room: Room,
+  registry: PropertyRegistry,
+  stateMap: PropertyStateMap,
+  personality: BotPersonality,
+  roundCount?: number,
+): BotSwapTradeIntent | null {
+  const currentRound = roundCount ?? room.roundCount ?? room.round ?? 1;
+  const botGaps = findAllMonopolyGaps(bot, room, registry, stateMap);
+  if (botGaps.length === 0) return null;
+
+  for (const botGap of botGaps) {
+    const targetOwner = room.players.find((p) => p.id === botGap.targetOwnerId);
+    if (!targetOwner || targetOwner.bankrupt) continue;
+
+    const targetGaps = findAllMonopolyGaps(targetOwner, room, registry, stateMap);
+    const matchingGaps = targetGaps.filter((tg) => registry.get(tg.cellIndex) === bot.id);
+    for (const targetGap of matchingGaps) {
+      const wantedCell = botGap.cellIndex;
+      const offeredCell = targetGap.cellIndex;
+      const wantedGroup = BOARD_CONFIG.find((c) => c.index === wantedCell)?.colorGroup;
+      const offeredGroup = BOARD_CONFIG.find((c) => c.index === offeredCell)?.colorGroup;
+      if (wantedGroup && wantedGroup === offeredGroup) {
+        continue;
+      }
+      const pairKey = `${wantedCell}_${offeredCell}`;
+      const lastRejected = bot.swapPairLastRejectedRound?.[pairKey];
+      if (lastRejected !== undefined && currentRound - lastRejected < 3) {
+        continue;
+      }
+
+      const deedWanted = PROPERTY_DEEDS.get(wantedCell);
+      const deedOffered = PROPERTY_DEEDS.get(offeredCell);
+      const baseDiff = (deedWanted?.price ?? 1000) - (deedOffered?.price ?? 1000);
+      let price = baseDiff;
+      if (personality === BotPersonality.Aggressive && price > 0) {
+        price = Math.round(price * 1.2);
+      }
+      if (price > 0 && bot.balance - price < 500) continue;
+
+      return {
+        type: 'INTENT_TRADE_OFFER',
+        cellIndex: wantedCell,
+        offeredCellIndex: offeredCell,
+        sellerId: targetOwner.id,
+        targetPlayerId: targetOwner.id,
+        buyerId: bot.id,
+        price,
+      };
+    }
+  }
+
+  return null;
+}
+
+function completesMonopoly(cellIndex: number, ownerId: string, registry: PropertyRegistry): boolean {
+  const grp = BOARD_CONFIG.find((c) => c.index === cellIndex)?.colorGroup;
+  if (!grp) return false;
+  const others = BOARD_CONFIG.filter((c) => c.colorGroup === grp && c.index !== cellIndex);
+  return others.length > 0 && others.every((c) => registry.get(c.index) === ownerId);
+}
+
+export function evaluateBotSwapAcceptance(
+  requestedCell: number,
+  offeredCell: number,
+  price: number,
+  bot: Player,
+  partner: Player,
+  room: Room,
+  registry: PropertyRegistry,
+  stateMap: PropertyStateMap,
+  personality?: BotPersonality,
+): BotTradeDecision {
+  const pers = personality ?? BotPersonality.Balanced;
+
+  if (isLeadingPlayer(partner.id, room?.players ?? [partner, bot], registry, stateMap)) {
+    return { accept: false, reason: 'EMBARGO_LEADER' };
+  }
+
+  const givesMonopolyToBot = completesMonopoly(requestedCell, bot.id, registry);
+  const givesMonopolyToPartner = completesMonopoly(offeredCell, partner.id, registry);
+
+  if (price > 0) {
+    if (bot.balance < price) {
+      return { accept: false, reason: 'INSUFFICIENT_FUNDS' };
+    }
+    const safetyThreshold = pers === BotPersonality.Passive ? 1500 : (pers === BotPersonality.Balanced ? 800 : 300);
+    if (bot.balance - price < safetyThreshold) {
+      return { accept: false, reason: 'SAFETY_BUFFER_BREACH' };
+    }
+  }
+
+  if (!givesMonopolyToBot && givesMonopolyToPartner) {
+    return { accept: false, reason: 'PREVENT_MONOPOLY' };
+  }
+
+  if (givesMonopolyToBot) {
+    if (pers === BotPersonality.Aggressive) {
+      return { accept: true };
+    }
+    if (pers === BotPersonality.Balanced) {
+      return { accept: true };
+    }
+    if (pers === BotPersonality.Passive) {
+      if (price <= 500 && bot.balance - price >= 1000) {
+        return { accept: true };
+      }
+      return { accept: false, reason: 'PASSIVE_DEFENSIVE' };
+    }
+  }
+
+  const deedReq = PROPERTY_DEEDS.get(requestedCell);
+  const deedOff = PROPERTY_DEEDS.get(offeredCell);
+  const valDiff = (deedReq?.price ?? 1000) - (deedOff?.price ?? 1000);
+  if (valDiff - price >= 0) {
+    return { accept: true };
+  }
+
+  return { accept: false, reason: 'UNFAVORABLE_VALUATION' };
 }

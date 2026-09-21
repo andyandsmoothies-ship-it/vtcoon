@@ -13,7 +13,7 @@ export type PlayerIntent =
   | { type: 'INTENT_DOWNGRADE'; cellIndex: number; stepByStep?: boolean; enforceEvenDowngrading?: boolean }
   | { type: 'INTENT_MORTGAGE'; cellIndex: number }
   | { type: 'INTENT_REDEEM'; cellIndex: number }
-  | { type: 'INTENT_TRADE_OFFER'; sellerId: string; buyerId: string; cellIndex: number; price: number }
+  | { type: 'INTENT_TRADE_OFFER'; sellerId: string; buyerId: string; cellIndex: number; price: number; offeredCellIndex?: number }
   | { type: 'INTENT_RESPOND_TRADE_OFFER'; offerId: string; accept: boolean }
   | { type: 'INTENT_EXECUTE_COMPULSORY_BUYOUT'; cellIndex: number }
   | { type: 'INTENT_DECLINE_COMPULSORY_BUYOUT' }
@@ -55,8 +55,8 @@ const INTENT_DISPATCH: Record<PlayerIntent['type'], IntentHandler> = {
   INTENT_MORTGAGE: (m, rc, p, i) => m.handleMortgage(rc, p, (i as { cellIndex: number }).cellIndex),
   INTENT_REDEEM: (m, rc, p, i) => m.handleRedeem(rc, p, (i as { cellIndex: number }).cellIndex),
   INTENT_TRADE_OFFER: (m, rc, p, i) => {
-    const ti = i as { sellerId: string; buyerId: string; cellIndex: number; price: number };
-    return m.handleTradeOffer(rc, p, ti.sellerId, ti.buyerId, ti.cellIndex, ti.price);
+    const ti = i as { sellerId: string; buyerId: string; cellIndex: number; price: number; offeredCellIndex?: number };
+    return m.handleTradeOffer(rc, p, ti.sellerId, ti.buyerId, ti.cellIndex, ti.price, ti.offeredCellIndex);
   },
   INTENT_RESPOND_TRADE_OFFER: (m, rc, p, i) => {
     const ri = i as { offerId: string; accept: boolean };

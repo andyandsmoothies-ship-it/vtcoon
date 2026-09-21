@@ -97,7 +97,9 @@ export function resolveRent(
     const deed = PROPERTY_DEEDS.get(cellIndex);
     if (!deed) return 0;
     const lvl = stateMap?.get(cellIndex)?.level ?? 0;
-    if (lvl === 3 && deed.rent3 !== undefined) rent = deed.rent3;
+    if (lvl === 3 && deed.rent3 !== undefined) {
+      rent = hasMonopoly(ownerId, cellIndex, registry, stateMap) ? Math.floor(deed.rent3 * 1.5) : deed.rent3;
+    }
     else if (lvl === 2 && deed.rent2 !== undefined) rent = deed.rent2;
     else if (lvl === 1 && deed.rent1 !== undefined) rent = deed.rent1;
     else {

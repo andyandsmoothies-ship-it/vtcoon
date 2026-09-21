@@ -76,6 +76,7 @@ export function liquidateAssets(
         cellIndex,
         declinedPlayerId: playerId,    // Người phá sản KHÔNG được đặt giá
         highestBid: startingBid,
+        startingBid,
         passedPlayers: new Set<string>(),
         insolvencyPlayerId: playerId,  // Tiền đấu giá trả nợ + hoàn surplus cho player này
       });

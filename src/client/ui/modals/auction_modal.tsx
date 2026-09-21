@@ -9,6 +9,7 @@ import { AuctionDistrictCard } from './auction_district_card';
 export interface AuctionModalProps {
   readonly cellIndex: number;
   readonly currentBid: number;
+  readonly startingBid?: number;
   readonly highestBidderId: string | null;
   readonly timeRemaining: number;
   readonly hasPassed?: boolean;
@@ -19,6 +20,8 @@ export interface AuctionModalProps {
   readonly isConcluded?: boolean;
   readonly winnerId?: string | null;
   readonly finalPrice?: number;
+  readonly isForeclosure?: boolean;
+  readonly insolvencyPlayerId?: string;
   readonly playersInfo?: Record<string, any>;
   readonly levelMap?: Record<number, number>;
   readonly onBid?: (newAmount: number) => void;
@@ -29,6 +32,7 @@ export interface AuctionModalProps {
 export function AuctionModal({
   cellIndex,
   currentBid,
+  startingBid,
   highestBidderId,
   timeRemaining,
   hasPassed = false,
@@ -39,6 +43,8 @@ export function AuctionModal({
   isConcluded = false,
   winnerId,
   finalPrice,
+  isForeclosure = false,
+  insolvencyPlayerId,
   playersInfo: propPlayersInfo,
   levelMap: propLevelMap,
   onBid,
@@ -46,6 +52,8 @@ export function AuctionModal({
   onClose,
 }: AuctionModalProps): React.ReactElement {
   const deed = getDeedDisplayInfo(cellIndex);
+  const basePrice = deed?.price ?? (startingBid ? Math.round(startingBid / 0.70) : currentBid);
+  const floorPrice = startingBid ?? Math.floor(basePrice * 0.70);
   const increments = calculateAuctionIncrements(currentBid);
   const isUrgent = timeRemaining <= 5;
   const timerPercent = Math.min(100, Math.max(0, (timeRemaining / 15) * 100));
@@ -55,6 +63,8 @@ export function AuctionModal({
 
   const storePlayersInfo = useGameStore((s) => s.playersInfo);
   const playersInfo = propPlayersInfo ?? storePlayersInfo;
+  const debtor = insolvencyPlayerId ? playersInfo?.[insolvencyPlayerId] : undefined;
+  const debtorName = debtor?.name;
   const [autoBid, setAutoBid] = useState<boolean>(false);
 
   // Xử lý tự động đặt giá nếu bật Auto-Bid
@@ -95,7 +105,11 @@ export function AuctionModal({
             BÚA GÕ THÀNH CÔNG!
           </h3>
           <p className="text-xs font-bold text-amber-900 mt-1">
-            {displayName} đã trúng đấu giá {deed?.name ?? `Ô #${cellIndex}`} với giá {formatCurrency(finalPrice ?? currentBid)}!
+            {isForeclosure
+              ? (myId && insolvencyPlayerId === myId
+                  ? `${displayName} đã trúng đấu giá giải cứu ${deed?.name ?? `Ô #${cellIndex}`} với giá ${formatCurrency(finalPrice ?? currentBid)}. Khoản tiền này đã được cấn trừ vào nợ của bạn!`
+                  : `${displayName} đã trúng đấu giá giải cứu ${deed?.name ?? `Ô #${cellIndex}`} với giá ${formatCurrency(finalPrice ?? currentBid)}!`)
+              : `${displayName} đã trúng đấu giá ${deed?.name ?? `Ô #${cellIndex}`} với giá ${formatCurrency(finalPrice ?? currentBid)}!`}
           </p>
         </div>
       )}
@@ -112,9 +126,15 @@ export function AuctionModal({
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-400">
-            ĐANG MỞ
-          </span>
+          {isForeclosure ? (
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-100 text-rose-800 border border-rose-400 flex items-center gap-1 animate-pulse">
+              <span>⚠️ PHÁT MÃI CƯỠNG CHẾ (-30%)</span>
+            </span>
+          ) : (
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-400">
+              ĐANG MỞ
+            </span>
+          )}
           {onClose && (
             <button
               type="button"
@@ -128,13 +148,39 @@ export function AuctionModal({
         </div>
       </div>
 
+      {/* Banner cảnh báo thanh lý nợ */}
+      {isForeclosure && (
+        <div className="bg-rose-50 border border-rose-300 rounded-2xl p-3 text-xs text-rose-900 flex items-center gap-2.5">
+          <span className="text-xl" aria-hidden="true">🚨</span>
+          <div>
+            <span className="font-bold block uppercase tracking-wider text-rose-950">
+              {`TÀI SẢN PHÁT MẠI THANH LÝ NỢ${debtorName ? ` • ${debtorName}` : ''}`}
+            </span>
+            <span className="text-[11px] text-rose-700">
+              {myId && insolvencyPlayerId === myId
+                ? 'Đang phát mãi với giá sàn 70% để thu hồi vốn trả nợ cho bạn. Tiền thặng dư (nếu có) sẽ được hoàn trả.'
+                : 'Khởi điểm chỉ 70% giá niêm yết. Cơ hội bắt đáy sinh lời! Tiền đấu giá dùng để cấn trừ nợ.'}
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Tên BĐS & Phân khu quy hoạch */}
       <div className="flex items-center gap-3 bg-[#F7F2E7] p-3 rounded-2xl border border-slate-300">
         <div className="w-3.5 h-10 rounded-md shrink-0 shadow border border-slate-900" style={{ backgroundColor: ribbonColor }} />
         <div className="flex-1 min-w-0">
           <h3 className="font-bold text-slate-900 text-sm truncate">{deed?.name ?? `Ô #${cellIndex}`}</h3>
           <p className="text-xs text-slate-600 truncate">
-            Giá khởi điểm: <span className="text-slate-900 font-bold">{formatCurrency(deed?.price ?? currentBid)}</span>
+            {isForeclosure ? (
+              <>
+                Giá gốc: <span className="line-through text-slate-400 mr-1">{formatCurrency(basePrice)}</span>
+                ➔ Giá sàn: <span className="text-rose-600 font-bold">{formatCurrency(floorPrice)} (-30%)</span>
+              </>
+            ) : (
+              <>
+                Giá khởi điểm: <span className="text-slate-900 font-bold">{formatCurrency(basePrice)}</span>
+              </>
+            )}
           </p>
         </div>
       </div>
@@ -146,6 +192,7 @@ export function AuctionModal({
         myId={myId}
         playersInfo={playersInfo}
         levelMap={propLevelMap}
+        isForeclosure={isForeclosure}
       />
 
       {/* Bảng giá hiện tại & Người dẫn đầu */}
@@ -234,7 +281,9 @@ export function AuctionModal({
       {isDeclinedPlayer ? (
         <div className="p-3 bg-amber-100 rounded-xl text-center border border-amber-300">
           <p className="text-xs font-bold text-amber-900">
-            Bạn đã từ chối mua ô đất này (Luật game cấm tham gia đấu giá). Đang chờ các đối thủ khác đặt giá...
+            {isForeclosure
+              ? 'Tài sản của bạn đang được phát mãi cưỡng chế để cấn trừ nợ xấu. Bạn không thể tự đấu giá tài sản của chính mình.'
+              : 'Bạn đã từ chối mua ô đất này (Luật game cấm tham gia đấu giá). Đang chờ các đối thủ khác đặt giá...'}
           </p>
         </div>
       ) : hasPassed ? (

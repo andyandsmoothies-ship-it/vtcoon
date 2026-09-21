@@ -40,6 +40,7 @@ export interface PlayerHudInfo {
   readonly ownerSlot?: number;
   readonly mascotIcon?: string;
   readonly mascotName?: string;
+  readonly avatar?: string;
 }
 
 export interface ActiveEmote {
@@ -102,6 +103,9 @@ export interface ModalPayloadMap {
     isConcluded?: boolean;
     winnerId?: string | null;
     finalPrice?: number;
+    insolvencyPlayerId?: string;
+    isForeclosure?: boolean;
+    startingBid?: number;
   };
   trade: {
     targetPlayerId: string;
@@ -152,6 +156,7 @@ export interface ModalPayloadMap {
     buyerId: string;
     sellerId: string;
     expiresAt: number;
+    offeredCellIndex?: number;
   };
   compulsory_buyout: PendingBuyoutSession;
 }

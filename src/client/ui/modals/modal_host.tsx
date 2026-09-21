@@ -282,6 +282,7 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
         <AuctionModal
           cellIndex={(modalPayload as ModalPayloadMap['auction']).cellIndex}
           currentBid={(modalPayload as ModalPayloadMap['auction']).currentBid}
+          startingBid={(modalPayload as ModalPayloadMap['auction']).startingBid}
           highestBidderId={(modalPayload as ModalPayloadMap['auction']).highestBidderId}
           timeRemaining={(modalPayload as ModalPayloadMap['auction']).timeRemaining}
           hasPassed={(modalPayload as ModalPayloadMap['auction']).hasPassed}
@@ -292,6 +293,8 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
           isConcluded={(modalPayload as ModalPayloadMap['auction']).isConcluded}
           winnerId={(modalPayload as ModalPayloadMap['auction']).winnerId}
           finalPrice={(modalPayload as ModalPayloadMap['auction']).finalPrice}
+          isForeclosure={(modalPayload as ModalPayloadMap['auction']).isForeclosure}
+          insolvencyPlayerId={(modalPayload as ModalPayloadMap['auction']).insolvencyPlayerId}
           onClose={closeModal}
           onBid={(amount) => {
             AudioEngine.playSfx(SoundEffect.AUCTION_BID);
@@ -345,20 +348,31 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
             onSubmitTrade={(tradeData) => {
               AudioEngine.playSfx(SoundEffect.TRADE_SUCCESS);
               if (tradeData) {
-                if (tradeData.offeredProperties[0] !== undefined) {
-                  onIntent?.({
-                    type: 'INTENT_TRADE_OFFER',
-                    sellerId: myId,
-                    buyerId: tradeData.targetPlayerId,
-                    cellIndex: tradeData.offeredProperties[0],
-                    price: tradeData.cashRequest || tradeData.cashOffer || 1000,
-                  });
-                } else if (tradeData.requestedProperties[0] !== undefined) {
+                const off0 = tradeData.offeredProperties[0];
+                const req0 = tradeData.requestedProperties[0];
+                if (off0 !== undefined && req0 !== undefined) {
                   onIntent?.({
                     type: 'INTENT_TRADE_OFFER',
                     sellerId: tradeData.targetPlayerId,
                     buyerId: myId,
-                    cellIndex: tradeData.requestedProperties[0],
+                    cellIndex: req0,
+                    offeredCellIndex: off0,
+                    price: (tradeData.cashOffer || 0) - (tradeData.cashRequest || 0),
+                  });
+                } else if (off0 !== undefined) {
+                  onIntent?.({
+                    type: 'INTENT_TRADE_OFFER',
+                    sellerId: myId,
+                    buyerId: tradeData.targetPlayerId,
+                    cellIndex: off0,
+                    price: tradeData.cashRequest || tradeData.cashOffer || 1000,
+                  });
+                } else if (req0 !== undefined) {
+                  onIntent?.({
+                    type: 'INTENT_TRADE_OFFER',
+                    sellerId: tradeData.targetPlayerId,
+                    buyerId: myId,
+                    cellIndex: req0,
                     price: tradeData.cashOffer || tradeData.cashRequest || 1000,
                   });
                 }
@@ -430,67 +444,45 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
       {activeModal === 'game_over' && (
         <GameOverModal
           leaderboard={(modalPayload as ModalPayloadMap['game_over'])?.leaderboard}
-          onClose={() => {
-            closeModal();
-            if (typeof window !== 'undefined') window.location.reload();
-          }}
-          onPlayAgain={() => {
-            closeModal();
-            if (typeof window !== 'undefined') window.location.reload();
-          }}
+          onClose={() => { closeModal(); if (typeof window !== 'undefined') window.location.reload(); }}
+          onPlayAgain={() => { closeModal(); if (typeof window !== 'undefined') window.location.reload(); }}
         />
       )}
 
-      {activeModal === 'bot_trade_offer' && modalPayload && (
-        <BotTradeOfferModal
-          offerId={(modalPayload as ModalPayloadMap['bot_trade_offer']).offerId}
-          cellIndex={(modalPayload as ModalPayloadMap['bot_trade_offer']).cellIndex}
-          price={(modalPayload as ModalPayloadMap['bot_trade_offer']).price}
-          buyerId={(modalPayload as ModalPayloadMap['bot_trade_offer']).buyerId}
-          sellerId={(modalPayload as ModalPayloadMap['bot_trade_offer']).sellerId}
-          expiresAt={(modalPayload as ModalPayloadMap['bot_trade_offer']).expiresAt}
-          onAccept={(offerId) => {
-            AudioEngine.playSfx(SoundEffect.BUY_PROPERTY);
-            onIntent?.({ type: 'INTENT_RESPOND_TRADE_OFFER', offerId, accept: true });
-            closeModal();
-          }}
-          onReject={(offerId) => {
-            AudioEngine.playSfx(SoundEffect.CARD_FLIP);
-            onIntent?.({ type: 'INTENT_RESPOND_TRADE_OFFER', offerId, accept: false });
-            closeModal();
-          }}
-          onClose={() => {
-            const payload = modalPayload as ModalPayloadMap['bot_trade_offer'];
-            onIntent?.({ type: 'INTENT_RESPOND_TRADE_OFFER', offerId: payload.offerId, accept: false });
-            closeModal();
-          }}
-        />
-      )}
+      {activeModal === 'bot_trade_offer' && modalPayload && (() => {
+        const p = modalPayload as ModalPayloadMap['bot_trade_offer'];
+        return (
+          <BotTradeOfferModal
+            offerId={p.offerId}
+            cellIndex={p.cellIndex}
+            price={p.price}
+            buyerId={p.buyerId}
+            sellerId={p.sellerId}
+            expiresAt={p.expiresAt}
+            offeredCellIndex={p.offeredCellIndex}
+            onAccept={(offerId) => { AudioEngine.playSfx(SoundEffect.BUY_PROPERTY); onIntent?.({ type: 'INTENT_RESPOND_TRADE_OFFER', offerId, accept: true }); closeModal(); }}
+            onReject={(offerId) => { AudioEngine.playSfx(SoundEffect.CARD_FLIP); onIntent?.({ type: 'INTENT_RESPOND_TRADE_OFFER', offerId, accept: false }); closeModal(); }}
+            onClose={() => { onIntent?.({ type: 'INTENT_RESPOND_TRADE_OFFER', offerId: p.offerId, accept: false }); closeModal(); }}
+          />
+        );
+      })()}
 
-      {activeModal === 'compulsory_buyout' && modalPayload && (
-        <CompulsoryBuyoutModal
-          buyerId={(modalPayload as ModalPayloadMap['compulsory_buyout']).buyerId}
-          sellerId={(modalPayload as ModalPayloadMap['compulsory_buyout']).sellerId}
-          cellIndex={(modalPayload as ModalPayloadMap['compulsory_buyout']).cellIndex}
-          cost={(modalPayload as ModalPayloadMap['compulsory_buyout']).cost}
-          basePrice={(modalPayload as ModalPayloadMap['compulsory_buyout']).basePrice}
-          expiresAt={(modalPayload as ModalPayloadMap['compulsory_buyout']).expiresAt}
-          onBuyout={(cellIndex) => {
-            AudioEngine.playSfx(SoundEffect.BUY_PROPERTY);
-            onIntent?.({ type: 'INTENT_EXECUTE_COMPULSORY_BUYOUT', cellIndex });
-            closeModal();
-          }}
-          onDecline={() => {
-            AudioEngine.playSfx(SoundEffect.CARD_FLIP);
-            onIntent?.({ type: 'INTENT_DECLINE_COMPULSORY_BUYOUT' });
-            closeModal();
-          }}
-          onClose={() => {
-            onIntent?.({ type: 'INTENT_DECLINE_COMPULSORY_BUYOUT' });
-            closeModal();
-          }}
-        />
-      )}
+      {activeModal === 'compulsory_buyout' && modalPayload && (() => {
+        const p = modalPayload as ModalPayloadMap['compulsory_buyout'];
+        return (
+          <CompulsoryBuyoutModal
+            buyerId={p.buyerId}
+            sellerId={p.sellerId}
+            cellIndex={p.cellIndex}
+            cost={p.cost}
+            basePrice={p.basePrice}
+            expiresAt={p.expiresAt}
+            onBuyout={(cellIndex) => { AudioEngine.playSfx(SoundEffect.BUY_PROPERTY); onIntent?.({ type: 'INTENT_EXECUTE_COMPULSORY_BUYOUT', cellIndex }); closeModal(); }}
+            onDecline={() => { AudioEngine.playSfx(SoundEffect.CARD_FLIP); onIntent?.({ type: 'INTENT_DECLINE_COMPULSORY_BUYOUT' }); closeModal(); }}
+            onClose={() => { onIntent?.({ type: 'INTENT_DECLINE_COMPULSORY_BUYOUT' }); closeModal(); }}
+          />
+        );
+      })()}
     </ModalBackdrop>
   );
 };

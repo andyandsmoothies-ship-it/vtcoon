@@ -7,11 +7,11 @@
 ## 🧭 BẢNG CHỈ MỤC THEO DOMAIN (DOMAIN INDEX)
 | Domain Tag | Trọng Tâm & Phạm Vi Mã Nguồn | Các Gotchas Liên Quan |
 | :--- | :--- | :--- |
-| `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78, #82, #104, #105, #106, #145, #146, #147, #159, #164, #174, #180, #188 |
-| `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147, #190, #191 |
+| `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78, #82, #104, #105, #106, #145, #146, #147, #159, #164, #174, #180, #188, #195, #196, #197 |
+| `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147, #190, #191, #195, #196, #197 |
 | `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190 |
 | `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #32, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #60, #61, #63, #69, #72, #74, #77, #80, #85, #86, #88, #89, #90, #91, #92, #93, #94, #95, #96, #101, #103, #109, #110, #114, #115, #116, #117, #120, #122, #123, #124, #125, #126, #127, #128, #129, #130, #133, #134, #135, #136, #140, #141, #144, #148, #159, #160, #161, #162, #163, #164, #165, #169, #175, #177, #189 |
-| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192 |
+| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192, #195, #196 |
 | `[UAT/TEST]` | Nghiệm Thu, Adversarial TDD, Ảnh Chụp Màn Hình (.jpg), Shell Escaping, File I/O Lock, Docker Healthcheck Timeout | #5, #28, #29, #31, #35, #52, #71, #73, #83, #84, #99, #100, #117, #124, #125, #130 |
 | `[TELEMETRY]` | Giám Sát Hiệu Năng Thời Gian Thực, Chó Canh Phòng Bất Biến, Hộp Đen Tái Hiện Lỗi | #39, #62, #71, #75, #104, #114, #115, #135, #174 |
 | `[ARCH/REFACTOR]` | Tách Module Facade, Ngân Sách Render Loop, Chuẩn Hóa Môi Trường Build | #43, #98, #99 |
@@ -3208,3 +3208,103 @@
   4. **Quyết Định Hợp Lý Của Bot & Fallback Tài Chính Minh Bạch**:
      - Bot chỉ thực hiện buyout khi số dư `bot.balance - buyoutCost >= safetyBuffer` (800 Tr. VNĐ) và ưu tiên ô đất giúp chặn chuỗi độc quyền của đối thủ hoặc bổ sung nhóm màu tiềm năng.
      - Nếu bàn cờ không có ô C0 hợp lệ nào hoặc không ai mua lại: Ngân sách nhà nước (Kho Bạc / Ngân Hàng) chi trả tiền đền bù/trợ cấp +800 Tr. hoặc +1.000 Tr. VNĐ cho người chơi rút thẻ theo đúng quy tắc thẻ Cơ Hội.
+
+---
+
+### 194. [FSM/AUCTION][UI/CRAFT][NET/SYNC] Nhận Diện Đấu Giá Phát Mãi Cưỡng Chế 70% & Radar Bắt Đáy Nợ Xấu (IMP-149 V3)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Mù Trạng Thái Đấu Giá Phát Mãi Cưỡng Chế*:
+     - Khi người chơi bị thâm hụt số dư trong `InsolvencyPhase` (§V.3), FSM tạo phiên đấu giá cưỡng chế 70% thị giá (`liquidateAssets`).
+     - Tuy nhiên, `AuctionPayload` trước đây không truyền cờ `isForeclosure` hay `insolvencyPlayerId` qua WebSocket delta xuống client, khiến người chơi không biết đây là tài sản phát mại nợ xấu đang được giảm giá sàn 30% để tranh thủ "bắt đáy".
+  2. *Bẫy Mất `startingBid` Ở Server State (Gotcha V3)*:
+     - `insolvency_manager.ts` và `turn_loop.ts` khởi tạo `auctions.set()` nhưng quên lưu trường `startingBid`. Dẫn đến việc `session_manager.ts` đọc `session.startingBid` luôn ra `undefined`.
+  3. *Bẫy Vỡ Layout Header Mobile 360px & Thông Điệp Sai Lệch Cho Con Nợ*:
+     - Nhồi nhét badge độc lập trên header `AuctionDistrictCard` làm gãy dòng trên mobile.
+     - Con nợ bị hiển thị nhầm thông báo "Bạn đã từ chối mua ô đất này" thay vì thông báo cưỡng chế nợ xấu.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Lưu Trữ Server State & Đồng Bộ DTO Delta Xuyên Suốt**:
+     - `auctions.set()` trong `insolvency_manager.ts` (70%) và `turn_loop.ts` (50%) bắt buộc lưu `startingBid`.
+     - `AuctionPayload` và `ModalPayloadMap['auction']` mở rộng `startingBid?: number; insolvencyPlayerId?: string; isForeclosure?: boolean;`.
+  2. **Bảo Vệ Layout Mobile 360px (AuctionDistrictCard)**:
+     - Tích hợp badge bắt đáy `-30%` với kích thước thu gọn (`text-[8px] px-1 py-0.5 shrink-0 bg-rose-100 text-rose-900 border border-rose-400 rounded`), bảo đảm không làm gãy dòng header trên màn hình hẹp 360px.
+  3. **Cá Nhân Hóa Trải Nghiệm Con Nợ**:
+     - Con nợ (`myId === insolvencyPlayerId`) nhìn thấy thông điệp cưỡng chế chuẩn xác: *"Tài sản của bạn đang được phát mãi cưỡng chế để cấn trừ nợ xấu. Bạn không thể tự đấu giá tài sản của chính mình."*
+     - Banner phát mãi hiển thị tên con nợ được giải cứu: `TÀI SẢN PHÁT MẠI THANH LÝ NỢ • [Tên Con Nợ]`.
+     - Khi gõ búa thành công, con nợ thấy thông điệp cấn trừ nợ: `"{displayName} đã trúng đấu giá giải cứu {tên_ô} với giá {finalPrice}. Khoản tiền này đã được cấn trừ vào nợ của bạn!"`.
+  4. **Toán Học Giá Sàn Kháng Trễ Dữ Liệu**:
+     - `basePrice = deed?.price ?? (startingBid ? Math.round(startingBid / 0.70) : currentBid)`.
+     - `floorPrice = startingBid ?? Math.floor(basePrice * 0.70)`.
+     - Hiển thị: `Giá gốc: ~{formatCurrency(basePrice)}~ ➔ Giá sàn: {formatCurrency(floorPrice)} (-30%)`.
+
+
+---
+
+### 195. [FSM/RULE][BOT/AI][UI/CRAFT] Giao Dịch Đổi Đất 2 Chiều (Two-Way Property Swap) & Đàm Phán Người - Bot AI (IMP-146)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Bảo Toàn Kho Bạc Khi Đổi Đất Kèm Bù Tiền Âm*:
+     - Giao dịch đổi đất 2 chiều (`offeredCellIndex !== undefined`) cho phép bên đề nghị bù thêm tiền mặt cho bên nhận (`price < 0`) hoặc yêu cầu bên nhận bù thêm tiền (`price > 0`).
+     - Nếu tính thuế trên `price < 0` mà không lấy `Math.abs(price)`, thuế bị âm dẫn đến việc rút ruột kho bạc, phá vỡ bất biến `deltaTreasury + deltaBalances === 0`.
+  2. *Bẫy Kiểm Tra Thế Chấp Không Nhất Quán (Mortgage SSOT Trap)*:
+     - Với `cellIndex`, các kịch bản kiểm thử lịch sử giải chấp qua `player.mortgagedProperties` mà không cập nhật `stateMap`. Nếu kiểm tra `stateMap.get(cellIndex)?.isMortgaged`, các test lịch sử sẽ fail. Tuy nhiên, với `offeredCellIndex`, bắt buộc kiểm tra cả `offeredOwner.mortgagedProperties` và `stateMap` để ngăn đổi tài sản đang thế chấp.
+  3. *Bẫy Spam Đổi Đất Của Bot*:
+     - Nếu Bot liên tục chào đổi cùng một cặp đất bị người chơi từ chối, ván đấu sẽ bị bế tắc hoặc gây khó chịu. Cần ghi nhận `swapPairLastRejectedRound[pairKey]` với `pairKey = min(c1,c2)_max(c1,c2)` và cooldown 3 vòng (`currentRound - rejectedRound < 3`).
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Đẳng Thức Bảo Toàn Kho Bạc Tuyệt Đối**:
+     - Thuế giao dịch P2P luôn được tính bằng `Math.floor(Math.abs(price) * 0.05)`.
+     - Bên nhận tiền mặt đóng thuế 5% nộp vào Kho Bạc (`room.treasury += taxAmount`), bên nhận thực nhận `Math.abs(price) - taxAmount`.
+  2. **Hoán Đổi Sở Hữu Nguyên Tử (Atomic Property Swap)**:
+     - `executeP2PTrade`: Thu hồi cả 2 sổ đỏ từ 2 bên và hoán đổi quyền sở hữu trong cùng 1 tick FSM.
+     - Xóa toàn bộ cooldown từ chối/yêu cầu trước đó liên quan đến cả 2 ô đất.
+     - Phát sinh sự kiện telemetry `P2P_TRADE_SWAP`.
+  3. **Cơ Chế Embargo Leader & Định Giá Đổi Đất Của Bot**:
+     - Bot từ chối mọi giao dịch đổi đất nếu giao dịch đó giúp Người chơi dẫn đầu (Leader về tài sản) hoàn thành thế độc quyền (Monopoly), trừ khi Bot cũng hoàn thành monopoly và có tài chính thặng dư.
+     - Ngưỡng đánh giá đổi đất của Bot phụ thuộc Personality (`cautious`, `aggressive`, `balanced`) và quy tắc Monopoly Multiplier (1.8x đến 2.5x).
+
+---
+
+### 196. [FSM/FINANCE][UI/CRAFT][BOT/AI] Cân Bằng Hệ Số Cước Độc Quyền x1.5 Cho C3 & Tính Quyết Đoán Của Trận Đấu (IMP-147)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Bế Tắc Trận Đấu Kéo Dài Vòng 40 (40-Round Stalemate Trap)*:
+     - Trước đây, `resolveRent` chỉ áp dụng hệ số độc quyền x2 cho đất thô C0 (`lvl === 0`). Khi người chơi nâng cấp lên C3 (Khách Sạn / TTTM Resort), cước dừng chân chỉ lấy `deed.rent3` cố định mà không có bonus độc quyền.
+     - Dù đã đầu tư hàng ngàn triệu VNĐ để xây C3, mức cước không đủ tính sát thương để loại đối thủ, khiến các ván đấu 3-4 người/bot thường cù cưa kéo dài tới vòng 40 (tỷ lệ kết thúc phá sản tự nhiên chỉ đạt 7.6%).
+  2. *Bẫy Kiểm Tra Thế Chấp Không Nhất Quán*:
+     - Nếu chỉ kiểm tra quyền sở hữu mà không kiểm tra tình trạng thế chấp của các ô trong nhóm, người chơi có thể thế chấp 1 ô để lấy tiền mà vẫn hưởng bonus x1.5 trên ô C3, vi phạm luật chơi Monopoly chuẩn Hasbro.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Hệ Số Cước Độc Quyền x1.5 Trên C3**:
+     - Tại `resolveRent` (`property_rent.ts`): Khi `lvl === 3 && deed.rent3 !== undefined`, kiểm tra `hasMonopoly(ownerId, cellIndex, registry, stateMap)`.
+     - Nếu có độc quyền và không có ô nào trong nhóm bị thế chấp: `rent = Math.floor(deed.rent3 * 1.5)`.
+     - Toàn bộ 22 ô đất đều có `rent3` chia hết cho 20, đảm bảo kết quả phép tính luôn là số nguyên tròn chẵn (Zero Float Drift).
+  2. **Hiệu Ứng Nhân Dồn Quyết Định Ở Late-Game**:
+     - Cước C3 độc quyền tiếp tục nhân dồn hợp lệ với Late-Game Rent Surge:
+       * Vòng 20+: x 1.2 -> cước C3 đạt 1.8x cước gốc.
+       * Vòng 30+: x 1.5 -> cước C3 đạt 2.25x cước gốc (ví dụ C3 Lê Lợi đạt 19.800 Tr. VNĐ, knockout đối thủ dứt điểm).
+  3. **Đồng Bộ UI Bảng Cước Sổ Đỏ**:
+     - Tại `title_deed_rent_table.tsx`: Khi `idx === 3 && hasMonopoly && !isRailroad && !isUtility`, hiển thị cước tính theo `Math.floor(rent * 1.5)` kèm huy hiệu xúc giác `<span className="text-[9px] font-extrabold text-amber-700">x1.5 ĐỘC QUYỀN</span>`.
+  4. **Kế Thừa Tự Nhiên Vào Bot Threat & Solvency Solver**:
+     - Bot AI tự động nhận diện mức nguy hiểm C3 mới qua `ThreatForecaster` và định giá tài sản chính xác qua `SolvencySolver` mà không cần duplicate logic.
+
+---
+
+### 197. [FSM/RULE][BOT/AI] Cân Bằng Kinh Tế Nhóm 3 Lô Đất Xanh Lá & Vàng & Khôi Phục Sức Hút Đầu Tư (IMP-148)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Thâm Hụt Vốn Nhóm 3 Ô (Three-Property Capital Trap)*:
+     - Trong luật chuẩn Hasbro Monopoly, nhóm 3 ô (Green) có cùng đơn giá xây dựng mỗi nhà ($200) như nhóm 2 ô đắt nhất (Dark Blue). Nhưng vì có 3 ô nên tổng chi phí xây hoàn thiện cao hơn 1.5 lần ($3,000 vs $2,000), đổi lại tổng cước cả bộ khi có khách sạn ($4,050) vượt trội so với bộ 2 ô ($3,500).
+     - Tại VTCoOn trước đây, chi phí nâng cấp Xanh Lá lên tới 20.700 Tr. VNĐ cho 3 ô (`[1500, 2250, 3000]` Tr. cho ô 31, 32 và `[1600, 2400, 3200]` Tr. cho ô 34), vượt quá khả năng tích lũy tiền mặt thực tế của người chơi và Bot AI (người chơi/bot chỉ có 8.000 - 15.000 Tr. tiền mặt ở mid-game). Trong khi đó, cước C3 gốc chỉ đạt 6.600 - 7.040 Tr. VNĐ, khiến nhóm Xanh Lá bị "chết yểu", không ai dám nâng cấp C3.
+  2. *Bẫy Ngưỡng Sát Thương Quá Mức (Overkill Shock Trap)*:
+     - Nếu tăng cước C3 Xanh Lá quá cao (ví dụ tăng 40% lên 9.200 Tr.), khi nhân hệ số độc quyền x1.5 (IMP-147) cước đơn lẻ đạt 13.800 Tr., vượt qua cả ô đắt nhất bàn cờ là Lê Lợi (13.200 Tr.), làm phá vỡ thứ bậc giá trị địa lý của bàn cờ và gây phá sản đột ngột không công bằng.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Hạ Chi Phí Xây Nhóm Xanh Lá 20% Về Mức Khả Thi**:
+     - Ô 31 (Hưng Yên) & Ô 32 (Hà Nội Cầu Giấy): `upgradeCosts: [1200, 1800, 2400]` Tr. (tổng xây 5.400 Tr./ô).
+     - Ô 34 (Hà Nội Hoàn Kiếm): `upgradeCosts: [1300, 1950, 2600]` Tr. (tổng xây 5.850 Tr./ô).
+     - Tổng chi phí hoàn thiện cả bộ 3 ô giảm từ 20.700 Tr. xuống đúng **16.650 Tr. VNĐ**, tương đương chi phí xây 2 ô Tím (16.875 Tr.), nằm hoàn toàn trong ngân sách đầu tư của Bot AI và người chơi.
+  2. **Cân Chỉnh Cước C3 Độc Quyền Tiệm Cận Nhưng Không Vượt Đỉnh**:
+     - Cước C3 cơ bản mới:
+       * Ô 29 (Quảng Ninh - Vàng): `rent3 = 7.200 Tr.` (tăng từ 7.000 Tr.). Khi có độc quyền x1.5: **10.800 Tr. VNĐ**.
+       * Ô 31 & Ô 32 (Xanh Lá): `rent3 = 7.200 Tr.` (tăng từ 6.600 Tr.). Khi có độc quyền x1.5: **10.800 Tr. VNĐ**.
+       * Ô 34 (Xanh Lá): `rent3 = 7.800 Tr.` (tăng từ 7.040 Tr.). Khi có độc quyền x1.5: **11.700 Tr. VNĐ**.
+     - Tổng cước độc quyền cả bộ 3 ô Xanh Lá C3 đạt **33.300 Tr. VNĐ** (vượt trội bộ Tím 24.750 Tr. do có 3 ô giăng bẫy liên tiếp), nhưng từng ô đơn lẻ (10.800 và 11.700 Tr.) không vượt qua đỉnh Lê Lợi ô 39 (13.200 Tr.).
+  3. **Zero Float Drift & Bảo Toàn Đơn Điệu Tuyệt Đối**:
+     - Mọi mức cước cơ bản và cước nhân độc quyền x1.5 của ô 29, 31, 32, 34 đều là số nguyên tròn chẵn 100% (`Number.isInteger === true`).
+     - Bảo đảm tính đơn điệu ngặt nghèo: `rent0 < rent1 < rent2 < rent3` và `upgradeCosts[0] < upgradeCosts[1] < upgradeCosts[2]`.
+  4. **Kế Thừa Trí Tuệ Tự Nhiên Của Bot AI**:
+     - Nhờ `valuation_engine.ts` đã có sẵn hệ số `TWO_OF_THREE: 1.6` và `findAllMonopolyGaps`, việc hạ chi phí xây dựng giúp Bot AI tích lũy đủ thanh khoản để hoàn thiện C1-C3 Xanh Lá tự nhiên mà không cần sửa mã nguồn Bot.

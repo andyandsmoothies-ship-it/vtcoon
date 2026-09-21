@@ -61,9 +61,14 @@ export class EnvelopeValidator {
     for (const key of Object.keys(record)) {
       const val = record[key];
       if (typeof val === 'number') {
-        if (!Number.isFinite(val) || val < 0) return false;
-        if (key === 'cellIndex' && (!Number.isInteger(val) || val < 0 || val >= 40)) return false;
-        if ((key === 'amount' || key === 'price' || key === 'stake') && (!Number.isInteger(val) || val < 0)) return false;
+        if (!Number.isFinite(val)) return false;
+        if (key === 'price') {
+          if (!Number.isInteger(val)) return false;
+        } else {
+          if (val < 0) return false;
+        }
+        if ((key === 'cellIndex' || key === 'offeredCellIndex') && (!Number.isInteger(val) || val < 0 || val >= 40)) return false;
+        if ((key === 'amount' || key === 'stake') && (!Number.isInteger(val) || val < 0)) return false;
       } else if (typeof val === 'object' && val !== null && !this.checkValidNumbers(val)) {
         return false;
       }
@@ -192,6 +197,9 @@ export class EnvelopeValidator {
         typeof it['buyerId'] === 'string' && it['buyerId'] &&
         typeof it['cellIndex'] === 'number' && typeof it['price'] === 'number';
       if (!ok) return { success: false, reasonCode: 'INVALID_ENVELOPE' };
+      if (it['offeredCellIndex'] !== undefined && (typeof it['offeredCellIndex'] !== 'number' || !Number.isInteger(it['offeredCellIndex']))) {
+        return { success: false, reasonCode: 'INVALID_ENVELOPE' };
+      }
     }
     if (it['type'] === 'INTENT_RESPOND_TRADE_OFFER') {
       const ok = typeof it['offerId'] === 'string' && it['offerId'] &&

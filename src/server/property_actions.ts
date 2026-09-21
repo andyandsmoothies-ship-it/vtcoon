@@ -173,12 +173,13 @@ function calcP2PTax(room: Room, price: number): { taxRate: number; totalCost: nu
     (m) => m.type === MarketCardId.MC_ANTI_SPECULATE && m.remainingRounds > 0,
   );
   const taxRate = antiSpeculate ? P2P_ANTI_SPECULATE_TAX : P2P_TAX_RATE;
-  const taxAmount = Math.floor(price * taxRate);
+  const absPrice = Math.abs(price);
+  const taxAmount = Math.floor(absPrice * taxRate);
   return {
     taxRate,
-    totalCost: price,
+    totalCost: absPrice,
     taxAmount,
-    sellerNet: price - taxAmount,
+    sellerNet: absPrice - taxAmount,
   };
 }
 
@@ -188,14 +189,17 @@ function isTradeFrozen(room: Room): boolean {
   );
 }
 
-function isInvalidPrice(price: number): boolean {
+function isInvalidPrice(price: number, isSwap = false): boolean {
+  if (isSwap) {
+    return !Number.isInteger(price);
+  }
   return !Number.isInteger(price) || price <= 0;
 }
 
-function checkTradeBasics(room: Room, sellerId: string, buyerId: string, price: number): ActionRejectReason | undefined {
+function checkTradeBasics(room: Room, sellerId: string, buyerId: string, price: number, isSwap = false): ActionRejectReason | undefined {
   if (!room.started) return ActionRejectReason.GAME_NOT_STARTED;
   if (sellerId === buyerId) return ActionRejectReason.INVALID_TRADE;
-  if (isInvalidPrice(price)) return ActionRejectReason.INVALID_PRICE;
+  if (isInvalidPrice(price, isSwap)) return ActionRejectReason.INVALID_PRICE;
   if (isTradeFrozen(room)) return ActionRejectReason.FREEZE_ACTIVE;
   return undefined;
 }
@@ -210,14 +214,17 @@ function checkTradeProperty(
   cellIndex: number,
   sellerId: string,
   price: number,
+  isSwap = false,
 ): ActionRejectReason | undefined {
   if (registry.get(cellIndex) !== sellerId) return ActionRejectReason.NOT_OWNER;
   const deed = PROPERTY_DEEDS.get(cellIndex);
   if (!deed) return ActionRejectReason.NOT_PURCHASABLE;
   if (hasBuildingOrUpgrade(stateMap.get(cellIndex))) return ActionRejectReason.PROPERTY_HAS_BUILDING;
-  const floorPrice = Math.floor(deed.price * 0.7);
-  if (price < floorPrice) {
-    return ActionRejectReason.PRICE_BELOW_FLOOR;
+  if (!isSwap) {
+    const floorPrice = Math.floor(deed.price * 0.7);
+    if (price < floorPrice) {
+      return ActionRejectReason.PRICE_BELOW_FLOOR;
+    }
   }
   return undefined;
 }
@@ -234,6 +241,9 @@ function checkTradeParties(
   buyerId: string,
   cellIndex: number,
   price: number,
+  offeredCellIndex?: number,
+  registry?: PropertyRegistry,
+  stateMap?: PropertyStateMap,
 ): P2PTradeValidation {
   const buyer = room.players.find((p) => p.id === buyerId);
   const seller = room.players.find((p) => p.id === sellerId);
@@ -244,8 +254,29 @@ function checkTradeParties(
     return { valid: false, reason: ActionRejectReason.PROPERTY_MORTGAGED };
   }
 
+  if (offeredCellIndex !== undefined) {
+    if (registry && registry.get(offeredCellIndex) !== buyerId) {
+      return { valid: false, reason: ActionRejectReason.NOT_OWNER };
+    }
+    const offeredDeed = PROPERTY_DEEDS.get(offeredCellIndex);
+    if (!offeredDeed) {
+      return { valid: false, reason: ActionRejectReason.NOT_PURCHASABLE };
+    }
+    if (stateMap && hasBuildingOrUpgrade(stateMap.get(offeredCellIndex))) {
+      return { valid: false, reason: ActionRejectReason.PROPERTY_HAS_BUILDING };
+    }
+    if (buyer!.mortgagedProperties?.includes(offeredCellIndex)) {
+      return { valid: false, reason: ActionRejectReason.PROPERTY_MORTGAGED };
+    }
+  }
+
   const { taxRate, totalCost, taxAmount, sellerNet } = calcP2PTax(room, price);
-  if (buyer!.balance < totalCost) return { valid: false, reason: ActionRejectReason.INSUFFICIENT_FUNDS };
+  if (price > 0 && buyer!.balance < totalCost) {
+    return { valid: false, reason: ActionRejectReason.INSUFFICIENT_FUNDS };
+  }
+  if (price < 0 && seller!.balance < totalCost) {
+    return { valid: false, reason: ActionRejectReason.INSUFFICIENT_FUNDS };
+  }
 
   return { valid: true, taxRate, totalCost, taxAmount, sellerNet, buyer: buyer!, seller: seller! };
 }
@@ -258,14 +289,16 @@ function validateP2PTrade(
   price: number,
   registry: PropertyRegistry,
   stateMap: PropertyStateMap,
+  offeredCellIndex?: number,
 ): P2PTradeValidation {
-  const basicErr = checkTradeBasics(room, sellerId, buyerId, price);
+  const isSwap = offeredCellIndex !== undefined;
+  const basicErr = checkTradeBasics(room, sellerId, buyerId, price, isSwap);
   if (basicErr) return { valid: false, reason: basicErr };
 
-  const propErr = checkTradeProperty(registry, stateMap, cellIndex, sellerId, price);
+  const propErr = checkTradeProperty(registry, stateMap, cellIndex, sellerId, price, isSwap);
   if (propErr) return { valid: false, reason: propErr };
 
-  return checkTradeParties(room, sellerId, buyerId, cellIndex, price);
+  return checkTradeParties(room, sellerId, buyerId, cellIndex, price, offeredCellIndex, registry, stateMap);
 }
 
 export function executeP2PTrade(
@@ -276,20 +309,36 @@ export function executeP2PTrade(
   price: number,
   registry: PropertyRegistry,
   stateMap: PropertyStateMap,
+  offeredCellIndex?: number,
 ): { success: boolean; reason?: ActionRejectReason } {
-  const v = validateP2PTrade(room, sellerId, buyerId, cellIndex, price, registry, stateMap);
+  const v = validateP2PTrade(room, sellerId, buyerId, cellIndex, price, registry, stateMap, offeredCellIndex);
   if (!v.valid) return { success: false, reason: v.reason };
 
-  v.buyer.balance -= v.totalCost;
-  v.seller.balance += v.sellerNet;
-  room.treasury += v.taxAmount;
+  if (price > 0) {
+    v.buyer.balance -= v.totalCost;
+    v.seller.balance += v.sellerNet;
+    room.treasury = (room.treasury ?? 0) + v.taxAmount;
+  } else if (price < 0) {
+    v.seller.balance -= v.totalCost;
+    v.buyer.balance += v.sellerNet;
+    room.treasury = (room.treasury ?? 0) + v.taxAmount;
+  }
+
   registry.set(cellIndex, buyerId);
   delete v.buyer.cellTradeRejections?.[cellIndex];
   delete v.buyer.cellLastRejectedRound?.[cellIndex];
 
+  if (offeredCellIndex !== undefined) {
+    registry.set(offeredCellIndex, sellerId);
+    delete v.seller.cellTradeRejections?.[offeredCellIndex];
+    delete v.seller.cellLastRejectedRound?.[offeredCellIndex];
+  }
+
   console.info(JSON.stringify({
-    event: 'P2P_TRADE', correlationId: room.roomCode,
-    timestamp: Date.now(), delta: { sellerId, buyerId, cellIndex, price, taxAmount: v.taxAmount },
+    event: offeredCellIndex !== undefined ? 'P2P_TRADE_SWAP' : 'P2P_TRADE',
+    correlationId: room.roomCode,
+    timestamp: Date.now(),
+    delta: { sellerId, buyerId, cellIndex, offeredCellIndex, price, taxAmount: v.taxAmount },
   }));
   return { success: true };
 }

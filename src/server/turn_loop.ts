@@ -74,6 +74,7 @@ function processUnbuiltRounds(
           cellIndex,
           declinedPlayerId: '',
           highestBid: startingBid,
+          startingBid,
           passedPlayers: new Set<string>(),
         });
         room.phase = TurnPhase.AuctionPhase;

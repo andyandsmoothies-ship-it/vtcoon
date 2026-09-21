@@ -207,10 +207,10 @@ describe('Threat Forecaster 2D6 & Safety Buffer', () => {
 
       const horizon = calculateThreatHorizon(bot, room, registry, stateMap, BotPersonality.Balanced);
 
-      const expectedCalc = (4 / 36) * 400 + (6 / 36) * 1000 + (5 / 36) * 3000;
+      const expectedCalc = (4 / 36) * 400 + (6 / 36) * 1000 + (5 / 36) * 4500;
       expect(horizon.expectedLoss).toBeCloseTo(expectedCalc, 2);
       expect(horizon.dangerTilesCount).toBe(3);
-      expect(horizon.maxSingleDanger).toBe(3000);
+      expect(horizon.maxSingleDanger).toBe(4500);
       expect(horizon.safetyBuffer).toBe(Math.max(DEFAULT_MIN_SAFETY_BUFFER, Math.round(expectedCalc * 1.0)));
     });
 

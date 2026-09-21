@@ -48,6 +48,9 @@ export interface AuctionPayload {
   readonly timeRemaining: number;
   readonly declinedPlayerId?: string;
   readonly hasPassed?: boolean;
+  readonly insolvencyPlayerId?: string;
+  readonly isForeclosure?: boolean;
+  readonly startingBid?: number;
 }
 
 export interface PendingTradeOfferDelta {
@@ -57,6 +60,7 @@ export interface PendingTradeOfferDelta {
   readonly buyerId: string;
   readonly sellerId: string;
   readonly expiresAt: number;
+  readonly offeredCellIndex?: number;
 }
 
 export interface DeltaPayload {
@@ -137,9 +141,14 @@ export function buildDeltaFromRoom(
       auction = {
         cellIndex: session.cellIndex,
         currentBid: session.highestBid,
+        startingBid: session.startingBid,
         highestBidderId: session.highestBidder ?? null,
         timeRemaining,
         declinedPlayerId: session.declinedPlayerId,
+        ...(session.insolvencyPlayerId ? {
+          insolvencyPlayerId: session.insolvencyPlayerId,
+          isForeclosure: true,
+        } : {}),
       };
     }
   } else if (auctions) {
@@ -156,9 +165,10 @@ export function buildDeltaFromRoom(
       buyerId: pendingSession.buyerId,
       sellerId: pendingSession.sellerId,
       expiresAt: pendingSession.expiresAt,
+      ...(pendingSession.offeredCellIndex !== undefined ? { offeredCellIndex: pendingSession.offeredCellIndex } : {}),
     };
-  } else if ((room as any).pendingTradeOffer) {
-    pendingTradeOffer = (room as any).pendingTradeOffer;
+  } else if (room.pendingTradeOffer) {
+    pendingTradeOffer = room.pendingTradeOffer;
   } else {
     pendingTradeOffer = null;
   }

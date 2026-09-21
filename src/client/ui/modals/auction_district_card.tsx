@@ -14,6 +14,7 @@ export interface AuctionDistrictCardProps {
   readonly myId?: string;
   readonly playersInfo?: Record<string, any>;
   readonly levelMap?: Record<number, number>;
+  readonly isForeclosure?: boolean;
 }
 
 function getToneTheme(tone: StrategicHintTone): { container: string; badge: string } {
@@ -90,6 +91,7 @@ export function AuctionDistrictCard({
   myId,
   playersInfo: propPlayersInfo,
   levelMap: propLevelMap,
+  isForeclosure,
 }: AuctionDistrictCardProps): React.ReactElement | null {
   const storePlayersInfo = useGameStore((s) => s.playersInfo);
   const storeLevelMap = useGameStore((s) => s.levelMap);
@@ -138,6 +140,14 @@ export function AuctionDistrictCard({
           >
             {info.strategicHint.badgeText}
           </span>
+          {isForeclosure && (
+            <span
+              data-testid="foreclosure-distressed-badge"
+              className="px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wide bg-rose-100 text-rose-900 border border-rose-400 shrink-0"
+            >
+              🔥 BẮT ĐÁY -30%
+            </span>
+          )}
         </div>
         <span className="text-[10px] font-mono font-bold text-slate-600 bg-white/80 px-2 py-0.5 rounded-full border border-slate-300 shrink-0 ml-auto">
           {info.ownedByMeCount}/{info.totalCells} Ô CỦA BẠN

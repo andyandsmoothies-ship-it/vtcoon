@@ -21,6 +21,7 @@ server_logs/
 .env.local
 .agents/tmp/
 .agents/evidence/
+.agents/audit/
 
 # OS / Editor
 .DS_Store

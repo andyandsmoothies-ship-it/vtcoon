@@ -50,11 +50,11 @@ export const PROPERTY_DEEDS: ReadonlyMap<number, PropertyDeed> = new Map([
   // Vàng — Dịch vụ ô 26,27 + Nghỉ dưỡng ô 29
   [26, { price: 2600, rent0: 312, rent1: 1040, rent2: 2600, rent3: 6500, upgradeCosts: [1300, 1820, 2600] }],
   [27, { price: 2600, rent0: 312, rent1: 1040, rent2: 2600, rent3: 6500, upgradeCosts: [1300, 1820, 2600] }],
-  [29, { price: 2800, rent0: 280, rent1:  840, rent2: 2240, rent3: 7000, upgradeCosts: [1260, 1960, 3360] }],
-  // Xanh Lá — Đô thị: C0=10%, C1=35%, C2=90%, C3=220%; UC=[50%,75%,100%]
-  [31, { price: 3000, rent0: 300, rent1: 1050, rent2: 2700, rent3: 6600, upgradeCosts: [1500, 2250, 3000] }],
-  [32, { price: 3000, rent0: 300, rent1: 1050, rent2: 2700, rent3: 6600, upgradeCosts: [1500, 2250, 3000] }],
-  [34, { price: 3200, rent0: 320, rent1: 1120, rent2: 2880, rent3: 7040, upgradeCosts: [1600, 2400, 3200] }],
+  [29, { price: 2800, rent0: 280, rent1:  840, rent2: 2240, rent3: 7200, upgradeCosts: [1260, 1960, 3360] }],
+  // Xanh Lá — Đô thị (IMP-148): C0=10%, C1=35%, C2=90%, C3=240%~244%; UC=[40%,60%,80%]
+  [31, { price: 3000, rent0: 300, rent1: 1050, rent2: 2700, rent3: 7200, upgradeCosts: [1200, 1800, 2400] }],
+  [32, { price: 3000, rent0: 300, rent1: 1050, rent2: 2700, rent3: 7200, upgradeCosts: [1200, 1800, 2400] }],
+  [34, { price: 3200, rent0: 320, rent1: 1120, rent2: 2880, rent3: 7800, upgradeCosts: [1300, 1950, 2600] }],
   // Tím — Đô thị: C0=10%, C1=35%, C2=90%, C3=220%; UC=[50%,75%,100%]
   [37, { price: 3500, rent0: 350, rent1: 1225, rent2: 3150, rent3: 7700, upgradeCosts: [1750, 2625, 3500] }],
   [39, { price: 4000, rent0: 400, rent1: 1400, rent2: 3600, rent3: 8800, upgradeCosts: [2000, 3000, 4000] }],

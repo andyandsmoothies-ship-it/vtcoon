@@ -222,9 +222,38 @@ export class RoomManager {
   }
 
   handleTradeOffer(
-    roomCode: string, requesterId: string, sellerId: string, buyerId: string, cellIndex: number, price: number,
+    roomCode: string,
+    arg2: string,
+    arg3: string,
+    arg4: string | number,
+    arg5?: number,
+    arg6?: number,
+    arg7?: number,
   ): { success: boolean; reason?: string; pending?: boolean; offerId?: string } {
-    return coordTrade(this.getContext(roomCode), requesterId, sellerId, buyerId, cellIndex, price);
+    let requesterId: string;
+    let sellerId: string;
+    let buyerId: string;
+    let cellIndex: number;
+    let price: number;
+    let offeredCellIndex: number | undefined;
+
+    if (typeof arg4 === 'number') {
+      requesterId = arg2;
+      sellerId = arg2;
+      buyerId = arg3;
+      cellIndex = arg4;
+      price = arg5 ?? 0;
+      offeredCellIndex = arg6;
+    } else {
+      requesterId = arg2;
+      sellerId = arg3;
+      buyerId = arg4;
+      cellIndex = arg5!;
+      price = arg6!;
+      offeredCellIndex = arg7;
+    }
+
+    return coordTrade(this.getContext(roomCode), requesterId, sellerId, buyerId, cellIndex, price, offeredCellIndex);
   }
 
   handleRespondTradeOffer(
@@ -249,7 +278,7 @@ export class RoomManager {
     if (res.timeout && res.session) {
       const room = this.rooms.get(roomCode);
       if (room) {
-        (room as any).pendingTradeOffer = null;
+        room.pendingTradeOffer = null;
         const buyer = room.players.find((p) => p.id === res.session?.buyerId);
         if (buyer) {
           const round = room.roundCount ?? room.round ?? 1;
@@ -267,7 +296,7 @@ export class RoomManager {
     if (cancelled) {
       const room = this.rooms.get(roomCode);
       if (room) {
-        (room as any).pendingTradeOffer = null;
+        room.pendingTradeOffer = null;
       }
     }
     return cancelled;

@@ -75,6 +75,7 @@ export function coordTrade(
   buyerId: string,
   cellIndex: number,
   price: number,
+  offeredCellIndex?: number,
 ): { success: boolean; reason?: string; pending?: boolean; offerId?: string } {
   if (!ctx) return { success: false, reason: ActionRejectReason.INVALID_ROOM };
   if (requesterId !== sellerId && requesterId !== buyerId) {
@@ -86,19 +87,37 @@ export function coordTrade(
     return { success: false, reason: ActionRejectReason.INVALID_ROOM };
   }
 
-  // [IMP-142] If buyer is Bot and seller is Human: initiate 15s Pending Trade Session (Zero Premature Trade)
-  if (buyer.isBot && !seller.isBot) {
+  const isBotHuman = (buyer.isBot && !seller.isBot) || (!buyer.isBot && seller.isBot && offeredCellIndex !== undefined) || (seller.isBot && !buyer.isBot && offeredCellIndex !== undefined);
+
+  if (isBotHuman) {
     if (ctx.reg.get(cellIndex) !== sellerId) {
       return { success: false, reason: ActionRejectReason.NOT_OWNER };
     }
     const propState = ctx.sm.get(cellIndex);
-    if (propState?.isMortgaged) {
+    if (propState?.isMortgaged || seller.mortgagedProperties?.includes(cellIndex)) {
       return { success: false, reason: ActionRejectReason.PROPERTY_MORTGAGED };
     }
-    if ((propState?.level ?? 0) > 0) {
+    if ((propState?.level ?? 0) > 0 || Boolean(propState?.isETC) || Boolean(propState?.isUpgradedUtility)) {
       return { success: false, reason: ActionRejectReason.PROPERTY_HAS_BUILDING };
     }
-    if (buyer.balance < price) {
+
+    if (offeredCellIndex !== undefined) {
+      if (ctx.reg.get(offeredCellIndex) !== buyerId) {
+        return { success: false, reason: ActionRejectReason.NOT_OWNER };
+      }
+      const offState = ctx.sm.get(offeredCellIndex);
+      if (offState?.isMortgaged || buyer.mortgagedProperties?.includes(offeredCellIndex)) {
+        return { success: false, reason: ActionRejectReason.PROPERTY_MORTGAGED };
+      }
+      if ((offState?.level ?? 0) > 0 || Boolean(offState?.isETC) || Boolean(offState?.isUpgradedUtility)) {
+        return { success: false, reason: ActionRejectReason.PROPERTY_HAS_BUILDING };
+      }
+    }
+
+    if (price > 0 && buyer.balance < price) {
+      return { success: false, reason: ActionRejectReason.INSUFFICIENT_FUNDS };
+    }
+    if (price < 0 && seller.balance < Math.abs(price)) {
       return { success: false, reason: ActionRejectReason.INSUFFICIENT_FUNDS };
     }
 
@@ -111,15 +130,17 @@ export function coordTrade(
       price,
       basePrice,
       15_000,
+      offeredCellIndex,
     );
 
-    (ctx.room as any).pendingTradeOffer = {
+    ctx.room.pendingTradeOffer = {
       offerId: session.offerId,
       cellIndex: session.cellIndex,
       price: session.price,
       buyerId: session.buyerId,
       sellerId: session.sellerId,
       expiresAt: session.expiresAt,
+      ...(offeredCellIndex !== undefined ? { offeredCellIndex } : {}),
     };
 
     return { success: true, pending: true, offerId: session.offerId };
@@ -146,8 +167,10 @@ export function coordTrade(
       return { success: false, reason: ActionRejectReason.TRADE_REJECTED };
     }
   }
-  return executeP2PTrade(ctx.room, sellerId, buyerId, cellIndex, price, ctx.reg, ctx.sm);
+  return executeP2PTrade(ctx.room, sellerId, buyerId, cellIndex, price, ctx.reg, ctx.sm, offeredCellIndex);
 }
+
+export const coordTradeOffer = coordTrade;
 
 export function coordRespondTradeOffer(
   ctx: RoomContext | undefined,
@@ -166,14 +189,14 @@ export function coordRespondTradeOffer(
     return { success: false, reason: 'OFFER_ALREADY_RESOLVED' };
   }
 
-  if (playerId !== session.sellerId) {
+  if (playerId !== session.sellerId && playerId !== session.buyerId) {
     return { success: false, reason: 'NOT_TARGET_PLAYER' };
   }
 
   if (Date.now() > session.expiresAt) {
     session.status = 'timeout';
     pendingTradeManager.clearSession(ctx.room.roomCode);
-    (ctx.room as any).pendingTradeOffer = null;
+    ctx.room.pendingTradeOffer = null;
     return { success: false, reason: 'INVALID_OFFER_ID' };
   }
 
@@ -184,7 +207,26 @@ export function coordRespondTradeOffer(
   }
 
   if (accept) {
-    // Atomic re-validation
+    if (session.offeredCellIndex !== undefined) {
+      const res = executeP2PTrade(
+        ctx.room,
+        session.sellerId,
+        session.buyerId,
+        session.cellIndex,
+        session.price,
+        ctx.reg,
+        ctx.sm,
+        session.offeredCellIndex,
+      );
+      if (!res.success) {
+        return { success: false, reason: res.reason };
+      }
+      pendingTradeManager.resolveSession(ctx.room.roomCode, offerId, true);
+      ctx.room.pendingTradeOffer = null;
+      return { success: true };
+    }
+
+    // Atomic re-validation for normal 1-way trade
     if (buyer.balance < session.price) {
       return { success: false, reason: 'INSUFFICIENT_FUNDS' };
     }
@@ -209,7 +251,7 @@ export function coordRespondTradeOffer(
     delete buyer.cellTradeRejections?.[session.cellIndex];
     delete buyer.cellLastRejectedRound?.[session.cellIndex];
     pendingTradeManager.resolveSession(ctx.room.roomCode, offerId, true);
-    (ctx.room as any).pendingTradeOffer = null;
+    ctx.room.pendingTradeOffer = null;
     return { success: true };
   } else {
     const round = ctx.room.roundCount ?? ctx.room.round ?? 1;
@@ -217,7 +259,7 @@ export function coordRespondTradeOffer(
     (buyer.cellTradeRejections ??= {})[session.cellIndex] = ((buyer.cellTradeRejections ??= {})[session.cellIndex] ?? 0) + 1;
     (buyer.cellLastRejectedRound ??= {})[session.cellIndex] = round;
     pendingTradeManager.resolveSession(ctx.room.roomCode, offerId, false);
-    (ctx.room as any).pendingTradeOffer = null;
+    ctx.room.pendingTradeOffer = null;
     return { success: true };
   }
 }
