@@ -7,11 +7,11 @@
 ## 🧭 BẢNG CHỈ MỤC THEO DOMAIN (DOMAIN INDEX)
 | Domain Tag | Trọng Tâm & Phạm Vi Mã Nguồn | Các Gotchas Liên Quan |
 | :--- | :--- | :--- |
-| `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78, #82, #104, #105, #106, #145, #146, #147, #159, #164, #174, #180, #188, #195, #196, #197, #200, #203, #215 |
+| `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78, #82, #104, #105, #106, #145, #146, #147, #159, #164, #174, #180, #188, #195, #196, #197, #200, #203, #215, #217 |
 | `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147, #190, #191, #195, #196, #197, #200, #206 |
-| `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190, #200, #203, #209, #210, #211, #212, #213, #215 |
+| `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190, #200, #203, #209, #210, #211, #212, #213, #215, #217 |
 | `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #32, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #60, #61, #63, #69, #72, #74, #77, #80, #85, #86, #88, #89, #90, #91, #92, #93, #94, #95, #96, #101, #103, #109, #110, #114, #115, #116, #117, #120, #122, #123, #124, #125, #126, #127, #128, #129, #130, #133, #134, #135, #136, #140, #141, #144, #148, #159, #160, #161, #162, #163, #164, #165, #169, #175, #177, #189, #198, #200 |
-| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192, #195, #196, #199, #201, #202, #204, #205, #206, #216 |
+| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192, #195, #196, #199, #201, #202, #204, #205, #206, #216, #217 |
 | `[UAT/TEST]` | Nghiệm Thu, Adversarial TDD, Ảnh Chụp Màn Hình (.jpg), Shell Escaping, File I/O Lock, Docker Healthcheck Timeout | #5, #28, #29, #31, #35, #52, #71, #73, #83, #84, #99, #100, #117, #124, #125, #130, #199 |
 | `[TELEMETRY]` | Giám Sát Hiệu Năng Thời Gian Thực, Chó Canh Phòng Bất Biến, Hộp Đen Tái Hiện Lỗi | #39, #62, #71, #75, #104, #114, #115, #135, #174, #200 |
 | `[ARCH/REFACTOR]` | Tách Module Facade, Ngân Sách Render Loop, Chuẩn Hóa Môi Trường Build | #43, #98, #99 |
@@ -3631,4 +3631,23 @@
   3. **Unified Arena Podium**: Tích hợp tiêu đề nhỏ `GIÁ THẦU HIỆN TẠI`, bộ đếm thời gian `THỜI GIAN CÒN LẠI:`, flip-counter vàng hổ phách trên nền sẫm và dòng `DẪN ĐẦU:` (`👑` + tên người chơi hoặc `Chưa có ai`) vào duy nhất 1 bục đấu giá có `data-testid="auction-unified-podium"`.
   4. **Mobile 360px Safe Vertical Participant Strip**: Danh sách người chơi bắt buộc hiển thị dạng hàng dọc tối giản không border thô cứng, kèm `truncate max-w-[120px]` và `min-w-0`, đánh dấu `(Bạn)` cho người chơi thật và huy hiệu `👑 Dẫn đầu` cho người trả giá cao nhất.
   5. **Actor Inversion & Foreclosure Defense**: Luôn bảo toàn trạng thái ẩn 3 nút bid khi `isLeading = true` ("Bạn đang dẫn đầu mức giá cao nhất!"), banner phát mãi cưỡng chế (-30%), cảnh báo cấn trừ nợ cho con nợ và touch targets WCAG AA (`min-h-[44px]`).
+
+---
+
+### 217. [NET/UI][FSM] Ghost Auction Modal Loop & Business Lifecycle Settlement Hardening (IMP-160)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Kẹt Sàn Đấu Giá Ma (Ghost Auction Modal Loop)*: Khi phiên đấu giá kết thúc gõ búa (`isConcluded: true`), `apply_delta.ts` trước đó có điều kiện `if (!currentPayload?.isConcluded) state.closeModal()`. Điều này khiến khi nhận `delta.auction === null` (hoặc phase chuyển sang lượt tiếp theo), modal kết luận bị chặn không cho đóng tự động, kẹt lơ lửng trên màn hình vô thời hạn.
+  2. *Bẫy Settle Timer Bị Clear Nhầm Bới Intent Hoặc clearRoom*: Khi phiên kết thúc, orchestrator lên lịch settle 2.5s để dọn dẹp `lastAuctionResult`. Nếu lưu timer vào `activeTimers` hoặc `registerTimer`, các lệnh `clearRoom(roomCode)` từ turn loop thông thường sẽ hủy nhầm timer settle, khiến `lastAuctionResult` tồn dư vĩnh viễn và liên tục được gửi trong mọi delta sau đó.
+  3. *Bẫy Cross-Auction Collateral Damage*: Nếu timer settle của phiên A nổ trong khi phiên B mới hơn vừa diễn ra trên cùng phòng, timer A sẽ xóa sổ nhầm kết quả của phiên B nếu không kiểm tra `auctionKey`.
+  4. *Bẫy Tàn Dư Modal Chứng Khoán HOSE*: Kết quả chứng khoán HOSE (`lastHoseResult`) của lượt trước không được dọn dẹp ở biên lượt (`handleRollDice`), làm modal HOSE kết quả cũ bật lại ngoài ý muốn ở lượt người chơi kế tiếp.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Dedicated Settle Timer Isolation**: `TurnOrchestrator` sở hữu map riêng `auctionSettleTimers` tách biệt với `activeTimers`. `clearRoom()` tuyệt đối không hủy settle timer; chỉ có `destroyRoom()` hoặc `onGameOver()` mới dọn dẹp.
+  2. **Cross-Auction Key Guard**: `scheduleAuctionSettle` tính toán `effectiveKey = auctionKey ?? \`${cellIndex}:${winnerId}:${winningBid}\``. Khi timer nổ, nếu `auctionKey !== undefined && auctionKey !== latestKey`, lập tức return sớm để bảo toàn phiên mới hơn.
+  3. **Turn Boundary Strict Cleanup**: Ở đầu `handleRollDice`, server bắt buộc dọn sạch cả `clearLastAuctionResult(roomCode)` (`room.lastAuctionResult = undefined`) VÀ `room.lastHoseResult = undefined`.
+  4. **Wire Protocol Null-SSOT**: `buildDeltaFromRoom` luôn phát sóng tường minh `lastHoseResult: room.lastHoseResult ?? null` để client biết khi nào cần đóng modal kết quả chứng khoán.
+  5. **Client Idempotent Projection & Zombie UI Defense**:
+     - `syncBusinessModals`: Khi `delta.auction.isConcluded === true`, nếu phòng đã chuyển sang `WaitingRoll` hoặc `ActionPhase`, tuyệt đối không mở lại modal; nếu người dùng đã chủ động đóng (`activeModal !== 'auction'` và `lastDismissedAuctionKey === auctionKey`), không tự mở lại.
+     - Khi `delta.auction === null && state.activeModal === 'auction'`: dọn `lastDismissedAuctionKey = null` và gọi `state.closeModal()` vô điều kiện.
+     - `AuctionModal`: Khi `isConcluded === true`, header badge đổi thành `ĐÃ KẾT THÚC`, 3 nút nâng giá nhanh bị vô hiệu hóa `disabled` kèm `cursor-not-allowed opacity-50`, nút Auto-Bid bị khóa `disabled`, và footer chuyển thành nút `Đóng / Xem Bàn Cờ` kích hoạt `onClose`.
+
 

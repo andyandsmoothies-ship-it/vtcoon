@@ -78,24 +78,46 @@ function syncRoundAndModifiers(delta: DeltaPayload, state: GameState): void {
 
 import type { ModalPayloadMap } from '../store/game_store_types.js';
 
+let lastDismissedAuctionKey: string | null = null;
+
 function syncBusinessModals(delta: DeltaPayload, state: GameState): void {
   // [IMP-50] Trụ Cột 3: UI as Pure Projection — Modal chỉ đóng khi server phát delta.auction === null hoặc phase thay đổi
   if (delta.auction) {
-    const myPid = useLobbyStore.getState().myPlayerId;
-    const prevPayload = state.activeModal === 'auction' ? state.modalPayload as { hasPassed?: boolean } | null : null;
-    const hasPassed = Boolean(
-      prevPayload?.hasPassed ||
-      (myPid && delta.auction.passedPlayerIds?.includes(myPid))
-    );
-    state.openModal('auction', {
-      ...delta.auction,
-      ...(hasPassed ? { hasPassed: true } : {}),
-    });
+    const isConcluded = Boolean(delta.auction.isConcluded);
+    const auctionKey = `${delta.auction.cellIndex}:${delta.auction.winnerId}:${delta.auction.finalPrice ?? delta.auction.currentBid}`;
+    const isWaitingOrAction = delta.turnPhase === TurnPhase.WaitingRoll || delta.turnPhase === TurnPhase.ActionPhase;
+
+    if (isConcluded && isWaitingOrAction) {
+      // KHÔNG mở lại modal state.openModal('auction')
+    } else if (isConcluded && lastDismissedAuctionKey === auctionKey && state.activeModal !== 'auction') {
+      // KHÔNG mở lại modal
+    } else {
+      if (isConcluded) {
+        lastDismissedAuctionKey = auctionKey;
+      } else {
+        lastDismissedAuctionKey = null;
+      }
+      const myPid = useLobbyStore.getState().myPlayerId;
+      const prevPayload = state.activeModal === 'auction' ? state.modalPayload as { hasPassed?: boolean } | null : null;
+      const hasPassed = Boolean(
+        prevPayload?.hasPassed ||
+        (myPid && delta.auction.passedPlayerIds?.includes(myPid))
+      );
+      state.openModal('auction', {
+        ...delta.auction,
+        ...(hasPassed ? { hasPassed: true } : {}),
+      });
+    }
+  } else if (delta.auction === null) {
+    lastDismissedAuctionKey = null;
+    if (state.activeModal === 'auction') {
+      state.closeModal();
+    }
   } else if (
-    (delta.auction === null || (delta.turnPhase !== undefined && delta.turnPhase !== TurnPhase.AuctionPhase)) &&
+    delta.turnPhase !== undefined &&
+    delta.turnPhase !== TurnPhase.AuctionPhase &&
     state.activeModal === 'auction'
   ) {
-    // Không đóng modal nếu modal hiện tại đang hiển thị banner kết luận
     const currentPayload = state.modalPayload as { isConcluded?: boolean } | null;
     if (!currentPayload?.isConcluded) {
       state.closeModal();
@@ -125,7 +147,9 @@ function syncBusinessModals(delta: DeltaPayload, state: GameState): void {
     }
   }
 
-  if (delta.lastHoseResult && state.activeModal === 'hose') {
+  if (delta.lastHoseResult === null && state.activeModal === 'hose') {
+    state.closeModal();
+  } else if (delta.lastHoseResult && state.activeModal === 'hose') {
     const hr = delta.lastHoseResult;
     const myPid = useLobbyStore.getState().myPlayerId;
     const isTarget = !myPid || hr.playerId === myPid || hr.playerId === state.currentTurnPlayerId;

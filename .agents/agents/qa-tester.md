@@ -32,9 +32,9 @@ tools: [view_file, write_to_file, replace_file_content, list_dir, find_by_name, 
    - **Universal 4-Facet Behavioral Matrix (Mandatory 4-Group Coverage)**:
      - Every feature slice test suite must assert across 4 facets:
        1. *Boundary & Range*: Input/model bounds, range constraints, format validity.
-       2. *State Reactivity*: Lifecycle transitions, reactive updates, events emitted/received.
-       3. *Resource Disposal*: Memory/resource cleanup, unmount `.dispose()`, no listener leaks.
-       4. *Error Defense*: Edge values (negative, NaN, overflow), idempotency, invalid intents.
+       2. *State Reactivity & Multi-Turn Teardown*: Lifecycle transitions, reactive updates, events emitted/received, and Turn N+1 purge (assert Turn N ephemeral state is 100% cleared/nullified upon Turn N+1 roll/advance).
+       3. *Resource Disposal & Timer Isolation*: Memory/resource cleanup, unmount `.dispose()`, no listener leaks, and timer handle isolation (settle timers never blocked by unrelated resets).
+       4. *Error Defense & Terminal Invariants*: Edge values (negative, NaN, overflow), idempotency, invalid intents, and terminal state immutability (concluded modals reject actions with explicit reason codes).
    - **Test Density Floor**:
      - Minimum 15-30 atomic tests per feature slice. Ratio of `expect()` / `it()` must stay between 1.0 and 3.5 (ratios > 4.0 indicate monolithic anti-pattern).
    - **Consumer-Side Assertion (Universal Rule - Assert Effect at Point of Consumption)**:

@@ -162,7 +162,7 @@ export function buildDeltaFromRoom(
       };
     }
   } else {
-    const lastRes = lastAuctionResults?.get(room.roomCode) ?? room.lastAuctionResult;
+    const lastRes = room.lastAuctionResult ?? lastAuctionResults?.get(room.roomCode);
     if (lastRes) {
       auction = {
         cellIndex: lastRes.cellIndex ?? 0,
@@ -222,7 +222,7 @@ export function buildDeltaFromRoom(
     ...(pendingTradeOffer !== undefined ? { pendingTradeOffer } : {}),
     ...(pendingBuyout !== undefined ? { pendingBuyout } : {}),
     ...(room.lastEventCard !== undefined ? { lastEventCard: room.lastEventCard } : {}),
-    ...(room.lastHoseResult !== undefined ? { lastHoseResult: room.lastHoseResult } : {}),
+    lastHoseResult: room.lastHoseResult ?? null,
     roundNumber: Math.max(room.roundCount ?? 1, room.round ?? 1),
     treasury: room.treasury ?? 0,
     ...(room.activeModifiers !== undefined ? { activeModifiers: room.activeModifiers.map((m) => ({ ...m })) } : {}),

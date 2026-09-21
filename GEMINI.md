@@ -35,6 +35,10 @@
 - **Zero-Polling & Background Harness**: Never execute in-loop polling (`sleep`/`while`). Offload long tasks to background. Kill processes hanging > 60s.
 - **Docker Health Check Timeout**: Always use timeout flags (`curl -m 5 --connect-timeout 3`) and initial delay (`timeout /t 6 /nobreak >nul`) for container start period (Gotcha #83).
 - **SSOT & Player Intent Integrity**: Player decisions (buy, upgrade, trade) must be explicit Intent transitions (ADR-0001). Never execute player choices as implicit movement side-effects.
+- **Transient State & Turn N+1 Teardown Invariant**: Ephemeral states (auctions, trades, prompts) MUST be purged on turn transitions (`handleRollDice`/`handleEndTurn`). Leaking stale state into Turn N+1 is strictly forbidden.
+- **Explicit Tombstone Protocol (`null` vs `undefined`)**: Cleared delta payload fields MUST explicitly serialize as `null` (never `undefined`) to prevent client retention of stale data.
+- **Timer Domain Isolation & Pure Domain Core**: Domain services (`RoomManager`, FSM) must remain pure synchronous (zero `setTimeout`). All timers belong to Orchestrators and must use identity-keyed maps to prevent accidental cancellation during room resets.
+- **Interactive Zombie UI Prohibition**: Terminal modal states (`isConcluded: true`) must disable action controls immediately and emit zero server intents on dismiss. Client stores must never reopen dismissed terminal dialogs.
 - **Subagent Artifact Persistence (Dual Output Pattern)**: Subagents write large artifacts to disk (`docs/plans/`, `docs/reports/`) and return concise chat summaries (<20 lines) with clickable links.
 - **Lean Runtime Observability**: Zero silent error swallowing (empty `catch` forbidden). All domain transitions emit structured logs (`{ event, correlationId, timestamp, delta }`). Rejections must return explicit Reason Codes.
 - **Vertical Slice Completeness**: State fields on `Player` or `PropertyState` must map to `DeltaPayload`. Every emitted event must have consumer tests verifying state change.
@@ -57,7 +61,7 @@ A task is COMPLETE only when:
 3. Reviewer gates approve via physical disk inspection (`spec-reviewer` verifies 100% spec reconciliation; `code-reviewer` verifies code quality/observability; `game-3d-visual-critic` verifies 3D visual gate; `ui-craft-reviewer` verifies 2D craft gate; implementer never approves own code; zero approvals without disk evidence).
 4. Progress updated in `docs/epics/[epic]/_epic_ledger.md` (including Tech Debt Ledger).
 5. Domain learnings and invariants recorded in `docs/domain/gotchas.md` with domain tags and traceability.
-6. Production resilience verified: defense against invalid intents, treasury conservation invariant, safe disconnection grace period.
+6. Production resilience verified: defense against invalid intents, treasury conservation invariant, safe disconnection grace period, Turn N+1 state teardown, and explicit tombstone payload delivery.
 7. Ad-hoc improvements documented in `docs/plans/improvements/` and `docs/reports/improvements/`, with roadmap update.
 
 ## 3. PROJECT NFR BASELINE (VTCOON 3D BOARD GAME)

@@ -69,13 +69,13 @@ export function AuctionModal({
 
   // Xử lý tự động đặt giá nếu bật Auto-Bid
   useEffect(() => {
-    if (autoBid && !isLeading && !hasPassed && !isDeclinedPlayer && onBid) {
+    if (autoBid && !isConcluded && !isLeading && !hasPassed && !isDeclinedPlayer && onBid) {
       const minBid = increments[0];
       if (minBid && (myBalance === undefined || minBid <= myBalance)) {
         onBid(minBid);
       }
     }
-  }, [autoBid, isLeading, hasPassed, isDeclinedPlayer, currentBid, increments, myBalance, onBid]);
+  }, [autoBid, isConcluded, isLeading, hasPassed, isDeclinedPlayer, currentBid, increments, myBalance, onBid]);
 
   // Tự động đóng modal sau 2.5s khi phiên đấu giá gõ búa thành công
   useEffect(() => {
@@ -138,7 +138,11 @@ export function AuctionModal({
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {isForeclosure ? (
+          {isConcluded ? (
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-amber-100 text-amber-800 border border-amber-400">
+              ĐÃ KẾT THÚC
+            </span>
+          ) : isForeclosure ? (
             <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-rose-100 text-rose-800 border border-rose-400 flex items-center gap-1 animate-pulse">
               <span>⚠️ PHÁT MÃI CƯỠNG CHẾ (-30%)</span>
             </span>
@@ -339,21 +343,21 @@ export function AuctionModal({
             <div className="grid grid-cols-3 gap-2">
               {([100, 200, 500] as const).map((step, idx) => {
                 const targetBid = increments[idx]!;
-                const canAfford = myBalance === undefined || targetBid <= myBalance;
+                const canAfford = !isConcluded && (myBalance === undefined || targetBid <= myBalance);
                 return (
                   <button
                     key={step}
                     type="button"
                     onClick={() => onBid?.(targetBid)}
-                    disabled={!canAfford}
+                    disabled={!canAfford || isConcluded}
                     className={`min-h-[48px] py-2 px-2 font-bold text-xs rounded-xl border-2 flex flex-col items-center justify-center transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
-                      canAfford
+                      canAfford && !isConcluded
                         ? 'bg-amber-500 hover:bg-amber-400 text-amber-950 border-amber-700 font-black shadow-[0_4px_0_0_#b45309] active:shadow-[0_1px_0_0_#b45309] active:translate-y-[3px] cursor-pointer'
                         : 'bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed opacity-50'
                     }`}
                   >
                     <span className="text-xs md:text-sm font-black tracking-wide">+{step} Tr.</span>
-                    <span className={`text-xs font-semibold mt-0.5 ${canAfford ? 'text-amber-950' : 'text-slate-400'}`}>
+                    <span className={`text-xs font-semibold mt-0.5 ${canAfford && !isConcluded ? 'text-amber-950' : 'text-slate-400'}`}>
                       ({formatCurrency(targetBid)})
                     </span>
                   </button>
@@ -367,25 +371,37 @@ export function AuctionModal({
             <button
               type="button"
               onClick={() => setAutoBid((prev) => !prev)}
-              disabled={hasPassed || isDeclinedPlayer}
-              className={`min-h-[44px] px-3.5 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 cursor-pointer ${
-                autoBid
-                  ? 'bg-amber-500 text-amber-950 font-black border-amber-700 shadow-[0_2px_0_0_#b45309]'
-                  : 'bg-slate-200 text-slate-700 border-slate-400 hover:bg-slate-300'
+              disabled={hasPassed || isDeclinedPlayer || isConcluded}
+              className={`min-h-[44px] px-3.5 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 ${
+                hasPassed || isDeclinedPlayer || isConcluded
+                  ? 'bg-slate-200 text-slate-400 border-slate-300 opacity-50 cursor-not-allowed'
+                  : autoBid
+                    ? 'bg-amber-500 text-amber-950 font-black border-amber-700 shadow-[0_2px_0_0_#b45309] cursor-pointer'
+                    : 'bg-slate-200 text-slate-700 border-slate-400 hover:bg-slate-300 cursor-pointer'
               }`}
             >
               <span className={`w-2 h-2 rounded-full ${autoBid ? 'bg-amber-900' : 'bg-slate-400'}`} />
               <span>AUTO-BID</span>
             </button>
 
-            <button
-              type="button"
-              onClick={onPass ?? onClose}
-              disabled={hasPassed || isDeclinedPlayer}
-              className="min-h-[44px] px-4 py-2 rounded-xl text-xs font-bold text-rose-700 hover:text-rose-800 bg-rose-100 hover:bg-rose-200 border-2 border-rose-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 cursor-pointer"
-            >
-              {isDeclinedPlayer ? 'Không Thể Tham Gia' : hasPassed ? 'Đã Rút Lui' : 'Rút Lui / Bỏ Cuộc'}
-            </button>
+            {isConcluded ? (
+              <button
+                type="button"
+                onClick={onClose}
+                className="min-h-[44px] px-4 py-2 rounded-xl text-xs font-bold text-amber-950 bg-amber-400 hover:bg-amber-300 border-2 border-amber-600 shadow-[0_2px_0_0_#b45309] transition-all active:translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 cursor-pointer"
+              >
+                Đóng / Xem Bàn Cờ
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={onPass ?? onClose}
+                disabled={hasPassed || isDeclinedPlayer}
+                className="min-h-[44px] px-4 py-2 rounded-xl text-xs font-bold text-rose-700 hover:text-rose-800 bg-rose-100 hover:bg-rose-200 border-2 border-rose-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 cursor-pointer"
+              >
+                {isDeclinedPlayer ? 'Không Thể Tham Gia' : hasPassed ? 'Đã Rút Lui' : 'Rút Lui / Bỏ Cuộc'}
+              </button>
+            )}
           </div>
         </div>
       </div>

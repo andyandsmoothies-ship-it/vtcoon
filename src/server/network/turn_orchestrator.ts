@@ -68,6 +68,7 @@ export class TurnOrchestrator {
   private readonly customDefaultTimeoutMs?: number;
   private readonly activeTimers = new Map<string, NodeJS.Timeout>();
   private readonly deadlines = new Map<string, number>();
+  private readonly auctionSettleTimers = new Map<string, { timer: NodeJS.Timeout; auctionKey: string }>();
 
   constructor(options: TurnOrchestratorOptions) {
     this.rooms = options.rooms;
@@ -99,6 +100,45 @@ export class TurnOrchestrator {
 
   clearTimeout(roomCode: string): void {
     this.clearRoom(roomCode);
+  }
+
+  private clearAuctionSettleTimer(roomCode: string): void {
+    const existing = this.auctionSettleTimers.get(roomCode);
+    if (existing) {
+      clearTimeout(existing.timer);
+      this.auctionSettleTimers.delete(roomCode);
+    }
+  }
+
+  destroyRoom(roomCode: string): void {
+    this.clearRoom(roomCode);
+    this.clearAuctionSettleTimer(roomCode);
+  }
+
+  scheduleAuctionSettle(roomCode: string, auctionKey?: string): void {
+    this.clearAuctionSettleTimer(roomCode);
+    const currentRes = this.rooms.getLastAuctionResult(roomCode);
+    const effectiveKey =
+      auctionKey ??
+      (currentRes
+        ? `${currentRes.cellIndex}:${currentRes.winnerId}:${currentRes.winningBid}`
+        : 'unknown');
+
+    const timer = setTimeout(() => {
+      this.auctionSettleTimers.delete(roomCode);
+      const latestRes = this.rooms.getLastAuctionResult(roomCode);
+      const latestKey = latestRes
+        ? `${latestRes.cellIndex}:${latestRes.winnerId}:${latestRes.winningBid}`
+        : 'unknown';
+      if (auctionKey !== undefined && auctionKey !== latestKey) {
+        return;
+      }
+      this.rooms.settleAuction(roomCode);
+      this.broadcaster.broadcastRoomDelta(roomCode);
+      this.orchestrate(roomCode);
+    }, AUCTION_SETTLE_DELAY_MS);
+
+    this.auctionSettleTimers.set(roomCode, { timer, auctionKey: effectiveKey });
   }
 
   hasEligibleAuctionBot(room: Room): boolean {
@@ -172,14 +212,7 @@ export class TurnOrchestrator {
           const stepRes = this.rooms.stepAuctionBot(roomCode);
           this.broadcaster.broadcastRoomDelta(roomCode);
           if (stepRes.finished) {
-            const settleTimer = setTimeout(() => {
-              this.activeTimers.delete(roomCode);
-              this.rooms.clearLastAuctionResult(roomCode);
-              this.broadcaster.broadcastRoomDelta(roomCode);
-              this.orchestrate(roomCode);
-            }, AUCTION_SETTLE_DELAY_MS);
-            this.activeTimers.set(roomCode, settleTimer);
-            this.rooms.registerTimer(roomCode, settleTimer);
+            this.scheduleAuctionSettle(roomCode);
           } else {
             this.orchestrate(roomCode, AUCTION_BOT_STEP_DELAY_MS);
           }
@@ -187,6 +220,7 @@ export class TurnOrchestrator {
           this.rooms.stepBotTurn(roomCode);
           const rAfter = this.rooms.getRoom(roomCode);
           if (rAfter && isRoomGameOver(rAfter)) {
+            this.clearAuctionSettleTimer(roomCode);
             this.onGameOver(roomCode);
           } else {
             this.broadcaster.broadcastRoomDelta(roomCode);
@@ -213,11 +247,13 @@ export class TurnOrchestrator {
         const r = this.rooms.getRoom(roomCode);
         if (!r?.started || r.phase !== TurnPhase.AuctionPhase) return;
         if (isRoomGameOver(r)) {
+          this.clearAuctionSettleTimer(roomCode);
           this.onGameOver(roomCode);
           return;
         }
 
         this.rooms.handleAuctionClose(roomCode);
+        this.scheduleAuctionSettle(roomCode);
         const rMid = this.rooms.getRoom(roomCode);
         const curr = rMid?.players[rMid.currentPlayerIndex];
         if (rMid?.phase === TurnPhase.PropertyManagement && curr?.isBot) {
@@ -226,6 +262,7 @@ export class TurnOrchestrator {
 
         const rAfter = this.rooms.getRoom(roomCode);
         if (rAfter && isRoomGameOver(rAfter)) {
+          this.clearAuctionSettleTimer(roomCode);
           this.onGameOver(roomCode);
         } else {
           this.broadcaster.broadcastRoomDelta(roomCode);
@@ -259,6 +296,7 @@ export class TurnOrchestrator {
         const r = this.rooms.getRoom(roomCode);
         if (!r?.started) return;
         if (isRoomGameOver(r)) {
+          this.clearAuctionSettleTimer(roomCode);
           this.onGameOver(roomCode);
           return;
         }
@@ -270,6 +308,7 @@ export class TurnOrchestrator {
 
         const rAfter = this.rooms.getRoom(roomCode);
         if (rAfter && isRoomGameOver(rAfter)) {
+          this.clearAuctionSettleTimer(roomCode);
           this.onGameOver(roomCode);
         } else {
           this.broadcaster.broadcastRoomDelta(roomCode);
@@ -317,6 +356,7 @@ export class TurnOrchestrator {
       }
       case TurnPhase.AuctionPhase: {
         this.rooms.handleAuctionClose(roomCode);
+        this.scheduleAuctionSettle(roomCode);
         const rMid = this.rooms.getRoom(roomCode);
         if (rMid?.phase === TurnPhase.PropertyManagement) {
           this.rooms.handleEndTurn(roomCode, playerId);

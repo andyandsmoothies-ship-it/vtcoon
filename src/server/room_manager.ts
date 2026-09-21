@@ -131,7 +131,12 @@ export class RoomManager {
 
   handleRollDice(roomCode: string, playerId: string): RollResult | undefined {
     this.touchActivity(roomCode);
+    this.clearLastAuctionResult(roomCode);
     const room = this.rooms.get(roomCode);
+    if (room) {
+      room.lastAuctionResult = undefined;
+      room.lastHoseResult = undefined;
+    }
     const current = this.getActivePlayer(room, playerId);
     if (!current || !room) return undefined;
     const reg = this.registries.get(roomCode) ?? new Map();
@@ -203,11 +208,19 @@ export class RoomManager {
   }
 
   getLastAuctionResult(roomCode: string): AuctionResult | undefined {
-    return this.lastAuctionResults.get(roomCode) ?? this.rooms.get(roomCode)?.lastAuctionResult ?? undefined;
+    return this.rooms.get(roomCode)?.lastAuctionResult ?? this.lastAuctionResults.get(roomCode) ?? undefined;
   }
 
   clearLastAuctionResult(roomCode: string): void {
     this.lastAuctionResults.delete(roomCode);
+    const room = this.rooms.get(roomCode);
+    if (room) {
+      room.lastAuctionResult = undefined;
+    }
+  }
+
+  settleAuction(roomCode: string): void {
+    this.clearLastAuctionResult(roomCode);
     const room = this.rooms.get(roomCode);
     if (room) {
       room.lastAuctionResult = undefined;
