@@ -1,5 +1,6 @@
 // [UC-GAME-001/MSS][UC-GAME-003/MSS][UC-GAME-004/MSS][UC-GAME-006/MSS][UC-GAME-007/MSS]
 // WSS Server — chạy độc lập trên WebSocket port
+import http from 'node:http';
 import { WebSocketServer, WebSocket } from 'ws';
 import { RoomManager } from '../room_manager.js';
 import { SessionManager, SessionState, HEARTBEAT_INTERVAL_MS } from '../session_manager.js';
@@ -117,7 +118,18 @@ export class WssServer {
       roomManager: this.rooms, timeoutMs: config.abandonedTimeoutMs,
       intervalMs: config.cleanupIntervalMs, onCleanup: (rc) => this.closeRoom(rc),
     });
-    this.wss         = config.server ? new WebSocketServer({ server: config.server }) : new WebSocketServer({ port: config.port });
+    const allowedOrigins = process.env['ALLOWED_ORIGINS']?.split(',') ?? [];
+    const wsOpts = {
+      maxPayload: 64 * 1024,
+      verifyClient: (info: { origin?: string; req: http.IncomingMessage }, cb: (res: boolean, code?: number, msg?: string) => void) => {
+        if (process.env['NODE_ENV'] !== 'production' || allowedOrigins.length === 0) return cb(true);
+        const origin = info.origin ?? (info.req.headers['origin'] as string | undefined) ?? '';
+        if (!origin || allowedOrigins.includes(origin)) return cb(true);
+        console.warn(JSON.stringify({ event: 'SECURITY_ORIGIN_REJECTED', timestamp: Date.now(), delta: { origin } }));
+        cb(false, 403, 'Forbidden Origin');
+      },
+    };
+    this.wss         = config.server ? new WebSocketServer({ ...wsOpts, server: config.server }) : new WebSocketServer({ ...wsOpts, port: config.port });
 
     this.cleanupScheduler.start();
     this.rooms.onCloseRoom((rc) => this.closeRoom(rc));

@@ -9,7 +9,7 @@
 | :--- | :--- | :--- |
 | `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78, #82, #104, #105, #106, #145, #146, #147, #159, #164, #174, #180, #188, #195, #196, #197, #200, #203 |
 | `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147, #190, #191, #195, #196, #197, #200, #206 |
-| `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190, #200, #203 |
+| `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190, #200, #203, #209, #210, #211, #212, #213 |
 | `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #32, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #60, #61, #63, #69, #72, #74, #77, #80, #85, #86, #88, #89, #90, #91, #92, #93, #94, #95, #96, #101, #103, #109, #110, #114, #115, #116, #117, #120, #122, #123, #124, #125, #126, #127, #128, #129, #130, #133, #134, #135, #136, #140, #141, #144, #148, #159, #160, #161, #162, #163, #164, #165, #169, #175, #177, #189, #198, #200 |
 | `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192, #195, #196, #199, #201, #202, #204, #205, #206 |
 | `[UAT/TEST]` | Nghiệm Thu, Adversarial TDD, Ảnh Chụp Màn Hình (.jpg), Shell Escaping, File I/O Lock, Docker Healthcheck Timeout | #5, #28, #29, #31, #35, #52, #71, #73, #83, #84, #99, #100, #117, #124, #125, #130, #199 |
@@ -3532,3 +3532,53 @@
   4. **Multi-Class Z-Index Retention (Gotcha #31)**:
      - Container `MilestoneBanner` kết hợp đồng thời `z-30 z-[60]` để thỏa mãn cả hợp đồng kiểm thử tĩnh kế thừa `imp139`/`imp129` (`z-30`) vừa đẩy banner lên trên `ModalBackdrop` (`z-[60] > z-50`).
 
+---
+
+### 209. [NET/SYNC] Hybrid Socket Identity Guard — Chống Impersonation Nhưng Cho Phép Tab Refresh (IMP-156)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Trusted playerId*: `handleIntentMsg` nhận `msg.playerId` từ client và gọi `bindSocket()` vô điều kiện, cho phép attacker gửi intent giả mạo player khác bằng cách tự khai `playerId`.
+  2. *Bẫy Strict Reject Phá Vỡ Tab Refresh*: Nếu reject tuyệt đối mọi socket không khớp, player refresh trang (socket cũ đóng → socket mới gửi INTENT trước RECONNECT) sẽ bị lock out.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Hybrid Ownership Invariant**: `isSocketOwner(sockets, roomCode, playerId, socket)` tại `wss_lobby_handlers.ts` trả `true` khi: (a) socket === bound, (b) bound === undefined, (c) bound.readyState !== OPEN. Chỉ reject khi bound socket vẫn OPEN và khác socket gửi.
+  2. **Guard Coverage**: Check áp dụng trên `handleIntentMsg`, `handleStartGame`, `handleLeaveRoom`, `handleEmote`, `handleResync`. Không áp dụng trên `handleCreateRoom`, `handleJoinRoom` (binding lần đầu).
+
+---
+
+### 210. [NET/SYNC] Triệt Tiêu Admin Secret Mặc Định — Production Crash Guard (IMP-156)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy DEFAULT_ADMIN_SECRET*: Constant `'vtcoon-admin-2026'` hardcoded tại `admin_types.ts:4`, sử dụng làm fallback trong constructor `AdminManager`. Attacker biết secret sẵn từ source code public.
+  2. *Bẫy Ops Docs Sai Tên Biến*: `ops_runbook.md` ghi `ADMIN_SECRET`, code đọc `VTCOON_ADMIN_SECRET`.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Zero Default Secret Invariant**: CẤM tồn tại bất kỳ constant chứa giá trị bí mật mặc định. `AdminManager` constructor: production throw, dev warn + `this.secret = ''`.
+  2. **Empty Secret Disabled Invariant**: `authenticate()` trả `false` ngay khi `this.secret` rỗng — admin panel tự disabled.
+
+---
+
+### 211. [NET/SYNC] WebSocket maxPayload 64KB & Byte Pre-Check Defense-in-Depth (IMP-156)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy maxPayload Mặc Định 100MB*: Thư viện `ws` mặc định cho phép frame 100MB. Attacker gửi payload lớn → RAM spike → crash server.
+  2. *Bẫy toString() Trước Kiểm Tra Kích Thước*: `EnvelopeValidator.parseAndValidate()` gọi `raw.toString()` trước khi kiểm tra byte length → freeze main thread trên payload lớn.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **maxPayload 64KB Invariant**: `WebSocketServer` PHẢI có `maxPayload: 64 * 1024`. Giá trị này cho margin 6x so với `MAX_DELTA_BYTES` (10KB).
+  2. **Byte Pre-Check Invariant**: `EnvelopeValidator` PHẢI kiểm tra `byteLength > 65_536` TRƯỚC `raw.toString()`.
+
+---
+
+### 212. [NET/SYNC] Path Traversal Guard — resolve + startsWith + Windows Separator Strip (IMP-156)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Regex Chỉ Strip Leading `..`*: `replace(/^(\.\.[/\\])+/, '')` chỉ loại bỏ `..` ở đầu. `path.normalize('/assets/../../etc/passwd')` → `/etc/passwd` → vẫn vượt khỏi staticDir.
+  2. *Bẫy path.resolve Trên Windows*: `path.normalize('/')` trả `\` trên Windows. `path.resolve(staticDir, '\\')` → `C:\` (drive root) → file ngoài staticDir.
+  3. *Bẫy decodeURIComponent*: URL malformed `%ZZ` gây throw uncaught exception.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Canonical Path Invariant**: `filePath = path.resolve(staticDir, safePath)` + `filePath.startsWith(resolvedStatic + path.sep)`. Trả 403 nếu vi phạm.
+  2. **Windows Separator Strip Invariant**: `cleanPath.replace(/^[/\\]+/, '') || 'index.html'` — strip tất cả leading separators trước khi resolve, tránh bẫy `path.resolve(dir, '\\')` → drive root.
+  3. **URI Decode Guard**: `decodeURIComponent` PHẢI nằm trong try/catch, trả 400 Bad Request khi malformed.
+
+---
+
+### 213. [NET/SYNC] PendingTradeManager Dual-Map Lifecycle — sessionsByOfferId Leak Fix (IMP-156)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Dual-Map Không Đồng Bộ*: `PendingTradeManager` dùng 2 map: `sessionsByRoom` và `sessionsByOfferId`. `resolveSession`, `cancelSession`, `checkTimeout` xóa `sessionsByRoom` nhưng KHÔNG xóa `sessionsByOfferId` → entry rò rỉ vĩnh viễn.
+  2. *Bẫy clearSession Phantom*: `clearSession(roomCode)` tìm session qua `sessionsByRoom.get()` — trả `undefined` nếu đã bị xóa bởi resolve/cancel/timeout → `sessionsByOfferId` không bao giờ được dọn.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Dual-Map Sync Invariant**: Mọi thao tác xóa session PHẢI xóa ĐỒNG THỜI cả `sessionsByRoom` VÀ `sessionsByOfferId`. Thứ tự: xóa `sessionsByOfferId` TRƯỚC `sessionsByRoom`.

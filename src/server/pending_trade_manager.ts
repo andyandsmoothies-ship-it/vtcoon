@@ -69,6 +69,7 @@ export class PendingTradeManager {
     if (session.status !== 'pending') return undefined;
 
     session.status = accept ? 'accepted' : 'rejected';
+    this.sessionsByOfferId.delete(session.offerId);
     this.sessionsByRoom.delete(roomCode);
     return session;
   }
@@ -82,6 +83,7 @@ export class PendingTradeManager {
     }
 
     session.status = 'cancelled';
+    this.sessionsByOfferId.delete(session.offerId);
     this.sessionsByRoom.delete(roomCode);
     return true;
   }
@@ -94,6 +96,7 @@ export class PendingTradeManager {
 
     if (currentTime >= session.expiresAt) {
       session.status = 'timeout';
+      this.sessionsByOfferId.delete(session.offerId);
       this.sessionsByRoom.delete(roomCode);
       return { timeout: true, session };
     }

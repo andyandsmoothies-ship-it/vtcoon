@@ -40,7 +40,7 @@ export function AdminLockScreen({
               type="password"
               value={secret}
               onChange={(e) => onSecretChange(e.target.value)}
-              placeholder="vtcoon-admin-2026"
+              placeholder="Nhập mã admin..."
               className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-amber-300 focus:border-amber-400 focus:outline-none"
             />
           </div>

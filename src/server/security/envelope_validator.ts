@@ -25,6 +25,11 @@ const VALID_INTENTS = new Set([
 
 export class EnvelopeValidator {
   parseAndValidate(raw: string | Buffer): EnvelopeValidationResult {
+    const byteLen = typeof raw === 'string' ? raw.length : raw.byteLength;
+    if (byteLen > 65_536) {
+      this.logSecurityEvent('SECURITY_OVERSIZED_PAYLOAD', 'INVALID_ENVELOPE');
+      return { success: false, reasonCode: 'INVALID_ENVELOPE' };
+    }
     let parsed: unknown;
     try {
       parsed = JSON.parse(raw.toString());

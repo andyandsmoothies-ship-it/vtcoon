@@ -8,6 +8,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const TEST_PORT = 3205;
+const TEST_ADMIN_SECRET = 'test-admin-secret';
 const TEST_ADMIN_LOG_DIR = path.resolve(process.cwd(), 'server_logs', 'test_admin_portal_logs');
 let server: WssServer;
 const activeSockets: WebSocket[] = [];
@@ -24,7 +25,7 @@ function cleanAdminTestDir(): void {
 
 beforeAll(() => {
   cleanAdminTestDir();
-  server = new WssServer({ port: TEST_PORT, adminLoggerDir: TEST_ADMIN_LOG_DIR });
+  server = new WssServer({ port: TEST_PORT, adminSecret: TEST_ADMIN_SECRET, adminLoggerDir: TEST_ADMIN_LOG_DIR });
 });
 
 afterEach(() => {
@@ -88,10 +89,10 @@ describe('[IMP-25/MSS] Admin Central Portal Tests', () => {
     ws.close();
   });
 
-  it('[TC-ADM01.2/MSS] ADMIN_AUTH thành công với secret mặc định vtcoon-admin-2026', async () => {
+  it('[TC-ADM01.2/MSS] ADMIN_AUTH thành công với secret được cấu hình', async () => {
     const ws = await openSocket();
     const pending = collectN(ws, 2); // ADMIN_AUTH_SUCCESS + ADMIN_ROOM_LIST
-    ws.send(JSON.stringify({ type: 'ADMIN_AUTH', secret: 'vtcoon-admin-2026' }));
+    ws.send(JSON.stringify({ type: 'ADMIN_AUTH', secret: TEST_ADMIN_SECRET }));
     const [msgSuccess, msgList] = await pending;
 
     expect(msgSuccess?.type).toBe('ADMIN_AUTH_SUCCESS');
@@ -124,7 +125,7 @@ describe('[IMP-25/MSS] Admin Central Portal Tests', () => {
 
     const ws = await openSocket();
     const authPending = collectN(ws, 2);
-    ws.send(JSON.stringify({ type: 'ADMIN_AUTH', secret: 'vtcoon-admin-2026' }));
+    ws.send(JSON.stringify({ type: 'ADMIN_AUTH', secret: TEST_ADMIN_SECRET }));
     await authPending;
 
     const listRes = await sendRecv(ws, { type: 'ADMIN_GET_ROOMS' });
@@ -147,7 +148,7 @@ describe('[IMP-25/MSS] Admin Central Portal Tests', () => {
   it('[TC-ADM01.5/MSS] ADMIN_SUBSCRIBE_ROOM nhận chi tiết phòng và nhận live stream nhật ký sự kiện', async () => {
     const ws = await openSocket();
     const authPending = collectN(ws, 2);
-    ws.send(JSON.stringify({ type: 'ADMIN_AUTH', secret: 'vtcoon-admin-2026' }));
+    ws.send(JSON.stringify({ type: 'ADMIN_AUTH', secret: TEST_ADMIN_SECRET }));
     await authPending;
 
     // Đăng ký theo dõi phòng NORM01
@@ -183,7 +184,7 @@ describe('[IMP-25/MSS] Admin Central Portal Tests', () => {
   it('[TC-ADM01.6/MSS] ADMIN_TERMINATE_ROOM cưỡng chế đóng bàn chơi khẩn cấp và giải phóng tài nguyên', async () => {
     const ws = await openSocket();
     const authPending = collectN(ws, 2);
-    ws.send(JSON.stringify({ type: 'ADMIN_AUTH', secret: 'vtcoon-admin-2026' }));
+    ws.send(JSON.stringify({ type: 'ADMIN_AUTH', secret: TEST_ADMIN_SECRET }));
     await authPending;
 
     expect(server.getRoomManager().hasRoom('GLIT01')).toBe(true);
@@ -218,7 +219,7 @@ describe('[IMP-25/MSS] Admin Central Portal Tests', () => {
   it('[TC-ADM01.8-inv/Adversarial] ADMIN_SUBSCRIBE_ROOM từ chối với ADMIN_ROOM_NOT_FOUND khi phòng không tồn tại', async () => {
     const ws = await openSocket();
     const authPending = collectN(ws, 2);
-    ws.send(JSON.stringify({ type: 'ADMIN_AUTH', secret: 'vtcoon-admin-2026' }));
+    ws.send(JSON.stringify({ type: 'ADMIN_AUTH', secret: TEST_ADMIN_SECRET }));
     await authPending;
 
     const res = await sendRecv(ws, { type: 'ADMIN_SUBSCRIBE_ROOM', roomCode: 'PHONG_MA' });
@@ -243,7 +244,7 @@ describe('[IMP-25/MSS] Admin Central Portal Tests', () => {
 
     const ws = await openSocket();
     const authPending = collectN(ws, 2);
-    ws.send(JSON.stringify({ type: 'ADMIN_AUTH', secret: 'vtcoon-admin-2026' }));
+    ws.send(JSON.stringify({ type: 'ADMIN_AUTH', secret: TEST_ADMIN_SECRET }));
     await authPending;
 
     // Admin đăng ký theo dõi TEMP99
@@ -260,7 +261,7 @@ describe('[IMP-25/MSS] Admin Central Portal Tests', () => {
   it('[TC-ADM01.10/MSS] ADMIN_GET_ARCHIVED_ROOMS trả về danh sách ván đấu đã kết thúc từ persistent manifest', async () => {
     const ws = await openSocket();
     const authPending = collectN(ws, 2);
-    ws.send(JSON.stringify({ type: 'ADMIN_AUTH', secret: 'vtcoon-admin-2026' }));
+    ws.send(JSON.stringify({ type: 'ADMIN_AUTH', secret: TEST_ADMIN_SECRET }));
     await authPending;
 
     const res = await sendRecv(ws, { type: 'ADMIN_GET_ARCHIVED_ROOMS' });
@@ -278,7 +279,7 @@ describe('[IMP-25/MSS] Admin Central Portal Tests', () => {
   it('[TC-ADM01.11/MSS] ADMIN_GET_ARCHIVED_LOGS trả về 100% bản ghi log từ tệp .jsonl của phòng đã đóng', async () => {
     const ws = await openSocket();
     const authPending = collectN(ws, 2);
-    ws.send(JSON.stringify({ type: 'ADMIN_AUTH', secret: 'vtcoon-admin-2026' }));
+    ws.send(JSON.stringify({ type: 'ADMIN_AUTH', secret: TEST_ADMIN_SECRET }));
     await authPending;
 
     const res = await sendRecv(ws, { type: 'ADMIN_GET_ARCHIVED_LOGS', roomCode: 'TEMP99' });
@@ -315,7 +316,7 @@ describe('[IMP-25/MSS] Admin Central Portal Tests', () => {
 
     const ws = await openSocket();
     const authPending = collectN(ws, 2);
-    ws.send(JSON.stringify({ type: 'ADMIN_AUTH', secret: 'vtcoon-admin-2026' }));
+    ws.send(JSON.stringify({ type: 'ADMIN_AUTH', secret: TEST_ADMIN_SECRET }));
     await authPending;
 
     const res = await sendRecv(ws, { type: 'ADMIN_GET_ARCHIVED_ROOMS' });

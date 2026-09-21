@@ -24,12 +24,22 @@ const MIME_TYPES: Record<string, string> = {
   '.gltf': 'model/gltf+json',
 };
 
+const SECURITY_HEADERS: Record<string, string> = {
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'SAMEORIGIN',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+};
+
 export function createHealthServer(
   getActiveRooms: () => number,
   startTime = Date.now(),
   staticDir?: string,
 ): http.Server {
   return http.createServer((req, res) => {
+    for (const [k, v] of Object.entries(SECURITY_HEADERS)) {
+      res.setHeader(k, v);
+    }
+
     if ((req.method === 'GET' || req.method === 'HEAD') && req.url === '/health') {
       const payload: HealthStatus = {
         status: 'ok',
@@ -46,9 +56,26 @@ export function createHealthServer(
     }
 
     if ((req.method === 'GET' || req.method === 'HEAD') && staticDir && fs.existsSync(staticDir)) {
-      const rawUrl = req.url ? req.url.split('?')[0] : '/';
-      const cleanPath = path.normalize(rawUrl ?? '/').replace(/^(\.\.[/\\])+/, '');
-      let filePath = path.join(staticDir, cleanPath === '/' ? 'index.html' : cleanPath);
+      const rawUrl = (req.url ? req.url.split('?')[0] : '/') ?? '/';
+      let decodedUrl: string;
+      try {
+        decodedUrl = decodeURIComponent(rawUrl);
+      } catch {
+        res.writeHead(400, { 'Content-Type': 'text/plain' });
+        res.end('Bad Request');
+        return;
+      }
+      const cleanPath = path.normalize(decodedUrl).replace(/^(\.\.[/\\])+/, '');
+      const safePath = cleanPath.replace(/^[/\\]+/, '') || 'index.html';
+      let filePath = path.resolve(staticDir, safePath);
+
+      // [SECURITY] Canonical path must stay within staticDir
+      const resolvedStatic = path.resolve(staticDir);
+      if (!filePath.startsWith(resolvedStatic + path.sep) && filePath !== resolvedStatic) {
+        res.writeHead(403, { 'Content-Type': 'text/plain' });
+        res.end('Forbidden');
+        return;
+      }
 
       if (!fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
         if (!path.extname(cleanPath)) {
@@ -73,4 +100,3 @@ export function createHealthServer(
     res.end('Not Found');
   });
 }
-

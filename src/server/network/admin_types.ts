@@ -1,7 +1,7 @@
 // [IMP-25/MSS] Admin Manager Type Definitions
 import type { RoomManager } from '../room_manager.js';
 
-export const DEFAULT_ADMIN_SECRET = 'vtcoon-admin-2026';
+// [SECURITY] No default admin secret — must be configured via VTCOON_ADMIN_SECRET env var
 export const MAX_ROOM_LOGS = 100;
 
 export type RoomHealthStatus = 'NORMAL' | 'WARNING' | 'CRITICAL';

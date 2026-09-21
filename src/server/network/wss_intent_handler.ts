@@ -3,7 +3,7 @@
 import { WebSocket } from 'ws';
 import { SessionState } from '../session_manager.js';
 import { isRoomGameOver } from '../../domain/room.js';
-import { validateIntentRequest, executeIntentAction } from './wss_lobby_handlers.js';
+import { validateIntentRequest, executeIntentAction, isSocketOwner } from './wss_lobby_handlers.js';
 import type { RoomManager } from '../room_manager.js';
 import type { SessionManager } from '../session_manager.js';
 import type { IntentMutex } from './intent_mutex.js';
@@ -20,6 +20,7 @@ export interface IntentHandlerDeps {
   readonly intentMutex: IntentMutex;
   readonly broadcaster: DeltaBroadcaster;
   readonly adminManager: AdminManager;
+  readonly sockets: SocketRegistry;
   sendSafe(socket: WebSocket, msg: WsServerMessage): void;
   bindSocket(rc: string, pid: string, socket: WebSocket): void;
   scheduleBotTurn(rc: string): void;
@@ -51,6 +52,16 @@ export async function handleIntentMsg(
   socket: WebSocket,
   msg: Extract<WsClientMessage, { type: 'INTENT' }>,
 ): Promise<void> {
+  if (!isSocketOwner(deps.sockets, msg.roomCode, msg.playerId, socket)) {
+    console.warn(JSON.stringify({
+      event: 'SECURITY_IMPERSONATION_ATTEMPT',
+      timestamp: Date.now(),
+      delta: { roomCode: msg.roomCode, claimedPlayerId: msg.playerId },
+    }));
+    deps.sendSafe(socket, { type: 'ERROR', reasonCode: 'TOKEN_EXPIRED' });
+    return;
+  }
+
   const room = deps.rooms.getRoom(msg.roomCode);
   const player = room?.players.find((p) => p.id === msg.playerId);
   const validation = validateIntentRequest(room, player, msg, deps.intentGuard);

@@ -10,7 +10,7 @@ import type {
 import type { WsServerMessage, WsClientMessage } from '../../../server/network/network_types';
 
 export const STORAGE_KEY = 'vtcoon_admin_secret';
-export const DEFAULT_SECRET = 'vtcoon-admin-2026';
+export const DEFAULT_SECRET = '';
 
 export type AdminTab = 'LIVE' | 'ARCHIVE';
 

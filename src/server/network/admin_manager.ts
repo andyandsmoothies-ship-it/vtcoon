@@ -13,7 +13,6 @@ import {
 import { handleAdminMessage } from './admin_message_handler.js';
 
 import {
-  DEFAULT_ADMIN_SECRET,
   MAX_ROOM_LOGS,
   type RoomHealthStatus,
   type AdminPlayerSummary,
@@ -25,7 +24,6 @@ import {
 } from './admin_types.js';
 
 export {
-  DEFAULT_ADMIN_SECRET,
   MAX_ROOM_LOGS,
   type RoomHealthStatus,
   type AdminRoomSummary,
@@ -47,7 +45,18 @@ export class AdminManager {
 
   constructor(options: AdminManagerOptions) {
     this.rooms = options.roomManager;
-    this.secret = options.secret ?? process.env['VTCOON_ADMIN_SECRET'] ?? DEFAULT_ADMIN_SECRET;
+    const secret = options.secret ?? process.env['VTCOON_ADMIN_SECRET'];
+    if (!secret) {
+      if (process.env['NODE_ENV'] === 'production') {
+        throw new Error('FATAL: VTCOON_ADMIN_SECRET must be configured in production mode');
+      }
+      console.warn(JSON.stringify({
+        event: 'WARN_ADMIN_SECRET_MISSING',
+        timestamp: Date.now(),
+        delta: { hint: 'Set VTCOON_ADMIN_SECRET env var. Admin panel disabled.' },
+      }));
+    }
+    this.secret = secret ?? '';
     this.onTerminateRoom = options.onTerminateRoom;
     this.roomLogger = new PersistentRoomLogger({ logDir: options.loggerDir });
   }
@@ -65,6 +74,7 @@ export class AdminManager {
   }
 
   authenticate(socket: WebSocket, secret: string): boolean {
+    if (!this.secret) return false;
     if (typeof secret === 'string' && secret.trim() === this.secret) {
       this.authenticatedSockets.add(socket);
       return true;

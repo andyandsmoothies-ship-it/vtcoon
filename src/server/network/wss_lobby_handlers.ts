@@ -1,5 +1,5 @@
 // [UC-GAME-001/MSS][UC-GAME-002/MSS] WSS Lobby Handlers — Create, Join, Start, Leave Room handlers
-import type { WebSocket } from 'ws';
+import { WebSocket } from 'ws';
 import type { RoomManager } from '../room_manager.js';
 import type { SessionManager } from '../session_manager.js';
 import type { ReconnectManager } from './reconnect_manager.js';
@@ -12,6 +12,13 @@ import type { IntentGuard } from '../security/intent_guard.js';
 import type { PlayerIntent } from '../intent_dispatcher.js';
 
 export const MAX_PLAYERS = 4;
+
+/** [SECURITY] Hybrid socket ownership check — reject only if a different socket is still OPEN */
+export function isSocketOwner(sockets: SocketRegistry, roomCode: string, playerId: string, socket: WebSocket): boolean {
+  const bound = sockets.getPlayerSocket(roomCode, playerId);
+  if (!bound || bound === socket) return true;
+  return bound.readyState !== WebSocket.OPEN;
+}
 
 export interface WssLobbyContext {
   readonly rooms: RoomManager;
@@ -39,6 +46,10 @@ export function handleCreateRoom(
     if (existing && existing.hostId === msg.playerId) {
       ctx.closeRoom(upper);
     }
+  }
+  if (ctx.rooms.getRoomCount() >= (Number(process.env['MAX_CONCURRENT_ROOMS']) || 50)) {
+    ctx.sendSafe(socket, { type: 'ERROR', reasonCode: 'ROOM_FULL' as ReasonCode });
+    return;
   }
   const room = ctx.rooms.createRoom(msg.playerId, msg.roomCode);
   ctx.reconnects.cancelGracePeriod(room.roomCode, msg.playerId);
@@ -109,6 +120,10 @@ export function handleStartGame(
     ctx.sendSafe(socket, { type: 'ERROR', reasonCode: rejectReason });
     return;
   }
+  if (!isSocketOwner(ctx.sockets, msg.roomCode, msg.playerId, socket)) {
+    ctx.sendSafe(socket, { type: 'ERROR', reasonCode: 'TOKEN_EXPIRED' });
+    return;
+  }
   const normRoomCode = room!.roomCode;
   unmarkHumanSockets(ctx, room!, normRoomCode, msg.playerId);
   if (!ctx.rooms.startGame(normRoomCode, msg.bots)) {
@@ -147,6 +162,10 @@ export function handleEmote(
     ctx.sendSafe(socket, { type: 'ERROR', reasonCode: 'ROOM_NOT_FOUND' });
     return;
   }
+  if (!isSocketOwner(ctx.sockets, msg.roomCode, msg.playerId, socket)) {
+    ctx.sendSafe(socket, { type: 'ERROR', reasonCode: 'TOKEN_EXPIRED' });
+    return;
+  }
   ctx.bindSocket(msg.roomCode, msg.playerId, socket);
   ctx.broadcast(msg.roomCode, {
     type: 'PLAYER_EMOTE',
@@ -162,6 +181,10 @@ export function handleResync(
   msg: Extract<WsClientMessage, { type: 'INTENT_REQUEST_RESYNC' }>,
 ): void {
   if (!msg.roomCode) return;
+  if (!isSocketOwner(ctx.sockets, msg.roomCode, msg.playerId, socket)) {
+    ctx.sendSafe(socket, { type: 'ERROR', reasonCode: 'TOKEN_EXPIRED' });
+    return;
+  }
   ctx.bindSocket(msg.roomCode, msg.playerId, socket);
   ctx.broadcaster.resyncClient(msg.roomCode, socket);
   if (ctx.rooms.getRoom(msg.roomCode)?.started) {
@@ -176,6 +199,10 @@ export function handleLeaveRoom(
 ): void {
   const room = ctx.rooms.getRoom(msg.roomCode);
   if (!room) return;
+  if (!isSocketOwner(ctx.sockets, msg.roomCode, msg.playerId, socket)) {
+    ctx.sendSafe(socket, { type: 'ERROR', reasonCode: 'TOKEN_EXPIRED' });
+    return;
+  }
   ctx.sockets.unregister(socket);
   ctx.reconnects.cancelGracePeriod(msg.roomCode, msg.playerId);
   if (room.hostId === msg.playerId) {
