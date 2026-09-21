@@ -70,7 +70,7 @@ export function handleAuctionBid(
     }
   }
   if (player.isBot) {
-    session.endTime = Math.max(session.endTime ?? 0, Date.now()) + 10_000;
+    session.endTime = Date.now() + 15_000;
   }
 
   const eligiblePlayers = room.players.filter((p) => p.id !== session.declinedPlayerId);
@@ -99,7 +99,7 @@ export function handleAuctionPass(
   if (!session.passedPlayers) session.passedPlayers = new Set<string>();
   session.passedPlayers.add(playerId);
   if (player.isBot) {
-    session.endTime = Math.max(session.endTime ?? 0, Date.now()) + 10_000;
+    session.endTime = Date.now() + 15_000;
   }
 
   const eligiblePlayers = room.players.filter((p) => p.id !== session.declinedPlayerId && !p.bankrupt);

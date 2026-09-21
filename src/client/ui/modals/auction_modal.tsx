@@ -90,7 +90,7 @@ export function AuctionModal({
   return (
     <div
       data-testid="auction-modal"
-      className="w-full max-w-lg bg-[#FFFBEB] border-2 border-slate-900 rounded-3xl p-5 md:p-6 shadow-[0_6px_0_0_#0f172a] space-y-4 pointer-events-auto relative select-none text-slate-900 max-h-[90vh] overflow-y-auto pr-1"
+      className="w-full max-w-lg md:max-w-3xl lg:max-w-4xl bg-[#FFFBEB] border-2 border-slate-900 rounded-3xl p-3.5 sm:p-5 md:p-6 shadow-[0_4px_0_0_#b45309] space-y-3.5 md:space-y-4 pointer-events-auto relative select-none text-slate-900 max-h-[92vh] overflow-y-auto pr-1"
     >
       {/* Vùng Live Region cho Trình Đọc Màn Hình [WCAG 4.1.3] */}
       <div aria-live="polite" aria-atomic="true" className="sr-only">
@@ -134,16 +134,16 @@ export function AuctionModal({
             <h2 className="text-sm font-black uppercase tracking-wider text-slate-900">
               SÀN ĐẤU GIÁ TRỰC TUYẾN
             </h2>
-            <p className="text-[10px] text-amber-800 font-mono font-bold">LIVE TABLETOP ARENA</p>
+            <p className="text-xs text-amber-800 font-mono font-bold">LIVE TABLETOP ARENA</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           {isForeclosure ? (
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-100 text-rose-800 border border-rose-400 flex items-center gap-1 animate-pulse">
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-rose-100 text-rose-800 border border-rose-400 flex items-center gap-1 animate-pulse">
               <span>⚠️ PHÁT MÃI CƯỠNG CHẾ (-30%)</span>
             </span>
           ) : (
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-400">
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-400">
               ĐANG MỞ
             </span>
           )}
@@ -168,7 +168,7 @@ export function AuctionModal({
             <span className="font-bold block uppercase tracking-wider text-rose-950">
               {`TÀI SẢN PHÁT MẠI THANH LÝ NỢ${debtorName ? ` • ${debtorName}` : ''}`}
             </span>
-            <span className="text-[11px] text-rose-700">
+            <span className="text-xs text-rose-700">
               {myId && insolvencyPlayerId === myId
                 ? 'Đang phát mãi với giá sàn 70% để thu hồi vốn trả nợ cho bạn. Tiền thặng dư (nếu có) sẽ được hoàn trả.'
                 : 'Khởi điểm chỉ 70% giá niêm yết. Cơ hội bắt đáy sinh lời! Tiền đấu giá dùng để cấn trừ nợ.'}
@@ -177,187 +177,217 @@ export function AuctionModal({
         </div>
       )}
 
-      {/* Tên BĐS & Phân khu quy hoạch */}
-      <div className="flex items-center gap-3 bg-[#F7F2E7] p-3 rounded-2xl border border-slate-300">
-        <div className="w-3.5 h-10 rounded-md shrink-0 shadow border border-slate-900" style={{ backgroundColor: ribbonColor }} />
-        <div className="flex-1 min-w-0">
-          <h3 className="font-bold text-slate-900 text-sm truncate">{deed?.name ?? `Ô #${cellIndex}`}</h3>
-          <p className="text-xs text-slate-600 truncate">
-            {isForeclosure ? (
-              <>
-                Giá gốc: <span className="line-through text-slate-400 mr-1">{formatCurrency(basePrice)}</span>
-                ➔ Giá sàn: <span className="text-rose-600 font-bold">{formatCurrency(floorPrice)} (-30%)</span>
-              </>
-            ) : (
-              <>
-                Giá khởi điểm: <span className="text-slate-900 font-bold">{formatCurrency(basePrice)}</span>
-              </>
-            )}
-          </p>
-        </div>
-      </div>
-
-      {/* Tình báo phân khu & Radar độc quyền [IMP-138] */}
-      <AuctionDistrictCard
-        cellIndex={cellIndex}
-        currentBid={currentBid}
-        myId={myId}
-        playersInfo={playersInfo}
-        levelMap={propLevelMap}
-        isForeclosure={isForeclosure}
-      />
-
-      {/* Bảng giá hiện tại & Người dẫn đầu */}
-      <div className="grid grid-cols-2 gap-2.5 text-center">
-        <div className="bg-[#F7F2E7] p-2.5 rounded-xl border border-slate-300 flex flex-col justify-between">
-          <span className="text-[10px] text-slate-600 block font-bold">GIÁ THẦU HIỆN TẠI</span>
-          <div
-            data-testid="flip-counter"
-            className="tracking-widest font-mono font-black text-2xl md:text-3xl text-amber-400 bg-slate-900 py-1 px-3 rounded-lg shadow-inner border border-slate-700 mt-1"
-          >
-            {formatCurrency(currentBid)}
-          </div>
-        </div>
-        <div className="bg-[#F7F2E7] p-2.5 rounded-xl border border-slate-300 flex flex-col justify-between">
-          <span className="text-[10px] text-slate-600 block font-bold">DẪN ĐẦU</span>
-          <div className="p-2 rounded-lg bg-white/90 border border-slate-200 mt-1">
-            <span className={`text-xs font-black truncate block ${isLeading ? 'text-emerald-700' : 'text-slate-900'}`}>
-              {displayName}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Danh sách đại gia & Ví tiền */}
-      <div className="space-y-1.5 bg-[#F7F2E7] p-3 rounded-2xl border border-slate-300">
-        <div className="flex items-center justify-between text-[11px] pb-1 border-b border-slate-300">
-          <span className="font-bold text-slate-700 uppercase tracking-wider">
-            ĐẠI GIA THAM GIA
-          </span>
-          <span className="font-medium text-slate-700">
-            Ví của bạn: <span className="font-mono font-bold text-emerald-700">{myBalance !== undefined ? formatCurrency(myBalance) : '---'}</span>
-          </span>
-        </div>
-        <div className="space-y-1 max-h-24 overflow-y-auto pr-1">
-          {Object.values(playersInfo).length > 0 ? (
-            Object.values(playersInfo).map((p) => {
-              const isBidder = p.id === highestBidderId;
-              return (
-                <div
-                  key={p.id}
-                  className={`flex items-center justify-between text-xs px-2.5 py-1 rounded-lg border ${
-                    isBidder
-                      ? 'bg-amber-200 border-amber-400 text-amber-950 font-bold'
-                      : 'bg-white/80 border-slate-200 text-slate-800'
-                  }`}
-                >
-                  <div className="flex items-center gap-2 truncate">
-                    <span
-                      className="w-2 h-2 rounded-full shrink-0 border border-slate-900"
-                      style={{ backgroundColor: p.tokenColor ?? '#F59E0B' }}
-                    />
-                    <span className="truncate max-w-[140px] font-medium">{p.name}</span>
-                  </div>
-                  <span className="font-mono text-[11px] font-bold">{formatCurrency(p.balance)}</span>
-                </div>
-              );
-            })
-          ) : (
-            <div className="text-[11px] text-slate-600 text-center py-1">
-              {displayName ? `Dẫn đầu: ${displayName}` : 'Chưa có người chơi kết nối'}
+      {/* Bố cục 2 cột Desktop */}
+      <div className="flex flex-col md:grid md:grid-cols-2 gap-3.5 md:gap-5 items-start divide-y md:divide-y-0 md:divide-x divide-amber-900/10">
+        {/* Cột 1 (Cánh Trái: Tài Sản & Phân Khu) */}
+        <div className="w-full space-y-3.5">
+          {/* Tên BĐS & Phân khu quy hoạch */}
+          <div data-testid="auction-hero-header" className="flex items-center gap-3 bg-amber-50/40 p-3 rounded-2xl border border-amber-900/10">
+            <div className="w-3.5 h-10 rounded-md shrink-0 shadow border border-slate-900" style={{ backgroundColor: ribbonColor }} />
+            <div className="flex-1 min-w-0">
+              <h3 className="font-bold text-slate-900 text-sm md:text-base truncate">{deed?.name ?? `Ô #${cellIndex}`}</h3>
+              <p className="text-xs text-slate-600 truncate">
+                {isForeclosure ? (
+                  <>
+                    Giá gốc: <span className="line-through text-slate-400 mr-1">{formatCurrency(basePrice)}</span>
+                    ➔ Giá sàn: <span className="text-rose-600 font-bold">{formatCurrency(floorPrice)} (-30%)</span>
+                  </>
+                ) : (
+                  <>
+                    Giá khởi điểm: <span className="text-slate-900 font-bold">{formatCurrency(basePrice)}</span>
+                  </>
+                )}
+              </p>
             </div>
-          )}
-        </div>
-      </div>
-
-      {/* Đồng hồ đếm ngược & Thanh thời gian */}
-      <div className="space-y-1.5 pt-1">
-        <div className="flex items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-2">
-            <span className={`w-2.5 h-2.5 rounded-full ${isUrgent ? 'bg-rose-500 animate-ping' : 'bg-amber-500'}`} />
-            <span className="text-slate-700 font-bold">THỜI GIAN CÒN LẠI:</span>
           </div>
-          <span className={`font-mono font-black text-base ${isUrgent ? 'text-rose-600 animate-pulse' : 'text-amber-800'}`}>
-            {timeRemaining.toString().padStart(2, '0')} GIÂY
-          </span>
-        </div>
-        <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden border border-slate-300">
-          <div
-            className={`h-full transition-all duration-300 ${isUrgent ? 'bg-rose-500' : 'bg-amber-500'}`}
-            style={{ width: `${timerPercent}%` }}
+
+          {/* Tình báo phân khu & Radar độc quyền [IMP-138] */}
+          <AuctionDistrictCard
+            cellIndex={cellIndex}
+            currentBid={currentBid}
+            myId={myId}
+            playersInfo={playersInfo}
+            levelMap={propLevelMap}
+            isForeclosure={isForeclosure}
+            badgeMaxWidth="max-w-[120px]"
           />
         </div>
-      </div>
 
-      {/* Trạng thái & Các nút nâng giá nhanh */}
-      {isDeclinedPlayer ? (
-        <div className="p-3 bg-amber-100 rounded-xl text-center border border-amber-300">
-          <p className="text-xs font-bold text-amber-900">
-            {isForeclosure
-              ? 'Tài sản của bạn đang được phát mãi cưỡng chế để cấn trừ nợ xấu. Bạn không thể tự đấu giá tài sản của chính mình.'
-              : 'Bạn đã từ chối mua ô đất này (Luật game cấm tham gia đấu giá). Đang chờ các đối thủ khác đặt giá...'}
-          </p>
-        </div>
-      ) : hasPassed ? (
-        <div className="p-3 bg-slate-200 rounded-xl text-center border border-slate-300">
-          <p className="text-xs font-bold text-rose-700">Bạn đã rút lui khỏi phiên đấu giá này.</p>
-        </div>
-      ) : isLeading ? (
-        <div className="p-3 bg-emerald-100 rounded-xl text-center border border-emerald-400 flex items-center justify-center gap-2">
-          <span className="text-emerald-700 font-bold text-sm">✓</span>
-          <p className="text-xs font-bold text-emerald-800">Bạn đang dẫn đầu mức giá cao nhất!</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-3 gap-2">
-          {([100, 200, 500] as const).map((step, idx) => {
-            const targetBid = increments[idx]!;
-            const canAfford = myBalance === undefined || targetBid <= myBalance;
-            return (
-              <button
-                key={step}
-                type="button"
-                onClick={() => onBid?.(targetBid)}
-                disabled={!canAfford}
-                className={`min-h-[48px] py-2 px-2 font-bold text-xs rounded-xl border-2 flex flex-col items-center justify-center transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
-                  canAfford
-                    ? 'bg-amber-500 hover:bg-amber-400 text-amber-950 border-amber-700 font-black shadow-[0_4px_0_0_#b45309] active:shadow-[0_1px_0_0_#b45309] active:translate-y-[3px] cursor-pointer'
-                    : 'bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed opacity-50'
-                }`}
-              >
-                <span className="text-xs md:text-sm font-black tracking-wide">+{step} Tr.</span>
-                <span className={`text-[10px] font-semibold mt-0.5 ${canAfford ? 'text-amber-950' : 'text-slate-400'}`}>
-                  ({formatCurrency(targetBid)})
+        {/* Cột 2 (Cánh Phải: Đấu Giá & Hành Động Thời Gian Thực) */}
+        <div className="w-full space-y-3.5 pt-3.5 md:pt-0 md:pl-5">
+          {/* Bục đấu giá hợp nhất [IMP-159] */}
+          <div
+            data-testid="auction-unified-podium"
+            className="bg-amber-50/40 p-3 rounded-2xl border border-amber-900/10 space-y-2"
+          >
+            {/* Dòng trên: Giá thầu hiện tại & Thời gian còn lại */}
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-bold text-slate-600 uppercase tracking-wider">GIÁ THẦU HIỆN TẠI</span>
+              <div className="flex items-center gap-1.5">
+                <span className={`w-2 h-2 rounded-full ${isUrgent ? 'bg-rose-500 animate-ping' : 'bg-amber-500'}`} />
+                <span className="text-slate-600 font-bold">THỜI GIAN CÒN LẠI:</span>
+                <span className={`font-mono font-black text-xs md:text-sm ${isUrgent ? 'text-rose-600 animate-pulse' : 'text-amber-800'}`}>
+                  {timeRemaining.toString().padStart(2, '0')} GIÂY
                 </span>
-              </button>
-            );
-          })}
+              </div>
+            </div>
+
+            {/* Thanh thời gian mini */}
+            <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden border border-slate-300/60">
+              <div
+                className={`h-full transition-all duration-300 ${isUrgent ? 'bg-rose-500' : 'bg-amber-500'}`}
+                style={{ width: `${timerPercent}%` }}
+              />
+            </div>
+
+            {/* Ở giữa: data-testid="flip-counter" */}
+            <div
+              data-testid="flip-counter"
+              className="tracking-widest font-mono font-black text-2xl md:text-3xl text-amber-400 bg-slate-900 py-1.5 px-4 rounded-xl shadow-inner border border-slate-700 text-center"
+            >
+              {formatCurrency(currentBid)}
+            </div>
+
+            {/* Dòng dưới: Dẫn đầu */}
+            <div className="flex items-center justify-between text-xs pt-0.5">
+              <span className="font-bold text-slate-600">DẪN ĐẦU:</span>
+              <div className="flex items-center gap-1 truncate max-w-[200px]">
+                {highestBidderId ? (
+                  <>
+                    <span aria-hidden="true">👑</span>
+                    <span className={`font-bold truncate ${isLeading ? 'text-emerald-700 font-black' : 'text-slate-900'}`}>
+                      {displayName}
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-slate-500 font-medium">Chưa có ai</span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Danh sách đại gia & Ví tiền [IMP-159] */}
+          <div className="space-y-1.5 bg-amber-50/40 p-3 rounded-2xl border border-amber-900/10">
+            <div className="flex items-center justify-between text-xs pb-1 border-b border-amber-900/10">
+              <span className="font-bold text-slate-700 uppercase tracking-wider">
+                ĐẠI GIA THAM GIA
+              </span>
+              <span className="font-medium text-slate-700">
+                Ví của bạn: <span className="font-mono font-bold text-emerald-700">{myBalance !== undefined ? formatCurrency(myBalance) : '---'}</span>
+              </span>
+            </div>
+            <div className="space-y-1 max-h-24 overflow-y-auto pr-1">
+              {Object.values(playersInfo ?? {}).length > 0 ? (
+                Object.values(playersInfo ?? {}).map((p) => {
+                  const isBidder = p.id === highestBidderId;
+                  const isMe = p.id === myId;
+                  return (
+                    <div
+                      key={p.id}
+                      className={`flex items-center justify-between text-xs px-2.5 py-1 rounded-lg ${
+                        isBidder
+                          ? 'bg-amber-100/80 text-amber-950 font-bold'
+                          : 'bg-white/60 text-slate-800'
+                      }`}
+                    >
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span
+                          className="w-2 h-2 rounded-full shrink-0 border border-slate-900"
+                          style={{ backgroundColor: p.tokenColor ?? '#F59E0B' }}
+                        />
+                        <span className="truncate max-w-[120px] font-medium min-w-0">{p.name}</span>
+                        {isMe && (
+                          <span className="text-[11px] font-bold text-amber-800 shrink-0">(Bạn)</span>
+                        )}
+                        {isBidder && (
+                          <span className="text-[11px] font-black text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded border border-amber-300 shrink-0">
+                            👑 Dẫn đầu
+                          </span>
+                        )}
+                      </div>
+                      <span className="font-mono text-xs font-bold shrink-0">{formatCurrency(p.balance)}</span>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="text-xs text-slate-600 text-center py-1">
+                  {displayName ? `Dẫn đầu: ${displayName}` : 'Chưa có người chơi kết nối'}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Trạng thái & Các nút nâng giá nhanh */}
+          {isDeclinedPlayer ? (
+            <div className="p-3 bg-amber-100 rounded-xl text-center border border-amber-300">
+              <p className="text-xs font-bold text-amber-900">
+                {isForeclosure
+                  ? 'Tài sản của bạn đang được phát mãi cưỡng chế để cấn trừ nợ xấu. Bạn không thể tự đấu giá tài sản của chính mình.'
+                  : 'Bạn đã từ chối mua ô đất này (Luật game cấm tham gia đấu giá). Đang chờ các đối thủ khác đặt giá...'}
+              </p>
+            </div>
+          ) : hasPassed ? (
+            <div className="p-3 bg-slate-200 rounded-xl text-center border border-slate-300">
+              <p className="text-xs font-bold text-rose-700">Bạn đã rút lui khỏi phiên đấu giá này.</p>
+            </div>
+          ) : isLeading ? (
+            <div className="p-3 bg-emerald-100 rounded-xl text-center border border-emerald-400 flex items-center justify-center gap-2">
+              <span className="text-emerald-700 font-bold text-sm">✓</span>
+              <p className="text-xs font-bold text-emerald-800">Bạn đang dẫn đầu mức giá cao nhất!</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 gap-2">
+              {([100, 200, 500] as const).map((step, idx) => {
+                const targetBid = increments[idx]!;
+                const canAfford = myBalance === undefined || targetBid <= myBalance;
+                return (
+                  <button
+                    key={step}
+                    type="button"
+                    onClick={() => onBid?.(targetBid)}
+                    disabled={!canAfford}
+                    className={`min-h-[48px] py-2 px-2 font-bold text-xs rounded-xl border-2 flex flex-col items-center justify-center transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+                      canAfford
+                        ? 'bg-amber-500 hover:bg-amber-400 text-amber-950 border-amber-700 font-black shadow-[0_4px_0_0_#b45309] active:shadow-[0_1px_0_0_#b45309] active:translate-y-[3px] cursor-pointer'
+                        : 'bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed opacity-50'
+                    }`}
+                  >
+                    <span className="text-xs md:text-sm font-black tracking-wide">+{step} Tr.</span>
+                    <span className={`text-xs font-semibold mt-0.5 ${canAfford ? 'text-amber-950' : 'text-slate-400'}`}>
+                      ({formatCurrency(targetBid)})
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Footer: Công tắc Auto-Bid & Nút Rút lui */}
+          <div className="flex items-center justify-between gap-3 pt-2 border-t border-amber-300/80">
+            <button
+              type="button"
+              onClick={() => setAutoBid((prev) => !prev)}
+              disabled={hasPassed || isDeclinedPlayer}
+              className={`min-h-[44px] px-3.5 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 cursor-pointer ${
+                autoBid
+                  ? 'bg-amber-500 text-amber-950 font-black border-amber-700 shadow-[0_2px_0_0_#b45309]'
+                  : 'bg-slate-200 text-slate-700 border-slate-400 hover:bg-slate-300'
+              }`}
+            >
+              <span className={`w-2 h-2 rounded-full ${autoBid ? 'bg-amber-900' : 'bg-slate-400'}`} />
+              <span>AUTO-BID</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={onPass ?? onClose}
+              disabled={hasPassed || isDeclinedPlayer}
+              className="min-h-[44px] px-4 py-2 rounded-xl text-xs font-bold text-rose-700 hover:text-rose-800 bg-rose-100 hover:bg-rose-200 border-2 border-rose-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 cursor-pointer"
+            >
+              {isDeclinedPlayer ? 'Không Thể Tham Gia' : hasPassed ? 'Đã Rút Lui' : 'Rút Lui / Bỏ Cuộc'}
+            </button>
+          </div>
         </div>
-      )}
-
-      {/* Footer: Công tắc Auto-Bid & Nút Rút lui */}
-      <div className="flex items-center justify-between gap-3 pt-2 border-t border-amber-300/80">
-        <button
-          type="button"
-          onClick={() => setAutoBid((prev) => !prev)}
-          disabled={hasPassed || isDeclinedPlayer}
-          className={`min-h-[44px] px-3.5 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 cursor-pointer ${
-            autoBid
-              ? 'bg-amber-500 text-amber-950 font-black border-amber-700 shadow-[0_2px_0_0_#b45309]'
-              : 'bg-slate-200 text-slate-700 border-slate-400 hover:bg-slate-300'
-          }`}
-        >
-          <span className={`w-2 h-2 rounded-full ${autoBid ? 'bg-amber-900' : 'bg-slate-400'}`} />
-          <span>AUTO-BID</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={onPass ?? onClose}
-          disabled={hasPassed || isDeclinedPlayer}
-          className="min-h-[44px] px-4 py-2 rounded-xl text-xs font-bold text-rose-700 hover:text-rose-800 bg-rose-100 hover:bg-rose-200 border-2 border-rose-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 cursor-pointer"
-        >
-          {isDeclinedPlayer ? 'Không Thể Tham Gia' : hasPassed ? 'Đã Rút Lui' : 'Rút Lui / Bỏ Cuộc'}
-        </button>
       </div>
     </div>
   );

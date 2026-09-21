@@ -48,6 +48,7 @@ export interface AuctionPayload {
   readonly timeRemaining: number;
   readonly declinedPlayerId?: string;
   readonly hasPassed?: boolean;
+  readonly passedPlayerIds?: readonly string[];
   readonly insolvencyPlayerId?: string;
   readonly isForeclosure?: boolean;
   readonly startingBid?: number;
@@ -55,6 +56,8 @@ export interface AuctionPayload {
   winnerId?: string | null;
   finalPrice?: number;
 }
+
+export type AuctionDelta = AuctionPayload;
 
 export interface PendingTradeOfferDelta {
   readonly offerId: string;
@@ -149,6 +152,9 @@ export function buildDeltaFromRoom(
         highestBidderId: session.highestBidder ?? null,
         timeRemaining,
         declinedPlayerId: session.declinedPlayerId,
+        ...(session.passedPlayers && session.passedPlayers.size > 0
+          ? { passedPlayerIds: Array.from(session.passedPlayers) }
+          : {}),
         ...(session.insolvencyPlayerId ? {
           insolvencyPlayerId: session.insolvencyPlayerId,
           isForeclosure: true,
@@ -223,7 +229,7 @@ export function buildDeltaFromRoom(
   });
 }
 
-export function buildDeltaPayload(options: {
+export interface DeltaPayloadOptions {
   tick: number;
   cells: ReadonlyArray<CellDelta>;
   players?: ReadonlyArray<PlayerDelta>;
@@ -243,7 +249,9 @@ export function buildDeltaPayload(options: {
   roundNumber?: number;
   treasury?: number;
   activeModifiers?: ReadonlyArray<MarketModifier>;
-}): DeltaPayload;
+}
+
+export function buildDeltaPayload(options: DeltaPayloadOptions): DeltaPayload;
 export function buildDeltaPayload(options: {
   tick: number;
   room: Room;
@@ -259,27 +267,7 @@ export function buildDeltaPayload(
 export function buildDeltaPayload(
   tickOrOptions:
     | number
-    | {
-        tick: number;
-        cells: ReadonlyArray<CellDelta>;
-        players?: ReadonlyArray<PlayerDelta>;
-        currentPlayerIndex?: number;
-        currentTurnPlayerId?: string;
-        dice?: readonly [number, number];
-        diceRollerId?: string;
-        diceSeq?: number;
-        auction?: AuctionPayload | null;
-        pendingTradeOffer?: PendingTradeOfferDelta | null;
-        pendingBuyout?: PendingBuyoutSession | null;
-        roomStarted?: boolean;
-        turnPhase?: TurnPhase;
-        timeRemaining?: number;
-        lastEventCard?: EventCardInfo | null;
-        lastHoseResult?: HoseResultInfo | null;
-        roundNumber?: number;
-        treasury?: number;
-        activeModifiers?: ReadonlyArray<MarketModifier>;
-      }
+    | DeltaPayloadOptions
     | { tick: number; room: Room; registry: PropertyRegistry; stateMap: PropertyStateMap; auctions?: Map<string, AuctionSession>; lastAuctionResults?: Map<string, any> },
   cells?: ReadonlyArray<CellDelta>,
   players?: ReadonlyArray<PlayerDelta>,
@@ -390,7 +378,5 @@ export class SessionManager {
     };
   }
 
-  getLastDelta(): DeltaPayload | undefined {
-    return this.lastDelta;
-  }
+  getLastDelta(): DeltaPayload | undefined { return this.lastDelta; }
 }

@@ -73,7 +73,7 @@ const KNOWN_HERO_STATS: Readonly<Record<string, HeroStat>> = {
   [MarketCardId.MC_PUBLIC_INVEST]: { label: 'ĐẦU TƯ CÔNG', value: '+400 Tr. & x2', variant: 'positive' },
   [MarketCardId.MC_ANTI_SPECULATE]: { label: 'THUẾ CHỐNG ĐẦU CƠ', value: '20% GIAO DỊCH', variant: 'warning' },
   [MarketCardId.MC_PEAK_TOURISM]: { label: 'CAO ĐIỂM DU LỊCH', value: 'x2 PHÍ NGHỈ DƯỠNG', variant: 'positive' },
-  [MarketCardId.MC_FREEZE_TRADE]: { label: 'ĐÓNG BĂNG THỊ TRƯỜNG', value: 'CẤM THẾ CHẤP', variant: 'warning' },
+  [MarketCardId.MC_FREEZE_TRADE]: { label: 'HIỆU LỰC', value: 'CẤM THẾ CHẤP & ĐẤU GIÁ', variant: 'warning' },
   [MarketCardId.MC_UTILITY_DOUBLE]: { label: 'GIÁ ĐIỆN & CƯỚC PHÍ', value: 'x2 TIỆN ÍCH', variant: 'warning' },
   [MarketCardId.MC_COASTAL_STORM]: { label: 'BÃO LŨ DUYÊN HẢI', value: 'MIỄN 100% THUÊ', variant: 'warning' },
 
@@ -163,6 +163,56 @@ export function sanitizeDestination(destination?: string): string {
   if (lower.includes('chủ sở hữu') || lower.includes('chủ ô')) return 'Chủ Sở Hữu Ô';
   if (lower.includes('tài khoản') || lower.includes('cá nhân')) return 'Tài Khoản Cá Nhân';
   return destination.trim();
+}
+
+export function cleanEventDescription(text?: string): string {
+  if (!text) return '';
+  const trimmed = text.trim();
+  const colonIndex = trimmed.indexOf(':');
+  if (colonIndex !== -1 && colonIndex < trimmed.length - 1) {
+    const remainder = trimmed.slice(colonIndex + 1).trim();
+    if (remainder.length > 0) {
+      return remainder.charAt(0).toUpperCase() + remainder.slice(1);
+    }
+  }
+  return trimmed;
+}
+
+export function isFinancialDestination(destination?: string, effectDelta?: number): boolean {
+  if (!destination) return false;
+  const lower = destination.toLowerCase().trim();
+  if (!lower) return false;
+
+  if (
+    lower.includes('đóng băng') ||
+    lower.includes('thanh khoản') ||
+    lower.includes('bảo toàn') ||
+    lower === 'toàn thị trường' ||
+    lower === 'toàn bộ thị trường'
+  ) {
+    return false;
+  }
+
+  if (
+    lower.includes('kho bạc') ||
+    lower.includes('chủ sở hữu') ||
+    lower.includes('chủ ô') ||
+    lower.includes('đối thủ') ||
+    lower.includes('người nghèo nhất') ||
+    lower.includes('bồi thường') ||
+    lower.includes('nộp phạt') ||
+    lower.includes('chi thưởng') ||
+    lower.includes('giải ngân')
+  ) {
+    return true;
+  }
+
+  if (lower.includes('tài khoản') || lower.includes('ngân sách')) {
+    if (typeof effectDelta === 'number' && effectDelta !== 0) return true;
+    if (lower.includes('cộng') || lower.includes('trừ') || lower.includes('chuyển')) return true;
+  }
+
+  return false;
 }
 
 export function getHeroStatStyles(variant: HeroStatVariant): HeroStatStyles {

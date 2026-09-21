@@ -21,6 +21,7 @@ const VALID_INTENTS = new Set([
   'INTENT_ROLL', 'INTENT_BUY', 'INTENT_BUY_PROPERTY', 'INTENT_DECLINE', 'INTENT_BID',
   'INTENT_AUCTION_PASS', 'INTENT_UPGRADE_ETC', 'INTENT_TRADE_OFFER', 'INTENT_RESPOND_TRADE_OFFER', 'INTENT_END_TURN',
   'INTENT_INVEST', 'INTENT_SKIP', 'INTENT_BAIL_OUT', 'INTENT_BANKRUPTCY',
+  'INTENT_EXECUTE_COMPULSORY_BUYOUT', 'INTENT_DECLINE_COMPULSORY_BUYOUT',
 ]);
 
 export class EnvelopeValidator {
@@ -189,6 +190,9 @@ export class EnvelopeValidator {
       return { success: false, reasonCode: 'INVALID_ENVELOPE' };
     }
     if (CELL_INTENTS.has(it['type']) && typeof it['cellIndex'] !== 'number') {
+      return { success: false, reasonCode: 'INVALID_ENVELOPE' };
+    }
+    if (it['type'] === 'INTENT_EXECUTE_COMPULSORY_BUYOUT' && typeof it['cellIndex'] !== 'number') {
       return { success: false, reasonCode: 'INVALID_ENVELOPE' };
     }
     if (it['type'] === 'INTENT_BID' && typeof it['amount'] !== 'number') {

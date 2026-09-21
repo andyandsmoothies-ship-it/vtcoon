@@ -9,6 +9,8 @@ import {
   getHeroStatStyles,
   sanitizeTargetScope,
   sanitizeDestination,
+  cleanEventDescription,
+  isFinancialDestination,
 } from './event_card_visuals.js';
 
 export interface EventCardModalProps {
@@ -60,17 +62,16 @@ export function EventCardModal({
   const resolvedDenseScope = sanitizeTargetScope(rawDenseScope);
   const resolvedTargetScope = sanitizeTargetScope(rawTargetScope);
 
-  const resolvedDescription = description || detail?.description || '';
-  const resolvedEffectDetail = effectDetail || detail?.effectDetail || resolvedDescription;
+  const rawDescription = effectDetail || description || detail?.effectDetail || detail?.description || '';
+  const singleTruthDescription = cleanEventDescription(rawDescription);
+
   const resolvedDuration = duration || detail?.duration || (isMarket ? '1 vòng chơi' : 'Tức thì');
   const rawDestination = destination || detail?.destination || (isMarket ? 'Toàn thị trường' : 'Kho Bạc Nhà Nước');
   const resolvedDestination = sanitizeDestination(rawDestination);
 
   const shouldShowDestination = Boolean(
-    rawDestination &&
-    rawDestination !== 'Toàn thị trường' &&
-    !rawDestination.toLowerCase().includes('người chơi') &&
-    !rawDestination.toLowerCase().includes('thực hiện')
+    isFinancialDestination(rawDestination, effectDelta) &&
+    resolvedDestination !== 'Toàn thị trường'
   );
 
   const iconEmoji = getCardThemedEmoji(cardId, cardType);
@@ -80,7 +81,7 @@ export function EventCardModal({
   return (
     <div
       data-testid="event-card-modal"
-      className="w-full max-w-[340px] sm:max-w-[370px] bg-[#FFFDF8] border-2 border-slate-900 rounded-3xl shadow-[0_8px_0_0_#0f172a] pt-7 pb-6 px-5 sm:px-6 max-h-[90vh] overflow-y-auto flex flex-col items-center text-center relative pointer-events-auto transition-all animate-in fade-in zoom-in-95 duration-200 my-auto text-slate-900 select-none"
+      className="w-full max-w-[340px] sm:max-w-[420px] bg-[#FFFDF8] border-2 border-slate-900 rounded-3xl shadow-[0_8px_0_0_#0f172a] pt-7 pb-6 px-5 sm:px-6 max-h-[90vh] overflow-y-auto flex flex-col items-center text-center relative pointer-events-auto transition-all animate-in fade-in zoom-in-95 duration-200 my-auto text-slate-900 select-none"
     >
       {/* Khung viền chỉ mực kép hoài cổ (Double Border) */}
       <div
@@ -118,7 +119,7 @@ export function EventCardModal({
           type="button"
           onClick={onClose}
           aria-label="Đóng thẻ sự kiện"
-          className="absolute top-3 right-3 min-w-[38px] min-h-[38px] inline-flex items-center justify-center text-slate-500 hover:text-slate-900 text-lg font-bold rounded-full bg-slate-100 hover:bg-slate-200 border border-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 z-20 cursor-pointer shadow-xs transition-colors"
+          className="absolute top-3 right-3 min-w-[44px] min-h-[44px] inline-flex items-center justify-center text-slate-500 hover:text-slate-900 text-lg font-bold rounded-full bg-slate-100 hover:bg-slate-200 border border-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 z-20 cursor-pointer shadow-xs transition-colors"
         >
           ✕
         </button>
@@ -154,7 +155,7 @@ export function EventCardModal({
 
       {/* Description text — Giữ hidden sm:block cho test contract & hiển thị mô tả gọn gàng */}
       <p className="relative z-10 text-xs text-slate-600 mb-3 leading-relaxed px-1 font-semibold hidden sm:block">
-        {resolvedDescription}
+        {singleTruthDescription}
       </p>
 
       {/* Khối Tóm Tắt Tác Động Nhanh 1 Giây — Mobile (< 640px) */}
@@ -173,34 +174,29 @@ export function EventCardModal({
           </span>
         </div>
         <p className="text-xs text-slate-800 font-bold leading-relaxed text-center">
-          {resolvedEffectDetail}
+          {singleTruthDescription}
         </p>
       </div>
 
       {/* Khối Thông Số Tác Động Nhanh — Desktop (>= 640px) */}
       <div
         data-testid="event-specs-table"
-        className="relative z-10 w-full bg-[#F7F2E7] border border-slate-300 rounded-xl p-3 mb-3 text-left hidden sm:flex flex-col gap-2.5 shadow-xs"
+        className="relative z-10 w-full bg-[#F7F2E7] border border-slate-300 rounded-xl p-3 mb-3 items-center justify-center gap-2 hidden sm:flex flex-wrap shadow-xs"
       >
-        <p className="text-xs text-slate-800 font-bold leading-relaxed text-center px-1">
-          {resolvedEffectDetail}
-        </p>
-        <div className="flex items-center justify-center gap-2 pt-1 border-t border-slate-300/80 flex-wrap">
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300">
-            <span>🎯</span>
-            <span title={resolvedDenseScope}>{resolvedDenseScope}</span>
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300">
+          <span>🎯</span>
+          <span title={resolvedDenseScope}>{resolvedDenseScope}</span>
+        </span>
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-slate-100 text-slate-800 border border-slate-300">
+          <span>⏳</span>
+          <span>{resolvedDuration}</span>
+        </span>
+        {shouldShowDestination && (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-100 text-emerald-900 border border-emerald-300">
+            <span>🏛️</span>
+            <span className="whitespace-nowrap">{resolvedDestination}</span>
           </span>
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-slate-100 text-slate-800 border border-slate-300">
-            <span>⏳</span>
-            <span>{resolvedDuration}</span>
-          </span>
-          {shouldShowDestination && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-100 text-emerald-900 border border-emerald-300">
-              <span>🏛️</span>
-              <span className="whitespace-nowrap">{resolvedDestination}</span>
-            </span>
-          )}
-        </div>
+        )}
       </div>
 
       {/* CTA Button */}

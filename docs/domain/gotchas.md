@@ -7,11 +7,11 @@
 ## 🧭 BẢNG CHỈ MỤC THEO DOMAIN (DOMAIN INDEX)
 | Domain Tag | Trọng Tâm & Phạm Vi Mã Nguồn | Các Gotchas Liên Quan |
 | :--- | :--- | :--- |
-| `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78, #82, #104, #105, #106, #145, #146, #147, #159, #164, #174, #180, #188, #195, #196, #197, #200, #203 |
+| `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78, #82, #104, #105, #106, #145, #146, #147, #159, #164, #174, #180, #188, #195, #196, #197, #200, #203, #215 |
 | `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147, #190, #191, #195, #196, #197, #200, #206 |
-| `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190, #200, #203, #209, #210, #211, #212, #213 |
+| `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190, #200, #203, #209, #210, #211, #212, #213, #215 |
 | `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #32, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #60, #61, #63, #69, #72, #74, #77, #80, #85, #86, #88, #89, #90, #91, #92, #93, #94, #95, #96, #101, #103, #109, #110, #114, #115, #116, #117, #120, #122, #123, #124, #125, #126, #127, #128, #129, #130, #133, #134, #135, #136, #140, #141, #144, #148, #159, #160, #161, #162, #163, #164, #165, #169, #175, #177, #189, #198, #200 |
-| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192, #195, #196, #199, #201, #202, #204, #205, #206 |
+| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192, #195, #196, #199, #201, #202, #204, #205, #206, #216 |
 | `[UAT/TEST]` | Nghiệm Thu, Adversarial TDD, Ảnh Chụp Màn Hình (.jpg), Shell Escaping, File I/O Lock, Docker Healthcheck Timeout | #5, #28, #29, #31, #35, #52, #71, #73, #83, #84, #99, #100, #117, #124, #125, #130, #199 |
 | `[TELEMETRY]` | Giám Sát Hiệu Năng Thời Gian Thực, Chó Canh Phòng Bất Biến, Hộp Đen Tái Hiện Lỗi | #39, #62, #71, #75, #104, #114, #115, #135, #174, #200 |
 | `[ARCH/REFACTOR]` | Tách Module Facade, Ngân Sách Render Loop, Chuẩn Hóa Môi Trường Build | #43, #98, #99 |
@@ -3516,8 +3516,8 @@
 - **Bối cảnh & Bẫy thực tế**:
   1. *Bẫy Đấu Giá Đồng Bộ Chớp Nhoáng Khiến Người Chơi Choáng Ngợp*:
      - Trước đây, khi bot từ chối mua đất hoặc kích hoạt đấu giá, FSM gọi `resolveAuctionBots` đồng bộ giải quyết toàn bộ phiên đấu giá trong 1 nhịp duy nhất. Kết quả là người chơi không kịp theo dõi bot nào trả giá, giá tăng từng bước ra sao.
-  2. *Bẫy Xung Đột Gia Hạn Anti-Sniping Của Người Chơi Và Nhịp Đấu Giá Bot*:
-     - Theo Gotcha #21 (Anti-Sniping), người chơi chỉ được cộng +3.000ms khi đặt giá ở thời điểm `<= 3s`. Nếu áp đặt vô điều kiện công thức cộng 10.000ms cho mọi lệnh đặt giá của người chơi thật, các bài test hợp đồng anti-sniping (`phase4_fsm_auction_upgrades.test.ts`) sẽ bị gãy.
+  2. *Bẫy Xung Đột Gia Hạn Anti-Sniping Của Người Chơi Và Lỗi Cộng Dồn Timer 73s*:
+     - Theo Gotcha #21 (Anti-Sniping), người chơi chỉ được cộng +3.000ms khi đặt giá ở thời điểm `<= 3s`. Trước đây, khi bot đặt giá hoặc pass liên tục, công thức `Math.max(session.endTime ?? 0, Date.now()) + 10_000` cộng dồn vào `endTime` sẵn có, khiến timer phiên đấu giá leo thang lên tới 73 giây. Cần chuẩn hóa gán trần cố định `Date.now() + 15_000`.
   3. *Bẫy Kẹt Lượt Headless Simulation Khi Xóa Bỏ Gọi Đồng Bộ*:
      - Khi xóa các lệnh gọi `resolveAuctionBots` khỏi các hàm xử lý bot, vòng lặp mô phỏng headless `runBotTurn` (sử dụng trong Chaos Monkey 1.000 ván và golden stream) bị kẹt ở `AuctionPhase` vì không có `TurnOrchestrator` hẹn giờ nền để gọi `stepAuctionBot`.
   4. *Bẫy Tàng Hình Kết Quả Đấu Giá (Modal Đóng Đột Ngột)*:
@@ -3525,8 +3525,8 @@
 - **Ràng buộc cứng & Thiết kế bất biến**:
   1. **Paced Bot Auction Stepping**:
      - Trong trận đấu trực tuyến, `TurnOrchestrator` điều phối từng bước qua `this.rooms.stepAuctionBot(roomCode)` với độ trễ `AUCTION_BOT_STEP_DELAY_MS = 1000ms`. Trong chế độ headless (`runBotTurn`), vòng lặp `while (room.phase === AuctionPhase)` chủ động bước từng nhịp qua `stepAuctionBot` cho tới khi phiên đấu giá hoàn tất, bảo toàn 100% liveness của Chaos Monkey.
-  2. **Role-Aware Time Extension Invariant**:
-     - Lệnh đặt giá của người chơi thật tuân thủ tuyệt đối Gotcha #21 (+3.000ms khi `<= 3s`). Chỉ khi người ra quyết định là Bot (`player.isBot`), hệ thống mới tự động gia hạn `session.endTime = Math.max(session.endTime ?? 0, Date.now()) + 10_000` để đảm bảo bot không bị `AUCTION_EXPIRED` khi giằng co nhiều vòng.
+  2. **Role-Aware Time Extension Invariant & Timer 73s Fix (IMP-156)**:
+     - Lệnh đặt giá của người chơi thật tuân thủ tuyệt đối Gotcha #21 (+3.000ms khi `<= 3s`). Khi người ra quyết định là Bot (`player.isBot`), hệ thống khống chế trần thời gian với `session.endTime = Date.now() + 15_000`, triệt tiêu hoàn toàn lỗi cộng dồn thời gian tích lũy `Math.max(session.endTime ?? 0, Date.now()) + 10_000` khiến timer bị đẩy lên 73 giây làm người chơi phải chờ đợi vô lý.
   3. **Auction Transparency Settle Delay**:
      - Khi phiên đấu giá đóng, `RoomManager` lưu `lastAuctionResult` và broadcast `DeltaPayload.auction` mang cờ `isConcluded: true`, `winnerId`, `finalPrice`, `isForeclosure: !winnerId`. Client giữ nguyên modal hiển thị banner kết luận (màu hổ phách nếu thắng búa hoặc màu xám nếu phát mãi) trong `AUCTION_SETTLE_DELAY_MS = 2500ms` trước khi `TurnOrchestrator` dọn dẹp kết quả và kích hoạt lượt kế tiếp.
   4. **Multi-Class Z-Index Retention (Gotcha #31)**:
@@ -3582,3 +3582,53 @@
   2. *Bẫy clearSession Phantom*: `clearSession(roomCode)` tìm session qua `sessionsByRoom.get()` — trả `undefined` nếu đã bị xóa bởi resolve/cancel/timeout → `sessionsByOfferId` không bao giờ được dọn.
 - **Ràng buộc cứng & Thiết kế bất biến**:
   1. **Dual-Map Sync Invariant**: Mọi thao tác xóa session PHẢI xóa ĐỒNG THỜI cả `sessionsByRoom` VÀ `sessionsByOfferId`. Thứ tự: xóa `sessionsByOfferId` TRƯỚC `sessionsByRoom`.
+
+---
+
+### 214. [UI/CARD] Single-Truth Event Description & Financial Destination Filtering (IMP-156B / IMP-157)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Double Paragraph Desktop*: `EventCardModal` cùng hiển thị `<p className="hidden sm:block">{resolvedDescription}</p>` và `<div data-testid="event-specs-table" className="hidden sm:flex"><p>{resolvedEffectDetail}</p>...</div>`. Trên màn hình lớn, 2 đoạn văn dài gần như giống hệt nhau (trùng lặp 95%) xếp chồng lên nhau, gây nghẽn thị giác và tạo cảm giác giao diện "quá nhiều chữ".
+  2. *Bẫy Lặp Từ 5 Tầng (Word Loop)*: Thẻ `MC_FREEZE_TRADE` lặp lại cụm từ "Đóng băng" tới 5 lần qua Tiêu đề, Hero Stat, Paragraph 1, Paragraph 2 và chip dưới cùng.
+  3. *Bẫy Rò Rỉ Pseudo-Destination*: Thuộc tính `destination` trong metadata thẻ phi tiền tệ chứa nguyên câu văn dài 43 ký tự ("Đóng băng các kênh thanh khoản thị trường") bị rò rỉ vào chip `🏛️` làm vỡ bố cục.
+  4. *Bẫy Thắt Hẹp Khung Thẻ*: Chiều rộng 370px trên Desktop ép văn bản thành 4-5 dòng chen chúc, nút đóng chỉ 38px dưới chuẩn Apple HIG / Web 44px.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Single-Truth Description Invariant**: Tuyệt đối chỉ có 1 thẻ paragraph mô tả hiệu ứng được hiển thị trên mỗi viewport (`hidden sm:block` trên Desktop, `event-impact-summary` trên Mobile). Xóa bỏ hoàn toàn thẻ `<p>` thừa thãi bên trong `event-specs-table`.
+  2. **Colon Prefix Stripping (`cleanEventDescription`)**: Tự động bóc tách tiền tố lặp trước dấu hai chấm và viết hoa ký tự đầu (vd: "Đóng băng thị trường: Tạm ngưng mua bán..." -> "Tạm ngưng mua bán...").
+  3. **Financial Destination Filtering (`isFinancialDestination`)**: Chỉ render chip `🏛️` trên Desktop khi đích đến thực sự là một thực thể luân chuyển tiền tệ (Kho Bạc, Chủ Sở Hữu Ô, Đối Thủ, hoặc Tài Khoản khi `effectDelta !== 0`). Chặn đứng 100% câu văn phi tiền tệ ("Đóng băng...", "Bảo toàn...").
+  4. **Spacious Ergonomics**: Mở rộng bề ngang Desktop lên `sm:max-w-[420px]`, tăng kích thước nút đóng đạt chuẩn `min-w-[44px] min-h-[44px]`. Mobile (<640px) giữ nghiêm ngặt ngân sách 2 badge (`🎯`, `⏳`).
+
+---
+
+### 215. [FSM/NET][SEC] Auction Pass State Persistence & Compulsory Buyout Deadlock Resolution (IMP-154)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Xóa Trạng Thái hasPassed Khi Nhận Delta Mới*:
+     - Khi một người chơi đã ấn rút lui trong phiên đấu giá (`hasPassed: true`), mỗi khi server phát sóng delta mới (như có người chơi khác đặt giá), `openModal('auction', delta.auction)` ghi đè toàn bộ payload của modal. Do payload thiếu `passedPlayerIds`, cờ `hasPassed` bị xóa sạch (undefined), làm nút Rút Lui sáng trở lại và người chơi có thể tiếp tục đặt giá trái luật.
+  2. *Bẫy Bế Tắc Vĩnh Viễn Compulsory Buyout (CC_SWAP_PROJECT)*:
+     - `EnvelopeValidator` chưa khai báo `INTENT_EXECUTE_COMPULSORY_BUYOUT` và `INTENT_DECLINE_COMPULSORY_BUYOUT` trong `VALID_INTENTS`, trả về `INVALID_INTENT`.
+     - `IntentGuard` từ chối người mua gửi intent ngoài lượt với lỗi `OUT_OF_TURN`.
+     - `TurnWatchdog.checkRoom` không kiểm tra `checkPendingBuyoutTimeout`, khiến phiên thâu tóm hết hạn bị treo vĩnh viễn trên `room.pendingBuyout`.
+     - `executeEmergencyRecovery` không dọn dẹp `room.pendingBuyout = null`, làm hàm `handleEndTurn` bị block vô thời hạn (kẹt bàn chơi).
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Auction Pass State Persistence Invariant**:
+     - `AuctionPayload` bắt buộc mang `passedPlayerIds?: readonly string[]`. Server trích xuất `passedPlayerIds` từ `session.passedPlayers`.
+     - Client `syncBusinessModals` khi nhận `delta.auction` PHẢI duy trì `hasPassed: true` nếu (a) `prevPayload.hasPassed === true` hoặc (b) `myPid` nằm trong `delta.auction.passedPlayerIds`.
+  2. **Compulsory Buyout Deadlock Resolution Invariants**:
+     - `VALID_INTENTS` tích hợp đầy đủ hai intent `INTENT_EXECUTE_COMPULSORY_BUYOUT` và `INTENT_DECLINE_COMPULSORY_BUYOUT`. Intent thực thi bắt buộc kiểm chuẩn `typeof it['cellIndex'] === 'number'`.
+     - `IntentGuard.isPhaseSpecificAllowed` cho phép người chơi thực thi/từ chối khi `room.pendingBuyout?.buyerId === playerId`.
+     - `TurnWatchdog` tự động kiểm tra `checkPendingBuyoutTimeout` mỗi nhịp quét và dọn `room.pendingBuyout = null` trước khi `executeEmergencyRecovery` ép bàn chơi chuyển lượt.
+
+---
+
+### 216. [UI/CRAFT] Auction Arena Card De-Nesting, Unified Podium & 360px Layout Budget (IMP-159)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Hội chứng lồng thẻ đa tầng (Card Nesting Syndrome)*: Giao diện sàn đấu giá cũ có tới 12 đường viền `border-slate-300` và 6 sắc độ nền lộn xộn (`#FFFBEB`, `#F7F2E7`, `#FAF6EC`, `white/80`, `white/90`, `bg-slate-900`), khiến modal trông như một bảng kê khai thuế hành chính thay vì sàn đấu giá hào hứng của game cờ tỷ phú.
+  2. *Bục đấu giá chắp vá (Mismatched Podium)*: Khối giá thầu nền đen sì đứng cạnh khối người dẫn đầu nền trắng nhợt nhạt, phá vỡ tính đồng nhất thị giác.
+  3. *Bẫy tràn ngang Mobile 360px (Participant Overflow)*: Đặt danh sách người chơi thành dải ngang với avatar, tên, số dư ví và badge dẫn đầu sẽ vượt quá 332px bề ngang khả dụng trên màn hình di động nhỏ, gây tràn ngang (Horizontal Overflow).
+  4. *Bẫy mất Palette SSOT*: Đổi tùy tiện nền modal sang `#FFFDF9` làm rớt toàn bộ suite kiểm thử `imp61` do không khớp `BRIGHT_PAPER_OR_FELT_REGEX` và `TC-61.12`.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Tabletop Palette SSOT Invariant**: Root container của AuctionModal bắt buộc giữ nguyên nền ngà ấm `#FFFBEB` và bóng xúc giác `shadow-[0_4px_0_0_#b45309]` để tuân thủ 100% hợp đồng bàn cờ.
+  2. **Zero Card-Nesting & Whitespace Hierarchy**: Khử bỏ toàn bộ `border-slate-300` và nền xám bẩn `#F7F2E7`. Dùng nền trong sáng `bg-amber-50/40` và đường phân tách thanh mảnh `divide-amber-900/10` để tạo chiều sâu tự nhiên.
+  3. **Unified Arena Podium**: Tích hợp tiêu đề nhỏ `GIÁ THẦU HIỆN TẠI`, bộ đếm thời gian `THỜI GIAN CÒN LẠI:`, flip-counter vàng hổ phách trên nền sẫm và dòng `DẪN ĐẦU:` (`👑` + tên người chơi hoặc `Chưa có ai`) vào duy nhất 1 bục đấu giá có `data-testid="auction-unified-podium"`.
+  4. **Mobile 360px Safe Vertical Participant Strip**: Danh sách người chơi bắt buộc hiển thị dạng hàng dọc tối giản không border thô cứng, kèm `truncate max-w-[120px]` và `min-w-0`, đánh dấu `(Bạn)` cho người chơi thật và huy hiệu `👑 Dẫn đầu` cho người trả giá cao nhất.
+  5. **Actor Inversion & Foreclosure Defense**: Luôn bảo toàn trạng thái ẩn 3 nút bid khi `isLeading = true` ("Bạn đang dẫn đầu mức giá cao nhất!"), banner phát mãi cưỡng chế (-30%), cảnh báo cấn trừ nợ cho con nợ và touch targets WCAG AA (`min-h-[44px]`).
+

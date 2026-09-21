@@ -44,6 +44,11 @@ export class IntentGuard {
     if (intent.type === 'INTENT_BANKRUPTCY') {
       return true;
     }
+    if (intent.type === 'INTENT_EXECUTE_COMPULSORY_BUYOUT' || intent.type === 'INTENT_DECLINE_COMPULSORY_BUYOUT') {
+      if (room.pendingBuyout && room.pendingBuyout.buyerId === playerId) {
+        return true;
+      }
+    }
     if (room.phase === TurnPhase.AuctionPhase) {
       if (intent.type === 'INTENT_BID' || intent.type === 'INTENT_AUCTION_PASS') {
         return true;

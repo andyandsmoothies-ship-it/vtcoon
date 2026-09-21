@@ -81,7 +81,16 @@ import type { ModalPayloadMap } from '../store/game_store_types.js';
 function syncBusinessModals(delta: DeltaPayload, state: GameState): void {
   // [IMP-50] Trụ Cột 3: UI as Pure Projection — Modal chỉ đóng khi server phát delta.auction === null hoặc phase thay đổi
   if (delta.auction) {
-    state.openModal('auction', delta.auction);
+    const myPid = useLobbyStore.getState().myPlayerId;
+    const prevPayload = state.activeModal === 'auction' ? state.modalPayload as { hasPassed?: boolean } | null : null;
+    const hasPassed = Boolean(
+      prevPayload?.hasPassed ||
+      (myPid && delta.auction.passedPlayerIds?.includes(myPid))
+    );
+    state.openModal('auction', {
+      ...delta.auction,
+      ...(hasPassed ? { hasPassed: true } : {}),
+    });
   } else if (
     (delta.auction === null || (delta.turnPhase !== undefined && delta.turnPhase !== TurnPhase.AuctionPhase)) &&
     state.activeModal === 'auction'

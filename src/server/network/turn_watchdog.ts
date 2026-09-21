@@ -119,6 +119,15 @@ export class TurnWatchdog {
       }
     }
 
+    // [IMP-154/C] Auto-clear expired pending buyouts (every Watchdog tick ~5s)
+    if (this.rooms.hasPendingBuyout?.(roomCode)) {
+      const buyoutTimeout = this.rooms.checkPendingBuyoutTimeout?.(roomCode, Date.now());
+      if (buyoutTimeout?.timeout) {
+        this.broadcaster.broadcastRoomDelta(roomCode);
+        console.log(`[TurnWatchdog] Pending buyout expired and auto-cleared for room ${roomCode}`);
+      }
+    }
+
     const curr = room.players[room.currentPlayerIndex];
     const currId = curr?.id ?? '';
     const currentTick = this.broadcaster.getCurrentTick(roomCode);
@@ -184,6 +193,12 @@ export class TurnWatchdog {
     if (this.rooms.hasPendingTrade?.(roomCode)) {
       this.rooms.cancelPendingTrade?.(roomCode);
       console.warn(`[TurnWatchdog] Emergency recovery: force-cancelled pending trade for room ${roomCode}`);
+    }
+    // [IMP-154/C] Guard: cancel any pending buyout session before force-advancing turn
+    if (this.rooms.hasPendingBuyout?.(roomCode)) {
+      const room = this.rooms.getRoom(roomCode);
+      if (room) room.pendingBuyout = null;
+      console.warn(`[TurnWatchdog] Emergency recovery: force-cancelled pending buyout for room ${roomCode}`);
     }
     switch (phase) {
       case TurnPhase.AuctionPhase: {

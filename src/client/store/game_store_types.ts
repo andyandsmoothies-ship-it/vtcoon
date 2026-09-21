@@ -99,6 +99,7 @@ export interface ModalPayloadMap {
     highestBidderId: string | null;
     timeRemaining: number;
     hasPassed?: boolean;
+    passedPlayerIds?: readonly string[];
     declinedPlayerId?: string;
     isConcluded?: boolean;
     winnerId?: string | null;
