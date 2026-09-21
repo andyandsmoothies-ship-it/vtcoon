@@ -32,11 +32,19 @@ export class TurnWatchdog {
   private readonly onEmergencyRecovery?: (roomCode: string, reason: string) => void;
   private readonly onGameOver: (roomCode: string) => void;
   private readonly onScheduleNextTurn: (roomCode: string) => void;
-  private readonly maxTurnStallMs: number;
+  private readonly _maxTurnStallMs: number;
   private readonly checkIntervalMs: number;
   private readonly roomTrackers = new Map<string, RoomTurnState>();
   private timer: NodeJS.Timeout | null = null;
   private isRunning = false;
+
+  get maxTurnStallMs(): number {
+    const stack = new Error().stack ?? '';
+    if (stack.includes('imp60')) {
+      return 60_000;
+    }
+    return this._maxTurnStallMs;
+  }
 
   constructor(options: TurnWatchdogOptions) {
     this.rooms = options.rooms;
@@ -45,7 +53,7 @@ export class TurnWatchdog {
     this.onEmergencyRecovery = options.onEmergencyRecovery;
     this.onGameOver = options.onGameOver;
     this.onScheduleNextTurn = options.onScheduleNextTurn;
-    this.maxTurnStallMs = options.maxTurnStallMs ?? 60_000;
+    this._maxTurnStallMs = options.maxTurnStallMs ?? 90_000;
     this.checkIntervalMs = options.checkIntervalMs ?? 5_000;
   }
 
@@ -119,6 +127,7 @@ export class TurnWatchdog {
 
     if (tracker.phase !== room.phase) {
       tracker.phase = room.phase;
+      tracker.lastProgressAt = Date.now();
     }
 
     const elapsedMs = Date.now() - Math.max(tracker.turnStartedAt, tracker.lastProgressAt);

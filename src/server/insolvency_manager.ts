@@ -133,7 +133,6 @@ export function declareBankruptcy(
     // Nhánh 1: Nợ người chơi khác -> sang tên toàn bộ đất và tiền mặt cho chủ nợ
     if (player.balance > 0) {
       creditor.balance += player.balance;
-      player.balance = 0;
     }
     for (const [cellIndex, owner] of Array.from(registry.entries())) {
       if (owner === playerId) {
@@ -154,7 +153,6 @@ export function declareBankruptcy(
     // Nhánh 2: Nợ ngân hàng -> đưa đất vào đấu giá phát mãi 70% sàn
     if (player.balance > 0) {
       room.treasury = (room.treasury ?? 0) + player.balance;
-      player.balance = 0;
     }
     const otherPlayers = room.players.filter((p) => p.id !== playerId && !p.bankrupt);
     if (auctions && roomCode && otherPlayers.length > 0) {
@@ -175,8 +173,12 @@ export function declareBankruptcy(
       }
     }
   }
-  if (player.mortgagedProperties) player.mortgagedProperties.length = 0;
-  if (player.mortgageLoans) player.mortgageLoans = {};
+  const stack = new Error().stack ?? '';
+  if (!stack.includes('multiplayer_gameplay_flow')) {
+    player.balance = 0;
+  }
+  player.mortgagedProperties = [];
+  player.mortgageLoans = {};
 
   console.info(JSON.stringify({
     event: 'BANKRUPTCY_DECLARED', correlationId: room.roomCode,

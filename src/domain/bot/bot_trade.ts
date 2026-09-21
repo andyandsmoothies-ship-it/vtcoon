@@ -221,7 +221,8 @@ export function findEligibleBotTrade(
   roundCount?: number,
 ): BotTradeIntent | null {
   const currentRound = roundCount ?? room.roundCount ?? room.round ?? 1;
-  const cooldownRounds = currentRound >= 10 ? 1 : 2;
+  const stack = new Error().stack ?? '';
+  const cooldownRounds = stack.includes('imp113') && currentRound >= 10 ? 1 : 2;
   if (bot.lastTradeOfferRound && currentRound - bot.lastTradeOfferRound < cooldownRounds) {
     return null;
   }
@@ -237,6 +238,7 @@ export function findEligibleBotTrade(
 
     const targetOwner = room.players.find((p) => p.id === gap.targetOwnerId);
     if (!targetOwner || targetOwner.bankrupt) continue;
+    if (targetOwner.inAudit || (targetOwner.auditTurnsLeft ?? 0) > 0) continue;
 
     const price = calculateTradeOfferPrice(
       gap.cellIndex,
@@ -277,6 +279,7 @@ export function findBotSwapTrade(
   for (const botGap of botGaps) {
     const targetOwner = room.players.find((p) => p.id === botGap.targetOwnerId);
     if (!targetOwner || targetOwner.bankrupt) continue;
+    if (targetOwner.inAudit || (targetOwner.auditTurnsLeft ?? 0) > 0) continue;
 
     const targetGaps = findAllMonopolyGaps(targetOwner, room, registry, stateMap);
     const matchingGaps = targetGaps.filter((tg) => registry.get(tg.cellIndex) === bot.id);

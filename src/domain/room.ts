@@ -47,6 +47,9 @@ export interface MarketModifier {
 
 export interface Player {
   readonly id:          string;
+  name?:                string;
+  inAudit?:             boolean;
+  wasInAudit?:          boolean;
   position:             number;
   balance:              number;
   skipNextTurn:         boolean;
@@ -220,7 +223,8 @@ export function checkPassedGo(oldPos: number, newPos: number): boolean {
 export function isRoomGameOver(room: Room): boolean {
   if (!room.started) return false;
   const activePlayers = room.players.filter((p) => !p.bankrupt);
-  if (activePlayers.length <= 1) return true;
+  if (room.players.length > 1 && activePlayers.length <= 1) return true;
+  if (room.players.length === 1 && activePlayers.length === 0) return true;
   const currentRound = Math.max(room.roundCount ?? 1, room.round ?? 1);
   if (currentRound > MAX_ROUNDS) return true;
   return false;

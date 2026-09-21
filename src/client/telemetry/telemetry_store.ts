@@ -9,6 +9,7 @@ import type {
   RecordedIntentContext,
   FlightRecorderDump,
 } from './telemetry_types.js';
+import { hashSeed } from '../../domain/pawn_assignment.js';
 
 export const MAX_AUDIT_ENTRIES = 100;
 export const MAX_SNAPSHOT_ENTRIES = 20;
@@ -149,10 +150,14 @@ export const useTelemetryStore = create<TelemetryState>((set, get) => ({
   },
 
   setSessionMetadata: (meta) => {
-    set((state) => ({
-      roomCode: meta.roomCode ?? state.roomCode,
-      seed: meta.seed ?? state.seed,
-    }));
+    set((state) => {
+      const roomCode = meta.roomCode ?? state.roomCode;
+      const seed = meta.seed !== undefined ? meta.seed : (roomCode ? hashSeed(roomCode) : state.seed);
+      return {
+        roomCode,
+        seed,
+      };
+    });
   },
 
   exportFlightRecorderDump: () => {

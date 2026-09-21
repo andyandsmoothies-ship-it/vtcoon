@@ -17,6 +17,11 @@ export const PHASE_TIMEOUTS_MS: Record<TurnPhase, number> = {
   [TurnPhase.TurnEnd]: 5_000,
 };
 
+export const HUMAN_PHASE_TIMEOUTS_MS: Record<TurnPhase, number> = {
+  ...PHASE_TIMEOUTS_MS,
+  [TurnPhase.WaitingRoll]: 45_000,
+};
+
 export function calculateBotStepDelay(
   room: Room | undefined,
   baseDelayMs: number = 1500
@@ -219,7 +224,11 @@ export class TurnOrchestrator {
     if (!room) return;
 
     const ms =
-      customTimeoutMs ?? this.customDefaultTimeoutMs ?? PHASE_TIMEOUTS_MS[room.phase] ?? this.defaultTimeoutMs;
+      customTimeoutMs ??
+      this.customDefaultTimeoutMs ??
+      HUMAN_PHASE_TIMEOUTS_MS[room.phase] ??
+      PHASE_TIMEOUTS_MS[room.phase] ??
+      this.defaultTimeoutMs;
     const deadline = Date.now() + ms;
     this.deadlines.set(roomCode, deadline);
 
@@ -257,6 +266,12 @@ export class TurnOrchestrator {
   private executeSafeAfkAction(roomCode: string, phase: TurnPhase, playerId: string): void {
     switch (phase) {
       case TurnPhase.WaitingRoll: {
+        const room = this.rooms.getRoom(roomCode);
+        const player = room?.players.find((p) => p.id === playerId);
+        if (player && player.wasInAudit === true) {
+          player.wasInAudit = false;
+          return;
+        }
         this.rooms.handleRollDice(roomCode, playerId);
         const rMid = this.rooms.getRoom(roomCode);
         if (rMid?.phase === TurnPhase.PropertyManagement) {

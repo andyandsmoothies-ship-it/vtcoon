@@ -9,14 +9,24 @@ import {
   GRID_TILE_COORDS,
   DISTRICT_GROUPS,
   resolveSpecialIcon,
+  classifyDistrict,
   type DistrictGroupDef,
+  type DistrictClassification,
 } from './masterplan_constants';
 import {
   MasterplanInspectorCard,
   MasterplanDistrictCard,
+  MasterplanEmptyState,
 } from './masterplan_components';
 
-export { GRID_TILE_COORDS, DISTRICT_GROUPS, resolveSpecialIcon, type DistrictGroupDef };
+export {
+  GRID_TILE_COORDS,
+  DISTRICT_GROUPS,
+  resolveSpecialIcon,
+  classifyDistrict,
+  type DistrictGroupDef,
+  type DistrictClassification,
+};
 
 export interface MasterplanModalProps {
   readonly initialTab?: 'blueprint' | 'districts';
@@ -32,6 +42,8 @@ export interface MasterplanModalProps {
   readonly myPlayerId?: string;
   readonly districtFilter?: 'all' | 'near-monopoly' | 'monopoly' | 'vacant';
   readonly initialFilter?: 'all' | 'near-monopoly' | 'monopoly' | 'vacant';
+  readonly districts?: readonly DistrictGroupDef[];
+  readonly onFilterChange?: (filter: 'all' | 'near-monopoly' | 'monopoly' | 'vacant') => void;
   readonly onQuickTrade?: (payload: {
     readonly targetPlayerId: string;
     readonly offeredProperties: readonly number[];
@@ -59,6 +71,8 @@ export function MasterplanModal({
   myPlayerId,
   districtFilter,
   initialFilter,
+  districts: propDistricts,
+  onFilterChange: propOnFilterChange,
   onQuickTrade: propOnQuickTrade,
   onSelectCell: propOnSelectCell,
 }: MasterplanModalProps): React.ReactElement {
@@ -76,7 +90,45 @@ export function MasterplanModal({
   const [filterState, setFilterState] = useState<'all' | 'near-monopoly' | 'monopoly' | 'vacant'>(
     initialFilter ?? districtFilter ?? 'all'
   );
-  const activeFilter = districtFilter ?? filterState;
+
+  React.useEffect(() => {
+    if (districtFilter) {
+      setFilterState(districtFilter);
+    }
+  }, [districtFilter]);
+
+  const activeFilter = filterState;
+
+  const contentContainerRef = React.useRef<HTMLDivElement>(null);
+
+  const handleFilterChange = (filterId: typeof activeFilter) => {
+    setFilterState(filterId);
+    propOnFilterChange?.(filterId);
+    if (contentContainerRef.current) {
+      contentContainerRef.current.scrollTop = 0;
+      if (typeof contentContainerRef.current.scrollTo === 'function') {
+        try {
+          contentContainerRef.current.scrollTo({ top: 0, behavior: 'instant' });
+        } catch {
+          // Fallback an toàn nếu JSDOM/trình duyệt không hỗ trợ options object
+        }
+      }
+    }
+  };
+
+  const handleTabChange = (tab: 'blueprint' | 'districts') => {
+    setActiveTab(tab);
+    if (contentContainerRef.current) {
+      contentContainerRef.current.scrollTop = 0;
+      if (typeof contentContainerRef.current.scrollTo === 'function') {
+        try {
+          contentContainerRef.current.scrollTo({ top: 0, behavior: 'instant' });
+        } catch {
+          // Fallback an toàn nếu JSDOM/trình duyệt không hỗ trợ options object
+        }
+      }
+    }
+  };
 
   const currentInspected = initialSelectedCellIndex !== undefined ? initialSelectedCellIndex : inspectedIndex;
 
@@ -138,40 +190,38 @@ export function MasterplanModal({
       }
     }
     return { ownedCount, vacantCount: totalPurchasable - ownedCount, totalPurchasable };
-  }, [players, propStates]);
+  }, [players, propStates, levels]);
+
+  const districts = propDistricts ?? DISTRICT_GROUPS;
+
+  const filterCounts = useMemo(() => {
+    let nearMonopolyCount = 0;
+    let monopolyCount = 0;
+    let vacantCount = 0;
+    for (const district of districts) {
+      const { isMonopoly, isNearMonopoly, hasVacant } = classifyDistrict(district, getCellOwnership);
+      if (isMonopoly) monopolyCount++;
+      if (isNearMonopoly) nearMonopolyCount++;
+      if (hasVacant) vacantCount++;
+    }
+    return {
+      all: districts.length,
+      'near-monopoly': nearMonopolyCount,
+      monopoly: monopolyCount,
+      vacant: vacantCount,
+    };
+  }, [districts, players, propStates, levels]);
 
   const filteredDistricts = useMemo(() => {
-    return DISTRICT_GROUPS.filter((district) => {
+    return districts.filter((district) => {
       if (activeFilter === 'all') return true;
-
-      const totalCells = district.cellIndices.length;
-      const playerOwnershipCounts: Record<string, number> = {};
-      let vacantCount = 0;
-
-      for (const cellIndex of district.cellIndices) {
-        const { owner } = getCellOwnership(cellIndex);
-        if (owner?.id) {
-          playerOwnershipCounts[owner.id] = (playerOwnershipCounts[owner.id] ?? 0) + 1;
-        } else {
-          vacantCount++;
-        }
-      }
-
-      let maxOwned = 0;
-      for (const count of Object.values(playerOwnershipCounts)) {
-        if (count > maxOwned) maxOwned = count;
-      }
-
-      const isMonopoly = maxOwned === totalCells;
-      const isNearMonopoly = totalCells > 1 && maxOwned === totalCells - 1 && !isMonopoly;
-      const hasVacant = vacantCount > 0;
-
+      const { isMonopoly, isNearMonopoly, hasVacant } = classifyDistrict(district, getCellOwnership);
       if (activeFilter === 'near-monopoly') return isNearMonopoly;
       if (activeFilter === 'monopoly') return isMonopoly;
       if (activeFilter === 'vacant') return hasVacant;
       return true;
     });
-  }, [activeFilter, players, propStates]);
+  }, [districts, activeFilter, players, propStates, levels]);
 
   const inspectedDeedInfo = currentInspected !== null ? getDeedDisplayInfo(currentInspected) : null;
   const inspectedOwnership = currentInspected !== null ? getCellOwnership(currentInspected) : null;
@@ -181,10 +231,10 @@ export function MasterplanModal({
       role="dialog"
       aria-label="Bản đồ quy hoạch đô thị"
       data-testid="masterplan-modal"
-      className="w-full max-w-4xl bg-[#FFFDF8] border-2 border-slate-900 rounded-2xl shadow-[0_8px_0_0_#0f172a] flex flex-col pointer-events-auto text-slate-900 select-none overflow-hidden max-h-[92vh]"
+      className="relative w-full max-w-4xl bg-[#FFFDF9] border-2 border-slate-900 rounded-3xl shadow-[0_8px_0_0_#0f172a] shadow-[0_8px_0_0_#0f172a,0_16px_36px_rgba(15,23,42,0.18)] max-h-[92vh] flex flex-col overflow-hidden text-slate-800 animate-in fade-in zoom-in-95 duration-200 pointer-events-auto select-none"
     >
       {/* Header */}
-      <header className="px-4 py-3 bg-[#F7F2E7] border-b-2 border-slate-900 flex items-center justify-between shrink-0">
+      <header className="px-4 py-3 bg-[#FBF8F1] border-b border-amber-900/10 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2.5">
           <span className="text-2xl" aria-hidden="true">🗺️</span>
           <div>
@@ -199,15 +249,15 @@ export function MasterplanModal({
 
         {/* Tab switcher & Close button */}
         <div className="flex items-center gap-2">
-          <nav className="flex items-center gap-1 bg-slate-200/80 p-1 rounded-xl border border-slate-300">
+          <nav className="flex items-center gap-1.5 p-1 bg-amber-950/5 border border-amber-900/10 rounded-2xl">
             <button
               type="button"
               data-testid="tab-blueprint"
-              onClick={() => setActiveTab('blueprint')}
-              className={`min-h-[44px] min-w-[44px] px-3 py-1.5 rounded-lg text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer ${
+              onClick={() => handleTabChange('blueprint')}
+              className={`min-h-[44px] min-w-[44px] px-3.5 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeTab === 'blueprint'
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'text-slate-700 hover:bg-slate-300/60'
+                  ? 'bg-slate-900 text-amber-300 shadow-xs border border-slate-700/50 font-black'
+                  : 'text-slate-600 hover:text-slate-900 font-bold'
               }`}
             >
               <span>🗺️</span>
@@ -216,11 +266,11 @@ export function MasterplanModal({
             <button
               type="button"
               data-testid="tab-districts"
-              onClick={() => setActiveTab('districts')}
-              className={`min-h-[44px] min-w-[44px] px-3 py-1.5 rounded-lg text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer ${
+              onClick={() => handleTabChange('districts')}
+              className={`min-h-[44px] min-w-[44px] px-3.5 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeTab === 'districts'
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'text-slate-700 hover:bg-slate-300/60'
+                  ? 'bg-slate-900 text-amber-300 shadow-xs border border-slate-700/50 font-black'
+                  : 'text-slate-600 hover:text-slate-900 font-bold'
               }`}
             >
               <span>🏛️</span>
@@ -234,7 +284,7 @@ export function MasterplanModal({
               data-testid="masterplan-close-btn"
               aria-label="Đóng"
               onClick={onClose}
-              className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 font-black border border-slate-300 transition-colors cursor-pointer text-base"
+              className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-2xl bg-white/90 hover:bg-amber-50 text-slate-700 hover:text-slate-900 font-black border border-amber-900/15 shadow-2xs transition-colors cursor-pointer text-base"
             >
               ✕
             </button>
@@ -243,7 +293,7 @@ export function MasterplanModal({
       </header>
 
       {/* Body Content */}
-      <div className="flex-1 overflow-y-auto p-3 sm:p-4">
+      <div ref={contentContainerRef} className="flex-1 overflow-y-auto p-3 sm:p-4">
         {/* ================================================================= */}
         {/* TAB 1: SA BÀN 40 Ô (BLUEPRINT GRID) */}
         {/* ================================================================= */}
@@ -383,7 +433,7 @@ export function MasterplanModal({
             {/* Filter Bar */}
             <div
               data-testid="district-filter-bar"
-              className="flex items-center gap-1.5 p-1 bg-slate-200/80 rounded-xl mb-3 flex-wrap"
+              className="flex items-center gap-1.5 p-1.5 bg-amber-950/5 border border-amber-900/10 rounded-2xl mb-3 overflow-x-auto no-scrollbar"
             >
               {FILTER_OPTIONS.map((opt) => {
                 const isActive = activeFilter === opt.id;
@@ -392,14 +442,24 @@ export function MasterplanModal({
                     key={opt.id}
                     type="button"
                     data-testid={`district-filter-${opt.id}`}
-                    onClick={() => setFilterState(opt.id)}
-                    className={`min-h-[36px] px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    onClick={() => handleFilterChange(opt.id)}
+                    className={`min-h-[36px] px-3.5 py-1.5 rounded-xl text-xs transition-all cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
                       isActive
-                        ? 'bg-slate-900 text-white shadow-xs'
-                        : 'bg-white/80 hover:bg-white text-slate-700 border border-slate-300'
+                        ? 'bg-amber-500 text-amber-950 font-black shadow-xs'
+                        : 'bg-white/90 hover:bg-amber-50/60 text-slate-700 border border-amber-900/15 font-bold'
                     }`}
                   >
-                    {opt.label}
+                    <span>{opt.label}</span>
+                    <span
+                      data-testid={`district-filter-badge-${opt.id}`}
+                      className={`px-1.5 py-0.5 rounded-full text-[10px] font-black leading-none ${
+                        isActive
+                          ? 'bg-amber-950/15 text-amber-950'
+                          : 'bg-slate-200/80 text-slate-700'
+                      }`}
+                    >
+                      {filterCounts[opt.id]}
+                    </span>
                   </button>
                 );
               })}
@@ -409,18 +469,26 @@ export function MasterplanModal({
               data-testid="masterplan-districts-grid"
               className="grid grid-cols-1 md:grid-cols-2 gap-3"
             >
-              {filteredDistricts.map((district) => (
-                <MasterplanDistrictCard
-                  key={district.id}
-                  district={district}
-                  players={players}
-                  getCellOwnership={getCellOwnership}
-                  myPlayerId={myPlayerId}
-                  onQuickTrade={handleQuickTrade}
-                  onSelectCell={handleSelectCell}
-                  onClose={onClose}
+              {filteredDistricts.length > 0 ? (
+                filteredDistricts.map((district) => (
+                  <MasterplanDistrictCard
+                    key={district.id}
+                    district={district}
+                    players={players}
+                    getCellOwnership={getCellOwnership}
+                    myPlayerId={myPlayerId}
+                    onQuickTrade={handleQuickTrade}
+                    onSelectCell={handleSelectCell}
+                    onClose={onClose}
+                  />
+                ))
+              ) : (
+                <MasterplanEmptyState
+                  filter={activeFilter}
+                  totalDistricts={districts.length}
+                  onResetFilter={() => handleFilterChange('all')}
                 />
-              ))}
+              )}
             </div>
           </div>
         )}

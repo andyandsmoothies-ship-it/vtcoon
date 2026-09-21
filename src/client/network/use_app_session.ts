@@ -12,6 +12,8 @@ import type { ReasonCode } from '../../server/network/network_types';
 import type { DeltaPayload } from '../../server/session_manager';
 import { formatServerErrorMessage } from '../ui/actionable_notification';
 import { preloadBaseTileImages } from '../assets/tile_assets';
+import { useTelemetryStore } from '../telemetry/telemetry_store';
+import { hashSeed } from '../../domain/pawn_assignment';
 
 export const SERVER_ERROR_TOAST_TIMEOUT_MS = 6000;
 
@@ -147,6 +149,12 @@ export function useAppSession(
   );
 
   const handleSessionInit = useCallback((_token: string, activeRoomCode: string) => {
+    if (activeRoomCode) {
+      useTelemetryStore.getState().setSessionMetadata({
+        roomCode: activeRoomCode,
+        seed: hashSeed(activeRoomCode),
+      });
+    }
     if (activeRoomCode && activeRoomCode !== useLobbyStore.getState().roomCode) {
       useLobbyStore.getState().setRoomCode(activeRoomCode);
       if (typeof window !== 'undefined' && window.history) {
@@ -182,6 +190,15 @@ export function useAppSession(
     if (!roomCode) {
       const initCfg = getInitialLobbyConfig();
       initLobby(initCfg.roomCode, initCfg.playerId, initCfg.isHost, initCfg.playerName);
+      useTelemetryStore.getState().setSessionMetadata({
+        roomCode: initCfg.roomCode,
+        seed: hashSeed(initCfg.roomCode),
+      });
+    } else {
+      useTelemetryStore.getState().setSessionMetadata({
+        roomCode,
+        seed: hashSeed(roomCode),
+      });
     }
   }, [roomCode, initLobby]);
 

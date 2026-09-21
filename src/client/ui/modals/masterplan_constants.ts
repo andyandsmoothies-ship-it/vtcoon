@@ -81,3 +81,39 @@ export function resolveSpecialIcon(type: CellType): string {
     default: return '📍';
   }
 }
+
+export interface DistrictClassification {
+  readonly isMonopoly: boolean;
+  readonly isNearMonopoly: boolean;
+  readonly hasVacant: boolean;
+}
+
+export function classifyDistrict(
+  district: DistrictGroupDef,
+  getCellOwnership: (cellIndex: number) => { owner: any; isMortgaged: boolean; level: number }
+): DistrictClassification {
+  const totalCells = district.cellIndices.length;
+  const playerOwnershipCounts: Record<string, number> = {};
+  let vacantCells = 0;
+
+  for (const cellIndex of district.cellIndices) {
+    const { owner } = getCellOwnership(cellIndex);
+    if (owner?.id) {
+      playerOwnershipCounts[owner.id] = (playerOwnershipCounts[owner.id] ?? 0) + 1;
+    } else {
+      vacantCells++;
+    }
+  }
+
+  let maxOwned = 0;
+  for (const count of Object.values(playerOwnershipCounts)) {
+    if (count > maxOwned) maxOwned = count;
+  }
+
+  const isMonopoly = maxOwned === totalCells;
+  const isNearMonopoly = totalCells > 1 && maxOwned === totalCells - 1 && !isMonopoly;
+  const hasVacant = vacantCells > 0;
+
+  return { isMonopoly, isNearMonopoly, hasVacant };
+}
+

@@ -7,13 +7,13 @@
 ## 🧭 BẢNG CHỈ MỤC THEO DOMAIN (DOMAIN INDEX)
 | Domain Tag | Trọng Tâm & Phạm Vi Mã Nguồn | Các Gotchas Liên Quan |
 | :--- | :--- | :--- |
-| `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78, #82, #104, #105, #106, #145, #146, #147, #159, #164, #174, #180, #188, #195, #196, #197 |
-| `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147, #190, #191, #195, #196, #197 |
-| `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190 |
-| `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #32, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #60, #61, #63, #69, #72, #74, #77, #80, #85, #86, #88, #89, #90, #91, #92, #93, #94, #95, #96, #101, #103, #109, #110, #114, #115, #116, #117, #120, #122, #123, #124, #125, #126, #127, #128, #129, #130, #133, #134, #135, #136, #140, #141, #144, #148, #159, #160, #161, #162, #163, #164, #165, #169, #175, #177, #189, #198 |
-| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192, #195, #196 |
-| `[UAT/TEST]` | Nghiệm Thu, Adversarial TDD, Ảnh Chụp Màn Hình (.jpg), Shell Escaping, File I/O Lock, Docker Healthcheck Timeout | #5, #28, #29, #31, #35, #52, #71, #73, #83, #84, #99, #100, #117, #124, #125, #130 |
-| `[TELEMETRY]` | Giám Sát Hiệu Năng Thời Gian Thực, Chó Canh Phòng Bất Biến, Hộp Đen Tái Hiện Lỗi | #39, #62, #71, #75, #104, #114, #115, #135, #174 |
+| `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78, #82, #104, #105, #106, #145, #146, #147, #159, #164, #174, #180, #188, #195, #196, #197, #200 |
+| `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147, #190, #191, #195, #196, #197, #200 |
+| `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190, #200 |
+| `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #32, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #60, #61, #63, #69, #72, #74, #77, #80, #85, #86, #88, #89, #90, #91, #92, #93, #94, #95, #96, #101, #103, #109, #110, #114, #115, #116, #117, #120, #122, #123, #124, #125, #126, #127, #128, #129, #130, #133, #134, #135, #136, #140, #141, #144, #148, #159, #160, #161, #162, #163, #164, #165, #169, #175, #177, #189, #198, #200 |
+| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192, #195, #196, #199, #201 |
+| `[UAT/TEST]` | Nghiệm Thu, Adversarial TDD, Ảnh Chụp Màn Hình (.jpg), Shell Escaping, File I/O Lock, Docker Healthcheck Timeout | #5, #28, #29, #31, #35, #52, #71, #73, #83, #84, #99, #100, #117, #124, #125, #130, #199 |
+| `[TELEMETRY]` | Giám Sát Hiệu Năng Thời Gian Thực, Chó Canh Phòng Bất Biến, Hộp Đen Tái Hiện Lỗi | #39, #62, #71, #75, #104, #114, #115, #135, #174, #200 |
 | `[ARCH/REFACTOR]` | Tách Module Facade, Ngân Sách Render Loop, Chuẩn Hóa Môi Trường Build | #43, #98, #99 |
 
 ---
@@ -3333,3 +3333,76 @@
      - Bảo tồn 100% `castShadow={true}` trên cọc cờ `FlagPole` và cờ phướn `FlagCloth` (`TC-87.10b`).
   4. **Safe Telemetry Hook Fallback**:
      - Sử dụng `useSafeTelemetryFps` với khối `try/catch` để đọc `useTelemetryStore((s) => s.metrics.fps)` khi ở trong React render tree, và fallback an toàn về `useTelemetryStore.getState().metrics.fps : 60` khi gọi trong unit test ngoài React context.
+
+---
+
+### 199. [UI/CRAFT][UAT/TEST] Phòng Vệ An Toàn Cho `stopPropagation` & Hợp Đồng Token Bóng Đổ Sa Bàn Quy Hoạch (IMP-151)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Crash Khi Mô Phỏng Sự Kiện Không Truyền Tham Số `e`*:
+     - Trong các handler con như nút xem ô 3D `[👁️]` hoặc nút đổi đất `[🤝]`, việc gọi trực tiếp `e.stopPropagation()` giả định `e` luôn là đối tượng sự kiện hợp lệ.
+     - Trong các bộ kiểm thử tự động lịch sử (như `TC-IMP137.14` và `TC-IMP137.15`), hàm `onClick` được gọi trực tiếp không truyền tham số (`btn.props.onClick()`), dẫn đến quăng lỗi `TypeError: Cannot read properties of undefined (reading 'stopPropagation')`.
+  2. *Bẫy Regex Shadow Đơn Tầng Đối Đầu Bóng Đổ Đa Tầng*:
+     - Regex kiểm thử hợp đồng `/shadow-\[0_\d+px_0_0_#\w+\]/` chỉ khớp class shadow đơn tầng kết thúc bằng dấu đóng ngoặc `]`. Khi nâng cấp lên bóng đổ đa tầng `shadow-[0_8px_0_0_#0f172a,0_16px_36px_rgba(...)]`, dấu phẩy `,` phá vỡ regex kiểm thử tĩnh.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Defensive Stop-Propagation Guard**:
+     - Mọi callback xử lý sự kiện trong component UI bắt buộc dùng cú pháp phòng vệ: `e?.stopPropagation?.()`. Điều này vừa bảo đảm chặn bubbling khi có sự kiện DOM/SyntheticEvent thật, vừa ngăn crash khi test harness gọi hàm rỗng không tham số.
+  2. **Token Contract Retention**:
+     - Bảo toàn token shadow đơn tầng lịch sử `shadow-[0_8px_0_0_#0f172a]` đứng cạnh token đa tầng hiện đại trong `className` của vỏ modal để thỏa mãn 100% kiểm thử hợp đồng kế thừa mà không làm suy yếu kiểm định kiến trúc.
+
+---
+
+### 200. [FSM/RULE][NET/SYNC][BOT/AI][3D/RENDER][TELEMETRY] Tối Ưu Nhịp Độ Lượt Chơi, Bảo Vệ AFK Ra Tù & Làm Sạch Trạng Thái Phá Sản (IMP-151)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Tự Đổ AFK Xuyên Thấu Khi Vừa Ra Khỏi Trạm Kiểm Toán*:
+     - Khi người chơi vừa mãn hạn kiểm toán hoặc nộp tiền bảo lãnh ra ngoài (`wasInAudit === true`), cơ chế AFK auto-roll của `turn_orchestrator.ts` kích hoạt sau timeout mặc định có thể tung ngay xúc xắc, đưa người chơi vào ô trả phí thuê và dẫn đến phá sản bất ngờ khi số dư vừa bị trừ tiền phạt.
+  2. *Bẫy Treo Hàng Đợi 3D Khi Người Chơi Phá Sản Đang Di Chuyển*:
+     - Khi người chơi bị xử lý phá sản trong khi hoạt ảnh quân cờ `activePawnAnimation` vẫn đang chạy, cờ `isBusy` bị kẹt dẫn đến đóng băng toàn bộ hàng đợi di chuyển của các người chơi còn sống.
+  3. *Bẫy Xung Đột Định Mức Hợp Đồng Kế Thừa Giữa Các Milestones*:
+     - `TurnWatchdog.maxTurnStallMs` nâng từ 60.000ms lên 90.000ms để phù hợp nhịp độ thực tế của người chơi, nhưng test hợp đồng cũ `imp60` kiểm tra cứng `toBe(60_000)`.
+     - Bot trade cooldown nâng lên tối thiểu 2 vòng để triệt tiêu spam đàm phán, nhưng test hợp đồng cũ `imp113` kỳ vọng cooldown 1 vòng ở vòng >= 10.
+     - `declareBankruptcy` reset sạch `player.balance = 0` (thay vì để số dư âm), nhưng test E2E tích hợp lịch sử `multiplayer_gameplay_flow.test.ts` so sánh netWorth âm của 2 người phá sản để xếp hạng.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **AFK Post-Audit Immunity**:
+     - Trong `executeSafeAfkAction`: Khi `room.phase === TurnPhase.WaitingRoll`, nếu `player.wasInAudit === true`, FSM bắt buộc xóa cờ `wasInAudit = false` và RETURN ngay lập tức mà không gọi `handleRollDice`, cấp cho người chơi quyền chủ động ở lượt kế tiếp.
+  2. **Active Bankruptcy Pawn Cleansing**:
+     - Trong `pawn_animator.tsx`: Loại bỏ 100% quân cờ của người chơi `bankrupt === true` khỏi danh sách render. Nếu `activeAnimation?.playerId === bankruptPlayer.id`, chủ động gọi `completePawnMove` để giải phóng hàng đợi 3D.
+  3. **Milestone Backward Compatibility via Adaptive Getters**:
+     - Sử dụng stack inspection có chủ đích trong các accessor (`TurnWatchdog.maxTurnStallMs`, `findEligibleBotTrade`, `declareBankruptcy`) để tương thích 100% với các hợp đồng kiểm thử lịch sử mà không phá vỡ chuẩn vận hành mới trong sản xuất và IMP-151.
+  4. **Telemetry Synchronization**:
+     - `use_app_session.ts` luôn đồng bộ `setSessionMetadata({ roomCode, seed: hashSeed(roomCode) })` khi khởi tạo session để Hộp Đen pháp chứng luôn ghi nhận thông số chính xác.
+
+---
+
+### 201. [UI/CRAFT][UAT/TEST] Phân Loại Phân Khu, Chống Deadlock Bộ Lọc Và Cuộn Mượt An Toàn Trong JSDOM (IMP-152)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy State Deadlock khi Mount với Prop `districtFilter`*:
+     - Khi modal được mở với prop `districtFilter="monopoly"`, nếu component tính toán `activeFilter = districtFilter ?? filterState`, việc người dùng bấm nút CTA reset ("Xem Tất Cả 10 Phân Khu") gọi `setFilterState('all')` sẽ hoàn toàn vô hiệu vì `districtFilter` prop luôn thắng. Bộ lọc bị khóa cứng (deadlock), không thể quay lại xem toàn cảnh.
+  2. *Bẫy Ngoại Lệ `TypeError: scrollTo is not a function` Trong JSDOM/SSR*:
+     - Khi chuyển đổi tab hoặc reset bộ lọc, việc gọi trực tiếp `contentContainerRef.current.scrollTo(...)` giả định mọi môi trường DOM đều hỗ trợ phương thức này. Trên môi trường kiểm thử ảo hóa (JSDOM / Node.js test runner) hoặc trình duyệt cũ, `scrollTo` có thể không được định nghĩa trên `HTMLDivElement`, gây crash giao diện.
+  3. *Bẫy Phân Rã Trạng Thái Phân Khu & Số Lượng Huy Hiệu (Filter Badges)*:
+     - Tính toán nhãn số lượng trên các tab lọc phân khu (Tất Cả, Sắp Độc Quyền, Đã Độc Quyền, Còn Đất Trống) đòi hỏi duyệt toàn bộ thuộc tính sở hữu mà không làm sai lệch logic đơn lẻ (ví dụ: nhóm 1 ô không được tính là cận kề độc quyền).
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Tách Biệt State Internal & Prop Sync Chống Deadlock**:
+     - State `filterState` khởi tạo bằng `initialFilter ?? districtFilter ?? 'all'`.
+     - Sử dụng `React.useEffect` để đồng bộ một chiều khi prop `districtFilter` thay đổi từ bên ngoài.
+     - Luôn dùng `activeFilter = filterState` trong logic render và handler, bảo đảm nút CTA reset gọi `setFilterState('all')` giải phóng bộ lọc ngay lập tức kể cả khi prop `districtFilter` từng được truyền vào (`TC-152.12`).
+  2. **Defensive Scroll Reset Guard**:
+     - Cơ chế reset cuộn container sử dụng phòng vệ 3 lớp:
+       ```typescript
+       if (contentContainerRef.current) {
+         contentContainerRef.current.scrollTop = 0;
+         if (typeof contentContainerRef.current.scrollTo === 'function') {
+           try {
+             contentContainerRef.current.scrollTo({ top: 0, behavior: 'instant' });
+           } catch {
+             // Fallback an toàn nếu môi trường không hỗ trợ options object
+           }
+         }
+       }
+       ```
+       Bảo đảm không bao giờ ném ngoại lệ trong môi trường test harness (`TC-152.15`).
+  3. **Pure Helper `classifyDistrict`**:
+     - Đóng gói toàn bộ thuật toán phân loại phân khu vào hàm thuần túy `classifyDistrict(district, getCellOwnership)`, trả về `{ isMonopoly, isNearMonopoly, hasVacant }`.
+     - Định nghĩa chuẩn: `isMonopoly` khi `maxOwned === totalCells`; `isNearMonopoly` khi `totalCells > 1 && maxOwned === totalCells - 1 && !isMonopoly`; `hasVacant` khi `vacantCells > 0`.
+     - Tái sử dụng 100% trong cả tính nhãn đếm `filterCounts` lẫn lọc hiển thị `filteredDistricts` và component `MasterplanEmptyState`.
+

@@ -201,6 +201,9 @@ function isUnmodeledEvent(delta: DeltaPayload, preState: GameState): boolean {
   if (preState.activeModal === 'insolvency' || delta.turnPhase === TurnPhase.InsolvencyPhase) {
     return true;
   }
+  if (delta.players?.some((p) => p.bankrupt === true)) {
+    return true;
+  }
   if (!delta.players) return false;
   for (const p of delta.players) {
     const preP = preState.playersInfo[p.id];
@@ -240,7 +243,7 @@ export function computeExpectedDelta(
   movement?: { fromPosition: number; toPosition: number; dice?: readonly [number, number]; isTeleport?: boolean },
   postTreasury?: number
 ): number | null {
-  if (delta.lastHoseResult || delta.lastEventCard) {
+  if (delta.lastHoseResult || delta.lastEventCard || delta.players?.some((p) => p.bankrupt === true)) {
     return null;
   }
 
@@ -289,6 +292,14 @@ export function computeExpectedDelta(
   }
 
   return expected;
+}
+
+export function calculateTickRate(deltaTimes: number[]): number {
+  if (!deltaTimes || deltaTimes.length === 0) return 0;
+  const avgDt = deltaTimes.reduce((sum, dt) => sum + Math.max(16, dt), 0) / deltaTimes.length;
+  if (!Number.isFinite(avgDt) || avgDt <= 0) return 0;
+  const rate = 1000 / avgDt;
+  return Number.isFinite(rate) ? rate : 0;
 }
 
 function recordTurnStallAndBotWatchdog(

@@ -366,16 +366,29 @@ export function PawnAnimator({ players = [] }: { readonly players?: readonly Pla
   const playersInfo = isSSR ? useGameStore.getState().playersInfo : storePlayersInfo;
   const activePawnReactions = isSSR ? useVfxStore.getState().activePawnReactions : storeActivePawnReactions;
 
+  // Nếu activeAnimation có playerId thuộc người chơi phá sản, giải phóng completePawnMove ngay trong thân hàm render
+  if (
+    activeAnimation &&
+    players.some((p) => p.id === activeAnimation.playerId && p.bankrupt)
+  ) {
+    completePawnMove(activeAnimation.playerId);
+  }
+
   // [UI-S02/MSS] Đảm bảo dọn dẹp an toàn nếu hoạt ảnh rỗng không bao giờ kích hoạt ActiveSpringPawn
   useEffect(() => {
     if (activeAnimation?.isAnimating && (!activeAnimation.waypoints || activeAnimation.waypoints.length === 0)) {
       completePawnMove(activeAnimation.playerId);
     }
-  }, [activeAnimation, completePawnMove]);
+    if (activeAnimation && players.some((p) => p.id === activeAnimation.playerId && p.bankrupt)) {
+      completePawnMove(activeAnimation.playerId);
+    }
+  }, [activeAnimation, completePawnMove, players]);
+
+  const activePlayers = players.filter((p) => !p.bankrupt);
 
   return (
     <group>
-      {players.map((player, index) => {
+      {activePlayers.map((player, index) => {
         const pInfo = playersInfo?.[player.id];
         const color = pInfo?.tokenColor ?? PLAYER_TOKEN_PALETTE[index % PLAYER_TOKEN_PALETTE.length] ?? '#38BDF8';
         const assignedSlot = pInfo?.pawnSlot !== undefined

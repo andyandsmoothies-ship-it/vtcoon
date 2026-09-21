@@ -19,7 +19,7 @@ NGÀY THỰC HIỆN: 11/09/2026 | SEED: 9920264 | CHU KỲ KIỂM ĐỊNH: ĐỘ
 | 1 | Bé Bo (Cạnh tranh / Aggressive) | Aggressive | 5.068 Tr. VNĐ | 40.868 Tr. VNĐ | 5 ô | 🏆 Vô địch |
 | 2 | Bác Ba (Thực dụng / Aggressive) | Aggressive | 3.442 Tr. VNĐ | 25.342 Tr. VNĐ | 10 ô | ✓ Hoàn thành |
 | 3 | Chú Sáu (Cân bằng / Balanced) | Balanced | 2.609 Tr. VNĐ | 23.409 Tr. VNĐ | 11 ô | ✓ Hoàn thành |
-| 4 | Cô Tư (Thận trọng / Passive) | Passive | -2.562 Tr. VNĐ | -2.562 Tr. VNĐ | 0 ô | ❌ Phá sản |
+| 4 | Cô Tư (Thận trọng / Passive) | Passive | 0 Tr. VNĐ | 0 Tr. VNĐ | 0 ô | ❌ Phá sản |
 
 ---
 
@@ -1077,7 +1077,7 @@ NGÀY THỰC HIỆN: 11/09/2026 | SEED: 9920264 | CHU KỲ KIỂM ĐỊNH: ĐỘ
 - **Giải cứu tài chính:** Thế chấp BĐS ô 34
 - **Giải cứu tài chính:** Thế chấp BĐS ô 25
 - **Giải cứu tài chính:** Tuyên bố Phá sản (Insolvent Bankruptcy)
-- **Số dư sau lượt:** -2.562 Tr. VNĐ | **Tài sản ròng:** -2.562 Tr. VNĐ
+- **Số dư sau lượt:** 0 Tr. VNĐ | **Tài sản ròng:** 0 Tr. VNĐ
 - **Danh mục BĐS sở hữu (0):** Chưa có
 
 #### Lượt #94 | Vòng #21 — Bé Bo (Cạnh tranh / Aggressive) (Aggressive)
