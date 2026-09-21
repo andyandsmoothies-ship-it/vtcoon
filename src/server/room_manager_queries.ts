@@ -33,6 +33,7 @@ export function buildRoomDelta(
   tick: number,
   auctions: Map<string, AuctionSession>,
   timeRemaining?: number,
+  lastAuctionResults?: Map<string, any>,
 ): DeltaPayload {
-  return buildDeltaFromRoom(room, reg, sm, tick, auctions, timeRemaining);
+  return buildDeltaFromRoom(room, reg, sm, tick, auctions, timeRemaining, lastAuctionResults);
 }

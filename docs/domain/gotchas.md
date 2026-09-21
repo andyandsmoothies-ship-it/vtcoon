@@ -3483,3 +3483,52 @@
      - Trong `getBotNeedBadge`, kiểm tra thanh khoản nguy cấp `balance < 1500` (`🧊 Kẹt tiền`) trước khi quét Monopoly Gap, phản ánh trung thực năng lực tài chính thực tế của Bot.
   3. **Modular Facade Separation**:
      - Bóc tách toàn bộ logic thẩm định sang `trade_intelligence.ts` và thước đo xúc giác sang `trade_sentiment_meter.tsx`, giữ `trade_modal.tsx` chỉ đóng vai trò View Orchestrator với số dòng ổn định ở 436 LOC (thỏa mãn <= 450 LOC).
+
+---
+
+### 207. [UI/CRAFT][POPUP] Đại Tu Pop-Up & Banner Thông Báo Tinh Gọn Thân Thiện (Compact & Friendly Notification Popups Overhaul - IMP-155)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Tiền Tố Hành Chính Dài Dòng & Tràn Lề (Bureaucratic Prefix & Layout Overflow)*:
+     - Thẻ sự kiện thị trường `MarketCard` thường chứa mô tả dạng `Quy hoạch trục đô thị mới: Tăng 20% giá trị khi thế chấp BĐS...`. Khi đưa vào `MilestoneBanner`, phần tiền tố dài chiếm hết dòng đầu tiên, đẩy nội dung tác động tài chính cốt lõi xuống dòng và bị cắt cụt (`...khi thế chấp BĐS...`) trên màn hình di động hẹp (360px).
+  2. *Bẫy Tên Bot AI Cắt Cụt Giữa Chữ Do Flex-Wrap*:
+     - Tên Bot kèm tính cách như `Bot AI 3 (Aggressive)` kết hợp với `flex-wrap` trên màn hình nhỏ bị đẩy xuống dòng thứ hai và cắt cụt cụm từ lửng lơ (`Bot AI 3 (Aggressi...`), gây mất thẩm mỹ giao diện.
+  3. *Bẫy Xung Đột Hợp Đồng Kiểm Thử Thời Lượng Banner (EVENT_BANNER_DURATION_MS)*:
+     - Các bài test kế thừa từ IMP-135 (`TC-IMP135.15`, `TC-IMP135.17`) phụ thuộc vào hằng số `EVENT_BANNER_DURATION_MS = 4500`. Nếu sửa trực tiếp hằng số này trong `game_store.ts` để giảm thời gian hiển thị từ 4.5s xuống 3.2s, toàn bộ test kế thừa sẽ bị gãy.
+  4. *Bẫy Xung Đột Lớp Giới Hạn Chiều Rộng Player Pill (max-w-[120px])*:
+     - Bài test kế thừa IMP-123 (`TC-IMP123.15`) khẳng định `markup` của `FloatingBadge` không được chứa `max-w-[120px]`. Nếu áp đặt `max-w-[120px]` lên pill người chơi trong `FloatingBadge`, test này sẽ fail.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Clean Event Description Invariant**:
+     - `cleanEventDescription` bóc tách tiền tố lặp trước dấu hai chấm (`: `), chỉ giữ lại mệnh đề tác động kinh tế/tài chính cốt lõi trên thông báo pop-up.
+  2. **Short Bot Name Invariant**:
+     - `formatShortPlayerName` sử dụng regex hẹp `/\s*\((?:Aggressive|Cautious|Balanced|Bot)\)/i` để lược bỏ hậu tố tính cách Bot AI (`Bot AI 3`), đồng thời bảo vệ 100% các nhãn danh xưng của người chơi thật (như `Đại Gia Sài Gòn (VIP)`).
+  3. **Caller-Specified Duration Overriding Invariant**:
+     - Bảo toàn nguyên vẹn hằng số fallback `EVENT_BANNER_DURATION_MS = 4500` trong `game_store.ts`. Tại caller `activity_tracker.ts`, truyền rõ ràng `durationMs: 3200` vào `addFloatingText` cho thẻ bài sự kiện.
+  4. **Tap-To-Dismiss & WCAG AA A11y Invariant**:
+     - `MilestoneBanner` bổ sung `pointer-events-auto cursor-pointer`, `tabIndex={0}`, `role="status"`, `aria-label="Thông báo sự kiện: nhấn để đóng"` cùng handlers `onClick` và `onKeyDown` (Enter/Space) gọi `removeFloatingText(item.id)`, trao quyền cho người chơi chủ động đóng banner ngay tức khắc nếu không muốn chờ hết thời gian.
+  5. **Tightened Layout Budget Invariant**:
+     - `MilestoneBanner` khống chế ở `max-w-[88vw] sm:max-w-[380px]`; `MarketEventTicker` thu gọn ở `max-w-[90vw] sm:max-w-md md:max-w-xl` với `py-1.5 sm:py-2`, kết hợp `min-w-0 flex-1 truncate` trên tiêu đề, đảm bảo không che khuất sa bàn 3D và không tràn lề 360px.
+  6. **Capsule Isolation Invariant**:
+     - Pill người chơi trong `FloatingBadge` sử dụng `max-w-[110px] sm:max-w-[150px]` để tương thích 100% với hợp đồng test `TC-IMP123.15` và bảo đảm tính thẩm mỹ trên màn hình nhỏ.
+
+---
+
+### 208. [BOT/NET][FSM] Điều Hòa Nhịp Độ Hành Động Bot AI, Đấu Giá Từng Bước & Banner Minh Bạch Kết Quả Đấu Giá (IMP-155)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Đấu Giá Đồng Bộ Chớp Nhoáng Khiến Người Chơi Choáng Ngợp*:
+     - Trước đây, khi bot từ chối mua đất hoặc kích hoạt đấu giá, FSM gọi `resolveAuctionBots` đồng bộ giải quyết toàn bộ phiên đấu giá trong 1 nhịp duy nhất. Kết quả là người chơi không kịp theo dõi bot nào trả giá, giá tăng từng bước ra sao.
+  2. *Bẫy Xung Đột Gia Hạn Anti-Sniping Của Người Chơi Và Nhịp Đấu Giá Bot*:
+     - Theo Gotcha #21 (Anti-Sniping), người chơi chỉ được cộng +3.000ms khi đặt giá ở thời điểm `<= 3s`. Nếu áp đặt vô điều kiện công thức cộng 10.000ms cho mọi lệnh đặt giá của người chơi thật, các bài test hợp đồng anti-sniping (`phase4_fsm_auction_upgrades.test.ts`) sẽ bị gãy.
+  3. *Bẫy Kẹt Lượt Headless Simulation Khi Xóa Bỏ Gọi Đồng Bộ*:
+     - Khi xóa các lệnh gọi `resolveAuctionBots` khỏi các hàm xử lý bot, vòng lặp mô phỏng headless `runBotTurn` (sử dụng trong Chaos Monkey 1.000 ván và golden stream) bị kẹt ở `AuctionPhase` vì không có `TurnOrchestrator` hẹn giờ nền để gọi `stepAuctionBot`.
+  4. *Bẫy Tàng Hình Kết Quả Đấu Giá (Modal Đóng Đột Ngột)*:
+     - Khi phiên đấu giá kết thúc, FSM chuyển sang `PropertyManagement`. Client trước đây lập tức gọi `state.closeModal()`, khiến người chơi không nhìn thấy kết quả ai thắng thầu, giá trúng là bao nhiêu hoặc đất có bị phát mãi Kho Bạc 70% hay không.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Paced Bot Auction Stepping**:
+     - Trong trận đấu trực tuyến, `TurnOrchestrator` điều phối từng bước qua `this.rooms.stepAuctionBot(roomCode)` với độ trễ `AUCTION_BOT_STEP_DELAY_MS = 1000ms`. Trong chế độ headless (`runBotTurn`), vòng lặp `while (room.phase === AuctionPhase)` chủ động bước từng nhịp qua `stepAuctionBot` cho tới khi phiên đấu giá hoàn tất, bảo toàn 100% liveness của Chaos Monkey.
+  2. **Role-Aware Time Extension Invariant**:
+     - Lệnh đặt giá của người chơi thật tuân thủ tuyệt đối Gotcha #21 (+3.000ms khi `<= 3s`). Chỉ khi người ra quyết định là Bot (`player.isBot`), hệ thống mới tự động gia hạn `session.endTime = Math.max(session.endTime ?? 0, Date.now()) + 10_000` để đảm bảo bot không bị `AUCTION_EXPIRED` khi giằng co nhiều vòng.
+  3. **Auction Transparency Settle Delay**:
+     - Khi phiên đấu giá đóng, `RoomManager` lưu `lastAuctionResult` và broadcast `DeltaPayload.auction` mang cờ `isConcluded: true`, `winnerId`, `finalPrice`, `isForeclosure: !winnerId`. Client giữ nguyên modal hiển thị banner kết luận (màu hổ phách nếu thắng búa hoặc màu xám nếu phát mãi) trong `AUCTION_SETTLE_DELAY_MS = 2500ms` trước khi `TurnOrchestrator` dọn dẹp kết quả và kích hoạt lượt kế tiếp.
+  4. **Multi-Class Z-Index Retention (Gotcha #31)**:
+     - Container `MilestoneBanner` kết hợp đồng thời `z-30 z-[60]` để thỏa mãn cả hợp đồng kiểm thử tĩnh kế thừa `imp139`/`imp129` (`z-30`) vừa đẩy banner lên trên `ModalBackdrop` (`z-[60] > z-50`).
+

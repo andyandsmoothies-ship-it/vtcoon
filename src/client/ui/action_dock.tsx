@@ -97,7 +97,7 @@ export function ActionDock({
   const canRollAgain = canRollAgainProp !== undefined ? canRollAgainProp : storeCanRollAgain;
   const hasRolledThisTurn = hasRolledThisTurnProp !== undefined ? hasRolledThisTurnProp : storeHasRolledThisTurn;
   const [isRollPending, setIsRollPending] = useState(false);
-  const botPacing = resolveBotPacingStatus(currentTurnPlayerId, localPlayerId ?? 'p1', playersInfo);
+  const botPacing = resolveBotPacingStatus(currentTurnPlayerId, localPlayerId ?? 'p1', playersInfo, turnPhase);
 
   useEffect(() => {
     if (hasRolledThisTurn || isRolling || !isMyTurn) {

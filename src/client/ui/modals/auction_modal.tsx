@@ -97,21 +97,33 @@ export function AuctionModal({
         {`Giá thầu cao nhất hiện tại: ${formatCurrency(currentBid)}, người dẫn đầu: ${displayName}, thời gian còn lại: ${timeRemaining} giây`}
       </div>
 
-      {/* Banner Gõ Búa Thành Công khi phiên đấu giá kết thúc */}
+      {/* Banner kết luận phiên đấu giá */}
       {isConcluded && (
-        <div className="bg-amber-100 border-2 border-amber-500 rounded-2xl p-4 text-center shadow-md animate-pulse">
-          <div className="text-2xl mb-1" aria-hidden="true">🔨🎉</div>
-          <h3 className="font-black text-amber-950 text-base uppercase tracking-wider">
-            BÚA GÕ THÀNH CÔNG!
-          </h3>
-          <p className="text-xs font-bold text-amber-900 mt-1">
-            {isForeclosure
-              ? (myId && insolvencyPlayerId === myId
-                  ? `${displayName} đã trúng đấu giá giải cứu ${deed?.name ?? `Ô #${cellIndex}`} với giá ${formatCurrency(finalPrice ?? currentBid)}. Khoản tiền này đã được cấn trừ vào nợ của bạn!`
-                  : `${displayName} đã trúng đấu giá giải cứu ${deed?.name ?? `Ô #${cellIndex}`} với giá ${formatCurrency(finalPrice ?? currentBid)}!`)
-              : `${displayName} đã trúng đấu giá ${deed?.name ?? `Ô #${cellIndex}`} với giá ${formatCurrency(finalPrice ?? currentBid)}!`}
-          </p>
-        </div>
+        (winnerId ?? highestBidderId) ? (
+          <div className="bg-amber-100 border-2 border-amber-500 rounded-2xl p-4 text-center shadow-md animate-pulse">
+            <div className="text-2xl mb-1" aria-hidden="true">🔨🎉</div>
+            <h3 className="font-black text-amber-950 text-base uppercase tracking-wider">
+              BÚA GÕ THÀNH CÔNG!
+            </h3>
+            <p className="text-xs font-bold text-amber-900 mt-1">
+              {isForeclosure
+                ? (myId && insolvencyPlayerId === myId
+                    ? `${displayName} đã trúng đấu giá giải cứu ${deed?.name ?? `Ô #${cellIndex}`} với giá ${formatCurrency(finalPrice ?? currentBid)}. Khoản tiền này đã được cấn trừ vào nợ của bạn!`
+                    : `${displayName} đã trúng đấu giá giải cứu ${deed?.name ?? `Ô #${cellIndex}`} với giá ${formatCurrency(finalPrice ?? currentBid)}!`)
+                : `${displayName} đã trúng đấu giá ${deed?.name ?? `Ô #${cellIndex}`} với giá ${formatCurrency(finalPrice ?? currentBid)}!`}
+            </p>
+          </div>
+        ) : (
+          <div className="bg-slate-100 border-2 border-slate-400 rounded-2xl p-4 text-center shadow-md">
+            <div className="text-2xl mb-1" aria-hidden="true">⚠️🏛️</div>
+            <h3 className="font-black text-slate-800 text-base uppercase tracking-wider">
+              ĐẤU GIÁ BẤT THÀNH
+            </h3>
+            <p className="text-xs font-bold text-slate-600 mt-1">
+              Không có người chơi nào đặt giá. Bất động sản {deed?.name ?? `Ô #${cellIndex}`} được chuyển sang phát mãi Kho Bạc 70% giá trị ({formatCurrency(floorPrice)}).
+            </p>
+          </div>
+        )
       )}
 
       {/* Header phiên đấu giá */}

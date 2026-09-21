@@ -69,6 +69,9 @@ export function handleAuctionBid(
       session.endTime += 3_000;
     }
   }
+  if (player.isBot) {
+    session.endTime = Math.max(session.endTime ?? 0, Date.now()) + 10_000;
+  }
 
   const eligiblePlayers = room.players.filter((p) => p.id !== session.declinedPlayerId);
   const otherPlayers = eligiblePlayers.filter((p) => p.id !== playerId);
@@ -95,6 +98,9 @@ export function handleAuctionPass(
 
   if (!session.passedPlayers) session.passedPlayers = new Set<string>();
   session.passedPlayers.add(playerId);
+  if (player.isBot) {
+    session.endTime = Math.max(session.endTime ?? 0, Date.now()) + 10_000;
+  }
 
   const eligiblePlayers = room.players.filter((p) => p.id !== session.declinedPlayerId && !p.bankrupt);
   const targetPlayers = session.highestBidder
@@ -113,8 +119,8 @@ export function handleAuctionClose(
   registry: PropertyRegistry | undefined,
   auctions?: Map<string, AuctionSession>,
   roomCode?: string,
-): { winnerId?: string; winningBid: number } {
-  if (!room?.started || room.phase !== TurnPhase.AuctionPhase || !session) return { winnerId: undefined, winningBid: 0 };
+): { winnerId?: string; winningBid: number; cellIndex: number; isForeclosure: boolean } {
+  if (!room?.started || room.phase !== TurnPhase.AuctionPhase || !session) return { winnerId: undefined, winningBid: 0, cellIndex: session?.cellIndex ?? 0, isForeclosure: true };
   let winnerId: string | undefined;
   let winningBid = 0;
   if (session.highestBidder) {
@@ -172,8 +178,17 @@ export function handleAuctionClose(
   } else {
     room.phase = TurnPhase.PropertyManagement;
   }
+  if (room) {
+    room.lastAuctionResult = {
+      cellIndex: session.cellIndex,
+      winnerId: winnerId ?? null,
+      winningBid,
+      finalPrice: winningBid,
+      isForeclosure: !winnerId,
+    };
+  }
   if (auctions && roomCode) {
     auctions.delete(roomCode);
   }
-  return { winnerId, winningBid };
+  return { winnerId, winningBid, cellIndex: session.cellIndex, isForeclosure: !winnerId };
 }

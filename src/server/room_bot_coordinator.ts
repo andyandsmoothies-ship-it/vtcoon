@@ -101,6 +101,48 @@ export function resolveAuctionBots(roomManager: RoomManager, roomCode: string): 
   finalizeAuctionIfFinished(roomManager, roomCode, room, auction);
 }
 
+export function stepAuctionBot(
+  roomManager: RoomManager,
+  roomCode: string,
+): { changed: boolean; finished: boolean } {
+  const room = roomManager.getRoom(roomCode);
+  if (!room || (room.phase as TurnPhase) !== TurnPhase.AuctionPhase) {
+    return { changed: false, finished: true };
+  }
+  const auction = roomManager.getAuctionSession(roomCode);
+  if (!auction) {
+    return { changed: false, finished: true };
+  }
+
+  const eligibleBots = room.players.filter(
+    (p) => p.isBot && !p.bankrupt && p.id !== auction.declinedPlayerId && !auction.passedPlayers?.has(p.id),
+  );
+  if (eligibleBots.length === 0) {
+    return { changed: false, finished: true };
+  }
+
+  const candidateBot = eligibleBots.find((b) => auction.highestBidder !== b.id);
+  if (!candidateBot) {
+    const otherContenders = room.players.filter(
+      (p) => !p.bankrupt && p.id !== auction.declinedPlayerId && p.id !== auction.highestBidder,
+    );
+    if (otherContenders.length === 0 || otherContenders.every((p) => auction.passedPlayers?.has(p.id))) {
+      roomManager.handleAuctionClose(roomCode);
+      return { changed: false, finished: true };
+    }
+    return { changed: false, finished: true };
+  }
+
+  const registry = roomManager.getRegistry(roomCode) ?? new Map();
+  const stateMap = roomManager.getPropertyStates(roomCode) ?? new Map();
+  const changed = evaluateSingleBotBid(roomManager, roomCode, candidateBot, auction, registry, stateMap);
+
+  finalizeAuctionIfFinished(roomManager, roomCode, room, auction);
+  const isFinished = (roomManager.getRoom(roomCode)?.phase as TurnPhase) !== TurnPhase.AuctionPhase || !roomManager.getAuctionSession(roomCode);
+
+  return { changed, finished: isFinished };
+}
+
 function handleFailedBotIntent(
   roomManager: RoomManager,
   roomCode: string,
@@ -109,7 +151,6 @@ function handleFailedBotIntent(
 ): boolean {
   if (intentType === 'INTENT_BUY' || intentType === 'INTENT_BUY_PROPERTY') {
     roomManager.handleDecline(roomCode, botId);
-    resolveAuctionBots(roomManager, roomCode);
     return (roomManager.getRoom(roomCode)?.phase as TurnPhase) !== TurnPhase.AuctionPhase;
   }
   if (intentType === 'INTENT_BAIL_OUT') {
@@ -123,10 +164,7 @@ function handleFailedBotIntent(
   return false;
 }
 
-function handleDeclineIntent(roomManager: RoomManager, roomCode: string): boolean {
-  if ((roomManager.getRoom(roomCode)?.phase as TurnPhase) === TurnPhase.AuctionPhase) {
-    resolveAuctionBots(roomManager, roomCode);
-  }
+function handleDeclineIntent(_roomManager: RoomManager, _roomCode: string): boolean {
   return true;
 }
 
@@ -159,7 +197,10 @@ function isAuctionPhaseStuck(roomManager: RoomManager, roomCode: string): boolea
   if ((roomManager.getRoom(roomCode)?.phase as TurnPhase) !== TurnPhase.AuctionPhase) {
     return false;
   }
-  resolveAuctionBots(roomManager, roomCode);
+  while ((roomManager.getRoom(roomCode)?.phase as TurnPhase) === TurnPhase.AuctionPhase) {
+    const step = stepAuctionBot(roomManager, roomCode);
+    if (step.finished) break;
+  }
   return (roomManager.getRoom(roomCode)?.phase as TurnPhase) === TurnPhase.AuctionPhase;
 }
 
@@ -174,8 +215,7 @@ function executeBotIntentStep(
   const active = room.players[room.currentPlayerIndex];
   if (!active || !active.isBot || active.id !== botId) return false;
   if ((room.phase as TurnPhase) === TurnPhase.AuctionPhase) {
-    resolveAuctionBots(roomManager, roomCode);
-    return (roomManager.getRoom(roomCode)?.phase as TurnPhase) !== TurnPhase.AuctionPhase;
+    return false;
   }
   return executeSingleBotIntent(roomManager, roomCode, active, room, config);
 }
@@ -205,6 +245,10 @@ export function runBotTurn(roomManager: RoomManager, roomCode: string): void {
 
   const config = getBotConfig(roomManager.getBotPersonality(roomCode, current.id), roomManager.getRng());
   runBotIntentLoop(roomManager, roomCode, current.id, config);
+  while ((roomManager.getRoom(roomCode)?.phase as TurnPhase) === TurnPhase.AuctionPhase) {
+    const step = stepAuctionBot(roomManager, roomCode);
+    if (step.finished) break;
+  }
   if (roomManager.hasPendingTrade?.(roomCode) || roomManager.hasPendingBuyout?.(roomCode)) return;
   releaseStuckBotTurn(roomManager, roomCode, current.id);
 }
@@ -233,7 +277,6 @@ function releaseStuckBotTurn(roomManager: RoomManager, roomCode: string, botPlay
   if (!roomEnd) return;
   if ((roomEnd.phase as TurnPhase) === TurnPhase.ActionPhase) {
     roomManager.handleDecline(roomCode, botPlayerId);
-    resolveAuctionBots(roomManager, roomCode);
     if ((roomManager.getRoom(roomCode)?.phase as TurnPhase) !== TurnPhase.AuctionPhase) {
       roomManager.handleEndTurn(roomCode, botPlayerId);
     }

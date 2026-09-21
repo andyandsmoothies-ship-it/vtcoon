@@ -22,6 +22,9 @@ export const HUMAN_PHASE_TIMEOUTS_MS: Record<TurnPhase, number> = {
   [TurnPhase.WaitingRoll]: 45_000,
 };
 
+export const AUCTION_SETTLE_DELAY_MS = 2500;
+export const AUCTION_BOT_STEP_DELAY_MS = 1000;
+
 export function calculateBotStepDelay(
   room: Room | undefined,
   baseDelayMs: number = 1500
@@ -51,6 +54,9 @@ export interface TurnOrchestratorOptions {
 }
 
 export class TurnOrchestrator {
+  public static readonly AUCTION_SETTLE_DELAY_MS = AUCTION_SETTLE_DELAY_MS;
+  public static readonly AUCTION_BOT_STEP_DELAY_MS = AUCTION_BOT_STEP_DELAY_MS;
+
   private readonly rooms: RoomManager;
   private readonly intentMutex: IntentMutex;
   private readonly broadcaster: DeltaBroadcaster;
@@ -163,16 +169,29 @@ export class TurnOrchestrator {
         if (!hasBots) return;
 
         if (r.phase === TurnPhase.AuctionPhase) {
-          this.rooms.resolveAuctionBots(roomCode);
+          const stepRes = this.rooms.stepAuctionBot(roomCode);
+          this.broadcaster.broadcastRoomDelta(roomCode);
+          if (stepRes.finished) {
+            const settleTimer = setTimeout(() => {
+              this.activeTimers.delete(roomCode);
+              this.rooms.clearLastAuctionResult(roomCode);
+              this.broadcaster.broadcastRoomDelta(roomCode);
+              this.orchestrate(roomCode);
+            }, AUCTION_SETTLE_DELAY_MS);
+            this.activeTimers.set(roomCode, settleTimer);
+            this.rooms.registerTimer(roomCode, settleTimer);
+          } else {
+            this.orchestrate(roomCode, AUCTION_BOT_STEP_DELAY_MS);
+          }
         } else {
           this.rooms.stepBotTurn(roomCode);
-        }
-        const rAfter = this.rooms.getRoom(roomCode);
-        if (rAfter && isRoomGameOver(rAfter)) {
-          this.onGameOver(roomCode);
-        } else {
-          this.broadcaster.broadcastRoomDelta(roomCode);
-          this.orchestrate(roomCode);
+          const rAfter = this.rooms.getRoom(roomCode);
+          if (rAfter && isRoomGameOver(rAfter)) {
+            this.onGameOver(roomCode);
+          } else {
+            this.broadcaster.broadcastRoomDelta(roomCode);
+            this.orchestrate(roomCode);
+          }
         }
       });
     }, delayMs);

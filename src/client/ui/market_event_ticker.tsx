@@ -124,7 +124,7 @@ export const MarketEventTicker: React.FC<MarketEventTickerProps> = ({
       data-testid="market-event-ticker"
       role="region"
       aria-label="Sự kiện thị trường đang hiệu lực"
-      className="pointer-events-none select-none z-30 flex flex-col items-center gap-1.5 w-full max-w-[94vw] md:max-w-xl mx-auto mt-1 px-2"
+      className="pointer-events-none select-none z-30 flex flex-col items-center gap-1.5 w-full max-w-[90vw] sm:max-w-md md:max-w-xl mx-auto mt-1 px-2"
     >
       {active.map((modifier, index) => {
         const cardType = String(modifier.type ?? '');
@@ -136,7 +136,7 @@ export const MarketEventTicker: React.FC<MarketEventTickerProps> = ({
           <div
             key={`${cardType}_${index}`}
             data-testid={`market-ticker-item-${cardType}`}
-            className="w-full pointer-events-auto flex flex-col gap-1 px-3 py-2 bg-[#FFFDF8] border-2 border-slate-900 rounded-xl shadow-[0_3px_0_0_#0f172a] text-slate-900 transition-all duration-150 animate-in fade-in slide-in-from-top-1"
+            className="w-full pointer-events-auto flex flex-col gap-1 px-3 py-1.5 sm:py-2 bg-[#FFFDF8] border-2 border-slate-900 rounded-xl shadow-[0_3px_0_0_#0f172a] text-slate-900 transition-all duration-150 animate-in fade-in slide-in-from-top-1"
           >
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 min-w-0 flex-1">

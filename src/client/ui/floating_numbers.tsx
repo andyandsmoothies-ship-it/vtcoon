@@ -129,6 +129,28 @@ export function resolveFriendlyReason(item: FloatingTextItem, _player?: PlayerHu
   return item.title || (item.text ? `Giao dịch ${item.text}` : 'Biến động tài chính');
 }
 
+/**
+ * Strips redundant thematic prefix before colon (e.g. "Quy hoạch trục đô thị mới: ")
+ * to present punchy, actionable financial summaries without truncation.
+ */
+export function cleanEventDescription(text: string): string {
+  if (!text) return '';
+  const trimmed = text.trim();
+  const colonIndex = trimmed.indexOf(': ');
+  if (colonIndex !== -1 && colonIndex < trimmed.length - 2) {
+    return trimmed.slice(colonIndex + 2).trim();
+  }
+  return trimmed;
+}
+
+/**
+ * Formats player names for compact popup pills, stripping bot personality tags like (Aggressive).
+ */
+export function formatShortPlayerName(name: string): string {
+  if (!name) return '';
+  return name.replace(/\s*\((?:Aggressive|Cautious|Balanced|Bot)\)/i, '').trim();
+}
+
 export function MilestoneBanner({ item }: { readonly item: FloatingTextItem }): React.ReactElement {
   const isSSR = typeof window === 'undefined';
   const storePlayersInfo = useGameStore((state) => state.playersInfo);
@@ -143,38 +165,55 @@ export function MilestoneBanner({ item }: { readonly item: FloatingTextItem }): 
     : 'border-amber-500 shadow-[0_4px_0_0_#d97706]';
 
   const bannerClasses = [
-    'pointer-events-none flex items-center gap-3 px-4 py-2.5 rounded-2xl border-2',
+    'pointer-events-auto cursor-pointer flex items-center gap-2.5 sm:gap-3 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-2xl border-2',
     'bg-[#FFFDF8] text-slate-900 select-none animate-in fade-in slide-in-from-top-3 duration-200',
-    'max-w-[94vw] sm:max-w-md',
+    'max-w-[88vw] sm:max-w-[380px]',
     borderShadowStyle,
   ].join(' ');
 
   const titleText =
     item.title ||
     (isEventCard ? (item.actionType === 'market' ? 'Sự Kiện Thị Trường' : 'Thẻ Cơ Hội') : item.text);
-  const descText = item.title ? item.text : null;
+  const rawDescText = item.title ? item.text : null;
+  const descText = rawDescText ? cleanEventDescription(rawDescText) : null;
+
+  const handleDismiss = () => {
+    useGameStore.getState().removeFloatingText(item.id);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleDismiss();
+    }
+  };
 
   return (
     <div
       role="status"
+      tabIndex={0}
+      aria-label="Thông báo sự kiện: nhấn để đóng"
       aria-live="polite"
       data-testid={testId}
       className={bannerClasses}
+      onClick={handleDismiss}
+      onKeyDown={handleKeyDown}
     >
       <span className="text-2xl shrink-0" aria-hidden="true">{icon}</span>
-      <div className="flex flex-col min-w-0">
-        <div className="flex items-center gap-1.5 flex-wrap">
+      <div className="flex flex-col min-w-0 flex-1">
+        <div className="flex items-center gap-1.5 flex-wrap sm:flex-nowrap min-w-0">
           {player && (
             <span
-              className="text-[11px] font-bold px-2 py-0.5 rounded-full text-white shadow-xs truncate max-w-[100px] sm:max-w-[140px]"
+              className="text-[11px] font-bold px-2 py-0.5 rounded-full text-white shadow-xs shrink-0 truncate max-w-[120px] sm:max-w-[150px]"
               style={{ backgroundColor: player.tokenColor || '#64748B' }}
             >
-              {player.name}
+              {formatShortPlayerName(player.name)}
             </span>
           )}
           <span
             data-testid="milestone-card-title"
-            className="font-extrabold text-xs sm:text-sm text-slate-900 tracking-tight"
+            className="font-extrabold text-xs sm:text-sm text-slate-900 tracking-tight min-w-0 flex-1 truncate"
+            title={titleText}
           >
             {titleText}
           </span>
@@ -222,10 +261,10 @@ export function FloatingBadge({ item }: { readonly item: FloatingTextItem }): Re
           </span>
           {player && (
             <span
-              className="text-[11px] sm:text-xs font-bold px-2 py-0.5 rounded-full text-white shadow-xs shrink-0 truncate max-w-[100px] sm:max-w-[140px]"
+              className="text-[11px] sm:text-xs font-bold px-2 py-0.5 rounded-full text-white shadow-xs shrink-0 truncate max-w-[110px] sm:max-w-[150px]"
               style={{ backgroundColor: player.tokenColor || '#64748B' }}
             >
-              {player.name}
+              {formatShortPlayerName(player.name)}
             </span>
           )}
         </div>
@@ -331,7 +370,7 @@ export function FloatingNumbersOverlay(): React.ReactElement | null {
       {latestMilestone && (
         <div
           data-testid="milestone-banner-container"
-          className={`fixed ${milestoneTopClass} left-1/2 -translate-x-1/2 z-30 flex flex-col items-center`}
+          className={`fixed ${milestoneTopClass} left-1/2 -translate-x-1/2 z-30 z-[60] flex flex-col items-center`}
         >
           <MilestoneBanner item={latestMilestone} />
         </div>

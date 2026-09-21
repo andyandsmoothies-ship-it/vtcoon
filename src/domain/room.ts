@@ -156,6 +156,13 @@ export interface Room {
   currentAuction?:       CurrentAuctionState;
   lastEventCard?:        EventCardInfo;
   lastHoseResult?:       HoseResultInfo;
+  lastAuctionResult?:    {
+    winnerId: string | null;
+    winningBid: number;
+    finalPrice?: number;
+    isForeclosure?: boolean;
+    cellIndex?: number;
+  } | null;
   pendingBuyout?:        PendingBuyoutSession | null;
   pendingTradeOffer?:    PendingTradeOfferInfo | null;
 }

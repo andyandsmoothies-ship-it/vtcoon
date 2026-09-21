@@ -3,7 +3,7 @@ import {
   ActionRejectReason,
 } from '../domain/room.js';
 import { BotPersonality } from '../domain/bot/bot_engine.js';
-import { resolveAuctionBots as coordResolveAuctionBots, runBotTurn as coordRunBotTurn, stepBotTurn as coordStepBotTurn } from './room_bot_coordinator.js';
+import { resolveAuctionBots as coordResolveAuctionBots, runBotTurn as coordRunBotTurn, stepBotTurn as coordStepBotTurn, stepAuctionBot as coordStepAuctionBot } from './room_bot_coordinator.js';
 import type { Room, Player, PendingBuyoutSession } from '../domain/room.js';
 import { mulberry32 } from '../domain/dice.js';
 import {
@@ -39,6 +39,14 @@ import type { RoomBotSpec } from './room_bot_manager.js';
 
 export type { AuctionSession, PlayerIntent, PendingTradeSession, PendingBuyoutSession };
 
+export interface AuctionResult {
+  winnerId: string | null;
+  winningBid: number;
+  finalPrice?: number;
+  isForeclosure?: boolean;
+  cellIndex?: number;
+}
+
 export interface RollResult {
   readonly dice:        DiceResult;
   readonly player:      Readonly<{ id: string; position: number; balance: number }>;
@@ -58,6 +66,7 @@ export class RoomManager {
   private readonly lastActivity = new Map<string, number>();
   private readonly closeHooks: Array<(roomCode: string, room: Room) => void> = [];
   private readonly botPersonalities = new Map<string, BotPersonality>();
+  private readonly lastAuctionResults = new Map<string, AuctionResult>();
 
   get roomMap(): Map<string, Room> { return this.rooms; }
   get activeTimers(): Map<string, Set<NodeJS.Timeout>> { return this.activeTimersMap; }
@@ -156,19 +165,62 @@ export class RoomManager {
   handleAuctionBid(roomCode: string, playerId: string, amount: number): { success: boolean; reason?: string } {
     const res = handleAuctionBid(this.rooms.get(roomCode), this.auctions.get(roomCode), playerId, amount, this.registries.get(roomCode), this.auctions, roomCode);
     this.syncAuction(roomCode);
+    const room = this.rooms.get(roomCode);
+    if (room?.lastAuctionResult) {
+      this.lastAuctionResults.set(roomCode, room.lastAuctionResult);
+    }
     return res;
   }
 
   handleAuctionPass(roomCode: string, playerId: string): { success: boolean; reason?: string } {
     const res = handleAuctionPass(this.rooms.get(roomCode), this.auctions.get(roomCode), playerId, this.registries.get(roomCode), this.auctions, roomCode);
     this.syncAuction(roomCode);
+    const room = this.rooms.get(roomCode);
+    if (room?.lastAuctionResult) {
+      this.lastAuctionResults.set(roomCode, room.lastAuctionResult);
+    }
     return res;
   }
 
-  handleAuctionClose(roomCode: string): { winnerId?: string; winningBid: number } {
-    const res = handleAuctionClose(this.rooms.get(roomCode), this.auctions.get(roomCode), this.registries.get(roomCode), this.auctions, roomCode);
+  handleAuctionClose(roomCode: string): { winnerId?: string; winningBid: number; cellIndex: number; isForeclosure: boolean } {
+    const session = this.auctions.get(roomCode);
+    const cellIndex = session?.cellIndex ?? 0;
+    const res = handleAuctionClose(this.rooms.get(roomCode), session, this.registries.get(roomCode), this.auctions, roomCode);
     const room = this.rooms.get(roomCode);
     if (room) room.currentAuction = undefined;
+    const result: AuctionResult = {
+      cellIndex,
+      winnerId: res.winnerId ?? null,
+      winningBid: res.winningBid,
+      finalPrice: res.winningBid,
+      isForeclosure: !res.winnerId,
+    };
+    this.lastAuctionResults.set(roomCode, result);
+    if (room) {
+      room.lastAuctionResult = result;
+    }
+    return res;
+  }
+
+  getLastAuctionResult(roomCode: string): AuctionResult | undefined {
+    return this.lastAuctionResults.get(roomCode) ?? this.rooms.get(roomCode)?.lastAuctionResult ?? undefined;
+  }
+
+  clearLastAuctionResult(roomCode: string): void {
+    this.lastAuctionResults.delete(roomCode);
+    const room = this.rooms.get(roomCode);
+    if (room) {
+      room.lastAuctionResult = undefined;
+    }
+  }
+
+  getLastAuctionResultsMap(): Map<string, AuctionResult> {
+    return this.lastAuctionResults;
+  }
+
+  stepAuctionBot(roomCode: string): { changed: boolean; finished: boolean } {
+    const res = coordStepAuctionBot(this, roomCode);
+    this.syncAuction(roomCode);
     return res;
   }
 
@@ -404,7 +456,7 @@ export class RoomManager {
 
   createDelta(roomCode: string, tick: number, timeRemaining?: number): DeltaPayload | undefined {
     const ctx = this.getContext(roomCode);
-    return ctx ? buildRoomDelta(ctx.room, ctx.reg, ctx.sm, tick, this.auctions, timeRemaining) : undefined;
+    return ctx ? buildRoomDelta(ctx.room, ctx.reg, ctx.sm, tick, this.auctions, timeRemaining, this.lastAuctionResults) : undefined;
   }
 
   registerTimer(roomCode: string, timer: NodeJS.Timeout): void {
@@ -444,6 +496,7 @@ export class RoomManager {
   }
 
   closeRoom(roomCode: string): boolean {
+    this.lastAuctionResults.delete(roomCode);
     return doCloseRoom(this.rooms, this.registries, this.propertyStates, this.auctions, this.rolledThisTurn, this.activeTimersMap, this.lastActivity, this.closeHooks, this.botPersonalities, roomCode);
   }
 }

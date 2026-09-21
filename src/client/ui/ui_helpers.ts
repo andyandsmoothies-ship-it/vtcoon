@@ -2,6 +2,7 @@
 import { PROPERTY_DEEDS } from '../../domain/property_data';
 import { BOARD_CONFIG, ColorGroup } from '../../domain/board_config';
 import type { RecordedIntentContext } from '../telemetry/telemetry_types';
+import { TurnPhase } from '../../domain/room';
 
 const LEVEL_MULTIPLIER: Record<number, number> = { 0: 1, 1: 1.5, 2: 2.5, 3: 4 };
 
@@ -180,8 +181,33 @@ export interface BotPacingStatus {
 export function resolveBotPacingStatus(
   currentTurnPlayerId: string | null | undefined,
   localPlayerId: string,
-  playersInfo: Record<string, { id: string; name?: string; isBot?: boolean }>
+  playersInfo: Record<string, { id: string; name?: string; isBot?: boolean }>,
+  turnPhase?: TurnPhase | string,
 ): BotPacingStatus | null {
+  if (turnPhase === TurnPhase.AuctionPhase) {
+    const allBots = Object.values(playersInfo).filter((p) => p.isBot);
+    if (allBots.length > 0) {
+      const activeBot = (currentTurnPlayerId && playersInfo[currentTurnPlayerId]?.isBot)
+        ? playersInfo[currentTurnPlayerId]
+        : allBots[0];
+      const botName = activeBot?.name || 'Bot AI';
+      return {
+        botId: activeBot?.id ?? 'bot_auction',
+        botName,
+        botOrder: 1,
+        totalBots: allBots.length,
+        displayText: `🤖 Đang đấu giá... (${botName})`,
+      };
+    }
+    return {
+      botId: 'bot_auction',
+      botName: 'Bot AI',
+      botOrder: 1,
+      totalBots: 1,
+      displayText: '🤖 Đang đấu giá...',
+    };
+  }
+
   if (!currentTurnPlayerId || currentTurnPlayerId === localPlayerId) return null;
   const currentTurnPlayer = playersInfo[currentTurnPlayerId];
   if (!currentTurnPlayer || !currentTurnPlayer.isBot) return null;

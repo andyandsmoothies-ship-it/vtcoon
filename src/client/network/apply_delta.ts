@@ -86,7 +86,11 @@ function syncBusinessModals(delta: DeltaPayload, state: GameState): void {
     (delta.auction === null || (delta.turnPhase !== undefined && delta.turnPhase !== TurnPhase.AuctionPhase)) &&
     state.activeModal === 'auction'
   ) {
-    state.closeModal();
+    // Không đóng modal nếu modal hiện tại đang hiển thị banner kết luận
+    const currentPayload = state.modalPayload as { isConcluded?: boolean } | null;
+    if (!currentPayload?.isConcluded) {
+      state.closeModal();
+    }
   }
 
   // [IMP-142] Bot Trade Offer Modal — mở khi offer gửi cho mình, đóng khi offer là null

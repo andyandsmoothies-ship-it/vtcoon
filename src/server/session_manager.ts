@@ -51,6 +51,9 @@ export interface AuctionPayload {
   readonly insolvencyPlayerId?: string;
   readonly isForeclosure?: boolean;
   readonly startingBid?: number;
+  isConcluded?: boolean;
+  winnerId?: string | null;
+  finalPrice?: number;
 }
 
 export interface PendingTradeOfferDelta {
@@ -93,6 +96,7 @@ export function buildDeltaFromRoom(
   tick: number,
   auctions?: Map<string, AuctionSession>,
   timeRemaining?: number,
+  lastAuctionResults?: Map<string, { cellIndex: number; winnerId?: string | null; winningBid: number; isForeclosure?: boolean; finalPrice?: number }>,
 ): DeltaPayload {
   const mortgagedSet = new Set<number>();
   for (const player of room.players) {
@@ -151,8 +155,23 @@ export function buildDeltaFromRoom(
         } : {}),
       };
     }
-  } else if (auctions) {
-    auction = null;
+  } else {
+    const lastRes = lastAuctionResults?.get(room.roomCode) ?? room.lastAuctionResult;
+    if (lastRes) {
+      auction = {
+        cellIndex: lastRes.cellIndex ?? 0,
+        currentBid: lastRes.winningBid,
+        startingBid: lastRes.winningBid,
+        highestBidderId: lastRes.winnerId ?? null,
+        timeRemaining: 0,
+        isConcluded: true,
+        winnerId: lastRes.winnerId ?? null,
+        finalPrice: lastRes.finalPrice ?? lastRes.winningBid,
+        ...(lastRes.isForeclosure ? { isForeclosure: true } : {}),
+      };
+    } else if (auctions) {
+      auction = null;
+    }
   }
 
   let pendingTradeOffer: PendingTradeOfferDelta | null | undefined = undefined;
@@ -261,7 +280,7 @@ export function buildDeltaPayload(
         treasury?: number;
         activeModifiers?: ReadonlyArray<MarketModifier>;
       }
-    | { tick: number; room: Room; registry: PropertyRegistry; stateMap: PropertyStateMap; auctions?: Map<string, AuctionSession> },
+    | { tick: number; room: Room; registry: PropertyRegistry; stateMap: PropertyStateMap; auctions?: Map<string, AuctionSession>; lastAuctionResults?: Map<string, any> },
   cells?: ReadonlyArray<CellDelta>,
   players?: ReadonlyArray<PlayerDelta>,
 ): DeltaPayload {
@@ -273,6 +292,8 @@ export function buildDeltaPayload(
         tickOrOptions.stateMap,
         tickOrOptions.tick,
         tickOrOptions.auctions,
+        undefined,
+        tickOrOptions.lastAuctionResults,
       );
     }
     return {
@@ -351,15 +372,9 @@ export class SessionManager {
     this.lastDelta = {
       tick: payload.tick,
       cells: payload.cells.map((c) => ({ ...c })),
-      ...(payload.players !== undefined
-        ? { players: payload.players.map((p) => ({ ...p })) }
-        : {}),
-      ...(payload.currentPlayerIndex !== undefined
-        ? { currentPlayerIndex: payload.currentPlayerIndex }
-        : {}),
-      ...(payload.currentTurnPlayerId !== undefined
-        ? { currentTurnPlayerId: payload.currentTurnPlayerId }
-        : {}),
+      ...(payload.players !== undefined ? { players: payload.players.map((p) => ({ ...p })) } : {}),
+      ...(payload.currentPlayerIndex !== undefined ? { currentPlayerIndex: payload.currentPlayerIndex } : {}),
+      ...(payload.currentTurnPlayerId !== undefined ? { currentTurnPlayerId: payload.currentTurnPlayerId } : {}),
       ...(payload.dice !== undefined ? { dice: payload.dice } : {}),
       ...(payload.diceRollerId !== undefined ? { diceRollerId: payload.diceRollerId } : {}),
       ...(payload.diceSeq !== undefined ? { diceSeq: payload.diceSeq } : {}),

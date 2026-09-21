@@ -61,13 +61,13 @@ export function sanitizeDeltaToSnapshot(
       ...(p.inAudit ? { inAudit: true } : {}),
       ...(p.auditTurnsLeft ? { auditTurnsLeft: p.auditTurnsLeft } : {}),
     })),
-    auction: delta.auction
+    auction: (delta.auction && !delta.auction.isConcluded)
       ? {
           cellIndex: delta.auction.cellIndex,
           currentBid: delta.auction.currentBid,
           highestBidderId: delta.auction.highestBidderId,
         }
-      : delta.auction === null
+      : (delta.auction === null || delta.auction?.isConcluded)
       ? null
       : undefined,
     ownedCells: delta.cells
