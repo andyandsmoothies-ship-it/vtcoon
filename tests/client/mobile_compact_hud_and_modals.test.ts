@@ -16,6 +16,7 @@ React.useSyncExternalStore = ((subscribe, getSnapshot, _getServerSnapshot) => {
 }) as typeof React.useSyncExternalStore;
 
 import { PlayerCard } from '../../src/client/ui/player_card';
+import { formatShortPlayerName } from '../../src/client/ui/ui_helpers';
 import { PropertyPortfolioModal } from '../../src/client/ui/modals/property_portfolio_modal';
 import { InsolvencyBanner } from '../../src/client/ui/modals/insolvency_banner';
 import { EventCardModal } from '../../src/client/ui/modals/event_card_modal';
@@ -179,6 +180,50 @@ describe('[TC-MCH01/MSS][UI-S02/MSS] Mobile Compact HUD & Tactile Retropoly Moda
       );
       expect(html).toContain('LƯỢT');
       expect(html).toContain('animate-pulse');
+    });
+
+    it('[TC-MCH01.08A/MSS][UC-MCH-01] formatShortPlayerName strips bot personality suffixes while preserving human names', () => {
+      expect(formatShortPlayerName('Bot AI 2 (Balanced)')).toBe('Bot AI 2');
+      expect(formatShortPlayerName('Bot AI 3 (Aggressive)')).toBe('Bot AI 3');
+      expect(formatShortPlayerName('Bot AI 4 (Cautious)')).toBe('Bot AI 4');
+      expect(formatShortPlayerName('Bot AI 1 (Passive)')).toBe('Bot AI 1');
+      expect(formatShortPlayerName('Dapper Panda')).toBe('Dapper Panda');
+      expect(formatShortPlayerName('Chủ Tịch Hưng')).toBe('Chủ Tịch Hưng');
+      expect(formatShortPlayerName('')).toBe('');
+    });
+
+    it('[TC-MCH01.08B/MSS][UC-MCH-01] PlayerCard displays short display name and sets title attribute for full name accessibility', () => {
+      const botPlayer: PlayerHudInfo = {
+        ...mockActivePlayer,
+        id: 'bot_2',
+        name: 'Bot AI 2 (Balanced)',
+        isBot: true,
+      };
+      const html = renderToStaticMarkup(
+        React.createElement(PlayerCard, {
+          player: botPlayer,
+          isCurrentTurn: false,
+          levelMap: {},
+          slotIndex: 1,
+        })
+      );
+      // Display text contains cleaned name
+      expect(html).toContain('Bot AI 2');
+      // Full name is preserved in title attribute for accessibility
+      expect(html).toContain('title="Bot AI 2 (Balanced)"');
+    });
+
+    it('[TC-MCH01.08C/MSS][UC-MCH-01] PlayerCard uses compact responsive font and top turn pill clearance', () => {
+      const html = renderToStaticMarkup(
+        React.createElement(PlayerCard, {
+          player: mockActivePlayer,
+          isCurrentTurn: true,
+          levelMap: {},
+          slotIndex: 0,
+        })
+      );
+      expect(html).toContain('text-xs sm:text-sm font-bold');
+      expect(html).toContain('absolute -top-2.5 right-3');
     });
   });
 

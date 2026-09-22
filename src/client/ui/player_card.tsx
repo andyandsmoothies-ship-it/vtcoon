@@ -1,6 +1,6 @@
 import React from 'react';
 import { useGameStore, type PlayerHudInfo } from '../store/game_store';
-import { formatCurrency, calculatePlayerNetWorth, getOwnedColorGroups } from './ui_helpers';
+import { formatCurrency, calculatePlayerNetWorth, getOwnedColorGroups, formatShortPlayerName } from './ui_helpers';
 import { COLOR_GROUP_HEX } from '../../domain/theme';
 import { getEmoteDef } from '../../domain/emotes';
 import { getPawnConfigBySlot } from '../3d/luxury_pawn_models';
@@ -62,6 +62,15 @@ export function PlayerCard({
       role="region"
       aria-label={`Thông tin ${player.name}`}
     >
+      {/* Huy hiệu LƯỢT nổi bật trên đỉnh thẻ (Corner Tab) - không chiếm diện tích dòng Tên người chơi */}
+      {isCurrentTurn && (
+        <span
+          className="absolute -top-2.5 right-3 px-1.5 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300 shadow-xs animate-pulse select-none uppercase tracking-wider z-10"
+        >
+          LƯỢT
+        </span>
+      )}
+
       {/* Emote Bubble Popover trên Avatar (3 giây) */}
       {activeEmote && (
         <div
@@ -76,8 +85,8 @@ export function PlayerCard({
         </div>
       )}
       {/* Header: Token avatar, Tên, Badges */}
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 min-w-0">
+      <div className="flex items-center justify-between gap-1.5 min-w-0">
+        <div className="flex items-center gap-1.5 min-w-0 flex-1">
           <div
             data-testid={`player-pawn-badge-${player.id}`}
             data-legacy-size="w-8 h-8"
@@ -90,8 +99,11 @@ export function PlayerCard({
               {pawnConfig.icon}
             </span>
           </div>
-          <span className="text-sm font-bold text-slate-900 truncate">
-            {player.name}
+          <span
+            className="text-xs sm:text-sm font-bold text-slate-900 truncate"
+            title={player.name}
+          >
+            {formatShortPlayerName(player.name)}
           </span>
         </div>
 
@@ -114,11 +126,6 @@ export function PlayerCard({
               aria-label="Kiểm Toán"
             >
               <span role="img" aria-hidden="true">⚖️</span>
-            </span>
-          )}
-          {isCurrentTurn && (
-            <span className="px-1 py-0.5 rounded text-[9px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300 animate-pulse">
-              LƯỢT
             </span>
           )}
         </div>

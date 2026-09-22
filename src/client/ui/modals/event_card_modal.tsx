@@ -61,7 +61,8 @@ export function EventCardModal({
     cardId;
 
   const rawDenseScope = targetScope || detail?.targetScope || (isMarket ? 'Toàn bộ thị trường' : 'Người chơi rút thẻ');
-  const rawTargetScope = targetScope || (isMarket ? 'Toàn bộ thị trường' : (detail?.targetScope || 'Người chơi rút thẻ'));
+  const isDefaultMacroMarket = isMarket && (cardId === MarketCardId.MC_RATE_HIKE || cardId === 'MC_RATE_HIKE');
+  const rawTargetScope = targetScope || (isDefaultMacroMarket ? 'Toàn bộ thị trường' : detail?.targetScope) || (isMarket ? 'Toàn bộ thị trường' : 'Người chơi rút thẻ');
   const resolvedDenseScope = sanitizeTargetScope(rawDenseScope);
   const resolvedTargetScope = sanitizeTargetScope(rawTargetScope);
 

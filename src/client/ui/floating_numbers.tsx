@@ -143,13 +143,8 @@ export function cleanEventDescription(text: string): string {
   return trimmed;
 }
 
-/**
- * Formats player names for compact popup pills, stripping bot personality tags like (Aggressive).
- */
-export function formatShortPlayerName(name: string): string {
-  if (!name) return '';
-  return name.replace(/\s*\((?:Aggressive|Cautious|Balanced|Bot)\)/i, '').trim();
-}
+import { formatShortPlayerName } from './ui_helpers';
+export { formatShortPlayerName };
 
 export function MilestoneBanner({ item }: { readonly item: FloatingTextItem }): React.ReactElement {
   const isSSR = typeof window === 'undefined';

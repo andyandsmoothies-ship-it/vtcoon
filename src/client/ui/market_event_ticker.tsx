@@ -5,6 +5,7 @@ import { useGameStore } from '../store/game_store.js';
 import { MarketCardId, ChanceCardId } from '../../domain/event_card_types.js';
 import { MARKET_CARD_DETAILS, CHANCE_CARD_DETAILS } from '../../domain/event_card_metadata.js';
 import { vi as viTranslations } from '../../domain/i18n/vi.js';
+import { getCardHeroStat, getHeroStatStyles } from './modals/event_card_visuals.js';
 
 export interface MarketEventTickerProps {
   readonly activeModifiers?: ReadonlyArray<{
@@ -53,11 +54,11 @@ export function resolveMarketTitle(type: string): string {
 
 export const ACTIVE_MARKET_EFFECT_SUMMARIES: Readonly<Record<string, string>> = {
   [MarketCardId.MC_PUBLIC_INVEST]:
-    'Nhân đôi cước vận tải tại 4 Ga Tàu (Ô 5, 15, 25, 35).',
+    'Nhân đôi cước vận tải tại 4 Ga Tàu trên toàn bàn cờ.',
   [MarketCardId.MC_COASTAL_STORM]:
-    'Miễn 100% tiền thuê ô ven biển (Ô 11, 14, 16, 18, 19); dừng chân mất lượt.',
+    'Miễn 100% tiền thuê tại các ô ven biển; dừng chân mất lượt.',
   [MarketCardId.MC_NIGHT_ECONOMY]:
-    'Nhân đôi tiền thuê tại các ô Dịch Vụ Cấp 1 trở lên (Ô 6, 8, 26, 27).',
+    'Nhân đôi tiền thuê tại các ô Dịch Vụ từ Cấp 1 trở lên.',
   [MarketCardId.MC_ALCOHOL_CHECK]:
     'Giảm 50% tiền thuê ô Dịch Vụ; dừng chân phạt 800 Tr. và mất lượt.',
   [MarketCardId.MC_MEGA_CONCERT]:
@@ -77,11 +78,11 @@ export const ACTIVE_MARKET_EFFECT_SUMMARIES: Readonly<Record<string, string>> = 
   [MarketCardId.MC_FREEZE_TRADE]:
     'Tạm ngưng mua ô đất mới, đóng băng đấu giá và cấm chuyển nhượng P2P.',
   [MarketCardId.MC_FUEL_SURGE]:
-    'Phụ thu thêm 500 Tr. cước vận tải tại 4 Ga Tàu (Ô 5, 15, 25, 35).',
+    'Phụ thu thêm 500 Tr. cước vận tải tại 4 Ga Tàu toàn bàn cờ.',
   [MarketCardId.MC_URBAN_PLANNING]:
     'Tăng 20% giá trị khi thế chấp BĐS Hà Nội & TP.HCM (nhận 60% giá gốc).',
   [MarketCardId.MC_UTILITY_DOUBLE]:
-    'Nhân đôi phí dịch vụ tiện ích công cộng (Ô 12 EVN và Ô 28 Viettel).',
+    'Nhân đôi phí dịch vụ tiện ích công cộng (EVN và Viettel).',
   [MarketCardId.MC_CASINO_PILOT]:
     'Thưởng 1.500 Tr./ô Dịch Vụ C2+, 3.000 Tr./ô 27 C3 (hoặc trợ cấp 1.000 Tr.).',
   [ChanceCardId.CC_PORT_EXCLUSIVE]:
@@ -131,12 +132,32 @@ export const MarketEventTicker: React.FC<MarketEventTickerProps> = ({
         const icon = resolveMarketIcon(cardType);
         const title = resolveMarketTitle(cardType);
         const effectSummary = resolveMarketEffectSummary(cardType);
+        const heroStat = getCardHeroStat(cardType);
+        const heroStyles = getHeroStatStyles(heroStat.variant);
+
+        const handleCardClick = () => {
+          const detail =
+            MARKET_CARD_DETAILS[cardType as MarketCardId] ??
+            CHANCE_CARD_DETAILS[cardType as ChanceCardId];
+          useGameStore.getState().openModal('event', {
+            cardType: cardType.startsWith('CC_') ? 'chance' : 'market',
+            cardId: cardType,
+            title,
+            description: detail?.description ?? effectSummary,
+            targetScope: detail?.targetScope,
+            effectDetail: detail?.effectDetail ?? effectSummary,
+            duration: `${modifier.remainingRounds} vòng chơi`,
+            destination: detail?.destination,
+          });
+        };
 
         return (
           <div
             key={`${cardType}_${index}`}
             data-testid={`market-ticker-item-${cardType}`}
-            className="w-full pointer-events-auto flex flex-col gap-1 px-3 py-1.5 sm:py-2 bg-[#FFFDF8] border-2 border-slate-900 rounded-xl shadow-[0_3px_0_0_#0f172a] text-slate-900 transition-all duration-150 animate-in fade-in slide-in-from-top-1"
+            onClick={handleCardClick}
+            title="Bấm để xem chi tiết thẻ"
+            className="w-full pointer-events-auto cursor-pointer flex flex-col gap-1 px-3 py-1.5 sm:py-2 bg-[#FFFDF8] border-2 border-slate-900 rounded-xl shadow-[0_3px_0_0_#0f172a] hover:border-amber-500 hover:shadow-[0_4px_0_0_#d97706] text-slate-900 transition-all duration-150 animate-in fade-in slide-in-from-top-1"
           >
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -146,6 +167,11 @@ export const MarketEventTicker: React.FC<MarketEventTickerProps> = ({
                 <span className="font-black text-xs sm:text-sm truncate text-slate-900 leading-tight">
                   {title}
                 </span>
+                {heroStat.value && (
+                  <span className={`px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-black uppercase tracking-wider shrink-0 ${heroStyles.badge}`}>
+                    {heroStat.value}
+                  </span>
+                )}
               </div>
 
               <span className="px-2.5 py-0.5 rounded-lg text-[11px] font-extrabold border bg-amber-100 text-amber-900 border-amber-400 shrink-0">

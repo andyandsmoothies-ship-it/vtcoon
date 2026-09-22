@@ -19,9 +19,26 @@ export class SupabaseStorageService implements ISupabaseStorageService {
   readonly defaultBucket: string;
 
   constructor(config?: SupabaseStorageConfig) {
-    this.url = (config?.url ?? process.env['SUPABASE_URL'] ?? '').trim();
-    this.key = (config?.key ?? process.env['SUPABASE_KEY'] ?? '').trim();
-    this.defaultBucket = (config?.defaultBucket ?? process.env['SUPABASE_BUCKET'] ?? 'game-logs').trim() || 'game-logs';
+    this.url = (
+      config?.url ??
+      process.env['SUPABASE_URL'] ??
+      process.env['NEXT_PUBLIC_SUPABASE_URL'] ??
+      ''
+    ).trim();
+    this.key = (
+      config?.key ??
+      process.env['SUPABASE_KEY'] ??
+      process.env['SUPABASE_SERVICE_ROLE_KEY'] ??
+      process.env['SUPABASE_SECRET_KEY'] ??
+      process.env['NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY'] ??
+      ''
+    ).trim();
+    this.defaultBucket = (
+      config?.defaultBucket ??
+      process.env['SUPABASE_BUCKET'] ??
+      process.env['NEXT_PUBLIC_SUPABASE_BUCKET'] ??
+      'game-logs'
+    ).trim() || 'game-logs';
   }
 
   get isConfigured(): boolean {
@@ -52,8 +69,15 @@ export class SupabaseStorageService implements ISupabaseStorageService {
         body: typeof content === 'string' ? content : new Uint8Array(content),
         signal: AbortSignal.timeout(5000),
       });
-      return response.ok;
-    } catch {
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => '');
+        console.warn(`[SupabaseStorage] Upload failed (${response.status} ${response.statusText}) for ${cleanBucket}/${cleanPath}: ${errorText}`);
+        return false;
+      }
+      return true;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn(`[SupabaseStorage] Network/Fetch error uploading ${cleanBucket}/${cleanPath}: ${msg}`);
       return false;
     }
   }

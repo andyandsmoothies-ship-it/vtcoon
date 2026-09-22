@@ -14,6 +14,7 @@ export interface HeroStatStyles {
   readonly container: string;
   readonly label: string;
   readonly value: string;
+  readonly badge: string;
 }
 
 const THEMED_EMOJIS: Readonly<Record<string, string>> = {
@@ -271,18 +272,21 @@ export function getHeroStatStyles(variant: HeroStatVariant): HeroStatStyles {
         container: 'bg-emerald-50 border-emerald-400 text-emerald-950',
         label: 'text-emerald-700',
         value: 'text-emerald-900',
+        badge: 'bg-emerald-100 text-emerald-950 border border-emerald-400',
       };
     case 'negative':
       return {
         container: 'bg-rose-50 border-rose-400 text-rose-950',
         label: 'text-rose-700',
         value: 'text-rose-900',
+        badge: 'bg-rose-100 text-rose-950 border border-rose-400',
       };
     case 'warning':
       return {
         container: 'bg-amber-50 border-amber-400 text-amber-950',
         label: 'text-amber-700',
         value: 'text-amber-900',
+        badge: 'bg-amber-100 text-amber-950 border border-amber-400',
       };
     case 'info':
     default:
@@ -290,6 +294,7 @@ export function getHeroStatStyles(variant: HeroStatVariant): HeroStatStyles {
         container: 'bg-sky-50 border-sky-400 text-sky-950',
         label: 'text-sky-700',
         value: 'text-sky-900',
+        badge: 'bg-sky-100 text-sky-950 border border-sky-400',
       };
   }
 }

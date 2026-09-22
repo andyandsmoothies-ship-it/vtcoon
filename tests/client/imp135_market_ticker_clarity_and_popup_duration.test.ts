@@ -17,6 +17,7 @@ import {
   FloatingTextType,
 } from '../../src/client/store/game_store.js';
 import { MilestoneBanner } from '../../src/client/ui/floating_numbers.js';
+import { EventCardModal } from '../../src/client/ui/modals/event_card_modal.js';
 import { SERVER_ERROR_TOAST_TIMEOUT_MS } from '../../src/client/network/use_app_session.js';
 import { MarketCardId, ChanceCardId } from '../../src/domain/event_card_types.js';
 
@@ -259,6 +260,52 @@ describe('[IMP-135] Market Event Ticker Clarity & Extended Pop-up Duration Contr
       expect(markup).toContain('Nhân đôi tiền thuê');
       // Đảm bảo không còn class truncate cứng trên mô tả thẻ bài sự kiện
       expect(markup).not.toMatch(/text-slate-600[^"]*truncate/);
+    });
+  });
+
+  // =========================================================================
+  // FACET 5: Ticker Hero Stat Badge, Clickable Details & Unambiguous Scope
+  // =========================================================================
+  describe('FACET 5: Ticker Hero Stat Badge, Clickable Details & Unambiguous Scope', () => {
+    it('[TC-IMP135.24] MarketEventTicker render huy hiệu Hero Stat đậm nét, hỗ trợ click và không chứa mã ô kỹ thuật', () => {
+      const markup = renderToStaticMarkup(
+        React.createElement(MarketEventTicker, {
+          activeModifiers: [
+            {
+              type: MarketCardId.MC_COASTAL_STORM,
+              remainingRounds: 2,
+            },
+            {
+              type: MarketCardId.MC_CREDIT_STIMULUS,
+              remainingRounds: 1,
+            },
+          ],
+        })
+      );
+
+      // Hero Stat Badges
+      expect(markup).toContain('MIỄN 100% THUÊ');
+      expect(markup).toContain('-20% XÂY DỰNG');
+
+      // Clickable affordance
+      expect(markup).toContain('cursor-pointer');
+
+      // Không chứa mã ô kỹ thuật như (Ô 11, 14, 16...)
+      expect(markup).not.toMatch(/\(Ô\s*\d+/);
+    });
+
+    it('[TC-IMP135.25] EventCardModal bảo toàn phạm vi mục tiêu BĐS Duyên Hải thay vì fallback Toàn bộ thị trường', () => {
+      const markup = renderToStaticMarkup(
+        React.createElement(EventCardModal, {
+          cardType: 'market',
+          cardId: MarketCardId.MC_COASTAL_STORM,
+          onClose: () => {},
+        })
+      );
+
+      // Chip phạm vi mục tiêu phải hiển thị BĐS Duyên Hải, không được hiển thị sai thành Toàn bộ thị trường
+      expect(markup).toContain('BĐS Duyên Hải');
+      expect(markup).not.toContain('Toàn bộ thị trường');
     });
   });
 });

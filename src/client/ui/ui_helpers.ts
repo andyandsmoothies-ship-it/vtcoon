@@ -399,3 +399,11 @@ export function resolveActionDockNotice(params: ActionDockNoticeParams): ActionD
 
   return null;
 }
+
+/**
+ * Formats player names for compact displays, stripping bot personality tags like (Aggressive).
+ */
+export function formatShortPlayerName(name: string): string {
+  if (!name) return '';
+  return name.replace(/\s*\((?:Aggressive|Cautious|Balanced|Passive|Bot)\)/i, '').trim();
+}
