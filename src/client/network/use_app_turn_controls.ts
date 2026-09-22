@@ -101,10 +101,16 @@ export function useAppTurnControls(
     if (roomCode) clearReconnectToken(roomCode);
     clearReconnectToken('VT8888');
 
+    if (roomCode && typeof window !== 'undefined') {
+      window.sessionStorage?.removeItem('vtcoon_host_' + roomCode);
+    }
+
     useGameStore.getState().closeModal();
     useGameStore.setState({
       activePawnAnimation: null,
       floatingTexts: [],
+      playersInfo: {},
+      playerPositions: {},
     });
 
     if (typeof window !== 'undefined' && window.history) {
@@ -115,7 +121,7 @@ export function useAppTurnControls(
       }
     }
 
-    useLobbyStore.getState().setGameStarted(false);
+    useLobbyStore.getState().resetLobby();
   }, [isConnected, roomCode, localPlayerId, sendWsMessage, landingTimerRef]);
 
   return { handleRollDice, handleEndTurn, handleSendEmote, handleLeaveRoom };

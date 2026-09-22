@@ -8,7 +8,7 @@ import { WebSocket } from 'ws';
 import { WssServer } from '../../src/server/network/wss_server.js';
 import { doJoinRoom, doStartGame } from '../../src/server/room_manager_lifecycle.js';
 import { handleJoinRoom } from '../../src/server/network/wss_lobby_handlers.js';
-import { getInitialLobbyConfig } from '../../src/client/offline_landing.js';
+import { getInitialLobbyConfig, createNewRoomConfig } from '../../src/client/offline_landing.js';
 import { useLobbyStore } from '../../src/client/store/lobby_store.js';
 import { createPlayer, createRoom } from '../../src/domain/room.js';
 import type { WsServerMessage } from '../../src/server/network/network_types.js';
@@ -112,19 +112,24 @@ function restoreWindow(): void {
 describe('[IMP-165] Boundary & Range — Mã phòng động & Slot Assignment', () => {
 
   /**
-   * [TC-IMP165.01/MSS] getInitialLobbyConfig() không có ?room= phải sinh mã VTxxxx 6 ký tự
-   * BUG HIỆN TẠI: Trả về hardcoded 'VT8888', không phải mã ngẫu nhiên.
+   * [TC-IMP165.01/MSS] Reconciled IMP-168:
+   * getInitialLobbyConfig() không ?room= → trả về roomCode: null
+   * createNewRoomConfig() → sinh mã ngẫu nhiên VTxxxx khớp /^[A-Z0-9]{6}$/
    */
-  it('[TC-IMP165.01/MSS] getInitialLobbyConfig() không ?room= → sinh mã ngẫu nhiên VTxxxx khớp /^[A-Z0-9]{6}$/', () => {
+  it('[TC-IMP165.01/MSS] getInitialLobbyConfig() không ?room= → roomCode: null; createNewRoomConfig() → sinh mã ngẫu nhiên khớp /^[A-Z0-9]{6}$/', () => {
     const ROOM_CODE_REGEX = /^[A-Z0-9]{6}$/;
     mockWindow({ search: '', href: 'http://localhost/' });
     try {
       const config = getInitialLobbyConfig();
-      // Contract: phải sinh mã ngẫu nhiên, KHÔNG hardcoded 'VT8888'
-      expect(config.roomCode).toMatch(ROOM_CODE_REGEX);
-      expect(config.roomCode).not.toBe('VT8888');
-      expect(config.playerId).toBe('p1');
-      expect(config.isHost).toBe(true);
+      expect(config.roomCode).toBeNull();
+      expect(config.playerId).toBe('');
+      expect(config.isHost).toBe(false);
+
+      const created = createNewRoomConfig(true);
+      expect(created.roomCode).toMatch(ROOM_CODE_REGEX);
+      expect(created.roomCode).not.toBe('VT8888');
+      expect(created.playerId).toBe('p1');
+      expect(created.isHost).toBe(true);
     } finally {
       restoreWindow();
     }

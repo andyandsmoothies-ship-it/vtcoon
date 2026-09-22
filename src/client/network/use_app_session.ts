@@ -7,7 +7,7 @@ import { useGameWs, isGameRunningDelta, clearReconnectToken } from './use_game_w
 import { AudioEngine } from '../audio/audio_engine';
 import { getInitialBalanceForPlayerCount } from '../../domain/room';
 import { PLAYER_TOKEN_PALETTE } from '../../domain/theme';
-import { getInitialLobbyConfig, executeCellLanding } from '../offline_landing';
+import { executeCellLanding } from '../offline_landing';
 import type { ReasonCode } from '../../server/network/network_types';
 import type { DeltaPayload } from '../../server/session_manager';
 import { formatServerErrorMessage } from '../ui/actionable_notification';
@@ -28,6 +28,29 @@ export interface AppSessionHandlers {
   prevPlayerIndexRef: React.RefObject<number | null>;
   prevPositionRef: React.RefObject<number | null>;
   lastHandledLandingTimestampRef: React.RefObject<number | null>;
+}
+
+export function handleSessionServerError(
+  reasonCode: ReasonCode,
+  setErrorMessage: (msg: string | null) => void
+): (() => void) | undefined {
+  if (reasonCode === 'TOKEN_INVALID' || reasonCode === 'TOKEN_EXPIRED') {
+    // Phục hồi trong suốt phiên kết nối cũ/hết hạn qua cơ chế tự động CREATE_ROOM / JOIN_ROOM của useGameWs
+    return () => {};
+  }
+  const formatted = formatServerErrorMessage(reasonCode as string);
+  setErrorMessage(formatted);
+  if (reasonCode === 'NOT_ENOUGH_PLAYERS' || reasonCode === 'NOT_HOST' || reasonCode === 'ROOM_NOT_FOUND') {
+    useLobbyStore.getState().setGameStarted(false);
+  }
+  if (reasonCode === 'ROOM_NOT_FOUND' || reasonCode === 'ROOM_FULL') {
+    useLobbyStore.getState().resetLobby();
+    if (typeof window !== 'undefined' && window.history) {
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }
+  const timer = setTimeout(() => setErrorMessage(null), SERVER_ERROR_TOAST_TIMEOUT_MS);
+  return () => clearTimeout(timer);
 }
 
 export function useAppSession(
@@ -82,17 +105,7 @@ export function useAppSession(
   }, [lastLandedPawn, localPlayerId, handleCellLanding]);
 
   const handleError = useCallback((reasonCode: ReasonCode) => {
-    if (reasonCode === 'TOKEN_INVALID' || reasonCode === 'TOKEN_EXPIRED') {
-      // Phục hồi trong suốt phiên kết nối cũ/hết hạn qua cơ chế tự động CREATE_ROOM / JOIN_ROOM của useGameWs
-      return () => {};
-    }
-    const formatted = formatServerErrorMessage(reasonCode as string);
-    setErrorMessage(formatted);
-    if (reasonCode === 'NOT_ENOUGH_PLAYERS' || reasonCode === 'NOT_HOST' || reasonCode === 'ROOM_NOT_FOUND') {
-      useLobbyStore.getState().setGameStarted(false);
-    }
-    const timer = setTimeout(() => setErrorMessage(null), SERVER_ERROR_TOAST_TIMEOUT_MS);
-    return () => clearTimeout(timer);
+    return handleSessionServerError(reasonCode, setErrorMessage);
   }, [setErrorMessage]);
 
   const handleDelta = useCallback((delta: DeltaPayload) => {
@@ -170,10 +183,10 @@ export function useAppSession(
   }, []);
 
   const { isConnected, sendIntent, sendEmote, sendWsMessage } = useGameWs({
-    roomCode: roomCode || 'VT8888',
+    roomCode: roomCode || '',
     playerId: localPlayerId,
     isHost,
-    autoConnect: true,
+    autoConnect: Boolean(roomCode),
     onDelta: handleDelta,
     onError: handleError,
     onRoomStarted: handleRoomStarted,
@@ -189,20 +202,13 @@ export function useAppSession(
   useEffect(() => {
     AudioEngine.init();
 
-    if (!roomCode) {
-      const initCfg = getInitialLobbyConfig();
-      initLobby(initCfg.roomCode, initCfg.playerId, initCfg.isHost, initCfg.playerName);
-      useTelemetryStore.getState().setSessionMetadata({
-        roomCode: initCfg.roomCode,
-        seed: hashSeed(initCfg.roomCode),
-      });
-    } else {
+    if (roomCode) {
       useTelemetryStore.getState().setSessionMetadata({
         roomCode,
         seed: hashSeed(roomCode),
       });
     }
-  }, [roomCode, initLobby]);
+  }, [roomCode]);
 
   const gameInitializedRef = React.useRef(false);
 

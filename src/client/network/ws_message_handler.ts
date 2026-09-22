@@ -81,7 +81,7 @@ function handleWsError(
   msg: Extract<WsServerMessage, { type: 'ERROR' | 'INTENT_REJECTED' }>,
   ctx: WsMessageHandlerContext
 ): void {
-  if (msg.type === 'ERROR' && (msg.reasonCode === 'TOKEN_INVALID' || msg.reasonCode === 'TOKEN_EXPIRED' || msg.reasonCode === 'ROOM_NOT_FOUND')) {
+  if (msg.type === 'ERROR' && (msg.reasonCode === 'TOKEN_INVALID' || msg.reasonCode === 'TOKEN_EXPIRED' || (msg.reasonCode === 'ROOM_NOT_FOUND' && ctx.isHost))) {
     clearReconnectToken(ctx.roomCode);
     const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
     const isExplicitGuest = Boolean(params?.has('room')) && params?.get('host') !== 'true';

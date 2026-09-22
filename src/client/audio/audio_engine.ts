@@ -173,6 +173,7 @@ class AudioEngineImpl {
       if (typeof Howler !== 'undefined' && Howler.ctx && Howler.ctx.state === 'suspended') {
         void Howler.ctx.resume();
       }
+      void SoundEngine.resumeAudioContext();
     } catch {
       // Fallback an toàn khi truy cập AudioContext bị hạn chế
     }

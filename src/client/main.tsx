@@ -9,6 +9,7 @@ import { useLobbyStore } from './store/lobby_store';
 import { useEnvironmentStore } from './store/environment_store';
 import { useVfxStore } from './store/vfx_store';
 import { PreMatchDeck } from './ui/lobby/pre_match_deck';
+import { WelcomeHubModal } from './ui/lobby/welcome_hub_modal';
 import { getInitialBalanceForPlayerCount, type Player } from '../domain/room';
 import { AdminPortal } from './ui/admin/admin_portal';
 import { Suspense, lazy } from 'react';
@@ -39,7 +40,9 @@ if (typeof window !== 'undefined') {
 
   if (!useLobbyStore.getState().roomCode) {
     const initCfg = getInitialLobbyConfig();
-    useLobbyStore.getState().initLobby(initCfg.roomCode, initCfg.playerId, initCfg.isHost, initCfg.playerName);
+    if (initCfg.roomCode) {
+      useLobbyStore.getState().initLobby(initCfg.roomCode, initCfg.playerId, initCfg.isHost, initCfg.playerName);
+    }
   }
 }
 
@@ -208,18 +211,26 @@ export function App(): React.ReactElement {
         </Suspense>
       </div>
 
+      {/* Welcome Hub Modal: Khi chưa có phòng (!roomCode) */}
+      {!roomCode && (
+        <WelcomeHubModal />
+      )}
+
       {/* 2. Thẻ PreMatchDeck chuẩn bị phòng nổi cánh phải, trượt êm ra ngoài khi trận đấu bắt đầu */}
-      <div
-        className={`relative z-10 w-full h-full pointer-events-none transition-transform duration-500 ease-out ${
-          gameStarted ? 'translate-x-[calc(100%+3rem)] opacity-0 pointer-events-none' : 'translate-x-0 opacity-100'
-        }`}
-        aria-hidden={gameStarted}
-      >
-        <PreMatchDeck
-          sendWsMessage={session.sendWsMessage}
-          onStartGame={() => useLobbyStore.getState().setGameStarted(true)}
-        />
-      </div>
+      {roomCode && (
+        <div
+          className={`relative z-10 w-full h-full pointer-events-none transition-transform duration-500 ease-out ${
+            gameStarted ? 'translate-x-[calc(100%+3rem)] opacity-0 pointer-events-none' : 'translate-x-0 opacity-100'
+          }`}
+          aria-hidden={gameStarted}
+        >
+          <PreMatchDeck
+            sendWsMessage={session.sendWsMessage}
+            onStartGame={() => useLobbyStore.getState().setGameStarted(true)}
+            onLeaveRoom={handleLeaveRoom}
+          />
+        </div>
+      )}
 
       {/* 3. In-Game HUD: trượt êm vào màn hình khi gameStarted = true */}
       {gameStarted && (

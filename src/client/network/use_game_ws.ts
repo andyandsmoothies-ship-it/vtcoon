@@ -125,6 +125,7 @@ export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
   const lastActionTimeRef = useRef<number>(0);
 
   const connect = useCallback(() => {
+    if (!roomCode) return;
     if (wsRef.current && wsRef.current.readyState === 1) return;
     isManualDisconnectRef.current = false;
     if (reconnectTimerRef.current) {

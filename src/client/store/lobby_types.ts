@@ -89,4 +89,6 @@ export interface LobbyState {
   readonly resetLobby: () => void;
   readonly setMyPlayerId: (myPlayerId: string) => void;
   readonly syncLobbySlots: (players: ReadonlyArray<{ id: string; isHost: boolean; slotIndex: number; name?: string }>) => void;
+  readonly createCustomRoom: (isBotSolo?: boolean) => { roomCode: string; playerId: string };
+  readonly joinCustomRoom: (code: string) => { success: boolean; reasonCode?: string };
 }

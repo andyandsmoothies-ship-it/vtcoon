@@ -19,7 +19,7 @@ export function generateRandomRoomCode(): string {
 }
 
 export function getInitialLobbyConfig(search?: string): {
-  roomCode: string;
+  roomCode: string | null;
   playerId: string;
   isHost: boolean;
   playerName: string;
@@ -47,17 +47,31 @@ export function getInitialLobbyConfig(search?: string): {
     };
   }
 
-  // Sinh mã mới và lưu flag host
+  return {
+    roomCode: null,
+    playerId: '',
+    isHost: false,
+    playerName: '',
+  };
+}
+
+export function createNewRoomConfig(isHost = true): {
+  roomCode: string;
+  playerId: string;
+  isHost: boolean;
+  playerName: string;
+} {
   const randomCode = generateRandomRoomCode();
+  const targetPid = isHost ? 'p1' : 'p2';
   if (typeof window !== 'undefined') {
     window.sessionStorage?.setItem(`vtcoon_host_${randomCode}`, 'true');
-    window.history.replaceState(null, '', `?room=${randomCode}`);
+    window.history?.replaceState(null, '', `?room=${randomCode}`);
   }
   return {
     roomCode: randomCode,
-    playerId: 'p1',
-    isHost: true,
-    playerName: generateRandomAnimalName([], `${randomCode}_p1`),
+    playerId: targetPid,
+    isHost,
+    playerName: generateRandomAnimalName([], `${randomCode}_${targetPid}`),
   };
 }
 

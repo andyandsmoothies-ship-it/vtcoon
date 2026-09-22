@@ -13,6 +13,7 @@ import {
   createDefaultSlots,
   getNextBotPersonality,
 } from './lobby_types';
+import { createNewRoomConfig } from '../offline_landing';
 
 export * from './lobby_types';
 
@@ -219,6 +220,29 @@ export const useLobbyStore = create<LobbyState>((set, get) => ({
       return slot;
     });
     set({ slots: updatedSlots });
+  },
+
+  createCustomRoom: (isBotSolo?: boolean) => {
+    const cfg = createNewRoomConfig(true);
+    get().initLobby(cfg.roomCode, cfg.playerId, cfg.isHost, cfg.playerName);
+    if (isBotSolo) {
+      get().toggleBotSlot(1);
+      get().toggleBotSlot(2);
+      get().toggleBotSlot(3);
+    }
+    return { roomCode: cfg.roomCode, playerId: cfg.playerId };
+  },
+
+  joinCustomRoom: (code: string) => {
+    const cleanCode = code.trim().toUpperCase();
+    if (!/^[A-Z0-9]{6}$/.test(cleanCode)) {
+      return { success: false, reasonCode: 'INVALID_ROOM_CODE' };
+    }
+    get().initLobby(cleanCode, 'p2', false);
+    if (typeof window !== 'undefined' && window.history) {
+      window.history.replaceState({}, '', '?room=' + cleanCode);
+    }
+    return { success: true };
   },
 }));
 

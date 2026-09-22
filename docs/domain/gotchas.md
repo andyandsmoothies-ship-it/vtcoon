@@ -9,9 +9,9 @@
 | :--- | :--- | :--- |
 | `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78, #82, #104, #105, #106, #145, #146, #147, #159, #164, #174, #180, #188, #195, #196, #197, #200, #203, #215, #217, #218, #219, #220, #223 |
 | `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147, #190, #191, #195, #196, #197, #200, #206, #223 |
-| `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190, #200, #203, #209, #210, #211, #212, #213, #215, #217, #223, #224, #225, #226, #227 |
+| `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190, #200, #203, #209, #210, #211, #212, #213, #215, #217, #223, #224, #225, #226, #227, #231 |
 | `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #32, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #60, #61, #63, #69, #72, #74, #77, #80, #85, #86, #88, #89, #90, #91, #92, #93, #94, #95, #96, #101, #103, #109, #110, #114, #115, #116, #117, #120, #122, #123, #124, #125, #126, #127, #128, #129, #130, #133, #134, #135, #136, #140, #141, #144, #148, #159, #160, #161, #162, #163, #164, #165, #169, #175, #177, #189, #198, #200, #222 |
-| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192, #195, #196, #199, #201, #202, #204, #205, #206, #216, #217 |
+| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192, #195, #196, #199, #201, #202, #204, #205, #206, #216, #217, #231 |
 | `[UAT/TEST]` | Nghiệm Thu, Adversarial TDD, Ảnh Chụp Màn Hình (.jpg), Shell Escaping, File I/O Lock, Docker Healthcheck Timeout | #5, #28, #29, #31, #35, #52, #71, #73, #83, #84, #99, #100, #117, #124, #125, #130, #199 |
 | `[TELEMETRY]` | Giám Sát Hiệu Năng Thời Gian Thực, Chó Canh Phòng Bất Biến, Hộp Đen Tái Hiện Lỗi | #39, #62, #71, #75, #104, #114, #115, #135, #174, #200, #227 |
 | `[ARCH/REFACTOR]` | Tách Module Facade, Ngân Sách Render Loop, Chuẩn Hóa Môi Trường Build | #43, #98, #99 |
@@ -3846,5 +3846,34 @@
   3. **Server-Authoritative Turn End Execution**: Chỉ người chơi hiện tại theo SSOT (`room.players[room.currentPlayerIndex]`) mới được phép phát `INTENT_END_TURN`.
   4. **Active Session Query for Auctions**: Mọi thao tác đấu giá trong simulation phải tra cứu phiên trực tiếp qua `server.getRoomManager().getAuctionSession(roomCode)` để kiểm tra chính xác `session.declinedPlayerId` và lập tức dừng gửi `INTENT_AUCTION_PASS` ngay khi `room.phase !== TurnPhase.AuctionPhase`.
 - **Traceability**: `[TC-SIM165.01..04/MSS]`, `tests/simulation/imp165_four_player_gameplay_sync.test.ts`.
+
+---
+
+### 231. [UI/LOBBY][NET/SYNC] Welcome Hub & Controlled Intentional Room Creation Invariant (IMP-168)
+- **Bẫy nghiệp vụ & kỹ thuật**:
+  1. *Khởi tạo phòng tự động ngoài ý muốn (Accidental Auto-Room Invariant Trap)*: Khi người dùng mở trang chủ mà không kèm query parameter (`?room=`), hệ thống cũ tự động gọi `generateRandomRoomCode()`, ghi vào URL qua `replaceState` và kích hoạt WebSocket handshake tạo phòng. Điều này gây lãng phí tài nguyên server, khiến người dùng bị đưa vào sảnh mà không có chủ đích, và làm hỏng luồng chào mừng.
+  2. *Vòng lặp vô tận khi khách vào phòng không tồn tại (Guest ROOM_NOT_FOUND Auto-Reconnect Loop)*: Trong `ws_message_handler.ts`, khi nhận lỗi `ROOM_NOT_FOUND`, cơ chế fallback tự động gửi lại `JOIN_ROOM`. Nếu phòng thực sự không tồn tại trên server, server liên tục trả về `ROOM_NOT_FOUND` và client liên tục gửi lại `JOIN_ROOM`, gây kẹt mạng và làm treo trình duyệt.
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **Network Silence at Root URL**: `getInitialLobbyConfig()` khi URL không chứa `?room=` BẮT BUỘC trả về `{ roomCode: null, playerId: '', isHost: false, playerName: '' }` và TUYỆT ĐỐI không gọi `replaceState` hay `sessionStorage.setItem`.
+  2. **WebSocket Connect Guard**: Trong `useGameWs`, hàm `connect()` BẮT BUỘC có chốt chặn `if (!roomCode) return;` ở ngay đầu hàm. `useAppSession` truyền `autoConnect: Boolean(roomCode)` để giữ kết nối ở trạng thái im lặng hoàn toàn.
+  3. **Intentional Room Actions**: Việc tạo hoặc tham gia phòng phải thông qua hành động chủ đích: `createCustomRoom(isBotSolo?)` (gọi `createNewRoomConfig`) hoặc `joinCustomRoom(code)` sau khi kiểm tra biểu thức chính quy `/^[A-Z0-9]{6}$/`.
+  4. **Guest ROOM_NOT_FOUND Loop Termination**: Khi `msg.reasonCode === 'ROOM_NOT_FOUND'`, client CHỈ cho phép fallback `CREATE_ROOM` nếu `ctx.isHost === true`. Với khách (`isHost === false`), cấm gửi lại `JOIN_ROOM`; chỉ cập nhật trạng thái lỗi qua `ctx.setErrorReason` và `ctx.onError`.
+  5. **Clean Room Teardown**: Khi rời phòng (`handleLeaveRoom` hoặc `onLeaveRoom` trên `PreMatchDeck`), bắt buộc xóa sessionStorage `vtcoon_host_${roomCode}`, reset `lobbyStore`, xóa `playersInfo` và reset URL về `window.location.pathname`.
+- **Traceability**: `[TC-IMP168.01..20/MSS]`, `tests/client/imp168_welcome_hub_and_room_creation.test.ts`, `tests/server/imp165_multiplayer_lobby_sync.test.ts#TC-IMP165.01`.
+
+---
+
+### 232. [UI/UX][AUDIO/MOBILE] Welcome Hub Ergonomics, Input Enter Handler & Mobile AudioContext Resume Invariant (IMP-168 Addendum)
+- **Bẫy nghiệp vụ & kỹ thuật**:
+  1. *Kẹt tại sảnh trống khi phòng không tồn tại hoặc đã đầy (Orphaned Lobby Trap)*: Khi người chơi nhập mã phòng không tồn tại (`ROOM_NOT_FOUND`) hoặc phòng đã đủ 4 người (`ROOM_FULL`), `use_app_session.ts` trước đây chỉ gọi `setGameStarted(false)`. `useLobbyStore.roomCode` vẫn giữ mã phòng cũ, khiến người chơi bị mắc kẹt tại sảnh `PreMatchDeck` với WebSocket ngắt kết nối, buộc phải tự tìm nút "Về Menu".
+  2. *Thiếu bộ lắng nghe phím Enter trên ô nhập mã phòng (Desktop/Mobile Keyboard Frustration)*: Người chơi nhập đủ 6 ký tự mã phòng rồi nhấn phím Enter (hoặc nút Done/Go trên bàn phím ảo điện thoại) nhưng giao diện không phản hồi, buộc phải bấm chính xác nút "Vào Bàn".
+  3. *Trình duyệt di động phong tỏa Web Audio API (Mobile AudioContext Autoplay Restriction)*: Trên iOS Safari và Android Chrome, Web Audio API mặc định ở trạng thái `suspended`. Nếu không kích hoạt `AudioContext.resume()` ngay trong hành động chạm (touch/click) đầu tiên của người dùng ở Welcome Hub, nhạc nền và hiệu ứng âm thanh xúc giác (Tactile Synthesizer) sau khi vào trận sẽ bị câm hoàn toàn.
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **Session Error Auto-Teardown Invariant (`handleSessionServerError`)**: Khi server trả về `ROOM_NOT_FOUND` hoặc `ROOM_FULL`, `handleSessionServerError` BẮT BUỘC gọi `useLobbyStore.getState().resetLobby()` và xóa sạch query param URL qua `window.history.replaceState({}, '', window.location.pathname)`. Người dùng lập tức được đưa về `WelcomeHubModal` kèm theo thông báo lỗi nổi `ServerToast`, giải phóng 100% sảnh mồ côi.
+  2. **Unstale Enter Key Dispatch**: Ô nhập mã phòng gắn `onKeyDown` kiểm tra `e.key === 'Enter'`. Để chống bẫy stale closure trong React và đảm bảo bắt kịp tốc độ gõ phím nhanh của người dùng, hàm đọc giá trị mới nhất qua `(codeRef.current || code).trim().toUpperCase()` và kiểm tra regex `/^[A-Z0-9]{6}$/` trước khi gọi `joinCustomRoom`.
+  3. **Multi-Engine Audio Context Resume**: Cả 3 hành động tương tác chính tại Welcome Hub (`handleCreateRoom`, `handlePlayWithBots`, `handleJoinRoom`) đều đồng thời gọi `AudioEngine.resumeAudioContext()`. Hàm này đánh thức cả `Howler.ctx` và `SoundEngine.resumeAudioContext()`, đảm bảo toàn bộ hệ thống âm thanh sẵn sàng 100% trước khi chuyển cảnh vào game.
+- **Traceability**: `[TC-IMP168.20..24/MSS]`, `tests/client/imp168_welcome_hub_and_room_creation.test.ts#TC-IMP168.20-24`, `src/client/network/use_app_session.ts`, `src/client/ui/lobby/welcome_hub_modal.tsx`, `src/client/audio/audio_engine.ts`.
+
+
 
 
