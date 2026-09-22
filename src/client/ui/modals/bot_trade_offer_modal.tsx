@@ -161,7 +161,7 @@ export function BotTradeOfferModal({
 
             {/* Khối 3: Bù tiền & Thuế */}
             <div className="p-2.5 bg-[#F7F2E7] border border-slate-300 rounded-xl flex flex-col gap-1.5 text-xs">
-              <div className="flex justify-between items-center">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 min-w-0">
                 <span className="font-bold text-slate-700">Chênh Lệch Tiền Mặt:</span>
                 {price > 0 ? (
                   <span className="font-black text-emerald-700">+{formatCurrency(price)} (Bạn nhận thêm)</span>

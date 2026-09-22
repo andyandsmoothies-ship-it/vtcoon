@@ -225,20 +225,20 @@ export function TradeModal({
           </div>
 
           {!isMine && offered.length > 0 && (
-            <div className="mt-1.5 pt-1.5 border-t border-amber-200/60 flex items-center gap-1 flex-wrap text-[10px]">
+            <div className="mt-1.5 pt-1.5 border-t border-amber-200/60 flex items-center gap-1.5 flex-wrap text-[10px]">
               <span className="text-slate-500 font-medium">Gợi ý giá bán:</span>
-              <button type="button" onClick={() => onCash(price70)} className="px-1.5 py-0.5 bg-white hover:bg-amber-100 border border-amber-300 rounded text-amber-900 font-bold cursor-pointer">70% Sàn ({price70} Tr.)</button>
-              <button type="button" onClick={() => onCash(price100)} className="px-1.5 py-0.5 bg-white hover:bg-amber-100 border border-amber-300 rounded text-amber-900 font-bold cursor-pointer">100% Gốc ({price100} Tr.)</button>
-              <button type="button" onClick={() => onCash(price120)} className="px-1.5 py-0.5 bg-white hover:bg-amber-100 border border-amber-300 rounded text-amber-900 font-bold cursor-pointer">120% ({price120} Tr.)</button>
+              <button type="button" onClick={() => onCash(price70)} className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-bold inline-flex items-center justify-center border transition-all cursor-pointer touch-manipulation bg-white hover:bg-amber-100 border-amber-300 text-amber-900">70% Sàn ({price70} Tr.)</button>
+              <button type="button" onClick={() => onCash(price100)} className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-bold inline-flex items-center justify-center border transition-all cursor-pointer touch-manipulation bg-white hover:bg-amber-100 border-amber-300 text-amber-900">100% Gốc ({price100} Tr.)</button>
+              <button type="button" onClick={() => onCash(price120)} className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-bold inline-flex items-center justify-center border transition-all cursor-pointer touch-manipulation bg-white hover:bg-amber-100 border-amber-300 text-amber-900">120% ({price120} Tr.)</button>
             </div>
           )}
 
           {isMine && requested.length > 0 && (
-            <div className="mt-1.5 pt-1.5 border-t border-blue-200/60 flex items-center gap-1 flex-wrap text-[10px]">
+            <div className="mt-1.5 pt-1.5 border-t border-blue-200/60 flex items-center gap-1.5 flex-wrap text-[10px]">
               <span className="text-slate-500 font-medium">Gợi ý giá mua:</span>
-              <button type="button" onClick={() => onCash(reqPrice100)} className="px-1.5 py-0.5 bg-white hover:bg-blue-100 border border-blue-300 rounded text-blue-900 font-bold cursor-pointer">100% Gốc ({formatCurrency(reqPrice100)})</button>
-              <button type="button" onClick={() => onCash(reqPrice130)} className="px-1.5 py-0.5 bg-white hover:bg-blue-100 border border-blue-300 rounded text-blue-900 font-bold cursor-pointer">130% ({formatCurrency(reqPrice130)})</button>
-              <button type="button" onClick={() => onCash(reqPrice150)} className="px-1.5 py-0.5 bg-white hover:bg-blue-100 border border-blue-300 rounded text-blue-900 font-bold cursor-pointer">150% ({formatCurrency(reqPrice150)})</button>
+              <button type="button" onClick={() => onCash(reqPrice100)} className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-bold inline-flex items-center justify-center border transition-all cursor-pointer touch-manipulation bg-white hover:bg-blue-100 border-blue-300 text-blue-900">100% Gốc ({formatCurrency(reqPrice100)})</button>
+              <button type="button" onClick={() => onCash(reqPrice130)} className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-bold inline-flex items-center justify-center border transition-all cursor-pointer touch-manipulation bg-white hover:bg-blue-100 border-blue-300 text-blue-900">130% ({formatCurrency(reqPrice130)})</button>
+              <button type="button" onClick={() => onCash(reqPrice150)} className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-bold inline-flex items-center justify-center border transition-all cursor-pointer touch-manipulation bg-white hover:bg-blue-100 border-blue-300 text-blue-900">150% ({formatCurrency(reqPrice150)})</button>
             </div>
           )}
 

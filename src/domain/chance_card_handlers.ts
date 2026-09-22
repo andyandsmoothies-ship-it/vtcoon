@@ -37,10 +37,13 @@ function handleTaxAudit(player: Player, registry?: PropertyRegistry, stateMap?: 
   if (room) room.treasury = (room.treasury ?? 0) + penalty;
 }
 
-function handleContractPenalty(player: Player, players: Player[]): void {
+function handleContractPenalty(player: Player, players: Player[], room?: Room): void {
   player.balance -= 1000;
-  const opponents = players.filter((p) => p.id !== player.id);
-  if (opponents.length === 0) return;
+  const opponents = players.filter((p) => p.id !== player.id && !p.bankrupt);
+  if (opponents.length === 0) {
+    if (room) room.treasury = (room.treasury ?? 0) + 1000;
+    return;
+  }
   let poorest = opponents[0]!;
   for (let i = 1; i < opponents.length; i++) {
     if (opponents[i]!.balance < poorest.balance) poorest = opponents[i]!;
@@ -50,7 +53,7 @@ function handleContractPenalty(player: Player, players: Player[]): void {
 
 function handleFranchise(player: Player, players: Player[]): void {
   for (const p of players) {
-    if (p.id !== player.id) {
+    if (p.id !== player.id && !p.bankrupt) {
       p.balance -= 800;
       player.balance += 800;
     }
@@ -90,15 +93,16 @@ function handleMaForce(
 
   for (const [cellIndex, ownerId] of registry) {
     if (ownerId !== player.id && !isCellMortgaged(cellIndex, ownerId)) {
+      const seller = room?.players.find((p) => p.id === ownerId) ?? players.find((p) => p.id === ownerId);
+      if (!seller || seller.bankrupt) continue;
       const isProperty = BOARD_CONFIG[cellIndex]?.type === CellType.Property;
       const level = stateMap?.get(cellIndex)?.level ?? 0;
       if (isProperty && level === 0) {
         const deed = PROPERTY_DEEDS.get(cellIndex);
         const cost = deed ? Math.floor(deed.price * 1.2) : 0;
         if (player.balance >= cost) {
-          const seller = room?.players.find((p) => p.id === ownerId) ?? players.find((p) => p.id === ownerId);
           player.balance -= cost;
-          if (seller) seller.balance += cost;
+          seller.balance += cost;
           registry.set(cellIndex, player.id);
           return;
         }
@@ -210,7 +214,8 @@ const CHANCE_HANDLERS: Partial<Record<ChanceCardId, ChanceHandler>> = {
     if (room) room.treasury = (room.treasury ?? 0) + 500;
     player.extraTurns += 1;
   },
-  [ChanceCardId.CC_CONTRACT_PENALTY]: (player, players) => handleContractPenalty(player, players),
+  [ChanceCardId.CC_CONTRACT_PENALTY]: (player, players, _id, _mods, _reg, _sm, _bonus, room) =>
+    handleContractPenalty(player, players, room),
   [ChanceCardId.CC_LAND_CHANGE]: (player, _players, _id, _mods, registry, stateMap, _bonus, room) => {
     let targetC0: number | undefined;
     if (registry) {

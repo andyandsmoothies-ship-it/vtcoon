@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { HOSE_OUTCOMES } from '../../../domain/event_card_types';
 import { formatCurrency } from '../ui_helpers';
+import { useAudioStore } from '../../store/audio_store';
 
 export interface HoseModalProps {
   readonly myBalance?: number;
@@ -18,16 +19,27 @@ const STAKE_PRESETS = [500, 1000, 2000, 3000] as const;
 const DICE_ICONS = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'] as const;
 
 let sharedAudioCtx: AudioContext | null = null;
-function playFloorBellSound(): void {
+
+export function playFloorBellSound(): (() => void) | void {
   if (typeof window === 'undefined') return;
+  if (useAudioStore.getState().isMuted) return;
+
   try {
-    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
     if (!AudioCtx) return;
-    if (!sharedAudioCtx || sharedAudioCtx.state === 'closed') sharedAudioCtx = new AudioCtx();
-    if (sharedAudioCtx.state === 'suspended') sharedAudioCtx.resume().catch(() => {});
+    if (!sharedAudioCtx || sharedAudioCtx.state === 'closed' || sharedAudioCtx.constructor !== AudioCtx) {
+      sharedAudioCtx = new AudioCtx();
+    }
+    if (sharedAudioCtx.state === 'suspended') {
+      try {
+        sharedAudioCtx.resume().catch(() => {});
+      } catch {}
+    }
     const now = sharedAudioCtx.currentTime;
-    const osc1 = sharedAudioCtx.createOscillator(), osc2 = sharedAudioCtx.createOscillator();
+    const osc1 = sharedAudioCtx.createOscillator();
+    const osc2 = sharedAudioCtx.createOscillator();
     const gain = sharedAudioCtx.createGain();
+
     osc1.type = 'triangle';
     osc2.type = 'sine';
     osc1.frequency.setValueAtTime(880, now);
@@ -35,7 +47,38 @@ function playFloorBellSound(): void {
     gain.gain.setValueAtTime(0.2, now);
     gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.8);
     gain.connect(sharedAudioCtx.destination);
-    [osc1, osc2].forEach((osc) => { osc.connect(gain); osc.start(now); osc.stop(now + 0.8); });
+
+    [osc1, osc2].forEach((osc) => {
+      osc.connect(gain);
+      osc.start(now);
+      osc.stop(now + 0.8);
+    });
+
+    let cleanedUp = false;
+    let fallbackTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const cleanup = () => {
+      if (cleanedUp) return;
+      cleanedUp = true;
+      if (fallbackTimer) {
+        clearTimeout(fallbackTimer);
+        fallbackTimer = null;
+      }
+      try {
+        gain.disconnect();
+      } catch {}
+      try {
+        osc1.disconnect();
+      } catch {}
+      try {
+        osc2.disconnect();
+      } catch {}
+    };
+
+    osc1.onended = cleanup;
+    fallbackTimer = setTimeout(cleanup, 1200);
+
+    return cleanup;
   } catch {
     // Fallback im lặng nếu AudioContext bị chặn
   }
@@ -100,7 +143,7 @@ export function HoseModal({
       role="dialog"
       aria-modal="true"
       aria-label="Sàn Giao Dịch Chứng Khoán HOSE"
-      className="relative bg-[#FFFDF8] border-2 border-slate-900 rounded-2xl shadow-[0_6px_0_0_#0f172a] p-5 w-full max-w-md text-slate-900 select-none flex flex-col gap-3.5 overflow-hidden"
+      className="relative bg-[#FFFDF8] border-2 border-slate-900 rounded-2xl shadow-[0_6px_0_0_#0f172a] p-5 w-full max-w-md text-slate-900 select-none flex flex-col gap-3.5 max-h-[90dvh] overflow-y-auto"
     >
       {/* Thanh Ticker Bảng Điện Tử LED Trực Tuyến */}
       <div className="bg-[#F7F2E7] border border-slate-300 rounded-lg px-2.5 py-1 flex items-center justify-between text-[11px] font-mono tracking-wider overflow-hidden text-slate-800">
@@ -219,7 +262,7 @@ export function HoseModal({
             Số dư: <strong className="text-slate-900 font-black">{formatCurrency(myBalance)}</strong>
           </span>
         </div>
-        <div className="grid grid-cols-4 gap-2 font-mono">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 font-mono">
           {STAKE_PRESETS.map((amount) => {
             const isSelected = stake === amount;
             const disabled = isReviewingResult || !Number.isFinite(myBalance) || myBalance < amount;
@@ -243,7 +286,7 @@ export function HoseModal({
       </div>
 
       {/* Nút hành động 3D tactile vật lý */}
-      <div className="flex gap-3 pt-1">
+      <div className="sticky bottom-0 -mx-5 -mb-5 p-4 bg-[#FFFDF8] border-t border-slate-300 z-10 flex gap-3">
         {isReviewingResult ? (
           <button
             data-testid="hose-confirm-btn"
@@ -272,7 +315,7 @@ export function HoseModal({
                   : 'bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed'
               }`}
             >
-              {isRolling ? 'Đang Khớp Lệnh...' : `Đặt Cược ${formatCurrency(stake)}`}
+              {isRolling ? 'Đang Khớp Lệnh...' : `Cược ${formatCurrency(stake)}`}
             </button>
           </>
         )}

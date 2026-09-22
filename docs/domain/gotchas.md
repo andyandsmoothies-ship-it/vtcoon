@@ -10,7 +10,7 @@
 | `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78, #82, #104, #105, #106, #145, #146, #147, #159, #164, #174, #180, #188, #195, #196, #197, #200, #203, #215, #217, #218, #219, #220 |
 | `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147, #190, #191, #195, #196, #197, #200, #206 |
 | `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190, #200, #203, #209, #210, #211, #212, #213, #215, #217 |
-| `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #32, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #60, #61, #63, #69, #72, #74, #77, #80, #85, #86, #88, #89, #90, #91, #92, #93, #94, #95, #96, #101, #103, #109, #110, #114, #115, #116, #117, #120, #122, #123, #124, #125, #126, #127, #128, #129, #130, #133, #134, #135, #136, #140, #141, #144, #148, #159, #160, #161, #162, #163, #164, #165, #169, #175, #177, #189, #198, #200 |
+| `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #32, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #60, #61, #63, #69, #72, #74, #77, #80, #85, #86, #88, #89, #90, #91, #92, #93, #94, #95, #96, #101, #103, #109, #110, #114, #115, #116, #117, #120, #122, #123, #124, #125, #126, #127, #128, #129, #130, #133, #134, #135, #136, #140, #141, #144, #148, #159, #160, #161, #162, #163, #164, #165, #169, #175, #177, #189, #198, #200, #222 |
 | `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192, #195, #196, #199, #201, #202, #204, #205, #206, #216, #217 |
 | `[UAT/TEST]` | Nghiệm Thu, Adversarial TDD, Ảnh Chụp Màn Hình (.jpg), Shell Escaping, File I/O Lock, Docker Healthcheck Timeout | #5, #28, #29, #31, #35, #52, #71, #73, #83, #84, #99, #100, #117, #124, #125, #130, #199 |
 | `[TELEMETRY]` | Giám Sát Hiệu Năng Thời Gian Thực, Chó Canh Phòng Bất Biến, Hộp Đen Tái Hiện Lỗi | #39, #62, #71, #75, #104, #114, #115, #135, #174, #200 |
@@ -3684,4 +3684,52 @@
 - **Ràng buộc cứng & Thiết kế bất biến**:
   1. **Bankrupt Isolation Mandate**: Mọi domain service, card handler, hoặc quy trình duyệt `Player[]` BẮT BUỘC phải lọc qua `alivePlayers = players.filter(p => !p.bankrupt)`. Người chết: 0 nhận tiền, 0 bị trừ tiền, 0 đổi vị trí, 0 tính vào pool length, 0 tham gia mua lại cưỡng chế.
   2. **Treasury Fallback**: Mọi khoản phạt hoặc bồi thường khi không còn đối thủ sống sót (`opponents.length === 0`) BẮT BUỘC nộp vào Kho Bạc Nhà Nước (`room.treasury += amount`), tuyệt đối không để thất thoát dòng tiền.
+
+---
+
+### 221. [UI/CRAFT][SAFARI] Bất Biến Chân Trang Sticky Độc Lập, Touch Target 44px & Công Thái Học Mobile 360px (Sticky Action Footers & 360px Ergonomics - IMP-161)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Sticky Trong Cột Flex Bị Gãy Bối Cảnh (Broken Flex Column Sticky Trap)*: Khi đặt khối hành động `sticky bottom-0` bên trong Cột 2 (Cánh phải) của modal, trên màn hình di động khi layout chuyển sang flex-col (1 cột), Cột 1 (Hồ sơ BĐS & Phân khu) dài 500px nằm phía trên. Do bối cảnh cuộn sticky chỉ có hiệu lực bên trong container cha trực tiếp của Cột 2, người chơi trên mobile phải cuộn hết 500px của Cột 1 mới nhìn thấy các nút đặt giá và nút rút lui. Khi Cột 2 chưa vào tầm nhìn, sticky hoàn toàn không hoạt động. Ngoài ra, trên Desktop, việc dùng margin âm `-mx-5` bên trong Cột 2 làm khối footer tràn mép đè lấn sang Cột 1.
+  2. *Bẫy Teo Chữ Tên BĐS Khi Mở Rộng Nút Chữ 44px Trên Màn Hình 360px (Title Squeeze Layout Overflow Trap)*: Trong `property_portfolio_modal.tsx`, khi nâng cấp các nút hành động dạng text dài (`🤝 Đàm Phán`, `🔍 Xem Ô`) lên chuẩn `min-h-[44px]` kèm padding, trên viewport 360px (chỉ có ~332px chiều rộng khả dụng), 2 nút hành động chiếm tới 180px bề ngang. Hàng flex co rút tên BĐS còn lại đúng 8px khiến tên biến thành dấu ba chấm cụt lủn `...`.
+  3. *Bẫy Trình Duyệt Di Động (Mobile Browser Safari/WebKit Dynamic Viewport & Truncate Trap)*:
+     - Trên iOS Safari, việc sử dụng `max-h-[90vh]` khiến modal bị thanh địa chỉ (URL address bar) và thanh công cụ dưới đáy che khuất phần chân trang khi thanh này bung ra. Bắt buộc dùng `max-h-[90dvh]` (Dynamic Viewport Height).
+     - Trên Safari WebKit, thuộc tính `truncate` (`text-overflow: ellipsis`) trên thẻ flex child không hoạt động nếu phần tử con hoặc container cha thiếu `min-w-0`, dẫn đến tràn ngang (horizontal overflow).
+  4. *Bẫy Bất Đối Xứng Chiều Cao Lưới Nút Khi Nội Dung Khác Nhau (Button Grid Asymmetry Trap)*: Trong `compulsory_buyout_modal.tsx`, nút 1 chỉ có 1 dòng chữ ("Từ Chối"), nút 2 có 2 dòng chữ kèm số tiền ("Xác Nhận Mua Lại / 1.500 Tr."). Khi nút 1 dùng `py-3` và nút 2 dùng `py-2`, trên CSS Grid 2 cột, 2 nút bị lệch đường đáy và khác biệt chiều cao thị giác.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Root-Level Sticky Action Footer Invariant**:
+     - Mọi cụm nút hành động quyết định thời gian thực (Đấu giá, HOSE) BẮT BUỘC được trích xuất thành khối Footer ghim cố định độc lập ở đáy root modal: `sticky bottom-0 -mx-3.5 -mb-3.5 sm:-mx-5 sm:-mb-5 p-3.5 sm:p-4 bg-[#FFFBEB] z-20 shadow-[0_-4px_12px_rgba(0,0,0,0.06)]`.
+     - Trên mobile: Nút bấm luôn nổi trên màn hình ngay khi mở modal, người chơi không phải cuộn để thao tác.
+     - Trên desktop: Footer trải đều toàn bộ bề ngang modal, không xâm lấn giữa các cột.
+  2. **Mobile Icon Button Condensation Invariant**:
+     - Khi không gian ngang hàng danh sách BĐS hẹp (< 640px), các nút hành động phụ trợ BẮT BUỘC chuyển đổi thành icon nút chạm vuông chuẩn `min-h-[44px] min-w-[44px]` (chỉ hiện icon `🤝`, `🔍`, ẩn nhãn chữ `hidden sm:inline`).
+     - Tiết kiệm >= 60px bề ngang, bảo vệ 100% không gian hiển thị cho tiêu đề và tên BĐS.
+  3. **Cross-Browser Dynamic Viewport & WebKit Truncate Invariant**:
+     - Toàn bộ modal có nội dung dài hoặc cuộn BẮT BUỘC sử dụng `max-h-[90dvh] overflow-y-auto`.
+     - Toàn bộ flex container chứa văn bản cần cắt bớt BẮT BUỘC bổ sung `min-w-0` để bảo đảm `truncate` hoạt động chuẩn trên Safari WebKit.
+     - Toàn bộ nút bấm và chip tương tác bổ sung `touch-manipulation` để triệt tiêu 300ms tap delay trên di động.
+  4. **Equal Height Grid Button Invariant**:
+     - Các nút đặt cạnh nhau trong CSS Grid hành động BẮT BUỘC dùng chung thuộc tính chiều cao `h-full min-h-[48px]` kết hợp `flex items-center justify-center` để tự động kéo dãn khớp 100% chiều cao và đường đáy, bất kể số dòng văn bản bên trong.
+
+---
+
+### 222. [3D/RENDER][SAFARI] Bất Biến Polyfill W3C roundRect, WebGL Context Loss & Phòng Thủ Rò Rỉ Bộ Nhớ Audio/Texture (IMP-162)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Safari Legacy WebKit crash do thiếu `roundRect`*: Trên iOS Safari < 16.0 và một số trình duyệt nhúng WebKit, `CanvasRenderingContext2D.prototype.roundRect` không tồn tại, khiến các thủ tục vẽ Canvas 2D / procedural texture crash `TypeError: ctx.roundRect is not a function`.
+  2. *Bẫy WebGL Context Loss trên thiết bị di động*: Khi mobile device chuyển tab, chạy đa nhiệm hoặc tràn VRAM, trình duyệt phát sự kiện `webglcontextlost`. Nếu thiếu `e.preventDefault()`, WebGL context bị huỷ vĩnh viễn không thể khôi phục, dẫn đến màn hình đen bàn cờ. Đồng thời khi context được phục hồi (`webglcontextrestored`), các texture cũ đã bị vô hiệu hóa nhưng vẫn nằm trong cache Map, dẫn đến lỗi render texture đen hoặc memory leak.
+  3. *Bẫy rò rỉ WebAudio Node & Dangling Timers*: Khi modal (như HOSE) phát âm thanh sàn giao dịch, nếu người dùng tắt tiếng (`isMuted: true`), các AudioNode vẫn có thể được tạo vô ích. Khi AudioContext ở trạng thái `suspended`, sự kiện `onended` không bao giờ bắn, khiến các AudioNode và gain node không được `disconnect()`, dẫn đến rò rỉ audio bus.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **W3C Standard roundRect Polyfill Invariant**:
+     - Chuẩn hóa tọa độ âm theo W3C spec: `if (w < 0) { x += w; w = -w; } if (h < 0) { y += h; h = -h; }`.
+     - Kiểm tra bán kính không âm: ném `RangeError` nếu có bán kính < 0 hoặc NaN.
+     - Tỷ lệ co giãn tỉ lệ W3C (proportional scaling factor): khi tổng bán kính các góc liền kề vượt quá chiều rộng hoặc chiều cao, bắt buộc tính hệ số `scale` co đồng bộ toàn bộ bán kính để tránh tự giao cắt (self-intersecting).
+  2. **WebGL Context Loss Interception & Cache Purge Invariant**:
+     - `webglcontextlost`: BẮT BUỘC `e.preventDefault()` để cho phép trình duyệt kích hoạt phục hồi WebGL.
+     - `webglcontextrestored`: BẮT BUỘC gọi `clearAll3DTextureCaches()` để giải phóng GPU memory cũ và giải phóng toàn bộ 6 cache textures 3D (`tile`, `standee`, `mascot`, `heritage`, `price`, `emote`).
+     - Mọi hàm xóa cache texture 3D BẮT BUỘC duyệt qua các instance CanvasTexture / Texture và gọi `.dispose()` trước khi `.clear()`.
+  3. **WebAudio Node Idempotent Disposal & Fallback Invariant**:
+     - Kiểm tra `useAudioStore.getState().isMuted` trước khi khởi tạo bất kỳ oscillator hay gain node nào.
+     - Cleanup function phải idempotent (chỉ dọn 1 lần), bọc `disconnect()` trong try/catch để nuốt lỗi DOMException.
+     - Thiết lập timer dự phòng 1200ms kích hoạt cleanup phòng khi AudioContext bị suspended hoặc tab bị background.
+
+
 

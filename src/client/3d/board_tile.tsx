@@ -46,6 +46,11 @@ export function getStandeeWebpUrl(index: number): string {
 export const standeeWebpCache = new Map<number, Texture | null>();
 
 export function clearStandeeWebpCache(): void {
+  for (const tex of standeeWebpCache.values()) {
+    if (tex && typeof tex.dispose === 'function') {
+      tex.dispose();
+    }
+  }
   standeeWebpCache.clear();
 }
 

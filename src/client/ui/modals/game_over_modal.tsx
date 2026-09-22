@@ -154,7 +154,7 @@ export function GameOverModal({
 
   return (
     <div
-      className="w-full max-w-xl bg-[#FFFDF8] border-2 border-slate-900 rounded-2xl shadow-[0_6px_0_0_#0f172a] p-6 text-slate-900 flex flex-col relative animate-in fade-in zoom-in-95 duration-200 select-none"
+      className="w-full max-w-xl max-h-[90dvh] overflow-y-auto bg-[#FFFDF8] border-2 border-slate-900 rounded-2xl shadow-[0_6px_0_0_#0f172a] p-6 text-slate-900 flex flex-col relative animate-in fade-in zoom-in-95 duration-200 select-none"
       data-testid="game-over-modal"
     >
       {/* Header Vinh Danh Quán Quân */}

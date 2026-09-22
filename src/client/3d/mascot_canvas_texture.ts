@@ -7,6 +7,9 @@ const textureCache = new Map<string, CanvasTexture>();
  * Xóa sạch bộ nhớ đệm Mascot Texture (phục vụ dọn rác và unit test cô lập)
  */
 export function clearMascotTextureCache(): void {
+  for (const tex of textureCache.values()) {
+    if (tex && typeof tex.dispose === 'function') tex.dispose();
+  }
   textureCache.clear();
 }
 

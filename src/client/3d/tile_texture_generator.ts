@@ -382,6 +382,13 @@ export function getStandeeTexture(index: number): CanvasTexture | null {
  * Xóa cache texture cho môi trường test và hot-reload
  */
 export function clearTileTextureCache(): void {
+  for (const tex of tileTextureCache.values()) {
+    if (tex && typeof tex.dispose === 'function') tex.dispose();
+  }
+  for (const tex of standeeTextureCache.values()) {
+    if (tex && typeof tex.dispose === 'function') tex.dispose();
+  }
   tileTextureCache.clear();
   standeeTextureCache.clear();
+  tileImageCache.clear();
 }

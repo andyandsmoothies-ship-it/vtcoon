@@ -16,6 +16,13 @@ export interface OwnerPricePillProps {
 
 const priceTextureCache = new Map<string, CanvasTexture>();
 
+export function clearPriceTextureCache(): void {
+  for (const tex of priceTextureCache.values()) {
+    if (tex && typeof tex.dispose === 'function') tex.dispose();
+  }
+  priceTextureCache.clear();
+}
+
 export function getPriceCanvasTexture(text: string, color: string): CanvasTexture | null {
   if (typeof document === 'undefined' || !text) return null;
   const key = `${text}_${color}`;

@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import './3d/r3f_fiber_shield';
+import './polyfills/canvas_round_rect';
 import { HudContainer } from './ui/hud_container';
 import { useGameStore } from './store/game_store';
 import { useLobbyStore } from './store/lobby_store';

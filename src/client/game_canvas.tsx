@@ -14,6 +14,8 @@ export {
 
 import React, { useRef, useEffect } from 'react';
 import './3d/r3f_fiber_shield';
+import './polyfills/canvas_round_rect';
+import { clearAll3DTextureCaches } from './3d/texture_cache_manager';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, ContactShadows, Environment } from '@react-three/drei';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
@@ -270,6 +272,43 @@ export function AdaptiveCinematicCamera({
   );
 }
 
+/**
+ * Attaches WebGL context loss and restore listeners to prevent unrecoverable context loss
+ * and trigger texture cache clearing upon context restoration.
+ */
+export function attachWebGLContextHandlers(
+  canvas: HTMLCanvasElement | EventTarget,
+  onRestored?: () => void
+): () => void {
+  const handleContextLost = (e: Event) => {
+    e.preventDefault();
+    console.warn('[WebGL] Context lost detected. Default prevented to allow restoration.');
+  };
+  const handleContextRestored = () => {
+    console.info('[WebGL] Context restored. Purging stale textures.');
+    onRestored?.();
+  };
+
+  canvas.addEventListener('webglcontextlost', handleContextLost);
+  canvas.addEventListener('webglcontextrestored', handleContextRestored);
+
+  return () => {
+    canvas.removeEventListener('webglcontextlost', handleContextLost);
+    canvas.removeEventListener('webglcontextrestored', handleContextRestored);
+  };
+}
+
+function WebGLContextWatcher(): null {
+  const { gl } = useThree();
+  useEffect(() => {
+    if (!gl?.domElement) return;
+    return attachWebGLContextHandlers(gl.domElement, () => {
+      clearAll3DTextureCaches();
+    });
+  }, [gl]);
+  return null;
+}
+
 export interface GameCanvasProps {
   readonly players?: readonly Player[];
   readonly isLobby?: boolean;
@@ -281,6 +320,12 @@ export function GameCanvas({
   isLobby = false,
   isMobile: propIsMobile,
 }: GameCanvasProps): React.ReactElement {
+  useEffect(() => {
+    return () => {
+      clearAll3DTextureCaches();
+    };
+  }, []);
+
   const [isAutoMobile, setIsAutoMobile] = React.useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
     return window.innerWidth < 768 || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
@@ -348,6 +393,7 @@ export function GameCanvas({
             <React.Suspense fallback={null}>
               <Environment preset="city" />
             </React.Suspense>
+            <WebGLContextWatcher />
             <PerfTelemetryTracker />
 
             {isLobby ? (

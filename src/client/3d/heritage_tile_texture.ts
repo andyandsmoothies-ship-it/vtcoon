@@ -168,5 +168,8 @@ export function getHeritageEncausticTileTexture(): CanvasTexture | null {
  * Xóa cache phục vụ kiểm thử đơn vị
  */
 export function clearHeritageTileTextureCache(): void {
+  if (cachedEncausticTexture && typeof cachedEncausticTexture.dispose === 'function') {
+    cachedEncausticTexture.dispose();
+  }
   cachedEncausticTexture = null;
 }

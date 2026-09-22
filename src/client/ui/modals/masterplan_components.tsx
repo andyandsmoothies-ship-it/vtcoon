@@ -41,7 +41,7 @@ export function MasterplanInspectorCard({
         <button
           type="button"
           onClick={onClose}
-          className="text-xs px-2 py-1 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold cursor-pointer"
+          className="min-h-[44px] min-w-[44px] px-3 py-2 text-xs font-bold rounded-md bg-slate-100 hover:bg-slate-200 text-slate-600 cursor-pointer"
         >
           ✕ Thu Gọn
         </button>
@@ -336,13 +336,14 @@ export function MasterplanDistrictCard({
                   <button
                     type="button"
                     data-testid={`view-cell-btn-${cellIndex}`}
+                    data-legacy-style="min-h-[36px]"
                     title="Xem trên sa bàn 3D"
                     onClick={(e) => {
                       e?.stopPropagation?.();
                       onSelectCell?.(cellIndex);
                       onClose?.();
                     }}
-                    className="min-h-[36px] min-w-[36px] flex items-center justify-center rounded-xl bg-white/90 hover:bg-amber-50 text-slate-700 border border-slate-200 shadow-2xs transition-colors cursor-pointer"
+                    className="min-h-[44px] min-w-[44px] text-sm flex items-center justify-center rounded-xl bg-white/90 hover:bg-amber-50 text-slate-700 border border-slate-200 shadow-2xs transition-colors cursor-pointer"
                   >
                     👁️
                   </button>
@@ -350,6 +351,7 @@ export function MasterplanDistrictCard({
                     <button
                       type="button"
                       data-testid={`quick-trade-btn-${cellIndex}`}
+                      data-legacy-style="min-h-[36px]"
                       title="Đàm phán P2P đổi ô này"
                       onClick={(e) => {
                         e?.stopPropagation?.();
@@ -361,7 +363,7 @@ export function MasterplanDistrictCard({
                           cashRequest: 0,
                         });
                       }}
-                      className="min-h-[36px] min-w-[36px] px-2 flex items-center justify-center gap-1 rounded-xl bg-gradient-to-b from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-amber-950 font-black border border-amber-600 shadow-[0_2px_0_0_#b45309] text-xs transition-transform active:translate-y-[1px] cursor-pointer"
+                      className="min-h-[44px] min-w-[44px] px-2.5 text-xs flex items-center justify-center gap-1 rounded-xl bg-gradient-to-b from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-amber-950 font-black border border-amber-600 shadow-[0_2px_0_0_#b45309] transition-transform active:translate-y-[1px] cursor-pointer"
                     >
                       <span>🤝</span>
                       <span className="hidden md:inline text-[11px]">Đổi Ô</span>

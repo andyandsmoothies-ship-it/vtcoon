@@ -1,5 +1,6 @@
 // [UI-S01/MSS][UI-S03/MSS][UI-S04/MSS] Game Store Types, Interfaces & Payloads
 import type { EventCardInfo, MarketModifier, PendingBuyoutSession } from '../../domain/room';
+import type { BotPersonality } from '../../domain/bot/bot_types';
 
 export interface PawnAnimationState {
   readonly playerId: string;
@@ -34,6 +35,8 @@ export interface PlayerHudInfo {
   readonly skipNextTurn?: boolean;
   readonly consecutiveDoubles?: number;
   readonly bankrupt?: boolean;
+  readonly isBankrupt?: boolean;
+  readonly personality?: BotPersonality;
   readonly isBot?: boolean;
   readonly overdraftRoundsLeft?: number;
   readonly pawnSlot?: number;

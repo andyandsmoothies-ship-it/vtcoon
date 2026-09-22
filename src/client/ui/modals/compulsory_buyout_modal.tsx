@@ -155,7 +155,7 @@ export function CompulsoryBuyoutModal({
             type="button"
             data-testid="buyout-decline-btn"
             onClick={onDecline}
-            className="h-11 px-4 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs uppercase tracking-wider transition-colors active:translate-y-0.5 shadow-sm"
+            className="h-full min-h-[48px] px-4 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs uppercase tracking-wider transition-colors active:translate-y-0.5 shadow-sm inline-flex items-center justify-center cursor-pointer"
           >
             ✕ Bỏ Qua
           </button>
@@ -164,7 +164,7 @@ export function CompulsoryBuyoutModal({
             data-testid="buyout-confirm-btn"
             onClick={() => onBuyout(cellIndex)}
             disabled={!canAfford}
-            className={`h-11 px-4 rounded-xl font-bold text-xs uppercase tracking-wider text-white shadow-md transition-all active:translate-y-0.5 flex items-center justify-center gap-1.5 ${
+            className={`h-full min-h-[48px] px-4 rounded-xl font-bold text-xs uppercase tracking-wider text-white shadow-md transition-all active:translate-y-0.5 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 leading-tight cursor-pointer ${
               canAfford
                 ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-700/20'
                 : 'bg-slate-400 cursor-not-allowed opacity-60'

@@ -47,7 +47,14 @@ export function PawnMesh({ color }: { readonly color: string }): React.ReactElem
   );
 }
 
-const emoteCanvasCache = new Map<string, CanvasTexture>();
+export const emoteCanvasCache = new Map<string, CanvasTexture>();
+
+export function clearEmoteCanvasCache(): void {
+  for (const tex of emoteCanvasCache.values()) {
+    if (tex && typeof tex.dispose === 'function') tex.dispose();
+  }
+  emoteCanvasCache.clear();
+}
 function getEmoteBillboardTexture(icon: string): CanvasTexture | null {
   if (typeof document === 'undefined') return null;
   const cached = emoteCanvasCache.get(icon);

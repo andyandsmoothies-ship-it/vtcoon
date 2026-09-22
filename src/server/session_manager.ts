@@ -92,6 +92,54 @@ export interface DeltaPayload {
   readonly activeModifiers?:     ReadonlyArray<MarketModifier>;
 }
 
+function buildAuctionDelta(
+  room: Room,
+  auctions?: Map<string, AuctionSession>,
+  lastAuctionResults?: Map<string, { cellIndex: number; winnerId?: string | null; winningBid: number; isForeclosure?: boolean; finalPrice?: number }>,
+): AuctionPayload | null | undefined {
+  if (room.phase === TurnPhase.AuctionPhase && auctions) {
+    const session = auctions.get(room.roomCode);
+    if (session) {
+      const timeRemaining = session.endTime
+        ? Math.max(0, Math.ceil((session.endTime - Date.now()) / 1000))
+        : 0;
+      return {
+        cellIndex: session.cellIndex,
+        currentBid: session.highestBid,
+        startingBid: session.startingBid,
+        highestBidderId: session.highestBidder ?? null,
+        timeRemaining,
+        declinedPlayerId: session.declinedPlayerId,
+        ...(session.passedPlayers && session.passedPlayers.size > 0
+          ? { passedPlayerIds: Array.from(session.passedPlayers) }
+          : {}),
+        ...(session.insolvencyPlayerId ? {
+          insolvencyPlayerId: session.insolvencyPlayerId,
+          isForeclosure: true,
+        } : {}),
+      };
+    }
+  } else {
+    const lastRes = room.lastAuctionResult ?? lastAuctionResults?.get(room.roomCode);
+    if (lastRes) {
+      return {
+        cellIndex: lastRes.cellIndex ?? 0,
+        currentBid: lastRes.winningBid,
+        startingBid: lastRes.winningBid,
+        highestBidderId: lastRes.winnerId ?? null,
+        timeRemaining: 0,
+        isConcluded: true,
+        winnerId: lastRes.winnerId ?? null,
+        finalPrice: lastRes.finalPrice ?? lastRes.winningBid,
+        ...(lastRes.isForeclosure ? { isForeclosure: true } : {}),
+      };
+    } else if (auctions) {
+      return null;
+    }
+  }
+  return undefined;
+}
+
 export function buildDeltaFromRoom(
   room: Room,
   registry: PropertyRegistry,
@@ -138,47 +186,7 @@ export function buildDeltaFromRoom(
     ...(p.consecutiveDoubles !== undefined ? { consecutiveDoubles: p.consecutiveDoubles } : {}),
   }));
 
-  let auction: AuctionPayload | null | undefined = undefined;
-  if (room.phase === TurnPhase.AuctionPhase && auctions) {
-    const session = auctions.get(room.roomCode);
-    if (session) {
-      const timeRemaining = session.endTime
-        ? Math.max(0, Math.ceil((session.endTime - Date.now()) / 1000))
-        : 0;
-      auction = {
-        cellIndex: session.cellIndex,
-        currentBid: session.highestBid,
-        startingBid: session.startingBid,
-        highestBidderId: session.highestBidder ?? null,
-        timeRemaining,
-        declinedPlayerId: session.declinedPlayerId,
-        ...(session.passedPlayers && session.passedPlayers.size > 0
-          ? { passedPlayerIds: Array.from(session.passedPlayers) }
-          : {}),
-        ...(session.insolvencyPlayerId ? {
-          insolvencyPlayerId: session.insolvencyPlayerId,
-          isForeclosure: true,
-        } : {}),
-      };
-    }
-  } else {
-    const lastRes = room.lastAuctionResult ?? lastAuctionResults?.get(room.roomCode);
-    if (lastRes) {
-      auction = {
-        cellIndex: lastRes.cellIndex ?? 0,
-        currentBid: lastRes.winningBid,
-        startingBid: lastRes.winningBid,
-        highestBidderId: lastRes.winnerId ?? null,
-        timeRemaining: 0,
-        isConcluded: true,
-        winnerId: lastRes.winnerId ?? null,
-        finalPrice: lastRes.finalPrice ?? lastRes.winningBid,
-        ...(lastRes.isForeclosure ? { isForeclosure: true } : {}),
-      };
-    } else if (auctions) {
-      auction = null;
-    }
-  }
+  const auction = buildAuctionDelta(room, auctions, lastAuctionResults);
 
   let pendingTradeOffer: PendingTradeOfferDelta | null | undefined = undefined;
   const pendingSession = pendingTradeManager.getSession(room.roomCode);

@@ -39,20 +39,24 @@ Kỹ năng **Impeccable** nâng chuẩn thiết kế đồ họa 2D lên tầm t
 - **Các bước thực hiện**:
   1. Xác định ngữ cảnh màn hình và thành phần UI cần đánh giá.
   2. Phân tích 4 khía cạnh: Chiều sâu xúc giác (Tactile Depth), Phân tầng thị giác (Hierarchy), Bảng màu & Tương phản, Chuyển động & Phản hồi tương tác.
-  3. Lập danh sách tối đa 8 lỗi vật lý cụ thể (P1-P8), gắn nhãn anti-pattern nếu vi phạm.
+  3. Lập danh sách tối đa 8 lỗi vật lý cụ thể (P1-P8), gắn nhãn anti-pattern nếu vi phạm kèm kích thước viewport xảy ra lỗi (`@360px`, `@768px`, `@1440px`).
   4. Đưa ra phán quyết disposition: `recapture | rebuild | fix | ship`.
   5. Luôn xác định mục `keep` (nét tinh hoa bắt buộc giữ lại, cấm làm mất).
 
-### 2. `/impeccable audit` - Kiểm Tra Tĩnh Toàn Diện Mã Nguồn
-- **Mục tiêu**: Quét mã nguồn để phát hiện vi phạm quy chuẩn thiết kế trước khi đưa vào sản xuất.
+### 2. `/impeccable audit` - Kiểm Tra Toàn Diện Mã Nguồn & Bố Cục
+- **Mục tiêu**: Quét mã nguồn và bố cục giao diện để phát hiện vi phạm quy chuẩn thiết kế trước khi đưa vào sản xuất.
 - **Các bước thực hiện**:
   1. Chạy linter nội bộ tự đứng vững: `npm run lint:ui`.
-  2. Kiểm tra 4 anti-patterns cấm kỵ:
+  2. Kiểm tra các anti-patterns cấm kỵ cốt lõi:
      - `border-accent-on-rounded` (viền directional trên phần tử bo góc).
      - `bounce-easing` (hiệu ứng nảy lò xo rẻ tiền hoặc overshoot > 1.0).
      - `gray-on-color` (chữ xám đen đè trực tiếp lên nền màu sặc sỡ).
      - `gradient-text` (chữ cắt dải màu làm giảm khả năng đọc).
-  3. Kiểm tra tính khả dụng và trợ năng: Kích thước vùng bấm tối thiểu 44x44px (`min-h-[44px] min-w-[44px]`), trạng thái focus-visible đầy đủ (`focus-visible:ring-2`).
+     - `undersized-ui-text` (chữ chức năng hoặc nút bấm li ti < 11px).
+     - `first-viewport-column-overflow` (cột cao đẩy trôi footer hành động hoặc tràn quá viewport fold).
+     - `cramped-padding` & `text-overflow` (nội dung tràn viền hoặc viền quá sát < 8px trên mobile hẹp mà thiếu truncate/min-w-0).
+     - `nested-cards` (lồng ghép thẻ viền xám thừa thãi trên nền thẻ gây nhiễu thị giác).
+  3. Kiểm tra tính khả dụng và trợ năng: Kích thước vùng bấm tối thiểu 44x44px (`min-h-[44px] min-w-[44px]`), trạng thái focus-visible đầy đủ (`focus-visible:ring-2`), độ tương thích đa màn hình từ `@360px` đến `@1440px`.
 
 ### 3. `/impeccable polish` - Nâng Cấp Xúc Giác Thượng Lưu
 - **Mục tiêu**: Biến một giao diện "chạy được chức năng" thành một trải nghiệm xúc giác sang trọng.
@@ -82,6 +86,10 @@ Kỹ năng **Impeccable** nâng chuẩn thiết kế đồ họa 2D lên tầm t
 | **`bounce-easing`** | `animate-bounce` hoặc `cubic-bezier` có overshoot > 1.0 | Tạo cảm giác đồ họa đồ chơi, lơ lửng, thiếu độ đanh chắc | Dùng đường cong dứt khoát: `cubic-bezier(0.16, 1, 0.3, 1)` |
 | **`gray-on-color`** | `bg-amber-400 text-slate-950` | Độ tương phản đục, thiếu hài hòa sắc độ thị giác | Dùng chữ trắng (`text-white`) hoặc chữ đậm cùng tông (`text-amber-950`) |
 | **`gradient-text`** | `bg-clip-text text-transparent bg-gradient-...` | Nhìn rẻ tiền kiểu template web quảng cáo, viền chữ răng cưa | Dùng chữ khối đồng nhất sắc nét: `text-amber-400 font-black tracking-tight` |
+| **`undersized-ui-text`** | `text-[9px]`, `text-[10px]` trên nhãn tương tác hoặc nút bấm | Khó đọc trên thiết bị di động, vi phạm sàn hiển thị thông tin | Sàn kích thước chữ tối thiểu `text-[11px]` (ưu tiên `text-xs font-bold`) |
+| **`first-viewport-column-overflow`** | Cột nội dung quá dài không có scroll riêng, đẩy cụm nút hành động rớt khỏi màn hình | Mất khả năng thao tác tức thì của người chơi trên màn hình dọc | Bố cục sticky footer độc lập ở root container, tách scroll cho vùng dữ liệu |
+| **`cramped-padding`** | Chữ hoặc phần tử con chạm sát mép viền thẻ (`px-1`, `p-0.5` trên khối lớn) hoặc tràn chữ thiếu `truncate` + `min-w-0` | Bức bối thị giác, chữ bị cắt nham nhở trên mobile 360px | Đệm tối thiểu `px-2` đến `px-3`, bọc `truncate` kèm `min-w-0` trong khối flex |
+| **`nested-cards`** | Thẻ xám lồng trong thẻ xám (`bg-slate-100` trong `bg-slate-50` với nhiều lớp `border`) | Gây nhiễu thị giác, nặng nề, làm loãng điểm nhấn của sa bàn | Phẳng hóa phân cấp bằng khoảng cách whitespace, divider mảnh hoặc nền tương phản rõ |
 
 ---
 

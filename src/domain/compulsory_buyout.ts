@@ -29,6 +29,7 @@ export function isEligibleForCompulsoryBuyout(
   if (state?.isMortgaged) return false;
 
   const owner = room?.players.find((p) => p.id === ownerId) ?? players?.find((p) => p.id === ownerId);
+  if (owner?.bankrupt) return false;
   if (owner?.mortgagedProperties?.includes(cellIndex)) return false;
 
   if (hasMonopoly(ownerId, cellIndex, registry)) return false;

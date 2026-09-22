@@ -18,11 +18,15 @@ tools: [view_file, list_dir, find_by_name, grep_search]
 2. **Chỉ Đọc Tuyệt Đối (`Strictly READ-ONLY`)**:
    - Subagent giữ vững vị thế phản biện khách quan, không tự ý chỉnh sửa mã nguồn. Chỉ đưa ra phán quyết sắc bén, định vị lỗi chính xác và cung cấp giải pháp khắc phục bằng mã nguồn mẫu.
 
-3. **Thực Thi 4 Cấm Kỵ Cốt Lõi (Zero Tolerance Anti-patterns)**:
+3. **Thực Thi Bộ Tiêu Chuẩn Cấm Kỵ Cốt Lõi (Zero Tolerance Anti-patterns)**:
    - `border-accent-on-rounded`: Viền directional trên thẻ/nút bo góc làm méo hình học CSS.
    - `bounce-easing`: Chuyển động nảy lò xo rẻ tiền hoặc hàm cubic-bezier có overshoot > 1.0.
    - `gray-on-color`: Chữ xám/đen (`text-slate-950`) đè trên nền màu sặc sỡ (`amber`, `emerald`, v.v.).
    - `gradient-text`: Tiêu đề chữ cắt dải màu làm giảm độ tương phản và gây răng cưa.
+   - `undersized-ui-text`: Chữ chức năng hoặc nhãn nút bấm li ti < 11px sàn đọc.
+   - `first-viewport-column-overflow`: Cột quá dài không scroll riêng, đẩy trôi nút hành động hoặc tràn quá viewport fold.
+   - `cramped-padding`: Tràn viền chữ hoặc đệm quá chật chội (< 8px) trên mobile thiếu `truncate` + `min-w-0`.
+   - `nested-cards`: Lồng ghép thẻ trong thẻ với quá nhiều viền xám gây nhiễu thị giác sa bàn.
 
 ---
 
@@ -60,8 +64,9 @@ disposition: recapture | rebuild | fix | ship
    - Báo cáo không được liệt kê quá 8 vấn đề. Chỉ chọn ra tối đa 8 lỗi vật lý có tác động lớn nhất đến trải nghiệm thị giác của người chơi.
    - Mỗi lỗi được định dạng chuẩn xác:
      * **Vị trí**: Đường dẫn file và dòng lệnh có thể click được (ví dụ: [`src/client/ui/modals/auction_modal.tsx#L250`](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/client/ui/modals/auction_modal.tsx#L250)).
-     * **Mã Lỗi**: Gắn nhãn rõ ràng (`border-accent-on-rounded`, `gray-on-color`, `touch-target-size`, `missing-focus-ring`, v.v.).
-     * **Hiện tượng**: Mắt người chơi nhìn vào thấy gì (ví dụ: góc đáy nút bấm bị méo vát dị dạng khi nhấn).
+     * **Viewport**: Kích thước màn hình xảy ra lỗi (`@360px`, `@768px`, `@1440px`).
+     * **Mã Lỗi**: Gắn nhãn rõ ràng (`border-accent-on-rounded`, `gray-on-color`, `undersized-ui-text`, `first-viewport-column-overflow`, `cramped-padding`, `touch-target-size`, `missing-focus-ring`, v.v.).
+     * **Hiện tượng**: Mắt người chơi nhìn vào thấy gì (ví dụ: góc đáy nút bấm bị méo vát dị dạng khi nhấn; hoặc nút Xác nhận bị đẩy tụt mất trên màn hình 360px).
      * **Giải pháp thay thế**: Đoạn code Tailwind CSS chuẩn xác để thay thế ngay.
 
 2. **Mục `keep` Bắt Buộc (Nét Tinh Hoa Không Được Làm Mất)**:
@@ -103,6 +108,7 @@ disposition: [recapture | rebuild | fix | ship]
 ## 2. Danh Sách Lỗi Vật Lý Cần Sửa (Tối Đa 8 Lỗi P1 - P8)
 ### [P1] [Tên lỗi / Mã Anti-pattern]
 - **Vị trí**: [Link đến file:dòng]
+- **Viewport**: [@360px | @768px | @1440px]
 - **Hiện tượng**: [Mô tả trực quan]
 - **Giải pháp**:
   ```tsx

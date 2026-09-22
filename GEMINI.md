@@ -46,6 +46,12 @@
 - **3D Visual Quality Gate & Macro-Crop Evidence Mandate**: `game-3d-visual-critic` CANNOT self-approve. Score ratings alone cannot close tickets. 3D object changes require macro-focus screenshots (camera <= 2.5m, object >= 30% viewport) posted to chat. Final ship approval strictly belongs to USER (Human-in-the-loop Gate).
 - **Zero-Blank-Material Invariant**: Plain untextured `<meshBasicMaterial />` or `<meshStandardMaterial />` on badges, flagpoles, signs, or paintings without real texture (`map`) is forbidden. Hidden DOM attributes (`data-*`) cannot bypass WebGL rendering verification.
 - **2D UI Craft Quality Gate**: UI changes must pass `npm run lint:ui` with 0 violations (4 anti-patterns: `border-accent-on-rounded`, `bounce-easing`, `gray-on-color`, `gradient-text`). Audit via `ui-craft-reviewer`.
+- **Root-Level Sticky Action Footer**: Primary modal action footers (Submit, Confirm, Bid, Close) MUST be direct children of the root modal container (`sticky bottom-0`), NEVER nested within multi-column sub-trees to prevent broken mobile sticky context.
+- **Mobile 360px & Cross-Browser Ergonomics Triad**:
+  - *Dynamic Viewport*: Scrollable dialogs/modals MUST use `max-h-[90dvh]` (never raw `vh`) to prevent mobile browser URL/toolbars from obscuring bottom action controls.
+  - *WebKit Flex Ellipsis*: Any flex child with `truncate` MUST specify `min-w-0` to prevent horizontal text overflow in Safari WebKit.
+  - *Responsive Action Condensation*: In dense list rows on mobile (< sm / 360px), secondary action buttons MUST collapse to icon-only (`min-h-[44px] min-w-[44px]`, label `hidden sm:inline`) to prevent entity title clipping.
+  - *Grid Action Symmetry*: Sibling buttons in CSS grid action footers MUST share `h-full min-h-[48px]` for uniform height and baseline alignment.
 - **Visual Ground Truth Anchor**: Compare render outputs against commercial anchor (`media_1789200902293.jpg`). Checklists alone do not prove visual quality.
 - **Rule "Kill The Premise" (2-Fix Limit)**: If a feature fails reference quality after 2 fix rounds, FORBID a 3rd micro-fix. Trigger Architectural Premise Challenge to replace flawed premise.
 - **Single Cohesive World Invariant**: Entire game lifecycle belongs to ONE world: Outdoor Sunny Island Metropolis diorama. Zero dark isolated rooms.

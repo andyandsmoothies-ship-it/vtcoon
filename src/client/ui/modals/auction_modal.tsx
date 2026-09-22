@@ -87,6 +87,8 @@ export function AuctionModal({
     }
   }, [isConcluded, onClose]);
 
+  const activePlayers = Object.values(playersInfo ?? {}).filter((p) => !p.bankrupt && !p.isBankrupt);
+
   return (
     <div
       data-testid="auction-modal"
@@ -281,8 +283,8 @@ export function AuctionModal({
               </span>
             </div>
             <div className="space-y-1 max-h-24 overflow-y-auto pr-1">
-              {Object.values(playersInfo ?? {}).length > 0 ? (
-                Object.values(playersInfo ?? {}).map((p) => {
+              {activePlayers.length > 0 ? (
+                activePlayers.map((p) => {
                   const isBidder = p.id === highestBidderId;
                   const isMe = p.id === myId;
                   return (
@@ -320,89 +322,92 @@ export function AuctionModal({
               )}
             </div>
           </div>
+        </div>
+      </div>
 
-          {/* Trạng thái & Các nút nâng giá nhanh */}
-          {isDeclinedPlayer ? (
-            <div className="p-3 bg-amber-100 rounded-xl text-center border border-amber-300">
-              <p className="text-xs font-bold text-amber-900">
-                {isForeclosure
-                  ? 'Tài sản của bạn đang được phát mãi cưỡng chế để cấn trừ nợ xấu. Bạn không thể tự đấu giá tài sản của chính mình.'
-                  : 'Bạn đã từ chối mua ô đất này (Luật game cấm tham gia đấu giá). Đang chờ các đối thủ khác đặt giá...'}
-              </p>
-            </div>
-          ) : hasPassed ? (
-            <div className="p-3 bg-slate-200 rounded-xl text-center border border-slate-300">
-              <p className="text-xs font-bold text-rose-700">Bạn đã rút lui khỏi phiên đấu giá này.</p>
-            </div>
-          ) : isLeading ? (
-            <div className="p-3 bg-emerald-100 rounded-xl text-center border border-emerald-400 flex items-center justify-center gap-2">
-              <span className="text-emerald-700 font-bold text-sm">✓</span>
-              <p className="text-xs font-bold text-emerald-800">Bạn đang dẫn đầu mức giá cao nhất!</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-3 gap-2">
-              {([100, 200, 500] as const).map((step, idx) => {
-                const targetBid = increments[idx]!;
-                const canAfford = !isConcluded && (myBalance === undefined || targetBid <= myBalance);
-                return (
-                  <button
-                    key={step}
-                    type="button"
-                    onClick={() => onBid?.(targetBid)}
-                    disabled={!canAfford || isConcluded}
-                    className={`min-h-[48px] py-2 px-2 font-bold text-xs rounded-xl border-2 flex flex-col items-center justify-center transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
-                      canAfford && !isConcluded
-                        ? 'bg-amber-500 hover:bg-amber-400 text-amber-950 border-amber-700 font-black shadow-[0_4px_0_0_#b45309] active:shadow-[0_1px_0_0_#b45309] active:translate-y-[3px] cursor-pointer'
-                        : 'bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed opacity-50'
-                    }`}
-                  >
-                    <span className="text-xs md:text-sm font-black tracking-wide">+{step} Tr.</span>
-                    <span className={`text-xs font-semibold mt-0.5 ${canAfford && !isConcluded ? 'text-amber-950' : 'text-slate-400'}`}>
-                      ({formatCurrency(targetBid)})
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
+      {/* Sticky Footer: Trạng thái, Cụm nút nâng giá & Footer Auto-Bid / Rút lui / Đóng [IMP-161] */}
+      <div className="sticky bottom-0 -mx-3.5 -mb-3.5 sm:-mx-5 sm:-mb-5 p-3.5 sm:p-4 bg-[#FFFBEB] border-t border-amber-300/80 z-20 shadow-[0_-4px_12px_rgba(0,0,0,0.06)] space-y-3">
+        {/* Trạng thái & Các nút nâng giá nhanh */}
+        {isDeclinedPlayer ? (
+          <div className="p-3 bg-amber-100 rounded-xl text-center border border-amber-300">
+            <p className="text-xs font-bold text-amber-900">
+              {isForeclosure
+                ? 'Tài sản của bạn đang được phát mãi cưỡng chế để cấn trừ nợ xấu. Bạn không thể tự đấu giá tài sản của chính mình.'
+                : 'Bạn đã từ chối mua ô đất này (Luật game cấm tham gia đấu giá). Đang chờ các đối thủ khác đặt giá...'}
+            </p>
+          </div>
+        ) : hasPassed ? (
+          <div className="p-3 bg-slate-200 rounded-xl text-center border border-slate-300">
+            <p className="text-xs font-bold text-rose-700">Bạn đã rút lui khỏi phiên đấu giá này.</p>
+          </div>
+        ) : isLeading ? (
+          <div className="p-3 bg-emerald-100 rounded-xl text-center border border-emerald-400 flex items-center justify-center gap-2">
+            <span className="text-emerald-700 font-bold text-sm">✓</span>
+            <p className="text-xs font-bold text-emerald-800">Bạn đang dẫn đầu mức giá cao nhất!</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 gap-2">
+            {([100, 200, 500] as const).map((step, idx) => {
+              const targetBid = increments[idx]!;
+              const canAfford = !isConcluded && (myBalance === undefined || targetBid <= myBalance);
+              return (
+                <button
+                  key={step}
+                  type="button"
+                  onClick={() => onBid?.(targetBid)}
+                  disabled={!canAfford || isConcluded}
+                  className={`min-h-[48px] py-2 px-2 font-bold text-xs rounded-xl border-2 flex flex-col items-center justify-center transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+                    canAfford && !isConcluded
+                      ? 'bg-amber-500 hover:bg-amber-400 text-amber-950 border-amber-700 font-black shadow-[0_4px_0_0_#b45309] active:shadow-[0_1px_0_0_#b45309] active:translate-y-[3px] cursor-pointer'
+                      : 'bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed opacity-50'
+                  }`}
+                >
+                  <span className="text-xs md:text-sm font-black tracking-wide">+{step} Tr.</span>
+                  <span className={`text-xs font-semibold mt-0.5 ${canAfford && !isConcluded ? 'text-amber-950' : 'text-slate-400'}`}>
+                    ({formatCurrency(targetBid)})
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
 
-          {/* Footer: Công tắc Auto-Bid & Nút Rút lui */}
-          <div className="flex items-center justify-between gap-3 pt-2 border-t border-amber-300/80">
+        {/* Footer: Công tắc Auto-Bid & Nút Rút lui */}
+        <div className="flex items-center justify-between gap-3 pt-2 border-t border-amber-300/80">
+          <button
+            type="button"
+            onClick={() => setAutoBid((prev) => !prev)}
+            disabled={hasPassed || isDeclinedPlayer || isConcluded}
+            className={`min-h-[44px] px-3.5 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 ${
+              hasPassed || isDeclinedPlayer || isConcluded
+                ? 'bg-slate-200 text-slate-400 border-slate-300 opacity-50 cursor-not-allowed'
+                : autoBid
+                  ? 'bg-amber-500 text-amber-950 font-black border-amber-700 shadow-[0_2px_0_0_#b45309] cursor-pointer'
+                  : 'bg-slate-200 text-slate-700 border-slate-400 hover:bg-slate-300 cursor-pointer'
+            }`}
+          >
+            <span className={`w-2 h-2 rounded-full ${autoBid ? 'bg-amber-900' : 'bg-slate-400'}`} />
+            <span>AUTO-BID</span>
+          </button>
+
+          {isConcluded ? (
             <button
               type="button"
-              onClick={() => setAutoBid((prev) => !prev)}
-              disabled={hasPassed || isDeclinedPlayer || isConcluded}
-              className={`min-h-[44px] px-3.5 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 ${
-                hasPassed || isDeclinedPlayer || isConcluded
-                  ? 'bg-slate-200 text-slate-400 border-slate-300 opacity-50 cursor-not-allowed'
-                  : autoBid
-                    ? 'bg-amber-500 text-amber-950 font-black border-amber-700 shadow-[0_2px_0_0_#b45309] cursor-pointer'
-                    : 'bg-slate-200 text-slate-700 border-slate-400 hover:bg-slate-300 cursor-pointer'
-              }`}
+              onClick={onClose}
+              className="min-h-[44px] px-4 py-2 rounded-xl text-xs font-bold text-amber-950 bg-amber-400 hover:bg-amber-300 border-2 border-amber-600 shadow-[0_2px_0_0_#b45309] transition-all active:translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 cursor-pointer"
             >
-              <span className={`w-2 h-2 rounded-full ${autoBid ? 'bg-amber-900' : 'bg-slate-400'}`} />
-              <span>AUTO-BID</span>
+              Đóng / Xem Bàn Cờ
             </button>
-
-            {isConcluded ? (
-              <button
-                type="button"
-                onClick={onClose}
-                className="min-h-[44px] px-4 py-2 rounded-xl text-xs font-bold text-amber-950 bg-amber-400 hover:bg-amber-300 border-2 border-amber-600 shadow-[0_2px_0_0_#b45309] transition-all active:translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 cursor-pointer"
-              >
-                Đóng / Xem Bàn Cờ
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={onPass ?? onClose}
-                disabled={hasPassed || isDeclinedPlayer}
-                className="min-h-[44px] px-4 py-2 rounded-xl text-xs font-bold text-rose-700 hover:text-rose-800 bg-rose-100 hover:bg-rose-200 border-2 border-rose-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 cursor-pointer"
-              >
-                {isDeclinedPlayer ? 'Không Thể Tham Gia' : hasPassed ? 'Đã Rút Lui' : 'Rút Lui / Bỏ Cuộc'}
-              </button>
-            )}
-          </div>
+          ) : (
+            <button
+              type="button"
+              onClick={onPass ?? onClose}
+              disabled={hasPassed || isDeclinedPlayer}
+              className="min-h-[44px] px-4 py-2 rounded-xl text-xs font-bold text-rose-700 hover:text-rose-800 bg-rose-100 hover:bg-rose-200 border-2 border-rose-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 cursor-pointer"
+            >
+              {isDeclinedPlayer ? 'Không Thể Tham Gia' : hasPassed ? 'Đã Rút Lui' : 'Rút Lui / Bỏ Cuộc'}
+            </button>
+          )}
         </div>
       </div>
     </div>

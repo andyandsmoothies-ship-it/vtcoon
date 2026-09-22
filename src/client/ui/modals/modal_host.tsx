@@ -323,7 +323,7 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
               name: playersInfo[id]?.name ?? id,
               balance: playersInfo[id]?.balance ?? 0,
               isBot: Boolean(playersInfo[id]?.isBot),
-              personality: (playersInfo[id] as any)?.personality ?? slot?.botPersonality,
+              personality: playersInfo[id]?.personality ?? slot?.botPersonality,
             };
           });
         const targetPlayer = playersInfo[currentTargetId];
