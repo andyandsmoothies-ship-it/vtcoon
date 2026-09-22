@@ -19,6 +19,7 @@ export * from './lobby_types';
 
 export const useLobbyStore = create<LobbyState>((set, get) => ({
   roomCode: null,
+  isJoining: false,
   myPlayerId: '',
   isHost: false,
   isReady: false,
@@ -55,7 +56,7 @@ export const useLobbyStore = create<LobbyState>((set, get) => ({
       return { ...s, tokenColor, pawnSlot, mascotIcon };
     });
 
-    set({ roomCode: trimmedCode, myPlayerId: pid, isHost, isReady: isHost, gameStarted: false, slots, errorReason: null });
+    set({ roomCode: trimmedCode, isJoining: false, myPlayerId: pid, isHost, isReady: isHost, gameStarted: false, slots, errorReason: null });
     return true;
   },
 
@@ -194,7 +195,9 @@ export const useLobbyStore = create<LobbyState>((set, get) => ({
 
   setGameStarted: (gameStarted) => set({ gameStarted }),
   resetLobby: () =>
-    set({ roomCode: null, myPlayerId: '', isHost: false, isReady: false, gameStarted: false, slots: createDefaultSlots(), errorReason: null }),
+    set({ roomCode: null, isJoining: false, myPlayerId: '', isHost: false, isReady: false, gameStarted: false, slots: createDefaultSlots(), errorReason: null }),
+
+  confirmJoined: () => set({ isJoining: false }),
 
   setMyPlayerId: (myPlayerId) => set({ myPlayerId }),
 
@@ -239,6 +242,7 @@ export const useLobbyStore = create<LobbyState>((set, get) => ({
       return { success: false, reasonCode: 'INVALID_ROOM_CODE' };
     }
     get().initLobby(cleanCode, 'p2', false);
+    set({ isJoining: true });
     if (typeof window !== 'undefined' && window.history) {
       window.history.replaceState({}, '', '?room=' + cleanCode);
     }

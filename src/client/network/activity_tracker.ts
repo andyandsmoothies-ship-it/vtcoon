@@ -5,6 +5,7 @@ import { useActivityStore, type ActivityLogEntry } from '../store/activity_store
 import { BOARD_SIZE } from '../../domain/room.js';
 import { formatCurrency } from '../ui/ui_helpers.js';
 import { resolveMarketEffectSummary } from '../ui/market_event_ticker.js';
+import { resolvePunchyEventSummary } from '../ui/event_card_punchy_summaries.js';
 import { AudioEngine } from '../audio/audio_engine.js';
 import { SoundEffect } from '../audio/audio_types.js';
 import { useVfxStore } from '../store/vfx_store.js';
@@ -436,16 +437,12 @@ export function trackDeltaActivities(
       nextState.currentTurnPlayerId ??
       '';
     const effectDelta = typeof card.effectDelta === 'number' ? card.effectDelta : undefined;
-    const rawMarketSummary = isMarket && card.id ? resolveMarketEffectSummary(card.id) : '';
-    const rawDesc = rawMarketSummary || card.description || card.title;
-    const text = effectDelta !== undefined && effectDelta !== 0
-      ? (effectDelta > 0 ? `+${formatCurrency(effectDelta)}` : formatCurrency(effectDelta))
-      : rawDesc;
+    const punchySummary = resolvePunchyEventSummary(card.id || card.cardId, card.description || card.title);
     const isReward = effectDelta !== undefined ? effectDelta >= 0 : true;
 
     if (typeof nextState?.addFloatingText === 'function') {
       nextState.addFloatingText({
-        text,
+        text: punchySummary,
         type: isReward ? FloatingTextType.Reward : FloatingTextType.Penalty,
         playerId,
         actionType: isMarket ? 'market' : 'chance',

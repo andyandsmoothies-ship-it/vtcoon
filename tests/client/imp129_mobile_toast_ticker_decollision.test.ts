@@ -43,12 +43,12 @@ describe('[IMP-129] Mobile Toast & Market Event Ticker De-Collision', () => {
     });
   });
 
-  it('[TC-IMP129.01/MSS][Facet-1/Boundary] Khi không có sự kiện thị trường, mobile container định vị ở top-[4.25rem]', () => {
+  it('[TC-IMP129.01/MSS][Facet-1/Boundary] Khi không có sự kiện thị trường, mobile container định vị ở top-20', () => {
     useGameStore.setState({ activeModifiers: [] });
     const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
-    const mobileMatch = html.match(/<div[^>]*class="[^"]*md:hidden[^"]*"[^>]*>/);
+    const mobileMatch = html.match(/<div[^>]*class="[^"]*(?:md:hidden|md:max-w-md|fixed\s+top-)[^"]*"[^>]*>/);
     expect(mobileMatch).not.toBeNull();
-    expect(mobileMatch![0]).toContain('top-[4.25rem]');
+    expect(mobileMatch![0]).toContain('top-20');
   });
 
   it('[TC-IMP129.02/MSS][Facet-1/Boundary] Khi có 1 sự kiện thị trường, mobile container định vị an toàn ở top-[10.5rem] tránh đè MarketEventTicker', () => {
@@ -58,10 +58,10 @@ describe('[IMP-129] Mobile Toast & Market Event Ticker De-Collision', () => {
       ],
     });
     const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
-    const mobileMatch = html.match(/<div[^>]*class="[^"]*md:hidden[^"]*"[^>]*>/);
+    const mobileMatch = html.match(/<div[^>]*class="[^"]*(?:md:hidden|md:max-w-md|fixed\s+top-)[^"]*"[^>]*>/);
     expect(mobileMatch).not.toBeNull();
     expect(mobileMatch![0]).toContain('top-[10.5rem]');
-    expect(mobileMatch![0]).not.toContain('top-[4.25rem]');
+    expect(mobileMatch![0]).not.toContain('top-20');
   });
 
   it('[TC-IMP129.03/MSS][Facet-1/Boundary] Khi có >= 2 sự kiện thị trường, mobile container dịch chuyển sâu hơn xuống top-[15.5rem]', () => {
@@ -72,12 +72,12 @@ describe('[IMP-129] Mobile Toast & Market Event Ticker De-Collision', () => {
       ],
     });
     const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
-    const mobileMatch = html.match(/<div[^>]*class="[^"]*md:hidden[^"]*"[^>]*>/);
+    const mobileMatch = html.match(/<div[^>]*class="[^"]*(?:md:hidden|md:max-w-md|fixed\s+top-)[^"]*"[^>]*>/);
     expect(mobileMatch).not.toBeNull();
     expect(mobileMatch![0]).toContain('top-[15.5rem]');
   });
 
-  it('[TC-IMP129.04/MSS][Facet-2/Reactivity] Khi có sự kiện thị trường và milestone banner cùng lúc, milestone banner ở top-[10.5rem] và mobile toast ở top-[16.5rem]', () => {
+  it('[TC-IMP129.04/MSS][Facet-2/Reactivity] Khi có sự kiện thị trường và milestone banner cùng lúc, milestone banner nằm trong unified stack ở top-[10.5rem]', () => {
     useGameStore.setState({
       activeModifiers: [
         { type: MarketCardId.MC_PEAK_TOURISM, remainingRounds: 1 },
@@ -104,24 +104,22 @@ describe('[IMP-129] Mobile Toast & Market Event Ticker De-Collision', () => {
       ],
     });
     const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
-    const milestoneMatch = html.match(/<div[^>]*class="[^"]*z-30[^"]*"[^>]*>/);
-    expect(milestoneMatch).not.toBeNull();
-    expect(milestoneMatch![0]).toContain('top-[10.5rem]');
-
-    const mobileMatch = html.match(/<div[^>]*class="[^"]*md:hidden[^"]*"[^>]*>/);
-    expect(mobileMatch).not.toBeNull();
-    expect(mobileMatch![0]).toContain('top-[16.5rem]');
+    const stackMatch = html.match(/<div[^>]*class="[^"]*(?:md:max-w-md|fixed\s+top-)[^"]*"[^>]*>/);
+    expect(stackMatch).not.toBeNull();
+    expect(stackMatch![0]).toContain('top-[10.5rem]');
+    expect(html).toContain('data-testid="milestone-banner-container"');
+    expect(html).toContain('data-testid="contextual-transaction-badge"');
   });
 
-  it('[TC-IMP129.05/MSS][Facet-3/Disposal] Khi sự kiện thị trường hết hiệu lực (remainingRounds=0), mobile container tự động hoàn nguyên về top-[4.25rem]', () => {
+  it('[TC-IMP129.05/MSS][Facet-3/Disposal] Khi sự kiện thị trường hết hiệu lực (remainingRounds=0), mobile container tự động hoàn nguyên về top-20', () => {
     useGameStore.setState({
       activeModifiers: [
         { type: MarketCardId.MC_ANTI_SPECULATE, remainingRounds: 0 },
       ],
     });
     const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
-    const mobileMatch = html.match(/<div[^>]*class="[^"]*md:hidden[^"]*"[^>]*>/);
+    const mobileMatch = html.match(/<div[^>]*class="[^"]*(?:md:hidden|md:max-w-md|fixed\s+top-)[^"]*"[^>]*>/);
     expect(mobileMatch).not.toBeNull();
-    expect(mobileMatch![0]).toContain('top-[4.25rem]');
+    expect(mobileMatch![0]).toContain('top-20');
   });
 });

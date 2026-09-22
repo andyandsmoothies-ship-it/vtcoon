@@ -67,6 +67,7 @@ export function createDefaultSlots(): readonly LobbySlot[] {
 
 export interface LobbyState {
   readonly roomCode: string | null;
+  readonly isJoining: boolean;
   readonly myPlayerId: string;
   readonly isHost: boolean;
   readonly isReady: boolean;
@@ -92,4 +93,5 @@ export interface LobbyState {
   readonly createCustomRoom: (isBotSolo?: boolean) => { roomCode: string; playerId: string };
   readonly joinCustomRoom: (code: string) => { success: boolean; reasonCode?: string };
   readonly fillAllBotSlots: () => void;
+  readonly confirmJoined: () => void;
 }

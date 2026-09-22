@@ -100,6 +100,7 @@ export function App(): React.ReactElement {
   const lobbySlots = useLobbyStore((s) => s.slots);
   const myPlayerId = useLobbyStore((s) => s.myPlayerId);
   const isHost = useLobbyStore((s) => s.isHost);
+  const isJoining = useLobbyStore((s) => s.isJoining);
   const localPlayerId = myPlayerId || 'p1';
 
   const setPlayersInfo = useGameStore((state) => state.setPlayersInfo);
@@ -211,13 +212,13 @@ export function App(): React.ReactElement {
         </Suspense>
       </div>
 
-      {/* Welcome Hub Modal: Khi chưa có phòng (!roomCode) */}
-      {!roomCode && (
+      {/* Welcome Hub Modal: Khi chưa có phòng (!roomCode) hoặc đang đợi server xác nhận (isJoining) */}
+      {(!roomCode || isJoining) && (
         <WelcomeHubModal />
       )}
 
       {/* 2. Thẻ PreMatchDeck chuẩn bị phòng nổi cánh phải, trượt êm ra ngoài khi trận đấu bắt đầu */}
-      {roomCode && (
+      {roomCode && !isJoining && (
         <div
           className={`relative z-10 w-full h-full pointer-events-none transition-transform duration-500 ease-out ${
             gameStarted ? 'translate-x-[calc(100%+3rem)] opacity-0 pointer-events-none' : 'translate-x-0 opacity-100'

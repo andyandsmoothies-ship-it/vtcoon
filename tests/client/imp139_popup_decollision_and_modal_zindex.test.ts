@@ -158,19 +158,19 @@ describe('[IMP-139] Popup De-collision & Modal Z-Index Hierarchy Contract Suite'
   // FACET 2: Mobile De-collision
   // ============================================================================
   describe('Facet 2: Mobile De-collision', () => {
-    it('[TC-139.10/MSS][UC-IMP139][Facet-2/Mobile] Khi có latestMilestone và activeMarketCount === 0, mobile container có class top-[11.5rem]', () => {
+    it('[TC-139.10/MSS][UC-IMP139][Facet-2/Mobile] Khi có latestMilestone và activeMarketCount === 0, container có class top-20', () => {
       useGameStore.setState({
         activeModifiers: [],
         floatingTexts: [sampleMilestoneToast, sampleRegularToast],
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
-      const mobileMatch = html.match(/<div[^>]*class="[^"]*md:hidden[^"]*"[^>]*>/);
-      expect(mobileMatch).not.toBeNull();
-      expect(mobileMatch![0]).toContain('top-[11.5rem]');
-      expect(mobileMatch![0]).not.toContain('top-36');
+      const stackMatch = html.match(/<div[^>]*class="[^"]*(?:md:max-w-md|fixed\s+top-)[^"]*"[^>]*>/);
+      expect(stackMatch).not.toBeNull();
+      expect(stackMatch![0]).toContain('top-20');
+      expect(stackMatch![0]).not.toContain('top-36');
     });
 
-    it('[TC-139.11/MSS][UC-IMP139][Facet-2/Mobile] Khi có latestMilestone và activeMarketCount === 1, mobile container giữ class top-[16.5rem]', () => {
+    it('[TC-139.11/MSS][UC-IMP139][Facet-2/Mobile] Khi có latestMilestone và activeMarketCount === 1, container giữ class top-[10.5rem]', () => {
       useGameStore.setState({
         activeModifiers: [
           { type: MarketCardId.MC_PEAK_TOURISM, remainingRounds: 1 },
@@ -178,12 +178,12 @@ describe('[IMP-139] Popup De-collision & Modal Z-Index Hierarchy Contract Suite'
         floatingTexts: [sampleMilestoneToast, sampleRegularToast],
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
-      const mobileMatch = html.match(/<div[^>]*class="[^"]*md:hidden[^"]*"[^>]*>/);
-      expect(mobileMatch).not.toBeNull();
-      expect(mobileMatch![0]).toContain('top-[16.5rem]');
+      const stackMatch = html.match(/<div[^>]*class="[^"]*(?:md:max-w-md|fixed\s+top-)[^"]*"[^>]*>/);
+      expect(stackMatch).not.toBeNull();
+      expect(stackMatch![0]).toContain('top-[10.5rem]');
     });
 
-    it('[TC-139.12/MSS][UC-IMP139][Facet-2/Mobile] Khi có latestMilestone và activeMarketCount >= 2, mobile container có class top-[21.5rem]', () => {
+    it('[TC-139.12/MSS][UC-IMP139][Facet-2/Mobile] Khi có latestMilestone và activeMarketCount >= 2, container có class top-[15.5rem]', () => {
       useGameStore.setState({
         activeModifiers: [
           { type: MarketCardId.MC_PEAK_TOURISM, remainingRounds: 1 },
@@ -192,19 +192,19 @@ describe('[IMP-139] Popup De-collision & Modal Z-Index Hierarchy Contract Suite'
         floatingTexts: [sampleMilestoneToast, sampleRegularToast],
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
-      const mobileMatch = html.match(/<div[^>]*class="[^"]*md:hidden[^"]*"[^>]*>/);
-      expect(mobileMatch).not.toBeNull();
-      expect(mobileMatch![0]).toContain('top-[21.5rem]');
+      const stackMatch = html.match(/<div[^>]*class="[^"]*(?:md:max-w-md|fixed\s+top-)[^"]*"[^>]*>/);
+      expect(stackMatch).not.toBeNull();
+      expect(stackMatch![0]).toContain('top-[15.5rem]');
     });
 
-    it('[TC-139.13/MSS][UC-IMP139][Facet-2/Mobile] Khi không có latestMilestone, mobile container hoàn nguyên top-[4.25rem] (0 market) và top-[10.5rem] (1 market)', () => {
+    it('[TC-139.13/MSS][UC-IMP139][Facet-2/Mobile] Khi không có latestMilestone, container hoàn nguyên top-20 (0 market) và top-[10.5rem] (1 market)', () => {
       useGameStore.setState({
         activeModifiers: [],
         floatingTexts: [sampleRegularToast],
       });
       const html0 = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
-      const mobileMatch0 = html0.match(/<div[^>]*class="[^"]*md:hidden[^"]*"[^>]*>/);
-      expect(mobileMatch0![0]).toContain('top-[4.25rem]');
+      const stackMatch0 = html0.match(/<div[^>]*class="[^"]*(?:md:max-w-md|fixed\s+top-)[^"]*"[^>]*>/);
+      expect(stackMatch0![0]).toContain('top-20');
 
       useGameStore.setState({
         activeModifiers: [
@@ -213,8 +213,8 @@ describe('[IMP-139] Popup De-collision & Modal Z-Index Hierarchy Contract Suite'
         floatingTexts: [sampleRegularToast],
       });
       const html1 = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
-      const mobileMatch1 = html1.match(/<div[^>]*class="[^"]*md:hidden[^"]*"[^>]*>/);
-      expect(mobileMatch1![0]).toContain('top-[10.5rem]');
+      const stackMatch1 = html1.match(/<div[^>]*class="[^"]*(?:md:max-w-md|fixed\s+top-)[^"]*"[^>]*>/);
+      expect(stackMatch1![0]).toContain('top-[10.5rem]');
     });
   });
 
@@ -222,26 +222,25 @@ describe('[IMP-139] Popup De-collision & Modal Z-Index Hierarchy Contract Suite'
   // FACET 3: Desktop De-collision
   // ============================================================================
   describe('Facet 3: Desktop De-collision', () => {
-    it('[TC-139.14/MSS][UC-IMP139][Facet-3/Desktop] Khi có latestMilestone, desktop container dịch xuống top-[12rem] md:top-[12rem] để không chèn đè MilestoneBanner', () => {
+    it('[TC-139.14/MSS][UC-IMP139][Facet-3/Desktop] Khi có latestMilestone, container căn giữa và áp dụng gap-2 để không chèn đè MilestoneBanner', () => {
       useGameStore.setState({
         floatingTexts: [sampleMilestoneToast, sampleRegularToast],
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
-      const desktopMatch = html.match(/<div[^>]*class="[^"]*md:flex[^"]*"[^>]*>/);
-      expect(desktopMatch).not.toBeNull();
-      expect(desktopMatch![0]).toContain('top-[12rem]');
-      expect(desktopMatch![0]).toContain('md:top-[12rem]');
+      const stackMatch = html.match(/<div[^>]*class="[^"]*(?:md:max-w-md|fixed\s+top-)[^"]*"[^>]*>/);
+      expect(stackMatch).not.toBeNull();
+      expect(stackMatch![0]).toContain('gap-2');
+      expect(stackMatch![0]).toContain('left-1/2');
     });
 
-    it('[TC-139.15/MSS][UC-IMP139][Facet-3/Desktop] Khi không có latestMilestone, desktop container giữ nguyên top-28 md:top-32 (bảo toàn IMP-128)', () => {
+    it('[TC-139.15/MSS][UC-IMP139][Facet-3/Desktop] Khi không có latestMilestone, container giữ nguyên top-20 (bảo toàn IMP-128 & IMP-169)', () => {
       useGameStore.setState({
         floatingTexts: [sampleRegularToast],
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
-      const desktopMatch = html.match(/<div[^>]*class="[^"]*md:flex[^"]*"[^>]*>/);
-      expect(desktopMatch).not.toBeNull();
-      expect(desktopMatch![0]).toContain('top-28');
-      expect(desktopMatch![0]).toContain('md:top-32');
+      const stackMatch = html.match(/<div[^>]*class="[^"]*(?:md:max-w-md|fixed\s+top-)[^"]*"[^>]*>/);
+      expect(stackMatch).not.toBeNull();
+      expect(stackMatch![0]).toContain('top-20');
     });
   });
 

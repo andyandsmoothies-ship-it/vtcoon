@@ -46,17 +46,20 @@ export function handleWsMessage(
   } else if (msg.type === 'ROOM_CREATED') {
     ctx.onSessionInit?.('', msg.roomCode);
   } else if (msg.type === 'ROOM_JOINED') {
+    useLobbyStore.getState().confirmJoined?.();
     // [IMP-165/P1.1] Cập nhật myPlayerId nếu server cấp slot khác với client đã gửi
     if (msg.playerId !== ctx.playerId) {
       useLobbyStore.getState().setMyPlayerId?.(msg.playerId);
     }
     ctx.onSessionInit?.('', msg.roomCode);
   } else if (msg.type === 'LOBBY_UPDATE') {
+    useLobbyStore.getState().confirmJoined?.();
     // [IMP-165] Đồng bộ tức thì danh sách slot sảnh chờ vào Zustand store
     // Gọi trực tiếp store — không phụ thuộc callback chain use_app_session
     useLobbyStore.getState().syncLobbySlots?.(msg.players);
     ctx.onLobbyUpdate?.(msg.players);
   } else if (msg.type === 'SESSION_INIT') {
+    useLobbyStore.getState().confirmJoined?.();
     const activeCode = msg.roomCode || ctx.roomCode;
     saveReconnectToken(activeCode, msg.reconnectToken);
     ctx.onSessionInit?.(msg.reconnectToken, activeCode);

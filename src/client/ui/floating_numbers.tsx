@@ -199,7 +199,7 @@ export function MilestoneBanner({ item }: { readonly item: FloatingTextItem }): 
       onClick={handleDismiss}
       onKeyDown={handleKeyDown}
     >
-      <span className="text-2xl shrink-0" aria-hidden="true">{icon}</span>
+      <span className="text-2xl shrink-0 truncate" aria-hidden="true">{icon}</span>
       <div className="flex flex-col min-w-0 flex-1">
         <div className="flex items-center gap-1.5 flex-wrap sm:flex-nowrap min-w-0">
           {player && (
@@ -219,7 +219,7 @@ export function MilestoneBanner({ item }: { readonly item: FloatingTextItem }): 
           </span>
         </div>
         {descText && (
-          <span className="text-[11px] sm:text-xs text-slate-600 font-semibold leading-tight line-clamp-2 break-words mt-0.5">
+          <span className="truncate min-w-0 text-[11px] sm:text-xs text-slate-600 font-semibold leading-tight mt-0.5">
             {descText}
           </span>
         )}
@@ -322,42 +322,8 @@ export function FloatingNumbersOverlay(): React.ReactElement | null {
       t.actionType !== 'market',
   );
 
-  // Desktop: hiển thị tối đa 2 toasts gần nhất ở giữa dưới Market Ticker
-  const desktopTexts = regularTexts.slice(-2);
-  // Mobile: hiển thị duy nhất 1 toast mới nhất ở giữa đỉnh màn hình
-  const mobileTexts = regularTexts.slice(-1);
-
-  // Vị trí an toàn cho MilestoneBanner tránh chèn đè MarketEventTicker (chiều cao ticker 3 dòng ~ 144-150px)
-  const milestoneTopClass =
+  const stackTopClass =
     activeMarketCount >= 2 ? 'top-[15.5rem]' : activeMarketCount === 1 ? 'top-[10.5rem]' : 'top-20';
-
-  // Vị trí an toàn cho toast giao dịch thường trên mobile:
-  // Tự động đẩy xuống dưới MarketEventTicker và MilestoneBanner nếu đang hiển thị
-  let mobileTopClass = 'top-[4.25rem]';
-  if (latestMilestone) {
-    mobileTopClass =
-      activeMarketCount >= 2
-        ? 'top-[21.5rem]'
-        : activeMarketCount === 1
-        ? 'top-[16.5rem]'
-        : 'top-[11.5rem]';
-  } else if (activeMarketCount >= 2) {
-    mobileTopClass = 'top-[15.5rem]';
-  } else if (activeMarketCount === 1) {
-    mobileTopClass = 'top-[10.5rem]';
-  }
-
-  const desktopTopClass = latestMilestone
-    ? activeMarketCount >= 2
-      ? 'top-[22rem] md:top-[22rem]'
-      : activeMarketCount === 1
-      ? 'top-[17rem] md:top-[17rem]'
-      : 'top-[12rem] md:top-[12rem]'
-    : activeMarketCount >= 2
-    ? 'top-[16rem] md:top-[16.5rem]'
-    : activeMarketCount === 1
-    ? 'top-[11rem] md:top-[11.5rem]'
-    : 'top-28 md:top-32';
 
   return (
     <aside
@@ -366,27 +332,16 @@ export function FloatingNumbersOverlay(): React.ReactElement | null {
       aria-label="Thông báo biến động tài chính"
       className="pointer-events-none select-none z-30"
     >
-      {/* Cột mốc đặc biệt (Milestone Banner) luôn căn giữa màn hình */}
-      {latestMilestone && (
-        <div
-          data-testid="milestone-banner-container"
-          className={`fixed ${milestoneTopClass} left-1/2 -translate-x-1/2 z-30 z-[60] flex flex-col items-center`}
-        >
-          <MilestoneBanner item={latestMilestone} />
-        </div>
-      )}
-
-      {/* Giao diện Desktop (>= 768px): Căn giữa an toàn dưới Market Event Ticker */}
-      <div className={`hidden md:flex fixed ${desktopTopClass} left-1/2 -translate-x-1/2 flex-col items-center gap-2 max-w-md z-30 pointer-events-none`}>
-        {desktopTexts.map((item) => (
-          <FloatingBadge key={item.id} item={item} />
-        ))}
-      </div>
-
-      {/* Giao diện Mobile (< 768px): Nằm an toàn dưới TopBar & MarketEventTicker, duy nhất 1 thẻ */}
-      <div className={`flex md:hidden fixed ${mobileTopClass} left-1/2 -translate-x-1/2 flex-col items-center w-full px-2 pointer-events-none`}>
-        {mobileTexts.map((item) => (
-          <FloatingBadge key={item.id} item={item} />
+      <div className={"fixed " + stackTopClass + " left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 w-full max-w-[92vw] md:max-w-md px-2 z-30 pointer-events-none"}>
+        {latestMilestone && (
+          <div data-testid="milestone-banner-container" className="w-full flex justify-center pointer-events-auto">
+            <MilestoneBanner item={latestMilestone} />
+          </div>
+        )}
+        {regularTexts.slice(-2).map((item, idx) => (
+          <div key={item.id} className={"w-full flex justify-center " + (idx === 0 && regularTexts.length > 1 ? "hidden md:flex" : "flex")}>
+            <FloatingBadge item={item} />
+          </div>
         ))}
       </div>
     </aside>

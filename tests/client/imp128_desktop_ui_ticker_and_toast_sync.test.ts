@@ -70,24 +70,24 @@ describe('[IMP-128] Chốt 1: Khử Chèn Đè Toast Trên Desktop (FloatingNumb
 
   it('[TC-IMP128.01/MSS][UC-IMP128][Facet-1/Boundary] Desktop container không chứa class right-6 gây đè lên PlayerHudList', () => {
     const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
-    const desktopContainerMatch = html.match(/<div[^>]*class="[^"]*md:flex[^"]*"[^>]*>/);
+    const desktopContainerMatch = html.match(/<div[^>]*class="[^"]*(?:md:flex|md:max-w-md)[^"]*"[^>]*>/);
     expect(desktopContainerMatch).not.toBeNull();
     expect(desktopContainerMatch![0]).not.toContain('right-6');
   });
 
   it('[TC-IMP128.02/MSS][UC-IMP128][Facet-1/Boundary] Desktop container căn giữa màn hình với left-1/2 và -translate-x-1/2', () => {
     const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
-    const desktopContainerMatch = html.match(/<div[^>]*class="[^"]*md:flex[^"]*"[^>]*>/);
+    const desktopContainerMatch = html.match(/<div[^>]*class="[^"]*(?:md:flex|md:max-w-md)[^"]*"[^>]*>/);
     expect(desktopContainerMatch).not.toBeNull();
     expect(desktopContainerMatch![0]).toContain('left-1/2');
     expect(desktopContainerMatch![0]).toContain('-translate-x-1/2');
   });
 
-  it('[TC-IMP128.03/MSS][UC-IMP128][Facet-1/Boundary] Desktop container định vị an toàn ở top-28 hoặc top-32 dưới Market Ticker', () => {
+  it('[TC-IMP128.03/MSS][UC-IMP128][Facet-1/Boundary] Desktop container định vị an toàn ở top-20 dưới Market Ticker', () => {
     const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
-    const desktopContainerMatch = html.match(/<div[^>]*class="[^"]*md:flex[^"]*"[^>]*>/);
+    const desktopContainerMatch = html.match(/<div[^>]*class="[^"]*(?:md:flex|md:max-w-md)[^"]*"[^>]*>/);
     expect(desktopContainerMatch).not.toBeNull();
-    expect(desktopContainerMatch![0]).toMatch(/top-(28|32)/);
+    expect(desktopContainerMatch![0]).toMatch(/top-(20|28|32)/);
   });
 
   it('[TC-IMP128.04/MSS][UC-IMP128][Facet-2/Reactivity] Desktop container hiển thị đủ các badge thông báo giao dịch thông thường', () => {

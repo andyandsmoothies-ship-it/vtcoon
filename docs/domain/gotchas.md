@@ -11,7 +11,7 @@
 | `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147, #190, #191, #195, #196, #197, #200, #206, #223 |
 | `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190, #200, #203, #209, #210, #211, #212, #213, #215, #217, #223, #224, #225, #226, #227, #231 |
 | `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #32, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #60, #61, #63, #69, #72, #74, #77, #80, #85, #86, #88, #89, #90, #91, #92, #93, #94, #95, #96, #101, #103, #109, #110, #114, #115, #116, #117, #120, #122, #123, #124, #125, #126, #127, #128, #129, #130, #133, #134, #135, #136, #140, #141, #144, #148, #159, #160, #161, #162, #163, #164, #165, #169, #175, #177, #189, #198, #200, #222 |
-| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192, #195, #196, #199, #201, #202, #204, #205, #206, #216, #217, #231 |
+| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192, #195, #196, #199, #201, #202, #204, #205, #206, #216, #217, #231, #234 |
 | `[UAT/TEST]` | Nghiệm Thu, Adversarial TDD, Ảnh Chụp Màn Hình (.jpg), Shell Escaping, File I/O Lock, Docker Healthcheck Timeout | #5, #28, #29, #31, #35, #52, #71, #73, #83, #84, #99, #100, #117, #124, #125, #130, #199 |
 | `[TELEMETRY]` | Giám Sát Hiệu Năng Thời Gian Thực, Chó Canh Phòng Bất Biến, Hộp Đen Tái Hiện Lỗi | #39, #62, #71, #75, #104, #114, #115, #135, #174, #200, #227 |
 | `[ARCH/REFACTOR]` | Tách Module Facade, Ngân Sách Render Loop, Chuẩn Hóa Môi Trường Build | #43, #98, #99 |
@@ -3873,6 +3873,40 @@
   2. **Unstale Enter Key Dispatch**: Ô nhập mã phòng gắn `onKeyDown` kiểm tra `e.key === 'Enter'`. Để chống bẫy stale closure trong React và đảm bảo bắt kịp tốc độ gõ phím nhanh của người dùng, hàm đọc giá trị mới nhất qua `(codeRef.current || code).trim().toUpperCase()` và kiểm tra regex `/^[A-Z0-9]{6}$/` trước khi gọi `joinCustomRoom`.
   3. **Multi-Engine Audio Context Resume**: Cả 3 hành động tương tác chính tại Welcome Hub (`handleCreateRoom`, `handlePlayWithBots`, `handleJoinRoom`) đều đồng thời gọi `AudioEngine.resumeAudioContext()`. Hàm này đánh thức cả `Howler.ctx` và `SoundEngine.resumeAudioContext()`, đảm bảo toàn bộ hệ thống âm thanh sẵn sàng 100% trước khi chuyển cảnh vào game.
 - **Traceability**: `[TC-IMP168.20..24/MSS]`, `tests/client/imp168_welcome_hub_and_room_creation.test.ts#TC-IMP168.20-24`, `src/client/network/use_app_session.ts`, `src/client/ui/lobby/welcome_hub_modal.tsx`, `src/client/audio/audio_engine.ts`.
+
+---
+
+### 233. [UI/UX][LOBBY/NET] Pessimistic Room Join Transition, Button Spinner & SSR Zustand Snapshot Invariant (IMP-168 Flash Defense)
+- **Bẫy nghiệp vụ & kỹ thuật**:
+  1. *Chuyển cảnh lạc quan sớm gây giật/chớp màn hình (Premature Optimistic UI Flash Trap)*: Khi người chơi ở `WelcomeHubModal` nhập mã phòng và bấm "Vào Bàn", hàm `joinCustomRoom` trước đây lập tức gán `roomCode = cleanCode` vào Zustand store. `main.tsx` dựa vào điều kiện `roomCode !== null` đã lập tức unmount `WelcomeHubModal` và mount `PreMatchDeck`. Khoảng 100ms sau, khi server WebSocket phản hồi lỗi `ROOM_NOT_FOUND` hoặc `ROOM_FULL`, `handleSessionServerError` gọi `resetLobby()` gán `roomCode = null`, buộc giao diện unmount `PreMatchDeck` và mount lại `WelcomeHubModal`. Hiện tượng này tạo ra cú chớp giật giao diện (flash of wrong state) làm người dùng thấy "nhập xong bấm nút, mặc dù sai nhưng thấy nó vào giao diện game rồi out ra".
+  2. *Bẫy Zustand SSR Snapshot trong React renderToStaticMarkup*: Trong môi trường SSR (`renderToStaticMarkup` của Vitest hoặc Server Component), `React.useSyncExternalStore` của Zustand v4/v5 sử dụng đối số thứ ba `api.getInitialState()` làm `getServerSnapshot`. Dù test có gọi `useLobbyStore.setState({ isJoining: true })` trước khi render, hook `useLobbyStore((s) => s.isJoining)` trong SSR vẫn trả về giá trị khởi tạo ban đầu (`false`).
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Pessimistic UI Transition Invariant**: Bổ sung cờ `isJoining: boolean` và hàm `confirmJoined: () => void` vào `LobbyState`. Khi người chơi bấm "Vào Bàn", `joinCustomRoom()` gán `isJoining = true`. Tại `main.tsx`, `WelcomeHubModal` được hiển thị khi `(!roomCode || isJoining)`, và `PreMatchDeck` CHỈ được render khi `{roomCode && !isJoining}`. Người dùng ở yên tại `WelcomeHubModal`, nút "Vào Bàn" chuyển sang trạng thái loading với spinner và nhãn `"Đang Vào..."`, đồng thời vô hiệu hóa ô input và nút bấm để chống double-submit.
+  2. **Server Confirmation Handshake**: Chỉ khi WebSocket nhận được gói tin xác nhận phòng hợp lệ từ server (`ROOM_JOINED`, `LOBBY_UPDATE`, `SESSION_INIT`, `STATE_DELTA`), `confirmJoined()` mới được kích hoạt trong `ws_message_handler.ts` để đưa `isJoining = false`, thực hiện chuyển cảnh 60 FPS mượt mà sang `PreMatchDeck`.
+  3. **Zero-Flash Error Reset**: Khi server từ chối (`ROOM_NOT_FOUND`, `ROOM_FULL`), `handleSessionServerError` gọi `resetLobby()` đưa `isJoining = false` và `roomCode = null`. Giao diện giữ nguyên `WelcomeHubModal` mà không hề có bất kỳ khung hình giật/chớp nào, đồng thời `ServerToast` hiển thị thông báo lỗi rõ ràng.
+  4. **SSR Snapshot Invariant**: Trong component `WelcomeHubModal`, trích xuất trạng thái kết hợp: `const storeJoining = useLobbyStore((s) => s.isJoining); const isJoining = storeJoining || useLobbyStore.getState().isJoining;` bảo đảm tính nhất quán tuyệt đối giữa cả môi trường trình duyệt tương tác thực tế và môi trường kiểm thử tĩnh SSR.
+- **Traceability**: `[TC-IMP168.26..28/MSS]`, `tests/client/imp168_welcome_hub_and_room_creation.test.ts#TC-IMP168.26-28`, `src/client/main.tsx`, `src/client/store/lobby_store.ts`, `src/client/ui/lobby/welcome_hub_modal.tsx`, `src/client/network/ws_message_handler.ts`.
+
+---
+
+### 234. [UI/CRAFT][TOAST] Punchy Event Card Summaries & Unified Pop-up Stack Architecture (IMP-169)
+- **Bẫy nghiệp vụ & kỹ thuật**:
+  1. *Tràn chữ & che khuất giao diện mobile bởi mô tả thẻ cơ hội/thị trường dài dòng (Card Description Bloat Trap)*: Các thẻ sự kiện rút trong game có mô tả gốc dài đến 70-100 ký tự (chứa đầy đủ điều kiện pháp lý, thuật ngữ kinh tế, số liệu). Khi đẩy nguyên văn chuỗi này vào floating toasts / milestone banner, văn bản bị xuống hàng 3-4 dòng, che lấp toàn bộ bàn cờ hoặc MarketEventTicker trên thiết bị 360px.
+  2. *Phân mảnh 2 container desktop/mobile & lệch tọa độ chèn đè (Two-Container Layout Fragmentation)*: Trước đây hệ thống duy trì 2 container riêng biệt (`md:hidden` và `hidden md:flex`) với các quy tắc tính top offset khác nhau (`top-[4.25rem]`, `top-[11.5rem]`, `top-28`, `top-32`), dẫn đến tình trạng MilestoneBanner và Toast chèn đè lên nhau hoặc thụt lệch khi số lượng `activeModifiers` thay đổi từ 0 -> 1 -> 2+.
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **Punchy Event Summaries Dictionary (`PUNCHY_EVENT_SUMMARIES`)**: `src/client/ui/event_card_punchy_summaries.ts` chuẩn hóa 100% (36/36) thẻ sự kiện (16 Thẻ Thị Trường + 20 Thẻ Cơ Hội) thành các thông điệp hành động súc tích (Punchy Summaries), độ dài khống chế nghiêm ngặt $\le 35$ ký tự (ví dụ: `'Chậm tiến độ, phạt 400 Tr./c.trình'`). Hàm fallback `resolvePunchyEventSummary` tách theo dấu `;` / `.` và cắt ngắn an toàn $\le 38$ ký tự kèm `'...'`.
+  2. **Unified Pop-up Stack Architecture**: Xóa bỏ hoàn toàn 2 container phân mảnh; hợp nhất thành 1 container xếp chồng duy nhất (`fixed ${stackTopClass} left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 w-full max-w-[92vw] md:max-w-md px-2 z-30 pointer-events-none`).
+  3. **Biên độ Top Offset Đa Tầng**:
+     - `activeMarketCount === 0`: `top-20` (dưới thanh header an toàn).
+     - `activeMarketCount === 1`: `top-[10.5rem]` (dưới 1 card ticker).
+     - `activeMarketCount >= 2`: `top-[15.5rem]` (dưới 2 card tickers).
+  4. **Thứ tự & Tương tác Xúc giác (Tactile A11y & Truncate Invariant)**:
+     - `MilestoneBanner` luôn nằm ở đỉnh stack (`pointer-events-auto`), có `truncate min-w-0` để không bao giờ tràn layout.
+     - Hỗ trợ giải phóng ngay khi click chạm hoặc phím `Enter` / `Space` kích hoạt `removeFloatingText`.
+     - Phía dưới tối đa 2 regular contextual transaction toasts, căn giữa với `gap-2`.
+- **Traceability**: `[TC-IMP169.01..57]`, `tests/client/imp169_punchy_notifications_and_unified_stack.test.ts`, `src/client/ui/event_card_punchy_summaries.ts`, `src/client/network/activity_tracker.ts`, `src/client/ui/floating_numbers.tsx`.
+
+
 
 
 

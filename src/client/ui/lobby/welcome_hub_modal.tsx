@@ -12,6 +12,8 @@ export function WelcomeHubModal(props: WelcomeHubModalProps = {}): React.ReactEl
   const [code, setCode] = useState('');
   const [showRules, setShowRules] = useState(false);
   const codeRef = useRef('');
+  const storeJoining = useLobbyStore((s) => s.isJoining);
+  const isJoining = storeJoining || useLobbyStore.getState().isJoining;
 
   const cleanCode = code.trim().toUpperCase();
   const isValidCode = /^[A-Z0-9]{6}$/.test(cleanCode);
@@ -23,17 +25,20 @@ export function WelcomeHubModal(props: WelcomeHubModalProps = {}): React.ReactEl
   };
 
   const handleCreateRoom = () => {
+    if (isJoining) return;
     AudioEngine.resumeAudioContext();
     useLobbyStore.getState().createCustomRoom(false);
   };
 
   const handleJoinRoom = () => {
+    if (isJoining) return;
     AudioEngine.resumeAudioContext();
     const targetCode = (codeRef.current || code).trim().toUpperCase();
     useLobbyStore.getState().joinCustomRoom(targetCode);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (isJoining) return;
     const targetCode = (codeRef.current || code).trim().toUpperCase();
     if (e.key === 'Enter' && /^[A-Z0-9]{6}$/.test(targetCode)) {
       handleJoinRoom();
@@ -84,8 +89,9 @@ export function WelcomeHubModal(props: WelcomeHubModalProps = {}): React.ReactEl
           <button
             type="button"
             data-testid="create-room-btn"
+            disabled={isJoining}
             onClick={handleCreateRoom}
-            className="w-full min-h-[48px] flex items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-amber-950 font-black text-sm uppercase tracking-wider shadow-[0_3px_0_0_#78350f] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
+            className="w-full min-h-[48px] flex items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-amber-950 font-black text-sm uppercase tracking-wider shadow-[0_3px_0_0_#78350f] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
           >
             <span>🎮</span>
             <span>Tạo Phòng Mới</span>
@@ -109,22 +115,32 @@ export function WelcomeHubModal(props: WelcomeHubModalProps = {}): React.ReactEl
               data-testid="join-room-input"
               data-testid-alt="room-code-input"
               value={code}
+              disabled={isJoining}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
               placeholder="VTxxxx"
               maxLength={6}
-              className="flex-1 min-h-[44px] px-3.5 text-center uppercase font-mono font-black tracking-widest text-sm rounded-xl bg-slate-800 border border-amber-400/40 text-amber-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-400"
+              className="flex-1 min-h-[44px] px-3.5 text-center uppercase font-mono font-black tracking-widest text-sm rounded-xl bg-slate-800 border border-amber-400/40 text-amber-200 placeholder:text-slate-500 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-amber-400"
               aria-label="Nhập mã phòng 6 ký tự"
             />
             <button
               type="button"
               data-testid="join-room-btn"
-              disabled={!isValidCode}
+              disabled={!isValidCode || isJoining}
               onClick={handleJoinRoom}
               className="min-h-[44px] px-4 flex items-center justify-center gap-1.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed bg-gradient-to-b from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-amber-950 shadow-[0_2px_0_0_#78350f] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 shrink-0"
             >
-              <span>👉</span>
-              <span>Vào Bàn</span>
+              {isJoining ? (
+                <>
+                  <span className="inline-block w-3.5 h-3.5 border-2 border-amber-950 border-t-transparent rounded-full animate-spin" aria-hidden="true" />
+                  <span>Đang Vào...</span>
+                </>
+              ) : (
+                <>
+                  <span aria-hidden="true">👉</span>
+                  <span>Vào Bàn</span>
+                </>
+              )}
             </button>
           </div>
         </div>

@@ -559,6 +559,51 @@ describe('[IMP-168: Trạm 1 RED] Welcome Hub & Controlled Room Creation Contrac
       expect(replaceStateSpy).toHaveBeenCalledWith({}, '', '/');
       expect(setErrorMessageSpy).toHaveBeenCalled();
     });
+
+    it('[TC-IMP168.26/MSS][UC-IMP168][Facet-2/Reactivity] joinCustomRoom gán isJoining: true, và confirmJoined() đưa isJoining về false', () => {
+      useLobbyStore.getState().joinCustomRoom('VT5555');
+      expect((useLobbyStore.getState() as any).isJoining).toBe(true);
+
+      (useLobbyStore.getState() as any).confirmJoined?.();
+      expect((useLobbyStore.getState() as any).isJoining).toBe(false);
+    });
+
+    it('[TC-IMP168.27/MSS][UC-IMP168][Facet-1/Boundary] WelcomeHubModal khi isJoining=true hiển thị "Đang Vào...", vô hiệu hóa input và nút Vào Bàn', () => {
+      useLobbyStore.setState({ isJoining: true } as any);
+
+      let capturedTree: any;
+      function TestWrapper() {
+        capturedTree = React.createElement(WelcomeHubModal!);
+        return capturedTree;
+      }
+      const html = renderToStaticMarkup(React.createElement(TestWrapper));
+      expect(html).toContain('Đang Vào...');
+
+      const input = findElementByTestId(capturedTree, 'join-room-input');
+      expect(input?.props?.disabled).toBe(true);
+
+      const btn = findElementByTestId(capturedTree, 'join-room-btn');
+      expect(btn?.props?.disabled).toBe(true);
+    });
+
+    it('[TC-IMP168.28/MSS][UC-IMP168][Facet-2/Reactivity] ws_message_handler: nhận ROOM_JOINED hoặc LOBBY_UPDATE tự động kích hoạt confirmJoined() xóa cờ isJoining', () => {
+      const confirmSpy = vi.fn();
+      useLobbyStore.setState({ confirmJoined: confirmSpy, isJoining: true } as any);
+
+      const mockSocket = { send: vi.fn() };
+      const ctx: WsMessageHandlerContext = {
+        roomCode: 'VT5555',
+        playerId: 'p2',
+        isHost: false,
+        socket: mockSocket as any,
+      };
+
+      handleWsMessage({ type: 'ROOM_JOINED', roomCode: 'VT5555', playerId: 'p2', playerCount: 2 }, ctx);
+      expect(confirmSpy).toHaveBeenCalledTimes(1);
+
+      handleWsMessage({ type: 'LOBBY_UPDATE', roomCode: 'VT5555', players: [] }, ctx);
+      expect(confirmSpy).toHaveBeenCalledTimes(2);
+    });
   });
 });
 
