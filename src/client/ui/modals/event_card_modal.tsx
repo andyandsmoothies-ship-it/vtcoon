@@ -11,6 +11,7 @@ import {
   sanitizeDestination,
   cleanEventDescription,
   isFinancialDestination,
+  getCardCtaButtonText,
 } from './event_card_visuals.js';
 
 export interface EventCardModalProps {
@@ -23,6 +24,7 @@ export interface EventCardModalProps {
   readonly effectDetail?: string;
   readonly duration?: string;
   readonly destination?: string;
+  readonly ctaButtonText?: string;
   readonly onConfirm?: () => void;
   readonly onClose?: () => void;
 }
@@ -37,6 +39,7 @@ export function EventCardModal({
   effectDetail,
   duration,
   destination,
+  ctaButtonText,
   onConfirm,
   onClose,
 }: EventCardModalProps): React.ReactElement {
@@ -77,6 +80,7 @@ export function EventCardModal({
   const iconEmoji = getCardThemedEmoji(cardId, cardType);
   const heroStat = getCardHeroStat(cardId, effectDelta);
   const heroStyles = getHeroStatStyles(heroStat.variant);
+  const resolvedCta = ctaButtonText ?? getCardCtaButtonText(cardId);
 
   return (
     <div
@@ -164,14 +168,18 @@ export function EventCardModal({
         className="relative z-10 w-full bg-[#F7F2E7] border border-slate-300 rounded-xl p-3 mb-3 text-left sm:hidden flex flex-col gap-2 shadow-xs"
       >
         <div className="flex items-center justify-between gap-1.5 flex-wrap">
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300">
-            <span>🎯</span>
-            <span>{resolvedTargetScope}</span>
-          </span>
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-800 border border-slate-300">
-            <span>⏳</span>
-            <span>{resolvedDuration}</span>
-          </span>
+          {resolvedTargetScope && resolvedTargetScope !== 'Người chơi rút thẻ' && (
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300">
+              <span>🎯</span>
+              <span>{resolvedTargetScope}</span>
+            </span>
+          )}
+          {resolvedDuration && resolvedDuration !== 'Tức thì' && (
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-800 border border-slate-300">
+              <span>⏳</span>
+              <span>{resolvedDuration}</span>
+            </span>
+          )}
         </div>
         <p className="text-xs text-slate-800 font-bold leading-relaxed text-center">
           {singleTruthDescription}
@@ -183,14 +191,18 @@ export function EventCardModal({
         data-testid="event-specs-table"
         className="relative z-10 w-full bg-[#F7F2E7] border border-slate-300 rounded-xl p-3 mb-3 items-center justify-center gap-2 hidden sm:flex flex-wrap shadow-xs"
       >
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300">
-          <span>🎯</span>
-          <span title={resolvedDenseScope}>{resolvedDenseScope}</span>
-        </span>
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-slate-100 text-slate-800 border border-slate-300">
-          <span>⏳</span>
-          <span>{resolvedDuration}</span>
-        </span>
+        {resolvedDenseScope && resolvedDenseScope !== 'Người chơi rút thẻ' && (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300">
+            <span>🎯</span>
+            <span title={resolvedDenseScope}>{resolvedDenseScope}</span>
+          </span>
+        )}
+        {resolvedDuration && resolvedDuration !== 'Tức thì' && (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-slate-100 text-slate-800 border border-slate-300">
+            <span>⏳</span>
+            <span>{resolvedDuration}</span>
+          </span>
+        )}
         {shouldShowDestination && (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-100 text-emerald-900 border border-emerald-300">
             <span>🏛️</span>
@@ -202,10 +214,11 @@ export function EventCardModal({
       {/* CTA Button */}
       <button
         type="button"
+        data-testid="event-card-confirm-btn"
         onClick={onConfirm ?? onClose}
         className="relative z-10 w-full min-h-[46px] py-2.5 rounded-2xl font-black text-white text-xs sm:text-sm uppercase tracking-wider transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer bg-emerald-600 hover:bg-emerald-500 border-2 border-emerald-700 shadow-[0_4px_0_0_#065f46] active:shadow-[0_1px_0_0_#065f46] active:translate-y-[3px]"
       >
-        Đã Hiểu / Tiếp Tục
+        {resolvedCta}
       </button>
     </div>
   );

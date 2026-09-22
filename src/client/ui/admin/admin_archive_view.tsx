@@ -23,9 +23,9 @@ export function AdminArchiveView({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900 p-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 rounded-xl border border-slate-800 bg-slate-900 p-4">
         <div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <h2 className="font-mono text-2xl font-bold text-cyan-300">{selectedArchivedRoom.roomCode}</h2>
             <span className={`rounded px-2 py-0.5 text-xs font-bold ${
               selectedArchivedRoom.status === 'FINISHED'
@@ -35,7 +35,7 @@ export function AdminArchiveView({
               {selectedArchivedRoom.status}
             </span>
           </div>
-          <div className="mt-2 flex gap-4 text-xs text-slate-400">
+          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-400">
             <span>Bắt đầu: <b className="text-slate-200">{new Date(selectedArchivedRoom.startTime).toLocaleString()}</b></span>
             {selectedArchivedRoom.endTime && (
               <span>Kết thúc: <b className="text-slate-200">{new Date(selectedArchivedRoom.endTime).toLocaleString()}</b></span>
@@ -48,7 +48,7 @@ export function AdminArchiveView({
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => downloadLogFile(selectedArchivedRoom.roomCode, archivedLogs, 'jsonl')}
             className="rounded border border-cyan-500/40 bg-cyan-950/40 px-3 py-1.5 text-xs font-semibold text-cyan-300 hover:bg-cyan-900/60"
@@ -65,15 +65,15 @@ export function AdminArchiveView({
       </div>
 
       <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
-        <div className="mb-2 flex items-center justify-between">
+        <div className="mb-2 flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
           <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
             📁 Nhật Ký Toàn Bộ Ván Đấu ({archivedLogs.length} sự kiện lưu trên đĩa)
           </h3>
-          <span className="text-[11px] font-mono text-slate-400">
+          <span className="text-[11px] font-mono text-slate-400 truncate max-w-full sm:max-w-xs" title={selectedArchivedRoom.logFilePath}>
             {selectedArchivedRoom.logFilePath}
           </span>
         </div>
-        <div className="h-[480px] overflow-y-auto rounded-lg border border-slate-950 bg-slate-950 p-3 font-mono text-[11px] space-y-1 text-slate-300">
+        <div className="h-[480px] overflow-auto rounded-lg border border-slate-950 bg-slate-950 p-3 font-mono text-[11px] space-y-1 text-slate-300">
           {archivedLogs.length === 0 ? (
             <div className="py-20 text-center text-slate-600">Đang đọc dữ liệu từ tệp log trên máy chủ...</div>
           ) : (

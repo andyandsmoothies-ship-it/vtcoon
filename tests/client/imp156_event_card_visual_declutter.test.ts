@@ -131,7 +131,7 @@ describe('[IMP-156: Trạm 1 RED] Event Cards Visual De-Clutter & Single-Truth U
         return vdom;
       }
       renderToStaticMarkup(React.createElement(TestWrapper));
-      const btn = vdom.props.children.find((child: any) => child?.type === 'button' && child?.props?.children?.includes?.('Đã Hiểu'));
+      const btn = vdom.props.children.find((child: any) => child?.type === 'button' && (child?.props?.['data-testid'] === 'event-card-confirm-btn' || child?.props?.children?.includes?.('Bỏ Túi') || child?.props?.children?.includes?.('Đã Hiểu')));
       expect(btn).toBeDefined();
       btn.props.onClick();
       expect(confirmSpy).toHaveBeenCalledOnce();

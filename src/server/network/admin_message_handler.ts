@@ -3,18 +3,19 @@ import type { WebSocket } from 'ws';
 import type { WsClientMessage, WsServerMessage, ReasonCode } from './network_types.js';
 import type { AdminManager } from './admin_manager.js';
 
-export function handleAdminMessage(
+export function handleAdminClientMessage(
   admin: AdminManager,
   socket: WebSocket,
   msg: WsClientMessage,
   sendSafe: (s: WebSocket, m: WsServerMessage) => void,
-): boolean {
+): boolean | Promise<boolean> {
   switch (msg.type) {
     case 'ADMIN_AUTH':
       return handleAuth(admin, socket, msg.secret, sendSafe);
     case 'ADMIN_GET_ROOMS':
       return handleGetRooms(admin, socket, sendSafe);
     case 'ADMIN_GET_ARCHIVED_ROOMS':
+    case 'ADMIN_GET_ARCHIVED_ROOMLIST' as any:
       return handleGetArchivedRooms(admin, socket, sendSafe);
     case 'ADMIN_GET_ARCHIVED_LOGS':
       return handleGetArchivedLogs(admin, socket, msg.roomCode, msg.timestamp, sendSafe);
@@ -29,6 +30,9 @@ export function handleAdminMessage(
       return false;
   }
 }
+
+export const handleAdminMessage = handleAdminClientMessage;
+export const handleClientMessage = handleAdminClientMessage;
 
 function handleAuth(
   admin: AdminManager,
@@ -60,6 +64,21 @@ function dispatchAuth(
   return true;
 }
 
+async function dispatchAuthAsync(
+  admin: AdminManager,
+  socket: WebSocket,
+  sendSafe: (s: WebSocket, m: WsServerMessage) => void,
+  factory: () => Promise<WsServerMessage>,
+): Promise<boolean> {
+  if (!admin.isAuthenticated(socket)) {
+    sendSafe(socket, { type: 'ERROR', reasonCode: 'ADMIN_UNAUTHORIZED' });
+  } else {
+    const msg = await factory();
+    sendSafe(socket, msg);
+  }
+  return true;
+}
+
 function handleGetRooms(
   admin: AdminManager,
   socket: WebSocket,
@@ -72,30 +91,40 @@ function handleGetRooms(
   }));
 }
 
-function handleGetArchivedRooms(
+async function handleGetArchivedRooms(
   admin: AdminManager,
   socket: WebSocket,
   sendSafe: (s: WebSocket, m: WsServerMessage) => void,
-): boolean {
-  return dispatchAuth(admin, socket, sendSafe, () => ({
-    type: 'ADMIN_ARCHIVED_ROOM_LIST',
-    rooms: admin.getArchivedRoomsList(),
-  }));
+): Promise<boolean> {
+  return dispatchAuthAsync(admin, socket, sendSafe, async () => {
+    const rooms = typeof admin.getArchivedRoomsListAsync === 'function'
+      ? await admin.getArchivedRoomsListAsync()
+      : admin.getArchivedRoomsList();
+    return {
+      type: 'ADMIN_ARCHIVED_ROOM_LIST',
+      rooms,
+    };
+  });
 }
 
-function handleGetArchivedLogs(
+async function handleGetArchivedLogs(
   admin: AdminManager,
   socket: WebSocket,
   roomCode: string,
   timestamp: number | undefined,
   sendSafe: (s: WebSocket, m: WsServerMessage) => void,
-): boolean {
+): Promise<boolean> {
   const norm = roomCode.trim().toUpperCase();
-  return dispatchAuth(admin, socket, sendSafe, () => ({
-    type: 'ADMIN_ARCHIVED_LOG_DATA',
-    roomCode: norm,
-    logs: admin.getRoomFullLog(norm, timestamp),
-  }));
+  return dispatchAuthAsync(admin, socket, sendSafe, async () => {
+    const logs = typeof admin.getRoomFullLogAsync === 'function'
+      ? await admin.getRoomFullLogAsync(norm, timestamp)
+      : admin.getRoomFullLog(norm, timestamp);
+    return {
+      type: 'ADMIN_ARCHIVED_LOG_DATA',
+      roomCode: norm,
+      logs,
+    };
+  });
 }
 
 function handleSubscribe(

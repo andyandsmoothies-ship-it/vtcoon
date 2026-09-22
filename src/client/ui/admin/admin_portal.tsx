@@ -54,8 +54,8 @@ export function AdminPortal(): React.ReactElement {
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-slate-950 font-sans text-slate-100">
-      <header className="flex h-14 shrink-0 items-center justify-between border-b border-slate-800 bg-slate-900 px-6">
-        <div className="flex items-center gap-3">
+      <header className="flex min-h-14 shrink-0 flex-wrap items-center justify-between gap-2 border-b border-slate-800 bg-slate-900 px-3 py-2 sm:px-6">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <span className="text-xl">🛡️</span>
           <span className="text-sm font-bold tracking-wider text-amber-400">VTCOON ADMIN PORTAL</span>
           <span className="rounded bg-slate-800 px-2 py-0.5 text-[11px] font-mono text-emerald-400">
@@ -74,7 +74,7 @@ export function AdminPortal(): React.ReactElement {
             </div>
           )}
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           {toastMessage && (
             <span className="rounded bg-emerald-950 border border-emerald-500/40 px-3 py-1 text-xs text-emerald-300">
               {toastMessage}
@@ -101,8 +101,8 @@ export function AdminPortal(): React.ReactElement {
         </div>
       </header>
 
-      <div className="flex flex-1 overflow-hidden">
-        <aside className="flex w-96 flex-col border-r border-slate-800 bg-slate-900/60">
+      <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
+        <aside className="flex w-full md:w-96 shrink-0 flex-col border-b md:border-b-0 md:border-r border-slate-800 bg-slate-900/60 max-h-[35vh] md:max-h-none">
           <div className="border-b border-slate-800 p-2 flex gap-1 bg-slate-950/50">
             <button
               onClick={() => setActiveTab('LIVE')}
@@ -142,8 +142,8 @@ export function AdminPortal(): React.ReactElement {
                     const isCurrent = statusFilter === st;
                     const label = st === 'ALL' ? 'Tất Cả' : st === 'NORMAL' ? '🟢 Xanh' : st === 'WARNING' ? '🟡 Cảnh Báo' : '🔴 Lỗi';
                     const btnClass = isCurrent
-                      ? 'flex-1 rounded py-1 text-[10px] font-bold bg-amber-400 text-amber-950'
-                      : 'flex-1 rounded py-1 text-[10px] font-bold bg-slate-800 text-slate-400 hover:text-white';
+                      ? 'flex-1 rounded py-1 text-[11px] font-bold bg-amber-400 text-amber-950'
+                      : 'flex-1 rounded py-1 text-[11px] font-bold bg-slate-800 text-slate-400 hover:text-white';
                     return (
                       <button key={st} onClick={() => setStatusFilter(st)} className={btnClass}>
                         {label}
@@ -157,8 +157,8 @@ export function AdminPortal(): React.ReactElement {
                     const isCurrent = lifecycleFilter === lc;
                     const label = lc === 'ALL' ? 'Toàn Bộ' : lc === 'LOBBY' ? '🛋️ Sảnh Chờ' : '🎲 Đang Chơi';
                     const btnClass = isCurrent
-                      ? 'flex-1 rounded py-1 text-[10px] font-bold bg-cyan-400 text-cyan-950'
-                      : 'flex-1 rounded py-1 text-[10px] font-bold bg-slate-800/80 text-slate-400 hover:text-white';
+                      ? 'flex-1 rounded py-1 text-[11px] font-bold bg-cyan-400 text-cyan-950'
+                      : 'flex-1 rounded py-1 text-[11px] font-bold bg-slate-800/80 text-slate-400 hover:text-white';
                     return (
                       <button key={lc} onClick={() => setLifecycleFilter(lc)} className={btnClass}>
                         {label}
@@ -249,7 +249,7 @@ export function AdminPortal(): React.ReactElement {
           </div>
         </aside>
 
-        <main className="flex flex-1 flex-col overflow-y-auto p-6">
+        <main className="flex flex-1 flex-col overflow-y-auto p-3 sm:p-6">
           {activeTab === 'LIVE' ? (
             <AdminLiveView
               selectedRoomDetail={selectedRoomDetail}

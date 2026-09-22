@@ -2,10 +2,23 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import type { AdminRoomLogEntry, AdminArchivedRoomSummary, ArchivedRoomStatus } from '../network/admin_types.js';
+import {
+  type ISupabaseStorageService,
+  SupabaseStorageService,
+} from '../storage/supabase_storage.js';
+import { reindexLocalLogs, parseLogEntries } from './room_logger_reindexer.js';
+
+function isStorageConfigured(storage?: ISupabaseStorageService): boolean {
+  if (!storage) return false;
+  return typeof storage.isConfigured === 'function'
+    ? storage.isConfigured()
+    : Boolean(storage.isConfigured);
+}
 
 export interface PersistentRoomLoggerOptions {
   readonly logDir?: string;
   readonly flushIntervalMs?: number;
+  readonly supabaseStorage?: ISupabaseStorageService;
 }
 
 export interface RoomLogMeta {
@@ -28,12 +41,27 @@ export class PersistentRoomLogger {
   private readonly manifest = new Map<string, AdminArchivedRoomSummary>();
   private readonly activeRoomFiles = new Map<string, string>();
   private readonly writeBuffer = new Map<string, string[]>();
+  public readonly pendingUploads: Promise<unknown>[] = [];
+  public readonly supabaseStorage?: ISupabaseStorageService;
   private flushTimer?: NodeJS.Timeout;
 
   constructor(options?: PersistentRoomLoggerOptions) {
-    this.logDir = options?.logDir ?? path.resolve(process.cwd(), 'server_logs', 'rooms');
+    if (options?.logDir) {
+      this.logDir = options.logDir;
+    } else if (process.env['NODE_ENV'] === 'test') {
+      this.logDir = path.resolve(
+        process.cwd(),
+        '.agents',
+        'tmp',
+        'test_logs',
+        `worker_${process.env['VITEST_POOL_ID'] || process.pid}`,
+      );
+    } else {
+      this.logDir = path.resolve(process.cwd(), 'server_logs', 'rooms');
+    }
     this.manifestFile = path.join(this.logDir, 'rooms_manifest.json');
-    this.flushIntervalMs = options?.flushIntervalMs ?? (process.env.NODE_ENV === 'test' ? 0 : 500);
+    this.flushIntervalMs = options?.flushIntervalMs ?? (process.env['NODE_ENV'] === 'test' ? 0 : 500);
+    this.supabaseStorage = options?.supabaseStorage ?? new SupabaseStorageService();
     this.ensureDir();
     this.loadManifest();
   }
@@ -54,17 +82,22 @@ export class PersistentRoomLogger {
 
   private loadManifest(): void {
     try {
-      if (!fs.existsSync(this.manifestFile)) return;
-      const raw = fs.readFileSync(this.manifestFile, 'utf8');
-      const list = JSON.parse(raw) as AdminArchivedRoomSummary[];
-      for (const item of list) {
-        this.manifest.set(item.logFilePath, item);
-        if (item.status === 'ACTIVE') {
-          this.activeRoomFiles.set(item.roomCode.trim().toUpperCase(), item.logFilePath);
+      if (fs.existsSync(this.manifestFile)) {
+        const raw = fs.readFileSync(this.manifestFile, 'utf8');
+        const list = JSON.parse(raw) as AdminArchivedRoomSummary[];
+        for (const item of list) {
+          this.manifest.set(item.logFilePath, item);
+          if (item.status === 'ACTIVE') {
+            this.activeRoomFiles.set(item.roomCode.trim().toUpperCase(), item.logFilePath);
+          }
         }
       }
     } catch {
       /* safe-ignore */
+    }
+
+    if (reindexLocalLogs(this.logDir, this.manifest)) {
+      this.saveManifest();
     }
   }
 
@@ -188,8 +221,12 @@ export class PersistentRoomLogger {
     }
   }
 
-  stop(): void {
+  async stop(): Promise<void> {
     this.flushSync();
+    if (this.pendingUploads.length > 0) {
+      await Promise.allSettled(this.pendingUploads);
+      this.pendingUploads.length = 0;
+    }
   }
 
   finishRoomLog(roomCode: string, summary?: RoomFinishSummary): void {
@@ -211,10 +248,57 @@ export class PersistentRoomLogger {
       this.saveManifest();
     }
     this.activeRoomFiles.delete(norm);
+
+    if (isStorageConfigured(this.supabaseStorage)) {
+      const bucket = (this.supabaseStorage as any)?.defaultBucket ?? 'game-logs';
+      const fullPath = path.join(this.logDir, fileName);
+      let logContent = '';
+      try {
+        if (fs.existsSync(fullPath)) {
+          logContent = fs.readFileSync(fullPath, 'utf8');
+        }
+      } catch {
+        /* safe-ignore */
+      }
+      const manifestList = this.getArchivedRoomsList();
+      const manifestContent = JSON.stringify(manifestList, null, 2);
+
+      const p1 = this.supabaseStorage!.uploadFile(bucket, fileName, logContent, 'application/x-ndjson');
+      const p2 = this.supabaseStorage!.uploadFile(bucket, '_manifest/rooms_manifest.json', manifestContent, 'application/json');
+
+      let uploadPromise: Promise<unknown>;
+      uploadPromise = Promise.allSettled([p1, p2]).finally(() => {
+        const idx = this.pendingUploads.indexOf(uploadPromise);
+        if (idx !== -1) {
+          this.pendingUploads.splice(idx, 1);
+        }
+      });
+      this.pendingUploads.push(uploadPromise);
+    }
   }
 
   getArchivedRoomsList(): AdminArchivedRoomSummary[] {
     return Array.from(this.manifest.values()).sort((a, b) => b.startTime - a.startTime);
+  }
+
+  async syncCloudManifest(): Promise<void> {
+    if (!isStorageConfigured(this.supabaseStorage)) return;
+    const bucket = (this.supabaseStorage as any)?.defaultBucket ?? 'game-logs';
+    try {
+      const raw = await this.supabaseStorage!.downloadFile(bucket, '_manifest/rooms_manifest.json');
+      if (!raw) return;
+      const list = JSON.parse(raw) as AdminArchivedRoomSummary[];
+      if (Array.isArray(list)) {
+        for (const item of list) {
+          if (item && item.logFilePath) {
+            this.manifest.set(item.logFilePath, item);
+          }
+        }
+        this.saveManifest();
+      }
+    } catch {
+      /* safe-ignore */
+    }
   }
 
   getRoomFullLog(roomCode: string, timestamp?: number): AdminRoomLogEntry[] {
@@ -227,22 +311,58 @@ export class PersistentRoomLogger {
     try {
       if (!fs.existsSync(fullPath)) return [];
       const content = fs.readFileSync(fullPath, 'utf8');
-      const lines = content.split('\n');
-      const entries: AdminRoomLogEntry[] = [];
-      for (const rawLine of lines) {
-        const trimmed = rawLine.trim();
-        if (!trimmed) continue;
-        try {
-          entries.push(JSON.parse(trimmed) as AdminRoomLogEntry);
-        } catch {
-          /* safe-ignore corrupted line from unexpected process crash */
-        }
-      }
-      return entries;
+      return parseLogEntries(content);
     } catch {
       /* safe-ignore */
       return [];
     }
+  }
+
+  async getRoomFullLogAsync(roomCode: string, timestamp?: number): Promise<AdminRoomLogEntry[]> {
+    this.flushSync();
+    const norm = roomCode.trim().toUpperCase();
+    let targetFile = this.resolveLogFileName(norm, timestamp);
+
+    if (targetFile) {
+      const fullPath = path.join(this.logDir, path.basename(targetFile));
+      if (fs.existsSync(fullPath)) {
+        return this.getRoomFullLog(norm, timestamp);
+      }
+    }
+
+    if (!isStorageConfigured(this.supabaseStorage)) {
+      return [];
+    }
+
+    let fileName = targetFile;
+    if (!fileName) {
+      if (timestamp !== undefined) {
+        fileName = `${norm}_${timestamp}.jsonl`;
+      } else {
+        fileName = `${norm}.jsonl`;
+      }
+    }
+
+    const bucket = (this.supabaseStorage as any)?.defaultBucket ?? 'game-logs';
+    const remoteContent = await this.supabaseStorage!.downloadFile(bucket, fileName);
+    if (!remoteContent) {
+      return [];
+    }
+
+    const cachedPath = path.join(this.logDir, fileName);
+    try {
+      this.ensureDir();
+      fs.writeFileSync(cachedPath, remoteContent, 'utf8');
+      if (!this.manifest.has(fileName)) {
+        if (reindexLocalLogs(this.logDir, this.manifest)) {
+          this.saveManifest();
+        }
+      }
+    } catch {
+      /* safe-ignore */
+    }
+
+    return parseLogEntries(remoteContent);
   }
 
   private resolveLogFileName(norm: string, timestamp?: number): string | undefined {

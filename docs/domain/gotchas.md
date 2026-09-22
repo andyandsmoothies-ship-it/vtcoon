@@ -9,11 +9,11 @@
 | :--- | :--- | :--- |
 | `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78, #82, #104, #105, #106, #145, #146, #147, #159, #164, #174, #180, #188, #195, #196, #197, #200, #203, #215, #217, #218, #219, #220, #223 |
 | `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147, #190, #191, #195, #196, #197, #200, #206, #223 |
-| `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190, #200, #203, #209, #210, #211, #212, #213, #215, #217, #223, #224, #225, #226, #227, #231 |
+| `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190, #200, #203, #209, #210, #211, #212, #213, #215, #217, #223, #224, #225, #226, #227, #231, #235 |
 | `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #32, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #60, #61, #63, #69, #72, #74, #77, #80, #85, #86, #88, #89, #90, #91, #92, #93, #94, #95, #96, #101, #103, #109, #110, #114, #115, #116, #117, #120, #122, #123, #124, #125, #126, #127, #128, #129, #130, #133, #134, #135, #136, #140, #141, #144, #148, #159, #160, #161, #162, #163, #164, #165, #169, #175, #177, #189, #198, #200, #222 |
 | `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192, #195, #196, #199, #201, #202, #204, #205, #206, #216, #217, #231, #234 |
-| `[UAT/TEST]` | Nghiệm Thu, Adversarial TDD, Ảnh Chụp Màn Hình (.jpg), Shell Escaping, File I/O Lock, Docker Healthcheck Timeout | #5, #28, #29, #31, #35, #52, #71, #73, #83, #84, #99, #100, #117, #124, #125, #130, #199 |
-| `[TELEMETRY]` | Giám Sát Hiệu Năng Thời Gian Thực, Chó Canh Phòng Bất Biến, Hộp Đen Tái Hiện Lỗi | #39, #62, #71, #75, #104, #114, #115, #135, #174, #200, #227 |
+| `[UAT/TEST]` | Nghiệm Thu, Adversarial TDD, Ảnh Chụp Màn Hình (.jpg), Shell Escaping, File I/O Lock, Docker Healthcheck Timeout | #5, #28, #29, #31, #35, #52, #71, #73, #83, #84, #99, #100, #117, #124, #125, #130, #199, #235 |
+| `[TELEMETRY]` | Giám Sát Hiệu Năng Thời Gian Thực, Chó Canh Phòng Bất Biến, Hộp Đen Tái Hiện Lỗi | #39, #62, #71, #75, #104, #114, #115, #135, #174, #200, #227, #235 |
 | `[ARCH/REFACTOR]` | Tách Module Facade, Ngân Sách Render Loop, Chuẩn Hóa Môi Trường Build | #43, #98, #99 |
 
 ---
@@ -3906,8 +3906,36 @@
      - Phía dưới tối đa 2 regular contextual transaction toasts, căn giữa với `gap-2`.
 - **Traceability**: `[TC-IMP169.01..57]`, `tests/client/imp169_punchy_notifications_and_unified_stack.test.ts`, `src/client/ui/event_card_punchy_summaries.ts`, `src/client/network/activity_tracker.ts`, `src/client/ui/floating_numbers.tsx`.
 
+---
 
+### 235. [NET/STORAGE][UAT/TEST] Supabase Cloud Log Persistence, Self-Healing Re-indexer & Test Isolation Invariant (IMP-169)
+- **Bẫy nghiệp vụ & kỹ thuật**:
+  1. *Ô nhiễm thư mục production khi chạy test (Test Pollution Trap)*: Khi chạy bộ test kiểm thử `PersistentRoomLogger` mà không chỉ định `logDir`, hệ thống cũ fallback vào thư mục `server_logs/rooms/`. Điều này làm ô nhiễm file manifest thực tế của server với các mã phòng test giả lập và có nguy cơ ghi đè log trận đấu live.
+  2. *Mất mát danh mục phòng khi manifest bị xóa/hỏng (Manifest Desync / Orphaned Logs)*: Khi tệp `rooms_manifest.json` bị mất hoặc hỏng do lỗi tiến trình đột ngột, toàn bộ các tệp log `.jsonl` quý giá trên đĩa bị cô lập và không hiển thị trên Admin Portal.
+  3. *Nghẽn tiến trình khi upload đám mây (Cloud Upload Blocking)*: Khi đồng bộ file log và manifest lên Supabase Storage, nếu dùng lệnh synchronous hoặc await chặn luồng kết thúc ván, client và worker sẽ bị đóng băng theo độ trễ mạng Internet.
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **Strict Test Directory Isolation**: Khi `process.env.NODE_ENV === 'test'` và không truyền `logDir`, `PersistentRoomLogger` BẮT BUỘC lưu log tại `.agents/tmp/test_logs/worker_${process.env.VITEST_POOL_ID || process.pid}`, tuyệt đối không chạm vào `server_logs/rooms/`.
+  2. **Self-Healing Re-indexer**: Trong `loadManifest()`, tự động quét mọi tệp `*.jsonl` trên đĩa chưa nằm trong catalog. Trích xuất `roomCode`, `startTime`, đếm `totalEvents`, `fileSizeBytes`, và nhận diện trạng thái `FINISHED` để tái tạo catalog và lưu lại `rooms_manifest.json`.
+  3. **Non-blocking Cloud Persistence with Graceful Drain**:
+     - `finishRoomLog`: Đẩy task upload async vào `pendingUploads` và trả về ngay cho caller, không block server event loop.
+     - `stop()`: Bắt buộc gọi `this.flushSync()` và `await Promise.allSettled(this.pendingUploads)` để đảm bảo mọi upload dở dang được hoàn tất trước khi tiến trình tắt hoàn toàn.
+- **Traceability**: `[TC-IMP169.01..15]`, `tests/server/imp169_supabase_storage.test.ts`, `src/server/storage/supabase_storage.ts`, `src/server/logging/persistent_room_logger.ts`, `src/server/network/admin_manager.ts`, `src/server/network/admin_message_handler.ts`.
 
+---
+
+### 236. [UI/CRAFT][DOMAIN] Event Cards Visual De-Clutter, Zero Word Repetition & Contextual Emotional CTA Invariant (IMP-170)
+- **Bẫy nghiệp vụ & kỹ thuật**:
+  1. *Lặp từ 3 lớp & trùng lặp số tiền (Triple Redundancy & Cognitive Fatigue Trap)*: Trên `EventCardModal`, tiêu đề thẻ, khối mô tả, và khối Hero Stat trước đây lặp lại cùng một cụm từ (ví dụ: Tiêu đề "Chốt Lời Danh Mục Đầu Tư Chứng Khoán", Mô tả "Chốt lời cổ phiếu...", Hero Stat "CHỐT LỜI CỔ PHIẾU | +2.500 Tr.", Mô tả lại lặp "+2.500 Tr."). Người chơi phải đọc cùng một thông điệp 3 lần, gây mệt mỏi thị giác và thiếu tính chuyên nghiệp thương mại.
+  2. *Nhiễu thông tin bởi các tag hành chính rườm rà (Administrative Tag Pollution)*: Các thẻ hiển thị tag "🎯 Người chơi rút thẻ" và "⏳ Tức thì" - những thông tin mặc định, hiển nhiên của một thẻ rút trên tay, chiếm dụng diện tích hiển thị quý giá trên màn hình mobile 360px.
+  3. *Nút bấm CTA khô cứng, đơn điệu (Monotonous Dry CTA Button)*: Cả 36 thẻ đều dùng chung một nút bấm tĩnh duy nhất: `"Đã Hiểu / Tiếp Tục"`, làm mất đi cảm xúc hồi hộp, kịch tính của các sự kiện kinh tế và cơ hội làm giàu.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Zero Word Repetition Hierarchy**:
+     - Tiêu đề (`vi.ts`): Ngắn gọn, gợi hình, mang tính sự kiện thương mại.
+     - Mô tả (`event_card_metadata.ts`): Kể câu chuyện bối cảnh sinh động (storytelling), tuyệt đối không lặp lại từ đầu tiên của tiêu đề và không lặp lại số tiền lớn.
+     - Hero Stat (`event_card_visuals.ts`): Là nơi DUY NHẤT hiển thị con số tài chính định lượng hoặc hiệu ứng cốt lõi dạng Mono đậm nét để người chơi nắm bắt trong 0.5 giây.
+  2. **Administrative Tag Cleanliness**: Tự động ẩn các tag mặc định hiển nhiên (`'Người chơi rút thẻ'`, `'Tức thì'`). Chỉ render chip phạm vi khi có mục tiêu đặc thù (Bình Dương, Đồng Nai, Ô Dịch vụ, v.v.) và chỉ render chip thời hạn khi sự kiện kéo dài nhiều vòng (`'2 vòng chơi'`, `'Lượt tiếp theo'`).
+  3. **Contextual Emotional CTA Matrix (`KNOWN_CARD_CTA_BUTTONS`)**: Chuẩn hóa 100% (36/36) thẻ sự kiện với nút bấm hành động theo ngữ cảnh (ví dụ: `'Lên Xe Đi Tiếp! 🎲'`, `'Nộp Truy Thu 💸'`, `'Bỏ Túi Ngay 💰'`, `'Cất Vào Túi 🎴'`, `'Bảo Toàn Tiền Mặt ❄️'`, `'Nắm Bắt Thời Cơ 🏙️'`). Hàm `getCardCtaButtonText(cardId)` tự động ánh xạ nút bấm tương ứng kèm fallback an toàn.
+- **Traceability**: `[TC-IMP170]`, `tests/client/imp134_event_card_hero_stat_visual_overhaul.test.ts`, `tests/client/imp156_event_card_visual_declutter.test.ts`, `src/domain/i18n/vi.ts`, `src/domain/event_card_metadata.ts`, `src/client/ui/modals/event_card_visuals.ts`, `src/client/ui/modals/event_card_modal.tsx`.
 
 
 

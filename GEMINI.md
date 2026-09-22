@@ -32,6 +32,11 @@
 - **Zero-Trust Plan Grilling & Dual Output**: Plans are flawed by default. Before user approval, invoke `plan-griller` (model: inherit) to audit physical disk code across 3 pillars (Data Origin-to-Sink Lifecycle, 360px Layout Budget, Actor Inversion). `plan-griller` MUST write detailed audit to `.agents/audit/PLAN_AUDIT_[TICKET].md` and return a concise summary table (<20 lines) in chat. Main agent verifies findings against physical files before updating `implementation_plan.md`. Zero blind compliance.
 - **Automated Evidence Snapshot**: Quantitative evidence snapshot (`.agents/evidence/`) must be recorded before Station 3 sign-off. Triggered automatically by Station 2 or `npm run gate`.
 - **Test Tiering & UAT Execution Boundary**: Fast in-memory tests (`npm test`) must complete in <= 5s. Heavy Turn-by-Turn UAT (`npm run test:uat`, 100 turns) runs ONLY for core changes in `src/domain/`, `src/server/`, or pre-release UAT. STRICTLY FORBIDDEN during UI-only, CSS, 3D assets, or docs edits.
+- **No Post-Hoc Tests**: Write failing tests first (TDD RED). Never write unit tests after code is done.
+- **E2E Artifact Requirement**: Complex feature tests must produce verifiable artifacts (snapshots, logs, or screenshots).
+- **Adversarial Test Scenarios**: Ban happy-path testing. Test medium/hard scenarios (multi-agent competition, debt, disconnects).
+- **Enumerate Failure Modes First**: List 3-5 failure modes before writing isolation tests. Attack those modes directly.
+- **Banned Test Antipatterns**: Ban tautological tests (mock echoes), change detectors (private state / exact CSS), and shallow bug-fix tests.
 - **Zero-Polling & Background Harness**: Never execute in-loop polling (`sleep`/`while`). Offload long tasks to background. Kill processes hanging > 60s.
 - **Docker Health Check Timeout**: Always use timeout flags (`curl -m 5 --connect-timeout 3`) and initial delay (`timeout /t 6 /nobreak >nul`) for container start period (Gotcha #83).
 - **SSOT & Player Intent Integrity**: Player decisions (buy, upgrade, trade) must be explicit Intent transitions (ADR-0001). Never execute player choices as implicit movement side-effects.

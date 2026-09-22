@@ -350,7 +350,7 @@ describe('[IMP-134] Thẻ Bài Fintech "Hiểu Ngay Trong 1 Giây" / Event Card 
       expect(html).not.toContain('Khoản Chi:');
     });
 
-    it('[TC-IMP134.26/MSS][UC-IMP134][Facet-3/Disposal] Bấm nút CTA Đã Hiểu / Tiếp Tục gọi onConfirm khi được cung cấp', () => {
+    it('[TC-IMP134.26/MSS][UC-IMP134][Facet-3/Disposal] Bấm nút CTA xác nhận gọi onConfirm khi được cung cấp', () => {
       const onConfirm = vi.fn();
       const vdom = EventCardModal({
         cardType: 'market',
@@ -358,13 +358,13 @@ describe('[IMP-134] Thẻ Bài Fintech "Hiểu Ngay Trong 1 Giây" / Event Card 
         description: 'Quy hoạch trục đô thị mới.',
         onConfirm,
       });
-      const ctaBtn = findElementByProp(vdom, (p: any) => p.children === 'Đã Hiểu / Tiếp Tục');
+      const ctaBtn = findElementByProp(vdom, (p: any) => p['data-testid'] === 'event-card-confirm-btn' || p.children === 'Nắm Bắt Thời Cơ 🏙️' || p.children === 'Đã Hiểu / Tiếp Tục');
       expect(ctaBtn).not.toBeNull();
       ctaBtn.props.onClick();
       expect(onConfirm).toHaveBeenCalledTimes(1);
     });
 
-    it('[TC-IMP134.27/MSS][UC-IMP134][Facet-3/Disposal] Bấm nút CTA Đã Hiểu / Tiếp Tục fallback gọi onClose khi onConfirm không được cung cấp', () => {
+    it('[TC-IMP134.27/MSS][UC-IMP134][Facet-3/Disposal] Bấm nút CTA xác nhận fallback gọi onClose khi onConfirm không được cung cấp', () => {
       const onClose = vi.fn();
       const vdom = EventCardModal({
         cardType: 'market',
@@ -372,7 +372,7 @@ describe('[IMP-134] Thẻ Bài Fintech "Hiểu Ngay Trong 1 Giây" / Event Card 
         description: 'Quy hoạch trục đô thị mới.',
         onClose,
       });
-      const ctaBtn = findElementByProp(vdom, (p: any) => p.children === 'Đã Hiểu / Tiếp Tục');
+      const ctaBtn = findElementByProp(vdom, (p: any) => p['data-testid'] === 'event-card-confirm-btn' || p.children === 'Nắm Bắt Thời Cơ 🏙️' || p.children === 'Đã Hiểu / Tiếp Tục');
       expect(ctaBtn).not.toBeNull();
       ctaBtn.props.onClick();
       expect(onClose).toHaveBeenCalledTimes(1);

@@ -245,7 +245,8 @@ export class WssServer {
   }
 
   private async route(socket: WebSocket, msg: WsClientMessage): Promise<void> {
-    if (this.adminManager.handleClientMessage(socket, msg, (s, m) => this.sendSafe(s, m))) {
+    const adminHandled = this.adminManager.handleClientMessage(socket, msg, (s, m) => this.sendSafe(s, m));
+    if (adminHandled instanceof Promise ? await adminHandled : adminHandled) {
       return;
     }
     const ctx = this.lobbyContext;

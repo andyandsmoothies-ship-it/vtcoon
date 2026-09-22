@@ -11,7 +11,7 @@ import {
   buildRoomDetail,
   buildDiagnosticDump,
 } from './admin_inspector.js';
-import { handleAdminMessage } from './admin_message_handler.js';
+import { handleAdminMessage, handleAdminClientMessage } from './admin_message_handler.js';
 
 import {
   MAX_ROOM_LOGS,
@@ -250,8 +250,19 @@ export class AdminManager {
     return this.roomLogger.getArchivedRoomsList();
   }
 
+  async getArchivedRoomsListAsync(): Promise<AdminArchivedRoomSummary[]> {
+    if (this.roomLogger.getArchivedRoomsList().length === 0) {
+      await this.roomLogger.syncCloudManifest();
+    }
+    return this.roomLogger.getArchivedRoomsList();
+  }
+
   getRoomFullLog(roomCode: string, timestamp?: number): AdminRoomLogEntry[] {
     return this.roomLogger.getRoomFullLog(roomCode, timestamp);
+  }
+
+  async getRoomFullLogAsync(roomCode: string, timestamp?: number): Promise<AdminRoomLogEntry[]> {
+    return this.roomLogger.getRoomFullLogAsync(roomCode, timestamp);
   }
 
   handleRoomClosed(rawRoomCode: string, summary?: RoomFinishSummary): void {
@@ -303,8 +314,8 @@ export class AdminManager {
     socket: WebSocket,
     msg: WsClientMessage,
     sendSafe: (s: WebSocket, m: WsServerMessage) => void,
-  ): boolean {
-    return handleAdminMessage(this, socket, msg, sendSafe);
+  ): boolean | Promise<boolean> {
+    return handleAdminClientMessage(this, socket, msg, sendSafe);
   }
 
   broadcastToAdmins(msg: WsServerMessage): void {
