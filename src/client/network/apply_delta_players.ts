@@ -110,7 +110,7 @@ type DeltaPlayer = NonNullable<DeltaPayload['players']>[number];
 
 const OPTIONAL_PLAYER_KEYS = [
   'bankrupt', 'overdraftRoundsLeft', 'inAudit',
-  'auditTurnsLeft', 'skipNextTurn', 'consecutiveDoubles',
+  'auditTurnsLeft', 'skipNextTurn', 'consecutiveDoubles', 'extraTurns',
 ] as const;
 
 function assignPlayerOptionalFlags(target: PlayerHudInfo, p: DeltaPlayer): PlayerHudInfo {

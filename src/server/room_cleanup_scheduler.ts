@@ -1,12 +1,14 @@
 // [UC-GAME-010/MSS][TD-NET-005] Room Cleanup Scheduler — Tự động dọn phòng bỏ hoang sau 10 phút
 import type { RoomManager } from './room_manager.js';
 
-export const DEFAULT_ABANDONED_TIMEOUT_MS = 10 * 60 * 1000; // 10 phút (600.000ms)
+export const DEFAULT_ABANDONED_TIMEOUT_MS = 10 * 60 * 1000; // 10 phút (600.000ms) cho ván đang chơi
+export const DEFAULT_LOBBY_TIMEOUT_MS     = 3 * 60 * 1000;  // 3 phút (180.000ms) cho sảnh chờ chưa bắt đầu
 export const DEFAULT_CLEANUP_INTERVAL_MS  = 60 * 1000;      // Quét mỗi 1 phút (60.000ms)
 
 export interface RoomCleanupSchedulerConfig {
   readonly roomManager: RoomManager;
   readonly timeoutMs?: number;
+  readonly lobbyTimeoutMs?: number;
   readonly intervalMs?: number;
   readonly onCleanup?: (roomCode: string) => void;
 }
@@ -14,6 +16,7 @@ export interface RoomCleanupSchedulerConfig {
 export class RoomCleanupScheduler {
   private readonly roomManager: RoomManager;
   private readonly timeoutMs: number;
+  private readonly lobbyTimeoutMs: number;
   private readonly intervalMs: number;
   private readonly onCleanup?: (roomCode: string) => void;
   private timer?: NodeJS.Timeout;
@@ -21,6 +24,7 @@ export class RoomCleanupScheduler {
   constructor(config: RoomCleanupSchedulerConfig) {
     this.roomManager = config.roomManager;
     this.timeoutMs   = config.timeoutMs ?? DEFAULT_ABANDONED_TIMEOUT_MS;
+    this.lobbyTimeoutMs = config.lobbyTimeoutMs ?? (config.timeoutMs !== undefined ? config.timeoutMs : DEFAULT_LOBBY_TIMEOUT_MS);
     this.intervalMs  = config.intervalMs ?? DEFAULT_CLEANUP_INTERVAL_MS;
     this.onCleanup   = config.onCleanup;
   }
@@ -42,14 +46,17 @@ export class RoomCleanupScheduler {
   sweep(now: number = Date.now()): string[] {
     const cleaned: string[] = [];
     for (const roomCode of this.roomManager.getAllRoomCodes()) {
+      const room = this.roomManager.getRoom(roomCode);
+      const isLobby = room ? !room.started : true;
+      const effectiveTimeout = isLobby ? this.lobbyTimeoutMs : this.timeoutMs;
       const lastActive = this.roomManager.getLastActivity(roomCode);
-      const isAbandoned = lastActive === undefined || now - lastActive >= this.timeoutMs;
+      const isAbandoned = lastActive === undefined || now - lastActive >= effectiveTimeout;
       if (isAbandoned) {
         console.warn(JSON.stringify({
           event: 'WARN_ROOM_TIMEOUT',
           correlationId: roomCode,
           timestamp: now,
-          delta: { idleMs: lastActive !== undefined ? now - lastActive : this.timeoutMs },
+          delta: { idleMs: lastActive !== undefined ? now - lastActive : effectiveTimeout, isLobby },
         }));
         if (this.onCleanup) {
           this.onCleanup(roomCode);

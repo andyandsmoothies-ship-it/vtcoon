@@ -34,6 +34,7 @@ export interface PlayerHudInfo {
   readonly auditTurnsLeft?: number;
   readonly skipNextTurn?: boolean;
   readonly consecutiveDoubles?: number;
+  readonly extraTurns?: number;
   readonly bankrupt?: boolean;
   readonly isBankrupt?: boolean;
   readonly personality?: BotPersonality;
@@ -45,6 +46,8 @@ export interface PlayerHudInfo {
   readonly mascotName?: string;
   readonly avatar?: string;
 }
+
+export type PlayerInfo = PlayerHudInfo;
 
 export interface ActiveEmote {
   readonly playerId: string;

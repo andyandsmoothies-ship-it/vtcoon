@@ -14,6 +14,9 @@ export interface AdminPlayerSummary {
   readonly bankrupt: boolean;
   readonly propertyCount: number;
   readonly netWorth: number;
+  readonly isConnected?: boolean;
+  readonly inGracePeriod?: boolean;
+  readonly graceSecondsLeft?: number;
 }
 
 export interface AdminRoomSummary {
@@ -30,6 +33,18 @@ export interface AdminRoomSummary {
   readonly lastActivity: number;
   readonly activeTimersCount: number;
   readonly hasAuction: boolean;
+  readonly currentTurnPlayerId?: string;
+  readonly currentTurnStepName?: string;
+  readonly turnSecondsLeft?: number;
+}
+
+export interface ServerVitals {
+  readonly memoryRssMb: number;
+  readonly memoryHeapUsedMb: number;
+  readonly uptimeSeconds: number;
+  readonly totalRooms: number;
+  readonly liveRooms: number;
+  readonly lobbyRooms: number;
 }
 
 export interface AdminRoomDetail extends AdminRoomSummary {
@@ -45,6 +60,7 @@ export interface AdminRoomLogEntry {
   readonly source: 'SERVER' | 'PLAYER' | 'BOT' | 'SYSTEM';
   readonly action: string;
   readonly payloadSummary: string;
+  readonly playerId?: string;
 }
 
 export type ArchivedRoomStatus = 'ACTIVE' | 'FINISHED' | 'TERMINATED';

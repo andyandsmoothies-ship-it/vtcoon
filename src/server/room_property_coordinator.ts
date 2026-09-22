@@ -94,6 +94,13 @@ export function coordTrade(
     return { success: false, reason: ActionRejectReason.NOT_YOUR_TURN };
   }
 
+  if (buyer.balance < 0 || (price > 0 && buyer.balance < price)) {
+    return { success: false, reason: ActionRejectReason.INSUFFICIENT_FUNDS };
+  }
+  if (seller.balance < 0 && price <= 0) {
+    return { success: false, reason: ActionRejectReason.INSUFFICIENT_FUNDS };
+  }
+
   const isBotHuman = (buyer.isBot && !seller.isBot) || (!buyer.isBot && seller.isBot && offeredCellIndex !== undefined) || (seller.isBot && !buyer.isBot && offeredCellIndex !== undefined);
 
   if (isBotHuman) {
@@ -139,6 +146,7 @@ export function coordTrade(
       15_000,
       offeredCellIndex,
     );
+    (ctx.room.lastTargetTradeOfferRound ??= {})[sellerId] = ctx.room.roundCount ?? ctx.room.round ?? 1;
 
     ctx.room.pendingTradeOffer = {
       offerId: session.offerId,
@@ -214,6 +222,13 @@ export function coordRespondTradeOffer(
   }
 
   if (accept) {
+    if (buyer.balance < 0 || buyer.balance < session.price) {
+      return { success: false, reason: ActionRejectReason.INSUFFICIENT_FUNDS };
+    }
+    if (seller.balance < 0 && session.price <= 0) {
+      return { success: false, reason: ActionRejectReason.INSUFFICIENT_FUNDS };
+    }
+
     if (session.offeredCellIndex !== undefined) {
       const res = executeP2PTrade(
         ctx.room,
@@ -228,6 +243,9 @@ export function coordRespondTradeOffer(
       if (!res.success) {
         return { success: false, reason: res.reason };
       }
+      buyer.lastTradeOfferRound = ctx.room.roundCount ?? ctx.room.round ?? 1;
+      delete buyer.cellTradeRejections?.[session.cellIndex];
+      delete buyer.cellLastRejectedRound?.[session.cellIndex];
       pendingTradeManager.resolveSession(ctx.room.roomCode, offerId, true);
       ctx.room.pendingTradeOffer = null;
       return { success: true };
@@ -280,6 +298,8 @@ export function coordBankruptcy(
   rolledThisTurn: Map<string, boolean>,
 ): { gameOver: boolean; rankings?: Array<{ id: string; netWorth: number }> } {
   if (!ctx) return { gameOver: false };
+  const p = ctx.room.players.find((pl) => pl.id === playerId);
+  if (p) p.extraTurns = 0;
   const isCurrent = ctx.room.players[ctx.room.currentPlayerIndex]?.id === playerId;
   const res = declareBankruptcy(ctx.room, playerId, ctx.reg, ctx.sm, creditorId, auctions, roomCode);
   if (isCurrent && ctx.room.phase !== TurnPhase.AuctionPhase) {

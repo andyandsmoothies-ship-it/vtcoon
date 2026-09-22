@@ -39,7 +39,7 @@ function handleAuth(
   const ok = admin.authenticate(socket, secret);
   if (ok) {
     sendSafe(socket, { type: 'ADMIN_AUTH_SUCCESS', message: 'Xác thực Quản trị viên thành công' });
-    sendSafe(socket, { type: 'ADMIN_ROOM_LIST', rooms: admin.getRoomsSummary() });
+    sendSafe(socket, { type: 'ADMIN_ROOM_LIST', rooms: admin.getRoomsSummary(), vitals: admin.getServerVitals() });
   } else {
     sendSafe(socket, { type: 'ADMIN_AUTH_FAILED', reason: 'Sai mã bí mật quản trị (Secret Key)' });
   }
@@ -68,6 +68,7 @@ function handleGetRooms(
   return dispatchAuth(admin, socket, sendSafe, () => ({
     type: 'ADMIN_ROOM_LIST',
     rooms: admin.getRoomsSummary(),
+    vitals: admin.getServerVitals(),
   }));
 }
 

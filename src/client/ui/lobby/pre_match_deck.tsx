@@ -135,7 +135,7 @@ export function PreMatchDeck({
   return (
     <div className="relative w-full h-full min-h-screen text-slate-100 select-none pointer-events-none overflow-hidden">
       {/* Huy hiệu thương hiệu 3D dập nổi đỏ - vàng hoàng gia chuẩn Retropoly */}
-      <header className="pointer-events-auto absolute top-3 left-3 right-3 sm:right-auto md:top-6 md:left-6 z-30 inline-flex items-center gap-3.5 bg-gradient-to-b from-[#B91C1C] via-[#991B1B] to-[#700A0A] border-[2.5px] border-amber-300 ring-2 ring-amber-500/50 rounded-2xl px-3.5 py-2 md:px-5 md:py-3 shadow-[0_6px_0_0_#450a0a,0_12px_28px_rgba(0,0,0,0.65),inset_0_1px_2px_rgba(255,255,255,0.45)] overflow-hidden w-fit">
+      <header className="pointer-events-auto absolute top-3 left-3 right-3 sm:right-auto md:top-6 md:left-6 z-30 inline-flex items-center gap-3.5 bg-gradient-to-b from-[#B91C1C] via-[#991B1B] to-[#700A0A] border-[2.5px] border-amber-300 ring-2 ring-amber-500/50 rounded-2xl px-3.5 py-2 md:px-5 md:py-3 shadow-[0_6px_0_0_#450a0a,0_12px_28px_rgba(0,0,0,0.65),inset_0_1px_2px_rgba(255,255,255,0.45)] overflow-hidden w-fit max-w-[calc(100vw-1.5rem)] sm:max-w-none">
         {/* Lớp phủ vệt bóng bề mặt (Juicy Gloss Specular Highlight) */}
         <div className="absolute top-0 left-0 right-0 h-[45%] bg-gradient-to-b from-white/30 via-white/10 to-transparent pointer-events-none rounded-t-2xl" />
 
@@ -145,7 +145,7 @@ export function PreMatchDeck({
         </div>
 
         {/* Tiêu đề thương hiệu VTCOON dập nổi 3D sắc nét */}
-        <div className="relative z-10 flex flex-col justify-center">
+        <div className="relative z-10 flex flex-col justify-center min-w-0">
           <div className="flex items-center gap-2">
             <h1 className="text-3xl font-black tracking-wider text-white [text-shadow:_0_3px_0_#450a0a,_0_6px_12px_rgba(0,0,0,0.85)] leading-none">
               VTCOON
@@ -154,7 +154,7 @@ export function PreMatchDeck({
               3D
             </span>
           </div>
-          <p className="text-[11px] font-bold text-amber-200 uppercase tracking-widest drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] mt-1">
+          <p className="text-[11px] font-bold text-amber-200 uppercase tracking-widest drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] mt-1 truncate max-w-[140px] sm:max-w-none">
             Sảnh Chờ Đảo Ngọc 🏝️ • Bến Cảng Du Thuyền
           </p>
         </div>
@@ -206,7 +206,7 @@ export function PreMatchDeck({
 
       {/* Thẻ PreMatchDeck Clean & Modern nổi bên cánh phải */}
       <aside
-        className="pointer-events-auto absolute top-24 md:top-6 right-3 md:right-6 w-[calc(100%-1.5rem)] sm:w-[360px] max-w-[360px] max-h-[calc(100vh-7rem)] md:max-h-[calc(100vh-3rem)] z-20 flex flex-col justify-between p-4 bg-[#FFFDF8] border-2 border-slate-900 shadow-[0_6px_0_0_#0f172a] rounded-3xl text-slate-900 overflow-hidden gap-3 transition-transform duration-300"
+        className="pointer-events-auto absolute top-24 md:top-6 right-3 md:right-6 w-[calc(100%-1.5rem)] sm:w-[360px] max-w-[360px] max-h-[calc(100dvh-7rem)] md:max-h-[calc(100dvh-3rem)] z-20 flex flex-col justify-between p-4 bg-[#FFFDF8] border-2 border-slate-900 shadow-[0_6px_0_0_#0f172a] rounded-3xl text-slate-900 overflow-hidden gap-3 transition-transform duration-300"
         style={{ transform: isPanelCollapsed ? 'translateX(calc(100% + 2rem))' : undefined }}
         data-testid="pre-match-deck"
       >
@@ -216,11 +216,11 @@ export function PreMatchDeck({
           <div className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-slate-50/80 p-2.5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Mã Phòng:</span>
+                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Mã Phòng:</span>
                 <span className="text-lg font-black font-mono tracking-widest text-slate-900" data-testid="lobby-room-code">
                   {roomCode}
                 </span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold tracking-wide ml-1">
+                <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold tracking-wide ml-1">
                   {occupiedCount === 4 && slots.every((s) => !s.isOccupied || s.isReady)
                     ? 'SẴN SÀNG (4/4)'
                     : `ĐANG CHỜ (${occupiedCount}/4)`}
@@ -229,7 +229,7 @@ export function PreMatchDeck({
               <button
                 type="button"
                 onClick={handleCopyCode}
-                className={`min-h-[40px] px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer border shadow-[0_2px_0_0_#78350f] active:translate-y-0.5 ${
+                className={`min-h-[44px] px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer border shadow-[0_2px_0_0_#78350f] active:translate-y-0.5 ${
                   copiedCode
                     ? 'bg-emerald-600 text-white border-emerald-700 shadow-xs'
                     : 'bg-gradient-to-b from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-amber-950 border-amber-200'
@@ -246,7 +246,7 @@ export function PreMatchDeck({
               <button
                 type="button"
                 onClick={() => setShowRulesModal(true)}
-                className="inline-flex items-center justify-center gap-1 min-h-[42px] px-2.5 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
+                className="inline-flex items-center justify-center gap-1 min-h-[44px] px-2.5 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
                 data-testid="open-game-rules-btn"
                 aria-label="Xem hướng dẫn game"
               >
@@ -255,18 +255,12 @@ export function PreMatchDeck({
               <button
                 type="button"
                 onClick={() => setShowQr((prev) => !prev)}
-                className="inline-flex items-center justify-center gap-1 min-h-[42px] px-2.5 rounded-lg bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
+                className="inline-flex items-center justify-center gap-1 min-h-[44px] px-2.5 rounded-lg bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
                 aria-label={showQr ? 'Ẩn mã QR' : 'Hiện mã QR'}
               >
                 <span>📱</span> {showQr ? 'Ẩn QR' : 'Mã QR'}
               </button>
             </div>
-
-            {showQr && (
-              <div className="mt-1">
-                <QrCodeCard roomCode={roomCode} />
-              </div>
-            )}
           </div>
         </div>
 
@@ -276,7 +270,7 @@ export function PreMatchDeck({
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700">
               Danh Sách Người Chơi ({occupiedCount}/4)
             </h2>
-            <span className="text-[10px] text-slate-500">Tối đa 4 người/bàn</span>
+            <span className="text-[11px] text-slate-500">Tối đa 4 người/bàn</span>
           </div>
 
           <div className="flex flex-col gap-2" data-testid="lobby-slots-grid">
@@ -341,6 +335,35 @@ export function PreMatchDeck({
         isOpen={showRulesModal}
         onClose={() => setShowRulesModal(false)}
       />
+
+      {/* Modal Mã QR Mời Bạn Bè */}
+      {showQr && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 pointer-events-auto animate-in fade-in duration-200 select-none"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowQr(false);
+            }
+          }}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Mã QR phòng"
+          data-testid="lobby-qr-modal"
+        >
+          <div className="relative w-full max-w-sm animate-in zoom-in-95 duration-200">
+            <button
+              type="button"
+              onClick={() => setShowQr(false)}
+              className="absolute top-3 right-3 z-10 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 font-bold transition-colors cursor-pointer text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              aria-label="Đóng mã QR"
+              data-testid="close-qr-modal-btn"
+            >
+              ✕
+            </button>
+            <QrCodeCard roomCode={roomCode} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

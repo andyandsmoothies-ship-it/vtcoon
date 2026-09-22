@@ -118,28 +118,28 @@ describe('[TC-MOB01/MSS] Mobile Responsive HUD Quality Standards Contract Suite'
     expect(asideMatch).not.toMatch(/\babsolute top-4\b/);
   });
 
-  it('[TC-MOB01.02/MSS] [UC-MOB-01] PreMatchDeck Copy Room Code button fulfills minimum touch height min-h-[40px]', () => {
+  it('[TC-MOB01.02/MSS] [UC-MOB-01] PreMatchDeck Copy Room Code button fulfills minimum touch height min-h-[44px]', () => {
     useLobbyStore.getState().initLobby('VT8888', 'p1', true, 'Chủ Tịch Hưng');
     const html = renderToStaticMarkup(React.createElement(PreMatchDeck, { isHost: true }));
     const copyBtnMatch = html.match(/<button[^>]*data-testid="copy-room-code-btn"[^>]*>/)?.[0] ?? '';
 
-    expect(copyBtnMatch).toContain('min-h-[40px]');
+    expect(copyBtnMatch).toContain('min-h-[44px]');
   });
 
-  it('[TC-MOB01.03/MSS] [UC-MOB-01] PreMatchDeck Game Rules button fulfills minimum touch height min-h-[42px]', () => {
+  it('[TC-MOB01.03/MSS] [UC-MOB-01] PreMatchDeck Game Rules button fulfills minimum touch height min-h-[44px]', () => {
     useLobbyStore.getState().initLobby('VT8888', 'p1', true, 'Chủ Tịch Hưng');
     const html = renderToStaticMarkup(React.createElement(PreMatchDeck, { isHost: true }));
     const rulesBtnMatch = html.match(/<button[^>]*data-testid="open-game-rules-btn"[^>]*>/)?.[0] ?? '';
 
-    expect(rulesBtnMatch).toContain('min-h-[42px]');
+    expect(rulesBtnMatch).toContain('min-h-[44px]');
   });
 
-  it('[TC-MOB01.04/MSS] [UC-MOB-01] PreMatchDeck QR Code button fulfills minimum touch height min-h-[42px]', () => {
+  it('[TC-MOB01.04/MSS] [UC-MOB-01] PreMatchDeck QR Code button fulfills minimum touch height min-h-[44px]', () => {
     useLobbyStore.getState().initLobby('VT8888', 'p1', true, 'Chủ Tịch Hưng');
     const html = renderToStaticMarkup(React.createElement(PreMatchDeck, { isHost: true }));
     const qrBtnMatch = html.match(/<button[^>]*aria-label="[^"]*mã QR[^"]*"[^>]*>/i)?.[0] ?? '';
 
-    expect(qrBtnMatch).toContain('min-h-[42px]');
+    expect(qrBtnMatch).toContain('min-h-[44px]');
   });
 
   it('[TC-MOB01.05/MSS] [UC-MOB-01] PlayerSlotCard empty slot bounds uses compact height min-h-[68px] or min-h-[72px]', () => {

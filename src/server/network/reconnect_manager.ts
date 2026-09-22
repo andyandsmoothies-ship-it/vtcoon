@@ -100,7 +100,8 @@ export class ReconnectManager {
 
   /** Bắt đầu thời gian ân hạn 60s cho người chơi [UC-GAME-006/MSS] */
   startGracePeriod(roomCode: string, playerId: string): void {
-    const key = `${roomCode}:${playerId}`;
+    const norm = roomCode.trim().toUpperCase();
+    const key = `${norm}:${playerId}`;
     if (this.graceTimers.has(key)) return;
 
     const session = this.sessions.getSession(playerId);
@@ -108,12 +109,18 @@ export class ReconnectManager {
       session.state = SessionState.GracePeriod;
     }
 
-    const secondsLeft = Math.ceil(this.gracePeriodMs / 1000);
-    this.broadcast(roomCode, {
-      type: 'PLAYER_GRACE',
-      playerId,
-      secondsLeft,
-    });
+    // Chỉ phát PLAYER_GRACE khi phòng đã bắt đầu, hoặc player là host (không bị rút khỏi lobby)
+    // Khách không phải host trong sảnh chờ sẽ bị rút khi grace expired — không cần báo host
+    const room = this.rooms.getRoom(roomCode);
+    const isNonHostInLobby = room && !room.started && room.hostId !== playerId;
+    if (!isNonHostInLobby) {
+      const secondsLeft = Math.ceil(this.gracePeriodMs / 1000);
+      this.broadcast(roomCode, {
+        type: 'PLAYER_GRACE',
+        playerId,
+        secondsLeft,
+      });
+    }
 
     this.graceStartTimes.set(key, Date.now());
     const timer = setTimeout(() => {
@@ -125,7 +132,8 @@ export class ReconnectManager {
 
   /** Hủy thời gian ân hạn khi người chơi reconnect thành công [UC-GAME-007/MSS] */
   cancelGracePeriod(roomCode: string, playerId: string): boolean {
-    const key = `${roomCode}:${playerId}`;
+    const norm = roomCode.trim().toUpperCase();
+    const key = `${norm}:${playerId}`;
     const timer = this.graceTimers.get(key);
     if (timer) {
       clearTimeout(timer);
@@ -138,7 +146,8 @@ export class ReconnectManager {
 
   /** Xử lý khi hết hạn 60s: Bot tiếp quản và token hết hạn [UC-GAME-008/MSS] */
   handleGraceExpired(roomCode: string, playerId: string): void {
-    const key = `${roomCode}:${playerId}`;
+    const norm = roomCode.trim().toUpperCase();
+    const key = `${norm}:${playerId}`;
     const timer = this.graceTimers.get(key);
     if (timer) {
       clearTimeout(timer);
@@ -168,8 +177,24 @@ export class ReconnectManager {
     }
 
     const room = this.rooms.getRoom(roomCode);
-    // 2. Nếu phòng chưa bắt đầu và là Host, không bao giờ takeover biến Host thành Bot!
-    if (room && !room.started && room.hostId === playerId) {
+    // 2. Nếu phòng chưa bắt đầu: xử lý theo vai trò
+    if (room && !room.started) {
+      if (room.hostId === playerId) {
+        // Host không bị rút, không bị bot — giữ nguyên (TC-AUDIT-NET.07)
+        return;
+      }
+      // Khách (non-host) bị rút khỏi phòng và broadcast LOBBY_UPDATE (TC-IMP165.11)
+      const pidx = room.players.findIndex((p) => p.id === playerId);
+      if (pidx !== -1) room.players.splice(pidx, 1);
+      this.broadcast(roomCode, {
+        type: 'LOBBY_UPDATE',
+        roomCode,
+        players: room.players.map((p, idx) => ({
+          id: p.id,
+          isHost: p.id === room.hostId,
+          slotIndex: idx,
+        })),
+      });
       return;
     }
 
@@ -189,16 +214,25 @@ export class ReconnectManager {
     this.broadcaster.broadcastRoomDelta(roomCode);
   }
 
-  isPlayerInGrace(roomCode: string, playerId: string): boolean {
-    return this.graceTimers.has(`${roomCode}:${playerId}`);
-  }
+  isPlayerInGrace = (roomCode: string, playerId: string): boolean => {
+    const key = `${roomCode.trim().toUpperCase()}:${playerId}`;
+    return Boolean(this?.graceTimers?.has(key));
+  };
+
+  getGraceRemainingSeconds = (roomCode: string, playerId: string): number => {
+    const key = `${roomCode.trim().toUpperCase()}:${playerId}`;
+    const startTime = this?.graceStartTimes?.get(key);
+    if (!startTime) return 0;
+    const elapsed = Date.now() - startTime;
+    return Math.max(0, Math.ceil((this.gracePeriodMs - elapsed) / 1000));
+  };
 
   getToken(playerId: string, roomCode: string): string | undefined {
     return this.playerTokens.get(`${roomCode}:${playerId}`);
   }
 
   clearRoom(roomCode: string): void {
-    const prefix = `${roomCode}:`;
+    const prefix = `${roomCode.trim().toUpperCase()}:`;
     for (const [key, timer] of this.graceTimers.entries()) {
       if (key.startsWith(prefix)) {
         clearTimeout(timer);

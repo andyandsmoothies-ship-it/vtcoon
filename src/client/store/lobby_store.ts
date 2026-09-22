@@ -3,6 +3,7 @@
 import { create } from 'zustand';
 import { BotPersonality } from '../../domain/bot/bot_engine';
 import { assignRandomPlayerPawns } from '../../domain/pawn_assignment';
+import { generateRandomAnimalName } from '../../domain/name_generator';
 import {
   MAX_LOBBY_SLOTS,
   ROOM_CODE_REGEX,
@@ -44,11 +45,11 @@ export const useLobbyStore = create<LobbyState>((set, get) => ({
       const mascotIcon = assignment?.mascotIcon;
       if (i === 0) {
         return isHost
-          ? { ...s, playerId: pid, playerName: playerName ?? 'Chủ Phòng (P1)', isHost: true, isReady: true, isOccupied: true, tokenColor, pawnSlot, mascotIcon }
-          : { ...s, playerId: 'host_player', playerName: 'Chủ Phòng (Host)', isHost: true, isReady: true, isOccupied: true, tokenColor, pawnSlot, mascotIcon };
+          ? { ...s, playerId: pid, playerName: playerName ?? generateRandomAnimalName([], `${trimmedCode}_p1`), isHost: true, isReady: true, isOccupied: true, tokenColor, pawnSlot, mascotIcon }
+          : { ...s, playerId: 'host_player', playerName: generateRandomAnimalName([], `${trimmedCode}_p1`), isHost: true, isReady: true, isOccupied: true, tokenColor, pawnSlot, mascotIcon };
       }
       if (i === 1 && !isHost) {
-        return { ...s, playerId: pid, playerName: playerName ?? 'Khách Mời (P2)', isHost: false, isReady: false, isOccupied: true, tokenColor, pawnSlot, mascotIcon };
+        return { ...s, playerId: pid, playerName: playerName ?? generateRandomAnimalName([], `${trimmedCode}_p2`), isHost: false, isReady: false, isOccupied: true, tokenColor, pawnSlot, mascotIcon };
       }
       return { ...s, tokenColor, pawnSlot, mascotIcon };
     });
@@ -193,6 +194,32 @@ export const useLobbyStore = create<LobbyState>((set, get) => ({
   setGameStarted: (gameStarted) => set({ gameStarted }),
   resetLobby: () =>
     set({ roomCode: null, myPlayerId: '', isHost: false, isReady: false, gameStarted: false, slots: createDefaultSlots(), errorReason: null }),
+
+  setMyPlayerId: (myPlayerId) => set({ myPlayerId }),
+
+  syncLobbySlots: (players) => {
+    const { slots } = get();
+    const updatedSlots = slots.map((slot, i) => {
+      // Mapping slot index -> playerId: p1->0, p2->1, p3->2, p4->3
+      const playerIdForSlot = `p${i + 1}`;
+      const serverPlayer = players.find((p) => p.id === playerIdForSlot);
+      if (serverPlayer) {
+        // Người chơi thật từ server đè Bot AI cục bộ
+        return {
+          ...slot,
+          playerId: serverPlayer.id,
+          playerName: serverPlayer.name ?? slot.playerName,
+          isHost: serverPlayer.isHost,
+          isOccupied: true,
+          isReady: true,
+          isBot: false,
+        };
+      }
+      // Slot không có người — giữ bot nếu có, hoặc empty
+      return slot;
+    });
+    set({ slots: updatedSlots });
+  },
 }));
 
 declare global {

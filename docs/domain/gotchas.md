@@ -7,13 +7,13 @@
 ## 🧭 BẢNG CHỈ MỤC THEO DOMAIN (DOMAIN INDEX)
 | Domain Tag | Trọng Tâm & Phạm Vi Mã Nguồn | Các Gotchas Liên Quan |
 | :--- | :--- | :--- |
-| `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78, #82, #104, #105, #106, #145, #146, #147, #159, #164, #174, #180, #188, #195, #196, #197, #200, #203, #215, #217, #218, #219, #220 |
-| `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147, #190, #191, #195, #196, #197, #200, #206 |
-| `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190, #200, #203, #209, #210, #211, #212, #213, #215, #217 |
+| `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78, #82, #104, #105, #106, #145, #146, #147, #159, #164, #174, #180, #188, #195, #196, #197, #200, #203, #215, #217, #218, #219, #220, #223 |
+| `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147, #190, #191, #195, #196, #197, #200, #206, #223 |
+| `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190, #200, #203, #209, #210, #211, #212, #213, #215, #217, #223, #224, #225, #226, #227 |
 | `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #32, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #60, #61, #63, #69, #72, #74, #77, #80, #85, #86, #88, #89, #90, #91, #92, #93, #94, #95, #96, #101, #103, #109, #110, #114, #115, #116, #117, #120, #122, #123, #124, #125, #126, #127, #128, #129, #130, #133, #134, #135, #136, #140, #141, #144, #148, #159, #160, #161, #162, #163, #164, #165, #169, #175, #177, #189, #198, #200, #222 |
 | `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192, #195, #196, #199, #201, #202, #204, #205, #206, #216, #217 |
 | `[UAT/TEST]` | Nghiệm Thu, Adversarial TDD, Ảnh Chụp Màn Hình (.jpg), Shell Escaping, File I/O Lock, Docker Healthcheck Timeout | #5, #28, #29, #31, #35, #52, #71, #73, #83, #84, #99, #100, #117, #124, #125, #130, #199 |
-| `[TELEMETRY]` | Giám Sát Hiệu Năng Thời Gian Thực, Chó Canh Phòng Bất Biến, Hộp Đen Tái Hiện Lỗi | #39, #62, #71, #75, #104, #114, #115, #135, #174, #200 |
+| `[TELEMETRY]` | Giám Sát Hiệu Năng Thời Gian Thực, Chó Canh Phòng Bất Biến, Hộp Đen Tái Hiện Lỗi | #39, #62, #71, #75, #104, #114, #115, #135, #174, #200, #227 |
 | `[ARCH/REFACTOR]` | Tách Module Facade, Ngân Sách Render Loop, Chuẩn Hóa Môi Trường Build | #43, #98, #99 |
 
 ---
@@ -3730,6 +3730,121 @@
      - Kiểm tra `useAudioStore.getState().isMuted` trước khi khởi tạo bất kỳ oscillator hay gain node nào.
      - Cleanup function phải idempotent (chỉ dọn 1 lần), bọc `disconnect()` trong try/catch để nuốt lỗi DOMException.
      - Thiết lập timer dự phòng 1200ms kích hoạt cleanup phòng khi AudioContext bị suspended hoặc tab bị background.
+---
 
+### 223. [NET/FSM/BOT] Đồng Bộ Đa Tầng Lượt Đi Bổ Sung (Extra Turns), Dọn Dẹp Vòng Đời Thẻ Sự Kiện & Chống Spam Đàm Phán Bot (IMP-164)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy mất đồng bộ Extra Turns & Drop Sparse Delta*: Khi người chơi nhận thêm lượt (như thẻ `CC_PLATE_AUCTION`), FSM server giữ `currentPlayerIndex` không đổi và reset về `TurnPhase.WaitingRoll`. Tuy nhiên Sparse Broadcaster so sánh người chơi mà bỏ qua `extraTurns`, khiến gói Delta không mang theo cờ cập nhật. Đồng thời Client Store không reset `hasRolledThisTurn` khi nhận `WaitingRoll` nếu ID người chơi không đổi, dẫn đến ActionDock bị khóa nút Roll hoặc quăng lỗi `INVALID_PHASE`.
+  2. *Bẫy thẻ sự kiện ma vắt qua nhiều lượt (Dangling Event Card)*: `room.lastEventCard` không được xóa khi kết thúc lượt hoặc khi bắt đầu gieo xúc xắc lượt mới, khiến UI hiển thị thẻ cũ dai dẳng sang lượt người chơi tiếp theo.
+  3. *Bẫy lợi dụng chuyển nhượng P2P khi âm tiền (Insolvent Trade Exploit)*: Người chơi hoặc bot có số dư âm (`balance < 0`) thực hiện giao dịch đổi đất (swap, `price = 0`) hoặc mua đất trả chậm, trốn tránh cơ chế cưỡng chế thanh lý tài sản nợ của FSM.
+  4. *Bẫy bot spam đề xuất đàm phán dồn dập (Bot Trade Harassment)*: Nhiều Bot trong cùng một vòng chơi thi nhau gửi đề xuất mua đất tới cùng một người chơi, hoặc một Bot bị từ chối liên tiếp nhưng vẫn gửi lại ngay sau 1 vòng.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Full-Stack Extra Turns Synchronization Invariant**:
+     - `PlayerDelta` và `PlayerHudInfo` bắt buộc chứa `extraTurns?: number;`.
+     - `OPTIONAL_PLAYER_KEYS` trong `apply_delta_players.ts` bắt buộc map `'extraTurns'`.
+     - `isPlayerEqual` trong `delta_broadcaster.ts` bắt buộc so khớp `(a.extraTurns ?? 0) === (b.extraTurns ?? 0)`.
+     - `apply_delta.ts`: Khi nhận `turnPhase === TurnPhase.WaitingRoll`, bắt buộc `state.setHasRolledThisTurn(false)`.
+     - `declareBankruptcy` & `coordBankruptcy`: Bắt buộc dọn sạch `player.extraTurns = 0` để tránh tạo ra phantom turns.
+  2. **Event Card Lifecycle Purge Invariant**:
+     - `Room.lastEventCard?: EventCardInfo | null;` cho phép giá trị `null` làm tombstone.
+     - `executeTurnEnd` (cả nhánh `extraTurns > 0` và nhánh chuyển lượt thông thường) và `executeTurnRoll` (đầu hàm gieo xúc xắc) BẮT BUỘC gán `room.lastEventCard = null;`.
+  3. **Insolvent Buyer Protection & Solvency Guard**:
+     - Trong `coordTrade`, `coordRespondTradeOffer`, `validateP2PTrade`: Bên Mua có `balance < 0` BẮT BUỘC bị từ chối với `ActionRejectReason.INSUFFICIENT_FUNDS`.
+     - Bên Bán có `balance < 0` CHỈ ĐƯỢC PHÉP bán tài sản thu tiền mặt ròng (`price > 0`) để giải cứu dòng tiền nợ; cấm tuyệt đối hoán đổi tài sản không thu tiền mặt (`price <= 0`).
+  4. **Room-Level Target & Persistent Rejection Anti-Spam Guard**:
+     - `Room.lastTargetTradeOfferRound`: Mỗi người chơi chỉ nhận tối đa 1 đề xuất giao dịch từ TẤT CẢ các Bot trong cùng 1 round (`if (room.lastTargetTradeOfferRound?.[targetId] === currentRound) continue;`).
+     - Ghi nhận `lastTargetTradeOfferRound` ngay khi Bot sinh intent và khi tạo `pendingTradeOffer`.
+     - Nếu một ô đất bị từ chối `>= 2` lần (`cellTradeRejections >= 2`), thời gian cooldown kéo dài thành 4 round (`currentRound - lastRejected < 4`).
+     - Khi giao dịch thành công, xóa sạch bộ nhớ từ chối `cellTradeRejections` của ô đất đó.
+
+---
+
+### 224. [NET/SYNC] Server Slot Assignment Tuyệt Đối — Zero Client PlayerId Trust (IMP-165)
+- **Bẫy nghiệp vụ**: Nếu server tin tưởng `msg.playerId` từ client khi xử lý `JOIN_ROOM`, nhiều khách vào cùng URL sẽ đồng loạt gửi `playerId: 'p2'`, gây ra trùng lặp playerId trong `room.players` và conflict state.
+- **Ràng buộc cứng**:
+  1. `handleJoinRoom` BẮT BUỘC tìm slot trống từ `candidateSlots = ['p2', 'p3', 'p4']` thay vì dùng `msg.playerId`.
+  2. `doJoinRoom` trong `room_manager_lifecycle.ts` BẮT BUỘC có 2 guards: `room.players.length >= 4` (return undefined) VÀ `room.players.some(p => p.id === playerId)` (return undefined).
+  3. Phản hồi `ROOM_JOINED` phải chứa đúng `playerId: assignedPlayerId` (slot server cấp) chứ không phải `msg.playerId`.
+  4. `LOBBY_UPDATE` broadcast đến **tất cả** socket trong phòng sau mỗi JOIN hoặc LEAVE để đồng bộ UI sảnh chờ.
+- **Tech Debt TD-IMP165-01**: Logic đóng phòng cũ khi trùng `hostId` tại `wss_lobby_handlers.ts` vẫn tồn tại. Xác suất collision 1/1.000.000 — chưa xử lý trong slice này.
+- **Traceability**: `[TC-IMP165.02..05]`, `[TC-IMP165.06]`
+
+---
+
+### 225. [NET/SYNC][BOT/AI] Pre-Game Guest Disconnect — Lobby Guard (Không Bot Takeover) (IMP-165)
+- **Bẫy nghiệp vụ**: `handleGraceExpired` trong `reconnect_manager.ts` gọi `BotEngine.takeover` cho mọi player — bao gồm cả khách disconnect trong lobby chưa bắt đầu trận, tạo ra "zombie Bot" nằm lỳ trong sảnh.
+- **Ràng buộc cứng**:
+  1. Trong `handleGraceExpired`: Nếu `room && !room.started` VÀ player là **khách** (không phải host): BẮT BUỘC remove player khỏi `room.players`, broadcast `LOBBY_UPDATE`, rồi **return** — tuyệt đối không gọi `BotEngine.takeover`.
+  2. Host pre-game disconnect: Giữ host trong phòng (không remove, không takeover) — bảo toàn quyền chủ phòng.
+  3. `startGracePeriod`: Khi phòng chưa bắt đầu và player là khách, không broadcast `PLAYER_GRACE` đến các socket khác.
+  4. UC-GAME-006/007/008 (Grace Period → Reconnect → Bot Takeover) chỉ áp dụng khi `room.started === true`.
+- **Traceability**: `[TC-IMP165.11]`, `[TC-NET04.1..3]` (reconciled với IMP-165)
+
+---
+
+### 226. [NET/SYNC] WS Store Wiring Invariant — Gọi Store Trực Tiếp, Không Phụ Thuộc Callback Chain (IMP-165)
+- **Bẫy nghiệp vụ**: Handler trong `ws_message_handler.ts` chỉ gọi `ctx.onLobbyUpdate?.(msg.players)` — nếu caller (như `use_app_session.ts`) không truyền callback này, toàn bộ luồng store update bị câm silently ở runtime. Test suite xanh vì test gọi store trực tiếp, không qua React Hook.
+- **Ràng buộc cứng**:
+  1. Bất kỳ store action nào cần kích hoạt từ WS message BẮT BUỘC được gọi **trực tiếp** trong `handleWsMessage` (`useLobbyStore.getState().syncLobbySlots?.(...)`), KHÔNG chỉ qua `ctx.onXxx?.()` tùy chọn.
+  2. Callback tùy chọn `ctx.onXxx` là defence-in-depth cho UI layer — được gọi SAU lệnh store trực tiếp.
+  3. Pattern đúng cho mọi WS message kích hoạt store: `store.getState().action?.(data); ctx.onCallback?.(data);`
+  4. Test phải cover luồng xuyên suốt qua React Hook thật — KHÔNG chỉ gọi store trực tiếp trong test body.
+- **Traceability**: IMP-165 post-review fix (`use_app_session.ts` + `ws_message_handler.ts`)
+
+---
+
+### 227. [NET/TELEMETRY][ADM] Method Extraction Context Binding & Dice Tuple Compatibility in Telemetry Log Enrichment (IMP-166)
+- **Bẫy nghiệp vụ & kỹ thuật**:
+  1. *Unbound Method Extraction*: Các bộ kiểm thử và component giám sát telemetry thường trích xuất hàm getter (`const vitalsGetter = adminManager.getServerVitals; vitalsGetter?.()`, hoặc `const getter = reconnectManager.getGraceRemainingSeconds; getter?.(...)`) mà không gọi qua phương thức đối tượng có ngữ cảnh `this`. Khai báo dưới dạng method thông thường (`getServerVitals() { ... }`) sẽ dẫn tới `TypeError: Cannot read properties of undefined` do mất ngữ cảnh `this`.
+  2. *Dirty Double Cast trong Server Core*: Cố tình dùng `(roll.dice as unknown as { dice: number[] })` để lấy mảng xúc xắc sẽ vi phạm quy tắc Hiến pháp (Constitution Invariant: cấm tuyệt đối `as unknown as` trong Domain & Server Logic).
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **Bound Arrow Property Invariant**: Mọi phương thức telemetry, inspector và provider getter được trích xuất cho kiểm thử/giám sát BẮT BUỘC khai báo bằng cú pháp thuộc tính hàm mũi tên (arrow function property): `getServerVitals = (): ServerVitals => { ... }`, `isPlayerInGrace = (...) => { ... }`, `getGraceRemainingSeconds = (...) => { ... }` và phòng vệ an toàn với toán tử optional chaining `this?.rooms?.roomMap`.
+  2. **Type-Safe Dice Tuple**: Cấu trúc `DiceResult` trong `dice.ts` bổ sung trường hợp lệ `readonly dice?: readonly [number, number]` song hành với `die1, die2`. Trình xử lý `handleIntentMsg` truy xuất an toàn `roll.dice.dice?.[0] ?? roll.dice.die1` mà không cần bất kỳ ép kiểu bẩn nào.
+- **Traceability**: `[IMP-166/MSS]`, `[UC-GAME-ADM]`, `[TC-IMP166.01..15]`, `tests/contracts/constitution_governance.test.ts`.
+
+---
+
+### 228. [DOMAIN/NAME][UI/UX] Quirky English Animal Name Generator & Mobile 360px Touch Target Invariant
+- **Bẫy nghiệp vụ & kỹ thuật**:
+  1. Khi người chơi tạo phòng hoặc tham gia phòng trực tuyến, nếu cho phép nhập tên tự do sẽ tiềm ẩn rủi ro về kiểm duyệt nội dung (toxic/vulgar names) và phá vỡ bố cục giao diện 360px (tên quá dài làm tràn ô thẻ). Ngược lại, tên mặc định cố định gây trùng lặp tên hiển thị giữa các người chơi.
+  2. Các nút thao tác nhanh trên sảnh chờ (Sao chép mã phòng, Hướng dẫn, Mã QR) từng có chiều cao `min-h-[40px]` hoặc `min-h-[42px]`, vi phạm chuẩn công thái học di động 360px (tối thiểu `min-h-[44px] min-w-[44px]`).
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **Kho từ vựng con vật ngộ nghĩnh (Quirky Animals)**: `src/domain/name_generator.ts` gồm 30 tính từ vui nhộn cổ điển (Sleepy, Sneaky, Dapper, Jolly, Grumpy, Cheerful,...) ghép với 30 loài động vật độc đáo (Panda, Otter, Badger, Llama, Capybara, Koala, Wombat,...). Độ dài kết quả khống chế chặt chẽ 10–16 ký tự, tương thích hoàn toàn với layout 360px và không có nguy cơ nội dung độc hại.
+  2. **Khử trùng lặp trong bàn chơi (Collision-Free Guarantee)**: `generateUniqueAnimalName(existingNames)` bảo đảm 4 người chơi trong cùng một phòng luôn có tên khác biệt, không bao giờ trùng nhau.
+  3. **Server-Authoritative Assignment**: Tên người chơi được cấp phát trực tiếp trên server tại `doCreateRoom` và `doJoinRoom` (`room_manager_lifecycle.ts`), phát thanh qua `LOBBY_UPDATE` để đồng bộ nhất quán tới toàn bộ client.
+  4. **Chuẩn hóa Touch Target 44px**: Mọi nút hành động trong `pre_match_deck.tsx` (sao chép, mở luật chơi, mở QR) đều đáp ứng `min-h-[44px]`, đồng bộ hoàn toàn giữa `ui06_lobby_screen.test.ts` và `mobile_responsive_hud.test.ts`.
+- **Traceability**: `tests/domain/name_generator.test.ts`, `tests/client/ui06_lobby_screen.test.ts`, `tests/client/mobile_responsive_hud.test.ts`, `tests/server/imp165_multiplayer_lobby_sync.test.ts`.
+
+---
+
+### 229. [PERF/LOG][OPS/CLEANUP] Async Buffered Persistent Logger & Fast 3-Minute Unstarted Lobby Teardown
+- **Bẫy nghiệp vụ & kỹ thuật**:
+  1. *Đồng bộ I/O nghẽn Event Loop (Synchronous Disk I/O Bottleneck)*: Khi ghi nhận nhật ký trận đấu (`persistent_room_logger.ts`), phương thức `appendFileSync` gây chặn luồng đơn của Node.js trong mỗi hành động gieo xúc xắc/giao dịch. Dưới tải đồng thời nhiều người chơi, việc truy cập đĩa đồng bộ làm gián đoạn việc phản hồi WebSocket và tính toán thời gian thực.
+  2. *Sảnh chờ rác lãng phí bộ nhớ (Abandoned Lobby Bloat)*: Người chơi tạo phòng nhưng rời đi hoặc không bắt đầu trận đấu vẫn giữ tài nguyên phòng trong RAM suốt 10 phút mặc định (`DEFAULT_TIMEOUT_MS = 10 * 60 * 1000`). Điều này khiến sảnh chờ mồ côi tích tụ không cần thiết.
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **Async Buffered Write Flush (`PersistentRoomLogger`)**:
+     - Lưu trữ tạm thời các dòng sự kiện trong `writeBuffer: Map<string, string[]>`.
+     - `appendEvent()` chỉ đẩy sự kiện vào RAM buffer và lập lịch xả nền bất đồng bộ (`flushIntervalMs = 500ms`, sử dụng `.unref()` để không treo process).
+     - Cập nhật manifest sự kiện tức thì trong RAM để đảm bảo tính sẵn sàng cao cho các truy vấn kiểm thử hoặc telemetry.
+     - Bảo đảm xả cưỡng bức đồng bộ (`flushSync()`) khi gọi `finishRoomLog()`, `getRoomFullLog()` hoặc `stop()`.
+  2. **Phân tầng Thời hạn Dọn Dẹp Phòng (`RoomCleanupScheduler`)**:
+     - Khởi tạo hằng số `DEFAULT_LOBBY_TIMEOUT_MS = 3 * 60 * 1000` (3 phút).
+     - Trong chu trình quét định kỳ (`sweep()`): Kiểm tra `const isLobby = room ? !room.started : true`. Nếu là sảnh chờ chưa bắt đầu, áp dụng `effectiveTimeout = this.lobbyTimeoutMs` (3 phút); nếu là trận đang chơi dở bị bỏ hoang, giữ nguyên 10 phút.
+     - Tương thích ngược tuyệt đối: nếu `config.timeoutMs` được cung cấp mà không có `lobbyTimeoutMs`, tự động kế thừa giá trị đó.
+- **Traceability**: `tests/server/persistent_room_logger.test.ts#TC-LOG01.11`, `tests/server/ops01_room_cleanup.test.ts#TC-OPS01.5`, `tests/simulation/imp165_four_player_gameplay_sync.test.ts`.
+
+---
+
+### 230. [SIMULATION/WS][TEST/HARNESS] Listener-Before-Send Client Handle, Stale Inbox Isolation & 4-Player Turn Lifecycle Invariant
+- **Bẫy nghiệp vụ & kỹ thuật**:
+  1. *Tiêu thụ tin nhắn cũ làm sai lệch thời điểm kiểm thử (Stale Inbox Race Condition Trap)*: Trong mô phỏng WebSocket nhiều người chơi, mỗi hành động trên bàn cờ phát thanh `STATE_DELTA` tới toàn bộ client (`p1..p4`). Nếu client handle dùng cơ chế hàng đợi `inbox` thông thường kết hợp `waitFor((m) => m.type === 'STATE_DELTA')`, client sẽ lập tức lấy ra `STATE_DELTA` tồn đọng từ các lượt trước của người khác thay vì đợi server xử lý intent vừa gửi. Hệ quả: client gửi intent tiếp theo quá sớm khi server chưa chuyển pha, gây lỗi `OUT_OF_TURN` hoặc sai lệch lượt đi.
+  2. *Điều kiện đợi cứng nhắc làm treo kiểm thử (Predictive Predicate Brittle Timeout Trap)*: Khi viết predicate cho `waitFor` đợi kết thúc lượt, nếu bắt buộc `currentTurnPlayerId !== prevPlayerId` thì test sẽ bị timeout 10s trong các tình huống hợp lệ của game: đổ xúc xắc đôi, thẻ Cơ hội cấp thêm lượt (`extraTurns > 0`), hoặc tài sản bị cưỡng chế phát mãi do chậm xây dựng (`processUnbuiltRounds`) giữ lượt để xử lý đấu giá.
+  3. *Bẫy đấu giá phát mãi unbuiltRounds không người từ chối*: Khác với đấu giá do từ chối mua (`declinedPlayerId` là người vừa từ chối), đấu giá cưỡng chế do chậm xây dựng có `declinedPlayerId = ''`. Mọi người chơi còn sống đều đủ điều kiện; nếu chỉ cho các người chơi khác pass mà bỏ qua người giữ lượt, sàn đấu giá sẽ không thể đóng.
+- **Ràng buộc cứng & Giải pháp bất biến**:
+  1. **Listener-Before-Send Pattern (`sendAndWait`)**: Client handle kiểm thử mô phỏng BẮT BUỘC đăng ký bộ lắng nghe (listener) vào mảng socket listeners TRƯỚC KHI phát gói tin `ws.send()`. Cơ chế này loại trừ 100% việc đọc trúng tin nhắn cũ trong inbox và bắt đúng phản hồi `STATE_DELTA` thực tế của server.
+  2. **Fail-Fast Error & Rejection Handler**: `sendAndWait` kiểm tra ngay lập tức `m.type === 'INTENT_REJECTED' || m.type === 'ERROR'` để quăng ngoại lệ có ngữ cảnh rõ ràng (kèm tên intent và mã lỗi) trong 0ms thay vì đợi hết hạn timeout.
+  3. **Server-Authoritative Turn End Execution**: Chỉ người chơi hiện tại theo SSOT (`room.players[room.currentPlayerIndex]`) mới được phép phát `INTENT_END_TURN`.
+  4. **Active Session Query for Auctions**: Mọi thao tác đấu giá trong simulation phải tra cứu phiên trực tiếp qua `server.getRoomManager().getAuctionSession(roomCode)` để kiểm tra chính xác `session.declinedPlayerId` và lập tức dừng gửi `INTENT_AUCTION_PASS` ngay khi `room.phase !== TurnPhase.AuctionPhase`.
+- **Traceability**: `[TC-SIM165.01..04/MSS]`, `tests/simulation/imp165_four_player_gameplay_sync.test.ts`.
 
 

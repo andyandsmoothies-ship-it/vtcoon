@@ -124,6 +124,7 @@ export function declareBankruptcy(
   }
 
   player.bankrupt = true;
+  player.extraTurns = 0;
 
   const creditor = creditorId && creditorId !== 'BANK'
     ? room.players.find((p) => p.id === creditorId)

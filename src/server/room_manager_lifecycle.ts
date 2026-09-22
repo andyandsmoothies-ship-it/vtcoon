@@ -14,6 +14,7 @@ import type { Room, Player } from '../domain/room.js';
 import type { PropertyRegistry, PropertyStateMap } from '../domain/property_manager.js';
 import type { AuctionSession } from './auction_manager.js';
 import { pendingTradeManager } from './pending_trade_manager.js';
+import { generateRandomAnimalName } from '../domain/name_generator.js';
 
 export function getActivePlayerFn(room: Room | undefined, playerId: string): Player | undefined {
   if (!room?.started) return undefined;
@@ -37,6 +38,10 @@ export function doCreateRoom(
   const canUseCustom = upperCode && (!existing || existing.hostId === hostId);
   const code = canUseCustom ? upperCode : undefined;
   const room = domainCreateRoom(hostId, code);
+  const hostPlayer = room.players.find((p) => p.id === hostId);
+  if (hostPlayer && !hostPlayer.name) {
+    hostPlayer.name = generateRandomAnimalName([], `${room.roomCode}_${hostId}`);
+  }
   room.marketDeck = createMarketDeck(deckRng);
   room.chanceDeck = createChanceDeck(deckRng);
   rooms.set(room.roomCode, room);
@@ -57,7 +62,12 @@ export function doJoinRoom(
 ): Room | undefined {
   const room = rooms.get(roomCode) ?? rooms.get(roomCode.toUpperCase());
   if (!room || room.started) return undefined;
-  room.players.push(createPlayer(playerId));
+  if (room.players.length >= 4) return undefined;  // ROOM_FULL guard
+  if (room.players.some((p) => p.id === playerId)) return undefined;  // duplicate guard
+  const newPlayer = createPlayer(playerId);
+  const existingNames = room.players.filter((p) => p.name).map((p) => p.name as string);
+  newPlayer.name = generateRandomAnimalName(existingNames, `${room.roomCode}_${playerId}`);
+  room.players.push(newPlayer);
   touchActivityFn(room.roomCode);
   return room;
 }

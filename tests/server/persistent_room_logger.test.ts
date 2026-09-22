@@ -245,4 +245,31 @@ describe('[IMP-28/MSS] Persistent Room Logger Tests', () => {
     expect(list[0]?.totalEvents).toBe(20);
     expect((list[0]?.fileSizeBytes ?? 0)).toBeGreaterThan(0);
   });
+
+  it('[TC-LOG01.11/MSS] Hàng đợi đệm bất đồng bộ (Buffered Queue): appendEvent không chặn Event Loop, flushSync ghi toàn bộ đệm vào đĩa', () => {
+    const logger = new PersistentRoomLogger({ logDir: TEST_LOG_DIR, flushIntervalMs: 500 });
+    const fileName = logger.initRoomLog('ASYNC01', { timestamp: 1700000020000 });
+    const fullPath = path.join(TEST_LOG_DIR, fileName);
+
+    logger.appendEvent('ASYNC01', {
+      id: 'async_ev1',
+      roomCode: 'ASYNC01',
+      timestamp: 1700000020100,
+      source: 'PLAYER',
+      action: 'DICE_ROLL',
+      payloadSummary: 'Tung xí ngầu 6-6',
+    });
+
+    // Khi có buffer interval (500ms), dữ liệu chưa được ghi đồng bộ ngay vào file
+    const contentBefore = fs.readFileSync(fullPath, 'utf8');
+    expect(contentBefore).toBe('');
+
+    // Gọi flushSync(): Toàn bộ hàng đợi được xả xuống đĩa
+    logger.flushSync();
+    const contentAfter = fs.readFileSync(fullPath, 'utf8').trim();
+    expect(contentAfter).toContain('async_ev1');
+    expect(contentAfter).toContain('Tung xí ngầu 6-6');
+
+    logger.stop();
+  });
 });

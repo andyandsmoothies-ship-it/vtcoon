@@ -36,7 +36,7 @@ export function PlayerSlotCard({
               <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
                 Vị Trí {slotNumber}
               </span>
-              <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-200/80 text-slate-600 font-medium">
+              <span className="text-[11px] px-1.5 py-0.5 rounded bg-slate-200/80 text-slate-600 font-medium">
                 Trống
               </span>
             </div>
@@ -85,7 +85,7 @@ export function PlayerSlotCard({
           <span className="text-xs font-bold text-slate-900 truncate max-w-[120px] sm:max-w-[150px]">
             {slot.playerName || `Người chơi ${slotNumber}`}
           </span>
-          <span className="text-[10px] text-slate-400">
+          <span className="text-[11px] text-slate-400">
             Vị Trí {slotNumber}
           </span>
         </div>
@@ -99,7 +99,7 @@ export function PlayerSlotCard({
           </span>
         ) : slot.isBot ? (
           <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
+            <span className="hidden sm:inline-block text-[11px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
               Bot AI
             </span>
             {isHostViewer && onCycleBotPersonality && (

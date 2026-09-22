@@ -25,7 +25,10 @@ tools: [view_file, write_to_file, replace_file_content, list_dir, find_by_name, 
    - For alternative flows that end with `Use case ends`, write test assertions to verify Failure Postconditions (clean rollback, zero dangling state).
    - Never benchmark NFRs on empty datasets. Create realistic seed datasets to verify zero N+1 queries and turn timeout enforcement.
 7. **Context Offloading & Visual Evidence**: Run test suites and linters via local scripts; report only concise high-density summaries into chat context. Mọi ảnh chụp màn hình minh chứng giao diện (UAT/Visual Verification) BẮT BUỘC lưu định dạng `.jpg` (JPEG Quality 85–92, dung lượng < 1MB theo chuẩn IMP-19), tuyệt đối cấm xuất `.png` toàn cảnh.
-8. **Autonomous Reflexion & Self-Correction**: Whenever an error, bug, test failure, or flawed practice is detected during analysis or execution, autonomously diagnose root causes and self-correct until all quality gates pass. Do not stop halfway. Record any newly resolved edge-case trap or hard invariant into `docs/domain/gotchas.md` with domain tag and ticket traceability.
+8. **Autonomous Reflexion & Self-Correction**:
+   - Whenever an error, bug, test failure, or flawed practice is detected during analysis or execution, autonomously diagnose root causes and self-correct until all quality gates pass. Do not stop halfway. Record any newly resolved edge-case trap or hard invariant into `docs/domain/gotchas.md` with domain tag and ticket traceability.
+   - **Anti-Rationalization Protocol**: FORBIDDEN from declaring completion with failing tests by claiming "design superseded" or "acceptable regressions". If an architectural evolution breaks legacy tests due to outdated setup preconditions, align the preconditions explicitly or report `BLOCKED: SPEC_CONFLICT`.
+   - **Full-Pipeline Delivery**: MUST implement all layers specified in the ticket plan (Protocol, Server, Client Hooks, Store). Passing isolated backend tests while omitting frontend/consumer integration is an immediate failure.
 9. **Report Template**:
 ```markdown
 ### 🚀 TICKET IMPLEMENTATION RESULT: [TICKET_ID]

@@ -77,6 +77,8 @@ describe('[UI-06.2/MSS] QrCodeCard Component Markup', () => {
     expect(html).toContain('Mã QR Mời Bạn Bè');
     expect(html).toContain('data-testid="copy-invite-link-btn"');
     expect(html).toContain('Sao Chép Liên Kết Mời');
+    const qrBtn = html.match(/<button[^>]*data-testid="copy-invite-link-btn"[^>]*>/)?.[0] ?? '';
+    expect(qrBtn).toContain('min-h-[44px]');
   });
 });
 
@@ -205,5 +207,29 @@ describe('[UI-06.3/MSS] LobbyView Full Screen Markup', () => {
     const html = renderToStaticMarkup(element);
     expect(html).toContain('Người chơi 2');
     expect(html).toContain('>P<');
+  });
+
+  it('[P1-P6/Craft] Thỏa mãn chuẩn công thái học 360px: dvh, touch target 44px và sàn chữ 11px', () => {
+    useLobbyStore.getState().initLobby('VT7777', 'p1', true, 'Chủ Phòng SG');
+    const state = useLobbyStore.getState();
+    const element = React.createElement(LobbyView, {
+      roomCode: state.roomCode ?? undefined,
+      isHost: state.isHost,
+      slots: state.slots,
+    });
+    const html = renderToStaticMarkup(element);
+
+    // [P1] Dynamic viewport 100dvh
+    expect(html).toContain('max-h-[calc(100dvh-7rem)]');
+    // [P2] Touch target >= 44px
+    expect(html).toContain('data-testid="copy-room-code-btn"');
+    const copyBtn = html.match(/<button[^>]*data-testid="copy-room-code-btn"[^>]*>/)?.[0] ?? '';
+    expect(copyBtn).toContain('min-h-[44px]');
+    const rulesBtn = html.match(/<button[^>]*data-testid="open-game-rules-btn"[^>]*>/)?.[0] ?? '';
+    expect(rulesBtn).toContain('min-h-[44px]');
+    // [P4] Text floor >= 11px (không có text-[10px])
+    expect(html).not.toContain('text-[10px]');
+    // [P5] Header co giãn mobile 360px
+    expect(html).toContain('max-w-[calc(100vw-1.5rem)]');
   });
 });

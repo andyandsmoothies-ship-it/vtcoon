@@ -6,7 +6,8 @@ import type {
   AdminRoomLogEntry,
   AdminArchivedRoomSummary,
   RoomHealthStatus,
-} from '../../../server/network/admin_manager';
+  ServerVitals,
+} from '../../../server/network/admin_types';
 import type { WsServerMessage, WsClientMessage } from '../../../server/network/network_types';
 
 export const STORAGE_KEY = 'vtcoon_admin_secret';
@@ -30,6 +31,8 @@ export function useAdminPortal() {
   const [archivedLogs, setArchivedLogs] = useState<AdminRoomLogEntry[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | RoomHealthStatus>('ALL');
+  const [lifecycleFilter, setLifecycleFilter] = useState<'ALL' | 'LOBBY' | 'PLAYING'>('ALL');
+  const [serverVitals, setServerVitals] = useState<ServerVitals | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const wsRef = useRef<WebSocket | null>(null);
@@ -85,6 +88,9 @@ export function useAdminPortal() {
       setIsAuthenticated(false);
       setAuthError(msg.reason);
     } else if (msg.type === 'ADMIN_ROOM_LIST') {
+      if (msg.vitals) {
+        setServerVitals(msg.vitals);
+      }
       handleRoomListUpdate(msg.rooms as AdminRoomSummary[]);
     } else if (msg.type === 'ADMIN_ARCHIVED_ROOM_LIST') {
       setArchivedRooms(msg.rooms as AdminArchivedRoomSummary[]);
@@ -136,6 +142,9 @@ export function useAdminPortal() {
           lastActivity: summary.lastActivity,
           activeTimersCount: summary.activeTimersCount,
           hasAuction: summary.hasAuction,
+          currentTurnPlayerId: summary.currentTurnPlayerId,
+          currentTurnStepName: summary.currentTurnStepName,
+          turnSecondsLeft: summary.turnSecondsLeft,
         } : prev));
       }
     }
@@ -218,9 +227,13 @@ export function useAdminPortal() {
       const q = searchQuery.toLowerCase();
       const matchQuery = r.roomCode.toLowerCase().includes(q) || r.hostId.toLowerCase().includes(q);
       const matchStatus = statusFilter === 'ALL' || r.status === statusFilter;
-      return matchQuery && matchStatus;
+      const matchLifecycle =
+        lifecycleFilter === 'ALL' ||
+        (lifecycleFilter === 'LOBBY' && !r.started) ||
+        (lifecycleFilter === 'PLAYING' && r.started);
+      return matchQuery && matchStatus && matchLifecycle;
     });
-  }, [rooms, searchQuery, statusFilter]);
+  }, [rooms, searchQuery, statusFilter, lifecycleFilter]);
 
   const filteredArchivedRooms = useMemo(() => {
     return archivedRooms.filter((r) => {
@@ -249,6 +262,9 @@ export function useAdminPortal() {
     setSearchQuery,
     statusFilter,
     setStatusFilter,
+    lifecycleFilter,
+    setLifecycleFilter,
+    serverVitals,
     toastMessage,
     logTerminalRef,
     filteredRooms,

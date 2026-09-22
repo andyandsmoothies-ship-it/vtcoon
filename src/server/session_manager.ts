@@ -39,6 +39,7 @@ export interface PlayerDelta {
   readonly auditTurnsLeft?:     number;
   readonly skipNextTurn?:       boolean;
   readonly consecutiveDoubles?: number;
+  readonly extraTurns?:         number;
 }
 
 export interface AuctionPayload {
@@ -184,6 +185,7 @@ export function buildDeltaFromRoom(
     ...(p.auditTurnsLeft !== undefined ? { auditTurnsLeft: p.auditTurnsLeft } : {}),
     ...(p.skipNextTurn !== undefined ? { skipNextTurn: p.skipNextTurn } : {}),
     ...(p.consecutiveDoubles !== undefined ? { consecutiveDoubles: p.consecutiveDoubles } : {}),
+    ...(p.extraTurns !== undefined ? { extraTurns: p.extraTurns } : {}),
   }));
 
   const auction = buildAuctionDelta(room, auctions, lastAuctionResults);

@@ -231,8 +231,12 @@ export function findEligibleBotTrade(
   if (gaps.length === 0) return null;
 
   for (const gap of gaps) {
+    if (room.lastTargetTradeOfferRound?.[gap.targetOwnerId] === currentRound) continue;
+
     const lastRejected = bot.cellLastRejectedRound?.[gap.cellIndex];
-    if (lastRejected !== undefined && currentRound - lastRejected <= 1) {
+    if ((bot.cellTradeRejections?.[gap.cellIndex] ?? 0) >= 2) {
+      if (lastRejected !== undefined && currentRound - lastRejected < 4) continue;
+    } else if (lastRejected !== undefined && currentRound - lastRejected <= 1) {
       continue; // Cooldown 1 lượt cho ô đất này, xét gap tiếp theo (Anti-Gap Starvation)
     }
 

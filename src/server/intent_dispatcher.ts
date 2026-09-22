@@ -1,7 +1,7 @@
 // [UC-GAME-001..003/MSS][UC-GAME-051..057/MSS] Player Intent Dispatcher — ADR-0001
 import { TurnPhase } from '../domain/room';
 import { BuyResult } from '../domain/property_manager';
-import type { RoomManager } from './room_manager';
+import type { RoomManager, RollResult } from './room_manager';
 
 export type PlayerIntent =
   | { type: 'INTENT_BUY' } | { type: 'INTENT_BUY_PROPERTY' } | { type: 'INTENT_DECLINE' }
@@ -24,12 +24,12 @@ export type PlayerIntent =
   | { type: 'INTENT_BANKRUPTCY'; creditorId?: string }
   | { type: 'INTENT_ROLL' };
 
-type IntentHandler = (mgr: RoomManager, rc: string, p: string, intent: PlayerIntent) => { success: boolean; reason?: string };
+type IntentHandler = (mgr: RoomManager, rc: string, p: string, intent: PlayerIntent) => { success: boolean; reason?: string; rollResult?: RollResult };
 
 const INTENT_DISPATCH: Record<PlayerIntent['type'], IntentHandler> = {
   INTENT_ROLL: (m, rc, p) => {
     const res = m.handleRollDice(rc, p);
-    return { success: res !== undefined, reason: res ? undefined : 'CANNOT_ROLL' };
+    return { success: res !== undefined, reason: res ? undefined : 'CANNOT_ROLL', rollResult: res };
   },
   INTENT_BUY: (m, rc, p) => {
     const res = m.handleBuyProperty(rc, p);
@@ -90,7 +90,7 @@ export function dispatchPlayerIntent(
   roomCode: string,
   playerId: string,
   intent: PlayerIntent,
-): { success: boolean; reason?: string } {
+): { success: boolean; reason?: string; rollResult?: RollResult } {
   const room = mgr.getRoom(roomCode);
   if (room?.phase === TurnPhase.InsolvencyPhase) {
     if (intent.type !== 'INTENT_MORTGAGE' && intent.type !== 'INTENT_DOWNGRADE' && intent.type !== 'INTENT_BANKRUPTCY') {

@@ -154,7 +154,7 @@ export interface Room {
   lastDiceRollerId?:     string;
   diceSeq?:              number;
   currentAuction?:       CurrentAuctionState;
-  lastEventCard?:        EventCardInfo;
+  lastEventCard?:        EventCardInfo | null;
   lastHoseResult?:       HoseResultInfo;
   lastAuctionResult?:    {
     winnerId: string | null;
@@ -165,6 +165,7 @@ export interface Room {
   } | null;
   pendingBuyout?:        PendingBuyoutSession | null;
   pendingTradeOffer?:    PendingTradeOfferInfo | null;
+  lastTargetTradeOfferRound?: Record<string, number>;
 }
 
 

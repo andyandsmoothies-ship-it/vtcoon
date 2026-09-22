@@ -1,6 +1,7 @@
-// [IMP-25/MSS][IMP-28/MSS] Admin Manager — Hệ Thống Quản Trị Trung Tâm Đa Bàn Chơi
 import type { WebSocket } from 'ws';
 import type { RoomManager } from '../room_manager.js';
+import type { SessionManager } from '../session_manager.js';
+import type { ReconnectManager } from './reconnect_manager.js';
 import type { Room } from '../../domain/room.js';
 import { encodeMsg, type WsServerMessage, type WsClientMessage } from './network_types.js';
 import { PersistentRoomLogger, type RoomLogMeta, type RoomFinishSummary } from '../logging/persistent_room_logger.js';
@@ -21,6 +22,7 @@ import {
   type AdminRoomLogEntry,
   type AdminArchivedRoomSummary,
   type AdminManagerOptions,
+  type ServerVitals,
 } from './admin_types.js';
 
 export {
@@ -31,6 +33,7 @@ export {
   type AdminRoomLogEntry,
   type AdminArchivedRoomSummary,
   type AdminManagerOptions,
+  type ServerVitals,
 };
 
 export class AdminManager {
@@ -42,6 +45,9 @@ export class AdminManager {
   private readonly roomLogs = new Map<string, AdminRoomLogEntry[]>();
   private readonly roomViolations = new Map<string, Array<{ type: string; message: string; timestamp: number }>>();
   private readonly roomLogger: PersistentRoomLogger;
+  private timeRemainingProvider?: (roomCode: string) => number;
+  private reconnectManager?: ReconnectManager;
+  private sessionManager?: SessionManager;
 
   constructor(options: AdminManagerOptions) {
     this.rooms = options.roomManager;
@@ -68,6 +74,43 @@ export class AdminManager {
   get authenticatedCount(): number {
     return this.authenticatedSockets.size;
   }
+
+  setTimeRemainingProvider(p: (roomCode: string) => number): void {
+    this.timeRemainingProvider = p;
+  }
+
+  setReconnectManager(r: ReconnectManager): void {
+    this.reconnectManager = r;
+  }
+
+  setSessionManager(s: SessionManager): void {
+    this.sessionManager = s;
+  }
+
+  getServerVitals = (): ServerVitals => {
+    const mem = process.memoryUsage();
+    let totalRooms = 0;
+    let liveRooms = 0;
+    let lobbyRooms = 0;
+    if (this?.rooms?.roomMap) {
+      for (const r of this.rooms.roomMap.values()) {
+        totalRooms++;
+        if (r.started) {
+          liveRooms++;
+        } else {
+          lobbyRooms++;
+        }
+      }
+    }
+    return {
+      memoryRssMb: Math.round((mem.rss / (1024 * 1024)) * 100) / 100,
+      memoryHeapUsedMb: Math.round((mem.heapUsed / (1024 * 1024)) * 100) / 100,
+      uptimeSeconds: Math.floor(process.uptime()),
+      totalRooms,
+      liveRooms,
+      lobbyRooms,
+    };
+  };
 
   hasRoom(roomCode: string): boolean {
     return this.rooms.hasRoom(roomCode);
@@ -126,7 +169,7 @@ export class AdminManager {
 
   recordRoomEvent(
     roomCode: string,
-    entry: Omit<AdminRoomLogEntry, 'id' | 'roomCode' | 'timestamp'> & { timestamp?: number },
+    entry: Omit<AdminRoomLogEntry, 'id' | 'roomCode' | 'timestamp'> & { timestamp?: number; playerId?: string },
   ): AdminRoomLogEntry {
     const norm = roomCode.toUpperCase();
     const timestamp = entry.timestamp ?? Date.now();
@@ -138,6 +181,7 @@ export class AdminManager {
       source: entry.source,
       action: entry.action,
       payloadSummary: entry.payloadSummary,
+      ...(entry.playerId ? { playerId: entry.playerId } : {}),
     };
 
     this.roomLogger.appendEvent(norm, fullEntry);
@@ -177,20 +221,30 @@ export class AdminManager {
 
   getRoomsSummary(): AdminRoomSummary[] {
     const result: AdminRoomSummary[] = [];
+    const opts = {
+      timeRemainingProvider: this.timeRemainingProvider,
+      reconnectManager: this.reconnectManager,
+    };
     for (const room of this.rooms.roomMap.values()) {
-      result.push(buildRoomSummary(room, this.rooms, this.roomViolations.get(room.roomCode)));
+      result.push(buildRoomSummary(room, this.rooms, this.roomViolations.get(room.roomCode), opts));
     }
     return result;
   }
 
   getRoomDetail(rawRoomCode: string): AdminRoomDetail | undefined {
     const norm = rawRoomCode.toUpperCase();
-    return buildRoomDetail(rawRoomCode, this.rooms, this.roomViolations.get(norm));
+    const opts = {
+      timeRemainingProvider: this.timeRemainingProvider,
+      reconnectManager: this.reconnectManager,
+    };
+    return buildRoomDetail(rawRoomCode, this.rooms, this.roomViolations.get(norm), opts);
   }
 
-  getRecentLogs(rawRoomCode: string): AdminRoomLogEntry[] {
-    return this.roomLogs.get(rawRoomCode.toUpperCase()) ?? [];
-  }
+  getRecentLogs = (rawRoomCode: string, playerId?: string): AdminRoomLogEntry[] => {
+    const all = this?.roomLogs?.get(rawRoomCode.toUpperCase()) ?? [];
+    if (!playerId) return all;
+    return all.filter((l) => l.playerId === playerId);
+  };
 
   getArchivedRoomsList(): AdminArchivedRoomSummary[] {
     return this.roomLogger.getArchivedRoomsList();
@@ -263,7 +317,11 @@ export class AdminManager {
   }
 
   broadcastRoomListToAdmins(): void {
-    this.broadcastToAdmins({ type: 'ADMIN_ROOM_LIST', rooms: this.getRoomsSummary() });
+    this.broadcastToAdmins({
+      type: 'ADMIN_ROOM_LIST',
+      rooms: this.getRoomsSummary(),
+      vitals: this.getServerVitals(),
+    });
   }
 
   private broadcastToRoomSubscribers(roomCode: string, msg: WsServerMessage): void {

@@ -87,7 +87,7 @@ export function QrCodeCard({ roomCode }: QrCodeCardProps): React.ReactElement {
         <button
           type="button"
           onClick={handleCopyLink}
-          className={`w-full py-2 px-4 rounded-xl font-medium text-xs transition-all flex items-center justify-center gap-2 shadow-md cursor-pointer ${
+          className={`w-full min-h-[44px] py-2 px-4 rounded-xl font-medium text-xs transition-all flex items-center justify-center gap-2 shadow-md cursor-pointer ${
             isCopied
               ? 'bg-emerald-600 text-white border border-emerald-700'
               : 'bg-amber-500 hover:bg-amber-600 text-white font-bold border border-amber-700 shadow-[0_2px_0_0_#b45309] active:translate-y-0.5'

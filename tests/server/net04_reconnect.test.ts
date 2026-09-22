@@ -69,8 +69,10 @@ describe('[Slice NET-04] Reconnect Token & Ân Hạn 60s → Bot Tiếp Quản',
 
   // =========================================================================
   // TC-NET04.1: Grace period kích hoạt khi socket đứt, phát sóng PLAYER_GRACE
+  // IMP-165: Pre-game disconnect phát LOBBY_UPDATE (không phải PLAYER_GRACE)
+  // TC-NET04.1 kiểm tra UC-GAME-006 trong context trận đang chơi (room.started=true)
   // =========================================================================
-  it('[TC-NET04.1/MSS] [UC-GAME-006/MSS] Socket guest đứt → Server chuyển GracePeriod và broadcast PLAYER_GRACE', async () => {
+  it('[TC-NET04.1/MSS] [UC-GAME-006/MSS] Socket guest đứt trong trận → Server chuyển GracePeriod và broadcast PLAYER_GRACE', async () => {
     const wsHost = await openSocket();
     const hostInitPromise = collectMessages(wsHost, 2);
     wsHost.send(JSON.stringify({ type: 'CREATE_ROOM', playerId: 'host-tc1' }));
@@ -82,6 +84,9 @@ describe('[Slice NET-04] Reconnect Token & Ân Hạn 60s → Bot Tiếp Quản',
     const guestInitPromise = collectMessages(wsGuest, 2);
     wsGuest.send(JSON.stringify({ type: 'JOIN_ROOM', playerId: 'guest-tc1', roomCode }));
     await guestInitPromise;
+
+    // IMP-165: Bắt đầu trận trước khi test grace period (UC-GAME-006 chỉ áp dụng room.started=true)
+    server.getRoomManager().startGame(roomCode);
 
     const hostGracePromise = waitForMessageType(wsHost, 'PLAYER_GRACE');
     wsGuest.close();
@@ -132,8 +137,9 @@ describe('[Slice NET-04] Reconnect Token & Ân Hạn 60s → Bot Tiếp Quản',
 
   // =========================================================================
   // TC-NET04.2: Gửi RECONNECT với token hợp lệ khôi phục thành công session & Full Snapshot
+  // IMP-165: Pre-game disconnect phát LOBBY_UPDATE; RECONNECT flow áp dụng room.started=true
   // =========================================================================
-  it('[TC-NET04.2/MSS] [UC-GAME-007/MSS] Gửi RECONNECT với token hợp lệ → Session Connected & nhận Full Snapshot', async () => {
+  it('[TC-NET04.2/MSS] [UC-GAME-007/MSS] Gửi RECONNECT với token hợp lệ trong trận → Session Connected & nhận Full Snapshot', async () => {
     const wsHost = await openSocket();
     const hostInitPromise = collectMessages(wsHost, 2);
     wsHost.send(JSON.stringify({ type: 'CREATE_ROOM', playerId: 'host-tc2' }));
@@ -147,6 +153,9 @@ describe('[Slice NET-04] Reconnect Token & Ân Hạn 60s → Bot Tiếp Quản',
     const [, sessionInit] = await guestInitPromise;
     if (sessionInit?.type !== 'SESSION_INIT') throw new Error('SESSION_INIT expected');
     const reconnectToken = sessionInit.reconnectToken;
+
+    // IMP-165: Bắt đầu trận để PLAYER_GRACE được phát khi guest disconnect
+    server.getRoomManager().startGame(roomCode);
 
     const hostGracePromise = waitForMessageType(wsHost, 'PLAYER_GRACE');
     wsGuest.close();
@@ -189,8 +198,10 @@ describe('[Slice NET-04] Reconnect Token & Ân Hạn 60s → Bot Tiếp Quản',
 
   // =========================================================================
   // TC-NET04.3: Hết ân hạn tự động chuyển isBot = true, Bot tiếp quản
+  // IMP-165: Pre-game disconnect loại player ra khỏi phòng (không phải bot takeover)
+  // TC-NET04.3 kiểm tra UC-GAME-008 trong context trận đang chơi (room.started=true)
   // =========================================================================
-  it('[TC-NET04.3/MSS] [UC-GAME-008/MSS] Hết thời gian ân hạn → isBot = true và broadcast PLAYER_BOT_TAKEOVER', async () => {
+  it('[TC-NET04.3/MSS] [UC-GAME-008/MSS] Hết thời gian ân hạn trong trận → isBot = true và broadcast PLAYER_BOT_TAKEOVER', async () => {
     const wsHost = await openSocket();
     const hostInitPromise = collectMessages(wsHost, 2);
     wsHost.send(JSON.stringify({ type: 'CREATE_ROOM', playerId: 'host-tc3' }));
@@ -203,6 +214,9 @@ describe('[Slice NET-04] Reconnect Token & Ân Hạn 60s → Bot Tiếp Quản',
     wsGuest.send(JSON.stringify({ type: 'JOIN_ROOM', playerId: 'guest-tc3', roomCode }));
     const [, sessionInit] = await guestInitPromise;
     if (sessionInit?.type !== 'SESSION_INIT') throw new Error('SESSION_INIT expected');
+
+    // IMP-165: Bắt đầu trận trước khi test bot takeover (UC-GAME-008 chỉ áp dụng room.started=true)
+    server.getRoomManager().startGame(roomCode);
 
     const hostTakeoverPromise = waitForMessageType(wsHost, 'PLAYER_BOT_TAKEOVER');
     wsGuest.close();
@@ -273,7 +287,7 @@ describe('[Slice NET-04] Reconnect Token & Ân Hạn 60s → Bot Tiếp Quản',
       wsAttacker.close();
     });
 
-    it('[TC-NET04.4-inv3/Adversarial] [UC-GAME-007/A1] Token đã hết hạn sau Bot takeover → ERROR TOKEN_EXPIRED', async () => {
+    it('[TC-NET04.4-inv3/Adversarial] [UC-GAME-007/A1] Token đã hết hạn sau Bot takeover trong trận → ERROR TOKEN_EXPIRED', async () => {
       const wsHost = await openSocket();
       const hostInitPromise = collectMessages(wsHost, 2);
       wsHost.send(JSON.stringify({ type: 'CREATE_ROOM', playerId: 'host-tc5' }));
@@ -287,6 +301,9 @@ describe('[Slice NET-04] Reconnect Token & Ân Hạn 60s → Bot Tiếp Quản',
       const [, sessionInit] = await guestInitPromise;
       if (sessionInit?.type !== 'SESSION_INIT') throw new Error('SESSION_INIT expected');
       const guestToken = sessionInit.reconnectToken;
+
+      // IMP-165: Bắt đầu trận để bot takeover xảy ra khi grace expired
+      server.getRoomManager().startGame(roomCode);
 
       const hostTakeoverPromise = waitForMessageType(wsHost, 'PLAYER_BOT_TAKEOVER');
       wsGuest.close();
@@ -346,7 +363,7 @@ describe('[Slice NET-04] Reconnect Token & Ân Hạn 60s → Bot Tiếp Quản',
       wsGuestTab2.close();
     });
 
-    it('[TC-NET04.4-inv5/Adversarial] Player đã bị Bot takeover gửi INTENT bị từ chối TOKEN_EXPIRED', async () => {
+    it('[TC-NET04.4-inv5/Adversarial] Player đã bị Bot takeover trong trận gửi INTENT bị từ chối TOKEN_EXPIRED', async () => {
       const wsHost = await openSocket();
       const hostInitPromise = collectMessages(wsHost, 2);
       wsHost.send(JSON.stringify({ type: 'CREATE_ROOM', playerId: 'host-tc7' }));
@@ -358,6 +375,9 @@ describe('[Slice NET-04] Reconnect Token & Ân Hạn 60s → Bot Tiếp Quản',
       const guestInitPromise = collectMessages(wsGuest, 2);
       wsGuest.send(JSON.stringify({ type: 'JOIN_ROOM', playerId: 'guest-tc7', roomCode }));
       await guestInitPromise;
+
+      // IMP-165: Bắt đầu trận để bot takeover xảy ra khi grace expired
+      server.getRoomManager().startGame(roomCode);
 
       // Đợi Bot takeover sau khi socket guest đứt
       const hostTakeoverPromise = waitForMessageType(wsHost, 'PLAYER_BOT_TAKEOVER');

@@ -4,7 +4,7 @@
 
 import type { DeltaPayload } from '../session_manager.js';
 import type { PlayerIntent } from '../intent_dispatcher.js';
-import type { AdminRoomSummary, AdminRoomDetail, AdminRoomLogEntry, AdminArchivedRoomSummary } from './admin_types.js';
+import type { AdminRoomSummary, AdminRoomDetail, AdminRoomLogEntry, AdminArchivedRoomSummary, ServerVitals } from './admin_types.js';
 
 export type ReasonCode =
   | 'ROOM_CODE_COLLISION'
@@ -144,13 +144,23 @@ export type WsServerMessage =
       readonly timestamp: number;
     }
   | {
+      readonly type: 'LOBBY_UPDATE';
+      readonly roomCode: string;
+      readonly players: ReadonlyArray<{
+        readonly id: string;
+        readonly isHost: boolean;
+        readonly slotIndex: number;
+        readonly name?: string;
+      }>;
+    }
+  | {
       readonly type: 'GAME_OVER';
       readonly roomCode: string;
       readonly leaderboard: ReadonlyArray<{ readonly id: string; readonly netWorth: number }>;
     }
   | { readonly type: 'ADMIN_AUTH_SUCCESS'; readonly message: string }
   | { readonly type: 'ADMIN_AUTH_FAILED'; readonly reason: string }
-  | { readonly type: 'ADMIN_ROOM_LIST'; readonly rooms: readonly AdminRoomSummary[] }
+  | { readonly type: 'ADMIN_ROOM_LIST'; readonly rooms: readonly AdminRoomSummary[]; readonly vitals?: ServerVitals }
   | { readonly type: 'ADMIN_ARCHIVED_ROOM_LIST'; readonly rooms: readonly AdminArchivedRoomSummary[] }
   | {
       readonly type: 'ADMIN_ARCHIVED_LOG_DATA';

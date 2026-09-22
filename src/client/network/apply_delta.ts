@@ -58,6 +58,9 @@ function syncTurnAndTimer(delta: DeltaPayload, state: GameState): void {
   }
   if (delta.turnPhase !== undefined) {
     state.setTurnPhase(delta.turnPhase);
+    if (delta.turnPhase === TurnPhase.WaitingRoll) {
+      state.setHasRolledThisTurn(false);
+    }
   }
 }
 

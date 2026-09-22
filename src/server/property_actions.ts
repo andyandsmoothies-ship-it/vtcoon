@@ -250,6 +250,13 @@ function checkTradeParties(
   const partyErr = checkPartyStatus(buyer, seller);
   if (partyErr) return { valid: false, reason: partyErr };
 
+  if (buyer!.balance < 0) {
+    return { valid: false, reason: ActionRejectReason.INSUFFICIENT_FUNDS };
+  }
+  if (seller!.balance < 0 && price <= 0) {
+    return { valid: false, reason: ActionRejectReason.INSUFFICIENT_FUNDS };
+  }
+
   if (seller!.mortgagedProperties?.includes(cellIndex)) {
     return { valid: false, reason: ActionRejectReason.PROPERTY_MORTGAGED };
   }

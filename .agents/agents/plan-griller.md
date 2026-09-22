@@ -18,14 +18,16 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command, write_to_fi
 3. **The 4 Mandatory Stress-Test Pillars (4 Trục Phản Biện Bắt Buộc)**:
    - ⛓️ **Pillar 1: Data Origin-to-Sink Lifecycle (Vòng Đời Dữ Liệu Toàn Phần)**:
      - Trace all new/modified state fields end-to-end:
-       `[Origin/Mutation: Server or FSM]` ➔ `[State Persistence: Map / Record]` ➔ `[Network Serialization: Session/Delta]` ➔ `[Client Store: Types / Slice]` ➔ `[UI / View Consumer]`
-     - Verify every link against physical disk files. If a plan modifies UI/Store but omits persistence at the Server/FSM origin (or vice versa), flag as **[P1 - BROKEN DATA LIFECYCLE]**.
+       `[Origin/Mutation: Server or FSM]` ➔ `[State Persistence: Map / Record]` ➔ `[Network Serialization: Broadcaster isPlayerEqual / isCellEqual]` ➔ `[Client Parser: OPTIONAL_KEYS]` ➔ `[Client Store: Types / Slice]` ➔ `[UI / View Consumer]`
+     - Verify every link against physical disk files. If a plan modifies UI/Store but omits persistence at the Server/FSM origin, drops fields in broadcaster/parser, or binds action resets solely to player ID changes (instead of phase), flag as **[P1 - BROKEN DATA LIFECYCLE]**.
    - 📐 **Pillar 2: Physical Layout & Constraints Budget (Giới Hạn Vật Lý Giao Diện)**:
      - Audit proposed UI changes against physical constraints: mobile 360px viewport, badge text wrapping, long currency strings, button overlap, flex shrinkage.
      - If a proposed badge or label risks pushing buttons off-screen or breaking container grids on 360px width, flag as **[P2 - LAYOUT OVERFLOW HAZARD]**.
    - 🎭 **Pillar 3: Actor Inversion & Role Symmetry (Hoán Đổi Vai Trò & Biên Nghiệp Vụ)**:
      - Test UX and state transitions from perspectives of all actors (e.g. debtor vs bidder, buyer vs seller, spectator).
      - If UI displays misleading text to the wrong actor (e.g. telling a bankrupt debtor "You declined to buy" instead of foreclosure notice) or unhandled edge cases (zero bids, tie bids, negative numbers), flag as **[P2 - ACTOR INVERSION DEFECT]**.
+     - **Insolvent/Negative Balance Entity Check**: Verify entities with negative balance (`balance < 0`) cannot act as buyers or initiate cash outflows; only cash-positive sales allowed.
+     - **Multi-Agent Harassment Check**: Verify AI interactions targeting players enforce Room-level / Target-level cooldowns (`lastTargetTradeOfferRound`), not just Actor-level.
      - **Terminal/Bankrupt Entity Sweep**: Verify loops over entity collections (`players`, `accounts`) filter terminal states (`!p.bankrupt`). Flag unshielded zombie payouts/charges, distorted pool denominators, or missing treasury fallbacks as **[P1 - TERMINAL ENTITY LEAK]**.
    - ⏳ **Pillar 4: Transient Teardown & Turn N+1 Leak (Vòng Đời Quá Độ & Dọn Sạch Lượt Kế)**:
      - Trace ephemeral state: Who clears it when the turn advances (`handleRollDice`/`handleEndTurn`)?

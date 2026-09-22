@@ -38,7 +38,8 @@ function isPlayerEqual(a: PlayerDelta, b: PlayerDelta): boolean {
     Boolean(a.bankrupt) === Boolean(b.bankrupt) &&
     Boolean(a.isBot) === Boolean(b.isBot) &&
     (a.overdraftRoundsLeft ?? 0) === (b.overdraftRoundsLeft ?? 0) &&
-    Boolean(a.inAudit) === Boolean(b.inAudit)
+    Boolean(a.inAudit) === Boolean(b.inAudit) &&
+    (a.extraTurns ?? 0) === (b.extraTurns ?? 0)
   );
 }
 

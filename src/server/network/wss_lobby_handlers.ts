@@ -1,6 +1,6 @@
 // [UC-GAME-001/MSS][UC-GAME-002/MSS] WSS Lobby Handlers — Create, Join, Start, Leave Room handlers
 import { WebSocket } from 'ws';
-import type { RoomManager } from '../room_manager.js';
+import type { RoomManager, RollResult } from '../room_manager.js';
 import type { SessionManager } from '../session_manager.js';
 import type { ReconnectManager } from './reconnect_manager.js';
 import type { SocketRegistry } from './socket_registry.js';
@@ -66,28 +66,60 @@ export function handleCreateRoom(
   ctx.sendSessionInit(socket, msg.playerId, room.roomCode);
 }
 
+// Helper: xây dựng payload LOBBY_UPDATE từ room
+function buildLobbyUpdatePayload(room: Room): Extract<WsServerMessage, { type: 'LOBBY_UPDATE' }> {
+  return {
+    type: 'LOBBY_UPDATE',
+    roomCode: room.roomCode,
+    players: room.players.map((p, idx) => ({
+      id: p.id,
+      isHost: p.id === room.hostId,
+      slotIndex: idx,
+      name: p.name,
+    })),
+  };
+}
+
 export function handleJoinRoom(
   ctx: WssLobbyContext,
   socket: WebSocket,
   msg: Extract<WsClientMessage, { type: 'JOIN_ROOM' }>,
 ): void {
-  const joined = ctx.rooms.joinRoom(msg.roomCode, msg.playerId);
-  if (!joined) return ctx.sendSafe(socket, { type: 'ERROR', reasonCode: 'ROOM_NOT_FOUND' });
-  if (joined.players.length > MAX_PLAYERS) {
-    joined.players.pop();
-    return ctx.sendSafe(socket, { type: 'ERROR', reasonCode: 'ROOM_FULL' });
+  const room = ctx.rooms.getRoom(msg.roomCode);
+  if (!room) return ctx.sendSafe(socket, { type: 'ERROR', reasonCode: 'ROOM_NOT_FOUND' });
+  if (room.started) return ctx.sendSafe(socket, { type: 'ERROR', reasonCode: 'ROOM_STARTED' });
+  if (room.players.length >= MAX_PLAYERS) return ctx.sendSafe(socket, { type: 'ERROR', reasonCode: 'ROOM_FULL' });
+
+  // Server Slot Assignment Tuyệt Đối (Zero Ambiguity)
+  // Nếu playerId client gửi không bị trùng → dùng nguyên; nếu trùng → tìm slot trống ['p2','p3','p4']
+  let assignedPlayerId: string;
+  if (!room.players.some((p) => p.id === msg.playerId)) {
+    assignedPlayerId = msg.playerId;
+  } else {
+    const candidateSlots = ['p2', 'p3', 'p4'];
+    const freeSlot = candidateSlots.find((s) => !room.players.some((p) => p.id === s));
+    if (!freeSlot) return ctx.sendSafe(socket, { type: 'ERROR', reasonCode: 'ROOM_FULL' });
+    assignedPlayerId = freeSlot;
   }
-  ctx.reconnects.cancelGracePeriod(msg.roomCode, msg.playerId);
-  ctx.sessions.addSession(msg.playerId);
-  ctx.bindSocket(msg.roomCode, msg.playerId, socket);
+
+  ctx.rooms.joinRoom(msg.roomCode, assignedPlayerId);
+  ctx.reconnects.cancelGracePeriod(msg.roomCode, assignedPlayerId);
+  ctx.sessions.addSession(assignedPlayerId);
   ctx.adminManager.recordRoomEvent(msg.roomCode, {
     source: 'PLAYER',
     action: 'JOIN_ROOM',
-    payloadSummary: `Người chơi ${msg.playerId} đã vào phòng (${joined.players.length} người)`,
+    payloadSummary: `Người chơi ${assignedPlayerId} đã vào phòng (${room.players.length} người)`,
   });
   ctx.adminManager.broadcastRoomListToAdmins();
-  ctx.sendSafe(socket, { type: 'ROOM_JOINED', roomCode: msg.roomCode, playerId: msg.playerId, playerCount: joined.players.length });
-  ctx.sendSessionInit(socket, msg.playerId, msg.roomCode);
+  // Broadcast LOBBY_UPDATE đến tất cả socket HIỆN TẠI trong phòng (trước khi bindSocket guest)
+  // Đảm bảo host nhận LOBBY_UPDATE từ join TRƯỚC khi guest socket được đăng ký
+  ctx.broadcast(msg.roomCode, buildLobbyUpdatePayload(room));
+  // Sau đó bind socket của guest và gửi ROOM_JOINED/SESSION_INIT cho guest
+  ctx.bindSocket(msg.roomCode, assignedPlayerId, socket);
+  ctx.sendSafe(socket, { type: 'ROOM_JOINED', roomCode: msg.roomCode, playerId: assignedPlayerId, playerCount: room.players.length });
+  ctx.sendSessionInit(socket, assignedPlayerId, msg.roomCode);
+  // Gửi LOBBY_UPDATE cho chính socket vừa vào để người chơi này đồng bộ danh sách slot sảnh chờ
+  ctx.sendSafe(socket, buildLobbyUpdatePayload(room));
 }
 
 function validateStartGame(room: Room | undefined, playerId: string): ReasonCode | undefined {
@@ -216,7 +248,8 @@ export function handleLeaveRoom(
   } else {
     const idx = room.players.findIndex((pl) => pl.id === msg.playerId);
     if (idx !== -1) room.players.splice(idx, 1);
-    ctx.broadcaster.broadcastRoomDelta(msg.roomCode);
+    ctx.broadcast(msg.roomCode, buildLobbyUpdatePayload(room));
+    ctx.adminManager.broadcastRoomListToAdmins();
   }
 }
 
@@ -247,10 +280,10 @@ export function executeIntentAction(
   roomCode: string,
   playerId: string,
   intent: PlayerIntent,
-): { success: boolean; reason?: string } {
+): { success: boolean; reason?: string; rollResult?: RollResult } {
   if (intent.type === 'INTENT_ROLL') {
     const rollRes = rooms.handleRollDice(roomCode, playerId);
-    return { success: rollRes !== undefined, reason: rollRes !== undefined ? undefined : 'CANNOT_ROLL' };
+    return { success: rollRes !== undefined, reason: rollRes !== undefined ? undefined : 'CANNOT_ROLL', rollResult: rollRes };
   }
   return rooms.handlePlayerIntent(roomCode, playerId, intent);
 }

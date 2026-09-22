@@ -35,6 +35,7 @@ export interface UseGameWsOptions {
   readonly onEmote?: (playerId: string, emoteId: string, timestamp: number) => void;
   readonly onRoomStarted?: () => void;
   readonly onSessionInit?: (token: string, roomCode: string) => void;
+  readonly onLobbyUpdate?: (players: ReadonlyArray<{ readonly id: string; readonly isHost: boolean; readonly slotIndex: number; readonly name?: string }>) => void;
   readonly webSocketFactory?: (url: string) => WebSocketLike;
 }
 
@@ -111,6 +112,13 @@ export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
   const activeRoomCodeRef = useRef(roomCode);
   activeRoomCodeRef.current = roomCode;
 
+  // [IMP-165/P1.1] playerIdRef: đồng bộ playerId hiện tại để sendIntent/sendEmote không bị stale closure
+  const playerIdRef = useRef(playerId);
+  useEffect(() => { playerIdRef.current = playerId; }, [playerId]);
+
+  const onLobbyUpdateRef = useRef(options.onLobbyUpdate);
+  onLobbyUpdateRef.current = options.onLobbyUpdate;
+
   const isManualDisconnectRef = useRef(false);
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const reconnectAttemptsRef = useRef(0);
@@ -175,6 +183,7 @@ export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
           onGameOver: onGameOverRef.current,
           onEmote: onEmoteRef.current,
           onRoomStarted: onRoomStartedRef.current,
+          onLobbyUpdate: onLobbyUpdateRef.current,
           onSessionInit: (tok, rc) => {
             if (rc) activeRoomCodeRef.current = rc;
             onSessionInitRef.current?.(tok, rc);
@@ -221,24 +230,26 @@ export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
   const sendIntent = useCallback(
     (intent: PlayerIntent): boolean => {
       if (!wsRef.current || wsRef.current.readyState !== 1) return false;
+      // [IMP-165/P1.1] Dùng playerIdRef.current để chống stale closure khi server đổi slot
+      const effectivePid = playerIdRef.current || playerId;
       const msg: WsClientMessage = {
         type: 'INTENT',
         roomCode: activeRoomCodeRef.current || roomCode,
-        playerId,
+        playerId: effectivePid,
         intent,
       };
       const gameState = useGameStore.getState();
-      const player = gameState.playersInfo[playerId];
+      const player = gameState.playersInfo[effectivePid];
       const telemetryContext = buildIntentTelemetryContext({
         intentType: intent.type,
         dice: gameState.dice,
         consecutiveDoubles: player?.consecutiveDoubles,
         balance: player?.balance,
-        position: gameState.playerPositions[playerId],
+        position: gameState.playerPositions[effectivePid],
         currentTurnPlayerId: gameState.currentTurnPlayerId,
-        localPlayerId: playerId,
+        localPlayerId: effectivePid,
       });
-      useTelemetryStore.getState().recordIntent(playerId, intent, telemetryContext);
+      useTelemetryStore.getState().recordIntent(effectivePid, intent, telemetryContext);
       useTelemetryStore.getState().addAuditLog({
         tick: 0,
         source: 'PLAYER',
@@ -255,10 +266,11 @@ export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
   const sendEmote = useCallback(
     (emoteId: string): boolean => {
       if (!wsRef.current || wsRef.current.readyState !== 1) return false;
+      // [IMP-165/P1.1] Dùng playerIdRef.current để chống stale closure
       const msg: WsClientMessage = {
         type: 'EMOTE',
         roomCode: activeRoomCodeRef.current || roomCode,
-        playerId,
+        playerId: playerIdRef.current || playerId,
         emoteId,
       };
       wsRef.current.send(JSON.stringify(msg));

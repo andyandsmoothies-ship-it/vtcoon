@@ -229,8 +229,20 @@ export function ActionDock({
             ? 'Đang Đi...'
             : isBankrupt
             ? 'Đã Phá Sản'
+            : (actingPlayer?.extraTurns ?? 0) > 0
+            ? (
+              <>
+                <span className="sm:hidden">Đổ Tiếp</span>
+                <span className="hidden sm:inline">Đổ Tiếp (+1 Lượt)</span>
+              </>
+            )
             : canRollAgain && hasRolledThisTurn
-            ? 'Đổ Tiếp (Đôi)'
+            ? (
+              <>
+                <span className="sm:hidden">Đổ Tiếp</span>
+                <span className="hidden sm:inline">Đổ Tiếp (Đôi)</span>
+              </>
+            )
             : 'Đổ Xúc Xắc'}
         </span>
       </button>

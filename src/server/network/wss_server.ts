@@ -114,6 +114,9 @@ export class WssServer {
         return Boolean(s && s.readyState === WebSocket.OPEN);
       },
     });
+    this.adminManager.setTimeRemainingProvider((rc) => this.turnOrchestrator.getTimeRemaining(rc));
+    this.adminManager.setReconnectManager(this.reconnects);
+    this.adminManager.setSessionManager(this.sessions);
     this.cleanupScheduler = new RoomCleanupScheduler({
       roomManager: this.rooms, timeoutMs: config.abandonedTimeoutMs,
       intervalMs: config.cleanupIntervalMs, onCleanup: (rc) => this.closeRoom(rc),

@@ -87,4 +87,6 @@ export interface LobbyState {
   readonly startGame: () => { readonly success: boolean; readonly reasonCode?: LobbyReasonCode };
   readonly setGameStarted: (started: boolean) => void;
   readonly resetLobby: () => void;
+  readonly setMyPlayerId: (myPlayerId: string) => void;
+  readonly syncLobbySlots: (players: ReadonlyArray<{ id: string; isHost: boolean; slotIndex: number; name?: string }>) => void;
 }

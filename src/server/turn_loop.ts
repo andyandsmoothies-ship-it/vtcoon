@@ -93,6 +93,7 @@ export function executeTurnRoll(
   rolledThisTurn: Map<string, boolean>,
   roomCode: string,
 ): RollResult | undefined {
+  room.lastEventCard = null;
   if (current.skipNextTurn) {
     current.skipNextTurn = false;
     room.phase = TurnPhase.PropertyManagement;
@@ -215,6 +216,7 @@ export function executeTurnEnd(
       room.phase = TurnPhase.WaitingRoll;
     }
     rolledThisTurnMap.set(roomCode, false);
+    room.lastEventCard = null;
     return room;
   }
   const total = room.players.length;
@@ -243,6 +245,7 @@ export function executeTurnEnd(
     room.phase = TurnPhase.WaitingRoll;
   }
   rolledThisTurnMap.set(roomCode, false);
+  room.lastEventCard = null;
   return room;
 }
 

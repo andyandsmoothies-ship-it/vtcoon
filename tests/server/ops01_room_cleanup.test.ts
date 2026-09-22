@@ -178,6 +178,45 @@ describe('[Slice OPS-01] Room Cleanup & Game Over Lifecycle', () => {
     }
   });
 
+  it('[TC-OPS01.5/MSS] Sảnh chờ chưa bắt đầu (!room.started) dọn dẹp nhanh sau lobbyTimeoutMs (3 phút) thay vì chờ 10 phút', () => {
+    vi.useFakeTimers();
+    try {
+      const rm = new RoomManager(42);
+      const scheduler = new RoomCleanupScheduler({
+        roomManager: rm,
+        timeoutMs: 10 * 60 * 1000,
+        lobbyTimeoutMs: 3 * 60 * 1000,
+        intervalMs: 60 * 1000,
+      });
+      scheduler.start();
+
+      const lobby = rm.createRoom('p_lobby');
+      const lobbyCode = lobby.roomCode;
+
+      const playing = rm.createRoom('p_playing');
+      const playingCode = playing.roomCode;
+      rm.joinRoom(playingCode, 'p_guest');
+      const started = rm.startGame(playingCode); // phòng đang chơi với 2 người
+      expect(started?.started).toBe(true);
+
+      expect(rm.roomMap.has(lobbyCode)).toBe(true);
+      expect(rm.roomMap.has(playingCode)).toBe(true);
+
+      // Trôi qua 3 phút: sảnh chờ chưa bắt đầu bị dọn sạch
+      vi.advanceTimersByTime(3 * 60 * 1000);
+      expect(rm.roomMap.has(lobbyCode)).toBe(false);
+      expect(rm.roomMap.has(playingCode)).toBe(true);
+
+      // Trôi thêm 7 phút (tổng 10 phút): phòng đang chơi mới hết hạn
+      vi.advanceTimersByTime(7 * 60 * 1000);
+      expect(rm.roomMap.has(playingCode)).toBe(false);
+
+      scheduler.stop();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   // =========================================================================
   // TC-OPS01.3b: Intent phá sản tự động kích hoạt GAME_OVER và dọn sạch phòng
   // =========================================================================

@@ -181,6 +181,8 @@ export function useAppSession(
     onGameOver: handleGameOver,
     onEmote: handleEmote,
     onSessionInit: handleSessionInit,
+    // [IMP-165] Cắm dây onLobbyUpdate để syncLobbySlots được gọi từ WS layer
+    onLobbyUpdate: (players) => useLobbyStore.getState().syncLobbySlots?.(players),
   });
   isConnectedRef.current = isConnected;
 

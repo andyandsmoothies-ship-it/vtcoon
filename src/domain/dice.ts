@@ -5,6 +5,7 @@ export interface DiceResult {
   readonly die2:     number;
   readonly total:    number;
   readonly isDouble: boolean;
+  readonly dice?:    readonly [number, number];
 }
 
 /**
@@ -32,5 +33,5 @@ function dieRoll(rng: () => number): number {
 export function rollDice(rng: () => number): DiceResult {
   const die1 = dieRoll(rng);
   const die2 = dieRoll(rng);
-  return { die1, die2, total: die1 + die2, isDouble: die1 === die2 };
+  return { die1, die2, total: die1 + die2, isDouble: die1 === die2, dice: [die1, die2] };
 }

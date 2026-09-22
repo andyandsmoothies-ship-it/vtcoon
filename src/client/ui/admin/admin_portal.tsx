@@ -25,6 +25,9 @@ export function AdminPortal(): React.ReactElement {
     setSearchQuery,
     statusFilter,
     setStatusFilter,
+    lifecycleFilter,
+    setLifecycleFilter,
+    serverVitals,
     toastMessage,
     logTerminalRef,
     filteredRooms,
@@ -61,6 +64,15 @@ export function AdminPortal(): React.ReactElement {
           <span className="rounded bg-slate-800 px-2 py-0.5 text-[11px] font-mono text-cyan-400">
             {archivedRooms.length} Bàn Lịch Sử
           </span>
+          {serverVitals && (
+            <div className="hidden lg:flex items-center gap-2 rounded border border-slate-700 bg-slate-950/80 px-2.5 py-1 text-[11px] font-mono text-slate-300">
+              <span title="Memory RSS / Heap Used">💾 RAM: <b className="text-amber-300">{serverVitals.memoryRssMb}M</b> / {serverVitals.memoryHeapUsedMb}M</span>
+              <span className="text-slate-600">|</span>
+              <span title="Server Uptime">⏱️ Uptime: <b className="text-emerald-300">{Math.floor(serverVitals.uptimeSeconds / 60)}m {serverVitals.uptimeSeconds % 60}s</b></span>
+              <span className="text-slate-600">|</span>
+              <span title="Phòng: Tổng (Live / Sảnh)">🏠 {serverVitals.totalRooms} phòng (<b className="text-emerald-400">{serverVitals.liveRooms} Live</b> / <b className="text-amber-400">{serverVitals.lobbyRooms} Sảnh</b>)</span>
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-3">
           {toastMessage && (
@@ -123,19 +135,37 @@ export function AdminPortal(): React.ReactElement {
               className="w-full rounded border border-slate-700 bg-slate-950 px-2.5 py-1.5 text-xs text-slate-200 focus:border-amber-400 focus:outline-none"
             />
             {activeTab === 'LIVE' && (
-              <div className="flex gap-1">
-                {(['ALL', 'NORMAL', 'WARNING', 'CRITICAL'] as const).map((st) => {
-                  const isCurrent = statusFilter === st;
-                  const label = st === 'ALL' ? 'Tất Cả' : st === 'NORMAL' ? '🟢 Xanh' : st === 'WARNING' ? '🟡 Cảnh Báo' : '🔴 Lỗi';
-                  const btnClass = isCurrent
-                    ? 'flex-1 rounded py-1 text-[10px] font-bold bg-amber-400 text-amber-950'
-                    : 'flex-1 rounded py-1 text-[10px] font-bold bg-slate-800 text-slate-400 hover:text-white';
-                  return (
-                    <button key={st} onClick={() => setStatusFilter(st)} className={btnClass}>
-                      {label}
-                    </button>
-                  );
-                })}
+              <div className="space-y-1.5">
+                {/* Hàng 1: Sức khỏe */}
+                <div className="flex gap-1">
+                  {(['ALL', 'NORMAL', 'WARNING', 'CRITICAL'] as const).map((st) => {
+                    const isCurrent = statusFilter === st;
+                    const label = st === 'ALL' ? 'Tất Cả' : st === 'NORMAL' ? '🟢 Xanh' : st === 'WARNING' ? '🟡 Cảnh Báo' : '🔴 Lỗi';
+                    const btnClass = isCurrent
+                      ? 'flex-1 rounded py-1 text-[10px] font-bold bg-amber-400 text-amber-950'
+                      : 'flex-1 rounded py-1 text-[10px] font-bold bg-slate-800 text-slate-400 hover:text-white';
+                    return (
+                      <button key={st} onClick={() => setStatusFilter(st)} className={btnClass}>
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+                {/* Hàng 2: Vòng đời */}
+                <div className="flex gap-1">
+                  {(['ALL', 'LOBBY', 'PLAYING'] as const).map((lc) => {
+                    const isCurrent = lifecycleFilter === lc;
+                    const label = lc === 'ALL' ? 'Toàn Bộ' : lc === 'LOBBY' ? '🛋️ Sảnh Chờ' : '🎲 Đang Chơi';
+                    const btnClass = isCurrent
+                      ? 'flex-1 rounded py-1 text-[10px] font-bold bg-cyan-400 text-cyan-950'
+                      : 'flex-1 rounded py-1 text-[10px] font-bold bg-slate-800/80 text-slate-400 hover:text-white';
+                    return (
+                      <button key={lc} onClick={() => setLifecycleFilter(lc)} className={btnClass}>
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
           </div>

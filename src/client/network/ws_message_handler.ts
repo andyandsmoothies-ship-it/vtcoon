@@ -6,6 +6,7 @@ import { saveReconnectToken, getReconnectToken, clearReconnectToken } from './re
 import { applyDeltaToStore, isGameRunningDelta } from './apply_delta.js';
 import { useTelemetryStore } from '../telemetry/telemetry_store.js';
 import { useGameStore, FloatingTextType } from '../store/game_store.js';
+import { useLobbyStore } from '../store/lobby_store.js';
 
 export interface WsMessageHandlerContext {
   readonly roomCode: string;
@@ -21,6 +22,7 @@ export interface WsMessageHandlerContext {
   readonly onEmote?: (playerId: string, emoteId: string, timestamp: number) => void;
   readonly onRoomStarted?: () => void;
   readonly onSessionInit?: (token: string, roomCode: string) => void;
+  readonly onLobbyUpdate?: (players: ReadonlyArray<{ readonly id: string; readonly isHost: boolean; readonly slotIndex: number; readonly name?: string }>) => void;
   readonly setLastTick?: (tick: number) => void;
   readonly setErrorReason?: (reason: ReasonCode | null) => void;
 }
@@ -41,8 +43,19 @@ export function handleWsMessage(
     ctx.onGameOver?.(msg.leaderboard);
   } else if (msg.type === 'ROOM_STARTED') {
     ctx.onRoomStarted?.();
-  } else if (msg.type === 'ROOM_CREATED' || msg.type === 'ROOM_JOINED') {
+  } else if (msg.type === 'ROOM_CREATED') {
     ctx.onSessionInit?.('', msg.roomCode);
+  } else if (msg.type === 'ROOM_JOINED') {
+    // [IMP-165/P1.1] Cập nhật myPlayerId nếu server cấp slot khác với client đã gửi
+    if (msg.playerId !== ctx.playerId) {
+      useLobbyStore.getState().setMyPlayerId?.(msg.playerId);
+    }
+    ctx.onSessionInit?.('', msg.roomCode);
+  } else if (msg.type === 'LOBBY_UPDATE') {
+    // [IMP-165] Đồng bộ tức thì danh sách slot sảnh chờ vào Zustand store
+    // Gọi trực tiếp store — không phụ thuộc callback chain use_app_session
+    useLobbyStore.getState().syncLobbySlots?.(msg.players);
+    ctx.onLobbyUpdate?.(msg.players);
   } else if (msg.type === 'SESSION_INIT') {
     const activeCode = msg.roomCode || ctx.roomCode;
     saveReconnectToken(activeCode, msg.reconnectToken);

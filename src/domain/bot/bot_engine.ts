@@ -351,6 +351,7 @@ export function decideBotIntent(
       const tradeIntent = findEligibleBotTrade(bot, room, registry, stateMap, personality, currentRound);
       if (tradeIntent !== null) {
         bot.lastTradeOfferRound = currentRound;
+        (room.lastTargetTradeOfferRound ??= {})[tradeIntent.sellerId] = currentRound;
         return tradeIntent;
       }
       return { type: 'INTENT_END_TURN' };

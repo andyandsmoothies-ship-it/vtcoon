@@ -8,6 +8,7 @@ import type {
   AdminRoomDetail,
   AdminRoomLogEntry,
 } from './admin_types.js';
+import type { ReconnectManager } from './reconnect_manager.js';
 
 export function evaluateRoomHealth(
   room: Room,
@@ -39,7 +40,51 @@ export function evaluateRoomHealth(
   return { status: 'NORMAL' };
 }
 
-function mapPlayers(room: Room, norm: string, rooms: RoomManager): AdminPlayerSummary[] {
+export function resolveTurnStepName(
+  phaseOrRoom: TurnPhase | Room,
+  auditOrPlayer?: boolean | { inAudit?: boolean } | Player,
+  started?: boolean,
+): string {
+  const isStarted = typeof phaseOrRoom === 'object' && phaseOrRoom !== null && 'started' in phaseOrRoom
+    ? phaseOrRoom.started
+    : (started !== undefined ? started : true);
+  if (!isStarted) return 'Sảnh chờ';
+
+  const phase = typeof phaseOrRoom === 'object' && phaseOrRoom !== null && 'phase' in phaseOrRoom
+    ? phaseOrRoom.phase
+    : phaseOrRoom;
+
+  const inAudit = auditOrPlayer === true ||
+    (typeof auditOrPlayer === 'object' && auditOrPlayer !== null && 'inAudit' in auditOrPlayer && Boolean(auditOrPlayer.inAudit));
+
+  if (inAudit && phase === TurnPhase.WaitingRoll) {
+    return 'Đang trong diện Kiểm toán (Đóng bảo lãnh / Thẻ ngoại giao)';
+  }
+
+  switch (phase) {
+    case TurnPhase.WaitingRoll: return 'Chờ gieo xúc xắc';
+    case TurnPhase.ActionPhase: return 'Đang chọn hành động (Mua đất / Nâng cấp / Kết thúc lượt)';
+    case TurnPhase.AuctionPhase: return 'Đang diễn ra phiên đấu giá BĐS';
+    case TurnPhase.PropertyManagement: return 'Quản lý tài sản (Xây dựng / Thế chấp)';
+    case TurnPhase.InsolvencyPhase: return 'Xử lý khủng hoảng nợ / Bán tài sản trả nợ';
+    case TurnPhase.BankruptcyCheck: return 'Kiểm tra điều kiện phá sản';
+    case TurnPhase.HosePhase: return 'Thực hiện sự kiện Vòi Rồng / Thiên tai';
+    case TurnPhase.TurnEnd: return 'Kết thúc lượt';
+    default: return String(phase);
+  }
+}
+
+export interface BuildRoomSummaryOptions {
+  readonly timeRemainingProvider?: (rc: string) => number;
+  readonly reconnectManager?: ReconnectManager;
+}
+
+function mapPlayers(
+  room: Room,
+  norm: string,
+  rooms: RoomManager,
+  reconnectManager?: ReconnectManager,
+): AdminPlayerSummary[] {
   const reg = rooms.getRegistry(norm);
   const rankings = rooms.getRankings(norm);
   const netWorthMap = new Map(rankings.map((r) => [r.id, r.netWorth]));
@@ -50,6 +95,9 @@ function mapPlayers(room: Room, norm: string, rooms: RoomManager): AdminPlayerSu
         if (ownerId === p.id) propCount++;
       }
     }
+    const inGracePeriod = reconnectManager ? reconnectManager.isPlayerInGrace(norm, p.id) : false;
+    const graceSecondsLeft = reconnectManager ? reconnectManager.getGraceRemainingSeconds(norm, p.id) : 0;
+    const isConnected = !inGracePeriod && !p.isBot;
     return {
       id: p.id,
       balance: p.balance,
@@ -58,6 +106,9 @@ function mapPlayers(room: Room, norm: string, rooms: RoomManager): AdminPlayerSu
       bankrupt: Boolean(p.bankrupt),
       propertyCount: propCount,
       netWorth: netWorthMap.get(p.id) ?? p.balance,
+      inGracePeriod,
+      graceSecondsLeft,
+      isConnected,
     };
   });
 }
@@ -66,9 +117,16 @@ export function buildRoomSummary(
   room: Room,
   rooms: RoomManager,
   violations?: Array<{ type: string; message: string }>,
+  opts?: BuildRoomSummaryOptions,
 ): AdminRoomSummary {
   const norm = room.roomCode;
   const health = evaluateRoomHealth(room, violations, rooms);
+  const turnSecondsLeft = opts?.timeRemainingProvider ? opts.timeRemainingProvider(norm) : 0;
+  const currentTurnPlayerId = room.started ? room.players[room.currentPlayerIndex]?.id : undefined;
+  const currentTurnStepName = room.started
+    ? resolveTurnStepName(room.phase, room.players[room.currentPlayerIndex], room.started)
+    : 'Sảnh chờ';
+
   return {
     roomCode: norm,
     hostId: room.hostId,
@@ -76,13 +134,16 @@ export function buildRoomSummary(
     phase: room.phase,
     round: room.round ?? 1,
     playerCount: room.players.length,
-    players: mapPlayers(room, norm, rooms),
+    players: mapPlayers(room, norm, rooms, opts?.reconnectManager),
     treasuryPool: room.treasury,
     status: health.status,
     warningReason: health.warningReason,
     lastActivity: rooms.getLastActivity(norm) ?? Date.now(),
     activeTimersCount: rooms.getActiveTimers(norm)?.size ?? 0,
     hasAuction: Boolean(room.currentAuction),
+    currentTurnPlayerId,
+    currentTurnStepName,
+    turnSecondsLeft,
   };
 }
 
@@ -109,11 +170,12 @@ export function buildRoomDetail(
   rawRoomCode: string,
   rooms: RoomManager,
   violations?: Array<{ type: string; message: string }>,
+  opts?: BuildRoomSummaryOptions,
 ): AdminRoomDetail | undefined {
   const room = rooms.getRoom(rawRoomCode);
   if (!room) return undefined;
   const norm = room.roomCode;
-  const summary = buildRoomSummary(room, rooms, violations);
+  const summary = buildRoomSummary(room, rooms, violations, opts);
   return {
     ...summary,
     propertyStates: buildPropertyStates(norm, rooms),

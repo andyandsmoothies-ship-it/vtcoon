@@ -4,7 +4,7 @@ import { WebSocket } from 'ws';
 import { SessionState } from '../session_manager.js';
 import { isRoomGameOver } from '../../domain/room.js';
 import { validateIntentRequest, executeIntentAction, isSocketOwner } from './wss_lobby_handlers.js';
-import type { RoomManager } from '../room_manager.js';
+import type { RoomManager, RollResult } from '../room_manager.js';
 import type { SessionManager } from '../session_manager.js';
 import type { IntentMutex } from './intent_mutex.js';
 import type { DeltaBroadcaster } from './delta_broadcaster.js';
@@ -82,10 +82,21 @@ export async function handleIntentMsg(
       deps.broadcaster.broadcastRoomDelta(msg.roomCode);
       return;
     }
+    const roll = res.rollResult;
+    let payloadSummary = `Người chơi ${msg.playerId}: ${msg.intent.type}`;
+    if (roll) {
+      const d1 = roll.dice.dice?.[0] ?? roll.dice.die1;
+      const d2 = roll.dice.dice?.[1] ?? roll.dice.die2;
+      payloadSummary = `Người chơi ${msg.playerId}: Gieo xúc xắc [${d1}, ${d2}] -> Đến ô ${roll.player.position}`;
+      if (roll.rentCharged > 0) payloadSummary += ` (Trả tiền thuê ${roll.rentCharged.toLocaleString('vi-VN')} Tr.)`;
+      if (roll.passedGo) payloadSummary += ' (Qua ô Bắt Đầu +2.000 Tr.)';
+      payloadSummary += ` | Số dư: ${roll.player.balance.toLocaleString('vi-VN')} Tr.`;
+    }
     deps.adminManager.recordRoomEvent(msg.roomCode, {
       source: player?.isBot ? 'BOT' : 'PLAYER',
       action: msg.intent.type,
-      payloadSummary: `Người chơi ${msg.playerId}: ${msg.intent.type}`,
+      payloadSummary,
+      playerId: msg.playerId,
     });
     syncRoomAfterIntent(deps, msg.roomCode);
   });

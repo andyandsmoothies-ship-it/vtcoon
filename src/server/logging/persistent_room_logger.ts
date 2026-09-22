@@ -5,6 +5,7 @@ import type { AdminRoomLogEntry, AdminArchivedRoomSummary, ArchivedRoomStatus } 
 
 export interface PersistentRoomLoggerOptions {
   readonly logDir?: string;
+  readonly flushIntervalMs?: number;
 }
 
 export interface RoomLogMeta {
@@ -23,12 +24,16 @@ export interface RoomFinishSummary {
 export class PersistentRoomLogger {
   private readonly logDir: string;
   private readonly manifestFile: string;
+  private readonly flushIntervalMs: number;
   private readonly manifest = new Map<string, AdminArchivedRoomSummary>();
   private readonly activeRoomFiles = new Map<string, string>();
+  private readonly writeBuffer = new Map<string, string[]>();
+  private flushTimer?: NodeJS.Timeout;
 
   constructor(options?: PersistentRoomLoggerOptions) {
     this.logDir = options?.logDir ?? path.resolve(process.cwd(), 'server_logs', 'rooms');
     this.manifestFile = path.join(this.logDir, 'rooms_manifest.json');
+    this.flushIntervalMs = options?.flushIntervalMs ?? (process.env.NODE_ENV === 'test' ? 0 : 500);
     this.ensureDir();
     this.loadManifest();
   }
@@ -113,11 +118,21 @@ export class PersistentRoomLogger {
 
     const fullPath = path.join(this.logDir, fileName);
     const line = JSON.stringify(entry) + '\n';
-    try {
-      this.ensureDir();
-      fs.appendFileSync(fullPath, line, 'utf8');
-    } catch {
-      /* safe-ignore */
+
+    if (this.flushIntervalMs <= 0) {
+      try {
+        fs.appendFileSync(fullPath, line, 'utf8');
+      } catch {
+        /* safe-ignore */
+      }
+    } else {
+      let buf = this.writeBuffer.get(fullPath);
+      if (!buf) {
+        buf = [];
+        this.writeBuffer.set(fullPath, buf);
+      }
+      buf.push(line);
+      this.scheduleFlush();
     }
 
     const existing = this.manifest.get(fileName);
@@ -132,7 +147,53 @@ export class PersistentRoomLogger {
     }
   }
 
+  private scheduleFlush(): void {
+    if (this.flushTimer) return;
+    this.flushTimer = setTimeout(() => {
+      this.flushTimer = undefined;
+      void this.flush();
+    }, this.flushIntervalMs);
+    this.flushTimer.unref?.();
+  }
+
+  async flush(): Promise<void> {
+    if (this.writeBuffer.size === 0) return;
+    const entries = Array.from(this.writeBuffer.entries());
+    this.writeBuffer.clear();
+    for (const [fullPath, lines] of entries) {
+      if (lines.length === 0) continue;
+      try {
+        await fs.promises.appendFile(fullPath, lines.join(''), 'utf8');
+      } catch {
+        /* safe-ignore */
+      }
+    }
+  }
+
+  flushSync(): void {
+    if (this.flushTimer) {
+      clearTimeout(this.flushTimer);
+      this.flushTimer = undefined;
+    }
+    if (this.writeBuffer.size === 0) return;
+    const entries = Array.from(this.writeBuffer.entries());
+    this.writeBuffer.clear();
+    for (const [fullPath, lines] of entries) {
+      if (lines.length === 0) continue;
+      try {
+        fs.appendFileSync(fullPath, lines.join(''), 'utf8');
+      } catch {
+        /* safe-ignore */
+      }
+    }
+  }
+
+  stop(): void {
+    this.flushSync();
+  }
+
   finishRoomLog(roomCode: string, summary?: RoomFinishSummary): void {
+    this.flushSync();
     const norm = roomCode.trim().toUpperCase();
     const fileName = this.activeRoomFiles.get(norm) ?? this.resolveLogFileName(norm);
     if (!fileName) return;
@@ -157,6 +218,7 @@ export class PersistentRoomLogger {
   }
 
   getRoomFullLog(roomCode: string, timestamp?: number): AdminRoomLogEntry[] {
+    this.flushSync();
     const norm = roomCode.trim().toUpperCase();
     const targetFile = this.resolveLogFileName(norm, timestamp);
     if (!targetFile) return [];

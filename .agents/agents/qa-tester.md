@@ -32,9 +32,9 @@ tools: [view_file, write_to_file, replace_file_content, list_dir, find_by_name, 
    - **Universal 4-Facet Behavioral Matrix (Mandatory 4-Group Coverage)**:
      - Every feature slice test suite must assert across 4 facets:
        1. *Boundary & Range*: Input/model bounds, range constraints, format validity.
-       2. *State Reactivity & Multi-Turn Teardown*: Lifecycle transitions, reactive updates, events emitted/received, and Turn N+1 purge (assert Turn N ephemeral state is 100% cleared/nullified upon Turn N+1 roll/advance).
+       2. *State Reactivity & Multi-Turn Teardown*: Lifecycle transitions, full-pipe delta serialization (origin ➔ broadcaster sparse diff ➔ client parser ➔ store), phase-driven action state resets (actions unblock on turn phase, not just ID swap), and Turn N+1 purge (assert Turn N ephemeral state is 100% cleared/nullified upon Turn N+1 roll/advance).
        3. *Resource Disposal & Timer Isolation*: Memory/resource cleanup, unmount `.dispose()`, no listener leaks, and timer handle isolation (settle timers never blocked by unrelated resets).
-       4. *Error Defense & Terminal Invariants*: Edge values (negative, NaN, overflow), idempotency, invalid intents, and terminal state immutability (concluded modals reject actions with explicit reason codes; entity collections test zombie immunity with bankrupt/deleted entities receiving 0 funds, paying 0 fees, and triggering fallback).
+       4. *Error Defense & Terminal Invariants*: Edge values (negative, NaN, overflow), idempotency, invalid intents, insolvent role guards (`balance < 0` cannot buy/pay), multi-agent harassment guards (target/room-scope cooldowns), and terminal state immutability (concluded modals reject actions; bankrupt/deleted entities receive 0 funds, pay 0 fees, and trigger fallback).
    - **Test Density Floor**:
      - Minimum 15-30 atomic tests per feature slice. Ratio of `expect()` / `it()` must stay between 1.0 and 3.5 (ratios > 4.0 indicate monolithic anti-pattern).
    - **Consumer-Side Assertion (Universal Rule - Assert Effect at Point of Consumption)**:
@@ -44,6 +44,10 @@ tools: [view_file, write_to_file, replace_file_content, list_dir, find_by_name, 
    - **Double-Entry Bookkeeping (Zero Bug-Codification)**:
      - Tests represent the SSOT contract. Once written to reflect the specification, tests are IMMUTABLE during the green implementation pass.
      - STRICTLY FORBIDDEN from modifying test assertions or deleting tests to match buggy or incomplete implementation behavior.
+   - **Asynchronous Event Stream Mandate**:
+     - In event-driven/WebSocket systems, tests asserting downstream events MUST filter by event type (e.g., `waitForMessageType`).
+     - NEVER assert raw positional array indices (`messages[0]`) on multi-event streams, as this falsely fails when upstream lifecycle events fire.
+     - Explicitly establish the required domain Precondition (e.g., in-game Use Cases must initialize with `started = true`) before asserting in-phase state changes.
 
 4. **Phase 3: Business RED Validation (ATDD Quality Gate)**:
    - Run the newly written test file using the project's test runner.
