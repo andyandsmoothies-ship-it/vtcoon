@@ -148,3 +148,17 @@ onLobbyUpdate: (players) => useLobbyStore.getState().syncLobbySlots?.(players),
   - P5: Khắc phục tràn ngang header với `max-w-[calc(100vw-1.5rem)]` và `truncate`.
   - P6: Ẩn badge phụ Bot AI trên `@360px` để bảo vệ độ rộng hiển thị tên người chơi.
 - **Hạ tầng kiểm thử**: 55/55 tests PASS trên toàn bộ suite sảnh chờ.
+
+---
+
+## 9. Nghiệm Thu Kiểm Thử Mô Phỏng Trận Đấu 4 Người Chơi Thật (4-Player Gameplay Sync Simulation)
+
+- **Tệp kiểm thử**: [`tests/simulation/imp165_four_player_gameplay_sync.test.ts`](file:///c:/Users/HP/Documents/GitHub/vtcoon/tests/simulation/imp165_four_player_gameplay_sync.test.ts)
+- **Hạ tầng**: Kết nối trực tiếp qua `WssServer` WebSocket (Port 3169), 4 client handles độc lập (`p1` Host, `p2`, `p3`, `p4` khách).
+- **Kết quả**: **4/4 atomic test suites PASS 100% (Thời gian chạy ~280ms - 3.5s)**:
+  1. `TC-SIM165.01/MSS`: Tạo phòng với mã 6 ký tự ngẫu nhiên, 3 khách tham gia nhận `LOBBY_UPDATE` 4 người với Quirky animal names, Host gửi `START_GAME` (không bot), cả 4 client nhận `ROOM_STARTED` và `STATE_DELTA` đầy đủ 4 người với số vốn ban đầu đúng 18.000 Tr. VNĐ theo SSOT IMP-60.
+  2. `TC-SIM165.02/MSS`: Sàn đấu giá kích hoạt khi p1 từ chối mua Ô 1 (Cần Thơ) gửi `INTENT_DECLINE` -> `currentBid` khởi điểm 300 Tr. (50% giá gốc 600 Tr.); p2 gửi `INTENT_BID` 400 Tr., p3 nâng lên 500 Tr.; p2 và p4 gửi `INTENT_AUCTION_PASS`; Ô 1 thuộc về p3 với giá 500 Tr. trừ thẳng vào số dư.
+  3. `TC-SIM165.03/MSS`: Vỡ nợ (Bankruptcy) — p4 âm tiền gửi `INTENT_BANKRUPTCY` nhận `bankrupt: true`; các lượt kế tiếp FSM luân chuyển p1 -> p2 -> p3 -> p1 bỏ qua p4 hoàn toàn.
+  4. `TC-SIM165.04/MSS`: Giả lập vòng lặp 15 vòng chơi liên tục (60 lượt đầy đủ): Luân chuyển lượt tuần tự p1 -> p2 -> p3 -> p4, nộp bảo lãnh kiểm toán 500 Tr. tự động, xử lý mua/từ chối/đấu giá/đóng băng/vòi rồng, đạt 15 vòng trơn tru với 0 deadlock, 0 desync, 0 timeout.
+- **Invariant ghi nhận**: Gotcha #230 (Listener-Before-Send Client Handle, Stale Inbox Isolation & 4-Player Turn Lifecycle Invariant).
+

@@ -241,7 +241,7 @@ Khác với Unit Test (kiểm tra hàm toán học) hay E2E Test (kiểm tra sel
   - Bấm emote không thấy phản hồi gì hoặc che khuất bàn cờ quá lâu.
 
 ### [UAT-15] Đại gia vô địch / Cảnh báo phá sản (Climax & GameOver)
-- **Thao tác thực tế:** Tất cả đối thủ bị phá sản hoặc trận đấu hoàn thành 30 vòng.
+- **Thao tác thực tế:** Tất cả đối thủ bị phá sản hoặc trận đấu hoàn thành 40 vòng (trần MAX_ROUNDS = 40 theo IMP-128).
 - **Tiêu chí người dùng chấp nhận:**
   - Màn hình vinh danh "ĐẠI GIA VÔ ĐỊCH ĐỊA ỐC" bùng nổ với pháo hoa giấy và cúp vàng 3D lấp lánh.
   - Bảng tổng kết tài sản chi tiết (Tiền mặt, BĐS, Cổ phiếu) xếp hạng từ hạng 1 đến hạng 4.

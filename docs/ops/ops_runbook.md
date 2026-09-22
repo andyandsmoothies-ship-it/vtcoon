@@ -25,8 +25,11 @@ NODE_ENV=production
 PORT=3000
 WSS_PORT=3001
 GRACE_PERIOD_MS=60000
-ADMIN_SECRET=vtcoon-admin-2026
+VTCOON_ADMIN_SECRET=vtcoon_admin_secret_key_2026
+ADMIN_SECRET=vtcoon_admin_secret_key_2026
 ```
+
+> **Ghi chú kiến trúc Single-Port Cloud PaaS (IMP-139 / Gotcha #184):** Khi triển khai trên các nền tảng PaaS chỉ cấp một cổng duy nhất (Render, Fly.io, Railway), cấu hình `PORT=WSS_PORT=3000`. Hệ thống tự động kích hoạt cơ chế HTTP Upgrade, gắn WebSocket Server trực tiếp vào HTTP server của ứng dụng, không xảy ra xung đột `EADDRINUSE`.
 
 ### 1.3 Quy Trình Khởi Chạy Hệ Thống
 1. Kéo mã nguồn mới nhất hoặc clone kho lưu trữ:
@@ -182,7 +185,7 @@ Hệ thống VTCoOn tuân thủ nguyên tắc Thiết kế Phòng Thủ (Fail-Fa
 | `WSS_PORT` | **Có** | `3001` | Cổng mạng mở socket lắng nghe kết nối WebSocket Server. Nginx upstream `app_wss` sẽ proxy các yêu cầu `/rooms/` vào cổng này. |
 | `GRACE_PERIOD_MS` | **Có** | `60000` | Thời gian ân hạn mất kết nối tính bằng mili-giây (chuẩn 60000ms = 60 giây). Sau thời gian này nếu người chơi không khôi phục phiên (F5/Reconnect Token), Bot AI sẽ tự động tiếp quản lượt chơi. |
 | `PORT` | Không (Mặc định 3000) | `3000` | Cổng dịch vụ HTTP phục vụ endpoint `/health` kiểm tra sức khỏe container và điều phối qua Nginx upstream `app_http`. |
-| `ADMIN_SECRET` | Không (Mặc định `vtcoon-admin-2026`) | `vtcoon-admin-2026` | Khóa bí mật bảo vệ Trang Quản Trị Admin Tập Trung (IMP-25) để giám sát đa phòng và cưỡng chế đóng bàn chơi. |
+| `VTCOON_ADMIN_SECRET` (hoặc `ADMIN_SECRET`) | Không (Mặc định `vtcoon_admin_secret_key_2026`) | `vtcoon_admin_secret_key_2026` | Khóa bí mật bảo vệ Đài Quan Sát Quản Trị Hỗ Trợ Người Chơi (IMP-166) tại `/#/admin` để giám sát đa phòng và hỗ trợ người chơi từng bước. |
 
 ### 5.1 Kiểm Chứng Cơ Chế Bắt Lỗi Môi Trường
 Nếu thiếu biến `NODE_ENV`:
@@ -202,15 +205,21 @@ Nếu thiếu biến `GRACE_PERIOD_MS`:
 
 ## 6. CÔNG CỤ GIÁM SÁT VẬN HÀNH & ĐIỀU TRA LỖI (MONITORING & FORENSICS)
 
-### 6.1 Trang Quản Trị Admin Tập Trung (Admin Central Portal — IMP-25)
-- **Đường dẫn truy cập:** `https://<DOMAIN>/?admin=true` hoặc `https://<DOMAIN>/#/admin`
-- **Xác thực:** Nhập mã bí mật tương ứng với biến môi trường `ADMIN_SECRET` (mặc định: `vtcoon-admin-2026`).
-- **Chức năng:**
-  * Giám sát trạng thái toàn bộ các phòng chơi (bình thường 🟢 / cảnh báo lỗi 🔴).
-  * Xem trực tiếp luồng log sự kiện, số dư người chơi và danh mục BĐS của từng phòng.
-  * Tải file Hộp Đen JSON và sao chép mã test Vitest tái hiện lỗi 1-click.
-  * Cưỡng chế đóng bàn chơi khẩn cấp (Force Terminate).
+### 6.1 Đài Quan Sát Quản Trị Hỗ Trợ Người Chơi Từng Bước & Đa Phòng (Admin Portal — IMP-166)
+- **Đường dẫn truy cập:** `https://<DOMAIN>/#/admin` hoặc `http://127.0.0.1:3000/#/admin`
+- **Xác thực:** Nhập mã bí mật tương ứng với `VTCOON_ADMIN_SECRET` (mặc định: `vtcoon_admin_secret_key_2026`).
+- **5 Chiều Giám Sát Thời Gian Thực (Deep Visibility — Read-Only):**
+  1. **Sức khỏe Máy chủ (Server Vitals):** Giám sát bộ nhớ RAM RSS, Heap Used, thời gian hoạt động (Uptime), tổng số phòng, phân loại Sảnh chờ vs Đang chơi theo chu kỳ 4s (pull-driven).
+  2. **Trạng thái Mạng & Ân hạn 60s (Network Telemetry):** Đèn báo trạng thái kết nối từng người chơi: 🟢 Online | 🟡 Ân hạn Xs | 🤖 Bot Takeover.
+  3. **Chỉ Báo Lượt Trực Quan (Turn Step Indicator):** Banner nhận diện trạng thái Sảnh chờ vs Trong trận, dịch nghĩa 8 pha FSM tiếng Việt, hiển thị đếm ngược thời gian lượt chơi từ `TurnOrchestrator`.
+  4. **Kính Lúp Hỗ Trợ Từng Bước (Player Support Inspector):** Click vào thẻ người chơi để tra cứu số dư tiền mặt, tài sản ròng, danh mục BĐS và 10 bước hành động gần nhất của riêng người đó.
+  5. **Bộ Lọc Danh Sách Phòng 2 Trục (360px Adaptive):** Trục Sức khỏe (`Tất cả / Xanh / Cảnh báo / Lỗi`) và Trục Vòng đời (`Tất cả / Sảnh chờ / Đang chơi`).
 
-### 6.2 Bảng Điều Khiển Invariant Watchdog & Flight Recorder (IMP-24)
+### 6.2 Chu Kỳ Thu Hồi Phòng Tự Động & Bộ Đệm Ghi Log (IMP-167, Gotcha #229)
+- **Thu hồi sảnh chờ rác nhanh (Fast Lobby Teardown):** Sảnh chờ chưa bắt đầu (`!room.started`) tự động dọn dẹp và giải phóng tài nguyên sau **3 phút** (`DEFAULT_LOBBY_TIMEOUT_MS = 3 * 60 * 1000`).
+- **Thu hồi phòng chơi dở (Game Teardown):** Phòng đang chơi dở bị bỏ hoang tự động dọn dẹp sau **10 phút** (`DEFAULT_TIMEOUT_MS = 10 * 60 * 1000`).
+- **Bộ đệm ghi log bất đồng bộ (Async Buffered Logger):** Mọi sự kiện trận đấu ghi vào buffer RAM và xả đĩa định kỳ 500ms không chặn Event Loop, xả cưỡng bức tức thì khi kết thúc trận đấu.
+
+### 6.3 Bảng Điều Khiển Invariant Watchdog & Flight Recorder (IMP-24)
 - **Phím tắt kích hoạt:** Bấm phím `~` (Tilde) hoặc click vào huy hiệu Telemetry `[60 FPS | 14ms | 🛡️ OK]` trên góc màn hình in-game.
 - **Chức năng:** Soi vi phạm 4 bất biến (Bảo toàn tiền tệ, Tọa độ di chuyển, Số dư, Cấp BĐS 0-3), cảnh báo Bot loop burst hoặc Turn stall > 45s.

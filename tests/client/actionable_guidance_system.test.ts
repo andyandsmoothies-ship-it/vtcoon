@@ -417,5 +417,24 @@ describe('[IMP-134][Trạm 1] Actionable In-Game Guidance System Contract Tests'
       expect(msg).not.toMatch(/:\s*$/);
       expect(msg).not.toContain('Lỗi máy chủ:');
     });
+
+    it('[TC-IMP167.01/MSS][UC-IMP167][Facet-1/Boundary] resolveActionableNotification định nghĩa chính xác thông báo cho ROOM_FULL', () => {
+      const res = getActionableNotification('ROOM_FULL');
+      expect(res).toBeDefined();
+      expect(res.icon).toBe('🚪');
+      expect(res.title).toBe('Phòng Đã Đủ Người Chơi');
+      expect(res.description).toContain('đủ 4 người chơi');
+      expect(formatServerErrorMessage('ROOM_FULL')).toContain('đủ 4 người chơi');
+    });
+
+    it('[TC-IMP167.02/MSS][UC-IMP167][Facet-1/Boundary] resolveActionableNotification định nghĩa thông báo cho ROOM_CODE_COLLISION và SLOT_CONFLICT', () => {
+      const resCollision = getActionableNotification('ROOM_CODE_COLLISION');
+      expect(resCollision.title).toBe('Mã Phòng Đã Tồn Tại');
+      expect(formatServerErrorMessage('ROOM_CODE_COLLISION')).toContain('Mã phòng này đang được sử dụng');
+
+      const resSlot = getActionableNotification('SLOT_CONFLICT');
+      expect(resSlot.title).toBe('Vị Trí Đã Có Người');
+      expect(formatServerErrorMessage('SLOT_CONFLICT')).toContain('Vị trí này đã có người chơi');
+    });
   });
 });

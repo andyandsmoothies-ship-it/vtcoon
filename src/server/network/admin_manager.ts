@@ -51,7 +51,7 @@ export class AdminManager {
 
   constructor(options: AdminManagerOptions) {
     this.rooms = options.roomManager;
-    const secret = options.secret ?? process.env['VTCOON_ADMIN_SECRET'];
+    const secret = options.secret ?? process.env['VTCOON_ADMIN_SECRET'] ?? process.env['ADMIN_SECRET'];
     if (!secret) {
       if (process.env['NODE_ENV'] === 'production') {
         throw new Error('FATAL: VTCOON_ADMIN_SECRET must be configured in production mode');

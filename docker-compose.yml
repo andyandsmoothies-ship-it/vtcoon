@@ -7,7 +7,8 @@ services:
       - WSS_PORT=3001
       - PORT=3000
       - GRACE_PERIOD_MS=60000
-      - VTCOON_ADMIN_SECRET=${VTCOON_ADMIN_SECRET:-vtcoon_admin_secret_key_2026}
+      - VTCOON_ADMIN_SECRET=${VTCOON_ADMIN_SECRET:-${ADMIN_SECRET}}
+      - ADMIN_SECRET=${ADMIN_SECRET:-${VTCOON_ADMIN_SECRET}}
     ports:
       - "127.0.0.1:3000:3000"
       - "127.0.0.1:3001:3001"

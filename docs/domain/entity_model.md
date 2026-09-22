@@ -18,8 +18,13 @@ Toàn bộ 28 ô tài sản kinh tế trên bàn cờ được phân chia thành
 
 ### 1.2. Quy Chuẩn Cấp Bậc, Thế Chấp & Dòng Tiền Vận Hành
 - **Vốn khả dụng ban đầu (Kinh tế động - IMP-60):** 2 người = 25.000 Tr. VNĐ; 3 người = 20.000 Tr. VNĐ; 4 người = 18.000 Tr. VNĐ/người chơi.
+- **Thời lượng ván đấu & Lương GO lũy thoái (IMP-128):** Tối đa 40 vòng (`MAX_ROUNDS = 40`). Lương qua ô GO điều tiết theo vòng (`calculateGoSalary`): Vòng 1–20 nhận +2.000 Tr.; Vòng 21–30 nhận +1.500 Tr.; Vòng 31–40 nhận +1.000 Tr.
 - **Giá trị thế chấp (Mortgage Value):** Cố định bằng 50% giá mua gốc ban đầu cho toàn bộ 28 thẻ tài sản.
-- **Khóa trần thuế tài sản qua GO (GO_PROPERTY_TAX_CAP - IMP-60):** Tối đa 1.000 Tr. VNĐ/vòng, bảo đảm lương thực nhận tối thiểu +1.000 Tr. VNĐ.
+- **Khóa trần thuế tài sản qua GO (GO_PROPERTY_TAX_CAP - IMP-60):** Tối đa 1.000 Tr. VNĐ/vòng, bảo đảm lương thực nhận tối thiểu luôn dương.
+- **Ràng buộc tư cách giao dịch P2P (IMP-164):** Người chơi có số dư âm (`balance < 0`) bị nghiêm cấm làm bên mua BĐS hoặc tham gia hoán đổi đất ngang hàng (`price <= 0`), chỉ được phép bán tài sản nhận tiền mặt dương (`price > 0`) để thanh toán nợ thụ động.
+- **Sàn đấu giá trực tuyến (IMP-156, IMP-158):** Khống chế tối đa 15 giây đếm ngược (`Date.now() + 15_000`, Gotcha #208), bố cục 2 cánh Desktop (Dual-Wing Arena) và cô lập người chơi đã phá sản khỏi sàn đấu giá.
+- **Thực thể định danh người chơi (IMP-165, Gotcha #228):** Hệ thống cấp phát ngẫu nhiên tên con vật ngộ nghĩnh tiếng Anh (`Quirky Animals Name Generator`, 10–16 ký tự, 30 tính từ + 30 loài động vật, collision-free trong bàn 4 người) bảo đảm an toàn nội dung và tương thích tuyệt đối giao diện di động 360px.
+- **Vòng đời dọn dẹp sảnh chờ (IMP-167, Gotcha #229):** Sảnh chờ chưa bắt đầu (`!room.started`) tự động thu hồi tài nguyên sau 3 phút (`DEFAULT_LOBBY_TIMEOUT_MS = 3 * 60 * 1000`).
 - **Biểu tỷ lệ thu phí chuẩn theo giá đất:**
   - **BĐS Đô thị & Thương mại:** Cấp 0: 10% | Cấp 1: 35% | Cấp 2: 90% | Cấp 3: 220%.
   - **BĐS Dịch vụ & Giải trí:** Cấp 0: 12% | Cấp 1: 40% | Cấp 2: 100% (+ Phụ thu $1D6$) | Cấp 3: 250% (+ Mất lượt).
