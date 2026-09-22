@@ -205,8 +205,9 @@ const CHANCE_HANDLERS: Partial<Record<ChanceCardId, ChanceHandler>> = {
       player.hand.push(ChanceCardId.CC_FREE_CREDIT);
     }
   },
-  [ChanceCardId.CC_PLATE_AUCTION]: (player) => {
+  [ChanceCardId.CC_PLATE_AUCTION]: (player, _players, _id, _mods, _registry, _stateMap, _bonus, room) => {
     player.balance -= 500;
+    if (room) room.treasury = (room.treasury ?? 0) + 500;
     player.extraTurns += 1;
   },
   [ChanceCardId.CC_CONTRACT_PENALTY]: (player, players) => handleContractPenalty(player, players),
@@ -248,7 +249,10 @@ const CHANCE_HANDLERS: Partial<Record<ChanceCardId, ChanceHandler>> = {
     player.balance -= 1200;
     if (room) room.treasury = (room.treasury ?? 0) + 1200;
   },
-  [ChanceCardId.CC_JUNK_STOCK]: (player) => { player.balance -= 1500; },
+  [ChanceCardId.CC_JUNK_STOCK]: (player, _players, _id, _mods, _reg, _sm, _bonus, room) => {
+    player.balance -= 1500;
+    if (room) room.treasury = (room.treasury ?? 0) + 1500;
+  },
   [ChanceCardId.CC_FRANCHISE]: (player, players) => handleFranchise(player, players),
   [ChanceCardId.CC_LAND_RECLAIM]: (player, _players, _id, _mods, registry, stateMap) => handleLandReclaim(player, registry, stateMap),
   [ChanceCardId.CC_VENUE_INCIDENT]: (player, _players, _id, _mods, registry, _sm, _bonus, room) => {
@@ -265,8 +269,9 @@ const CHANCE_HANDLERS: Partial<Record<ChanceCardId, ChanceHandler>> = {
       if (room) room.treasury = (room.treasury ?? 0) + 600;
     }
   },
-  [ChanceCardId.CC_CONCERT_SPONSOR]: (player) => {
+  [ChanceCardId.CC_CONCERT_SPONSOR]: (player, _players, _id, _mods, _reg, _sm, _bonus, room) => {
     player.balance -= 600;
+    if (room) room.treasury = (room.treasury ?? 0) + 600;
     player.doubleNextDice = true;
   },
   [ChanceCardId.CC_PORT_EXCLUSIVE]: (player, _players, playerId, activeModifiers, _reg, _sm, _bonus, room) => {

@@ -207,12 +207,10 @@ export function executeTurnEnd(
   }
   if (current.extraTurns > 0) {
     current.extraTurns -= 1;
+    if (current.skipNextTurn) current.skipNextTurn = false;
     if ((current.balance ?? 0) < 0) {
       room.phase = TurnPhase.InsolvencyPhase;
       checkInsolvency(room);
-    } else if (current.skipNextTurn) {
-      current.skipNextTurn = false;
-      room.phase = TurnPhase.PropertyManagement;
     } else {
       room.phase = TurnPhase.WaitingRoll;
     }

@@ -180,7 +180,8 @@ function handleAntiSpeculate(players?: Player[], registry?: PropertyRegistry, ro
   }
 }
 
-function handleFireInspection(players: Player[], registry: PropertyRegistry, stateMap: PropertyStateMap): void {
+function handleFireInspection(players: Player[], registry: PropertyRegistry, stateMap: PropertyStateMap, room?: Room): void {
+  let totalPenalty = 0;
   for (const player of players) {
     let penalty = 0;
     for (const [cellIndex, ownerId] of registry) {
@@ -190,6 +191,10 @@ function handleFireInspection(players: Player[], registry: PropertyRegistry, sta
       }
     }
     player.balance -= penalty;
+    totalPenalty += penalty;
+  }
+  if (room && totalPenalty > 0) {
+    room.treasury = (room.treasury ?? 0) + totalPenalty;
   }
 }
 
@@ -230,8 +235,8 @@ const MARKET_HANDLERS: Partial<Record<MarketCardId, MarketHandler>> = {
     mods.push({ type: MarketCardId.MC_UTILITY_DOUBLE, affectedCells: UTILITY_CELLS, remainingRounds: 2, multiplier: 2 });
     distributeCellPool(UTILITY_CELLS, 400, 200, players, registry, room);
   },
-  [MarketCardId.MC_FIRE_INSPECTION]: (_mods, players, registry, stateMap) => {
-    if (players && registry && stateMap) handleFireInspection(players, registry, stateMap);
+  [MarketCardId.MC_FIRE_INSPECTION]: (_mods, players, registry, stateMap, room) => {
+    if (players && registry && stateMap) handleFireInspection(players, registry, stateMap, room);
   },
   [MarketCardId.MC_PUBLIC_INVEST]:   (mods, players, registry, _stateMap, room) => {
     mods.push({ type: MarketCardId.MC_PUBLIC_INVEST, affectedCells: INFRA_CELLS, remainingRounds: 2, multiplier: 2 });

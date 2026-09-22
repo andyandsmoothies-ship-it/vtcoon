@@ -7,7 +7,7 @@
 ## 🧭 BẢNG CHỈ MỤC THEO DOMAIN (DOMAIN INDEX)
 | Domain Tag | Trọng Tâm & Phạm Vi Mã Nguồn | Các Gotchas Liên Quan |
 | :--- | :--- | :--- |
-| `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78, #82, #104, #105, #106, #145, #146, #147, #159, #164, #174, #180, #188, #195, #196, #197, #200, #203, #215, #217 |
+| `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78, #82, #104, #105, #106, #145, #146, #147, #159, #164, #174, #180, #188, #195, #196, #197, #200, #203, #215, #217, #218, #219, #220 |
 | `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147, #190, #191, #195, #196, #197, #200, #206 |
 | `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190, #200, #203, #209, #210, #211, #212, #213, #215, #217 |
 | `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #32, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #60, #61, #63, #69, #72, #74, #77, #80, #85, #86, #88, #89, #90, #91, #92, #93, #94, #95, #96, #101, #103, #109, #110, #114, #115, #116, #117, #120, #122, #123, #124, #125, #126, #127, #128, #129, #130, #133, #134, #135, #136, #140, #141, #144, #148, #159, #160, #161, #162, #163, #164, #165, #169, #175, #177, #189, #198, #200 |
@@ -3650,4 +3650,38 @@
      - Khi `delta.auction === null && state.activeModal === 'auction'`: dọn `lastDismissedAuctionKey = null` và gọi `state.closeModal()` vô điều kiện.
      - `AuctionModal`: Khi `isConcluded === true`, header badge đổi thành `ĐÃ KẾT THÚC`, 3 nút nâng giá nhanh bị vô hiệu hóa `disabled` kèm `cursor-not-allowed opacity-50`, nút Auto-Bid bị khóa `disabled`, và footer chuyển thành nút `Đóng / Xem Bàn Cờ` kích hoạt `onClose`.
 
+---
+
+### 218. [FSM/RULE] Treasury Conservation Invariant — Mọi Khoản Trừ Player Phải Cộng Treasury (IMP-157)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Handler Chỉ Nhận `player` Param*: Nhiều chance card handler ban đầu chỉ khai báo `(player) => { player.balance -= X; }` mà không nhận `room` param. Khi metadata spec ghi "nộp vào Kho Bạc", handler thiếu `room.treasury += X` → tiền bốc hơi khỏi hệ thống.
+  2. *Bẫy Audit Thiếu Cross-Reference*: Code review từng handler riêng lẻ không phát hiện lỗi vì logic `balance -= X` trông hợp lý. Chỉ khi cross-reference handler vs metadata spec (`destination: "Nộp vào Kho Bạc"`) mới phát hiện treasury leak.
+  3. *Các thẻ đã bị leak*: `CC_PLATE_AUCTION` (-500), `CC_JUNK_STOCK` (-1500), `CC_CONCERT_SPONSOR` (-600), `MC_FIRE_INSPECTION` (phạt C1/C2/C3).
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Treasury Conservation Invariant**: Mọi handler trừ `player.balance` với destination "Kho Bạc" PHẢI có `room.treasury += amount`. Handler PHẢI nhận `room` param (pattern: `(_p, _pl, _id, _m, _r, _s, _b, room)`).
+  2. **Audit Checklist**: Khi thêm/sửa event card, cross-reference 3 trường: (a) `effectDelta` trong metadata, (b) `destination` trong metadata, (c) `room.treasury` trong handler.
+
+---
+
+### 219. [FSM/RULE] Extra Turn Triệt Tiêu Skip — Không Để Player Mất Cả Hai (IMP-157)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Extra Turn Bị Skip Ăn*: Khi player có cả `extraTurns > 0` VÀ `skipNextTurn = true` (ví dụ: rút CC_PLATE_AUCTION rồi bị phạt bỏ lượt), code cũ tiêu hao `extraTurns -= 1` rồi kiểm tra `skipNextTurn` → phase = PropertyManagement. Player mất cả extra turn LẪN lượt chơi — bất công vì đã trả 500 Tr. cho extra turn.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Extra Turn Cancels Skip Invariant**: Tại `executeTurnEnd` trong `turn_loop.ts`, khi `extraTurns > 0`: trừ `extraTurns -= 1`, xóa `skipNextTurn = false` (nếu có), rồi set phase = `WaitingRoll`. Extra turn luôn cho player được tung xúc xắc.
+
+---
+
+### 220. [FSM/RULE] Bankrupt & Terminal Entity Absolute Isolation Invariant (IMP-158)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Zombie Entity Loop*: Khi có người chơi phá sản (`player.bankrupt === true`), các hàm duyệt danh sách `players` không lọc `!p.bankrupt` dẫn đến:
+     - (a) Chuyển tiền bồi thường cho người đã chết (`CC_CONTRACT_PENALTY`).
+     - (b) Tự in tiền ma khi trừ tiền người chết để cộng cho người rút thẻ (`CC_FRANCHISE`).
+     - (c) Kéo toạ độ người chết đi xem ca nhạc và trừ tiền thuê (`MC_MEGA_CONCERT`).
+     - (d) Chọn người chết làm đối tượng nhận kích cầu (`MC_CASINO_PILOT`) hoặc rút ruột Kho Bạc trả thưởng hạ tầng (`MC_PUBLIC_INVEST`).
+     - (e) Tính cả người chết vào mẫu số quy mô pool (`distributeCellPool`), làm phình to dòng tiền thưởng.
+     - (f) Tạo `pendingBuyout` với người chết làm treo FSM 15s (`compulsory_buyout.ts`).
+  2. *Bẫy nuốt context Kho Bạc*: Khi tất cả đối thủ đều chết, tiền phạt không có người nhận sẽ bốc hơi nếu handler không có context `room.treasury`.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Bankrupt Isolation Mandate**: Mọi domain service, card handler, hoặc quy trình duyệt `Player[]` BẮT BUỘC phải lọc qua `alivePlayers = players.filter(p => !p.bankrupt)`. Người chết: 0 nhận tiền, 0 bị trừ tiền, 0 đổi vị trí, 0 tính vào pool length, 0 tham gia mua lại cưỡng chế.
+  2. **Treasury Fallback**: Mọi khoản phạt hoặc bồi thường khi không còn đối thủ sống sót (`opponents.length === 0`) BẮT BUỘC nộp vào Kho Bạc Nhà Nước (`room.treasury += amount`), tuyệt đối không để thất thoát dòng tiền.
 

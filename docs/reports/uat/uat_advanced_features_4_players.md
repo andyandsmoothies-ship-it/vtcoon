@@ -17,8 +17,8 @@ NGÀY THỰC HIỆN: 11/09/2026 | SEED: 9920264 | CHU KỲ KIỂM ĐỊNH: ĐỘ
 | Hạng | Người chơi | Tính cách AI | Tiền mặt còn lại | Tài sản ròng (Net Worth) | Số ô đất sở hữu | Trạng thái |
 | :---: | :--- | :--- | :---: | :---: | :---: | :---: |
 | 1 | Cô Tư (Thận trọng / Passive) | Passive | 10.152 Tr. VNĐ | 41.352 Tr. VNĐ | 6 ô | 🏆 Vô địch |
-| 2 | Bé Bo (Cạnh tranh / Aggressive) | Aggressive | 3.508 Tr. VNĐ | 21.708 Tr. VNĐ | 8 ô | ✓ Hoàn thành |
-| 3 | Chú Sáu (Cân bằng / Balanced) | Balanced | 4.055 Tr. VNĐ | 18.155 Tr. VNĐ | 7 ô | ✓ Hoàn thành |
+| 2 | Bé Bo (Cạnh tranh / Aggressive) | Aggressive | 3.568 Tr. VNĐ | 21.768 Tr. VNĐ | 8 ô | ✓ Hoàn thành |
+| 3 | Chú Sáu (Cân bằng / Balanced) | Balanced | 4.115 Tr. VNĐ | 18.215 Tr. VNĐ | 7 ô | ✓ Hoàn thành |
 | 4 | Bác Ba (Thực dụng / Aggressive) | Aggressive | 3.823 Tr. VNĐ | 15.023 Tr. VNĐ | 6 ô | ✓ Hoàn thành |
 
 ---
@@ -1573,7 +1573,7 @@ NGÀY THỰC HIỆN: 11/09/2026 | SEED: 9920264 | CHU KỲ KIỂM ĐỊNH: ĐỘ
 - **Di chuyển:** Ô 10 ➔ Ô 21 (**Thanh Hóa (Sầm Sơn)**)
 - **Sự kiện ô:** Dừng chân tại [Thanh Hóa (Sầm Sơn)]: Trả tiền thuê 990 Tr. VNĐ cho Cô Tư (Thận trọng / Passive)
 - **Tính năng tương tác:** Kích hoạt nút Hết Lượt (End Turn)
-- **Số dư sau lượt:** 3.508 Tr. VNĐ | **Tài sản ròng:** 21.708 Tr. VNĐ
+- **Số dư sau lượt:** 3.568 Tr. VNĐ | **Tài sản ròng:** 21.768 Tr. VNĐ
 - **Danh mục BĐS sở hữu (8):** Ninh Bình (Tràng An), Quảng Ninh (Hạ Long), Bà Rịa - Vũng Tàu, Cảng HKQT Long Thành, Hà Nội (Hoàn Kiếm), Đồng Nai (Đại Công Viên Chủ Đề), Kiên Giang (Phú Quốc - Grand World), Hà Nội (Cầu Giấy)
 
 ---

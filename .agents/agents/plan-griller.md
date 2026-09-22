@@ -26,6 +26,7 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command, write_to_fi
    - 🎭 **Pillar 3: Actor Inversion & Role Symmetry (Hoán Đổi Vai Trò & Biên Nghiệp Vụ)**:
      - Test UX and state transitions from perspectives of all actors (e.g. debtor vs bidder, buyer vs seller, spectator).
      - If UI displays misleading text to the wrong actor (e.g. telling a bankrupt debtor "You declined to buy" instead of foreclosure notice) or unhandled edge cases (zero bids, tie bids, negative numbers), flag as **[P2 - ACTOR INVERSION DEFECT]**.
+     - **Terminal/Bankrupt Entity Sweep**: Verify loops over entity collections (`players`, `accounts`) filter terminal states (`!p.bankrupt`). Flag unshielded zombie payouts/charges, distorted pool denominators, or missing treasury fallbacks as **[P1 - TERMINAL ENTITY LEAK]**.
    - ⏳ **Pillar 4: Transient Teardown & Turn N+1 Leak (Vòng Đời Quá Độ & Dọn Sạch Lượt Kế)**:
      - Trace ephemeral state: Who clears it when the turn advances (`handleRollDice`/`handleEndTurn`)?
      - Verify delta payloads emit explicit `null` (tombstone) instead of `undefined`.
