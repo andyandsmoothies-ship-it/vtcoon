@@ -30,7 +30,7 @@ export function GameRulesModal({
       }}
     >
       <div
-        className="w-full max-w-xl bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden flex flex-col text-slate-900 max-h-[85vh] animate-in zoom-in-95 duration-200"
+        className="w-full max-w-xl bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden flex flex-col text-slate-900 max-h-[90dvh] animate-in zoom-in-95 duration-200"
         data-testid="game-rules-modal"
         role="dialog"
         aria-modal="true"
@@ -104,9 +104,12 @@ export function GameRulesModal({
               <div className="p-3.5 rounded-xl bg-blue-50/70 border border-blue-100 flex items-start gap-3">
                 <span className="text-xl" aria-hidden="true">💰</span>
                 <div>
-                  <h3 className="font-bold text-slate-900 text-sm mb-0.5">Vốn Khởi Điểm & Lương Vòng Đấu</h3>
+                  <h3 className="font-bold text-slate-900 text-sm mb-0.5">Vốn Khởi Điểm Linh Hoạt &amp; Lương Vượt GO</h3>
                   <p>
-                    Mỗi người chơi bắt đầu ván đấu với số vốn <strong className="text-blue-700 font-semibold">15.000 Tr.</strong> VNĐ (15 Tỷ). Khi hoàn thành một vòng quanh bàn cờ hoặc dừng tại ô Khởi Hành (GO), nhận thêm mức lương <strong className="text-emerald-700 font-semibold">+2.000 Tr.</strong> VNĐ.
+                    Vốn khởi đầu phân tầng theo số người chơi: <strong className="text-blue-700 font-semibold">2 người: 25.000 Tr.</strong>, <strong className="text-blue-700 font-semibold">3 người: 20.000 Tr.</strong>, <strong className="text-blue-700 font-semibold">4 người: 18.000 Tr.</strong> VNĐ (mức chuẩn từ 15.000 Tr. trở lên). Khi hoàn thành một vòng quanh bàn cờ hoặc dừng tại ô Khởi Hành (GO), nhận thêm mức lương <strong className="text-emerald-700 font-semibold">+2.000 Tr.</strong> VNĐ.
+                  </p>
+                  <p className="mt-1 text-slate-600 text-[11px]">
+                    <strong className="text-slate-800 font-semibold">Thuế Đất Đai Vượt GO:</strong> Sở hữu 4–6 ô đất bị truy thu 150 Tr./ô; sở hữu từ 7 ô trở lên bị thu 400 Tr./ô kèm phụ thu 300 Tr./công trình C2-C3.
                   </p>
                 </div>
               </div>
@@ -114,7 +117,7 @@ export function GameRulesModal({
               <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-start gap-3">
                 <span className="text-xl" aria-hidden="true">🎲</span>
                 <div>
-                  <h3 className="font-bold text-slate-900 text-sm mb-0.5">Xúc Xắc & Đổ Đôi</h3>
+                  <h3 className="font-bold text-slate-900 text-sm mb-0.5">Xúc Xắc &amp; Đổ Đôi</h3>
                   <p>
                     Người chơi tung 2 viên xúc xắc để di chuyển. Nếu tung được <strong className="text-slate-900 font-semibold">xúc xắc đôi</strong> (hai mặt giống nhau), bạn được quyền thực hiện thêm 1 lượt tung tiếp theo. Tuy nhiên, nếu đổ 3 lần xúc xắc đôi liên tiếp, bạn sẽ bị phạt tống giam ngay vào ô Tạm Giam Kiểm Toán.
                   </p>
@@ -152,14 +155,21 @@ export function GameRulesModal({
             <div className="space-y-3.5">
               <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
                 <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2 mb-1">
-                  <span>🏘️</span> 28 Bất Động Sản Tỉnh Thành
+                  <span>🏘️</span> 28 Bất Động Sản Tỉnh Thành &amp; Cấp Công Trình
                 </h3>
                 <p className="mb-2">
                   Bàn cờ có <strong className="text-slate-900 font-semibold">28</strong> ô bất động sản chia làm 8 <strong className="text-blue-700 font-semibold">nhóm màu</strong> địa lý. Khi sở hữu trọn bộ nhóm màu độc quyền, tiền thuê đất trống tăng gấp đôi.
                 </p>
-                <div className="flex items-center gap-2 text-[11px] bg-white p-2 rounded-lg border border-slate-200 text-slate-600">
-                  <span className="font-semibold text-slate-800">Cấp công trình:</span>
-                  <span>Đất Trống (C0) ➔ Nhà Cấp 1 (C1) ➔ Nhà Cấp 2 (C2) ➔ Biệt Thự (C3) ➔ <strong className="text-amber-700 font-semibold">khách sạn</strong></span>
+                <div className="flex flex-col gap-1.5 text-[11px] bg-white p-2.5 rounded-lg border border-slate-200 text-slate-600">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="font-semibold text-slate-800">Cấp công trình:</span>
+                    <span>Đất Trống (C0) ➔ Nhà Cấp 1 (C1) ➔ Nhà Cấp 2 (C2) ➔ Biệt Thự Cấp 3 (C3, cấp cao nhất thay thế <strong className="text-amber-700 font-semibold">khách sạn</strong>)</span>
+                  </div>
+                  <div className="text-[10.5px] text-slate-500 pt-1 border-t border-slate-100 flex flex-col gap-0.5">
+                    <span>• <strong className="text-slate-700 font-semibold">Nhà Cấp 2 (C2):</strong> Thu thêm phụ phí dịch vụ +200 Tr. khi đối thủ dừng chân.</span>
+                    <span>• <strong className="text-slate-700 font-semibold">Biệt Thự C3:</strong> Kích hoạt hiệu ứng đặc quyền <strong className="text-rose-600 font-semibold">Hoãn Lượt (Skip Turn)</strong> đối thủ!</span>
+                    <span>• <strong className="text-slate-700 font-semibold">Quy Tắc Xây Đều Tay:</strong> Phải nâng cấp các ô cùng nhóm màu đồng đều trước khi lên cấp tiếp theo.</span>
+                  </div>
                 </div>
               </div>
 
@@ -171,7 +181,7 @@ export function GameRulesModal({
                   Gồm 4 trạm huyết mạch: <strong className="text-slate-900 font-semibold">sân bay</strong> Cát Bi, <strong className="text-slate-900 font-semibold">sân bay</strong> Đà Nẵng, Cảng Sài Gòn và <strong className="text-slate-900 font-semibold">sân bay</strong> Phú Quốc.
                 </p>
                 <p className="mt-1 text-slate-600">
-                  Tiền thuê tăng theo cấp số trạm sở hữu: 1 trạm = 250 Tr. ➔ 2 trạm = 500 Tr. ➔ 3 trạm = 1.000 Tr. ➔ 4 trạm = 2.000 Tr. VNĐ.
+                  Tiền thuê tăng theo cấp số trạm sở hữu: 1 trạm = 500 Tr. ➔ 2 trạm = 1.000 Tr. ➔ 3 trạm = 2.000 Tr. ➔ 4 trạm = 4.000 Tr. VNĐ. Nâng cấp Thu Phí Tự Động Không Dừng ETC (1.500 Tr.) để nhận thêm +50% tiền vé.
                 </p>
               </div>
 
@@ -183,7 +193,7 @@ export function GameRulesModal({
                   Gồm Điện Lực và Nước Sạch. Tiền thuê tính theo công thức xúc xắc:
                 </p>
                 <p className="mt-1 text-slate-600">
-                  Sở hữu 1 <strong className="text-slate-900 font-semibold">tiện ích</strong>: Điểm xúc xắc × 100 Tr. VNĐ. Sở hữu cả 2 tiện ích: Điểm xúc xắc × 250 Tr. VNĐ.
+                  Sở hữu 1 <strong className="text-slate-900 font-semibold">tiện ích</strong>: Điểm xúc xắc × 40 Tr. VNĐ. Sở hữu cả 2 tiện ích: Điểm xúc xắc × 100 Tr. VNĐ. Nâng cấp Công Nghệ Xanh (1.000 Tr.) để nhận Điểm xúc xắc × 150 Tr. VNĐ.
                 </p>
               </div>
 
@@ -208,7 +218,7 @@ export function GameRulesModal({
 
               <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
                 <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2 mb-1">
-                  <span>📈</span> Sàn Giao Dịch Chứng Khoán HOSE & Lệ Phí
+                  <span>📈</span> Sàn Giao Dịch Chứng Khoán HOSE &amp; Lệ Phí
                 </h3>
                 <p>
                   Ô Sàn Giao Dịch <strong className="text-blue-700 font-semibold">HOSE</strong> cho phép đầu tư chỉ số VN-Index sinh lời theo biến động thị trường. Ô Lệ Phí Đất Đai yêu cầu nộp 2.000 Tr. hoặc 10% tổng giá trị tài sản vào Ngân sách.
@@ -221,7 +231,7 @@ export function GameRulesModal({
             <div className="space-y-3.5">
               <div className="p-3.5 rounded-xl bg-rose-50/70 border border-rose-100">
                 <h3 className="font-bold text-rose-900 text-sm flex items-center gap-2 mb-1">
-                  <span>🚨</span> Trạm Kiểm Toán & Tạm Giam
+                  <span>🚨</span> Trạm Kiểm Toán &amp; Tạm Giam
                 </h3>
                 <p className="text-rose-800 mb-1.5">
                   Khi dừng tại ô Lệnh Thu Thuế (ô 30) hoặc đổ 3 lần xúc xắc đôi liên tiếp, bạn bị tống vào ô <strong className="font-semibold">Tạm Giam</strong> của Trạm <strong className="font-semibold">Kiểm Toán</strong> (ô 10).
@@ -234,12 +244,24 @@ export function GameRulesModal({
                 </ol>
               </div>
 
+              <div className="p-3.5 rounded-xl bg-indigo-50/70 border border-indigo-100">
+                <h3 className="font-bold text-indigo-900 text-sm flex items-center gap-2 mb-1">
+                  <span>🤝</span> Thâu Tóm Bắt Buộc (Compulsory Buyout 130%)
+                </h3>
+                <p className="text-indigo-900 text-[11px] leading-relaxed">
+                  Khi dừng chân tại ô đất cấp 0 của đối thủ (chưa thế chấp, không thuộc nhóm màu độc quyền), bạn có quyền kích hoạt <strong className="font-semibold text-indigo-950">Thâu Tóm Bắt Buộc</strong> bằng cách trả khoản bồi thường bằng <strong className="font-semibold text-indigo-950">130% giá niêm yết</strong> để lập tức sở hữu ô đất, phá vỡ chiến thuật phòng thủ của đối phương!
+                </p>
+              </div>
+
               <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
                 <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2 mb-1">
-                  <span>🔨</span> Đấu Giá Công Khai (Public Auction)
+                  <span>🔨</span> Đấu Giá Công Khai &amp; Phát Mãi Kho Bạc 70%
                 </h3>
                 <p>
                   Khi người chơi dừng tại bất động sản chưa có chủ nhưng quyết định bỏ qua không mua, quyền mua sẽ được đưa ra phiên <strong className="text-blue-700 font-semibold">Đấu Giá</strong> công khai cho toàn thể người chơi. Giá khởi điểm bằng <strong className="text-slate-900 font-semibold">50%</strong> giá niêm yết, bước giá đặt nhanh linh hoạt <strong className="text-slate-900 font-semibold">+100, +200, +500 Tr.</strong> VNĐ.
+                </p>
+                <p className="mt-1 text-slate-600 text-[11px]">
+                  Nếu toàn bộ người chơi đều Bỏ Cuộc (Pass), ô đất sẽ được <strong className="text-slate-800 font-semibold">Phát Mãi về Quỹ Kho Bạc với mức giá 70%</strong> để bổ sung nguồn vốn cứu trợ quốc gia.
                 </p>
               </div>
 
@@ -257,10 +279,13 @@ export function GameRulesModal({
 
               <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
                 <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2 mb-1">
-                  <span>🏛️</span> Thế Chấp Bất Động Sản
+                  <span>🏛️</span> Thế Chấp Bất Động Sản &amp; Lãi Vay Vượt GO
                 </h3>
                 <p>
-                  Khi gặp khó khăn tài chính, người chơi có thể <strong className="text-slate-900 font-semibold">Thế Chấp</strong> đất cấp 0 cho Ngân hàng để nhận về khoản vay bằng <strong className="text-slate-900 font-semibold">50%</strong> giá niêm yết. Đất thế chấp không thể thu tiền thuê. Khi chuộc lại, người chơi trả tiền gốc kèm 10% phí lãi suất.
+                  Khi gặp khó khăn tài chính, người chơi có thể <strong className="text-slate-900 font-semibold">Thế Chấp</strong> đất cấp 0 cho Ngân hàng để nhận về khoản vay bằng <strong className="text-slate-900 font-semibold">50%</strong> giá niêm yết. Đất thế chấp không thể thu tiền thuê. Khi chuộc lại, người chơi trả tiền gốc kèm 10% phí giải chấp.
+                </p>
+                <p className="mt-1 text-slate-600 text-[11px]">
+                  Khi đang có dư nợ thế chấp, mỗi lần vượt qua ô Khởi Hành (GO), Ngân hàng sẽ tự động trích thu 5% lãi suất định kỳ (hoặc 10% nếu thị trường đang Siết Tín Dụng).
                 </p>
               </div>
 

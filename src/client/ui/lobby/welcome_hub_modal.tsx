@@ -27,11 +27,6 @@ export function WelcomeHubModal(props: WelcomeHubModalProps = {}): React.ReactEl
     useLobbyStore.getState().createCustomRoom(false);
   };
 
-  const handlePlayWithBots = () => {
-    AudioEngine.resumeAudioContext();
-    useLobbyStore.getState().createCustomRoom(true);
-  };
-
   const handleJoinRoom = () => {
     AudioEngine.resumeAudioContext();
     const targetCode = (codeRef.current || code).trim().toUpperCase();
@@ -94,16 +89,6 @@ export function WelcomeHubModal(props: WelcomeHubModalProps = {}): React.ReactEl
           >
             <span>🎮</span>
             <span>Tạo Phòng Mới</span>
-          </button>
-
-          <button
-            type="button"
-            data-testid="play-with-bots-btn"
-            onClick={handlePlayWithBots}
-            className="w-full min-h-[48px] flex items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-[#1E375B] to-[#0F223D] hover:from-[#25446F] hover:to-[#162F52] text-amber-200 border border-amber-400/60 font-black text-sm uppercase tracking-wider shadow-[0_3px_0_0_#07101C] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
-          >
-            <span>🤖</span>
-            <span>Chơi Với Bot</span>
           </button>
         </div>
 

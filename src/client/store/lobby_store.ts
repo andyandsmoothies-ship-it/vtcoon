@@ -244,6 +244,16 @@ export const useLobbyStore = create<LobbyState>((set, get) => ({
     }
     return { success: true };
   },
+
+  fillAllBotSlots: () => {
+    const { slots, isHost } = get();
+    if (!isHost) return;
+    slots.forEach((s, idx) => {
+      if (idx > 0 && !s.isOccupied) {
+        get().toggleBotSlot(idx);
+      }
+    });
+  },
 }));
 
 declare global {

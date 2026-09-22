@@ -59,6 +59,7 @@ export function PreMatchDeck(props: PreMatchDeckProps): React.ReactElement {
   const toggleMyReady = useLobbyStore((s) => s.toggleMyReady);
   const toggleBotSlot = useLobbyStore((s) => s.toggleBotSlot);
   const cycleBotPersonality = useLobbyStore((s) => s.cycleBotPersonality);
+  const fillAllBotSlots = useLobbyStore((s) => s.fillAllBotSlots);
   const startGame = useLobbyStore((s) => s.startGame);
   const canStartGame = useLobbyStore((s) => s.canStartGame);
   const isMuted = useAudioStore((s) => s.isMuted);
@@ -106,6 +107,16 @@ export function PreMatchDeck(props: PreMatchDeckProps): React.ReactElement {
   const handleCycleBotPersonality = (slotIndex: number) => {
     AudioEngine.resumeAudioContext();
     cycleBotPersonality(slotIndex);
+  };
+
+  const handleFillAllBots = () => {
+    AudioEngine.resumeAudioContext();
+    try {
+      AudioEngine.playSfx(SoundEffect.CARD_FLIP);
+    } catch {
+      /* safe-ignore */
+    }
+    fillAllBotSlots();
   };
 
   const handleStartGame = () => {
@@ -300,7 +311,20 @@ export function PreMatchDeck(props: PreMatchDeckProps): React.ReactElement {
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700">
               Danh Sách Người Chơi ({occupiedCount}/4)
             </h2>
-            <span className="text-[11px] text-slate-500">Tối đa 4 người/bàn</span>
+            {isHost && occupiedCount < 4 ? (
+              <button
+                type="button"
+                onClick={handleFillAllBots}
+                className="min-h-[36px] px-2.5 py-1 rounded-lg bg-gradient-to-b from-amber-300 via-amber-400 to-amber-500 hover:from-amber-200 hover:to-amber-400 text-amber-950 font-black text-[11px] border border-amber-600 shadow-2xs active:translate-y-0.5 cursor-pointer transition-all flex items-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+                data-testid="fill-all-bots-btn"
+                aria-label="Điền đầy bot vào các vị trí trống"
+              >
+                <span aria-hidden="true">🤖</span>
+                <span>+ Điền Đầy Bot</span>
+              </button>
+            ) : (
+              <span className="text-[11px] text-slate-500">Tối đa 4 người/bàn</span>
+            )}
           </div>
 
           <div className="flex flex-col gap-2" data-testid="lobby-slots-grid">

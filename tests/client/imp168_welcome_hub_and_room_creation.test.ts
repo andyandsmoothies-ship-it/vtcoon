@@ -93,9 +93,16 @@ function findElementByTestId(node: any, testId: string): any {
   return null;
 }
 
+const originalCreateCustomRoom = useLobbyStore.getState().createCustomRoom;
+const originalJoinCustomRoom = useLobbyStore.getState().joinCustomRoom;
+
 describe('[IMP-168: Trạm 1 RED] Welcome Hub & Controlled Room Creation Contract Suite', () => {
   afterEach(() => {
     restoreWindow();
+    useLobbyStore.setState({
+      createCustomRoom: originalCreateCustomRoom,
+      joinCustomRoom: originalJoinCustomRoom,
+    });
     useLobbyStore.getState().resetLobby();
     vi.restoreAllMocks();
   });
@@ -243,12 +250,9 @@ describe('[IMP-168: Trạm 1 RED] Welcome Hub & Controlled Room Creation Contrac
       expect(createRoomSpy).toHaveBeenCalledWith(false);
     });
 
-    it('[TC-IMP168.12/MSS][UC-IMP168][Facet-2/Reactivity] WelcomeHubModal: click [Chơi Với Bot] gọi createCustomRoom(true)', () => {
+    it('[TC-IMP168.12/MSS][UC-IMP168][Facet-2/Reactivity] WelcomeHubModal giao diện thống nhất: KHÔNG chứa nút "Chơi Với Bot" gây trùng lặp, chỉ duy trì 1 nút "Tạo Phòng Mới"', () => {
       expect(WelcomeHubModal, 'WelcomeHubModal component must be defined').toBeDefined();
       expect(WelcomeHubModal).not.toBeNull();
-
-      const createRoomSpy = vi.fn();
-      useLobbyStore.setState({ createCustomRoom: createRoomSpy } as any);
 
       let capturedTree: any;
       function TestWrapper() {
@@ -256,11 +260,9 @@ describe('[IMP-168: Trạm 1 RED] Welcome Hub & Controlled Room Creation Contrac
         return capturedTree;
       }
       const html = renderToStaticMarkup(React.createElement(TestWrapper));
-      expect(html).toContain('data-testid="play-with-bots-btn"');
-
-      const btn = findElementByTestId(capturedTree, 'play-with-bots-btn');
-      btn?.props?.onClick?.();
-      expect(createRoomSpy).toHaveBeenCalledWith(true);
+      expect(html).toContain('data-testid="create-room-btn"');
+      expect(html).not.toContain('data-testid="play-with-bots-btn"');
+      expect(html).not.toContain('Chơi Với Bot');
     });
 
     it('[TC-IMP168.13/MSS][UC-IMP168][Facet-2/Reactivity] WelcomeHubModal: nhập "VT6789" và click [Vào Bàn] gọi joinCustomRoom("VT6789")', () => {
@@ -469,7 +471,7 @@ describe('[IMP-168: Trạm 1 RED] Welcome Hub & Controlled Room Creation Contrac
       expect(joinRoomSpy).not.toHaveBeenCalled();
     });
 
-    it('[TC-IMP168.22/MSS][UC-IMP168][Facet-2/Reactivity] WelcomeHubModal: kích hoạt các hành động tạo/vào phòng đều gọi AudioEngine.resumeAudioContext() để mở khóa âm thanh trên mobile', () => {
+    it('[TC-IMP168.22/MSS][UC-IMP168][Facet-2/Reactivity] WelcomeHubModal: kích hoạt Tạo Phòng và Vào Bàn đều gọi AudioEngine.resumeAudioContext() để mở khóa âm thanh trên mobile', () => {
       const resumeSpy = vi.spyOn(AudioEngine, 'resumeAudioContext').mockImplementation(() => {});
       let capturedTree: any;
       function TestWrapper() {
@@ -483,19 +485,41 @@ describe('[IMP-168: Trạm 1 RED] Welcome Hub & Controlled Room Creation Contrac
       createBtn?.props?.onClick?.();
       expect(resumeSpy).toHaveBeenCalledTimes(1);
 
-      // Click Chơi Với Bot
-      const botsBtn = findElementByTestId(capturedTree, 'play-with-bots-btn');
-      botsBtn?.props?.onClick?.();
-      expect(resumeSpy).toHaveBeenCalledTimes(2);
-
       // Vào Bàn
       const input = findElementByTestId(capturedTree, 'join-room-input');
       input?.props?.onChange?.({ target: { value: 'VT8888' } });
       const joinBtn = findElementByTestId(capturedTree, 'join-room-btn');
       joinBtn?.props?.onClick?.();
+      expect(resumeSpy).toHaveBeenCalledTimes(2);
+
+      // Enter trên input
+      input?.props?.onKeyDown?.({ key: 'Enter' });
       expect(resumeSpy).toHaveBeenCalledTimes(3);
 
       resumeSpy.mockRestore();
+    });
+
+    it('[TC-IMP168.25/MSS][UC-IMP168][Facet-2/Reactivity] PreMatchDeck hiển thị nút fill-all-bots-btn khi là Host và có slot trống, click sẽ lấp đầy toàn bộ slot trống bằng Bot AI', () => {
+      useLobbyStore.getState().initLobby('VT1234', 'p1', true);
+      let capturedDeck: any;
+      function TestDeck() {
+        capturedDeck = React.createElement(PreMatchDeck, {
+          roomCode: 'VT1234',
+          isHost: true,
+        });
+        return capturedDeck;
+      }
+      const html = renderToStaticMarkup(React.createElement(TestDeck));
+      expect(html).toContain('data-testid="fill-all-bots-btn"');
+
+      const fillBtn = findElementByTestId(capturedDeck, 'fill-all-bots-btn');
+      expect(fillBtn).not.toBeNull();
+      fillBtn?.props?.onClick?.();
+
+      const slots = useLobbyStore.getState().slots;
+      expect(slots[1]?.isBot).toBe(true);
+      expect(slots[2]?.isBot).toBe(true);
+      expect(slots[3]?.isBot).toBe(true);
     });
 
     it('[TC-IMP168.23/MSS][UC-IMP168][Facet-4/Error Defense] handleSessionServerError: khi gặp ROOM_NOT_FOUND hoặc ROOM_FULL sẽ gọi resetLobby() và dọn URL query param về pathname', () => {

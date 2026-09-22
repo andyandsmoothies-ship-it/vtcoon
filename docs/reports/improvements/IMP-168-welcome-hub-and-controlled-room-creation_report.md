@@ -85,8 +85,8 @@ Trước IMP-168, bất kỳ ai (người dùng thật, bot tìm kiếm quét UR
 
 ### Station 2: GREEN Implementation (`implementer`)
 - Triển khai tối giản toàn bộ logic theo kế hoạch.
-- 25/25 test cases trong `imp168_welcome_hub_and_room_creation.test.ts` chuyển **XANH**.
-- Toàn bộ 296 test files (`npm test`) đạt **6.013/6.013 PASS (100%)**, zero regression.
+- 26/26 test cases trong `imp168_welcome_hub_and_room_creation.test.ts` chuyển **XANH**.
+- Toàn bộ 296 test files (`npm test`) đạt **6.014/6.014 PASS (100%)**, zero regression.
 
 ### Station 3: Independent Review & Disk Verification
 - **Spec Reviewer**: **APPROVED (SIGN-OFF)** — 100% đối soát theo spec, 0 scope drift, bảo toàn hợp đồng IMP-74.
@@ -102,5 +102,10 @@ Trước IMP-168, bất kỳ ai (người dùng thật, bot tìm kiếm quét UR
 2. **Hỗ Trợ Phím Enter Trên Ô Nhập Mã Phòng**:
    - Gắn `onKeyDown` kiểm tra `Enter`, đọc giá trị tức thì từ `(codeRef.current || code)` để tránh stale closure khi người dùng bấm nhanh trên điện thoại.
 3. **Đánh Thức Web Audio API Trên Mobile**:
-   - Gọi `AudioEngine.resumeAudioContext()` trên cả 3 thao tác tạo/vào phòng để mở khóa `Howler.ctx` và `SoundEngine.resumeAudioContext()`, bảo đảm âm thanh và bộ tổng hợp xúc giác sẵn sàng 100%.
+   - Gọi `AudioEngine.resumeAudioContext()` trên các thao tác tạo/vào phòng để mở khóa `Howler.ctx` và `SoundEngine.resumeAudioContext()`, bảo đảm âm thanh và bộ tổng hợp xúc giác sẵn sàng 100%.
+4. **Hợp Nhất Giao Diện Trang Chủ & Điền Bot Thông Minh Tại Sảnh Chờ (Phương Án 1)**:
+   - Gỡ bỏ nút "Chơi Với Bot" ở Trang chủ ([`WelcomeHubModal`](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/client/ui/lobby/welcome_hub_modal.tsx)), tập trung hoàn toàn vào CTA "🎮 Tạo Phòng Mới".
+   - Bổ sung nút `+ Điền Đầy Bot` (`fill-all-bots-btn`) tại Sảnh chờ ([`PreMatchDeck`](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/client/ui/lobby/pre_match_deck.tsx)) khi `isHost && occupiedCount < 4`, cho phép lấp đầy các vị trí trống còn lại bằng Bot AI chỉ trong 1 click.
+   - Thêm `fillAllBotSlots()` vào [`lobby_store.ts`](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/client/store/lobby_store.ts).
+
 

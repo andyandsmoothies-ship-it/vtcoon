@@ -473,6 +473,14 @@ describe('[SIM-IMP165] Vòng Đời Trận Đấu 4 Người Chơi Thật (4-Pla
         ).catch(() => {});
       }
 
+      // C2. Thâu tóm bắt buộc (Compulsory Buyout) -> Bỏ qua nếu có để tiếp tục vòng lặp
+      if (room.pendingBuyout && room.pendingBuyout.buyerId === activePlayer.id) {
+        await client.sendAndWait(
+          { type: 'INTENT', roomCode, playerId: activePlayer.id, intent: { type: 'INTENT_DECLINE_COMPULSORY_BUYOUT' } },
+          (m) => m.type === 'STATE_DELTA',
+        ).catch(() => {});
+      }
+
       // D. Kết thúc lượt
       const currentActive = room.players[room.currentPlayerIndex];
       if (currentActive && !currentActive.bankrupt && (room.phase === TurnPhase.ActionPhase || room.phase === TurnPhase.PropertyManagement)) {
