@@ -335,6 +335,14 @@ export class AdminManager {
       if (target === norm) this.subscribedRooms.delete(sock);
     }
     this.broadcastRoomListToAdmins();
+    this.broadcastArchivedRoomsToAdmins();
+  }
+
+  broadcastArchivedRoomsToAdmins(): void {
+    this.broadcastToAdmins({
+      type: 'ADMIN_ARCHIVED_ROOM_LIST',
+      rooms: this.getArchivedRoomsList(),
+    });
   }
 
   terminateRoom(rawRoomCode: string, reason: string = 'ADMIN_FORCE_TERMINATE'): boolean {
