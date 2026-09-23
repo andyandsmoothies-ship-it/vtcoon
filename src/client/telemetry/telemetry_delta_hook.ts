@@ -72,7 +72,7 @@ export function detectMovement(
   delta: DeltaPayload,
   prePositions: Record<string, number>
 ): { fromPosition: number; toPosition: number; dice?: readonly [number, number]; isTeleport?: boolean } | undefined {
-  if (!delta.players) return undefined;
+  if (!delta.players || delta.roomStarted === false) return undefined;
   for (const p of delta.players) {
     const fromPos = prePositions[p.id];
     if (fromPos !== undefined && fromPos !== p.position) {
@@ -352,7 +352,7 @@ export function handleDeltaTelemetry(
 ): void {
   const preBalances = extractBalances(preState.playersInfo);
   const postBalances = extractBalances(postState.playersInfo);
-  const movement = detectMovement(delta, preState.playerPositions);
+  const movement = delta.roomStarted === false ? undefined : detectMovement(delta, preState.playerPositions);
   const expectedMoneyDelta = computeExpectedDelta(delta, preState, movement, postState.treasuryPool);
 
   const isInitialSetupOrCalibration =

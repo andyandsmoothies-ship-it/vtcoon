@@ -7,9 +7,19 @@ import { PLAYER_TOKEN_PALETTE } from '../../domain/theme.js';
 import type { DeltaPayload } from '../../server/session_manager.js';
 import { formatCurrency } from '../ui/ui_helpers.js';
 
-function initPlayersInfoMap(state: GameState, isFullSync: boolean): Record<string, PlayerHudInfo> {
+function initPlayersInfoMap(
+  state: GameState,
+  isFullSync: boolean,
+  deltaPlayers?: DeltaPayload['players'],
+): Record<string, PlayerHudInfo> {
   const map: Record<string, PlayerHudInfo> = {};
+  const shouldPrune = isFullSync && Array.isArray(deltaPlayers);
+  const allowedIds = shouldPrune ? new Set(deltaPlayers.map((p) => p.id)) : null;
+
   for (const [id, info] of Object.entries(state.playersInfo)) {
+    if (allowedIds && !allowedIds.has(id)) {
+      continue;
+    }
     map[id] = {
       ...info,
       ownedProperties: isFullSync ? [] : [...info.ownedProperties],
@@ -223,7 +233,7 @@ function syncPlayerBalanceDiff(
 }
 
 function syncFinalPositions(state: GameState, nextPositions: Record<string, number>, hasPosChange: boolean, isFullSync: boolean): void {
-  if (!hasPosChange) return;
+  if (!hasPosChange && !isFullSync) return;
   state.setPlayerPositions(nextPositions);
   if (isFullSync && state.setVisualPositions) {
     state.setVisualPositions(nextPositions);
@@ -239,6 +249,16 @@ export function applyPlayerDeltas(
   if (!players || players.length === 0) return false;
   const nextPositions = { ...state.playerPositions };
   let hasPosChange = false;
+
+  if (isFullSync && Array.isArray(players)) {
+    const allowedIds = new Set(players.map((p) => p.id));
+    for (const id of Object.keys(nextPositions)) {
+      if (!allowedIds.has(id)) {
+        delete nextPositions[id];
+        hasPosChange = true;
+      }
+    }
+  }
 
   players.forEach((p, pIdx) => {
     if (processSinglePlayerPosition(state, p, nextPositions, isFullSync)) hasPosChange = true;

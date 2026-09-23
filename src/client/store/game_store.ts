@@ -10,44 +10,14 @@ export const TRANSACTION_POPUP_DURATION_MS = 3600;
 export const MAX_FLOATING_TEXTS = 6;
 
 export * from './game_store_types.js';
-import { type GameState, type FloatingTextItem, FloatingTextType } from './game_store_types.js';
+import { type GameState, type FloatingTextItem, FloatingTextType, INITIAL_GAME_STATE } from './game_store_types.js';
 
 export const useGameStore = create<GameState>((set, get) => ({
-  levelMap: {},
-  playerPositions: {},
-  visualPositions: {},
-  dice: [1, 1],
-  isRolling: false,
-  hasRolledThisTurn: false,
-  lastDiceSeq: undefined,
-  activePawnAnimation: null,
-  pawnAnimationQueue: [],
-  pendingPawnMove: null,
-  lastLandedPawn: null,
-
-  playersInfo: {},
-  currentTurnPlayerId: null,
-  turnTimeRemaining: 60,
-  turnPhase: 'WaitingRoll',
-  treasuryPool: 0,
-  roundNumber: 1,
-  maxRounds: 40,
-  activeModifiers: [],
-  isHeatmapActive: false,
-
-  activeModal: null,
-  modalPayload: null,
-  lastEventCard: null,
-  pendingBuyout: null,
-  auction: null,
-
-  activeEmotes: {},
-  floatingTexts: [],
+  ...INITIAL_GAME_STATE,
 
   // IMP-133 Camera Sticky Focus
-  cameraFocusCell: null,
   setCameraFocusCell: (cellIndex) => set({ cameraFocusCell: cellIndex }),
-  resetGameState: () => set({ cameraFocusCell: null, activeModal: null, modalPayload: null, isRolling: false, hasRolledThisTurn: false, pendingBuyout: null }),
+  resetGameState: () => set(INITIAL_GAME_STATE),
 
   setLevelMap: (map) => set({ levelMap: map }),
   setPlayerPositions: (positions) => {

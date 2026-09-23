@@ -235,7 +235,7 @@ export interface GameState {
   // IMP-133 Camera Sticky Focus
   readonly cameraFocusCell: number | null;
   setCameraFocusCell: (cellIndex: number | null) => void;
-  resetGameState?: () => void;
+  resetGameState: () => void;
 
   setLastEventCard: (card: EventCardInfo | null) => void;
   setLevelMap: (map: Record<number, 0 | 1 | 2 | 3>) => void;
@@ -280,3 +280,67 @@ export interface GameState {
   removeFloatingText: (id: string) => void;
   clearExpiredFloatingTexts: (now?: number) => void;
 }
+
+export type InitialGameState = Pick<
+  GameState,
+  | 'levelMap'
+  | 'playerPositions'
+  | 'visualPositions'
+  | 'dice'
+  | 'isRolling'
+  | 'hasRolledThisTurn'
+  | 'lastDiceSeq'
+  | 'activePawnAnimation'
+  | 'pawnAnimationQueue'
+  | 'pendingPawnMove'
+  | 'lastLandedPawn'
+  | 'playersInfo'
+  | 'currentTurnPlayerId'
+  | 'turnTimeRemaining'
+  | 'turnPhase'
+  | 'treasuryPool'
+  | 'roundNumber'
+  | 'maxRounds'
+  | 'activeModifiers'
+  | 'isHeatmapActive'
+  | 'activeModal'
+  | 'modalPayload'
+  | 'lastEventCard'
+  | 'pendingBuyout'
+  | 'auction'
+  | 'activeEmotes'
+  | 'floatingTexts'
+  | 'cameraFocusCell'
+>;
+
+export const INITIAL_GAME_STATE: InitialGameState = {
+  levelMap: {},
+  playerPositions: {},
+  visualPositions: {},
+  dice: [1, 1],
+  isRolling: false,
+  hasRolledThisTurn: false,
+  lastDiceSeq: undefined,
+  activePawnAnimation: null,
+  pawnAnimationQueue: [],
+  pendingPawnMove: null,
+  lastLandedPawn: null,
+  playersInfo: {},
+  currentTurnPlayerId: null,
+  turnTimeRemaining: 60,
+  turnPhase: 'WaitingRoll',
+  treasuryPool: 0,
+  roundNumber: 1,
+  maxRounds: 40,
+  activeModifiers: [],
+  isHeatmapActive: false,
+  activeModal: null,
+  modalPayload: null,
+  lastEventCard: null,
+  pendingBuyout: null,
+  auction: null,
+  activeEmotes: {},
+  floatingTexts: [],
+  cameraFocusCell: null,
+};
+

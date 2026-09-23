@@ -187,7 +187,19 @@ function syncBusinessModals(delta: DeltaPayload, state: GameState): void {
   }
 }
 
-function syncGameStarted(delta: DeltaPayload): void {
+function syncGameStarted(delta: DeltaPayload, state: GameState): void {
+  if (delta.roomStarted !== undefined) {
+    try {
+      useLobbyStore.getState().setGameStarted(delta.roomStarted);
+      if (!delta.roomStarted) {
+        state.resetGameState?.();
+        useLobbyStore.getState().resetBotSlots?.();
+      }
+    } catch (err) {
+      console.warn('[applyDelta] setGameStarted error:', err);
+    }
+    return;
+  }
   if (!isGameRunningDelta(delta)) return;
   try { useLobbyStore.getState().setGameStarted(true); } catch (err) { console.warn('[applyDelta] setGameStarted error:', err); }
 }
@@ -213,7 +225,7 @@ export function applyPhaseAndTimerDeltas(delta: DeltaPayload, state: GameState, 
   syncRoundAndModifiers(delta, state);
   syncBusinessModals(delta, state);
   syncEventCard(delta.lastEventCard, state);
-  syncGameStarted(delta);
+  syncGameStarted(delta, state);
   syncTelemetryAndActivities(delta, state, store);
 }
 
@@ -232,7 +244,7 @@ export function applyDeltaToStore(delta: DeltaPayload, store: typeof useGameStor
   syncDiceRoll(delta, state);
 
   const currentState = store.getState();
-  const playersInfoMap = initPlayersInfoMap(currentState, isFullSync);
+  const playersInfoMap = initPlayersInfoMap(currentState, isFullSync, delta.players);
   let hasPlayerInfoChange = isFullSync && Object.keys(playersInfoMap).length > 0;
 
   if (applyPlayerDeltas(delta, currentState, playersInfoMap, isFullSync)) hasPlayerInfoChange = true;

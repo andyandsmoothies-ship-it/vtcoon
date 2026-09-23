@@ -443,4 +443,37 @@ describe('[TC-IMP40/MSS] Telemetry Watchdog Gameplay Invariants Suite', () => {
     const violations = useTelemetryStore.getState().violations.filter((v) => v.type === 'TREASURY_INVARIANT_VIOLATED');
     expect(violations.length).toBe(0);
   });
+
+  // === FACET 6: ROOM RESET & LOBBY MOVEMENT SUPPRESSION ===
+
+  it('[TC-IMP40.21/MSS] reset phòng về sảnh chờ (roomStarted: false, vị trí nhảy 27 -> 0 không có xúc xắc) KHÔNG báo INVALID_POSITION_STEP', () => {
+    // Tình huống phòng VTHUQQ: người chơi AFK 3 phút, server reset phòng về sảnh chờ
+    const pre = createTestState({ p1Pos: 27, p1Balance: 11_000, roundNumber: 7 });
+    const post = createTestState({ p1Pos: 0, p1Balance: 15_000, roundNumber: 1 });
+
+    const delta: DeltaPayload = {
+      tick: 1,
+      currentTurnPlayerId: 'p1',
+      roundNumber: 1,
+      cells: Array.from({ length: 40 }, (_, index) => ({ index, ownerId: null })),
+      players: [{ id: 'p1', position: 0, balance: 15_000 }],
+      turnPhase: TurnPhase.WaitingRoll,
+      roomStarted: false,
+    };
+
+    handleDeltaTelemetry(delta, pre, post);
+    const moveViolations = useTelemetryStore.getState().violations.filter((v) => v.type === 'INVALID_POSITION_STEP');
+    expect(moveViolations.length).toBe(0);
+  });
+
+  it('[TC-IMP40.22/MSS] verifyMovementStep trả về null khi roomStarted là false', async () => {
+    const { verifyMovementStep } = await import('../../src/client/telemetry/invariant_checker.js');
+    const result = verifyMovementStep({
+      fromPosition: 27,
+      toPosition: 0,
+      tick: 1,
+      roomStarted: false,
+    });
+    expect(result).toBeNull();
+  });
 });

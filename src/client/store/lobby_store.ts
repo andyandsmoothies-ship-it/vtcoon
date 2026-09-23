@@ -196,6 +196,8 @@ export const useLobbyStore = create<LobbyState>((set, get) => ({
   setGameStarted: (gameStarted) => set({ gameStarted }),
   resetLobby: () =>
     set({ roomCode: null, isJoining: false, myPlayerId: '', isHost: false, isReady: false, gameStarted: false, slots: createDefaultSlots(), errorReason: null }),
+  resetBotSlots: () =>
+    set({ slots: get().slots.map((s, i) => (s.isBot ? createEmptySlot(i) : s)) }),
 
   confirmJoined: () => set({ isJoining: false }),
 

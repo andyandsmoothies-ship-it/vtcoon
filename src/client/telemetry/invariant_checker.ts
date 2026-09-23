@@ -53,8 +53,9 @@ export function verifyMovementStep(params: {
   readonly dice?: readonly [number, number];
   readonly tick: number;
   readonly isTeleport?: boolean;
+  readonly roomStarted?: boolean;
 }): InvariantViolation | null {
-  if (params.fromPosition === params.toPosition || params.isTeleport) return null;
+  if (params.roomStarted === false || params.fromPosition === params.toPosition || params.isTeleport) return null;
   if (!params.dice || (params.dice[0] === 0 && params.dice[1] === 0)) {
     return {
       id: `viol_move_${params.tick}_${Date.now()}`,
@@ -190,13 +191,14 @@ export function verifyAllInvariants(params: {
     }
   }
 
-  if (params.movement) {
+  if (params.movement && params.roomStarted !== false) {
     const v = verifyMovementStep({
       fromPosition: params.movement.fromPosition,
       toPosition: params.movement.toPosition,
       dice: params.movement.dice,
       tick: params.tick,
       isTeleport: params.movement.isTeleport,
+      roomStarted: params.roomStarted,
     });
     if (v) violations.push(v);
   }
