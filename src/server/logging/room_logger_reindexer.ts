@@ -92,3 +92,66 @@ export function parseLogEntries(content: string): AdminRoomLogEntry[] {
   return entries;
 }
 
+export function mergeCloudManifest(
+  manifest: Map<string, AdminArchivedRoomSummary>,
+  cloudData: string,
+): boolean {
+  try {
+    const list = JSON.parse(cloudData) as AdminArchivedRoomSummary[];
+    if (!Array.isArray(list)) return false;
+    let changed = false;
+    for (const item of list) {
+      if (!item || !item.logFilePath) continue;
+      const local = manifest.get(item.logFilePath);
+      if (!local) {
+        manifest.set(item.logFilePath, item);
+        changed = true;
+      } else if (local.status === 'ACTIVE' && (item.status === 'FINISHED' || item.status === 'TERMINATED')) {
+        manifest.set(item.logFilePath, { ...local, ...item });
+        changed = true;
+      }
+    }
+    return changed;
+  } catch {
+    return false;
+  }
+}
+
+export function resolveLogFileName(
+  manifest: Map<string, AdminArchivedRoomSummary>,
+  norm: string,
+  timestamp?: number,
+): string | undefined {
+  if (timestamp !== undefined) {
+    const numTs = Number(timestamp);
+    for (const item of manifest.values()) {
+      if (item.roomCode === norm && item.startTime === numTs) {
+        return item.logFilePath;
+      }
+    }
+  }
+  let latest: AdminArchivedRoomSummary | undefined;
+  for (const item of manifest.values()) {
+    if (item.roomCode === norm) {
+      if (!latest || item.startTime > latest.startTime) {
+        latest = item;
+      }
+    }
+  }
+  return latest?.logFilePath;
+}
+
+export function resolveLogDir(optionsLogDir?: string): string {
+  if (optionsLogDir) return optionsLogDir;
+  if (process.env['NODE_ENV'] === 'test') {
+    return path.resolve(
+      process.cwd(),
+      '.agents',
+      'tmp',
+      'test_logs',
+      `worker_${process.env['VITEST_POOL_ID'] || process.pid}`,
+    );
+  }
+  return path.resolve(process.cwd(), 'server_logs', 'rooms');
+}
+

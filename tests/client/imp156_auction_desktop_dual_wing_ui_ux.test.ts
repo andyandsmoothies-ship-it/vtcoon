@@ -238,10 +238,10 @@ describe('[UC-IMP156/MSS] Station 1 RED: Dual-Wing Arena, Anti-Tiny-Text & Timer
       const bidRes = mgr.handleAuctionBid(room.roomCode, 'bot_trader', 350);
       expect(bidRes.success).toBe(true);
       expect(session.endTime).toBeDefined();
-      expect(session.endTime!).toBeLessThanOrEqual(Date.now() + 15_000);
+      expect(session.endTime!).toBeLessThanOrEqual(Date.now() + 20_000);
     });
 
-    it('[TC-IMP156.04/MSS][UC-IMP156] (Reactivity) Sửa lỗi timer 73s: Khi bot bỏ cuộc (pass), session.endTime trên server cũng không bị cộng dồn vượt quá Date.now() + 15_000', () => {
+    it('[TC-IMP156.04/MSS][UC-IMP156] (Reactivity) Sửa lỗi timer 73s: Khi bot bỏ cuộc (pass), session.endTime trên server cũng không bị cộng dồn vượt quá Date.now() + 20_000', () => {
       const mgr = new RoomManager(42);
       const room = mgr.createRoom('p1_human');
       mgr.addBot(room.roomCode, 'bot_trader', BotPersonality.Aggressive);
@@ -259,7 +259,7 @@ describe('[UC-IMP156/MSS] Station 1 RED: Dual-Wing Arena, Anti-Tiny-Text & Timer
       const passRes = mgr.handleAuctionPass(room.roomCode, 'bot_trader');
       expect(passRes.success).toBe(true);
       expect(session.endTime).toBeDefined();
-      expect(session.endTime!).toBeLessThanOrEqual(Date.now() + 15_000);
+      expect(session.endTime!).toBeLessThanOrEqual(Date.now() + 20_000);
     });
 
     it('[TC-IMP156.18/MSS][UC-IMP156] (Reactivity) Cập nhật động các mức nâng giá và số dư đối thủ khi currentBid thay đổi (+100, +200, +500 Tr.)', () => {

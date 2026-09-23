@@ -145,9 +145,10 @@ export class TurnOrchestrator {
   }
 
   hasEligibleAuctionBot(room: Room): boolean {
-    const declinedId = room.currentAuction?.declinedPlayerId;
-    const passed = room.currentAuction?.passedPlayers;
-    const highestBidder = room.currentAuction?.highestBidder;
+    const session = this.rooms.getAuctionSession(room.roomCode) ?? room.currentAuction;
+    const declinedId = session?.declinedPlayerId;
+    const passed = session?.passedPlayers;
+    const highestBidder = session?.highestBidder;
     return room.players.some(
       (p) => p.isBot && !p.bankrupt && p.id !== declinedId && p.id !== highestBidder && !passed?.has(p.id),
     );
@@ -164,7 +165,8 @@ export class TurnOrchestrator {
         this.scheduleBotStep(roomCode);
       } else {
         this.onScheduleTurnTimeout?.(roomCode);
-        this.scheduleAuctionTimeoutStep(roomCode, customTimeoutMs);
+        const timeoutMs = customTimeoutMs && customTimeoutMs > 5000 ? customTimeoutMs : undefined;
+        this.scheduleAuctionTimeoutStep(roomCode, timeoutMs);
       }
       return;
     }
@@ -217,7 +219,7 @@ export class TurnOrchestrator {
           if (stepRes.finished) {
             this.scheduleAuctionSettle(roomCode);
           } else {
-            this.orchestrate(roomCode, AUCTION_BOT_STEP_DELAY_MS);
+            this.orchestrate(roomCode);
           }
         } else {
           this.rooms.stepBotTurn(roomCode);

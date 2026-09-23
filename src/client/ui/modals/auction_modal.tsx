@@ -56,7 +56,7 @@ export function AuctionModal({
   const floorPrice = startingBid ?? Math.floor(basePrice * 0.70);
   const increments = calculateAuctionIncrements(currentBid);
   const isUrgent = timeRemaining <= 5;
-  const timerPercent = Math.min(100, Math.max(0, (timeRemaining / 15) * 100));
+  const timerPercent = Math.min(100, Math.max(0, (timeRemaining / Math.max(20, timeRemaining)) * 100));
   const ribbonColor = deed?.colorGroup ? COLOR_GROUP_HEX[deed.colorGroup] : '#eab308';
   const isLeading = Boolean(myId && highestBidderId === myId);
   const displayName = isLeading ? 'Bạn' : (bidderName ?? (highestBidderId ? `Người Chơi (${highestBidderId})` : 'Chưa có ai'));
@@ -92,7 +92,7 @@ export function AuctionModal({
   return (
     <div
       data-testid="auction-modal"
-      className="w-full max-w-lg md:max-w-3xl lg:max-w-4xl bg-[#FFFBEB] border-2 border-slate-900 rounded-3xl p-3.5 sm:p-5 md:p-6 shadow-[0_4px_0_0_#b45309] space-y-3.5 md:space-y-4 pointer-events-auto relative select-none text-slate-900 max-h-[92vh] overflow-y-auto pr-1"
+      className="w-full max-w-lg md:max-w-3xl lg:max-w-4xl bg-[#FFFBEB] border-2 border-slate-900 rounded-3xl p-3.5 sm:p-5 md:p-6 shadow-[0_4px_0_0_#b45309] space-y-3.5 md:space-y-4 pointer-events-auto relative select-none text-slate-900 max-h-[90dvh] overflow-y-auto pr-1"
     >
       {/* Vùng Live Region cho Trình Đọc Màn Hình [WCAG 4.1.3] */}
       <div aria-live="polite" aria-atomic="true" className="sr-only">
@@ -145,7 +145,7 @@ export function AuctionModal({
               ĐÃ KẾT THÚC
             </span>
           ) : isForeclosure ? (
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-rose-100 text-rose-800 border border-rose-400 flex items-center gap-1 animate-pulse">
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-rose-100 text-rose-800 border border-rose-400 flex items-center gap-1 animate-pulse truncate max-w-[130px] sm:max-w-none">
               <span>⚠️ PHÁT MÃI CƯỠNG CHẾ (-30%)</span>
             </span>
           ) : (

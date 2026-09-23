@@ -35,8 +35,8 @@ describe('[UC-GAME-028/MSS] Đấu Giá BĐS & INTENT_DECLINE', () => {
     expect(delta?.auction?.cellIndex).toBe(1);
     expect(delta?.auction?.currentBid).toBe(300); // 50% của 600
     expect(delta?.auction?.highestBidderId).toBeNull();
-    expect(delta?.auction?.timeRemaining).toBeGreaterThanOrEqual(14);
-    expect(delta?.auction?.timeRemaining).toBeLessThanOrEqual(15);
+    expect(delta?.auction?.timeRemaining).toBeGreaterThanOrEqual(19);
+    expect(delta?.auction?.timeRemaining).toBeLessThanOrEqual(20);
   });
 });
 

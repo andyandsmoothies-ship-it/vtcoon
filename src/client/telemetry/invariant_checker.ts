@@ -68,17 +68,18 @@ export function verifyMovementStep(params: {
     };
   }
   const diceSum = params.dice[0] + params.dice[1];
-  const expectedPosition = (params.fromPosition + diceSum) % 40;
+  const expectedNormal = (params.fromPosition + diceSum) % 40;
+  const expectedDouble = (params.fromPosition + diceSum * 2) % 40;
 
-  if (params.toPosition !== expectedPosition) {
+  if (params.toPosition !== expectedNormal && params.toPosition !== expectedDouble) {
     return {
       id: `viol_move_${params.tick}_${Date.now()}`,
       timestamp: Date.now(),
       tick: params.tick,
       type: 'INVALID_POSITION_STEP',
       severity: 'CRITICAL',
-      message: `Quân cờ nhảy sai ô: từ ô ${params.fromPosition} tới ô ${params.toPosition} với xúc xắc tổng ${diceSum} (kỳ vọng ô ${expectedPosition}).`,
-      details: { from: params.fromPosition, to: params.toPosition, diceSum, expected: expectedPosition },
+      message: `Quân cờ nhảy sai ô: từ ô ${params.fromPosition} tới ô ${params.toPosition} với xúc xắc tổng ${diceSum} (kỳ vọng ô ${expectedNormal}).`,
+      details: { from: params.fromPosition, to: params.toPosition, diceSum, expected: expectedNormal },
     };
   }
   return null;

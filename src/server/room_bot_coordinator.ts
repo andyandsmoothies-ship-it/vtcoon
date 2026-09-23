@@ -118,7 +118,14 @@ export function stepAuctionBot(
     (p) => p.isBot && !p.bankrupt && p.id !== auction.declinedPlayerId && !auction.passedPlayers?.has(p.id),
   );
   if (eligibleBots.length === 0) {
-    return { changed: false, finished: true };
+    const otherContenders = room.players.filter(
+      (p) => !p.bankrupt && p.id !== auction.declinedPlayerId && p.id !== auction.highestBidder,
+    );
+    if (otherContenders.length === 0 || otherContenders.every((p) => auction.passedPlayers?.has(p.id))) {
+      roomManager.handleAuctionClose(roomCode);
+      return { changed: false, finished: true };
+    }
+    return { changed: false, finished: false };
   }
 
   const candidateBot = eligibleBots.find((b) => auction.highestBidder !== b.id);
@@ -130,7 +137,7 @@ export function stepAuctionBot(
       roomManager.handleAuctionClose(roomCode);
       return { changed: false, finished: true };
     }
-    return { changed: false, finished: true };
+    return { changed: false, finished: false };
   }
 
   const registry = roomManager.getRegistry(roomCode) ?? new Map();
@@ -197,9 +204,11 @@ function isAuctionPhaseStuck(roomManager: RoomManager, roomCode: string): boolea
   if ((roomManager.getRoom(roomCode)?.phase as TurnPhase) !== TurnPhase.AuctionPhase) {
     return false;
   }
-  while ((roomManager.getRoom(roomCode)?.phase as TurnPhase) === TurnPhase.AuctionPhase) {
+  let iterations = 0;
+  while ((roomManager.getRoom(roomCode)?.phase as TurnPhase) === TurnPhase.AuctionPhase && iterations < MAX_AUCTION_ITERATIONS) {
+    iterations++;
     const step = stepAuctionBot(roomManager, roomCode);
-    if (step.finished) break;
+    if (step.finished || !step.changed) break;
   }
   return (roomManager.getRoom(roomCode)?.phase as TurnPhase) === TurnPhase.AuctionPhase;
 }
@@ -245,9 +254,11 @@ export function runBotTurn(roomManager: RoomManager, roomCode: string): void {
 
   const config = getBotConfig(roomManager.getBotPersonality(roomCode, current.id), roomManager.getRng());
   runBotIntentLoop(roomManager, roomCode, current.id, config);
-  while ((roomManager.getRoom(roomCode)?.phase as TurnPhase) === TurnPhase.AuctionPhase) {
+  let iterations = 0;
+  while ((roomManager.getRoom(roomCode)?.phase as TurnPhase) === TurnPhase.AuctionPhase && iterations < MAX_AUCTION_ITERATIONS) {
+    iterations++;
     const step = stepAuctionBot(roomManager, roomCode);
-    if (step.finished) break;
+    if (step.finished || !step.changed) break;
   }
   if (roomManager.hasPendingTrade?.(roomCode) || roomManager.hasPendingBuyout?.(roomCode)) return;
   releaseStuckBotTurn(roomManager, roomCode, current.id);

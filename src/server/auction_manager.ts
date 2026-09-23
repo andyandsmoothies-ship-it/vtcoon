@@ -33,7 +33,7 @@ export function handleDecline(
     startingBid,
     currentBid: startingBid,
     passedPlayers: new Set<string>(),
-    endTime: Date.now() + 15_000,
+    endTime: Date.now() + 20_000,
   });
   room.phase = TurnPhase.AuctionPhase;
   return { success: true };
@@ -58,22 +58,22 @@ export function handleAuctionBid(
   if (player.balance < amount) return { success: false, reason: 'INSUFFICIENT_FUNDS' };
   const minBid = session.highestBidder !== undefined ? session.highestBid + 50 : session.highestBid;
   if (amount < minBid) return { success: false, reason: 'BID_TOO_LOW' };
+  if (session.endTime !== undefined) {
+    const remainingSec = (session.endTime - Date.now()) / 1000;
+    if (remainingSec <= 0) return { success: false, reason: 'AUCTION_EXPIRED' };
+    if (remainingSec <= 3 && remainingSec > 0) {
+      session.endTime += 3_000;
+    }
+  }
   session.highestBid = amount;
   session.currentBid = amount;
   session.highestBidder = playerId;
 
-  if (session.endTime !== undefined) {
-    const remainingSec = (session.endTime - Date.now()) / 1000;
-    if (remainingSec <= 0) return { success: false, reason: 'AUCTION_EXPIRED' };
-    if (remainingSec <= 3) {
-      session.endTime += 3_000;
-    }
-  }
   if (player.isBot) {
-    session.endTime = Date.now() + 15_000;
+    session.endTime = Date.now() + 20_000;
   }
 
-  const eligiblePlayers = room.players.filter((p) => p.id !== session.declinedPlayerId);
+  const eligiblePlayers = room.players.filter((p) => p.id !== session.declinedPlayerId && !p.bankrupt);
   const otherPlayers = eligiblePlayers.filter((p) => p.id !== playerId);
   if (otherPlayers.length > 0 && otherPlayers.every((p) => session.passedPlayers?.has(p.id))) {
     handleAuctionClose(room, session, registry, auctions, roomCode);
@@ -99,7 +99,7 @@ export function handleAuctionPass(
   if (!session.passedPlayers) session.passedPlayers = new Set<string>();
   session.passedPlayers.add(playerId);
   if (player.isBot) {
-    session.endTime = Date.now() + 15_000;
+    session.endTime = Date.now() + 20_000;
   }
 
   const eligiblePlayers = room.players.filter((p) => p.id !== session.declinedPlayerId && !p.bankrupt);
@@ -107,7 +107,12 @@ export function handleAuctionPass(
     ? eligiblePlayers.filter((p) => p.id !== session.highestBidder)
     : eligiblePlayers;
 
-  if (targetPlayers.every((p) => session.passedPlayers!.has(p.id))) {
+  const hasHumanInRoom = room.players.some((p) => !p.isBot && !p.bankrupt);
+  const shouldClose = session.highestBidder
+    ? targetPlayers.every((p) => session.passedPlayers!.has(p.id))
+    : targetPlayers.every((p) => session.passedPlayers!.has(p.id)) && (!player.isBot || !hasHumanInRoom);
+
+  if (shouldClose) {
     handleAuctionClose(room, session, registry, auctions, roomCode);
   }
   return { success: true };

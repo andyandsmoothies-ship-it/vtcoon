@@ -62,8 +62,9 @@ export function detectMovement(
         ? delta.diceRollerId === p.id
         : (!delta.currentTurnPlayerId || delta.currentTurnPlayerId === p.id);
       const isMovementPhase = !delta.turnPhase || MOVEMENT_PHASES.has(delta.turnPhase);
+      const diceSum = delta.dice ? delta.dice[0] + delta.dice[1] : 0;
       const isExactDiceMove = Boolean(
-        delta.dice && (fromPos + delta.dice[0] + delta.dice[1]) % 40 === p.position
+        isRoller && delta.dice && ((fromPos + diceSum) % 40 === p.position || (fromPos + diceSum * 2) % 40 === p.position)
       );
       const isTeleport = isExactDiceMove
         ? false
@@ -117,19 +118,28 @@ function resolvePurchaseCost(cell: CellDelta, deed: PropertyDeed, preState: Game
       ? (preState.modalPayload as { cellIndex?: number; currentBid?: number; highestBid?: number })
       : undefined;
   const isAuction =
+    delta?.auction?.cellIndex === cell.index ||
     preState.auction?.cellIndex === cell.index ||
     modalPayload?.cellIndex === cell.index ||
     storeBid?.cellIndex === cell.index;
 
+  const auctionFinal =
+    delta?.auction?.cellIndex === cell.index
+      ? (delta.auction.finalPrice ?? delta.auction.currentBid)
+      : undefined;
+
   const highestBid = isAuction
-    ? ((storeBid?.cellIndex === cell.index ? storeBid.currentBid : undefined)
+    ? (auctionFinal
+        ?? (storeBid?.cellIndex === cell.index ? storeBid.currentBid : undefined)
         ?? preState.auction?.highestBid
         ?? preState.auction?.currentBid
         ?? modalPayload?.highestBid
         ?? modalPayload?.currentBid)
     : undefined;
 
-  return isAuction ? (buyerSpent ?? highestBid ?? deed.price) : (highestBid ?? deed.price);
+  return isAuction
+    ? (auctionFinal ?? buyerSpent ?? highestBid ?? deed.price)
+    : (buyerSpent ?? highestBid ?? deed.price);
 }
 
 function computeCellDelta(cells: readonly CellDelta[], preState: GameState, delta?: DeltaPayload): number {
@@ -210,7 +220,12 @@ function isUnmodeledEvent(delta: DeltaPayload, preState: GameState): boolean {
         continue;
       }
       const cell = BOARD_CONFIG[p.position];
-      if (cell && EVENT_CELL_TYPES.has(cell.type)) return true;
+      if (cell && EVENT_CELL_TYPES.has(cell.type)) {
+        if (cell.type === CellType.Audit && !p.inAudit && !(p.auditTurnsLeft && p.auditTurnsLeft > 0) && p.balance > preP.balance) {
+          continue;
+        }
+        return true;
+      }
     }
   }
   return false;
@@ -250,9 +265,13 @@ export function computeExpectedDelta(
 
   if (movement?.dice) {
     const diceSum = movement.dice[0] + movement.dice[1];
-    const isExactDiceMove = (movement.fromPosition + diceSum) % 40 === movement.toPosition;
+    const isDoubleDiceMove = (movement.fromPosition + diceSum * 2) % 40 === movement.toPosition;
+    const effectiveSteps = isDoubleDiceMove ? diceSum * 2 : diceSum;
+    const isSentToAudit = Boolean(delta.players?.some((p) => p.inAudit === true || (p.auditTurnsLeft && p.auditTurnsLeft > 0)));
+    const isPassingGo = (movement.fromPosition + effectiveSteps >= 40) || (movement.toPosition <= movement.fromPosition && movement.fromPosition !== movement.toPosition && !isSentToAudit);
+    const isExactDiceMove = (movement.fromPosition + diceSum) % 40 === movement.toPosition || isDoubleDiceMove;
     if (!movement.isTeleport || isExactDiceMove) {
-      if (movement.fromPosition + diceSum >= 40) {
+      if (isPassingGo && !isSentToAudit) {
         const activeId = delta.currentTurnPlayerId ?? Object.keys(preState.playersInfo)[0] ?? '';
         expected += calculateGoSalary(preState, activeId, treasuryGain, delta);
         hasKnown = true;
@@ -262,7 +281,9 @@ export function computeExpectedDelta(
 
   if (delta.cells && delta.cells.length > 0) {
     const cellDelta = computeCellDelta(delta.cells, preState, delta);
-    const absorbedTreasury = cellDelta < 0 ? Math.min(Math.max(0, treasuryGain), -cellDelta) : 0;
+    const absorbedTreasury = (cellDelta < 0 && treasuryGain > 0 && treasuryGain === -cellDelta)
+      ? treasuryGain
+      : 0;
     expected += cellDelta + absorbedTreasury;
     hasKnown = true;
   }

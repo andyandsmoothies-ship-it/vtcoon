@@ -1,6 +1,6 @@
 // [TC-IMP40/MSS] Telemetry Watchdog Real Gameplay Invariants & Edge Case Suite
 import { describe, it, expect, beforeEach } from 'vitest';
-import { handleDeltaTelemetry } from '../../src/client/telemetry/telemetry_delta_hook.js';
+import { handleDeltaTelemetry, computeExpectedDelta } from '../../src/client/telemetry/telemetry_delta_hook.js';
 import { useTelemetryStore } from '../../src/client/telemetry/telemetry_store.js';
 import { watchdogMonitor } from '../../src/client/telemetry/watchdog_monitor.js';
 import type { GameState } from '../../src/client/store/game_store.js';
@@ -475,5 +475,85 @@ describe('[TC-IMP40/MSS] Telemetry Watchdog Gameplay Invariants Suite', () => {
       roomStarted: false,
     });
     expect(result).toBeNull();
+  });
+
+  // === FACET 7: ROOM VTBX1T TICK 368 REPRODUCTION & AUCTION CALIBRATION ===
+
+  it('[TC-IMP185.01/MSS] Mua ô đất đấu giá 2.350 Tr kèm biến động nộp kho bạc 1.025 Tr không bị báo động TREASURY_INVARIANT_VIOLATED', () => {
+    // Tái hiện phòng VTBX1T (Tick 368):
+    // preTotal: 42447, postTotal: 40097, actualDelta: -2350
+    // Mua ô đất đấu giá 2350 Tr, và người chơi khác nộp phạt 1025 Tr vào kho bạc (người nộp -1025, kho bạc +1025 -> delta = 0)
+    const pre = {
+      ...createTestState({ p1Balance: 3_800, bot2Balance: 10_000, treasuryPool: 8_647 }),
+      playersInfo: {
+        p1: { id: 'p1', name: 'Player 1', balance: 3_800, tokenColor: '#f00', ownedProperties: [], mortgagedProperties: [] },
+        bot_2: { id: 'bot_2', name: 'Bot 2', balance: 10_000, tokenColor: '#0f0', ownedProperties: [], mortgagedProperties: [] },
+        bot_3: { id: 'bot_3', name: 'Bot 3', balance: 15_000, tokenColor: '#00f', ownedProperties: [], mortgagedProperties: [] },
+        bot_4: { id: 'bot_4', name: 'Bot 4', balance: 5_000, tokenColor: '#ff0', ownedProperties: [], mortgagedProperties: [] },
+      },
+    } as unknown as GameState;
+
+    const post = {
+      ...createTestState({ p1Balance: 3_800, bot2Balance: 8_975, treasuryPool: 9_672 }),
+      playersInfo: {
+        p1: { id: 'p1', name: 'Player 1', balance: 3_800, tokenColor: '#f00', ownedProperties: [], mortgagedProperties: [] },
+        bot_2: { id: 'bot_2', name: 'Bot 2', balance: 8_975, tokenColor: '#0f0', ownedProperties: [], mortgagedProperties: [] },
+        bot_3: { id: 'bot_3', name: 'Bot 3', balance: 12_650, tokenColor: '#00f', ownedProperties: [32], mortgagedProperties: [] },
+        bot_4: { id: 'bot_4', name: 'Bot 4', balance: 5_000, tokenColor: '#ff0', ownedProperties: [], mortgagedProperties: [] },
+      },
+    } as unknown as GameState;
+
+    const delta: DeltaPayload = {
+      tick: 368,
+      currentTurnPlayerId: 'bot_3',
+      cells: [{ index: 32, ownerId: 'bot_3' }],
+      auction: {
+        cellIndex: 32,
+        currentBid: 2350,
+        finalPrice: 2350,
+        highestBidderId: 'bot_3',
+        winnerId: 'bot_3',
+        isConcluded: true,
+        timeRemaining: 0,
+      },
+      players: [
+        { id: 'bot_2', balance: 8_975, position: 5 },
+        { id: 'bot_3', balance: 12_650, position: 32 },
+      ],
+      treasury: 9_672,
+    };
+
+    handleDeltaTelemetry(delta, pre, post);
+    const violations = useTelemetryStore.getState().violations.filter((v) => v.type === 'TREASURY_INVARIANT_VIOLATED');
+    expect(violations.length).toBe(0);
+  });
+
+  it('[TC-IMP185.02/MSS] Đấu giá kết thúc ưu tiên delta.auction.finalPrice chính thức thay vì chênh lệch số dư bị nhiễu', () => {
+    const pre = {
+      ...createTestState(),
+      playersInfo: {
+        p1: { id: 'p1', name: 'Player 1', balance: 15_000, tokenColor: '#f00', ownedProperties: [], mortgagedProperties: [] },
+        bot_3: { id: 'bot_3', name: 'Bot 3', balance: 10_000, tokenColor: '#00f', ownedProperties: [], mortgagedProperties: [] },
+      },
+    } as unknown as GameState;
+    // bot_3 trả 1550 mua đất ô 32 nhưng đồng thời nhận thêm 500 tiền thuê trong cùng tick -> số dư ròng giảm 1050
+    const delta: DeltaPayload = {
+      tick: 385,
+      currentTurnPlayerId: 'p1',
+      cells: [{ index: 32, ownerId: 'bot_3' }],
+      auction: {
+        cellIndex: 32,
+        currentBid: 1550,
+        finalPrice: 1550,
+        highestBidderId: 'bot_3',
+        winnerId: 'bot_3',
+        isConcluded: true,
+        timeRemaining: 0,
+      },
+      players: [{ id: 'bot_3', balance: 8_950, position: 32 }],
+    };
+
+    const expected = computeExpectedDelta(delta, pre);
+    expect(expected).toBe(-1550);
   });
 });

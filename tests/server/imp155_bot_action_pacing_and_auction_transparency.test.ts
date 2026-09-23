@@ -333,7 +333,7 @@ describe('[TC-IMP155] Bot Action Pacing & Auction Transparency Contract Suite', 
     expect(stepRes.finished).toBe(true);
   });
 
-  it('[TC-IMP155.13/MSS][UC-GAME-028] (Error Defense) stepAuctionBot trên phòng không có bot nào hợp lệ trả về { changed: false, finished: true }', () => {
+  it('[TC-IMP155.13/MSS][UC-GAME-028] (Error Defense) stepAuctionBot trên phòng không có bot nào hợp lệ trả về { changed: false, finished: false } khi người chơi thật chưa pass', () => {
     const mgr = new RoomManager(42);
     const room = mgr.createRoom('p1_human');
     mgr.joinRoom(room.roomCode, 'p2_human'); // Chỉ toàn người chơi thật
@@ -345,7 +345,7 @@ describe('[TC-IMP155] Bot Action Pacing & Auction Transparency Contract Suite', 
 
     const stepRes = mgr.stepAuctionBot(room.roomCode);
     expect(stepRes.changed).toBe(false);
-    expect(stepRes.finished).toBe(true);
+    expect(stepRes.finished).toBe(false);
   });
 
   it('[TC-IMP155.17/MSS][UC-GAME-028] (Error Defense) stepAuctionBot với mã phòng không tồn tại trả về { changed: false, finished: true } an toàn', () => {

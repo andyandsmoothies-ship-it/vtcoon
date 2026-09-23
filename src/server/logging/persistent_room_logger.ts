@@ -6,7 +6,13 @@ import {
   type ISupabaseStorageService,
   SupabaseStorageService,
 } from '../storage/supabase_storage.js';
-import { reindexLocalLogs, parseLogEntries } from './room_logger_reindexer.js';
+import {
+  reindexLocalLogs,
+  parseLogEntries,
+  mergeCloudManifest,
+  resolveLogFileName,
+  resolveLogDir,
+} from './room_logger_reindexer.js';
 
 function isStorageConfigured(storage?: ISupabaseStorageService): boolean {
   if (!storage) return false;
@@ -47,19 +53,7 @@ export class PersistentRoomLogger {
   private flushTimer?: NodeJS.Timeout;
 
   constructor(options?: PersistentRoomLoggerOptions) {
-    if (options?.logDir) {
-      this.logDir = options.logDir;
-    } else if (process.env['NODE_ENV'] === 'test') {
-      this.logDir = path.resolve(
-        process.cwd(),
-        '.agents',
-        'tmp',
-        'test_logs',
-        `worker_${process.env['VITEST_POOL_ID'] || process.pid}`,
-      );
-    } else {
-      this.logDir = path.resolve(process.cwd(), 'server_logs', 'rooms');
-    }
+    this.logDir = resolveLogDir(options?.logDir);
     this.manifestFile = path.join(this.logDir, 'rooms_manifest.json');
     this.flushIntervalMs = options?.flushIntervalMs ?? (process.env['NODE_ENV'] === 'test' ? 0 : 500);
     this.supabaseStorage = options?.supabaseStorage ?? new SupabaseStorageService();
@@ -77,12 +71,8 @@ export class PersistentRoomLogger {
 
   private ensureDir(): void {
     try {
-      if (!fs.existsSync(this.logDir)) {
-        fs.mkdirSync(this.logDir, { recursive: true });
-      }
-    } catch {
-      /* safe-ignore */
-    }
+      if (!fs.existsSync(this.logDir)) fs.mkdirSync(this.logDir, { recursive: true });
+    } catch { /* safe-ignore */ }
   }
 
   private loadManifest(): void {
@@ -97,9 +87,7 @@ export class PersistentRoomLogger {
           }
         }
       }
-    } catch {
-      /* safe-ignore */
-    }
+    } catch { /* safe-ignore */ }
 
     if (reindexLocalLogs(this.logDir, this.manifest)) {
       this.saveManifest();
@@ -111,9 +99,7 @@ export class PersistentRoomLogger {
       this.ensureDir();
       const list = Array.from(this.manifest.values());
       fs.writeFileSync(this.manifestFile, JSON.stringify(list, null, 2), 'utf8');
-    } catch {
-      /* safe-ignore */
-    }
+    } catch { /* safe-ignore */ }
   }
 
   initRoomLog(roomCode: string, meta?: RoomLogMeta): string {
@@ -237,7 +223,7 @@ export class PersistentRoomLogger {
   finishRoomLog(roomCode: string, summary?: RoomFinishSummary): void {
     this.flushSync();
     const norm = roomCode.trim().toUpperCase();
-    const fileName = this.activeRoomFiles.get(norm) ?? this.resolveLogFileName(norm);
+    const fileName = this.activeRoomFiles.get(norm) ?? resolveLogFileName(this.manifest, norm);
     if (!fileName) return;
 
     const fullPath = path.join(this.logDir, fileName);
@@ -308,26 +294,8 @@ export class PersistentRoomLogger {
         }
 
         // Merge cloud manifest:
-        if (cloudData) {
-          try {
-            const list = JSON.parse(cloudData) as AdminArchivedRoomSummary[];
-            if (Array.isArray(list)) {
-              for (const item of list) {
-                if (item && item.logFilePath) {
-                  const local = this.manifest.get(item.logFilePath);
-                  if (!local) {
-                    this.manifest.set(item.logFilePath, item);
-                  } else if (local.status === 'ACTIVE' && (item.status === 'FINISHED' || item.status === 'TERMINATED')) {
-                    this.manifest.set(item.logFilePath, { ...local, ...item });
-                  }
-                  // Note: If local.status === 'TERMINATED' or 'FINISHED', local retains precedence!
-                }
-              }
-              this.saveManifest();
-            }
-          } catch {
-            /* safe-ignore */
-          }
+        if (cloudData && mergeCloudManifest(this.manifest, cloudData)) {
+          this.saveManifest();
         }
 
         // 3. Upload merged master manifest
@@ -351,14 +319,7 @@ export class PersistentRoomLogger {
     const bucket = (this.supabaseStorage as any)?.defaultBucket ?? 'game-logs';
     try {
       const raw = await this.supabaseStorage!.downloadFile(bucket, '_manifest/rooms_manifest.json');
-      if (!raw) return;
-      const list = JSON.parse(raw) as AdminArchivedRoomSummary[];
-      if (Array.isArray(list)) {
-        for (const item of list) {
-          if (item && item.logFilePath) {
-            this.manifest.set(item.logFilePath, item);
-          }
-        }
+      if (raw && mergeCloudManifest(this.manifest, raw)) {
         this.saveManifest();
       }
     } catch {
@@ -369,7 +330,7 @@ export class PersistentRoomLogger {
   getRoomFullLog(roomCode: string, timestamp?: number): AdminRoomLogEntry[] {
     this.flushSync();
     const norm = roomCode.trim().toUpperCase();
-    const targetFile = this.resolveLogFileName(norm, timestamp);
+    const targetFile = resolveLogFileName(this.manifest, norm, timestamp);
     if (!targetFile) return [];
 
     const fullPath = path.join(this.logDir, path.basename(targetFile));
@@ -386,7 +347,7 @@ export class PersistentRoomLogger {
   async getRoomFullLogAsync(roomCode: string, timestamp?: number): Promise<AdminRoomLogEntry[]> {
     this.flushSync();
     const norm = roomCode.trim().toUpperCase();
-    let targetFile = this.resolveLogFileName(norm, timestamp);
+    let targetFile = resolveLogFileName(this.manifest, norm, timestamp);
 
     if (targetFile) {
       const fullPath = path.join(this.logDir, path.basename(targetFile));
@@ -428,25 +389,5 @@ export class PersistentRoomLogger {
     }
 
     return parseLogEntries(remoteContent);
-  }
-
-  private resolveLogFileName(norm: string, timestamp?: number): string | undefined {
-    if (timestamp !== undefined) {
-      const numTs = Number(timestamp);
-      for (const item of this.manifest.values()) {
-        if (item.roomCode === norm && item.startTime === numTs) {
-          return item.logFilePath;
-        }
-      }
-    }
-    let latest: AdminArchivedRoomSummary | undefined;
-    for (const item of this.manifest.values()) {
-      if (item.roomCode === norm) {
-        if (!latest || item.startTime > latest.startTime) {
-          latest = item;
-        }
-      }
-    }
-    return latest?.logFilePath;
   }
 }
