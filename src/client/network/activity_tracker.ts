@@ -10,6 +10,15 @@ import { AudioEngine } from '../audio/audio_engine.js';
 import { SoundEffect } from '../audio/audio_types.js';
 import { useVfxStore } from '../store/vfx_store.js';
 import { SoundEngine } from '../audio/sound_engine.js';
+import { ChanceCardId } from '../../domain/event_card_types.js';
+
+const INVESTMENT_OR_FEE_CARDS: ReadonlySet<string> = new Set([
+  ChanceCardId.CC_LAND_CHANGE,
+  ChanceCardId.CC_MA_FORCE,
+  ChanceCardId.CC_CONCERT_SPONSOR,
+  ChanceCardId.CC_PLATE_AUCTION,
+  ChanceCardId.CC_SWAP_PROJECT,
+]);
 import {
   getPlayerName,
   detectFinancialAndStatusActivities,
@@ -209,7 +218,12 @@ export function detectEventCardActivities(
   maybeNextState?: GameState,
   activityStore: typeof useActivityStore = useActivityStore,
 ): ActivityLogEntry[] {
-  if (!delta.lastEventCard) return [];
+  if (!delta.lastEventCard) {
+    if (delta.lastEventCard === null) {
+      lastProcessedEventCardKey = null;
+    }
+    return [];
+  }
   const card = delta.lastEventCard;
   const cardId = card.id || card.cardId || `${card.type}_${card.title}`;
   const isMarket = card.type === 'Market' || card.cardType === 'market';
@@ -438,7 +452,9 @@ export function trackDeltaActivities(
       '';
     const effectDelta = typeof card.effectDelta === 'number' ? card.effectDelta : undefined;
     const punchySummary = resolvePunchyEventSummary(card.id || card.cardId, card.description || card.title);
-    const isReward = effectDelta !== undefined ? effectDelta >= 0 : true;
+    const cardKey = card.id || card.cardId || '';
+    const isInvestment = INVESTMENT_OR_FEE_CARDS.has(cardKey);
+    const isReward = isInvestment || (effectDelta !== undefined ? effectDelta >= 0 : true);
 
     if (typeof nextState?.addFloatingText === 'function') {
       nextState.addFloatingText({

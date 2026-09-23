@@ -166,6 +166,39 @@ export function getCardThemedEmoji(cardId: string, cardType: 'chance' | 'market'
 }
 
 export function getCardHeroStat(cardId: string, effectDelta?: number): HeroStat {
+  if (typeof effectDelta === 'number') {
+    if (cardId === ChanceCardId.CC_LAND_CHANGE) {
+      if (effectDelta > 0) {
+        return { label: 'TRỢ CẤP QUY HOẠCH', value: formatDeltaString(effectDelta), variant: 'positive' };
+      }
+      if (effectDelta < 0) {
+        return { label: 'CHI PHÍ QUY HOẠCH', value: formatDeltaString(effectDelta), variant: 'positive' };
+      }
+    } else if (cardId === ChanceCardId.CC_TAX_AUDIT) {
+      if (effectDelta !== 0) {
+        return { label: 'THANH TRA THUẾ', value: formatDeltaString(effectDelta), variant: 'negative' };
+      }
+    } else if (cardId === ChanceCardId.CC_LAND_RECLAIM) {
+      if (effectDelta > 0) {
+        return { label: 'TIỀN BỒI HOÀN', value: formatDeltaString(effectDelta), variant: 'positive' };
+      }
+    } else if (cardId === ChanceCardId.CC_MA_FORCE) {
+      if (effectDelta > 0) {
+        return { label: 'TRỢ CẤP M&A', value: formatDeltaString(effectDelta), variant: 'positive' };
+      }
+      if (effectDelta < 0) {
+        return { label: 'THƯƠNG VỤ M&A', value: formatDeltaString(effectDelta), variant: 'warning' };
+      }
+    } else if (cardId === ChanceCardId.CC_SWAP_PROJECT) {
+      if (effectDelta > 0) {
+        return { label: 'TRỢ CẤP DỰ ÁN', value: formatDeltaString(effectDelta), variant: 'positive' };
+      }
+      if (effectDelta < 0) {
+        return { label: 'QUYỀN MUA LẠI', value: formatDeltaString(effectDelta), variant: 'warning' };
+      }
+    }
+  }
+
   const base = KNOWN_HERO_STATS[cardId];
   if (base) {
     if (typeof effectDelta === 'number' && effectDelta !== 0) {

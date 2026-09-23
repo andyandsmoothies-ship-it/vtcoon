@@ -93,8 +93,29 @@ export function drawChanceCard(
   }
   const card = room.chanceDeck.shift();
   if (card) {
-    room.lastEventCard = getChanceCardInfo(card, current.id);
+    const prevBalance = current.balance;
+    const cardInfo = getChanceCardInfo(card, current.id);
     applyChanceCard(card, current.id, room.players, room.activeModifiers, reg, sm, permanentRentBonus ?? room.permanentRentBonus, room);
+    const actualDelta = current.balance - prevBalance;
+
+    const resolvedDelta = actualDelta !== 0
+      ? actualDelta
+      : (cardInfo.effectDelta !== undefined ? 0 : undefined);
+
+    let resolvedDestination = cardInfo.destination;
+    if (card === ChanceCardId.CC_LAND_CHANGE) {
+      resolvedDestination = actualDelta > 0 ? 'Kho Bạc hỗ trợ vào Ngân sách người chơi' : 'Nộp vào Kho Bạc Nhà Nước';
+    } else if (card === ChanceCardId.CC_MA_FORCE) {
+      resolvedDestination = actualDelta > 0 ? 'Kho Bạc hỗ trợ vào Ngân sách người chơi' : 'Thanh toán chuyển nhượng cho đối thủ';
+    } else if (card === ChanceCardId.CC_SWAP_PROJECT) {
+      resolvedDestination = actualDelta > 0 ? 'Kho Bạc hỗ trợ vào Ngân sách người chơi' : cardInfo.destination;
+    }
+
+    room.lastEventCard = {
+      ...cardInfo,
+      destination: resolvedDestination,
+      ...(resolvedDelta !== undefined ? { effectDelta: resolvedDelta } : {}),
+    };
     if (card !== ChanceCardId.CC_DIPLOMATIC) room.chanceDiscard.push(card);
   }
   room.phase = TurnPhase.PropertyManagement;

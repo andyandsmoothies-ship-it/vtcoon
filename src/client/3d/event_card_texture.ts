@@ -2,6 +2,15 @@
 // Generates Dong Son Bronze Drum / Imperial Dragon Back Texture and High-Readability FinTech Front Texture
 import { CanvasTexture, SRGBColorSpace } from 'three';
 import { formatCurrency } from '../ui/ui_helpers';
+import { ChanceCardId } from '../../domain/event_card_types';
+
+export const INVESTMENT_OR_FEE_CARDS: ReadonlySet<string> = new Set([
+  ChanceCardId.CC_LAND_CHANGE,
+  ChanceCardId.CC_MA_FORCE,
+  ChanceCardId.CC_CONCERT_SPONSOR,
+  ChanceCardId.CC_PLATE_AUCTION,
+  ChanceCardId.CC_SWAP_PROJECT,
+]);
 
 export interface EventCardTextureData {
   readonly cardType: 'chance' | 'market';
@@ -270,20 +279,38 @@ export function generateEventCardFrontTexture(
   // 7. Badge biến động tài chính (+/- VNĐ)
   if (typeof data.effectDelta === 'number' && data.effectDelta !== 0) {
     const isGain = data.effectDelta > 0;
+    const isInvestment = !isGain && INVESTMENT_OR_FEE_CARDS.has(data.cardId);
     const deltaY = 282;
-    ctx.fillStyle = isGain ? 'rgba(5, 150, 105, 0.25)' : 'rgba(225, 29, 72, 0.25)';
-    ctx.beginPath();
-    ctx.roundRect(24, deltaY, w - 48, 32, 8);
-    ctx.fill();
-    ctx.strokeStyle = isGain ? '#10B981' : '#F43F5E';
-    ctx.lineWidth = 1.2;
-    ctx.stroke();
 
-    ctx.font = 'bold 11px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-    ctx.fillStyle = isGain ? '#34D399' : '#FB7185';
-    ctx.textAlign = 'center';
-    const sign = isGain ? '+' : '';
-    ctx.fillText(`${isGain ? 'THƯỞNG' : 'PHẠT'}: ${sign}${formatCurrency(data.effectDelta)}`, w / 2, deltaY + 20);
+    if (isInvestment) {
+      ctx.fillStyle = 'rgba(56, 189, 248, 0.2)';
+      ctx.beginPath();
+      ctx.roundRect(24, deltaY, w - 48, 32, 8);
+      ctx.fill();
+      ctx.strokeStyle = '#FBBF24';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+
+      ctx.font = 'bold 11px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.fillStyle = '#38BDF8';
+      ctx.textAlign = 'center';
+      const sign = '';
+      ctx.fillText(`CHI PHÍ: ${sign}${formatCurrency(data.effectDelta)}`, w / 2, deltaY + 20);
+    } else {
+      ctx.fillStyle = isGain ? 'rgba(5, 150, 105, 0.25)' : 'rgba(225, 29, 72, 0.25)';
+      ctx.beginPath();
+      ctx.roundRect(24, deltaY, w - 48, 32, 8);
+      ctx.fill();
+      ctx.strokeStyle = isGain ? '#10B981' : '#F43F5E';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+
+      ctx.font = 'bold 11px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.fillStyle = isGain ? '#34D399' : '#FB7185';
+      ctx.textAlign = 'center';
+      const sign = isGain ? '+' : '';
+      ctx.fillText(`${isGain ? 'THƯỞNG' : 'PHẠT'}: ${sign}${formatCurrency(data.effectDelta)}`, w / 2, deltaY + 20);
+    }
   }
 
   // Footer nhãn bảo chứng
