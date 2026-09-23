@@ -94,12 +94,18 @@ export class SupabaseStorageService implements ISupabaseStorageService {
   readonly defaultBucket: string;
 
   constructor(config?: SupabaseStorageConfig) {
-    this.url = stripQuotes(
+    let rawUrl = stripQuotes(
       config?.url ??
       process.env['SUPABASE_URL'] ??
       process.env['NEXT_PUBLIC_SUPABASE_URL'] ??
       ''
     );
+    if (rawUrl && !/^https?:\/\//i.test(rawUrl)) {
+      rawUrl = `https://${rawUrl}`;
+    }
+    // Auto-fix frequent typo 'subpabase.co' -> 'supabase.co'
+    rawUrl = rawUrl.replace(/\.subpabase\.co/gi, '.supabase.co');
+    this.url = rawUrl;
 
     const keyParam = config?.key !== undefined ? { customKey: config.key } : undefined;
     const resolved = resolveSupabaseKey(keyParam);
@@ -114,8 +120,14 @@ export class SupabaseStorageService implements ISupabaseStorageService {
     ) || 'game-logs';
 
     if (process.env['NODE_ENV'] !== 'test') {
+      let hostDisplay = 'NONE';
+      try {
+        hostDisplay = this.url ? new URL(this.url).host : 'EMPTY';
+      } catch {
+        hostDisplay = 'INVALID_URL';
+      }
       console.info(
-        `[SupabaseStorage] Initialized (url: ${this.url ? 'YES' : 'NO'}, keyType: ${this.keyType}, bucket: ${this.defaultBucket})`
+        `[SupabaseStorage] Initialized (host: ${hostDisplay}, keyType: ${this.keyType}, bucket: ${this.defaultBucket})`
       );
     }
   }
@@ -136,7 +148,7 @@ export class SupabaseStorageService implements ISupabaseStorageService {
     const cleanPath = filePath.replace(/^\/+/, '');
     const endpoint = `${cleanUrl}/storage/v1/object/${cleanBucket}/${cleanPath}`;
 
-    try {
+    const executeUpload = async (): Promise<boolean> => {
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
@@ -146,7 +158,7 @@ export class SupabaseStorageService implements ISupabaseStorageService {
           'Content-Type': contentType,
         },
         body: typeof content === 'string' ? content : new Uint8Array(content),
-        signal: AbortSignal.timeout(5000),
+        signal: AbortSignal.timeout(15000),
       });
       if (!response.ok) {
         const errorText = await response.text().catch(() => '');
@@ -154,10 +166,24 @@ export class SupabaseStorageService implements ISupabaseStorageService {
         return false;
       }
       return true;
+    };
+
+    try {
+      return await executeUpload();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.warn(`[SupabaseStorage] Network/Fetch error uploading ${cleanBucket}/${cleanPath}: ${msg}`);
-      return false;
+      const retryDelay = process.env['NODE_ENV'] === 'test' ? 5 : 1000;
+      try {
+        await new Promise((resolve) => setTimeout(resolve, retryDelay));
+        return await executeUpload();
+      } catch (retryErr: unknown) {
+        const finalErr = retryErr || err;
+        const msg = finalErr instanceof Error ? finalErr.message : String(finalErr);
+        const cause = finalErr instanceof Error && 'cause' in finalErr ? (finalErr as { cause?: unknown }).cause : undefined;
+        const causeDetail = cause instanceof Error ? cause.message : (cause ? String(cause) : '');
+        const detail = causeDetail ? `${msg} (cause: ${causeDetail})` : msg;
+        console.warn(`[SupabaseStorage] Network/Fetch error uploading ${cleanBucket}/${cleanPath} to ${cleanUrl}: ${detail}`);
+        return false;
+      }
     }
   }
 
@@ -175,11 +201,16 @@ export class SupabaseStorageService implements ISupabaseStorageService {
           apikey: this.key,
           Authorization: `Bearer ${this.key}`,
         },
-        signal: AbortSignal.timeout(5000),
+        signal: AbortSignal.timeout(15000),
       });
       if (!response.ok) return null;
       return await response.text();
-    } catch {
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      const cause = err instanceof Error && 'cause' in err ? (err as { cause?: unknown }).cause : undefined;
+      const causeDetail = cause instanceof Error ? cause.message : (cause ? String(cause) : '');
+      const detail = causeDetail ? `${msg} (cause: ${causeDetail})` : msg;
+      console.warn(`[SupabaseStorage] Network/Fetch error downloading ${cleanBucket}/${cleanPath} from ${cleanUrl}: ${detail}`);
       return null;
     }
   }

@@ -118,9 +118,10 @@ export function useAdminPortal() {
       showToast(`Lỗi: ${msg.message}`);
     } else if (msg.type === 'ADMIN_SYNC_CLOUD_RESULT') {
       setIsSyncingCloud(false);
+      const errorText = msg.error || msg.reason || msg.message || 'Lỗi không xác định';
       const toast = msg.success
         ? `Đồng bộ Cloud thành công (${msg.uploadedCount} tệp -> ${msg.bucket})`
-        : `Đồng bộ Cloud thất bại: ${msg.message || 'Lỗi không xác định'}`;
+        : `Đồng bộ Cloud thất bại: ${errorText}`;
       showToast(toast);
     }
   };

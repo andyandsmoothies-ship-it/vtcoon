@@ -188,6 +188,8 @@ export type WsServerMessage =
       readonly uploadedCount: number;
       readonly bucket: string;
       readonly message?: string;
+      readonly error?: string;
+      readonly reason?: string;
     };
 
 // Hàm helper: serialize message thành JSON string
