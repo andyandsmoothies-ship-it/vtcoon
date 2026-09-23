@@ -5,6 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { WssServer } from './network/wss_server.js';
 import { createHealthServer } from './health_check.js';
+import { autoBackfillCloudLogs } from './storage/supabase_log_sync.js';
 
 export const DEFAULT_BOT_TURN_DELAY_MS = 1500;
 
@@ -79,6 +80,17 @@ export async function startServer(config?: ServerConfig): Promise<RunningServer>
     httpServer.listen(port, () => resolve());
     httpServer.once('error', reject);
   });
+
+  if (process.env['NODE_ENV'] !== 'test') {
+    const adminMgr = wssServer.getAdminManager();
+    autoBackfillCloudLogs(
+      adminMgr.logger.storageDir,
+      adminMgr.logger.manifestCatalog,
+      adminMgr.logger.supabaseStorage,
+    ).catch((err) => {
+      console.warn('[Server] autoBackfillCloudLogs error:', err);
+    });
+  }
 
   return {
     httpServer,

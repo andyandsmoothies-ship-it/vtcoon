@@ -45,6 +45,7 @@ export type WsClientMessage =
   | { readonly type: 'ADMIN_SUBSCRIBE_ROOM'; readonly roomCode: string }
   | { readonly type: 'ADMIN_UNSUBSCRIBE_ROOM'; readonly roomCode?: string }
   | { readonly type: 'ADMIN_TERMINATE_ROOM'; readonly roomCode: string; readonly reason?: string }
+  | { readonly type: 'ADMIN_SYNC_CLOUD_STORAGE' }
   | {
       readonly type: 'START_GAME';
       readonly playerId: string;
@@ -180,7 +181,14 @@ export type WsServerMessage =
       readonly log: AdminRoomLogEntry;
     }
   | { readonly type: 'ADMIN_ACTION_SUCCESS'; readonly action: string; readonly roomCode: string }
-  | { readonly type: 'ADMIN_ERROR'; readonly reasonCode: string; readonly message: string };
+  | { readonly type: 'ADMIN_ERROR'; readonly reasonCode: string; readonly message: string }
+  | {
+      readonly type: 'ADMIN_SYNC_CLOUD_RESULT';
+      readonly success: boolean;
+      readonly uploadedCount: number;
+      readonly bucket: string;
+      readonly message?: string;
+    };
 
 // Hàm helper: serialize message thành JSON string
 export function encodeMsg(msg: WsServerMessage): string {

@@ -34,6 +34,7 @@ export function useAdminPortal() {
   const [lifecycleFilter, setLifecycleFilter] = useState<'ALL' | 'LOBBY' | 'PLAYING'>('ALL');
   const [serverVitals, setServerVitals] = useState<ServerVitals | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isSyncingCloud, setIsSyncingCloud] = useState<boolean>(false);
 
   const wsRef = useRef<WebSocket | null>(null);
   const logTerminalRef = useRef<HTMLDivElement | null>(null);
@@ -115,6 +116,12 @@ export function useAdminPortal() {
       fetchArchivedRooms();
     } else if (msg.type === 'ADMIN_ERROR') {
       showToast(`Lỗi: ${msg.message}`);
+    } else if (msg.type === 'ADMIN_SYNC_CLOUD_RESULT') {
+      setIsSyncingCloud(false);
+      const toast = msg.success
+        ? `Đồng bộ Cloud thành công (${msg.uploadedCount} tệp -> ${msg.bucket})`
+        : `Đồng bộ Cloud thất bại: ${msg.message || 'Lỗi không xác định'}`;
+      showToast(toast);
     }
   };
 
@@ -222,6 +229,13 @@ export function useAdminPortal() {
     if (wsRef.current) wsRef.current.close();
   };
 
+  const handleSyncCloud = (): void => {
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
+      setIsSyncingCloud(true);
+      wsRef.current.send(JSON.stringify({ type: 'ADMIN_SYNC_CLOUD_STORAGE' }));
+    }
+  };
+
   const filteredRooms = useMemo(() => {
     return rooms.filter((r) => {
       const q = searchQuery.toLowerCase();
@@ -266,6 +280,7 @@ export function useAdminPortal() {
     setLifecycleFilter,
     serverVitals,
     toastMessage,
+    isSyncingCloud,
     logTerminalRef,
     filteredRooms,
     filteredArchivedRooms,
@@ -274,6 +289,7 @@ export function useAdminPortal() {
     handleSelectRoom,
     handleSelectArchived,
     handleRefresh,
+    handleSyncCloud,
     handleTerminate,
     handleLogout,
     fetchArchivedRooms,

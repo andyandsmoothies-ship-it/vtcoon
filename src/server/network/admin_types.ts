@@ -38,6 +38,14 @@ export interface AdminRoomSummary {
   readonly turnSecondsLeft?: number;
 }
 
+export interface CloudStorageVitals {
+  readonly configured: boolean;
+  readonly provider: 'supabase';
+  readonly bucket: string;
+  readonly keyType: 'JWT' | 'OPAQUE' | 'NONE';
+  readonly uploadedCount?: number;
+}
+
 export interface ServerVitals {
   readonly memoryRssMb: number;
   readonly memoryHeapUsedMb: number;
@@ -45,6 +53,7 @@ export interface ServerVitals {
   readonly totalRooms: number;
   readonly liveRooms: number;
   readonly lobbyRooms: number;
+  readonly storageStatus?: CloudStorageVitals;
 }
 
 export interface AdminRoomDetail extends AdminRoomSummary {

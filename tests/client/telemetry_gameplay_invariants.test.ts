@@ -19,6 +19,11 @@ describe('[TC-IMP40/MSS] Telemetry Watchdog Gameplay Invariants Suite', () => {
     readonly p1Pos?: number;
     readonly bot2Pos?: number;
     readonly p1Props?: readonly number[];
+    readonly bot2Props?: readonly number[];
+    readonly p1Mortgaged?: readonly number[];
+    readonly bot2Mortgaged?: readonly number[];
+    readonly roundNumber?: number;
+    readonly treasuryPool?: number;
     readonly levels?: Record<number, number>;
   }): GameState =>
     ({
@@ -29,13 +34,15 @@ describe('[TC-IMP40/MSS] Telemetry Watchdog Gameplay Invariants Suite', () => {
           balance: overrides?.p1Balance ?? 15_000,
           tokenColor: '#ff0000',
           ownedProperties: overrides?.p1Props ? [...overrides.p1Props] : [],
+          mortgagedProperties: overrides?.p1Mortgaged ? [...overrides.p1Mortgaged] : [],
         },
         bot_2: {
           id: 'bot_2',
           name: 'Bot 2',
           balance: overrides?.bot2Balance ?? 15_000,
           tokenColor: '#00ff00',
-          ownedProperties: [],
+          ownedProperties: overrides?.bot2Props ? [...overrides.bot2Props] : [],
+          mortgagedProperties: overrides?.bot2Mortgaged ? [...overrides.bot2Mortgaged] : [],
         },
       },
       playerPositions: {
@@ -43,7 +50,8 @@ describe('[TC-IMP40/MSS] Telemetry Watchdog Gameplay Invariants Suite', () => {
         bot_2: overrides?.bot2Pos ?? 0,
       },
       levelMap: overrides?.levels ? { ...overrides.levels } : {},
-      treasuryPool: 2_000,
+      treasuryPool: overrides?.treasuryPool ?? 2_000,
+      roundNumber: overrides?.roundNumber ?? 1,
       activeModal: null,
       currentTurnPlayerId: 'p1',
       turnTimeRemaining: 30,
@@ -332,5 +340,107 @@ describe('[TC-IMP40/MSS] Telemetry Watchdog Gameplay Invariants Suite', () => {
 
     handleDeltaTelemetry(delta, pre, post);
     expect(useTelemetryStore.getState().snapshots.length).toBe(1);
+  });
+
+  // === FACET 5: DYNAMIC ROUND GO SALARY & UNMORTGAGE HARDENING ===
+
+  it('[TC-IMP40.17/MSS] nhận lương qua ô GO tại Vòng 21-30 (+1.500 Tr.) không báo TREASURY_INVARIANT_VIOLATED', () => {
+    const pre = createTestState({ p1Pos: 38, p1Balance: 10_000, roundNumber: 21 });
+    const post = createTestState({ p1Pos: 2, p1Balance: 11_500, roundNumber: 21 });
+
+    const delta: DeltaPayload = {
+      tick: 311,
+      currentTurnPlayerId: 'p1',
+      roundNumber: 21,
+      dice: [2, 2],
+      cells: [],
+      players: [{ id: 'p1', position: 2, balance: 11_500 }],
+      turnPhase: TurnPhase.ActionPhase,
+      roomStarted: true,
+    };
+
+    handleDeltaTelemetry(delta, pre, post);
+    const violations = useTelemetryStore.getState().violations.filter((v) => v.type === 'TREASURY_INVARIANT_VIOLATED');
+    expect(violations.length).toBe(0);
+  });
+
+  it('[TC-IMP40.18/MSS] nhận lương qua ô GO tại Vòng 31+ (+1.000 Tr.) không báo TREASURY_INVARIANT_VIOLATED', () => {
+    const pre = createTestState({ p1Pos: 37, p1Balance: 8_000, roundNumber: 31 });
+    const post = createTestState({ p1Pos: 1, p1Balance: 9_000, roundNumber: 31 });
+
+    const delta: DeltaPayload = {
+      tick: 405,
+      currentTurnPlayerId: 'p1',
+      roundNumber: 31,
+      dice: [2, 2],
+      cells: [],
+      players: [{ id: 'p1', position: 1, balance: 9_000 }],
+      turnPhase: TurnPhase.ActionPhase,
+      roomStarted: true,
+    };
+
+    handleDeltaTelemetry(delta, pre, post);
+    const violations = useTelemetryStore.getState().violations.filter((v) => v.type === 'TREASURY_INVARIANT_VIOLATED');
+    expect(violations.length).toBe(0);
+  });
+
+  it('[TC-IMP40.19/MSS] chuộc thế chấp bất động sản (ô 16 giá 1.800 Tr., nợ 900, phí kho bạc 90) không báo TREASURY_INVARIANT_VIOLATED', () => {
+    // Cell 16 (Hải Phòng) giá 1.800 Tr. Loan: 900 Tr. Fee: 90 Tr. Tổng trả: 990 Tr.
+    // bot_2 balance: 2167 -> 1177 (-990). Kho bạc: 10796 -> 10886 (+90). Net actual delta: -900 Tr.
+    const pre = createTestState({
+      bot2Balance: 2167,
+      bot2Props: [16],
+      bot2Mortgaged: [16],
+      treasuryPool: 10796,
+      roundNumber: 21,
+    });
+    const post = createTestState({
+      bot2Balance: 1177,
+      bot2Props: [16],
+      bot2Mortgaged: [],
+      treasuryPool: 10886,
+      roundNumber: 21,
+    });
+
+    const delta: DeltaPayload = {
+      tick: 314,
+      currentTurnPlayerId: 'bot_2',
+      roundNumber: 21,
+      cells: [{ index: 16, ownerId: 'bot_2', level: 0, isMortgaged: false }],
+      players: [{ id: 'bot_2', position: 10, balance: 1177 }],
+      treasury: 10886,
+      roomStarted: true,
+    };
+
+    handleDeltaTelemetry(delta, pre, post);
+    const violations = useTelemetryStore.getState().violations.filter((v) => v.type === 'TREASURY_INVARIANT_VIOLATED');
+    expect(violations.length).toBe(0);
+  });
+
+  it('[TC-IMP40.20/MSS] delta gửi lại isMortgaged: true khi ô đã thế chấp không bị cộng dồn trùng lặp delta', () => {
+    const pre = createTestState({
+      bot2Balance: 5000,
+      bot2Props: [16],
+      bot2Mortgaged: [16], // Đã thế chấp từ trước
+      treasuryPool: 2000,
+    });
+    const post = createTestState({
+      bot2Balance: 5000,
+      bot2Props: [16],
+      bot2Mortgaged: [16],
+      treasuryPool: 2000,
+    });
+
+    const delta: DeltaPayload = {
+      tick: 320,
+      currentTurnPlayerId: 'bot_2',
+      cells: [{ index: 16, ownerId: 'bot_2', level: 0, isMortgaged: true }],
+      players: [{ id: 'bot_2', position: 10, balance: 5000 }],
+      roomStarted: true,
+    };
+
+    handleDeltaTelemetry(delta, pre, post);
+    const violations = useTelemetryStore.getState().violations.filter((v) => v.type === 'TREASURY_INVARIANT_VIOLATED');
+    expect(violations.length).toBe(0);
   });
 });

@@ -12,6 +12,7 @@ import {
   buildDiagnosticDump,
 } from './admin_inspector.js';
 import { handleAdminMessage, handleAdminClientMessage } from './admin_message_handler.js';
+import { syncAllLocalLogsToCloud } from '../storage/supabase_log_sync.js';
 
 import {
   MAX_ROOM_LOGS,
@@ -45,6 +46,7 @@ export class AdminManager {
   private readonly roomLogs = new Map<string, AdminRoomLogEntry[]>();
   private readonly roomViolations = new Map<string, Array<{ type: string; message: string; timestamp: number }>>();
   private readonly roomLogger: PersistentRoomLogger;
+  private isSyncingCloud = false;
   private timeRemainingProvider?: (roomCode: string) => number;
   private reconnectManager?: ReconnectManager;
   private sessionManager?: SessionManager;
@@ -69,6 +71,10 @@ export class AdminManager {
 
   get logger(): PersistentRoomLogger {
     return this.roomLogger;
+  }
+
+  get isSyncing(): boolean {
+    return this.isSyncingCloud;
   }
 
   get authenticatedCount(): number {
@@ -102,6 +108,16 @@ export class AdminManager {
         }
       }
     }
+
+    const storage = this.roomLogger.supabaseStorage;
+    const configured = Boolean(
+      typeof storage?.isConfigured === 'function'
+        ? storage.isConfigured()
+        : storage?.isConfigured,
+    );
+    const bucket = storage?.defaultBucket ?? 'game-logs';
+    const keyType: 'JWT' | 'OPAQUE' | 'NONE' = storage?.keyType ?? (configured ? 'JWT' : 'NONE');
+
     return {
       memoryRssMb: Math.round((mem.rss / (1024 * 1024)) * 100) / 100,
       memoryHeapUsedMb: Math.round((mem.heapUsed / (1024 * 1024)) * 100) / 100,
@@ -109,6 +125,12 @@ export class AdminManager {
       totalRooms,
       liveRooms,
       lobbyRooms,
+      storageStatus: {
+        configured,
+        provider: 'supabase',
+        bucket,
+        keyType,
+      },
     };
   };
 
@@ -263,6 +285,38 @@ export class AdminManager {
 
   async getRoomFullLogAsync(roomCode: string, timestamp?: number): Promise<AdminRoomLogEntry[]> {
     return this.roomLogger.getRoomFullLogAsync(roomCode, timestamp);
+  }
+
+  async syncCloudLogs(options?: { force?: boolean }): Promise<{
+    success: boolean;
+    uploadedCount?: number;
+    bucket?: string;
+    reason?: string;
+    error?: string;
+  }> {
+    if (this.isSyncingCloud) {
+      return { success: false, reason: 'ALREADY_SYNCING' };
+    }
+    this.isSyncingCloud = true;
+    try {
+      this.roomLogger.flushSync();
+      const bucket = this.roomLogger.supabaseStorage?.defaultBucket ?? 'game-logs';
+      const result = await syncAllLocalLogsToCloud(
+        this.roomLogger.storageDir,
+        this.roomLogger.manifestCatalog,
+        this.roomLogger.supabaseStorage,
+        bucket,
+      );
+      return {
+        success: result.success,
+        uploadedCount: result.uploadedCount,
+        bucket: result.bucket,
+        reason: result.reason,
+        error: result.error,
+      };
+    } finally {
+      this.isSyncingCloud = false;
+    }
   }
 
   handleRoomClosed(rawRoomCode: string, summary?: RoomFinishSummary): void {

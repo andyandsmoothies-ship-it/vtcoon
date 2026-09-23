@@ -62,7 +62,7 @@ const THEMED_EMOJIS: Readonly<Record<string, string>> = {
 const KNOWN_HERO_STATS: Readonly<Record<string, HeroStat>> = {
   // Market Cards
   [MarketCardId.MC_FUEL_SURGE]: { label: 'PHỤ PHÍ NHIÊN LIỆU', value: '-500 Tr.', variant: 'negative' },
-  [MarketCardId.MC_ALCOHOL_CHECK]: { label: 'SIẾT NỒNG ĐỘ CỒN', value: '-800 Tr.', variant: 'negative' },
+  [MarketCardId.MC_ALCOHOL_CHECK]: { label: 'GIẢM 50% THUÊ • PHẠT NỒNG ĐỘ CỒN', value: '-800 Tr.', variant: 'negative' },
   [MarketCardId.MC_RATE_HIKE]: { label: 'LÃI SUẤT VAY MỚI', value: '10% QUA GO', variant: 'warning' },
   [MarketCardId.MC_URBAN_PLANNING]: { label: 'ĐỊNH GIÁ TRUNG TÂM', value: '+20% THẾ CHẤP', variant: 'positive' },
   [MarketCardId.MC_NIGHT_ECONOMY]: { label: 'BÙNG NỔ DOANH THU', value: 'x2 THU TIỀN THUÊ', variant: 'positive' },

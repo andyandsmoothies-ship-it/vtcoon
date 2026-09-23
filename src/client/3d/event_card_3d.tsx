@@ -137,7 +137,7 @@ export function EventCard3D(): React.ReactElement | null {
       cardType: eventPayload.cardType,
       cardId: eventPayload.cardId,
       title: resolvedTitle,
-      description: eventPayload.description,
+      description: eventPayload.effectDetail || eventPayload.description,
       effectDelta: eventPayload.effectDelta,
     });
   }, [eventPayload, resolvedTitle]);

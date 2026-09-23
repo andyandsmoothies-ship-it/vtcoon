@@ -29,6 +29,7 @@ export function AdminPortal(): React.ReactElement {
     setLifecycleFilter,
     serverVitals,
     toastMessage,
+    isSyncingCloud,
     logTerminalRef,
     filteredRooms,
     filteredArchivedRooms,
@@ -37,6 +38,7 @@ export function AdminPortal(): React.ReactElement {
     handleSelectRoom,
     handleSelectArchived,
     handleRefresh,
+    handleSyncCloud,
     handleTerminate,
     handleLogout,
   } = useAdminPortal();
@@ -64,6 +66,20 @@ export function AdminPortal(): React.ReactElement {
           <span className="rounded bg-slate-800 px-2 py-0.5 text-[11px] font-mono text-cyan-400">
             {archivedRooms.length} Bàn Lịch Sử
           </span>
+          {serverVitals?.storageStatus?.configured ? (
+            <span
+              className="rounded bg-emerald-950/80 border border-emerald-500/50 px-2 py-0.5 text-[11px] font-mono text-emerald-300"
+              title={`Cloud Storage: ${serverVitals.storageStatus.bucket}`}
+            >
+              <span className="hidden sm:inline">☁️ Supabase: 🟢 Đã kết nối ({serverVitals.storageStatus.bucket})</span>
+              <span className="sm:hidden">☁️ 🟢</span>
+            </span>
+          ) : (
+            <span className="rounded bg-rose-950/80 border border-rose-500/50 px-2 py-0.5 text-[11px] font-mono text-rose-300">
+              <span className="hidden sm:inline">☁️ Supabase: 🔴 Chưa kết nối</span>
+              <span className="sm:hidden">☁️ 🔴</span>
+            </span>
+          )}
           {serverVitals && (
             <div className="hidden lg:flex items-center gap-2 rounded border border-slate-700 bg-slate-950/80 px-2.5 py-1 text-[11px] font-mono text-slate-300">
               <span title="Memory RSS / Heap Used">💾 RAM: <b className="text-amber-300">{serverVitals.memoryRssMb}M</b> / {serverVitals.memoryHeapUsedMb}M</span>
@@ -80,6 +96,14 @@ export function AdminPortal(): React.ReactElement {
               {toastMessage}
             </span>
           )}
+          <button
+            onClick={handleSyncCloud}
+            disabled={isSyncingCloud}
+            className="min-h-[44px] rounded border border-cyan-500/40 bg-cyan-950/40 px-3 py-1 text-xs text-cyan-300 hover:bg-cyan-900/60 font-semibold disabled:opacity-50 cursor-pointer"
+            data-testid="admin-sync-cloud-btn"
+          >
+            {isSyncingCloud ? '⏳ Đang đồng bộ...' : '☁️ Đồng Bộ Cloud'}
+          </button>
           <button
             onClick={handleRefresh}
             className="rounded border border-slate-700 bg-slate-800 px-3 py-1 text-xs font-semibold hover:bg-slate-700"

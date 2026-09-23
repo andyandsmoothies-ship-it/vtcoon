@@ -188,9 +188,9 @@ export const MARKET_CARD_DETAILS: Readonly<Record<MarketCardId, MarketCardDetail
     destination: 'Chủ sở hữu ô Dịch vụ đón khách',
   },
   [MarketCardId.MC_ALCOHOL_CHECK]: {
-    description: 'Tổng kiểm tra nồng độ cồn diện rộng, vắng khách và phạt nặng các phương tiện vi phạm.',
-    targetScope: 'Tất cả các ô BĐS Dịch vụ (Ô 6, 8, 26, 27)',
-    effectDetail: 'Giảm 50% tiền thuê ô Dịch vụ trong 2 vòng; người dừng chân bị phạt 800 Tr. nộp Kho Bạc Nhà Nước và bị tạm giữ xe (mất lượt kế tiếp)',
+    description: 'Tổng kiểm tra nồng độ cồn diện rộng tại các tổ hợp dịch vụ giải trí, vắng khách và phạt nặng các phương tiện vi phạm.',
+    targetScope: '4 ô BĐS Dịch vụ: Bình Dương, Đồng Nai, Hải Phòng, Phú Quốc',
+    effectDetail: 'Giảm 50% tiền thuê cho chủ ô đất trong 2 vòng. Người dừng chân bị phạt 800 Tr. nộp Kho Bạc và giam xe (mất lượt kế tiếp).',
     duration: '2 vòng chơi',
     destination: 'Nộp phạt 800 Tr. vào Kho Bạc Nhà Nước',
   },

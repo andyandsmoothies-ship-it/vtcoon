@@ -11,7 +11,7 @@ import {
 import { BOARD_CONFIG, CellType } from '../../domain/board_config.js';
 import { calculateGoPropertyTax, GO_PROPERTY_TAX_CAP } from '../../domain/property_rent.js';
 import { SERVICE_CELLS as DOMAIN_SERVICE_CELLS } from '../../domain/event_card_types.js';
-import { TurnPhase } from '../../domain/room.js';
+import { TurnPhase, calculateGoSalary as getRoundGoSalary } from '../../domain/room.js';
 import { verifyAllInvariants } from './invariant_checker.js';
 import { watchdogMonitor } from './watchdog_monitor.js';
 import { useTelemetryStore } from './telemetry_store.js';
@@ -105,7 +105,12 @@ export function detectMovement(
   return undefined;
 }
 
-function calculateGoSalary(preState: GameState, activeId: string, treasuryGain: number = 0): number {
+function calculateGoSalary(
+  preState: GameState,
+  activeId: string,
+  treasuryGain: number = 0,
+  delta?: DeltaPayload
+): number {
   const registry: PropertyRegistry = new Map<number, string>();
   for (const [id, info] of Object.entries(preState.playersInfo)) {
     for (const c of info.ownedProperties) registry.set(c, id);
@@ -117,7 +122,9 @@ function calculateGoSalary(preState: GameState, activeId: string, treasuryGain: 
   const rawTax = calculateGoPropertyTax(activeId, registry, stateMap);
   const tax = Math.min(rawTax, GO_PROPERTY_TAX_CAP);
   const absorbedTax = Math.min(Math.max(0, treasuryGain), tax);
-  return (2000 - tax) + absorbedTax;
+  const round = delta?.roundNumber ?? preState.roundNumber ?? 1;
+  const baseSalary = getRoundGoSalary(round);
+  return (baseSalary - tax) + absorbedTax;
 }
 
 function resolvePurchaseCost(
@@ -179,8 +186,14 @@ function computeCellDelta(cells: readonly CellDelta[], preState: GameState, delt
     if (cell.ownerId && !prevOwner) {
       deltaSum -= resolvePurchaseCost(cell, deed, preState, delta);
     }
-    if (cell.isMortgaged === true) {
+    const mortgagedOwner = Object.values(preState.playersInfo).find((p) => p.mortgagedProperties?.includes(cell.index));
+    const wasMortgaged = Boolean(mortgagedOwner);
+    if (cell.isMortgaged === true && !wasMortgaged) {
       deltaSum += Math.floor(deed.price * 0.5);
+    } else if (cell.isMortgaged === false && wasMortgaged) {
+      const loan = mortgagedOwner?.mortgageLoans?.[cell.index] ?? Math.floor(deed.price * 0.5);
+      const fee = Math.floor(loan * 0.10);
+      deltaSum -= (loan + fee);
     }
   }
   return deltaSum;
@@ -261,7 +274,7 @@ export function computeExpectedDelta(
     if (!movement.isTeleport || isExactDiceMove) {
       if (movement.fromPosition + diceSum >= 40) {
         const activeId = delta.currentTurnPlayerId ?? Object.keys(preState.playersInfo)[0] ?? '';
-        expected += calculateGoSalary(preState, activeId, treasuryGain);
+        expected += calculateGoSalary(preState, activeId, treasuryGain, delta);
         hasKnown = true;
       }
     }

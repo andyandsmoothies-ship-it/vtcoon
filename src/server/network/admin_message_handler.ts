@@ -26,6 +26,8 @@ export function handleAdminClientMessage(
       return true;
     case 'ADMIN_TERMINATE_ROOM':
       return handleTerminate(admin, socket, msg.roomCode, msg.reason, sendSafe);
+    case 'ADMIN_SYNC_CLOUD_STORAGE':
+      return handleSyncCloudStorage(admin, socket, sendSafe);
     default:
       return false;
   }
@@ -165,5 +167,30 @@ function handleTerminate(
   }
   sendSafe(socket, { type: 'ADMIN_ACTION_SUCCESS', action: 'TERMINATE_ROOM', roomCode: norm });
   admin.terminateRoom(norm, reason);
+  return true;
+}
+
+async function handleSyncCloudStorage(
+  admin: AdminManager,
+  socket: WebSocket,
+  sendSafe: (s: WebSocket, m: WsServerMessage) => void,
+): Promise<boolean> {
+  if (!admin.isAuthenticated(socket)) {
+    sendSafe(socket, { type: 'ERROR', reasonCode: 'ADMIN_UNAUTHORIZED' });
+    return true;
+  }
+  const result = await admin.syncCloudLogs();
+  sendSafe(socket, {
+    type: 'ADMIN_SYNC_CLOUD_RESULT',
+    success: result.success,
+    uploadedCount: result.uploadedCount ?? 0,
+    bucket: result.bucket ?? 'game-logs',
+    message: result.reason ?? result.error,
+  });
+  sendSafe(socket, {
+    type: 'ADMIN_ROOM_LIST',
+    rooms: admin.getRoomsSummary(),
+    vitals: admin.getServerVitals(),
+  });
   return true;
 }

@@ -70,6 +70,10 @@ export class PersistentRoomLogger {
     return this.logDir;
   }
 
+  get manifestCatalog(): Map<string, AdminArchivedRoomSummary> {
+    return this.manifest;
+  }
+
   private ensureDir(): void {
     try {
       if (!fs.existsSync(this.logDir)) {

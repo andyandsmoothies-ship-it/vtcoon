@@ -128,6 +128,10 @@ export function executeCellLanding(
         cardId: card?.cardId ?? `chance_${targetCell}`,
         title: card?.title ?? 'PHIẾU CƠ HỘI',
         description: card?.description ?? 'Cơ hội phát triển kinh doanh và mở rộng mạng lưới địa ốc.',
+        ...(card?.effectDetail ? { effectDetail: card.effectDetail } : {}),
+        ...(card?.targetScope ? { targetScope: card.targetScope } : {}),
+        ...(card?.duration ? { duration: card.duration } : {}),
+        ...(card?.destination ? { destination: card.destination } : {}),
         ...(card?.effectDelta !== undefined ? { effectDelta: card.effectDelta } : {}),
       });
     }
@@ -139,6 +143,10 @@ export function executeCellLanding(
         cardId: card?.cardId ?? `market_${targetCell}`,
         title: card?.title ?? 'PHIẾU THỊ TRƯỜNG',
         description: card?.description ?? 'Biến động chính sách vĩ mô và dòng vốn đầu tư toàn quốc.',
+        ...(card?.effectDetail ? { effectDetail: card.effectDetail } : {}),
+        ...(card?.targetScope ? { targetScope: card.targetScope } : {}),
+        ...(card?.duration ? { duration: card.duration } : {}),
+        ...(card?.destination ? { destination: card.destination } : {}),
         ...(card?.effectDelta !== undefined ? { effectDelta: card.effectDelta } : {}),
       });
     }

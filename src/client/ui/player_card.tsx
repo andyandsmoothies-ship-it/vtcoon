@@ -1,9 +1,32 @@
 import React from 'react';
 import { useGameStore, type PlayerHudInfo } from '../store/game_store';
-import { formatCurrency, calculatePlayerNetWorth, getOwnedColorGroups, formatShortPlayerName } from './ui_helpers';
+import { formatCurrency, calculatePlayerNetWorth, formatShortPlayerName } from './ui_helpers';
+import { BOARD_CONFIG, ColorGroup } from '../../domain/board_config';
 import { COLOR_GROUP_HEX } from '../../domain/theme';
 import { getEmoteDef } from '../../domain/emotes';
 import { getPawnConfigBySlot } from '../3d/luxury_pawn_models';
+
+const PROPERTY_COLOR_GROUP_ORDER: readonly ColorGroup[] = [
+  ColorGroup.Nau,
+  ColorGroup.XanhDaTroi,
+  ColorGroup.Hong,
+  ColorGroup.Cam,
+  ColorGroup.Do,
+  ColorGroup.Vang,
+  ColorGroup.XanhLa,
+  ColorGroup.Tim,
+];
+
+export const PROPERTY_CLUSTERS: readonly {
+  readonly group: ColorGroup;
+  readonly cells: readonly { readonly index: number; readonly name: string }[];
+}[] = PROPERTY_COLOR_GROUP_ORDER.map((group) => ({
+  group,
+  cells: BOARD_CONFIG.filter((c) => c.colorGroup === group).map((c) => ({
+    index: c.index,
+    name: c.name,
+  })),
+}));
 
 interface PlayerCardProps {
   readonly player: PlayerHudInfo;
@@ -48,8 +71,6 @@ export function PlayerCard({
   const balanceColorClass = isNegativeBalance
     ? 'text-rose-700 font-black'
     : 'text-emerald-700 font-black';
-
-  const ownedGroups = getOwnedColorGroups(player.ownedProperties ?? []);
 
   return (
     <div
@@ -152,24 +173,42 @@ export function PlayerCard({
         </div>
       </div>
 
-      {/* Dải chấm màu nhóm đất sở hữu */}
-      {ownedGroups.length > 0 && (
-        <div className="flex items-center gap-1 pt-1 border-t border-slate-300">
-          <span className="text-[9px] text-slate-600 uppercase tracking-tighter mr-0.5 font-bold">
-            BĐS:
-          </span>
-          <div className="flex items-center gap-1 flex-wrap">
-            {ownedGroups.map((group) => (
-              <span
-                key={group}
-                className="w-2.5 h-2.5 rounded-full border border-slate-900/40 shadow-xs"
-                style={{ backgroundColor: COLOR_GROUP_HEX[group] }}
-                title={group}
-              />
-            ))}
-          </div>
+      {/* Dải 22 chấm BĐS theo 8 cụm nhóm màu (Option A) */}
+      <div
+        className="flex items-center gap-1 pt-1 border-t border-slate-300"
+        data-testid="player-property-clusters"
+      >
+        <span className="text-[9px] text-slate-600 uppercase tracking-tighter mr-0.5 font-bold shrink-0">
+          BĐS:
+        </span>
+        <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
+          {PROPERTY_CLUSTERS.map(({ group, cells }) => (
+            <div
+              key={group}
+              className="flex items-center gap-0.5 shrink-0"
+              data-testid={`cluster-${group}`}
+            >
+              {cells.map((cell) => {
+                const isOwned = Boolean(player.ownedProperties?.includes(cell.index));
+                return (
+                  <span
+                    key={cell.index}
+                    data-testid={`dot-cell-${cell.index}`}
+                    data-owned={isOwned ? 'true' : 'false'}
+                    className={`w-2.5 h-2.5 rounded-full transition-all ${
+                      isOwned
+                        ? 'border border-slate-900/40 shadow-xs'
+                        : 'border border-slate-300 bg-slate-100/70'
+                    }`}
+                    style={isOwned ? { backgroundColor: COLOR_GROUP_HEX[group] } : undefined}
+                    title={`${cell.name}: ${isOwned ? 'Đã sở hữu' : 'Chưa sở hữu'}`}
+                  />
+                );
+              })}
+            </div>
+          ))}
         </div>
-      )}
+      </div>
     </div>
   );
 }

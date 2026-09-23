@@ -9,7 +9,7 @@
 | :--- | :--- | :--- |
 | `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78, #82, #104, #105, #106, #145, #146, #147, #159, #164, #174, #180, #188, #195, #196, #197, #200, #203, #215, #217, #218, #219, #220, #223 |
 | `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147, #190, #191, #195, #196, #197, #200, #206, #223 |
-| `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190, #200, #203, #209, #210, #211, #212, #213, #215, #217, #223, #224, #225, #226, #227, #231, #235 |
+| `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190, #200, #203, #209, #210, #211, #212, #213, #215, #217, #223, #224, #225, #226, #227, #231, #235, #244 |
 | `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #32, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #60, #61, #63, #69, #72, #74, #77, #80, #85, #86, #88, #89, #90, #91, #92, #93, #94, #95, #96, #101, #103, #109, #110, #114, #115, #116, #117, #120, #122, #123, #124, #125, #126, #127, #128, #129, #130, #133, #134, #135, #136, #140, #141, #144, #148, #159, #160, #161, #162, #163, #164, #165, #169, #175, #177, #189, #198, #200, #222 |
 | `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192, #195, #196, #199, #201, #202, #204, #205, #206, #216, #217, #231, #234, #237 |
 | `[UAT/TEST]` | Nghiệm Thu, Adversarial TDD, Ảnh Chụp Màn Hình (.jpg), Shell Escaping, File I/O Lock, Docker Healthcheck Timeout | #5, #28, #29, #31, #35, #52, #71, #73, #83, #84, #99, #100, #117, #124, #125, #130, #199, #235 |
@@ -4026,5 +4026,65 @@
      - `<main>` bắt buộc có `flex-1 min-h-0 overflow-y-auto` để tự do cuộn bên trong vùng không gian cố định mà không bao giờ chèn ép footer hay làm biến dạng modal.
   3. **Tab-Switch Scroll Reset**: Sử dụng `useRef<HTMLElement>` gắn vào thẻ `<main>` kết hợp `useEffect` lắng nghe `activeTab` để tự động đưa `contentRef.current.scrollTop = 0` ngay khi người dùng chọn tab mới.
 - **Traceability**: `[TC-172.01..06/MSS]`, `tests/client/imp172_game_rules_modal_stable_height.test.ts`, `tests/contracts/imp72_lobby_redesign_game_rules_and_desktop_framing.test.ts`, `src/client/ui/modals/game_rules_modal.tsx`.
+
+---
+
+### 243. [DOMAIN/UI/3D] Event Card Clarity, Explicit Subject Partitioning & Property Naming Invariant (IMP-176)
+- **Bẫy nghiệp vụ & kỹ thuật**:
+  1. *Bẫy Thẻ 3D Chỉ In Văn Xuôi Bối Cảnh (3D Card Flavor-Only Trap)*: Khi thẻ 3D lật (`EventCard3D`), texture mặt trước chỉ lấy trường `description` (câu chuyện văn học bối cảnh), bỏ qua toàn bộ thông số định lượng và hiệu ứng thực tế (`effectDetail`), khiến người chơi đọc thẻ xong không biết tác dụng game thực tế là gì cho tới khi modal 2D hiện lên.
+  2. *Bẫy Hero Stat Đơn Giá Trị Che Lấp Cơ Chế Kép (Single-Stat Hero Masking Dual Impact)*: Đối với thẻ có cơ chế kép như `MC_ALCOHOL_CHECK` (vừa giảm 50% tiền thuê thị trường vừa phạt 800 Tr. người dừng chân), Hero Stat chỉ hiển thị đơn độc giá trị `-800 Tr.`, che giấu mất tác động vĩ mô giảm 50% tiền thuê đất.
+  3. *Bẫy Ẩn Tên Ô Đất Khiến Nhầm Lẫn Nhóm BĐS (Masked Target Property Coordinates Trap)*: Hàm `sanitizeTargetScope` dùng regex xóa sạch mã ô trong ngoặc `(Ô 6, 8, 26, 27)`, chỉ để lại chuỗi trừu tượng `"Tất cả các ô BĐS Dịch vụ"`. Người chơi không biết đó là những ô nào, đặc biệt ô 27 (Kiên Giang - Phú Quốc) thường bị người chơi hiểu nhầm thành ô nghỉ dưỡng.
+  4. *Bẫy Gộp Hai Chủ Thể Vào Một Câu Gây Mâu Thuẫn (Merged Dual Subjects Semantic Trap)*: Viết gộp tác động lên chủ đất và tác động lên khách dừng chân vào 1 câu khiến người chơi lầm tưởng chính mình vừa được giảm 50% tiền thuê nhưng lại vừa bị phạt 800 Tr.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Actionable 3D Card Front Texture Invariant**: `event_card_3d.tsx` bắt buộc ưu tiên `eventPayload.effectDetail || eventPayload.description` để render trực tiếp hành động và thông số định lượng lên mặt trước thẻ bài 3D ngay khi lật.
+  2. **Comprehensive Dual-Aspect Hero Stat Invariant**: Thẻ có tác động kép bắt buộc thể hiện cả hai cơ chế trên khối Hero Stat (Nhãn `GIẢM 50% THUÊ • PHẠT NỒNG ĐỘ CỒN` đi kèm giá trị `-800 Tr.`).
+  3. **Explicit Named Target Scope Invariant**: Chuẩn hóa `targetScope` thành tên địa danh thực tế (`4 ô BĐS Dịch vụ: Bình Dương, Đồng Nai, Hải Phòng, Phú Quốc`) thay vì các mã ô thô kệch, giúp người chơi định vị tức thì trên bàn cờ.
+  4. **Subject-Partitioned Event Descriptions**: Mọi thẻ tác động đa chiều bắt buộc phân định rạch ròi câu văn giữa *Chủ ô đất* (bị giảm tiền thuê) và *Người dừng chân* (bị phạt tiền + giam xe mất lượt).
+- **Traceability**: `[TC-176.01..06/MSS]`, `tests/client/imp176_event_card_clarity.test.ts`, `src/domain/event_card_metadata.ts`, `src/client/ui/modals/event_card_visuals.ts`, `src/client/3d/event_card_3d.tsx`, `src/client/offline_landing.ts`.
+
+---
+
+### 244. [NET/STORAGE] Safe Fallback For Unconfigured Cloud Storage & No-op Auto-Backfill Invariant (IMP-175)
+- **Bẫy nghiệp vụ & kỹ thuật**:
+  1. *Bẫy gãy WebSocket khi chưa cấu hình Supabase*: Khi Admin kích hoạt đồng bộ 1-click hoặc khi máy chủ chạy `autoBackfillCloudLogs`, nếu môi trường thiếu khóa Supabase (`!storage?.isConfigured`), việc quăng lỗi hoặc trả về `success: false` làm gián đoạn luồng xử lý và gây hiểu nhầm là lỗi máy chủ nghiêm trọng thay vì trạng thái chưa kết nối.
+  2. *Bẫy treo mutex khi đồng bộ thất bại giữa chừng*: Nếu một tiến trình upload bị lỗi mạng hoặc xác thực (401/403 Compact JWS), cờ `isSyncingCloud` nếu không nằm trong khối `finally` sẽ bị kẹt vĩnh viễn ở `true`, phong tỏa toàn bộ các lần đồng bộ sau đó (`ALREADY_SYNCING`).
+  3. *Bẫy ưu tiên sai khóa JWT vs Opaque*: Supabase sinh ra nhiều định dạng khóa (`eyJ...` JWT vs `sb_...` publishable/opaque). Nếu chọn nhầm publishable key khi service role key tồn tại, Storage REST API sẽ từ chối upload với mã HTTP 403 Forbidden.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Safe Unconfigured Storage Handling**: `syncAllLocalLogsToCloud` và `syncCloudLogs` xử lý tình huống chưa cấu hình storage như một thao tác hoàn tất an toàn (`{ success: true, reason: 'STORAGE_NOT_CONFIGURED', uploadedCount: 0 }`), bảo đảm `this.roomLogger.flushSync()` vẫn xả bộ nhớ đệm cục bộ mà không làm sập giao thức.
+  2. **Strict Mutex Lifecycle (`try/finally`)**: Khối `syncCloudLogs` bắt buộc giải phóng `this.isSyncingCloud = false` trong `finally` block để ngăn ngừa deadlock.
+  3. **RFC 7515 JWT Priority Resolution**: `resolveSupabaseKey` bắt buộc quét toàn bộ các biến môi trường tiềm năng, tự động strip dấu ngoặc đơn/kép và khoảng trắng, ưu tiên token bắt đầu bằng `eyJ` gán `keyType = 'JWT'` trước khi fallback về `sb_...` (`keyType = 'OPAQUE'`).
+  4. **Test Environment No-Op Guard**: `autoBackfillCloudLogs` luôn là no-op khi `NODE_ENV === 'test'` trừ khi có cờ `force: true`.
+- **Traceability**: `[TC-IMP175.01..14]`, `tests/server/imp175_cloud_sync_and_backfill.test.ts`, `tests/server/imp169_supabase_storage.test.ts`, `src/server/storage/supabase_storage.ts`, `src/server/storage/supabase_log_sync.ts`, `src/server/network/admin_manager.ts`.
+
+---
+
+### 245. [UI/UX/HUD] PlayerCard Option A: 22 Property Dots in 8 Color Clusters Invariant (IMP-177)
+- **Bẫy nghiệp vụ & kỹ thuật**:
+  1. *Bẫy chấm màu động làm mất dấu các ô chưa sở hữu (Dynamic Dots Information Deficit Trap)*: Trước đây, thẻ người chơi chỉ hiển thị chấm tròn màu cho các nhóm đất mà người đó đang sở hữu. Người chơi nhìn vào 4 thẻ không thể biết còn những ô nào chưa mua, ai đang giữ ô nào trong cùng một nhóm màu, và ai sắp hoàn thành bộ độc quyền.
+  2. *Bẫy phân rã 22 chấm rời rạc gây tràn viền mobile 160px (Unclustered Dot Breakage Trap)*: Nếu rải 22 chấm liên tục thành một dòng dài không phân nhóm, trên màn hình di động (`w-40` = 160px), các chấm sẽ bị bẻ dòng ngẫu nhiên ở giữa một nhóm màu (ví dụ nhóm Cam 3 ô bị rớt 1 ô xuống dòng dưới), gây rối mắt và phá vỡ trực giác thị giác.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **SSOT 8-Cluster Structure Invariant**: 22 ô BĐS được gom cứng thành 8 cụm vi mô tương ứng 8 nhóm màu địa lý (`PROPERTY_CLUSTERS`), theo thứ tự bàn cờ (Nâu: 2, Xanh da trời: 3, Hồng: 3, Cam: 3, Đỏ: 3, Vàng: 3, Xanh lục: 3, Tím: 2).
+  2. **Non-Breaking Cluster Wrapping (`shrink-0`)**: Mỗi cụm nhóm màu được bọc trong thẻ `div` có `shrink-0` và `gap-0.5`. Khi màn hình thu nhỏ xuống mobile `w-40`, các cụm tự động ngắt dòng theo cả nhóm (4 cụm dòng trên, 4 cụm dòng dưới, mỗi dòng 11 chấm với chiều rộng ~136px < 144px), tuyệt đối không bao giờ làm đứt rời các chấm trong cùng một nhóm màu.
+  3. **Filled vs Hollow Visual Semantic (`data-owned`)**: Ô người chơi sở hữu được tô đặc bằng màu nhóm `COLOR_GROUP_HEX[group]` (`data-owned="true"`). Ô chưa mua hoặc đối thủ nắm giữ hiển thị dạng vòng tròn rỗng viền xám nhạt `border-slate-300 bg-slate-100/70` (`data-owned="false"`).
+  4. **Accessible Tooltip Title**: Mỗi chấm mang thuộc tính `title` chỉ rõ tên địa danh và tình trạng sở hữu (`${cell.name}: Đã sở hữu / Chưa sở hữu`).
+- **Traceability**: `[TC-173.01..08/MSS]`, `tests/client/imp173_player_card_property_clusters.test.ts`, `tests/client/mobile_compact_hud_and_modals.test.ts`, `src/client/ui/player_card.tsx`.
+
+---
+
+### 246. [TELEMETRY/ECONOMY] Dynamic Round GO Salary & Property Unmortgage Conservation Invariant (IMP-178)
+- **Bẫy nghiệp vụ & kỹ thuật**:
+  1. *Bẫy Lương GO Cố Định 2.000 Tr. Sau Vòng 21 (Hardcoded GO Salary Drift)*: Client telemetry watchdog hardcoded lương qua ô GO là `2.000 Tr.` (`2000 - tax + absorbedTax`). Tuy nhiên theo luật SSOT vĩ mô của VTCOON (`src/domain/room.ts:calculateGoSalary`), lương qua GO giảm xuống `1.500 Tr.` ở Vòng 21-30 và `1.000 Tr.` từ Vòng 31+. Khi người chơi vượt GO ở vòng 21+, chênh lệch 500 Tr. hoặc 1.000 Tr. lập tức kích hoạt cảnh báo sai `TREASURY_INVARIANT_VIOLATED: CRITICAL` trên Hộp đen máy bay.
+  2. *Bẫy Bỏ Sót Chuộc Thế Chấp Khi Kiểm Định Kho Bạc (Unmortgage Redemption Deficit Trap)*: Trong `computeCellDelta`, Telemetry chỉ kiểm tra `cell.isMortgaged === true` (cộng tiền thế chấp `+Math.floor(deed.price * 0.5)`), bỏ qua chiều ngược lại khi người chơi giải chấp / chuộc tài sản (`cell.isMortgaged === false`). Khi unmortgage, người chơi phải trả `loan + fee = Math.floor(loan * 1.1)`, trong đó tiền nợ gốc `loan` trả về ngân hàng, và phí `fee = Math.floor(loan * 0.10)` nộp vào Kho bạc. Việc bỏ qua unmortgage khiến tổng tiền sụt giảm `loan` không có lý do được mô hình hóa, kích hoạt vi phạm thất thoát tiền tệ ảo.
+  3. *Bẫy Cộng Dồn Trùng Lặp Cờ Thế Chấp (Duplicate Mortgage Flag Leak)*: Nếu delta kế tiếp tiếp tục gửi `cell.isMortgaged === true` trên ô đã bị thế chấp từ trước, việc thiếu kiểm tra `!wasMortgaged` làm cộng dồn tiền giả mạo vào kỳ vọng ngân sách.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Dynamic Round GO Salary Invariant**: `calculateGoSalary` trong Telemetry bắt buộc gọi `getRoundGoSalary(delta?.roundNumber ?? preState.roundNumber ?? 1)` từ `src/domain/room.ts`, đồng bộ hoàn toàn với giảm phát lương theo vòng đấu (Vòng 1-20: 2.000 Tr., Vòng 21-30: 1.500 Tr., Vòng 31+: 1.000 Tr.).
+  2. **Bilateral Mortgage State Lifecycle**: `computeCellDelta` bắt buộc kiểm tra trạng thái trước đó `wasMortgaged`:
+     - `isMortgaged === true && !wasMortgaged`: cộng tiền thế chấp `+Math.floor(deed.price * 0.5)`.
+     - `isMortgaged === false && wasMortgaged`: trừ tiền chuộc `-(loan + fee)`, để `absorbedTreasury` tự động hấp thụ phần `fee` nộp vào Kho bạc, cân bằng hoàn hảo `postTotal - preTotal`.
+- **Traceability**: `[TC-IMP40.17..20/MSS]`, `tests/client/telemetry_gameplay_invariants.test.ts`, `src/client/telemetry/telemetry_delta_hook.ts`.
+
+
+
+
 
 
