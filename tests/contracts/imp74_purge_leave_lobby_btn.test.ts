@@ -107,12 +107,12 @@ describe('[TC-74/MSS][IMP-74] Purge Leave Lobby Button Contract Suite', () => {
   // FACET 2: PRESERVATION OF ESSENTIAL HEADER & DECK CONTROLS
   // =========================================================================
   describe('Facet 2: Preservation of Essential Header Controls', () => {
-    it('[TC-74.05/MSS][IMP-74] PreMatchDeck preserves data-testid="toggle-lobby-panel-btn" for 3D viewing', () => {
-      expect(hostMarkup).toContain('data-testid="toggle-lobby-panel-btn"');
+    it('[TC-74.05/MSS][IMP-74] PreMatchDeck purges data-testid="toggle-lobby-panel-btn" to simplify lobby UX', () => {
+      expect(hostMarkup).not.toContain('data-testid="toggle-lobby-panel-btn"');
     });
 
-    it('[TC-74.06/MSS][IMP-74] PreMatchDeck preserves data-testid="reset-camera-btn" for camera reset', () => {
-      expect(hostMarkup).toContain('data-testid="reset-camera-btn"');
+    it('[TC-74.06/MSS][IMP-74] PreMatchDeck purges data-testid="reset-camera-btn" to remove redundant lobby control', () => {
+      expect(hostMarkup).not.toContain('data-testid="reset-camera-btn"');
     });
 
     it('[TC-74.07/MSS][IMP-74] PreMatchDeck preserves data-testid="lobby-mute-toggle-button" for audio toggling', () => {

@@ -147,18 +147,17 @@ describe('[TC-73/MSS][IMP-73] Telephoto Camera & Responsive Aspect Fit Contract 
   // =========================================================================
   // FACET 3: UI HEADER RESET CAMERA CTA
   // =========================================================================
-  describe('Facet 3: UI Header Reset Camera CTA', () => {
-    it('[TC-73.15/MSS][IMP-73] PreMatchDeck header renders reset-camera-btn container', () => {
-      expect(preMatchHtml).toContain('data-testid="reset-camera-btn"');
+  describe('Facet 3: UI Header Camera Controls Cleanliness', () => {
+    it('[TC-73.15/MSS][IMP-73] PreMatchDeck header purges redundant reset-camera-btn container', () => {
+      expect(preMatchHtml).not.toContain('data-testid="reset-camera-btn"');
     });
 
-    it('[TC-73.16/MSS][IMP-73] reset-camera-btn displays target icon or Góc Chuẩn label', () => {
-      const hasIconOrText = preMatchHtml.includes('🎯') || preMatchHtml.includes('Góc Chuẩn');
-      expect(hasIconOrText).toBe(true);
+    it('[TC-73.16/MSS][IMP-73] PreMatchDeck does not leak obsolete camera reset icon', () => {
+      expect(preMatchHtml).not.toContain('title="Đặt lại góc chuẩn 4 góc"');
     });
 
-    it('[TC-73.17/MSS][IMP-73] reset-camera-btn provides accessible label for screen readers', () => {
-      expect(preMatchHtml).toMatch(/aria-label=".*(?:góc chuẩn|đặt lại|reset).*"/i);
+    it('[TC-73.17/MSS][IMP-73] PreMatchDeck maintains clean non-cluttered header controls', () => {
+      expect(preMatchHtml).not.toMatch(/aria-label=".*(?:góc chuẩn|đặt lại).*"/i);
     });
   });
 

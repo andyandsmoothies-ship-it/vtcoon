@@ -3965,6 +3965,24 @@
 
 ---
 
+### 240. [UI/UX][LOBBY] Purge Gaudy Top-Left Floating Header & Unified PreMatchDeck All-in-One Lobby Controls (IMP-173)
+- **Bẫy nghiệp vụ & kỹ thuật**:
+  1. *Thanh công cụ sảnh chờ lệch ngữ cảnh & phân mảnh thị giác (Lobby Context Mismatch & Visual Clash Trap)*: Màn hình sảnh chờ (`PreMatchDeck`) trước đây tồn tại một dải banner đỏ - vàng kim bóng bẩy (`bg-gradient-to-b from-[#B91C1C]`) ở góc trên bên trái, chứa tiêu đề dài dòng (*"Sảnh Chờ Đảo Ngọc 🏝️ • Bến Cảng Du Thuyền"*) và cụm nút điều khiển camera 3D (`🎯 Góc Chuẩn`, `🏙️ Ngắm 3D`). Trong khi ván đấu chưa bắt đầu, việc hiển thị các nút điều khiển camera 3D gây cảm giác thừa thãi, vô nghĩa ("không có ý nghĩa gì cả" theo phản hồi người dùng) và che khuất sa bàn 3D phía sau.
+  2. *Nút thoát phòng đặt sai vị trí (Misplaced Leave Room Affordance)*: Nút `[🏠 Về Menu]` bị nhét chung vào dải banner camera ở góc trái, khiến người chơi đang tương tác với thẻ sảnh chờ bên phải phải tìm kiếm rời rạc khắp màn hình khi muốn hủy phòng.
+  3. *Lãng phí không gian hiển thị trên thiết bị di động*: Do phải chừa chỗ cho banner góc trái không bị đè lên thẻ phòng, thẻ sảnh chờ mobile phải đẩy lề xuống `top-24`, làm hẹp không gian dọc dành cho danh sách người chơi và nút Bắt đầu trận đấu.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Purge Gaudy Floating Header Invariant**: Loại bỏ 100% thanh banner đỏ cồng kềnh ở góc trên bên trái. Sa bàn 3D Đảo Ngọc được giải phóng trọn vẹn, tạo cảm giác thoáng đãng, chuyên nghiệp chuẩn Retropoly.
+  2. **Unified PreMatchDeck Header (All-in-One Deck)**: Toàn bộ điều khiển cần thiết được tích hợp gọn gàng ngay trên hàng đầu tiên của thẻ `PreMatchDeck`:
+     - Nút `[🏠 Về Menu]` (`data-testid="back-to-hub-btn"`, `hidden sm:inline`) đặt ngay góc trên bên trái của thẻ.
+     - Nhãn thương hiệu súc tích: `VTCOON 3D • 🏝️ Sảnh Chờ`.
+     - Nút bật/tắt âm thanh sảnh chờ tinh tế ở góc phải thẻ: `[🔊/🔇 Âm thanh]` (`data-testid="lobby-mute-toggle-button"`).
+  3. **Purge Redundant Pre-Match Camera & Collapse Controls**: Loại bỏ hoàn toàn 2 nút `[🎯 Góc Chuẩn]` (`reset-camera-btn`) và `[🏙️ Ngắm 3D]` (`toggle-lobby-panel-btn`) cùng trạng thái `isPanelCollapsed` khỏi sảnh chờ. Góc quay sảnh chờ được cố định từ trước theo góc nhìn toàn cảnh đảo ngọc, người chơi chỉ cần tập trung thiết lập phòng và bắt đầu ván đấu.
+  4. **Contract Preservation**: Duy trì đầy đủ các thuộc tính kiểm thử bắt buộc: `data-testid="back-to-hub-btn"`, `data-testid="lobby-mute-toggle-button"`, `VTCOON`, `🏝️`, `Sảnh Chờ`, `max-h-[calc(100dvh-7rem)]`, và `top-24 md:top-6`.
+- **Traceability**: `[TC-74.01..18]`, `[TC-MOB01.01..03]`, `[TC-IMP168.14..20]`, `tests/contracts/imp74_purge_leave_lobby_btn.test.ts`, `tests/contracts/imp73_telephoto_camera_and_responsive_fit.test.ts`, `tests/contracts/imp63_lean_tabletop_hud_and_perf.test.ts`, `tests/client/mobile_responsive_hud.test.ts`, `tests/client/ui06_lobby_screen.test.ts`, `tests/client/imp168_welcome_hub_and_room_creation.test.ts`, `src/client/ui/lobby/pre_match_deck.tsx`.
+
+
+---
+
 ### 239. [SERVER/STORAGE] Supabase Storage REST API JWT Bearer Contract & Invalid Compact JWS Invariant (IMP-169)
 - **Bẫy nghiệp vụ & kỹ thuật**:
   1. *Bẫy chìa khóa Opaque mới gây lỗi Invalid Compact JWS (New Opaque API Key Trap)*: Supabase giới thiệu định dạng API key mới dạng chuỗi không định hình (`sb_secret_...` và `sb_publishable_...`). Tuy nhiên, hệ thống máy chủ `storage-api` của Supabase nội bộ vẫn sử dụng bộ xác thực JWT (yêu cầu chuỗi JSON Web Token theo chuẩn RFC 7515 Compact JWS gồm 3 phần `header.payload.signature` bắt đầu bằng `eyJhbGciOi...`). Khi gửi `Authorization: Bearer sb_secret_...`, Supabase Storage cố giải mã token và trả về lỗi `HTTP 400/403 Bad Request / Unauthorized: {"statusCode":"403","error":"Unauthorized","message":"Invalid Compact JWS","code":"AccessDenied"}`.
@@ -3974,3 +3992,39 @@
   2. **Diagnostic Upload Error Logging**: `SupabaseStorageService.uploadFile` BẮT BUỘC ghi log chi tiết mã trạng thái và nội dung lỗi từ Supabase (`console.warn('[SupabaseStorage] Upload failed (${status} ${statusText}): ${errorText}')`) khi `response.ok === false`, loại bỏ hoàn toàn các lỗi câm trong vận hành hệ thống.
   3. **Multi-Key Flexible Env Fallback**: Constructor của `SupabaseStorageService` tự động kiểm tra cả `SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_URL` và `SUPABASE_KEY` / `SUPABASE_SERVICE_ROLE_KEY` / `SUPABASE_SECRET_KEY` / `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, bảo đảm tính thích ứng với mọi quy ước đặt tên biến môi trường của các nền tảng PaaS.
 - **Traceability**: `[TC-IMP169.01..15]`, `tests/server/imp169_supabase_storage.test.ts`, `src/server/storage/supabase_storage.ts`, `src/server/logging/persistent_room_logger.ts`.
+
+---
+
+### 241. [DOMAIN/I18N/UI] Event Cards Brevity, Professional Tone & Commercial Storytelling Invariant (IMP-174)
+- **Bẫy nghiệp vụ & kỹ thuật**:
+  1. *Bẫy Tiêu Đề Tiếng Lóng Cợt Nhả (Colloquial Slang & Inappropriate Tone Trap)*: Tiêu đề thẻ như 'CỔ PHIẾU "MÚA BÊN TRĂNG"' mang tính cợt nhả, thiếu đứng đắn, làm giảm tính nghiêm túc của một trò chơi cờ tỷ phú mô phỏng tài chính - địa ốc chuyên nghiệp.
+  2. *Bẫy Mô Tả Dài Dòng, Quá Tải Thông Tin Thị Giác (Multi-Sentence Wordy Description Trap)*: Mô tả thẻ sự kiện trước đây gồm 2-3 câu (20-25 từ), gây quá tải thông tin, ép layout popup và cản trở người chơi đọc nhanh trong nhịp độ ván đấu.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Professional Commercial Tone Invariant**:
+     - `CC_JUNK_STOCK`: Chuẩn hóa vĩnh viễn thành `'Bán Tháo Cổ Phiếu'` (loại bỏ hoàn toàn "múa bên trăng" trên toàn bộ codebase).
+     - Rà soát toàn bộ 36 thẻ theo văn phong tài chính, thương mại chuyên nghiệp nhưng gần gũi, súc tích (`Bán Tháo Cổ Phiếu`, `Đấu Giá Biển Số Đẹp`, `Chốt Lời Cổ Phiếu VN30`, `Tăng Lãi Suất Tín Dụng`, `Đóng Băng Giao Dịch`, `Mùa Cao Điểm Du Lịch Quốc Tế`).
+  2. **Single-Sentence Concise Storytelling Invariant (<= 15-20 Words)**:
+     - Toàn bộ 36 thẻ (20 Cơ Hội + 16 Thị Trường) trong `src/domain/event_card_metadata.ts` được rút gọn thành đúng 1 câu văn duy nhất, cô đọng dưới 15-20 từ.
+     - Bảo toàn 100% hợp đồng kiểm thử của các ticket trước (giữ nguyên cụm từ bắt buộc `tăng 20% giá trị khi thế chấp` trong `MC_URBAN_PLANNING`, giá trị Hero Stat `'-500 Tr.'` trong `MC_FUEL_SURGE`, `'-800 Tr.'` trong `MC_ALCOHOL_CHECK`, và tiêu đề chuẩn hóa).
+  3. **Zero Word Repetition Across 3 Tiers**:
+     - Tầng 1 Tiêu đề (`vi.ts`): Tên sự kiện thương mại ngắn gọn (2-5 từ).
+     - Tầng 2 Mô tả (`event_card_metadata.ts`): Bối cảnh thực tế (1 câu duy nhất <= 15-20 từ).
+     - Tầng 3 Hero Stat (`event_card_visuals.ts`): Tác động tài chính định lượng Mono đậm nét.
+- **Traceability**: `src/domain/i18n/vi.ts`, `src/domain/event_card_metadata.ts`, `src/client/ui/modals/event_card_visuals.ts`, `tests/client/imp156_event_card_visual_declutter.test.ts`, `tests/client/imp135_market_ticker_clarity_and_popup_duration.test.ts`.
+
+---
+
+### 242. [UI/UX/ERGONOMICS] GameRulesModal Stable Container Height, Zero Layout Shift & Flex Clipping Prevention Invariant (IMP-175)
+- **Bẫy nghiệp vụ & kỹ thuật**:
+  1. *Bẫy chiều cao co giãn theo nội dung tab (Tab Content Height Jump Trap)*: Khi chuyển đổi giữa các tab có độ dài nội dung chênh lệch lớn (Tab "Quy Tắc Cốt Lõi" ~400px vs Tab "Cơ Chế Đặc Biệt" ~850px), modal tự động co giãn chiều cao theo nội dung (`max-h-[90dvh]` không cố định `h`). Do modal được căn giữa màn hình (`items-center`), mỗi lần đổi tab toàn bộ hộp thoại bị giật nảy lên xuống (nhảy từ 500px lên 750px), làm vị trí các nút tab trên màn hình bị dịch chuyển liên tục khiến người dùng khó thao tác và trải nghiệm thị giác bị đứt gãy.
+  2. *Bẫy đẩy chân trang ra ngoài vùng hiển thị (Flexbox Overflow Clipping Trap)*: Thẻ `<main>` bên trong flex container không có thuộc tính `min-h-0`, trong khi `<header>`, `<nav>`, `<footer>` thiếu `shrink-0`. Khi nội dung cuộn bên trong dài hơn trần `max-h`, thẻ `<main>` cản trở co lại, đẩy thẻ `<footer>` chứa nút "Đã Hiểu" vượt ra ngoài đáy của modal và bị `overflow-hidden` cắt mất phân nửa nút bấm.
+  3. *Bẫy giữ vị trí cuộn cũ khi đổi tab (Stale Scroll Position Trap)*: Người dùng cuộn xuống dưới cùng của tab dài rồi chuyển sang tab ngắn hơn, vị trí cuộn không được reset khiến tab mới bị hiển thị lơ lửng ở giữa hoặc đáy trang.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Constant Modal Container Height**: Hộp thoại hướng dẫn game cố định chiều cao `h-[85dvh] max-h-[640px]`, đảm bảo khung viền modal, header và thanh tab hoàn toàn cố định ở cùng một tọa độ Y trên màn hình bất kể đang xem tab nào.
+  2. **Flexbox Non-Clipping Triad (`shrink-0` & `min-h-0`)**:
+     - `<header>`, `<nav>`, `<footer>` bắt buộc có class `shrink-0` để chống bị ép bẹp.
+     - `<main>` bắt buộc có `flex-1 min-h-0 overflow-y-auto` để tự do cuộn bên trong vùng không gian cố định mà không bao giờ chèn ép footer hay làm biến dạng modal.
+  3. **Tab-Switch Scroll Reset**: Sử dụng `useRef<HTMLElement>` gắn vào thẻ `<main>` kết hợp `useEffect` lắng nghe `activeTab` để tự động đưa `contentRef.current.scrollTop = 0` ngay khi người dùng chọn tab mới.
+- **Traceability**: `[TC-172.01..06/MSS]`, `tests/client/imp172_game_rules_modal_stable_height.test.ts`, `tests/contracts/imp72_lobby_redesign_game_rules_and_desktop_framing.test.ts`, `src/client/ui/modals/game_rules_modal.tsx`.
+
+

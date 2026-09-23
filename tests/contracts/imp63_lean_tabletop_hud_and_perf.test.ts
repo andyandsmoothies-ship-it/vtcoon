@@ -322,7 +322,7 @@ describe('[TC-63/MSS][UC-IMP63] Lean Tabletop HUD & GPU Optimization Contract Su
       expect(html).not.toContain('bg-slate-900/90');
     });
 
-    it('[TC-63.4/MSS] PreMatchDeck duy trì 100% data-testid="toggle-lobby-panel-btn"', () => {
+    it('[TC-63.4/MSS] PreMatchDeck loại bỏ data-testid="toggle-lobby-panel-btn" dư thừa', () => {
       const html = renderToStaticMarkup(
         React.createElement(PreMatchDeck, {
           roomCode: 'VT8888',
@@ -330,7 +330,7 @@ describe('[TC-63/MSS][UC-IMP63] Lean Tabletop HUD & GPU Optimization Contract Su
           slots: sampleLobbySlots,
         })
       );
-      expect(html).toContain('data-testid="toggle-lobby-panel-btn"');
+      expect(html).not.toContain('data-testid="toggle-lobby-panel-btn"');
     });
 
     it('[TC-63.4/MSS] PreMatchDeck duy trì 100% data-testid="lobby-room-code"', () => {

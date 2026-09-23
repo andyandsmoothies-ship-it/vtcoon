@@ -1,5 +1,5 @@
 // [IMP-72] GameRulesModal — Hướng Dẫn & Thể Lệ Game Toàn Diện (Clean & Modern Style)
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 type GameRulesTab = 'core' | 'cards' | 'mechanics';
 
@@ -15,6 +15,14 @@ export function GameRulesModal({
   initialTab = 'core',
 }: GameRulesModalProps): React.ReactElement | null {
   const [activeTab, setActiveTab] = useState<GameRulesTab>(initialTab);
+  const contentRef = useRef<HTMLElement>(null);
+
+  // Cuộn về đầu trang mỗi khi chuyển tab để chống giữ vị trí cuộn cũ
+  useEffect(() => {
+    if (contentRef.current) {
+      contentRef.current.scrollTop = 0;
+    }
+  }, [activeTab]);
 
   if (!isOpen) {
     return null;
@@ -30,14 +38,14 @@ export function GameRulesModal({
       }}
     >
       <div
-        className="w-full max-w-xl bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden flex flex-col text-slate-900 max-h-[90dvh] animate-in zoom-in-95 duration-200"
+        className="w-full max-w-xl h-[85dvh] max-h-[640px] bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden flex flex-col text-slate-900 animate-in zoom-in-95 duration-200"
         data-testid="game-rules-modal"
         role="dialog"
         aria-modal="true"
         aria-labelledby="rules-modal-title"
       >
         {/* Header */}
-        <header className="flex items-center justify-between px-5 py-4 border-b border-slate-200 bg-slate-50/80">
+        <header className="flex items-center justify-between px-5 py-4 border-b border-slate-200 bg-slate-50/80 shrink-0">
           <div className="flex items-center gap-2">
             <h2 id="rules-modal-title" className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
               <span>📖</span> HƯỚNG DẪN & THỂ LỆ GAME
@@ -55,7 +63,7 @@ export function GameRulesModal({
         </header>
 
         {/* Tab Navigation */}
-        <nav className="flex items-center p-2 gap-1.5 bg-slate-100/70 border-b border-slate-200" aria-label="Danh mục hướng dẫn">
+        <nav className="flex items-center p-2 gap-1.5 bg-slate-100/70 border-b border-slate-200 shrink-0" aria-label="Danh mục hướng dẫn">
           <button
             type="button"
             onClick={() => setActiveTab('core')}
@@ -98,7 +106,7 @@ export function GameRulesModal({
         </nav>
 
         {/* Tab Content */}
-        <main className="flex-1 overflow-y-auto p-5 space-y-4 text-xs leading-relaxed text-slate-700">
+        <main ref={contentRef} className="flex-1 min-h-0 overflow-y-auto p-5 space-y-4 text-xs leading-relaxed text-slate-700">
           {activeTab === 'core' && (
             <div className="space-y-3.5">
               <div className="p-3.5 rounded-xl bg-blue-50/70 border border-blue-100 flex items-start gap-3">
@@ -302,7 +310,7 @@ export function GameRulesModal({
         </main>
 
         {/* Footer */}
-        <footer className="px-5 py-3 border-t border-slate-200 bg-slate-50/50 flex justify-end">
+        <footer className="px-5 py-3 border-t border-slate-200 bg-slate-50/50 flex justify-end shrink-0">
           <button
             type="button"
             onClick={onClose}

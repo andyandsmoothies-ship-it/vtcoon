@@ -68,7 +68,6 @@ export function PreMatchDeck(props: PreMatchDeckProps): React.ReactElement {
   const canStartCheck = canStartGame();
   const [copiedCode, setCopiedCode] = useState(false);
   const [showQr, setShowQr] = useState(false);
-  const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
   const [showRulesModal, setShowRulesModal] = useState(false);
   const occupiedCount = slots.filter((s) => s.isOccupied).length;
 
@@ -163,96 +162,57 @@ export function PreMatchDeck(props: PreMatchDeckProps): React.ReactElement {
 
   const rendered = (
     <div className="relative w-full h-full min-h-screen text-slate-100 select-none pointer-events-none overflow-hidden">
-      {/* Huy hiệu thương hiệu 3D dập nổi đỏ - vàng hoàng gia chuẩn Retropoly */}
-      <header className="pointer-events-auto absolute top-3 left-3 right-3 sm:right-auto md:top-6 md:left-6 z-30 inline-flex items-center gap-3.5 bg-gradient-to-b from-[#B91C1C] via-[#991B1B] to-[#700A0A] border-[2.5px] border-amber-300 ring-2 ring-amber-500/50 rounded-2xl px-3.5 py-2 md:px-5 md:py-3 shadow-[0_6px_0_0_#450a0a,0_12px_28px_rgba(0,0,0,0.65),inset_0_1px_2px_rgba(255,255,255,0.45)] overflow-hidden w-fit max-w-[calc(100vw-1.5rem)] sm:max-w-none">
-        {/* Lớp phủ vệt bóng bề mặt (Juicy Gloss Specular Highlight) */}
-        <div className="absolute top-0 left-0 right-0 h-[45%] bg-gradient-to-b from-white/30 via-white/10 to-transparent pointer-events-none rounded-t-2xl" />
-
-        {/* Huy hiệu kim loại mạ vàng dập nổi 3D */}
-        <div className="relative z-10 w-12 h-12 rounded-xl bg-gradient-to-tr from-amber-600 via-amber-300 to-yellow-100 flex items-center justify-center font-black text-amber-950 text-lg shadow-[0_3px_0_0_#78350f,0_4px_10px_rgba(0,0,0,0.45),inset_0_1px_2px_rgba(255,255,255,0.9)] border-2 border-amber-100 ring-1 ring-amber-700/60 shrink-0">
-          <span className="drop-shadow-[0_1px_0_rgba(255,255,255,0.6)]">VT</span>
-        </div>
-
-        {/* Tiêu đề thương hiệu VTCOON dập nổi 3D sắc nét */}
-        <div className="relative z-10 flex flex-col justify-center min-w-0">
-          <div className="flex items-center gap-2">
-            <h1 className="text-3xl font-black tracking-wider text-white [text-shadow:_0_3px_0_#450a0a,_0_6px_12px_rgba(0,0,0,0.85)] leading-none">
-              VTCOON
-            </h1>
-            <span className="text-[11px] px-2 py-0.5 rounded-md bg-gradient-to-b from-amber-300 via-amber-400 to-amber-500 text-amber-950 font-black uppercase tracking-wider shadow-[0_2px_0_0_#78350f] border border-amber-100 leading-none">
-              3D
-            </span>
-          </div>
-          <p className="text-[11px] font-bold text-amber-200 uppercase tracking-widest drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] mt-1 truncate max-w-[140px] sm:max-w-none">
-            Sảnh Chờ Đảo Ngọc 🏝️ • Bến Cảng Du Thuyền
-          </p>
-        </div>
-
-        {/* Nút Bật / Tắt âm thanh & Thu gọn bảng trong thanh huy hiệu */}
-        <div className="relative z-10 flex items-center gap-2 pl-3 border-l-2 border-amber-400/40">
-          <button
-            type="button"
-            onClick={() => {
-              AudioEngine.resumeAudioContext();
-              toggleMute();
-            }}
-            className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-gradient-to-b from-[#1E375B] to-[#0F223D] hover:from-[#25446F] hover:to-[#162F52] text-amber-200 border border-amber-400/60 transition-all cursor-pointer text-xs font-bold shadow-[0_2px_0_0_#07101C] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
-            title={isMuted ? 'Bật âm thanh sảnh chờ' : 'Tắt âm thanh sảnh chờ'}
-            aria-label={isMuted ? 'Bật âm thanh sảnh chờ' : 'Tắt âm thanh sảnh chờ'}
-            data-testid="lobby-mute-toggle-button"
-          >
-            <span className="text-sm" aria-hidden="true">{isMuted ? '🔇' : '🔊'}</span>
-            <span className="hidden md:inline text-[11px] font-black">{isMuted ? 'Tắt âm' : 'Bật âm'}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              if (typeof window !== 'undefined' && typeof window.__resetCameraToDefault === 'function') {
-                window.__resetCameraToDefault();
-              }
-            }}
-            className="min-h-[44px] inline-flex items-center justify-center gap-1 text-[11px] px-3 py-2 rounded-xl bg-gradient-to-b from-[#1E375B] to-[#0F223D] hover:from-[#25446F] hover:to-[#162F52] text-amber-200 border border-amber-400/60 font-bold cursor-pointer transition-all shadow-[0_2px_0_0_#07101C] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
-            data-testid="reset-camera-btn"
-            aria-label="Đặt lại góc chuẩn"
-            title="Đặt lại góc chuẩn 4 góc"
-          >
-            <span className="text-sm" aria-hidden="true">🎯</span>
-            <span className="hidden md:inline text-[11px] font-black">Góc Chuẩn</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setIsPanelCollapsed((prev) => !prev)}
-            className="min-h-[44px] inline-flex items-center justify-center text-[11px] px-3.5 py-2 rounded-xl bg-gradient-to-b from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-amber-950 border border-amber-200 font-black cursor-pointer transition-all shadow-[0_2px_0_0_#78350f] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
-            data-testid="toggle-lobby-panel-btn"
-            aria-label={isPanelCollapsed ? 'Mở bảng điều khiển' : 'Thu gọn bảng điều khiển'}
-          >
-            {isPanelCollapsed ? '📋 Bảng' : '🏙️ Ngắm 3D'}
-          </button>
-
-          <button
-            type="button"
-            onClick={onLeaveRoom}
-            className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center gap-1.5 text-[11px] px-3 py-2 rounded-xl bg-gradient-to-b from-[#1E375B] to-[#0F223D] hover:from-[#25446F] hover:to-[#162F52] text-amber-200 border border-amber-400/60 font-bold cursor-pointer transition-all shadow-[0_2px_0_0_#07101C] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
-            data-testid="back-to-hub-btn"
-            aria-label="Quay về màn hình chính"
-            title="Quay về màn hình chính"
-          >
-            <span className="text-sm" aria-hidden="true">🏠</span>
-            <span className="hidden sm:inline text-[11px] font-black">Về Menu</span>
-          </button>
-        </div>
-      </header>
-
-      {/* Thẻ PreMatchDeck Clean & Modern nổi bên cánh phải */}
+      {/* Thẻ PreMatchDeck Clean & Modern tích hợp toàn diện bên cánh phải */}
       <aside
-        className="pointer-events-auto absolute top-24 md:top-6 right-3 md:right-6 w-[calc(100%-1.5rem)] sm:w-[360px] max-w-[360px] max-h-[calc(100dvh-7rem)] md:max-h-[calc(100dvh-3rem)] z-20 flex flex-col justify-between p-4 bg-[#FFFDF8] border-2 border-slate-900 shadow-[0_6px_0_0_#0f172a] rounded-3xl text-slate-900 overflow-hidden gap-3 transition-transform duration-300"
-        style={{ transform: isPanelCollapsed ? 'translateX(calc(100% + 2rem))' : undefined }}
+        className="pointer-events-auto absolute top-24 md:top-6 right-3 md:right-6 w-[calc(100%-1.5rem)] sm:w-[360px] max-w-[calc(100vw-1.5rem)] sm:max-w-[360px] max-h-[calc(100dvh-7rem)] md:max-h-[calc(100dvh-3rem)] z-20 flex flex-col justify-between p-4 bg-[#FFFDF8] border-2 border-slate-900 shadow-[0_6px_0_0_#0f172a] rounded-3xl text-slate-900 overflow-hidden gap-3"
         data-testid="pre-match-deck"
       >
         {/* Tiêu đề & Hộp Mã phòng */}
         <div className="flex flex-col gap-2.5">
+          {/* Header Sảnh Chờ Tích Hợp: Về Menu | Thương Hiệu VTCOON 3D 🏝️ Sảnh Chờ | Tiện Ích */}
+          <header className="flex items-center justify-between gap-2 pb-2.5 border-b border-slate-200">
+            <div className="flex items-center gap-2 min-w-0">
+              <button
+                type="button"
+                onClick={onLeaveRoom}
+                className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-300 text-slate-700 border border-slate-300 transition-all font-bold text-xs cursor-pointer shadow-xs active:translate-y-0.5"
+                data-testid="back-to-hub-btn"
+                aria-label="Quay về màn hình chính"
+                title="Quay về màn hình chính"
+              >
+                <span className="text-sm" aria-hidden="true">🏠</span>
+                <span className="hidden sm:inline text-[11px] font-black">Về Menu</span>
+              </button>
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className="font-black text-sm tracking-wider text-slate-900 leading-none">
+                  VTCOON
+                </span>
+                <span className="text-[11px] px-1.5 py-0.5 rounded-md bg-gradient-to-b from-amber-300 via-amber-400 to-amber-500 text-amber-950 font-black shadow-2xs border border-amber-200 leading-none">
+                  3D
+                </span>
+                <span className="text-xs text-slate-500 font-bold hidden sm:inline truncate">
+                  • 🏝️ Sảnh Chờ
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                type="button"
+                onClick={() => {
+                  AudioEngine.resumeAudioContext();
+                  toggleMute();
+                }}
+                className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 transition-all cursor-pointer shadow-xs active:translate-y-0.5"
+                title={isMuted ? 'Bật âm thanh sảnh chờ' : 'Tắt âm thanh sảnh chờ'}
+                aria-label={isMuted ? 'Bật âm thanh sảnh chờ' : 'Tắt âm thanh sảnh chờ'}
+                data-testid="lobby-mute-toggle-button"
+              >
+                <span className="text-sm" aria-hidden="true">{isMuted ? '🔇' : '🔊'}</span>
+              </button>
+            </div>
+          </header>
+
           {/* Hộp Mã phòng & Nút Thao tác */}
           <div className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-slate-50/80 p-2.5">
             <div className="flex items-center justify-between">
