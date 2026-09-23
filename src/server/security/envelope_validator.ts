@@ -9,7 +9,7 @@ export type EnvelopeValidationResult =
 
 const VALID_CLIENT_TYPES = new Set([
   'CREATE_ROOM', 'JOIN_ROOM', 'START_GAME', 'PONG', 'RECONNECT', 'INTENT', 'INTENT_REQUEST_RESYNC', 'EMOTE', 'LEAVE_ROOM',
-  'ADMIN_AUTH', 'ADMIN_GET_ROOMS', 'ADMIN_GET_ARCHIVED_ROOMS', 'ADMIN_GET_ARCHIVED_LOGS', 'ADMIN_SUBSCRIBE_ROOM', 'ADMIN_UNSUBSCRIBE_ROOM', 'ADMIN_TERMINATE_ROOM',
+  'ADMIN_AUTH', 'ADMIN_GET_ROOMS', 'ADMIN_GET_ARCHIVED_ROOMS', 'ADMIN_GET_ARCHIVED_LOGS', 'ADMIN_SUBSCRIBE_ROOM', 'ADMIN_UNSUBSCRIBE_ROOM', 'ADMIN_TERMINATE_ROOM', 'ADMIN_SYNC_CLOUD_STORAGE',
 ]);
 
 const CELL_INTENTS = new Set([
@@ -174,6 +174,9 @@ export class EnvelopeValidator {
       return typeof rc === 'string' && rc.length > 0
         ? { success: true, message: { type, roomCode: rc, ...(typeof reason === 'string' ? { reason } : {}) } }
         : { success: false, reasonCode: 'INVALID_ENVELOPE' };
+    }
+    if (type === 'ADMIN_SYNC_CLOUD_STORAGE') {
+      return { success: true, message: { type } };
     }
     return this.validateIntentEnvelope(obj);
   }

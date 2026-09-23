@@ -115,7 +115,12 @@ export function useAdminPortal() {
       }
       fetchArchivedRooms();
     } else if (msg.type === 'ADMIN_ERROR') {
+      setIsSyncingCloud(false);
       showToast(`Lỗi: ${msg.message}`);
+    } else if (msg.type === 'ERROR') {
+      setIsSyncingCloud(false);
+      const reason = (msg as { reasonCode?: string }).reasonCode;
+      showToast(`Lỗi máy chủ: ${reason ?? 'Thao tác bị từ chối'}`);
     } else if (msg.type === 'ADMIN_SYNC_CLOUD_RESULT') {
       setIsSyncingCloud(false);
       const errorText = msg.error || msg.reason || msg.message || 'Lỗi không xác định';
@@ -234,6 +239,15 @@ export function useAdminPortal() {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       setIsSyncingCloud(true);
       wsRef.current.send(JSON.stringify({ type: 'ADMIN_SYNC_CLOUD_STORAGE' }));
+      setTimeout(() => {
+        setIsSyncingCloud((curr) => {
+          if (curr) {
+            showToast('Đồng bộ Cloud quá thời gian chờ (Timeout)');
+            return false;
+          }
+          return false;
+        });
+      }, 45000);
     }
   };
 

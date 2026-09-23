@@ -53,6 +53,7 @@ function syncTurnAndTimer(delta: DeltaPayload, state: GameState): void {
   if (turnPlayerId && state.currentTurnPlayerId !== turnPlayerId) {
     state.setCurrentTurnPlayerId(turnPlayerId);
     state.setTurnTimeRemaining(delta.timeRemaining ?? 60);
+    state.setHasRolledThisTurn(false); // [IMP-182] Triệt tiêu Turn N+1 Leak
   } else if (delta.timeRemaining !== undefined) {
     state.setTurnTimeRemaining(delta.timeRemaining);
   }
@@ -232,16 +233,20 @@ export function applyPhaseAndTimerDeltas(delta: DeltaPayload, state: GameState, 
 export function applyDeltaToStore(delta: DeltaPayload, store: typeof useGameStore = useGameStore): void {
   const state = store.getState();
   const isFullSync = Boolean(delta.cells && delta.cells.length === BOARD_SIZE);
-  if (isFullSync && state.activePawnAnimation) state.clearActivePawnAnimation();
-  if (isFullSync && delta.diceSeq !== undefined) state.setLastDiceSeq(delta.diceSeq);
-  if (isFullSync && delta.dice && delta.dice[0] > 0 && delta.dice[1] > 0) {
-    state.setDice([delta.dice[0], delta.dice[1]]);
+  if (isFullSync) {
+    state.clearActivePawnAnimation();
+    state.setIsRolling(false);
+    if (delta.diceSeq !== undefined) state.setLastDiceSeq(delta.diceSeq);
+    if (delta.dice && delta.dice[0] > 0 && delta.dice[1] > 0) {
+      state.setDice([delta.dice[0], delta.dice[1]]);
+    }
+    state.setHasRolledThisTurn(false);
+  } else {
+    // [IMP-112] Đồng bộ xúc xắc TRƯỚC KHI xử lý di chuyển quân cờ.
+    // Nếu delta mang kết quả xúc xắc mới, triggerDiceRoll sẽ kích hoạt isRolling: true.
+    // Nhờ đó applyPlayerDeltas sẽ đưa bước di chuyển vào pendingPawnMove thay vì chạy trước xúc xắc.
+    syncDiceRoll(delta, state);
   }
-
-  // [IMP-112] Đồng bộ xúc xắc TRƯỚC KHI xử lý di chuyển quân cờ.
-  // Nếu delta mang kết quả xúc xắc mới, triggerDiceRoll sẽ kích hoạt isRolling: true.
-  // Nhờ đó applyPlayerDeltas sẽ đưa bước di chuyển vào pendingPawnMove thay vì chạy trước xúc xắc.
-  syncDiceRoll(delta, state);
 
   const currentState = store.getState();
   const playersInfoMap = initPlayersInfoMap(currentState, isFullSync, delta.players);

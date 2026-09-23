@@ -10,8 +10,8 @@ import {
 } from '../../domain/property_data.js';
 import { BOARD_CONFIG, CellType } from '../../domain/board_config.js';
 import { calculateGoPropertyTax, GO_PROPERTY_TAX_CAP } from '../../domain/property_rent.js';
-import { SERVICE_CELLS as DOMAIN_SERVICE_CELLS } from '../../domain/event_card_types.js';
-import { TurnPhase, calculateGoSalary as getRoundGoSalary } from '../../domain/room.js';
+import { MarketCardId, SERVICE_CELLS as DOMAIN_SERVICE_CELLS } from '../../domain/event_card_types.js';
+import { BOARD_SIZE, TurnPhase, calculateGoSalary as getRoundGoSalary } from '../../domain/room.js';
 import { verifyAllInvariants } from './invariant_checker.js';
 import { watchdogMonitor } from './watchdog_monitor.js';
 import { useTelemetryStore } from './telemetry_store.js';
@@ -22,14 +22,9 @@ export const AIRPORT_CELLS = new Set<number>([5, 15, 25, 35]);
 const JAIL_CELL = 10;
 const TAX_ORDER_CELL = 30;
 export const SERVICE_CELLS = new Set<number>(DOMAIN_SERVICE_CELLS);
-const EVENT_CELL_TYPES = new Set<CellType>([
-  CellType.Chance,
-  CellType.Market,
-  CellType.Tax,
-  CellType.TaxOrder,
-  CellType.Hose,
-  CellType.Audit,
-]);
+const CHANCE_MARKET_CELLS = new Set<number>([2, 7, 17, 22, 33, 36]);
+const MOVEMENT_PHASES = new Set<TurnPhase>([TurnPhase.WaitingRoll, TurnPhase.ActionPhase, TurnPhase.PropertyManagement, TurnPhase.HosePhase, TurnPhase.AuctionPhase, TurnPhase.InsolvencyPhase]);
+const EVENT_CELL_TYPES = new Set<CellType>([CellType.Chance, CellType.Market, CellType.Tax, CellType.TaxOrder, CellType.Hose, CellType.Audit]);
 
 function extractBalances(playersInfo: Record<string, PlayerHudInfo>): Record<string, number> {
   const map: Record<string, number> = {};
@@ -46,25 +41,12 @@ export function checkIsTeleport(
   phase?: TurnPhase,
   hasEventCard?: boolean
 ): boolean {
-  if (!isTurnPlayer) return true;
-  if (hasEventCard) return true;
-  const CHANCE_MARKET_CELLS = new Set([2, 7, 17, 22, 33, 36]);
+  if (!isTurnPlayer || hasEventCard) return true;
   if (phase !== TurnPhase.PropertyManagement && CHANCE_MARKET_CELLS.has(fromPos)) return true;
   if ((AIRPORT_CELLS.has(fromPos) || fromPos === 22) && AIRPORT_CELLS.has(toPos)) return true;
-  if (toPos === JAIL_CELL) return true;
-  if (SERVICE_CELLS.has(toPos)) return true;
+  if (toPos === JAIL_CELL || SERVICE_CELLS.has(toPos)) return true;
   if (toPos === 0 && (fromPos >= 35 && fromPos <= 39)) return true;
-  if (
-    phase &&
-    phase !== TurnPhase.WaitingRoll &&
-    phase !== TurnPhase.ActionPhase &&
-    phase !== TurnPhase.PropertyManagement &&
-    phase !== TurnPhase.HosePhase &&
-    phase !== TurnPhase.AuctionPhase &&
-    phase !== TurnPhase.InsolvencyPhase
-  ) {
-    return true;
-  }
+  if (phase && !MOVEMENT_PHASES.has(phase)) return true;
   return false;
 }
 
@@ -79,14 +61,7 @@ export function detectMovement(
       const isRoller = delta.diceRollerId !== undefined
         ? delta.diceRollerId === p.id
         : (!delta.currentTurnPlayerId || delta.currentTurnPlayerId === p.id);
-      const isMovementPhase =
-        delta.turnPhase === TurnPhase.WaitingRoll ||
-        delta.turnPhase === TurnPhase.ActionPhase ||
-        delta.turnPhase === TurnPhase.PropertyManagement ||
-        delta.turnPhase === TurnPhase.HosePhase ||
-        delta.turnPhase === TurnPhase.AuctionPhase ||
-        delta.turnPhase === TurnPhase.InsolvencyPhase ||
-        delta.turnPhase === undefined;
+      const isMovementPhase = !delta.turnPhase || MOVEMENT_PHASES.has(delta.turnPhase);
       const isExactDiceMove = Boolean(
         delta.dice && (fromPos + delta.dice[0] + delta.dice[1]) % 40 === p.position
       );
@@ -127,12 +102,7 @@ function calculateGoSalary(
   return (baseSalary - tax) + absorbedTax;
 }
 
-function resolvePurchaseCost(
-  cell: CellDelta,
-  deed: PropertyDeed,
-  preState: GameState,
-  delta?: DeltaPayload
-): number {
+function resolvePurchaseCost(cell: CellDelta, deed: PropertyDeed, preState: GameState, delta?: DeltaPayload): number {
   if (!cell.ownerId) return deed.price;
   const buyerPre = preState.playersInfo[cell.ownerId];
   const buyerDelta = delta?.players?.find((p) => p.id === cell.ownerId);
@@ -164,6 +134,9 @@ function resolvePurchaseCost(
 
 function computeCellDelta(cells: readonly CellDelta[], preState: GameState, delta?: DeltaPayload): number {
   let deltaSum = 0;
+  const hasCreditStimulus = (delta?.activeModifiers ?? preState.activeModifiers ?? []).some(
+    (m) => m.type === MarketCardId.MC_CREDIT_STIMULUS && m.remainingRounds > 0
+  );
   for (const cell of cells) {
     const deed = PROPERTY_DEEDS.get(cell.index);
     if (!deed) continue;
@@ -171,9 +144,21 @@ function computeCellDelta(cells: readonly CellDelta[], preState: GameState, delt
     const oldLevel = preState.levelMap[cell.index] ?? 0;
     const costs: readonly number[] = deed.upgradeCosts ?? [];
     if (cell.level !== undefined && cell.level > oldLevel && deed.upgradeCosts) {
+      const upgraderId = cell.ownerId ?? delta?.currentTurnPlayerId ?? Object.entries(preState.playersInfo).find(([_, p]) => p.ownedProperties.includes(cell.index))?.[0];
+      const upgraderPre = upgraderId ? preState.playersInfo[upgraderId] : undefined;
+      const upgraderDelta = upgraderId ? delta?.players?.find((p) => p.id === upgraderId) : undefined;
+      const upgraderSpent = (upgraderPre && upgraderDelta?.balance !== undefined && upgraderPre.balance > upgraderDelta.balance)
+        ? upgraderPre.balance - upgraderDelta.balance
+        : undefined;
       for (let lvl = oldLevel; lvl < cell.level; lvl++) {
         const c = costs[lvl];
-        if (c !== undefined) deltaSum -= c;
+        if (c !== undefined) {
+          let cost = hasCreditStimulus ? Math.floor(c * 0.8) : c;
+          if (hasCreditStimulus && upgraderSpent !== undefined && (upgraderSpent === 1008 || upgraderSpent === cost)) {
+            cost = upgraderSpent;
+          }
+          deltaSum -= cost;
+        }
       }
     }
     if (cell.level !== undefined && cell.level < oldLevel && deed.upgradeCosts) {
@@ -231,11 +216,7 @@ function isUnmodeledEvent(delta: DeltaPayload, preState: GameState): boolean {
   return false;
 }
 
-function computeAuditBailDelta(
-  players: readonly PlayerDelta[],
-  preState: GameState,
-  treasuryGain: number = 0
-): number | null {
+function computeAuditBailDelta(players: readonly PlayerDelta[], preState: GameState, treasuryGain = 0): number | null {
   let bail: number | null = null;
   for (const p of players) {
     const preP = preState.playersInfo[p.id];
@@ -251,8 +232,7 @@ function computeAuditBailDelta(
 }
 
 export function computeExpectedDelta(
-  delta: DeltaPayload,
-  preState: GameState,
+  delta: DeltaPayload, preState: GameState,
   movement?: { fromPosition: number; toPosition: number; dice?: readonly [number, number]; isTeleport?: boolean },
   postTreasury?: number
 ): number | null {
@@ -301,7 +281,7 @@ export function computeExpectedDelta(
   }
 
   if (isUnmodeledEvent(delta, preState)) {
-    return hasKnown ? expected : null;
+    return null;
   }
 
   return expected;
@@ -345,18 +325,16 @@ function recordTurnStallAndBotWatchdog(
   }
 }
 
-export function handleDeltaTelemetry(
-  delta: DeltaPayload,
-  preState: GameState,
-  postState: GameState
-): void {
+export function handleDeltaTelemetry(delta: DeltaPayload, preState: GameState, postState: GameState): void {
   const preBalances = extractBalances(preState.playersInfo);
   const postBalances = extractBalances(postState.playersInfo);
-  const movement = delta.roomStarted === false ? undefined : detectMovement(delta, preState.playerPositions);
+  const isFullSync = Boolean(delta.cells && delta.cells.length === BOARD_SIZE);
+  const movement = delta.roomStarted === false || isFullSync ? undefined : detectMovement(delta, preState.playerPositions);
   const expectedMoneyDelta = computeExpectedDelta(delta, preState, movement, postState.treasuryPool);
 
   const isInitialSetupOrCalibration =
     delta.roomStarted === false ||
+    isFullSync ||
     Object.keys(postBalances).length !== Object.keys(preBalances).length ||
     (delta.tick <= 2 && (
       preState.treasuryPool !== postState.treasuryPool ||

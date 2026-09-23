@@ -11,6 +11,7 @@ import {
 } from './ui_helpers';
 import { BOARD_CONFIG, CellType } from '../../domain/board_config';
 import { MarketCardId } from '../../domain/event_card_types';
+import { TurnPhase } from '../../domain/room';
 
 export interface ActionDockProps {
   readonly onRollDice?: () => void;
@@ -99,11 +100,33 @@ export function ActionDock({
   const [isRollPending, setIsRollPending] = useState(false);
   const botPacing = resolveBotPacingStatus(currentTurnPlayerId, localPlayerId ?? 'p1', playersInfo, turnPhase);
 
-  useEffect(() => {
-    if (hasRolledThisTurn || isRolling || !isMyTurn) {
+  React.useEffect(() => {
+    if ((hasRolledThisTurn || isRolling || !isMyTurn) && isRollPending) {
       setIsRollPending(false);
     }
-  }, [hasRolledThisTurn, isRolling, isMyTurn]);
+  }, [hasRolledThisTurn, isRolling, isMyTurn, isRollPending]);
+
+  React.useEffect(() => {
+    const handleVisibility = () => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        setIsRollPending(false);
+      }
+    };
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', handleVisibility);
+    }
+    return () => {
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('visibilitychange', handleVisibility);
+      }
+    };
+  }, []);
+
+  React.useEffect(() => {
+    if (turnPhase === TurnPhase.WaitingRoll && isRollPending) {
+      setIsRollPending(false);
+    }
+  }, [turnPhase, isRollPending]);
 
   const isRollDisabled = isRollActionDisabled({
     isRolling,
@@ -185,7 +208,7 @@ export function ActionDock({
 
   return (
     <nav
-      className="relative pointer-events-auto flex items-center gap-2 md:gap-3 bg-[#FFFDF8] border-2 border-slate-900 shadow-[0_4px_0_0_#0f172a] rounded-2xl p-2 px-4"
+      className="relative pointer-events-auto flex items-center gap-2 md:gap-3 bg-[#FFFDF8] border-2 border-slate-900 shadow-[0_4px_0_0_#0f172a] rounded-2xl p-2 px-4 max-w-[calc(100vw-1rem)] overflow-x-auto no-scrollbar"
       aria-label="Thanh điều khiển tác vụ"
     >
       {/* Chip Thông Báo Ngữ Cảnh Độc Quyền (Actionable Guidance Chip) */}
@@ -243,7 +266,12 @@ export function ActionDock({
                 <span className="hidden sm:inline">Đổ Tiếp (Đôi)</span>
               </>
             )
-            : 'Đổ Xúc Xắc'}
+            : (
+              <>
+                <span className="sm:hidden">Đổ</span>
+                <span className="hidden sm:inline">Đổ Xúc Xắc</span>
+              </>
+            )}
         </span>
       </button>
 

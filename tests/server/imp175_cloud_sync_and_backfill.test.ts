@@ -10,6 +10,7 @@ import { PersistentRoomLogger } from '../../src/server/logging/persistent_room_l
 import { AdminManager } from '../../src/server/network/admin_manager.js';
 import { RoomManager } from '../../src/server/room_manager.js';
 import * as AdminMessageHandler from '../../src/server/network/admin_message_handler.js';
+import { EnvelopeValidator } from '../../src/server/security/envelope_validator.js';
 import type { AdminArchivedRoomSummary } from '../../src/server/network/admin_types.js';
 import type { WsServerMessage } from '../../src/server/network/network_types.js';
 
@@ -504,5 +505,14 @@ describe('[IMP-175][Facet D: Error Defense & Dispatcher] WebSocket Protocol & Me
       type: 'ERROR',
       reasonCode: 'ADMIN_UNAUTHORIZED',
     });
+  });
+
+  it('[TC-IMP175.14/MSS][UC-IMP175] EnvelopeValidator accepts ADMIN_SYNC_CLOUD_STORAGE without INVALID_ENVELOPE', () => {
+    const validator = new EnvelopeValidator();
+    const result = validator.parseAndValidate(JSON.stringify({ type: 'ADMIN_SYNC_CLOUD_STORAGE' }));
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.message.type).toBe('ADMIN_SYNC_CLOUD_STORAGE');
+    }
   });
 });
