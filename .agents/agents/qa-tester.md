@@ -29,12 +29,13 @@ tools: [view_file, write_to_file, replace_file_content, list_dir, find_by_name, 
      - STRICTLY FORBIDDEN: `for`, `while`, or `.forEach()` inside `it()` body. Use parameterized table testing (`it.each`, `@pytest.mark.parametrize`, `[Theory]`, Table-driven).
    - **Banned Static Checklist Anti-Patterns**:
      - NEVER write tests merely asserting `fs.existsSync`, `typeof fn === 'function'`, or file LOC limits. Those belong to static linters (`npm run lint:slop`, `tsc --noEmit`). Tests must verify runtime observable behavior (inputs ➔ processing ➔ outputs).
-   - **Universal 4-Facet Behavioral Matrix (Mandatory 4-Group Coverage)**:
-     - Every feature slice test suite must assert across 4 facets:
+   - **Universal 5-Facet Behavioral Matrix (Mandatory 5-Group Coverage)**:
+     - Every feature slice test suite must assert across 5 facets:
        1. *Boundary & Range*: Input/model bounds, range constraints, format validity.
        2. *State Reactivity & Multi-Turn Teardown*: Lifecycle transitions, full-pipe delta serialization (origin ➔ broadcaster sparse diff ➔ client parser ➔ store), phase-driven action state resets (actions unblock on turn phase, not just ID swap), and Turn N+1 purge (assert Turn N ephemeral state is 100% cleared/nullified upon Turn N+1 roll/advance).
        3. *Resource Disposal & Timer Isolation*: Memory/resource cleanup, unmount `.dispose()`, no listener leaks, and timer handle isolation (settle timers never blocked by unrelated resets).
        4. *Error Defense & Terminal Invariants*: Edge values (negative, NaN, overflow), idempotency, invalid intents, insolvent role guards (`balance < 0` cannot buy/pay), multi-agent harassment guards (target/room-scope cooldowns), and terminal state immutability (concluded modals reject actions; bankrupt/deleted entities receive 0 funds, pay 0 fees, and trigger fallback).
+       5. *Cross-Coupling Blast Radius & Exceptional Lifecycles*: Assert behavior across 3 axes: downstream consumers update correctly; upstream environmental modifiers/policies alter outputs as specified; and exceptional lifecycles (full resync/reconnect, cold start, concurrent multi-event mutations, terminal entity isolation) execute without state corruption.
    - **Test Density Floor**:
      - Minimum 15-30 atomic tests per feature slice. Ratio of `expect()` / `it()` must stay between 1.0 and 3.5 (ratios > 4.0 indicate monolithic anti-pattern).
    - **Consumer-Side Assertion (Universal Rule - Assert Effect at Point of Consumption)**:
@@ -48,6 +49,9 @@ tools: [view_file, write_to_file, replace_file_content, list_dir, find_by_name, 
      - In event-driven/WebSocket systems, tests asserting downstream events MUST filter by event type (e.g., `waitForMessageType`).
      - NEVER assert raw positional array indices (`messages[0]`) on multi-event streams, as this falsely fails when upstream lifecycle events fire.
      - Explicitly establish the required domain Precondition (e.g., in-game Use Cases must initialize with `started = true`) before asserting in-phase state changes.
+   - **Mock Async Browser Web APIs (Prevent False Greens in Node/JSDOM)**:
+     - In headless test runners (Vitest/Jest/Node), asynchronous browser Web APIs (`img.onload`, `requestAnimationFrame`, `AudioContext`, `canvas.getContext('2d')`, `IntersectionObserver`) do NOT execute network or layout cycles automatically.
+     - Tests asserting asynchronous browser callbacks MUST explicitly provide mock harnesses and trigger handlers (e.g. `img.onload?.()`, fake timers, or mock class stubs). Never allow assertions to pass synchronously while callback logic remains unexecuted.
 
 4. **Phase 3: Business RED Validation (ATDD Quality Gate)**:
    - Run the newly written test file using the project's test runner.

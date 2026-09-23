@@ -4,41 +4,33 @@
 
 ## 1. HARD CONSTRAINTS
 
-- **Terminal Execution**: Windows Command Prompt (`cmd /c`) with `;` for command chaining.
-- **File Modification Tooling**: Use native `write_to_file` or `replace_file_content`. NEVER use shell redirects (`echo`, `cat`, `>`, PowerShell here-strings).
-- **Source Control Safety**: AI NEVER executes `git commit` or `git push`. Only the human user controls git.
-- **Atomic Edits**: Verify target chunk match count before editing.
-- **Context Offloading**: Summarize test outputs to <10 lines. Never dump verbose terminal logs.
 - **Visual Design Compliance**: Follow `docs/domain/design.md`. Keep theme tokens lean.
-- **Anti-Slop (YAGNI)**: Minimum structure. Zero single-use abstractions, zero speculative extensions.
-- **Complexity Limits**:
-  - Core Logic / FSM / Domain Services: <= 400 LOC (warning at 300 LOC).
-  - UI Components: <= 500 LOC (extract hooks if logic exceeds 50 LOC).
-  - Static Data / Config / Tables: <= 800 LOC.
-  - Integration / Living Tests: <= 600 LOC (unit tests <= 300 LOC).
-  - Functions: Max 30 LOC, Cyclomatic Complexity <= 5.
-  - Forbidden: Code golf, line stripping, fake no-op stubs. Files under 300 LOC stay intact.
+- **Anti-Slop (YAGNI) & Project LOC Tiers (Enforced by lint:slop)**:
+  - Minimum structure: Zero single-use abstractions, zero speculative extensions.
+  - TIER 1 (Domain Logic / FSM / Server): Max 400 LOC (modular warning at 300 LOC, hard error at 550 LOC).
+  - TIER 2 (UI Components / 3D Canvas / Views): Max 500 LOC (extract hooks if logic exceeds 50 LOC; warning at 400 LOC).
+  - TIER 3 (Static Data / Config / Board Tables): Max 800 LOC (e.g. `tile_icons.ts`, `property_manager_data.ts`, `board_config.ts`; warning at 650 LOC).
+  - Living / Integration Tests: Max 600 LOC (isolated unit tests <= 300 LOC).
+  - Functions: Max 30 LOC, Cyclomatic Complexity <= 5 (logic warns at 50 SLOC, fails at 80 SLOC; declarative JSX/textures exempt).
+  - Pre-Coding Delta LOC: Any target file >= 300 LOC MUST include `[Current + Delta = Expected]` calculation. If `Expected > 400`, Task 1 MUST extract submodules before adding features.
+  - Subtractive Refactoring: When replacing states, listeners, or flags, plans MUST explicitly specify obsolete code to delete.
+  - Anti-Regression Guard: Code golf, line stripping, and fake no-op stubs are strictly forbidden. Files under 300 LOC must stay intact.
 - **Slice Scope Confinement**: Implement only flows in current ticket. Log deferred flows in Tech Debt Ledger.
-- **Pre-Flight Blast Radius Audit**: Every plan MUST evaluate: Risk Level (Isolated / Slice-Bound / Systemic), Direct Touch, Downstream Consumers, and Worst-Case Defense.
+- **Pre-Flight Blast Radius Audit (3-Way Matrix)**: Every plan and review MUST evaluate 3 cross-cutting axes: 1. *Downstream Consumers* (callers, UI subscribers, derived stores, broadcasters, observers); 2. *Upstream Environmental Modifiers* (active market cards/buffs/debuffs `MC_*`, global policies, interest/tax rates); 3. *Exceptional Lifecycle Modes* (reconnect full-sync, Turn N+1 reset, concurrent multi-event mutations, terminal/bankrupt state). Worst-case defense and regression tests mandatory for each axis.
 - **Test State Isolation**: Zero order-dependent tests. Run test suites with `--randomize`. Reconcile static data with fixture contracts.
 - **Risk-Based Autonomous Tiering & Implementation Pipeline**:
   - *Tier 1 (Fast-Track)*: < 50 LOC, UI/CSS/spacing, 3D math, audio, text, or isolated fix to 1-2 files (0 Schema, 0 FSM/Server, 0 Network). Main agent executes directly (Zero subagents, no separate plan/report). Write 1-3 fast tests + minimal code + verify. Complete in 1-2 minutes.
   - *Tier 2 (Full Rigor)*: Schema/Database, Network Protocol, FSM/Finance/Auth, or feature > 50 LOC. Requires Plan Grilling (`plan-griller`) and 3-Station Pipeline:
     - *Visual Banner*: Render `🚦 [KÍCH HOẠT QUY TRÌNH 3 TRẠM]` into chat.
     - *Auto-Escalation*: If Tier 1 exceeds 50 LOC, touches FSM/Schema, or triggers regression, STOP immediately and escalate to Tier 2.
-    1. Station 1 (RED Contract Test): `qa-tester` writes edge/contract tests in `tests/**` and proves failure (Adversarial Inversion). FORBIDDEN from editing `src/**`. Atomic Test Mandate (1-4 asserts/test, zero loops in `it()`). BANNED: static checklist tests (`fs.existsSync`, `typeof fn`). Universal 4-Facet Matrix (Boundary, Reactivity, Disposal, Error Defense). Floor: >= 15 atomic tests / feature slice.
+    1. Station 1 (RED Contract Test): `qa-tester` writes edge/contract tests in `tests/**` and proves failure (Adversarial Inversion). FORBIDDEN from editing `src/**`. Atomic Test Mandate (1-4 asserts/test, zero loops in `it()`). BANNED: static checklist tests (`fs.existsSync`, `typeof fn`). Universal 5-Facet Matrix (Boundary, Reactivity, Disposal, Error Defense, Cross-Coupling Blast Radius). Floor: >= 15 atomic tests / feature slice.
     2. Station 2 (GREEN Implementation): `implementer` writes minimum code in `src/**` to pass tests. FORBIDDEN from relaxing assertions (Zero Bug-Codification).
     3. Station 3 (Independent Review & Disk Verification): Read-only reviewers (`spec-reviewer`, `code-reviewer`, `game-3d-visual-critic`, `ui-craft-reviewer`) audit independently. Reject monolithic or static checklist tests. Implementer never approves own code. Reviewers MUST inspect physical disk files (`view_file`, `list_dir`) and `.agents/evidence/` snapshot before signing off.
-- **Zero-Trust Plan Grilling & Dual Output**: Plans are flawed by default. Before user approval, invoke `plan-griller` (model: inherit) to audit physical disk code across 3 pillars (Data Origin-to-Sink Lifecycle, 360px Layout Budget, Actor Inversion). `plan-griller` MUST write detailed audit to `.agents/audit/PLAN_AUDIT_[TICKET].md` and return a concise summary table (<20 lines) in chat. Main agent verifies findings against physical files before updating `implementation_plan.md`. Zero blind compliance.
+- **Zero-Trust Plan Grilling & Dual Output**: Plans are flawed by default. Before user approval, invoke `plan-griller` (model: inherit) to audit physical disk code across 5 pillars (Data Origin-to-Sink Lifecycle, Layout Budget, Actor Inversion, Transient Teardown, 3-Way Blast Radius). `plan-griller` MUST write detailed audit to `.agents/audit/PLAN_AUDIT_[TICKET].md` and return a concise summary table (<20 lines) in chat. Main agent verifies findings against physical files before updating `implementation_plan.md`. Zero blind compliance.
 - **Automated Evidence Snapshot**: Quantitative evidence snapshot (`.agents/evidence/`) must be recorded before Station 3 sign-off. Triggered automatically by Station 2 or `npm run gate`.
 - **Test Tiering & UAT Execution Boundary**: Fast in-memory tests (`npm test`) must complete in <= 5s. Heavy Turn-by-Turn UAT (`npm run test:uat`, 100 turns) runs ONLY for core changes in `src/domain/`, `src/server/`, or pre-release UAT. STRICTLY FORBIDDEN during UI-only, CSS, 3D assets, or docs edits.
-- **No Post-Hoc Tests**: Write failing tests first (TDD RED). Never write unit tests after code is done.
 - **E2E Artifact Requirement**: Complex feature tests must produce verifiable artifacts (snapshots, logs, or screenshots).
 - **Adversarial Test Scenarios**: Ban happy-path testing. Test medium/hard scenarios (multi-agent competition, debt, disconnects).
-- **Enumerate Failure Modes First**: List 3-5 failure modes before writing isolation tests. Attack those modes directly.
-- **Banned Test Antipatterns**: Ban tautological tests (mock echoes), change detectors (private state / exact CSS), and shallow bug-fix tests.
-- **Zero-Polling & Background Harness**: Never execute in-loop polling (`sleep`/`while`). Offload long tasks to background. Kill processes hanging > 60s.
-- **Docker Health Check Timeout**: Always use timeout flags (`curl -m 5 --connect-timeout 3`) and initial delay (`timeout /t 6 /nobreak >nul`) for container start period (Gotcha #83).
 - **SSOT & Player Intent Integrity**: Player decisions (buy, upgrade, trade) must be explicit Intent transitions (ADR-0001). Never execute player choices as implicit movement side-effects.
 - **Transient State & Turn N+1 Teardown Invariant**: Ephemeral states (auctions, trades, prompts) MUST be purged on turn transitions (`handleRollDice`/`handleEndTurn`). Leaking stale state into Turn N+1 is strictly forbidden.
 - **Explicit Tombstone Protocol (`null` vs `undefined`)**: Cleared delta payload fields MUST explicitly serialize as `null` (never `undefined`) to prevent client retention of stale data.
@@ -50,9 +42,7 @@
 - **Phase-Driven Action State Reset**: Client action availability flags (`hasRolledThisTurn`, `isActing`) MUST reset on `turnPhase` transitions (e.g., `WaitingRoll` resets `hasRolledThisTurn = false`), NEVER solely reliant on `currentPlayerId` changes to prevent extra-turn deadlocks.
 - **Insolvent Entity Role Guard**: Entities with `balance < 0` are strictly forbidden from acting as `buyer` in property trades or asset swaps (`price <= 0`). Insolvent entities may only act as `seller` with positive cash inflow (`price > 0`) to resolve passive debt.
 - **Multi-Agent Harassment Guard**: In P2P trades, auctions, or AI prompts targeting players, cooldowns must be enforced at Target/Room scope (`room.lastTargetTradeOfferRound`), not just Actor scope, preventing N bots from spamming a single player in one round.
-- **Specification Evolution & Precondition Alignment**: When new specifications modify system behavior, AI must NEVER accept regressions (`"N tests failed due to design supersession"` is strictly banned). If legacy tests fail due to outdated preconditions (e.g., in-game Use Cases missing `startGame()`), reconcile by establishing the correct precondition. Never relax assertions to match defective code.
 - **Asynchronous Stream Contract & Event Isolation**: In event-driven/WebSocket systems, tests MUST filter events by type (`waitForMessageType`) or assert full event sequences. NEVER assert positional indices (`messages[0]`) on multi-event lifecycle transitions. Production code MUST NOT suppress valid upstream domain events solely to satisfy naive single-message test listeners.
-- **Full-Pipeline Delivery Checkpoint**: Implementers MUST deliver all architectural layers declared in the approved plan (Backend, Client Hook, Store, Protocol). Passing backend tests while omitting frontend/client wiring is an immediate review rejection (Incomplete Pipeline).
 - **Zero-Blank-Material Invariant**: Plain untextured `<meshBasicMaterial />` or `<meshStandardMaterial />` on badges, flagpoles, signs, or paintings without real texture (`map`) is forbidden. Hidden DOM attributes (`data-*`) cannot bypass WebGL rendering verification.
 - **2D UI Craft Quality Gate**: UI changes must pass `npm run lint:ui` with 0 violations (4 anti-patterns: `border-accent-on-rounded`, `bounce-easing`, `gray-on-color`, `gradient-text`). Audit via `ui-craft-reviewer`.
 - **Root-Level Sticky Action Footer**: Primary modal action footers (Submit, Confirm, Bid, Close) MUST be direct children of the root modal container (`sticky bottom-0`), NEVER nested within multi-column sub-trees to prevent broken mobile sticky context.
@@ -66,8 +56,8 @@
 - **Single Cohesive World Invariant**: Entire game lifecycle belongs to ONE world: Outdoor Sunny Island Metropolis diorama. Zero dark isolated rooms.
 - **Anti-Programmer-Art Primitive Ban**: Raw unlit geometric primitives (`boxGeometry`, `cylinderGeometry`) forbidden. Use outdoor sunlight, saturated palette, and beveled toy-like geometry.
 - **Verification Screenshot Invariant**: Save all verification and UAT screenshots as `.jpg` (Quality 85-92).
-- **Continuous Improvement Persistence**: Ad-hoc fixes and refactors must include plan in `docs/plans/improvements/IMP-[ID]-[slug]_plan.md` and report in `docs/reports/improvements/IMP-[ID]-[slug]_report.md`, updating ADRs and `docs/master_roadmap.md`.
-- **Active Domain Memory & Reflexion Loop**: Pre-flight inspection of `docs/domain/gotchas.md` is mandatory before modifying code in any domain (`[FSM]`, `[3D]`, `[UI]`, `[NET]`, `[BOT]`, `[UAT]`). Every resolved defect must yield a numbered invariant in `docs/domain/gotchas.md`.
+- **Container Health & Timeout Safety**: Always use timeout flags (`curl -m 5 --connect-timeout 3`) and initial delay (`timeout /t 6 /nobreak >nul`) during health checks and container start periods.
+- **Active Domain Memory & JIT Inspection (Zero-Bloat)**: Pre-flight lookup of `docs/domain/gotchas.md` is mandatory before modifying code in any domain (`[FSM]`, `[3D]`, `[UI]`, `[NET]`, `[BOT]`, `[UAT]`). To prevent context bloat, agents MUST ONLY read the Domain Index (lines 1-20) or use targeted `grep_search`. Reading the entire file via `view_file` is strictly forbidden. Every resolved defect must yield a numbered invariant in `docs/domain/gotchas.md`.
 
 ## 2. DEFINITION OF DONE
 

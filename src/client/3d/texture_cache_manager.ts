@@ -5,6 +5,7 @@ import { clearMascotTextureCache } from './mascot_canvas_texture';
 import { clearHeritageTileTextureCache } from './heritage_tile_texture';
 import { clearPriceTextureCache } from './owner_property_markers';
 import { clearEmoteCanvasCache } from './pawn_animator';
+import { bumpTextureRevision } from './texture_revision';
 
 /**
  * Disposes all GPU texture allocations and clears texture caches across all 3D subsystems.
@@ -17,4 +18,5 @@ export function clearAll3DTextureCaches(): void {
   clearHeritageTileTextureCache();
   clearPriceTextureCache();
   clearEmoteCanvasCache();
+  bumpTextureRevision();
 }

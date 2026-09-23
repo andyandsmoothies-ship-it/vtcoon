@@ -80,11 +80,17 @@ argues from the spec, so the spec travels with it; executors read both]
 
 [Project-wide requirements — version floors, dependency limits, naming rules, platform requirements — one line each, exact values from the spec.]
 
-## System Impact & Blast Radius
+## System Impact & Blast Radius (3-Way Matrix)
 - **Risk Dial**: [Isolated (Level 1) | Slice-Bound (Level 2) | Systemic/Global (Level 3)]
 - **Direct Touch**: [Files/modules modified]
-- **Downstream Consumers**: [Components, stores, or schedulers observing or calling this]
-- **Worst-Case Defense**: [Failure mode and fallback isolation]
+- **Subtractive Audit (Delete/Cleanup)**: [Obsolete states, listeners, flags, or dead code paths to remove]
+- **Call-Site Exhaustion**: [100% of callers audited via grep_search — never rely on default parameters]
+- **Import DAG Check**: [Verify upstream imports of modified files to prevent circular dependencies]
+- **Delta LOC Budget**: [For files >= 300 LOC: Current + Delta = Expected; extract submodule if Expected > Ceiling]
+- **Axis 1 - Downstream Consumers**: [Direct callers, UI subscribers, derived stores/caches, event observers]
+- **Axis 2 - Upstream & Environmental Modifiers**: [Active policies, interceptors, feature flags, global modifiers, buffs/debuffs]
+- **Axis 3 - Exceptional Lifecycle Modes**: [Cold start, full state resync/reconnect, session reset, concurrent multi-event mutations, terminal/closed entity states]
+- **Worst-Case Defense**: [Failure mode isolation, fallback guarantees, and blast radius regression tests]
 
 ---
 ```
@@ -97,6 +103,7 @@ argues from the spec, so the spec travels with it; executors read both]
 **Files:**
 - Create: `exact/path/to/file.py`
 - Modify: `exact/path/to/existing.py:123-145`
+- Delete: `exact/path/to/obsolete.py` (or obsolete states/listeners to remove)
 - Test: `tests/exact/path/to/test.py`
 
 **Interfaces:**

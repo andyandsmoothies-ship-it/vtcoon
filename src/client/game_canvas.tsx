@@ -16,6 +16,7 @@ import React, { useRef, useEffect } from 'react';
 import './3d/r3f_fiber_shield';
 import './polyfills/canvas_round_rect';
 import { clearAll3DTextureCaches } from './3d/texture_cache_manager';
+import { isMobileHardware, getRecommendedDpr } from './3d/device_detect';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, ContactShadows, Environment } from '@react-three/drei';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
@@ -326,19 +327,7 @@ export function GameCanvas({
     };
   }, []);
 
-  const [isAutoMobile, setIsAutoMobile] = React.useState<boolean>(() => {
-    if (typeof window === 'undefined') return false;
-    return window.innerWidth < 768 || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-  });
-
-  useEffect(() => {
-    if (propIsMobile !== undefined || typeof window === 'undefined') return;
-    const onResize = () => setIsAutoMobile(window.innerWidth < 768 || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent));
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, [propIsMobile]);
-
-  const isMobileDevice = propIsMobile ?? isAutoMobile;
+  const isMobileDevice = propIsMobile ?? isMobileHardware();
 
   const playersInfo = useGameStore((s) => s.playersInfo);
   const playerPositions = useGameStore((s) => s.playerPositions);
@@ -368,12 +357,12 @@ export function GameCanvas({
     <div className="relative w-full h-full overflow-hidden">
       <Canvas
         shadows={isMobileDevice ? false : "soft"} /* shadows="soft" */
-        dpr={[1, 1.5]}
+        dpr={getRecommendedDpr(isMobileDevice)} /* dpr={[1, 1.5]} */
         camera={{ position: isLobby ? CAMERA_CONFIG.pre_match.position : CAMERA_CONFIG.overview.position, fov: 24, near: 0.5, far: 300 }}
         gl={{
+          antialias: !isMobileDevice,
           toneMapping: ACESFilmicToneMapping,
           toneMappingExposure: 1.08,
-          antialias: true,
         }}
         onCreated={({ gl }) => {
           if (gl?.info) {

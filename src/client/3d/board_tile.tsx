@@ -4,6 +4,8 @@ import { Texture, SRGBColorSpace, Color, type InstancedMesh } from 'three';
 import { CellType, type BoardCell } from '../../domain/board_config';
 import { COLOR_GROUP_HEX } from '../../domain/theme';
 import { getTileTexture, getStandeeTexture } from './tile_texture_generator';
+import { useTextureRevision } from './texture_revision';
+import { isMobileHardware } from './device_detect';
 import { READY_TILES, getTileAssetUrl } from '../assets/tile_assets';
 import { ProceduralBuilding } from './procedural_building';
 import { LUXURY_PAWN_CONFIGS } from './luxury_pawn_models';
@@ -166,6 +168,7 @@ export interface LayeredDioramaTileProps {
   readonly mascotIcon?: string;
   readonly isHeatmapActive?: boolean;
   readonly isMonopolyGroup?: boolean;
+  readonly isMobile?: boolean;
 }
 
 export function tierColor(level: number): string {
@@ -185,8 +188,11 @@ export function LayeredDioramaTile({
   mascotIcon: _mascotIcon,
   isHeatmapActive = false,
   isMonopolyGroup = false,
+  isMobile: propIsMobile,
 }: LayeredDioramaTileProps): React.ReactElement {
-  const tileTexture = useMemo(() => getTileTexture(cell.index), [cell.index]);
+  const textureRevision = useTextureRevision();
+  const isMobile = propIsMobile ?? isMobileHardware();
+  const tileTexture = useMemo(() => getTileTexture(cell.index, isMobile), [cell.index, isMobile, textureRevision]);
 
   if (isCornerTile) {
     return (
