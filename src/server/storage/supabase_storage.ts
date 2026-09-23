@@ -13,6 +13,7 @@ export interface ISupabaseStorageService {
   readonly keyType?: 'JWT' | 'OPAQUE' | 'NONE';
   uploadFile(bucket: string, path: string, content: string | Buffer, contentType?: string): Promise<boolean>;
   downloadFile(bucket: string, path: string): Promise<string | null>;
+  downloadFileWithStatus?(bucket: string, path: string): Promise<{ data: string | null; status: number }>;
 }
 
 export interface KeyResolutionResult {
@@ -212,6 +213,29 @@ export class SupabaseStorageService implements ISupabaseStorageService {
       const detail = causeDetail ? `${msg} (cause: ${causeDetail})` : msg;
       console.warn(`[SupabaseStorage] Network/Fetch error downloading ${cleanBucket}/${cleanPath} from ${cleanUrl}: ${detail}`);
       return null;
+    }
+  }
+
+  async downloadFileWithStatus(bucket: string, path: string): Promise<{ data: string | null; status: number }> {
+    if (!this.isConfigured) return { data: null, status: 0 };
+    const key = this.key;
+    if (!key) return { data: null, status: 0 };
+    const cleanUrl = this.url.replace(/\/$/, '');
+    const cleanBucket = bucket.replace(/^\/+|\/+$/g, '');
+    const cleanPath = path.replace(/^\/+/, '');
+    const url = `${cleanUrl}/storage/v1/object/${cleanBucket}/${cleanPath}`;
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: { apikey: key, Authorization: `Bearer ${key}` },
+        signal: AbortSignal.timeout(15_000),
+      });
+      if (response.status === 404) return { data: null, status: 404 };
+      if (!response.ok) return { data: null, status: response.status };
+      const text = await response.text();
+      return { data: text, status: response.status };
+    } catch {
+      return { data: null, status: 0 };
     }
   }
 }

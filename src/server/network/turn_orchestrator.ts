@@ -113,6 +113,9 @@ export class TurnOrchestrator {
   destroyRoom(roomCode: string): void {
     this.clearRoom(roomCode);
     this.clearAuctionSettleTimer(roomCode);
+    this.activeTimers.delete(roomCode);
+    this.deadlines.delete(roomCode);
+    this.auctionSettleTimers.delete(roomCode);
   }
 
   scheduleAuctionSettle(roomCode: string, auctionKey?: string): void {

@@ -4134,6 +4134,22 @@
   3. **Full Sync Static Roll & Telemetry Invariant Calibration**: Trong `applyDeltaToStore`, khi nhận full sync (40 ô), bắt buộc dọn sạch cờ visual animation và cập nhật xúc xắc tĩnh mà không kích hoạt SFX xúc xắc hoặc animation xúc xắc xoay; reset `hasRolledThisTurn = false`. Trong `telemetry_delta_hook.ts`, khi `isFullSync = Boolean(delta.cells && delta.cells.length === 40)`, triệt tiêu hoàn toàn `movement = undefined` và đăng ký delta vào chế độ thiết lập ban đầu `isInitialSetupOrCalibration`. Đồng thời tích hợp chiết khấu 20% cho `MC_CREDIT_STIMULUS` khi kiểm tra delta nâng cấp ô đất.
 - **Traceability**: `[TC-IMP182.01..25/MSS]`, `[UC-IMP182]`, `tests/client/imp182_mobile_inactivity_and_reconnect_unfreeze.test.ts`, `src/client/network/use_game_ws.ts`, `src/client/network/apply_delta.ts`, `src/client/ui/action_dock.tsx`, `src/client/telemetry/telemetry_delta_hook.ts`.
 
+---
+
+### 251. [NET/SYNC] / [STORAGE] Auto-Terminate When All Humans Leave & Master Manifest Merge (IMP-176)
+- **Bẫy nghiệp vụ & kỹ thuật**:
+  1. *Bẫy Hủy Phòng Oan Khi Chủ Phòng Rời Đi Trong Trận Đấu Nhiều Người (Premature Host Departure Room Teardown Trap)*: Trước đây, khi `room.hostId === msg.playerId`, `handleLeaveRoom` lập tức đóng phòng và giải tán toàn bộ người chơi (`ctx.closeRoom`), kể cả khi các người chơi thật khác vẫn đang thi đấu.
+  2. *Bẫy Kẹt Trận Đấu Toàn Bot Sau Khi Con Người Rời Đi / Mất Kết Nối (Zombie All-Bot Room Resource Leak Trap)*: Khi tất cả người chơi thật thoát phòng hoặc hết thời gian ân hạn 60s (`gracePeriod`), phòng tiếp tục chạy vòng lặp Bot vô tận, lãng phí tài nguyên CPU/RAM máy chủ và tạo ra các phiên chơi ma.
+  3. *Bẫy Ghi Đè Trắng Master Manifest Khi Boot Lạnh / Mạng Lỗi (Cold Boot Manifest Overwrite & Corrupt Merge Trap)*: Khi máy chủ khởi động lại hoặc instance mới hoàn tất trận đấu, việc tải manifest từ Supabase nếu không tải trước (`downloadFile`) sẽ ghi đè danh sách phòng cũ. Thêm vào đó, nếu gặp lỗi mạng (5xx/timeout), nếu cố ghi manifest sẽ phá hủy dữ liệu lịch sử trên Cloud.
+  4. *Bẫy Rò Rỉ Timer Đấu Giá Khi Đóng Phòng (Auction Timer Leak On Room Close)*: `closeRoom` trước đây chỉ gọi `clearRoom(roomCode)`, bỏ quên `auctionSettleTimers`, khiến timer giải quyết đấu giá tiếp tục kích hoạt sau khi phòng đã bị hủy.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Multi-Human Host Migration Invariant**: Trong trận đấu đang diễn ra (`room.started`), khi người chơi rời phòng, nếu còn người chơi thật khác (`remainingHumans.length > 0`), KHÔNG ĐƯỢC đóng phòng. Nếu người rời là chủ phòng (`room.hostId === msg.playerId`), tự động chuyển giao quyền chủ phòng cho người chơi thật kế tiếp (`room.hostId = remainingHumans[0]!.id`).
+  2. **Authoritative All-Humans-Disconnected Teardown**: Nếu `remainingHumans.length === 0` (hoặc sau `BotEngine.takeover` khi grace period hết hạn mà không còn người thật nào `!hasHuman`), máy chủ lập tức đóng phòng với trạng thái `status: 'TERMINATED'`.
+  3. **Sequential Manifest Sync Queue & Fail-Safe Guard**: Toàn bộ thao tác cập nhật master manifest Cloud (`_manifest/rooms_manifest.json`) bắt buộc xếp hàng tuần tự qua `manifestSyncQueue: Promise<void>`. Bắt buộc kiểm tra `cloudStatus`: nếu gặp lỗi mạng / 5xx / timeout (`cloudStatus !== 200 && cloudStatus !== 404`), BẮT BUỘC bỏ qua thao tác upload manifest để bảo vệ dữ liệu Cloud không bị ghi đè rỗng.
+  4. **Thorough Turn Orchestrator Teardown (`destroyRoom`)**: `destroyRoom(roomCode)` bắt buộc dọn dẹp sạch sẽ cả `activeTimers`, `deadlines`, và `auctionSettleTimers`.
+- **Traceability**: `[TC-IMP176.01..08/MSS]`, `[UC-IMP176]`, `tests/server/imp176_auto_terminate_and_manifest_merge.test.ts`, `src/server/network/turn_orchestrator.ts`, `src/server/network/wss_server.ts`, `src/server/network/wss_lobby_handlers.ts`, `src/server/network/reconnect_manager.ts`, `src/server/storage/supabase_storage.ts`, `src/server/logging/persistent_room_logger.ts`.
+
+
 
 
 

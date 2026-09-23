@@ -22,6 +22,7 @@ export interface ReconnectManagerConfig {
   readonly broadcast: (roomCode: string, msg: WsServerMessage) => void;
   readonly gracePeriodMs?: number;
   readonly isSocketConnected?: (roomCode: string, playerId: string) => boolean;
+  readonly onAllHumansDisconnected?: (roomCode: string) => void;
 }
 
 export type VerifyTokenResult =
@@ -35,6 +36,7 @@ export class ReconnectManager {
   private readonly broadcast: (roomCode: string, msg: WsServerMessage) => void;
   private readonly gracePeriodMs: number;
   private readonly isSocketConnected?: (roomCode: string, playerId: string) => boolean;
+  private readonly onAllHumansDisconnected?: (roomCode: string) => void;
 
   /** token -> ReconnectTokenRecord */
   private readonly tokens = new Map<string, ReconnectTokenRecord>();
@@ -52,6 +54,7 @@ export class ReconnectManager {
     this.broadcast = config.broadcast;
     this.gracePeriodMs = config.gracePeriodMs ?? GRACE_PERIOD_MS;
     this.isSocketConnected = config.isSocketConnected;
+    this.onAllHumansDisconnected = config.onAllHumansDisconnected;
   }
 
   getGracePeriodMs(): number {
@@ -200,6 +203,17 @@ export class ReconnectManager {
 
     if (room) {
       BotEngine.takeover(room, playerId);
+      if (room.started) {
+        const hasHuman = room.players.some((p) => !p.isBot && !p.bankrupt);
+        if (!hasHuman) {
+          if (this.onAllHumansDisconnected) {
+            this.onAllHumansDisconnected(roomCode);
+          } else {
+            this.rooms.closeRoom(roomCode);
+          }
+          return;
+        }
+      }
       const current = room.players[room.currentPlayerIndex];
       if (current && current.id === playerId && current.isBot && room.started) {
         this.rooms.runBotTurn(roomCode);

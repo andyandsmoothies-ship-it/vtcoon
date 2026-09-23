@@ -11,6 +11,8 @@ import type { Room, Player } from '../../domain/room.js';
 import type { IntentGuard } from '../security/intent_guard.js';
 import type { PlayerIntent } from '../intent_dispatcher.js';
 
+import type { RoomFinishSummary } from '../logging/persistent_room_logger.js';
+
 export const MAX_PLAYERS = 4;
 
 /** [SECURITY] Hybrid socket ownership check — reject only if a different socket is still OPEN */
@@ -32,7 +34,7 @@ export interface WssLobbyContext {
   sendSessionInit: (socket: WebSocket, playerId: string, roomCode: string) => void;
   bindSocket: (roomCode: string, playerId: string, socket: WebSocket) => void;
   scheduleBotTurn: (roomCode: string) => void;
-  closeRoom: (roomCode: string) => void;
+  closeRoom: (roomCode: string, summary?: RoomFinishSummary) => void;
 }
 
 export function handleCreateRoom(
@@ -237,19 +239,34 @@ export function handleLeaveRoom(
   }
   ctx.sockets.unregister(socket);
   ctx.reconnects.cancelGracePeriod(msg.roomCode, msg.playerId);
-  if (room.hostId === msg.playerId) {
-    ctx.closeRoom(msg.roomCode);
-  } else if (room.started) {
+  if (room.started) {
     ctx.broadcast(msg.roomCode, { type: 'PLAYER_BOT_TAKEOVER', playerId: msg.playerId });
     const p = room.players.find((pl) => pl.id === msg.playerId);
-    if (p) p.bankrupt = true;
+    if (p) {
+      p.isBot = true;
+      p.bankrupt = true;
+    }
+
+    const remainingHumans = room.players.filter((pl) => pl.id !== msg.playerId && !pl.isBot && !pl.bankrupt);
+    if (remainingHumans.length === 0) {
+      ctx.closeRoom(msg.roomCode, { status: 'TERMINATED' });
+      return;
+    }
+
+    if (room.hostId === msg.playerId) {
+      room.hostId = remainingHumans[0]!.id;
+    }
     ctx.broadcaster.broadcastRoomDelta(msg.roomCode);
     ctx.scheduleBotTurn(msg.roomCode);
   } else {
-    const idx = room.players.findIndex((pl) => pl.id === msg.playerId);
-    if (idx !== -1) room.players.splice(idx, 1);
-    ctx.broadcast(msg.roomCode, buildLobbyUpdatePayload(room));
-    ctx.adminManager.broadcastRoomListToAdmins();
+    if (room.hostId === msg.playerId) {
+      ctx.closeRoom(msg.roomCode);
+    } else {
+      const idx = room.players.findIndex((pl) => pl.id === msg.playerId);
+      if (idx !== -1) room.players.splice(idx, 1);
+      ctx.broadcast(msg.roomCode, buildLobbyUpdatePayload(room));
+      ctx.adminManager.broadcastRoomListToAdmins();
+    }
   }
 }
 

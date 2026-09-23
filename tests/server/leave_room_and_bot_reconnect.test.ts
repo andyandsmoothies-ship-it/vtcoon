@@ -42,8 +42,7 @@ describe('LEAVE_ROOM & Bot AI Wakeup on Reconnect/Resync', () => {
   it('[TC-LEAVE-01] Chủ phòng gửi LEAVE_ROOM -> Máy chủ đóng phòng và dọn sạch dữ liệu', async () => {
     const hostSocket = createMockSocket();
     const room = roomManager.createRoom('p1', 'TEST88');
-    roomManager.joinRoom('TEST88', 'p2');
-    roomManager.startGame('TEST88');
+    roomManager.startGame('TEST88', [{ id: 'bot_2' }]);
 
     // Giả lập gửi LEAVE_ROOM từ chủ phòng
     const rawMsg = JSON.stringify({

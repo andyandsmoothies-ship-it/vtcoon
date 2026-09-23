@@ -136,7 +136,7 @@ export interface PendingTradeOfferInfo {
 export interface Room {
   readonly roomCode:      string;
   readonly code?:         string;
-  readonly hostId:        string;
+  hostId:                 string;
   players:               Player[];
   currentPlayerIndex:    number;
   phase:                 TurnPhase;
@@ -194,7 +194,7 @@ export function createPlayer(id: string): Player {
 }
 
 export function createRoom(hostId: string, customRoomCode?: string): Room {
-  const code = customRoomCode && /^[A-Z0-9]{6}$/i.test(customRoomCode) ? customRoomCode.toUpperCase() : generateRoomCode();
+  const code = customRoomCode && customRoomCode.trim().length > 0 ? customRoomCode.trim().toUpperCase() : generateRoomCode();
   return {
     roomCode:           code,
     get code() { return this.roomCode; },

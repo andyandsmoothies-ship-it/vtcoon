@@ -109,6 +109,7 @@ export class WssServer {
     this.reconnects  = config.reconnectManager ?? new ReconnectManager({
       rooms: this.rooms, sessions: this.sessions, broadcaster: this.broadcaster,
       broadcast: (rc, msg) => this.broadcast(rc, msg), gracePeriodMs: config.gracePeriodMs,
+      onAllHumansDisconnected: (rc) => this.closeRoom(rc, { status: 'TERMINATED' }),
       isSocketConnected: (rc, pid) => {
         const s = this.sockets.getPlayerSocket(rc, pid);
         return Boolean(s && s.readyState === WebSocket.OPEN);
@@ -240,7 +241,7 @@ export class WssServer {
       sendSessionInit: (s, pid, rc) => this.sendSessionInit(s, pid, rc),
       bindSocket: (rc, pid, s) => this.bindSocket(rc, pid, s),
       scheduleBotTurn: (rc) => this.scheduleBotTurn(rc),
-      closeRoom: (rc) => this.closeRoom(rc),
+      closeRoom: (rc, summary) => this.closeRoom(rc, summary),
     };
   }
 
@@ -309,7 +310,7 @@ export class WssServer {
     if (this.closingRooms.has(roomCode)) return;
     this.closingRooms.add(roomCode);
     try {
-      this.turnOrchestrator.clearRoom(roomCode);
+      this.turnOrchestrator.destroyRoom(roomCode);
       this.turnWatchdog.clearRoom(roomCode);
       this.sockets.clearRoomSockets(roomCode);
       this.reconnects.clearRoom(roomCode);
