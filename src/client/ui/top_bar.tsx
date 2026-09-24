@@ -77,11 +77,11 @@ export function TopBar(props: TopBarProps): React.ReactElement {
   const displayMaxRounds = roundNumber > maxRounds ? (roundNumber <= 40 ? 40 : roundNumber) : maxRounds;
 
   return (
-    <header className="w-full max-w-full overflow-hidden flex justify-between items-center pointer-events-none px-1.5 sm:px-4">
+    <header className="w-full max-w-full overflow-hidden flex justify-between items-center pointer-events-none px-1.5 sm:px-4 pt-[calc(0.375rem+env(safe-area-inset-top))]">
       {/* Cụm bên trái: Thông tin trận đấu */}
       <div
         data-testid="match-info-capsule"
-        className="pointer-events-auto flex items-center gap-1.5 sm:gap-3 md:gap-4 bg-[#FFFDF8] border-2 border-slate-900 rounded-xl sm:rounded-2xl px-3 sm:px-4 py-1 sm:py-2 shadow-[0_4px_0_0_#0f172a] text-slate-900 text-xs md:text-sm font-medium"
+        className="pointer-events-auto flex items-center gap-1 min-[360px]:gap-1.5 sm:gap-3 md:gap-4 bg-[#FFFDF8] border-2 border-slate-900 rounded-xl sm:rounded-2xl px-3 sm:px-4 py-1 sm:py-2 shadow-[0_4px_0_0_#0f172a] text-slate-900 text-xs md:text-sm font-medium"
       >
         {/* Vòng đấu */}
         <div className="flex items-center gap-1 sm:gap-2">
@@ -122,14 +122,14 @@ export function TopBar(props: TopBarProps): React.ReactElement {
         </div>
 
         {/* Huy hiệu FPS di động */}
-        <div className="h-4 w-px bg-slate-300 sm:hidden" aria-hidden="true" />
+        <div className="h-4 w-px bg-slate-300 hidden min-[360px]:block sm:hidden" aria-hidden="true" />
         <button
           type="button"
+          data-testid="mobile-fps-badge"
           onClick={() => toggleConsole()}
-          className="sm:hidden pointer-events-auto inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-slate-900 text-emerald-400 font-mono text-[10px] font-bold border border-slate-700 shadow-2xs cursor-pointer select-none active:translate-y-px"
+          className="hidden min-[360px]:inline-flex sm:hidden pointer-events-auto items-center gap-1 px-1.5 py-0.5 rounded-md bg-slate-900 text-emerald-400 font-mono text-[10px] font-bold border border-slate-700 shadow-2xs cursor-pointer select-none active:translate-y-px"
           title="Tốc độ khung hình (Bấm để mở hộp đen)"
           aria-label={`FPS: ${fps}`}
-          data-testid="mobile-fps-badge"
         >
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" aria-hidden="true" />
           <span>{fps} FPS</span>
@@ -139,7 +139,7 @@ export function TopBar(props: TopBarProps): React.ReactElement {
       {/* Cụm bên phải: Tiện ích HUD */}
       <div
         data-testid="hud-utilities-cluster"
-        className="pointer-events-auto flex items-center gap-1 sm:gap-2 bg-[#FFFDF8] border-2 border-slate-900 rounded-2xl p-1 sm:p-1.5 px-1.5 sm:px-3 shadow-[0_4px_0_0_#0f172a]"
+        className="pointer-events-auto flex items-center gap-1 min-[360px]:gap-1.5 sm:gap-2 bg-[#FFFDF8] border-2 border-slate-900 rounded-2xl p-1 sm:p-1.5 px-1.5 min-[360px]:px-2.5 sm:px-3 shadow-[0_4px_0_0_#0f172a]"
       >
         {/* Nút Chu kỳ Thời gian Ngày - Hoàng Hôn - Đêm */}
         <button

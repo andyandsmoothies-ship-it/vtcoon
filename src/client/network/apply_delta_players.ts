@@ -22,7 +22,7 @@ function initPlayersInfoMap(
     }
     map[id] = {
       ...info,
-      ownedProperties: isFullSync ? [] : [...info.ownedProperties],
+      ownedProperties: isFullSync ? [] : (info.ownedProperties ? [...info.ownedProperties] : []),
       mortgagedProperties: isFullSync ? [] : (info.mortgagedProperties ? [...info.mortgagedProperties] : []),
     };
   }

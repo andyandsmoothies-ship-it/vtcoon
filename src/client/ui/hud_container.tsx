@@ -1,6 +1,7 @@
 // [UI-S03/MSS][UI-S04/MSS][UI-S05/MSS] HudContainer — Root HUD DOM Overlay (Z-10, pointer-events-none root)
 import React from 'react';
 import { TopBar } from './top_bar';
+import { InAppBrowserBanner } from './in_app_browser_banner';
 import { PlayerHudList } from './player_hud_list';
 import { ActionDock, type ActionDockProps } from './action_dock';
 import { ModalHost } from './modals/modal_host';
@@ -10,6 +11,7 @@ import { ActivityFeedSidebar } from './activity_feed_sidebar';
 import { TelemetryBadge } from './telemetry/telemetry_badge';
 import { TelemetryConsoleModal } from './telemetry/telemetry_console_modal';
 import { RecenterPawnPill } from './recenter_pawn_pill';
+import { CameraResetPill } from './camera_reset_pill';
 import { useGameStore } from '../store/game_store';
 import { useLobbyStore } from '../store/lobby_store';
 import type { PlayerIntent } from '../../server/intent_dispatcher';
@@ -46,10 +48,12 @@ export function HudContainer({
   const pawnPos = playerPositions[myId] ?? 0;
 
   return (
-    <div
-      className="fixed inset-0 pointer-events-none flex flex-col justify-between p-1.5 sm:p-3 md:p-6 z-10 select-none font-sans"
-      data-testid="hud-container"
-    >
+    <>
+      <InAppBrowserBanner />
+      <div
+        className="fixed inset-0 pointer-events-none flex flex-col justify-between p-1.5 sm:p-3 md:p-6 z-10 select-none font-sans"
+        data-testid="hud-container"
+      >
       {/* Tầng đỉnh: Top Bar thông tin vòng đấu, timer, kho bạc */}
       <TopBar onLeaveRoom={onLeaveRoom} />
 
@@ -65,18 +69,19 @@ export function HudContainer({
         <PlayerHudList />
       </div>
 
-      {/* Nút Nổi Recenter Camera Về Quân Cờ */}
-      <div className="pointer-events-auto fixed bottom-24 left-1/2 -translate-x-1/2 z-20">
+      {/* Cụm Nút Nổi Điều Hướng Camera (Recenter Pawn & Camera Snap Overview) */}
+      <div className="pointer-events-none fixed bottom-24 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center gap-2 max-w-[95vw]">
         <RecenterPawnPill
           activeModal={activeModal}
           cameraFocusCell={cameraFocusCell}
           pawnPosition={pawnPos}
           onRecenter={() => setCameraFocusCell(null)}
         />
+        <CameraResetPill />
       </div>
 
       {/* Tầng đáy: Telemetry Badge ở góc dưới bên trái, Action Dock ở góc dưới bên phải */}
-      <footer className="w-full flex flex-row justify-center sm:justify-between items-end gap-2 md:gap-3 pointer-events-none pb-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
+      <footer className="w-full flex flex-row justify-center sm:justify-between items-end gap-2 md:gap-3 pointer-events-none pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
         {/* Huy hiệu Giám Sát Thời Gian Thực & Sức Khỏe Bất Biến (Bottom-Left, không che khuất ActionDock hay Player Cards) */}
         <div className="pointer-events-auto hidden sm:block">
           <TelemetryBadge />
@@ -106,5 +111,6 @@ export function HudContainer({
       {/* Tầng Bảng Điều Khiển Hộp Đen Giám Sát (Z-40 Modal) */}
       <TelemetryConsoleModal />
     </div>
+    </>
   );
 }

@@ -6,7 +6,7 @@ import {
 } from './tile_texture_data';
 import { drawIcon } from './tile_icons';
 import { CORNER_DRAWERS, drawGoCorner } from './corner_tile_art';
-import { isMobileHardware } from './device_detect';
+import { isMobileHardware, isPhoneHardware, isTabletDevice } from './device_detect';
 import {
   hasTileArt,
   getBannerTextColor,
@@ -126,15 +126,16 @@ function createCornerTileTexture(index: number, isMobile = isMobileHardware()): 
 /**
  * Lấy hoặc sinh mới Canvas Texture cho 40 ô cờ với phân tách bộ đệm Desktop / Mobile
  */
-export function getTileTexture(index: number, isMobile = isMobileHardware()): CanvasTexture | null {
-  const cache = isMobile ? mobileTileTextureCache : desktopTileTextureCache;
+export function getTileTexture(index: number, isMobile = isPhoneHardware()): CanvasTexture | null {
+  const useMobile = isMobile && !isTabletDevice();
+  const cache = useMobile ? mobileTileTextureCache : desktopTileTextureCache;
   if (cache.has(index)) {
     return cache.get(index)!;
   }
 
   const isCorner = index === 0 || index === 10 || index === 20 || index === 30;
   const texture = isCorner
-    ? createCornerTileTexture(index, isMobile)
+    ? createCornerTileTexture(index, useMobile)
     : createStandardTileTexture(
         index,
         TILE_METADATA_MAP[index] ?? {
@@ -144,7 +145,7 @@ export function getTileTexture(index: number, isMobile = isMobileHardware()): Ca
           category: 'BÀN CỜ',
           icon: 'default',
         },
-        isMobile,
+        useMobile,
       );
 
   if (texture) {
@@ -156,8 +157,9 @@ export function getTileTexture(index: number, isMobile = isMobileHardware()): Ca
 /**
  * Lấy hoặc sinh mới Canvas Texture 2.5D cho Standee Billboard (512 x 512)
  */
-export function getStandeeTexture(index: number, isMobile = isMobileHardware()): CanvasTexture | null {
-  const cache = isMobile ? mobileStandeeTextureCache : desktopStandeeTextureCache;
+export function getStandeeTexture(index: number, isMobile = isPhoneHardware()): CanvasTexture | null {
+  const useMobile = isMobile && !isTabletDevice();
+  const cache = useMobile ? mobileStandeeTextureCache : desktopStandeeTextureCache;
   if (cache.has(index)) {
     return cache.get(index)!;
   }
@@ -192,7 +194,7 @@ export function getStandeeTexture(index: number, isMobile = isMobileHardware()):
 
   const texture = new CanvasTexture(canvas);
   texture.colorSpace = SRGBColorSpace;
-  texture.anisotropy = isMobile ? 2 : 16;
+  texture.anisotropy = useMobile ? 2 : 16;
   texture.generateMipmaps = true;
   texture.minFilter = LinearMipmapLinearFilter;
   texture.magFilter = LinearFilter;

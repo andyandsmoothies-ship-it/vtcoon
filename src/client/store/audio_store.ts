@@ -12,12 +12,15 @@ export interface AudioState {
   bgmVolume: number;
   sfxVolume: number;
   isMuted: boolean;
+  hapticsEnabled: boolean;
   currentBgmTrack: BGMTrack | null;
   setMasterVolume: (volume: number) => void;
   setBgmVolume: (volume: number) => void;
   setSfxVolume: (volume: number) => void;
   toggleMute: () => void;
   setIsMuted: (isMuted: boolean) => void;
+  setHapticsEnabled: (hapticsEnabled: boolean) => void;
+  toggleHaptics: () => void;
   setCurrentBgmTrack: (track: BGMTrack | null) => void;
 }
 
@@ -26,11 +29,14 @@ export const useAudioStore = create<AudioState>((set) => ({
   bgmVolume: 0.6,
   sfxVolume: 0.8,
   isMuted: false,
+  hapticsEnabled: true,
   currentBgmTrack: null,
   setMasterVolume: (volume) => set({ masterVolume: clampVolume(volume) }),
   setBgmVolume: (volume) => set({ bgmVolume: clampVolume(volume) }),
   setSfxVolume: (volume) => set({ sfxVolume: clampVolume(volume) }),
   toggleMute: () => set((state) => ({ isMuted: !state.isMuted })),
   setIsMuted: (isMuted) => set({ isMuted }),
+  setHapticsEnabled: (hapticsEnabled) => set({ hapticsEnabled }),
+  toggleHaptics: () => set((state) => ({ hapticsEnabled: !state.hapticsEnabled })),
   setCurrentBgmTrack: (currentBgmTrack) => set({ currentBgmTrack }),
 }));

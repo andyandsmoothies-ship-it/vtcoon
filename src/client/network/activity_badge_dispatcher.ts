@@ -191,7 +191,7 @@ const BADGE_HANDLERS: Record<string, (act: ActivityLogEntry, state: GameState) =
   tax: handleTaxBadge,
   auction: handleAuctionBadge,
   card: (act, state) => {
-    if (act.id.startsWith('ma_buyout') || act.message.includes('M&A') || act.message.includes('thâu tóm')) {
+    if (act.id.startsWith('ma_buyout')) {
       handleMaBuyoutBadge(act, state);
     }
   },

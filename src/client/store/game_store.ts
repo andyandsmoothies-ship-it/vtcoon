@@ -15,8 +15,9 @@ import { type GameState, type FloatingTextItem, FloatingTextType, INITIAL_GAME_S
 export const useGameStore = create<GameState>((set, get) => ({
   ...INITIAL_GAME_STATE,
 
-  // IMP-133 Camera Sticky Focus
+  // IMP-133 Camera Sticky Focus & IMP-190 Custom Orbit Camera
   setCameraFocusCell: (cellIndex) => set({ cameraFocusCell: cellIndex }),
+  setHasUserCustomCamera: (hasUserCustomCamera) => set({ hasUserCustomCamera }),
   resetGameState: () => set(INITIAL_GAME_STATE),
 
   setLevelMap: (map) => set({ levelMap: map }),
@@ -93,7 +94,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   setIsRolling: (isRolling) => {
-    set({ isRolling, ...(isRolling ? { cameraFocusCell: null } : {}) });
+    set({ isRolling, ...(isRolling ? { cameraFocusCell: null, hasUserCustomCamera: false } : {}) });
     if (!isRolling) {
       const pending = get().pendingPawnMove;
       if (pending) {
@@ -124,6 +125,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       isRolling: true,
       hasRolledThisTurn: true,
       cameraFocusCell: null,
+      hasUserCustomCamera: false,
       ...(diceSeq !== undefined ? { lastDiceSeq: diceSeq } : {}),
     });
     setTimeout(() => {

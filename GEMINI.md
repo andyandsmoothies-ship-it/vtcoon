@@ -25,6 +25,7 @@
     - *Auto-Escalation*: If Tier 1 exceeds 50 LOC, touches FSM/Schema, or triggers regression, STOP immediately and escalate to Tier 2.
     1. Station 1 (RED Contract Test): `qa-tester` writes edge/contract tests in `tests/**` and proves failure (Adversarial Inversion). FORBIDDEN from editing `src/**`. Atomic Test Mandate (1-4 asserts/test, zero loops in `it()`). BANNED: static checklist tests (`fs.existsSync`, `typeof fn`). Universal 5-Facet Matrix (Boundary, Reactivity, Disposal, Error Defense, Cross-Coupling Blast Radius). Floor: >= 15 atomic tests / feature slice.
     2. Station 2 (GREEN Implementation): `implementer` writes minimum code in `src/**` to pass tests. FORBIDDEN from relaxing assertions (Zero Bug-Codification).
+    2.5. Station 2.5 (Sweeping Scout Audit): After tests pass and before Station 3 review, Agent invokes `scout` to sweep all modified physical files for stale snapshots, unhandled async, leaked listeners, secret hacks, and dead-end UI states. All findings must be resolved before Station 3 sign-off.
     3. Station 3 (Independent Review & Disk Verification): Read-only reviewers (`spec-reviewer`, `code-reviewer`, `game-3d-visual-critic`, `ui-craft-reviewer`) audit independently. Reject monolithic or static checklist tests. Implementer never approves own code. Reviewers MUST inspect physical disk files (`view_file`, `list_dir`) and `.agents/evidence/` snapshot before signing off.
 - **Zero-Trust Plan Grilling & Dual Output**: Plans are flawed by default. Before user approval, invoke `plan-griller` (model: inherit) to audit physical disk code across 5 pillars (Data Origin-to-Sink Lifecycle, Layout Budget, Actor Inversion, Transient Teardown, 3-Way Blast Radius). `plan-griller` MUST write detailed audit to `.agents/audit/PLAN_AUDIT_[TICKET].md` and return a concise summary table (<20 lines) in chat. Main agent verifies findings against physical files before updating `implementation_plan.md`. Zero blind compliance.
 - **Automated Evidence Snapshot**: Quantitative evidence snapshot (`.agents/evidence/`) must be recorded before Station 3 sign-off. Triggered automatically by Station 2 or `npm run gate`.
@@ -58,7 +59,7 @@
 - **Anti-Programmer-Art Primitive Ban**: Raw unlit geometric primitives (`boxGeometry`, `cylinderGeometry`) forbidden. Use outdoor sunlight, saturated palette, and beveled toy-like geometry.
 - **Verification Screenshot Invariant**: Save all verification and UAT screenshots as `.jpg` (Quality 85-92).
 - **Container Health & Timeout Safety**: Always use timeout flags (`curl -m 5 --connect-timeout 3`) and initial delay (`timeout /t 6 /nobreak >nul`) during health checks and container start periods.
-- **Active Domain Memory & JIT Inspection (Zero-Bloat)**: Pre-flight lookup of `docs/domain/gotchas.md` is mandatory before modifying code in any domain (`[FSM]`, `[3D]`, `[UI]`, `[NET]`, `[BOT]`, `[UAT]`). To prevent context bloat, agents MUST ONLY read the Domain Index (lines 1-20) or use targeted `grep_search`. Reading the entire file via `view_file` is strictly forbidden. Every resolved defect must yield a numbered invariant in `docs/domain/gotchas.md`.
+- **Active Domain Memory & JIT Inspection (Zero-Bloat)**: Pre-flight lookup of `docs/domain/gotchas.md` is mandatory before modifying code in any domain (`[FSM]`, `[3D]`, `[UI]`, `[NET]`, `[BOT]`, `[UAT]`). To prevent context bloat, agents MUST ONLY read the Domain Index (lines 1-20) or use targeted `grep_search`. Reading the entire file via `view_file` is strictly forbidden. Every resolved defect must yield a numbered invariant in `docs/domain/gotchas.md` only AFTER Station 2.5 Scout multi-round physical verification (zero speculative gotchas).
 
 ## 2. DEFINITION OF DONE
 
@@ -67,7 +68,7 @@ A task is COMPLETE only when:
 2. Code passes 6 Slop Red Flags audit (least new structure, complexity <= 5, visual token compliance, zero code golf). UI passes `npm run lint:ui` with 0 violations.
 3. Reviewer gates approve via physical disk inspection (`spec-reviewer` verifies 100% spec reconciliation; `code-reviewer` verifies code quality/observability; `game-3d-visual-critic` verifies 3D visual gate; `ui-craft-reviewer` verifies 2D craft gate; implementer never approves own code; zero approvals without disk evidence).
 4. Progress updated in `docs/epics/[epic]/_epic_ledger.md` (including Tech Debt Ledger).
-5. Domain learnings and invariants recorded in `docs/domain/gotchas.md` with domain tags and traceability.
+5. Empirical domain learnings recorded in `docs/domain/gotchas.md` (distilled from multi-round Scout verification with 3 layers: initial illusion, scout finding, verified invariant).
 6. Production resilience verified: defense against invalid intents, treasury conservation invariant, safe disconnection grace period, Turn N+1 state teardown, and explicit tombstone payload delivery.
 7. Ad-hoc improvements documented in `docs/plans/improvements/` and `docs/reports/improvements/`, with roadmap update.
 

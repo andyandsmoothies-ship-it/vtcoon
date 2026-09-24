@@ -9,11 +9,11 @@ import { AudioEngine } from '../audio/audio_engine.js';
 import { SoundEffect } from '../audio/audio_types.js';
 import { trackDeltaActivities } from './activity_tracker.js';
 import { handleDeltaTelemetry } from '../telemetry/telemetry_delta_hook.js';
+import { HapticEngine } from '../haptics/haptic_engine.js';
 
-export { applyPlayerDeltas, initPlayersInfoMap } from './apply_delta_players.js';
-export { applyCellDeltas } from './apply_delta_cells.js';
 import { applyPlayerDeltas, initPlayersInfoMap } from './apply_delta_players.js';
 import { applyCellDeltas } from './apply_delta_cells.js';
+export { applyPlayerDeltas, initPlayersInfoMap, applyCellDeltas };
 
 export function isGameRunningDelta(delta: DeltaPayload): boolean {
   if (delta.roomStarted !== undefined) return delta.roomStarted;
@@ -51,9 +51,15 @@ function resolveTurnPlayerId(delta: DeltaPayload): string | undefined {
 function syncTurnAndTimer(delta: DeltaPayload, state: GameState): void {
   const turnPlayerId = resolveTurnPlayerId(delta);
   if (turnPlayerId && state.currentTurnPlayerId !== turnPlayerId) {
+    const myPid = useLobbyStore.getState().myPlayerId;
+    const isBankrupt = Boolean(state.playersInfo[myPid]?.bankrupt);
+    if (myPid && turnPlayerId === myPid && !isBankrupt) {
+      try { HapticEngine.turnAlert(); } catch { /* Haptic trigger safe fallback */ }
+    }
     state.setCurrentTurnPlayerId(turnPlayerId);
     state.setTurnTimeRemaining(delta.timeRemaining ?? 60);
     state.setHasRolledThisTurn(false); // [IMP-182] Triệt tiêu Turn N+1 Leak
+    state.setHasUserCustomCamera?.(false); // [IMP-190] Reset camera custom orbit on new player turn
   } else if (delta.timeRemaining !== undefined) {
     state.setTurnTimeRemaining(delta.timeRemaining);
   }
@@ -220,14 +226,15 @@ function syncEventCard(card: DeltaPayload['lastEventCard'], state: GameState): v
   }
 }
 
-export function applyPhaseAndTimerDeltas(delta: DeltaPayload, state: GameState, store: typeof useGameStore): void {
-  syncTurnAndTimer(delta, state);
-  syncTreasuryPool(delta, state);
-  syncRoundAndModifiers(delta, state);
-  syncBusinessModals(delta, state);
-  syncEventCard(delta.lastEventCard, state);
-  syncGameStarted(delta, state);
-  syncTelemetryAndActivities(delta, state, store);
+export function applyPhaseAndTimerDeltas(delta: DeltaPayload, prevState: GameState, store: typeof useGameStore): void {
+  const currentState = store.getState();
+  syncTurnAndTimer(delta, currentState);
+  syncTreasuryPool(delta, currentState);
+  syncRoundAndModifiers(delta, currentState);
+  syncBusinessModals(delta, currentState);
+  syncEventCard(delta.lastEventCard, currentState);
+  syncGameStarted(delta, currentState);
+  syncTelemetryAndActivities(delta, prevState, store);
 }
 
 export function applyDeltaToStore(delta: DeltaPayload, store: typeof useGameStore = useGameStore): void {

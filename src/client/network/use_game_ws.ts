@@ -6,6 +6,7 @@ import type { PlayerIntent } from '../../server/intent_dispatcher.js';
 import type { WsClientMessage, WsServerMessage, ReasonCode } from '../../server/network/network_types.js';
 import { saveReconnectToken, getReconnectToken, clearReconnectToken } from './reconnect_token.js';
 import { applyDeltaToStore, isGameRunningDelta } from './apply_delta.js';
+import { useWsLivenessWatchdog } from './ws_liveness_watchdog.js';
 
 export { saveReconnectToken, getReconnectToken, clearReconnectToken };
 export { applyDeltaToStore, isGameRunningDelta };
@@ -100,8 +101,15 @@ export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const reconnectAttemptsRef = useRef(0);
   const lastActionTimeRef = useRef<number>(0);
-  const resyncWatchdogRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const wakeupDebounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const watchdogRef = useRef<{
+    recordPacketReceived: () => void;
+    startResyncWatchdog: (onTimeout?: () => void) => void;
+    clearResyncWatchdog: () => void;
+  }>({
+    recordPacketReceived: () => {},
+    startResyncWatchdog: () => {},
+    clearResyncWatchdog: () => {},
+  });
 
   const connect = useCallback(() => {
     if (!roomCode) return;
@@ -142,10 +150,7 @@ export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
 
     socket.onmessage = (event) => {
       try {
-        if (resyncWatchdogRef.current) {
-          clearTimeout(resyncWatchdogRef.current);
-          resyncWatchdogRef.current = null;
-        }
+        watchdogRef.current.recordPacketReceived();
         const raw = typeof event.data === 'string' ? event.data : String(event.data);
         if (lastActionTimeRef.current > 0) {
           const rtt = Math.max(1, Math.min(Date.now() - lastActionTimeRef.current, 500));
@@ -185,10 +190,7 @@ export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
     };
 
     socket.onclose = () => {
-      if (resyncWatchdogRef.current) {
-        clearTimeout(resyncWatchdogRef.current);
-        resyncWatchdogRef.current = null;
-      }
+      if (wsRef.current && wsRef.current !== socket) return;
       setIsConnected(false);
       if (!isManualDisconnectRef.current) {
         const delay = Math.min(1000 * Math.pow(1.5, reconnectAttemptsRef.current), 5000);
@@ -208,14 +210,7 @@ export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
       clearTimeout(reconnectTimerRef.current);
       reconnectTimerRef.current = null;
     }
-    if (resyncWatchdogRef.current) {
-      clearTimeout(resyncWatchdogRef.current);
-      resyncWatchdogRef.current = null;
-    }
-    if (wakeupDebounceTimerRef.current) {
-      clearTimeout(wakeupDebounceTimerRef.current);
-      wakeupDebounceTimerRef.current = null;
-    }
+    watchdogRef.current.clearResyncWatchdog();
     if (wsRef.current) {
       wsRef.current.close();
       wsRef.current = null;
@@ -294,6 +289,7 @@ export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
       playerId,
     };
     wsRef.current.send(JSON.stringify(msg));
+    watchdogRef.current.startResyncWatchdog();
     return true;
   }, [roomCode, playerId]);
 
@@ -304,71 +300,46 @@ export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
   requestResyncRef.current = requestResync;
 
   const handleWakeup = useCallback(() => {
-    if (wakeupDebounceTimerRef.current) {
-      clearTimeout(wakeupDebounceTimerRef.current);
+    if (typeof document !== 'undefined' && document.visibilityState && document.visibilityState !== 'visible') {
+      return;
     }
-    wakeupDebounceTimerRef.current = setTimeout(() => {
-      wakeupDebounceTimerRef.current = null;
-      if (typeof document !== 'undefined' && document.visibilityState !== 'visible') {
-        return;
-      }
-      useGameStore.getState().clearActivePawnAnimation();
-      useGameStore.getState().setIsRolling(false);
+    useGameStore.getState().clearActivePawnAnimation();
+    useGameStore.getState().setIsRolling(false);
 
-      if (!wsRef.current || (wsRef.current.readyState !== 0 && wsRef.current.readyState !== 1)) {
-        connectRef.current();
-        return;
-      }
+    if (!wsRef.current || (wsRef.current.readyState !== 0 && wsRef.current.readyState !== 1)) {
+      connectRef.current();
+      return;
+    }
 
-      if (wsRef.current.readyState === 1) {
-        requestResyncRef.current();
-        if (resyncWatchdogRef.current) {
-          clearTimeout(resyncWatchdogRef.current);
-        }
-        resyncWatchdogRef.current = setTimeout(() => {
-          resyncWatchdogRef.current = null;
-          if (wsRef.current) {
-            const oldSocket = wsRef.current;
-            try {
-              oldSocket.close();
-            } catch {
-              // Ignore close error
-            }
-            clearRef(wsRef);
-            setIsConnected(false);
-            connectRef.current();
-            const reconnectedSocket = wsRef.current;
-            if (reconnectedSocket && oldSocket && reconnectedSocket !== oldSocket) {
-              reconnectedSocket.close = oldSocket.close;
-            }
-          }
-        }, 2500);
-      }
-    }, 200);
+    if (wsRef.current.readyState === 1) {
+      requestResyncRef.current();
+    }
   }, []);
 
-  React.useEffect(() => {
-    if (typeof document !== 'undefined') document.addEventListener('visibilitychange', handleWakeup);
-    if (typeof window !== 'undefined') {
-      window.addEventListener('focus', handleWakeup);
-      window.addEventListener('pageshow', handleWakeup);
+  const handleDeadSocket = useCallback(() => {
+    if (wsRef.current) {
+      const oldSocket = wsRef.current;
+      try {
+        oldSocket.close();
+      } catch {
+        // Ignore close error
+      }
+      clearRef(wsRef);
+      setIsConnected(false);
+      connectRef.current();
+      const reconnectedSocket = wsRef.current;
+      if (reconnectedSocket && oldSocket && reconnectedSocket !== oldSocket) {
+        reconnectedSocket.close = oldSocket.close;
+      }
     }
-    return () => {
-      if (typeof document !== 'undefined') document.removeEventListener('visibilitychange', handleWakeup);
-      if (typeof window !== 'undefined') {
-        window.removeEventListener('focus', handleWakeup);
-        window.removeEventListener('pageshow', handleWakeup);
-      }
-      if (wakeupDebounceTimerRef.current) {
-        clearTimeout(wakeupDebounceTimerRef.current);
-        wakeupDebounceTimerRef.current = null;
-      }
-      if (resyncWatchdogRef.current) {
-        clearTimeout(resyncWatchdogRef.current);
-        resyncWatchdogRef.current = null;
-      }
-    };
-  }, [handleWakeup]);
+  }, []);
+
+  const watchdog = useWsLivenessWatchdog({
+    isConnected,
+    onWakeup: handleWakeup,
+    onDeadSocket: handleDeadSocket,
+  });
+  watchdogRef.current = watchdog;
 
   React.useEffect(() => {
     if (autoConnect) {

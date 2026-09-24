@@ -1,12 +1,6 @@
 // [UI-S05/MSS] AudioEngine — Singleton sound coordinator using howler.js
 import { Howl, Howler } from 'howler';
-import {
-  BGMTrack,
-  SoundEffect,
-  BGM_FILE_MAP,
-  SFX_FILE_MAP,
-  getBgmTrackForCell,
-} from './audio_types';
+import { BGMTrack, SoundEffect, BGM_FILE_MAP, SFX_FILE_MAP, getBgmTrackForCell } from './audio_types';
 import { useAudioStore } from '../store/audio_store';
 import { SoundEngine } from './sound_engine';
 
@@ -15,7 +9,46 @@ class AudioEngineImpl {
   private sfxCache = new Map<SoundEffect, Howl>();
   private currentTrack: BGMTrack | null = null;
   private fadeTimeoutId: ReturnType<typeof setTimeout> | null = null;
-  private isInitialized = false;
+  public isInitialized = false;
+  public isRecoveryArmed = false;
+  private isHowlerListenerBound = false;
+  private visibilityHandler: (() => void) | null = null;
+  private unsubAudioStore: (() => void) | null = null;
+
+  private ensureHowlerListener(): void {
+    if (this.isHowlerListenerBound || typeof Howler === 'undefined' || !Howler.ctx?.addEventListener) return;
+    try {
+      Howler.ctx.addEventListener('statechange', this.handleStateChange);
+      this.isHowlerListenerBound = true;
+    } catch {
+      // Ignore statechange listener error
+    }
+  }
+
+  private onEmergencyTouch = (): void => {
+    this.isRecoveryArmed = false;
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('pointerdown', this.onEmergencyTouch, { capture: true });
+      window.removeEventListener('touchstart', this.onEmergencyTouch, { capture: true });
+    }
+    this.resumeAudioContext();
+  };
+
+  private handleStateChange = (event?: Event): void => {
+    const target = event?.target as { state?: string } | undefined;
+    const targetState = target?.state ?? Howler?.ctx?.state ?? SoundEngine.getContext()?.state;
+    if (targetState === 'interrupted' || targetState === 'suspended') {
+      this.armInterruptionRecovery();
+    }
+  };
+
+  public armInterruptionRecovery(): void {
+    if (this.isRecoveryArmed || typeof window === 'undefined') return;
+    this.isRecoveryArmed = true;
+
+    window.addEventListener('pointerdown', this.onEmergencyTouch, { once: true, capture: true });
+    window.addEventListener('touchstart', this.onEmergencyTouch, { once: true, capture: true });
+  }
 
   public init(): void {
     if (this.isInitialized) return;
@@ -25,10 +58,7 @@ class AudioEngineImpl {
     if (typeof window !== 'undefined') {
       const unlock = () => {
         try {
-          if (Howler.ctx && Howler.ctx.state === 'suspended') {
-            Howler.ctx.resume().catch(() => {});
-          }
-          void SoundEngine.resumeAudioContext();
+          this.resumeAudioContext();
           if (this.currentTrack) {
             const currentHowl = this.bgmCache.get(this.currentTrack);
             if (currentHowl && !currentHowl.playing()) {
@@ -47,16 +77,23 @@ class AudioEngineImpl {
 
     // Tự động khôi phục AudioContext khi người dùng quay lại tab (Safari iOS / Background freeze)
     if (typeof document !== 'undefined') {
-      document.addEventListener('visibilitychange', () => {
+      this.visibilityHandler = () => {
         if (document.visibilityState === 'visible') {
           this.resumeAudioContext();
-          void SoundEngine.resumeAudioContext();
         }
-      });
+      };
+      document.addEventListener('visibilitychange', this.visibilityHandler);
+    }
+
+    // Lắng nghe statechange trên Howler.ctx và SoundEngine.getContext() (iOS Safari 'interrupted' sau cuộc gọi/Siri)
+    this.ensureHowlerListener();
+    const soundCtx = SoundEngine.getContext();
+    if (soundCtx?.addEventListener) {
+      try { soundCtx.addEventListener('statechange', this.handleStateChange); } catch { /* Ignore statechange listener error */ }
     }
 
     // Lắng nghe thay đổi volume/mute từ Zustand store
-    useAudioStore.subscribe((state) => {
+    this.unsubAudioStore = useAudioStore.subscribe((state) => {
       Howler.mute(state.isMuted);
       this.syncCurrentBgmVolume();
       SoundEngine.syncVolumesWithStore();
@@ -143,9 +180,7 @@ class AudioEngineImpl {
       if (oldHowl && oldHowl.playing()) {
         if (crossfade) {
           oldHowl.fade(oldHowl.volume(), 0, 1500);
-          this.fadeTimeoutId = setTimeout(() => {
-            oldHowl.stop();
-          }, 1550);
+          this.fadeTimeoutId = setTimeout(() => oldHowl.stop(), 1550);
         } else {
           oldHowl.stop();
         }
@@ -170,10 +205,20 @@ class AudioEngineImpl {
 
   public resumeAudioContext(): void {
     try {
-      if (typeof Howler !== 'undefined' && Howler.ctx && Howler.ctx.state === 'suspended') {
-        void Howler.ctx.resume();
+      this.ensureHowlerListener();
+      if (typeof Howler !== 'undefined' && Howler.ctx) {
+        const hState = Howler.ctx.state as string;
+        if (hState === 'suspended' || hState === 'interrupted') {
+          void Howler.ctx.resume().catch(() => {});
+        }
       }
-      void SoundEngine.resumeAudioContext();
+      const soundCtx = SoundEngine.getContext();
+      if (soundCtx) {
+        const sState = soundCtx.state as string;
+        if (sState === 'suspended' || sState === 'interrupted') {
+          void soundCtx.resume().catch(() => {});
+        }
+      }
     } catch {
       // Fallback an toàn khi truy cập AudioContext bị hạn chế
     }
@@ -269,6 +314,35 @@ class AudioEngineImpl {
 
   public getCurrentTrack(): BGMTrack | null {
     return this.currentTrack;
+  }
+
+  public dispose(): void {
+    this.isInitialized = false;
+    this.isRecoveryArmed = false;
+    this.isHowlerListenerBound = false;
+    if (this.fadeTimeoutId) {
+      clearTimeout(this.fadeTimeoutId);
+      this.fadeTimeoutId = null;
+    }
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('pointerdown', this.onEmergencyTouch, { capture: true });
+      window.removeEventListener('touchstart', this.onEmergencyTouch, { capture: true });
+    }
+    if (this.visibilityHandler && typeof document !== 'undefined') {
+      document.removeEventListener('visibilitychange', this.visibilityHandler);
+      this.visibilityHandler = null;
+    }
+    if (this.unsubAudioStore) {
+      this.unsubAudioStore();
+      this.unsubAudioStore = null;
+    }
+    if (typeof Howler !== 'undefined' && Howler.ctx?.removeEventListener) {
+      try { Howler.ctx.removeEventListener('statechange', this.handleStateChange); } catch { /* Ignore cleanup error */ }
+    }
+    const soundCtx = SoundEngine.getContext();
+    if (soundCtx?.removeEventListener) {
+      try { soundCtx.removeEventListener('statechange', this.handleStateChange); } catch { /* Ignore cleanup error */ }
+    }
   }
 }
 

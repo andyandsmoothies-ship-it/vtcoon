@@ -5,7 +5,7 @@ import { CellType, type BoardCell } from '../../domain/board_config';
 import { COLOR_GROUP_HEX } from '../../domain/theme';
 import { getTileTexture, getStandeeTexture } from './tile_texture_generator';
 import { useTextureRevision } from './texture_revision';
-import { isMobileHardware } from './device_detect';
+import { isMobileHardware, isPhoneHardware } from './device_detect';
 import { READY_TILES, getTileAssetUrl } from '../assets/tile_assets';
 import { ProceduralBuilding } from './procedural_building';
 import { LUXURY_PAWN_CONFIGS } from './luxury_pawn_models';
@@ -191,7 +191,7 @@ export function LayeredDioramaTile({
   isMobile: propIsMobile,
 }: LayeredDioramaTileProps): React.ReactElement {
   const textureRevision = useTextureRevision();
-  const isMobile = propIsMobile ?? isMobileHardware();
+  const isMobile = propIsMobile !== undefined ? propIsMobile : isPhoneHardware();
   const tileTexture = useMemo(() => getTileTexture(cell.index, isMobile), [cell.index, isMobile, textureRevision]);
 
   if (isCornerTile) {

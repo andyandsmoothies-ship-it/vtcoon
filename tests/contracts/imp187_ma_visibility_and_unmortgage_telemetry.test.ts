@@ -16,28 +16,15 @@ import { TurnPhase, type EventCardInfo } from '../../src/domain/room';
 import type { PlayerHudInfo } from '../../src/client/store/game_store_types';
 
 function mockHudPlayer(p: { id: string; name: string; balance: number } & Partial<PlayerHudInfo>): PlayerHudInfo {
-  return {
-    tokenColor: '#38BDF8',
-    ownedProperties: [],
-    mortgagedProperties: [],
-    isBot: false,
-    inAudit: false,
-    ...p,
-  };
+  return { tokenColor: '#38BDF8', ownedProperties: [], mortgagedProperties: [], isBot: false, inAudit: false, ...p };
 }
 
 function mockPlayerDelta(p: { id: string; balance: number } & Partial<PlayerDelta>): PlayerDelta {
-  return {
-    position: 0,
-    ...p,
-  };
+  return { position: 0, ...p };
 }
 
 function mockCardInfo(c: { id: string; title: string; type: 'Market' | 'Chance' } & Partial<EventCardInfo>): EventCardInfo {
-  return {
-    description: c.title,
-    ...c,
-  };
+  return { description: c.title, ...c };
 }
 
 function createMockGameState(overrides?: Partial<GameState>): GameState {
@@ -48,9 +35,9 @@ function createMockGameState(overrides?: Partial<GameState>): GameState {
     playerPositions: { p1: 19, bot_2: 0, bot_3: 36, bot_4: 10 },
     dice: [1, 1],
     playersInfo: {
-      p1: { id: 'p1', name: 'Bubbly Parrot', balance: 15000, tokenColor: '#38BDF8', ownedProperties: [19], mortgagedProperties: [], isBot: false, inAudit: false },
-      bot_2: { id: 'bot_2', name: 'Bot AI 2', balance: 14000, tokenColor: '#F59E0B', ownedProperties: [], mortgagedProperties: [], isBot: true, inAudit: false },
-      bot_3: { id: 'bot_3', name: 'Bot AI 3', balance: 18000, tokenColor: '#10B981', ownedProperties: [], mortgagedProperties: [], isBot: true, inAudit: false },
+      p1: mockHudPlayer({ id: 'p1', name: 'Bubbly Parrot', balance: 15000, ownedProperties: [19] }),
+      bot_2: mockHudPlayer({ id: 'bot_2', name: 'Bot AI 2', balance: 14000, tokenColor: '#F59E0B', isBot: true }),
+      bot_3: mockHudPlayer({ id: 'bot_3', name: 'Bot AI 3', balance: 18000, tokenColor: '#10B981', isBot: true }),
     },
     currentTurnPlayerId: 'bot_3',
     turnTimeRemaining: 60,
@@ -63,17 +50,10 @@ function createMockGameState(overrides?: Partial<GameState>): GameState {
 
 describe('IMP-187 Contract Tests: Telemetry Unmortgage & M&A Transparency', () => {
   beforeEach(() => {
-    useActivityStore.setState({
-      activityLogs: [],
-      isActivityFeedOpen: false,
-      unreadCount: 0,
-      activeFilter: 'all',
-    });
+    useActivityStore.setState({ activityLogs: [], isActivityFeedOpen: false, unreadCount: 0, activeFilter: 'all' });
   });
 
-  // =========================================================================
-  // FACET 1: UNMORTGAGE TELEMETRY PRECISION (TICK 307 & 312 REPRODUCTION)
-  // =========================================================================
+  // --- FACET 1: UNMORTGAGE TELEMETRY PRECISION (TICK 307 & 312 REPRODUCTION) ---
   describe('Facet 1: Unmortgage Circulation Delta Precision', () => {
     it('[TC-187.01/MSS] Tick 307: Unmortgage of Cell 28 (Viettel, loan 750, fee 75) produces expectedDelta = -750', () => {
       const preState = createMockGameState({
@@ -141,9 +121,7 @@ describe('IMP-187 Contract Tests: Telemetry Unmortgage & M&A Transparency', () =
     });
   });
 
-  // =========================================================================
-  // FACET 2: TREASURY CONSERVATION INVARIANT INTEGRATION
-  // =========================================================================
+  // --- FACET 2: TREASURY CONSERVATION INVARIANT INTEGRATION ---
   describe('Facet 2: Treasury Conservation Invariant Integration', () => {
     it('[TC-187.04/MSS] Tick 307: verifyTreasuryConservation returns null when actualDelta (-750) matches expectedDelta (-750)', () => {
       // Pre: player 5000, treasury 5000 -> total 10000
@@ -179,6 +157,24 @@ describe('IMP-187 Contract Tests: Telemetry Unmortgage & M&A Transparency', () =
       expect(violation).toBeNull();
     });
 
+    it('[TC-187.05b/MSS][Adversarial] verifyTreasuryConservation detects violation when actualDelta (-750) mismatches buggy expectedDelta (-825)', () => {
+      // Adversarial regression defense: If legacy formula deltaSum -= (loan + fee) is passed (-825 instead of -750),
+      // verifyTreasuryConservation must detect discrepancy and return InvariantViolation object.
+      const violation = verifyTreasuryConservation({
+        preBalances: { bot_2: 5000 },
+        postBalances: { bot_2: 4175 },
+        preTreasury: 5000,
+        postTreasury: 5075,
+        tick: 307,
+        expectedDelta: -825, // Buggy legacy expectation: -(750 + 75)
+        roomStarted: true,
+      });
+
+      expect(violation).not.toBeNull();
+      expect(violation?.type).toBe('TREASURY_INVARIANT_VIOLATED');
+      expect(violation?.severity).toBe('CRITICAL');
+    });
+
     it('[TC-187.06/MSS] Preserves Foreclosure Auction Treasury Absorption (L284 integrity check)', () => {
       const preState = createMockGameState({
         playersInfo: {
@@ -201,9 +197,7 @@ describe('IMP-187 Contract Tests: Telemetry Unmortgage & M&A Transparency', () =
     });
   });
 
-  // =========================================================================
-  // FACET 3: M&A / COMPULSORY BUYOUT SEPARATION (TICK 309 REPRODUCTION)
-  // =========================================================================
+  // --- FACET 3: M&A / COMPULSORY BUYOUT SEPARATION (TICK 309 REPRODUCTION) ---
   describe('Facet 3: M&A Separation from Rent Transactions', () => {
     it('[TC-187.07/MSS] matchRentTransactions does NOT match M&A participants when buyoutCellIndices are present', () => {
       // Bot 3 pays 2400 Tr to P1 for Đà Nẵng (Cell 19)
@@ -336,9 +330,7 @@ describe('IMP-187 Contract Tests: Telemetry Unmortgage & M&A Transparency', () =
     });
   });
 
-  // =========================================================================
-  // FACET 4: CAUSAL TIMELINE ORDERING
-  // =========================================================================
+  // --- FACET 4: CAUSAL TIMELINE ORDERING ---
   describe('Facet 4: Causal Timeline Ordering', () => {
     it('[TC-187.11/MSS] trackDeltaActivities logs card event BEFORE property transfer and financial transfer', () => {
       const preState = createMockGameState({
@@ -386,9 +378,7 @@ describe('IMP-187 Contract Tests: Telemetry Unmortgage & M&A Transparency', () =
     });
   });
 
-  // =========================================================================
-  // FACET 5: VICTIM DEFENSE & ACTOR INVERSION PREVENTION
-  // =========================================================================
+  // --- FACET 5: VICTIM DEFENSE & ACTOR INVERSION PREVENTION ---
   describe('Facet 5: Victim Alert & Actor Inversion Defense', () => {
     it('[TC-187.12/MSS] Victim of M&A does NOT trigger victory_spin pawn reaction', () => {
       const triggerSpy = vi.spyOn(useVfxStore.getState(), 'triggerPawnReaction');

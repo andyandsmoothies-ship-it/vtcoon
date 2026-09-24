@@ -1,0 +1,16 @@
+{
+  "name": "VTCOON — Đại Gia Địa Ốc Việt Nam",
+  "short_name": "VTCOON",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ]
+}

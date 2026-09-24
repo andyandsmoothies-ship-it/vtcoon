@@ -1,17 +1,3 @@
-// [UI-S01/MSS][UI-S03/MSS][UI-S04/MSS] GameCanvas — 3D Cinematic Perspective Viewport & Post-Processing Pipeline
-// Re-exports cellPosition for backward-compat with tests/client/game_canvas.test.ts
-export { cellPosition } from './3d/board_coords';
-export {
-  BASE_PERSPECTIVE_FOV,
-  EVENT_PERSPECTIVE_FOV,
-  BASE_CAMERA_ZOOM,
-  EVENT_CAMERA_ZOOM,
-  CAMERA_FOCUS_WEIGHT,
-  calculateCameraFocusTarget,
-  calculateCameraZoom,
-  resolveCameraTargetCell,
-} from './3d/use_game_camera';
-
 import React, { useRef, useEffect } from 'react';
 import './3d/r3f_fiber_shield';
 import './polyfills/canvas_round_rect';
@@ -43,11 +29,29 @@ import {
   CAMERA_CONFIG,
 } from './3d/camera_state_machine';
 import {
+  BASE_PERSPECTIVE_FOV,
+  EVENT_PERSPECTIVE_FOV,
+  BASE_CAMERA_ZOOM,
+  EVENT_CAMERA_ZOOM,
+  CAMERA_FOCUS_WEIGHT,
+  calculateCameraFocusTarget,
   calculateCameraZoom,
   resolveCameraTargetCell,
 } from './3d/use_game_camera';
 import { SoundEngine } from './audio/sound_engine';
 import { PerfTelemetryTracker } from './telemetry/perf_telemetry_tracker';
+
+export {
+  cellPosition,
+  BASE_PERSPECTIVE_FOV,
+  EVENT_PERSPECTIVE_FOV,
+  BASE_CAMERA_ZOOM,
+  EVENT_CAMERA_ZOOM,
+  CAMERA_FOCUS_WEIGHT,
+  calculateCameraFocusTarget,
+  calculateCameraZoom,
+  resolveCameraTargetCell,
+};
 
 export interface AdaptiveCinematicCameraProps {
   readonly isPreMatch?: boolean;
@@ -66,7 +70,9 @@ export function AdaptiveCinematicCamera({
   const isUserInteractingRef = useRef<boolean>(false);
   const lastUserInteractionTimeRef = useRef<number>(0);
   const isResettingRef = useRef<boolean>(true);
+  const isManualOverviewResetRef = useRef<boolean>(false);
   const prevModeRef = useRef<string | null>(null);
+  const prevHasUserCustomCameraRef = useRef<boolean>(false);
 
   const isRolling = useGameStore((s) => s.isRolling);
   const hasRolledThisTurn = useGameStore((s) => s.hasRolledThisTurn);
@@ -76,6 +82,7 @@ export function AdaptiveCinematicCamera({
   const activeModal = useGameStore((s) => s.activeModal);
   const modalPayload = useGameStore((s) => s.modalPayload);
   const cameraFocusCell = useGameStore((s) => s.cameraFocusCell);
+  const hasUserCustomCamera = useGameStore((s) => s.hasUserCustomCamera);
   const activeScreenShake = useVfxStore((s) => s.activeScreenShake);
   const playersInfo = useGameStore((s) => s.playersInfo);
   const levelMap = useGameStore((s) => s.levelMap);
@@ -113,18 +120,21 @@ export function AdaptiveCinematicCamera({
         isUserInteractingRef.current = false;
         lastUserInteractionTimeRef.current = 0;
         isResettingRef.current = true;
-        camBaseRef.current = defaultPos;
-        targetBaseRef.current = defaultTarget;
-        if (controlsRef.current) {
-          controlsRef.current.target.set(defaultTarget[0], defaultTarget[1], defaultTarget[2]);
-        }
-        camera.position.set(defaultPos[0], defaultPos[1], defaultPos[2]);
-        controlsRef.current?.update();
+        isManualOverviewResetRef.current = true;
+        camBaseRef.current = [camera.position.x, camera.position.y, camera.position.z];
+        targetBaseRef.current = controlsRef.current
+          ? [controlsRef.current.target.x, controlsRef.current.target.y, controlsRef.current.target.z]
+          : defaultTarget;
+        useGameStore.getState().setCameraFocusCell(null);
+        useGameStore.getState().setHasUserCustomCamera?.(false);
       };
     }
     return () => {
       if (typeof window !== 'undefined') {
         delete window.__resetCameraToDefault;
+        delete window.__threeScene;
+        delete window.__threeCamera;
+        delete window.__orbitControls;
       }
     };
   }, [scene, camera]);
@@ -161,12 +171,27 @@ export function AdaptiveCinematicCamera({
     });
 
     const cellCoords = targetCell !== null && targetCell !== undefined && Number.isFinite(targetCell) ? cellPosition(targetCell) : undefined;
-    const targetState = calculateTargetCameraState(mode, cellCoords, cellCoords);
+    const targetState = isManualOverviewResetRef.current
+      ? calculateTargetCameraState('overview', undefined, undefined)
+      : calculateTargetCameraState(mode, cellCoords, cellCoords);
 
     if (mode !== prevModeRef.current) {
       prevModeRef.current = mode;
       isResettingRef.current = true;
     }
+
+    if (prevHasUserCustomCameraRef.current && !hasUserCustomCamera) {
+      camBaseRef.current[0] = camera.position.x;
+      camBaseRef.current[1] = camera.position.y;
+      camBaseRef.current[2] = camera.position.z;
+      if (controlsRef.current) {
+        targetBaseRef.current[0] = controlsRef.current.target.x;
+        targetBaseRef.current[1] = controlsRef.current.target.y;
+        targetBaseRef.current[2] = controlsRef.current.target.z;
+      }
+      isResettingRef.current = true;
+    }
+    prevHasUserCustomCameraRef.current = hasUserCustomCamera;
 
     let shakeOffset: [number, number, number] = [0, 0, 0];
     if (activeScreenShake) {
@@ -219,17 +244,8 @@ export function AdaptiveCinematicCamera({
         camBaseRef.current[1] += (targetState.position[1] - camBaseRef.current[1]) * lerpFactor;
         camBaseRef.current[2] += (targetState.position[2] - camBaseRef.current[2]) * lerpFactor;
 
-        controlsRef.current.target.set(
-          targetBaseRef.current[0],
-          targetBaseRef.current[1],
-          targetBaseRef.current[2]
-        );
-
-        camera.position.set(
-          camBaseRef.current[0] + shakeOffset[0],
-          camBaseRef.current[1] + shakeOffset[1],
-          camBaseRef.current[2] + shakeOffset[2]
-        );
+        controlsRef.current.target.set(targetBaseRef.current[0], targetBaseRef.current[1], targetBaseRef.current[2]);
+        camera.position.set(camBaseRef.current[0] + shakeOffset[0], camBaseRef.current[1] + shakeOffset[1], camBaseRef.current[2] + shakeOffset[2]);
 
         controlsRef.current.minDistance = (mode === 'overview' || mode === 'pre_match') ? 14 : 3.8;
         controlsRef.current.update();
@@ -240,6 +256,7 @@ export function AdaptiveCinematicCamera({
           Math.abs(camBaseRef.current[2] - targetState.position[2]) < 0.05
         ) {
           isResettingRef.current = false;
+          isManualOverviewResetRef.current = false;
         }
       }
     }
@@ -250,7 +267,8 @@ export function AdaptiveCinematicCamera({
       ref={(node) => {
         controlsRef.current = node;
         if (typeof window !== 'undefined') {
-          window.__orbitControls = node;
+          if (node) window.__orbitControls = node;
+          else delete window.__orbitControls;
         }
       }}
       enableRotate
@@ -264,10 +282,18 @@ export function AdaptiveCinematicCamera({
       target={defaultTarget}
       onStart={() => {
         isUserInteractingRef.current = true;
+        isManualOverviewResetRef.current = false;
       }}
       onEnd={() => {
         isUserInteractingRef.current = false;
         lastUserInteractionTimeRef.current = Date.now();
+        const distPos = Math.hypot(camera.position.x - defaultPos[0], camera.position.y - defaultPos[1], camera.position.z - defaultPos[2]);
+        const distTarget = controlsRef.current
+          ? Math.hypot(controlsRef.current.target.x - defaultTarget[0], controlsRef.current.target.y - defaultTarget[1], controlsRef.current.target.z - defaultTarget[2])
+          : 0;
+        if (distPos > 0.8 || distTarget > 0.5) {
+          useGameStore.getState().setHasUserCustomCamera?.(true);
+        }
       }}
     />
   );

@@ -233,9 +233,11 @@ export interface GameState {
   readonly activeEmotes: Record<string, ActiveEmote>;
   readonly floatingTexts: readonly FloatingTextItem[];
 
-  // IMP-133 Camera Sticky Focus
+  // IMP-133 Camera Sticky Focus & IMP-190 Custom Orbit Camera
   readonly cameraFocusCell: number | null;
   setCameraFocusCell: (cellIndex: number | null) => void;
+  readonly hasUserCustomCamera: boolean;
+  setHasUserCustomCamera: (hasUserCustomCamera: boolean) => void;
   resetGameState: () => void;
 
   setLastEventCard: (card: EventCardInfo | null) => void;
@@ -312,6 +314,7 @@ export type InitialGameState = Pick<
   | 'activeEmotes'
   | 'floatingTexts'
   | 'cameraFocusCell'
+  | 'hasUserCustomCamera'
 >;
 
 export const INITIAL_GAME_STATE: InitialGameState = {
@@ -343,5 +346,7 @@ export const INITIAL_GAME_STATE: InitialGameState = {
   activeEmotes: {},
   floatingTexts: [],
   cameraFocusCell: null,
+  hasUserCustomCamera: false,
 };
+
 
