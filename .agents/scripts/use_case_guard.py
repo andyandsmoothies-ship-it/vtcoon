@@ -124,11 +124,45 @@ def audit_file() -> None:
             print(f"INFO [Slop]: Raw 'console.log' detected in '{target_file}'. Prefer structured logging for state transitions.")
 
 
+TEST_DIR_PATTERNS = ["/tests/", "/test/", "/spec/", "/__tests__/", ".test.", ".spec.", "_test."]
+SRC_DIR_PATTERNS = ["/src/", "/lib/", "/app/", "/internal/", "/pkg/", "/core/"]
+
+
+def check_role(role: str) -> None:
+    """Enforces role-based file sandboxing for universal engineering subagents."""
+    target_file = os.environ.get("AG_TOOL_TARGET_FILE", "") or (
+        sys.argv[3] if len(sys.argv) > 3 else ""
+    )
+    if not target_file:
+        return
+
+    norm_path = "/" + target_file.replace("\\", "/").lstrip("/")
+
+    if role == "qa-tester":
+        if any(p in norm_path for p in SRC_DIR_PATTERNS):
+            print(
+                f"ERROR [Role Gate]: qa-tester is strictly forbidden from modifying production code: '{target_file}'. "
+                "Only test files in tests/** or test/** are permitted."
+            )
+            sys.exit(1)
+
+    elif role == "implementer":
+        if any(p in norm_path for p in TEST_DIR_PATTERNS):
+            print(
+                f"ERROR [Role Gate]: implementer is forbidden from modifying test contracts: '{target_file}'. "
+                "Test contracts are authoritatively locked by qa-tester."
+            )
+            sys.exit(1)
+
+
 if __name__ == "__main__":
     mode = sys.argv[1] if len(sys.argv) > 1 else ""
     if mode == "--check-command":
         check_command()
     elif mode == "--audit-file":
         audit_file()
+    elif mode == "--role":
+        role_name = sys.argv[2] if len(sys.argv) > 2 else ""
+        check_role(role_name)
     else:
-        print("Usage: python use_case_guard.py [--check-command <cmd>] | [--audit-file <filepath>]")
+        print("Usage: python use_case_guard.py [--check-command <cmd>] | [--audit-file <filepath>] | [--role <role_name> <filepath>]")

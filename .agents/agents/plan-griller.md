@@ -37,7 +37,7 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command, write_to_fi
      - If plan lacks Turn N+1 teardown or tombstone serialization, flag as **[P1 - TRANSIENT LEAK HAZARD]**.
    - 🌐 **Pillar 5: Systemic Blast Radius & Cross-Coupling Interoperability (Bán Kính Ảnh Hưởng Đa Chiều)**:
      - Audit the change across 3 universal axes:
-       1. *Downstream Consumers*: Audit 100% of callers via `grep_search`. Never rely on default parameters to skip call-site updates. Flag unverified callers as **[P2 - CALL-SITE BLINDSPOT]**.
+       1. *Downstream Consumers*: Audit 100% of callers via `grep_search`. Verify container components explicitly propagate computed environmental props (e.g. `isMobile`) to children instead of relying on child ambient fallbacks. Verify callback signatures strictly match external framework listener contracts (e.g. `useSyncExternalStore` `() => void`). Flag unverified callers, ambient prop omissions, or signature mismatches as **[P2 - CALL-SITE BLINDSPOT]**.
        2. *Upstream & Environmental Modifiers*: Active tenant policies, global middleware, feature flags, environmental modifiers, active buffs/debuffs/discounts.
        3. *Exceptional Lifecycle Modes*: Cold start/reset, full state resync/reconnect, session invalidation, concurrent multi-event mutations, terminal/closed entity states.
      - **Subtractive Audit (Delete-First)**: If plan replaces a state, listener, or flag, verify obsolete code is explicitly targeted for deletion. Leaving old listeners running in parallel is **[P1 - ADDITIVE BIAS LEAK]**.

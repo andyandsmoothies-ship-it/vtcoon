@@ -129,12 +129,9 @@ function resolvePurchaseCost(cell: CellDelta, deed: PropertyDeed, preState: Game
       : undefined;
 
   const highestBid = isAuction
-    ? (auctionFinal
-        ?? (storeBid?.cellIndex === cell.index ? storeBid.currentBid : undefined)
-        ?? preState.auction?.highestBid
-        ?? preState.auction?.currentBid
-        ?? modalPayload?.highestBid
-        ?? modalPayload?.currentBid)
+    ? (auctionFinal ?? (storeBid?.cellIndex === cell.index ? storeBid.currentBid : undefined) ??
+        preState.auction?.highestBid ?? preState.auction?.currentBid ??
+        modalPayload?.highestBid ?? modalPayload?.currentBid)
     : undefined;
 
   return isAuction
@@ -187,8 +184,7 @@ function computeCellDelta(cells: readonly CellDelta[], preState: GameState, delt
       deltaSum += Math.floor(deed.price * 0.5);
     } else if (cell.isMortgaged === false && wasMortgaged) {
       const loan = mortgagedOwner?.mortgageLoans?.[cell.index] ?? Math.floor(deed.price * 0.5);
-      const fee = Math.floor(loan * 0.10);
-      deltaSum -= (loan + fee);
+      deltaSum -= loan;
     }
   }
   return deltaSum;

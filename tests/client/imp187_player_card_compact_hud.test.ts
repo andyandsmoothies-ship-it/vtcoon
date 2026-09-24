@@ -26,12 +26,13 @@ const mockOverdraftPlayer: PlayerHudInfo = {
 };
 
 describe('[TC-187/MSS][IMP-187] Compact PlayerCard HUD & Zero-Waste Layout', () => {
-  it('[TC-187.01/MSS] PlayerCard renders property count pill with data-testid="player-property-count"', () => {
+  it('[TC-187.01/MSS] PlayerCard removes redundant text property count and displays net worth cleanly', () => {
     const html = renderToStaticMarkup(
       React.createElement(PlayerCard, { player: mockPlayer, isCurrentTurn: true, levelMap: {}, slotIndex: 0 })
     );
-    expect(html).toContain('data-testid="player-property-count"');
-    expect(html).toContain('4');
+    // Redundant text count 1/22 is removed in favor of direct dot counting
+    expect(html).not.toContain('data-testid="player-property-count"');
+    expect(html).toContain('data-testid="player-net-worth"');
   });
 
   it('[TC-187.02/MSS] Property clusters container uses flex-nowrap to guarantee single-line micro-bar', () => {
@@ -52,13 +53,16 @@ describe('[TC-187/MSS][IMP-187] Compact PlayerCard HUD & Zero-Waste Layout', () 
     expect(html).toContain('absolute -top-2.5 right-3');
   });
 
-  it('[TC-187.04/MSS] Property dots use micro size to fit within single line without overflow', () => {
+  it('[TC-187.04/MSS] Property dots span 100% width without redundant BDS: label', () => {
     const html = renderToStaticMarkup(
       React.createElement(PlayerCard, { player: mockPlayer, isCurrentTurn: false, levelMap: {}, slotIndex: 0 })
     );
+    // Redundant 'BĐS:' label is removed to give full width to 22 dots
+    const clusterSection = html.match(/<div[^>]*data-testid="player-property-clusters"[^>]*>[\s\S]*?<\/div>/);
+    expect(clusterSection).not.toBeNull();
+    expect(clusterSection![0]).not.toContain('BĐS:');
     const dotMatch = html.match(/<span[^>]*data-testid="dot-cell-1"[^>]*>/);
     expect(dotMatch).not.toBeNull();
-    expect(dotMatch![0]).toMatch(/w-1\.5|w-2/);
   });
 
   it('[TC-187.05/MSS] Overdraft status is rendered compactly without blowing up vertical space', () => {

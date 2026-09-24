@@ -7,13 +7,13 @@
 ## 🧭 BẢNG CHỈ MỤC THEO DOMAIN (DOMAIN INDEX)
 | Domain Tag | Trọng Tâm & Phạm Vi Mã Nguồn | Các Gotchas Liên Quan |
 | :--- | :--- | :--- |
-| `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78, #82, #104, #105, #106, #145, #146, #147, #159, #164, #174, #180, #188, #195, #196, #197, #200, #203, #215, #217, #218, #219, #220, #223, #249 |
+| `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78, #82, #104, #105, #106, #145, #146, #147, #159, #164, #174, #180, #188, #195, #196, #197, #200, #203, #215, #217, #218, #219, #220, #223, #249, #255 |
 | `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147, #190, #191, #195, #196, #197, #200, #206, #223 |
-| `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190, #200, #203, #209, #210, #211, #212, #213, #215, #217, #223, #224, #225, #226, #227, #231, #235, #244, #247, #248, #249, #250 |
+| `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190, #200, #203, #209, #210, #211, #212, #213, #215, #217, #223, #224, #225, #226, #227, #231, #235, #244, #247, #248, #249, #250, #255 |
 | `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #32, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #60, #61, #63, #69, #72, #74, #77, #80, #85, #86, #88, #89, #90, #91, #92, #93, #94, #95, #96, #101, #103, #109, #110, #114, #115, #116, #117, #120, #122, #123, #124, #125, #126, #127, #128, #129, #130, #133, #134, #135, #136, #140, #141, #144, #148, #159, #160, #161, #162, #163, #164, #165, #169, #175, #177, #189, #198, #200, #222, #254 |
-| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192, #195, #196, #199, #201, #202, #204, #205, #206, #216, #217, #231, #234, #237, #249, #250 |
+| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192, #195, #196, #199, #201, #202, #204, #205, #206, #216, #217, #231, #234, #237, #249, #250, #255 |
 | `[UAT/TEST]` | Nghiệm Thu, Adversarial TDD, Ảnh Chụp Màn Hình (.jpg), Shell Escaping, File I/O Lock, Docker Healthcheck Timeout | #5, #28, #29, #31, #35, #52, #71, #73, #83, #84, #99, #100, #117, #124, #125, #130, #199, #235 |
-| `[TELEMETRY]` | Giám Sát Hiệu Năng Thời Gian Thực, Chó Canh Phòng Bất Biến, Hộp Đen Tái Hiện Lỗi | #39, #62, #71, #75, #104, #114, #115, #135, #174, #200, #227, #235, #250 |
+| `[TELEMETRY]` | Giám Sát Hiệu Năng Thời Gian Thực, Chó Canh Phòng Bất Biến, Hộp Đen Tái Hiện Lỗi | #39, #62, #71, #75, #104, #114, #115, #135, #174, #200, #227, #235, #250, #255 |
 | `[ARCH/REFACTOR]` | Tách Module Facade, Ngân Sách Render Loop, Chuẩn Hóa Môi Trường Build | #43, #98, #99 |
 
 ---
@@ -2884,14 +2884,15 @@
   3. **Isolated Cache Maps & Dynamic Revision Subscription**: Tách biệt hoàn toàn `mobileTileTextureCache`, `desktopTileTextureCache`, `mobileStandeeTextureCache`, `desktopStandeeTextureCache`. Sử dụng hook `useTextureRevision` (Pure DAG `texture_revision.ts`) để đồng bộ làm tươi texture 3D khi context restore hoặc clear caches mà không gây re-render vòng lặp.
 - **Traceability**: `[TC-186.01..14/MSS]`, `[UC-IMP186]`, `tests/client/imp186_ios_mobile_texture_lod_and_jetsam_defense.test.ts`, `src/client/3d/device_detect.ts`, `src/client/3d/texture_revision.ts`, `src/client/3d/tile_texture_drawers.ts`, `src/client/3d/tile_texture_generator.ts`, `src/client/3d/texture_cache_manager.ts`, `src/client/game_canvas.tsx`, `src/client/3d/board_tile.tsx`.
 
+---
 
-
-
-
-
-
-
-
-
-
-
+### 255. [TELEMETRY/RULE/UI] Unmortgage Circulation Balance, M&A Buyout Activity Attribution & Inverted Victim Defense (IMP-187)
+- **Bẫy nghiệp vụ & kỹ thuật**:
+  1. *Bẫy Gấp Đôi Phí Giải Chấp Khi Tính Biến Động Lưu Thông (Unmortgage Fee Double-Dipping Trap)*: Tại Tick 307 và Tick 312, khi Bot giải chấp ô đất (ô 28 nợ 750 Tr., phí 75 Tr.; ô 27 nợ 1.300 Tr., phí 130 Tr.), `telemetry_delta_hook.ts` tính `deltaSum -= (loan + fee)` thay vì `-loan`. Thực tế phí 10% nộp vào Kho Bạc là chuyển nhượng nội bộ giữa người chơi và Kho Bạc (cả hai đều thuộc tổng tài chính hệ thống `sum(players) + treasury`), không làm hao hụt tiền tệ hệ thống. Việc trừ cả gốc lẫn phí làm biến động lưu thông kỳ vọng bị tính thừa, kích hoạt báo động đỏ giả `TREASURY_INVARIANT_VIOLATED` lệch đúng bằng số tiền gốc (-750 Tr. và -1.300 Tr.).
+  2. *Bẫy Hiểu Lầm M&A Thâu Tóm Là Tiền Thuê & Ăn Mừng Oan Ứng Cho Nạn Nhân (M&A Rent Conflation & Inverted Celebration Trap)*: Tại Tick 309, Bot AI 3 dùng thẻ Cơ Hội `CC_MA_FORCE` ép mua khu đất Đà Nẵng của Người chơi 1 với giá 2.400 Tr. Hàm `activity_financial_tracker.ts` quét thấy P1 nhận 2.400 Tr. và Bot 3 mất 2.400 Tr., lập tức ghép đôi nhầm thành giao dịch nộp tiền thuê đất ("P1 thu tiền thuê 2.400 Tr. từ Bot 3"). Hệ quả: Người chơi 1 bị cướp mất khu đất nhưng hệ thống lại kích hoạt hoạt ảnh ăn mừng chiến thắng (`victory_spin` + chuông reo vàng son) cho nạn nhân!
+  3. *Bẫy Xáo Trộn Thời Gian Nhân Quả (Casual Timeline Reversal)*: Nhật ký sự kiện ghi nhận giao dịch tài chính trước khi ghi nhận thẻ bài và chuyển quyền sở hữu ô cờ, khiến người chơi thấy tiền biến động trước khi biết lý do tại sao.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Two-Sided Fund Flow & Net Circulation Invariant**: Khi giải chấp tài sản, biến động lưu thông tiền ròng của toàn hệ thống là `-loan` (hoàn trả tín dụng cho ngân hàng). Phí giải chấp 10% chuyển thẳng vào quỹ Kho Bạc là dòng tiền bảo toàn nội bộ, tuyệt đối không được trừ thêm vào `expectedDelta`.
+  2. **M&A / Compulsory Buyout Activity Partitioning**: Giao dịch phát sinh từ các thẻ cưỡng chế mua lại (`CC_MA_FORCE`, `CC_SWAP_PROJECT`) phải được tách riêng thành phân loại `ma_buyout` (biểu tượng 🤝), hoàn toàn loại trừ khỏi danh sách khớp tiền thuê (`matchRentTransactions`) bằng tập hợp `buyoutCellIndices`, `handledPayerIds`, và `handledReceiverIds`.
+  3. **Victim Defense & Causal Timeline Dispatch**: Nạn nhân bị thâu tóm đất bị cấm tuyệt đối mọi hoạt ảnh ăn mừng (`victory_spin`), thay vào đó nhận popup cảnh báo 2 dòng rõ ràng: "⚡ Bị thâu tóm: Đà Nẵng / Đối thủ đã mua đứt ô đất của bạn (+2.400 Tr.)". Trình tự phát sự kiện bắt buộc tuân thủ trục nhân quả: Thẻ bài sự kiện (Nguyên nhân) ➔ Chuyển quyền BĐS (Chuyển giao) ➔ Biến động số dư (Kết quả).
+- **Traceability**: `[TC-187.01..16/MSS]`, `[UC-IMP187]`, `tests/contracts/imp187_ma_visibility_and_unmortgage_telemetry.test.ts`, `src/client/telemetry/telemetry_delta_hook.ts`, `src/client/network/activity_financial_tracker.ts`, `src/client/network/activity_property_tracker.ts`, `src/client/network/activity_badge_dispatcher.ts`, `src/client/network/activity_tracker.ts`, `src/client/ui/floating_numbers.tsx`, `src/client/3d/board_layout.tsx`, `src/client/3d/texture_revision.ts`.

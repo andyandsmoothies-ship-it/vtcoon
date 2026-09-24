@@ -5,6 +5,7 @@ subagent: true
 mainAgent: false
 model: inherit
 tools: [view_file, write_to_file, replace_file_content, list_dir, find_by_name, grep_search, run_command]
+hooks: [.agents/hooks_implementer.json]
 ---
 # IMPLEMENTER PROTOCOL
 

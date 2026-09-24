@@ -3,6 +3,7 @@ import type { DeltaPayload } from '../../server/session_manager.js';
 import type { GameState, PlayerHudInfo } from '../store/game_store.js';
 import { type ActivityLogEntry } from '../store/activity_store.js';
 import { PROPERTY_DEEDS } from '../../domain/property_data.js';
+import { BOARD_CONFIG } from '../../domain/board_config.js';
 import { formatCurrency } from '../ui/ui_helpers.js';
 
 export interface BalanceDelta {
@@ -13,6 +14,7 @@ export interface BalanceDelta {
 
 export interface PropertyFinancialContext {
   readonly boughtCellIndices: readonly number[];
+  readonly buyoutCellIndices?: readonly number[];
   readonly upgradedCells: ReadonlyArray<{ cellIndex: number; cost: number; ownerId: string }>;
   readonly mortgagedCells: ReadonlyArray<{ cellIndex: number; loan: number; ownerId: string }>;
   readonly unmortgagedCells: ReadonlyArray<{ cellIndex: number; cost: number; ownerId: string }>;
@@ -25,16 +27,19 @@ export function getPlayerName(pInfo?: PlayerHudInfo, fallbackId?: string): strin
 export function matchRentTransactions(
   payers: readonly BalanceDelta[],
   receivers: readonly BalanceDelta[],
+  initialHandledPayers?: ReadonlySet<string>,
+  initialHandledReceivers?: ReadonlySet<string>,
 ): {
   rentLogs: ActivityLogEntry[];
   handledPayerIds: Set<string>;
   handledReceiverIds: Set<string>;
 } {
   const rentLogs: ActivityLogEntry[] = [];
-  const handledPayerIds = new Set<string>();
-  const handledReceiverIds = new Set<string>();
+  const handledPayerIds = new Set<string>(initialHandledPayers ?? []);
+  const handledReceiverIds = new Set<string>(initialHandledReceivers ?? []);
 
   for (const payer of payers) {
+    if (handledPayerIds.has(payer.id)) continue;
     const rentAmount = Math.abs(payer.diff);
     const receiver = receivers.find((r) => !handledReceiverIds.has(r.id) && r.diff === rentAmount);
     if (receiver) {
@@ -186,6 +191,7 @@ export function detectFinancialAndStatusActivities(
   const context: PropertyFinancialContext = Array.isArray(contextOrBoughtIndices)
     ? {
         boughtCellIndices: contextOrBoughtIndices,
+        buyoutCellIndices: [],
         upgradedCells: [],
         mortgagedCells: [],
         unmortgagedCells: [],
@@ -213,8 +219,55 @@ export function detectFinancialAndStatusActivities(
     }
   }
 
-  const { rentLogs, handledPayerIds, handledReceiverIds } = matchRentTransactions(payers, receivers);
+  const handledPayerIds = new Set<string>();
+  const handledReceiverIds = new Set<string>();
+
+  // [IMP-187] Xử lý M&A / Hoán đổi dự án (CC_MA_FORCE, CC_SWAP_PROJECT): tách riêng khỏi tiền thuê
+  if (context.buyoutCellIndices && context.buyoutCellIndices.length > 0 && delta.cells && delta.cells.length > 0) {
+    for (const buyoutIndex of context.buyoutCellIndices) {
+      const cellDelta = delta.cells.find((c) => c.index === buyoutIndex);
+      if (!cellDelta?.ownerId) continue;
+      const buyerId = cellDelta.ownerId;
+      const prevOwner = Object.values(prevState.playersInfo).find((p) => p.ownedProperties?.includes(buyoutIndex));
+      const targetScopeId = (delta.lastEventCard as { targetScope?: string } | undefined)?.targetScope;
+      const sellerId = prevOwner?.id ?? (targetScopeId && targetScopeId in prevState.playersInfo ? targetScopeId : undefined);
+
+      const payer = payers.find((p) => p.id === buyerId && !handledPayerIds.has(p.id));
+      const receiver = sellerId ? receivers.find((r) => r.id === sellerId && !handledReceiverIds.has(r.id)) : undefined;
+
+      const buyerInfo = nextState.playersInfo[buyerId] ?? prevState.playersInfo[buyerId];
+      const buyerName = getPlayerName(buyerInfo, buyerId);
+      const sellerInfo = sellerId ? (nextState.playersInfo[sellerId] ?? prevState.playersInfo[sellerId]) : undefined;
+      const sellerName = sellerId ? getPlayerName(sellerInfo, sellerId) : 'đối thủ';
+      const cellName = BOARD_CONFIG[buyoutIndex]?.name ?? `Ô #${buyoutIndex}`;
+      const amount = payer ? Math.abs(payer.diff) : (receiver ? receiver.diff : (PROPERTY_DEEDS.get(buyoutIndex)?.price ?? 0));
+
+      entries.push({
+        id: `ma_buyout_${Date.now()}_${buyoutIndex}_${buyerId}`,
+        timestamp: Date.now(),
+        type: 'card',
+        message: `⚡ [M&A] ${buyerName} đã chi trả ${formatCurrency(amount)} thâu tóm ${cellName} từ ${sellerName}`,
+        playerId: buyerId,
+        playerName: buyerName,
+        amount: -amount,
+        cellIndex: buyoutIndex,
+        ...(buyerInfo?.tokenColor ? { playerTokenColor: buyerInfo.tokenColor } : {}),
+      });
+
+      if (payer) handledPayerIds.add(payer.id);
+      if (receiver) handledReceiverIds.add(receiver.id);
+    }
+  }
+
+  const { rentLogs, handledPayerIds: rentPayers, handledReceiverIds: rentReceivers } = matchRentTransactions(
+    payers,
+    receivers,
+    handledPayerIds,
+    handledReceiverIds,
+  );
   entries.push(...rentLogs);
+  for (const id of rentPayers) handledPayerIds.add(id);
+  for (const id of rentReceivers) handledReceiverIds.add(id);
 
   if (delta.lastHoseResult) {
     const hr = delta.lastHoseResult;

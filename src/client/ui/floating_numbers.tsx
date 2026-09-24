@@ -28,6 +28,7 @@ export function resolveActionIcon(actionType?: string, isReward?: boolean): stri
     case 'hose': return '📊';
     case 'teleport': return '✈️';
     case 'audit_jail': return '🚨';
+    case 'ma_buyout': return '🤝';
     default: return isReward ? '✨' : '💸';
   }
 }
@@ -119,6 +120,7 @@ const ACTION_REASON_FORMATTERS: Partial<Record<FloatingActionType, (item: Floati
   debt_relief: () => 'Thoát vỡ nợ thành công!',
   teleport: (item) => `Dịch chuyển: ${item.title || 'Di chuyển đặc biệt'}`,
   audit_jail: () => 'Vào Trạm Kiểm Toán',
+  ma_buyout: (item) => item.title || 'Thương vụ M&A',
 };
 
 export function resolveFriendlyReason(item: FloatingTextItem, _player?: PlayerHudInfo): string {

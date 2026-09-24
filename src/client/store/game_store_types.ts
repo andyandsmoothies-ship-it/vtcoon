@@ -77,6 +77,7 @@ export type FloatingActionType =
   | 'hose'
   | 'teleport'
   | 'audit_jail'
+  | 'ma_buyout'
   | 'general';
 
 export interface FloatingTextItem {

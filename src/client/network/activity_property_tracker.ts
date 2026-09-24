@@ -128,12 +128,25 @@ function processCellOwnerDiff(
   nextState: GameState,
   entries: ActivityLogEntry[],
   boughtCellIndices: number[],
+  buyoutCellIndices: number[],
+  delta: DeltaPayload,
 ): void {
   if (cell.ownerId === undefined) return;
   const prevOwnerId = Object.keys(prevState.playersInfo).find((id) =>
     prevState.playersInfo[id]?.ownedProperties.includes(cell.index),
   );
   if (cell.ownerId && cell.ownerId !== prevOwnerId) {
+    const cardId = delta.lastEventCard?.id?.toLowerCase() ?? '';
+    const effectType = delta.lastEventCard?.effectType?.toLowerCase() ?? '';
+    const action = delta.lastEventCard?.action?.toLowerCase() ?? '';
+    const isBuyout = cardId.includes('ma_force') || effectType === 'ma_force' || action === 'ma_force' ||
+                     cardId.includes('swap_project') || effectType === 'swap_project' || action === 'swap_project';
+
+    if (isBuyout) {
+      buyoutCellIndices.push(cell.index);
+      return;
+    }
+
     const buyer = nextState.playersInfo[cell.ownerId] ?? prevState.playersInfo[cell.ownerId];
     const modalAuction =
       prevState.activeModal === 'auction' && prevState.modalPayload && 'cellIndex' in prevState.modalPayload
@@ -198,25 +211,26 @@ export function detectPropertyAndLevelActivities(
   if (!delta.cells || delta.cells.length === 0) {
     return {
       entries: [],
-      context: { boughtCellIndices: [], upgradedCells: [], mortgagedCells: [], unmortgagedCells: [] },
+      context: { boughtCellIndices: [], buyoutCellIndices: [], upgradedCells: [], mortgagedCells: [], unmortgagedCells: [] },
       boughtCellIndices: [],
     };
   }
   const entries: ActivityLogEntry[] = [];
   const boughtCellIndices: number[] = [];
+  const buyoutCellIndices: number[] = [];
   const upgradedCells: Array<{ cellIndex: number; cost: number; ownerId: string }> = [];
   const mortgagedCells: Array<{ cellIndex: number; loan: number; ownerId: string }> = [];
   const unmortgagedCells: Array<{ cellIndex: number; cost: number; ownerId: string }> = [];
 
   for (const cell of delta.cells) {
-    processCellOwnerDiff(cell, prevState, nextState, entries, boughtCellIndices);
+    processCellOwnerDiff(cell, prevState, nextState, entries, boughtCellIndices, buyoutCellIndices, delta);
     processCellLevelDiff(cell, prevState, nextState, entries, upgradedCells);
     processCellMortgageDiff(cell, prevState, nextState, entries, mortgagedCells, unmortgagedCells);
   }
 
   return {
     entries,
-    context: { boughtCellIndices, upgradedCells, mortgagedCells, unmortgagedCells },
+    context: { boughtCellIndices, buyoutCellIndices, upgradedCells, mortgagedCells, unmortgagedCells },
     boughtCellIndices,
   };
 }

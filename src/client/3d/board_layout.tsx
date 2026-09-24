@@ -18,6 +18,7 @@ import {
   createWalnutTabletopTexture,
   createWalnutRoughnessTexture,
 } from './tabletop_texture_generator';
+import { isMobileHardware } from './device_detect';
 
 // Depth Layer Stack triệt tiêu Z-Fighting (IMP-30 Terrain Flush & IMP-32 Executive Tabletop Master Plan)
 export const WALNUT_TABLE_Y = -0.350;
@@ -97,6 +98,7 @@ export function GameBoard(): React.ReactElement {
   const hasRolledThisTurn = useGameStore((s) => s.hasRolledThisTurn);
   const localPlayerId = useLobbyStore((s) => s.myPlayerId) || 'p1';
   const isHeatmapActive = useGameStore((s) => s.isHeatmapActive);
+  const isMobile = useMemo(() => isMobileHardware(), []);
 
   const ownerInfoMap = useMemo(() => computeOwnerMap(playersInfo), [playersInfo]);
   const monopolyGroups = useMemo(() => detectPlayerMonopolies(playersInfo), [playersInfo]);
@@ -165,6 +167,7 @@ export function GameBoard(): React.ReactElement {
           onClick={() => handleTileClick(cell.index)}
           isHeatmapActive={isHeatmapActive}
           isMonopolyGroup={isCellInMonopolyGroup(cell.index, monopolyGroups)}
+          isMobile={isMobile}
         />
       ))}
 

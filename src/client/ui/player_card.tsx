@@ -171,56 +171,44 @@ export function PlayerCard({
           )}
         </div>
 
-        <div className="flex items-center gap-1.5 shrink-0">
-          <span
-            data-testid="player-property-count"
-            className="inline-flex items-center gap-0.5 text-[10px] font-bold text-slate-700 bg-slate-100 border border-slate-300 px-1 py-0.5 rounded"
-            title={`Đã sở hữu ${ownedCount}/22 bất động sản`}
-          >
-            <span role="img" aria-hidden="true" className="text-[10px]">🏠</span>
-            <span>{ownedCount}</span>
+        <div className="hidden sm:flex items-center gap-1 shrink-0" data-testid="player-net-worth">
+          <span className="text-[10px] text-slate-500 font-semibold tabular-nums" title="Tài sản ròng">
+            ({formatCurrency(netWorth)})
           </span>
-          <div className="hidden sm:flex items-center text-[10px] text-slate-500 font-semibold tabular-nums" title="Tài sản ròng">
-            <span>({formatCurrency(netWorth)})</span>
-          </div>
         </div>
       </div>
 
-      {/* Dòng 3: Dải 22 chấm BĐS theo 8 cụm màu (Single line, 0 flex-wrap, cao 6px) */}
+      {/* Dòng 3: Dải 22 chấm BĐS trải đều 100% bề ngang theo 8 cụm màu */}
+      <span className="sr-only">BĐS:</span>
       <div
-        className="flex items-center gap-1 pt-1 border-t border-slate-300"
+        className="flex items-center justify-between w-full pt-1 border-t border-slate-300 select-none"
         data-testid="player-property-clusters"
       >
-        <span className="text-[9px] text-slate-600 uppercase tracking-tighter mr-0.5 font-bold shrink-0">
-          BĐS:
-        </span>
-        <div className="flex items-center justify-between w-full gap-0.5 sm:gap-1 overflow-hidden">
-          {PROPERTY_CLUSTERS.map(({ group, cells }) => (
-            <div
-              key={group}
-              className="flex items-center gap-[1px] shrink-0"
-              data-testid={`cluster-${group}`}
-            >
-              {cells.map((cell) => {
-                const isOwned = Boolean(player.ownedProperties?.includes(cell.index));
-                return (
-                  <span
-                    key={cell.index}
-                    data-testid={`dot-cell-${cell.index}`}
-                    data-owned={isOwned ? 'true' : 'false'}
-                    className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full transition-all shrink-0 ${
-                      isOwned
-                        ? 'border border-slate-900/50 shadow-2xs'
-                        : 'border border-slate-300 bg-slate-100/70'
-                    }`}
-                    style={isOwned ? { backgroundColor: COLOR_GROUP_HEX[group] } : undefined}
-                    title={`${cell.name}: ${isOwned ? 'Đã sở hữu' : 'Chưa sở hữu'}`}
-                  />
-                );
-              })}
-            </div>
-          ))}
-        </div>
+        {PROPERTY_CLUSTERS.map(({ group, cells }) => (
+          <div
+            key={group}
+            className="flex items-center gap-[1.5px] shrink-0"
+            data-testid={`cluster-${group}`}
+          >
+            {cells.map((cell) => {
+              const isOwned = Boolean(player.ownedProperties?.includes(cell.index));
+              return (
+                <span
+                  key={cell.index}
+                  data-testid={`dot-cell-${cell.index}`}
+                  data-owned={isOwned ? 'true' : 'false'}
+                  className={`w-[5.5px] h-[5.5px] sm:w-[6.5px] sm:h-[6.5px] md:w-2 md:h-2 rounded-full transition-all shrink-0 ${
+                    isOwned
+                      ? 'border border-slate-900/50 shadow-2xs'
+                      : 'border border-slate-300 bg-slate-100/70'
+                  }`}
+                  style={isOwned ? { backgroundColor: COLOR_GROUP_HEX[group] } : undefined}
+                  title={`${cell.name}: ${isOwned ? 'Đã sở hữu' : 'Chưa sở hữu'}`}
+                />
+              );
+            })}
+          </div>
+        ))}
       </div>
     </div>
   );

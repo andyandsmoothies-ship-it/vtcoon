@@ -84,7 +84,7 @@ argues from the spec, so the spec travels with it; executors read both]
 - **Risk Dial**: [Isolated (Level 1) | Slice-Bound (Level 2) | Systemic/Global (Level 3)]
 - **Direct Touch**: [Files/modules modified]
 - **Subtractive Audit (Delete/Cleanup)**: [Obsolete states, listeners, flags, or dead code paths to remove]
-- **Call-Site Exhaustion**: [100% of callers audited via grep_search — never rely on default parameters]
+- **Call-Site Exhaustion**: [100% of callers audited via grep_search with a call-site matrix — never rely on default parameters. Tabulate every caller when modifying signatures.]
 - **Import DAG Check**: [Verify upstream imports of modified files to prevent circular dependencies]
 - **Delta LOC Budget**: [For files >= 300 LOC: Current + Delta = Expected; extract submodule if Expected > Ceiling]
 - **Axis 1 - Downstream Consumers**: [Direct callers, UI subscribers, derived stores/caches, event observers]
@@ -152,6 +152,7 @@ Every step must contain the actual content an engineer needs. These are **plan f
 - "Similar to Task N" (repeat the code — the engineer may be reading tasks out of order)
 - Steps that describe what to do without showing how (code blocks required for code steps)
 - References to types, functions, or methods not defined in any task
+- Vague quantifiers (e.g. "N test files unaffected", "several callers") without exact file paths or verified grep proof
 
 ## Rich Formatting
 

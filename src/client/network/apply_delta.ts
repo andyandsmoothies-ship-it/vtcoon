@@ -209,8 +209,8 @@ function syncTelemetryAndActivities(delta: DeltaPayload, state: GameState, store
   try {
     trackDeltaActivities(delta, state, store.getState());
     handleDeltaTelemetry(delta, state, store.getState());
-  } catch (err) {
-    console.warn('[applyDelta] syncTelemetryAndActivities error:', err);
+  } catch {
+    // safe fallback: Telemetry and activity tracking must never break game store state
   }
 }
 

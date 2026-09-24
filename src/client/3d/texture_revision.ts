@@ -2,13 +2,13 @@
 import { useSyncExternalStore } from 'react';
 
 let textureRevision = 0;
-const revisionListeners = new Set<(revision: number) => void>();
+const revisionListeners = new Set<(revision?: number) => void>();
 
 export function getTextureRevision(): number {
   return textureRevision;
 }
 
-export function subscribeTextureRevision(listener: (revision: number) => void): () => void {
+export function subscribeTextureRevision(listener: (revision?: number) => void): () => void {
   revisionListeners.add(listener);
   return () => {
     revisionListeners.delete(listener);
