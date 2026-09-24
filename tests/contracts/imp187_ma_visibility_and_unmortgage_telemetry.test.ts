@@ -11,8 +11,34 @@ import { matchRentTransactions } from '../../src/client/network/activity_financi
 import { useActivityStore } from '../../src/client/store/activity_store';
 import { useGameStore, type GameState } from '../../src/client/store/game_store';
 import { useVfxStore } from '../../src/client/store/vfx_store';
-import type { DeltaPayload } from '../../src/server/session_manager';
-import { TurnPhase } from '../../src/domain/room';
+import type { DeltaPayload, PlayerDelta } from '../../src/server/session_manager';
+import { TurnPhase, type EventCardInfo } from '../../src/domain/room';
+import type { PlayerHudInfo } from '../../src/client/store/game_store_types';
+
+function mockHudPlayer(p: { id: string; name: string; balance: number } & Partial<PlayerHudInfo>): PlayerHudInfo {
+  return {
+    tokenColor: '#38BDF8',
+    ownedProperties: [],
+    mortgagedProperties: [],
+    isBot: false,
+    inAudit: false,
+    ...p,
+  };
+}
+
+function mockPlayerDelta(p: { id: string; balance: number } & Partial<PlayerDelta>): PlayerDelta {
+  return {
+    position: 0,
+    ...p,
+  };
+}
+
+function mockCardInfo(c: { id: string; title: string; type: 'Market' | 'Chance' } & Partial<EventCardInfo>): EventCardInfo {
+  return {
+    description: c.title,
+    ...c,
+  };
+}
 
 function createMockGameState(overrides?: Partial<GameState>): GameState {
   const base = useGameStore.getState();
@@ -52,7 +78,7 @@ describe('IMP-187 Contract Tests: Telemetry Unmortgage & M&A Transparency', () =
     it('[TC-187.01/MSS] Tick 307: Unmortgage of Cell 28 (Viettel, loan 750, fee 75) produces expectedDelta = -750', () => {
       const preState = createMockGameState({
         playersInfo: {
-          bot_2: { id: 'bot_2', name: 'Bot AI 2', balance: 5000, ownedProperties: [28], mortgagedProperties: [28], mortgageLoans: { 28: 750 }, isBot: true, inAudit: false },
+          bot_2: mockHudPlayer({ id: 'bot_2', name: 'Bot AI 2', balance: 5000, ownedProperties: [28], mortgagedProperties: [28], mortgageLoans: { 28: 750 }, isBot: true }),
         },
         treasuryPool: 5000,
       });
@@ -61,7 +87,7 @@ describe('IMP-187 Contract Tests: Telemetry Unmortgage & M&A Transparency', () =
       const delta: DeltaPayload = {
         tick: 307,
         cells: [{ index: 28, isMortgaged: false }],
-        players: [{ id: 'bot_2', balance: 4175 }], // -825
+        players: [mockPlayerDelta({ id: 'bot_2', balance: 4175 })], // -825
         treasury: 5075, // +75
         roomStarted: true,
       };
@@ -74,7 +100,7 @@ describe('IMP-187 Contract Tests: Telemetry Unmortgage & M&A Transparency', () =
     it('[TC-187.02/MSS] Tick 312: Unmortgage of Cell 27 (Kiên Giang, loan 1300, fee 130) produces expectedDelta = -1300', () => {
       const preState = createMockGameState({
         playersInfo: {
-          bot_3: { id: 'bot_3', name: 'Bot AI 3', balance: 8000, ownedProperties: [27], mortgagedProperties: [27], mortgageLoans: { 27: 1300 }, isBot: true, inAudit: false },
+          bot_3: mockHudPlayer({ id: 'bot_3', name: 'Bot AI 3', balance: 8000, ownedProperties: [27], mortgagedProperties: [27], mortgageLoans: { 27: 1300 }, isBot: true }),
         },
         treasuryPool: 5075,
       });
@@ -83,7 +109,7 @@ describe('IMP-187 Contract Tests: Telemetry Unmortgage & M&A Transparency', () =
       const delta: DeltaPayload = {
         tick: 312,
         cells: [{ index: 27, isMortgaged: false }],
-        players: [{ id: 'bot_3', balance: 6570 }], // -1430
+        players: [mockPlayerDelta({ id: 'bot_3', balance: 6570 })], // -1430
         treasury: 5205, // +130
         roomStarted: true,
       };
@@ -97,7 +123,7 @@ describe('IMP-187 Contract Tests: Telemetry Unmortgage & M&A Transparency', () =
       // Cell 28 deed price is 1500 -> 50% = 750
       const preState = createMockGameState({
         playersInfo: {
-          bot_2: { id: 'bot_2', name: 'Bot AI 2', balance: 5000, ownedProperties: [28], mortgagedProperties: [28], isBot: true, inAudit: false },
+          bot_2: mockHudPlayer({ id: 'bot_2', name: 'Bot AI 2', balance: 5000, ownedProperties: [28], mortgagedProperties: [28], isBot: true }),
         },
         treasuryPool: 5000,
       });
@@ -105,7 +131,7 @@ describe('IMP-187 Contract Tests: Telemetry Unmortgage & M&A Transparency', () =
       const delta: DeltaPayload = {
         tick: 308,
         cells: [{ index: 28, isMortgaged: false }],
-        players: [{ id: 'bot_2', balance: 4175 }],
+        players: [mockPlayerDelta({ id: 'bot_2', balance: 4175 })],
         treasury: 5075,
         roomStarted: true,
       };
@@ -156,7 +182,7 @@ describe('IMP-187 Contract Tests: Telemetry Unmortgage & M&A Transparency', () =
     it('[TC-187.06/MSS] Preserves Foreclosure Auction Treasury Absorption (L284 integrity check)', () => {
       const preState = createMockGameState({
         playersInfo: {
-          p1: { id: 'p1', name: 'P1', balance: 10000, ownedProperties: [], isBot: false, inAudit: false },
+          p1: mockHudPlayer({ id: 'p1', name: 'P1', balance: 10000 }),
         },
         treasuryPool: 12000,
         auction: { cellIndex: 6, highestBid: 1650, highestBidder: 'p1' },
@@ -165,7 +191,7 @@ describe('IMP-187 Contract Tests: Telemetry Unmortgage & M&A Transparency', () =
       const delta: DeltaPayload = {
         tick: 15,
         cells: [{ index: 6, ownerId: 'p1', level: 0 }],
-        players: [{ id: 'p1', balance: 8350 }],
+        players: [mockPlayerDelta({ id: 'p1', balance: 8350 })],
         treasury: 13650, // +1650 absorbed into treasury
         roomStarted: true,
       };
@@ -193,33 +219,32 @@ describe('IMP-187 Contract Tests: Telemetry Unmortgage & M&A Transparency', () =
     it('[TC-187.08/MSS] Tick 309: detectFinancialAndStatusActivities emits M&A log instead of rent log when CC_MA_FORCE is present', () => {
       const preState = createMockGameState({
         playersInfo: {
-          p1: { id: 'p1', name: 'Bubbly Parrot', balance: 10000, ownedProperties: [19], isBot: false, inAudit: false },
-          bot_3: { id: 'bot_3', name: 'Bot AI 3', balance: 18000, ownedProperties: [], isBot: true, inAudit: false },
+          p1: mockHudPlayer({ id: 'p1', name: 'Bubbly Parrot', balance: 10000, ownedProperties: [19] }),
+          bot_3: mockHudPlayer({ id: 'bot_3', name: 'Bot AI 3', balance: 18000, isBot: true }),
         },
       });
 
       const postState = createMockGameState({
         playersInfo: {
-          p1: { id: 'p1', name: 'Bubbly Parrot', balance: 12400, ownedProperties: [], isBot: false, inAudit: false },
-          bot_3: { id: 'bot_3', name: 'Bot AI 3', balance: 15600, ownedProperties: [19], isBot: true, inAudit: false },
+          p1: mockHudPlayer({ id: 'p1', name: 'Bubbly Parrot', balance: 12400 }),
+          bot_3: mockHudPlayer({ id: 'bot_3', name: 'Bot AI 3', balance: 15600, ownedProperties: [19], isBot: true }),
         },
       });
 
       const delta: DeltaPayload = {
         tick: 309,
-        lastEventCard: {
+        lastEventCard: mockCardInfo({
           id: 'cc_ma_force',
           title: 'Thâu Tóm Doanh Nghiệp',
-          description: 'Cưỡng chế mua lại 1 ô đất bất kỳ',
           type: 'Chance',
           cardType: 'chance',
           effectType: 'ma_force',
           action: 'ma_force',
-        },
+        }),
         cells: [{ index: 19, ownerId: 'bot_3' }],
         players: [
-          { id: 'bot_3', balance: 15600 },
-          { id: 'p1', balance: 12400 },
+          mockPlayerDelta({ id: 'bot_3', balance: 15600 }),
+          mockPlayerDelta({ id: 'p1', balance: 12400 }),
         ],
         roomStarted: true,
       };
@@ -242,28 +267,28 @@ describe('IMP-187 Contract Tests: Telemetry Unmortgage & M&A Transparency', () =
     it('[TC-187.09/MSS] detectPropertyAndLevelActivities suppresses generic "nhận quyền sở hữu" for buyoutCellIndices', () => {
       const preState = createMockGameState({
         playersInfo: {
-          p1: { id: 'p1', name: 'Bubbly Parrot', balance: 10000, ownedProperties: [19], isBot: false, inAudit: false },
-          bot_3: { id: 'bot_3', name: 'Bot AI 3', balance: 18000, ownedProperties: [], isBot: true, inAudit: false },
+          p1: mockHudPlayer({ id: 'p1', name: 'Bubbly Parrot', balance: 10000, ownedProperties: [19] }),
+          bot_3: mockHudPlayer({ id: 'bot_3', name: 'Bot AI 3', balance: 18000, isBot: true }),
         },
       });
 
       const postState = createMockGameState({
         playersInfo: {
-          p1: { id: 'p1', name: 'Bubbly Parrot', balance: 12400, ownedProperties: [], isBot: false, inAudit: false },
-          bot_3: { id: 'bot_3', name: 'Bot AI 3', balance: 15600, ownedProperties: [19], isBot: true, inAudit: false },
+          p1: mockHudPlayer({ id: 'p1', name: 'Bubbly Parrot', balance: 12400 }),
+          bot_3: mockHudPlayer({ id: 'bot_3', name: 'Bot AI 3', balance: 15600, ownedProperties: [19], isBot: true }),
         },
       });
 
       const delta: DeltaPayload = {
         tick: 309,
-        lastEventCard: {
+        lastEventCard: mockCardInfo({
           id: 'cc_ma_force',
           title: 'Thâu Tóm Doanh Nghiệp',
           type: 'Chance',
           cardType: 'chance',
           effectType: 'ma_force',
           action: 'ma_force',
-        },
+        }),
         cells: [{ index: 19, ownerId: 'bot_3' }],
         roomStarted: true,
       };
@@ -280,23 +305,24 @@ describe('IMP-187 Contract Tests: Telemetry Unmortgage & M&A Transparency', () =
     it('[TC-187.10/MSS] Ordinary rent payment between two players without card event remains unaffected', () => {
       const preState = createMockGameState({
         playersInfo: {
-          p1: { id: 'p1', name: 'Bubbly Parrot', balance: 10000, ownedProperties: [19], isBot: false, inAudit: false },
-          bot_2: { id: 'bot_2', name: 'Bot AI 2', balance: 5000, ownedProperties: [], isBot: true, inAudit: false },
+          p1: mockHudPlayer({ id: 'p1', name: 'Bubbly Parrot', balance: 10000, ownedProperties: [19] }),
+          bot_2: mockHudPlayer({ id: 'bot_2', name: 'Bot AI 2', balance: 5000, isBot: true }),
         },
       });
 
       const postState = createMockGameState({
         playersInfo: {
-          p1: { id: 'p1', name: 'Bubbly Parrot', balance: 11000, ownedProperties: [19], isBot: false, inAudit: false },
-          bot_2: { id: 'bot_2', name: 'Bot AI 2', balance: 4000, ownedProperties: [], isBot: true, inAudit: false },
+          p1: mockHudPlayer({ id: 'p1', name: 'Bubbly Parrot', balance: 11000, ownedProperties: [19] }),
+          bot_2: mockHudPlayer({ id: 'bot_2', name: 'Bot AI 2', balance: 4000, isBot: true }),
         },
       });
 
       const delta: DeltaPayload = {
         tick: 310,
+        cells: [],
         players: [
-          { id: 'bot_2', balance: 4000 },
-          { id: 'p1', balance: 11000 },
+          mockPlayerDelta({ id: 'bot_2', balance: 4000 }),
+          mockPlayerDelta({ id: 'p1', balance: 11000 }),
         ],
         roomStarted: true,
       };
@@ -317,32 +343,32 @@ describe('IMP-187 Contract Tests: Telemetry Unmortgage & M&A Transparency', () =
     it('[TC-187.11/MSS] trackDeltaActivities logs card event BEFORE property transfer and financial transfer', () => {
       const preState = createMockGameState({
         playersInfo: {
-          p1: { id: 'p1', name: 'Bubbly Parrot', balance: 10000, ownedProperties: [19], isBot: false, inAudit: false },
-          bot_3: { id: 'bot_3', name: 'Bot AI 3', balance: 18000, ownedProperties: [], isBot: true, inAudit: false },
+          p1: mockHudPlayer({ id: 'p1', name: 'Bubbly Parrot', balance: 10000, ownedProperties: [19] }),
+          bot_3: mockHudPlayer({ id: 'bot_3', name: 'Bot AI 3', balance: 18000, isBot: true }),
         },
       });
 
       const postState = createMockGameState({
         playersInfo: {
-          p1: { id: 'p1', name: 'Bubbly Parrot', balance: 12400, ownedProperties: [], isBot: false, inAudit: false },
-          bot_3: { id: 'bot_3', name: 'Bot AI 3', balance: 15600, ownedProperties: [19], isBot: true, inAudit: false },
+          p1: mockHudPlayer({ id: 'p1', name: 'Bubbly Parrot', balance: 12400 }),
+          bot_3: mockHudPlayer({ id: 'bot_3', name: 'Bot AI 3', balance: 15600, ownedProperties: [19], isBot: true }),
         },
       });
 
       const delta: DeltaPayload = {
         tick: 309,
-        lastEventCard: {
+        lastEventCard: mockCardInfo({
           id: 'cc_ma_force',
           title: 'Thâu Tóm Doanh Nghiệp',
           type: 'Chance',
           cardType: 'chance',
           effectType: 'ma_force',
           action: 'ma_force',
-        },
+        }),
         cells: [{ index: 19, ownerId: 'bot_3' }],
         players: [
-          { id: 'bot_3', balance: 15600 },
-          { id: 'p1', balance: 12400 },
+          mockPlayerDelta({ id: 'bot_3', balance: 15600 }),
+          mockPlayerDelta({ id: 'p1', balance: 12400 }),
         ],
         roomStarted: true,
       };
@@ -369,32 +395,32 @@ describe('IMP-187 Contract Tests: Telemetry Unmortgage & M&A Transparency', () =
 
       const preState = createMockGameState({
         playersInfo: {
-          p1: { id: 'p1', name: 'Bubbly Parrot', balance: 10000, ownedProperties: [19], isBot: false, inAudit: false },
-          bot_3: { id: 'bot_3', name: 'Bot AI 3', balance: 18000, ownedProperties: [], isBot: true, inAudit: false },
+          p1: mockHudPlayer({ id: 'p1', name: 'Bubbly Parrot', balance: 10000, ownedProperties: [19] }),
+          bot_3: mockHudPlayer({ id: 'bot_3', name: 'Bot AI 3', balance: 18000, isBot: true }),
         },
       });
 
       const postState = createMockGameState({
         playersInfo: {
-          p1: { id: 'p1', name: 'Bubbly Parrot', balance: 12400, ownedProperties: [], isBot: false, inAudit: false },
-          bot_3: { id: 'bot_3', name: 'Bot AI 3', balance: 15600, ownedProperties: [19], isBot: true, inAudit: false },
+          p1: mockHudPlayer({ id: 'p1', name: 'Bubbly Parrot', balance: 12400 }),
+          bot_3: mockHudPlayer({ id: 'bot_3', name: 'Bot AI 3', balance: 15600, ownedProperties: [19], isBot: true }),
         },
       });
 
       const delta: DeltaPayload = {
         tick: 309,
-        lastEventCard: {
+        lastEventCard: mockCardInfo({
           id: 'cc_ma_force',
           title: 'Thâu Tóm Doanh Nghiệp',
           type: 'Chance',
           cardType: 'chance',
           effectType: 'ma_force',
           action: 'ma_force',
-        },
+        }),
         cells: [{ index: 19, ownerId: 'bot_3' }],
         players: [
-          { id: 'bot_3', balance: 15600 },
-          { id: 'p1', balance: 12400 },
+          mockPlayerDelta({ id: 'bot_3', balance: 15600 }),
+          mockPlayerDelta({ id: 'p1', balance: 12400 }),
         ],
         roomStarted: true,
       };
@@ -418,25 +444,25 @@ describe('IMP-187 Contract Tests: Telemetry Unmortgage & M&A Transparency', () =
 
       const preState = createMockGameState({
         playersInfo: {
-          p1: { id: 'p1', name: 'Bubbly Parrot', balance: 10000, ownedProperties: [19], isBot: false, inAudit: false },
-          bot_3: { id: 'bot_3', name: 'Bot AI 3', balance: 18000, ownedProperties: [], isBot: true, inAudit: false },
+          p1: mockHudPlayer({ id: 'p1', name: 'Bubbly Parrot', balance: 10000, ownedProperties: [19] }),
+          bot_3: mockHudPlayer({ id: 'bot_3', name: 'Bot AI 3', balance: 18000, isBot: true }),
         },
       });
 
       const delta: DeltaPayload = {
         tick: 309,
-        lastEventCard: {
+        lastEventCard: mockCardInfo({
           id: 'cc_ma_force',
           title: 'Thâu Tóm Doanh Nghiệp',
           type: 'Chance',
           cardType: 'chance',
           effectType: 'ma_force',
           action: 'ma_force',
-        },
+        }),
         cells: [{ index: 19, ownerId: 'bot_3' }],
         players: [
-          { id: 'bot_3', balance: 15600 },
-          { id: 'p1', balance: 12400 },
+          mockPlayerDelta({ id: 'bot_3', balance: 15600 }),
+          mockPlayerDelta({ id: 'p1', balance: 12400 }),
         ],
         roomStarted: true,
       };
@@ -448,7 +474,7 @@ describe('IMP-187 Contract Tests: Telemetry Unmortgage & M&A Transparency', () =
         ([param]) => param.playerId === 'p1' && param.actionType === 'ma_buyout',
       );
       expect(victimTexts).toHaveLength(1);
-      const victimParam = victimTexts[0][0];
+      const victimParam = victimTexts[0]![0];
       expect(victimParam.title).toContain('Bị thâu tóm');
       expect(victimParam.title).toContain('Đà Nẵng');
       expect(victimParam.text).toContain('2.400 Tr');
@@ -463,25 +489,25 @@ describe('IMP-187 Contract Tests: Telemetry Unmortgage & M&A Transparency', () =
 
       const preState = createMockGameState({
         playersInfo: {
-          p1: { id: 'p1', name: 'Bubbly Parrot', balance: 10000, ownedProperties: [19], isBot: false, inAudit: false },
-          bot_3: { id: 'bot_3', name: 'Bot AI 3', balance: 18000, ownedProperties: [], isBot: true, inAudit: false },
+          p1: mockHudPlayer({ id: 'p1', name: 'Bubbly Parrot', balance: 10000, ownedProperties: [19] }),
+          bot_3: mockHudPlayer({ id: 'bot_3', name: 'Bot AI 3', balance: 18000, isBot: true }),
         },
       });
 
       const delta: DeltaPayload = {
         tick: 309,
-        lastEventCard: {
+        lastEventCard: mockCardInfo({
           id: 'cc_ma_force',
           title: 'Thâu Tóm Doanh Nghiệp',
           type: 'Chance',
           cardType: 'chance',
           effectType: 'ma_force',
           action: 'ma_force',
-        },
+        }),
         cells: [{ index: 19, ownerId: 'bot_3' }],
         players: [
-          { id: 'bot_3', balance: 15600 },
-          { id: 'p1', balance: 12400 },
+          mockPlayerDelta({ id: 'bot_3', balance: 15600 }),
+          mockPlayerDelta({ id: 'p1', balance: 12400 }),
         ],
         roomStarted: true,
       };
@@ -492,36 +518,36 @@ describe('IMP-187 Contract Tests: Telemetry Unmortgage & M&A Transparency', () =
         ([param]) => param.playerId === 'bot_3' && param.actionType === 'ma_buyout',
       );
       expect(buyerTexts).toHaveLength(1);
-      expect(buyerTexts[0][0].title).toContain('Thâu tóm');
-      expect(buyerTexts[0][0].title).toContain('Đà Nẵng');
+      expect(buyerTexts[0]![0].title).toContain('Thâu tóm');
+      expect(buyerTexts[0]![0].title).toContain('Đà Nẵng');
     });
 
     it('[TC-187.15/MSS] Fallback gracefully when cell owner is not in prevState.playersInfo', () => {
       // Cell 19 had no owner in preState
       const preState = createMockGameState({
         playersInfo: {
-          bot_3: { id: 'bot_3', name: 'Bot AI 3', balance: 18000, ownedProperties: [], isBot: true, inAudit: false },
+          bot_3: mockHudPlayer({ id: 'bot_3', name: 'Bot AI 3', balance: 18000, isBot: true }),
         },
       });
 
       const postState = createMockGameState({
         playersInfo: {
-          bot_3: { id: 'bot_3', name: 'Bot AI 3', balance: 15600, ownedProperties: [19], isBot: true, inAudit: false },
+          bot_3: mockHudPlayer({ id: 'bot_3', name: 'Bot AI 3', balance: 15600, ownedProperties: [19], isBot: true }),
         },
       });
 
       const delta: DeltaPayload = {
         tick: 309,
-        lastEventCard: {
+        lastEventCard: mockCardInfo({
           id: 'cc_ma_force',
           title: 'Thâu Tóm Doanh Nghiệp',
           type: 'Chance',
           cardType: 'chance',
           effectType: 'ma_force',
           action: 'ma_force',
-        },
+        }),
         cells: [{ index: 19, ownerId: 'bot_3' }],
-        players: [{ id: 'bot_3', balance: 15600 }],
+        players: [mockPlayerDelta({ id: 'bot_3', balance: 15600 })],
         roomStarted: true,
       };
 
@@ -535,28 +561,28 @@ describe('IMP-187 Contract Tests: Telemetry Unmortgage & M&A Transparency', () =
     it('[TC-187.16/MSS] Supports Project Swap CC_SWAP_PROJECT as M&A buyout equivalent', () => {
       const preState = createMockGameState({
         playersInfo: {
-          p1: { id: 'p1', name: 'Bubbly Parrot', balance: 10000, ownedProperties: [19], isBot: false, inAudit: false },
-          bot_3: { id: 'bot_3', name: 'Bot AI 3', balance: 18000, ownedProperties: [21], isBot: true, inAudit: false },
+          p1: mockHudPlayer({ id: 'p1', name: 'Bubbly Parrot', balance: 10000, ownedProperties: [19] }),
+          bot_3: mockHudPlayer({ id: 'bot_3', name: 'Bot AI 3', balance: 18000, ownedProperties: [21], isBot: true }),
         },
       });
 
       const postState = createMockGameState({
         playersInfo: {
-          p1: { id: 'p1', name: 'Bubbly Parrot', balance: 10000, ownedProperties: [21], isBot: false, inAudit: false },
-          bot_3: { id: 'bot_3', name: 'Bot AI 3', balance: 18000, ownedProperties: [19], isBot: true, inAudit: false },
+          p1: mockHudPlayer({ id: 'p1', name: 'Bubbly Parrot', balance: 10000, ownedProperties: [21] }),
+          bot_3: mockHudPlayer({ id: 'bot_3', name: 'Bot AI 3', balance: 18000, ownedProperties: [19], isBot: true }),
         },
       });
 
       const delta: DeltaPayload = {
         tick: 315,
-        lastEventCard: {
+        lastEventCard: mockCardInfo({
           id: 'cc_swap_project',
           title: 'Hoán Đổi Dự Án',
           type: 'Chance',
           cardType: 'chance',
           effectType: 'swap_project',
           action: 'swap_project',
-        },
+        }),
         cells: [
           { index: 19, ownerId: 'bot_3' },
           { index: 21, ownerId: 'p1' },

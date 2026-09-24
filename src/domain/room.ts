@@ -99,6 +99,8 @@ export interface EventCardInfo {
   readonly cardType?: 'chance' | 'market';
   readonly cardId?: string;
   readonly playerId?: string;
+  readonly effectType?: string;
+  readonly action?: string;
 }
 
 export interface HoseResultInfo {
