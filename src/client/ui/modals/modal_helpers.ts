@@ -289,3 +289,43 @@ export function checkPropertyUpgradeEligibility(params: CheckUpgradeParams): Upg
     hasMonopoly: true,
   };
 }
+
+const COLOR_GROUP_ORDER_WEIGHT: Record<ColorGroup, number> = {
+  [ColorGroup.Nau]: 100,
+  [ColorGroup.XanhDaTroi]: 200,
+  [ColorGroup.Hong]: 300,
+  [ColorGroup.Cam]: 400,
+  [ColorGroup.Do]: 500,
+  [ColorGroup.Vang]: 600,
+  [ColorGroup.XanhLa]: 700,
+  [ColorGroup.Tim]: 800,
+};
+
+/**
+ * [IMP-188] Tính trọng số sắp xếp theo khu vực/cụm màu:
+ * Nâu (100+) -> Xanh Da Trời (200+) -> Hồng (300+) -> Cam (400+) -> Đỏ (500+) -> Vàng (600+) -> Xanh Lá (700+) -> Tím (800+) -> Hạ Tầng/Railroad (900+) -> Tiện Ích (1000+).
+ * Trong mỗi cụm, cộng thêm cellIndex để đảm bảo thứ tự tăng dần theo bàn cờ.
+ */
+export function getPropertySortWeight(cellIndex: number): number {
+  const cell = BOARD_CONFIG[cellIndex];
+  if (!cell) {
+    return 9999 + cellIndex;
+  }
+  if (cell.colorGroup && COLOR_GROUP_ORDER_WEIGHT[cell.colorGroup] !== undefined) {
+    return COLOR_GROUP_ORDER_WEIGHT[cell.colorGroup] + cellIndex;
+  }
+  if (cell.type === CellType.Railroad) {
+    return 900 + cellIndex;
+  }
+  if (cell.type === CellType.Utility) {
+    return 1000 + cellIndex;
+  }
+  return 9999 + cellIndex;
+}
+
+/**
+ * [IMP-188] Sắp xếp danh sách cellIndex bất động sản theo nhóm khu vực địa lý bàn cờ.
+ */
+export function sortPropertiesByRegion(properties: readonly number[]): number[] {
+  return [...properties].sort((a, b) => getPropertySortWeight(a) - getPropertySortWeight(b));
+}

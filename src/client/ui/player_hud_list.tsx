@@ -31,7 +31,7 @@ export function PlayerHudList(): React.ReactElement | null {
       </button>
 
       {!isCollapsed && (
-        <div className="flex flex-col gap-2 w-full">
+        <div className="flex flex-col gap-1.5 w-full">
           {playerList.map((player, index) => (
             <PlayerCard
               key={player.id}

@@ -1,6 +1,6 @@
 // [UI-IMP75/MSS][IMP-133][IMP-136] PropertyPortfolioModal — Danh Mục Bất Động Sản Toàn Diện, 1-Click Quick Build & Strategic Insights
 import React, { useState } from 'react';
-import { getDeedDisplayInfo, checkPropertyUpgradeEligibility } from './modal_helpers';
+import { getDeedDisplayInfo, checkPropertyUpgradeEligibility, sortPropertiesByRegion } from './modal_helpers';
 import { formatCurrency } from '../ui_helpers';
 import { COLOR_GROUP_HEX } from '../../../domain/theme';
 import { BOARD_CONFIG } from '../../../domain/board_config';
@@ -196,7 +196,7 @@ export function PropertyPortfolioModal({
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {filteredProperties.map((cellIndex) => {
+            {sortPropertiesByRegion(filteredProperties).map((cellIndex) => {
               const deed = getDeedDisplayInfo(cellIndex);
               const state = propertyStates[cellIndex];
               const isMort = Boolean(state?.isMortgaged);

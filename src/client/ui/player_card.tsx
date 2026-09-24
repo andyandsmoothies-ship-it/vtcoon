@@ -71,11 +71,12 @@ export function PlayerCard({
   const balanceColorClass = isNegativeBalance
     ? 'text-rose-700 font-black'
     : 'text-emerald-700 font-black';
+  const ownedCount = player.ownedProperties?.length ?? 0;
 
   return (
     <div
       data-testid="player-ribbon"
-      className={`pointer-events-auto relative flex flex-col gap-1.5 p-2 md:p-3 rounded-xl md:rounded-2xl border-2 border-slate-900 bg-[#FFFDF8] text-slate-900 transition-all duration-200 w-full ${
+      className={`pointer-events-auto relative flex flex-col gap-1 p-2 rounded-xl border-2 border-slate-900 bg-[#FFFDF8] text-slate-900 transition-all duration-200 w-full ${
         isCurrentTurn
           ? 'ring-2 ring-amber-400 shadow-[0_6px_0_0_#0f172a]'
           : 'shadow-[0_4px_0_0_#0f172a]'
@@ -83,10 +84,10 @@ export function PlayerCard({
       role="region"
       aria-label={`Thông tin ${player.name}`}
     >
-      {/* Huy hiệu LƯỢT nổi bật trên đỉnh thẻ (Corner Tab) - không chiếm diện tích dòng Tên người chơi */}
+      {/* Huy hiệu LƯỢT nổi bật trên đỉnh thẻ (Corner Tab) */}
       {isCurrentTurn && (
         <span
-          className="absolute -top-2.5 right-3 px-1.5 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300 shadow-xs animate-pulse select-none uppercase tracking-wider z-10"
+          className="absolute -top-2.5 right-3 px-1.5 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-200 text-amber-950 border border-amber-400 shadow-xs animate-pulse select-none uppercase tracking-wider z-10"
         >
           LƯỢT
         </span>
@@ -105,13 +106,14 @@ export function PlayerCard({
           <div className="absolute -bottom-1 left-4 w-2 h-2 bg-[#FFFDF8] border-r-2 border-b-2 border-slate-900 rotate-45" />
         </div>
       )}
-      {/* Header: Token avatar, Tên, Badges */}
+
+      {/* Dòng 1 (Header): Token avatar, Tên, Badges */}
       <div className="flex items-center justify-between gap-1.5 min-w-0">
         <div className="flex items-center gap-1.5 min-w-0 flex-1">
           <div
             data-testid={`player-pawn-badge-${player.id}`}
             data-legacy-size="w-8 h-8"
-            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 border-slate-900 flex items-center justify-center text-base sm:text-lg shadow-xs shrink-0 select-none leading-none"
+            className="w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 border-slate-900 flex items-center justify-center text-sm sm:text-base shadow-xs shrink-0 select-none leading-none"
             style={{ backgroundColor: player.tokenColor || '#38BDF8' }}
             title={pawnConfig.name}
             aria-label={`Linh vật: ${pawnConfig.name}`}
@@ -128,7 +130,7 @@ export function PlayerCard({
           </span>
         </div>
 
-        {/* Badges */}
+        {/* Badges: BOT, Phá Sản, Kiểm Toán */}
         <div className="flex items-center gap-1 shrink-0">
           {player.isBot && (
             <span className="px-1 py-0.5 rounded text-[9px] font-extrabold bg-cyan-100 text-cyan-900 border border-cyan-300">
@@ -142,7 +144,7 @@ export function PlayerCard({
           )}
           {player.inAudit && !player.bankrupt && (
             <span
-              className="px-1 py-0.5 rounded text-[9px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300 flex items-center justify-center"
+              className="px-1 py-0.5 rounded text-[9px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300 flex items-center justify-center leading-none"
               title="Kiểm Toán"
               aria-label="Kiểm Toán"
             >
@@ -152,28 +154,39 @@ export function PlayerCard({
         </div>
       </div>
 
-      {/* Dữ liệu tài chính: Tiền mặt + Net Worth */}
-      <div className="flex items-baseline justify-between gap-3 text-xs">
-        <div className="flex flex-col">
-          <span className="text-[10px] text-slate-600 uppercase font-semibold">Tiền mặt</span>
-          <span className={`tabular-nums ${balanceColorClass}`}>
+      {/* Dòng 2: Dữ liệu tài chính & BĐS gọn gàng, không để trống bên phải */}
+      <div className="flex items-center justify-between gap-1 text-xs">
+        <div className="flex items-center gap-1 min-w-0">
+          <span className={`tabular-nums text-xs ${balanceColorClass}`}>
             {formatCurrency(player.balance)}
           </span>
           {isNegativeBalance && (
-            <span className="text-[10px] text-rose-700 font-semibold mt-0.5">
-              Thấu chi: còn {player.overdraftRoundsLeft ?? 3} vòng
+            <span
+              className="text-[9px] font-extrabold text-rose-700 bg-rose-100 border border-rose-300 px-1 py-0.5 rounded shrink-0"
+              title={`Thấu chi: còn ${player.overdraftRoundsLeft ?? 3} vòng`}
+            >
+              <span className="inline sm:hidden">Nợ {player.overdraftRoundsLeft ?? 3}v</span>
+              <span className="hidden sm:inline">Thấu chi: còn {player.overdraftRoundsLeft ?? 3} vòng</span>
             </span>
           )}
         </div>
-        <div className="hidden sm:flex flex-col text-right">
-          <span className="text-[10px] text-slate-600 uppercase font-semibold">Tài sản ròng</span>
-          <span className="font-bold text-slate-900 tabular-nums">
-            {formatCurrency(netWorth)}
+
+        <div className="flex items-center gap-1.5 shrink-0">
+          <span
+            data-testid="player-property-count"
+            className="inline-flex items-center gap-0.5 text-[10px] font-bold text-slate-700 bg-slate-100 border border-slate-300 px-1 py-0.5 rounded"
+            title={`Đã sở hữu ${ownedCount}/22 bất động sản`}
+          >
+            <span role="img" aria-hidden="true" className="text-[10px]">🏠</span>
+            <span>{ownedCount}</span>
           </span>
+          <div className="hidden sm:flex items-center text-[10px] text-slate-500 font-semibold tabular-nums" title="Tài sản ròng">
+            <span>({formatCurrency(netWorth)})</span>
+          </div>
         </div>
       </div>
 
-      {/* Dải 22 chấm BĐS theo 8 cụm nhóm màu (Option A) */}
+      {/* Dòng 3: Dải 22 chấm BĐS theo 8 cụm màu (Single line, 0 flex-wrap, cao 6px) */}
       <div
         className="flex items-center gap-1 pt-1 border-t border-slate-300"
         data-testid="player-property-clusters"
@@ -181,11 +194,11 @@ export function PlayerCard({
         <span className="text-[9px] text-slate-600 uppercase tracking-tighter mr-0.5 font-bold shrink-0">
           BĐS:
         </span>
-        <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
+        <div className="flex items-center justify-between w-full gap-0.5 sm:gap-1 overflow-hidden">
           {PROPERTY_CLUSTERS.map(({ group, cells }) => (
             <div
               key={group}
-              className="flex items-center gap-0.5 shrink-0"
+              className="flex items-center gap-[1px] shrink-0"
               data-testid={`cluster-${group}`}
             >
               {cells.map((cell) => {
@@ -195,9 +208,9 @@ export function PlayerCard({
                     key={cell.index}
                     data-testid={`dot-cell-${cell.index}`}
                     data-owned={isOwned ? 'true' : 'false'}
-                    className={`w-2.5 h-2.5 rounded-full transition-all ${
+                    className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full transition-all shrink-0 ${
                       isOwned
-                        ? 'border border-slate-900/40 shadow-xs'
+                        ? 'border border-slate-900/50 shadow-2xs'
                         : 'border border-slate-300 bg-slate-100/70'
                     }`}
                     style={isOwned ? { backgroundColor: COLOR_GROUP_HEX[group] } : undefined}
