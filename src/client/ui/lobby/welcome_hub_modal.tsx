@@ -91,7 +91,7 @@ export function WelcomeHubModal(props: WelcomeHubModalProps = {}): React.ReactEl
             data-testid="create-room-btn"
             disabled={isJoining}
             onClick={handleCreateRoom}
-            className="w-full min-h-[48px] flex items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-amber-950 font-black text-sm uppercase tracking-wider shadow-[0_3px_0_0_#78350f] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
+            className="w-full min-h-[48px] px-4 py-2.5 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-amber-950 font-black text-sm uppercase tracking-wider shadow-[0_3px_0_0_#78350f] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
           >
             <span>🎮</span>
             <span>Tạo Phòng Mới</span>
@@ -151,7 +151,7 @@ export function WelcomeHubModal(props: WelcomeHubModalProps = {}): React.ReactEl
             type="button"
             data-testid="open-rules-btn"
             onClick={handleOpenRules}
-            className="w-full min-h-[44px] flex items-center justify-center gap-2 rounded-xl bg-slate-800 hover:bg-slate-750 text-slate-200 hover:text-white border border-slate-700 font-bold text-xs transition-all cursor-pointer active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
+            className="w-full min-h-[44px] px-4 py-2.5 flex items-center justify-center gap-2 rounded-xl bg-slate-800 hover:bg-slate-750 text-slate-200 hover:text-white border border-slate-700 font-bold text-xs transition-all cursor-pointer active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
           >
             <span>📖</span>
             <span>Hướng Dẫn & Thể Lệ Game</span>

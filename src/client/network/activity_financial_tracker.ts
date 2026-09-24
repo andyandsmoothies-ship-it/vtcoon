@@ -10,6 +10,7 @@ export interface BalanceDelta {
   readonly id: string;
   readonly diff: number;
   readonly pInfo?: PlayerHudInfo;
+  readonly cellIndex?: number;
 }
 
 export interface PropertyFinancialContext {
@@ -52,7 +53,10 @@ export function matchRentTransactions(
         message: `${payerName} đã trả ${formatCurrency(rentAmount)} tiền thuê cho ${receiverName}`,
         playerId: payer.id,
         playerName: payerName,
+        targetPlayerId: receiver.id,
+        targetPlayerName: receiverName,
         amount: -rentAmount,
+        ...(payer.cellIndex !== undefined ? { cellIndex: payer.cellIndex } : {}),
         ...(payer.pInfo?.tokenColor ? { playerTokenColor: payer.pInfo.tokenColor } : {}),
       });
       handledPayerIds.add(payer.id);
@@ -91,7 +95,7 @@ export function processPayerFee(
 
   // [IMP-79] Nhận diện Lệ Phí Đăng Ký Đất Đai (Ô 04)
   const deltaP = delta?.players?.find((p) => p.id === payer.id);
-  const currentPos = deltaP?.position ?? prevState?.playerPositions[payer.id];
+  const currentPos = deltaP?.position ?? prevState?.playerPositions[payer.id] ?? payer.cellIndex;
   if (currentPos === 4) {
     return {
       id: `tax_${Date.now()}_${payer.id}`,
@@ -100,6 +104,7 @@ export function processPayerFee(
       message: `🏛️ ${pName} đã nộp phí / nộp thuế ${formatCurrency(absDiff)} (Lệ Phí Đăng Ký Đất Đai)`,
       playerId: payer.id,
       playerName: pName,
+      cellIndex: 4,
       amount: payer.diff,
       ...(payer.pInfo?.tokenColor ? { playerTokenColor: payer.pInfo.tokenColor } : {}),
     };
@@ -112,10 +117,11 @@ export function processPayerFee(
     return {
       id: `bail_${Date.now()}_${payer.id}`,
       timestamp: Date.now(),
-      type: 'tax',
+      type: 'bail',
       message: `⚖️ ${pName} đã nộp phí / nộp thuế ${formatCurrency(absDiff)} (Bảo Lãnh Kiểm Toán để rời Trạm)`,
       playerId: payer.id,
       playerName: pName,
+      cellIndex: 10,
       amount: payer.diff,
       ...(payer.pInfo?.tokenColor ? { playerTokenColor: payer.pInfo.tokenColor } : {}),
     };
@@ -129,6 +135,7 @@ export function processPayerFee(
     playerId: payer.id,
     playerName: pName,
     amount: payer.diff,
+    ...(payer.cellIndex !== undefined ? { cellIndex: payer.cellIndex } : {}),
     ...(payer.pInfo?.tokenColor ? { playerTokenColor: payer.pInfo.tokenColor } : {}),
   };
 }
@@ -214,8 +221,9 @@ export function detectFinancialAndStatusActivities(
     }
     if (prevP && prevP.balance !== p.balance) {
       const diff = p.balance - prevP.balance;
-      if (diff < 0) payers.push({ id: p.id, diff, pInfo: prevP });
-      else if (diff > 0) receivers.push({ id: p.id, diff, pInfo: nextState.playersInfo[p.id] ?? prevP });
+      const playerPos = p.position ?? (nextState.playersInfo[p.id] as { position?: number } | undefined)?.position ?? nextState.playerPositions?.[p.id] ?? prevState.playerPositions?.[p.id];
+      if (diff < 0) payers.push({ id: p.id, diff, pInfo: prevP, cellIndex: playerPos });
+      else if (diff > 0) receivers.push({ id: p.id, diff, pInfo: nextState.playersInfo[p.id] ?? prevP, cellIndex: playerPos });
     }
   }
 

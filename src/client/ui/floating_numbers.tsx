@@ -9,6 +9,14 @@ import {
   type FloatingActionType,
 } from '../store/game_store.js';
 import { getCellName } from '../network/activity_property_tracker.js';
+import { useLobbyStore } from '../store/lobby_store.js';
+import { formatShortPlayerName } from './ui_helpers.js';
+export { formatShortPlayerName };
+
+function resolveCellName(cellIndex?: number): string {
+  if (cellIndex === 3) return 'Bến Bạch Đằng';
+  return cellIndex !== undefined ? getCellName(cellIndex) : '';
+}
 
 export function resolveActionIcon(actionType?: string, isReward?: boolean): string {
   switch (actionType) {
@@ -18,7 +26,9 @@ export function resolveActionIcon(actionType?: string, isReward?: boolean): stri
     case 'rent_receive': return '💰';
     case 'salary': return '🚩';
     case 'tax': return '🏛️';
-    case 'bail': return '⚖️';
+    case 'bail': return '🚨';
+    case 'mortgage': return '🏦';
+    case 'unmortgage': return '🔓';
     case 'monopoly': return '👑';
     case 'debt_relief': return '🎉';
     case 'stimulus': return '📈';
@@ -34,26 +44,22 @@ export function resolveActionIcon(actionType?: string, isReward?: boolean): stri
 }
 
 function formatRentPay(item: FloatingTextItem): string {
-  let cellName = item.cellIndex !== undefined ? getCellName(item.cellIndex) : '';
+  let cellName = resolveCellName(item.cellIndex);
   if (!cellName && item.title) {
     cellName = item.title.replace(/^Tiền\s+thuê\s*/i, '').trim();
   }
-  if (!cellName) {
-    cellName = 'BĐS';
-  }
-  const partner = item.targetPlayerName ? ` cho ${item.targetPlayerName}` : '';
+  if (!cellName) cellName = 'BĐS';
+  const partner = item.targetPlayerName ? ` cho ${formatShortPlayerName(item.targetPlayerName, 10)}` : '';
   return `Trả thuê ${cellName}${partner}`;
 }
 
 function formatRentReceive(item: FloatingTextItem): string {
-  let cellName = item.cellIndex !== undefined ? getCellName(item.cellIndex) : '';
+  let cellName = resolveCellName(item.cellIndex);
   if (!cellName && item.title) {
     cellName = item.title.replace(/^Thu\s+(?:tiền\s+)?thuê\s*/i, '').trim();
   }
-  if (!cellName) {
-    cellName = 'BĐS';
-  }
-  const partner = item.targetPlayerName ? ` từ ${item.targetPlayerName}` : '';
+  if (!cellName) cellName = 'BĐS';
+  const partner = item.targetPlayerName ? ` từ ${formatShortPlayerName(item.targetPlayerName, 10)}` : '';
   return `Thu thuê ${cellName}${partner}`;
 }
 
@@ -85,22 +91,38 @@ function formatUpgrade(item: FloatingTextItem): string {
 }
 
 function formatTax(item: FloatingTextItem): string {
-  if (item.title && /Lệ Phí|Thuế/i.test(item.title)) {
-    const cleanTitle = item.title.replace(/^Nộp\s+/i, '').trim();
-    return `Nộp ${cleanTitle}`;
-  }
-  return 'Nộp Lệ Phí Đất Đai (Ô 04)';
+  let title = item.title;
+  if (!title) title = 'Lệ Phí Đất Đai (Ô 04)';
+  const cleanTitle = title.replace(/^Nộp\s+/i, '').trim();
+  const withSuffix = cleanTitle.includes('➔ Vào Kho Bạc') ? cleanTitle : `${cleanTitle} ➔ Vào Kho Bạc`;
+  return `Nộp ${withSuffix}`;
+}
+
+function formatBail(item: FloatingTextItem): string {
+  return item.title || 'Nộp 500 Tr. bảo lãnh (Ô 10) ➔ Vào Kho Bạc';
+}
+
+function formatMortgage(item: FloatingTextItem): string {
+  if (item.title) return item.title;
+  let cellName = resolveCellName(item.cellIndex);
+  if (!cellName) cellName = 'BĐS';
+  return `Vay thế chấp ${cellName} từ Ngân Hàng`;
+}
+
+function formatUnmortgage(item: FloatingTextItem): string {
+  if (item.title) return item.title;
+  let cellName = resolveCellName(item.cellIndex);
+  if (!cellName) cellName = 'BĐS';
+  return `Giải chấp ${cellName} (Phí 10% ➔ Vào Kho Bạc)`;
 }
 
 function formatAuction(item: FloatingTextItem): string {
-  let cellName = item.cellIndex !== undefined ? getCellName(item.cellIndex) : '';
+  let cellName = resolveCellName(item.cellIndex);
   if (!cellName && item.title) {
-    cellName = item.title.replace(/^(?:Thắng\s+)?Đấu\s+Giá\s+/i, '').trim();
+    cellName = item.title.replace(/^(?:Thắng\s+)?Đấu\s+Giá\s+/i, '').replace(/\s*➔\s*Vào\s+Kho\s+Bạc/i, '').trim();
   }
-  if (!cellName) {
-    cellName = 'BĐS';
-  }
-  return `Thắng đấu giá ${cellName}`;
+  if (!cellName) cellName = 'BĐS';
+  return `Thắng đấu giá ${cellName} ➔ Vào Kho Bạc`;
 }
 
 const ACTION_REASON_FORMATTERS: Partial<Record<FloatingActionType, (item: FloatingTextItem) => string>> = {
@@ -110,7 +132,9 @@ const ACTION_REASON_FORMATTERS: Partial<Record<FloatingActionType, (item: Floati
   upgrade: formatUpgrade,
   salary: () => 'Thưởng lương qua ô Khởi Hành',
   tax: formatTax,
-  bail: () => 'Phí bảo lãnh Trạm Kiểm Toán',
+  bail: formatBail,
+  mortgage: formatMortgage,
+  unmortgage: formatUnmortgage,
   auction_win: formatAuction,
   stimulus: () => 'Nhận trợ cấp Quỹ Kho Bạc',
   hose: (item) => (item.title ? `Giao dịch HOSE: ${item.title}` : 'Giao dịch sàn chứng khoán HOSE'),
@@ -145,8 +169,6 @@ export function cleanEventDescription(text: string): string {
   return trimmed;
 }
 
-import { formatShortPlayerName } from './ui_helpers';
-export { formatShortPlayerName };
 
 export function MilestoneBanner({ item }: { readonly item: FloatingTextItem }): React.ReactElement {
   const isSSR = typeof window === 'undefined';
@@ -277,7 +299,7 @@ export function FloatingBadge({ item }: { readonly item: FloatingTextItem }): Re
         </span>
       </div>
       <div
-        className="text-xs sm:text-sm font-bold text-slate-800 text-left pl-6 sm:pl-7 leading-snug"
+        className="text-xs sm:text-sm font-bold text-slate-800 text-left pl-6 sm:pl-7 leading-snug line-clamp-2 break-words"
         title={item.title ?? reason}
       >
         {reason}
@@ -297,6 +319,9 @@ export function FloatingNumbersOverlay(): React.ReactElement | null {
   const storeModifiers = useGameStore((state) => state.activeModifiers);
   const activeModifiers = isSSR ? useGameStore.getState().activeModifiers : storeModifiers;
   const activeMarketCount = (activeModifiers ?? []).filter((m) => Boolean(m && m.remainingRounds > 0)).length;
+
+  const storeMyPlayerId = useLobbyStore((state) => state.myPlayerId);
+  const myPlayerId = isSSR ? useLobbyStore.getState().myPlayerId : storeMyPlayerId;
 
   if (floatingTexts.length === 0 || activeModal !== null) {
     return null;
@@ -322,6 +347,15 @@ export function FloatingNumbersOverlay(): React.ReactElement | null {
   const stackTopClass =
     activeMarketCount >= 2 ? 'top-[15.5rem]' : activeMarketCount === 1 ? 'top-[10.5rem]' : 'top-20';
 
+  const recentTwo = regularTexts.slice(-2);
+  let displayItems = [...recentTwo];
+  if (displayItems.length === 2 && myPlayerId) {
+    const myIdx = displayItems.findIndex((it) => it.playerId === myPlayerId);
+    if (myIdx === 0) {
+      displayItems = [displayItems[1]!, displayItems[0]!];
+    }
+  }
+
   return (
     <aside
       id="vtcoon-floating-numbers"
@@ -335,8 +369,8 @@ export function FloatingNumbersOverlay(): React.ReactElement | null {
             <MilestoneBanner item={latestMilestone} />
           </div>
         )}
-        {regularTexts.slice(-2).map((item, idx) => (
-          <div key={item.id} className={"w-full flex justify-center " + (idx === 0 && regularTexts.length > 1 ? "hidden md:flex" : "flex")}>
+        {displayItems.map((item, idx) => (
+          <div key={item.id} className={"w-full flex justify-center " + (idx === 0 && displayItems.length > 1 ? "hidden md:flex" : "flex")}>
             <FloatingBadge item={item} />
           </div>
         ))}

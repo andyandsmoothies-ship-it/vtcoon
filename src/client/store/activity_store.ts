@@ -8,9 +8,11 @@ export type ActivityLogType =
   | 'upgrade'
   | 'rent'
   | 'tax'
+  | 'bail'
   | 'card'
   | 'auction'
   | 'mortgage'
+  | 'unmortgage'
   | 'bankrupt'
   | 'system';
 
@@ -23,6 +25,8 @@ export interface ActivityLogEntry {
   readonly message: string;
   readonly playerId?: string;
   readonly playerName?: string;
+  readonly targetPlayerId?: string;
+  readonly targetPlayerName?: string;
   readonly playerTokenColor?: string;
   readonly amount?: number;
   readonly cellIndex?: number;
@@ -70,6 +74,8 @@ export const useActivityStore = create<ActivityStoreState>((set) => ({
       message: entryInput.message,
       ...(entryInput.playerId ? { playerId: entryInput.playerId } : {}),
       ...(entryInput.playerName ? { playerName: entryInput.playerName } : {}),
+      ...(entryInput.targetPlayerId ? { targetPlayerId: entryInput.targetPlayerId } : {}),
+      ...(entryInput.targetPlayerName ? { targetPlayerName: entryInput.targetPlayerName } : {}),
       ...(entryInput.playerTokenColor ? { playerTokenColor: entryInput.playerTokenColor } : {}),
       ...(entryInput.amount !== undefined ? { amount: entryInput.amount } : {}),
       ...(entryInput.cellIndex !== undefined ? { cellIndex: entryInput.cellIndex } : {}),

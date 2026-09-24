@@ -217,7 +217,7 @@ export function EventCardModal({
         type="button"
         data-testid="event-card-confirm-btn"
         onClick={onConfirm ?? onClose}
-        className="relative z-10 w-full min-h-[46px] py-2.5 rounded-2xl font-black text-white text-xs sm:text-sm uppercase tracking-wider transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer bg-emerald-600 hover:bg-emerald-500 border-2 border-emerald-700 shadow-[0_4px_0_0_#065f46] active:shadow-[0_1px_0_0_#065f46] active:translate-y-[3px]"
+        className="relative z-10 w-full min-h-[46px] px-4 py-2.5 rounded-2xl font-black text-white text-xs sm:text-sm uppercase tracking-wider transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer bg-emerald-600 hover:bg-emerald-500 border-2 border-emerald-700 shadow-[0_4px_0_0_#065f46] active:shadow-[0_1px_0_0_#065f46] active:translate-y-[3px]"
       >
         {resolvedCta}
       </button>

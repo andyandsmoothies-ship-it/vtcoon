@@ -402,8 +402,13 @@ export function resolveActionDockNotice(params: ActionDockNoticeParams): ActionD
 
 /**
  * Formats player names for compact displays, stripping bot personality tags like (Aggressive).
+ * Optionally truncates with ellipsis if maxLength is provided.
  */
-export function formatShortPlayerName(name: string): string {
+export function formatShortPlayerName(name?: string, maxLength?: number): string {
   if (!name) return '';
-  return name.replace(/\s*\((?:Aggressive|Cautious|Balanced|Passive|Bot)\)/i, '').trim();
+  const cleaned = name.replace(/\s*\((?:Aggressive|Cautious|Balanced|Passive|Bot)\)/i, '').trim();
+  if (maxLength && cleaned.length > maxLength) {
+    return `${cleaned.slice(0, maxLength > 3 ? maxLength - 2 : maxLength)}...`;
+  }
+  return cleaned;
 }

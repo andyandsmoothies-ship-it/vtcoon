@@ -108,7 +108,7 @@ export function detectCellMortgage(
     entry: {
       id: `mortgage_${Date.now()}_${cell.index}`,
       timestamp: Date.now(),
-      type: 'mortgage',
+      type: cell.isMortgaged ? 'mortgage' : 'unmortgage',
       message: `${ownerName} ${cell.isMortgaged ? 'đã thế chấp' : 'đã chuộc lại'} ${getCellName(cell.index)} vào ngân hàng`,
       ...(ownerId ? { playerId: ownerId } : {}),
       playerName: ownerName,

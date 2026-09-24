@@ -63,7 +63,7 @@ export function TitleDeedActionFooter({
               onClick={onUpgrade}
               disabled={Boolean(upgradeBlockedReason)}
               title={upgradeBlockedReason}
-              className={`min-h-[48px] flex flex-col items-center justify-center py-2 px-2 text-center leading-tight min-w-0 rounded-xl font-bold text-xs transition-all focus-visible:outline-none focus-visible:ring-2 ${
+              className={`min-h-[48px] flex flex-col items-center justify-center py-2 px-3 text-center leading-tight min-w-0 rounded-xl font-bold text-xs transition-all focus-visible:outline-none focus-visible:ring-2 ${
                 upgradeBlockedReason
                   ? 'bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed shadow-none'
                   : 'bg-teal-600 hover:bg-teal-500 text-white border-2 border-teal-800 shadow-[0_4px_0_0_#115e59] active:shadow-[0_1px_0_0_#115e59] active:translate-y-[3px] focus-visible:ring-teal-400 cursor-pointer'
@@ -126,7 +126,7 @@ export function TitleDeedActionFooter({
             type="button"
             onClick={isTradeFrozen ? undefined : onBuy}
             disabled={isTradeFrozen || !canBuy}
-            className={`min-h-[48px] flex flex-col items-center justify-center py-2 px-2 text-center leading-tight min-w-0 rounded-xl font-black tracking-wide uppercase text-xs sm:text-sm transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+            className={`min-h-[48px] flex flex-col items-center justify-center py-2 px-3 text-center leading-tight min-w-0 rounded-xl font-black tracking-wide uppercase text-xs sm:text-sm transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
               isTradeFrozen
                 ? 'bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed'
                 : canBuy

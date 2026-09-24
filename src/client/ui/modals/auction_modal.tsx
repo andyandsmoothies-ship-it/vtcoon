@@ -356,7 +356,7 @@ export function AuctionModal({
                   type="button"
                   onClick={() => onBid?.(targetBid)}
                   disabled={!canAfford || isConcluded}
-                  className={`min-h-[48px] py-2 px-2 font-bold text-xs rounded-xl border-2 flex flex-col items-center justify-center transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+                  className={`min-h-[48px] py-2 px-2.5 font-bold text-xs rounded-xl border-2 flex flex-col items-center justify-center transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
                     canAfford && !isConcluded
                       ? 'bg-amber-500 hover:bg-amber-400 text-amber-950 border-amber-700 font-black shadow-[0_4px_0_0_#b45309] active:shadow-[0_1px_0_0_#b45309] active:translate-y-[3px] cursor-pointer'
                       : 'bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed opacity-50'

@@ -137,6 +137,8 @@ describe('[IMP-122] Comprehensive Financial & Event Card Pop-Ups Contract Suite'
         message: 'Đại Gia Sài Gòn đã trả 500 Tr. tiền thuê cho Tỷ Phú Hà Nội (Bot)',
         playerId: 'p1',
         playerName: 'Đại Gia Sài Gòn',
+        targetPlayerId: 'p2',
+        targetPlayerName: 'Tỷ Phú Hà Nội',
         amount: -500,
         cellIndex: 19,
       };
@@ -160,6 +162,8 @@ describe('[IMP-122] Comprehensive Financial & Event Card Pop-Ups Contract Suite'
         message: 'Đại Gia Sài Gòn đã trả 500 Tr. tiền thuê cho Tỷ Phú Hà Nội (Bot)',
         playerId: 'p1',
         playerName: 'Đại Gia Sài Gòn',
+        targetPlayerId: 'p2',
+        targetPlayerName: 'Tỷ Phú Hà Nội',
         amount: -500,
         cellIndex: 19,
       };

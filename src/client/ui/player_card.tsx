@@ -133,18 +133,18 @@ export function PlayerCard({
         {/* Badges: BOT, Phá Sản, Kiểm Toán */}
         <div className="flex items-center gap-1 shrink-0">
           {player.isBot && (
-            <span className="px-1 py-0.5 rounded text-[9px] font-extrabold bg-cyan-100 text-cyan-900 border border-cyan-300">
+            <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-cyan-100 text-cyan-900 border border-cyan-300">
               BOT
             </span>
           )}
           {player.bankrupt && (
-            <span className="px-1 py-0.5 rounded text-[9px] font-extrabold bg-rose-100 text-rose-900 border border-rose-300">
+            <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-rose-100 text-rose-900 border border-rose-300">
               Phá Sản
             </span>
           )}
           {player.inAudit && !player.bankrupt && (
             <span
-              className="px-1 py-0.5 rounded text-[9px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300 flex items-center justify-center leading-none"
+              className="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300 flex items-center justify-center leading-none"
               title="Kiểm Toán"
               aria-label="Kiểm Toán"
             >
@@ -162,7 +162,7 @@ export function PlayerCard({
           </span>
           {isNegativeBalance && (
             <span
-              className="text-[9px] font-extrabold text-rose-700 bg-rose-100 border border-rose-300 px-1 py-0.5 rounded shrink-0"
+              className="text-[9px] font-extrabold text-rose-700 bg-rose-100 border border-rose-300 px-1.5 py-0.5 rounded shrink-0"
               title={`Thấu chi: còn ${player.overdraftRoundsLeft ?? 3} vòng`}
             >
               <span className="inline sm:hidden">Nợ {player.overdraftRoundsLeft ?? 3}v</span>

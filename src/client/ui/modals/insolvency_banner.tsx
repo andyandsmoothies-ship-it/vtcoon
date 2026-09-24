@@ -76,7 +76,7 @@ export function InsolvencyBanner({
           <button
             type="button"
             onClick={onManageProperties}
-            className="w-full min-h-[44px] py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-900 font-black text-sm cursor-pointer transition-all border-2 border-amber-700 shadow-[0_4px_0_0_#b45309] active:shadow-[0_1px_0_0_#b45309] active:translate-y-[3px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+            className="w-full min-h-[44px] px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-900 font-black text-sm cursor-pointer transition-all border-2 border-amber-700 shadow-[0_4px_0_0_#b45309] active:shadow-[0_1px_0_0_#b45309] active:translate-y-[3px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
           >
             Quản Lý BĐS / Thế Chấp
           </button>
@@ -85,7 +85,7 @@ export function InsolvencyBanner({
           <button
             type="button"
             onClick={onDeclareBankruptcy}
-            className="w-full min-h-[44px] py-2.5 rounded-xl border-2 border-rose-400 bg-rose-100 hover:bg-rose-200 text-rose-800 font-bold text-xs cursor-pointer transition-all shadow-[0_4px_0_0_#fda4af] active:shadow-[0_1px_0_0_#fda4af] active:translate-y-[3px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
+            className="w-full min-h-[44px] px-4 py-2.5 rounded-xl border-2 border-rose-400 bg-rose-100 hover:bg-rose-200 text-rose-800 font-bold text-xs cursor-pointer transition-all shadow-[0_4px_0_0_#fda4af] active:shadow-[0_1px_0_0_#fda4af] active:translate-y-[3px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
           >
             Tuyên Bố Phá Sản (Rời Bàn)
           </button>

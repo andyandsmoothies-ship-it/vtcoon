@@ -78,6 +78,8 @@ export type FloatingActionType =
   | 'teleport'
   | 'audit_jail'
   | 'ma_buyout'
+  | 'mortgage'
+  | 'unmortgage'
   | 'general';
 
 export interface FloatingTextItem {

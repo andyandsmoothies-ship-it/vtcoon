@@ -276,7 +276,7 @@ export function HoseModal({
                 key={amount}
                 disabled={disabled}
                 onClick={() => setStake(amount)}
-                className={`min-h-[44px] py-2 px-1 rounded-xl text-xs font-bold transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${btnColor}`}
+                className={`min-h-[44px] py-2 px-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${btnColor}`}
               >
                 {formatCurrency(amount)}
               </button>
@@ -291,7 +291,7 @@ export function HoseModal({
           <button
             data-testid="hose-confirm-btn"
             onClick={onConfirm ?? onClose}
-            className="w-full min-h-[44px] py-2.5 rounded-xl font-black text-sm cursor-pointer transition-all bg-emerald-600 hover:bg-emerald-500 text-white border-2 border-emerald-800 shadow-[0_4px_0_0_#065f46] active:shadow-[0_1px_0_0_#065f46] active:translate-y-[3px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+            className="w-full min-h-[44px] px-4 py-2.5 rounded-xl font-black text-sm cursor-pointer transition-all bg-emerald-600 hover:bg-emerald-500 text-white border-2 border-emerald-800 shadow-[0_4px_0_0_#065f46] active:shadow-[0_1px_0_0_#065f46] active:translate-y-[3px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
           >
             Tiếp Tục ➔
           </button>
@@ -300,7 +300,7 @@ export function HoseModal({
             <button
               onClick={onSkip}
               disabled={isRolling}
-              className={`flex-1 min-h-[44px] py-2.5 rounded-xl border-2 border-slate-400 bg-slate-200 hover:bg-slate-300 text-slate-900 font-bold text-sm transition-all shadow-[0_4px_0_0_#64748b] active:shadow-[0_1px_0_0_#64748b] active:translate-y-[3px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+              className={`flex-1 min-h-[44px] px-4 py-2.5 rounded-xl border-2 border-slate-400 bg-slate-200 hover:bg-slate-300 text-slate-900 font-bold text-sm transition-all shadow-[0_4px_0_0_#64748b] active:shadow-[0_1px_0_0_#64748b] active:translate-y-[3px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
                 isRolling ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
               }`}
             >
@@ -309,7 +309,7 @@ export function HoseModal({
             <button
               disabled={!canAfford || isRolling}
               onClick={handleInvestClick}
-              className={`flex-1 min-h-[44px] py-2.5 rounded-xl font-black text-sm cursor-pointer transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+              className={`flex-1 min-h-[44px] px-4 py-2.5 rounded-xl font-black text-sm cursor-pointer transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
                 canAfford && !isRolling
                   ? 'bg-amber-500 hover:bg-amber-400 text-slate-900 border-2 border-amber-700 shadow-[0_4px_0_0_#b45309] active:shadow-[0_1px_0_0_#b45309] active:translate-y-[3px]'
                   : 'bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed'

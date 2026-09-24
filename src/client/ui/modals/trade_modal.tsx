@@ -336,7 +336,7 @@ export function TradeModal({
           <button
             type="button"
             onClick={() => setMobileTab('mine')}
-            className={`flex-1 min-h-[44px] py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+            className={`flex-1 min-h-[44px] px-3 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
               mobileTab === 'mine' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -345,7 +345,7 @@ export function TradeModal({
           <button
             type="button"
             onClick={() => setMobileTab('partner')}
-            className={`flex-1 min-h-[44px] py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+            className={`flex-1 min-h-[44px] px-3 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
               mobileTab === 'partner' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
             }`}
           >

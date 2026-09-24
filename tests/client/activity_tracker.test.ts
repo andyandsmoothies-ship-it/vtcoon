@@ -191,7 +191,7 @@ describe('[TC-ACT02/MSS] ActivityTracker Unit Tests', () => {
       prevMortgagedState,
       prevMortgagedState,
     );
-    expect(unmortgageEntries[0]?.type).toBe('mortgage');
+    expect(unmortgageEntries[0]?.type).toBe('unmortgage');
     expect(unmortgageEntries[0]?.message).toContain('đã chuộc lại');
   });
 
@@ -533,7 +533,7 @@ describe('[TC-ACT02/MSS] ActivityTracker Unit Tests', () => {
     trackDeltaActivities(delta, prevState, nextState, useActivityStore);
     const logs = useActivityStore.getState().activityLogs;
 
-    const unmortLog = logs.find((l) => l.type === 'mortgage');
+    const unmortLog = logs.find((l) => l.type === 'unmortgage');
     expect(unmortLog).toBeDefined();
     expect(unmortLog?.amount).toBe(-330);
 

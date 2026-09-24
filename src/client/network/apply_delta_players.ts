@@ -17,9 +17,7 @@ function initPlayersInfoMap(
   const allowedIds = shouldPrune ? new Set(deltaPlayers.map((p) => p.id)) : null;
 
   for (const [id, info] of Object.entries(state.playersInfo)) {
-    if (allowedIds && !allowedIds.has(id)) {
-      continue;
-    }
+    if (allowedIds && !allowedIds.has(id)) continue;
     map[id] = {
       ...info,
       ownedProperties: isFullSync ? [] : (info.ownedProperties ? [...info.ownedProperties] : []),
@@ -100,7 +98,7 @@ export function notifyBalanceChange(
       targetPlayerName: context?.targetPlayerName,
     });
   } else if (diff < 0) {
-    const isBail = context?.isBail || (context?.cellIndex === 10 && Math.abs(diff) === 500);
+    const isBail = context?.isBail;
     const isTax = context?.cellIndex === 4;
     const actionType: FloatingActionType = context?.actionType ?? (isBail ? 'bail' : isTax ? 'tax' : 'general');
     const title = context?.title ?? (isBail ? 'Bảo Lãnh Kiểm Toán' : isTax ? 'Lệ Phí Đất Đai' : undefined);
@@ -156,11 +154,10 @@ function getLobbySlot(playerId: string): { playerName?: string; tokenColor?: str
 
 function updatePlayerHudRecord(existing: PlayerHudInfo | undefined, p: DeltaPlayer, pIdx: number): PlayerHudInfo {
   if (existing) {
-    const updated: PlayerHudInfo = { ...existing, balance: p.balance, isBot: Boolean(p.isBot) };
-    return assignPlayerOptionalFlags(updated, p);
+    return assignPlayerOptionalFlags({ ...existing, balance: p.balance, isBot: Boolean(p.isBot) }, p);
   }
   const slot = getLobbySlot(p.id);
-  const created: PlayerHudInfo = {
+  return assignPlayerOptionalFlags({
     id: p.id,
     name: resolvePlayerName(p, pIdx, slot?.playerName),
     balance: p.balance,
@@ -170,8 +167,7 @@ function updatePlayerHudRecord(existing: PlayerHudInfo | undefined, p: DeltaPlay
     isBot: Boolean(p.isBot),
     pawnSlot: slot?.pawnSlot,
     mascotIcon: slot?.mascotIcon,
-  };
-  return assignPlayerOptionalFlags(created, p);
+  }, p);
 }
 
 function processSinglePlayerPosition(
@@ -215,29 +211,22 @@ function syncPlayerBalanceDiff(
   const diff = p.balance - existing.balance;
   const prevPos = state.playerPositions[p.id] ?? 0;
   const isPassingGo = prevPos > (p.position ?? prevPos) || p.position === 0;
-  const isBail = (p.position === 10 || prevPos === 10) && existing.balance - p.balance === 500;
   const isDebtRelief = existing.balance < 0 && p.balance >= 0;
   const isSalary = isPassingGo || diff === 2000;
 
-  // [IMP-122] Không sinh badge generic trùng lặp khi biến động tài chính đã được
-  // activity_tracker (rent, buy, upgrade, tax, auction) gắn pop-up ngữ cảnh chuyên biệt.
-  if (!isDebtRelief && !isSalary && !isBail) {
+  // [IMP-122][IMP-191] Không sinh badge generic trùng lặp khi biến động tài chính đã được
+  // activity_tracker (rent, buy, upgrade, tax, bail, auction) gắn pop-up ngữ cảnh chuyên biệt.
+  if (!isDebtRelief && !isSalary) {
     return;
   }
 
-  notifyBalanceChange(state, p.id, diff, existing.balance, p.balance, {
-    cellIndex: p.position,
-    isPassingGo,
-    isBail,
-  });
+  notifyBalanceChange(state, p.id, diff, existing.balance, p.balance, { cellIndex: p.position, isPassingGo });
 }
 
 function syncFinalPositions(state: GameState, nextPositions: Record<string, number>, hasPosChange: boolean, isFullSync: boolean): void {
   if (!hasPosChange && !isFullSync) return;
   state.setPlayerPositions(nextPositions);
-  if (isFullSync && state.setVisualPositions) {
-    state.setVisualPositions(nextPositions);
-  }
+  if (isFullSync) state.setVisualPositions?.(nextPositions);
 }
 
 export { initPlayersInfoMap };
@@ -265,10 +254,8 @@ export function applyPlayerDeltas(
     const existing = playersInfoMap[p.id];
     syncPlayerBalanceDiff(state, p, existing, isFullSync);
     if (p.bankrupt === true && state.activeModal === 'insolvency') {
-      const modalPayload = state.modalPayload as Record<string, unknown> | undefined;
-      if (!modalPayload?.playerId || modalPayload.playerId === p.id) {
-        state.closeModal();
-      }
+      const modalPlayerId = (state.modalPayload as Record<string, unknown> | undefined)?.playerId;
+      if (!modalPlayerId || modalPlayerId === p.id) state.closeModal();
     }
     playersInfoMap[p.id] = updatePlayerHudRecord(existing, p, pIdx);
   });

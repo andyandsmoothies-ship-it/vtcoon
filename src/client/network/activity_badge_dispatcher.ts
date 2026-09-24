@@ -7,33 +7,15 @@ import { SoundEngine } from '../audio/sound_engine.js';
 import { getCellName, LEVEL_NAMES } from './activity_property_tracker.js';
 
 function handleRentBadge(act: ActivityLogEntry, state: GameState): void {
-  const parts = act.id.split('_');
-  let receiverId: string | undefined;
-  let receiverName: string | undefined;
-
-  if (parts.length >= 4) {
-    const candidateId = parts[parts.length - 1];
-    if (candidateId) {
-      receiverId = candidateId;
-      receiverName = state.playersInfo[candidateId]?.name;
-    }
+  if (!act.targetPlayerId || !act.targetPlayerName) {
+    console.warn('[ActivityBadgeDispatcher] Missing targetPlayerId or targetPlayerName in rent log:', act);
+    return;
   }
 
-  if (!receiverName) {
-    const match = act.message.match(/cho\s+(.+)$/);
-    if (match) {
-      receiverName = match[1]?.trim();
-      if (!receiverId && receiverName) {
-        receiverId = Object.keys(state.playersInfo).find(
-          (id) => state.playersInfo[id]?.name === receiverName,
-        );
-      }
-    }
-  }
-
-  const fallbackPayerId = parts.length >= 4 ? (parts[parts.length - 2] ?? '') : '';
-  const payerId = act.playerId ?? fallbackPayerId;
+  const payerId = act.playerId;
   const payerName = act.playerName ?? (payerId ? state.playersInfo[payerId]?.name : '');
+  const receiverId = act.targetPlayerId;
+  const receiverName = act.targetPlayerName;
   const absAmount = Math.abs(act.amount ?? 0);
   const cellName = act.cellIndex !== undefined ? getCellName(act.cellIndex) : 'BĐS';
 
@@ -104,11 +86,8 @@ function handleUpgradeBadge(act: ActivityLogEntry, state: GameState): void {
 }
 
 function handleTaxBadge(act: ActivityLogEntry, state: GameState): void {
-  if (act.id.startsWith('bail_') || act.message.includes('Bảo Lãnh')) {
-    return;
-  }
   const amount = act.amount !== undefined ? -Math.abs(act.amount) : 0;
-  const title = act.message.includes('Lệ Phí')
+  const baseTitle = act.message.includes('Lệ Phí')
     ? 'Lệ Phí Đất Đai'
     : 'Thuế Đất Đai';
 
@@ -117,7 +96,45 @@ function handleTaxBadge(act: ActivityLogEntry, state: GameState): void {
     type: FloatingTextType.Penalty,
     playerId: act.playerId ?? '',
     actionType: 'tax',
-    title,
+    title: `${baseTitle} ➔ Vào Kho Bạc`,
+    cellIndex: act.cellIndex,
+  });
+}
+
+function handleBailBadge(act: ActivityLogEntry, state: GameState): void {
+  const amount = act.amount !== undefined ? -Math.abs(act.amount) : -500;
+  state.addFloatingText({
+    text: formatCurrency(amount),
+    type: FloatingTextType.Penalty,
+    playerId: act.playerId ?? '',
+    actionType: 'bail',
+    title: 'Nộp Bảo Lãnh Kiểm Toán (Ô 10) ➔ Vào Kho Bạc',
+    cellIndex: act.cellIndex ?? 10,
+  });
+}
+
+function handleMortgageBadge(act: ActivityLogEntry, state: GameState): void {
+  const cellName = act.cellIndex === 3 ? 'Bến Bạch Đằng' : (act.cellIndex !== undefined ? getCellName(act.cellIndex) : 'BĐS');
+  const amount = act.amount !== undefined ? Math.abs(act.amount) : 0;
+  state.addFloatingText({
+    text: `+${formatCurrency(amount)}`,
+    type: FloatingTextType.Reward,
+    playerId: act.playerId ?? '',
+    actionType: 'mortgage',
+    title: `Vay thế chấp ${cellName} từ Ngân Hàng`,
+    cellIndex: act.cellIndex,
+  });
+}
+
+function handleUnmortgageBadge(act: ActivityLogEntry, state: GameState): void {
+  const cellName = act.cellIndex === 3 ? 'Bến Bạch Đằng' : (act.cellIndex !== undefined ? getCellName(act.cellIndex) : 'BĐS');
+  const amount = act.amount !== undefined ? -Math.abs(act.amount) : 0;
+  state.addFloatingText({
+    text: formatCurrency(amount),
+    type: FloatingTextType.Penalty,
+    playerId: act.playerId ?? '',
+    actionType: 'unmortgage',
+    title: `Giải chấp ${cellName} (Phí 10% ➔ Vào Kho Bạc)`,
     cellIndex: act.cellIndex,
   });
 }
@@ -189,6 +206,9 @@ const BADGE_HANDLERS: Record<string, (act: ActivityLogEntry, state: GameState) =
   buy: handleBuyBadge,
   upgrade: handleUpgradeBadge,
   tax: handleTaxBadge,
+  bail: handleBailBadge,
+  mortgage: handleMortgageBadge,
+  unmortgage: handleUnmortgageBadge,
   auction: handleAuctionBadge,
   card: (act, state) => {
     if (act.id.startsWith('ma_buyout')) {

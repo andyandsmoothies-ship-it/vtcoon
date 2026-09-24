@@ -20,6 +20,8 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command, write_to_fi
      - Trace all new/modified state fields end-to-end:
        `[Origin/Mutation: Server or FSM]` ➔ `[State Persistence: Map / Record]` ➔ `[Network Serialization: Broadcaster isPlayerEqual / isCellEqual]` ➔ `[Client Parser: OPTIONAL_KEYS]` ➔ `[Client Store: Types / Slice]` ➔ `[UI / View Consumer]`
      - Verify every link against physical disk files. If a plan modifies UI/Store but omits persistence at the Server/FSM origin, drops fields in broadcaster/parser, or binds action resets solely to player ID changes (instead of phase), flag as **[P1 - BROKEN DATA LIFECYCLE]**.
+     - **Closed-Loop Type Union Parity**: Any new action, status, or event string literal must exist across 100% of intermediate types/DTOs (`Origin -> DTO -> Store -> Dispatcher -> UI`). If a literal is handled in UI/Dispatcher but missing from an upstream DTO union, flag as **[P1 - DIVERGENT TYPE PIPELINE]**.
+     - **Zero String-Scraping / Structured Origin**: Forbid `split()`, regex, or substring parsing on IDs/messages to extract downstream domain data. Upstream origin must provide structured fields. Flag string parsers as **[P1 - STRING SCRAPING BAND-AID]**.
    - 📐 **Pillar 2: Physical Layout & File LOC Budget (Giới Hạn Bố Cục & Ngân Sách Dòng Mã)**:
      - Audit proposed UI changes against physical constraints: mobile 360px viewport, badge text wrapping, long currency strings, button overlap, flex shrinkage.
      - If a proposed badge or label risks pushing buttons off-screen or breaking container grids on 360px width, flag as **[P2 - LAYOUT OVERFLOW HAZARD]**.
@@ -40,7 +42,9 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command, write_to_fi
        1. *Downstream Consumers*: Audit 100% of callers via `grep_search`. Verify container components explicitly propagate computed environmental props (e.g. `isMobile`) to children instead of relying on child ambient fallbacks. Verify callback signatures strictly match external framework listener contracts (e.g. `useSyncExternalStore` `() => void`). Flag unverified callers, ambient prop omissions, or signature mismatches as **[P2 - CALL-SITE BLINDSPOT]**.
        2. *Upstream & Environmental Modifiers*: Active tenant policies, global middleware, feature flags, environmental modifiers, active buffs/debuffs/discounts.
        3. *Exceptional Lifecycle Modes*: Cold start/reset, full state resync/reconnect, session invalidation, concurrent multi-event mutations, terminal/closed entity states.
+     - **Pure Seam & SRP Invariant**: Pure calculation, diffing, or domain functions must NEVER receive transport/network payloads (`DeltaPayload`, `HttpRequest`, `DbContext`). Callers must resolve primitives before passing. Flag invasive transport parameter creep as **[P1 - INVASIVE COUPLING]**.
      - **Subtractive Audit (Delete-First)**: If plan replaces a state, listener, or flag, verify obsolete code is explicitly targeted for deletion. Leaving old listeners running in parallel is **[P1 - ADDITIVE BIAS LEAK]**.
+     - **Atomic Tag Realignment**: When replacing event or message routing flows, the producer emission tag and consumer handler registration must be aligned simultaneously. Flag mismatched tags or orphaned handlers as **[P1 - TAG DESYNCHRONIZATION]**.
      - **Import DAG Check**: Inspect upstream imports of target modules. Flag reverse imports creating circular loops as **[P1 - CIRCULAR IMPORT HAZARD]**.
      - If a plan touches a calculation or state transition without auditing upstream modifiers or exceptional lifecycles, flag as **[P1 - BLAST RADIUS BLINDSPOT]**.
 
