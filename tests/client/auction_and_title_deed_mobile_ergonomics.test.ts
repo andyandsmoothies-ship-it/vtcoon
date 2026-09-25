@@ -149,8 +149,7 @@ describe('[TC-AUC-ERG/MSS] Mobile Ergonomics & Visual Polish for Auction and Tit
     expect(html).toContain('px-2 py-1');
 
     // 4. Toàn bộ 4 ga và nút mua hiển thị trọn vẹn
-    expect(html).toContain('1 Bến / Ga');
-    expect(html).toContain('4 Bến / Ga');
+    expect(html).toContain('CƯỚC 1-4 GA:');
     expect(html).toContain('Mua BĐS (2.000 Tr.)');
 
     // 5. Thanh khoản sau mua và badge không bị ngắt dòng (whitespace-nowrap)
@@ -159,4 +158,73 @@ describe('[TC-AUC-ERG/MSS] Mobile Ergonomics & Visual Polish for Auction and Tit
     expect(html).toContain('Ví:');
     expect(html).toContain('➔ Còn lại:');
   });
+
+  it('[TC-AUC-ERG.08/MSS] purchase_decision_card: Lưới thẻ tactile phân khu 2-3 cột hiển thị line-clamp-2 không cắt cụt max-w-[80px]', async () => {
+    const { PurchaseDecisionCard } = await import('../../src/client/ui/modals/purchase_decision_card');
+    const html = renderToStaticMarkup(
+      React.createElement(PurchaseDecisionCard, {
+        cellIndex: 19, // Đà Nẵng (Nhóm Cam 3 ô: 16, 18, 19)
+        buyerBalance: 5000,
+        buyerId: 'p1',
+        allPlayers: {
+          p1: { id: 'p1', name: 'Đại Gia Sài Gòn', ownedProperties: [18], balance: 5000 },
+          bot1: { id: 'bot1', name: 'Tỷ Phú Hà Thành', ownedProperties: [], balance: 4000 },
+        },
+      })
+    );
+
+    // 1. Sử dụng lưới grid-cols-3 cho nhóm 3 ô, không dùng flex wrap max-w-[80px]
+    expect(html).toContain('grid-cols-3');
+    expect(html).not.toContain('truncate max-w-[80px]');
+
+    // 2. Tên ô đất hiển thị nguyên vẹn 2 dòng với line-clamp-2
+    expect(html).toContain('line-clamp-2');
+    expect(html).toContain('Đà Nẵng (Hải Châu - Sơn Trà)');
+    expect(html).toContain('Bình Định (Quy Nhơn)');
+
+    // 3. Badge trạng thái sở hữu xúc giác
+    expect(html).toContain('🎯 MUA NGAY');
+    expect(html).toContain('✓ Bạn');
+    expect(html).toContain('⚪ Trống');
+  });
+
+  it('[TC-AUC-ERG.09/MSS] purchase_decision_card: Xử lý Actor Inversion chuyển sang 🎯 ĐANG XÉT khi người chơi không đủ tiền', async () => {
+    const { PurchaseDecisionCard } = await import('../../src/client/ui/modals/purchase_decision_card');
+    const html = renderToStaticMarkup(
+      React.createElement(PurchaseDecisionCard, {
+        cellIndex: 19, // Đà Nẵng giá 2.000 Tr.
+        buyerBalance: 500, // Chỉ có 500 Tr. -> không đủ tiền mua
+        buyerId: 'p1',
+        allPlayers: {
+          p1: { id: 'p1', name: 'Đại Gia Sài Gòn', ownedProperties: [], balance: 500 },
+        },
+      })
+    );
+
+    // Không hô hào "MUA NGAY" khi không đủ tiền
+    expect(html).toContain('🎯 ĐANG XÉT');
+    expect(html).not.toContain('🎯 MUA NGAY');
+  });
+
+  it('[TC-AUC-ERG.10/MSS] title_deed_rent_table: Chế độ compact kết xuất Mini Rent Bar (~40px) và nút toggle mở rộng', async () => {
+    const { TitleDeedRentTable } = await import('../../src/client/ui/modals/title_deed_rent_table');
+    const html = renderToStaticMarkup(
+      React.createElement(TitleDeedRentTable, {
+        isRailroad: false,
+        isUtility: false,
+        rents: [200, 700, 1800, 4400],
+        upgradeCosts: [1000, 1500, 2000],
+        compact: true,
+      })
+    );
+
+    // 1. Kết xuất Mini Rent Bar
+    expect(html).toContain('C0 (ĐẤT)');
+    expect(html).toContain('x2 ĐỘC QUYỀN');
+    expect(html).toContain('C3 (KHÁCH SẠN)');
+
+    // 2. Chứa nút toggle mở rộng biểu phí
+    expect(html).toContain('Xem chi tiết 4 cấp nâng cấp');
+  });
 });
+

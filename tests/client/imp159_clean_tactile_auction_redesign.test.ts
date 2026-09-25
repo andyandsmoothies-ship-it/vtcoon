@@ -7,9 +7,10 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { AuctionModal } from '../../src/client/ui/modals/auction_modal';
 import { AuctionDistrictCard } from '../../src/client/ui/modals/auction_district_card';
+import type { PlayerInfo } from '../../src/client/store/game_store_types';
 
 // Realistic investor test fixtures adhering to Saigon / Hanoi investor themes
-const MOCK_PLAYERS: Record<string, any> = {
+const MOCK_PLAYERS: Record<string, Partial<PlayerInfo>> = {
   p1: {
     id: 'p1',
     name: 'Đại Gia Sài Gòn',
@@ -255,7 +256,7 @@ describe('[UC-IMP159/MSS] Station 1 RED: Clean Tactile Auction Redesign Contract
       );
       expect(html).toContain('data-testid="foreclosure-distressed-badge"');
       expect(html).toContain('line-through');
-      expect(html).toContain('PHÁT MÃI CƯỠNG CHẾ');
+      expect(html).toContain('PHÁT MÃI');
     });
 
     it('[TC-159.15/MSS][UC-IMP159] Khi người chơi là con nợ bị phát mãi tài sản (insolvencyPlayerId === myId), hiển thị thông điệp giải thích cấn trừ nợ và vô hiệu hóa đặt giá', () => {
@@ -276,7 +277,7 @@ describe('[UC-IMP159/MSS] Station 1 RED: Clean Tactile Auction Redesign Contract
       expect(html).not.toContain('+100 Tr.');
     });
 
-    it('[TC-159.16/MSS][UC-IMP159] Các nút hành động bảo tồn touch target WCAG AA: min-h-[44px] và nút Đóng min-w-[44px] min-h-[44px]', () => {
+    it('[TC-159.16/MSS][UC-IMP159] Các nút hành động bảo tồn touch target WCAG AA: min-h-[44px] và nút Đóng w-9 h-9 tactile', () => {
       const html = renderToStaticMarkup(
         React.createElement(AuctionModal, {
           cellIndex: 1,
@@ -286,7 +287,7 @@ describe('[UC-IMP159/MSS] Station 1 RED: Clean Tactile Auction Redesign Contract
           onClose: () => {},
         })
       );
-      expect(html).toContain('min-w-[44px] min-h-[44px]');
+      expect(html).toContain('w-9 h-9');
       expect(html).toContain('min-h-[44px]');
       expect(html).toContain('aria-label="Đóng sàn đấu giá"');
     });

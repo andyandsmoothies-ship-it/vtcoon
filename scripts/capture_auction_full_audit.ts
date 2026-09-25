@@ -1,4 +1,4 @@
-// Verification Screenshot Capturer for Auction Modal & Title Deed Modal
+// Comprehensive Audit Capturer for Auction Modal across Viewports & Lifecycle States
 import { spawn, type ChildProcess } from 'child_process';
 import http from 'http';
 import fs from 'fs';
@@ -6,7 +6,7 @@ import path from 'path';
 import WebSocket from 'ws';
 
 const BROWSER_PATH = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe';
-const SCREENSHOT_DIR = path.resolve(process.cwd(), 'docs/reports/uat/screenshots/imp193');
+const SCREENSHOT_DIR = path.resolve(process.cwd(), 'docs/reports/uat/screenshots/auction_audit');
 const ARTIFACT_DIR = 'C:\\Users\\HP\\.gemini\\antigravity\\brain\\8cca9836-b0ff-4bc7-a6c2-e675742fa525';
 
 function sleep(ms: number): Promise<void> {
@@ -35,11 +35,11 @@ class VerificationCapturer {
   private messageId = 1;
   private pendingRequests = new Map<number, { resolve: (v: any) => void; reject: (e: any) => void }>();
   private tempDir: string;
-  private port = 9335;
+  private port = 9336;
 
   constructor() {
     const sysTemp = process.env.TEMP || 'C:\\Users\\HP\\AppData\\Local\\Temp';
-    this.tempDir = path.join(sysTemp, `edge_vtcoon_auc_${Date.now()}`);
+    this.tempDir = path.join(sysTemp, `edge_vtcoon_auc_audit_${Date.now()}`);
   }
 
   async start(targetUrl = 'http://localhost:4173/'): Promise<void> {
@@ -150,7 +150,7 @@ class VerificationCapturer {
     fs.writeFileSync(outPath, buf);
     const artifactPath = path.join(ARTIFACT_DIR, filename);
     fs.writeFileSync(artifactPath, buf);
-    console.log(`[Capture] Saved: ${outPath} & ${artifactPath} (${buf.length} bytes)`);
+    console.log(`[Capture] Saved: ${filename}`);
     return outPath;
   }
 
@@ -174,10 +174,10 @@ class VerificationCapturer {
 async function main() {
   const capturer = new VerificationCapturer();
   try {
-    console.log('[Verification] Starting headless Edge capturer on Mobile 390x844...');
+    console.log('[Audit] Starting headless Edge capturer on Mobile 390x844...');
     await capturer.start();
 
-    console.log('[Verification] Initializing game state...');
+    console.log('[Audit] Initializing game state...');
     await capturer.eval(`
       (() => {
         if (window.__lobbyStore) {
@@ -186,11 +186,8 @@ async function main() {
         }
       })()
     `);
-    await sleep(2000);
+    await sleep(1500);
 
-    // Setup players to reproduce exact context from user's screenshot
-    // Cell 16: Bình Định (Quy Nhơn) - Nhóm Cam
-    // P1 (Bạn) owns Thừa Thiên Huế (18), bot_2 owns nothing in orange, Đà Nẵng (19) is unowned
     await capturer.eval(`
       (() => {
         if (!window.__gameStore) return;
@@ -228,39 +225,13 @@ async function main() {
         game.setPlayersInfo(infoMap);
         game.setCurrentTurnPlayerId('bot_2');
         game.setRoundInfo(3, 30);
-        game.setTurnTimeRemaining(19);
+        game.setTurnTimeRemaining(18);
       })()
     `);
     await sleep(1000);
 
-    // SHOT 1: Exact reproduction of user's scenario (Withdrawn / hasPassed: true)
-    console.log('[Verification] Opening Auction Modal (Withdrawn State)...');
-    await capturer.eval(`
-      (() => {
-        if (!window.__gameStore) return;
-        const game = window.__gameStore.getState();
-        game.openModal('auction', {
-          cellIndex: 16, // Bình Định (Quy Nhơn) - Orange Group
-          currentBid: 2250,
-          startingBid: 1800,
-          highestBidderId: 'bot_2',
-          bidderName: 'Tỷ Phú Hà Thành',
-          timeRemaining: 19,
-          hasPassed: true,
-          myId: 'p1',
-          myBalance: 6500,
-          playersInfo: game.playersInfo,
-          levelMap: game.levelMap,
-        });
-      })()
-    `);
-    await sleep(1500);
-
-    console.log('[Verification] Capturing Shot 1: Auction Modal Withdrawn...');
-    await capturer.takeScreenshot('auction_modal_withdrawn_verified.jpg');
-
-    // SHOT 2: Active Bidding State (hasPassed: false)
-    console.log('[Verification] Switching to Active Bidding State...');
+    // 1. Mobile 390x844 - Active Bidding
+    console.log('[Audit] 1. Opening Mobile 390x844 Active Bidding...');
     await capturer.eval(`
       (() => {
         if (!window.__gameStore) return;
@@ -271,7 +242,7 @@ async function main() {
           startingBid: 1800,
           highestBidderId: 'bot_2',
           bidderName: 'Tỷ Phú Hà Thành',
-          timeRemaining: 19,
+          timeRemaining: 18,
           hasPassed: false,
           myId: 'p1',
           myBalance: 6500,
@@ -281,73 +252,87 @@ async function main() {
       })()
     `);
     await sleep(1000);
+    await capturer.takeScreenshot('audit_auction_mobile_390_active.jpg');
 
-    console.log('[Verification] Capturing Shot 2: Auction Modal Active Bidding...');
-    await capturer.takeScreenshot('auction_modal_active_bidding_verified.jpg');
-
-    // SHOT 3: Title Deed Modal for Cảng HKQT Long Thành (cellIndex: 5 - exact user case)
-    console.log('[Verification] Opening Title Deed Modal (Long Thành Airport - Cell 5)...');
-    await capturer.eval(`
-      (() => {
-        if (!window.__gameStore) return;
-        const game = window.__gameStore.getState();
-        game.openModal('deed', {
-          cellIndex: 5, // Cảng HKQT Long Thành (Hạ tầng 4 Ga)
-          canBuy: true,
-          isOwned: false,
-          buyerBalance: 18000,
-          buyerId: 'p1',
-          allPlayers: game.playersInfo,
-        });
-      })()
-    `);
-    await sleep(1000);
-
-    console.log('[Verification] Capturing Shot 3: Title Deed Modal (Long Thành)...');
-    await capturer.takeScreenshot('title_deed_modal_verified.jpg');
-    await capturer.takeScreenshot('title_deed_modal_long_thanh_verified.jpg');
-
-    // SHOT 4: Title Deed Modal for Đà Nẵng (cellIndex: 19 - exact user screenshot) on Mobile 360x740
-    console.log('[Verification] Opening Title Deed Modal (Đà Nẵng - Cell 19 on Mobile 360x740)...');
+    // 2. Mobile 360x740 (Small device stress test)
+    console.log('[Audit] 2. Setting Viewport to Mobile 360x740...');
     await capturer.setViewport(360, 740, true);
-    await capturer.eval(`
-      (() => {
-        if (!window.__gameStore) return;
-        const game = window.__gameStore.getState();
-        game.openModal('deed', {
-          cellIndex: 19, // Đà Nẵng (Hải Châu - Sơn Trà)
-          canBuy: true,
-          isOwned: false,
-          buyerBalance: 6500,
-          buyerId: 'p1',
-          allPlayers: game.playersInfo,
-        });
-      })()
-    `);
     await sleep(1000);
+    await capturer.takeScreenshot('audit_auction_mobile_360_active.jpg');
 
-    console.log('[Verification] Capturing Shot 4A: Title Deed Modal (Đà Nẵng Mobile 360x740)...');
-    await capturer.takeScreenshot('title_deed_modal_da_nang_mobile_360_verified.jpg');
-
-    // SHOT 4B: Mobile 390x844
-    console.log('[Verification] Switching to Mobile 390x844...');
-    await capturer.setViewport(390, 844, true);
-    await sleep(1000);
-
-    console.log('[Verification] Capturing Shot 4B: Title Deed Modal (Đà Nẵng Mobile 390x844)...');
-    await capturer.takeScreenshot('title_deed_modal_da_nang_mobile_verified.jpg');
-
-    // SHOT 5: Switch to Desktop 1280x800 for Đà Nẵng (Cell 19) to verify 2-column zero-scroll layout
-    console.log('[Verification] Switching viewport to Desktop 1280x800...');
+    // 3. Desktop 1280x800 - Active Bidding
+    console.log('[Audit] 3. Setting Viewport to Desktop 1280x800...');
     await capturer.setViewport(1280, 800, false);
     await sleep(1000);
+    await capturer.takeScreenshot('audit_auction_desktop_active.jpg');
 
-    console.log('[Verification] Capturing Shot 5: Title Deed Modal (Đà Nẵng Desktop 1280x800)...');
-    await capturer.takeScreenshot('title_deed_modal_da_nang_desktop_verified.jpg');
+    // 4. Desktop 1280x800 - Foreclosure State
+    console.log('[Audit] 4. Foreclosure on Desktop 1280x800...');
+    await capturer.eval(`
+      (() => {
+        if (!window.__gameStore) return;
+        const game = window.__gameStore.getState();
+        game.openModal('auction', {
+          cellIndex: 16,
+          currentBid: 1260,
+          startingBid: 1260,
+          highestBidderId: null,
+          timeRemaining: 15,
+          hasPassed: false,
+          isForeclosure: true,
+          insolvencyPlayerId: 'bot_3',
+          myId: 'p1',
+          myBalance: 6500,
+          playersInfo: game.playersInfo,
+          levelMap: game.levelMap,
+        });
+      })()
+    `);
+    await sleep(1000);
+    await capturer.takeScreenshot('audit_auction_desktop_foreclosure.jpg');
 
-    console.log('[Verification] All screenshots captured successfully!');
+    // 5. Mobile 390x844 - Foreclosure State
+    console.log('[Audit] 5. Foreclosure on Mobile 390x844...');
+    await capturer.setViewport(390, 844, true);
+    await sleep(1000);
+    await capturer.takeScreenshot('audit_auction_mobile_390_foreclosure.jpg');
+
+    // 6. Mobile 360x740 - Foreclosure State (Stress Test)
+    console.log('[Audit] 6. Foreclosure on Mobile 360x740 (Small device stress test)...');
+    await capturer.setViewport(360, 740, true);
+    await sleep(1000);
+    await capturer.takeScreenshot('audit_auction_mobile_360_foreclosure.jpg');
+
+    // 7. Mobile 390x844 - Concluded Hammer Fall State
+    console.log('[Audit] 7. Concluded Hammer Fall State on Mobile 390x844...');
+    await capturer.setViewport(390, 844, true);
+    await capturer.eval(`
+      (() => {
+        if (!window.__gameStore) return;
+        const game = window.__gameStore.getState();
+        game.openModal('auction', {
+          cellIndex: 16,
+          currentBid: 2450,
+          startingBid: 1800,
+          highestBidderId: 'bot_2',
+          bidderName: 'Tỷ Phú Hà Thành',
+          timeRemaining: 0,
+          isConcluded: true,
+          winnerId: 'bot_2',
+          finalPrice: 2450,
+          myId: 'p1',
+          myBalance: 6500,
+          playersInfo: game.playersInfo,
+          levelMap: game.levelMap,
+        });
+      })()
+    `);
+    await sleep(1000);
+    await capturer.takeScreenshot('audit_auction_mobile_390_concluded.jpg');
+
+    console.log('[Audit] All audit screenshots captured successfully!');
   } catch (err) {
-    console.error('[Verification] Error during capture:', err);
+    console.error('[Audit] Error:', err);
   } finally {
     await capturer.close();
   }

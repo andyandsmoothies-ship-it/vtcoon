@@ -38,6 +38,7 @@ function resolveHintAndBadge(owned: number, total: number, maxOpp: number, oppNa
 }
 
 export interface PurchaseDecisionPlayer {
+  readonly id?: string;
   readonly ownedProperties?: readonly number[] | number[];
   readonly name?: string; readonly tokenColor?: string; readonly balance?: number; readonly isBot?: boolean;
 }

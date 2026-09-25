@@ -16,7 +16,6 @@ export interface AuctionDistrictCardProps {
   readonly playersInfo?: Record<string, Partial<PlayerInfo>>;
   readonly levelMap?: Record<number, number>;
   readonly isForeclosure?: boolean;
-  readonly badgeMaxWidth?: string;
 }
 
 function getToneTheme(tone: StrategicHintTone): { container: string; badge: string } {
@@ -45,7 +44,7 @@ function renderCellChip(cell: DistrictCellChip): React.ReactElement {
 
   if (cell.isTarget) {
     badgeClasses = 'bg-amber-400 text-amber-950 font-black border-amber-600 shadow-sm';
-    badgeLabel = '🔨 ĐANG ĐẤU';
+    badgeLabel = '🔨 ĐẤU GIÁ';
   } else if (cell.isMine) {
     badgeClasses = 'bg-emerald-100 text-emerald-900 font-bold border-emerald-400';
     badgeLabel = '✓ Bạn';
@@ -60,24 +59,24 @@ function renderCellChip(cell: DistrictCellChip): React.ReactElement {
     <div
       key={cell.cellIndex}
       data-testid={`district-cell-chip-${cell.cellIndex}`}
-      className={`px-1.5 sm:px-2 py-1 rounded-xl border text-[10px] sm:text-[11px] min-w-0 flex flex-col justify-between transition-all min-h-[3rem] ${
+      className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-xl border text-[10px] sm:text-[11px] min-w-0 flex flex-col justify-between transition-all min-h-[2.5rem] sm:min-h-[3rem] ${
         cell.isTarget ? 'ring-2 ring-amber-400 bg-amber-50/80 border-amber-400' : 'bg-amber-50/60 border-amber-900/10'
       }`}
     >
-      <div className="flex items-center justify-between gap-1 mb-1 min-w-0">
-        <span className="font-bold text-slate-900 line-clamp-2 leading-tight text-[11px] sm:text-xs block" title={cell.name}>
+      <div className="flex items-center justify-between gap-1 mb-0.5 min-w-0">
+        <span className="font-bold text-slate-900 line-clamp-2 leading-tight text-[10px] sm:text-xs block" title={cell.name}>
           {cell.name}
         </span>
         {cell.level > 0 && (
           <span
-            className="text-[11px] font-bold px-1 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300 shrink-0 inline-flex items-center gap-0.5"
+            className="text-[10px] font-bold px-1 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300 shrink-0 inline-flex items-center gap-0.5"
             title={`Cấp công trình: ${cell.level}`}
           >
             🏠 {cell.level}
           </span>
         )}
       </div>
-      <div className={`text-xs py-0.5 rounded-lg text-center truncate border ${badgeClasses}`}>
+      <div className={`text-[10px] sm:text-xs py-0.5 rounded-lg text-center whitespace-nowrap border ${badgeClasses}`}>
         {badgeLabel}
       </div>
     </div>
@@ -91,7 +90,6 @@ export function AuctionDistrictCard({
   playersInfo: propPlayersInfo,
   levelMap: propLevelMap,
   isForeclosure,
-  badgeMaxWidth,
 }: AuctionDistrictCardProps): React.ReactElement | null {
   const storePlayersInfo = useGameStore((s) => s.playersInfo);
   const storeLevelMap = useGameStore((s) => s.levelMap);
@@ -111,7 +109,6 @@ export function AuctionDistrictCard({
   }
 
   const toneTheme = getToneTheme(info.strategicHint.tone);
-  const badgeWidthClass = badgeMaxWidth ?? 'max-w-[140px]';
 
   const gridColsClass =
     info.totalCells === 2
@@ -123,28 +120,30 @@ export function AuctionDistrictCard({
   return (
     <div
       data-testid="auction-district-intelligence"
-      className="bg-amber-50/40 p-2.5 sm:p-3 rounded-2xl border border-amber-900/10 space-y-2 shadow-sm"
+      className="bg-amber-50/40 p-1.5 sm:p-2.5 rounded-xl sm:rounded-2xl border border-amber-900/10 space-y-1 sm:space-y-1.5 shadow-sm"
     >
       {/* Header phân khu */}
-      <div className="flex items-center justify-between flex-wrap gap-1.5 border-b border-amber-900/10 pb-2">
+      <div className="flex items-center justify-between flex-wrap gap-1 border-b border-amber-900/10 pb-1 sm:pb-1.5">
         <div className="flex items-center gap-1.5 min-w-0">
           <span
-            className="w-3 h-3 rounded-full border border-slate-800 shrink-0"
+            className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full border border-slate-800 shrink-0"
             style={{ backgroundColor: info.hexColor }}
           />
-          <h4 className="text-xs md:text-sm font-black uppercase tracking-wider text-slate-900 truncate">
+          <h4 className="text-xs sm:text-sm font-black uppercase tracking-wider text-slate-900 whitespace-nowrap shrink-0">
             {COLOR_GROUP_NAMES[info.districtId] ? `Nhóm ${COLOR_GROUP_NAMES[info.districtId]}` : info.districtName}
           </h4>
+        </div>
+        <div className="flex items-center gap-1 shrink-0">
           <span
             data-testid="auction-strategic-hint"
-            className={`px-2 py-0.5 rounded-md text-xs font-black uppercase tracking-wide border shrink-0 ${badgeWidthClass} truncate sm:max-w-none ${toneTheme.badge}`}
+            className={`px-1.5 sm:px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-black uppercase tracking-wide border whitespace-nowrap shrink-0 ${toneTheme.badge}`}
           >
             {info.strategicHint.badgeText}
           </span>
           {isForeclosure && (
             <span
               data-testid="foreclosure-distressed-badge"
-              className="px-2 py-0.5 rounded-md text-xs font-black uppercase tracking-wide bg-rose-100 text-rose-900 border border-rose-400 shrink-0"
+              className="hidden sm:inline-block px-1.5 sm:px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-black uppercase tracking-wide bg-rose-100 text-rose-900 border border-rose-400 whitespace-nowrap shrink-0"
             >
               🔥 BẮT ĐÁY -30%
             </span>
@@ -153,33 +152,33 @@ export function AuctionDistrictCard({
       </div>
 
       {/* Lưới chips các ô trong phân khu */}
-      <div className={`grid ${gridColsClass} gap-1.5`}>
+      <div className={`grid ${gridColsClass} gap-1 sm:gap-1.5`}>
         {info.cells.map((cell) => renderCellChip(cell))}
       </div>
 
       {/* Thanh tiền thuê mini (Mini Rent Bar) */}
-      <div className="space-y-1">
-        <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-0.5">
+      <div className="space-y-0.5 sm:space-y-1">
+        <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-slate-500 px-0.5">
           BIỂU PHÍ THUÊ Ô ĐẤU GIÁ
         </div>
-        <div className="bg-white/70 rounded-xl p-2 border border-amber-900/10 flex items-center justify-between text-xs">
+        <div className="bg-white/70 rounded-xl p-1 sm:p-2 border border-amber-900/10 flex items-center justify-between text-xs">
           {info.rentPreview.type === 'property' && (
             <>
               <div className="text-center flex-1 border-r border-amber-900/10 pr-1">
-                <span className="text-[11px] text-slate-500 block font-semibold">C0 (ĐẤT)</span>
-                <span className="font-mono text-xs font-bold text-slate-800">
+                <span className="text-[10px] sm:text-[11px] text-slate-500 block font-semibold">C0 (ĐẤT)</span>
+                <span className="font-mono text-[11px] sm:text-xs font-bold text-slate-800 whitespace-nowrap">
                   {formatCurrency(info.rentPreview.rent0 ?? 0)}
                 </span>
               </div>
               <div className="text-center flex-1 border-r border-amber-900/10 px-1">
-                <span className="text-[11px] text-emerald-700 block font-black">2x (ĐỘC QUYỀN)</span>
-                <span className="font-mono text-xs font-bold text-emerald-700">
+                <span className="text-[10px] sm:text-[11px] text-emerald-700 block font-black whitespace-nowrap">2x (ĐỘC QUYỀN)</span>
+                <span className="font-mono text-[11px] sm:text-xs font-bold text-emerald-700 whitespace-nowrap">
                   {formatCurrency(info.rentPreview.rentMonopoly ?? 0)}
                 </span>
               </div>
               <div className="text-center flex-1 pl-1">
-                <span className="text-[11px] text-amber-700 block font-semibold">C3 (KHÁCH SẠN)</span>
-                <span className="font-mono text-xs font-bold text-amber-800">
+                <span className="text-[10px] sm:text-[11px] text-amber-700 block font-semibold whitespace-nowrap">C3 (KHÁCH SẠN)</span>
+                <span className="font-mono text-[11px] sm:text-xs font-bold text-amber-800 whitespace-nowrap">
                   {formatCurrency(info.rentPreview.rentC3 ?? 0)}
                 </span>
               </div>
@@ -188,8 +187,8 @@ export function AuctionDistrictCard({
 
           {info.rentPreview.type === 'railroad' && (
             <div className="w-full flex items-center justify-between px-1">
-              <span className="text-xs text-slate-600 font-bold">CƯỚC 1-4 GA:</span>
-              <span className="font-mono text-xs font-bold text-slate-800">
+              <span className="text-[11px] sm:text-xs text-slate-600 font-bold whitespace-nowrap">CƯỚC 1-4 GA:</span>
+              <span className="font-mono text-[11px] sm:text-xs font-bold text-slate-800 whitespace-nowrap">
                 500 / 1.000 / 2.000 / 4.000 Tr.
               </span>
             </div>
@@ -197,8 +196,8 @@ export function AuctionDistrictCard({
 
           {info.rentPreview.type === 'utility' && (
             <div className="w-full flex items-center justify-between px-1">
-              <span className="text-xs text-slate-600 font-bold">CƯỚC TIỆN ÍCH:</span>
-              <span className="font-mono text-xs font-bold text-slate-800">
+              <span className="text-[11px] sm:text-xs text-slate-600 font-bold whitespace-nowrap">CƯỚC TIỆN ÍCH:</span>
+              <span className="font-mono text-[10px] sm:text-xs font-bold text-slate-800 whitespace-nowrap">
                 Điểm xúc xắc x40 Tr. (1 ô) | x100 Tr. (2 ô)
               </span>
             </div>

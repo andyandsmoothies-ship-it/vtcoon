@@ -80,7 +80,7 @@ export function TitleDeedModal({
 }: TitleDeedModalProps): React.ReactElement {
   const deed = getDeedDisplayInfo(cellIndex);
   const currentIndex = ownedProperties ? ownedProperties.indexOf(cellIndex) : -1;
-  const showCarousel = Boolean(isOwner && ownedProperties && ownedProperties.length > 1 && currentIndex !== -1);
+  const showCarousel = Boolean(isOwner && ownedProperties && ownedProperties.length > 1 && currentIndex !== -1 && onSelectCell);
 
   const isSSR = typeof window === 'undefined';
   const storeModifiers = useGameStore((state) => state.activeModifiers);
@@ -88,7 +88,7 @@ export function TitleDeedModal({
   const isTradeFrozen = propsIsTradeFrozen ??
     effectiveModifiers.some((m) => m.type === MarketCardId.MC_FREEZE_TRADE && m.remainingRounds > 0);
   const isLiquidityFrozen = effectiveModifiers.some(
-    (m) => (m.type as string) === 'MACRO_LIQUIDITY_FREEZE' &&
+    (m) => String(m.type) === 'MACRO_LIQUIDITY_FREEZE' &&
            m.remainingRounds > 0 &&
            (m.affectedCells ?? []).includes(cellIndex),
   );
@@ -140,7 +140,7 @@ export function TitleDeedModal({
 
   return (
     <div
-      className="relative w-full max-w-md md:max-w-2xl max-h-[90dvh] md:max-h-[85vh] bg-[#FFFDF8] border-2 border-slate-900 rounded-2xl shadow-[0_6px_0_0_#0f172a] ring-2 ring-slate-900/10 overflow-hidden flex flex-col pointer-events-auto animate-in zoom-in-90 fade-in duration-200 ease-out select-none p-3.5 sm:p-5 text-slate-900"
+      className="relative w-full max-w-md md:max-w-2xl max-h-[90dvh] md:max-h-[85vh] bg-[#FFFDF8] border-2 border-slate-900 rounded-2xl shadow-[0_6px_0_0_#0f172a] ring-2 ring-slate-900/10 overflow-hidden flex flex-col pointer-events-auto animate-in zoom-in-90 fade-in duration-200 ease-out select-none p-2.5 sm:p-4 text-slate-900"
       data-testid="title-deed-modal"
     >
       {/* Khung viền chỉ mực kép bên trong */}
@@ -170,7 +170,7 @@ export function TitleDeedModal({
       >
         <div className="absolute top-2.5 left-2.5 w-2 h-2 rounded-full bg-white/80 border border-slate-900" aria-hidden="true" />
         {!onClose && <div className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-white/80 border border-slate-900" aria-hidden="true" />}
-        <p className="text-[10px] uppercase tracking-widest text-white/95 font-black drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+        <p className="text-[10px] uppercase tracking-widest text-white/95 font-black drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] pr-12 sm:pr-14">
           {isRailroad ? 'Hạ Tầng Giao Thông' : isUtility ? 'Tiện Ích Quốc Gia' : 'Giấy Chứng Nhận Quyền Sở Hữu'}
         </p>
         <h2 className="tracking-wide text-xs sm:text-sm font-black uppercase text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] mt-0.5 px-3 py-1 pr-12 sm:pr-14 leading-snug break-words mx-auto">
@@ -233,8 +233,8 @@ export function TitleDeedModal({
         </div>
       ))}
 
-      {/* Thân thẻ cuộn mượt mà */}
-      <div className="relative z-10 flex-1 min-h-0 overflow-y-auto pr-1 p-2 sm:p-3 text-xs md:text-sm text-slate-900">
+      {/* Thân thẻ cuộn mượt mà (bảo toàn flex-1 min-h-0 overflow-y-auto pr-1 cho test contract) */}
+      <div className="relative z-10 flex-1 min-h-0 overflow-y-auto pr-1 p-2 sm:p-3 text-xs md:text-sm text-slate-900 scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         <div className="flex flex-col md:grid md:grid-cols-2 gap-2.5 sm:gap-3.5 items-start">
           {/* Cột 1 (Desktop) / Phần trên (Mobile): Ảnh BĐS, Giá niêm yết, Thế chấp, Radar Quy Hoạch */}
           <div className="w-full space-y-2 sm:space-y-2.5">
@@ -287,6 +287,7 @@ export function TitleDeedModal({
           {/* Cột 2 (Desktop) / Phần dưới (Mobile): Biểu phí cước dừng chân / ga */}
           <div className="w-full">
             <TitleDeedRentTable
+              key={cellIndex}
               isRailroad={isRailroad}
               isUtility={isUtility}
               rents={deed.rents}
@@ -294,6 +295,7 @@ export function TitleDeedModal({
               hasMonopoly={hasMonopoly}
               currentLevel={currentLevel}
               isOwner={isOwner}
+              compact={canBuy && !isOwned}
             />
           </div>
         </div>

@@ -14,6 +14,7 @@ export interface PurchaseDecisionCardProps {
   readonly buyerBalance?: number;
   readonly buyerId?: string;
   readonly allPlayers?: Record<string, PurchaseDecisionPlayer>;
+  readonly levelMap?: Record<number, number>;
 }
 
 const TONE_CLASSES = {
@@ -23,19 +24,28 @@ const TONE_CLASSES = {
 };
 
 export function PurchaseDecisionCard({
-  cellIndex, deedPrice, buyerBalance, buyerId, allPlayers,
+  cellIndex, deedPrice, buyerBalance, buyerId, allPlayers, levelMap,
 }: PurchaseDecisionCardProps): React.ReactElement {
   const isSSR = typeof window === 'undefined';
   const storePlayers = useGameStore((s) => s.playersInfo);
   const storeBuyerId = useGameStore((s) => s.currentTurnPlayerId ?? '');
+  const storeLevels = useGameStore((s) => s.levelMap);
   const effectivePlayers = allPlayers ?? (isSSR ? useGameStore.getState().playersInfo : storePlayers) ?? {};
   const effectiveBuyerId = buyerId ?? storeBuyerId;
   const effectiveBalance = buyerBalance ?? effectivePlayers[effectiveBuyerId]?.balance ?? 0;
+  const effectiveLevels = levelMap ?? (isSSR ? {} : storeLevels) ?? {};
   const price = deedPrice ?? PROPERTY_DEEDS.get(cellIndex)?.price ?? 0;
 
   const insight = resolvePurchaseDecisionInsight({ cellIndex, buyerId: effectiveBuyerId, buyerBalance: effectiveBalance, allPlayers: effectivePlayers });
   const cashBuffer = deedPrice !== undefined ? resolveCashBufferSafety({ buyerBalance: effectiveBalance, deedPrice: price }) : insight.cashBuffer;
   const { radar } = insight;
+
+  const gridColsClass =
+    radar.totalCells === 2
+      ? 'grid-cols-2'
+      : radar.totalCells === 3
+        ? 'grid-cols-3'
+        : 'grid-cols-2 sm:grid-cols-4';
 
   return (
     <div className="bg-[#F8F5ED] border border-amber-900/15 rounded-xl p-2 sm:p-2.5 space-y-1.5 sm:space-y-2 select-none text-xs text-slate-800" data-testid="purchase-decision-card">
@@ -50,25 +60,58 @@ export function PurchaseDecisionCard({
             {radar.badge}
           </span>
         </div>
-        <div className="flex flex-wrap gap-1" data-testid="radar-group-chips">
-          {radar.groupCells.map((c) => (
-            <span
-              key={c.cellIndex}
-              className={`px-1.5 py-0.5 rounded text-[10px] border flex items-center gap-1 ${
-                c.isTarget
-                  ? 'border-amber-600 bg-amber-100 font-bold text-amber-900 ring-1 ring-amber-500/50'
-                  : c.isMine
-                    ? 'border-emerald-500 bg-emerald-50 text-emerald-900 font-medium'
-                    : c.isOpponent
-                      ? 'border-rose-300 bg-rose-50 text-rose-800 font-medium'
-                      : 'border-slate-300 bg-white text-slate-500 border-dashed'
-              }`}
-              title={c.ownerName ? `Sở hữu: ${c.ownerName}` : c.isTarget ? 'Ô mục tiêu' : 'Chưa có chủ'}
-            >
-              <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: c.ownerColor ?? (c.isTarget ? '#D97706' : '#94A3B8') }} />
-              <span className="truncate max-w-[80px]">{c.name}</span>
-            </span>
-          ))}
+        <div className={`grid ${gridColsClass} gap-1 sm:gap-1.5`} data-testid="radar-group-chips">
+          {radar.groupCells.map((c) => {
+            const level = effectiveLevels[c.cellIndex] ?? 0;
+            let badgeClasses = 'border-amber-900/10 bg-white/90 text-slate-600';
+            let badgeLabel = '⚪ Trống';
+
+            if (c.isTarget) {
+              if (cashBuffer.canAfford) {
+                badgeClasses = 'bg-amber-400 text-amber-950 font-black border-amber-600 shadow-sm';
+                badgeLabel = '🎯 MUA NGAY';
+              } else {
+                badgeClasses = 'bg-amber-200 text-amber-900 font-bold border-amber-400';
+                badgeLabel = '🎯 ĐANG XÉT';
+              }
+            } else if (c.isMine) {
+              badgeClasses = 'bg-emerald-100 text-emerald-900 font-bold border-emerald-400';
+              badgeLabel = '✓ Bạn';
+            } else if (c.isOpponent) {
+              badgeClasses = 'bg-rose-100 text-rose-900 font-medium border-rose-300';
+              badgeLabel = c.ownerName ? c.ownerName.slice(0, 10) : 'Đối thủ';
+            } else {
+              badgeClasses = 'border-dashed border-amber-900/20 bg-amber-50/30 text-slate-500';
+            }
+
+            return (
+              <div
+                key={c.cellIndex}
+                data-testid={`district-cell-chip-${c.cellIndex}`}
+                className={`px-1 sm:px-2 py-1 rounded-xl border text-[9.5px] sm:text-[11px] min-w-0 flex flex-col justify-between transition-all min-h-[3.25rem] sm:min-h-[3.5rem] ${
+                  c.isTarget ? 'ring-2 ring-amber-400 bg-amber-50/80 border-amber-400' : 'bg-amber-50/60 border-amber-900/10'
+                }`}
+                title={c.ownerName ? `Sở hữu: ${c.ownerName}` : c.isTarget ? 'Ô mục tiêu' : 'Chưa có chủ'}
+              >
+                <div className="flex items-center justify-between gap-1 mb-1 min-w-0">
+                  <span className="font-bold text-slate-900 line-clamp-2 leading-tight text-[9.5px] sm:text-xs block" title={c.name}>
+                    {c.name}
+                  </span>
+                  {level > 0 && (
+                    <span
+                      className="text-[9px] font-bold px-1 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300 shrink-0 inline-flex items-center gap-0.5"
+                      title={`Cấp công trình: ${level}`}
+                    >
+                      🏠 {level}
+                    </span>
+                  )}
+                </div>
+                <div className={`text-[9.5px] sm:text-xs py-0.5 rounded-lg text-center whitespace-nowrap border mt-auto ${badgeClasses}`}>
+                  {badgeLabel}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
