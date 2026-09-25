@@ -271,7 +271,7 @@ export function FloatingBadge({ item }: { readonly item: FloatingTextItem }): Re
       role="status"
       aria-live="polite"
       data-testid="contextual-transaction-badge"
-      className="pointer-events-none flex flex-col gap-1 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-2xl border-2 border-slate-900 bg-[#FFFDF8] select-none shadow-[0_3px_0_0_#0f172a] animate-in fade-in duration-200 max-w-[92vw] sm:max-w-none"
+      className="pointer-events-none flex flex-col gap-1.5 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl border-2 border-slate-900 bg-[#FFFDF8] select-none shadow-[0_3px_0_0_#0f172a] animate-in fade-in duration-200 max-w-[92vw] sm:max-w-none"
     >
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
@@ -299,7 +299,7 @@ export function FloatingBadge({ item }: { readonly item: FloatingTextItem }): Re
         </span>
       </div>
       <div
-        className="text-xs sm:text-sm font-bold text-slate-800 text-left pl-6 sm:pl-7 leading-snug line-clamp-2 break-words"
+        className="text-xs sm:text-sm font-bold text-slate-800 text-left pl-6 sm:pl-7 pb-0.5 leading-snug line-clamp-2 break-words"
         title={item.title ?? reason}
       >
         {reason}

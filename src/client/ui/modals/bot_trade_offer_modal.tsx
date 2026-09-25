@@ -244,7 +244,7 @@ export function BotTradeOfferModal({
           data-testid="reject-trade-btn"
           aria-label={isSwap ? 'Từ chối đổi đất' : 'Từ chối bán đất'}
           onClick={() => onReject(offerId)}
-          className="flex-1 min-h-[44px] py-2 px-3 rounded-xl font-black text-xs text-white bg-rose-600 hover:bg-rose-700 border-2 border-rose-800 shadow-[0_4px_0_0_#9f1239] active:shadow-[0_1px_0_0_#9f1239] active:translate-y-[3px] transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
+          className="flex-1 min-h-[44px] py-2.5 px-4 rounded-xl font-black text-xs text-white bg-rose-600 hover:bg-rose-700 border-2 border-rose-800 shadow-[0_4px_0_0_#9f1239] active:shadow-[0_1px_0_0_#9f1239] active:translate-y-[3px] transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
         >
           {isSwap ? '✕ TỪ CHỐI ĐỔI' : '✕ TỪ CHỐI BÁN'}
         </button>
@@ -253,7 +253,7 @@ export function BotTradeOfferModal({
           data-testid="accept-trade-btn"
           aria-label={isSwap ? 'Đồng ý đổi đất' : 'Đồng ý bán đất'}
           onClick={() => onAccept(offerId)}
-          className="flex-1 min-h-[44px] py-2 px-3 rounded-xl font-black text-xs text-white bg-emerald-600 hover:bg-emerald-700 border-2 border-emerald-800 shadow-[0_4px_0_0_#065f46] active:shadow-[0_1px_0_0_#065f46] active:translate-y-[3px] transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+          className="flex-1 min-h-[44px] py-2.5 px-4 rounded-xl font-black text-xs text-white bg-emerald-600 hover:bg-emerald-700 border-2 border-emerald-800 shadow-[0_4px_0_0_#065f46] active:shadow-[0_1px_0_0_#065f46] active:translate-y-[3px] transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
         >
           {isSwap ? '✓ ĐỒNG Ý ĐỔI' : '✓ ĐỒNG Ý BÁN'}
         </button>

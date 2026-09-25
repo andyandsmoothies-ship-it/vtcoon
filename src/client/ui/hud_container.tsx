@@ -81,7 +81,7 @@ export function HudContainer({
       </div>
 
       {/* Tầng đáy: Telemetry Badge ở góc dưới bên trái, Action Dock ở góc dưới bên phải */}
-      <footer className="w-full flex flex-row justify-center sm:justify-between items-end gap-2 md:gap-3 pointer-events-none pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
+      <footer className="w-full flex flex-row justify-center sm:justify-between items-end gap-2 md:gap-3 pointer-events-none pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:pb-3">
         {/* Huy hiệu Giám Sát Thời Gian Thực & Sức Khỏe Bất Biến (Bottom-Left, không che khuất ActionDock hay Player Cards) */}
         <div className="pointer-events-auto hidden sm:block">
           <TelemetryBadge />

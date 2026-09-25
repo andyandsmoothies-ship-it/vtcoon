@@ -205,7 +205,7 @@ export function ActivityFeedSidebar(props: ActivityFeedSidebarProps): React.Reac
         <button
           type="button"
           onClick={() => setFilter('all')}
-          className={`min-h-[36px] px-3 py-1 rounded-lg text-xs font-bold transition-colors border cursor-pointer ${
+          className={`min-h-[36px] px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors border cursor-pointer ${
             activeFilter === 'all'
               ? 'bg-amber-500 text-slate-900 border-amber-600 shadow-sm'
               : 'bg-white text-slate-700 hover:text-slate-900 border-slate-300'
@@ -217,7 +217,7 @@ export function ActivityFeedSidebar(props: ActivityFeedSidebarProps): React.Reac
         <button
           type="button"
           onClick={() => setFilter('money')}
-          className={`min-h-[36px] px-3 py-1 rounded-lg text-xs font-bold transition-colors border cursor-pointer ${
+          className={`min-h-[36px] px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors border cursor-pointer ${
             activeFilter === 'money'
               ? 'bg-amber-500 text-slate-900 border-amber-600 shadow-sm'
               : 'bg-white text-slate-700 hover:text-slate-900 border-slate-300'
@@ -229,7 +229,7 @@ export function ActivityFeedSidebar(props: ActivityFeedSidebarProps): React.Reac
         <button
           type="button"
           onClick={() => setFilter('property')}
-          className={`min-h-[36px] px-3 py-1 rounded-lg text-xs font-bold transition-colors border cursor-pointer ${
+          className={`min-h-[36px] px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors border cursor-pointer ${
             activeFilter === 'property'
               ? 'bg-amber-500 text-slate-900 border-amber-600 shadow-sm'
               : 'bg-white text-slate-700 hover:text-slate-900 border-slate-300'
@@ -320,7 +320,7 @@ export function ActivityFeedSidebar(props: ActivityFeedSidebarProps): React.Reac
         <button
           type="button"
           onClick={clearLogs}
-          className="min-h-[36px] px-2.5 py-1 text-xs text-slate-700 hover:text-slate-900 font-bold transition-colors rounded-lg bg-white hover:bg-slate-100 border border-slate-300 cursor-pointer shadow-sm"
+          className="min-h-[36px] px-3.5 py-1.5 text-xs text-slate-700 hover:text-slate-900 font-bold transition-colors rounded-lg bg-white hover:bg-slate-100 border border-slate-300 cursor-pointer shadow-sm"
           data-testid="clear-activity-logs"
         >
           Xóa nhật ký

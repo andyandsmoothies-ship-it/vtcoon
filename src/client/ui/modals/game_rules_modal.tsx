@@ -67,7 +67,7 @@ export function GameRulesModal({
           <button
             type="button"
             onClick={() => setActiveTab('core')}
-            className={`flex-1 min-h-[44px] py-2 px-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer text-center flex items-center justify-center gap-1 ${
+            className={`flex-1 min-h-[44px] py-2.5 px-3.5 rounded-xl text-xs font-bold transition-all cursor-pointer text-center flex items-center justify-center gap-1.5 ${
               activeTab === 'core'
                 ? 'bg-white text-blue-600 shadow-xs border border-slate-200'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
@@ -80,7 +80,7 @@ export function GameRulesModal({
           <button
             type="button"
             onClick={() => setActiveTab('cards')}
-            className={`flex-1 min-h-[44px] py-2 px-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer text-center flex items-center justify-center gap-1 ${
+            className={`flex-1 min-h-[44px] py-2.5 px-3.5 rounded-xl text-xs font-bold transition-all cursor-pointer text-center flex items-center justify-center gap-1.5 ${
               activeTab === 'cards'
                 ? 'bg-white text-blue-600 shadow-xs border border-slate-200'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
@@ -93,7 +93,7 @@ export function GameRulesModal({
           <button
             type="button"
             onClick={() => setActiveTab('mechanics')}
-            className={`flex-1 min-h-[44px] py-2 px-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer text-center flex items-center justify-center gap-1 ${
+            className={`flex-1 min-h-[44px] py-2.5 px-3.5 rounded-xl text-xs font-bold transition-all cursor-pointer text-center flex items-center justify-center gap-1.5 ${
               activeTab === 'mechanics'
                 ? 'bg-white text-blue-600 shadow-xs border border-slate-200'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'

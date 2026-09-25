@@ -177,12 +177,12 @@ export function TitleDeedModal({
 
       {/* Bộ chọn Carousel chuyển đổi nhanh giữa các BĐS của chính chủ */}
       {showCarousel && ownedProperties && (
-        <div className="title-deed-carousel mx-1 mt-2 px-3 py-1 bg-slate-100 border border-slate-300 rounded-lg flex items-center justify-between text-xs z-10 shrink-0 font-bold" data-testid="title-deed-carousel">
+        <div className="title-deed-carousel mx-1 mt-2 px-3 py-1.5 bg-slate-100 border border-slate-300 rounded-lg flex items-center justify-between text-xs z-10 shrink-0 font-bold" data-testid="title-deed-carousel">
           <button
             type="button"
             onClick={() => onSelectCell?.(ownedProperties[(currentIndex - 1 + ownedProperties.length) % ownedProperties.length]!)}
             aria-label="Sổ đỏ trước"
-            className="min-h-[44px] min-w-[68px] px-2.5 py-1 bg-white hover:bg-slate-100 border-2 border-slate-300 rounded-lg text-slate-800 text-xs font-bold shadow-[0_2px_0_0_#cbd5e1] active:shadow-none active:translate-y-[2px] transition-all cursor-pointer inline-flex items-center justify-center"
+            className="min-h-[44px] min-w-[68px] px-3.5 py-2 bg-white hover:bg-slate-100 border-2 border-slate-300 rounded-lg text-slate-800 text-xs font-bold shadow-[0_2px_0_0_#cbd5e1] active:shadow-none active:translate-y-[2px] transition-all cursor-pointer inline-flex items-center justify-center"
           >
             ◀ Trước
           </button>
@@ -191,7 +191,7 @@ export function TitleDeedModal({
             type="button"
             onClick={() => onSelectCell?.(ownedProperties[(currentIndex + 1) % ownedProperties.length]!)}
             aria-label="Sổ đỏ tiếp theo"
-            className="min-h-[44px] min-w-[68px] px-2.5 py-1 bg-white hover:bg-slate-100 border-2 border-slate-300 rounded-lg text-slate-800 text-xs font-bold shadow-[0_2px_0_0_#cbd5e1] active:shadow-none active:translate-y-[2px] transition-all cursor-pointer inline-flex items-center justify-center"
+            className="min-h-[44px] min-w-[68px] px-3.5 py-2 bg-white hover:bg-slate-100 border-2 border-slate-300 rounded-lg text-slate-800 text-xs font-bold shadow-[0_2px_0_0_#cbd5e1] active:shadow-none active:translate-y-[2px] transition-all cursor-pointer inline-flex items-center justify-center"
           >
             Sau ▶
           </button>

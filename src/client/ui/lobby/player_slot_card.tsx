@@ -36,7 +36,7 @@ export function PlayerSlotCard({
               <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
                 Vị Trí {slotNumber}
               </span>
-              <span className="text-[11px] px-1.5 py-0.5 rounded bg-slate-200/80 text-slate-600 font-medium">
+              <span className="text-[11px] px-2 py-0.5 rounded bg-slate-200/80 text-slate-600 font-medium">
                 Trống
               </span>
             </div>
@@ -50,7 +50,7 @@ export function PlayerSlotCard({
           <button
             type="button"
             onClick={() => onToggleBot(slot.slotIndex)}
-            className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center gap-1.5 text-xs font-black px-3.5 py-1.5 rounded-xl bg-gradient-to-b from-amber-100 to-amber-200 hover:from-amber-200 hover:to-amber-300 text-amber-950 border border-amber-400/80 shadow-[0_2px_0_0_#b45309] active:translate-y-[1px] transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 shrink-0"
+            className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center gap-1.5 text-xs font-black px-4 py-2 rounded-xl bg-gradient-to-b from-amber-100 to-amber-200 hover:from-amber-200 hover:to-amber-300 text-amber-950 border border-amber-400/80 shadow-[0_2px_0_0_#b45309] active:translate-y-[1px] transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 shrink-0"
             data-testid={`add-bot-slot-${slot.slotIndex}-btn`}
           >
             <span aria-hidden="true">🤖</span> + Thêm Bot AI
@@ -94,19 +94,19 @@ export function PlayerSlotCard({
       {/* Cụm phải: Chủ Phòng / Bot AI controls / Badge trạng thái */}
       <div className="flex items-center gap-1.5 shrink-0">
         {slot.isHost ? (
-          <span className="text-[11px] font-black px-2 py-0.5 rounded-lg bg-amber-100 border border-amber-300 text-amber-900 flex items-center gap-1 shadow-xs">
+          <span className="text-[11px] font-black px-2.5 py-1 rounded-lg bg-amber-100 border border-amber-300 text-amber-900 flex items-center gap-1 shadow-xs">
             <span>👑</span> Chủ Phòng
           </span>
         ) : slot.isBot ? (
           <div className="flex items-center gap-1.5">
-            <span className="hidden sm:inline-block text-[11px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
+            <span className="hidden sm:inline-block text-[11px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
               Bot AI
             </span>
             {isHostViewer && onCycleBotPersonality && (
               <button
                 type="button"
                 onClick={() => onCycleBotPersonality(slot.slotIndex)}
-                className="min-h-[44px] inline-flex items-center justify-center text-[11px] font-semibold px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white active:translate-y-px transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
+                className="min-h-[44px] inline-flex items-center justify-center text-[11px] font-semibold px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white active:translate-y-px transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
                 title="Nhấn để đổi tính cách Bot (Cân Bằng / Hiếu Chiến / Phòng Thủ)"
                 data-testid={`cycle-bot-${slot.slotIndex}-btn`}
               >
@@ -127,11 +127,11 @@ export function PlayerSlotCard({
             )}
           </div>
         ) : slot.isReady ? (
-          <span className="text-[11px] font-bold px-2 py-0.5 rounded-lg bg-emerald-100 border border-emerald-300 text-emerald-800 flex items-center gap-1 shadow-xs">
+          <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-emerald-100 border border-emerald-300 text-emerald-800 flex items-center gap-1 shadow-xs">
             <span>✓</span> Sẵn sàng
           </span>
         ) : (
-          <span className="text-[11px] font-bold px-2 py-0.5 rounded-lg bg-amber-100 border border-amber-300 text-amber-800 flex items-center gap-1 shadow-xs">
+          <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-amber-100 border border-amber-300 text-amber-800 flex items-center gap-1 shadow-xs">
             <span>⏳</span> Chờ
           </span>
         )}

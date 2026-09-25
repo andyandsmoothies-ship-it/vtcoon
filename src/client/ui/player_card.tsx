@@ -76,7 +76,7 @@ export function PlayerCard({
   return (
     <div
       data-testid="player-ribbon"
-      className={`pointer-events-auto relative flex flex-col gap-1 p-2 rounded-xl border-2 border-slate-900 bg-[#FFFDF8] text-slate-900 transition-all duration-200 w-full ${
+      className={`pointer-events-auto relative flex flex-col gap-1.5 p-2.5 sm:p-3 rounded-xl border-2 border-slate-900 bg-[#FFFDF8] text-slate-900 transition-all duration-200 w-full ${
         isCurrentTurn
           ? 'ring-2 ring-amber-400 shadow-[0_6px_0_0_#0f172a]'
           : 'shadow-[0_4px_0_0_#0f172a]'
@@ -87,7 +87,7 @@ export function PlayerCard({
       {/* Huy hiệu LƯỢT nổi bật trên đỉnh thẻ (Corner Tab) */}
       {isCurrentTurn && (
         <span
-          className="absolute -top-2.5 right-3 px-1.5 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-200 text-amber-950 border border-amber-400 shadow-xs animate-pulse select-none uppercase tracking-wider z-10"
+          className="absolute -top-2.5 right-3 px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-200 text-amber-950 border border-amber-400 shadow-xs animate-pulse select-none uppercase tracking-wider z-10"
         >
           LƯỢT
         </span>
@@ -133,18 +133,18 @@ export function PlayerCard({
         {/* Badges: BOT, Phá Sản, Kiểm Toán */}
         <div className="flex items-center gap-1 shrink-0">
           {player.isBot && (
-            <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-cyan-100 text-cyan-900 border border-cyan-300">
+            <span className="px-2 py-0.5 rounded text-[9px] font-extrabold bg-cyan-100 text-cyan-900 border border-cyan-300">
               BOT
             </span>
           )}
           {player.bankrupt && (
-            <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-rose-100 text-rose-900 border border-rose-300">
+            <span className="px-2 py-0.5 rounded text-[9px] font-extrabold bg-rose-100 text-rose-900 border border-rose-300">
               Phá Sản
             </span>
           )}
           {player.inAudit && !player.bankrupt && (
             <span
-              className="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300 flex items-center justify-center leading-none"
+              className="px-2 py-0.5 rounded text-[9px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300 flex items-center justify-center leading-none"
               title="Kiểm Toán"
               aria-label="Kiểm Toán"
             >
@@ -162,7 +162,7 @@ export function PlayerCard({
           </span>
           {isNegativeBalance && (
             <span
-              className="text-[9px] font-extrabold text-rose-700 bg-rose-100 border border-rose-300 px-1.5 py-0.5 rounded shrink-0"
+              className="text-[9px] font-extrabold text-rose-700 bg-rose-100 border border-rose-300 px-2 py-0.5 rounded shrink-0"
               title={`Thấu chi: còn ${player.overdraftRoundsLeft ?? 3} vòng`}
             >
               <span className="inline sm:hidden">Nợ {player.overdraftRoundsLeft ?? 3}v</span>
@@ -171,7 +171,7 @@ export function PlayerCard({
           )}
         </div>
 
-        <div className="hidden sm:flex items-center gap-1 shrink-0" data-testid="player-net-worth">
+        <div className="hidden sm:flex items-center gap-1 shrink-0 pr-0.5" data-testid="player-net-worth">
           <span className="text-[10px] text-slate-500 font-semibold tabular-nums" title="Tài sản ròng">
             ({formatCurrency(netWorth)})
           </span>
@@ -181,7 +181,7 @@ export function PlayerCard({
       {/* Dòng 3: Dải 22 chấm BĐS trải đều 100% bề ngang theo 8 cụm màu */}
       <span className="sr-only">BĐS:</span>
       <div
-        className="flex items-center justify-between w-full pt-1 border-t border-slate-300 select-none"
+        className="flex items-center justify-between w-full pt-1.5 pb-0.5 border-t border-slate-300 select-none"
         data-testid="player-property-clusters"
       >
         {PROPERTY_CLUSTERS.map(({ group, cells }) => (

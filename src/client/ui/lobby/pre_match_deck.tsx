@@ -247,7 +247,7 @@ export function PreMatchDeck(props: PreMatchDeckProps): React.ReactElement {
               <button
                 type="button"
                 onClick={() => setShowRulesModal(true)}
-                className="inline-flex items-center justify-center gap-1 min-h-[44px] px-2.5 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
+                className="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-3 py-2 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
                 data-testid="open-game-rules-btn"
                 aria-label="Xem hướng dẫn game"
               >
@@ -256,7 +256,7 @@ export function PreMatchDeck(props: PreMatchDeckProps): React.ReactElement {
               <button
                 type="button"
                 onClick={() => setShowQr((prev) => !prev)}
-                className="inline-flex items-center justify-center gap-1 min-h-[44px] px-2.5 rounded-lg bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
+                className="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-3 py-2 rounded-lg bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
                 aria-label={showQr ? 'Ẩn mã QR' : 'Hiện mã QR'}
               >
                 <span>📱</span> {showQr ? 'Ẩn QR' : 'Mã QR'}
@@ -275,7 +275,7 @@ export function PreMatchDeck(props: PreMatchDeckProps): React.ReactElement {
               <button
                 type="button"
                 onClick={handleFillAllBots}
-                className="min-h-[36px] px-2.5 py-1 rounded-lg bg-gradient-to-b from-amber-300 via-amber-400 to-amber-500 hover:from-amber-200 hover:to-amber-400 text-amber-950 font-black text-[11px] border border-amber-600 shadow-2xs active:translate-y-0.5 cursor-pointer transition-all flex items-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+                className="min-h-[38px] px-3 py-1.5 rounded-lg bg-gradient-to-b from-amber-300 via-amber-400 to-amber-500 hover:from-amber-200 hover:to-amber-400 text-amber-950 font-black text-[11px] border border-amber-600 shadow-2xs active:translate-y-0.5 cursor-pointer transition-all flex items-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
                 data-testid="fill-all-bots-btn"
                 aria-label="Điền đầy bot vào các vị trí trống"
               >
@@ -304,7 +304,7 @@ export function PreMatchDeck(props: PreMatchDeckProps): React.ReactElement {
         <footer className="pt-1 flex flex-col gap-2 border-t border-slate-200">
           {/* Hộp hướng dẫn điều kiện bắt đầu trận đấu */}
           <div
-            className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-center"
+            className="w-full flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-center"
             aria-live="polite"
           >
             <span className="text-slate-500 text-xs shrink-0" aria-hidden="true">ℹ️</span>

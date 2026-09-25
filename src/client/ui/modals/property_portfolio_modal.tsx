@@ -149,7 +149,7 @@ export function PropertyPortfolioModal({
             <button
               type="button"
               onClick={() => setFilter('all')}
-              className={`min-h-[44px] px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              className={`min-h-[44px] px-3.5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 filter === 'all' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -158,7 +158,7 @@ export function PropertyPortfolioModal({
             <button
               type="button"
               onClick={() => setFilter('nearMonopoly')}
-              className={`min-h-[44px] px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              className={`min-h-[44px] px-3.5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 filter === 'nearMonopoly' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -167,7 +167,7 @@ export function PropertyPortfolioModal({
             <button
               type="button"
               onClick={() => setFilter('upgradeable')}
-              className={`min-h-[44px] px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              className={`min-h-[44px] px-3.5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 filter === 'upgradeable' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -176,7 +176,7 @@ export function PropertyPortfolioModal({
             <button
               type="button"
               onClick={() => setFilter('mortgaged')}
-              className={`min-h-[44px] px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              className={`min-h-[44px] px-3.5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 filter === 'mortgaged' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -334,7 +334,7 @@ export function PropertyPortfolioModal({
                                   type="button"
                                   data-testid={`view-vacant-cell-btn-${piece.cellIndex}`}
                                   onClick={() => onViewVacantCell ? onViewVacantCell(piece.cellIndex) : onSelectDeed?.(piece.cellIndex)}
-                                  className="min-h-[44px] min-w-[44px] px-2.5 py-1 text-xs inline-flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-md border border-slate-300 transition-all cursor-pointer"
+                                  className="min-h-[44px] min-w-[44px] px-3 py-1.5 text-xs inline-flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-md border border-slate-300 transition-all cursor-pointer"
                                 >
                                   🔍 Xem Ô
                                 </button>
@@ -343,7 +343,7 @@ export function PropertyPortfolioModal({
                                   type="button"
                                   data-testid={`quick-trade-btn-${piece.cellIndex}`}
                                   onClick={() => piece.ownerId && onQuickTrade?.(piece.ownerId, piece.cellIndex)}
-                                  className="min-h-[44px] min-w-[44px] px-2.5 py-1 text-xs inline-flex items-center justify-center bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold rounded-md border border-blue-300 shadow-[0_1px_0_0_#93c5fd] active:translate-y-[1px] transition-all cursor-pointer"
+                                  className="min-h-[44px] min-w-[44px] px-3 py-1.5 text-xs inline-flex items-center justify-center bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold rounded-md border border-blue-300 shadow-[0_1px_0_0_#93c5fd] active:translate-y-[1px] transition-all cursor-pointer"
                                 >
                                   <span>🤝</span>
                                   <span className="hidden sm:inline ml-1">Đàm Phán</span>
@@ -396,7 +396,7 @@ export function PropertyPortfolioModal({
                         type="button"
                         data-legacy-style="min-h-[38px]"
                         onClick={() => onMortgage?.(cellIndex)}
-                        className="flex-1 min-h-[44px] px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold rounded-lg border-2 border-rose-300 shadow-[0_2px_0_0_#fecdd3] active:shadow-none active:translate-y-[1px] transition-all text-xs cursor-pointer inline-flex items-center justify-center"
+                        className="flex-1 min-h-[44px] px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold rounded-lg border-2 border-rose-300 shadow-[0_2px_0_0_#fecdd3] active:shadow-none active:translate-y-[1px] transition-all text-xs cursor-pointer inline-flex items-center justify-center"
                       >
                         Thế Chấp (+{mortgageVal} Tr.)
                       </button>
@@ -408,7 +408,7 @@ export function PropertyPortfolioModal({
                         data-legacy-style="min-h-[38px]"
                         onClick={() => onRedeem?.(cellIndex)}
                         disabled={currentBalance < redeemCost}
-                        className="flex-1 min-h-[44px] px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold rounded-lg border-2 border-emerald-800 shadow-[0_3px_0_0_#065f46] active:shadow-[0_1px_0_0_#065f46] active:translate-y-[2px] transition-all text-xs cursor-pointer disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 inline-flex items-center justify-center"
+                        className="flex-1 min-h-[44px] px-3 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold rounded-lg border-2 border-emerald-800 shadow-[0_3px_0_0_#065f46] active:shadow-[0_1px_0_0_#065f46] active:translate-y-[2px] transition-all text-xs cursor-pointer disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 inline-flex items-center justify-center"
                       >
                         Giải Chấp (-{redeemCost} Tr.)
                       </button>
@@ -418,7 +418,7 @@ export function PropertyPortfolioModal({
                       <button
                         type="button"
                         onClick={() => onDowngrade(cellIndex)}
-                        className="min-h-[44px] px-2.5 py-1.5 bg-rose-100 hover:bg-rose-200 text-rose-800 font-bold rounded-lg border-2 border-rose-300 shadow-[0_2px_0_0_#fecdd3] active:shadow-[0_1px_0_0_#fecdd3] active:translate-y-[1px] text-xs cursor-pointer inline-flex items-center justify-center"
+                        className="min-h-[44px] px-3 py-2 bg-rose-100 hover:bg-rose-200 text-rose-800 font-bold rounded-lg border-2 border-rose-300 shadow-[0_2px_0_0_#fecdd3] active:shadow-[0_1px_0_0_#fecdd3] active:translate-y-[1px] text-xs cursor-pointer inline-flex items-center justify-center"
                       >
                         Hạ Cấp
                       </button>

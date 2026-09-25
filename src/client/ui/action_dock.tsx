@@ -208,14 +208,14 @@ export function ActionDock({
 
   return (
     <nav
-      className="relative pointer-events-auto flex items-center gap-2 md:gap-3 bg-[#FFFDF8] border-2 border-slate-900 shadow-[0_4px_0_0_#0f172a] rounded-2xl p-2 px-4 max-w-[calc(100vw-1rem)] overflow-x-auto no-scrollbar"
+      className="relative pointer-events-auto flex items-center gap-2 md:gap-3 bg-[#FFFDF8] border-2 border-slate-900 shadow-[0_4px_0_0_#0f172a] rounded-2xl p-2.5 px-5 max-w-[calc(100vw-1rem)] overflow-x-auto no-scrollbar"
       aria-label="Thanh điều khiển tác vụ"
     >
       {/* Chip Thông Báo Ngữ Cảnh Độc Quyền (Actionable Guidance Chip) */}
       {actionDockNotice && (
         <div
           data-testid={actionDockNotice.type === 'bot_pacing' ? 'bot-pacing-chip' : `${actionDockNotice.type === 'skip_turn' ? 'skip-turn-notice-chip' : `${actionDockNotice.type}-notice-chip`}`}
-          className={`absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold shadow-md animate-pulse select-none ${
+          className={`absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold shadow-md animate-pulse select-none ${
             actionDockNotice.tone === 'error'
               ? 'bg-rose-950 text-rose-300 border border-rose-500/60'
               : actionDockNotice.tone === 'warning'
@@ -318,7 +318,7 @@ export function ActionDock({
         aria-label="Quản lý và nâng cấp bất động sản"
         onClick={handleOpenManageProperty}
         disabled={isBankrupt}
-        className="min-w-[44px] min-h-[44px] flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold border-2 border-blue-800 shadow-[0_4px_0_0_#0f172a] active:translate-y-[3px] disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+        className="min-w-[44px] min-h-[44px] flex items-center justify-center gap-1.5 px-4.5 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold border-2 border-blue-800 shadow-[0_4px_0_0_#0f172a] active:translate-y-[3px] disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
       >
         <span aria-hidden="true">🏛️</span>
         <span className="hidden sm:inline">Quản Lý BĐS</span>
@@ -331,7 +331,7 @@ export function ActionDock({
         onClick={handleOpenTrade}
         disabled={isBankrupt || isTradeFrozen}
         title={isTradeFrozen ? 'Thị trường đang đóng băng giao dịch' : undefined}
-        className={`min-w-[44px] min-h-[44px] flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-2xl font-bold border-2 transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+        className={`min-w-[44px] min-h-[44px] flex items-center justify-center gap-1.5 px-4.5 py-2.5 rounded-2xl font-bold border-2 transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
           isBankrupt || isTradeFrozen
             ? 'bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed opacity-50'
             : 'bg-amber-500 hover:bg-amber-600 text-white border-amber-700 shadow-[0_4px_0_0_#0f172a] active:translate-y-[3px]'
@@ -355,7 +355,7 @@ export function ActionDock({
             useGameStore.getState().openModal('masterplan', {});
           }
         }}
-        className={`min-w-[44px] min-h-[44px] flex items-center justify-center gap-1.5 px-3 py-2 rounded-2xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 font-bold border-2 border-slate-900 shadow-[0_4px_0_0_#0f172a] active:translate-y-[3px] transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+        className={`min-w-[44px] min-h-[44px] flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-2xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 font-bold border-2 border-slate-900 shadow-[0_4px_0_0_#0f172a] active:translate-y-[3px] transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
           isHeatmapActive ? 'ring-2 ring-amber-400 bg-amber-100 shadow-[0_0_12px_rgba(245,158,11,0.5)]' : ''
         }`}
       >
@@ -376,7 +376,7 @@ export function ActionDock({
             ? 'Bạn vừa đổ đôi, hãy tung xúc xắc tiếp để hoàn thành lượt'
             : undefined
         }
-        className={`min-w-[44px] min-h-[44px] flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-2xl transition-all text-sm font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
+        className={`min-w-[44px] min-h-[44px] flex items-center justify-center gap-1.5 px-4.5 py-2.5 rounded-2xl transition-all text-sm font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
           isEndDisabled
             ? isInsolvent
               ? 'bg-rose-100 text-rose-500 border-2 border-rose-300 cursor-not-allowed'
