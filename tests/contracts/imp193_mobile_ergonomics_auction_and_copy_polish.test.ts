@@ -87,7 +87,7 @@ describe('[TC-193.01/MSS..TC-193.16/MSS][UC-IMP193] Mobile Ergonomics, Auction R
       expect(endTurnBtn).toContain('sm:px-4');
     });
 
-    it('[TC-193.03/MSS][UC-IMP193] PlayerCard: Dải 22 chấm BĐS dùng class w-1 h-1 và gap-[1px], thẻ root KHÔNG chứa overflow-hidden', () => {
+    it('[TC-193.03/MSS][UC-IMP193] PlayerCard: Cụm 22 chấm BĐS 2 dòng dùng class w-2 h-2 và gap-1, thẻ root KHÔNG chứa overflow-hidden', () => {
       const mockPlayer: PlayerHudInfo = {
         id: 'p1',
         name: 'Đại Gia Hà Thành',
@@ -109,8 +109,8 @@ describe('[TC-193.01/MSS..TC-193.16/MSS][UC-IMP193] Mobile Ergonomics, Auction R
       const dotSpan = html.match(/<span[^>]*data-testid="dot-cell-1"[^>]*>/)?.[0] ?? '';
 
       expect(rootDiv).not.toContain('overflow-hidden');
-      expect(clusterDiv).toContain('gap-[1px]');
-      expect(dotSpan).toContain('w-1 h-1');
+      expect(clusterDiv).toContain('gap-1');
+      expect(dotSpan).toContain('w-2 h-2');
     });
   });
 

@@ -77,16 +77,16 @@ export function TopBar(props: TopBarProps): React.ReactElement {
   const displayMaxRounds = roundNumber > maxRounds ? (roundNumber <= 40 ? 40 : roundNumber) : maxRounds;
 
   return (
-    <header className="w-full max-w-full overflow-hidden flex justify-between items-center pointer-events-none px-2 sm:px-4 pt-[calc(0.375rem+env(safe-area-inset-top))] sm:pt-3">
+    <header className="w-full max-w-full overflow-hidden flex justify-between items-center pointer-events-none px-0.5 min-[360px]:px-1 sm:px-4 pt-[calc(0.375rem+env(safe-area-inset-top))] sm:pt-3">
       {/* Cụm bên trái: Thông tin trận đấu */}
       <div
         data-testid="match-info-capsule"
-        className="pointer-events-auto flex items-center gap-1.5 min-[360px]:gap-2 sm:gap-3 md:gap-4 bg-[#FFFDF8] border-2 border-slate-900 rounded-xl sm:rounded-2xl px-3 sm:px-5 py-1.5 sm:py-2.5 shadow-[0_4px_0_0_#0f172a] text-slate-900 text-xs md:text-sm font-medium"
+        className="pointer-events-auto flex items-center gap-1 min-[360px]:gap-1 sm:gap-3 md:gap-4 bg-[#FFFDF8] border-2 border-slate-900 rounded-xl sm:rounded-2xl px-3 sm:px-5 py-1 sm:py-2.5 shadow-[0_4px_0_0_#0f172a] text-slate-900 text-xs md:text-sm font-medium"
       >
         {/* Vòng đấu */}
         <div className="flex items-center gap-1 sm:gap-2">
           <span className="text-slate-600 text-xs uppercase tracking-wider font-bold hidden sm:inline">Vòng</span>
-          <span className="font-bold text-amber-700 pl-1">
+          <span className="font-bold text-amber-700 pl-0.5">
             {roundNumber}
             <span className="text-slate-500 text-xs font-normal">/{displayMaxRounds}</span>
           </span>
@@ -96,9 +96,9 @@ export function TopBar(props: TopBarProps): React.ReactElement {
 
         {/* Đồng hồ đếm ngược */}
         <div className="flex items-center gap-1 sm:gap-2" role="timer" aria-live="polite">
-          <span className="text-base" aria-hidden="true">⏱️</span>
+          <span className="text-sm sm:text-base" aria-hidden="true">⏱️</span>
           <span className="hidden sm:inline text-xs text-slate-600 font-semibold">Thời gian:</span>
-          <span className={`tabular-nums font-mono text-base whitespace-nowrap ${timerColorClass}`}>
+          <span className={`tabular-nums font-mono text-xs sm:text-base whitespace-nowrap ${timerColorClass}`}>
             {isBotTurn ? (
               <>
                 <span className="sm:hidden" aria-hidden="true">🤖</span>
@@ -114,9 +114,9 @@ export function TopBar(props: TopBarProps): React.ReactElement {
 
         {/* Quỹ Kho Bạc */}
         <div className="flex items-center gap-1 sm:gap-2">
-          <span className="text-base" aria-hidden="true">🏦</span>
+          <span className="text-sm sm:text-base" aria-hidden="true">🏦</span>
           <span className="hidden sm:inline text-xs text-slate-600 font-semibold">Kho Bạc:</span>
-          <span className="font-bold text-amber-700 whitespace-nowrap tabular-nums shrink-0">
+          <span className="font-bold text-amber-700 whitespace-nowrap tabular-nums shrink-0 text-xs sm:text-sm">
             {formatCurrency(treasuryPool)}
           </span>
         </div>
@@ -127,25 +127,25 @@ export function TopBar(props: TopBarProps): React.ReactElement {
           type="button"
           data-testid="mobile-fps-badge"
           onClick={() => toggleConsole()}
-          className="hidden min-[360px]:inline-flex sm:hidden pointer-events-auto items-center gap-1 px-1.5 py-0.5 rounded-md bg-slate-900 text-emerald-400 font-mono text-[10px] font-bold border border-slate-700 shadow-2xs cursor-pointer select-none active:translate-y-px"
+          className="hidden min-[360px]:inline-flex sm:hidden pointer-events-auto items-center gap-0.5 px-1 py-0.5 rounded-md bg-slate-900 text-emerald-400 font-mono text-[10px] font-bold border border-slate-700 shadow-2xs cursor-pointer select-none active:translate-y-px"
           title="Tốc độ khung hình (Bấm để mở hộp đen)"
           aria-label={`FPS: ${fps}`}
         >
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" aria-hidden="true" />
-          <span>{fps} FPS</span>
+          <span>{fps}<span className="hidden min-[400px]:inline"> FPS</span></span>
         </button>
       </div>
 
       {/* Cụm bên phải: Tiện ích HUD */}
       <div
         data-testid="hud-utilities-cluster"
-        className="pointer-events-auto flex items-center gap-1 min-[360px]:gap-1.5 sm:gap-2 bg-[#FFFDF8] border-2 border-slate-900 rounded-2xl p-1 sm:p-2 px-1.5 min-[360px]:px-2.5 sm:px-3.5 shadow-[0_4px_0_0_#0f172a]"
+        className="pointer-events-auto flex items-center gap-1 sm:gap-2 bg-[#FFFDF8] border-2 border-slate-900 rounded-xl sm:rounded-2xl p-1 sm:p-2 px-1 min-[360px]:px-1 sm:px-3.5 shadow-[0_4px_0_0_#0f172a]"
       >
         {/* Nút Chu kỳ Thời gian Ngày - Hoàng Hôn - Đêm */}
         <button
           type="button"
           onClick={toggleNextTimeOfDay}
-          className="w-9 h-9 min-h-[36px] min-w-[36px] sm:w-auto sm:min-h-[44px] sm:min-w-[44px] inline-flex items-center justify-center gap-1.5 p-0 sm:px-3.5 sm:py-2 rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-colors cursor-pointer text-xs font-semibold border border-slate-900 shadow-[0_2px_0_0_#0f172a] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+          className="hidden min-[390px]:inline-flex sm:inline-flex w-9 h-9 min-h-[36px] min-w-[36px] sm:w-auto sm:min-h-[44px] sm:min-w-[44px] items-center justify-center gap-1.5 p-0 sm:px-3.5 sm:py-2 rounded-lg sm:rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-colors cursor-pointer text-xs font-semibold border border-slate-900 shadow-[0_2px_0_0_#0f172a] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
           title={`Thời gian: ${timeOfDayLabel} (Bấm để đổi)`}
           aria-label={`Chuyển chu kỳ thời gian (Hiện tại: ${timeOfDayLabel})`}
           data-testid="time-of-day-toggle-button"
@@ -154,11 +154,11 @@ export function TopBar(props: TopBarProps): React.ReactElement {
           <span className="hidden sm:inline">{timeOfDayLabel}</span>
         </button>
 
-        {/* Nút Bật / Tắt âm thanh đạt chuẩn công thái học >= 44px */}
+        {/* Nút Bật / Tắt âm thanh đạt chuẩn công thái học */}
         <button
           type="button"
           onClick={toggleMute}
-          className="w-9 h-9 min-h-[36px] min-w-[36px] sm:w-auto sm:min-h-[44px] sm:min-w-[44px] inline-flex items-center justify-center gap-1.5 p-0 sm:px-3.5 sm:py-2 rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-colors cursor-pointer text-xs font-semibold border border-slate-900 shadow-[0_2px_0_0_#0f172a] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+          className="w-9 h-9 min-h-[36px] min-w-[36px] sm:w-auto sm:min-h-[44px] sm:min-w-[44px] inline-flex items-center justify-center gap-1.5 p-0 sm:px-3.5 sm:py-2 rounded-lg sm:rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-colors cursor-pointer text-xs font-semibold border border-slate-900 shadow-[0_2px_0_0_#0f172a] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
           title={isMuted ? 'Bật âm thanh' : 'Tắt âm thanh'}
           aria-label={isMuted ? 'Bật âm thanh trò chơi' : 'Tắt âm thanh trò chơi'}
           data-testid="mute-toggle-button"
@@ -171,7 +171,7 @@ export function TopBar(props: TopBarProps): React.ReactElement {
         <button
           type="button"
           onClick={toggleActivityFeed}
-          className="relative w-9 h-9 min-h-[36px] min-w-[36px] sm:w-auto sm:min-h-[44px] sm:min-w-[44px] inline-flex items-center justify-center gap-1.5 p-0 sm:px-3.5 sm:py-2 rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-colors cursor-pointer text-xs font-semibold border border-slate-900 shadow-[0_2px_0_0_#0f172a] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+          className="relative w-9 h-9 min-h-[36px] min-w-[36px] sm:w-auto sm:min-h-[44px] sm:min-w-[44px] inline-flex items-center justify-center gap-1.5 p-0 sm:px-3.5 sm:py-2 rounded-lg sm:rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-colors cursor-pointer text-xs font-semibold border border-slate-900 shadow-[0_2px_0_0_#0f172a] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
           title={isActivityFeedOpen ? 'Đóng nhật ký' : 'Mở nhật ký hoạt động'}
           aria-label={`Nhật ký hoạt động${unreadCount > 0 ? ` (${unreadCount} mới)` : ''}`}
           data-testid="activity-feed-toggle-button"

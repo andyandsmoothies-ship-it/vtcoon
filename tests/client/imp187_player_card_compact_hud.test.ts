@@ -35,14 +35,24 @@ describe('[TC-187/MSS][IMP-187] Compact PlayerCard HUD & Zero-Waste Layout', () 
     expect(html).toContain('data-testid="player-net-worth"');
   });
 
-  it('[TC-187.02/MSS] Property clusters container uses flex-nowrap to guarantee single-line micro-bar', () => {
+  it('[TC-187.02/MSS] Property clusters container organizes 22 dots into 2 balanced rows of 11 dots each with w-2 h-2 size', () => {
     const html = renderToStaticMarkup(
       React.createElement(PlayerCard, { player: mockPlayer, isCurrentTurn: false, levelMap: {}, slotIndex: 0 })
     );
     const clusterContainer = html.match(/<div[^>]*data-testid="player-property-clusters"[^>]*>/);
     expect(clusterContainer).not.toBeNull();
-    // Must prevent multi-row wrapping (prohibit flex-wrap, enforce flex-nowrap or single row)
     expect(clusterContainer![0]).not.toContain('flex-wrap');
+
+    // 2 dòng đối xứng 11 chấm mỗi dòng
+    const row1Segment = html.split('data-testid="property-clusters-row-1"')[1]?.split('data-testid="property-clusters-row-2"')[0] ?? '';
+    const row2Segment = html.split('data-testid="property-clusters-row-2"')[1] ?? '';
+    expect(row1Segment.match(/data-testid="dot-cell-\d+"/g)?.length).toBe(11);
+    expect(row2Segment.match(/data-testid="dot-cell-\d+"/g)?.length).toBe(11);
+
+    // Kích thước chấm tối thiểu 8px (w-2 h-2) trên mobile giúp thấy rõ màu sắc
+    const dotCell1 = html.match(/<span[^>]*data-testid="dot-cell-1"[^>]*>/);
+    expect(dotCell1).not.toBeNull();
+    expect(dotCell1![0]).toContain('w-2 h-2');
   });
 
   it('[TC-187.03/MSS] In-turn badge LƯỢT is rendered as sleek corner tab when isCurrentTurn is true', () => {

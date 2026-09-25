@@ -105,8 +105,8 @@ function resolveStrategicHint(
     return {
       type: 'my_monopoly',
       tone: 'emerald',
-      badgeText: '👑 CƠ HỘI ĐỘC QUYỀN',
-      badge: '👑 CƠ HỘI ĐỘC QUYỀN',
+      badgeText: '🎯 ĐỘC QUYỀN',
+      badge: '🎯 ĐỘC QUYỀN',
       description: 'Hoàn tất phân khu để kích hoạt x2 tiền thuê đất nền & mở quyền xây dựng công trình C1-C3.',
     };
   }
@@ -115,8 +115,8 @@ function resolveStrategicHint(
     return {
       type: 'block_opponent',
       tone: 'rose',
-      badgeText: '🚨 CẢNH BÁO CHẶN ĐỐI THỦ',
-      badge: '🚨 CẢNH BÁO CHẶN ĐỐI THỦ',
+      badgeText: '🛡️ CHẶN ĐỐI THỦ',
+      badge: '🛡️ CHẶN ĐỐI THỦ',
       description: `Chặn ${opponentMax.name} hoàn tất độc quyền phân khu để tránh nguy cơ phá sản khi dẫm vào.`,
     };
   }
@@ -125,8 +125,8 @@ function resolveStrategicHint(
     return {
       type: 'first_piece',
       tone: 'blue',
-      badgeText: '🚩 KHAI MỞ PHÂN KHU',
-      badge: '🚩 KHAI MỞ PHÂN KHU',
+      badgeText: '🧩 KHỞI ĐẦU',
+      badge: '🧩 KHỞI ĐẦU',
       description: 'Đặt nền móng đầu tiên cho phân khu để tạo tiền đề gom trọn bộ độc quyền.',
     };
   }
@@ -134,8 +134,8 @@ function resolveStrategicHint(
   return {
     type: 'contested',
     tone: 'amber',
-    badgeText: '⚔️ TRANH CHẤP CHIẾN LƯỢC',
-    badge: '⚔️ TRANH CHẤP CHIẾN LƯỢC',
+    badgeText: '⚔️ TRANH CHẤP',
+    badge: '⚔️ TRANH CHẤP',
     description: 'Phân khu đang bị phân mảnh sở hữu, hãy cân nhắc giá trị đàm phán P2P sau này.',
   };
 }

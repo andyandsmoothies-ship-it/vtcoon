@@ -26,7 +26,7 @@ describe('[TC-P3.1/MSS] TitleDeedModal Layout Polish & Chống Tràn Màn Hình 
     const html = renderToStaticMarkup(
       React.createElement(TitleDeedModal, { cellIndex: 1, canBuy: true, isOwned: false })
     );
-    expect(html).toContain('max-h-[90vh]');
+    expect(html).toContain('max-h-[90dvh]');
     expect(html).toContain('md:max-h-[85vh]');
     expect(html).toContain('flex flex-col');
     expect(html).toContain('overflow-hidden');

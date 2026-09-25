@@ -140,7 +140,7 @@ export function TitleDeedModal({
 
   return (
     <div
-      className="relative w-full max-w-md max-h-[90vh] md:max-h-[85vh] bg-[#FFFDF8] border-2 border-slate-900 rounded-2xl shadow-[0_6px_0_0_#0f172a] ring-2 ring-slate-900/10 overflow-hidden flex flex-col pointer-events-auto animate-in zoom-in-90 fade-in duration-200 ease-out select-none p-5 text-slate-900"
+      className="relative w-full max-w-md max-h-[90dvh] md:max-h-[85vh] bg-[#FFFDF8] border-2 border-slate-900 rounded-2xl shadow-[0_6px_0_0_#0f172a] ring-2 ring-slate-900/10 overflow-hidden flex flex-col pointer-events-auto animate-in zoom-in-90 fade-in duration-200 ease-out select-none p-5 text-slate-900"
       data-testid="title-deed-modal"
     >
       {/* Khung viền chỉ mực kép bên trong */}

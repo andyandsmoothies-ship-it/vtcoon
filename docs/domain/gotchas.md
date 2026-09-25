@@ -11,7 +11,7 @@
 | `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147, #190, #191, #195, #196, #197, #200, #206, #223 |
 | `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190, #200, #203, #209, #210, #211, #212, #213, #215, #217, #223, #224, #225, #226, #227, #231, #235, #244, #247, #248, #249, #250, #255, #256, #259, #260, #261, #265 |
 | `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #32, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #60, #61, #63, #69, #72, #74, #77, #80, #85, #86, #88, #89, #90, #91, #92, #93, #94, #95, #96, #101, #103, #109, #110, #114, #115, #116, #117, #120, #122, #123, #124, #125, #126, #127, #128, #129, #130, #133, #134, #135, #136, #140, #141, #144, #148, #159, #160, #161, #162, #163, #164, #165, #169, #175, #177, #189, #198, #200, #222, #254, #257, #258, #259 |
-| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192, #195, #196, #199, #201, #202, #204, #205, #206, #216, #217, #231, #234, #237, #249, #250, #255, #256, #257, #258, #259, #260, #261, #266, #267, #268 |
+| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192, #195, #196, #199, #201, #202, #204, #205, #206, #216, #217, #231, #234, #237, #249, #250, #255, #256, #257, #258, #259, #260, #261, #266, #267, #268, #269 |
 | `[UAT/TEST]` | Nghiệm Thu, Adversarial TDD, Ảnh Chụp Màn Hình (.jpg), Shell Escaping, File I/O Lock, Docker Healthcheck Timeout | #5, #28, #29, #31, #35, #52, #71, #73, #83, #84, #99, #100, #117, #124, #125, #130, #199, #235 |
 | `[TELEMETRY]` | Giám Sát Hiệu Năng Thời Gian Thực, Chó Canh Phòng Bất Biến, Hộp Đen Tái Hiện Lỗi | #39, #62, #71, #75, #104, #114, #115, #135, #174, #200, #227, #235, #250, #255, #259 |
 | `[ARCH/REFACTOR]` | Tách Module Facade, Ngân Sách Render Loop, Chuẩn Hóa Môi Trường Build | #43, #98, #99 |
@@ -3105,4 +3105,22 @@
   3. **Plan Budget SSOT Invariant**: Mọi con số trần LOC trong Bảng ngân sách kế hoạch và trong bài test hợp đồng Trạm 1 bắt buộc phải khớp nhau 100% về mặt giá trị SSOT trước khi khởi chạy Trạm 1.
   4. **Subtractive Cleanliness Invariant**: Khi chuyển dịch cơ chế logic sang DTO mới, bắt buộc dọn dẹp sạch sẽ 100% các biến trung gian cũ, cấm để lại biến chết vi phạm `noUnusedLocals`.
 - **Traceability**: `[TC-194.01..18/MSS]`, `[UC-IMP194]`, `src/client/ui/transaction_narrative.ts`, `src/client/ui/floating_numbers.tsx`, `tests/contracts/imp194_natural_narrative_floating_badges.test.ts`.
+
+---
+
+### 269. [UI/CRAFT] Bất Biến Bố Cục 2 Hàng Đối Xứng 11 Chấm & Kích Thước Chấm BĐS Tối Thiểu 8px (2-Row Symmetric 11-Dot Property Clusters & Minimal Dot Diameter Invariant)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Bóp Nghẹt 1 Hàng Trên Mobile (Single-Row Squeeze Trap)*:
+     Trong các phiên bản trước (từ IMP-187 đến IMP-193), để nhét toàn bộ 22 chấm BĐS vào thẻ người chơi di động có bề rộng chỉ 160px (`w-40`) trên 1 hàng ngang duy nhất, kích thước chấm bị thu nhỏ tối đa xuống còn `w-1 h-1` (4px). Ở kích thước 4px, người chơi không thể phân biệt được màu sắc của các nhóm đất (Nâu, Hồng, Đỏ, Cam,...), làm mất đi hoàn toàn công năng thông tin chiến lược của cụm chấm.
+  2. *Sự Bất Đối Xứng Ngẫu Nhiên Nếu Dùng Flex-Wrap Tự Động (Auto-Wrap Asymmetry)*:
+     Nếu dùng `flex-wrap` thuần túy, tùy theo bề rộng màn hình và font chữ, số lượng chấm trên mỗi hàng bị ngắt quãng không đều (ví dụ: hàng 1 có 14 chấm, hàng 2 có 8 chấm), làm lệch cụm màu giữa chừng.
+  3. *Bẫy Regular Expression Greedy Match trong Unit Tests (Vitest Regex Greedy Trap)*:
+     Khi test assert cấu trúc HTML của 2 hàng bằng regex dạng `/...[\s\S]*?<\/div>/`, biểu thức chính quy dừng lại ngay tại thẻ `</div>` đóng của cụm màu đầu tiên (inner cluster) thay vì container của cả hàng, dẫn đến đếm thiếu số chấm (chỉ thấy 2 hoặc 3 chấm thay vì 11 chấm).
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **2-Row Symmetric 11-Dot Layout Invariant**: 22 ô đất bất động sản thuộc 8 nhóm màu được chia tuyệt đối đối xứng thành 2 hàng, mỗi hàng gồm đúng 4 nhóm màu với tổng số 11 chấm:
+     - Hàng 1 (Nửa bàn cờ đầu): Nâu (2) + Xanh da trời (3) + Hồng (3) + Cam (3) = 11 chấm (`data-testid="property-clusters-row-1"`).
+     - Hàng 2 (Nửa bàn cờ sau): Đỏ (3) + Vàng (3) + Xanh lá (3) + Tím (2) = 11 chấm (`data-testid="property-clusters-row-2"`).
+  2. **Tactile Dot Diameter >= 8px Invariant**: Kích thước chấm BĐS tối thiểu trên mobile phải đạt `w-2 h-2` (8px), tablet `sm:w-[9px] sm:h-[9px]` (9px), desktop `md:w-2.5 md:h-2.5` (10px). Khoảng cách giữa các chấm trong nhóm là `gap-1 sm:gap-1.5` để màu sắc nổi bật rõ ràng, dễ nhận biết thị giác tức thì.
+  3. **Row Splitting DOM Testing**: Khi kiểm thử số lượng chấm per-row, test suite phân tách chuỗi HTML theo testid của từng hàng (`data-testid="property-clusters-row-X"`) thay vì dựa vào single regex greedy search.
+- **Traceability**: `[TC-187.02]`, `[TC-193.03]`, `src/client/ui/player_card.tsx`, `tests/client/imp187_player_card_compact_hud.test.ts`, `tests/contracts/imp193_mobile_ergonomics_auction_and_copy_polish.test.ts`.
 

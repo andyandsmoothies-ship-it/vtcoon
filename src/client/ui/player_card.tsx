@@ -177,35 +177,43 @@ export function PlayerCard({
         </div>
       </div>
 
-      {/* Dòng 3: Dải 22 chấm BĐS trải đều 100% bề ngang theo 8 cụm màu */}
+      {/* Dòng 3: Cụm 22 chấm BĐS sắp xếp 2 dòng đối xứng (11 chấm/dòng) giúp nhận diện rõ màu sắc */}
       <span className="sr-only">BĐS:</span>
       <div
-        className="flex items-center justify-between w-full px-2 pt-1.5 pb-0.5 border-t border-slate-300 select-none"
+        className="flex flex-col gap-1 w-full px-2 pt-1.5 pb-1 border-t border-slate-300 select-none"
         data-testid="player-property-clusters"
       >
-        {PROPERTY_CLUSTERS.map(({ group, cells }) => (
+        {[PROPERTY_CLUSTERS.slice(0, 4), PROPERTY_CLUSTERS.slice(4, 8)].map((clusterRow, rowIdx) => (
           <div
-            key={group}
-            className="flex items-center gap-[1px] sm:gap-[1.5px] shrink-0"
-            data-testid={`cluster-${group}`}
+            key={rowIdx}
+            data-testid={`property-clusters-row-${rowIdx + 1}`}
+            className="flex items-center justify-between w-full"
           >
-            {cells.map((cell) => {
-              const isOwned = Boolean(player.ownedProperties?.includes(cell.index));
-              return (
-                <span
-                  key={cell.index}
-                  data-testid={`dot-cell-${cell.index}`}
-                  data-owned={isOwned ? 'true' : 'false'}
-                  className={`w-1 h-1 sm:w-[5.5px] sm:h-[5.5px] md:w-2 md:h-2 rounded-full transition-all shrink-0 ${
-                    isOwned
-                      ? 'border border-slate-900/50 shadow-2xs'
-                      : 'border border-slate-300 bg-slate-100/70'
-                  }`}
-                  style={isOwned ? { backgroundColor: COLOR_GROUP_HEX[group] } : undefined}
-                  title={`${cell.name}: ${isOwned ? 'Đã sở hữu' : 'Chưa sở hữu'}`}
-                />
-              );
-            })}
+            {clusterRow.map(({ group, cells }) => (
+              <div
+                key={group}
+                className="flex items-center gap-1 sm:gap-1.5 shrink-0"
+                data-testid={`cluster-${group}`}
+              >
+                {cells.map((cell) => {
+                  const isOwned = Boolean(player.ownedProperties?.includes(cell.index));
+                  return (
+                    <span
+                      key={cell.index}
+                      data-testid={`dot-cell-${cell.index}`}
+                      data-owned={isOwned ? 'true' : 'false'}
+                      className={`w-2 h-2 sm:w-[9px] sm:h-[9px] md:w-2.5 md:h-2.5 rounded-full transition-all shrink-0 ${
+                        isOwned
+                          ? 'border border-slate-900/50 shadow-2xs'
+                          : 'border border-slate-300 bg-slate-100/70'
+                      }`}
+                      style={isOwned ? { backgroundColor: COLOR_GROUP_HEX[group] } : undefined}
+                      title={`${cell.name}: ${isOwned ? 'Đã sở hữu' : 'Chưa sở hữu'}`}
+                    />
+                  );
+                })}
+              </div>
+            ))}
           </div>
         ))}
       </div>

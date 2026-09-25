@@ -283,5 +283,30 @@ describe('[TC-UI03.7/MSS] ActionDock DOM Markup & Tactile 3D Buttons', () => {
     const targetUndefined = resolveManagePropertyTarget(undefined, 23);
     expect(targetUndefined).toEqual({ cellIndex: 23, canBuy: true });
   });
+
+  it('[TC-UI03.8/MSS] Nút Mua Đất màu vàng duy trì whitespace-nowrap shrink-0 và nhãn Mua Đất súc tích không bị xuống dòng', () => {
+    useGameStore.setState({
+      playersInfo: {
+        p1: { id: 'p1', name: 'P1', balance: 10000, tokenColor: '#fff', ownedProperties: [] },
+      },
+      currentTurnPlayerId: 'p1',
+      playerPositions: { p1: 3 },
+      dice: [2, 3],
+    });
+    const html = renderToStaticMarkup(
+      React.createElement(ActionDock, {
+        localPlayerId: 'p1',
+        isMyTurn: true,
+        hasRolledThisTurn: true,
+        canRollAgain: false,
+      })
+    );
+    expect(html).toContain('bg-amber-500');
+    expect(html).toContain('whitespace-nowrap');
+    expect(html).toContain('shrink-0');
+    expect(html).toContain('Mua Đất');
+    expect(html).not.toContain('Mua Đất (#3)');
+  });
 });
+
 

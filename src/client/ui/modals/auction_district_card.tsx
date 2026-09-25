@@ -60,7 +60,7 @@ function renderCellChip(cell: DistrictCellChip): React.ReactElement {
     <div
       key={cell.cellIndex}
       data-testid={`district-cell-chip-${cell.cellIndex}`}
-      className={`px-1.5 sm:px-2 py-1.5 rounded-xl border text-[10px] sm:text-[11px] min-w-0 flex flex-col justify-between transition-all min-h-[3.75rem] ${
+      className={`px-1.5 sm:px-2 py-1 rounded-xl border text-[10px] sm:text-[11px] min-w-0 flex flex-col justify-between transition-all min-h-[3rem] ${
         cell.isTarget ? 'ring-2 ring-amber-400 bg-amber-50/80 border-amber-400' : 'bg-amber-50/60 border-amber-900/10'
       }`}
     >
@@ -123,7 +123,7 @@ export function AuctionDistrictCard({
   return (
     <div
       data-testid="auction-district-intelligence"
-      className="bg-amber-50/40 p-3 rounded-2xl border border-amber-900/10 space-y-2.5 shadow-sm"
+      className="bg-amber-50/40 p-2.5 sm:p-3 rounded-2xl border border-amber-900/10 space-y-2 shadow-sm"
     >
       {/* Header phân khu */}
       <div className="flex items-center justify-between flex-wrap gap-1.5 border-b border-amber-900/10 pb-2">

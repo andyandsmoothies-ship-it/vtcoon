@@ -228,51 +228,70 @@ export function ActionDock({
         </div>
       )}
 
-      {/* Nút Đổ Xúc Xắc (CTA chính mang sắc đỏ/cam rực rỡ phong cách Retropoly với viền vàng & nút bấm nổi 3D) */}
-      <button
-        type="button"
-        onClick={handleRollClick}
-        disabled={isRollDisabled}
-        data-testid="roll-dice-btn"
-        className={`min-h-[44px] flex items-center justify-center gap-1.5 sm:gap-2 px-5 sm:px-6 py-2.5 shrink-0 rounded-2xl font-black text-white shadow-lg transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 ${
-          isRollDisabled
-            ? 'bg-slate-200 text-slate-600 cursor-not-allowed border-2 border-slate-400 shadow-none'
-            : `bg-gradient-to-b from-rose-500 via-red-600 to-red-700 hover:from-rose-400 hover:to-red-600 border-2 border-emerald-800 shadow-[0_4px_0_0_#064e3b] active:shadow-none active:translate-y-[3px] ${
-                isGlowActive ? 'ring-4 ring-amber-400/60 shadow-[0_0_24px_rgba(245,158,11,0.55)] animate-pulse' : ''
-              }`
-        }`}
-        aria-label="Đổ xúc xắc"
-      >
-        <span className="text-xl" aria-hidden="true">🎲</span>
-        <span className="text-sm md:text-base">
-          {isRollPending || isRolling
-            ? 'Đang Đổ...'
-            : isPawnMoving
-            ? 'Đang Đi...'
-            : isBankrupt
-            ? 'Đã Phá Sản'
-            : (actingPlayer?.extraTurns ?? 0) > 0
-            ? (
-              <>
-                <span className="sm:hidden">Đổ Tiếp</span>
-                <span className="hidden sm:inline">Đổ Tiếp (+1 Lượt)</span>
-              </>
-            )
-            : canRollAgain && hasRolledThisTurn
-            ? (
-              <>
-                <span className="sm:hidden">Đổ Tiếp</span>
-                <span className="hidden sm:inline">Đổ Tiếp (Đôi)</span>
-              </>
-            )
-            : (
-              <>
-                <span className="sm:hidden min-w-[28px] text-center">Đổ</span>
-                <span className="hidden sm:inline">Đổ Xúc Xắc</span>
-              </>
-            )}
-        </span>
-      </button>
+      {/* Primary Action Button (Chuyển đổi theo Pha: Khi đứng trên ô chưa có chủ thì Primary CTA là [Mua Đất], ngược lại là [Đổ Xúc Xắc]) */}
+      {isStandingOnBuyable && !canRollAgain ? (
+        <button
+          type="button"
+          onClick={isTradeFrozen ? undefined : () => openModal('deed', { cellIndex: currentPos, canBuy: true })}
+          disabled={isTradeFrozen}
+          className={`min-h-[44px] shrink-0 whitespace-nowrap flex items-center justify-center gap-1.5 px-4 sm:px-6 py-2.5 rounded-2xl font-black text-white shadow-lg transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 ${
+            isTradeFrozen
+              ? 'bg-slate-200 text-slate-500 border-2 border-slate-400 cursor-not-allowed shadow-none'
+              : 'bg-amber-500 hover:bg-amber-600 border-2 border-amber-700 shadow-[0_4px_0_0_#0f172a] active:shadow-none active:translate-y-[3px] ring-4 ring-amber-400/60 shadow-[0_0_24px_rgba(245,158,11,0.55)] animate-pulse'
+          }`}
+          aria-label={isTradeFrozen ? `Thị trường đóng băng (#${currentPos})` : `Mua ô đất số ${currentPos}`}
+        >
+          <span className="text-xl" aria-hidden="true">{isTradeFrozen ? '🔒' : '🏷️'}</span>
+          <span className="text-sm md:text-base font-black">
+            {isTradeFrozen ? 'Đóng Băng' : 'Mua Đất'}
+          </span>
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={handleRollClick}
+          disabled={isRollDisabled}
+          data-testid="roll-dice-btn"
+          className={`min-h-[44px] flex items-center justify-center gap-1.5 sm:gap-2 px-5 sm:px-6 py-2.5 shrink-0 rounded-2xl font-black text-white shadow-lg transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 ${
+            isRollDisabled
+              ? 'bg-slate-200 text-slate-600 cursor-not-allowed border-2 border-slate-400 shadow-none'
+              : `bg-gradient-to-b from-rose-500 via-red-600 to-red-700 hover:from-rose-400 hover:to-red-600 border-2 border-emerald-800 shadow-[0_4px_0_0_#064e3b] active:shadow-none active:translate-y-[3px] ${
+                  isGlowActive ? 'ring-4 ring-amber-400/60 shadow-[0_0_24px_rgba(245,158,11,0.55)] animate-pulse' : ''
+                }`
+          }`}
+          aria-label="Đổ xúc xắc"
+        >
+          <span className="text-xl" aria-hidden="true">🎲</span>
+          <span className="text-sm md:text-base">
+            {isRollPending || isRolling
+              ? 'Đang Đổ...'
+              : isPawnMoving
+              ? 'Đang Đi...'
+              : isBankrupt
+              ? 'Đã Phá Sản'
+              : (actingPlayer?.extraTurns ?? 0) > 0
+              ? (
+                <>
+                  <span className="sm:hidden">Đổ Tiếp</span>
+                  <span className="hidden sm:inline">Đổ Tiếp (+1 Lượt)</span>
+                </>
+              )
+              : canRollAgain && hasRolledThisTurn
+              ? (
+                <>
+                  <span className="sm:hidden">Đổ Tiếp</span>
+                  <span className="hidden sm:inline">Đổ Tiếp (Đôi)</span>
+                </>
+              )
+              : (
+                <>
+                  <span className="sm:hidden min-w-[28px] text-center">Đổ</span>
+                  <span className="hidden sm:inline">Đổ Xúc Xắc</span>
+                </>
+              )}
+          </span>
+        </button>
+      )}
 
       <div className="h-6 w-px bg-slate-300 rounded-full" aria-hidden="true" />
 
@@ -290,24 +309,6 @@ export function ActionDock({
           <span className="text-[11px] bg-amber-900/40 px-1.5 py-0.5 rounded font-mono">
             {`${actingPlayer?.auditTurnsLeft ?? 0} lượt`}
           </span>
-        </button>
-      )}
-
-      {/* Nút Mua Đất nhanh khi đang đứng trên ô chưa có chủ trong lượt mình */}
-      {isStandingOnBuyable && (
-        <button
-          type="button"
-          onClick={isTradeFrozen ? undefined : () => openModal('deed', { cellIndex: currentPos, canBuy: true })}
-          disabled={isTradeFrozen}
-          className={`min-h-[44px] flex items-center gap-1.5 px-3.5 py-2 rounded-2xl font-bold border-2 transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
-            isTradeFrozen
-              ? 'bg-slate-200 text-slate-500 border-slate-400 cursor-not-allowed'
-              : 'text-white bg-amber-500 hover:bg-amber-600 border-amber-700 shadow-[0_4px_0_0_#0f172a] active:shadow-none active:translate-y-[3px] animate-pulse'
-          }`}
-          aria-label={isTradeFrozen ? `Thị trường đóng băng (#${currentPos})` : `Mua ô đất số ${currentPos}`}
-        >
-          <span aria-hidden="true">{isTradeFrozen ? '🔒' : '🏷️'}</span>
-          <span>{isTradeFrozen ? `🔒 Đóng Băng (#${currentPos})` : `Mua Đất (#${currentPos})`}</span>
         </button>
       )}
 
