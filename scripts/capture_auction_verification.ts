@@ -133,6 +133,16 @@ class VerificationCapturer {
     return this.sendCmd('Runtime.evaluate', { expression: code, returnByValue: true });
   }
 
+  async setViewport(width: number, height: number, mobile: boolean): Promise<void> {
+    await this.sendCmd('Emulation.setDeviceMetricsOverride', {
+      width,
+      height,
+      deviceScaleFactor: mobile ? 2 : 1,
+      mobile,
+    });
+    await sleep(1000);
+  }
+
   async takeScreenshot(filename: string): Promise<string> {
     const shot = await this.sendCmd('Page.captureScreenshot', { format: 'jpeg', quality: 90 });
     const buf = Buffer.from(shot.data, 'base64');
@@ -297,17 +307,17 @@ async function main() {
     await capturer.takeScreenshot('title_deed_modal_verified.jpg');
     await capturer.takeScreenshot('title_deed_modal_long_thanh_verified.jpg');
 
-    // SHOT 4: Title Deed Modal for standard city property (cellIndex: 16 - Bình Định, C0..C3)
-    console.log('[Verification] Opening Title Deed Modal (Bình Định - Cell 16)...');
+    // SHOT 4: Title Deed Modal for Đà Nẵng (cellIndex: 19 - exact user screenshot) on Mobile 390x844
+    console.log('[Verification] Opening Title Deed Modal (Đà Nẵng - Cell 19 on Mobile)...');
     await capturer.eval(`
       (() => {
         if (!window.__gameStore) return;
         const game = window.__gameStore.getState();
         game.openModal('deed', {
-          cellIndex: 16, // Bình Định (Đô thị C0..C3)
+          cellIndex: 19, // Đà Nẵng (Hải Châu - Sơn Trà)
           canBuy: true,
           isOwned: false,
-          buyerBalance: 6500,
+          buyerBalance: 16500,
           buyerId: 'p1',
           allPlayers: game.playersInfo,
         });
@@ -315,8 +325,16 @@ async function main() {
     `);
     await sleep(1000);
 
-    console.log('[Verification] Capturing Shot 4: Title Deed Modal (Standard Property)...');
-    await capturer.takeScreenshot('title_deed_modal_property_verified.jpg');
+    console.log('[Verification] Capturing Shot 4: Title Deed Modal (Đà Nẵng Mobile)...');
+    await capturer.takeScreenshot('title_deed_modal_da_nang_mobile_verified.jpg');
+
+    // SHOT 5: Switch to Desktop 1280x800 for Đà Nẵng (Cell 19) to verify 2-column zero-scroll layout
+    console.log('[Verification] Switching viewport to Desktop 1280x800...');
+    await capturer.setViewport(1280, 800, false);
+    await sleep(1000);
+
+    console.log('[Verification] Capturing Shot 5: Title Deed Modal (Đà Nẵng Desktop)...');
+    await capturer.takeScreenshot('title_deed_modal_da_nang_desktop_verified.jpg');
 
     console.log('[Verification] All screenshots captured successfully!');
   } catch (err) {

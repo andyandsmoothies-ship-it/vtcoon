@@ -46,7 +46,7 @@ export function PurchaseDecisionCard({
             <span>🧭</span>
             <span>{radar.isRailroad ? 'Hạ Tầng' : radar.isUtility ? 'Tiện Ích' : 'Bộ Màu Quy Hoạch'} ({radar.ownedCount}/{radar.totalCells})</span>
           </span>
-          <span className="px-2 py-0.5 rounded-full font-black text-[10px] bg-white border border-slate-300 shadow-sm text-slate-800" data-testid="radar-strategy-badge">
+          <span className="px-2 py-0.5 rounded-full font-black text-[10px] bg-white border border-slate-300 shadow-sm text-slate-800 whitespace-nowrap shrink-0" data-testid="radar-strategy-badge">
             {radar.badge}
           </span>
         </div>
@@ -73,24 +73,24 @@ export function PurchaseDecisionCard({
       </div>
 
       {/* Khối 2: Đệm tiền mặt & An toàn thanh khoản */}
-      <div className="pt-1.5 sm:pt-2 border-t border-amber-900/10 space-y-1 sm:space-y-1.5">
-        <div className="flex items-center justify-between text-[11px]">
-          <span className="text-slate-600 font-medium">Thanh khoản sau mua:</span>
-          <div className="flex items-center gap-1.5">
-            <span className="text-xs font-mono font-bold">
-              <span className="text-slate-500">{formatCurrency(effectiveBalance)}</span>
-              <span className="text-slate-400 mx-1">➔</span>
-              <span className={cashBuffer.tone === 'rose' ? 'text-rose-700' : 'text-slate-900'}>{formatCurrency(cashBuffer.balanceAfterBuy)}</span>
-            </span>
-            <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-black border ${TONE_CLASSES[cashBuffer.tone]}`} data-testid="cash-buffer-badge">
-              {cashBuffer.tone === 'emerald' ? '🟢' : cashBuffer.tone === 'amber' ? '🟡' : '🔴'} {cashBuffer.label}
-            </span>
-          </div>
+      <div className="pt-1.5 border-t border-amber-900/10 space-y-1">
+        <div className="flex items-center justify-between gap-1 text-[11px]">
+          <span className="text-slate-600 font-medium whitespace-nowrap">Thanh khoản sau mua:</span>
+          <span
+            className={`px-2 py-0.5 rounded-full text-[10px] font-black border whitespace-nowrap shrink-0 ${TONE_CLASSES[cashBuffer.tone]}`}
+            data-testid="cash-buffer-badge"
+          >
+            {cashBuffer.tone === 'emerald' ? '🟢' : cashBuffer.tone === 'amber' ? '🟡' : '🔴'} {cashBuffer.label}
+          </span>
         </div>
-        <p className="text-[10px] text-slate-500 italic leading-tight hidden sm:block">{cashBuffer.description}</p>
-        <div className="hidden sm:flex items-center justify-between text-[10px] text-amber-900/80 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-600/20">
-          <span>🛡️ Phao thế chấp 50%:</span>
-          <span className="font-bold font-mono">+{formatCurrency(cashBuffer.mortgageValue)}</span>
+        <div className="flex items-center justify-between text-xs font-mono font-bold px-2 py-0.5 rounded-lg bg-white/70 border border-slate-200/80">
+          <span className="text-slate-500 whitespace-nowrap text-[11px] sm:text-xs">
+            Ví: {formatCurrency(effectiveBalance)}
+          </span>
+          <span className="text-slate-400 font-normal text-[11px]">➔ Còn lại:</span>
+          <span className={`whitespace-nowrap text-[11px] sm:text-xs ${cashBuffer.tone === 'rose' ? 'text-rose-700 font-black' : 'text-slate-900 font-black'}`}>
+            {formatCurrency(cashBuffer.balanceAfterBuy)}
+          </span>
         </div>
       </div>
     </div>

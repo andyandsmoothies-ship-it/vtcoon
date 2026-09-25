@@ -141,12 +141,22 @@ describe('[TC-AUC-ERG/MSS] Mobile Ergonomics & Visual Polish for Auction and Tit
     expect(html).toContain('flex flex-row gap-2');
     expect(html).toContain('w-20 h-20');
 
-    // 2. Biểu phí theo số ga sở hữu sử dụng compact padding px-2 py-1
+    // 2. Bố cục 2 cột rộng rãi trên Desktop loại bỏ hoàn toàn thanh cuộn
+    expect(html).toContain('md:max-w-2xl');
+    expect(html).toContain('md:grid md:grid-cols-2');
+
+    // 3. Biểu phí theo số ga sở hữu sử dụng compact padding px-2 py-1
     expect(html).toContain('px-2 py-1');
 
-    // 3. Toàn bộ 4 ga và nút mua hiển thị trọn vẹn
+    // 4. Toàn bộ 4 ga và nút mua hiển thị trọn vẹn
     expect(html).toContain('1 Bến / Ga');
     expect(html).toContain('4 Bến / Ga');
     expect(html).toContain('Mua BĐS (2.000 Tr.)');
+
+    // 5. Thanh khoản sau mua và badge không bị ngắt dòng (whitespace-nowrap)
+    expect(html).toContain('Thanh khoản sau mua:</span>');
+    expect(html).toContain('whitespace-nowrap');
+    expect(html).toContain('Ví:');
+    expect(html).toContain('➔ Còn lại:');
   });
 });

@@ -140,7 +140,7 @@ export function TitleDeedModal({
 
   return (
     <div
-      className="relative w-full max-w-md max-h-[90dvh] md:max-h-[85vh] bg-[#FFFDF8] border-2 border-slate-900 rounded-2xl shadow-[0_6px_0_0_#0f172a] ring-2 ring-slate-900/10 overflow-hidden flex flex-col pointer-events-auto animate-in zoom-in-90 fade-in duration-200 ease-out select-none p-3.5 sm:p-5 text-slate-900"
+      className="relative w-full max-w-md md:max-w-2xl max-h-[90dvh] md:max-h-[85vh] bg-[#FFFDF8] border-2 border-slate-900 rounded-2xl shadow-[0_6px_0_0_#0f172a] ring-2 ring-slate-900/10 overflow-hidden flex flex-col pointer-events-auto animate-in zoom-in-90 fade-in duration-200 ease-out select-none p-3.5 sm:p-5 text-slate-900"
       data-testid="title-deed-modal"
     >
       {/* Khung viền chỉ mực kép bên trong */}
@@ -234,61 +234,69 @@ export function TitleDeedModal({
       ))}
 
       {/* Thân thẻ cuộn mượt mà */}
-      <div className="relative z-10 flex-1 min-h-0 overflow-y-auto pr-1 p-2 sm:p-4 space-y-2 sm:space-y-3 text-xs md:text-sm text-slate-900">
-        {/* Hàng Hero Media & Giá niêm yết: Đặt ngang trên Mobile để tiết kiệm tối đa không gian thẳng đứng */}
-        <div className="flex flex-row gap-2 sm:gap-2.5 items-stretch">
-          <div className="w-20 h-20 sm:w-28 sm:h-28 shrink-0">
-            <TitleDeedArtShowcase
-              tileAssetUrl={tileAssetUrl}
-              deedName={deed.name}
-              ribbonColor={ribbonColor}
+      <div className="relative z-10 flex-1 min-h-0 overflow-y-auto pr-1 p-2 sm:p-3 text-xs md:text-sm text-slate-900">
+        <div className="flex flex-col md:grid md:grid-cols-2 gap-2.5 sm:gap-3.5 items-start">
+          {/* Cột 1 (Desktop) / Phần trên (Mobile): Ảnh BĐS, Giá niêm yết, Thế chấp, Radar Quy Hoạch */}
+          <div className="w-full space-y-2 sm:space-y-2.5">
+            {/* Hàng Hero: Ảnh BĐS + Khối giá niêm yết & Giá trị thế chấp */}
+            <div className="flex flex-row gap-2 sm:gap-2.5 items-stretch">
+              <div className="w-20 h-20 shrink-0">
+                <TitleDeedArtShowcase
+                  tileAssetUrl={tileAssetUrl}
+                  deedName={deed.name}
+                  ribbonColor={ribbonColor}
+                  isRailroad={isRailroad}
+                  isUtility={isUtility}
+                  showImage={showImage}
+                  onImageError={() => setImageError(true)}
+                  className="w-full h-full"
+                />
+              </div>
+
+              {/* Khối giá niêm yết & giá thế chấp */}
+              <div className="flex-1 grid grid-cols-2 gap-1.5 sm:gap-2 bg-[#F7F2E7] p-1.5 sm:p-2 rounded-xl border border-slate-300">
+                <div className="bg-white/90 p-1.5 sm:p-2 rounded-lg border border-slate-200 flex flex-col justify-center">
+                  <span className="text-slate-600 block text-[10px] sm:text-[11px] font-medium leading-none mb-1">Giá niêm yết</span>
+                  <span className="text-emerald-700 font-extrabold text-xs sm:text-sm leading-tight">{formatCurrency(deed.price)}</span>
+                </div>
+                <div className="bg-white/90 p-1.5 sm:p-2 rounded-lg border border-slate-200 flex flex-col justify-center">
+                  <span className="text-slate-600 block text-[10px] sm:text-[11px] font-medium leading-none mb-1">Giá trị thế chấp</span>
+                  <span className="text-amber-700 font-extrabold text-xs sm:text-sm leading-tight">{formatCurrency(deed.mortgageValue)}</span>
+                </div>
+              </div>
+            </div>
+
+            {canBuy && !isOwned && (
+              <PurchaseDecisionCard
+                cellIndex={cellIndex}
+                deedPrice={deed.price}
+                buyerBalance={buyerBalance}
+                buyerId={buyerId}
+                allPlayers={allPlayers}
+              />
+            )}
+
+            {isMortgaged && (
+              <div className="p-2 rounded-xl bg-rose-100 border border-rose-400 text-rose-800 text-xs text-center font-bold flex items-center justify-center gap-1.5 shadow-sm">
+                <span aria-hidden="true">⚠️</span>
+                <span>Tài sản đang thế chấp — Tạm ngưng thu phí thuê</span>
+              </div>
+            )}
+          </div>
+
+          {/* Cột 2 (Desktop) / Phần dưới (Mobile): Biểu phí cước dừng chân / ga */}
+          <div className="w-full">
+            <TitleDeedRentTable
               isRailroad={isRailroad}
               isUtility={isUtility}
-              showImage={showImage}
-              onImageError={() => setImageError(true)}
-              className="w-full h-full"
+              rents={deed.rents}
+              upgradeCosts={deed.upgradeCosts}
+              hasMonopoly={hasMonopoly}
+              currentLevel={currentLevel}
+              isOwner={isOwner}
             />
           </div>
-
-          {/* Khối giá niêm yết & giá thế chấp */}
-          <div className="flex-1 grid grid-cols-2 gap-1.5 sm:gap-2.5 bg-[#F7F2E7] p-1.5 sm:p-2.5 rounded-xl border border-slate-300">
-            <div className="bg-white/90 p-1.5 sm:p-2 rounded-lg border border-slate-200 flex flex-col justify-center">
-              <span className="text-slate-600 block text-[10px] sm:text-[11px] font-medium leading-none mb-1">Giá niêm yết</span>
-              <span className="text-emerald-700 font-extrabold text-xs sm:text-sm">{formatCurrency(deed.price)}</span>
-            </div>
-            <div className="bg-white/90 p-1.5 sm:p-2 rounded-lg border border-slate-200 flex flex-col justify-center">
-              <span className="text-slate-600 block text-[10px] sm:text-[11px] font-medium leading-none mb-1">Giá trị thế chấp</span>
-              <span className="text-amber-700 font-extrabold text-xs sm:text-sm">{formatCurrency(deed.mortgageValue)}</span>
-            </div>
-          </div>
         </div>
-
-        {canBuy && !isOwned && (
-          <PurchaseDecisionCard
-            cellIndex={cellIndex}
-            deedPrice={deed.price}
-            buyerBalance={buyerBalance}
-            buyerId={buyerId}
-            allPlayers={allPlayers}
-          />
-        )}
-
-        {isMortgaged && (
-          <div className="p-2 rounded-xl bg-rose-100 border border-rose-400 text-rose-800 text-xs text-center font-bold flex items-center justify-center gap-1.5 shadow-sm">
-            <span aria-hidden="true">⚠️</span>
-            <span>Tài sản đang thế chấp — Tạm ngưng thu phí thuê</span>
-          </div>
-        )}
-
-        <TitleDeedRentTable
-          isRailroad={isRailroad}
-          isUtility={isUtility}
-          rents={deed.rents}
-          upgradeCosts={deed.upgradeCosts}
-          hasMonopoly={hasMonopoly}
-          currentLevel={currentLevel}
-          isOwner={isOwner}
-        />
       </div>
 
       {/* Nút hành động 3D tactile vật lý */}

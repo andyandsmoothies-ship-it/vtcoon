@@ -37,10 +37,19 @@
   - `Biểu Phí Theo Số Ga Sở Hữu`: Cả 4 cấp bậc ga (`1 Ga: 500 Tr.`, `2 Ga: 1.000 Tr.`, `3 Ga: 2.000 Tr.`, `4 Ga: 4.000 Tr.`) hiển thị đầy đủ, sắc nét, không bị che khuất một phần nào.
   - `Nút Hành Động`: Nằm trọn vẹn trên màn hình cùng toàn bộ thông tin trên, người chơi KHÔNG CẦN CUỘN TAY một pixel nào để ra quyết định mua.
 
-### Ảnh 4: Trang Mua Đất / Sổ Đỏ — Đô Thị Thành Phố (Bình Định C0..C3) [Zero-Scroll Tabletop]
-- **Đường dẫn**: [`title_deed_modal_property_verified.jpg`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/reports/uat/screenshots/imp193/title_deed_modal_property_verified.jpg)
+### Ảnh 4: Trang Mua Đất / Sổ Đỏ — Đà Nẵng (Case Thực Tế Của Bạn Trên Desktop 1280x800) [Zero-Scroll 2 Cột]
+- **Đường dẫn**: [`title_deed_modal_da_nang_desktop_verified.jpg`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/reports/uat/screenshots/imp193/title_deed_modal_da_nang_desktop_verified.jpg)
+- **Kiểm tra công thái học (Triệt tiêu 100% thanh cuộn trên Desktop)**:
+  - `Bố cục 2 cột (md:grid md:grid-cols-2)`: Cột 1 chứa [Ảnh BĐS + Giá niêm yết + Thế chấp + Thẻ quy hoạch], Cột 2 chứa [Biểu phí dừng chân C0..C3].
+  - Chiều cao modal chỉ còn ~380px, chiếm chưa tới 50% chiều cao màn hình desktop.
+  - **Thanh cuộn xám biến mất hoàn toàn** (Zero Scrollbar), C3 Quần thể Resort/TTTM hiển thị nguyên vẹn kèm phí nâng cấp.
+
+### Ảnh 5: Trang Mua Đất / Sổ Đỏ — Đà Nẵng (Mobile 390x844) [Zero-Scroll 1 Cột Tinh Gọn]
+- **Đường dẫn**: [`title_deed_modal_da_nang_mobile_verified.jpg`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/reports/uat/screenshots/imp193/title_deed_modal_da_nang_mobile_verified.jpg)
 - **Kiểm tra công thái học**:
-  - Tương tự ô hạ tầng, thẻ đô thị với 4 cấp bậc cước (`C0 Đất Nền: 180 Tr.`, `C1 Nhà Phố: 540 Tr.`, `C2 Khách Sạn: 1.440 Tr.`, `C3 Quần Thể Resort: 4.500 Tr.`) cùng tiến độ bộ màu quy hoạch (1/3 ➔ 2/3) lọt 100% Above-The-Fold trên mobile 390px.
+  - **Khắc phục triệt để lỗi ngắt dòng (Text-Wrapping)**: Tách dòng tiêu đề `Thanh khoản sau mua:` đi kèm huy hiệu `[🟢 Dư Dả]` (`whitespace-nowrap shrink-0`) riêng biệt với dòng số tiền `Ví: 6.500 Tr. ➔ Còn lại: 4.500 Tr.` dạng pill nền trắng dịu mắt.
+  - Loại bỏ hoàn toàn hiện tượng chữ `mua:` hoặc `Tr.` bị rớt dòng đơn độc.
+  - Cả 4 cấp bậc cước C0..C3 lọt 100% trong khung nhìn trên mobile mà không chạm đáy hay che lấp nút Mua/Bỏ Qua.
 
 ---
 
@@ -51,5 +60,6 @@
 - `vitest run tests/client/phase3_visual_polish.test.ts`: **21/21 tests passed**.
 - `vitest run tests/client/property_purchase_decision.test.ts`: **16/16 tests passed**.
 - `vitest run tests/client/auction_modal*.test.ts`: **100% contract tests passed**.
+
 
 
