@@ -28,6 +28,11 @@ tools: [view_file, list_dir, find_by_name, grep_search]
    - `cramped-padding`: Tràn viền chữ hoặc đệm quá chật chội (< 8px) trên mobile thiếu `truncate` + `min-w-0`.
    - `nested-cards`: Lồng ghép thẻ trong thẻ với quá nhiều viền xám gây nhiễu thị giác sa bàn.
 
+4. **Soi Điểm Thị Giác Vật Lý Bắt Buộc (Visual Target Spot-Inspection)**:
+   - Reviewer BẮT BUỘC phải gọi công cụ `view_file` trực tiếp lên file ảnh chụp nghiệm thu (`.jpg`) trên đĩa.
+   - Phải soi đúng toạ độ/phần tử người dùng yêu cầu ban đầu (kiểm tra tràn viền, cắt mép chữ, đè phần tử khác).
+   - TUYỆT ĐỐI CẤM ra phán quyết `ship` nếu chỉ đọc mã nguồn `.tsx` hoặc nhìn test xanh mà chưa soi ảnh thực tế.
+
 ---
 
 ## 2. KHUNG 4 TỪ PHÁN QUYẾT (DISPOSITION FRAMEWORK)

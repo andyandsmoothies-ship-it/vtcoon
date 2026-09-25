@@ -150,9 +150,9 @@ describe('[TC-193.01/MSS..TC-193.16/MSS][UC-IMP193] Mobile Ergonomics, Auction R
         ],
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
-      const listContainer = html.match(/<div[^>]*class="[^"]*fixed[^"]*left-1\/2[^"]*"[^>]*>/)?.[0] ?? '';
+      const listContainer = html.match(/<div[^>]*class="[^"]*fixed[^"]*left-3[^"]*"[^>]*>/)?.[0] ?? '';
 
-      expect(listContainer).toContain('max-w-[84vw]');
+      expect(listContainer).toContain('max-w-[calc(100vw-11.5rem)]');
       expect(listContainer).toContain('md:max-w-md');
       expect(listContainer).not.toContain('max-w-[92vw]');
     });
@@ -441,6 +441,45 @@ describe('[TC-193.01/MSS..TC-193.16/MSS][UC-IMP193] Mobile Ergonomics, Auction R
         return loc > max;
       });
       expect(overBudgetFiles).toEqual([]);
+    });
+
+    it('[TC-193.17/MSS][UC-IMP193] AuctionDistrictCard: Hiển thị icon nhà trực quan "🏠" khi cell.level > 0, loại bỏ mã hóa kỹ thuật "C1" / "C2"', () => {
+      const html = renderToStaticMarkup(
+        React.createElement(AuctionDistrictCard, {
+          cellIndex: 3,
+          currentBid: 1000,
+          myId: 'p1',
+          playersInfo: {
+            p1: { id: 'p1', name: 'Đại Gia', balance: 10000, tokenColor: '#EF4444', ownedProperties: [1, 3] },
+          },
+          levelMap: { 1: 2, 3: 1 },
+        })
+      );
+      // Kiểm tra chip ô đất có level 1 hoặc 2 phải hiển thị icon nhà 🏠
+      expect(html).toContain('🏠');
+      // Không được chứa mã hóa kỹ thuật C1 hoặc C2 trong badge cấp nhà
+      expect(html).not.toMatch(/>\s*C[1-9]\s*</);
+    });
+
+    it('[TC-193.18/MSS][UC-IMP193] PlayerCard: Cụm 22 chấm BĐS player-property-clusters có padding ngang px-2 chống dính mép viền bo góc', () => {
+      const mockPlayer: PlayerHudInfo = {
+        id: 'p1',
+        name: 'Đại Gia Hà Thành',
+        balance: 15000,
+        tokenColor: '#38BDF8',
+        ownedProperties: [1, 3],
+        isBot: false,
+        bankrupt: false,
+      };
+      const html = renderToStaticMarkup(
+        React.createElement(PlayerCard, {
+          player: mockPlayer,
+          isCurrentTurn: true,
+          levelMap: {},
+        })
+      );
+      const clustersContainer = html.match(/<div[^>]*data-testid="player-property-clusters"[^>]*>/)?.[0] ?? '';
+      expect(clustersContainer).toContain('px-2');
     });
   });
 });

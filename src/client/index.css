@@ -1,10 +1,10 @@
 @import "tailwindcss";
 
-/* Base reset — moved from index.html inline <style> to fix Vite 6 html-inline-proxy bug with @tailwindcss/vite */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+/* Base reset — wrapped in @layer base to preserve Tailwind v4 utilities cascade */
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
 }
 
 html, body, #root {

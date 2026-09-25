@@ -10,6 +10,8 @@ import type { MarketModifier } from '../../../domain/room';
 import { TitleDeedArtShowcase } from './title_deed_art_showcase';
 import { TitleDeedRentTable } from './title_deed_rent_table';
 import { TitleDeedActionFooter } from './title_deed_action_footer';
+import { PurchaseDecisionCard } from './purchase_decision_card';
+import type { PurchaseDecisionPlayer } from './purchase_decision_logic';
 
 export interface TitleDeedModalProps {
   readonly cellIndex: number;
@@ -34,6 +36,9 @@ export interface TitleDeedModalProps {
   readonly onSelectCell?: (cellIndex: number) => void;
   readonly activeModifiers?: ReadonlyArray<MarketModifier>;
   readonly isTradeFrozen?: boolean;
+  readonly buyerBalance?: number;
+  readonly buyerId?: string;
+  readonly allPlayers?: Record<string, PurchaseDecisionPlayer>;
 }
 
 const MODIFIER_DESCS: Record<string, { icon: string; text: string }> = {
@@ -69,6 +74,9 @@ export function TitleDeedModal({
   onSelectCell,
   activeModifiers: propsActiveModifiers,
   isTradeFrozen: propsIsTradeFrozen,
+  buyerBalance,
+  buyerId,
+  allPlayers,
 }: TitleDeedModalProps): React.ReactElement {
   const deed = getDeedDisplayInfo(cellIndex);
   const currentIndex = ownedProperties ? ownedProperties.indexOf(cellIndex) : -1;
@@ -248,6 +256,16 @@ export function TitleDeedModal({
             <span className="text-amber-700 font-extrabold text-sm">{formatCurrency(deed.mortgageValue)}</span>
           </div>
         </div>
+
+        {canBuy && !isOwned && (
+          <PurchaseDecisionCard
+            cellIndex={cellIndex}
+            deedPrice={deed.price}
+            buyerBalance={buyerBalance}
+            buyerId={buyerId}
+            allPlayers={allPlayers}
+          />
+        )}
 
         {isMortgaged && (
           <div className="p-2 rounded-xl bg-rose-100 border border-rose-400 text-rose-800 text-xs text-center font-bold flex items-center justify-center gap-1.5 shadow-sm">

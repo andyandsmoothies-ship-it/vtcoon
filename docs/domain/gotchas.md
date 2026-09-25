@@ -11,7 +11,7 @@
 | `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147, #190, #191, #195, #196, #197, #200, #206, #223 |
 | `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190, #200, #203, #209, #210, #211, #212, #213, #215, #217, #223, #224, #225, #226, #227, #231, #235, #244, #247, #248, #249, #250, #255, #256, #259, #260, #261, #265 |
 | `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #32, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #60, #61, #63, #69, #72, #74, #77, #80, #85, #86, #88, #89, #90, #91, #92, #93, #94, #95, #96, #101, #103, #109, #110, #114, #115, #116, #117, #120, #122, #123, #124, #125, #126, #127, #128, #129, #130, #133, #134, #135, #136, #140, #141, #144, #148, #159, #160, #161, #162, #163, #164, #165, #169, #175, #177, #189, #198, #200, #222, #254, #257, #258, #259 |
-| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192, #195, #196, #199, #201, #202, #204, #205, #206, #216, #217, #231, #234, #237, #249, #250, #255, #256, #257, #258, #259, #260, #261 |
+| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192, #195, #196, #199, #201, #202, #204, #205, #206, #216, #217, #231, #234, #237, #249, #250, #255, #256, #257, #258, #259, #260, #261, #266, #267, #268 |
 | `[UAT/TEST]` | Nghiệm Thu, Adversarial TDD, Ảnh Chụp Màn Hình (.jpg), Shell Escaping, File I/O Lock, Docker Healthcheck Timeout | #5, #28, #29, #31, #35, #52, #71, #73, #83, #84, #99, #100, #117, #124, #125, #130, #199, #235 |
 | `[TELEMETRY]` | Giám Sát Hiệu Năng Thời Gian Thực, Chó Canh Phòng Bất Biến, Hộp Đen Tái Hiện Lỗi | #39, #62, #71, #75, #104, #114, #115, #135, #174, #200, #227, #235, #250, #255, #259 |
 | `[ARCH/REFACTOR]` | Tách Module Facade, Ngân Sách Render Loop, Chuẩn Hóa Môi Trường Build | #43, #98, #99 |
@@ -3050,3 +3050,59 @@
   3. **Auto-Tracking StateMap Cleanup**: `auction_manager.ts` theo dõi `stateMap` qua `DeletableMap` tại các điểm gán session, tự động gọi `delete(cellIndex)` khi phiên phát mãi khép lại mà không ai mua.
   4. **Strict Collateral Protection**: Khóa tuyệt đối hành động thế chấp (`mortgage`), chuyển nhượng P2P (`executeP2PTrade`) và cưỡng chế mua lại (`compulsoryBuyout`) đối với các ô thuộc tài sản thế chấp trái phiếu đang hoạt động với mã lỗi `BOND_COLLATERAL_LOCKED`.
 - **Traceability**: `[TC-192C.01..22/MSS]`, `[UC-IMP192C]`, `tests/contracts/imp192c_corporate_bond_fire_sale.test.ts`, `src/domain/bond_types.ts`, `src/server/bond_manager.ts`, `src/server/auction_manager.ts`, `src/server/insolvency_manager.ts`, `src/server/mortgage_manager.ts`, `src/server/property_actions.ts`, `src/server/room_property_coordinator.ts`.
+
+### 266. [UI/CRAFT/FINANCE] Bất Biến Radar Độc Quyền & Đệm Thanh Khoản Khi Mua Bất Động Sản (Purchase Decision Support Invariant - PDS)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Mua Mù & Phá Sản Thụ Động (Blind Purchase & Passive Insolvency Trap)*: Khi người chơi dẫm vào ô đất vô chủ, giao diện `TitleDeedModal` chỉ hiển thị giá niêm yết và biểu phí thuê theo cấp. Người chơi thiếu 2 thông số sống còn: (1) Ô đất này có giúp mình hoàn thành độc quyền hoặc chặn đối thủ không; (2) Số dư tiền mặt còn lại sau khi mua có an toàn không hay rơi vào vùng nguy hiểm (dưới 500 Tr.) dễ bị phá sản ngay lượt sau nếu dẫm ô thuê lớn.
+  2. *Bẫy Desync Giữa Store & Props Trong Modal Host (Realtime Balance Desync Trap)*: Nếu component hỗ trợ ra quyết định chỉ đọc từ closure cũ hoặc đọc duy nhất 1 nguồn (chỉ Zustand hoặc chỉ props), khi số dư người chơi biến động hoặc khi modal được mount trong môi trường kiểm thử/SSR, dữ liệu tiền mặt sẽ bị sai lệch hoặc ném ngoại lệ trên `undefined`.
+  3. *Bẫy Tranh Chấp Bộ Màu (Contested Group Mirage)*: Khi 2 đối thủ khác nhau cùng sở hữu các mảnh trong 1 bộ màu 3 ô, không ai có thể hoàn thành độc quyền tự nhiên nếu không có giao dịch M&A/P2P. Nếu radar vẫn báo `progress_monopoly`, người chơi sẽ lầm tưởng mình đang tiến tới độc quyền.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Monopoly Radar 5-State Invariant**: Hàm pure `resolveMonopolyRadar` phân loại chính xác 5 trạng thái chiến lược với mức ưu tiên: `complete_monopoly` (🎯 Độc Quyền) > `block_opponent` (🛡️ Chặn Đối Thủ) > `contested` (⚔️ Tranh Chấp) > `progress_monopoly` (🚀 Tiến Tới) > `first_piece` (🧩 Khởi Đầu). Hiển thị đầy đủ chip BĐS mini với chấm màu định danh token người sở hữu.
+  2. **Three-Tier Solvency & 50% Mortgage Safety Net**: `balanceAfterBuy = buyerBalance - deedPrice` phân bổ nghiêm ngặt 3 tone trực quan:
+     - 🟢 Dư Dả: `balanceAfterBuy >= 1500 Tr.` (`bg-emerald-100 text-emerald-800 border-emerald-300`)
+     - 🟡 Cẩn Trọng: `500 <= balanceAfterBuy < 1500 Tr.` (`bg-amber-100 text-amber-800 border-amber-300`)
+     - 🔴 Rủi Ro Cao: `balanceAfterBuy < 500 Tr.` (`bg-rose-100 text-rose-800 border-rose-300`)
+     Kèm giá trị thế chấp khẩn cấp `mortgageValue = floor(deedPrice * 0.5)` đóng vai trò phao cứu sinh an toàn.
+  3. **Strict Conditional Embedding**: `<PurchaseDecisionCard>` CHỈ được nhúng hiển thị khi `canBuy && !isOwned` trong `title_deed_modal.tsx`, giữ nguyên vẹn trải nghiệm thẩm mỹ khi người chơi xem lại sổ đỏ đã có chủ.
+  4. **Strict LOC Tier & Pure Domain Separation**: `purchase_decision_logic.ts` (120 LOC, TIER 1) hoàn toàn độc lập với React/DOM; `purchase_decision_card.tsx` (97 LOC, TIER 2) tuân thủ 0 anti-patterns Impeccable và công thái học mobile 360px (`truncate min-w-0`).
+- **Traceability**: `[TC-PDS.01..16/MSS]`, `[UC-PDS]`, `tests/client/property_purchase_decision.test.ts`, `src/client/ui/modals/purchase_decision_logic.ts`, `src/client/ui/modals/purchase_decision_card.tsx`, `src/client/ui/modals/title_deed_modal.tsx`, `src/client/ui/modals/modal_host.tsx`.
+
+---
+
+### 267. [UI/CRAFT/CSS] Bất Biến Triệt Tiêu Lớp CSS Reset (@layer Base) & Khoảng Cách Hình Học Bo Góc 20px (Unlayered CSS Reset Annihilation & Corner Clearance Invariant)
+- **Bối cảnh & Bẫy ngầm cực kỳ nguy hiểm**:
+  1. *Bẫy Triệt Tiêu Padding Toàn Cục Bởi CSS Reset Trần (Unlayered CSS Reset Trap)*:
+     Trong `src/client/index.css`, đoạn khai báo `* { box-sizing: border-box; margin: 0; padding: 0; }` đặt trần bên ngoài `@layer`. Theo đặc tả CSS Cascade Layers (W3C) được áp dụng mặc định trong Tailwind CSS v4, **mọi CSS unlayered luôn có độ ưu tiên cao hơn CSS nằm trong `@layer`**. Do đó, quy tắc `* { padding: 0; }` đã đè bẹp và triệt tiêu 100% các class padding tiện ích của Tailwind (`p-2.5`, `px-2`, `p-3`,...) trên toàn bộ ứng dụng khi chạy trên trình duyệt thực tế.
+  2. *Ảo Ảnh Kiểm Thử JSDOM (JSDOM Class String Mirage)*:
+     Các bài kiểm thử đơn vị thông thường sử dụng JSDOM hoặc `renderToStaticMarkup` chỉ kiểm tra chuỗi class (`expect(html).toContain('px-2')`). Do JSDOM không tính toán CSS Cascade Layers thực tế, bộ test luôn báo `PASS` xanh dù trên trình duyệt thực tế giá trị `window.getComputedStyle(el).paddingLeft` luôn bị ép về `"0px"`. Đây là nguyên nhân gốc rễ khiến qua rất nhiều vé IMP trước đây, padding trên mobile vẫn liên tục bị người dùng phản ánh là thiếu và sát rạt viền.
+  3. *Bẫy Chạm Viền Bo Góc 12px (Rounded Corner Collision Trap)*:
+     Với thẻ người chơi `PlayerCard` có `rounded-xl` ($R = 12\text{px}$), khi padding bị ép về 0, khoảng cách từ chấm BĐS ngoài cùng đến mép ngoài thẻ chỉ vỏn vẹn $2\text{px}$ (bằng đúng độ dày border đen). Tại cung tròn bo góc $12\text{px}$, chấm $2\text{px}$ bị viền bo cắt ngang trực tiếp, gây cảm giác chấm bị lồi hoặc dính bết vào viền.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Layered Base Reset Invariant**: Mọi CSS reset toàn cục (`* { box-sizing: border-box; }`) BẮT BUỘC phải được bọc trong `@layer base` để không bao giờ đè lên `@layer utilities`. Tuyệt đối cấm đặt `* { padding: 0; margin: 0; }` trần bên ngoài layer.
+  2. **Geometry Clearance >= 1.5R Invariant**: Khoảng cách từ phần tử con ngoài cùng tới mép thẻ có bo góc bắt buộc phải lớn hơn bán kính bo góc tối thiểu 1.5 lần ($d \ge 1.5 \times R$). Với `rounded-xl` ($R = 12\text{px}$), khoảng cách vật lý thực tế đạt được sau khi khôi phục padding là $d = 10\text{px} \ (\text{card } p-2.5) + 8\text{px} \ (\text{clusters } px-2) + 2\text{px} \ (\text{border}) = \mathbf{20\text{px}}$ ($20\text{px} > 12\text{px}$), đưa toàn bộ 22 chấm BĐS lùi sâu an toàn vào vùng phẳng của thẻ.
+  3. **Empirical Measurement Verification**: Mọi nghiệm thu bố cục nhạy cảm phải đo đạc trực tiếp qua CDP Bounding Box trên trình duyệt thật (Edge/Chrome headless), cấm khẳng định chỉ dựa vào chuỗi class trong JSDOM.
+- **Traceability**: `[TC-193.18/MSS]`, `src/client/index.css`, `src/client/ui/player_card.tsx`, `scripts/capture_imp193_verification.ts`, `docs/reports/uat/screenshots/imp193/imp193_01_mobile_dock_and_player_card.jpg`.
+
+---
+
+### 268. [UI/NARRATIVE/FINANCE] Bất Biến Ngữ Nghĩa Dòng Tiền Tự Nhiên & Đồng Bộ Hóa Ngân Sách Kế Hoạch (Natural Financial Narrative & Plan Budget SSOT Invariant - IMP-194)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Phân Mảnh Ngữ Nghĩa & Tranh Chấp Chiều Ngang (Semantic Fragmentation & Horizontal Squeeze Trap)*:
+     Khi đặt `[Tên người chơi]` và `[Pill số tiền]` chung một hàng ngang trên mobile (< 390px), tên bị bóp nghẹt (`max-w-[85px]`) dẫn đến bị cắt cụt (`Đại Gia Sài ..`). Đồng thời việc đẩy hành động xuống hàng 2 làm câu văn bị xé làm 2 nửa rời rạc, mắt người chơi phải đọc zíc-zắc và tự chắp vá logic dòng tiền.
+  2. *Bẫy Hoán Đổi Vai Trò M&A Đối Kháng (M&A Actor Inversion Trap)*:
+     Trong giao dịch M&A buyout, hệ thống phát 2 badge: Bên mua bị phạt tiền (`Penalty`), Bên bán nhận bồi hoàn (`Reward`). Nếu kế hoạch chỉ dùng template cứng ("A chi X Tr. thâu tóm M&A từ B"), nạn nhân bị thâu tóm sẽ bị hiển thị thông báo ngược là "chi tiền thâu tóm bên mua".
+  3. *Bẫy Mâu Thuẫn Ngân Sách Kế Hoạch (Plan Budget SSOT Divergence Trap)*:
+     Khi kế hoạch ghi nhận trần Tier toàn cục (400 LOC) ở bảng ngân sách nhưng bài test hợp đồng Station 1 lại assert trần hẹp hơn (250 LOC), sự không đồng nhất này tạo ra điểm mù nguy hiểm khiến implementer bị fail test dù vẫn tuân thủ bảng ngân sách.
+  4. *Bẫy Biến Chết Sau Tái Cấu Trúc (Dead Code & noUnusedLocals Trap)*:
+     Khi thay thế cơ chế styling (dùng `narrative.isPositive` thay cho `isReward`), nếu không dọn sạch các biến cũ (`const isReward = item.type === ...`), trình biên dịch TypeScript ở chế độ nghiêm ngặt (`noUnusedLocals: true`) sẽ báo lỗi biên dịch `TS6133`.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Natural Narrative Syntax Invariant**: Mọi thông báo giao dịch tài chính bắt buộc tuân theo cú pháp câu tự nhiên hoàn chỉnh:
+     $$\mathbf{[Chủ\ thể\ A]} \ \mathbf{[Động\ từ]} \ \mathbf{[Pill\ Số\ tiền\ X]} \ \mathbf{[cho/vào\ Đối\ tượng\ B]} \ (\mathbf{Chi\ tiết\ C})$$
+     Pill số tiền được nhúng trực tiếp sau động từ hành động (`trả`, `nộp`, `vay`, `nhận`), loại bỏ hoàn toàn việc bóp nghẹt tên người chơi.
+  2. **Two-Sided Buyout Symmetry**: M&A Buyout bắt buộc phân định:
+     - Bên mua: `[A] chi [X Tr.] thâu tóm M&A từ [B] ([Ô])`
+     - Bên bán: `[B] nhận [X Tr.] bồi hoàn M&A từ [A] (Chuyển nhượng [Ô])`
+  3. **Plan Budget SSOT Invariant**: Mọi con số trần LOC trong Bảng ngân sách kế hoạch và trong bài test hợp đồng Trạm 1 bắt buộc phải khớp nhau 100% về mặt giá trị SSOT trước khi khởi chạy Trạm 1.
+  4. **Subtractive Cleanliness Invariant**: Khi chuyển dịch cơ chế logic sang DTO mới, bắt buộc dọn dẹp sạch sẽ 100% các biến trung gian cũ, cấm để lại biến chết vi phạm `noUnusedLocals`.
+- **Traceability**: `[TC-194.01..18/MSS]`, `[UC-IMP194]`, `src/client/ui/transaction_narrative.ts`, `src/client/ui/floating_numbers.tsx`, `tests/contracts/imp194_natural_narrative_floating_badges.test.ts`.
+

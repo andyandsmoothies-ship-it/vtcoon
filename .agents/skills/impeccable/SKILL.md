@@ -56,6 +56,8 @@ Kỹ năng **Impeccable** nâng chuẩn thiết kế đồ họa 2D lên tầm t
      - `first-viewport-column-overflow` (cột cao đẩy trôi footer hành động hoặc tràn quá viewport fold).
      - `cramped-padding` & `text-overflow` (nội dung tràn viền hoặc viền quá sát < 8px trên mobile hẹp mà thiếu truncate/min-w-0).
      - `nested-cards` (lồng ghép thẻ viền xám thừa thãi trên nền thẻ gây nhiễu thị giác).
+     - `unlayered-css-reset` (quy tắc CSS reset đặt ngoài `@layer base` làm triệt tiêu `@layer utilities`).
+     - `corner-clearance-violation` (khoảng cách phần tử con tới mép viền bo góc nhỏ hơn bán kính cong $R$, gây hiện tượng dính hoặc chạm mép viền bo cong).
   3. Kiểm tra tính khả dụng và trợ năng: Kích thước vùng bấm tối thiểu 44x44px (`min-h-[44px] min-w-[44px]`), trạng thái focus-visible đầy đủ (`focus-visible:ring-2`), độ tương thích đa màn hình từ `@360px` đến `@1440px`.
 
 ### 3. `/impeccable polish` - Nâng Cấp Xúc Giác Thượng Lưu

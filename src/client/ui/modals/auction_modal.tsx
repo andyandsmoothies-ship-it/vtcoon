@@ -24,7 +24,7 @@ export interface AuctionModalProps {
   readonly isForeclosure?: boolean;
   readonly isFireSale?: boolean;
   readonly insolvencyPlayerId?: string;
-  readonly playersInfo?: Record<string, PlayerInfo>;
+  readonly playersInfo?: Record<string, Partial<PlayerInfo>>;
   readonly levelMap?: Record<number, number>;
   readonly onBid?: (newAmount: number) => void;
   readonly onPass?: () => void;
@@ -315,7 +315,7 @@ export function AuctionModal({
                           </span>
                         )}
                       </div>
-                      <span className="font-mono text-xs font-bold shrink-0">{formatCurrency(p.balance)}</span>
+                      <span className="font-mono text-xs font-bold shrink-0">{formatCurrency(p.balance ?? 0)}</span>
                     </div>
                   );
                 })

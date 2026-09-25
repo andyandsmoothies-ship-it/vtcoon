@@ -180,7 +180,7 @@ export function PlayerCard({
       {/* Dòng 3: Dải 22 chấm BĐS trải đều 100% bề ngang theo 8 cụm màu */}
       <span className="sr-only">BĐS:</span>
       <div
-        className="flex items-center justify-between w-full pt-1.5 pb-0.5 border-t border-slate-300 select-none"
+        className="flex items-center justify-between w-full px-2 pt-1.5 pb-0.5 border-t border-slate-300 select-none"
         data-testid="player-property-clusters"
       >
         {PROPERTY_CLUSTERS.map(({ group, cells }) => (

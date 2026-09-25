@@ -18,14 +18,15 @@ Never claim UI work is correct without visual evidence. Browser automation makes
 1. **Navigate** to the page under test using browser automation
 2. **Screenshot** the current state — embed in walkthrough artifact
 3. **Inspect DOM** to verify structure matches expectations (correct elements, classes, attributes)
-4. **Record a walkthrough** of the key user flow (if multi-step interaction)
-5. **Embed evidence** in a walkthrough artifact with screenshots and recordings
+4. **Spot-inspect image** via `view_file` at the exact requested coordinates/element (clipping, occlusion, alignment)
+5. **Record a walkthrough** of the key user flow (if multi-step interaction)
+6. **Embed evidence** in a walkthrough artifact with screenshots and recordings
 
 ## Quick Reference
 
 | What to verify | Tool | Output |
 |---------------|------|--------|
-| Visual appearance | Screenshot | `![description](/path/to/screenshot.jpg)` |
+| Visual appearance | Screenshot + `view_file` spot-check | `![description](/path/to/screenshot.jpg)` |
 | DOM structure | Inspect elements | Element presence, attributes, classes |
 | User flow | Recording | Embedded video in artifact |
 | Responsive layout | Screenshot at viewport | Multiple screenshots at different widths |
@@ -37,8 +38,8 @@ Never claim UI work is correct without visual evidence. Browser automation makes
 | Not waiting for page load before screenshot | Wait for key elements to be visible |
 | Checking only one viewport size | Test at desktop (1280px) and mobile (375px) minimum |
 | Visual-only verification (no DOM check) | Always inspect DOM structure — visual can hide broken markup |
-| Forgetting to embed evidence | Every claim needs a screenshot or recording in the artifact |
-| Saying "looks correct" without proof | Take the screenshot. Embed it. Let the user judge. |
+| Submitting screenshot without looking | Agent must `view_file` the screenshot and check target element before user delivery |
+| Saying "looks correct" without proof | Take screenshot, inspect target spot via `view_file`. Verify pixels before claiming done |
 
 **Evidence classification in artifacts:** Use GitHub-style alerts:
 - `> [!TIP]` for passing checks

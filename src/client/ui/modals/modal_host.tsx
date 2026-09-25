@@ -16,10 +16,8 @@ import { BotTradeOfferModal } from './bot_trade_offer_modal';
 import { CompulsoryBuyoutModal } from './compulsory_buyout_modal';
 import { AudioEngine } from '../../audio/audio_engine';
 import { SoundEffect } from '../../audio/audio_types';
-import { formatCurrency } from '../ui_helpers';
 import type { PlayerIntent } from '../../../server/intent_dispatcher';
 import { getDeedDisplayInfo } from './modal_helpers';
-import { resolveHoseInvestment } from '../../../domain/event_card_engine';
 import { BOARD_CONFIG } from '../../../domain/board_config';
 import { useLobbyStore } from '../../store/lobby_store';
 
@@ -179,31 +177,19 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
             hasMonopoly={hasMonopoly}
             upgradeBlockedReason={upgradeBlockedReason}
             downgradeBlockedReason={downgradeBlockedReason}
+            buyerBalance={myPlayer?.balance ?? 0}
+            buyerId={myId}
+            allPlayers={playersInfo}
             onBuy={() => {
               AudioEngine.playSfx(SoundEffect.BUY_PROPERTY);
               onIntent?.({ type: 'INTENT_BUY_PROPERTY' });
               closeModal();
             }}
-            onUpgrade={() => {
-              onIntent?.({ type: 'INTENT_UPGRADE', cellIndex: payload.cellIndex });
-              closeModal();
-            }}
-            onDowngrade={() => {
-              onIntent?.({ type: 'INTENT_DOWNGRADE', cellIndex: payload.cellIndex });
-              closeModal();
-            }}
-            onMortgage={() => {
-              onIntent?.({ type: 'INTENT_MORTGAGE', cellIndex: payload.cellIndex });
-              closeModal();
-            }}
-            onRedeem={() => {
-              onIntent?.({ type: 'INTENT_REDEEM', cellIndex: payload.cellIndex });
-              closeModal();
-            }}
-            onPass={() => {
-              onIntent?.({ type: 'INTENT_DECLINE' });
-              closeModal();
-            }}
+            onUpgrade={() => { onIntent?.({ type: 'INTENT_UPGRADE', cellIndex: payload.cellIndex }); closeModal(); }}
+            onDowngrade={() => { onIntent?.({ type: 'INTENT_DOWNGRADE', cellIndex: payload.cellIndex }); closeModal(); }}
+            onMortgage={() => { onIntent?.({ type: 'INTENT_MORTGAGE', cellIndex: payload.cellIndex }); closeModal(); }}
+            onRedeem={() => { onIntent?.({ type: 'INTENT_REDEEM', cellIndex: payload.cellIndex }); closeModal(); }}
+            onPass={() => { onIntent?.({ type: 'INTENT_DECLINE' }); closeModal(); }}
             ownedProperties={myPlayer?.ownedProperties}
             onSelectCell={(nextIdx) => updateModalPayload<'deed'>({ cellIndex: nextIdx })}
             onClose={closeModal}

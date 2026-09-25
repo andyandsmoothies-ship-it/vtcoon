@@ -13,7 +13,7 @@ export interface AuctionDistrictCardProps {
   readonly cellIndex: number;
   readonly currentBid: number;
   readonly myId?: string;
-  readonly playersInfo?: Record<string, PlayerInfo>;
+  readonly playersInfo?: Record<string, Partial<PlayerInfo>>;
   readonly levelMap?: Record<number, number>;
   readonly isForeclosure?: boolean;
   readonly badgeMaxWidth?: string;
@@ -69,8 +69,11 @@ function renderCellChip(cell: DistrictCellChip): React.ReactElement {
           {cell.name}
         </span>
         {cell.level > 0 && (
-          <span className="font-mono text-[11px] font-bold px-1 py-0.5 rounded bg-amber-200 text-amber-900 shrink-0">
-            C{cell.level}
+          <span
+            className="text-[11px] font-bold px-1 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300 shrink-0 inline-flex items-center gap-0.5"
+            title={`Cấp công trình: ${cell.level}`}
+          >
+            🏠 {cell.level}
           </span>
         )}
       </div>

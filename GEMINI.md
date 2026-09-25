@@ -13,6 +13,7 @@
   - Living / Integration Tests: Max 600 LOC (isolated unit tests <= 300 LOC; tolerance <= 650 LOC for suites >= 16 atomic tests).
   - Functions: Max 30 LOC, Cyclomatic Complexity <= 5 (logic warns at 50 SLOC, fails at 80 SLOC; declarative JSX/textures exempt).
   - Pre-Coding Delta LOC: Any target file >= 300 LOC MUST include `[Current + Delta = Expected]` calculation. If Tier 1 `Expected > 400` or Tier 2 `Expected > 480`, Task 1 MUST extract submodules before adding features. Declarative Tailwind JSX layouts are exempt from premature extraction if custom hooks logic <= 50 LOC.
+  - Plan Budget SSOT Alignment: All slice-specific LOC ceilings declared in task plans and contract test assertions MUST strictly match (zero divergence between plan tables and test limits).
   - Subtractive Refactoring: When replacing states, listeners, or flags, plans MUST explicitly specify obsolete code to delete.
   - Anti-Regression Guard: Code golf, line stripping, and fake no-op stubs are strictly forbidden. Files under 300 LOC must stay intact.
 - **Slice Scope Confinement**: Implement only flows in current ticket. Log deferred flows in Tech Debt Ledger.
@@ -47,6 +48,7 @@
 - **Asynchronous Stream Contract & Event Isolation**: In event-driven/WebSocket systems, tests MUST filter events by type (`waitForMessageType`) or assert full event sequences. NEVER assert positional indices (`messages[0]`) on multi-event lifecycle transitions. Production code MUST NOT suppress valid upstream domain events solely to satisfy naive single-message test listeners.
 - **Zero-Blank-Material Invariant**: Plain untextured `<meshBasicMaterial />` or `<meshStandardMaterial />` on badges, flagpoles, signs, or paintings without real texture (`map`) is forbidden. Hidden DOM attributes (`data-*`) cannot bypass WebGL rendering verification.
 - **2D UI Craft Quality Gate**: UI changes must pass `npm run lint:ui` with 0 violations (4 anti-patterns: `border-accent-on-rounded`, `bounce-easing`, `gray-on-color`, `gradient-text`). Audit via `ui-craft-reviewer`.
+- **Tailwind Cascade & Unlayered CSS Reset Prohibition**: All global CSS resets MUST reside strictly inside `@layer base`. Unlayered CSS rules (such as `* { padding: 0; }` outside layers) that annihilate `@layer utilities` are strictly forbidden. UI layout regressions must be verified via physical DOM bounding boxes (CDP) on real mobile viewports, never solely reliant on JSDOM class string assertions.
 - **Root-Level Sticky Action Footer**: Primary modal action footers (Submit, Confirm, Bid, Close) MUST be direct children of the root modal container (`sticky bottom-0`), NEVER nested within multi-column sub-trees to prevent broken mobile sticky context.
 - **Mobile 360px & Cross-Browser Ergonomics Triad**:
   - *Dynamic Viewport*: Scrollable dialogs/modals MUST use `max-h-[90dvh]` (never raw `vh`) to prevent mobile browser URL/toolbars from obscuring bottom action controls.
@@ -57,7 +59,7 @@
 - **Rule "Kill The Premise" (2-Fix Limit)**: If a feature fails reference quality after 2 fix rounds, FORBID a 3rd micro-fix. Trigger Architectural Premise Challenge to replace flawed premise.
 - **Single Cohesive World Invariant**: Entire game lifecycle belongs to ONE world: Outdoor Sunny Island Metropolis diorama. Zero dark isolated rooms.
 - **Anti-Programmer-Art Primitive Ban**: Raw unlit geometric primitives (`boxGeometry`, `cylinderGeometry`) forbidden. Use outdoor sunlight, saturated palette, and beveled toy-like geometry.
-- **Verification Screenshot Invariant**: Save all verification and UAT screenshots as `.jpg` (Quality 85-92).
+- **Visual Target Spot-Inspection Invariant**: Save verification screenshots as `.jpg` (Quality 85-92). After any UI change, agent/reviewer MUST call `view_file` on the target image to inspect the exact requested coordinates/element (no text clipping, no border collision, no neighbor occlusion) before claiming completion. JSDOM/test string pass without visual inspection is strictly forbidden.
 - **Container Health & Timeout Safety**: Always use timeout flags (`curl -m 5 --connect-timeout 3`) and initial delay (`timeout /t 6 /nobreak >nul`) during health checks and container start periods.
 - **Active Domain Memory & JIT Inspection (Zero-Bloat)**: Pre-flight lookup of `docs/domain/gotchas.md` is mandatory before modifying code in any domain (`[FSM]`, `[3D]`, `[UI]`, `[NET]`, `[BOT]`, `[UAT]`). To prevent context bloat, agents MUST ONLY read the Domain Index (lines 1-20) or use targeted `grep_search`. Reading the entire file via `view_file` is strictly forbidden. Every resolved defect must yield a numbered invariant in `docs/domain/gotchas.md` only AFTER Station 2.5 Scout multi-round physical verification (zero speculative gotchas).
 
@@ -66,7 +68,7 @@
 A task is COMPLETE only when:
 1. Automated tests pass Adversarial Inversion, include traceability tags (`[UC-XXX/MSS]` or `[UC-XXX/A#]`), and pass fixture contract tests against SSOT.
 2. Code passes 6 Slop Red Flags audit (least new structure, complexity <= 5, visual token compliance, zero code golf). UI passes `npm run lint:ui` with 0 violations.
-3. Reviewer gates approve via physical disk inspection (`spec-reviewer` verifies 100% spec reconciliation; `code-reviewer` verifies code quality/observability; `game-3d-visual-critic` verifies 3D visual gate; `ui-craft-reviewer` verifies 2D craft gate; implementer never approves own code; zero approvals without disk evidence).
+3. Reviewer gates approve via physical disk inspection (`spec-reviewer` verifies 100% spec reconciliation; `code-reviewer` verifies code quality/observability; `game-3d-visual-critic` verifies 3D visual gate; `ui-craft-reviewer` verifies 2D craft gate via screenshot `view_file`; implementer never approves own code; zero approvals without disk evidence).
 4. Progress updated in `docs/epics/[epic]/_epic_ledger.md` (including Tech Debt Ledger).
 5. Empirical domain learnings recorded in `docs/domain/gotchas.md` (distilled from multi-round Scout verification with 3 layers: initial illusion, scout finding, verified invariant).
 6. Production resilience verified: defense against invalid intents, treasury conservation invariant, safe disconnection grace period, Turn N+1 state teardown, and explicit tombstone payload delivery.
