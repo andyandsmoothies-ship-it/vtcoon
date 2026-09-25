@@ -128,7 +128,7 @@ describe('[UC-IMP191] Financial Flow Transparency & Badge Clarity Contract Suite
         targetPlayerName: 'AI Alpha',
         amount: -200,
         cellIndex: 3,
-      } as unknown as Parameters<typeof useActivityStore.getState.addActivityLog>[0]);
+      } as unknown as Parameters<ReturnType<typeof useActivityStore.getState>['addActivityLog']>[0]);
 
       const logs = useActivityStore.getState().activityLogs;
       const entry = logs[logs.length - 1];
@@ -145,6 +145,7 @@ describe('[UC-IMP191] Financial Flow Transparency & Badge Clarity Contract Suite
       };
       const delta: DeltaPayload = {
         tick: 1,
+        cells: [],
         players: [{ id: 'human_p1', position: 10, balance: 9500 }],
       };
       const prevState = createMockGameState({
@@ -202,6 +203,7 @@ describe('[UC-IMP191] Financial Flow Transparency & Badge Clarity Contract Suite
       };
       const delta: DeltaPayload = {
         tick: 2,
+        cells: [],
         players: [{ id: 'human_p1', position: 4, balance: 9900 }],
       };
 
@@ -220,6 +222,7 @@ describe('[UC-IMP191] Financial Flow Transparency & Badge Clarity Contract Suite
       };
       const delta: DeltaPayload = {
         tick: 3,
+        cells: [],
         players: [{ id: 'human_p1', position: 10, balance: 9500 }],
       };
       const prevState = createMockGameState({
@@ -305,6 +308,7 @@ describe('[UC-IMP191] Financial Flow Transparency & Badge Clarity Contract Suite
       };
       const delta: DeltaPayload = {
         tick: 4,
+        cells: [],
         players: [{ id: 'human_p1', position: 10, balance: 4500 }],
       };
 

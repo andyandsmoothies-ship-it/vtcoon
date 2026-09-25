@@ -157,7 +157,7 @@ export const MarketEventTicker: React.FC<MarketEventTickerProps> = ({
             data-testid={`market-ticker-item-${cardType}`}
             onClick={handleCardClick}
             title="Bấm để xem chi tiết thẻ"
-            className="w-full pointer-events-auto cursor-pointer flex flex-col gap-1 px-3 py-1.5 sm:py-2 bg-[#FFFDF8] border-2 border-slate-900 rounded-xl shadow-[0_3px_0_0_#0f172a] hover:border-amber-500 hover:shadow-[0_4px_0_0_#d97706] text-slate-900 transition-all duration-150 animate-in fade-in slide-in-from-top-1"
+            className="w-full pointer-events-auto cursor-pointer flex flex-col gap-1 px-3.5 py-2 sm:py-2.5 bg-[#FFFDF8] border-2 border-slate-900 rounded-xl shadow-[0_3px_0_0_#0f172a] hover:border-amber-500 hover:shadow-[0_4px_0_0_#d97706] text-slate-900 transition-all duration-150 animate-in fade-in slide-in-from-top-1"
           >
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -181,7 +181,7 @@ export const MarketEventTicker: React.FC<MarketEventTickerProps> = ({
 
             <p
               data-testid="market-ticker-effect-summary"
-              className="text-[11px] sm:text-xs text-slate-600 font-semibold leading-tight line-clamp-3 pl-6 sm:pl-7 text-left"
+              className="text-[11px] sm:text-xs text-slate-600 font-semibold leading-tight line-clamp-3 pl-6 sm:pl-7 pb-0.5 text-left"
             >
               {effectSummary}
             </p>

@@ -213,7 +213,7 @@ export function AdaptiveCinematicCamera({
     if ('isPerspectiveCamera' in camera && (camera as PerspectiveCamera).isPerspectiveCamera) {
       const perspCam = camera as PerspectiveCamera;
       perspCam.fov += (targetState.fov - perspCam.fov) * lerpFactor;
-      perspCam.updateProjectionMatrix();
+      if (Math.abs(targetState.fov - perspCam.fov) > 0.01) perspCam.updateProjectionMatrix();
     } else {
       const orthoCam = camera as OrthographicCamera;
       const isBigEvent = activeModal !== null || isPawnMoving;
@@ -405,9 +405,9 @@ export function GameCanvas({
       >
         {!isSSR && (
           <>
-            <React.Suspense fallback={null}>
-              <Environment preset="city" />
-            </React.Suspense>
+            {!isMobileDevice && (
+              <React.Suspense fallback={null}><Environment preset="city" /></React.Suspense>
+            )}
             <WebGLContextWatcher />
             <PerfTelemetryTracker />
 
@@ -421,7 +421,7 @@ export function GameCanvas({
                 <GameBoard />
                 <PawnAnimator players={effectivePlayers} />
                 {/* <PostProcessingPipeline /> */}
-                <PostProcessingPipeline isMobile={isMobileDevice} />
+                <PostProcessingPipeline isMobile={isMobileDevice} enabled={!isMobileDevice} />
               </>
             ) : (
               <>
@@ -434,7 +434,7 @@ export function GameCanvas({
                 <EventCard3D />
                 <Coronation3DStage />
                 {/* <PostProcessingPipeline /> */}
-                <PostProcessingPipeline isMobile={isMobileDevice} />
+                <PostProcessingPipeline isMobile={isMobileDevice} enabled={!isMobileDevice} />
               </>
             )}
           </>

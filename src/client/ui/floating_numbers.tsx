@@ -184,7 +184,7 @@ export function MilestoneBanner({ item }: { readonly item: FloatingTextItem }): 
     : 'border-amber-500 shadow-[0_4px_0_0_#d97706]';
 
   const bannerClasses = [
-    'pointer-events-auto cursor-pointer flex items-center gap-2.5 sm:gap-3 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-2xl border-2',
+    'pointer-events-auto cursor-pointer flex items-center gap-2.5 sm:gap-3 px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-2xl border-2',
     'bg-[#FFFDF8] text-slate-900 select-none animate-in fade-in slide-in-from-top-3 duration-200',
     'max-w-[88vw] sm:max-w-[380px]',
     borderShadowStyle,
@@ -238,7 +238,7 @@ export function MilestoneBanner({ item }: { readonly item: FloatingTextItem }): 
           </span>
         </div>
         {descText && (
-          <span className="truncate min-w-0 text-[11px] sm:text-xs text-slate-600 font-semibold leading-tight mt-0.5">
+          <span className="truncate min-w-0 text-[11px] sm:text-xs text-slate-600 font-semibold leading-tight mt-0.5 pt-0.5 pb-0.5">
             {descText}
           </span>
         )}
@@ -271,7 +271,7 @@ export function FloatingBadge({ item }: { readonly item: FloatingTextItem }): Re
       role="status"
       aria-live="polite"
       data-testid="contextual-transaction-badge"
-      className="pointer-events-none flex flex-col gap-1.5 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl border-2 border-slate-900 bg-[#FFFDF8] select-none shadow-[0_3px_0_0_#0f172a] animate-in fade-in duration-200 max-w-[92vw] sm:max-w-none"
+      className="pointer-events-none flex flex-col gap-1.5 px-3.5 sm:px-5 py-2.5 sm:py-3.5 rounded-2xl border-2 border-slate-900 bg-[#FFFDF8] select-none shadow-[0_3px_0_0_#0f172a] animate-in fade-in duration-200 max-w-[92vw] sm:max-w-none"
     >
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
@@ -299,7 +299,7 @@ export function FloatingBadge({ item }: { readonly item: FloatingTextItem }): Re
         </span>
       </div>
       <div
-        className="text-xs sm:text-sm font-bold text-slate-800 text-left pl-6 sm:pl-7 pb-0.5 leading-snug line-clamp-2 break-words"
+        className="text-[11px] sm:text-xs font-bold text-slate-800 text-left pl-5 sm:pl-7 pt-0.5 pb-1 leading-snug line-clamp-2 break-words"
         title={item.title ?? reason}
       >
         {reason}

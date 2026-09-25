@@ -208,7 +208,7 @@ export function ActionDock({
 
   return (
     <nav
-      className="relative pointer-events-auto flex items-center gap-2 md:gap-3 bg-[#FFFDF8] border-2 border-slate-900 shadow-[0_4px_0_0_#0f172a] rounded-2xl p-2.5 px-5 max-w-[calc(100vw-1rem)] overflow-x-auto no-scrollbar"
+      className="relative pointer-events-auto flex items-center gap-1.5 min-[360px]:gap-2 md:gap-3 bg-[#FFFDF8] border-2 border-slate-900 shadow-[0_4px_0_0_#0f172a] rounded-2xl p-1.5 sm:p-2.5 px-2.5 min-[360px]:px-3.5 sm:px-5 max-w-[calc(100vw-1rem)] overflow-x-auto no-scrollbar"
       aria-label="Thanh điều khiển tác vụ"
     >
       {/* Chip Thông Báo Ngữ Cảnh Độc Quyền (Actionable Guidance Chip) */}
@@ -235,7 +235,7 @@ export function ActionDock({
         onClick={handleRollClick}
         disabled={isRollDisabled}
         data-testid="roll-dice-btn"
-        className={`min-h-[44px] flex items-center gap-2 px-5 py-2.5 rounded-2xl font-black text-white shadow-lg transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 ${
+        className={`min-h-[44px] flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 min-[360px]:px-4.5 sm:px-5 py-2.5 shrink-0 rounded-2xl font-black text-white shadow-lg transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 ${
           isRollDisabled
             ? 'bg-slate-200 text-slate-600 cursor-not-allowed border-2 border-slate-400 shadow-none'
             : `bg-gradient-to-b from-rose-500 via-red-600 to-red-700 hover:from-rose-400 hover:to-red-600 border-2 border-emerald-800 shadow-[0_4px_0_0_#064e3b] active:shadow-none active:translate-y-[3px] ${
@@ -318,7 +318,7 @@ export function ActionDock({
         aria-label="Quản lý và nâng cấp bất động sản"
         onClick={handleOpenManageProperty}
         disabled={isBankrupt}
-        className="min-w-[44px] min-h-[44px] flex items-center justify-center gap-1.5 px-4.5 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold border-2 border-blue-800 shadow-[0_4px_0_0_#0f172a] active:translate-y-[3px] disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+        className="w-11 h-11 min-w-[44px] min-h-[44px] sm:w-auto flex items-center justify-center p-0 sm:px-4.5 sm:py-2.5 gap-1.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold border-2 border-blue-800 shadow-[0_4px_0_0_#0f172a] active:translate-y-[3px] disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
       >
         <span aria-hidden="true">🏛️</span>
         <span className="hidden sm:inline">Quản Lý BĐS</span>
@@ -331,7 +331,7 @@ export function ActionDock({
         onClick={handleOpenTrade}
         disabled={isBankrupt || isTradeFrozen}
         title={isTradeFrozen ? 'Thị trường đang đóng băng giao dịch' : undefined}
-        className={`min-w-[44px] min-h-[44px] flex items-center justify-center gap-1.5 px-4.5 py-2.5 rounded-2xl font-bold border-2 transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+        className={`w-11 h-11 min-w-[44px] min-h-[44px] sm:w-auto flex items-center justify-center p-0 sm:px-4.5 sm:py-2.5 gap-1.5 rounded-2xl font-bold border-2 transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
           isBankrupt || isTradeFrozen
             ? 'bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed opacity-50'
             : 'bg-amber-500 hover:bg-amber-600 text-white border-amber-700 shadow-[0_4px_0_0_#0f172a] active:translate-y-[3px]'
@@ -355,7 +355,7 @@ export function ActionDock({
             useGameStore.getState().openModal('masterplan', {});
           }
         }}
-        className={`min-w-[44px] min-h-[44px] flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-2xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 font-bold border-2 border-slate-900 shadow-[0_4px_0_0_#0f172a] active:translate-y-[3px] transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+        className={`w-11 h-11 min-w-[44px] min-h-[44px] sm:w-auto flex items-center justify-center p-0 sm:px-4 sm:py-2.5 gap-1.5 rounded-2xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 font-bold border-2 border-slate-900 shadow-[0_4px_0_0_#0f172a] active:translate-y-[3px] transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
           isHeatmapActive ? 'ring-2 ring-amber-400 bg-amber-100 shadow-[0_0_12px_rgba(245,158,11,0.5)]' : ''
         }`}
       >
@@ -376,7 +376,7 @@ export function ActionDock({
             ? 'Bạn vừa đổ đôi, hãy tung xúc xắc tiếp để hoàn thành lượt'
             : undefined
         }
-        className={`min-w-[44px] min-h-[44px] flex items-center justify-center gap-1.5 px-4.5 py-2.5 rounded-2xl transition-all text-sm font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
+        className={`w-11 h-11 min-w-[44px] min-h-[44px] sm:w-auto flex items-center justify-center p-0 sm:px-4.5 sm:py-2.5 gap-1.5 rounded-2xl transition-all text-sm font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
           isEndDisabled
             ? isInsolvent
               ? 'bg-rose-100 text-rose-500 border-2 border-rose-300 cursor-not-allowed'
