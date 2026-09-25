@@ -8,6 +8,7 @@ export interface TitleDeedArtShowcaseProps {
   readonly isUtility: boolean;
   readonly showImage: boolean;
   readonly onImageError?: () => void;
+  readonly className?: string;
 }
 
 export function TitleDeedArtShowcase({
@@ -18,6 +19,7 @@ export function TitleDeedArtShowcase({
   isUtility,
   showImage,
   onImageError,
+  className,
 }: TitleDeedArtShowcaseProps): React.ReactElement {
   const [isLoaded, setIsLoaded] = React.useState(false);
 
@@ -27,7 +29,9 @@ export function TitleDeedArtShowcase({
 
   return (
     <div
-      className="relative w-full h-32 sm:h-36 rounded-xl bg-[#F7F2E7] border border-slate-300 overflow-hidden flex items-center justify-center p-2 shadow-inner"
+      className={`relative rounded-xl bg-[#F7F2E7] border border-slate-300 overflow-hidden flex items-center justify-center p-1.5 sm:p-2 shadow-inner ${
+        className ?? 'w-full h-20 sm:h-32'
+      }`}
       data-testid="diorama-art-banner"
     >
       {showImage && tileAssetUrl ? (

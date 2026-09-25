@@ -125,4 +125,28 @@ describe('[TC-AUC-ERG/MSS] Mobile Ergonomics & Visual Polish for Auction and Tit
     expect(html).toContain('max-h-[90dvh]');
     expect(html).not.toContain('max-h-[90vh]');
   });
+
+  it('[TC-AUC-ERG.07/MSS] title_deed_modal: Bố cục Zero-Scroll Tabletop tích hợp hàng ngang Hero Media và biểu phí compact', () => {
+    const html = renderToStaticMarkup(
+      React.createElement(TitleDeedModal, {
+        cellIndex: 5,
+        canBuy: true,
+        isOwned: false,
+        buyerBalance: 18000,
+        buyerId: 'p1',
+      })
+    );
+
+    // 1. Hero row đặt ngang ảnh BĐS và khối giá niêm yết
+    expect(html).toContain('flex flex-row gap-2');
+    expect(html).toContain('w-20 h-20');
+
+    // 2. Biểu phí theo số ga sở hữu sử dụng compact padding px-2 py-1
+    expect(html).toContain('px-2 py-1');
+
+    // 3. Toàn bộ 4 ga và nút mua hiển thị trọn vẹn
+    expect(html).toContain('1 Bến / Ga');
+    expect(html).toContain('4 Bến / Ga');
+    expect(html).toContain('Mua BĐS (2.000 Tr.)');
+  });
 });

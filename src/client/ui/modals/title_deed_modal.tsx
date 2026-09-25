@@ -140,7 +140,7 @@ export function TitleDeedModal({
 
   return (
     <div
-      className="relative w-full max-w-md max-h-[90dvh] md:max-h-[85vh] bg-[#FFFDF8] border-2 border-slate-900 rounded-2xl shadow-[0_6px_0_0_#0f172a] ring-2 ring-slate-900/10 overflow-hidden flex flex-col pointer-events-auto animate-in zoom-in-90 fade-in duration-200 ease-out select-none p-5 text-slate-900"
+      className="relative w-full max-w-md max-h-[90dvh] md:max-h-[85vh] bg-[#FFFDF8] border-2 border-slate-900 rounded-2xl shadow-[0_6px_0_0_#0f172a] ring-2 ring-slate-900/10 overflow-hidden flex flex-col pointer-events-auto animate-in zoom-in-90 fade-in duration-200 ease-out select-none p-3.5 sm:p-5 text-slate-900"
       data-testid="title-deed-modal"
     >
       {/* Khung viền chỉ mực kép bên trong */}
@@ -234,26 +234,32 @@ export function TitleDeedModal({
       ))}
 
       {/* Thân thẻ cuộn mượt mà */}
-      <div className="relative z-10 flex-1 min-h-0 overflow-y-auto pr-1 p-4 space-y-3 text-xs md:text-sm text-slate-900">
-        <TitleDeedArtShowcase
-          tileAssetUrl={tileAssetUrl}
-          deedName={deed.name}
-          ribbonColor={ribbonColor}
-          isRailroad={isRailroad}
-          isUtility={isUtility}
-          showImage={showImage}
-          onImageError={() => setImageError(true)}
-        />
-
-        {/* Khối giá niêm yết & giá thế chấp */}
-        <div className="grid grid-cols-2 gap-2.5 bg-[#F7F2E7] p-2.5 rounded-xl border border-slate-300">
-          <div className="bg-white/90 p-2 rounded-lg border border-slate-200">
-            <span className="text-slate-600 block text-[11px] font-medium">Giá niêm yết</span>
-            <span className="text-emerald-700 font-extrabold text-sm">{formatCurrency(deed.price)}</span>
+      <div className="relative z-10 flex-1 min-h-0 overflow-y-auto pr-1 p-2 sm:p-4 space-y-2 sm:space-y-3 text-xs md:text-sm text-slate-900">
+        {/* Hàng Hero Media & Giá niêm yết: Đặt ngang trên Mobile để tiết kiệm tối đa không gian thẳng đứng */}
+        <div className="flex flex-row gap-2 sm:gap-2.5 items-stretch">
+          <div className="w-20 h-20 sm:w-28 sm:h-28 shrink-0">
+            <TitleDeedArtShowcase
+              tileAssetUrl={tileAssetUrl}
+              deedName={deed.name}
+              ribbonColor={ribbonColor}
+              isRailroad={isRailroad}
+              isUtility={isUtility}
+              showImage={showImage}
+              onImageError={() => setImageError(true)}
+              className="w-full h-full"
+            />
           </div>
-          <div className="bg-white/90 p-2 rounded-lg border border-slate-200">
-            <span className="text-slate-600 block text-[11px] font-medium">Giá trị thế chấp</span>
-            <span className="text-amber-700 font-extrabold text-sm">{formatCurrency(deed.mortgageValue)}</span>
+
+          {/* Khối giá niêm yết & giá thế chấp */}
+          <div className="flex-1 grid grid-cols-2 gap-1.5 sm:gap-2.5 bg-[#F7F2E7] p-1.5 sm:p-2.5 rounded-xl border border-slate-300">
+            <div className="bg-white/90 p-1.5 sm:p-2 rounded-lg border border-slate-200 flex flex-col justify-center">
+              <span className="text-slate-600 block text-[10px] sm:text-[11px] font-medium leading-none mb-1">Giá niêm yết</span>
+              <span className="text-emerald-700 font-extrabold text-xs sm:text-sm">{formatCurrency(deed.price)}</span>
+            </div>
+            <div className="bg-white/90 p-1.5 sm:p-2 rounded-lg border border-slate-200 flex flex-col justify-center">
+              <span className="text-slate-600 block text-[10px] sm:text-[11px] font-medium leading-none mb-1">Giá trị thế chấp</span>
+              <span className="text-amber-700 font-extrabold text-xs sm:text-sm">{formatCurrency(deed.mortgageValue)}</span>
+            </div>
           </div>
         </div>
 

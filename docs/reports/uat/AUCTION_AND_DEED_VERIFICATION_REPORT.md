@@ -29,16 +29,27 @@
 - **Kiểm tra công thái học**:
   - **Zero-Scroll Tabletop**: Toàn bộ dữ liệu đưa ra quyết định đấu giá (Bục đấu giá 2.250 Tr., Thời gian 18s, Người dẫn đầu, Tình báo phân khu 3 ô đất, và Biểu phí thuê đất C0 / 2x / C3) cùng Cụm nút đặt giá (`+100 Tr.`, `+200 Tr.`, `+500 Tr.`, `AUTO-BID`, `Rút Lui`) hiển thị 100% TRỌN VẸN trên 1 màn hình nhìn (Above-the-fold) trên mobile 390px, người chơi không phải cuộn tay trong phiên đếm ngược!
 
-### Ảnh 3: Trang Mua Đất / Sổ Đỏ (`TitleDeedModal`)
-- **Đường dẫn**: [`title_deed_modal_verified.jpg`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/reports/uat/screenshots/imp193/title_deed_modal_verified.jpg)
+### Ảnh 3: Trang Mua Đất / Sổ Đỏ — Cảng HKQT Long Thành (Hạ Tầng 4 Ga) [Zero-Scroll Tabletop]
+- **Đường dẫn**: [`title_deed_modal_long_thanh_verified.jpg`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/reports/uat/screenshots/imp193/title_deed_modal_long_thanh_verified.jpg)
+- **Kiểm tra công thái học (Khắc phục triệt để lỗi cuộn lên cuộn xuống)**:
+  - `Hero Media Row`: Ảnh 3D Diorama sân bay (`w-20 h-20`) đặt nằm ngang cạnh khối [Giá niêm yết: 2.000 Tr. | Giá trị thế chấp: 1.000 Tr.], tiết kiệm ngay 115px chiều cao.
+  - `Purchase Decision Card`: Gom gọn dòng thanh khoản sau mua (`6.500 Tr. ➔ 4.500 Tr. [🟢 Dư Dả]`).
+  - `Biểu Phí Theo Số Ga Sở Hữu`: Cả 4 cấp bậc ga (`1 Ga: 500 Tr.`, `2 Ga: 1.000 Tr.`, `3 Ga: 2.000 Tr.`, `4 Ga: 4.000 Tr.`) hiển thị đầy đủ, sắc nét, không bị che khuất một phần nào.
+  - `Nút Hành Động`: Nằm trọn vẹn trên màn hình cùng toàn bộ thông tin trên, người chơi KHÔNG CẦN CUỘN TAY một pixel nào để ra quyết định mua.
+
+### Ảnh 4: Trang Mua Đất / Sổ Đỏ — Đô Thị Thành Phố (Bình Định C0..C3) [Zero-Scroll Tabletop]
+- **Đường dẫn**: [`title_deed_modal_property_verified.jpg`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/reports/uat/screenshots/imp193/title_deed_modal_property_verified.jpg)
 - **Kiểm tra công thái học**:
-  - Đã chuyển sang `max-h-[90dvh]`, cụm nút hành động chân modal `[MUA BĐS (1.800 TR.)]` và `[BỎ QUA]` nằm trọn vẹn phía trên thanh URL của Safari/Chrome di động, không bị che khuất.
-  - Bảng cước thuê và thẻ quyết định đầu tư hiển thị mạch lạc, không bị tràn viền.
+  - Tương tự ô hạ tầng, thẻ đô thị với 4 cấp bậc cước (`C0 Đất Nền: 180 Tr.`, `C1 Nhà Phố: 540 Tr.`, `C2 Khách Sạn: 1.440 Tr.`, `C3 Quần Thể Resort: 4.500 Tr.`) cùng tiến độ bộ màu quy hoạch (1/3 ➔ 2/3) lọt 100% Above-The-Fold trên mobile 390px.
 
 ---
 
 ## 3. Bản Kê Linter & Test Suite
 - `npm run lint:ui`: **0 anti-patterns** qua 184 files.
-- `vitest run tests/client/auction_and_title_deed_mobile_ergonomics.test.ts`: **6/6 tests passed**.
+- `vitest run tests/client/auction_and_title_deed_mobile_ergonomics.test.ts`: **7/7 tests passed**.
+- `vitest run tests/client/imp140_title_deed_ui_ux_and_preloading.test.ts`: **20/20 tests passed**.
+- `vitest run tests/client/phase3_visual_polish.test.ts`: **21/21 tests passed**.
+- `vitest run tests/client/property_purchase_decision.test.ts`: **16/16 tests passed**.
 - `vitest run tests/client/auction_modal*.test.ts`: **100% contract tests passed**.
+
 

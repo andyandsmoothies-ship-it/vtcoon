@@ -38,7 +38,7 @@ export function TitleDeedRentTable({
   const hasUpgrades = upgradeCosts.some((cost) => cost > 0);
 
   return (
-    <div className="bg-[#F7F2E7] rounded-xl border border-slate-300 p-3 space-y-2">
+    <div className="bg-[#F7F2E7] rounded-xl border border-slate-300 p-2 sm:p-3 space-y-1.5 sm:space-y-2">
       <div className="flex items-center justify-between">
         <p className="text-[11px] font-bold text-slate-900 uppercase tracking-wider">
           {isRailroad ? 'Biểu Phí Theo Số Ga Sở Hữu' : isUtility ? 'Phí Dịch Vụ Cơ Bản' : 'Biểu Phí Dừng Chân'}
@@ -47,10 +47,10 @@ export function TitleDeedRentTable({
       </div>
 
       {isUtility ? (
-        <div className="space-y-2 text-xs text-slate-900">
-          <div className="flex justify-between items-center p-2 rounded-lg bg-white/90 border border-slate-200">
+        <div className="space-y-1.5 sm:space-y-2 text-xs text-slate-900">
+          <div className="flex justify-between items-center p-1.5 sm:p-2 rounded-lg bg-white/90 border border-slate-200">
             <div className="flex items-center gap-2">
-              <span className="text-base" aria-hidden="true">⚡</span>
+              <span className="text-sm sm:text-base" aria-hidden="true">⚡</span>
               <span className="font-semibold text-slate-900">Phí cơ sở (1 trạm):</span>
             </div>
             <span className="font-bold text-slate-900">{formatCurrency(rents[0] ?? 0)}</span>
@@ -60,7 +60,7 @@ export function TitleDeedRentTable({
           </p>
         </div>
       ) : (
-        <div className="space-y-1.5">
+        <div className="space-y-1 sm:space-y-1.5">
           {rents.map((rent, idx) => {
             const tier = tiers[idx];
             const isMax = idx === 3;
@@ -75,14 +75,14 @@ export function TitleDeedRentTable({
             return (
               <div
                 key={tier ? tier.chip : idx}
-                className={`flex justify-between items-center p-2 rounded-xl border transition-all ${tierClass}`}
+                className={`flex justify-between items-center px-2 py-1 sm:p-2 rounded-lg sm:rounded-xl border transition-all ${tierClass}`}
               >
-                <div className="flex items-center gap-2">
-                  <span className="text-base" aria-hidden="true">
+                <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                  <span className="text-sm sm:text-base shrink-0" aria-hidden="true">
                     {tier?.icon}
                   </span>
                   <span
-                    className={`text-[10px] font-black px-1.5 py-0.5 rounded border ${
+                    className={`text-[9px] sm:text-[10px] font-black px-1 sm:px-1.5 py-0.2 sm:py-0.5 rounded border shrink-0 ${
                       isMax
                         ? 'bg-amber-200 text-amber-900 border-amber-400'
                         : 'bg-slate-100 text-slate-900 border-slate-300'
@@ -90,17 +90,17 @@ export function TitleDeedRentTable({
                   >
                     {tier?.chip}
                   </span>
-                  <div className="flex flex-col">
-                    <span className="font-bold text-xs text-slate-900">
+                  <div className="flex flex-col min-w-0">
+                    <span className="font-bold text-[11px] sm:text-xs text-slate-900 truncate">
                       {tier?.label}
                     </span>
-                    <span className="text-[10px] text-slate-600 font-medium">
+                    <span className="text-[9px] sm:text-[10px] text-slate-600 font-medium truncate">
                       {cost && cost > 0 ? `Nâng cấp: +${formatCurrency(cost)}` : tier?.sub}
                     </span>
                   </div>
                 </div>
-                <div className="flex flex-col items-end">
-                  <span className="font-black text-xs text-slate-900">
+                <div className="flex flex-col items-end shrink-0 pl-1">
+                  <span className="font-black text-[11px] sm:text-xs text-slate-900 font-mono">
                     {formatCurrency(
                       idx === 0 && hasMonopoly && !isRailroad && !isUtility
                         ? rent * 2
@@ -110,10 +110,10 @@ export function TitleDeedRentTable({
                     )}
                   </span>
                   {idx === 0 && hasMonopoly && !isRailroad && !isUtility && (
-                    <span className="text-[9px] font-extrabold text-emerald-700">x2 ĐỘC QUYỀN</span>
+                    <span className="text-[8px] sm:text-[9px] font-extrabold text-emerald-700">x2 ĐỘC QUYỀN</span>
                   )}
                   {idx === 3 && hasMonopoly && !isRailroad && !isUtility && (
-                    <span className="text-[9px] font-extrabold text-amber-700">x1.5 ĐỘC QUYỀN</span>
+                    <span className="text-[8px] sm:text-[9px] font-extrabold text-amber-700">x1.5 ĐỘC QUYỀN</span>
                   )}
                 </div>
               </div>

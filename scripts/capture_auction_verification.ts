@@ -275,14 +275,36 @@ async function main() {
     console.log('[Verification] Capturing Shot 2: Auction Modal Active Bidding...');
     await capturer.takeScreenshot('auction_modal_active_bidding_verified.jpg');
 
-    // SHOT 3: Title Deed Modal (canBuy: true)
-    console.log('[Verification] Opening Title Deed Modal...');
+    // SHOT 3: Title Deed Modal for Cảng HKQT Long Thành (cellIndex: 5 - exact user case)
+    console.log('[Verification] Opening Title Deed Modal (Long Thành Airport - Cell 5)...');
     await capturer.eval(`
       (() => {
         if (!window.__gameStore) return;
         const game = window.__gameStore.getState();
         game.openModal('deed', {
-          cellIndex: 16,
+          cellIndex: 5, // Cảng HKQT Long Thành (Hạ tầng 4 Ga)
+          canBuy: true,
+          isOwned: false,
+          buyerBalance: 18000,
+          buyerId: 'p1',
+          allPlayers: game.playersInfo,
+        });
+      })()
+    `);
+    await sleep(1000);
+
+    console.log('[Verification] Capturing Shot 3: Title Deed Modal (Long Thành)...');
+    await capturer.takeScreenshot('title_deed_modal_verified.jpg');
+    await capturer.takeScreenshot('title_deed_modal_long_thanh_verified.jpg');
+
+    // SHOT 4: Title Deed Modal for standard city property (cellIndex: 16 - Bình Định, C0..C3)
+    console.log('[Verification] Opening Title Deed Modal (Bình Định - Cell 16)...');
+    await capturer.eval(`
+      (() => {
+        if (!window.__gameStore) return;
+        const game = window.__gameStore.getState();
+        game.openModal('deed', {
+          cellIndex: 16, // Bình Định (Đô thị C0..C3)
           canBuy: true,
           isOwned: false,
           buyerBalance: 6500,
@@ -293,8 +315,8 @@ async function main() {
     `);
     await sleep(1000);
 
-    console.log('[Verification] Capturing Shot 3: Title Deed Modal...');
-    await capturer.takeScreenshot('title_deed_modal_verified.jpg');
+    console.log('[Verification] Capturing Shot 4: Title Deed Modal (Standard Property)...');
+    await capturer.takeScreenshot('title_deed_modal_property_verified.jpg');
 
     console.log('[Verification] All screenshots captured successfully!');
   } catch (err) {
