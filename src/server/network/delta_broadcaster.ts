@@ -31,6 +31,11 @@ function isCellEqual(a: CellDelta, b: CellDelta): boolean {
 }
 
 function isPlayerEqual(a: PlayerDelta, b: PlayerDelta): boolean {
+  const bondEqual = (!a.bondContract && !b.bondContract) || (
+    Boolean(a.bondContract) === Boolean(b.bondContract) &&
+    a.bondContract?.roundsLeft === b.bondContract?.roundsLeft &&
+    a.bondContract?.isActive === b.bondContract?.isActive
+  );
   return (
     a.id === b.id &&
     a.position === b.position &&
@@ -39,7 +44,8 @@ function isPlayerEqual(a: PlayerDelta, b: PlayerDelta): boolean {
     Boolean(a.isBot) === Boolean(b.isBot) &&
     (a.overdraftRoundsLeft ?? 0) === (b.overdraftRoundsLeft ?? 0) &&
     Boolean(a.inAudit) === Boolean(b.inAudit) &&
-    (a.extraTurns ?? 0) === (b.extraTurns ?? 0)
+    (a.extraTurns ?? 0) === (b.extraTurns ?? 0) &&
+    bondEqual
   );
 }
 

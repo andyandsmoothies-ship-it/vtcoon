@@ -1,0 +1,12 @@
+export enum MacroCycleType {
+  MACRO_LAND_FEVER = 'MACRO_LAND_FEVER',
+  MACRO_LIQUIDITY_FREEZE = 'MACRO_LIQUIDITY_FREEZE',
+}
+
+export const MACRO_CYCLE_LENGTH = 6;
+export const MACRO_FEVER_ROUNDS = 3;
+export const MACRO_FREEZE_ROUNDS = 2;
+export const MACRO_FEVER_RENT_MULT = 2.5;
+export const MACRO_FREEZE_RENT_MULT = 0.5;
+export const MACRO_FEVER_UPGRADE_COST_MULT = 0.75;
+export const MACRO_UPGRADE_COST_FLOOR = 0.50;

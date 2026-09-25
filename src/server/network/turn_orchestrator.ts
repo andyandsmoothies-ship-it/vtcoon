@@ -39,6 +39,9 @@ export function calculateBotStepDelay(
     const dynamicDelay = 1100 + steps * 200 + 800;
     return Math.max(baseDelayMs, dynamicDelay);
   }
+  if (room.lastEventCard && baseDelayMs > 500) {
+    return Math.max(baseDelayMs, 2500);
+  }
   return baseDelayMs;
 }
 

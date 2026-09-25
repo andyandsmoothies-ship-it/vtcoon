@@ -32,7 +32,13 @@ export type ReasonCode =
   | 'ADMIN_ROOM_NOT_FOUND'
   | 'TradeFrozen'
   | 'FREEZE_ACTIVE'
+  | 'LIQUIDITY_FROZEN'
+  | 'BOND_COLLATERAL_LOCKED'
+  | 'BOND_NOT_ELIGIBLE'
+  | 'BOND_ALREADY_ACTIVE'
   | 'ACTION_REJECTED';
+
+export type WsErrorMessageReason = ReasonCode;
 
 // ─── Client → Server ────────────────────────────────────────────
 export type WsClientMessage =

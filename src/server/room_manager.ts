@@ -18,6 +18,7 @@ import {
   handleBuyProperty, handleUpgrade, handleUpgradeETC, handleUpgradeUtility,
 } from './property_actions.js';
 import { handleHoseInvest, handleHoseSkip } from './hose_actions.js';
+import { handleIssueBond, handleRepayBond } from './bond_manager.js';
 import { dispatchPlayerIntent, type PlayerIntent } from './intent_dispatcher.js';
 import {
   coordMortgage, coordRedeem, coordDowngrade,
@@ -120,7 +121,13 @@ export class RoomManager {
   }
 
   handleBailOut(roomCode: string, playerId: string): { success: boolean; reason?: string } {
-    return handleBailOut(this.rooms.get(roomCode), playerId, Boolean(this.rolledThisTurn.get(roomCode)));
+    return handleBailOut(
+      this.rooms.get(roomCode),
+      playerId,
+      Boolean(this.rolledThisTurn.get(roomCode)),
+      this.registries.get(roomCode),
+      this.propertyStates.get(roomCode),
+    );
   }
 
   handleUseDiplomatic(roomCode: string, playerId: string): { success: boolean; reason?: string } {
@@ -191,8 +198,8 @@ export class RoomManager {
     const session = this.auctions.get(roomCode);
     const cellIndex = session?.cellIndex ?? 0;
     const res = handleAuctionClose(this.rooms.get(roomCode), session, this.registries.get(roomCode), this.auctions, roomCode);
+    this.syncAuction(roomCode);
     const room = this.rooms.get(roomCode);
-    if (room) room.currentAuction = undefined;
     const result: AuctionResult = {
       cellIndex,
       winnerId: res.winnerId ?? null,
@@ -417,7 +424,7 @@ export class RoomManager {
   }
 
   handleEndTurn(roomCode: string, playerId: string, continueDoubles?: boolean): Room | undefined {
-    return doHandleEndTurn(this.rooms, this.rolledThisTurn, this.registries, this.propertyStates, this.auctions, (rc) => this.touchActivity(rc), roomCode, playerId, continueDoubles);
+    return doHandleEndTurn(this.rooms, this.rolledThisTurn, this.registries, this.propertyStates, this.auctions, (rc) => this.touchActivity(rc), roomCode, playerId, continueDoubles, this.deckRng);
   }
 
   resolveAuctionBots(roomCode: string): void {
@@ -512,4 +519,7 @@ export class RoomManager {
     this.lastAuctionResults.delete(roomCode);
     return doCloseRoom(this.rooms, this.registries, this.propertyStates, this.auctions, this.rolledThisTurn, this.activeTimersMap, this.lastActivity, this.closeHooks, this.botPersonalities, roomCode);
   }
+
+  handleIssueBond(rc: string, p: string) { const r = this.rooms.get(rc); return r ? handleIssueBond(r, p, this.registries.get(rc)!, this.propertyStates.get(rc)!) : { success: false, reason: 'INVALID_ROOM' }; }
+  handleRepayBond(rc: string, p: string) { const r = this.rooms.get(rc); return r ? handleRepayBond(r, p) : { success: false, reason: 'INVALID_ROOM' }; }
 }

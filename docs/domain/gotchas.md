@@ -7,9 +7,9 @@
 ## 🧭 BẢNG CHỈ MỤC THEO DOMAIN (DOMAIN INDEX)
 | Domain Tag | Trọng Tâm & Phạm Vi Mã Nguồn | Các Gotchas Liên Quan |
 | :--- | :--- | :--- |
-| `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78, #82, #104, #105, #106, #145, #146, #147, #159, #164, #174, #180, #188, #195, #196, #197, #200, #203, #215, #217, #218, #219, #220, #223, #249, #255 |
+| `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78, #82, #104, #105, #106, #145, #146, #147, #159, #164, #174, #180, #188, #195, #196, #197, #200, #203, #215, #217, #218, #219, #220, #223, #249, #255, #262, #263, #265 |
 | `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147, #190, #191, #195, #196, #197, #200, #206, #223 |
-| `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190, #200, #203, #209, #210, #211, #212, #213, #215, #217, #223, #224, #225, #226, #227, #231, #235, #244, #247, #248, #249, #250, #255, #256, #259, #260, #261 |
+| `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190, #200, #203, #209, #210, #211, #212, #213, #215, #217, #223, #224, #225, #226, #227, #231, #235, #244, #247, #248, #249, #250, #255, #256, #259, #260, #261, #265 |
 | `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #32, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #60, #61, #63, #69, #72, #74, #77, #80, #85, #86, #88, #89, #90, #91, #92, #93, #94, #95, #96, #101, #103, #109, #110, #114, #115, #116, #117, #120, #122, #123, #124, #125, #126, #127, #128, #129, #130, #133, #134, #135, #136, #140, #141, #144, #148, #159, #160, #161, #162, #163, #164, #165, #169, #175, #177, #189, #198, #200, #222, #254, #257, #258, #259 |
 | `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192, #195, #196, #199, #201, #202, #204, #205, #206, #216, #217, #231, #234, #237, #249, #250, #255, #256, #257, #258, #259, #260, #261 |
 | `[UAT/TEST]` | Nghiệm Thu, Adversarial TDD, Ảnh Chụp Màn Hình (.jpg), Shell Escaping, File I/O Lock, Docker Healthcheck Timeout | #5, #28, #29, #31, #35, #52, #71, #73, #83, #84, #99, #100, #117, #124, #125, #130, #199, #235 |
@@ -2984,7 +2984,69 @@
 - **Ràng buộc cứng & Thiết kế bất biến**:
   1. **Optimistic Roll Transmission Guard**: `handleRollDice` trong `use_app_turn_controls.ts` bắt buộc kiểm tra `const sent = sendIntent({ type: 'INTENT_ROLL' });`. Chỉ kích hoạt `store.setIsRolling(true)` khi `sent === true`. Cấm tuyệt đối bật `isRolling` khi `sent === false`.
   2. **Fast Abort Pending State Invariant**: Trong `ActionDock`, nếu `onRollDice?.() === false`, lập tức giải phóng `setIsRollPending(false)` ngay tức thì (0ms) thay vì chờ hết timer 1.500ms, cho phép người chơi bấm lại ngay khi kết nối WebSocket hoàn tất bắt tay.
-- **Traceability**: `[TC-ROLL-GUARD.01..03/MSS]`, `tests/client/use_app_turn_controls_roll_guard.test.ts`, `src/client/network/use_app_turn_controls.ts`, `src/client/ui/action_dock.tsx`.
+---
 
+### 262. [FSM/FINANCE] Bất Biến Chống Camping Trạm Kiểm Toán & Phí Bảo Lãnh Động Theo Quyền Sở Hữu (Anti-Camping Audit & Property-Aware Dynamic Bailout Invariant - IMP-192A)
+- **Bẫy nghiệp vụ & kỹ thuật**:
+  1. *Bẫy Camping Trong Trạm Kiểm Toán Vẫn Thu Tiền Thuê (Rent Camping Exploit)*: Khi tài phiệt nhiều đất bị giam giữ tại Trạm Kiểm Toán Ô 10 (`auditTurnsLeft > 0`), nếu đối thủ dừng chân vào ô đất của tài phiệt, hệ thống vẫn thu tiền thuê bình thường. Điều này tạo ra động cơ tiêu cực (perverse incentive) để người chơi cố tình ngồi tù né tránh rủi ro mà vẫn thu tiền đối thủ.
+  2. *Bẫy Phí Cố Định 500 Tr. Rẻ Mạt Cho Tài Phiệt (Flat Bailout Regressive Bias)*: Mức phí bảo lãnh 500 Tr. cố định quá nhỏ so với tài sản của tài phiệt BĐS (vốn sở hữu hàng chục ngàn Tr.), khiến việc nộp bảo lãnh thoát Trạm không có sức răn đe kinh tế.
+  3. *Bẫy Đánh Đồng Tài Phiệt Với Người Không Sở Hữu Đất (Homeless Over-Penalization)*: Nếu áp dụng 10% Net Worth cho cả người chơi không sở hữu bất kỳ bất động sản nào, người chơi mới vào ván hoặc không có tài sản sẽ bị trừ tiền oan uổng (ví dụ có 25.000 Tr. tiền mặt bị trừ 2.500 Tr. dù không có đất để camping), phá vỡ toàn bộ các kịch bản Slice 04 / Golden Flow.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Anti-Camping Rent Freeze**: Tại `property_manager.ts#handleLanding`, bắt buộc kiểm tra `(owner.auditTurnsLeft ?? 0) > 0 || owner.inAudit`. Nếu chủ đất đang thụ án, miễn 100% tiền thuê (`result: LandingResult.RentPaid, rentAmount: 0`).
+  2. **Property-Aware Dynamic Bailout**: Mức phí 10% Net Worth (`Math.max(500, Math.floor(netWorth * 0.10))`) chỉ áp dụng khi người chơi có sở hữu bất động sản trong `registry` (`hasOwnedProperties(playerId, registry)`). Người chơi không sở hữu BĐS áp dụng mức sàn tiêu chuẩn 500 Tr. nộp Kho Bạc.
+  3. **Universal Natural Release Penalty**: Khi mãn hạn tù tự nhiên (`auditTurnsLeft === 0`), `handleAuditTurnTransition` tính phạt tương tự theo 10% Net Worth nộp vào `room.treasury`, triệt tiêu hoàn toàn động cơ ngồi chờ hết 3 lượt để trốn phí.
+- **Traceability**: `[TC-192A/MSS][UC-IMP192A]`, `tests/contracts/imp192a_anti_camping_audit.test.ts`, `src/domain/property_manager.ts`, `src/server/audit_manager.ts`, `src/server/turn_loop.ts`, `src/server/room_manager.ts`, `src/server/insolvency_manager.ts`.
 
+---
 
+### 263. [FSM/ECONOMY/NET] Bất Biến Tách Biệt PRNG Xúc Xắc vs Sự Kiện Vĩ Mô & Khởi Tạo Chu Kỳ Vĩ Mô Không Can Nhiễu Vòng 1 (Macro Cycle PRNG Isolation & Mid-Cycle Activation Invariant - IMP-192B)
+- **Bẫy nghiệp vụ & kỹ thuật**:
+  1. *Bẫy Tiêu Tốn PRNG Xúc Xắc Tại Game Start và Biên Vòng (PRNG Stream Desync Trap)*:
+     Khi `doStartGame` hoặc `advanceRoundBoundary` gọi `evaluateMacroCycle` và truyền `this.rng` (PRNG của xúc xắc), hàm gọi `rng()` để chọn ColorGroup. Việc này làm lệch toàn bộ chuỗi số ngẫu nhiên của xúc xắc (`mulberry32(seed)`), làm vỡ toàn bộ các test xác định (deterministic test suites: `room_manager.test.ts`, `golden_gameplay_flow.test.ts`).
+  2. *Bẫy Tự Động Kích Hoạt Sốt Đất Giữa Chu Kỳ (Mid-Cycle Auto-Activation Trap)*:
+     Khi `roundCount` chuyển sang vòng 2 hoặc vòng 3, nếu logic `evaluateMacroCycle` chỉ kiểm tra `cycleStep <= MACRO_FEVER_ROUNDS` mà không kiểm tra nhóm màu đã được kích hoạt trước đó, nó sẽ tự ý sinh ra `MACRO_LAND_FEVER` mới ở vòng 2, làm hỏng các test kiểm tra phân rã thẻ sự kiện thị trường về 0 (`toHaveLength(0)`).
+  3. *Bẫy Độ Dài Chuỗi Tóm Tắt Ticker UI (Active Market Summary Budget Trap)*:
+     Quy tắc kiểm thử `ACTIVE_MARKET_EFFECT_SUMMARIES` áp đặt giới hạn độ dài `<= 85 ký tự` cho mọi chuỗi tóm tắt trên Ticker để chống tràn thanh thông báo trên thiết bị di động. Chuỗi tóm tắt của các sự kiện vĩ mô mới bắt buộc tuân thủ trần này.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **PRNG Domain Separation**: `RoomManager` sử dụng `this.deckRng` cho toàn bộ các sự kiện chu kỳ vĩ mô và phân phát thẻ bài, giữ nguyên `this.rng` nguyên vẹn 100% chỉ phục vụ đổ xúc xắc và đầu tư HOSE.
+  2. **Mid-Cycle Activation Guard**: `evaluateMacroCycle` bắt buộc kiểm tra `if (cycleStep !== 1 && !room.activeMacroGroup) return;`. Sốt đất mới chỉ khởi phát tại `cycleStep === 1` hoặc khi `activeMacroGroup` đã được định danh từ trước.
+  3. **Ticker Summary Budget Invariant**: Các chuỗi tóm tắt hiệu ứng `MACRO_LAND_FEVER` và `MACRO_LIQUIDITY_FREEZE` trong `ACTIVE_MARKET_EFFECT_SUMMARIES` bắt buộc có độ dài `<= 85 ký tự`.
+- **Traceability**: `[TC-192B/MSS][UC-IMP192B]`, `tests/contracts/imp192b_macro_cycle_engine.test.ts`, `src/domain/macro_cycle_engine.ts`, `src/domain/macro_cycle_types.ts`, `src/server/turn_loop.ts`, `src/server/room_manager.ts`, `src/client/ui/market_event_ticker.tsx`.
+
+---
+
+### 264. [UI/MOBILE/FINANCE] Bất Biến Công Thái Học Di Động, Đấu Giá Rút Gọn & Chuẩn Hóa Sao Kê Tài Chính (Mobile Ergonomics, Compact Auction & Standardized Financial Copy Invariant - IMP-193)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Nút Đổ Xúc Xắc Bị Co Hẹp & Nhảy Bố Cục (Mobile Dice Button Squeeze & Jitter Trap)*:
+     Trên màn hình di động hẹp (< 380px), nút Đổ Xúc Xắc với padding `px-3.5` và nhãn chữ "Đổ" không có `min-w` dẫn đến nhảy bố cục (layout jitter) khi chuyển đổi trạng thái giữa số hiển thị và nhãn text. Đồng thời các nút phụ Quản Lý BĐS, Đàm Phán, Kết Thúc Lượt với `sm:px-4.5` làm tràn container ActionDock.
+  2. *Bẫy Cắt Cụt Huy Hiệu Thẻ Người Chơi (PlayerCard Badge Clipping Trap)*:
+     Khi bố trí 22 chấm bất động sản trên PlayerCard di động, nếu gán `overflow-hidden` lên khung chứa gốc để chống tràn các chấm, các huy hiệu định vị tuyệt đối nhô ra ngoài viền như huy hiệu `LƯỢT` và bóng thoại Emote sẽ bị cắt cụt (clipped).
+  3. *Bẫy Sao Kê Tài Chính Thiếu Minh Bạch Dòng Tiền (Ambiguous Cashflow Destination Trap)*:
+     Các thông báo số nổi (`FloatingBadge`) và thông báo hệ thống trước đây dùng câu từ mơ hồ như "Bảo lãnh kiểm toán", "Nộp Thuế", "Giải chấp BĐS" mà không nêu rõ dòng tiền chảy về đâu (Kho Bạc hay Ngân Hàng), khiến người chơi hoang mang về cơ chế hấp thụ tiền tệ của trò chơi.
+  4. *Bẫy Lỗi Phạm Vi Map Lượt (Turn Loop Scope Trap)*:
+     Khi tái cấu trúc trích xuất hàm chuyển lượt `advanceTurnToNextPlayer` trong `turn_loop.ts`, việc đặt `rolledThisTurnMap.set(room.roomCode, false)` bên trong hàm con gây lỗi runtime `ReferenceError: rolledThisTurnMap is not defined` do map này chỉ nằm trong scope của `executeTurnEnd`.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Mobile Ergonomics Dock Invariant**: Nút Đổ Xúc Xắc bắt buộc dùng `px-5 sm:px-6` với nhãn chữ có `min-w-[28px] text-center`. Các nút phụ chuẩn hóa `sm:px-4`.
+  2. **Unclipped PlayerCard Root Invariant**: Khung chứa gốc của `player_card.tsx` TUYỆT ĐỐI KHÔNG chứa `overflow-hidden`. Kích thước 22 chấm BĐS chuẩn hóa `w-1 h-1 sm:w-[5.5px] sm:h-[5.5px] md:w-2 md:h-2` với `gap-[1px] sm:gap-[1.5px]`.
+  3. **Standardized Transparent Financial Copy**:
+     - Đấu giá thắng: `Thắng đấu giá ${cellName} ➔ Nộp Kho Bạc`
+     - Thuế: `Nộp ${cleanTitle} ➔ Kho Bạc`
+     - Bảo lãnh: `Bảo lãnh kiểm toán (Ô 10) ➔ Nộp Kho Bạc`
+     - Thế chấp: `Thế chấp ${cellName} ➔ Vay Ngân Hàng`
+     - Giải chấp: `Giải chấp ${cellName} (Phí 10% ➔ Kho Bạc)`
+     - Trả/Thu thuê: `Trả thuê ${cellName}${partner}` / `Thu thuê ${cellName}${partner}`
+  4. **Turn State Scope Invariant**: Việc reset cờ `rolledThisTurnMap` phải nằm trực tiếp tại `executeTurnEnd` ngay sau khi gọi `advanceTurnToNextPlayer(room, rng)`.
+  5. **Anti-Double-Cast Constitution Governance**: Tuyệt đối không dùng cú pháp ép kiểu kép `as unknown as` trong domain và server.
+- **Traceability**: `[TC-193.01` đến `TC-193.16]`, `tests/contracts/imp193_mobile_ergonomics_auction_and_copy_polish.test.ts`, `src/client/ui/action_dock.tsx`, `src/client/ui/player_card.tsx`, `src/client/ui/floating_numbers.tsx`, `src/client/network/activity_badge_dispatcher.ts`, `src/client/ui/modals/auction_modal.tsx`, `src/client/ui/modals/auction_district_card.tsx`, `src/server/network/turn_orchestrator.ts`, `src/client/network/activity_tracker.ts`.
+### 265. [FINANCE/FSM/NET] Bất Biến Trái Phiếu Doanh Nghiệp, Thứ Tự Ưu Tiên Senior Lien & Phát Mãi Hàng Đợi (Corporate Bond, Senior Lien Priority & Queued Fire Sale Invariant - IMP-192C)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Thứ Tự Thu Hồi Nợ Khi Vỡ Nợ (Senior Lien Precedence Trap)*: Khi con nợ có hợp đồng trái phiếu hoạt động tuyên bố phá sản (`declareBankruptcy`), nếu chuyển toàn bộ tài sản cho chủ nợ dân sự trước, các tài sản thế chấp trái phiếu nhà nước sẽ bị thất thoát. Theo quy định tài chính vĩ mô, Nhà nước giữ quyền ưu tiên cao nhất (Senior Lien): toàn bộ tài sản thế chấp trái phiếu (`collateralCells`) bắt buộc phải bị tịch thu vào `room.fireSaleQueue` trước khi chia tài sản còn lại cho chủ nợ hoặc giải phóng vô chủ.
+  2. *Bẫy Kẹt Dọn Dẹp StateMap Trong Sàn Phát Mãi Không Người Mua (All-Passed Fire Sale StateMap Cleanup Trap)*: Hàm `handleAuctionClose` trong các bài test hợp đồng không nhận tham số `stateMap`. Khi toàn bộ người chơi đều bỏ cuộc (`isPassed === true`) trong sàn phát mãi, nếu không dọn dẹp `stateMap.delete(cellIndex)`, ô đất sẽ vẫn bị đánh dấu là đang trong phiên đấu giá ở các vòng kiểm tra sau.
+  3. *Bẫy Sàn Đấu Giá Bắt Đáy 0 Tr. (Zero-Bid Opening Trap)*: Sàn đấu giá phát mãi trái phiếu cho phép mức giá khởi điểm 0 Tr. (`Bắt Đáy`). Hệ thống bước nhảy giá `calculateAuctionIncrements` nếu áp dụng logic đấu giá thông thường (tối thiểu giá mở hoặc bước nhảy cố định) sẽ không sinh ra lựa chọn trả giá 0 Tr., khiến người chơi không thể bắt đáy tài sản phát mãi.
+  4. *Bẫy Mã Lỗi Từ Chối Phát Hành Trái Phiếu (Bond Issuance Rejection Code Desync)*: Khi một người chơi đã có hợp đồng trái phiếu hoạt động (`player.bondContract?.isActive === true`), hợp đồng kiểm thử `TC-192C.21` yêu cầu `validateIssueBond` trả về `ActionRejectReason.BOND_NOT_ELIGIBLE` nhằm duy trì thông điệp đồng nhất với các điều kiện không đủ điều kiện phát hành khác.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Senior Lien Priority Invariant**: `declareBankruptcy` trong `insolvency_manager.ts` thu hồi 100% `collateralCells` vào `room.fireSaleQueue` trước mọi thủ tục thanh lý/chuyển nhượng cho chủ nợ, và tự động kích hoạt `handleStartFireSaleAuction` nếu hàng đợi có tài sản.
+  2. **Zero-Bid Fire Sale Opening**: Cho phép `amount === 0` khi `session.isFireSale === true && session.highestBidderId === null`. Helper `calculateAuctionIncrements` trả về `[0, 50, 100]` khi chưa có người đặt giá.
+  3. **Auto-Tracking StateMap Cleanup**: `auction_manager.ts` theo dõi `stateMap` qua `DeletableMap` tại các điểm gán session, tự động gọi `delete(cellIndex)` khi phiên phát mãi khép lại mà không ai mua.
+  4. **Strict Collateral Protection**: Khóa tuyệt đối hành động thế chấp (`mortgage`), chuyển nhượng P2P (`executeP2PTrade`) và cưỡng chế mua lại (`compulsoryBuyout`) đối với các ô thuộc tài sản thế chấp trái phiếu đang hoạt động với mã lỗi `BOND_COLLATERAL_LOCKED`.
+- **Traceability**: `[TC-192C.01..22/MSS]`, `[UC-IMP192C]`, `tests/contracts/imp192c_corporate_bond_fire_sale.test.ts`, `src/domain/bond_types.ts`, `src/server/bond_manager.ts`, `src/server/auction_manager.ts`, `src/server/insolvency_manager.ts`, `src/server/mortgage_manager.ts`, `src/server/property_actions.ts`, `src/server/room_property_coordinator.ts`.

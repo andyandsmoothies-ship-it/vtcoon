@@ -338,12 +338,12 @@ describe('[UC-IMP191] Financial Flow Transparency & Badge Clarity Contract Suite
       dispatchActivityFloatingBadges([act], state);
       expect(mockAddFloatingText).toHaveBeenCalledWith(expect.objectContaining({
         actionType: 'tax',
-        title: expect.stringContaining('➔ Vào Kho Bạc'),
+        title: expect.stringContaining('➔ Kho Bạc'),
         cellIndex: 4,
       }));
     });
 
-    it('[TC-191.11/MSS][UC-IMP191] dispatchActivityFloatingBadges: Routing type bail phát badge actionType bail, tiêu đề chứa (Ô 10) ➔ Vào Kho Bạc', () => {
+    it('[TC-191.11/MSS][UC-IMP191] dispatchActivityFloatingBadges: Routing type bail phát badge actionType bail, tiêu đề chứa (Ô 10) ➔ Nộp Kho Bạc', () => {
       const mockAddFloatingText = vi.fn();
       const state = createMockGameState({ addFloatingText: mockAddFloatingText });
 
@@ -360,7 +360,7 @@ describe('[UC-IMP191] Financial Flow Transparency & Badge Clarity Contract Suite
       dispatchActivityFloatingBadges([act], state);
       expect(mockAddFloatingText).toHaveBeenCalledWith(expect.objectContaining({
         actionType: 'bail',
-        title: expect.stringMatching(/Ô 10.*➔ Vào Kho Bạc/),
+        title: expect.stringMatching(/Ô 10.*➔ Nộp Kho Bạc/),
         cellIndex: 10,
       }));
     });
@@ -392,11 +392,11 @@ describe('[UC-IMP191] Financial Flow Transparency & Badge Clarity Contract Suite
 
       expect(mockAddFloatingText).toHaveBeenCalledWith(expect.objectContaining({
         actionType: 'mortgage',
-        title: expect.stringMatching(/Vay thế chấp.*từ Ngân Hàng/),
+        title: expect.stringMatching(/Thế chấp.*➔ Vay Ngân Hàng/),
       }));
       expect(mockAddFloatingText).toHaveBeenCalledWith(expect.objectContaining({
         actionType: 'unmortgage',
-        title: expect.stringMatching(/Giải chấp.*Phí 10%.*➔ Vào Kho Bạc/),
+        title: expect.stringMatching(/Giải chấp.*Phí 10%.*➔ Kho Bạc/),
       }));
     });
   });
@@ -440,8 +440,8 @@ describe('[UC-IMP191] Financial Flow Transparency & Badge Clarity Contract Suite
       const unmortgageReason = resolveFriendlyReason(unmortgageItem);
 
       expect(rentPayReason).toContain('Nguyễn V...');
-      expect(mortgageReason).toContain('Vay thế chấp Bến Bạch Đằng từ Ngân Hàng');
-      expect(unmortgageReason).toContain('Giải chấp Bến Bạch Đằng (Phí 10% ➔ Vào Kho Bạc)');
+      expect(mortgageReason).toContain('Thế chấp Bến Bạch Đằng ➔ Vay Ngân Hàng');
+      expect(unmortgageReason).toContain('Giải chấp Bến Bạch Đằng (Phí 10% ➔ Kho Bạc)');
     });
 
     it('[TC-191.15/MSS][UC-IMP191] FloatingNumbersOverlay: Đảo thứ tự ưu tiên badge của myPlayerId lên vị trí hiển thị trên mobile viewport', () => {

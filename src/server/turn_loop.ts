@@ -2,13 +2,14 @@
 // Extracted from room_manager.ts — Slice 06 refactor (DEBT-S06-06)
 
 import type { Room, Player } from '../domain/room';
-import { checkPassedGo, GO_BONUS, calculateGoSalary, BOARD_SIZE, TurnPhase } from '../domain/room';
+import { checkPassedGo, calculateGoSalary, BOARD_SIZE, TurnPhase } from '../domain/room';
 import { rollDice } from '../domain/dice';
 import type { PropertyRegistry, PropertyStateMap } from '../domain/property_manager';
 import { handleLanding, LandingResult, calculateGoPropertyTax, PROPERTY_DEEDS, GO_PROPERTY_TAX_CAP } from '../domain/property_manager';
 import { BOARD_CONFIG } from '../domain/board_config';
 import { decayModifiers } from '../domain/event_card_engine';
 import { processTreasuryStimulus } from '../domain/treasury_stimulus';
+import { evaluateMacroCycle } from '../domain/macro_cycle_engine';
 import {
   processRollDoubles,
   handleAuditTurnTransition,
@@ -23,6 +24,7 @@ import { checkInsolvency } from './insolvency_manager';
 import type { RollResult } from './room_manager';
 import type { AuctionSession } from './auction_manager';
 import { ChanceCardId } from '../domain/event_card_types';
+import { processBondTurnTransition } from './bond_manager';
 
 // [DEBT-S06-01][DEBT-S06-02] Xử lý nợ định kỳ khi player vượt GO (TRƯỚC GO_BONUS)
 function processPendingDebts(room: Room, player: Player): void {
@@ -161,6 +163,13 @@ export function executeTurnRoll(
   };
 }
 
+export function advanceRoundBoundary(room: Room, rng: () => number = Math.random): void {
+  room.roundCount = (room.roundCount ?? 1) + 1;
+  room.activeModifiers = decayModifiers(room.activeModifiers ?? []);
+  evaluateMacroCycle(room, rng);
+  processTreasuryStimulus(room);
+}
+
 export function executeTurnEnd(
   room: Room,
   current: Player,
@@ -171,6 +180,7 @@ export function executeTurnEnd(
   registry?: PropertyRegistry,
   stateMap?: PropertyStateMap,
   auctions?: Map<string, AuctionSession>,
+  rng: () => number = Math.random,
 ): Room | undefined {
   if (room.phase === TurnPhase.AuctionPhase || room.phase === TurnPhase.InsolvencyPhase || room.pendingBuyout) return undefined;
   if (!rolledThisTurn && room.phase === TurnPhase.WaitingRoll && (current.auditTurnsLeft ?? 0) <= 0) return undefined;
@@ -199,7 +209,7 @@ export function executeTurnEnd(
     : current.auditTurnsLeft > 0;
   deleteTurnStartedInAudit(roomCode);
   if (wasInAudit) {
-    handleAuditTurnTransition(room, current);
+    handleAuditTurnTransition(room, current, registry, stateMap);
     if (current.balance < 0) {
       checkInsolvency(room);
       rolledThisTurnMap.set(roomCode, true);
@@ -219,14 +229,25 @@ export function executeTurnEnd(
     room.lastEventCard = null;
     return room;
   }
+  if (current.bondContract?.isActive && registry && stateMap) {
+    processBondTurnTransition(room, current, registry, stateMap, auctions, roomCode);
+    if ((room.phase as string) === TurnPhase.AuctionPhase) {
+      rolledThisTurnMap.set(roomCode, false);
+      return room;
+    }
+  }
+  advanceTurnToNextPlayer(room, rng);
+  rolledThisTurnMap.set(roomCode, false);
+  return room;
+}
+
+export function advanceTurnToNextPlayer(room: Room, rng: () => number = Math.random): void {
   const total = room.players.length;
   let next = (room.currentPlayerIndex + 1) % total;
   let steps = 0;
   while (steps < total) {
     if (next === 0) {
-      room.roundCount = (room.roundCount ?? 1) + 1;
-      room.activeModifiers = decayModifiers(room.activeModifiers);
-      processTreasuryStimulus(room);
+      advanceRoundBoundary(room, rng);
     }
     if (!room.players[next]?.bankrupt) break;
     next = (next + 1) % total;
@@ -244,8 +265,6 @@ export function executeTurnEnd(
   } else {
     room.phase = TurnPhase.WaitingRoll;
   }
-  rolledThisTurnMap.set(roomCode, false);
   room.lastEventCard = null;
-  return room;
 }
 

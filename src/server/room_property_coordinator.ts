@@ -87,6 +87,13 @@ export function coordTrade(
     return { success: false, reason: ActionRejectReason.INVALID_ROOM };
   }
 
+  if (
+    (seller.bondContract?.isActive && seller.bondContract.collateralCells.includes(cellIndex)) ||
+    (offeredCellIndex !== undefined && buyer.bondContract?.isActive && buyer.bondContract.collateralCells.includes(offeredCellIndex))
+  ) {
+    return { success: false, reason: ActionRejectReason.BOND_COLLATERAL_LOCKED };
+  }
+
   // [IMP-152/C] Turn-order guard: only allow when requester is current turn player OR is a bot
   const currentTurnPlayer = ctx.room.players[ctx.room.currentPlayerIndex];
   const requester = ctx.room.players.find((p) => p.id === requesterId);
@@ -322,6 +329,9 @@ export function coordExecuteCompulsoryBuyout(
   const buyer = ctx.room.players.find((p) => p.id === session.buyerId);
   const seller = ctx.room.players.find((p) => p.id === session.sellerId);
   if (!buyer || !seller) return { success: false, reason: 'PLAYER_NOT_FOUND' };
+  if (seller.bondContract?.isActive && seller.bondContract.collateralCells.includes(cellIndex)) {
+    return { success: false, reason: ActionRejectReason.BOND_COLLATERAL_LOCKED };
+  }
   if (buyer.balance < session.cost) return { success: false, reason: 'INSUFFICIENT_FUNDS' };
 
   buyer.balance -= session.cost;

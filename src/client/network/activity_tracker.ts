@@ -4,7 +4,6 @@ import { type GameState, FloatingTextType } from '../store/game_store.js';
 import { useActivityStore, type ActivityLogEntry } from '../store/activity_store.js';
 import { BOARD_SIZE } from '../../domain/room.js';
 import { formatCurrency } from '../ui/ui_helpers.js';
-import { resolveMarketEffectSummary } from '../ui/market_event_ticker.js';
 import { resolvePunchyEventSummary } from '../ui/event_card_punchy_summaries.js';
 import { AudioEngine } from '../audio/audio_engine.js';
 import { SoundEffect } from '../audio/audio_types.js';
@@ -312,7 +311,7 @@ export function trackDeltaActivities(
         playerId,
         actionType: isMarket ? 'market' : 'chance',
         title: card.title,
-        durationMs: 3200,
+        durationMs: 4800,
       });
     }
 

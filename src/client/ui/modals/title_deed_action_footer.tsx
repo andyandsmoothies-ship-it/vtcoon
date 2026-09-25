@@ -8,6 +8,7 @@ export interface TitleDeedActionFooterProps {
   readonly ownerName?: string;
   readonly canBuy?: boolean;
   readonly isTradeFrozen?: boolean;
+  readonly isLiquidityFrozen?: boolean;
   readonly hasUpgrades?: boolean;
   readonly currentLevel?: 0 | 1 | 2 | 3;
   readonly upgradeCost?: number;
@@ -30,6 +31,7 @@ export function TitleDeedActionFooter({
   ownerName,
   canBuy = true,
   isTradeFrozen,
+  isLiquidityFrozen,
   hasUpgrades,
   currentLevel,
   upgradeCost,
@@ -47,6 +49,12 @@ export function TitleDeedActionFooter({
   const showUpgrade = Boolean(isOwner && !isMortgaged && hasUpgrades && (currentLevel ?? 0) < 3 && onUpgrade);
   const showDowngrade = Boolean(isOwner && !isMortgaged && hasUpgrades && (currentLevel ?? 0) > 0 && onDowngrade);
   const showMortgage = Boolean(isOwner && (isMortgaged ? onRedeem : onMortgage));
+  const isMortgageBlocked = Boolean(!isMortgaged && (isTradeFrozen || isLiquidityFrozen));
+  const mortgageBlockedTitle = !isMortgaged && isLiquidityFrozen
+    ? 'Bất động sản đang đóng băng thanh khoản'
+    : !isMortgaged && isTradeFrozen
+      ? 'Thị trường đang đóng băng giao dịch'
+      : undefined;
   const actionCount = (showUpgrade ? 1 : 0) + (showDowngrade ? 1 : 0) + (showMortgage ? 1 : 0);
   const closeButtonSpan = (!isOwner || actionCount === 0 || actionCount === 2) ? 'col-span-2' : '';
 
@@ -90,11 +98,11 @@ export function TitleDeedActionFooter({
           {showMortgage && (
             <button
               type="button"
-              onClick={isTradeFrozen && !isMortgaged ? undefined : (isMortgaged ? onRedeem : onMortgage)}
-              disabled={Boolean(isTradeFrozen && !isMortgaged)}
-              title={isTradeFrozen && !isMortgaged ? 'Thị trường đang đóng băng giao dịch' : undefined}
+              onClick={isMortgageBlocked ? undefined : (isMortgaged ? onRedeem : onMortgage)}
+              disabled={isMortgageBlocked}
+              title={mortgageBlockedTitle}
               className={`min-h-[48px] whitespace-nowrap px-3.5 py-2 rounded-xl font-black text-xs border-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
-                isTradeFrozen && !isMortgaged
+                isMortgageBlocked
                   ? 'bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed opacity-60'
                   : 'bg-amber-500 hover:bg-amber-400 text-slate-900 border-amber-700 shadow-[0_4px_0_0_#b45309] active:shadow-[0_1px_0_0_#b45309] active:translate-y-[3px] cursor-pointer'
               }`}

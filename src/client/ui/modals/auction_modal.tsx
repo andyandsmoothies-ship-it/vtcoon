@@ -4,6 +4,7 @@ import { getDeedDisplayInfo, calculateAuctionIncrements } from './modal_helpers'
 import { formatCurrency } from '../ui_helpers';
 import { COLOR_GROUP_HEX } from '../../../domain/theme';
 import { useGameStore } from '../../store/game_store';
+import type { PlayerInfo } from '../../store/game_store_types';
 import { AuctionDistrictCard } from './auction_district_card';
 
 export interface AuctionModalProps {
@@ -21,8 +22,9 @@ export interface AuctionModalProps {
   readonly winnerId?: string | null;
   readonly finalPrice?: number;
   readonly isForeclosure?: boolean;
+  readonly isFireSale?: boolean;
   readonly insolvencyPlayerId?: string;
-  readonly playersInfo?: Record<string, any>;
+  readonly playersInfo?: Record<string, PlayerInfo>;
   readonly levelMap?: Record<number, number>;
   readonly onBid?: (newAmount: number) => void;
   readonly onPass?: () => void;
@@ -44,6 +46,7 @@ export function AuctionModal({
   winnerId,
   finalPrice,
   isForeclosure = false,
+  isFireSale = false,
   insolvencyPlayerId,
   playersInfo: propPlayersInfo,
   levelMap: propLevelMap,
@@ -54,7 +57,8 @@ export function AuctionModal({
   const deed = getDeedDisplayInfo(cellIndex);
   const basePrice = deed?.price ?? (startingBid ? Math.round(startingBid / 0.70) : currentBid);
   const floorPrice = startingBid ?? Math.floor(basePrice * 0.70);
-  const increments = calculateAuctionIncrements(currentBid);
+  const hasBidder = Boolean(highestBidderId);
+  const increments = calculateAuctionIncrements(currentBid, isFireSale, hasBidder);
   const isUrgent = timeRemaining <= 5;
   const timerPercent = Math.min(100, Math.max(0, (timeRemaining / Math.max(20, timeRemaining)) * 100));
   const ribbonColor = deed?.colorGroup ? COLOR_GROUP_HEX[deed.colorGroup] : '#eab308';
@@ -215,7 +219,7 @@ export function AuctionModal({
             playersInfo={playersInfo}
             levelMap={propLevelMap}
             isForeclosure={isForeclosure}
-            badgeMaxWidth="max-w-[120px]"
+            badgeMaxWidth="max-w-[180px] sm:max-w-none"
           />
         </div>
 
@@ -301,7 +305,7 @@ export function AuctionModal({
                           className="w-2 h-2 rounded-full shrink-0 border border-slate-900"
                           style={{ backgroundColor: p.tokenColor ?? '#F59E0B' }}
                         />
-                        <span className="truncate max-w-[120px] font-medium min-w-0">{p.name}</span>
+                        <span className="truncate max-w-[100px] sm:max-w-[160px] font-medium min-w-0">{p.name}</span>
                         {isMe && (
                           <span className="text-[11px] font-bold text-amber-800 shrink-0">(Bạn)</span>
                         )}
@@ -347,12 +351,12 @@ export function AuctionModal({
           </div>
         ) : (
           <div className="grid grid-cols-3 gap-2">
-            {([100, 200, 500] as const).map((step, idx) => {
-              const targetBid = increments[idx]!;
+            {increments.map((targetBid, idx) => {
+              const diff = targetBid - currentBid;
               const canAfford = !isConcluded && (myBalance === undefined || targetBid <= myBalance);
               return (
                 <button
-                  key={step}
+                  key={idx}
                   type="button"
                   onClick={() => onBid?.(targetBid)}
                   disabled={!canAfford || isConcluded}
@@ -362,7 +366,9 @@ export function AuctionModal({
                       : 'bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed opacity-50'
                   }`}
                 >
-                  <span className="text-xs md:text-sm font-black tracking-wide">+{step} Tr.</span>
+                  <span className="text-xs md:text-sm font-black tracking-wide">
+                    {targetBid === 0 ? 'Bắt Đáy (0 Tr.)' : (diff > 0 ? `+${diff} Tr.` : `${targetBid} Tr.`)}
+                  </span>
                   <span className={`text-xs font-semibold mt-0.5 ${canAfford && !isConcluded ? 'text-amber-950' : 'text-slate-400'}`}>
                     ({formatCurrency(targetBid)})
                   </span>

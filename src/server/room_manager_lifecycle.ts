@@ -89,6 +89,7 @@ export function doStartGame(
     hostPlayer.isBot = false;
   }
   room.started = true;
+  room.roundCount = 1;
   const initialBalance = getInitialBalanceForPlayerCount(room.players.length);
   for (const player of room.players) {
     player.balance = initialBalance;
@@ -151,6 +152,7 @@ export function doHandleEndTurn(
   roomCode: string,
   playerId: string,
   continueDoubles?: boolean,
+  rng: () => number = Math.random,
 ): Room | undefined {
   touchActivityFn(roomCode);
   const room = rooms.get(roomCode);
@@ -166,6 +168,7 @@ export function doHandleEndTurn(
     registries.get(roomCode),
     propertyStates.get(roomCode),
     auctions,
+    rng,
   );
 }
 

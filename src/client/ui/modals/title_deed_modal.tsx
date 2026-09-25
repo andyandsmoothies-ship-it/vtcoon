@@ -79,6 +79,11 @@ export function TitleDeedModal({
   const effectiveModifiers = propsActiveModifiers ?? (isSSR ? useGameStore.getState().activeModifiers : storeModifiers) ?? [];
   const isTradeFrozen = propsIsTradeFrozen ??
     effectiveModifiers.some((m) => m.type === MarketCardId.MC_FREEZE_TRADE && m.remainingRounds > 0);
+  const isLiquidityFrozen = effectiveModifiers.some(
+    (m) => (m.type as string) === 'MACRO_LIQUIDITY_FREEZE' &&
+           m.remainingRounds > 0 &&
+           (m.affectedCells ?? []).includes(cellIndex),
+  );
 
   const activeModifierBadges = React.useMemo(() => {
     return effectiveModifiers
@@ -270,6 +275,7 @@ export function TitleDeedModal({
         ownerName={ownerName}
         canBuy={canBuy}
         isTradeFrozen={isTradeFrozen}
+        isLiquidityFrozen={isLiquidityFrozen}
         hasUpgrades={hasUpgrades}
         currentLevel={currentLevel}
         upgradeCost={upgradeCost}

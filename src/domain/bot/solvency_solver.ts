@@ -1,6 +1,7 @@
 import type { Player, Room } from '../room';
 import { BOARD_CONFIG } from '../board_config';
 import { MarketCardId } from '../event_card_engine';
+import { MacroCycleType } from '../macro_cycle_types';
 import { PROPERTY_DEEDS, type PropertyRegistry, type PropertyStateMap } from '../property_data';
 import { hasMonopoly, checkEvenDowngrading } from '../property_upgrade';
 import { resolveRent } from '../property_rent';
@@ -10,6 +11,14 @@ import type { BotIntent } from './bot_types';
 function isTradeFrozen(room?: Room): boolean {
   return (room?.activeModifiers ?? []).some(
     (m) => m.type === MarketCardId.MC_FREEZE_TRADE && m.remainingRounds > 0,
+  );
+}
+
+function isCellLiquidityFrozen(cellIndex: number, room?: Room): boolean {
+  return (room?.activeModifiers ?? []).some(
+    (m) => m.type === MacroCycleType.MACRO_LIQUIDITY_FREEZE &&
+           m.remainingRounds > 0 &&
+           (m.affectedCells as readonly number[]).includes(cellIndex),
   );
 }
 
@@ -71,11 +80,13 @@ function findSingleMortgageCell(
   bot: Player,
   registry: PropertyRegistry,
   stateMap: PropertyStateMap,
+  room?: Room,
 ): number | null {
   const candidates: Array<{ cellIndex: number; rent: number; price: number }> = [];
 
   for (const cellIndex of ownedCells) {
     if (isCellMortgaged(cellIndex, bot, stateMap)) continue;
+    if (isCellLiquidityFrozen(cellIndex, room)) continue;
 
     const deed = PROPERTY_DEEDS.get(cellIndex);
     if (!deed) continue;
@@ -143,11 +154,13 @@ function findRemainingMortgageCell(
   bot: Player,
   registry: PropertyRegistry,
   stateMap: PropertyStateMap,
+  room?: Room,
 ): number | null {
   const candidates: Array<{ cellIndex: number; rent: number; price: number }> = [];
 
   for (const cellIndex of ownedCells) {
     if (isCellMortgaged(cellIndex, bot, stateMap)) continue;
+    if (isCellLiquidityFrozen(cellIndex, room)) continue;
 
     const deed = PROPERTY_DEEDS.get(cellIndex);
     if (!deed) continue;
@@ -199,7 +212,7 @@ export function resolveInsolvencyStep(
 
   // Step 2: Mortgage unbuilt single (non-monopoly) properties with lowest rent (if not frozen)
   if (!tradeFrozen) {
-    const step2Cell = findSingleMortgageCell(ownedCells, bot, registry, stateMap);
+    const step2Cell = findSingleMortgageCell(ownedCells, bot, registry, stateMap, room);
     if (step2Cell !== null) {
       return { type: 'INTENT_MORTGAGE', cellIndex: step2Cell };
     }
@@ -213,7 +226,7 @@ export function resolveInsolvencyStep(
 
   // Step 4: Mortgage remaining unbuilt properties (if not frozen)
   if (!tradeFrozen) {
-    const step4Cell = findRemainingMortgageCell(ownedCells, bot, registry, stateMap);
+    const step4Cell = findRemainingMortgageCell(ownedCells, bot, registry, stateMap, room);
     if (step4Cell !== null) {
       return { type: 'INTENT_MORTGAGE', cellIndex: step4Cell };
     }

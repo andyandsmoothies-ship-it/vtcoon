@@ -6,6 +6,7 @@ import { BOARD_SIZE } from '../room';
 import { BOARD_CONFIG, CellType } from '../board_config';
 import { PROPERTY_DEEDS, type PropertyRegistry, type PropertyStateMap } from '../property_data';
 import { hasMonopoly } from '../property_upgrade';
+import { MacroCycleType } from '../macro_cycle_types';
 import { BotPosture, DICE_2D6_PROBABILITIES } from './bot_types';
 
 const LEVEL_MULTIPLIER: Record<number, number> = { 0: 1, 1: 1.5, 2: 2.5, 3: 4 };
@@ -176,6 +177,13 @@ export function findEligibleProactiveMortgage(
       bot.mortgagedProperties?.includes(cellIdx) || stateMap.get(cellIdx)?.isMortgaged,
     );
     if (isMortgaged) continue;
+
+    const isFrozen = (room.activeModifiers ?? []).some(
+      (m) => m.type === MacroCycleType.MACRO_LIQUIDITY_FREEZE &&
+             m.remainingRounds > 0 &&
+             (m.affectedCells as readonly number[]).includes(cellIdx),
+    );
+    if (isFrozen) continue;
 
     const cell = BOARD_CONFIG[cellIdx];
     if (!cell || cell.type !== CellType.Property) continue;

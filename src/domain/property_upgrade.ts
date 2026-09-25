@@ -5,6 +5,11 @@ import type { Player, MarketModifier } from './room';
 import { CellType, BOARD_CONFIG } from './board_config';
 import { MarketCardId } from './event_card_engine';
 import {
+  MacroCycleType,
+  MACRO_FEVER_UPGRADE_COST_MULT,
+  MACRO_UPGRADE_COST_FLOOR,
+} from './macro_cycle_types';
+import {
   PROPERTY_DEEDS, RAILROAD_CELLS, ETC_COST_PER_CELL, UTILITY_UPGRADE_COST,
   type PropertyRegistry, type PropertyStateMap,
 } from './property_data';
@@ -65,6 +70,24 @@ export function checkEvenDowngrading(
   return { valid: true };
 }
 
+export function calculateUpgradeCost(
+  cellIndex: number,
+  currentLevel: number,
+  modifiers?: readonly MarketModifier[],
+): number {
+  const deed = PROPERTY_DEEDS.get(cellIndex);
+  if (!deed?.upgradeCosts || currentLevel >= 3) return 0;
+  const baseCost = deed.upgradeCosts[currentLevel] ?? 0;
+  let cost = baseCost;
+  if (modifiers?.some((m) => m.type === MarketCardId.MC_CREDIT_STIMULUS && m.remainingRounds > 0)) {
+    cost = Math.floor(cost * 0.8);
+  }
+  if (modifiers?.some((m) => m.type === MacroCycleType.MACRO_LAND_FEVER && m.remainingRounds > 0 && (m.affectedCells as readonly number[]).includes(cellIndex))) {
+    cost = Math.floor(cost * MACRO_FEVER_UPGRADE_COST_MULT);
+  }
+  return Math.max(Math.floor(baseCost * MACRO_UPGRADE_COST_FLOOR), cost);
+}
+
 export function upgradeProperty(
   player: Player, cellIndex: number, registry: PropertyRegistry, stateMap: PropertyStateMap,
   modifiers?: readonly MarketModifier[],
@@ -88,10 +111,7 @@ export function upgradeProperty(
     if (!eb.valid) return { success: false, reason: eb.reason };
   }
 
-  let cost = deed.upgradeCosts[state.level]!;
-  if (modifiers?.some((m) => m.type === MarketCardId.MC_CREDIT_STIMULUS && m.remainingRounds > 0)) {
-    cost = Math.floor(cost * 0.8);
-  }
+  const cost = calculateUpgradeCost(cellIndex, state.level, modifiers);
   if (player.balance < cost) return { success: false, reason: ActionRejectReason.INSUFFICIENT_FUNDS };
   player.balance -= cost;
   stateMap.set(cellIndex, { ...state, level: state.level + 1 });

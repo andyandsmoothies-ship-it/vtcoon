@@ -72,8 +72,13 @@ export function handleLanding(
   if (ownerId === undefined) return { result: LandingResult.Unowned, rentAmount: 0, landlordId: undefined };
   if (ownerId === player.id) return { result: LandingResult.OwnProperty, rentAmount: 0, landlordId: ownerId };
 
-  // Guard thế chấp: ô đang thế chấp không thu phí thuê
+  // [IMP-192A] Anti-camping guard: miễn thu tiền thuê khi chủ đất đang ở Trạm Kiểm Toán
   const owner = players.find((p) => p.id === ownerId);
+  if (owner && ((owner.auditTurnsLeft ?? 0) > 0 || owner.inAudit)) {
+    return { result: LandingResult.RentPaid, rentAmount: 0, landlordId: ownerId };
+  }
+
+  // Guard thế chấp: ô đang thế chấp không thu phí thuê
   if (owner?.mortgagedProperties?.includes(cellIndex)) {
     return { result: LandingResult.RentPaid, rentAmount: 0, landlordId: ownerId };
   }

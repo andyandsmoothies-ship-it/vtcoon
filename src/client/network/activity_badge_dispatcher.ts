@@ -27,7 +27,7 @@ function handleRentBadge(act: ActivityLogEntry, state: GameState): void {
       type: FloatingTextType.Penalty,
       playerId: payerId,
       actionType: 'rent_pay',
-      title: `Tiền thuê ${cellName}`,
+      title: `Trả thuê ${cellName}`,
       targetPlayerName: receiverName,
       cellIndex: act.cellIndex,
     });
@@ -41,7 +41,7 @@ function handleRentBadge(act: ActivityLogEntry, state: GameState): void {
       type: FloatingTextType.Reward,
       playerId: receiverId,
       actionType: 'rent_receive',
-      title: `Thu tiền thuê ${cellName}`,
+      title: `Thu thuê ${cellName}`,
       targetPlayerName: payerName,
       cellIndex: act.cellIndex,
     });
@@ -96,7 +96,7 @@ function handleTaxBadge(act: ActivityLogEntry, state: GameState): void {
     type: FloatingTextType.Penalty,
     playerId: act.playerId ?? '',
     actionType: 'tax',
-    title: `${baseTitle} ➔ Vào Kho Bạc`,
+    title: `Nộp ${baseTitle} ➔ Kho Bạc`,
     cellIndex: act.cellIndex,
   });
 }
@@ -108,7 +108,7 @@ function handleBailBadge(act: ActivityLogEntry, state: GameState): void {
     type: FloatingTextType.Penalty,
     playerId: act.playerId ?? '',
     actionType: 'bail',
-    title: 'Nộp Bảo Lãnh Kiểm Toán (Ô 10) ➔ Vào Kho Bạc',
+    title: 'Bảo lãnh kiểm toán (Ô 10) ➔ Nộp Kho Bạc',
     cellIndex: act.cellIndex ?? 10,
   });
 }
@@ -121,7 +121,7 @@ function handleMortgageBadge(act: ActivityLogEntry, state: GameState): void {
     type: FloatingTextType.Reward,
     playerId: act.playerId ?? '',
     actionType: 'mortgage',
-    title: `Vay thế chấp ${cellName} từ Ngân Hàng`,
+    title: `Thế chấp ${cellName} ➔ Vay Ngân Hàng`,
     cellIndex: act.cellIndex,
   });
 }
@@ -134,7 +134,7 @@ function handleUnmortgageBadge(act: ActivityLogEntry, state: GameState): void {
     type: FloatingTextType.Penalty,
     playerId: act.playerId ?? '',
     actionType: 'unmortgage',
-    title: `Giải chấp ${cellName} (Phí 10% ➔ Vào Kho Bạc)`,
+    title: `Giải chấp ${cellName} (Phí 10% ➔ Kho Bạc)`,
     cellIndex: act.cellIndex,
   });
 }
@@ -153,7 +153,7 @@ function handleAuctionBadge(act: ActivityLogEntry, state: GameState): void {
     type: FloatingTextType.Penalty,
     playerId: act.playerId ?? '',
     actionType: 'auction_win',
-    title: cellName ? `Đấu Giá ${cellName}` : 'Đấu Giá Thành Công',
+    title: cellName ? `Thắng đấu giá ${cellName} ➔ Nộp Kho Bạc` : 'Thắng đấu giá BĐS ➔ Nộp Kho Bạc',
     cellIndex: act.cellIndex,
   });
 }

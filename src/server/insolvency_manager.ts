@@ -1,8 +1,9 @@
 // [UC-GAME-053/MSS][UC-GAME-054/MSS][UC-GAME-055/MSS] Insolvency Manager
 import { TurnPhase, type Room, type Player, isRoomGameOver } from '../domain/room';
 import { PROPERTY_DEEDS, type PropertyRegistry, type PropertyStateMap } from '../domain/property_manager';
-import { decayModifiers } from '../domain/event_card_engine';
+import { advanceRoundBoundary } from './turn_loop';
 import type { AuctionSession } from './auction_manager';
+import { handleStartFireSaleAuction } from './bond_manager';
 
 const LEVEL_MULTIPLIER: Record<number, number> = { 0: 1, 1: 1.5, 2: 2.5, 3: 4 };
 
@@ -115,6 +116,7 @@ export function declareBankruptcy(
   creditorId?: string,
   auctions?: Map<string, AuctionSession>,
   roomCode?: string,
+  rng: () => number = Math.random,
 ): { gameOver: boolean; rankings?: Array<{ id: string; netWorth: number }> } {
   const player = room.players.find((p) => p.id === playerId);
   if (!player) return { gameOver: false };
@@ -125,6 +127,18 @@ export function declareBankruptcy(
 
   player.bankrupt = true;
   player.extraTurns = 0;
+
+  const collateralCells = new Set<number>();
+  if (player.bondContract?.isActive) {
+    for (const cell of player.bondContract.collateralCells) {
+      collateralCells.add(cell);
+      registry.delete(cell);
+      stateMap.delete(cell);
+      room.fireSaleQueue ??= [];
+      room.fireSaleQueue.push(cell);
+    }
+    player.bondContract = null;
+  }
 
   const creditor = creditorId && creditorId !== 'BANK'
     ? room.players.find((p) => p.id === creditorId)
@@ -137,6 +151,7 @@ export function declareBankruptcy(
     }
     for (const [cellIndex, owner] of Array.from(registry.entries())) {
       if (owner === playerId) {
+        if (collateralCells.has(cellIndex)) continue;
         registry.set(cellIndex, creditor.id);
         if (player.mortgagedProperties?.includes(cellIndex)) {
           creditor.mortgagedProperties ??= [];
@@ -186,6 +201,13 @@ export function declareBankruptcy(
     timestamp: Date.now(), delta: { playerId, creditorId },
   }));
 
+  if (room.fireSaleQueue && room.fireSaleQueue.length > 0 && auctions && roomCode) {
+    const first = room.fireSaleQueue.shift()!;
+    handleStartFireSaleAuction(room, first, auctions, roomCode, playerId);
+    room.phase = TurnPhase.AuctionPhase;
+    return { gameOver: false };
+  }
+
   if (isRoomGameOver(room)) {
     const rankings = calculateRankings(room, registry, stateMap);
     return { gameOver: true, rankings };
@@ -193,17 +215,19 @@ export function declareBankruptcy(
 
   // Chuyển lượt sang người chơi tiếp theo còn sống nếu người phá sản đang giữ lượt
   if (room.players[room.currentPlayerIndex]?.id === playerId && room.phase !== TurnPhase.AuctionPhase) {
-    advanceTurnAfterBankruptcy(room);
+    advanceTurnAfterBankruptcy(room, rng);
   }
   return { gameOver: false };
 }
 
-function advanceTurnAfterBankruptcy(room: Room): void {
+export function advanceTurnAfterBankruptcy(room: Room, rng: () => number = Math.random): void {
   const total = room.players.length;
   let next    = (room.currentPlayerIndex + 1) % total;
   let steps   = 0;
   while (steps < total) {
-    if (next === 0) room.activeModifiers = decayModifiers(room.activeModifiers);
+    if (next === 0) {
+      advanceRoundBoundary(room, rng);
+    }
     if (!room.players[next]?.bankrupt) break;
     next = (next + 1) % total;
     steps++;

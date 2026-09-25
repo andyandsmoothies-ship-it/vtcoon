@@ -1,6 +1,7 @@
 // [UI-S01/MSS][UI-S03/MSS][UI-S04/MSS] Game Store Types, Interfaces & Payloads
 import type { EventCardInfo, MarketModifier, PendingBuyoutSession } from '../../domain/room';
 import type { BotPersonality } from '../../domain/bot/bot_types';
+import type { BondContract } from '../../domain/bond_types';
 
 export interface PawnAnimationState {
   readonly playerId: string;
@@ -45,6 +46,7 @@ export interface PlayerHudInfo {
   readonly mascotIcon?: string;
   readonly mascotName?: string;
   readonly avatar?: string;
+  readonly bondContract?: BondContract | null;
 }
 
 export type PlayerInfo = PlayerHudInfo;

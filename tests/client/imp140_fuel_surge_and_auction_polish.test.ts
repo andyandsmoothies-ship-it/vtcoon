@@ -238,7 +238,7 @@ describe('[IMP-140: Station 1 RED] Fuel Surge Clarification & Auction Polish', (
       expect(html).toMatch(/class="[^"]*flex[^"]*flex-wrap[^"]*gap-1\.5[^"]*"/);
     });
 
-    it('[TC-IMP140.16/MSS][UC-IMP140][Facet-3/Streamline] Bộ đếm X/N Ô CỦA BẠN có shrink-0 để không bị bóp méo khi thu hẹp màn hình', () => {
+    it('[TC-IMP140.16/MSS][UC-IMP140][Facet-3/Streamline] Tinh giản AuctionDistrictCard: Không còn hiển thị bộ đếm Ô CỦA BẠN (chuẩn IMP-193)', () => {
       const html = renderToStaticMarkup(
         React.createElement(AuctionDistrictCard, {
           cellIndex: 6,
@@ -247,7 +247,7 @@ describe('[IMP-140: Station 1 RED] Fuel Surge Clarification & Auction Polish', (
           myId: 'p1',
         })
       );
-      expect(html).toMatch(/class="[^"]*shrink-0[^"]*"[^>]*>[^<]*Ô CỦA BẠN/);
+      expect(html).not.toContain('Ô CỦA BẠN');
     });
 
     it('[TC-IMP140.17/MSS][UC-IMP140][Facet-3/Streamline] Huy hiệu chiến lược có max-w-[140px] truncate sm:max-w-none', () => {
@@ -316,7 +316,7 @@ describe('[IMP-140: Station 1 RED] Fuel Surge Clarification & Auction Polish', (
       );
       expect(html).toContain('data-testid="auction-district-intelligence"');
       expect(html).toContain('data-testid="auction-strategic-hint"');
-      expect(html).toContain('Đông Nam Bộ');
+      expect(html).toContain('Nhóm Xanh Da Trời');
     });
   });
 });

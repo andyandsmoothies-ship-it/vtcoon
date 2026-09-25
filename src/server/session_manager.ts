@@ -1,4 +1,4 @@
-import type { Room, EventCardInfo, HoseResultInfo, MarketModifier, PendingBuyoutSession } from '../domain/room';
+import type { Room, EventCardInfo, HoseResultInfo, MarketModifier, PendingBuyoutSession, BondContract } from '../domain/room';
 import { BOARD_SIZE, TurnPhase } from '../domain/room';
 import type { PropertyRegistry, PropertyStateMap } from '../domain/property_manager';
 import type { AuctionSession } from './auction_manager';
@@ -40,6 +40,7 @@ export interface PlayerDelta {
   readonly skipNextTurn?:       boolean;
   readonly consecutiveDoubles?: number;
   readonly extraTurns?:         number;
+  readonly bondContract?:       BondContract | null;
 }
 
 export interface AuctionPayload {
@@ -53,6 +54,7 @@ export interface AuctionPayload {
   readonly insolvencyPlayerId?: string;
   readonly isForeclosure?: boolean;
   readonly startingBid?: number;
+  readonly isFireSale?: boolean;
   isConcluded?: boolean;
   winnerId?: string | null;
   finalPrice?: number;
@@ -118,6 +120,7 @@ function buildAuctionDelta(
           insolvencyPlayerId: session.insolvencyPlayerId,
           isForeclosure: true,
         } : {}),
+        isFireSale: session.isFireSale ?? false,
       };
     }
   } else {
@@ -178,6 +181,7 @@ export function buildDeltaFromRoom(
     id: p.id,
     position: p.position,
     balance: p.balance,
+    bondContract: p.bondContract ?? null,
     ...(p.bankrupt ? { bankrupt: true } : {}),
     ...(p.isBot ? { isBot: true } : {}),
     ...(p.overdraftRoundsLeft ? { overdraftRoundsLeft: p.overdraftRoundsLeft } : {}),

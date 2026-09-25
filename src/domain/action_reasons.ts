@@ -32,6 +32,10 @@ export const ActionRejectReason = {
   EVEN_DOWNGRADE_VIOLATION:  'EVEN_DOWNGRADE_VIOLATION',
   GROUP_MORTGAGED:           'GROUP_MORTGAGED',
   TRADE_REJECTED:            'TRADE_REJECTED',
+  LIQUIDITY_FROZEN:          'LIQUIDITY_FROZEN',
+  BOND_COLLATERAL_LOCKED:    'BOND_COLLATERAL_LOCKED',
+  BOND_NOT_ELIGIBLE:         'BOND_NOT_ELIGIBLE',
+  BOND_ALREADY_ACTIVE:       'BOND_ALREADY_ACTIVE',
 } as const;
 
 export type ActionRejectReason = (typeof ActionRejectReason)[keyof typeof ActionRejectReason];

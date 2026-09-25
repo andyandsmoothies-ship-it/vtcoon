@@ -10,9 +10,9 @@
   - TIER 1 (Domain Logic / FSM / Server): Max 400 LOC (modular warning at 300 LOC, hard error at 550 LOC).
   - TIER 2 (UI Components / 3D Canvas / Views): Max 500 LOC (extract hooks if logic exceeds 50 LOC; warning at 400 LOC).
   - TIER 3 (Static Data / Config / Board Tables): Max 800 LOC (e.g. `tile_icons.ts`, `property_manager_data.ts`, `board_config.ts`; warning at 650 LOC).
-  - Living / Integration Tests: Max 600 LOC (isolated unit tests <= 300 LOC).
+  - Living / Integration Tests: Max 600 LOC (isolated unit tests <= 300 LOC; tolerance <= 650 LOC for suites >= 16 atomic tests).
   - Functions: Max 30 LOC, Cyclomatic Complexity <= 5 (logic warns at 50 SLOC, fails at 80 SLOC; declarative JSX/textures exempt).
-  - Pre-Coding Delta LOC: Any target file >= 300 LOC MUST include `[Current + Delta = Expected]` calculation. If `Expected > 400`, Task 1 MUST extract submodules before adding features.
+  - Pre-Coding Delta LOC: Any target file >= 300 LOC MUST include `[Current + Delta = Expected]` calculation. If Tier 1 `Expected > 400` or Tier 2 `Expected > 480`, Task 1 MUST extract submodules before adding features. Declarative Tailwind JSX layouts are exempt from premature extraction if custom hooks logic <= 50 LOC.
   - Subtractive Refactoring: When replacing states, listeners, or flags, plans MUST explicitly specify obsolete code to delete.
   - Anti-Regression Guard: Code golf, line stripping, and fake no-op stubs are strictly forbidden. Files under 300 LOC must stay intact.
 - **Slice Scope Confinement**: Implement only flows in current ticket. Log deferred flows in Tech Debt Ledger.

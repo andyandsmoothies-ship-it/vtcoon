@@ -5,6 +5,9 @@ import { formatCurrency } from '../ui_helpers';
 import { COLOR_GROUP_HEX } from '../../../domain/theme';
 import { BOARD_CONFIG } from '../../../domain/board_config';
 import { analyzePropertyMonopolyInsight } from './portfolio_monopoly_analytics';
+import { PortfolioTabHeader, type PortfolioTab } from './portfolio_tab_header';
+import { BondIssuanceTab } from './bond_issuance_tab';
+import type { BondContract } from '../../../domain/bond_types';
 
 export interface PropertyPortfolioModalProps {
   readonly ownedProperties: readonly number[];
@@ -34,6 +37,9 @@ export interface PropertyPortfolioModalProps {
   readonly onRedeem?: (cellIndex: number) => void;
   readonly onDowngrade?: (cellIndex: number) => void;
   readonly onClose?: () => void;
+  readonly bondContract?: BondContract | null;
+  readonly onIssueBond?: () => void;
+  readonly onRepayBond?: () => void;
 }
 
 const TIER_NAMES = ['Đất Nền', 'Nhà Phố C1', 'Khách Sạn C2', 'Resort C3'];
@@ -55,7 +61,11 @@ export function PropertyPortfolioModal({
   onRedeem,
   onDowngrade,
   onClose,
+  bondContract,
+  onIssueBond,
+  onRepayBond,
 }: PropertyPortfolioModalProps): React.ReactElement {
+  const [activeTab, setActiveTab] = useState<PortfolioTab>('properties');
   const isNegative = currentBalance < 0 || isInInsolvency;
   const deficitAmount = currentBalance < 0 ? Math.abs(currentBalance) : 0;
   const [filter, setFilter] = useState<'all' | 'nearMonopoly' | 'upgradeable' | 'mortgaged'>('all');
@@ -118,8 +128,28 @@ export function PropertyPortfolioModal({
         )}
       </header>
 
-      {/* Banner Cứu Nợ Khẩn Cấp nếu đang âm tiền */}
-      {isNegative && (
+      <div className="px-4 pt-3 shrink-0">
+        <PortfolioTabHeader
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          hasBond={Boolean(bondContract?.isActive)}
+        />
+      </div>
+
+      {activeTab === 'bonds' ? (
+        <div className="p-4 flex-1 overflow-y-auto">
+          <BondIssuanceTab
+            bondContract={bondContract}
+            balance={currentBalance}
+            isMyTurn={isMyTurn}
+            onIssueBond={onIssueBond}
+            onRepayBond={onRepayBond}
+          />
+        </div>
+      ) : (
+        <>
+          {/* Banner Cứu Nợ Khẩn Cấp nếu đang âm tiền */}
+          {isNegative && (
         <div className="bg-rose-50 border-b border-rose-300 p-3.5 flex items-center justify-between gap-3 text-xs shrink-0">
           <div className="flex items-center gap-2">
             <span className="text-lg">⚠️</span>
@@ -440,6 +470,8 @@ export function PropertyPortfolioModal({
           </div>
         )}
       </div>
+      </>
+      )}
 
       {/* Footer */}
       <footer className="p-3 pb-8 sm:pb-3 bg-[#F7F2E7] border-t border-slate-300 flex items-center justify-between text-xs shrink-0">

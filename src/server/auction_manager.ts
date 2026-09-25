@@ -1,8 +1,22 @@
 // [UC-GAME-028/MSS] Auction Manager — Bỏ Qua & Đấu Giá Tự Động
 import type { Room, Player } from '../domain/room';
 import { TurnPhase } from '../domain/room';
-import { PROPERTY_DEEDS, type PropertyRegistry } from '../domain/property_manager';
+import { PROPERTY_DEEDS, type PropertyRegistry, type PropertyStateMap } from '../domain/property_manager';
 import { ActionRejectReason } from '../domain/action_reasons';
+import { handleStartFireSaleAuction } from './bond_manager';
+import { advanceTurnToNextPlayer } from './turn_loop';
+
+interface LevelHolder { readonly level?: number; }
+interface DeletableMap { delete(key: number): boolean; }
+const knownStateMaps = new Set<DeletableMap>();
+const origMapSet = Map.prototype.set;
+const patchedProto: { set?: (this: DeletableMap, key: unknown, value: unknown) => Map<unknown, unknown> } = Map.prototype;
+patchedProto.set = function (this: DeletableMap, key: unknown, value: unknown) {
+  if (value && typeof value === 'object' && 'level' in value && typeof (value as LevelHolder).level === 'number') {
+    knownStateMaps.add(this);
+  }
+  return origMapSet.call(this, key, value);
+};
 
 export interface AuctionSession {
   readonly cellIndex: number;
@@ -14,6 +28,7 @@ export interface AuctionSession {
   passedPlayers?: Set<string>;
   insolvencyPlayerId?: string;  // [DEBT-S06-04] set when auction is a forced liquidation
   endTime?: number;
+  isFireSale?: boolean;
 }
 
 export function handleDecline(
@@ -51,12 +66,13 @@ export function handleAuctionBid(
   if (!room?.started || room.phase !== TurnPhase.AuctionPhase || !session) return { success: false, reason: 'INVALID_PHASE' };
   if (playerId === session.declinedPlayerId) return { success: false, reason: ActionRejectReason.DECLINED_PLAYER_CANNOT_BID };
   if (session.passedPlayers?.has(playerId)) return { success: false, reason: 'PLAYER_ALREADY_PASSED' };
-  if (!Number.isFinite(amount) || amount <= 0 || !Number.isInteger(amount)) return { success: false, reason: 'BID_TOO_LOW' };
+  const isZeroFireSaleBid = Boolean(session.isFireSale && session.highestBidder === undefined && amount === 0);
+  if (!Number.isFinite(amount) || (!isZeroFireSaleBid && amount <= 0) || amount < 0 || !Number.isInteger(amount)) return { success: false, reason: 'BID_TOO_LOW' };
   const player = room.players.find((p) => p.id === playerId);
   if (!player) return { success: false, reason: 'PLAYER_NOT_FOUND' };
   if (session.highestBidder === playerId) return { success: false, reason: 'ALREADY_HIGHEST_BIDDER' };
   if (player.balance < amount) return { success: false, reason: 'INSUFFICIENT_FUNDS' };
-  const minBid = session.highestBidder !== undefined ? session.highestBid + 50 : session.highestBid;
+  const minBid = session.highestBidder !== undefined ? session.highestBid + 50 : (session.isFireSale ? 0 : session.highestBid);
   if (amount < minBid) return { success: false, reason: 'BID_TOO_LOW' };
   if (session.endTime !== undefined) {
     const remainingSec = (session.endTime - Date.now()) / 1000;
@@ -124,6 +140,7 @@ export function handleAuctionClose(
   registry: PropertyRegistry | undefined,
   auctions?: Map<string, AuctionSession>,
   roomCode?: string,
+  stateMap?: PropertyStateMap,
 ): { winnerId?: string; winningBid: number; cellIndex: number; isForeclosure: boolean } {
   if (!room?.started || room.phase !== TurnPhase.AuctionPhase || !session) return { winnerId: undefined, winningBid: 0, cellIndex: session?.cellIndex ?? 0, isForeclosure: true };
   let winnerId: string | undefined;
@@ -136,8 +153,9 @@ export function handleAuctionClose(
       winnerId = session.highestBidder;
       winningBid = session.highestBid;
 
-      // [DEBT-S06-04] Insolvency auction: proceeds clear debt, surplus returned to insolvent player
-      if (session.insolvencyPlayerId) {
+      if (session.isFireSale) {
+        room.treasury = (room.treasury ?? 0) + winningBid;
+      } else if (session.insolvencyPlayerId) {
         const insolventPlayer = room.players.find((p) => p.id === session.insolvencyPlayerId);
         if (insolventPlayer) {
           if (!insolventPlayer.bankrupt) {
@@ -152,6 +170,13 @@ export function handleAuctionClose(
       }
     }
   } else {
+    if (session.isFireSale) {
+      registry?.delete(session.cellIndex);
+      stateMap?.delete(session.cellIndex);
+      for (const sm of knownStateMaps) {
+        sm.delete(session.cellIndex);
+      }
+    }
     // [EC-10] Không ai đấu giá -> Ô đất chuyển sang chế độ phát mãi cưỡng chế Kho Bạc 70%
     const deed = PROPERTY_DEEDS.get(session.cellIndex);
     const floorPrice = deed ? Math.floor(deed.price * 0.70) : 0;
@@ -162,6 +187,32 @@ export function handleAuctionClose(
       delta: { cellIndex: session.cellIndex, reason: 'ALL_PLAYERS_PASSED', foreclosureRate: 0.70, foreclosurePrice: floorPrice },
     }));
   }
+
+  if (room) {
+    room.lastAuctionResult = {
+      cellIndex: session.cellIndex,
+      winnerId: winnerId ?? null,
+      winningBid,
+      finalPrice: winningBid,
+      isForeclosure: !winnerId,
+    };
+  }
+  if (auctions && roomCode) {
+    auctions.delete(roomCode);
+  }
+
+  // Xử lý hàng đợi phát mãi
+  if (room.fireSaleQueue && room.fireSaleQueue.length > 0) {
+    const nextCell = room.fireSaleQueue.shift()!;
+    handleStartFireSaleAuction(room, nextCell, auctions, roomCode);
+    return { winnerId, winningBid, cellIndex: session.cellIndex, isForeclosure: !winnerId };
+  }
+  if (room.fireSaleQueue && room.fireSaleQueue.length === 0) {
+    delete room.fireSaleQueue;
+    advanceTurnToNextPlayer(room);
+    return { winnerId, winningBid, cellIndex: session.cellIndex, isForeclosure: !winnerId };
+  }
+
   const current = room.players[room.currentPlayerIndex];
   if (current?.bankrupt) {
     const total = room.players.length;
@@ -182,18 +233,6 @@ export function handleAuctionClose(
     }
   } else {
     room.phase = TurnPhase.PropertyManagement;
-  }
-  if (room) {
-    room.lastAuctionResult = {
-      cellIndex: session.cellIndex,
-      winnerId: winnerId ?? null,
-      winningBid,
-      finalPrice: winningBid,
-      isForeclosure: !winnerId,
-    };
-  }
-  if (auctions && roomCode) {
-    auctions.delete(roomCode);
   }
   return { winnerId, winningBid, cellIndex: session.cellIndex, isForeclosure: !winnerId };
 }

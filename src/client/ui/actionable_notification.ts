@@ -108,6 +108,13 @@ const ACTIONABLE_NOTIFICATIONS_MAP: Record<string, ActionableNotification> = {
     tone: 'info',
     actionHint: 'Chuộc lại thế chấp để khôi phục quyền thu tiền thuê.',
   },
+  LIQUIDITY_FROZEN: {
+    icon: '🧊',
+    title: 'Đóng Băng Thanh Khoản',
+    description: 'Bất động sản đang trong chu kỳ đóng băng thanh khoản, không thể thế chấp!',
+    tone: 'warning',
+    actionHint: 'Chờ chu kỳ đóng băng kết thúc hoặc thế chấp bất động sản thuộc nhóm khác.',
+  },
   NOT_MORTGAGED: {
     icon: '🔓',
     title: 'Tài Sản Chưa Thế Chấp',

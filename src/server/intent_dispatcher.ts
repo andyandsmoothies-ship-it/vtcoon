@@ -22,6 +22,8 @@ export type PlayerIntent =
   | { type: 'INTENT_SKIP' }
   | { type: 'INTENT_BAIL_OUT' }
   | { type: 'INTENT_BANKRUPTCY'; creditorId?: string }
+  | { type: 'INTENT_ISSUE_BOND' }
+  | { type: 'INTENT_REPAY_BOND' }
   | { type: 'INTENT_ROLL' };
 
 type IntentHandler = (mgr: RoomManager, rc: string, p: string, intent: PlayerIntent) => { success: boolean; reason?: string; rollResult?: RollResult };
@@ -75,6 +77,8 @@ const INTENT_DISPATCH: Record<PlayerIntent['type'], IntentHandler> = {
     m.handleBankruptcy(rc, p, ci.creditorId);
     return { success: true };
   },
+  INTENT_ISSUE_BOND: (m, rc, p) => m.handleIssueBond(rc, p),
+  INTENT_REPAY_BOND: (m, rc, p) => m.handleRepayBond(rc, p),
   INTENT_END_TURN: (m, rc, p) => {
     const room = m.getRoom(rc);
     const current = room?.players[room.currentPlayerIndex];

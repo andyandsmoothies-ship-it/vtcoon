@@ -150,7 +150,7 @@ describe('[IMP-122] Comprehensive Financial & Event Card Pop-Ups Contract Suite'
       );
       expect(payerBadge).toBeDefined();
       expect(payerBadge?.text).toBe('-500 Tr.');
-      expect(payerBadge?.title).toContain('Tiền thuê');
+      expect(payerBadge?.title).toContain('Trả thuê');
       expect(payerBadge?.targetPlayerName).toContain('Tỷ Phú Hà Nội');
     });
 
@@ -175,7 +175,7 @@ describe('[IMP-122] Comprehensive Financial & Event Card Pop-Ups Contract Suite'
       );
       expect(receiverBadge).toBeDefined();
       expect(receiverBadge?.text).toBe('+500 Tr.');
-      expect(receiverBadge?.title).toContain('Thu tiền thuê');
+      expect(receiverBadge?.title).toContain('Thu thuê');
       expect(receiverBadge?.targetPlayerName).toContain('Đại Gia Sài Gòn');
     });
 
@@ -265,7 +265,7 @@ describe('[IMP-122] Comprehensive Financial & Event Card Pop-Ups Contract Suite'
       );
       expect(auctionBadge).toBeDefined();
       expect(auctionBadge?.text).toBe('-3.200 Tr.');
-      expect(auctionBadge?.title).toContain('Đấu Giá');
+      expect(auctionBadge?.title).toContain('Thắng đấu giá');
     });
   });
 

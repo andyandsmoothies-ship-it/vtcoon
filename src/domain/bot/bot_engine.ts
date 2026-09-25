@@ -3,12 +3,11 @@
 import type { Player, Room, MarketModifier, CurrentAuctionState } from '../room';
 import { TurnPhase } from '../room';
 import { BOARD_CONFIG, CellType } from '../board_config';
-import { MarketCardId } from '../event_card_engine';
 import type { PropertyRegistry, PropertyStateMap } from '../property_data';
 import { PROPERTY_DEEDS } from '../property_data';
-import { hasMonopoly, checkEvenBuilding } from '../property_upgrade';
+import { hasMonopoly, checkEvenBuilding, calculateUpgradeCost } from '../property_upgrade';
 
-import { BotPersonality, BotPosture, type BotIntent, type TileValuation, type BotConfig, DEFAULT_MIN_SAFETY_BUFFER } from './bot_types';
+import { BotPersonality, BotPosture, type BotIntent, type TileValuation, type BotConfig } from './bot_types';
 import {
   evaluateBotPosture,
   calculateAmbushScore,
@@ -62,15 +61,7 @@ export function getUpgradeCost(
   stateMap: PropertyStateMap,
   modifiers?: readonly MarketModifier[],
 ): number {
-  const deed = PROPERTY_DEEDS.get(cellIndex);
-  if (!deed?.upgradeCosts) return 0;
-  const level = stateMap.get(cellIndex)?.level ?? 0;
-  if (level >= 3) return 0;
-  let cost = deed.upgradeCosts[level] ?? 0;
-  if (modifiers?.some((m) => m.type === MarketCardId.MC_CREDIT_STIMULUS && m.remainingRounds > 0)) {
-    cost = Math.floor(cost * 0.8);
-  }
-  return cost;
+  return calculateUpgradeCost(cellIndex, stateMap.get(cellIndex)?.level ?? 0, modifiers);
 }
 
 function decidePassiveActionIntent(

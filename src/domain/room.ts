@@ -1,6 +1,10 @@
 // [UC-GAME-001/MSS][UC-GAME-008/MSS] Room & Player Domain Types
 import type { MarketCardId, ChanceCardId } from './event_card_engine';
+import type { MacroCycleType } from './macro_cycle_types';
+import type { ColorGroup } from './board_config';
+import type { BondContract } from './bond_types';
 export { ActionRejectReason } from './action_reasons';
+export type { BondContract } from './bond_types';
 
 export const BOARD_SIZE       = 40;
 export const GO_BONUS         = 2_000;
@@ -38,11 +42,12 @@ export enum TurnPhase {
 }
 
 export interface MarketModifier {
-  readonly type: MarketCardId | ChanceCardId;
+  readonly type: MarketCardId | ChanceCardId | MacroCycleType;
   readonly affectedCells: readonly number[];
   remainingRounds: number;
   readonly multiplier?: number;
   readonly beneficiaryId?: string;
+  readonly colorGroup?: ColorGroup;
 }
 
 export interface Player {
@@ -72,6 +77,7 @@ export interface Player {
   ownerSlot?:           number;
   mascotIcon?:          string;
   mascotName?:          string;
+  bondContract?:        BondContract | null;
 }
 
 export interface CurrentAuctionState {
@@ -168,6 +174,8 @@ export interface Room {
   pendingBuyout?:        PendingBuyoutSession | null;
   pendingTradeOffer?:    PendingTradeOfferInfo | null;
   lastTargetTradeOfferRound?: Record<string, number>;
+  activeMacroGroup?:          ColorGroup;
+  fireSaleQueue?:             number[];
 }
 
 

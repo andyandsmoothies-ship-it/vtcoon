@@ -13,6 +13,7 @@ export interface MarketEventTickerProps {
     readonly remainingRounds: number;
     readonly affectedCells?: readonly number[];
     readonly beneficiaryId?: string;
+    readonly colorGroup?: string;
   }>;
 }
 
@@ -34,11 +35,18 @@ export function resolveMarketIcon(type: string): string {
     case MarketCardId.MC_URBAN_PLANNING: return '📐';
     case MarketCardId.MC_UTILITY_DOUBLE: return '⚡';
     case ChanceCardId.CC_PORT_EXCLUSIVE: return '🚢';
+    case 'MACRO_LAND_FEVER': return '🌋';
+    case 'MACRO_LIQUIDITY_FREEZE': return '🧊';
     default: return '🎴';
   }
 }
 
 export function resolveMarketTitle(type: string): string {
+  const macroDict = viTranslations.macroCycles as Record<string, string | undefined>;
+  const macroTranslated = macroDict[type];
+  if (macroTranslated) {
+    return macroTranslated;
+  }
   const marketDict = viTranslations.marketCards as Record<string, string | undefined>;
   const marketTranslated = marketDict[type];
   if (marketTranslated) {
@@ -53,6 +61,10 @@ export function resolveMarketTitle(type: string): string {
 }
 
 export const ACTIVE_MARKET_EFFECT_SUMMARIES: Readonly<Record<string, string>> = {
+  MACRO_LAND_FEVER:
+    'Sốt đất vĩ mô: Tăng 250% tiền thuê và giảm 25% chi phí xây dựng cho nhóm màu.',
+  MACRO_LIQUIDITY_FREEZE:
+    'Đóng băng thanh khoản: Giảm 50% tiền thuê và cấm thế chấp BĐS trong nhóm màu.',
   [MarketCardId.MC_PUBLIC_INVEST]:
     'Nhân đôi cước vận tải tại 4 Ga Tàu trên toàn bàn cờ.',
   [MarketCardId.MC_COASTAL_STORM]:

@@ -221,7 +221,7 @@ describe('[IMP-138: Station 1 RED] Auction District Intelligence & Monopoly Rada
           playersInfo: MOCK_PLAYERS,
         })
       );
-      expect(html).toContain('Đông Nam Bộ');
+      expect(html).toContain('Nhóm Xanh Da Trời');
     });
 
     it('[TC-IMP138.23/MSS][UC-GAME-022][IMP-138][Facet-4/Component] Hiển thị chips cho 3 ô trong phân khu Đông Nam Bộ', () => {

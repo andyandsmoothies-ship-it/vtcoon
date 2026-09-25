@@ -4,6 +4,8 @@ import type { Room, Player } from '../domain/room';
 import type { DiceResult } from '../domain/dice';
 import { ChanceCardId } from '../domain/event_card_types';
 import { ActionRejectReason } from '../domain/action_reasons';
+import type { PropertyRegistry, PropertyStateMap } from '../domain/property_manager';
+import { calculateNetWorth } from './insolvency_manager';
 
 const turnStartedInAudit = new Map<string, boolean>();
 
@@ -51,19 +53,36 @@ export function handleTurnStart(room: Room | undefined, playerId: string): { can
   return { canRoll: true };
 }
 
+function hasOwnedProperties(playerId: string, registry?: PropertyRegistry): boolean {
+  if (!registry) return false;
+  for (const owner of registry.values()) {
+    if (owner === playerId) return true;
+  }
+  return false;
+}
+
 export function handleBailOut(
   room: Room | undefined,
   playerId: string,
   rolledThisTurn: boolean,
+  registry?: PropertyRegistry,
+  stateMap?: PropertyStateMap,
 ): { success: boolean; reason?: string } {
   if (!room?.started) return { success: false, reason: ActionRejectReason.INVALID_PLAYER };
   const current = room.players[room.currentPlayerIndex];
   if (current?.id !== playerId) return { success: false, reason: ActionRejectReason.INVALID_PLAYER };
   if (current.auditTurnsLeft <= 0) return { success: false, reason: 'NOT_IN_AUDIT' };
-  if (current.balance < 500) return { success: false, reason: ActionRejectReason.INSUFFICIENT_FUNDS };
-  current.balance -= 500;
-  room.treasury = (room.treasury ?? 0) + 500;
+
+  const netWorth = (registry && stateMap && room && hasOwnedProperties(current.id, registry))
+    ? calculateNetWorth(current.id, registry, stateMap, room.players)
+    : 0;
+  const bailAmount = Math.max(500, Math.floor(netWorth * 0.10));
+
+  if (current.balance < bailAmount) return { success: false, reason: ActionRejectReason.INSUFFICIENT_FUNDS };
+  current.balance -= bailAmount;
+  room.treasury = (room.treasury ?? 0) + bailAmount;
   current.auditTurnsLeft = 0;
+  if (current.inAudit) current.inAudit = false;
   room.phase = rolledThisTurn ? TurnPhase.PropertyManagement : TurnPhase.WaitingRoll;
   return { success: true };
 }
@@ -108,12 +127,22 @@ export function processRollDoubles(room: Room, current: Player, dice: DiceResult
   return { stopped: true, result: { dice, player, passedGo: false, rentCharged: 0 } };
 }
 
-export function handleAuditTurnTransition(room: Room, player: Player): void {
+export function handleAuditTurnTransition(
+  room: Room,
+  player: Player,
+  registry?: PropertyRegistry,
+  stateMap?: PropertyStateMap,
+): void {
   if (player.auditTurnsLeft > 0) {
     player.auditTurnsLeft -= 1;
     if (player.auditTurnsLeft === 0) {
-      player.balance -= 500;
-      room.treasury = (room.treasury ?? 0) + 500;
+      if (player.inAudit) player.inAudit = false;
+      const netWorth = (registry && stateMap && hasOwnedProperties(player.id, registry))
+        ? calculateNetWorth(player.id, registry, stateMap, room.players)
+        : 0;
+      const penaltyAmount = Math.max(500, Math.floor(netWorth * 0.10));
+      player.balance -= penaltyAmount;
+      room.treasury = (room.treasury ?? 0) + penaltyAmount;
     }
   }
 }

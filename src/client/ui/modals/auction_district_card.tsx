@@ -7,12 +7,13 @@ import {
 } from './auction_intelligence';
 import { formatCurrency } from '../ui_helpers';
 import { useGameStore } from '../../store/game_store';
+import type { PlayerInfo } from '../../store/game_store_types';
 
 export interface AuctionDistrictCardProps {
   readonly cellIndex: number;
   readonly currentBid: number;
   readonly myId?: string;
-  readonly playersInfo?: Record<string, any>;
+  readonly playersInfo?: Record<string, PlayerInfo>;
   readonly levelMap?: Record<number, number>;
   readonly isForeclosure?: boolean;
   readonly badgeMaxWidth?: string;
@@ -21,28 +22,22 @@ export interface AuctionDistrictCardProps {
 function getToneTheme(tone: StrategicHintTone): { container: string; badge: string } {
   switch (tone) {
     case 'emerald':
-      return {
-        container: 'bg-emerald-50/90 border-emerald-300 text-emerald-950',
-        badge: 'bg-emerald-200 text-emerald-950 border-emerald-400',
-      };
+      return { container: 'bg-emerald-50/90 border-emerald-300 text-emerald-950', badge: 'bg-emerald-200 text-emerald-950 border-emerald-400' };
     case 'rose':
-      return {
-        container: 'bg-rose-50/90 border-rose-300 text-rose-950',
-        badge: 'bg-rose-200 text-rose-950 border-rose-400',
-      };
+      return { container: 'bg-rose-50/90 border-rose-300 text-rose-950', badge: 'bg-rose-200 text-rose-950 border-rose-400' };
     case 'amber':
-      return {
-        container: 'bg-amber-50/90 border-amber-300 text-amber-950',
-        badge: 'bg-amber-200 text-amber-950 border-amber-400',
-      };
+      return { container: 'bg-amber-50/90 border-amber-300 text-amber-950', badge: 'bg-amber-200 text-amber-950 border-amber-400' };
     case 'blue':
     default:
-      return {
-        container: 'bg-sky-50/90 border-sky-300 text-sky-950',
-        badge: 'bg-sky-200 text-sky-950 border-sky-400',
-      };
+      return { container: 'bg-sky-50/90 border-sky-300 text-sky-950', badge: 'bg-sky-200 text-sky-950 border-sky-400' };
   }
 }
+
+const COLOR_GROUP_NAMES: Record<string, string> = {
+  Nau: 'Nâu', XanhDaTroi: 'Xanh Da Trời', Hong: 'Hồng', Cam: 'Cam',
+  Do: 'Đỏ', Vang: 'Vàng', XanhLa: 'Xanh Lá', Tim: 'Tím',
+  Railroad: 'Hạ Tầng', Utility: 'Tiện Ích',
+};
 
 function renderCellChip(cell: DistrictCellChip): React.ReactElement {
   let badgeClasses = 'border-amber-900/10 bg-white/90 text-slate-600';
@@ -70,7 +65,7 @@ function renderCellChip(cell: DistrictCellChip): React.ReactElement {
       }`}
     >
       <div className="flex items-center justify-between gap-1 mb-1 min-w-0">
-        <span className="font-bold text-slate-900 text-xs md:text-sm truncate block" title={cell.name}>
+        <span className="font-bold text-slate-900 line-clamp-2 leading-tight text-[11px] sm:text-xs block" title={cell.name}>
           {cell.name}
         </span>
         {cell.level > 0 && (
@@ -135,7 +130,7 @@ export function AuctionDistrictCard({
             style={{ backgroundColor: info.hexColor }}
           />
           <h4 className="text-xs md:text-sm font-black uppercase tracking-wider text-slate-900 truncate">
-            {info.districtName}
+            {COLOR_GROUP_NAMES[info.districtId] ? `Nhóm ${COLOR_GROUP_NAMES[info.districtId]}` : info.districtName}
           </h4>
           <span
             data-testid="auction-strategic-hint"
@@ -152,9 +147,6 @@ export function AuctionDistrictCard({
             </span>
           )}
         </div>
-        <span className="text-xs font-mono font-bold text-slate-600 bg-white/80 px-2 py-0.5 rounded-full border border-amber-900/10 shrink-0 ml-auto">
-          {info.ownedByMeCount}/{info.totalCells} Ô CỦA BẠN
-        </span>
       </div>
 
       {/* Lưới chips các ô trong phân khu */}
@@ -163,47 +155,52 @@ export function AuctionDistrictCard({
       </div>
 
       {/* Thanh tiền thuê mini (Mini Rent Bar) */}
-      <div className="bg-white/70 rounded-xl p-2 border border-amber-900/10 flex items-center justify-between text-xs">
-        {info.rentPreview.type === 'property' && (
-          <>
-            <div className="text-center flex-1 border-r border-amber-900/10 pr-1">
-              <span className="text-[11px] text-slate-500 block font-semibold">C0 (ĐẤT)</span>
+      <div className="space-y-1">
+        <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-0.5">
+          BIỂU PHÍ THUÊ Ô ĐẤU GIÁ
+        </div>
+        <div className="bg-white/70 rounded-xl p-2 border border-amber-900/10 flex items-center justify-between text-xs">
+          {info.rentPreview.type === 'property' && (
+            <>
+              <div className="text-center flex-1 border-r border-amber-900/10 pr-1">
+                <span className="text-[11px] text-slate-500 block font-semibold">C0 (ĐẤT)</span>
+                <span className="font-mono text-xs font-bold text-slate-800">
+                  {formatCurrency(info.rentPreview.rent0 ?? 0)}
+                </span>
+              </div>
+              <div className="text-center flex-1 border-r border-amber-900/10 px-1">
+                <span className="text-[11px] text-emerald-700 block font-black">2x (ĐỘC QUYỀN)</span>
+                <span className="font-mono text-xs font-bold text-emerald-700">
+                  {formatCurrency(info.rentPreview.rentMonopoly ?? 0)}
+                </span>
+              </div>
+              <div className="text-center flex-1 pl-1">
+                <span className="text-[11px] text-amber-700 block font-semibold">C3 (KHÁCH SẠN)</span>
+                <span className="font-mono text-xs font-bold text-amber-800">
+                  {formatCurrency(info.rentPreview.rentC3 ?? 0)}
+                </span>
+              </div>
+            </>
+          )}
+
+          {info.rentPreview.type === 'railroad' && (
+            <div className="w-full flex items-center justify-between px-1">
+              <span className="text-xs text-slate-600 font-bold">CƯỚC 1-4 GA:</span>
               <span className="font-mono text-xs font-bold text-slate-800">
-                {formatCurrency(info.rentPreview.rent0 ?? 0)}
+                500 / 1.000 / 2.000 / 4.000 Tr.
               </span>
             </div>
-            <div className="text-center flex-1 border-r border-amber-900/10 px-1">
-              <span className="text-[11px] text-emerald-700 block font-black">2x (ĐỘC QUYỀN)</span>
-              <span className="font-mono text-xs font-bold text-emerald-700">
-                {formatCurrency(info.rentPreview.rentMonopoly ?? 0)}
-              </span>
-            </div>
-            <div className="text-center flex-1 pl-1">
-              <span className="text-[11px] text-amber-700 block font-semibold">C3 (KHÁCH SẠN)</span>
-              <span className="font-mono text-xs font-bold text-amber-800">
-                {formatCurrency(info.rentPreview.rentC3 ?? 0)}
-              </span>
-            </div>
-          </>
-        )}
+          )}
 
-        {info.rentPreview.type === 'railroad' && (
-          <div className="w-full flex items-center justify-between px-1">
-            <span className="text-xs text-slate-600 font-bold">CƯỚC 1-4 GA:</span>
-            <span className="font-mono text-xs font-bold text-slate-800">
-              500 / 1.000 / 2.000 / 4.000 Tr.
-            </span>
-          </div>
-        )}
-
-        {info.rentPreview.type === 'utility' && (
-          <div className="w-full flex items-center justify-between px-1">
-            <span className="text-xs text-slate-600 font-bold">CƯỚC TIỆN ÍCH:</span>
-            <span className="font-mono text-xs font-bold text-slate-800">
-              Điểm xúc xắc x40 Tr. (1 ô) | x100 Tr. (2 ô)
-            </span>
-          </div>
-        )}
+          {info.rentPreview.type === 'utility' && (
+            <div className="w-full flex items-center justify-between px-1">
+              <span className="text-xs text-slate-600 font-bold">CƯỚC TIỆN ÍCH:</span>
+              <span className="font-mono text-xs font-bold text-slate-800">
+                Điểm xúc xắc x40 Tr. (1 ô) | x100 Tr. (2 ô)
+              </span>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

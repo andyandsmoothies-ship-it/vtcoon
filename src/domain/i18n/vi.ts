@@ -5,6 +5,7 @@
 import { MarketCardId, ChanceCardId } from '../event_card_types';
 import { ActionRejectReason } from '../action_reasons';
 import { TurnPhase } from '../room';
+import { MacroCycleType } from '../macro_cycle_types';
 
 export const vi = {
   marketCards: {
@@ -77,7 +78,16 @@ export const vi = {
     [ActionRejectReason.NOT_UTILITY]:                'Ô không phải Tiện ích',
     [ActionRejectReason.INVALID_PLAYER]:             'Người chơi không hợp lệ',
     [ActionRejectReason.DECLINED_PLAYER_CANNOT_BID]: 'Người chơi đã bỏ qua không được đặt giá',
+    [ActionRejectReason.LIQUIDITY_FROZEN]:           'Bất động sản đang trong chu kỳ đóng băng thanh khoản',
+    [ActionRejectReason.BOND_COLLATERAL_LOCKED]:    'Bất động sản đang là tài sản đảm bảo trái phiếu',
+    [ActionRejectReason.BOND_NOT_ELIGIBLE]:         'Chưa đủ điều kiện phát hành trái phiếu doanh nghiệp',
+    [ActionRejectReason.BOND_ALREADY_ACTIVE]:       'Người chơi đang có hợp đồng trái phiếu chưa tất toán',
   } as Record<string, string>,
+
+  macroCycles: {
+    [MacroCycleType.MACRO_LAND_FEVER]:        'Sốt Đất Vĩ Mô',
+    [MacroCycleType.MACRO_LIQUIDITY_FREEZE]:  'Đóng Băng Thanh Khoản',
+  } as Record<MacroCycleType, string>,
 
   turnPhases: {
     [TurnPhase.WaitingRoll]:        'Chờ Đổ Xúc Xắc',

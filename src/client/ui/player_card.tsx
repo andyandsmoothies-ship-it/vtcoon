@@ -71,7 +71,6 @@ export function PlayerCard({
   const balanceColorClass = isNegativeBalance
     ? 'text-rose-700 font-black'
     : 'text-emerald-700 font-black';
-  const ownedCount = player.ownedProperties?.length ?? 0;
 
   return (
     <div
@@ -187,7 +186,7 @@ export function PlayerCard({
         {PROPERTY_CLUSTERS.map(({ group, cells }) => (
           <div
             key={group}
-            className="flex items-center gap-[1.5px] shrink-0"
+            className="flex items-center gap-[1px] sm:gap-[1.5px] shrink-0"
             data-testid={`cluster-${group}`}
           >
             {cells.map((cell) => {
@@ -197,7 +196,7 @@ export function PlayerCard({
                   key={cell.index}
                   data-testid={`dot-cell-${cell.index}`}
                   data-owned={isOwned ? 'true' : 'false'}
-                  className={`w-[5.5px] h-[5.5px] sm:w-[6.5px] sm:h-[6.5px] md:w-2 md:h-2 rounded-full transition-all shrink-0 ${
+                  className={`w-1 h-1 sm:w-[5.5px] sm:h-[5.5px] md:w-2 md:h-2 rounded-full transition-all shrink-0 ${
                     isOwned
                       ? 'border border-slate-900/50 shadow-2xs'
                       : 'border border-slate-300 bg-slate-100/70'

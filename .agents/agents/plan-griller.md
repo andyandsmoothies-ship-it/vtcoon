@@ -21,6 +21,8 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command, write_to_fi
        `[Origin/Mutation: Server or FSM]` ➔ `[State Persistence: Map / Record]` ➔ `[Network Serialization: Broadcaster isPlayerEqual / isCellEqual]` ➔ `[Client Parser: OPTIONAL_KEYS]` ➔ `[Client Store: Types / Slice]` ➔ `[UI / View Consumer]`
      - Verify every link against physical disk files. If a plan modifies UI/Store but omits persistence at the Server/FSM origin, drops fields in broadcaster/parser, or binds action resets solely to player ID changes (instead of phase), flag as **[P1 - BROKEN DATA LIFECYCLE]**.
      - **Closed-Loop Type Union Parity**: Any new action, status, or event string literal must exist across 100% of intermediate types/DTOs (`Origin -> DTO -> Store -> Dispatcher -> UI`). If a literal is handled in UI/Dispatcher but missing from an upstream DTO union, flag as **[P1 - DIVERGENT TYPE PIPELINE]**.
+     - **Phantom Serialization Guard**: If a plan claims a field is serialized over the wire, verify it physically exists in the transfer DTO/Payload schema. Server-only state must be explicitly declared as internal. Flag as **[P1 - PHANTOM SERIALIZATION MIRAGE]**.
+     - **Multiplier vs Rate Semantics**: Value multipliers (< 1.0 or > 1.0) must be named `*_MULT`/`*_FACTOR`, never `*_DISCOUNT`/`*_RATE` to prevent double-subtraction bugs. Flag as **[P2 - SEMANTIC NAMING TRAP]**.
      - **Zero String-Scraping / Structured Origin**: Forbid `split()`, regex, or substring parsing on IDs/messages to extract downstream domain data. Upstream origin must provide structured fields. Flag string parsers as **[P1 - STRING SCRAPING BAND-AID]**.
    - 📐 **Pillar 2: Physical Layout & File LOC Budget (Giới Hạn Bố Cục & Ngân Sách Dòng Mã)**:
      - Audit proposed UI changes against physical constraints: mobile 360px viewport, badge text wrapping, long currency strings, button overlap, flex shrinkage.
@@ -32,10 +34,13 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command, write_to_fi
      - **Insolvent/Negative Balance Entity Check**: Verify entities with negative balance (`balance < 0`) cannot act as buyers or initiate cash outflows; only cash-positive sales allowed.
      - **Multi-Agent Harassment Check**: Verify AI interactions targeting players enforce Room-level / Target-level cooldowns (`lastTargetTradeOfferRound`), not just Actor-level.
      - **Terminal/Bankrupt Entity Sweep**: Verify loops over entity collections (`players`, `accounts`) filter terminal states (`!p.bankrupt`). Flag unshielded zombie payouts/charges, distorted pool denominators, or missing treasury fallbacks as **[P1 - TERMINAL ENTITY LEAK]**.
+     - **Dual-Exit Parity**: When a state has multiple exits (e.g. active intent vs passive timeout/transition), verify cost, penalty, and side-effects are symmetric. Flag asymmetric exits causing perverse incentives as **[P1 - ASYMMETRIC EXIT INCENTIVE]**.
+     - **Resource Backing Guard**: When allocating leverage, credit, or quotas based on calculated metrics, verify physical assets/collateral exist (no unbacked allocations). Flag as **[P1 - UNBACKED ALLOCATION DEFECT]**.
    - ⏳ **Pillar 4: Transient Teardown & Turn N+1 Leak (Vòng Đời Quá Độ & Dọn Sạch Lượt Kế)**:
      - Trace ephemeral state: Who clears it when the turn advances (`handleRollDice`/`handleEndTurn`)?
      - Verify delta payloads emit explicit `null` (tombstone) instead of `undefined`.
      - Verify settle timers are isolated with identity keys and not cancelled by generic room resets.
+     - **Dual-Boundary Advance Parity**: When a loop/cycle has multiple exit paths (normal vs terminal/skip/timeout), all paths must invoke a unified boundary advance helper (`advanceBoundary`), preventing drift in counters or periodic engines. Flag as **[P1 - DUAL-BOUNDARY DRIFT]**.
      - If plan lacks Turn N+1 teardown or tombstone serialization, flag as **[P1 - TRANSIENT LEAK HAZARD]**.
    - 🌐 **Pillar 5: Systemic Blast Radius & Cross-Coupling Interoperability (Bán Kính Ảnh Hưởng Đa Chiều)**:
      - Audit the change across 3 universal axes:
@@ -48,9 +53,9 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command, write_to_fi
      - **Import DAG Check**: Inspect upstream imports of target modules. Flag reverse imports creating circular loops as **[P1 - CIRCULAR IMPORT HAZARD]**.
      - If a plan touches a calculation or state transition without auditing upstream modifiers or exceptional lifecycles, flag as **[P1 - BLAST RADIUS BLINDSPOT]**.
 
-4. **Ghost File & Regression Verification**:
-   - For every file in the plan, use `grep_search` or `view_file` to verify the target function/property ACTUALLY exists in that specific file.
-   - If a target file does not contain the referenced symbol, flag as **[P1 - GHOST FILE HALLUCINATION]**.
+4. **Ghost File & Specification Mirage Verification**:
+   - For every file in the plan, use `grep_search` or `view_file` to verify the target function/property ACTUALLY exists in that specific file. Flag missing files/symbols as **[P1 - GHOST FILE HALLUCINATION]**.
+   - **Constraint Grounding (Anti-Mirage)**: If a plan claims to relax, override, or replace a pre-existing restriction, verify via search that the constraint physically exists in code. Flag phantom premises as **[P1 - SPECIFICATION MIRAGE]**.
 
 5. **Dual Output Mandate**:
    - **Step 1 (Disk Report)**: Use `write_to_file` to write the full exhaustive trace to `.agents/audit/PLAN_AUDIT_[TICKET].md`.
@@ -63,7 +68,7 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command, write_to_fi
 - **Verdict**: [REVISE_REQUIRED / HARDENED_APPROVED]
 
 | Mã Lỗi | Loại Điểm Mù | Tệp & Dòng Thực Tế | Rủi Ro Kỹ Thuật | Chỉ Định Khắc Phục |
-| :---: | :--- | :--- | :--- | :--- |
+| :--- | :--- | :--- | :--- | :--- |
 | **P1** | [Broken Lifecycle] | `[file.ts#L...]` | [Mô tả chi tiết lỗi] | [Chỉ định hành động sửa plan] |
 | **P2** | [Layout / Inversion] | `[file.ts#L...]` | [Mô tả chi tiết lỗi] | [Chỉ định hành động sửa plan] |
 ```

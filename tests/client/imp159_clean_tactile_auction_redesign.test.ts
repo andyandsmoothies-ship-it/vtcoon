@@ -190,7 +190,7 @@ describe('[UC-IMP159/MSS] Station 1 RED: Clean Tactile Auction Redesign Contract
           playersInfo: MOCK_PLAYERS,
         })
       );
-      expect(html).toContain('max-w-[120px]');
+      expect(html).toContain('max-w-[100px] sm:max-w-[160px]');
       expect(html).toContain('min-w-0');
       expect(html).not.toContain('max-w-[140px]');
     });

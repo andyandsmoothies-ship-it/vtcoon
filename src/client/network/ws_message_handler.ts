@@ -4,7 +4,6 @@ import type { DeltaPayload } from '../../server/session_manager.js';
 import type { WsClientMessage, WsServerMessage, ReasonCode } from '../../server/network/network_types.js';
 import { saveReconnectToken, getReconnectToken, clearReconnectToken } from './reconnect_token.js';
 import { applyDeltaToStore, isGameRunningDelta } from './apply_delta.js';
-import { useTelemetryStore } from '../telemetry/telemetry_store.js';
 import { useGameStore, FloatingTextType } from '../store/game_store.js';
 import { useLobbyStore } from '../store/lobby_store.js';
 
@@ -117,6 +116,14 @@ function handleWsError(
       text: 'Thị trường đang đóng băng: Tạm ngưng mua bán, thế chấp & chuyển nhượng!',
       type: FloatingTextType.Penalty,
       title: '❄️ Đóng Băng Giao Dịch',
+    });
+  }
+  if (msg.reasonCode === 'LIQUIDITY_FROZEN') {
+    useGameStore.getState().addFloatingText({
+      playerId: ctx.playerId,
+      text: 'Bất động sản đang trong chu kỳ đóng băng thanh khoản, không thể thế chấp!',
+      type: FloatingTextType.Penalty,
+      title: '🧊 Đóng Băng Thanh Khoản',
     });
   }
   ctx.setErrorReason?.(msg.reasonCode);

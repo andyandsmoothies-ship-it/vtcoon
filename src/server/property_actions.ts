@@ -261,6 +261,10 @@ function checkTradeParties(
     return { valid: false, reason: ActionRejectReason.PROPERTY_MORTGAGED };
   }
 
+  if (seller!.bondContract?.isActive && seller!.bondContract.collateralCells.includes(cellIndex)) {
+    return { valid: false, reason: ActionRejectReason.BOND_COLLATERAL_LOCKED };
+  }
+
   if (offeredCellIndex !== undefined) {
     if (registry && registry.get(offeredCellIndex) !== buyerId) {
       return { valid: false, reason: ActionRejectReason.NOT_OWNER };
@@ -274,6 +278,9 @@ function checkTradeParties(
     }
     if (buyer!.mortgagedProperties?.includes(offeredCellIndex)) {
       return { valid: false, reason: ActionRejectReason.PROPERTY_MORTGAGED };
+    }
+    if (buyer!.bondContract?.isActive && buyer!.bondContract.collateralCells.includes(offeredCellIndex)) {
+      return { valid: false, reason: ActionRejectReason.BOND_COLLATERAL_LOCKED };
     }
   }
 

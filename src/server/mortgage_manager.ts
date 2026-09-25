@@ -2,6 +2,7 @@
 import type { Room, Player } from '../domain/room';
 import { TurnPhase } from '../domain/room';
 import { MarketCardId, HANOI_HCMC_CELLS } from '../domain/event_card_types';
+import { MacroCycleType } from '../domain/macro_cycle_types';
 import { PROPERTY_DEEDS } from '../domain/property_manager';
 import type { PropertyRegistry, PropertyStateMap, PropertyState } from '../domain/property_manager';
 import { ActionRejectReason } from '../domain/action_reasons';
@@ -98,6 +99,10 @@ function checkMortgagePlayer(
   const player = getPlayer(room, playerId);
   if (!player) return { valid: false, reason: ActionRejectReason.PLAYER_NOT_FOUND };
 
+  if (player.bondContract?.isActive && player.bondContract.collateralCells.includes(cellIndex)) {
+    return { valid: false, reason: ActionRejectReason.BOND_COLLATERAL_LOCKED };
+  }
+
   player.mortgagedProperties ??= [];
   if (player.mortgagedProperties.includes(cellIndex)) {
     return { valid: false, reason: ActionRejectReason.ALREADY_MORTGAGED };
@@ -120,6 +125,13 @@ function validateMortgage(
 ): MortgageValidation {
   const roomErr = checkMortgageRoomState(room, playerId);
   if (roomErr) return { valid: false, reason: roomErr };
+
+  const isLiquidityFrozen = (room.activeModifiers ?? []).some(
+    (m) => m.type === MacroCycleType.MACRO_LIQUIDITY_FREEZE &&
+           m.remainingRounds > 0 &&
+           (m.affectedCells as readonly number[]).includes(cellIndex),
+  );
+  if (isLiquidityFrozen) return { valid: false, reason: ActionRejectReason.LIQUIDITY_FROZEN };
 
   const propErr = checkMortgageProperty(registry, stateMap, cellIndex, playerId);
   if (propErr) return { valid: false, reason: propErr };
