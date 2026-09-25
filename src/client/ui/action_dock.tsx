@@ -14,7 +14,7 @@ import { MarketCardId } from '../../domain/event_card_types';
 import { TurnPhase } from '../../domain/room';
 
 export interface ActionDockProps {
-  readonly onRollDice?: () => void;
+  readonly onRollDice?: () => boolean | void;
   readonly onOpenProperties?: () => void;
   readonly onOpenTrade?: () => void;
   readonly onOpenUpgrade?: () => void;
@@ -155,10 +155,11 @@ export function ActionDock({
   const handleRollClick = () => {
     if (isRollDisabled || isRollPending) return;
     setIsRollPending(true);
-    onRollDice?.();
-    setTimeout(() => {
+    if (onRollDice?.() === false) {
       setIsRollPending(false);
-    }, 1500);
+      return;
+    }
+    setTimeout(() => setIsRollPending(false), 1500);
   };
 
   const currentPos = actingPlayerId ? (playerPositions[actingPlayerId] ?? 0) : 0;

@@ -9,7 +9,7 @@ import type { PlayerIntent } from '../../server/intent_dispatcher';
 import type { WsClientMessage } from '../../server/network/network_types';
 
 export interface TurnControlHandlers {
-  handleRollDice: () => void;
+  handleRollDice: () => boolean;
   handleEndTurn: () => void;
   handleSendEmote: (emoteId: string) => void;
   handleLeaveRoom: () => void;
@@ -30,11 +30,15 @@ export function useAppTurnControls(
 ): TurnControlHandlers {
   const turnTimeRemaining = useGameStore((state) => state.turnTimeRemaining);
 
-  const handleRollDice = useCallback(() => {
+  const handleRollDice = useCallback((): boolean => {
     const store = useGameStore.getState();
-    if (store.isRolling || store.activePawnAnimation?.isAnimating) return;
+    if (store.isRolling || store.activePawnAnimation?.isAnimating) return false;
+    const sent = sendIntent({ type: 'INTENT_ROLL' });
+    if (!sent) {
+      return false;
+    }
     store.setIsRolling(true);
-    sendIntent({ type: 'INTENT_ROLL' });
+    return true;
   }, [sendIntent]);
 
   const handleEndTurn = useCallback(() => {
