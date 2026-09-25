@@ -282,6 +282,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   closeModal: () => set({ activeModal: null, modalPayload: null }),
   setLastEventCard: (card) => set({ lastEventCard: card }),
   setPendingBuyout: (pendingBuyout) => set({ pendingBuyout }),
+  setPendingTradeOffer: (pendingTradeOffer) => set({ pendingTradeOffer }),
   updateModalPayload: (patch) =>
     set((state) => ({
       modalPayload: state.modalPayload ? { ...state.modalPayload, ...patch } : state.modalPayload,

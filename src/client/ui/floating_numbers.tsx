@@ -129,7 +129,7 @@ export function FloatingBadge({ item }: { readonly item: FloatingTextItem }): Re
       role="status"
       aria-live="polite"
       data-testid="contextual-transaction-badge"
-      className="pointer-events-none flex flex-col gap-1.5 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-2xl border-2 border-slate-900 bg-[#FFFDF8] select-none shadow-[0_3px_0_0_#0f172a] animate-in fade-in duration-200 max-w-[82vw] sm:max-w-[340px]"
+      className="pointer-events-none flex flex-col gap-1.5 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-2xl border-2 border-slate-900 bg-[#FFFDF8] select-none shadow-[0_3px_0_0_#0f172a] animate-in fade-in duration-200 w-full min-w-0 max-w-[82vw] sm:max-w-[340px]"
     >
       {/* Hàng 1: Header định danh danh mục */}
       <div className="flex items-center justify-between gap-1.5 border-b border-slate-200/80 pb-1">
@@ -212,7 +212,7 @@ export function FloatingNumbersOverlay(): React.ReactElement | null {
   );
 
   const stackTopClass =
-    activeMarketCount >= 2 ? 'top-[17rem] sm:top-[15.5rem]' : activeMarketCount === 1 ? 'top-[12.5rem] sm:top-[10.5rem]' : 'top-20';
+    activeMarketCount >= 1 ? 'top-28 sm:top-24' : 'top-20';
 
   const recentTwo = regularTexts.slice(-2);
   let displayItems = [...recentTwo];
@@ -230,7 +230,7 @@ export function FloatingNumbersOverlay(): React.ReactElement | null {
       aria-label="Thông báo biến động tài chính"
       className="pointer-events-none select-none z-30"
     >
-      <div className={"fixed " + stackTopClass + " left-1/2 left-3 sm:left-1/2 translate-x-0 sm:-translate-x-1/2 flex flex-col items-start sm:items-center gap-2 w-auto max-w-[calc(100vw-11.5rem)] md:max-w-md px-1 sm:px-2 z-30 pointer-events-none"}>
+      <div className={"fixed " + stackTopClass + " left-3 sm:left-1/2 translate-x-0 sm:-translate-x-1/2 flex flex-col items-start sm:items-center gap-2 w-auto max-w-[calc(100vw-11.5rem)] md:max-w-md px-1 sm:px-2 z-30 pointer-events-none"}>
         {latestMilestone && (
           <div data-testid="milestone-banner-container" className="w-full flex justify-center pointer-events-auto">
             <MilestoneBanner item={latestMilestone} />
@@ -240,9 +240,9 @@ export function FloatingNumbersOverlay(): React.ReactElement | null {
           <div
             key={item.id}
             className={
-              idx === 0 && displayItems.length > 1
+              (latestMilestone || (idx === 0 && displayItems.length > 1))
                 ? "w-full flex justify-start sm:justify-center hidden md:flex"
-                : "w-full flex justify-center flex justify-start sm:justify-center"
+                : "w-full flex justify-start sm:justify-center flex"
             }
           >
             <FloatingBadge item={item} />

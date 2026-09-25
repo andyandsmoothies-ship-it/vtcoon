@@ -132,9 +132,9 @@ describe('[UI-S04/MSS] Environment Store — Time-of-Day State Machine & Presets
     expect(TIME_OF_DAY_PRESETS.day.hemiIntensity).toBeLessThanOrEqual(0.25);
 
     // Ban dem phai co anh sang moonlight xanh diu va suong mu dem toi dam
-    expect(TIME_OF_DAY_PRESETS.night.sunColor).toBe('#60A5FA');
-    expect(TIME_OF_DAY_PRESETS.night.fogColor).toBe('#090D1A');
-    expect(TIME_OF_DAY_PRESETS.night.skyColor).toBe('#050814');
+    expect(TIME_OF_DAY_PRESETS.night.sunColor).toBe('#93C5FD');
+    expect(TIME_OF_DAY_PRESETS.night.fogColor).toBe('#0F172A');
+    expect(TIME_OF_DAY_PRESETS.night.skyColor).toBe('#0C1527');
   });
 });
 

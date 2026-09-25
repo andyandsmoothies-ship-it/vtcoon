@@ -12,6 +12,7 @@ import { TelemetryBadge } from './telemetry/telemetry_badge';
 import { TelemetryConsoleModal } from './telemetry/telemetry_console_modal';
 import { RecenterPawnPill } from './recenter_pawn_pill';
 import { CameraResetPill } from './camera_reset_pill';
+import { InlineBotTradeStrip } from './modals/bot_trade_offer_strip';
 import { useGameStore } from '../store/game_store';
 import { useLobbyStore } from '../store/lobby_store';
 import type { PlayerIntent } from '../../server/intent_dispatcher';
@@ -87,18 +88,21 @@ export function HudContainer({
           <TelemetryBadge />
         </div>
 
-        {/* Thanh Điều Khiển Tác Vụ Cốt Lõi (Bottom-Right, thuận tay thao tác công thái học) */}
-        <div className="pointer-events-auto">
-          <ActionDock
-            onRollDice={onRollDice}
-            onOpenProperties={onOpenProperties}
-            onOpenTrade={onOpenTrade}
-            onOpenUpgrade={onOpenUpgrade}
-            onOpenManageProperty={onOpenManageProperty}
-            onEndTurn={onEndTurn}
-            onBailOut={handleBailOut}
-            localPlayerId={localPlayerId}
-          />
+        {/* Thanh Điều Khiển Tác Vụ Cốt Lõi & Strip Giao Dịch Bot (Bottom-Right, thuận tay thao tác công thái học) */}
+        <div className="flex flex-col items-center sm:items-end gap-1.5 w-full sm:w-auto max-w-[96vw] sm:max-w-md pointer-events-none">
+          <InlineBotTradeStrip onIntent={onIntent} localPlayerId={localPlayerId} />
+          <div className="pointer-events-auto">
+            <ActionDock
+              onRollDice={onRollDice}
+              onOpenProperties={onOpenProperties}
+              onOpenTrade={onOpenTrade}
+              onOpenUpgrade={onOpenUpgrade}
+              onOpenManageProperty={onOpenManageProperty}
+              onEndTurn={onEndTurn}
+              onBailOut={handleBailOut}
+              localPlayerId={localPlayerId}
+            />
+          </div>
         </div>
       </footer>
 

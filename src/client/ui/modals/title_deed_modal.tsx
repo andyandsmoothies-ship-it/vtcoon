@@ -80,7 +80,7 @@ export function TitleDeedModal({
 }: TitleDeedModalProps): React.ReactElement {
   const deed = getDeedDisplayInfo(cellIndex);
   const currentIndex = ownedProperties ? ownedProperties.indexOf(cellIndex) : -1;
-  const showCarousel = Boolean(isOwner && ownedProperties && ownedProperties.length > 1 && currentIndex !== -1 && onSelectCell);
+  const showCarousel = Boolean(isOwner && ownedProperties && ownedProperties.length > 1 && currentIndex !== -1);
 
   const isSSR = typeof window === 'undefined';
   const storeModifiers = useGameStore((state) => state.activeModifiers);

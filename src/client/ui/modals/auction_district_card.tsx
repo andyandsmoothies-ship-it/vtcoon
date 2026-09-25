@@ -64,7 +64,7 @@ function renderCellChip(cell: DistrictCellChip): React.ReactElement {
       }`}
     >
       <div className="flex items-center justify-between gap-1 mb-0.5 min-w-0">
-        <span className="font-bold text-slate-900 line-clamp-2 leading-tight text-[10px] sm:text-xs block" title={cell.name}>
+        <span className="font-bold text-slate-900 line-clamp-2 leading-tight text-[10px] sm:text-xs block min-w-0 truncate" title={cell.name}>
           {cell.name}
         </span>
         {cell.level > 0 && (
@@ -123,7 +123,7 @@ export function AuctionDistrictCard({
       className="bg-amber-50/40 p-1.5 sm:p-2.5 rounded-xl sm:rounded-2xl border border-amber-900/10 space-y-1 sm:space-y-1.5 shadow-sm"
     >
       {/* Header phân khu */}
-      <div className="flex items-center justify-between flex-wrap gap-1 border-b border-amber-900/10 pb-1 sm:pb-1.5">
+      <div className="flex items-center justify-between flex-wrap gap-1.5 border-b border-amber-900/10 pb-1 sm:pb-1.5">
         <div className="flex items-center gap-1.5 min-w-0">
           <span
             className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full border border-slate-800 shrink-0"
@@ -136,7 +136,7 @@ export function AuctionDistrictCard({
         <div className="flex items-center gap-1 shrink-0">
           <span
             data-testid="auction-strategic-hint"
-            className={`px-1.5 sm:px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-black uppercase tracking-wide border whitespace-nowrap shrink-0 ${toneTheme.badge}`}
+            className={`px-1.5 sm:px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-black uppercase tracking-wide border whitespace-nowrap shrink-0 max-w-[180px] truncate sm:max-w-none ${toneTheme.badge}`}
           >
             {info.strategicHint.badgeText}
           </span>
@@ -158,7 +158,7 @@ export function AuctionDistrictCard({
 
       {/* Thanh tiền thuê mini (Mini Rent Bar) */}
       <div className="space-y-0.5 sm:space-y-1">
-        <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-slate-500 px-0.5">
+        <div className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-500 px-0.5">
           BIỂU PHÍ THUÊ Ô ĐẤU GIÁ
         </div>
         <div className="bg-white/70 rounded-xl p-1 sm:p-2 border border-amber-900/10 flex items-center justify-between text-xs">

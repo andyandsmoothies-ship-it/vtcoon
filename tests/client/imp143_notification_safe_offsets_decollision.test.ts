@@ -22,7 +22,7 @@ function extractMilestoneContainer(html: string): string {
 }
 
 function extractStackContainer(html: string): string {
-  const match = html.match(/<div[^>]*class="[^"]*left-1\/2[^"]*-translate-x-1\/2[^"]*gap-2[^"]*"[^>]*>/);
+  const match = html.match(/<div[^>]*class="[^"]*(?:left-1\/2|sm:left-1\/2)[^"]*gap-2[^"]*"[^>]*>/);
   return match ? match[0] : '';
 }
 
@@ -92,18 +92,17 @@ describe('[IMP-143] Tọa Độ Đa Tầng Định Lượng Chính Xác Dưới 
       expect(container).not.toContain('top-[10.5rem]');
     });
 
-    it('[TC-IMP143.02/MSS][UC-IMP143][Facet-1/Boundary] activeMarketCount === 1: unified stack container có class top-[10.5rem]', () => {
+    it('[TC-IMP143.02/MSS][UC-IMP143][Facet-1/Boundary] activeMarketCount === 1: unified stack container có class top-28 sm:top-24 (IMP-195)', () => {
       useGameStore.setState({
         floatingTexts: [BASE_MILESTONE_ITEM],
         activeModifiers: [{ type: MarketCardId.MC_FREEZE_TRADE, remainingRounds: 2 }],
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
       const container = extractStackContainer(html);
-      expect(container).toContain('top-[10.5rem]');
-      expect(container).not.toContain('top-28');
+      expect(container).toContain('top-28 sm:top-24');
     });
 
-    it('[TC-IMP143.03/MSS][UC-IMP143][Facet-1/Boundary] activeMarketCount >= 2: unified stack container có class top-[15.5rem]', () => {
+    it('[TC-IMP143.03/MSS][UC-IMP143][Facet-1/Boundary] activeMarketCount >= 2: unified stack container có class top-28 sm:top-24 (IMP-195)', () => {
       useGameStore.setState({
         floatingTexts: [BASE_MILESTONE_ITEM],
         activeModifiers: [
@@ -113,8 +112,7 @@ describe('[IMP-143] Tọa Độ Đa Tầng Định Lượng Chính Xác Dưới 
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
       const container = extractStackContainer(html);
-      expect(container).toContain('top-[15.5rem]');
-      expect(container).not.toContain('top-40');
+      expect(container).toContain('top-28 sm:top-24');
     });
   });
 
@@ -134,19 +132,18 @@ describe('[IMP-143] Tọa Độ Đa Tầng Định Lượng Chính Xác Dưới 
       expect(container).not.toContain('top-[11.5rem]');
     });
 
-    it('[TC-IMP143.05/MSS][UC-IMP143][Facet-2/Reactivity] Có latestMilestone và activeMarketCount === 1: mobile container có class top-[10.5rem] và gap-2', () => {
+    it('[TC-IMP143.05/MSS][UC-IMP143][Facet-2/Reactivity] Có latestMilestone và activeMarketCount === 1: mobile container có class top-28 sm:top-24 và gap-2 (IMP-195)', () => {
       useGameStore.setState({
         floatingTexts: [BASE_MILESTONE_ITEM, BASE_REGULAR_TOAST],
         activeModifiers: [{ type: MarketCardId.MC_ANTI_SPECULATE, remainingRounds: 2 }],
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
       const container = extractMobileContainer(html);
-      expect(container).toContain('top-[10.5rem]');
+      expect(container).toContain('top-28 sm:top-24');
       expect(container).toContain('gap-2');
-      expect(container).not.toContain('top-[11rem]');
     });
 
-    it('[TC-IMP143.06/MSS][UC-IMP143][Facet-2/Reactivity] Có latestMilestone và activeMarketCount >= 2: mobile container có class top-[15.5rem] và gap-2', () => {
+    it('[TC-IMP143.06/MSS][UC-IMP143][Facet-2/Reactivity] Có latestMilestone và activeMarketCount >= 2: mobile container có class top-28 sm:top-24 và gap-2 (IMP-195)', () => {
       useGameStore.setState({
         floatingTexts: [BASE_MILESTONE_ITEM, BASE_REGULAR_TOAST],
         activeModifiers: [
@@ -156,9 +153,8 @@ describe('[IMP-143] Tọa Độ Đa Tầng Định Lượng Chính Xác Dưới 
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
       const container = extractMobileContainer(html);
-      expect(container).toContain('top-[15.5rem]');
+      expect(container).toContain('top-28 sm:top-24');
       expect(container).toContain('gap-2');
-      expect(container).not.toContain('top-[13.5rem]');
     });
 
     it('[TC-IMP143.07/MSS][UC-IMP143][Facet-2/Reactivity] Không có latestMilestone và activeMarketCount === 0: mobile container có class top-20 và gap-2', () => {
@@ -172,19 +168,18 @@ describe('[IMP-143] Tọa Độ Đa Tầng Định Lượng Chính Xác Dưới 
       expect(container).toContain('gap-2');
     });
 
-    it('[TC-IMP143.08/MSS][UC-IMP143][Facet-2/Reactivity] Không có latestMilestone và activeMarketCount === 1: mobile container có class top-[10.5rem] và gap-2', () => {
+    it('[TC-IMP143.08/MSS][UC-IMP143][Facet-2/Reactivity] Không có latestMilestone và activeMarketCount === 1: mobile container có class top-28 sm:top-24 và gap-2 (IMP-195)', () => {
       useGameStore.setState({
         floatingTexts: [BASE_REGULAR_TOAST],
         activeModifiers: [{ type: MarketCardId.MC_ANTI_SPECULATE, remainingRounds: 2 }],
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
       const container = extractMobileContainer(html);
-      expect(container).toContain('top-[10.5rem]');
+      expect(container).toContain('top-28 sm:top-24');
       expect(container).toContain('gap-2');
-      expect(container).not.toContain('top-28');
     });
 
-    it('[TC-IMP143.09/MSS][UC-IMP143][Facet-2/Reactivity] Không có latestMilestone và activeMarketCount >= 2: mobile container có class top-[15.5rem] và gap-2', () => {
+    it('[TC-IMP143.09/MSS][UC-IMP143][Facet-2/Reactivity] Không có latestMilestone và activeMarketCount >= 2: mobile container có class top-28 sm:top-24 và gap-2 (IMP-195)', () => {
       useGameStore.setState({
         floatingTexts: [BASE_REGULAR_TOAST],
         activeModifiers: [
@@ -194,9 +189,8 @@ describe('[IMP-143] Tọa Độ Đa Tầng Định Lượng Chính Xác Dưới 
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
       const container = extractMobileContainer(html);
-      expect(container).toContain('top-[15.5rem]');
+      expect(container).toContain('top-28 sm:top-24');
       expect(container).toContain('gap-2');
-      expect(container).not.toContain('top-40');
     });
   });
 
@@ -215,18 +209,18 @@ describe('[IMP-143] Tọa Độ Đa Tầng Định Lượng Chính Xác Dưới 
       expect(container).toContain('gap-2');
     });
 
-    it('[TC-IMP143.11/MSS][UC-IMP143][Facet-3/Boundary] Có latestMilestone và activeMarketCount === 1: desktop container có class top-[10.5rem] và gap-2', () => {
+    it('[TC-IMP143.11/MSS][UC-IMP143][Facet-3/Boundary] Có latestMilestone và activeMarketCount === 1: desktop container có class top-28 sm:top-24 và gap-2 (IMP-195)', () => {
       useGameStore.setState({
         floatingTexts: [BASE_MILESTONE_ITEM, BASE_REGULAR_TOAST],
         activeModifiers: [{ type: MarketCardId.MC_PUBLIC_INVEST, remainingRounds: 2 }],
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
       const container = extractDesktopContainer(html);
-      expect(container).toContain('top-[10.5rem]');
+      expect(container).toContain('top-28 sm:top-24');
       expect(container).toContain('gap-2');
     });
 
-    it('[TC-IMP143.12/MSS][UC-IMP143][Facet-3/Boundary] Có latestMilestone và activeMarketCount >= 2: desktop container có class top-[15.5rem] và gap-2', () => {
+    it('[TC-IMP143.12/MSS][UC-IMP143][Facet-3/Boundary] Có latestMilestone và activeMarketCount >= 2: desktop container có class top-28 sm:top-24 và gap-2 (IMP-195)', () => {
       useGameStore.setState({
         floatingTexts: [BASE_MILESTONE_ITEM, BASE_REGULAR_TOAST],
         activeModifiers: [
@@ -236,7 +230,7 @@ describe('[IMP-143] Tọa Độ Đa Tầng Định Lượng Chính Xác Dưới 
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
       const container = extractDesktopContainer(html);
-      expect(container).toContain('top-[15.5rem]');
+      expect(container).toContain('top-28 sm:top-24');
       expect(container).toContain('gap-2');
     });
 
@@ -251,18 +245,18 @@ describe('[IMP-143] Tọa Độ Đa Tầng Định Lượng Chính Xác Dưới 
       expect(container).toContain('gap-2');
     });
 
-    it('[TC-IMP143.14/MSS][UC-IMP143][Facet-3/Boundary] Không có latestMilestone và activeMarketCount === 1: desktop container có class top-[10.5rem] và gap-2', () => {
+    it('[TC-IMP143.14/MSS][UC-IMP143][Facet-3/Boundary] Không có latestMilestone và activeMarketCount === 1: desktop container có class top-28 sm:top-24 và gap-2 (IMP-195)', () => {
       useGameStore.setState({
         floatingTexts: [BASE_REGULAR_TOAST],
         activeModifiers: [{ type: MarketCardId.MC_PUBLIC_INVEST, remainingRounds: 2 }],
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
       const container = extractDesktopContainer(html);
-      expect(container).toContain('top-[10.5rem]');
+      expect(container).toContain('top-28 sm:top-24');
       expect(container).toContain('gap-2');
     });
 
-    it('[TC-IMP143.15/MSS][UC-IMP143][Facet-3/Boundary] Không có latestMilestone và activeMarketCount >= 2: desktop container có class top-[15.5rem] và gap-2', () => {
+    it('[TC-IMP143.15/MSS][UC-IMP143][Facet-3/Boundary] Không có latestMilestone và activeMarketCount >= 2: desktop container có class top-28 sm:top-24 và gap-2 (IMP-195)', () => {
       useGameStore.setState({
         floatingTexts: [BASE_REGULAR_TOAST],
         activeModifiers: [
@@ -272,7 +266,7 @@ describe('[IMP-143] Tọa Độ Đa Tầng Định Lượng Chính Xác Dưới 
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
       const container = extractDesktopContainer(html);
-      expect(container).toContain('top-[15.5rem]');
+      expect(container).toContain('top-28 sm:top-24');
       expect(container).toContain('gap-2');
     });
   });

@@ -51,7 +51,7 @@ describe('[IMP-129] Mobile Toast & Market Event Ticker De-Collision', () => {
     expect(mobileMatch![0]).toContain('top-20');
   });
 
-  it('[TC-IMP129.02/MSS][Facet-1/Boundary] Khi có 1 sự kiện thị trường, mobile container định vị an toàn ở top-[10.5rem] tránh đè MarketEventTicker', () => {
+  it('[TC-IMP129.02/MSS][Facet-1/Boundary] Khi có 1 sự kiện thị trường, mobile container định vị an toàn ở top-28 tránh đè MarketEventTicker', () => {
     useGameStore.setState({
       activeModifiers: [
         { type: MarketCardId.MC_ANTI_SPECULATE, remainingRounds: 1 },
@@ -60,11 +60,11 @@ describe('[IMP-129] Mobile Toast & Market Event Ticker De-Collision', () => {
     const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
     const mobileMatch = html.match(/<div[^>]*class="[^"]*(?:md:hidden|md:max-w-md|fixed\s+top-)[^"]*"[^>]*>/);
     expect(mobileMatch).not.toBeNull();
-    expect(mobileMatch![0]).toContain('top-[10.5rem]');
+    expect(mobileMatch![0]).toContain('top-28');
     expect(mobileMatch![0]).not.toContain('top-20');
   });
 
-  it('[TC-IMP129.03/MSS][Facet-1/Boundary] Khi có >= 2 sự kiện thị trường, mobile container dịch chuyển sâu hơn xuống top-[15.5rem]', () => {
+  it('[TC-IMP129.03/MSS][Facet-1/Boundary] Khi có >= 2 sự kiện thị trường, mobile container vẫn neo an toàn ở top-28 nhờ dải Glanceable Ticker cao cố định', () => {
     useGameStore.setState({
       activeModifiers: [
         { type: MarketCardId.MC_PEAK_TOURISM, remainingRounds: 1 },
@@ -74,10 +74,10 @@ describe('[IMP-129] Mobile Toast & Market Event Ticker De-Collision', () => {
     const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
     const mobileMatch = html.match(/<div[^>]*class="[^"]*(?:md:hidden|md:max-w-md|fixed\s+top-)[^"]*"[^>]*>/);
     expect(mobileMatch).not.toBeNull();
-    expect(mobileMatch![0]).toContain('top-[15.5rem]');
+    expect(mobileMatch![0]).toContain('top-28');
   });
 
-  it('[TC-IMP129.04/MSS][Facet-2/Reactivity] Khi có sự kiện thị trường và milestone banner cùng lúc, milestone banner nằm trong unified stack ở top-[10.5rem]', () => {
+  it('[TC-IMP129.04/MSS][Facet-2/Reactivity] Khi có sự kiện thị trường và milestone banner cùng lúc, milestone banner nằm trong unified stack ở top-28', () => {
     useGameStore.setState({
       activeModifiers: [
         { type: MarketCardId.MC_PEAK_TOURISM, remainingRounds: 1 },
@@ -106,7 +106,7 @@ describe('[IMP-129] Mobile Toast & Market Event Ticker De-Collision', () => {
     const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
     const stackMatch = html.match(/<div[^>]*class="[^"]*(?:md:max-w-md|fixed\s+top-)[^"]*"[^>]*>/);
     expect(stackMatch).not.toBeNull();
-    expect(stackMatch![0]).toContain('top-[10.5rem]');
+    expect(stackMatch![0]).toContain('top-28');
     expect(html).toContain('data-testid="milestone-banner-container"');
     expect(html).toContain('data-testid="contextual-transaction-badge"');
   });

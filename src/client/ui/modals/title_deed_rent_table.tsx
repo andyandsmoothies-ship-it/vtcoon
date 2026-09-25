@@ -86,7 +86,7 @@ export function TitleDeedRentTable({
 
             {isRailroad && (
               <div className="w-full flex items-center justify-between px-2 py-1">
-                <span className="text-[10px] sm:text-[11px] text-slate-600 font-bold whitespace-nowrap">CƯỚC 1-4 GA:</span>
+                <span className="text-[10px] sm:text-[11px] text-slate-600 font-bold whitespace-nowrap">CƯỚC 1-4 GA: (Toàn mạng lưới)</span>
                 <span className="font-mono text-[10px] sm:text-[11px] font-bold text-slate-800 whitespace-nowrap">
                   {rents.map((r) => formatCurrency(r).replace(' Tr.', '')).join(' / ')} Tr.
                 </span>
@@ -115,7 +115,7 @@ export function TitleDeedRentTable({
                 ? 'Xem chi tiết biểu phí 1 Ga - 4 Ga'
                 : isUtility
                   ? 'Xem chi tiết cước tiện ích'
-                  : 'Xem chi tiết 4 cấp nâng cấp'}
+                  : 'Xem chi tiết 4 cấp nâng cấp (C0 Đất Nền, C1 Nhà Phố, C2 Khách Sạn, C3 Quần thể Resort/TTTM)'}
             </span>
           </button>
         </div>

@@ -455,7 +455,7 @@ describe('[IMP-122] Comprehensive Financial & Event Card Pop-Ups Contract Suite'
 
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
       expect(html).toContain('data-testid="event-card-notification-banner"');
-      expect(html).toContain('fixed top-20 left-1/2');
+      expect(html).toContain('fixed top-20 left-3 sm:left-1/2');
     });
 
     it('[TC-122.24/MSS][UC-IMP122] FloatingNumbersOverlay nhận diện actionType=\'market\' là latestMilestone ở vị trí trung tâm', () => {
@@ -475,7 +475,7 @@ describe('[IMP-122] Comprehensive Financial & Event Card Pop-Ups Contract Suite'
 
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
       expect(html).toContain('data-testid="event-card-notification-banner"');
-      expect(html).toContain('fixed top-20 left-1/2');
+      expect(html).toContain('fixed top-20 left-3 sm:left-1/2');
     });
 
     it('[TC-122.25/MSS][UC-IMP122] FloatingBadge hiển thị an toàn với actionType=\'auction_win\' và icon 🔨', () => {

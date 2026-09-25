@@ -92,7 +92,7 @@ describe('[TC-P1.3/MSS] IBL Environment & Atmosphere Balancing', () => {
     const lightingPath = path.resolve(process.cwd(), 'src/client/3d/time_of_day_lighting.tsx');
     const source = fs.readFileSync(lightingPath, 'utf-8');
     expect(source).toContain('environmentIntensity');
-    expect(source).toContain("phase === 'night' ? 0.16 : phase === 'sunset' ? 0.28 : 0.75");
+    expect(source).toContain("phase === 'night' ? 0.28 : phase === 'sunset' ? 0.38 : 0.75");
     expect(source).not.toContain('(state.scene as any)');
   });
 });

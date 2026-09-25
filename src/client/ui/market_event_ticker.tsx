@@ -119,6 +119,36 @@ export function resolveMarketEffectSummary(type: string): string {
   return detail.description || detail.effectDetail || 'Chính sách vĩ mô tác động toàn bộ thị trường';
 }
 
+export const ACTIVE_MARKET_COMPACT_FORMULAS: Readonly<Record<string, string>> = {
+  MACRO_LAND_FEVER: 'ĐẤT: Thuê +250%, Xây -25%',
+  MACRO_LIQUIDITY_FREEZE: 'ĐẤT: Thuê -50%, Cấm thế chấp',
+  [MarketCardId.MC_PUBLIC_INVEST]: '4 GA: Cước x2',
+  [MarketCardId.MC_COASTAL_STORM]: 'VEN BIỂN: Miễn thuê, mất lượt',
+  [MarketCardId.MC_NIGHT_ECONOMY]: 'DỊCH VỤ C1+: Nhân đôi tiền thuê',
+  [MarketCardId.MC_ALCOHOL_CHECK]: 'DỊCH VỤ: Thuê -50%, Phạt 800 Tr.',
+  [MarketCardId.MC_MEGA_CONCERT]: 'DI CHUYỂN: Đến ô cấp cao nhất',
+  [MarketCardId.MC_RATE_HIKE]: 'VAY: Lãi +10% qua Khởi Hành',
+  [MarketCardId.MC_CREDIT_STIMULUS]: 'XÂY NHÀ: Giảm 20%, Lãi 0%',
+  [MarketCardId.MC_LAND_FEVER]: 'VEN ĐÔ: Thuê & Giá +50%',
+  [MarketCardId.MC_FIRE_INSPECTION]: 'PCCC: Phạt 200-800 Tr./C1-C3',
+  [MarketCardId.MC_ANTI_SPECULATE]: 'CHUYỂN NHƯỢNG: Thuế 20%',
+  [MarketCardId.MC_PEAK_TOURISM]: 'NGHỈ DƯỠNG: Nhân đôi tiền thuê',
+  [MarketCardId.MC_FREEZE_TRADE]: 'GIAO DỊCH: Đóng băng',
+  [MarketCardId.MC_FUEL_SURGE]: '4 GA: Phụ thu +500 Tr.',
+  [MarketCardId.MC_URBAN_PLANNING]: 'HÀ NỘI/HCM: Thế chấp +20%',
+  [MarketCardId.MC_UTILITY_DOUBLE]: 'TIỆN ÍCH: Cước x2',
+  [MarketCardId.MC_CASINO_PILOT]: 'CASINO: Thưởng 1.500-3.000 Tr.',
+  [ChanceCardId.CC_PORT_EXCLUSIVE]: 'CẢNG BIỂN: Nhận 50% phí',
+};
+
+export function resolveMarketCompactFormula(type: string): string {
+  const explicit = ACTIVE_MARKET_COMPACT_FORMULAS[type];
+  if (explicit) {
+    return explicit;
+  }
+  return resolveMarketEffectSummary(type);
+}
+
 export const MarketEventTicker: React.FC<MarketEventTickerProps> = ({
   activeModifiers: propsModifiers,
 }) => {
@@ -137,69 +167,68 @@ export const MarketEventTicker: React.FC<MarketEventTickerProps> = ({
       data-testid="market-event-ticker"
       role="region"
       aria-label="Sự kiện thị trường đang hiệu lực"
-      className="pointer-events-none select-none z-30 flex flex-col items-center gap-1.5 w-full max-w-[90vw] sm:max-w-md md:max-w-xl mx-auto mt-1 px-2"
+      className="pointer-events-none select-none z-30 flex items-center justify-center w-full max-w-[90vw] sm:max-w-xl md:max-w-2xl mx-auto mt-1 px-1 sm:px-2"
     >
-      {active.map((modifier, index) => {
-        const cardType = String(modifier.type ?? '');
-        const icon = resolveMarketIcon(cardType);
-        const title = resolveMarketTitle(cardType);
-        const effectSummary = resolveMarketEffectSummary(cardType);
-        const heroStat = getCardHeroStat(cardType);
-        const heroStyles = getHeroStatStyles(heroStat.variant);
+      <div className="w-full pointer-events-auto flex items-center gap-1.5 overflow-x-auto scrollbar-none flex-nowrap py-1 px-1.5 bg-[#FFFDF8]/95 backdrop-blur-xs border-2 border-slate-900 rounded-xl shadow-[0_2px_0_0_#0f172a] max-h-10">
+        {active.map((modifier, index) => {
+          const cardType = String(modifier.type ?? '');
+          const icon = resolveMarketIcon(cardType);
+          const title = resolveMarketTitle(cardType);
+          const formula = resolveMarketCompactFormula(cardType);
+          const effectSummary = resolveMarketEffectSummary(cardType);
+          const heroStat = getCardHeroStat(cardType);
+          const heroStyles = getHeroStatStyles(heroStat.variant);
 
-        const handleCardClick = () => {
-          const detail =
-            MARKET_CARD_DETAILS[cardType as MarketCardId] ??
-            CHANCE_CARD_DETAILS[cardType as ChanceCardId];
-          useGameStore.getState().openModal('event', {
-            cardType: cardType.startsWith('CC_') ? 'chance' : 'market',
-            cardId: cardType,
-            title,
-            description: detail?.description ?? effectSummary,
-            targetScope: detail?.targetScope,
-            effectDetail: detail?.effectDetail ?? effectSummary,
-            duration: `${modifier.remainingRounds} vòng chơi`,
-            destination: detail?.destination,
-          });
-        };
+          const handleCardClick = () => {
+            const detail =
+              MARKET_CARD_DETAILS[cardType as MarketCardId] ??
+              CHANCE_CARD_DETAILS[cardType as ChanceCardId];
+            useGameStore.getState().openModal('event', {
+              cardType: cardType.startsWith('CC_') ? 'chance' : 'market',
+              cardId: cardType,
+              title,
+              description: detail?.description ?? effectSummary,
+              targetScope: detail?.targetScope,
+              effectDetail: detail?.effectDetail ?? effectSummary,
+              duration: `${modifier.remainingRounds} vòng chơi`,
+              destination: detail?.destination,
+            });
+          };
 
-        return (
-          <div
-            key={`${cardType}_${index}`}
-            data-testid={`market-ticker-item-${cardType}`}
-            onClick={handleCardClick}
-            title="Bấm để xem chi tiết thẻ"
-            className="w-full pointer-events-auto cursor-pointer flex flex-col gap-1 px-3.5 py-2 sm:py-2.5 bg-[#FFFDF8] border-2 border-slate-900 rounded-xl shadow-[0_3px_0_0_#0f172a] hover:border-amber-500 hover:shadow-[0_4px_0_0_#d97706] text-slate-900 transition-all duration-150 animate-in fade-in slide-in-from-top-1"
-          >
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 min-w-0 flex-1">
-                <span className="text-base sm:text-lg shrink-0" aria-hidden="true">
+          return (
+            <div
+              key={`${cardType}_${index}`}
+              data-testid={`market-ticker-item-${cardType}`}
+              onClick={handleCardClick}
+              title={`${title}: ${formula} (Bấm xem chi tiết)`}
+              className="flex items-center justify-between gap-1.5 shrink-0 px-2 py-0.5 bg-amber-50/90 hover:bg-amber-100 border border-amber-300 rounded-lg text-xs font-bold transition-colors cursor-pointer select-none text-slate-900"
+            >
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className="text-sm shrink-0" aria-hidden="true">
                   {icon}
                 </span>
-                <span className="font-black text-xs sm:text-sm truncate text-slate-900 leading-tight">
-                  {title}
+                <span className="font-extrabold text-[11px] sm:text-xs text-slate-900 shrink-0 truncate max-w-[120px] sm:max-w-[160px]">
+                  {title}:
                 </span>
                 {heroStat.value && (
-                  <span className={`px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-black uppercase tracking-wider shrink-0 ${heroStyles.badge}`}>
+                  <span className={`px-1.5 py-0.2 rounded text-[10px] sm:text-[11px] font-black uppercase tracking-wider shrink-0 ${heroStyles.badge}`}>
                     {heroStat.value}
                   </span>
                 )}
+                <span
+                  data-testid="market-ticker-effect-summary"
+                  className="font-bold text-[11px] sm:text-xs text-slate-700 whitespace-nowrap line-clamp-2"
+                >
+                  {formula}
+                </span>
               </div>
-
-              <span className="px-2.5 py-0.5 rounded-lg text-[11px] font-extrabold border bg-amber-100 text-amber-900 border-amber-400 shrink-0">
+              <span className="text-[10px] font-extrabold text-amber-900 bg-amber-100 px-1.5 py-0.2 rounded-full shrink-0 border border-amber-400 ml-1">
                 Còn {modifier.remainingRounds} vòng
               </span>
             </div>
-
-            <p
-              data-testid="market-ticker-effect-summary"
-              className="text-[11px] sm:text-xs text-slate-600 font-semibold leading-tight line-clamp-3 pl-6 sm:pl-7 pb-0.5 text-left"
-            >
-              {effectSummary}
-            </p>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 };

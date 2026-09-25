@@ -145,8 +145,8 @@ describe('[IMP-141] Chuẩn Hóa Toàn Diện Nội Dung & Quy Tắc Luật Chơ
         })
       );
       expect(html).toContain('data-testid="market-ticker-item-MC_PUBLIC_INVEST"');
-      expect(html).toContain('line-clamp-3');
-      expect(html).not.toContain('line-clamp-2');
+      expect(html).toContain('data-testid="market-ticker-effect-summary"');
+      expect(html).toContain('whitespace-nowrap');
     });
 
     it('[TC-141.19/MSS][UC-IMP141][Facet-3/StateReactivity] MarketEventTicker render đồng thời 2 thẻ MC_PUBLIC_INVEST và MC_COASTAL_STORM không crash', () => {

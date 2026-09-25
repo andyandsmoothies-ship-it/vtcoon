@@ -8,10 +8,10 @@
 | Domain Tag | Trọng Tâm & Phạm Vi Mã Nguồn | Các Gotchas Liên Quan |
 | :--- | :--- | :--- |
 | `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78, #82, #104, #105, #106, #145, #146, #147, #159, #164, #174, #180, #188, #195, #196, #197, #200, #203, #215, #217, #218, #219, #220, #223, #249, #255, #262, #263, #265 |
-| `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147, #190, #191, #195, #196, #197, #200, #206, #223 |
+| `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147, #190, #191, #195, #196, #197, #200, #206, #223, #272 |
 | `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190, #200, #203, #209, #210, #211, #212, #213, #215, #217, #223, #224, #225, #226, #227, #231, #235, #244, #247, #248, #249, #250, #255, #256, #259, #260, #261, #265 |
-| `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #32, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #60, #61, #63, #69, #72, #74, #77, #80, #85, #86, #88, #89, #90, #91, #92, #93, #94, #95, #96, #101, #103, #109, #110, #114, #115, #116, #117, #120, #122, #123, #124, #125, #126, #127, #128, #129, #130, #133, #134, #135, #136, #140, #141, #144, #148, #159, #160, #161, #162, #163, #164, #165, #169, #175, #177, #189, #198, #200, #222, #254, #257, #258, #259 |
-| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192, #195, #196, #199, #201, #202, #204, #205, #206, #216, #217, #231, #234, #237, #249, #250, #255, #256, #257, #258, #259, #260, #261, #266, #267, #268, #269 |
+| `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #32, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #60, #61, #63, #69, #72, #74, #77, #80, #85, #86, #88, #89, #90, #91, #92, #93, #94, #95, #96, #101, #103, #109, #110, #114, #115, #116, #117, #120, #122, #123, #124, #125, #126, #127, #128, #129, #130, #133, #134, #135, #136, #140, #141, #144, #148, #159, #160, #161, #162, #163, #164, #165, #169, #175, #177, #189, #198, #200, #222, #254, #257, #258, #259, #270 |
+| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192, #195, #196, #199, #201, #202, #204, #205, #206, #216, #217, #231, #234, #237, #249, #250, #255, #256, #257, #258, #259, #260, #261, #266, #267, #268, #269, #271 |
 | `[UAT/TEST]` | Nghiệm Thu, Adversarial TDD, Ảnh Chụp Màn Hình (.jpg), Shell Escaping, File I/O Lock, Docker Healthcheck Timeout | #5, #28, #29, #31, #35, #52, #71, #73, #83, #84, #99, #100, #117, #124, #125, #130, #199, #235 |
 | `[TELEMETRY]` | Giám Sát Hiệu Năng Thời Gian Thực, Chó Canh Phòng Bất Biến, Hộp Đen Tái Hiện Lỗi | #39, #62, #71, #75, #104, #114, #115, #135, #174, #200, #227, #235, #250, #255, #259 |
 | `[ARCH/REFACTOR]` | Tách Module Facade, Ngân Sách Render Loop, Chuẩn Hóa Môi Trường Build | #43, #98, #99 |
@@ -3123,4 +3123,44 @@
   2. **Tactile Dot Diameter >= 8px Invariant**: Kích thước chấm BĐS tối thiểu trên mobile phải đạt `w-2 h-2` (8px), tablet `sm:w-[9px] sm:h-[9px]` (9px), desktop `md:w-2.5 md:h-2.5` (10px). Khoảng cách giữa các chấm trong nhóm là `gap-1 sm:gap-1.5` để màu sắc nổi bật rõ ràng, dễ nhận biết thị giác tức thì.
   3. **Row Splitting DOM Testing**: Khi kiểm thử số lượng chấm per-row, test suite phân tách chuỗi HTML theo testid của từng hàng (`data-testid="property-clusters-row-X"`) thay vì dựa vào single regex greedy search.
 - **Traceability**: `[TC-187.02]`, `[TC-193.03]`, `src/client/ui/player_card.tsx`, `tests/client/imp187_player_card_compact_hud.test.ts`, `tests/contracts/imp193_mobile_ergonomics_auction_and_copy_polish.test.ts`.
+
+---
+
+### 270. [3D/RENDER] Khử Triệt Để Bóng Đổ Hoàng Hôn Góc Hẹp & Điều Tiết Smooth Top-Down Fill (Golden Sunset & Smooth Zenith Fill Invariant)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Cao Độ Mặt Trời Quá Thấp ($Y=12$)*: Khi mặt trời hoàng hôn có cao độ $Y=12$ ($\approx 18^\circ$), bóng đổ các công trình 3D kéo dài ngoằng phủ kín mặt bàn cờ phía bắc. Kết hợp màu cam cháy `#F97316` và nền đất bùn `#78350F` làm nhòe và biến dạng 8 nhóm màu đất.
+  2. *Bẫy Nhảy Sáng / Giật Khung Hình (Brightness Pop / Flash Trap)*: Đèn `directionalLight` chiếu đỉnh (Top-down fill) gắn trực tiếp biểu thức logic trong JSX prop (`intensity={phase === 'day' ? ... : 0}`) không qua `useRef` và lerp khiến việc đổi pha tạo ra cú giật sáng đột ngột, phá vỡ trải nghiệm điện ảnh.
+  3. *Bẫy Hố Đen Vũ Trụ Ban Đêm (Night Abyss Trap)*: Bầu trời `#050814` và sương mù `#090D1A` ở khoảng cách gần ($65\text{m}$) cùng `environmentIntensity = 0.16` làm vật liệu PBR (kim loại, kính) mất ánh phản xạ, bàn cờ tối đen.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Elevated Sunset Vector Invariant**: Mặt trời hoàng hôn đặt tại `[-28, 24, 18]` ($Y=24$) với ánh nắng vàng kim `#FDE047` và đất nung ấm `#9A3412`, triệt tiêu 75% bóng đổ dài mà vẫn bảo toàn thẩm mỹ chiều tà.
+  2. **Elevated Night Moonbeam Invariant**: Mặt trăng ban đêm nâng $Y=32$ (`[18, 32, -20]`) với ánh trăng xanh bạc `#93C5FD`, bầu trời xanh chàm `#0C1527`, sương mù `#0F172A` ($75-240\text{m}$) và phản xạ biển dạ quang `#0369A1`.
+  3. **Continuous Top-Down Fill Lerp Invariant**: Đèn đỉnh bàn cờ bắt buộc điều khiển qua `topDownRef = useRef<DirectionalLight>(null)`, lerp mượt mà qua $1 - e^{-3\Delta t}$ trong `useSafeFrame` (Ngày $0.25$, Chiều $0.18$, Đêm $0.14$, dìm về $0.05$ khi đấu giá).
+  4. **PBR Environment Intensity Invariant**: `calculateBaseEnv` điều tiết môi trường IBL đạt $0.75$ (Ngày), $0.38$ (Chiều), $0.28$ (Đêm), bảo toàn ánh lấp lánh neon của vật liệu PBR mà không cháy nền nước biển.
+  5. **R3F Scene Background & Fog Direct Attachment Invariant**: Trong React Three Fiber, `<color attach="background" />` và `<fog attach="fog" />` TUYỆT ĐỐI KHÔNG lồng bên trong `<group>` vì Three.js Group không có thuộc tính `background`/`fog` (khiến `scene.background` và `scene.fog` bị null vĩnh viễn). Phải đặt trực tiếp dưới `<>` (React Fragment) tại gốc Canvas kết hợp kiểm tra khởi tạo chủ động `new Fog(...)` / `new Color(...)` trong vòng lặp cập nhật khí quyển.
+- **Traceability**: `[TC-196.01..18/MSS]`, `[UC-IMP196]`, `src/client/store/environment_store.ts`, `src/client/3d/time_of_day_lighting.tsx`, `tests/contracts/imp196_golden_sunset_and_neon_night_lighting.test.ts`.
+
+---
+
+### 271. [UI/CRAFT] Bất Biến Dải Hiệu Ứng Liếc Nhanh & Mật Độ HUD Không Tương Tác (Glanceable Impact Strip & Zero-Interaction HUD Density Invariant - IMP-195)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Xếp Chồng Thông Báo Che Phủ Màn Hình (Notification Overstacking Trap)*: Khi 1 sự kiện vĩ mô, 1 thẻ bài Cơ Hội, 1 biến động cước dừng chân, và 1 đề xuất Bot Trade diễn ra cùng lúc trên Mobile (360x740), hệ thống pop-up cũ tính toán dynamic top-offset (`top-[10.5rem]`, `top-[15.5rem]`) đẩy cả chuỗi banner phủ kín hơn 60% màn hình, đè nghẽn tầm nhìn bàn cờ 3D và các modal giao dịch.
+  2. *Bẫy Dashboard Quá Tối Giản Nhưng Đòi Hỏi Vuốt/Click (The Dashboard & Swipe Trap)*: Giải pháp gom thẻ vào một ngăn kéo (drawer) hoặc thanh pill yêu cầu người chơi phải click/vuốt để đọc nội dung hoàn toàn thất bại trong nhịp game nhanh; người chơi không có thời gian dừng lại 1-2 giây chỉ để thao tác xem thông báo trong khi lượt đi đang đếm ngược.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Glanceable HUD Principle (0.5s Glance, 0-Click, 0-Swipe)**: Toàn bộ thông tin sự kiện thị trường bắt buộc cô đọng thành các công thức toán học/chỉ số súc tích (`🔥 Đất x2.5`, `🚂 Ga x2`, `💰 Vay -20%`) tích hợp trong duy nhất một dải ngang `max-h-10` (~40px) có cuộn ngang `overflow-x-auto scrollbar-none`.
+  2. **Unified Financial Toast Anchor**: Các thông báo biến động tài chính (Floating Numbers) cố định ở vị trí `top-28 sm:top-24`, trên mobile chỉ hiển thị tối đa 1 badge tại một thời điểm (ưu tiên Milestone Banner nếu có), bảo toàn > 75% chiều cao màn hình cho bàn cờ 3D.
+- **Traceability**: `[TC-HUD.01..03]`, `src/client/ui/market_event_ticker.tsx`, `src/client/ui/floating_numbers.tsx`, `tests/client/imp195_glanceable_hud_and_event_stacking.test.ts`.
+
+---
+
+### 272. [BOT/AI/NET] Bất Biến Đảo Vai Giao Dịch P2P & Thanh Đề Xuất Bot Trực Tuyến 1-Chạm (Bot Trade Actor Inversion & Inline Deal Strip Safety Guard - IMP-195)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Modal Chiếm Quyền Điều Khiển (Modal Hijack Trap)*: Khi Bot gửi đề xuất mua/đổi BĐS, client cũ tự động gọi `openModal('bot_trade_offer')`, bật toang một hộp thoại toàn màn hình đè lên TitleDeedModal hoặc sàn đấu giá, cắt ngang dòng suy nghĩ mua đất của người chơi.
+  2. *Bẫy Đổi Đất Bù Tiền Âm (Negative Cash Trade Inversion Trap)*: Đề xuất Bot gửi sang có thể là mua đứt (`price > 0`), hoán đổi ngang giá (`price === 0`), hoặc hoán đổi người chơi phải bù tiền (`price < 0`). Nếu UI không kiểm tra số dư hiện tại của người chơi (`myBalance < Math.abs(price)`), người chơi bấm chấp thuận sẽ bị âm tiền thụ động dẫn đến phá sản ngoài ý muốn.
+  3. *Bẫy Rò Rỉ Timer Đếm Ngược (Stale Timer Leak Trap)*: Interval 15s đếm ngược của đề xuất Bot nếu không dọn dẹp khi unmount hoặc khi người chơi đã phản hồi (Accept/Reject) sẽ tiếp tục chạy ngầm, bắn intent từ chối giả mạo sang máy chủ sau khi đề xuất đã kết thúc.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Non-Intrusive Inline Strip Invariant**: Đề xuất giao dịch từ Bot không được tự động mở modal toàn màn hình (`activeModal`). Đề xuất được lưu vào `game_store.pendingTradeOffer` và hiển thị bằng một thanh strip nhỏ gọn (`InlineBotTradeStrip`) gắn trực tiếp trên ActionDock ở đáy màn hình. Chỉ khi người chơi chủ động bấm `[ℹ️ Chi tiết]` thì modal đầy đủ mới mở ra.
+  2. **Insolvency Balance Guard**: Khi `price < 0` (người chơi phải bù tiền), nhãn hiển thị chuyển thành `(Bù X Tr.)` và nút chấp thuận bị disable hoàn toàn nếu `myBalance < Math.abs(price)`.
+  3. **Strict Teardown & Seller Guard**: Thanh đề xuất chỉ hiển thị khi `sellerId === myId`. Khi người chơi Accept, Reject hoặc khi nhận `pendingTradeOffer === null` từ server delta, `clearInterval` phải được gọi ngay lập tức và reset `timerRef.current = null`.
+- **Traceability**: `[TC-HUD.04..08]`, `src/client/network/apply_delta.ts`, `src/client/ui/modals/bot_trade_offer_strip.tsx`, `src/client/ui/hud_container.tsx`, `tests/client/imp195_glanceable_hud_and_event_stacking.test.ts`.
+
 

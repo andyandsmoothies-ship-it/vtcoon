@@ -1,6 +1,6 @@
 // [UI-S01/MSS][UI-S04/MSS] TimeOfDayLighting — Dynamic Day-Sunset-Night Lighting & Atmosphere Coordinator
 import React, { useRef, useMemo } from 'react';
-import { Color, Vector3, type DirectionalLight, type AmbientLight, type HemisphereLight, type Fog, type Scene } from 'three';
+import { Color, Vector3, Fog, type DirectionalLight, type AmbientLight, type HemisphereLight, type Scene } from 'three';
 import { useSafeFrame } from './safe_frame';
 import {
   useEnvironmentStore,
@@ -27,6 +27,21 @@ export function calculateBaseRim(phase: 'day' | 'sunset' | 'night'): number {
     case 'sunset': return 0.40;
     case 'night': return 0.25;
   }
+}
+
+export function calculateTopDownFill(phase: 'day' | 'sunset' | 'night', isAuctionActive: boolean): { intensity: number; color: string } {
+  switch (phase) {
+    case 'day':
+      return { intensity: isAuctionActive ? 0.05 : 0.25, color: '#F8FAFC' };
+    case 'sunset':
+      return { intensity: isAuctionActive ? 0.05 : 0.18, color: '#FEF3C7' };
+    case 'night':
+      return { intensity: isAuctionActive ? 0.05 : 0.14, color: '#BAE6FD' };
+  }
+}
+
+export function calculateBaseEnv(phase: 'day' | 'sunset' | 'night'): number {
+  return phase === 'night' ? 0.28 : phase === 'sunset' ? 0.38 : 0.75;
 }
 
 function isThreeFog(fog: unknown): fog is Fog {
@@ -99,17 +114,21 @@ function updateDiffuseAndAtmosphere(
     hemi.intensity += (targetHemi - hemi.intensity) * lerpRate;
   }
   if (scene) {
-    if (isThreeFog(scene.fog)) {
+    if (!scene.fog || !isThreeFog(scene.fog)) {
+      scene.fog = new Fog(preset.fogColor, preset.fogNear, preset.fogFar);
+    } else {
       tempColor.set(preset.fogColor);
       scene.fog.color.lerp(tempColor, lerpRate);
       scene.fog.near += (preset.fogNear - scene.fog.near) * lerpRate;
       scene.fog.far += (preset.fogFar - scene.fog.far) * lerpRate;
     }
-    if (isThreeColor(scene.background)) {
+    if (!scene.background || !isThreeColor(scene.background)) {
+      scene.background = new Color(preset.skyColor);
+    } else {
       tempColor.set(preset.skyColor);
       scene.background.lerp(tempColor, lerpRate);
     }
-    const baseEnv = phase === 'night' ? 0.16 : phase === 'sunset' ? 0.28 : 0.75;
+    const baseEnv = phase === 'night' ? 0.28 : phase === 'sunset' ? 0.38 : 0.75;
     const targetEnv = isAuctionActive ? 0.12 : baseEnv;
     if (typeof scene.environmentIntensity !== 'number') {
       scene.environmentIntensity = 1.0;
@@ -136,9 +155,11 @@ export function TimeOfDayLighting({ isMobile = false }: TimeOfDayLightingProps =
   const rimRef = useRef<DirectionalLight>(null);
   const ambientRef = useRef<AmbientLight>(null);
   const hemiRef = useRef<HemisphereLight>(null);
+  const topDownRef = useRef<DirectionalLight>(null);
 
   const preset = TIME_OF_DAY_PRESETS[phase];
   const initialPreset = useMemo(() => TIME_OF_DAY_PRESETS[useEnvironmentStore.getState().phase], []);
+  const initialTopDown = useMemo(() => calculateTopDownFill(useEnvironmentStore.getState().phase, false), []);
 
   // Temporary Three.js math objects for GC-free smooth lerp
   const tempColor = useMemo(() => new Color(), []);
@@ -157,15 +178,23 @@ export function TimeOfDayLighting({ isMobile = false }: TimeOfDayLightingProps =
     const lerpRate = 1 - Math.exp(-dt * 3.0);
     updateDirectLights(sunRef.current, fillRef.current, rimRef.current, preset, phase, isAuctionActive, lerpRate, tempVec, tempColor);
     updateDiffuseAndAtmosphere(ambientRef.current, hemiRef.current, state.scene, preset, phase, isAuctionActive, dt, lerpRate, tempColor);
+    if (topDownRef.current) {
+      const topDownTarget = calculateTopDownFill(phase, isAuctionActive);
+      tempColor.set(topDownTarget.color);
+      topDownRef.current.color.lerp(tempColor, lerpRate);
+      topDownRef.current.intensity += (topDownTarget.intensity - topDownRef.current.intensity) * lerpRate;
+    }
   });
 
   return (
-    <group data-testid="time-of-day-lighting">
+    <>
       {/* 1. Bầu trời động (Dynamic Sky Dome Color) */}
       <color attach="background" args={[initialPreset.skyColor]} />
 
       {/* 2. Sương mù chân trời khí quyển (Dynamic Atmospheric Fog) */}
       <fog attach="fog" args={[initialPreset.fogColor, initialPreset.fogNear, initialPreset.fogFar]} />
+
+      <group data-testid="time-of-day-lighting">
 
       {/* 3. Ánh sáng tán xạ không gian (Ambient Light) */}
       <ambientLight ref={ambientRef} color={initialPreset.ambientColor} intensity={initialPreset.ambientIntensity} />
@@ -213,12 +242,14 @@ export function TimeOfDayLighting({ isMobile = false }: TimeOfDayLightingProps =
         intensity={0.12}
       />
 
-      {/* 8. Daylight Top-down Fill Light: Khử triệt để bóng tối sầm khi zoom cận cảnh vào bàn cờ */}
+      {/* 8. Balanced Top-down Fill Light: Khử triệt để bóng tối sầm mọi thời điểm */}
       <directionalLight
+        ref={topDownRef}
         position={[0, 30, 0]}
-        intensity={phase === 'day' ? (isAuctionActive ? 0.05 : 0.25) : 0}
-        color="#F8FAFC"
+        intensity={initialTopDown.intensity}
+        color={initialTopDown.color}
       />
     </group>
+  </>
   );
 }

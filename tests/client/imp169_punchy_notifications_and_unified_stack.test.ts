@@ -203,17 +203,16 @@ describe('[IMP-169] Punchy Event Notifications & Unified Pop-up Stack Architectu
       expect(html).not.toContain('top-[4.25rem]');
     });
 
-    it('[TC-IMP169.06/A1][UC-GAME-023][Facet-2/Reactivity] activeMarketCount === 1: Unified Stack Container định vị tại top-[10.5rem]', () => {
+    it('[TC-IMP169.06/A1][UC-GAME-023][Facet-2/Reactivity] activeMarketCount === 1: Unified Stack Container định vị tại top-28 sm:top-24 (IMP-195)', () => {
       useGameStore.setState({
         floatingTexts: [BASE_MILESTONE_ITEM, BASE_REGULAR_TOAST],
         activeModifiers: [{ type: MarketCardId.MC_ANTI_SPECULATE, remainingRounds: 2 }],
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
-      expect(html).toContain('top-[10.5rem]');
-      expect(html).not.toContain('top-[16.5rem]');
+      expect(html).toContain('top-28 sm:top-24');
     });
 
-    it('[TC-IMP169.06/A2][UC-GAME-023][Facet-2/Reactivity] activeMarketCount >= 2: Unified Stack Container định vị tại top-[15.5rem]', () => {
+    it('[TC-IMP169.06/A2][UC-GAME-023][Facet-2/Reactivity] activeMarketCount >= 2: Unified Stack Container định vị tại top-28 sm:top-24 (IMP-195)', () => {
       useGameStore.setState({
         floatingTexts: [BASE_MILESTONE_ITEM, BASE_REGULAR_TOAST],
         activeModifiers: [
@@ -222,8 +221,7 @@ describe('[IMP-169] Punchy Event Notifications & Unified Pop-up Stack Architectu
         ],
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
-      expect(html).toContain('top-[15.5rem]');
-      expect(html).not.toContain('top-[21.5rem]');
+      expect(html).toContain('top-28 sm:top-24');
     });
   });
 

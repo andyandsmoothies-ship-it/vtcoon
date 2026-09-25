@@ -132,3 +132,10 @@ Khi triển khai mã nguồn hoặc tinh chỉnh giao diện, agent mở các t�
 - **Công thức đổ bóng đa tầng xúc giác**: [`reference/tactile_shadows.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/tactile_shadows.md)
 - **Sàn chất lượng và các điều cấm kỵ**: [`reference/craft-floor.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/craft-floor.md)
 - **Hệ thống thiết kế mỹ thuật tổng thể**: [`docs/domain/design.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/design.md) hoặc [`DESIGN.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/DESIGN.md)
+
+---
+
+## 7. BẤT BIẾN THIẾT KẾ HUD: GLANCEABLE HUD VS DASHBOARD TRAP
+
+- **Cấm Bẫy Dashboard Hóa**: Trong game nhịp độ nhanh (lượt 15–30s), người chơi không dừng lại click/swipe để đọc từng thông báo. Cấm thu nhỏ thông báo thành icon phẳng hoặc giấu vào menu/drawer.
+- **Glanceable HUD Principle**: Không giấu thông tin, mà cô đọng văn bản thành công thức toán học/chỉ số ngoại vi (`🔥 Đất: Thuê x2.5`, `🚂 4 Ga: Cước x2`). Chiều cao dải thông báo cố định $\le 44px$, người chơi nắm bắt toàn bộ trạng thái trong 0.5s với **0 click, 0 vuốt**.

@@ -153,7 +153,7 @@ export function AuctionModal({
             </span>
           ) : isForeclosure ? (
             <span className="px-1.5 sm:px-2.5 py-0.5 rounded-full text-[9px] sm:text-xs font-extrabold bg-rose-100 text-rose-800 border border-rose-400 flex items-center gap-0.5 sm:gap-1 animate-pulse whitespace-nowrap shrink-0">
-              <span>⚠️ PHÁT MÃI (-30%)</span>
+              <span>⚠️ PHÁT MÃI CƯỠNG CHẾ (-30%)</span>
             </span>
           ) : (
             <span className="px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-400 whitespace-nowrap">
@@ -165,7 +165,7 @@ export function AuctionModal({
               type="button"
               onClick={onClose}
               aria-label="Đóng sàn đấu giá"
-              className="min-w-[36px] min-h-[36px] w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-amber-100 hover:bg-amber-200 border border-amber-300 text-slate-800 font-black shadow-sm flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 transition-colors cursor-pointer shrink-0"
+              className="min-w-[44px] min-h-[44px] w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-amber-100 hover:bg-amber-200 border border-amber-300 text-slate-800 font-black shadow-sm flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 transition-colors cursor-pointer shrink-0"
             >
               ✕
             </button>
@@ -365,7 +365,7 @@ export function AuctionModal({
                   type="button"
                   onClick={() => onBid?.(targetBid)}
                   disabled={!canAfford || isConcluded}
-                  className={`min-h-[44px] py-1 px-1.5 sm:py-1.5 sm:px-2 font-bold text-xs rounded-xl border-2 flex flex-col items-center justify-center transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 whitespace-nowrap ${
+                  className={`min-h-[44px] sm:min-h-[48px] py-1 px-1.5 sm:py-1.5 sm:px-2 font-bold text-xs rounded-xl border-2 flex flex-col items-center justify-center transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 whitespace-nowrap ${
                     canAfford && !isConcluded
                       ? 'bg-amber-500 hover:bg-amber-400 text-amber-950 border-amber-700 font-black shadow-[0_3px_0_0_#b45309] active:shadow-[0_1px_0_0_#b45309] active:translate-y-[2px] cursor-pointer'
                       : 'bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed opacity-50'
@@ -389,7 +389,7 @@ export function AuctionModal({
             type="button"
             onClick={() => setAutoBid((prev) => !prev)}
             disabled={hasPassed || isDeclinedPlayer || isConcluded}
-            className={`min-h-[40px] sm:min-h-[44px] px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 whitespace-nowrap ${
+            className={`min-h-[44px] px-3.5 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 whitespace-nowrap ${
               hasPassed || isDeclinedPlayer || isConcluded
                 ? 'bg-slate-200 text-slate-400 border-slate-300 opacity-50 cursor-not-allowed'
                 : autoBid
@@ -405,7 +405,7 @@ export function AuctionModal({
             <button
               type="button"
               onClick={onClose}
-              className="min-h-[40px] sm:min-h-[44px] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-bold text-amber-950 bg-amber-400 hover:bg-amber-300 border-2 border-amber-600 shadow-[0_2px_0_0_#b45309] transition-all active:translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 cursor-pointer whitespace-nowrap"
+              className="min-h-[44px] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-bold text-amber-950 bg-amber-400 hover:bg-amber-300 border-2 border-amber-600 shadow-[0_2px_0_0_#b45309] transition-all active:translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 cursor-pointer whitespace-nowrap"
             >
               Đóng / Xem Bàn Cờ
             </button>
@@ -413,7 +413,7 @@ export function AuctionModal({
             <button
               type="button"
               onClick={onClose}
-              className="min-h-[40px] sm:min-h-[44px] px-4 sm:px-5 py-1.5 sm:py-2 rounded-xl text-xs font-black text-amber-950 bg-amber-400 hover:bg-amber-300 border-2 border-amber-600 shadow-[0_2px_0_0_#b45309] transition-all active:translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 cursor-pointer whitespace-nowrap"
+              className="min-h-[44px] px-4 sm:px-5 py-1.5 sm:py-2 rounded-xl text-xs font-black text-amber-950 bg-amber-400 hover:bg-amber-300 border-2 border-amber-600 shadow-[0_2px_0_0_#b45309] transition-all active:translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 cursor-pointer whitespace-nowrap"
             >
               Đã Rút Lui • Đóng
             </button>
@@ -421,7 +421,7 @@ export function AuctionModal({
             <button
               type="button"
               onClick={onClose}
-              className="min-h-[40px] sm:min-h-[44px] px-4 sm:px-5 py-1.5 sm:py-2 rounded-xl text-xs font-black text-amber-950 bg-amber-400 hover:bg-amber-300 border-2 border-amber-600 shadow-[0_2px_0_0_#b45309] transition-all active:translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 cursor-pointer whitespace-nowrap"
+              className="min-h-[44px] px-4 sm:px-5 py-1.5 sm:py-2 rounded-xl text-xs font-black text-amber-950 bg-amber-400 hover:bg-amber-300 border-2 border-amber-600 shadow-[0_2px_0_0_#b45309] transition-all active:translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 cursor-pointer whitespace-nowrap"
             >
               Đóng / Xem Bàn Cờ
             </button>
@@ -429,7 +429,7 @@ export function AuctionModal({
             <button
               type="button"
               onClick={onPass ?? onClose}
-              className="min-h-[40px] sm:min-h-[44px] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-bold text-rose-700 hover:text-rose-800 bg-rose-100 hover:bg-rose-200 border-2 border-rose-300 transition-all active:translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 cursor-pointer whitespace-nowrap"
+              className="min-h-[44px] px-4 py-2 rounded-xl text-xs font-bold text-rose-700 hover:text-rose-800 bg-rose-100 hover:bg-rose-200 border-2 border-rose-300 transition-all active:translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 cursor-pointer whitespace-nowrap"
             >
               Rút Lui / Bỏ Cuộc
             </button>

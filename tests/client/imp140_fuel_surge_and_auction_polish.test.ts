@@ -259,7 +259,7 @@ describe('[IMP-140: Station 1 RED] Fuel Surge Clarification & Auction Polish', (
           myId: 'p1',
         })
       );
-      expect(html).toMatch(/class="[^"]*max-w-\[140px\][^"]*truncate[^"]*sm:max-w-none[^"]*"/);
+      expect(html).toMatch(/class="[^"]*max-w-\[(?:140px|180px)\][^"]*truncate[^"]*sm:max-w-none[^"]*"/);
     });
   });
 

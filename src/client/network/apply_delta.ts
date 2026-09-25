@@ -134,14 +134,15 @@ function syncBusinessModals(delta: DeltaPayload, state: GameState): void {
     }
   }
 
-  // [IMP-142] Bot Trade Offer Modal — mở khi offer gửi cho mình, đóng khi offer là null
-  if (delta.pendingTradeOffer) {
+  // [IMP-142][IMP-195] Bot Trade Offer — lưu vào store pendingTradeOffer cho InlineBotTradeStrip (không auto-open modal làm che màn hình)
+  if (delta.pendingTradeOffer !== undefined) {
     const myPid = useLobbyStore.getState().myPlayerId;
-    if (delta.pendingTradeOffer.sellerId === myPid) {
-      state.openModal('bot_trade_offer', delta.pendingTradeOffer);
+    const isTargetedToMe = Boolean(delta.pendingTradeOffer && delta.pendingTradeOffer.sellerId === myPid);
+    state.setPendingTradeOffer(isTargetedToMe ? delta.pendingTradeOffer : null);
+
+    if (delta.pendingTradeOffer === null && state.activeModal === 'bot_trade_offer') {
+      state.closeModal();
     }
-  } else if (delta.pendingTradeOffer === null && state.activeModal === 'bot_trade_offer') {
-    state.closeModal();
   }
 
   // [IMP-145] Compulsory Buyout Modal — mở khi người chơi là bên mua (buyerId), đóng khi pendingBuyout là null
@@ -265,3 +266,5 @@ export function applyDeltaToStore(delta: DeltaPayload, store: typeof useGameStor
   if (hasPlayerInfoChange) currentState.setPlayersInfo(playersInfoMap);
   applyPhaseAndTimerDeltas(delta, state, store);
 }
+
+export { applyDeltaToStore as applyDelta };

@@ -1,5 +1,6 @@
 // [UI-S01/MSS][UI-S03/MSS][UI-S04/MSS] Game Store Types, Interfaces & Payloads
 import type { EventCardInfo, MarketModifier, PendingBuyoutSession } from '../../domain/room';
+import type { PendingTradeOfferDelta } from '../../server/session_manager';
 import type { BotPersonality } from '../../domain/bot/bot_types';
 import type { BondContract } from '../../domain/bond_types';
 
@@ -225,6 +226,7 @@ export interface GameState {
   readonly modalPayload: ModalPayloadMap[keyof ModalPayloadMap] | null;
   readonly lastEventCard: EventCardInfo | null;
   readonly pendingBuyout?: PendingBuyoutSession | null;
+  readonly pendingTradeOffer: PendingTradeOfferDelta | null;
   readonly auction?: {
     readonly cellIndex: number;
     readonly highestBid?: number;
@@ -279,6 +281,7 @@ export interface GameState {
   closeModal: () => void;
   updateModalPayload: <T extends keyof ModalPayloadMap>(patch: Partial<ModalPayloadMap[T]>) => void;
   setPendingBuyout: (pendingBuyout: PendingBuyoutSession | null) => void;
+  setPendingTradeOffer: (offer: PendingTradeOfferDelta | null) => void;
 
   // UI-05 Social Emotes & Micro-VFX Actions
   triggerEmote: (playerId: string, emoteId: string) => void;
@@ -314,6 +317,7 @@ export type InitialGameState = Pick<
   | 'modalPayload'
   | 'lastEventCard'
   | 'pendingBuyout'
+  | 'pendingTradeOffer'
   | 'auction'
   | 'activeEmotes'
   | 'floatingTexts'
@@ -346,6 +350,7 @@ export const INITIAL_GAME_STATE: InitialGameState = {
   modalPayload: null,
   lastEventCard: null,
   pendingBuyout: null,
+  pendingTradeOffer: null,
   auction: null,
   activeEmotes: {},
   floatingTexts: [],
