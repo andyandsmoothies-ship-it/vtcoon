@@ -22,7 +22,7 @@ const posArgs = args.filter((a) => !a.startsWith('--'));
 
 let sliceId = posArgs[0] ? posArgs[0].toUpperCase() : '';
 const specifiedFiles = posArgs.slice(1);
-const shouldRunContract = flags.includes('--run-contract');
+const shouldRunContract = !flags.includes('--no-test') && !flags.includes('--skip-test');
 
 const repoRoot = process.cwd();
 const evidenceDir = path.join(repoRoot, '.agents', 'evidence');
@@ -239,4 +239,9 @@ if (testExecution && testExecution.executed) {
   console.log(`├── Test Exec : ${testExecution.status} (${testExecution.passedCount ?? 0} tests in ${testExecution.suite})`);
 }
 console.log(`└── Status    : READY FOR TRẠM 3 (Zero-Memorization Active)`);
+console.log('----------------------------------------------------');
+console.log('📋 [PHYSICAL DISK LOC FOR REPORT]');
+fileReports.forEach((f) => {
+  console.log(`- \`${f.path}\`: **${f.loc} LOC**`);
+});
 console.log('----------------------------------------------------');
