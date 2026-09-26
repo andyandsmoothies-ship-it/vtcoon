@@ -221,7 +221,7 @@ describe('[UI-S04/MSS] TitleDeedModal Nâng Cấp & Hạ Cấp BĐS', () => {
         onDowngrade: () => {},
       })
     );
-    expect(html).toContain('Nâng Cấp (+450 Tr.)');
+    expect(html).toContain('Nâng Cấp (+450)');
     expect(html).toContain('Hạ Cấp (-50%)');
   });
 
@@ -238,7 +238,7 @@ describe('[UI-S04/MSS] TitleDeedModal Nâng Cấp & Hạ Cấp BĐS', () => {
         onDowngrade: () => {},
       })
     );
-    expect(html).toContain('Nâng Cấp (+300 Tr.)');
+    expect(html).toContain('Nâng Cấp (+300)');
     expect(html).not.toContain('Hạ Cấp (-50%)');
   });
 

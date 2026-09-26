@@ -218,7 +218,7 @@ export function DiceTray(): React.ReactElement {
 
       {/* 2 Xúc xắc 3D đỏ Ruby chỉ render khi đang quay hoặc mờ dần */}
       {Boolean(isRolling || (isVisible && fadeOpacity > 0)) && (
-        <group>
+        <group rotation={!isRolling ? [-0.35, 0.35, 0] : [0, 0, 0]}>
           <SingleDie
             face={dice[0]}
             targetX={-0.65}

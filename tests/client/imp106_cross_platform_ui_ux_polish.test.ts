@@ -290,8 +290,9 @@ describe('[UC-IMP106/MSS] Cross-Platform UI/UX Multi-Platform Polish Contract Su
         })
       );
       expect(html).toContain('activity-feed-backdrop');
-      expect(html).toContain('bg-black/50');
-      expect(html).toContain('md:hidden');
+      expect(html).toContain('bg-black/40');
+      expect(html).toContain('z-20');
+      expect(html).not.toContain('md:hidden');
     });
 
     it('[UC-IMP106/MSS-P7.2] ActivityFeedSidebar header close button preserves min-h-[44px] min-w-[44px]', () => {

@@ -58,7 +58,7 @@ export function CompulsoryBuyoutModal({
   return (
     <div
       data-testid="compulsory-buyout-modal"
-      className="w-full max-w-md bg-[#FFFDF8] border-2 border-amber-900/25 rounded-2xl shadow-2xl overflow-hidden flex flex-col pointer-events-auto"
+      className="w-full max-w-md max-h-[90dvh] overflow-y-auto bg-[#FFFDF8] border-2 border-amber-900/25 rounded-2xl shadow-2xl flex flex-col pointer-events-auto"
       role="dialog"
       aria-modal="true"
       aria-labelledby="compulsory-buyout-modal-title"

@@ -163,7 +163,7 @@ export function ActivityFeedSidebar(props: ActivityFeedSidebarProps): React.Reac
         <div
           data-testid="activity-feed-backdrop"
           onClick={() => setOpen(false)}
-          className="fixed inset-0 bg-black/50 backdrop-blur-xs z-20 md:hidden pointer-events-auto"
+          className="fixed inset-0 bg-black/40 backdrop-blur-2xs z-20 pointer-events-auto"
           aria-hidden="true"
         />
       )}

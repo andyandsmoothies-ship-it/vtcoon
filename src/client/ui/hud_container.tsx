@@ -55,23 +55,25 @@ export function HudContainer({
         className="fixed inset-0 pointer-events-none flex flex-col justify-between p-1.5 sm:p-3 md:p-6 z-10 select-none font-sans"
         data-testid="hud-container"
       >
-      {/* Tầng đỉnh: Top Bar thông tin vòng đấu, timer, kho bạc */}
-      <TopBar onLeaveRoom={onLeaveRoom} />
+        {/* Tầng đỉnh: Top Bar thông tin vòng đấu, timer, kho bạc - Nổi trên backdrop Z-20 */}
+        <div className="relative z-30 pointer-events-none">
+          <TopBar onLeaveRoom={onLeaveRoom} />
+        </div>
 
-      {/* Tầng hiển thị Sự kiện thị trường vĩ mô */}
-      <MarketEventTicker />
+        {/* Tầng hiển thị Sự kiện thị trường vĩ mô */}
+        <MarketEventTicker />
 
-      {/* Tầng hiển thị số tiền bay (Floating Text / Numbers) */}
-      <FloatingNumbersOverlay />
+        {/* Tầng hiển thị số tiền bay (Floating Text / Numbers) */}
+        <FloatingNumbersOverlay />
 
-      {/* Tầng giữa: Trục giữa thông thoáng, PlayerHudList ở cạnh phải */}
-      <div className="flex-1 flex justify-end items-start pointer-events-none my-2 overflow-hidden">
-        {children}
-        <PlayerHudList />
-      </div>
+        {/* Tầng giữa: Trục giữa thông thoáng, PlayerHudList ở cạnh phải */}
+        <div className="flex-1 flex justify-end items-start pointer-events-none my-2 overflow-hidden">
+          {children}
+          <PlayerHudList />
+        </div>
 
-      {/* Cụm Nút Nổi Điều Hướng Camera (Recenter Pawn & Camera Snap Overview) */}
-      <div className="pointer-events-none fixed bottom-24 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center gap-2 max-w-[95vw]">
+        {/* Cụm Nút Nổi Điều Hướng Camera (Recenter Pawn & Camera Snap Overview) */}
+        <div className="pointer-events-none fixed bottom-28 sm:bottom-32 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center gap-2 max-w-[95vw]">
         <RecenterPawnPill
           activeModal={activeModal}
           cameraFocusCell={cameraFocusCell}

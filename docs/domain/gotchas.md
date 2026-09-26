@@ -11,8 +11,8 @@
 | `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147, #190, #191, #195, #196, #197, #200, #206, #223, #272 |
 | `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190, #200, #203, #209, #210, #211, #212, #213, #215, #217, #223, #224, #225, #226, #227, #231, #235, #244, #247, #248, #249, #250, #255, #256, #259, #260, #261, #265 |
 | `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #32, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #60, #61, #63, #69, #72, #74, #77, #80, #85, #86, #88, #89, #90, #91, #92, #93, #94, #95, #96, #101, #103, #109, #110, #114, #115, #116, #117, #120, #122, #123, #124, #125, #126, #127, #128, #129, #130, #133, #134, #135, #136, #140, #141, #144, #148, #159, #160, #161, #162, #163, #164, #165, #169, #175, #177, #189, #198, #200, #222, #254, #257, #258, #259, #270, #275 |
-| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192, #195, #196, #199, #201, #202, #204, #205, #206, #216, #217, #231, #234, #237, #249, #250, #255, #256, #257, #258, #259, #260, #261, #266, #267, #268, #269, #271, #273, #274, #276 |
-| `[UAT/TEST]` | Nghiệm Thu, Adversarial TDD, Ảnh Chụp Màn Hình (.jpg), Shell Escaping, File I/O Lock, Docker Healthcheck Timeout | #5, #28, #29, #31, #35, #52, #71, #73, #83, #84, #99, #100, #117, #124, #125, #130, #199, #235, #273 |
+| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192, #195, #196, #199, #201, #202, #204, #205, #206, #216, #217, #231, #234, #237, #249, #250, #255, #256, #257, #258, #259, #260, #261, #266, #267, #268, #269, #271, #273, #274, #276, #277, #278 |
+| `[UAT/TEST]` | Nghiệm Thu, Adversarial TDD, Ảnh Chụp Màn Hình (.jpg), Shell Escaping, File I/O Lock, Docker Healthcheck Timeout | #5, #28, #29, #31, #35, #52, #71, #73, #83, #84, #99, #100, #117, #124, #125, #130, #199, #235, #273, #278 |
 | `[TELEMETRY]` | Giám Sát Hiệu Năng Thời Gian Thực, Chó Canh Phòng Bất Biến, Hộp Đen Tái Hiện Lỗi | #39, #62, #71, #75, #104, #114, #115, #135, #174, #200, #227, #235, #250, #255, #259 |
 | `[ARCH/REFACTOR]` | Tách Module Facade, Ngân Sách Render Loop, Chuẩn Hóa Môi Trường Build | #43, #98, #99 |
 
@@ -3223,4 +3223,38 @@
   2. **Unconstrained Ancestor Viewport Invariant**: Khối bọc ngoài của ActionDock trên desktop bắt buộc khai báo `sm:max-w-none sm:min-w-0` để không bóp nghẹt các nút con, trong khi các dải component con đặc thù (như trade strip) tự quản lý `max-w` của riêng mình.
   3. **Zero-Collision Notice Suppression Invariant**: Bất kỳ thông báo nổi phía trên dock (`actionDockNotice`) bắt buộc phải bị triệt tiêu khi có component nổi cấp cao hơn đang active: `{actionDockNotice && !isTradeStripActive && (...)}`, với `isTradeStripActive = Boolean(pendingTradeOffer && pendingTradeOffer.sellerId === actingPlayerId)`.
 - **Traceability**: `[TC-198.01..17/MSS]`, `[UC-IMP198]`, `src/client/ui/hud_container.tsx`, `src/client/ui/action_dock.tsx`, `src/client/ui/modals/bot_trade_offer_strip.tsx`, `tests/contracts/imp198_desktop_actiondock_layout.test.ts`.
+
+---
+
+### 277. [UI/CRAFT][BOT/AI] Bất Biến Thẻ Giao Dịch Vi Mô 2 Tầng Công Thái Học & Đồng Bộ Thoát Trạng Thái Đề Xuất (Ergonomic 2-Tier Bot Trade Micro-Card & Modal Escape Synchronization Invariant - IMP-199)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Nút Bỏ Qua Bị Xén Cụt Chữ (Mobile Label Drop & Inspection Trap)*: Trên thanh trade strip 1 hàng cũ, nhãn "BỎ QUA" bị ẩn trên mobile (`hidden sm:inline`), người chơi chỉ thấy biểu tượng "✕" và nhầm lẫn là nút đóng thay vì từ chối. Nút chi tiết "ℹ️" thiếu text "Chi tiết" gây khó hiểu cho người chơi mới.
+  2. *Bẫy Kẹt Trạng Thái Khi Đóng Modal Toàn Màn Hình (Modal Escape State Stagnation Trap)*: Khi mở modal kiểm tra chi tiết (`BotTradeOfferModal`), nếu người chơi bấm Chấp nhận, Từ chối hoặc Đóng modal, client chỉ gọi `closeModal()` mà không giải phóng `pendingTradeOffer = null`, khiến thanh strip tiếp tục hiện lại và đè lấn lượt chơi.
+  3. *Bẫy Phá Sản Thụ Động Khi Đổi Ngang Giá (Zero-Price Negative Cash Inversion Trap)*: Người chơi âm tiền (`myBalance < 0`) nếu chấp nhận đổi đất ngang giá (`price === 0`) vẫn vi phạm bảo toàn thanh khoản; đồng thời người chơi đã phá sản (`bankrupt === true`) vẫn có thể bấm nút BÁN/ĐỔI nếu UI thiếu guard `!myPlayer?.bankrupt`.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **2-Tier Ergonomic Micro-Card Invariant**: Tách biệt thanh đề xuất thành 2 tầng rõ ràng: Tầng 1 gồm Avatar bot, mô tả hành động, badge đếm ngược `{secondsLeft}s` và nút `[ℹ️ Chi tiết]`. Tầng 2 gồm tên BĐS kèm giá tiền (`shrink-0`), ký hiệu hoán đổi 2 chiều `⇄` và cặp nút bấm xúc giác cao tối thiểu 38px (`min-h-[38px]`) với nhãn "✕ TỪ CHỐI" và "✓ BÁN / ĐỔI" hiển thị trên mọi độ phân giải.
+  2. **Modal Synchronization & Null Teardown**: Khi `activeModal === 'bot_trade_offer'`, `InlineBotTradeStrip` trả về `null` chống race condition. Khi đóng/chấp nhận/từ chối từ `BotTradeOfferModal`, `modal_host.tsx` bắt buộc kích hoạt `useGameStore.getState().setPendingTradeOffer(null)`.
+  3. **Strict Solvency & Bankruptcy Guard**: Nút chấp nhận bị vô hiệu hóa (`disabled` kèm nhãn `Thiếu tiền`) khi người chơi phá sản hoặc không đủ tiền bù (`!isNegativeCash ? (myBalance >= 0 || price > 0) : myBalance >= absCash`).
+- **Traceability**: `[TC-199.01..18/MSS]`, `[UC-IMP199]`, `src/client/ui/modals/bot_trade_offer_strip.tsx`, `src/client/ui/modals/modal_host.tsx`, `tests/contracts/imp199_bot_trade_strip_ergonomic_card.test.ts`.
+
+---
+
+### 278. [UI/CRAFT][UAT/TEST] Bất Biến Triệt Tiêu Cắt Xén Chip Thông Báo, Stepped Offsets Thông Báo Nổi & Đồng Bộ Khối Bọc Desktop (Zero-Clipping Notice Architecture, Stepped Toast Offsets & Desktop Layout Harmonization - IMP-199)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Cắt Xén Chip Thông Báo do CSS Overflow (ActionDock Overflow-X Clip Trap)*: Thẻ `<nav>` của ActionDock có class `overflow-x-auto` để cuộn ngang trên mobile. Khi đặt chip thông báo (Audit Notice, Bot Pacing) bên trong `<nav>` với vị trí âm `-top-9`, thuộc tính `overflow-x-auto` vô tình kích hoạt ngữ cảnh clipping theo chiều dọc, khiến nửa trên của chip thông báo bị xén cụt hoặc biến mất hoàn toàn.
+  2. *Bẫy Đè Lấn 44px Giữa Dải Ticker & Thông Báo Biến Động Tài Chính (Floating Numbers Decollision Trap)*: Dải sự kiện thị trường `MarketEventTicker` có chiều cao biến thiên theo số lượng thẻ active (lên tới 140px khi có >= 2 thẻ). Nếu `FloatingNumbersOverlay` chỉ neo ở mức `top-28`, các badge tài chính sẽ bị đè lấn 44px bên dưới ticker.
+  3. *Bẫy Tràn Chiều Cao Cụm Nút Tiện Ích TopBar (TopBar Utility Button Box-Sizing Overflow Trap)*: Vỏ ngoài `hud-utilities-cluster` có chiều cao `h-10 sm:h-11` (40px/44px). Việc gán nhầm `sm:min-h-[44px]` kèm viền `border` và padding khiến kích thước hộp thực tế vượt quá 46px, đẩy nút trào ra ngoài khung chứa.
+  4. *Bẫy Tràn Viewport Mobile Trên Modal (Mobile Viewport 90vh Overflow Trap)*: Các modal sử dụng `max-h-[90vh]` bị thanh địa chỉ và công cụ của trình duyệt di động (Safari/Chrome Mobile) che khuất chân modal.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Zero-Clipping Notice Wrapper Invariant**: Khối bọc ngoài của ActionDock tách biệt hoàn toàn `<div className="relative flex flex-col items-center">` (không có `overflow-x-auto`). Chip thông báo (`actionDockNotice`) được render ở tầng container cha phía trên `<nav>`, trong khi `<nav>` nằm bên dưới bảo tồn nguyên vẹn `relative overflow-x-auto no-scrollbar`.
+  2. **Stepped Top Offsets Invariant**: `FloatingNumbersOverlay` áp dụng bước nhảy tọa độ bậc thang:
+     - 0 thẻ: `top-20 sm:top-20`
+     - 1 thẻ: `top-28 sm:top-28`
+     - 2 thẻ: `top-36 sm:top-36` (triệt tiêu hoàn toàn 44px đè lấn dưới ticker 140px)
+     - >= 3 thẻ: `top-44 sm:top-44`
+  3. **Tactile Button Inner Geometry Invariant**: Cụm nút tiện ích TopBar sử dụng `min-h-[36px] min-w-[36px] sm:w-auto sm:h-8 sm:min-w-[36px]` kết hợp `after:absolute after:-inset-1.5` để mở rộng hit area >= 44x44px theo WCAG mà không làm biến dạng flex container `sm:h-11`.
+  4. **Universal Dynamic Viewport Triad**: Mọi modal trung tâm (`CompulsoryBuyoutModal`, `PropertyPortfolioModal`, `EventCardModal`) bắt buộc sử dụng chuẩn `max-h-[90dvh]` kết hợp `overflow-y-auto`.
+  5. **Camera Pills Clearance Invariant**: Cụm nút camera điều hướng cố định tại `bottom-28 sm:bottom-32 left-1/2 -translate-x-1/2 z-20` để không che khuất chip thông báo (108px mobile) và ActionDock trên desktop.
+- **Traceability**: `[TC-199.01..18/MSS]`, `[UC-IMP199]`, `src/client/ui/action_dock.tsx`, `src/client/ui/floating_numbers.tsx`, `src/client/ui/hud_container.tsx`, `src/client/ui/top_bar.tsx`, `src/client/ui/activity_feed_sidebar.tsx`, `src/client/ui/modals/compulsory_buyout_modal.tsx`, `src/client/ui/modals/property_portfolio_modal.tsx`, `src/client/ui/modals/event_card_modal.tsx`, `tests/contracts/imp199_desktop_layout_harmonization.test.ts`.
+
 

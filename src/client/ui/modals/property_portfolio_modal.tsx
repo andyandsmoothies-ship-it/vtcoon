@@ -100,7 +100,7 @@ export function PropertyPortfolioModal({
     <div
       role="dialog"
       aria-label="Danh mục bất động sản"
-      className="w-full max-w-2xl max-h-[90vh] bg-[#FFFDF8] border-2 border-slate-900 rounded-2xl shadow-[0_6px_0_0_#0f172a] flex flex-col pointer-events-auto text-slate-900 select-none overflow-hidden"
+      className="w-full max-w-2xl max-h-[90dvh] bg-[#FFFDF8] border-2 border-slate-900 rounded-2xl shadow-[0_6px_0_0_#0f172a] flex flex-col pointer-events-auto text-slate-900 select-none overflow-hidden"
       data-testid="property-portfolio-modal"
     >
       {/* Header */}

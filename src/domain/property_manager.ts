@@ -50,14 +50,22 @@ export function buyProperty(
   return { result: BuyResult.Success };
 }
 
+export interface LandingDetails {
+  result: LandingResult;
+  rentAmount: number;
+  landlordId?: string;
+  diplomaticCardUsed?: boolean;
+  savedRentAmount?: number;
+}
+
 export function handleLanding(
   player: Player, cellIndex: number, registry: PropertyRegistry, players: Player[],
   stateMap?: PropertyStateMap, diceTotal?: number, modifiers?: readonly MarketModifier[], rng?: () => number,
   chanceDiscard?: ChanceCardId[], permanentRentBonus?: Readonly<Record<number, number>>,
   roundCount?: number,
   room?: Room,
-): { result: LandingResult; rentAmount: number; landlordId: string | undefined } {
-  if (!isPurchasable(cellIndex)) return { result: LandingResult.NotPurchasable, rentAmount: 0, landlordId: undefined };
+): LandingDetails {
+  if (!isPurchasable(cellIndex)) return { result: LandingResult.NotPurchasable, rentAmount: 0, landlordId: undefined, diplomaticCardUsed: false };
 
   // [IMP-116] Hiệu ứng dừng chân sự kiện: Nghị Định 100 nồng độ cồn & Bão duyên hải
   if (modifiers?.some((m) => m.type === MarketCardId.MC_ALCOHOL_CHECK && m.remainingRounds > 0 && (m.affectedCells ?? SERVICE_CELLS).includes(cellIndex))) {
@@ -69,24 +77,22 @@ export function handleLanding(
     player.skipNextTurn = true;
   }
   const ownerId = registry.get(cellIndex);
-  if (ownerId === undefined) return { result: LandingResult.Unowned, rentAmount: 0, landlordId: undefined };
-  if (ownerId === player.id) return { result: LandingResult.OwnProperty, rentAmount: 0, landlordId: ownerId };
+  if (ownerId === undefined) return { result: LandingResult.Unowned, rentAmount: 0, landlordId: undefined, diplomaticCardUsed: false };
+  if (ownerId === player.id) return { result: LandingResult.OwnProperty, rentAmount: 0, landlordId: ownerId, diplomaticCardUsed: false };
 
   // [IMP-192A] Anti-camping guard: miễn thu tiền thuê khi chủ đất đang ở Trạm Kiểm Toán
   const owner = players.find((p) => p.id === ownerId);
   if (owner && ((owner.auditTurnsLeft ?? 0) > 0 || owner.inAudit)) {
-    return { result: LandingResult.RentPaid, rentAmount: 0, landlordId: ownerId };
+    return { result: LandingResult.RentPaid, rentAmount: 0, landlordId: ownerId, diplomaticCardUsed: false };
   }
 
   // Guard thế chấp: ô đang thế chấp không thu phí thuê
   if (owner?.mortgagedProperties?.includes(cellIndex)) {
-    return { result: LandingResult.RentPaid, rentAmount: 0, landlordId: ownerId };
+    return { result: LandingResult.RentPaid, rentAmount: 0, landlordId: ownerId, diplomaticCardUsed: false };
   }
 
-  if (hasZeroRent(cellIndex, modifiers)) return { result: LandingResult.RentPaid, rentAmount: 0, landlordId: ownerId };
-  if (tryUseDiplomaticCard(player, cellIndex, stateMap, chanceDiscard)) {
-    return { result: LandingResult.RentPaid, rentAmount: 0, landlordId: ownerId };
-  }
+  if (hasZeroRent(cellIndex, modifiers)) return { result: LandingResult.RentPaid, rentAmount: 0, landlordId: ownerId, diplomaticCardUsed: false };
+
   const cell = BOARD_CONFIG[cellIndex];
   let baseRent = resolveRent(cell, cellIndex, ownerId, registry, stateMap, diceTotal, undefined, roundCount);
   if (cell?.type === CellType.Utility && modifiers?.some((m) => m.type === MarketCardId.MC_UTILITY_DOUBLE && m.remainingRounds > 0)) {
@@ -97,7 +103,14 @@ export function handleLanding(
   const bonusPct = permanentRentBonus?.[cellIndex] ?? 0;
   if (bonusPct > 0) baseRent = Math.floor(baseRent * (1 + bonusPct));
 
-  let rentAmount = calculateRent(baseRent, cellIndex, modifiers, stateMap);
+  const potentialRent = calculateRent(baseRent, cellIndex, modifiers, stateMap);
+
+  const isNormalProperty = cell?.type === CellType.Property;
+  if (isNormalProperty && tryUseDiplomaticCard(player, cellIndex, stateMap, chanceDiscard)) {
+    return { result: LandingResult.RentPaid, rentAmount: 0, landlordId: ownerId, diplomaticCardUsed: true, savedRentAmount: potentialRent };
+  }
+
+  let rentAmount = potentialRent;
 
   // CC_PORT_EXCLUSIVE: chia 50% phí cảng cho beneficiary; chủ nhận 50%; người trả = 100%
   const portMod = modifiers?.find(
@@ -122,7 +135,7 @@ export function handleLanding(
       beneficiary.balance += half;
     }
     const surcharge = applyServiceBonus(cellIndex, stateMap, player, owner, rng);
-    return { result: LandingResult.RentPaid, rentAmount: rentAmount + surcharge, landlordId: ownerId };
+    return { result: LandingResult.RentPaid, rentAmount: rentAmount + surcharge, landlordId: ownerId, diplomaticCardUsed: false };
   }
 
   if (player.balance >= rentAmount) {
@@ -135,5 +148,5 @@ export function handleLanding(
   }
   const surcharge = applyServiceBonus(cellIndex, stateMap, player, owner, rng);
   rentAmount += surcharge;
-  return { result: LandingResult.RentPaid, rentAmount, landlordId: ownerId };
+  return { result: LandingResult.RentPaid, rentAmount, landlordId: ownerId, diplomaticCardUsed: false };
 }

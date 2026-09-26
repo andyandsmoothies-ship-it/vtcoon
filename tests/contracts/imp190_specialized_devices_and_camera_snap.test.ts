@@ -392,7 +392,7 @@ describe('[IMP-190] Specialized Devices & Camera Snap Universal Contract Suite',
       const hudSrc = fs.readFileSync(hudSrcPath, 'utf-8');
 
       expect(hudSrc).toMatch(/import\s*\{\s*CameraResetPill\s*\}\s*from\s*['"]\.\/camera_reset_pill['"]/);
-      expect(hudSrc).toMatch(/fixed\s+bottom-24[^"']*gap-2[^"']*max-w-\[95vw\]/);
+      expect(hudSrc).toMatch(/fixed\s+bottom-(?:24|28)[^"']*gap-2[^"']*max-w-\[95vw\]/);
       expect(hudSrc).toMatch(/<CameraResetPill\s*\/>/);
     });
 

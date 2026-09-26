@@ -192,7 +192,6 @@ export function ActionDock({
       });
     }
   };
-
   const isSkippedTurn = Boolean(isMyTurn && turnPhase === 'PropertyManagement' && !hasRolledThisTurn && !inAudit);
   const isGlowActive = (isMyTurn && !isRollDisabled) || isSkippedTurn;
   const actionDockNotice = resolveActionDockNotice({
@@ -208,10 +207,7 @@ export function ActionDock({
   });
 
   return (
-    <nav
-      className="relative pointer-events-auto flex items-center gap-1.5 min-[360px]:gap-2 md:gap-3 bg-[#FFFDF8] border-2 border-slate-900 shadow-[0_4px_0_0_#0f172a] rounded-2xl p-1.5 sm:p-2.5 px-2.5 min-[360px]:px-3.5 sm:px-5 max-w-[calc(100vw-1rem)] overflow-x-auto no-scrollbar"
-      aria-label="Thanh điều khiển tác vụ"
-    >
+    <div className="relative flex flex-col items-center">
       {/* Chip Thông Báo Ngữ Cảnh Độc Quyền (Actionable Guidance Chip) */}
       {actionDockNotice && !isTradeStripActive && (
         <div
@@ -229,15 +225,18 @@ export function ActionDock({
           <span className="hidden sm:inline">{actionDockNotice.desktopText}</span>
         </div>
       )}
-
-      {/* Primary Action Button (Chuyển đổi theo Pha: Khi đứng trên ô chưa có chủ thì Primary CTA là [Mua Đất], ngược lại là [Đổ Xúc Xắc]) */}
-      {isStandingOnBuyable && !canRollAgain ? (
-        <button
-          type="button"
-          onClick={isTradeFrozen ? undefined : () => openModal('deed', { cellIndex: currentPos, canBuy: true })}
-          disabled={isTradeFrozen}
-          className={`min-h-[44px] shrink-0 whitespace-nowrap flex items-center justify-center gap-1.5 px-4 sm:px-6 py-2.5 rounded-2xl font-black text-white shadow-lg transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 ${
-            isTradeFrozen
+      <nav
+        className="relative pointer-events-auto flex items-center gap-1.5 min-[360px]:gap-2 md:gap-3 bg-[#FFFDF8] border-2 border-slate-900 shadow-[0_4px_0_0_#0f172a] rounded-2xl p-1.5 sm:p-2.5 px-2.5 min-[360px]:px-3.5 sm:px-5 max-w-[calc(100vw-1rem)] overflow-x-auto no-scrollbar"
+        aria-label="Thanh điều khiển tác vụ"
+      >
+        {/* Primary Action Button (Chuyển đổi theo Pha: Khi đứng trên ô chưa có chủ thì Primary CTA là [Mua Đất], ngược lại là [Đổ Xúc Xắc]) */}
+        {isStandingOnBuyable && !canRollAgain ? (
+          <button
+            type="button"
+            onClick={isTradeFrozen ? undefined : () => openModal('deed', { cellIndex: currentPos, canBuy: true })}
+            disabled={isTradeFrozen}
+            className={`min-h-[44px] shrink-0 whitespace-nowrap flex items-center justify-center gap-1.5 px-4 sm:px-6 py-2.5 rounded-2xl font-black text-white shadow-lg transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 ${
+              isTradeFrozen
               ? 'bg-slate-200 text-slate-500 border-2 border-slate-400 cursor-not-allowed shadow-none'
               : 'bg-amber-500 hover:bg-amber-600 border-2 border-amber-700 shadow-[0_4px_0_0_#0f172a] active:shadow-none active:translate-y-[3px] ring-4 ring-amber-400/60 shadow-[0_0_24px_rgba(245,158,11,0.55)] animate-pulse'
           }`}
@@ -392,5 +391,6 @@ export function ActionDock({
         </span>
       </button>
     </nav>
+  </div>
   );
 }

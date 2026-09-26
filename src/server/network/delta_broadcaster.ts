@@ -30,12 +30,15 @@ function isCellEqual(a: CellDelta, b: CellDelta): boolean {
   );
 }
 
-function isPlayerEqual(a: PlayerDelta, b: PlayerDelta): boolean {
+export function isPlayerEqual(a: PlayerDelta, b: PlayerDelta): boolean {
   const bondEqual = (!a.bondContract && !b.bondContract) || (
     Boolean(a.bondContract) === Boolean(b.bondContract) &&
     a.bondContract?.roundsLeft === b.bondContract?.roundsLeft &&
     a.bondContract?.isActive === b.bondContract?.isActive
   );
+  const aHand = a.hand ?? [];
+  const bHand = b.hand ?? [];
+  const handEqual = aHand.length === bHand.length && aHand.every((c, i) => c === bHand[i]);
   return (
     a.id === b.id &&
     a.position === b.position &&
@@ -45,7 +48,8 @@ function isPlayerEqual(a: PlayerDelta, b: PlayerDelta): boolean {
     (a.overdraftRoundsLeft ?? 0) === (b.overdraftRoundsLeft ?? 0) &&
     Boolean(a.inAudit) === Boolean(b.inAudit) &&
     (a.extraTurns ?? 0) === (b.extraTurns ?? 0) &&
-    bondEqual
+    bondEqual &&
+    handEqual
   );
 }
 
@@ -103,6 +107,7 @@ export function buildSparseDelta(prev: DeltaPayload, next: DeltaPayload): DeltaP
     ...(next.roundNumber !== undefined ? { roundNumber: next.roundNumber } : {}),
     ...(next.treasury !== undefined ? { treasury: next.treasury } : {}),
     ...(next.activeModifiers !== undefined ? { activeModifiers: next.activeModifiers } : {}),
+    ...(next.lastDiplomaticEvent !== undefined ? { lastDiplomaticEvent: next.lastDiplomaticEvent } : {}),
   };
 }
 

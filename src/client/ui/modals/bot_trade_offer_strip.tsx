@@ -21,6 +21,9 @@ export function InlineBotTradeStrip({
   const storeOffer = useGameStore((state) => state.pendingTradeOffer);
   const pendingTradeOffer = isSSR ? useGameStore.getState().pendingTradeOffer : storeOffer;
 
+  const storeActiveModal = useGameStore((state) => state.activeModal);
+  const activeModal = isSSR ? useGameStore.getState().activeModal : storeActiveModal;
+
   const storePlayers = useGameStore((state) => state.playersInfo);
   const playersInfo = isSSR ? useGameStore.getState().playersInfo : storePlayers;
 
@@ -68,7 +71,7 @@ export function InlineBotTradeStrip({
     };
   }, [pendingTradeOffer, onIntent, myId]);
 
-  if (!pendingTradeOffer || pendingTradeOffer.sellerId !== myId) {
+  if (!pendingTradeOffer || pendingTradeOffer.sellerId !== myId || activeModal === 'bot_trade_offer') {
     return null;
   }
 
@@ -89,7 +92,9 @@ export function InlineBotTradeStrip({
   const price = pendingTradeOffer.price;
   const isNegativeCash = price < 0;
   const absCash = Math.abs(price);
-  const canAfford = !isNegativeCash || myBalance >= absCash;
+  // Invariant [IMP-199]: Phá sản hoặc âm tiền không thể chấp nhận giao dịch bất lợi/ngang giá (Server Guard)
+  const isSolventForTrade = !isNegativeCash ? (myBalance >= 0 || price > 0) : myBalance >= absCash;
+  const canAfford = isSolventForTrade && !myPlayer?.bankrupt;
 
   const secondsLeft = Math.ceil(remainingMs / 1000);
 
@@ -131,76 +136,93 @@ export function InlineBotTradeStrip({
       data-testid="inline-bot-trade-strip"
       role="region"
       aria-label="Đề xuất giao dịch từ Bot"
-      className="w-full sm:max-w-md flex items-center justify-between gap-1.5 sm:gap-2 px-2.5 py-1.5 bg-[#FFFDF8] border-2 border-amber-500 rounded-xl shadow-[0_3px_0_0_#d97706] text-slate-900 pointer-events-auto select-none animate-in fade-in slide-in-from-bottom-2 duration-150"
+      className="w-full sm:max-w-md flex flex-col gap-1.5 p-2 bg-[#FFFDF8] border-2 border-amber-500 rounded-xl shadow-[0_3px_0_0_#d97706] text-slate-900 pointer-events-auto select-none animate-in fade-in slide-in-from-bottom-2 duration-150"
     >
-      {/* Tóm tắt đề xuất */}
-      <div className="flex items-center gap-1.5 min-w-0 flex-1">
-        <span className="text-base shrink-0" aria-hidden="true">🤖</span>
-        <div className="flex items-center gap-1 min-w-0 truncate text-xs font-bold">
-          <span className="text-amber-800 shrink-0 font-extrabold">{buyerName}:</span>
+      {/* Tầng 1: Metadata, Đếm ngược & Xem chi tiết */}
+      <div className="flex items-center justify-between gap-1.5 min-w-0 text-xs">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span className="text-sm shrink-0" aria-hidden="true">🤖</span>
+          <span className="text-[11px] font-black text-amber-800 truncate">
+            {buyerName} <span className="font-semibold text-slate-600">{isSwap ? 'đề xuất đổi đất' : 'muốn mua đất'}</span>
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5 shrink-0">
+          <span className="text-[10px] font-extrabold text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded-full border border-amber-300">
+            {secondsLeft}s
+          </span>
+          <button
+            type="button"
+            onClick={handleInspect}
+            data-testid="inline-bot-inspect-btn"
+            title="Xem chi tiết & nguy cơ độc quyền"
+            className="flex items-center gap-0.5 px-1.5 py-0.5 text-[11px] font-bold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-md transition-colors cursor-pointer"
+          >
+            <span>ℹ️</span>
+            <span className="text-[10px]">Chi tiết</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Tầng 2: Thông tin BĐS & Cặp nút xúc giác công thái học */}
+      <div className="flex items-center justify-between gap-2 min-w-0 pt-1 border-t border-amber-200/60">
+        <div className="flex items-center gap-1.5 min-w-0 flex-1 text-xs">
           {!isSwap ? (
-            <span className="truncate">
-              Mua <span className="text-slate-900 font-extrabold">{targetName}</span> (
-              <span className="text-emerald-700 font-black">{formatCurrency(price)}</span>)
-            </span>
+            <div className="flex items-center gap-1.5 min-w-0 truncate">
+              <span className="truncate font-extrabold text-slate-900">{targetName}</span>
+              <span className="shrink-0 font-black text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                +{formatCurrency(price)}
+              </span>
+            </div>
           ) : (
-            <span className="truncate">
-              Đổi <span className="text-slate-900 font-extrabold">{offeredName}</span> lấy{' '}
-              <span className="text-slate-900 font-extrabold">{targetName}</span>{' '}
+            <div className="flex items-center gap-1 min-w-0 truncate text-[11px]">
+              <span className="text-slate-600 shrink-0">Đổi:</span>
+              <span className="font-extrabold text-slate-900 truncate">{targetName}</span>
+              <span className="text-amber-600 font-bold shrink-0">⇄</span>
+              <span className="font-extrabold text-slate-900 truncate">{offeredName}</span>
               {isNegativeCash ? (
-                <span className="text-rose-600 font-black whitespace-nowrap">
+                <span className="text-rose-600 font-black whitespace-nowrap shrink-0">
                   (Bù {formatCurrency(absCash)})
                 </span>
               ) : price > 0 ? (
-                <span className="text-emerald-700 font-black whitespace-nowrap">
-                  (+{formatCurrency(price)})
+                <span className="shrink-0 font-black text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded border border-emerald-200">
+                  +{formatCurrency(price)}
                 </span>
               ) : (
-                <span className="text-slate-600 whitespace-nowrap">(Ngang giá)</span>
+                <span className="text-slate-600 whitespace-nowrap shrink-0">(Ngang)</span>
               )}
-            </span>
+            </div>
           )}
         </div>
-        <span className="text-[10px] font-extrabold text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded-full shrink-0 border border-amber-300">
-          {secondsLeft}s
-        </span>
-      </div>
 
-      {/* Cụm nút hành động 1-chạm */}
-      <div className="flex items-center gap-1 shrink-0">
-        <button
-          type="button"
-          onClick={handleInspect}
-          title="Xem chi tiết & nguy cơ độc quyền"
-          className="px-1.5 py-1 text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg text-xs font-bold transition-colors cursor-pointer"
-        >
-          ℹ️
-        </button>
+        {/* Cặp nút hành động xúc giác lớn */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          <button
+            type="button"
+            onClick={handleReject}
+            data-testid="inline-bot-reject-btn"
+            aria-label="Từ chối đề xuất"
+            className="min-h-[38px] sm:min-h-[40px] px-2.5 sm:px-3 py-1 bg-slate-200 hover:bg-slate-300 border-2 border-slate-400 text-slate-800 rounded-lg text-xs font-black shadow-[0_2px_0_0_#94a3b8] active:shadow-none active:translate-y-0.5 transition-all cursor-pointer flex items-center justify-center gap-1"
+          >
+            <span>✕</span>
+            <span>TỪ CHỐI</span>
+          </button>
 
-        <button
-          type="button"
-          onClick={handleReject}
-          data-testid="inline-bot-reject-btn"
-          aria-label="Bỏ qua đề xuất"
-          className="px-2 py-1 bg-slate-200 hover:bg-slate-300 border border-slate-400 text-slate-800 rounded-lg text-xs font-black transition-colors cursor-pointer"
-        >
-          ✕<span className="hidden sm:inline"> BỎ QUA</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={handleAccept}
-          disabled={!canAfford}
-          data-testid="inline-bot-accept-btn"
-          title={!canAfford ? 'Thiếu tiền bù' : undefined}
-          className={`px-2.5 py-1 rounded-lg text-xs font-black transition-transform cursor-pointer border ${
-            !canAfford
-              ? 'bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed'
-              : 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-700 active:translate-y-0.5'
-          }`}
-        >
-          {!canAfford ? 'Thiếu tiền' : isSwap ? '✓ ĐỔI' : '✓ BÁN'}
-        </button>
+          <button
+            type="button"
+            onClick={handleAccept}
+            disabled={!canAfford}
+            data-testid="inline-bot-accept-btn"
+            title={!canAfford ? 'Thiếu tiền bù' : undefined}
+            className={`min-h-[38px] sm:min-h-[40px] px-3 sm:px-3.5 py-1 rounded-lg text-xs font-black transition-all cursor-pointer border-2 flex items-center justify-center gap-1 ${
+              !canAfford
+                ? 'bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed shadow-none'
+                : 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-800 shadow-[0_2px_0_0_#065f46] active:shadow-none active:translate-y-0.5'
+            }`}
+          >
+            <span>✓</span>
+            <span>{!canAfford ? 'Thiếu tiền' : isSwap ? 'ĐỔI' : 'BÁN'}</span>
+          </button>
+        </div>
       </div>
     </div>
   );

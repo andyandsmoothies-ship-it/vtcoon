@@ -119,7 +119,7 @@ type DeltaPlayer = NonNullable<DeltaPayload['players']>[number];
 const OPTIONAL_PLAYER_KEYS = [
   'bankrupt', 'overdraftRoundsLeft', 'inAudit',
   'auditTurnsLeft', 'skipNextTurn', 'consecutiveDoubles', 'extraTurns',
-  'bondContract',
+  'bondContract', 'hand',
 ] as const;
 
 function assignPlayerOptionalFlags(target: PlayerHudInfo, p: DeltaPlayer): PlayerHudInfo {
@@ -168,6 +168,7 @@ function updatePlayerHudRecord(existing: PlayerHudInfo | undefined, p: DeltaPlay
     isBot: Boolean(p.isBot),
     pawnSlot: slot?.pawnSlot,
     mascotIcon: slot?.mascotIcon,
+    hand: p.hand ?? [],
   }, p);
 }
 
@@ -181,7 +182,7 @@ function processSinglePlayerPosition(
   const fromCell = determineFromCell(state, p.id, nextPositions[p.id] ?? 0);
   nextPositions[p.id] = p.position;
 
-  const existingInfo = state.playersInfo[p.id];
+  const existingInfo = state.playersInfo?.[p.id];
   const existingWasInAudit = Boolean(existingInfo?.inAudit || (existingInfo?.auditTurnsLeft && existingInfo.auditTurnsLeft > 0));
   const isGoingToAudit = p.position === 10 && Boolean(p.inAudit || (p.auditTurnsLeft && p.auditTurnsLeft > 0)) && !existingWasInAudit;
 

@@ -205,10 +205,12 @@ export function FloatingNumbersOverlay(): React.ReactElement | null {
 
   const stackTopClass =
     activeMarketCount >= 3
-      ? 'top-36 sm:top-32'
+      ? 'top-44 sm:top-44'
+      : activeMarketCount === 2
+      ? 'top-36 sm:top-36'
       : activeMarketCount >= 1
-      ? 'top-28 sm:top-24'
-      : 'top-20';
+      ? 'top-28 sm:top-28'
+      : 'top-20 sm:top-20';
 
   const recentTwo = regularTexts.slice(-2);
   let displayItems = [...recentTwo];

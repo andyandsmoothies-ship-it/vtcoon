@@ -96,6 +96,7 @@ export function executeTurnRoll(
   roomCode: string,
 ): RollResult | undefined {
   room.lastEventCard = null;
+  room.lastDiplomaticEvent = null;
   if (current.skipNextTurn) {
     current.skipNextTurn = false;
     room.phase = TurnPhase.PropertyManagement;
@@ -148,6 +149,14 @@ export function executeTurnRoll(
       room.roundCount,
       room,
     );
+    if (landing.diplomaticCardUsed) {
+      room.lastDiplomaticEvent = {
+        playerId: current.id,
+        landlordId: landing.landlordId ?? '',
+        cellIndex: newPos,
+        savedRent: landing.savedRentAmount ?? 0,
+      };
+    }
     room.phase = landing.result === LandingResult.Unowned ? TurnPhase.ActionPhase : TurnPhase.PropertyManagement;
     rentCharged = landing.rentAmount;
   }
@@ -185,6 +194,7 @@ export function executeTurnEnd(
   if (room.phase === TurnPhase.AuctionPhase || room.phase === TurnPhase.InsolvencyPhase || room.pendingBuyout) return undefined;
   if (!rolledThisTurn && room.phase === TurnPhase.WaitingRoll && (current.auditTurnsLeft ?? 0) <= 0) return undefined;
 
+  room.lastDiplomaticEvent = null;
   if (continueDoubles && current.consecutiveDoubles > 0 && !current.skipNextTurn) {
     room.phase = TurnPhase.WaitingRoll;
     rolledThisTurnMap.set(roomCode, false);

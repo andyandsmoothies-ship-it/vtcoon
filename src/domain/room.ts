@@ -176,6 +176,7 @@ export interface Room {
   lastTargetTradeOfferRound?: Record<string, number>;
   activeMacroGroup?:          ColorGroup;
   fireSaleQueue?:             number[];
+  lastDiplomaticEvent?:       { playerId: string; landlordId: string; cellIndex: number; savedRent: number } | null;
 }
 
 

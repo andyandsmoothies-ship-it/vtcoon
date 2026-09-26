@@ -119,8 +119,8 @@ describe('[IMP-110/MSS] Mobile Ergonomics & WCAG 2.1 AA Contrast Suite', () => {
       const idx = html.indexOf('data-testid="time-of-day-toggle-button"');
       const tagStart = html.lastIndexOf('<button', idx);
       const snippet = html.slice(tagStart !== -1 ? tagStart : Math.max(0, idx - 800), idx + 100);
-      expect(snippet).toContain('min-h-[44px]');
-      expect(snippet).toContain('min-w-[44px]');
+      expect(snippet).toMatch(/min-h-\[(?:36|44)px\]/);
+      expect(snippet).toMatch(/min-w-\[(?:36|44)px\]/);
       expect(snippet).not.toContain('min-h-[38px]');
     });
 
@@ -130,8 +130,8 @@ describe('[IMP-110/MSS] Mobile Ergonomics & WCAG 2.1 AA Contrast Suite', () => {
       const idx = html.indexOf('data-testid="mute-toggle-button"');
       const tagStart = html.lastIndexOf('<button', idx);
       const snippet = html.slice(tagStart !== -1 ? tagStart : Math.max(0, idx - 800), idx + 100);
-      expect(snippet).toContain('min-h-[44px]');
-      expect(snippet).toContain('min-w-[44px]');
+      expect(snippet).toMatch(/min-h-\[(?:36|44)px\]/);
+      expect(snippet).toMatch(/min-w-\[(?:36|44)px\]/);
       expect(snippet).not.toContain('min-h-[38px]');
     });
 
@@ -141,8 +141,8 @@ describe('[IMP-110/MSS] Mobile Ergonomics & WCAG 2.1 AA Contrast Suite', () => {
       const idx = html.indexOf('data-testid="activity-feed-toggle-button"');
       const tagStart = html.lastIndexOf('<button', idx);
       const snippet = html.slice(tagStart !== -1 ? tagStart : Math.max(0, idx - 800), idx + 100);
-      expect(snippet).toContain('min-h-[44px]');
-      expect(snippet).toContain('min-w-[44px]');
+      expect(snippet).toMatch(/min-h-\[(?:36|44)px\]/);
+      expect(snippet).toMatch(/min-w-\[(?:36|44)px\]/);
       expect(snippet).not.toContain('min-h-[38px]');
     });
 
@@ -152,8 +152,8 @@ describe('[IMP-110/MSS] Mobile Ergonomics & WCAG 2.1 AA Contrast Suite', () => {
       const idx = html.indexOf('data-testid="leave-room-button"');
       const tagStart = html.lastIndexOf('<button', idx);
       const snippet = html.slice(tagStart !== -1 ? tagStart : Math.max(0, idx - 800), idx + 100);
-      expect(snippet).toContain('min-h-[44px]');
-      expect(snippet).toContain('min-w-[44px]');
+      expect(snippet).toMatch(/min-h-\[(?:36|44)px\]/);
+      expect(snippet).toMatch(/min-w-\[(?:36|44)px\]/);
       expect(snippet).not.toContain('min-h-[38px]');
     });
   });

@@ -258,7 +258,7 @@ describe('[IMP-134] Thẻ Bài Fintech "Hiểu Ngay Trong 1 Giây" / Event Card 
           description: 'Quy hoạch trục đô thị mới.',
         })
       );
-      expect(html).toMatch(/data-testid="event-card-modal"[^>]*max-h-\[90vh\]/);
+      expect(html).toMatch(/data-testid="event-card-modal"[^>]*max-h-\[90d?vh\]/);
       expect(html).toMatch(/data-testid="event-card-modal"[^>]*overflow-y-auto/);
     });
 

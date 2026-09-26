@@ -7,6 +7,7 @@ import {
 } from '../store/game_store.js';
 import { getCellName } from '../network/activity_property_tracker.js';
 import { formatShortPlayerName } from './ui_helpers.js';
+import { ChanceCardId } from '../../domain/event_card_engine.js';
 
 export interface TransactionNarrative {
   readonly category: string;
@@ -36,6 +37,7 @@ const ACTION_ICONS: Record<string, string> = {
   tax: '🏛️', bail: '🚨', mortgage: '🏦', unmortgage: '🔓', monopoly: '👑',
   debt_relief: '🎉', stimulus: '📈', chance: '⚡', market: '🎴',
   auction_win: '🔨', hose: '📊', teleport: '✈️', audit_jail: '🚨', ma_buyout: '🤝',
+  diplomatic: '🤝',
 };
 
 export function resolveActionIcon(actionType?: string, isReward?: boolean): string {
@@ -45,14 +47,12 @@ export function resolveActionIcon(actionType?: string, isReward?: boolean): stri
 
 function formatRentPay(item: FloatingTextItem): string {
   const cell = resolveCellName(item.cellIndex) || item.title?.replace(/^Tiền\s+thuê\s*/i, '').trim() || 'BĐS';
-  const partner = item.targetPlayerName ? ` cho ${formatShortPlayerName(item.targetPlayerName, 10)}` : '';
-  return `Trả thuê ${cell}${partner}`;
+  return `Trả thuê ${cell}${item.targetPlayerName ? ` cho ${formatShortPlayerName(item.targetPlayerName, 10)}` : ''}`;
 }
 
 function formatRentReceive(item: FloatingTextItem): string {
   const cell = resolveCellName(item.cellIndex) || item.title?.replace(/^Thu\s+(?:tiền\s+)?thuê\s*/i, '').trim() || 'BĐS';
-  const partner = item.targetPlayerName ? ` từ ${formatShortPlayerName(item.targetPlayerName, 10)}` : '';
-  return `Thu thuê ${cell}${partner}`;
+  return `Thu thuê ${cell}${item.targetPlayerName ? ` từ ${formatShortPlayerName(item.targetPlayerName, 10)}` : ''}`;
 }
 
 function formatBuy(item: FloatingTextItem): string {
@@ -72,23 +72,19 @@ function formatUpgrade(item: FloatingTextItem): string {
 }
 
 function formatTax(item: FloatingTextItem): string {
-  const clean = (item.title || 'Lệ Phí Đất Đai (Ô 04)').replace(/^Nộp\s+/i, '').replace(/\s*➔\s*(?:Vào\s+)?Kho\s+Bạc/i, '').trim();
-  return `Nộp ${clean} ➔ Kho Bạc`;
+  return `Nộp ${(item.title || 'Lệ Phí Đất Đai (Ô 04)').replace(/^Nộp\s+/i, '').replace(/\s*➔\s*(?:Vào\s+)?Kho\s+Bạc/i, '').trim()} ➔ Kho Bạc`;
 }
 
 function formatMortgage(item: FloatingTextItem): string {
-  const cell = resolveCellName(item.cellIndex) || item.title?.replace(/^(?:Vay\s+)?thế\s+chấp\s+/i, '').replace(/\s*(?:➔\s*Vay\s+Ngân\s+Hàng|từ\s+Ngân\s+Hàng)/i, '').trim() || 'BĐS';
-  return `Thế chấp ${cell} ➔ Vay Ngân Hàng`;
+  return `Thế chấp ${resolveCellName(item.cellIndex) || item.title?.replace(/^(?:Vay\s+)?thế\s+chấp\s+/i, '').replace(/\s*(?:➔\s*Vay\s+Ngân\s+Hàng|từ\s+Ngân\s+Hàng)/i, '').trim() || 'BĐS'} ➔ Vay Ngân Hàng`;
 }
 
 function formatUnmortgage(item: FloatingTextItem): string {
-  const cell = resolveCellName(item.cellIndex) || item.title?.replace(/^Giải\s+chấp\s+/i, '').replace(/\s*\(Phí\s+10%\s*➔\s*(?:Vào\s+)?Kho\s+Bạc\)/i, '').trim() || 'BĐS';
-  return `Giải chấp ${cell} (Phí 10% ➔ Kho Bạc)`;
+  return `Giải chấp ${resolveCellName(item.cellIndex) || item.title?.replace(/^Giải\s+chấp\s+/i, '').replace(/\s*\(Phí\s+10%\s*➔\s*(?:Vào\s+)?Kho\s+Bạc\)/i, '').trim() || 'BĐS'} (Phí 10% ➔ Kho Bạc)`;
 }
 
 function formatAuction(item: FloatingTextItem): string {
-  const cell = resolveCellName(item.cellIndex) || item.title?.replace(/^(?:Thắng\s+)?(?:đấu\s+giá|Đấu\s+Giá)\s+/i, '').replace(/\s*➔\s*(?:Vào\s+|Nộp\s+)?Kho\s+Bạc/i, '').trim() || 'BĐS';
-  return `Thắng đấu giá ${cell} ➔ Nộp Kho Bạc`;
+  return `Thắng đấu giá ${resolveCellName(item.cellIndex) || item.title?.replace(/^(?:Thắng\s+)?(?:đấu\s+giá|Đấu\s+Giá)\s+/i, '').replace(/\s*➔\s*(?:Vào\s+|Nộp\s+)?Kho\s+Bạc/i, '').trim() || 'BĐS'} ➔ Nộp Kho Bạc`;
 }
 
 const ACTION_REASON_FORMATTERS: Partial<Record<FloatingActionType, (item: FloatingTextItem) => string>> = {
@@ -111,9 +107,11 @@ const ACTION_REASON_FORMATTERS: Partial<Record<FloatingActionType, (item: Floati
   teleport: (item) => `Dịch chuyển: ${item.title || 'Di chuyển đặc biệt'}`,
   audit_jail: () => 'Vào Trạm Kiểm Toán',
   ma_buyout: (item) => item.title || 'Thương vụ M&A',
+  diplomatic: () => 'Kích hoạt Thẻ Ngoại Giao',
 };
 
 export function resolveFriendlyReason(item: FloatingTextItem, _player?: PlayerHudInfo): string {
+  if (item.actionType === 'diplomatic') return 'Kích hoạt Thẻ Ngoại Giao';
   const formatter = item.actionType ? ACTION_REASON_FORMATTERS[item.actionType] : undefined;
   if (formatter) return formatter(item);
   return item.title || (item.text ? `Giao dịch ${item.text}` : 'Biến động tài chính');
@@ -149,12 +147,34 @@ export function resolveTransactionNarrative(
   let detail: string | undefined;
 
   switch (item.actionType) {
-    case 'rent_pay':
+    case 'diplomatic': {
+      category = 'ĐẶC QUYỀN NGOẠI GIAO';
+      icon = '🤝';
+      const isLandlordSide = item.type === FloatingTextType.Penalty ||
+        (item.title && item.title.includes('Khách dùng')) ||
+        (item.title && item.title.includes('Hụt thu'));
+      if (isLandlordSide) {
+        verb = 'miễn thu';
+        target = `tiền thuê ${cellName}`;
+        detail = `(Khách dùng Thẻ Ngoại Giao - Hụt thu ${amountText})`;
+      } else {
+        verb = 'kích hoạt';
+        target = 'Thẻ Ngoại Giao';
+        detail = `(Miễn 100% tiền thuê ${cellName} - Tiết kiệm ${amountText})`;
+      }
+      break;
+    }
+    case 'rent_pay': {
       category = 'TIỀN THUÊ BẤT ĐỘNG SẢN';
       verb = 'trả';
       target = `cho ${targetName}`;
       detail = cellName ? `(Tiền thuê ${cellName})` : '(Tiền thuê BĐS)';
+      const isInfraOrUtility = item.cellIndex !== undefined && [5, 15, 25, 35, 12, 28].includes(item.cellIndex);
+      if (isInfraOrUtility && player?.hand?.includes(ChanceCardId.CC_DIPLOMATIC)) {
+        detail = '(Thẻ Ngoại Giao được bảo lưu - Không áp dụng cho Hạ tầng/Tiện ích)';
+      }
       break;
+    }
     case 'rent_receive':
       category = 'TIỀN THUÊ BẤT ĐỘNG SẢN';
       verb = 'thu';
@@ -187,30 +207,10 @@ export function resolveTransactionNarrative(
       detail = cleanTax ? `(${cleanTax})` : '(Nộp thuế)';
       break;
     }
-    case 'bail':
-      category = 'BẢO LÃNH KIỂM TOÁN';
-      verb = 'nộp';
-      target = 'vào Kho Bạc';
-      detail = '(Rời Trạm Kiểm Toán)';
-      break;
-    case 'audit_jail':
-      category = 'TRẠM KIỂM TOÁN';
-      verb = 'vào';
-      target = 'Trạm Kiểm Toán';
-      detail = '(Bị kiểm toán thuế)';
-      break;
-    case 'mortgage':
-      category = 'TÍN DỤNG NGÂN HÀNG';
-      verb = 'vay';
-      target = 'từ Ngân Hàng';
-      detail = cellName ? `(Thế chấp ${cellName})` : '(Thế chấp BĐS)';
-      break;
-    case 'unmortgage':
-      category = 'GIẢI CHẤP BẤT ĐỘNG SẢN';
-      verb = 'trả';
-      target = `giải chấp ${cellName || 'BĐS'}`;
-      detail = '(Phí 10% ➔ Kho Bạc)';
-      break;
+    case 'bail': category = 'BẢO LÃNH KIỂM TOÁN'; verb = 'nộp'; target = 'vào Kho Bạc'; detail = '(Rời Trạm Kiểm Toán)'; break;
+    case 'audit_jail': category = 'TRẠM KIỂM TOÁN'; verb = 'vào'; target = 'Trạm Kiểm Toán'; detail = '(Bị kiểm toán thuế)'; break;
+    case 'mortgage': category = 'TÍN DỤNG NGÂN HÀNG'; verb = 'vay'; target = 'từ Ngân Hàng'; detail = cellName ? `(Thế chấp ${cellName})` : '(Thế chấp BĐS)'; break;
+    case 'unmortgage': category = 'GIẢI CHẤP BẤT ĐỘNG SẢN'; verb = 'trả'; target = `giải chấp ${cellName || 'BĐS'}`; detail = '(Phí 10% ➔ Kho Bạc)'; break;
     case 'buy':
       category = 'MUA ĐẤT ĐẦU TƯ';
       verb = 'thanh toán';
@@ -230,37 +230,24 @@ export function resolveTransactionNarrative(
       detail = levelStr ? `(${levelStr})` : undefined;
       break;
     }
-    case 'salary':
-      category = 'LƯƠNG KHỞI HÀNH';
-      verb = 'nhận';
-      target = 'tiền lương qua ô Khởi Hành';
-      break;
+    case 'salary': category = 'LƯƠNG KHỞI HÀNH'; verb = 'nhận'; target = 'tiền lương qua ô Khởi Hành'; break;
     case 'hose':
       category = 'THỊ TRƯỜNG CHỨNG KHOÁN';
       verb = isPositive ? 'nhận cổ tức' : 'đầu tư cổ phiếu';
       target = isPositive ? 'từ sàn HOSE' : 'vào sàn HOSE';
       detail = item.title ? `(${item.title})` : undefined;
       break;
-    case 'stimulus':
-      category = 'TRỢ CẤP QUỸ KHO BẠC';
-      verb = 'nhận';
-      target = 'từ Quỹ Kho Bạc';
-      detail = item.title ? `(${item.title})` : undefined;
-      break;
-    case 'teleport':
-      category = 'DỊCH CHUYỂN BẾN BÃI';
-      verb = 'thanh toán';
-      target = 'vé dịch chuyển';
-      detail = item.title ? `(${item.title})` : undefined;
-      break;
-    default:
-      break;
+    case 'stimulus': category = 'TRỢ CẤP QUỸ KHO BẠC'; verb = 'nhận'; target = 'từ Quỹ Kho Bạc'; detail = item.title ? `(${item.title})` : undefined; break;
+    case 'teleport': category = 'DỊCH CHUYỂN BẾN BÃI'; verb = 'thanh toán'; target = 'vé dịch chuyển'; detail = item.title ? `(${item.title})` : undefined; break;
+    default: break;
   }
 
   // Sentence length guard (<= 95 characters)
   if (detail && `${subject} ${verb} ${item.text} ${target} ${detail}`.length > 95) {
-    const maxDetailLen = Math.max(8, 95 - (`${subject} ${verb} ${item.text} ${target}`.length + 5));
-    detail = `${detail.slice(0, maxDetailLen - 3)}...)`;
+    if (item.actionType !== 'diplomatic' && !detail.includes('Thẻ Ngoại Giao')) {
+      const maxDetailLen = Math.max(8, 95 - (`${subject} ${verb} ${item.text} ${target}`.length + 5));
+      detail = `${detail.slice(0, maxDetailLen - 3)}...)`;
+    }
   }
 
   return { category, icon, subject, verb, amountText, isPositive, target, detail };

@@ -1,8 +1,9 @@
 // [UI-S01/MSS][UI-S03/MSS][UI-S04/MSS] Game Store Types, Interfaces & Payloads
 import type { EventCardInfo, MarketModifier, PendingBuyoutSession } from '../../domain/room';
-import type { PendingTradeOfferDelta } from '../../server/session_manager';
+import type { PendingTradeOfferDelta, DiplomaticEventDelta } from '../../server/session_manager';
 import type { BotPersonality } from '../../domain/bot/bot_types';
 import type { BondContract } from '../../domain/bond_types';
+import type { ChanceCardId } from '../../domain/event_card_engine';
 
 export interface PawnAnimationState {
   readonly playerId: string;
@@ -48,6 +49,7 @@ export interface PlayerHudInfo {
   readonly mascotName?: string;
   readonly avatar?: string;
   readonly bondContract?: BondContract | null;
+  readonly hand?: readonly ChanceCardId[];
 }
 
 export type PlayerInfo = PlayerHudInfo;
@@ -83,6 +85,7 @@ export type FloatingActionType =
   | 'ma_buyout'
   | 'mortgage'
   | 'unmortgage'
+  | 'diplomatic'
   | 'general';
 
 export interface FloatingTextItem {
@@ -239,6 +242,7 @@ export interface GameState {
   // UI-05 Social Emotes & Micro-VFX
   readonly activeEmotes: Record<string, ActiveEmote>;
   readonly floatingTexts: readonly FloatingTextItem[];
+  readonly lastDiplomaticEvent?: DiplomaticEventDelta | null;
 
   // IMP-133 Camera Sticky Focus & IMP-190 Custom Orbit Camera
   readonly cameraFocusCell: number | null;

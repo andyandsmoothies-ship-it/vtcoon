@@ -55,12 +55,8 @@ function handleBuyBadge(act: ActivityLogEntry, state: GameState): void {
   const cellName = match?.[1]?.trim() || (act.cellIndex !== undefined ? getCellName(act.cellIndex) : '');
   const amount = act.amount !== undefined ? -Math.abs(act.amount) : 0;
   state.addFloatingText({
-    text: formatCurrency(amount),
-    type: FloatingTextType.Penalty,
-    playerId: act.playerId ?? '',
-    actionType: 'buy',
-    title: cellName ? `Mua ${cellName}` : 'Mua BĐS',
-    cellIndex: act.cellIndex,
+    text: formatCurrency(amount), type: FloatingTextType.Penalty, playerId: act.playerId ?? '',
+    actionType: 'buy', title: cellName ? `Mua ${cellName}` : 'Mua BĐS', cellIndex: act.cellIndex,
   });
 }
 
@@ -68,50 +64,28 @@ function handleUpgradeBadge(act: ActivityLogEntry, state: GameState): void {
   const cellName = act.cellIndex !== undefined ? getCellName(act.cellIndex) : '';
   const amount = act.amount !== undefined ? -Math.abs(act.amount) : 0;
   const levelMatch = act.message.match(/(C[1-3]|Nhà Phố|Khách Sạn|Biệt Thự)/i);
-  const levelStr = levelMatch
-    ? levelMatch[0]
-    : (act.cellIndex !== undefined && state.levelMap[act.cellIndex]
-        ? LEVEL_NAMES[state.levelMap[act.cellIndex] as 1 | 2 | 3]
-        : '');
-  const title = levelStr
-    ? `Nâng cấp ${levelStr} ${cellName}`.trim()
-    : (cellName ? `Nâng cấp ${cellName}` : 'Nâng cấp công trình');
-
+  const levelStr = levelMatch ? levelMatch[0] : (act.cellIndex !== undefined && state.levelMap[act.cellIndex] ? LEVEL_NAMES[state.levelMap[act.cellIndex] as 1 | 2 | 3] : '');
+  const title = levelStr ? `Nâng cấp ${levelStr} ${cellName}`.trim() : (cellName ? `Nâng cấp ${cellName}` : 'Nâng cấp công trình');
   state.addFloatingText({
-    text: formatCurrency(amount),
-    type: FloatingTextType.Penalty,
-    playerId: act.playerId ?? '',
-    actionType: 'upgrade',
-    title,
-    cellIndex: act.cellIndex,
+    text: formatCurrency(amount), type: FloatingTextType.Penalty, playerId: act.playerId ?? '',
+    actionType: 'upgrade', title, cellIndex: act.cellIndex,
   });
 }
 
 function handleTaxBadge(act: ActivityLogEntry, state: GameState): void {
   const amount = act.amount !== undefined ? -Math.abs(act.amount) : 0;
-  const baseTitle = act.message.includes('Lệ Phí')
-    ? 'Lệ Phí Đất Đai'
-    : 'Thuế Đất Đai';
-
+  const baseTitle = act.message.includes('Lệ Phí') ? 'Lệ Phí Đất Đai' : 'Thuế Đất Đai';
   state.addFloatingText({
-    text: formatCurrency(amount),
-    type: FloatingTextType.Penalty,
-    playerId: act.playerId ?? '',
-    actionType: 'tax',
-    title: `Nộp ${baseTitle} ➔ Kho Bạc`,
-    cellIndex: act.cellIndex,
+    text: formatCurrency(amount), type: FloatingTextType.Penalty, playerId: act.playerId ?? '',
+    actionType: 'tax', title: `Nộp ${baseTitle} ➔ Kho Bạc`, cellIndex: act.cellIndex,
   });
 }
 
 function handleBailBadge(act: ActivityLogEntry, state: GameState): void {
   const amount = act.amount !== undefined ? -Math.abs(act.amount) : -500;
   state.addFloatingText({
-    text: formatCurrency(amount),
-    type: FloatingTextType.Penalty,
-    playerId: act.playerId ?? '',
-    actionType: 'bail',
-    title: 'Bảo lãnh kiểm toán (Ô 10) ➔ Nộp Kho Bạc',
-    cellIndex: act.cellIndex ?? 10,
+    text: formatCurrency(amount), type: FloatingTextType.Penalty, playerId: act.playerId ?? '',
+    actionType: 'bail', title: 'Bảo lãnh kiểm toán (Ô 10) ➔ Nộp Kho Bạc', cellIndex: act.cellIndex ?? 10,
   });
 }
 
@@ -119,12 +93,8 @@ function handleMortgageBadge(act: ActivityLogEntry, state: GameState): void {
   const cellName = act.cellIndex === 3 ? 'Bến Bạch Đằng' : (act.cellIndex !== undefined ? getCellName(act.cellIndex) : 'BĐS');
   const amount = act.amount !== undefined ? Math.abs(act.amount) : 0;
   state.addFloatingText({
-    text: `+${formatCurrency(amount)}`,
-    type: FloatingTextType.Reward,
-    playerId: act.playerId ?? '',
-    actionType: 'mortgage',
-    title: `Thế chấp ${cellName} ➔ Vay Ngân Hàng`,
-    cellIndex: act.cellIndex,
+    text: `+${formatCurrency(amount)}`, type: FloatingTextType.Reward, playerId: act.playerId ?? '',
+    actionType: 'mortgage', title: `Thế chấp ${cellName} ➔ Vay Ngân Hàng`, cellIndex: act.cellIndex,
   });
 }
 
@@ -132,12 +102,8 @@ function handleUnmortgageBadge(act: ActivityLogEntry, state: GameState): void {
   const cellName = act.cellIndex === 3 ? 'Bến Bạch Đằng' : (act.cellIndex !== undefined ? getCellName(act.cellIndex) : 'BĐS');
   const amount = act.amount !== undefined ? -Math.abs(act.amount) : 0;
   state.addFloatingText({
-    text: formatCurrency(amount),
-    type: FloatingTextType.Penalty,
-    playerId: act.playerId ?? '',
-    actionType: 'unmortgage',
-    title: `Giải chấp ${cellName} (Phí 10% ➔ Kho Bạc)`,
-    cellIndex: act.cellIndex,
+    text: formatCurrency(amount), type: FloatingTextType.Penalty, playerId: act.playerId ?? '',
+    actionType: 'unmortgage', title: `Giải chấp ${cellName} (Phí 10% ➔ Kho Bạc)`, cellIndex: act.cellIndex,
   });
 }
 
@@ -219,12 +185,42 @@ const BADGE_HANDLERS: Record<string, (act: ActivityLogEntry, state: GameState) =
   },
 };
 
+import type { DeltaPayload } from '../../server/session_manager.js';
+
+export function handleDiplomaticEventBadge(
+  ev: { playerId: string; landlordId: string; cellIndex: number; savedRent: number },
+  state: GameState,
+): void {
+  if (typeof state?.addFloatingText !== 'function') return;
+  const pName = state.playersInfo[ev.playerId]?.name || 'Khách thuê';
+  const lName = state.playersInfo[ev.landlordId]?.name || 'Chủ đất';
+  const amt = formatCurrency(ev.savedRent);
+  if (ev.playerId) {
+    state.addFloatingText({
+      text: `+${amt} Tr.`, type: FloatingTextType.Reward, playerId: ev.playerId,
+      actionType: 'diplomatic', title: 'Miễn Trừ Ngoại Giao', cellIndex: ev.cellIndex,
+      targetPlayerId: ev.landlordId, targetPlayerName: lName,
+    });
+  }
+  if (ev.landlordId) {
+    state.addFloatingText({
+      text: `-${amt} Tr.`, type: FloatingTextType.Penalty, playerId: ev.landlordId,
+      actionType: 'diplomatic', title: `${pName} dùng Thẻ Ngoại Giao`, cellIndex: ev.cellIndex,
+      targetPlayerId: ev.playerId, targetPlayerName: pName,
+    });
+  }
+}
+
 export function dispatchActivityFloatingBadges(
   activities: readonly ActivityLogEntry[],
   state: GameState,
+  delta?: DeltaPayload,
 ): void {
   if (typeof state?.addFloatingText !== 'function') return;
   for (const act of activities) {
     BADGE_HANDLERS[act.type]?.(act, state);
+  }
+  if (delta?.lastDiplomaticEvent) {
+    handleDiplomaticEventBadge(delta.lastDiplomaticEvent, state);
   }
 }

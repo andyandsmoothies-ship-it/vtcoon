@@ -5,6 +5,7 @@ import { BOARD_CONFIG, ColorGroup } from '../../domain/board_config';
 import { COLOR_GROUP_HEX } from '../../domain/theme';
 import { getEmoteDef } from '../../domain/emotes';
 import { getPawnConfigBySlot } from '../3d/luxury_pawn_models';
+import { ChanceCardId } from '../../domain/event_card_engine';
 
 const PROPERTY_COLOR_GROUP_ORDER: readonly ColorGroup[] = [
   ColorGroup.Nau,
@@ -112,7 +113,7 @@ export function PlayerCard({
           <div
             data-testid={`player-pawn-badge-${player.id}`}
             data-legacy-size="w-8 h-8"
-            className="w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 border-slate-900 flex items-center justify-center text-sm sm:text-base shadow-xs shrink-0 select-none leading-none"
+            className="w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 border-slate-900 flex items-center justify-center text-sm sm:text-base shadow-xs shrink-0 select-none leading-none relative"
             style={{ backgroundColor: player.tokenColor || '#38BDF8' }}
             title={pawnConfig.name}
             aria-label={`Linh vật: ${pawnConfig.name}`}
@@ -120,6 +121,15 @@ export function PlayerCard({
             <span role="img" aria-hidden="true">
               {pawnConfig.icon}
             </span>
+            {Boolean(player.hand?.includes(ChanceCardId.CC_DIPLOMATIC)) && (
+              <span
+                className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-amber-300 border border-slate-900 rounded-full flex items-center justify-center text-[8px] leading-none shadow-xs"
+                title="Giữ Thẻ Miễn Trừ Ngoại Giao"
+                aria-label="Giữ Thẻ Miễn Trừ Ngoại Giao"
+              >
+                🤝
+              </span>
+            )}
           </div>
           <span
             className="text-xs sm:text-sm font-bold text-slate-900 truncate"

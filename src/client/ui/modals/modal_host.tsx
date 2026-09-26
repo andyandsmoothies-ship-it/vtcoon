@@ -446,9 +446,9 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
             sellerId={p.sellerId}
             expiresAt={p.expiresAt}
             offeredCellIndex={p.offeredCellIndex}
-            onAccept={(offerId) => { AudioEngine.playSfx(SoundEffect.BUY_PROPERTY); onIntent?.({ type: 'INTENT_RESPOND_TRADE_OFFER', offerId, accept: true }); closeModal(); }}
-            onReject={(offerId) => { AudioEngine.playSfx(SoundEffect.CARD_FLIP); onIntent?.({ type: 'INTENT_RESPOND_TRADE_OFFER', offerId, accept: false }); closeModal(); }}
-            onClose={() => { onIntent?.({ type: 'INTENT_RESPOND_TRADE_OFFER', offerId: p.offerId, accept: false }); closeModal(); }}
+            onAccept={(offerId) => { AudioEngine.playSfx(SoundEffect.BUY_PROPERTY); onIntent?.({ type: 'INTENT_RESPOND_TRADE_OFFER', offerId, accept: true }); useGameStore.getState().setPendingTradeOffer(null); closeModal(); }}
+            onReject={(offerId) => { AudioEngine.playSfx(SoundEffect.CARD_FLIP); onIntent?.({ type: 'INTENT_RESPOND_TRADE_OFFER', offerId, accept: false }); useGameStore.getState().setPendingTradeOffer(null); closeModal(); }}
+            onClose={() => { onIntent?.({ type: 'INTENT_RESPOND_TRADE_OFFER', offerId: p.offerId, accept: false }); useGameStore.getState().setPendingTradeOffer(null); closeModal(); }}
           />
         );
       })()}

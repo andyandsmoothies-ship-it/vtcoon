@@ -57,7 +57,7 @@ describe('[TC-P4.1/MSS] Thẻ Bài Game 3D Kim Loại TitleDeedModal', () => {
         onClose: () => {},
       })
     );
-    expect(html).toContain('Nâng Cấp (+450 Tr.)');
+    expect(html).toContain('Nâng Cấp (+450)');
     expect(html).toContain('Hạ Cấp (-50%)');
     expect(html).toContain('Thế Chấp');
     expect(html).toContain('border-teal-800');

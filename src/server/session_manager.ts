@@ -3,6 +3,7 @@ import { BOARD_SIZE, TurnPhase } from '../domain/room';
 import type { PropertyRegistry, PropertyStateMap } from '../domain/property_manager';
 import type { AuctionSession } from './auction_manager';
 import { pendingTradeManager } from './pending_trade_manager.js';
+import type { ChanceCardId } from '../domain/event_card_engine.js';
 
 export const HEARTBEAT_INTERVAL_MS = 5_000;
 export const GRACE_PERIOD_MS       = 60_000;
@@ -20,27 +21,20 @@ export interface Session {
 }
 
 export interface CellDelta {
-  readonly index:          number;
-  readonly ownerId?:       string | null;
-  readonly level?:         number;
-  readonly isETC?:         boolean;
-  readonly isMortgaged?:   boolean;
-  readonly unbuiltRounds?: number;
+  readonly index: number; readonly ownerId?: string | null; readonly level?: number;
+  readonly isETC?: boolean; readonly isMortgaged?: boolean; readonly unbuiltRounds?: number;
+}
+
+export interface DiplomaticEventDelta {
+  readonly playerId: string; readonly landlordId: string; readonly cellIndex: number; readonly savedRent: number;
 }
 
 export interface PlayerDelta {
-  readonly id:                  string;
-  readonly position:            number;
-  readonly balance:             number;
-  readonly bankrupt?:           boolean;
-  readonly isBot?:              boolean;
-  readonly overdraftRoundsLeft?: number;
-  readonly inAudit?:            boolean;
-  readonly auditTurnsLeft?:     number;
-  readonly skipNextTurn?:       boolean;
-  readonly consecutiveDoubles?: number;
-  readonly extraTurns?:         number;
-  readonly bondContract?:       BondContract | null;
+  readonly id: string; readonly position: number; readonly balance: number;
+  readonly bankrupt?: boolean; readonly isBot?: boolean; readonly overdraftRoundsLeft?: number;
+  readonly inAudit?: boolean; readonly auditTurnsLeft?: number; readonly skipNextTurn?: boolean;
+  readonly consecutiveDoubles?: number; readonly extraTurns?: number;
+  readonly bondContract?: BondContract | null; readonly hand?: readonly ChanceCardId[];
 }
 
 export interface AuctionPayload {
@@ -93,6 +87,7 @@ export interface DeltaPayload {
   readonly roundNumber?:         number;
   readonly treasury?:            number;
   readonly activeModifiers?:     ReadonlyArray<MarketModifier>;
+  readonly lastDiplomaticEvent?:  DiplomaticEventDelta | null;
 }
 
 function buildAuctionDelta(
@@ -162,19 +157,15 @@ export function buildDeltaFromRoom(
 
   const cells: CellDelta[] = [];
   for (let i = 0; i < BOARD_SIZE; i++) {
-    const ownerId = registry.get(i) ?? null;
     const state = stateMap.get(i);
-    const isM = mortgagedSet.has(i);
-
-    const cellDelta: CellDelta = {
+    cells.push({
       index: i,
-      ownerId,
+      ownerId: registry.get(i) ?? null,
       ...(state?.level !== undefined ? { level: state.level } : {}),
       ...(state?.isETC ? { isETC: true } : {}),
-      ...(isM ? { isMortgaged: true } : {}),
+      ...(mortgagedSet.has(i) ? { isMortgaged: true } : {}),
       ...(state?.unbuiltRounds ? { unbuiltRounds: state.unbuiltRounds } : {}),
-    };
-    cells.push(cellDelta);
+    });
   }
 
   const players: PlayerDelta[] = room.players.map((p) => ({
@@ -182,6 +173,7 @@ export function buildDeltaFromRoom(
     position: p.position,
     balance: p.balance,
     bondContract: p.bondContract ?? null,
+    hand: p.hand ?? [],
     ...(p.bankrupt ? { bankrupt: true } : {}),
     ...(p.isBot ? { isBot: true } : {}),
     ...(p.overdraftRoundsLeft ? { overdraftRoundsLeft: p.overdraftRoundsLeft } : {}),
@@ -240,6 +232,7 @@ export function buildDeltaFromRoom(
     roundNumber: Math.max(room.roundCount ?? 1, room.round ?? 1),
     treasury: room.treasury ?? 0,
     ...(room.activeModifiers !== undefined ? { activeModifiers: room.activeModifiers.map((m) => ({ ...m })) } : {}),
+    lastDiplomaticEvent: room.lastDiplomaticEvent ?? null,
   });
 }
 
@@ -263,6 +256,7 @@ export interface DeltaPayloadOptions {
   roundNumber?: number;
   treasury?: number;
   activeModifiers?: ReadonlyArray<MarketModifier>;
+  lastDiplomaticEvent?: DiplomaticEventDelta | null;
 }
 
 export function buildDeltaPayload(options: DeltaPayloadOptions): DeltaPayload;
@@ -318,6 +312,7 @@ export function buildDeltaPayload(
       ...(tickOrOptions.roundNumber !== undefined ? { roundNumber: tickOrOptions.roundNumber } : {}),
       ...(tickOrOptions.treasury !== undefined ? { treasury: tickOrOptions.treasury } : {}),
       ...(tickOrOptions.activeModifiers !== undefined ? { activeModifiers: tickOrOptions.activeModifiers.map((m) => ({ ...m })) } : {}),
+      ...(tickOrOptions.lastDiplomaticEvent !== undefined ? { lastDiplomaticEvent: tickOrOptions.lastDiplomaticEvent } : {}),
     };
   }
   return {
@@ -389,6 +384,7 @@ export class SessionManager {
       ...(payload.roundNumber !== undefined ? { roundNumber: payload.roundNumber } : {}),
       ...(payload.treasury !== undefined ? { treasury: payload.treasury } : {}),
       ...(payload.activeModifiers !== undefined ? { activeModifiers: payload.activeModifiers } : {}),
+      ...(payload.lastDiplomaticEvent !== undefined ? { lastDiplomaticEvent: payload.lastDiplomaticEvent } : {}),
     };
   }
 

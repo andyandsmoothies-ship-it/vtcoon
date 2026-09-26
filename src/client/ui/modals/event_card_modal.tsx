@@ -86,7 +86,7 @@ export function EventCardModal({
   return (
     <div
       data-testid="event-card-modal"
-      className="w-full max-w-[340px] sm:max-w-[420px] bg-[#FFFDF8] border-2 border-slate-900 rounded-3xl shadow-[0_8px_0_0_#0f172a] pt-7 pb-6 px-5 sm:px-6 max-h-[90vh] overflow-y-auto flex flex-col items-center text-center relative pointer-events-auto transition-all animate-in fade-in zoom-in-95 duration-200 my-auto text-slate-900 select-none"
+      className="w-full max-w-[340px] sm:max-w-[420px] bg-[#FFFDF8] border-2 border-slate-900 rounded-3xl shadow-[0_8px_0_0_#0f172a] pt-7 pb-6 px-5 sm:px-6 max-h-[90dvh] overflow-y-auto flex flex-col items-center text-center relative pointer-events-auto transition-all animate-in fade-in zoom-in-95 duration-200 my-auto text-slate-900 select-none"
     >
       {/* Khung viền chỉ mực kép hoài cổ (Double Border) */}
       <div

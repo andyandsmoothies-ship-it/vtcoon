@@ -287,7 +287,7 @@ export function trackDeltaActivities(
     store.addActivityLog(entry);
   }
 
-  dispatchActivityFloatingBadges(activities, nextState);
+  dispatchActivityFloatingBadges(activities, nextState, delta);
 
   if (cardEntries.length > 0 && delta.lastEventCard) {
     const card = delta.lastEventCard;

@@ -23,6 +23,7 @@ export const SLOP_RULES = {
   ZERO_DIRTY_CASTS: 'zero-dirty-casts',
   FILE_LOC_BUDGET: 'file-loc-budget',
   FUNCTION_LOC_BUDGET: 'function-loc-budget',
+  ZERO_WORKAROUND_COMMENTS: 'zero-workaround-comments',
 };
 
 export const TIER_BUDGETS = {
@@ -119,6 +120,30 @@ export function lintSlopContent(content, filePath = 'anonymous.ts') {
       message: `File reached warning threshold of ${budget.maxWarn} lines (current: ${lineCount} lines, tier: ${tier}). Consider extracting submodules.`,
     });
   }
+
+  // Rule 5: zero-workaround-comments (Lauren Tan / Dune Invariant)
+  // Prohibits comments papering over defects instead of solving root causes.
+  const WORKAROUND_REGEX = /\b(workaround|quick hack|dirty hack|temporary fix|temp fix|fix later|hack tạm|sửa tạm|vá tạm)\b/i;
+  lines.forEach((lineText, idx) => {
+    let commentText = null;
+    const slashIndex = lineText.indexOf('//');
+    const blockIndex = lineText.indexOf('/*');
+    if (slashIndex !== -1) {
+      commentText = lineText.slice(slashIndex + 2);
+    } else if (blockIndex !== -1) {
+      commentText = lineText.slice(blockIndex + 2);
+    } else if (/^\s*\*+/.test(lineText)) {
+      commentText = lineText.replace(/^\s*\*+\s*/, '');
+    }
+    if (commentText && WORKAROUND_REGEX.test(commentText)) {
+      errors.push({
+        rule: SLOP_RULES.ZERO_WORKAROUND_COMMENTS,
+        file: filePath,
+        line: idx + 1,
+        message: 'Workaround justification detected in comment. Resolve root cause in architecture/code instead of papering over defects.',
+      });
+    }
+  });
 
   const sf = ts.createSourceFile(filePath, content, ts.ScriptTarget.Latest, true);
 

@@ -127,4 +127,48 @@ describe('Local Anti-Slop AST Linter (lint_slop.mjs)', () => {
       expect(errors.some((e) => e.rule === SLOP_RULES.FUNCTION_LOC_BUDGET)).toBe(false);
     });
   });
+
+  describe('Rule 5: zero-workaround-comments', () => {
+    it('catches single-line comment with temporary workaround justification', () => {
+      const code = `
+        // temporary workaround for race condition
+        function syncState() {
+          return true;
+        }
+      `;
+      const { errors } = lintSlopContent(code, 'src/domain/sample.ts');
+      expect(errors.some((e) => e.rule === SLOP_RULES.ZERO_WORKAROUND_COMMENTS)).toBe(true);
+    });
+
+    it('catches block comment with quick hack', () => {
+      const code = `
+        /* quick hack to bypass check */
+        const valid = true;
+      `;
+      const { errors } = lintSlopContent(code, 'src/domain/sample.ts');
+      expect(errors.some((e) => e.rule === SLOP_RULES.ZERO_WORKAROUND_COMMENTS)).toBe(true);
+    });
+
+    it('catches Vietnamese workaround comment', () => {
+      const code = `
+        // sửa tạm để test qua
+        const fallback = 10;
+      `;
+      const { errors } = lintSlopContent(code, 'src/domain/sample.ts');
+      expect(errors.some((e) => e.rule === SLOP_RULES.ZERO_WORKAROUND_COMMENTS)).toBe(true);
+    });
+
+    it('passes on domain invariant comments and clean code', () => {
+      const code = `
+        // Invariant [IMP-199]: Phá sản không thể nhận deal
+        // Safe: environment mock fallback
+        function calculate() {
+          return 42;
+        }
+      `;
+      const { errors } = lintSlopContent(code, 'src/domain/sample.ts');
+      expect(errors.some((e) => e.rule === SLOP_RULES.ZERO_WORKAROUND_COMMENTS)).toBe(false);
+    });
+  });
 });
+

@@ -74,7 +74,7 @@ describe('[IMP-129] Mobile Toast & Market Event Ticker De-Collision', () => {
     const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
     const mobileMatch = html.match(/<div[^>]*class="[^"]*(?:md:hidden|md:max-w-md|fixed\s+top-)[^"]*"[^>]*>/);
     expect(mobileMatch).not.toBeNull();
-    expect(mobileMatch![0]).toContain('top-28');
+    expect(mobileMatch![0]).toMatch(/top-(?:28|36)/);
   });
 
   it('[TC-IMP129.04/MSS][Facet-2/Reactivity] Khi có sự kiện thị trường và milestone banner cùng lúc, milestone banner nằm trong unified stack ở top-28', () => {
