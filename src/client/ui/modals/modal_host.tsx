@@ -17,7 +17,7 @@ import { CompulsoryBuyoutModal } from './compulsory_buyout_modal';
 import { AudioEngine } from '../../audio/audio_engine';
 import { SoundEffect } from '../../audio/audio_types';
 import type { PlayerIntent } from '../../../server/intent_dispatcher';
-import { getDeedDisplayInfo } from './modal_helpers';
+import { getDeedDisplayInfo, isAuctionDismissible } from './modal_helpers';
 import { BOARD_CONFIG } from '../../../domain/board_config';
 import { useLobbyStore } from '../../store/lobby_store';
 
@@ -40,13 +40,11 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
   const playersInfo = Object.keys(hookPlayers).length > 0 ? hookPlayers : useGameStore.getState().playersInfo;
   const currentTurnPlayerId = useGameStore((state) => state.currentTurnPlayerId);
   const hoseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   useEffect(() => {
     return () => {
       if (hoseTimerRef.current) clearTimeout(hoseTimerRef.current);
     };
   }, []);
-
   // [UC-GAME-022] Đồng hồ đếm ngược 15s sàn đấu giá tự động
   useEffect(() => {
     if (activeModal !== 'auction') return;
@@ -55,24 +53,21 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
       if (state.activeModal !== 'auction') return;
       const payload = state.modalPayload as ModalPayloadMap['auction'] | null;
       if (!payload) return;
-      if (payload.timeRemaining > 0) {
-        state.updateModalPayload<'auction'>({ timeRemaining: payload.timeRemaining - 1 });
+      if ((payload.timeRemaining ?? 0) > 0) {
+        state.updateModalPayload<'auction'>({ timeRemaining: (payload.timeRemaining ?? 0) - 1 });
       }
     }, 1000);
     return () => clearInterval(timer);
   }, [activeModal]);
-
   // SFX khi mở thẻ sự kiện hoặc đề xuất mua đất từ Bot / mua lại C0
   useEffect(() => {
     if (activeModal === 'event' || activeModal === 'bot_trade_offer' || activeModal === 'compulsory_buyout') {
       AudioEngine.playSfx(SoundEffect.CARD_DRAW);
     }
   }, [activeModal]);
-
   if (!activeModal) {
     return null;
   }
-
   if (activeModal === 'rules') {
     return (
       <GameRulesModal
@@ -82,7 +77,6 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
       />
     );
   }
-
   if (activeModal === 'masterplan') {
     const payload = (modalPayload as ModalPayloadMap['masterplan']) || {};
     return (
@@ -99,21 +93,27 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
       </ModalBackdrop>
     );
   }
-
   if (!modalPayload) {
     return null;
   }
-
   const lobbyPid = useLobbyStore.getState().myPlayerId;
   const myId = props.localPlayerId || (lobbyPid && lobbyPid.length > 0 ? lobbyPid : undefined) || 'p1';
   const myPlayer = playersInfo[myId];
 
   const isBuyModal = activeModal === 'deed' && Boolean((modalPayload as ModalPayloadMap['deed'])?.canBuy);
-  const isCriticalDecision = isBuyModal || activeModal === 'auction' || activeModal === 'insolvency' || activeModal === 'compulsory_buyout';
+  const isAuctionActive = activeModal === 'auction';
+  const isCriticalDecision = isBuyModal || (isAuctionActive && !isAuctionDismissible(modalPayload as ModalPayloadMap['auction'], myId, myPlayer)) || activeModal === 'insolvency' || activeModal === 'compulsory_buyout';
+  const handleBackdropClose = () => {
+    if (isAuctionActive && modalPayload && 'cellIndex' in modalPayload) {
+      useGameStore.getState().dismissAuction((modalPayload as ModalPayloadMap['auction']).cellIndex);
+    } else {
+      closeModal();
+    }
+  };
 
   return (
     <ModalBackdrop
-      onClose={closeModal}
+      onClose={handleBackdropClose}
       center={activeModal === 'auction' || activeModal === 'event'}
       dismissible={!isCriticalDecision}
     >
@@ -259,14 +259,14 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
         return (
           <AuctionModal
             cellIndex={payload.cellIndex}
-            currentBid={payload.currentBid}
+            currentBid={payload.currentBid ?? 0}
             startingBid={payload.startingBid}
-            highestBidderId={payload.highestBidderId}
-            timeRemaining={payload.timeRemaining}
+            highestBidderId={payload.highestBidderId ?? null}
+            timeRemaining={payload.timeRemaining ?? 15}
             hasPassed={payload.hasPassed}
             passedPlayerIds={payload.passedPlayerIds}
             declinedPlayerId={payload.declinedPlayerId}
-            isDeclinedPlayer={payload.declinedPlayerId === myId}
+            isDeclinedPlayer={payload.declinedPlayerId === myId || payload.insolvencyPlayerId === myId}
             bidderName={payload.highestBidderId ? playersInfo[payload.highestBidderId]?.name : undefined}
             myBalance={myPlayer?.balance}
             myId={myId}
@@ -275,11 +275,11 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
             finalPrice={payload.finalPrice}
             isForeclosure={payload.isForeclosure}
             insolvencyPlayerId={payload.insolvencyPlayerId}
-            onClose={closeModal}
+            onClose={() => { useGameStore.getState().dismissAuction(payload.cellIndex); }}
             onBid={(amount) => {
               AudioEngine.playSfx(SoundEffect.AUCTION_BID);
               onIntent?.({ type: 'INTENT_BID', amount });
-              const curTime = payload.timeRemaining;
+              const curTime = payload.timeRemaining ?? 15;
               const nextTime = curTime <= 3 ? curTime + 3 : curTime;
               updateModalPayload<'auction'>({ currentBid: amount, highestBidderId: myId, timeRemaining: nextTime });
             }}

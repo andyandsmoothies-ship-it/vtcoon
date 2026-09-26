@@ -9,7 +9,7 @@ import { IntentMutex } from '../../src/server/network/intent_mutex.js';
 import { DeltaBroadcaster } from '../../src/server/network/delta_broadcaster.js';
 import { SessionManager } from '../../src/server/session_manager.js';
 import { TurnWatchdog } from '../../src/server/network/turn_watchdog.js';
-import { TurnPhase } from '../../src/domain/room.js';
+import { TurnPhase, ActionRejectReason } from '../../src/domain/room.js';
 import { pendingTradeManager } from '../../src/server/pending_trade_manager.js';
 import { coordTrade } from '../../src/server/room_property_coordinator.js';
 
@@ -419,9 +419,10 @@ describe('[IMP-152/C] Bug #3 — coordTrade MUST enforce turn-order guard', () =
     };
   }
 
-  it('[IMP-152/C1] coordTrade MUST reject when requesterId is not currentTurnPlayerId and not a bot', () => {
-    // [TC-152.11/MSS] Turn-order guard: off-turn human cannot initiate trade
+  it('[IMP-152/C1] coordTrade MUST reject when room is in ActionPhase', () => {
+    // [TC-152.11/MSS] Phase guard: off-turn human cannot initiate trade in ActionPhase
     const { room, ctx, reg } = makeTradeContext('alice', 'bob');
+    room.phase = TurnPhase.ActionPhase;
 
     // alice is at index 0 (currentTurnPlayer); set bob's property so trade is valid structurally
     reg.set(9, 'alice');
@@ -431,28 +432,25 @@ describe('[IMP-152/C] Bug #3 — coordTrade MUST enforce turn-order guard', () =
     // bob is NOT currentTurnPlayer (index=1, currentPlayerIndex=0)
     expect(room.currentPlayerIndex).toBe(0);
 
-    // bob requests the trade (not his turn, not a bot)
+    // bob requests the trade in ActionPhase
     const result = coordTrade(ctx, 'bob', 'alice', 'bob', 9, 1000);
 
-    // BUG #3: current code has no turn-order check, trade succeeds or returns pending
-    // This assertion FAILS on original code → RED
     expect(result.success).toBe(false);
   });
 
-  it('[IMP-152/C2] coordTrade MUST reject with reason NOT_YOUR_TURN for off-turn human requester', () => {
+  it('[IMP-152/C2] coordTrade MUST reject with reason INVALID_PHASE for ActionPhase trade request', () => {
     // [TC-152.12/MSS] Error reason must precisely identify the violation
     const { room, ctx, reg } = makeTradeContext('alice', 'bob');
+    room.phase = TurnPhase.ActionPhase;
 
     reg.set(9, 'alice');
     room.players[0]!.balance = 20_000;
     room.players[1]!.balance = 20_000;
 
-    // bob (off-turn) requests trade
+    // bob (off-turn) requests trade in ActionPhase
     const result = coordTrade(ctx, 'bob', 'alice', 'bob', 9, 1000);
 
-    // BUG #3: reason is not 'NOT_YOUR_TURN' — original code returns success or other reason
-    // This assertion FAILS on original code → RED
-    expect(result.reason).toBe('NOT_YOUR_TURN');
+    expect(result.reason).toBe(ActionRejectReason.INVALID_PHASE);
   });
 
   it('[IMP-152/C3] coordTrade MUST succeed when requesterId IS currentTurnPlayerId (human in their turn)', () => {
@@ -509,22 +507,20 @@ describe('[IMP-152/C] Bug #3 — coordTrade MUST enforce turn-order guard', () =
     expect(result.reason).not.toBe('NOT_YOUR_TURN');
   });
 
-  it('[IMP-152/C1-strict] Off-turn human buyer MUST be rejected even when seller is in-turn player', () => {
-    // [TC-152.16/MSS] Strict: requesterId drives the guard, not sellerId
+  it('[IMP-152/C1-strict] Off-turn human buyer MUST be rejected in ActionPhase even when seller is in-turn player', () => {
+    // [TC-152.16/MSS] Strict: phase guard rejects trade during ActionPhase
     const { room, ctx, reg } = makeTradeContext('alice', 'bob');
+    room.phase = TurnPhase.ActionPhase;
 
     reg.set(11, 'alice');
     room.players[0]!.balance = 20_000;
     room.players[1]!.balance = 20_000;
 
-    // bob (index=1) sends the request but alice (index=0) is the current player
-    // requesterId = 'bob' (off-turn human)
+    // bob (index=1) sends the request in ActionPhase
     const result = coordTrade(ctx, 'bob', 'alice', 'bob', 11, 1500);
 
-    // BUG #3: requesterId='bob' should be caught by turn-order guard
-    // This assertion FAILS on original code → RED
     expect(result.success).toBe(false);
-    expect(result.reason).toBe('NOT_YOUR_TURN');
+    expect(result.reason).toBe(ActionRejectReason.INVALID_PHASE);
   });
 });
 

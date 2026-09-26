@@ -59,7 +59,7 @@ export function TradeSentimentMeter({
           <span className="text-sm" aria-hidden="true">🤖</span>
           <span className="text-slate-900 tracking-tight">Tâm Lý Đồng Thuận AI ({partnerName})</span>
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 whitespace-nowrap shrink-0">
           <span className="font-mono text-xs font-black text-slate-700">{score}%</span>
           <span className={`px-2 py-0.5 rounded-md border text-[10px] font-black ${moodConfig.badgeClass}`}>
             {moodConfig.icon} {moodConfig.label}

@@ -2,6 +2,7 @@
 // Đồng bộ hóa DeltaPayload (kể cả Sparse Diff) vào Zustand useGameStore
 // [IMP-64] Player & Cell sections extracted to apply_delta_players.ts and apply_delta_cells.ts
 import { useGameStore, type GameState } from '../store/game_store.js';
+import type { ModalPayloadMap } from '../store/game_store_types.js';
 import { useLobbyStore } from '../store/lobby_store.js';
 import { BOARD_SIZE, TurnPhase } from '../../domain/room.js';
 import type { DeltaPayload } from '../../server/session_manager.js';
@@ -72,74 +73,83 @@ function syncTurnAndTimer(delta: DeltaPayload, state: GameState): void {
 }
 
 function syncTreasuryPool(delta: DeltaPayload, state: GameState): void {
-  if (delta.treasury !== undefined) {
-    state.setTreasuryPool(delta.treasury);
-  }
+  if (delta.treasury !== undefined) state.setTreasuryPool(delta.treasury);
 }
 
 function syncRoundAndModifiers(delta: DeltaPayload, state: GameState): void {
-  if (delta.roundNumber !== undefined) {
-    state.setRoundNumber(delta.roundNumber);
-  }
-  if (delta.activeModifiers !== undefined) {
-    state.setActiveModifiers(delta.activeModifiers);
-  }
+  if (delta.roundNumber !== undefined) state.setRoundNumber(delta.roundNumber);
+  if (delta.activeModifiers !== undefined) state.setActiveModifiers(delta.activeModifiers);
 }
 
-import type { ModalPayloadMap } from '../store/game_store_types.js';
-
-let lastDismissedAuctionKey: string | null = null;
-
-function syncBusinessModals(delta: DeltaPayload, state: GameState): void {
-  // [IMP-50] Trụ Cột 3: UI as Pure Projection — Modal chỉ đóng khi server phát delta.auction === null hoặc phase thay đổi
+function syncAuctionModal(delta: DeltaPayload, state: GameState): void {
+  // [IMP-50][IMP-200] Trụ Cột 3: UI as Pure Projection — Đồng bộ auction state & bảo vệ dismiss state (Zustand SSOT)
   if (delta.auction) {
     const isConcluded = Boolean(delta.auction.isConcluded);
-    const auctionKey = `${delta.auction.cellIndex}:${delta.auction.winnerId}:${delta.auction.finalPrice ?? delta.auction.currentBid}`;
+    const myPid = useLobbyStore.getState().myPlayerId;
+    const prevPayload = state.activeModal === 'auction' ? state.modalPayload as ModalPayloadMap['auction'] | null : null;
+    const isSameAuction = prevPayload?.cellIndex === delta.auction.cellIndex && !prevPayload?.isConcluded;
+    const hasPassed = Boolean(
+      (isSameAuction && prevPayload?.hasPassed) ||
+      (myPid && delta.auction.passedPlayerIds?.includes(myPid))
+    );
+
+    const auctionData: ModalPayloadMap['auction'] = {
+      ...delta.auction,
+      ...(hasPassed ? { hasPassed: true } : {}),
+    };
+
+    state.setAuction?.(auctionData);
+
+    // Fire Sale Queue Defense: Sang ô đất mới thì tự động reset cờ dismiss của ô cũ
+    if (state.dismissedAuctionCellIndex !== null && state.dismissedAuctionCellIndex !== delta.auction.cellIndex) {
+      state.setDismissedAuctionCellIndex?.(null);
+    }
+
+    const isDismissed = state.dismissedAuctionCellIndex === delta.auction.cellIndex;
     const isWaitingOrAction = delta.turnPhase === TurnPhase.WaitingRoll || delta.turnPhase === TurnPhase.ActionPhase;
 
-    if (isConcluded && isWaitingOrAction) {
-      // KHÔNG mở lại modal state.openModal('auction')
-    } else if (isConcluded && lastDismissedAuctionKey === auctionKey && state.activeModal !== 'auction') {
-      // KHÔNG mở lại modal
-    } else {
-      if (isConcluded) {
-        lastDismissedAuctionKey = auctionKey;
-      } else {
-        lastDismissedAuctionKey = null;
+    if (isDismissed) {
+      if (state.activeModal === 'auction') {
+        state.updateModalPayload<'auction'>(auctionData);
       }
-      const myPid = useLobbyStore.getState().myPlayerId;
-      const prevPayload = state.activeModal === 'auction' ? state.modalPayload as { hasPassed?: boolean; cellIndex?: number; isConcluded?: boolean } | null : null;
-      const isSameAuction = prevPayload?.cellIndex === delta.auction.cellIndex && !prevPayload?.isConcluded;
-      const hasPassed = Boolean(
-        (isSameAuction && prevPayload?.hasPassed) ||
-        (myPid && delta.auction.passedPlayerIds?.includes(myPid))
-      );
-      state.openModal('auction', {
-        ...delta.auction,
-        ...(hasPassed ? { hasPassed: true } : {}),
-      });
+    } else if (isConcluded && isWaitingOrAction) {
+      // KHÔNG mở lại modal khi lượt chơi đã chuyển sang đổ xúc xắc
+    } else {
+      state.openModal('auction', auctionData);
     }
   } else if (delta.auction === null) {
-    lastDismissedAuctionKey = null;
+    state.setAuction?.(null);
     if (state.activeModal === 'auction') {
       state.closeModal();
     }
+    state.setDismissedAuctionCellIndex?.(null);
   } else if (
     delta.turnPhase !== undefined &&
-    delta.turnPhase !== TurnPhase.AuctionPhase &&
-    state.activeModal === 'auction'
+    delta.turnPhase !== TurnPhase.AuctionPhase
   ) {
-    const currentPayload = state.modalPayload as { isConcluded?: boolean } | null;
-    if (!currentPayload?.isConcluded) {
-      state.closeModal();
+    state.setAuction?.(null);
+    if (state.activeModal === 'auction') {
+      const currentPayload = state.modalPayload as { isConcluded?: boolean } | null;
+      if (!currentPayload?.isConcluded) {
+        state.closeModal();
+      }
     }
+    state.setDismissedAuctionCellIndex?.(null);
   }
+}
 
-  // [IMP-142][IMP-195] Bot Trade Offer — lưu vào store pendingTradeOffer cho InlineBotTradeStrip (không auto-open modal làm che màn hình)
+function syncOtherModals(delta: DeltaPayload, state: GameState): void {
+  // [IMP-142][IMP-195][IMP-200] Trade Offer — lưu vào store pendingTradeOffer cho InlineBotTradeStrip (chống tự nhận & hỗ trợ targetPlayerId)
   if (delta.pendingTradeOffer !== undefined) {
     const myPid = useLobbyStore.getState().myPlayerId;
-    const isTargetedToMe = Boolean(delta.pendingTradeOffer && delta.pendingTradeOffer.sellerId === myPid);
-    state.setPendingTradeOffer(isTargetedToMe ? delta.pendingTradeOffer : null);
+    const offer = delta.pendingTradeOffer;
+    const isTargetedToMe = Boolean(
+      offer &&
+      myPid &&
+      offer.requesterId !== myPid &&
+      (offer.targetPlayerId ? offer.targetPlayerId === myPid : offer.sellerId === myPid)
+    );
+    state.setPendingTradeOffer(isTargetedToMe ? offer : null);
 
     if (delta.pendingTradeOffer === null && state.activeModal === 'bot_trade_offer') {
       state.closeModal();
@@ -196,6 +206,11 @@ function syncBusinessModals(delta: DeltaPayload, state: GameState): void {
   }
 }
 
+function syncBusinessModals(delta: DeltaPayload, state: GameState): void {
+  syncAuctionModal(delta, state);
+  syncOtherModals(delta, state);
+}
+
 function syncGameStarted(delta: DeltaPayload, state: GameState): void {
   if (delta.roomStarted !== undefined) {
     try {
@@ -250,6 +265,7 @@ export function applyDeltaToStore(delta: DeltaPayload, store: typeof useGameStor
       state.setDice([delta.dice[0], delta.dice[1]]);
     }
     state.setHasRolledThisTurn(false);
+    state.setDismissedAuctionCellIndex?.(null);
   } else {
     // [IMP-112] Đồng bộ xúc xắc TRƯỚC KHI xử lý di chuyển quân cờ.
     // Nếu delta mang kết quả xúc xắc mới, triggerDiceRoll sẽ kích hoạt isRolling: true.

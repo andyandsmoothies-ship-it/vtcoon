@@ -248,17 +248,17 @@ export class RoomManager {
 
   handleUpgradeETC(roomCode: string, playerId: string): { success: boolean; reason?: string } {
     const room = this.rooms.get(roomCode);
-    return handleUpgradeETC(this.getActivePlayer(room, playerId), room?.phase, this.registries.get(roomCode), this.propertyStates.get(roomCode));
+    return handleUpgradeETC(this.getActivePlayer(room, playerId), room?.phase, this.registries.get(roomCode), this.propertyStates.get(roomCode), room);
   }
 
   handleUpgradeUtility(roomCode: string, playerId: string, cellIndex: number): { success: boolean; reason?: string } {
     const room = this.rooms.get(roomCode);
-    return handleUpgradeUtility(this.getActivePlayer(room, playerId), room?.phase, cellIndex, this.registries.get(roomCode), this.propertyStates.get(roomCode));
+    return handleUpgradeUtility(this.getActivePlayer(room, playerId), room?.phase, cellIndex, this.registries.get(roomCode), this.propertyStates.get(roomCode), room);
   }
 
   handleUpgrade(roomCode: string, playerId: string, cellIndex: number): { success: boolean; reason?: string } {
     const room = this.rooms.get(roomCode);
-    return handleUpgrade(this.getActivePlayer(room, playerId), room?.phase, cellIndex, this.registries.get(roomCode), this.propertyStates.get(roomCode), room?.activeModifiers);
+    return handleUpgrade(this.getActivePlayer(room, playerId), room?.phase, cellIndex, this.registries.get(roomCode), this.propertyStates.get(roomCode), room?.activeModifiers, room);
   }
 
   handleHoseInvest(roomCode: string, playerId: string, stake: number): { success: boolean; reason?: string } {
@@ -424,6 +424,12 @@ export class RoomManager {
   }
 
   handleEndTurn(roomCode: string, playerId: string, continueDoubles?: boolean): Room | undefined {
+    if (this.rooms.get(roomCode)?.pendingTradeOffer) {
+      const p = this.rooms.get(roomCode)!.pendingTradeOffer!;
+      if (p.sellerId === playerId || p.buyerId === playerId) {
+        this.cancelPendingTrade(roomCode, playerId);
+      }
+    }
     return doHandleEndTurn(this.rooms, this.rolledThisTurn, this.registries, this.propertyStates, this.auctions, (rc) => this.touchActivity(rc), roomCode, playerId, continueDoubles, this.deckRng);
   }
 

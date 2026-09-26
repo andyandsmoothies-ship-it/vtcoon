@@ -64,6 +64,8 @@ export interface PendingTradeOfferDelta {
   readonly sellerId: string;
   readonly expiresAt: number;
   readonly offeredCellIndex?: number;
+  readonly requesterId?: string;
+  readonly targetPlayerId?: string;
 }
 
 export interface DeltaPayload {
@@ -197,6 +199,8 @@ export function buildDeltaFromRoom(
       sellerId: pendingSession.sellerId,
       expiresAt: pendingSession.expiresAt,
       ...(pendingSession.offeredCellIndex !== undefined ? { offeredCellIndex: pendingSession.offeredCellIndex } : {}),
+      ...(pendingSession.targetPlayerId !== undefined ? { targetPlayerId: pendingSession.targetPlayerId } : {}),
+      ...(room.pendingTradeOffer?.requesterId !== undefined ? { requesterId: room.pendingTradeOffer.requesterId } : {}),
     };
   } else if (room.pendingTradeOffer) {
     pendingTradeOffer = room.pendingTradeOffer;
@@ -276,7 +280,7 @@ export function buildDeltaPayload(
   tickOrOptions:
     | number
     | DeltaPayloadOptions
-    | { tick: number; room: Room; registry: PropertyRegistry; stateMap: PropertyStateMap; auctions?: Map<string, AuctionSession>; lastAuctionResults?: Map<string, AuctionDelta> },
+    | { tick: number; room: Room; registry: PropertyRegistry; stateMap: PropertyStateMap; auctions?: Map<string, AuctionSession>; lastAuctionResults?: Map<string, { cellIndex: number; winnerId?: string | null; winningBid: number; isForeclosure?: boolean; finalPrice?: number }> },
   cells?: ReadonlyArray<CellDelta>,
   players?: ReadonlyArray<PlayerDelta>,
 ): DeltaPayload {

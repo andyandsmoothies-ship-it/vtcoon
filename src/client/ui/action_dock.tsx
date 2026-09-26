@@ -59,10 +59,9 @@ export function ActionDock({
   const storeIsHeatmapActive = useGameStore((state) => state.isHeatmapActive);
   const toggleHeatmap = useGameStore((state) => state.toggleHeatmap);
   const pendingTradeOfferStore = useGameStore((state) => state.pendingTradeOffer);
-
+  const activeModalStore = useGameStore((state) => state.activeModal);
   const isSSR = typeof window === 'undefined';
   const ssrState = ssrStateProp ?? (isSSR ? useGameStore.getState() : null);
-
   const isRolling = ssrState ? ssrState.isRolling : isRollingStore;
   const activePawnAnimation = ssrState ? ssrState.activePawnAnimation : activePawnAnimationStore;
   const pawnAnimationQueue = ssrState ? ssrState.pawnAnimationQueue : pawnAnimationQueueStore;
@@ -82,7 +81,9 @@ export function ActionDock({
     );
   const queueHasTasks = Boolean(pawnAnimationQueue && pawnAnimationQueue.length > 0);
   const actingPlayerId = localPlayerId ?? currentTurnPlayerId;
-  const isTradeStripActive = Boolean(pendingTradeOffer && pendingTradeOffer.sellerId === actingPlayerId);
+  const activeModal = ssrState ? ssrState.activeModal : activeModalStore;
+  const isAuctionMinimized = Boolean(turnPhase === TurnPhase.AuctionPhase && !activeModal);
+  const isStripActive = Boolean((pendingTradeOffer && pendingTradeOffer.sellerId === actingPlayerId) || isAuctionMinimized);
   const isMyTurn = isMyTurnProp !== undefined ? isMyTurnProp : (!localPlayerId || currentTurnPlayerId === localPlayerId);
   const isPawnMoving = (isPawnMovingProp ?? Boolean(activePawnAnimation?.isAnimating)) || queueHasTasks;
   const actingPlayer = actingPlayerId ? playersInfo[actingPlayerId] : undefined;
@@ -167,7 +168,6 @@ export function ActionDock({
   const isPropertyCell = currentCell && (currentCell.type === CellType.Property || currentCell.type === CellType.Railroad);
   const isOwnedByAnyone = Object.values(playersInfo).some((p) => p.ownedProperties?.includes(currentPos));
   const isStandingOnBuyable = Boolean(isMyTurn && hasRolledThisTurn && isPropertyCell && !isOwnedByAnyone);
-
   const handleOpenManageProperty = () => {
     if (onOpenManageProperty) {
       onOpenManageProperty();
@@ -205,11 +205,10 @@ export function ActionDock({
     isSkippedTurn: Boolean(actingPlayer?.skipNextTurn),
     botPacing,
   });
-
   return (
     <div className="relative flex flex-col items-center">
       {/* Chip Thông Báo Ngữ Cảnh Độc Quyền (Actionable Guidance Chip) */}
-      {actionDockNotice && !isTradeStripActive && (
+      {actionDockNotice && !isStripActive && (
         <div
           data-testid={actionDockNotice.type === 'bot_pacing' ? 'bot-pacing-chip' : `${actionDockNotice.type === 'skip_turn' ? 'skip-turn-notice-chip' : `${actionDockNotice.type}-notice-chip`}`}
           className={`absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold shadow-md animate-pulse select-none ${

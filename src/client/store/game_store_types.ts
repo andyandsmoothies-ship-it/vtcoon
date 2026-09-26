@@ -111,9 +111,9 @@ export interface ModalPayloadMap {
   };
   auction: {
     cellIndex: number;
-    currentBid: number;
-    highestBidderId: string | null;
-    timeRemaining: number;
+    currentBid?: number;
+    highestBidderId?: string | null;
+    timeRemaining?: number;
     hasPassed?: boolean;
     passedPlayerIds?: readonly string[];
     declinedPlayerId?: string;
@@ -123,6 +123,8 @@ export interface ModalPayloadMap {
     insolvencyPlayerId?: string;
     isForeclosure?: boolean;
     startingBid?: number;
+    highestBid?: number;
+    highestBidder?: string;
   };
   trade: {
     targetPlayerId: string;
@@ -231,13 +233,12 @@ export interface GameState {
   readonly lastEventCard: EventCardInfo | null;
   readonly pendingBuyout?: PendingBuyoutSession | null;
   readonly pendingTradeOffer: PendingTradeOfferDelta | null;
-  readonly auction?: {
-    readonly cellIndex: number;
-    readonly highestBid?: number;
-    readonly currentBid?: number;
-    readonly highestBidder?: string;
-    readonly highestBidderId?: string | null;
-  } | null;
+  readonly auction?: ModalPayloadMap['auction'] | null;
+  readonly dismissedAuctionCellIndex: number | null;
+  setAuction: (auction: ModalPayloadMap['auction'] | null) => void;
+  setDismissedAuctionCellIndex: (cellIndex: number | null) => void;
+  dismissAuction: (cellIndex: number) => void;
+  restoreAuction: () => void;
 
   // UI-05 Social Emotes & Micro-VFX
   readonly activeEmotes: Record<string, ActiveEmote>;
@@ -324,6 +325,7 @@ export type InitialGameState = Pick<
   | 'pendingBuyout'
   | 'pendingTradeOffer'
   | 'auction'
+  | 'dismissedAuctionCellIndex'
   | 'activeEmotes'
   | 'floatingTexts'
   | 'lastDiplomaticEvent'
@@ -358,6 +360,7 @@ export const INITIAL_GAME_STATE: InitialGameState = {
   pendingBuyout: null,
   pendingTradeOffer: null,
   auction: null,
+  dismissedAuctionCellIndex: null,
   activeEmotes: {},
   floatingTexts: [],
   lastDiplomaticEvent: null,

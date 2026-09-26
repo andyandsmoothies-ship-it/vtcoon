@@ -27,9 +27,14 @@ export function handleUpgradeETC(
   phase: TurnPhase | undefined,
   registry: PropertyRegistry | undefined,
   stateMap: PropertyStateMap | undefined,
+  room?: Room,
 ): { success: boolean; reason?: string } {
   if (!current || phase !== TurnPhase.PropertyManagement) return { success: false, reason: ActionRejectReason.INVALID_PHASE };
   if (!registry || !stateMap) return { success: false, reason: ActionRejectReason.INVALID_ROOM };
+  const etcIndices = [5, 15, 25, 35];
+  if (room?.pendingTradeOffer && (etcIndices.includes(room.pendingTradeOffer.cellIndex) || (room.pendingTradeOffer.offeredCellIndex !== undefined && etcIndices.includes(room.pendingTradeOffer.offeredCellIndex)))) {
+    return { success: false, reason: ActionRejectReason.ASSET_LOCKED };
+  }
   return upgradeETC(current, registry, stateMap);
 }
 
@@ -39,9 +44,13 @@ export function handleUpgradeUtility(
   cellIndex: number,
   registry: PropertyRegistry | undefined,
   stateMap: PropertyStateMap | undefined,
+  room?: Room,
 ): { success: boolean; reason?: string } {
   if (!current || phase !== TurnPhase.PropertyManagement) return { success: false, reason: ActionRejectReason.INVALID_PHASE };
   if (!registry || !stateMap) return { success: false, reason: ActionRejectReason.INVALID_ROOM };
+  if (room?.pendingTradeOffer && (room.pendingTradeOffer.cellIndex === cellIndex || room.pendingTradeOffer.offeredCellIndex === cellIndex)) {
+    return { success: false, reason: ActionRejectReason.ASSET_LOCKED };
+  }
   return upgradeUtilityFull(current, cellIndex, registry, stateMap);
 }
 
@@ -52,9 +61,13 @@ export function handleUpgrade(
   registry: PropertyRegistry | undefined,
   stateMap: PropertyStateMap | undefined,
   modifiers?: readonly MarketModifier[],
+  room?: Room,
 ): { success: boolean; reason?: string } {
   if (!current || phase !== TurnPhase.PropertyManagement) return { success: false, reason: ActionRejectReason.INVALID_PHASE };
   if (!registry || !stateMap) return { success: false, reason: ActionRejectReason.INVALID_ROOM };
+  if (room?.pendingTradeOffer && (room.pendingTradeOffer.cellIndex === cellIndex || room.pendingTradeOffer.offeredCellIndex === cellIndex)) {
+    return { success: false, reason: ActionRejectReason.ASSET_LOCKED };
+  }
   return upgradeProperty(current, cellIndex, registry, stateMap, modifiers, { enforceEvenBuilding: true });
 }
 
@@ -126,7 +139,11 @@ export function handleDowngrade(
   stateMap: PropertyStateMap | undefined,
   roomCode?: string,
   options?: import('../domain/property_upgrade').DowngradeOptions,
+  room?: Room,
 ): { success: boolean; reason?: ActionRejectReason; refund?: number; newLevel?: number } {
+  if (room?.pendingTradeOffer && (room.pendingTradeOffer.cellIndex === cellIndex || room.pendingTradeOffer.offeredCellIndex === cellIndex)) {
+    return { success: false, reason: ActionRejectReason.ASSET_LOCKED as ActionRejectReason };
+  }
   const v = validateDowngrade(current, phase, cellIndex, registry, stateMap);
   if (!v.valid) return { success: false, reason: v.reason };
 

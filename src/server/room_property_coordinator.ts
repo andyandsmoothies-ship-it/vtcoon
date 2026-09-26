@@ -8,7 +8,6 @@ import { liquidateAssets, declareBankruptcy } from './insolvency_manager.js';
 import type { AuctionSession } from './auction_manager.js';
 import { evaluateBotTradeAcceptance } from '../domain/bot/bot_trade.js';
 import { BotPersonality } from '../domain/bot/bot_types.js';
-import { BOARD_CONFIG } from '../domain/board_config.js';
 import { PROPERTY_DEEDS } from '../domain/property_data.js';
 import { pendingTradeManager } from './pending_trade_manager.js';
 
@@ -19,12 +18,28 @@ export interface RoomContext {
   readonly botPersonalities?: Map<string, BotPersonality>;
 }
 
+export function isRoomQuiescentForTrade(room: Room): boolean {
+  if (room.phase === TurnPhase.AuctionPhase || Boolean(room.currentAuction)) return false;
+  if (room.phase === TurnPhase.InsolvencyPhase) return false;
+  if (room.phase === TurnPhase.ActionPhase) return false;
+  if (Boolean(room.pendingBuyout)) return false;
+  return room.phase === TurnPhase.WaitingRoll || room.phase === TurnPhase.PropertyManagement;
+}
+
+function isCellLockedInPendingTrade(room: Room, cellIndex: number): boolean {
+  if (!room.pendingTradeOffer) return false;
+  return room.pendingTradeOffer.cellIndex === cellIndex || room.pendingTradeOffer.offeredCellIndex === cellIndex;
+}
+
 export function coordMortgage(
   ctx: RoomContext | undefined,
   playerId: string,
   cellIndex: number,
 ): { success: boolean; reason?: string } {
   if (!ctx) return { success: false, reason: ActionRejectReason.INVALID_ROOM };
+  if (isCellLockedInPendingTrade(ctx.room, cellIndex)) {
+    return { success: false, reason: ActionRejectReason.ASSET_LOCKED };
+  }
   const res = mortgageProperty(ctx.room, playerId, cellIndex, ctx.reg, ctx.sm);
   if (res.success && ctx.room.phase === TurnPhase.InsolvencyPhase) {
     const p = ctx.room.players.find((pl) => pl.id === playerId);
@@ -39,6 +54,9 @@ export function coordRedeem(
   cellIndex: number,
 ): { success: boolean; reason?: string } {
   if (!ctx) return { success: false, reason: ActionRejectReason.INVALID_ROOM };
+  if (isCellLockedInPendingTrade(ctx.room, cellIndex)) {
+    return { success: false, reason: ActionRejectReason.ASSET_LOCKED };
+  }
   return redeemProperty(ctx.room, playerId, cellIndex, ctx.reg, ctx.sm);
 }
 
@@ -50,7 +68,7 @@ export function coordDowngrade(
   options?: DowngradeOptions,
 ): { success: boolean; reason?: string } {
   if (!ctx) return { success: false, reason: ActionRejectReason.INVALID_ROOM };
-  const res = handleDowngrade(player, ctx.room.phase, cellIndex, ctx.reg, ctx.sm, roomCode, options);
+  const res = handleDowngrade(player, ctx.room.phase, cellIndex, ctx.reg, ctx.sm, roomCode, options, ctx.room);
   if (res.success && ctx.room.phase === TurnPhase.InsolvencyPhase && player && player.balance >= 0) {
     ctx.room.phase = TurnPhase.PropertyManagement;
   }
@@ -78,6 +96,12 @@ export function coordTrade(
   offeredCellIndex?: number,
 ): { success: boolean; reason?: string; pending?: boolean; offerId?: string } {
   if (!ctx) return { success: false, reason: ActionRejectReason.INVALID_ROOM };
+  if (!isRoomQuiescentForTrade(ctx.room)) {
+    return { success: false, reason: ActionRejectReason.INVALID_PHASE };
+  }
+  if (ctx.room.pendingTradeOffer) {
+    return { success: false, reason: ActionRejectReason.TRADE_ALREADY_PENDING };
+  }
   if (requesterId !== sellerId && requesterId !== buyerId) {
     return { success: false, reason: ActionRejectReason.UNAUTHORIZED };
   }
@@ -92,13 +116,6 @@ export function coordTrade(
     (offeredCellIndex !== undefined && buyer.bondContract?.isActive && buyer.bondContract.collateralCells.includes(offeredCellIndex))
   ) {
     return { success: false, reason: ActionRejectReason.BOND_COLLATERAL_LOCKED };
-  }
-
-  // [IMP-152/C] Turn-order guard: only allow when requester is current turn player OR is a bot
-  const currentTurnPlayer = ctx.room.players[ctx.room.currentPlayerIndex];
-  const requester = ctx.room.players.find((p) => p.id === requesterId);
-  if (currentTurnPlayer?.id !== requesterId && !(requester?.isBot ?? false)) {
-    return { success: false, reason: ActionRejectReason.NOT_YOUR_TURN };
   }
 
   if (buyer.balance < 0 || (price > 0 && buyer.balance < price)) {
@@ -142,6 +159,7 @@ export function coordTrade(
       return { success: false, reason: ActionRejectReason.INSUFFICIENT_FUNDS };
     }
 
+    const targetPlayerId = requesterId === sellerId ? buyerId : sellerId;
     const basePrice = PROPERTY_DEEDS.get(cellIndex)?.price ?? price;
     const session = pendingTradeManager.createSession(
       ctx.room.roomCode,
@@ -152,6 +170,7 @@ export function coordTrade(
       basePrice,
       15_000,
       offeredCellIndex,
+      targetPlayerId,
     );
     (ctx.room.lastTargetTradeOfferRound ??= {})[sellerId] = ctx.room.roundCount ?? ctx.room.round ?? 1;
 
@@ -161,6 +180,8 @@ export function coordTrade(
       price: session.price,
       buyerId: session.buyerId,
       sellerId: session.sellerId,
+      requesterId,
+      targetPlayerId,
       expiresAt: session.expiresAt,
       ...(offeredCellIndex !== undefined ? { offeredCellIndex } : {}),
     };
@@ -211,8 +232,17 @@ export function coordRespondTradeOffer(
     return { success: false, reason: 'OFFER_ALREADY_RESOLVED' };
   }
 
-  if (playerId !== session.sellerId && playerId !== session.buyerId) {
-    return { success: false, reason: 'NOT_TARGET_PLAYER' };
+  const pendingInfo = ctx.room.pendingTradeOffer;
+  if (pendingInfo?.targetPlayerId) {
+    if (playerId !== pendingInfo.targetPlayerId) {
+      return { success: false, reason: ActionRejectReason.UNAUTHORIZED };
+    }
+  } else if (session.targetPlayerId) {
+    if (playerId !== session.targetPlayerId) {
+      return { success: false, reason: ActionRejectReason.UNAUTHORIZED };
+    }
+  } else if (playerId !== session.sellerId && playerId !== session.buyerId) {
+    return { success: false, reason: ActionRejectReason.UNAUTHORIZED };
   }
 
   if (Date.now() > session.expiresAt) {
@@ -228,11 +258,15 @@ export function coordRespondTradeOffer(
     return { success: false, reason: ActionRejectReason.INVALID_ROOM };
   }
 
+  if (buyer.bankrupt || seller.bankrupt) {
+    return { success: false, reason: ActionRejectReason.PLAYER_BANKRUPT };
+  }
+
   if (accept) {
-    if (buyer.balance < 0 || buyer.balance < session.price) {
+    if (session.price > 0 && buyer.balance < session.price) {
       return { success: false, reason: ActionRejectReason.INSUFFICIENT_FUNDS };
     }
-    if (seller.balance < 0 && session.price <= 0) {
+    if (session.price < 0 && seller.balance < Math.abs(session.price)) {
       return { success: false, reason: ActionRejectReason.INSUFFICIENT_FUNDS };
     }
 
@@ -260,7 +294,7 @@ export function coordRespondTradeOffer(
 
     // Atomic re-validation for normal 1-way trade
     if (buyer.balance < session.price) {
-      return { success: false, reason: 'INSUFFICIENT_FUNDS' };
+      return { success: false, reason: ActionRejectReason.INSUFFICIENT_FUNDS };
     }
     if (ctx.reg.get(session.cellIndex) !== session.sellerId) {
       return { success: false, reason: 'INVALID_OWNERSHIP' };

@@ -137,6 +137,8 @@ export interface PendingTradeOfferInfo {
   readonly price: number;
   readonly buyerId: string;
   readonly sellerId: string;
+  readonly requesterId: string;
+  readonly targetPlayerId: string;
   readonly expiresAt: number;
   readonly offeredCellIndex?: number;
 }

@@ -82,6 +82,8 @@ export const vi = {
     [ActionRejectReason.BOND_COLLATERAL_LOCKED]:    'Bất động sản đang là tài sản đảm bảo trái phiếu',
     [ActionRejectReason.BOND_NOT_ELIGIBLE]:         'Chưa đủ điều kiện phát hành trái phiếu doanh nghiệp',
     [ActionRejectReason.BOND_ALREADY_ACTIVE]:       'Người chơi đang có hợp đồng trái phiếu chưa tất toán',
+    [ActionRejectReason.ASSET_LOCKED]:              'Bất động sản đang trong phiên đàm phán giao dịch',
+    [ActionRejectReason.TRADE_ALREADY_PENDING]:     'Phòng đang có một phiên đàm phán chưa giải quyết',
   } as Record<string, string>,
 
   macroCycles: {

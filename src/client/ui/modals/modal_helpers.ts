@@ -1,6 +1,7 @@
 // [UI-S04/MSS] Modal Helpers — Pure calculation & validation functions for business modals
 import { PROPERTY_DEEDS, RAILROAD_FEES } from '../../../domain/property_data';
 import { BOARD_CONFIG, ColorGroup, CellType } from '../../../domain/board_config';
+import type { ModalPayloadMap, PlayerInfo } from '../../store/game_store_types.js';
 
 export const P2P_TAX_RATE = 0.05;
 
@@ -335,4 +336,21 @@ export function getPropertySortWeight(cellIndex: number): number {
  */
 export function sortPropertiesByRegion(properties: readonly number[]): number[] {
   return [...properties].sort((a, b) => getPropertySortWeight(a) - getPropertySortWeight(b));
+}
+
+// [IMP-200] Kiểm tra xem người chơi có thuộc diện không liên quan để cho phép đóng/thu nhỏ modal đấu giá hay không
+export function isAuctionDismissible(
+  payload: ModalPayloadMap['auction'] | null | undefined,
+  myId: string | undefined,
+  myPlayer: Partial<PlayerInfo> | undefined
+): boolean {
+  if (!payload) return true;
+  return Boolean(
+    payload.hasPassed ||
+    payload.declinedPlayerId === myId ||
+    payload.insolvencyPlayerId === myId ||
+    payload.isConcluded ||
+    myPlayer?.bankrupt ||
+    myPlayer?.isBankrupt
+  );
 }

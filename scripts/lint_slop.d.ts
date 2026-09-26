@@ -16,6 +16,7 @@ export declare const SLOP_RULES: {
   readonly ZERO_DIRTY_CASTS: 'zero-dirty-casts';
   readonly FILE_LOC_BUDGET: 'file-loc-budget';
   readonly FUNCTION_LOC_BUDGET: 'function-loc-budget';
+  readonly ZERO_WORKAROUND_COMMENTS: 'zero-workaround-comments';
 };
 
 export declare const TIER_BUDGETS: {

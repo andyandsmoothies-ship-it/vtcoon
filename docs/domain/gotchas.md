@@ -7,11 +7,11 @@
 ## 🧭 BẢNG CHỈ MỤC THEO DOMAIN (DOMAIN INDEX)
 | Domain Tag | Trọng Tâm & Phạm Vi Mã Nguồn | Các Gotchas Liên Quan |
 | :--- | :--- | :--- |
-| `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78, #82, #104, #105, #106, #145, #146, #147, #159, #164, #174, #180, #188, #195, #196, #197, #200, #203, #215, #217, #218, #219, #220, #223, #249, #255, #262, #263, #265, #274 |
-| `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147, #190, #191, #195, #196, #197, #200, #206, #223, #272 |
-| `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190, #200, #203, #209, #210, #211, #212, #213, #215, #217, #223, #224, #225, #226, #227, #231, #235, #244, #247, #248, #249, #250, #255, #256, #259, #260, #261, #265 |
+| `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78, #82, #104, #105, #106, #145, #146, #147, #159, #164, #174, #180, #188, #195, #196, #197, #200, #203, #215, #217, #218, #219, #220, #223, #249, #255, #262, #263, #265, #274, #279, #280, #281 |
+| `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147, #190, #191, #195, #196, #197, #200, #206, #223, #272, #280 |
+| `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190, #200, #203, #209, #210, #211, #212, #213, #215, #217, #223, #224, #225, #226, #227, #231, #235, #244, #247, #248, #249, #250, #255, #256, #259, #260, #261, #265, #280, #281 |
 | `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #32, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #60, #61, #63, #69, #72, #74, #77, #80, #85, #86, #88, #89, #90, #91, #92, #93, #94, #95, #96, #101, #103, #109, #110, #114, #115, #116, #117, #120, #122, #123, #124, #125, #126, #127, #128, #129, #130, #133, #134, #135, #136, #140, #141, #144, #148, #159, #160, #161, #162, #163, #164, #165, #169, #175, #177, #189, #198, #200, #222, #254, #257, #258, #259, #270, #275 |
-| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192, #195, #196, #199, #201, #202, #204, #205, #206, #216, #217, #231, #234, #237, #249, #250, #255, #256, #257, #258, #259, #260, #261, #266, #267, #268, #269, #271, #273, #274, #276, #277, #278 |
+| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192, #195, #196, #199, #201, #202, #204, #205, #206, #216, #217, #231, #234, #237, #249, #250, #255, #256, #257, #258, #259, #260, #261, #266, #267, #268, #269, #271, #273, #274, #276, #277, #278, #281 |
 | `[UAT/TEST]` | Nghiệm Thu, Adversarial TDD, Ảnh Chụp Màn Hình (.jpg), Shell Escaping, File I/O Lock, Docker Healthcheck Timeout | #5, #28, #29, #31, #35, #52, #71, #73, #83, #84, #99, #100, #117, #124, #125, #130, #199, #235, #273, #278 |
 | `[TELEMETRY]` | Giám Sát Hiệu Năng Thời Gian Thực, Chó Canh Phòng Bất Biến, Hộp Đen Tái Hiện Lỗi | #39, #62, #71, #75, #104, #114, #115, #135, #174, #200, #227, #235, #250, #255, #259 |
 | `[ARCH/REFACTOR]` | Tách Module Facade, Ngân Sách Render Loop, Chuẩn Hóa Môi Trường Build | #43, #98, #99 |
@@ -3274,3 +3274,45 @@
   2. **Hand Array Tombstone Protocol**: Delta luôn phát `hand: []` khi không còn thẻ. Client `apply_delta_players.ts` cập nhật `hand: p.hand ?? []` vào `playersInfo`.
   3. **Turn Teardown Invariant**: `room.lastDiplomaticEvent` chỉ tồn tại trong lượt xảy ra sự kiện, bắt buộc reset về `null` ở đầu `executeTurnRoll` và trong `executeTurnEnd`.
 - **Traceability**: `[TC-196.01..16/MSS]`, `[UC-IMP196]`, `src/domain/property_manager.ts`, `src/server/turn_loop.ts`, `src/server/session_manager.ts`, `src/server/network/delta_broadcaster.ts`, `src/client/ui/player_card.tsx`, `src/client/ui/transaction_narrative.ts`, `src/client/ui/dice_score_badge.tsx`, `tests/contracts/imp196_diplomatic_card_and_dice_clarity.test.ts`.
+
+---
+
+### 280. [FSM/RULE][BOT/AI][NET/SYNC] Bất Biến Đàm Phán Pha Tĩnh Toàn Phần, Mutex Hai Chiều Thuận - Nghịch & Bẫy Wrapper Delegation Trong RoomManager (Quiescent State Protocol, Two-Way Mutation Mutex & Wrapper Teardown Injection - IMP-200)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Wrapper Delegation Trong RoomManager (Facade Wrapper Teardown Trap)*:
+     - `RoomManager.handleEndTurn` là 1-line wrapper delegate trực tiếp cho hàm thuần `doHandleEndTurn`. Nếu chỉ mô tả "thêm logic dọn dẹp vào handleEndTurn", implementer dễ nhầm lẫn hoặc gọi `cancelPendingTrade` sai context `this`. Bắt buộc chèn đoạn code dọn dẹp `this.cancelPendingTrade(roomCode, playerId)` trước lời gọi delegate.
+  2. *Bẫy Đặc Quyền Bot Xuyên Pha Ambient (Bot Ambient Phase Invariant Trap)*:
+     - Khi cho phép Bot mở đàm phán linh hoạt, logic `!isCurrentTurn && !isBot && !isQuiescent` vô tình cho phép Bot trong lượt đổ xúc xắc/di chuyển (`ActionPhase`) phát lệnh đàm phán, gây xung đột trạng thái với các sự kiện cờ ô đất. Ràng buộc pha tĩnh (`WaitingRoll` hoặc `PropertyManagement`) phải áp dụng tuyệt đối cho cả Human lẫn Bot.
+  3. *Bẫy Mutex Một Chiều (One-Sided Mutation Mutex Trap)*:
+     - Khóa tài sản đang đàm phán chỉ ở thao tác Thế chấp (`coordMortgage`) là chưa đủ; thao tác Chuộc BĐS (`coordRedeem` / unmortgage) cũng làm thay đổi tính chất và giá trị ròng của BĐS trong phiên thương lượng. Mutex bắt buộc khóa cả hai chiều Thế chấp và Chuộc, kèm các thao tác nâng/hạ cấp.
+  4. *Bẫy Deadlock Kép (Dual-Pending Interactive Conflict Trap)*:
+     - Kiểm tra pha tĩnh nếu chỉ dựa vào `TurnPhase` sẽ bỏ sót các phiên tương tác ngầm khác. Nếu phòng đang có phiên M&A Compulsory Buyout (`room.pendingBuyout`), việc mở thêm phiên Trade sẽ dẫn tới deadlock kép. `isRoomQuiescentForTrade` bắt buộc kiểm tra `!room.pendingBuyout`.
+  5. *Bẫy Tự Duyệt Đề Xuất Phía Client (P2P Requester Anti-Self-Targeting Trap)*:
+     - Trong đàm phán 2 chiều (P2P Trade), `apply_delta` nếu chỉ kiểm tra `targetPlayerId === myPid` hoặc fallback `sellerId === myPid` có thể làm lộ thẻ chấp thuận cho chính người gửi. Client filter bắt buộc assert `offer.requesterId !== myPid`.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Wrapper Delegation Injection Invariant**: Mọi thao tác dọn dẹp quá độ tại facade wrapper bắt buộc đặt trước lời gọi hàm ủy quyền `doHandleEndTurn`.
+  2. **Universal Quiescent State Invariant**: Cả Bot lẫn Human chỉ được mở đàm phán khi `isRoomQuiescentForTrade(room) === true` (tức `WaitingRoll` hoặc `PropertyManagement`, đồng thời không có `auction` và `pendingBuyout`).
+  3. **Two-Way Asset Mutex Invariant**: `coordMortgage`, `coordRedeem`, `handleUpgrade*`, `handleDowngrade` từ chối ngay với `ASSET_LOCKED` nếu ô đất nằm trong `pendingTradeOffer`.
+  4. **P2P Anti-Self-Targeting Invariant**: `apply_delta` gán `pendingTradeOffer = null` nếu `offer.requesterId === myPid`.
+- **Traceability**: `[TC-200.01..25/MSS]`, `[UC-IMP200]`, `src/server/room_property_coordinator.ts`, `src/server/room_manager.ts`, `src/server/property_actions.ts`, `src/domain/action_reasons.ts`, `src/client/network/apply_delta.ts`, `tests/contracts/imp200_safe_off_turn_trade_and_ergonomics.test.ts`.
+
+---
+
+### 281. [UI/CRAFT][FSM/RULE][NET/SYNC] Bất Biến Nguồn Chân Lý Duy Nhất Cho Trạng Thái Thu Nhỏ Đấu Giá, Triệt Tiêu Biến Closure Module Song Song & Authoritative Resync Chống Lệch Giờ Client (Single Source of Truth Dismissal Invariant, Zero Parallel Closure Flags & Client Timer Drift Immunity - IMP-200)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Hai Nguồn Chân Lý Chạy Song Song (Dual SSOT Parallel Mechanism Trap)*:
+     - Để tránh pop-up đấu giá tự mở lại sau mỗi giây, `apply_delta.ts` trước đây sử dụng biến module-level closure `let lastDismissedAuctionKey = null;`. Khi thêm trạng thái `dismissedAuctionCellIndex` vào Zustand, việc duy trì cả 2 cơ chế tạo ra race condition: `lastDismissedAuctionKey` không bị reset bởi `resetGameState()` hoặc full-sync reconnect, dẫn đến rò rỉ trạng thái ma sang Turn N+1 hoặc khóa nhầm ô đất kế tiếp trong Fire Sale Queue.
+  2. *Bẫy Type Shadowing Hai Kiểu Dữ Liệu Khác Nhau (Partial vs Full Payload Shadowing Trap)*:
+     - `game_store_types.ts` từng chứa định nghĩa partial inline `auction?: { cellIndex, highestBid, currentBid... }`, khác với `ModalPayloadMap['auction']`. Việc khai báo đè gây lỗi linter, type shadow hoặc mất mát các trường dữ liệu mở rộng (`timeRemaining`, `passedPlayerIds`, `isForeclosure`).
+  3. *Bẫy Lệch Nhịp Timer Nội Bộ Client (Client Timer Drift Trap)*:
+     - Bộ đếm ngược `setInterval` 1s trên UI client nếu không có `useEffect` đồng bộ trực tiếp từ server delta `auction.timeRemaining` sẽ bị trôi giờ sau khi reconnect hoặc khi network lag, gây hiển thị lệch 2-3s so với máy chủ.
+  4. *Bẫy Nuốt Cờ Khi Đóng Modal Trong apply_delta (Teardown Order Inversion Trap)*:
+     - Trong khối dọn dẹp khi `delta.auction === null`, nếu gọi `state.setDismissedAuctionCellIndex(null)` trước `state.closeModal()`, hàm `closeModal()` có thể vô tình gán ngược lại `dismissedAuctionCellIndex` do payload cũ còn lưu trong state.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Single Source of Truth Dismissal Invariant**: Xóa bỏ 100% biến closure module `lastDismissedAuctionKey`. Toàn bộ trạng thái thu nhỏ sàn đấu giá hội tụ vào Zustand store (`dismissedAuctionCellIndex`).
+  2. **Authoritative Resync on Client Ephemeral Timers**: Component `MiniAuctionStrip` có `useEffect` đồng bộ `displaySeconds` từ `auction.timeRemaining` mỗi khi server delta cập nhật, triệt tiêu client clock drift.
+  3. **Fire Sale Teardown Guard**: Khi server phát mại liên tiếp nhiều ô đất trong cùng pha `AuctionPhase`, nếu `delta.auction.cellIndex !== state.dismissedAuctionCellIndex`, `apply_delta.ts` tự động reset `dismissedAuctionCellIndex: null`.
+  4. **Teardown Call Order Invariant**: Khi teardown auction (`auction === null` hoặc khác `AuctionPhase`), bắt buộc gọi `state.closeModal()` TRƯỚC, rồi mới gọi `state.setDismissedAuctionCellIndex(null)`.
+  5. **Non-Involved Dismissibility Invariant**: Người chơi không liên quan (`hasPassed`, `declinedPlayerId === myId`, `insolvencyPlayerId === myId`, `isConcluded`, hoặc phá sản) được phép đóng modal sàn đấu giá qua nút ✕, nút rút lui, hoặc click backdrop (`dismissible = true`). Active bidder được bảo vệ khỏi miss-click (`dismissible = false`).
+- **Traceability**: `[TC-200.01..17/MSS]`, `[UC-IMP200]`, `src/client/network/apply_delta.ts`, `src/client/store/game_store.ts`, `src/client/store/game_store_types.ts`, `src/client/ui/modals/modal_helpers.ts`, `src/client/ui/modals/modal_host.tsx`, `src/client/ui/modals/mini_auction_strip.tsx`, `src/client/ui/action_dock.tsx`, `src/client/ui/hud_container.tsx`, `tests/contracts/imp200_auction_dismiss_and_mini_widget.test.ts`.
+

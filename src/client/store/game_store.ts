@@ -279,7 +279,18 @@ export const useGameStore = create<GameState>((set, get) => ({
   setHeatmapActive: (active) => set({ isHeatmapActive: active }),
 
   openModal: (type, payload) => set({ activeModal: type, modalPayload: payload }),
-  closeModal: () => set({ activeModal: null, modalPayload: null }),
+  closeModal: () =>
+    set((state) => {
+      const isAuction = state.activeModal === 'auction';
+      const cellIndex = isAuction && state.modalPayload && 'cellIndex' in state.modalPayload
+        ? (state.modalPayload as { cellIndex?: number }).cellIndex ?? null
+        : null;
+      return {
+        activeModal: null,
+        modalPayload: null,
+        ...(cellIndex !== null ? { dismissedAuctionCellIndex: cellIndex } : {}),
+      };
+    }),
   setLastEventCard: (card) => set({ lastEventCard: card }),
   setPendingBuyout: (pendingBuyout) => set({ pendingBuyout }),
   setPendingTradeOffer: (pendingTradeOffer) => set({ pendingTradeOffer }),
@@ -287,6 +298,18 @@ export const useGameStore = create<GameState>((set, get) => ({
     set((state) => ({
       modalPayload: state.modalPayload ? { ...state.modalPayload, ...patch } : state.modalPayload,
     })),
+  dismissedAuctionCellIndex: null,
+  setAuction: (auction) => set({ auction }),
+  setDismissedAuctionCellIndex: (cellIndex) => set({ dismissedAuctionCellIndex: cellIndex }),
+  dismissAuction: (cellIndex) =>
+    set({ dismissedAuctionCellIndex: cellIndex, activeModal: null, modalPayload: null }),
+  restoreAuction: () => {
+    const current = get().auction;
+    set({ dismissedAuctionCellIndex: null });
+    if (current) {
+      get().openModal('auction', current);
+    }
+  },
 
   triggerEmote: (playerId, emoteId) => {
     const timestamp = Date.now();

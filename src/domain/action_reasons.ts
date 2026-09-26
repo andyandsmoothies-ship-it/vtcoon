@@ -36,6 +36,8 @@ export const ActionRejectReason = {
   BOND_COLLATERAL_LOCKED:    'BOND_COLLATERAL_LOCKED',
   BOND_NOT_ELIGIBLE:         'BOND_NOT_ELIGIBLE',
   BOND_ALREADY_ACTIVE:       'BOND_ALREADY_ACTIVE',
+  ASSET_LOCKED:              'ASSET_LOCKED',
+  TRADE_ALREADY_PENDING:     'TRADE_ALREADY_PENDING',
 } as const;
 
 export type ActionRejectReason = (typeof ActionRejectReason)[keyof typeof ActionRejectReason];
