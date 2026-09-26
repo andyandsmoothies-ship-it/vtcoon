@@ -1,5 +1,4 @@
-// [UI-S01/MSS][UI-S03/MSS][UI-S04/MSS] Game Store Types, Interfaces & Payloads
-import type { EventCardInfo, MarketModifier, PendingBuyoutSession } from '../../domain/room';
+import { TurnPhase, type EventCardInfo, type MarketModifier, type PendingBuyoutSession } from '../../domain/room';
 import type { PendingTradeOfferDelta, DiplomaticEventDelta } from '../../server/session_manager';
 import type { BotPersonality } from '../../domain/bot/bot_types';
 import type { BondContract } from '../../domain/bond_types';
@@ -220,7 +219,7 @@ export interface GameState {
   readonly currentTurnPlayerId: string | null;
 
   readonly turnTimeRemaining: number;
-  readonly turnPhase?: string;
+  readonly turnPhase?: TurnPhase;
   readonly treasuryPool: number;
   readonly roundNumber: number;
   readonly maxRounds: number;
@@ -274,7 +273,7 @@ export interface GameState {
   setCurrentTurnPlayerId: (playerId: string | null) => void;
   setTurnTimeRemaining: (seconds: number) => void;
   decrementTurnTimer: () => void;
-  setTurnPhase: (turnPhase?: string) => void;
+  setTurnPhase: (turnPhase?: TurnPhase) => void;
   setTreasuryPool: (amount: number) => void;
   setRoundInfo: (round: number, maxRounds?: number) => void;
   setRoundNumber: (round: number) => void;
@@ -348,7 +347,7 @@ export const INITIAL_GAME_STATE: InitialGameState = {
   playersInfo: {},
   currentTurnPlayerId: null,
   turnTimeRemaining: 60,
-  turnPhase: 'WaitingRoll',
+  turnPhase: TurnPhase.WaitingRoll,
   treasuryPool: 0,
   roundNumber: 1,
   maxRounds: 40,

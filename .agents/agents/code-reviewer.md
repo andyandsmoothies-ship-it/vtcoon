@@ -29,6 +29,9 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command]
        - Event/FSM: Mapped to an Event / Intent Dispatcher / FSM Transition.
        - CLI/Desktop: Mapped to a Command / Handler.
      - If a domain mutation function exists without an active invocation path, it is an **Orphan Mutation** (Dead Code or Unwired Feature causing runtime deadlock) ➔ **MANDATORY REJECT**.
+   - **Zero Magic String & Strict Domain Enum**: Forbid loose `string` typing or string literal comparisons for lifecycle, FSM, or domain category fields. Must strictly use domain enums across DTOs, stores, and props.
+   - **Transient UI Opt-In Default Guard**: Ephemeral feedback components (badges, toasts, chips) must default visibility flags to `false` (opt-in), never `true` (opt-out), preventing premature or ghost renders.
+   - **Runtime Value Import Integrity**: Verify enums or objects accessed at runtime (initial state, default props) are imported as runtime values (`import { Enum }`), never erased type imports (`import type`).
 5. **Severity Classification & False Positive Filtering**:
    - **Filter False Positives**: Suppress nitpicks on formatting or syntax already enforced by tooling/linters. Focus exclusively on runtime behavior, correctness, and architecture.
    - **Severity Ranking**:

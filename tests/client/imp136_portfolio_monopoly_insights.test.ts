@@ -9,6 +9,7 @@ import {
   type MonopolyGroupInsight,
 } from '../../src/client/ui/modals/portfolio_monopoly_analytics.js';
 import { useGameStore } from '../../src/client/store/game_store.js';
+import { TurnPhase } from '../../src/domain/room.js';
 
 describe('[IMP-136] Strategic Property Portfolio & Monopoly Insights Contract Suite', () => {
   const mockPlayers = {
@@ -33,7 +34,7 @@ describe('[IMP-136] Strategic Property Portfolio & Monopoly Insights Contract Su
     useGameStore.setState({
       playersInfo: mockPlayers,
       currentTurnPlayerId: 'p1',
-      turnPhase: 'PropertyManagement',
+      turnPhase: TurnPhase.PropertyManagement,
       levelMap: {},
     });
   });

@@ -15,6 +15,7 @@ import {
 } from '../../src/client/ui/ui_helpers';
 import { ActionDock } from '../../src/client/ui/action_dock';
 import { useGameStore } from '../../src/client/store/game_store';
+import { TurnPhase } from '../../src/domain/room';
 
 // ============================================================================
 // FACET 1: BOUNDARY & STATE — AUDIT INITIAL ROLL ALLOWED (4 ATOMIC TESTS)
@@ -300,7 +301,7 @@ describe('[IMP-135] Facet 4: Component Rendering & Error Defense — ActionDock 
       activePawnAnimation: null,
       pawnAnimationQueue: [],
       hasRolledThisTurn: false,
-      turnPhase: 'WaitingRoll',
+      turnPhase: TurnPhase.WaitingRoll,
       dice: [1, 2],
     });
   });

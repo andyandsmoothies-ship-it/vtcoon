@@ -14,6 +14,7 @@ import {
   getNextBotPersonality,
 } from './lobby_types';
 import { createNewRoomConfig } from '../offline_landing';
+import { purgeClientMatchSession } from '../network/client_session_purger.js';
 
 export * from './lobby_types';
 
@@ -189,13 +190,16 @@ export const useLobbyStore = create<LobbyState>((set, get) => ({
   startGame: () => {
     const check = get().canStartGame();
     if (!check.canStart) return { success: false, reasonCode: check.reasonCode };
+    purgeClientMatchSession({ clearGameStore: true });
     set({ gameStarted: true });
     return { success: true };
   },
 
   setGameStarted: (gameStarted) => set({ gameStarted }),
-  resetLobby: () =>
-    set({ roomCode: null, isJoining: false, myPlayerId: '', isHost: false, isReady: false, gameStarted: false, slots: createDefaultSlots(), errorReason: null }),
+  resetLobby: () => {
+    set({ roomCode: null, isJoining: false, myPlayerId: '', isHost: false, isReady: false, gameStarted: false, slots: createDefaultSlots(), errorReason: null });
+    purgeClientMatchSession({ clearGameStore: true });
+  },
   resetBotSlots: () =>
     set({ slots: get().slots.map((s, i) => (s.isBot ? createEmptySlot(i) : s)) }),
 
@@ -228,6 +232,7 @@ export const useLobbyStore = create<LobbyState>((set, get) => ({
   },
 
   createCustomRoom: (isBotSolo?: boolean) => {
+    purgeClientMatchSession({ clearGameStore: true });
     const cfg = createNewRoomConfig(true);
     get().initLobby(cfg.roomCode, cfg.playerId, cfg.isHost, cfg.playerName);
     if (isBotSolo) {
@@ -243,6 +248,7 @@ export const useLobbyStore = create<LobbyState>((set, get) => ({
     if (!/^[A-Z0-9]{6}$/.test(cleanCode)) {
       return { success: false, reasonCode: 'INVALID_ROOM_CODE' };
     }
+    purgeClientMatchSession({ clearGameStore: true });
     get().initLobby(cleanCode, 'p2', false);
     set({ isJoining: true });
     if (typeof window !== 'undefined' && window.history) {

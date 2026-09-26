@@ -11,6 +11,7 @@ import { SoundEffect } from '../audio/audio_types.js';
 import { trackDeltaActivities } from './activity_tracker.js';
 import { handleDeltaTelemetry } from '../telemetry/telemetry_delta_hook.js';
 import { HapticEngine } from '../haptics/haptic_engine.js';
+import { purgeClientMatchSession } from './client_session_purger.js';
 
 import { applyPlayerDeltas, initPlayersInfoMap } from './apply_delta_players.js';
 import { applyCellDeltas } from './apply_delta_cells.js';
@@ -258,6 +259,7 @@ export function applyDeltaToStore(delta: DeltaPayload, store: typeof useGameStor
   const state = store.getState();
   const isFullSync = Boolean(delta.cells && delta.cells.length === BOARD_SIZE);
   if (isFullSync) {
+    if (delta.tick <= 1) purgeClientMatchSession({ clearGameStore: false });
     state.clearActivePawnAnimation();
     state.setIsRolling(false);
     if (delta.diceSeq !== undefined) state.setLastDiceSeq(delta.diceSeq);

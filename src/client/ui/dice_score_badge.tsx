@@ -1,18 +1,30 @@
 // [UI-S02/MSS][IMP-196] 2D HUD Dice Score Callout Badge
 import React from 'react';
+import { TurnPhase } from '../../domain/room.js';
 
 export interface DiceScoreBadgeProps {
   readonly dice: readonly [number, number];
   readonly isRolling?: boolean;
   readonly isVisible?: boolean;
+  readonly hasRolledThisTurn?: boolean;
+  readonly turnPhase?: TurnPhase;
 }
 
 export function DiceScoreBadge({
   dice,
   isRolling = false,
   isVisible = true,
+  hasRolledThisTurn = false,
+  turnPhase,
 }: DiceScoreBadgeProps): React.ReactElement | null {
-  if (!isVisible || isRolling || dice[0] <= 0 || dice[1] <= 0) {
+  if (
+    !isVisible ||
+    !hasRolledThisTurn ||
+    turnPhase === TurnPhase.WaitingRoll ||
+    isRolling ||
+    dice[0] <= 0 ||
+    dice[1] <= 0
+  ) {
     return null;
   }
 

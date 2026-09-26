@@ -109,14 +109,6 @@ export function useAppTurnControls(
       window.sessionStorage?.removeItem('vtcoon_host_' + roomCode);
     }
 
-    useGameStore.getState().closeModal();
-    useGameStore.setState({
-      activePawnAnimation: null,
-      floatingTexts: [],
-      playersInfo: {},
-      playerPositions: {},
-    });
-
     if (typeof window !== 'undefined' && window.history) {
       try {
         window.history.replaceState({}, '', window.location.pathname);

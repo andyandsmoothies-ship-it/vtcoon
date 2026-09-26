@@ -72,6 +72,8 @@ const DiceScoreBadge: React.ComponentType<{
   dice: readonly [number, number];
   isRolling?: boolean;
   isVisible?: boolean;
+  hasRolledThisTurn?: boolean;
+  turnPhase?: TurnPhase;
 }> =
   diceBadgeMod?.DiceScoreBadge ??
   (() => {
@@ -496,6 +498,7 @@ describe('[UC-IMP196] IMP-196 Diplomatic Immunity Feedback & Dice Readability Co
           dice: [1, 5],
           isRolling: false,
           isVisible: true,
+          hasRolledThisTurn: true,
         })
       );
       expect(htmlStandard).toContain('1 + 5 = 6');
@@ -506,6 +509,7 @@ describe('[UC-IMP196] IMP-196 Diplomatic Immunity Feedback & Dice Readability Co
           dice: [3, 3],
           isRolling: false,
           isVisible: true,
+          hasRolledThisTurn: true,
         })
       );
       expect(htmlDoubles).toContain('3 + 3 = 6');

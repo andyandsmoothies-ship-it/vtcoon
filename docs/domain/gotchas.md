@@ -7,11 +7,11 @@
 ## 🧭 BẢNG CHỈ MỤC THEO DOMAIN (DOMAIN INDEX)
 | Domain Tag | Trọng Tâm & Phạm Vi Mã Nguồn | Các Gotchas Liên Quan |
 | :--- | :--- | :--- |
-| `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78, #82, #104, #105, #106, #145, #146, #147, #159, #164, #174, #180, #188, #195, #196, #197, #200, #203, #215, #217, #218, #219, #220, #223, #249, #255, #262, #263, #265, #274, #279, #280, #281 |
+| `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78, #82, #104, #105, #106, #145, #146, #147, #159, #164, #174, #180, #188, #195, #196, #197, #200, #203, #215, #217, #218, #219, #220, #223, #249, #255, #262, #263, #265, #274, #279, #280, #281, #282 |
 | `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147, #190, #191, #195, #196, #197, #200, #206, #223, #272, #280 |
-| `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190, #200, #203, #209, #210, #211, #212, #213, #215, #217, #223, #224, #225, #226, #227, #231, #235, #244, #247, #248, #249, #250, #255, #256, #259, #260, #261, #265, #280, #281 |
+| `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190, #200, #203, #209, #210, #211, #212, #213, #215, #217, #223, #224, #225, #226, #227, #231, #235, #244, #247, #248, #249, #250, #255, #256, #259, #260, #261, #265, #280, #281, #283 |
 | `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #32, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #60, #61, #63, #69, #72, #74, #77, #80, #85, #86, #88, #89, #90, #91, #92, #93, #94, #95, #96, #101, #103, #109, #110, #114, #115, #116, #117, #120, #122, #123, #124, #125, #126, #127, #128, #129, #130, #133, #134, #135, #136, #140, #141, #144, #148, #159, #160, #161, #162, #163, #164, #165, #169, #175, #177, #189, #198, #200, #222, #254, #257, #258, #259, #270, #275 |
-| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192, #195, #196, #199, #201, #202, #204, #205, #206, #216, #217, #231, #234, #237, #249, #250, #255, #256, #257, #258, #259, #260, #261, #266, #267, #268, #269, #271, #273, #274, #276, #277, #278, #281 |
+| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192, #195, #196, #199, #201, #202, #204, #205, #206, #216, #217, #231, #234, #237, #249, #250, #255, #256, #257, #258, #259, #260, #261, #266, #267, #268, #269, #271, #273, #274, #276, #277, #278, #281, #282, #283 |
 | `[UAT/TEST]` | Nghiệm Thu, Adversarial TDD, Ảnh Chụp Màn Hình (.jpg), Shell Escaping, File I/O Lock, Docker Healthcheck Timeout | #5, #28, #29, #31, #35, #52, #71, #73, #83, #84, #99, #100, #117, #124, #125, #130, #199, #235, #273, #278 |
 | `[TELEMETRY]` | Giám Sát Hiệu Năng Thời Gian Thực, Chó Canh Phòng Bất Biến, Hộp Đen Tái Hiện Lỗi | #39, #62, #71, #75, #104, #114, #115, #135, #174, #200, #227, #235, #250, #255, #259 |
 | `[ARCH/REFACTOR]` | Tách Module Facade, Ngân Sách Render Loop, Chuẩn Hóa Môi Trường Build | #43, #98, #99 |
@@ -3315,4 +3315,49 @@
   4. **Teardown Call Order Invariant**: Khi teardown auction (`auction === null` hoặc khác `AuctionPhase`), bắt buộc gọi `state.closeModal()` TRƯỚC, rồi mới gọi `state.setDismissedAuctionCellIndex(null)`.
   5. **Non-Involved Dismissibility Invariant**: Người chơi không liên quan (`hasPassed`, `declinedPlayerId === myId`, `insolvencyPlayerId === myId`, `isConcluded`, hoặc phá sản) được phép đóng modal sàn đấu giá qua nút ✕, nút rút lui, hoặc click backdrop (`dismissible = true`). Active bidder được bảo vệ khỏi miss-click (`dismissible = false`).
 - **Traceability**: `[TC-200.01..17/MSS]`, `[UC-IMP200]`, `src/client/network/apply_delta.ts`, `src/client/store/game_store.ts`, `src/client/store/game_store_types.ts`, `src/client/ui/modals/modal_helpers.ts`, `src/client/ui/modals/modal_host.tsx`, `src/client/ui/modals/mini_auction_strip.tsx`, `src/client/ui/action_dock.tsx`, `src/client/ui/hud_container.tsx`, `tests/contracts/imp200_auction_dismiss_and_mini_widget.test.ts`.
+
+---
+
+### 282. [UI/CRAFT][FSM/RULE] Bất Biến Ẩn Huy Hiệu Điểm Số Xúc Xắc 2D Khi Khởi Đầu Game & Trạng Thái Chờ Đổ, Triệt Tiêu Lỗi Hiển Thị Giả 1 + 1 = 2 Đôi (Dice Score Badge Entry Visibility Invariant & WaitingRoll Ghost Badge Suppression - IMP-196-BUGFIX)
+- **Bối cảnh & Bẫy thực tế**:
+  - *Bẫy Mặc Định Giá Trị Xúc Xắc Ban Đầu (Initial State Default Tuple Trap)*:
+    - Trong `game_store_types.ts`, `INITIAL_GAME_STATE.dice` được khởi tạo là `[1, 1]` (và `hasRolledThisTurn: false`, `turnPhase: TurnPhase.WaitingRoll`).
+    - Component `DiceScoreBadge` ban đầu chỉ kiểm tra `if (!isVisible || isRolling || dice[0] <= 0 || dice[1] <= 0) return null;`. Do `dice[0] === 1` và `dice[1] === 1`, `isVisible` mặc định là `true`, huy hiệu ngay lập tức kết luận người chơi vừa gieo được đôi và hiển thị `🎲 1 + 1 = 2 (Đôi! 🎉)` ngay khi vừa mở game trên điện thoại (Chrome/Safari) hoặc bất kỳ trình duyệt nào trước khi đổ lượt đầu tiên.
+  - *Bẫy Rò Rỉ Điểm Số Sang Lượt Mới (Turn N+1 Dice Leak Trap)*:
+    - Khi chuyển sang lượt mới (`turnPhase === TurnPhase.WaitingRoll`), nếu không có điều kiện chặn ở tầng component hoặc container, điểm gieo của lượt trước tiếp tục hiển thị gây nhầm lẫn cho người chơi mới nhận lượt.
+  - *Bẫy Bẫy Opt-Out Default Prop (Default Truthy Parameter Trap)*:
+    - Nếu khai báo `hasRolledThisTurn = true` làm giá trị mặc định, bất kỳ consumer nào gọi component mà không truyền prop sẽ vô tình kích hoạt hiển thị điểm ngay cả khi chưa đổ. Bắt buộc phải là `hasRolledThisTurn = false` (Opt-in display, not opt-out).
+  - *Bẫy Magic String Trong State Type (String vs Enum Inconsistency Trap)*:
+    - `turnPhase` từng khai báo `string` thay vì `TurnPhase` enum dẫn đến việc so sánh magic string `'WaitingRoll'`. Bắt buộc dùng `TurnPhase.WaitingRoll`.
+  - *Bẫy Zustand SSR Snapshot Trong RenderToStaticMarkup*:
+    - Trong môi trường Node/SSR, `useGameStore(selector)` trả về snapshot tĩnh nếu không kiểm tra `typeof window === 'undefined' ? useGameStore.getState() : ...`, khiến các bài test snapshot render không bắt kịp trạng thái gán động của store.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **DiceScoreBadge Visibility Invariant**: Huy hiệu `DiceScoreBadge` bắt buộc phải kiểm tra `!hasRolledThisTurn || turnPhase === TurnPhase.WaitingRoll`. Nếu người chơi chưa gieo trong lượt hiện tại (`hasRolledThisTurn === false`) hoặc phase đang ở `WaitingRoll`, badge BẮT BUỘC trả về `null`.
+  2. **Opt-In Prop Contract**: Mặc định `hasRolledThisTurn = false`, bảo đảm an toàn khi consumer không truyền prop.
+  3. **No Magic Strings Invariant**: Sử dụng triệt để enum `TurnPhase.WaitingRoll` trong type signature `turnPhase?: TurnPhase` và logic điều kiện rẽ nhánh.
+  4. **HudContainer Explicit Prop Propagation**: `HudContainer` truyền trực tiếp `hasRolledThisTurn={hasRolledThisTurn}` và `turnPhase={turnPhase}` cho `DiceScoreBadge`, bảo đảm tính đồng bộ toàn vẹn.
+  5. **SSR State Compatibility**: `HudContainer` sử dụng `typeof window === 'undefined'` fallback về `useGameStore.getState()` để tương thích 100% với môi trường test và SSR.
+- **Traceability**: `[TC-DSB.01..11/MSS]`, `src/client/ui/dice_score_badge.tsx`, `src/client/ui/hud_container.tsx`, `src/client/store/game_store_types.ts`, `tests/client/dice_score_badge.test.ts`, `scripts/capture_dice_badge_fix_verification.ts`.
+
+---
+
+### 283. [NET/SYNC][UI/CRAFT] Bất Biến Cô Lập Trạng Thái Ván Đấu & Thanh Lọc Vòng Đời SPA Client Tránh Rò Rỉ Nhật Ký Hoạt Động Sang Ván Mới (Client Session Lifecycle Purge & Cross-Match Activity Feed State Isolation Invariant - IMP-201)
+- **Bối cảnh & Bẫy thực tế**:
+  - *Bẫy SPA Zustand Store Singleton trong RAM*: VTCOON chạy SPA trên trình duyệt. Khi người chơi nhấn nút "Thoát game" và tạo ván mới, các store (`useActivityStore`, `useTelemetryStore`, `useGameStore`, `useVfxStore`) là singleton trong RAM. Nếu `handleLeaveRoom` chỉ reset `lobbyStore`, toàn bộ `activityLogs` của ván cũ vẫn lưu trong RAM.
+  - *Bẫy Append Nối Đuôi Của Activity Feed*: Khi ván mới bắt đầu, các sự kiện đổ xúc xắc, mua đất tiếp tục append `[...activityLogs, entry]`, làm lẫn lộn lịch sử của ván cũ vào trước ván mới trong drawer "Nhật Ký Ván Đấu".
+  - *Bẫy Stale Deduplication Tracker (Event Card & Auction Bid)*: `lastProcessedEventCardKey` và `lastAuctionBid` là các biến module/store. Nếu ván mới rút lại đúng thẻ sự kiện của ván cũ, tracker coi là duplicate và nuốt mất log.
+  - *Bẫy Server Genesis Tick = 1*: Server phát delta khởi tạo bàn cờ với `tick = 1` (do `getNextTick = 0 + 1`), không phải `tick = 0`. Nếu chỉ kiểm tra `delta.tick === 0` thì ngoài runtime thực tế không bao giờ kích hoạt purge.
+  - *Bẫy Reconnect Loss & Render Frame Trùng*: Phải phân biệt rõ Genesis Sync (`delta.tick <= 1`) với Reconnect (`delta.tick > 1`) để người chơi reconnect không bị mất nhật ký. Thứ tự reset lobby phải chuyển `gameStarted: false` TRƯỚC KHI purge `gameStore` để tránh intermediate frame render HUD thiếu data.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **SSOT Client Session Purge Engine**: Toàn bộ thao tác dọn dẹp tập trung tại `purgeClientMatchSession(options?)` trong `src/client/network/client_session_purger.ts`.
+  2. **Tam Tầng Phòng Vệ (Defense-in-Depth)**:
+     - *Egress*: `handleLeaveRoom` ủy quyền cho `resetLobby()` dọn sạch toàn bộ store.
+     - *Ingress*: `createCustomRoom()`, `joinCustomRoom()`, `startGame()` chủ động purge trước khi vào ván.
+     - *Genesis Boundary*: `applyDelta` kích hoạt purge khi `isFullSync && delta.tick <= 1`.
+  3. **Authoritative Reconnect Preservation Guard**: Khi `delta.tick > 1`, TUYỆT ĐỐI KHÔNG purge, bảo toàn 100% nhật ký và telemetry cho người chơi kết nối lại giữa ván.
+  4. **Post-Match Log Preservation**: Không purge trong `syncGameStarted` để bảo toàn nhật ký khi ván cờ kết thúc cho người chơi đọc lại kết quả.
+  5. **Filter & Feed Teardown Invariant**: `clearLogs()` bắt buộc reset `activeFilter = 'all'` và `isActivityFeedOpen = false` để tránh kẹt tab filter ở ván mới.
+- **Traceability**: `[TC-201.01..20/MSS]`, `[UC-IMP201]`, `src/client/network/client_session_purger.ts`, `src/client/store/activity_store.ts`, `src/client/network/use_app_turn_controls.ts`, `src/client/store/lobby_store.ts`, `src/client/network/apply_delta.ts`, `tests/contracts/imp201_client_session_lifecycle_purge.test.ts`.
+
+
 

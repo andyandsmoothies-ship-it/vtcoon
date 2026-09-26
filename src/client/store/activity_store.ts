@@ -116,7 +116,14 @@ export const useActivityStore = create<ActivityStoreState>((set) => ({
   },
 
   clearLogs: () => {
-    set({ activityLogs: [], unreadCount: 0, lastDiceSeq: undefined, lastAuctionBid: undefined });
+    set({
+      activityLogs: [],
+      unreadCount: 0,
+      activeFilter: 'all',
+      isActivityFeedOpen: false,
+      lastDiceSeq: undefined,
+      lastAuctionBid: undefined,
+    });
   },
 }));
 
