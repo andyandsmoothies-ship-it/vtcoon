@@ -337,3 +337,18 @@
 - **Kiểm thử & Bất biến**: `tests/contracts/imp196_diplomatic_card_and_dice_clarity.test.ts` (16/16 atomic contract tests PASS 100%, Adversarial Inversion PASS), Gotcha #279, toàn bộ 119 test suites PASS, `npm run lint:ui` 0 lỗi.
 - **Phê chuẩn**: `spec-reviewer` APPROVED, `ui-craft-reviewer` VERDICT SHIP, `game-3d-visual-critic` VERDICT PASS (8.5/10 Commercial AAA Ready).
 - **Trạng thái**: ✅ Hoàn thành (2026-09-26).
+
+---
+
+### [IMP-204] Năng Lực Mua BĐS Bền Vững & Điểm Neo Mua Đất ActionDock (Resilient Purchase Affordance)
+- **Mục tiêu**: Xóa bỏ hoàn toàn hiện tượng bấm nút Mua bị văng modal do thiếu tiền; triệt tiêu lỗi hardcode 600 tại 3 vị trí; khắc phục lỗi kẹt nút Mua khi đổ đôi; xây dựng phân tầng công thái học 3 hàng tại Footer Sổ Đỏ (Dòng tài chính -> Cầm cố để mua -> Đóng xoay vốn / Bỏ qua); thiết lập nút vàng ActionDock làm điểm neo bảo toàn quyền mua.
+- **Hạ tầng hoàn tất**:
+  * `title_deed_affordance.ts`: Module SSOT tính toán `resolvePurchaseAffordance`, `resolveMonopolyGroupInfo`, `resolveEvenBuildRules`, và `resolveTitleDeedModalState` (216 LOC, Tier 1 <= 400 LOC).
+  * `modal_host.tsx`: Tinh gọn sâu từ 475 dòng xuống **447 LOC** (Tier 2 <= 500 LOC), ủy quyền 100% logic Sổ Đỏ sang helper.
+  * `action_dock.tsx`: Siết `turnPhase === TurnPhase.ActionPhase` cho `isStandingOnBuyable`; ưu tiên nút `[🏷️ Mua Đất]` không truyền `canBuy` cứng để SSOT tự tính toán; chống deadlock kẹt nút khi đổ đôi; thêm notice `buy_opportunity` cảnh báo vị trí và giá đất.
+  * `title_deed_action_footer.tsx`: Phân tầng 3 hàng (Dòng đệm tài chính khi thiếu tiền -> CTA Mua / `[🏛️ Cầm Cố Để Mua]` -> Nút phụ `[Đóng Xoay Vốn]` vs `[Bỏ Qua (Pass)]` strictly gọi `onPass`; sa bàn chỉ hiện `[Đóng]`).
+  * `offline_landing.ts` & `board_layout.tsx`: Xóa bỏ triệt để hardcode 600, lấy giá từ `PROPERTY_DEEDS`.
+- **Kiểm thử & Bất biến**: `tests/contracts/imp204_property_purchase_affordance.test.ts` (17/17 atomic contract tests PASS 100%, Adversarial Inversion PASS), Gotcha #289, 93/93 regression tests PASS, `npm run lint:ui` 0 lỗi.
+- **Tech Debt**: `DEBT-IMP204-01` (Render Goal Badge & Auto-Return trong `property_portfolio_modal.tsx` khi có `targetPurchaseCellIndex`, hoãn do Portfolio đang 493 LOC).
+- **Phê chuẩn**: `spec-reviewer` SPEC_PASS, `ui-craft-reviewer` VERDICT SHIP, `scout` Station 2.5 PASS.
+- **Trạng thái**: ✅ Hoàn thành (2026-09-27).

@@ -1,13 +1,20 @@
 // [UI-S03/MSS][IMP-29.3] ProceduralBuilding — 3D Architecture (C0-C3) with SafeGLTFModel & Zero-Crash Fallback
 import React, { useRef } from 'react';
 import { RoundedBox } from '@react-three/drei';
-import type { Mesh, Group } from 'three';
+import type { Group } from 'three';
 import { useSafeFrame } from './safe_frame';
 import { useEnvironmentStore } from '../store/environment_store';
 import { useVfxStore } from '../store/vfx_store';
 import { calculateImpactDrop } from './construction_slam_vfx';
 import { SafeGLTFModel } from './asset_loader/safe_gltf_model';
 import { SurveyorPlotBoundary } from './surveyor_plot_boundary';
+import { BespokeLandmarkFallback } from './bespoke_landmark_fallback';
+import {
+  BUILDING_MODEL_URLS,
+  getBuildingModelUrl,
+  BUILDING_BASE_PLINTH_WIDTH,
+  getRegionalTypology,
+} from './building_typology';
 
 export interface ProceduralBuildingProps {
   readonly level: 0 | 1 | 2 | 3;
@@ -16,13 +23,7 @@ export interface ProceduralBuildingProps {
   readonly showEmptyPlotBoundary?: boolean;
 }
 
-import {
-  BUILDING_MODEL_URLS,
-  getBuildingModelUrl,
-  BUILDING_BASE_PLINTH_WIDTH,
-} from './building_typology';
-
-export { BUILDING_MODEL_URLS, BUILDING_BASE_PLINTH_WIDTH };
+export { BUILDING_MODEL_URLS, BUILDING_BASE_PLINTH_WIDTH, BespokeLandmarkFallback };
 
 export interface BuildingLotTransform {
   readonly position: [number, number, number];
@@ -70,6 +71,7 @@ interface FallbackProps {
  * Cấp 1 Fallback: Nhà Phố Đông Dương (Indochine Shophouse)
  */
 function ShophouseFallback({ groupColor, isNight, isSunset }: FallbackProps): React.ReactElement {
+  const glow = isNight ? 0.45 : isSunset ? 0.25 : 0.0;
   return (
     <group>
       <mesh receiveShadow position={[0, 0.002, 0]} rotation={[-Math.PI / 2, 0, 0]}>
@@ -86,23 +88,10 @@ function ShophouseFallback({ groupColor, isNight, isSunset }: FallbackProps): Re
         <meshStandardMaterial color="#451A03" roughness={0.5} />
       </RoundedBox>
       <RoundedBox args={[0.17, 0.15, 0.02]} radius={0.004} smoothness={1} position={[0.12, 0.14, 0.212]}>
-        <meshPhysicalMaterial
-          color="#FDE68A"
-          roughness={0.04}
-          ior={1.52}
-          reflectivity={0.9}
-          clearcoat={1.0}
-          envMapIntensity={1.8}
-          emissive="#F59E0B"
-          emissiveIntensity={isNight ? 0.45 : isSunset ? 0.25 : 0.0}
-        />
+        <meshPhysicalMaterial color="#FDE68A" roughness={0.04} ior={1.52} reflectivity={0.9} clearcoat={1.0} envMapIntensity={1.8} emissive="#F59E0B" emissiveIntensity={glow} />
       </RoundedBox>
       <RoundedBox args={[0.12, 0.07, 0.02]} radius={0.003} smoothness={1} position={[-0.12, 0.25, 0.212]}>
-        <meshStandardMaterial
-          color="#FDE68A"
-          emissive="#FBBF24"
-          emissiveIntensity={isNight ? 0.45 : isSunset ? 0.25 : 0.0}
-        />
+        <meshStandardMaterial color="#FDE68A" emissive="#FBBF24" emissiveIntensity={glow} />
       </RoundedBox>
       <RoundedBox args={[0.55, 0.025, 0.45]} radius={0.005} smoothness={1} position={[0, 0.325, 0]} castShadow>
         <meshStandardMaterial color="#F8FAFC" roughness={0.3} />
@@ -116,14 +105,7 @@ function ShophouseFallback({ groupColor, isNight, isSunset }: FallbackProps): Re
         <meshStandardMaterial color="#7F1D1D" roughness={0.4} />
       </mesh>
       <RoundedBox args={[0.36, 0.045, 0.02]} radius={0.008} smoothness={2} position={[0, 0.3, 0.22]} castShadow>
-        <meshStandardMaterial
-          color={groupColor}
-          roughness={0.3}
-          metalness={0.2}
-          emissive={groupColor}
-          emissiveIntensity={isNight ? 0.45 : isSunset ? 0.25 : 0.0}
-          envMapIntensity={1.2}
-        />
+        <meshStandardMaterial color={groupColor} roughness={0.3} metalness={0.2} emissive={groupColor} emissiveIntensity={glow} envMapIntensity={1.2} />
       </RoundedBox>
     </group>
   );
@@ -133,6 +115,7 @@ function ShophouseFallback({ groupColor, isNight, isSunset }: FallbackProps): Re
  * Cấp 2 Fallback: Khối Cao Ốc Kính Sapphire Hiện Đại
  */
 function ComplexFallback({ groupColor, isNight, isSunset }: FallbackProps): React.ReactElement {
+  const glow = isNight ? 0.45 : isSunset ? 0.25 : 0.0;
   return (
     <group>
       <mesh position={[0, 0.002, 0]} receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
@@ -143,47 +126,19 @@ function ComplexFallback({ groupColor, isNight, isSunset }: FallbackProps): Reac
         <meshStandardMaterial color={groupColor} roughness={0.3} metalness={0.3} envMapIntensity={1.0} />
       </RoundedBox>
       <RoundedBox args={[0.3, 0.12, 0.02]} radius={0.006} smoothness={2} position={[0, 0.07, 0.252]} castShadow receiveShadow>
-        <meshPhysicalMaterial
-          color="#0284C7"
-          roughness={0.04}
-          metalness={0.85}
-          ior={1.52}
-          reflectivity={0.9}
-          clearcoat={1.0}
-          clearcoatRoughness={0.02}
-          envMapIntensity={1.8}
-          emissive="#38BDF8"
-          emissiveIntensity={isNight ? 0.45 : isSunset ? 0.25 : 0.0}
-        />
+        <meshPhysicalMaterial color="#0284C7" roughness={0.04} metalness={0.85} ior={1.52} reflectivity={0.9} clearcoat={1.0} clearcoatRoughness={0.02} envMapIntensity={1.8} emissive="#38BDF8" emissiveIntensity={glow} />
       </RoundedBox>
       <RoundedBox args={[0.34, 0.02, 0.07]} radius={0.005} smoothness={2} position={[0, 0.14, 0.28]} castShadow>
         <meshStandardMaterial color="#F8FAFC" roughness={0.2} metalness={0.5} envMapIntensity={1.2} />
       </RoundedBox>
       <RoundedBox args={[0.52, 0.52, 0.42]} radius={0.025} smoothness={4} position={[0, 0.42, 0]} castShadow receiveShadow>
-        <meshPhysicalMaterial
-          color="#0284C7"
-          roughness={0.04}
-          metalness={0.85}
-          ior={1.52}
-          reflectivity={0.95}
-          clearcoat={1.0}
-          clearcoatRoughness={0.02}
-          envMapIntensity={2.0}
-        />
+        <meshPhysicalMaterial color="#0284C7" roughness={0.04} metalness={0.85} ior={1.52} reflectivity={0.95} clearcoat={1.0} clearcoatRoughness={0.02} envMapIntensity={2.0} />
       </RoundedBox>
       <RoundedBox args={[0.44, 0.05, 0.01]} radius={0.004} smoothness={1} position={[0, 0.35, 0.212]}>
-        <meshStandardMaterial
-          color="#FEF08A"
-          emissive="#FDE047"
-          emissiveIntensity={isNight ? 0.45 : isSunset ? 0.25 : 0.0}
-        />
+        <meshStandardMaterial color="#FEF08A" emissive="#FDE047" emissiveIntensity={glow} />
       </RoundedBox>
       <RoundedBox args={[0.44, 0.05, 0.01]} radius={0.004} smoothness={1} position={[0, 0.49, 0.212]}>
-        <meshStandardMaterial
-          color="#38BDF8"
-          emissive="#00F5FF"
-          emissiveIntensity={isNight ? 0.45 : isSunset ? 0.25 : 0.0}
-        />
+        <meshStandardMaterial color="#38BDF8" emissive="#00F5FF" emissiveIntensity={glow} />
       </RoundedBox>
       {[0.28, 0.42, 0.56].map((ly, idx) => (
         <RoundedBox key={`louver-${idx}`} args={[0.54, 0.018, 0.44]} radius={0.004} smoothness={2} position={[0, ly, 0]} castShadow>
@@ -191,11 +146,7 @@ function ComplexFallback({ groupColor, isNight, isSunset }: FallbackProps): Reac
         </RoundedBox>
       ))}
       <RoundedBox args={[0.53, 0.015, 0.43]} radius={0.003} smoothness={1} position={[0, 0.69, 0]}>
-        <meshStandardMaterial
-          color="#38BDF8"
-          emissive="#00F5FF"
-          emissiveIntensity={isNight ? 0.45 : isSunset ? 0.25 : 0.0}
-        />
+        <meshStandardMaterial color="#38BDF8" emissive="#00F5FF" emissiveIntensity={glow} />
       </RoundedBox>
       <RoundedBox args={[0.2, 0.1, 0.2]} radius={0.01} smoothness={2} position={[-0.08, 0.72, 0]} castShadow receiveShadow>
         <meshStandardMaterial color="#475569" roughness={0.5} envMapIntensity={0.8} />
@@ -203,116 +154,6 @@ function ComplexFallback({ groupColor, isNight, isSunset }: FallbackProps): Reac
       <mesh position={[0.1, 0.74, 0]} castShadow>
         <cylinderGeometry args={[0.007, 0.012, 0.18, 6]} />
         <meshStandardMaterial color="#94A3B8" metalness={0.9} roughness={0.2} envMapIntensity={1.8} />
-      </mesh>
-    </group>
-  );
-}
-
-interface LandmarkFallbackProps extends Omit<FallbackProps, 'groupColor'> {
-  readonly crownRef?: React.RefObject<Mesh | null>;
-}
-
-/**
- * Cấp 3 Fallback: Quần Thể Landmark Hoàng Kim
- */
-function LandmarkFallback({ isNight, isSunset, crownRef }: LandmarkFallbackProps): React.ReactElement {
-  return (
-    <group>
-      <mesh position={[0, 0.002, 0]} receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[0.68, 0.56]} />
-        <meshBasicMaterial color="#0F172A" transparent opacity={0.42} />
-      </mesh>
-      <RoundedBox args={[0.62, 0.06, 0.5]} radius={0.015} smoothness={3} position={[0, 0.03, 0]} castShadow receiveShadow>
-        <meshStandardMaterial color="#1E293B" roughness={0.25} metalness={0.3} envMapIntensity={1.2} />
-      </RoundedBox>
-      <RoundedBox args={[0.24, 0.52, 0.36]} radius={0.02} smoothness={3} position={[-0.14, 0.32, 0]} castShadow receiveShadow>
-        <meshStandardMaterial color="#FEF3C7" roughness={0.25} metalness={0.3} envMapIntensity={1.4} />
-      </RoundedBox>
-      <RoundedBox args={[0.18, 0.42, 0.01]} radius={0.005} smoothness={2} position={[-0.14, 0.32, 0.185]}>
-        <meshPhysicalMaterial
-          color="#0284C7"
-          roughness={0.04}
-          metalness={0.85}
-          ior={1.52}
-          reflectivity={0.9}
-          clearcoat={1.0}
-          clearcoatRoughness={0.02}
-          envMapIntensity={1.8}
-          emissive="#38BDF8"
-          emissiveIntensity={isNight ? 0.45 : isSunset ? 0.25 : 0.0}
-        />
-      </RoundedBox>
-      <RoundedBox args={[0.22, 0.03, 0.34]} radius={0.008} smoothness={2} position={[-0.14, 0.6, 0]} castShadow>
-        <meshStandardMaterial
-          color="#F59E0B"
-          roughness={0.1}
-          metalness={0.95}
-          envMapIntensity={2.0}
-          emissive="#F59E0B"
-          emissiveIntensity={isNight ? 0.45 : isSunset ? 0.25 : 0.0}
-        />
-      </RoundedBox>
-      <RoundedBox args={[0.24, 0.72, 0.36]} radius={0.02} smoothness={3} position={[0.14, 0.42, 0]} castShadow receiveShadow>
-        <meshStandardMaterial color="#FDE68A" roughness={0.2} metalness={0.4} envMapIntensity={1.5} />
-      </RoundedBox>
-      <RoundedBox args={[0.18, 0.58, 0.01]} radius={0.005} smoothness={2} position={[0.14, 0.42, 0.185]}>
-        <meshPhysicalMaterial
-          color="#0284C7"
-          roughness={0.04}
-          metalness={0.85}
-          ior={1.52}
-          reflectivity={0.9}
-          clearcoat={1.0}
-          clearcoatRoughness={0.02}
-          envMapIntensity={1.8}
-          emissive="#38BDF8"
-          emissiveIntensity={isNight ? 0.45 : isSunset ? 0.25 : 0.0}
-        />
-      </RoundedBox>
-      <RoundedBox args={[0.1, 0.06, 0.16]} radius={0.008} smoothness={2} position={[0, 0.38, 0]} castShadow receiveShadow>
-        <meshPhysicalMaterial
-          color="#38BDF8"
-          roughness={0.04}
-          metalness={0.8}
-          ior={1.52}
-          clearcoat={1.0}
-          envMapIntensity={2.0}
-          emissive="#00F5FF"
-          emissiveIntensity={isNight ? 0.45 : isSunset ? 0.25 : 0.0}
-        />
-      </RoundedBox>
-      <RoundedBox args={[0.12, 0.015, 0.18]} radius={0.004} smoothness={2} position={[0, 0.42, 0]} castShadow>
-        <meshStandardMaterial
-          color="#F59E0B"
-          roughness={0.1}
-          metalness={0.95}
-          envMapIntensity={2.0}
-          emissive="#F59E0B"
-          emissiveIntensity={isNight ? 0.45 : 0.0}
-        />
-      </RoundedBox>
-      <mesh position={[0.262, 0.42, 0.182]}>
-        <boxGeometry args={[0.008, 0.68, 0.008]} />
-        <meshStandardMaterial
-          color="#F59E0B"
-          emissive="#F59E0B"
-          emissiveIntensity={isNight ? 0.45 : isSunset ? 0.25 : 0.0}
-        />
-      </mesh>
-      <mesh ref={crownRef} position={[0.14, 0.84, 0]} rotation={[0, Math.PI / 4, 0]} castShadow>
-        <cylinderGeometry args={[0, 0.18, 0.16, 4]} />
-        <meshStandardMaterial
-          color="#F59E0B"
-          roughness={0.06}
-          metalness={0.98}
-          envMapIntensity={2.2}
-          emissive="#F59E0B"
-          emissiveIntensity={isNight ? 0.45 : isSunset ? 0.25 : 0.0}
-        />
-      </mesh>
-      <mesh position={[0.14, 0.94, 0]} castShadow>
-        <cylinderGeometry args={[0.005, 0.012, 0.12, 6]} />
-        <meshStandardMaterial color="#FBBF24" roughness={0.08} metalness={1.0} envMapIntensity={2.0} />
       </mesh>
     </group>
   );
@@ -328,7 +169,7 @@ export function ProceduralBuilding({
   showEmptyPlotBoundary = false,
 }: ProceduralBuildingProps): React.ReactElement {
   const rootGroupRef = useRef<Group>(null);
-  const crownRef = useRef<Mesh>(null);
+  const crownRef = useRef<Group>(null);
   const wasSlammingRef = useRef<boolean>(false);
   const phase = useEnvironmentStore((s) => s.phase);
   const isNight = phase === 'night';
@@ -383,13 +224,57 @@ export function ProceduralBuilding({
       rotation={lotTransform.rotation}
       scale={lotTransform.scale}
     >
+      {level === 3 && (
+        <>
+          {/* 1. Mỏ neo vương miện: Khối bảo ngọc giác cắt đa diện tự xoay */}
+          <group ref={crownRef} data-testid="landmark-crown" position={[0, 1.05, 0]}>
+            <RoundedBox
+              args={[0.12, 0.12, 0.12]}
+              radius={0.025}
+              smoothness={4}
+              rotation={[Math.PI / 4, Math.PI / 4, 0]}
+              castShadow
+              data-testid="landmark-crown-jewel"
+            >
+              <meshPhysicalMaterial
+                color="#F59E0B"
+                metalness={0.98}
+                roughness={0.08}
+                clearcoat={1.0}
+                envMapIntensity={2.5}
+                emissive="#F59E0B"
+                emissiveIntensity={isNight ? 0.6 : 0.25}
+              />
+            </RoundedBox>
+          </group>
+
+          {/* 2. Mỏ neo chân đế: Đai bo góc mạ vàng hoàng kim */}
+          <RoundedBox
+            args={[0.57, 0.02, 0.57]}
+            radius={0.012}
+            smoothness={3}
+            position={[0, 0.01, 0]}
+            castShadow
+            receiveShadow
+          >
+            <meshStandardMaterial color="#F59E0B" metalness={0.95} roughness={0.15} envMapIntensity={2.0} />
+          </RoundedBox>
+        </>
+      )}
       <SafeGLTFModel
         url={modelUrl}
         fallback={
           <>
             {level === 1 && <ShophouseFallback groupColor={groupColor} isNight={isNight} isSunset={isSunset} />}
             {level === 2 && <ComplexFallback groupColor={groupColor} isNight={isNight} isSunset={isSunset} />}
-            {level === 3 && <LandmarkFallback isNight={isNight} isSunset={isSunset} crownRef={crownRef} />}
+            {level === 3 && (
+              <BespokeLandmarkFallback
+                cellIndex={cellIndex ?? 0}
+                typology={getRegionalTypology(cellIndex ?? 0) ?? 'metropolis'}
+                isNight={isNight}
+                isSunset={isSunset}
+              />
+            )}
           </>
         }
         position={[0, 0, 0]}

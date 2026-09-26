@@ -218,14 +218,14 @@ describe('[TC-65/MSS][IMP-65] Building Scale, Corner Clearance & Typologies Suit
   );
 
   it.each([
-    [1, 1, '/models/buildings/bld_riverine_c1.glb'],
-    [1, 2, '/models/buildings/bld_riverine_c2.glb'],
-    [1, 3, '/models/buildings/bld_riverine_c3.glb'],
-    [9, 1, '/models/buildings/bld_resort_c1.glb'],
-    [18, 2, '/models/buildings/bld_heritage_c2.glb'],
-    [39, 3, '/models/buildings/bld_metropolis_c3.glb'],
+    [1, 1, '/models/buildings/building_c1.glb'],
+    [1, 2, '/models/buildings/building_c2.glb'],
+    [1, 3, '/models/landmarks/bld_c3_cell_1.glb'],
+    [9, 1, '/models/buildings/building_c1.glb'],
+    [18, 2, '/models/buildings/building_c2.glb'],
+    [39, 3, '/models/landmarks/bld_c3_cell_39.glb'],
   ] as const)(
-    '[TC-65.18/MSS][IMP-65] Resolves GLB URL for cell %i level %i to %s',
+    '[TC-65.18/MSS][IMP-65] Resolves standardized GLB URL for cell %i level %i to %s',
     async (cellIndex, level, expectedUrl) => {
       const mod = await loadTypologyModule();
       expect(mod.getBuildingModelUrl(cellIndex, level)).toBe(expectedUrl);

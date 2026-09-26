@@ -17,8 +17,8 @@ import { CompulsoryBuyoutModal } from './compulsory_buyout_modal';
 import { AudioEngine } from '../../audio/audio_engine';
 import { SoundEffect } from '../../audio/audio_types';
 import type { PlayerIntent } from '../../../server/intent_dispatcher';
-import { getDeedDisplayInfo, isAuctionDismissible } from './modal_helpers';
-import { BOARD_CONFIG } from '../../../domain/board_config';
+import { isAuctionDismissible } from './modal_helpers';
+import { resolveTitleDeedModalState } from './title_deed_affordance';
 import { useLobbyStore } from '../../store/lobby_store';
 
 export interface ModalHostProps {
@@ -119,65 +119,37 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
     >
       {activeModal === 'deed' && (() => {
         const payload = modalPayload as ModalPayloadMap['deed'];
-        const ownerId = Object.keys(playersInfo).find((id) => playersInfo[id]?.ownedProperties?.includes(payload.cellIndex));
-        const owner = ownerId ? playersInfo[ownerId] : undefined;
-        const isOwner = ownerId === myId;
-        const isMortgaged = Boolean(owner?.mortgagedProperties?.includes(payload.cellIndex));
-        const deed = getDeedDisplayInfo(payload.cellIndex);
-        const currentLevel = (useGameStore.getState().levelMap[payload.cellIndex] ?? 0) as 0 | 1 | 2 | 3;
-        const upgradeCost = deed && currentLevel < 3 ? deed.upgradeCosts[currentLevel as 0 | 1 | 2] : 0;
-
-        // Monopoly & Even-building calculation
-        const colorGroup = deed?.colorGroup;
-        const groupCells = colorGroup ? BOARD_CONFIG.filter((c) => c.colorGroup === colorGroup).map((c) => c.index) : [];
-        const hasAllProperties = Boolean(owner && groupCells.length > 0 && groupCells.every((idx) => owner.ownedProperties?.includes(idx)));
-        const hasAnyGroupMortgaged = Boolean(owner && groupCells.some((idx) => owner.mortgagedProperties?.includes(idx)));
-        const hasMonopoly = hasAllProperties && !hasAnyGroupMortgaged;
-
-        let upgradeBlockedReason: string | undefined = undefined;
-        if (isOwner && deed && !isMortgaged) {
-          if (!hasAllProperties) {
-            upgradeBlockedReason = 'Cần sở hữu trọn bộ màu trước khi nâng cấp';
-          } else if (hasAnyGroupMortgaged) {
-            upgradeBlockedReason = 'Không thể nâng cấp khi nhóm có ô thế chấp';
-          } else if (currentLevel < 3 && groupCells.length > 0) {
-            const levelMap = useGameStore.getState().levelMap;
-            const targetLevel = currentLevel + 1;
-            const laggingCells = groupCells
-              .filter((idx) => idx !== payload.cellIndex)
-              .filter((idx) => (levelMap[idx] ?? 0) < targetLevel - 1);
-            if (laggingCells.length > 0) {
-              const names = laggingCells.map((idx) => BOARD_CONFIG[idx]?.name ?? `Ô ${idx}`).join(', ');
-              upgradeBlockedReason = `Quy tắc xây dựng đều tay: Cần nâng cấp ${names} lên C${targetLevel - 1} trước khi xây C${targetLevel}`;
-            }
-          }
-        }
-
-        let downgradeBlockedReason: string | undefined = undefined;
-        if (isOwner && !isMortgaged && (currentLevel ?? 0) > 0 && groupCells.length > 0) {
-          const levelMap = useGameStore.getState().levelMap;
-          const higherCells = groupCells
-            .filter((idx) => idx !== payload.cellIndex)
-            .filter((idx) => (levelMap[idx] ?? 0) > (currentLevel ?? 0));
-          if (higherCells.length > 0) {
-            const names = higherCells.map((idx) => BOARD_CONFIG[idx]?.name ?? `Ô ${idx}`).join(', ');
-            downgradeBlockedReason = `Quy tắc hạ cấp đều tay: Cần hạ cấp ${names} trước khi hạ tiếp ô này`;
-          }
-        }
+        const deedState = resolveTitleDeedModalState({
+          cellIndex: payload.cellIndex,
+          canBuyOverride: payload.canBuy,
+          isBuyOpportunityOverride: payload.isBuyOpportunity,
+          myId,
+          myPlayer,
+          playersInfo,
+          levelMap: useGameStore.getState().levelMap,
+          activeModifiers: useGameStore.getState().activeModifiers,
+          turnPhase: useGameStore.getState().turnPhase,
+          currentTurnPlayerId: useGameStore.getState().currentTurnPlayerId,
+        });
 
         return (
           <TitleDeedModal
             cellIndex={payload.cellIndex}
-            canBuy={payload.canBuy ?? (!owner && myPlayer ? myPlayer.balance >= 600 : true)}
-            isOwned={Boolean(owner)}
-            isOwner={isOwner}
-            isMortgaged={isMortgaged}
-            ownerName={owner?.name}
-            currentLevel={currentLevel}
-            upgradeCost={upgradeCost}
-            hasMonopoly={hasMonopoly}
-            upgradeBlockedReason={upgradeBlockedReason}
-            downgradeBlockedReason={downgradeBlockedReason}
+            canBuy={deedState.canBuy}
+            isBuyOpportunity={deedState.isBuyOpportunity}
+            shortfall={deedState.shortfall}
+            canCoverWithMortgage={deedState.canCoverWithMortgage}
+            totalMortgageCapacity={deedState.totalMortgageCapacity}
+            onOpenMortgage={() => useGameStore.getState().openModal('portfolio', { playerId: myId, targetPurchaseCellIndex: payload.cellIndex })}
+            isOwned={Boolean(deedState.owner)}
+            isOwner={deedState.isOwner}
+            isMortgaged={deedState.isMortgaged}
+            ownerName={deedState.ownerName}
+            currentLevel={deedState.currentLevel}
+            upgradeCost={deedState.upgradeCost}
+            hasMonopoly={deedState.hasMonopoly}
+            upgradeBlockedReason={deedState.upgradeBlockedReason}
+            downgradeBlockedReason={deedState.downgradeBlockedReason}
             buyerBalance={myPlayer?.balance ?? 0}
             buyerId={myId}
             allPlayers={playersInfo}

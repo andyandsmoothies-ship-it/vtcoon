@@ -7,7 +7,12 @@
 
 ## MỤC LỤC
 1. [TRIẾT LÝ: Harness Engineering, Terminal Engine & Universal Visual UI/UX Governance](#1-triết-lý-harness-engineering-terminal-engine--universal-visual-uiux-governance)
-2. [KIẾN TRÚC BỘ NHỚ PHÂN CẤP 3 TẦNG (Lean Indexed Memory)](#2-kiến-trúc-bộ-nhớ-phân-cấp-3-tầng-lean-indexed-memory)
+2. [KIẾN TRÚC BỘ NHỚ PHÂN CẤP 5 TẦNG & MÔ HÌNH ĐỊNH TUYẾN TRI THỨC (The 5-Layer Knowledge Routing & Context Deflation Architecture)](#2-kiến-trúc-bộ-nhớ-phân-cấp-5-tầng--mô-hình-định-tuyến-tri-thức-the-5-layer-knowledge-routing--context-deflation-architecture)
+   - [2.1 Bệnh Phình To Quy Tắc (The "Rule Bloat" & Instruction Dilution Syndrome)](#21-bệnh-phình-to-quy-tắc-the-rule-bloat--instruction-dilution-syndrome)
+   - [2.2 Bản Đồ 5 Cấp Định Tuyến Tri Thức (The 5-Layer Knowledge Routing Matrix)](#22-bản-đồ-5-cấp-định-tuyến-tri-thức-the-5-layer-knowledge-routing-matrix)
+   - [2.3 Quy Trình 4 Bước Định Tuyến Khi Phát Hiện Lỗi/Sai Sót (Defect-to-Layer Routing Protocol)](#23-quy-trình-4-bước-định-tuyến-khi-phát-hiện-lỗisai-sót-defect-to-layer-routing-protocol)
+   - [2.4 Quy Trình "Giảm Cân" & Nén Context Định Kỳ (Periodic Context Deflation & Compaction Routine)](#24-quy-trình-giảm-cân--nén-context-định-kỳ-periodic-context-deflation--compaction-routine)
+   - [2.5 Minh Họa Thực Chiến Từ Dự Án VTCOON (Case Study: Deflation & LOC Tooling)](#25-minh-họa-thực-chiến-từ-dự-án-vtcoon-case-study-deflation--loc-tooling)
 3. [CƠ CHẾ KỸ NĂNG HẠT GIỐNG (Seed Skill & JIT Dispatcher)](#3-cơ-chế-kỹ-năng-hạt-giống-seed-skill--jit-dispatcher)
 4. [SƠ ĐỒ DÒNG CHẢY KẾT HỢP CÁC KỸ NĂNG (The Artifact Pipeline)](#4-sơ-đồ-dòng-chảy-kết-hợp-các-kỹ-năng-the-artifact-pipeline)
 5. [HỆ THỐNG TRUY XUẤT NGUỒN GỐC ARTIFACTS (3-Bucket Taxonomy, 4D ADR & Universal design.md)](#5-hệ-thống-truy-xuất-nguồn-gốc-artifacts-3-bucket-taxonomy-4d-adr--universal-designmd)
@@ -344,36 +349,145 @@
 │       • Quy chuẩn Gotchas 3 tầng: Bất biến chỉ ghi sau khi đã qua kiểm chứng vật lý đa vòng (Sweeping audit + full tests pass):
 │         (1) Initial deceptive trap (Bẫy ảo tưởng ban đầu) ➔ (2) Physical finding (Phát hiện thực tế trên đĩa) ➔ (3) Verified invariant (Bất biến được xác minh).
 │
-└── 31. TRA CỨU TÀI LIỆU NGOẠI VI BẮT BUỘC (CONTEXT7 DOCUMENTATION LOOKUP):
-        • Bắt buộc dùng Context7 MCP (`resolve-library-id` -> `query-docs`) khi lập trình với thư viện/framework bên ngoài (React 19, Three.js/R3F, Tailwind v4, Flutter, ORM...).
-        • Nghiêm cấm dùng Context7 cho logic nghiệp vụ nội bộ của dự án.
+├── 31. TRA CỨU TÀI LIỆU NGOẠI VI BẮT BUỘC (CONTEXT7 DOCUMENTATION LOOKUP):
+│       • Bắt buộc dùng Context7 MCP (`resolve-library-id` -> `query-docs`) khi lập trình với thư viện/framework bên ngoài (React 19, Three.js/R3F, Tailwind v4, Flutter, ORM...).
+│       • Nghiêm cấm dùng Context7 cho logic nghiệp vụ nội bộ của dự án.
+│
+└── 32. MÔ HÌNH ĐỊNH TUYẾN TRI THỨC 5 CẤP & CHIẾN LƯỢC NÉN CONTEXT CHỐNG PHÌNH TO QUY TẮC (THE 5-LAYER KNOWLEDGE ROUTING & CONTEXT DEFLATION MATRIX):
+        • Phân định triệt để nơi cư trú của tri thức dự án theo 5 cấp độ để chống "Rule Fatigue", Instruction Dilution và bão hòa context:
+          - Layer 1 (Machine Guards - 0 Token): Trình biên dịch TypeScript, Linter AST (`check_loc`, `lint_ui`, `lint_slop`), Git hooks (`use_case_guard`).
+          - Layer 2 (Subagent Personas - Ngữ cảnh cô lập): Persona chuyên trách (`plan-griller`, `ui-craft-reviewer`, `scout`, `qa-tester`, `implementer`).
+          - Layer 3 (JIT Skills - Nạp động khi cần): Bộ kỹ năng chuyên biệt trong `.agents/skills/*` (`impeccable`, `atdd-quality-gates`, `threejs-*`).
+          - Layer 4 (Static Domain Reference - Tra cứu theo công cụ): `docs/domain/*`, `gotchas_archive.md`, `entity_model.md`, `design.md`.
+          - Layer 5 (Minimal Constitution - Hiến pháp tối thiểu): `GEMINI.md` lõi (<80 dòng) chỉ giữ rào chắn sinh tử và con trỏ chỉ mục.
+        • Nguyên tắc điều hướng khi phát hiện sai sót: Luôn ưu tiên đẩy xuống tầng thấp nhất có thể (Layer 1 ➔ Layer 2/3 ➔ Layer 4 ➔ Layer 5).
+          Tuyệt đối không nhồi nhét mọi quy tắc vào Global/Project Rule hay Persona.
 ```
 
 
 ---
 
-## 2. KIẾN TRÚC BỘ NHỚ PHÂN CẤP 3 TẦNG (Lean Indexed Memory)
+## 2. KIẾN TRÚC BỘ NHỚ PHÂN CẤP 5 TẦNG & MÔ HÌNH ĐỊNH TUYẾN TRI THỨC (The 5-Layer Knowledge Routing & Context Deflation Architecture)
 
-*(Giải quyết triệt để bài toán: Không làm phình to file Rule, chống hiện tượng "Rule Fatigue" và loạn ngữ cảnh).*
+*(Giải quyết triệt để bài toán: Không làm phình to file Rule, chống hiện tượng "Rule Fatigue", Instruction Dilution và bão hòa ngữ cảnh).*
+
+### 2.1 BỆNH PHÌNH TO QUY TẮC (The "Rule Bloat" & Instruction Dilution Syndrome)
+
+Trong các dự án AI-native kéo dài qua nhiều tuần và nhiều chục tickets, một phản xạ tự nhiên của kỹ sư là: **"Mỗi khi AI làm sai điều gì, lập tức paste thêm một điều luật vào file rule hoặc prompt của subagent."**
+
+Hậu quả tai hại của căn bệnh phình to quy tắc này gồm 4 căn nguyên:
+1. **Instruction Dilution (Loãng chỉ thị)**: Khi mọi thứ đều được đánh dấu là "BẮT BUỘC / NGHIÊM CẤM" trong một văn bản dài hàng trăm dòng, mô hình LLM sẽ gặp hiện tượng "Lost in the Middle" và bắt đầu bỏ qua các quy tắc cốt tử nhất (như Zero-Git, Atomic Edits).
+2. **Token Tax (Thuế Token thường trực)**: Mỗi một lượt gọi (turn) của Agent chính hoặc mỗi lần spawn Subagent đều phải gánh toàn bộ chi phí token đọc đi đọc lại hàng nghìn từ quy tắc, dù 95% trong số đó hoàn toàn không liên quan đến tác vụ đang thực thi.
+3. **Context Saturation (Bão hòa ngữ cảnh)**: Tiêu tốn vô ích không gian cửa sổ ngữ cảnh quý giá (Context Window), làm giảm dung lượng dành cho diff mã nguồn thực tế, compiler logs và suy luận logic sâu.
+4. **Negative Transfer & Fragility (Xung đột quy tắc chéo)**: Một quy tắc được viết quá chi tiết để vá lỗi cho một edge case của Ticket A có thể vô tình trói buộc và làm gãy thiết kế tối ưu của Ticket B.
+
+**Triết lý cốt lõi của Kiến trúc 5 Cấp**: *Không phải tri thức nào cũng được sinh ra bình đẳng. Tri thức phải cư trú tại đúng nơi có chi phí token thấp nhất và hiệu lực cưỡng chế cao nhất.*
 
 ```text
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
-│               TẦNG 1: NHÂN LÕI BẤT BIẾN (LEAN KERNEL - DƯỚI 80 DÒNG)                   │
-│               File: `%USERPROFILE%\.gemini\gemini.md` (Global) & Project `GEMINI.md`   │
-│               • Rào chắn sinh tử: Cấm git commit, Atomic Edit, Universal UI Governance │
-│               • Hoạt động như BẢNG CON TRỎ CHỈ MỤC (Index Pointers) dẫn link đến Tầng 2│
-└───────────────────────────────────┬────────────────────────────────────────────────────┘
-                                    │
-    ┌───────────────────────────────┴───────────────────────────────┐
-    ▼                                                               ▼
-[TẦNG 2: CHỈ MỤC ĐỘNG & SỔ CÁI]                     [TẦNG 3: GIÀN GIÁO KỸ THUẬT (HARNESS)]
-(Chỉ nạp đúng lúc khi cần - JIT)                    (Đóng gói độc lập vào Skills & Subagents)
-• `docs/epics/[epic]/_epic_ledger.md`: Sổ cái tiến độ  • `use-case-creator`: Vét cạn Extensions
-• `docs/domain/CONTEXT.md`: Từ điển thuật ngữ       • `implementer.md`: TDD + Atomic Edit (Branch)
-• `docs/domain/adr/`: Quyết định kiến trúc & 4D     • `code-reviewer.md`: Quét 6 Cờ Đỏ & UI Audit
-• `docs/domain/design.md`: Quản trị Visual UI/UX    • `google/skills`: Nạp động giữa phiên
-• `skill-dispatcher`: Nạp skill con khi cần         
+│                        THÁP ĐỊNH TUYẾN TRI THỨC 5 CẤP (KNOWLEDGE PYRAMID)               │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+
+ [LAYER 5: HIẾN PHÁP TỐI THIỂU]        <─── Chi phí: Cố định (~50-80 dòng). Rào chắn sinh tử.
+ 📁 GEMINI.md & ~/.gemini/gemini.md          (Zero-Git, 3 Trạm, LOC Budgets, Con trỏ chỉ mục)
+             ▲
+             │ (Chỉ ghi bất biến nghiệp vụ chắt lọc)
+ [LAYER 4: TÀI LIỆU DOMAIN THỤ ĐỘNG]   <─── Chi phí: 0 Token nền. Đọc thụ động qua view_file.
+ 📁 docs/domain/*, gotchas_archive.md        (Data dictionary, Entity models, Gotchas lịch sử)
+             ▲
+             │ (Nạp theo nhu cầu chuyên môn)
+ [LAYER 3: JIT SKILLS ĐỘNG]            <─── Chi phí: Động (JIT). Nạp khi làm tính năng liên quan.
+ 📁 .agents/skills/<skill>/SKILL.md          (Impeccable, Three.js shaders, ATDD Quality Gates)
+             ▲
+             │ (Cô lập trong phiên của subagent)
+ [LAYER 2: PERSONA CỦA SUBAGENTS]       <─── Chi phí: Cô lập (Chỉ subagent đó đọc khi chạy).
+ 📁 .agents/agents/*.md                     (plan-griller, ui-craft-reviewer, scout, qa-tester)
+             ▲
+             │ (ƯU TIÊN TUYỆT ĐỐI: CHUYỂN HÓA THÀNH MÃ MÁY ĐỌC)
+ [LAYER 1: MACHINE GUARDS & HARNESS]   <─── Chi phí: 0 TOKEN! Cưỡng chế cơ học tất định 100%.
+ ⚙️ scripts/check_loc.mjs, lint_ui.mjs,       (Compiler, Linters AST, Git Hooks, Contract Tests)
+    lint_slop.mjs, tsc, vitest contract
 ```
+
+---
+
+### 2.2 BẢN ĐỒ 5 CẤP ĐỊNH TUYẾN TRI THỨC (The 5-Layer Knowledge Routing Matrix)
+
+| Cấp Độ (Layer) | Vị Trí Vật Lý Trên Đĩa | Chi Phí Token | Cơ Chế Cưỡng Chế (Enforcement) | Khi Nào Sử Dụng? |
+| :--- | :--- | :--- | :--- | :--- |
+| **Layer 1: Machine Guards** | `scripts/*.mjs`, `package.json`, Git hooks, Linter AST, Test suites | **0 Token** (Nằm ngoài prompt) | **100% Tất Định Cơ Học** (Compiler/Linter/Exit Code ngăn chặn lập tức trong 0.1s) | Bất kỳ quy tắc nào có thể kiểm tra bằng Regex, AST, TypeScript types, LOC count, hoặc Test assertion. |
+| **Layer 2: Subagent Personas** | `.agents/agents/*.md` (`plan-griller.md`, `ui-craft-reviewer.md`, v.v.) | **Cô lập** (Chỉ tốn token khi subagent đó được kích hoạt; Main Context sạch 100%) | **Phán Quyết Cổng Chuyên Môn** (Review Gate: Pass / Revise / Ship) | Tiêu chí đánh giá, checklist phản biện, góc nhìn thẩm mỹ hoặc kiến trúc chỉ thuộc về một vai trò cụ thể. |
+| **Layer 3: JIT Skills** | `.agents/skills/<name>/SKILL.md` (Seed & Dynamic Skills) | **Nạp Theo Nhu Cầu** (Chỉ nạp vào context khi chạm đến domain đó) | **Quy Trình & Mẫu Thực Thi** (Procedural Guiding / Recipes) | Quy trình nhiều bước, tri thức nghiệp vụ sâu về một công nghệ (Three.js, Canvas, Accessibility, Responsive). |
+| **Layer 4: Static Domain Reference** | `docs/domain/*.md`, `docs/domain/gotchas_archive.md`, ADRs | **0 Token Nền** (Chỉ tốn token khi Agent gọi `view_file` tra cứu) | **Tra Cứu Sự Thật Độc Quyền** (SSOT Domain Fact Lookup) | Thuật ngữ nghiệp vụ, mô hình dữ liệu (Title deeds, FSM states), kho lưu trữ gotchas lịch sử (#1 đến #N). |
+| **Layer 5: Minimal Constitution** | `./GEMINI.md` (Project) & `~/.gemini/gemini.md` (Global) | **Thường Trực Toàn Phiên** (Gắn vào mọi turn của Agent) | **Rào Chắn Sinh Tử** (Existential Harness & Hard Boundaries) | DUY NHẤT các rào chắn sinh tử (No-Git, 3-Station Pipeline, Trần LOC Tiers, Con trỏ liên kết đến Layer 4). |
+
+---
+
+### 2.3 QUY TRÌNH 4 BƯỚC ĐỊNH TUYẾN KHI PHÁT HIỆN LỖI/SAI SÓT (Defect-to-Layer Routing Protocol)
+
+Mỗi khi phát hiện một lỗi sai, một hành vi ngoài ý muốn, hoặc một phản hồi phê duyệt từ người dùng, **tuyệt đối không mở `GEMINI.md` để append thêm text**. Thay vào đó, chạy quy trình sàng lọc 4 bước sau:
+
+```text
+[PHÁT HIỆN SAI SÓT HOẶC BÀI HỌC MỚI]
+                │
+                ▼
+┌───────────────────────────────────────────────┐
+│ BƯỚC 1: CÓ THỂ BIẾN THÀNH MACHINE CHECK KHÔNG? │
+│ (Types, AST Regex, Script đo lường, Test?)   │
+└───────┬───────────────────────────────┬───────┘
+        │ CÓ                            │ KHÔNG
+        ▼                               ▼
+[ĐẨY VÀO LAYER 1: MACHINE GUARDS]       ┌───────────────────────────────────────────────┐
+• Viết Contract Test (TDD RED)          │ BƯỚC 2: CÓ THUỘC VỀ VAI TRÒ CHUYÊN TRÁCH NÀO? │
+• Bổ sung rule vào scripts/lint_ui.mjs  │ (Thẩm định kế hoạch, Thẩm mỹ UI, Rà soát code)│
+• Bổ sung rule vào scripts/check_loc.mjs└───────┬───────────────────────────────┬───────┘
+• Sửa TypeScript Type/Interface                 │ CÓ                            │ KHÔNG
+                                                ▼                               ▼
+                                        [ĐẨY VÀO LAYER 2: SUBAGENT PERSONA]    ┌───────────────────────────────────────────────┐
+                                        • Cập nhật .agents/agents/plan-griller │ BƯỚC 3: CÓ PHẢI BÍ QUYẾT KỸ THUẬT TÁI SỬ DỤNG?│
+                                        • Cập nhật .agents/agents/ui-craft-rev │ (Công thức CSS, animation, mẫu TDD chuyên sâu)│
+                                                                               └───────┬───────────────────────────────┬───────┘
+                                                                                       │ CÓ                            │ KHÔNG
+                                                                                       ▼                               ▼
+                                                                               [ĐẨY VÀO LAYER 3: JIT SKILL]            ┌───────────────────────────────────────────────┐
+                                                                               • Bổ sung mục vào .agents/skills/      │ BƯỚC 4: LÀ BẤT BIẾN NGHIỆP VỤ HAY SỰ THẬT DOMAIN?│
+                                                                                 impeccable/SKILL.md, threejs, v.v.    │ (Luật chơi, dòng tiền, reset state turn N+1)  │
+                                                                                                                       └───────┬───────────────────────────────┬───────┘
+                                                                                                                               │ CÓ                            │ KHÔNG (CỰC HIẾM)
+                                                                                                                               ▼                               ▼
+                                                                                                                       [ĐẨY VÀO LAYER 4: DOMAIN REFERENCE]    [ĐẨY VÀO LAYER 5: CONSTITUTION]
+                                                                                                                       • Lưu chi tiết vào gotchas_archive.md  • CHỈ KHI là rào chắn sinh tử
+                                                                                                                       • Nếu là quy luật cốt tử: nén vào      • BẮT BUỘC giữ tổng số dòng
+                                                                                                                         6 Trụ cột bất biến trong gotchas.md    của GEMINI.md dưới 80 dòng!
+```
+
+---
+
+### 2.4 QUY TRÌNH "GIẢM CÂN" & NÉN CONTEXT ĐỊNH KỲ (Periodic Context Deflation & Compaction Routine)
+
+Dự án càng chạy lâu, context nạp vào càng dễ bị "ô nhiễm" (context pollution). Định kỳ sau mỗi Epic hoặc 2-3 tính năng lớn, kích hoạt phiên **"Giảm cân & Tinh gọn ngữ cảnh"**:
+
+1. **Audit Kích Thước Vật Lý**:
+   - `GEMINI.md`: Phải <= 80 dòng. Nếu vượt quá, lập tức cắt tỉa các mô tả dài dòng thành con trỏ link (`[Tên tài liệu](file:///...)`).
+   - `docs/domain/gotchas.md`: Phải <= 100 dòng. Chỉ giữ lại các **Trụ Cột Bất Biến (Invariant Pillars)** có tính trừu tượng cao đại diện cho toàn bộ hệ thống.
+2. **Lưu Trữ Gotchas Lịch Sử (Gotchas Archival)**:
+   - Toàn bộ các ca bắt lỗi cụ thể, số hiệu chi tiết (#1, #2, ..., #289) được lưu trữ nguyên vẹn vào `docs/domain/gotchas_archive.md`. File này không bao giờ được nạp vào system prompt; Agent chỉ tìm kiếm bằng `grep_search` khi cần tra cứu tiền lệ tương tự.
+3. **Cơ Giới Hóa Reviewer Thành Machine Scripts (Mechanical Elevation)**:
+   - Bất kỳ checklist nào mà reviewer hoặc plan-griller phải lặp lại thủ công trên 3 lần (ví dụ: đếm LOC, tìm class màu xám đè lên nền màu, kiểm tra import circular) phải được lập trình hóa thành script thực thi (`scripts/*.mjs`) và gắn vào `package.json` hoặc Git Hook.
+4. **Đo Lường Bằng Công Cụ Độc Lập (Automated SLOC Baseline)**:
+   - Cấm Agent tự đếm dòng bằng mắt hoặc dùng shell redirect. Sử dụng công cụ đo lường chuẩn mực (như `npm run check:loc`) để xuất kết quả khách quan trước và sau mỗi phiên refactoring.
+
+---
+
+### 2.5 MINH HỌA THỰC CHIẾN TỪ DỰ ÁN VTCOON (Case Study: Deflation & LOC Tooling)
+
+Dự án VTCOON (Game Monopoly 3D/2D kiến trúc Server-Authoritative) là minh chứng sống động cho hiệu quả vượt bậc của Mô hình Định tuyến Tri thức 5 Cấp:
+
+| Hạng Mục | Trước Khi Nén (Bloated State) | Sau Khi Nén (Deflated Lean State) | Hiệu Quả Đạt Được |
+| :--- | :--- | :--- | :--- |
+| **`docs/domain/gotchas.md`** | 3,383 dòng (chứa 289 gotchas tích tụ qua hàng trăm commits). Gây bão hòa prompt mỗi khi Agent đọc. | **61 dòng** (Cô đọng thành **6 Trụ Cột Bất Biến**: SSOT Intent, Transient Teardown, Strict Intent Isolation, Treasury Conservation, Full-Pipeline Slice, Spatial/Touch Standards). | **Giảm 98.2% dung lượng context!** Toàn bộ 289 gotchas lịch sử được chuyển an toàn sang `gotchas_archive.md` (4,801 dòng) làm tài liệu tra cứu thụ động (Layer 4). |
+| **`GEMINI.md` (Project Rule)** | 101 dòng (chứa nhiều hướng dẫn lặp lại và chi tiết thừa). | **59 dòng** (Bao gồm: Hard Constraints, Definition of Done, NFR Baseline, và 8 Index Memory Pointers). | Nằm gọn trong ngân sách vàng <= 80 dòng (Layer 5). |
+| **Đo Lường Dòng Mã (LOC Checks)** | Agent tự đếm dòng bằng PowerShell `Measure-Object` hoặc phỏng đoán, dẫn đến sai lệch delta (báo −32 nhưng thực tế −9 do xóa và thêm code xen kẽ). | Tạo tệp `scripts/check_loc.mjs` (Layer 1) phân định rõ ràng giữa **Total Lines (Độ dài vật lý tệp)** và **Non-Empty SLOC (Dòng code thực tế)**, tự động so khớp với trần ngân sách 5 Tầng (Tier 1-5). | Triệt tiêu 100% ảo giác đếm dòng của AI trong 0.2 giây! |
 
 ---
 
@@ -1166,6 +1280,11 @@ Khi mang Antigravity 2.0 qua dự án mới, sai lầm phổ biến nhất của
 │   kiểm soát nội bộ (lint:ui, lint:slop, gate), Definition of Done, Memory Pointers     │
 └────────────────────────────────────────────────────────────────────────────────────────┘
 ```
+
+> [!TIP]
+> **Vị trí của 2 cấp luật này trong Mô Hình Định Tuyến Tri Thức 5 Cấp**:
+> Cả Global Rule và Project Rule đều đóng vai trò **Layer 5 (Hiến Pháp Tối Thiểu)**. Đây là tầng có chi phí token thường trực cao nhất vì luôn gắn vào mọi turn của Agent. Do đó, **tuyệt đối không nhét checklist review, mẹo vặt, hoặc quy tắc chi tiết vào 2 file này** (nguy cơ gây phình to quy tắc và loãng chỉ thị).
+> Hãy đọc chi tiết [Phần 2: Kiến Trúc Bộ Nhớ Phân Cấp 5 Tầng & Mô Hình Định Tuyến Tri Thức](#2-kiến-trúc-bộ-nhớ-phân-cấp-5-tầng--mô-hình-định-tuyến-tri-thức-the-5-layer-knowledge-routing--context-deflation-architecture) để biết cách định tuyến bài học và rào chắn vào đúng 4 tầng bên dưới (Layer 1: Machine Scripts, Layer 2: Subagents, Layer 3: Skills, Layer 4: Domain Docs).
 
 #### MẪU TỆP GLOBAL RULE CHUẨN DÙNG CHUNG CHO MÁY TÍNH (`%USERPROFILE%\.gemini\gemini.md`)
 Junior tạo tệp này một lần duy nhất tại thư mục người dùng cá nhân (ví dụ: `C:\Users\TenCuaBan\.gemini\gemini.md`):

@@ -108,23 +108,24 @@ export function PlayerCard({
         </div>
       )}
 
-      {/* Dòng 1 (Header): Token avatar, Tên, Badges */}
-      <div className="flex items-center justify-between gap-1.5 min-w-0">
+      {/* Dòng 1 (Header siêu gọn): Chấm màu quân cờ, Tên, Số tiền (và Tài sản ròng), Badges */}
+      <div className={`flex items-center justify-between gap-1.5 min-w-0 ${isCurrentTurn ? 'pr-12' : ''}`}>
         <div className="flex items-center gap-1.5 min-w-0 flex-1">
+          {/* Chấm màu nhận diện quân cờ trên bàn 3D (thay thế avatar cồng kềnh) */}
           <div
             data-testid={`player-pawn-badge-${player.id}`}
             data-legacy-size="w-8 h-8"
-            className="w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 border-slate-900 flex items-center justify-center text-sm sm:text-base shadow-xs shrink-0 select-none leading-none relative"
+            className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full border border-slate-900 shadow-2xs shrink-0 select-none relative"
             style={{ backgroundColor: player.tokenColor || '#38BDF8' }}
-            title={pawnConfig.name}
-            aria-label={`Linh vật: ${pawnConfig.name}`}
+            title={`${player.name} (${pawnConfig.name})`}
+            aria-label={`Màu quân cờ: ${pawnConfig.name}`}
           >
-            <span role="img" aria-hidden="true">
+            <span className="sr-only" aria-hidden="true">
               {pawnConfig.icon}
             </span>
             {Boolean(player.hand?.includes(ChanceCardId.CC_DIPLOMATIC)) && (
               <span
-                className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-amber-300 border border-slate-900 rounded-full flex items-center justify-center text-[8px] leading-none shadow-xs"
+                className="absolute -top-1.5 -right-2 text-[9px] leading-none select-none"
                 title="Giữ Thẻ Miễn Trừ Ngoại Giao"
                 aria-label="Giữ Thẻ Miễn Trừ Ngoại Giao"
               >
@@ -132,59 +133,54 @@ export function PlayerCard({
               </span>
             )}
           </div>
+
           <span
             className="text-xs sm:text-sm font-bold text-slate-900 truncate"
             title={player.name}
           >
             {formatShortPlayerName(player.name)}
           </span>
-        </div>
 
-        {/* Badges: BOT, Phá Sản, Kiểm Toán */}
-        <div className="flex items-center gap-1 shrink-0">
-          {player.isBot && (
-            <span className="px-2 py-0.5 rounded text-[9px] font-extrabold bg-cyan-100 text-cyan-900 border border-cyan-300">
-              BOT
-            </span>
-          )}
-          {player.bankrupt && (
-            <span className="px-2 py-0.5 rounded text-[9px] font-extrabold bg-rose-100 text-rose-900 border border-rose-300">
-              Phá Sản
-            </span>
-          )}
-          {player.inAudit && !player.bankrupt && (
-            <span
-              className="px-2 py-0.5 rounded text-[9px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300 flex items-center justify-center leading-none"
-              title="Kiểm Toán"
-              aria-label="Kiểm Toán"
-            >
-              <span role="img" aria-hidden="true">⚖️</span>
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Dòng 2: Dữ liệu tài chính & BĐS gọn gàng, không để trống bên phải */}
-      <div className="flex items-center justify-between gap-1 text-xs">
-        <div className="flex items-center gap-1 min-w-0">
-          <span className={`tabular-nums text-xs ${balanceColorClass}`}>
+          <span className={`tabular-nums text-xs ${balanceColorClass} shrink-0`}>
             {formatCurrency(player.balance)}
           </span>
+
           {isNegativeBalance && (
             <span
-              className="text-[9px] font-extrabold text-rose-700 bg-rose-100 border border-rose-300 px-2 py-0.5 rounded shrink-0"
+              className="text-[9px] font-extrabold text-rose-700 bg-rose-100 border border-rose-300 px-1.5 py-0.2 rounded shrink-0 leading-tight"
               title={`Thấu chi: còn ${player.overdraftRoundsLeft ?? 3} vòng`}
             >
               <span className="inline sm:hidden">Nợ {player.overdraftRoundsLeft ?? 3}v</span>
               <span className="hidden sm:inline">Thấu chi: còn {player.overdraftRoundsLeft ?? 3} vòng</span>
             </span>
           )}
-        </div>
 
-        <div className="hidden sm:flex items-center gap-1 shrink-0 pr-0.5" data-testid="player-net-worth">
-          <span className="text-[10px] text-slate-500 font-semibold tabular-nums" title="Tài sản ròng">
+          <span className="hidden sm:flex items-center text-[10px] text-slate-400 font-semibold tabular-nums shrink-0" data-testid="player-net-worth" title="Tài sản ròng">
             ({formatCurrency(netWorth)})
           </span>
+        </div>
+
+        {/* Badges: BOT, Phá Sản, Kiểm Toán */}
+        <div className="flex items-center gap-1 shrink-0">
+          {player.isBot && (
+            <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-cyan-100 text-cyan-900 border border-cyan-300">
+              BOT
+            </span>
+          )}
+          {player.bankrupt && (
+            <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-rose-100 text-rose-900 border border-rose-300">
+              Phá Sản
+            </span>
+          )}
+          {player.inAudit && !player.bankrupt && (
+            <span
+              className="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300 flex items-center justify-center leading-none"
+              title="Kiểm Toán"
+              aria-label="Kiểm Toán"
+            >
+              <span role="img" aria-hidden="true">⚖️</span>
+            </span>
+          )}
         </div>
       </div>
 

@@ -33,5 +33,13 @@ export function getBuildingModelUrl(cellIndex: number, level: 1 | 2 | 3): string
   if (!typology) {
     return null;
   }
-  return `/models/buildings/bld_${typology}_c${level}.glb`;
+  if (level === 1) return BUILDING_MODEL_URLS[1];
+  if (level === 2) return BUILDING_MODEL_URLS[2];
+  return `/models/landmarks/bld_c3_cell_${cellIndex}.glb`;
 }
+
+export {
+  LANDMARK_REGISTRY,
+  getLandmarkInfo,
+  type LandmarkEntry,
+} from './landmark_registry';

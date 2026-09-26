@@ -16,6 +16,7 @@
     "test:uat": "vitest run --config vitest.uat.config.ts",
     "lint:ui": "node scripts/lint_ui.mjs",
     "lint:slop": "node scripts/lint_slop.mjs",
+    "check:loc": "node scripts/check_loc.mjs",
     "lint:dup": "jscpd src/ --config .jscpd.json",
     "lint:assets": "node scripts/optimize_assets.mjs",
     "evidence": "node scripts/collect_evidence.mjs",

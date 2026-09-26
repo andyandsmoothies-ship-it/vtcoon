@@ -21,8 +21,18 @@ import sys
 if sys.platform == "win32":
     sys.stdout.reconfigure(encoding="utf-8")
 
-TOUCHED_FILES_LOG = ".agents/tmp/touched_files.txt"
-LAST_TARGET_FILE_LOG = ".agents/tmp/last_target_file.txt"
+def find_repo_root():
+    curr = os.path.abspath(os.path.dirname(__file__))
+    while curr and os.path.dirname(curr) != curr:
+        if os.path.exists(os.path.join(curr, "package.json")) and os.path.exists(os.path.join(curr, "scripts")):
+            return curr
+        curr = os.path.dirname(curr)
+    return os.getcwd()
+
+REPO_ROOT = find_repo_root()
+TOUCHED_FILES_LOG = os.path.join(REPO_ROOT, ".agents", "tmp", "touched_files.txt")
+LAST_TARGET_FILE_LOG = os.path.join(REPO_ROOT, ".agents", "tmp", "last_target_file.txt")
+LEGACY_TOUCHED_LOG = os.path.join(REPO_ROOT, ".agents", ".agents", "tmp", "touched_files.txt")
 
 ZONE_3_BLOCKLIST = [
     r"\bJWT\b",
@@ -238,15 +248,18 @@ def audit_file(payload: dict) -> None:
 
 def stop_gate(payload: dict) -> None:
     """Stop Hook: Verifies modified UI files conform to Impeccable craft rules before concluding."""
-    if not os.path.exists(TOUCHED_FILES_LOG):
+    touched = []
+    for log_path in [TOUCHED_FILES_LOG, LEGACY_TOUCHED_LOG]:
+        if os.path.exists(log_path):
+            try:
+                with open(log_path, "r", encoding="utf-8") as f:
+                    touched.extend([line.strip() for line in f if line.strip()])
+            except Exception:
+                pass
+
+    if not touched:
         print(json.dumps({}))
         sys.exit(0)
-
-    try:
-        with open(TOUCHED_FILES_LOG, "r", encoding="utf-8") as f:
-            touched = [line.strip() for line in f if line.strip()]
-    except Exception:
-        touched = []
 
     ui_touched = any(
         ("src/client/" in p.replace("\\", "/") or "src\\client\\" in p)
@@ -255,15 +268,20 @@ def stop_gate(payload: dict) -> None:
 
     if ui_touched:
         try:
+            lint_script = os.path.join(REPO_ROOT, "scripts", "lint_ui.mjs")
             res = subprocess.run(
-                ["node", "scripts/lint_ui.mjs"],
+                ["node", lint_script],
                 capture_output=True,
                 text=True,
+                encoding="utf-8",
+                errors="replace",
+                cwd=REPO_ROOT,
+                stdin=subprocess.DEVNULL,
             )
             if res.returncode != 0:
                 reason = (
                     "Quality Gate Check Failed: Impeccable UI craft violations detected. "
-                    f"Please fix all anti-patterns before stopping.\n{res.stdout}"
+                    f"Please fix all anti-patterns before stopping.\n{res.stdout}\n{res.stderr}"
                 )
                 print(json.dumps({"decision": "continue", "reason": reason}))
                 sys.exit(0)
@@ -271,13 +289,12 @@ def stop_gate(payload: dict) -> None:
             print(f"WARNING [Stop Gate]: Failed to execute lint_ui: {e}", file=sys.stderr)
 
     # Clean up touched files log once stop gate passes
-    try:
-        if os.path.exists(TOUCHED_FILES_LOG):
-            os.remove(TOUCHED_FILES_LOG)
-        if os.path.exists(LAST_TARGET_FILE_LOG):
-            os.remove(LAST_TARGET_FILE_LOG)
-    except Exception:
-        pass
+    for log_path in [TOUCHED_FILES_LOG, LAST_TARGET_FILE_LOG, LEGACY_TOUCHED_LOG]:
+        try:
+            if os.path.exists(log_path):
+                os.remove(log_path)
+        except Exception:
+            pass
 
     print(json.dumps({}))
     sys.exit(0)

@@ -329,7 +329,7 @@ export function resolveAdaptivePostProcessing(
 }
 
 export interface ActionDockNotice {
-  readonly type: 'insolvent' | 'audit' | 'skip_turn' | 'bot_pacing';
+  readonly type: 'insolvent' | 'audit' | 'skip_turn' | 'bot_pacing' | 'buy_opportunity';
   readonly icon: string;
   readonly desktopText: string;
   readonly mobileText: string;
@@ -346,6 +346,9 @@ export interface ActionDockNoticeParams {
   readonly hasRolledThisTurn?: boolean;
   readonly isSkippedTurn?: boolean;
   readonly botPacing?: { readonly displayText: string } | null;
+  readonly isStandingOnBuyable?: boolean;
+  readonly buyableCellName?: string;
+  readonly buyableCellPrice?: number;
 }
 
 export function resolveActionDockNotice(params: ActionDockNoticeParams): ActionDockNotice | null {
@@ -384,6 +387,17 @@ export function resolveActionDockNotice(params: ActionDockNoticeParams): ActionD
       icon: '🌪️',
       desktopText: 'Bạn bị hoãn gieo xúc xắc lượt này (Bão duyên hải / Kiểm tra cồn)',
       mobileText: 'Hoãn gieo xúc xắc lượt này',
+      tone: 'warning',
+    };
+  }
+
+  if (params.isStandingOnBuyable && params.isMyTurn) {
+    const priceText = params.buyableCellPrice ? ` (${formatCurrency(params.buyableCellPrice)})` : '';
+    return {
+      type: 'buy_opportunity',
+      icon: '🏷️',
+      desktopText: `Bạn đang ở ${params.buyableCellName ?? 'ô đất'}${priceText}: Bấm Mua Đất hoặc Cầm Cố để xoay vốn!`,
+      mobileText: `Đứng tại ${params.buyableCellName ?? 'ô đất'}: Bấm Mua Đất để chốt`,
       tone: 'warning',
     };
   }

@@ -1,5 +1,6 @@
 // [UI-S03/MSS] offline_landing.ts — Fallback landing handlers and initial lobby configuration
 import { BOARD_CONFIG, CellType } from '../domain/board_config';
+import { PROPERTY_DEEDS } from '../domain/property_data';
 import { AudioEngine } from './audio/audio_engine';
 import { SoundEffect } from './audio/audio_types';
 import { useGameStore, FloatingTextType } from './store/game_store';
@@ -100,7 +101,8 @@ export function executeCellLanding(
     );
     if (!ownerEntry) {
       if (isLocal) {
-        state.openModal('deed', { cellIndex: targetCell, canBuy: (activePlayer?.balance ?? 0) >= 600 });
+        const price = PROPERTY_DEEDS.get(targetCell)?.price ?? 0;
+        state.openModal('deed', { cellIndex: targetCell, canBuy: (activePlayer?.balance ?? 0) >= price, isBuyOpportunity: true });
       }
     } else if (ownerEntry[0] !== activeId) {
       AudioEngine.playSfx(SoundEffect.TAX_PENALTY);

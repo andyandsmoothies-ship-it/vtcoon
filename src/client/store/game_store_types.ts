@@ -106,9 +106,10 @@ export interface FloatingTextItem {
 export type ActiveModalType = 'deed' | 'portfolio' | 'auction' | 'trade' | 'event' | 'hose' | 'insolvency' | 'game_over' | 'rules' | 'masterplan' | 'bot_trade_offer' | 'compulsory_buyout' | null;
 
 export interface ModalPayloadMap {
-  deed: { cellIndex: number; canBuy?: boolean; ownedProperties?: readonly number[] };
+  deed: { cellIndex: number; canBuy?: boolean; ownedProperties?: readonly number[]; isBuyOpportunity?: boolean };
   portfolio: {
     playerId?: string;
+    targetPurchaseCellIndex?: number;
   };
   auction: {
     cellIndex: number;

@@ -46,9 +46,7 @@ function determineFromCell(state: GameState, playerId: string, currentPos: numbe
 function dispatchPawnMove(state: GameState, task: PawnMoveTask, isRolling: boolean): void {
   if (isRolling && state.setPendingPawnMove) {
     state.setPendingPawnMove({
-      playerId: task.playerId,
-      targetCell: task.targetCell,
-      fromCell: task.fromCell,
+      playerId: task.playerId, targetCell: task.targetCell, fromCell: task.fromCell,
       ...(task.isJailFlight ? { isJailFlight: true, isBot: Boolean(task.isBot) } : {}),
     });
   } else if (state.enqueuePawnMove) {
@@ -69,50 +67,31 @@ export interface BalanceChangeContext {
 }
 
 export function notifyBalanceChange(
-  state: GameState,
-  playerId: string,
-  diff: number,
-  oldBalance: number,
-  newBalance: number,
-  context?: BalanceChangeContext,
+  state: GameState, playerId: string, diff: number, oldBalance: number, newBalance: number, context?: BalanceChangeContext,
 ): void {
   if (diff > 0) {
     if (!context?.isBankrupt && oldBalance < 0 && newBalance >= 0) {
       if (state.activeModal === 'insolvency') state.closeModal();
       state.addFloatingText({
-        text: `+${formatCurrency(diff)}`,
-        type: FloatingTextType.Reward,
-        playerId,
-        actionType: 'debt_relief',
-        title: 'Thoát vỡ nợ thành công! Hãy bấm Hết Lượt.',
+        text: `+${formatCurrency(diff)}`, type: FloatingTextType.Reward, playerId, actionType: 'debt_relief', title: 'Thoát vỡ nợ thành công! Hãy bấm Hết Lượt.',
       });
       return;
     }
     const isSalary = context?.isPassingGo || context?.actionType === 'salary' || diff === 2000;
-    const actionType: FloatingActionType = context?.actionType ?? (isSalary ? 'salary' : 'general');
-    const title = context?.title ?? (isSalary ? 'Lương Vượt GO' : undefined);
     state.addFloatingText({
-      text: `+${formatCurrency(diff)}`,
-      type: FloatingTextType.Reward,
-      playerId,
-      actionType,
-      title,
-      cellIndex: context?.cellIndex,
-      targetPlayerName: context?.targetPlayerName,
+      text: `+${formatCurrency(diff)}`, type: FloatingTextType.Reward, playerId,
+      actionType: context?.actionType ?? (isSalary ? 'salary' : 'general'),
+      title: context?.title ?? (isSalary ? 'Lương Vượt GO' : undefined),
+      cellIndex: context?.cellIndex, targetPlayerName: context?.targetPlayerName,
     });
   } else if (diff < 0) {
     const isBail = context?.isBail;
     const isTax = context?.cellIndex === 4;
-    const actionType: FloatingActionType = context?.actionType ?? (isBail ? 'bail' : isTax ? 'tax' : 'general');
-    const title = context?.title ?? (isBail ? 'Bảo Lãnh Kiểm Toán' : isTax ? 'Lệ Phí Đất Đai' : undefined);
     state.addFloatingText({
-      text: formatCurrency(diff),
-      type: FloatingTextType.Penalty,
-      playerId,
-      actionType,
-      title,
-      cellIndex: context?.cellIndex,
-      targetPlayerName: context?.targetPlayerName,
+      text: formatCurrency(diff), type: FloatingTextType.Penalty, playerId,
+      actionType: context?.actionType ?? (isBail ? 'bail' : isTax ? 'tax' : 'general'),
+      title: context?.title ?? (isBail ? 'Bảo Lãnh Kiểm Toán' : isTax ? 'Lệ Phí Đất Đai' : undefined),
+      cellIndex: context?.cellIndex, targetPlayerName: context?.targetPlayerName,
     });
   }
 }

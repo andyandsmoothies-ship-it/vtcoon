@@ -22,6 +22,13 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 If the spec covers multiple independent subsystems, it should have been broken into sub-project specs during brainstorming. If it wasn't, suggest breaking this into separate plans — one per subsystem. Each plan should produce working, testable software on its own.
 
+## Pre-Drafting Physical Verification (The 3 Mandatory Checks)
+
+Before writing any task steps or code snippets, you MUST physically inspect the disk using tools:
+1. **Call-Site Exhaustion (`grep_search`)**: Run `grep_search` on every symbol/function you plan to change across `tests/` and `src/`. Tabulate every caller and every affected test case. Zero unverified assumptions.
+2. **Subtractive Deletion Range (`view_file`)**: Run `view_file` on target files to inspect exact lines being replaced or deleted. Record exact start/end line numbers and functions to delete. Zero hand-wavy "refactor later".
+3. **Banned Mechanism Check**: Cross-check proposed snippets against project constraints (e.g. anti-programmer-art primitives, bare strings, loose types).
+
 ## File Structure
 
 Before defining tasks, use `list_dir` and `grep_search` to map out which files will be created or modified and what each one is responsible for. This is where decomposition decisions get locked in.

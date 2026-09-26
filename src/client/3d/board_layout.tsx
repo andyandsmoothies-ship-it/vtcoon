@@ -1,6 +1,7 @@
 // [UI-S01/MSS][IMP-30] GameBoard — 40-tile procedural board layout with terrain-flush Depth Layer Stack
 import React, { useCallback, useMemo } from 'react';
 import { BOARD_CONFIG, CellType } from '../../domain/board_config';
+import { PROPERTY_DEEDS } from '../../domain/property_data';
 import { useGameStore } from '../store/game_store';
 import type { PlayerHudInfo } from '../store/game_store_types';
 import { useLobbyStore } from '../store/lobby_store';
@@ -116,8 +117,10 @@ export function GameBoard(): React.ReactElement {
       const myPos = playerPositions[localPlayerId] ?? 0;
       const isStandingHere = myPos === cellIndex;
       const myBalance = playersInfo[localPlayerId]?.balance ?? 0;
-      const canBuy = Boolean(isMyTurn && isStandingHere && !isOwned && hasRolledThisTurn && myBalance >= 600);
-      openModal('deed', { cellIndex, canBuy });
+      const cellPrice = PROPERTY_DEEDS.get(cellIndex)?.price ?? 0;
+      const canBuy = Boolean(isMyTurn && isStandingHere && !isOwned && hasRolledThisTurn && myBalance >= cellPrice);
+      const isBuyOpportunity = Boolean(isMyTurn && isStandingHere && !isOwned && hasRolledThisTurn);
+      openModal('deed', { cellIndex, canBuy, isBuyOpportunity });
     },
     [openModal, currentTurnPlayerId, localPlayerId, playerPositions, playersInfo, hasRolledThisTurn]
   );

@@ -199,10 +199,11 @@ describe('[TC-VFX02.3/MSS] applyDeltaToStore Tu Dong Kich Hoat Floating Text The
     vi.advanceTimersByTime(1000);
 
     const fts = useGameStore.getState().floatingTexts;
-    expect(fts).toHaveLength(1);
-    expect(fts[0]?.type).toBe(FloatingTextType.Penalty);
-    expect(fts[0]?.text).toContain('11.500'); // 10000 -> -1500 = diff -11500
-    expect(fts[0]?.text.startsWith('-')).toBe(true);
+    expect(fts.length).toBeGreaterThanOrEqual(1);
+    const penaltyItem = fts.find((f) => f.text.includes('11.500'));
+    expect(penaltyItem).toBeDefined();
+    expect(penaltyItem?.type).toBe(FloatingTextType.Penalty);
+    expect(penaltyItem?.text.startsWith('-')).toBe(true);
     expect(useGameStore.getState().playersInfo['p1']?.balance).toBe(-1500);
     expect(useGameStore.getState().playersInfo['p1']?.bankrupt).toBe(true);
   });

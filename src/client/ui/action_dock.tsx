@@ -8,6 +8,7 @@ import {
   resolveActionDockNotice,
 } from './ui_helpers';
 import { BOARD_CONFIG, CellType } from '../../domain/board_config';
+import { PROPERTY_DEEDS } from '../../domain/property_data';
 import { MarketCardId } from '../../domain/event_card_types';
 import { TurnPhase } from '../../domain/room';
 
@@ -51,7 +52,7 @@ export function ActionDock({
   const pawnAnimationQueueStore = useGameStore((state) => state.pawnAnimationQueue);
   const currentTurnPlayerIdStore = useGameStore((state) => state.currentTurnPlayerId);
   const playersInfoStore = useGameStore((state) => state.playersInfo);
-  const openModal = useGameStore((state) => state.openModal);
+  const openModalStore = useGameStore((state) => state.openModal);
   const diceStore = useGameStore((state) => state.dice);
   const storeHasRolledThisTurnStore = useGameStore((state) => state.hasRolledThisTurn);
   const playerPositionsStore = useGameStore((state) => state.playerPositions);
@@ -62,6 +63,7 @@ export function ActionDock({
   const activeModalStore = useGameStore((state) => state.activeModal);
   const isSSR = typeof window === 'undefined';
   const ssrState = ssrStateProp ?? (isSSR ? useGameStore.getState() : null);
+  const openModal = ssrState ? ssrState.openModal : openModalStore;
   const isRolling = ssrState ? ssrState.isRolling : isRollingStore;
   const activePawnAnimation = ssrState ? ssrState.activePawnAnimation : activePawnAnimationStore;
   const pawnAnimationQueue = ssrState ? ssrState.pawnAnimationQueue : pawnAnimationQueueStore;
@@ -170,29 +172,24 @@ export function ActionDock({
   const currentCell = BOARD_CONFIG[currentPos];
   const isPropertyCell = currentCell && (currentCell.type === CellType.Property || currentCell.type === CellType.Railroad);
   const isOwnedByAnyone = Object.values(playersInfo).some((p) => p.ownedProperties?.includes(currentPos));
-  const isStandingOnBuyable = Boolean(isMyTurn && hasRolledThisTurn && isPropertyCell && !isOwnedByAnyone);
+  const isStandingOnBuyable = Boolean(
+    isMyTurn &&
+    (turnPhase === TurnPhase.ActionPhase || (hasRolledThisTurn && turnPhase !== TurnPhase.PropertyManagement && turnPhase !== TurnPhase.AuctionPhase && turnPhase !== TurnPhase.InsolvencyPhase)) &&
+    hasRolledThisTurn &&
+    isPropertyCell &&
+    !isOwnedByAnyone
+  );
   const handleOpenManageProperty = () => {
-    if (onOpenManageProperty) {
-      onOpenManageProperty();
-    } else if (onOpenProperties) {
-      onOpenProperties();
-    } else {
-      openModal('portfolio', { playerId: actingPlayerId ?? undefined });
-    }
+    if (onOpenManageProperty) onOpenManageProperty();
+    else if (onOpenProperties) onOpenProperties();
+    else openModal('portfolio', { playerId: actingPlayerId ?? undefined });
   };
 
   const handleOpenTrade = () => {
-    if (onOpenTrade) {
-      onOpenTrade();
-    } else {
+    if (onOpenTrade) onOpenTrade();
+    else {
       const otherId = Object.keys(playersInfo).find((id) => id !== actingPlayerId) ?? 'p2';
-      openModal('trade', {
-        targetPlayerId: otherId,
-        offeredProperties: [],
-        requestedProperties: [],
-        cashOffer: 0,
-        cashRequest: 0,
-      });
+      openModal('trade', { targetPlayerId: otherId, offeredProperties: [], requestedProperties: [], cashOffer: 0, cashRequest: 0 });
     }
   };
   const isSkippedTurn = Boolean(isMyTurn && turnPhase === 'PropertyManagement' && !hasRolledThisTurn && !inAudit);
@@ -207,6 +204,9 @@ export function ActionDock({
     hasRolledThisTurn,
     isSkippedTurn: Boolean(actingPlayer?.skipNextTurn),
     botPacing,
+    isStandingOnBuyable,
+    buyableCellName: currentCell?.name,
+    buyableCellPrice: PROPERTY_DEEDS.get(currentPos)?.price,
   });
   return (
     <div className="relative flex flex-col items-center">
@@ -231,11 +231,11 @@ export function ActionDock({
         className="relative pointer-events-auto flex items-center gap-1.5 min-[360px]:gap-2 md:gap-3 bg-[#FFFDF8]/95 backdrop-blur-sm border border-slate-300/80 shadow-lg shadow-slate-900/10 rounded-2xl p-1.5 sm:p-2.5 px-2.5 min-[360px]:px-3.5 sm:px-5 max-w-[calc(100vw-1rem)] overflow-x-auto no-scrollbar"
         aria-label="Thanh điều khiển tác vụ"
       >
-        {/* Primary Action Button (Chuyển đổi theo Pha: Khi đứng trên ô chưa có chủ thì Primary CTA là [Mua Đất], ngược lại là [Đổ Xúc Xắc]) */}
-        {isStandingOnBuyable && !canRollAgain ? (
+        {/* Primary Action Button: Trong ActionPhase luôn ưu tiên nút Mua Đất */}
+        {isStandingOnBuyable ? (
           <button
             type="button"
-            onClick={isTradeFrozen ? undefined : () => openModal('deed', { cellIndex: currentPos, canBuy: true })}
+            onClick={isTradeFrozen ? undefined : () => openModal('deed', { cellIndex: currentPos, isBuyOpportunity: true })}
             disabled={isTradeFrozen}
             className={`min-h-[44px] shrink-0 whitespace-nowrap flex items-center justify-center gap-1.5 px-4 sm:px-6 py-2.5 rounded-2xl font-black text-white shadow-lg transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 ${
               isTradeFrozen
@@ -245,9 +245,7 @@ export function ActionDock({
           aria-label={isTradeFrozen ? `Thị trường đóng băng (#${currentPos})` : `Mua ô đất số ${currentPos}`}
         >
           <span className="text-xl" aria-hidden="true">{isTradeFrozen ? '🔒' : '🏷️'}</span>
-          <span className="text-sm md:text-base font-black">
-            {isTradeFrozen ? 'Đóng Băng' : 'Mua Đất'}
-          </span>
+          <span className="text-sm md:text-base font-black">{isTradeFrozen ? 'Đóng Băng' : 'Mua Đất'}</span>
         </button>
       ) : (
         <button
@@ -273,25 +271,10 @@ export function ActionDock({
               : isBankrupt
               ? 'Đã Phá Sản'
               : (actingPlayer?.extraTurns ?? 0) > 0
-              ? (
-                <>
-                  <span className="sm:hidden">Đổ Tiếp</span>
-                  <span className="hidden sm:inline">Đổ Tiếp (+1 Lượt)</span>
-                </>
-              )
+              ? (<><span className="sm:hidden">Đổ Tiếp</span><span className="hidden sm:inline">Đổ Tiếp (+1 Lượt)</span></>)
               : canRollAgain && hasRolledThisTurn
-              ? (
-                <>
-                  <span className="sm:hidden">Đổ Tiếp</span>
-                  <span className="hidden sm:inline">Đổ Tiếp (Đôi)</span>
-                </>
-              )
-              : (
-                <>
-                  <span className="sm:hidden min-w-[28px] text-center">Đổ</span>
-                  <span className="hidden sm:inline">Đổ Xúc Xắc</span>
-                </>
-              )}
+              ? (<><span className="sm:hidden">Đổ Tiếp</span><span className="hidden sm:inline">Đổ Tiếp (Đôi)</span></>)
+              : (<><span className="sm:hidden min-w-[28px] text-center">Đổ</span><span className="hidden sm:inline">Đổ Xúc Xắc</span></>)}
           </span>
         </button>
       )}

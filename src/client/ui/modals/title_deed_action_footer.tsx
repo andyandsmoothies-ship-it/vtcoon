@@ -22,6 +22,11 @@ export interface TitleDeedActionFooterProps {
   readonly onRedeem?: () => void;
   readonly onUpgrade?: () => void;
   readonly onDowngrade?: () => void;
+  readonly isBuyOpportunity?: boolean;
+  readonly shortfall?: number;
+  readonly canCoverWithMortgage?: boolean;
+  readonly totalMortgageCapacity?: number;
+  readonly onOpenMortgage?: () => void;
 }
 
 export function TitleDeedActionFooter({
@@ -45,6 +50,11 @@ export function TitleDeedActionFooter({
   onRedeem,
   onUpgrade,
   onDowngrade,
+  isBuyOpportunity,
+  shortfall,
+  canCoverWithMortgage,
+  totalMortgageCapacity,
+  onOpenMortgage,
 }: TitleDeedActionFooterProps): React.ReactElement {
   const showUpgrade = Boolean(isOwner && !isMortgaged && hasUpgrades && (currentLevel ?? 0) < 3 && onUpgrade);
   const showDowngrade = Boolean(isOwner && !isMortgaged && hasUpgrades && (currentLevel ?? 0) > 0 && onDowngrade);
@@ -128,31 +138,73 @@ export function TitleDeedActionFooter({
             </div>
           )}
         </>
-      ) : (
-        <>
-          <button
-            type="button"
-            onClick={isTradeFrozen ? undefined : onBuy}
-            disabled={isTradeFrozen || !canBuy}
-            className={`min-h-[48px] flex flex-col items-center justify-center py-2 px-3 text-center leading-tight min-w-0 rounded-xl font-black tracking-wide uppercase text-xs sm:text-sm transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
-              isTradeFrozen
-                ? 'bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed'
-                : canBuy
-                ? 'bg-emerald-700 hover:bg-emerald-600 border-2 border-emerald-700 shadow-[0_4px_0_0_#065f46] active:shadow-[0_1px_0_0_#065f46] active:translate-y-[3px] text-white cursor-pointer'
-                : 'bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed'
-            }`}
-          >
-            {isTradeFrozen ? 'Thị Trường Đóng Băng' : canBuy ? `Mua BĐS (${formatCurrency(deedPrice)})` : 'Không Đủ Tiền'}
-          </button>
+      ) : isBuyOpportunity !== false ? (
+        <div className="col-span-2 w-full flex flex-col gap-2">
+          {/* Hàng 1: Dòng đệm tài chính khi thiếu tiền */}
+          {!canBuy && (
+            <div className="w-full py-1 px-2.5 rounded-lg bg-amber-100/80 border border-amber-300 text-amber-900 text-[11px] font-bold flex items-center justify-between">
+              <span>Thiếu: {formatCurrency(shortfall ?? 0)}</span>
+              <span>Vay tối đa: +{formatCurrency(totalMortgageCapacity ?? 0)}</span>
+            </div>
+          )}
 
-          <button
-            type="button"
-            onClick={isTradeFrozen ? onClose : (onPass ?? onClose)}
-            className="min-h-[48px] whitespace-nowrap py-3 px-3.5 sm:px-6 rounded-xl uppercase text-xs sm:text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer bg-[#FFFDF8] hover:bg-slate-100 text-slate-800 font-black border-2 border-slate-800 shadow-[0_4px_0_0_#1e293b] active:shadow-none active:translate-y-[3px]"
-          >
-            {isTradeFrozen ? 'Đóng' : 'Bỏ Qua'}
-          </button>
-        </>
+          {/* Hàng 2: Nút chính mua hoặc thế chấp */}
+          {canBuy ? (
+            <button
+              type="button"
+              onClick={isTradeFrozen ? undefined : onBuy}
+              disabled={isTradeFrozen}
+              className="w-full min-h-[48px] py-2 px-3.5 sm:px-6 rounded-xl font-black uppercase text-xs sm:text-sm bg-emerald-700 hover:bg-emerald-600 border-2 border-emerald-700 shadow-[0_4px_0_0_#065f46] active:translate-y-[3px] text-white cursor-pointer"
+            >
+              {isTradeFrozen ? 'Thị Trường Đóng Băng' : `Mua BĐS (${formatCurrency(deedPrice)})`}
+            </button>
+          ) : canCoverWithMortgage ? (
+            <button
+              type="button"
+              onClick={onOpenMortgage}
+              className="w-full min-h-[48px] py-2 px-3.5 sm:px-6 rounded-xl font-black uppercase text-xs sm:text-sm bg-amber-500 hover:bg-amber-600 border-2 border-amber-700 shadow-[0_4px_0_0_#b45309] active:translate-y-[3px] text-white cursor-pointer"
+            >
+              {`🏛️ Cầm Cố Để Mua (+${formatCurrency(totalMortgageCapacity ?? 0)})`}
+            </button>
+          ) : (
+            <button
+              type="button"
+              disabled
+              className="w-full min-h-[48px] py-2 px-3.5 sm:px-6 rounded-xl font-black uppercase text-xs sm:text-sm bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed"
+            >
+              {`Không Đủ Tiền (Thiếu ${formatCurrency(shortfall ?? 0)})`}
+            </button>
+          )}
+
+          {/* Hàng 3: 2 nút phụ Đóng Để Xoay Vốn & Bỏ Qua */}
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className={`min-h-[44px] py-2 px-2 rounded-xl uppercase text-[11px] sm:text-xs font-black bg-white hover:bg-slate-100 text-slate-800 border-2 border-slate-300 shadow-[0_4px_0_0_#cbd5e1] active:translate-y-[2px] ${isTradeFrozen ? 'col-span-2' : ''}`}
+            >
+              {isTradeFrozen ? 'Đóng' : 'Đóng Xoay Vốn'}
+            </button>
+            {!isTradeFrozen && (
+              <button
+                type="button"
+                onClick={onPass}
+                className="min-h-[44px] py-2 px-2 rounded-xl uppercase text-[11px] sm:text-xs font-black bg-rose-50 hover:bg-rose-100 text-rose-700 border-2 border-rose-300 shadow-[0_4px_0_0_#fca5a5] active:translate-y-[2px]"
+              >
+                Bỏ Qua (Pass)
+              </button>
+            )}
+          </div>
+        </div>
+      ) : (
+        /* Khi chỉ click xem sa bàn (isBuyOpportunity === false): chỉ render duy nhất nút Đóng */
+        <button
+          type="button"
+          onClick={onClose}
+          className="col-span-2 w-full min-h-[48px] py-2 px-4 rounded-xl font-black uppercase text-xs sm:text-sm bg-[#FFFDF8] hover:bg-slate-100 text-slate-800 border-2 border-slate-800 shadow-[0_4px_0_0_#1e293b] active:translate-y-[3px]"
+        >
+          Đóng
+        </button>
       )}
     </footer>
   );

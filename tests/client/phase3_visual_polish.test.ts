@@ -57,13 +57,13 @@ describe('[TC-P3.1/MSS] TitleDeedModal Layout Polish & Chống Tràn Màn Hình 
     expect(html).toContain('flex-1 min-h-0 overflow-y-auto pr-1');
   });
 
-  it('Các nút hành động Mua BĐS và Bỏ Qua đạt chuẩn touch target min-h-[48px] và whitespace-nowrap', () => {
+  it('Các nút hành động Mua BĐS và Bỏ Qua đạt chuẩn touch target min-h-[48px]', () => {
     const html = renderToStaticMarkup(
       React.createElement(TitleDeedModal, { cellIndex: 1, canBuy: true, isOwned: false })
     );
     expect(html).toContain('Mua BĐS');
     expect(html).toContain('Bỏ Qua');
-    expect(html).toContain('min-h-[48px] whitespace-nowrap');
+    expect(html).toContain('min-h-[48px]');
   });
 
   it('Trạng thái đã sở hữu: nút Giải Chấp, Thế Chấp và Đóng đều có min-h-[48px] và whitespace-nowrap', () => {

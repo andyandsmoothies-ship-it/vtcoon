@@ -29,6 +29,9 @@ tools: [view_file, list_dir, find_by_name, grep_search]
    - **Mốc 7.0 - 8.0 / 10 (Chuẩn Game Thương Mại Hiện Đại)**: Camera Perspective có độ tụ và chiều sâu trường ảnh, sa bàn đảo nhiệt đới ngập nắng, giao diện Glassmorphism / Gold Embellished sang trọng, thẻ bài Sổ Đỏ có thể cầm nắm trực quan, nút bấm game 3D có độ nảy xúc giác.
    - **Mốc 8.5 - 10 / 10 (Đẳng Cấp Retropoly & Monopoly Tycoon / Wow-Factor)**: Sa bàn đô thị đảo vịnh sống động ngoài trời, đại dương gợn sóng ngọc bích, bãi cát vàng lấp lánh, xe cộ vi mô di chuyển, camera động cinematic zoom theo nước đi, vật liệu PBR cao cấp.
 
+5. **Zero-Blank-Material Invariant & Cấm Texture Rỗng**:
+   - Nghiêm cấm dùng `<meshBasicMaterial />` hoặc `<meshStandardMaterial />` trần trụi không có texture (`map`) trên huy hiệu, cọc cờ, biển báo hoặc tranh vẽ. Không được dùng thuộc tính DOM ẩn (`data-*`) để qua mặt kiểm thử WebGL.
+
 ---
 
 ## 2. KHUNG 6 TRỤ CỘT THẨM ĐỊNH RETROPOLY & MONOPOLY TYCOON

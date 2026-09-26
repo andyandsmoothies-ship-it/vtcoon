@@ -35,6 +35,11 @@ tools: [view_file, list_dir, find_by_name, grep_search]
    - Phải soi đúng toạ độ/phần tử người dùng yêu cầu ban đầu (kiểm tra tràn viền, cắt mép chữ, đè phần tử khác).
    - TUYỆT ĐỐI CẤM ra phán quyết `ship` nếu chỉ đọc mã nguồn `.tsx` hoặc nhìn test xanh mà chưa soi ảnh thực tế.
 
+5. **Kỷ Luật Bố Cục Mobile 360px & CSS Reset (Layout & Ergonomics Guard)**:
+   - `Tailwind Cascade`: Toàn bộ CSS reset toàn cục bắt buộc nằm trong `@layer base`. Cấm CSS reset không lớp làm triệt tiêu `@layer utilities`.
+   - `Root-Level Sticky Action Footer`: Thanh nút hành động chính của Modal bắt buộc là con trực tiếp của container gốc (`sticky bottom-0`), cấm lồng sâu trong cây con.
+   - `Bộ Ba Công Thái Học Mobile 360px`: Modal dùng `max-h-[90dvh]`; flex child có `truncate` kèm `min-w-0`; nút bấm đạt chuẩn chạm `min-h-[44px] min-w-[44px]`; các nút grid ngang hàng dùng `h-full min-h-[48px]`.
+
 ---
 
 ## 2. KHUNG 4 TỪ PHÁN QUYẾT (DISPOSITION FRAMEWORK)

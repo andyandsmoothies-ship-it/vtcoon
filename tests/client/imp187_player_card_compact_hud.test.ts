@@ -82,4 +82,25 @@ describe('[TC-187/MSS][IMP-187] Compact PlayerCard HUD & Zero-Waste Layout', () 
     );
     expect(html).toContain('Nợ 2v');
   });
+
+  it('[TC-187.06/MSS] PlayerCard merges player name and currency balance into a single top row', () => {
+    const html = renderToStaticMarkup(
+      React.createElement(PlayerCard, { player: mockPlayer, isCurrentTurn: true, levelMap: {}, slotIndex: 0 })
+    );
+    // Currency balance is placed in the same header container as the player name
+    expect(html).toContain('10.020');
+    expect(html).toContain('data-testid="player-net-worth"');
+    // Ensure header row has right padding when isCurrentTurn to protect LƯỢT badge
+    expect(html).toContain('pr-12');
+  });
+
+  it('[TC-187.07/MSS] PlayerCard renders color indicator dot for pawn badge (w-2.5 h-2.5) instead of chunky emoji avatar', () => {
+    const html = renderToStaticMarkup(
+      React.createElement(PlayerCard, { player: mockPlayer, isCurrentTurn: false, levelMap: {}, slotIndex: 0 })
+    );
+    const pawnBadge = html.match(/<div[^>]*data-testid="player-pawn-badge-p1"[^>]*>/);
+    expect(pawnBadge).not.toBeNull();
+    expect(pawnBadge![0]).toContain('w-2.5 h-2.5');
+    expect(pawnBadge![0]).not.toContain('w-6 h-6');
+  });
 });

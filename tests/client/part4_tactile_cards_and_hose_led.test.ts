@@ -37,8 +37,8 @@ describe('[TC-P4.1/MSS] Thẻ Bài Game 3D Kim Loại TitleDeedModal', () => {
     expect(html).toContain('border-emerald-700');
     expect(html).toContain('shadow-[0_4px_0_0_#065f46]');
     expect(html).toContain('active:translate-y-[3px]');
-    expect(html).toContain('border-slate-800');
-    expect(html).toContain('shadow-[0_4px_0_0_#1e293b]');
+    expect(html).toContain('border-slate-300');
+    expect(html).toContain('shadow-[0_4px_0_0_#cbd5e1]');
   });
 
   it('Hỗ trợ đầy đủ các trạng thái Nâng Cấp, Hạ Cấp, Thế Chấp với nút bấm 3D vật lý', () => {

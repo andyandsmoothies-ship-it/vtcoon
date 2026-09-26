@@ -39,6 +39,11 @@ export interface TitleDeedModalProps {
   readonly buyerBalance?: number;
   readonly buyerId?: string;
   readonly allPlayers?: Record<string, PurchaseDecisionPlayer>;
+  readonly isBuyOpportunity?: boolean;
+  readonly shortfall?: number;
+  readonly canCoverWithMortgage?: boolean;
+  readonly totalMortgageCapacity?: number;
+  readonly onOpenMortgage?: () => void;
 }
 
 const MODIFIER_DESCS: Record<string, { icon: string; text: string }> = {
@@ -77,6 +82,11 @@ export function TitleDeedModal({
   buyerBalance,
   buyerId,
   allPlayers,
+  isBuyOpportunity,
+  shortfall,
+  canCoverWithMortgage,
+  totalMortgageCapacity,
+  onOpenMortgage,
 }: TitleDeedModalProps): React.ReactElement {
   const deed = getDeedDisplayInfo(cellIndex);
   const currentIndex = ownedProperties ? ownedProperties.indexOf(cellIndex) : -1;
@@ -323,6 +333,11 @@ export function TitleDeedModal({
         onRedeem={onRedeem}
         onUpgrade={onUpgrade}
         onDowngrade={onDowngrade}
+        isBuyOpportunity={isBuyOpportunity}
+        shortfall={shortfall}
+        canCoverWithMortgage={canCoverWithMortgage}
+        totalMortgageCapacity={totalMortgageCapacity}
+        onOpenMortgage={onOpenMortgage}
       />
     </div>
 
