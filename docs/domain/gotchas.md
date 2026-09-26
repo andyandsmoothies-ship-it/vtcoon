@@ -3257,4 +3257,20 @@
   5. **Camera Pills Clearance Invariant**: Cụm nút camera điều hướng cố định tại `bottom-28 sm:bottom-32 left-1/2 -translate-x-1/2 z-20` để không che khuất chip thông báo (108px mobile) và ActionDock trên desktop.
 - **Traceability**: `[TC-199.01..18/MSS]`, `[UC-IMP199]`, `src/client/ui/action_dock.tsx`, `src/client/ui/floating_numbers.tsx`, `src/client/ui/hud_container.tsx`, `src/client/ui/top_bar.tsx`, `src/client/ui/activity_feed_sidebar.tsx`, `src/client/ui/modals/compulsory_buyout_modal.tsx`, `src/client/ui/modals/property_portfolio_modal.tsx`, `src/client/ui/modals/event_card_modal.tsx`, `tests/contracts/imp199_desktop_layout_harmonization.test.ts`.
 
+---
 
+### 279. [FSM/NET][UI/CRAFT] Bất Biến Đồng Bộ Thẻ Ngoại Giao, Định Giá Tiền Thuê Trước Tiêu Thụ & HUD Xúc Xắc Trực Quan (Diplomatic Immunity Valuation Precedence, Hand Tombstone & Isometric Dice Clarity - IMP-196)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Tiêu Thụ Thẻ Trước Khi Định Giá (Pre-Valuation Card Consumption Trap)*:
+     - Nếu gọi `tryUseDiplomaticCard` trước khi tính toán `potentialRent`, thẻ bị trừ khỏi `player.hand` và đưa vào discard pile trước khi xác định được người chơi thực sự tiết kiệm được bao nhiêu tiền thuê. Hậu quả là thông điệp hiển thị "Tiết kiệm 0 Tr." hoặc làm sai lệch sự kiện `lastDiplomaticEvent`.
+     - Phải tính `baseRent = resolveRent(...)` -> `potentialRent = calculateRent(baseRent, ...)` trước, sau đó mới tiêu thụ thẻ và trả về `savedRentAmount: potentialRent`.
+  2. *Bẫy Đồng Bộ Mảng Hand Thiếu Array Tombstone (Delta Serialization Trap)*:
+     - Khi người chơi sử dụng hết thẻ bài ngoại giao, `p.hand` trở thành mảng rỗng `[]`. Nếu delta serializer bỏ qua key rỗng (`undefined`), client store sẽ giữ nguyên thẻ cũ từ tick trước. Bắt buộc map `hand: p.hand ?? []` và kiểm tra từng phần tử trong `isPlayerEqual`.
+  3. *Bẫy Che Khuất Góc Nhìn Xúc Xắc 3D (Isometric Dice Readability Trap)*:
+     - Camera phối cảnh nghiêng của sa bàn khiến mặt trên cùng của viên xúc xắc bị dẹt và khó đọc số chấm (pips) khi dừng lăn.
+     - Cần thêm góc nghiêng bù trừ `rotation={!isRolling ? [0.35, 0, -0.35] : [0, 0, 0]}` cho nhóm xúc xắc khi dừng lăn để hướng mặt kết quả trực diện mắt người chơi, đồng thời bổ sung huy hiệu 2D `DiceScoreBadge` nổi với công thức tính `d1 + d2 = total` (kèm cờ Đôi! 🎉) mount vào HudContainer.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Valuation Precedence Invariant**: Trong `handleLanding`, bất biến `hasZeroRent` (Gotcha #260) luôn chạy đầu tiên. Tiếp đến, tính `potentialRent`. Cuối cùng mới gọi `tryUseDiplomaticCard`. Nếu thành công, trả về `{ result: LandingResult.RentPaid, rentAmount: 0, landlordId: ownerId, diplomaticCardUsed: true, savedRentAmount: potentialRent }`.
+  2. **Hand Array Tombstone Protocol**: Delta luôn phát `hand: []` khi không còn thẻ. Client `apply_delta_players.ts` cập nhật `hand: p.hand ?? []` vào `playersInfo`.
+  3. **Turn Teardown Invariant**: `room.lastDiplomaticEvent` chỉ tồn tại trong lượt xảy ra sự kiện, bắt buộc reset về `null` ở đầu `executeTurnRoll` và trong `executeTurnEnd`.
+- **Traceability**: `[TC-196.01..16/MSS]`, `[UC-IMP196]`, `src/domain/property_manager.ts`, `src/server/turn_loop.ts`, `src/server/session_manager.ts`, `src/server/network/delta_broadcaster.ts`, `src/client/ui/player_card.tsx`, `src/client/ui/transaction_narrative.ts`, `src/client/ui/dice_score_badge.tsx`, `tests/contracts/imp196_diplomatic_card_and_dice_clarity.test.ts`.

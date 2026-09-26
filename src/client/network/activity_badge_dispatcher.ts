@@ -5,6 +5,7 @@ import { formatCurrency } from '../ui/ui_helpers.js';
 import { useVfxStore } from '../store/vfx_store.js';
 import { SoundEngine } from '../audio/sound_engine.js';
 import { getCellName, LEVEL_NAMES } from './activity_property_tracker.js';
+import type { DeltaPayload } from '../../server/session_manager.js';
 
 function handleRentBadge(act: ActivityLogEntry, state: GameState): void {
   if (!act.targetPlayerId || !act.targetPlayerName) {
@@ -184,8 +185,6 @@ const BADGE_HANDLERS: Record<string, (act: ActivityLogEntry, state: GameState) =
     }
   },
 };
-
-import type { DeltaPayload } from '../../server/session_manager.js';
 
 export function handleDiplomaticEventBadge(
   ev: { playerId: string; landlordId: string; cellIndex: number; savedRent: number },

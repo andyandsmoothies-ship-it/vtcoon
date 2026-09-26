@@ -17,7 +17,9 @@
    - [6.3 Bộ Công Cụ Local Quality Gates Chuẩn Mực Cho Junior Developer (Solo Harness)](#63-bộ-công-cụ-local-quality-gates-chuẩn-mực-cho-junior-developer-solo-harness)
    - [6.4 Quy Chuẩn Test Nguyên Tử & Ma Trận 4 Khía Cạnh Hành Vi Đa Năng Cho Mọi Dự Án](#64-quy-chuẩn-test-nguyên-tử--ma-trận-4-khía-cạnh-hành-vi-đa-năng-cho-mọi-dự-án)
    - [6.5 Ma Trận Sẵn Sàng Xuất Xưởng Theo Hình Thái Dự Án (Archetype-Based Production Ship Readiness Matrix)](#65-ma-trận-sẵn-sàng-xuất-xưởng-theo-hình-thái-dự-án-archetype-based-production-ship-readiness-matrix)
+   - [6.6 Diệt 3 Anti-Patterns Test Của AI & Kiểm Thử Observable Behavior](#66-diệt-3-anti-patterns-test-của-ai-mock-echoes-change-detectors-static-checklists--observable-behavior)
 7. [GIAI ĐOẠN 1: Khởi Tạo Dự Án & Cài Đặt Cấp Project (Setup 1 Lần)](#giai-đoạn-1-khởi-tạo-dự-án--cài-đặt-cấp-project-setup-1-lần)
+   - [1.0.0 Kiến Trúc Phân Tầng 2 Cấp Luật: Global Rule (`~/.gemini/gemini.md`) vs Project Rule (`./GEMINI.md`)](#100-kiến-trúc-phân-tầng-2-cấp-luật-global-rule-geminigeminimd-vs-project-rule-geminimd)
    - [1.0.1 Quy Tắc Bản Địa Hóa Công Cụ Native AG 2.0 & Tiêu Chuẩn Kỹ Năng (Toolchain Mapping, reference/, PRODUCT.md)](#101-quy-tắc-bản-địa-hóa-công-cụ-sang-native-ag-20--tiêu-chuẩn-kỹ-năng-toolchain-mapping)
 8. [GIAI ĐOẠN 2: Trọn Bộ Subagents Chuyên Trách Native AG 2.0 Sẵn Sàng Sử Dụng](#giai-đoạn-2-trọn-bộ-subagents-chuyên-trách-native-ag-20-sẵn-sàng-sử-dụng)
    - [8.1 Bộ 6 Subagents Cốt Lõi Kỹ Thuật & Kiến Trúc (scout, plan-griller, qa-tester, implementer, spec-reviewer, re-reviewer, code-reviewer)](#1-file-agentsagentsscoutmd-trinh-sát---định-vị-tọa-độ--nạp-skill-jit)
@@ -26,6 +28,8 @@
 10. [GIAI ĐOẠN 8: Nén Bộ Nhớ & Chuyển Phiên (Session Handoff & Visual Mining)](#giai-đoạn-8-nén-bộ-nhớ--chuyển-phiên-session-handoff--visual-mining)
 11. [BẢNG TRA CỨU CÂU LỆNH NHANH (Cheat Sheet & Slash Commands)](#bảng-tra-cứu-câu-lệnh-nhanh-cheat-sheet--slash-commands)
 12. [QUY TRÌNH TUẦN TỰ TOÀN DIỆN TỪ A-Z (The Master SDLC Workflow)](#12-quy-trình-tuần-tự-toàn-diện-từ-a-z-the-master-sdlc-workflow)
+    - [12.0 Phân Định Cửa 1 Chiều vs Cửa 2 Chiều (One-Way vs Two-Way Doors)](#120-phân-định-cửa-1-chiều-vs-cửa-2-chiều-one-way-vs-two-way-doors)
+    - [12.1 Sổ Tay Prompts Thực Chiến & Quy Trình 3 Trạm Mở Rộng (Trạm 1 ➔ 2 ➔ 2.5 ➔ 3 ➔ 3.5)](#121-sổ-tay-prompts-thực-chiến-4-cạnh-cho-junior-the-4-tier-step-harness-playbook)
 
 ---
 
@@ -287,19 +291,62 @@
 │             `implementation_plan.md` để giải quyết dứt điểm các điểm mù đó TRƯỚC KHI xin người dùng phê duyệt. Người dùng
 │             TUYỆT ĐỐI KHÔNG PHẢI copy-paste plan sang conversation khác để hỏi.
 │
-└── 24. KỶ LUẬT TIỀN CODE & QUY TẮC "KILL THE PREMISE" (2-FIX LIMIT & PRE-CODING DISCIPLINE):
-        • 4 Bước Tiền Code Bắt Buộc (Pre-Coding Discipline):
-          1. Think First: Vẽ sơ đồ cây logic/dòng chảy text trước khi chạm vào mã nguồn.
-          2. Read First: Dùng grep_search và view_file kiểm tra ngữ cảnh; cấm sửa mù (zero blind edits).
-          3. Zero-Warning Prerequisite: Giải quyết sạch các cảnh báo/lỗi biên dịch hiện có trước khi viết tính năng mới.
-          4. Enumerate Failure Modes: Liệt kê trước 3–5 kịch bản thất bại trước khi viết isolation tests để bao vây trực tiếp.
-        • Quy Tắc "Kill The Premise" (2-Fix Limit): Nếu một lỗi hoặc tính năng sửa đến lần thứ 2 vẫn không đạt chuẩn
-          hoặc phát sinh hồi quy (regression), NGHIÊM CẤM micro-fix lần 3. Bắt buộc kích hoạt Thách Thức Tiền Đề Kiến Trúc
-          (Architectural Premise Challenge) để thay thế tiền đề sai lầm bằng giải pháp căn cơ.
-        • Công Thái Học Đa Nền Tảng (Mobile 360px & Cross-Browser Ergonomics Triad):
-          - Dynamic Viewport: Dialog/Modal cuộn bắt buộc dùng `max-h-[90dvh]` (cấm raw `vh`) chống thanh công cụ mobile che lấp CTA.
-          - WebKit Flex Ellipsis: Mọi flex-child có `truncate` bắt buộc gắn `min-w-0` chống vỡ layout trên Safari WebKit.
-          - Grid Action Symmetry: Các nút bấm cùng hàng trong action footer bắt buộc đồng bộ `h-full min-h-[48px]`.
+├── 24. KỶ LUẬT TIỀN CODE & QUY TẮC "KILL THE PREMISE" (2-FIX LIMIT & PRE-CODING DISCIPLINE):
+│       • 4 Bước Tiền Code Bắt Buộc (Pre-Coding Discipline):
+│         1. Think First: Vẽ sơ đồ cây logic/dòng chảy text trước khi chạm vào mã nguồn.
+│         2. Read First: Dùng grep_search và view_file kiểm tra ngữ cảnh; cấm sửa mù (zero blind edits).
+│         3. Zero-Warning Prerequisite: Giải quyết sạch các cảnh báo/lỗi biên dịch hiện có trước khi viết tính năng mới.
+│         4. Enumerate Failure Modes: Liệt kê trước 3–5 kịch bản thất bại trước khi viết isolation tests để bao vây trực tiếp.
+│       • Quy Tắc "Kill The Premise" (2-Fix Limit): Nếu một lỗi hoặc tính năng sửa đến lần thứ 2 vẫn không đạt chuẩn
+│         hoặc phát sinh hồi quy (regression), NGHIÊM CẤM micro-fix lần 3. Bắt buộc kích hoạt Thách Thức Tiền Đề Kiến Trúc
+│         (Architectural Premise Challenge) để thay thế tiền đề sai lầm bằng giải pháp căn cơ.
+│       • Công Thái Học Đa Nền Tảng (Mobile 360px & Cross-Browser Ergonomics Triad):
+│         - Dynamic Viewport: Dialog/Modal cuộn bắt buộc dùng `max-h-[90dvh]` (cấm raw `vh`) chống thanh công cụ mobile che lấp CTA.
+│         - WebKit Flex Ellipsis: Mọi flex-child có `truncate` bắt buộc gắn `min-w-0` chống vỡ layout trên Safari WebKit.
+│         - Grid Action Symmetry: Các nút bấm cùng hàng trong action footer bắt buộc đồng bộ `h-full min-h-[48px]`.
+│
+├── 25. DEEP MODULES & CHỐNG SLOP WRAPPERS (JOHN OUSTERHOUT / NASH):
+│       • Deep Modules: Thiết kế module sâu — giao diện đơn giản (simple interfaces) che giấu độ phức tạp lớn bên trong (hiding complex logic).
+│       • CẤM Tuyệt Đối Shallow Pass-Through Wrappers: Những hàm/lớp bọc nông cạn chỉ làm nhiệm vụ chuyển tiếp tham số vô nghĩa,
+│         làm phình to bề mặt tiếp xúc và ép viết các unit test mock rác vô hồn.
+│       • Tuân thủ nghiêm ngặt Single Responsibility Principle (SRP). Giữ giao diện công khai mỏng và trực diện.
+│
+├── 26. DIỆT 3 ANTI-PATTERNS TEST CỦA AI & KIỂM THỬ OBSERVABLE BEHAVIOR:
+│       • Triệt tiêu hoàn toàn 3 dạng bài test AI sinh ra "luôn xanh mãi mãi nhưng không bao giờ bắt được lỗi":
+│         1. Tautological Tests (Mock Echoes): Mock A trả về X rồi assert X == X (test chính cái mock thay vì code thật).
+│         2. Change Detectors: Assert vào biến private hoặc cấu trúc nội bộ khiến refactor bị gãy dù hành vi bên ngoài không đổi.
+│         3. Static Checklist Tests: Viết test chỉ assert `fs.existsSync`, `typeof fn === 'function'`, hay đếm LOC file bên trong `it()`.
+│       • Mệnh lệnh cốt tử: Kiểm thử hành vi quan sát được (Observable Behavior: inputs ➔ processing ➔ outputs) đối chiếu với SSOT và public contracts.
+│
+├── 27. PHÂN LOẠI CỬA 1 CHIỀU VS CỬA 2 CHIỀU (ONE-WAY VS TWO-WAY DOORS - JEFF BEZOS):
+│       • Phân định rõ ràng theo tính khả nghịch (Reversibility) để tối ưu tốc độ và kiểm soát rủi ro:
+│         - Two-Way Doors (Cửa 2 chiều - Đảo ngược dễ): UI, CSS, khoảng cách, animation, copy, logic cô lập ➔
+│           AI được phép thực thi tự hành (Autonomous execution with fast feedback), con người chỉ nghiệm thu kết quả cuối.
+│         - One-Way Doors (Cửa 1 chiều - Đảo ngược khó/đắt): Database schemas, auth/security, wire protocols, breaking contracts ➔
+│           BẮT BUỘC soạn thảo Implementation Plan chi tiết với drop-in snippets, kích hoạt `plan-griller` và chặn bằng Human Approval Gate (Plan Review Policy).
+│
+├── 28. ACTIVE REMEDIATION: FIX OVER TALK (SỬA TRỰC TIẾP THAY VÌ COMMENT THỤ ĐỘNG):
+│       • Cấm Reviewers và QA để lại bình luận thụ động (passive text comments) đối với các lỗi cơ học (linter, formatting, imports, thiếu prop).
+│       • Trực tiếp áp dụng bản vá (Directly apply fixes) vào mã nguồn trước khi ký duyệt [APPROVED].
+│
+├── 29. TRẠM 2.5: SWEEPING SCOUT AUDIT (QUÉT SẠCH 5 KHUYẾT TẬT PHỔ QUÁT TRƯỚC REVIEW):
+│       • Sau khi Trạm 2 test xanh và trước khi chuyển sang Trạm 3, kích hoạt `scout` quét 100% file vật lý đã sửa trên đĩa:
+│         (1) Stale state / closure snapshots (useEffect, useCallback, useMemo).
+│         (2) Unhandled async / promises / exceptions.
+│         (3) Resource / listener / timer leaks (clearInterval, clearTimeout, unsubscribes).
+│         (4) Private internals or dirty bypasses (as any, as unknown).
+│         (5) Dead-end states & dead code (nút bấm không có action, trạng thái kẹt loading/modal).
+│       • Toàn bộ 5 khuyết tật phải được giải quyết dứt điểm trước khi Trạm 3 tiến hành thẩm định.
+│
+├── 30. RETRO FEEDBACK INOCULATION & GOTCHAS 3 TẦNG THỰC NGHIỆM:
+│       • Miễn dịch phản hồi hồi cứu: Biến 100% phản hồi/sửa lỗi của con người thành: (1) Contract/Regression test tự động,
+│         (2) Rule trong linter AST, hoặc (3) Bất biến có số hiệu trong `docs/domain/gotchas.md`. Không bao giờ sửa lỗi mà không có rào chắn ngăn ngừa tái diễn.
+│       • Quy chuẩn Gotchas 3 tầng: Bất biến chỉ ghi sau khi đã qua kiểm chứng vật lý đa vòng (Sweeping audit + full tests pass):
+│         (1) Initial deceptive trap (Bẫy ảo tưởng ban đầu) ➔ (2) Physical finding (Phát hiện thực tế trên đĩa) ➔ (3) Verified invariant (Bất biến được xác minh).
+│
+└── 31. TRA CỨU TÀI LIỆU NGOẠI VI BẮT BUỘC (CONTEXT7 DOCUMENTATION LOOKUP):
+        • Bắt buộc dùng Context7 MCP (`resolve-library-id` -> `query-docs`) khi lập trình với thư viện/framework bên ngoài (React 19, Three.js/R3F, Tailwind v4, Flutter, ORM...).
+        • Nghiêm cấm dùng Context7 cho logic nghiệp vụ nội bộ của dự án.
 ```
 
 
@@ -1026,6 +1073,45 @@ Khi đọc bất kỳ checklist nào trên mạng hoặc tài liệu của bên 
    - "Open Graph Image" ➔ Chuyển thành "Ảnh bìa 3D kích thước 1200x630 đại diện bàn cờ để link mời bạn bè trên mạng xã hội hiển thị bắt mắt".
 
 ---
+
+### 6.6 DIỆT 3 ANTI-PATTERNS TEST CỦA AI (MOCK ECHOES, CHANGE DETECTORS, STATIC CHECKLISTS) & OBSERVABLE BEHAVIOR
+
+> *"Những bài test AI viết ra chạy xanh mãi mãi nhưng không bao giờ bắt được bug." (The tests AI writes that pass forever and catch nothing)*
+
+#### 1. Bản Chất 3 Dạng Test Phế Liệu Phổ Biến Của AI
+
+```text
+[3 BẪY TEST PHẾ LIỆU CỦA AI]
+├── 1. TAUTOLOGICAL TESTS (MOCK ECHOES / BẢN SAO TIẾNG VỌNG MOCK):
+│      Mock dependency A trả về { status: 200 } ➔ Gọi hàm ➔ Assert expect(res.status).toBe(200).
+│      Bản chất: Test chỉ kiểm tra xem thư viện Mock có trả về đúng thứ vừa cấu hình không!
+│      Khi mã nguồn thực tế bên trong bị hỏng hoặc logic nghiệp vụ sai lệch, bài test vẫn xanh 100%.
+│
+├── 2. CHANGE DETECTORS (MÁY DÒ THAY ĐỔI CẤU TRÚC NỘI BỘ):
+│      Assert trực tiếp vào biến private, tên hàm phụ nội bộ, hoặc thứ tự gọi các hàm helper ẩn:
+│      expect(service['internalCounter']).toBe(1) hoặc expect(helperSpy).toHaveBeenCalledBefore(otherSpy).
+│      Bản chất: Khóa cứng chi tiết cài đặt (Implementation Details). Khi bạn tái cấu trúc (Refactoring)
+│      để code sạch hơn dù kết quả nghiệp vụ bên ngoài hoàn toàn đúng, bài test vẫn vỡ ĐỎ tan tành!
+│
+└── 3. STATIC CHECKLIST TESTS (DANH SÁCH CHECKLIST TĨNH):
+       Assert kiểm tra sự tồn tại của file, kiểu dữ liệu hàm hoặc số dòng code bên trong bài unit test:
+       expect(fs.existsSync('src/service.ts')).toBe(true) hoặc expect(typeof calculateTax).toBe('function').
+       Bản chất: Đây là việc của Linter/Compiler/OS, không phải của Unit Test. Test này không truyền dữ liệu
+       thực tế qua hệ thống và không chứng minh được code có sinh lỗi khi vận hành hay không.
+```
+
+#### 2. Nguyên Tắc Cứu Cánh: Kiểm Thử Hành Vi Quan Sát Được (Observable Behavior Testing)
+
+- **Chỉ Test Trên Public Contract**: Chỉ gọi các hàm/class/API được export công khai. Không bao giờ hack `any` để đọc biến `private`/`protected`.
+- **Mô Hình Hộp Đen Thực Tế**:
+  ```text
+  [Input Thực Tế (Literal Data)] ──► [Hệ Thống Thực Thi] ──► [Output / Chuyển Dịch State Quan Sát Được]
+  ```
+- **Không Bao Giờ Mock Thứ Đang Được Test**: Nếu đang test `OrderService`, tuyệt đối không mock các phương thức của `OrderService`.
+- **Assert Tại Điểm Tiêu Thụ Cuối (Consumer-Side Assertion)**:
+  - ❌ Sai: `expect(user.discounts).toHaveLength(1)` (Chỉ assert mảng lưu trữ).
+  - ✅ Đúng: `expect(order.calculateTotal()).toBe(80000)` (Chứng minh chiết khấu thực sự làm giảm số tiền phải trả).
+
 ---
 
 ## GIAI ĐOẠN 1: Khởi Tạo Dự Án & Cài Đặt Cấp Project (Setup 1 Lần)
@@ -1055,6 +1141,110 @@ Trước khi gõ bất kỳ prompt nào, bạn kiểm tra 5 setting hệ điều
 3. **Setting MCP Servers (Context7)**: Bật MCP Server `context7` (`resolve-library-id` -> `query-docs`). Bắt buộc dùng để tra cứu API tài liệu thư viện/framework bên ngoài (tránh dùng API cũ/deprecated); Nghiêm cấm dùng Context7 cho logic nghiệp vụ nội bộ hoặc script cục bộ.
 4. **Setting Kho Kỹ Năng Gốc**: Đảm bảo đường dẫn `%USERPROFILE%\Documents\GitHub\backup\skills_backup\` (hoặc thư mục lưu trữ kỹ năng thực tế trên máy bạn) tồn tại để `skill-dispatcher` tự động copy kỹ năng JIT khi cần.
 5. **Setting Plan Review Policy (AG 2.0 Native)**: Trong Cài đặt Antigravity IDE, chọn `Plan Review Policy = "Review every plan"`. Khi bật, mỗi khi Agent lập hoặc sửa plan, IDE sẽ tự động dừng lại và hiển thị hộp thoại duyệt trực quan (Proceed / Feedback / Reject). Junior chỉ cần bấm "Proceed" để tự động kích hoạt pipeline thi công.
+
+---
+
+### 1.0.0 KIẾN TRÚC PHÂN TẦNG 2 CẤP LUẬT: GLOBAL RULE (`~/.gemini/gemini.md`) VS PROJECT RULE (`./GEMINI.md`)
+
+Khi mang Antigravity 2.0 qua dự án mới, sai lầm phổ biến nhất của Junior là nhồi nhét tất cả vào một file rule hoặc copy nguyên xi file rule cũ gây xung đột ngữ cảnh. Kiến trúc chuẩn mực của AG 2.0 phân tách rõ ràng thành 2 cấp độ:
+
+```text
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ 1. GLOBAL RULE (%USERPROFILE%\.gemini\gemini.md) - CÀI ĐẶT 1 LẦN CHO CẢ MÁY TÍNH      │
+│ • Áp dụng cho: MỌI DỰ ÁN (Cross-project, Machine-wide)                                 │
+│ • Ngôn ngữ: TIẾNG ANH CHUẨN KỸ THUẬT (ASD-STE100) để AI hiểu chính xác 100% các lệnh OS│
+│ • Chứa: Rào chắn OS Terminal (cmd /c), No-Git AI, Pre-Coding Discipline, Anti-Slop,     │
+│   Deep Modules, Testing Integrity, Context7, Active Remediation, One-Way/Two-Way Doors  │
+└──────────────────────────────────────────┬─────────────────────────────────────────────┘
+                                           │ (Kế thừa & Chuyên biệt hóa)
+                                           ▼
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ 2. PROJECT RULE (<project_root>/GEMINI.md) - CÀI ĐẶT RIÊNG CHO TỪNG DỰ ÁN             │
+│ • Áp dụng cho: DUY NHẤT REPOSITORY ĐÓ (Repository-scoped)                             │
+│ • Ngôn ngữ: NGÔN NGỮ THỊ TRƯỜNG MỤC TIÊU (Tiếng Việt cho dự án Việt Nam)               │
+│ • Chứa: Kiến trúc Domain riêng (FSM/State), Trần LOC dự án, Design Tokens, Scripts     │
+│   kiểm soát nội bộ (lint:ui, lint:slop, gate), Definition of Done, Memory Pointers     │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### MẪU TỆP GLOBAL RULE CHUẨN DÙNG CHUNG CHO MÁY TÍNH (`%USERPROFILE%\.gemini\gemini.md`)
+Junior tạo tệp này một lần duy nhất tại thư mục người dùng cá nhân (ví dụ: `C:\Users\TenCuaBan\.gemini\gemini.md`):
+
+```markdown
+# Antigravity Global OS Rules
+
+## 1. Communication
+- **Simplified Technical English**: Use ASD-STE100. Reply in English if user writes in English; reply in Vietnamese if user writes in Vietnamese. No fluff.
+- **Mechanical Language**: Do not use human terms ("thought", "forgot"). Describe literal code states (e.g., "The function lacks row persistence", not "The system forgot to save").
+- **Visual Architecture**: Provide simple text flowcharts (e.g., `[UI] --> [DB]`) before coding.
+- **Constructive Pushback**: If a request is suboptimal or overcomplicated, propose a cleaner alternative.
+
+## 2. Pre-Coding Discipline
+- **Think First**: Diagram logic with a text tree before touching code.
+- **Read First**: Inspect context using `grep_search` and `view_file`. Verify physical disk baselines before planning. Zero blind edits.
+- **Zero-Warning Prerequisite**: Resolve existing compiler/linter warnings before adding features.
+- **Enumerate Failure Modes**: List 3-5 failure modes before writing isolation tests. Attack those modes directly.
+
+## 3. Implementation Standards
+- **Scope Confinement**: Edit only target logic. Match existing code style. Never reformat nearby unrelated code.
+- **File Modification Tooling**: Use native `write_to_file` or `replace_file_content`. NEVER use shell redirects (`echo`, `cat`, `>`, PowerShell here-strings). Verify target chunk match count before editing.
+- **Deep Modules & Anti-Slop**: Design deep modules (simple interfaces hiding complex logic). Ban shallow pass-through wrappers that merely increase surface area and force mock-heavy tests. Enforce Single Responsibility Principle (SRP). Concrete LOC budgets and pre-coding delta thresholds are governed strictly by project-specific rules (`GEMINI.md`, `CLAUDE.md`, or local linters). No code-golf, line stripping, or fake stubs.
+- **Subtractive Refactoring**: When replacing mechanisms (states, listeners, flags), explicitly identify and remove obsolete code. Never leave old listeners running parallel to new logic.
+- **No Magic Strings**: Use Enums or static constants.
+- **Trust Framework Guards**: Do not write redundant manual null checks when framework/compiler guarantees safety.
+- **Prune Dead Code**: Remove unused files, unreferenced variables, and dead dependencies.
+- **Zero Reinvention**: Use existing standard libraries for routing, state, and utilities.
+- **Zero Dirty Casts**: Never use `as unknown as T`, raw `any`, or compiler bypass hacks. Update types properly.
+- **Full-Pipeline Delivery**: Implement all architectural layers declared in the approved plan (Entity/DTO/Mappers, Serializers, Store/Hook, UI). When adding data fields or clearing states, verify end-to-end propagation and explicit empty/tombstone serialization. Never deliver partial pipelines.
+- **Framework Canonical Signature Guard**: Match framework contracts directly (e.g., `() => void` for store listeners, `Parameters<T>` for hooks). Do not invent custom callback signatures.
+- **Explicit Environmental Prop Propagation**: When environmental/hardware state (`isMobile`, `theme`) is computed at a container or layout root, pass it explicitly to children. Do not rely on child ambient hardware fallbacks during normal rendering.
+
+## 4. Testing Integrity
+- **No Post-Hoc Tests**: Write failing tests first (TDD RED). Never write unit tests after implementation is complete.
+- **No Concurrent Edits**: Never modify tests and production code in the same edit step.
+- **No Mirroring**: Never copy private production logic into tests. Assert against real exports.
+- **Zero Bug-Codification**: Never relax assertions to match buggy code. Always assert against SSOT.
+- **Banned Test Antipatterns**: Ban tautological tests (mock echoes), change detectors (private internal state), and static checklist tests (`fs.existsSync`, `typeof fn`, testing file LOC/content inside unit tests).
+- **Specification Evolution**: When specifications evolve, never accept regressions ("N tests failed due to design supersession" is banned). Reconcile outdated preconditions; never relax assertions to match defective code.
+- **Verify Consumers**: For event-driven logic, assert that downstream consumers processed the event and updated state.
+- **Bilateral Testing**: If frontend and backend both change, test the last-changed side to prove parity.
+- **No Silent Fails**: Never assert raw booleans without printing underlying error payloads.
+- **Observable Behavior**: Test public contracts, not private internal state.
+- **Fixture Reconcile**: Reconcile 100% of static data and entity properties against SSOT.
+
+## 5. Environment & Tooling
+- **Test DB Safety**: Test setups must enforce database names ending in `_test`.
+- **Terminal**: Windows OS only. Use `cmd /c` with `;` for command chaining. Never use bash wrappers.
+- **Context Offloading**: Summarize command and test outputs to <10 lines. Never dump verbose terminal logs into context.
+- **File System Cleanliness**: No root clutter. Store temporary scripts in `.agents/tmp/`.
+- **Regex Grep**: Searches with pipe (`|`) or regex patterns require `IsRegex: true`.
+- **Hanging Processes**: Kill processes hanging > 60s without output.
+- **Source Control Safety**: AI NEVER runs `git` commands. Git is strictly human-controlled.
+- **Markdown Hygiene**: Write plain numbers, currencies, and percentages (e.g., `150%`, `$100`, `10%`). NEVER wrap normal numbers in LaTeX math blocks (`$ ... $`) or escape characters (`\=`, `\-`).
+- **Stack Autodetection**: Detect and respect the project's native toolchain (npm, cargo, go, pytest, dotnet, flutter). Never force foreign package managers or assumptions.
+
+## 6. Workflows & Governance
+- **One-Way vs Two-Way Doors**: Classify changes by reversibility. Two-Way Doors (UI, CSS, isolated logic) execute autonomously with fast feedback. One-Way Doors (DB schemas, auth/security, wire protocols, breaking contracts) mandate structured implementation plans and human approval gates.
+- **Approval Gates & Autonomous Pipeline**: For One-Way Doors, Agent MUST draft an implementation plan with concrete drop-in snippets (ban vague directives) to trigger the IDE's Plan Review Policy. After approval, execute autonomously: Station 1 (QA RED) -> Station 2 (GREEN) -> Station 3 (Review).
+- **Active Remediation (Fix Over Talk)**: Reviewers and QA must not leave passive text comments for mechanical defects (linter, formatting, imports). Directly apply fixes before sign-off.
+- **Post-Implementation Sweeping Audit**: Inspect 100% modified physical files (via dedicated review subagent if configured, or directly) for 5 universal defect archetypes before sign-off: (1) Stale state/closure snapshots; (2) Unhandled async/promises/exceptions; (3) Resource/listener/timer leaks; (4) Private internals or dirty bypasses; (5) Dead-end states and dead code. Resolve all defects before completion.
+- **Retro Feedback Inoculation**: Transform every user review correction into an automated regression test, linter rule, or domain invariant. Never fix a defect without preventing recurrence.
+- **Tech Debt Ledger**: Log deferred edge cases in debt ledger with target slice. Audit against SSOT every 2 slices.
+- **Empirical Gotchas Recording**: Persist invariants only after multi-round physical verification (sweeping audit + full tests pass). Document: (1) Initial deceptive trap, (2) Physical finding, (3) Verified invariant.
+
+## 7. Documentation Lookup (Context7)
+- **Mandatory Lookup**: Use Context7 MCP (`resolve-library-id` -> `query-docs`) for external library/framework APIs (e.g., frameworks, UI libraries, ORMs).
+- **Prohibited Scope**: Do not invoke Context7 for internal business logic or local scripts.
+
+## 8. Subagent Orchestration
+- **Delegation Scope**: Spawn subagents ONLY for heavy research, concurrent feature modules, or independent reviews.
+- **Separation of Duties**: Reviewers/QA are strictly read-only. Builders cannot review or approve own work.
+- **Fast Escalation**: Stop and report `BLOCKED` on ambiguous requirements. No speculative guesses.
+- **Context Hygiene**: Subagents return concise summaries (<20 lines) with clickable file links. No raw log dumps.
+- **Zero Polling**: Never loop on task status. Wait reactively for system notifications.
+```
+
+---
 
 ---
 
@@ -1627,12 +1817,20 @@ mainAgent: false
 model: flash
 tools: [view_file, list_dir, find_by_name, grep_search, run_command]
 ---
-# NHIỆM VỤ TRINH SÁT (SCOUT PROTOCOL)
-1. **Quyền hạn**: Trinh sát và nạp Skill. CẤM sửa code nguồn dự án.
+# NHIỆM VỤ TRINH SÁT & QUÉT SẠCH 5 KHUYẾT TẬT (SCOUT PROTOCOL)
+1. **Quyền hạn**: Trinh sát, nạp Skill, và kiểm toán quét sạch đĩa vật lý (Sweeping Scout Audit). CẤM sửa code nguồn dự án.
 2. **Nạp Skill JIT**: Nếu phát hiện bài toán cần kỹ năng chuyên sâu (Docker, Postgres, Flutter, Cloud...), tự động chạy `skill-dispatcher` copy từ `%USERPROFILE%\Documents\GitHub\backup\skills_backup\` vào `.agents/skills/`.
-3. **Context Offloading**: Nếu tra cứu log hoặc file lớn, dùng script lọc/tóm tắt trước khi trả về kết quả.
+3. **Context Offloading**: Nếu tra cứu log hoặc file lớn, dùng script lọc/tóm tắt trước khi trả về kết quả (<10 dòng).
 4. **Định dạng bắt buộc**: Mọi vị trí đề xuất can thiệp phải dùng link: `[đường/dẫn/file.ts#Ldòng_bắt_đầu-Ldòng_kết_thúc]`.
-5. **Mẫu báo cáo**:
+5. **Nhiệm vụ Trạm 2.5: Sweeping Scout Audit (Kiểm toán quét sạch 5 khuyết tật phổ quát)**:
+   Sau khi Trạm 2 thi công xong và toàn bộ test xanh, trước khi gửi cho Reviewer Trạm 3, `scout` quét sạch 100% file vật lý vừa sửa trên đĩa cứng theo 5 archetypes khuyết tật:
+   - (1) *Stale state / closure snapshots*: Đọc các `useEffect`, `useCallback`, `useMemo` tìm closure giữ state/prop cũ.
+   - (2) *Unhandled async / promises / exceptions*: Tìm các async call thiếu `await`, thiếu `catch`, hoặc nuốt lỗi âm thầm.
+   - (3) *Resource / listener / timer leaks*: Kiểm tra hàm cleanup trong `useEffect` có gọi `clearInterval`, `clearTimeout`, `unsubscribe` không.
+   - (4) *Private internals or dirty bypasses*: Tìm `as any`, `as unknown as`, hoặc bypass compiler hack.
+   - (5) *Dead-end states & dead code*: Nút bấm không gắn onClick, modal không thể đóng, hoặc biến/mesh mồ côi.
+   - *Phán quyết*: Trả về `SWEEP: PASS` nếu sạch 100%, hoặc `SWEEP: REVISE` kèm tọa độ `file:line` chính xác để sửa trước khi vào Trạm 3.
+6. **Mẫu báo cáo**:
 ```markdown
 ### 📍 TỌA ĐỘ MÃ NGUỒN CẦN CAN THIỆP
 | # | Vị trí chính xác (File:Dòng) | Hành động | Mô tả ngắn gọn |
@@ -1640,6 +1838,9 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command]
 | 1 | `[src/services/auth.ts#L25-L42]` | MODIFY | Bổ sung kiểm tra hết hạn token |
 ### 📦 KỸ NĂNG CHUYÊN SÂU ĐÃ NẠP (JIT SKILLS)
 - Đã nạp: `.agents/skills/postgresql-best-practices/` (từ kho backup nội bộ).
+### 🧹 KẾT QUẢ QUÉT SẠCH TRẠM 2.5 (SWEEPING SCOUT AUDIT)
+- Phán quyết: [SWEEP: PASS | SWEEP: REVISE]
+- Phát hiện 5 archetypes: [0 vi phạm | Danh sách chi tiết file:line]
 ```
 
 ### 1b. File `.agents/agents/plan-griller.md` (Kiểm Toán Viên Phản Biện Đối Kháng Kế Hoạch - Zero-Trust Plan Auditor)
@@ -1854,7 +2055,9 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command]
 5. **Giao Thức TRIM & Quét Dọn Tàn Dư Thử Nghiệm (Trajectory Redundancy Purge - arXiv 2026)**:
    - *Quét Tàn Dư Trajectory*: Kiểm tra `git status --porcelain`. Phát hiện và XÓA BỎ 100% các file nháp tạm thời, package cài thử không dùng, biến/hàm mồ côi (orphaned code) do các lần thử nghiệm thất bại của Agent để lại trước khi chốt nghiệm thu.
    - *Quét Dead-Code Tự Động*: Chạy `knip` (TypeScript/Node) hoặc compiler analyzer tương đương để diệt sạch unreferenced exports, unused variables/types.
-6. **Mẫu Báo Cáo: Gói Nghiệm Thu 1 Trang Đa Nền Tảng (The 1-Page Universal Reviewer Packet)**:
+6. **Nguyên Tắc Active Remediation (Sửa Trực Tiếp Thay Vì Comment Thụ Động - Fix Over Talk)**:
+   - Khi phát hiện các lỗi cơ học như: vi phạm linter format, thiếu import, thừa unused variable, kiểu dữ liệu thiếu prop đơn giản ➔ Reviewer KHÔNG để lại comment thụ động trong chat; reviewer trực tiếp áp dụng bản vá (hoặc điều phối implementer sửa ngay tại chỗ) trước khi ký duyệt `[APPROVED]`.
+7. **Mẫu Báo Cáo: Gói Nghiệm Thu 1 Trang Đa Nền Tảng (The 1-Page Universal Reviewer Packet)**:
 *(Thiết kế để lập trình viên hoặc Tech Lead nắm toàn bộ bản chất thay đổi trong 30 giây đối với mọi loại dự án: Web, Backend API, Mobile, CLI, Data/Worker)*:
 
 ```markdown
@@ -2532,25 +2735,27 @@ Khi bạn chạy lệnh trong Terminal gặp lỗi đỏ, hoặc Subagent báo t
 │    • Nhánh Greenfield (src/ rỗng): Kiểm tra Test Harness (package.json, runner). │
 │    • Nhánh Brownfield (codebase lớn): Phân tích tác động lan tỏa (Impact Graph). │
 │                                                                                  │
-│ 3. BẺ NHỎ KẾ HOẠCH THI CÔNG (MICRO-TASK BREAKDOWN - writing-plans):              │
-│    • TUYỆT ĐỐI CẤM code ngay! Bẻ Slice thành danh sách Micro-Tasks tuần tự.       │
-│    • Mỗi Micro-Task: 1 mục tiêu đơn nhất, LOC budget <= 50-80 dòng, 1 test đỏ/xanh.│
+│ 3. BẺ NHỎ KẾ HOẠCH & GRILL ZERO-TRUST (writing-plans + plan-griller):            │
+│    • Phân loại cửa: One-Way Door (Bắt buộc plan chi tiết) vs Two-Way Door (Fast).│
+│    • plan-griller đối kháng đĩa cứng, vạch trần 1-3 điểm mù trước khi duyệt.     │
 │                                                                                  │
-│ 4. THI CÔNG TDD CẤP HỆ THỐNG (SYSTEM-LEVEL TDD - ADAM TORNHILL 2026):             │
-│    • [1. Specify]: qa-tester tạo E2E Tests ĐỎ, Inversion Gate khóa ranh giới.    │
-│    • [2. Delegate]: implementer tự do thi công One-Sweep trên toàn bộ hệ thống.  │
-│    • [3. Validate]: Chạy E2E Tests nghiệm thu, phản hồi cấp hệ thống Người+Agent.│
+│ 4. THI CÔNG TDD CẤP HỆ THỐNG (STATION 1 RED ➔ STATION 2 GREEN):                  │
+│    • [Trạm 1: RED]: qa-tester tạo E2E Tests ĐỎ, Inversion Gate khóa ranh giới.  │
+│    • [Trạm 2: GREEN]: implementer tự do thi công One-Sweep toàn hệ thống.        │
 │    • Kế toán kép (Double-entry bookkeeping): Test assertion bất biến, cấm sửa test.│
-│    • Inversion Gate: Chứng minh bài test bắt được lỗi khi mutate 1 dòng logic.  │
 │                                                                                  │
-│ 5. HỢP ĐỒNG NGHIỆM THU TÍCH HỢP (ACCEPTANCE SUITE INTEGRATION):                  │
-│    • Chạy toàn bộ các hợp đồng kiểm thử nghiệm thu [TC-xx.x/MSS] & [TC-xx.x/A#]. │
+│ 5. QUÉT SẠCH 5 KHUYẾT TẬT ĐĨA VẬT LÝ (STATION 2.5: SWEEPING SCOUT AUDIT):       │
+│    • scout quét 100% file đã sửa: Stale closures, Unhandled async, Leaks, Dirty  │
+│      casts, Dead-end states. Dọn sạch triệt để trước khi chuyển Reviewer.        │
 │                                                                                  │
-│ 6. KIỂM TOÁN 2 CỔNG ĐỘC LẬP:                                                     │
-│    • Cổng 1 (Spec Gate): Gọi spec-reviewer (23 tiêu chí Martinelli, chặn rò rỉ). │
-│    • Cổng 2 (Code Gate): Gọi code-reviewer (6 Cờ Đỏ Slop Nash, Token schema).   │
+│ 6. KIỂM TOÁN ĐĨA VẬT LÝ & ACTIVE REMEDIATION (STATION 3: INDEPENDENT REVIEW):    │
+│    • spec-reviewer + code-reviewer kiểm chứng đĩa vật lý (view_file, terminal).  │
+│    • Active Remediation: Reviewer tự áp dụng bản vá cơ học (Fix Over Talk).      │
 │                                                                                  │
-│ 7. NGHIỆM THU THỰC TẾ, GÕ GIT COMMIT & HANDOFF CHUYỂN PHIÊN:                     │
+│ 7. MIỄN DỊCH PHẢN HỒI HỒI CỨU (STATION 3.5: RETRO FEEDBACK INOCULATION):         │
+│    • Mọi góp ý/sửa lỗi biến thành test tự động, linter AST, hoặc gotchas 3 tầng.│
+│                                                                                  │
+│ 8. NGHIỆM THU THỰC TẾ, GÕ GIT COMMIT & HANDOFF CHUYỂN PHIÊN:                     │
 │    • Smoke test 30s ➔ Con người TỰ TAY gõ git commit ➔ Đánh dấu [x] vào Sổ Cái. │
 │    • Gõ /handoff dọn sạch ngữ cảnh (Token về 0) trước khi sang Slice tiếp theo.   │
 └────────────────────────────────────────┬─────────────────────────────────────────┘
@@ -2609,12 +2814,14 @@ Khi bạn chạy lệnh trong Terminal gặp lỗi đỏ, hoặc Subagent báo t
 | **1.3** | Lập Sổ Cái Tiến Độ | 💬 `[AG 2.0]` Dựng `docs/epics/[epic]/_epic_ledger.md` (phân bổ Use Cases vào Slices) | Flash | Sổ Cái tiến độ theo dõi |
 | **2.1** | Cắt Lát Cắt (JIT)<br>*(Song tác nhân)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.1]**: `slicer` soạn thảo ticket ➔ `spec-reviewer` quét rò rỉ Zone 3 trước khi lưu | Flash | File `issues/[TICKET].md` sạch |
 | **2.2** | Trinh sát bối cảnh<br>*(Đơn tác nhân)* | 💬 `[AG 2.0]` Gọi `scout` (Read-only) trinh sát hiện trạng mã nguồn:<br>• **Greenfield (S00):** Dùng **[Mẫu P-2.2A]** Target File Map<br>• **Brownfield (S01+):** Dùng **[Mẫu P-2.2B]** Change Impact | Flash | Báo cáo hiện trạng & tọa độ dòng |
-| **2.3a** | Lập Plan & Phản Biện Zero-Trust<br>*(Song tác nhân đối kháng)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3a]**: `architect` bẻ Task DAG <= 80 LOC ➔ `spec-reviewer` phản biện Zero-Trust vạch trần 1–3 điểm bất hợp lý / rủi ro runtime | Sonnet 4.6 | Kế Hoạch qua Cổng Zero-Trust `[APPROVED]` |
+| **2.3a** | Lập Plan & Phản Biện Zero-Trust<br>*(Song tác nhân đối kháng)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3a]**: `architect` bẻ Task DAG <= 80 LOC ➔ `plan-griller` phản biện đối kháng Zero-Trust vạch trần 1–3 điểm mù kỹ thuật trên đĩa cứng | Sonnet 4.6 | Kế Hoạch qua Cổng Zero-Trust `[APPROVED]` |
 | **2.3b** | Khởi tạo Test Harness<br>*(Đơn tác nhân - S00)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3b]** gọi `implementer` dựng Test Runner tối thiểu (`package.json`, `tsconfig.json`, `vitest`...) ➔ Chạy smoke test PASS | Flash / Sonnet | Lệnh `npm test` chạy PASS trên CMD |
-| **2.3c** | Quy Trình 3 Trạm Tự Động<br>*(RED ➔ GREEN ➔ Snapshot ➔ Review)* | 💬 `[AG 2.0]` Dùng **[Mẫu P-2.3-STATIONS]**: QA viết test ĐỎ ➔ Implementer code XANH và TỰ ĐỘNG sinh `Evidence Snapshot` ➔ Reviewer đối chiếu đĩa vật lý | Sonnet 4.6 | 100% Contract PASS + File Snapshot đĩa |
+| **2.3c** | Thi Công Trạm 1 & 2<br>*(RED ➔ GREEN)* | 💬 `[AG 2.0]` Dùng **[Mẫu P-2.3-STATIONS]**: QA viết test ĐỎ ➔ Implementer code XANH và TỰ ĐỘNG sinh `Evidence Snapshot` | Sonnet 4.6 | 100% Contract PASS + File Snapshot đĩa |
+| **2.3.5**| Quét Sạch Đĩa Vật Lý<br>*(Trạm 2.5 Sweeping Scout)* | 💬 `[AG 2.0]` Gọi `scout` quét 100% file vừa sửa trên đĩa tìm 5 archetypes (Stale closures, Unhandled async, Leaks, Dirty casts, Dead-ends) | Flash | Phán quyết `SWEEP: PASS` sạch 100% |
 | **2.3d** | Chẩn đoán lỗi khoa học<br>*(Song tác nhân)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3d]**: `Investigator` truy nguyên nhân gốc ➔ `Implementer` sửa mã nguồn tối thiểu | Sonnet 4.6 | Báo cáo nguyên nhân & bản sửa tối thiểu |
 | **2.3e** | Nghiệm thu tích hợp<br>*(Đơn tác nhân)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3e]** gọi `implementer` chạy toàn bộ Test Suite với cờ `--randomize` (cách ly trạng thái) | Flash / Sonnet | 100% Test Contracts PASS |
-| **2.4** | Kiểm toán 2 Cổng Pháp Chứng<br>*(Song tác nhân độc lập)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.4]** gọi `spec-reviewer` + `code-reviewer` thẩm định tệp `Evidence Snapshot` vật lý ➔ Xuất Biên bản nghiệm thu | Sonnet / Flash | Báo cáo APPROVED + File `docs/reports/audits/[MÃ]_acceptance_report.md` |
+| **2.4** | Kiểm toán Đĩa & Sửa Lỗi<br>*(Trạm 3 Review & Active Remediation)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.4]** gọi `spec-reviewer` + `code-reviewer` thẩm định đĩa vật lý ➔ Trực tiếp áp dụng bản vá lỗi linter/import cơ học | Sonnet / Flash | Báo cáo APPROVED + File `docs/reports/audits/[MÃ]_acceptance_report.md` |
+| **2.4.5**| Miễn dịch phản hồi hồi cứu<br>*(Trạm 3.5 Retro Inoculation)* | 💬 `[AG 2.0]` Tự động chuyển 100% lỗi review thành test hồi quy tự động, linter AST rule, hoặc bất biến có số hiệu trong `docs/domain/gotchas.md` | Flash | Rào chắn hồi quy tự động khóa cứng |
 | **2.5** | Nghiệm thu & Commit | 💻 `[CMD]` Chạy lệnh **[Lệnh Terminal P-2.5]**: Smoke test 30s ➔ Tự gõ `git commit` trên CMD ➔ Đánh dấu `[x]` vào Sổ Cái `_epic_ledger.md` | Bạn (Human) | Git commit sạch, không lỗi |
 | **2.6** | Chuyển phiên chat | 💬 `[AG 2.0]` Dùng **[Mẫu Lệnh P-2.6]**: Gõ `/handoff` ➔ Bấm **New Conversation** (Ngữ cảnh về 0, không bị bloat trước khi sang Slice mới) | Flash | Tài liệu bàn giao gọn, sạch |
 | **3.1** | Xử lý bài toán khó | 💬 `[AG 2.0]` Gõ `/boost [bài toán phức tạp]` để kích hoạt deep reasoning 3 pha | Sonnet / Opus | Lời giải FSM / Thuật toán sạch |
@@ -2624,6 +2831,35 @@ Khi bạn chạy lệnh trong Terminal gặp lỗi đỏ, hoặc Subagent báo t
 | **4.3** | Kiểm toán hiệu năng xuất xưởng | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-4.3]** đo Bundle Size, Payload Delta < 10KB, và 60 FPS | Flash | Báo cáo Performance Audit PASS |
 | **4.4** | Quản trị cải tiến đột xuất | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-4.4]** lập cặp Plan & Report (`IMP-XX`) và đăng ký Roadmap | Flash | Cặp tệp Plan/Report trong `docs/` |
 | **4.5** | Đóng gói Docker & Healthz | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-4.5]** tạo Multi-stage Dockerfile, `/healthz` và Graceful Shutdown | Flash | Dockerfile + Endpoint `/healthz` |
+
+---
+
+### 12.0 PHÂN ĐỊNH CỬA 1 CHIỀU VS CỬA 2 CHIỀU (ONE-WAY VS TWO-WAY DOORS)
+
+> *"Không phải mọi quyết định hay pull request đều cần con người phải ngồi đọc từng dòng. Bí quyết làm việc siêu tốc với AI là phân định chính xác tính khả nghịch (Reversibility)."* — Jeff Bezos Model
+
+```text
+                                  [MỌI YÊU CẦU / TASK KỸ THUẬT]
+                                                │
+                     ┌──────────────────────────┴──────────────────────────┐
+                     ▼                                                     ▼
+        [TWO-WAY DOORS / CỬA 2 CHIỀU]                         [ONE-WAY DOORS / CỬA 1 CHIỀU]
+        (Dễ đảo ngược - Chi phí sửa sai thấp)                  (Khó đảo ngược - Chi phí sửa sai rất đắt)
+        • Thay đổi UI, Tailwind CSS, Spacing, Màu             • Thay đổi Database Schema / Migrations
+        • Thêm icon, âm thanh, hoạt cảnh 3D math              • Giao thức mạng (Wire Protocol, WebSocket Delta)
+        • Sửa copy text, nhãn localization                    • Kiến trúc bảo mật, Auth, Phân quyền (RBAC)
+        • Sửa bug nhỏ cục bộ trong 1-2 hàm độc lập            • State Machine (FSM), Luật tài chính, Tiền tệ
+        • Thay đổi mã nguồn < 50 LOC                          • Tính năng mới hoặc tái cấu trúc > 50 LOC
+                     │                                                     │
+                     ▼                                                     ▼
+        [TIER 1: FAST-TRACK PIPELINE]                         [TIER 2: FULL RIGOR PIPELINE]
+        • 0 Subagent, 0 Plan file riêng                       • BẮT BUỘC lập Implementation Plan chi tiết
+        • Main Agent tự viết 1-3 test nhanh + sửa code        • BẮT BUỘC gọi plan-griller phản biện đĩa cứng
+        • Xác minh tự động qua lệnh test in-memory            • Kích hoạt Plan Review Policy của IDE ("Proceed")
+        • Hoàn tất trong 1–2 phút, tiết kiệm 90% token        • Tự động kích hoạt Quy Trình 3 Trạm Mở Rộng
+```
+
+---
 
 
 ---
@@ -2871,16 +3107,19 @@ Báo cáo kết quả lệnh test và dừng lại để tôi kiểm tra.
 
 ---
 
-### 📋 MẪU P-2.3-STATIONS: QUY TRÌNH 3 TRẠM THỰC THI BẮT BUỘC CHO TÍNH NĂNG & BUGFIX (MANDATORY 3-STATION PIPELINE)
-- **🏷️ CHẾ ĐỘ THỰC THI**: `[3 TRẠM CÔ LẬP NGUYÊN TỬ TỰ ĐỘNG HÓA]` *(Trạm 1: QA Tester ĐỎ ➔ Trạm 2: Implementer XANH ➔ Trạm 3: Reviewer Thẩm Định Đĩa Vật Lý)*.
+### 📋 MẪU P-2.3-STATIONS: QUY TRÌNH THỰC THI ĐỐI KHÁNG MỞ RỘNG (EXPANDED 5-STATION PIPELINE)
+- **🏷️ CHẾ ĐỘ THỰC THI**: `[5 TRẠM CÔ LẬP NGUYÊN TỬ TỰ ĐỘNG HÓA]` *(Trạm 1: QA Tester ĐỎ ➔ Trạm 2: Implementer XANH ➔ Trạm 2.5: Sweeping Scout Quét Đĩa ➔ Trạm 3: Reviewer Thẩm Định Đĩa & Sửa Lỗi Trực Tiếp ➔ Trạm 3.5: Tiêm Chủng Retro)*.
 - **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Kế hoạch (`docs/plans/[MÃ_TICKET]_plan.md` hoặc `implementation_plan.md`) đã được duyệt `[APPROVED]` hoặc người dùng đã bấm **Proceed** trên modal Plan Review của IDE. Agent bắt buộc in biểu ngữ `🚦 [KÍCH HOẠT QUY TRÌNH 3 TRẠM]` ra cửa sổ chat.
 - **🛡️ RÀO CHẮN GÁC CỔNG**:
-  * Trạm 1: `qa-tester` CHỈ được viết test trong `tests/**`, TUYỆT ĐỐI CẤM sửa `src/**` (rào chắn cơ học `.agents/hooks_qa.json` cưỡng chế ở 0ms, 0-token). Phải chứng minh test ĐỎ (Adversarial Inversion).
+  * Trạm 1: `qa-tester` CHỈ được viết test trong `tests/**`, TUYỆT ĐỐI CẤM sửa `src/**` (rào chắn cơ học `.agents/hooks_qa.json` cưỡng chế ở 0ms, 0-token). Phải chứng minh test ĐỎ (Adversarial Inversion). Cấm viết static checklist test (`fs.existsSync`, `typeof fn`).
   * Trạm 2: `implementer` CHỈ viết mã trong `src/**`, TUYỆT ĐỐI CẤM sửa `tests/**` (rào chắn cơ học `.agents/hooks_implementer.json` cưỡng chế). Cấm nới lỏng assertion để test pass giả tạo (Zero Bug-Codification).
-  * Trạm 3: `spec-reviewer` + `code-reviewer` (và Visual Critic / UI Craft Reviewer nếu có UI/3D) hoàn toàn Read-Only. CẤM implementer tự duyệt code của chính mình. CẤM duyệt dựa trên lời nói trong chat. Reviewer BẮT BUỘC dùng công cụ đọc đĩa vật lý (`view_file`, `list_dir`, lệnh terminal thực tế) để xác minh code thật và test thật đang PASS trên đĩa cứng trước khi ký `[APPROVED]`.
-- **💬 CÂU LỆNH PROMPT CHUẨN KÍCH HOẠT 3 TRẠM (Dùng khi kích hoạt thủ công, hoặc được Agent tự động thực thi sau khi bấm "Proceed") (Model: Sonnet 4.6 hoặc Flash)**:
+  * Trạm 2.5: `scout` quét sạch 100% tệp vật lý vừa sửa trên đĩa theo 5 Archetypes khuyết tật phổ quát (stale closures, unhandled async, leaked listeners/timers, dirty casts, dead-end states). Nếu phát hiện khuyết tật, bắt buộc implementer sửa dứt điểm trước khi chuyển sang Trạm 3.
+  * Trạm 3: `spec-reviewer` + `code-reviewer` (và Visual Critic / UI Craft Reviewer nếu có UI/3D) hoàn toàn Read-Only đối với logic nghiệp vụ. CẤM implementer tự duyệt code của chính mình. CẤM duyệt dựa trên lời nói trong chat. Reviewer BẮT BUỘC dùng công cụ đọc đĩa vật lý (`view_file`, `list_dir`, lệnh terminal thực tế) để xác minh code thật và test thật đang PASS trên đĩa cứng trước khi ký `[APPROVED]`.
+    - **Active Remediation (Sửa Thay Vì Nói)**: Reviewer không để lại comment thụ động cho các lỗi cơ học (linter, imports, formatting, type annotations). Reviewer trực tiếp áp dụng bản vá trên đĩa trước khi cấp chữ ký nghiệm thu.
+  * Trạm 3.5: Tiêm chủng phản hồi (Retro Feedback Inoculation): Mọi khiếm khuyết được phát hiện trong đợt review hoặc từ người dùng BẮT BUỘC phải được biến thành automated test (`tests/contracts/`), linter rule (`scripts/lint_*.mjs`), hoặc ghi nhận vào `docs/domain/gotchas.md` theo cấu trúc 3 lớp (ảo tưởng ban đầu ➔ phát hiện thực tế ➔ bất biến xác minh). Không sửa lỗi đơn lẻ mà không có rào chắn hồi quy tự động.
+- **💬 CÂU LỆNH PROMPT CHUẨN KÍCH HOẠT 5 TRẠM (Dùng khi kích hoạt thủ công, hoặc được Agent tự động thực thi sau khi bấm "Proceed") (Model: Sonnet 4.6 hoặc Flash)**:
 ```text
-Kế hoạch [ĐƯỜNG_DẪN_TỆP_PLAN] đã được duyệt. Hãy kích hoạt Quy Trình 3 Trạm Bắt Buộc (Mandatory 3-Station Pipeline) để thi công [MÃ_TICKET]:
+Kế hoạch [ĐƯỜNG_DẪN_TỆP_PLAN] đã được duyệt. Hãy kích hoạt Quy Trình Thực Thi Đối Kháng Mở Rộng để thi công [MÃ_TICKET]:
 
 🚦 [KÍCH HOẠT QUY TRÌNH 3 TRẠM]
 
@@ -2896,26 +3135,47 @@ TRẠM 2 (GREEN IMPLEMENTATION - Subagent implementer, Read-only tests/):
 1. Đọc kết quả test ĐỎ từ Trạm 1 và bản kế hoạch.
 2. VÙNG CÔ LẬP: TUYỆT ĐỐI CẤM sửa tệp test trong tests/ để che giấu lỗi (Hook .agents/hooks_implementer.json khóa cứng; Zero Bug-Codification).
 3. Viết mã nguồn tối thiểu vào src/ để chuyển toàn bộ bài test sang XANH (PASS 100%).
-4. Kiểm soát chất lượng: Hàm <= 30 dòng, Cyclomatic Complexity <= 5, đúng trần 5-Tier LOC, zero dirty casts, zero nuốt lỗi âm thầm.
+4. Kiểm soát chất lượng: Hàm <= 30 dòng, Cyclomatic Complexity <= 5, đúng trần 5-Tier LOC, deep modules (ban shallow pass-through wrappers), zero dirty casts, zero nuốt lỗi âm thầm.
 5. Chạy lại lệnh test và chứng minh PASS 100%.
-6. TỰ ĐỘNG HÓA BẰNG CHỨNG SỐ (Zero-Memorization): Tự động thực thi `node scripts/collect_evidence.mjs` để đóng gói tệp `.agents/evidence/[MÃ_TICKET]_snapshot.json` trước khi báo cáo hoàn tất. Người dùng KHÔNG PHẢI gõ lệnh thủ công.
+6. TỰ ĐỘNG HÓA BẰNG CHỨNG SỐ (Zero-Memorization): Tự động thực thi `node scripts/collect_evidence.mjs` để đóng gói tệp `.agents/evidence/[MÃ_TICKET]_snapshot.json` trước khi báo cáo hoàn tất.
 
-TRẠM 3 (INDEPENDENT REVIEW & PHYSICAL DISK VERIFICATION - Subagent spec-reviewer + code-reviewer, Read-only):
+TRẠM 2.5 (SWEEPING SCOUT AUDIT - Subagent scout, Read-only src/ & tests/):
+1. Dùng view_file quét sạch 100% tệp vật lý vừa sửa trên đĩa theo 5 Archetypes khuyết tật:
+   - (1) Stale state / closure snapshots (đặc biệt trong useEffect/useCallback/setInterval).
+   - (2) Unhandled async / promises / exceptions.
+   - (3) Resource / listener / timer leaks (kiểm tra clearInterval/clearTimeout/subscription dispose).
+   - (4) Private internals or dirty bypasses (as any, as unknown, compiler bypass).
+   - (5) Dead-end states & dead code (nút bấm không có action, trạng thái đơ không thể thoát).
+2. Trả về báo cáo súc tích (<20 dòng) kèm tọa độ file:line.
+3. Nếu phát hiện khuyết tật: Bắt buộc implementer sửa sạch trước khi chuyển sang Trạm 3.
+
+TRẠM 3 (INDEPENDENT REVIEW & ACTIVE REMEDIATION - Subagent spec-reviewer + code-reviewer, Read-only logic):
 1. CẤM implementer tự phê duyệt code của chính mình.
-2. CẤM chấp thuận dựa trên báo cáo bằng lời nói của agent trước. BẮT BUỘC dùng công cụ đọc đĩa vật lý (view_file, list_dir, terminal command) để xác minh trực tiếp trên ổ cứng:
+2. CẤM chấp thuận dựa trên lời nói trong chat. BẮT BUỘC dùng công cụ đọc đĩa vật lý (view_file, list_dir, terminal command) để xác minh trực tiếp trên ổ cứng:
    - spec-reviewer: Đọc diff thực tế trên đĩa, đối chiếu 1-1 với kế hoạch và requirements.md, xác nhận 0% Scope Drift.
-   - code-reviewer: Đọc mã nguồn thực tế trên đĩa, chạy lệnh kiểm tra chất lượng (npm run gate:quick), xác nhận 0 cờ đỏ slop, đúng chuẩn kiến trúc.
+   - code-reviewer: Đọc mã nguồn thực tế trên đĩa, chạy lệnh kiểm tra chất lượng (npm run gate:quick), xác nhận 0 cờ đỏ slop, đúng chuẩn kiến trúc deep module.
+   - ui-craft-reviewer / visual-critic: Soi trực tiếp pixel ảnh chụp từ đĩa (view_file), kiểm tra 4 anti-patterns và chuẩn công thái học.
+   - ACTIVE REMEDIATION: Nếu phát hiện lỗi cơ học (linter, imports, formatting, type annotation thiếu), reviewer TRỰC TIẾP SỬA TRÊN ĐĨA thay vì để lại comment thụ động.
    - ĐỐI CHIẾU EVIDENCE SNAPSHOT: Đọc tệp `.agents/evidence/[MÃ_TICKET]_snapshot.json` trên đĩa vật lý để xác nhận bằng chứng định lượng (blast radius, delta LOC, downstream consumers, contract tests PASS).
 3. Cấp chữ ký [APPROVED] hoặc [REJECTED] kèm báo cáo ngắn gọn (<20 dòng).
+
+TRẠM 3.5 (RETRO FEEDBACK INOCULATION - Tiêm Chủng Phản Hồi):
+1. Ghi nhận mọi bài học kinh nghiệm hoặc phản hồi review thành rào chắn tự động:
+   - Tạo test hồi quy tại tests/contracts/ để lỗi không thể tái diễn vĩnh viễn.
+   - Hoặc thêm quy tắc vào scripts/lint_*.mjs nếu là lỗi cú pháp/mã nguồn phổ quát.
+   - Ghi nhận vào docs/domain/gotchas.md với 3 tầng cấu trúc: Ảo tưởng ban đầu ➔ Phát hiện thực tế trên đĩa ➔ Bất biến miền đã xác minh.
+2. Đảm bảo 100% test hồi quy mới PASS trên máy thật.
 ```
-- **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu - 3 TRẠM HOÀN TẤT)**:
-  - Trạm 1 có log test ĐỎ thật sự.
+- **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu - QUY TRÌNH HOÀN TẤT)**:
+  - Trạm 1 có log test ĐỎ thật sự (Adversarial Inversion).
   - Trạm 2 có mã nguồn sạch, test XANH 100%, và tệp `.agents/evidence/[MÃ_TICKET]_snapshot.json` đã được sinh tự động.
-  - Trạm 3 có biên bản thẩm định đĩa vật lý độc lập với chữ ký `[APPROVED]`.
+  - Trạm 2.5 quét sạch 5 khuyết tật phổ quát với phán quyết PASS.
+  - Trạm 3 có biên bản thẩm định đĩa vật lý độc lập với chữ ký `[APPROVED]`, các lỗi cơ học đã được vá trực tiếp.
+  - Trạm 3.5 có test hồi quy / gotchas ghi nhận bất biến thực tế.
 - **📌 CHỈ DẪN VẠN NĂNG CHO JUNIOR**:
   - *Biến số cần thay thế*: `[ĐƯỜNG_DẪN_TỆP_PLAN]` (VD: `docs/plans/improvements/IMP-51_plan.md`), `[MÃ_TICKET]`, và `[TÊN_CONTRACT]`.
-  - *Quy Trình Tự Động Hóa 1 Cú Bấm (1-Click Autonomous Execution)*: Nếu bạn đã kích hoạt `Plan Review Policy = "Review every plan"` trong IDE AG 2.0, bạn thậm chí không cần gõ câu lệnh prompt P-2.3-STATIONS này. Ngay khi bạn bấm nút "Proceed" trên giao diện Plan Review Modal, Agent sẽ tự động mang nội dung chỉ dẫn 3 trạm này đi thực thi tự hành xuyên suốt từ Trạm 1 đến Trạm 3 mà không cần bạn can thiệp thêm.
-  - *Giá trị cốt lõi*: 3 Trạm loại bỏ hoàn toàn tình trạng AI "vừa đá bóng vừa thổi còi", đảm bảo mọi tính năng hay bugfix dù lớn hay nhỏ đều có test hợp đồng bảo vệ, rào chắn hooks cơ học bảo vệ ranh giới file, bằng chứng số bất biến được lưu tự động trên đĩa, và được thẩm định khách quan trên đĩa vật lý.
+  - *Quy Trình Tự Động Hóa 1 Cú Bấm (1-Click Autonomous Execution)*: Nếu bạn đã kích hoạt `Plan Review Policy = "Review every plan"` trong IDE AG 2.0, bạn thậm chí không cần gõ câu lệnh prompt P-2.3-STATIONS này. Ngay khi bạn bấm nút "Proceed" trên giao diện Plan Review Modal, Agent sẽ tự động mang nội dung chỉ dẫn dây chuyền này đi thực thi tự hành xuyên suốt từ Trạm 1 đến Trạm 3.5 mà không cần bạn can thiệp thêm.
+  - *Giá trị cốt lõi*: Loại bỏ hoàn toàn tình trạng AI "vừa đá bóng vừa thổi còi", đảm bảo mọi tính năng hay bugfix dù lớn hay nhỏ đều có test hợp đồng bảo vệ, rào chắn hooks cơ học bảo vệ ranh giới file, bằng chứng số bất biến được lưu tự động trên đĩa, quét sạch rò rỉ ngầm trước khi review, và vĩnh viễn không bao giờ lặp lại lỗi cũ nhờ cơ chế tiêm chủng phản hồi.
 
 ---
 

@@ -276,7 +276,7 @@ export function buildDeltaPayload(
   tickOrOptions:
     | number
     | DeltaPayloadOptions
-    | { tick: number; room: Room; registry: PropertyRegistry; stateMap: PropertyStateMap; auctions?: Map<string, AuctionSession>; lastAuctionResults?: Map<string, any> },
+    | { tick: number; room: Room; registry: PropertyRegistry; stateMap: PropertyStateMap; auctions?: Map<string, AuctionSession>; lastAuctionResults?: Map<string, AuctionDelta> },
   cells?: ReadonlyArray<CellDelta>,
   players?: ReadonlyArray<PlayerDelta>,
 ): DeltaPayload {
@@ -384,6 +384,8 @@ export class SessionManager {
       ...(payload.roundNumber !== undefined ? { roundNumber: payload.roundNumber } : {}),
       ...(payload.treasury !== undefined ? { treasury: payload.treasury } : {}),
       ...(payload.activeModifiers !== undefined ? { activeModifiers: payload.activeModifiers } : {}),
+      ...(payload.pendingBuyout !== undefined ? { pendingBuyout: payload.pendingBuyout } : {}),
+      ...(payload.pendingTradeOffer !== undefined ? { pendingTradeOffer: payload.pendingTradeOffer } : {}),
       ...(payload.lastDiplomaticEvent !== undefined ? { lastDiplomaticEvent: payload.lastDiplomaticEvent } : {}),
     };
   }

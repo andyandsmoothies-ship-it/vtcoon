@@ -378,6 +378,7 @@ describe('[UC-IMP196] IMP-196 Diplomatic Immunity Feedback & Dice Readability Co
         actionType: 'diplomatic' as any,
         title: 'Miễn Trừ Ngoại Giao',
         cellIndex: 3,
+        timestamp: Date.now(),
       };
 
       const tenantInfo: PlayerHudInfo = {
@@ -409,6 +410,7 @@ describe('[UC-IMP196] IMP-196 Diplomatic Immunity Feedback & Dice Readability Co
         actionType: 'diplomatic' as any,
         title: 'Khách dùng Thẻ Ngoại Giao',
         cellIndex: 3,
+        timestamp: Date.now(),
       };
 
       const landlordInfo: PlayerHudInfo = {
@@ -434,6 +436,7 @@ describe('[UC-IMP196] IMP-196 Diplomatic Immunity Feedback & Dice Readability Co
         targetPlayerName: 'Chủ Ga',
         actionType: 'rent_pay',
         cellIndex: 5, // Ga Sài Gòn (Railroad)
+        timestamp: Date.now(),
       };
 
       const playerWithCard: PlayerHudInfo = {

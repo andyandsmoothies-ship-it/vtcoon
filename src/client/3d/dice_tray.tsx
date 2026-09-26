@@ -175,14 +175,17 @@ export function DiceTray(): React.ReactElement {
       AudioEngine.playSfx(SoundEffect.DICE_ROLL);
     } else if (!isRolling && prevRollingRef.current) {
       // Dừng quay -> chờ 1.5s rồi mờ dần trong 300ms
+      let hideTimer: ReturnType<typeof setTimeout> | undefined;
       const timer = setTimeout(() => {
         setFadeOpacity(0);
-        const hideTimer = setTimeout(() => {
+        hideTimer = setTimeout(() => {
           setIsVisible(false);
         }, 300);
-        return () => clearTimeout(hideTimer);
       }, 1500);
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(timer);
+        if (hideTimer) clearTimeout(hideTimer);
+      };
     }
     prevRollingRef.current = isRolling;
   }, [isRolling]);
@@ -218,7 +221,7 @@ export function DiceTray(): React.ReactElement {
 
       {/* 2 Xúc xắc 3D đỏ Ruby chỉ render khi đang quay hoặc mờ dần */}
       {Boolean(isRolling || (isVisible && fadeOpacity > 0)) && (
-        <group rotation={!isRolling ? [-0.35, 0.35, 0] : [0, 0, 0]}>
+        <group rotation={!isRolling ? [0.35, 0, -0.35] : [0, 0, 0]}>
           <SingleDie
             face={dice[0]}
             targetX={-0.65}

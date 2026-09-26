@@ -47,6 +47,9 @@ export function isPlayerEqual(a: PlayerDelta, b: PlayerDelta): boolean {
     Boolean(a.isBot) === Boolean(b.isBot) &&
     (a.overdraftRoundsLeft ?? 0) === (b.overdraftRoundsLeft ?? 0) &&
     Boolean(a.inAudit) === Boolean(b.inAudit) &&
+    (a.auditTurnsLeft ?? 0) === (b.auditTurnsLeft ?? 0) &&
+    Boolean(a.skipNextTurn) === Boolean(b.skipNextTurn) &&
+    (a.consecutiveDoubles ?? 0) === (b.consecutiveDoubles ?? 0) &&
     (a.extraTurns ?? 0) === (b.extraTurns ?? 0) &&
     bondEqual &&
     handEqual

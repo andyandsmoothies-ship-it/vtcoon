@@ -2,7 +2,7 @@
 // Barrel re-export — bảo toàn 100% import paths cho 12 test files
 
 import type { Player, MarketModifier, Room } from './room';
-import { MarketCardId, ChanceCardId, COASTAL_CELLS, RESORT_CELLS, SERVICE_CELLS } from './event_card_engine';
+import { MarketCardId, ChanceCardId, COASTAL_CELLS, SERVICE_CELLS } from './event_card_engine';
 import {
   PROPERTY_DEEDS, isPurchasable,
   type PropertyRegistry, type PropertyStateMap,

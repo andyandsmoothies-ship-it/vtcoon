@@ -326,6 +326,7 @@ export type InitialGameState = Pick<
   | 'auction'
   | 'activeEmotes'
   | 'floatingTexts'
+  | 'lastDiplomaticEvent'
   | 'cameraFocusCell'
   | 'hasUserCustomCamera'
 >;
@@ -359,6 +360,7 @@ export const INITIAL_GAME_STATE: InitialGameState = {
   auction: null,
   activeEmotes: {},
   floatingTexts: [],
+  lastDiplomaticEvent: null,
   cameraFocusCell: null,
   hasUserCustomCamera: false,
 };

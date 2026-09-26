@@ -13,6 +13,7 @@ import { TelemetryConsoleModal } from './telemetry/telemetry_console_modal';
 import { RecenterPawnPill } from './recenter_pawn_pill';
 import { CameraResetPill } from './camera_reset_pill';
 import { InlineBotTradeStrip } from './modals/bot_trade_offer_strip';
+import { DiceScoreBadge } from './dice_score_badge';
 import { useGameStore } from '../store/game_store';
 import { useLobbyStore } from '../store/lobby_store';
 import type { PlayerIntent } from '../../server/intent_dispatcher';
@@ -44,6 +45,8 @@ export function HudContainer({
   const setCameraFocusCell = useGameStore((s) => s.setCameraFocusCell);
   const playerPositions = useGameStore((s) => s.playerPositions);
   const currentTurnPlayerId = useGameStore((s) => s.currentTurnPlayerId);
+  const dice = useGameStore((s) => s.dice);
+  const isRolling = useGameStore((s) => s.isRolling);
   const lobbyPid = useLobbyStore((s) => s.myPlayerId);
   const myId = localPlayerId || (lobbyPid && lobbyPid.length > 0 ? lobbyPid : undefined) || currentTurnPlayerId || 'p1';
   const pawnPos = playerPositions[myId] ?? 0;
@@ -92,6 +95,7 @@ export function HudContainer({
 
         {/* Thanh Điều Khiển Tác Vụ Cốt Lõi & Strip Giao Dịch Bot (Bottom-Right, thuận tay thao tác công thái học) */}
         <div className="flex flex-col items-center sm:items-end gap-1.5 w-full sm:w-auto max-w-[96vw] sm:max-w-none sm:min-w-0 pointer-events-none">
+          <DiceScoreBadge dice={dice} isRolling={isRolling} />
           <InlineBotTradeStrip onIntent={onIntent} localPlayerId={localPlayerId} />
           <div className="pointer-events-auto">
             <ActionDock

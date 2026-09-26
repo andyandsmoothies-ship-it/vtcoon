@@ -322,10 +322,18 @@
 - **Phê chuẩn**: `spec-reviewer` APPROVED (0 Scope Drift), `npm run lint:ui` 0 lỗi, `npx tsc --noEmit` 0 lỗi.
 - **Trạng thái**: ✅ Hoàn thành (2026-09-19).
 
+---
 
-
-
-
-
-
-
+### [IMP-196] Minh Bạch Hiệu Lực Phiếu Miễn Trừ Ngoại Giao & Triệt Tiêu Độ Lệch Thị Giác Xúc Xắc 3D
+- **Mục tiêu**: Đồng bộ toàn phần 5 trạm WebSocket cho Thẻ Miễn Trừ Ngoại Giao (`CC_DIPLOMATIC`), định giá tiền thuê trước khi tiêu thụ thẻ (`pre-consumption valuation`), hiển thị micro-chip `🤝` trên PlayerCard, và hiệu chỉnh góc nghiêng 3D Bias Tilt kết hợp 2D HUD `DiceScoreBadge` triệt tiêu ảo giác nhìn nhầm mặt xúc xắc 3D.
+- **Hạ tầng hoàn tất**:
+  * `session_manager.ts` & `delta_broadcaster.ts`: `PlayerDelta.hand` emit `hand: []` khi rỗng (Array Tombstone Protocol) và so sánh theo từng phần tử trong `isPlayerEqual`; đồng bộ `lastDiplomaticEvent` qua 4 vị trí đồng thời.
+  * `property_manager.ts`: Tính `potentialRent = calculateRent(baseRent, ...)` trước khi gọi `tryUseDiplomaticCard`, trả về `savedRentAmount: potentialRent`; bảo lưu thẻ khi dẫm Ga tàu / Tiện ích (chỉ miễn BĐS C0-C3).
+  * `turn_loop.ts`: Ghi nhận `room.lastDiplomaticEvent` và dọn dẹp Turn N+1 về `null`.
+  * `transaction_narrative.ts`: Nhánh `actionType === 'diplomatic'` tự nhiên hóa câu chữ cho khách thuê và chủ đất; thông báo rõ bảo lưu thẻ khi nộp tiền thuê ga tàu/tiện ích.
+  * `player_card.tsx`: Micro-chip `🤝` (16x16px) đè góc dưới bên phải avatar tròn với tooltip `title="Giữ Thẻ Miễn Trừ Ngoại Giao"`.
+  * `dice_tray.tsx`: Áp dụng góc nghiêng tĩnh Euler chuẩn xác `rotation={[0.35, 0, -0.35]}` đưa mặt trên (+Y) ngửa trực diện mắt người chơi ($\cos \approx 0.90$) và dìm mặt đứng (+Z) xuống góc dẹp.
+  * `dice_score_badge.tsx` & `hud_container.tsx`: Trích xuất component 2D HUD callout hiển thị điểm `🎲 1 + 5 = 6` kèm cờ `(Đôi! 🎉)` và mount trực tiếp lên HUD ActionDock.
+- **Kiểm thử & Bất biến**: `tests/contracts/imp196_diplomatic_card_and_dice_clarity.test.ts` (16/16 atomic contract tests PASS 100%, Adversarial Inversion PASS), Gotcha #279, toàn bộ 119 test suites PASS, `npm run lint:ui` 0 lỗi.
+- **Phê chuẩn**: `spec-reviewer` APPROVED, `ui-craft-reviewer` VERDICT SHIP, `game-3d-visual-critic` VERDICT PASS (8.5/10 Commercial AAA Ready).
+- **Trạng thái**: ✅ Hoàn thành (2026-09-26).
