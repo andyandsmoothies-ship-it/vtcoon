@@ -88,7 +88,7 @@ export function TitleDeedRentTable({
               <div className="w-full flex items-center justify-between px-2 py-1">
                 <span className="text-[10px] sm:text-[11px] text-slate-600 font-bold whitespace-nowrap">CƯỚC 1-4 GA: (Toàn mạng lưới)</span>
                 <span className="font-mono text-[10px] sm:text-[11px] font-bold text-slate-800 whitespace-nowrap">
-                  {rents.map((r) => formatCurrency(r).replace(' Tr.', '')).join(' / ')} Tr.
+                  {rents.map((r) => formatCurrency(r)).join(' / ')}
                 </span>
               </div>
             )}

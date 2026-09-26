@@ -199,7 +199,7 @@ describe('[FACET-1] Touch Target Ergonomics (>= 44px Mandate)', () => {
         initialRequested: [3],
       })
     );
-    const chipMatch = html.match(/<button[^>]*>[\s\S]*?100% Gốc \(\d+ Tr\.\)[\s\S]*?<\/button>/);
+    const chipMatch = html.match(/<button[^>]*>[\s\S]*?100% Gốc \(\d+\)[\s\S]*?<\/button>/);
     expect(chipMatch).not.toBeNull();
     expect(chipMatch![0]).toContain('min-h-[44px]');
   });
@@ -215,7 +215,7 @@ describe('[FACET-1] Touch Target Ergonomics (>= 44px Mandate)', () => {
         initialRequested: [3],
       })
     );
-    const chipMatch = html.match(/<button[^>]*>[\s\S]*?120% \(\d+ Tr\.\)[\s\S]*?<\/button>/);
+    const chipMatch = html.match(/<button[^>]*>[\s\S]*?120% \(\d+\)[\s\S]*?<\/button>/);
     expect(chipMatch).not.toBeNull();
     expect(chipMatch![0]).toContain('min-h-[44px]');
   });
@@ -231,7 +231,7 @@ describe('[FACET-1] Touch Target Ergonomics (>= 44px Mandate)', () => {
         initialRequested: [3],
       })
     );
-    const chipMatch = html.match(/<button[^>]*>[\s\S]*?100% Gốc \([\d\.,]+ Tr\.\)[\s\S]*?<\/button>/);
+    const chipMatch = html.match(/<button[^>]*>[\s\S]*?100% Gốc \([\d\.,]+\)[\s\S]*?<\/button>/);
     expect(chipMatch).not.toBeNull();
     expect(chipMatch![0]).toContain('min-h-[44px]');
   });
@@ -247,7 +247,7 @@ describe('[FACET-1] Touch Target Ergonomics (>= 44px Mandate)', () => {
         initialRequested: [3],
       })
     );
-    const chipMatch = html.match(/<button[^>]*>[\s\S]*?130% \([\d\.,]+ Tr\.\)[\s\S]*?<\/button>/);
+    const chipMatch = html.match(/<button[^>]*>[\s\S]*?130% \([\d\.,]+\)[\s\S]*?<\/button>/);
     expect(chipMatch).not.toBeNull();
     expect(chipMatch![0]).toContain('min-h-[44px]');
   });
@@ -263,7 +263,7 @@ describe('[FACET-1] Touch Target Ergonomics (>= 44px Mandate)', () => {
         initialRequested: [3],
       })
     );
-    const chipMatch = html.match(/<button[^>]*>[\s\S]*?150% \([\d\.,]+ Tr\.\)[\s\S]*?<\/button>/);
+    const chipMatch = html.match(/<button[^>]*>[\s\S]*?150% \([\d\.,]+\)[\s\S]*?<\/button>/);
     expect(chipMatch).not.toBeNull();
     expect(chipMatch![0]).toContain('min-h-[44px]');
   });
@@ -348,7 +348,7 @@ describe('[FACET-3] Viewport & Responsive Layout Constraints', () => {
         onClose: () => {},
       })
     );
-    expect(html).toContain('Cược 500 Tr.');
+    expect(html).toContain('Cược 500');
     expect(html).not.toContain('Đặt Cược');
   });
 

@@ -174,11 +174,11 @@ describe('[TC-OPS02.3/MSS] Logic Toan Hoc Hoat Anh sin(wt) & Business Modals', (
       );
       expect(html).toContain('role="dialog"');
       expect(html).toContain('SÀN CHỨNG KHOÁN HOSE');
-      expect(html).toContain('500 Tr.');
-      expect(html).toContain('1.000 Tr.');
-      expect(html).toContain('2.000 Tr.');
-      expect(html).toContain('3.000 Tr.');
-      expect(html).toContain('15.000 Tr.');
+      expect(html).toContain('500');
+      expect(html).toContain('1.000');
+      expect(html).toContain('2.000');
+      expect(html).toContain('3.000');
+      expect(html).toContain('15.000');
       for (const [face, mult] of Object.entries(HOSE_OUTCOMES)) {
         expect(html).toContain(`Mặt ${face}`);
         expect(html).toContain(`${mult.toFixed(2)}x`);
@@ -190,7 +190,7 @@ describe('[TC-OPS02.3/MSS] Logic Toan Hoc Hoat Anh sin(wt) & Business Modals', (
         React.createElement(HoseModal, { myBalance: 15000, lastDiceRoll: 5, lastPayout: 1500, onInvest: () => {}, onSkip: () => {}, onClose: () => {} })
       );
       expect(html).toContain('Điểm xúc xắc 1D6: <strong class="text-slate-900 font-black">5</strong>');
-      expect(html).toContain('Tiền thu về: 1.500 Tr.');
+      expect(html).toContain('Tiền thu về: 1.500');
     });
 
     it('[Adversarial] So du khong du (balance < stake): nut cuoc va nut preset bi disabled', () => {
@@ -198,7 +198,7 @@ describe('[TC-OPS02.3/MSS] Logic Toan Hoc Hoat Anh sin(wt) & Business Modals', (
         React.createElement(HoseModal, { myBalance: 400, onInvest: () => {}, onSkip: () => {}, onClose: () => {} })
       );
       expect(html).toContain('disabled=""');
-      expect(html).toContain('400 Tr.');
+      expect(html).toContain('400');
     });
 
     it('Dong mo Modal HOSE qua GameStore', () => {
@@ -225,22 +225,22 @@ describe('[TC-OPS02.3/MSS] Logic Toan Hoc Hoat Anh sin(wt) & Business Modals', (
       expect(html).toContain('role="alert"');
       expect(html).toContain('Thanh Lý Cưỡng Chế');
       expect(html).toContain('Nguyễn Văn A');
-      expect(html).toContain('-1.200 Tr.');
+      expect(html).toContain('-1.200');
       expect(html).toContain('Quản Lý BĐS / Thế Chấp');
       expect(html).toContain('Tuyên Bố Phá Sản (Rời Bàn)');
     });
 
-    it('[Adversarial] Tham hut 0 hoac NaN khong hien thi -0 Tr.', () => {
+    it('[Adversarial] Tham hut 0 hoac NaN khong hien thi -0', () => {
       const htmlZero = renderToStaticMarkup(
         React.createElement(InsolvencyBanner, { playerId: 'p1', deficit: 0 })
       );
-      expect(htmlZero).toContain('0 Tr.');
-      expect(htmlZero).not.toContain('-0 Tr.');
+      expect(htmlZero).toContain('0');
+      expect(htmlZero).not.toMatch(/>\s*-\s*0\s*</);
 
       const htmlNaN = renderToStaticMarkup(
         React.createElement(InsolvencyBanner, { playerId: 'p1', deficit: Number.NaN })
       );
-      expect(htmlNaN).toContain('0 Tr.');
+      expect(htmlNaN).toContain('0');
       expect(htmlNaN).not.toContain('NaN');
     });
 

@@ -16,12 +16,12 @@ describe('[TC-AUC-MODAL.1/MSS] Cấu Trúc Giao Diện 2 Cánh Glassmorphism (Du
     );
 
     expect(html).toContain('data-testid="auction-modal"');
-    // Cánh trái: Bảng giá hiện tại & Tên ô đất
-    expect(html).toContain('SÀN ĐẤU GIÁ TRỰC TUYẾN');
+    // Header hợp nhất: Tên BĐS & Phân khu quy hoạch
+    expect(html).toContain('data-testid="auction-hero-header"');
     expect(html).toContain('GIÁ THẦU HIỆN TẠI');
     expect(html).toContain('Cần Thơ (Cái Răng)');
-    expect(html).toContain('600 Tr.');
-    expect(html).toContain('LIVE TABLETOP ARENA');
+    expect(html).toContain('600');
+    expect(html).toContain('Đấu giá BĐS');
 
     // Cánh phải: Đại gia tham gia
     expect(html).toContain('ĐẠI GIA THAM GIA');
@@ -29,9 +29,9 @@ describe('[TC-AUC-MODAL.1/MSS] Cấu Trúc Giao Diện 2 Cánh Glassmorphism (Du
     // Băng chuyền dưới chân: Đồng hồ đếm ngược & nút đặt giá
     expect(html).toContain('THỜI GIAN CÒN LẠI');
     expect(html).toContain('15 GIÂY');
-    expect(html).toContain('+100 Tr.');
-    expect(html).toContain('+200 Tr.');
-    expect(html).toContain('+500 Tr.');
+    expect(html).toContain('+100');
+    expect(html).toContain('+200');
+    expect(html).toContain('+500');
     expect(html).toContain('AUTO-BID');
     expect(html).toContain('Rút Lui / Bỏ Cuộc');
   });
@@ -48,7 +48,7 @@ describe('[TC-AUC-MODAL.1/MSS] Cấu Trúc Giao Diện 2 Cánh Glassmorphism (Du
     );
 
     expect(html).toContain('Bạn đang dẫn đầu mức giá cao nhất!');
-    expect(html).not.toContain('+100 Tr.'); // Khi đang dẫn đầu, các nút bid được ẩn để tránh tự đấu với chính mình
+    expect(html).not.toContain('+100'); // Khi đang dẫn đầu, các nút bid được ẩn để tránh tự đấu với chính mình
   });
 
   it('Hiển thị thông báo khi người chơi đã rút lui khỏi sàn đấu giá', () => {
@@ -94,7 +94,7 @@ describe('[TC-AUC-MODAL.1/MSS] Cấu Trúc Giao Diện 2 Cánh Glassmorphism (Du
     );
 
     expect(html).toContain('aria-live="polite"');
-    expect(html).toContain('Giá thầu cao nhất hiện tại: 950 Tr., người dẫn đầu: Đại Gia Sài Gòn, thời gian còn lại: 12 giây');
+    expect(html).toContain('Giá thầu cao nhất hiện tại: 950, người dẫn đầu: Đại Gia Sài Gòn, thời gian còn lại: 12 giây');
   });
 
   it('Vô hiệu hóa các nút nâng giá khi số dư người chơi không đủ (myBalance < targetBid)', () => {

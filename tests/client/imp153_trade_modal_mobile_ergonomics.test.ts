@@ -87,7 +87,7 @@ describe('[IMP-153][Trạm 1 RED] P2P Trade Modal Tactile UI/UX Overhaul & Mobil
 
     expect(html).toContain('partner-selector-tab');
     expect(html).toContain('min-h-[44px]');
-    expect(html).toContain('8.000 Tr.');
+    expect(html).toContain('8.000');
   });
 
   // =========================================================================
@@ -262,7 +262,7 @@ describe('[IMP-153][Trạm 1 RED] P2P Trade Modal Tactile UI/UX Overhaul & Mobil
 
     expect(html).toContain('5%');
     expect(html).toContain('Thuế nộp Kho Bạc');
-    expect(html).toContain('50 Tr.');
+    expect(html).toContain('50');
   });
 
   it('[TC-153.16/MSS][UC-IMP153][Facet-4/ErrorDefense] Consumer Assertion: Khi người chơi yêu cầu số tiền vượt quá số dư đối tác, nút gửi đề xuất bị khóa disabled và hiển thị cảnh báo', () => {

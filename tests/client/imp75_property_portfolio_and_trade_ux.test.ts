@@ -70,7 +70,7 @@ describe('[IMP-75: Trạm 1 RED] Property Portfolio, Title Deed Carousel, Trade 
           currentBalance: 1000,
         })
       );
-      expect(html).toContain('Thế Chấp (+500 Tr.)');
+      expect(html).toContain('Thế Chấp (+500)');
     });
 
     it('[TC-IMP75.05/MSS] Hiển thị banner tiến trình cứu nợ khi có thâm hụt tài chính', () => {
@@ -86,7 +86,7 @@ describe('[IMP-75: Trạm 1 RED] Property Portfolio, Title Deed Carousel, Trade 
         })
       );
       expect(html).toContain('Cần Giải Tỏa Thâm Hụt');
-      expect(html).toContain('-3.022 Tr.');
+      expect(html).toContain('-3.022');
     });
 
     it('[TC-IMP75.06/MSS] Hiển thị trạng thái không có BĐS khi mảng ownedProperties rỗng', () => {
@@ -184,7 +184,7 @@ describe('[IMP-75: Trạm 1 RED] Property Portfolio, Title Deed Carousel, Trade 
           targetBalance: 4246,
         })
       );
-      expect(html).toContain('4.246 Tr.');
+      expect(html).toContain('4.246');
       expect(html).toContain('Tiền mặt đối tác');
     });
 
@@ -236,7 +236,7 @@ describe('[IMP-75: Trạm 1 RED] Property Portfolio, Title Deed Carousel, Trade 
       );
       expect(html).toContain('Thuế nộp Kho Bạc (5%)');
       expect(html).toContain('Thực nhận');
-      expect(html).toContain('950 Tr.');
+      expect(html).toContain('950');
     });
 
     it('[TC-IMP75.15/MSS] Giao diện không sử dụng các khối màu xanh đen tối và đỏ bầm', () => {

@@ -133,8 +133,8 @@ describe('[TC-IMP127/MSS] P2P Trade Intent Dispatch for Both Buy and Sell Offers
     );
 
     expect(html).toContain('Gợi ý giá mua:');
-    expect(html).toContain('100% Gốc (1.000 Tr.)');
-    expect(html).toContain('130% (1.300 Tr.)');
-    expect(html).toContain('150% (1.500 Tr.)');
+    expect(html).toContain('100% Gốc (1.000)');
+    expect(html).toContain('130% (1.300)');
+    expect(html).toContain('150% (1.500)');
   });
 });

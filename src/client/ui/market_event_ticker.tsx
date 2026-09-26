@@ -60,6 +60,31 @@ export function resolveMarketTitle(type: string): string {
   return type || 'Sự Kiện Thị Trường';
 }
 
+export function resolveMarketShortTag(type: string): string {
+  switch (type) {
+    case 'MACRO_LAND_FEVER': return 'Sốt Đất';
+    case 'MACRO_LIQUIDITY_FREEZE': return 'Đóng Băng';
+    case MarketCardId.MC_PUBLIC_INVEST: return 'Đầu Tư Công';
+    case MarketCardId.MC_COASTAL_STORM: return 'Bão Lũ';
+    case MarketCardId.MC_NIGHT_ECONOMY: return 'Dịch Vụ Đêm';
+    case MarketCardId.MC_ALCOHOL_CHECK: return 'Nồng Độ Cồn';
+    case MarketCardId.MC_MEGA_CONCERT: return 'Đại Nhạc Hội';
+    case MarketCardId.MC_RATE_HIKE: return 'Tăng Lãi Suất';
+    case MarketCardId.MC_CREDIT_STIMULUS: return 'Kích Cầu';
+    case MarketCardId.MC_LAND_FEVER: return 'Sốt Ven Đô';
+    case MarketCardId.MC_FIRE_INSPECTION: return 'Kiểm Tra PCCC';
+    case MarketCardId.MC_ANTI_SPECULATE: return 'Chống Đầu Cơ';
+    case MarketCardId.MC_PEAK_TOURISM: return 'Mùa Du Lịch';
+    case MarketCardId.MC_FREEZE_TRADE: return 'Đóng Băng GD';
+    case MarketCardId.MC_FUEL_SURGE: return 'Tăng Giá Xăng';
+    case MarketCardId.MC_URBAN_PLANNING: return 'Quy Hoạch';
+    case MarketCardId.MC_UTILITY_DOUBLE: return 'Biểu Giá Điện';
+    case MarketCardId.MC_CASINO_PILOT: return 'Casino';
+    case ChanceCardId.CC_PORT_EXCLUSIVE: return 'Cảng Biển';
+    default: return 'Sự Kiện';
+  }
+}
+
 export const ACTIVE_MARKET_EFFECT_SUMMARIES: Readonly<Record<string, string>> = {
   MACRO_LAND_FEVER:
     'Sốt đất vĩ mô: Tăng 250% tiền thuê và giảm 25% chi phí xây dựng cho nhóm màu.',
@@ -72,7 +97,7 @@ export const ACTIVE_MARKET_EFFECT_SUMMARIES: Readonly<Record<string, string>> = 
   [MarketCardId.MC_NIGHT_ECONOMY]:
     'Nhân đôi tiền thuê tại các ô Dịch Vụ từ Cấp 1 trở lên.',
   [MarketCardId.MC_ALCOHOL_CHECK]:
-    'Giảm 50% tiền thuê ô Dịch Vụ; dừng chân phạt 800 Tr. và mất lượt.',
+    'Giảm 50% tiền thuê ô Dịch Vụ; dừng chân phạt 800 và mất lượt.',
   [MarketCardId.MC_MEGA_CONCERT]:
     'Mọi người chơi lập tức di chuyển đến ô Dịch Vụ có cấp nhà cao nhất.',
   [MarketCardId.MC_RATE_HIKE]:
@@ -82,7 +107,7 @@ export const ACTIVE_MARKET_EFFECT_SUMMARIES: Readonly<Record<string, string>> = 
   [MarketCardId.MC_LAND_FEVER]:
     'Tăng 50% tiền thuê & giá chuyển nhượng (Bình Dương, Đồng Nai, Hưng Yên).',
   [MarketCardId.MC_FIRE_INSPECTION]:
-    'Phạt 200 Tr./C1, 400 Tr./C2, 800 Tr./C3 nộp Kho Bạc. Đất C0 miễn phạt.',
+    'Phạt 200/C1, 400/C2, 800/C3 nộp Kho Bạc. Đất C0 miễn phạt.',
   [MarketCardId.MC_ANTI_SPECULATE]:
     'Áp thuế chuyển nhượng bất động sản P2P 20% nộp vào Kho Bạc.',
   [MarketCardId.MC_PEAK_TOURISM]:
@@ -90,13 +115,13 @@ export const ACTIVE_MARKET_EFFECT_SUMMARIES: Readonly<Record<string, string>> = 
   [MarketCardId.MC_FREEZE_TRADE]:
     'Tạm ngưng mua ô đất mới, đóng băng đấu giá và cấm chuyển nhượng P2P.',
   [MarketCardId.MC_FUEL_SURGE]:
-    'Phụ thu thêm 500 Tr. cước vận tải tại 4 Ga Tàu toàn bàn cờ.',
+    'Phụ thu thêm 500 cước vận tải tại 4 Ga Tàu toàn bàn cờ.',
   [MarketCardId.MC_URBAN_PLANNING]:
     'Tăng 20% giá trị khi thế chấp BĐS Hà Nội & TP.HCM (nhận 60% giá gốc).',
   [MarketCardId.MC_UTILITY_DOUBLE]:
     'Nhân đôi phí dịch vụ tiện ích công cộng (EVN và Viettel).',
   [MarketCardId.MC_CASINO_PILOT]:
-    'Thưởng 1.500 Tr./ô Dịch Vụ C2+, 3.000 Tr./ô 27 C3 (hoặc trợ cấp 1.000 Tr.).',
+    'Thưởng 1.500/ô Dịch Vụ C2+, 3.000/ô 27 C3 (hoặc trợ cấp 1.000).',
   [ChanceCardId.CC_PORT_EXCLUSIVE]:
     'Trích nhận 50% phí cảng từ người chơi dừng chân tại các ô Cảng biển.',
 };
@@ -120,25 +145,25 @@ export function resolveMarketEffectSummary(type: string): string {
 }
 
 export const ACTIVE_MARKET_COMPACT_FORMULAS: Readonly<Record<string, string>> = {
-  MACRO_LAND_FEVER: 'ĐẤT: Thuê +250%, Xây -25%',
-  MACRO_LIQUIDITY_FREEZE: 'ĐẤT: Thuê -50%, Cấm thế chấp',
-  [MarketCardId.MC_PUBLIC_INVEST]: '4 GA: Cước x2',
-  [MarketCardId.MC_COASTAL_STORM]: 'VEN BIỂN: Miễn thuê, mất lượt',
-  [MarketCardId.MC_NIGHT_ECONOMY]: 'DỊCH VỤ C1+: Nhân đôi tiền thuê',
-  [MarketCardId.MC_ALCOHOL_CHECK]: 'DỊCH VỤ: Thuê -50%, Phạt 800 Tr.',
-  [MarketCardId.MC_MEGA_CONCERT]: 'DI CHUYỂN: Đến ô cấp cao nhất',
-  [MarketCardId.MC_RATE_HIKE]: 'VAY: Lãi +10% qua Khởi Hành',
-  [MarketCardId.MC_CREDIT_STIMULUS]: 'XÂY NHÀ: Giảm 20%, Lãi 0%',
-  [MarketCardId.MC_LAND_FEVER]: 'VEN ĐÔ: Thuê & Giá +50%',
-  [MarketCardId.MC_FIRE_INSPECTION]: 'PCCC: Phạt 200-800 Tr./C1-C3',
-  [MarketCardId.MC_ANTI_SPECULATE]: 'CHUYỂN NHƯỢNG: Thuế 20%',
-  [MarketCardId.MC_PEAK_TOURISM]: 'NGHỈ DƯỠNG: Nhân đôi tiền thuê',
-  [MarketCardId.MC_FREEZE_TRADE]: 'GIAO DỊCH: Đóng băng',
-  [MarketCardId.MC_FUEL_SURGE]: '4 GA: Phụ thu +500 Tr.',
-  [MarketCardId.MC_URBAN_PLANNING]: 'HÀ NỘI/HCM: Thế chấp +20%',
-  [MarketCardId.MC_UTILITY_DOUBLE]: 'TIỆN ÍCH: Cước x2',
-  [MarketCardId.MC_CASINO_PILOT]: 'CASINO: Thưởng 1.500-3.000 Tr.',
-  [ChanceCardId.CC_PORT_EXCLUSIVE]: 'CẢNG BIỂN: Nhận 50% phí',
+  MACRO_LAND_FEVER: 'Thuê x2.5, Xây nhà -25%',
+  MACRO_LIQUIDITY_FREEZE: 'Thuê -50%, Cấm thế chấp',
+  [MarketCardId.MC_PUBLIC_INVEST]: '4 Ga Tàu: Nhân đôi cước',
+  [MarketCardId.MC_COASTAL_STORM]: 'Ven biển: Miễn thuê, mất lượt',
+  [MarketCardId.MC_NIGHT_ECONOMY]: 'Dịch vụ C1+: Cước thuê x2',
+  [MarketCardId.MC_ALCOHOL_CHECK]: 'Dịch vụ: Thuê -50%, Phạt 800',
+  [MarketCardId.MC_MEGA_CONCERT]: 'Đến ô Dịch vụ cấp cao nhất',
+  [MarketCardId.MC_RATE_HIKE]: 'Lãi thế chấp 10% qua GO',
+  [MarketCardId.MC_CREDIT_STIMULUS]: 'Xây nhà -20%, Miễn lãi vay',
+  [MarketCardId.MC_LAND_FEVER]: 'Ven đô: Thuê & Bán +50%',
+  [MarketCardId.MC_FIRE_INSPECTION]: 'Phạt PCCC 200 - 800 Tr.',
+  [MarketCardId.MC_ANTI_SPECULATE]: 'Thuế chuyển nhượng P2P 20%',
+  [MarketCardId.MC_PEAK_TOURISM]: 'Nghỉ dưỡng: Nhân đôi thuê',
+  [MarketCardId.MC_FREEZE_TRADE]: 'Cấm mua đất, đấu giá & P2P',
+  [MarketCardId.MC_FUEL_SURGE]: '4 Ga Tàu: Phụ thu thêm 500',
+  [MarketCardId.MC_URBAN_PLANNING]: 'Thế chấp HN/HCM nhận 60%',
+  [MarketCardId.MC_UTILITY_DOUBLE]: 'Điện & Viễn thông: Cước x2',
+  [MarketCardId.MC_CASINO_PILOT]: 'Thưởng 1.500 - 3.000 khi dừng',
+  [ChanceCardId.CC_PORT_EXCLUSIVE]: 'Cảng biển: Hưởng 50% cước',
 };
 
 export function resolveMarketCompactFormula(type: string): string {
@@ -162,73 +187,75 @@ export const MarketEventTicker: React.FC<MarketEventTickerProps> = ({
     return null;
   }
 
+  const displayedActive = active.slice(0, 3);
+
   return (
     <div
       data-testid="market-event-ticker"
       role="region"
       aria-label="Sự kiện thị trường đang hiệu lực"
-      className="pointer-events-none select-none z-30 flex items-center justify-center w-full max-w-[90vw] sm:max-w-xl md:max-w-2xl mx-auto mt-1 px-1 sm:px-2"
+      className="pointer-events-none select-none z-30 flex flex-col items-center justify-center w-full max-w-[90vw] min-[360px]:max-w-[calc(100vw-8px)] sm:max-w-xl md:max-w-2xl mx-auto mt-1 px-0.5 min-[360px]:px-1 sm:px-2 gap-1"
     >
-      <div className="w-full pointer-events-auto flex items-center gap-1.5 overflow-x-auto scrollbar-none flex-nowrap py-1 px-1.5 bg-[#FFFDF8]/95 backdrop-blur-xs border-2 border-slate-900 rounded-xl shadow-[0_2px_0_0_#0f172a] max-h-10">
-        {active.map((modifier, index) => {
-          const cardType = String(modifier.type ?? '');
-          const icon = resolveMarketIcon(cardType);
-          const title = resolveMarketTitle(cardType);
-          const formula = resolveMarketCompactFormula(cardType);
-          const effectSummary = resolveMarketEffectSummary(cardType);
-          const heroStat = getCardHeroStat(cardType);
-          const heroStyles = getHeroStatStyles(heroStat.variant);
+      {displayedActive.map((modifier, index) => {
+        const cardType = String(modifier.type ?? '');
+        const icon = resolveMarketIcon(cardType);
+        const title = resolveMarketTitle(cardType);
+        const shortTag = resolveMarketShortTag(cardType);
+        const formula = resolveMarketCompactFormula(cardType);
+        const effectSummary = resolveMarketEffectSummary(cardType);
+        const heroStat = getCardHeroStat(cardType);
+        const heroStyles = getHeroStatStyles(heroStat.variant);
 
-          const handleCardClick = () => {
-            const detail =
-              MARKET_CARD_DETAILS[cardType as MarketCardId] ??
-              CHANCE_CARD_DETAILS[cardType as ChanceCardId];
-            useGameStore.getState().openModal('event', {
-              cardType: cardType.startsWith('CC_') ? 'chance' : 'market',
-              cardId: cardType,
-              title,
-              description: detail?.description ?? effectSummary,
-              targetScope: detail?.targetScope,
-              effectDetail: detail?.effectDetail ?? effectSummary,
-              duration: `${modifier.remainingRounds} vòng chơi`,
-              destination: detail?.destination,
-            });
-          };
+        const handleCardClick = () => {
+          const detail =
+            MARKET_CARD_DETAILS[cardType as MarketCardId] ??
+            CHANCE_CARD_DETAILS[cardType as ChanceCardId];
+          useGameStore.getState().openModal('event', {
+            cardType: cardType.startsWith('CC_') ? 'chance' : 'market',
+            cardId: cardType,
+            title,
+            description: detail?.description ?? effectSummary,
+            targetScope: detail?.targetScope,
+            effectDetail: detail?.effectDetail ?? effectSummary,
+            duration: `${modifier.remainingRounds} vòng chơi`,
+            destination: detail?.destination,
+          });
+        };
 
-          return (
-            <div
-              key={`${cardType}_${index}`}
-              data-testid={`market-ticker-item-${cardType}`}
-              onClick={handleCardClick}
-              title={`${title}: ${formula} (Bấm xem chi tiết)`}
-              className="flex items-center justify-between gap-1.5 shrink-0 px-2 py-0.5 bg-amber-50/90 hover:bg-amber-100 border border-amber-300 rounded-lg text-xs font-bold transition-colors cursor-pointer select-none text-slate-900"
-            >
-              <div className="flex items-center gap-1.5 min-w-0">
-                <span className="text-sm shrink-0" aria-hidden="true">
-                  {icon}
+        return (
+          <div
+            key={`${cardType}_${index}`}
+            data-testid={`market-ticker-item-${cardType}`}
+            onClick={handleCardClick}
+            title={`${title}: ${formula} (Bấm xem chi tiết)`}
+            className="w-full pointer-events-auto flex items-center justify-between gap-1.5 px-2 py-0.5 sm:py-1 bg-[#FFFDF8]/95 hover:bg-amber-50/95 backdrop-blur-xs border-2 border-slate-900 rounded-lg sm:rounded-xl shadow-[0_2px_0_0_#0f172a] text-xs font-bold transition-colors cursor-pointer select-none text-slate-900 leading-none"
+          >
+            <div className="flex items-center gap-1.5 min-w-0 flex-1">
+              <span className="text-sm shrink-0" aria-hidden="true">
+                {icon}
+              </span>
+              <span className="font-extrabold text-[11px] sm:text-xs text-slate-900 shrink-0">
+                <span className="sm:hidden">{shortTag}:</span>
+                <span className="hidden sm:inline truncate max-w-[150px]">{title}:</span>
+              </span>
+              {heroStat.value && (
+                <span className={`hidden sm:inline-flex px-1 py-0.5 rounded text-[10px] sm:text-[11px] font-black uppercase tracking-wider shrink-0 ${heroStyles.badge}`}>
+                  {heroStat.value}
                 </span>
-                <span className="font-extrabold text-[11px] sm:text-xs text-slate-900 shrink-0 truncate max-w-[120px] sm:max-w-[160px]">
-                  {title}:
-                </span>
-                {heroStat.value && (
-                  <span className={`px-1.5 py-0.2 rounded text-[10px] sm:text-[11px] font-black uppercase tracking-wider shrink-0 ${heroStyles.badge}`}>
-                    {heroStat.value}
-                  </span>
-                )}
-                <span
-                  data-testid="market-ticker-effect-summary"
-                  className="font-bold text-[11px] sm:text-xs text-slate-700 whitespace-nowrap line-clamp-2"
-                >
-                  {formula}
-                </span>
-              </div>
-              <span className="text-[10px] font-extrabold text-amber-900 bg-amber-100 px-1.5 py-0.2 rounded-full shrink-0 border border-amber-400 ml-1">
-                Còn {modifier.remainingRounds} vòng
+              )}
+              <span
+                data-testid="market-ticker-effect-summary"
+                className="font-semibold text-[11px] sm:text-xs text-slate-700 truncate min-w-0 line-clamp-2"
+              >
+                {formula}
               </span>
             </div>
-          );
-        })}
-      </div>
+            <span className="text-[10px] font-extrabold text-amber-900 bg-amber-100 px-1.5 py-0.5 rounded-full shrink-0 border border-amber-400 ml-1 whitespace-nowrap">
+              Còn {modifier.remainingRounds} vòng
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 };

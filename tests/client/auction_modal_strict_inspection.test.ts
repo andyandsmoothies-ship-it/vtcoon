@@ -26,9 +26,9 @@ describe('[TC-AUC-STRICT] Khảo Sát & Ràng Buộc Công Thái Học Đấu Gi
       })
     );
 
-    // Tiêu đề sàn đấu giá phải có whitespace-nowrap để không bị bẻ thành 3 dòng trên mobile
-    expect(html).toContain('SÀN ĐẤU GIÁ TRỰC TUYẾN');
-    expect(html).toMatch(/SÀN ĐẤU GIÁ TRỰC TUYẾN[^<]*?<\/h2>/);
+    // Tiêu đề Hero Header BĐS phải có whitespace-nowrap để không bị bẻ dòng trên mobile
+    expect(html).toContain('data-testid="auction-hero-header"');
+    expect(html).toMatch(/<h2[^>]*class="[^"]*whitespace-nowrap[^"]*"[^>]*>/);
     expect(html).toContain('whitespace-nowrap');
 
     // Huy hiệu phát mãi trên header phải gọn gàng, không dùng class max-w-[130px] gây cụt chữ
@@ -83,7 +83,7 @@ describe('[TC-AUC-STRICT] Khảo Sát & Ràng Buộc Công Thái Học Đấu Gi
     expect(html).toContain('🔨 ĐẤU GIÁ');
   });
 
-  it('[TC-AUC-STRICT.05] Cụm nút nâng giá nhanh (Quick Bid): Luôn có whitespace-nowrap để bảo toàn số tiền và đơn vị Tr.', () => {
+  it('[TC-AUC-STRICT.05] Cụm nút nâng giá nhanh (Quick Bid): Luôn có whitespace-nowrap để bảo toàn số tiền', () => {
     const html = renderToStaticMarkup(
       React.createElement(AuctionModal, {
         cellIndex: 16,
@@ -95,8 +95,8 @@ describe('[TC-AUC-STRICT] Khảo Sát & Ràng Buộc Công Thái Học Đấu Gi
       })
     );
 
-    expect(html).toContain('+100 Tr.');
-    expect(html).toContain('(2.350 Tr.)');
+    expect(html).toContain('+100');
+    expect(html).toContain('(2.350)');
     expect(html).toContain('whitespace-nowrap');
   });
 
@@ -128,7 +128,7 @@ describe('[TC-AUC-STRICT] Khảo Sát & Ràng Buộc Công Thái Học Đấu Gi
       })
     );
     expect(railroadHtml).toContain('CƯỚC 1-4 GA:');
-    expect(railroadHtml).toContain('500 / 1.000 / 2.000 / 4.000 Tr.');
+    expect(railroadHtml).toContain('500 / 1.000 / 2.000 / 4.000');
 
     // 2. Tiện ích Điện Lực (Cell 12)
     const utilityHtml = renderToStaticMarkup(

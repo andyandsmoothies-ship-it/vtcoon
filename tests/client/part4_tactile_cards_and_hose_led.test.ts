@@ -126,7 +126,7 @@ describe('[TC-P4.2/MSS] Bảng Điện Tử LED Sàn Chứng Khoán HOSE', () =>
       })
     );
     expect(html).toContain('Điểm xúc xắc 1D6: <strong class="text-slate-900 font-black">5</strong>');
-    expect(html).toContain('Tiền thu về: 1.500 Tr.');
+    expect(html).toContain('Tiền thu về: 1.500');
     expect(html).toContain('Khớp Lệnh Lãi');
     expect(html).toContain('text-emerald-800');
   });
@@ -144,7 +144,7 @@ describe('[TC-P4.2/MSS] Bảng Điện Tử LED Sàn Chứng Khoán HOSE', () =>
       })
     );
     expect(html).toContain('Điểm xúc xắc 1D6: <strong class="text-slate-900 font-black">1</strong>');
-    expect(html).toContain('Tiền thu về: 250 Tr.');
+    expect(html).toContain('Tiền thu về: 250');
     expect(html).toContain('Khớp Lệnh Lỗ');
     expect(html).toContain('text-rose-800');
     expect(html).toContain('bg-rose-50');
@@ -163,7 +163,7 @@ describe('[TC-P4.2/MSS] Bảng Điện Tử LED Sàn Chứng Khoán HOSE', () =>
       })
     );
     expect(html).toContain('Điểm xúc xắc 1D6: <strong class="text-slate-900 font-black">3</strong>');
-    expect(html).toContain('Tiền thu về: 500 Tr.');
+    expect(html).toContain('Tiền thu về: 500');
     expect(html).toContain('Khớp Lệnh Hòa');
     expect(html).toContain('text-amber-800');
     expect(html).toContain('bg-amber-50');

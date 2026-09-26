@@ -326,7 +326,7 @@ describe('IMP-187 Contract Tests: Telemetry Unmortgage & M&A Transparency', () =
 
       const rentLogs = finEntries.filter((e) => e.type === 'rent');
       expect(rentLogs).toHaveLength(1);
-      expect(rentLogs[0]?.message).toContain('Bot AI 2 đã trả 1.000 Tr. tiền thuê cho Bubbly Parrot');
+      expect(rentLogs[0]?.message).toContain('Bot AI 2 đã trả 1.000 tiền thuê cho Bubbly Parrot');
     });
   });
 
@@ -467,7 +467,7 @@ describe('IMP-187 Contract Tests: Telemetry Unmortgage & M&A Transparency', () =
       const victimParam = victimTexts[0]![0];
       expect(victimParam.title).toContain('Bị thâu tóm');
       expect(victimParam.title).toContain('Đà Nẵng');
-      expect(victimParam.text).toContain('2.400 Tr');
+      expect(victimParam.text).toContain('2.400');
     });
 
     it('[TC-187.14/MSS] Buyer of M&A receives purchase floating badge with cell name', () => {

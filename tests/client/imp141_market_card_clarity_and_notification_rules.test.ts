@@ -37,10 +37,10 @@ describe('[IMP-141] Chuẩn Hóa Toàn Diện Nội Dung & Quy Tắc Luật Chơ
       expect(summary).toMatch(/(dịch vụ|6,\s*8,\s*26,\s*27)/i);
     });
 
-    it('[TC-141.04/MSS][UC-IMP141][Facet-1/Boundary] MC_ALCOHOL_CHECK nêu rõ Giảm 50% và 800 Tr. hoặc mất lượt', () => {
+    it('[TC-141.04/MSS][UC-IMP141][Facet-1/Boundary] MC_ALCOHOL_CHECK nêu rõ Giảm 50% và 800 hoặc mất lượt', () => {
       const summary = resolveMarketEffectSummary(MarketCardId.MC_ALCOHOL_CHECK);
       expect(summary).toMatch(/giảm 50%/i);
-      expect(summary).toMatch(/(800\s*tr|mất lượt)/i);
+      expect(summary).toMatch(/(800|mất lượt)/i);
     });
 
     it('[TC-141.05/MSS][UC-IMP141][Facet-1/Boundary] MC_LAND_FEVER nêu rõ 50% và Bình Dương, Đồng Nai, Hưng Yên hoặc ô 6, 8, 31', () => {
@@ -74,9 +74,9 @@ describe('[IMP-141] Chuẩn Hóa Toàn Diện Nội Dung & Quy Tắc Luật Chơ
       expect(summary).not.toContain('Tạm ngừng mua bán, cấm thế chấp đất mới');
     });
 
-    it('[TC-141.10/MSS][UC-IMP141][Facet-1/Boundary] MC_FUEL_SURGE nêu rõ 500 Tr. và Ga Tàu hoặc ô 5, 15, 25, 35', () => {
+    it('[TC-141.10/MSS][UC-IMP141][Facet-1/Boundary] MC_FUEL_SURGE nêu rõ 500 và Ga Tàu hoặc ô 5, 15, 25, 35', () => {
       const summary = resolveMarketEffectSummary(MarketCardId.MC_FUEL_SURGE);
-      expect(summary).toMatch(/500\s*tr/i);
+      expect(summary).toMatch(/500/i);
       expect(summary).toMatch(/(ga tàu|5,\s*15,\s*25,\s*35)/i);
     });
 
@@ -98,17 +98,17 @@ describe('[IMP-141] Chuẩn Hóa Toàn Diện Nội Dung & Quy Tắc Luật Chơ
       expect(summary).toMatch(/(kho bạc|p2p)/i);
     });
 
-    it('[TC-141.14/MSS][UC-IMP141][Facet-1/Boundary] MC_FIRE_INSPECTION nêu rõ 200 Tr., 400 Tr., 800 Tr. và C0', () => {
+    it('[TC-141.14/MSS][UC-IMP141][Facet-1/Boundary] MC_FIRE_INSPECTION nêu rõ 200, 400, 800 và C0', () => {
       const summary = resolveMarketEffectSummary(MarketCardId.MC_FIRE_INSPECTION);
-      expect(summary).toMatch(/200\s*tr/i);
-      expect(summary).toMatch(/400\s*tr/i);
-      expect(summary).toMatch(/800\s*tr/i);
+      expect(summary).toMatch(/200/i);
+      expect(summary).toMatch(/400/i);
+      expect(summary).toMatch(/800/i);
       expect(summary).toMatch(/c0/i);
     });
 
-    it('[TC-141.15/MSS][UC-IMP141][Facet-1/Boundary] MC_CASINO_PILOT nêu rõ 1.500 Tr., 3.000 Tr. hoặc 1.000 Tr.', () => {
+    it('[TC-141.15/MSS][UC-IMP141][Facet-1/Boundary] MC_CASINO_PILOT nêu rõ 1.500, 3.000 hoặc 1.000', () => {
       const summary = resolveMarketEffectSummary(MarketCardId.MC_CASINO_PILOT);
-      expect(summary).toMatch(/(1\.500\s*tr|3\.000\s*tr|1\.000\s*tr)/i);
+      expect(summary).toMatch(/(1\.500|3\.000|1\.000)/i);
     });
 
     it('[TC-141.16/MSS][UC-IMP141][Facet-1/Boundary] MC_MEGA_CONCERT nêu rõ di chuyển và Dịch Vụ', () => {

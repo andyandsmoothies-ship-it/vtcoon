@@ -81,7 +81,7 @@ export function TopBar(props: TopBarProps): React.ReactElement {
       {/* Cụm bên trái: Thông tin trận đấu */}
       <div
         data-testid="match-info-capsule"
-        className="pointer-events-auto flex items-center gap-1 min-[360px]:gap-1 sm:gap-3 md:gap-4 bg-[#FFFDF8] border-2 border-slate-900 rounded-xl sm:rounded-2xl px-3 sm:px-5 py-1 sm:py-2.5 shadow-[0_4px_0_0_#0f172a] text-slate-900 text-xs md:text-sm font-medium"
+        className="pointer-events-auto h-10 sm:h-11 flex items-center gap-1 min-[360px]:gap-1.5 sm:gap-3 md:gap-4 bg-[#FFFDF8] border-2 border-slate-900 rounded-xl sm:rounded-2xl px-3 sm:px-4 shadow-[0_3px_0_0_#0f172a] text-slate-900 text-xs md:text-sm font-medium"
       >
         {/* Vòng đấu */}
         <div className="flex items-center gap-1 sm:gap-2">
@@ -139,13 +139,13 @@ export function TopBar(props: TopBarProps): React.ReactElement {
       {/* Cụm bên phải: Tiện ích HUD */}
       <div
         data-testid="hud-utilities-cluster"
-        className="pointer-events-auto flex items-center gap-1 sm:gap-2 bg-[#FFFDF8] border-2 border-slate-900 rounded-xl sm:rounded-2xl p-1 sm:p-2 px-1 min-[360px]:px-1 sm:px-3.5 shadow-[0_4px_0_0_#0f172a]"
+        className="pointer-events-auto h-10 sm:h-11 flex items-center gap-1 sm:gap-1.5 bg-[#FFFDF8] border-2 border-slate-900 rounded-xl sm:rounded-2xl px-1 sm:px-2 shadow-[0_3px_0_0_#0f172a]"
       >
         {/* Nút Chu kỳ Thời gian Ngày - Hoàng Hôn - Đêm */}
         <button
           type="button"
           onClick={toggleNextTimeOfDay}
-          className="hidden min-[390px]:inline-flex sm:inline-flex w-9 h-9 min-h-[36px] min-w-[36px] sm:w-auto sm:min-h-[44px] sm:min-w-[44px] items-center justify-center gap-1.5 p-0 sm:px-3.5 sm:py-2 rounded-lg sm:rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-colors cursor-pointer text-xs font-semibold border border-slate-900 shadow-[0_2px_0_0_#0f172a] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+          className="hidden min-[390px]:inline-flex sm:inline-flex relative w-8 h-8 min-h-[36px] min-w-[36px] sm:w-auto sm:h-8 sm:min-h-[44px] sm:min-w-[44px] items-center justify-center gap-1.5 p-0 sm:px-3 rounded-lg sm:rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-colors cursor-pointer text-xs font-semibold border border-slate-900 shadow-[0_1.5px_0_0_#0f172a] sm:shadow-[0_2px_0_0_#0f172a] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 after:absolute after:-inset-1.5 after:content-['']"
           title={`Thời gian: ${timeOfDayLabel} (Bấm để đổi)`}
           aria-label={`Chuyển chu kỳ thời gian (Hiện tại: ${timeOfDayLabel})`}
           data-testid="time-of-day-toggle-button"
@@ -158,7 +158,7 @@ export function TopBar(props: TopBarProps): React.ReactElement {
         <button
           type="button"
           onClick={toggleMute}
-          className="w-9 h-9 min-h-[36px] min-w-[36px] sm:w-auto sm:min-h-[44px] sm:min-w-[44px] inline-flex items-center justify-center gap-1.5 p-0 sm:px-3.5 sm:py-2 rounded-lg sm:rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-colors cursor-pointer text-xs font-semibold border border-slate-900 shadow-[0_2px_0_0_#0f172a] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+          className="relative w-8 h-8 min-h-[36px] min-w-[36px] sm:w-auto sm:h-8 sm:min-h-[44px] sm:min-w-[44px] inline-flex items-center justify-center gap-1.5 p-0 sm:px-3 rounded-lg sm:rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-colors cursor-pointer text-xs font-semibold border border-slate-900 shadow-[0_1.5px_0_0_#0f172a] sm:shadow-[0_2px_0_0_#0f172a] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 after:absolute after:-inset-1.5 after:content-['']"
           title={isMuted ? 'Bật âm thanh' : 'Tắt âm thanh'}
           aria-label={isMuted ? 'Bật âm thanh trò chơi' : 'Tắt âm thanh trò chơi'}
           data-testid="mute-toggle-button"
@@ -171,7 +171,7 @@ export function TopBar(props: TopBarProps): React.ReactElement {
         <button
           type="button"
           onClick={toggleActivityFeed}
-          className="relative w-9 h-9 min-h-[36px] min-w-[36px] sm:w-auto sm:min-h-[44px] sm:min-w-[44px] inline-flex items-center justify-center gap-1.5 p-0 sm:px-3.5 sm:py-2 rounded-lg sm:rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-colors cursor-pointer text-xs font-semibold border border-slate-900 shadow-[0_2px_0_0_#0f172a] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+          className="relative w-8 h-8 min-h-[36px] min-w-[36px] sm:w-auto sm:h-8 sm:min-h-[44px] sm:min-w-[44px] inline-flex items-center justify-center gap-1.5 p-0 sm:px-3 rounded-lg sm:rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-colors cursor-pointer text-xs font-semibold border border-slate-900 shadow-[0_1.5px_0_0_#0f172a] sm:shadow-[0_2px_0_0_#0f172a] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 after:absolute after:-inset-1.5 after:content-['']"
           title={isActivityFeedOpen ? 'Đóng nhật ký' : 'Mở nhật ký hoạt động'}
           aria-label={`Nhật ký hoạt động${unreadCount > 0 ? ` (${unreadCount} mới)` : ''}`}
           data-testid="activity-feed-toggle-button"
@@ -180,7 +180,7 @@ export function TopBar(props: TopBarProps): React.ReactElement {
           <span className="hidden sm:inline">Nhật Ký</span>
           {unreadCount > 0 && (
             <span
-              className="absolute -top-1.5 -right-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-600 px-1 text-[10px] font-bold text-white shadow-md border border-slate-900"
+              className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-600 px-1 text-[9px] font-bold text-white shadow-md border border-slate-900"
               data-testid="activity-unread-badge"
             >
               {unreadCount > 99 ? '99+' : unreadCount}
@@ -195,7 +195,7 @@ export function TopBar(props: TopBarProps): React.ReactElement {
             <button
               type="button"
               onClick={onLeaveRoom}
-              className="w-9 h-9 min-h-[44px] min-w-[44px] sm:w-auto inline-flex items-center justify-center gap-1.5 p-0 sm:px-3.5 sm:py-2 rounded-xl bg-rose-100 hover:bg-rose-200 text-rose-900 transition-colors cursor-pointer text-xs font-bold border border-rose-400 shadow-[0_2px_0_0_#9f1239] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
+              className="relative w-8 h-8 min-h-[36px] min-w-[36px] sm:w-auto sm:h-8 sm:min-h-[44px] sm:min-w-[44px] inline-flex items-center justify-center gap-1.5 p-0 sm:px-3 rounded-lg sm:rounded-xl bg-rose-100 hover:bg-rose-200 text-rose-900 transition-colors cursor-pointer text-xs font-bold border border-rose-400 shadow-[0_1.5px_0_0_#9f1239] sm:shadow-[0_2px_0_0_#9f1239] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 after:absolute after:-inset-1.5 after:content-['']"
               title="Thoát bàn và trở về sảnh chờ"
               aria-label="Thoát bàn và trở về sảnh chờ"
               data-testid="leave-room-button"

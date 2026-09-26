@@ -142,8 +142,8 @@ describe('[UC-IMP140] Title Deed UI/UX & Asset Preloading Contract Tests', () =>
       React.createElement(TitleDeedModal, { cellIndex: 1, canBuy: true, isOwned: false })
     );
     expect(html).toContain('Giá niêm yết');
-    expect(html).toContain('600 Tr.');
-    expect(html).toContain('300 Tr.');
+    expect(html).toContain('600');
+    expect(html).toContain('300');
   });
 
   it('[TC-140.13/MSS][UC-IMP140][Facet-2/Reactivity] Hiển thị biểu phí C0–C3 với highlight cấp công trình hiện tại hoặc x2 Độc Quyền', () => {

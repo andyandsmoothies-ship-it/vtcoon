@@ -42,12 +42,12 @@ export interface TitleDeedModalProps {
 }
 
 const MODIFIER_DESCS: Record<string, { icon: string; text: string }> = {
-  [MarketCardId.MC_FUEL_SURGE]: { icon: '⚡', text: 'Biến Động Xăng Dầu: Phụ thu +500 Tr. cước vận tải' },
+  [MarketCardId.MC_FUEL_SURGE]: { icon: '⚡', text: 'Biến Động Xăng Dầu: Phụ thu +500 cước vận tải' },
   [MarketCardId.MC_PEAK_TOURISM]: { icon: '🌊', text: 'Mùa Du Lịch: Nhân đôi phí thuê (x2)' },
   [MarketCardId.MC_UTILITY_DOUBLE]: { icon: '💡', text: 'Giá Điện & Viễn Thông: Nhân đôi phí dịch vụ (x2)' },
   [MarketCardId.MC_COASTAL_STORM]: { icon: '🌀', text: 'Bão Lũ Duyên Hải: Miễn 100% tiền thuê & cô lập giao thông' },
   [MarketCardId.MC_NIGHT_ECONOMY]: { icon: '🌙', text: 'Kinh Tế Ban Đêm: Nhân đôi phí dịch vụ (x2)' },
-  [MarketCardId.MC_ALCOHOL_CHECK]: { icon: '🚨', text: 'Nghị Định 100: Giảm 50% tiền thuê; chốt phạt 800 Tr. & giữ xe' },
+  [MarketCardId.MC_ALCOHOL_CHECK]: { icon: '🚨', text: 'Nghị Định 100: Giảm 50% tiền thuê; chốt phạt 800 & giữ xe' },
   [MarketCardId.MC_PUBLIC_INVEST]: { icon: '🏗️', text: 'Vốn Đầu Tư Công: Nhân đôi cước phí vận tải (x2)' },
 };
 

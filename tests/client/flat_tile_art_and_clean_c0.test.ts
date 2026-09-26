@@ -213,7 +213,7 @@ describe('[TC-IMP36/MSS][UC-IMP36] Flat Tile Art & Clean C0 Plot Contract Suite'
     tileTextureGen.getTileTexture(8);
     const priceText = recordedFillText.find((t) => t.y === 300);
     expect(priceText).toBeDefined();
-    expect(priceText?.text).toBe('1.000 Tr.');
+    expect(priceText?.text).toBe('1.000');
   });
 
   it('[TC-IMP36.05/MSS][UC-IMP36] Heritage art tier: Safe clipping boundary rect(10, 94, 236, 172) expands art to middle zone [90..270]', () => {

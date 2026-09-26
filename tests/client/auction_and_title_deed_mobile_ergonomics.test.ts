@@ -150,7 +150,7 @@ describe('[TC-AUC-ERG/MSS] Mobile Ergonomics & Visual Polish for Auction and Tit
 
     // 4. Toàn bộ 4 ga và nút mua hiển thị trọn vẹn
     expect(html).toContain('CƯỚC 1-4 GA:');
-    expect(html).toContain('Mua BĐS (2.000 Tr.)');
+    expect(html).toContain('Mua BĐS (2.000)');
 
     // 5. Thanh khoản sau mua và badge không bị ngắt dòng (whitespace-nowrap)
     expect(html).toContain('Thanh khoản sau mua:</span>');

@@ -88,6 +88,10 @@ describe('[IMP-195] Glanceable HUD & Mobile Event Stacking', () => {
 
     // Không render thành các thẻ riêng biệt có viền dày độc lập dạng thẻ bài lớn
     expect(html).not.toContain('line-clamp-3');
+    // Không dùng overflow-x-auto hay flex-nowrap làm tràn lề phải cần vuốt ngang
+    expect(html).not.toContain('overflow-x-auto');
+    expect(html).not.toContain('flex-nowrap');
+    expect(html).toContain('flex-col');
   });
 
   it('[TC-HUD.03/MSS][Facet-1/Boundary] FloatingNumbersOverlay định vị ở top-28 sm:top-24 khi có sự kiện thị trường (không đẩy sâu top-[17rem])', () => {
@@ -158,7 +162,7 @@ describe('[IMP-195] Glanceable HUD & Mobile Event Stacking', () => {
     );
     expect(buyHtml).toContain('data-testid="inline-bot-trade-strip"');
     expect(buyHtml).toContain('BÁN');
-    expect(buyHtml).toContain('3.000 Tr.');
+    expect(buyHtml).toContain('3.000');
 
     // 2. Trường hợp hoán đổi ô đất (isSwap = true)
     const swapOffer: PendingTradeOfferDelta = {

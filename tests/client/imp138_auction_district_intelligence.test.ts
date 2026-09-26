@@ -184,11 +184,11 @@ describe('[IMP-138: Station 1 RED] Auction District Intelligence & Monopoly Rada
       expect(info?.cells.map((c: DistrictCellChip) => c.cellIndex)).toEqual([12, 28]);
     });
 
-    it('[TC-IMP138.20/MSS][UC-GAME-022][IMP-138][Facet-3/Branching] Tiện Ích (cell 12): cung cấp strategic hint dạng utility và bội số x40 / x100 Tr.', () => {
+    it('[TC-IMP138.20/MSS][UC-GAME-022][IMP-138][Facet-3/Branching] Tiện Ích (cell 12): cung cấp strategic hint dạng utility và bội số x40 / x100', () => {
       const info = resolveAuctionDistrictInfo(12, MOCK_PLAYERS, 'p1');
       expect(info?.strategicHint.type).toBe('utility');
-      expect(info?.strategicHint.description).toContain('x40 Tr.');
-      expect(info?.strategicHint.description).toContain('x100 Tr.');
+      expect(info?.strategicHint.description).toContain('x40');
+      expect(info?.strategicHint.description).toContain('x100');
     });
   });
 
@@ -281,7 +281,7 @@ describe('[IMP-138: Station 1 RED] Auction District Intelligence & Monopoly Rada
       );
       expect(html).toContain('data-testid="auction-modal"');
       expect(html).toContain('data-testid="flip-counter"');
-      expect(html).toContain('+100 Tr.');
+      expect(html).toContain('+100');
       expect(html).toContain('AUTO-BID');
     });
 

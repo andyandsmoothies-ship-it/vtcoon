@@ -51,10 +51,10 @@ describe('[IMP-108] Auction Bid Increments Upgrade (100 - 200 - 500 Tr.) Contrac
           timeRemaining: 10,
         })
       );
-      expect(html).toContain('+100 Tr.');
+      expect(html).toContain('+100');
     });
 
-    it('[TC-108.08/MSS][Facet2-Reactivity] AuctionModal kết xuất nút nâng giá +200 Tr.', () => {
+    it('[TC-108.08/MSS][Facet2-Reactivity] AuctionModal kết xuất nút nâng giá +200', () => {
       const html = renderToStaticMarkup(
         React.createElement(AuctionModal, {
           cellIndex: 25,
@@ -65,10 +65,10 @@ describe('[IMP-108] Auction Bid Increments Upgrade (100 - 200 - 500 Tr.) Contrac
           timeRemaining: 10,
         })
       );
-      expect(html).toContain('+200 Tr.');
+      expect(html).toContain('+200');
     });
 
-    it('[TC-108.09/MSS][Facet2-Reactivity] AuctionModal kết xuất nút nâng giá +500 Tr.', () => {
+    it('[TC-108.09/MSS][Facet2-Reactivity] AuctionModal kết xuất nút nâng giá +500', () => {
       const html = renderToStaticMarkup(
         React.createElement(AuctionModal, {
           cellIndex: 25,
@@ -79,10 +79,10 @@ describe('[IMP-108] Auction Bid Increments Upgrade (100 - 200 - 500 Tr.) Contrac
           timeRemaining: 10,
         })
       );
-      expect(html).toContain('+500 Tr.');
+      expect(html).toContain('+500');
     });
 
-    it('[TC-108.10/MSS][Facet2-Reactivity] AuctionModal triệt tiêu hoàn toàn nút cũ +50 Tr.', () => {
+    it('[TC-108.10/MSS][Facet2-Reactivity] AuctionModal triệt tiêu hoàn toàn nút cũ +50', () => {
       const html = renderToStaticMarkup(
         React.createElement(AuctionModal, {
           cellIndex: 25,
@@ -93,10 +93,10 @@ describe('[IMP-108] Auction Bid Increments Upgrade (100 - 200 - 500 Tr.) Contrac
           timeRemaining: 10,
         })
       );
-      expect(html).not.toContain('+50 Tr.');
+      expect(html).not.toMatch(/>\+50</);
     });
 
-    it('[TC-108.11/MSS][Facet2-Reactivity] Hiển thị chính xác giá thầu kỳ vọng tương ứng với mức giá hiện tại 2.400 Tr.', () => {
+    it('[TC-108.11/MSS][Facet2-Reactivity] Hiển thị chính xác giá thầu kỳ vọng tương ứng với mức giá hiện tại 2.400', () => {
       const html = renderToStaticMarkup(
         React.createElement(AuctionModal, {
           cellIndex: 25,
@@ -107,9 +107,9 @@ describe('[IMP-108] Auction Bid Increments Upgrade (100 - 200 - 500 Tr.) Contrac
           timeRemaining: 10,
         })
       );
-      expect(html).toContain('(2.500 Tr.)');
-      expect(html).toContain('(2.600 Tr.)');
-      expect(html).toContain('(2.900 Tr.)');
+      expect(html).toContain('(2.500)');
+      expect(html).toContain('(2.600)');
+      expect(html).toContain('(2.900)');
     });
   });
 
@@ -160,9 +160,9 @@ describe('[IMP-108] Auction Bid Increments Upgrade (100 - 200 - 500 Tr.) Contrac
         })
       );
       expect(html).toContain('Bạn đang dẫn đầu mức giá cao nhất!');
-      expect(html).not.toContain('+100 Tr.');
-      expect(html).not.toContain('+200 Tr.');
-      expect(html).not.toContain('+500 Tr.');
+      expect(html).not.toContain('+100');
+      expect(html).not.toContain('+200');
+      expect(html).not.toContain('+500');
     });
   });
 
@@ -170,7 +170,7 @@ describe('[IMP-108] Auction Bid Increments Upgrade (100 - 200 - 500 Tr.) Contrac
   // FACET 4: SYSTEM DEFENSE, ACCESSIBILITY & SSR HYGIENE
   // =========================================================================
   describe('Facet 4: Error Defense & Accessibility', () => {
-    it('[TC-108.15/MSS][Facet4-Defense] Bước giá tối thiểu mới (+100 Tr.) thỏa mãn điều kiện máy chủ Server (>= +50 Tr.)', () => {
+    it('[TC-108.15/MSS][Facet4-Defense] Bước giá tối thiểu mới (+100) thỏa mãn điều kiện máy chủ Server (>= +50)', () => {
       const [firstIncrement] = calculateAuctionIncrements(2400);
       const serverMinIncrement = 50;
       expect(firstIncrement - 2400).toBeGreaterThanOrEqual(serverMinIncrement);
@@ -187,7 +187,7 @@ describe('[IMP-108] Auction Bid Increments Upgrade (100 - 200 - 500 Tr.) Contrac
         })
       );
       expect(html).toContain('aria-live="polite"');
-      expect(html).toContain('Giá thầu cao nhất hiện tại: 2.400 Tr.');
+      expect(html).toContain('Giá thầu cao nhất hiện tại: 2.400');
       expect(html).toContain('người dẫn đầu: Bot AI 4 (Aggressive)');
     });
 

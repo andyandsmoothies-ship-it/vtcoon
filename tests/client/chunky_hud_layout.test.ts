@@ -40,8 +40,8 @@ describe('[TC-CHUNKY-HUD.1/MSS] Facet 1: Boundary & Range (Format & Edge Display
       })
     );
 
-    expect(html).toContain('15.000 Tr.');
-    expect(html).toContain('16.200 Tr.');
+    expect(html).toContain('15.000');
+    expect(html).toContain('16.200');
   });
 
   it('[TC-CHUNKY-HUD.2/MSS] [UC-HUD-01] Player Ribbon handles zero cash boundary safely without displaying negative zero', () => {
@@ -61,8 +61,8 @@ describe('[TC-CHUNKY-HUD.1/MSS] Facet 1: Boundary & Range (Format & Edge Display
       })
     );
 
-    expect(html).toContain('0 Tr.');
-    expect(html).not.toContain('-0 Tr.');
+    expect(html).toContain('0');
+    expect(html).not.toMatch(/>\s*-\s*0\s*</);
   });
 
   it('[TC-CHUNKY-HUD.3/MSS] [UC-HUD-01] Player Ribbon formats high-tier billionaire net worth without layout breakage', () => {
@@ -82,7 +82,7 @@ describe('[TC-CHUNKY-HUD.1/MSS] Facet 1: Boundary & Range (Format & Edge Display
       })
     );
 
-    expect(html).toContain('1.000.000 Tr.');
+    expect(html).toContain('1.000.000');
   });
 
   it('[TC-CHUNKY-HUD.4/MSS] [UC-HUD-01] Match Info Capsule formats round progression at start boundary (1/30)', () => {
@@ -121,7 +121,7 @@ describe('[TC-CHUNKY-HUD.1/MSS] Facet 1: Boundary & Range (Format & Edge Display
     useGameStore.setState({ treasuryPool: 25000 });
     const html = renderToStaticMarkup(React.createElement(TopBar));
 
-    expect(html).toContain('25.000 Tr.');
+    expect(html).toContain('25.000');
   });
 });
 
@@ -400,7 +400,7 @@ describe('[TC-CHUNKY-HUD.4/MSS] Facet 4: Error Defense & Exceptional States', ()
       })
     );
 
-    expect(html).toContain('-2.500 Tr.');
+    expect(html).toContain('-2.500');
     expect(html).toContain('text-rose-700');
     expect(html).toContain('Thấu chi: còn 2 vòng');
   });

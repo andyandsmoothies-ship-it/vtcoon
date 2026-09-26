@@ -440,7 +440,7 @@ describe('[TC-MOB01/MSS] Mobile Responsive HUD Quality Standards Contract Suite'
     );
 
     expect(html).toContain('text-rose-700');
-    expect(html).toContain('-2.500 Tr.');
+    expect(html).toContain('-2.500');
   });
 
   it('[TC-MOB01.26/MSS] [UC-MOB-02] PlayerCard bankrupt state dims cleanly with grayscale and reduced opacity', () => {

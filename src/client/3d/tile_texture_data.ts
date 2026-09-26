@@ -25,11 +25,11 @@ export function isInfrastructureTile(index: number): boolean {
 
 export const TILE_METADATA_MAP: Readonly<Record<number, TileMetadata>> = {
   // Cạnh 1: Ô 00 - Ô 10
-  0:  { title: 'KHỞI HÀNH', subtitle: 'GO', priceLabel: '+2.000 Tr.', bannerColor: '#F59E0B', category: 'XUẤT PHÁT', icon: 'flag' },
+  0:  { title: 'KHỞI HÀNH', subtitle: 'GO', priceLabel: '+2.000', bannerColor: '#F59E0B', category: 'XUẤT PHÁT', icon: 'flag' },
   1:  { title: 'CẦN THƠ', subtitle: 'Cái Răng', price: 600, bannerColor: COLOR_GROUP_HEX[ColorGroup.Nau], category: 'BĐS ĐÔ THỊ', icon: 'boat' },
   2:  { title: 'THỊ TRƯỜNG', subtitle: 'Phiếu Cơ Chế', actionLabel: 'RÚT THẺ THỊ TRƯỜNG', bannerColor: '#0D9488', category: 'CƠ CHẾ', icon: 'chest' },
   3:  { title: 'AN GIANG', subtitle: 'Châu Đốc', price: 600, bannerColor: COLOR_GROUP_HEX[ColorGroup.Nau], category: 'BĐS ĐÔ THỊ', icon: 'temple' },
-  4:  { title: 'LỆ PHÍ ĐẤT', subtitle: 'Đăng Ký Đất Đai', priceLabel: 'NỘP 1.000 TR.', actionLabel: 'NỘP 1.000 TR.', bannerColor: '#E11D48', category: 'NGÂN SÁCH', icon: 'tax' },
+  4:  { title: 'LỆ PHÍ ĐẤT', subtitle: 'Đăng Ký Đất Đai', priceLabel: 'NỘP 1.000', actionLabel: 'NỘP 1.000', bannerColor: '#E11D48', category: 'NGÂN SÁCH', icon: 'tax' },
   5:  { title: 'LONG THÀNH', subtitle: 'Cảng HKQT', price: 2000, bannerColor: '#334155', category: 'HẠ TẦNG', icon: 'plane' },
   6:  { title: 'BÌNH DƯƠNG', subtitle: 'Thể Thao & Golf', price: 1000, bannerColor: COLOR_GROUP_HEX[ColorGroup.XanhDaTroi], category: 'BĐS DỊCH VỤ', icon: 'golf' },
   7:  { title: 'CƠ HỘI', subtitle: 'Vận May', actionLabel: 'RÚT THẺ CƠ HỘI', bannerColor: '#EA580C', category: 'VẬN MAY', icon: 'chance' },
@@ -75,5 +75,5 @@ export const TILE_METADATA_MAP: Readonly<Record<number, TileMetadata>> = {
 
 export function formatPriceLabel(price?: number): string {
   if (price == null) return '';
-  return `${price.toLocaleString('vi-VN')} Tr.`;
+  return `${price.toLocaleString('vi-VN')}`;
 }

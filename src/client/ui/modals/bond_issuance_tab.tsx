@@ -53,7 +53,7 @@ export function BondIssuanceTab({
         <p className="text-slate-600 mt-1">Vay 80% Net Worth, kỳ hạn 3 vòng, lãi suất 20% nộp Kho Bạc.</p>
       </div>
       <ul className="space-y-1.5 list-disc pl-4 text-slate-700">
-        <li>Tối thiểu Net Worth 3.000 Tr. VNĐ.</li>
+        <li>Tối thiểu Net Worth 3.000.</li>
         <li>Sở hữu ít nhất 2 Bất Động Sản chưa thế chấp.</li>
         <li>Tổng giá trị BĐS đảm bảo phải đạt tối thiểu 50% khoản vay.</li>
         <li>Tài sản đảm bảo bị khóa giao dịch & thế chấp trong thời gian hợp đồng.</li>

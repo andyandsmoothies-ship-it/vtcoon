@@ -151,9 +151,9 @@ describe('[TC-IMP78.3/MSS] Activity Log Định Danh Sự Kiện HOSE', () => {
     const hoseLog = logs.find((l) => l.message.includes('HOSE'));
     expect(hoseLog).toBeDefined();
     expect(hoseLog?.message).toContain('Đại Gia Chủ Sảnh');
-    expect(hoseLog?.message).toContain('500 Tr.');
+    expect(hoseLog?.message).toContain('500');
     expect(hoseLog?.message).toContain('Mặt 4');
-    expect(hoseLog?.message).toContain('600 Tr.');
+    expect(hoseLog?.message).toContain('600');
 
     const genericRewardLog = logs.find((l) => l.message.includes('tiền thưởng'));
     expect(genericRewardLog).toBeUndefined();

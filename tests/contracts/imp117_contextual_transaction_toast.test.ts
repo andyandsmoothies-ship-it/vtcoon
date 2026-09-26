@@ -151,7 +151,7 @@ describe('[IMP-117] Contextual Transaction Toast & Responsive HUD Notifications'
 
       const item = useGameStore.getState().floatingTexts.find((t) => t.actionType === 'salary');
       expect(item).toBeDefined();
-      expect(item?.text).toBe('+2.000 Tr.');
+      expect(item?.text).toBe('+2.000');
       expect(item?.title).toContain('GO');
     });
 
@@ -161,7 +161,7 @@ describe('[IMP-117] Contextual Transaction Toast & Responsive HUD Notifications'
 
       const item = useGameStore.getState().floatingTexts.find((t) => t.actionType === 'tax');
       expect(item).toBeDefined();
-      expect(item?.text).toBe('-500 Tr.');
+      expect(item?.text).toBe('-500');
       expect(item?.title).toContain('Lệ Phí');
     });
 
@@ -171,7 +171,7 @@ describe('[IMP-117] Contextual Transaction Toast & Responsive HUD Notifications'
 
       const item = useGameStore.getState().floatingTexts.find((t) => t.actionType === 'bail');
       expect(item).toBeDefined();
-      expect(item?.text).toBe('-500 Tr.');
+      expect(item?.text).toBe('-500');
       expect(item?.title).toContain('Bảo Lãnh');
     });
   });

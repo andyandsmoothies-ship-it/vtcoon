@@ -164,26 +164,26 @@ describe('[IMP-181] Dynamic Event Card Delta Synchronization & Financial Audit',
       expect(room.lastEventCard?.effectDelta).toBe(1500);
     });
 
-    it('[TC-IMP181.13/MSS][UC-GAME-038..041] getCardHeroStat cho CC_LAND_CHANGE khi effectDelta === 600: trả về TRỢ CẤP QUY HOẠCH +600 Tr. positive', () => {
+    it('[TC-IMP181.13/MSS][UC-GAME-038..041] getCardHeroStat cho CC_LAND_CHANGE khi effectDelta === 600: trả về TRỢ CẤP QUY HOẠCH +600 positive', () => {
       const heroStat = getCardHeroStat(ChanceCardId.CC_LAND_CHANGE, 600);
 
       expect(heroStat.label).toBe('TRỢ CẤP QUY HOẠCH');
-      expect(heroStat.value).toBe('+600 Tr.');
+      expect(heroStat.value).toBe('+600');
       expect(heroStat.variant).toBe('positive');
     });
 
-    it('[TC-IMP181.14/MSS][UC-GAME-038..041] getCardHeroStat cho CC_LAND_CHANGE khi effectDelta === -500: trả về value -500 Tr. và variant positive', () => {
+    it('[TC-IMP181.14/MSS][UC-GAME-038..041] getCardHeroStat cho CC_LAND_CHANGE khi effectDelta === -500: trả về value -500 và variant positive', () => {
       const heroStat = getCardHeroStat(ChanceCardId.CC_LAND_CHANGE, -500);
 
-      expect(heroStat.value).toBe('-500 Tr.');
+      expect(heroStat.value).toBe('-500');
       expect(heroStat.variant).toBe('positive');
     });
 
-    it('[TC-IMP181.15/MSS][UC-GAME-038..041] getCardHeroStat cho CC_TAX_AUDIT khi effectDelta === -1000: trả về THANH TRA THUẾ -1.000 Tr. negative', () => {
+    it('[TC-IMP181.15/MSS][UC-GAME-038..041] getCardHeroStat cho CC_TAX_AUDIT khi effectDelta === -1000: trả về THANH TRA THUẾ -1.000 negative', () => {
       const heroStat = getCardHeroStat(ChanceCardId.CC_TAX_AUDIT, -1000);
 
       expect(heroStat.label).toBe('THANH TRA THUẾ');
-      expect(heroStat.value).toBe('-1.000 Tr.');
+      expect(heroStat.value).toBe('-1.000');
       expect(heroStat.variant).toBe('negative');
     });
   });
@@ -230,20 +230,20 @@ describe('[IMP-181] Dynamic Event Card Delta Synchronization & Financial Audit',
       expect(room.lastEventCard?.effectDelta).toBeUndefined();
     });
 
-    it('[TC-IMP181.18/MSS][UC-GAME-038..041] PUNCHY_EVENT_SUMMARIES[CC_CONCERT_SPONSOR] phải chứa Chi 600 Tr. hoặc x2 (KHÔNG ĐƯỢC chứa +800 Tr.)', () => {
+    it('[TC-IMP181.18/MSS][UC-GAME-038..041] PUNCHY_EVENT_SUMMARIES[CC_CONCERT_SPONSOR] phải chứa Chi 600 hoặc x2 (KHÔNG ĐƯỢC chứa +800)', () => {
       const summary = PUNCHY_EVENT_SUMMARIES[ChanceCardId.CC_CONCERT_SPONSOR];
 
       expect(summary).toBeDefined();
-      expect(summary.includes('Chi 600 Tr.') || summary.includes('x2')).toBe(true);
-      expect(summary).not.toContain('+800 Tr.');
+      expect(summary.includes('Chi 600') || summary.includes('x2')).toBe(true);
+      expect(summary).not.toContain('+800');
     });
 
-    it('[TC-IMP181.19/MSS][UC-GAME-038..041] PUNCHY_EVENT_SUMMARIES[CC_FRANCHISE] phải chứa 800 Tr. (KHÔNG ĐƯỢC chứa 1.200 Tr.)', () => {
+    it('[TC-IMP181.19/MSS][UC-GAME-038..041] PUNCHY_EVENT_SUMMARIES[CC_FRANCHISE] phải chứa 800 (KHÔNG ĐƯỢC chứa 1.200)', () => {
       const summary = PUNCHY_EVENT_SUMMARIES[ChanceCardId.CC_FRANCHISE];
 
       expect(summary).toBeDefined();
-      expect(summary).toContain('800 Tr.');
-      expect(summary).not.toContain('1.200 Tr.');
+      expect(summary).toContain('800');
+      expect(summary).not.toContain('1.200');
     });
 
     it('[TC-IMP181.20/MSS][UC-GAME-038..041] PUNCHY_EVENT_SUMMARIES[CC_LAND_RECLAIM] phải chứa 150% (KHÔNG ĐƯỢC chứa 2.000)', () => {
@@ -254,11 +254,11 @@ describe('[IMP-181] Dynamic Event Card Delta Synchronization & Financial Audit',
       expect(summary).not.toContain('2.000');
     });
 
-    it('[TC-IMP181.21/MSS][UC-GAME-038..041] PUNCHY_EVENT_SUMMARIES[CC_MEDIA_CRISIS] phải chứa 800 Tr. (KHÔNG ĐƯỢC chứa 700)', () => {
+    it('[TC-IMP181.21/MSS][UC-GAME-038..041] PUNCHY_EVENT_SUMMARIES[CC_MEDIA_CRISIS] phải chứa 800 (KHÔNG ĐƯỢC chứa 700)', () => {
       const summary = PUNCHY_EVENT_SUMMARIES[ChanceCardId.CC_MEDIA_CRISIS];
 
       expect(summary).toBeDefined();
-      expect(summary).toContain('800 Tr.');
+      expect(summary).toContain('800');
       expect(summary).not.toContain('700');
     });
   });

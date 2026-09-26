@@ -157,7 +157,7 @@ describe('[UC-IMP159/MSS] Station 1 RED: Clean Tactile Auction Redesign Contract
         })
       );
       expect(html).toContain('data-testid="flip-counter"');
-      expect(html).toContain('1.500 Tr.');
+      expect(html).toContain('1.500');
       expect(html).toMatch(/font-(mono|black|bold)/);
     });
   });
@@ -178,7 +178,7 @@ describe('[UC-IMP159/MSS] Station 1 RED: Clean Tactile Auction Redesign Contract
       );
       expect(html).toContain('ĐẠI GIA THAM GIA');
       expect(html).toContain('Ví của bạn:');
-      expect(html).toContain('5.000 Tr.');
+      expect(html).toContain('5.000');
     });
 
     it('[TC-159.10/MSS][UC-IMP159] Danh sách người chơi hiển thị dạng hàng dọc tối giản không border thô cứng, có class truncate max-w-[120px] và min-w-0 để chống tràn màn hình trên mobile 360px', () => {
@@ -239,9 +239,9 @@ describe('[UC-IMP159/MSS] Station 1 RED: Clean Tactile Auction Redesign Contract
         })
       );
       expect(html).toContain('Bạn đang dẫn đầu mức giá cao nhất!');
-      expect(html).not.toContain('+100 Tr.');
-      expect(html).not.toContain('+200 Tr.');
-      expect(html).not.toContain('+500 Tr.');
+      expect(html).not.toContain('+100');
+      expect(html).not.toContain('+200');
+      expect(html).not.toContain('+500');
     });
 
     it('[TC-159.14/MSS][UC-IMP159] Khi là phiên phát mãi cưỡng chế (isForeclosure = true), hiển thị badge data-testid="foreclosure-distressed-badge" và giá gốc gạch ngang (line-through)', () => {
@@ -274,7 +274,7 @@ describe('[UC-IMP159/MSS] Station 1 RED: Clean Tactile Auction Redesign Contract
       );
       expect(html).toContain('cấn trừ nợ xấu');
       expect(html).toContain('Bạn không thể tự đấu giá');
-      expect(html).not.toContain('+100 Tr.');
+      expect(html).not.toContain('+100');
     });
 
     it('[TC-159.16/MSS][UC-IMP159] Các nút hành động bảo tồn touch target WCAG AA: min-h-[44px] và nút Đóng w-9 h-9 tactile', () => {

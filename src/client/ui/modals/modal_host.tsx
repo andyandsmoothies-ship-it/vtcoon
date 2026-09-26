@@ -30,13 +30,14 @@ export interface ModalHostProps {
 
 export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
   const { activeModal: propActiveModal, modalPayload: propModalPayload, onIntent } = props;
-  const storeActiveModal = useGameStore((state) => state.activeModal);
-  const storeModalPayload = useGameStore((state) => state.modalPayload);
+  const storeActiveModal = useGameStore((state) => state.activeModal) ?? useGameStore.getState().activeModal;
+  const storeModalPayload = useGameStore((state) => state.modalPayload) ?? useGameStore.getState().modalPayload;
   const activeModal = propActiveModal !== undefined ? propActiveModal : storeActiveModal;
   const modalPayload = propModalPayload !== undefined ? propModalPayload : storeModalPayload;
   const closeModal = useGameStore((state) => state.closeModal);
   const updateModalPayload = useGameStore((state) => state.updateModalPayload);
-  const playersInfo = useGameStore((state) => state.playersInfo);
+  const hookPlayers = useGameStore((state) => state.playersInfo);
+  const playersInfo = Object.keys(hookPlayers).length > 0 ? hookPlayers : useGameStore.getState().playersInfo;
   const currentTurnPlayerId = useGameStore((state) => state.currentTurnPlayerId);
   const hoseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -237,9 +238,7 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
           onUpgrade={(cellIndex) => {
             onIntent?.({ type: 'INTENT_UPGRADE', cellIndex });
           }}
-          onHoverCell={(cellIndex) => {
-            useGameStore.getState().setCameraFocusCell(cellIndex);
-          }}
+          onHoverCell={(cellIndex) => useGameStore.getState().setCameraFocusCell(cellIndex)}
           onSelectDeed={(cellIndex) => {
             closeModal();
             useGameStore.getState().openModal('deed', {
@@ -248,53 +247,49 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
               ownedProperties: myPlayer?.ownedProperties,
             });
           }}
-          onMortgage={(cellIndex) => {
-            onIntent?.({ type: 'INTENT_MORTGAGE', cellIndex });
-          }}
-          onRedeem={(cellIndex) => {
-            onIntent?.({ type: 'INTENT_REDEEM', cellIndex });
-          }}
-          onDowngrade={(cellIndex) => {
-            onIntent?.({ type: 'INTENT_DOWNGRADE', cellIndex });
-          }}
-          onClose={() => {
-            useGameStore.getState().setCameraFocusCell(null);
-            closeModal();
-          }}
+          onMortgage={(cellIndex) => onIntent?.({ type: 'INTENT_MORTGAGE', cellIndex })}
+          onRedeem={(cellIndex) => onIntent?.({ type: 'INTENT_REDEEM', cellIndex })}
+          onDowngrade={(cellIndex) => onIntent?.({ type: 'INTENT_DOWNGRADE', cellIndex })}
+          onClose={() => { useGameStore.getState().setCameraFocusCell(null); closeModal(); }}
         />
       )}
 
-      {activeModal === 'auction' && (
-        <AuctionModal
-          cellIndex={(modalPayload as ModalPayloadMap['auction']).cellIndex}
-          currentBid={(modalPayload as ModalPayloadMap['auction']).currentBid}
-          startingBid={(modalPayload as ModalPayloadMap['auction']).startingBid}
-          highestBidderId={(modalPayload as ModalPayloadMap['auction']).highestBidderId}
-          timeRemaining={(modalPayload as ModalPayloadMap['auction']).timeRemaining}
-          hasPassed={(modalPayload as ModalPayloadMap['auction']).hasPassed}
-          isDeclinedPlayer={(modalPayload as ModalPayloadMap['auction']).declinedPlayerId === myId}
-          bidderName={(modalPayload as ModalPayloadMap['auction']).highestBidderId ? playersInfo[(modalPayload as ModalPayloadMap['auction']).highestBidderId!]?.name : undefined}
-          myBalance={myPlayer?.balance}
-          myId={myId}
-          isConcluded={(modalPayload as ModalPayloadMap['auction']).isConcluded}
-          winnerId={(modalPayload as ModalPayloadMap['auction']).winnerId}
-          finalPrice={(modalPayload as ModalPayloadMap['auction']).finalPrice}
-          isForeclosure={(modalPayload as ModalPayloadMap['auction']).isForeclosure}
-          insolvencyPlayerId={(modalPayload as ModalPayloadMap['auction']).insolvencyPlayerId}
-          onClose={closeModal}
-          onBid={(amount) => {
-            AudioEngine.playSfx(SoundEffect.AUCTION_BID);
-            onIntent?.({ type: 'INTENT_BID', amount });
-            const curTime = (modalPayload as ModalPayloadMap['auction']).timeRemaining;
-            const nextTime = curTime <= 3 ? curTime + 3 : curTime;
-            updateModalPayload<'auction'>({ currentBid: amount, highestBidderId: myId, timeRemaining: nextTime });
-          }}
-          onPass={() => {
-            onIntent?.({ type: 'INTENT_AUCTION_PASS' });
-            updateModalPayload<'auction'>({ hasPassed: true });
-          }}
-        />
-      )}
+      {activeModal === 'auction' && (() => {
+        const payload = modalPayload as ModalPayloadMap['auction'];
+        return (
+          <AuctionModal
+            cellIndex={payload.cellIndex}
+            currentBid={payload.currentBid}
+            startingBid={payload.startingBid}
+            highestBidderId={payload.highestBidderId}
+            timeRemaining={payload.timeRemaining}
+            hasPassed={payload.hasPassed}
+            passedPlayerIds={payload.passedPlayerIds}
+            declinedPlayerId={payload.declinedPlayerId}
+            isDeclinedPlayer={payload.declinedPlayerId === myId}
+            bidderName={payload.highestBidderId ? playersInfo[payload.highestBidderId]?.name : undefined}
+            myBalance={myPlayer?.balance}
+            myId={myId}
+            isConcluded={payload.isConcluded}
+            winnerId={payload.winnerId}
+            finalPrice={payload.finalPrice}
+            isForeclosure={payload.isForeclosure}
+            insolvencyPlayerId={payload.insolvencyPlayerId}
+            onClose={closeModal}
+            onBid={(amount) => {
+              AudioEngine.playSfx(SoundEffect.AUCTION_BID);
+              onIntent?.({ type: 'INTENT_BID', amount });
+              const curTime = payload.timeRemaining;
+              const nextTime = curTime <= 3 ? curTime + 3 : curTime;
+              updateModalPayload<'auction'>({ currentBid: amount, highestBidderId: myId, timeRemaining: nextTime });
+            }}
+            onPass={() => {
+              onIntent?.({ type: 'INTENT_AUCTION_PASS' });
+              updateModalPayload<'auction'>({ hasPassed: true });
+            }}
+          />
+        );
+      })()}
 
       {activeModal === 'trade' && (() => {
         const tradePayload = modalPayload as ModalPayloadMap['trade'];

@@ -302,10 +302,10 @@ export function ActionDock({
           onClick={() => onBailOut?.()}
           disabled={Boolean((actingPlayer?.balance ?? 0) < 500)}
           className="min-h-[44px] flex items-center gap-1.5 px-3.5 py-2 rounded-2xl text-white font-bold bg-amber-600 hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-amber-800 shadow-[0_4px_0_0_#0f172a] active:shadow-none active:translate-y-[3px] transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
-          aria-label="Nộp 500 Tr. bảo lãnh kiểm toán để rời trạm ngay"
+          aria-label="Nộp 500 bảo lãnh kiểm toán để rời trạm ngay"
         >
           <span aria-hidden="true">⚖️</span>
-          <span>Bảo Lãnh (500 Tr.)</span>
+          <span>Bảo Lãnh (500)</span>
           <span className="text-[11px] bg-amber-900/40 px-1.5 py-0.5 rounded font-mono">
             {`${actingPlayer?.auditTurnsLeft ?? 0} lượt`}
           </span>

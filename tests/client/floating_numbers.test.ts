@@ -105,7 +105,7 @@ describe('[TC-VFX02.3/MSS] applyDeltaToStore Tu Dong Kich Hoat Floating Text The
     });
   });
 
-  it('Kich hoat Reward (+2.000 Tr.) khi so du tang do thuong Khởi Hành (GO)', () => {
+  it('Kich hoat Reward (+2.000) khi so du tang do thuong Khởi Hành (GO)', () => {
     const delta: DeltaPayload = {
       tick: 1,
       cells: [],
@@ -119,11 +119,11 @@ describe('[TC-VFX02.3/MSS] applyDeltaToStore Tu Dong Kich Hoat Floating Text The
     const fts = useGameStore.getState().floatingTexts;
     expect(fts).toHaveLength(1);
     expect(fts[0]?.type).toBe(FloatingTextType.Reward);
-    expect(fts[0]?.text).toContain('2.000 Tr.');
+    expect(fts[0]?.text).toContain('2.000');
     expect(fts[0]?.text.startsWith('+')).toBe(true);
   });
 
-  it('Kich hoat Penalty (-1.500 Tr.) khi so du bi tru do nop thue hoac tien thue', () => {
+  it('Kich hoat Penalty (-1.500) khi so du bi tru do nop thue hoac tien thue', () => {
     const delta: DeltaPayload = {
       tick: 2,
       cells: [],
@@ -137,7 +137,7 @@ describe('[TC-VFX02.3/MSS] applyDeltaToStore Tu Dong Kich Hoat Floating Text The
     const fts = useGameStore.getState().floatingTexts;
     expect(fts).toHaveLength(1);
     expect(fts[0]?.type).toBe(FloatingTextType.Penalty);
-    expect(fts[0]?.text).toContain('1.500 Tr.');
+    expect(fts[0]?.text).toContain('1.500');
     expect(fts[0]?.text.startsWith('-')).toBe(true);
   });
 
@@ -194,7 +194,7 @@ describe('[TC-VFX02.3/MSS] applyDeltaToStore Tu Dong Kich Hoat Floating Text The
     const fts = useGameStore.getState().floatingTexts;
     expect(fts).toHaveLength(1);
     expect(fts[0]?.type).toBe(FloatingTextType.Penalty);
-    expect(fts[0]?.text).toContain('11.500 Tr.'); // 10000 -> -1500 = diff -11500
+    expect(fts[0]?.text).toContain('11.500'); // 10000 -> -1500 = diff -11500
     expect(fts[0]?.text.startsWith('-')).toBe(true);
     expect(useGameStore.getState().playersInfo['p1']?.balance).toBe(-1500);
     expect(useGameStore.getState().playersInfo['p1']?.bankrupt).toBe(true);

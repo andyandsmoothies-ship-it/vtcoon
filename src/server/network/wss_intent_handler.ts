@@ -88,9 +88,9 @@ export async function handleIntentMsg(
       const d1 = roll.dice.dice?.[0] ?? roll.dice.die1;
       const d2 = roll.dice.dice?.[1] ?? roll.dice.die2;
       payloadSummary = `Người chơi ${msg.playerId}: Gieo xúc xắc [${d1}, ${d2}] -> Đến ô ${roll.player.position}`;
-      if (roll.rentCharged > 0) payloadSummary += ` (Trả tiền thuê ${roll.rentCharged.toLocaleString('vi-VN')} Tr.)`;
-      if (roll.passedGo) payloadSummary += ' (Qua ô Bắt Đầu +2.000 Tr.)';
-      payloadSummary += ` | Số dư: ${roll.player.balance.toLocaleString('vi-VN')} Tr.`;
+      if (roll.rentCharged > 0) payloadSummary += ` (Trả tiền thuê ${roll.rentCharged.toLocaleString('vi-VN')})`;
+      if (roll.passedGo) payloadSummary += ' (Qua ô Bắt Đầu +2.000)';
+      payloadSummary += ` | Số dư: ${roll.player.balance.toLocaleString('vi-VN')}`;
     }
     deps.adminManager.recordRoomEvent(msg.roomCode, {
       source: player?.isBot ? 'BOT' : 'PLAYER',

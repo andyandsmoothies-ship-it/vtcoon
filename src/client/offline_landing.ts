@@ -112,7 +112,7 @@ export function executeCellLanding(
 
       if (!isConnected) {
         state.addFloatingText({
-          text: '-500 Tr.',
+          text: '-500',
           type: FloatingTextType.Penalty,
           playerId: activeId,
           actionType: 'rent_pay',
@@ -158,7 +158,7 @@ export function executeCellLanding(
     AudioEngine.playSfx(SoundEffect.TAX_PENALTY);
     if (!isConnected) {
       state.addFloatingText({
-        text: '-1.000 Tr.',
+        text: '-1.000',
         type: FloatingTextType.Penalty,
         playerId: activeId,
         actionType: 'tax',
@@ -169,7 +169,7 @@ export function executeCellLanding(
     AudioEngine.playSfx(SoundEffect.BUY_PROPERTY);
     if (!isConnected) {
       state.addFloatingText({
-        text: '+2.000 Tr.',
+        text: '+2.000',
         type: FloatingTextType.Reward,
         playerId: activeId,
         actionType: 'salary',

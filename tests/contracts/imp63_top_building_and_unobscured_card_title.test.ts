@@ -234,9 +234,9 @@ describe('[TC-63/MSS][IMP-63] Top Building Outside Card & Pristine Card Layout C
 
   it('[TC-63.22/MSS][IMP-63] Price text is printed directly on ivory paper at y = 300 on property tile 1 under IMP-104', () => {
     getTileTexture(1);
-    const priceEntry = recordedFillText.find((t) => t.text.includes('Tr.'));
+    const priceEntry = recordedFillText.find((t) => t.y === 300);
     expect(priceEntry?.y).toBe(300);
-    expect(priceEntry?.text).toBe('600 Tr.');
+    expect(priceEntry?.text).toBe('600');
   });
 
   it.each([6, 9, 39])('[TC-63.23/MSS][IMP-63] Property tile %i consistently eliminates 2D price capsule at y = 274', (cellIndex) => {
@@ -249,7 +249,7 @@ describe('[TC-63/MSS][IMP-63] Top Building Outside Card & Pristine Card Layout C
   it.each([6, 9, 39])('[TC-63.24/MSS][IMP-63] Property tile %i consistently prints price text directly on ivory paper at y = 300 under IMP-104', (cellIndex) => {
     clearTileTextureCache();
     getTileTexture(cellIndex);
-    const priceEntry = recordedFillText.find((t) => t.text.includes('Tr.'));
+    const priceEntry = recordedFillText.find((t) => t.y === 300);
     expect(priceEntry?.y).toBe(300);
   });
 

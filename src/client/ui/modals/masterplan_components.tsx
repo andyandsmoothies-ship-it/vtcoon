@@ -2,6 +2,7 @@
 import React from 'react';
 import { COLOR_GROUP_HEX } from '../../../domain/theme';
 import { BOARD_CONFIG } from '../../../domain/board_config';
+import { formatCurrency } from '../ui_helpers';
 import { getDeedDisplayInfo, type DeedDisplayInfo } from './modal_helpers';
 import type { DistrictGroupDef } from './masterplan_constants';
 
@@ -34,7 +35,7 @@ export function MasterplanInspectorCard({
               {deedInfo.name}
             </h3>
             <p className="text-[10px] text-slate-500 font-semibold">
-              Ô số {deedInfo.cellIndex} • Giá mua {deedInfo.price} Tr.
+              Ô số {deedInfo.cellIndex} • Giá mua {formatCurrency(deedInfo.price)}
             </p>
           </div>
         </div>
@@ -65,7 +66,7 @@ export function MasterplanInspectorCard({
         <div className="p-2 bg-slate-50 rounded-lg border border-slate-200">
           <span className="text-[10px] text-slate-500 block">Tiền Thuê Cơ Bản (C0)</span>
           <span className="font-bold text-emerald-600">
-            {deedInfo.rents[0]} Tr.
+            {formatCurrency(deedInfo.rents[0])}
           </span>
         </div>
         <div className="p-2 bg-slate-50 rounded-lg border border-slate-200">
@@ -77,7 +78,7 @@ export function MasterplanInspectorCard({
         <div className="p-2 bg-slate-50 rounded-lg border border-slate-200">
           <span className="text-[10px] text-slate-500 block">Giá Trị Thế Chấp</span>
           <span className="font-bold text-slate-700">
-            {deedInfo.mortgageValue} Tr.
+            {formatCurrency(deedInfo.mortgageValue)}
           </span>
         </div>
       </div>
@@ -86,10 +87,10 @@ export function MasterplanInspectorCard({
       <div className="bg-slate-50 p-2 rounded-lg border border-slate-200 text-[10px]">
         <div className="font-bold text-slate-700 mb-1">Biểu Phí Dừng Chân:</div>
         <div className="grid grid-cols-4 gap-1 text-center font-semibold">
-          <div className="bg-white p-1 rounded border border-slate-200">C0: {deedInfo.rents[0]} Tr.</div>
-          <div className="bg-white p-1 rounded border border-slate-200">C1: {deedInfo.rents[1]} Tr.</div>
-          <div className="bg-white p-1 rounded border border-slate-200">C2: {deedInfo.rents[2]} Tr.</div>
-          <div className="bg-white p-1 rounded border border-slate-200">C3: {deedInfo.rents[3]} Tr.</div>
+          <div className="bg-white p-1 rounded border border-slate-200">C0: {formatCurrency(deedInfo.rents[0])}</div>
+          <div className="bg-white p-1 rounded border border-slate-200">C1: {formatCurrency(deedInfo.rents[1])}</div>
+          <div className="bg-white p-1 rounded border border-slate-200">C2: {formatCurrency(deedInfo.rents[2])}</div>
+          <div className="bg-white p-1 rounded border border-slate-200">C3: {formatCurrency(deedInfo.rents[3])}</div>
         </div>
       </div>
     </div>
@@ -296,7 +297,7 @@ export function MasterplanDistrictCard({
                     {cell.name}
                   </span>
                   <span className="text-[10px] text-amber-800 font-bold">
-                    {deed?.price ? `${deed.price} Tr.` : ''}
+                    {deed?.price ? `${formatCurrency(deed.price)}` : ''}
                   </span>
                 </div>
 

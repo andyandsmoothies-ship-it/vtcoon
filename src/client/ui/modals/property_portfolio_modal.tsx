@@ -166,7 +166,7 @@ export function PropertyPortfolioModal({
           <div className="bg-white border border-rose-300 rounded-lg px-2.5 py-1 text-right shrink-0">
             <span className="text-[10px] text-slate-500 block">Số tiền còn thiếu</span>
             <span className="font-mono font-black text-rose-600 text-xs">
-              {deficitAmount.toLocaleString('vi-VN')} Tr.
+              {deficitAmount.toLocaleString('vi-VN')}
             </span>
           </div>
         </div>
@@ -318,10 +318,10 @@ export function PropertyPortfolioModal({
                     {/* Thông tin Tiền Thuê & Giá */}
                     <div className="flex items-center justify-between text-[11px] text-slate-600 mb-2">
                       <span>
-                        Tiền Thuê: <strong data-testid="property-rent-val" className="font-mono text-slate-900 font-bold">{deed ? formatCurrency(deed.rents[level] ?? deed.rents[0] ?? 0) : '0 Tr.'}</strong>
+                        Tiền Thuê: <strong data-testid="property-rent-val" className="font-mono text-slate-900 font-bold">{deed ? formatCurrency(deed.rents[level] ?? deed.rents[0] ?? 0) : '0'}</strong>
                       </span>
                       <span>
-                        Giá: <strong className="font-mono text-slate-900 font-bold">{deed ? formatCurrency(deed.price) : '0 Tr.'}</strong>
+                        Giá: <strong className="font-mono text-slate-900 font-bold">{deed ? formatCurrency(deed.price) : '0'}</strong>
                       </span>
                     </div>
                   </div>
@@ -407,7 +407,7 @@ export function PropertyPortfolioModal({
                       >
                         <span>
                           {upgradeInfo.canUpgrade
-                            ? `🏗️ Xây C${upgradeInfo.nextLevel} (${upgradeInfo.upgradeCost} Tr.)`
+                            ? `🏗️ Xây C${upgradeInfo.nextLevel} (${formatCurrency(upgradeInfo.upgradeCost ?? 0)})`
                             : (level >= 3 ? 'Cấp Tối Đa' : `🏗️ Xây C${upgradeInfo.nextLevel ?? (level + 1)}`)}
                         </span>
                       </button>
@@ -428,7 +428,7 @@ export function PropertyPortfolioModal({
                         onClick={() => onMortgage?.(cellIndex)}
                         className="flex-1 min-h-[44px] px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold rounded-lg border-2 border-rose-300 shadow-[0_2px_0_0_#fecdd3] active:shadow-none active:translate-y-[1px] transition-all text-xs cursor-pointer inline-flex items-center justify-center"
                       >
-                        Thế Chấp (+{mortgageVal} Tr.)
+                        Thế Chấp (+{formatCurrency(mortgageVal)})
                       </button>
                     )}
 
@@ -440,7 +440,7 @@ export function PropertyPortfolioModal({
                         disabled={currentBalance < redeemCost}
                         className="flex-1 min-h-[44px] px-3 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold rounded-lg border-2 border-emerald-800 shadow-[0_3px_0_0_#065f46] active:shadow-[0_1px_0_0_#065f46] active:translate-y-[2px] transition-all text-xs cursor-pointer disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 inline-flex items-center justify-center"
                       >
-                        Giải Chấp (-{redeemCost} Tr.)
+                        Giải Chấp (-{formatCurrency(redeemCost)})
                       </button>
                     )}
 

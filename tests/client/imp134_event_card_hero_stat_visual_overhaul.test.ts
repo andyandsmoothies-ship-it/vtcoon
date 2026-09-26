@@ -50,11 +50,11 @@ describe('[IMP-134] Thẻ Bài Fintech "Hiểu Ngay Trong 1 Giây" / Event Card 
         })
       );
       expect(html).toContain('data-testid="event-hero-stat"');
-      expect(html).toMatch(/data-testid="event-hero-stat"[\s\S]*?[+-]?500\s*Tr\./);
+      expect(html).toMatch(/data-testid="event-hero-stat"[\s\S]*?[+-]?500/);
       expect(html).toMatch(/data-testid="event-hero-stat"[\s\S]*?(?:Phụ thu|Phụ phí|Cảnh báo|Nhiên liệu)/i);
     });
 
-    it('[TC-IMP134.03/MSS][UC-IMP134][Facet-2/Reactivity] Thẻ MC_ALCOHOL_CHECK hiển thị Hero Stat -800 Tr. với biến thể cảnh báo hoặc phạt', () => {
+    it('[TC-IMP134.03/MSS][UC-IMP134][Facet-2/Reactivity] Thẻ MC_ALCOHOL_CHECK hiển thị Hero Stat -800 với biến thể cảnh báo hoặc phạt', () => {
       const html = renderToStaticMarkup(
         React.createElement(EventCardModal, {
           cardType: 'market',
@@ -63,7 +63,7 @@ describe('[IMP-134] Thẻ Bài Fintech "Hiểu Ngay Trong 1 Giây" / Event Card 
         })
       );
       expect(html).toContain('data-testid="event-hero-stat"');
-      expect(html).toMatch(/data-testid="event-hero-stat"[\s\S]*?-800\s*Tr\./);
+      expect(html).toMatch(/data-testid="event-hero-stat"[\s\S]*?-800/);
     });
 
     it('[TC-IMP134.04/MSS][UC-IMP134][Facet-2/Reactivity] Thẻ MC_RATE_HIKE hiển thị Hero Stat 10% QUA GO hoặc tỷ lệ lãi suất', () => {
@@ -100,10 +100,10 @@ describe('[IMP-134] Thẻ Bài Fintech "Hiểu Ngay Trong 1 Giây" / Event Card 
         })
       );
       expect(html).toContain('data-testid="event-hero-stat"');
-      expect(html).toMatch(/data-testid="event-hero-stat"[\s\S]*?\+2\.500\s*Tr\./);
+      expect(html).toMatch(/data-testid="event-hero-stat"[\s\S]*?\+2\.500/);
     });
 
-    it('[TC-IMP134.07/MSS][UC-IMP134][Facet-2/Reactivity] Thẻ CC_TAX_AUDIT hiển thị Hero Stat định mức thanh tra -500 Tr. / ĐẤT TRỐNG', () => {
+    it('[TC-IMP134.07/MSS][UC-IMP134][Facet-2/Reactivity] Thẻ CC_TAX_AUDIT hiển thị Hero Stat định mức thanh tra -500 / ĐẤT TRỐNG', () => {
       const html = renderToStaticMarkup(
         React.createElement(EventCardModal, {
           cardType: 'chance',
@@ -112,7 +112,7 @@ describe('[IMP-134] Thẻ Bài Fintech "Hiểu Ngay Trong 1 Giây" / Event Card 
         })
       );
       expect(html).toContain('data-testid="event-hero-stat"');
-      expect(html).toMatch(/data-testid="event-hero-stat"[\s\S]*?-500\s*Tr\.(?:\s*\/\s*ĐẤT TRỐNG)?/i);
+      expect(html).toMatch(/data-testid="event-hero-stat"[\s\S]*?-500(?:\s*\/\s*ĐẤT TRỐNG)?/i);
     });
 
     it('[TC-IMP134.08/MSS][UC-IMP134][Facet-2/Reactivity] Thẻ CC_DIPLOMATIC hiển thị Hero Stat MIỄN 100% THUÊ', () => {
@@ -149,7 +149,7 @@ describe('[IMP-134] Thẻ Bài Fintech "Hiểu Ngay Trong 1 Giây" / Event Card 
         })
       );
       expect(html).toContain('data-testid="event-hero-stat"');
-      expect(html).toMatch(/data-testid="event-hero-stat"[\s\S]*?-1\.200\s*Tr\./);
+      expect(html).toMatch(/data-testid="event-hero-stat"[\s\S]*?-1\.200/);
     });
   });
 

@@ -17,26 +17,26 @@ import { ActionDock } from '../../src/client/ui/action_dock';
 
 describe('[TC-UI03.1/MSS] Format Tien Te Thuan Tuy (formatCurrency)', () => {
   it('Dinh dang dung so nguyen duong co phan tach hang nghin dau cham', () => {
-    expect(formatCurrency(12500)).toBe('12.500 Tr.');
-    expect(formatCurrency(500)).toBe('500 Tr.');
-    expect(formatCurrency(1000000)).toBe('1.000.000 Tr.');
-    expect(formatCurrency(0)).toBe('0 Tr.');
+    expect(formatCurrency(12500)).toBe('12.500');
+    expect(formatCurrency(500)).toBe('500');
+    expect(formatCurrency(1000000)).toBe('1.000.000');
+    expect(formatCurrency(0)).toBe('0');
   });
 
   it('Dinh dang so am co dau tru chuan xac dai dien cho du no', () => {
-    expect(formatCurrency(-1200)).toBe('-1.200 Tr.');
-    expect(formatCurrency(-50)).toBe('-50 Tr.');
+    expect(formatCurrency(-1200)).toBe('-1.200');
+    expect(formatCurrency(-50)).toBe('-50');
   });
 
-  it('[Adversarial] Chan gia tri lam tron am ve 0 tranh hien thi -0 Tr.', () => {
-    expect(formatCurrency(-0.2)).toBe('0 Tr.');
-    expect(formatCurrency(-0)).toBe('0 Tr.');
+  it('[Adversarial] Chan gia tri lam tron am ve 0 tranh hien thi -0', () => {
+    expect(formatCurrency(-0.2)).toBe('0');
+    expect(formatCurrency(-0)).toBe('0');
   });
 
-  it('[Adversarial] Chan gia tri phi so NaN hoac Vo Han ve 0 Tr.', () => {
-    expect(formatCurrency(Number.NaN)).toBe('0 Tr.');
-    expect(formatCurrency(Number.POSITIVE_INFINITY)).toBe('0 Tr.');
-    expect(formatCurrency(Number.NEGATIVE_INFINITY)).toBe('0 Tr.');
+  it('[Adversarial] Chan gia tri phi so NaN hoac Vo Han ve 0', () => {
+    expect(formatCurrency(Number.NaN)).toBe('0');
+    expect(formatCurrency(Number.POSITIVE_INFINITY)).toBe('0');
+    expect(formatCurrency(Number.NEGATIVE_INFINITY)).toBe('0');
   });
 });
 

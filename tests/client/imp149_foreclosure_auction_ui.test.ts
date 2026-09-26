@@ -241,7 +241,7 @@ describe('[IMP-149: Station 1 RED] Foreclosure Auction UI & Distressed Asset Rad
       expect(html).toContain('(-30%)');
     });
 
-    it('[TC-149.10/MSS][UC-GAME-028][IMP-149][Facet-2/UIBadge] AuctionModal khi isForeclosure = false hoặc undefined render nhãn bình thường ĐANG MỞ và không chứa line-through', () => {
+    it('[TC-149.10/MSS][UC-GAME-028][IMP-149][Facet-2/UIBadge] AuctionModal khi isForeclosure = false hoặc undefined không chứa nhãn phát mãi cưỡng chế và không chứa line-through', () => {
       const html = renderToStaticMarkup(
         React.createElement(AuctionModal, {
           cellIndex: 1,
@@ -252,9 +252,8 @@ describe('[IMP-149: Station 1 RED] Foreclosure Auction UI & Distressed Asset Rad
         } as any)
       );
 
-      expect(html).toContain('ĐANG MỞ');
-      expect(html).not.toContain('line-through');
       expect(html).not.toContain('PHÁT MÃI CƯỠNG CHẾ');
+      expect(html).not.toContain('line-through');
     });
   });
 
@@ -311,7 +310,7 @@ describe('[IMP-149: Station 1 RED] Foreclosure Auction UI & Distressed Asset Rad
         } as any)
       );
 
-      expect(html).toContain('850 Tr.');
+      expect(html).toContain('850');
     });
   });
 
@@ -364,7 +363,6 @@ describe('[IMP-149: Station 1 RED] Foreclosure Auction UI & Distressed Asset Rad
         })
       );
 
-      expect(html).toContain('ĐANG MỞ');
       expect(html).not.toContain('PHÁT MÃI CƯỠNG CHẾ');
       expect(html).not.toContain('TÀI SẢN PHÁT MẠI THANH LÝ NỢ');
     });
@@ -565,8 +563,8 @@ describe('[IMP-149: Station 1 RED] Foreclosure Auction UI & Distressed Asset Rad
         } as any)
       );
 
-      expect(html).toContain('400 Tr.');
-      expect(html).not.toContain('420 Tr.');
+      expect(html).toContain('400');
+      expect(html).not.toContain('420');
     });
   });
 });

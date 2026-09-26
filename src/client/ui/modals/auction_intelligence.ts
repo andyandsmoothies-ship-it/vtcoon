@@ -87,7 +87,7 @@ function resolveStrategicHint(
       tone: 'blue',
       badgeText: '🚂 MẠNG LƯỚI ĐƯỜNG SẮT',
       badge: '🚂 MẠNG LƯỚI ĐƯỜNG SẮT',
-      description: 'Lũy tiến cước phí 4 bậc (500 Tr. - 4.000 Tr.). Thu cước mỗi khi đối thủ ghé thăm ga tàu.',
+      description: 'Lũy tiến cước phí 4 bậc (500 - 4.000). Thu cước mỗi khi đối thủ ghé thăm ga tàu.',
     };
   }
 
@@ -97,7 +97,7 @@ function resolveStrategicHint(
       tone: 'blue',
       badgeText: '⚡ TIỆN ÍCH NĂNG LƯỢNG',
       badge: '⚡ TIỆN ÍCH NĂNG LƯỢNG',
-      description: 'Cước phí tính theo điểm xúc xắc x40 Tr. (1 tiện ích) hoặc x100 Tr. (khi gom đủ 2 tiện ích quốc gia).',
+      description: 'Cước phí tính theo điểm xúc xắc x40 (1 tiện ích) hoặc x100 (khi gom đủ 2 tiện ích quốc gia).',
     };
   }
 

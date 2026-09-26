@@ -79,7 +79,7 @@ export function drawGoCorner(ctx: CanvasRenderingContext2D, img?: HTMLImageEleme
 
   ctx.fillStyle = '#ECFDF5';
   ctx.font = '900 28px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-  ctx.fillText('+2.000 Tr.', 192, 301);
+  ctx.fillText('+2.000', 192, 301);
 
   ctx.fillStyle = '#78350F';
   ctx.font = 'bold 15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
@@ -181,7 +181,7 @@ export function drawAuditCorner(ctx: CanvasRenderingContext2D, img?: HTMLImageEl
   ctx.fillText('TẠM GIAM', 278, 272);
   ctx.fillStyle = '#FEE2E2';
   ctx.font = 'bold 12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-  ctx.fillText('(Nộp Phạt 500 Tr.)', 278, 296);
+  ctx.fillText('(Nộp Phạt 500)', 278, 296);
 
   // Chú thích đáy
   ctx.fillStyle = '#94A3B8';

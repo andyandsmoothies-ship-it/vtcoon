@@ -326,7 +326,7 @@ describe('[TC-IMP37/MSS][UC-IMP37] Realistic Card Art Assets Contract Suite', ()
 
       expect(priceTray).toBeUndefined();
       expect(priceText).toBeDefined();
-      expect(priceText?.text).toBe('2.000 Tr.');
+      expect(priceText?.text).toBe('2.000');
     });
 
     it('[TC-IMP37.13/MSS][UC-IMP37] Target card art rendering dimensions (216x68 at dx=20, dy=204) fit entirely within clip rect [10..246, 202..274]', () => {

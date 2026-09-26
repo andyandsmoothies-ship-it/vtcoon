@@ -189,7 +189,7 @@ export function AuctionDistrictCard({
             <div className="w-full flex items-center justify-between px-1">
               <span className="text-[11px] sm:text-xs text-slate-600 font-bold whitespace-nowrap">CƯỚC 1-4 GA:</span>
               <span className="font-mono text-[11px] sm:text-xs font-bold text-slate-800 whitespace-nowrap">
-                500 / 1.000 / 2.000 / 4.000 Tr.
+                500 / 1.000 / 2.000 / 4.000
               </span>
             </div>
           )}
@@ -198,7 +198,7 @@ export function AuctionDistrictCard({
             <div className="w-full flex items-center justify-between px-1">
               <span className="text-[11px] sm:text-xs text-slate-600 font-bold whitespace-nowrap">CƯỚC TIỆN ÍCH:</span>
               <span className="font-mono text-[10px] sm:text-xs font-bold text-slate-800 whitespace-nowrap">
-                Điểm xúc xắc x40 Tr. (1 ô) | x100 Tr. (2 ô)
+                Điểm xúc xắc x40 (1 ô) | x100 (2 ô)
               </span>
             </div>
           )}

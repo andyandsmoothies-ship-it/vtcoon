@@ -84,7 +84,7 @@ describe('[TC-MCH01/MSS][UI-S02/MSS] Mobile Compact HUD & Tactile Retropoly Moda
       );
       expect(html).toContain('text-emerald-700');
       expect(html).toContain('font-black');
-      expect(html).toContain('15.000 Tr.');
+      expect(html).toContain('15.000');
     });
 
     it('[TC-MCH01.03/MSS][UC-MCH-01] PlayerCard renders overdraft negative cash in bold rose red text-rose-700 font-black (Chốt 1.2)', () => {
@@ -103,7 +103,7 @@ describe('[TC-MCH01/MSS][UI-S02/MSS] Mobile Compact HUD & Tactile Retropoly Moda
       );
       expect(html).toContain('text-rose-700');
       expect(html).toContain('font-black');
-      expect(html).toContain('-2.500 Tr.');
+      expect(html).toContain('-2.500');
     });
 
     it('[TC-MCH01.04/MSS][UC-MCH-01] PlayerCard renders compact property group color dots stripe with border and padding (Chốt 1.3)', () => {

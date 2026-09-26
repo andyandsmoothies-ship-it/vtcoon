@@ -11,37 +11,37 @@ export const PUNCHY_EVENT_SUMMARIES: PunchyEventSummariesMap = Object.freeze({
   [MarketCardId.MC_CREDIT_STIMULUS]: 'Giảm 20% xây nhà, miễn lãi vay',
   [MarketCardId.MC_COASTAL_STORM]: 'Miễn thuê ven biển & mất lượt',
   [MarketCardId.MC_NIGHT_ECONOMY]: 'Nhân đôi thuê ô Dịch Vụ (C1+)',
-  [MarketCardId.MC_ALCOHOL_CHECK]: 'Giảm 50% thuê ô DV, phạt 800 Tr.',
-  [MarketCardId.MC_PUBLIC_INVEST]: 'Thưởng 400 Tr. & x2 cước Ga Tàu',
-  [MarketCardId.MC_FUEL_SURGE]: 'Phụ thu 500 Tr. cước 4 Ga Tàu',
+  [MarketCardId.MC_ALCOHOL_CHECK]: 'Giảm 50% thuê ô DV, phạt 800',
+  [MarketCardId.MC_PUBLIC_INVEST]: 'Thưởng 400 & x2 cước Ga Tàu',
+  [MarketCardId.MC_FUEL_SURGE]: 'Phụ thu 500 cước 4 Ga Tàu',
   [MarketCardId.MC_FIRE_INSPECTION]: 'Phạt PCCC công trình C1-C3',
   [MarketCardId.MC_LAND_FEVER]: 'Tăng 50% tiền thuê & sang nhượng',
   [MarketCardId.MC_ANTI_SPECULATE]: 'Thuế sang nhượng P2P 20%',
   [MarketCardId.MC_PEAK_TOURISM]: 'Nhân đôi thuê BĐS Nghỉ Dưỡng',
   [MarketCardId.MC_URBAN_PLANNING]: 'Tăng 20% giá trị thế chấp HN/HCM',
   [MarketCardId.MC_UTILITY_DOUBLE]: 'Nhân đôi phí EVN & Viettel',
-  [MarketCardId.MC_CASINO_PILOT]: 'Thưởng ô Dịch Vụ C2+ tới 3.000 Tr.',
+  [MarketCardId.MC_CASINO_PILOT]: 'Thưởng ô Dịch Vụ C2+ tới 3.000',
 
   // 20 Chance cards
   [ChanceCardId.CC_PLATE_AUCTION]: 'Thêm 1 lượt gieo xúc xắc',
-  [ChanceCardId.CC_TAX_AUDIT]: 'Phạt 500 Tr./đất trống C0',
-  [ChanceCardId.CC_STOCK_PROFIT]: 'Chốt lời cổ phiếu +2.500 Tr.',
+  [ChanceCardId.CC_TAX_AUDIT]: 'Phạt 500/đất trống C0',
+  [ChanceCardId.CC_STOCK_PROFIT]: 'Chốt lời cổ phiếu +2.500',
   [ChanceCardId.CC_DIPLOMATIC]: 'Miễn 100% tiền thuê BĐS đối thủ',
-  [ChanceCardId.CC_CONTRACT_PENALTY]: 'Phạt vi phạm hợp đồng 1.000 Tr.',
-  [ChanceCardId.CC_LAND_CHANGE]: 'Nâng C0 lên C1 / Hỗ trợ 600 Tr.',
-  [ChanceCardId.CC_BUILD_HALT]: 'Phạt 800 Tr. & phong tỏa thu tiền',
+  [ChanceCardId.CC_CONTRACT_PENALTY]: 'Phạt vi phạm hợp đồng 1.000',
+  [ChanceCardId.CC_LAND_CHANGE]: 'Nâng C0 lên C1 / Hỗ trợ 600',
+  [ChanceCardId.CC_BUILD_HALT]: 'Phạt 800 & phong tỏa thu tiền',
   [ChanceCardId.CC_MA_FORCE]: 'Thâu tóm 1 ô đất C0 đối thủ (120%)',
-  [ChanceCardId.CC_COPYRIGHT]: 'Phạt vi phạm bản quyền 1.200 Tr.',
-  [ChanceCardId.CC_OVERDRAFT]: 'Tạm ứng 3.000 Tr., hoàn trả 3.300',
-  [ChanceCardId.CC_JUNK_STOCK]: 'Lỗ cổ phiếu đầu cơ -1.500 Tr.',
-  [ChanceCardId.CC_FRANCHISE]: 'Thu 800 Tr./đối thủ nhượng quyền',
+  [ChanceCardId.CC_COPYRIGHT]: 'Phạt vi phạm bản quyền 1.200',
+  [ChanceCardId.CC_OVERDRAFT]: 'Tạm ứng 3.000, hoàn trả 3.300',
+  [ChanceCardId.CC_JUNK_STOCK]: 'Lỗ cổ phiếu đầu cơ -1.500',
+  [ChanceCardId.CC_FRANCHISE]: 'Thu 800/đối thủ nhượng quyền',
   [ChanceCardId.CC_LAND_RECLAIM]: 'Thu hồi đất C0 bồi hoàn 150%',
-  [ChanceCardId.CC_VENUE_INCIDENT]: 'Sự cố dịch vụ, phạt tới 1.200 Tr.',
-  [ChanceCardId.CC_CONCERT_SPONSOR]: 'Chi 600 Tr. tài trợ, x2 xúc xắc',
-  [ChanceCardId.CC_FREE_CREDIT]: 'Giải ngân 2.000 Tr., lãi 400 tại GO',
+  [ChanceCardId.CC_VENUE_INCIDENT]: 'Sự cố dịch vụ, phạt tới 1.200',
+  [ChanceCardId.CC_CONCERT_SPONSOR]: 'Chi 600 tài trợ, x2 xúc xắc',
+  [ChanceCardId.CC_FREE_CREDIT]: 'Giải ngân 2.000, lãi 400 tại GO',
   [ChanceCardId.CC_PORT_EXCLUSIVE]: 'Thu 50% phí cảng dừng chân',
-  [ChanceCardId.CC_SLOW_BUILD]: 'Phạt chậm tiến độ 600 Tr. (C0)',
-  [ChanceCardId.CC_MEDIA_CRISIS]: 'Xử lý khủng hoảng, phạt 800 Tr.',
+  [ChanceCardId.CC_SLOW_BUILD]: 'Phạt chậm tiến độ 600 (C0)',
+  [ChanceCardId.CC_MEDIA_CRISIS]: 'Xử lý khủng hoảng, phạt 800',
   [ChanceCardId.CC_SWAP_PROJECT]: 'Mua lại dự án đối thủ đền bù 130%',
 });
 
@@ -75,7 +75,7 @@ export function resolvePunchyEventSummary(
 
   if (cleaned.length > 38) {
     const semiIdx = cleaned.indexOf(';');
-    const dotIdx = cleaned.indexOf('.');
+    const dotIdx = cleaned.search(/\.\s/);
     let splitIdx = -1;
     if (semiIdx !== -1 && dotIdx !== -1) {
       splitIdx = Math.min(semiIdx, dotIdx);

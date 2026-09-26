@@ -25,7 +25,7 @@ describe('[IMP-176] Event Card Texture & Modal Clarity Verification', () => {
       expect(meta.effectDetail).toContain('chủ ô đất');
       expect(meta.effectDetail).toContain('50%');
       expect(meta.effectDetail).toContain('Người dừng chân');
-      expect(meta.effectDetail).toContain('800 Tr.');
+      expect(meta.effectDetail).toContain('800');
       expect(meta.effectDetail).toContain('mất lượt');
     });
 
@@ -44,7 +44,7 @@ describe('[IMP-176] Event Card Texture & Modal Clarity Verification', () => {
     it('[TC-176.04/MSS] Hero Stat của MC_ALCOHOL_CHECK nêu bật cả Giảm 50% Thuê và Phạt Nồng Độ Cồn', () => {
       const hero = getCardHeroStat(MarketCardId.MC_ALCOHOL_CHECK);
       expect(hero.label).toBe('GIẢM 50% THUÊ • PHẠT NỒNG ĐỘ CỒN');
-      expect(hero.value).toBe('-800 Tr.');
+      expect(hero.value).toBe('-800');
       expect(hero.variant).toBe('negative');
     });
 
@@ -56,7 +56,7 @@ describe('[IMP-176] Event Card Texture & Modal Clarity Verification', () => {
         })
       );
       expect(html).toContain('GIẢM 50% THUÊ • PHẠT NỒNG ĐỘ CỒN');
-      expect(html).toContain('-800 Tr.');
+      expect(html).toContain('-800');
       expect(html).toContain('Bình Dương');
       expect(html).toContain('Phú Quốc');
       expect(html).toContain('chủ ô đất');

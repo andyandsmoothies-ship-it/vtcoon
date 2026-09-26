@@ -7,17 +7,17 @@ import { TurnPhase } from '../../domain/room';
 const LEVEL_MULTIPLIER: Record<number, number> = { 0: 1, 1: 1.5, 2: 2.5, 3: 4 };
 
 /**
- * Format currency to Vietnamese standard abbreviation ("12.500 Tr." or "-1.200 Tr.")
- * Clamps negative rounding to zero (e.g. -0.2 -> "0 Tr.") to prevent "-0 Tr."
+ * Format currency to Vietnamese standard format ("12.500" or "-1.200")
+ * Clamps negative rounding to zero (e.g. -0.2 -> "0") to prevent "-0"
  */
 export function formatCurrency(amount: number): string {
   if (!Number.isFinite(amount)) {
-    return '0 Tr.';
+    return '0';
   }
   const absVal = Math.abs(Math.round(amount));
   const isNegative = amount < 0 && absVal > 0;
   const formatted = absVal.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  return `${isNegative ? '-' : ''}${formatted} Tr.`;
+  return `${isNegative ? '-' : ''}${formatted}`;
 }
 
 /**
@@ -352,8 +352,8 @@ export function resolveActionDockNotice(params: ActionDockNoticeParams): ActionD
     return {
       type: 'insolvent',
       icon: '🚨',
-      desktopText: `Ngân sách âm (${bal} Tr.): Hãy thế chấp hoặc thanh lý tài sản để cứu nợ!`,
-      mobileText: `Âm vốn (${bal} Tr.): Cần thế chấp cứu nợ`,
+      desktopText: `Ngân sách âm (${bal}): Hãy thế chấp hoặc thanh lý tài sản để cứu nợ!`,
+      mobileText: `Âm vốn (${bal}): Cần thế chấp cứu nợ`,
       tone: 'error',
     };
   }

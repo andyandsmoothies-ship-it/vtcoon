@@ -244,32 +244,32 @@ describe('[TC-IMP102/MSS][UI-S01/MSS][BR-UI-002] Zero 2D Price Decal & Pure 3D P
       expect(markup).toContain('data-testid="owner-price-label"');
     });
 
-    it('[TC-IMP102.07/MSS][BR-UI-002] OwnerPricePill dynamically resolves property deed price from cellIndex 1 (600 Tr.)', () => {
+    it('[TC-IMP102.07/MSS][BR-UI-002] OwnerPricePill dynamically resolves property deed price from cellIndex 1 (600)', () => {
       const markup = renderToStaticMarkup(
         React.createElement(OwnerPricePill, { cellIndex: 1, ownerColor: '#EF4444' })
       );
-      expect(markup).toContain('data-price-label="600 Tr."');
+      expect(markup).toContain('data-price-label="600"');
     });
 
-    it('[TC-IMP102.08/MSS][BR-UI-002] OwnerPricePill dynamically resolves railroad deed price from cellIndex 5 (2.000 Tr.)', () => {
+    it('[TC-IMP102.08/MSS][BR-UI-002] OwnerPricePill dynamically resolves railroad deed price from cellIndex 5 (2.000)', () => {
       const markup = renderToStaticMarkup(
         React.createElement(OwnerPricePill, { cellIndex: 5, ownerColor: '#EF4444' })
       );
-      expect(markup).toContain('data-price-label="2.000 Tr."');
+      expect(markup).toContain('data-price-label="2.000"');
     });
 
-    it('[TC-IMP102.09/MSS][BR-UI-002] OwnerPricePill dynamically resolves utility deed price from cellIndex 12 (1.500 Tr.)', () => {
+    it('[TC-IMP102.09/MSS][BR-UI-002] OwnerPricePill dynamically resolves utility deed price from cellIndex 12 (1.500)', () => {
       const markup = renderToStaticMarkup(
         React.createElement(OwnerPricePill, { cellIndex: 12, ownerColor: '#EF4444' })
       );
-      expect(markup).toContain('data-price-label="1.500 Tr."');
+      expect(markup).toContain('data-price-label="1.500"');
     });
 
-    it('[TC-IMP102.10/MSS][BR-UI-002] OwnerPricePill resolves highest value property from cellIndex 39 (4.000 Tr.)', () => {
+    it('[TC-IMP102.10/MSS][BR-UI-002] OwnerPricePill resolves highest value property from cellIndex 39 (4.000)', () => {
       const markup = renderToStaticMarkup(
         React.createElement(OwnerPricePill, { cellIndex: 39, ownerColor: '#EF4444' })
       );
-      expect(markup).toContain('data-price-label="4.000 Tr."');
+      expect(markup).toContain('data-price-label="4.000"');
     });
 
     it('[TC-IMP102.11/MSS][BR-UI-002] OwnerPricePill does NOT render dark slate tone #090D1A when ownerColor is omitted', () => {
@@ -420,11 +420,11 @@ describe('[TC-IMP102/MSS][UI-S01/MSS][BR-UI-002] Zero 2D Price Decal & Pure 3D P
       }
     );
 
-    it('[TC-IMP102.24/MSS][UI-S01/MSS] Tax tile 4 STILL renders action label "NỘP 1.000 TR." at y=300', () => {
+    it('[TC-IMP102.24/MSS][UI-S01/MSS] Tax tile 4 STILL renders action label "NỘP 1.000" at y=300', () => {
       clearTileTextureCache();
       getTileTexture(4);
       const actionText = recordedFillTexts.find(
-        (t) => t.y === 300 && t.text === 'NỘP 1.000 TR.'
+        (t) => t.y === 300 && t.text === 'NỘP 1.000'
       );
       expect(actionText).toBeDefined();
       expect(actionText?.fillStyle).toBe('#FFFFFF');

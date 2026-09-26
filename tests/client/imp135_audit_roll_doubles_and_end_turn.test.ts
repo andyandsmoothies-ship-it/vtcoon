@@ -340,10 +340,10 @@ describe('[IMP-135] Facet 4: Component Rendering & Error Defense — ActionDock 
       },
     });
     const html = renderToStaticMarkup(React.createElement(ActionDock, { localPlayerId: 'p1' }));
-    const bailoutMatch = html.match(/<button[^>]*(data-testid="bailout-btn"|aria-label="Nộp 500 Tr\.)[^>]*>/);
+    const bailoutMatch = html.match(/<button[^>]*(data-testid="bailout-btn"|aria-label="Nộp 500)[^>]*>/);
     expect(bailoutMatch).not.toBeNull();
     expect(bailoutMatch![0]).not.toContain('disabled=""');
-    expect(html).toContain('Bảo Lãnh (500 Tr.)');
+    expect(html).toContain('Bảo Lãnh (500)');
   });
 
   it('[TC-IMP135.24/MSS][UC-AUDIT-DOM] Render ActionDock với inAudit: true và balance < 500 Tr. thì nút bảo lãnh kiểm toán CÓ thuộc tính disabled', () => {
@@ -365,7 +365,7 @@ describe('[IMP-135] Facet 4: Component Rendering & Error Defense — ActionDock 
       },
     });
     const html = renderToStaticMarkup(React.createElement(ActionDock, { localPlayerId: 'p1' }));
-    const bailoutMatch = html.match(/<button[^>]*(data-testid="bailout-btn"|aria-label="Nộp 500 Tr\.)[^>]*>/);
+    const bailoutMatch = html.match(/<button[^>]*(data-testid="bailout-btn"|aria-label="Nộp 500)[^>]*>/);
     expect(bailoutMatch).not.toBeNull();
     expect(bailoutMatch![0]).toContain('disabled=""');
   });

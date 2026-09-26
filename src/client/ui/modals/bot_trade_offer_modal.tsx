@@ -168,7 +168,7 @@ export function BotTradeOfferModal({
                 ) : price < 0 ? (
                   <span className="font-black text-rose-700">-{formatCurrency(absPrice)} (Bạn bù thêm)</span>
                 ) : (
-                  <span className="font-black text-slate-700">0 Tr. (Ngang giá)</span>
+                  <span className="font-black text-slate-700">0 (Ngang giá)</span>
                 )}
               </div>
               {absPrice > 0 && (

@@ -149,7 +149,7 @@ describe('[IMP-122] Comprehensive Financial & Event Card Pop-Ups Contract Suite'
         (b) => b.playerId === 'p1' && b.actionType === 'rent_pay',
       );
       expect(payerBadge).toBeDefined();
-      expect(payerBadge?.text).toBe('-500 Tr.');
+      expect(payerBadge?.text).toBe('-500');
       expect(payerBadge?.title).toContain('Trả thuê');
       expect(payerBadge?.targetPlayerName).toContain('Tỷ Phú Hà Nội');
     });
@@ -159,7 +159,7 @@ describe('[IMP-122] Comprehensive Financial & Event Card Pop-Ups Contract Suite'
         id: 'rent_1002_p1_p2',
         timestamp: Date.now(),
         type: 'rent',
-        message: 'Đại Gia Sài Gòn đã trả 500 Tr. tiền thuê cho Tỷ Phú Hà Nội (Bot)',
+        message: 'Đại Gia Sài Gòn đã trả 500 tiền thuê cho Tỷ Phú Hà Nội (Bot)',
         playerId: 'p1',
         playerName: 'Đại Gia Sài Gòn',
         targetPlayerId: 'p2',
@@ -174,7 +174,7 @@ describe('[IMP-122] Comprehensive Financial & Event Card Pop-Ups Contract Suite'
         (b) => b.playerId === 'p2' && b.actionType === 'rent_receive',
       );
       expect(receiverBadge).toBeDefined();
-      expect(receiverBadge?.text).toBe('+500 Tr.');
+      expect(receiverBadge?.text).toBe('+500');
       expect(receiverBadge?.title).toContain('Thu thuê');
       expect(receiverBadge?.targetPlayerName).toContain('Đại Gia Sài Gòn');
     });
@@ -184,7 +184,7 @@ describe('[IMP-122] Comprehensive Financial & Event Card Pop-Ups Contract Suite'
         id: 'buy_1003_16_p1',
         timestamp: Date.now(),
         type: 'buy',
-        message: 'Đại Gia Sài Gòn đã mua Đà Nẵng với giá 1.800 Tr.',
+        message: 'Đại Gia Sài Gòn đã mua Đà Nẵng với giá 1.800',
         playerId: 'p1',
         playerName: 'Đại Gia Sài Gòn',
         amount: -1800,
@@ -197,7 +197,7 @@ describe('[IMP-122] Comprehensive Financial & Event Card Pop-Ups Contract Suite'
         (b) => b.playerId === 'p1' && b.actionType === 'buy',
       );
       expect(buyBadge).toBeDefined();
-      expect(buyBadge?.text).toBe('-1.800 Tr.');
+      expect(buyBadge?.text).toBe('-1.800');
       expect(buyBadge?.title).toContain('Mua');
       expect(buyBadge?.title).toContain('Đà Nẵng');
     });
@@ -220,7 +220,7 @@ describe('[IMP-122] Comprehensive Financial & Event Card Pop-Ups Contract Suite'
         (b) => b.playerId === 'p1' && b.actionType === 'upgrade',
       );
       expect(upgradeBadge).toBeDefined();
-      expect(upgradeBadge?.text).toBe('-450 Tr.');
+      expect(upgradeBadge?.text).toBe('-450');
       expect(upgradeBadge?.title).toContain('Nâng');
     });
 
@@ -229,7 +229,7 @@ describe('[IMP-122] Comprehensive Financial & Event Card Pop-Ups Contract Suite'
         id: 'tax_1005_p1',
         timestamp: Date.now(),
         type: 'tax',
-        message: 'Đại Gia Sài Gòn đã nộp phí / nộp thuế 500 Tr. (Lệ Phí Đăng Ký Đất Đai)',
+        message: 'Đại Gia Sài Gòn đã nộp phí / nộp thuế 500 (Lệ Phí Đăng Ký Đất Đai)',
         playerId: 'p1',
         playerName: 'Đại Gia Sài Gòn',
         amount: -500,
@@ -242,7 +242,7 @@ describe('[IMP-122] Comprehensive Financial & Event Card Pop-Ups Contract Suite'
         (b) => b.playerId === 'p1' && b.actionType === 'tax',
       );
       expect(taxBadge).toBeDefined();
-      expect(taxBadge?.text).toBe('-500 Tr.');
+      expect(taxBadge?.text).toBe('-500');
       expect(taxBadge?.title).toMatch(/Lệ Phí|Thuế/);
     });
 
@@ -251,7 +251,7 @@ describe('[IMP-122] Comprehensive Financial & Event Card Pop-Ups Contract Suite'
         id: 'auction_win_1006_39_p1',
         timestamp: Date.now(),
         type: 'auction',
-        message: '🔨 [Đấu Giá] Búa gõ thành công! Đại Gia Sài Gòn đã trúng đấu giá Tràng Tiền với giá 3.200 Tr.!',
+        message: '🔨 [Đấu Giá] Búa gõ thành công! Đại Gia Sài Gòn đã trúng đấu giá Tràng Tiền với giá 3.200!',
         playerId: 'p1',
         playerName: 'Đại Gia Sài Gòn',
         amount: -3200,
@@ -264,7 +264,7 @@ describe('[IMP-122] Comprehensive Financial & Event Card Pop-Ups Contract Suite'
         (b) => b.playerId === 'p1' && b.actionType === 'auction_win',
       );
       expect(auctionBadge).toBeDefined();
-      expect(auctionBadge?.text).toBe('-3.200 Tr.');
+      expect(auctionBadge?.text).toBe('-3.200');
       expect(auctionBadge?.title).toContain('Thắng đấu giá');
     });
   });

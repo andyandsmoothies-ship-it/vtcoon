@@ -320,7 +320,7 @@ describe('[IMP-154][Trạm 1 RED] Smart Bot Tabs & AI Acceptance Sentiment Meter
       );
       expect(html, '[INTEGRITY] Bảo tồn thẻ truncate max-w-[120px]').toContain('truncate max-w-[120px]');
       expect(html, '[INTEGRITY] Bảo tồn tên đối tác').toContain('Bot AI Trọng Tài');
-      expect(html, '[INTEGRITY] Bảo tồn định dạng tiền tệ').toContain('5.000 Tr.');
+      expect(html, '[INTEGRITY] Bảo tồn định dạng tiền tệ').toContain('5.000');
     });
 
     it('[TC-154.16/MSS][UC-IMP154][Facet-4/Integrity] Danh sách BĐS trong TradeModal áp dụng class max-h-36 sm:max-h-52 md:max-h-72 để triệt tiêu bẫy cuộn lồng nhau trên mobile', () => {

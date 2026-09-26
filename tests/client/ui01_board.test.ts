@@ -154,9 +154,9 @@ describe('[TC-UI01.6] Tile Metadata & Cultural Identifiers — 40 Tiles Legibili
   });
 
   it('formatPriceLabel formats Vietnamese currency with comma/dot grouping', () => {
-    expect(formatPriceLabel(600)).toBe('600 Tr.');
-    expect(formatPriceLabel(1400)).toBe('1.400 Tr.');
-    expect(formatPriceLabel(4000)).toBe('4.000 Tr.');
+    expect(formatPriceLabel(600)).toBe('600');
+    expect(formatPriceLabel(1400)).toBe('1.400');
+    expect(formatPriceLabel(4000)).toBe('4.000');
     expect(formatPriceLabel(undefined)).toBe('');
   });
 

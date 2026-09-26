@@ -145,7 +145,7 @@ describe('[UC-IMP106/MSS] Cross-Platform UI/UX Multi-Platform Polish Contract Su
           onClose: () => {},
         })
       );
-      expect(html).toContain('8.000 Tr.');
+      expect(html).toContain('8.000');
       expect(html).toContain('min-h-[44px]');
     });
   });

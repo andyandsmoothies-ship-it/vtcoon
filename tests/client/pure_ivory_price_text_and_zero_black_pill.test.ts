@@ -438,28 +438,28 @@ describe('[TC-PIPT01/MSS..TC-PIPT04/A4][UI-S01/MSS][BR-UI-002] Pure Ivory Price 
         React.createElement(OwnerPricePill, { cellIndex: 1, ownerColor: '#DC2626' })
       );
       expect(markup).toContain('data-testid="owner-price-label"');
-      expect(markup).toContain('data-price-label="600 Tr."');
+      expect(markup).toContain('data-price-label="600"');
     });
 
-    it('[TC-PIPT02.15/MSS][UI-S01/MSS][BR-UI-002][Facet2-Reactivity] Dynamic price resolution khi có chủ: ô hạ tầng cellIndex 5 hiển thị nhãn 2.000 Tr.', () => {
+    it('[TC-PIPT02.15/MSS][UI-S01/MSS][BR-UI-002][Facet2-Reactivity] Dynamic price resolution khi có chủ: ô hạ tầng cellIndex 5 hiển thị nhãn 2.000', () => {
       const markup = renderToStaticMarkup(
         React.createElement(OwnerPricePill, { cellIndex: 5, ownerColor: '#27AE60' })
       );
-      expect(markup).toContain('data-price-label="2.000 Tr."');
+      expect(markup).toContain('data-price-label="2.000"');
     });
 
-    it('[TC-PIPT02.16/MSS][UI-S01/MSS][BR-UI-002][Facet2-Reactivity] Dynamic price resolution khi có chủ: ô tiện ích cellIndex 12 hiển thị nhãn 1.500 Tr.', () => {
+    it('[TC-PIPT02.16/MSS][UI-S01/MSS][BR-UI-002][Facet2-Reactivity] Dynamic price resolution khi có chủ: ô tiện ích cellIndex 12 hiển thị nhãn 1.500', () => {
       const markup = renderToStaticMarkup(
         React.createElement(OwnerPricePill, { cellIndex: 12, ownerColor: '#E67E22' })
       );
-      expect(markup).toContain('data-price-label="1.500 Tr."');
+      expect(markup).toContain('data-price-label="1.500"');
     });
 
-    it('[TC-PIPT02.17/MSS][UI-S01/MSS][BR-UI-002][Facet2-Reactivity] Dynamic price resolution khi có chủ: ô cao cấp cellIndex 39 hiển thị nhãn 4.000 Tr.', () => {
+    it('[TC-PIPT02.17/MSS][UI-S01/MSS][BR-UI-002][Facet2-Reactivity] Dynamic price resolution khi có chủ: ô cao cấp cellIndex 39 hiển thị nhãn 4.000', () => {
       const markup = renderToStaticMarkup(
         React.createElement(OwnerPricePill, { cellIndex: 39, ownerColor: '#10B981' })
       );
-      expect(markup).toContain('data-price-label="4.000 Tr."');
+      expect(markup).toContain('data-price-label="4.000"');
     });
 
     it('[TC-PIPT02.18/MSS][UI-S01/MSS][BR-UI-002][Facet2-Reactivity] OwnerPricePill tuân thủ thuộc tính priceLabel ghi đè khi được cung cấp', () => {
@@ -536,12 +536,12 @@ describe('[TC-PIPT01/MSS..TC-PIPT04/A4][UI-S01/MSS][BR-UI-002] Pure Ivory Price 
       expect(actionText).toBeDefined();
     });
 
-    it('[TC-PIPT04.03/MSS][UI-S01/MSS][BR-UI-002][Facet4-Preservation] Ô Lệ Phí (cellIndex 4) bảo tồn Action Badge đỏ hồng #E11D48 với nhãn "NỘP 1.000 TR."', () => {
+    it('[TC-PIPT04.03/MSS][UI-S01/MSS][BR-UI-002][Facet4-Preservation] Ô Lệ Phí (cellIndex 4) bảo tồn Action Badge đỏ hồng #E11D48 với nhãn "NỘP 1.000"', () => {
       getTileTexture(4);
       const badge = recordedRoundRects.find((r) => r.y === 274);
       expect(badge).toBeDefined();
       expect(badge?.fillStyle).toBe('#E11D48');
-      const actionText = recordedFillTexts.find((t) => t.text === 'NỘP 1.000 TR.');
+      const actionText = recordedFillTexts.find((t) => t.text === 'NỘP 1.000');
       expect(actionText).toBeDefined();
     });
 

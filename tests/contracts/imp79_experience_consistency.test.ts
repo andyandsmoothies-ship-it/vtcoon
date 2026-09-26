@@ -119,7 +119,7 @@ describe('[TC-79.1/MSS] Auction Victory Fanfare & Log Notification', () => {
     );
 
     expect(html).toContain('BÚA GÕ THÀNH CÔNG');
-    expect(html).toContain('1.500 Tr.');
+    expect(html).toContain('1.500');
   });
 });
 
@@ -382,7 +382,7 @@ describe('[TC-79.4/MSS] Financial Context Disambiguation (Edge Case: Generic Fee
     const log = processPayerFee(payer, dummyContext, delta);
     expect(log).toBeDefined();
     expect(log?.message).toContain('Lệ Phí Đăng Ký Đất Đai');
-    expect(log?.message).toContain('1.000 Tr.');
+    expect(log?.message).toContain('1.000');
   });
 
   it('TC-79.4.2: processPayerFee tạo log Bảo Lãnh Kiểm Toán khi người chơi nộp 500 Tr. rời khỏi Trạm', () => {
@@ -405,7 +405,7 @@ describe('[TC-79.4/MSS] Financial Context Disambiguation (Edge Case: Generic Fee
     const log = processPayerFee(payer, dummyContext, delta, prevState);
     expect(log).toBeDefined();
     expect(log?.message).toContain('Bảo Lãnh Kiểm Toán');
-    expect(log?.message).toContain('500 Tr.');
+    expect(log?.message).toContain('500');
   });
 
   it('TC-79.4.3: processPayerFee fallback về log phí chung cho các khoản trừ khác', () => {

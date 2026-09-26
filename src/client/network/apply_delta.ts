@@ -108,9 +108,10 @@ function syncBusinessModals(delta: DeltaPayload, state: GameState): void {
         lastDismissedAuctionKey = null;
       }
       const myPid = useLobbyStore.getState().myPlayerId;
-      const prevPayload = state.activeModal === 'auction' ? state.modalPayload as { hasPassed?: boolean } | null : null;
+      const prevPayload = state.activeModal === 'auction' ? state.modalPayload as { hasPassed?: boolean; cellIndex?: number; isConcluded?: boolean } | null : null;
+      const isSameAuction = prevPayload?.cellIndex === delta.auction.cellIndex && !prevPayload?.isConcluded;
       const hasPassed = Boolean(
-        prevPayload?.hasPassed ||
+        (isSameAuction && prevPayload?.hasPassed) ||
         (myPid && delta.auction.passedPlayerIds?.includes(myPid))
       );
       state.openModal('auction', {

@@ -148,12 +148,12 @@ describe('[IMP-140: Station 1 RED] Fuel Surge Clarification & Auction Polish', (
         React.createElement(EventCardModal, {
           cardType: 'market',
           cardId: MarketCardId.MC_FUEL_SURGE,
-          description: 'Biến động giá xăng dầu: Nộp 500 Tr. phụ phí nhiên liệu và phụ thu cước ô hạ tầng.',
+          description: 'Biến động giá xăng dầu: Nộp 500 phụ phí nhiên liệu và phụ thu cước ô hạ tầng.',
         })
       );
       expect(html).toContain('data-testid="event-hero-stat"');
-      expect(html).toMatch(/data-testid="event-hero-stat"[\s\S]*?-500\s*Tr\./);
-      expect(html).not.toMatch(/data-testid="event-hero-stat"[\s\S]*?\+500\s*Tr\./);
+      expect(html).toMatch(/data-testid="event-hero-stat"[\s\S]*?-500/);
+      expect(html).not.toMatch(/data-testid="event-hero-stat"[\s\S]*?\+500/);
     });
 
     it('[TC-IMP140.09/MSS][UC-IMP140][Facet-2/FuelSurge] Nhãn Hero Stat của MC_FUEL_SURGE hiển thị PHỤ PHÍ NHIÊN LIỆU hoặc PHÍ NHIÊN LIỆU', () => {
@@ -179,16 +179,16 @@ describe('[IMP-140: Station 1 RED] Fuel Surge Clarification & Auction Polish', (
       expect(html).toMatch(/data-testid="event-hero-stat"[^>]*border-rose-400/);
     });
 
-    it('[TC-IMP140.11/MSS][UC-IMP140][Facet-2/FuelSurge] Hàm getCardHeroStat trả về cấu hình negative và -500 Tr. cho MC_FUEL_SURGE', () => {
+    it('[TC-IMP140.11/MSS][UC-IMP140][Facet-2/FuelSurge] Hàm getCardHeroStat trả về cấu hình negative và -500 cho MC_FUEL_SURGE', () => {
       const heroStat = getCardHeroStat(MarketCardId.MC_FUEL_SURGE);
-      expect(heroStat.value).toBe('-500 Tr.');
+      expect(heroStat.value).toBe('-500');
       expect(heroStat.variant).toBe('negative');
       expect(heroStat.label).toMatch(/(?:PHỤ PHÍ NHIÊN LIỆU|PHÍ NHIÊN LIỆU)/i);
     });
 
-    it('[TC-IMP140.12/MSS][UC-IMP140][Facet-2/FuelSurge] Metadata trong event_card_metadata.ts mô tả rõ nộp 500 Tr. phụ phí nhiên liệu và phụ thu cước 2 vòng', () => {
+    it('[TC-IMP140.12/MSS][UC-IMP140][Facet-2/FuelSurge] Metadata trong event_card_metadata.ts mô tả rõ nộp 500 phụ phí nhiên liệu và phụ thu cước 2 vòng', () => {
       const metadata = MARKET_CARD_DETAILS[MarketCardId.MC_FUEL_SURGE];
-      expect(metadata.effectDetail).toMatch(/500\s*Tr\./);
+      expect(metadata.effectDetail).toMatch(/500/);
       expect(metadata.effectDetail).toMatch(/(?:phụ phí nhiên liệu|nhiên liệu)/i);
       expect(metadata.duration).toContain('2 vòng');
     });

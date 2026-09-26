@@ -114,7 +114,7 @@ describe('[UC-IMP156/MSS] Station 1 RED: Dual-Wing Arena, Anti-Tiny-Text & Timer
         })
       );
       expect(html).toContain('data-testid="flip-counter"');
-      expect(html).toContain('1.200 Tr.');
+      expect(html).toContain('1.200');
       expect(html).toContain('GIÁ THẦU HIỆN TẠI');
       expect(html).toContain('DẪN ĐẦU');
     });
@@ -271,9 +271,9 @@ describe('[UC-IMP156/MSS] Station 1 RED: Dual-Wing Arena, Anti-Tiny-Text & Timer
           timeRemaining: 12,
         })
       );
-      expect(html).toContain('+100 Tr.');
-      expect(html).toContain('(2.600 Tr.)');
-      expect(html).toContain('(3.000 Tr.)');
+      expect(html).toContain('+100');
+      expect(html).toContain('(2.600)');
+      expect(html).toContain('(3.000)');
     });
   });
 

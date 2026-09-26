@@ -214,7 +214,7 @@ describe('[TC-IMP40/MSS][UC-IMP40] Anti-Glare Specular & Gentle Daylight Suite',
     getTileTexture(3);
     const pricePill = recordedRoundRects.find((r) => (r.y === 282 || r.y === 274) && (r.h === 48 || r.h === 50));
     expect(pricePill).toBeUndefined();
-    const priceText = recordedFillTexts.find((f) => f.text === '600 Tr.');
+    const priceText = recordedFillTexts.find((f) => f.text === '600');
     expect(priceText).toBeDefined();
     expect(priceText?.style).toBe('#0F172A');
   });

@@ -220,7 +220,7 @@ describe('[TC-ACT02/MSS] ActivityTracker Unit Tests', () => {
     const entries = detectFinancialAndStatusActivities(delta, prevState, nextState, []);
     expect(entries).toHaveLength(1);
     expect(entries[0]?.type).toBe('rent');
-    expect(entries[0]?.message).toContain('Đại Gia Sài Gòn đã trả 800 Tr. tiền thuê cho Tỷ Phú Hà Nội');
+    expect(entries[0]?.message).toContain('Đại Gia Sài Gòn đã trả 800 tiền thuê cho Tỷ Phú Hà Nội');
     expect(entries[0]?.amount).toBe(-800);
   });
 
@@ -243,7 +243,7 @@ describe('[TC-ACT02/MSS] ActivityTracker Unit Tests', () => {
     };
     const taxEntries = detectFinancialAndStatusActivities(deltaTax, prevState, nextState, []);
     expect(taxEntries[0]?.type).toBe('tax');
-    expect(taxEntries[0]?.message).toContain('đã nộp phí / nộp thuế 500 Tr.');
+    expect(taxEntries[0]?.message).toContain('đã nộp phí / nộp thuế 500');
 
     // Nhan thuong
     const deltaReward: DeltaPayload = {
@@ -260,7 +260,7 @@ describe('[TC-ACT02/MSS] ActivityTracker Unit Tests', () => {
       [],
     );
     expect(rewardEntries[0]?.type).toBe('system');
-    expect(rewardEntries[0]?.message).toContain('đã nhận được 2.000 Tr. tiền thưởng');
+    expect(rewardEntries[0]?.message).toContain('đã nhận được 2.000 tiền thưởng');
   });
 
   it('Trich xuat su kien tuyen bo pha san', () => {
@@ -302,7 +302,7 @@ describe('[TC-ACT02/MSS] ActivityTracker Unit Tests', () => {
     const entries = detectAuctionActivities(delta, nextState);
     expect(entries).toHaveLength(1);
     expect(entries[0]?.type).toBe('auction');
-    expect(entries[0]?.message).toContain('Đại Gia Sài Gòn đã đặt giá 1.200 Tr.');
+    expect(entries[0]?.message).toContain('Đại Gia Sài Gòn đã đặt giá 1.200');
   });
 
   it('[Adversarial Guard] Full Sync (cells.length === BOARD_SIZE) khong duoc sinh ra spam log', () => {

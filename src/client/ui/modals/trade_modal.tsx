@@ -203,7 +203,7 @@ export function TradeModal({
               min={0}
               max={maxCash}
               value={cashVal === 0 ? '' : cashVal}
-              placeholder="0 Tr."
+              placeholder="0"
               onChange={(e) => {
                 const val = Math.max(0, maxCash !== undefined ? Math.min(maxCash, Number(e.target.value) || 0) : Number(e.target.value) || 0);
                 onCash(val);
@@ -227,9 +227,9 @@ export function TradeModal({
           {!isMine && offered.length > 0 && (
             <div className="mt-1.5 pt-1.5 border-t border-amber-200/60 flex items-center gap-1.5 flex-wrap text-[10px]">
               <span className="text-slate-500 font-medium">Gợi ý giá bán:</span>
-              <button type="button" onClick={() => onCash(price70)} className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-bold inline-flex items-center justify-center border transition-all cursor-pointer touch-manipulation bg-white hover:bg-amber-100 border-amber-300 text-amber-900">70% Sàn ({price70} Tr.)</button>
-              <button type="button" onClick={() => onCash(price100)} className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-bold inline-flex items-center justify-center border transition-all cursor-pointer touch-manipulation bg-white hover:bg-amber-100 border-amber-300 text-amber-900">100% Gốc ({price100} Tr.)</button>
-              <button type="button" onClick={() => onCash(price120)} className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-bold inline-flex items-center justify-center border transition-all cursor-pointer touch-manipulation bg-white hover:bg-amber-100 border-amber-300 text-amber-900">120% ({price120} Tr.)</button>
+              <button type="button" onClick={() => onCash(price70)} className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-bold inline-flex items-center justify-center border transition-all cursor-pointer touch-manipulation bg-white hover:bg-amber-100 border-amber-300 text-amber-900">70% Sàn ({formatCurrency(price70)})</button>
+              <button type="button" onClick={() => onCash(price100)} className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-bold inline-flex items-center justify-center border transition-all cursor-pointer touch-manipulation bg-white hover:bg-amber-100 border-amber-300 text-amber-900">100% Gốc ({formatCurrency(price100)})</button>
+              <button type="button" onClick={() => onCash(price120)} className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-bold inline-flex items-center justify-center border transition-all cursor-pointer touch-manipulation bg-white hover:bg-amber-100 border-amber-300 text-amber-900">120% ({formatCurrency(price120)})</button>
             </div>
           )}
 
