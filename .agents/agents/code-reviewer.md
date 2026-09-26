@@ -4,6 +4,8 @@ description: Acceptance Gate Auditor: Reviews full diff and nearby code, catches
 subagent: true
 mainAgent: false
 model: inherit
+workspace: share
+skills: [de-sloppify, codebase-design, code-review]
 tools: [view_file, list_dir, find_by_name, grep_search, run_command]
 ---
 # ACCEPTANCE GATE & DE-SLOP AUDIT PROTOCOL

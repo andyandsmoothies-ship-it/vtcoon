@@ -1350,6 +1350,42 @@ Khi phát hiện dự án cần kỹ năng chuyên sâu (Docker, Postgres, Flutt
 4. Kích hoạt và áp dụng ngay cho phiên làm việc hiện tại.
 ```
 
+6. **Cấu Trúc 4 Thư Mục Chuẩn Của Skill Trong AG 2.0 & File Khai Báo `skills.json`**:
+   Mỗi kỹ năng tùy biến (Custom Skill) khi tự viết cần tuân theo cấu trúc chuẩn:
+   ```text
+   .agents/skills/<tên-kỹ-năng>/
+   ├── SKILL.md       # BẮT BUỘC: File chỉ dẫn chính (có YAML name, description)
+   ├── scripts/       # Tùy chọn: Scripts thực thi tự động (Node.js, Python)
+   ├── examples/      # Tùy chọn: Code hoặc test mẫu tham chiếu
+   ├── resources/     # Tùy chọn: Templates, assets, checklists
+   └── references/    # Tùy chọn: Tài liệu kỹ thuật sâu (chỉ đọc khi cần - Progressive Disclosure)
+   ```
+   *Quản lý danh mục kỹ năng bằng `.agents/skills.json`*:
+   ```json
+   {
+     "entries": [
+       { "path": ".agents/skills" }
+     ]
+   }
+   ```
+
+7. **Cơ Chế Khởi Chạy Sidecars (`.agents/sidecar.json`) — Khi Nào Dùng & Khi Nào Không**:
+   Sidecar là tiến trình nền (Background Daemon) chạy song song với Agent suốt phiên làm việc.
+   - **KHI NÀO DÙNG**:
+     • Headless Dev Server / WebSocket Watchdog: Giám sát server game/API nền, tự động quét rò rỉ bộ nhớ hoặc deadlocks khi chạy test.
+     • Mock Service Daemon: Giả lập bên thứ ba (Stripe webhook, OAuth provider) cho kịch bản E2E.
+   - **KHI NÀO KHÔNG DÙNG**:
+     • Phát triển logic thông thường, viết unit/contract tests chạy in-memory (Vitest/Jest). Không mở sidecar gây tốn RAM và khóa port máy tính.
+   - *Cấu hình mẫu `.agents/sidecar.json` (nếu dự án cần)*:
+     ```json
+     {
+       "dev-watchdog": {
+         "command": "node scripts/watchdog.mjs",
+         "timeout": 0
+       }
+     }
+     ```
+
 ### Bước 1.3: Cấu Trúc Hệ Thống Luật & Tạo File `GEMINI.md` Chuẩn Mực (<80 Dòng)
 
 #### 1.3.0 KIẾN TRÚC PHÂN TẦNG VÀ PHÂN BỔ LUẬT (RULE HIERARCHY & BEST PRACTICES)
@@ -1388,7 +1424,11 @@ Antigravity tự động tìm và nạp các file luật Markdown theo cơ chế
 | **Quy chuẩn chuyên sâu tầng** | ❌ Không đưa vào | ❌ Không đưa vào | ✅ Token CSS, SQL Rollback |
 
 ##### C. 5 Nguyên tắc vàng khi thiết kế File Luật Dự Án cho Junior (Project Rule Principles):
-1. **Ngân sách ngắn gọn (<80 - 100 dòng)**: File luật luôn bị tiêm ngầm vào mọi lượt prompt. File dài gây lãng phí token và làm loãng khả năng chú ý của mô hình (Context Drift).
+1. **Ngân sách ngắn gọn (<80 - 100 dòng) & Giới hạn vật lý AG 2.0**:
+   - *Giới hạn cứng per-file*: Tối đa **24 KB (24.000 bytes)** cho mỗi file rule.
+   - *Tổng ngân sách rules*: Tối đa **20.000 tokens** (`defaultRulesBudget`) cho toàn bộ Always-on/Global rules. Nếu vượt ngưỡng, hệ thống sẽ tự động hạ cấp (demote) luật từ inline text thành file path pointers (AI phải đọc theo nhu cầu, làm giảm độ tuân thủ nghiêm ngặt).
+   - *Cú pháp Modularize `@[label](path)`*: AG 2.0 hỗ trợ nhúng file quy tắc chuyên đề qua cú pháp `@[tên_nhãn](đường_dẫn)`.
+   - *Tách Subdirectory Rules JIT*: Giữ `GEMINI.md` tại root mỏng; đặt luật backend vào `src/server/GEMINI.md` (FSM, treasury, netcode) và frontend vào `src/client/GEMINI.md` (UI tokens, touch targets, R3F). AI chỉ nạp luật khi thao tác thực sự trong thư mục đó, triệt tiêu context bloat.
 2. **Rules != Skills**: File luật chỉ chứa **Rào chắn cấm đoán / Tiêu chuẩn xuất xưởng** (CẤM làm X, PHẢI giữ Y). Quy trình hướng dẫn nhiều bước phải đưa vào `SKILL.md` để nạp theo nhu cầu (Progressive Disclosure).
 3. **Rules != Hooks**: Những gì máy móc kiểm tra tự động được (chặn lệnh git, đếm số dòng, lọc từ cấm), hãy viết vào `.agents/hooks.json` (chạy 0 token, 0ms). File luật chỉ dành để định hướng tư duy lập trình.
 4. **Không viết luật suy đoán**: Chỉ đưa vào file luật các rào chắn từ những lỗi/bug thực tế đã từng xảy ra.
@@ -1446,9 +1486,9 @@ Khi cần thông tin chuyên sâu, BẮT BUỘC đọc các file chỉ mục sau
 ---
 
 ### Bước 1.4: Cấu hình AG 2.0 Lifecycle Hooks (`.agents/hooks*.json`)
-*(Tạo Cổng Cơ Học Tất Định: Chặn lệnh Git vi phạm, tự động quét Zone 3 Blocklist & Khóa Ranh Giới Quyền Subagents - Chi phí 0 Token, 0.01s)*:
+*(Tạo Cổng Cơ Học Tất Định: Chặn lệnh Git vi phạm, chặn Shell Redirection, tự động quét Zone 3 Blocklist & Khóa Ranh Giới Quyền Subagents - Chi phí 0 Token, 0.01s)*:
 
-1. Tạo file `.agents/hooks.json` (Gác cổng an toàn toàn cục):
+1. Tạo file `.agents/hooks.json` (Gác cổng an toàn toàn cục & Chốt chặn Stop):
 ```json
 {
   "git-safety-gate": {
@@ -1465,27 +1505,40 @@ Khi cần thông tin chuyên sâu, BẮT BUỘC đọc các file chỉ mục sau
       }
     ]
   },
+  "pre-tool-file-tracker": {
+    "PreToolUse": [
+      {
+        "matcher": "write_to_file|replace_file_content",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .agents/scripts/use_case_guard.py --pre-tool-file",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  },
   "spec-and-traceability-guard": {
     "PostToolUse": [
       {
-        "matcher": "write_to_file",
+        "matcher": "write_to_file|replace_file_content",
         "hooks": [
           {
             "type": "command",
             "command": "python .agents/scripts/use_case_guard.py --audit-file",
-            "timeout": 5
+            "timeout": 10
           }
         ]
-      },
+      }
+    ]
+  },
+  "quality-gate-stop": {
+    "Stop": [
       {
-        "matcher": "replace_file_content",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python .agents/scripts/use_case_guard.py --audit-file",
-            "timeout": 5
-          }
-        ]
+        "type": "command",
+        "command": "python .agents/scripts/use_case_guard.py --stop-gate",
+        "timeout": 20
       }
     ]
   }
@@ -1498,17 +1551,7 @@ Khi cần thông tin chuyên sâu, BẮT BUỘC đọc các file chỉ mục sau
   "qa-role-sandbox": {
     "PreToolUse": [
       {
-        "matcher": "write_to_file",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python .agents/scripts/use_case_guard.py --role qa-tester",
-            "timeout": 5
-          }
-        ]
-      },
-      {
-        "matcher": "replace_file_content",
+        "matcher": "write_to_file|replace_file_content",
         "hooks": [
           {
             "type": "command",
@@ -1528,17 +1571,7 @@ Khi cần thông tin chuyên sâu, BẮT BUỘC đọc các file chỉ mục sau
   "implementer-role-sandbox": {
     "PreToolUse": [
       {
-        "matcher": "write_to_file",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python .agents/scripts/use_case_guard.py --role implementer",
-            "timeout": 5
-          }
-        ]
-      },
-      {
-        "matcher": "replace_file_content",
+        "matcher": "write_to_file|replace_file_content",
         "hooks": [
           {
             "type": "command",
@@ -1555,29 +1588,35 @@ Khi cần thông tin chuyên sâu, BẮT BUỘC đọc các file chỉ mục sau
 ---
 
 ### Bước 1.5: Script Gác Cổng Tự Động (`.agents/scripts/use_case_guard.py`)
-*(Script Python chuẩn, không dùng thư viện ngoài, tự động thực thi khi Agent thao tác file)*:
+*(Script Python chuẩn giao tiếp AG 2.0 protojson IPC qua stdin/stdout, không dùng thư viện ngoài, tự động thực thi khi Agent thao tác file)*:
 
 Tạo file `.agents/scripts/use_case_guard.py`:
 ```python
 """
-Use Case & Safety Quality Gate Script
+Use Case & Safety Quality Gate Script (Antigravity 2.0 Hook IPC Conforming)
 Enforces deterministic mechanical guardrails:
 1. Blocks forbidden Git mutation commands (AI must never commit/push/merge).
-2. Audits file line count budgets (warns if file > 400 lines).
-3. Detects Zone 3 technical implementation leaks in Use Case specs.
-4. Detects vague delegated decision words (The Blank Check) in specs.
-5. Verifies traceability tags in test files.
-6. Source micro-guards: Anti-Silent Catch & Anti-Debug Slop.
-7. Role Sandboxing: Mechanically confines qa-tester to tests/ and implementer to src/.
+2. Blocks shell redirection (AI must use native write/replace tools).
+3. Enforces subagent role-based file sandboxes (qa-tester vs implementer).
+4. Audits file line count budgets (warns if file > 400 lines).
+5. Detects Zone 3 technical implementation leaks in Use Case specs.
+6. Detects vague delegated decision words (The Blank Check) in specs.
+7. Verifies traceability tags in test files.
+8. Stop Gate: Prevents completion if modified UI files violate Impeccable craft rules.
 """
 
+import json
 import os
 import re
+import subprocess
 import sys
 
 # Ensure UTF-8 output on Windows
 if sys.platform == "win32":
     sys.stdout.reconfigure(encoding="utf-8")
+
+TOUCHED_FILES_LOG = ".agents/tmp/touched_files.txt"
+LAST_TARGET_FILE_LOG = ".agents/tmp/last_target_file.txt"
 
 ZONE_3_BLOCKLIST = [
     r"\bJWT\b",
@@ -1611,124 +1650,252 @@ FORBIDDEN_GIT_COMMANDS = [
     "git cherry-pick",
 ]
 
-
-def check_command() -> None:
-    """Inspects CLI commands before execution to prevent source control mutation."""
-    cmd = os.environ.get("AG_TOOL_COMMAND", "") or (
-        " ".join(sys.argv[2:]) if len(sys.argv) > 2 else ""
-    )
-    cmd_lower = cmd.lower()
-    for forbidden in FORBIDDEN_GIT_COMMANDS:
-        if forbidden in cmd_lower:
-            print(
-                f"ERROR [Safety Gate]: Prohibited command detected: '{forbidden}'. "
-                "AI is forbidden from modifying Git history directly. The human user controls Git."
-            )
-            sys.exit(1)
-
-
-def audit_file() -> None:
-    """Audits file modifications for budget, zone leaks, traceability, and micro-cleanliness."""
-    target_file = os.environ.get("AG_TOOL_TARGET_FILE", "") or (
-        sys.argv[2] if len(sys.argv) > 2 else ""
-    )
-    if not target_file or not os.path.exists(target_file):
-        return
-
-    with open(target_file, "r", encoding="utf-8", errors="ignore") as f:
-        lines = f.readlines()
-
-    line_count = len(lines)
-    norm_path = target_file.replace("\\", "/")
-
-    # 1. Kiểm soát ngân sách file (>400 dòng)
-    if line_count > 400:
-        print(
-            f"WARNING [Budget]: {target_file} has {line_count} lines (budget limit is 400 lines). "
-            "Extract logic into smaller modular files."
-        )
-
-    # 2. Quét rò rỉ Zone 3 và The Blank Check trong các file spec Use Case
-    if "/docs/epics/" in norm_path and norm_path.endswith(".md") and ("UC-" in norm_path or "spec_" in norm_path):
-        content = "".join(lines)
-        for pattern in ZONE_3_BLOCKLIST:
-            match = re.search(pattern, content, re.IGNORECASE)
-            if match:
-                print(f"ERROR [Zone 3 Leak]: Detected forbidden technical mechanism: '{match.group(0)}'")
-                print("ACTION: Rewrite spec using observable behavior or reference docs/domain/entity_model.md.")
-                sys.exit(1)
-
-        for pattern in VAGUE_WORDS_BLOCKLIST:
-            match = re.search(pattern, content, re.IGNORECASE)
-            if match:
-                print(f"ERROR [The Blank Check]: Detected vague decision word: '{match.group(0)}'")
-                print("ACTION: Specify exact concrete outcomes (state exact error message, field, or quantity).")
-                sys.exit(1)
-
-    # 3. Quét nhãn vết truy xuất nguồn gốc trong file test
-    if "/tests/" in norm_path or norm_path.endswith(".test.ts") or norm_path.endswith("_test.py") or norm_path.endswith(".spec.ts"):
-        content = "".join(lines)
-        if not re.search(r"\[UC-[A-Z0-9]+-\d+", content):
-            print(f"WARNING [Traceability]: Test file '{target_file}' lacks required traceability tag [UC-[EPIC]-NNN].")
-
-    # 4. Micro-guards cho mã nguồn trong src/ / lib/ / app/ (Anti-Silent Catch & Anti-Debug Slop)
-    if "/src/" in norm_path or "/lib/" in norm_path or "/app/" in norm_path:
-        content = "".join(lines)
-        # 4a. Anti-Silent Catch (Lean Observability)
-        if re.search(r"catch\s*\([^)]*\)\s*\{\s*\}", content) or re.search(r"except\s*:\s*pass\b", content):
-            print(
-                f"WARNING [Lean Observability]: Empty catch/except block detected in '{target_file}'. "
-                "Forbidden silent error swallowing. Rejections must emit structured logs or explicit reason codes."
-            )
-        # 4b. Anti-Debug Slop (debugger, raw console.log)
-        if re.search(r"\bdebugger\s*;", content):
-            print(f"WARNING [Slop]: 'debugger;' statement detected in '{target_file}'. Remove before commit.")
-        if re.search(r"\bconsole\.log\(", content) and not norm_path.endswith((".test.ts", ".spec.ts")):
-            print(f"INFO [Slop]: Raw 'console.log' detected in '{target_file}'. Prefer structured logging for state transitions.")
-
+FORBIDDEN_SHELL_REDIRECTS = [
+    r">\s*[\w\.\/\\]+",
+    r">>\s*[\w\.\/\\]+",
+    r"\bOut-File\b",
+    r"\bSet-Content\b",
+]
 
 TEST_DIR_PATTERNS = ["/tests/", "/test/", "/spec/", "/__tests__/", ".test.", ".spec.", "_test."]
 SRC_DIR_PATTERNS = ["/src/", "/lib/", "/app/", "/internal/", "/pkg/", "/core/"]
 
 
-def check_role(role: str) -> None:
-    """Enforces role-based file sandboxing for universal engineering subagents."""
-    target_file = os.environ.get("AG_TOOL_TARGET_FILE", "") or (
-        sys.argv[3] if len(sys.argv) > 3 else ""
-    )
+def read_hook_payload() -> dict:
+    """Reads JSON hook context from stdin (AG 2.0 protojson IPC)."""
+    if not sys.stdin.isatty():
+        try:
+            raw = sys.stdin.read().strip()
+            if raw:
+                return json.loads(raw)
+        except Exception:
+            pass
+    return {}
+
+
+def record_target_file(target_file: str) -> None:
+    """Tracks target file path for post-tool and stop-gate verification."""
     if not target_file:
         return
+    try:
+        os.makedirs(os.path.dirname(TOUCHED_FILES_LOG), exist_ok=True)
+        with open(LAST_TARGET_FILE_LOG, "w", encoding="utf-8") as f:
+            f.write(target_file)
+        with open(TOUCHED_FILES_LOG, "a", encoding="utf-8") as f:
+            f.write(target_file + "\n")
+    except Exception:
+        pass
 
-    norm_path = "/" + target_file.replace("\\", "/").lstrip("/")
 
-    if role == "qa-tester":
-        if any(p in norm_path for p in SRC_DIR_PATTERNS):
-            print(
+def check_command(payload: dict) -> None:
+    """PreToolUse: Inspects CLI commands to block Git mutations and shell redirection."""
+    cmd = ""
+    if payload:
+        tool_call = payload.get("toolCall", {})
+        cmd = tool_call.get("args", {}).get("CommandLine", "")
+
+    if not cmd:
+        cmd = os.environ.get("AG_TOOL_COMMAND", "") or (
+            " ".join(sys.argv[2:]) if len(sys.argv) > 2 else ""
+        )
+
+    cmd_lower = cmd.lower()
+    for forbidden in FORBIDDEN_GIT_COMMANDS:
+        if forbidden in cmd_lower:
+            reason = (
+                f"ERROR [Safety Gate]: Prohibited command detected: '{forbidden}'. "
+                "AI is forbidden from modifying Git history directly. The human user controls Git."
+            )
+            print(json.dumps({"decision": "deny", "reason": reason}))
+            sys.exit(0)
+
+    for pattern in FORBIDDEN_SHELL_REDIRECTS:
+        if re.search(pattern, cmd, re.IGNORECASE):
+            reason = (
+                "ERROR [Safety Gate]: Shell redirection detected. "
+                "AI must use native write_to_file or replace_file_content instead of shell redirects."
+            )
+            print(json.dumps({"decision": "deny", "reason": reason}))
+            sys.exit(0)
+
+    print(json.dumps({"decision": "allow"}))
+    sys.exit(0)
+
+
+def pre_tool_file_gate(payload: dict, role: str = "") -> None:
+    """PreToolUse: Enforces role sandbox and registers target file before edit."""
+    target_file = ""
+    if payload:
+        tool_call = payload.get("toolCall", {})
+        target_file = tool_call.get("args", {}).get("TargetFile", "")
+
+    if not target_file:
+        target_file = os.environ.get("AG_TOOL_TARGET_FILE", "") or (
+            sys.argv[3] if len(sys.argv) > 3 else (sys.argv[2] if len(sys.argv) > 2 else "")
+        )
+
+    record_target_file(target_file)
+
+    if role and target_file:
+        norm_path = "/" + target_file.replace("\\", "/").lstrip("/")
+        if role == "qa-tester" and any(p in norm_path for p in SRC_DIR_PATTERNS):
+            reason = (
                 f"ERROR [Role Gate]: qa-tester is strictly forbidden from modifying production code: '{target_file}'. "
                 "Only test files in tests/** or test/** are permitted."
             )
-            sys.exit(1)
+            print(json.dumps({"decision": "deny", "reason": reason}))
+            sys.exit(0)
 
-    elif role == "implementer":
-        if any(p in norm_path for p in TEST_DIR_PATTERNS):
-            print(
+        if role == "implementer" and any(p in norm_path for p in TEST_DIR_PATTERNS):
+            reason = (
                 f"ERROR [Role Gate]: implementer is forbidden from modifying test contracts: '{target_file}'. "
                 "Test contracts are authoritatively locked by qa-tester."
             )
-            sys.exit(1)
+            print(json.dumps({"decision": "deny", "reason": reason}))
+            sys.exit(0)
+
+    print(json.dumps({"decision": "allow"}))
+    sys.exit(0)
+
+
+def audit_file(payload: dict) -> None:
+    """PostToolUse: Audits file modifications for budget, zone leaks, and traceability tags."""
+    target_file = ""
+    if payload:
+        tool_call = payload.get("toolCall", {})
+        target_file = tool_call.get("args", {}).get("TargetFile", "")
+
+    if not target_file and os.path.exists(LAST_TARGET_FILE_LOG):
+        try:
+            with open(LAST_TARGET_FILE_LOG, "r", encoding="utf-8") as f:
+                target_file = f.read().strip()
+        except Exception:
+            pass
+
+    if not target_file:
+        target_file = os.environ.get("AG_TOOL_TARGET_FILE", "") or (
+            sys.argv[2] if len(sys.argv) > 2 else ""
+        )
+
+    if target_file and os.path.exists(target_file):
+        with open(target_file, "r", encoding="utf-8", errors="ignore") as f:
+            lines = f.readlines()
+
+        line_count = len(lines)
+        norm_path = target_file.replace("\\", "/")
+
+        # 1. Kiểm soát ngân sách file (>400 dòng)
+        if line_count > 400:
+            print(
+                f"WARNING [Budget]: {target_file} has {line_count} lines (budget limit is 400 lines). "
+                "Extract logic into smaller modular files.",
+                file=sys.stderr,
+            )
+
+        # 2. Quét rò rỉ Zone 3 và The Blank Check trong các file spec Use Case
+        if "/docs/epics/" in norm_path and norm_path.endswith(".md") and ("UC-" in norm_path or "spec_" in norm_path):
+            content = "".join(lines)
+            for pattern in ZONE_3_BLOCKLIST:
+                match = re.search(pattern, content, re.IGNORECASE)
+                if match:
+                    print(f"ERROR [Zone 3 Leak]: Detected forbidden technical mechanism: '{match.group(0)}'", file=sys.stderr)
+
+            for pattern in VAGUE_WORDS_BLOCKLIST:
+                match = re.search(pattern, content, re.IGNORECASE)
+                if match:
+                    print(f"ERROR [The Blank Check]: Detected vague decision word: '{match.group(0)}'", file=sys.stderr)
+
+        # 3. Quét nhãn vết truy xuất nguồn gốc trong file test
+        if "/tests/" in norm_path or norm_path.endswith(".test.ts") or norm_path.endswith("_test.py") or norm_path.endswith(".spec.ts"):
+            content = "".join(lines)
+            if not re.search(r"\[UC-[A-Z0-9]+-\d+", content):
+                print(f"WARNING [Traceability]: Test file '{target_file}' lacks required traceability tag [UC-[EPIC]-NNN].", file=sys.stderr)
+
+        # 4. Micro-guards cho mã nguồn trong src/ / lib/ / app/ (Anti-Silent Catch & Anti-Debug Slop)
+        if "/src/" in norm_path or "/lib/" in norm_path or "/app/" in norm_path:
+            content = "".join(lines)
+            if re.search(r"catch\s*\([^)]*\)\s*\{\s*\}", content) or re.search(r"except\s*:\s*pass\b", content):
+                print(
+                    f"WARNING [Lean Observability]: Empty catch/except block detected in '{target_file}'. "
+                    "Forbidden silent error swallowing.",
+                    file=sys.stderr,
+                )
+            if re.search(r"\bdebugger\s*;", content):
+                print(f"WARNING [Slop]: 'debugger;' statement detected in '{target_file}'. Remove before commit.", file=sys.stderr)
+            if re.search(r"\bconsole\.log\(", content) and not norm_path.endswith((".test.ts", ".spec.ts")):
+                print(f"INFO [Slop]: Raw 'console.log' detected in '{target_file}'. Prefer structured logging for state transitions.", file=sys.stderr)
+
+    # PostToolUse expects empty JSON on stdout
+    print(json.dumps({}))
+    sys.exit(0)
+
+
+def stop_gate(payload: dict) -> None:
+    """Stop Hook: Verifies modified UI files conform to Impeccable craft rules before concluding."""
+    if not os.path.exists(TOUCHED_FILES_LOG):
+        print(json.dumps({}))
+        sys.exit(0)
+
+    try:
+        with open(TOUCHED_FILES_LOG, "r", encoding="utf-8") as f:
+            touched = [line.strip() for line in f if line.strip()]
+    except Exception:
+        touched = []
+
+    ui_touched = any(
+        ("src/client/" in p.replace("\\", "/") or "src\\client\\" in p)
+        for p in touched
+    )
+
+    if ui_touched:
+        try:
+            res = subprocess.run(
+                ["node", "scripts/lint_ui.mjs"],
+                capture_output=True,
+                text=True,
+            )
+            if res.returncode != 0:
+                reason = (
+                    "Quality Gate Check Failed: Impeccable UI craft violations detected. "
+                    f"Please fix all anti-patterns before stopping.\n{res.stdout}"
+                )
+                print(json.dumps({"decision": "continue", "reason": reason}))
+                sys.exit(0)
+        except Exception as e:
+            print(f"WARNING [Stop Gate]: Failed to execute lint_ui: {e}", file=sys.stderr)
+
+    # Clean up touched files log once stop gate passes
+    try:
+        if os.path.exists(TOUCHED_FILES_LOG):
+            os.remove(TOUCHED_FILES_LOG)
+        if os.path.exists(LAST_TARGET_FILE_LOG):
+            os.remove(LAST_TARGET_FILE_LOG)
+    except Exception:
+        pass
+
+    print(json.dumps({}))
+    sys.exit(0)
 
 
 if __name__ == "__main__":
+    payload = read_hook_payload()
     mode = sys.argv[1] if len(sys.argv) > 1 else ""
+
     if mode == "--check-command":
-        check_command()
+        check_command(payload)
+    elif mode == "--pre-tool-file":
+        role_arg = sys.argv[2] if len(sys.argv) > 2 else ""
+        pre_tool_file_gate(payload, role=role_arg)
     elif mode == "--audit-file":
-        audit_file()
+        audit_file(payload)
     elif mode == "--role":
-        role_name = sys.argv[2] if len(sys.argv) > 2 else ""
-        check_role(role_name)
+        role_arg = sys.argv[2] if len(sys.argv) > 2 else ""
+        pre_tool_file_gate(payload, role=role_arg)
+    elif mode == "--stop-gate":
+        stop_gate(payload)
     else:
-        print("Usage: python use_case_guard.py [--check-command <cmd>] | [--audit-file <filepath>] | [--role <role_name> <filepath>]")
+        print(json.dumps({"decision": "allow"}))
+        sys.exit(0)
 ```
 
 #### 1.5.1 NGUYÊN TẮC PHÂN TẦNG KIỂM SOÁT CƠ HỌC (TIERED MECHANICAL GUARDING)
@@ -1800,12 +1967,22 @@ Nếu bạn là Fresher hoặc lần đầu tiếp xúc với các thuật ngữ
 | **Master Roadmap (Rolling Wave Planning)** | **Bản đồ toàn chuyến đi** | Bản đồ lộ trình tổng thể (`master_roadmap.md`) định hình toàn bộ các chặng lớn (Core ➔ UI ➔ Network ➔ Go-Live) từ ngày đầu tiên, tránh lạc hướng khi cắm cúi làm từng chặng nhỏ. |
 | **Epic Ledger** | **Sổ cái công nhật** | Bảng danh sách công việc (`_epic_ledger.md`) ghi rõ việc nào đã xong `[x]`, việc nào đang làm để đổi phiên chat không bị quên. |
 | **Workspace: "branch"** | **Phòng thí nghiệm cách ly** | Môi trường rẽ nhánh riêng để AI thử nghiệm và chạy test; chỉ khi bài test xanh 100% thì mới đưa mã nguồn vào dự án chính. |
+| **Workspace: "share"** | **Phòng đọc dùng chung** | Cơ chế chia sẻ git worktree an toàn cho các tác nhân chỉ đọc (Reviewer/Auditor); kiểm tra mã nguồn thật trên đĩa mà không tốn dung lượng sao chép và không gây khóa file trên Windows. |
 
 ---
 
 ## GIAI ĐOẠN 2: Trọn Bộ Subagents Chuyên Trách Native AG 2.0 Sẵn Sàng Sử Dụng
 
-Tạo 11 file subagents chuyên trách sau trong thư mục `.agents/agents/` (6 subagents cốt lõi kỹ thuật & kiến trúc và 5 subagents chuyên biệt về đồ họa, thẩm định 2D/3D và thủ công):
+### 2.0 QUY CHUẨN CẤU HÌNH SUBAGENTS TRONG AG 2.0 (WORKSPACE MODES & SKILL BINDING)
+
+Mỗi subagent trong thư mục `.agents/agents/<name>.md` được cấu hình qua YAML frontmatter ở đầu file. Junior cần nắm vững 2 quy tắc bất biến:
+1. **Phân định chế độ Workspace (`workspace: share` vs `workspace: branch`)**:
+   - `workspace: share` (Dành cho nhóm Reviewer / Auditor - Read-only): Chia sẻ trực tiếp cây git worktree an toàn; đọc và kiểm toán mã nguồn thật trên đĩa mà KHÔNG tốn dung lượng sao chép và KHÔNG gây lỗi khóa file trên Windows khi nhiều subagent chạy cùng lúc.
+   - `workspace: branch` (Dành cho nhóm Coder / Builder - Writers): Tự động tạo nhánh cách ly riêng biệt; chỉ đưa mã nguồn vào dự án chính khi toàn bộ test đã xanh 100%.
+2. **Khai báo Kỹ năng Gắn kèm (`skills: [...]`)**:
+   - Khai báo mảng `skills: [tên_kỹ_năng]` trong frontmatter để subagent tự động nạp runbook chuyên sâu tương ứng theo cơ chế JIT, giảm thiểu độ dài system prompt.
+
+Tạo các file subagents chuyên trách sau trong thư mục `.agents/agents/` (6 subagents cốt lõi kỹ thuật & kiến trúc và 5 subagents chuyên biệt về đồ họa, thẩm định 2D/3D và thủ công):
 
 ### 1. File `.agents/agents/scout.md` (Trinh Sát - Định Vị Tọa Độ & Nạp Skill JIT)
 ```markdown
@@ -1815,6 +1992,8 @@ description: Trinh sát codebase, tra cứu tài liệu và nạp kỹ năng chu
 subagent: true
 mainAgent: false
 model: flash
+workspace: share
+skills: [skill-dispatcher, research]
 tools: [view_file, list_dir, find_by_name, grep_search, run_command]
 ---
 # NHIỆM VỤ TRINH SÁT & QUÉT SẠCH 5 KHUYẾT TẬT (SCOUT PROTOCOL)
@@ -1850,7 +2029,9 @@ name: plan-griller
 description: Adversarial Plan Auditor & Architectural Stress-Tester. Reads implementation plans, audits physical disk code, detects ghost files, broken dependencies, boundary flaws, and mandates 1-3 concrete blind spots. READ-ONLY.
 subagent: true
 mainAgent: false
-model: flash
+model: inherit
+workspace: share
+skills: [grilling, writing-plans, codebase-design]
 tools: [view_file, list_dir, find_by_name, grep_search, run_command]
 ---
 # QUY TRÌNH PHẢN BIỆN ĐỐI KHÁNG KẾ HOẠCH (PLAN-GRILLER PROTOCOL)
@@ -1880,6 +2061,8 @@ description: Universal Adversarial TDD QA Engineer. Writes failing contract test
 subagent: true
 mainAgent: false
 model: inherit
+workspace: branch
+skills: [tdd, test-driven-development, atdd-quality-gates, javascript-testing-patterns]
 tools: [view_file, write_to_file, replace_file_content, list_dir, find_by_name, grep_search, run_command]
 hooks: [.agents/hooks_qa.json]
 ---
@@ -1945,6 +2128,8 @@ description: Lập trình viên thi công lát cắt tính năng theo TDD đối
 subagent: true
 mainAgent: false
 model: inherit
+workspace: branch
+skills: [tdd, test-driven-development, de-sloppify, typescript-pro]
 tools: [view_file, write_to_file, replace_file_content, list_dir, find_by_name, grep_search, run_command]
 hooks: [.agents/hooks_implementer.json]
 ---
@@ -1990,6 +2175,8 @@ description: Đối chiếu từng dòng diff với file spec.md gốc để ch�
 subagent: true
 mainAgent: false
 model: inherit
+workspace: share
+skills: [use-case-creator, use-case-slicing]
 tools: [view_file, list_dir, find_by_name, grep_search]
 ---
 # NHIỆM VỤ ĐỐI CHIẾU ĐẶC TẢ (SPEC INTEGRITY PROTOCOL)
@@ -2031,6 +2218,8 @@ description: Rà soát Cổng Nghiệm Thu (Acceptance Gate): Tối thiểu hóa
 subagent: true
 mainAgent: false
 model: inherit
+workspace: share
+skills: [de-sloppify, codebase-design, code-review]
 tools: [view_file, list_dir, find_by_name, grep_search, run_command]
 ---
 # NHIỆM VỤ KIỂM TOÁN CỔNG NGHIỆM THU (ACCEPTANCE GATE & DE-SLOP PROTOCOL)
@@ -2108,6 +2297,8 @@ description: Verifies a fix round - verdicts each prior finding ADDRESSED or NOT
 subagent: true
 mainAgent: false
 model: inherit
+workspace: share
+skills: [receiving-code-review, code-review]
 tools: [view_file, list_dir, find_by_name, grep_search, run_command]
 ---
 
@@ -2156,6 +2347,8 @@ description: Chuyên gia thẩm định thủ công UI/UX 2D độc lập chuẩ
 subagent: true
 mainAgent: false
 model: inherit
+workspace: share
+skills: [impeccable, browser-testing, tailwind-design-system]
 tools: [view_file, list_dir, find_by_name, grep_search]
 ---
 # QUY TRÌNH THẨM ĐỊNH THỦ CÔNG UI/UX 2D (UI-CRAFT-REVIEWER PROTOCOL)
@@ -2192,6 +2385,8 @@ description: Senior Adversarial 3D Game Art Director & Creative Visionary. Bench
 subagent: true
 mainAgent: false
 model: inherit
+workspace: share
+skills: [threejs-fundamentals, threejs-lighting, threejs-materials, threejs-textures]
 tools: [view_file, list_dir, find_by_name, grep_search]
 ---
 # QUY TRÌNH PHẢN BIỆN ĐỐI KHÁNG 3D GAME (GAME-3D-VISUAL-CRITIC PROTOCOL)
@@ -2226,6 +2421,8 @@ description: Chuyên gia sản xuất asset đồ họa raster sạch từ mock 
 subagent: true
 mainAgent: false
 model: inherit
+workspace: branch
+skills: [impeccable]
 tools: [view_file, write_to_file, replace_file_content, run_command, list_dir, find_by_name, grep_search]
 ---
 # QUY TRÌNH SẢN XUẤT ASSET RASTER (IMPECCABLE-ASSET-PRODUCER PROTOCOL)
@@ -2245,6 +2442,8 @@ description: Ghi nhận DESIGN.md và sidecar json từ sản phẩm Impeccable 
 subagent: true
 mainAgent: false
 model: inherit
+workspace: branch
+skills: [impeccable, writing-for-agents]
 tools: [view_file, write_to_file, replace_file_content, run_command, list_dir, find_by_name, grep_search]
 ---
 # QUY TRÌNH ĐỒNG BỘ THIẾT KẾ (IMPECCABLE-DOCUMENTER PROTOCOL)
@@ -2265,6 +2464,8 @@ description: Áp dụng các đợt chỉnh sửa trực tiếp (live manual cop
 subagent: true
 mainAgent: false
 model: inherit
+workspace: branch
+skills: [impeccable]
 tools: [view_file, write_to_file, replace_file_content, run_command, list_dir, find_by_name, grep_search]
 ---
 # QUY TRÌNH ÁP DỤNG CHỈNH SỬA TRỰC TIẾP (MANUAL-EDIT-APPLIER PROTOCOL)

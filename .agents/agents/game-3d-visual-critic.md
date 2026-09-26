@@ -4,6 +4,8 @@ description: Senior Adversarial 3D Game Art Director & Creative Visionary. Bench
 subagent: true
 mainAgent: false
 model: inherit
+workspace: share
+skills: [threejs-fundamentals, threejs-lighting, threejs-materials, threejs-textures]
 tools: [view_file, list_dir, find_by_name, grep_search]
 ---
 # EXECUTIVE GAME VISUAL & UI/UX DIRECTOR PROTOCOL (MONOPOLY TYCOON BENCHMARK)

@@ -222,7 +222,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     if (!existing) return;
     const oldBalance = existing.balance;
     const newBalance = partial.balance !== undefined ? partial.balance : oldBalance;
-    if (oldBalance !== undefined && oldBalance < 0 && newBalance >= 0) {
+    if (!partial.bankrupt && !existing.bankrupt && oldBalance !== undefined && oldBalance < 0 && newBalance >= 0) {
       const state = get();
       if (state.activeModal === 'insolvency') {
         state.closeModal();

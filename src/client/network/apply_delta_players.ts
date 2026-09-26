@@ -6,6 +6,8 @@ import { useLobbyStore } from '../store/lobby_store.js';
 import { PLAYER_TOKEN_PALETTE } from '../../domain/theme.js';
 import type { DeltaPayload } from '../../server/session_manager.js';
 import { formatCurrency } from '../ui/ui_helpers.js';
+import { AudioEngine } from '../audio/audio_engine.js';
+import { SoundEffect } from '../audio/audio_types.js';
 
 function initPlayersInfoMap(
   state: GameState,
@@ -60,6 +62,7 @@ export interface BalanceChangeContext {
   readonly isPassingGo?: boolean;
   readonly cellIndex?: number;
   readonly isBail?: boolean;
+  readonly isBankrupt?: boolean;
   readonly targetPlayerName?: string;
   readonly actionType?: FloatingActionType;
   readonly title?: string;
@@ -74,7 +77,7 @@ export function notifyBalanceChange(
   context?: BalanceChangeContext,
 ): void {
   if (diff > 0) {
-    if (oldBalance < 0 && newBalance >= 0) {
+    if (!context?.isBankrupt && oldBalance < 0 && newBalance >= 0) {
       if (state.activeModal === 'insolvency') state.closeModal();
       state.addFloatingText({
         text: `+${formatCurrency(diff)}`,
@@ -213,7 +216,8 @@ function syncPlayerBalanceDiff(
   const diff = p.balance - existing.balance;
   const prevPos = state.playerPositions[p.id] ?? 0;
   const isPassingGo = prevPos > (p.position ?? prevPos) || p.position === 0;
-  const isDebtRelief = existing.balance < 0 && p.balance >= 0;
+  const isBankrupt = Boolean(p.bankrupt || existing.bankrupt);
+  const isDebtRelief = !isBankrupt && existing.balance < 0 && p.balance >= 0;
   const isSalary = isPassingGo || diff === 2000;
 
   // [IMP-122][IMP-191] Không sinh badge generic trùng lặp khi biến động tài chính đã được
@@ -222,7 +226,7 @@ function syncPlayerBalanceDiff(
     return;
   }
 
-  notifyBalanceChange(state, p.id, diff, existing.balance, p.balance, { cellIndex: p.position, isPassingGo });
+  notifyBalanceChange(state, p.id, diff, existing.balance, p.balance, { cellIndex: p.position, isPassingGo, isBankrupt });
 }
 
 function syncFinalPositions(state: GameState, nextPositions: Record<string, number>, hasPosChange: boolean, isFullSync: boolean): void {
@@ -255,6 +259,22 @@ export function applyPlayerDeltas(
     if (processSinglePlayerPosition(state, p, nextPositions, isFullSync)) hasPosChange = true;
     const existing = playersInfoMap[p.id];
     syncPlayerBalanceDiff(state, p, existing, isFullSync);
+    if (!isFullSync && p.bankrupt === true && !existing?.bankrupt) {
+      const pName = existing?.name ?? resolvePlayerName(p, pIdx);
+      state.addFloatingText?.({
+        text: 'Tài sản đã thanh lý',
+        type: FloatingTextType.Penalty,
+        playerId: p.id,
+        actionType: 'bankrupt',
+        title: `${pName} đã tuyên bố phá sản!`,
+        durationMs: 5000,
+      });
+      try {
+        AudioEngine.playSfx(SoundEffect.BANKRUPT);
+      } catch {
+        /* safe-ignore */
+      }
+    }
     if (p.bankrupt === true && state.activeModal === 'insolvency') {
       const modalPlayerId = (state.modalPayload as Record<string, unknown> | undefined)?.playerId;
       if (!modalPlayerId || modalPlayerId === p.id) state.closeModal();

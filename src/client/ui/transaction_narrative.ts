@@ -37,7 +37,7 @@ const ACTION_ICONS: Record<string, string> = {
   tax: '🏛️', bail: '🚨', mortgage: '🏦', unmortgage: '🔓', monopoly: '👑',
   debt_relief: '🎉', stimulus: '📈', chance: '⚡', market: '🎴',
   auction_win: '🔨', hose: '📊', teleport: '✈️', audit_jail: '🚨', ma_buyout: '🤝',
-  diplomatic: '🤝',
+  diplomatic: '🤝', bankrupt: '🚨',
 };
 
 export function resolveActionIcon(actionType?: string, isReward?: boolean): string {
@@ -104,6 +104,7 @@ const ACTION_REASON_FORMATTERS: Partial<Record<FloatingActionType, (item: Floati
   market: (item) => `Thị Trường: ${item.title?.replace(/^Thị\s+Trường:\s*/i, '').trim() || 'Phiếu Thị Trường'}`,
   monopoly: (item) => item.text || 'Độc quyền nhóm màu!',
   debt_relief: () => 'Thoát vỡ nợ thành công!',
+  bankrupt: (item) => item.title || 'Đã tuyên bố phá sản!',
   teleport: (item) => `Dịch chuyển: ${item.title || 'Di chuyển đặc biệt'}`,
   audit_jail: () => 'Vào Trạm Kiểm Toán',
   ma_buyout: (item) => item.title || 'Thương vụ M&A',

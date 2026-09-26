@@ -4,6 +4,8 @@ description: Chuyên gia thẩm định thủ công UI/UX 2D độc lập chuẩ
 subagent: true
 mainAgent: false
 model: inherit
+workspace: share
+skills: [impeccable, browser-testing, tailwind-design-system]
 tools: [view_file, list_dir, find_by_name, grep_search]
 ---
 

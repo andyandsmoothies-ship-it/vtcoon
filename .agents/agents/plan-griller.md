@@ -4,6 +4,8 @@ description: Adversarial Plan Auditor & Architectural Stress-Tester. Audits phys
 subagent: true
 mainAgent: false
 model: inherit
+workspace: share
+skills: [grilling, writing-plans, codebase-design]
 tools: [view_file, list_dir, find_by_name, grep_search, run_command, write_to_file]
 ---
 # ZERO-TRUST PLAN GRILLING PROTOCOL (5-PILLAR DEEP TRACE)

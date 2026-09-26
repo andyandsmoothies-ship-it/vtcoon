@@ -4,11 +4,11 @@ import { PROPERTY_DEEDS, type PropertyRegistry, type PropertyStateMap } from '..
 import { BotPersonality, DEFAULT_MIN_SAFETY_BUFFER, type BotIntent } from './bot_types.js';
 import type { Player, Room } from '../room.js';
 import { isLeadingPlayer } from './bot_posture.js';
+import { type MonopolyGap, findAllMonopolyGaps, findMonopolyGap } from './bot_monopoly_utils.js';
+import { findEligibleBotHybridTrade, findBotSwapTrade, evaluateBotSwapAcceptance } from './bot_hybrid_trade.js';
 
-export interface MonopolyGap {
-  readonly cellIndex: number;
-  readonly targetOwnerId: string;
-}
+export { type MonopolyGap, findAllMonopolyGaps, findMonopolyGap };
+export { findBotSwapTrade, evaluateBotSwapAcceptance };
 
 export interface BotTradeDecision {
   readonly accept: boolean;
@@ -34,56 +34,6 @@ export interface BotSwapTradeIntent extends BotIntent {
   readonly price: number;
 }
 
-/**
- * Quét các nhóm màu có khả năng xây dựng, phát hiện nhóm màu mà Bot đang sở hữu N-1 ô.
- * Ô còn thiếu (gapCell) phải thuộc người chơi khác, không cầm cố và chưa có công trình.
- */
-export function findAllMonopolyGaps(
-  bot: Player,
-  room: Room,
-  registry: PropertyRegistry,
-  stateMap: PropertyStateMap,
-): MonopolyGap[] {
-  const gaps: MonopolyGap[] = [];
-  for (const group of Object.values(ColorGroup)) {
-    const groupCells = BOARD_CONFIG.filter((c) => c.colorGroup === group);
-    const totalCount = groupCells.length;
-    if (totalCount < 2) continue;
-
-    const botOwned = groupCells.filter((c) => registry.get(c.index) === bot.id);
-    if (botOwned.length === totalCount - 1) {
-      const gapCell = groupCells.find((c) => registry.get(c.index) !== bot.id);
-      if (!gapCell) continue;
-
-      const targetOwnerId = registry.get(gapCell.index);
-      if (!targetOwnerId || targetOwnerId === bot.id) continue;
-
-      const targetOwner = room.players.find((p) => p.id === targetOwnerId);
-      if (!targetOwner || targetOwner.bankrupt) continue;
-
-      const state = stateMap.get(gapCell.index);
-      if ((state?.level ?? 0) > 0) continue; // Ô đất đã có công trình, không thể giao dịch
-
-      const isMortgaged = Boolean(
-        state?.isMortgaged || targetOwner.mortgagedProperties?.includes(gapCell.index),
-      );
-      if (isMortgaged) continue; // Ô đất đang bị cầm cố
-
-      gaps.push({ cellIndex: gapCell.index, targetOwnerId });
-    }
-  }
-
-  return gaps;
-}
-
-export function findMonopolyGap(
-  bot: Player,
-  room: Room,
-  registry: PropertyRegistry,
-  stateMap: PropertyStateMap,
-): MonopolyGap | null {
-  return findAllMonopolyGaps(bot, room, registry, stateMap)[0] ?? null;
-}
 
 /**
  * Tính toán mức giá Bot sẵn sàng trả để mua ô đất hoàn thiện độc quyền.
@@ -244,6 +194,13 @@ export function findEligibleBotTrade(
     if (!targetOwner || targetOwner.bankrupt) continue;
     if (targetOwner.inAudit || (targetOwner.auditTurnsLeft ?? 0) > 0) continue;
 
+    // 1. Ưu tiên đề xuất Hybrid (Đất thặng dư + Tiền mặt)
+    const hybridOffer = findEligibleBotHybridTrade(bot, gap, room, registry, stateMap, personality, currentRound);
+    if (hybridOffer !== null) {
+      return hybridOffer;
+    }
+
+    // 2. Fallback về đề xuất thuần tiền mặt (Cash-only) nếu không có đất thặng dư hoặc thiếu tiền bù
     const price = calculateTradeOfferPrice(
       gap.cellIndex,
       bot,
@@ -266,127 +223,4 @@ export function findEligibleBotTrade(
   }
 
   return null;
-}
-
-export function findBotSwapTrade(
-  bot: Player,
-  room: Room,
-  registry: PropertyRegistry,
-  stateMap: PropertyStateMap,
-  personality: BotPersonality,
-  roundCount?: number,
-): BotSwapTradeIntent | null {
-  const currentRound = roundCount ?? room.roundCount ?? room.round ?? 1;
-  const botGaps = findAllMonopolyGaps(bot, room, registry, stateMap);
-  if (botGaps.length === 0) return null;
-
-  for (const botGap of botGaps) {
-    const targetOwner = room.players.find((p) => p.id === botGap.targetOwnerId);
-    if (!targetOwner || targetOwner.bankrupt) continue;
-    if (targetOwner.inAudit || (targetOwner.auditTurnsLeft ?? 0) > 0) continue;
-
-    const targetGaps = findAllMonopolyGaps(targetOwner, room, registry, stateMap);
-    const matchingGaps = targetGaps.filter((tg) => registry.get(tg.cellIndex) === bot.id);
-    for (const targetGap of matchingGaps) {
-      const wantedCell = botGap.cellIndex;
-      const offeredCell = targetGap.cellIndex;
-      const wantedGroup = BOARD_CONFIG.find((c) => c.index === wantedCell)?.colorGroup;
-      const offeredGroup = BOARD_CONFIG.find((c) => c.index === offeredCell)?.colorGroup;
-      if (wantedGroup && wantedGroup === offeredGroup) {
-        continue;
-      }
-      const pairKey = `${wantedCell}_${offeredCell}`;
-      const lastRejected = bot.swapPairLastRejectedRound?.[pairKey];
-      if (lastRejected !== undefined && currentRound - lastRejected < 3) {
-        continue;
-      }
-
-      const deedWanted = PROPERTY_DEEDS.get(wantedCell);
-      const deedOffered = PROPERTY_DEEDS.get(offeredCell);
-      const baseDiff = (deedWanted?.price ?? 1000) - (deedOffered?.price ?? 1000);
-      let price = baseDiff;
-      if (personality === BotPersonality.Aggressive && price > 0) {
-        price = Math.round(price * 1.2);
-      }
-      if (price > 0 && bot.balance - price < 500) continue;
-
-      return {
-        type: 'INTENT_TRADE_OFFER',
-        cellIndex: wantedCell,
-        offeredCellIndex: offeredCell,
-        sellerId: targetOwner.id,
-        targetPlayerId: targetOwner.id,
-        buyerId: bot.id,
-        price,
-      };
-    }
-  }
-
-  return null;
-}
-
-function completesMonopoly(cellIndex: number, ownerId: string, registry: PropertyRegistry): boolean {
-  const grp = BOARD_CONFIG.find((c) => c.index === cellIndex)?.colorGroup;
-  if (!grp) return false;
-  const others = BOARD_CONFIG.filter((c) => c.colorGroup === grp && c.index !== cellIndex);
-  return others.length > 0 && others.every((c) => registry.get(c.index) === ownerId);
-}
-
-export function evaluateBotSwapAcceptance(
-  requestedCell: number,
-  offeredCell: number,
-  price: number,
-  bot: Player,
-  partner: Player,
-  room: Room,
-  registry: PropertyRegistry,
-  stateMap: PropertyStateMap,
-  personality?: BotPersonality,
-): BotTradeDecision {
-  const pers = personality ?? BotPersonality.Balanced;
-
-  if (isLeadingPlayer(partner.id, room?.players ?? [partner, bot], registry, stateMap)) {
-    return { accept: false, reason: 'EMBARGO_LEADER' };
-  }
-
-  const givesMonopolyToBot = completesMonopoly(requestedCell, bot.id, registry);
-  const givesMonopolyToPartner = completesMonopoly(offeredCell, partner.id, registry);
-
-  if (price > 0) {
-    if (bot.balance < price) {
-      return { accept: false, reason: 'INSUFFICIENT_FUNDS' };
-    }
-    const safetyThreshold = pers === BotPersonality.Passive ? 1500 : (pers === BotPersonality.Balanced ? 800 : 300);
-    if (bot.balance - price < safetyThreshold) {
-      return { accept: false, reason: 'SAFETY_BUFFER_BREACH' };
-    }
-  }
-
-  if (!givesMonopolyToBot && givesMonopolyToPartner) {
-    return { accept: false, reason: 'PREVENT_MONOPOLY' };
-  }
-
-  if (givesMonopolyToBot) {
-    if (pers === BotPersonality.Aggressive) {
-      return { accept: true };
-    }
-    if (pers === BotPersonality.Balanced) {
-      return { accept: true };
-    }
-    if (pers === BotPersonality.Passive) {
-      if (price <= 500 && bot.balance - price >= 1000) {
-        return { accept: true };
-      }
-      return { accept: false, reason: 'PASSIVE_DEFENSIVE' };
-    }
-  }
-
-  const deedReq = PROPERTY_DEEDS.get(requestedCell);
-  const deedOff = PROPERTY_DEEDS.get(offeredCell);
-  const valDiff = (deedReq?.price ?? 1000) - (deedOff?.price ?? 1000);
-  if (valDiff - price >= 0) {
-    return { accept: true };
-  }
-
-  return { accept: false, reason: 'UNFAVORABLE_VALUATION' };
 }

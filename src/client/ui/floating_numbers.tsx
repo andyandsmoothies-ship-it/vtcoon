@@ -41,6 +41,8 @@ export function MilestoneBanner({ item }: { readonly item: FloatingTextItem }): 
   const testId = isEventCard ? 'event-card-notification-banner' : 'milestone-celebration-banner';
   const borderShadowStyle = item.actionType === 'market'
     ? 'border-cyan-500/80 shadow-md shadow-cyan-900/15'
+    : item.actionType === 'bankrupt'
+    ? 'border-rose-500/80 shadow-md shadow-rose-900/15'
     : 'border-amber-500/80 shadow-md shadow-amber-900/15';
 
   const bannerClasses = [
@@ -117,7 +119,8 @@ export function FloatingBadge({ item }: { readonly item: FloatingTextItem }): Re
     item.actionType === 'monopoly' ||
     item.actionType === 'debt_relief' ||
     item.actionType === 'chance' ||
-    item.actionType === 'market'
+    item.actionType === 'market' ||
+    item.actionType === 'bankrupt'
   ) {
     return <MilestoneBanner item={item} />;
   }

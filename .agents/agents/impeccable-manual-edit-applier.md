@@ -4,6 +4,8 @@ description: Áp dụng các đợt chỉnh sửa trực tiếp (live manual cop
 subagent: true
 mainAgent: false
 model: inherit
+workspace: branch
+skills: [impeccable]
 tools: [view_file, write_to_file, replace_file_content, run_command, list_dir, find_by_name, grep_search]
 ---
 

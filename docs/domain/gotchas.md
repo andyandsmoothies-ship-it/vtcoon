@@ -7,11 +7,11 @@
 ## 🧭 BẢNG CHỈ MỤC THEO DOMAIN (DOMAIN INDEX)
 | Domain Tag | Trọng Tâm & Phạm Vi Mã Nguồn | Các Gotchas Liên Quan |
 | :--- | :--- | :--- |
-| `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78, #82, #104, #105, #106, #145, #146, #147, #159, #164, #174, #180, #188, #195, #196, #197, #200, #203, #215, #217, #218, #219, #220, #223, #249, #255, #262, #263, #265, #274, #279, #280, #281, #282 |
-| `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147, #190, #191, #195, #196, #197, #200, #206, #223, #272, #280 |
+| `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78, #82, #104, #105, #106, #145, #146, #147, #159, #164, #174, #180, #188, #195, #196, #197, #200, #203, #215, #217, #218, #219, #220, #223, #249, #255, #262, #263, #265, #274, #279, #280, #281, #282, #287, #288 |
+| `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147, #190, #191, #195, #196, #197, #200, #206, #223, #272, #280, #288 |
 | `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190, #200, #203, #209, #210, #211, #212, #213, #215, #217, #223, #224, #225, #226, #227, #231, #235, #244, #247, #248, #249, #250, #255, #256, #259, #260, #261, #265, #280, #281, #283, #284 |
 | `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #32, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #60, #61, #63, #69, #72, #74, #77, #80, #85, #86, #88, #89, #90, #91, #92, #93, #94, #95, #96, #101, #103, #109, #110, #114, #115, #116, #117, #120, #122, #123, #124, #125, #126, #127, #128, #129, #130, #133, #134, #135, #136, #140, #141, #144, #148, #159, #160, #161, #162, #163, #164, #165, #169, #175, #177, #189, #198, #200, #222, #254, #257, #258, #259, #270, #275 |
-| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192, #195, #196, #199, #201, #202, #204, #205, #206, #216, #217, #231, #234, #237, #249, #250, #255, #256, #257, #258, #259, #260, #261, #266, #267, #268, #269, #271, #273, #274, #276, #277, #278, #281, #282, #283, #284, #285, #286 |
+| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192, #195, #196, #199, #201, #202, #204, #205, #206, #216, #217, #231, #234, #237, #249, #250, #255, #256, #257, #258, #259, #260, #261, #266, #267, #268, #269, #271, #273, #274, #276, #277, #278, #281, #282, #283, #284, #285, #286, #287 |
 | `[UAT/TEST]` | Nghiệm Thu, Adversarial TDD, Ảnh Chụp Màn Hình (.jpg), Shell Escaping, File I/O Lock, Docker Healthcheck Timeout | #5, #28, #29, #31, #35, #52, #71, #73, #83, #84, #99, #100, #117, #124, #125, #130, #199, #235, #273, #278 |
 | `[TELEMETRY]` | Giám Sát Hiệu Năng Thời Gian Thực, Chó Canh Phòng Bất Biến, Hộp Đen Tái Hiện Lỗi | #39, #62, #71, #75, #104, #114, #115, #135, #174, #200, #227, #235, #250, #255, #259 |
 | `[ARCH/REFACTOR]` | Tách Module Facade, Ngân Sách Render Loop, Chuẩn Hóa Môi Trường Build | #43, #98, #99 |
@@ -3429,4 +3429,44 @@
      - **Zero Dummy Element / Zero Dummy Attribute Invariant**: Nghiêm cấm tạo phần tử DOM ẩn (`sr-only`) hoặc thuộc tính rác (`data-legacy-style`) chỉ để thoả mãn test lỗi thời. Bắt buộc tiến hóa đặc tả và điều hòa điều kiện tiên quyết của test suite.
      - **Smart Barter Tab Summary**: Tiêu đề Tab di động tự động tóm tắt trực quan `(2 BĐS)`, `(500 Tr.)`, hoặc `(2 BĐS • 500)`, bao quát đầy đủ cả đề xuất thuần tiền mặt và triệt tiêu hiển thị số 0 vô nghĩa `(0 • 0)`.
 - **Traceability**: `[TC-202.01..16/MSS]`, `[UC-IMP202]`, `src/client/ui/modals/trade_modal.tsx`, `src/client/ui/modals/trade/trade_partner_strip.tsx`, `src/client/ui/modals/trade/trade_column.tsx`, `src/client/ui/modals/trade/trade_deal_hud.tsx`, `src/client/ui/modals/trade_sentiment_meter.tsx`, `tests/client/imp202_trade_modal_ergonomics_overhaul.test.ts`.
+
+---
+
+### 287. [UI/CRAFT][FSM/RULE] Bất Biến Cô Lập Thông Báo Phá Sản Khỏi Luồng Cứu Nợ (Bankruptcy vs Debt Relief Notification Isolation Invariant - IMP-203)
+- **Bối cảnh & Bẫy thực tế (3 Lớp Thực Chứng)**:
+  1. *Ảo tưởng ban đầu (Initial Illusion)*:
+     - Khi người chơi phá sản trong trạng thái số dư âm (`balance < 0`), server `declareBankruptcy` xóa sạch số dư âm về 0 (`player.balance = 0`) và đánh dấu `player.bankrupt = true`.
+     - Phía client, bộ điều phối `apply_delta_players.ts` và `game_store.ts` chỉ kiểm tra điều kiện biến động toán học đơn thuần: `existing.balance < 0 && p.balance >= 0`.
+     - Do không lọc cờ `bankrupt`, client nhầm tưởng việc server đưa số dư về 0 là hành động "thoát nợ thành công", lập tức phát sinh banner ăn mừng vàng hổ phách: `🎉 Thoát vỡ nợ thành công! Hãy bấm Hết Lượt.` kèm số tiền cộng ảo.
+  2. *Phát hiện vật lý từ Scout & Codebase (Scout Physical Finding)*:
+     - Cả 2 điểm xử lý delta: `syncPlayerBalanceDiff` trong `apply_delta_players.ts` và `updatePlayerInfo` trong `game_store.ts` đều thiếu biểu thức bảo vệ `!p.bankrupt && !existing.bankrupt`.
+     - Đồng thời, khi một người chơi bị loại do phá sản, giao diện chính thiếu hoàn toàn thông báo nổi (Floating Toast / Milestone Banner) cấp độ ván đấu để cảnh báo toàn bộ người chơi khác về sự kiện này.
+  3. *Bất biến đã kiểm chứng (Verified Invariants)*:
+     - **Bankruptcy Immunity from Debt Relief**: Mọi điều kiện kích hoạt `debt_relief` ("Thoát vỡ nợ thành công!") BẮT BUỘC phải kiểm tra `!p.bankrupt && !existing?.bankrupt` tại cả `syncPlayerBalanceDiff`, `notifyBalanceChange`, và `updatePlayerInfo`.
+     - **Dedicated Bankruptcy Milestone Banner**: Khi `!isFullSync && p.bankrupt === true && !existing?.bankrupt`, client phát sinh `FloatingText` với `actionType: 'bankrupt'`, `type: FloatingTextType.Penalty`, hiển thị viền đỏ cảnh báo `border-rose-500/80 shadow-rose-900/15` và icon `🚨` với tiêu đề `[Tên Người Chơi] đã tuyên bố phá sản!`.
+     - **Synchronized Bankruptcy SFX**: Kích hoạt `AudioEngine.playSfx(SoundEffect.BANKRUPT)` đồng bộ cho mọi người chơi trong phòng đấu khi nhận delta phá sản.
+- **Traceability**: `[TC-203.01..06/MSS]`, `[UC-IMP203]`, `src/client/store/game_store_types.ts`, `src/client/store/game_store.ts`, `src/client/network/apply_delta_players.ts`, `src/client/ui/transaction_narrative.ts`, `src/client/ui/floating_numbers.tsx`, `tests/contracts/imp203_bankruptcy_vs_debt_relief_notification.test.ts`.
+
+---
+
+### 288. [BOT/AI][FSM/RULE] Bất Biến Đề Xuất Giao Dịch Hỗn Hợp Đất & Tiền Cùng Định Giá Song Phương Đa Chiều (Bot Hybrid Trade Offers & Strategic Bilateral Valuation Invariant - IMP-203)
+- **Bối cảnh & Bẫy thực tế (3 Lớp Thực Chứng)**:
+  1. *Ảo tưởng ban đầu (Initial Illusion)*:
+     - Cho rằng Bot chỉ cần đưa ra tiền mặt là đủ để thuyết phục đối tác bán đất độc quyền, và `evaluateBotSwapAcceptance` chỉ cần từ chối cứng `PREVENT_MONOPOLY` nếu đối tác được độc quyền.
+     - Cho rằng biểu thức `isBotHuman` mở modal 15s có thể đơn giản hóa bằng `!targetPlayer?.isBot`, dẫn đến việc nuốt chửng cả giao dịch giữa 2 người thật (Human-to-Human) và làm gãy tính đồng bộ.
+     - Cho rằng có thể import trực tiếp `findAllMonopolyGaps` từ `bot_trade.ts` sang `bot_hybrid_trade.ts` trong khi `bot_trade.ts` import ngược lại các hàm hybrid mà không bị lỗi.
+  2. *Phát hiện vật lý từ Scout & Codebase (Scout Physical Finding)*:
+     - Bot chỉ có thể hoàn tất bộ độc quyền hiệu quả nếu biết luân chuyển tài sản chết (đất thặng dư/mồ côi bị đối thủ chặn) kết hợp tiền bù, thay vì đốt sạch tiền mặt dự trữ an toàn.
+     - Khi Human gửi đề xuất đổi đất cho Bot, nếu mở modal 15s thì Bot không có UI để bấm, game sẽ bị treo 15s chờ timeout. Bắt buộc: modal 15s CHỈ mở khi Bot là bên chủ động đề xuất cho Người chơi thật (`Boolean(requester?.isBot && !targetPlayer?.isBot)`). Mọi trường hợp còn lại (Human-to-Bot, Bot-to-Bot, Human-to-Human) đều xử lý đồng bộ 0ms.
+     - `bot_hybrid_trade.ts` và `bot_trade.ts` nếu import chéo sẽ sinh Circular Dependency tại runtime của Node.js ESM. Bắt buộc tách `MonopolyGap`, `findAllMonopolyGaps`, `findMonopolyGap` ra module lá độc lập `src/domain/bot/bot_monopoly_utils.ts` (~61 LOC) để tạo đồ thị DAG thuần túy.
+     - Cơ chế cấm vận kẻ dẫn đầu (`isLeadingPlayer`) bắt buộc áp dụng khi đất thặng dư của Bot có nguy cơ giúp kẻ dẫn đầu hoàn tất độc quyền (`partnerGetsMonopoly`).
+  3. *Bất biến đã kiểm chứng (Verified Invariants)*:
+     - **Strategic 3-Axes Hybrid Pricing Invariant**: Giá tiền bù trong gói đổi đất được tính theo 3 trục: (1) Độ lệch giá gốc $\Delta = W - O$, (2) Lợi ích mở khóa xây nhà của người nhận (`partnerGetsMonopoly`: Win-Win đổi ngang tiền = 0 hoặc chỉ bù $\Delta$), và (3) Cá tính Bot (Aggressive/Balanced lì xì thêm tiền thiện chí, Passive đổi ngang).
+     - **Anti-Modal Freeze & Synchronous Bot Valuation**: Giao dịch gửi tới Bot luôn được thẩm định đồng bộ 0ms qua `handleBotRecipientTrade`. Modal 15s chỉ dành riêng cho trường hợp Bot đề xuất tới Người chơi thật.
+     - **Sign Convention & Bilateral Parity**: `cashPaidByBot` dương khi Bot bù tiền, âm khi Bot nhận tiền. Công thức định giá: `totalValueReceived = deedAcquired.price - cashPaidByBot`. Nếu tổng giá trị $\ge 1.60\times$ giá đất, Bot chấp thuận chuyển nhượng độc quyền.
+     - **Zero-Cycle Leaf Module Invariant**: Các hàm tiện ích quét gap (`findAllMonopolyGaps`) bắt buộc nằm ở module lá độc lập `bot_monopoly_utils.ts`.
+     - **Persistent Pair Cooldown Invariant**: Khi đề xuất đổi đất bị từ chối (bởi Bot hay Human), cặp ô đất `${wanted}_${offered}` bắt buộc được ghi nhận vào `swapPairLastRejectedRound` để kích hoạt cooldown 3 vòng chống spam.
+- **Traceability**: `[TC-203.01..20/MSS]`, `[UC-IMP203]`, `src/domain/bot/bot_monopoly_utils.ts`, `src/domain/bot/bot_hybrid_trade.ts`, `src/domain/bot/bot_trade.ts`, `src/server/trade_coordinator_helper.ts`, `src/server/room_property_coordinator.ts`, `tests/contracts/imp203_bot_hybrid_trade_offers.test.ts`.
+
+
 

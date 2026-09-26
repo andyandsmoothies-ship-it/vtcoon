@@ -6,10 +6,10 @@ import { mortgageProperty, redeemProperty } from './mortgage_manager.js';
 import { handleDowngrade, executeP2PTrade } from './property_actions.js';
 import { liquidateAssets, declareBankruptcy } from './insolvency_manager.js';
 import type { AuctionSession } from './auction_manager.js';
-import { evaluateBotTradeAcceptance } from '../domain/bot/bot_trade.js';
-import { BotPersonality } from '../domain/bot/bot_types.js';
+import { type BotPersonality } from '../domain/bot/bot_types.js';
 import { PROPERTY_DEEDS } from '../domain/property_data.js';
 import { pendingTradeManager } from './pending_trade_manager.js';
+import { handleBotRecipientTrade } from './trade_coordinator_helper.js';
 
 export interface RoomContext {
   readonly room: Room;
@@ -125,9 +125,11 @@ export function coordTrade(
     return { success: false, reason: ActionRejectReason.INSUFFICIENT_FUNDS };
   }
 
-  const isBotHuman = (buyer.isBot && !seller.isBot) || (!buyer.isBot && seller.isBot && offeredCellIndex !== undefined) || (seller.isBot && !buyer.isBot && offeredCellIndex !== undefined);
+  const requester = requesterId === sellerId ? seller : buyer;
+  const targetPlayer = requesterId === sellerId ? buyer : seller;
+  const shouldOpenModal = Boolean(requester?.isBot && !targetPlayer?.isBot);
 
-  if (isBotHuman) {
+  if (shouldOpenModal) {
     if (ctx.reg.get(cellIndex) !== sellerId) {
       return { success: false, reason: ActionRejectReason.NOT_OWNER };
     }
@@ -190,25 +192,8 @@ export function coordTrade(
   }
 
   if (seller?.isBot && buyer) {
-    const botPers = ctx.botPersonalities?.get(`${ctx.room.roomCode}:${sellerId}`)
-      ?? ctx.botPersonalities?.get(sellerId)
-      ?? BotPersonality.Balanced;
-    let decision = evaluateBotTradeAcceptance(
-      cellIndex, price, seller, buyer, ctx.room, ctx.reg, ctx.sm, botPers
-    );
-    // [IMP-142] Bot-to-Bot negotiation parity: if buyer is Bot and price meets monopoly gap threshold (>= 1.60x)
-    if (!decision.accept && buyer.isBot && price >= Math.round(1.60 * (PROPERTY_DEEDS.get(cellIndex)?.price ?? 1000))) {
-      decision = { accept: true };
-    }
-    if (!decision.accept) {
-      if (buyer.isBot) {
-        const round = ctx.room.roundCount ?? ctx.room.round ?? 1;
-        buyer.lastTradeOfferRound = round;
-        (buyer.cellTradeRejections ??= {})[cellIndex] = ((buyer.cellTradeRejections ??= {})[cellIndex] ?? 0) + 1;
-        (buyer.cellLastRejectedRound ??= {})[cellIndex] = round;
-      }
-      return { success: false, reason: ActionRejectReason.TRADE_REJECTED };
-    }
+    const botRes = handleBotRecipientTrade(ctx, seller, buyer, cellIndex, price, offeredCellIndex);
+    if (!botRes.success) return botRes;
   }
   return executeP2PTrade(ctx.room, sellerId, buyerId, cellIndex, price, ctx.reg, ctx.sm, offeredCellIndex);
 }
@@ -324,6 +309,9 @@ export function coordRespondTradeOffer(
     buyer.lastTradeOfferRound = round;
     (buyer.cellTradeRejections ??= {})[session.cellIndex] = ((buyer.cellTradeRejections ??= {})[session.cellIndex] ?? 0) + 1;
     (buyer.cellLastRejectedRound ??= {})[session.cellIndex] = round;
+    if (buyer.isBot && session.offeredCellIndex !== undefined) {
+      (buyer.swapPairLastRejectedRound ??= {})[`${session.cellIndex}_${session.offeredCellIndex}`] = round;
+    }
     pendingTradeManager.resolveSession(ctx.room.roomCode, offerId, false);
     ctx.room.pendingTradeOffer = null;
     return { success: true };
@@ -390,4 +378,3 @@ export function coordDeclineCompulsoryBuyout(
   ctx.room.phase = TurnPhase.PropertyManagement;
   return { success: true };
 }
-

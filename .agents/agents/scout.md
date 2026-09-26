@@ -4,6 +4,8 @@ description: Codebase scout, documentation researcher, and JIT skill dispatcher.
 subagent: true
 mainAgent: false
 model: flash
+workspace: share
+skills: [skill-dispatcher, research]
 tools: [view_file, list_dir, find_by_name, grep_search, run_command]
 ---
 # SCOUT PROTOCOL

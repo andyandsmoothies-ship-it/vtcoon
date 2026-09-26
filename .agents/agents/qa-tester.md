@@ -4,6 +4,8 @@ description: Universal Adversarial TDD QA Engineer. Writes failing contract test
 subagent: true
 mainAgent: false
 model: inherit
+workspace: branch
+skills: [tdd, test-driven-development, atdd-quality-gates, javascript-testing-patterns]
 tools: [view_file, write_to_file, replace_file_content, list_dir, find_by_name, grep_search, run_command]
 hooks: [.agents/hooks_qa.json]
 ---

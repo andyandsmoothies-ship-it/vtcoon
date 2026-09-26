@@ -75,6 +75,7 @@ export type FloatingActionType =
   | 'salary'
   | 'monopoly'
   | 'debt_relief'
+  | 'bankrupt'
   | 'stimulus'
   | 'chance'
   | 'market'

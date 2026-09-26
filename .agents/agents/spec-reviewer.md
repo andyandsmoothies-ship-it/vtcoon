@@ -4,6 +4,8 @@ description: Verifies diffs line-by-line against original specifications to prev
 subagent: true
 mainAgent: false
 model: inherit
+workspace: share
+skills: [use-case-creator, use-case-slicing]
 tools: [view_file, list_dir, find_by_name, grep_search]
 ---
 # SPEC INTEGRITY PROTOCOL

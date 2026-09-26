@@ -2,17 +2,7 @@
   "qa-role-sandbox": {
     "PreToolUse": [
       {
-        "matcher": "write_to_file",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python .agents/scripts/use_case_guard.py --role qa-tester",
-            "timeout": 5
-          }
-        ]
-      },
-      {
-        "matcher": "replace_file_content",
+        "matcher": "write_to_file|replace_file_content",
         "hooks": [
           {
             "type": "command",
