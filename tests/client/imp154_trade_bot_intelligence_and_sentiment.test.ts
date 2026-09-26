@@ -323,7 +323,7 @@ describe('[IMP-154][Trạm 1 RED] Smart Bot Tabs & AI Acceptance Sentiment Meter
       expect(html, '[INTEGRITY] Bảo tồn định dạng tiền tệ').toContain('5.000');
     });
 
-    it('[TC-154.16/MSS][UC-IMP154][Facet-4/Integrity] Danh sách BĐS trong TradeModal áp dụng class max-h-36 sm:max-h-52 md:max-h-72 để triệt tiêu bẫy cuộn lồng nhau trên mobile', () => {
+    it('[TC-154.16/MSS][UC-IMP154][Facet-4/Integrity] Danh sách BĐS trong TradeModal áp dụng class max-h-52 trên mobile và sm:max-h-72 trên desktop để triệt tiêu bẫy cuộn lồng nhau', () => {
       const html = renderToStaticMarkup(
         React.createElement(TradeModal, {
           targetPlayerId: 'bot_2',
@@ -332,9 +332,8 @@ describe('[IMP-154][Trạm 1 RED] Smart Bot Tabs & AI Acceptance Sentiment Meter
           myBalance: 5000,
         })
       );
-      expect(html, '[RED GATE] Danh sách BĐS phải có max-h-36 trên mobile').toContain('max-h-36');
-      expect(html, '[RED GATE] Danh sách BĐS phải có sm:max-h-52 trên tablet').toContain('sm:max-h-52');
-      expect(html, '[RED GATE] Danh sách BĐS phải có md:max-h-72 trên desktop').toContain('md:max-h-72');
+      expect(html, '[RED GATE] Danh sách BĐS phải có max-h-52 trên mobile').toContain('max-h-52');
+      expect(html, '[RED GATE] Danh sách BĐS phải có sm:max-h-72 trên desktop').toContain('sm:max-h-72');
     });
   });
 });

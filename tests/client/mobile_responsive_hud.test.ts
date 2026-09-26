@@ -411,15 +411,15 @@ describe('[TC-MOB01/MSS] Mobile Responsive HUD Quality Standards Contract Suite'
     expect(startBtnMatch).toMatch(/text-slate-(500|600)/);
   });
 
-  it('[TC-MOB01.24/MSS] [UC-MOB-03] ActionDock Roll Dice button disabled state achieves WCAG AA contrast (text-slate-600)', () => {
+  it('[TC-MOB01.24/MSS] [UC-MOB-03] ActionDock Roll Dice button disabled state uses soft slate (text-slate-400, bg-slate-100)', () => {
     useGameStore.setState({ currentTurnPlayerId: 'p2' });
     const html = renderToStaticMarkup(
       React.createElement(ActionDock, { localPlayerId: 'p1' })
     );
     const rollBtnMatch = html.match(/<button[^>]*aria-label="Đổ xúc xắc"[^>]*>/)?.[0] ?? '';
 
-    expect(rollBtnMatch).toContain('text-slate-600');
-    expect(rollBtnMatch).not.toContain('text-slate-400');
+    expect(rollBtnMatch).toContain('text-slate-400');
+    expect(rollBtnMatch).toContain('bg-slate-100');
   });
 
   it('[TC-MOB01.25/MSS] [UC-MOB-02] PlayerCard defends against negative debt balance displaying overdraft warning cleanly', () => {

@@ -223,7 +223,7 @@ describe('[TC-MCH01/MSS][UI-S02/MSS] Mobile Compact HUD & Tactile Retropoly Moda
         })
       );
       expect(html).toContain('text-xs sm:text-sm font-bold');
-      expect(html).toContain('absolute -top-2.5 right-3');
+      expect(html).toContain('absolute top-1.5 right-2');
     });
   });
 

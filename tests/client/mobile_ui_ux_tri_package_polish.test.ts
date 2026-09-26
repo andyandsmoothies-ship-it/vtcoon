@@ -413,7 +413,8 @@ describe('[IMP-123/MSS] Mobile UI/UX Tri-Package Polish Contract Test Suite', ()
       const html = renderToStaticMarkup(
         React.createElement(ActionDock, { isMyTurn: true, hasRolledThisTurn: true })
       );
-      expect(html).toContain('shadow-[0_4px_0_0_#0f172a]');
+      expect(html).toContain('shadow-sm');
+      expect(html).not.toContain('shadow-[0_4px_0_0_#0f172a]');
       expect(html).not.toContain('shadow-[0_4px_0_0_#020617]');
     });
   });

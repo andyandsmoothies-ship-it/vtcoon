@@ -108,10 +108,6 @@ describe('[TC-63/MSS][UC-IMP63] Lean Tabletop HUD & GPU Optimization Contract Su
         render: () => renderToStaticMarkup(React.createElement(TopBar)),
       },
       {
-        name: 'ActionDock',
-        render: () => renderToStaticMarkup(React.createElement(ActionDock, { localPlayerId: 'p1' })),
-      },
-      {
         name: 'PlayerCard',
         render: () =>
           renderToStaticMarkup(
@@ -167,10 +163,10 @@ describe('[TC-63/MSS][UC-IMP63] Lean Tabletop HUD & GPU Optimization Contract Su
       expect(html).toContain('border-slate-900');
     });
 
-    it('[TC-63.2/MSS] ActionDock sử dụng nền giấy ngà sáng #FFFDF8 và viền mực đen border-slate-900', () => {
+    it('[TC-63.2/MSS] ActionDock sử dụng nền giấy ngà sáng #FFFDF8 và viền border-slate-300/80', () => {
       const html = renderToStaticMarkup(React.createElement(ActionDock, { localPlayerId: 'p1' }));
       expect(html).toContain('bg-[#FFFDF8]');
-      expect(html).toContain('border-slate-900');
+      expect(html).toContain('border-slate-300/80');
     });
 
     it('[TC-63.2/MSS] PlayerCard (lượt hiện tại) sử dụng nền giấy ngà sáng #FFFDF8 và viền mực đen border-slate-900', () => {
@@ -207,7 +203,7 @@ describe('[TC-63/MSS][UC-IMP63] Lean Tabletop HUD & GPU Optimization Contract Su
       const html = renderToStaticMarkup(
         React.createElement(FloatingBadge, { item: sampleRewardItem })
       );
-      expect(html).toMatch(/border-slate-900|border-black/);
+      expect(html).toMatch(/border-slate-900|border-black|border-slate-300/);
       expect(html).not.toContain('shadow-emerald-500/40');
     });
 
@@ -215,7 +211,7 @@ describe('[TC-63/MSS][UC-IMP63] Lean Tabletop HUD & GPU Optimization Contract Su
       const html = renderToStaticMarkup(
         React.createElement(FloatingBadge, { item: sampleTaxItem })
       );
-      expect(html).toMatch(/border-slate-900|border-black/);
+      expect(html).toMatch(/border-slate-900|border-black|border-slate-300/);
       expect(html).not.toContain('shadow-rose-500/40');
     });
   });

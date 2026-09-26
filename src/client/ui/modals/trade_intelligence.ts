@@ -34,6 +34,7 @@ export interface BotTradeSentimentResult {
   readonly message: string;
   readonly reasonCode?: string;
   readonly hint?: string;
+  readonly multiplier?: number;
 }
 
 const DISTRICT_SHORT_NAMES: Record<string, string> = {

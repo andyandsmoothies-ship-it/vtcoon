@@ -1,64 +1,107 @@
-// [UI-S06/MSS][IMP-187] ActivityBadgeDispatcher — Floating badge triggers, audio & VFX synchronization
-import { type GameState, FloatingTextType } from '../store/game_store.js';
+// [UI-S06/MSS][IMP-187][IMP-201] ActivityBadgeDispatcher — Floating badge triggers, audio & VFX synchronization
+import { useGameStore, type GameState, FloatingTextType } from '../store/game_store.js';
 import type { ActivityLogEntry } from '../store/activity_store.js';
 import { formatCurrency } from '../ui/ui_helpers.js';
 import { useVfxStore } from '../store/vfx_store.js';
 import { SoundEngine } from '../audio/sound_engine.js';
 import { getCellName, LEVEL_NAMES } from './activity_property_tracker.js';
 import type { DeltaPayload } from '../../server/session_manager.js';
+import { HOP_DURATION, LANDING_DURATION, BOT_STEP_DURATION } from '../3d/pawn_path.js';
 
-function handleRentBadge(act: ActivityLogEntry, state: GameState): void {
+export const pendingBadgeTimers = new Set<ReturnType<typeof setTimeout>>();
+
+export function clearPendingBadgeTimers(): void {
+  for (const t of pendingBadgeTimers) clearTimeout(t);
+  pendingBadgeTimers.clear();
+}
+
+export function getPawnLandingDelay(playerId?: string): number {
+  if (!playerId) return 0;
+  const state = useGameStore.getState();
+  if (state.pendingPawnMove && state.pendingPawnMove.playerId === playerId) {
+    const steps = Math.abs((state.pendingPawnMove.targetCell - (state.pendingPawnMove.fromCell ?? 0)) % 40);
+    const stepMs = (state.pendingPawnMove.isBot ? BOT_STEP_DURATION : (HOP_DURATION + LANDING_DURATION)) * 1000;
+    const diceDelay = state.isRolling ? 1200 : 0;
+    return Math.round(diceDelay + steps * stepMs);
+  }
+  const anim = state.activePawnAnimation;
+  if (!anim || anim.playerId !== playerId || !anim.waypoints?.length) return 0;
+  const remainingSteps = Math.max(1, anim.waypoints.length - (anim.currentIndex ?? 0));
+  const stepMs = (anim.isBot ? BOT_STEP_DURATION : (HOP_DURATION + LANDING_DURATION)) * 1000;
+  return Math.round(remainingSteps * stepMs);
+}
+
+export function scheduleAction(action: () => void, delayMs: number): ReturnType<typeof setTimeout> | null {
+  if (delayMs <= 0) {
+    action();
+    return null;
+  }
+  const timer = setTimeout(() => {
+    pendingBadgeTimers.delete(timer);
+    action();
+  }, delayMs);
+  pendingBadgeTimers.add(timer);
+  return timer;
+}
+
+export function handleRentBadge(act: ActivityLogEntry, state: GameState): void {
   if (!act.targetPlayerId || !act.targetPlayerName) {
     console.warn('[ActivityBadgeDispatcher] Missing targetPlayerId or targetPlayerName in rent log:', act);
     return;
   }
-
   const payerId = act.playerId;
   const payerName = act.playerName ?? (payerId ? state.playersInfo[payerId]?.name : '');
   const receiverId = act.targetPlayerId;
   const receiverName = act.targetPlayerName;
   const absAmount = Math.abs(act.amount ?? 0);
   const cellName = act.cellIndex !== undefined ? getCellName(act.cellIndex) : 'BĐS';
+  const delay = getPawnLandingDelay(payerId);
 
-  if (payerId) {
-    useVfxStore.getState().triggerPawnReaction(payerId, 'slump_recoil', 400);
-    SoundEngine.playSlumpThud();
-    state.addFloatingText({
-      text: formatCurrency(-absAmount),
-      type: FloatingTextType.Penalty,
-      playerId: payerId,
-      actionType: 'rent_pay',
-      title: `Trả thuê ${cellName}`,
-      targetPlayerId: receiverId,
-      targetPlayerName: receiverName,
-      cellIndex: act.cellIndex,
-    });
-  }
-
-  if (receiverId) {
-    useVfxStore.getState().triggerPawnReaction(receiverId, 'victory_spin', 600);
-    SoundEngine.playVictoryChime();
-    state.addFloatingText({
-      text: `+${formatCurrency(absAmount)}`,
-      type: FloatingTextType.Reward,
-      playerId: receiverId,
-      actionType: 'rent_receive',
-      title: `Thu thuê ${cellName}`,
-      targetPlayerId: payerId,
-      targetPlayerName: payerName,
-      cellIndex: act.cellIndex,
-    });
-  }
+  scheduleAction(() => {
+    if (payerId) {
+      useVfxStore.getState().triggerPawnReaction(payerId, 'slump_recoil', 400);
+      SoundEngine.playSlumpThud();
+      state.addFloatingText({
+        text: formatCurrency(-absAmount), type: FloatingTextType.Penalty, playerId: payerId,
+        actionType: 'rent_pay', title: `Trả thuê ${cellName}`, targetPlayerId: receiverId,
+        targetPlayerName: receiverName, cellIndex: act.cellIndex,
+      });
+    }
+    if (receiverId) {
+      useVfxStore.getState().triggerPawnReaction(receiverId, 'victory_spin', 600);
+      SoundEngine.playVictoryChime();
+      state.addFloatingText({
+        text: `+${formatCurrency(absAmount)}`, type: FloatingTextType.Reward, playerId: receiverId,
+        actionType: 'rent_receive', title: `Thu thuê ${cellName}`, targetPlayerId: payerId,
+        targetPlayerName: payerName, cellIndex: act.cellIndex,
+      });
+    }
+  }, delay);
 }
 
-function handleBuyBadge(act: ActivityLogEntry, state: GameState): void {
+export function handleBuyBadge(act: ActivityLogEntry, state: GameState): void {
   const match = act.message.match(/đã mua\s+(.+?)(?:\s+với giá|$)/);
   const cellName = match?.[1]?.trim() || (act.cellIndex !== undefined ? getCellName(act.cellIndex) : '');
   const amount = act.amount !== undefined ? -Math.abs(act.amount) : 0;
-  state.addFloatingText({
-    text: formatCurrency(amount), type: FloatingTextType.Penalty, playerId: act.playerId ?? '',
-    actionType: 'buy', title: cellName ? `Mua ${cellName}` : 'Mua BĐS', cellIndex: act.cellIndex,
-  });
+  const delay = getPawnLandingDelay(act.playerId);
+  scheduleAction(() => {
+    state.addFloatingText({
+      text: formatCurrency(amount), type: FloatingTextType.Penalty, playerId: act.playerId ?? '',
+      actionType: 'buy', title: cellName ? `Mua ${cellName}` : 'Mua BĐS', cellIndex: act.cellIndex,
+    });
+  }, delay);
+}
+
+export function handleTaxBadge(act: ActivityLogEntry, state: GameState): void {
+  const amount = act.amount !== undefined ? -Math.abs(act.amount) : 0;
+  const baseTitle = act.message.includes('Lệ Phí') ? 'Lệ Phí Đất Đai' : 'Thuế Đất Đai';
+  const delay = getPawnLandingDelay(act.playerId);
+  scheduleAction(() => {
+    state.addFloatingText({
+      text: formatCurrency(amount), type: FloatingTextType.Penalty, playerId: act.playerId ?? '',
+      actionType: 'tax', title: `Nộp ${baseTitle} ➔ Kho Bạc`, cellIndex: act.cellIndex,
+    });
+  }, delay);
 }
 
 function handleUpgradeBadge(act: ActivityLogEntry, state: GameState): void {
@@ -70,15 +113,6 @@ function handleUpgradeBadge(act: ActivityLogEntry, state: GameState): void {
   state.addFloatingText({
     text: formatCurrency(amount), type: FloatingTextType.Penalty, playerId: act.playerId ?? '',
     actionType: 'upgrade', title, cellIndex: act.cellIndex,
-  });
-}
-
-function handleTaxBadge(act: ActivityLogEntry, state: GameState): void {
-  const amount = act.amount !== undefined ? -Math.abs(act.amount) : 0;
-  const baseTitle = act.message.includes('Lệ Phí') ? 'Lệ Phí Đất Đai' : 'Thuế Đất Đai';
-  state.addFloatingText({
-    text: formatCurrency(amount), type: FloatingTextType.Penalty, playerId: act.playerId ?? '',
-    actionType: 'tax', title: `Nộp ${baseTitle} ➔ Kho Bạc`, cellIndex: act.cellIndex,
   });
 }
 
@@ -109,63 +143,38 @@ function handleUnmortgageBadge(act: ActivityLogEntry, state: GameState): void {
 }
 
 function handleAuctionBadge(act: ActivityLogEntry, state: GameState): void {
-  const isWin =
-    act.id.startsWith('auction_win') ||
-    act.message.includes('trúng đấu giá') ||
-    act.message.includes('Búa gõ');
+  const isWin = act.id.startsWith('auction_win') || act.message.includes('trúng đấu giá') || act.message.includes('Búa gõ');
   if (!isWin) return;
-
   const cellName = act.cellIndex !== undefined ? getCellName(act.cellIndex) : '';
   const amount = act.amount !== undefined ? -Math.abs(act.amount) : 0;
   state.addFloatingText({
-    text: formatCurrency(amount),
-    type: FloatingTextType.Penalty,
-    playerId: act.playerId ?? '',
-    actionType: 'auction_win',
-    title: cellName ? `Thắng đấu giá ${cellName} ➔ Nộp Kho Bạc` : 'Thắng đấu giá BĐS ➔ Nộp Kho Bạc',
-    cellIndex: act.cellIndex,
+    text: formatCurrency(amount), type: FloatingTextType.Penalty, playerId: act.playerId ?? '',
+    actionType: 'auction_win', title: cellName ? `Thắng đấu giá ${cellName} ➔ Nộp Kho Bạc` : 'Thắng đấu giá BĐS ➔ Nộp Kho Bạc', cellIndex: act.cellIndex,
   });
 }
 
-// [IMP-187] Badge xử lý M&A / Hoán Đổi Dự Án — Dập tắt Actor Inversion cho nạn nhân
 function handleMaBuyoutBadge(act: ActivityLogEntry, state: GameState): void {
   const buyerId = act.playerId;
   const buyerInfo = buyerId ? state.playersInfo[buyerId] : undefined;
   const buyerName = act.playerName ?? (buyerInfo?.name || 'Người chơi');
   const absAmount = Math.abs(act.amount ?? 0);
   const cellName = act.cellIndex !== undefined ? getCellName(act.cellIndex) : 'BĐS';
-
   const match = act.message.match(/từ\s+(.+)$/);
   const sellerName = match ? match[1]?.trim() : undefined;
-  const sellerId = sellerName
-    ? Object.keys(state.playersInfo).find((id) => state.playersInfo[id]?.name === sellerName)
-    : undefined;
+  const sellerId = sellerName ? Object.keys(state.playersInfo).find((id) => state.playersInfo[id]?.name === sellerName) : undefined;
 
-  // 1. Phía bên mua: Thông báo thâu tóm tài sản
   if (buyerId) {
     state.addFloatingText({
-      text: formatCurrency(-absAmount),
-      type: FloatingTextType.Penalty,
-      playerId: buyerId,
-      actionType: 'ma_buyout',
-      title: `Thâu tóm ${cellName}`,
-      targetPlayerName: sellerName,
-      cellIndex: act.cellIndex,
+      text: formatCurrency(-absAmount), type: FloatingTextType.Penalty, playerId: buyerId,
+      actionType: 'ma_buyout', title: `Thâu tóm ${cellName}`, targetPlayerName: sellerName, cellIndex: act.cellIndex,
     });
   }
-
-  // 2. Phía bên bán / Nạn nhân bị thâu tóm: Cảnh báo 2 dòng, triệt tiêu hoàn toàn victory_spin & chuông ăn mừng!
   if (sellerId) {
     useVfxStore.getState().triggerPawnReaction(sellerId, 'slump_recoil', 400);
     SoundEngine.playSlumpThud();
     state.addFloatingText({
-      text: `${buyerName} bồi hoàn +${formatCurrency(absAmount)}`,
-      type: FloatingTextType.Reward,
-      playerId: sellerId,
-      actionType: 'ma_buyout',
-      title: `⚠️ Bị thâu tóm: ${cellName}`,
-      targetPlayerName: buyerName,
-      cellIndex: act.cellIndex,
+      text: `${buyerName} bồi hoàn +${formatCurrency(absAmount)}`, type: FloatingTextType.Reward, playerId: sellerId,
+      actionType: 'ma_buyout', title: `⚠️ Bị thâu tóm: ${cellName}`, targetPlayerName: buyerName, cellIndex: act.cellIndex,
     });
   }
 }
@@ -180,9 +189,7 @@ const BADGE_HANDLERS: Record<string, (act: ActivityLogEntry, state: GameState) =
   unmortgage: handleUnmortgageBadge,
   auction: handleAuctionBadge,
   card: (act, state) => {
-    if (act.id.startsWith('ma_buyout')) {
-      handleMaBuyoutBadge(act, state);
-    }
+    if (act.id.startsWith('ma_buyout')) handleMaBuyoutBadge(act, state);
   },
 };
 

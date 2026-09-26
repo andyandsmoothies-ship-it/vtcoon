@@ -84,10 +84,11 @@ export function PlayerCard({
       role="region"
       aria-label={`Thông tin ${player.name}`}
     >
-      {/* Huy hiệu LƯỢT nổi bật trên đỉnh thẻ (Corner Tab) */}
+      {/* Huy hiệu LƯỢT nổi bật trên góc thẻ (Nằm gọn trong lòng thẻ, không margin âm) */}
       {isCurrentTurn && (
         <span
-          className="absolute -top-2.5 right-3 px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-200 text-amber-950 border border-amber-400 shadow-xs animate-pulse select-none uppercase tracking-wider z-10"
+          data-testid="player-in-turn-badge"
+          className="absolute top-1.5 right-2 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-300 text-amber-950 border border-amber-500 shadow-xs animate-pulse select-none uppercase tracking-wider z-10 leading-none"
         >
           LƯỢT
         </span>

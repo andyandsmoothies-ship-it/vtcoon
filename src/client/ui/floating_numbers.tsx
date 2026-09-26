@@ -1,4 +1,4 @@
-// [UI-S05/MSS][IMP-117][IMP-123][IMP-194] FloatingNumbers Component — Contextual Financial Toasts & Milestone Banners
+// [UI-S05/MSS][IMP-117][IMP-123][IMP-194][IMP-201] FloatingNumbers Component — Contextual Financial Toasts & Milestone Banners
 // Responsive layout for Desktop (top-right, max 2) & Mobile (top-center, max 1) without obscuring 3D board
 import React from 'react';
 import {
@@ -40,8 +40,8 @@ export function MilestoneBanner({ item }: { readonly item: FloatingTextItem }): 
   const isEventCard = item.actionType === 'chance' || item.actionType === 'market';
   const testId = isEventCard ? 'event-card-notification-banner' : 'milestone-celebration-banner';
   const borderShadowStyle = item.actionType === 'market'
-    ? 'border-cyan-500 shadow-[0_4px_0_0_#06b6d4]'
-    : 'border-amber-500 shadow-[0_4px_0_0_#d97706]';
+    ? 'border-cyan-500/80 shadow-md shadow-cyan-900/15'
+    : 'border-amber-500/80 shadow-md shadow-amber-900/15';
 
   const bannerClasses = [
     'pointer-events-auto cursor-pointer flex items-center gap-2.5 sm:gap-3 px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-2xl border-2',
@@ -126,19 +126,46 @@ export function FloatingBadge({ item }: { readonly item: FloatingTextItem }): Re
   const myPlayerId = isSSR ? useLobbyStore.getState().myPlayerId : storeMyPlayerId;
   const narrative = resolveTransactionNarrative(item, player, playersInfo, myPlayerId);
 
+  const handleDismiss = () => {
+    useGameStore.getState().removeFloatingText(item.id);
+  };
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleDismiss();
+    }
+  };
+
   return (
     <div
       role="status"
+      tabIndex={0}
+      aria-label={`${narrative.category}: nhấn để đóng`}
       aria-live="polite"
       data-testid="contextual-transaction-badge"
-      className="pointer-events-none flex flex-col gap-1 px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-2xl border-2 border-slate-900 bg-[#FFFDF8] select-none shadow-[0_3px_0_0_#0f172a] animate-in fade-in duration-200 w-full min-w-0 max-w-[82vw] sm:max-w-[340px]"
+      onClick={handleDismiss}
+      onKeyDown={handleKeyDown}
+      className="pointer-events-auto cursor-pointer flex flex-col gap-1 px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-2xl border border-slate-300 bg-[#FFFDF8] select-none shadow-md shadow-slate-900/10 active:scale-95 animate-in fade-in duration-200 w-full min-w-0 max-w-[82vw] sm:max-w-[340px]"
     >
       {/* Hàng 1: Header định danh danh mục */}
-      <div className="flex items-center gap-1.5 border-b border-slate-200/80 pb-0.5">
-        <span className="text-sm shrink-0" aria-hidden="true">{narrative.icon}</span>
-        <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-500 truncate">
-          {narrative.category}
-        </span>
+      <div className="flex items-center justify-between border-b border-slate-200/80 pb-0.5">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span className="text-sm shrink-0" aria-hidden="true">{narrative.icon}</span>
+          <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-500 truncate">
+            {narrative.category}
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleDismiss();
+          }}
+          className="text-slate-400 hover:text-slate-700 text-xs font-bold leading-none p-0.5 cursor-pointer focus-visible:outline-none"
+          aria-label="Đóng thông báo"
+        >
+          ✕
+        </button>
       </div>
 
       {/* Hàng 2: Câu văn tự nhiên hoàn chỉnh */}

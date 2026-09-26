@@ -222,15 +222,16 @@ describe('IMP-132: Desktop UI De-clutter, Streamlined Ticker & Friendly Modal Co
   // CHỐT 4: SỬA CẤN MÉP CHỮ VÒNG TRÊN TOPBAR (src/client/ui/top_bar.tsx)
   // =========================================================================
   describe('Chốt 4: Sửa Cấn Mép Chữ VÒNG Trên TopBar', () => {
-    it('[TC-IMP132.21/MSS][UC-IMP132][Facet-1/Boundary] match-info-capsule có đệm lề an toàn chống cấn mép bo góc trái (chứa pl-3.5, pl-3 hoặc px-3)', () => {
+    it('[TC-IMP132.21/MSS][UC-IMP132][Facet-1/Boundary] match-info-capsule có đệm lề an toàn chống cấn mép bo góc trái (chứa pl-3.5, pl-3, px-3 hoặc sm:px-4)', () => {
       const html = renderToStaticMarkup(React.createElement(TopBar));
       expect(html).toContain('data-testid="match-info-capsule"');
-      expect(html).toMatch(/data-testid="match-info-capsule"[^>]*(?:pl-3\.5|pl-3|px-3)/);
+      expect(html).toMatch(/data-testid="match-info-capsule"[^>]*(?:pl-3\.5|pl-3|px-3|sm:px-4)/);
     });
 
-    it('[TC-IMP132.22/MSS][UC-IMP132][Facet-1/Boundary] match-info-capsule loại bỏ hoàn toàn đệm lề quá hẹp px-2 làm cấn chữ Vòng', () => {
+    it('[TC-IMP132.22/MSS][UC-IMP132][Facet-1/Boundary] match-info-capsule sử dụng đệm lề responsive an toàn chống tràn mobile và cấn chữ desktop', () => {
       const html = renderToStaticMarkup(React.createElement(TopBar));
-      expect(html).not.toMatch(/data-testid="match-info-capsule"[^>]*\bpx-2\b/);
+      expect(html).toContain('min-[360px]:px-2.5');
+      expect(html).toContain('sm:px-4');
     });
 
     it('[TC-IMP132.23/MSS][UC-IMP132][Facet-4/ErrorDefense] TopBar render an toàn không throw exception khi gọi trực tiếp', () => {

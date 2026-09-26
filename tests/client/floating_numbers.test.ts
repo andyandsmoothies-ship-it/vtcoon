@@ -1,5 +1,5 @@
 // [UI-S05/MSS][TC-VFX02/MSS] Floating Financial Numbers & Store Emotes Lifecycle Test Suite
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { useGameStore, FloatingTextType } from '../../src/client/store/game_store';
 import { applyDeltaToStore } from '../../src/client/network/apply_delta';
 import type { DeltaPayload } from '../../src/server/session_manager';
@@ -90,6 +90,7 @@ describe('[TC-VFX02.2/MSS] useGameStore Social Emotes Lifecycle', () => {
 
 describe('[TC-VFX02.3/MSS] applyDeltaToStore Tu Dong Kich Hoat Floating Text Theo Bien Dong So Du', () => {
   beforeEach(() => {
+    vi.useFakeTimers();
     useGameStore.setState({
       floatingTexts: [],
       playersInfo: {
@@ -103,6 +104,10 @@ describe('[TC-VFX02.3/MSS] applyDeltaToStore Tu Dong Kich Hoat Floating Text The
       },
       playerPositions: { p1: 0 },
     });
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('Kich hoat Reward (+2.000) khi so du tang do thuong Khởi Hành (GO)', () => {
@@ -133,6 +138,7 @@ describe('[TC-VFX02.3/MSS] applyDeltaToStore Tu Dong Kich Hoat Floating Text The
     };
 
     applyDeltaToStore(delta, useGameStore);
+    vi.advanceTimersByTime(1900);
 
     const fts = useGameStore.getState().floatingTexts;
     expect(fts).toHaveLength(1);
@@ -190,6 +196,7 @@ describe('[TC-VFX02.3/MSS] applyDeltaToStore Tu Dong Kich Hoat Floating Text The
     };
 
     applyDeltaToStore(penaltyDelta, useGameStore);
+    vi.advanceTimersByTime(1000);
 
     const fts = useGameStore.getState().floatingTexts;
     expect(fts).toHaveLength(1);

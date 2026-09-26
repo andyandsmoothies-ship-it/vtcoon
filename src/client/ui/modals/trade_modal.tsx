@@ -14,6 +14,18 @@ import { TradeSentimentMeter } from './trade_sentiment_meter';
 import { TradePartnerStrip, type TradePartnerInfo, type TradePartnerStripProps } from './trade/trade_partner_strip';
 import { TradeColumn, type TradeColumnProps } from './trade/trade_column';
 import { TradeDealHud, type TradeDealHudProps } from './trade/trade_deal_hud';
+import { formatCurrency } from '../ui_helpers';
+
+function formatDealTabSummary(propertyCount: number, cash: number): string {
+  if (propertyCount === 0 && cash === 0) return '';
+  if (propertyCount > 0 && cash > 0) {
+    return ` (${propertyCount} BĐS • ${formatCurrency(cash)})`;
+  }
+  if (propertyCount > 0) {
+    return ` (${propertyCount} BĐS)`;
+  }
+  return ` (${formatCurrency(cash)} Tr.)`;
+}
 
 export {
   resolveBotPersonality,
@@ -116,16 +128,6 @@ export function TradeModal({
       data-testid="trade-modal"
       data-legacy-style="max-w-md lg:max-w-lg"
     >
-      <button
-        type="button"
-        onClick={handleSubmit}
-        disabled={!isValid}
-        className={`sr-only min-w-0 flex-1 min-h-[44px] ${isValid ? 'bg-emerald-500' : 'bg-slate-200'}`}
-        tabIndex={-1}
-        aria-hidden="true"
-      >
-        Gửi Đề Xuất Đàm Phán
-      </button>
 
       {/* Header */}
       <header className="p-3.5 bg-[#F7F2E7] border-b border-slate-300 flex items-center justify-between sticky top-0 z-10 shrink-0">
@@ -171,7 +173,7 @@ export function TradeModal({
               mobileTab === 'mine' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            Bạn Đưa
+            Bạn Đưa{formatDealTabSummary(offered.length, cashOffer)}
           </button>
           <button
             type="button"
@@ -180,7 +182,7 @@ export function TradeModal({
               mobileTab === 'partner' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            Đối Tác
+            Đối Tác{formatDealTabSummary(requested.length, cashRequest)}
           </button>
         </div>
       </div>
@@ -217,6 +219,7 @@ export function TradeModal({
             onToggleProperty={(id) => toggleProperty(id, false)}
             cashVal={cashRequest}
             onCashChange={(v) => { setCashRequest(v); if (v > 0) setCashOffer(0); }}
+            maxCash={effectiveTargetBalance}
             effectiveTargetBalance={effectiveTargetBalance}
             partnerCanAfford={partnerCanAfford}
             myProperties={myProperties}
@@ -260,7 +263,7 @@ export function TradeModal({
           <button
             type="button"
             onClick={onClose}
-            className="min-h-[44px] min-w-[76px] px-3 sm:px-4 py-2 rounded-xl text-xs font-bold shrink-0 text-slate-900 bg-slate-200 hover:bg-slate-300 border-2 border-slate-400 shadow-[0_4px_0_0_#64748b] active:shadow-[0_1px_0_0_#64748b] active:translate-y-[3px] transition-all cursor-pointer"
+            className="min-h-[44px] min-w-[76px] px-3 sm:px-4 py-2 rounded-xl text-xs font-bold shrink-0 transition-all cursor-pointer text-slate-700 bg-white hover:bg-slate-100 border border-slate-300 shadow-xs active:translate-y-[1px]"
           >
             Hủy
           </button>

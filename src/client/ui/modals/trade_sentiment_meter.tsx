@@ -5,17 +5,28 @@ import type { BotTradeSentimentResult } from './trade_intelligence';
 export interface TradeSentimentMeterProps {
   readonly sentiment: BotTradeSentimentResult;
   readonly partnerName?: string;
+  readonly isZeroDeal?: boolean;
   readonly className?: string;
 }
 
 export function TradeSentimentMeter({
   sentiment,
   partnerName = 'Bot AI',
+  isZeroDeal = false,
   className = '',
 }: TradeSentimentMeterProps): React.ReactElement {
   const { status, score, message, hint } = sentiment;
 
   const moodConfig = (() => {
+    if (isZeroDeal) {
+      return {
+        icon: '⏳',
+        label: 'Chờ đề xuất',
+        badgeClass: 'bg-slate-100 text-slate-700 border-slate-300',
+        barColor: 'bg-slate-400',
+        textColor: 'text-slate-600',
+      };
+    }
     switch (status) {
       case 'likely_accept':
         return {
@@ -45,13 +56,13 @@ export function TradeSentimentMeter({
     }
   })();
 
-  const clampedScore = Math.max(5, Math.min(100, score));
+  const clampedScore = isZeroDeal ? 0 : Math.max(5, Math.min(100, score));
 
   return (
     <div
       data-testid="bot-sentiment-meter"
       data-trade-meter="true"
-      className={`p-3 bg-[#F7F2E7] border border-slate-300 rounded-xl flex flex-col gap-2 text-xs text-slate-800 select-none ${className}`}
+      className={`flex flex-col gap-1.5 text-xs text-slate-800 select-none ${className}`}
     >
       {/* Header bar */}
       <div className="flex items-center justify-between font-bold">
@@ -60,8 +71,8 @@ export function TradeSentimentMeter({
           <span className="text-slate-900 tracking-tight">Tâm Lý Đồng Thuận AI ({partnerName})</span>
         </div>
         <div className="flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <span className="font-mono text-xs font-black text-slate-700">{score}%</span>
-          <span className={`px-2 py-0.5 rounded-md border text-[10px] font-black ${moodConfig.badgeClass}`}>
+          <span className="font-mono text-xs font-black text-slate-700">{clampedScore}%</span>
+          <span className={`px-2 py-0.5 rounded-md border text-[11px] font-black ${moodConfig.badgeClass}`}>
             {moodConfig.icon} {moodConfig.label}
           </span>
         </div>
@@ -78,11 +89,11 @@ export function TradeSentimentMeter({
       {/* Dynamic reaction message */}
       <div className="flex items-start justify-between gap-2 text-[11px]">
         <p className={`font-semibold ${moodConfig.textColor}`}>
-          💬 &ldquo;{message}&rdquo;
+          💬 &ldquo;{isZeroDeal ? 'Hãy chọn BĐS hoặc điều chỉnh tiền mặt để bắt đầu đàm phán.' : message}&rdquo;
         </p>
       </div>
-      {hint && (
-        <p className="text-[10px] text-slate-500 font-medium italic">
+      {hint && !isZeroDeal && (
+        <p className="text-[11px] text-slate-500 font-medium italic">
           💡 Gợi ý: {hint}
         </p>
       )}

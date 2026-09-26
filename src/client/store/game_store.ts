@@ -11,6 +11,7 @@ export const MAX_FLOATING_TEXTS = 6;
 
 export * from './game_store_types.js';
 import { type GameState, type FloatingTextItem, FloatingTextType, INITIAL_GAME_STATE } from './game_store_types.js';
+import { clearPendingBadgeTimers } from '../network/activity_badge_dispatcher.js';
 
 export const useGameStore = create<GameState>((set, get) => ({
   ...INITIAL_GAME_STATE,
@@ -18,7 +19,10 @@ export const useGameStore = create<GameState>((set, get) => ({
   // IMP-133 Camera Sticky Focus & IMP-190 Custom Orbit Camera
   setCameraFocusCell: (cellIndex) => set({ cameraFocusCell: cellIndex }),
   setHasUserCustomCamera: (hasUserCustomCamera) => set({ hasUserCustomCamera }),
-  resetGameState: () => set(INITIAL_GAME_STATE),
+  resetGameState: () => {
+    clearPendingBadgeTimers();
+    set(INITIAL_GAME_STATE);
+  },
 
   setLevelMap: (map) => set({ levelMap: map }),
   setPlayerPositions: (positions) => {
@@ -82,7 +86,6 @@ export const useGameStore = create<GameState>((set, get) => ({
     });
 
     const isBot = Boolean(nextTask.isBot);
-    const stepDuration = isBot ? 200 : 230;
     // [IMP-42] Thời gian chờ an toàn rộng rãi để không bao giờ cắt ngang các bước nhảy bình thường khi đi xa
     const timeoutMs = Math.max(10000, nextTask.waypoints.length * 1500 + 8000);
     setTimeout(() => {

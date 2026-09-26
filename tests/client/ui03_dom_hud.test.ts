@@ -230,17 +230,17 @@ describe('[TC-UI03.7/MSS] ActionDock DOM Markup & Tactile 3D Buttons', () => {
     expect(html).toContain('aria-label="Đổ xúc xắc"');
     expect(html).toContain('ring-amber-400/60');
     expect(html).toContain('animate-pulse');
-    expect(html).toContain('border-emerald-800');
-    expect(html).toContain('shadow-[0_4px_0_0_#064e3b]');
+    expect(html).toContain('border-red-700');
+    expect(html).toContain('shadow-md');
   });
 
-  it('Hien thi cac nut 3D tactile cho Quan Ly BDS, Dam Phan va Het Luot', () => {
+  it('Hien thi cac nut tactile cho Quan Ly BDS, Dam Phan va Het Luot', () => {
     const html = renderToStaticMarkup(React.createElement(ActionDock, { localPlayerId: 'p1' }));
     expect(html).toContain('Quản Lý BĐS');
     expect(html).toContain('Đàm Phán');
     expect(html).toContain('Hết Lượt');
-    expect(html).toMatch(/shadow-\[0_4px_0_0_#(020617|0f172a)\]/);
-    expect(html).toContain('active:translate-y-[3px]');
+    expect(html).toContain('shadow-sm');
+    expect(html).toContain('active:scale-95');
   });
 
   it('Vo hieu hoa hao quang vang kim khi khong phai luot cua minh', () => {

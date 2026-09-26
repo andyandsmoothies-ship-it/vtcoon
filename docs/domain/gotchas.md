@@ -9,9 +9,9 @@
 | :--- | :--- | :--- |
 | `[FSM/RULE]` | Finite State Machine, Luật Chơi, Thẻ Cơ Hội/Thị Trường, Đấu Giá, Phá Sản, Trạm Kiểm Toán | #1, #2, #3, #4, #6, #7, #8, #9, #10, #15, #16, #18, #19, #21, #65, #66, #70, #78, #82, #104, #105, #106, #145, #146, #147, #159, #164, #174, #180, #188, #195, #196, #197, #200, #203, #215, #217, #218, #219, #220, #223, #249, #255, #262, #263, #265, #274, #279, #280, #281, #282 |
 | `[BOT/AI]` | Quyết Định Bot, Phá Sản Bot, Thuật Toán Cứu Nợ Solvency Solver, Bot Takeover | #12, #13, #14, #18, #19, #27, #40, #64, #66, #70, #72, #77, #78, #79, #81, #82, #146, #147, #190, #191, #195, #196, #197, #200, #206, #223, #272, #280 |
-| `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190, #200, #203, #209, #210, #211, #212, #213, #215, #217, #223, #224, #225, #226, #227, #231, #235, #244, #247, #248, #249, #250, #255, #256, #259, #260, #261, #265, #280, #281, #283 |
+| `[NET/SYNC]` | WebSocket Server/Client, Đồng Bộ Delta, Heartbeat Ping/Pong, Grace Period, Reconnect | #11, #17, #27, #38, #40, #41, #44, #45, #65, #66, #67, #70, #71, #74, #75, #76, #77, #100, #105, #106, #114, #144, #156, #159, #165, #168, #184, #190, #200, #203, #209, #210, #211, #212, #213, #215, #217, #223, #224, #225, #226, #227, #231, #235, #244, #247, #248, #249, #250, #255, #256, #259, #260, #261, #265, #280, #281, #283, #284 |
 | `[3D/RENDER]` | Three.js, React Three Fiber, Shader Sóng Biển, Ánh Sáng, Tối Ưu GPU/RAM, Camera, Nạp Mô Hình GLTF An Toàn | #20, #22, #23, #24, #25, #26, #30, #32, #38, #40, #46, #47, #48, #49, #50, #51, #54, #55, #56, #57, #58, #59, #60, #61, #63, #69, #72, #74, #77, #80, #85, #86, #88, #89, #90, #91, #92, #93, #94, #95, #96, #101, #103, #109, #110, #114, #115, #116, #117, #120, #122, #123, #124, #125, #126, #127, #128, #129, #130, #133, #134, #135, #136, #140, #141, #144, #148, #159, #160, #161, #162, #163, #164, #165, #169, #175, #177, #189, #198, #200, #222, #254, #257, #258, #259, #270, #275 |
-| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192, #195, #196, #199, #201, #202, #204, #205, #206, #216, #217, #231, #234, #237, #249, #250, #255, #256, #257, #258, #259, #260, #261, #266, #267, #268, #269, #271, #273, #274, #276, #277, #278, #281, #282, #283 |
+| `[UI/CRAFT]` | 2D UI, Tailwind CSS, Touch Targets, Tactile Depth, Bẫy Cuộn Lồng, Anti-Patterns | #16, #30, #31, #34, #36, #37, #40, #42, #53, #67, #68, #70, #74, #80, #84, #87, #95, #96, #97, #101, #102, #104, #105, #106, #108, #109, #110, #114, #121, #131, #132, #135, #136, #138, #156, #157, #158, #159, #160, #161, #162, #164, #167, #168, #170, #171, #172, #175, #176, #178, #179, #181, #182, #183, #185, #186, #187, #188, #192, #195, #196, #199, #201, #202, #204, #205, #206, #216, #217, #231, #234, #237, #249, #250, #255, #256, #257, #258, #259, #260, #261, #266, #267, #268, #269, #271, #273, #274, #276, #277, #278, #281, #282, #283, #284, #285, #286 |
 | `[UAT/TEST]` | Nghiệm Thu, Adversarial TDD, Ảnh Chụp Màn Hình (.jpg), Shell Escaping, File I/O Lock, Docker Healthcheck Timeout | #5, #28, #29, #31, #35, #52, #71, #73, #83, #84, #99, #100, #117, #124, #125, #130, #199, #235, #273, #278 |
 | `[TELEMETRY]` | Giám Sát Hiệu Năng Thời Gian Thực, Chó Canh Phòng Bất Biến, Hộp Đen Tái Hiện Lỗi | #39, #62, #71, #75, #104, #114, #115, #135, #174, #200, #227, #235, #250, #255, #259 |
 | `[ARCH/REFACTOR]` | Tách Module Facade, Ngân Sách Render Loop, Chuẩn Hóa Môi Trường Build | #43, #98, #99 |
@@ -3359,5 +3359,74 @@
   5. **Filter & Feed Teardown Invariant**: `clearLogs()` bắt buộc reset `activeFilter = 'all'` và `isActivityFeedOpen = false` để tránh kẹt tab filter ở ván mới.
 - **Traceability**: `[TC-201.01..20/MSS]`, `[UC-IMP201]`, `src/client/network/client_session_purger.ts`, `src/client/store/activity_store.ts`, `src/client/network/use_app_turn_controls.ts`, `src/client/store/lobby_store.ts`, `src/client/network/apply_delta.ts`, `tests/contracts/imp201_client_session_lifecycle_purge.test.ts`.
 
+---
 
+### 284. [UI/CRAFT][NET/SYNC] Bất Biến Đồng Bộ Nhịp Chạm Đất Quân Cờ Cho Huy Hiệu Tài Chính, Chống Tràn TopBar Mobile & Tinh Gọn Edge Tab Bảng Điểm (Pawn Stepping Landing Delay Sync, TopBar Mobile Overflow Hardening & Player HUD List Edge Tab Invariant - IMP-201)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Lệch Nhịp Hoạt Cảnh Quân Cờ Với Huy Hiệu Tài Chính (Pawn Hop Toast Desync Trap)*:
+     - Khi người chơi di chuyển (ví dụ 8 ô từ ô 0 tới ô 8), server gửi delta chứa cả vị trí mới và giao dịch trừ tiền thuê/mua đất/thuế. Nếu client dispatch huy hiệu (`FloatingNumbers`) ngay lập tức ở thời điểm delta đến, thông báo tiền rơi hiển thị trong khi quân cờ 3D vẫn đang nhảy ở ô số 1 hoặc số 2, phá vỡ tính đồng bộ và cảm giác nhập vai.
+     - Nếu trì hoãn bằng `setTimeout` cục bộ không có quản lý vòng đời, các timer này sẽ rò rỉ khi reset game hoặc kết thúc lượt, bắn ra các toast "ma" ở ván cờ sau.
+  2. *Bẫy Tràn Thanh Tiện Ích TopBar Trên Màn Hình Nhỏ (< 440px)*:
+     - Trên thiết bị di động có chiều rộng hẹp (320px - 375px như iPhone SE), TopBar chứa quá nhiều viên nang (Vòng chơi, Thời tiết, Âm thanh, Hướng dẫn, Chuông thông báo). Nhãn chữ của thời tiết cùng padding quá lớn làm TopBar bị tràn chiều ngang hoặc vỡ layout.
+     - Huy hiệu đếm số chưa đọc trên chuông thông báo nếu định vị tuyệt đối không có tọa độ chuẩn sẽ bị cắt xén mép phải hoặc đè lên icon chuông.
+  3. *Bẫy Thông Báo Bay Không Thể Tắt Chủ Động (Non-Interactive Floating Numbers Trap)*:
+     - Lớp phủ `FloatingNumbers` từng đặt cứng `pointer-events-none`, khiến người chơi không thể click đóng nhanh thông báo đang che khuất tầm nhìn bàn cờ.
+  4. *Bẫy Chiếm Dụng Diện Tích Của Nút Danh Sách Người Chơi (Floating Pill Screen Real Estate Trap)*:
+     - Nút ẩn/hiện danh sách người chơi nếu dùng pill nổi lơ lửng giữa màn hình sẽ che lấp sa bàn 3D và nút điều khiển. Hơn nữa, nếu không có khoảng đệm đỉnh (`pt-10`), danh sách người chơi khi mở rộng sẽ bị các viên nang của TopBar che khuất thẻ người chơi đầu tiên trên màn hình mobile.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Pawn Landing Delay Synchronization Invariant**: Mọi hoạt động tài chính phát sinh khi đáp đất (`handleRentBadge`, `handleBuyBadge`, `handleTaxBadge`) bắt buộc tính toán độ trễ dựa trên số bước nhảy của quân cờ qua `getPawnLandingDelay(targetCell, currentCell, steps)` và lên lịch dispatch qua `scheduleAction()`.
+  2. **Timer Teardown & Isolation Invariant**: Toàn bộ timer trì hoãn huy hiệu lưu trong `pendingBadgeTimers` và bắt buộc được giải phóng triệt để qua `clearPendingBadgeTimers()` khi `resetGameState()` trong `game_store.ts`.
+  3. **TopBar Mobile Adaptive Layout**:
+     - Ẩn nhãn chữ thời tiết trên màn hình < 440px (`hidden min-[440px]:inline-flex`).
+     - Thu nhỏ padding ngang responsive: `px-2 min-[360px]:px-2.5 sm:px-4`.
+     - Ghim chặt huy hiệu chưa đọc tại `-top-1 right-0` với kích thước `h-3.5 min-w-[14px] text-[10px]` không gây tràn mép.
+  4. **Dismissible Floating Numbers**: Thẻ thông báo bay chuyển sang `pointer-events-auto cursor-pointer`, cung cấp nút đóng `✕` (`aria-label="Đóng thông báo"`) và hỗ trợ thao tác phím `Enter`/`Space`.
+  5. **Player HUD List Edge Tab Ergonomics & Boundary**:
+     - Nút toggle neo sát mép phải màn hình (`fixed right-0 rounded-l-xl rounded-r-none`), nhãn tiếp cận chứa rõ ngữ nghĩa "Bảng Điểm".
+     - Thêm `pt-28 sm:pt-0` cho container thẻ bài để chống che khuất bởi nút Edge Tab và TopBar trên mobile.
+     - Tuân thủ nghiêm ngặt trần ngân sách dòng code: `player_hud_list.tsx` <= 55 LOC (TC-190.16).
+- **Traceability**: `[TC-201.01..20/MSS]`, `[UC-IMP201]`, `src/client/ui/top_bar.tsx`, `src/client/ui/floating_numbers.tsx`, `src/client/network/activity_badge_dispatcher.ts`, `src/client/ui/player_hud_list.tsx`, `src/client/store/game_store.ts`, `tests/contracts/imp201_topbar_overflow_and_hud_fixes.test.ts`.
+
+---
+
+### 285. [UI/TACTILE] Bất Biến Hiện Đại Hóa Đổ Bóng Xúc Giác, Công Thái Học Mobile & Tinh Gọn HUD (Mobile UI Ergonomics, Modern Shadows & Visual Polish Invariant - IMP-202)
+- **Bối cảnh & Bẫy thực tế**:
+  1. *Bẫy Đổ Bóng Cục Mịch Kiểu 3D Cũ (Chunky Hard Drop-Shadow Trap)*:
+     - Các thành phần HUD như `FloatingBadge`, `MilestoneBanner`, `ActionDock` và các nút hành động con trước đây sử dụng bóng cứng cố định (`shadow-[0_4px_0_0_#0f172a]`, `shadow-[0_3px_0_0_#0f172a]`), tạo cảm giác thô kệch và không ăn nhập với phong cách mặt bàn cao cấp.
+     - Khi chuyển đổi sang đổ bóng hiện đại mềm mại (`shadow-md shadow-slate-900/10`, `shadow-sm`, `active:scale-95`), các bài test cũ (Specification Evolution) cần được cập nhật đồng bộ để tránh xung đột kỳ vọng lớp CSS.
+  2. *Bẫy Tràn Thẻ Người Chơi Do Huy Hiệu LƯỢT Margin Âm (PlayerCard Overflow Trap)*:
+     - Huy hiệu `LƯỢT` trên `PlayerCard` từng dùng `-top-2.5` gây tràn khỏi khung thẻ, dẫn đến bị cắt cụt (clipping) khi đặt trong container có `overflow-hidden`.
+  3. *Bẫy Kép Emoji Lượt Bot & Đồng Hồ Trên Mobile TopBar*:
+     - Khi tới lượt Bot AI, TopBar trên màn hình di động hẹp vô tình hiển thị cả hai emoji ⏱️ và 🤖 sát nhau, làm chật hẹp không gian và gây nhầm lẫn thị giác.
+  4. *Bẫy Rò Rỉ Thẻ Tính Cách Bot Vào Giao Diện Người Dùng*:
+     - Các nhãn trạng thái bot pacing hiển thị cả hậu tố tính cách nội bộ như `(Passive)` hoặc `(Aggressive)` trên HUD và sàn đấu giá, làm suy giảm tính tự nhiên của trải nghiệm.
+- **Ràng buộc cứng & Thiết kế bất biến**:
+  1. **Modern Tactile Shadows Invariant**: Thay thế hoàn toàn bóng cứng `shadow-[0_4px_0_0_#...]` bằng hệ thống đổ bóng khuếch tán mềm (`shadow-sm`, `shadow-md`, `shadow-lg shadow-slate-900/10`) kết hợp viền tinh tế (`border-slate-300/80`) và hiệu ứng co giãn xúc giác (`active:scale-95`).
+  2. **In-Turn Badge Containment Invariant**: Huy hiệu `LƯỢT` định vị tuyệt đối bên trong góc trên phải của thẻ (`absolute top-1.5 right-2 text-[10px]`), triệt tiêu hoàn toàn margin âm `-top-2.5` để bảo toàn ranh giới hiển thị.
+  3. **Mobile Bot Pacing Clarity**: TopBar hiển thị trực quan `🤖` và nhãn `Lượt Bot:` / `Đang tính` ngắn gọn trên mobile, bảo toàn `🤖 Đang tính...` trên desktop.
+  4. **Clean Bot Identity**: `resolveBotPacingStatus` tự động loại bỏ các thẻ tính cách `(Passive)`, `(Aggressive)` ở cả pha gieo xúc xắc và đấu giá.
+  5. **HUD Toggle & Spacing Ergonomics**: Nút toggle danh sách người chơi sử dụng nhãn rõ nghĩa `👥 Ẩn` / `👥 Hiện`, khoảng cách thẻ bài sử dụng `gap-2`.
+  6. **ActionDock Contrast & Backdrop**: Nút gieo xúc xắc khi bị vô hiệu hóa sử dụng `bg-slate-100 text-slate-400 border border-slate-300 shadow-none`. Thanh dock áp dụng `bg-[#FFFDF8]/95 backdrop-blur-sm border border-slate-300/80 shadow-lg shadow-slate-900/10`.
+- **Traceability**: `[TC-202.01..18/MSS]`, `[UC-IMP202]`, `src/client/ui/floating_numbers.tsx`, `src/client/ui/action_dock.tsx`, `src/client/ui/player_card.tsx`, `src/client/ui/top_bar.tsx`, `src/client/ui/ui_helpers.ts`, `src/client/ui/player_hud_list.tsx`, `tests/contracts/imp202_mobile_ui_ergonomics_and_shadows.test.ts`.
+
+---
+
+### 286. [UI/CRAFT][P2P/TRADE] Bất Biến Buồng Lái Đàm Phán Hợp Nhất, Công Thái Học Stepper 2 Hàng & Triệt Tiêu Bẫy Cuộn Lồng Nhau Mobile 360px (P2P Trade Modal Unified Cockpit, 2-Row Ergonomic Stepper & Nested-Scroll Elimination Invariant - IMP-202)
+- **Bối cảnh & Bẫy thực tế (3 Lớp Thực Chứng)**:
+  1. *Ảo tưởng ban đầu (Initial Illusion)*:
+     - Danh sách BĐS đàm phán bị bó hẹp trong `max-h-36` (144px) dẫn đến bẫy kẹt cuộn lồng nhau (nested-scroll trap) trên màn hình cảm ứng di động.
+     - Khay điều khiển tiền mặt nhồi nhét 7 phần tử (2 nút stepper, 1 input, 4 phím tắt nhanh) trên 1 hàng ngang duy nhất. Phép cộng pixel vật lý yêu cầu tối thiểu 340px, trong khi độ rộng khả dụng của thẻ cột trên màn hình mobile 360px chỉ là 296px, gây tràn khung ngang trầm trọng.
+     - Phân tích đàm phán bị chia vụn thành 3 card tách rời (AI Sentiment, Cán cân giao dịch, Phí chuyển nhượng) chiếm tới hơn 240px chiều dọc, đẩy danh sách BĐS và các nút hành động rớt xuống dưới nếp gấp màn hình (below the fold).
+     - Duy trì nút gửi đề xuất ẩn `sr-only` chỉ để thoả hiệp với biểu thức chính quy Regex đa dòng lỏng lẻo trong bài test cũ (`TC-153.15`).
+  2. *Phát hiện vật lý từ Scout & Codebase (Scout Physical Finding)*:
+     - Biểu thức chính quy `/<button[^>]*>[\s\S]*?Gửi Đề Xuất Đàm Phán/` trong `TC-153.15` là nguyên nhân gốc rễ sinh ra nút `sr-only`: nó nuốt trọn từ thẻ `<button>` đầu tiên trong tài liệu đến thẻ submit cuối cùng, vô tình gom luôn thuộc tính `disabled=""` của các nút con bên trong. Khắc phục bằng regex không vượt ranh giới `/<button(?:(?!<button)[\s\S])*?.../` cho phép thanh lọc 100% nút ẩn trong DOM.
+     - Trên mobile 360px (khoảng trống 296px), bố cục 2 hàng: Hàng 1 (Stepper [-] [input] [+]), Hàng 2 (4 phím tắt [+100], [+500], [Tối đa], [Xóa] với touch target chuẩn $\ge 44$px) vừa khít tuyệt đối với 0 pixel tràn lề.
+     - Tích hợp AI Sentiment + Cán Cân + Thuế vào một thẻ bao bọc duy nhất `deal-cockpit` tiết kiệm khoảng 145px chiều dọc, đưa toàn bộ quy trình thương lượng lên trên nếp gấp màn hình.
+  3. *Bất biến đã kiểm chứng (Verified Invariants)*:
+     - **Unified Deal Cockpit Invariant**: Toàn bộ dữ liệu phân tích giá trị và phản hồi bot phải hội tụ trong một card `data-testid="deal-cockpit"`. Khi chưa có đề xuất (`totalDealValue === 0`), cán cân hiển thị trạng thái trung tính `0 vs 0`, thước đo AI hiển thị `⏳ Chờ đề xuất (0%)`.
+     - **2-Row Ergonomic Stepper Invariant**: Các bộ điều khiển tiền tệ có từ 5 tương tác trở lên phải tách thành 2 hàng phân cấp rõ ràng trên mobile: hàng nhập liệu & tinh chỉnh, và hàng phím tắt định mức nhanh với touch target $\ge 44$px.
+     - **Nested-Scroll Elimination**: Danh sách BĐS trong modal giao dịch bắt buộc sử dụng `max-h-52 sm:max-h-72` để loại bỏ hoàn toàn bẫy kẹt cuộn 144px.
+     - **Zero Dummy Element / Zero Dummy Attribute Invariant**: Nghiêm cấm tạo phần tử DOM ẩn (`sr-only`) hoặc thuộc tính rác (`data-legacy-style`) chỉ để thoả mãn test lỗi thời. Bắt buộc tiến hóa đặc tả và điều hòa điều kiện tiên quyết của test suite.
+     - **Smart Barter Tab Summary**: Tiêu đề Tab di động tự động tóm tắt trực quan `(2 BĐS)`, `(500 Tr.)`, hoặc `(2 BĐS • 500)`, bao quát đầy đủ cả đề xuất thuần tiền mặt và triệt tiêu hiển thị số 0 vô nghĩa `(0 • 0)`.
+- **Traceability**: `[TC-202.01..16/MSS]`, `[UC-IMP202]`, `src/client/ui/modals/trade_modal.tsx`, `src/client/ui/modals/trade/trade_partner_strip.tsx`, `src/client/ui/modals/trade/trade_column.tsx`, `src/client/ui/modals/trade/trade_deal_hud.tsx`, `src/client/ui/modals/trade_sentiment_meter.tsx`, `tests/client/imp202_trade_modal_ergonomics_overhaul.test.ts`.
 

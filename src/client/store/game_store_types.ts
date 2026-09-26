@@ -67,6 +67,7 @@ export enum FloatingTextType {
 export type FloatingActionType =
   | 'buy'
   | 'upgrade'
+  | 'rent'
   | 'rent_pay'
   | 'rent_receive'
   | 'tax'
@@ -90,7 +91,7 @@ export type FloatingActionType =
 export interface FloatingTextItem {
   readonly id: string;
   readonly text: string;
-  readonly type: FloatingTextType;
+  readonly type?: FloatingTextType;
   readonly playerId: string;
   readonly timestamp: number;
   readonly durationMs?: number;

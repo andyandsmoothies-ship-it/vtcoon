@@ -190,7 +190,8 @@ export function resolveBotPacingStatus(
       const activeBot = (currentTurnPlayerId && playersInfo[currentTurnPlayerId]?.isBot)
         ? playersInfo[currentTurnPlayerId]
         : allBots[0];
-      const botName = activeBot?.name || 'Bot AI';
+      const rawBotName = activeBot?.name || 'Bot AI';
+      const botName = formatShortPlayerName(rawBotName);
       return {
         botId: activeBot?.id ?? 'bot_auction',
         botName,
@@ -217,7 +218,8 @@ export function resolveBotPacingStatus(
   const botIndex = allBots.findIndex((b) => b.id === currentTurnPlayerId);
   const botOrder = botIndex >= 0 ? botIndex + 1 : 1;
   const totalBots = allBots.length;
-  const botName = currentTurnPlayer.name || `Bot ${botOrder}`;
+  const rawBotName = currentTurnPlayer.name || `Bot ${botOrder}`;
+  const botName = formatShortPlayerName(rawBotName);
 
   return {
     botId: currentTurnPlayerId,

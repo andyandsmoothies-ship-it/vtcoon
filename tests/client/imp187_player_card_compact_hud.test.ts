@@ -60,7 +60,8 @@ describe('[TC-187/MSS][IMP-187] Compact PlayerCard HUD & Zero-Waste Layout', () 
       React.createElement(PlayerCard, { player: mockPlayer, isCurrentTurn: true, levelMap: {}, slotIndex: 0 })
     );
     expect(html).toContain('LƯỢT');
-    expect(html).toContain('absolute -top-2.5 right-3');
+    expect(html).toContain('absolute top-1.5 right-2');
+    expect(html).not.toContain('-top-2.5');
   });
 
   it('[TC-187.04/MSS] Property dots span 100% width without redundant BDS: label', () => {

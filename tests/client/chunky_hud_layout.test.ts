@@ -155,8 +155,8 @@ describe('[TC-CHUNKY-HUD.2/MSS] Facet 2: State Reactivity (Chunky Toy Tabletop U
     const html = renderToStaticMarkup(React.createElement(ActionDock, { localPlayerId: 'p1' }));
 
     expect(html).toContain('rounded-full');
-    expect(html).toContain('shadow-[0_4px_0_0_#0f172a]');
-    expect(html).toContain('active:translate-y-[3px]');
+    expect(html).toContain('shadow-sm');
+    expect(html).toContain('active:scale-95');
   });
 
   it('[TC-CHUNKY-HUD.10/MSS] [UC-HUD-02] ActionDock Roll Dice button pulses with golden aura when active on player turn', () => {

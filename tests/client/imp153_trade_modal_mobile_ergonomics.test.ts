@@ -151,7 +151,7 @@ describe('[IMP-153][Trạm 1 RED] P2P Trade Modal Tactile UI/UX Overhaul & Mobil
       })
     );
 
-    const submitBtnMatch = html.match(/<button[^>]*>[\s\S]*?Gửi Đề Xuất Đàm Phán[\s\S]*?<\/button>/);
+    const submitBtnMatch = html.match(/<button(?:(?!<button)[\s\S])*?Gửi Đề Xuất Đàm Phán[\s\S]*?<\/button>/);
     expect(submitBtnMatch).toBeTruthy();
     expect(submitBtnMatch![0]).toContain('bg-emerald-500');
     expect(submitBtnMatch![0]).not.toContain('disabled');

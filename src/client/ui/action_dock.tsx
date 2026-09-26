@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useGameStore, type GameState } from '../store/game_store';
 import {
   isRollActionDisabled,
@@ -99,6 +99,7 @@ export function ActionDock({
   const canRollAgain = canRollAgainProp !== undefined ? canRollAgainProp : storeCanRollAgain;
   const hasRolledThisTurn = hasRolledThisTurnProp !== undefined ? hasRolledThisTurnProp : storeHasRolledThisTurn;
   const [isRollPending, setIsRollPending] = useState(false);
+  const rollTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const botPacing = resolveBotPacingStatus(currentTurnPlayerId, localPlayerId ?? 'p1', playersInfo, turnPhase);
 
   React.useEffect(() => {
@@ -117,6 +118,7 @@ export function ActionDock({
       document.addEventListener('visibilitychange', handleVisibility);
     }
     return () => {
+      if (rollTimerRef.current) clearTimeout(rollTimerRef.current);
       if (typeof document !== 'undefined') {
         document.removeEventListener('visibilitychange', handleVisibility);
       }
@@ -160,7 +162,8 @@ export function ActionDock({
       setIsRollPending(false);
       return;
     }
-    setTimeout(() => setIsRollPending(false), 1500);
+    if (rollTimerRef.current) clearTimeout(rollTimerRef.current);
+    rollTimerRef.current = setTimeout(() => setIsRollPending(false), 1500);
   };
 
   const currentPos = actingPlayerId ? (playerPositions[actingPlayerId] ?? 0) : 0;
@@ -225,7 +228,7 @@ export function ActionDock({
         </div>
       )}
       <nav
-        className="relative pointer-events-auto flex items-center gap-1.5 min-[360px]:gap-2 md:gap-3 bg-[#FFFDF8] border-2 border-slate-900 shadow-[0_4px_0_0_#0f172a] rounded-2xl p-1.5 sm:p-2.5 px-2.5 min-[360px]:px-3.5 sm:px-5 max-w-[calc(100vw-1rem)] overflow-x-auto no-scrollbar"
+        className="relative pointer-events-auto flex items-center gap-1.5 min-[360px]:gap-2 md:gap-3 bg-[#FFFDF8]/95 backdrop-blur-sm border border-slate-300/80 shadow-lg shadow-slate-900/10 rounded-2xl p-1.5 sm:p-2.5 px-2.5 min-[360px]:px-3.5 sm:px-5 max-w-[calc(100vw-1rem)] overflow-x-auto no-scrollbar"
         aria-label="Thanh điều khiển tác vụ"
       >
         {/* Primary Action Button (Chuyển đổi theo Pha: Khi đứng trên ô chưa có chủ thì Primary CTA là [Mua Đất], ngược lại là [Đổ Xúc Xắc]) */}
@@ -237,7 +240,7 @@ export function ActionDock({
             className={`min-h-[44px] shrink-0 whitespace-nowrap flex items-center justify-center gap-1.5 px-4 sm:px-6 py-2.5 rounded-2xl font-black text-white shadow-lg transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 ${
               isTradeFrozen
               ? 'bg-slate-200 text-slate-500 border-2 border-slate-400 cursor-not-allowed shadow-none'
-              : 'bg-amber-500 hover:bg-amber-600 border-2 border-amber-700 shadow-[0_4px_0_0_#0f172a] active:shadow-none active:translate-y-[3px] ring-4 ring-amber-400/60 shadow-[0_0_24px_rgba(245,158,11,0.55)] animate-pulse'
+              : 'bg-amber-500 hover:bg-amber-600 border border-amber-700 shadow-md shadow-amber-500/30 active:scale-95 ring-4 ring-amber-400/60 animate-pulse'
           }`}
           aria-label={isTradeFrozen ? `Thị trường đóng băng (#${currentPos})` : `Mua ô đất số ${currentPos}`}
         >
@@ -254,8 +257,8 @@ export function ActionDock({
           data-testid="roll-dice-btn"
           className={`min-h-[44px] shrink-0 whitespace-nowrap flex items-center justify-center gap-1.5 sm:gap-2 px-5 sm:px-6 py-2.5 rounded-2xl font-black text-white shadow-lg transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 ${
             isRollDisabled
-              ? 'bg-slate-200 text-slate-600 cursor-not-allowed border-2 border-slate-400 shadow-none'
-              : `bg-gradient-to-b from-rose-500 via-red-600 to-red-700 hover:from-rose-400 hover:to-red-600 border-2 border-emerald-800 shadow-[0_4px_0_0_#064e3b] active:shadow-none active:translate-y-[3px] ${
+              ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-300 shadow-none'
+              : `bg-gradient-to-b from-rose-500 via-red-600 to-red-700 hover:from-rose-400 hover:to-red-600 border border-red-700 shadow-md shadow-red-600/30 active:scale-95 ${
                   isGlowActive ? 'ring-4 ring-amber-400/60 shadow-[0_0_24px_rgba(245,158,11,0.55)] animate-pulse' : ''
                 }`
           }`}
@@ -299,7 +302,7 @@ export function ActionDock({
           type="button"
           onClick={() => onBailOut?.()}
           disabled={Boolean((actingPlayer?.balance ?? 0) < 500)}
-          className="min-h-[44px] shrink-0 whitespace-nowrap flex items-center gap-1.5 px-3.5 py-2 rounded-2xl text-white font-bold bg-amber-600 hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-amber-800 shadow-[0_4px_0_0_#0f172a] active:shadow-none active:translate-y-[3px] transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+          className="min-h-[44px] shrink-0 whitespace-nowrap flex items-center gap-1.5 px-3.5 py-2 rounded-2xl text-white font-bold bg-amber-600 hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed border border-amber-800 shadow-sm active:scale-95 transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
           aria-label="Nộp 500 bảo lãnh kiểm toán để rời trạm ngay"
         >
           <span aria-hidden="true">⚖️</span>
@@ -316,7 +319,7 @@ export function ActionDock({
         aria-label="Quản lý và nâng cấp bất động sản"
         onClick={handleOpenManageProperty}
         disabled={isBankrupt}
-        className="w-11 h-11 min-w-[44px] min-h-[44px] sm:w-auto sm:h-auto shrink-0 whitespace-nowrap flex items-center justify-center p-0 sm:px-4 sm:py-2.5 gap-1.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold border-2 border-blue-800 shadow-[0_4px_0_0_#0f172a] active:translate-y-[3px] disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+        className="w-11 h-11 min-w-[44px] min-h-[44px] sm:w-auto sm:h-auto shrink-0 whitespace-nowrap flex items-center justify-center p-0 sm:px-4 sm:py-2.5 gap-1.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold border border-blue-800 shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
       >
         <span aria-hidden="true">🏛️</span>
         <span className="hidden sm:inline">Quản Lý BĐS</span>
@@ -332,7 +335,7 @@ export function ActionDock({
         className={`w-11 h-11 min-w-[44px] min-h-[44px] sm:w-auto sm:h-auto shrink-0 whitespace-nowrap flex items-center justify-center p-0 sm:px-4 sm:py-2.5 gap-1.5 rounded-2xl font-bold border-2 transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
           isBankrupt || isTradeFrozen
             ? 'bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed opacity-50'
-            : 'bg-amber-500 hover:bg-amber-600 text-white border-amber-700 shadow-[0_4px_0_0_#0f172a] active:translate-y-[3px]'
+            : 'bg-amber-500 hover:bg-amber-600 text-white border border-amber-700 shadow-sm active:scale-95'
         }`}
       >
         <span aria-hidden="true">🤝</span>
@@ -353,7 +356,7 @@ export function ActionDock({
             useGameStore.getState().openModal('masterplan', {});
           }
         }}
-        className={`w-11 h-11 min-w-[44px] min-h-[44px] sm:w-auto sm:h-auto shrink-0 whitespace-nowrap flex items-center justify-center p-0 sm:px-4 sm:py-2.5 gap-1.5 rounded-2xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 font-bold border-2 border-slate-900 shadow-[0_4px_0_0_#0f172a] active:translate-y-[3px] transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+        className={`w-11 h-11 min-w-[44px] min-h-[44px] sm:w-auto sm:h-auto shrink-0 whitespace-nowrap flex items-center justify-center p-0 sm:px-4 sm:py-2.5 gap-1.5 rounded-2xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 font-bold border border-slate-300 shadow-sm active:scale-95 transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
           isHeatmapActive ? 'ring-2 ring-amber-400 bg-amber-100 shadow-[0_0_12px_rgba(245,158,11,0.5)]' : ''
         }`}
       >
@@ -379,7 +382,7 @@ export function ActionDock({
             ? isInsolvent
               ? 'bg-rose-100 text-rose-500 border-2 border-rose-300 cursor-not-allowed'
               : 'bg-slate-200 text-slate-400 border-2 border-slate-300 cursor-not-allowed'
-            : `bg-emerald-600 hover:bg-emerald-700 text-white font-bold border-2 border-emerald-800 shadow-[0_4px_0_0_#0f172a] active:translate-y-[3px] ${
+            : `bg-emerald-600 hover:bg-emerald-700 text-white font-bold border border-emerald-800 shadow-sm active:scale-95 ${
                 isSkippedTurn ? 'ring-4 ring-amber-400/80 shadow-[0_0_24px_rgba(245,158,11,0.55)] animate-pulse' : ''
               }`
         }`}

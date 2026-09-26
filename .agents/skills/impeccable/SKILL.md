@@ -92,6 +92,8 @@ Kỹ năng **Impeccable** nâng chuẩn thiết kế đồ họa 2D lên tầm t
 | **`first-viewport-column-overflow`** | Cột nội dung quá dài không có scroll riêng, đẩy cụm nút hành động rớt khỏi màn hình | Mất khả năng thao tác tức thì của người chơi trên màn hình dọc | Bố cục sticky footer độc lập ở root container, tách scroll cho vùng dữ liệu |
 | **`cramped-padding`** | Chữ hoặc phần tử con chạm sát mép viền thẻ (`px-1`, `p-0.5` trên khối lớn) hoặc tràn chữ thiếu `truncate` + `min-w-0` | Bức bối thị giác, chữ bị cắt nham nhở trên mobile 360px | Đệm tối thiểu `px-2` đến `px-3`, bọc `truncate` kèm `min-w-0` trong khối flex |
 | **`nested-cards`** | Thẻ xám lồng trong thẻ xám (`bg-slate-100` trong `bg-slate-50` với nhiều lớp `border`) | Gây nhiễu thị giác, nặng nề, làm loãng điểm nhấn của sa bàn | Phẳng hóa phân cấp bằng khoảng cách whitespace, divider mảnh hoặc nền tương phản rõ |
+| **`physical-horizontal-overflow`** | Nhồi >= 4 nút/input trên 1 hàng ngang vượt quá 296px lọt lòng của màn 360px | Tràn viền hoặc ép bẹp nút bấm cảm ứng | Tính tổng pixel $W_{\text{net}} \le 296\text{px}$, tách 2 tầng công thái học |
+| **`dummy-attribute-test-bypass`** | Dùng `data-legacy-style` nhét class cũ để lừa test assertion | Che giấu hồi quy, tạo accidental pass ảo | Reconcile đặc tả test cũ minh bạch theo Specification Evolution |
 
 ---
 

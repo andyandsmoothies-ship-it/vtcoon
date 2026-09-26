@@ -81,7 +81,7 @@ export function TopBar(props: TopBarProps): React.ReactElement {
       {/* Cụm bên trái: Thông tin trận đấu */}
       <div
         data-testid="match-info-capsule"
-        className="pointer-events-auto h-10 sm:h-11 flex items-center gap-1 min-[360px]:gap-1.5 sm:gap-3 md:gap-4 bg-[#FFFDF8] border-2 border-slate-900 rounded-xl sm:rounded-2xl px-3 sm:px-4 shadow-[0_3px_0_0_#0f172a] text-slate-900 text-xs md:text-sm font-medium"
+        className="pointer-events-auto h-10 sm:h-11 flex items-center gap-1 min-[360px]:gap-1.5 sm:gap-3 md:gap-4 bg-[#FFFDF8] border-2 border-slate-900 rounded-xl sm:rounded-2xl px-2 min-[360px]:px-2.5 sm:px-4 shadow-[0_3px_0_0_#0f172a] text-slate-900 text-xs md:text-sm font-medium"
       >
         {/* Vòng đấu */}
         <div className="flex items-center gap-1 sm:gap-2">
@@ -96,12 +96,12 @@ export function TopBar(props: TopBarProps): React.ReactElement {
 
         {/* Đồng hồ đếm ngược */}
         <div className="flex items-center gap-1 sm:gap-2" role="timer" aria-live="polite">
-          <span className="text-sm sm:text-base" aria-hidden="true">⏱️</span>
-          <span className="hidden sm:inline text-xs text-slate-600 font-semibold">Thời gian:</span>
+          <span className="text-sm sm:text-base" aria-hidden="true">{isBotTurn ? '🤖' : '⏱️'}</span>
+          <span className="hidden sm:inline text-xs text-slate-600 font-semibold">{isBotTurn ? 'Lượt Bot:' : 'Thời gian:'}</span>
           <span className={`tabular-nums font-mono text-xs sm:text-base whitespace-nowrap ${timerColorClass}`}>
             {isBotTurn ? (
               <>
-                <span className="sm:hidden" aria-hidden="true">🤖</span>
+                <span className="sm:hidden text-xs text-amber-600 font-bold">Đang tính</span>
                 <span className="hidden sm:inline">🤖 Đang tính...</span>
               </>
             ) : (
@@ -145,7 +145,7 @@ export function TopBar(props: TopBarProps): React.ReactElement {
         <button
           type="button"
           onClick={toggleNextTimeOfDay}
-          className="hidden min-[390px]:inline-flex sm:inline-flex relative w-8 h-8 min-h-[36px] min-w-[36px] sm:w-auto sm:h-8 sm:min-w-[36px] items-center justify-center gap-1.5 p-0 sm:px-3 rounded-lg sm:rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-colors cursor-pointer text-xs font-semibold border border-slate-900 shadow-[0_1.5px_0_0_#0f172a] sm:shadow-[0_2px_0_0_#0f172a] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 after:absolute after:-inset-1.5 after:content-['']"
+          className="hidden min-[440px]:inline-flex sm:inline-flex relative w-8 h-8 min-h-[36px] min-w-[36px] sm:w-auto sm:h-8 sm:min-w-[36px] items-center justify-center gap-1.5 p-0 sm:px-3 rounded-lg sm:rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-colors cursor-pointer text-xs font-semibold border border-slate-900 shadow-[0_1.5px_0_0_#0f172a] sm:shadow-[0_2px_0_0_#0f172a] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 after:absolute after:-inset-1.5 after:content-['']"
           title={`Thời gian: ${timeOfDayLabel} (Bấm để đổi)`}
           aria-label={`Chuyển chu kỳ thời gian (Hiện tại: ${timeOfDayLabel})`}
           data-testid="time-of-day-toggle-button"
@@ -180,7 +180,7 @@ export function TopBar(props: TopBarProps): React.ReactElement {
           <span className="hidden sm:inline">Nhật Ký</span>
           {unreadCount > 0 && (
             <span
-              className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-600 px-1 text-[9px] font-bold text-white shadow-md border border-slate-900"
+              className="absolute -top-1 right-0 flex h-3.5 min-w-[14px] items-center justify-center rounded-full bg-rose-600 px-0.5 text-[8px] font-black text-white shadow-md border border-slate-900 pointer-events-none"
               data-testid="activity-unread-badge"
             >
               {unreadCount > 99 ? '99+' : unreadCount}

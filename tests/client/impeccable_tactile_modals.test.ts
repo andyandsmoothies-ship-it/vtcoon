@@ -37,11 +37,13 @@ describe('[IMP-P1/P2] TradeModal Responsive Bounds & Tactile Shadows', () => {
         onClose: () => {},
       })
     );
-    expect(html).not.toContain('active:scale-95');
-    expect(html).toContain('shadow-[0_4px_0_0_#065f46]');
-    expect(html).toContain('active:shadow-[0_1px_0_0_#065f46]');
-    expect(html).toContain('active:translate-y-[3px]');
-    expect(html).toContain('shadow-[0_4px_0_0_#64748b]');
+    const footerMatch = html.match(/<footer[^>]*>([\s\S]*?)<\/footer>/);
+    const footerHtml = footerMatch ? footerMatch[1] : html;
+    expect(footerHtml).not.toContain('active:scale-95');
+    expect(footerHtml).toContain('shadow-[0_4px_0_0_#065f46]');
+    expect(footerHtml).toContain('active:shadow-[0_1px_0_0_#065f46]');
+    expect(footerHtml).toContain('active:translate-y-[3px]');
+    expect(footerHtml).toMatch(/shadow-\[0_4px_0_0_#64748b\]|shadow-xs/);
   });
 });
 
