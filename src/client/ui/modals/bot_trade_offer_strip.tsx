@@ -131,7 +131,7 @@ export function InlineBotTradeStrip({
       data-testid="inline-bot-trade-strip"
       role="region"
       aria-label="Đề xuất giao dịch từ Bot"
-      className="w-full flex items-center justify-between gap-1.5 sm:gap-2 px-2.5 py-1.5 bg-[#FFFDF8] border-2 border-amber-500 rounded-xl shadow-[0_3px_0_0_#d97706] text-slate-900 pointer-events-auto select-none animate-in fade-in slide-in-from-bottom-2 duration-150"
+      className="w-full sm:max-w-md flex items-center justify-between gap-1.5 sm:gap-2 px-2.5 py-1.5 bg-[#FFFDF8] border-2 border-amber-500 rounded-xl shadow-[0_3px_0_0_#d97706] text-slate-900 pointer-events-auto select-none animate-in fade-in slide-in-from-bottom-2 duration-150"
     >
       {/* Tóm tắt đề xuất */}
       <div className="flex items-center gap-1.5 min-w-0 flex-1">

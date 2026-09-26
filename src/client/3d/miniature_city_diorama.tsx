@@ -14,6 +14,7 @@ import { DioramaMicroLife } from './diorama/diorama_microlife';
 import { DioramaTraffic } from './diorama/diorama_traffic';
 import { DioramaShophouseBlocks } from './diorama/diorama_shophouse_blocks';
 import { DioramaHighriseBlocks } from './diorama/diorama_highrise_blocks';
+import { DioramaResidentialPool } from './diorama/diorama_residential_pool';
 import {
   DioramaModelRailroad,
   DioramaWaterfrontStation,
@@ -298,6 +299,7 @@ export function MiniatureCityDiorama(): React.ReactElement {
       {/* 5. Cụm cao ốc tài chính Landmark Skyline & Tháp cao ốc nén */}
       <DioramaSkyline />
       <DioramaHighriseBlocks />
+      <DioramaResidentialPool />
       {/* 5.1. Khu di sản văn hóa Chợ Lớn & Shophouse phố cổ */}
       <DioramaHeritageDistrict />
       <DioramaShophouseBlocks />

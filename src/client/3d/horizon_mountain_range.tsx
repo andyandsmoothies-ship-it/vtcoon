@@ -70,34 +70,6 @@ export function HorizonMountainRange(): React.ReactElement {
           <meshStandardMaterial color="#EF4444" emissive="#EF4444" emissiveIntensity={1.2} />
         </mesh>
       </group>
-
-      {/* 4. Cụm mây trắng xốp ôm sườn núi */}
-      {([
-        [-18, 16, -44, 1.8],
-        [14, 18, -48, 2.0],
-        [0, 20, -54, 2.2],
-        [32, 15, -46, 1.6],
-        [-34, 15, -45, 1.7],
-      ] as const).map(([cx, cy, cz, scale], cIdx) => (
-        <group key={`cloud-${cIdx}`} position={[cx, cy, cz]} scale={scale}>
-          <mesh>
-            <sphereGeometry args={[2.2, 14, 14]} />
-            <meshStandardMaterial color="#FFFFFF" roughness={0.95} transparent opacity={0.86} />
-          </mesh>
-          <mesh position={[1.6, -0.2, 0.4]}>
-            <sphereGeometry args={[1.7, 14, 14]} />
-            <meshStandardMaterial color="#FFFFFF" roughness={0.95} transparent opacity={0.86} />
-          </mesh>
-          <mesh position={[-1.5, -0.2, -0.4]}>
-            <sphereGeometry args={[1.8, 14, 14]} />
-            <meshStandardMaterial color="#FFFFFF" roughness={0.95} transparent opacity={0.86} />
-          </mesh>
-          <mesh position={[0.2, 0.8, 0]}>
-            <sphereGeometry args={[1.5, 14, 14]} />
-            <meshStandardMaterial color="#FFFFFF" roughness={0.95} transparent opacity={0.86} />
-          </mesh>
-        </group>
-      ))}
     </group>
   );
 }

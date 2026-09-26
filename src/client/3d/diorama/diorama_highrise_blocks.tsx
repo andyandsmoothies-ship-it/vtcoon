@@ -16,23 +16,23 @@ export interface HighriseConfig {
 // 10 Tháp cao ốc tài chính Tây Bắc thiết kế giật cấp bao bọc quanh tháp Bitexco
 // Quy hoạch mở toang hành lang hướng Đông ra sông Sài Gòn (X >= -3.8, Z: -4.8 .. -3.6)
 export const HIGHRISE_CONFIGS: ReadonlyArray<HighriseConfig> = [
-  // Hàng 1 Bắc (Hậu cảnh sâu Z = -5.8 .. -5.9, cao 2.3 - 2.6m)
-  { id: 'tower-1', x: -5.4, y: 0.025, z: -5.8, width: 0.52, height: 2.4, depth: 0.52, rotationY: 0, typology: 'prismatic' },
-  { id: 'tower-2', x: -4.5, y: 0.025, z: -5.9, width: 0.50, height: 2.6, depth: 0.50, rotationY: 0, typology: 'crowned' },
+  // Hàng 1 Bắc (Hậu cảnh sâu Z = -5.8 .. -5.9)
+  { id: 'tower-1', x: -5.4, y: 0.025, z: -5.8, width: 0.52, height: 2.3, depth: 0.52, rotationY: 0, typology: 'prismatic' },
+  { id: 'tower-2', x: -4.5, y: 0.025, z: -5.9, width: 0.50, height: 2.4, depth: 0.50, rotationY: 0, typology: 'crowned' },
   { id: 'tower-3', x: -3.5, y: 0.025, z: -5.8, width: 0.50, height: 2.3, depth: 0.50, rotationY: 0, typology: 'stepped' },
 
-  // Cánh Tây (Z = -4.7 .. -3.7, cao 1.7 - 2.0m)
-  { id: 'tower-4', x: -5.5, y: 0.025, z: -4.7, width: 0.48, height: 2.0, depth: 0.48, rotationY: 0, typology: 'curved' },
-  { id: 'tower-5', x: -5.5, y: 0.025, z: -3.7, width: 0.46, height: 1.7, depth: 0.46, rotationY: 0, typology: 'prismatic' },
+  // Cánh Tây (Z = -4.7 .. -3.7)
+  { id: 'tower-4', x: -5.5, y: 0.025, z: -4.7, width: 0.48, height: 1.3, depth: 0.48, rotationY: 0, typology: 'curved' },
+  { id: 'tower-5', x: -5.5, y: 0.025, z: -3.7, width: 0.46, height: 1.1, depth: 0.46, rotationY: 0, typology: 'prismatic' },
 
-  // Cánh Đông Bắc & Đông Nam (Hành lang Đông mở toang đón gió sông, Z <= -5.0 hoặc Z >= -3.2)
-  { id: 'tower-6', x: -3.5, y: 0.025, z: -5.2, width: 0.48, height: 1.9, depth: 0.48, rotationY: 0, typology: 'curved' },
-  { id: 'tower-7', x: -3.5, y: 0.025, z: -3.0, width: 0.46, height: 1.6, depth: 0.46, rotationY: 0, typology: 'stepped' },
+  // Cánh Đông Bắc & Đông Nam
+  { id: 'tower-6', x: -3.5, y: 0.025, z: -5.2, width: 0.48, height: 1.2, depth: 0.48, rotationY: 0, typology: 'curved' },
+  { id: 'tower-7', x: -3.5, y: 0.025, z: -3.0, width: 0.46, height: 1.0, depth: 0.46, rotationY: 0, typology: 'stepped' },
 
-  // Hàng Nam (Tiền cảnh Z = -2.8 .. -2.9, cao 1.3 - 1.5m)
-  { id: 'tower-8', x: -5.3, y: 0.025, z: -2.8, width: 0.44, height: 1.4, depth: 0.44, rotationY: 0, typology: 'stepped' },
-  { id: 'tower-9', x: -4.5, y: 0.025, z: -2.9, width: 0.46, height: 1.5, depth: 0.46, rotationY: 0, typology: 'crowned' },
-  { id: 'tower-10', x: -3.7, y: 0.025, z: -2.8, width: 0.42, height: 1.3, depth: 0.42, rotationY: 0, typology: 'prismatic' },
+  // Hàng Nam (Tiền cảnh Z = -2.8 .. -2.9)
+  { id: 'tower-8', x: -5.3, y: 0.025, z: -2.8, width: 0.44, height: 0.9, depth: 0.44, rotationY: 0, typology: 'stepped' },
+  { id: 'tower-9', x: -4.5, y: 0.025, z: -2.9, width: 0.46, height: 1.0, depth: 0.46, rotationY: 0, typology: 'crowned' },
+  { id: 'tower-10', x: -3.7, y: 0.025, z: -2.8, width: 0.42, height: 0.8, depth: 0.42, rotationY: 0, typology: 'prismatic' },
 ];
 
 export function DioramaHighriseBlocks(): React.ReactElement {

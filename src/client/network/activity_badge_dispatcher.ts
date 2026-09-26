@@ -28,6 +28,7 @@ function handleRentBadge(act: ActivityLogEntry, state: GameState): void {
       playerId: payerId,
       actionType: 'rent_pay',
       title: `Trả thuê ${cellName}`,
+      targetPlayerId: receiverId,
       targetPlayerName: receiverName,
       cellIndex: act.cellIndex,
     });
@@ -42,6 +43,7 @@ function handleRentBadge(act: ActivityLogEntry, state: GameState): void {
       playerId: receiverId,
       actionType: 'rent_receive',
       title: `Thu thuê ${cellName}`,
+      targetPlayerId: payerId,
       targetPlayerName: payerName,
       cellIndex: act.cellIndex,
     });

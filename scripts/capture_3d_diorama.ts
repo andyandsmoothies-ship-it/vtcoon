@@ -185,14 +185,14 @@ async function main() {
     // 1. Isometric / Overview View
     console.log('[Diorama] 1. Capturing isometric overview (1280x800)...');
     await capturer.setViewport(1280, 800);
-    await sleep(1500);
-    await capturer.takeScreenshot('current_diorama_overview.jpg');
+    await sleep(2000);
+    await capturer.takeScreenshot('imp197_diorama_overview.jpg');
 
     // 2. Square Overhead View (like Monopoly Plus)
     console.log('[Diorama] 2. Capturing top-down overhead view (1000x1000)...');
     await capturer.setViewport(1000, 1000);
-    await sleep(1000);
-    await capturer.takeScreenshot('current_diorama_topdown.jpg');
+    await sleep(1500);
+    await capturer.takeScreenshot('imp197_diorama_topdown.jpg');
 
     console.log('[Diorama] All captures complete!');
   } finally {

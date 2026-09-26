@@ -240,31 +240,6 @@ export const CoastalIslandEnvironment: React.FC<CoastalIslandEnvironmentProps> =
         </mesh>
       </group>
 
-      {/* 7. Mây trắng xốp bồng bềnh chân trời & Máy bay dân dụng */}
-      {([
-        [-34, 22, -38, 1.4],
-        [16, 24, -45, 1.6],
-        [38, 21, -24, 1.3],
-        [-42, 19, 18, 1.5],
-        [34, 19, 32, 1.2],
-        [-14, 23, 42, 1.4],
-      ] as const).map(([cx, cy, cz, scale], cIdx) => (
-        <group key={`cloud-${cIdx}`} position={[cx, cy, cz]} scale={scale}>
-          <mesh>
-            <sphereGeometry args={[2.2, 14, 14]} />
-            <meshStandardMaterial color="#FFFFFF" roughness={0.95} transparent opacity={0.82} />
-          </mesh>
-          <mesh position={[1.5, -0.2, 0.4]}><sphereGeometry args={[1.7, 14, 14]} /><meshStandardMaterial color="#FFFFFF" roughness={0.95} transparent opacity={0.82} /></mesh>
-          <mesh position={[-1.4, -0.2, -0.4]}><sphereGeometry args={[1.8, 14, 14]} /><meshStandardMaterial color="#FFFFFF" roughness={0.95} transparent opacity={0.82} /></mesh>
-        </group>
-      ))}
-
-      {/* Máy bay dân dụng tí hon bay trên vịnh biển */}
-      <group position={[-14, 14, 8]} rotation={[0, -0.8, 0]}>
-        <mesh castShadow rotation={[Math.PI / 2, 0, 0]}><cylinderGeometry args={[0.22, 0.22, 2.6, 8]} /><meshStandardMaterial color="#F8FAFC" roughness={0.3} /></mesh>
-        <mesh position={[0, 0, 0]}><boxGeometry args={[3.2, 0.05, 0.6]} /><meshStandardMaterial color="#38BDF8" roughness={0.4} /></mesh>
-        <mesh position={[0, 0.4, 1.1]}><boxGeometry args={[0.06, 0.6, 0.4]} /><meshStandardMaterial color="#0284C7" /></mesh>
-      </group>
 
       {/* 8. Hoạt cảnh hàng hải */}
       <CoastalPatrolBoat />

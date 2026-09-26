@@ -95,6 +95,7 @@ export interface FloatingTextItem {
   readonly actionType?: FloatingActionType;
   readonly title?: string;
   readonly cellIndex?: number;
+  readonly targetPlayerId?: string;
   readonly targetPlayerName?: string;
 }
 

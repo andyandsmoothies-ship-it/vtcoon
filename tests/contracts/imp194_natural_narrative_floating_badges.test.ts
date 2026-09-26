@@ -54,7 +54,8 @@ export interface TransactionNarrative {
 export const resolveTransactionNarrative: (
   item: FloatingTextItem,
   player?: PlayerHudInfo,
-  playersInfo?: Record<string, PlayerHudInfo>
+  playersInfo?: Record<string, PlayerHudInfo>,
+  myPlayerId?: string
 ) => TransactionNarrative =
   narrativeMod?.resolveTransactionNarrative ??
   (() => {
@@ -457,6 +458,65 @@ describe('[TC-194.01/MSS..TC-194.18/MSS][UC-IMP194] Natural Narrative Floating B
       expect(narrativeLoc).toBeLessThanOrEqual(280);
 
       expect(typeof resolveFriendlyReason).toBe('function');
+    });
+
+    it('[TC-194.19/MSS][UC-IMP194] Self-Centric Narrative: Khi playerId === myPlayerId thì subject là "Bạn", khi đối thủ giao dịch với Bạn thì target là "Bạn"', () => {
+      const itemMyRentPay: FloatingTextItem = {
+        id: 'badge-self-1',
+        text: '-350 Tr.',
+        type: FloatingTextType.Penalty,
+        playerId: 'player-1',
+        actionType: 'rent_pay',
+        targetPlayerName: 'Tỷ Phú Hà Thành',
+        cellIndex: 3,
+        timestamp: Date.now(),
+      };
+      const narrativeSelf = resolveTransactionNarrative(itemMyRentPay, mockPlayerPayer, undefined, 'player-1');
+      expect(narrativeSelf.subject).toBe('Bạn');
+      expect(narrativeSelf.verb).toBe('trả');
+      expect(narrativeSelf.target).toContain('cho Tỷ Phú');
+
+      const itemPartnerRentPay: FloatingTextItem = {
+        id: 'badge-self-2',
+        text: '-350 Tr.',
+        type: FloatingTextType.Penalty,
+        playerId: 'player-2',
+        actionType: 'rent_pay',
+        targetPlayerName: 'Đại Gia Sài Gòn',
+        cellIndex: 3,
+        timestamp: Date.now(),
+      };
+      const narrativePartner = resolveTransactionNarrative(
+        itemPartnerRentPay,
+        mockPlayerReceiver,
+        { 'player-1': mockPlayerPayer, 'player-2': mockPlayerReceiver },
+        'player-1'
+      );
+      expect(narrativePartner.subject).toBe('Tỷ Phú Hà Thành');
+      expect(narrativePartner.target).toBe('cho Bạn');
+    });
+
+    it('[TC-194.20/MSS][UC-IMP194] Streamlined FloatingBadge: Loại bỏ lặp tên ở header, dùng py-1.5 sm:py-2.5 để thu gọn chiều cao', () => {
+      useGameStore.setState({
+        playersInfo: {
+          'player-1': mockPlayerPayer,
+        },
+      });
+
+      const item: FloatingTextItem = {
+        id: 'badge-compact-1',
+        text: '-500 Tr.',
+        type: FloatingTextType.Penalty,
+        playerId: 'player-1',
+        actionType: 'tax',
+        title: 'Lệ Phí Đất Đai Ô 04',
+        timestamp: Date.now(),
+      };
+
+      const html = renderToStaticMarkup(React.createElement(FloatingBadge, { item }));
+      expect(html).toContain('py-1.5 sm:py-2.5');
+      // Không còn pill tên người chơi trùng lặp ở góc trên bên phải header
+      expect(html).not.toMatch(/border-b[^>]*>[^<]*<div[^>]*>.*?<\/div>\s*<span[^>]*style="background-color:/s);
     });
   });
 });

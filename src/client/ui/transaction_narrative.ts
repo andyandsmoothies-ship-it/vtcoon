@@ -122,12 +122,24 @@ export function resolveFriendlyReason(item: FloatingTextItem, _player?: PlayerHu
 export function resolveTransactionNarrative(
   item: FloatingTextItem,
   player?: PlayerHudInfo,
-  _allPlayers?: Record<string, PlayerHudInfo>
+  _allPlayers?: Record<string, PlayerHudInfo>,
+  myPlayerId?: string
 ): TransactionNarrative {
   const isPositive = item.type === FloatingTextType.Reward;
-  const subject = formatShortPlayerName(player?.name || 'Người chơi');
+  const isMe = Boolean(myPlayerId && (player?.id === myPlayerId || item.playerId === myPlayerId));
+  const subject = isMe ? 'Bạn' : formatShortPlayerName(player?.name || 'Người chơi');
   const { amountText } = extractCleanAmount(item.text);
-  let targetName = item.targetPlayerName ? formatShortPlayerName(item.targetPlayerName) : 'đối thủ';
+
+  const isTargetMe = Boolean(
+    myPlayerId && (
+      item.targetPlayerId === myPlayerId ||
+      (_allPlayers && myPlayerId && item.targetPlayerName && _allPlayers[myPlayerId]?.name === item.targetPlayerName)
+    )
+  );
+
+  let targetName = isTargetMe
+    ? 'Bạn'
+    : (item.targetPlayerName ? formatShortPlayerName(item.targetPlayerName) : 'đối thủ');
   let cellName = resolveCellName(item.cellIndex);
 
   let category = isPositive ? 'THU NHẬP' : 'CHI PHÍ';

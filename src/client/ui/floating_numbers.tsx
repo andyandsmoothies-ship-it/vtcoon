@@ -122,31 +122,23 @@ export function FloatingBadge({ item }: { readonly item: FloatingTextItem }): Re
     return <MilestoneBanner item={item} />;
   }
 
-  const narrative = resolveTransactionNarrative(item, player, playersInfo);
+  const storeMyPlayerId = useLobbyStore((state) => state.myPlayerId);
+  const myPlayerId = isSSR ? useLobbyStore.getState().myPlayerId : storeMyPlayerId;
+  const narrative = resolveTransactionNarrative(item, player, playersInfo, myPlayerId);
 
   return (
     <div
       role="status"
       aria-live="polite"
       data-testid="contextual-transaction-badge"
-      className="pointer-events-none flex flex-col gap-1.5 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-2xl border-2 border-slate-900 bg-[#FFFDF8] select-none shadow-[0_3px_0_0_#0f172a] animate-in fade-in duration-200 w-full min-w-0 max-w-[82vw] sm:max-w-[340px]"
+      className="pointer-events-none flex flex-col gap-1 px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-2xl border-2 border-slate-900 bg-[#FFFDF8] select-none shadow-[0_3px_0_0_#0f172a] animate-in fade-in duration-200 w-full min-w-0 max-w-[82vw] sm:max-w-[340px]"
     >
       {/* Hàng 1: Header định danh danh mục */}
-      <div className="flex items-center justify-between gap-1.5 border-b border-slate-200/80 pb-1">
-        <div className="flex items-center gap-1.5 min-w-0">
-          <span className="text-sm shrink-0" aria-hidden="true">{narrative.icon}</span>
-          <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-500 truncate">
-            {narrative.category}
-          </span>
-        </div>
-        {player && (
-          <span
-            className="text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full text-white shadow-xs shrink-0 truncate max-w-[115px]"
-            style={{ backgroundColor: player.tokenColor || '#64748B' }}
-          >
-            {formatShortPlayerName(player.name)}
-          </span>
-        )}
+      <div className="flex items-center gap-1.5 border-b border-slate-200/80 pb-0.5">
+        <span className="text-sm shrink-0" aria-hidden="true">{narrative.icon}</span>
+        <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-500 truncate">
+          {narrative.category}
+        </span>
       </div>
 
       {/* Hàng 2: Câu văn tự nhiên hoàn chỉnh */}
@@ -234,7 +226,7 @@ export function FloatingNumbersOverlay(): React.ReactElement | null {
       aria-label="Thông báo biến động tài chính"
       className="pointer-events-none select-none z-30"
     >
-      <div className={"fixed " + stackTopClass + " left-3 sm:left-1/2 translate-x-0 sm:-translate-x-1/2 flex flex-col items-start sm:items-center gap-2 w-auto max-w-[calc(100vw-11.5rem)] md:max-w-md px-1 sm:px-2 z-30 pointer-events-none"}>
+      <div className={"fixed " + stackTopClass + " left-2 min-[360px]:left-3 sm:left-1/2 translate-x-0 sm:-translate-x-1/2 flex flex-col items-start sm:items-center gap-1.5 w-auto max-w-[calc(100vw-11.5rem)] min-[360px]:max-w-[calc(100vw-9.75rem)] md:max-w-md px-0.5 sm:px-2 z-30 pointer-events-none"}>
         {latestMilestone && (
           <div data-testid="milestone-banner-container" className="w-full flex justify-center pointer-events-auto">
             <MilestoneBanner item={latestMilestone} />

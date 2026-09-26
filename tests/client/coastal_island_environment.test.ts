@@ -77,9 +77,9 @@ describe('[UI-S01/MSS][IMP-13] CoastalIslandEnvironment — Structure & Visual A
     expect(envSource).toContain('#10B981'); // Green container
     expect(envSource).toContain('#3B82F6'); // Blue container
 
-    // 3. May trang xop bong benh tren bau troi
-    expect(envSource).toContain('sphereGeometry');
-    expect(envSource).toContain('transparent');
+    // 3. Thanh loc bau troi: tap trung mat dat, khong chua may va may bay bay tren troi (IMP-197)
+    expect(envSource).not.toContain('sphereGeometry');
+    expect(envSource).toContain('data-testid="living-ocean-water"');
   });
 
   it('GameBoard tich hop CoastalIslandEnvironment thay the cho TabletopEnvironment', () => {

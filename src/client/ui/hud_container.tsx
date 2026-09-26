@@ -84,12 +84,12 @@ export function HudContainer({
       {/* Tầng đáy: Telemetry Badge ở góc dưới bên trái, Action Dock ở góc dưới bên phải */}
       <footer className="w-full flex flex-row justify-center sm:justify-between items-end gap-2 md:gap-3 pointer-events-none pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:pb-3">
         {/* Huy hiệu Giám Sát Thời Gian Thực & Sức Khỏe Bất Biến (Bottom-Left, không che khuất ActionDock hay Player Cards) */}
-        <div className="pointer-events-auto hidden sm:block">
+        <div className="pointer-events-auto hidden sm:block shrink-0">
           <TelemetryBadge />
         </div>
 
         {/* Thanh Điều Khiển Tác Vụ Cốt Lõi & Strip Giao Dịch Bot (Bottom-Right, thuận tay thao tác công thái học) */}
-        <div className="flex flex-col items-center sm:items-end gap-1.5 w-full sm:w-auto max-w-[96vw] sm:max-w-md pointer-events-none">
+        <div className="flex flex-col items-center sm:items-end gap-1.5 w-full sm:w-auto max-w-[96vw] sm:max-w-none sm:min-w-0 pointer-events-none">
           <InlineBotTradeStrip onIntent={onIntent} localPlayerId={localPlayerId} />
           <div className="pointer-events-auto">
             <ActionDock
