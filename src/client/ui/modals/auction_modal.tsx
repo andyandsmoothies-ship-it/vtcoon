@@ -158,7 +158,7 @@ export function AuctionModal({
       )}
 
       {/* Header BĐS Hợp Nhất (Hero Header & Điều khiển sàn đấu giá) */}
-      <div data-testid="auction-hero-header" className="flex items-center justify-between gap-2 bg-amber-50/60 p-1.5 sm:p-2.5 rounded-2xl border border-amber-900/10 shrink-0">
+      <div data-testid="auction-hero-header" className="flex justify-between items-center gap-2 bg-amber-50/60 p-1.5 sm:p-2.5 rounded-2xl border border-amber-900/10 shrink-0">
         <div className="flex items-center gap-2 min-w-0 flex-1">
           <div className="w-3 h-8 sm:w-3.5 sm:h-9 rounded-md shrink-0 shadow border border-slate-900" style={{ backgroundColor: ribbonColor }} />
           <div className="min-w-0 flex-1">
@@ -214,7 +214,7 @@ export function AuctionModal({
             className="w-full bg-amber-50/40 p-1.5 sm:p-2.5 rounded-xl sm:rounded-2xl border border-amber-900/10 space-y-1 sm:space-y-1.5 order-1 md:order-2 md:col-start-2 md:row-start-1 md:pl-5"
           >
             {/* Dòng trên: Giá thầu hiện tại & Thời gian còn lại */}
-            <div className="flex items-center justify-between text-xs whitespace-nowrap gap-2">
+            <div className="flex justify-between items-center text-xs whitespace-nowrap gap-2">
               <span className="font-bold text-slate-600 uppercase tracking-wider text-[10px] sm:text-xs whitespace-nowrap shrink-0">
                 GIÁ THẦU HIỆN TẠI
               </span>
@@ -246,7 +246,7 @@ export function AuctionModal({
             </div>
 
             {/* Dòng dưới: Dẫn đầu */}
-            <div className="flex items-center justify-between text-xs pt-0.5 whitespace-nowrap">
+            <div className="flex justify-between items-center text-xs pt-0.5 whitespace-nowrap">
               <span className="font-bold text-slate-600 text-[10px] sm:text-xs shrink-0">DẪN ĐẦU:</span>
               <div className="flex items-center gap-1 truncate max-w-[200px]">
                 {highestBidderId ? (
@@ -277,7 +277,7 @@ export function AuctionModal({
 
           {/* Khối 3: Danh sách đại gia & Ví tiền (Trên Mobile hiển thị THỨ BA: order-3 md:order-2) */}
           <div className="w-full space-y-1 bg-amber-50/40 p-1.5 sm:p-2.5 rounded-xl sm:rounded-2xl border border-amber-900/10 order-3 md:order-2 md:col-start-2 md:row-start-2 md:pl-5">
-            <div className="flex items-center justify-between text-xs pb-0.5 border-b border-amber-900/10">
+            <div className="flex justify-between items-center text-xs pb-0.5 border-b border-amber-900/10">
               <span className="font-bold text-slate-700 uppercase tracking-wider text-[10px] sm:text-xs">
                 ĐẠI GIA THAM GIA ({competingCount}/{activePlayers.length})
               </span>
@@ -296,7 +296,7 @@ export function AuctionModal({
                   return (
                     <div
                       key={p.id}
-                      className={`flex items-center justify-between text-xs px-2 py-0.5 rounded-lg ${
+                      className={`flex justify-between items-center text-xs px-2 py-0.5 rounded-lg ${
                         isPassed || isDebtorInForeclosure || isDeclined ? 'bg-slate-100/70 text-slate-500 opacity-60' : isBidder ? 'bg-amber-100/80 text-amber-950 font-bold' : 'bg-white/60 text-slate-800'
                       }`}
                     >
@@ -313,7 +313,7 @@ export function AuctionModal({
                         ) : isDebtorInForeclosure ? (
                           <span className="text-[10px] font-bold bg-rose-100 text-rose-700 px-1 py-0.2 rounded border border-rose-200 shrink-0">⚖️ Phát mãi</span>
                         ) : isDeclined ? (
-                          <span className="text-[10px] font-bold bg-amber-100 text-amber-800 px-1 py-0.2 rounded border border-amber-300 shrink-0">🚫 Bỏ qua</span>
+                          <span className="text-[10px] font-bold bg-amber-100 text-amber-800 px-1 py-0.2 rounded border border-amber-300 shrink-0">🚫 Từ chối mua</span>
                         ) : null}
                       </div>
                       <span className="font-mono text-[11px] sm:text-xs font-bold shrink-0">{formatCurrency(p.balance ?? 0)}</span>
@@ -379,55 +379,60 @@ export function AuctionModal({
           </div>
         )}
 
-        {/* Footer: Công tắc Auto-Bid & Nút Rút lui */}
-        <div className="flex items-center justify-between gap-2 sm:gap-3 pt-1.5 sm:pt-2 border-t border-amber-300/80">
+        {/* Footer: Công tắc Tự động đặt giá & Nút Hành Động (Single Row Grid 2 cột đối xứng) */}
+        <div className="grid grid-cols-2 gap-2 pt-1.5 sm:pt-2 border-t border-amber-300/80">
           <button
             type="button"
             onClick={() => setAutoBid((prev) => !prev)}
             disabled={hasPassed || isDeclinedPlayer || isConcluded}
-            className={`min-h-[44px] px-3.5 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 whitespace-nowrap ${
+            data-testid="auction-autobid-btn"
+            className={`min-h-[44px] px-3 py-2 rounded-xl text-xs font-bold border transition-all flex items-center justify-center gap-1.5 whitespace-nowrap ${
               hasPassed || isDeclinedPlayer || isConcluded
-                ? 'bg-slate-200 text-slate-400 border-slate-300 opacity-50 cursor-not-allowed'
+                ? 'bg-slate-200 text-slate-400 border-slate-300 opacity-50 cursor-not-allowed shadow-none'
                 : autoBid
-                  ? 'bg-amber-500 text-amber-950 font-black border-amber-700 shadow-[0_2px_0_0_#b45309] cursor-pointer'
-                  : 'bg-slate-200 text-slate-700 border-slate-400 hover:bg-slate-300 cursor-pointer'
+                  ? 'bg-amber-500 text-amber-950 font-black border-amber-700 shadow-[0_3px_0_0_#b45309] active:translate-y-[2px] cursor-pointer'
+                  : 'bg-[#F7F2E7] text-slate-700 border-slate-300 hover:bg-amber-100 cursor-pointer shadow-xs active:translate-y-[1px]'
             }`}
           >
-            <span className={`w-2 h-2 rounded-full ${autoBid ? 'bg-amber-900' : 'bg-slate-400'}`} />
-            <span>AUTO-BID</span>
+            <span className={`w-2 h-2 rounded-full ${autoBid ? 'bg-amber-900 animate-pulse' : 'bg-slate-400'}`} />
+            <span>{autoBid ? 'TỰ ĐỘNG ĐẶT GIÁ: BẬT' : 'TỰ ĐỘNG ĐẶT GIÁ: TẮT'}</span>
           </button>
 
           {isConcluded ? (
             <button
               type="button"
               onClick={onClose}
-              className="min-h-[44px] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-bold text-amber-950 bg-amber-400 hover:bg-amber-300 border-2 border-amber-600 shadow-[0_2px_0_0_#b45309] transition-all active:translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 cursor-pointer whitespace-nowrap"
+              data-testid="auction-concluded-close-btn"
+              className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-black text-amber-950 bg-amber-400 hover:bg-amber-300 border-2 border-amber-600 shadow-[0_3px_0_0_#b45309] active:translate-y-[2px] transition-all cursor-pointer whitespace-nowrap"
             >
-              Đóng / Xem Bàn Cờ
+              ✕ Đóng / Xem Bàn Cờ
             </button>
           ) : hasPassed ? (
             <button
               type="button"
               onClick={onClose}
-              className="min-h-[44px] px-4 sm:px-5 py-1.5 sm:py-2 rounded-xl text-xs font-black text-amber-950 bg-amber-400 hover:bg-amber-300 border-2 border-amber-600 shadow-[0_2px_0_0_#b45309] transition-all active:translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 cursor-pointer whitespace-nowrap"
+              data-testid="auction-passed-close-btn"
+              className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-black text-slate-700 bg-slate-200 hover:bg-slate-300 border-2 border-slate-400 shadow-[0_3px_0_0_#94a3b8] active:translate-y-[2px] transition-all cursor-pointer whitespace-nowrap"
             >
-              Đã Rút Lui • Đóng
+              ✕ Đã Rút Lui • Đóng
             </button>
           ) : isDeclinedPlayer ? (
             <button
               type="button"
               onClick={onClose}
-              className="min-h-[44px] px-4 sm:px-5 py-1.5 sm:py-2 rounded-xl text-xs font-black text-amber-950 bg-amber-400 hover:bg-amber-300 border-2 border-amber-600 shadow-[0_2px_0_0_#b45309] transition-all active:translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 cursor-pointer whitespace-nowrap"
+              data-testid="auction-declined-close-btn"
+              className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-black text-amber-950 bg-amber-100 hover:bg-amber-200 border-2 border-amber-400 shadow-[0_3px_0_0_#d97706] active:translate-y-[2px] transition-all cursor-pointer whitespace-nowrap"
             >
-              Đóng / Xem Bàn Cờ
+              ✕ Đóng / Xem Bàn Cờ
             </button>
           ) : (
             <button
               type="button"
-              onClick={onPass ?? onClose}
-              className="min-h-[44px] px-4 py-2 rounded-xl text-xs font-bold text-rose-700 hover:text-rose-800 bg-rose-100 hover:bg-rose-200 border-2 border-rose-300 transition-all active:translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 cursor-pointer whitespace-nowrap"
+              data-testid="auction-pass-btn"
+              onClick={() => onPass?.()}
+              className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-black text-rose-700 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border-2 border-rose-300 shadow-[0_3px_0_0_#fca5a5] active:translate-y-[2px] transition-all cursor-pointer whitespace-nowrap"
             >
-              Rút Lui / Bỏ Cuộc
+              ✕ Rút Lui
             </button>
           )}
         </div>

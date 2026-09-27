@@ -103,11 +103,11 @@ describe('[TC-P4.2/MSS] Bảng Điện Tử LED Sàn Chứng Khoán HOSE', () =>
       expect(html).toContain(`Mặt ${face}`);
       expect(html).toContain(`${mult.toFixed(2)}x`);
     }
-    expect(html).toContain('-70%');
-    expect(html).toContain('-40%');
-    expect(html).toContain('-20%');
-    expect(html).toContain('+10%');
+    expect(html).toContain('-50%');
+    expect(html).toContain('-25%');
+    expect(html).toContain('Hoà');
     expect(html).toContain('+20%');
+    expect(html).toContain('+50%');
     expect(html).toContain('+100%');
     expect(html).toContain('text-emerald-800');
     expect(html).toContain('text-rose-800');
@@ -173,7 +173,7 @@ describe('[TC-P4.2/MSS] Bảng Điện Tử LED Sàn Chứng Khoán HOSE', () =>
     const html = renderToStaticMarkup(
       React.createElement(HoseModal, { myBalance: 15000, onInvest: () => {}, onSkip: () => {}, onClose: () => {} })
     );
-    expect(html).toContain('shadow-[0_4px_0_0_#64748b]');
+    expect(html).toContain('shadow-[0_4px_0_0_#fca5a5]');
     expect(html).toContain('shadow-[0_4px_0_0_#b45309]');
     expect(html).toContain('active:translate-y-[3px]');
   });

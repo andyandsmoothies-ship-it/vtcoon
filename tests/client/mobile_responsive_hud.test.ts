@@ -375,7 +375,7 @@ describe('[TC-MOB01/MSS] Mobile Responsive HUD Quality Standards Contract Suite'
         isOwned: false,
       })
     );
-    const passBtnMatch = html.match(/<button[^>]*>[^<]*Bỏ Qua[^<]*<\/button>/i)?.[0] ?? '';
+    const passBtnMatch = html.match(/<button[^>]*>[^<]*Từ Chối Mua[^<]*<\/button>/i)?.[0] ?? '';
 
     expect(passBtnMatch).toMatch(/shadow-\[0_4px_0_0/);
     expect(passBtnMatch).not.toContain('bg-slate-200 text-slate-900');

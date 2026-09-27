@@ -97,7 +97,7 @@ describe('[TC-IMP66.2/MSS] 2D PlayerCard Tactile Pawn Avatars', () => {
     expect(html).toContain('data-testid="player-pawn-badge-bot_3"');
     expect(html).toContain('🐎'); // Ngựa bạc icon cho slot 2
     expect(html).toContain('w-8 h-8');
-    expect(html).toContain('BOT');
+    expect(html).toContain('Bot');
   });
 });
 

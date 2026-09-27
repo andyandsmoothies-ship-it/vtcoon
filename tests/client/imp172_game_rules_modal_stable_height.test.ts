@@ -58,13 +58,10 @@ describe('[TC-172/MSS][IMP-172] GameRulesModal Stable Height & Non-Jumping Tabs'
     expect(mainMatch![0]).toContain('overflow-y-auto');
   });
 
-  it('[TC-172.06/MSS][IMP-172] GameRulesModal footer has shrink-0 so "Đã Hiểu" button is never clipped or pushed out', () => {
+  it('[TC-172.06/MSS][IMP-172][IMP-213] GameRulesModal eliminates footer to maximize viewport space and prevent layout clutter', () => {
     const html = renderToStaticMarkup(
       React.createElement(GameRulesModal, { isOpen: true, onClose: () => {} })
     );
-    const footerMatch = html.match(/<footer[^>]*>[\s\S]*?<\/footer>/);
-    expect(footerMatch).not.toBeNull();
-    expect(footerMatch![0]).toContain('shrink-0');
-    expect(footerMatch![0]).toContain('Đã Hiểu');
+    expect(html).not.toMatch(/<footer/);
   });
 });

@@ -25,15 +25,17 @@ export function playFloorBellSound(): (() => void) | void {
   if (useAudioStore.getState().isMuted) return;
 
   try {
-    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
     if (!AudioCtx) return;
     if (!sharedAudioCtx || sharedAudioCtx.state === 'closed' || sharedAudioCtx.constructor !== AudioCtx) {
       sharedAudioCtx = new AudioCtx();
     }
     if (sharedAudioCtx.state === 'suspended') {
       try {
-        sharedAudioCtx.resume().catch(() => {});
-      } catch {}
+        sharedAudioCtx.resume().catch(() => { /* ignore resume errors */ });
+      } catch {
+        // Ignore AudioContext resume errors
+      }
     }
     const now = sharedAudioCtx.currentTime;
     const osc1 = sharedAudioCtx.createOscillator();
@@ -66,13 +68,19 @@ export function playFloorBellSound(): (() => void) | void {
       }
       try {
         gain.disconnect();
-      } catch {}
+      } catch {
+        // Ignore disconnect errors
+      }
       try {
         osc1.disconnect();
-      } catch {}
+      } catch {
+        // Ignore disconnect errors
+      }
       try {
         osc2.disconnect();
-      } catch {}
+      } catch {
+        // Ignore disconnect errors
+      }
     };
 
     osc1.onended = cleanup;
@@ -221,10 +229,6 @@ export function HoseModal({
         <span className="text-xs font-bold text-slate-700 uppercase tracking-wider font-mono">
           Bảng Tỷ Lệ Khớp Lệnh (1D6)
         </span>
-        {/* Contract retention: P4.2 static assertion retention */}
-        <span className="hidden" aria-hidden="true" data-legacy-rates="-70% -40% -20% +10% +20% +100%">
-          -70% -40% -20% +10%
-        </span>
         <div className="grid grid-cols-3 gap-1.5 text-center text-xs font-mono">
           {Object.entries(HOSE_OUTCOMES).map(([face, mult]) => {
             const isTargetProfit = mult > 1;
@@ -298,21 +302,25 @@ export function HoseModal({
         ) : (
           <>
             <button
+              type="button"
               onClick={onSkip}
               disabled={isRolling}
-              className={`flex-1 min-h-[44px] px-4 py-2.5 rounded-xl border-2 border-slate-400 bg-slate-200 hover:bg-slate-300 text-slate-900 font-bold text-sm transition-all shadow-[0_4px_0_0_#64748b] active:shadow-[0_1px_0_0_#64748b] active:translate-y-[3px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
-                isRolling ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+              data-testid="hose-skip-btn"
+              className={`flex-1 min-h-[46px] px-4 py-2.5 rounded-xl border-2 border-rose-300 bg-rose-50 hover:bg-rose-100 text-rose-700 font-black text-xs uppercase tracking-wider shadow-[0_4px_0_0_#fca5a5] active:translate-y-[3px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 ${
+                isRolling ? 'opacity-50 cursor-not-allowed shadow-none' : 'cursor-pointer'
               }`}
             >
-              Bỏ Qua
+              ✕ Không Cược
             </button>
             <button
+              type="button"
               disabled={!canAfford || isRolling}
               onClick={handleInvestClick}
-              className={`flex-1 min-h-[44px] px-4 py-2.5 rounded-xl font-black text-sm cursor-pointer transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+              data-testid="hose-invest-btn"
+              className={`flex-1 min-h-[46px] px-4 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
                 canAfford && !isRolling
-                  ? 'bg-amber-500 hover:bg-amber-400 text-slate-900 border-2 border-amber-700 shadow-[0_4px_0_0_#b45309] active:shadow-[0_1px_0_0_#b45309] active:translate-y-[3px]'
-                  : 'bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed'
+                  ? 'bg-amber-500 hover:bg-amber-400 text-amber-950 border-2 border-amber-700 shadow-[0_4px_0_0_#b45309] active:translate-y-[3px] cursor-pointer'
+                  : 'bg-slate-200 text-slate-400 border border-slate-300 shadow-none cursor-not-allowed'
               }`}
             >
               {isRolling ? 'Đang Khớp Lệnh...' : `Cược ${formatCurrency(stake)}`}

@@ -164,12 +164,14 @@ export function ActionDock({
 
   const currentPos = actingPlayerId ? (playerPositions[actingPlayerId] ?? 0) : 0;
   const currentCell = BOARD_CONFIG[currentPos];
-  const isPropertyCell = currentCell && (currentCell.type === CellType.Property || currentCell.type === CellType.Railroad);
+  const isPropertyCell = Boolean(
+    currentCell &&
+    (currentCell.type === CellType.Property || currentCell.type === CellType.Railroad || currentCell.type === CellType.Utility)
+  );
   const isOwnedByAnyone = Object.values(playersInfo).some((p) => p.ownedProperties?.includes(currentPos));
   const isStandingOnBuyable = Boolean(
     isMyTurn &&
     (turnPhase === TurnPhase.ActionPhase || (hasRolledThisTurn && turnPhase !== TurnPhase.PropertyManagement && turnPhase !== TurnPhase.AuctionPhase && turnPhase !== TurnPhase.InsolvencyPhase)) &&
-    hasRolledThisTurn &&
     isPropertyCell &&
     !isOwnedByAnyone &&
     !isTradeFrozen
@@ -208,7 +210,7 @@ export function ActionDock({
   return (
     <div className="relative flex flex-col items-center gap-1.5">
       {/* Chip Thông Báo Ngữ Cảnh Độc Quyền (Actionable Guidance Chip) */}
-      {actionDockNotice && !isStripActive && (
+      {actionDockNotice && !isStripActive && !activeModal && (
         <div
           data-testid={actionDockNotice.type === 'bot_pacing' ? 'bot-pacing-chip' : `${actionDockNotice.type === 'skip_turn' ? 'skip-turn-notice-chip' : `${actionDockNotice.type}-notice-chip`}`}
           className={`whitespace-nowrap flex items-center gap-1.5 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-bold shadow-md animate-pulse select-none ${

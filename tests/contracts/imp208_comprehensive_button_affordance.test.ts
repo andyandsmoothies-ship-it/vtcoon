@@ -345,7 +345,7 @@ describe('[TC-208.01/MSS..TC-208.18/MSS][UC-IMP208] Comprehensive Button Afforda
     expect(html).toContain('cursor-pointer');
   });
 
-  it('[TC-208.11/MSS][UC-IMP208] BotTradeOfferModal đổi nhãn nút thành Thiếu Tiền Bù (-X Tr.) khi thiếu tiền mặt', () => {
+  it('[TC-208.11/MSS][UC-IMP208] BotTradeOfferModal hiển thị thẻ cảnh báo trade-shortfall-notice khi thiếu tiền mặt bù giao dịch', () => {
     useGameStore.setState({
       playersInfo: {
         p1: { id: 'p1', name: 'Chủ Tịch Hưng', balance: 100 } as any,
@@ -367,8 +367,8 @@ describe('[TC-208.01/MSS..TC-208.18/MSS][UC-IMP208] Comprehensive Button Afforda
       })
     );
 
-    expect(html).toContain('Thiếu Tiền Bù');
-    expect(html).toContain('500');
+    expect(html).toContain('trade-shortfall-notice');
+    expect(html).toContain('400');
   });
 
   it('[TC-208.12/MSS][UC-IMP208] BotTradeOfferModal mở nút Đồng Ý Đổi sáng xanh khi người chơi đủ tiền bù hoặc nhận tiền (price >= 0)', () => {
@@ -443,7 +443,7 @@ describe('[TC-208.01/MSS..TC-208.18/MSS][UC-IMP208] Comprehensive Button Afforda
 
     expect(html).not.toContain('disabled=""');
     expect(html).toContain('bg-amber-500');
-    expect(html).toContain('Phát Hành Trái Phiếu');
+    expect(html.toUpperCase()).toContain('PHÁT HÀNH TRÁI PHIẾU');
   });
 
   it('[TC-208.16/MSS][UC-IMP208] ActionDock nút Bảo Lãnh chuyển sang màu xám mờ không nảy (bg-slate-200 cursor-not-allowed) khi số dư ví < 500', () => {

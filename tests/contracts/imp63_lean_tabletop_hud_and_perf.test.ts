@@ -169,7 +169,7 @@ describe('[TC-63/MSS][UC-IMP63] Lean Tabletop HUD & GPU Optimization Contract Su
       expect(html).toContain('border-slate-300/80');
     });
 
-    it('[TC-63.2/MSS] PlayerCard (lượt hiện tại) sử dụng nền giấy ngà sáng #FFFDF8 và viền mực đen border-slate-900', () => {
+    it('[TC-63.2/MSS] PlayerCard (lượt hiện tại) sử dụng nền hổ phách bg-amber-50/70 và viền nổi bật border-amber-500', () => {
       const html = renderToStaticMarkup(
         React.createElement(PlayerCard, {
           player: samplePlayer,
@@ -177,8 +177,8 @@ describe('[TC-63/MSS][UC-IMP63] Lean Tabletop HUD & GPU Optimization Contract Su
           levelMap: {},
         })
       );
-      expect(html).toContain('bg-[#FFFDF8]');
-      expect(html).toContain('border-slate-900');
+      expect(html).toContain('bg-amber-50/70');
+      expect(html).toContain('border-amber-500');
     });
 
     it('[TC-63.2/MSS] PlayerCard (lượt chờ) sử dụng nền giấy ngà sáng #FFFDF8 và viền mực đen border-slate-900', () => {

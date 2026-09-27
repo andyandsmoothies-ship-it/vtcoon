@@ -20,6 +20,8 @@ React.useSyncExternalStore = ((subscribe, getSnapshot, _getServerSnapshot) => {
 import { ActionDock } from '../../src/client/ui/action_dock.js';
 import { resolveActionDockNotice } from '../../src/client/ui/ui_helpers.js';
 import { TitleDeedActionFooter } from '../../src/client/ui/modals/title_deed_action_footer.js';
+import { resolveTitleDeedModalState } from '../../src/client/ui/modals/title_deed_affordance.js';
+import { TurnPhase } from '../../src/domain/room.js';
 import { useGameStore } from '../../src/client/store/game_store.js';
 
 // Tree traversal helper for React vdom elements (defined outside it() to enforce zero loops inside test body)
@@ -360,7 +362,7 @@ describe('[TC-208.01/MSS..TC-208.16/MSS][UC-IMP208] Audit Bailout & Dock Ergonom
   // =========================================================================
   // Facet 5: TitleDeed Close Label Ergonomics (Ngữ cảnh hóa nút Sổ Đỏ)
   // =========================================================================
-  it('[TC-208.13/MSS][UC-IMP208] Khi canBuy = true, TitleDeedActionFooter render nút phụ với nhãn ✕ Đóng kèm tooltip', () => {
+  it('[TC-208.13/MSS][UC-IMP208] Khi canBuy = true, TitleDeedActionFooter không còn nút Đóng ở footer (chỉ còn nút Header [X])', () => {
     const html = renderToStaticMarkup(
       React.createElement(TitleDeedActionFooter, {
         isOwned: false,
@@ -370,11 +372,11 @@ describe('[TC-208.01/MSS..TC-208.16/MSS][UC-IMP208] Audit Bailout & Dock Ergonom
       })
     );
 
-    expect(html).toContain('✕ Đóng');
+    expect(html).not.toContain('✕ Đóng');
     expect(html).not.toContain('Đóng Xoay Vốn');
   });
 
-  it('[TC-208.14/MSS][UC-IMP208] Khi canBuy = false, TitleDeedActionFooter render nút phụ với nhãn ✕ Đóng và tooltip hướng dẫn', () => {
+  it('[TC-208.14/MSS][UC-IMP208] Khi canBuy = false, TitleDeedActionFooter không còn nút Đóng ở footer (chỉ còn nút Header [X])', () => {
     const html = renderToStaticMarkup(
       React.createElement(TitleDeedActionFooter, {
         isOwned: false,
@@ -386,11 +388,11 @@ describe('[TC-208.01/MSS..TC-208.16/MSS][UC-IMP208] Audit Bailout & Dock Ergonom
       })
     );
 
-    expect(html).toContain('✕ Đóng');
+    expect(html).not.toContain('✕ Đóng');
     expect(html).not.toContain('Đóng Xoay Vốn');
   });
 
-  it('[TC-208.15/MSS][UC-IMP208] Khi isTradeFrozen = true, TitleDeedActionFooter render nút phụ với nhãn ✕ Đóng (col-span-2)', () => {
+  it('[TC-208.15/MSS][UC-IMP208] Khi isTradeFrozen = true, TitleDeedActionFooter render nút phụ với nhãn ✕ Đóng (col-span-1 đối xứng)', () => {
     const html = renderToStaticMarkup(
       React.createElement(TitleDeedActionFooter, {
         isOwned: false,
@@ -402,11 +404,11 @@ describe('[TC-208.01/MSS..TC-208.16/MSS][UC-IMP208] Audit Bailout & Dock Ergonom
     );
 
     expect(html).toContain('✕ Đóng');
-    expect(html).toContain('col-span-2');
+    expect(html).not.toContain('col-span-2');
     expect(html).not.toContain('Đóng Xoay Vốn');
   });
 
-  it('[TC-208.16/MSS][UC-IMP208] Bấm ✕ Đóng gọi onClose và không kích hoạt onPass', () => {
+  it('[TC-208.16/MSS][UC-IMP208] Khi isTradeFrozen = true, bấm ✕ Đóng gọi onClose và không kích hoạt onPass', () => {
     const onCloseSpy = vi.fn();
     const onPassSpy = vi.fn();
     let vdom: any;
@@ -416,6 +418,7 @@ describe('[TC-208.01/MSS..TC-208.16/MSS][UC-IMP208] Audit Bailout & Dock Ergonom
         isOwned: false,
         isBuyOpportunity: true,
         canBuy: true,
+        isTradeFrozen: true,
         deedPrice: 1000,
         onClose: onCloseSpy,
         onPass: onPassSpy,
@@ -431,4 +434,101 @@ describe('[TC-208.01/MSS..TC-208.16/MSS][UC-IMP208] Audit Bailout & Dock Ergonom
     expect(onCloseSpy).toHaveBeenCalledOnce();
     expect(onPassSpy).not.toHaveBeenCalled();
   });
+
+  // =========================================================================
+  // Facet 6: Reopening Purchase Affordance & Utility Property Support
+  // =========================================================================
+  it('[TC-208.17/MSS][UC-IMP208] resolveTitleDeedModalState: Đang đứng tại ô chưa ai mua trong ActionPhase, dù canBuyOverride = false thì isBuyOpportunity vẫn phải bằng true', () => {
+    const deedState = resolveTitleDeedModalState({
+      cellIndex: 9,
+      canBuyOverride: false,
+      myId: 'p1',
+      myPlayer: {
+        id: 'p1',
+        name: 'Chủ Tịch Hưng',
+        position: 9,
+        balance: 200,
+        ownedProperties: [],
+        mortgagedProperties: [],
+      } as any,
+      playersInfo: {
+        p1: {
+          id: 'p1',
+          name: 'Chủ Tịch Hưng',
+          position: 9,
+          balance: 200,
+          ownedProperties: [],
+          mortgagedProperties: [],
+        } as any,
+      },
+      turnPhase: 'ActionPhase',
+      currentTurnPlayerId: 'p1',
+      levelMap: {},
+    });
+
+    expect(deedState.isBuyOpportunity).toBe(true);
+    expect(deedState.canBuy).toBe(false);
+  });
+
+  it('[TC-208.18/MSS][UC-IMP208] ActionDock: Khi turnPhase === TurnPhase.ActionPhase, nút Mua Đất hiển thị dù hasRolledThisTurn chưa set trên client', () => {
+    useGameStore.setState({
+      currentTurnPlayerId: 'p1',
+      playerPositions: { p1: 9 },
+      turnPhase: TurnPhase.ActionPhase,
+      hasRolledThisTurn: false,
+      playersInfo: {
+        p1: {
+          id: 'p1',
+          name: 'Chủ Tịch Hưng',
+          balance: 1000,
+          ownedProperties: [],
+          mortgagedProperties: [],
+        } as any,
+      },
+    });
+
+    const html = renderToStaticMarkup(
+      React.createElement(ActionDock, { localPlayerId: 'p1', isMyTurn: true })
+    );
+
+    expect(html).toContain('Mua Đất');
+  });
+
+  it('[TC-208.19/MSS][UC-IMP208] ActionDock: Khi người chơi đứng tại ô dịch vụ CellType.Utility (Ô 12 EVN) chưa ai mua, nút Mua Đất hiển thị', () => {
+    useGameStore.setState({
+      currentTurnPlayerId: 'p1',
+      playerPositions: { p1: 12 },
+      turnPhase: TurnPhase.ActionPhase,
+      hasRolledThisTurn: true,
+      playersInfo: {
+        p1: {
+          id: 'p1',
+          name: 'Chủ Tịch Hưng',
+          balance: 2000,
+          ownedProperties: [],
+          mortgagedProperties: [],
+        } as any,
+      },
+    });
+
+    const html = renderToStaticMarkup(
+      React.createElement(ActionDock, { localPlayerId: 'p1', isMyTurn: true })
+    );
+
+    expect(html).toContain('Mua Đất');
+  });
+
+  it('[TC-208.20/MSS][UC-IMP208] resolveActionDockNotice: Khi isStandingOnBuyable = true, chip thông báo không chứa cụm từ xoay vốn và mang nhãn sở hữu', () => {
+    const notice = resolveActionDockNotice({
+      isMyTurn: true,
+      isStandingOnBuyable: true,
+      buyableCellName: 'Hà Tiên',
+      buyableCellPrice: 600,
+    });
+
+    expect(notice).not.toBeNull();
+    expect(notice?.desktopText).not.toContain('xoay vốn');
+    expect(notice?.desktopText).toContain('để sở hữu');
+  });
 });
+

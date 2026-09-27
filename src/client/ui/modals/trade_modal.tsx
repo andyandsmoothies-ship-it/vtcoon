@@ -138,11 +138,7 @@ export function TradeModal({
     <div
       className="w-full max-w-md md:max-w-2xl lg:max-w-4xl max-h-[90vh] overflow-y-auto max-h-[90dvh] overflow-x-hidden bg-[#FFFDF8] border-2 border-slate-900 rounded-2xl shadow-[0_6px_0_0_#0f172a] flex flex-col pointer-events-auto text-slate-900 select-none"
       data-testid="trade-modal"
-      data-legacy-style="max-w-md lg:max-w-lg"
     >
-      {myMortgagedProperties.length > 0 && (
-        <button type="button" disabled aria-hidden="true" className="hidden">Thế chấp</button>
-      )}
 
       {/* Header */}
       <header className="p-3.5 bg-[#F7F2E7] border-b border-slate-300 flex items-center justify-between sticky top-0 z-10 shrink-0">
@@ -263,28 +259,20 @@ export function TradeModal({
       />
 
       {/* Footer */}
-      <footer className="p-3 pt-2 sm:p-4 gap-2 bg-[#F7F2E7] border-t border-slate-300 flex items-center sticky bottom-0 z-10 shrink-0">
+      <footer className="p-3 sm:p-4 bg-[#F7F2E7] border-t border-slate-300 sticky bottom-0 z-10 shrink-0">
         <button
           type="button"
+          data-testid="submit-trade-btn"
           onClick={handleSubmit}
           disabled={!isValid}
-          className={`flex-1 min-w-0 truncate min-h-[44px] py-2 px-3 rounded-xl font-bold text-xs transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+          className={`w-full min-h-[48px] py-2.5 px-4 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
             isValid
-              ? 'bg-emerald-500 hover:bg-emerald-600 text-white border-2 border-emerald-700 shadow-[0_4px_0_0_#065f46] active:shadow-[0_1px_0_0_#065f46] active:translate-y-[3px] cursor-pointer font-black'
-              : 'bg-slate-200 text-slate-600 cursor-not-allowed border border-slate-300'
+              ? 'bg-emerald-600 hover:bg-emerald-700 text-white border-2 border-emerald-800 shadow-[0_4px_0_0_#065f46] active:translate-y-[3px] cursor-pointer'
+              : 'bg-slate-200 text-slate-400 border border-slate-300 shadow-none cursor-not-allowed'
           }`}
         >
           Gửi Đề Xuất Đàm Phán
         </button>
-        {onClose && (
-          <button
-            type="button"
-            onClick={onClose}
-            className="min-h-[44px] min-w-[76px] px-3 sm:px-4 py-2 rounded-xl text-xs font-bold shrink-0 transition-all cursor-pointer text-slate-700 bg-white hover:bg-slate-100 border border-slate-300 shadow-xs active:translate-y-[1px]"
-          >
-            Hủy
-          </button>
-        )}
       </footer>
     </div>
   );

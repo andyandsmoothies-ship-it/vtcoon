@@ -34,6 +34,9 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command]
    - **Zero Magic String & Strict Domain Enum**: Forbid loose `string` typing or string literal comparisons for lifecycle, FSM, or domain category fields. Must strictly use domain enums across DTOs, stores, and props.
    - **Transient UI Opt-In Default Guard**: Ephemeral feedback components (badges, toasts, chips) must default visibility flags to `false` (opt-in), never `true` (opt-out), preventing premature or ghost renders.
    - **Runtime Value Import Integrity**: Verify enums or objects accessed at runtime (initial state, default props) are imported as runtime values (`import { Enum }`), never erased type imports (`import type`).
+   - **Full Collection Protocol Parity (Proxy/Adapter Integrity)**: When a diff introduces or modifies a Proxy, Adapter, or Virtual Collection mimicking built-in collections (`Map`, `Set`), verify it implements 100% of standard protocol methods (`[Symbol.iterator]`, `entries()`, `keys()`, `values()`, `size`, `forEach()`, `clear()`, `get()`, `set()`, `has()`, `delete()`). Flag partial proxies omitting iteration/size as **[BLOCKER] Logic Bug**.
+   - **Ban Scalar Pseudo-Proxies (KISS Local Adapters)**: Prohibit `new Proxy` wrapping scalar primitive variables inside local functions/methods. Mandate simple single-entry local collections (`new Map([[key, value]])`) with sync-back. Flag as **[BLOCKER] Self-introduced Complexity (Flag 6)**.
+   - **Anti-Getter Allocation Churn**: Verify getters in classes/services do NOT return newly instantiated wrappers (`return new Proxy(...)` or `return new Class(...)`) on every access in recurring flows. Flag as **[BLOCKER] NFR Performance Leak**.
 5. **Severity Classification & False Positive Filtering**:
    - **Filter False Positives**: Suppress nitpicks on formatting or syntax already enforced by tooling/linters. Focus exclusively on runtime behavior, correctness, and architecture.
    - **Severity Ranking**:
@@ -83,6 +86,10 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command]
 | 4. Zero Dirty Cast | `[Toàn bộ diff]` | 0 `as any` / dirty cast | 0 dirty cast | 0 | APPROVED |
 | 5. Runtime Wire Gate | `[Entry -> Logic]` | 100% wired invocation | All mutations wired | 0 | APPROVED |
 | 6. Evidence Snapshot | `.agents/evidence/latest_snapshot.json` | Tồn tại & Đã đọc trên đĩa | Đọc qua view_file | 0 | APPROVED |
+| 7. Typecheck Gate | Toàn bộ workspace | Compiler exit 0 (`npx tsc --noEmit`) | `[typecheck status từ snapshot]` | 0 | APPROVED |
+
+> [!CAUTION]
+> **The Transpiler Trap Filter**: Test runners (Vitest/esbuild/SWC/tsx) transpile without typechecking. NEVER accept test passes as proof of type safety. Snapshot BẮT BUỘC có `typecheckPassed: true` với 0 lỗi biên dịch. MANDATORY REJECT nếu typecheck đỏ.
 
 #### 5. Severity Findings & False Positive Filter
 - [BLOCKER]: 0 detected.

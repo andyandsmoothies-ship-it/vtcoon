@@ -8,7 +8,7 @@
 
 ---
 
-## 🧭 CHỈ MỤC 6 TRỤ CỘT BẤT BIẾN (INVARIANT PILLARS)
+## 🧭 CHỈ MỤC 7 TRỤ CỘT BẤT BIẾN (INVARIANT PILLARS)
 
 | Trụ Cột | Trọng Tâm Nghiệp Vụ | Phạm Vi Mã Nguồn |
 | :--- | :--- | :--- |
@@ -18,10 +18,11 @@
 | **[Pillar IV: WebSocket & Delta]** | Quy Trình 5 Trạm, Array Tombstone `[]`, Khử Null vs Undefined | `src/server/`, `apply_delta.ts` |
 | **[Pillar V: Công Thái Học UI 2D]** | Phân Tầng 3 Hàng 360px, Sàn Chạm 44px, Zero Anti-Patterns, SSOT | `src/client/ui/`, `modals/` |
 | **[Pillar VI: Kiểm Thử Detroit]** | Adversarial Inversion (RED), Atomic Contracts, Tránh Mock Echo | `tests/**` |
+| **[Pillar VII: Mô-đun Sâu & DDD]** | Full Collection Protocol Parity, Ban Scalar Pseudo-Proxies | `src/server/`, `src/domain/` |
 
 ---
 
-## 🏛️ CHI TIẾT 6 BỘ NGUYÊN LÝ BẤT BIẾN
+## 🏛️ CHI TIẾT 7 BỘ NGUYÊN LÝ BẤT BIẾN
 
 ### Pillar I: [FSM & VÒNG ĐỜI TRẠNG THÁI]
 1. **Phase-Driven Action State Reset**: Cờ hành động phía client (`hasRolledThisTurn`, `isActing`) bắt buộc phải reset theo sự chuyển dịch của `turnPhase` (ví dụ: chuyển sang `WaitingRoll` lập tức reset `hasRolledThisTurn = false`), TUYỆT ĐỐI KHÔNG chỉ dựa vào sự thay đổi của `currentPlayerId` (đặc biệt khi người chơi đổ đôi được thêm lượt).
@@ -62,3 +63,9 @@
 2. **Atomic Contract Mandate**: Mỗi ca kiểm thử chỉ chứa 1–4 assertions, tập trung vào 1 hành vi duy nhất, cấm sử dụng vòng lặp trong `it()`. Cấm tuyệt đối các bài test checklist tĩnh (`fs.existsSync`, `typeof fn`, test LOC trong unit test).
 3. **Universal 5-Facet Matrix**: Bộ test cho mỗi tính năng phải bao quát đủ 5 mặt: (1) Biên và giá trị cực hạn (Boundary); (2) Phản ứng trạng thái (Reactivity); (3) Dọn dẹp hủy tài nguyên (Disposal); (4) Phòng thủ lỗi (Error Defense); (5) Bán kính ảnh hưởng đa chiều (Blast Radius).
 4. **Detroit Classical State Assertions**: Khẳng định trạng thái quan sát được của hệ thống (Observable State/Output), cấm spy/mock vào các hàm private nội bộ của module.
+
+### Pillar VII: [KIẾN TRÚC MÔ-ĐUN SÂU & AGGREGATE ROOT PHÒNG CHƠI]
+1. **Full Collection Protocol Parity (Proxy/Adapter Completeness)**: Khi xây dựng Proxy hoặc Adapter để bọc/thay thế Collection chuẩn (`Map`, `Set`, `Array`), BẮT BUỘC phải cài đặt 100% protocol methods (`[Symbol.iterator]`, `entries()`, `keys()`, `values()`, `size`, `forEach()`, `clear()`, `get()`, `set()`, `has()`, `delete()`). Phân tách rõ ràng ngữ nghĩa (semantics) giữa trường bắt buộc (`size = sessions.size`, `has` luôn `true` khi session tồn tại kể cả khi mang giá trị falsy như `false`, `0`) và trường tùy chọn (`size` đếm `val !== undefined`). CẤM tạo Partial Proxy chỉ bẫy 3-4 methods vì sẽ gây ra silent bug làm tê liệt `for...of` và `.size`.
+2. **Ban Pseudo-Proxies on Scalar Primitives**: CẤM tạo `Proxy` bọc các biến primitive (scalar: boolean, number, string) bên trong hàm cục bộ. Phải dùng cấu trúc dữ liệu đơn giản chuẩn mực (Local Map 1-entry `new Map([[key, value]])`) và đồng bộ ngược sau khi hàm thực thi.
+3. **Getter Allocation Churn Prohibition**: CẤM truyền getter động (vốn sinh Proxy instance mới mỗi lần truy cập như `this.auctions`) vào các hàm điều phối tuần hoàn. Phải truyền trực tiếp target state hoặc callback để tránh cấp phát rác GC liên tục.
+4. **EndTurn Direct Session Dispatch & WaitingRoll Guard Invariant [IMP-210]**: Trong mô hình Aggregate Root `GameRoomSession`, hàm điều phối lượt `doHandleEndTurnSession(session, ...)` nhận trực tiếp session và chuyển giao thẳng cho `executeTurnEnd` bằng local single-entry maps. Tại lớp Facade `RoomManager.handleEndTurn`, hệ thống bắt buộc phải kiểm tra điều kiện chặn kết thúc lượt khi chưa đổ xúc xắc (`!session.rolledThisTurn && session.room.phase === TurnPhase.WaitingRoll && (current.auditTurnsLeft ?? 0) <= 0`) trước khi dispatch, bảo toàn 100% nghiệp vụ chống skip lượt gian lận.

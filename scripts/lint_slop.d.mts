@@ -17,6 +17,8 @@ export declare const SLOP_RULES: {
   readonly FILE_LOC_BUDGET: 'file-loc-budget';
   readonly FUNCTION_LOC_BUDGET: 'function-loc-budget';
   readonly ZERO_WORKAROUND_COMMENTS: 'zero-workaround-comments';
+  readonly ZERO_GETTER_PROXIES: 'zero-getter-proxies';
+  readonly ZERO_PSEUDO_PROXIES: 'zero-pseudo-proxies';
 };
 
 export declare const TIER_BUDGETS: {

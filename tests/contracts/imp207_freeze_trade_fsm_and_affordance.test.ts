@@ -328,7 +328,7 @@ describe('[TC-207/MSS][UC-IMP207] Freeze Trade FSM Transition & UI Affordance Co
       expect(state.isBuyOpportunity).toBe(true);
     });
 
-    it('[TC-207.12/MSS][UC-IMP207] Khi isTradeFrozen = true, TitleDeedActionFooter render nút ❄️ Thị Trường Đóng Băng (Cấm Mua) với class disabled (cursor-not-allowed, bg-slate-200), tuyệt đối không có class bg-emerald-700 hay cursor-pointer', () => {
+    it('[TC-207.12/MSS][UC-IMP207] Khi isTradeFrozen = true, TitleDeedActionFooter render nút ❄️ Đóng Băng (Cấm Mua) với class disabled (cursor-not-allowed, bg-slate-200), tuyệt đối không có class bg-emerald-700 hay cursor-pointer', () => {
       const html = renderToStaticMarkup(
         React.createElement(TitleDeedActionFooter, {
           isOwned: false,
@@ -339,13 +339,14 @@ describe('[TC-207/MSS][UC-IMP207] Freeze Trade FSM Transition & UI Affordance Co
         } as any)
       );
 
-      expect(html).toContain('❄️ Thị Trường Đóng Băng (Cấm Mua)');
-      expect(html).toContain('cursor-not-allowed');
-      expect(html).not.toContain('bg-emerald-700');
-      expect(html).not.toContain('cursor-pointer');
+      const freezeBtnMatch = html.match(/<button[^>]*>❄️ Đóng Băng[^<]*<\/button>/)?.[0] ?? '';
+      expect(freezeBtnMatch).toContain('❄️ Đóng Băng (Cấm Mua)');
+      expect(freezeBtnMatch).toContain('cursor-not-allowed');
+      expect(freezeBtnMatch).not.toContain('bg-emerald-700');
+      expect(freezeBtnMatch).not.toContain('cursor-pointer');
     });
 
-    it('[TC-207.13/MSS][UC-IMP207] Khi isTradeFrozen = true, nút Bỏ Qua (Pass) hoàn toàn bị ẩn, chỉ hiển thị nút Đóng', () => {
+    it('[TC-207.13/MSS][UC-IMP207] Khi isTradeFrozen = true, nút Từ Chối Mua hoàn toàn bị ẩn, hiển thị nút ✕ Đóng (chiếm 1 cột đối xứng col-span-1)', () => {
       const html = renderToStaticMarkup(
         React.createElement(TitleDeedActionFooter, {
           isOwned: false,
@@ -356,11 +357,12 @@ describe('[TC-207/MSS][UC-IMP207] Freeze Trade FSM Transition & UI Affordance Co
         } as any)
       );
 
-      expect(html).not.toContain('Bỏ Qua (Pass)');
-      expect(html).toContain('Đóng');
+      expect(html).not.toContain('Từ Chối Mua');
+      expect(html).toContain('✕ Đóng');
+      expect(html).not.toContain('col-span-2');
     });
 
-    it('[TC-207.14/MSS][UC-IMP207] Khi isTradeFrozen = false và đủ tiền, nút Mua hiển thị màu xanh bg-emerald-700 và nút Bỏ Qua hiển thị đầy đủ', () => {
+    it('[TC-207.14/MSS][UC-IMP207] Khi isTradeFrozen = false và đủ tiền, nút Mua hiển thị màu xanh bg-emerald-700 và nút Từ Chối Mua hiển thị đầy đủ', () => {
       const html = renderToStaticMarkup(
         React.createElement(TitleDeedActionFooter, {
           isOwned: false,
@@ -372,7 +374,7 @@ describe('[TC-207/MSS][UC-IMP207] Freeze Trade FSM Transition & UI Affordance Co
       );
 
       expect(html).toContain('bg-emerald-700');
-      expect(html).toContain('Bỏ Qua (Pass)');
+      expect(html).toContain('✕ Từ Chối Mua');
       expect(html).toContain('Mua BĐS (2.000)');
     });
   });

@@ -27,7 +27,8 @@ export function CompulsoryBuyoutModal({
   onBuyout,
   onDecline,
 }: CompulsoryBuyoutModalProps): React.ReactElement {
-  const playersInfo = useGameStore((state) => state.playersInfo);
+  const storePlayersInfo = useGameStore((state) => state.playersInfo);
+  const playersInfo = (Object.keys(storePlayersInfo ?? {}).length > 0 ? storePlayersInfo : useGameStore.getState().playersInfo) ?? {};
   const buyer = playersInfo[buyerId];
   const seller = playersInfo[sellerId];
   const sellerName = seller?.name ?? 'Đối thủ';
@@ -149,29 +150,40 @@ export function CompulsoryBuyoutModal({
           </span>
         </div>
 
-        {/* Action Buttons */}
+        {/* Cảnh báo thiếu tiền nếu không đủ trả 130% */}
+        {!canAfford && (
+          <div
+            data-testid="buyout-shortfall-notice"
+            className="p-2 bg-amber-50 border border-amber-300 rounded-xl flex items-center justify-between text-xs text-amber-900 font-semibold"
+          >
+            <span>⚠️ Số dư ví không đủ đền bù 130%</span>
+            <span className="font-bold text-rose-700">Thiếu: {formatCurrency(cost - (buyer?.balance ?? 0))}</span>
+          </div>
+        )}
+
+        {/* Action Buttons: 2 Cột đối xứng 1 hàng */}
         <div className="grid grid-cols-2 gap-2.5 pt-1">
           <button
             type="button"
-            data-testid="buyout-decline-btn"
-            onClick={onDecline}
-            className="h-full min-h-[48px] px-4 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs uppercase tracking-wider transition-colors active:translate-y-0.5 shadow-sm inline-flex items-center justify-center cursor-pointer"
-          >
-            ✕ Bỏ Qua
-          </button>
-          <button
-            type="button"
             data-testid="buyout-confirm-btn"
-            onClick={() => onBuyout(cellIndex)}
+            onClick={() => canAfford && onBuyout(cellIndex)}
             disabled={!canAfford}
-            className={`h-full min-h-[48px] px-4 rounded-xl font-bold text-xs uppercase tracking-wider text-white shadow-md transition-all active:translate-y-0.5 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 leading-tight cursor-pointer ${
+            className={`h-full min-h-[48px] px-3 py-2 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 ${
               canAfford
-                ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-700/20'
-                : 'bg-slate-400 cursor-not-allowed opacity-60'
+                ? 'text-white bg-emerald-600 hover:bg-emerald-700 border-2 border-emerald-800 shadow-[0_4px_0_0_#065f46] active:translate-y-[3px] cursor-pointer'
+                : 'bg-slate-200 text-slate-400 border border-slate-300 shadow-none cursor-not-allowed'
             }`}
           >
             <span>💰</span>
             <span>Mua Lại ({formatCurrency(cost)})</span>
+          </button>
+          <button
+            type="button"
+            data-testid="buyout-decline-btn"
+            onClick={onDecline}
+            className="h-full min-h-[48px] px-3 py-2 rounded-xl border-2 border-rose-300 bg-rose-50 hover:bg-rose-100 text-rose-700 font-black text-xs uppercase tracking-wider shadow-[0_4px_0_0_#fca5a5] active:translate-y-[3px] transition-all inline-flex items-center justify-center cursor-pointer"
+          >
+            ✕ Từ Chối Mua
           </button>
         </div>
       </div>

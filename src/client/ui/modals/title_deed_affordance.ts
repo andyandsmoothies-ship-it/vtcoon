@@ -145,7 +145,7 @@ export function resolveTitleDeedModalState(params: {
   myId: string;
   myPlayer?: AffordancePlayer | Player | null;
   playersInfo: Record<string, AffordancePlayer | Player>;
-  levelMap: Record<number, number>;
+  levelMap?: Record<number, number>;
   activeModifiers?: readonly { readonly type: string; readonly remainingRounds: number }[];
   turnPhase?: string | null;
   currentTurnPlayerId?: string | null;
@@ -155,7 +155,7 @@ export function resolveTitleDeedModalState(params: {
   const isOwner = ownerId === params.myId;
   const isMortgaged = Boolean(owner?.mortgagedProperties?.includes(params.cellIndex));
   const deed = PROPERTY_DEEDS.get(params.cellIndex);
-  const currentLevel = (params.levelMap[params.cellIndex] ?? 0) as 0 | 1 | 2 | 3;
+  const currentLevel = (params.levelMap?.[params.cellIndex] ?? 0) as 0 | 1 | 2 | 3;
   const upgradeCost = deed?.upgradeCosts && currentLevel < 3 ? deed.upgradeCosts[currentLevel as 0 | 1 | 2] : 0;
 
   const cell = BOARD_CONFIG[params.cellIndex];
@@ -173,7 +173,7 @@ export function resolveTitleDeedModalState(params: {
     currentLevel,
     cellIndex: params.cellIndex,
     groupCells: groupInfo.groupCells,
-    levelMap: params.levelMap,
+    levelMap: params.levelMap ?? {},
   });
 
   const isTradeFrozen = Boolean(params.activeModifiers?.some((m) => m.type === 'MC_FREEZE_TRADE' && m.remainingRounds > 0));
@@ -183,15 +183,15 @@ export function resolveTitleDeedModalState(params: {
     buyerBalance: params.myPlayer?.balance ?? 0,
     ownedProperties: (params.myPlayer as AffordancePlayer)?.ownedProperties,
     mortgagedProperties: (params.myPlayer as AffordancePlayer)?.mortgagedProperties,
-    levelMap: params.levelMap,
+    levelMap: params.levelMap ?? {},
     isTradeFrozen,
   });
 
   const currentPos = params.myPlayer?.position ?? 0;
   const isStandingHere = currentPos === params.cellIndex;
   const isBuyOpportunity = params.isBuyOpportunityOverride ?? (
-    params.canBuyOverride !== undefined
-      ? Boolean(params.canBuyOverride)
+    params.canBuyOverride === true
+      ? true
       : Boolean(
           isStandingHere &&
           !owner &&

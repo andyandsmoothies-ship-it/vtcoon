@@ -81,11 +81,11 @@ describe('[IMP-110/MSS] Mobile Ergonomics & WCAG 2.1 AA Contrast Suite', () => {
       expect(ratio).toBeGreaterThanOrEqual(4.5);
     });
 
-    it('[IMP-110/UC-A11Y-04] Nút Bỏ Qua trong TitleDeedModal đạt chuẩn vùng chạm >= 48px', () => {
+    it('[IMP-110/UC-A11Y-04] Nút Từ Chối Mua trong TitleDeedModal đạt chuẩn vùng chạm >= 48px', () => {
       const html = renderToStaticMarkup(
         React.createElement(TitleDeedModal, { cellIndex: 1, canBuy: true, isOwned: false })
       );
-      expect(html).toContain('Bỏ Qua');
+      expect(html).toContain('Từ Chối Mua');
       expect(html).toContain('min-h-[48px]');
     });
   });

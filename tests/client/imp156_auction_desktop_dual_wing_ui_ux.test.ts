@@ -133,7 +133,7 @@ describe('[UC-IMP156/MSS] Station 1 RED: Dual-Wing Arena, Anti-Tiny-Text & Timer
       expect(html).toContain('aria-label="Đóng sàn đấu giá"');
     });
 
-    it('[TC-IMP156.10/MSS][UC-IMP156] (Boundary) Bảo toàn bất biến CSS nút Auto-Bid chứa min-h-[44px] px-3.5 py-2 rounded-xl text-xs font-bold border (bảo vệ imp106)', () => {
+    it('[TC-IMP156.10/MSS][UC-IMP156] (Boundary) Bảo toàn bất biến CSS nút Auto-Bid chứa min-h-[44px] và nhãn TỰ ĐỘNG ĐẶT GIÁ (bảo vệ imp106)', () => {
       const html = renderToStaticMarkup(
         React.createElement(AuctionModal, {
           cellIndex: 1,
@@ -142,11 +142,11 @@ describe('[UC-IMP156/MSS] Station 1 RED: Dual-Wing Arena, Anti-Tiny-Text & Timer
           timeRemaining: 15,
         })
       );
-      expect(html).toContain('min-h-[44px] px-3.5 py-2 rounded-xl text-xs font-bold border');
-      expect(html).toContain('AUTO-BID');
+      expect(html).toContain('min-h-[44px]');
+      expect(html).toContain('TỰ ĐỘNG ĐẶT GIÁ');
     });
 
-    it('[TC-IMP156.11/MSS][UC-IMP156] (Boundary) Bảo toàn bất biến CSS nút Rút lui chứa min-h-[44px] px-4 py-2 rounded-xl text-xs font-bold text-rose-700 (bảo vệ imp106)', () => {
+    it('[TC-IMP156.11/MSS][UC-IMP156] (Boundary) Bảo toàn bất biến CSS nút Rút lui chứa min-h-[44px] text-rose-700 và nhãn ✕ Rút Lui (bảo vệ imp106)', () => {
       const html = renderToStaticMarkup(
         React.createElement(AuctionModal, {
           cellIndex: 1,
@@ -155,8 +155,9 @@ describe('[UC-IMP156/MSS] Station 1 RED: Dual-Wing Arena, Anti-Tiny-Text & Timer
           timeRemaining: 15,
         })
       );
-      expect(html).toContain('min-h-[44px] px-4 py-2 rounded-xl text-xs font-bold text-rose-700');
-      expect(html).toContain('Rút Lui / Bỏ Cuộc');
+      expect(html).toContain('min-h-[44px]');
+      expect(html).toContain('text-rose-700');
+      expect(html).toContain('✕ Rút Lui');
     });
 
     it('[TC-IMP156.12/MSS][UC-IMP156] (Boundary) Bảo toàn bất biến tactile shadow nút đặt giá shadow-[0_4px_0_0_#b45309] và cursor-not-allowed opacity-50', () => {

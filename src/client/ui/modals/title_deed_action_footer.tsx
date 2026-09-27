@@ -142,71 +142,64 @@ export function TitleDeedActionFooter({
           )}
         </>
       ) : isBuyOpportunity !== false ? (
-        <div className="col-span-2 w-full flex flex-col gap-2">
-          {/* Hàng 1: Dòng đệm tài chính khi thiếu tiền */}
+        <>
+          {/* Cảnh báo thiếu tiền (chỉ khi thiếu tiền và thị trường không đóng băng) */}
           {!canBuy && !isTradeFrozen && (
-            <div className="w-full py-1 px-2.5 rounded-lg bg-amber-100/80 border border-amber-300 text-amber-900 text-[11px] font-bold flex items-center justify-between">
-              <span>Thiếu: {formatCurrency(shortfall ?? 0)}</span>
-              <span>Vay tối đa: +{formatCurrency(totalMortgageCapacity ?? 0)}</span>
+            <div
+              className="col-span-2 w-full py-1.5 px-3 rounded-xl bg-amber-50 border border-amber-300/80 text-amber-900 text-xs font-semibold flex flex-col sm:flex-row sm:items-center justify-between gap-0.5 sm:gap-1"
+              data-testid="insufficient-funds-notice"
+            >
+              <span>⚠️ Số dư không đủ (Thiếu {formatCurrency(shortfall ?? 0)})</span>
+              <span className="text-[11px] text-amber-700 font-normal">Bấm [✕] ở trên để xoay vốn</span>
             </div>
           )}
 
-          {/* Hàng 2: Nút chính mua hoặc thế chấp */}
+          {/* Cột 1: Nút Mua BĐS */}
           {isTradeFrozen ? (
             <button
               type="button"
               disabled
-              className="w-full min-h-[48px] py-2 px-3.5 sm:px-6 rounded-xl font-black uppercase text-xs sm:text-sm bg-slate-200 text-slate-500 border border-slate-300 cursor-not-allowed shadow-none active:translate-y-0"
+              className="w-full min-h-[48px] py-2 px-3.5 sm:px-6 rounded-xl font-bold text-xs sm:text-sm bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed shadow-none active:translate-y-0"
             >
-              ❄️ Thị Trường Đóng Băng (Cấm Mua)
+              ❄️ Đóng Băng (Cấm Mua)
             </button>
           ) : canBuy ? (
             <button
               type="button"
               onClick={onBuy}
-              className="w-full min-h-[48px] py-2 px-3.5 sm:px-6 rounded-xl font-black uppercase text-xs sm:text-sm bg-emerald-700 hover:bg-emerald-600 border-2 border-emerald-700 shadow-[0_4px_0_0_#065f46] active:translate-y-[3px] text-white cursor-pointer"
+              className="w-full min-h-[48px] py-2 px-3.5 sm:px-6 rounded-xl font-black text-sm sm:text-base bg-emerald-700 hover:bg-emerald-600 text-white cursor-pointer shadow-[0_4px_0_0_#065f46] active:translate-y-[3px]"
             >
               {`Mua BĐS (${formatCurrency(deedPrice)})`}
-            </button>
-          ) : canCoverWithMortgage ? (
-            <button
-              type="button"
-              onClick={onOpenMortgage}
-              className="w-full min-h-[48px] py-2 px-3.5 sm:px-6 rounded-xl font-black uppercase text-xs sm:text-sm bg-amber-500 hover:bg-amber-600 border-2 border-amber-700 shadow-[0_4px_0_0_#b45309] active:translate-y-[3px] text-white cursor-pointer"
-            >
-              {`🏛️ Cầm Cố Để Mua (+${formatCurrency(totalMortgageCapacity ?? 0)})`}
             </button>
           ) : (
             <button
               type="button"
               disabled
-              className="w-full min-h-[48px] py-2 px-3.5 sm:px-6 rounded-xl font-black uppercase text-xs sm:text-sm bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed"
+              className="w-full min-h-[48px] py-2 px-3.5 sm:px-6 rounded-xl font-bold text-sm sm:text-base bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed shadow-none active:translate-y-0"
             >
-              {`Không Đủ Tiền (Thiếu ${formatCurrency(shortfall ?? 0)})`}
+              {`Mua BĐS (${formatCurrency(deedPrice)})`}
             </button>
           )}
 
-          {/* Hàng 3: 2 nút phụ Đóng Để Xoay Vốn & Bỏ Qua */}
-          <div className="grid grid-cols-2 gap-2">
+          {/* Cột 2: Nút Từ Chối Mua (hoặc Đóng khi đóng băng) */}
+          {isTradeFrozen ? (
             <button
               type="button"
               onClick={onClose}
-              title="Tạm đóng Sổ Đỏ. Bạn có thể bấm [🏷️ Mua Đất] trên thanh dưới đáy màn hình để mua lại trước khi hết giờ"
-              className={`min-h-[44px] py-2 px-2 rounded-xl uppercase text-[11px] sm:text-xs font-black bg-white hover:bg-slate-100 text-slate-800 border-2 border-slate-300 shadow-[0_4px_0_0_#cbd5e1] active:translate-y-[2px] ${isTradeFrozen ? 'col-span-2' : ''}`}
+              className="w-full min-h-[48px] py-2 px-3.5 sm:px-6 rounded-xl font-bold text-sm sm:text-base bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 shadow-[0_3px_0_0_#cbd5e1] active:translate-y-[2px] cursor-pointer"
             >
               ✕ Đóng
             </button>
-            {!isTradeFrozen && (
-              <button
-                type="button"
-                onClick={onPass}
-                className="min-h-[44px] py-2 px-2 rounded-xl uppercase text-[11px] sm:text-xs font-black bg-rose-50 hover:bg-rose-100 text-rose-700 border-2 border-rose-300 shadow-[0_4px_0_0_#fca5a5] active:translate-y-[2px]"
-              >
-                Bỏ Qua (Pass)
-              </button>
-            )}
-          </div>
-        </div>
+          ) : (
+            <button
+              type="button"
+              onClick={onPass}
+              className="w-full min-h-[48px] py-2 px-3.5 sm:px-6 rounded-xl font-black text-sm sm:text-base bg-rose-50 hover:bg-rose-100 text-rose-700 border-2 border-rose-300 shadow-[0_4px_0_0_#fca5a5] active:translate-y-[3px] cursor-pointer"
+            >
+              ✕ Từ Chối Mua
+            </button>
+          )}
+        </>
       ) : (
         /* Khi chỉ click xem sa bàn (isBuyOpportunity === false): chỉ render duy nhất nút Đóng */
         <button

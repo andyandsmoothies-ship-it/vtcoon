@@ -97,7 +97,7 @@ describe('[UC-IMP140] Title Deed UI/UX & Asset Preloading Contract Tests', () =>
     }
   });
 
-  it('[TC-140.08/MSS][UC-IMP140][Facet-1/Boundary] Nút đóng Sổ Đỏ bảo toàn min-w-[48px] min-h-[48px], aria-label="Đóng Sổ Đỏ", và ký tự ✕', () => {
+  it('[TC-140.08/MSS][UC-IMP140][Facet-1/Boundary] Nút đóng Sổ Đỏ bảo toàn min-w-[44px] min-h-[44px], aria-label="Đóng Sổ Đỏ", và ký tự ✕', () => {
     const html = renderToStaticMarkup(
       React.createElement(TitleDeedModal, {
         cellIndex: 1,
@@ -107,7 +107,7 @@ describe('[UC-IMP140] Title Deed UI/UX & Asset Preloading Contract Tests', () =>
       })
     );
     expect(html).toContain('aria-label="Đóng Sổ Đỏ"');
-    expect(html).toContain('min-w-[48px] min-h-[48px]');
+    expect(html).toContain('min-w-[44px] min-h-[44px]');
     expect(html).toContain('✕');
   });
 
@@ -176,14 +176,14 @@ describe('[UC-IMP140] Title Deed UI/UX & Asset Preloading Contract Tests', () =>
     expect(html).toContain('4× điểm xúc xắc');
   });
 
-  it('[TC-140.16/MSS][UC-IMP140][Facet-1/Boundary] Nút Mua BĐS và Bỏ Qua bảo toàn touch target min-h-[48px], active:translate-y-[3px]', () => {
+  it('[TC-140.16/MSS][UC-IMP140][Facet-1/Boundary] Nút Mua BĐS và Từ Chối Mua bảo toàn touch target min-h-[48px], active:translate-y-[3px]', () => {
     const html = renderToStaticMarkup(
       React.createElement(TitleDeedModal, { cellIndex: 1, canBuy: true, isOwned: false })
     );
     expect(html).toContain('min-h-[48px]');
     expect(html).toContain('active:translate-y-[3px]');
     expect(html).toContain('Mua BĐS');
-    expect(html).toContain('Bỏ Qua');
+    expect(html).toContain('Từ Chối Mua');
   });
 
   it('[TC-140.17/MSS][UC-IMP140][Facet-2/Reactivity] Trạng thái đã sở hữu bảo toàn các nút Nâng Cấp, Hạ Cấp, Thế Chấp, Giải Chấp', () => {
@@ -271,6 +271,6 @@ describe('[UC-IMP140] Title Deed UI/UX & Asset Preloading Contract Tests', () =>
         isTradeFrozen: true,
       })
     );
-    expect(frozenHtml).toContain('Thị Trường Đóng Băng');
+    expect(frozenHtml).toContain('Đóng Băng');
   });
 });

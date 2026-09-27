@@ -325,7 +325,7 @@ describe('[IMP-128] Chốt 3: Đồng Bộ Toàn Vẹn Nghiệp Vụ Đóng Băn
     expect(hasDisabledOrFreezeLabel).toBe(true);
   });
 
-  it('[TC-IMP128.21/MSS][UC-IMP128][Facet-2/Reactivity] TitleDeedModal: Nút Mua BĐS bị disabled = true và đổi nhãn thành Thị Trường Đóng Băng khi isTradeFrozen = true', () => {
+  it('[TC-IMP128.21/MSS][UC-IMP128][Facet-2/Reactivity] TitleDeedModal: Nút Mua BĐS bị disabled = true và đổi nhãn thành Đóng Băng khi isTradeFrozen = true', () => {
     const html = renderToStaticMarkup(
       React.createElement(TitleDeedModal, {
         cellIndex: 1,
@@ -334,8 +334,8 @@ describe('[IMP-128] Chốt 3: Đồng Bộ Toàn Vẹn Nghiệp Vụ Đóng Băn
         isTradeFrozen: true,
       } as any)
     );
-    expect(html).toContain('Thị Trường Đóng Băng');
-    expect(html).toMatch(/<button[^>]*disabled[^>]*>[\s\S]*?Thị Trường Đóng Băng[\s\S]*?<\/button>/);
+    expect(html).toContain('Đóng Băng');
+    expect(html).toMatch(/<button[^>]*disabled[^>]*>[\s\S]*?Đóng Băng[\s\S]*?<\/button>/);
   });
 
   it('[TC-IMP128.22/MSS][UC-IMP128][Facet-3/Disposal] TitleDeedModal: Nút Thế Chấp bị vô hiệu hóa khi isTradeFrozen = true bảo toàn kỷ luật tín dụng', () => {
@@ -354,7 +354,7 @@ describe('[IMP-128] Chốt 3: Đồng Bộ Toàn Vẹn Nghiệp Vụ Đóng Băn
     expect(isMortgageLocked).toBe(true);
   });
 
-  it('[TC-IMP128.23/MSS][UC-IMP128][Facet-3/Disposal] TitleDeedModal: Nút Bỏ Qua đổi thành Đóng không kích hoạt onPass khi isTradeFrozen = true', () => {
+  it('[TC-IMP128.23/MSS][UC-IMP128][Facet-3/Disposal] TitleDeedModal: Nút Từ Chối Mua đổi thành Đóng không kích hoạt onPass khi isTradeFrozen = true', () => {
     const html = renderToStaticMarkup(
       React.createElement(TitleDeedModal, {
         cellIndex: 1,
@@ -365,10 +365,10 @@ describe('[IMP-128] Chốt 3: Đồng Bộ Toàn Vẹn Nghiệp Vụ Đóng Băn
     );
     // Khi thị trường đóng băng, không cho phép kích hoạt sàn đấu giá (onPass), chỉ cho phép Đóng
     expect(html).toContain('Đóng');
-    expect(html).not.toContain('Bỏ Qua');
+    expect(html).not.toContain('Từ Chối Mua');
   });
 
-  it('[TC-IMP128.24/A1][UC-IMP128][Facet-2/Reactivity] TitleDeedModal: Khi isTradeFrozen = false, nút Mua BĐS và Bỏ Qua hoạt động bình thường', () => {
+  it('[TC-IMP128.24/A1][UC-IMP128][Facet-2/Reactivity] TitleDeedModal: Khi isTradeFrozen = false, nút Mua BĐS và Từ Chối Mua hoạt động bình thường', () => {
     const html = renderToStaticMarkup(
       React.createElement(TitleDeedModal, {
         cellIndex: 1,
@@ -378,7 +378,7 @@ describe('[IMP-128] Chốt 3: Đồng Bộ Toàn Vẹn Nghiệp Vụ Đóng Băn
       } as any)
     );
     expect(html).toContain('Mua BĐS');
-    expect(html).toContain('Bỏ Qua');
+    expect(html).toContain('Từ Chối Mua');
     expect(html).not.toContain('Thị Trường Đóng Băng');
   });
 

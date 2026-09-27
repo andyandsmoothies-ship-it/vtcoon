@@ -437,7 +437,7 @@ describe('[TC-160/MSS][UC-GAME-028] Ghost Auction Modal & Business Lifecycle Har
         })
       );
 
-      const autoBidBtnMatch = html.match(/<button[^>]*>[\s\S]*?AUTO-BID[\s\S]*?<\/button>/);
+      const autoBidBtnMatch = html.match(/<button[^>]*data-testid="auction-autobid-btn"[^>]*>[\s\S]*?<\/button>/) ?? html.match(/<button[^>]*>[\s\S]*?(?:AUTO-BID|TỰ ĐỘNG ĐẶT GIÁ)[\s\S]*?<\/button>/);
       expect(autoBidBtnMatch).not.toBeNull();
       expect(autoBidBtnMatch?.[0]).toMatch(/\sdisabled([=>\s]|$)/);
     });

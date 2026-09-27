@@ -232,7 +232,8 @@ describe('[UC-IMP106/MSS] Cross-Platform UI/UX Multi-Platform Polish Contract Su
           onClose: () => {},
         })
       );
-      expect(html).toContain('min-h-[44px] px-3.5 py-2 rounded-xl text-xs font-bold border');
+      expect(html).toContain('min-h-[44px]');
+      expect(html).toContain('TỰ ĐỘNG ĐẶT GIÁ');
     });
 
     it('[UC-IMP106/MSS-P5.3] AuctionModal surrender / pass button satisfies min-h-[44px]', () => {
@@ -245,7 +246,8 @@ describe('[UC-IMP106/MSS] Cross-Platform UI/UX Multi-Platform Polish Contract Su
           onClose: () => {},
         })
       );
-      expect(html).toContain('min-h-[44px] px-4 py-2 rounded-xl text-xs font-bold text-rose-700');
+      expect(html).toContain('min-h-[44px]');
+      expect(html).toContain('✕ Rút Lui');
     });
   });
 

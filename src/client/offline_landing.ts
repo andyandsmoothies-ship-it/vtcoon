@@ -143,8 +143,7 @@ export function executeCellLanding(
     );
     if (!ownerEntry) {
       if (isLocal) {
-        const price = PROPERTY_DEEDS.get(targetCell)?.price ?? 0;
-        state.openModal('deed', { cellIndex: targetCell, canBuy: (activePlayer?.balance ?? 0) >= price, isBuyOpportunity: true });
+        state.openModal('deed', { cellIndex: targetCell, isBuyOpportunity: true });
       }
     } else if (ownerEntry[0] !== activeId) {
       AudioEngine.playSfx(SoundEffect.TAX_PENALTY);

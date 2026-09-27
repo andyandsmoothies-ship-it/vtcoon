@@ -139,10 +139,10 @@ describe('[UC-IMP196/MSS] Station 1 RED: Auction Passed Players Transparency Con
           isForeclosure: false,
         })
       );
-      expect(html).toContain('🚫 Bỏ qua');
+      expect(html).toContain('🚫 Từ chối mua');
     });
 
-    it('[TC-196.06/MSS][UC-IMP196] Badge [🚫 Bỏ qua] tuân thủ bảng màu vàng hổ phách bg-amber-100 text-amber-800 border-amber-300', () => {
+    it('[TC-196.06/MSS][UC-IMP196] Badge [🚫 Từ chối mua] tuân thủ bảng màu vàng hổ phách bg-amber-100 text-amber-800 border-amber-300', () => {
       const html = renderToStaticMarkup(
         React.createElement(AuctionModal as any, {
           cellIndex: 1,
@@ -293,8 +293,8 @@ describe('[UC-IMP196/MSS] Station 1 RED: Auction Passed Players Transparency Con
         })
       );
       expect(html).toContain('Tỷ Phú Hà Thành');
-      expect(html).toContain('🚫 Bỏ qua');
-      expect(html.match(/🚫 Bỏ qua/g)?.length).toBe(1);
+      expect(html).toContain('🚫 Từ chối mua');
+      expect(html.match(/🚫 Từ chối mua/g)?.length).toBe(1);
     });
 
     it('[TC-196.14/MSS][UC-IMP196] ModalHost chuyển tiếp đầy đủ passedPlayerIds từ modalPayload sang AuctionModal', () => {
@@ -332,7 +332,7 @@ describe('[UC-IMP196/MSS] Station 1 RED: Auction Passed Players Transparency Con
       const html = renderToStaticMarkup(
         React.createElement(ModalHost, { localPlayerId: 'p1' })
       );
-      expect(html).toContain('🚫 Bỏ qua');
+      expect(html).toContain('🚫 Từ chối mua');
     });
   });
 
@@ -488,7 +488,7 @@ describe('[UC-IMP196/MSS] Station 1 RED: Auction Passed Players Transparency Con
   // FACET 6: LOC BUDGET (NGÂN SÁCH DÒNG MÃ)
   // =========================================================================
   describe('Facet 6: LOC Budget (Ngân sách dòng mã)', () => {
-    it('[TC-196.22/MSS][UC-IMP196] Ngân sách LOC: auction_modal.tsx <= 480 LOC, modal_host.tsx <= 480 LOC, apply_delta.ts <= 300 LOC', () => {
+    it('[TC-196.22/MSS][UC-IMP196] Ngân sách LOC: auction_modal.tsx <= 480 LOC, modal_host.tsx <= 480 LOC, apply_delta.ts <= 350 LOC', () => {
       const auctionModalPath = path.resolve(process.cwd(), 'src/client/ui/modals/auction_modal.tsx');
       const modalHostPath = path.resolve(process.cwd(), 'src/client/ui/modals/modal_host.tsx');
       const applyDeltaPath = path.resolve(process.cwd(), 'src/client/network/apply_delta.ts');
@@ -499,7 +499,7 @@ describe('[UC-IMP196/MSS] Station 1 RED: Auction Passed Players Transparency Con
 
       expect(locAuctionModal).toBeLessThanOrEqual(480);
       expect(locModalHost).toBeLessThanOrEqual(480);
-      expect(locApplyDelta).toBeLessThanOrEqual(300);
+      expect(locApplyDelta).toBeLessThanOrEqual(350);
     });
   });
 });

@@ -232,7 +232,7 @@ describe('[TC-MCH01/MSS][UI-S02/MSS] Mobile Compact HUD & Tactile Retropoly Moda
   // =========================================================================
 
   describe('Gói 2: Tái Cấu Trúc Danh Mục Bất Động Sản Compact & Safe Area (PropertyPortfolioModal)', () => {
-    it('[TC-MCH01.09/MSS][UC-MCH-02] PropertyPortfolioModal footer incorporates safe area bottom clearance pb-8 sm:pb-3 (Chốt 2.1)', () => {
+    it('[TC-MCH01.09/MSS][UC-MCH-02] PropertyPortfolioModal không còn footer dư thừa, đóng qua Header [X] (Chốt 2.1)', () => {
       const html = renderToStaticMarkup(
         React.createElement(PropertyPortfolioModal, {
           ownedProperties: [1, 6],
@@ -244,12 +244,7 @@ describe('[TC-MCH01/MSS][UI-S02/MSS] Mobile Compact HUD & Tactile Retropoly Moda
           onClose: () => {},
         })
       );
-      const footerMatch = html.match(/<footer[^>]*class="([^"]*)"[^>]*>/)?.[1] ?? '';
-      const hasSafeAreaPadding =
-        footerMatch.includes('pb-8 sm:pb-3') ||
-        footerMatch.includes('safe-area-bottom') ||
-        footerMatch.includes('pb-8');
-      expect(hasSafeAreaPadding).toBe(true);
+      expect(html).not.toMatch(/<footer[\s>]/);
     });
 
     it('[TC-MCH01.10/MSS][UC-MCH-02] PropertyPortfolioModal renders property rows with data-testid="property-portfolio-item-${cellIndex}" (Chốt 2.3)', () => {
@@ -296,6 +291,7 @@ describe('[TC-MCH01/MSS][UI-S02/MSS] Mobile Compact HUD & Tactile Retropoly Moda
       );
       const mortgageBtnMatch = html.match(/<button[^>]*>Thế Chấp[^<]*<\/button>/)?.[0] ?? '';
       const hasSufficientHeight =
+        mortgageBtnMatch.includes('min-h-[44px]') ||
         mortgageBtnMatch.includes('min-h-[40px]') ||
         mortgageBtnMatch.includes('min-h-[38px]');
       expect(hasSufficientHeight).toBe(true);
@@ -314,6 +310,7 @@ describe('[TC-MCH01/MSS][UI-S02/MSS] Mobile Compact HUD & Tactile Retropoly Moda
       );
       const redeemBtnMatch = html.match(/<button[^>]*>Giải Chấp[^<]*<\/button>/)?.[0] ?? '';
       const hasSufficientHeight =
+        redeemBtnMatch.includes('min-h-[44px]') ||
         redeemBtnMatch.includes('min-h-[40px]') ||
         redeemBtnMatch.includes('min-h-[38px]');
       expect(hasSufficientHeight).toBe(true);

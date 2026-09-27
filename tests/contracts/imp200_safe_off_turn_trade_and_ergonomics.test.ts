@@ -581,7 +581,7 @@ expect(html).toContain('partner-selector-tab');
     expect(html).toContain('min-h-[44px]');
   });
 
-  it('[TC-200.25/MSS][UC-IMP200][Facet-5/TouchErgonomics] TradeModal giữ nguyên data-testid="trade-modal" và data-legacy-style="max-w-md lg:max-w-lg"', () => {
+  it('[TC-200.25/MSS][UC-IMP200][Facet-5/TouchErgonomics] TradeModal giữ nguyên data-testid="trade-modal" và loại bỏ data-legacy-style', () => {
     const html = renderToStaticMarkup(
       React.createElement(TradeModal, {
         targetPlayerId: 'bob_investor',
@@ -590,8 +590,8 @@ expect(html).toContain('partner-selector-tab');
         myBalance: 15_000,
       }),
     );
-expect(html).toContain('data-testid="trade-modal"');
-    expect(html).toContain('data-legacy-style="max-w-md lg:max-w-lg"');
+    expect(html).toContain('data-testid="trade-modal"');
+    expect(html).not.toContain('data-legacy-style');
   });
 
 });

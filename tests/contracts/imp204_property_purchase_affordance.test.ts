@@ -274,7 +274,7 @@ describe('[TC-204/MSS][UC-IMP204] Property Purchase Affordance & ActionDock Cont
   // FACET 3: TitleDeed Modal Resilient Actions (TC-204.10 - 16)
   // =========================================================================
   describe('Facet 3: TitleDeed Modal Resilient Actions', () => {
-    it('[TC-204.10/MSS][UC-IMP204][Facet-3/ResilientModal] Khi người chơi đủ tiền mặt (canAffordCash === true), Footer render nút [Mua BĐS (X Tr.)] (Active, Emerald) và [Bỏ Qua]', () => {
+    it('[TC-204.10/MSS][UC-IMP204][Facet-3/ResilientModal] Khi người chơi đủ tiền mặt (canAffordCash === true), Footer render nút [Mua BĐS (X Tr.)] (Active, Emerald) và [✕ Từ Chối Mua]', () => {
       const html = renderToStaticMarkup(
         React.createElement(TitleDeedActionFooter, {
           isOwned: false,
@@ -285,83 +285,56 @@ describe('[TC-204/MSS][UC-IMP204] Property Purchase Affordance & ActionDock Cont
       );
       expect(html).toContain(`Mua BĐS (${formatCurrency(1200)})`);
       expect(html).toContain('bg-emerald-700');
-      expect(html).toContain('✕ Đóng');
-      expect(html).toContain('Bỏ Qua (Pass)');
+      expect(html).not.toContain('✕ Đóng');
+      expect(html).toContain('✕ Từ Chối Mua');
     });
 
-    it('[TC-204.11/MSS][UC-IMP204][Facet-3/ResilientModal] Khi người chơi thiếu tiền mặt nhưng đủ khả năng thế chấp (canCoverWithMortgage === true), Footer render nút [🏛️ Cầm Cố Để Mua] và [✕ Đóng]', () => {
+    it('[TC-204.11/MSS][UC-IMP204][Facet-3/ResilientModal] Khi người chơi thiếu tiền mặt, Footer render nút [Mua BĐS] dạng disabled và nút [✕ Từ Chối Mua]', () => {
       const html = renderToStaticMarkup(
         React.createElement(TitleDeedActionFooter, {
           isOwned: false,
           canBuy: false,
-          canCoverWithMortgage: true,
           shortfall: 400,
           totalMortgageCapacity: 500,
           deedPrice: 1200,
           isBuyOpportunity: true,
         } as any)
       );
-      expect(html).toContain('Cầm Cố Để Mua');
-      expect(html).toContain('✕ Đóng');
+      expect(html).toContain('Mua BĐS (1.200)');
+      expect(html).toContain('cursor-not-allowed');
+      expect(html).toContain('✕ Từ Chối Mua');
     });
 
-    it('[TC-204.12/MSS][UC-IMP204][Facet-3/ResilientModal] Bấm [🏛️ Cầm Cố Để Mua] kích hoạt onOpenMortgage, tuyệt đối không gửi bất kỳ intent mua đất nào lên server', () => {
-      const onOpenMortgageSpy = vi.fn();
-      const onBuySpy = vi.fn();
-      let vdom: any;
-      function TestFooter() {
-        vdom = TitleDeedActionFooter({
+    it('[TC-204.12/MSS][UC-IMP204][Facet-3/ResilientModal] Khi thiếu tiền mặt, Footer render notice thiếu tiền insufficient-funds-notice', () => {
+      const html = renderToStaticMarkup(
+        React.createElement(TitleDeedActionFooter, {
           isOwned: false,
           canBuy: false,
-          canCoverWithMortgage: true,
           shortfall: 400,
           totalMortgageCapacity: 500,
           deedPrice: 1200,
           isBuyOpportunity: true,
-          onOpenMortgage: onOpenMortgageSpy,
-          onBuy: onBuySpy,
-        } as any);
-        return vdom;
-      }
-      renderToStaticMarkup(React.createElement(TestFooter));
-
-      const mortgageBtn = findVNode(vdom, (n) => n?.type === 'button' && typeof n.props?.children === 'string' && n.props.children.includes('Cầm Cố Để Mua'));
-      expect(mortgageBtn).toBeDefined();
-      mortgageBtn.props.onClick();
-
-      expect(onOpenMortgageSpy).toHaveBeenCalledOnce();
-      expect(onBuySpy).not.toHaveBeenCalled();
+        } as any)
+      );
+      expect(html).toContain('data-testid="insufficient-funds-notice"');
+      expect(html).toContain('⚠️ Số dư không đủ (Thiếu 400)');
     });
 
-    it('[TC-204.13/MSS][UC-IMP204][Facet-3/ResilientModal] Bấm [✕ Đóng] gọi onClose, tuyệt đối KHÔNG kích hoạt onPass (INTENT_DECLINE)', () => {
-      const onCloseSpy = vi.fn();
-      const onPassSpy = vi.fn();
-      let vdom: any;
-      function TestFooter() {
-        vdom = TitleDeedActionFooter({
+    it('[TC-204.13/MSS][UC-IMP204][Facet-3/ResilientModal] Khi isBuyOpportunity = true, footer sạch nút đóng (không còn ✕ Đóng ở đáy)', () => {
+      const html = renderToStaticMarkup(
+        React.createElement(TitleDeedActionFooter, {
           isOwned: false,
           canBuy: false,
-          canCoverWithMortgage: true,
           shortfall: 400,
           totalMortgageCapacity: 500,
           deedPrice: 1200,
           isBuyOpportunity: true,
-          onClose: onCloseSpy,
-          onPass: onPassSpy,
-        } as any);
-        return vdom;
-      }
-      renderToStaticMarkup(React.createElement(TestFooter));
-
-      const closeBtn = findVNode(vdom, (n) => n?.type === 'button' && n.props?.children === '✕ Đóng');
-      expect(closeBtn).toBeDefined();
-      closeBtn.props.onClick();
-
-      expect(onCloseSpy).toHaveBeenCalledOnce();
-      expect(onPassSpy).not.toHaveBeenCalled();
+        } as any)
+      );
+      expect(html).not.toContain('✕ Đóng');
     });
 
-    it('[TC-204.14/MSS][UC-IMP204][Facet-3/ResilientModal] Khi isBuyOpportunity === true, nút Bỏ Qua strictly gọi onPass (không có silent fallback)', () => {
+    it('[TC-204.14/MSS][UC-IMP204][Facet-3/ResilientModal] Khi isBuyOpportunity === true, nút Từ Chối Mua strictly gọi onPass (không có silent fallback)', () => {
       const onCloseSpy = vi.fn();
       let vdom: any;
       function TestFooter() {
@@ -377,7 +350,7 @@ describe('[TC-204/MSS][UC-IMP204] Property Purchase Affordance & ActionDock Cont
       }
       renderToStaticMarkup(React.createElement(TestFooter));
 
-      const passBtn = findVNode(vdom, (n) => n?.type === 'button' && (n.props?.children === 'Bỏ Qua' || n.props?.children === 'Bỏ Qua (Pass)'));
+      const passBtn = findVNode(vdom, (n) => n?.type === 'button' && (n.props?.children === '✕ Từ Chối Mua' || (typeof n.props?.children === 'string' && n.props.children.includes('Từ Chối Mua'))));
       expect(passBtn).toBeDefined();
       passBtn.props.onClick?.();
 

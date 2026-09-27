@@ -40,11 +40,13 @@ export function BondIssuanceTab({
           type="button"
           onClick={onRepayBond}
           disabled={!canRepay}
-          className={`w-full min-h-[44px] py-2.5 px-4 rounded-xl font-bold text-xs transition-all ${
-            canRepay ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-md active:translate-y-0.5 cursor-pointer' : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+          className={`w-full min-h-[46px] py-2.5 px-4 rounded-xl font-bold text-xs transition-all ${
+            canRepay
+              ? 'bg-emerald-600 hover:bg-emerald-500 text-white border-2 border-emerald-800 shadow-[0_4px_0_0_#065f46] active:translate-y-[3px] cursor-pointer'
+              : 'bg-slate-200 text-slate-400 border border-slate-300 shadow-none cursor-not-allowed'
           }`}
         >
-          {canRepay ? `Tất Toán Trước Hạn (${formatCurrency(bondContract.repayAmount)})` : `Chưa đủ tiền tất toán (${formatCurrency(bondContract.repayAmount)})`}
+          {`Tất Toán Trước Hạn (${formatCurrency(bondContract.repayAmount)})`}
         </button>
       </div>
     );
@@ -74,18 +76,27 @@ export function BondIssuanceTab({
         <li>Tổng giá trị BĐS đảm bảo phải đạt tối thiểu 50% khoản vay.</li>
         <li>Tài sản đảm bảo bị khóa giao dịch & thế chấp trong thời gian hợp đồng.</li>
       </ul>
+      {blockedReason && (
+        <div
+          data-testid="bond-blocked-notice"
+          className="p-2.5 bg-amber-50 border border-amber-300 rounded-xl text-amber-900 text-xs font-semibold flex items-center gap-1.5"
+        >
+          <span>⚠️</span>
+          <span>{blockedReason}</span>
+        </div>
+      )}
       <button
         type="button"
+        data-testid="issue-bond-btn"
         onClick={() => canIssue && onIssueBond?.()}
         disabled={!canIssue}
-        title={blockedReason}
-        className={`w-full min-h-[44px] py-2.5 px-4 rounded-xl font-bold text-xs transition-all ${
+        className={`w-full min-h-[46px] py-2.5 px-4 rounded-xl font-black text-xs transition-all ${
           canIssue
-            ? 'bg-amber-500 hover:bg-amber-400 text-amber-950 shadow-md active:translate-y-0.5 font-black cursor-pointer'
+            ? 'bg-amber-500 hover:bg-amber-400 text-amber-950 border-2 border-amber-700 shadow-[0_4px_0_0_#b45309] active:translate-y-[3px] cursor-pointer'
             : 'bg-slate-200 text-slate-400 border border-slate-300 shadow-none cursor-not-allowed'
         }`}
       >
-        {blockedReason ?? 'Phát Hành Trái Phiếu'}
+        PHÁT HÀNH TRÁI PHIẾU
       </button>
     </div>
   );

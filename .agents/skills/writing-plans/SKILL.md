@@ -22,12 +22,14 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 If the spec covers multiple independent subsystems, it should have been broken into sub-project specs during brainstorming. If it wasn't, suggest breaking this into separate plans — one per subsystem. Each plan should produce working, testable software on its own.
 
-## Pre-Drafting Physical Verification (The 3 Mandatory Checks)
+## Pre-Drafting Physical Verification (The 5 Mandatory Checks)
 
 Before writing any task steps or code snippets, you MUST physically inspect the disk using tools:
 1. **Call-Site Exhaustion (`grep_search`)**: Run `grep_search` on every symbol/function you plan to change across `tests/` and `src/`. Tabulate every caller and every affected test case. Zero unverified assumptions.
 2. **Subtractive Deletion Range (`view_file`)**: Run `view_file` on target files to inspect exact lines being replaced or deleted. Record exact start/end line numbers and functions to delete. Zero hand-wavy "refactor later".
 3. **Banned Mechanism Check**: Cross-check proposed snippets against project constraints (e.g. anti-programmer-art primitives, bare strings, loose types).
+4. **Physical Snippet LOC Count Verification**: When writing drop-in replacement snippets for tasks, physically count the lines of the snippet (`snippet.split('\n').length`). If a planned abstraction or proxy exceeds 100 LOC, design it as an isolated standalone file upfront, preventing accidental LOC ceiling breaches.
+5. **Collection & Adapter Protocol Parity**: When specifying a Proxy or Adapter emulating a standard collection (`Map`, `Set`, `List`, `Dict`), specify all standard protocol methods (CRUD, iteration, size, entries). Never plan partial stubs. For scalar variables, plan simple local single-entry collections (`new Map([[k, v]])`) with sync-back instead of dynamic proxies.
 
 ## File Structure
 

@@ -282,7 +282,7 @@ describe('[IMP-138: Station 1 RED] Auction District Intelligence & Monopoly Rada
       expect(html).toContain('data-testid="auction-modal"');
       expect(html).toContain('data-testid="flip-counter"');
       expect(html).toContain('+100');
-      expect(html).toContain('AUTO-BID');
+      expect(html).toContain('TỰ ĐỘNG ĐẶT GIÁ');
     });
 
     it('[TC-IMP138.27/MSS][UC-GAME-022][IMP-138][Facet-4/Component] Fallback an toàn: Render AuctionModal với cellIndex 0 (GO) không crash runtime', () => {

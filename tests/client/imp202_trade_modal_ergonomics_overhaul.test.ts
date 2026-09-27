@@ -221,7 +221,7 @@ describe('[IMP-202][Trạm 1 RED] Trade Modal Ergonomics Overhaul Contract', () 
   // FACET 5: Ergonomics & Anti-Regression
   // =========================================================================
   describe('Facet 5: Ergonomics & Anti-Regression', () => {
-    it('[TC-202.11/MSS][UC-IMP202][Facet-5/Ergonomics] Nút Hủy mang viền phẳng nhẹ, không mang shadow 3D nặng shadow-[0_4px_0_0_#64748b]', () => {
+    it('[TC-202.11/MSS][UC-IMP202][Facet-5/Ergonomics] Footer không còn nút Hủy thừa, chỉ dùng nút [X] header và nút gửi chiếm w-full', () => {
       const html = renderToStaticMarkup(
         React.createElement(TradeModal, {
           targetPlayerId: 'bot_2',
@@ -231,7 +231,7 @@ describe('[IMP-202][Trạm 1 RED] Trade Modal Ergonomics Overhaul Contract', () 
           onClose: () => {},
         })
       );
-      expect(html).toContain('Hủy');
+      expect(html).not.toMatch(/<footer[^>]*>[\s\S]*?Hủy[\s\S]*?<\/footer>/);
       expect(html).not.toContain('shadow-[0_4px_0_0_#64748b]');
     });
 

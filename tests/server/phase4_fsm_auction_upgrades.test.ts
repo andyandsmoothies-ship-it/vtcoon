@@ -428,7 +428,7 @@ describe('[NET-S04/MSS] Client Sàn Đấu Giá Tự Động & Sparse Delta Sync
 });
 
 describe('[UI-S04/MSS] ModalHost TitleDeedModal onPass Integration', () => {
-  it('TitleDeedModal hiển thị nút Bỏ Qua và cho phép người chơi từ chối mua', () => {
+  it('TitleDeedModal hiển thị nút Từ Chối Mua và cho phép người chơi từ chối mua', () => {
     let passCalled = false;
     const markup = renderToStaticMarkup(
       React.createElement(TitleDeedModal, {
@@ -441,7 +441,7 @@ describe('[UI-S04/MSS] ModalHost TitleDeedModal onPass Integration', () => {
       })
     );
 
-    expect(markup).toContain('Bỏ Qua');
+    expect(markup).toContain('Từ Chối Mua');
     expect(markup).toContain('Mua BĐS');
   });
 
@@ -462,7 +462,7 @@ describe('[UI-S04/MSS] ModalHost TitleDeedModal onPass Integration', () => {
       })
     );
 
-    expect(markup).toContain('Bỏ Qua');
+    expect(markup).toContain('Từ Chối Mua');
     expect(markup).toContain('Mua BĐS');
   });
 });

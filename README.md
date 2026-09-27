@@ -33,49 +33,7 @@ Trò chơi bàn cờ tỷ phú bất động sản 3D trực tuyến lấy bối
 
 ## 🏛️ Kiến Trúc Hệ Thống (System Architecture)
 
-VTCoOn được thiết kế theo 2 cấp độ kiến trúc: **Cấp độ 1** (Trừu tượng, trực quan dành cho người không chuyên) và **Cấp độ 2** (Bóc tách kỹ thuật chi tiết từng Engine game dành cho lập trình viên & kỹ sư).
-
----
-
-### 🌟 Cấp Độ 1: Kiến Trúc Trực Quan (Dành Cho Người Không Chuyên)
-
-Ở góc độ người chơi và vận hành, VTCoOn hoạt động giống như một **"Sân Khấu Kịch Bản Kép & Trọng Tài Tối Cao"**:
-
-```text
-  [ 📱 Người Chơi (Điện thoại / Laptop) ]
-         │
-         │ (1) Gửi Ý Định: "Tôi muốn gieo xúc xắc / Mua đất / Đổi BĐS"
-         ▼
-  [ ⚖️ Trọng Tài Máy Chủ (Server-Authoritative Game Master) ]
-         │ - Cầm cuốn Luật Chơi (FSM): Kiểm tra tính hợp lệ
-         │ - Tung xúc xắc công tâm, tính tiền thuê, thu thuế Kho Bạc
-         │ - Điều hành các phiên Đấu giá và kích hoạt Bot AI
-         │
-         │ (2) Phát sóng thay đổi (Chỉ gửi phần vi sai < 10KB)
-         ▼
-  [ ⚡ Bảng Điện Tử Realtime (WebSocket Network) ]
-         │
-         ├──► Cập nhật bàn cờ 3D & số dư cho tất cả người chơi cùng lúc!
-         │
-         ▼ (3) Ghi nhật ký ván đấu
-  [ 🏛️ Cuốn Sổ Cái Đám Mây (Supabase Cloud Storage) ]
-         └─► Lưu trữ biên bản trận đấu vĩnh viễn để xem lại lịch sử
-```
-
-#### 💡 3 Nguyên Tắc Vận Hành Vàng:
-1. **Khách Gửi Ý Định, Trọng Tài Ra Quyết Định (Server-Authoritative)**:
-   - Trình duyệt điện thoại/laptop của người chơi chỉ đóng vai trò hiển thị đồ họa và thu nhận thao tác chạm.
-   - Mọi phép tính tiền bạc, mua bán, gieo xúc xắc và nâng cấp nhà đều do máy chủ quyết định. **Tuyệt đối chống hack, can thiệp mã nguồn hay gian lận 100%**.
-2. **Gói Tin Nhẹ Như Tin Nhắn (Sparse Delta Compression)**:
-   - Khi có biến động, máy chủ không gửi lại toàn bộ bàn cờ mà chỉ gửi vài dòng thay đổi (ví dụ: *"Người chơi 1 mất 500đ tiền thuê, di chuyển đến ô số 9"*). Dung lượng mỗi lần gửi chưa tới **10KB**, chơi mượt mà ngay cả trên mạng 4G di động chập chờn.
-3. **Rớt Mạng Không Mất Bàn (60s Reconnect Grace Period)**:
-   - Nếu bạn lỡ tay tắt trình duyệt hoặc mất kết nối mạng, máy chủ sẽ giữ nguyên vị trí và tài sản của bạn trong **60 giây**. Chỉ cần mở lại liên kết phòng, bạn sẽ lập tức trở lại bàn cờ đúng trạng thái đang chơi.
-
----
-
-### ⚙️ Cấp Độ 2: Bóc Tách Chi Tiết Từng Engine Game (Kỹ Thuật Chuyên Sâu)
-
-Dành cho lập trình viên và kiến trúc sư hệ thống, hệ thống lõi của VTCoOn phân rã thành **7 Engine chuyên biệt** tuân thủ nguyên lý Deep Modules (Giao diện đơn giản giấu kín logic phức tạp) và ranh giới bất biến nghiêm ngặt:
+Hệ thống lõi của VTCoOn được thiết kế theo nguyên lý **Domain-Driven Design (DDD)** và **Deep Modules** (Giao diện đơn giản giấu kín logic phức tạp), phân rã thành **7 Engine chuyên biệt** với ranh giới bất biến nghiêm ngặt:
 
 ```text
 ┌────────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -103,9 +61,10 @@ Dành cho lập trình viên và kiến trúc sư hệ thống, hệ thống lõ
 │                                                                                                    │
 │  ┌──────────────────────────────────────────────────────────────────────────────────────────────┐  │
 │  │ Engine 4: Server Orchestration & WebSocket Network Engine                                    │  │
-│  │ - Single-Port HTTP/WSS Server (Port 3000/3001)     - Multi-Room Mutex & Zero Cross-Talk E2E  │  │
-│  │ - TurnOrchestrator (Deterministic Timers)          - DeltaBroadcaster (Array Tombstones)     │  │
-│  │ - TurnWatchdog (Stall & Timeout Self-Rescue)       - AdminManager & Portal Telemetry Guard    │  │
+│  │ - Single-Port HTTP/WSS Server (Port 3000/3001)     - GameRoomSession Aggregate Root (DDD)    │  │
+│  │ - IntentDispatcher (Direct Domain Delegation)      - SessionFieldMapFacade (100% Map Parity) │  │
+│  │ - TurnOrchestrator & Watchdog (Stall Recovery)     - DeltaBroadcaster (Sparse Diffs & Nulls) │  │
+│  │ - Multi-Room Mutex & Zero Cross-Talk E2E           - AdminManager & Portal Telemetry Guard   │  │
 │  └─────────────────────────────────────────────┬────────────────────────────────────────────────┘  │
 │                                                │                                                   │
 │  ┌─────────────────────────────────────────────┴────────────────────────────────────────────────┐  │
@@ -122,11 +81,11 @@ Dành cho lập trình viên và kiến trúc sư hệ thống, hệ thống lõ
 │  │                      │                                               │                       │  │
 │  │                      ▼                                               ▼                       │  │
 │  │  ┌────────────────────────────────────────┐     ┌─────────────────────────────────────────┐  │  │
-│  │  │ Engine 3: Bot AI Decision Engine       │     │ Event & Market Simulation Subsystem     │  │  │
-│  │  │ - 3 Personas: Aggressive/Balanced/Pass │◄───►│ - 16 Market Shock Cards (Phiếu Thị Trường)│  │
-│  │  │ - Softmax Sigmoid Probabilistic Model  │     │ - 20 Personal Fate Cards (Phiếu Cơ Hội) │  │  │
-│  │  │ - Monopoly Gap Detector (N-1 Strategy) │     │ - HOSE Stock Exchange 1D6 Matrix        │  │  │
-│  │  │ - Solvency Recovery (Even-Downgrade)   │     │ - Dynamic Audit Bailout & Anti-Camping  │  │  │
+│  │  │ Engine 3: Bot AI Decision Engine       │     │ Domain Action Coordinators Subsystem    │  │  │
+│  │  │ - 3 Personas: Aggressive/Balanced/Pass │◄───►│ - Property Actions & Even-Build Rule    │  │  │
+│  │  │ - Softmax Sigmoid Probabilistic Model  │     │ - HOSE Stock Exchange & Bond Manager    │  │  │
+│  │  │ - Monopoly Gap Detector (N-1 Strategy) │     │ - Auction Manager & Mortgage Sanitizer  │  │  │
+│  │  │ - Solvency Recovery (Even-Downgrade)   │     │ - Market Shock & Personal Fate Cards    │  │  │
 │  │  └────────────────────────────────────────┘     └─────────────────────────────────────────┘  │  │
 │  └─────────────────────────────────────────────┬────────────────────────────────────────────────┘  │
 │                                                │                                                   │
@@ -151,6 +110,7 @@ Dành cho lập trình viên và kiến trúc sư hệ thống, hệ thống lõ
    - **Chuyển nhượng BĐS thế chấp kèm nợ (Loan Assumption P2P - IMP-204B)**: Định giá lại tài sản theo Giá trị ròng (Net Equity = Giá đất - Nợ vay), hạ sàn giao dịch xuống 35% giá niêm yết, di dời nghĩa vụ nợ nguyên tử sang người mua.
    - **Đòn bẩy Trái phiếu Doanh nghiệp & Sàn phát mãi 0 đồng (IMP-192C)**: Cho phép thế chấp danh mục vay 80% Net Worth từ Kho Bạc; vỡ nợ tự động kích hoạt sàn đấu giá phát mãi 0 đồng (Bắt đáy 0).
    - **Chu kỳ kinh tế vĩ mô 6 vòng (IMP-192B)**: Tự động xoay tua Sốt đất (x2.5 tiền thuê, giảm giá xây) ➔ Đóng băng thanh khoản (giảm tiền thuê, cấm mở khoản vay mới) ➔ Hạ nhiệt.
+   - **Làm sạch thế chấp khi trúng đấu giá (Mortgage Sanitization - IMP-205)**: Đất trúng đấu giá phát mãi được giải phóng thế chấp ngay lập tức, tiền nợ gốc của người chơi vỡ nợ được hoàn trả ưu tiên cho Kho Bạc.
 
 3. **Bot AI Decision Engine (Trí Tuệ Nhân Tạo Đối Kháng - `src/domain/bot/`)**:
    - Phân hóa 3 trường phái tính cách: **Aggressive** (Hiếu chiến, gom đất nhanh, ép giá), **Balanced** (Cân bằng thực dụng), **Passive** (Nhà đầu tư giá trị, tích lũy an toàn).
@@ -160,9 +120,12 @@ Dành cho lập trình viên và kiến trúc sư hệ thống, hệ thống lõ
 
 4. **Server Orchestration & WebSocket Network Engine (Điều Phối & Mạng Realtime - `src/server/`)**:
    - Kiến trúc Single-Port phục vụ đồng thời giao thức HTTP REST và WebSocket trên cùng một cổng Node.js.
-   - `RoomManager`: Cơ chế khóa Mutex theo từng phòng, bảo đảm cách ly tuyệt đối gói tin giữa các phòng chơi (**WSS Zero Cross-Talk verified**).
-   - `TurnOrchestrator`: Quản lý nhịp thở trận đấu với các đồng hồ đếm ngược xác định, kích hoạt Bot tự động và Watchdog giải cứu khẩn cấp khi người chơi AFK.
-   - `DeltaBroadcaster`: Nén và phát tán vi sai trạng thái cực nhỏ (**Sparse Diff < 10KB**), tích hợp giao thức mồ mả (Array Tombstones `[]` / `null`) giúp client cập nhật tức thì mà không cần nạp lại toàn bộ bàn cờ.
+   - **GameRoomSession Aggregate Root (DDD - IMP-210)**: Gom cụm toàn bộ 10 cấu trúc dữ liệu phân tán (`Room`, `PropertyRegistry`, `PropertyStateMap`, `AuctionSession`, `rolledThisTurn`, `lastAuctionResult`, `activeTimers`, `lastActivity`, `botPersonalities`) vào một Aggregate Root nguyên tử duy nhất, quản trị vòng đời tập trung và triệt tiêu rò rỉ bộ nhớ qua chu trình Teardown nghiêm ngặt (`closeHooks` ➔ `pendingTradeManager.clearSession` ➔ `session.destroy()` ➔ `sessions.delete()`).
+   - **Dynamic Map Facades & 100% Map Protocol Parity (`SessionFieldMapFacade`, `BotPersonalityMapFacade`)**: Cung cấp lớp bọc tương thích ngược chuẩn `Map` và `MapIterator` (chuẩn ES2025/TS 5.6+) cho các subsystem và test suites cũ mà không tốn chi phí RAM nhân đôi.
+   - **Domain Action Coordinators (Khử Ping-Pong Surface - IMP-209)**: Tách bạch các điều phối viên nghiệp vụ chuyên biệt (`room_property_coordinator`, `hose_actions`, `bond_manager`, `auction_manager`). `IntentDispatcher` ủy quyền trực tiếp sang các Coordinators thay vì dội ngược qua `RoomManager`, giúp `RoomManager` tinh gọn (< 400 LOC, đạt chuẩn Tier 1).
+   - **TurnOrchestrator & Watchdog**: Quản lý nhịp thở ván đấu, timer xác định, giải cứu AFK/Stall, đồng bộ vòng đời Turn N+1 dọn dẹp sạch sẽ ephemeral states.
+   - **DeltaBroadcaster**: Nén và phát tán vi sai trạng thái cực nhỏ (**Sparse Diff < 10KB**), tích hợp giao thức mồ mả (Array Tombstones `[]` / `null`) giúp client cập nhật tức thì mà không cần nạp lại toàn bộ bàn cờ.
+   - **Multi-Room Mutex & Zero Cross-Talk**: Cơ chế khóa Mutex theo từng phòng, bảo đảm cách ly tuyệt đối gói tin giữa các phòng chơi trong môi trường đa người dùng.
 
 5. **3D Diorama & Physics Rendering Engine (Đồ Họa Sa Bàn & Vật Lý 3D - `src/client/3d/`)**:
    - Xây dựng trên nền tảng **React Three Fiber (Three.js)** kết hợp thư viện Drei, tối ưu hóa tốc độ khung hình 60 FPS trên cả thiết bị di động.
@@ -258,9 +221,16 @@ npm test
 npm run lint:ui
 npx tsc --noEmit
 
+# Kiểm tra ngân sách dòng mã (LOC Budget) & chống code phình to
+npm run check:loc
+
 # Chạy toàn bộ cổng kiểm duyệt chất lượng trước khi bàn giao
 npm run gate
 ```
+
+- **345+ Living Test Suites (~7.000 test cases PASS 100%)**: Kiểm thử đa tầng từ Unit Tests, Living FSM Tests, Contract Suites đến E2E Multiplayer Flow.
+- **Typecheck Gate Tự Động**: Bắt buộc kiểm tra biên dịch kiểu tĩnh qua `npx tsc --noEmit` trong pipeline nghiệm thu (`scripts/collect_evidence.mjs`), cấm tuyệt đối transpiler bypass (Vitest/esbuild) và bảo đảm 0 lỗi TypeScript trên toàn bộ codebase.
+- **Anti-Slop & LOC Budget Guard**: Kiểm soát độ phức tạp cyclomatic (<= 5) và ngân sách LOC theo tầng kiến trúc (Tier 1 <= 400 LOC, Tier 2 <= 500 LOC) qua `scripts/lint_slop.mjs` và `scripts/check_loc.mjs`.
 
 ---
 
@@ -270,7 +240,7 @@ npm run gate
 vtcoon/
 ├── src/
 │   ├── domain/        # FSM lõi, bảng cờ, kinh tế, quy tắc nghiệp vụ thuần túy
-│   ├── server/        # WebSocket server, RoomManager, Bot AI, AdminManager
+│   ├── server/        # GameRoomSession, RoomManager, Domain Coordinators, WebSocket, Bot AI
 │   └── client/        # Giao diện R3F 3D, âm thanh Howler, HUD, Modals, Stores
 ├── nginx/             # Cấu hình reverse proxy và chứng chỉ SSL
 ├── tests/             # 345+ living test suites (~7.000 tests: domain, server, client, contracts)

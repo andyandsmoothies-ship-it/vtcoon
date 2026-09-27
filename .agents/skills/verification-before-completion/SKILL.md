@@ -37,9 +37,8 @@ Skip any step = lying, not verifying
 
 ## Common Failures
 
-| Claim | Requires | Not Sufficient |
-|-------|----------|----------------|
 | Tests pass | Test command output: 0 failures | Previous run, "should pass" |
+| Typecheck clean | Compiler command (tsc --noEmit, cargo check): exit 0 | Tests passing (Transpilers like Vitest/esbuild/SWC/tsx strip types and ignore compile errors!) |
 | Linter clean | Linter output: 0 errors | Partial check, extrapolation |
 | Build succeeds | Build command: exit 0 | Linter passing, logs look good |
 | Bug fixed | Test original symptom: passes | Code changed, assumed fixed |
@@ -67,6 +66,7 @@ Skip any step = lying, not verifying
 | "I'm confident" | Confidence ≠ evidence |
 | "Just this once" | No exceptions |
 | "Linter passed" | Linter ≠ compiler |
+| "Tests pass so types are fine" | Transpilers (Vitest/esbuild/SWC) strip types without checking them. Run compiler! |
 | "Agent said success" | Verify independently |
 | "I'm tired" | Exhaustion ≠ excuse |
 | "Partial check is enough" | Partial proves nothing |
@@ -79,6 +79,12 @@ Skip any step = lying, not verifying
 ```
 ✅ [Run test command] [See: 34/34 pass] "All tests pass"
 ❌ "Should pass now" / "Looks correct"
+```
+
+**Typecheck & Compiler (The Transpiler Trap):**
+```
+✅ [Run compiler: tsc --noEmit / cargo check] [See: exit 0] "Typecheck clean"
+❌ "Tests pass so types must be fine" (Vitest/esbuild/SWC/tsx only transpile; they ignore type errors!)
 ```
 
 **Regression tests (TDD Red-Green):**

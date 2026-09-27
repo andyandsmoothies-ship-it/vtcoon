@@ -78,6 +78,8 @@ function syncTurnAndTimer(delta: DeltaPayload, state: GameState): void {
       (delta.diceRollerId === effectiveTurnPlayerId || (delta.dice && (delta.dice[0] > 0 || delta.dice[1] > 0)))
     ) {
       state.setHasRolledThisTurn(true);
+    }
+    if (delta.turnPhase === TurnPhase.PropertyManagement) {
       state.setIsRolling(false);
     }
   }

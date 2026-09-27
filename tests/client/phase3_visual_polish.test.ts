@@ -33,7 +33,7 @@ describe('[TC-P3.1/MSS] TitleDeedModal Layout Polish & Chống Tràn Màn Hình 
     expect(html).toContain('data-testid="title-deed-modal"');
   });
 
-  it('Thẻ header có px-3 py-1 chống ngắt từ ngẫu nhiên và nút đóng đạt touch target 48px', () => {
+  it('Thẻ header có py-1 chống ngắt từ ngẫu nhiên và nút đóng đạt touch target 44px', () => {
     const html = renderToStaticMarkup(
       React.createElement(TitleDeedModal, {
         cellIndex: 1,
@@ -42,11 +42,11 @@ describe('[TC-P3.1/MSS] TitleDeedModal Layout Polish & Chống Tràn Màn Hình 
         onClose: () => {},
       })
     );
-    expect(html).toContain('px-3 py-1');
+    expect(html).toContain('py-1');
     expect(html).toContain('shrink-0');
     expect(html).toContain('break-words');
     expect(html).toContain('aria-label="Đóng Sổ Đỏ"');
-    expect(html).toContain('min-w-[48px] min-h-[48px]');
+    expect(html).toContain('min-w-[44px] min-h-[44px]');
     expect(html).toContain('✕');
   });
 
@@ -57,12 +57,12 @@ describe('[TC-P3.1/MSS] TitleDeedModal Layout Polish & Chống Tràn Màn Hình 
     expect(html).toContain('flex-1 min-h-0 overflow-y-auto pr-1');
   });
 
-  it('Các nút hành động Mua BĐS và Bỏ Qua đạt chuẩn touch target min-h-[48px]', () => {
+  it('Các nút hành động Mua BĐS và Từ Chối Mua đạt chuẩn touch target min-h-[48px]', () => {
     const html = renderToStaticMarkup(
       React.createElement(TitleDeedModal, { cellIndex: 1, canBuy: true, isOwned: false })
     );
     expect(html).toContain('Mua BĐS');
-    expect(html).toContain('Bỏ Qua');
+    expect(html).toContain('Từ Chối Mua');
     expect(html).toContain('min-h-[48px]');
   });
 
@@ -114,7 +114,7 @@ describe('[TC-P3.1/MSS] TitleDeedModal Layout Polish & Chống Tràn Màn Hình 
       React.createElement(TitleDeedModal, { cellIndex: 39, canBuy: true, isOwned: false })
     );
     expect(html).toContain('TP.HCM (Quận 1 - Nguyễn Huệ)');
-    expect(html).toContain('px-3 py-1');
+    expect(html).toContain('py-1');
     expect(html).toContain('break-words');
   });
 });

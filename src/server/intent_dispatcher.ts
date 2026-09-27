@@ -1,7 +1,17 @@
 // [UC-GAME-001..003/MSS][UC-GAME-051..057/MSS] Player Intent Dispatcher — ADR-0001
-import { TurnPhase } from '../domain/room';
-import { BuyResult } from '../domain/property_manager';
-import type { RoomManager, RollResult } from './room_manager';
+import { TurnPhase, ActionRejectReason } from '../domain/room.js';
+import { BuyResult } from '../domain/property_manager.js';
+import type { RoomManager, RollResult } from './room_manager.js';
+import { getActivePlayerFn } from './room_manager_lifecycle.js';
+import {
+  coordMortgage, coordRedeem, coordDowngrade, coordTrade,
+  coordRespondTradeOffer, coordBankruptcy, coordExecuteCompulsoryBuyout,
+  coordDeclineCompulsoryBuyout,
+} from './room_property_coordinator.js';
+import { handleUpgrade, handleUpgradeETC, handleUpgradeUtility, handleBuyProperty } from './property_actions.js';
+import { handleHoseInvest, handleHoseSkip } from './hose_actions.js';
+import { handleIssueBond, handleRepayBond } from './bond_manager.js';
+import { handleBailOut } from './audit_manager.js';
 
 export type PlayerIntent =
   | { type: 'INTENT_BUY' } | { type: 'INTENT_BUY_PROPERTY' } | { type: 'INTENT_DECLINE' }
@@ -34,47 +44,94 @@ const INTENT_DISPATCH: Record<PlayerIntent['type'], IntentHandler> = {
     return { success: res !== undefined, reason: res ? undefined : 'CANNOT_ROLL', rollResult: res };
   },
   INTENT_BUY: (m, rc, p) => {
-    const res = m.handleBuyProperty(rc, p);
+    const ctx = m.getContext(rc);
+    if (!ctx) return { success: false, reason: ActionRejectReason.INVALID_ROOM };
+    const player = getActivePlayerFn(ctx.room, p);
+    const res = handleBuyProperty(ctx.room, player, ctx.reg);
     return { success: res?.result === BuyResult.Success, reason: res?.result };
   },
   INTENT_BUY_PROPERTY: (m, rc, p) => {
-    const res = m.handleBuyProperty(rc, p);
+    const ctx = m.getContext(rc);
+    if (!ctx) return { success: false, reason: ActionRejectReason.INVALID_ROOM };
+    const player = getActivePlayerFn(ctx.room, p);
+    const res = handleBuyProperty(ctx.room, player, ctx.reg);
     return { success: res?.result === BuyResult.Success, reason: res?.result };
   },
   INTENT_DECLINE: (m, rc, p) => m.handleDecline(rc, p),
   INTENT_BID: (m, rc, p, i) => m.handleAuctionBid(rc, p, (i as { amount: number }).amount),
   INTENT_AUCTION_PASS: (m, rc, p) => m.handleAuctionPass(rc, p),
-  INTENT_UPGRADE: (m, rc, p, i) => m.handleUpgrade(rc, p, (i as { cellIndex: number }).cellIndex),
-  INTENT_UPGRADE_ETC: (m, rc, p) => m.handleUpgradeETC(rc, p),
-  INTENT_UPGRADE_UTILITY: (m, rc, p, i) => m.handleUpgradeUtility(rc, p, (i as { cellIndex: number }).cellIndex),
+  INTENT_UPGRADE: (m, rc, p, i) => {
+    const ctx = m.getContext(rc);
+    if (!ctx) return { success: false, reason: ActionRejectReason.INVALID_ROOM };
+    const player = getActivePlayerFn(ctx.room, p);
+    return handleUpgrade(player, ctx.room.phase, (i as { cellIndex: number }).cellIndex, ctx.reg, ctx.sm, ctx.room.activeModifiers, ctx.room);
+  },
+  INTENT_UPGRADE_ETC: (m, rc, p) => {
+    const ctx = m.getContext(rc);
+    if (!ctx) return { success: false, reason: ActionRejectReason.INVALID_ROOM };
+    const player = getActivePlayerFn(ctx.room, p);
+    return handleUpgradeETC(player, ctx.room.phase, ctx.reg, ctx.sm, ctx.room);
+  },
+  INTENT_UPGRADE_UTILITY: (m, rc, p, i) => {
+    const ctx = m.getContext(rc);
+    if (!ctx) return { success: false, reason: ActionRejectReason.INVALID_ROOM };
+    const player = getActivePlayerFn(ctx.room, p);
+    return handleUpgradeUtility(player, ctx.room.phase, (i as { cellIndex: number }).cellIndex, ctx.reg, ctx.sm, ctx.room);
+  },
   INTENT_DOWNGRADE: (m, rc, p, i) => {
+    const ctx = m.getContext(rc);
+    if (!ctx) return { success: false, reason: ActionRejectReason.INVALID_ROOM };
     const di = i as { cellIndex: number; stepByStep?: boolean; enforceEvenDowngrading?: boolean };
-    return m.handleDowngrade(rc, p, di.cellIndex, {
+    const player = getActivePlayerFn(ctx.room, p);
+    return coordDowngrade(ctx, player, di.cellIndex, rc, {
       stepByStep: di.stepByStep ?? true,
       enforceEvenDowngrading: di.enforceEvenDowngrading ?? true,
     });
   },
-  INTENT_MORTGAGE: (m, rc, p, i) => m.handleMortgage(rc, p, (i as { cellIndex: number }).cellIndex),
-  INTENT_REDEEM: (m, rc, p, i) => m.handleRedeem(rc, p, (i as { cellIndex: number }).cellIndex),
+  INTENT_MORTGAGE: (m, rc, p, i) => {
+    const ctx = m.getContext(rc);
+    return ctx ? coordMortgage(ctx, p, (i as { cellIndex: number }).cellIndex) : { success: false, reason: ActionRejectReason.INVALID_ROOM };
+  },
+  INTENT_REDEEM: (m, rc, p, i) => {
+    const ctx = m.getContext(rc);
+    return ctx ? coordRedeem(ctx, p, (i as { cellIndex: number }).cellIndex) : { success: false, reason: ActionRejectReason.INVALID_ROOM };
+  },
   INTENT_TRADE_OFFER: (m, rc, p, i) => {
+    const ctx = m.getContext(rc);
+    if (!ctx) return { success: false, reason: ActionRejectReason.INVALID_ROOM };
     const ti = i as { sellerId: string; buyerId: string; cellIndex: number; price: number; offeredCellIndex?: number };
-    return m.handleTradeOffer(rc, p, ti.sellerId, ti.buyerId, ti.cellIndex, ti.price, ti.offeredCellIndex);
+    return coordTrade(ctx, p, ti.sellerId, ti.buyerId, ti.cellIndex, ti.price, ti.offeredCellIndex);
   },
   INTENT_RESPOND_TRADE_OFFER: (m, rc, p, i) => {
+    const ctx = m.getContext(rc);
+    if (!ctx) return { success: false, reason: ActionRejectReason.INVALID_ROOM };
     const ri = i as { offerId: string; accept: boolean };
-    return m.handleRespondTradeOffer(rc, p, ri.offerId, ri.accept);
+    return coordRespondTradeOffer(ctx, p, ri.offerId, ri.accept);
   },
   INTENT_EXECUTE_COMPULSORY_BUYOUT: (m, rc, p, i) => {
-    const bi = i as { cellIndex: number };
-    return m.executeCompulsoryBuyout(rc, p, bi.cellIndex);
+    const ctx = m.getContext(rc);
+    return ctx ? coordExecuteCompulsoryBuyout(ctx, p, (i as { cellIndex: number }).cellIndex) : { success: false, reason: ActionRejectReason.INVALID_ROOM };
   },
-  INTENT_DECLINE_COMPULSORY_BUYOUT: (m, rc, p) => m.declineCompulsoryBuyout(rc, p),
-  INTENT_INVEST: (m, rc, p, i) => m.handleHoseInvest(rc, p, (i as { stake: number }).stake),
-  INTENT_SKIP: (m, rc, p) => m.handleHoseSkip(rc, p),
+  INTENT_DECLINE_COMPULSORY_BUYOUT: (m, rc, p) => {
+    const ctx = m.getContext(rc);
+    return ctx ? coordDeclineCompulsoryBuyout(ctx, p) : { success: false, reason: ActionRejectReason.INVALID_ROOM };
+  },
+  INTENT_INVEST: (m, rc, p, i) => {
+    const room = m.getRoom(rc);
+    const player = getActivePlayerFn(room, p);
+    return handleHoseInvest(room, player, m.getRng(), (i as { stake: number }).stake);
+  },
+  INTENT_SKIP: (m, rc, p) => {
+    const room = m.getRoom(rc);
+    const player = getActivePlayerFn(room, p);
+    return handleHoseSkip(room, player);
+  },
   INTENT_BAIL_OUT: (m, rc, p) => m.handleBailOut(rc, p),
   INTENT_BANKRUPTCY: (m, rc, p, i) => {
+    const ctx = m.getContext(rc);
+    if (!ctx) return { success: false, reason: ActionRejectReason.INVALID_ROOM };
     const ci = i as { creditorId?: string };
-    m.handleBankruptcy(rc, p, ci.creditorId);
+    coordBankruptcy(ctx, p, ci.creditorId, m.auctionsMap, rc, m.rolledThisTurnMap);
     return { success: true };
   },
   INTENT_ISSUE_BOND: (m, rc, p) => m.handleIssueBond(rc, p),
@@ -86,7 +143,6 @@ const INTENT_DISPATCH: Record<PlayerIntent['type'], IntentHandler> = {
     const r = m.handleEndTurn(rc, p, continueDoubles);
     return { success: r !== undefined, reason: r ? undefined : 'INVALID_PHASE' };
   },
-
 };
 
 export function dispatchPlayerIntent(
@@ -104,4 +160,3 @@ export function dispatchPlayerIntent(
   const handler = INTENT_DISPATCH[intent.type];
   return handler ? handler(mgr, roomCode, playerId, intent) : { success: false, reason: 'INVALID_INTENT' };
 }
-

@@ -19,7 +19,7 @@ export function PlayerHudList({ initialCollapsed = false }: { initialCollapsed?:
 
   return (
     <aside
-      className="pointer-events-none flex flex-col gap-2 w-44 sm:w-48 md:w-64 max-w-[calc(100vw-8rem)] select-none items-end"
+      className="pointer-events-none flex flex-col gap-2 w-40 sm:w-48 md:w-64 max-w-[calc(100vw-8rem)] select-none items-end"
       aria-label="Danh sách người chơi"
     >
       <div className="flex flex-col gap-2 w-full pt-16 sm:pt-0">

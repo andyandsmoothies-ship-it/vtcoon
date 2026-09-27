@@ -57,6 +57,7 @@ export function GameRulesModal({
             className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 font-bold transition-colors cursor-pointer text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             data-testid="close-rules-modal-btn"
             aria-label="Đóng hướng dẫn"
+            title="Đóng hướng dẫn (Phím Esc hoặc click nền)"
           >
             ✕
           </button>
@@ -326,17 +327,6 @@ export function GameRulesModal({
             </div>
           )}
         </main>
-
-        {/* Footer */}
-        <footer className="px-5 py-3 border-t border-slate-200 bg-slate-50/50 flex justify-end shrink-0">
-          <button
-            type="button"
-            onClick={onClose}
-            className="min-h-[44px] px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs transition-colors cursor-pointer"
-          >
-            Đã Hiểu
-          </button>
-        </footer>
       </div>
     </div>
   );

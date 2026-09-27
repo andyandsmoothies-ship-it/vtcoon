@@ -241,14 +241,25 @@ export function BotTradeOfferModal({
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <footer className="p-4 pt-1 bg-[#F7F2E7] border-t border-slate-300 flex gap-2.5">
+      {/* Cảnh báo thiếu tiền mặt bù giao dịch (Render riêng biệt trên nút) */}
+      {isCashShortfall && (
+        <div
+          data-testid="trade-shortfall-notice"
+          className="mx-4 mb-2 p-2 bg-amber-50 border border-amber-300 rounded-xl flex items-center justify-between text-xs text-amber-900 font-semibold"
+        >
+          <span>⚠️ Số dư không đủ bù chênh lệch</span>
+          <span className="font-bold text-rose-700">Thiếu: {formatCurrency(absPrice - sellerBalance)}</span>
+        </div>
+      )}
+
+      {/* Action Buttons: 2 Cột đối xứng ngang bằng */}
+      <footer className="p-4 pt-1 bg-[#F7F2E7] border-t border-slate-300 grid grid-cols-2 gap-2.5">
         <button
           type="button"
           data-testid="reject-trade-btn"
           aria-label={isSwap ? 'Từ chối đổi đất' : 'Từ chối bán đất'}
           onClick={() => onReject(offerId)}
-          className="flex-1 min-h-[44px] py-2.5 px-4 rounded-xl font-black text-xs text-white bg-rose-600 hover:bg-rose-700 border-2 border-rose-800 shadow-[0_4px_0_0_#9f1239] active:shadow-[0_1px_0_0_#9f1239] active:translate-y-[3px] transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
+          className="min-h-[46px] py-2.5 px-4 rounded-xl font-black text-xs text-rose-700 bg-rose-50 hover:bg-rose-100 border-2 border-rose-300 shadow-[0_4px_0_0_#fca5a5] active:translate-y-[3px] transition-all cursor-pointer"
         >
           {isSwap ? '✕ TỪ CHỐI ĐỔI' : '✕ TỪ CHỐI BÁN'}
         </button>
@@ -257,15 +268,14 @@ export function BotTradeOfferModal({
           data-testid="accept-trade-btn"
           aria-label={isSwap ? 'Đồng ý đổi đất' : 'Đồng ý bán đất'}
           disabled={!canAccept}
-          title={isCashShortfall ? `Bạn cần có tối thiểu ${formatCurrency(absPrice)} để bù tiền giao dịch này` : undefined}
           onClick={() => canAccept && onAccept(offerId)}
-          className={`flex-1 min-h-[44px] py-2.5 px-4 rounded-xl font-black text-xs transition-all ${
+          className={`min-h-[46px] py-2.5 px-4 rounded-xl font-black text-xs transition-all ${
             canAccept
               ? 'text-white bg-emerald-600 hover:bg-emerald-700 border-2 border-emerald-800 shadow-[0_4px_0_0_#065f46] active:translate-y-[3px] cursor-pointer'
-              : 'bg-slate-200 text-slate-400 border-2 border-slate-300 shadow-none cursor-not-allowed'
+              : 'bg-slate-200 text-slate-400 border border-slate-300 shadow-none cursor-not-allowed'
           }`}
         >
-          {isCashShortfall ? `Thiếu Tiền Bù (-${formatCurrency(absPrice)})` : isSwap ? '✓ ĐỒNG Ý ĐỔI' : '✓ ĐỒNG Ý BÁN'}
+          {isSwap ? '✓ ĐỒNG Ý ĐỔI' : '✓ ĐỒNG Ý BÁN'}
         </button>
       </footer>
     </div>

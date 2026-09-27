@@ -74,7 +74,6 @@ export function TradeColumn({
       </div>
 
       <div
-        data-legacy-style="max-h-36 sm:max-h-52 md:max-h-72"
         className="flex-1 max-h-52 sm:max-h-72 overflow-y-auto space-y-1.5 pr-1"
       >
         {properties.length === 0 ? (

@@ -63,7 +63,7 @@ function renderCellChip(cell: DistrictCellChip): React.ReactElement {
         cell.isTarget ? 'ring-2 ring-amber-400 bg-amber-50/80 border-amber-400' : 'bg-amber-50/60 border-amber-900/10'
       }`}
     >
-      <div className="flex items-center justify-between gap-1 mb-0.5 min-w-0">
+      <div className="flex justify-between items-center gap-1 mb-0.5 min-w-0">
         <span className="font-bold text-slate-900 line-clamp-2 leading-tight text-[10px] sm:text-xs block min-w-0 truncate" title={cell.name}>
           {cell.name}
         </span>
@@ -123,7 +123,7 @@ export function AuctionDistrictCard({
       className="bg-amber-50/40 p-1.5 sm:p-2.5 rounded-xl sm:rounded-2xl border border-amber-900/10 space-y-1 sm:space-y-1.5 shadow-sm"
     >
       {/* Header phân khu */}
-      <div className="flex items-center justify-between flex-wrap gap-1.5 border-b border-amber-900/10 pb-1 sm:pb-1.5">
+      <div className="flex justify-between items-center flex-wrap gap-1.5 border-b border-amber-900/10 pb-1 sm:pb-1.5">
         <div className="flex items-center gap-1.5 min-w-0">
           <span
             className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full border border-slate-800 shrink-0"
@@ -161,7 +161,7 @@ export function AuctionDistrictCard({
         <div className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-500 px-0.5">
           BIỂU PHÍ THUÊ Ô ĐẤU GIÁ
         </div>
-        <div className="bg-white/70 rounded-xl p-1 sm:p-2 border border-amber-900/10 flex items-center justify-between text-xs">
+        <div className="bg-white/70 rounded-xl p-1 sm:p-2 border border-amber-900/10 flex justify-between items-center text-xs">
           {info.rentPreview.type === 'property' && (
             <>
               <div className="text-center flex-1 border-r border-amber-900/10 pr-1">
@@ -186,7 +186,7 @@ export function AuctionDistrictCard({
           )}
 
           {info.rentPreview.type === 'railroad' && (
-            <div className="w-full flex items-center justify-between px-1">
+            <div className="w-full flex justify-between items-center px-1">
               <span className="text-[11px] sm:text-xs text-slate-600 font-bold whitespace-nowrap">CƯỚC 1-4 GA:</span>
               <span className="font-mono text-[11px] sm:text-xs font-bold text-slate-800 whitespace-nowrap">
                 500 / 1.000 / 2.000 / 4.000
@@ -195,7 +195,7 @@ export function AuctionDistrictCard({
           )}
 
           {info.rentPreview.type === 'utility' && (
-            <div className="w-full flex items-center justify-between px-1">
+            <div className="w-full flex justify-between items-center px-1">
               <span className="text-[11px] sm:text-xs text-slate-600 font-bold whitespace-nowrap">CƯỚC TIỆN ÍCH:</span>
               <span className="font-mono text-[10px] sm:text-xs font-bold text-slate-800 whitespace-nowrap">
                 Điểm xúc xắc x40 (1 ô) | x100 (2 ô)

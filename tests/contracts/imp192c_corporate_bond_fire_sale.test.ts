@@ -395,7 +395,7 @@ describe('[TC-192C/MSS][UC-IMP192C] IMP-192C Corporate Bond & Queued Fire Sale C
       };
       auctions.set(room.roomCode, session);
 
-      handleAuctionClose(room, session, registry, auctions, room.roomCode);
+      handleAuctionClose(room, session, registry, auctions, room.roomCode, stateMap);
       expect(registry.has(6)).toBe(false);
       expect(stateMap.has(6)).toBe(false);
     });

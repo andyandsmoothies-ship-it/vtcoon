@@ -2,6 +2,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { BOARD_CONFIG, CellType } from '../../domain/board_config';
 import { PROPERTY_DEEDS } from '../../domain/property_data';
+import { TurnPhase } from '../../domain/room';
 import { useGameStore } from '../store/game_store';
 import type { PlayerHudInfo } from '../store/game_store_types';
 import { useLobbyStore } from '../store/lobby_store';
@@ -97,6 +98,7 @@ export function GameBoard(): React.ReactElement {
   const storePlayersInfo = useGameStore((s) => s.playersInfo);
   const playersInfo = Object.keys(storePlayersInfo ?? {}).length > 0 ? storePlayersInfo : (useGameStore.getState()?.playersInfo ?? storePlayersInfo);
   const hasRolledThisTurn = useGameStore((s) => s.hasRolledThisTurn);
+  const turnPhase = useGameStore((s) => s.turnPhase);
   const localPlayerId = useLobbyStore((s) => s.myPlayerId) || 'p1';
   const isHeatmapActive = useGameStore((s) => s.isHeatmapActive);
   const isMobile = useMemo(() => isMobileHardware(), []);
@@ -109,20 +111,22 @@ export function GameBoard(): React.ReactElement {
   const handleTileClick = useCallback(
     (cellIndex: number) => {
       const cell = BOARD_CONFIG[cellIndex];
-      if (!cell || (cell.type !== CellType.Property && cell.type !== CellType.Railroad)) {
+      if (!cell || (cell.type !== CellType.Property && cell.type !== CellType.Railroad && cell.type !== CellType.Utility)) {
         return;
       }
       const isOwned = Object.values(playersInfo).some((p) => p.ownedProperties?.includes(cellIndex));
       const isMyTurn = currentTurnPlayerId === localPlayerId;
       const myPos = playerPositions[localPlayerId] ?? 0;
       const isStandingHere = myPos === cellIndex;
-      const myBalance = playersInfo[localPlayerId]?.balance ?? 0;
-      const cellPrice = PROPERTY_DEEDS.get(cellIndex)?.price ?? 0;
-      const canBuy = Boolean(isMyTurn && isStandingHere && !isOwned && hasRolledThisTurn && myBalance >= cellPrice);
-      const isBuyOpportunity = Boolean(isMyTurn && isStandingHere && !isOwned && hasRolledThisTurn);
-      openModal('deed', { cellIndex, canBuy, isBuyOpportunity });
+      const isBuyOpportunity = Boolean(
+        isMyTurn &&
+        isStandingHere &&
+        !isOwned &&
+        (turnPhase === TurnPhase.ActionPhase || (hasRolledThisTurn && turnPhase !== TurnPhase.AuctionPhase && turnPhase !== TurnPhase.InsolvencyPhase))
+      );
+      openModal('deed', { cellIndex, isBuyOpportunity });
     },
-    [openModal, currentTurnPlayerId, localPlayerId, playerPositions, playersInfo, hasRolledThisTurn]
+    [openModal, currentTurnPlayerId, localPlayerId, playerPositions, playersInfo, hasRolledThisTurn, turnPhase]
   );
 
   return (

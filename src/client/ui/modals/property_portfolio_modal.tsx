@@ -71,7 +71,7 @@ export function PropertyPortfolioModal({
               DANH MỤC BẤT ĐỘNG SẢN
             </h2>
             <p className="text-xs text-slate-600 font-semibold">
-              Quản lý tài sản, thế chấp &amp; nâng cấp nhanh 1-click
+              Quản lý {ownedProperties.length} tài sản sở hữu • Nâng cấp nhanh 1-click
             </p>
           </div>
         </div>
@@ -445,21 +445,6 @@ export function PropertyPortfolioModal({
       </>
       )}
 
-      {/* Footer */}
-      <footer className="p-3 pb-8 sm:pb-3 bg-[#F7F2E7] border-t border-slate-300 flex items-center justify-between text-xs shrink-0">
-        <span className="text-slate-600 font-medium">
-          Tổng tài sản sở hữu: <strong className="text-slate-900 font-bold">{ownedProperties.length}</strong> BĐS
-        </span>
-        {onClose && (
-          <button
-            type="button"
-            onClick={onClose}
-            className="min-h-[44px] px-5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-900 font-bold rounded-xl border-2 border-slate-400 shadow-[0_3px_0_0_#64748b] active:shadow-[0_1px_0_0_#64748b] active:translate-y-[2px] text-xs transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
-          >
-            Đóng
-          </button>
-        )}
-      </footer>
     </div>
   );
 }

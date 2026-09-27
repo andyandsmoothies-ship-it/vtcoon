@@ -32,8 +32,8 @@ describe('[TC-AUC-MODAL.1/MSS] Cấu Trúc Giao Diện 2 Cánh Glassmorphism (Du
     expect(html).toContain('+100');
     expect(html).toContain('+200');
     expect(html).toContain('+500');
-    expect(html).toContain('AUTO-BID');
-    expect(html).toContain('Rút Lui / Bỏ Cuộc');
+    expect(html).toContain('TỰ ĐỘNG ĐẶT GIÁ');
+    expect(html).toContain('✕ Rút Lui');
   });
 
   it('Hiển thị trạng thái dẫn đầu khi người chơi hiện tại là người trả giá cao nhất', () => {

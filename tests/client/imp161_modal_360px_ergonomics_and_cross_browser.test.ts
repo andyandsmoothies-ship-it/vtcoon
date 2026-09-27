@@ -22,16 +22,17 @@ import { TitleDeedActionFooter } from '../../src/client/ui/modals/title_deed_act
 // FACET 1: TOUCH TARGET ERGONOMICS (>= 44PX MANDATE)
 // ============================================================================
 describe('[FACET-1] Touch Target Ergonomics (>= 44px Mandate)', () => {
-  it('[TC-161.01/MSS][UC-161] GameRulesModal: Nút "Đã Hiểu" ở footer có class chứa min-h-[44px]', () => {
+  it('[TC-161.01/MSS][UC-161] GameRulesModal: Nút đóng [X] ở header có touch target min-h-[44px] min-w-[44px]', () => {
     const html = renderToStaticMarkup(
       React.createElement(GameRulesModal, {
         isOpen: true,
         onClose: () => {},
       })
     );
-    const btnMatch = html.match(/<button[^>]*>[\s\S]*?Đã Hiểu[\s\S]*?<\/button>/);
+    const btnMatch = html.match(/<button[^>]*data-testid="close-rules-modal-btn"[^>]*>/);
     expect(btnMatch).not.toBeNull();
     expect(btnMatch![0]).toContain('min-h-[44px]');
+    expect(btnMatch![0]).toContain('min-w-[44px]');
   });
 
   it('[TC-161.02/MSS][UC-161] MasterplanInspectorCard: Nút "✕ Thu Gọn" có class chứa min-h-[44px]', () => {

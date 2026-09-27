@@ -164,6 +164,35 @@ if (shouldRunContract && matchingTests.length > 0) {
   }
 }
 
+// 3.5. Mandatory Autonomous Typecheck Gate (TypeScript / native compiler)
+let typecheckExecution = { executed: false, status: 'SKIPPED' };
+const tsConfigPath = path.join(repoRoot, 'tsconfig.json');
+if (fs.existsSync(tsConfigPath) && !flags.includes('--no-typecheck') && !flags.includes('--skip-typecheck')) {
+  try {
+    execSync('npx tsc --noEmit', {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+      timeout: 60000,
+    });
+    typecheckExecution = {
+      executed: true,
+      status: 'PASSED',
+      errorCount: 0,
+    };
+  } catch (err) {
+    const rawOut = (err.stdout || err.stderr || err.message || '');
+    const cleanOut = rawOut.replace(/\x1B\[[0-9;]*[a-zA-Z]/g, '');
+    const errorMatches = cleanOut.match(/error TS\d+:/g);
+    const errorCount = errorMatches ? errorMatches.length : 1;
+    typecheckExecution = {
+      executed: true,
+      status: 'FAILED',
+      errorCount,
+      sampleErrors: cleanOut.split('\n').filter((l) => l.includes('error TS')).slice(0, 5),
+    };
+  }
+}
+
 // 4. Scan downstream consumers in src/
 const allSrcFiles = walkDir(path.join(repoRoot, 'src'));
 
@@ -216,10 +245,12 @@ const snapshot = {
     executed: false,
     matchingSuites: matchingTests.map((t) => path.relative(repoRoot, t).replace(/\\/g, '/')),
   },
+  typecheckExecution,
   files: fileReports,
   verificationChecklist: {
     hasContractTests: matchingTests.length > 0,
     contractTestsPassed: testExecution ? testExecution.status === 'PASSED' : null,
+    typecheckPassed: typecheckExecution.executed ? typecheckExecution.status === 'PASSED' : true,
     zeroDirectViolationsExpected: true,
     physicalDiskVerificationRequired: true,
   },
@@ -232,6 +263,9 @@ fs.writeFileSync(path.join(evidenceDir, 'latest_snapshot.json'), JSON.stringify(
 
 const relTarget = path.relative(repoRoot, path.join(evidenceDir, outputFileName)).replace(/\\/g, '/');
 
+const isTypecheckBlocked = typecheckExecution.executed && typecheckExecution.status === 'FAILED';
+const isTestBlocked = testExecution && testExecution.executed && testExecution.status === 'FAILED';
+
 console.log('----------------------------------------------------');
 console.log(`📸 [AUTOMATED EVIDENCE SNAPSHOT GENERATED]`);
 console.log(`├── Slice ID  : ${sliceId}`);
@@ -241,7 +275,18 @@ console.log(`├── Contracts : ${matchingTests.length} suite(s) matched`);
 if (testExecution && testExecution.executed) {
   console.log(`├── Test Exec : ${testExecution.status} (${testExecution.passedCount ?? 0} tests in ${testExecution.suite})`);
 }
-console.log(`└── Status    : READY FOR TRẠM 3 (Zero-Memorization Active)`);
+if (typecheckExecution && typecheckExecution.executed) {
+  console.log(`├── Typecheck : ${typecheckExecution.status} (${typecheckExecution.errorCount ?? 0} errors)`);
+}
+if (isTypecheckBlocked || isTestBlocked) {
+  const reasons = [];
+  if (isTypecheckBlocked) reasons.push('TypeScript Errors');
+  if (isTestBlocked) reasons.push('Test Failures');
+  console.log(`└── Status    : ❌ BLOCKED (${reasons.join(' & ')}) - NOT READY FOR TRẠM 3`);
+  process.exit(1);
+} else {
+  console.log(`└── Status    : READY FOR TRẠM 3 (Zero-Memorization Active)`);
+}
 console.log('----------------------------------------------------');
 console.log('📋 [PHYSICAL DISK LOC FOR REPORT]');
 fileReports.forEach((f) => {

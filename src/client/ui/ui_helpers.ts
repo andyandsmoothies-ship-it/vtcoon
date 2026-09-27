@@ -410,7 +410,7 @@ export function resolveActionDockNotice(params: ActionDockNoticeParams): ActionD
     return {
       type: 'buy_opportunity',
       icon: '🏷️',
-      desktopText: `Bạn đang ở ${params.buyableCellName ?? 'ô đất'}${priceText}: Bấm Mua Đất hoặc Cầm Cố để xoay vốn!`,
+      desktopText: `Bạn đang ở ${params.buyableCellName ?? 'ô đất'}${priceText}: Bấm Mua Đất hoặc Cầm Cố để sở hữu!`,
       mobileText: `Đứng tại ${params.buyableCellName ?? 'ô đất'}: Bấm Mua Đất để chốt`,
       tone: 'warning',
     };

@@ -24,6 +24,8 @@ export const SLOP_RULES = {
   FILE_LOC_BUDGET: 'file-loc-budget',
   FUNCTION_LOC_BUDGET: 'function-loc-budget',
   ZERO_WORKAROUND_COMMENTS: 'zero-workaround-comments',
+  ZERO_GETTER_PROXIES: 'zero-getter-proxies',
+  ZERO_PSEUDO_PROXIES: 'zero-pseudo-proxies',
 };
 
 export const TIER_BUDGETS = {
@@ -224,6 +226,47 @@ export function lintSlopContent(content, filePath = 'anonymous.ts') {
             file: filePath,
             line: startLine,
             message: `Declarative component/generator "${fnName}" is large (${sloc} lines). Consider splitting into subcomponents.`,
+          });
+        }
+      }
+    }
+
+    // Rule 6: zero-getter-proxies (Anti-Churn Invariant)
+    if (ts.isGetAccessorDeclaration(node)) {
+      const text = node.getText(sf);
+      if (text.includes('new Proxy(') || /return\s+new\s+\w+Proxy\b/.test(text)) {
+        const { line } = sf.getLineAndCharacterOfPosition(node.getStart());
+        errors.push({
+          rule: SLOP_RULES.ZERO_GETTER_PROXIES,
+          file: filePath,
+          line: line + 1,
+          message: 'Dynamic Proxy/Wrapper instantiation inside property getter causes allocation churn & breaks object identity. Cache the wrapper instance on initialization or expose a method.',
+        });
+      }
+    }
+
+    // Rule 7: zero-pseudo-proxies (KISS Local Adapters)
+    if (ts.isNewExpression(node) && node.expression.getText(sf) === 'Proxy') {
+      let parent = node.parent;
+      let insideLocalFunction = false;
+      while (parent) {
+        if (ts.isFunctionDeclaration(parent) || ts.isFunctionExpression(parent) || ts.isArrowFunction(parent) || ts.isMethodDeclaration(parent)) {
+          if (!ts.isConstructorDeclaration(parent)) {
+            insideLocalFunction = true;
+            break;
+          }
+        }
+        parent = parent.parent;
+      }
+      if (insideLocalFunction) {
+        const firstArg = node.arguments && node.arguments[0] ? node.arguments[0].getText(sf) : '';
+        if (firstArg.startsWith('new Map') || firstArg.startsWith('new Set') || firstArg === '{}') {
+          const { line } = sf.getLineAndCharacterOfPosition(node.getStart());
+          errors.push({
+            rule: SLOP_RULES.ZERO_PSEUDO_PROXIES,
+            file: filePath,
+            line: line + 1,
+            message: 'Pseudo-Proxy overengineering detected on local collection/object. Use simple native collection with sync-back or overload the target function.',
           });
         }
       }

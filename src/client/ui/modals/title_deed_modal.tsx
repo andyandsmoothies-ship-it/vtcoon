@@ -180,10 +180,10 @@ export function TitleDeedModal({
       >
         <div className="absolute top-2.5 left-2.5 w-2 h-2 rounded-full bg-white/80 border border-slate-900" aria-hidden="true" />
         {!onClose && <div className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-white/80 border border-slate-900" aria-hidden="true" />}
-        <p className="text-[10px] uppercase tracking-widest text-white/95 font-black drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] pr-12 sm:pr-14">
+        <p className="text-[10px] uppercase tracking-widest text-white/95 font-black drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] px-12 sm:px-14">
           {isRailroad ? 'Hạ Tầng Giao Thông' : isUtility ? 'Tiện Ích Quốc Gia' : 'Giấy Chứng Nhận Quyền Sở Hữu'}
         </p>
-        <h2 className="tracking-wide text-xs sm:text-sm font-black uppercase text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] mt-0.5 px-3 py-1 pr-12 sm:pr-14 leading-snug break-words mx-auto">
+        <h2 className="tracking-wide text-xs sm:text-sm font-black uppercase text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] mt-0.5 py-1 px-12 sm:px-14 leading-snug break-words mx-auto">
           {deed.name}
         </h2>
         {onClose && (
@@ -191,7 +191,7 @@ export function TitleDeedModal({
             type="button"
             onClick={onClose}
             aria-label="Đóng Sổ Đỏ"
-            className="absolute top-1/2 -translate-y-1/2 right-2 sm:right-2.5 min-w-[48px] min-h-[48px] w-8 h-8 rounded-full bg-slate-900/80 hover:bg-slate-900 border border-white/40 flex items-center justify-center text-white text-sm font-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 transition-colors cursor-pointer z-20 shadow-md"
+            className="absolute top-1/2 -translate-y-1/2 right-2 sm:right-2.5 min-w-[44px] min-h-[44px] w-8 h-8 rounded-full bg-black/25 hover:bg-black/45 backdrop-blur-sm border border-white/30 flex items-center justify-center text-white text-sm font-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 transition-colors cursor-pointer z-20 shadow-md"
           >
             ✕
           </button>

@@ -213,7 +213,7 @@ describe('[TC-UI04.6/MSS] Thẻ Bài Game Vật Lý TitleDeedModal Markup', () =
     expect(html).toContain('Khách Sạn');
     expect(html).toContain('Quần thể Resort/TTTM');
     expect(html).toContain('Mua BĐS');
-    expect(html).toContain('Bỏ Qua');
+    expect(html).toContain('Từ Chối Mua');
     expect(html).toContain('border-slate-900');
     expect(html).toContain('bg-[#FFFDF8]');
   });

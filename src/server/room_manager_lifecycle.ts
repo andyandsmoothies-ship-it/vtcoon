@@ -15,11 +15,38 @@ import type { PropertyRegistry, PropertyStateMap } from '../domain/property_mana
 import type { AuctionSession } from './auction_manager.js';
 import { pendingTradeManager } from './pending_trade_manager.js';
 import { generateRandomAnimalName } from '../domain/name_generator.js';
+import { GameRoomSession } from './game_room_session.js';
 
 export function getActivePlayerFn(room: Room | undefined, playerId: string): Player | undefined {
   if (!room?.started) return undefined;
   const current = room.players[room.currentPlayerIndex];
   return current?.id === playerId ? current : undefined;
+}
+
+export function doCreateRoomSession(
+  sessions: Map<string, GameRoomSession>,
+  deckRng: () => number,
+  hostId: string,
+  customRoomCode?: string,
+  touchActivityFn?: (rc: string) => void,
+): GameRoomSession {
+  const upperCode = customRoomCode?.toUpperCase();
+  const existing = upperCode ? (sessions.get(upperCode) ?? sessions.get(upperCode.toLowerCase())) : undefined;
+  const canUseCustom = upperCode && (!existing || existing.room.hostId === hostId);
+  const code = canUseCustom ? upperCode : undefined;
+  const room = domainCreateRoom(hostId, code);
+  const hostPlayer = room.players.find((p) => p.id === hostId);
+  if (hostPlayer && !hostPlayer.name) {
+    hostPlayer.name = generateRandomAnimalName([], `${room.roomCode}_${hostId}`);
+  }
+  room.marketDeck = createMarketDeck(deckRng);
+  room.chanceDeck = createChanceDeck(deckRng);
+
+  const session = new GameRoomSession(room);
+  sessions.set(room.roomCode, session);
+  pendingTradeManager.clearSession(room.roomCode);
+  touchActivityFn?.(room.roomCode);
+  return session;
 }
 
 export function doCreateRoom(
@@ -140,6 +167,45 @@ export function doGetBotPersonality(
   botId: string,
 ): BotPersonality {
   return botPersonalities.get(`${roomCode}:${botId}`) ?? BotPersonality.Balanced;
+}
+
+export function doHandleEndTurnSession(
+  session: GameRoomSession,
+  playerId: string,
+  continueDoubles?: boolean,
+  rng: () => number = Math.random,
+  touchActivityFn?: (rc: string) => void,
+): Room | undefined {
+  touchActivityFn?.(session.roomCode);
+  const room = session.room;
+  const current = getActivePlayerFn(room, playerId);
+  if (!current || !room) return undefined;
+
+  // Single-entry local maps: Zero proxy overhead, type-safe, direct mutation sync
+  const rolledMap = new Map<string, boolean>([[session.roomCode, session.rolledThisTurn]]);
+  const auctionsMap = new Map<string, AuctionSession>();
+  if (session.auction) {
+    auctionsMap.set(session.roomCode, session.auction);
+  }
+
+  const result = executeTurnEnd(
+    room,
+    current,
+    session.rolledThisTurn,
+    continueDoubles ?? false,
+    session.roomCode,
+    rolledMap,
+    session.registry,
+    session.propertyStates,
+    auctionsMap,
+    rng,
+  );
+
+  // Đồng bộ nguyên tử hai chiều về GameRoomSession (setter session.auction tự động sync room.currentAuction)
+  session.rolledThisTurn = rolledMap.get(session.roomCode) ?? false;
+  session.auction = auctionsMap.get(session.roomCode);
+
+  return result;
 }
 
 export function doHandleEndTurn(

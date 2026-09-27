@@ -153,7 +153,7 @@
 | DEBT-UI01-01 | Preloading 28 bộ WebP bằng preloadTileAssets() | UI-01 | UI-02 Task 1 | ✅ ĐÃ ĐÓNG |
 | DEBT-UI01-02 | Hoạt ảnh nhấp nhô điều hòa sin(omega*t) trên Standee | UI-01 | UI-02 Task 2 | ✅ ĐÃ ĐÓNG |
 | DEBT-IMP208-01 | ui_helpers.ts đạt 445 LOC (vượt ngưỡng cảnh báo 400 LOC Tier 2) -> Bóc tách action_dock_helpers.ts | IMP-208B | Slice UI Kế Tiếp | ⏳ CHỜ BÓC TÁCH |
-| DEBT-ROOM-MGR-01 | room_manager.ts đạt 533 LOC (vượt trần 400 LOC Tier 1) -> Khử Ping-Pong Surface giữa intent_dispatcher và room_manager (Bước 1), chuẩn bị GameRoomSession Aggregate Root (Bước 2) | IMP-205 | Slice Server Kế Tiếp | ⏳ CHỜ BÓC TÁCH |
+| DEBT-ROOM-MGR-01 | room_manager.ts gom 10 Map phân tán vào GameRoomSession Aggregate Root, đưa file về 378 LOC (<= 400 LOC Tier 1) | IMP-205 / IMP-209 | IMP-210 (Bước 2) | ✅ ĐÃ ĐÓNG |
 
 ---
 
@@ -443,4 +443,162 @@
 - **Tech Debt**: Ghi nhận `DEBT-ROOM-MGR-01` (`src/server/room_manager.ts` đạt 533 LOC, vượt trần Tier 1 <= 400 LOC do dồn nén dead delegate surface và 10 Map phân tán; lộ trình xử lý 2 bước: Bước 1 Fast-Track khử ping-pong wrappers giữa `intent_dispatcher` và `room_manager`; Bước 2 Full Rigor One-Way Door chuyển đổi sang `GameRoomSession` Aggregate Root để đưa file về < 180 LOC).
 - **Phê chuẩn**: `plan-griller` (P1-P5 hardened), `qa-tester` (Station 1 RED), `implementer` (Station 2 GREEN), `scout` (Station 2.5 PASS), `spec-reviewer` (Station 3 APPROVED), `code-reviewer` (Station 3 APPROVED).
 - **Trạng thái**: ✅ Hoàn thành (2026-09-27).
+
+---
+
+### [IMP-209] Bẻ Gãy Chuỗi Dội Ngược Intent & Tinh Giản Bề Mặt Delegate An Toàn (Decouple Intent Ping-Pong & Safe Delegate Pruning - Bước 1)
+- **Mục tiêu**: Bẻ gãy chuỗi dội ngược (Ping-Pong Antipattern) giữa `intent_dispatcher` và `room_manager`, chuyển `intent_dispatcher` sang gọi trực tiếp Domain Coordinators (`room_property_coordinator`, `property_actions`, `hose_actions`, `bond_manager`), bảo vệ tính tương thích ngược cho 54 call sites trong 18 test suite cũ, bảo toàn 100% thân hàm auction & watchdog, và dọn dẹp sạch bề mặt điều phối để chuẩn bị cho Bước 2 (`GameRoomSession` Aggregate Root).
+- **Hạ tầng hoàn tất**:
+  * `src/server/intent_dispatcher.ts`:
+    - Nhận `const ctx = m.getContext(rc)` và gọi trực tiếp các Domain Coordinators & Handlers (`coordMortgage`, `coordRedeem`, `coordDowngrade`, `coordTrade`, `coordRespondTradeOffer`, `coordBankruptcy`, `coordExecuteCompulsoryBuyout`, `coordDeclineCompulsoryBuyout`, `handleUpgrade`, `handleUpgradeETC`, `handleUpgradeUtility`, `handleBuyProperty`, `handleHoseInvest`, `handleHoseSkip`, `handleIssueBond`, `handleRepayBond`).
+    - Bổ sung Context Null Guard an toàn tuyệt đối: `if (!ctx) return { success: false, reason: ActionRejectReason.INVALID_ROOM }`.
+    - Đưa file từ 108 lên **162 LOC** (Tier 1 <= 400 LOC, hoàn toàn an toàn).
+  * `src/server/room_manager.ts`:
+    - Thêm public getter `rolledThisTurnMap` để `coordBankruptcy` truy cập an toàn mà không cần dirty casts `(m as any)`.
+    - Tinh giản `handleTradeOffer` với logic phân nhánh gọn gàng, giảm 16 dòng cồng kềnh.
+    - Bảo toàn 100% thân hàm `handleAuctionBid`, `handleAuctionPass`, `handleAuctionClose` (`auction_manager`, `this.syncAuction`, `this.lastAuctionResults.set`) bảo vệ Bot AI và Turn Watchdog.
+    - Giữ nguyên 100% public signatures cho 54 call sites trong 18 test suite cũ.
+    - Hạ kích thước file từ 533 LOC xuống **518 LOC** (SLOC 440).
+  * `src/server/network/afk_recovery.ts`:
+    - Giữ nguyên 100% (0 dòng sửa đổi), triệt tiêu hoàn toàn rủi ro vòng lặp cứu nguy AFK kích hoạt 50 lần `touchActivity` trong 1 tick.
+- **Kiểm thử & Bất biến**:
+  * `npx tsc --noEmit`: 0 lỗi, 0 cảnh báo.
+  * Toàn bộ 52 test files trong `tests/server/` (676 tests) PASS 100%.
+  * `tests/contracts/imp205_auction_mortgage_sanitization_and_treasury_conservation.test.ts`: 19/19 tests PASS 100%.
+  * Snapshot: `.agents/evidence/imp209_snapshot.json`.
+- **Tech Debt**: Khoản nợ `DEBT-ROOM-MGR-01` chuyển sang trạng thái ⏳ CHỜ BƯỚC 2 (One-Way Door chuyển đổi sang `GameRoomSession` Aggregate Root để đưa file về < 180 LOC).
+- **Phê chuẩn**: Kế hoạch `docs/plans/improvements/IMP-209-decouple-intent-ping-pong-and-delegate-pruning_plan.md`; Báo cáo `docs/reports/improvements/IMP-209-decouple-intent-ping-pong-and-delegate-pruning_report.md`.
+- **Trạng thái**: ✅ Hoàn thành Bước 1 (2026-09-27).
+
+---
+
+### [IMP-209-UI] Giao Diện Sổ Đỏ Tinh Giản & Khử Anti-Pattern (Clean Single-Row Purchase Footer & Semantic Disambiguation)
+- **Mục tiêu**: Loại bỏ triệt để các anti-pattern giao diện trên popup Sổ Đỏ (`TitleDeedActionFooter`): xóa bỏ nút `[✕ Đóng]` trùng lặp ở đáy footer; đổi nhãn mơ hồ `Bỏ Qua (Pass)` thành **`✕ Từ Chối Mua`** dứt khoát; xóa bỏ các nút giả lập trạng thái (`CẦM CỐ ĐỂ MUA (+10.050)` gây hiểu lầm cắm sạch tài sản, nút xám `[Không Đủ Tiền]`), thay bằng dòng text cảnh báo nhẹ nhàng `⚠️ Số dư không đủ (Thiếu ...)`; gom 2 nút quyết định chính vào **1 hàng duy nhất** (`grid-cols-2`); cân bằng quang học Header Sổ Đỏ (`px-12 sm:px-14`, nút đóng mờ `bg-black/25`); và ẩn chip thông báo ActionDock khi modal mở.
+- **Hạ tầng hoàn tất**:
+  * `src/client/ui/modals/title_deed_action_footer.tsx`:
+    - Tái cấu trúc Single Row: 2 nút đối xứng ngang bằng chiều cao `min-h-[48px]`, bo góc `rounded-xl`, xúc giác lún nảy `active:translate-y-[3px]`.
+    - Cột 1: Nút `Mua BĐS (X Tr.)` bảo toàn định danh khi thiếu tiền (`bg-slate-200 text-slate-400 cursor-not-allowed`) và khi đủ tiền (`bg-emerald-700 hover:bg-emerald-600 text-white`). Khi đóng băng: `❄️ Đóng Băng (Cấm Mua)`.
+    - Cột 2: Nút `✕ Từ Chối Mua` màu hồng phấn tao nhã (`bg-rose-50 hover:bg-rose-100 text-rose-700 border-2 border-rose-300`). Khi đóng băng: `✕ Đóng` (gọi `onClose`).
+    - Dòng text cảnh báo thiếu tiền: `data-testid="insufficient-funds-notice"` với layout linh hoạt `flex flex-col sm:flex-row` chống tràn chữ trên màn hình 360px.
+    - Subtractive Refactoring: Rút gọn kích thước file từ 222 xuống **215 LOC** (Tier 2 <= 500 LOC).
+  * `src/client/ui/modals/title_deed_modal.tsx`:
+    - Cân đối đối xứng padding tiêu đề `px-12 sm:px-14`.
+    - Nút đóng `[X]` tròn trên ruy-băng đổi sang kính mờ quang học `bg-black/25 hover:bg-black/45 backdrop-blur-sm border border-white/30 text-white min-w-[44px] min-h-[44px]`.
+  * `src/client/ui/action_dock.tsx`:
+    - Thêm guard `!activeModal` vào `actionDockNotice`, triệt tiêu hoàn toàn hiện tượng lem nhem xuyên thấu sau modal.
+- **Kiểm thử & Bất biến**:
+  - `tests/contracts/imp209_clean_single_row_purchase_footer.test.ts`: 17/17 atomic contract tests PASS 100%.
+  - Adversarial Inversion Gate: Station 1 FAILED 14/17 tests trước khi code, Station 2 PASSED 17/17 tests sau khi implement.
+  - Tuân thủ Domain Invariant **Strict Intent Callback Isolation** (TC-209.04b): Bấm `✕ Từ Chối Mua` gọi độc lập `onPass`, khẳng định `onClose` KHÔNG bị gọi (`toHaveBeenCalledTimes(0)`).
+  - Điều hòa 6 suites cũ: `imp204`, `imp207`, `imp208`, `imp110`, `imp128`, `imp140`, `phase4` (241/241 tests PASS).
+  - Linter: `npm run lint:ui` = 0 vi phạm; `npx tsc --noEmit` = 0 lỗi.
+  - Production Build: `npm run build` hoàn thành trong 6.8s; client bundle xác thực chứa `Từ Chối Mua: true`, loại trừ hoàn toàn `Đóng Xoay Vốn: false`, `Bỏ Qua (Pass): false`.
+- **Phê chuẩn**: `plan-griller` (P1-P5 hardened), `qa-tester` (Station 1 RED verified), `implementer` (Station 2 GREEN verified), `scout` (Station 2.5 PASS), `spec-reviewer` (SPEC_PASS), `code-reviewer` (CODE_PASS), `ui-craft-reviewer` (VERDICT SHIP).
+- **Trạng thái**: ✅ Hoàn thành (2026-09-27).
+
+---
+
+### [IMP-210] GameRoomSession Aggregate Root & RoomManager Structural Pruning
+- **Mục tiêu**: Bước 2 của Chiến lược Tái Cấu Trúc `RoomManager` (One-Way Door). Gom toàn bộ 10 `Map<string, T>` phân tán cấp class vào Domain-Driven Design (DDD) Aggregate Root `GameRoomSession`, cung cấp cơ chế Dynamic Map Facades (`SessionFieldProxy`, `BotPersonalityMapFacade`) tuân thủ 100% Map protocol parity (tất cả 11 methods), bóc tách composite key bot personality, dọn dẹp timers qua `session.clearTimers()`, chuyển `doHandleEndTurnSession` sang nhận trực tiếp session, đưa `room_manager.ts` về 378 LOC (<= 400 LOC Tier 1), và đóng vĩnh viễn nợ kỹ thuật `DEBT-ROOM-MGR-01`.
+- **Hạ tầng hoàn tất**:
+  * `src/server/game_room_session.ts` (MỚI - 118 LOC):
+    - Đóng gói toàn bộ vi trạng thái phòng chơi (`Room`, `PropertyRegistry`, `PropertyStateMap`, `AuctionSession`, `rolledThisTurn`, `lastAuctionResult`, `activeTimers`, `lastActivity`, `botPersonalities`).
+    - Getter/setter hai chiều nguyên tử cho `auction` và `lastAuctionResult` tự động đồng bộ sang `room`.
+    - Methods: `toContext()`, `touchActivity()`, `registerTimer()`, `clearTimers()`, `destroy()`.
+  * `src/server/session_proxy_facade.ts` (MỚI - 288 LOC):
+    - `createSessionFieldProxy`: Full Map Protocol (11/11 methods: `[Symbol.iterator]`, `entries`, `keys`, `values`, `size`, `forEach`, `clear`, `get`, `set`, `has`, `delete`), hỗ trợ two-way write-through và phân định trường tùy chọn (`auction`, `lastAuctionResult`).
+    - `createBotPersonalityMapFacade`: Composite key facade bóc tách `${roomCode}:${botId}` chuẩn mực.
+  * `src/server/room_manager.ts` (REFACTOR SÂU - 378 LOC, giảm 140 LOC):
+    - Triệt tiêu 10 Map phân tán, lưu trữ duy nhất `private readonly sessions = new Map<string, GameRoomSession>()`.
+    - Cung cấp `getSession(roomCode)` hỗ trợ case-insensitive lookup (`vtd8j8` == `VTD8J8`).
+    - Dynamic map getters bảo toàn 100% tương thích ngược cho 54 call sites trong 18 test suite cũ.
+    - Bảo toàn thứ tự Teardown: Hooks (bọc `try...catch`) -> PendingTrade -> Destroy -> Delete.
+  * `src/server/room_manager_lifecycle.ts` (335 LOC):
+    - Thêm `doCreateRoomSession` (trả về `GameRoomSession`).
+    - Thêm `doHandleEndTurnSession` (dùng local single-entry maps, truyền `session.rolledThisTurn`, zero proxy overhead).
+    - Bảo toàn 100% các adapter exported cũ.
+- **Kiểm thử & Bất biến**:
+  - `tests/contracts/imp210_game_room_session_aggregate_root.test.ts`: 20/20 atomic contract tests PASS 100% (5 facets).
+  - Adversarial Inversion Gate: Station 1 FAILED 20/20 tests trước khi code, Station 2 PASSED 20/20 tests sau khi implement.
+  - Toàn bộ 52 test files server (676 tests) PASS 100%.
+  - `tests/contracts/imp205_...test.ts`: 19/19 tests PASS 100%.
+  - `npx tsc --noEmit`: 0 lỗi, 0 cảnh báo.
+  - Đo LOC: `room_manager.ts` = 378 LOC (đạt chuẩn Tier 1 <= 400 LOC). ĐÓNG NỢ `DEBT-ROOM-MGR-01`.
+  - Evidence Snapshot: `.agents/evidence/imp210_snapshot.json` (`executed: true`).
+- **Phê chuẩn**: `plan-griller` (P1-P5 audit), `qa-tester` (Station 1 RED), `implementer` (Station 2 GREEN), `scout` (Station 2.5 PASS), `spec-reviewer` (APPROVED), `code-reviewer` (APPROVED).
+- **Trạng thái**: ✅ Hoàn thành Bước 2 (2026-09-27).
+
+### [IMP-211] Tinh Giản Sàn Đấu Giá 15s & Đề Xuất Đổi Đất Bot (Gói 1 Modernization)
+- **Mục tiêu**: Gói 1 trong kế hoạch cải tổ toàn diện UI game VTCoOn. Chuẩn hóa Clean Tactile Affordance, khử anti-pattern nút biến dạng thành biển báo nợ nần, loại bỏ fallback ngầm `onPass ?? onClose` (bảo vệ ADR-0001 Strict Intent Callback Isolation), chuẩn hóa SSOT thuần Việt (`✕ Rút Lui`, `TỰ ĐỘNG ĐẶT GIÁ: BẬT / TẮT`, `🚫 Từ chối mua`), và phân định minh bạch 4 trạng thái footer của sàn đấu giá.
+- **Hạ tầng hoàn tất**:
+  * `src/client/ui/modals/auction_modal.tsx` (442 LOC — Tier 2 <= 500 LOC):
+    - Khử hoàn toàn `onPass ?? onClose`, phân lập 100% callback intent (`onPass`) và dismiss handler (`onClose`).
+    - Lưới 2 cột đối xứng `grid-cols-2`: Cột 1 = Auto-Bid toggle button; Cột 2 = 4 trạng thái phân minh (`auction-pass-btn`, `auction-passed-close-btn`, `auction-declined-close-btn`, `auction-concluded-close-btn`).
+    - Chuẩn hóa nhãn SSOT: `✕ Rút Lui` (assert chuỗi tại TC-211.02), `TỰ ĐỘNG ĐẶT GIÁ: BẬT / TẮT`, badge `🚫 Từ chối mua`; các nút đóng phụ được kiểm thử định danh theo `data-testid` độc lập với copy text.
+  * `src/client/ui/modals/bot_trade_offer_modal.tsx` (283 LOC — Tier 2 <= 500 LOC):
+    - Tách biệt dòng thông báo thiếu tiền bù giao dịch ra thẻ riêng `data-testid="trade-shortfall-notice"`.
+    - Bảo toàn định danh nút `✓ ĐỒNG Ý ĐỔI` / `✓ ĐỒNG Ý BÁN` ở trạng thái disabled mờ khi thiếu tiền.
+    - Nút từ chối mang phong cách hồng phấn `bg-rose-50 border-rose-300`, touch target min-h-[46px].
+- **Kiểm thử & Bất biến**:
+  * `tests/contracts/imp211_auction_and_bot_trade_clean_affordance.test.ts`: 16/16 atomic tests PASS 100% (4 facets).
+  * Adversarial Inversion: Station 1 RED (12 failed / 4 passed), Station 2 GREEN (16/16 passed).
+  * Điều hòa đặc tả tiến hóa (Specification Evolution): Reconcile sạch 108 tests (`imp211`, `auction_modal`, `imp156`, `imp138`, `imp196`, `imp106`, `imp208`).
+  * `npx tsc --noEmit`: 0 lỗi. `npm run lint:ui`: 0 vi phạm (195 files scanned).
+  * Production Build: `npm run build` thành công, SSR bundle 430.80 kB.
+  * Evidence Snapshot: `.agents/evidence/imp211_snapshot.json` (`executed: true`).
+- **Phê chuẩn**: `qa-tester` (Station 1 RED), `implementer` (Station 2 GREEN), `scout` (Station 2.5 PASS), `spec-reviewer` (SPEC_PASS APPROVED), `ui-craft-reviewer` (VERDICT SHIP), `code-reviewer` (CODE_PASS APPROVED).
+- **Trạng thái**: ✅ Hoàn thành Gói 1 (2026-09-27).
+
+### [IMP-212] Tinh Giản Danh Mục BĐS, Trái Phiếu & Đàm Phán P2P (Gói 2 Modernization)
+- **Mục tiêu**: Gói 2 trong chiến dịch cải tổ UI toàn diện. Khử nút [✕ Đóng] footer trùng lặp tại Danh Mục BĐS (`PropertyPortfolioModal`) giải phóng 50px diện tích cuộn; hiển thị số liệu BĐS trên Header subtitle; chuẩn hóa True Affordance tab Trái Phiếu (`BondIssuanceTab`) với nhãn cố định `PHÁT HÀNH TRÁI PHIẾU`, thẻ cảnh báo điều kiện `bond-blocked-notice`, nút tất toán gờ bóng tactile `shadow-[0_4px_0_0_#065f46]` đạt touch target min-h-[46px]; thanh lọc sạch sẽ nút ma tàng hình `className="hidden"` và `data-legacy-style` trong Đàm Phán P2P (`TradeModal`), loại bỏ nút Hủy footer để nút gửi chiếm 100% bề ngang (`w-full min-h-[48px]`).
+- **Hạ tầng hoàn tất**:
+  * `src/client/ui/modals/property_portfolio_modal.tsx` (450 LOC — Tier 2 <= 500 LOC):
+    - Đưa thông kê tài sản lên tiêu đề phụ: `Quản lý {ownedProperties.length} tài sản sở hữu • Nâng cấp nhanh 1-click`.
+    - Xóa bỏ hoàn toàn thẻ `<footer>` ở chân modal, giải phóng không gian cuộn cho cả danh mục và tab trái phiếu.
+  * `src/client/ui/modals/bond_issuance_tab.tsx` (102 LOC — Tier 2 <= 500 LOC):
+    - Tách cảnh báo điều kiện phát hành ra thẻ riêng `data-testid="bond-blocked-notice"` tone amber trang nhã.
+    - Cố định nhãn `PHÁT HÀNH TRÁI PHIẾU` khi disabled; nút tất toán đạt chuẩn tactile button `shadow-[0_4px_0_0_#065f46]` min-h-[46px].
+  * `src/client/ui/modals/trade_modal.tsx` (279 LOC — Tier 2 <= 500 LOC) & `trade_column.tsx` (246 LOC):
+    - Quét sạch nút ma `hidden` 'Thế chấp' và thuộc tính `data-legacy-style`.
+    - Chân modal tinh gọn 1 nút duy nhất `data-testid="submit-trade-btn"` chiếm `w-full min-h-[48px]` với gờ bóng ngọc lục bảo `shadow-[0_4px_0_0_#065f46]`.
+- **Kiểm thử & Bất biến**:
+  * `tests/contracts/imp212_portfolio_bond_and_trade_clean_affordance.test.ts`: 16/16 atomic contract tests PASS 100% (4 facets).
+  * Adversarial Inversion: Station 1 RED (14 failed / 2 passed), Station 2 GREEN (16/16 passed).
+  * Điều hòa đặc tả tiến hóa (Specification Evolution): Reconcile sạch 172 tests thuộc 10 test suites (`imp212`, `imp153`, `imp202`, `imp200`, `imp211`, `imp209`, `imp208`, `imp75`, `imp188`, `imp199`).
+  * `npx tsc --noEmit`: 0 lỗi. `npm run lint:ui`: 0 vi phạm (195 files scanned).
+  * Production Build: `npm run build` thành công, SSR bundle 430.80 kB.
+  * Evidence Snapshot: `.agents/evidence/imp212_snapshot.json` (`executed: true`).
+- **Phê chuẩn**: `qa-tester` (Station 1 RED), `implementer` (Station 2 GREEN), `scout` (Station 2.5 PASS), `spec-reviewer` (SPEC_PASS APPROVED), `ui-craft-reviewer` (VERDICT SHIP), `code-reviewer` (CODE_PASS APPROVED).
+- **Trạng thái**: ✅ Hoàn thành Gói 2 (2026-09-27).
+
+### [IMP-213] Chuẩn Hóa Thu Hồi Cưỡng Chế 130%, Sàn HOSE & Thể Lệ (Gói 3 Modernization)
+- **Mục tiêu**: Gói 3 trong chiến dịch cải tổ UI toàn diện. Chuẩn hóa dứt khoát nhãn `✕ Từ Chối Mua` (loại bỏ `✕ Bỏ Qua`), giữ nguyên định danh nút `Mua Lại ({cost})` disabled mờ khi thiếu tiền đền bù 130% kèm thẻ cảnh báo `buyout-shortfall-notice`; đổi nhãn `✕ Bỏ Qua` thành `✕ Không Cược` chuẩn ngữ cảnh cá cược chứng khoán tại Sàn HOSE, quét sạch thuộc tính ma `data-legacy-rates`, nâng cấp nút bấm đạt `min-h-[46px]` với gờ bóng tactile chân thực; giải phóng 50px diện tích đọc thể lệ tại Modal Hướng Dẫn (`GameRulesModal`) bằng cách tháo gỡ hoàn toàn footer thừa, gắn tooltip rõ ràng (`title="Đóng hướng dẫn (Phím Esc hoặc click nền)"`) vào nút Header `[X]` với touch target min-h-[44px] min-w-[44px].
+- **Hạ tầng hoàn tất**:
+  * `src/client/ui/modals/compulsory_buyout_modal.tsx` (192 LOC — Tier 2 <= 500 LOC):
+    - Đổi nhãn `✕ Bỏ Qua` sang `✕ Từ Chối Mua` với tone hồng phấn tao nhã `bg-rose-50 border-rose-300 text-rose-700 shadow-[0_4px_0_0_#fca5a5]`.
+    - Bảo toàn định danh nút `Mua Lại ({cost})` khi không đủ tiền mặt ở trạng thái disabled mờ (`cursor-not-allowed bg-slate-200 text-slate-400`).
+    - Bổ sung thẻ cảnh báo riêng `data-testid="buyout-shortfall-notice"` tone amber hiển thị số tiền thiếu chính xác.
+    - Cả 2 nút đạt `h-full min-h-[48px]`, dàn trang 2 cột đối xứng `grid-cols-2`.
+    - Thêm cơ chế fallback SSR cho store Zustand để tương thích hoàn hảo `renderToStaticMarkup`.
+  * `src/client/ui/modals/hose_modal.tsx` (333 LOC — Tier 2 <= 500 LOC):
+    - Đổi nhãn `✕ Bỏ Qua` thành `✕ Không Cược` chuẩn ngữ cảnh giao dịch chứng khoán.
+    - Quét sạch 100% thuộc tính ma `data-legacy-rates` trong DOM.
+    - Nút Cược và Không Cược đều đạt touch target `min-h-[46px]` kèm gờ bóng tactile 3D (`shadow-[0_4px_0_0_#065f46]` và `shadow-[0_4px_0_0_#fca5a5]`), độ lún cơ học `active:translate-y-[3px]`.
+    - Dọn dẹp an toàn AudioContext types và timer unmount.
+  * `src/client/ui/modals/game_rules_modal.tsx` (333 LOC — Tier 2 <= 500 LOC):
+    - Loại bỏ hoàn toàn thanh `footer` chứa nút `Đã Hiểu` thừa thãi, giải phóng 50px diện tích cuộn cho toàn bộ các tab hướng dẫn.
+    - Nút đóng Header `[X]` đạt touch target chuẩn `min-w-[44px] min-h-[44px]`, bổ sung tooltip chỉ dẫn trực quan `title="Đóng hướng dẫn (Phím Esc hoặc click nền)"`.
+- **Kiểm thử & Bất biến**:
+  * `tests/contracts/imp213_buyout_hose_rules_clean_affordance.test.ts`: 16/16 atomic contract tests PASS 100% (4 facets).
+  * Adversarial Inversion: Station 1 RED (8 failed / 8 passed), Station 2 GREEN (16/16 passed).
+  * Điều hòa đặc tả tiến hóa (Specification Evolution): Reconcile sạch 108 tests thuộc 7 test suites (`imp213`, `imp212`, `imp211`, `imp209`, `imp161`, `imp172`, `auction_modal`).
+  * `npx tsc --noEmit`: 0 lỗi. `npm run lint:ui`: 0 vi phạm (195 files scanned).
+  * Production Build: `npm run build` thành công, SSR bundle 430.80 kB.
+  * Evidence Snapshot: `.agents/evidence/imp213_snapshot.json` (`executed: true`).
+- **Phê chuẩn**: `qa-tester` (Station 1 RED), `implementer` (Station 2 GREEN), `scout` (Station 2.5 PASS), `spec-reviewer` (SPEC_PASS APPROVED), `ui-craft-reviewer` (VERDICT SHIP), `code-reviewer` (CODE_PASS APPROVED).
+- **Trạng thái**: ✅ Hoàn thành Gói 3 (2026-09-27) — **HOÀN TẤT 100% CHIẾN DỊCH CẢI TỔ UI TOÀN GAME (IMP-209, IMP-211, IMP-212, IMP-213)**.
+
+
+
+
 

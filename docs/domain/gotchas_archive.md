@@ -4834,6 +4834,49 @@
      - **Subtractive LOC Preservation**: Rút gọn `action_dock.tsx` từ 393 xuống **378 LOC** (<= 385 LOC), bảo toàn trần Tier 2.
 - **Traceability**: `[TC-208.01..16/MSS]`, `[UC-IMP208]`, `src/client/ui/action_dock.tsx`, `src/client/ui/ui_helpers.ts`, `src/client/ui/modals/title_deed_action_footer.tsx`, `tests/contracts/imp208_audit_bailout_and_dock_ergonomics.test.ts`.
 
+---
+
+### 293. [FSM/TREASURY] Bất Biến Bảo Toàn Quỹ Kho Bạc & Làm Sạch Thế Chấp Khi Đấu Giá (Auction Mortgage Sanitization & Treasury Conservation - IMP-205)
+- **Bối cảnh & Bẫy thực tế (3 Lớp Thực Chứng)**:
+  1. *Ảo tưởng ban đầu (Initial Illusion)*:
+     - Cho rằng khi người chơi thắng đấu giá một BĐS từng bị thế chấp, người mua phải tiếp tục chịu khoản thế chấp đó hoặc tự chuộc đất.
+     - Cho rằng tiền thu từ đấu giá đất từ chối mua (`unclaimedPropertyAuction`) hay đất thu hồi chỉ cần trừ khỏi người thắng mà không cần rót vào Kho Bạc Nhà Nước (`room.treasury`), làm thất thoát dòng tiền vĩ mô của hệ thống.
+     - Cho rằng sau khi đất bị thu hồi vì không xây dựng trong 3 vòng (`unbuiltRounds >= 3`), việc chuyển quyền sở hữu về `BANK` là đủ, dẫn đến bẫy vòng lặp: ở các vòng tiếp theo `unbuiltRounds` vẫn giữ giá trị và đất tiếp tục bị thu hồi vô tận.
+  2. *Phát hiện vật lý từ Scout & Codebase (Scout Physical Finding)*:
+     - Khi trúng đấu giá, người chơi trả tiền thật để sở hữu BĐS sạch. Cờ thế chấp `isMortgaged` bắt buộc phải đặt về `false` và `mortgagedRound` phải xóa (`undefined`).
+     - Đẳng thức bảo toàn dòng tiền: Đối với đấu giá tài sản công (đất từ chối hoặc đất ngân hàng tịch thu), `room.treasury += winningBid`. Đối với đấu giá tài sản thế chấp để cứu nguy nợ, tiền bán được ưu tiên hoàn trả nợ gốc thế chấp vào Kho Bạc trước, phần dư thừa mới trả về ví của con nợ.
+     - `unbuiltRounds` bắt buộc phải được dọn sạch (`delete state.unbuiltRounds` hoặc `state.unbuiltRounds = undefined`) ngay khi quyền sở hữu chuyển giao.
+     - `activity_property_tracker.ts` phía Client tự động phát hiện `isMortgaged` chuyển từ `true` sang `false` và sinh log chuộc đất ma ("Người chơi đã chuộc đất"). Bắt buộc phải chặn log này khi nguồn gốc là chiến thắng đấu giá (`wasAuctionWon`).
+  3. *Bất biến đã kiểm chứng (Verified Invariants)*:
+     - **Auction Sanitization Invariant**: Người thắng đấu giá luôn nhận BĐS ở trạng thái hoàn toàn giải chấp (`isMortgaged: false`, `mortgagedRound: undefined`).
+     - **Treasury Conservation Invariant**: Mọi giao dịch đấu giá đất công đều đóng góp 100% doanh thu vào Kho Bạc (`room.treasury += winningBid`).
+     - **Unbuilt Rounds Teardown**: `unbuiltRounds` bị xóa triệt để khi thu hồi, triệt tiêu 100% bẫy lặp vô tận.
+     - **No Ghost Redemption Logs**: Client phân biệt chính xác giữa chuộc đất chủ động và nhận BĐS sạch qua đấu giá.
+- **Traceability**: `[TC-IMP205.01..19/MSS]`, `[UC-GAME-028]`, `src/server/turn_loop.ts`, `src/server/auction_manager.ts`, `src/server/room_manager.ts`, `src/client/network/activity_property_tracker.ts`, `tests/contracts/imp205_auction_mortgage_sanitization_and_treasury_conservation.test.ts`.
+
+---
+
+### 294. [SERVER/ARCH] Bất Biến GameRoomSession Aggregate Root & Map Protocol Parity Trên Dynamic Facades (IMP-210)
+- **Bối cảnh & Bẫy thực tế (3 Lớp Thực Chứng)**:
+  1. *Ảo tưởng ban đầu (Initial Illusion)*:
+     - Cho rằng `RoomManager` có thể tiếp tục mở rộng bằng cách thêm các `Map<string, T>` phân tán cấp class mỗi khi có tính năng mới (đã tích tụ lên 10 Map), dẫn đến `doCloseRoom` nhận 11 tham số và thường xuyên bỏ sót dọn rác, gây rò rỉ bộ nhớ nghiêm trọng (Memory Leak).
+     - Cho rằng chỉ cần tạo `new Proxy(new Map(), { get: (t, p) => ... })` đơn giản bọc getter của session field là đủ để tương thích ngược. Trên thực tế, các test suite và runtime lặp qua Map bằng `for (const [code, val] of mgr.registries)` hoặc gọi `.size`, `.entries()`, `.values()`, `.keys()`, `.forEach()`. Một proxy thiếu các method này sẽ sụp đổ ngay khi có lệnh duyệt collection.
+     - Cho rằng có thể tạo một `rolledMap` mini-proxy cục bộ bên trong `doHandleEndTurnSession`. Điều này vi phạm quy tắc chống allocation churn trong hot loop và làm méo mó type contract khi setter nhận `(key, value)` nhưng proxy chỉ nhận `(_: any, v: boolean)`.
+  2. *Phát hiện vật lý từ Scout & Codebase (Scout Physical Finding)*:
+     - `GameRoomSession` Aggregate Root đóng gói trọn vẹn 10 vi trạng thái phòng chơi (`Room`, `PropertyRegistry`, `PropertyStateMap`, `AuctionSession`, `rolledThisTurn`, `lastAuctionResult`, `activeTimers`, `lastActivity`, `botPersonalities`).
+     - Hai trường tùy chọn (`auction`, `lastAuctionResult`) yêu cầu getter/setter hai chiều nguyên tử sang `room.currentAuction` và `room.lastAuctionResult`. Facade `.size` và `.has()` chỉ được tính khi giá trị khác `undefined`.
+     - Facade cho bot personality bắt buộc phải bóc tách composite key dạng `${roomCode}:${botId}` để bảo đảm tính tương thích với API toàn cục cũ nhưng lưu trữ cục bộ trong từng session riêng biệt.
+     - Vòng lặp kết thúc lượt `doHandleEndTurnSession` nhận trực tiếp `session`, sử dụng local single-entry maps truyền `session.rolledThisTurn`, hoàn toàn không phát sinh proxy overhead.
+     - Trong `closeRoom`, thứ tự giải phóng bắt buộc: (1) `closeHooks` bọc trong `try...catch` (để exception trong hook của bên thứ ba không chặn đứng việc dọn dẹp) -> (2) `pendingTradeManager.clearSession` -> (3) `session.destroy()` (hủy bỏ Node timers) -> (4) `this.sessions.delete()`.
+     - Trong TypeScript >= 5.6, các phương thức `Map.prototype.keys()`, `values()`, `entries()`, `[Symbol.iterator]()` yêu cầu trả về `MapIterator<T>` (có `[Symbol.dispose]` và `IteratorReturnResult<undefined>`). Các Generator function tự viết `function* ()` sẽ bị từ chối do trả về `IteratorReturnResult<void>` và thiếu dispose symbol. Bắt buộc ủy quyền trả về trực tiếp `MapIterator` từ `Map` nội bộ, kết hợp type guard `isClearable` để loại bỏ 100% dirty casts.
+  3. *Bất biến đã kiểm chứng (Verified Invariants)*:
+     - **Aggregate Root Encapsulation Invariant**: Toàn bộ vi trạng thái phòng chơi được lưu trữ và hủy bỏ nguyên tử thông qua `GameRoomSession`. Triệt tiêu hoàn toàn rò rỉ trạng thái thây ma khi đóng phòng.
+     - **100% Map Protocol & MapIterator Parity**: Mọi Dynamic Map Facade (`createSessionFieldProxy`, `createBotPersonalityMapFacade`) tuân thủ trọn vẹn tất cả 11 methods của ECMAScript `Map` interface và trả về chuẩn `MapIterator` tương thích TypeScript >= 5.6.
+     - **Zero Pseudo-Proxy on Hot Paths**: Không bao giờ tạo proxy bọc scalar/collection rỗng trong vòng lặp runtime; sử dụng trực tiếp đối tượng domain hoặc single-entry map thuần túy.
+     - **Subtractive LOC Ceiling**: Rút gọn `room_manager.ts` từ 518 xuống **378 LOC** (<= 400 LOC Tier 1), chính thức đóng vĩnh viễn nợ kỹ thuật `DEBT-ROOM-MGR-01`.
+- **Traceability**: `[TC-IMP210.01..20/MSS]`, `[UC-GAME-029]`, `src/server/game_room_session.ts`, `src/server/session_proxy_facade.ts`, `src/server/room_manager.ts`, `src/server/room_manager_lifecycle.ts`, `tests/contracts/imp210_game_room_session_aggregate_root.test.ts`.
+
+
 
 
 
