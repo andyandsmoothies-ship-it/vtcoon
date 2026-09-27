@@ -197,7 +197,7 @@ describe('[TC-202.01/MSS..TC-202.18/MSS][UC-IMP202] Mobile UI Ergonomics, Shadow
       inAudit: false,
     };
 
-    it('[TC-202.06/MSS][UC-IMP202] PlayerCard khi isCurrentTurn: true render huy hiệu LƯỢT', () => {
+    it('[TC-202.06/MSS][UC-IMP202] PlayerCard khi isCurrentTurn: true áp dụng highlight toàn thẻ thay vì chèn chữ LƯỢT', () => {
       const cardHtml = renderToStaticMarkup(
         React.createElement(PlayerCard, {
           player: testPlayer,
@@ -207,7 +207,9 @@ describe('[TC-202.01/MSS..TC-202.18/MSS][UC-IMP202] Mobile UI Ergonomics, Shadow
         })
       );
 
-      expect(cardHtml).toContain('LƯỢT');
+      expect(cardHtml).toContain('data-in-turn="true"');
+      expect(cardHtml).toContain('ring-amber-400');
+      expect(cardHtml).not.toContain('>LƯỢT<');
     });
 
     it('[TC-202.07/MSS][UC-IMP202] PlayerCard không còn chứa class margin âm -top-2.5', () => {
@@ -223,20 +225,20 @@ describe('[TC-202.01/MSS..TC-202.18/MSS][UC-IMP202] Mobile UI Ergonomics, Shadow
       expect(cardHtml).not.toContain('-top-2.5');
     });
 
-    it('[TC-202.08/MSS][UC-IMP202] Huy hiệu LƯỢT chứa class absolute top-1.5 right-2 và cỡ chữ chuẩn text-[10px]', () => {
+    it('[TC-202.08/MSS][UC-IMP202] PlayerCard giải phóng không gian tên (không còn pr-12 né chữ LƯỢT, không render badge BOT và icon Kiểm Toán thừa)', () => {
       const cardHtml = renderToStaticMarkup(
         React.createElement(PlayerCard, {
-          player: testPlayer,
+          player: { ...testPlayer, isBot: true, inAudit: true },
           isCurrentTurn: true,
           levelMap: {},
           slotIndex: 0,
         })
       );
-      const badgeMatch = cardHtml.match(/<span[^>]*>[^<]*LƯỢT[^<]*<\/span>/)?.[0] ?? '';
 
-      expect(badgeMatch).toContain('top-1.5');
-      expect(badgeMatch).toContain('right-2');
-      expect(badgeMatch).toContain('text-[10px]');
+      expect(cardHtml).not.toContain('pr-12');
+      expect(cardHtml).not.toContain('>BOT<');
+      expect(cardHtml).not.toContain('Kiểm Toán');
+      expect(cardHtml).not.toContain('⚖️');
     });
   });
 

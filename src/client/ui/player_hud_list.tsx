@@ -18,19 +18,21 @@ export function PlayerHudList({ initialCollapsed = false }: { initialCollapsed?:
 
   return (
     <aside
-      className="pointer-events-none flex flex-col gap-2 w-40 sm:w-48 md:w-64 max-w-[calc(100vw-8rem)] select-none items-end"
+      className="pointer-events-none flex flex-col gap-2 w-44 sm:w-48 md:w-64 max-w-[calc(100vw-8rem)] select-none items-end"
       aria-label="Danh sách người chơi"
     >
       <button
         type="button"
         onClick={() => setIsCollapsed((prev) => !prev)}
-        className="pointer-events-auto sm:hidden fixed top-28 sm:top-32 right-0 z-20 min-h-[38px] inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-l-xl rounded-r-none bg-[#FFFDF8] border-2 border-r-0 border-slate-900 shadow-sm active:scale-95 text-slate-900 text-xs font-black transition-all cursor-pointer"
+        className="pointer-events-auto sm:hidden fixed top-28 sm:top-32 right-0 z-20 min-h-[38px] inline-flex items-center gap-1 px-2.5 py-1.5 rounded-l-xl rounded-r-none bg-[#FFFDF8] border-2 border-r-0 border-slate-900 shadow-sm active:scale-95 text-slate-900 text-xs font-black transition-all cursor-pointer"
         data-testid="toggle-player-hud-btn"
         aria-label={isCollapsed ? 'Mở Bảng Điểm' : 'Thu gọn Bảng Điểm'}
-        title={isCollapsed ? 'Hiện Bảng Điểm' : 'Thu gọn'}
+        title={isCollapsed ? 'Hiện Bảng Điểm' : 'Thu gọn Bảng Điểm'}
       >
-        <span aria-hidden="true">{isCollapsed ? '👥 Hiện' : '👥 Ẩn'}</span>
-        <span className="text-[11px] font-extrabold">{isCollapsed ? 'Bảng Điểm' : 'Đóng'}</span>
+        <span className="text-[11px] font-extrabold flex items-center gap-1">
+          <span aria-hidden="true">{isCollapsed ? '👥 Hiện' : '👥 Ẩn'}</span>
+          <span>Bảng Điểm</span>
+        </span>
       </button>
 
       {!isCollapsed && (

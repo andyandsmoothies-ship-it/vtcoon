@@ -78,14 +78,46 @@ SRC_DIR_PATTERNS = ["/src/", "/lib/", "/app/", "/internal/", "/pkg/", "/core/"]
 
 
 def read_hook_payload() -> dict:
-    """Reads JSON hook context from stdin (AG 2.0 protojson IPC)."""
-    if not sys.stdin.isatty():
+    """Reads JSON hook context from stdin (AG 2.0 protojson IPC) without hanging."""
+    if sys.stdin.isatty():
+        return {}
+
+    # Check if data is available on stdin to prevent indefinite blocking
+    if sys.platform == "win32":
         try:
-            raw = sys.stdin.read().strip()
-            if raw:
-                return json.loads(raw)
+            import msvcrt
+            import ctypes
+            import time
+            handle = msvcrt.get_osfhandle(sys.stdin.fileno())
+            avail = ctypes.c_ulong()
+            has_data = False
+            for _ in range(5):
+                res = ctypes.windll.kernel32.PeekNamedPipe(
+                    handle, None, 0, None, ctypes.byref(avail), None
+                )
+                if res and avail.value > 0:
+                    has_data = True
+                    break
+                time.sleep(0.02)
+            if not has_data:
+                return {}
         except Exception:
-            pass
+            return {}
+    else:
+        try:
+            import select
+            r, _, _ = select.select([sys.stdin], [], [], 0.1)
+            if not r:
+                return {}
+        except Exception:
+            return {}
+
+    try:
+        raw = sys.stdin.read().strip()
+        if raw:
+            return json.loads(raw)
+    except Exception:
+        pass
     return {}
 
 
@@ -174,6 +206,19 @@ def pre_tool_file_gate(payload: dict, role: str = "") -> None:
     sys.exit(0)
 
 
+def get_tier_budget(file_path: str) -> dict:
+    norm = file_path.replace("\\", "/")
+    if "/tests/" in norm or ".test." in norm or ".spec." in norm:
+        return {"name": "Contract / Unit Tests", "ceiling": 600, "warn": 500}
+    if norm.endswith(".md") or "/docs/" in norm:
+        return {"name": "Documentation / Meta", "ceiling": 9999, "warn": 1000}
+    if any(k in norm for k in ["tile_icons.ts", "property_manager_data.ts", "board_config.ts", "property_data.ts"]):
+        return {"name": "Tier 3 (Static Data/Config)", "ceiling": 800, "warn": 650}
+    if "/src/client/ui/" in norm or "/src/client/3d/" in norm or norm.endswith(".tsx"):
+        return {"name": "Tier 2 (UI/3D/Views)", "ceiling": 500, "warn": 400}
+    return {"name": "Tier 1 (Domain/Server/Logic)", "ceiling": 400, "warn": 300}
+
+
 def audit_file(payload: dict) -> None:
     """PostToolUse: Audits file modifications for budget, zone leaks, and traceability tags."""
     target_file = ""
@@ -200,11 +245,17 @@ def audit_file(payload: dict) -> None:
         line_count = len(lines)
         norm_path = target_file.replace("\\", "/")
 
-        # 1. File line budget check (>400 lines)
-        if line_count > 400:
+        # 1. Tier-aware file line budget check (GEMINI.md alignment)
+        budget = get_tier_budget(norm_path)
+        if line_count > budget["ceiling"]:
             print(
-                f"WARNING [Budget]: {target_file} has {line_count} lines (budget limit is 400 lines). "
-                "Extract logic into smaller modular files.",
+                f"ERROR [Budget Overflow]: '{target_file}' has {line_count} lines (ceiling for {budget['name']} is {budget['ceiling']} lines). "
+                "Task MUST extract submodules to comply with GEMINI.md.",
+                file=sys.stderr,
+            )
+        elif line_count >= budget["warn"]:
+            print(
+                f"WARNING [Budget Warning]: '{target_file}' has {line_count} lines (approaching {budget['name']} ceiling {budget['ceiling']} lines, warn threshold is {budget['warn']}).",
                 file=sys.stderr,
             )
 
@@ -301,8 +352,15 @@ def stop_gate(payload: dict) -> None:
 
 
 if __name__ == "__main__":
+    if len(sys.argv) <= 1 or sys.argv[1] in ("--status", "--self-check", "-h", "--help"):
+        print("🛡️ [use_case_guard] Antigravity 2.0 Quality Gate Hook is ACTIVE.")
+        print(f"📁 Repository Root: {REPO_ROOT}")
+        print(f"📝 Touched Log: {TOUCHED_FILES_LOG}")
+        print("✅ Guardrails: Git Command Blocker, Shell Redirect Blocker, Tier-Aware LOC Budget, Impeccable UI Stop Gate.")
+        sys.exit(0)
+
     payload = read_hook_payload()
-    mode = sys.argv[1] if len(sys.argv) > 1 else ""
+    mode = sys.argv[1]
 
     if mode == "--check-command":
         check_command(payload)

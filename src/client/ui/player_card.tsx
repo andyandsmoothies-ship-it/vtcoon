@@ -76,24 +76,15 @@ export function PlayerCard({
   return (
     <div
       data-testid="player-ribbon"
-      className={`pointer-events-auto relative flex flex-col gap-1.5 p-2.5 sm:p-3 rounded-xl border-2 border-slate-900 bg-[#FFFDF8] text-slate-900 transition-all duration-200 w-full ${
+      data-in-turn={isCurrentTurn ? 'true' : 'false'}
+      className={`pointer-events-auto relative flex flex-col gap-1.5 p-2.5 sm:p-3 rounded-xl border-2 transition-all duration-200 w-full ${
         isCurrentTurn
-          ? 'ring-2 ring-amber-400 shadow-[0_6px_0_0_#0f172a]'
-          : 'shadow-[0_4px_0_0_#0f172a]'
-      } ${player.bankrupt ? 'opacity-50 grayscale' : ''}`}
+          ? 'border-amber-500 bg-amber-50/70 ring-2 ring-amber-400 shadow-[0_6px_0_0_#0f172a]'
+          : 'border-slate-900 bg-[#FFFDF8] shadow-[0_4px_0_0_#0f172a]'
+      } text-slate-900 ${player.bankrupt ? 'opacity-50 grayscale' : ''}`}
       role="region"
       aria-label={`Thông tin ${player.name}`}
     >
-      {/* Huy hiệu LƯỢT nổi bật trên góc thẻ (Nằm gọn trong lòng thẻ, không margin âm) */}
-      {isCurrentTurn && (
-        <span
-          data-testid="player-in-turn-badge"
-          className="absolute top-1.5 right-2 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-300 text-amber-950 border border-amber-500 shadow-xs animate-pulse select-none uppercase tracking-wider z-10 leading-none"
-        >
-          LƯỢT
-        </span>
-      )}
-
       {/* Emote Bubble Popover trên Avatar (3 giây) */}
       {activeEmote && (
         <div
@@ -109,7 +100,7 @@ export function PlayerCard({
       )}
 
       {/* Dòng 1 (Header siêu gọn): Chấm màu quân cờ, Tên, Số tiền (và Tài sản ròng), Badges */}
-      <div className={`flex items-center justify-between gap-1.5 min-w-0 ${isCurrentTurn ? 'pr-12' : ''}`}>
+      <div className="flex items-center justify-between gap-1.5 min-w-0">
         <div className="flex items-center gap-1.5 min-w-0 flex-1">
           {/* Chấm màu nhận diện quân cờ trên bàn 3D (thay thế avatar cồng kềnh) */}
           <div
@@ -160,28 +151,14 @@ export function PlayerCard({
           </span>
         </div>
 
-        {/* Badges: BOT, Phá Sản, Kiểm Toán */}
-        <div className="flex items-center gap-1 shrink-0">
-          {player.isBot && (
-            <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-cyan-100 text-cyan-900 border border-cyan-300">
-              BOT
-            </span>
-          )}
-          {player.bankrupt && (
+        {/* Badges: Phá Sản (Đã tinh giản: loại bỏ badge BOT và icon Kiểm Toán) */}
+        {player.bankrupt && (
+          <div className="flex items-center gap-1 shrink-0">
             <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-rose-100 text-rose-900 border border-rose-300">
               Phá Sản
             </span>
-          )}
-          {player.inAudit && !player.bankrupt && (
-            <span
-              className="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300 flex items-center justify-center leading-none"
-              title="Kiểm Toán"
-              aria-label="Kiểm Toán"
-            >
-              <span role="img" aria-hidden="true">⚖️</span>
-            </span>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Dòng 3: Cụm 22 chấm BĐS sắp xếp 2 dòng đối xứng (11 chấm/dòng) giúp nhận diện rõ màu sắc */}

@@ -78,14 +78,46 @@ SRC_DIR_PATTERNS = ["/src/", "/lib/", "/app/", "/internal/", "/pkg/", "/core/"]
 
 
 def read_hook_payload() -> dict:
-    """Reads JSON hook context from stdin (AG 2.0 protojson IPC)."""
-    if not sys.stdin.isatty():
+    """Reads JSON hook context from stdin (AG 2.0 protojson IPC) without hanging."""
+    if sys.stdin.isatty():
+        return {}
+
+    # Check if data is available on stdin to prevent indefinite blocking
+    if sys.platform == "win32":
         try:
-            raw = sys.stdin.read().strip()
-            if raw:
-                return json.loads(raw)
+            import msvcrt
+            import ctypes
+            import time
+            handle = msvcrt.get_osfhandle(sys.stdin.fileno())
+            avail = ctypes.c_ulong()
+            has_data = False
+            for _ in range(5):
+                res = ctypes.windll.kernel32.PeekNamedPipe(
+                    handle, None, 0, None, ctypes.byref(avail), None
+                )
+                if res and avail.value > 0:
+                    has_data = True
+                    break
+                time.sleep(0.02)
+            if not has_data:
+                return {}
         except Exception:
-            pass
+            return {}
+    else:
+        try:
+            import select
+            r, _, _ = select.select([sys.stdin], [], [], 0.1)
+            if not r:
+                return {}
+        except Exception:
+            return {}
+
+    try:
+        raw = sys.stdin.read().strip()
+        if raw:
+            return json.loads(raw)
+    except Exception:
+        pass
     return {}
 
 
@@ -320,8 +352,15 @@ def stop_gate(payload: dict) -> None:
 
 
 if __name__ == "__main__":
+    if len(sys.argv) <= 1 or sys.argv[1] in ("--status", "--self-check", "-h", "--help"):
+        print("🛡️ [use_case_guard] Antigravity 2.0 Quality Gate Hook is ACTIVE.")
+        print(f"📁 Repository Root: {REPO_ROOT}")
+        print(f"📝 Touched Log: {TOUCHED_FILES_LOG}")
+        print("✅ Guardrails: Git Command Blocker, Shell Redirect Blocker, Tier-Aware LOC Budget, Impeccable UI Stop Gate.")
+        sys.exit(0)
+
     payload = read_hook_payload()
-    mode = sys.argv[1] if len(sys.argv) > 1 else ""
+    mode = sys.argv[1]
 
     if mode == "--check-command":
         check_command(payload)

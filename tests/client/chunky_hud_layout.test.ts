@@ -231,7 +231,7 @@ describe('[TC-CHUNKY-HUD.2/MSS] Facet 2: State Reactivity (Chunky Toy Tabletop U
       })
     );
 
-    expect(html).toContain('LƯỢT');
+    expect(html).not.toContain('LƯỢT');
     expect(html).toContain('ring-amber-400');
   });
 
@@ -360,7 +360,7 @@ describe('[TC-CHUNKY-HUD.4/MSS] Facet 4: Error Defense & Exceptional States', ()
     expect(html).toContain('disabled=""');
   });
 
-  it('[TC-CHUNKY-HUD.25/MSS] [UC-HUD-04] PlayerCard displays "Kiểm Toán" badge when player is detained in audit station', () => {
+  it('[TC-CHUNKY-HUD.25/MSS] [UC-HUD-04] PlayerCard omits redundant "Kiểm Toán" badge to preserve mobile layout space', () => {
     const player: PlayerHudInfo = {
       id: 'p1',
       name: 'Chủ Tịch Hưng',
@@ -379,7 +379,8 @@ describe('[TC-CHUNKY-HUD.4/MSS] Facet 4: Error Defense & Exceptional States', ()
       })
     );
 
-    expect(html).toContain('Kiểm Toán');
+    expect(html).not.toContain('Kiểm Toán');
+    expect(html).not.toContain('⚖️');
   });
 
   it('[TC-CHUNKY-HUD.26/MSS] [UC-HUD-04] PlayerCard formats negative cash balance with warning text and overdraft countdown', () => {
