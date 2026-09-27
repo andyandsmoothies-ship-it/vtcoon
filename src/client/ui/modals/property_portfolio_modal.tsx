@@ -4,30 +4,20 @@ import { getDeedDisplayInfo, checkPropertyUpgradeEligibility, sortPropertiesByRe
 import { formatCurrency } from '../ui_helpers';
 import { COLOR_GROUP_HEX } from '../../../domain/theme';
 import { BOARD_CONFIG } from '../../../domain/board_config';
-import { analyzePropertyMonopolyInsight } from './portfolio_monopoly_analytics';
+import { analyzePropertyMonopolyInsight, resolvePropertyCardActionState } from './portfolio_monopoly_analytics';
 import { PortfolioTabHeader, type PortfolioTab } from './portfolio_tab_header';
 import { BondIssuanceTab } from './bond_issuance_tab';
 import type { BondContract } from '../../../domain/bond_types';
 
 export interface PropertyPortfolioModalProps {
   readonly ownedProperties: readonly number[];
-  readonly propertyStates?: Record<number, {
-    readonly ownerId?: string | null;
-    readonly level?: number;
-    readonly isMortgaged?: boolean;
-  }>;
+  readonly isTradeFrozen?: boolean;
+  readonly propertyStates?: Record<number, { readonly ownerId?: string | null; readonly level?: number; readonly isMortgaged?: boolean }>;
   readonly currentBalance?: number;
   readonly isInInsolvency?: boolean;
   readonly isMyTurn?: boolean;
   readonly turnPhase?: string;
-  readonly allPlayers?: Record<string, {
-    readonly id: string;
-    readonly name?: string;
-    readonly balance?: number;
-    readonly tokenColor?: string;
-    readonly isBot?: boolean;
-    readonly ownedProperties?: readonly number[];
-  }>;
+  readonly allPlayers?: Record<string, { readonly id: string; readonly name?: string; readonly balance?: number; readonly tokenColor?: string; readonly isBot?: boolean; readonly ownedProperties?: readonly number[] }>;
   readonly onQuickTrade?: (targetPlayerId: string, targetPropertyIndex: number) => void;
   readonly onViewVacantCell?: (cellIndex: number) => void;
   readonly onUpgrade?: (cellIndex: number) => void;
@@ -45,25 +35,9 @@ export interface PropertyPortfolioModalProps {
 const TIER_NAMES = ['Đất Nền', 'Nhà Phố C1', 'Khách Sạn C2', 'Resort C3'];
 
 export function PropertyPortfolioModal({
-  ownedProperties,
-  propertyStates = {},
-  currentBalance = 0,
-  isInInsolvency = false,
-  isMyTurn,
-  turnPhase,
-  allPlayers,
-  onQuickTrade,
-  onViewVacantCell,
-  onUpgrade,
-  onHoverCell,
-  onSelectDeed,
-  onMortgage,
-  onRedeem,
-  onDowngrade,
-  onClose,
-  bondContract,
-  onIssueBond,
-  onRepayBond,
+  ownedProperties, isTradeFrozen, propertyStates = {}, currentBalance = 0, isInInsolvency = false,
+  isMyTurn, turnPhase, allPlayers, onQuickTrade, onViewVacantCell, onUpgrade, onHoverCell,
+  onSelectDeed, onMortgage, onRedeem, onDowngrade, onClose, bondContract, onIssueBond, onRepayBond,
 }: PropertyPortfolioModalProps): React.ReactElement {
   const [activeTab, setActiveTab] = useState<PortfolioTab>('properties');
   const isNegative = currentBalance < 0 || isInInsolvency;
@@ -71,27 +45,12 @@ export function PropertyPortfolioModal({
   const [filter, setFilter] = useState<'all' | 'nearMonopoly' | 'upgradeable' | 'mortgaged'>('all');
 
   const filteredProperties = ownedProperties.filter((cellIndex) => {
-    if (filter === 'mortgaged') {
-      return Boolean(propertyStates[cellIndex]?.isMortgaged);
-    }
+    if (filter === 'mortgaged') return Boolean(propertyStates[cellIndex]?.isMortgaged);
     if (filter === 'upgradeable') {
-      const eligibility = checkPropertyUpgradeEligibility({
-        cellIndex,
-        ownedProperties,
-        propertyStates,
-        balance: currentBalance,
-        isMyTurn,
-        turnPhase,
-      });
-      return eligibility.canUpgrade;
+      return checkPropertyUpgradeEligibility({ cellIndex, ownedProperties, propertyStates, balance: currentBalance, isMyTurn, turnPhase }).canUpgrade;
     }
     if (filter === 'nearMonopoly') {
-      const insight = analyzePropertyMonopolyInsight({
-        cellIndex,
-        ownedProperties,
-        allPlayers,
-      });
-      return insight.isNearMonopoly;
+      return analyzePropertyMonopolyInsight({ cellIndex, ownedProperties, allPlayers }).isNearMonopoly;
     }
     return true;
   });
@@ -176,42 +135,25 @@ export function PropertyPortfolioModal({
       {ownedProperties.length > 0 && (
         <div className="px-4 pt-3 shrink-0">
           <div data-testid="portfolio-filter-bar" className="flex items-center gap-1.5 p-1 bg-slate-200/80 rounded-xl overflow-x-auto no-scrollbar whitespace-nowrap">
-            <button
-              type="button"
-              onClick={() => setFilter('all')}
-              className={`min-h-[44px] px-3.5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                filter === 'all' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Tất Cả
-            </button>
-            <button
-              type="button"
-              onClick={() => setFilter('nearMonopoly')}
-              className={`min-h-[44px] px-3.5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                filter === 'nearMonopoly' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Sắp Đủ Bộ 🔥
-            </button>
-            <button
-              type="button"
-              onClick={() => setFilter('upgradeable')}
-              className={`min-h-[44px] px-3.5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                filter === 'upgradeable' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Có Thể Xây
-            </button>
-            <button
-              type="button"
-              onClick={() => setFilter('mortgaged')}
-              className={`min-h-[44px] px-3.5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                filter === 'mortgaged' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Đang Thế Chấp
-            </button>
+            {(
+              [
+                ['all', 'Tất Cả'],
+                ['nearMonopoly', 'Sắp Đủ Bộ 🔥'],
+                ['upgradeable', 'Có Thể Xây'],
+                ['mortgaged', 'Đang Thế Chấp'],
+              ] as const
+            ).map(([key, label]) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setFilter(key)}
+                className={`min-h-[44px] px-3.5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  filter === key ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
           </div>
         </div>
       )}
@@ -234,6 +176,15 @@ export function PropertyPortfolioModal({
               const ribbonColor = deed?.colorGroup ? COLOR_GROUP_HEX[deed.colorGroup] : '#64748b';
               const mortgageVal = deed?.mortgageValue ?? 0;
               const redeemCost = Math.round(mortgageVal * 1.1);
+              const actionState = resolvePropertyCardActionState({
+                cellIndex,
+                level,
+                isMortgaged: isMort,
+                isTradeFrozen,
+                isLiquidityFrozen: false,
+                levelMap: Object.fromEntries(Object.entries(propertyStates).map(([k, v]) => [Number(k), v.level ?? 0])),
+                ownedProperties,
+              });
 
               const insight = analyzePropertyMonopolyInsight({
                 cellIndex,
@@ -372,8 +323,14 @@ export function PropertyPortfolioModal({
                                 <button
                                   type="button"
                                   data-testid={`quick-trade-btn-${piece.cellIndex}`}
-                                  onClick={() => piece.ownerId && onQuickTrade?.(piece.ownerId, piece.cellIndex)}
-                                  className="min-h-[44px] min-w-[44px] px-3 py-1.5 text-xs inline-flex items-center justify-center bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold rounded-md border border-blue-300 shadow-[0_1px_0_0_#93c5fd] active:translate-y-[1px] transition-all cursor-pointer"
+                                  disabled={isTradeFrozen}
+                                  title={isTradeFrozen ? 'Thị trường đang đóng băng giao dịch' : undefined}
+                                  onClick={() => !isTradeFrozen && piece.ownerId && onQuickTrade?.(piece.ownerId, piece.cellIndex)}
+                                  className={`min-h-[44px] min-w-[44px] px-3 py-1.5 text-xs inline-flex items-center justify-center font-bold rounded-md border transition-all ${
+                                    isTradeFrozen
+                                      ? 'bg-slate-100 text-slate-400 border-slate-300 cursor-not-allowed shadow-none'
+                                      : 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-300 shadow-[0_1px_0_0_#93c5fd] active:translate-y-[1px] cursor-pointer'
+                                  }`}
                                 >
                                   <span>🤝</span>
                                   <span className="hidden sm:inline ml-1">Đàm Phán</span>
@@ -424,21 +381,29 @@ export function PropertyPortfolioModal({
                     {!isMort && (
                       <button
                         type="button"
-                        data-legacy-style="min-h-[38px]"
-                        onClick={() => onMortgage?.(cellIndex)}
-                        className="flex-1 min-h-[44px] px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold rounded-lg border-2 border-rose-300 shadow-[0_2px_0_0_#fecdd3] active:shadow-none active:translate-y-[1px] transition-all text-xs cursor-pointer inline-flex items-center justify-center"
+                        data-testid={`mortgage-btn-${cellIndex}`}
+                        onClick={() => actionState.canMortgage && onMortgage?.(cellIndex)}
+                        disabled={!actionState.canMortgage}
+                        title={actionState.mortgageBlockedReason}
+                        className={`flex-1 min-h-[44px] px-3 py-2 font-bold rounded-lg border-2 text-xs transition-all inline-flex items-center justify-center ${
+                          actionState.canMortgage
+                            ? 'bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-300 shadow-[0_2px_0_0_#fecdd3] active:translate-y-[1px] cursor-pointer'
+                            : 'bg-slate-100 text-slate-400 border-slate-200 shadow-none cursor-not-allowed opacity-75'
+                        }`}
                       >
-                        Thế Chấp (+{formatCurrency(mortgageVal)})
+                        {actionState.canMortgage
+                          ? `Thế Chấp (+${formatCurrency(mortgageVal)})`
+                          : `${actionState.mortgageButtonLabel} (+${formatCurrency(mortgageVal)})`}
                       </button>
                     )}
 
                     {isMort && (
                       <button
                         type="button"
-                        data-legacy-style="min-h-[38px]"
+                        data-testid={`redeem-btn-${cellIndex}`}
                         onClick={() => onRedeem?.(cellIndex)}
                         disabled={currentBalance < redeemCost}
-                        className="flex-1 min-h-[44px] px-3 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold rounded-lg border-2 border-emerald-800 shadow-[0_3px_0_0_#065f46] active:shadow-[0_1px_0_0_#065f46] active:translate-y-[2px] transition-all text-xs cursor-pointer disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 inline-flex items-center justify-center"
+                        className="flex-1 min-h-[44px] px-3 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold rounded-lg border-2 border-emerald-800 shadow-[0_3px_0_0_#065f46] active:translate-y-[2px] transition-all text-xs cursor-pointer disabled:cursor-not-allowed disabled:shadow-none inline-flex items-center justify-center"
                       >
                         Giải Chấp (-{formatCurrency(redeemCost)})
                       </button>
@@ -447,8 +412,15 @@ export function PropertyPortfolioModal({
                     {level > 0 && !isMort && onDowngrade && (
                       <button
                         type="button"
-                        onClick={() => onDowngrade(cellIndex)}
-                        className="min-h-[44px] px-3 py-2 bg-rose-100 hover:bg-rose-200 text-rose-800 font-bold rounded-lg border-2 border-rose-300 shadow-[0_2px_0_0_#fecdd3] active:shadow-[0_1px_0_0_#fecdd3] active:translate-y-[1px] text-xs cursor-pointer inline-flex items-center justify-center"
+                        data-testid={`downgrade-btn-${cellIndex}`}
+                        onClick={() => actionState.canDowngrade && onDowngrade(cellIndex)}
+                        disabled={!actionState.canDowngrade}
+                        title={actionState.downgradeBlockedReason}
+                        className={`min-h-[44px] px-3 py-2 font-bold rounded-lg border-2 text-xs transition-all inline-flex items-center justify-center ${
+                          actionState.canDowngrade
+                            ? 'bg-rose-100 hover:bg-rose-200 text-rose-800 border-rose-300 shadow-[0_2px_0_0_#fecdd3] active:translate-y-[1px] cursor-pointer'
+                            : 'bg-slate-100 text-slate-400 border-slate-200 shadow-none cursor-not-allowed opacity-75'
+                        }`}
                       >
                         Hạ Cấp
                       </button>

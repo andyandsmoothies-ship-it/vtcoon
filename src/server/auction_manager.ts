@@ -7,17 +7,6 @@ import { handleStartFireSaleAuction } from './bond_manager';
 import { advanceTurnToNextPlayer } from './turn_loop';
 import { MarketCardId } from '../domain/event_card_types';
 
-interface LevelHolder { readonly level?: number; }
-interface DeletableMap { delete(key: number): boolean; }
-const knownStateMaps = new Set<DeletableMap>();
-const origMapSet = Map.prototype.set;
-const patchedProto: { set?: (this: DeletableMap, key: unknown, value: unknown) => Map<unknown, unknown> } = Map.prototype;
-patchedProto.set = function (this: DeletableMap, key: unknown, value: unknown) {
-  if (value && typeof value === 'object' && 'level' in value && typeof (value as LevelHolder).level === 'number') {
-    knownStateMaps.add(this);
-  }
-  return origMapSet.call(this, key, value);
-};
 
 export interface AuctionSession {
   readonly cellIndex: number;
@@ -67,6 +56,7 @@ export function handleAuctionBid(
   registry?: PropertyRegistry,
   auctions?: Map<string, AuctionSession>,
   roomCode?: string,
+  stateMap?: PropertyStateMap,
 ): { success: boolean; reason?: string } {
   if (!room?.started || room.phase !== TurnPhase.AuctionPhase || !session) return { success: false, reason: 'INVALID_PHASE' };
   if (playerId === session.declinedPlayerId) return { success: false, reason: ActionRejectReason.DECLINED_PLAYER_CANNOT_BID };
@@ -97,7 +87,7 @@ export function handleAuctionBid(
   const eligiblePlayers = room.players.filter((p) => p.id !== session.declinedPlayerId && !p.bankrupt);
   const otherPlayers = eligiblePlayers.filter((p) => p.id !== playerId);
   if (otherPlayers.length > 0 && otherPlayers.every((p) => session.passedPlayers?.has(p.id))) {
-    handleAuctionClose(room, session, registry, auctions, roomCode);
+    handleAuctionClose(room, session, registry, auctions, roomCode, stateMap);
   }
   return { success: true };
 }
@@ -106,9 +96,10 @@ export function handleAuctionPass(
   room: Room | undefined,
   session: AuctionSession | undefined,
   playerId: string,
-  registry: PropertyRegistry | undefined,
+  registry?: PropertyRegistry,
   auctions?: Map<string, AuctionSession>,
   roomCode?: string,
+  stateMap?: PropertyStateMap,
 ): { success: boolean; reason?: string } {
   if (!room?.started || room.phase !== TurnPhase.AuctionPhase || !session) return { success: false, reason: 'INVALID_PHASE' };
   if (playerId === session.declinedPlayerId) return { success: false, reason: ActionRejectReason.DECLINED_PLAYER_CANNOT_BID };
@@ -134,7 +125,7 @@ export function handleAuctionPass(
     : targetPlayers.every((p) => session.passedPlayers!.has(p.id)) && (!player.isBot || !hasHumanInRoom);
 
   if (shouldClose) {
-    handleAuctionClose(room, session, registry, auctions, roomCode);
+    handleAuctionClose(room, session, registry, auctions, roomCode, stateMap);
   }
   return { success: true };
 }
@@ -158,13 +149,36 @@ export function handleAuctionClose(
       winnerId = session.highestBidder;
       winningBid = session.highestBid;
 
-      if (session.isFireSale) {
-        room.treasury = (room.treasury ?? 0) + winningBid;
-      } else if (session.insolvencyPlayerId) {
+      if (stateMap) {
+        const st = stateMap.get(session.cellIndex);
+        if (st) {
+          st.isMortgaged = false;
+          delete (st as { unbuiltRounds?: number }).unbuiltRounds;
+        }
+      }
+
+      for (const p of room.players) {
+        if (p.mortgagedProperties?.includes(session.cellIndex)) {
+          p.mortgagedProperties = p.mortgagedProperties.filter((c) => c !== session.cellIndex);
+        }
+      }
+
+      if (session.insolvencyPlayerId) {
         const insolventPlayer = room.players.find((p) => p.id === session.insolvencyPlayerId);
         if (insolventPlayer) {
+          const outstandingLoan = insolventPlayer.mortgageLoans?.[session.cellIndex] ?? 0;
+          if (insolventPlayer.mortgageLoans) {
+            delete insolventPlayer.mortgageLoans[session.cellIndex];
+          }
+
           if (!insolventPlayer.bankrupt) {
-            insolventPlayer.balance += winningBid;
+            // [TREASURY-INVARIANT] Ưu tiên thu hồi nợ gốc thế chấp cho Kho Bạc
+            const loanPayoff = Math.min(winningBid, outstandingLoan);
+            const surplus = winningBid - loanPayoff;
+            if (loanPayoff > 0) {
+              room.treasury = (room.treasury ?? 0) + loanPayoff;
+            }
+            insolventPlayer.balance += surplus;
             if (insolventPlayer.balance >= 0) {
               room.phase = TurnPhase.PropertyManagement;
             }
@@ -172,15 +186,15 @@ export function handleAuctionClose(
             room.treasury = (room.treasury ?? 0) + winningBid;
           }
         }
+      } else {
+        // [TREASURY-CONSERVATION] Đấu giá từ chối mua, thu hồi dự án treo, hoặc fire sale
+        room.treasury = (room.treasury ?? 0) + winningBid;
       }
     }
   } else {
     if (session.isFireSale) {
       registry?.delete(session.cellIndex);
       stateMap?.delete(session.cellIndex);
-      for (const sm of knownStateMaps) {
-        sm.delete(session.cellIndex);
-      }
     }
     // [EC-10] Không ai đấu giá -> Ô đất chuyển sang chế độ phát mãi cưỡng chế Kho Bạc 70%
     const deed = PROPERTY_DEEDS.get(session.cellIndex);

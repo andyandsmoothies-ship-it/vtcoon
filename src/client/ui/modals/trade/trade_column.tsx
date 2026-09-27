@@ -29,15 +29,16 @@ export interface TradeColumnProps {
   readonly reqPrice100?: number;
   readonly reqPrice130?: number;
   readonly reqPrice150?: number;
+  readonly levelMap?: Record<number, number>;
 }
 
 export function TradeColumn({
   title,
   isMine,
-  properties,
-  mortgagedProperties,
+  properties = [],
+  mortgagedProperties = [],
   mortgageLoans,
-  selectedProperties,
+  selectedProperties = [],
   onToggleProperty,
   cashVal,
   onCashChange,
@@ -55,6 +56,7 @@ export function TradeColumn({
   reqPrice100 = 0,
   reqPrice130 = 0,
   reqPrice150 = 0,
+  levelMap,
 }: TradeColumnProps): React.ReactElement {
   const matClass = isMine
     ? 'bg-blue-50/80 border-2 border-blue-300 shadow-sm text-slate-900'
@@ -85,27 +87,33 @@ export function TradeColumn({
           properties.map((id) => {
             const deed = getDeedDisplayInfo(id);
             const color = deed?.colorGroup ? COLOR_GROUP_HEX[deed.colorGroup] : '#64748b';
-            const isMort = mortgagedProperties.includes(id);
+            const isMort = mortgagedProperties?.includes(id) ?? false;
             const loan = mortgageLoans?.[id] ?? Math.floor((deed?.price ?? 0) * 0.5);
-            const checked = selectedProperties.includes(id);
+            const checked = selectedProperties?.includes(id) ?? false;
             const synergyTag = getPropertySynergyTag(id, isMine, myProperties, targetProperties);
             const rawName = deed?.name ?? `Ô #${id}`;
             const match = rawName.match(/^(.*?)\s*(\(.*?\))$/);
             const mainName = match ? match[1] : rawName;
             const subName = match ? match[2] : null;
+            const bldLevel = levelMap?.[id] ?? 0;
+            const hasBuilding = bldLevel > 0;
 
             return (
               <button
                 key={id}
                 type="button"
                 data-selected={checked ? 'true' : undefined}
-                onClick={() => onToggleProperty(id)}
-                className={`w-full text-left rounded-xl border transition-all overflow-hidden flex items-center min-h-[44px] text-xs cursor-pointer ${
-                  checked
-                    ? 'bg-amber-100 text-slate-900 border-2 border-amber-500 font-bold shadow-xs'
+                disabled={hasBuilding}
+                onClick={() => !hasBuilding && onToggleProperty(id)}
+                title={hasBuilding ? 'Cần hạ cấp hết công trình về Cấp 0 trước khi trao đổi' : undefined}
+                className={`w-full text-left rounded-xl border transition-all overflow-hidden flex items-center min-h-[44px] text-xs ${
+                  hasBuilding
+                    ? 'opacity-60 bg-slate-50 text-slate-500 border-slate-200 cursor-not-allowed'
+                    : checked
+                    ? 'bg-amber-100 text-slate-900 border-2 border-amber-500 font-bold shadow-xs cursor-pointer'
                     : isMort
-                    ? 'bg-slate-50 text-slate-900 border border-amber-200 hover:bg-slate-100 shadow-2xs'
-                    : 'bg-white text-slate-900 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 shadow-2xs'
+                    ? 'bg-slate-50 text-slate-900 border border-amber-200 hover:bg-slate-100 shadow-2xs cursor-pointer'
+                    : 'bg-white text-slate-900 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 shadow-2xs cursor-pointer'
                 }`}
               >
                 <div className="w-2.5 sm:w-3 self-stretch shrink-0" style={{ backgroundColor: color }} />
@@ -120,15 +128,19 @@ export function TradeColumn({
                     )}
                   </div>
                   <div className="flex flex-wrap gap-1 items-center shrink-0">
-                    {synergyTag && (
+                    {hasBuilding ? (
+                      <span className="px-1.5 py-0.5 rounded-md bg-slate-200 text-slate-700 font-bold text-[11px] border border-slate-300">
+                        🏠 C{bldLevel} (Có nhà)
+                      </span>
+                    ) : synergyTag ? (
                       <span className="px-1.5 py-0.5 rounded-md bg-amber-400 text-amber-950 font-black text-[11px] shadow-2xs border border-amber-600 animate-pulse">
                         {synergyTag}
                       </span>
-                    )}
-                    {checked && (
+                    ) : null}
+                    {!hasBuilding && checked && (
                       <span className="px-1.5 py-0.5 rounded-md bg-amber-500 text-amber-950 font-black text-[11px] shadow-2xs">✓ [ĐÃ CHỌN]</span>
                     )}
-                    {isMort && (
+                    {!hasBuilding && isMort && (
                       <span className="px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-300 font-bold text-[11px] whitespace-nowrap">
                         ⚠️ Nợ -{formatCurrency(loan)} (Thế chấp)
                       </span>

@@ -285,11 +285,11 @@ describe('[TC-204/MSS][UC-IMP204] Property Purchase Affordance & ActionDock Cont
       );
       expect(html).toContain(`Mua BĐS (${formatCurrency(1200)})`);
       expect(html).toContain('bg-emerald-700');
-      expect(html).toContain('Đóng Xoay Vốn');
+      expect(html).toContain('✕ Đóng');
       expect(html).toContain('Bỏ Qua (Pass)');
     });
 
-    it('[TC-204.11/MSS][UC-IMP204][Facet-3/ResilientModal] Khi người chơi thiếu tiền mặt nhưng đủ khả năng thế chấp (canCoverWithMortgage === true), Footer render nút [🏛️ Cầm Cố Để Mua] và [Đóng Xoay Vốn]', () => {
+    it('[TC-204.11/MSS][UC-IMP204][Facet-3/ResilientModal] Khi người chơi thiếu tiền mặt nhưng đủ khả năng thế chấp (canCoverWithMortgage === true), Footer render nút [🏛️ Cầm Cố Để Mua] và [✕ Đóng]', () => {
       const html = renderToStaticMarkup(
         React.createElement(TitleDeedActionFooter, {
           isOwned: false,
@@ -302,7 +302,7 @@ describe('[TC-204/MSS][UC-IMP204] Property Purchase Affordance & ActionDock Cont
         } as any)
       );
       expect(html).toContain('Cầm Cố Để Mua');
-      expect(html).toContain('Đóng Xoay Vốn');
+      expect(html).toContain('✕ Đóng');
     });
 
     it('[TC-204.12/MSS][UC-IMP204][Facet-3/ResilientModal] Bấm [🏛️ Cầm Cố Để Mua] kích hoạt onOpenMortgage, tuyệt đối không gửi bất kỳ intent mua đất nào lên server', () => {
@@ -333,7 +333,7 @@ describe('[TC-204/MSS][UC-IMP204] Property Purchase Affordance & ActionDock Cont
       expect(onBuySpy).not.toHaveBeenCalled();
     });
 
-    it('[TC-204.13/MSS][UC-IMP204][Facet-3/ResilientModal] Bấm [Đóng Xoay Vốn] gọi onClose, tuyệt đối KHÔNG kích hoạt onPass (INTENT_DECLINE)', () => {
+    it('[TC-204.13/MSS][UC-IMP204][Facet-3/ResilientModal] Bấm [✕ Đóng] gọi onClose, tuyệt đối KHÔNG kích hoạt onPass (INTENT_DECLINE)', () => {
       const onCloseSpy = vi.fn();
       const onPassSpy = vi.fn();
       let vdom: any;
@@ -353,7 +353,7 @@ describe('[TC-204/MSS][UC-IMP204] Property Purchase Affordance & ActionDock Cont
       }
       renderToStaticMarkup(React.createElement(TestFooter));
 
-      const closeBtn = findVNode(vdom, (n) => n?.type === 'button' && n.props?.children === 'Đóng Xoay Vốn');
+      const closeBtn = findVNode(vdom, (n) => n?.type === 'button' && n.props?.children === '✕ Đóng');
       expect(closeBtn).toBeDefined();
       closeBtn.props.onClick();
 

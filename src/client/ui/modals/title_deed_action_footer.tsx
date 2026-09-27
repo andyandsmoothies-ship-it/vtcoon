@@ -59,12 +59,15 @@ export function TitleDeedActionFooter({
   const showUpgrade = Boolean(isOwner && !isMortgaged && hasUpgrades && (currentLevel ?? 0) < 3 && onUpgrade);
   const showDowngrade = Boolean(isOwner && !isMortgaged && hasUpgrades && (currentLevel ?? 0) > 0 && onDowngrade);
   const showMortgage = Boolean(isOwner && (isMortgaged ? onRedeem : onMortgage));
-  const isMortgageBlocked = Boolean(!isMortgaged && (isTradeFrozen || isLiquidityFrozen));
-  const mortgageBlockedTitle = !isMortgaged && isLiquidityFrozen
+  const hasBuilding = (currentLevel ?? 0) > 0;
+  const isMortgageBlocked = Boolean(!isMortgaged && (isTradeFrozen || isLiquidityFrozen || hasBuilding));
+  const mortgageBlockedTitle = !isMortgaged && hasBuilding
+    ? 'Phải hạ cấp hết công trình về Cấp 0 trước khi thế chấp'
+    : !isMortgaged && isLiquidityFrozen
     ? 'Bất động sản đang đóng băng thanh khoản'
     : !isMortgaged && isTradeFrozen
-      ? 'Thị trường đang đóng băng giao dịch'
-      : undefined;
+    ? 'Thị trường đang đóng băng giao dịch'
+    : undefined;
   const actionCount = (showUpgrade ? 1 : 0) + (showDowngrade ? 1 : 0) + (showMortgage ? 1 : 0);
   const closeButtonSpan = (!isOwner || actionCount === 0 || actionCount === 2) ? 'col-span-2' : '';
 
@@ -114,7 +117,7 @@ export function TitleDeedActionFooter({
               className={`min-h-[48px] whitespace-nowrap px-3.5 py-2 rounded-xl font-black text-xs border-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
                 isMortgageBlocked
                   ? 'bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed opacity-60'
-                  : 'bg-amber-500 hover:bg-amber-400 text-slate-900 border-amber-700 shadow-[0_4px_0_0_#b45309] active:shadow-[0_1px_0_0_#b45309] active:translate-y-[3px] cursor-pointer'
+                  : 'bg-amber-500 hover:bg-amber-400 text-amber-950 border-amber-700 shadow-[0_4px_0_0_#b45309] active:shadow-[0_1px_0_0_#b45309] active:translate-y-[3px] cursor-pointer'
               }`}
             >
               {isMortgaged ? 'Giải Chấp' : 'Thế Chấp'}
@@ -188,9 +191,10 @@ export function TitleDeedActionFooter({
             <button
               type="button"
               onClick={onClose}
+              title="Tạm đóng Sổ Đỏ. Bạn có thể bấm [🏷️ Mua Đất] trên thanh dưới đáy màn hình để mua lại trước khi hết giờ"
               className={`min-h-[44px] py-2 px-2 rounded-xl uppercase text-[11px] sm:text-xs font-black bg-white hover:bg-slate-100 text-slate-800 border-2 border-slate-300 shadow-[0_4px_0_0_#cbd5e1] active:translate-y-[2px] ${isTradeFrozen ? 'col-span-2' : ''}`}
             >
-              {isTradeFrozen ? 'Đóng' : 'Đóng Xoay Vốn'}
+              ✕ Đóng
             </button>
             {!isTradeFrozen && (
               <button

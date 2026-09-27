@@ -172,6 +172,7 @@ export interface BotPacingStatus {
   readonly botOrder: number;
   readonly totalBots: number;
   readonly displayText: string;
+  readonly isBotTurn?: boolean;
 }
 
 /**
@@ -198,6 +199,7 @@ export function resolveBotPacingStatus(
         botOrder: 1,
         totalBots: allBots.length,
         displayText: `🤖 Đang đấu giá... (${botName})`,
+        isBotTurn: true,
       };
     }
     return {
@@ -206,6 +208,7 @@ export function resolveBotPacingStatus(
       botOrder: 1,
       totalBots: 1,
       displayText: '🤖 Đang đấu giá...',
+      isBotTurn: true,
     };
   }
 
@@ -227,6 +230,7 @@ export function resolveBotPacingStatus(
     botOrder,
     totalBots,
     displayText: `⏳ Lượt ${botName}... (${botOrder}/${totalBots})`,
+    isBotTurn: true,
   };
 }
 
@@ -345,7 +349,7 @@ export interface ActionDockNoticeParams {
   readonly turnPhase?: string;
   readonly hasRolledThisTurn?: boolean;
   readonly isSkippedTurn?: boolean;
-  readonly botPacing?: { readonly displayText: string } | null;
+  readonly botPacing?: { readonly displayText: string; readonly isBotTurn?: boolean } | null;
   readonly isStandingOnBuyable?: boolean;
   readonly buyableCellName?: string;
   readonly buyableCellPrice?: number;
@@ -363,8 +367,18 @@ export function resolveActionDockNotice(params: ActionDockNoticeParams): ActionD
     };
   }
 
-  if (params.inAudit) {
+  const isActorTurn = params.isMyTurn ?? true;
+  if (params.inAudit && (isActorTurn || !params.botPacing?.isBotTurn)) {
     const turns = params.auditTurnsLeft ?? 0;
+    if (params.hasRolledThisTurn) {
+      return {
+        type: 'audit',
+        icon: '⚖️',
+        desktopText: `Gieo không ra đôi (còn ${turns} lượt): Nộp tiền bảo lãnh hoặc kết thúc lượt.`,
+        mobileText: 'Không ra đôi: Nộp bảo lãnh hoặc Xong lượt',
+        tone: 'warning',
+      };
+    }
     return {
       type: 'audit',
       icon: '⚖️',

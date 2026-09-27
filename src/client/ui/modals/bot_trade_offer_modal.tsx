@@ -23,6 +23,7 @@ export function BotTradeOfferModal({
   cellIndex,
   price,
   buyerId,
+  sellerId,
   expiresAt,
   offeredCellIndex,
   onAccept,
@@ -32,8 +33,12 @@ export function BotTradeOfferModal({
   const playersInfo = useGameStore((state) => state.playersInfo);
   const buyer = playersInfo[buyerId];
   const buyerName = buyer?.name ?? 'Bot AI';
-
+  const seller = playersInfo[sellerId];
+  const sellerBalance = seller?.balance ?? 0;
+  const absPrice = Math.abs(price);
   const isSwap = offeredCellIndex !== undefined;
+  const isCashShortfall = isSwap && price < 0 && sellerBalance < absPrice;
+  const canAccept = !isCashShortfall;
   const cell = BOARD_CONFIG[cellIndex];
   const propertyName = cell?.name ?? `Ô Đất #${cellIndex}`;
   const deed = PROPERTY_DEEDS.get(cellIndex);
@@ -64,7 +69,6 @@ export function BotTradeOfferModal({
   const progressPercent = Math.min(100, Math.max(0, (remainingMs / 15_000) * 100));
   const isUrgent = secondsLeft <= 5;
 
-  const absPrice = Math.abs(price);
   const taxAmount = Math.round(absPrice * 0.05);
   const netReceived = absPrice - taxAmount;
 
@@ -252,10 +256,16 @@ export function BotTradeOfferModal({
           type="button"
           data-testid="accept-trade-btn"
           aria-label={isSwap ? 'Đồng ý đổi đất' : 'Đồng ý bán đất'}
-          onClick={() => onAccept(offerId)}
-          className="flex-1 min-h-[44px] py-2.5 px-4 rounded-xl font-black text-xs text-white bg-emerald-600 hover:bg-emerald-700 border-2 border-emerald-800 shadow-[0_4px_0_0_#065f46] active:shadow-[0_1px_0_0_#065f46] active:translate-y-[3px] transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+          disabled={!canAccept}
+          title={isCashShortfall ? `Bạn cần có tối thiểu ${formatCurrency(absPrice)} để bù tiền giao dịch này` : undefined}
+          onClick={() => canAccept && onAccept(offerId)}
+          className={`flex-1 min-h-[44px] py-2.5 px-4 rounded-xl font-black text-xs transition-all ${
+            canAccept
+              ? 'text-white bg-emerald-600 hover:bg-emerald-700 border-2 border-emerald-800 shadow-[0_4px_0_0_#065f46] active:translate-y-[3px] cursor-pointer'
+              : 'bg-slate-200 text-slate-400 border-2 border-slate-300 shadow-none cursor-not-allowed'
+          }`}
         >
-          {isSwap ? '✓ ĐỒNG Ý ĐỔI' : '✓ ĐỒNG Ý BÁN'}
+          {isCashShortfall ? `Thiếu Tiền Bù (-${formatCurrency(absPrice)})` : isSwap ? '✓ ĐỒNG Ý ĐỔI' : '✓ ĐỒNG Ý BÁN'}
         </button>
       </footer>
     </div>

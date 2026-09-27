@@ -4,7 +4,7 @@
 import type { Room, Player } from '../domain/room';
 import { checkPassedGo, calculateGoSalary, BOARD_SIZE, TurnPhase } from '../domain/room';
 import { rollDice } from '../domain/dice';
-import type { PropertyRegistry, PropertyStateMap } from '../domain/property_manager';
+import type { PropertyRegistry, PropertyStateMap, PropertyState } from '../domain/property_manager';
 import { handleLanding, LandingResult, calculateGoPropertyTax, PROPERTY_DEEDS, GO_PROPERTY_TAX_CAP } from '../domain/property_manager';
 import { BOARD_CONFIG } from '../domain/board_config';
 import { decayModifiers } from '../domain/event_card_engine';
@@ -73,20 +73,32 @@ function processUnbuiltRounds(
     if (nextRounds > 2) {
       // Thu hồi ô đất và mở auction 50%
       registry.delete(cellIndex);
-      stateMap.set(cellIndex, { ...state, unbuiltRounds: 0 });
+      const nextState: PropertyState = { ...state, isMortgaged: false };
+      delete (nextState as { unbuiltRounds?: number }).unbuiltRounds;
+      stateMap.set(cellIndex, nextState);
+
+      if (current.mortgagedProperties?.includes(cellIndex)) {
+        current.mortgagedProperties = current.mortgagedProperties.filter((c) => c !== cellIndex);
+      }
+      if (current.mortgageLoans?.[cellIndex] !== undefined) {
+        delete current.mortgageLoans[cellIndex];
+      }
+
       const deed = PROPERTY_DEEDS.get(cellIndex);
       if (deed) {
         const startingBid = Math.floor(deed.price * 0.50);
-        // declinedPlayerId = '' → tất cả players (kể cả cựu chủ P1) đều đủ điều kiện
         auctions.set(roomCode, {
           cellIndex,
           declinedPlayerId: '',
           highestBid: startingBid,
           startingBid,
+          currentBid: startingBid,
+          endTime: Date.now() + 20_000,
           passedPlayers: new Set<string>(),
         });
         room.phase = TurnPhase.AuctionPhase;
       }
+      break; // [P2-DEFENSE] Chỉ mở 1 auction tại một thời điểm, chống đè session
     }
   }
 }

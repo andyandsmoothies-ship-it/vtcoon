@@ -175,7 +175,7 @@ export class RoomManager {
   }
 
   handleAuctionBid(roomCode: string, playerId: string, amount: number): { success: boolean; reason?: string } {
-    const res = handleAuctionBid(this.rooms.get(roomCode), this.auctions.get(roomCode), playerId, amount, this.registries.get(roomCode), this.auctions, roomCode);
+    const res = handleAuctionBid(this.rooms.get(roomCode), this.auctions.get(roomCode), playerId, amount, this.registries.get(roomCode), this.auctions, roomCode, this.propertyStates.get(roomCode));
     this.syncAuction(roomCode);
     const room = this.rooms.get(roomCode);
     if (room?.lastAuctionResult) {
@@ -185,7 +185,7 @@ export class RoomManager {
   }
 
   handleAuctionPass(roomCode: string, playerId: string): { success: boolean; reason?: string } {
-    const res = handleAuctionPass(this.rooms.get(roomCode), this.auctions.get(roomCode), playerId, this.registries.get(roomCode), this.auctions, roomCode);
+    const res = handleAuctionPass(this.rooms.get(roomCode), this.auctions.get(roomCode), playerId, this.registries.get(roomCode), this.auctions, roomCode, this.propertyStates.get(roomCode));
     this.syncAuction(roomCode);
     const room = this.rooms.get(roomCode);
     if (room?.lastAuctionResult) {
@@ -197,7 +197,7 @@ export class RoomManager {
   handleAuctionClose(roomCode: string): { winnerId?: string; winningBid: number; cellIndex: number; isForeclosure: boolean } {
     const session = this.auctions.get(roomCode);
     const cellIndex = session?.cellIndex ?? 0;
-    const res = handleAuctionClose(this.rooms.get(roomCode), session, this.registries.get(roomCode), this.auctions, roomCode);
+    const res = handleAuctionClose(this.rooms.get(roomCode), session, this.registries.get(roomCode), this.auctions, roomCode, this.propertyStates.get(roomCode));
     this.syncAuction(roomCode);
     const room = this.rooms.get(roomCode);
     const result: AuctionResult = {
@@ -430,7 +430,9 @@ export class RoomManager {
         this.cancelPendingTrade(roomCode, playerId);
       }
     }
-    return doHandleEndTurn(this.rooms, this.rolledThisTurn, this.registries, this.propertyStates, this.auctions, (rc) => this.touchActivity(rc), roomCode, playerId, continueDoubles, this.deckRng);
+    const res = doHandleEndTurn(this.rooms, this.rolledThisTurn, this.registries, this.propertyStates, this.auctions, (rc) => this.touchActivity(rc), roomCode, playerId, continueDoubles, this.deckRng);
+    this.syncAuction(roomCode);
+    return res;
   }
 
   resolveAuctionBots(roomCode: string): void {

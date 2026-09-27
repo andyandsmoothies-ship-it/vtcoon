@@ -39,6 +39,8 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
   const hookPlayers = useGameStore((state) => state.playersInfo);
   const playersInfo = Object.keys(hookPlayers).length > 0 ? hookPlayers : useGameStore.getState().playersInfo;
   const currentTurnPlayerId = useGameStore((state) => state.currentTurnPlayerId);
+  const activeModifiers = useGameStore((state) => state.activeModifiers);
+  const isTradeFrozen = Boolean(activeModifiers?.some((m) => m.type === 'MC_FREEZE_TRADE' && m.remainingRounds > 0));
   const hoseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     return () => {
@@ -173,6 +175,7 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
       {activeModal === 'portfolio' && (
         <PropertyPortfolioModal
           ownedProperties={myPlayer?.ownedProperties ?? []}
+          isTradeFrozen={isTradeFrozen}
           propertyStates={Object.fromEntries(
             (myPlayer?.ownedProperties ?? []).map((idx) => [
               idx,

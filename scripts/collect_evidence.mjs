@@ -171,6 +171,9 @@ const fileReports = filesToAudit.map((filePath) => {
   const relPath = path.relative(repoRoot, filePath).replace(/\\/g, '/');
   const content = fs.readFileSync(filePath, 'utf8');
   const lines = content.split('\n');
+  if (lines.length > 0 && lines[lines.length - 1] === '') {
+    lines.pop();
+  }
   const baseName = path.basename(filePath, path.extname(filePath));
 
   let consumersCount = 0;

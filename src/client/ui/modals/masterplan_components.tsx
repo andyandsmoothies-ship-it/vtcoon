@@ -111,6 +111,7 @@ export interface MasterplanDistrictCardProps {
   }) => void;
   readonly onSelectCell?: (cellIndex: number) => void;
   readonly onClose?: () => void;
+  readonly isTradeFrozen?: boolean;
 }
 
 export function MasterplanDistrictCard({
@@ -121,6 +122,7 @@ export function MasterplanDistrictCard({
   onQuickTrade,
   onSelectCell,
   onClose,
+  isTradeFrozen,
 }: MasterplanDistrictCardProps): React.ReactElement {
   const totalCells = district.cellIndices.length;
 
@@ -312,7 +314,7 @@ export function MasterplanDistrictCard({
                     </span>
                   )}
                   {level > 0 && (
-                    <span className="text-[10px] font-black bg-amber-400 text-slate-900 px-1 py-0.5 rounded">
+                    <span className="text-[10px] font-black bg-amber-400 text-amber-950 px-1 py-0.5 rounded">
                       {`C${level}`}
                     </span>
                   )}
@@ -353,9 +355,11 @@ export function MasterplanDistrictCard({
                       type="button"
                       data-testid={`quick-trade-btn-${cellIndex}`}
                       data-legacy-style="min-h-[36px]"
-                      title="Đàm phán P2P đổi ô này"
+                      disabled={isTradeFrozen}
+                      title={isTradeFrozen ? 'Thị trường đang đóng băng giao dịch' : 'Đàm phán P2P đổi ô này'}
                       onClick={(e) => {
                         e?.stopPropagation?.();
+                        if (isTradeFrozen) return;
                         onQuickTrade?.({
                           targetPlayerId: owner.id,
                           offeredProperties: [],
@@ -364,7 +368,11 @@ export function MasterplanDistrictCard({
                           cashRequest: 0,
                         });
                       }}
-                      className="min-h-[44px] min-w-[44px] px-2.5 text-xs flex items-center justify-center gap-1 rounded-xl bg-gradient-to-b from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-amber-950 font-black border border-amber-600 shadow-[0_2px_0_0_#b45309] transition-transform active:translate-y-[1px] cursor-pointer"
+                      className={`min-h-[44px] min-w-[44px] px-2.5 text-xs flex items-center justify-center gap-1 rounded-xl font-black border transition-all ${
+                        isTradeFrozen
+                          ? 'bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed shadow-none active:translate-y-0'
+                          : 'bg-gradient-to-b from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-amber-950 border-amber-600 shadow-[0_2px_0_0_#b45309] active:translate-y-[1px] cursor-pointer'
+                      }`}
                     >
                       <span>🤝</span>
                       <span className="hidden md:inline text-[11px]">Đổi Ô</span>

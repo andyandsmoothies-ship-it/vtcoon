@@ -92,11 +92,14 @@ export function detectCellMortgage(
   wasMortgaged: boolean,
   nextState: GameState,
   prevState: GameState,
+  isOwnerChanged: boolean = false,
 ): { entry: ActivityLogEntry; isMortgaged: boolean; amount: number; ownerId: string } | null {
   if (cell.isMortgaged === undefined || cell.isMortgaged === wasMortgaged) return null;
   const ownerId = cell.ownerId ?? Object.keys(nextState.playersInfo).find((id) =>
     nextState.playersInfo[id]?.ownedProperties.includes(cell.index),
   );
+  // Bỏ qua giải chấp ma khi BĐS vô chủ hoặc được bàn giao sạch nợ cho chủ mới từ đấu giá
+  if (!cell.isMortgaged && (!ownerId || isOwnerChanged)) return null;
   const owner = ownerId ? (nextState.playersInfo[ownerId] ?? prevState.playersInfo[ownerId]) : undefined;
   const ownerName = getPlayerName(owner, ownerId);
   const deed = PROPERTY_DEEDS.get(cell.index);
@@ -192,7 +195,11 @@ function processCellMortgageDiff(
   const wasMortgaged = Object.values(prevState.playersInfo).some((p) =>
     p.mortgagedProperties?.includes(cell.index),
   );
-  const mg = detectCellMortgage(cell, wasMortgaged, nextState, prevState);
+  const prevOwnerId = Object.keys(prevState.playersInfo).find((id) =>
+    prevState.playersInfo[id]?.ownedProperties.includes(cell.index),
+  );
+  const isOwnerChanged = cell.ownerId !== undefined && cell.ownerId !== prevOwnerId;
+  const mg = detectCellMortgage(cell, wasMortgaged, nextState, prevState, isOwnerChanged);
   if (mg) {
     entries.push(mg.entry);
     if (mg.isMortgaged) {

@@ -77,10 +77,7 @@ export function ActionDock({
   const storeActiveModifiers = useGameStore((state) => state.activeModifiers);
   const activeModifiers = ssrState ? (ssrState.activeModifiers ?? []) : (isSSR ? useGameStore.getState().activeModifiers : storeActiveModifiers);
   const pendingTradeOffer = ssrState ? ssrState.pendingTradeOffer : pendingTradeOfferStore;
-  const isTradeFrozen = isTradeFrozenProp ??
-    (activeModifiers ?? []).some(
-      (m) => m.type === MarketCardId.MC_FREEZE_TRADE && m.remainingRounds > 0
-    );
+  const isTradeFrozen = isTradeFrozenProp ?? (activeModifiers ?? []).some((m) => m.type === MarketCardId.MC_FREEZE_TRADE && m.remainingRounds > 0);
   const queueHasTasks = Boolean(pawnAnimationQueue && pawnAnimationQueue.length > 0);
   const actingPlayerId = localPlayerId ?? currentTurnPlayerId;
   const activeModal = ssrState ? ssrState.activeModal : activeModalStore;
@@ -93,11 +90,8 @@ export function ActionDock({
   const inAudit = Boolean(actingPlayer?.inAudit);
   const isInsolvent = Boolean(actingPlayer && actingPlayer.balance < 0);
   const storeConsecutiveDoubles = actingPlayer ? actingPlayer.consecutiveDoubles : undefined;
-  const storeCanRollAgain = (
-    storeConsecutiveDoubles !== undefined
-      ? storeConsecutiveDoubles > 0
-      : (dice[0] === dice[1] && dice[0] > 0)
-  ) && !inAudit && !actingPlayer?.skipNextTurn;
+  const storeCanRollAgain = (storeConsecutiveDoubles !== undefined ? storeConsecutiveDoubles > 0 : (dice[0] === dice[1] && dice[0] > 0)) &&
+    !inAudit && !actingPlayer?.skipNextTurn;
   const canRollAgain = canRollAgainProp !== undefined ? canRollAgainProp : storeCanRollAgain;
   const hasRolledThisTurn = hasRolledThisTurnProp !== undefined ? hasRolledThisTurnProp : storeHasRolledThisTurn;
   const [isRollPending, setIsRollPending] = useState(false);
@@ -194,6 +188,8 @@ export function ActionDock({
     }
   };
   const isSkippedTurn = Boolean(isMyTurn && turnPhase === 'PropertyManagement' && !hasRolledThisTurn && !inAudit);
+  const isAuditEndTurnActive = Boolean(isMyTurn && inAudit && hasRolledThisTurn && !canRollAgain);
+  const shouldPulseEndTurn = isSkippedTurn || isAuditEndTurnActive;
   const isGlowActive = (isMyTurn && !isRollDisabled) || isSkippedTurn;
   const actionDockNotice = resolveActionDockNotice({
     isMyTurn,
@@ -210,12 +206,12 @@ export function ActionDock({
     buyableCellPrice: PROPERTY_DEEDS.get(currentPos)?.price,
   });
   return (
-    <div className="relative flex flex-col items-center">
+    <div className="relative flex flex-col items-center gap-1.5">
       {/* Chip Thông Báo Ngữ Cảnh Độc Quyền (Actionable Guidance Chip) */}
       {actionDockNotice && !isStripActive && (
         <div
           data-testid={actionDockNotice.type === 'bot_pacing' ? 'bot-pacing-chip' : `${actionDockNotice.type === 'skip_turn' ? 'skip-turn-notice-chip' : `${actionDockNotice.type}-notice-chip`}`}
-          className={`absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold shadow-md animate-pulse select-none ${
+          className={`whitespace-nowrap flex items-center gap-1.5 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-bold shadow-md animate-pulse select-none ${
             actionDockNotice.tone === 'error'
               ? 'bg-rose-950 text-rose-300 border border-rose-500/60'
               : actionDockNotice.tone === 'warning'
@@ -241,7 +237,7 @@ export function ActionDock({
             className={`min-h-[44px] shrink-0 whitespace-nowrap flex items-center justify-center gap-1.5 px-4 sm:px-6 py-2.5 rounded-2xl font-black text-white shadow-lg transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 ${
               isTradeFrozen
               ? 'bg-slate-200 text-slate-500 border-2 border-slate-400 cursor-not-allowed shadow-none'
-              : 'bg-amber-500 hover:bg-amber-600 border border-amber-700 shadow-md shadow-amber-500/30 active:scale-95 ring-4 ring-amber-400/60 animate-pulse'
+              : 'bg-amber-500 hover:bg-amber-700 border border-amber-700 shadow-md shadow-amber-500/30 active:scale-95 ring-4 ring-amber-400/60 animate-pulse cursor-pointer'
           }`}
           aria-label={isTradeFrozen ? `Thị trường đóng băng (#${currentPos})` : `Mua ô đất số ${currentPos}`}
         >
@@ -284,16 +280,18 @@ export function ActionDock({
       {inAudit && isMyTurn && !isBankrupt && (
         <button
           type="button"
-          onClick={() => onBailOut?.()}
-          disabled={Boolean((actingPlayer?.balance ?? 0) < 500)}
-          className="min-h-[44px] shrink-0 whitespace-nowrap flex items-center gap-1.5 px-3.5 py-2 rounded-2xl text-white font-bold bg-amber-600 hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed border border-amber-800 shadow-sm active:scale-95 transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+          onClick={() => (actingPlayer?.balance ?? 0) >= 500 && onBailOut?.()}
+          disabled={(actingPlayer?.balance ?? 0) < 500}
+          title={(actingPlayer?.balance ?? 0) < 500 ? 'Bạn cần ít nhất 500 để nộp tiền bảo lãnh' : undefined}
+          className={`min-h-[44px] shrink-0 whitespace-nowrap flex items-center gap-1.5 px-3.5 py-2 rounded-2xl font-bold border text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+            (actingPlayer?.balance ?? 0) < 500
+              ? 'bg-slate-200 text-slate-400 border-slate-300 shadow-none cursor-not-allowed active:scale-100'
+              : 'bg-amber-600 hover:bg-amber-700 text-white border-amber-800 shadow-sm active:scale-95 cursor-pointer'
+          }`}
           aria-label="Nộp 500 bảo lãnh kiểm toán để rời trạm ngay"
         >
           <span aria-hidden="true">⚖️</span>
           <span>Bảo Lãnh (500)</span>
-          <span className="text-[11px] bg-amber-900/40 px-1.5 py-0.5 rounded font-mono">
-            {`${actingPlayer?.auditTurnsLeft ?? 0} lượt`}
-          </span>
         </button>
       )}
 
@@ -303,7 +301,9 @@ export function ActionDock({
         aria-label="Quản lý và nâng cấp bất động sản"
         onClick={handleOpenManageProperty}
         disabled={isBankrupt}
-        className="w-11 h-11 min-w-[44px] min-h-[44px] sm:w-auto sm:h-auto shrink-0 whitespace-nowrap flex items-center justify-center p-0 sm:px-4 sm:py-2.5 gap-1.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold border border-blue-800 shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+        className={`w-11 h-11 min-w-[44px] min-h-[44px] sm:w-auto sm:h-auto shrink-0 whitespace-nowrap flex items-center justify-center p-0 sm:px-4 sm:py-2.5 gap-1.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold border border-blue-800 shadow-sm active:scale-95 transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 ${
+          isBankrupt ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+        }`}
       >
         <span aria-hidden="true">🏛️</span>
         <span className="hidden sm:inline">Quản Lý BĐS</span>
@@ -319,7 +319,7 @@ export function ActionDock({
         className={`w-11 h-11 min-w-[44px] min-h-[44px] sm:w-auto sm:h-auto shrink-0 whitespace-nowrap flex items-center justify-center p-0 sm:px-4 sm:py-2.5 gap-1.5 rounded-2xl font-bold border-2 transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
           isBankrupt || isTradeFrozen
             ? 'bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed opacity-50'
-            : 'bg-amber-500 hover:bg-amber-600 text-white border border-amber-700 shadow-sm active:scale-95'
+            : 'bg-amber-500 hover:bg-amber-700 text-white border border-amber-700 shadow-sm active:scale-95 cursor-pointer'
         }`}
       >
         <span aria-hidden="true">🤝</span>
@@ -334,11 +334,7 @@ export function ActionDock({
         title="Bản Đồ Quy Hoạch Đô Thị"
         onClick={() => {
           toggleHeatmap?.();
-          if (onOpenMasterplan) {
-            onOpenMasterplan();
-          } else {
-            useGameStore.getState().openModal('masterplan', {});
-          }
+          onOpenMasterplan ? onOpenMasterplan() : useGameStore.getState().openModal('masterplan', {});
         }}
         className={`w-11 h-11 min-w-[44px] min-h-[44px] sm:w-auto sm:h-auto shrink-0 whitespace-nowrap flex items-center justify-center p-0 sm:px-4 sm:py-2.5 gap-1.5 rounded-2xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 font-bold border border-slate-300 shadow-sm active:scale-95 transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
           isHeatmapActive ? 'ring-2 ring-amber-400 bg-amber-100 shadow-[0_0_12px_rgba(245,158,11,0.5)]' : ''
@@ -367,7 +363,7 @@ export function ActionDock({
               ? 'bg-rose-100 text-rose-500 border-2 border-rose-300 cursor-not-allowed'
               : 'bg-slate-200 text-slate-400 border-2 border-slate-300 cursor-not-allowed'
             : `bg-emerald-600 hover:bg-emerald-700 text-white font-bold border border-emerald-800 shadow-sm active:scale-95 ${
-                isSkippedTurn ? 'ring-4 ring-amber-400/80 shadow-[0_0_24px_rgba(245,158,11,0.55)] animate-pulse' : ''
+                shouldPulseEndTurn ? 'ring-4 ring-emerald-400/90 shadow-[0_0_18px_rgba(16,185,129,0.6)] animate-pulse' : ''
               }`
         }`}
       >

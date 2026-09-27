@@ -426,7 +426,7 @@ describe('[IMP-123/MSS] Mobile UI/UX Tri-Package Polish Contract Test Suite', ()
         React.createElement(ActionDock, { localPlayerId: 'p1', isMyTurn: false })
       );
       expect(html).toContain('data-testid="bot-pacing-chip"');
-      expect(html).toMatch(/data-testid="bot-pacing-chip"[^>]*absolute|-top-|top-/);
+      expect(html.indexOf('data-testid="bot-pacing-chip"')).toBeLessThan(html.indexOf('<nav'));
     });
 
     it('[TC-IMP123.34/MSS][UI-S03/MSS] ActionDock bảo toàn cấu trúc hàng nút chính khi bot-pacing-chip hiển thị', () => {

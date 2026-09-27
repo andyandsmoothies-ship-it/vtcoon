@@ -4815,6 +4815,26 @@
      - **Responsive Utility Cluster**: Nút `[👥 Bảng Điểm]` trên TopBar sở hữu 2 trạng thái xúc giác rõ rệt (`bg-amber-100` khi mở, `#F7F2E7` khi đóng), touch target an toàn $\ge 44$px, không tràn giao diện mobile 360px.
 - **Traceability**: `[TC-205.01..16/MSS]`, `[UC-IMP205]`, `src/client/store/game_store.ts`, `src/client/store/game_store_types.ts`, `src/client/ui/top_bar.tsx`, `src/client/ui/player_hud_list.tsx`, `src/client/offline_landing.ts`, `src/client/network/apply_delta.ts`, `src/client/network/use_app_session.ts`, `tests/contracts/imp205_bot_card_toast_and_hud_toggle.test.ts`.
 
+---
+
+### 292. [UI/CRAFT][ERGONOMICS] Bất Biến Khử Va Chạm Tọa Độ Thông Báo & Trợ Lực Trạm Kiểm Toán Mobile (Decollision Flex Flow & Jail Audit Affordance - IMP-208B)
+- **Bối cảnh & Bẫy thực tế (3 Lớp Thực Chứng)**:
+  1. *Ảo tưởng ban đầu (Initial Illusion)*:
+     - Cho rằng chip thông báo ngữ cảnh `ActionDockNotice` đặt `absolute -top-10` sẽ lơ lửng gọn gàng phía trên thanh điều khiển. Khi `DiceScoreBadge` (`🎲 5 + 1 = 6`) xuất hiện ngay sát mép trên dock trong cùng container cha, hai phần tử bị đẩy trùng tọa độ Y, gây đè chữ nham nhở.
+     - Cho rằng nút Bảo Lãnh nên nhồi nhét cả badge `${turns} lượt` bên trong nút. Trên mobile 360px-390px, độ rộng nút này (~165px) làm tràn ngang thanh dock, đẩy nút `[ ⏭️ Kết Thúc Lượt ]` văng khỏi mép phải màn hình (> 100px). Khi người chơi đổ xúc xắc không ra đôi, họ thấy nút Đổ bị disable và không thấy nút Kết Thúc Lượt, tưởng game bị đơ.
+  2. *Phát hiện vật lý từ Scout & Codebase (Scout Physical Finding)*:
+     - `DiceScoreBadge` và `actionDockNotice` bắt buộc phải nằm trong luồng Flex Document Flow có khoảng đệm tự nhiên `gap-1.5` (6px), loại bỏ hoàn toàn thuộc tính định vị tuyệt đối `absolute -top-10`.
+     - Nút Bảo Lãnh chỉ cần nhãn `⚖️ Bảo Lãnh (500)`, xóa bỏ badge `${turns} lượt` vì chip thông báo phía trên đã ghi rõ số lượt thụ án còn lại, tiết kiệm > 45px ngang.
+     - Khi ở trong tù đã đổ xúc xắc (`inAudit && hasRolledThisTurn && !canRollAgain`), nút `[ ⏭️ Kết Thúc Lượt ]` phải kích hoạt hiệu ứng thu hút chú ý `ring-4 ring-emerald-400/90 shadow-[0_0_18px_rgba(16,185,129,0.6)] animate-pulse` để người chơi chạm ngay chuyển lượt.
+     - Nhánh `inAudit` trong `resolveActionDockNotice` bắt buộc ràng buộc `params.isMyTurn`, tránh lỗi Actor Inversion nuốt chửng chip chờ bot `botPacing` khi không phải lượt của mình.
+     - Nút đóng Sổ Đỏ phải ngữ cảnh hóa: `Tạm Đóng` khi đủ tiền (`canBuy === true`), và `Đóng Xoay Vốn` khi thiếu tiền (`shortfall > 0`).
+  3. *Bất biến đã kiểm chứng (Verified Invariants)*:
+     - **Flex Decollision Invariant**: Toàn bộ chip thông báo ngữ cảnh và điểm xúc xắc xếp chồng tuần tự trong flex document flow với `gap-1.5`. Không bao giờ đè lấn tọa độ nhau trên mọi độ phân giải.
+     - **Dock EndTurn Affordance Guard**: Nút Kết Thúc Lượt luôn nằm trong khung nhìn và tự động nhấp nháy phát sáng khi đã hết lượt gieo trong tù.
+     - **Subtractive LOC Preservation**: Rút gọn `action_dock.tsx` từ 393 xuống **378 LOC** (<= 385 LOC), bảo toàn trần Tier 2.
+- **Traceability**: `[TC-208.01..16/MSS]`, `[UC-IMP208]`, `src/client/ui/action_dock.tsx`, `src/client/ui/ui_helpers.ts`, `src/client/ui/modals/title_deed_action_footer.tsx`, `tests/contracts/imp208_audit_bailout_and_dock_ergonomics.test.ts`.
+
+
 
 
 

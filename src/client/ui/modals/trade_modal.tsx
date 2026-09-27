@@ -15,6 +15,7 @@ import { TradePartnerStrip, type TradePartnerInfo, type TradePartnerStripProps }
 import { TradeColumn, type TradeColumnProps } from './trade/trade_column';
 import { TradeDealHud, type TradeDealHudProps } from './trade/trade_deal_hud';
 import { formatCurrency } from '../ui_helpers';
+import { useGameStore } from '../../store/game_store';
 
 function formatDealTabSummary(propertyCount: number, cash: number): string {
   if (propertyCount === 0 && cash === 0) return '';
@@ -80,6 +81,7 @@ export function TradeModal({
   const [cashOffer, setCashOffer] = useState<number>(initialCashOffer);
   const [cashRequest, setCashRequest] = useState<number>(initialCashRequest);
   const [mobileTab, setMobileTab] = useState<'mine' | 'partner'>('mine');
+  const levelMap = useGameStore((s) => s.levelMap);
 
   const currentPartner = availablePartners.find((p) => p.id === selectedPartnerId);
   const effectiveTargetBalance = currentPartner?.balance ?? targetBalance ?? 0;
@@ -220,6 +222,7 @@ export function TradeModal({
             reqPrice100={reqPrice100}
             reqPrice130={reqPrice130}
             reqPrice150={reqPrice150}
+            levelMap={levelMap}
           />
         </div>
         <div className={mobileTab === 'partner' ? 'block' : 'hidden sm:block'}>
@@ -241,6 +244,7 @@ export function TradeModal({
             price70={price70}
             price100={price100}
             price120={price120}
+            levelMap={levelMap}
           />
         </div>
       </div>

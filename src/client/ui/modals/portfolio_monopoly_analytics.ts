@@ -131,3 +131,84 @@ export function analyzePropertyMonopolyInsight(params: AnalyzeMonopolyParams): M
     missingPieces,
   };
 }
+
+export interface PropertyCardActionState {
+  readonly canMortgage: boolean;
+  readonly mortgageBlockedReason?: string;
+  readonly mortgageButtonLabel: string;
+  readonly canDowngrade: boolean;
+  readonly downgradeBlockedReason?: string;
+}
+
+export function resolvePropertyCardActionState(params: {
+  readonly cellIndex: number;
+  readonly level: number;
+  readonly isMortgaged: boolean;
+  readonly isTradeFrozen?: boolean;
+  readonly isLiquidityFrozen?: boolean;
+  readonly levelMap?: Record<number, number>;
+  readonly ownedProperties?: readonly number[];
+}): PropertyCardActionState {
+  const { cellIndex, level, isMortgaged, isTradeFrozen, isLiquidityFrozen, levelMap, ownedProperties } = params;
+
+  // 1. Phân giải Thế Chấp
+  let canMortgage = false;
+  let mortgageBlockedReason: string | undefined = undefined;
+  let mortgageButtonLabel = 'Thế Chấp';
+
+  if (isMortgaged) {
+    canMortgage = false;
+    mortgageBlockedReason = 'Bất động sản đã được thế chấp';
+  } else if (level > 0) {
+    canMortgage = false;
+    mortgageBlockedReason = 'Phải hạ cấp hết nhà về Cấp 0 trước khi thế chấp';
+    mortgageButtonLabel = 'Cần Hạ Cấp';
+  } else if (isLiquidityFrozen) {
+    canMortgage = false;
+    mortgageBlockedReason = 'Bất động sản đang bị đóng băng thanh khoản';
+    mortgageButtonLabel = 'Đóng Băng';
+  } else if (isTradeFrozen) {
+    canMortgage = false;
+    mortgageBlockedReason = 'Thị trường đang đóng băng giao dịch & thế chấp';
+    mortgageButtonLabel = 'Đóng Băng';
+  } else {
+    canMortgage = true;
+  }
+
+  // 2. Phân giải Hạ Cấp (Chuẩn SSOT checkEvenDowngrading từ src/domain/property_upgrade.ts)
+  let canDowngrade = false;
+  let downgradeBlockedReason: string | undefined = undefined;
+
+  if (level <= 0) {
+    canDowngrade = false;
+    downgradeBlockedReason = 'Bất động sản chưa xây dựng công trình';
+  } else if (isMortgaged) {
+    canDowngrade = false;
+    downgradeBlockedReason = 'Bất động sản đang thế chấp không thể hạ cấp';
+  } else {
+    const targetCell = BOARD_CONFIG[cellIndex];
+    if (targetCell?.colorGroup && levelMap && ownedProperties) {
+      // Tìm các ô cùng nhóm màu do người chơi sở hữu
+      const groupCells = BOARD_CONFIG.filter((c) => c.colorGroup === targetCell.colorGroup && ownedProperties.includes(c.index) && c.index !== cellIndex);
+      // Quy tắc Even Downgrading: Chỉ bị chặn khi có ô khác trong nhóm đang ở cấp CAO HƠN nó
+      const leadingCells = groupCells.filter((c) => (levelMap[c.index] ?? 0) > level);
+
+      if (leadingCells.length > 0) {
+        canDowngrade = false;
+        downgradeBlockedReason = 'Cần hạ cấp các ô có cấp độ cao hơn trước';
+      } else {
+        canDowngrade = true;
+      }
+    } else {
+      canDowngrade = true;
+    }
+  }
+
+  return {
+    canMortgage,
+    mortgageBlockedReason,
+    mortgageButtonLabel,
+    canDowngrade,
+    downgradeBlockedReason,
+  };
+}

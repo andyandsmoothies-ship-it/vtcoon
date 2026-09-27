@@ -152,6 +152,8 @@
 |---|---|---|---|:---:|
 | DEBT-UI01-01 | Preloading 28 bộ WebP bằng preloadTileAssets() | UI-01 | UI-02 Task 1 | ✅ ĐÃ ĐÓNG |
 | DEBT-UI01-02 | Hoạt ảnh nhấp nhô điều hòa sin(omega*t) trên Standee | UI-01 | UI-02 Task 2 | ✅ ĐÃ ĐÓNG |
+| DEBT-IMP208-01 | ui_helpers.ts đạt 445 LOC (vượt ngưỡng cảnh báo 400 LOC Tier 2) -> Bóc tách action_dock_helpers.ts | IMP-208B | Slice UI Kế Tiếp | ⏳ CHỜ BÓC TÁCH |
+| DEBT-ROOM-MGR-01 | room_manager.ts đạt 533 LOC (vượt trần 400 LOC Tier 1) -> Khử Ping-Pong Surface giữa intent_dispatcher và room_manager (Bước 1), chuẩn bị GameRoomSession Aggregate Root (Bước 2) | IMP-205 | Slice Server Kế Tiếp | ⏳ CHỜ BÓC TÁCH |
 
 ---
 
@@ -380,3 +382,65 @@
 - **Kiểm thử & Bất biến**: `tests/contracts/imp207_freeze_trade_fsm_and_affordance.test.ts` (16/16 atomic contract tests PASS 100%, Adversarial Inversion PASS), 61/61 regression tests PASS, `npm run lint:ui` 0 lỗi, `tsc --noEmit` 0 lỗi.
 - **Phê chuẩn**: `spec-reviewer` SPEC_PASS, `ui-craft-reviewer` VERDICT SHIP, `code-reviewer` CODE_PASS.
 - **Trạng thái**: ✅ Hoàn thành (2026-09-27).
+
+### [IMP-208] Khắc Phục Toàn Diện 7 Tình Huống Bẫy Nút Bấm & Chuẩn Hóa Công Thái Học Ngữ Cảnh (Comprehensive Button Affordance & Interaction Hardening)
+- **Mục tiêu**: Rà soát và triệt tiêu toàn bộ 7 tình huống False Affordance trên toàn bộ 195 tệp UI người dùng theo triết lý Công thái học Ngữ cảnh (Contextual True Affordance), không giấu nút cực đoan, bảo toàn nhận diện tài sản với disabled xám xúc giác và hướng dẫn hành động.
+- **Hạ tầng hoàn tất**:
+  * `src/client/ui/modals/title_deed_action_footer.tsx`: Khóa nút Thế Chấp sang xám disabled `bg-slate-200 text-slate-400 cursor-not-allowed` khi BĐS có công trình (`currentLevel > 0`), hiển thị tooltip hướng dẫn hạ cấp hết nhà về Cấp 0 trước khi thế chấp; triệt tiêu gray-on-color sang `text-amber-950 font-black`.
+  * `src/client/ui/modals/portfolio_monopoly_analytics.ts`: Trích xuất module thuần `resolvePropertyCardActionState` chuẩn SRP, đồng bộ 100% với Server SSOT `checkEvenDowngrading` (`src/domain/property_upgrade.ts`), bảo vệ bất biến hạ cấp đồng đều và triệt tiêu bẫy kẹt Deadlock khi nhiều ô cùng C3.
+  * `src/client/ui/modals/property_portfolio_modal.tsx`: Khai báo và truyền `isTradeFrozen`, áp dụng `actionState` cho nút Thế Chấp (`Cần Hạ Cấp`, `Đóng Băng`), nút Giải Chấp, nút Hạ Cấp và nút Đàm Phán Nhanh; thực hiện Subtractive Refactoring thành công giảm tệp từ 493 dòng xuống còn **465 dòng** (dưới trần nghiêm ngặt 483 LOC).
+  * `src/client/ui/modals/trade/trade_column.tsx` & `trade_modal.tsx`: Nhận reactive `levelMap` từ Zustand store; hiển thị thẻ BĐS có công trình ở dạng mờ `opacity-60 bg-slate-50 cursor-not-allowed` với huy hiệu chuẩn chữ `🏠 C{level} (Có nhà)` (`text-[11px] font-bold`) và khóa không cho tick chọn vào giao dịch P2P.
+  * `src/client/ui/modals/masterplan_components.tsx`: Nhận `isTradeFrozen` và vô hiệu hóa nút `[🤝 Đổi Ô]` khi thị trường đóng băng; đổi badge cấp độ sang `text-amber-950 font-black`.
+  * `src/client/ui/modals/bot_trade_offer_modal.tsx`: Nhận diện số dư ví người chơi từ `sellerId` có sẵn trong props mà không cần import thêm `useLobbyStore`; vô hiệu hóa nút Đồng Ý Đổi và đổi nhãn thành `Thiếu Tiền Bù (-X Tr.)` khi ví thiếu tiền bù.
+  * `src/client/ui/modals/bond_issuance_tab.tsx`: Kiểm tra điều kiện Net Worth >= 3000 và >= 2 BĐS chưa thế chấp; khóa nút phát hành kèm lý do rõ ràng; nâng chuẩn touch target min-h-[44px] cho 2 nút thao tác.
+  * `src/client/ui/action_dock.tsx`: Nút Nộp Bảo Lãnh Kiểm Toán chuyển sang xám tĩnh không nảy `bg-slate-200 text-slate-400 border-slate-300 shadow-none cursor-not-allowed active:scale-100` khi số dư ví < 500; badge lượt chuyển sang `bg-slate-300 text-slate-500`.
+  * `src/client/ui/modals/modal_host.tsx`: Truyền `isTradeFrozen` xuống `PropertyPortfolioModal`.
+- **Kiểm thử & Bất biến**: `tests/contracts/imp208_comprehensive_button_affordance.test.ts` (21/21 atomic contract tests PASS 100%, Adversarial Inversion PASS), 49/49 regression tests PASS, `npm run lint:ui` 0 vi phạm trên toàn codebase, `tsc --noEmit` 0 lỗi.
+- **Phê chuẩn**: `spec-reviewer` SPEC_PASS, `ui-craft-reviewer` VERDICT SHIP (4/4 điểm P1-P4 khắc phục triệt để), `code-reviewer` CODE_PASS.
+- **Trạng thái**: ✅ Hoàn thành (2026-09-27).
+
+---
+
+### [IMP-208B] Cải Thiện Công Thái Học Chức Năng Ra Tù, Khử Xung Đột Đè Chữ Xúc Xắc & Tràn Nút ActionDock Mobile
+- **Mục tiêu**: Khắc phục triệt để lỗi xung đột đè chữ giữa `actionDockNotice` và `DiceScoreBadge`, giải tỏa tình trạng chật chội tràn nút trên mobile 360px cho nút Nộp Bảo Lãnh, phá vỡ bẫy kẹt cảm xúc "không biết làm gì tiếp theo" khi gieo không ra đôi bằng hiệu ứng kêu gọi hành động (Callout Affordance) cho nút Kết Thúc Lượt, và ngữ cảnh hóa nút đóng Sổ Đỏ (`Tạm Đóng` vs `Đóng Xoay Vốn`).
+- **Hạ tầng hoàn tất**:
+  * `src/client/ui/action_dock.tsx`:
+    - Di dời `actionDockNotice` ra khỏi positioning `absolute -top-10` sang luồng tài liệu tự nhiên (`flex flex-col items-center gap-1.5`), triệt tiêu 100% va chạm hình học với `DiceScoreBadge`.
+    - Rút gọn nút Nộp Bảo Lãnh: Xóa bỏ badge `${turns} lượt` bên trong nút, giữ lại icon `⚖️` và nhãn `Bảo Lãnh (500)`, tiết kiệm không gian ngang trên màn hình di động 360px.
+    - Kích hoạt Callout Affordance: Thêm class `ring-4 ring-emerald-400/90 shadow-[0_0_18px_rgba(16,185,129,0.6)] animate-pulse` cho nút Kết Thúc Lượt khi `inAudit && hasRolledThisTurn && !canRollAgain`. Cơ chế Reactive Teardown đảm bảo gỡ bỏ animation ngay tức khắc khi chuyển lượt hoặc nộp bảo lãnh.
+    - Subtractive Refactoring đưa kích thước file từ 393 LOC xuống **379 LOC** (<= 385 LOC).
+  * `src/client/ui/ui_helpers.ts`:
+    - Ràng buộc `isMyTurn` chống Actor Inversion cho thông báo `inAudit`.
+    - Đồng bộ ngữ nghĩa thông báo sau khi đổ xúc xắc không ra đôi: hiển thị `Không ra đôi: Nộp bảo lãnh hoặc Xong lượt`.
+  * `src/client/ui/modals/title_deed_action_footer.tsx`:
+    - Phân nhánh ngữ nghĩa thông minh cho nút phụ: hiển thị `Tạm Đóng` khi `canBuy = true` (đủ tiền mua đất nhưng muốn xem xét thêm) và `Đóng Xoay Vốn` khi `canBuy = false` (thiếu tiền, cần ra ngoài huy động vốn).
+- **Kiểm thử & Bất biến**:
+  - `tests/contracts/imp208_audit_bailout_and_dock_ergonomics.test.ts`: 16/16 atomic contract tests PASS 100%.
+  - Adversarial Inversion Gate đã kiểm chứng: Station 1 FAILED 7 tests trước khi implement, Station 2 PASSED 16 tests sau khi implement.
+  - Regression: `mobile_ui_ux_tri_package_polish.test.ts` (35/35 PASS), `imp204_property_purchase_affordance.test.ts` (17/17 PASS).
+  - Snapshot: `.agents/evidence/imp-208b_snapshot.json` (`executed: true`, `inversionGate.verified: true`).
+  - Linter: `npm run lint:ui` đạt 0 vi phạm.
+- **Tech Debt**: Ghi nhận `DEBT-IMP208-01` (`ui_helpers.ts` đạt 445 LOC, cần tách `action_dock_helpers.ts` trong slice tới).
+- **Phê chuẩn**: `spec-reviewer` SPEC_PASS, `ui-craft-reviewer` VERDICT SHIP, `scout` Station 2.5 PASS.
+- **Trạng thái**: ✅ Hoàn thành (2026-09-27).
+
+---
+
+### [IMP-205] Làm Sạch Thế Chấp Khi Đấu Giá & Bảo Toàn Kho Bạc Bất Biến (Auction Mortgage Sanitization & Treasury Conservation)
+- **Mục tiêu**: Khắc phục dứt điểm nguyên nhân người chơi mua đất tại đấu giá nhưng lại bị tính trừ/thế chấp 600 Tr và bị kẹt đất vào thế chấp; triệt tiêu vòng lặp vô tận thu hồi đất dự án treo (`CC_SLOW_BUILD`); bảo toàn bất biến quỹ Kho Bạc khi đấu giá đất công/thu hồi; và khử log chuộc đất ma trên Client.
+- **Hạ tầng hoàn tất**:
+  * `src/server/turn_loop.ts`: Khi `nextRounds > 2`, xóa hoàn toàn `unbuiltRounds` (`delete nextState.unbuiltRounds` -> `undefined`) thay vì reset về `0`; giải chấp nguyên tử ô đất bị thu hồi (`isMortgaged = false`, dọn dẹp `mortgagedProperties` và `mortgageLoans` của cựu chủ sở hữu); bổ sung `endTime: Date.now() + 20_000` và `currentBid: startingBid` chống lệch đồng hồ 00:00; thêm `break;` bảo vệ phiên đấu giá đơn lẻ.
+  * `src/server/auction_manager.ts`: Truyền tham số `stateMap?: PropertyStateMap` qua `handleAuctionBid` và `handleAuctionPass` xuống `handleAuctionClose`; bàn giao Clean Title (`isMortgaged = false`, `delete unbuiltRounds`, xóa sạch khỏi `mortgagedProperties` trong phòng); xóa bỏ hoàn toàn monkey-patch toàn cục `knownStateMaps` loại bỏ rò rỉ bộ nhớ vĩnh viễn và ô nhiễm đa phòng; nộp 100% tiền trúng đấu giá đất công vào `room.treasury`; ưu tiên thu hồi nợ gốc thế chấp cho Kho Bạc khi phát mãi tài sản của con nợ trước khi hoàn trả thặng dư.
+  * `src/server/room_manager.ts`: Truyền `this.propertyStates.get(roomCode)` vào `handleAuctionBid`, `handleAuctionPass` và `handleAuctionClose`; đồng bộ `this.syncAuction(roomCode)` vào cuối `handleEndTurn`.
+  * `src/client/network/activity_property_tracker.ts`: `detectCellMortgage` nhận `isOwnerChanged` và kiểm tra an toàn sau khi resolve `ownerId`, chặn đứng hoàn toàn `ReferenceError` và chặn phát sinh log chuộc lại đất ma cho chủ mới khi nhận BĐS sạch nợ từ sàn đấu giá.
+- **Kiểm thử & Bất biến**:
+  * `tests/contracts/imp205_auction_mortgage_sanitization_and_treasury_conservation.test.ts`: 19/19 atomic contract tests PASS 100%.
+  * Adversarial Inversion Gate đã kiểm chứng: Station 1 FAILED 15 tests trước khi implement, Station 2 PASSED 19 tests sau khi implement.
+  * Toàn bộ 52 test files trong `tests/server/` (676 tests) PASS 100%.
+  * `npx tsc --noEmit` thoát mã 0 không lỗi.
+  * Snapshot: `.agents/evidence/imp205_snapshot.json` (`executed: true`, `contractTestsPassed: true`).
+  * Ghi nhận Invariant 4 (Pillar I) và Invariant 6 (Pillar II) vào `docs/domain/gotchas.md`.
+- **Tech Debt**: Ghi nhận `DEBT-ROOM-MGR-01` (`src/server/room_manager.ts` đạt 533 LOC, vượt trần Tier 1 <= 400 LOC do dồn nén dead delegate surface và 10 Map phân tán; lộ trình xử lý 2 bước: Bước 1 Fast-Track khử ping-pong wrappers giữa `intent_dispatcher` và `room_manager`; Bước 2 Full Rigor One-Way Door chuyển đổi sang `GameRoomSession` Aggregate Root để đưa file về < 180 LOC).
+- **Phê chuẩn**: `plan-griller` (P1-P5 hardened), `qa-tester` (Station 1 RED), `implementer` (Station 2 GREEN), `scout` (Station 2.5 PASS), `spec-reviewer` (Station 3 APPROVED), `code-reviewer` (Station 3 APPROVED).
+- **Trạng thái**: ✅ Hoàn thành (2026-09-27).
+

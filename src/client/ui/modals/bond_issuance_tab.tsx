@@ -6,6 +6,8 @@ interface BondIssuanceTabProps {
   readonly bondContract?: BondContract | null;
   readonly balance: number;
   readonly isMyTurn?: boolean;
+  readonly playerNetWorth?: number;
+  readonly unmortgagedPropertiesCount?: number;
   readonly onIssueBond?: () => void;
   readonly onRepayBond?: () => void;
 }
@@ -14,6 +16,8 @@ export function BondIssuanceTab({
   bondContract,
   balance,
   isMyTurn,
+  playerNetWorth,
+  unmortgagedPropertiesCount,
   onIssueBond,
   onRepayBond,
 }: BondIssuanceTabProps): React.ReactElement {
@@ -36,8 +40,8 @@ export function BondIssuanceTab({
           type="button"
           onClick={onRepayBond}
           disabled={!canRepay}
-          className={`w-full py-2.5 px-4 rounded-xl font-bold text-xs transition-all ${
-            canRepay ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-md active:translate-y-0.5' : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+          className={`w-full min-h-[44px] py-2.5 px-4 rounded-xl font-bold text-xs transition-all ${
+            canRepay ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-md active:translate-y-0.5 cursor-pointer' : 'bg-slate-200 text-slate-400 cursor-not-allowed'
           }`}
         >
           {canRepay ? `Tất Toán Trước Hạn (${formatCurrency(bondContract.repayAmount)})` : `Chưa đủ tiền tất toán (${formatCurrency(bondContract.repayAmount)})`}
@@ -45,6 +49,18 @@ export function BondIssuanceTab({
       </div>
     );
   }
+
+  const hasNetWorth = (playerNetWorth ?? 0) >= 3000;
+  const hasEnoughDeeds = (unmortgagedPropertiesCount ?? 0) >= 2;
+  const canIssue = Boolean(isMyTurn) && hasNetWorth && hasEnoughDeeds;
+
+  const blockedReason = !isMyTurn
+    ? 'Chỉ có thể phát hành trong lượt của bạn'
+    : !hasNetWorth
+    ? 'Cần tối thiểu 3.000 Net Worth để phát hành trái phiếu'
+    : !hasEnoughDeeds
+    ? 'Cần sở hữu ít nhất 2 Bất Động Sản chưa thế chấp'
+    : undefined;
 
   return (
     <div className="space-y-4 p-4 bg-amber-500/10 rounded-2xl border border-amber-500/30 text-slate-900 text-xs">
@@ -60,13 +76,16 @@ export function BondIssuanceTab({
       </ul>
       <button
         type="button"
-        onClick={onIssueBond}
-        disabled={!isMyTurn}
-        className={`w-full py-2.5 px-4 rounded-xl font-bold text-xs transition-all ${
-          isMyTurn ? 'bg-amber-500 hover:bg-amber-400 text-amber-950 shadow-md active:translate-y-0.5 font-black' : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+        onClick={() => canIssue && onIssueBond?.()}
+        disabled={!canIssue}
+        title={blockedReason}
+        className={`w-full min-h-[44px] py-2.5 px-4 rounded-xl font-bold text-xs transition-all ${
+          canIssue
+            ? 'bg-amber-500 hover:bg-amber-400 text-amber-950 shadow-md active:translate-y-0.5 font-black cursor-pointer'
+            : 'bg-slate-200 text-slate-400 border border-slate-300 shadow-none cursor-not-allowed'
         }`}
       >
-        {isMyTurn ? 'Phát Hành Trái Phiếu' : 'Chỉ có thể phát hành trong lượt của bạn'}
+        {blockedReason ?? 'Phát Hành Trái Phiếu'}
       </button>
     </div>
   );
