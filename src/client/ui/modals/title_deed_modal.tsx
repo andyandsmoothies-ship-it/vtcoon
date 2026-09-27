@@ -276,13 +276,14 @@ export function TitleDeedModal({
               </div>
             </div>
 
-            {canBuy && !isOwned && (
+            {(canBuy || isTradeFrozen) && !isOwned && (
               <PurchaseDecisionCard
                 cellIndex={cellIndex}
                 deedPrice={deed.price}
                 buyerBalance={buyerBalance}
                 buyerId={buyerId}
                 allPlayers={allPlayers}
+                isTradeFrozen={isTradeFrozen}
               />
             )}
 

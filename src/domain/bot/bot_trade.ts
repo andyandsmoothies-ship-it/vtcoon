@@ -47,6 +47,8 @@ export function calculateTradeOfferPrice(
   roundCount?: number,
   isMonopolyGap?: boolean,
   playerCount?: number,
+  isMortgaged?: boolean,
+  mortgageLoan?: number,
 ): number | null {
   const deed = PROPERTY_DEEDS.get(cellIndex);
   const basePrice = deed?.price ?? 1000;
@@ -61,10 +63,18 @@ export function calculateTradeOfferPrice(
   const maxEsc = personality === BotPersonality.Aggressive ? 0.40 : personality === BotPersonality.Balanced ? 0.30 : 0.15;
   multiplier += Math.min(maxEsc, rejections * 0.10);
 
-  const offerPrice = Math.round(basePrice * multiplier);
-  const safetyBuffer = isMonopolyGap
+  let offerPrice = Math.round(basePrice * multiplier);
+  let safetyBuffer = isMonopolyGap
     ? Math.max(customSafetyBuffer ?? DEFAULT_MIN_SAFETY_BUFFER, 1000)
     : (customSafetyBuffer !== undefined ? customSafetyBuffer : DEFAULT_MIN_SAFETY_BUFFER);
+
+  if (isMortgaged) {
+    const loan = mortgageLoan ?? Math.floor(basePrice * 0.5);
+    const redeemCost = Math.floor(loan * 1.10);
+    const floorPrice = Math.max(100, Math.floor(basePrice * 0.35));
+    offerPrice = Math.max(floorPrice, offerPrice - redeemCost);
+    safetyBuffer += redeemCost;
+  }
 
   if (bot.balance - offerPrice < safetyBuffer) {
     return null;
@@ -99,6 +109,19 @@ export function evaluateBotTradeAcceptance(
     return { accept: false, reason: 'EMBARGO_LEADER' };
   }
 
+  const isMortgaged = sellerBot.mortgagedProperties?.includes(cellIndex);
+  const loan = isMortgaged
+    ? (sellerBot.mortgageLoans?.[cellIndex] ?? Math.floor(basePrice * 0.5))
+    : 0;
+  const floorPrice = isMortgaged ? Math.max(100, Math.floor(basePrice * 0.35)) : 0;
+
+  const checkAcceptPrice = (threshold: number): boolean => {
+    const minAcceptablePrice = isMortgaged
+      ? Math.max(floorPrice, threshold - loan)
+      : threshold;
+    return offerPrice >= minAcceptablePrice;
+  };
+
   let givesMonopolyToBuyer = false;
   if (cellConfig?.colorGroup) {
     const groupCells = BOARD_CONFIG.filter((c) => c.colorGroup === cellConfig.colorGroup);
@@ -110,15 +133,15 @@ export function evaluateBotTradeAcceptance(
 
   if (pers === BotPersonality.Aggressive) {
     if (givesMonopolyToBuyer) {
-      if (offerPrice >= Math.round(1.75 * basePrice)) {
+      if (checkAcceptPrice(Math.round(1.75 * basePrice))) {
         return { accept: true };
       }
-      if (sellerBot.balance < 2000 && offerPrice >= Math.round(1.55 * basePrice)) {
+      if (sellerBot.balance < 2000 && checkAcceptPrice(Math.round(1.55 * basePrice))) {
         return { accept: true };
       }
       return { accept: false, reason: 'PREVENT_MONOPOLY' };
     }
-    if (offerPrice >= Math.round(1.3 * basePrice)) {
+    if (checkAcceptPrice(Math.round(1.3 * basePrice))) {
       return { accept: true };
     }
     return { accept: false, reason: 'PRICE_TOO_LOW' };
@@ -129,15 +152,15 @@ export function evaluateBotTradeAcceptance(
       return { accept: false, reason: 'KINGMAKING_DEFENSE' };
     }
     if (givesMonopolyToBuyer) {
-      if (offerPrice >= Math.round(1.5 * basePrice)) {
+      if (checkAcceptPrice(Math.round(1.5 * basePrice))) {
         return { accept: true };
       }
-      if (sellerBot.balance < 2000 && offerPrice >= Math.round(1.3 * basePrice)) {
+      if (sellerBot.balance < 2000 && checkAcceptPrice(Math.round(1.3 * basePrice))) {
         return { accept: true };
       }
       return { accept: false, reason: 'PREVENT_MONOPOLY' };
     }
-    if (offerPrice >= Math.round(1.3 * basePrice)) {
+    if (checkAcceptPrice(Math.round(1.3 * basePrice))) {
       return { accept: true };
     }
     return { accept: false, reason: 'PRICE_TOO_LOW' };
@@ -145,15 +168,15 @@ export function evaluateBotTradeAcceptance(
 
   // BotPersonality.Passive: Phòng thủ kiên cố, tuyệt đối không bán rẻ độc quyền
   if (givesMonopolyToBuyer) {
-    if (sellerBot.balance < 500 && offerPrice >= Math.round(2.0 * basePrice)) {
+    if (sellerBot.balance < 500 && checkAcceptPrice(Math.round(2.0 * basePrice))) {
       return { accept: true };
     }
     return { accept: false, reason: 'PREVENT_MONOPOLY' };
   }
-  if (offerPrice >= Math.round(1.25 * basePrice) && sellerBot.balance < 500) {
+  if (checkAcceptPrice(Math.round(1.25 * basePrice)) && sellerBot.balance < 500) {
     return { accept: true };
   }
-  if (offerPrice >= Math.round(1.40 * basePrice)) {
+  if (checkAcceptPrice(Math.round(1.40 * basePrice))) {
     return { accept: true };
   }
   return { accept: false, reason: 'PRICE_TOO_LOW' };
@@ -209,6 +232,8 @@ export function findEligibleBotTrade(
       currentRound,
       true,
       room.players.length,
+      gap.isMortgaged,
+      gap.mortgageLoan,
     );
     if (price === null) continue;
 

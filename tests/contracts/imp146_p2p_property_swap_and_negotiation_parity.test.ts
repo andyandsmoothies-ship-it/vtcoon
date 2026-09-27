@@ -130,28 +130,32 @@ describe('[TC-146][UC-IMP146] Two-Way Property Swap & Negotiation Parity Contrac
       expect(res.reason).toBe(ActionRejectReason.PROPERTY_HAS_BUILDING);
     });
 
-    it('[TC-146.06/A5][UC-IMP146] Từ chối khi ô đất đưa ra offeredCellIndex đang bị thế chấp (PROPERTY_MORTGAGED)', () => {
+    it('[TC-146.06/MSS][UC-IMP146] Chấp nhận swap khi ô đất đưa ra offeredCellIndex đang bị thế chấp và chuyển nghĩa vụ nợ sang bot', () => {
       const { room, human, bot, reg, sm } = setupSwapRoom();
       reg.set(1, human.id);
       human.mortgagedProperties = [1];
+      human.mortgageLoans = { 1: 300 };
       sm.set(1, { level: 0, isMortgaged: true });
       reg.set(3, bot.id);
 
       const res = (executeP2PTrade as any)(room, bot.id, human.id, 3, 0, reg, sm, 1);
-      expect(res.success).toBe(false);
-      expect(res.reason).toBe(ActionRejectReason.PROPERTY_MORTGAGED);
+      expect(res.success).toBe(true);
+      expect(bot.mortgagedProperties).toContain(1);
+      expect(human.mortgagedProperties).not.toContain(1);
     });
 
-    it('[TC-146.07a/A6][UC-IMP146] Từ chối khi ô đất mục tiêu cellIndex đang bị thế chấp (PROPERTY_MORTGAGED)', () => {
+    it('[TC-146.07a/MSS][UC-IMP146] Chấp nhận swap khi ô đất mục tiêu cellIndex đang bị thế chấp và chuyển nghĩa vụ nợ sang human', () => {
       const { room, human, bot, reg, sm } = setupSwapRoom();
       reg.set(1, human.id);
       reg.set(3, bot.id);
       bot.mortgagedProperties = [3];
+      bot.mortgageLoans = { 3: 300 };
       sm.set(3, { level: 0, isMortgaged: true });
 
       const res = (executeP2PTrade as any)(room, bot.id, human.id, 3, 0, reg, sm, 1);
-      expect(res.success).toBe(false);
-      expect(res.reason).toBe(ActionRejectReason.PROPERTY_MORTGAGED);
+      expect(res.success).toBe(true);
+      expect(human.mortgagedProperties).toContain(3);
+      expect(bot.mortgagedProperties).not.toContain(3);
     });
 
     it('[TC-146.07b/A7][UC-IMP146] Từ chối khi ô đất mục tiêu cellIndex đã có công trình (PROPERTY_HAS_BUILDING)', () => {

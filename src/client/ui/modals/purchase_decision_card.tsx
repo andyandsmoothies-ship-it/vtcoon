@@ -15,6 +15,7 @@ export interface PurchaseDecisionCardProps {
   readonly buyerId?: string;
   readonly allPlayers?: Record<string, PurchaseDecisionPlayer>;
   readonly levelMap?: Record<number, number>;
+  readonly isTradeFrozen?: boolean;
 }
 
 const TONE_CLASSES = {
@@ -24,7 +25,7 @@ const TONE_CLASSES = {
 };
 
 export function PurchaseDecisionCard({
-  cellIndex, deedPrice, buyerBalance, buyerId, allPlayers, levelMap,
+  cellIndex, deedPrice, buyerBalance, buyerId, allPlayers, levelMap, isTradeFrozen,
 }: PurchaseDecisionCardProps): React.ReactElement {
   const isSSR = typeof window === 'undefined';
   const storePlayers = useGameStore((s) => s.playersInfo);
@@ -67,7 +68,10 @@ export function PurchaseDecisionCard({
             let badgeLabel = '⚪ Trống';
 
             if (c.isTarget) {
-              if (cashBuffer.canAfford) {
+              if (isTradeFrozen) {
+                badgeClasses = 'bg-sky-100 text-sky-900 font-bold border-sky-300';
+                badgeLabel = '❄️ ĐÓNG BĂNG';
+              } else if (cashBuffer.canAfford) {
                 badgeClasses = 'bg-amber-400 text-amber-950 font-black border-amber-600 shadow-sm';
                 badgeLabel = '🎯 MUA NGAY';
               } else {
@@ -116,26 +120,36 @@ export function PurchaseDecisionCard({
       </div>
 
       {/* Khối 2: Đệm tiền mặt & An toàn thanh khoản */}
-      <div className="pt-1.5 border-t border-amber-900/10 space-y-1">
-        <div className="flex items-center justify-between gap-1 text-[11px]">
-          <span className="text-slate-600 font-medium whitespace-nowrap">Thanh khoản sau mua:</span>
-          <span
-            className={`px-2 py-0.5 rounded-full text-[10px] font-black border whitespace-nowrap shrink-0 ${TONE_CLASSES[cashBuffer.tone]}`}
-            data-testid="cash-buffer-badge"
-          >
-            {cashBuffer.tone === 'emerald' ? '🟢' : cashBuffer.tone === 'amber' ? '🟡' : '🔴'} {cashBuffer.label}
-          </span>
+      {isTradeFrozen ? (
+        <div
+          className="pt-1.5 border-t border-amber-900/10 flex items-center justify-between text-[11px] font-bold text-sky-900 bg-sky-50 px-2 py-1.5 rounded-lg border border-sky-200"
+          data-testid="freeze-trade-banner"
+        >
+          <span>❄️ Thị trường đóng băng</span>
+          <span className="text-[10px] text-sky-700 font-normal">Tạm dừng mua bán & thế chấp</span>
         </div>
-        <div className="flex items-center justify-between text-xs font-mono font-bold px-2 py-0.5 rounded-lg bg-white/70 border border-slate-200/80">
-          <span className="text-slate-500 whitespace-nowrap text-[11px] sm:text-xs">
-            Ví: {formatCurrency(effectiveBalance)}
-          </span>
-          <span className="text-slate-400 font-normal text-[11px]">➔ Còn lại:</span>
-          <span className={`whitespace-nowrap text-[11px] sm:text-xs ${cashBuffer.tone === 'rose' ? 'text-rose-700 font-black' : 'text-slate-900 font-black'}`}>
-            {formatCurrency(cashBuffer.balanceAfterBuy)}
-          </span>
+      ) : (
+        <div className="pt-1.5 border-t border-amber-900/10 space-y-1">
+          <div className="flex items-center justify-between gap-1 text-[11px]">
+            <span className="text-slate-600 font-medium whitespace-nowrap">Thanh khoản sau mua:</span>
+            <span
+              className={`px-2 py-0.5 rounded-full text-[10px] font-black border whitespace-nowrap shrink-0 ${TONE_CLASSES[cashBuffer.tone]}`}
+              data-testid="cash-buffer-badge"
+            >
+              {cashBuffer.tone === 'emerald' ? '🟢' : cashBuffer.tone === 'amber' ? '🟡' : '🔴'} {cashBuffer.label}
+            </span>
+          </div>
+          <div className="flex items-center justify-between text-xs font-mono font-bold px-2 py-0.5 rounded-lg bg-white/70 border border-slate-200/80">
+            <span className="text-slate-500 whitespace-nowrap text-[11px] sm:text-xs">
+              Ví: {formatCurrency(effectiveBalance)}
+            </span>
+            <span className="text-slate-400 font-normal text-[11px]">➔ Còn lại:</span>
+            <span className={`whitespace-nowrap text-[11px] sm:text-xs ${cashBuffer.tone === 'rose' ? 'text-rose-700 font-black' : 'text-slate-900 font-black'}`}>
+              {formatCurrency(cashBuffer.balanceAfterBuy)}
+            </span>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

@@ -171,11 +171,11 @@ export function GameRulesModal({
                 <div className="flex flex-col gap-1.5 text-[11px] bg-white p-2.5 rounded-lg border border-slate-200 text-slate-600">
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <span className="font-semibold text-slate-800">Cấp công trình:</span>
-                    <span>Đất Trống (C0) ➔ Nhà Cấp 1 (C1) ➔ Nhà Cấp 2 (C2) ➔ Biệt Thự Cấp 3 (C3, cấp cao nhất thay thế <strong className="text-amber-700 font-semibold">khách sạn</strong>)</span>
+                    <span>Đất Trống (C0) ➔ Nhà Cấp 1 (C1) ➔ Nhà Cấp 2 (C2) ➔ Landmark Cấp 3 / khách sạn (C3, 22 kiến trúc biểu tượng vùng miền độc bản)</span>
                   </div>
                   <div className="text-[10.5px] text-slate-500 pt-1 border-t border-slate-100 flex flex-col gap-0.5">
                     <span>• <strong className="text-slate-700 font-semibold">Nhà Cấp 2 (C2):</strong> Thu thêm phụ phí dịch vụ +200 khi đối thủ dừng chân.</span>
-                    <span>• <strong className="text-slate-700 font-semibold">Biệt Thự C3:</strong> Kích hoạt hiệu ứng đặc quyền <strong className="text-rose-600 font-semibold">Hoãn Lượt (Skip Turn)</strong> đối thủ!</span>
+                    <span>• <strong className="text-slate-700 font-semibold">Landmark C3 / khách sạn:</strong> Tòa nhà biểu tượng độc bản (đai vàng hoàng kim &amp; vương miện tự xoay) kích hoạt hiệu ứng <strong className="text-rose-600 font-semibold">Hoãn Lượt (Skip Turn)</strong> đối thủ!</span>
                     <span>• <strong className="text-slate-700 font-semibold">Quy Tắc Xây Đều Tay:</strong> Phải nâng cấp các ô cùng nhóm màu đồng đều trước khi lên cấp tiếp theo.</span>
                   </div>
                 </div>
@@ -239,26 +239,32 @@ export function GameRulesModal({
             <div className="space-y-3.5">
               <div className="p-3.5 rounded-xl bg-rose-50/70 border border-rose-100">
                 <h3 className="font-bold text-rose-900 text-sm flex items-center gap-2 mb-1">
-                  <span>🚨</span> Trạm Kiểm Toán &amp; Tạm Giam
+                  <span>🚨</span> Trạm Kiểm Toán &amp; Bảo Lãnh Động
                 </h3>
-                <p className="text-rose-800 mb-1.5">
+                <p className="text-rose-800 mb-1">
                   Khi dừng tại ô Lệnh Thu Thuế (ô 30) hoặc đổ 3 lần xúc xắc đôi liên tiếp, bạn bị tống vào ô <strong className="font-semibold">Tạm Giam</strong> của Trạm <strong className="font-semibold">Kiểm Toán</strong> (ô 10).
                 </p>
-                <p className="text-rose-900 font-semibold text-[11px] mb-1">3 Phương Thức Thoát Án:</p>
-                <ol className="list-decimal list-inside space-y-0.5 text-[11px] text-rose-800">
-                  <li>Nộp tiền bảo lãnh 500 ở đầu lượt để đi tiếp ngay.</li>
-                  <li>Đổ thành công xúc xắc đôi trong tối đa 3 lượt tiếp theo.</li>
-                  <li>Sử dụng Thẻ Miễn Kiểm Toán nếu đang nắm giữ.</li>
-                </ol>
+                <div className="text-[11px] text-rose-900 space-y-1">
+                  <p>• <strong className="font-semibold">Phí bảo lãnh động:</strong> Tính theo quy mô tài sản <code className="bg-rose-100/80 px-1 rounded font-bold">max(500, 10% Net Worth)</code> nộp vào Kho Bạc, hoặc đổ xúc xắc đôi / dùng Thẻ Miễn Kiểm Toán để thoát án.</p>
+                  <p>• <strong className="font-semibold">Cơ chế Chống Cắm Trại (Anti-Camping):</strong> Trong suốt thời gian chủ đất đang thụ án tại Trạm Kiểm Toán, toàn bộ BĐS của chủ đất này bị <strong className="font-semibold text-rose-700">miễn 100% tiền thuê</strong> cho đối thủ dừng chân!</p>
+                </div>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-indigo-50/70 border border-indigo-100">
-                <h3 className="font-bold text-indigo-900 text-sm flex items-center gap-2 mb-1">
-                  <span>🤝</span> Thâu Tóm Bắt Buộc (Compulsory Buyout 130%)
-                </h3>
-                <p className="text-indigo-900 text-[11px] leading-relaxed">
-                  Khi dừng chân tại ô đất cấp 0 của đối thủ (chưa thế chấp, không thuộc nhóm màu độc quyền), bạn có quyền kích hoạt <strong className="font-semibold text-indigo-950">Thâu Tóm Bắt Buộc</strong> bằng cách trả khoản bồi thường bằng <strong className="font-semibold text-indigo-950">130% giá niêm yết</strong> để lập tức sở hữu ô đất, phá vỡ chiến thuật phòng thủ của đối phương!
-                </p>
+              <div className="p-3.5 rounded-xl bg-indigo-50/70 border border-indigo-100 space-y-2">
+                <div>
+                  <h3 className="font-bold text-indigo-950 text-sm flex items-center gap-2 mb-1">
+                    <span>🤝</span> Thương Lượng P2P &amp; Thâu Tóm Bắt Buộc (Buyout 130%)
+                  </h3>
+                  <p className="text-indigo-900 text-[11px] leading-relaxed">
+                    <strong className="font-semibold text-indigo-950">Thâu Tóm Bắt Buộc (Compulsory Buyout):</strong> Khi dừng chân tại ô đất C0 của đối thủ (chưa thế chấp, chưa đủ bộ màu), có quyền chi trả <strong className="font-semibold text-indigo-950">130% giá niêm yết</strong> để mua đứt ô đất ngay lập tức.
+                  </p>
+                </div>
+                <div className="pt-1.5 border-t border-indigo-200/60 text-[11px] text-indigo-900 space-y-1">
+                  <p className="font-semibold text-indigo-950">Đàm Phán Thương Lượng &amp; Hoán Đổi P2P (Trade / Swap):</p>
+                  <p>• Cho phép đàm phán ngoài lượt khi bàn cờ tĩnh (đổi đất lấy tiền hoặc Swap đất 2 chiều).</p>
+                  <p>• <strong className="font-semibold">Giá sàn chuyển nhượng:</strong> Tối thiểu 70% giá gốc cho đất sạch; tối thiểu <strong className="font-semibold text-indigo-950">35% giá gốc</strong> cho BĐS đang thế chấp. Thuế giao dịch 5% nộp Kho Bạc.</p>
+                  <p>• <strong className="font-semibold text-indigo-950">Chuyển Giao Kèm Nợ (Loan Assumption):</strong> BĐS đang thế chấp vẫn được phép mua bán P2P! Người mua nhận quyền sở hữu kèm nghĩa vụ nợ, và có toàn quyền chuộc đất từ Kho Bạc (giá nợ gốc + 10%).</p>
+                </div>
               </div>
 
               <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
@@ -273,15 +279,27 @@ export function GameRulesModal({
                 </p>
               </div>
 
+              <div className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200/80">
+                <h3 className="font-bold text-amber-950 text-sm flex items-center gap-2 mb-1">
+                  <span>📜</span> Đòn Bẩy Trái Phiếu Doanh Nghiệp &amp; Sàn Phát Mãi 0 Đồng
+                </h3>
+                <p className="text-amber-900 text-[11px] leading-relaxed mb-1">
+                  Khi sở hữu tối thiểu 2 BĐS và tài sản ròng &ge; 3.000, người chơi có thể phát hành <strong className="font-semibold text-amber-950">Trái Phiếu Doanh Nghiệp</strong> vay 80% Net Worth từ Kho Bạc (kỳ hạn 3 vòng, hoàn trả gốc + 20% lãi).
+                </p>
+                <p className="text-amber-900 text-[11px] leading-relaxed">
+                  Toàn bộ BĐS đảm bảo bị phong tỏa thế chấp. Nếu vỡ nợ khi đáo hạn, tài sản đảm bảo sẽ bị tịch thu đưa vào <strong className="font-semibold text-amber-950">Sàn Đấu Giá Phát Mãi 0 Đồng (Bắt Đáy 0)</strong> cho toàn bàn cờ!
+                </p>
+              </div>
+
               <div className="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-100">
                 <h3 className="font-bold text-emerald-900 text-sm flex items-center gap-2 mb-1">
-                  <span>🏦</span> Gói Kích Cầu Quỹ Kho Bạc &amp; Siết Tín Dụng BĐS
+                  <span>🌊</span> Chu Kỳ Kinh Tế Vĩ Mô &amp; Quỹ Cứu Trợ Kho Bạc
                 </h3>
-                <p className="text-emerald-800 mb-1">
-                  Khi Quỹ Kho Bạc tích lũy đạt từ <strong className="font-semibold text-emerald-900">10.000</strong> trở lên, đầu vòng mới Nhà Nước tự động giải ngân <strong className="font-semibold text-emerald-900">20% quỹ</strong> chia đều cứu trợ người chơi có số dư thấp nhất bàn cờ.
+                <p className="text-emerald-800 text-[11px] mb-1">
+                  • <strong className="font-semibold text-emerald-950">Chu Kỳ Vĩ Mô 6 Vòng:</strong> Vòng 1–3 Sốt Đất (tiền thuê x2.5, giảm 25% giá xây dựng) ➔ Vòng 4–5 Đóng Băng Thanh Khoản (tiền thuê giảm 50%, cấm mở khoản vay thế chấp mới) ➔ Vòng 6 Thị trường hạ nhiệt bình thường.
                 </p>
                 <p className="text-emerald-800 text-[11px]">
-                  Ngược lại, khi thẻ <strong className="font-semibold text-emerald-900">Đóng Băng Giao Dịch</strong> kích hoạt, toàn bộ hoạt động mua đất, chuyển nhượng P2P và <strong className="font-semibold text-emerald-900">Thế Chấp mới</strong> bị cấm hoàn toàn trong 2 vòng.
+                  • <strong className="font-semibold text-emerald-950">Gói Cứu Cầu Quốc Gia:</strong> Khi Quỹ Kho Bạc đạt &ge; 10.000, đầu vòng mới tự động giải ngân 20% quỹ chia đều hỗ trợ người chơi có số dư thấp nhất.
                 </p>
               </div>
 
@@ -290,19 +308,19 @@ export function GameRulesModal({
                   <span>🏛️</span> Thế Chấp Bất Động Sản &amp; Lãi Vay Vượt GO
                 </h3>
                 <p>
-                  Khi gặp khó khăn tài chính, người chơi có thể <strong className="text-slate-900 font-semibold">Thế Chấp</strong> đất cấp 0 cho Ngân hàng để nhận về khoản vay bằng <strong className="text-slate-900 font-semibold">50%</strong> giá niêm yết. Đất thế chấp không thể thu tiền thuê. Khi chuộc lại, người chơi trả tiền gốc kèm 10% phí giải chấp.
+                  Khi gặp khó khăn tài chính, người chơi có thể <strong className="text-slate-900 font-semibold">Thế Chấp</strong> đất cấp 0 cho Ngân hàng để nhận về khoản vay bằng <strong className="text-slate-900 font-semibold">50%</strong> giá niêm yết. Đất thế chấp không thể thu tiền thuê và khóa xây cả nhóm màu, nhưng <strong className="text-slate-900 font-semibold">vẫn được phép chuyển nhượng P2P kèm nợ</strong>.
                 </p>
                 <p className="mt-1 text-slate-600 text-[11px]">
-                  Khi đang có dư nợ thế chấp, mỗi lần vượt qua ô Khởi Hành (GO), Ngân hàng sẽ tự động trích thu 5% lãi suất định kỳ (hoặc 10% nếu thị trường đang Siết Tín Dụng).
+                  Khi đang có dư nợ thế chấp, mỗi lần vượt qua ô Khởi Hành (GO), Ngân hàng sẽ tự động trích thu 5% lãi suất định kỳ nộp về Kho Bạc. Chuộc đất với giá gốc vay kèm 10% phí giải chấp.
                 </p>
               </div>
 
               <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
                 <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2 mb-1">
-                  <span>⚠️</span> Cơ Chế Phá Sản &amp; Thanh Lý Nợ
+                  <span>⚠️</span> Cơ Chế Phá Sản &amp; Thoát Nợ
                 </h3>
                 <p>
-                  Nếu số dư tiền mặt bị âm và sau khi đã thế chấp toàn bộ tài sản hoặc bán nhà vẫn không đủ thanh toán khoản nợ, người chơi sẽ chính thức <strong className="text-rose-700 font-semibold">Phá Sản</strong>. Toàn bộ tài sản sẽ được chuyển giao cho chủ nợ hoặc hoàn về Ngân sách.
+                  Nếu số dư tiền mặt bị âm và sau khi đã bán nhà, thế chấp tài sản hoặc bán BĐS thế chấp qua P2P vẫn không đủ thanh toán khoản nợ, người chơi sẽ chính thức <strong className="text-rose-700 font-semibold">Phá Sản</strong>. Toàn bộ tài sản sẽ được chuyển giao cho chủ nợ hoặc hoàn về Ngân sách.
                 </p>
               </div>
             </div>

@@ -191,7 +191,7 @@ function calcP2PTax(room: Room, price: number): { taxRate: number; totalCost: nu
   );
   const taxRate = antiSpeculate ? P2P_ANTI_SPECULATE_TAX : P2P_TAX_RATE;
   const absPrice = Math.abs(price);
-  const taxAmount = Math.floor(absPrice * taxRate);
+  const taxAmount = Math.round(absPrice * taxRate);
   return {
     taxRate,
     totalCost: absPrice,
@@ -225,6 +225,15 @@ function hasBuildingOrUpgrade(state?: PropertyState): boolean {
   return (state?.level ?? 0) > 0 || Boolean(state?.isETC) || Boolean(state?.isUpgradedUtility);
 }
 
+function transferMortgageDebt(from: Player, to: Player, cell: number, state?: PropertyState): void {
+  if (!state?.isMortgaged && !from.mortgagedProperties?.includes(cell)) return;
+  const loan = from.mortgageLoans?.[cell] ?? Math.floor((PROPERTY_DEEDS.get(cell)?.price ?? 0) * 0.5);
+  from.mortgagedProperties = (from.mortgagedProperties ?? []).filter((c) => c !== cell);
+  if (from.mortgageLoans) delete from.mortgageLoans[cell];
+  (to.mortgagedProperties ??= []).push(cell);
+  (to.mortgageLoans ??= {})[cell] = loan;
+}
+
 function checkTradeProperty(
   registry: PropertyRegistry,
   stateMap: PropertyStateMap,
@@ -238,7 +247,9 @@ function checkTradeProperty(
   if (!deed) return ActionRejectReason.NOT_PURCHASABLE;
   if (hasBuildingOrUpgrade(stateMap.get(cellIndex))) return ActionRejectReason.PROPERTY_HAS_BUILDING;
   if (!isSwap) {
-    const floorPrice = Math.floor(deed.price * 0.7);
+    const isMort = Boolean(stateMap?.get(cellIndex)?.isMortgaged);
+    const floorRate = isMort ? 0.35 : 0.70;
+    const floorPrice = Math.max(100, Math.floor(deed.price * floorRate));
     if (price < floorPrice) {
       return ActionRejectReason.PRICE_BELOW_FLOOR;
     }
@@ -274,10 +285,6 @@ function checkTradeParties(
     return { valid: false, reason: ActionRejectReason.INSUFFICIENT_FUNDS };
   }
 
-  if (seller!.mortgagedProperties?.includes(cellIndex)) {
-    return { valid: false, reason: ActionRejectReason.PROPERTY_MORTGAGED };
-  }
-
   if (seller!.bondContract?.isActive && seller!.bondContract.collateralCells.includes(cellIndex)) {
     return { valid: false, reason: ActionRejectReason.BOND_COLLATERAL_LOCKED };
   }
@@ -292,9 +299,6 @@ function checkTradeParties(
     }
     if (stateMap && hasBuildingOrUpgrade(stateMap.get(offeredCellIndex))) {
       return { valid: false, reason: ActionRejectReason.PROPERTY_HAS_BUILDING };
-    }
-    if (buyer!.mortgagedProperties?.includes(offeredCellIndex)) {
-      return { valid: false, reason: ActionRejectReason.PROPERTY_MORTGAGED };
     }
     if (buyer!.bondContract?.isActive && buyer!.bondContract.collateralCells.includes(offeredCellIndex)) {
       return { valid: false, reason: ActionRejectReason.BOND_COLLATERAL_LOCKED };
@@ -363,6 +367,11 @@ export function executeP2PTrade(
     registry.set(offeredCellIndex, sellerId);
     delete v.seller.cellTradeRejections?.[offeredCellIndex];
     delete v.seller.cellLastRejectedRound?.[offeredCellIndex];
+  }
+
+  transferMortgageDebt(v.seller, v.buyer, cellIndex, stateMap.get(cellIndex));
+  if (offeredCellIndex !== undefined) {
+    transferMortgageDebt(v.buyer, v.seller, offeredCellIndex, stateMap.get(offeredCellIndex));
   }
 
   console.info(JSON.stringify({

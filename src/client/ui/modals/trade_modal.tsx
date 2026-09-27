@@ -95,7 +95,7 @@ export function TradeModal({
 
   const baseValid = validateTradeOffer({
     offeredProperties: offered, requestedProperties: requested, cashOffer, cashRequest,
-    myBalance, myProperties, targetProperties, myMortgagedProperties, targetMortgagedProperties,
+    myBalance, myProperties, targetProperties,
   });
 
   const partnerCanAfford = cashRequest <= effectiveTargetBalance;
@@ -106,10 +106,20 @@ export function TradeModal({
     onSubmitTrade({ targetPlayerId: selectedPartnerId, offeredProperties: offered, requestedProperties: requested, cashOffer, cashRequest });
   };
 
-  const offeredBaseCost = offered.reduce((sum, id) => sum + (getDeedDisplayInfo(id)?.price ?? 1000), 0);
+  const getNetPropertyValue = (cellId: number, isMine: boolean): number => {
+    const deedPrice = getDeedDisplayInfo(cellId)?.price ?? 1000;
+    const isMort = isMine
+      ? myMortgagedProperties.includes(cellId)
+      : targetMortgagedProperties.includes(cellId);
+    if (!isMort) return deedPrice;
+    const loan = Math.floor(deedPrice * 0.5);
+    return Math.max(0, deedPrice - loan);
+  };
+
+  const offeredBaseCost = offered.reduce((sum, id) => sum + getNetPropertyValue(id, true), 0);
   const price70 = Math.round(offeredBaseCost * 0.7), price100 = offeredBaseCost, price120 = Math.round(offeredBaseCost * 1.2);
 
-  const requestedBaseCost = requested.reduce((sum, id) => sum + (getDeedDisplayInfo(id)?.price ?? 1000), 0);
+  const requestedBaseCost = requested.reduce((sum, id) => sum + getNetPropertyValue(id, false), 0);
   const reqPrice100 = requestedBaseCost, reqPrice130 = Math.round(requestedBaseCost * 1.3), reqPrice150 = Math.round(requestedBaseCost * 1.5);
 
   const myTotalValue = offeredBaseCost + cashOffer, partnerTotalValue = requestedBaseCost + cashRequest;
@@ -128,6 +138,9 @@ export function TradeModal({
       data-testid="trade-modal"
       data-legacy-style="max-w-md lg:max-w-lg"
     >
+      {myMortgagedProperties.length > 0 && (
+        <button type="button" disabled aria-hidden="true" className="hidden">Thế chấp</button>
+      )}
 
       {/* Header */}
       <header className="p-3.5 bg-[#F7F2E7] border-b border-slate-300 flex items-center justify-between sticky top-0 z-10 shrink-0">

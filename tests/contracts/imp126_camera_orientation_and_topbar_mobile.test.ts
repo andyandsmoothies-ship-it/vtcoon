@@ -128,21 +128,20 @@ describe('[IMP-126] Side-Aware Tile Camera Orbit & Mobile TopBar Polish Suite', 
   // FACET 3: TopBar Mobile Compact Bot Pacing & Responsive Optimization
   // =========================================================================
   describe('FACET 3: TopBar Mobile Compact Bot Pacing & Responsive Optimization', () => {
-    it('[TC-IMP126.10/MSS][UC-TOPBAR] TopBar chứa icon robot sm:hidden dành riêng cho màn hình di động khi là lượt Bot', () => {
+    it('[TC-IMP126.10/MSS][UC-TOPBAR][IMP-206] TopBar không còn chứa icon robot khi là lượt Bot, hiển thị icon đồng hồ ⏱️', () => {
       useGameStore.setState({ currentTurnPlayerId: 'bot_p2' });
       const html = renderToStaticMarkup(React.createElement(TopBar));
 
-      // Trên mobile hiển thị icon 🤖 thu gọn
-      expect(html).toContain('sm:hidden');
-      expect(html).toContain('🤖');
+      expect(html).not.toContain('🤖');
+      expect(html).toContain('⏱️');
     });
 
-    it('[TC-IMP126.11/MSS][UC-TOPBAR] TopBar ẩn chuỗi văn bản dài trên mobile bằng class hidden sm:inline khi là lượt Bot', () => {
+    it('[TC-IMP126.11/MSS][UC-TOPBAR][IMP-206] TopBar khi là lượt Bot không hiển thị icon 🤖 hay chuỗi Đang tính', () => {
       useGameStore.setState({ currentTurnPlayerId: 'bot_p2' });
       const html = renderToStaticMarkup(React.createElement(TopBar));
 
-      // Chuỗi dài 14 ký tự bị ẩn trên mobile để giải phóng 100px chiều ngang
-      expect(html).toMatch(/hidden\s+sm:inline[^>]*>🤖\s*Đang tính\.\.\./);
+      expect(html).not.toContain('Đang tính');
+      expect(html).not.toContain('🤖');
     });
 
     it('[TC-IMP126.12/MSS][UC-TOPBAR] TopBar duy trì padding an toàn chống cấn góc màn hình cong trên mobile', () => {
@@ -150,12 +149,12 @@ describe('[IMP-126] Side-Aware Tile Camera Orbit & Mobile TopBar Polish Suite', 
       expect(html).toContain('data-testid="match-info-capsule"');
     });
 
-    it('[TC-IMP126.13/MSS][UC-TOPBAR] TopBar hoàn trả định dạng thời gian số khi quay về lượt người chơi', () => {
+    it('[TC-IMP126.13/MSS][UC-TOPBAR][IMP-206] TopBar hoàn trả định dạng thời gian số khi quay về lượt người chơi', () => {
       useGameStore.setState({ currentTurnPlayerId: 'p1', turnTimeRemaining: 27 });
       const html = renderToStaticMarkup(React.createElement(TopBar));
 
       expect(html).toContain('00:27');
-      expect(html).not.toContain('🤖 Đang tính...');
+      expect(html).not.toContain('Đang tính');
     });
   });
 
@@ -163,12 +162,12 @@ describe('[IMP-126] Side-Aware Tile Camera Orbit & Mobile TopBar Polish Suite', 
   // FACET 4: Zero Regression Contracts (IMP-82 & IMP-123 Compatibility)
   // =========================================================================
   describe('FACET 4: Zero Regression Contracts (IMP-82 & IMP-123 Compatibility)', () => {
-    it('[TC-IMP126.14/MSS][UC-COMPAT] Hợp đồng IMP-82: renderToStaticMarkup vẫn tìm thấy chuỗi 🤖 Đang tính... khi là lượt Bot', () => {
+    it('[TC-IMP126.14/MSS][UC-COMPAT][IMP-206] Hợp đồng IMP-82 tiến hóa: TopBar không còn hiển thị 🤖 Đang tính... khi là lượt Bot', () => {
       useGameStore.setState({ currentTurnPlayerId: 'bot_p2' });
       const html = renderToStaticMarkup(React.createElement(TopBar));
 
-      expect(html).toContain('🤖 Đang tính...');
-      expect(html).not.toContain('00:00');
+      expect(html).not.toContain('Đang tính');
+      expect(html).not.toContain('🤖');
     });
 
     it('[TC-IMP126.15/MSS][UC-COMPAT] Hợp đồng IMP-123: match-info-capsule vẫn duy trì class whitespace-nowrap chống ngắt dòng', () => {

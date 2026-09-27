@@ -169,10 +169,10 @@ describe('[IMP-123/MSS] Mobile UI/UX Tri-Package Polish Contract Test Suite', ()
   });
 
   describe('Gói 1.3: Chống Gãy Dòng TopBar (src/client/ui/top_bar.tsx)', () => {
-    it('[TC-IMP123.10/MSS][UI-S03/MSS] TopBar khi đến lượt Bot phải có class whitespace-nowrap ngăn gãy dòng capsule', () => {
+    it('[TC-IMP123.10/MSS][UI-S03/MSS][IMP-206] TopBar khi đến lượt Bot duy trì class whitespace-nowrap và không còn hiển thị Đang tính', () => {
       useGameStore.setState({ currentTurnPlayerId: 'p2' }); // p2 isBot: true
       const html = renderToStaticMarkup(React.createElement(TopBar, {}));
-      expect(html).toContain('🤖 Đang tính...');
+      expect(html).not.toContain('Đang tính');
       expect(html).toContain('whitespace-nowrap');
     });
 
@@ -183,11 +183,11 @@ describe('[IMP-123/MSS] Mobile UI/UX Tri-Package Polish Contract Test Suite', ()
       expect(html).toContain('role="timer"');
     });
 
-    it('[TC-IMP123.12/MSS][UI-S03/MSS] TopBar phục hồi đồng hồ đếm ngược số dạng MM:SS khi lượt chuyển về người chơi', () => {
+    it('[TC-IMP123.12/MSS][UI-S03/MSS][IMP-206] TopBar phục hồi đồng hồ đếm ngược số dạng MM:SS khi lượt chuyển về người chơi', () => {
       useGameStore.setState({ currentTurnPlayerId: 'p1', turnTimeRemaining: 25 });
       const html = renderToStaticMarkup(React.createElement(TopBar, {}));
       expect(html).toContain('00:25');
-      expect(html).not.toContain('🤖 Đang tính...');
+      expect(html).not.toContain('Đang tính');
     });
   });
 

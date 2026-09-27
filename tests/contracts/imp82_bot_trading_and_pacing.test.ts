@@ -362,7 +362,7 @@ describe('[TC-82][UC-IMP82] IMP-82 Bot Trading and Pacing Contract Suite', () =>
   // FACET 4: TopBar Bot Pacing Display & Watchdog 90s Auction Tolerance (TC-82.13..16)
   // =========================================================================
   describe('Facet 4: TopBar Bot Pacing Display & Watchdog 90s Auction Tolerance', () => {
-    it('[TC-82.13/MSS][UC-IMP82] TopBar: khi currentTurnPlayer.isBot === true, hiển thị chuỗi 🤖 Đang tính... thay vì 00:00', () => {
+    it('[TC-82.13/MSS][UC-IMP82][IMP-206] TopBar: khi currentTurnPlayer.isBot === true, không còn hiển thị 🤖 Đang tính..., bảo toàn đồng hồ đếm ngược 00:00', () => {
       useGameStore.setState({
         currentTurnPlayerId: 'bot_pacing_p1',
         playersInfo: {
@@ -380,11 +380,12 @@ describe('[TC-82][UC-IMP82] IMP-82 Bot Trading and Pacing Contract Suite', () =>
 
       const html = renderToStaticMarkup(React.createElement(TopBar));
 
-      expect(html).toContain('🤖 Đang tính...');
-      expect(html).not.toContain('00:00');
+      expect(html).not.toContain('Đang tính');
+      expect(html).not.toContain('🤖');
+      expect(html).toContain('00:00');
     });
 
-    it('[TC-82.14/MSS][UC-IMP82] TopBar: không áp dụng class màu đỏ cảnh báo text-rose-600 animate-pulse khi là lượt Bot', () => {
+    it('[TC-82.14/MSS][UC-IMP82][IMP-206] TopBar: không áp dụng class màu đỏ cảnh báo khi thời gian > 10s', () => {
       useGameStore.setState({
         currentTurnPlayerId: 'bot_pacing_p1',
         playersInfo: {
@@ -397,12 +398,13 @@ describe('[TC-82][UC-IMP82] IMP-82 Bot Trading and Pacing Contract Suite', () =>
             isBot: true,
           } as PlayerHudInfo,
         },
-        turnTimeRemaining: 0,
+        turnTimeRemaining: 25,
       });
 
       const html = renderToStaticMarkup(React.createElement(TopBar));
 
       expect(html).not.toContain('text-rose-600 font-extrabold animate-pulse');
+      expect(html).toContain('text-emerald-700 font-bold');
     });
 
     it('[TC-82.15/MSS][UC-IMP82] watchdogMonitor.checkTurnStall: Khi isInAuction === true, lượt đấu giá kéo dài 60s (> 45s) không kích hoạt vi phạm TURN_STALLED', () => {

@@ -260,13 +260,16 @@ describe('[TC-05.5-inv/Adversarial] Tu Choi Giao Dich Bat Hop Le', () => {
     expect(res.reason).toBe('INVALID_TRADE');
   });
 
-  it('Tu choi khi BDS dang bi the chap (mortgaged) -> PROPERTY_MORTGAGED', () => {
+  it('Giao dich BDS dang the chap thanh cong va nghia vu no chuyen tu p1 sang p2', () => {
     const { room, reg, sm } = setup();
     reg.set(1, 'p1');
     room.players[0]!.mortgagedProperties = [1];
+    room.players[0]!.mortgageLoans = { 1: 300 };
+    sm.set(1, { level: 0, isMortgaged: true });
     const res = executeP2PTrade(room, 'p1', 'p2', 1, 800, reg, sm);
-    expect(res.success).toBe(false);
-    expect(res.reason).toBe('PROPERTY_MORTGAGED');
+    expect(res.success).toBe(true);
+    expect(room.players[1]!.mortgagedProperties).toContain(1);
+    expect(room.players[0]!.mortgagedProperties).not.toContain(1);
   });
 
   it('Tu choi khi nguoi choi da bi pha san -> PLAYER_BANKRUPT', () => {

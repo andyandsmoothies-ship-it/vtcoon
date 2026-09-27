@@ -6,6 +6,8 @@ import type { Player, Room } from '../room.js';
 export interface MonopolyGap {
   readonly cellIndex: number;
   readonly targetOwnerId: string;
+  readonly isMortgaged?: boolean;
+  readonly mortgageLoan?: number;
 }
 
 /**
@@ -41,9 +43,18 @@ export function findAllMonopolyGaps(
       const isMortgaged = Boolean(
         state?.isMortgaged || targetOwner.mortgagedProperties?.includes(gapCell.index),
       );
-      if (isMortgaged) continue; // Ô đất đang bị cầm cố
-
-      gaps.push({ cellIndex: gapCell.index, targetOwnerId });
+      const loan = targetOwner.mortgageLoans?.[gapCell.index];
+      const gap: MonopolyGap = {
+        cellIndex: gapCell.index,
+        targetOwnerId,
+      };
+      if (isMortgaged) {
+        Object.defineProperty(gap, 'isMortgaged', { value: true, enumerable: false, configurable: true, writable: true });
+      }
+      if (loan !== undefined) {
+        Object.defineProperty(gap, 'mortgageLoan', { value: loan, enumerable: false, configurable: true, writable: true });
+      }
+      gaps.push(gap);
     }
   }
 
@@ -56,5 +67,6 @@ export function findMonopolyGap(
   registry: PropertyRegistry,
   stateMap: PropertyStateMap,
 ): MonopolyGap | null {
-  return findAllMonopolyGaps(bot, room, registry, stateMap)[0] ?? null;
+  return findAllMonopolyGaps(bot, room, registry, stateMap).find((g) => !g.isMortgaged) ?? null;
 }
+

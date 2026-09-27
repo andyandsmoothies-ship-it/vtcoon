@@ -4797,5 +4797,24 @@
      - **Disjoint Root Position Property**: Đối với các công trình landmark độc bản cấp 3 (`level === 3 && cellIndex !== undefined`), sử dụng các thuộc tính phân tách `position-x`, `position-y`, `position-z` trên root `<group>` để tránh vô tình kích hoạt các regex tìm kiếm `\bposition="` của các mỏ neo con bên trong, đồng thời giữ nguyên `position={lotTransform.position}` cho các cấp C0-C2 và các bài test legacy không truyền `cellIndex`.
 - **Traceability**: `[TC-203.01..20/MSS]`, `[UC-IMP203]`, `src/client/3d/procedural_building.tsx`, `src/client/3d/bespoke_landmark_fallback.tsx`, `src/client/3d/landmark_registry.ts`, `src/client/3d/building_typology.ts`, `tests/contracts/imp203_bespoke_landmarks_and_housing.test.ts`.
 
+---
+
+### 291. [UI/CRAFT][NETWORK/FSM] Bất Biến Thông Báo Nổi Bot Bốc Thẻ Bài & Nút Chuyển Đổi Bảng Điểm TopBar (Bot Event Card Toasts & TopBar Scoreboard Toggle Ergonomics - IMP-205)
+- **Bối cảnh & Bẫy thực tế (3 Lớp Thực Chứng)**:
+  1. *Ảo tưởng ban đầu (Initial Illusion)*:
+     - Cho rằng trong `offline_landing.ts`, kiểm tra người chơi cục bộ có thể so sánh `activeId === (currentTurnPlayerId ?? 'p1')`. Tuy nhiên, trong lượt của Bot, `currentTurnPlayerId` chính là Bot. Biểu thức trên đánh giá `true`, dẫn đến lỗi Actor Inversion tai hại: Bot dẫm ô sự kiện hay ô BĐS lại tự động bật popup Modal chiếm màn hình của người chơi thật.
+     - Cho rằng chỉ cần gắn cờ `isPlayerHudVisible` trên `PlayerHudList` mà không dọn dẹp nút sườn `toggle-player-hud-btn` cũ. Nút toggle cũ neo cứng ở sườn phải (`fixed right-0 top-20`) kèm khoảng đệm `pt-28` làm xấu mỹ quan và che khuất góc nhìn 3D.
+  2. *Phát hiện vật lý từ Scout & Codebase (Scout Physical Finding)*:
+     - Thẻ Cơ Hội (`Chance`) có trường `card.playerId`, nhưng thẻ Thị Trường (`Market`) trong delta server lại không có `card.playerId` mà chỉ có `card.drawnBy` hoặc suy ra từ `delta.currentTurnPlayerId`. Bắt buộc phải có chuỗi fallback: `card.drawnBy ?? card.playerId ?? delta.currentTurnPlayerId ?? delta.diceRollerId ?? state.currentTurnPlayerId`.
+     - Chế độ chơi Online qua WebSocket không được emit `addFloatingText` trong `offline_landing.ts` vì `apply_delta.ts` (thông qua `syncEventCard`) đã chịu trách nhiệm phát thông báo, tránh phát đúp 2 lần (Double Toast Bug).
+     - Thời lượng hiển thị cho Bot bốc thẻ bắt buộc kẹp ở 2.500ms (`durationMs: 2500`), không được sửa hằng số toàn cục `EVENT_BANNER_DURATION_MS = 4500` vì người chơi thật cần 4.5s để đọc thẻ của chính mình.
+     - Trên màn hình di động hẹp (360px), nút Bảng Điểm trên TopBar bắt buộc ẩn chữ (`hidden sm:inline`), chỉ giữ lại icon `👥` với vùng chạm chuẩn WCAG AA $\ge 44$px (`after:-inset-1.5`) để chống tràn mép phải.
+  3. *Bất biến đã kiểm chứng (Verified Invariants)*:
+     - **Actor Guard Invariant**: Trong mọi trình xử lý tiếp đất quân cờ, quyền mở modal tương tác chỉ thuộc về người thật cục bộ: `isLocal = activeId === myPid && !activePlayer?.isBot`. Khi Bot hạ cánh ô sự kiện, hệ thống chỉ phát `MilestoneBanner` phi gián đoạn (2.5s) mà không ngắt nhịp độ trận đấu.
+     - **Subtractive Edge Button Elimination**: Khai tử 100% nút sườn `toggle-player-hud-btn` và khoảng đệm thừa `pt-28`. Dời toàn bộ quyền điều khiển ẩn/hiện bảng điểm vào nút `toggle-hud-topbar-btn` trên TopBar.
+     - **Responsive Utility Cluster**: Nút `[👥 Bảng Điểm]` trên TopBar sở hữu 2 trạng thái xúc giác rõ rệt (`bg-amber-100` khi mở, `#F7F2E7` khi đóng), touch target an toàn $\ge 44$px, không tràn giao diện mobile 360px.
+- **Traceability**: `[TC-205.01..16/MSS]`, `[UC-IMP205]`, `src/client/store/game_store.ts`, `src/client/store/game_store_types.ts`, `src/client/ui/top_bar.tsx`, `src/client/ui/player_hud_list.tsx`, `src/client/offline_landing.ts`, `src/client/network/apply_delta.ts`, `src/client/network/use_app_session.ts`, `tests/contracts/imp205_bot_card_toast_and_hud_toggle.test.ts`.
+
+
 
 

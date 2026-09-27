@@ -5,6 +5,7 @@ import { PROPERTY_DEEDS, type PropertyRegistry, type PropertyStateMap } from '..
 import { ActionRejectReason } from '../domain/action_reasons';
 import { handleStartFireSaleAuction } from './bond_manager';
 import { advanceTurnToNextPlayer } from './turn_loop';
+import { MarketCardId } from '../domain/event_card_types';
 
 interface LevelHolder { readonly level?: number; }
 interface DeletableMap { delete(key: number): boolean; }
@@ -38,6 +39,10 @@ export function handleDecline(
   roomCode: string,
 ): { success: boolean; reason?: string } {
   if (!current || room?.phase !== TurnPhase.ActionPhase) return { success: false, reason: 'INVALID_PHASE' };
+  if ((room?.activeModifiers ?? []).some((m) => m.type === MarketCardId.MC_FREEZE_TRADE && m.remainingRounds > 0)) {
+    room.phase = TurnPhase.PropertyManagement;
+    return { success: true };
+  }
   const deed = PROPERTY_DEEDS.get(current.position);
   if (!deed) return { success: false, reason: 'NOT_PURCHASABLE' };
   const startingBid = Math.floor(deed.price * 0.50);

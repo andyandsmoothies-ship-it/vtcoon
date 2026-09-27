@@ -3,6 +3,7 @@ import type { MarketCardId, ChanceCardId } from './event_card_engine';
 import type { MacroCycleType } from './macro_cycle_types';
 import type { ColorGroup } from './board_config';
 import type { BondContract } from './bond_types';
+import type { BotPersonality } from './bot/bot_types';
 export { ActionRejectReason } from './action_reasons';
 export type { BondContract } from './bond_types';
 
@@ -77,6 +78,7 @@ export interface Player {
   ownerSlot?:           number;
   mascotIcon?:          string;
   mascotName?:          string;
+  personality?:        BotPersonality;
   bondContract?:        BondContract | null;
 }
 

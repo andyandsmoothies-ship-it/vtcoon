@@ -141,7 +141,7 @@ export function TitleDeedActionFooter({
       ) : isBuyOpportunity !== false ? (
         <div className="col-span-2 w-full flex flex-col gap-2">
           {/* Hàng 1: Dòng đệm tài chính khi thiếu tiền */}
-          {!canBuy && (
+          {!canBuy && !isTradeFrozen && (
             <div className="w-full py-1 px-2.5 rounded-lg bg-amber-100/80 border border-amber-300 text-amber-900 text-[11px] font-bold flex items-center justify-between">
               <span>Thiếu: {formatCurrency(shortfall ?? 0)}</span>
               <span>Vay tối đa: +{formatCurrency(totalMortgageCapacity ?? 0)}</span>
@@ -149,14 +149,21 @@ export function TitleDeedActionFooter({
           )}
 
           {/* Hàng 2: Nút chính mua hoặc thế chấp */}
-          {canBuy ? (
+          {isTradeFrozen ? (
             <button
               type="button"
-              onClick={isTradeFrozen ? undefined : onBuy}
-              disabled={isTradeFrozen}
+              disabled
+              className="w-full min-h-[48px] py-2 px-3.5 sm:px-6 rounded-xl font-black uppercase text-xs sm:text-sm bg-slate-200 text-slate-500 border border-slate-300 cursor-not-allowed shadow-none active:translate-y-0"
+            >
+              ❄️ Thị Trường Đóng Băng (Cấm Mua)
+            </button>
+          ) : canBuy ? (
+            <button
+              type="button"
+              onClick={onBuy}
               className="w-full min-h-[48px] py-2 px-3.5 sm:px-6 rounded-xl font-black uppercase text-xs sm:text-sm bg-emerald-700 hover:bg-emerald-600 border-2 border-emerald-700 shadow-[0_4px_0_0_#065f46] active:translate-y-[3px] text-white cursor-pointer"
             >
-              {isTradeFrozen ? 'Thị Trường Đóng Băng' : `Mua BĐS (${formatCurrency(deedPrice)})`}
+              {`Mua BĐS (${formatCurrency(deedPrice)})`}
             </button>
           ) : canCoverWithMortgage ? (
             <button

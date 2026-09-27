@@ -134,9 +134,6 @@ export function coordTrade(
       return { success: false, reason: ActionRejectReason.NOT_OWNER };
     }
     const propState = ctx.sm.get(cellIndex);
-    if (propState?.isMortgaged || seller.mortgagedProperties?.includes(cellIndex)) {
-      return { success: false, reason: ActionRejectReason.PROPERTY_MORTGAGED };
-    }
     if ((propState?.level ?? 0) > 0 || Boolean(propState?.isETC) || Boolean(propState?.isUpgradedUtility)) {
       return { success: false, reason: ActionRejectReason.PROPERTY_HAS_BUILDING };
     }
@@ -146,9 +143,6 @@ export function coordTrade(
         return { success: false, reason: ActionRejectReason.NOT_OWNER };
       }
       const offState = ctx.sm.get(offeredCellIndex);
-      if (offState?.isMortgaged || buyer.mortgagedProperties?.includes(offeredCellIndex)) {
-        return { success: false, reason: ActionRejectReason.PROPERTY_MORTGAGED };
-      }
       if ((offState?.level ?? 0) > 0 || Boolean(offState?.isETC) || Boolean(offState?.isUpgradedUtility)) {
         return { success: false, reason: ActionRejectReason.PROPERTY_HAS_BUILDING };
       }
@@ -255,49 +249,19 @@ export function coordRespondTradeOffer(
       return { success: false, reason: ActionRejectReason.INSUFFICIENT_FUNDS };
     }
 
-    if (session.offeredCellIndex !== undefined) {
-      const res = executeP2PTrade(
-        ctx.room,
-        session.sellerId,
-        session.buyerId,
-        session.cellIndex,
-        session.price,
-        ctx.reg,
-        ctx.sm,
-        session.offeredCellIndex,
-      );
-      if (!res.success) {
-        return { success: false, reason: res.reason };
-      }
-      buyer.lastTradeOfferRound = ctx.room.roundCount ?? ctx.room.round ?? 1;
-      delete buyer.cellTradeRejections?.[session.cellIndex];
-      delete buyer.cellLastRejectedRound?.[session.cellIndex];
-      pendingTradeManager.resolveSession(ctx.room.roomCode, offerId, true);
-      ctx.room.pendingTradeOffer = null;
-      return { success: true };
+    const res = executeP2PTrade(
+      ctx.room,
+      session.sellerId,
+      session.buyerId,
+      session.cellIndex,
+      session.price,
+      ctx.reg,
+      ctx.sm,
+      session.offeredCellIndex,
+    );
+    if (!res.success) {
+      return { success: false, reason: res.reason };
     }
-
-    // Atomic re-validation for normal 1-way trade
-    if (buyer.balance < session.price) {
-      return { success: false, reason: ActionRejectReason.INSUFFICIENT_FUNDS };
-    }
-    if (ctx.reg.get(session.cellIndex) !== session.sellerId) {
-      return { success: false, reason: 'INVALID_OWNERSHIP' };
-    }
-    const propState = ctx.sm.get(session.cellIndex);
-    if (propState?.isMortgaged || (propState?.level ?? 0) > 0) {
-      return { success: false, reason: 'INVALID_PROPERTY_STATE' };
-    }
-
-    const price = session.price;
-    const tax = Math.round(price * 0.05);
-    const netReceived = price - tax;
-
-    buyer.balance -= price;
-    seller.balance += netReceived;
-    ctx.room.treasury = (ctx.room.treasury ?? 0) + tax;
-    ctx.reg.set(session.cellIndex, buyer.id);
-
     buyer.lastTradeOfferRound = ctx.room.roundCount ?? ctx.room.round ?? 1;
     delete buyer.cellTradeRejections?.[session.cellIndex];
     delete buyer.cellLastRejectedRound?.[session.cellIndex];

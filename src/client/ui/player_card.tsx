@@ -99,8 +99,9 @@ export function PlayerCard({
         </div>
       )}
 
-      {/* Dòng 1 (Header siêu gọn): Chấm màu quân cờ, Tên, Số tiền (và Tài sản ròng), Badges */}
-      <div className="flex items-center justify-between gap-1.5 min-w-0">
+      {/* Dòng 1 (Header siêu gọn): Chấm màu & Tên (Trái) | Số tiền & Trạng thái (Căn Phải) */}
+      <div className="flex items-center justify-between gap-1.5 min-w-0 w-full">
+        {/* Cột trái: Quân cờ & Tên người chơi */}
         <div className="flex items-center gap-1.5 min-w-0 flex-1">
           {/* Chấm màu nhận diện quân cờ trên bàn 3D (thay thế avatar cồng kềnh) */}
           <div
@@ -131,7 +132,10 @@ export function PlayerCard({
           >
             {formatShortPlayerName(player.name)}
           </span>
+        </div>
 
+        {/* Cột phải (Căn lề phải): Số tiền mặt, Cảnh báo thấu chi, Tài sản ròng & Badge Phá Sản */}
+        <div className="flex items-center justify-end gap-1.5 shrink-0 text-right">
           <span className={`tabular-nums text-xs ${balanceColorClass} shrink-0`}>
             {formatCurrency(player.balance)}
           </span>
@@ -149,16 +153,13 @@ export function PlayerCard({
           <span className="hidden sm:flex items-center text-[10px] text-slate-400 font-semibold tabular-nums shrink-0" data-testid="player-net-worth" title="Tài sản ròng">
             ({formatCurrency(netWorth)})
           </span>
-        </div>
 
-        {/* Badges: Phá Sản (Đã tinh giản: loại bỏ badge BOT và icon Kiểm Toán) */}
-        {player.bankrupt && (
-          <div className="flex items-center gap-1 shrink-0">
+          {player.bankrupt && (
             <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-rose-100 text-rose-900 border border-rose-300">
               Phá Sản
             </span>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Dòng 3: Cụm 22 chấm BĐS sắp xếp 2 dòng đối xứng (11 chấm/dòng) giúp nhận diện rõ màu sắc */}

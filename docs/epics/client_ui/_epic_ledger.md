@@ -352,3 +352,31 @@
 - **Tech Debt**: `DEBT-IMP204-01` (Render Goal Badge & Auto-Return trong `property_portfolio_modal.tsx` khi có `targetPurchaseCellIndex`, hoãn do Portfolio đang 493 LOC).
 - **Phê chuẩn**: `spec-reviewer` SPEC_PASS, `ui-craft-reviewer` VERDICT SHIP, `scout` Station 2.5 PASS.
 - **Trạng thái**: ✅ Hoàn thành (2026-09-27).
+
+---
+
+### [IMP-205] Thông Báo Rút Thẻ Cho Bot & Nút Toggle Bảng Điểm TopBar (Bot Card Toast & Scoreboard Toggle)
+- **Mục tiêu**: Minh bạch hóa hành động bốc thẻ Cơ Hội / Thị Trường của Bot thông qua MilestoneBanner 2.5s; chuyển đổi nút Ẩn/Hiện Bảng Điểm từ nút thô ở sườn phải sang icon gọn `[👥 Bảng Điểm]` trên TopBar.
+- **Hạ tầng hoàn tất**:
+  * `top_bar.tsx`: Bổ sung nút `[👥 Bảng Điểm]` trong cụm hud-utilities-cluster, chữ ẩn trên mobile 360px (`hidden sm:inline`).
+  * `player_hud_list.tsx`: Xóa bỏ hoàn toàn nút fixed sườn phải, giải phóng 100% tầm nhìn 3D sa bàn; dọn dẹp padding dư thừa `pt-28`.
+  * `apply_delta.ts` & `offline_landing.ts`: Bắn `MilestoneBanner` tự biến mất sau 2.5s khi Bot bốc thẻ Cơ Hội / Thị Trường; khắc phục Actor Inversion trong chế độ offline.
+- **Kiểm thử & Bất biến**: `tests/contracts/imp205_bot_card_toast_and_hud_toggle.test.ts` (17/17 atomic tests PASS 100%), `npm run lint:ui` 0 vi phạm.
+- **Phê chuẩn**: `spec-reviewer` SPEC_PASS, `ui-craft-reviewer` VERDICT SHIP, `code-reviewer` CODE_PASS.
+- **Trạng thái**: ✅ Hoàn thành (2026-09-27).
+
+---
+
+### [IMP-207] Phòng Vệ Chuyển Trạng Thái & Công Thái Học Khi Thị Trường Đóng Băng (Freeze Trade FSM & Affordance Defenses)
+- **Mục tiêu**: Khắc phục triệt để hiện tượng false affordance nút bấm xanh và deadlock kẹt vòng lặp lượt khi thẻ Thị Trường Đóng Băng (`MC_FREEZE_TRADE`) có hiệu lực.
+- **Hạ tầng hoàn tất**:
+  * `src/server/turn_loop.ts`: Khi `isTradeFrozen(room)` kích hoạt và người chơi hạ cánh ô đất chưa ai mua, chuyển thẳng sang `TurnPhase.PropertyManagement`, loại bỏ hoàn toàn bẫy kẹt tại `TurnPhase.ActionPhase`.
+  * `src/server/auction_manager.ts`: `handleDecline` chuyển sang `TurnPhase.PropertyManagement` khi đóng băng, ngăn chặn tạo phiên đấu giá không hợp lệ.
+  * `src/client/network/apply_delta.ts`: Đồng bộ `hasRolledThisTurn: true` khi nhận `turnPhase: ActionPhase` hoặc `PropertyManagement` có bằng chứng xúc xắc thật, phá vỡ bẫy kẹt nút Gieo và mở khóa nút Kết Thúc Lượt.
+  * `src/client/ui/modals/title_deed_affordance.ts`: Tính toán `canBuy: false` khi đóng băng, bảo toàn `isBuyOpportunity` để footer render đúng trạng thái đóng băng.
+  * `src/client/ui/modals/title_deed_action_footer.tsx`: Nút Mua chuyển sang style disabled xám xúc giác `bg-slate-200 text-slate-500 border border-slate-300 cursor-not-allowed shadow-none active:translate-y-0` với nhãn `❄️ Thị Trường Đóng Băng (Cấm Mua)`; nút `Bỏ Qua` ẩn hoàn toàn, chỉ giữ nút `Đóng` an toàn.
+  * `src/client/ui/modals/title_deed_modal.tsx` & `purchase_decision_card.tsx`: Guard render card duy trì khi đóng băng; chip mục tiêu chuyển thành `❄️ ĐÓNG BĂNG` (sky/slate); banner cảnh báo đóng băng thay thế khối thanh khoản sau mua.
+  * `src/client/ui/action_dock.tsx`: `isStandingOnBuyable = false` khi đóng băng, giải phóng nút `[🎲 Đổ Tiếp (Đôi)]` khi đổ đôi và kích hoạt nút `[⏭️ Kết Thúc Lượt]` bình thường.
+- **Kiểm thử & Bất biến**: `tests/contracts/imp207_freeze_trade_fsm_and_affordance.test.ts` (16/16 atomic contract tests PASS 100%, Adversarial Inversion PASS), 61/61 regression tests PASS, `npm run lint:ui` 0 lỗi, `tsc --noEmit` 0 lỗi.
+- **Phê chuẩn**: `spec-reviewer` SPEC_PASS, `ui-craft-reviewer` VERDICT SHIP, `code-reviewer` CODE_PASS.
+- **Trạng thái**: ✅ Hoàn thành (2026-09-27).

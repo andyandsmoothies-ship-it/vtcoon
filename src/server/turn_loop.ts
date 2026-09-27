@@ -23,8 +23,14 @@ import { collectMortgageInterest } from './mortgage_manager';
 import { checkInsolvency } from './insolvency_manager';
 import type { RollResult } from './room_manager';
 import type { AuctionSession } from './auction_manager';
-import { ChanceCardId } from '../domain/event_card_types';
+import { ChanceCardId, MarketCardId } from '../domain/event_card_types';
 import { processBondTurnTransition } from './bond_manager';
+
+function isTradeFrozen(room: Room): boolean {
+  return (room.activeModifiers ?? []).some(
+    (m) => m.type === MarketCardId.MC_FREEZE_TRADE && m.remainingRounds > 0,
+  );
+}
 
 // [DEBT-S06-01][DEBT-S06-02] Xử lý nợ định kỳ khi player vượt GO (TRƯỚC GO_BONUS)
 function processPendingDebts(room: Room, player: Player): void {
@@ -157,7 +163,8 @@ export function executeTurnRoll(
         savedRent: landing.savedRentAmount ?? 0,
       };
     }
-    room.phase = landing.result === LandingResult.Unowned ? TurnPhase.ActionPhase : TurnPhase.PropertyManagement;
+    const canEnterActionPhase = landing.result === LandingResult.Unowned && !isTradeFrozen(room);
+    room.phase = canEnterActionPhase ? TurnPhase.ActionPhase : TurnPhase.PropertyManagement;
     rentCharged = landing.rentAmount;
   }
 

@@ -271,15 +271,11 @@ export const useGameStore = create<GameState>((set, get) => ({
       roundNumber: Math.max(1, round),
       maxRounds: maxRounds ?? state.maxRounds,
     })),
-
-  setRoundNumber: (round) =>
-    set({ roundNumber: Math.max(1, round) }),
-
-  setActiveModifiers: (modifiers) =>
-    set({ activeModifiers: modifiers ? [...modifiers] : [] }),
-
+  setRoundNumber: (round) => set({ roundNumber: Math.max(1, round) }),
+  setActiveModifiers: (modifiers) => set({ activeModifiers: modifiers ? [...modifiers] : [] }),
   toggleHeatmap: () => set((state) => ({ isHeatmapActive: !state.isHeatmapActive })),
   setHeatmapActive: (active) => set({ isHeatmapActive: active }),
+  togglePlayerHudVisibility: () => set((state) => ({ isPlayerHudVisible: !state.isPlayerHudVisible })),
 
   openModal: (type, payload) => set({ activeModal: type, modalPayload: payload }),
   closeModal: () =>
@@ -393,4 +389,3 @@ declare global {
 if (typeof window !== 'undefined') {
   window.__gameStore = useGameStore;
 }
-

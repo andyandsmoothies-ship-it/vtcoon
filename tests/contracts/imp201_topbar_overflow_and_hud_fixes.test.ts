@@ -397,26 +397,26 @@ describe('[TC-201.01/MSS..TC-201.20/MSS][UC-IMP201] IMP-201 TopBar, Badge Collis
       });
     });
 
-    it('[TC-201.13/MSS][UC-IMP201] PlayerHudList render nút Edge Tab có class fixed right-0 và rounded-l-xl rounded-r-none', () => {
-      const html = renderToStaticMarkup(React.createElement(PlayerHudList));
-      const btnTag = extractTagByTestId(html, 'toggle-player-hud-btn');
+    it('[TC-201.13/MSS][UC-IMP201] TopBar render nút toggle-hud-topbar-btn và PlayerHudList sạch bóng nút fixed sườn phải', () => {
+      const topBarHtml = renderToStaticMarkup(React.createElement(TopBar));
+      expect(topBarHtml).toContain('data-testid="toggle-hud-topbar-btn"');
 
-      expect(btnTag).toContain('fixed');
-      expect(btnTag).toContain('right-0');
-      expect(btnTag).toContain('rounded-l-xl');
-      expect(btnTag).toContain('rounded-r-none');
+      const hudHtml = renderToStaticMarkup(React.createElement(PlayerHudList));
+      expect(hudHtml).not.toContain('data-testid="toggle-player-hud-btn"');
+      expect(hudHtml).not.toContain('fixed');
     });
 
-    it('[TC-201.14/MSS][UC-IMP201] Nút Edge Tab hiển thị nhãn văn bản Bảng Điểm khi thu gọn', () => {
-      const html = renderToStaticMarkup(React.createElement(PlayerHudList));
+    it('[TC-201.14/MSS][UC-IMP201] Nút Bảng Điểm trên TopBar hiển thị nhãn văn bản Bảng Điểm', () => {
+      const topBarHtml = renderToStaticMarkup(React.createElement(TopBar));
 
-      expect(html).toContain('Bảng Điểm');
+      expect(topBarHtml).toContain('Bảng Điểm');
     });
 
-    it('[TC-201.15/MSS][UC-IMP201] Khi mở bảng điểm thì container danh sách thẻ có pt-28 sm:pt-0 để không bị nút Edge Tab đè lên thẻ người chơi thứ hai', () => {
+    it('[TC-201.15/MSS][UC-IMP201] Khi mở bảng điểm thì container danh sách thẻ áp dụng pt-16 sm:pt-0 loại bỏ padding dư thừa pt-28', () => {
       const html = renderToStaticMarkup(React.createElement(PlayerHudList));
 
-      expect(html).toMatch(/class="[^"]*pt-28[^"]*"/);
+      expect(html).not.toContain('pt-28');
+      expect(html).toMatch(/class="[^"]*pt-16 sm:pt-0[^"]*"/);
     });
   });
 

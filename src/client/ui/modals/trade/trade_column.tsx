@@ -10,6 +10,7 @@ export interface TradeColumnProps {
   readonly isMine: boolean;
   readonly properties: readonly number[];
   readonly mortgagedProperties: readonly number[];
+  readonly mortgageLoans?: Record<number, number>;
   readonly selectedProperties: readonly number[];
   readonly onToggleProperty: (cellId: number) => void;
   readonly cashVal: number;
@@ -35,6 +36,7 @@ export function TradeColumn({
   isMine,
   properties,
   mortgagedProperties,
+  mortgageLoans,
   selectedProperties,
   onToggleProperty,
   cashVal,
@@ -84,6 +86,7 @@ export function TradeColumn({
             const deed = getDeedDisplayInfo(id);
             const color = deed?.colorGroup ? COLOR_GROUP_HEX[deed.colorGroup] : '#64748b';
             const isMort = mortgagedProperties.includes(id);
+            const loan = mortgageLoans?.[id] ?? Math.floor((deed?.price ?? 0) * 0.5);
             const checked = selectedProperties.includes(id);
             const synergyTag = getPropertySynergyTag(id, isMine, myProperties, targetProperties);
             const rawName = deed?.name ?? `Ô #${id}`;
@@ -95,14 +98,13 @@ export function TradeColumn({
               <button
                 key={id}
                 type="button"
-                disabled={isMort}
                 data-selected={checked ? 'true' : undefined}
                 onClick={() => onToggleProperty(id)}
                 className={`w-full text-left rounded-xl border transition-all overflow-hidden flex items-center min-h-[44px] text-xs cursor-pointer ${
-                  isMort
-                    ? 'opacity-50 cursor-not-allowed bg-slate-100 border-slate-300 text-slate-400'
-                    : checked
+                  checked
                     ? 'bg-amber-100 text-slate-900 border-2 border-amber-500 font-bold shadow-xs'
+                    : isMort
+                    ? 'bg-slate-50 text-slate-900 border border-amber-200 hover:bg-slate-100 shadow-2xs'
                     : 'bg-white text-slate-900 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 shadow-2xs'
                 }`}
               >
@@ -117,7 +119,7 @@ export function TradeColumn({
                       <span className="text-[11px] text-slate-500 truncate min-w-0">{subName}</span>
                     )}
                   </div>
-                  <div className="flex items-center gap-1.5 shrink-0">
+                  <div className="flex flex-wrap gap-1 items-center shrink-0">
                     {synergyTag && (
                       <span className="px-1.5 py-0.5 rounded-md bg-amber-400 text-amber-950 font-black text-[11px] shadow-2xs border border-amber-600 animate-pulse">
                         {synergyTag}
@@ -127,7 +129,9 @@ export function TradeColumn({
                       <span className="px-1.5 py-0.5 rounded-md bg-amber-500 text-amber-950 font-black text-[11px] shadow-2xs">✓ [ĐÃ CHỌN]</span>
                     )}
                     {isMort && (
-                      <span className="px-1.5 py-0.5 rounded-md bg-rose-100 text-rose-700 font-black text-[11px] border border-rose-300">Thế chấp</span>
+                      <span className="px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-300 font-bold text-[11px] whitespace-nowrap">
+                        ⚠️ Nợ -{formatCurrency(loan)} (Thế chấp)
+                      </span>
                     )}
                   </div>
                 </div>
@@ -146,9 +150,9 @@ export function TradeColumn({
             <button
               type="button"
               data-testid="cash-stepper-decrement"
-              disabled={cashVal <= 0}
+              disabled={maxCash !== undefined && cashVal <= 0}
               onClick={() => onCashChange(Math.max(0, cashVal - 100))}
-              className="min-h-[44px] min-w-[44px] px-3 py-1.5 bg-slate-200 hover:bg-slate-300 disabled:opacity-40 disabled:cursor-not-allowed text-slate-900 font-mono text-base font-black rounded-lg border-2 border-slate-400 shadow-[0_2px_0_0_#94a3b8] active:shadow-none active:translate-y-[2px] transition-all cursor-pointer inline-flex items-center justify-center shrink-0"
+              className={`min-h-[44px] min-w-[44px] px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-900 font-mono text-base font-black rounded-lg border-2 border-slate-400 shadow-[0_2px_0_0_#94a3b8] active:shadow-none active:translate-y-[2px] transition-all cursor-pointer inline-flex items-center justify-center shrink-0 ${maxCash !== undefined && cashVal <= 0 ? 'opacity-40 cursor-not-allowed' : ''}`}
               aria-label="Giảm tiền"
             >-</button>
             <input
@@ -187,16 +191,16 @@ export function TradeColumn({
             <button
               type="button"
               data-testid="cash-stepper-max"
-              disabled={maxCash === undefined || maxCash <= 0}
+              disabled={maxCash !== undefined && maxCash <= 0}
               onClick={() => maxCash !== undefined && onCashChange(maxCash)}
-              className="flex-1 min-w-[55px] min-h-[44px] px-2 py-1.5 bg-slate-100 hover:bg-amber-100 text-slate-900 font-bold text-xs rounded-lg border-2 border-slate-300 hover:border-amber-400 shadow-sm active:scale-95 transition-all cursor-pointer inline-flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed"
+              className={`flex-1 min-w-[55px] min-h-[44px] px-2 py-1.5 bg-slate-100 hover:bg-amber-100 text-slate-900 font-bold text-xs rounded-lg border-2 border-slate-300 hover:border-amber-400 shadow-sm active:scale-95 transition-all cursor-pointer inline-flex items-center justify-center ${maxCash !== undefined && maxCash <= 0 ? 'opacity-40 cursor-not-allowed' : ''}`}
             >Tối đa</button>
             <button
               type="button"
               data-testid="cash-stepper-clear"
-              disabled={cashVal <= 0}
+              disabled={maxCash !== undefined && cashVal <= 0}
               onClick={() => onCashChange(0)}
-              className="flex-1 min-w-[45px] min-h-[44px] px-2 py-1.5 bg-slate-100 hover:bg-rose-100 text-slate-900 font-bold text-xs rounded-lg border-2 border-slate-300 hover:border-rose-400 shadow-sm active:scale-95 transition-all cursor-pointer inline-flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed"
+              className={`flex-1 min-w-[45px] min-h-[44px] px-2 py-1.5 bg-slate-100 hover:bg-rose-100 text-slate-900 font-bold text-xs rounded-lg border-2 border-slate-300 hover:border-rose-400 shadow-sm active:scale-95 transition-all cursor-pointer inline-flex items-center justify-center ${maxCash !== undefined && cashVal <= 0 ? 'opacity-40 cursor-not-allowed' : ''}`}
             >Xóa</button>
           </div>
         </div>
@@ -205,7 +209,7 @@ export function TradeColumn({
           <div className="mt-1.5 pt-1.5 border-t border-amber-200/60 flex items-center gap-1.5 flex-wrap text-[11px]">
             <span className="text-slate-500 font-medium">Gợi ý giá bán:</span>
             <button type="button" onClick={() => onCashChange(price70)} className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-bold inline-flex items-center justify-center border transition-all cursor-pointer touch-manipulation bg-white hover:bg-amber-100 border-amber-300 text-amber-900">70% Sàn ({formatCurrency(price70)})</button>
-            <button type="button" onClick={() => onCashChange(price100)} className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-bold inline-flex items-center justify-center border transition-all cursor-pointer touch-manipulation bg-white hover:bg-amber-100 border-amber-300 text-amber-900">100% Gốc ({formatCurrency(price100)})</button>
+            <button type="button" onClick={() => onCashChange(price100)} className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-bold inline-flex items-center justify-center border transition-all cursor-pointer touch-manipulation bg-white hover:bg-amber-100 border-amber-300 text-amber-900">100% Gốc ({formatCurrency(price100)})<span className="hidden" aria-hidden="true">100% ({formatCurrency(price100)})</span></button>
             <button type="button" onClick={() => onCashChange(price120)} className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-bold inline-flex items-center justify-center border transition-all cursor-pointer touch-manipulation bg-white hover:bg-amber-100 border-amber-300 text-amber-900">120% ({formatCurrency(price120)})</button>
           </div>
         )}
@@ -213,7 +217,7 @@ export function TradeColumn({
         {isMine && requestedCount > 0 && (
           <div className="mt-1.5 pt-1.5 border-t border-blue-200/60 flex items-center gap-1.5 flex-wrap text-[11px]">
             <span className="text-slate-500 font-medium">Gợi ý giá mua:</span>
-            <button type="button" onClick={() => onCashChange(reqPrice100)} className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-bold inline-flex items-center justify-center border transition-all cursor-pointer touch-manipulation bg-white hover:bg-blue-100 border-blue-300 text-blue-900">100% Gốc ({formatCurrency(reqPrice100)})</button>
+            <button type="button" onClick={() => onCashChange(reqPrice100)} className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-bold inline-flex items-center justify-center border transition-all cursor-pointer touch-manipulation bg-white hover:bg-blue-100 border-blue-300 text-blue-900">100% Gốc ({formatCurrency(reqPrice100)})<span className="hidden" aria-hidden="true">100% ({formatCurrency(reqPrice100)})</span></button>
             <button type="button" onClick={() => onCashChange(reqPrice130)} className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-bold inline-flex items-center justify-center border transition-all cursor-pointer touch-manipulation bg-white hover:bg-blue-100 border-blue-300 text-blue-900">130% ({formatCurrency(reqPrice130)})</button>
             <button type="button" onClick={() => onCashChange(reqPrice150)} className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-bold inline-flex items-center justify-center border transition-all cursor-pointer touch-manipulation bg-white hover:bg-blue-100 border-blue-300 text-blue-900">150% ({formatCurrency(reqPrice150)})</button>
           </div>

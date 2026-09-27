@@ -19,9 +19,9 @@ export function TopBar(props: TopBarProps): React.ReactElement {
   const storeRoundNumber = useGameStore((state) => state.roundNumber);
   const storeMaxRounds = useGameStore((state) => state.maxRounds);
   const storeTurnTimeRemaining = useGameStore((state) => state.turnTimeRemaining);
-  const storeCurrentTurnPlayerId = useGameStore((state) => state.currentTurnPlayerId);
-  const storePlayersInfo = useGameStore((state) => state.playersInfo);
   const storeTreasuryPool = useGameStore((state) => state.treasuryPool);
+  const storeIsPlayerHudVisible = useGameStore((state) => state.isPlayerHudVisible);
+  const togglePlayerHudVisibility = useGameStore((state) => state.togglePlayerHudVisibility);
 
   const isSSR = typeof window === 'undefined';
   const live = isSSR ? useGameStore.getState() : null;
@@ -29,9 +29,8 @@ export function TopBar(props: TopBarProps): React.ReactElement {
   const roundNumber = live ? live.roundNumber : storeRoundNumber;
   const maxRounds = live ? live.maxRounds : storeMaxRounds;
   const turnTimeRemaining = live ? live.turnTimeRemaining : storeTurnTimeRemaining;
-  const currentTurnPlayerId = live ? live.currentTurnPlayerId : storeCurrentTurnPlayerId;
-  const playersInfo = live ? live.playersInfo : storePlayersInfo;
   const treasuryPool = live ? live.treasuryPool : storeTreasuryPool;
+  const isPlayerHudVisible = live ? live.isPlayerHudVisible : storeIsPlayerHudVisible;
   const isMuted = useAudioStore((state) => state.isMuted);
   const toggleMute = useAudioStore((state) => state.toggleMute);
   const timeOfDayMode = useEnvironmentStore((state) => state.mode);
@@ -65,12 +64,8 @@ export function TopBar(props: TopBarProps): React.ReactElement {
     ? 'Hoàng Hôn'
     : 'Ngày';
 
-  const currentTurnPlayer = currentTurnPlayerId ? playersInfo[currentTurnPlayerId] : undefined;
-  const isBotTurn = Boolean(currentTurnPlayer?.isBot);
-  const isLowTime = !isBotTurn && turnTimeRemaining <= 10;
-  const timerColorClass = isBotTurn
-    ? 'text-amber-700 font-semibold'
-    : isLowTime
+  const isLowTime = turnTimeRemaining <= 10;
+  const timerColorClass = isLowTime
     ? 'text-rose-600 font-extrabold animate-pulse'
     : 'text-emerald-700 font-bold';
 
@@ -96,17 +91,10 @@ export function TopBar(props: TopBarProps): React.ReactElement {
 
         {/* Đồng hồ đếm ngược */}
         <div className="flex items-center gap-1 sm:gap-2" role="timer" aria-live="polite">
-          <span className="text-sm sm:text-base" aria-hidden="true">{isBotTurn ? '🤖' : '⏱️'}</span>
-          <span className="hidden sm:inline text-xs text-slate-600 font-semibold">{isBotTurn ? 'Lượt Bot:' : 'Thời gian:'}</span>
+          <span className="text-sm sm:text-base" aria-hidden="true">⏱️</span>
+          <span className="hidden sm:inline text-xs text-slate-600 font-semibold">Thời gian:</span>
           <span className={`tabular-nums font-mono text-xs sm:text-base whitespace-nowrap ${timerColorClass}`}>
-            {isBotTurn ? (
-              <>
-                <span className="sm:hidden text-xs text-amber-600 font-bold">Đang tính</span>
-                <span className="hidden sm:inline">🤖 Đang tính...</span>
-              </>
-            ) : (
-              formatTimeRemaining(turnTimeRemaining)
-            )}
+            {formatTimeRemaining(turnTimeRemaining)}
           </span>
         </div>
 
@@ -141,6 +129,20 @@ export function TopBar(props: TopBarProps): React.ReactElement {
         data-testid="hud-utilities-cluster"
         className="pointer-events-auto h-10 sm:h-11 flex items-center gap-1 sm:gap-1.5 bg-[#FFFDF8] border-2 border-slate-900 rounded-xl sm:rounded-2xl px-1 sm:px-2 shadow-[0_3px_0_0_#0f172a]"
       >
+        {/* Nút Bật / Tắt Bảng Điểm người chơi */}
+        <button
+          type="button"
+          onClick={togglePlayerHudVisibility}
+          className={`relative w-8 h-8 min-h-[36px] min-w-[36px] sm:w-auto sm:h-8 sm:min-w-[36px] inline-flex items-center justify-center gap-1.5 p-0 sm:px-3 rounded-lg sm:rounded-xl transition-colors cursor-pointer text-xs font-semibold border border-slate-900 shadow-[0_1.5px_0_0_#0f172a] sm:shadow-[0_2px_0_0_#0f172a] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 after:absolute after:-inset-1.5 after:content-[''] ${
+            isPlayerHudVisible ? 'bg-amber-100 text-amber-900' : 'bg-[#F7F2E7] hover:bg-amber-100 text-slate-900'
+          }`}
+          title={isPlayerHudVisible ? 'Ẩn Bảng Điểm' : 'Hiện Bảng Điểm'}
+          aria-label={isPlayerHudVisible ? 'Ẩn Bảng Điểm người chơi' : 'Hiện Bảng Điểm người chơi'}
+          data-testid="toggle-hud-topbar-btn"
+        >
+          <span className="text-sm" aria-hidden="true">👥</span>
+          <span className="hidden sm:inline">Bảng Điểm</span>
+        </button>
         {/* Nút Chu kỳ Thời gian Ngày - Hoàng Hôn - Đêm */}
         <button
           type="button"

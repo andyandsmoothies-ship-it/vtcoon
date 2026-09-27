@@ -45,6 +45,7 @@ describe('[TC-202.01/MSS..TC-202.18/MSS][UC-IMP202] Mobile UI Ergonomics, Shadow
     useTelemetryStore.setState({ metrics: { fps: 60 } as any });
 
     useGameStore.setState({
+      isPlayerHudVisible: true,
       roundNumber: 1,
       maxRounds: 30,
       turnTimeRemaining: 20,
@@ -267,27 +268,27 @@ describe('[TC-202.01/MSS..TC-202.18/MSS][UC-IMP202] Mobile UI Ergonomics, Shadow
       });
     });
 
-    it('[TC-202.09/MSS][UC-IMP202] TopBar khi isBotTurn: true trên mobile không render đồng thời cả 2 emoji ⏱️ và 🤖 dính nhau', () => {
+    it('[TC-202.09/MSS][UC-IMP202][IMP-206] TopBar khi isBotTurn không render emoji 🤖', () => {
       const topBarHtml = renderToStaticMarkup(React.createElement(TopBar));
       const timerSection = topBarHtml.match(/<div[^>]*role="timer"[^>]*>[\s\S]*?<\/div>/)?.[0] ?? '';
 
-      expect(timerSection).not.toMatch(/⏱️[\s\S]*?<span[^>]*class="[^"]*sm:hidden[^"]*"[^>]*>🤖/);
+      expect(timerSection).not.toContain('🤖');
+      expect(timerSection).toContain('⏱️');
     });
 
-    it('[TC-202.10/MSS][UC-IMP202] TopBar bảo toàn chuỗi 🤖 Đang tính... trên desktop (hidden sm:inline)', () => {
+    it('[TC-202.10/MSS][UC-IMP202][IMP-206] TopBar không còn render chuỗi 🤖 Đang tính... trên desktop', () => {
       const topBarHtml = renderToStaticMarkup(React.createElement(TopBar));
       const timerSection = topBarHtml.match(/<div[^>]*role="timer"[^>]*>[\s\S]*?<\/div>/)?.[0] ?? '';
 
-      expect(timerSection).toContain('hidden sm:inline');
-      expect(timerSection).toContain('🤖 Đang tính...');
+      expect(timerSection).not.toContain('Đang tính');
+      expect(timerSection).not.toContain('🤖');
     });
 
-    it('[TC-202.11/MSS][UC-IMP202] TopBar render chữ Đang tính trên mobile khi là lượt bot', () => {
+    it('[TC-202.11/MSS][UC-IMP202][IMP-206] TopBar không còn render chữ Đang tính trên mobile khi là lượt bot', () => {
       const topBarHtml = renderToStaticMarkup(React.createElement(TopBar));
       const timerSection = topBarHtml.match(/<div[^>]*role="timer"[^>]*>[\s\S]*?<\/div>/)?.[0] ?? '';
-      const mobileSpanContent = timerSection.match(/<span[^>]*class="[^"]*sm:hidden[^"]*"[^>]*>([\s\S]*?)<\/span>/)?.[1] ?? '';
 
-      expect(mobileSpanContent).toContain('Đang tính');
+      expect(timerSection).not.toContain('Đang tính');
     });
   });
 
@@ -338,22 +339,22 @@ describe('[TC-202.01/MSS..TC-202.18/MSS][UC-IMP202] Mobile UI Ergonomics, Shadow
   // FACET 5: HUD Collapse Toggle & Spacing (TC-202.15 - 18)
   // =========================================================================
   describe('Facet 5: HUD Collapse Toggle & Spacing', () => {
-    it('[TC-202.15a/MSS][UC-IMP202] Nút toggle-player-hud-btn render nhãn có chữ trực quan 👥 Ẩn khi danh sách mở', () => {
-      const listHtml = renderToStaticMarkup(React.createElement(PlayerHudList));
-      const toggleBtnMatch = listHtml.match(/<button[^>]*data-testid="toggle-player-hud-btn"[^>]*>[\s\S]*?<\/button>/)?.[0] ?? '';
+    it('[TC-202.15a/MSS][UC-IMP202] TopBar toggle-hud-topbar-btn render nhãn Ẩn Bảng Điểm và icon 👥 khi danh sách mở', () => {
+      useGameStore.setState({ isPlayerHudVisible: true } as any);
+      const topBarHtml = renderToStaticMarkup(React.createElement(TopBar));
+      const toggleBtnMatch = topBarHtml.match(/<button[^>]*data-testid="toggle-hud-topbar-btn"[^>]*>[\s\S]*?<\/button>/)?.[0] ?? '';
 
-      expect(toggleBtnMatch).toContain('👥 Ẩn');
+      expect(toggleBtnMatch).toContain('👥');
+      expect(toggleBtnMatch).toMatch(/Ẩn.*Bảng Điểm/i);
     });
 
-    it('[TC-202.15b/MSS][UC-IMP202] Nút toggle-player-hud-btn render nhãn có chữ trực quan 👥 Hiện khi danh sách đóng', () => {
-      const listHtml = renderToStaticMarkup(
-        React.createElement(PlayerHudList as React.ComponentType<{ initialCollapsed?: boolean }>, {
-          initialCollapsed: true,
-        })
-      );
-      const toggleBtnMatch = listHtml.match(/<button[^>]*data-testid="toggle-player-hud-btn"[^>]*>[\s\S]*?<\/button>/)?.[0] ?? '';
+    it('[TC-202.15b/MSS][UC-IMP202] TopBar toggle-hud-topbar-btn render nhãn Hiện Bảng Điểm và icon 👥 khi danh sách đóng', () => {
+      useGameStore.setState({ isPlayerHudVisible: false } as any);
+      const topBarHtml = renderToStaticMarkup(React.createElement(TopBar));
+      const toggleBtnMatch = topBarHtml.match(/<button[^>]*data-testid="toggle-hud-topbar-btn"[^>]*>[\s\S]*?<\/button>/)?.[0] ?? '';
 
-      expect(toggleBtnMatch).toContain('👥 Hiện');
+      expect(toggleBtnMatch).toContain('👥');
+      expect(toggleBtnMatch).toMatch(/Hiện.*Bảng Điểm/i);
     });
 
     it('[TC-202.16/MSS][UC-IMP202] Container danh sách thẻ người chơi áp dụng gap-2', () => {

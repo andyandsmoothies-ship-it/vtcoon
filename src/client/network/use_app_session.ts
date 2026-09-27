@@ -95,14 +95,12 @@ export function useAppSession(
   // [UI-S02/MSS] Mở modal và tương tác ô đất CHÍNH XÁC khi con cờ chạm đất tại ô đích
   useEffect(() => {
     if (!lastLandedPawn) return;
-    if (lastLandedPawn.playerId === localPlayerId) {
-      if (lastHandledLandingTimestampRef.current === lastLandedPawn.timestamp) {
-        return;
-      }
-      lastHandledLandingTimestampRef.current = lastLandedPawn.timestamp;
-      handleCellLanding(localPlayerId, lastLandedPawn.cellIndex);
+    if (lastHandledLandingTimestampRef.current === lastLandedPawn.timestamp) {
+      return;
     }
-  }, [lastLandedPawn, localPlayerId, handleCellLanding]);
+    lastHandledLandingTimestampRef.current = lastLandedPawn.timestamp;
+    handleCellLanding(lastLandedPawn.playerId, lastLandedPawn.cellIndex);
+  }, [lastLandedPawn, handleCellLanding]);
 
   const handleError = useCallback((reasonCode: ReasonCode) => {
     return handleSessionServerError(reasonCode, setErrorMessage);

@@ -1,7 +1,7 @@
 // [UC-GAME-009/MSS][TC-NET03.1/MSS][TC-NET03.2/MSS][UC-GAME-008/MSS]
 // Đồng bộ hóa DeltaPayload (kể cả Sparse Diff) vào Zustand useGameStore
 // [IMP-64] Player & Cell sections extracted to apply_delta_players.ts and apply_delta_cells.ts
-import { useGameStore, type GameState } from '../store/game_store.js';
+import { useGameStore, type GameState, FloatingTextType } from '../store/game_store.js';
 import type { ModalPayloadMap } from '../store/game_store_types.js';
 import { useLobbyStore } from '../store/lobby_store.js';
 import { BOARD_SIZE, TurnPhase } from '../../domain/room.js';
@@ -69,6 +69,16 @@ function syncTurnAndTimer(delta: DeltaPayload, state: GameState): void {
     state.setTurnPhase(delta.turnPhase);
     if (delta.turnPhase === TurnPhase.WaitingRoll) {
       state.setHasRolledThisTurn(false);
+    }
+    const effectiveTurnPlayerId = turnPlayerId || state.currentTurnPlayerId;
+    if (
+      (delta.turnPhase === TurnPhase.ActionPhase || delta.turnPhase === TurnPhase.PropertyManagement) &&
+      effectiveTurnPlayerId &&
+      effectiveTurnPlayerId === (useLobbyStore.getState().myPlayerId || 'p1') &&
+      (delta.diceRollerId === effectiveTurnPlayerId || (delta.dice && (delta.dice[0] > 0 || delta.dice[1] > 0)))
+    ) {
+      state.setHasRolledThisTurn(true);
+      state.setIsRolling(false);
     }
   }
 }
@@ -238,9 +248,45 @@ function syncTelemetryAndActivities(delta: DeltaPayload, state: GameState, store
   }
 }
 
-function syncEventCard(card: DeltaPayload['lastEventCard'], state: GameState): void {
+export function syncEventCard(
+  cardOrDelta: DeltaPayload['lastEventCard'] | DeltaPayload,
+  state: GameState,
+  deltaPayload?: DeltaPayload
+): void {
+  let card: DeltaPayload['lastEventCard'];
+  let delta: DeltaPayload | undefined = deltaPayload;
+
+  if (cardOrDelta && typeof cardOrDelta === 'object' && 'roomCode' in cardOrDelta) {
+    delta = cardOrDelta as DeltaPayload;
+    card = delta.lastEventCard;
+  } else {
+    card = cardOrDelta as DeltaPayload['lastEventCard'];
+  }
+
+  const prevCard = state.lastEventCard;
   if (card !== undefined) {
     state.setLastEventCard(card ?? null);
+  }
+
+  if (card && card.cardId && card.cardId !== prevCard?.cardId) {
+    const myPid = useLobbyStore.getState().myPlayerId || 'p1';
+    const turnPlayerId =
+      card.drawnBy ??
+      card.playerId ??
+      delta?.currentTurnPlayerId ??
+      delta?.diceRollerId ??
+      state.currentTurnPlayerId;
+
+    if (turnPlayerId && turnPlayerId !== myPid) {
+      state.addFloatingText({
+        actionType: card.cardType ?? 'chance',
+        playerId: turnPlayerId,
+        title: card.title,
+        text: card.description || card.effectDetail || '',
+        type: (card.effectDelta ?? 0) >= 0 ? FloatingTextType.Bonus : FloatingTextType.Penalty,
+        durationMs: 2500,
+      });
+    }
   }
 }
 
@@ -250,7 +296,7 @@ export function applyPhaseAndTimerDeltas(delta: DeltaPayload, prevState: GameSta
   syncTreasuryPool(delta, currentState);
   syncRoundAndModifiers(delta, currentState);
   syncBusinessModals(delta, currentState);
-  syncEventCard(delta.lastEventCard, currentState);
+  syncEventCard(delta.lastEventCard, currentState, delta);
   syncGameStarted(delta, currentState);
   syncTelemetryAndActivities(delta, prevState, store);
 }

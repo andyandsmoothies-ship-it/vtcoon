@@ -177,7 +177,8 @@ export function ActionDock({
     (turnPhase === TurnPhase.ActionPhase || (hasRolledThisTurn && turnPhase !== TurnPhase.PropertyManagement && turnPhase !== TurnPhase.AuctionPhase && turnPhase !== TurnPhase.InsolvencyPhase)) &&
     hasRolledThisTurn &&
     isPropertyCell &&
-    !isOwnedByAnyone
+    !isOwnedByAnyone &&
+    !isTradeFrozen
   );
   const handleOpenManageProperty = () => {
     if (onOpenManageProperty) onOpenManageProperty();

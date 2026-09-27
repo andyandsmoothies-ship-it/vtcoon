@@ -61,6 +61,7 @@ export interface ActiveEmote {
 
 export enum FloatingTextType {
   Reward = 'reward',
+  Bonus = 'reward',
   Penalty = 'penalty',
 }
 
@@ -283,6 +284,8 @@ export interface GameState {
   setActiveModifiers: (modifiers: ReadonlyArray<ClientMarketModifier>) => void;
   toggleHeatmap: () => void;
   setHeatmapActive: (active: boolean) => void;
+  readonly isPlayerHudVisible: boolean;
+  togglePlayerHudVisibility: () => void;
 
   // UI-04 Business Modals Actions
   openModal: <T extends keyof ModalPayloadMap>(type: T, payload: ModalPayloadMap[T]) => void;
@@ -333,6 +336,7 @@ export type InitialGameState = Pick<
   | 'lastDiplomaticEvent'
   | 'cameraFocusCell'
   | 'hasUserCustomCamera'
+  | 'isPlayerHudVisible'
 >;
 
 export const INITIAL_GAME_STATE: InitialGameState = {
@@ -356,6 +360,7 @@ export const INITIAL_GAME_STATE: InitialGameState = {
   maxRounds: 40,
   activeModifiers: [],
   isHeatmapActive: false,
+  isPlayerHudVisible: true,
   activeModal: null,
   modalPayload: null,
   lastEventCard: null,

@@ -6,9 +6,10 @@ Bản tài liệu thiết kế hoàn chỉnh của trò chơi **"Đại Gia Đ�
 * **Vốn khả dụng ban đầu (Quy mô kinh tế động - IMP-60):** Cấp vốn linh hoạt theo số người chơi để tối ưu thanh khoản bàn cờ 40 ô: 2 người chơi = 25.000 Tr. VNĐ; 3 người chơi = 20.000 Tr. VNĐ; 4 người chơi = 18.000 Tr. VNĐ/người chơi.  
 * **Tiền thưởng qua ô Khởi Hành (GO - IMP-60, IMP-128):** Lương điều hành điều tiết theo tiến trình ván đấu (`calculateGoSalary`): Vòng 1–20 nhận +2.000 Tr. VNĐ; Vòng 21–30 nhận +1.500 Tr. VNĐ; Vòng 31–40 nhận +1.000 Tr. VNĐ. Khóa trần thuế tài sản tối đa 1.000 Tr. VNĐ để bảo đảm thực nhận tối thiểu luôn dương.  
 * **Cơ chế di chuyển:** Lắc 2 xúc xắc (2D6). Đổ đôi được đi tiếp; đổ đôi 3 lần liên tiếp bị đưa vào **Ô 10 (Trạm Kiểm Toán & Thanh Tra)**.  
-* **Quy tắc Trạm Kiểm Toán & Thanh Tra (Ô 10 - IMP-137):**  
+* **Quy tắc Trạm Kiểm Toán & Thanh Tra (Ô 10 - IMP-137, IMP-192A):**  
   * Người chơi bị đưa vào ô 10 do: đổ đôi 3 lần liên tiếp hoặc dừng tại ô 30 (Lệnh Thanh Tra Thuế). Khi đang bị tạm giữ (tối đa 3 lượt), người chơi bị phong tỏa di chuyển.  
-  * Cơ chế rời Trạm Kiểm Toán: (1) Được quyền gieo xúc xắc đầu lượt: nếu đổ ra đôi thì xóa án và di chuyển ngay lập tức theo điểm xúc xắc mà không mất phí; (2) Nộp bảo lãnh 500 Tr. VNĐ vào đầu lượt để rời trạm ngay; (3) Chờ hết 3 lượt thụ án thụ động, tự động rời trạm ở lượt tiếp theo.  
+  * Cơ chế rời Trạm Kiểm Toán: (1) Được quyền gieo xúc xắc đầu lượt: nếu đổ ra đôi thì xóa án và di chuyển ngay lập tức theo điểm xúc xắc mà không mất phí; (2) Nộp bảo lãnh động `max(500, floor(netWorth * 0.10))` Tr. VNĐ nộp Kho Bạc Nhà Nước đầu lượt để rời trạm ngay; (3) Hết 3 lượt thụ án, hệ thống tự động trừ tiền phạt bảo lãnh theo công thức động tương tự nộp Kho Bạc để giải phóng người chơi (nếu không đủ tiền nộp sẽ kích hoạt thủ tục phá sản).  
+  * **Cơ chế Chống Cắm Trại (Anti-Camping - IMP-192A):** Trong suốt thời gian chủ đất đang thụ án tại Trạm Kiểm Toán, toàn bộ BĐS của người này bị miễn 100% tiền thuê cho mọi đối thủ dừng chân, triệt tiêu động cơ trục lợi phong tỏa dòng tiền thụ động.  
   * Dừng chân bình thường tại ô 10 (chỉ ghé thăm) không bị tạm giữ hay phạt tiền.  
 * **Điều kiện kết thúc & Thắng cuộc (IMP-128):**  
   * *Theo thời gian/vòng đấu:* Kết thúc sau 40 vòng (Server Round Cap: `MAX_ROUNDS = 40` theo IMP-128) hoặc 60 phút. Người có **Tổng tài sản ròng** lớn nhất (Tiền mặt + Giá trị định giá BĐS & Công trình - Dư nợ ngân hàng) chiến thắng.  
@@ -18,12 +19,15 @@ Bản tài liệu thiết kế hoàn chỉnh của trò chơi **"Đại Gia Đ�
   * Khi người chơi dừng tại một ô đất chưa có chủ nhưng quyết định Bỏ qua, ô đất này không được giữ nguyên mà lập tức đưa vào phiên đấu giá công khai.  
   * Mọi người chơi khác (ngoại trừ người vừa bỏ qua và người đã phá sản) đều có quyền đặt giá. Giá khởi điểm: 50% giá niêm yết. Bước giá tối thiểu: +50 Tr. VNĐ (hỗ trợ các mức nâng giá nhanh +100, +200, +500 Tr. VNĐ theo IMP-108).  
   * Đồng hồ đếm ngược phiên đấu giá giới hạn tối đa 15 giây (`Date.now() + 15_000`, Gotcha #208), triệt tiêu lỗi cộng dồn thời gian vô hạn. Bố cục 2 cánh Desktop (Dual-Wing Arena) mở rộng trực quan, triệt tiêu text li ti trên di động.  
-* **Quy tắc Thương lượng & Giao dịch Song phương (P2P Trading - IMP-16, IMP-83, IMP-164):**  
-  * Người chơi chỉ được mở giao dịch trong lượt của mình (giai đoạn Quản lý tài sản).  
-  * Đối tượng giao dịch hợp lệ: Đất trống (Cấp 0), Thẻ Miễn Trừ Ngoại Giao, tiền mặt. Không được phép giao dịch các ô đất đã xây dựng công trình (phải thanh lý công trình về Cấp 0 trước khi chuyển nhượng).  
+* **Quy tắc Thương lượng & Giao dịch Song phương (P2P Trading - IMP-16, IMP-83, IMP-164, IMP-200, IMP-204):**  
+  * Cho phép mở giao dịch trong lượt (`PropertyManagement`) hoặc ngoài lượt khi bàn cờ ở trạng thái tĩnh (`WaitingRoll`, `PropertyManagement`) theo Giao Thức Trạng Thái Tĩnh (Quiescent State Protocol - IMP-200).  
+  * Đối tượng giao dịch hợp lệ: Đất trống (Cấp 0), Bất động sản đang thế chấp (Cấp 0), Thẻ Miễn Trừ Ngoại Giao, tiền mặt. Không được phép giao dịch các ô đất đã xây dựng công trình (phải thanh lý công trình về Cấp 0 trước khi chuyển nhượng).  
   * Áp dụng thuế chuyển nhượng bất động sản: Bên nhận tiền phải đóng thuế giao dịch 5% trên tổng giá trị nhận được vào Kho bạc Nhà nước.  
-  * Chống gian lận & Bảo vệ thanh khoản (IMP-164): Mức giá chuyển nhượng tối thiểu phải bằng 70% giá niêm yết của ô đất (mã lỗi: `PRICE_BELOW_FLOOR`). Người chơi có số dư âm (`balance < 0`) bị nghiêm cấm làm bên mua trong giao dịch mua BĐS hoặc hoán đổi đất ngang hàng (`price <= 0`), chỉ được phép bán tài sản lấy tiền mặt dương (`price > 0`) để giải quyết nợ.  
-  * Trí tuệ đàm phán Bot P2P (IMP-83, IMP-164): Bot nhận diện khoảng trống độc quyền (Monopoly Gap: N-1 ô) và chủ động gửi đề xuất; giới hạn tần suất toàn phòng tối đa 1 đề xuất/vòng và tăng thời gian giãn cách lên 4 vòng nếu bị từ chối 2 lần.  
+  * Chống gian lận & Bảo vệ thanh khoản (IMP-164, IMP-204):
+    * Mức giá chuyển nhượng tối thiểu bằng 70% giá niêm yết đối với đất sạch (mã lỗi: `PRICE_BELOW_FLOOR`).
+    * **Chuyển Giao BĐS Thế Chấp Kèm Nợ (Loan Assumption P2P - IMP-204):** BĐS đang thế chấp được phép chuyển nhượng với mức giá sàn hạ xuống 35% giá niêm yết. Cả quyền sở hữu và nghĩa vụ nợ (gốc và lãi định kỳ) được di dời nguyên tử sang người mua. Người mua bị cấm xây dựng trên nhóm màu đó cho đến khi giải chấp thành công (`loan * 1.10` nộp Kho Bạc).
+    * Người chơi có số dư âm (`balance < 0`) bị nghiêm cấm làm bên mua BĐS hoặc tham gia hoán đổi đất ngang hàng (`price <= 0`), nhưng được toàn quyền bán BĐS (kể cả BĐS đang thế chấp) lấy tiền mặt dương (`price > 0`) để thanh toán nợ và thoát phá sản.  
+  * Trí tuệ đàm phán Bot P2P (IMP-83, IMP-164, IMP-204): Bot nhận diện khoảng trống độc quyền (Monopoly Gap: N-1 ô, bao gồm cả ô đang thế chấp đã chiết khấu chi phí chuộc) và chủ động gửi đề xuất; giới hạn tần suất toàn phòng tối đa 1 đề xuất/vòng và tăng thời gian giãn cách lên 4 vòng nếu bị từ chối 2 lần.  
 * **Quy Chuẩn Định Danh Người Chơi (Quirky Animals - IMP-165, Gotcha #228):** Tự động cấp phát tên ngẫu nhiên kết hợp giữa 30 tính từ tiếng Anh cổ điển và 30 loài động vật ngộ nghĩnh (Sleepy Panda, Jolly Otter, Dapper Badger,...), độ dài 10–16 ký tự, bảo đảm không trùng lặp trong bàn 4 người, an toàn kiểm duyệt nội dung và vừa vặn chuẩn giao diện 360px.  
 * **Quy Chuẩn Vòng Đời Sảnh Chờ & Bộ Đệm Ghi Log (IMP-167, Gotcha #229):** Sảnh chờ chưa bắt đầu (`!room.started`) tự động quét dọn và giải phóng bộ nhớ sau 3 phút (`DEFAULT_LOBBY_TIMEOUT_MS = 3 * 60 * 1000`). Toàn bộ nhật ký trận đấu ghi đệm bất đồng bộ qua RAM buffer xả nền 500ms, giải phóng Event Loop khỏi nghẽn đĩa.  
 * **Bố cục Điều Khiển (Action Dock - IMP-89):** Đặt tại góc dưới bên phải màn hình (Bottom-Right) tối ưu công thái học (Fitts's Law), đối xứng với TelemetryBadge ở góc dưới bên trái; gộp hai nút "Tài Sản" và "Xây Dựng" thành nút duy nhất **"Quản Lý BĐS" 🏛️**.  
@@ -96,7 +100,9 @@ Bản tài liệu thiết kế hoàn chỉnh của trò chơi **"Đại Gia Đ�
 
 ### **III. QUY CHUẨN NÂNG CẤP THEO 5 NHÓM TÀI SẢN**
 
-Điều kiện chung: Đối với các ô BĐS (Đô thị, Dịch vụ & Giải trí, Nghỉ dưỡng), người chơi phải **sở hữu trọn bộ màu** mới được quyền đầu tư xây dựng công trình từ Cấp 1 trở lên.
+Điều kiện chung: Đối với các ô BĐS (Đô thị, Dịch vụ & Giải trí, Nghỉ dưỡng), người chơi phải **sở hữu trọn bộ màu** mới được quyền đầu tư xây dựng công trình từ Cấp 1 trở lên. Quy tắc nâng cấp đều tay (Even Build) bắt buộc nâng toàn bộ các ô trong nhóm lên cùng cấp trước khi tiến lên cấp kế tiếp.
+
+* **Kiến Trúc Tòa Nhà Landmark Độc Bản Cấp 3 Cho 22 Ô Đất (IMP-203):** Toàn bộ 22 ô đất mua được khi nâng cấp lên Cấp 3 sở hữu mô hình 3D độc bản biểu tượng cho từng địa danh vùng miền (Dinh Bình Thủy, Bà Chúa Xứ, Tháp Đôi Chăm Pa, Ngọ Môn Huế, Keangnam 72, Nhà Hát Lớn Hà Nội, Bitexco Sài Gòn,...). Định vị bằng bộ 3 mỏ neo nhận diện bất biến: (1) Đai chân đế bo góc mạ vàng hoàng kim `#F59E0B`, (2) Khối vương miện bảo ngọc tự xoay lơ lửng, (3) Khách sạn đồ chơi `ToyHotelMesh` đỏ ruby trên dải màu ô cờ. Cấp 3 kích hoạt hiệu ứng Hoãn Lượt (Skip Turn) đối thủ dừng chân.
 
                     [ĐẤT TRỐNG / MẶT BẰNG CƠ SỞ (Cấp 0)]  
                                       │  
@@ -167,10 +173,14 @@ Khi người chơi đi qua hoặc dừng tại ô GO, sau khi nhận trợ cấp
 
 #### **2. Tín Dụng & Đòn Bẩy Ngân Hàng**
 
-* **Thế chấp:** Nhận ngay 50% giá đất niêm yết từ Ngân hàng. Thẻ đất bị úp; tạm dừng thu toàn bộ phí trên ô này.  
-* **Lãi vay thế chấp:** Mỗi lần đi qua ô GO, người chơi phải nộp lãi 5% trên tổng dư nợ đang vay.  
-* **Giải chấp (Chuộc đất):** Trả lại khoản tiền đã vay +10% phí hành chính để kích hoạt lại ô đất.  
-* **Cưỡng chế thanh lý:** Nếu phá sản không trả được nợ, Ngân hàng bán đấu giá công khai ô đất khởi điểm từ 70% giá niêm yết.
+* **Thế chấp:** Nhận ngay 50% giá đất niêm yết từ Ngân hàng. Thẻ đất bị úp; tạm dừng thu toàn bộ phí trên ô này. Khóa xây dựng trên toàn bộ nhóm màu cho đến khi giải chấp.  
+* **Lãi vay thế chấp:** Mỗi lần đi qua ô GO, người chơi phải nộp lãi 5% trên tổng dư nợ đang vay vào Kho Bạc.  
+* **Giải chấp (Chuộc đất):** Trả lại khoản tiền đã vay +10% phí hành chính nộp Kho Bạc để kích hoạt lại ô đất.  
+* **Chuyển nhượng P2P BĐS thế chấp (Loan Assumption P2P - IMP-204):** BĐS đang thế chấp vẫn được phép chuyển nhượng qua giao dịch P2P. Giá sàn chuyển nhượng được hạ xuống 35% giá niêm yết (so với 70% của đất sạch). Cả quyền sở hữu và nghĩa vụ nợ chuyển sang người mua. Người mua giải chấp để mở khóa xây dựng.
+* **Đòn bẩy Trái phiếu Doanh nghiệp (Corporate Bond - IMP-192C):** Khi sở hữu tối thiểu 2 BĐS chưa thế chấp và Net Worth &ge; 3.000 Tr. VNĐ, người chơi có thể phát hành Trái phiếu Doanh nghiệp vay 80% Net Worth từ Kho Bạc (kỳ hạn 3 vòng, hoàn trả gốc + 20% lãi nộp Kho Bạc). Toàn bộ BĐS đảm bảo bị khóa chuyển nhượng và phong tỏa thế chấp.
+* **Sàn Đấu Giá Phát Mãi 0 Đồng (Queued Fire Sale - IMP-192C):** Nếu vỡ nợ trái phiếu khi đáo hạn, hệ thống tự động tịch thu tiền mặt khả dụng và đưa 100% BĐS đảm bảo vào Sàn phát mãi 0 đồng (Bắt đáy 0 Tr. VNĐ). Con nợ bị cấm tham gia đấu giá tài sản của chính mình.
+* **Chu Kỳ Kinh Tế Vĩ Mô 6 Vòng (Macro Cycle - IMP-192B):** Vòng 1–3 Sốt Đất (x2.5 tiền thuê, giảm 25% giá xây dựng) ➔ Vòng 4–5 Đóng Băng Thanh Khoản (giảm 50% tiền thuê, cấm mở khoản vay thế chấp mới) ➔ Vòng 6 Thị trường hạ nhiệt.
+* **Cưỡng chế thanh lý phá sản:** Nếu phá sản không trả được nợ, Ngân hàng bán đấu giá công khai ô đất khởi điểm từ 70% giá niêm yết (hoặc theo quy trình Senior Lien Priority nếu có nợ Kho Bạc).
 
 #### **3. Sàn Giao Dịch Chứng Khoán HOSE (Ô 38)**
 

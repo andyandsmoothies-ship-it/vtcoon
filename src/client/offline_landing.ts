@@ -4,6 +4,7 @@ import { PROPERTY_DEEDS } from '../domain/property_data';
 import { AudioEngine } from './audio/audio_engine';
 import { SoundEffect } from './audio/audio_types';
 import { useGameStore, FloatingTextType } from './store/game_store';
+import { useLobbyStore } from './store/lobby_store';
 import { useVfxStore } from './store/vfx_store';
 import { SoundEngine } from './audio/sound_engine';
 import { generateRandomAnimalName } from '../domain/name_generator';
@@ -76,6 +77,46 @@ export function createNewRoomConfig(isHost = true): {
   };
 }
 
+function handleEventCardLanding(
+  tileType: CellType,
+  targetCell: number,
+  activeId: string,
+  isLocal: boolean,
+  isConnected: boolean,
+  state: ReturnType<typeof useGameStore.getState>
+): void {
+  const isChance = tileType === CellType.Chance;
+  const cardType = isChance ? 'chance' : 'market';
+  const defaultTitle = isChance ? 'PHIẾU CƠ HỘI' : 'PHIẾU THỊ TRƯỜNG';
+  const defaultDesc = isChance
+    ? 'Cơ hội phát triển kinh doanh và mở rộng mạng lưới địa ốc.'
+    : 'Biến động chính sách vĩ mô và dòng vốn đầu tư toàn quốc.';
+  const card = state.lastEventCard?.cardType === cardType ? state.lastEventCard : null;
+
+  if (isLocal) {
+    state.openModal('event', {
+      cardType,
+      cardId: card?.cardId ?? `${cardType}_${targetCell}`,
+      title: card?.title ?? defaultTitle,
+      description: card?.description ?? defaultDesc,
+      ...(card?.effectDetail ? { effectDetail: card.effectDetail } : {}),
+      ...(card?.targetScope ? { targetScope: card.targetScope } : {}),
+      ...(card?.duration ? { duration: card.duration } : {}),
+      ...(card?.destination ? { destination: card.destination } : {}),
+      ...(card?.effectDelta !== undefined ? { effectDelta: card.effectDelta } : {}),
+    });
+  } else if (!isConnected) {
+    state.addFloatingText({
+      actionType: cardType,
+      playerId: activeId,
+      title: card?.title ?? defaultTitle,
+      text: card?.description ?? defaultDesc,
+      type: FloatingTextType.Bonus,
+      durationMs: 2500,
+    });
+  }
+}
+
 export function executeCellLanding(
   activeId: string,
   targetCell: number,
@@ -93,7 +134,8 @@ export function executeCellLanding(
 
   const state = useGameStore.getState();
   const activePlayer = state.playersInfo[activeId];
-  const isLocal = activeId === (currentTurnPlayerId ?? 'p1');
+  const myPid = useLobbyStore.getState().myPlayerId || 'p1';
+  const isLocal = activeId === myPid && !activePlayer?.isBot;
 
   if (tile.type === CellType.Property || tile.type === CellType.Railroad || tile.type === CellType.Utility) {
     const ownerEntry = Object.entries(state.playersInfo).find(([_, p]) =>
@@ -122,36 +164,8 @@ export function executeCellLanding(
         });
       }
     }
-  } else if (tile.type === CellType.Chance) {
-    if (isLocal) {
-      const card = state.lastEventCard?.cardType === 'chance' ? state.lastEventCard : null;
-      state.openModal('event', {
-        cardType: 'chance',
-        cardId: card?.cardId ?? `chance_${targetCell}`,
-        title: card?.title ?? 'PHIẾU CƠ HỘI',
-        description: card?.description ?? 'Cơ hội phát triển kinh doanh và mở rộng mạng lưới địa ốc.',
-        ...(card?.effectDetail ? { effectDetail: card.effectDetail } : {}),
-        ...(card?.targetScope ? { targetScope: card.targetScope } : {}),
-        ...(card?.duration ? { duration: card.duration } : {}),
-        ...(card?.destination ? { destination: card.destination } : {}),
-        ...(card?.effectDelta !== undefined ? { effectDelta: card.effectDelta } : {}),
-      });
-    }
-  } else if (tile.type === CellType.Market) {
-    if (isLocal) {
-      const card = state.lastEventCard?.cardType === 'market' ? state.lastEventCard : null;
-      state.openModal('event', {
-        cardType: 'market',
-        cardId: card?.cardId ?? `market_${targetCell}`,
-        title: card?.title ?? 'PHIẾU THỊ TRƯỜNG',
-        description: card?.description ?? 'Biến động chính sách vĩ mô và dòng vốn đầu tư toàn quốc.',
-        ...(card?.effectDetail ? { effectDetail: card.effectDetail } : {}),
-        ...(card?.targetScope ? { targetScope: card.targetScope } : {}),
-        ...(card?.duration ? { duration: card.duration } : {}),
-        ...(card?.destination ? { destination: card.destination } : {}),
-        ...(card?.effectDelta !== undefined ? { effectDelta: card.effectDelta } : {}),
-      });
-    }
+  } else if (tile.type === CellType.Chance || tile.type === CellType.Market) {
+    handleEventCardLanding(tile.type, targetCell, activeId, isLocal, isConnected, state);
   } else if (tile.type === CellType.Hose) {
     if (isLocal) {
       state.openModal('hose', { currentStake: 500 });

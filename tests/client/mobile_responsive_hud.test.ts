@@ -303,13 +303,15 @@ describe('[TC-MOB01/MSS] Mobile Responsive HUD Quality Standards Contract Suite'
     expect(addBotBtn).not.toContain('border-slate-900');
   });
 
-  it('[TC-MOB01.16/MSS] [UC-MOB-02] PlayerHudList provides mobile toggle button to collapse and expand player list', () => {
-    const html = renderToStaticMarkup(React.createElement(PlayerHudList));
+  it('[TC-MOB01.16/MSS] [UC-MOB-02] TopBar provides toggle button for player hud scoreboard and PlayerHudList has no edge button', () => {
+    const topBarHtml = renderToStaticMarkup(React.createElement(TopBar));
+    expect(topBarHtml).toContain('data-testid="toggle-hud-topbar-btn"');
 
-    expect(html).toContain('data-testid="toggle-player-hud-btn"');
+    const hudHtml = renderToStaticMarkup(React.createElement(PlayerHudList));
+    expect(hudHtml).not.toContain('data-testid="toggle-player-hud-btn"');
   });
 
-  it('[TC-MOB01.17/MSS] [UC-MOB-02] PlayerCard in audit state switches from text label to compact balance scale icon ⚖️', () => {
+  it('[TC-MOB01.17/MSS] [UC-MOB-02] PlayerCard in audit state does not render redundant text label Kiểm Toán or emoji', () => {
     const player: PlayerHudInfo = {
       id: 'p1',
       name: 'Chủ Tịch Hưng',
@@ -328,7 +330,7 @@ describe('[TC-MOB01/MSS] Mobile Responsive HUD Quality Standards Contract Suite'
       })
     );
 
-    expect(html).toContain('⚖️');
+    expect(html).not.toContain('⚖️');
     expect(html).not.toMatch(/>\s*Kiểm Toán\s*</);
   });
 

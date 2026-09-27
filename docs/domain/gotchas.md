@@ -33,6 +33,7 @@
 2. **Insolvent Entity Role Guard**: Thực thể có số dư âm (`balance < 0` trong `InsolvencyPhase`) TUYỆT ĐỐI KHÔNG được đóng vai trò là bên mua (`buyer`) trong giao dịch P2P hoặc đổi tài sản bù tiền âm (`price <= 0`). Thực thể âm vốn chỉ được đóng vai trò là bên bán (`seller`) với dòng tiền mặt thu về dương (`price > 0`) để cứu nợ.
 3. **Dynamic Pricing SSOT**: Tuyệt đối không hardcode giá trị giá đất (như con số 600) trong logic client hay UI. Giá trị BĐS bắt buộc phải truy vấn từ nguồn thẩm quyền `PROPERTY_DEEDS.get(cellIndex)?.price`.
 4. **Pre-Consumption Valuation Invariant**: Khi kích hoạt các hiệu ứng miễn giảm hay thẻ bài (như `CC_DIPLOMATIC` miễn tiền thuê), hệ thống bắt buộc phải tính toán giá trị gốc (`potentialRent = calculateRent(...)`) trước khi tiêu thụ thẻ để ghi nhận số tiền tiết kiệm được vào bảng tin tường minh.
+5. **Mortgaged Property P2P Debt Migration SSOT**: Khi BĐS đang thế chấp được giao dịch qua P2P (giá sàn 35% thay vì 70%), nghĩa vụ nợ gốc (`mortgageLoans[cell]`) và danh mục thế chấp (`mortgagedProperties`) bắt buộc phải được di dời nguyên vẹn và nguyên tử từ bên bán sang bên mua trong `executeP2PTrade`, đảm bảo bảo toàn tổng nợ toàn phòng.
 
 ### Pillar III: [ĐÀM PHÁN & TRÍ TUỆ NHÂN TẠO BOT]
 1. **Multi-Agent Harassment Guard**: Trong giao dịch P2P, cooldown đề xuất bắt buộc phải được áp dụng ở phạm vi Mục Tiêu / Phòng (`room.lastTargetTradeOfferRound`), không chỉ ở phạm vi Tác tử (Actor), ngăn chặn triệt để tình trạng $N$ bot cùng spam đề xuất đổi đất tới 1 người chơi trong 1 vòng.

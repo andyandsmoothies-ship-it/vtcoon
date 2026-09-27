@@ -144,7 +144,7 @@ export function resolveTitleDeedModalState(params: {
   isBuyOpportunityOverride?: boolean;
   myId: string;
   myPlayer?: AffordancePlayer | Player | null;
-  playersInfo: Record<string, AffordancePlayer | Player | any>;
+  playersInfo: Record<string, AffordancePlayer | Player>;
   levelMap: Record<number, number>;
   activeModifiers?: readonly { readonly type: string; readonly remainingRounds: number }[];
   turnPhase?: string | null;
@@ -195,7 +195,7 @@ export function resolveTitleDeedModalState(params: {
       : Boolean(
           isStandingHere &&
           !owner &&
-          params.turnPhase === 'ActionPhase' &&
+          (params.turnPhase === 'ActionPhase' || (isTradeFrozen && params.turnPhase === 'PropertyManagement')) &&
           params.myId === params.currentTurnPlayerId
         )
   );
@@ -210,7 +210,7 @@ export function resolveTitleDeedModalState(params: {
     hasMonopoly: groupInfo.hasMonopoly,
     upgradeBlockedReason: buildRules.upgradeBlockedReason,
     downgradeBlockedReason: buildRules.downgradeBlockedReason,
-    canBuy: params.canBuyOverride ?? affordance.canAffordCash,
+    canBuy: params.canBuyOverride ?? (affordance.canAffordCash && !isTradeFrozen),
     isBuyOpportunity,
     shortfall: affordance.shortfall,
     canCoverWithMortgage: affordance.canCoverWithMortgage,

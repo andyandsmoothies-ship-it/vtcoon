@@ -167,7 +167,7 @@ export function mortgageProperty(
 
 function checkRedeemRoomState(room: Room, playerId: string): ActionRejectReason | undefined {
   if (!room.started) return ActionRejectReason.GAME_NOT_STARTED;
-  if (!isCurrentPlayer(room, playerId)) return ActionRejectReason.NOT_YOUR_TURN;
+  if (!isCurrentPlayer(room, playerId) && room.phase !== TurnPhase.PropertyManagement) return ActionRejectReason.NOT_YOUR_TURN;
   if (room.phase !== TurnPhase.PropertyManagement) return ActionRejectReason.INVALID_PHASE;
   return undefined;
 }
