@@ -280,13 +280,13 @@ describe('[TC-147][UC-IMP-147] Cân Bằng Hệ Số Cước Độc Quyền x1.5
       const rrRent = resolveRent(BOARD_CONFIG[5], 5, OWNER_ID, railroadRegistry);
       expect(rrRent).toBe(4000); // 4 ga = 4000, không bị nhân 1.5
 
-      // 2 Tiện ích đều thuộc sở hữu của OWNER_ID, xúc xắc 7 -> 7 * 100 = 700
+      // 2 Tiện ích đều thuộc sở hữu của OWNER_ID -> phí phẳng 2 ô = 2.500 Tr. (IMP-214)
       const utilityRegistry: PropertyRegistry = new Map(
         UTILITY_CELLS.map((cell) => [cell, OWNER_ID]),
       );
       const diceTotal = 7;
       const utilRent = resolveRent(BOARD_CONFIG[12], 12, OWNER_ID, utilityRegistry, undefined, diceTotal);
-      expect(utilRent).toBe(700); // 7 * 100 = 700, không bị nhân 1.5
+      expect(utilRent).toBe(2500); // 2 ô = 2.500, không bị nhân 1.5
     });
 
     it('[TC-147.16/MSS][UC-IMP-147] Late-game Surge Compounding: Ô 39 C3 độc quyền ở roundCount = 20 đạt 13200 * 1.2 = 15840 Tr.', () => {

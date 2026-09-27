@@ -311,6 +311,8 @@ describe('[UI-S04/MSS] TitleDeedModal Nâng Cấp & Hạ Cấp BĐS', () => {
     expect(railroadHtml).not.toContain('Hạ Cấp');
 
     // Ô 12: EVN (Utility)
+    // IMP-214: Utility render label tier "Nâng Cấp Smart Grid / 5G" (hợp lệ).
+    // Assertion thu hẹp: không có nút action upgrade/downgrade (data-testid).
     const utilityHtml = renderToStaticMarkup(
       React.createElement(TitleDeedModal, {
         cellIndex: 12,
@@ -323,8 +325,8 @@ describe('[UI-S04/MSS] TitleDeedModal Nâng Cấp & Hạ Cấp BĐS', () => {
         onDowngrade: () => {},
       })
     );
-    expect(utilityHtml).not.toContain('Nâng Cấp');
-    expect(utilityHtml).not.toContain('Hạ Cấp');
+    expect(utilityHtml).not.toContain('data-testid="upgrade-btn"');
+    expect(utilityHtml).not.toContain('data-testid="downgrade-btn"');
   });
 });
 

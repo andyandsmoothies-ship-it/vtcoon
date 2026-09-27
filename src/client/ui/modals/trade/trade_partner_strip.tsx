@@ -49,7 +49,7 @@ export function TradePartnerStrip({
               key={partner.id}
               type="button"
               onClick={() => onSelectPartner(partner.id)}
-              className={`partner-selector-tab min-h-[44px] px-3.5 py-2 rounded-xl border-2 text-xs transition-all shrink-0 cursor-pointer flex items-center gap-1.5 ${
+              className={`partner-selector-tab min-h-[44px] px-3.5 py-2 rounded-xl border-2 text-xs transition-all shrink-0 cursor-pointer flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
                 isSelected
                   ? 'bg-amber-500 text-amber-950 border-amber-700 shadow-[0_3px_0_0_#b45309] active:shadow-[0_1px_0_0_#b45309] active:translate-y-[2px] font-black'
                   : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100 shadow-sm active:translate-y-[1px]'

@@ -153,12 +153,23 @@ Bản tài liệu thiết kế hoàn chỉnh của trò chơi **"Đại Gia Đ�
   * Sở hữu 4 hạ tầng: Thu $4.000$ Tr. VNĐ.  
 * **Gói Nâng cấp Cảng Thông Minh & Thu Phí Tự Động (ETC):** Khi sở hữu từ 2 hạ tầng trở lên, chủ sở hữu chi $1.500$ Tr. VNĐ/hạ tầng để lắp đặt hệ thống ETC. Toàn bộ tiền thu phí trên các hạ tầng của chủ này tăng thêm 50%.
 
-#### **5. Tiện ích Năng lượng & Viễn thông (EVN, Viettel)**
+#### **5. Tiện ích Năng lượng & Viễn thông (EVN, Viettel - IMP-214)**
 
-*Đặc trưng: Không phụ thuộc vào chuỗi màu; nâng cấp hạ tầng mạng lưới diện rộng.*
+*Đặc trưng: Cước hạ tầng toàn bàn cờ hiện đại hóa; loại bỏ hoàn toàn cơ chế phụ thuộc xúc xắc 2D6 của Monopoly 1935.*
 
-* **Mức phí chuẩn:** Đổ $2D6$, trả tiền bằng: Điểm xúc xắc x 40 Tr. VNĐ (nếu có 1 tiện ích) hoặc x 100 Tr. VNĐ (nếu sở hữu cả 2 tiện ích).  
-* **Gói Đầu tư Lưới Điện Thông Minh & Mạng 5G:** Chủ sở hữu nộp $1.000$ Tr. VNĐ cho Ngân hàng để tích hợp công nghệ cao. Hệ số thu phí tăng lên thành: Điểm xúc xắc x 150 Tr. VNĐ.
+* **Mức phí dừng chân phẳng (Flat Landing Fee):**  
+  * Sở hữu 1 tiện ích: Thu phẳng $1.000$ Tr. VNĐ.  
+  * Sở hữu cả 2 tiện ích (EVN + Viettel): Thu phẳng $2.500$ Tr. VNĐ.  
+  * Đã nâng cấp (Lưới Điện Thông Minh / Trạm Dữ Liệu 5G - phí nâng $1.000$ Tr. VNĐ): Thu phẳng $3.500$ Tr. VNĐ.  
+  * Thẻ sự kiện `MC_UTILITY_DOUBLE` nhân đôi mức cước dừng chân tương ứng ($2.000$ / $5.000$ / $7.000$ Tr. VNĐ).  
+* **Cước mạng lưới hạ tầng toàn bàn cờ (Grid & Network Monopoly):**  
+  * **EVN (Ô 12) — Hóa đơn tiền điện:** Mỗi khi đối thủ đi qua hoặc dừng tại ô GO (Khởi Hành), đối thủ phải nộp tiền điện tiêu thụ cho chủ EVN dựa trên số lượng nhà đang vận hành: Cấp 0 (Đất trống) miễn phí ($0$ Tr. VNĐ); Cấp 1: $100$ Tr. VNĐ/ô BĐS; Cấp 2: $200$ Tr. VNĐ/ô BĐS; Cấp 3: $300$ Tr. VNĐ/ô BĐS.  
+  * **Viettel (Ô 28) — Cước kết nối dữ liệu số:** Mỗi khi đối thủ dừng chân tại ô **Thị Trường (Market)** hoặc **Cơ Hội (Chance)**, đối thủ phải thanh toán $150$ Tr. VNĐ cước data viễn thông cho chủ Viettel trước khi rút thẻ sự kiện.  
+* **Quy tắc biên & Bảo vệ an toàn:**  
+  * Miễn phí cho chính chủ (tự cung tự cấp).  
+  * Tiện ích đang thế chấp (`mortgagedProperties`): Miễn 100% cước phí cho toàn bộ đối thủ.  
+  * Chủ tiện ích đang ở Trạm Kiểm Toán (`inAudit` hoặc `auditTurnsLeft > 0`): Tạm khóa quyền thu cước hạ tầng (Anti-Camping Guard).  
+  * Bảo toàn dòng tiền: Khi con nợ không đủ tiền, tài khoản con nợ bị âm nợ, chủ tiện ích chỉ nhận tối đa số tiền mặt thực tế của con nợ (`Math.max(0, debtor.balance)`). Hệ thống đóng vai trò Non-inflationary Sink để triệt tiêu tiền ma.
 
 ### **IV. CƠ CHẾ TÀI CHÍNH, THUẾ & ĐẦU TƯ CHỨNG KHOÁN**
 

@@ -65,10 +65,12 @@ export function TradeSentimentMeter({
       className={`flex flex-col gap-1.5 text-xs text-slate-800 select-none ${className}`}
     >
       {/* Header bar */}
-      <div className="flex items-center justify-between font-bold">
-        <div className="flex items-center gap-1.5">
-          <span className="text-sm" aria-hidden="true">🤖</span>
-          <span className="text-slate-900 tracking-tight">Tâm Lý Đồng Thuận AI ({partnerName})</span>
+      <div className="flex items-center justify-between font-bold gap-2 min-w-0">
+        <div className="flex items-center gap-1.5 min-w-0 flex-1">
+          <span className="text-sm shrink-0" aria-hidden="true">🤖</span>
+          <span className="text-slate-900 tracking-tight truncate min-w-0" title={`Tâm Lý Đồng Thuận AI (${partnerName})`}>
+            Tâm Lý Đồng Thuận AI ({partnerName})
+          </span>
         </div>
         <div className="flex items-center gap-1.5 whitespace-nowrap shrink-0">
           <span className="font-mono text-xs font-black text-slate-700">{clampedScore}%</span>

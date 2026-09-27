@@ -435,10 +435,10 @@ describe('[CONTRACT-TEST] IMP-111: Event Card Rebalance & High-Impact Overhaul',
       registry.set(12, p1.id);
       executeMarketCard(MarketCardId.MC_UTILITY_DOUBLE, modifiers, room.players, registry, stateMap, room);
 
-      // Điểm xúc xắc 8: Tiện ích cơ bản = 8 x 100 = 800 Tr. x 2 (modifier) = 1.600 Tr.
+      // Phí tiện ích phẳng 1.000 Tr. x 2 (modifier) = 2.000 Tr. (IMP-214)
       const res = handleLanding(p2, 12, registry, room.players, stateMap, 8, modifiers);
       expect(res.result).toBe(LandingResult.RentPaid);
-      expect(res.rentAmount).toBe(1600);
+      expect(res.rentAmount).toBe(2000);
     });
 
     it('[TC-IMP111.39/MSS][UC-038] Consumer Assertion: MC_FUEL_SURGE cộng đúng 500 Tr. phụ phí vận tải khi dừng chân tại Cảng Long Thành (5)', () => {

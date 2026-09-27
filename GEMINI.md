@@ -25,6 +25,7 @@
   - *Strict Intent Callback Isolation*: Action callbacks with server intents (`onBuy`, `onPass`) MUST NOT silently fallback to UI dismiss handlers (`onClose`).
   - *Treasury Conservation & Bankrupt Isolation*: System money delta = Player delta + Treasury delta. Bankrupt players: 0 income, 0 expenses, 0 actions. Insolvent entities (`balance < 0`) can only sell, never buy. Dynamic pricing queries `PROPERTY_DEEDS`.
   - *Full-Pipeline Vertical Slice*: State fields/events MUST update all 5 stations: (1) Entity/FSM, (2) DTO & Mappers, (3) Broadcaster sparse diff, (4) Client Parser, (5) Client Store & UI. Action resets drive on `turnPhase` transitions, not player ID.
+  - *Plan Hygiene & Subtractive Parity*: Drop-in snippets must cite exact enclosing function name. Plans strictly forbid `as any`. Subtractive branch deletions require parity proof. Label updates must co-evolve `aria-label`.
 - **Domain Specialist Delegations & Craft Invariants**:
   - 3D Visual & Spatial Standards (Zero-Blank-Material, Ground Truth Anchor): Governed by `game-3d-visual-critic` (`.agents/agents/game-3d-visual-critic.md`).
   - 2D UI Craft, Mobile 360px Ergonomics & Touch Targets: Governed by `ui-craft-reviewer` (`.agents/agents/ui-craft-reviewer.md`) and `impeccable` skill. Passes `npm run lint:ui` with 0 violations.

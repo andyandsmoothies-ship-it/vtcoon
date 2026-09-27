@@ -33,7 +33,7 @@ export function calculateRent(
       }
       const mult = m.beneficiaryId !== undefined
         ? undefined
-        : (m.multiplier ?? (m.type === MarketCardId.MC_PEAK_TOURISM ? 2 : undefined));
+        : (m.multiplier ?? (m.type === MarketCardId.MC_PEAK_TOURISM || m.type === MarketCardId.MC_UTILITY_DOUBLE ? 2 : undefined));
       if (mult !== undefined) {
         rent = Math.floor(rent * mult);
       }
@@ -127,13 +127,40 @@ export function calcRailroadFee(ownerId: string, registry: PropertyRegistry, sta
   return hasETC ? Math.floor(base * 1.5) : base;
 }
 
+export const UTILITY_FEE_SINGLE = 1_000;
+export const UTILITY_FEE_DOUBLE = 2_500;
+export const UTILITY_FEE_UPGRADED = 3_500;
+
 export function calcUtilityFee(
-  ownerId: string, diceTotal: number, registry: PropertyRegistry,
+  ownerId: string, _diceTotal: number, registry: PropertyRegistry,
   stateMap?: PropertyStateMap, cellIndex?: number,
 ): number {
-  if (cellIndex !== undefined && stateMap?.get(cellIndex)?.isUpgradedUtility) return diceTotal * 150;
+  if (cellIndex !== undefined && stateMap?.get(cellIndex)?.isUpgradedUtility) {
+    return UTILITY_FEE_UPGRADED;
+  }
   const count = UTILITY_CELLS.filter((c) => registry.get(c) === ownerId).length;
-  return count >= 2 ? diceTotal * 100 : diceTotal * 40;
+  return count >= 2 ? UTILITY_FEE_DOUBLE : UTILITY_FEE_SINGLE;
+}
+
+export const ELECTRIC_RATE_C1 = 100;
+export const ELECTRIC_RATE_C2 = 200;
+export const ELECTRIC_RATE_C3 = 300;
+
+export function calculateElectricBill(
+  playerId: string,
+  registry: PropertyRegistry,
+  stateMap?: PropertyStateMap,
+): number {
+  let totalBill = 0;
+  for (const [cellIndex, owner] of registry) {
+    if (owner === playerId) {
+      const lvl = stateMap?.get(cellIndex)?.level ?? 0;
+      if (lvl === 1) totalBill += ELECTRIC_RATE_C1;
+      else if (lvl === 2) totalBill += ELECTRIC_RATE_C2;
+      else if (lvl === 3) totalBill += ELECTRIC_RATE_C3;
+    }
+  }
+  return totalBill;
 }
 
 export function calculateGoPropertyTax(

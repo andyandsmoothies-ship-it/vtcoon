@@ -131,6 +131,7 @@ describe('[TC-AUC-STRICT] Khảo Sát & Ràng Buộc Công Thái Học Đấu Gi
     expect(railroadHtml).toContain('500 / 1.000 / 2.000 / 4.000');
 
     // 2. Tiện ích Điện Lực (Cell 12)
+    // IMP-214: mini-bar đổi sang grid 3-col (1 Ô CƠ BẢN / 2 Ô ĐỘC QUYỀN / NÂNG CẤP 5G)
     const utilityHtml = renderToStaticMarkup(
       React.createElement(AuctionDistrictCard, {
         cellIndex: 12,
@@ -139,7 +140,8 @@ describe('[TC-AUC-STRICT] Khảo Sát & Ràng Buộc Công Thái Học Đấu Gi
         playersInfo: MOCK_PLAYERS,
       })
     );
-    expect(utilityHtml).toContain('CƯỚC TIỆN ÍCH:');
+    expect(utilityHtml).toContain('1 Ô (CƠ BẢN)');
+    expect(utilityHtml).toContain('1.000 Tr.');
   });
 
   it('[TC-AUC-STRICT.08] Banner Phát Mại Nợ Xấu (Foreclosure Alert): Gọn nhẹ (p-2 thay vì p-3 cồng kềnh) để dành không gian cho bàn cờ', () => {

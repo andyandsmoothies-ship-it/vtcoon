@@ -86,8 +86,8 @@ export function handleLanding(
     return { result: LandingResult.RentPaid, rentAmount: 0, landlordId: ownerId, diplomaticCardUsed: false };
   }
 
-  // Guard thế chấp: ô đang thế chấp không thu phí thuê
-  if (owner?.mortgagedProperties?.includes(cellIndex)) {
+  // Guard thế chấp: ô đang thế chấp không thu phí thuê (SSOT)
+  if (owner?.mortgagedProperties?.includes(cellIndex) || stateMap?.get(cellIndex)?.isMortgaged) {
     return { result: LandingResult.RentPaid, rentAmount: 0, landlordId: ownerId, diplomaticCardUsed: false };
   }
 
@@ -95,9 +95,6 @@ export function handleLanding(
 
   const cell = BOARD_CONFIG[cellIndex];
   let baseRent = resolveRent(cell, cellIndex, ownerId, registry, stateMap, diceTotal, undefined, roundCount);
-  if (cell?.type === CellType.Utility && modifiers?.some((m) => m.type === MarketCardId.MC_UTILITY_DOUBLE && m.remainingRounds > 0)) {
-    baseRent = (diceTotal ?? 7) * 100;
-  }
 
   // Áp dụng permanentRentBonus (CC_LAND_CHANGE)
   const bonusPct = permanentRentBonus?.[cellIndex] ?? 0;

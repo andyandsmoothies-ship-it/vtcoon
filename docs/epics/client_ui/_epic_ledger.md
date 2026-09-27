@@ -154,6 +154,7 @@
 | DEBT-UI01-02 | Hoạt ảnh nhấp nhô điều hòa sin(omega*t) trên Standee | UI-01 | UI-02 Task 2 | ✅ ĐÃ ĐÓNG |
 | DEBT-IMP208-01 | ui_helpers.ts đạt 445 LOC (vượt ngưỡng cảnh báo 400 LOC Tier 2) -> Bóc tách action_dock_helpers.ts | IMP-208B | Slice UI Kế Tiếp | ⏳ CHỜ BÓC TÁCH |
 | DEBT-ROOM-MGR-01 | room_manager.ts gom 10 Map phân tán vào GameRoomSession Aggregate Root, đưa file về 378 LOC (<= 400 LOC Tier 1) | IMP-205 / IMP-209 | IMP-210 (Bước 2) | ✅ ĐÃ ĐÓNG |
+| DEBT-IMP208P-01 | trade_modal.tsx:28 branch cash-only thiếu suffix "Tr." | IMP-208P | IMP-208P (Active Remediation) | ✅ ĐÃ KHẮC PHỤC (Inoculated TC-208P.09) |
 
 ---
 
@@ -616,8 +617,22 @@
 - **Phê chuẩn**: `plan-griller` (AUDITED), `qa-tester` (Station 1 RED), `implementer` (Station 2 GREEN), `scout` (Station 2.5 PASS), `spec-reviewer` (SPEC_PASS APPROVED), `ui-craft-reviewer` (VERDICT SHIP), `code-reviewer` (CODE_PASS APPROVED).
 - **Trạng thái**: ✅ Hoàn thành IMP-214 (2026-09-27).
 
-
-
-
-
-
+### [IMP-208P] Nâng Cấp Công Thái Học Giao Diện Giao Dịch BĐS Trên Mobile
+- **Mục tiêu**: Chuẩn hóa toàn diện công thái học 2D UI/UX cho toàn bộ luồng giao dịch Bất Động Sản (Sổ Đỏ, Mua BĐS, Sàn Đàm Phán P2P, Quản Lý Danh Mục & Thế Chấp) trên thiết bị di động (viewport 360px - 414px), đảm bảo zero-regression trên Desktop, thỏa mãn 100% Impeccable Craft Standards và bảo toàn nghiêm ngặt ngân sách LOC.
+- **Hạ tầng hoàn tất**:
+  * `src/client/ui/modals/purchase_decision_card.tsx` (155 LOC — Tier 2 <= 500 LOC): Nâng toàn bộ sàn cỡ chữ (radar badge, cell chips, building level, freeze banner, cash buffer) lên >= 11px, sạch hoàn toàn micro-text < 11px.
+  * `src/client/ui/modals/title_deed_rent_table.tsx` (263 LOC — Tier 2 <= 500 LOC): Nâng nhãn độc quyền `x2 ĐỘC QUYỀN`, `x1.5 ĐỘC QUYỀN`, các chip cấp bậc và mini-bar lên text-[11px] font-black; nút mở rộng và thu gọn biểu phí nâng đạt chuẩn `min-h-[44px]`.
+  * `src/client/ui/modals/portfolio_tab_header.tsx` (34 LOC — Tier 2 <= 500 LOC): Nâng các nút tab BĐS và Trái Phiếu lên `min-h-[44px]`, bổ sung `focus-visible:ring-2 focus-visible:ring-amber-400`.
+  * `src/client/ui/modals/trade_sentiment_meter.tsx` (104 LOC — Tier 2 <= 500 LOC): Chống tràn văn bản với `min-w-0 flex-1` và `truncate min-w-0` kèm thuộc tính `title`.
+  * `src/client/ui/modals/trade/trade_partner_strip.tsx` (74 LOC — Tier 2 <= 500 LOC): Bổ sung `focus-visible:ring-2 focus-visible:ring-amber-400` cho các tab chọn đối tác.
+  * `src/client/ui/modals/trade_modal.tsx` (279 LOC — Tier 2 <= 500 LOC): Tinh giản nhãn deal compound ` (1 • 5.000)` và thuần tiền mặt ` (5.000)` triệt tiêu hoàn toàn hậu tố `Tr.` theo bất biến IMP-197, chống rớt dòng trên màn 360px nhưng bảo toàn 100% test TC-202.07 ` (2 BĐS)` khi thuần tài sản; thêm span truncate và focus-visible.
+  * `src/client/ui/modals/trade/trade_column.tsx` (246 LOC — Tier 2 <= 500 LOC): Nâng cấp các phím gợi ý giá bán/mua đạt hiệu ứng bóng xúc giác 3D `shadow-[0_2px_0_0_#fcd34d]` (bán) và `shadow-[0_2px_0_0_#93c5fd]` (mua) kèm độ lún `active:translate-y-[2px]`.
+  * `src/client/ui/modals/property_portfolio_modal.tsx` (450 LOC — Tier 2 <= 500 LOC): Bố cục lại cụm nút hành động thẻ BĐS dạng lưới 2 cột `grid grid-cols-2 gap-1.5`, nút chính (Thế Chấp / Giải Chấp) chiếm `col-span-2`, nút phụ (Hạ Cấp / Sổ Đỏ) chiếm `col-span-1` hoặc `col-span-2`; nâng toàn bộ sàn chữ lên >= 11px; bổ sung focus ring cho thanh lọc.
+- **Kiểm thử & Bất biến**:
+  * `tests/contracts/imp208_mobile_real_estate_ui_polish.test.ts`: 16/16 atomic contract tests PASS 100% (5 facets).
+  * Điều hòa tiền điều kiện regex `tests/client/imp202_trade_modal_ergonomics_overhaul.test.ts`: 16/16 tests PASS 100%.
+  * `npx tsc --noEmit`: 0 lỗi. `npm run lint:ui`: 0 vi phạm (195 files scanned).
+  * `node .agents/tmp/check_fonts.mjs`: 0 font < 11px trên cả 8 tệp UI.
+  * Evidence Snapshot: `.agents/evidence/imp208p_snapshot.json` (`executed: true`).
+- **Phê chuẩn**: `plan-griller` (AUDITED), `qa-tester` (Station 1 RED), `implementer` (Station 2 GREEN), `scout` (Station 2.5 PASS), `spec-reviewer` (SPEC_PASS APPROVED), `ui-craft-reviewer` (VERDICT SHIP vòng 2).
+- **Trạng thái**: ✅ Hoàn thành IMP-208P (2026-09-27).

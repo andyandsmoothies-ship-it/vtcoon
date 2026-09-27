@@ -90,25 +90,25 @@ describe('Upgrades, Monopoly, Railroad & Utility — Slice 03 Task 2', () => {
     expect(playerB.balance).toBe(6_500);
   });
 
-  // [TC-03.4/MSS] Utility phí biến thiên 2D6
-  it('[TC-03.4/MSS] Utility: 1ô → 2D6×40, 2ô → 2D6×100, Full → 2D6×150', () => {
+  // [TC-03.4/MSS] Utility: 1ô → 1.000, 2ô → 2.500, Full → 3.500 (IMP-214)
+  it('[TC-03.4/MSS] Utility: 1ô → 1.000, 2ô → 2.500, Full → 3.500', () => {
     const playerA = createPlayer('A');
     const registry: PropertyRegistry = new Map([[12, 'A']]);
     const stateMap: PropertyStateMap = new Map();
 
-    // 1. 1 Utility: diceTotal=7, fee = 7×40 = 280
-    expect(calcUtilityFee('A', 7, registry, stateMap, 12)).toBe(280);
+    // 1. 1 Utility: fee = 1.000
+    expect(calcUtilityFee('A', 7, registry, stateMap, 12)).toBe(1_000);
 
-    // 2. Thêm ô 28 → 2 Utility: fee = 7×100 = 700
+    // 2. Thêm ô 28 → 2 Utility: fee = 2.500
     registry.set(28, 'A');
-    expect(calcUtilityFee('A', 7, registry, stateMap, 12)).toBe(700);
+    expect(calcUtilityFee('A', 7, registry, stateMap, 12)).toBe(2_500);
 
-    // 3. Nâng cấp Full → fee = 7×150 = 1.050; chi phí 1.000
+    // 3. Nâng cấp Full → fee = 3.500; chi phí 1.000
     playerA.balance = 5_000;
     const upRes = upgradeUtilityFull(playerA, 12, registry, stateMap);
     expect(upRes.success).toBe(true);
     expect(playerA.balance).toBe(4_000);
-    expect(calcUtilityFee('A', 7, registry, stateMap, 12)).toBe(1_050);
+    expect(calcUtilityFee('A', 7, registry, stateMap, 12)).toBe(3_500);
   });
 
   // [TC-03.6/MSS] Downgrade công trình

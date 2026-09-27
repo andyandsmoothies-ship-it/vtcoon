@@ -54,7 +54,7 @@ export function TitleDeedRentTable({
         <p className="text-[11px] font-bold text-slate-900 uppercase tracking-wider">
           {isRailroad ? 'Biểu Phí Theo Số Ga Sở Hữu' : isUtility ? 'Phí Dịch Vụ Cơ Bản' : 'Biểu Phí Dừng Chân'}
         </p>
-        <span className="text-[10px] text-slate-600 font-bold">VNĐ</span>
+        <span className="text-[11px] text-slate-600 font-bold">VNĐ</span>
       </div>
 
       {showCompact ? (
@@ -64,19 +64,19 @@ export function TitleDeedRentTable({
             {!isRailroad && !isUtility && (
               <>
                 <div className="text-center flex-1 border-r border-slate-200 pr-1">
-                  <span className="text-[10px] sm:text-[11px] text-slate-500 block font-semibold">C0 (ĐẤT)</span>
+                  <span className="text-[11px] sm:text-xs text-slate-500 block font-semibold">C0 (ĐẤT)</span>
                   <span className="font-mono text-[11px] sm:text-xs font-bold text-slate-800 whitespace-nowrap">
                     {formatCurrency(rents[0] ?? 0)}
                   </span>
                 </div>
                 <div className="text-center flex-1 border-r border-slate-200 px-1">
-                  <span className="text-[10px] sm:text-[11px] text-emerald-700 block font-black whitespace-nowrap">x2 ĐỘC QUYỀN</span>
+                  <span className="text-[11px] sm:text-xs text-emerald-700 block font-black whitespace-nowrap">x2 ĐỘC QUYỀN</span>
                   <span className="font-mono text-[11px] sm:text-xs font-bold text-emerald-700 whitespace-nowrap">
                     {formatCurrency((rents[0] ?? 0) * 2)}
                   </span>
                 </div>
                 <div className="text-center flex-1 pl-1">
-                  <span className="text-[10px] sm:text-[11px] text-amber-700 block font-semibold whitespace-nowrap">C3 (KHÁCH SẠN)</span>
+                  <span className="text-[11px] sm:text-xs text-amber-700 block font-semibold whitespace-nowrap">C3 (KHÁCH SẠN)</span>
                   <span className="font-mono text-[11px] sm:text-xs font-bold text-amber-800 whitespace-nowrap">
                     {formatCurrency(rents[3] ?? 0)}
                   </span>
@@ -86,27 +86,41 @@ export function TitleDeedRentTable({
 
             {isRailroad && (
               <div className="w-full flex items-center justify-between px-2 py-1">
-                <span className="text-[10px] sm:text-[11px] text-slate-600 font-bold whitespace-nowrap">CƯỚC 1-4 GA: (Toàn mạng lưới)</span>
-                <span className="font-mono text-[10px] sm:text-[11px] font-bold text-slate-800 whitespace-nowrap">
+                <span className="text-[11px] sm:text-xs text-slate-600 font-bold whitespace-nowrap">CƯỚC 1-4 GA: (Toàn mạng lưới)</span>
+                <span className="font-mono text-[11px] sm:text-xs font-bold text-slate-800 whitespace-nowrap">
                   {rents.map((r) => formatCurrency(r)).join(' / ')}
                 </span>
               </div>
             )}
 
             {isUtility && (
-              <div className="w-full flex items-center justify-between px-1">
-                <span className="text-[10px] sm:text-[11px] text-slate-600 font-bold whitespace-nowrap">CƯỚC TIỆN ÍCH:</span>
-                <span className="font-mono text-[10px] sm:text-[11px] font-bold text-slate-800 whitespace-nowrap">
-                  4× điểm xúc xắc (1 trạm) | 10× điểm xúc xắc (2 trạm)
-                </span>
-              </div>
+              <>
+                <div className="text-center flex-1 border-r border-slate-200 pr-1 min-w-0">
+                  <span className="text-[11px] sm:text-xs text-slate-500 block font-semibold truncate">1 Ô (CƠ BẢN)</span>
+                  <span className="font-mono text-[11px] sm:text-xs font-bold text-slate-800 whitespace-nowrap">
+                    1.000
+                  </span>
+                </div>
+                <div className="text-center flex-1 border-r border-slate-200 px-1 min-w-0">
+                  <span className="text-[11px] sm:text-xs text-emerald-700 block font-black whitespace-nowrap">2 Ô (ĐỘC QUYỀN)</span>
+                  <span className="font-mono text-[11px] sm:text-xs font-bold text-emerald-700 whitespace-nowrap">
+                    2.500
+                  </span>
+                </div>
+                <div className="text-center flex-1 pl-1 min-w-0">
+                  <span className="text-[11px] sm:text-xs text-amber-700 block font-semibold whitespace-nowrap">NÂNG CẤP 5G</span>
+                  <span className="font-mono text-[11px] sm:text-xs font-bold text-amber-800 whitespace-nowrap">
+                    3.500
+                  </span>
+                </div>
+              </>
             )}
           </div>
 
           <button
             type="button"
             onClick={() => setIsExpanded(true)}
-            className="w-full text-center py-1 text-[10px] sm:text-[11px] font-bold text-amber-800 hover:text-amber-900 bg-amber-100/60 hover:bg-amber-100 border border-amber-300/80 rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1"
+            className="w-full text-center py-2 min-h-[44px] text-[11px] sm:text-xs font-bold text-amber-800 hover:text-amber-900 bg-amber-100/60 hover:bg-amber-100 border border-amber-300/80 rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1.5 active:scale-[0.98]"
             data-testid="toggle-rent-tiers"
           >
             <span>▾</span>
@@ -122,17 +136,51 @@ export function TitleDeedRentTable({
       ) : (
         <div className="space-y-1.5 sm:space-y-2">
           {isUtility ? (
-            <div className="space-y-1.5 sm:space-y-2 text-xs text-slate-900">
-              <div className="flex justify-between items-center p-1.5 sm:p-2 rounded-lg bg-white/90 border border-slate-200">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm sm:text-base" aria-hidden="true">⚡</span>
-                  <span className="font-semibold text-slate-900">Phí cơ sở (1 trạm):</span>
+            <div className="space-y-1 sm:space-y-1.5 text-xs text-slate-900">
+              <div className="flex justify-between items-center px-2 py-1.5 rounded-lg bg-white/90 border border-slate-200">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <span className="text-sm shrink-0" aria-hidden="true">⚡</span>
+                  <span className="text-[11px] font-black px-1.5 py-0.5 rounded border shrink-0 bg-slate-100 text-slate-900 border-slate-300">
+                    1 Ô
+                  </span>
+                  <span className="font-bold text-[11px] sm:text-xs text-slate-900 truncate">
+                    Cước Dịch Vụ Cơ Bản
+                  </span>
                 </div>
-                <span className="font-bold text-slate-900">{formatCurrency(rents[0] ?? 0)}</span>
+                <span className="font-mono font-bold text-[11px] sm:text-xs text-slate-900 shrink-0">
+                  1.000
+                </span>
               </div>
-              <p className="text-[10px] text-slate-600 italic px-1">
-                * Thu 4× điểm xúc xắc (1 trạm) hoặc 10× điểm xúc xắc (khi sở hữu cả 2 trạm).
-              </p>
+
+              <div className="flex justify-between items-center px-2 py-1.5 rounded-lg bg-emerald-50/80 border border-emerald-300">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <span className="text-sm shrink-0" aria-hidden="true">⚡⚡</span>
+                  <span className="text-[11px] font-black px-1.5 py-0.5 rounded border shrink-0 bg-emerald-100 text-emerald-900 border-emerald-400">
+                    2 Ô
+                  </span>
+                  <span className="font-bold text-[11px] sm:text-xs text-emerald-950 truncate">
+                    Độc Quyền Mạng Lưới
+                  </span>
+                </div>
+                <span className="font-mono font-bold text-[11px] sm:text-xs text-emerald-800 shrink-0">
+                  2.500
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center px-2 py-1.5 rounded-lg bg-amber-100/70 border border-amber-400">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <span className="text-sm shrink-0" aria-hidden="true">👑</span>
+                  <span className="text-[11px] font-black px-1.5 py-0.5 rounded border shrink-0 bg-amber-200 text-amber-900 border-amber-400">
+                    5G
+                  </span>
+                  <span className="font-bold text-[11px] sm:text-xs text-amber-950 truncate">
+                    Nâng Cấp Smart Grid / 5G
+                  </span>
+                </div>
+                <span className="font-mono font-black text-[11px] sm:text-xs text-amber-900 shrink-0">
+                  3.500
+                </span>
+              </div>
             </div>
           ) : (
             <div className="space-y-1 sm:space-y-1.5">
@@ -157,7 +205,7 @@ export function TitleDeedRentTable({
                         {tier?.icon}
                       </span>
                       <span
-                        className={`text-[9px] sm:text-[10px] font-black px-1 sm:px-1.5 py-0.2 sm:py-0.5 rounded border shrink-0 ${
+                        className={`text-[11px] font-black px-1 sm:px-1.5 py-0.5 rounded border shrink-0 ${
                           isMax
                             ? 'bg-amber-200 text-amber-900 border-amber-400'
                             : 'bg-slate-100 text-slate-900 border-slate-300'
@@ -169,7 +217,7 @@ export function TitleDeedRentTable({
                         <span className="font-bold text-[11px] sm:text-xs text-slate-900 truncate">
                           {tier?.label}
                         </span>
-                        <span className="text-[9px] sm:text-[10px] text-slate-600 font-medium truncate">
+                        <span className="text-[11px] text-slate-600 font-medium truncate">
                           {cost && cost > 0 ? `Nâng cấp: +${formatCurrency(cost)}` : tier?.sub}
                         </span>
                       </div>
@@ -185,10 +233,10 @@ export function TitleDeedRentTable({
                         )}
                       </span>
                       {idx === 0 && hasMonopoly && !isRailroad && !isUtility && (
-                        <span className="text-[8px] sm:text-[9px] font-extrabold text-emerald-700">x2 ĐỘC QUYỀN</span>
+                        <span className="text-[11px] font-black text-emerald-700 tracking-tight">x2 ĐỘC QUYỀN</span>
                       )}
                       {idx === 3 && hasMonopoly && !isRailroad && !isUtility && (
-                        <span className="text-[8px] sm:text-[9px] font-extrabold text-amber-700">x1.5 ĐỘC QUYỀN</span>
+                        <span className="text-[11px] font-black text-amber-700 tracking-tight">x1.5 ĐỘC QUYỀN</span>
                       )}
                     </div>
                   </div>
@@ -201,7 +249,7 @@ export function TitleDeedRentTable({
             <button
               type="button"
               onClick={() => setIsExpanded(false)}
-              className="w-full text-center py-1 text-[10px] sm:text-[11px] font-bold text-slate-600 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1"
+              className="w-full text-center py-2 min-h-[44px] text-[11px] sm:text-xs font-bold text-slate-600 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1.5 active:scale-[0.98]"
               data-testid="collapse-rent-tiers"
             >
               <span>▴</span>

@@ -431,7 +431,7 @@ describe('[TC-193.01/MSS..TC-193.16/MSS][UC-IMP193] Mobile Ergonomics, Auction R
         ['src/client/ui/floating_numbers.tsx', 400],
         ['src/client/network/activity_badge_dispatcher.ts', 300],
         ['src/client/ui/modals/auction_modal.tsx', 450],
-        ['src/client/ui/modals/auction_district_card.tsx', 220],
+        ['src/client/ui/modals/auction_district_card.tsx', 230], // IMP-214: compact grid sync +3 LOC
         ['src/server/network/turn_orchestrator.ts', 400],
       ];
       const overBudgetFiles = budgetMap.filter(([file, max]) => {

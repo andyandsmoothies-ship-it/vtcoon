@@ -368,7 +368,7 @@ export function AuctionModal({
                   }`}
                 >
                   <span className="text-[11px] sm:text-xs md:text-sm font-black tracking-wide whitespace-nowrap">
-                    {targetBid === 0 ? 'Bắt Đáy (0)' : (diff > 0 ? `+${formatCurrency(diff)} Tr.` : `${formatCurrency(targetBid)} Tr.`)}
+                    {targetBid === 0 ? 'Bắt Đáy (0)' : (diff > 0 ? `+${formatCurrency(diff)}` : `${formatCurrency(targetBid)}`)}
                   </span>
                   <span className={`text-[10px] sm:text-xs font-semibold mt-0.5 whitespace-nowrap ${canAfford && !isConcluded ? 'text-amber-950' : 'text-slate-400'}`}>
                     ({formatCurrency(targetBid)})

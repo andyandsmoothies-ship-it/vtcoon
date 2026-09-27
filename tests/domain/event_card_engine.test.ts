@@ -417,10 +417,10 @@ describe('[TC-04.T4-DIP/MSS] Thẻ Miễn Trừ Ngoại Giao (CC_DIPLOMATIC) tro
     expect(visitor.hand).toContain(ChanceCardId.CC_DIPLOMATIC);
     expect(chanceDiscard).toHaveLength(0);
 
-    // Dừng ô 12 (Utility 1 ô, diceTotal=8 -> 8 * 40 = 320)
+    // Dừng ô 12 (Utility 1 ô, phí phẳng = 1.000) (IMP-214)
     const resUtil = handleLanding(visitor, 12, registry, [visitor, owner], undefined, 8, undefined, undefined, chanceDiscard);
-    expect(resUtil.rentAmount).toBe(320);
-    expect(visitor.balance).toBe(4500 - 320);
+    expect(resUtil.rentAmount).toBe(1000);
+    expect(visitor.balance).toBe(4500 - 1000);
     expect(visitor.hand).toContain(ChanceCardId.CC_DIPLOMATIC);
     expect(chanceDiscard).toHaveLength(0);
   });

@@ -45,13 +45,24 @@ function syncDiceRoll(delta: DeltaPayload, state: GameState): void {
   try { AudioEngine.playSfx(SoundEffect.DICE_ROLL); } catch (err) { console.warn('[applyDelta] AudioEngine.playSfx error:', err); }
 }
 
-function resolveTurnPlayerId(delta: DeltaPayload): string | undefined {
+function resolveTurnPlayerId(delta: DeltaPayload, state?: GameState): string | undefined {
   if (delta.currentTurnPlayerId) return delta.currentTurnPlayerId;
-  return delta.currentPlayerIndex !== undefined ? delta.players?.[delta.currentPlayerIndex]?.id : undefined;
+  if (delta.currentPlayerIndex !== undefined) {
+    const playerAtIndex = delta.players?.[delta.currentPlayerIndex];
+    if (playerAtIndex?.id) {
+      return playerAtIndex.id;
+    }
+    if (state?.playersInfo) {
+      const playerIds = Object.keys(state.playersInfo);
+      const fallbackId = playerIds[delta.currentPlayerIndex];
+      if (fallbackId) return fallbackId;
+    }
+  }
+  return undefined;
 }
 
 function syncTurnAndTimer(delta: DeltaPayload, state: GameState): void {
-  const turnPlayerId = resolveTurnPlayerId(delta);
+  const turnPlayerId = resolveTurnPlayerId(delta, state);
   if (turnPlayerId && state.currentTurnPlayerId !== turnPlayerId) {
     const myPid = useLobbyStore.getState().myPlayerId;
     const isBankrupt = Boolean(state.playersInfo[myPid]?.bankrupt);
@@ -63,7 +74,19 @@ function syncTurnAndTimer(delta: DeltaPayload, state: GameState): void {
     state.setHasRolledThisTurn(false); // [IMP-182] Triệt tiêu Turn N+1 Leak
     state.setHasUserCustomCamera?.(false); // [IMP-190] Reset camera custom orbit on new player turn
   } else if (delta.timeRemaining !== undefined) {
-    state.setTurnTimeRemaining(delta.timeRemaining);
+    const isPhaseChange = delta.turnPhase !== undefined && delta.turnPhase !== state.turnPhase;
+    const isNewDiceRoll = delta.diceSeq !== undefined && delta.diceSeq !== state.lastDiceSeq;
+    const isTurnReset = isPhaseChange || isNewDiceRoll;
+
+    // [IMP-207] Monotonic countdown guard: chong hien tuong rung giat (41s -> 42s -> 41s)
+    // Bao toan 100% reset 60s khi do Doi (Doubles) hoac chuyen Phase
+    if (
+      isTurnReset ||
+      delta.timeRemaining <= state.turnTimeRemaining ||
+      delta.timeRemaining - state.turnTimeRemaining > 2
+    ) {
+      state.setTurnTimeRemaining(delta.timeRemaining);
+    }
   }
   if (delta.turnPhase !== undefined) {
     state.setTurnPhase(delta.turnPhase);

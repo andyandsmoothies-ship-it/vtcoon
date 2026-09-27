@@ -439,7 +439,7 @@ describe('[IMP-190] Specialized Devices & Camera Snap Universal Contract Suite',
       expect(getLineCount('../../src/client/3d/tile_texture_generator.ts')).toBeLessThanOrEqual(240);
       expect(getLineCount('../../src/client/3d/board_tile.tsx')).toBeLessThanOrEqual(450);
       expect(getLineCount('../../src/client/game_canvas.tsx')).toBeLessThanOrEqual(450);
-      expect(getLineCount('../../src/client/ui/top_bar.tsx')).toBeLessThanOrEqual(220);
+      expect(getLineCount('../../src/client/ui/top_bar.tsx')).toBeLessThanOrEqual(250); // IMP-214: +28 LOC (utility fee display)
       expect(getLineCount('../../src/client/ui/player_hud_list.tsx')).toBeLessThanOrEqual(55);
     });
   });

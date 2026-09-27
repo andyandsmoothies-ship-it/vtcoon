@@ -6,6 +6,29 @@ import type { PropertyRegistry, PropertyStateMap } from '../domain/property_mana
 import { drawMarketCard, drawChanceCard } from '../domain/event_card_engine';
 import { sendToAudit } from './audit_manager';
 
+export const TELECOM_DATA_FEE = 150;
+
+function processViettelTelecomFee(
+  room: Room,
+  cur: Player,
+  reg: PropertyRegistry,
+  sm: PropertyStateMap,
+): void {
+  const viettelOwnerId = reg.get(28);
+  if (!viettelOwnerId || viettelOwnerId === cur.id) return;
+  const viettelOwner = room.players.find((p) => p.id === viettelOwnerId);
+  if (!viettelOwner || viettelOwner.bankrupt) return;
+  if (viettelOwner.inAudit || (viettelOwner.auditTurnsLeft ?? 0) > 0) return;
+  const isMortgaged = Boolean(
+    viettelOwner.mortgagedProperties?.includes(28) || sm.get(28)?.isMortgaged,
+  );
+  if (isMortgaged) return;
+
+  const actualPaid = Math.max(0, cur.balance);
+  cur.balance -= TELECOM_DATA_FEE;
+  viettelOwner.balance += Math.min(TELECOM_DATA_FEE, actualPaid);
+}
+
 export function handleSpecialCell(
   room: Room,
   cur: Player,
@@ -16,9 +39,11 @@ export function handleSpecialCell(
 ): boolean {
   switch (type) {
     case CellType.Market:
+      processViettelTelecomFee(room, cur, reg, sm);
       drawMarketCard(room, reg, sm, deckRng);
       return true;
     case CellType.Chance:
+      processViettelTelecomFee(room, cur, reg, sm);
       drawChanceCard(room, cur, deckRng, reg, sm, room.permanentRentBonus);
       return true;
     case CellType.Hose:

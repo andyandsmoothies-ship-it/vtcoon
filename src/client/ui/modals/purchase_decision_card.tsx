@@ -57,7 +57,7 @@ export function PurchaseDecisionCard({
             <span>🧭</span>
             <span>{radar.isRailroad ? 'Hạ Tầng' : radar.isUtility ? 'Tiện Ích' : 'Bộ Màu Quy Hoạch'} ({radar.ownedCount}/{radar.totalCells})</span>
           </span>
-          <span className="px-2 py-0.5 rounded-full font-black text-[10px] bg-white border border-slate-300 shadow-sm text-slate-800 whitespace-nowrap shrink-0" data-testid="radar-strategy-badge">
+          <span className="px-2 py-0.5 rounded-full font-black text-[11px] bg-white border border-slate-300 shadow-sm text-slate-800 whitespace-nowrap shrink-0" data-testid="radar-strategy-badge">
             {radar.badge}
           </span>
         </div>
@@ -92,25 +92,25 @@ export function PurchaseDecisionCard({
               <div
                 key={c.cellIndex}
                 data-testid={`district-cell-chip-${c.cellIndex}`}
-                className={`px-1 sm:px-2 py-1 rounded-xl border text-[9.5px] sm:text-[11px] min-w-0 flex flex-col justify-between transition-all min-h-[3.25rem] sm:min-h-[3.5rem] ${
+                className={`px-1 sm:px-2 py-1 rounded-xl border text-[11px] sm:text-xs min-w-0 flex flex-col justify-between transition-all min-h-[3.25rem] sm:min-h-[3.5rem] ${
                   c.isTarget ? 'ring-2 ring-amber-400 bg-amber-50/80 border-amber-400' : 'bg-amber-50/60 border-amber-900/10'
                 }`}
                 title={c.ownerName ? `Sở hữu: ${c.ownerName}` : c.isTarget ? 'Ô mục tiêu' : 'Chưa có chủ'}
               >
                 <div className="flex items-center justify-between gap-1 mb-1 min-w-0">
-                  <span className="font-bold text-slate-900 line-clamp-2 leading-tight text-[9.5px] sm:text-xs block" title={c.name}>
+                  <span className="font-bold text-slate-900 line-clamp-2 leading-tight text-[11px] sm:text-xs block" title={c.name}>
                     {c.name}
                   </span>
                   {level > 0 && (
                     <span
-                      className="text-[9px] font-bold px-1 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300 shrink-0 inline-flex items-center gap-0.5"
+                      className="text-[11px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300 shrink-0 inline-flex items-center gap-0.5"
                       title={`Cấp công trình: ${level}`}
                     >
                       🏠 {level}
                     </span>
                   )}
                 </div>
-                <div className={`text-[9.5px] sm:text-xs py-0.5 rounded-lg text-center whitespace-nowrap border mt-auto ${badgeClasses}`}>
+                <div className={`text-[11px] sm:text-xs py-0.5 rounded-lg text-center whitespace-nowrap border mt-auto ${badgeClasses}`}>
                   {badgeLabel}
                 </div>
               </div>
@@ -126,14 +126,14 @@ export function PurchaseDecisionCard({
           data-testid="freeze-trade-banner"
         >
           <span>❄️ Thị trường đóng băng</span>
-          <span className="text-[10px] text-sky-700 font-normal">Tạm dừng mua bán & thế chấp</span>
+          <span className="text-[11px] text-sky-700 font-normal">Tạm dừng mua bán & thế chấp</span>
         </div>
       ) : (
         <div className="pt-1.5 border-t border-amber-900/10 space-y-1">
           <div className="flex items-center justify-between gap-1 text-[11px]">
             <span className="text-slate-600 font-medium whitespace-nowrap">Thanh khoản sau mua:</span>
             <span
-              className={`px-2 py-0.5 rounded-full text-[10px] font-black border whitespace-nowrap shrink-0 ${TONE_CLASSES[cashBuffer.tone]}`}
+              className={`px-2 py-0.5 rounded-full text-[11px] font-black border whitespace-nowrap shrink-0 ${TONE_CLASSES[cashBuffer.tone]}`}
               data-testid="cash-buffer-badge"
             >
               {cashBuffer.tone === 'emerald' ? '🟢' : cashBuffer.tone === 'amber' ? '🟡' : '🔴'} {cashBuffer.label}

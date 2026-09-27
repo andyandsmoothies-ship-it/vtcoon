@@ -123,7 +123,7 @@ export function PropertyPortfolioModal({
             </div>
           </div>
           <div className="bg-white border border-rose-300 rounded-lg px-2.5 py-1 text-right shrink-0">
-            <span className="text-[10px] text-slate-500 block">Số tiền còn thiếu</span>
+            <span className="text-[11px] text-slate-500 block">Số tiền còn thiếu</span>
             <span className="font-mono font-black text-rose-600 text-xs">
               {deficitAmount.toLocaleString('vi-VN')}
             </span>
@@ -147,7 +147,7 @@ export function PropertyPortfolioModal({
                 key={key}
                 type="button"
                 onClick={() => setFilter(key)}
-                className={`min-h-[44px] px-3.5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                className={`min-h-[44px] px-3.5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
                   filter === key ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
@@ -235,7 +235,7 @@ export function PropertyPortfolioModal({
                         </span>
                         {totalInGroup > 0 && (
                           <span
-                            className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold shrink-0 ${
+                            className={`px-1.5 py-0.5 rounded text-[11px] font-mono font-bold shrink-0 ${
                               isMonopoly
                                 ? 'bg-amber-100 text-amber-900 border border-amber-300'
                                 : 'bg-slate-100 text-slate-600 border border-slate-200'
@@ -245,7 +245,7 @@ export function PropertyPortfolioModal({
                           </span>
                         )}
                       </div>
-                      <span className="text-[10px] font-mono text-slate-500 shrink-0">
+                      <span className="text-[11px] font-mono text-slate-500 shrink-0">
                         #{cellIndex}
                       </span>
                     </div>
@@ -286,14 +286,14 @@ export function PropertyPortfolioModal({
                   ) : (
                     insight.missingPieces.length > 0 && (
                       <div data-testid="property-missing-pieces" className="my-2 p-2 bg-slate-50 border border-slate-200 rounded-xl space-y-1.5">
-                        <div className="flex items-center justify-between text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                        <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                           <span>Mảnh Ghép Còn Thiếu ({insight.missingPieces.length})</span>
                           <span className="font-mono">{insight.ownedCount}/{insight.totalCells}</span>
                         </div>
                         {insight.missingPieces.map((piece) => (
                           <div key={piece.cellIndex} className="flex items-center justify-between gap-2 p-1.5 bg-white border border-slate-200 rounded-lg text-xs">
                             <div className="flex items-center gap-1.5 min-w-0">
-                              <span className="text-[10px] font-mono text-slate-400">#{piece.cellIndex}</span>
+                              <span className="text-[11px] font-mono text-slate-400">#{piece.cellIndex}</span>
                               <span className="font-bold text-slate-800 truncate">{piece.name}</span>
                             </div>
                             <div className="flex items-center gap-1.5 shrink-0">
@@ -369,7 +369,7 @@ export function PropertyPortfolioModal({
                         </span>
                       </button>
                       {!upgradeInfo.canUpgrade && (upgradeInfo.blockedReason ?? upgradeInfo.reason) && (
-                        <span className="text-[10px] text-slate-500 italic mt-1 block text-center truncate" title={upgradeInfo.blockedReason ?? upgradeInfo.reason}>
+                        <span className="text-[11px] text-slate-500 italic mt-1 block text-center truncate" title={upgradeInfo.blockedReason ?? upgradeInfo.reason}>
                           {upgradeInfo.blockedReason ?? upgradeInfo.reason}
                         </span>
                       )}
@@ -377,7 +377,7 @@ export function PropertyPortfolioModal({
                   )}
 
                   {/* Nút hành động khác */}
-                  <div className="pt-2 border-t border-slate-200 flex flex-wrap gap-1.5 text-xs">
+                  <div className="pt-2 border-t border-slate-200 grid grid-cols-2 gap-1.5 text-xs">
                     {!isMort && (
                       <button
                         type="button"
@@ -385,7 +385,7 @@ export function PropertyPortfolioModal({
                         onClick={() => actionState.canMortgage && onMortgage?.(cellIndex)}
                         disabled={!actionState.canMortgage}
                         title={actionState.mortgageBlockedReason}
-                        className={`flex-1 min-h-[44px] px-3 py-2 font-bold rounded-lg border-2 text-xs transition-all inline-flex items-center justify-center ${
+                        className={`col-span-2 min-h-[44px] px-3 py-2 font-bold rounded-lg border-2 text-xs transition-all inline-flex items-center justify-center ${
                           actionState.canMortgage
                             ? 'bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-300 shadow-[0_2px_0_0_#fecdd3] active:translate-y-[1px] cursor-pointer'
                             : 'bg-slate-100 text-slate-400 border-slate-200 shadow-none cursor-not-allowed opacity-75'
@@ -403,7 +403,7 @@ export function PropertyPortfolioModal({
                         data-testid={`redeem-btn-${cellIndex}`}
                         onClick={() => onRedeem?.(cellIndex)}
                         disabled={currentBalance < redeemCost}
-                        className="flex-1 min-h-[44px] px-3 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold rounded-lg border-2 border-emerald-800 shadow-[0_3px_0_0_#065f46] active:translate-y-[2px] transition-all text-xs cursor-pointer disabled:cursor-not-allowed disabled:shadow-none inline-flex items-center justify-center"
+                        className="col-span-2 min-h-[44px] px-3 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold rounded-lg border-2 border-emerald-800 shadow-[0_3px_0_0_#065f46] active:translate-y-[2px] transition-all text-xs cursor-pointer disabled:cursor-not-allowed disabled:shadow-none inline-flex items-center justify-center"
                       >
                         Giải Chấp (-{formatCurrency(redeemCost)})
                       </button>
@@ -416,7 +416,7 @@ export function PropertyPortfolioModal({
                         onClick={() => actionState.canDowngrade && onDowngrade(cellIndex)}
                         disabled={!actionState.canDowngrade}
                         title={actionState.downgradeBlockedReason}
-                        className={`min-h-[44px] px-3 py-2 font-bold rounded-lg border-2 text-xs transition-all inline-flex items-center justify-center ${
+                        className={`col-span-1 min-h-[44px] px-3 py-2 font-bold rounded-lg border-2 text-xs transition-all inline-flex items-center justify-center ${
                           actionState.canDowngrade
                             ? 'bg-rose-100 hover:bg-rose-200 text-rose-800 border-rose-300 shadow-[0_2px_0_0_#fecdd3] active:translate-y-[1px] cursor-pointer'
                             : 'bg-slate-100 text-slate-400 border-slate-200 shadow-none cursor-not-allowed opacity-75'
@@ -430,7 +430,7 @@ export function PropertyPortfolioModal({
                       <button
                         type="button"
                         onClick={() => onSelectDeed(cellIndex)}
-                        className="min-w-[44px] min-h-[44px] px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-lg border-2 border-slate-300 shadow-[0_2px_0_0_#cbd5e1] active:shadow-none active:translate-y-[1px] text-xs cursor-pointer inline-flex items-center justify-center"
+                        className={`${level > 0 && !isMort && onDowngrade ? 'col-span-1' : 'col-span-2'} min-h-[44px] px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-lg border-2 border-slate-300 shadow-[0_2px_0_0_#cbd5e1] active:shadow-none active:translate-y-[1px] text-xs cursor-pointer inline-flex items-center justify-center`}
                       >
                         Sổ Đỏ ↗
                       </button>

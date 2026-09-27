@@ -157,10 +157,10 @@ describe('[TC-63/MSS][UC-IMP63] Lean Tabletop HUD & GPU Optimization Contract Su
   // FACET 2: Tabletop Solid Ivory & Ink Contrast (State Reactivity)
   // =========================================================================
   describe('[TC-63.2/MSS][UC-IMP63] Facet 2: Tabletop Solid Ivory & Ink Contrast', () => {
-    it('[TC-63.2/MSS] TopBar sử dụng nền giấy ngà sáng #FFFDF8 và viền mực đen border-slate-900', () => {
+    it('[TC-63.2/MSS] TopBar sử dụng nền giấy ngà sáng #FFFDF8 và viền border-slate-300/80', () => {
       const html = renderToStaticMarkup(React.createElement(TopBar));
       expect(html).toContain('bg-[#FFFDF8]');
-      expect(html).toContain('border-slate-900');
+      expect(html).toContain('border-slate-300/80');
     });
 
     it('[TC-63.2/MSS] ActionDock sử dụng nền giấy ngà sáng #FFFDF8 và viền border-slate-300/80', () => {

@@ -173,7 +173,9 @@ describe('[UC-IMP140] Title Deed UI/UX & Asset Preloading Contract Tests', () =>
       React.createElement(TitleDeedModal, { cellIndex: 12, canBuy: true, isOwned: false })
     );
     expect(html).toContain('Tiện Ích Quốc Gia');
-    expect(html).toContain('4× điểm xúc xắc');
+    // IMP-214: flat fee display — "1 ô:" cũ → grid 3-col "1 Ô (CƠ BẢN)" + "1.000 Tr."
+    expect(html).toContain('1 Ô (CƠ BẢN)');
+    expect(html).toContain('1.000 Tr.');
   });
 
   it('[TC-140.16/MSS][UC-IMP140][Facet-1/Boundary] Nút Mua BĐS và Từ Chối Mua bảo toàn touch target min-h-[48px], active:translate-y-[3px]', () => {

@@ -111,14 +111,12 @@ export function useAppSession(
       useLobbyStore.getState().setGameStarted(true);
     }
 
-    if (delta.timeRemaining !== undefined) {
-      useGameStore.getState().setTurnTimeRemaining(delta.timeRemaining);
-    } else if (delta.currentPlayerIndex !== undefined && delta.currentPlayerIndex !== prevPlayerIndexRef.current) {
+    // [IMP-207] SSOT: Timer synchronization is exclusively handled by apply_delta.ts (syncTurnAndTimer)
+    if (delta.currentPlayerIndex !== undefined) {
       prevPlayerIndexRef.current = delta.currentPlayerIndex;
-      useGameStore.getState().setTurnTimeRemaining(60);
-    } else if (delta.currentTurnPlayerId && delta.currentTurnPlayerId !== prevTurnPlayerRef.current) {
+    }
+    if (delta.currentTurnPlayerId) {
       prevTurnPlayerRef.current = delta.currentTurnPlayerId;
-      useGameStore.getState().setTurnTimeRemaining(60);
     }
 
     if (delta.players && delta.tick > 0) {

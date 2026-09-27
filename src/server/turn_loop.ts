@@ -6,6 +6,7 @@ import { checkPassedGo, calculateGoSalary, BOARD_SIZE, TurnPhase } from '../doma
 import { rollDice } from '../domain/dice';
 import type { PropertyRegistry, PropertyStateMap, PropertyState } from '../domain/property_manager';
 import { handleLanding, LandingResult, calculateGoPropertyTax, PROPERTY_DEEDS, GO_PROPERTY_TAX_CAP } from '../domain/property_manager';
+import { calculateElectricBill } from '../domain/property_rent';
 import { BOARD_CONFIG } from '../domain/board_config';
 import { decayModifiers } from '../domain/event_card_engine';
 import { processTreasuryStimulus } from '../domain/treasury_stimulus';
@@ -51,6 +52,31 @@ function processPendingDebts(room: Room, player: Player): void {
       if (player.balance < 0) checkInsolvency(room);
     }
   }
+}
+
+// IMP-214: Thu hóa đơn tiền điện EVN khi đối thủ vượt GO
+function processGoElectricBilling(
+  room: Room,
+  player: Player,
+  registry: PropertyRegistry,
+  stateMap?: PropertyStateMap,
+): void {
+  const evnOwnerId = registry.get(12);
+  if (!evnOwnerId || evnOwnerId === player.id) return;
+  const evnOwner = room.players.find((p) => p.id === evnOwnerId);
+  if (!evnOwner || evnOwner.bankrupt) return;
+  if (evnOwner.inAudit || (evnOwner.auditTurnsLeft ?? 0) > 0) return;
+  const isMortgaged = Boolean(
+    evnOwner.mortgagedProperties?.includes(12) || stateMap?.get(12)?.isMortgaged,
+  );
+  if (isMortgaged) return;
+
+  const electricBill = calculateElectricBill(player.id, registry, stateMap);
+  if (electricBill <= 0) return;
+
+  const actualPaid = Math.max(0, player.balance);
+  player.balance -= electricBill;
+  evnOwner.balance += Math.min(electricBill, actualPaid);
 }
 
 // [DEBT-S06-03] CC_SLOW_BUILD: kiểm tra và xử lý unbuiltRounds sau mỗi lượt
@@ -156,6 +182,8 @@ export function executeTurnRoll(
     }
     // UC-052: Thu lãi thế chấp khi vượt GO
     collectMortgageInterest(room, current.id);
+    // IMP-214: Thu hóa đơn tiền điện EVN
+    processGoElectricBilling(room, current, reg, sm);
   }
 
   const cell = BOARD_CONFIG[newPos];

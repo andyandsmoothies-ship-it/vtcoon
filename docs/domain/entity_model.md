@@ -117,13 +117,16 @@ Toàn bộ 28 ô tài sản kinh tế trên bàn cờ được phân chia thành
 1. **Tập Đoàn Điện Lực - EVN (Ô 12)**
 2. **Tập Đoàn Viễn Thông - Viettel (Ô 28)**
 
-**Nội dung in mặt sau của 2 thẻ:**
-- **Mức phí tiêu chuẩn:**
-  - Nếu sở hữu 1 Tiện ích: Phí = **Điểm 2D6 x 40 Tr. VNĐ**.
-  - Nếu sở hữu cả 2 Tiện ích: Phí = **Điểm 2D6 x 100 Tr. VNĐ**.
+**Nội dung in mặt sau của 2 thẻ (IMP-214):**
+- **Mức phí dừng chân phẳng (Flat Landing Fee):**
+  - Sở hữu 1 Tiện ích: Phí = **1.000 Tr. VNĐ**.
+  - Sở hữu cả 2 Tiện ích: Phí = **2.500 Tr. VNĐ**.
 - **Gói nâng cấp Lưới Điện Thông Minh / Trạm Dữ Liệu 5G:**
-  - **Chi phí lắp đặt:** **$1.000$ Tr. VNĐ/tiện ích**.
-  - **Hiệu lực:** Phí nộp nâng lên mức = **Điểm 2D6 x 150 Tr. VNĐ**.
+  - **Chi phí lắp đặt:** **1.000 Tr. VNĐ/tiện ích**.
+  - **Hiệu lực:** Phí dừng chân phẳng nâng lên mức = **3.500 Tr. VNĐ**.
+- **Cước mạng lưới hạ tầng toàn bàn cờ:**
+  - **EVN (Ô 12):** Thu tiền điện khi đối thủ qua/dừng tại ô GO: C1 = 100 Tr., C2 = 200 Tr., C3 = 300 Tr./ô (C0 = 0 Tr.).
+  - **Viettel (Ô 28):** Thu cước kết nối dữ liệu 150 Tr. VNĐ khi đối thủ dừng tại ô Thị Trường (Market) hoặc Cơ Hội (Chance).
 
 ---
 
@@ -182,10 +185,11 @@ Toàn bộ 28 ô tài sản kinh tế trên bàn cờ được phân chia thành
 * **Cấp 2 (Resort Thể Thao Biển & Lướt Ván Diều):** Chi phí $+980$ Tr. VNĐ (70%). Thu phí $1.120$ Tr. VNĐ (80%).  
 * **Cấp 3 - Max (Quần Thể Nghỉ Dưỡng Sinh Thái & Sân Golf Đồi Cát):** Chi phí $+1.680$ Tr. VNĐ (120%). Thu phí $3.500$ Tr. VNĐ (250%).
 
-#### Ô 12: Tập Đoàn Điện Lực (EVN) — Tiện ích Năng lượng
+#### Ô 12: Tập Đoàn Điện Lực (EVN) — Tiện ích Năng lượng (IMP-214)
 * **Giá mua quyền khai thác:** $1.500$ Tr. VNĐ.  
-* **Cơ chế phí cơ sở:** Người dừng tại ô tung $2D6$. Phí nộp = Điểm xúc xắc x 40 Tr. VNĐ (nếu chủ sở hữu có 1 tiện ích) hoặc x 100 Tr. VNĐ (nếu sở hữu cả EVN và Viettel).  
-* **Nâng cấp Full (Lưới Điện Thông Minh & Năng Lượng Tái Tạo):** Chi phí $1.000$ Tr. VNĐ. Tăng tỷ lệ thu phí lên: Điểm xúc xắc x 150 Tr. VNĐ.
+* **Cơ chế phí cơ sở (Phí dừng chân phẳng):** Thu phẳng $1.000$ Tr. VNĐ (1 tiện ích) hoặc $2.500$ Tr. VNĐ (sở hữu cả EVN và Viettel).  
+* **Nâng cấp Full (Lưới Điện Thông Minh & Năng Lượng Tái Tạo):** Chi phí $1.000$ Tr. VNĐ. Phí dừng chân tăng lên $3.500$ Tr. VNĐ.  
+* **Cơ chế độc quyền Lưới điện:** Thu tiền điện toàn bàn cờ mỗi khi đối thủ qua/dừng tại ô GO: C1 = $100$ Tr., C2 = $200$ Tr., C3 = $300$ Tr./ô BĐS (C0 = $0$ Tr. miễn phí). Miễn trừ cho chính chủ, khi EVN bị thế chấp hoặc khi chủ sở hữu đang bị Kiểm Toán (`inAudit`).
 
 #### Ô 13: Lâm Đồng (Đà Lạt) — BĐS Nghỉ dưỡng & Du lịch
 * **Giá mua đất gốc:** $1.400$ Tr. VNĐ.  
@@ -271,10 +275,11 @@ Toàn bộ 28 ô tài sản kinh tế trên bàn cờ được phân chia thành
 * **Cấp 2 (Vũ Trường Bãi Biển, Bar Lounge & Show Thực Cảnh):** Chi phí $+1.820$ Tr. VNĐ. Thu phí $2.600$ Tr. VNĐ (100%). Khách dẫm vào tung $1D6$: Số chẵn nộp thêm $200$ Tr. VNĐ phụ thu dịch vụ.  
 * **Cấp 3 - Max (Tổ Hợp Giải Trí Siêu Cấp, Casino & Mega Show Quốc Tế):** Chi phí $+2.600$ Tr. VNĐ. Thu phí $6.500$ Tr. VNĐ (250%). **Cơ chế đặc quyền:** Đối thủ dừng chân tại đây **bị mất lượt di chuyển tiếp theo**.
 
-#### Ô 28: Tập Đoàn Viễn Thông (Viettel) — Tiện ích Số hóa
+#### Ô 28: Tập Đoàn Viễn Thông (Viettel) — Tiện ích Số hóa (IMP-214)
 * **Giá mua quyền khai thác:** $1.500$ Tr. VNĐ.  
-* **Cơ chế phí cơ sở:** Người dừng chân tung $2D6$. Phí nộp = Điểm xúc xắc x 40 Tr. VNĐ (1 tiện ích) hoặc x 100 Tr. VNĐ (2 tiện ích).  
-* **Nâng cấp Full (Mạng Lưới 5G Siêu Tốc & Trung Tâm Dữ Liệu Xanh):** Chi phí $1.000$ Tr. VNĐ. Hệ số thu cước nâng lên mức: Điểm xúc xắc x 150 Tr. VNĐ.
+* **Cơ chế phí cơ sở (Phí dừng chân phẳng):** Thu phẳng $1.000$ Tr. VNĐ (1 tiện ích) hoặc $2.500$ Tr. VNĐ (sở hữu cả EVN và Viettel).  
+* **Nâng cấp Full (Mạng Lưới 5G Siêu Tốc & Trung Tâm Dữ Liệu Xanh):** Chi phí $1.000$ Tr. VNĐ. Phí dừng chân tăng lên $3.500$ Tr. VNĐ.  
+* **Cơ chế cước kết nối dữ liệu số:** Thu $150$ Tr. VNĐ cước data mỗi khi đối thủ dừng tại ô **Thị Trường (Market)** hoặc **Cơ Hội (Chance)** trước khi rút thẻ sự kiện. Miễn trừ cho chính chủ, khi Viettel bị thế chấp hoặc khi chủ sở hữu đang bị Kiểm Toán (`inAudit`).
 
 #### Ô 29: Quảng Ninh (Hạ Long) — BĐS Nghỉ dưỡng & Du lịch
 * **Giá mua đất gốc:** $2.800$ Tr. VNĐ.  

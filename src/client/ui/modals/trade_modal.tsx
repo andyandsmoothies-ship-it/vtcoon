@@ -20,12 +20,12 @@ import { useGameStore } from '../../store/game_store';
 function formatDealTabSummary(propertyCount: number, cash: number): string {
   if (propertyCount === 0 && cash === 0) return '';
   if (propertyCount > 0 && cash > 0) {
-    return ` (${propertyCount} BĐS • ${formatCurrency(cash)})`;
+    return ` (${propertyCount} • ${formatCurrency(cash)})`;
   }
   if (propertyCount > 0) {
     return ` (${propertyCount} BĐS)`;
   }
-  return ` (${formatCurrency(cash)} Tr.)`;
+  return ` (${formatCurrency(cash)})`;
 }
 
 export {
@@ -180,20 +180,20 @@ export function TradeModal({
           <button
             type="button"
             onClick={() => setMobileTab('mine')}
-            className={`flex-1 min-h-[44px] px-3 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+            className={`flex-1 min-h-[44px] px-2 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer truncate min-w-0 flex items-center justify-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
               mobileTab === 'mine' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            Bạn Đưa{formatDealTabSummary(offered.length, cashOffer)}
+            <span className="truncate">Bạn Đưa{formatDealTabSummary(offered.length, cashOffer)}</span>
           </button>
           <button
             type="button"
             onClick={() => setMobileTab('partner')}
-            className={`flex-1 min-h-[44px] px-3 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+            className={`flex-1 min-h-[44px] px-2 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer truncate min-w-0 flex items-center justify-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
               mobileTab === 'partner' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            Đối Tác{formatDealTabSummary(requested.length, cashRequest)}
+            <span className="truncate">Đối Tác{formatDealTabSummary(requested.length, cashRequest)}</span>
           </button>
         </div>
       </div>

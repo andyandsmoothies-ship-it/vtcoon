@@ -38,7 +38,7 @@ describe('[TC-UI04.1/MSS] Tra Cuu Thong Tin So Do (getDeedDisplayInfo)', () => {
     expect(util).not.toBeNull();
     expect(util?.price).toBe(1500);
     expect(util?.mortgageValue).toBe(750);
-    expect(util?.rents[0]).toBe(280);
+    expect(util?.rents[0]).toBe(1000);
     expect(util?.upgradeCosts).toEqual([0, 0, 0]);
   });
 

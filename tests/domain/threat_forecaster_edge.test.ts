@@ -66,11 +66,11 @@ describe('Threat Forecaster Edge Cases & Robustness', () => {
       registry.set(12, opponent.id);
 
       const horizon = calculateThreatHorizon(bot, room, registry, stateMap);
-      // Doi thu co 1 utility, buoc 4: phi thue = 4 * 40 = 160 Tr.
-      // P(4) = 3/36. Expected loss = 160 * (3/36)
-      expect(horizon.maxSingleDanger).toBe(160);
+      // Doi thu co 1 utility: phi thue phang = 1000 Tr. (IMP-214)
+      // P(4) = 3/36. Expected loss = 1000 * (3/36)
+      expect(horizon.maxSingleDanger).toBe(1000);
       expect(horizon.dangerTilesCount).toBe(1);
-      expect(horizon.expectedLoss).toBeCloseTo(160 * (3 / 36), 3);
+      expect(horizon.expectedLoss).toBeCloseTo(1000 * (3 / 36), 3);
     });
 
     it('o cong ich nang cap (isUpgradedUtility) nhan he so 150 Tr. * so buoc', () => {
@@ -79,9 +79,9 @@ describe('Threat Forecaster Edge Cases & Robustness', () => {
       stateMap.set(12, { level: 0, isUpgradedUtility: true });
 
       const horizon = calculateThreatHorizon(bot, room, registry, stateMap);
-      // Buoc 7: phi thue = 7 * 150 = 1050 Tr. P(7) = 6/36.
-      expect(horizon.maxSingleDanger).toBe(1050);
-      expect(horizon.expectedLoss).toBeCloseTo(1050 * (6 / 36), 3);
+      // Buoc 7: phi thue phang = 3500 Tr. P(7) = 6/36. (IMP-214)
+      expect(horizon.maxSingleDanger).toBe(3500);
+      expect(horizon.expectedLoss).toBeCloseTo(3500 * (6 / 36), 3);
     });
   });
 

@@ -146,9 +146,9 @@ describe('[FACET-1: BOUNDARY & RANGE] IMP-115 Pacing & Bot Limits', () => {
     const rentR25 = contractResolveRent(cell, 12, 'player_utility_owner', reg, undefined, diceTotal, undefined, 25);
     const rentR35 = contractResolveRent(cell, 12, 'player_utility_owner', reg, undefined, diceTotal, undefined, 35);
 
-    expect(rentR1).toBe(280); // 7 * 40 = 280
-    expect(rentR25).toBe(280);
-    expect(rentR35).toBe(280);
+    expect(rentR1).toBe(1000); // flat fee = 1000 (IMP-214)
+    expect(rentR25).toBe(1000);
+    expect(rentR35).toBe(1000);
   });
 
   // --- CHỐT 2: Hard Cap 40 Rounds ---

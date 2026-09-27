@@ -149,7 +149,7 @@ describe('[IMP-202][Trạm 1 RED] Trade Modal Ergonomics Overhaul Contract', () 
           initialCashOffer: 0,
         })
       );
-      const tabButtonMatch = html.match(/<button[^>]*>[^<]*Bạn Đưa[\s\S]*?<\/button>/)?.[0] ?? '';
+      const tabButtonMatch = html.match(/<button[^>]*>[\s\S]*?Bạn Đưa[\s\S]*?<\/button>/)?.[0] ?? '';
       expect(tabButtonMatch).toContain('2 BĐS');
     });
 
@@ -164,7 +164,7 @@ describe('[IMP-202][Trạm 1 RED] Trade Modal Ergonomics Overhaul Contract', () 
           initialCashOffer: 500,
         })
       );
-      const tabButtonMatch = html.match(/<button[^>]*>[^<]*Bạn Đưa[\s\S]*?<\/button>/)?.[0] ?? '';
+      const tabButtonMatch = html.match(/<button[^>]*>[\s\S]*?Bạn Đưa[\s\S]*?<\/button>/)?.[0] ?? '';
       expect(tabButtonMatch).toMatch(/500|500 Tr\./);
     });
   });

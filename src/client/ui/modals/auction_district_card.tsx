@@ -195,11 +195,25 @@ export function AuctionDistrictCard({
           )}
 
           {info.rentPreview.type === 'utility' && (
-            <div className="w-full flex justify-between items-center px-1">
-              <span className="text-[11px] sm:text-xs text-slate-600 font-bold whitespace-nowrap">CƯỚC TIỆN ÍCH:</span>
-              <span className="font-mono text-[10px] sm:text-xs font-bold text-slate-800 whitespace-nowrap">
-                Điểm xúc xắc x40 (1 ô) | x100 (2 ô)
-              </span>
+            <div className="w-full flex items-center justify-between text-xs">
+              <div className="text-center flex-1 border-r border-amber-900/10 pr-1 min-w-0">
+                <span className="text-[10px] sm:text-[11px] text-slate-500 block font-semibold truncate">1 Ô (CƠ BẢN)</span>
+                <span className="font-mono text-[11px] sm:text-xs font-bold text-slate-800 whitespace-nowrap">
+                  1.000
+                </span>
+              </div>
+              <div className="text-center flex-1 border-r border-amber-900/10 px-1 min-w-0">
+                <span className="text-[10px] sm:text-[11px] text-emerald-700 block font-black whitespace-nowrap">2 Ô (ĐỘC QUYỀN)</span>
+                <span className="font-mono text-[11px] sm:text-xs font-bold text-emerald-700 whitespace-nowrap">
+                  2.500
+                </span>
+              </div>
+              <div className="text-center flex-1 pl-1 min-w-0">
+                <span className="text-[10px] sm:text-[11px] text-amber-700 block font-semibold whitespace-nowrap">NÂNG CẤP 5G</span>
+                <span className="font-mono text-[11px] sm:text-xs font-bold text-amber-800 whitespace-nowrap">
+                  3.500
+                </span>
+              </div>
             </div>
           )}
         </div>
