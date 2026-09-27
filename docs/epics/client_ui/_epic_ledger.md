@@ -598,6 +598,25 @@
 - **Phê chuẩn**: `qa-tester` (Station 1 RED), `implementer` (Station 2 GREEN), `scout` (Station 2.5 PASS), `spec-reviewer` (SPEC_PASS APPROVED), `ui-craft-reviewer` (VERDICT SHIP), `code-reviewer` (CODE_PASS APPROVED).
 - **Trạng thái**: ✅ Hoàn thành Gói 3 (2026-09-27) — **HOÀN TẤT 100% CHIẾN DỊCH CẢI TỔ UI TOÀN GAME (IMP-209, IMP-211, IMP-212, IMP-213)**.
 
+### [IMP-214] Minh Bạch Hóa Thâu Tóm M&A & Cải Thiện Affordance Thẻ Sự Kiện
+- **Mục tiêu**: Xóa bỏ hoàn toàn sự mập mờ và ức chế của người chơi khi rút trúng thẻ Cơ Hội `CC_MA_FORCE` (Thâu Tóm Doanh Nghiệp M&A). Minh bạch hóa kết quả giao dịch trên Server & DTO (tên ô đất đã mua, chủ cũ bị thâu tóm, số tiền chuyển nhượng 120% thực tế, bên nhận tiền); cải thiện Client UI Affordance với nhãn nút `ĐÃ THÂU TÓM BĐS • ĐÓNG` (hoặc `NHẬN TRỢ CẤP M&A • ĐÓNG`) triệt tiêu 100% ngộ nhận mở giao diện đàm phán P2P.
+- **Hạ tầng hoàn tất**:
+  * `src/domain/room.ts` (265 LOC — Tier 1 <= 400 LOC): Định nghĩa interface `MaBuyoutResult` và trường `lastMaBuyout` trên `Room`.
+  * `src/domain/chance_card_handlers.ts` (362 LOC — Tier 1 <= 400 LOC): Trong `handleMaForce`, ghi nhận thông tin ô đất và đối thủ bị mua lại khi thâu tóm thành công; dọn sạch state khi fallback.
+  * `src/domain/event_card_engine.ts` (147 LOC — Tier 1 <= 400 LOC): Áp dụng mẫu Take-and-Clear Pattern, cấu tạo mô tả chi tiết `"Đã thâu tóm thành công [${cellName}] từ ${sellerName} với giá 120% (${cost.toLocaleString('vi-VN')})."`. Tuân thủ Clean Architecture không import `formatCurrency` client vào domain.
+  * `src/server/turn_loop.ts` (302 LOC — Tier 1 <= 400 LOC): Dọn dẹp `room.lastMaBuyout = undefined;` tại cả 2 pha chuyển lượt `executeRollDice` và `executeTurnEnd` để chống rò rỉ Turn N+1.
+  * `src/client/ui/modals/event_card_visuals.ts` (342 LOC — Tier 2 <= 500 LOC): Mở rộng `getCardCtaButtonText` nhận `effectDelta`, trả về `ĐÃ THÂU TÓM BĐS • ĐÓNG` hoặc `NHẬN TRỢ CẤP M&A • ĐÓNG`; cập nhật Hero Stat `THÂU TÓM BĐS`; bổ sung từ khóa "chuyển nhượng" và "thanh toán" cho destination pill.
+  * `src/client/ui/modals/event_card_modal.tsx` (226 LOC — Tier 2 <= 500 LOC): Kết nối `effectDelta` vào nút CTA, touch target min-h-[46px].
+- **Kiểm thử & Bất biến**:
+  * `tests/contracts/imp214_ma_event_card_transparency.test.ts`: 16/16 atomic contract tests PASS 100% (4 facets).
+  * Adversarial Inversion: Station 1 RED (9 failed / 7 passed), Station 2 GREEN (16/16 passed).
+  * `npx tsc --noEmit`: 0 lỗi. `npm run lint:ui`: 0 vi phạm (195 files scanned).
+  * Production Build: `npm run build` thành công, SSR bundle 432.53 kB.
+  * Evidence Snapshot: `.agents/evidence/imp214_snapshot.json` (`executed: true`).
+- **Phê chuẩn**: `plan-griller` (AUDITED), `qa-tester` (Station 1 RED), `implementer` (Station 2 GREEN), `scout` (Station 2.5 PASS), `spec-reviewer` (SPEC_PASS APPROVED), `ui-craft-reviewer` (VERDICT SHIP), `code-reviewer` (CODE_PASS APPROVED).
+- **Trạng thái**: ✅ Hoàn thành IMP-214 (2026-09-27).
+
+
 
 
 

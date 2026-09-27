@@ -72,7 +72,7 @@ describe('[TC-208.01/MSS..TC-208.16/MSS][UC-IMP208] Audit Bailout & Dock Ergonom
   // =========================================================================
   // Facet 1: Decollision & Flex Layout Flow (Khử đè chữ)
   // =========================================================================
-  it('[TC-208.01/MSS][UC-IMP208] ActionDock render actionDockNotice trong luồng flex document, wrapper cha mang class gap-1.5 và notice chip KHÔNG mang class absolute -top-10', () => {
+  it('[TC-208.01/MSS][UC-IMP208/IMP210] ActionDock không render audit-notice-chip theo yêu cầu tối giản UX IMP-210, wrapper cha bảo toàn layout flex gap-1.5', () => {
     useGameStore.setState({
       currentTurnPlayerId: 'p1',
       hasRolledThisTurn: false,
@@ -92,12 +92,11 @@ describe('[TC-208.01/MSS..TC-208.16/MSS][UC-IMP208] Audit Bailout & Dock Ergonom
       React.createElement(ActionDock, { localPlayerId: 'p1', isMyTurn: true })
     );
 
-    expect(html).toContain('data-testid="audit-notice-chip"');
-    expect(html).not.toContain('absolute -top-10');
+    expect(html).not.toContain('data-testid="audit-notice-chip"');
     expect(html).toContain('gap-1.5');
   });
 
-  it('[TC-208.02/MSS][UC-IMP208] actionDockNotice nằm ngoài và đứng trước <nav> trong DOM', () => {
+  it('[TC-208.02/MSS][UC-IMP208/IMP210] ActionDock triệt tiêu hoàn toàn actionDockNotice khỏi DOM khi inAudit = true', () => {
     useGameStore.setState({
       currentTurnPlayerId: 'p1',
       hasRolledThisTurn: false,
@@ -116,12 +115,9 @@ describe('[TC-208.01/MSS..TC-208.16/MSS][UC-IMP208] Audit Bailout & Dock Ergonom
     const html = renderToStaticMarkup(
       React.createElement(ActionDock, { localPlayerId: 'p1', isMyTurn: true })
     );
-    const chipIndex = html.indexOf('data-testid="audit-notice-chip"');
-    const navIndex = html.indexOf('<nav');
 
-    expect(chipIndex).toBeGreaterThan(-1);
-    expect(chipIndex).toBeLessThan(navIndex);
-    expect(html.slice(navIndex)).not.toContain('data-testid="audit-notice-chip"');
+    expect(html).not.toContain('data-testid="audit-notice-chip"');
+    expect(html).not.toContain('-notice-chip');
   });
 
   it('[TC-208.03/MSS][UC-IMP208] ActionDock outer container mang class relative flex flex-col items-center gap-1.5', () => {

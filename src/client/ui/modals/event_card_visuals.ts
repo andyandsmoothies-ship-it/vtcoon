@@ -110,7 +110,7 @@ export const KNOWN_CARD_CTA_BUTTONS: Readonly<Record<string, string>> = {
   [ChanceCardId.CC_CONTRACT_PENALTY]: 'Chấp Nhận Đền Bù 📉',
   [ChanceCardId.CC_LAND_CHANGE]: 'Duyệt Quy Hoạch 🏗️',
   [ChanceCardId.CC_BUILD_HALT]: 'Chấp Hành Thanh Tra ⚠️',
-  [ChanceCardId.CC_MA_FORCE]: 'Ký Hợp Đồng M&A 🤝',
+  [ChanceCardId.CC_MA_FORCE]: 'Đã Thâu Tóm BĐS • Đóng',
   [ChanceCardId.CC_COPYRIGHT]: 'Nộp Án Phạt 🏛️',
   [ChanceCardId.CC_OVERDRAFT]: 'Giải Ngân Ngay 💵',
   [ChanceCardId.CC_JUNK_STOCK]: 'Cắt Lỗ Ngay 💸',
@@ -143,7 +143,13 @@ export const KNOWN_CARD_CTA_BUTTONS: Readonly<Record<string, string>> = {
   [MarketCardId.MC_COASTAL_STORM]: 'Chống Bão Khẩn Cấp 🌪️',
 };
 
-export function getCardCtaButtonText(cardId?: string): string {
+export function getCardCtaButtonText(cardId?: string, effectDelta?: number): string {
+  if (cardId === ChanceCardId.CC_MA_FORCE) {
+    if (typeof effectDelta === 'number' && effectDelta > 0) {
+      return 'Nhận Trợ Cấp M&A • Đóng';
+    }
+    return 'Đã Thâu Tóm BĐS • Đóng';
+  }
   if (cardId && KNOWN_CARD_CTA_BUTTONS[cardId]) {
     return KNOWN_CARD_CTA_BUTTONS[cardId];
   }
@@ -187,7 +193,7 @@ export function getCardHeroStat(cardId: string, effectDelta?: number): HeroStat 
         return { label: 'TRỢ CẤP M&A', value: formatDeltaString(effectDelta), variant: 'positive' };
       }
       if (effectDelta < 0) {
-        return { label: 'THƯƠNG VỤ M&A', value: formatDeltaString(effectDelta), variant: 'warning' };
+        return { label: 'THÂU TÓM BĐS', value: formatDeltaString(effectDelta), variant: 'warning' };
       }
     } else if (cardId === ChanceCardId.CC_SWAP_PROJECT) {
       if (effectDelta > 0) {
@@ -281,6 +287,8 @@ export function isFinancialDestination(destination?: string, effectDelta?: numbe
     lower.includes('chủ sở hữu') ||
     lower.includes('chủ ô') ||
     lower.includes('đối thủ') ||
+    lower.includes('chuyển nhượng') ||
+    lower.includes('thanh toán') ||
     lower.includes('người nghèo nhất') ||
     lower.includes('bồi thường') ||
     lower.includes('nộp phạt') ||

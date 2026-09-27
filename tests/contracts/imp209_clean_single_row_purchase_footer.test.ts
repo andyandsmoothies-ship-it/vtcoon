@@ -410,7 +410,7 @@ describe('[TC-209.01/MSS..TC-209.16/MSS][UC-IMP209] Clean Single-Row Purchase Fo
     expect(html).not.toContain('Đứng tại');
   });
 
-  it('[TC-209.16/MSS][UC-IMP209] Khi activeModal === null và isStandingOnBuyable = true, ActionDock hiển thị notice chip Đứng tại ... Bấm Mua Đất để chốt', () => {
+  it('[TC-209.16/MSS][UC-IMP209/IMP210] Khi activeModal === null và isStandingOnBuyable = true, ActionDock KHÔNG hiển thị notice chip Đứng tại ... (đã loại bỏ theo yêu cầu UX tối giản)', () => {
     useGameStore.setState({
       activeModal: null,
       currentTurnPlayerId: 'p1',
@@ -434,8 +434,8 @@ describe('[TC-209.01/MSS..TC-209.16/MSS][UC-IMP209] Clean Single-Row Purchase Fo
       React.createElement(ActionDock, { localPlayerId: 'p1', isMyTurn: true })
     );
 
-    expect(html).toContain('buy_opportunity-notice-chip');
-    expect(html).toContain('Đứng tại Cần Thơ (Cái Răng)');
-    expect(html).toContain('Bấm Mua Đất để chốt');
+    expect(html).not.toContain('buy_opportunity-notice-chip');
+    expect(html).not.toContain('Đứng tại');
+    expect(html).not.toContain('Bấm Mua Đất để chốt');
   });
 });

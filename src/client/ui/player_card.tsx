@@ -1,7 +1,7 @@
 import React from 'react';
 import { useGameStore, type PlayerHudInfo } from '../store/game_store';
 import { formatCurrency, calculatePlayerNetWorth, formatShortPlayerName } from './ui_helpers';
-import { BOARD_CONFIG, ColorGroup } from '../../domain/board_config';
+import { BOARD_CONFIG, CellType, ColorGroup } from '../../domain/board_config';
 import { COLOR_GROUP_HEX } from '../../domain/theme';
 import { getEmoteDef } from '../../domain/emotes';
 import { getPawnConfigBySlot } from '../3d/luxury_pawn_models';
@@ -28,6 +28,23 @@ export const PROPERTY_CLUSTERS: readonly {
     name: c.name,
   })),
 }));
+
+export const INFRASTRUCTURE_CLUSTERS = {
+  railroads: {
+    color: '#475569',
+    cells: BOARD_CONFIG.filter((c) => c.type === CellType.Railroad).map((c) => ({
+      index: c.index,
+      name: c.name,
+    })),
+  },
+  utilities: {
+    color: '#0284C7',
+    cells: BOARD_CONFIG.filter((c) => c.type === CellType.Utility).map((c) => ({
+      index: c.index,
+      name: c.name,
+    })),
+  },
+} as const;
 
 interface PlayerCardProps {
   readonly player: PlayerHudInfo;
@@ -162,7 +179,10 @@ export function PlayerCard({
         </div>
       </div>
 
-      {/* Dòng 3: Cụm 22 chấm BĐS sắp xếp 2 dòng đối xứng (11 chấm/dòng) giúp nhận diện rõ màu sắc */}
+      {/* Cụm 28 chấm BĐS & Hạ Tầng/Tiện Ích sắp xếp 3 dòng:
+          - Dòng 1 (11 chấm): Nâu, Xanh Da Trời, Hồng, Cam
+          - Dòng 2 (11 chấm): Đỏ, Vàng, Xanh Lá, Tím
+          - Dòng 3 (6 chấm): 4 Giao Thông (Xám Thép #475569) & 2 Tiện Ích (Xanh Coban #0284C7) */}
       <span className="sr-only">BĐS:</span>
       <div
         className="flex flex-col gap-1 w-full px-2 pt-1.5 pb-1 border-t border-slate-300 select-none"
@@ -201,6 +221,63 @@ export function PlayerCard({
             ))}
           </div>
         ))}
+
+        {/* Dòng 3: Cụm 4 ô Giao Thông (Xám Thép) & 2 ô Tiện Ích (Xanh Coban) căn giữa */}
+        <div
+          data-testid="property-clusters-row-3"
+          className="flex items-center justify-center gap-2.5 sm:gap-3 w-full pt-0.5"
+        >
+          {/* Cụm 4 ô Giao thông */}
+          <div
+            className="flex items-center gap-1 sm:gap-1.5 shrink-0"
+            data-testid="cluster-railroad"
+          >
+            {INFRASTRUCTURE_CLUSTERS.railroads.cells.map((cell) => {
+              const isOwned = Boolean(player.ownedProperties?.includes(cell.index));
+              return (
+                <span
+                  key={cell.index}
+                  data-testid={`dot-cell-${cell.index}`}
+                  data-owned={isOwned ? 'true' : 'false'}
+                  className={`w-2 h-2 sm:w-[9px] sm:h-[9px] md:w-2.5 md:h-2.5 rounded-full transition-all shrink-0 ${
+                    isOwned
+                      ? 'border border-slate-900/50 shadow-2xs'
+                      : 'border border-slate-300 bg-slate-100/70'
+                  }`}
+                  style={isOwned ? { backgroundColor: INFRASTRUCTURE_CLUSTERS.railroads.color } : undefined}
+                  title={`${cell.name}: ${isOwned ? 'Đã sở hữu' : 'Chưa sở hữu'}`}
+                />
+              );
+            })}
+          </div>
+
+          {/* Vạch phân cách mỏng giữa Giao thông và Tiện ích */}
+          <span className="w-px h-2 bg-slate-300 shrink-0" aria-hidden="true" />
+
+          {/* Cụm 2 ô Tiện ích */}
+          <div
+            className="flex items-center gap-1 sm:gap-1.5 shrink-0"
+            data-testid="cluster-utility"
+          >
+            {INFRASTRUCTURE_CLUSTERS.utilities.cells.map((cell) => {
+              const isOwned = Boolean(player.ownedProperties?.includes(cell.index));
+              return (
+                <span
+                  key={cell.index}
+                  data-testid={`dot-cell-${cell.index}`}
+                  data-owned={isOwned ? 'true' : 'false'}
+                  className={`w-2 h-2 sm:w-[9px] sm:h-[9px] md:w-2.5 md:h-2.5 rounded-full transition-all shrink-0 ${
+                    isOwned
+                      ? 'border border-slate-900/50 shadow-2xs'
+                      : 'border border-slate-300 bg-slate-100/70'
+                  }`}
+                  style={isOwned ? { backgroundColor: INFRASTRUCTURE_CLUSTERS.utilities.color } : undefined}
+                  title={`${cell.name}: ${isOwned ? 'Đã sở hữu' : 'Chưa sở hữu'}`}
+                />
+              );
+            })}
+          </div>
+        </div>
       </div>
     </div>
   );

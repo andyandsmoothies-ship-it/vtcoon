@@ -470,9 +470,8 @@ describe('[TC-MOB01/MSS] Mobile Responsive HUD Quality Standards Contract Suite'
 
   it('[TC-MOB01.27/MSS] [UC-MOB-02] TopBar match-info-capsule hides static text labels on mobile to prevent horizontal overflow', () => {
     const html = renderToStaticMarkup(React.createElement(TopBar));
-    // Verify that static labels 'Thời gian:' and 'Kho Bạc:' are marked hidden on mobile (hidden sm:inline)
     expect(html).toContain('hidden sm:inline text-xs text-slate-600 font-semibold">Thời gian:</span>');
-    expect(html).toContain('hidden sm:inline text-xs text-slate-600 font-semibold">Kho Bạc:</span>');
+    expect(html).not.toContain('Kho Bạc:');
   });
 
   it('[TC-MOB01.28/MSS] [UC-MOB-02] TopBar renders activity-feed-toggle-button (Log) within compact mobile utilities cluster', () => {

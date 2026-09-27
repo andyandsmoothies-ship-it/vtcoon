@@ -117,11 +117,11 @@ describe('[TC-CHUNKY-HUD.1/MSS] Facet 1: Boundary & Range (Format & Edge Display
     expect(html).toContain('text-rose-600');
   });
 
-  it('[TC-CHUNKY-HUD.8/MSS] [UC-HUD-01] Treasury Pool Capsule formats accumulated national treasury funds', () => {
+  it('[TC-CHUNKY-HUD.8/MSS] [UC-HUD-01] TopBar omits treasury pool money display to keep mobile header clean', () => {
     useGameStore.setState({ treasuryPool: 25000 });
     const html = renderToStaticMarkup(React.createElement(TopBar));
 
-    expect(html).toContain('25.000');
+    expect(html).not.toContain('25.000');
   });
 });
 

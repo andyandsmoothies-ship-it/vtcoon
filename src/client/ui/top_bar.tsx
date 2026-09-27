@@ -19,7 +19,6 @@ export function TopBar(props: TopBarProps): React.ReactElement {
   const storeRoundNumber = useGameStore((state) => state.roundNumber);
   const storeMaxRounds = useGameStore((state) => state.maxRounds);
   const storeTurnTimeRemaining = useGameStore((state) => state.turnTimeRemaining);
-  const storeTreasuryPool = useGameStore((state) => state.treasuryPool);
   const storeIsPlayerHudVisible = useGameStore((state) => state.isPlayerHudVisible);
   const togglePlayerHudVisibility = useGameStore((state) => state.togglePlayerHudVisibility);
 
@@ -29,7 +28,6 @@ export function TopBar(props: TopBarProps): React.ReactElement {
   const roundNumber = live ? live.roundNumber : storeRoundNumber;
   const maxRounds = live ? live.maxRounds : storeMaxRounds;
   const turnTimeRemaining = live ? live.turnTimeRemaining : storeTurnTimeRemaining;
-  const treasuryPool = live ? live.treasuryPool : storeTreasuryPool;
   const isPlayerHudVisible = live ? live.isPlayerHudVisible : storeIsPlayerHudVisible;
   const isMuted = useAudioStore((state) => state.isMuted);
   const toggleMute = useAudioStore((state) => state.toggleMute);
@@ -95,17 +93,6 @@ export function TopBar(props: TopBarProps): React.ReactElement {
           <span className="hidden sm:inline text-xs text-slate-600 font-semibold">Thời gian:</span>
           <span className={`tabular-nums font-mono text-xs sm:text-base whitespace-nowrap ${timerColorClass}`}>
             {formatTimeRemaining(turnTimeRemaining)}
-          </span>
-        </div>
-
-        <div className="h-4 w-px bg-slate-300" aria-hidden="true" />
-
-        {/* Quỹ Kho Bạc */}
-        <div className="flex items-center gap-1 sm:gap-2">
-          <span className="text-sm sm:text-base" aria-hidden="true">🏦</span>
-          <span className="hidden sm:inline text-xs text-slate-600 font-semibold">Kho Bạc:</span>
-          <span className="font-bold text-amber-700 whitespace-nowrap tabular-nums shrink-0 text-xs sm:text-sm">
-            {formatCurrency(treasuryPool)}
           </span>
         </div>
 

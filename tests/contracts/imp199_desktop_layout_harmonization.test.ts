@@ -86,7 +86,7 @@ describe('[TC-199.01/MSS..TC-199.18/MSS][UC-IMP199] Comprehensive Desktop Layout
       expect(html).toMatch(/^<div[^>]*>[\s\S]*<nav/);
     });
 
-    it('[TC-199.03/MSS][UC-IMP199] When inAudit is true, ActionDock renders audit-notice-chip outside <nav> element in unclipped outer wrapper', () => {
+    it('[TC-199.03/MSS][UC-IMP199/IMP210] When inAudit is true, ActionDock KHÔNG render audit-notice-chip (đã gỡ bỏ theo IMP-210)', () => {
       useGameStore.setState({
         currentTurnPlayerId: 'p1',
         playersInfo: {
@@ -108,13 +108,10 @@ describe('[TC-199.01/MSS..TC-199.18/MSS][UC-IMP199] Comprehensive Desktop Layout
         })
       );
 
-      const navContent = html.match(/<nav[\s\S]*?<\/nav>/)?.[0] ?? '';
-      expect(html).toContain('data-testid="audit-notice-chip"');
-      expect(navContent).not.toContain('data-testid="audit-notice-chip"');
-      expect(html.indexOf('data-testid="audit-notice-chip"')).toBeLessThan(html.indexOf('<nav'));
+      expect(html).not.toContain('data-testid="audit-notice-chip"');
     });
 
-    it('[TC-199.04/MSS][UC-IMP199] When isMyTurn is false and bot is acting, ActionDock renders bot-pacing-chip outside <nav> element', () => {
+    it('[TC-199.04/MSS][UC-IMP199/IMP210] When isMyTurn is false and bot is acting, ActionDock KHÔNG render bot-pacing-chip (đã gỡ bỏ theo IMP-210)', () => {
       useGameStore.setState({
         currentTurnPlayerId: 'bot1',
         turnPhase: 'Roll' as any,
@@ -141,10 +138,7 @@ describe('[TC-199.01/MSS..TC-199.18/MSS][UC-IMP199] Comprehensive Desktop Layout
         })
       );
 
-      const navContent = html.match(/<nav[\s\S]*?<\/nav>/)?.[0] ?? '';
-      expect(html).toContain('data-testid="bot-pacing-chip"');
-      expect(navContent).not.toContain('data-testid="bot-pacing-chip"');
-      expect(html.indexOf('data-testid="bot-pacing-chip"')).toBeLessThan(html.indexOf('<nav'));
+      expect(html).not.toContain('data-testid="bot-pacing-chip"');
     });
   });
 

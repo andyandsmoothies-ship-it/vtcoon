@@ -133,7 +133,7 @@ describe('[TC-MCH01/MSS][UI-S02/MSS] Mobile Compact HUD & Tactile Retropoly Moda
       expect(html).toContain('data-testid="player-pawn-badge-p1"');
     });
 
-    it('[TC-MCH01.06/MSS][UC-MCH-01] PlayerCard renders micro badge BOT when player is artificial intelligence bot (Chốt 1.4)', () => {
+    it('[TC-MCH01.06/MSS][UC-MCH-01] PlayerCard simplifies UI by omitting bulky BOT badge in favor of clean pawn identification', () => {
       const botPlayer: PlayerHudInfo = {
         ...mockActivePlayer,
         id: 'bot_1',
@@ -148,11 +148,10 @@ describe('[TC-MCH01/MSS][UI-S02/MSS] Mobile Compact HUD & Tactile Retropoly Moda
           slotIndex: 1,
         })
       );
-      expect(html).toContain('BOT');
-      expect(html).toContain('bg-cyan-100 text-cyan-900');
+      expect(html).not.toContain('>BOT<');
     });
 
-    it('[TC-MCH01.07/MSS][UC-MCH-01] PlayerCard renders micro badge ⚖️ when player is detained in audit station (Chốt 1.4)', () => {
+    it('[TC-MCH01.07/MSS][UC-MCH-01] PlayerCard in audit state maintains clean header without redundant emoji badges', () => {
       const auditPlayer: PlayerHudInfo = {
         ...mockActivePlayer,
         inAudit: true,
@@ -165,11 +164,11 @@ describe('[TC-MCH01/MSS][UI-S02/MSS] Mobile Compact HUD & Tactile Retropoly Moda
           slotIndex: 0,
         })
       );
-      expect(html).toContain('⚖️');
-      expect(html).toContain('aria-label="Kiểm Toán"');
+      expect(html).not.toContain('aria-label="Kiểm Toán"');
+      expect(html).not.toContain('>⚖️<');
     });
 
-    it('[TC-MCH01.08/MSS][UC-MCH-01] PlayerCard renders animated micro badge LƯỢT when isCurrentTurn is active (Chốt 1.4)', () => {
+    it('[TC-MCH01.08/MSS][UC-MCH-01] PlayerCard renders active turn state via card-level highlight without bulky text badge', () => {
       const html = renderToStaticMarkup(
         React.createElement(PlayerCard, {
           player: mockActivePlayer,
@@ -178,8 +177,9 @@ describe('[TC-MCH01/MSS][UI-S02/MSS] Mobile Compact HUD & Tactile Retropoly Moda
           slotIndex: 0,
         })
       );
-      expect(html).toContain('LƯỢT');
-      expect(html).toContain('animate-pulse');
+      expect(html).toContain('data-in-turn="true"');
+      expect(html).toContain('border-amber-500');
+      expect(html).not.toContain('>LƯỢT<');
     });
 
     it('[TC-MCH01.08A/MSS][UC-MCH-01] formatShortPlayerName strips bot personality suffixes while preserving human names', () => {
@@ -213,7 +213,7 @@ describe('[TC-MCH01/MSS][UI-S02/MSS] Mobile Compact HUD & Tactile Retropoly Moda
       expect(html).toContain('title="Bot AI 2 (Balanced)"');
     });
 
-    it('[TC-MCH01.08C/MSS][UC-MCH-01] PlayerCard uses compact responsive font and top turn pill clearance', () => {
+    it('[TC-MCH01.08C/MSS][UC-MCH-01] PlayerCard uses compact responsive font and active turn highlight', () => {
       const html = renderToStaticMarkup(
         React.createElement(PlayerCard, {
           player: mockActivePlayer,
@@ -223,7 +223,7 @@ describe('[TC-MCH01/MSS][UI-S02/MSS] Mobile Compact HUD & Tactile Retropoly Moda
         })
       );
       expect(html).toContain('text-xs sm:text-sm font-bold');
-      expect(html).toContain('absolute top-1.5 right-2');
+      expect(html).toContain('data-in-turn="true"');
     });
   });
 

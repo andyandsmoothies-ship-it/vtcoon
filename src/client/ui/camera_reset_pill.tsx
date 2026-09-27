@@ -31,7 +31,11 @@ export function CameraResetPill(): React.ReactElement | null {
   if (!hasUserCustomCamera || activeModal !== null) return null;
 
   const handleClick = () => {
-    try { HapticEngine.selection(); } catch {}
+    try {
+      HapticEngine.selection();
+    } catch {
+      // Haptics might not be supported in test/SSR environment
+    }
     if (typeof window !== 'undefined') window.__resetCameraToDefault?.();
     setHasUserCustomCamera(false);
   };

@@ -145,6 +145,14 @@ export interface PendingTradeOfferInfo {
   readonly offeredCellIndex?: number;
 }
 
+export interface MaBuyoutResult {
+  readonly cellIndex: number;
+  readonly cellName: string;
+  readonly sellerId: string;
+  readonly sellerName: string;
+  readonly cost: number;
+}
+
 export interface Room {
   readonly roomCode:      string;
   readonly code?:         string;
@@ -181,6 +189,7 @@ export interface Room {
   activeMacroGroup?:          ColorGroup;
   fireSaleQueue?:             number[];
   lastDiplomaticEvent?:       { playerId: string; landlordId: string; cellIndex: number; savedRent: number } | null;
+  lastMaBuyout?:              MaBuyoutResult;
 }
 
 

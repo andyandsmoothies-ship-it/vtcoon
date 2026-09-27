@@ -104,6 +104,11 @@ function handleMaForce(
           player.balance -= cost;
           seller.balance += cost;
           registry.set(cellIndex, player.id);
+          if (room) {
+            const cellName = BOARD_CONFIG[cellIndex]?.name ?? `Ô #${cellIndex}`;
+            const sellerName = seller.name ?? `Người chơi ${seller.id}`;
+            room.lastMaBuyout = { cellIndex, cellName, sellerId: seller.id, sellerName, cost };
+          }
           return;
         }
       }
@@ -113,7 +118,10 @@ function handleMaForce(
   // Fallback: Không có ô C0 đối thủ hoặc người chơi không đủ tiền mua lại
   // Nhận trợ cấp M&A từ Kho Bạc Nhà Nước: 800 Tr.
   player.balance += 800;
-  if (room) room.treasury = Math.max(0, (room.treasury ?? 0) - 800);
+  if (room) {
+    room.treasury = Math.max(0, (room.treasury ?? 0) - 800);
+    room.lastMaBuyout = undefined;
+  }
 }
 
 function handleSwapProject(

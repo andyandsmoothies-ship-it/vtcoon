@@ -35,7 +35,7 @@ describe('[TC-187/MSS][IMP-187] Compact PlayerCard HUD & Zero-Waste Layout', () 
     expect(html).toContain('data-testid="player-net-worth"');
   });
 
-  it('[TC-187.02/MSS] Property clusters container organizes 22 dots into 2 balanced rows of 11 dots each with w-2 h-2 size', () => {
+  it('[TC-187.02/MSS] Property clusters container organizes 28 dots into 3 balanced rows (11 + 11 + 6) with w-2 h-2 size', () => {
     const html = renderToStaticMarkup(
       React.createElement(PlayerCard, { player: mockPlayer, isCurrentTurn: false, levelMap: {}, slotIndex: 0 })
     );
@@ -43,11 +43,13 @@ describe('[TC-187/MSS][IMP-187] Compact PlayerCard HUD & Zero-Waste Layout', () 
     expect(clusterContainer).not.toBeNull();
     expect(clusterContainer![0]).not.toContain('flex-wrap');
 
-    // 2 dòng đối xứng 11 chấm mỗi dòng
+    // 3 dòng đối xứng: Dòng 1 (11 chấm), Dòng 2 (11 chấm), Dòng 3 (6 chấm)
     const row1Segment = html.split('data-testid="property-clusters-row-1"')[1]?.split('data-testid="property-clusters-row-2"')[0] ?? '';
-    const row2Segment = html.split('data-testid="property-clusters-row-2"')[1] ?? '';
+    const row2Segment = html.split('data-testid="property-clusters-row-2"')[1]?.split('data-testid="property-clusters-row-3"')[0] ?? '';
+    const row3Segment = html.split('data-testid="property-clusters-row-3"')[1] ?? '';
     expect(row1Segment.match(/data-testid="dot-cell-\d+"/g)?.length).toBe(11);
     expect(row2Segment.match(/data-testid="dot-cell-\d+"/g)?.length).toBe(11);
+    expect(row3Segment.match(/data-testid="dot-cell-\d+"/g)?.length).toBe(6);
 
     // Kích thước chấm tối thiểu 8px (w-2 h-2) trên mobile giúp thấy rõ màu sắc
     const dotCell1 = html.match(/<span[^>]*data-testid="dot-cell-1"[^>]*>/);
@@ -55,12 +57,13 @@ describe('[TC-187/MSS][IMP-187] Compact PlayerCard HUD & Zero-Waste Layout', () 
     expect(dotCell1![0]).toContain('w-2 h-2');
   });
 
-  it('[TC-187.03/MSS] In-turn badge LƯỢT is rendered as sleek corner tab when isCurrentTurn is true', () => {
+  it('[TC-187.03/MSS] In-turn state highlights card with active border and ring without bulky text badges', () => {
     const html = renderToStaticMarkup(
       React.createElement(PlayerCard, { player: mockPlayer, isCurrentTurn: true, levelMap: {}, slotIndex: 0 })
     );
-    expect(html).toContain('LƯỢT');
-    expect(html).toContain('absolute top-1.5 right-2');
+    expect(html).toContain('data-in-turn="true"');
+    expect(html).toContain('ring-amber-400');
+    expect(html).toContain('border-amber-500');
     expect(html).not.toContain('-top-2.5');
   });
 
@@ -90,8 +93,7 @@ describe('[TC-187/MSS][IMP-187] Compact PlayerCard HUD & Zero-Waste Layout', () 
     // Currency balance is placed in the same header container as the player name
     expect(html).toContain('10.020');
     expect(html).toContain('data-testid="player-net-worth"');
-    // Ensure header row has right padding when isCurrentTurn to protect LƯỢT badge
-    expect(html).toContain('pr-12');
+    expect(html).not.toContain('pr-12');
   });
 
   it('[TC-187.07/MSS] PlayerCard renders color indicator dot for pawn badge (w-2.5 h-2.5) instead of chunky emoji avatar', () => {

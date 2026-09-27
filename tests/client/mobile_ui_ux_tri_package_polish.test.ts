@@ -420,22 +420,21 @@ describe('[IMP-123/MSS] Mobile UI/UX Tri-Package Polish Contract Test Suite', ()
   });
 
   describe('Gói 3.2: Tách Biệt Chip Lượt Bot (src/client/ui/action_dock.tsx)', () => {
-    it('[TC-IMP123.33/MSS][UI-S03/MSS] bot-pacing-chip được định vị bên trên hoặc tách dòng (absolute hoặc top position), không chèn ngang hàng làm xô lệch dock', () => {
+    it('[TC-IMP123.33/MSS][UI-S03/MSS][IMP210] bot-pacing-chip đã được loại bỏ hoàn toàn khỏi ActionDock theo yêu cầu tối giản UX', () => {
       useGameStore.setState({ currentTurnPlayerId: 'p2' }); // p2 is bot
       const html = renderToStaticMarkup(
         React.createElement(ActionDock, { localPlayerId: 'p1', isMyTurn: false })
       );
-      expect(html).toContain('data-testid="bot-pacing-chip"');
-      expect(html.indexOf('data-testid="bot-pacing-chip"')).toBeLessThan(html.indexOf('<nav'));
+      expect(html).not.toContain('data-testid="bot-pacing-chip"');
     });
 
-    it('[TC-IMP123.34/MSS][UI-S03/MSS] ActionDock bảo toàn cấu trúc hàng nút chính khi bot-pacing-chip hiển thị', () => {
+    it('[TC-IMP123.34/MSS][UI-S03/MSS][IMP210] ActionDock bảo toàn cấu trúc hàng nút chính và không render bot-pacing-chip', () => {
       useGameStore.setState({ currentTurnPlayerId: 'p2' });
       const html = renderToStaticMarkup(
         React.createElement(ActionDock, { localPlayerId: 'p1', isMyTurn: false })
       );
       expect(html).toContain('data-testid="roll-dice-btn"');
-      expect(html).toContain('data-testid="bot-pacing-chip"');
+      expect(html).not.toContain('data-testid="bot-pacing-chip"');
     });
 
     it('[TC-IMP123.35/MSS][UI-S03/MSS] ActionDock không hiển thị bot-pacing-chip khi đến lượt người chơi cục bộ (Resource Disposal)', () => {

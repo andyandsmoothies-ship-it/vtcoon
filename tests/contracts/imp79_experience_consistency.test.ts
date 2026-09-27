@@ -332,7 +332,7 @@ describe('[TC-79.3/MSS] Audit Mechanics & Bail Out UI (Edge Case: In-Jail Softlo
     expect(html).toMatch(/disabled=""[^>]*>[\s\S]*?Bảo Lãnh/);
   });
 
-  it('TC-79.3.5: ActionDock hiển thị số lượt còn lại của Trạm Kiểm Toán', () => {
+  it('TC-79.3.5 [IMP210]: ActionDock trong Trạm Kiểm Toán không render notice chip làm rối giao diện theo IMP-210', () => {
     const ssrState = {
       currentTurnPlayerId: 'p1',
       dice: [0, 0],
@@ -356,7 +356,8 @@ describe('[TC-79.3/MSS] Audit Mechanics & Bail Out UI (Edge Case: In-Jail Softlo
       })
     );
 
-    expect(html).toContain('3 lượt');
+    expect(html).not.toContain('data-testid="audit-notice-chip"');
+    expect(html).toContain('Bảo Lãnh (500)');
   });
 });
 

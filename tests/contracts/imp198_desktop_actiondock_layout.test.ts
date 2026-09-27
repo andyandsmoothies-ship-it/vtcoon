@@ -216,7 +216,7 @@ describe('[TC-198.01/MSS..TC-198.17/MSS][UC-IMP198] Desktop ActionDock Text Drop
       expect(tradeBtn).toContain('hidden sm:inline');
     });
 
-    it('[TC-198.14/MSS][UC-IMP198] ActionDock: Khi mock pendingTradeOffer gửi tới p1, DOM không chứa bot-pacing-chip hay notice-chip triệt tiêu đè lấn 183px', () => {
+    it('[TC-198.14/MSS][UC-IMP198/IMP210] ActionDock: Triệt tiêu bot-pacing-chip và notice-chip khỏi DOM theo IMP-210, không va chạm trade offer', () => {
       useGameStore.setState({
         currentTurnPlayerId: 'bot1',
         turnPhase: TurnPhase.WaitingRoll,
@@ -227,13 +227,13 @@ describe('[TC-198.01/MSS..TC-198.17/MSS][UC-IMP198] Desktop ActionDock Text Drop
         pendingTradeOffer: null,
       });
 
-      // 1. Khi chưa có offer: chip bot-pacing hiển thị bình thường
+      // 1. Khi chưa có offer: chip bot-pacing đã bị loại bỏ hoàn toàn theo IMP-210
       const htmlWithoutOffer = renderToStaticMarkup(
         React.createElement(ActionDock, { localPlayerId: 'p1', isMyTurn: false })
       );
-      expect(htmlWithoutOffer).toContain('data-testid="bot-pacing-chip"');
+      expect(htmlWithoutOffer).not.toContain('data-testid="bot-pacing-chip"');
 
-      // 2. Khi có pendingTradeOffer gửi đến p1: chip bị triệt tiêu khỏi DOM
+      // 2. Khi có pendingTradeOffer gửi đến p1: chip cũng không xuất hiện trong DOM
       useGameStore.setState({
         pendingTradeOffer: {
           offerId: 'offer_anti_collision',

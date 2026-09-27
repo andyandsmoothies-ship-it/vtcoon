@@ -3,9 +3,7 @@ import { useGameStore, type GameState } from '../store/game_store';
 import {
   isRollActionDisabled,
   isEndTurnDisabled,
-  resolveBotPacingStatus,
   resolveEndTurnButtonLabel,
-  resolveActionDockNotice,
 } from './ui_helpers';
 import { BOARD_CONFIG, CellType } from '../../domain/board_config';
 import { PROPERTY_DEEDS } from '../../domain/property_data';
@@ -96,7 +94,6 @@ export function ActionDock({
   const hasRolledThisTurn = hasRolledThisTurnProp !== undefined ? hasRolledThisTurnProp : storeHasRolledThisTurn;
   const [isRollPending, setIsRollPending] = useState(false);
   const rollTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
-  const botPacing = resolveBotPacingStatus(currentTurnPlayerId, localPlayerId ?? 'p1', playersInfo, turnPhase);
 
   React.useEffect(() => {
     if ((hasRolledThisTurn || isRolling || !isMyTurn) && isRollPending) {
@@ -193,41 +190,10 @@ export function ActionDock({
   const isAuditEndTurnActive = Boolean(isMyTurn && inAudit && hasRolledThisTurn && !canRollAgain);
   const shouldPulseEndTurn = isSkippedTurn || isAuditEndTurnActive;
   const isGlowActive = (isMyTurn && !isRollDisabled) || isSkippedTurn;
-  const actionDockNotice = resolveActionDockNotice({
-    isMyTurn,
-    isInsolvent,
-    inAudit,
-    auditTurnsLeft: actingPlayer?.auditTurnsLeft,
-    balance: actingPlayer?.balance,
-    turnPhase,
-    hasRolledThisTurn,
-    isSkippedTurn: Boolean(actingPlayer?.skipNextTurn),
-    botPacing,
-    isStandingOnBuyable,
-    buyableCellName: currentCell?.name,
-    buyableCellPrice: PROPERTY_DEEDS.get(currentPos)?.price,
-  });
   return (
     <div className="relative flex flex-col items-center gap-1.5">
-      {/* Chip Thông Báo Ngữ Cảnh Độc Quyền (Actionable Guidance Chip) */}
-      {actionDockNotice && !isStripActive && !activeModal && (
-        <div
-          data-testid={actionDockNotice.type === 'bot_pacing' ? 'bot-pacing-chip' : `${actionDockNotice.type === 'skip_turn' ? 'skip-turn-notice-chip' : `${actionDockNotice.type}-notice-chip`}`}
-          className={`whitespace-nowrap flex items-center gap-1.5 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-bold shadow-md animate-pulse select-none ${
-            actionDockNotice.tone === 'error'
-              ? 'bg-rose-950 text-rose-300 border border-rose-500/60'
-              : actionDockNotice.tone === 'warning'
-              ? 'bg-amber-950 text-amber-300 border border-amber-500/60'
-              : 'bg-slate-850 text-amber-300 border border-amber-500/40'
-          }`}
-        >
-          <span aria-hidden="true">{actionDockNotice.icon}</span>
-          <span className="sm:hidden">{actionDockNotice.mobileText}</span>
-          <span className="hidden sm:inline">{actionDockNotice.desktopText}</span>
-        </div>
-      )}
       <nav
-        className="relative pointer-events-auto flex items-center gap-1.5 min-[360px]:gap-2 md:gap-3 bg-[#FFFDF8]/95 backdrop-blur-sm border border-slate-300/80 shadow-lg shadow-slate-900/10 rounded-2xl p-1.5 sm:p-2.5 px-2.5 min-[360px]:px-3.5 sm:px-5 max-w-[calc(100vw-1rem)] overflow-x-auto no-scrollbar"
+        className="relative pointer-events-auto flex items-center justify-center gap-1.5 min-[360px]:gap-2 md:gap-3 bg-[#FFFDF8]/95 backdrop-blur-sm border border-slate-300/80 shadow-lg shadow-slate-900/10 rounded-2xl p-1.5 sm:p-2.5 px-2 min-[360px]:px-3 sm:px-5 max-w-[calc(100vw-1rem)] overflow-x-auto no-scrollbar"
         aria-label="Thanh điều khiển tác vụ"
       >
         {/* Primary Action Button: Trong ActionPhase luôn ưu tiên nút Mua Đất */}
@@ -236,7 +202,7 @@ export function ActionDock({
             type="button"
             onClick={isTradeFrozen ? undefined : () => openModal('deed', { cellIndex: currentPos, isBuyOpportunity: true })}
             disabled={isTradeFrozen}
-            className={`min-h-[44px] shrink-0 whitespace-nowrap flex items-center justify-center gap-1.5 px-4 sm:px-6 py-2.5 rounded-2xl font-black text-white shadow-lg transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 ${
+            className={`w-11 h-11 min-w-[44px] min-h-[44px] sm:w-auto sm:h-auto p-0 sm:px-6 sm:py-2.5 shrink-0 whitespace-nowrap flex items-center justify-center gap-1.5 rounded-2xl font-black text-white shadow-lg transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 ${
               isTradeFrozen
               ? 'bg-slate-200 text-slate-500 border-2 border-slate-400 cursor-not-allowed shadow-none'
               : 'bg-amber-500 hover:bg-amber-700 border border-amber-700 shadow-md shadow-amber-500/30 active:scale-95 ring-4 ring-amber-400/60 animate-pulse cursor-pointer'
@@ -244,7 +210,7 @@ export function ActionDock({
           aria-label={isTradeFrozen ? `Thị trường đóng băng (#${currentPos})` : `Mua ô đất số ${currentPos}`}
         >
           <span className="text-xl" aria-hidden="true">{isTradeFrozen ? '🔒' : '🏷️'}</span>
-          <span className="text-sm md:text-base font-black">{isTradeFrozen ? 'Đóng Băng' : 'Mua Đất'}</span>
+          <span className="hidden sm:inline text-sm md:text-base font-black">{isTradeFrozen ? 'Đóng Băng' : 'Mua Đất'}</span>
         </button>
       ) : (
         <button
@@ -252,7 +218,7 @@ export function ActionDock({
           onClick={handleRollClick}
           disabled={isRollDisabled}
           data-testid="roll-dice-btn"
-          className={`min-h-[44px] shrink-0 whitespace-nowrap flex items-center justify-center gap-1.5 sm:gap-2 px-5 sm:px-6 py-2.5 rounded-2xl font-black text-white shadow-lg transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 ${
+          className={`w-11 h-11 min-w-[44px] min-h-[44px] sm:w-auto sm:h-auto p-0 sm:px-6 sm:py-2.5 shrink-0 whitespace-nowrap flex items-center justify-center gap-1.5 sm:gap-2 rounded-2xl font-black text-white shadow-lg transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 ${
             isRollDisabled
               ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-300 shadow-none'
               : `bg-gradient-to-b from-rose-500 via-red-600 to-red-700 hover:from-rose-400 hover:to-red-600 border border-red-700 shadow-md shadow-red-600/30 active:scale-95 ${
@@ -261,8 +227,14 @@ export function ActionDock({
           }`}
           aria-label="Đổ xúc xắc"
         >
-          <span className="text-xl" aria-hidden="true">🎲</span>
-          <span className="text-sm md:text-base">
+          <span className="text-xl" aria-hidden="true">
+            {isRollPending || isRolling ? (
+              <span className="inline-block animate-spin">🎲</span>
+            ) : (
+              '🎲'
+            )}
+          </span>
+          <span className="hidden sm:inline text-sm md:text-base">
             {isRollPending || isRolling
               ? 'Đang Đổ...'
               : isPawnMoving
@@ -270,10 +242,10 @@ export function ActionDock({
               : isBankrupt
               ? 'Đã Phá Sản'
               : (actingPlayer?.extraTurns ?? 0) > 0
-              ? (<><span className="sm:hidden">Đổ Tiếp</span><span className="hidden sm:inline">Đổ Tiếp (+1 Lượt)</span></>)
+              ? 'Đổ Tiếp (+1 Lượt)'
               : canRollAgain && hasRolledThisTurn
-              ? (<><span className="sm:hidden">Đổ Tiếp</span><span className="hidden sm:inline">Đổ Tiếp (Đôi)</span></>)
-              : (<><span className="sm:hidden min-w-[28px] text-center">Đổ</span><span className="hidden sm:inline">Đổ Xúc Xắc</span></>)}
+              ? 'Đổ Tiếp (Đôi)'
+              : 'Đổ Xúc Xắc'}
           </span>
         </button>
       )}
@@ -285,7 +257,7 @@ export function ActionDock({
           onClick={() => (actingPlayer?.balance ?? 0) >= 500 && onBailOut?.()}
           disabled={(actingPlayer?.balance ?? 0) < 500}
           title={(actingPlayer?.balance ?? 0) < 500 ? 'Bạn cần ít nhất 500 để nộp tiền bảo lãnh' : undefined}
-          className={`min-h-[44px] shrink-0 whitespace-nowrap flex items-center gap-1.5 px-3.5 py-2 rounded-2xl font-bold border text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+          className={`w-11 h-11 min-w-[44px] min-h-[44px] sm:w-auto sm:h-auto p-0 sm:px-3.5 sm:py-2 shrink-0 whitespace-nowrap flex items-center justify-center gap-1.5 rounded-2xl font-bold border text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
             (actingPlayer?.balance ?? 0) < 500
               ? 'bg-slate-200 text-slate-400 border-slate-300 shadow-none cursor-not-allowed active:scale-100'
               : 'bg-amber-600 hover:bg-amber-700 text-white border-amber-800 shadow-sm active:scale-95 cursor-pointer'
@@ -293,7 +265,7 @@ export function ActionDock({
           aria-label="Nộp 500 bảo lãnh kiểm toán để rời trạm ngay"
         >
           <span aria-hidden="true">⚖️</span>
-          <span>Bảo Lãnh (500)</span>
+          <span className="hidden sm:inline">Bảo Lãnh (500)</span>
         </button>
       )}
 

@@ -102,11 +102,26 @@ export function drawChanceCard(
       ? actualDelta
       : (cardInfo.effectDelta !== undefined ? 0 : undefined);
 
+    let resolvedEffectDetail = cardInfo.effectDetail;
+    let resolvedTargetScope = cardInfo.targetScope;
     let resolvedDestination = cardInfo.destination;
+
+    const maBuyout = room.lastMaBuyout;
+    room.lastMaBuyout = undefined; // Take-and-clear pattern
+
     if (card === ChanceCardId.CC_LAND_CHANGE) {
       resolvedDestination = actualDelta > 0 ? 'Kho Bạc hỗ trợ vào Ngân sách người chơi' : 'Nộp vào Kho Bạc Nhà Nước';
     } else if (card === ChanceCardId.CC_MA_FORCE) {
-      resolvedDestination = actualDelta > 0 ? 'Kho Bạc hỗ trợ vào Ngân sách người chơi' : 'Thanh toán chuyển nhượng cho đối thủ';
+      if (actualDelta < 0 && maBuyout) {
+        const { cellName, sellerName, cost } = maBuyout;
+        resolvedEffectDetail = `Đã thâu tóm thành công [${cellName}] từ ${sellerName} với giá 120% (${cost.toLocaleString('vi-VN')}).`;
+        resolvedTargetScope = cellName;
+        resolvedDestination = `Thanh toán chuyển nhượng cho ${sellerName}`;
+      } else if (actualDelta > 0) {
+        resolvedEffectDetail = 'Nhận 800 trợ cấp M&A từ Kho Bạc (do đối thủ không có BĐS Cấp 0 phù hợp hoặc không đủ ngân sách mua lại).';
+        resolvedTargetScope = 'Kho Bạc Nhà Nước';
+        resolvedDestination = 'Kho Bạc hỗ trợ vào Ngân sách người chơi';
+      }
     } else if (card === ChanceCardId.CC_SWAP_PROJECT) {
       resolvedDestination = actualDelta > 0 ? 'Kho Bạc hỗ trợ vào Ngân sách người chơi' : cardInfo.destination;
     }
@@ -114,6 +129,8 @@ export function drawChanceCard(
     room.lastEventCard = {
       ...cardInfo,
       destination: resolvedDestination,
+      ...(resolvedEffectDetail ? { effectDetail: resolvedEffectDetail } : {}),
+      ...(resolvedTargetScope ? { targetScope: resolvedTargetScope } : {}),
       ...(resolvedDelta !== undefined ? { effectDelta: resolvedDelta } : {}),
     };
     if (card !== ChanceCardId.CC_DIPLOMATIC) room.chanceDiscard.push(card);

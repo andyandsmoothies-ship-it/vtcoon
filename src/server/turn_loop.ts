@@ -115,6 +115,7 @@ export function executeTurnRoll(
 ): RollResult | undefined {
   room.lastEventCard = null;
   room.lastDiplomaticEvent = null;
+  room.lastMaBuyout = undefined;
   if (current.skipNextTurn) {
     current.skipNextTurn = false;
     room.phase = TurnPhase.PropertyManagement;
@@ -214,6 +215,7 @@ export function executeTurnEnd(
   if (!rolledThisTurn && room.phase === TurnPhase.WaitingRoll && (current.auditTurnsLeft ?? 0) <= 0) return undefined;
 
   room.lastDiplomaticEvent = null;
+  room.lastMaBuyout = undefined;
   if (continueDoubles && current.consecutiveDoubles > 0 && !current.skipNextTurn) {
     room.phase = TurnPhase.WaitingRoll;
     rolledThisTurnMap.set(roomCode, false);

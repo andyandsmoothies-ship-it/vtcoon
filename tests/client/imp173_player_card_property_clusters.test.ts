@@ -41,13 +41,13 @@ describe('[TC-173/MSS][IMP-173] PlayerCard Option A: 22 Property Dots in 8 Color
     expect(html).toContain(`data-testid="cluster-${group}"`);
   });
 
-  it('[TC-173.03/MSS][IMP-173] PlayerCard renders exactly 22 individual property dots', () => {
+  it('[TC-173.03/MSS][IMP-173] PlayerCard renders exactly 28 individual property dots (22 streets + 4 railroads + 2 utilities)', () => {
     const html = renderToStaticMarkup(
       React.createElement(PlayerCard, { player: mockPlayer, isCurrentTurn: true, levelMap: {}, slotIndex: 0 })
     );
     const matches = html.match(/data-testid="dot-cell-\d+"/g);
     expect(matches).not.toBeNull();
-    expect(matches!.length).toBe(22);
+    expect(matches!.length).toBe(28);
   });
 
   it('[TC-173.04/MSS][IMP-173] Owned property cell (e.g. cell 1) is marked data-owned="true" and has group backgroundColor', () => {
@@ -97,5 +97,30 @@ describe('[TC-173/MSS][IMP-173] PlayerCard Option A: 22 Property Dots in 8 Color
     const clusterMatch = html.match(/<div[^>]*data-testid="cluster-Cam"[^>]*>/);
     expect(clusterMatch).not.toBeNull();
     expect(clusterMatch![0]).toContain('shrink-0');
+  });
+
+  it('[TC-173.09/MSS][IMP-173] PlayerCard renders Row 3 with 4 Railroad dots and 2 Utility dots', () => {
+    const playerWithInfra: PlayerHudInfo = {
+      ...mockPlayer,
+      ownedProperties: [5, 12], // Long Thành (Railroad), EVN (Utility)
+    };
+    const html = renderToStaticMarkup(
+      React.createElement(PlayerCard, { player: playerWithInfra, isCurrentTurn: true, levelMap: {}, slotIndex: 0 })
+    );
+    expect(html).toContain('data-testid="property-clusters-row-3"');
+    expect(html).toContain('data-testid="cluster-railroad"');
+    expect(html).toContain('data-testid="cluster-utility"');
+
+    // Owned cell 5 (Railroad) has Slate-600 #475569
+    const cell5Match = html.match(/<span[^>]*data-testid="dot-cell-5"[^>]*>/);
+    expect(cell5Match).not.toBeNull();
+    expect(cell5Match![0]).toContain('data-owned="true"');
+    expect(cell5Match![0]).toContain('#475569');
+
+    // Owned cell 12 (Utility) has Sky-600 #0284C7
+    const cell12Match = html.match(/<span[^>]*data-testid="dot-cell-12"[^>]*>/);
+    expect(cell12Match).not.toBeNull();
+    expect(cell12Match![0]).toContain('data-owned="true"');
+    expect(cell12Match![0]).toContain('#0284C7');
   });
 });
