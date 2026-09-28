@@ -4,6 +4,7 @@ import { useGameStore } from '../../store/game_store.js';
 import { BOARD_CONFIG } from '../../../domain/board_config.js';
 import { formatCurrency, formatShortPlayerName } from '../ui_helpers.js';
 import { TurnPhase } from '../../../domain/room.js';
+import { calculateAuctionTimeRemaining } from './modal_helpers.js';
 
 export function MiniAuctionStrip(): React.ReactElement | null {
   const isSSR = typeof window === 'undefined';
@@ -18,21 +19,21 @@ export function MiniAuctionStrip(): React.ReactElement | null {
   const turnPhase = ssrState ? ssrState.turnPhase : turnPhaseStore;
   const playersInfo = ssrState ? ssrState.playersInfo : playersInfoStore;
 
-  const [displaySeconds, setDisplaySeconds] = useState(auction?.timeRemaining ?? 0);
+  const [displaySeconds, setDisplaySeconds] = useState(() => calculateAuctionTimeRemaining(auction));
 
-  // Authoritative Resync: Đồng bộ mỗi khi server delta cập nhật timeRemaining (triệt tiêu client drift)
+  // Authoritative Resync: Đồng bộ ngay lập tức khi auction hoặc deadline thay đổi
   useEffect(() => {
-    setDisplaySeconds(auction?.timeRemaining ?? 0);
-  }, [auction?.timeRemaining]);
+    setDisplaySeconds(calculateAuctionTimeRemaining(auction));
+  }, [auction?.cellIndex, auction?.currentBid, auction?.deadline, auction?.timeRemaining]);
 
-  // Đếm ngược local từng giây mượt mà giữa các delta ticks
+  // Đếm ngược mượt mà giữa các delta ticks (250ms interval chuẩn hóa không rung giật)
   useEffect(() => {
-    if (!auction || auction.isConcluded || displaySeconds <= 0) return;
+    if (!auction || auction.isConcluded) return;
     const timer = setInterval(() => {
-      setDisplaySeconds((prev) => Math.max(0, prev - 1));
-    }, 1000);
+      setDisplaySeconds(calculateAuctionTimeRemaining(auction));
+    }, 250);
     return () => clearInterval(timer);
-  }, [auction?.cellIndex, auction?.isConcluded, auction?.timeRemaining]);
+  }, [auction?.cellIndex, auction?.isConcluded, auction?.deadline]);
 
   const isVisible = Boolean(
     auction &&

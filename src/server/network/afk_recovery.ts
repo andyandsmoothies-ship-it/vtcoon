@@ -143,3 +143,76 @@ export function executeInsolvencyAfkRecovery(
   rooms.handlePlayerIntent(roomCode, playerId, { type: 'INTENT_BANKRUPTCY' });
   return { rescued: false, bankrupt: true };
 }
+
+export function executeSafeAfkAction(
+  rooms: RoomManager,
+  roomCode: string,
+  phase: TurnPhase,
+  playerId: string,
+  onScheduleAuctionSettle?: (roomCode: string) => void,
+): void {
+  switch (phase) {
+    case TurnPhase.WaitingRoll: {
+      const room = rooms.getRoom(roomCode);
+      const player = room?.players.find((p) => p.id === playerId);
+      if (player && player.wasInAudit === true) {
+        player.wasInAudit = false;
+        return;
+      }
+      rooms.handleRollDice(roomCode, playerId);
+      const rMid = rooms.getRoom(roomCode);
+      if (rMid?.phase === TurnPhase.PropertyManagement) {
+        rooms.handleEndTurn(roomCode, playerId);
+      } else if (rMid?.phase === TurnPhase.HosePhase) {
+        rooms.handleHoseSkip(roomCode, playerId);
+        rooms.handleEndTurn(roomCode, playerId);
+      } else if (rMid?.phase === TurnPhase.ActionPhase) {
+        rooms.handleDecline(roomCode, playerId);
+        const rAfterDecline = rooms.getRoom(roomCode);
+        if (rAfterDecline?.phase === TurnPhase.PropertyManagement) {
+          rooms.handleEndTurn(roomCode, playerId);
+        }
+      }
+      break;
+    }
+    case TurnPhase.ActionPhase: {
+      rooms.handleDecline(roomCode, playerId);
+      const rMid = rooms.getRoom(roomCode);
+      if (rMid?.phase === TurnPhase.PropertyManagement) {
+        rooms.handleEndTurn(roomCode, playerId);
+      }
+      break;
+    }
+    case TurnPhase.AuctionPhase: {
+      rooms.handleAuctionClose(roomCode);
+      onScheduleAuctionSettle?.(roomCode);
+      const rMid = rooms.getRoom(roomCode);
+      if (rMid?.phase === TurnPhase.PropertyManagement) {
+        rooms.handleEndTurn(roomCode, playerId);
+      }
+      break;
+    }
+    case TurnPhase.PropertyManagement: {
+      rooms.handleEndTurn(roomCode, playerId);
+      break;
+    }
+    case TurnPhase.InsolvencyPhase: {
+      executeInsolvencyAfkRecovery(rooms, roomCode, playerId);
+      const rMid = rooms.getRoom(roomCode);
+      if (rMid?.phase === TurnPhase.PropertyManagement) {
+        rooms.handleEndTurn(roomCode, playerId);
+      }
+      break;
+    }
+    case TurnPhase.HosePhase: {
+      rooms.handleHoseSkip(roomCode, playerId);
+      rooms.handleEndTurn(roomCode, playerId);
+      break;
+    }
+    default: {
+      rooms.handleDecline(roomCode, playerId);
+      rooms.handleEndTurn(roomCode, playerId);
+      break;
+    }
+  }
+}

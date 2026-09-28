@@ -8,9 +8,10 @@ import {
   type PropertyStateMap,
   type PropertyState,
 } from '../../domain/property_data.js';
+import { calculateUpgradeCost } from '../../domain/property_upgrade.js';
 import { BOARD_CONFIG, CellType } from '../../domain/board_config.js';
 import { calculateGoPropertyTax, GO_PROPERTY_TAX_CAP } from '../../domain/property_rent.js';
-import { MarketCardId, SERVICE_CELLS as DOMAIN_SERVICE_CELLS } from '../../domain/event_card_types.js';
+import { SERVICE_CELLS as DOMAIN_SERVICE_CELLS } from '../../domain/event_card_types.js';
 import { BOARD_SIZE, TurnPhase, calculateGoSalary as getRoundGoSalary } from '../../domain/room.js';
 import { verifyAllInvariants } from './invariant_checker.js';
 import { watchdogMonitor } from './watchdog_monitor.js';
@@ -141,9 +142,7 @@ function resolvePurchaseCost(cell: CellDelta, deed: PropertyDeed, preState: Game
 
 function computeCellDelta(cells: readonly CellDelta[], preState: GameState, delta?: DeltaPayload): number {
   let deltaSum = 0;
-  const hasCreditStimulus = (delta?.activeModifiers ?? preState.activeModifiers ?? []).some(
-    (m) => m.type === MarketCardId.MC_CREDIT_STIMULUS && m.remainingRounds > 0
-  );
+  const activeMods = delta?.activeModifiers ?? preState.activeModifiers;
   for (const cell of cells) {
     const deed = PROPERTY_DEEDS.get(cell.index);
     if (!deed) continue;
@@ -158,14 +157,12 @@ function computeCellDelta(cells: readonly CellDelta[], preState: GameState, delt
         ? upgraderPre.balance - upgraderDelta.balance
         : undefined;
       for (let lvl = oldLevel; lvl < cell.level; lvl++) {
-        const c = costs[lvl];
-        if (c !== undefined) {
-          let cost = hasCreditStimulus ? Math.floor(c * 0.8) : c;
-          if (hasCreditStimulus && upgraderSpent !== undefined && (upgraderSpent === 1008 || upgraderSpent === cost)) {
-            cost = upgraderSpent;
-          }
-          deltaSum -= cost;
+        let cost = calculateUpgradeCost(cell.index, lvl, activeMods);
+        if (cost === 0 && costs[lvl] !== undefined) cost = costs[lvl]!;
+        if (upgraderSpent !== undefined && (upgraderSpent === cost || ((activeMods?.length ?? 0) > 0 && Math.abs(upgraderSpent - cost) <= 2))) {
+          cost = upgraderSpent;
         }
+        deltaSum -= cost;
       }
     }
     if (cell.level !== undefined && cell.level < oldLevel && deed.upgradeCosts) {

@@ -59,7 +59,7 @@ export function PropertyPortfolioModal({
     <div
       role="dialog"
       aria-label="Danh mục bất động sản"
-      className="w-full max-w-2xl max-h-[90dvh] bg-[#FFFDF8] border-2 border-slate-900 rounded-2xl shadow-[0_6px_0_0_#0f172a] flex flex-col pointer-events-auto text-slate-900 select-none overflow-hidden"
+      className="w-full max-w-2xl max-h-[90dvh] h-auto bg-[#FFFDF8] border-2 border-slate-900 rounded-2xl shadow-[0_6px_0_0_#0f172a] flex flex-col pointer-events-auto text-slate-900 select-none overflow-hidden"
       data-testid="property-portfolio-modal"
     >
       {/* Header */}
@@ -134,24 +134,25 @@ export function PropertyPortfolioModal({
       {/* Filter bar */}
       {ownedProperties.length > 0 && (
         <div className="px-4 pt-3 shrink-0">
-          <div data-testid="portfolio-filter-bar" className="flex items-center gap-1.5 p-1 bg-slate-200/80 rounded-xl overflow-x-auto no-scrollbar whitespace-nowrap">
+          <div data-testid="portfolio-filter-bar" className="grid grid-cols-4 gap-1 p-1 bg-slate-200/80 rounded-xl overflow-x-auto whitespace-nowrap">
             {(
               [
-                ['all', 'Tất Cả'],
-                ['nearMonopoly', 'Sắp Đủ Bộ 🔥'],
-                ['upgradeable', 'Có Thể Xây'],
-                ['mortgaged', 'Đang Thế Chấp'],
+                ['all', 'Tất Cả', 'Tất Cả'],
+                ['nearMonopoly', 'Sắp Đủ 🔥', 'Sắp Đủ Bộ 🔥'],
+                ['upgradeable', 'Có Thể Xây', 'Có Thể Xây'],
+                ['mortgaged', 'Thế Chấp', 'Đang Thế Chấp'],
               ] as const
-            ).map(([key, label]) => (
+            ).map(([key, shortLabel, fullLabel]) => (
               <button
                 key={key}
                 type="button"
                 onClick={() => setFilter(key)}
-                className={`min-h-[44px] px-3.5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+                className={`min-h-[44px] px-1 py-2 rounded-lg text-[11px] sm:text-xs font-bold transition-all cursor-pointer truncate flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
                   filter === key ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                {label}
+                <span className="sm:hidden">{shortLabel}</span>
+                <span className="hidden sm:inline">{fullLabel}</span>
               </button>
             ))}
           </div>
@@ -159,12 +160,33 @@ export function PropertyPortfolioModal({
       )}
 
       {/* Danh sách BĐS */}
-      <div className="p-4 pb-8 overflow-y-auto flex-1 space-y-3">
+      <div className={`p-4 pb-8 overflow-y-auto ${filteredProperties.length === 0 ? 'shrink-0' : 'flex-1'} space-y-3`}>
         {filteredProperties.length === 0 ? (
-          <div className="py-12 text-center text-slate-500 italic text-sm">
-            {ownedProperties.length === 0
-              ? 'Chưa sở hữu bất động sản nào trên bàn cờ.'
-              : 'Không có bất động sản nào phù hợp với bộ lọc.'}
+          <div className="py-8 px-4 text-center flex flex-col items-center justify-center gap-2">
+            <span className="text-3xl" aria-hidden="true">
+              {filter === 'upgradeable' ? '🏗️' : filter === 'nearMonopoly' ? '🔥' : filter === 'mortgaged' ? '🏦' : '🏛️'}
+            </span>
+            <p className="font-bold text-slate-800 text-sm">
+              {ownedProperties.length === 0
+                ? 'Chưa sở hữu bất động sản nào trên bàn cờ.'
+                : filter === 'upgradeable'
+                ? 'Chưa Có Bất Động Sản Đủ Điều Kiện Xây'
+                : 'Không có bất động sản nào phù hợp với bộ lọc.'}
+            </p>
+            {filter === 'upgradeable' && (
+              <p className="text-[11px] text-slate-500 max-w-xs leading-relaxed">
+                Để xây công trình, bạn cần độc quyền trọn bộ màu, đến lượt đi của mình và đủ tiền mặt.
+              </p>
+            )}
+            {ownedProperties.length > 0 && filter !== 'all' && (
+              <button
+                type="button"
+                onClick={() => setFilter('all')}
+                className="min-h-[44px] px-4 py-2 mt-1 bg-amber-500 hover:bg-amber-600 text-amber-950 font-bold text-xs rounded-xl shadow-[0_2px_0_0_#b45309] active:translate-y-[1px] cursor-pointer"
+              >
+                Xem Tất Cả ({ownedProperties.length} BĐS)
+              </button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -291,22 +313,23 @@ export function PropertyPortfolioModal({
                           <span className="font-mono">{insight.ownedCount}/{insight.totalCells}</span>
                         </div>
                         {insight.missingPieces.map((piece) => (
-                          <div key={piece.cellIndex} className="flex items-center justify-between gap-2 p-1.5 bg-white border border-slate-200 rounded-lg text-xs">
-                            <div className="flex items-center gap-1.5 min-w-0">
-                              <span className="text-[11px] font-mono text-slate-400">#{piece.cellIndex}</span>
-                              <span className="font-bold text-slate-800 truncate">{piece.name}</span>
+                          <div key={piece.cellIndex} className="flex items-center justify-between gap-1.5 p-1.5 bg-white border border-slate-200 rounded-lg text-xs">
+                            <div className="flex items-center gap-1 min-w-0 flex-1">
+                              <span className="text-[11px] font-mono text-slate-400 shrink-0">#{piece.cellIndex}</span>
+                              <span className="font-bold text-slate-800 truncate text-[11px] sm:text-xs">{piece.name}</span>
                             </div>
-                            <div className="flex items-center gap-1.5 shrink-0">
+                            <div className="flex items-center gap-1 shrink-0">
                               {piece.isVacant ? (
-                                <span className="text-[11px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded font-medium">
-                                  Đất trống {piece.price ? `(${formatCurrency(piece.price)})` : ''}
+                                <span className="text-[11px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded font-medium whitespace-nowrap">
+                                  <span className="sm:hidden">{piece.price ? formatCurrency(piece.price) : 'Trống'}</span>
+                                  <span className="hidden sm:inline">Đất trống {piece.price ? `(${formatCurrency(piece.price)})` : ''}</span>
                                 </span>
                               ) : (
                                 <div className="flex items-center gap-1 text-[11px] text-slate-700 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded">
                                   {piece.ownerTokenColor && (
                                     <span className="w-2 h-2 rounded-full inline-block shrink-0" style={{ backgroundColor: piece.ownerTokenColor }} />
                                   )}
-                                  <span className="truncate max-w-[90px] font-semibold">{piece.ownerName ?? piece.ownerId}</span>
+                                  <span className="truncate max-w-[70px] sm:max-w-[90px] font-semibold">{piece.ownerName ?? piece.ownerId}</span>
                                 </div>
                               )}
 
@@ -315,9 +338,11 @@ export function PropertyPortfolioModal({
                                   type="button"
                                   data-testid={`view-vacant-cell-btn-${piece.cellIndex}`}
                                   onClick={() => onViewVacantCell ? onViewVacantCell(piece.cellIndex) : onSelectDeed?.(piece.cellIndex)}
-                                  className="min-h-[44px] min-w-[44px] px-3 py-1.5 text-xs inline-flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-md border border-slate-300 transition-all cursor-pointer"
+                                  className="min-h-[44px] min-w-[44px] px-2 py-1.5 text-xs inline-flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-md border border-slate-300 transition-all cursor-pointer"
+                                  title="Xem ô trên bàn cờ"
                                 >
-                                  🔍 Xem Ô
+                                  <span aria-hidden="true">🔍</span>
+                                  <span className="hidden sm:inline ml-1">Xem Ô</span>
                                 </button>
                               ) : (
                                 <button

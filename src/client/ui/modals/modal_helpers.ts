@@ -354,3 +354,18 @@ export function isAuctionDismissible(
     myPlayer?.isBankrupt
   );
 }
+
+/**
+ * [IMP-200] Tính số giây đếm ngược còn lại của phiên đấu giá dựa trên deadline hoặc fallback timeRemaining.
+ * Khắc phục triệt để hiện tượng kẹt 20s và lệch pha thời gian giữa các lượt đặt giá từ Bot.
+ */
+export function calculateAuctionTimeRemaining(
+  auction: { timeRemaining?: number; deadline?: number; isConcluded?: boolean } | null | undefined,
+  now: number = Date.now(),
+): number {
+  if (!auction || auction.isConcluded) return 0;
+  if (auction.deadline !== undefined) {
+    return Math.max(0, Math.ceil((auction.deadline - now) / 1000));
+  }
+  return Math.max(0, Math.floor(auction.timeRemaining ?? 0));
+}

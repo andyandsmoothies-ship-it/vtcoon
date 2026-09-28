@@ -253,19 +253,10 @@ export const useGameStore = create<GameState>((set, get) => ({
     set({ currentTurnPlayerId: playerId, hasRolledThisTurn: false });
   },
 
-  setTurnTimeRemaining: (seconds) =>
-    set({ turnTimeRemaining: Math.max(0, Math.floor(seconds)) }),
-
-  decrementTurnTimer: () =>
-    set((state) => ({
-      turnTimeRemaining: Math.max(0, state.turnTimeRemaining - 1),
-    })),
-
+  setTurnTimeRemaining: (seconds) => set({ turnTimeRemaining: Math.max(0, Math.floor(seconds)) }),
+  decrementTurnTimer: () => set((state) => ({ turnTimeRemaining: Math.max(0, state.turnTimeRemaining - 1) })),
   setTurnPhase: (turnPhase) => set({ turnPhase }),
-
-  setTreasuryPool: (amount) =>
-    set({ treasuryPool: Math.max(0, Math.floor(amount)) }),
-
+  setTreasuryPool: (amount) => set({ treasuryPool: Math.max(0, Math.floor(amount)) }),
   setRoundInfo: (round, maxRounds) =>
     set((state) => ({
       roundNumber: Math.max(1, round),
@@ -306,7 +297,10 @@ export const useGameStore = create<GameState>((set, get) => ({
     const current = get().auction;
     set({ dismissedAuctionCellIndex: null });
     if (current) {
-      get().openModal('auction', current);
+      const remaining = current.deadline !== undefined
+        ? Math.max(0, Math.ceil((current.deadline - Date.now()) / 1000))
+        : (current.timeRemaining ?? 0);
+      get().openModal('auction', { ...current, timeRemaining: remaining });
     }
   },
 

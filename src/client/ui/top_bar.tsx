@@ -128,10 +128,17 @@ export function TopBar(props: TopBarProps): React.ReactElement {
               </span>
             </div>
           ) : (
-            <div className="flex items-center gap-1 sm:gap-2" role="timer" aria-live="polite">
+            <div
+              className="flex items-center gap-1 sm:gap-2 isolate [transform:translateZ(0)] [backface-visibility:hidden]"
+              role="timer"
+              aria-live="polite"
+            >
               <span className="text-sm sm:text-base" aria-hidden="true">⏱️</span>
               <span className="hidden sm:inline text-xs text-slate-600 font-semibold">Thời gian:</span>
-              <span className={`tabular-nums font-mono text-xs sm:text-base whitespace-nowrap ${timerColorClass}`}>
+              <span
+                key={turnTimeRemaining}
+                className={`tabular-nums font-mono text-xs sm:text-base whitespace-nowrap antialiased [transform:translateZ(0)] [backface-visibility:hidden] ${timerColorClass}`}
+              >
                 {formatTimeRemaining(turnTimeRemaining)}
               </span>
             </div>

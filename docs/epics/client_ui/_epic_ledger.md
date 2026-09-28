@@ -627,12 +627,11 @@
   * `src/client/ui/modals/trade/trade_partner_strip.tsx` (74 LOC — Tier 2 <= 500 LOC): Bổ sung `focus-visible:ring-2 focus-visible:ring-amber-400` cho các tab chọn đối tác.
   * `src/client/ui/modals/trade_modal.tsx` (279 LOC — Tier 2 <= 500 LOC): Tinh giản nhãn deal compound ` (1 • 5.000)` và thuần tiền mặt ` (5.000)` triệt tiêu hoàn toàn hậu tố `Tr.` theo bất biến IMP-197, chống rớt dòng trên màn 360px nhưng bảo toàn 100% test TC-202.07 ` (2 BĐS)` khi thuần tài sản; thêm span truncate và focus-visible.
   * `src/client/ui/modals/trade/trade_column.tsx` (246 LOC — Tier 2 <= 500 LOC): Nâng cấp các phím gợi ý giá bán/mua đạt hiệu ứng bóng xúc giác 3D `shadow-[0_2px_0_0_#fcd34d]` (bán) và `shadow-[0_2px_0_0_#93c5fd]` (mua) kèm độ lún `active:translate-y-[2px]`.
-  * `src/client/ui/modals/property_portfolio_modal.tsx` (450 LOC — Tier 2 <= 500 LOC): Bố cục lại cụm nút hành động thẻ BĐS dạng lưới 2 cột `grid grid-cols-2 gap-1.5`, nút chính (Thế Chấp / Giải Chấp) chiếm `col-span-2`, nút phụ (Hạ Cấp / Sổ Đỏ) chiếm `col-span-1` hoặc `col-span-2`; nâng toàn bộ sàn chữ lên >= 11px; bổ sung focus ring cho thanh lọc.
+  * `src/client/ui/modals/property_portfolio_modal.tsx` (475 LOC — Tier 2 <= 500 LOC): Triệt tiêu cuộn ngang thanh lọc với `grid grid-cols-4 gap-1` (nhãn responsive: Sắp Đủ 🔥, Thế Chấp); thiết lập Rich Empty State kèm giải thích luật và Recovery CTA [Xem Tất Cả (N BĐS)]; co giãn chiều cao `h-auto` tự nhiên khi rỗng; thu gọn hàng mảnh ghép còn thiếu chống xén tên tỉnh thành; bố cục lưới 2 cột cho các nút hành động thẻ BĐS.
 - **Kiểm thử & Bất biến**:
-  * `tests/contracts/imp208_mobile_real_estate_ui_polish.test.ts`: 16/16 atomic contract tests PASS 100% (5 facets).
-  * Điều hòa tiền điều kiện regex `tests/client/imp202_trade_modal_ergonomics_overhaul.test.ts`: 16/16 tests PASS 100%.
+  * `tests/contracts/imp208_mobile_real_estate_ui_polish.test.ts`: 18/18 atomic contract tests PASS 100%.
+  * Toàn bộ 9 suites liên quan (179 tests): PASS 100%.
   * `npx tsc --noEmit`: 0 lỗi. `npm run lint:ui`: 0 vi phạm (195 files scanned).
-  * `node .agents/tmp/check_fonts.mjs`: 0 font < 11px trên cả 8 tệp UI.
   * Evidence Snapshot: `.agents/evidence/imp208p_snapshot.json` (`executed: true`).
-- **Phê chuẩn**: `plan-griller` (AUDITED), `qa-tester` (Station 1 RED), `implementer` (Station 2 GREEN), `scout` (Station 2.5 PASS), `spec-reviewer` (SPEC_PASS APPROVED), `ui-craft-reviewer` (VERDICT SHIP vòng 2).
-- **Trạng thái**: ✅ Hoàn thành IMP-208P (2026-09-27).
+- **Phê chuẩn**: `plan-griller` (AUDITED), `qa-tester` (Station 1 RED), `implementer` (Station 2 GREEN), `scout` (Station 2.5 PASS), `spec-reviewer` (SPEC_PASS APPROVED), `ui-craft-reviewer` (VERDICT SHIP).
+- **Trạng thái**: ✅ Hoàn thành IMP-208P (2026-09-28).

@@ -219,4 +219,17 @@ describe('IMP-207: Single Contextual Timer & Monotonic Countdown Contract Suite'
     expect(useGameStore.getState().currentTurnPlayerId).toBe('p2');
     expect(useGameStore.getState().turnTimeRemaining).toBe(60);
   });
+
+  it('[TC-207.09/MSS][UC-IMP207] TopBar timer thiết lập isolate, antialiased và GPU compositing tokens chống lỗi đè chữ (ghosting) trên Mobile Safari', () => {
+    useGameStore.setState({ turnTimeRemaining: 28 });
+    const html = renderToStaticMarkup(React.createElement(TopBar));
+    const timerSection = html.match(/<div[^>]*role="timer"[^>]*>[\s\S]*?<\/div>/)?.[0] ?? '';
+
+    expect(timerSection).toContain('isolate');
+    expect(timerSection).toContain('[transform:translateZ(0)]');
+    expect(timerSection).toContain('[backface-visibility:hidden]');
+    expect(timerSection).toContain('antialiased');
+    expect(timerSection).toContain('00:28');
+  });
 });
+

@@ -17,7 +17,7 @@ import { CompulsoryBuyoutModal } from './compulsory_buyout_modal';
 import { AudioEngine } from '../../audio/audio_engine';
 import { SoundEffect } from '../../audio/audio_types';
 import type { PlayerIntent } from '../../../server/intent_dispatcher';
-import { isAuctionDismissible } from './modal_helpers';
+import { isAuctionDismissible, calculateAuctionTimeRemaining } from './modal_helpers';
 import { resolveTitleDeedModalState } from './title_deed_affordance';
 import { useLobbyStore } from '../../store/lobby_store';
 
@@ -47,7 +47,7 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
       if (hoseTimerRef.current) clearTimeout(hoseTimerRef.current);
     };
   }, []);
-  // [UC-GAME-022] Đồng hồ đếm ngược 15s sàn đấu giá tự động
+  // [UC-GAME-022] Đồng hồ đếm ngược sàn đấu giá tự động (đồng bộ theo deadline chuẩn xác)
   useEffect(() => {
     if (activeModal !== 'auction') return;
     const timer = setInterval(() => {
@@ -55,10 +55,11 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
       if (state.activeModal !== 'auction') return;
       const payload = state.modalPayload as ModalPayloadMap['auction'] | null;
       if (!payload) return;
-      if ((payload.timeRemaining ?? 0) > 0) {
-        state.updateModalPayload<'auction'>({ timeRemaining: (payload.timeRemaining ?? 0) - 1 });
+      const targetTime = calculateAuctionTimeRemaining(payload);
+      if (targetTime !== payload.timeRemaining) {
+        state.updateModalPayload<'auction'>({ timeRemaining: targetTime });
       }
-    }, 1000);
+    }, 250);
     return () => clearInterval(timer);
   }, [activeModal]);
   // SFX khi mở thẻ sự kiện hoặc đề xuất mua đất từ Bot / mua lại C0
@@ -256,7 +257,8 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
               onIntent?.({ type: 'INTENT_BID', amount });
               const curTime = payload.timeRemaining ?? 15;
               const nextTime = curTime <= 3 ? curTime + 3 : curTime;
-              updateModalPayload<'auction'>({ currentBid: amount, highestBidderId: myId, timeRemaining: nextTime });
+              const nextDeadline = Date.now() + nextTime * 1000;
+              updateModalPayload<'auction'>({ currentBid: amount, highestBidderId: myId, timeRemaining: nextTime, deadline: nextDeadline });
             }}
             onPass={() => {
               onIntent?.({ type: 'INTENT_AUCTION_PASS' });

@@ -18,6 +18,7 @@ import * as ModalHelpers from '../../src/client/ui/modals/modal_helpers.js';
 
 // Safe dynamic resolution for Station 1 Business RED contract gate
 const isAuctionDismissible = (ModalHelpers as Record<string, any>).isAuctionDismissible;
+const calculateAuctionTimeRemaining = (ModalHelpers as Record<string, any>).calculateAuctionTimeRemaining;
 
 const MINI_AUCTION_STRIP_PATH = '../../src/client/ui/modals/mini_auction_strip';
 let miniAuctionStripMod: any = null;
@@ -409,6 +410,71 @@ describe('[TC-200.01/MSS..TC-200.17/MSS][UC-IMP200] Auction Dismiss & Mini Widge
 
       const html = renderToStaticMarkup(React.createElement(MiniAuctionStrip));
       expect(html).toContain('9s');
+    });
+
+    it('[TC-200.18/MSS][UC-IMP200] calculateAuctionTimeRemaining tính toán chính xác theo deadline timestamp hoặc timeRemaining fallback', () => {
+      expect(typeof calculateAuctionTimeRemaining).toBe('function');
+      const now = 1_000_000;
+      // 1. Có deadline: tính theo Math.ceil((deadline - now) / 1000)
+      expect(calculateAuctionTimeRemaining({ deadline: now + 20_000 }, now)).toBe(20);
+      expect(calculateAuctionTimeRemaining({ deadline: now + 18_900 }, now)).toBe(19);
+      expect(calculateAuctionTimeRemaining({ deadline: now + 17_100 }, now)).toBe(18);
+      expect(calculateAuctionTimeRemaining({ deadline: now - 500 }, now)).toBe(0);
+
+      // 2. Không có deadline: fallback về timeRemaining
+      expect(calculateAuctionTimeRemaining({ timeRemaining: 15 }, now)).toBe(15);
+      expect(calculateAuctionTimeRemaining({ timeRemaining: 0 }, now)).toBe(0);
+
+      // 3. Đã kết luận hoặc null: trả về 0
+      expect(calculateAuctionTimeRemaining({ deadline: now + 20_000, isConcluded: true }, now)).toBe(0);
+      expect(calculateAuctionTimeRemaining(null, now)).toBe(0);
+    });
+
+    it('[TC-200.19/MSS][UC-IMP200] restoreAuction bảo toàn thời gian thực theo deadline timestamp', () => {
+      const now = Date.now();
+      useGameStore.getState().setAuction({
+        cellIndex: 14,
+        currentBid: 2400,
+        timeRemaining: 20,
+        deadline: now + 18_000,
+      } as any);
+
+      // Khi restoreAuction, modalPayload nhận timeRemaining tính theo deadline thực tế (18s thay vì 20s)
+      useGameStore.getState().dismissAuction(14);
+      expect(useGameStore.getState().activeModal).toBeNull();
+
+      useGameStore.getState().restoreAuction();
+      const restored = useGameStore.getState();
+      expect(restored.activeModal).toBe('auction');
+      expect((restored.modalPayload as any)?.timeRemaining).toBeGreaterThanOrEqual(17);
+      expect((restored.modalPayload as any)?.timeRemaining).toBeLessThanOrEqual(18);
+    });
+
+    it('[TC-200.20/MSS][UC-IMP200] applyDeltaToStore sinh deadline chuẩn cho auction payload khi nhận delta từ server', () => {
+      const now = Date.now();
+      useGameStore.setState({
+        activeModal: null,
+        modalPayload: null,
+        dismissedAuctionCellIndex: null,
+      } as any);
+
+      const delta = {
+        turnPhase: TurnPhase.AuctionPhase,
+        auction: {
+          cellIndex: 14,
+          currentBid: 2400,
+          timeRemaining: 20,
+          highestBidderId: 'bot2',
+          isConcluded: false,
+        },
+      };
+
+      applyDeltaToStore(delta as any);
+
+      const state = useGameStore.getState() as any;
+      expect(state.auction?.deadline).toBeDefined();
+      expect(state.auction.deadline).toBeGreaterThanOrEqual(now + 19_000);
+      expect((state.modalPayload as any)?.deadline).toBeDefined();
     });
   });
 });

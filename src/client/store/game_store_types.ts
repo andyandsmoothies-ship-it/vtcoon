@@ -117,6 +117,7 @@ export interface ModalPayloadMap {
     currentBid?: number;
     highestBidderId?: string | null;
     timeRemaining?: number;
+    deadline?: number;
     hasPassed?: boolean;
     passedPlayerIds?: readonly string[];
     declinedPlayerId?: string;

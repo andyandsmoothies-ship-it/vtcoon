@@ -4,7 +4,7 @@ import type { RoomManager } from '../room_manager.js';
 import type { IntentMutex } from './intent_mutex.js';
 import type { DeltaBroadcaster } from './delta_broadcaster.js';
 import { TurnPhase, isRoomGameOver, type Room } from '../../domain/room.js';
-import { executeInsolvencyAfkRecovery } from './afk_recovery.js';
+import { executeSafeAfkAction as executeSafeAfkActionHelper } from './afk_recovery.js';
 
 export const PHASE_TIMEOUTS_MS: Record<TurnPhase, number> = {
   [TurnPhase.WaitingRoll]: 25_000,
@@ -130,6 +130,8 @@ export class TurnOrchestrator {
         ? `${currentRes.cellIndex}:${currentRes.winnerId}:${currentRes.winningBid}`
         : 'unknown');
 
+    this.deadlines.set(roomCode, Date.now() + AUCTION_SETTLE_DELAY_MS + 500);
+
     const timer = setTimeout(() => {
       this.auctionSettleTimers.delete(roomCode);
       const latestRes = this.rooms.getLastAuctionResult(roomCode);
@@ -140,8 +142,8 @@ export class TurnOrchestrator {
         return;
       }
       this.rooms.settleAuction(roomCode);
-      this.broadcaster.broadcastRoomDelta(roomCode);
       this.orchestrate(roomCode);
+      this.broadcaster.broadcastRoomDelta(roomCode);
     }, AUCTION_SETTLE_DELAY_MS);
 
     this.auctionSettleTimers.set(roomCode, { timer, auctionKey: effectiveKey });
@@ -200,9 +202,12 @@ export class TurnOrchestrator {
   private scheduleBotStep(roomCode: string): void {
     this.onScheduleBotTurn?.(roomCode);
     const room = this.rooms.getRoom(roomCode);
+    const phaseTimeoutMs = (room?.phase ? PHASE_TIMEOUTS_MS[room.phase] : undefined) ?? 25_000;
+    this.deadlines.set(roomCode, Date.now() + phaseTimeoutMs);
     const delayMs = calculateBotStepDelay(room, this.botTurnDelayMs);
     const timer = setTimeout(() => {
       this.activeTimers.delete(roomCode);
+      this.deadlines.delete(roomCode);
       void this.intentMutex.runExclusive(roomCode, async () => {
         const r = this.rooms.getRoom(roomCode);
         if (!r?.started) return;
@@ -218,12 +223,13 @@ export class TurnOrchestrator {
 
         if (r.phase === TurnPhase.AuctionPhase) {
           const stepRes = this.rooms.stepAuctionBot(roomCode);
-          this.broadcaster.broadcastRoomDelta(roomCode);
           if (stepRes.finished) {
             this.scheduleAuctionSettle(roomCode);
+            this.deadlines.set(roomCode, Date.now() + AUCTION_SETTLE_DELAY_MS + 500);
           } else {
             this.orchestrate(roomCode);
           }
+          this.broadcaster.broadcastRoomDelta(roomCode);
         } else {
           this.rooms.stepBotTurn(roomCode);
           const rAfter = this.rooms.getRoom(roomCode);
@@ -231,8 +237,8 @@ export class TurnOrchestrator {
             this.clearAuctionSettleTimer(roomCode);
             this.onGameOver(roomCode);
           } else {
-            this.broadcaster.broadcastRoomDelta(roomCode);
             this.orchestrate(roomCode);
+            this.broadcaster.broadcastRoomDelta(roomCode);
           }
         }
       });
@@ -273,8 +279,8 @@ export class TurnOrchestrator {
           this.clearAuctionSettleTimer(roomCode);
           this.onGameOver(roomCode);
         } else {
-          this.broadcaster.broadcastRoomDelta(roomCode);
           this.orchestrate(roomCode);
+          this.broadcaster.broadcastRoomDelta(roomCode);
         }
       });
     }, ms);
@@ -319,8 +325,8 @@ export class TurnOrchestrator {
           this.clearAuctionSettleTimer(roomCode);
           this.onGameOver(roomCode);
         } else {
-          this.broadcaster.broadcastRoomDelta(roomCode);
           this.orchestrate(roomCode);
+          this.broadcaster.broadcastRoomDelta(roomCode);
         }
       });
     }, ms);
@@ -329,70 +335,7 @@ export class TurnOrchestrator {
     this.rooms.registerTimer(roomCode, timer);
   }
 
-  private executeSafeAfkAction(roomCode: string, phase: TurnPhase, playerId: string): void {
-    switch (phase) {
-      case TurnPhase.WaitingRoll: {
-        const room = this.rooms.getRoom(roomCode);
-        const player = room?.players.find((p) => p.id === playerId);
-        if (player && player.wasInAudit === true) {
-          player.wasInAudit = false;
-          return;
-        }
-        this.rooms.handleRollDice(roomCode, playerId);
-        const rMid = this.rooms.getRoom(roomCode);
-        if (rMid?.phase === TurnPhase.PropertyManagement) {
-          this.rooms.handleEndTurn(roomCode, playerId);
-        } else if (rMid?.phase === TurnPhase.HosePhase) {
-          this.rooms.handleHoseSkip(roomCode, playerId);
-          this.rooms.handleEndTurn(roomCode, playerId);
-        } else if (rMid?.phase === TurnPhase.ActionPhase) {
-          this.rooms.handleDecline(roomCode, playerId);
-          const rAfterDecline = this.rooms.getRoom(roomCode);
-          if (rAfterDecline?.phase === TurnPhase.PropertyManagement) {
-            this.rooms.handleEndTurn(roomCode, playerId);
-          }
-        }
-        break;
-      }
-      case TurnPhase.ActionPhase: {
-        this.rooms.handleDecline(roomCode, playerId);
-        const rMid = this.rooms.getRoom(roomCode);
-        if (rMid?.phase === TurnPhase.PropertyManagement) {
-          this.rooms.handleEndTurn(roomCode, playerId);
-        }
-        break;
-      }
-      case TurnPhase.AuctionPhase: {
-        this.rooms.handleAuctionClose(roomCode);
-        this.scheduleAuctionSettle(roomCode);
-        const rMid = this.rooms.getRoom(roomCode);
-        if (rMid?.phase === TurnPhase.PropertyManagement) {
-          this.rooms.handleEndTurn(roomCode, playerId);
-        }
-        break;
-      }
-      case TurnPhase.PropertyManagement: {
-        this.rooms.handleEndTurn(roomCode, playerId);
-        break;
-      }
-      case TurnPhase.InsolvencyPhase: {
-        executeInsolvencyAfkRecovery(this.rooms, roomCode, playerId);
-        const rMid = this.rooms.getRoom(roomCode);
-        if (rMid?.phase === TurnPhase.PropertyManagement) {
-          this.rooms.handleEndTurn(roomCode, playerId);
-        }
-        break;
-      }
-      case TurnPhase.HosePhase: {
-        this.rooms.handleHoseSkip(roomCode, playerId);
-        this.rooms.handleEndTurn(roomCode, playerId);
-        break;
-      }
-      default: {
-        this.rooms.handleDecline(roomCode, playerId);
-        this.rooms.handleEndTurn(roomCode, playerId);
-        break;
-      }
-    }
+  executeSafeAfkAction(roomCode: string, phase: TurnPhase, playerId: string): void {
+    executeSafeAfkActionHelper(this.rooms, roomCode, phase, playerId, (rc) => this.scheduleAuctionSettle(rc));
   }
 }

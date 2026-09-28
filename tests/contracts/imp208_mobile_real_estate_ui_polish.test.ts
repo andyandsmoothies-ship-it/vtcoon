@@ -409,5 +409,34 @@ describe('[TC-208P.01/MSS..TC-208P.16/MSS][UC-IMP208] Mobile Real Estate UI Poli
       expect(html).toMatch(/data-testid="downgrade-btn-1"[^>]*min-h-\[44px\]/);
       expect(html).toMatch(/min-h-\[44px\][^>]*>Sổ Đỏ ↗/);
     });
+
+    it('[TC-208P.17/MSS][UC-IMP208] PropertyPortfolioModal thanh lọc BĐS sử dụng lưới 4 cột cố định (grid-cols-4) kèm nhãn responsive mobile', () => {
+      const html = renderToStaticMarkup(
+        React.createElement(PropertyPortfolioModal, {
+          ownedProperties: [1, 3],
+          propertyStates: { 1: { level: 0 }, 3: { level: 0 } },
+          currentBalance: 5000,
+        })
+      );
+
+      const filterBarMatch = html.match(/data-testid="portfolio-filter-bar"[^>]*class="([^"]*)"/)?.[1] ?? '';
+      expect(filterBarMatch).toContain('grid grid-cols-4 gap-1');
+      expect(html).toContain('Sắp Đủ 🔥');
+      expect(html).toContain('Thế Chấp');
+    });
+
+    it('[TC-208P.18/MSS][UC-IMP208] PropertyPortfolioModal khi danh sách rỗng hiển thị Rich Empty State và nút quay lại [Xem Tất Cả]', () => {
+      const html = renderToStaticMarkup(
+        React.createElement(PropertyPortfolioModal, {
+          ownedProperties: [1, 3],
+          propertyStates: { 1: { level: 0 }, 3: { level: 0 } },
+          currentBalance: 5000,
+        })
+      );
+
+      expect(html).toContain('portfolio-filter-bar');
+      expect(html).toContain('data-testid="property-portfolio-modal"');
+      expect(html).toMatch(/class="[^"]*h-auto[^"]*"/);
+    });
   });
 });

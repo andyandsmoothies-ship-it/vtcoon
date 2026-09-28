@@ -70,7 +70,7 @@ function syncTurnAndTimer(delta: DeltaPayload, state: GameState): void {
       try { HapticEngine.turnAlert(); } catch { /* Haptic trigger safe fallback */ }
     }
     state.setCurrentTurnPlayerId(turnPlayerId);
-    state.setTurnTimeRemaining(delta.timeRemaining ?? 60);
+    state.setTurnTimeRemaining(delta.timeRemaining && delta.timeRemaining > 0 ? delta.timeRemaining : 60);
     state.setHasRolledThisTurn(false); // [IMP-182] Triệt tiêu Turn N+1 Leak
     state.setHasUserCustomCamera?.(false); // [IMP-190] Reset camera custom orbit on new player turn
   } else if (delta.timeRemaining !== undefined) {
@@ -81,9 +81,10 @@ function syncTurnAndTimer(delta: DeltaPayload, state: GameState): void {
     // [IMP-207] Monotonic countdown guard: chong hien tuong rung giat (41s -> 42s -> 41s)
     // Bao toan 100% reset 60s khi do Doi (Doubles) hoac chuyen Phase
     if (
-      isTurnReset ||
-      delta.timeRemaining <= state.turnTimeRemaining ||
-      delta.timeRemaining - state.turnTimeRemaining > 2
+      delta.timeRemaining > 0 &&
+      (isTurnReset ||
+        delta.timeRemaining <= state.turnTimeRemaining ||
+        delta.timeRemaining - state.turnTimeRemaining > 2)
     ) {
       state.setTurnTimeRemaining(delta.timeRemaining);
     }
@@ -129,8 +130,13 @@ function syncAuctionModal(delta: DeltaPayload, state: GameState): void {
       (myPid && delta.auction.passedPlayerIds?.includes(myPid))
     );
 
+    const deadline = delta.auction.timeRemaining !== undefined
+      ? Date.now() + delta.auction.timeRemaining * 1000
+      : undefined;
+
     const auctionData: ModalPayloadMap['auction'] = {
       ...delta.auction,
+      ...(deadline !== undefined ? { deadline } : {}),
       ...(hasPassed ? { hasPassed: true } : {}),
     };
 
@@ -278,30 +284,15 @@ export function syncEventCard(
   state: GameState,
   deltaPayload?: DeltaPayload
 ): void {
-  let card: DeltaPayload['lastEventCard'];
-  let delta: DeltaPayload | undefined = deltaPayload;
-
-  if (cardOrDelta && typeof cardOrDelta === 'object' && 'roomCode' in cardOrDelta) {
-    delta = cardOrDelta as DeltaPayload;
-    card = delta.lastEventCard;
-  } else {
-    card = cardOrDelta as DeltaPayload['lastEventCard'];
-  }
-
+  const isDelta = Boolean(cardOrDelta && typeof cardOrDelta === 'object' && 'roomCode' in cardOrDelta);
+  const delta = isDelta ? (cardOrDelta as DeltaPayload) : deltaPayload;
+  const card = isDelta ? (cardOrDelta as DeltaPayload).lastEventCard : (cardOrDelta as DeltaPayload['lastEventCard']);
   const prevCard = state.lastEventCard;
-  if (card !== undefined) {
-    state.setLastEventCard(card ?? null);
-  }
+  if (card !== undefined) state.setLastEventCard(card ?? null);
 
   if (card && card.cardId && card.cardId !== prevCard?.cardId) {
     const myPid = useLobbyStore.getState().myPlayerId || 'p1';
-    const turnPlayerId =
-      card.drawnBy ??
-      card.playerId ??
-      delta?.currentTurnPlayerId ??
-      delta?.diceRollerId ??
-      state.currentTurnPlayerId;
-
+    const turnPlayerId = card.drawnBy ?? card.playerId ?? delta?.currentTurnPlayerId ?? delta?.diceRollerId ?? state.currentTurnPlayerId;
     if (turnPlayerId && turnPlayerId !== myPid) {
       state.addFloatingText({
         actionType: card.cardType ?? 'chance',
@@ -334,15 +325,10 @@ export function applyDeltaToStore(delta: DeltaPayload, store: typeof useGameStor
     state.clearActivePawnAnimation();
     state.setIsRolling(false);
     if (delta.diceSeq !== undefined) state.setLastDiceSeq(delta.diceSeq);
-    if (delta.dice && delta.dice[0] > 0 && delta.dice[1] > 0) {
-      state.setDice([delta.dice[0], delta.dice[1]]);
-    }
+    if (delta.dice && delta.dice[0] > 0 && delta.dice[1] > 0) state.setDice([delta.dice[0], delta.dice[1]]);
     state.setHasRolledThisTurn(false);
     state.setDismissedAuctionCellIndex?.(null);
   } else {
-    // [IMP-112] Đồng bộ xúc xắc TRƯỚC KHI xử lý di chuyển quân cờ.
-    // Nếu delta mang kết quả xúc xắc mới, triggerDiceRoll sẽ kích hoạt isRolling: true.
-    // Nhờ đó applyPlayerDeltas sẽ đưa bước di chuyển vào pendingPawnMove thay vì chạy trước xúc xắc.
     syncDiceRoll(delta, state);
   }
 

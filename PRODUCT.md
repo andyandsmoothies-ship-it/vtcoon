@@ -2,6 +2,14 @@
 
 <!-- impeccable:product-schema 1 -->
 
+> ⚠️ **SINGLE SOURCE OF TRUTH (SSOT) NOTICE**:
+> Mọi đặc tả chức năng, quy tắc nghiệp vụ, luật chơi và chi tiết sản phẩm được quản trị chính thức tại:
+> - **Đặc tả yêu cầu & nghiệp vụ (SSOT):** [`docs/requirements.md`](docs/requirements.md)
+> - **Lộ trình sản phẩm & tiến độ Rolling Wave:** [`docs/master_roadmap.md`](docs/master_roadmap.md)
+> - **Tiến độ chi tiết từng Epic:** `docs/epics/[epic]/_epic_ledger.md`
+>
+> File này chỉ là mỏ neo tóm tắt cấp cao (High-Level Context Anchor) phục vụ tương thích với các công cụ tooling bên ngoài. AI Agents TUYỆT ĐỐI KHÔNG coi file này là tài liệu ghi đè hay cạnh tranh với `docs/requirements.md` và `docs/master_roadmap.md`.
+
 ## Platform
 
 web
@@ -33,23 +41,19 @@ VTCoOn định vị là một board game 3D trực tuyến mang đậm bản s�
 - 28 thẻ sổ đỏ (Title Deeds), 5 nhóm màu bất động sản, công trình 3 cấp (C1 Shophouse, C2 Biệt thự, C3 Resort) và cơ chế Đấu giá tự động (Auto-Auction).
 - Sàn Giao Dịch P2P song phương, sàn chứng khoán HOSE, và hệ thống Phiếu Thị Trường / Phiếu Cơ Hội.
 - Ràng buộc hiệu năng: 60 FPS mượt mà trên Canvas 3D, không thực hiện tính toán nặng trên luồng kết xuất chính, ngân sách chuyển động UI từ 100ms đến 350ms.
-- Bộ linter UI độc lập `npm run lint:ui` kiểm soát 4 Anti-patterns: `border-accent-on-rounded`, `bounce-easing`, `gray-on-color`, `gradient-text`.
+- Bộ linter UI độc lập `npm run lint:ui` kiểm soát các Anti-patterns cơ bản.
 
 ## Brand Commitments
 
 - Đậm chất tài phiệt thượng lưu, đanh chắc, tinh tế và đậm đà bản sắc Việt Nam.
 - Ba từ định vị thương hiệu: **đẳng cấp, xúc giác, bản sắc** (prestigious, tactile, authentic).
-- Tránh xa các yếu tố thẩm mỹ rẻ tiền:
-  - Hiệu ứng đổ bóng phát sáng (glow/neon) kiểu game viễn tưởng rẻ tiền.
-  - Chuyển động nảy lò xo (bounce) gây cảm giác đồ họa đồ chơi thiếu trọng lượng.
-  - Viền màu directional trên nút bo góc (`border-b-4`) làm méo hình học CSS.
-  - Chữ xám đè trên nền màu sặc sỡ hoặc dải màu chữ cắt (gradient text) làm mờ độ tương phản.
 
 ## Evidence on Hand
 
-- `docs/requirements.md` quy định chi tiết 40 ô bàn cờ, thông số tài chính vĩ mô và luật chơi.
+- `docs/requirements.md` quy định chi tiết 40 ô bàn cờ, thông số tài chính vĩ mô và luật chơi (SSOT Nghiệp Vụ).
 - `docs/domain/entity_model.md` và `docs/domain/property_data.ts` là SSOT cho 28 sổ đỏ và dữ liệu kinh tế.
-- `docs/domain/design.md` và `DESIGN.md` là kim chỉ nam ngôn ngữ thiết kế mỹ thuật và hệ thống token.
+- `docs/domain/design.md` là SSOT cho ngôn ngữ thiết kế mỹ thuật và hệ thống token.
+- `docs/master_roadmap.md` là SSOT cho lộ trình tiến độ sản phẩm tổng thể.
 - Bộ kiểm thử tự động toàn diện (>110 test files, >1300 test cases) bao phủ FSM, WebSocket, Bot AI, Chaos Simulation và Contract Tests.
 - `scripts/lint_ui.mjs` kiểm tra tĩnh 0 vi phạm anti-patterns trên toàn bộ tệp giao diện client.
 
@@ -63,6 +67,6 @@ VTCoOn định vị là một board game 3D trực tuyến mang đậm bản s�
 ## Accessibility & Inclusion
 
 - Tiêu chuẩn khả năng tiếp cận WCAG 2.1 AA trên toàn bộ giao diện 2D.
-- Kích thước vùng tương tác bấm tối thiểu 44x44px.
+- Kích thước vùng tương tác bấm tối thiểu 44x44px trên mobile, phù hợp density trên desktop.
 - Độ tương phản màu sắc cao, trạng thái focus-visible sắc nét.
 - Hỗ trợ đầy đủ cờ `prefers-reduced-motion` nhằm triệt tiêu các chuyển động phức tạp cho người dùng nhạy cảm.

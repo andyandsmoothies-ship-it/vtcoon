@@ -70,10 +70,16 @@ export function checkEvenDowngrading(
   return { valid: true };
 }
 
+export interface UpgradeCostModifier {
+  readonly type: string;
+  readonly remainingRounds: number;
+  readonly affectedCells?: readonly number[];
+}
+
 export function calculateUpgradeCost(
   cellIndex: number,
   currentLevel: number,
-  modifiers?: readonly MarketModifier[],
+  modifiers?: readonly UpgradeCostModifier[],
 ): number {
   const deed = PROPERTY_DEEDS.get(cellIndex);
   if (!deed?.upgradeCosts || currentLevel >= 3) return 0;
@@ -82,7 +88,7 @@ export function calculateUpgradeCost(
   if (modifiers?.some((m) => m.type === MarketCardId.MC_CREDIT_STIMULUS && m.remainingRounds > 0)) {
     cost = Math.floor(cost * 0.8);
   }
-  if (modifiers?.some((m) => m.type === MacroCycleType.MACRO_LAND_FEVER && m.remainingRounds > 0 && (m.affectedCells as readonly number[]).includes(cellIndex))) {
+  if (modifiers?.some((m) => m.type === MacroCycleType.MACRO_LAND_FEVER && m.remainingRounds > 0 && m.affectedCells?.includes(cellIndex))) {
     cost = Math.floor(cost * MACRO_FEVER_UPGRADE_COST_MULT);
   }
   return Math.max(Math.floor(baseCost * MACRO_UPGRADE_COST_FLOOR), cost);

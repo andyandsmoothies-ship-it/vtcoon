@@ -37,6 +37,11 @@
    - `src/client/ui/modals/trade/trade_partner_strip.tsx` (74 LOC): Bổ sung `focus-visible:ring-2 focus-visible:ring-amber-400`.
    - `src/client/ui/modals/trade_modal.tsx` (279 LOC): Tinh giản compound deal ` (1 • 5.000)` và thuần tiền mặt ` (5.000)` (triệt tiêu hoàn toàn hậu tố `Tr.` theo bất biến IMP-197), đồng thời bảo toàn nguyên vẹn ` (2 BĐS)` khi thuần tài sản (bảo toàn TC-202.07 100%); thêm thẻ `span.truncate` và focus ring.
    - `src/client/ui/modals/title_deed_rent_table.tsx` & `src/client/ui/modals/auction_district_card.tsx`: Dọn sạch các hậu tố `Tr.` còn sót trong biểu phí tiện ích để nhất quán 100% với IMP-197.
+   - `src/client/ui/modals/property_portfolio_modal.tsx` (475 LOC — Tier 2 $\le$ 500 LOC):
+     * **Zero-Scroll Filter Grid**: Chuyển thanh lọc từ dạng cuộn ngang tràn mép sang lưới 4 cột cố định `grid grid-cols-4 gap-1`, triệt tiêu hoàn toàn hiện tượng xén chữ `Đang T...`, vừa khít 100% màn hình 360px - 414px với nhãn responsive (`Sắp Đủ 🔥`, `Thế Chấp` trên mobile; `Sắp Đủ Bộ 🔥`, `Đang Thế Chấp` trên desktop).
+     * **Rich Empty State & Recovery CTA**: Thay thế dòng text cụt hứng bằng khung giải thích trực quan (icon 🏗️, nêu rõ điều kiện độc quyền/lượt đi/tiền mặt) kèm nút cứu vãn 1-chạm `[Xem Tất Cả (N BĐS)]`.
+     * **Chiều cao co giãn tự nhiên (`h-auto`)**: Khi danh sách rỗng, container tự ôm sát nội dung thay vì nuốt trọn 90dvh che khuất bàn cờ.
+     * **Gọn hóa hàng mảnh ghép còn thiếu**: Thu gọn chip giá và nút `🔍` (icon-only trên mobile) giúp tên địa danh (Đồng Nai, Bà Rịa - Vũng Tàu) không bị cắt cụt ba chấm.
 4. **Đổ bóng xúc giác 3D (Tactile Depth)**:
    - `src/client/ui/modals/trade/trade_column.tsx` (246 LOC): Phím gợi ý giá bán mang `border-2 border-amber-300 shadow-[0_2px_0_0_#fcd34d] active:shadow-none active:translate-y-[2px]`; phím gợi ý giá mua mang `border-2 border-blue-300 shadow-[0_2px_0_0_#93c5fd] active:shadow-none active:translate-y-[2px]`.
 5. **Hệ lưới Grid 2 cột vuông vức**:
@@ -45,21 +50,14 @@
 ---
 
 ## 3. KIỂM THỬ & CHỈ SỐ HOÀN TẤT
-- **Contract Test Suite**: `tests/contracts/imp208_mobile_real_estate_ui_polish.test.ts` — **16/16 atomic tests PASS 100%**.
-- **Specification Evolution Reconcile**: `tests/client/imp202_trade_modal_ergonomics_overhaul.test.ts` — **16/16 tests PASS 100%**.
-- **Tổng ca kiểm thử liên quan**: **136/136 tests PASS** trên cả 8 suites liên quan (`imp208`, `imp208p`, `imp202`, `imp153`, `imp140`, `imp75`, `auction_and_deed`, `imp202-shadows`).
+- **Contract Test Suite**: `tests/contracts/imp208_mobile_real_estate_ui_polish.test.ts` — **18/18 atomic tests PASS 100%**.
+- **Specification Evolution Reconcile**: `tests/client/imp202_trade_modal_ergonomics_overhaul.test.ts` & `tests/client/imp136_portfolio_monopoly_insights.test.ts` — **PASS 100%**.
+- **Tổng ca kiểm thử liên quan**: **179/179 tests PASS** trên cả 9 suites liên quan (`imp208`, `imp208p`, `imp202`, `imp161`, `imp133`, `imp136`, `imp106`, `imp75`, `imp212`).
 - **Linter & Typecheck**:
   - `npm run lint:ui`: **0 Anti-patterns** trên toàn bộ 195 tệp client.
   - `npx tsc --noEmit`: **0 lỗi compile**.
-  - `node .agents/tmp/check_fonts.mjs`: **Xác nhận 0 font < 11px** trên toàn bộ 8 tệp UI.
 - **Ngân sách LOC vật lý**:
-  - `src/client/ui/modals/purchase_decision_card.tsx`: 155 LOC ($\le$ 500 LOC Tier 2).
-  - `src/client/ui/modals/title_deed_rent_table.tsx`: 263 LOC ($\le$ 500 LOC Tier 2).
-  - `src/client/ui/modals/portfolio_tab_header.tsx`: 34 LOC ($\le$ 500 LOC Tier 2).
-  - `src/client/ui/modals/trade_sentiment_meter.tsx`: 104 LOC ($\le$ 500 LOC Tier 2).
-  - `src/client/ui/modals/trade/trade_partner_strip.tsx`: 74 LOC ($\le$ 500 LOC Tier 2).
-  - `src/client/ui/modals/trade_modal.tsx`: 279 LOC ($\le$ 500 LOC Tier 2).
-  - `src/client/ui/modals/trade/trade_column.tsx`: 246 LOC ($\le$ 500 LOC Tier 2).
-  - `src/client/ui/modals/property_portfolio_modal.tsx`: 450 LOC ($\le$ 500 LOC Tier 2, $\Delta = -1$ LOC).
+  - `src/client/ui/modals/property_portfolio_modal.tsx`: 475 LOC ($\le$ 500 LOC Tier 2).
+  - `tests/contracts/imp208_mobile_real_estate_ui_polish.test.ts`: 442 LOC ($\le$ 600 LOC Test Tier).
 - **Evidence Snapshot**: `.agents/evidence/imp208p_snapshot.json` (`executed: true`).
-- **Sổ cái Epic**: Đã ghi nhận tại `docs/epics/client_ui/_epic_ledger.md#L619-L639`.
+- **Sổ cái Epic**: Đã ghi nhận tại `docs/epics/client_ui/_epic_ledger.md`.
