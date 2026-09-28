@@ -1,5 +1,5 @@
-import React from 'react';
-import type { BondContract } from '../../../domain/bond_types';
+import React, { useState } from 'react';
+import { type BondContract, BondTrancheId, BOND_TRANCHES } from '../../../domain/bond_types';
 import { formatCurrency } from '../ui_helpers';
 
 interface BondIssuanceTabProps {
@@ -8,7 +8,7 @@ interface BondIssuanceTabProps {
   readonly isMyTurn?: boolean;
   readonly playerNetWorth?: number;
   readonly unmortgagedPropertiesCount?: number;
-  readonly onIssueBond?: () => void;
+  readonly onIssueBond?: (trancheId?: BondTrancheId) => void;
   readonly onRepayBond?: () => void;
 }
 
@@ -16,17 +16,24 @@ export function BondIssuanceTab({
   bondContract,
   balance,
   isMyTurn,
-  playerNetWorth,
-  unmortgagedPropertiesCount,
+  playerNetWorth = 0,
+  unmortgagedPropertiesCount = 0,
   onIssueBond,
   onRepayBond,
 }: BondIssuanceTabProps): React.ReactElement {
+  const [selectedTranche, setSelectedTranche] = useState<BondTrancheId>(BondTrancheId.WORKING_CAPITAL);
+
   if (bondContract?.isActive) {
     const canRepay = balance >= bondContract.repayAmount && Boolean(isMyTurn);
+    const activeTrancheName = bondContract.trancheId ? BOND_TRANCHES[bondContract.trancheId]?.name : 'Trái Phiếu Doanh Nghiệp';
+
     return (
       <div className="space-y-4 p-4 bg-amber-500/10 rounded-2xl border border-amber-500/30 text-slate-900">
         <div className="flex items-center justify-between border-b border-amber-900/10 pb-2">
-          <h4 className="font-black text-sm text-amber-950 uppercase">Hợp Đồng Trái Phiếu Đang Hoạt Động</h4>
+          <div>
+            <h4 className="font-black text-sm text-amber-950 uppercase">Hợp Đồng Trái Phiếu Đang Hoạt Động</h4>
+            <span className="text-[11px] font-bold text-amber-800">{activeTrancheName}</span>
+          </div>
           <span className="text-xs bg-amber-500 text-amber-950 px-2 py-0.5 rounded-full font-bold">
             Còn {bondContract.roundsLeft} vòng
           </span>
@@ -52,8 +59,8 @@ export function BondIssuanceTab({
     );
   }
 
-  const hasNetWorth = (playerNetWorth ?? 0) >= 3000;
-  const hasEnoughDeeds = (unmortgagedPropertiesCount ?? 0) >= 2;
+  const hasNetWorth = playerNetWorth >= 3000;
+  const hasEnoughDeeds = unmortgagedPropertiesCount >= 2;
   const canIssue = Boolean(isMyTurn) && hasNetWorth && hasEnoughDeeds;
 
   const blockedReason = !isMyTurn
@@ -64,18 +71,66 @@ export function BondIssuanceTab({
     ? 'Cần sở hữu ít nhất 2 Bất Động Sản chưa thế chấp'
     : undefined;
 
+  const trancheConfig = BOND_TRANCHES[selectedTranche];
+  const loanPrincipal = Math.floor(playerNetWorth * trancheConfig.loanRatio);
+
   return (
     <div className="space-y-4 p-4 bg-amber-500/10 rounded-2xl border border-amber-500/30 text-slate-900 text-xs">
       <div className="border-b border-amber-900/10 pb-2">
         <h4 className="font-black text-sm text-amber-950 uppercase">Đòn Bẩy Trái Phiếu Doanh Nghiệp</h4>
-        <p className="text-slate-600 mt-1">Vay 80% Net Worth, kỳ hạn 3 vòng, lãi suất 20% nộp Kho Bạc.</p>
+        <p className="text-slate-600 mt-1">Chọn gói đòn bẩy vốn phù hợp với chiến lược tài chính của bạn.</p>
       </div>
-      <ul className="space-y-1.5 list-disc pl-4 text-slate-700">
-        <li>Tối thiểu Net Worth 3.000.</li>
-        <li>Sở hữu ít nhất 2 Bất Động Sản chưa thế chấp.</li>
-        <li>Tổng giá trị BĐS đảm bảo phải đạt tối thiểu 50% khoản vay.</li>
-        <li>Tài sản đảm bảo bị khóa giao dịch & thế chấp trong thời gian hợp đồng.</li>
+
+      {/* 3 Tranches Cards: Dọc trên Mobile 360px, Ngang trên sm */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+        {(Object.values(BOND_TRANCHES)).map((t) => {
+          const isSelected = selectedTranche === t.id;
+          const estPrincipal = Math.floor(playerNetWorth * t.loanRatio);
+          const estInterest = Math.round(t.interestRate * 100);
+
+          return (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setSelectedTranche(t.id)}
+              className={`p-3 rounded-xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between min-h-[96px] ${
+                isSelected
+                  ? 'border-amber-600 bg-amber-50 shadow-sm ring-2 ring-amber-400/50'
+                  : 'border-slate-300 bg-white/80 hover:bg-white text-slate-700'
+              }`}
+            >
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className="font-black text-xs text-slate-900">{t.name}</span>
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
+                    t.id === BondTrancheId.ALL_IN ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800'
+                  }`}>
+                    {Math.round(t.loanRatio * 100)}% NW
+                  </span>
+                </div>
+                <div className="mt-1 font-mono font-bold text-amber-950 text-sm">
+                  {formatCurrency(estPrincipal)}
+                </div>
+              </div>
+              <div className="mt-2 text-[10px] text-slate-500 flex items-center justify-between border-t border-slate-200 pt-1">
+                <span>Kỳ hạn: <strong>{t.durationRounds} vòng</strong></span>
+                <span>Lãi: <strong className="text-rose-600">+{estInterest}%</strong></span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="text-[11px] font-semibold text-amber-900">
+        Gói đã chọn: <strong className="text-slate-900">{trancheConfig.name}</strong>
+      </div>
+
+      <ul className="space-y-1.5 list-disc pl-4 text-slate-700 text-[11px]">
+        <li>Tối thiểu Net Worth 3.000 (Hiện có: <strong className="font-mono">{formatCurrency(playerNetWorth)}</strong>).</li>
+        <li>Sở hữu ít nhất 2 Bất Động Sản chưa thế chấp (Hiện có: <strong>{unmortgagedPropertiesCount} BĐS</strong>).</li>
+        <li>Tài sản đảm bảo được ưu tiên chọn từ các ô đất rẻ nhất; vẫn được <strong>thu tiền thuê 100%</strong>.</li>
       </ul>
+
       {blockedReason && (
         <div
           data-testid="bond-blocked-notice"
@@ -85,10 +140,11 @@ export function BondIssuanceTab({
           <span>{blockedReason}</span>
         </div>
       )}
+
       <button
         type="button"
         data-testid="issue-bond-btn"
-        onClick={() => canIssue && onIssueBond?.()}
+        onClick={() => canIssue && onIssueBond?.(selectedTranche)}
         disabled={!canIssue}
         className={`w-full min-h-[46px] py-2.5 px-4 rounded-xl font-black text-xs transition-all ${
           canIssue
@@ -96,7 +152,7 @@ export function BondIssuanceTab({
             : 'bg-slate-200 text-slate-400 border border-slate-300 shadow-none cursor-not-allowed'
         }`}
       >
-        PHÁT HÀNH TRÁI PHIẾU
+        {canIssue ? `PHÁT HÀNH TRÁI PHIẾU: ${trancheConfig.name.toUpperCase()} (+${formatCurrency(loanPrincipal)})` : 'PHÁT HÀNH TRÁI PHIẾU'}
       </button>
     </div>
   );

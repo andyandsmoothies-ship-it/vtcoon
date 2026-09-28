@@ -694,5 +694,27 @@
 - **Phê chuẩn**: `plan-griller` (P1-P5 APPROVED), `qa-tester` (Station 1 RED), `implementer` (Station 2 GREEN), `scout` (Station 2.5 PASS), `spec-reviewer` (SPEC_PASS APPROVED), `code-reviewer` (CODE_PASS APPROVED), `ui-craft-reviewer` (UI_CRAFT APPROVED).
 - **Trạng thái**: ✅ Hoàn thành IMP-215 (Cross-Platform UI/UX & Browser Hardening) (2026-09-28).
 
+---
+
+### [IMP-217] Trái Phiếu Doanh Nghiệp Theo Gói Tranches & Nối Dây Toàn Trọn Pipeline (Corporate Bond Tranches, Collateral Selection & Pipeline Wiring)
+- **Mục tiêu**: Xóa bỏ rào cản bó cứng "Vay 80% Net Worth - All or Nothing" và vá vết đứt gãy kết nối (Wire Gap) khiến modal báo sai thiếu Net Worth; phân hóa thành 3 gói Tranches định sẵn (20% - 40% - 60% NW) với thuật toán tham lam tự động chọn các ô đất rẻ nhất làm tài sản bảo đảm, bảo toàn quyền thế chấp/P2P các ô đất đắt đỏ ngoài danh mục; bảo toàn dòng tiền Kho Bạc (`repayAmount - principal`), và hoàn thiện dây nối Intent từ Client UI qua WebSocket xuống FSM và Fire Sale Queue.
+- **Hạ tầng hoàn tất**:
+  * `src/domain/bond_types.ts` (57 LOC — Tier 1 <= 400 LOC): Định nghĩa enum `BondTrancheId`, interface `BondTrancheConfig` và cấu hình 3 gói `BOND_TRANCHES` (`WORKING_CAPITAL` 20% NW/2 vòng/lãi 8%, `EXPANSION` 40% NW/3 vòng/lãi 15%, `ALL_IN` 60% NW/3 vòng/lãi 20%); giữ nguyên hằng số legacy tương thích ngược.
+  * `src/server/bond_manager.ts` (223 LOC — Tier 1 <= 400 LOC): Cài đặt thuật toán tham lam `priceA - priceB` gom ô đất rẻ nhất; bảo toàn Kho Bạc chỉ nhận đúng tiền lãi chênh lệch thực tế; đếm lùi `roundsLeft` mỗi vòng; vỡ nợ chỉ phát mãi ô trong `collateralCells`.
+  * `src/server/intent_dispatcher.ts` (180 LOC — Tier 1 <= 400 LOC): Mở rộng `PlayerIntent` hỗ trợ `trancheId`, điều hướng `INTENT_ISSUE_BOND` và `INTENT_REPAY_BOND`, chặn gọi ngoài pha khi đang ở `InsolvencyPhase`.
+  * `src/server/room_manager.ts` (379 LOC — Tier 1 <= 400 LOC): Phương thức Facade ủy thác context session xuống `bond_manager`.
+  * `src/client/ui/modals/modal_host.tsx` (473 LOC — Tier 2 <= 500 LOC): Tính toán `playerNetWorth` thực tế và đếm `unmortgagedPropertiesCount` truyền xuống modal; nối dây 2 intent callback `onIssueBond` và `onRepayBond`.
+  * `src/client/ui/modals/property_portfolio_modal.tsx` (471 LOC — Tier 2 <= 500 LOC): Luân chuyển props toàn vẹn xuống Tab Trái Phiếu; áp dụng `React.useState` chuẩn cơ chế bẫy unit test.
+  * `src/client/ui/modals/bond_issuance_tab.tsx` (159 LOC — Tier 2 <= 500 LOC): Tái cấu trúc 3 thẻ Tranches dọc trên mobile 360px (`grid-cols-1 gap-2.5`), 3 cột trên desktop (`sm:grid-cols-3`); touch target $\ge 46$px; nhãn nút thích ứng chuẩn `TC-208.15` và `TC-217.16`.
+- **Kiểm thử & Bất biến**:
+  * `tests/contracts/imp217_corporate_bond_tranches_and_pipeline.test.ts`: 18/18 atomic contract tests PASS 100% (5 facets: Cấu hình 3 gói, Thuật toán chọn TSĐB rẻ nhất, Bảo toàn Kho Bạc & Vỡ nợ, Dây nối Pipeline, Công thái học UI Mobile 360px).
+  * Bảo toàn 100% các suite hồi quy liên quan: `imp192c` (22 tests), `imp212` (16 tests), `imp216` (16 tests), `imp208` (21 tests).
+  * `npx tsc --noEmit`: 0 lỗi. `npm run lint:ui`: 0 vi phạm (198 files scanned).
+  * Evidence Snapshot: `.agents/evidence/imp217_snapshot.json` (`executed: true`, 18 tests passed, 0 typecheck errors).
+- **Tech Debt**: Ghi nhận `DEBT-IMP217-01` (Hàm `validateIssueBond` tại `src/server/bond_manager.ts:26` đạt 74 SLOC, vượt ngưỡng cảnh báo 50 SLOC của `lint:slop` do tích hợp cả 3 gói và thuật toán gom đất; đề xuất tách `_resolveCollateral()` và `_validateTrancheEligibility()` ở slice sau).
+- **Phê chuẩn**: `plan-griller` (P1-P5 APPROVED), `qa-tester` (Station 1 RED), `implementer` (Station 2 GREEN), `scout` (Station 2.5 PASS & Remediation), `spec-reviewer` (SPEC_PASS APPROVED), `code-reviewer` (CODE_PASS APPROVED), `ui-craft-reviewer` (UI_CRAFT APPROVED).
+- **Trạng thái**: ✅ Hoàn thành IMP-217 (2026-09-28).
+
+
 
 

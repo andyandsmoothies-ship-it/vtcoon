@@ -11,6 +11,7 @@ import {
 import { handleUpgrade, handleUpgradeETC, handleUpgradeUtility, handleBuyProperty } from './property_actions.js';
 import { handleHoseInvest, handleHoseSkip } from './hose_actions.js';
 import { executeInsolvencyAfkRecovery } from './network/afk_recovery.js';
+import type { BondTrancheId } from '../domain/bond_types.js';
 
 export type PlayerIntent =
   | { type: 'INTENT_BUY' } | { type: 'INTENT_BUY_PROPERTY' } | { type: 'INTENT_DECLINE' }
@@ -31,7 +32,7 @@ export type PlayerIntent =
   | { type: 'INTENT_SKIP' }
   | { type: 'INTENT_BAIL_OUT' }
   | { type: 'INTENT_BANKRUPTCY'; creditorId?: string }
-  | { type: 'INTENT_ISSUE_BOND' }
+  | { type: 'INTENT_ISSUE_BOND'; trancheId?: BondTrancheId }
   | { type: 'INTENT_REPAY_BOND' }
   | { type: 'INTENT_AUTO_SOLVENCY' }
   | { type: 'INTENT_ROLL' };
@@ -134,7 +135,7 @@ const INTENT_DISPATCH: Record<PlayerIntent['type'], IntentHandler> = {
     coordBankruptcy(ctx, p, ci.creditorId, m.auctionsMap, rc, m.rolledThisTurnMap);
     return { success: true };
   },
-  INTENT_ISSUE_BOND: (m, rc, p) => m.handleIssueBond(rc, p),
+  INTENT_ISSUE_BOND: (m, rc, p, i) => m.handleIssueBond(rc, p, (i as { trancheId?: BondTrancheId })?.trancheId),
   INTENT_REPAY_BOND: (m, rc, p) => m.handleRepayBond(rc, p),
   INTENT_AUTO_SOLVENCY: (m, rc, p) => {
     const room = m.getRoom(rc);

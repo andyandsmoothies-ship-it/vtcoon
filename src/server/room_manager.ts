@@ -19,6 +19,7 @@ import { handleDecline, handleAuctionBid, handleAuctionPass, handleAuctionClose,
 import { handleBuyProperty, handleUpgrade, handleUpgradeETC, handleUpgradeUtility } from './property_actions.js';
 import { handleHoseInvest, handleHoseSkip } from './hose_actions.js';
 import { handleIssueBond, handleRepayBond } from './bond_manager.js';
+import type { BondTrancheId } from '../domain/bond_types.js';
 import { dispatchPlayerIntent, type PlayerIntent } from './intent_dispatcher.js';
 import {
   coordMortgage, coordRedeem, coordDowngrade, coordLiquidate, coordTrade,
@@ -373,6 +374,6 @@ export class RoomManager {
     return true;
   }
 
-  handleIssueBond(rc: string, p: string) { const s = this.getSession(rc); return s ? handleIssueBond(s.room, p, s.registry, s.propertyStates) : { success: false, reason: 'INVALID_ROOM' }; }
+  handleIssueBond(rc: string, p: string, trancheId?: BondTrancheId) { const s = this.getSession(rc); return s ? handleIssueBond(s.room, p, s.registry, s.propertyStates, trancheId) : { success: false, reason: 'INVALID_ROOM' }; }
   handleRepayBond(rc: string, p: string) { const s = this.getSession(rc); return s ? handleRepayBond(s.room, p) : { success: false, reason: 'INVALID_ROOM' }; }
 }

@@ -26,9 +26,11 @@ export interface TradeColumnProps {
   readonly price70?: number;
   readonly price100?: number;
   readonly price120?: number;
+  readonly price150?: number;
   readonly reqPrice100?: number;
-  readonly reqPrice130?: number;
+  readonly reqPrice120?: number;
   readonly reqPrice150?: number;
+  readonly reqPrice200?: number;
   readonly levelMap?: Record<number, number>;
 }
 
@@ -53,14 +55,93 @@ export function TradeColumn({
   price70 = 0,
   price100 = 0,
   price120 = 0,
+  price150 = 0,
   reqPrice100 = 0,
-  reqPrice130 = 0,
+  reqPrice120 = 0,
   reqPrice150 = 0,
+  reqPrice200 = 0,
   levelMap,
 }: TradeColumnProps): React.ReactElement {
   const matClass = isMine
     ? 'bg-blue-50/80 border-2 border-blue-300 shadow-sm text-slate-900'
     : 'bg-amber-50/80 border-2 border-amber-300 shadow-sm text-slate-900';
+
+  const synergyProps = properties.filter((id) =>
+    Boolean(getPropertySynergyTag(id, isMine, myProperties, targetProperties))
+  );
+  const standardProps = properties.filter((id) =>
+    !getPropertySynergyTag(id, isMine, myProperties, targetProperties)
+  );
+
+  const renderPropertyCard = (id: number) => {
+    const deed = getDeedDisplayInfo(id);
+    const color = deed?.colorGroup ? COLOR_GROUP_HEX[deed.colorGroup] : '#64748b';
+    const isMort = mortgagedProperties?.includes(id) ?? false;
+    const loan = mortgageLoans?.[id] ?? Math.floor((deed?.price ?? 0) * 0.5);
+    const checked = selectedProperties?.includes(id) ?? false;
+    const synergyTag = getPropertySynergyTag(id, isMine, myProperties, targetProperties);
+    const rawName = deed?.name ?? `Ô #${id}`;
+    const match = rawName.match(/^(.*?)\s*(\(.*?\))$/);
+    const mainName = match ? match[1] : rawName;
+    const subName = match ? match[2] : null;
+    const bldLevel = levelMap?.[id] ?? 0;
+    const hasBuilding = bldLevel > 0;
+
+    return (
+      <button
+        key={id}
+        type="button"
+        data-selected={checked ? 'true' : undefined}
+        disabled={hasBuilding}
+        onClick={() => !hasBuilding && onToggleProperty(id)}
+        title={hasBuilding ? 'Cần hạ cấp hết công trình về Cấp 0 trước khi trao đổi' : `Ô #${id} - ${rawName}`}
+        className={`w-full text-left rounded-xl border transition-all overflow-hidden flex items-center min-h-[44px] text-xs ${
+          hasBuilding
+            ? 'opacity-60 bg-slate-50 text-slate-500 border-slate-200 cursor-not-allowed'
+            : checked
+            ? 'bg-amber-100 text-slate-900 border-2 border-amber-500 font-bold shadow-xs cursor-pointer'
+            : isMort
+            ? 'bg-slate-50 text-slate-900 border border-amber-200 hover:bg-slate-100 shadow-2xs cursor-pointer'
+            : 'bg-white text-slate-900 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 shadow-2xs cursor-pointer'
+        }`}
+      >
+        <div className="w-2.5 sm:w-3 self-stretch shrink-0" style={{ backgroundColor: color }} />
+        <div className="px-2.5 py-1.5 flex-1 min-w-0 flex items-center justify-between gap-1.5 overflow-hidden">
+          <div className="flex flex-col flex-1 min-w-0 pr-1">
+            <div className="flex items-center justify-between gap-1">
+              <span className="truncate min-w-0 font-bold text-slate-900 text-xs sm:text-sm">{mainName}</span>
+              <span className="text-xs font-mono font-bold text-amber-900 shrink-0">{deed ? formatCurrency(deed.price) : ''}</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-[11px] text-slate-500 min-w-0">
+              <span className="font-mono font-bold text-slate-400 shrink-0">Ô #{id}</span>
+              {subName && (
+                <span className="truncate min-w-0">{subName}</span>
+              )}
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-1 items-center shrink-0">
+            {hasBuilding ? (
+              <span className="px-1.5 py-0.5 rounded-md bg-slate-200 text-slate-700 font-bold text-[11px] border border-slate-300">
+                🏠 C{bldLevel} (Có nhà)
+              </span>
+            ) : synergyTag ? (
+              <span className="px-1.5 py-0.5 rounded-md bg-amber-400 text-amber-950 font-black text-[11px] shadow-2xs border border-amber-600 animate-pulse">
+                {synergyTag}
+              </span>
+            ) : null}
+            {!hasBuilding && checked && (
+              <span className="px-1.5 py-0.5 rounded-md bg-amber-500 text-amber-950 font-black text-[11px] shadow-2xs">✓ [ĐÃ CHỌN]</span>
+            )}
+            {!hasBuilding && isMort && (
+              <span className="px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-300 font-bold text-[11px] whitespace-nowrap">
+                ⚠️ Nợ -{formatCurrency(loan)} (Thế chấp)
+              </span>
+            )}
+          </div>
+        </div>
+      </button>
+    );
+  };
 
   return (
     <div className={`p-3 rounded-xl flex flex-col space-y-2.5 ${matClass}`}>
@@ -74,7 +155,7 @@ export function TradeColumn({
       </div>
 
       <div
-        className="flex-1 max-h-52 sm:max-h-72 overflow-y-auto space-y-1.5 pr-1"
+        className="flex-1 max-h-52 sm:max-h-72 overflow-y-auto space-y-2 pr-1"
       >
         {properties.length === 0 ? (
           <div className="min-h-[100px] flex flex-col items-center justify-center p-3 text-center rounded-lg border border-dashed border-slate-300 bg-white/60">
@@ -83,72 +164,28 @@ export function TradeColumn({
             <span className="sr-only">🏛️ Chưa sở hữu BĐS</span>
           </div>
         ) : (
-          properties.map((id) => {
-            const deed = getDeedDisplayInfo(id);
-            const color = deed?.colorGroup ? COLOR_GROUP_HEX[deed.colorGroup] : '#64748b';
-            const isMort = mortgagedProperties?.includes(id) ?? false;
-            const loan = mortgageLoans?.[id] ?? Math.floor((deed?.price ?? 0) * 0.5);
-            const checked = selectedProperties?.includes(id) ?? false;
-            const synergyTag = getPropertySynergyTag(id, isMine, myProperties, targetProperties);
-            const rawName = deed?.name ?? `Ô #${id}`;
-            const match = rawName.match(/^(.*?)\s*(\(.*?\))$/);
-            const mainName = match ? match[1] : rawName;
-            const subName = match ? match[2] : null;
-            const bldLevel = levelMap?.[id] ?? 0;
-            const hasBuilding = bldLevel > 0;
-
-            return (
-              <button
-                key={id}
-                type="button"
-                data-selected={checked ? 'true' : undefined}
-                disabled={hasBuilding}
-                onClick={() => !hasBuilding && onToggleProperty(id)}
-                title={hasBuilding ? 'Cần hạ cấp hết công trình về Cấp 0 trước khi trao đổi' : undefined}
-                className={`w-full text-left rounded-xl border transition-all overflow-hidden flex items-center min-h-[44px] text-xs ${
-                  hasBuilding
-                    ? 'opacity-60 bg-slate-50 text-slate-500 border-slate-200 cursor-not-allowed'
-                    : checked
-                    ? 'bg-amber-100 text-slate-900 border-2 border-amber-500 font-bold shadow-xs cursor-pointer'
-                    : isMort
-                    ? 'bg-slate-50 text-slate-900 border border-amber-200 hover:bg-slate-100 shadow-2xs cursor-pointer'
-                    : 'bg-white text-slate-900 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 shadow-2xs cursor-pointer'
-                }`}
-              >
-                <div className="w-2.5 sm:w-3 self-stretch shrink-0" style={{ backgroundColor: color }} />
-                <div className="px-2.5 py-1.5 flex-1 min-w-0 flex items-center justify-between gap-1.5 overflow-hidden">
-                  <div className="flex flex-col flex-1 min-w-0 pr-1">
-                    <div className="flex items-center justify-between gap-1">
-                      <span className="truncate min-w-0 font-bold text-slate-900 text-xs sm:text-sm">{mainName}</span>
-                      <span className="text-xs font-mono font-bold text-amber-900 shrink-0">{deed ? formatCurrency(deed.price) : ''}</span>
-                    </div>
-                    {subName && (
-                      <span className="text-[11px] text-slate-500 truncate min-w-0">{subName}</span>
-                    )}
-                  </div>
-                  <div className="flex flex-wrap gap-1 items-center shrink-0">
-                    {hasBuilding ? (
-                      <span className="px-1.5 py-0.5 rounded-md bg-slate-200 text-slate-700 font-bold text-[11px] border border-slate-300">
-                        🏠 C{bldLevel} (Có nhà)
-                      </span>
-                    ) : synergyTag ? (
-                      <span className="px-1.5 py-0.5 rounded-md bg-amber-400 text-amber-950 font-black text-[11px] shadow-2xs border border-amber-600 animate-pulse">
-                        {synergyTag}
-                      </span>
-                    ) : null}
-                    {!hasBuilding && checked && (
-                      <span className="px-1.5 py-0.5 rounded-md bg-amber-500 text-amber-950 font-black text-[11px] shadow-2xs">✓ [ĐÃ CHỌN]</span>
-                    )}
-                    {!hasBuilding && isMort && (
-                      <span className="px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-300 font-bold text-[11px] whitespace-nowrap">
-                        ⚠️ Nợ -{formatCurrency(loan)} (Thế chấp)
-                      </span>
-                    )}
-                  </div>
+          <>
+            {synergyProps.length > 0 && (
+              <div className="space-y-1">
+                <div className="flex items-center gap-1.5 px-1 py-0.5 text-[11px] font-black text-amber-800 tracking-wide uppercase">
+                  <span>⭐ CƠ HỘI ĐỘC QUYỀN (WIN-WIN)</span>
                 </div>
-              </button>
-            );
-          })
+                <div className="space-y-1.5">
+                  {synergyProps.map(renderPropertyCard)}
+                </div>
+              </div>
+            )}
+            {standardProps.length > 0 && (
+              <div className="space-y-1">
+                <div className="flex items-center gap-1.5 px-1 py-0.5 text-[11px] font-black text-slate-600 tracking-wide uppercase">
+                  <span>📁 TÀI SẢN KHÁC (THEO BỘ MÀU)</span>
+                </div>
+                <div className="space-y-1.5">
+                  {standardProps.map(renderPropertyCard)}
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -217,20 +254,74 @@ export function TradeColumn({
         </div>
 
         {!isMine && offeredCount > 0 && (
-          <div className="mt-1.5 pt-1.5 border-t border-amber-200/60 flex items-center gap-1.5 flex-wrap text-[11px]">
-            <span className="text-slate-500 font-medium">Gợi ý giá bán:</span>
-            <button type="button" onClick={() => onCashChange(price70)} className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-bold inline-flex items-center justify-center border-2 transition-all cursor-pointer touch-manipulation bg-white hover:bg-amber-50 border-amber-300 text-amber-950 shadow-[0_2px_0_0_#fcd34d] active:shadow-none active:translate-y-[2px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400">70% Sàn ({formatCurrency(price70)})</button>
-            <button type="button" onClick={() => onCashChange(price100)} className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-bold inline-flex items-center justify-center border-2 transition-all cursor-pointer touch-manipulation bg-white hover:bg-amber-50 border-amber-300 text-amber-950 shadow-[0_2px_0_0_#fcd34d] active:shadow-none active:translate-y-[2px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400">100% Gốc ({formatCurrency(price100)})<span className="hidden" aria-hidden="true">100% ({formatCurrency(price100)})</span></button>
-            <button type="button" onClick={() => onCashChange(price120)} className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-bold inline-flex items-center justify-center border-2 transition-all cursor-pointer touch-manipulation bg-white hover:bg-amber-50 border-amber-300 text-amber-950 shadow-[0_2px_0_0_#fcd34d] active:shadow-none active:translate-y-[2px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400">120% ({formatCurrency(price120)})</button>
+          <div className="mt-1.5 pt-1.5 border-t border-amber-200/60 text-[11px] space-y-1">
+            <span className="text-slate-500 font-medium block">Gợi ý giá bán:</span>
+            <div className="grid grid-cols-2 gap-1.5">
+              <button
+                type="button"
+                onClick={() => onCashChange(price70)}
+                className="min-h-[44px] px-2 py-2 rounded-xl text-xs font-bold inline-flex items-center justify-center border-2 transition-all cursor-pointer touch-manipulation bg-white hover:bg-amber-50 border-amber-300 text-amber-950 shadow-[0_2px_0_0_#fcd34d] active:shadow-none active:translate-y-[2px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+              >
+                70% Sàn ({formatCurrency(price70)})
+              </button>
+              <button
+                type="button"
+                onClick={() => onCashChange(price100)}
+                className="min-h-[44px] px-2 py-2 rounded-xl text-xs font-bold inline-flex items-center justify-center border-2 transition-all cursor-pointer touch-manipulation bg-white hover:bg-amber-50 border-amber-300 text-amber-950 shadow-[0_2px_0_0_#fcd34d] active:shadow-none active:translate-y-[2px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+              >
+                100% Gốc ({formatCurrency(price100)})
+              </button>
+              <button
+                type="button"
+                onClick={() => onCashChange(price120)}
+                className="min-h-[44px] px-2 py-2 rounded-xl text-xs font-bold inline-flex items-center justify-center border-2 transition-all cursor-pointer touch-manipulation bg-white hover:bg-amber-50 border-amber-300 text-amber-950 shadow-[0_2px_0_0_#fcd34d] active:shadow-none active:translate-y-[2px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+              >
+                120% Lãi chuẩn ({formatCurrency(price120)})
+              </button>
+              <button
+                type="button"
+                onClick={() => onCashChange(price150)}
+                className="min-h-[44px] px-2 py-2 rounded-xl text-xs font-bold inline-flex items-center justify-center border-2 transition-all cursor-pointer touch-manipulation bg-white hover:bg-amber-50 border-amber-300 text-amber-950 shadow-[0_2px_0_0_#fcd34d] active:shadow-none active:translate-y-[2px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+              >
+                150% Thắng lớn ({formatCurrency(price150)})
+              </button>
+            </div>
           </div>
         )}
 
         {isMine && requestedCount > 0 && (
-          <div className="mt-1.5 pt-1.5 border-t border-blue-200/60 flex items-center gap-1.5 flex-wrap text-[11px]">
-            <span className="text-slate-500 font-medium">Gợi ý giá mua:</span>
-            <button type="button" onClick={() => onCashChange(reqPrice100)} className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-bold inline-flex items-center justify-center border-2 transition-all cursor-pointer touch-manipulation bg-white hover:bg-blue-50 border-blue-300 text-blue-950 shadow-[0_2px_0_0_#93c5fd] active:shadow-none active:translate-y-[2px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">100% Gốc ({formatCurrency(reqPrice100)})<span className="hidden" aria-hidden="true">100% ({formatCurrency(reqPrice100)})</span></button>
-            <button type="button" onClick={() => onCashChange(reqPrice130)} className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-bold inline-flex items-center justify-center border-2 transition-all cursor-pointer touch-manipulation bg-white hover:bg-blue-50 border-blue-300 text-blue-950 shadow-[0_2px_0_0_#93c5fd] active:shadow-none active:translate-y-[2px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">130% ({formatCurrency(reqPrice130)})</button>
-            <button type="button" onClick={() => onCashChange(reqPrice150)} className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-bold inline-flex items-center justify-center border-2 transition-all cursor-pointer touch-manipulation bg-white hover:bg-blue-50 border-blue-300 text-blue-950 shadow-[0_2px_0_0_#93c5fd] active:shadow-none active:translate-y-[2px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">150% ({formatCurrency(reqPrice150)})</button>
+          <div className="mt-1.5 pt-1.5 border-t border-blue-200/60 text-[11px] space-y-1">
+            <span className="text-slate-500 font-medium block">Gợi ý giá mua:</span>
+            <div className="grid grid-cols-2 gap-1.5">
+              <button
+                type="button"
+                onClick={() => onCashChange(reqPrice100)}
+                className="min-h-[44px] px-2 py-2 rounded-xl text-xs font-bold inline-flex items-center justify-center border-2 transition-all cursor-pointer touch-manipulation bg-white hover:bg-blue-50 border-blue-300 text-blue-950 shadow-[0_2px_0_0_#93c5fd] active:shadow-none active:translate-y-[2px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+              >
+                100% Gốc ({formatCurrency(reqPrice100)})
+              </button>
+              <button
+                type="button"
+                onClick={() => onCashChange(reqPrice120)}
+                className="min-h-[44px] px-2 py-2 rounded-xl text-xs font-bold inline-flex items-center justify-center border-2 transition-all cursor-pointer touch-manipulation bg-white hover:bg-blue-50 border-blue-300 text-blue-950 shadow-[0_2px_0_0_#93c5fd] active:shadow-none active:translate-y-[2px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+              >
+                120% Lãi nhẹ ({formatCurrency(reqPrice120)})
+              </button>
+              <button
+                type="button"
+                onClick={() => onCashChange(reqPrice150)}
+                className="min-h-[44px] px-2 py-2 rounded-xl text-xs font-bold inline-flex items-center justify-center border-2 transition-all cursor-pointer touch-manipulation bg-white hover:bg-blue-50 border-blue-300 text-blue-950 shadow-[0_2px_0_0_#93c5fd] active:shadow-none active:translate-y-[2px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+              >
+                150% Hấp dẫn ({formatCurrency(reqPrice150)})
+              </button>
+              <button
+                type="button"
+                onClick={() => onCashChange(reqPrice200)}
+                className="min-h-[44px] px-2 py-2 rounded-xl text-xs font-bold inline-flex items-center justify-center border-2 transition-all cursor-pointer touch-manipulation bg-white hover:bg-blue-50 border-blue-300 text-blue-950 shadow-[0_2px_0_0_#93c5fd] active:shadow-none active:translate-y-[2px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+              >
+                200% Ép bán ({formatCurrency(reqPrice200)})
+              </button>
+            </div>
           </div>
         )}
 

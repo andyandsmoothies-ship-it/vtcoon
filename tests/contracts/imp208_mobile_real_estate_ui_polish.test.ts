@@ -331,8 +331,9 @@ describe('[TC-208P.01/MSS..TC-208P.16/MSS][UC-IMP208] Mobile Real Estate UI Poli
           requestedCount: 1,
           myBalance: 10000,
           reqPrice100: 1000,
-          reqPrice130: 1300,
+          reqPrice120: 1200,
           reqPrice150: 1500,
+          reqPrice200: 2000,
         })
       );
 

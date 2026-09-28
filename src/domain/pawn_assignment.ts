@@ -48,20 +48,11 @@ export function assignRandomPlayerPawns(
     availableSlots[j] = temp;
   }
 
-  // Xáo trộn Fisher-Yates trên các màu từ PLAYER_TOKEN_PALETTE
-  const availableColors = [...PLAYER_TOKEN_PALETTE];
-  for (let i = availableColors.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    const temp = availableColors[i]!;
-    availableColors[i] = availableColors[j]!;
-    availableColors[j] = temp;
-  }
-
   return players.map((p, idx) => {
     const playerId = typeof p === 'string' ? p : p.id;
     const slotIndex = availableSlots[idx % availableSlots.length]!;
     const pawnConfig = getPawnConfigBySlot(slotIndex);
-    const tokenColor = availableColors[idx % availableColors.length] ?? '#38BDF8';
+    const tokenColor = PLAYER_TOKEN_PALETTE[idx % PLAYER_TOKEN_PALETTE.length] ?? '#2563EB';
     return {
       playerId,
       slotIndex,

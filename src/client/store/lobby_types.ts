@@ -52,7 +52,7 @@ export function createEmptySlot(index: number): LobbySlot {
     slotIndex: index,
     playerId: null,
     playerName: `Chờ người chơi ${index + 1}...`,
-    tokenColor: PLAYER_TOKEN_PALETTE[index % PLAYER_TOKEN_PALETTE.length] ?? '#38BDF8',
+    tokenColor: PLAYER_TOKEN_PALETTE[index % PLAYER_TOKEN_PALETTE.length] ?? '#2563EB',
     isHost: false,
     isReady: false,
     isBot: false,

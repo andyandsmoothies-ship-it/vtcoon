@@ -109,13 +109,14 @@ describe('[TC-MOB01/MSS] Mobile Responsive HUD Quality Standards Contract Suite'
   // FACET 1: BOUNDARY & RANGE (DIMENSIONS, TOUCH TARGETS & FORMAT BOUNDS)
   // =========================================================================
 
-  it('[TC-MOB01.01/MSS] [UC-MOB-01] PreMatchDeck aside uses mobile separation top-24 instead of sticky top-4', () => {
+  it('[TC-MOB01.01/MSS] [UC-MOB-01] PreMatchDeck aside uses mobile separation top-3 md:top-6 instead of excessive top-24', () => {
     useLobbyStore.getState().initLobby('VT8888', 'p1', true, 'Chủ Tịch Hưng');
     const html = renderToStaticMarkup(React.createElement(PreMatchDeck, { isHost: true }));
     const asideMatch = html.match(/<aside[^>]*data-testid="pre-match-deck"[^>]*>/)?.[0] ?? '';
 
-    expect(asideMatch).toContain('top-24');
-    expect(asideMatch).not.toMatch(/\babsolute top-4\b/);
+    expect(asideMatch).toContain('top-3');
+    expect(asideMatch).toContain('md:top-6');
+    expect(asideMatch).not.toContain('top-24');
   });
 
   it('[TC-MOB01.02/MSS] [UC-MOB-01] PreMatchDeck Copy Room Code button fulfills minimum touch height min-h-[44px]', () => {
@@ -142,7 +143,7 @@ describe('[TC-MOB01/MSS] Mobile Responsive HUD Quality Standards Contract Suite'
     expect(qrBtnMatch).toContain('min-h-[44px]');
   });
 
-  it('[TC-MOB01.05/MSS] [UC-MOB-01] PlayerSlotCard empty slot bounds uses compact height min-h-[68px] or min-h-[72px]', () => {
+  it('[TC-MOB01.05/MSS] [UC-MOB-01] PlayerSlotCard empty slot bounds uses compact height min-h-[50px] or min-h-[54px]', () => {
     const emptySlot: LobbySlot = {
       slotIndex: 1,
       playerId: null,
@@ -161,7 +162,7 @@ describe('[TC-MOB01/MSS] Mobile Responsive HUD Quality Standards Contract Suite'
     );
     const slotContainer = html.match(/<div[^>]*data-testid="lobby-slot-1-empty"[^>]*>/)?.[0] ?? '';
 
-    expect(slotContainer).toMatch(/min-h-\[(68|72)px\]/);
+    expect(slotContainer).toMatch(/min-h-\[(50|52|54)px\]/);
     expect(slotContainer).not.toContain('min-h-[92px]');
   });
 

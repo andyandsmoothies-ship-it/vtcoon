@@ -5,16 +5,17 @@
 export const BOARD_SURFACE = '#2a2a3e' as const;
 
 /**
- * Bảng màu quân cờ người chơi — 6 sắc văn hóa Việt Nam.
- * Thứ tự: Đỏ Đô, Xanh Da Trời, Xanh Lục Bảo, Cam Nắng, Tím Hoàng Gia, Vàng Ánh Kim
+ * Bảng màu quân cờ người chơi — 4 màu cố định theo 4 vị trí (Slot 0..3):
+ * 1. Đỏ (Red)          — Vị trí 1 (Slot 0)
+ * 2. Xanh Dương (Blue)  — Vị trí 2 (Slot 1)
+ * 3. Vàng (Yellow)      — Vị trí 3 (Slot 2)
+ * 4. Xanh Lá Cây (Green)— Vị trí 4 (Slot 3)
  */
 export const PLAYER_TOKEN_PALETTE = [
-  '#c0392b', // Đỏ Đô (Crimson Red)      — Cạnh 3: Thanh Hóa, Nghệ An, Ninh Bình
-  '#2980b9', // Xanh Da Trời (Sky Blue)  — Cạnh 1: Bình Dương, Đồng Nai, Vũng Tàu
-  '#27ae60', // Xanh Lục Bảo (Emerald)   — Cạnh 4: Hưng Yên, Hà Nội, Hoàn Kiếm
-  '#e67e22', // Cam Nắng (Warm Orange)   — Cạnh 2: Bình Định, Huế, Đà Nẵng
-  '#8e44ad', // Tím Hoàng Gia (Royal Purple)— Cạnh 4: TP.Thủ Đức, Q.Nguyễn Huệ
-  '#f1c40f', // Vàng Ánh Kim (Golden)    — Cạnh 3: Hải Phòng, Phú Quốc, Hạ Long
+  '#DC2626', // Đỏ (Red)          — Vị trí 1 (Slot 0)
+  '#2563EB', // Xanh Dương (Blue)  — Vị trí 2 (Slot 1)
+  '#F59E0B', // Vàng (Yellow)      — Vị trí 3 (Slot 2)
+  '#16A34A', // Xanh Lá Cây (Green)— Vị trí 4 (Slot 3)
 ] as const;
 
 import { ColorGroup } from './board_config';

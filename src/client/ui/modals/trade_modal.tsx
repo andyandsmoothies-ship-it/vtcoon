@@ -119,10 +119,16 @@ export function TradeModal({
   };
 
   const offeredBaseCost = offered.reduce((sum, id) => sum + getNetPropertyValue(id, true), 0);
-  const price70 = Math.round(offeredBaseCost * 0.7), price100 = offeredBaseCost, price120 = Math.round(offeredBaseCost * 1.2);
+  const price70 = Math.round(offeredBaseCost * 0.7);
+  const price100 = offeredBaseCost;
+  const price120 = Math.round(offeredBaseCost * 1.2);
+  const price150 = Math.round(offeredBaseCost * 1.5);
 
   const requestedBaseCost = requested.reduce((sum, id) => sum + getNetPropertyValue(id, false), 0);
-  const reqPrice100 = requestedBaseCost, reqPrice130 = Math.round(requestedBaseCost * 1.3), reqPrice150 = Math.round(requestedBaseCost * 1.5);
+  const reqPrice100 = requestedBaseCost;
+  const reqPrice120 = Math.round(requestedBaseCost * 1.2);
+  const reqPrice150 = Math.round(requestedBaseCost * 1.5);
+  const reqPrice200 = Math.round(requestedBaseCost * 2.0);
 
   const myTotalValue = offeredBaseCost + cashOffer, partnerTotalValue = requestedBaseCost + cashRequest;
   const totalDealValue = myTotalValue + partnerTotalValue;
@@ -216,8 +222,9 @@ export function TradeModal({
             targetProperties={targetProperties}
             requestedCount={requested.length}
             reqPrice100={reqPrice100}
-            reqPrice130={reqPrice130}
+            reqPrice120={reqPrice120}
             reqPrice150={reqPrice150}
+            reqPrice200={reqPrice200}
             levelMap={levelMap}
           />
         </div>
@@ -240,6 +247,7 @@ export function TradeModal({
             price70={price70}
             price100={price100}
             price120={price120}
+            price150={price150}
             levelMap={levelMap}
           />
         </div>

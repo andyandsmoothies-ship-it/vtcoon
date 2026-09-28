@@ -123,7 +123,7 @@ function resolvePlayerName(p: DeltaPlayer, pIdx: number, lobbyName?: string): st
 
 function resolvePlayerColor(pIdx: number, lobbyColor?: string): string {
   if (lobbyColor) return lobbyColor;
-  return PLAYER_TOKEN_PALETTE[pIdx % PLAYER_TOKEN_PALETTE.length] ?? '#38BDF8';
+  return PLAYER_TOKEN_PALETTE[pIdx % PLAYER_TOKEN_PALETTE.length] ?? '#2563EB';
 }
 
 function getLobbySlot(playerId: string): { playerName?: string; tokenColor?: string; pawnSlot?: number; mascotIcon?: string } | undefined {

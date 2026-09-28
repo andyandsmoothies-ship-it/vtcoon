@@ -1,4 +1,47 @@
+export enum BondTrancheId {
+  WORKING_CAPITAL = 'WORKING_CAPITAL',
+  EXPANSION = 'EXPANSION',
+  ALL_IN = 'ALL_IN',
+}
+
+export interface BondTrancheConfig {
+  readonly id: BondTrancheId;
+  readonly name: string;
+  readonly loanRatio: number;
+  readonly durationRounds: number;
+  readonly interestRate: number;
+  readonly collateralRatio: number;
+}
+
+export const BOND_TRANCHES: Record<BondTrancheId, BondTrancheConfig> = {
+  [BondTrancheId.WORKING_CAPITAL]: {
+    id: BondTrancheId.WORKING_CAPITAL,
+    name: 'Tín Dụng Lưu Động',
+    loanRatio: 0.20,
+    durationRounds: 2,
+    interestRate: 0.08,
+    collateralRatio: 1.00,
+  },
+  [BondTrancheId.EXPANSION]: {
+    id: BondTrancheId.EXPANSION,
+    name: 'Đầu Tư Tăng Tốc',
+    loanRatio: 0.40,
+    durationRounds: 3,
+    interestRate: 0.15,
+    collateralRatio: 1.20,
+  },
+  [BondTrancheId.ALL_IN]: {
+    id: BondTrancheId.ALL_IN,
+    name: 'Thâu Tóm Tất Tay',
+    loanRatio: 0.60,
+    durationRounds: 3,
+    interestRate: 0.20,
+    collateralRatio: 0.50,
+  },
+};
+
 export interface BondContract {
+  readonly trancheId?: BondTrancheId;
   readonly principal: number;
   readonly repayAmount: number;
   readonly roundsLeft: number;

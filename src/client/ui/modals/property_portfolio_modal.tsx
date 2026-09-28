@@ -7,7 +7,7 @@ import { analyzePropertyMonopolyInsight, resolvePropertyCardActionState } from '
 import { PortfolioTabHeader, type PortfolioTab } from './portfolio_tab_header';
 import { PortfolioDeficitBanner } from './portfolio_deficit_banner';
 import { BondIssuanceTab } from './bond_issuance_tab';
-import type { BondContract } from '../../../domain/bond_types';
+import { type BondContract, BondTrancheId } from '../../../domain/bond_types';
 import { MacroCycleType } from '../../../domain/macro_cycle_types';
 
 export interface PropertyPortfolioModalProps {
@@ -16,6 +16,8 @@ export interface PropertyPortfolioModalProps {
   readonly activeModifiers?: readonly { readonly type: string; readonly remainingRounds: number; readonly affectedCells?: readonly number[] }[];
   readonly propertyStates?: Record<number, { readonly ownerId?: string | null; readonly level?: number; readonly isMortgaged?: boolean }>;
   readonly currentBalance?: number;
+  readonly playerNetWorth?: number;
+  readonly unmortgagedPropertiesCount?: number;
   readonly isInInsolvency?: boolean;
   readonly isMyTurn?: boolean;
   readonly turnPhase?: string;
@@ -30,7 +32,7 @@ export interface PropertyPortfolioModalProps {
   readonly onDowngrade?: (cellIndex: number) => void;
   readonly onClose?: () => void;
   readonly bondContract?: BondContract | null;
-  readonly onIssueBond?: () => void;
+  readonly onIssueBond?: (trancheId?: BondTrancheId) => void;
   readonly onRepayBond?: () => void;
   readonly onAutoSolvency?: () => void;
 }
@@ -41,11 +43,12 @@ export function PropertyPortfolioModal({
   ownedProperties, isTradeFrozen, activeModifiers = [], propertyStates = {}, currentBalance = 0, isInInsolvency = false,
   isMyTurn, turnPhase, allPlayers, onQuickTrade, onViewVacantCell, onUpgrade, onHoverCell,
   onSelectDeed, onMortgage, onRedeem, onDowngrade, onClose, bondContract, onIssueBond, onRepayBond, onAutoSolvency,
+  playerNetWorth, unmortgagedPropertiesCount,
 }: PropertyPortfolioModalProps): React.ReactElement {
-  const [activeTab, setActiveTab] = useState<PortfolioTab>('properties');
+  const [activeTab, setActiveTab] = React.useState<PortfolioTab>('properties');
   const isNegative = currentBalance < 0 || isInInsolvency;
   const deficitAmount = currentBalance < 0 ? Math.abs(currentBalance) : 0;
-  const [filter, setFilter] = useState<'all' | 'nearMonopoly' | 'upgradeable' | 'mortgaged'>('all');
+  const [filter, setFilter] = React.useState<'all' | 'nearMonopoly' | 'upgradeable' | 'mortgaged'>('all');
 
   const filteredProperties = ownedProperties.filter((cellIndex) => {
     if (filter === 'mortgaged') return Boolean(propertyStates[cellIndex]?.isMortgaged);
@@ -104,6 +107,8 @@ export function PropertyPortfolioModal({
             bondContract={bondContract}
             balance={currentBalance}
             isMyTurn={isMyTurn}
+            playerNetWorth={playerNetWorth}
+            unmortgagedPropertiesCount={unmortgagedPropertiesCount}
             onIssueBond={onIssueBond}
             onRepayBond={onRepayBond}
           />

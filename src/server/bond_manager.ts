@@ -6,6 +6,9 @@ import { calculateNetWorth } from './insolvency_manager';
 import type { AuctionSession } from './auction_manager';
 import {
   type BondContract,
+  BondTrancheId,
+  type BondTrancheConfig,
+  BOND_TRANCHES,
   BOND_MIN_NET_WORTH,
   BOND_MIN_PROPERTIES,
   BOND_LOAN_RATIO,
@@ -19,7 +22,8 @@ export function validateIssueBond(
   playerId: string,
   registry: PropertyRegistry,
   stateMap: PropertyStateMap,
-): { valid: boolean; reason?: string; principal?: number; collateralCells?: number[] } {
+  trancheId?: BondTrancheId,
+): { valid: boolean; reason?: string; principal?: number; collateralCells?: number[]; tranche?: BondTrancheConfig } {
   const player = room.players.find((p) => p.id === playerId);
   if (!player) return { valid: false, reason: ActionRejectReason.INVALID_PLAYER };
   if (player.bondContract?.isActive) {
@@ -42,17 +46,57 @@ export function validateIssueBond(
     return { valid: false, reason: ActionRejectReason.BOND_NOT_ELIGIBLE };
   }
 
-  const principal = Math.floor(netWorth * BOND_LOAN_RATIO);
-  const totalCollateralValue = unmortgagedCells.reduce(
-    (sum, cell) => sum + (PROPERTY_DEEDS.get(cell)?.price ?? 0),
-    0,
-  );
+  // Legacy Fallback khi trancheId === undefined (bảo toàn 100% hợp đồng TC-192C)
+  if (!trancheId) {
+    const principal = Math.floor(netWorth * BOND_LOAN_RATIO);
+    const totalCollateralValue = unmortgagedCells.reduce(
+      (sum, cell) => sum + (PROPERTY_DEEDS.get(cell)?.price ?? 0),
+      0,
+    );
+    if (totalCollateralValue < principal * BOND_MIN_COLLATERAL_RATIO) {
+      return { valid: false, reason: ActionRejectReason.BOND_NOT_ELIGIBLE };
+    }
+    return { valid: true, principal, collateralCells: unmortgagedCells };
+  }
 
-  if (totalCollateralValue < principal * BOND_MIN_COLLATERAL_RATIO) {
+  const tranche = BOND_TRANCHES[trancheId] ?? BOND_TRANCHES[BondTrancheId.WORKING_CAPITAL];
+  const principal = Math.floor(netWorth * tranche.loanRatio);
+
+  if (trancheId === BondTrancheId.ALL_IN) {
+    const totalCollateralValue = unmortgagedCells.reduce(
+      (sum, cell) => sum + (PROPERTY_DEEDS.get(cell)?.price ?? 0),
+      0,
+    );
+    if (totalCollateralValue < principal * tranche.collateralRatio) {
+      return { valid: false, reason: ActionRejectReason.BOND_NOT_ELIGIBLE };
+    }
+    return { valid: true, principal, collateralCells: unmortgagedCells, tranche };
+  }
+
+  // Sắp xếp các ô đất tăng dần theo giá trị niêm yết
+  const sortedCells = [...unmortgagedCells].sort((a, b) => {
+    const priceA = PROPERTY_DEEDS.get(a)?.price ?? 0;
+    const priceB = PROPERTY_DEEDS.get(b)?.price ?? 0;
+    return priceA - priceB;
+  });
+
+  const requiredCollateralValue = Math.floor(principal * tranche.collateralRatio);
+  let accumulatedValue = 0;
+  const selectedCollaterals: number[] = [];
+
+  for (const cell of sortedCells) {
+    selectedCollaterals.push(cell);
+    accumulatedValue += PROPERTY_DEEDS.get(cell)?.price ?? 0;
+    if (accumulatedValue >= requiredCollateralValue && selectedCollaterals.length >= BOND_MIN_PROPERTIES) {
+      break;
+    }
+  }
+
+  if (accumulatedValue < requiredCollateralValue || selectedCollaterals.length < BOND_MIN_PROPERTIES) {
     return { valid: false, reason: ActionRejectReason.BOND_NOT_ELIGIBLE };
   }
 
-  return { valid: true, principal, collateralCells: unmortgagedCells };
+  return { valid: true, principal, collateralCells: selectedCollaterals, tranche };
 }
 
 export function handleIssueBond(
@@ -60,18 +104,24 @@ export function handleIssueBond(
   playerId: string,
   registry: PropertyRegistry,
   stateMap: PropertyStateMap,
+  trancheId?: BondTrancheId,
 ): { success: boolean; reason?: string; bondContract?: BondContract } {
-  const validation = validateIssueBond(room, playerId, registry, stateMap);
+  const validation = validateIssueBond(room, playerId, registry, stateMap, trancheId);
   if (!validation.valid || validation.principal === undefined || !validation.collateralCells) {
     return { success: false, reason: validation.reason };
   }
 
   const player = room.players.find((p) => p.id === playerId)!;
   player.balance += validation.principal;
+
+  const interestRate = validation.tranche ? validation.tranche.interestRate : BOND_INTEREST_RATE;
+  const durationRounds = validation.tranche ? validation.tranche.durationRounds : BOND_DURATION_ROUNDS;
+
   const contract: BondContract = {
+    trancheId: validation.tranche?.id,
     principal: validation.principal,
-    repayAmount: Math.floor(validation.principal * (1 + BOND_INTEREST_RATE)),
-    roundsLeft: BOND_DURATION_ROUNDS,
+    repayAmount: Math.floor(validation.principal * (1 + interestRate)),
+    roundsLeft: durationRounds,
     collateralCells: validation.collateralCells,
     isActive: true,
   };
@@ -91,7 +141,8 @@ export function handleRepayBond(
     return { success: false, reason: ActionRejectReason.INSUFFICIENT_FUNDS };
   }
   player.balance -= player.bondContract.repayAmount;
-  room.treasury = (room.treasury ?? 0) + Math.floor(player.bondContract.principal * BOND_INTEREST_RATE);
+  const interestPaid = Math.max(0, player.bondContract.repayAmount - player.bondContract.principal);
+  room.treasury = (room.treasury ?? 0) + interestPaid;
   player.bondContract = null;
   return { success: true };
 }
@@ -136,20 +187,22 @@ export function processBondTurnTransition(
 ): void {
   if (!player.bondContract?.isActive) return;
 
+  // Nhánh 1: Chưa đến hạn tất toán (roundsLeft > 1) -> Đếm lùi 1 vòng
   if (player.bondContract.roundsLeft > 1) {
     player.bondContract = { ...player.bondContract, roundsLeft: player.bondContract.roundsLeft - 1 };
     return;
   }
 
-  // roundsLeft === 1
+  // Nhánh 2: Đáo hạn (roundsLeft === 1) và đủ tiền tất toán
   if (player.balance >= player.bondContract.repayAmount) {
     player.balance -= player.bondContract.repayAmount;
-    room.treasury = (room.treasury ?? 0) + Math.floor(player.bondContract.principal * BOND_INTEREST_RATE);
+    const interestPaid = Math.max(0, player.bondContract.repayAmount - player.bondContract.principal);
+    room.treasury = (room.treasury ?? 0) + interestPaid;
     player.bondContract = null;
     return;
   }
 
-  // Vỡ nợ trái phiếu
+  // Nhánh 3: Đáo hạn (roundsLeft === 1) nhưng không đủ tiền -> VỠ NỢ TRÁI PHIẾU
   const cash = Math.min(Math.max(0, player.balance), player.bondContract.repayAmount);
   player.balance -= cash;
   room.treasury = (room.treasury ?? 0) + cash;

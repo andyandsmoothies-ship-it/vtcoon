@@ -20,6 +20,7 @@ import type { PlayerIntent } from '../../../server/intent_dispatcher';
 import { isAuctionDismissible, calculateAuctionTimeRemaining } from './modal_helpers';
 import { resolveTitleDeedModalState } from './title_deed_affordance';
 import { useLobbyStore } from '../../store/lobby_store';
+import { calculatePlayerNetWorth } from '../ui_helpers';
 
 export interface ModalHostProps {
   readonly activeModal?: ActiveModalType;
@@ -96,7 +97,7 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
       </ModalBackdrop>
     );
   }
-  if (!modalPayload) {
+  if (!modalPayload && activeModal !== 'portfolio') {
     return null;
   }
   const lobbyPid = useLobbyStore.getState().myPlayerId;
@@ -173,64 +174,81 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
         );
       })()}
 
-      {activeModal === 'portfolio' && (
-        <PropertyPortfolioModal
-          ownedProperties={myPlayer?.ownedProperties ?? []}
-          isTradeFrozen={isTradeFrozen}
-          activeModifiers={activeModifiers}
-          propertyStates={Object.fromEntries(
-            (myPlayer?.ownedProperties ?? []).map((idx) => [
-              idx,
-              {
-                ownerId: myId,
-                level: useGameStore.getState().levelMap[idx] ?? 0,
-                isMortgaged: Boolean(myPlayer?.mortgagedProperties?.includes(idx)),
-              },
-            ])
-          )}
-          currentBalance={myPlayer?.balance ?? 0}
-          isInInsolvency={useGameStore.getState().activeModal === 'insolvency' || (myPlayer?.balance ?? 0) < 0}
-          isMyTurn={currentTurnPlayerId === myId}
-          turnPhase={useGameStore.getState().turnPhase}
-          allPlayers={playersInfo}
-          onQuickTrade={(targetPlayerId, targetPropertyIndex) => {
-            closeModal();
-            useGameStore.getState().openModal('trade', {
-              targetPlayerId,
-              offeredProperties: [],
-              requestedProperties: [targetPropertyIndex],
-              cashOffer: 0,
-              cashRequest: 0,
-            });
-          }}
-          onViewVacantCell={(cellIndex) => {
-            closeModal();
-            useGameStore.getState().setCameraFocusCell(cellIndex);
-            useGameStore.getState().openModal('deed', {
-              cellIndex,
-              canBuy: false,
-              ownedProperties: myPlayer?.ownedProperties,
-            });
-          }}
-          onUpgrade={(cellIndex) => {
-            onIntent?.({ type: 'INTENT_UPGRADE', cellIndex });
-          }}
-          onHoverCell={(cellIndex) => useGameStore.getState().setCameraFocusCell(cellIndex)}
-          onSelectDeed={(cellIndex) => {
-            closeModal();
-            useGameStore.getState().openModal('deed', {
-              cellIndex,
-              canBuy: false,
-              ownedProperties: myPlayer?.ownedProperties,
-            });
-          }}
-          onMortgage={(cellIndex) => onIntent?.({ type: 'INTENT_MORTGAGE', cellIndex })}
-          onRedeem={(cellIndex) => onIntent?.({ type: 'INTENT_REDEEM', cellIndex })}
-          onDowngrade={(cellIndex) => onIntent?.({ type: 'INTENT_DOWNGRADE', cellIndex })}
-          onAutoSolvency={() => onIntent?.({ type: 'INTENT_AUTO_SOLVENCY' })}
-          onClose={() => { useGameStore.getState().setCameraFocusCell(null); closeModal(); }}
-        />
-      )}
+      {activeModal === 'portfolio' && (() => {
+        const owned = myPlayer?.ownedProperties ?? [];
+        const unmortgagedCount = owned.filter((idx) => !myPlayer?.mortgagedProperties?.includes(idx)).length;
+        const playerNW = calculatePlayerNetWorth(
+          myPlayer?.balance ?? 0,
+          owned,
+          useGameStore.getState().levelMap,
+          myPlayer?.mortgagedProperties ?? [],
+          myPlayer?.mortgageLoans,
+        );
+
+        return (
+          <PropertyPortfolioModal
+            ownedProperties={owned}
+            isTradeFrozen={isTradeFrozen}
+            activeModifiers={activeModifiers}
+            propertyStates={Object.fromEntries(
+              owned.map((idx) => [
+                idx,
+                {
+                  ownerId: myId,
+                  level: useGameStore.getState().levelMap[idx] ?? 0,
+                  isMortgaged: Boolean(myPlayer?.mortgagedProperties?.includes(idx)),
+                },
+              ])
+            )}
+            currentBalance={myPlayer?.balance ?? 0}
+            playerNetWorth={playerNW}
+            unmortgagedPropertiesCount={unmortgagedCount}
+            bondContract={myPlayer?.bondContract}
+            isInInsolvency={useGameStore.getState().activeModal === 'insolvency' || (myPlayer?.balance ?? 0) < 0}
+            isMyTurn={currentTurnPlayerId === myId}
+            turnPhase={useGameStore.getState().turnPhase}
+            allPlayers={playersInfo}
+            onIssueBond={(trancheId) => onIntent?.({ type: 'INTENT_ISSUE_BOND', trancheId })}
+            onRepayBond={() => onIntent?.({ type: 'INTENT_REPAY_BOND' })}
+            onQuickTrade={(targetPlayerId, targetPropertyIndex) => {
+              closeModal();
+              useGameStore.getState().openModal('trade', {
+                targetPlayerId,
+                offeredProperties: [],
+                requestedProperties: [targetPropertyIndex],
+                cashOffer: 0,
+                cashRequest: 0,
+              });
+            }}
+            onViewVacantCell={(cellIndex) => {
+              closeModal();
+              useGameStore.getState().setCameraFocusCell(cellIndex);
+              useGameStore.getState().openModal('deed', {
+                cellIndex,
+                canBuy: false,
+                ownedProperties: myPlayer?.ownedProperties,
+              });
+            }}
+            onUpgrade={(cellIndex) => {
+              onIntent?.({ type: 'INTENT_UPGRADE', cellIndex });
+            }}
+            onHoverCell={(cellIndex) => useGameStore.getState().setCameraFocusCell(cellIndex)}
+            onSelectDeed={(cellIndex) => {
+              closeModal();
+              useGameStore.getState().openModal('deed', {
+                cellIndex,
+                canBuy: false,
+                ownedProperties: myPlayer?.ownedProperties,
+              });
+            }}
+            onMortgage={(cellIndex) => onIntent?.({ type: 'INTENT_MORTGAGE', cellIndex })}
+            onRedeem={(cellIndex) => onIntent?.({ type: 'INTENT_REDEEM', cellIndex })}
+            onDowngrade={(cellIndex) => onIntent?.({ type: 'INTENT_DOWNGRADE', cellIndex })}
+            onAutoSolvency={() => onIntent?.({ type: 'INTENT_AUTO_SOLVENCY' })}
+            onClose={() => { useGameStore.getState().setCameraFocusCell(null); closeModal(); }}
+          />
+        );
+      })()}
 
       {activeModal === 'auction' && (() => {
         const payload = modalPayload as ModalPayloadMap['auction'];
@@ -284,6 +302,7 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
               balance: playersInfo[id]?.balance ?? 0,
               isBot: Boolean(playersInfo[id]?.isBot),
               personality: playersInfo[id]?.personality ?? slot?.botPersonality,
+              properties: playersInfo[id]?.ownedProperties ?? [],
             };
           });
         const targetPlayer = playersInfo[currentTargetId];

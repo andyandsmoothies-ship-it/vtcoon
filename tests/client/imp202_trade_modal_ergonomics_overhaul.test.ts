@@ -28,7 +28,7 @@ describe('[IMP-202][Trạm 1 RED] Trade Modal Ergonomics Overhaul Contract', () 
       );
       expect(html).toContain('Đối tác:');
       expect(html).not.toContain('Chọn đối tác:');
-      expect(html).toMatch(/<span[^>]*shrink-0[^>]*>[^<]*Đối tác:[^<]*<\/span>\s*<div[^>]*overflow-x-auto/);
+      expect(html).toMatch(/<span[^>]*shrink-0[^>]*>[^<]*Đối tác:[^<]*<\/span>\s*<div[^>]*grid/);
     });
 
     it('[TC-202.02/MSS][UC-IMP202][Facet-1/Boundary] Thẻ BĐS hiển thị tên tỉnh thành riêng và tên phân khu {subName} có truncate min-w-0', () => {
