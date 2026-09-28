@@ -5,8 +5,7 @@ import { TurnPhase } from '../domain/room';
 import type { PropertyRegistry, PropertyStateMap } from '../domain/property_manager';
 import { drawMarketCard, drawChanceCard } from '../domain/event_card_engine';
 import { sendToAudit } from './audit_manager';
-
-export const TELECOM_DATA_FEE = 150;
+import { TELECOM_DATA_FEE } from '../domain/property_rent';
 
 function processViettelTelecomFee(
   room: Room,

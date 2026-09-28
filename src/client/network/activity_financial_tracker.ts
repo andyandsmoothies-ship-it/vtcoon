@@ -110,15 +110,19 @@ export function processPayerFee(
     };
   }
 
-  // [IMP-79] Nhận diện Tiền Bảo Lãnh Kiểm Toán (Ô 10)
+  // [IMP-79][IMP-216] Nhận diện Tiền Bảo Lãnh Kiểm Toán (Ô 10)
   const prevP = prevState?.playersInfo[payer.id];
   const wasInAudit = Boolean(prevP?.inAudit || (prevP?.auditTurnsLeft && prevP.auditTurnsLeft > 0));
-  if (wasInAudit && absDiff === 500) {
+  if (wasInAudit && absDiff >= 500) {
+    const isTimeout = prevP?.auditTurnsLeft === 1 || prevP?.auditTurnsLeft === 0;
+    const bailDesc = isTimeout
+      ? 'Hết 3 lượt không ra đôi: Phạt bảo lãnh bắt buộc'
+      : 'Bảo Lãnh Kiểm Toán để rời Trạm';
     return {
       id: `bail_${Date.now()}_${payer.id}`,
       timestamp: Date.now(),
       type: 'bail',
-      message: `⚖️ ${pName} đã nộp phí / nộp thuế ${formatCurrency(absDiff)} (Bảo Lãnh Kiểm Toán để rời Trạm)`,
+      message: `⚖️ ${pName} đã nộp phí / nộp thuế ${formatCurrency(absDiff)} (${bailDesc})`,
       playerId: payer.id,
       playerName: pName,
       cellIndex: 10,

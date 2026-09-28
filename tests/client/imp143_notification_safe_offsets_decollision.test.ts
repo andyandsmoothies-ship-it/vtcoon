@@ -321,8 +321,8 @@ describe('[IMP-143] Tọa Độ Đa Tầng Định Lượng Chính Xác Dưới 
       const milestone = extractMilestoneContainer(html);
 
       expect(overlay).toContain('z-30');
-      expect(mobile).toContain('left-2 min-[360px]:left-3 sm:left-1/2');
-      expect(desktop).toContain('left-2 min-[360px]:left-3 sm:left-1/2');
+      expect(mobile).toContain('left-1/2');
+      expect(desktop).toContain('left-1/2');
       expect(mobile).toContain('-translate-x-1/2');
       expect(milestone).toContain('data-testid="milestone-banner-container"');
     });

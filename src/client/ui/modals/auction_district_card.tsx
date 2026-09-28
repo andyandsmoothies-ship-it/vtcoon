@@ -64,7 +64,7 @@ function renderCellChip(cell: DistrictCellChip): React.ReactElement {
       }`}
     >
       <div className="flex justify-between items-center gap-1 mb-0.5 min-w-0">
-        <span className="font-bold text-slate-900 line-clamp-2 leading-tight text-[10px] sm:text-xs block min-w-0 truncate" title={cell.name}>
+        <span className="font-bold text-slate-900 line-clamp-2 leading-tight text-[10px] sm:text-xs block min-w-0 break-words" title={cell.name}>
           {cell.name}
         </span>
         {cell.level > 0 && (

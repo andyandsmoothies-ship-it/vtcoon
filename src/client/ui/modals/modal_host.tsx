@@ -177,6 +177,7 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
         <PropertyPortfolioModal
           ownedProperties={myPlayer?.ownedProperties ?? []}
           isTradeFrozen={isTradeFrozen}
+          activeModifiers={activeModifiers}
           propertyStates={Object.fromEntries(
             (myPlayer?.ownedProperties ?? []).map((idx) => [
               idx,
@@ -226,6 +227,7 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
           onMortgage={(cellIndex) => onIntent?.({ type: 'INTENT_MORTGAGE', cellIndex })}
           onRedeem={(cellIndex) => onIntent?.({ type: 'INTENT_REDEEM', cellIndex })}
           onDowngrade={(cellIndex) => onIntent?.({ type: 'INTENT_DOWNGRADE', cellIndex })}
+          onAutoSolvency={() => onIntent?.({ type: 'INTENT_AUTO_SOLVENCY' })}
           onClose={() => { useGameStore.getState().setCameraFocusCell(null); closeModal(); }}
         />
       )}
@@ -394,6 +396,7 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
           playerId={(modalPayload as ModalPayloadMap['insolvency']).playerId}
           playerName={playersInfo[(modalPayload as ModalPayloadMap['insolvency']).playerId]?.name}
           deficit={(modalPayload as ModalPayloadMap['insolvency']).deficit}
+          onAutoSolvency={() => onIntent?.({ type: 'INTENT_AUTO_SOLVENCY' })}
           onManageProperties={() => useGameStore.getState().openModal('portfolio', {})}
           onDeclareBankruptcy={() => {
             AudioEngine.playSfx(SoundEffect.BANKRUPT);

@@ -438,5 +438,26 @@ describe('[TC-208P.01/MSS..TC-208P.16/MSS][UC-IMP208] Mobile Real Estate UI Poli
       expect(html).toContain('data-testid="property-portfolio-modal"');
       expect(html).toMatch(/class="[^"]*h-auto[^"]*"/);
     });
+
+    it('[TC-208P.19/MSS][UC-IMP208] PropertyPortfolioModal khi ô đất bị đóng băng thanh khoản (MACRO_LIQUIDITY_FREEZE), nút thế chấp hiển thị disabled với nhãn Đóng Băng', () => {
+      const html = renderToStaticMarkup(
+        React.createElement(PropertyPortfolioModal, {
+          ownedProperties: [6],
+          propertyStates: { 6: { ownerId: 'p1', level: 0, isMortgaged: false } },
+          currentBalance: -775,
+          activeModifiers: [
+            {
+              type: 'MACRO_LIQUIDITY_FREEZE',
+              affectedCells: [6, 8, 9],
+              remainingRounds: 2,
+            },
+          ],
+        })
+      );
+
+      expect(html).toMatch(/data-testid="mortgage-btn-6"[^>]*disabled/);
+      expect(html).toContain('Đóng Băng (+500)');
+      expect(html).toContain('Bất động sản đang bị đóng băng thanh khoản');
+    });
   });
 });

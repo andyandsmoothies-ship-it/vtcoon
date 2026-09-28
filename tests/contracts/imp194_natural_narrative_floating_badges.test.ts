@@ -415,7 +415,7 @@ describe('[TC-194.01/MSS..TC-194.18/MSS][UC-IMP194] Natural Narrative Floating B
   // FACET 5: Cross-Coupling Blast Radius, UI Markup & Codebase Hygiene
   // ===========================================================================
   describe('Facet 5: Cross-Coupling Blast Radius, UI Markup & Codebase Hygiene', () => {
-    it('[TC-194.17/MSS][UC-IMP194] FloatingBadge Rendering: Chứa header danh mục, tên người chơi, floating-amount-pill title, và max-w-[82vw]', () => {
+    it('[TC-194.17/MSS][UC-IMP194] FloatingBadge Rendering: Chứa header danh mục, tên người chơi, floating-amount-pill title, formula-line và flow-line', () => {
       useGameStore.setState({
         playersInfo: {
           'player-1': mockPlayerPayer,
@@ -438,7 +438,8 @@ describe('[TC-194.01/MSS..TC-194.18/MSS][UC-IMP194] Natural Narrative Floating B
       expect(html).toContain('ĐẤU GIÁ BẤT ĐỘNG SẢN');
       expect(html).toContain('Đại Gia Sài Gòn');
       expect(html).toContain('data-testid="floating-amount-pill"');
-      expect(html).toContain('max-w-[82vw] sm:max-w-[340px]');
+      expect(html).toContain('data-testid="transaction-formula-line"');
+      expect(html).toContain('data-testid="transaction-flow-line"');
     });
 
     it('[TC-194.18/MSS][UC-IMP194] Ngân sách LOC & Bảo tồn Hợp đồng cũ: floating_numbers <= 390 LOC, transaction_narrative <= 280 LOC, và export resolveFriendlyReason', () => {

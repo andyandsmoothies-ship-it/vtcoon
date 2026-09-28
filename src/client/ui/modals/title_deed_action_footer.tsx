@@ -167,7 +167,7 @@ export function TitleDeedActionFooter({
             <button
               type="button"
               onClick={onBuy}
-              className="w-full min-h-[48px] py-2 px-3.5 sm:px-6 rounded-xl font-black text-sm sm:text-base bg-emerald-700 hover:bg-emerald-600 text-white cursor-pointer shadow-[0_4px_0_0_#065f46] active:translate-y-[3px]"
+              className="w-full min-h-[48px] py-2 px-3.5 sm:px-6 rounded-xl font-black text-sm sm:text-base bg-emerald-700 hover:bg-emerald-600 text-white cursor-pointer border-2 border-emerald-700 shadow-[0_4px_0_0_#065f46] active:translate-y-[3px]"
             >
               {`Mua BĐS (${formatCurrency(deedPrice)})`}
             </button>

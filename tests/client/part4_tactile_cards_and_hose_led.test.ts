@@ -37,11 +37,11 @@ describe('[TC-P4.1/MSS] Thẻ Bài Game 3D Kim Loại TitleDeedModal', () => {
     expect(html).toContain('border-emerald-700');
     expect(html).toContain('shadow-[0_4px_0_0_#065f46]');
     expect(html).toContain('active:translate-y-[3px]');
-    expect(html).toContain('border-slate-300');
-    expect(html).toContain('shadow-[0_4px_0_0_#cbd5e1]');
+    expect(html).toContain('border-rose-300');
+    expect(html).toContain('shadow-[0_4px_0_0_#fca5a5]');
   });
 
-  it('Hỗ trợ đầy đủ các trạng thái Nâng Cấp, Hạ Cấp, Thế Chấp với nút bấm 3D vật lý', () => {
+  it('Hỗ trợ đầy đủ các trạng thái Nâng Cấp, Hạ Cấp với nút bấm 3D vật lý', () => {
     const html = renderToStaticMarkup(
       React.createElement(TitleDeedModal, {
         cellIndex: 1,
@@ -62,6 +62,27 @@ describe('[TC-P4.1/MSS] Thẻ Bài Game 3D Kim Loại TitleDeedModal', () => {
     expect(html).toContain('Thế Chấp');
     expect(html).toContain('border-teal-800');
     expect(html).toContain('border-orange-800');
+    // Khi currentLevel:1 → isMortgageBlocked=true (domain law: phải hạ cấp trước khi thế chấp)
+    // → nút Thế Chấp dùng border-slate-300 (disabled state) — đúng theo Monopoly invariant #18
+    expect(html).toContain('border-slate-300');
+  });
+
+  it('Nút Thế Chấp active với border-amber-700 khi currentLevel:0 (không có công trình)', () => {
+    const html = renderToStaticMarkup(
+      React.createElement(TitleDeedModal, {
+        cellIndex: 1,
+        isOwned: true,
+        isOwner: true,
+        isMortgaged: false,
+        currentLevel: 0,
+        upgradeCost: 300,
+        ownerName: 'Đại Gia Hà Nội',
+        onUpgrade: () => {},
+        onMortgage: () => {},
+        onClose: () => {},
+      })
+    );
+    expect(html).toContain('Thế Chấp');
     expect(html).toContain('border-amber-700');
   });
 

@@ -12,6 +12,10 @@ import { hasMonopoly } from './property_upgrade';
 
 const SERVICE_C2_SURCHARGE = 200;
 export const GO_PROPERTY_TAX_CAP = 1_000;
+// [IMP-216] SSOT Constants for Special Fees & Bail
+export const TELECOM_DATA_FEE = 150;
+export const MIN_BAIL_AMOUNT = 500;
+export const BAIL_NET_WORTH_RATIO = 0.10;
 
 /** @see docs/domain/gotchas.md#1-market-modifiers-lifecycle--scope-slice-04 */
 export function hasZeroRent(cellIndex: number, modifiers?: readonly MarketModifier[]): boolean {

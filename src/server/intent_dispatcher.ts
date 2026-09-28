@@ -10,8 +10,7 @@ import {
 } from './room_property_coordinator.js';
 import { handleUpgrade, handleUpgradeETC, handleUpgradeUtility, handleBuyProperty } from './property_actions.js';
 import { handleHoseInvest, handleHoseSkip } from './hose_actions.js';
-import { handleIssueBond, handleRepayBond } from './bond_manager.js';
-import { handleBailOut } from './audit_manager.js';
+import { executeInsolvencyAfkRecovery } from './network/afk_recovery.js';
 
 export type PlayerIntent =
   | { type: 'INTENT_BUY' } | { type: 'INTENT_BUY_PROPERTY' } | { type: 'INTENT_DECLINE' }
@@ -34,6 +33,7 @@ export type PlayerIntent =
   | { type: 'INTENT_BANKRUPTCY'; creditorId?: string }
   | { type: 'INTENT_ISSUE_BOND' }
   | { type: 'INTENT_REPAY_BOND' }
+  | { type: 'INTENT_AUTO_SOLVENCY' }
   | { type: 'INTENT_ROLL' };
 
 type IntentHandler = (mgr: RoomManager, rc: string, p: string, intent: PlayerIntent) => { success: boolean; reason?: string; rollResult?: RollResult };
@@ -136,6 +136,18 @@ const INTENT_DISPATCH: Record<PlayerIntent['type'], IntentHandler> = {
   },
   INTENT_ISSUE_BOND: (m, rc, p) => m.handleIssueBond(rc, p),
   INTENT_REPAY_BOND: (m, rc, p) => m.handleRepayBond(rc, p),
+  INTENT_AUTO_SOLVENCY: (m, rc, p) => {
+    const room = m.getRoom(rc);
+    if (!room || room.phase !== TurnPhase.InsolvencyPhase) {
+      return { success: false, reason: 'INVALID_PHASE' };
+    }
+    const current = room.players[room.currentPlayerIndex];
+    if (!current || current.id !== p || current.balance >= 0) {
+      return { success: false, reason: ActionRejectReason.NOT_YOUR_TURN };
+    }
+    const res = executeInsolvencyAfkRecovery(m, rc, p);
+    return { success: res.rescued, reason: res.bankrupt ? 'BANKRUPT' : (res.rescued ? undefined : 'CANNOT_RECOVER') };
+  },
   INTENT_END_TURN: (m, rc, p) => {
     const room = m.getRoom(rc);
     const current = room?.players[room.currentPlayerIndex];
@@ -153,7 +165,12 @@ export function dispatchPlayerIntent(
 ): { success: boolean; reason?: string; rollResult?: RollResult } {
   const room = mgr.getRoom(roomCode);
   if (room?.phase === TurnPhase.InsolvencyPhase) {
-    if (intent.type !== 'INTENT_MORTGAGE' && intent.type !== 'INTENT_DOWNGRADE' && intent.type !== 'INTENT_BANKRUPTCY') {
+    if (
+      intent.type !== 'INTENT_MORTGAGE' &&
+      intent.type !== 'INTENT_DOWNGRADE' &&
+      intent.type !== 'INTENT_BANKRUPTCY' &&
+      intent.type !== 'INTENT_AUTO_SOLVENCY'
+    ) {
       return { success: false, reason: 'INVALID_PHASE' };
     }
   }

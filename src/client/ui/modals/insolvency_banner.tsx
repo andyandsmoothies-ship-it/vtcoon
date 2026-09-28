@@ -7,6 +7,7 @@ export interface InsolvencyBannerProps {
   readonly deficit: number;
   readonly onManageProperties?: () => void;
   readonly onDeclareBankruptcy?: () => void;
+  readonly onAutoSolvency?: () => void;
   readonly onClose?: () => void;
 }
 
@@ -15,6 +16,7 @@ export function InsolvencyBanner({
   deficit,
   onManageProperties,
   onDeclareBankruptcy,
+  onAutoSolvency,
   onClose,
 }: InsolvencyBannerProps): React.ReactElement {
   const absDeficit = Math.abs(Number.isFinite(deficit) ? deficit : 0);
@@ -72,6 +74,16 @@ export function InsolvencyBanner({
 
       {/* Các nút hành động */}
       <div className="flex flex-col gap-2 pt-1">
+        {onAutoSolvency && (
+          <button
+            type="button"
+            data-testid="insolvency-auto-solvency-btn"
+            onClick={onAutoSolvency}
+            className="w-full min-h-[44px] px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-900 font-black text-xs cursor-pointer transition-all border-2 border-amber-700 shadow-[0_4px_0_0_#b45309] active:shadow-[0_1px_0_0_#b45309] active:translate-y-[3px] flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+          >
+            <span>⚡</span> CÂN ĐỐI TỰ ĐỘNG (CỨU NGUY NHANH)
+          </button>
+        )}
         {onManageProperties && (
           <button
             type="button"

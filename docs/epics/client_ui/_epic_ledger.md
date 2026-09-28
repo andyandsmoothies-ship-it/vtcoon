@@ -635,3 +635,64 @@
   * Evidence Snapshot: `.agents/evidence/imp208p_snapshot.json` (`executed: true`).
 - **Phê chuẩn**: `plan-griller` (AUDITED), `qa-tester` (Station 1 RED), `implementer` (Station 2 GREEN), `scout` (Station 2.5 PASS), `spec-reviewer` (SPEC_PASS APPROVED), `ui-craft-reviewer` (VERDICT SHIP).
 - **Trạng thái**: ✅ Hoàn thành IMP-208P (2026-09-28).
+
+### [IMP-210] 1-Click Smart Auto-Solvency (⚡ Cân Đối Tự Động / Cứu Nguy Nhanh 1-Chạm)
+- **Mục tiêu**: Bổ sung cơ chế giải cứu tự động 1-chạm (`INTENT_AUTO_SOLVENCY`) khi người chơi rơi vào trạng thái thâm hụt số dư trong `InsolvencyPhase`. Thay vì người chơi phải mở từng miếng đất và tính toán hạ cấp / thế chấp thủ công trong 45s đếm ngược, người chơi có thể bấm 1 nút để máy tự động tính toán phương án thanh lý tối ưu (hạ cấp công trình đồng đều từ thấp lên cao, sau đó thế chấp các ô đất rẻ nhất chưa thế chấp, bỏ qua ô đóng băng thanh khoản) đưa số dư về $\ge 0$ ngay lập tức.
+- **Hạ tầng hoàn tất**:
+  * `src/server/intent_dispatcher.ts` (179 LOC — Tier 1 <= 400 LOC): Mở rộng `PlayerIntent` với `{ type: 'INTENT_AUTO_SOLVENCY' }`. Thiết lập Single Authoritative Guard: FSM Phase Guard (`room.phase === TurnPhase.InsolvencyPhase`) và Off-Turn Hijack Guard (`current.id === p && current.balance < 0`) ngay trong handler, kết nối `executeInsolvencyAfkRecovery`. Loại bỏ double guard dư thừa.
+  * `src/client/ui/modals/portfolio_deficit_banner.tsx` (58 LOC — Tier 2 <= 500 LOC): Submodule mới tách ra từ `property_portfolio_modal.tsx`, hiển thị thông tin thâm hụt và nút bấm 1-chạm xúc giác 3D `min-h-[44px]` kèm `focus-visible:ring-2`.
+  * `src/client/ui/modals/property_portfolio_modal.tsx` (466 LOC — Tier 2 <= 500 LOC): Thực hiện tái cấu trúc trừu tượng (subtractive refactoring) trích xuất khối banner nợ, giúp tệp giảm từ 483 LOC xuống 466 LOC (giảm 17 dòng, an toàn dưới trần 470 LOC theo Hiến pháp).
+  * `src/client/ui/modals/insolvency_banner.tsx` (108 LOC — Tier 2 <= 500 LOC): Bổ sung nút "⚡ CÂN ĐỐI TỰ ĐỘNG (CỨU NGUY NHANH)" với kích thước `min-h-[44px]`, bóng xúc giác 3D, bảo toàn 100% markup và text của 2 nút cũ để bảo vệ các contract tests hồi quy.
+  * `src/client/ui/modals/modal_host.tsx` (454 LOC — Tier 2 <= 500 LOC): Truyền `onAutoSolvency` phát intent `INTENT_AUTO_SOLVENCY` thông suốt từ cả 2 modal.
+  * `src/client/network/use_app_session.ts` (272 LOC — Tier 1 <= 400 LOC): Bổ sung cơ chế auto-close modal `insolvency` khi nhận delta cập nhật số dư $\ge 0$.
+- **Kiểm thử & Bất biến**:
+  * `tests/contracts/imp210_auto_solvency_intent.test.ts`: 16/16 atomic contract tests PASS 100% (5 facets).
+  * `npx tsc --noEmit`: 0 lỗi. `npm run lint:ui`: 0 vi phạm (197 files scanned).
+  * Evidence Snapshot: `.agents/evidence/imp210_snapshot.json` (`executed: true`).
+- **Phê chuẩn**: `plan-griller` (P1-P5 REVISED & APPROVED), `qa-tester` (Station 1 RED), `implementer` (Station 2 GREEN), `scout` (Station 2.5 PASS), `spec-reviewer` (SPEC_PASS APPROVED), `ui-craft-reviewer` (APPROVE).
+- **Trạng thái**: ✅ Hoàn thành IMP-210 (2026-09-28).
+
+### [IMP-216] Minh Bạch Hóa Công Thức Biến Động Tài Chính & Mở Rộng Badge Mobile Full-Width
+- **Mục tiêu**: Xóa bỏ hoàn toàn giới hạn co cụm 1/2 màn hình mobile của thẻ thông báo tài chính (`FloatingBadge` & `FloatingNumbersOverlay`), mở rộng ra gần trọn bề ngang màn hình (`w-[calc(100vw-1.5rem)]` căn giữa trục màn hình); tái cấu trúc thẻ thành 3 tầng phân cấp thị giác chuẩn công thái học (Header + Dòng 1 Công thức súc tích dưới 50 ký tự + Dòng 2 Dòng tiền tự nhiên); đồng thời khóa chặt tính nhất quán với SSOT Domain Constants (`MIN_BAIL_AMOUNT`, `TELECOM_DATA_FEE`, `GO_PROPERTY_TAX_CAP`), chống rò rỉ dữ liệu hoặc sai lệch khi cập nhật luật tính tiền trong tương lai.
+- **Hạ tầng hoàn tất**:
+  * `src/domain/property_rent.ts` (186 LOC — Tier 1 <= 400 LOC): Xuất khẩu các hằng số SSOT tập trung `TELECOM_DATA_FEE = 150`, `MIN_BAIL_AMOUNT = 500`, `BAIL_NET_WORTH_RATIO = 0.10`.
+  * `src/server/special_cell_handler.ts` (72 LOC — Tier 1 <= 400 LOC): Nhập `TELECOM_DATA_FEE` từ domain SSOT, xóa bỏ khai báo trùng lặp.
+  * `src/server/audit_manager.ts` (150 LOC — Tier 1 <= 400 LOC): Sử dụng `MIN_BAIL_AMOUNT` và `BAIL_NET_WORTH_RATIO` từ domain SSOT.
+  * `src/client/store/game_store_types.ts` (380 LOC — Tier 1 <= 400 LOC): Bổ sung `readonly formula?: string;` vào `FloatingTextItem`.
+  * `src/client/store/game_store.ts` (387 LOC — Tier 1 <= 400 LOC): Vá lỗ hổng lifecycle trong `addFloatingText`, bảo toàn trường `formula` vào store.
+  * `src/client/ui/transaction_formula.ts` (76 LOC — Tier 2 <= 500 LOC): Submodule độc lập phân giải công thức rõ nghĩa, súc tích từ domain SSOT cho các tình huống (Bảo lãnh tự nguyện vs Cưỡng chế 3 lượt vs Đổ đôi; Điện EVN qua GO; Cước Viettel; Thuế đất đai ô 4; Thuế tài sản vượt GO; Thuê x2 độc quyền; Thẻ Ngoại Giao đối xứng 2 chiều; Vay và Chuộc thế chấp).
+  * `src/client/ui/transaction_narrative.ts` (260 LOC — Tier 2 <= 280 LOC): Tích hợp trường `formula` vào `TransactionNarrative`, giữ nguyên ngân sách LOC dưới trần của hợp đồng `TC-194.18`.
+  * `src/client/ui/floating_numbers.tsx` (290 LOC — Tier 2 <= 500 LOC): Mở rộng container mobile sang `w-[calc(100vw-1.5rem)] max-w-sm sm:max-w-md` căn giữa `left-1/2 -translate-x-1/2`; cấu trúc `FloatingBadge` thành 3 tầng rõ rệt: Tầng 1 Header + Tầng 2 Dòng 1 (`data-testid="transaction-formula-line"`) + Tầng 3 Dòng 2 (`data-testid="transaction-flow-line"`).
+  * `src/client/network/activity_financial_tracker.ts` (314 LOC — Tier 1 <= 400 LOC): Bóc tách bảo lãnh kiểm toán (không so sánh cứng 500, phân biệt bảo lãnh sớm vs cưỡng chế dựa trên số lượt còn lại).
+  * `src/client/network/activity_badge_dispatcher.ts` (243 LOC — Tier 1 <= 400 LOC): Truyền `formula` qua `addFloatingText`, sửa lỗi tính bước modular distance khi vượt GO.
+- **Kiểm thử & Bất biến**:
+  * `tests/contracts/imp216_financial_notification_formula_and_badge.test.ts`: 16/16 atomic contract tests PASS 100% (5 facets).
+  * Toàn bộ 9 suites liên quan (189 tests): PASS 100%.
+  * `npx tsc --noEmit`: 0 lỗi. `npm run lint:ui`: 0 vi phạm (197 files scanned).
+  * Evidence Snapshot: `.agents/evidence/imp216_snapshot.json` (`executed: true`).
+- **Phê chuẩn**: `plan-griller` (P1-P5 REVISED & APPROVED), `qa-tester` (Station 1 RED), `implementer` (Station 2 GREEN), `scout` (Station 2.5 PASS), `spec-reviewer` (SPEC_PASS APPROVED), `code-reviewer` (CODE_PASS APPROVED), `ui-craft-reviewer` (VERDICT SHIP APPROVED).
+- **Trạng thái**: ✅ Hoàn thành IMP-216 (2026-09-28).
+
+### [IMP-215 (Phần 2)] Chiến Dịch Gia Cố & Tối Ưu Hóa UI/UX Đa Nền Tảng & Trình Duyệt (Cross-Platform UI/UX & Browser Hardening)
+- **Mục tiêu**: Giải quyết triệt để 8 khuyết tật phát hiện trong Báo Cáo Kiểm Toán Đa Nền Tảng (DEF-01 đến DEF-08) và các phát hiện tối ưu từ Station 2.5 Scout, bảo đảm độ ổn định và hiển thị hoàn hảo trên Desktop (1920x1080, 1366x768, 1280x720) và Mobile (360px, 390px, 414px) cùng 4 trình duyệt chính (Chrome, Edge, Firefox, Safari iOS).
+- **Hạ tầng hoàn tất**:
+  * `src/client/ui/lobby/welcome_hub_modal.tsx` (169 LOC — Tier 2 <= 500 LOC): Nâng cấp font input mã phòng lên `text-base sm:text-sm` chống auto-zoom lệch tâm sa bàn 3D trên Safari iOS; loại bỏ triệt để đột biến props `(props as any).children = rendered`.
+  * `src/client/ui/modals/trade/trade_column.tsx` (246 LOC — Tier 2 <= 500 LOC): Nâng cấp input số tiền đàm phán lên `text-base sm:text-xs` chống auto-zoom trên mobile.
+  * `src/client/ui/modals/masterplan_modal.tsx` (274 LOC — Tier 2 <= 500 LOC): Chuyển đổi sang `h-[88dvh] max-h-[92dvh] min-h-0 sm:min-h-[480px]` chống tràn đáy trên mobile và thích ứng dynamic address bar của iOS Safari; bổ sung fallback key `key={p?.id ?? p?.name}` chống React key warning.
+  * `src/client/ui/activity_feed_sidebar.tsx` (332 LOC — Tier 2 <= 500 LOC): Giới hạn bề ngang drawer `w-[85vw] max-w-xs sm:w-80 md:w-96` và `h-[100dvh]`, luôn chừa tối thiểu 15vw vùng backdrop cho thao tác đóng 1 chạm trên mobile.
+  * `src/client/ui/market_event_ticker.tsx` (263 LOC — Tier 2 <= 500 LOC): Loại bỏ class xung đột `truncate`, áp dụng `line-clamp-2 break-words` khôi phục ngắt 2 dòng tự nhiên cho thẻ tóm tắt tác động thị trường.
+  * `src/client/ui/modals/auction_district_card.tsx` (223 LOC — Tier 2 <= 500 LOC): Loại bỏ `truncate`, áp dụng `line-clamp-2 break-words` cho tiêu đề ô đất.
+  * `src/client/ui/modals/game_over_modal.tsx` (403 LOC — Tier 2 <= 500 LOC): Tinh chỉnh khoảng đệm ngang `p-3.5 sm:p-6` giải phóng 20px không gian hữu dụng trên mobile 360px; bảo toàn touch targets $\ge 44$px cho toàn bộ các tab FinTech.
+  * `src/client/ui/modals/auction_modal.tsx` (442 LOC — Tier 2 <= 500 LOC): Chống cắt cụt subtitle giá sàn với `line-clamp-1 sm:whitespace-nowrap`; sửa lỗi falsy `minBid !== undefined` cho phép Auto-Bid đặt giá 0đ khi Bắt Đáy / Fire Sale; bổ sung fallback key `p.id || p.name`.
+  * `src/client/index.css` (129 LOC — Tier 1 <= 400 LOC): Bổ sung thanh cuộn mảnh toàn cục trên Firefox (`scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent`) trong `@layer base`, bảo toàn hoàn hảo các utility classes ẩn thanh cuộn chuyên biệt.
+  * `tests/client/impeccable_tactile_modals.test.ts` (204 LOC): Hòa giải 2 test suite cũ theo Specification Evolution: đồng bộ responsive bounds `max-w-md md:max-w-2xl lg:max-w-4xl` và bảo toàn 100% visual cue của disabled button (`cursor-not-allowed`, `shadow-none`, `text-slate-400`, `disabled=""`).
+- **Kiểm thử & Bất biến**:
+  * `tests/contracts/imp215_cross_platform_and_browser_hardening.test.ts`: 16/16 atomic contract tests PASS 100% (5 facets: Safari Auto-Zoom, Dynamic Viewport & Clamping, Typography & Multi-Line Clamping, Mobile Ergonomics & Scrollbar, Spec Evolution).
+  * `tests/client/impeccable_tactile_modals.test.ts`: 11/11 tests PASS 100%.
+  * `npx tsc --noEmit`: 0 lỗi. `npm run lint:ui`: 0 vi phạm (197 files scanned).
+  * Evidence Snapshot: `.agents/evidence/imp215_cross_platform_and_browser_hardening_snapshot.json` (`executed: true`, 16 tests passed).
+- **Phê chuẩn**: `plan-griller` (P1-P5 APPROVED), `qa-tester` (Station 1 RED), `implementer` (Station 2 GREEN), `scout` (Station 2.5 PASS), `spec-reviewer` (SPEC_PASS APPROVED), `code-reviewer` (CODE_PASS APPROVED), `ui-craft-reviewer` (UI_CRAFT APPROVED).
+- **Trạng thái**: ✅ Hoàn thành IMP-215 (Cross-Platform UI/UX & Browser Hardening) (2026-09-28).
+
+
+

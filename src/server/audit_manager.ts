@@ -6,6 +6,7 @@ import { ChanceCardId } from '../domain/event_card_types';
 import { ActionRejectReason } from '../domain/action_reasons';
 import type { PropertyRegistry, PropertyStateMap } from '../domain/property_manager';
 import { calculateNetWorth } from './insolvency_manager';
+import { MIN_BAIL_AMOUNT, BAIL_NET_WORTH_RATIO } from '../domain/property_rent';
 
 const turnStartedInAudit = new Map<string, boolean>();
 
@@ -76,7 +77,7 @@ export function handleBailOut(
   const netWorth = (registry && stateMap && room && hasOwnedProperties(current.id, registry))
     ? calculateNetWorth(current.id, registry, stateMap, room.players)
     : 0;
-  const bailAmount = Math.max(500, Math.floor(netWorth * 0.10));
+  const bailAmount = Math.max(MIN_BAIL_AMOUNT, Math.floor(netWorth * BAIL_NET_WORTH_RATIO));
 
   if (current.balance < bailAmount) return { success: false, reason: ActionRejectReason.INSUFFICIENT_FUNDS };
   current.balance -= bailAmount;
@@ -140,7 +141,7 @@ export function handleAuditTurnTransition(
       const netWorth = (registry && stateMap && hasOwnedProperties(player.id, registry))
         ? calculateNetWorth(player.id, registry, stateMap, room.players)
         : 0;
-      const penaltyAmount = Math.max(500, Math.floor(netWorth * 0.10));
+      const penaltyAmount = Math.max(MIN_BAIL_AMOUNT, Math.floor(netWorth * BAIL_NET_WORTH_RATIO));
       player.balance -= penaltyAmount;
       room.treasury = (room.treasury ?? 0) + penaltyAmount;
     }

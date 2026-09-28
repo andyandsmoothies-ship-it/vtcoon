@@ -8,6 +8,7 @@ import {
 import { getCellName } from '../network/activity_property_tracker.js';
 import { formatShortPlayerName } from './ui_helpers.js';
 import { ChanceCardId } from '../../domain/event_card_engine.js';
+import { resolveFormulaText } from './transaction_formula.js';
 
 export interface TransactionNarrative {
   readonly category: string;
@@ -18,6 +19,7 @@ export interface TransactionNarrative {
   readonly isPositive: boolean;
   readonly target: string;
   readonly detail?: string;
+  readonly formula: string;
 }
 
 export function extractCleanAmount(text: string): { amountText: string; isNumeric: boolean } {
@@ -169,6 +171,7 @@ export function resolveTransactionNarrative(
       category = 'TIỀN THUÊ BẤT ĐỘNG SẢN';
       verb = 'trả';
       target = `cho ${targetName}`;
+      if (!cellName && item.title) cellName = item.title.replace(/^Tiền\s+thuê\s*/i, '').trim();
       detail = cellName ? `(Tiền thuê ${cellName})` : '(Tiền thuê BĐS)';
       const isInfraOrUtility = item.cellIndex !== undefined && [5, 15, 25, 35, 12, 28].includes(item.cellIndex);
       if (isInfraOrUtility && player?.hand?.includes(ChanceCardId.CC_DIPLOMATIC)) {
@@ -180,6 +183,7 @@ export function resolveTransactionNarrative(
       category = 'TIỀN THUÊ BẤT ĐỘNG SẢN';
       verb = 'thu';
       target = `từ ${targetName}`;
+      if (!cellName && item.title) cellName = item.title.replace(/^(?:Thu\s+(?:tiền\s+)?)?thuê\s*/i, '').trim();
       detail = cellName ? `(Tiền thuê ${cellName})` : '(Tiền thuê BĐS)';
       break;
     case 'ma_buyout':
@@ -251,5 +255,6 @@ export function resolveTransactionNarrative(
     }
   }
 
-  return { category, icon, subject, verb, amountText, isPositive, target, detail };
+  const formula = resolveFormulaText(item, cellName, isPositive);
+  return { category, icon, subject, verb, amountText, isPositive, target, detail, formula };
 }

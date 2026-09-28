@@ -672,7 +672,7 @@ describe('[TC-IMP182/MSS][UC-IMP182] Mobile Tab Inactivity & Reconnect Unfreeze 
     it('[TC-IMP182.23/MSS][UC-IMP182] Telemetry Calibration (Tick 247): Khi MC_CREDIT_STIMULUS đang hiệu lực, nâng cấp ô đất được tính chiết khấu 20% (Math.floor(rawCost * 0.8)), không sinh ra TREASURY_INVARIANT_VIOLATED', () => {
       const preState: GameState = {
         ...createPreGameState(),
-        levelMap: { 1: 0 }, // Cell 1 Bến Vân Đồn level 0
+        levelMap: { 29: 0 }, // Cell 29 Chợ Đầm Nha Trang level 0 — upgradeCost C0→C1 = 1260 Tr.
         activeModifiers: [
           {
             type: MarketCardId.MC_CREDIT_STIMULUS,
@@ -682,10 +682,10 @@ describe('[TC-IMP182/MSS][UC-IMP182] Mobile Tab Inactivity & Reconnect Unfreeze 
         ],
       };
 
-      // Cell 1 raw upgrade cost is 1260 Tr. With 20% discount: 1260 * 0.8 = 1008 Tr.
+      // Cell 29 raw upgrade cost C0→C1 = 1260 Tr. With 20% discount: Math.floor(1260 * 0.8) = 1008 Tr.
       const postState: GameState = {
         ...preState,
-        levelMap: { 1: 1 },
+        levelMap: { 29: 1 },
         playersInfo: {
           ...preState.playersInfo,
           'p1-investor': {
@@ -700,7 +700,7 @@ describe('[TC-IMP182/MSS][UC-IMP182] Mobile Tab Inactivity & Reconnect Unfreeze 
         tick: 247,
         roomStarted: true,
         currentTurnPlayerId: 'p1-investor',
-        cells: [{ index: 1, level: 1 }],
+        cells: [{ index: 29, level: 1 }],
         players: [{ id: 'p1-investor', balance: 14000 - 1008, position: 1 }],
         activeModifiers: [
           {

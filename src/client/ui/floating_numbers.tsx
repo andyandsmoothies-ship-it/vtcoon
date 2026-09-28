@@ -148,9 +148,9 @@ export function FloatingBadge({ item }: { readonly item: FloatingTextItem }): Re
       data-testid="contextual-transaction-badge"
       onClick={handleDismiss}
       onKeyDown={handleKeyDown}
-      className="pointer-events-auto cursor-pointer flex flex-col gap-1 px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-2xl border border-slate-300 bg-[#FFFDF8] select-none shadow-md shadow-slate-900/10 active:scale-95 animate-in fade-in duration-200 w-full min-w-0 max-w-[82vw] sm:max-w-[340px]"
+      className="pointer-events-auto cursor-pointer flex flex-col gap-1 px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-2xl border border-slate-300 bg-[#FFFDF8] select-none shadow-md shadow-slate-900/10 active:scale-95 animate-in fade-in duration-200 w-full min-w-0"
     >
-      {/* Hàng 1: Header định danh danh mục */}
+      {/* Tầng 1: Header định danh danh mục & nút đóng */}
       <div className="flex items-center justify-between border-b border-slate-200/80 pb-0.5">
         <div className="flex items-center gap-1.5 min-w-0">
           <span className="text-sm shrink-0" aria-hidden="true">{narrative.icon}</span>
@@ -164,16 +164,27 @@ export function FloatingBadge({ item }: { readonly item: FloatingTextItem }): Re
             e.stopPropagation();
             handleDismiss();
           }}
-          className="text-slate-400 hover:text-slate-700 text-xs font-bold leading-none p-0.5 cursor-pointer focus-visible:outline-none"
+          className="text-slate-400 hover:text-slate-700 text-xs font-bold leading-none p-1 cursor-pointer focus-visible:outline-none"
           aria-label="Đóng thông báo"
         >
           ✕
         </button>
       </div>
 
-      {/* Hàng 2: Câu văn tự nhiên hoàn chỉnh */}
+      {/* Tầng 2 (Dòng 1): Lý do / Công thức rõ nghĩa, súc tích */}
       <div
-        className="text-xs sm:text-[13px] font-semibold text-slate-800 text-left leading-snug break-words line-clamp-2"
+        data-testid="transaction-formula-line"
+        className="text-[11px] sm:text-xs font-medium text-slate-600 text-left leading-tight truncate flex items-center gap-1"
+        title={narrative.formula}
+      >
+        <span className="text-slate-400 text-[10px]" aria-hidden="true">📐</span>
+        <span className="truncate">{narrative.formula}</span>
+      </div>
+
+      {/* Tầng 3 (Dòng 2): Biến động tài chính & Dòng tiền tự nhiên */}
+      <div
+        data-testid="transaction-flow-line"
+        className="text-xs sm:text-[13px] font-semibold text-slate-800 text-left leading-snug break-words"
         title={item.title}
       >
         <span className="font-bold text-slate-900">{narrative.subject}</span>{' '}
@@ -181,7 +192,7 @@ export function FloatingBadge({ item }: { readonly item: FloatingTextItem }): Re
         <span
           data-testid="floating-amount-pill"
           title={item.text}
-          className={`px-1.5 py-0.5 rounded-lg text-xs font-extrabold tabular-nums border inline-block ${
+          className={`px-1.5 py-0.5 rounded-lg text-xs font-extrabold font-mono tabular-nums border inline-block ${
             narrative.isPositive
               ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
               : 'bg-rose-50 text-rose-700 border-rose-300'
@@ -190,9 +201,6 @@ export function FloatingBadge({ item }: { readonly item: FloatingTextItem }): Re
           {item.text}
         </span>{' '}
         <span className="font-bold text-slate-800">{narrative.target}</span>
-        {narrative.detail && (
-          <span className="font-normal text-slate-500"> {narrative.detail}</span>
-        )}
       </div>
     </div>
   );
@@ -258,7 +266,7 @@ export function FloatingNumbersOverlay(): React.ReactElement | null {
       aria-label="Thông báo biến động tài chính"
       className="pointer-events-none select-none z-30"
     >
-      <div className={"fixed " + stackTopClass + " left-2 min-[360px]:left-3 sm:left-1/2 translate-x-0 sm:-translate-x-1/2 flex flex-col items-start sm:items-center gap-1.5 w-auto max-w-[calc(100vw-11.5rem)] min-[360px]:max-w-[calc(100vw-9.75rem)] md:max-w-md px-0.5 sm:px-2 z-30 pointer-events-none"}>
+      <div className={"fixed " + stackTopClass + " left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 w-[calc(100vw-1.5rem)] max-w-sm sm:max-w-md md:max-w-md px-1 z-30 pointer-events-none"}>
         {latestMilestone && (
           <div data-testid="milestone-banner-container" className="w-full flex justify-center pointer-events-auto">
             <MilestoneBanner item={latestMilestone} />
@@ -269,8 +277,8 @@ export function FloatingNumbersOverlay(): React.ReactElement | null {
             key={item.id}
             className={
               (latestMilestone || (idx === 0 && displayItems.length > 1))
-                ? "w-full flex justify-start sm:justify-center hidden md:flex"
-                : "w-full flex justify-start sm:justify-center flex"
+                ? "w-full justify-start sm:justify-center hidden md:flex"
+                : "w-full flex justify-start sm:justify-center"
             }
           >
             <FloatingBadge item={item} />

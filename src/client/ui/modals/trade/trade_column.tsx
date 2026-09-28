@@ -176,7 +176,7 @@ export function TradeColumn({
                 const val = Math.max(0, maxCash !== undefined ? Math.min(maxCash, Number(e.target.value) || 0) : Number(e.target.value) || 0);
                 onCashChange(val);
               }}
-              className="flex-1 min-w-0 min-h-[44px] bg-white border border-slate-300 rounded-lg p-2 text-xs text-slate-900 font-bold focus:outline-none focus:ring-2 focus:ring-amber-400 text-center"
+              className="flex-1 min-w-0 min-h-[44px] bg-white border border-slate-300 rounded-lg p-2 text-base sm:text-xs text-slate-900 font-bold focus:outline-none focus:ring-2 focus:ring-amber-400 text-center"
             />
             <button
               type="button"

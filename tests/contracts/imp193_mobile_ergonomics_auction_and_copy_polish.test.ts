@@ -116,7 +116,7 @@ describe('[TC-193.01/MSS..TC-193.16/MSS][UC-IMP193] Mobile Ergonomics, Auction R
   // FACET 2: Layout & Mobile Viewport Constraints
   // =========================================================================
   describe('Facet 2: Layout & Mobile Viewport Constraints', () => {
-    it('[TC-193.04/MSS][UC-IMP193] FloatingBadge: Container badge giới hạn max-w-[82vw] sm:max-w-[340px] trên mobile', () => {
+    it('[TC-193.04/MSS][UC-IMP193] FloatingBadge: Container badge mở rộng w-full min-w-0 trên mobile', () => {
       const item: FloatingTextItem = {
         id: 'ft_badge_test',
         text: '+500 Tr.',
@@ -128,13 +128,12 @@ describe('[TC-193.01/MSS..TC-193.16/MSS][UC-IMP193] Mobile Ergonomics, Auction R
       const html = renderToStaticMarkup(React.createElement(FloatingBadge, { item }));
       const badgeContainer = html.match(/<div[^>]*data-testid="contextual-transaction-badge"[^>]*>/)?.[0] ?? '';
 
-      expect(badgeContainer).toContain('max-w-[82vw]');
-      expect(badgeContainer).toContain('sm:max-w-[340px]');
+      expect(badgeContainer).toContain('w-full min-w-0');
       expect(badgeContainer).not.toContain('max-w-[92vw]');
       expect(badgeContainer).not.toContain('sm:max-w-none');
     });
 
-    it('[TC-193.05/MSS][UC-IMP193] FloatingNumbersOverlay: Container bọc danh sách thông báo giới hạn max-w-[84vw] md:max-w-md', () => {
+    it('[TC-193.05/MSS][UC-IMP193] FloatingNumbersOverlay: Container bọc danh sách thông báo giới hạn w-[calc(100vw-1.5rem)] sm:max-w-md', () => {
       useGameStore.setState({
         floatingTexts: [
           {
@@ -148,10 +147,10 @@ describe('[TC-193.01/MSS..TC-193.16/MSS][UC-IMP193] Mobile Ergonomics, Auction R
         ],
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
-      const listContainer = html.match(/<div[^>]*class="[^"]*fixed[^"]*left-3[^"]*"[^>]*>/)?.[0] ?? '';
+      const listContainer = html.match(/<div[^>]*class="[^"]*fixed[^"]*top-[^"]*"[^>]*>/)?.[0] ?? '';
 
-      expect(listContainer).toContain('max-w-[calc(100vw-11.5rem)]');
-      expect(listContainer).toContain('md:max-w-md');
+      expect(listContainer).toContain('w-[calc(100vw-1.5rem)]');
+      expect(listContainer).toContain('sm:max-w-md');
       expect(listContainer).not.toContain('max-w-[92vw]');
     });
 

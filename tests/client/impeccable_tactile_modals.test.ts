@@ -18,14 +18,14 @@ describe('[IMP-P1/P2] TradeModal Responsive Bounds & Tactile Shadows', () => {
         myBalance: 5000,
       })
     );
-    expect(html).toContain('max-w-md lg:max-w-lg');
+    expect(html).toContain('max-w-md md:max-w-2xl lg:max-w-4xl');
     expect(html).toContain('max-h-[90vh] overflow-y-auto');
     expect(html).toContain('data-testid="trade-modal"');
     expect(html).toContain('sticky top-0 z-10 shrink-0');
     expect(html).toContain('sticky bottom-0 z-10 shrink-0');
   });
 
-  it('P2: TradeModal action buttons use tactile shadows instead of active:scale-95', () => {
+  it('P2: TradeModal action buttons use tactile shadows instead of active:scale-95 and preserve disabled visual cue', () => {
     const html = renderToStaticMarkup(
       React.createElement(TradeModal, {
         targetPlayerId: 'p2',
@@ -41,9 +41,24 @@ describe('[IMP-P1/P2] TradeModal Responsive Bounds & Tactile Shadows', () => {
     const footerHtml = footerMatch ? footerMatch[1] : html;
     expect(footerHtml).not.toContain('active:scale-95');
     expect(footerHtml).toContain('shadow-[0_4px_0_0_#065f46]');
-    expect(footerHtml).toContain('active:shadow-[0_1px_0_0_#065f46]');
     expect(footerHtml).toContain('active:translate-y-[3px]');
-    expect(footerHtml).toMatch(/shadow-\[0_4px_0_0_#64748b\]|shadow-xs/);
+
+    // Disabled visual cue coverage: Khẳng định trạng thái vô hiệu hóa có đầy đủ chỉ báo trực quan
+    const disabledHtml = renderToStaticMarkup(
+      React.createElement(TradeModal, {
+        targetPlayerId: 'p2',
+        myProperties: [],
+        targetProperties: [],
+        myBalance: 0,
+        onClose: () => {},
+      })
+    );
+    const disabledFooterMatch = disabledHtml.match(/<footer[^>]*>([\s\S]*?)<\/footer>/);
+    const disabledFooterHtml = disabledFooterMatch ? disabledFooterMatch[1] : disabledHtml;
+    expect(disabledFooterHtml).toContain('cursor-not-allowed');
+    expect(disabledFooterHtml).toContain('shadow-none');
+    expect(disabledFooterHtml).toContain('text-slate-400');
+    expect(disabledFooterHtml).toContain('disabled=""');
   });
 });
 

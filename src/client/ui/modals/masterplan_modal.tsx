@@ -110,7 +110,7 @@ export function MasterplanModal({
       role="dialog"
       aria-label="Bản đồ quy hoạch đô thị"
       data-testid="masterplan-modal"
-      className="relative w-full max-w-4xl h-[88vh] max-h-[92vh] min-h-[520px] bg-[#FFFDF9] border-2 border-slate-900 rounded-3xl shadow-[0_8px_0_0_#0f172a] shadow-[0_8px_0_0_#0f172a,0_16px_36px_rgba(15,23,42,0.18)] flex flex-col overflow-hidden text-slate-800 animate-in fade-in zoom-in-95 duration-200 pointer-events-auto select-none"
+      className="relative w-full max-w-4xl h-[88dvh] max-h-[92dvh] min-h-0 sm:min-h-[480px] bg-[#FFFDF9] border-2 border-slate-900 rounded-3xl shadow-[0_8px_0_0_#0f172a] shadow-[0_8px_0_0_#0f172a,0_16px_36px_rgba(15,23,42,0.18)] flex flex-col overflow-hidden text-slate-800 animate-in fade-in zoom-in-95 duration-200 pointer-events-auto select-none"
     >
       {/* Header */}
       <header className="px-4 py-3 bg-[#FBF8F1] border-b border-amber-900/10 flex items-center justify-between shrink-0">
@@ -242,7 +242,7 @@ export function MasterplanModal({
                       const count = p?.ownedProperties?.length ?? 0;
                       return (
                         <div
-                          key={p.id}
+                          key={p?.id ?? p?.name}
                           className="flex items-center justify-between p-1.5 bg-slate-50 rounded-lg border border-slate-200 text-[11px]"
                         >
                           <div className="flex items-center gap-1.5">

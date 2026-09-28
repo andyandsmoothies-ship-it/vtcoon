@@ -350,6 +350,9 @@ export const useGameStore = create<GameState>((set, get) => ({
       ...(item.title ? { title: item.title } : {}),
       ...(item.cellIndex !== undefined ? { cellIndex: item.cellIndex } : {}),
       ...(item.targetPlayerName ? { targetPlayerName: item.targetPlayerName } : {}),
+      ...(item.targetPlayerId ? { targetPlayerId: item.targetPlayerId } : {}),
+      ...(item.formula ? { formula: item.formula } : {}),
+      ...(item.bailKind ? { bailKind: item.bailKind } : {}),
     };
     set((state) => ({
       floatingTexts: [...state.floatingTexts, newItem].slice(-MAX_FLOATING_TEXTS),

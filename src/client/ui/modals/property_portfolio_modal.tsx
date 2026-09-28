@@ -3,15 +3,17 @@ import React, { useState } from 'react';
 import { getDeedDisplayInfo, checkPropertyUpgradeEligibility, sortPropertiesByRegion } from './modal_helpers';
 import { formatCurrency } from '../ui_helpers';
 import { COLOR_GROUP_HEX } from '../../../domain/theme';
-import { BOARD_CONFIG } from '../../../domain/board_config';
 import { analyzePropertyMonopolyInsight, resolvePropertyCardActionState } from './portfolio_monopoly_analytics';
 import { PortfolioTabHeader, type PortfolioTab } from './portfolio_tab_header';
+import { PortfolioDeficitBanner } from './portfolio_deficit_banner';
 import { BondIssuanceTab } from './bond_issuance_tab';
 import type { BondContract } from '../../../domain/bond_types';
+import { MacroCycleType } from '../../../domain/macro_cycle_types';
 
 export interface PropertyPortfolioModalProps {
   readonly ownedProperties: readonly number[];
   readonly isTradeFrozen?: boolean;
+  readonly activeModifiers?: readonly { readonly type: string; readonly remainingRounds: number; readonly affectedCells?: readonly number[] }[];
   readonly propertyStates?: Record<number, { readonly ownerId?: string | null; readonly level?: number; readonly isMortgaged?: boolean }>;
   readonly currentBalance?: number;
   readonly isInInsolvency?: boolean;
@@ -30,14 +32,15 @@ export interface PropertyPortfolioModalProps {
   readonly bondContract?: BondContract | null;
   readonly onIssueBond?: () => void;
   readonly onRepayBond?: () => void;
+  readonly onAutoSolvency?: () => void;
 }
 
 const TIER_NAMES = ['Đất Nền', 'Nhà Phố C1', 'Khách Sạn C2', 'Resort C3'];
 
 export function PropertyPortfolioModal({
-  ownedProperties, isTradeFrozen, propertyStates = {}, currentBalance = 0, isInInsolvency = false,
+  ownedProperties, isTradeFrozen, activeModifiers = [], propertyStates = {}, currentBalance = 0, isInInsolvency = false,
   isMyTurn, turnPhase, allPlayers, onQuickTrade, onViewVacantCell, onUpgrade, onHoverCell,
-  onSelectDeed, onMortgage, onRedeem, onDowngrade, onClose, bondContract, onIssueBond, onRepayBond,
+  onSelectDeed, onMortgage, onRedeem, onDowngrade, onClose, bondContract, onIssueBond, onRepayBond, onAutoSolvency,
 }: PropertyPortfolioModalProps): React.ReactElement {
   const [activeTab, setActiveTab] = useState<PortfolioTab>('properties');
   const isNegative = currentBalance < 0 || isInInsolvency;
@@ -107,29 +110,12 @@ export function PropertyPortfolioModal({
         </div>
       ) : (
         <>
-          {/* Banner Cứu Nợ Khẩn Cấp nếu đang âm tiền */}
-          {isNegative && (
-        <div className="bg-rose-50 border-b border-rose-300 p-3.5 flex items-center justify-between gap-3 text-xs shrink-0">
-          <div className="flex items-center gap-2">
-            <span className="text-lg">⚠️</span>
-            <div>
-              <span className="font-bold text-rose-800">Cần Giải Tỏa Thâm Hụt: </span>
-              <span className="font-black text-rose-700 text-sm">
-                {formatCurrency(currentBalance)}
-              </span>
-              <p className="text-[11px] text-rose-700 mt-0.5">
-                Hãy thế chấp đất hoặc hạ cấp công trình để số dư không còn âm trước khi hết lượt!
-              </p>
-            </div>
-          </div>
-          <div className="bg-white border border-rose-300 rounded-lg px-2.5 py-1 text-right shrink-0">
-            <span className="text-[11px] text-slate-500 block">Số tiền còn thiếu</span>
-            <span className="font-mono font-black text-rose-600 text-xs">
-              {deficitAmount.toLocaleString('vi-VN')}
-            </span>
-          </div>
-        </div>
-      )}
+          <PortfolioDeficitBanner
+            isNegative={isNegative}
+            currentBalance={currentBalance}
+            deficitAmount={deficitAmount}
+            onAutoSolvency={onAutoSolvency}
+          />
 
       {/* Filter bar */}
       {ownedProperties.length > 0 && (
@@ -198,12 +184,17 @@ export function PropertyPortfolioModal({
               const ribbonColor = deed?.colorGroup ? COLOR_GROUP_HEX[deed.colorGroup] : '#64748b';
               const mortgageVal = deed?.mortgageValue ?? 0;
               const redeemCost = Math.round(mortgageVal * 1.1);
+              const isLiquidityFrozen = Boolean(activeModifiers?.some(
+                (m) => (m.type === 'MACRO_LIQUIDITY_FREEZE' || m.type === MacroCycleType.MACRO_LIQUIDITY_FREEZE) &&
+                       m.remainingRounds > 0 &&
+                       (m.affectedCells as readonly number[] | undefined)?.includes(cellIndex)
+              ));
               const actionState = resolvePropertyCardActionState({
                 cellIndex,
                 level,
                 isMortgaged: isMort,
                 isTradeFrozen,
-                isLiquidityFrozen: false,
+                isLiquidityFrozen,
                 levelMap: Object.fromEntries(Object.entries(propertyStates).map(([k, v]) => [Number(k), v.level ?? 0])),
                 ownedProperties,
               });

@@ -121,13 +121,17 @@ export function useAppSession(
 
     if (delta.players && delta.tick > 0) {
       const localP = delta.players.find((p) => p.id === localPlayerId);
-      if (localP && localP.balance < 0) {
-        const isBankrupt = Boolean(localP.bankrupt ?? useGameStore.getState().playersInfo[localPlayerId]?.bankrupt);
-        if (!isBankrupt) {
-          const currentModal = useGameStore.getState().activeModal;
-          if (currentModal !== 'insolvency' && currentModal !== 'game_over') {
-            openModal('insolvency', { playerId: localPlayerId, deficit: -localP.balance });
+      if (localP) {
+        if (localP.balance < 0) {
+          const isBankrupt = Boolean(localP.bankrupt ?? useGameStore.getState().playersInfo[localPlayerId]?.bankrupt);
+          if (!isBankrupt) {
+            const currentModal = useGameStore.getState().activeModal;
+            if (currentModal !== 'insolvency' && currentModal !== 'game_over') {
+              openModal('insolvency', { playerId: localPlayerId, deficit: -localP.balance });
+            }
           }
+        } else if (useGameStore.getState().activeModal === 'insolvency') {
+          useGameStore.getState().closeModal();
         }
       }
     }

@@ -102,6 +102,8 @@ export interface FloatingTextItem {
   readonly cellIndex?: number;
   readonly targetPlayerId?: string;
   readonly targetPlayerName?: string;
+  readonly formula?: string; // [IMP-216] Dòng 1: Lý do / công thức rõ nghĩa, súc tích
+  readonly bailKind?: 'voluntary' | 'forced' | 'doubles'; // [IMP-216] Phân định chính xác loại bảo lãnh (No Magic Strings)
 }
 
 export type ActiveModalType = 'deed' | 'portfolio' | 'auction' | 'trade' | 'event' | 'hose' | 'insolvency' | 'game_over' | 'rules' | 'masterplan' | 'bot_trade_offer' | 'compulsory_buyout' | null;

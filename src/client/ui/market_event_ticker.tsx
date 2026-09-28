@@ -245,7 +245,7 @@ export const MarketEventTicker: React.FC<MarketEventTickerProps> = ({
               )}
               <span
                 data-testid="market-ticker-effect-summary"
-                className="font-semibold text-[11px] sm:text-xs text-slate-700 truncate min-w-0 line-clamp-2"
+                className="font-semibold text-[11px] sm:text-xs text-slate-700 min-w-0 line-clamp-2 break-words"
               >
                 {formula}
               </span>

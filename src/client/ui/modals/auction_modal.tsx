@@ -81,7 +81,7 @@ export function AuctionModal({
   useEffect(() => {
     if (autoBid && !isConcluded && !isLeading && !hasPassed && !isDeclinedPlayer && onBid) {
       const minBid = increments[0];
-      if (minBid && (myBalance === undefined || minBid <= myBalance)) {
+      if (minBid !== undefined && (myBalance === undefined || minBid <= myBalance)) {
         onBid(minBid);
       }
     }
@@ -165,7 +165,7 @@ export function AuctionModal({
             <h2 className="font-black text-slate-900 text-xs sm:text-sm md:text-base truncate whitespace-nowrap leading-tight">
               {deed?.name ?? `Ô #${cellIndex}`}
             </h2>
-            <p className="text-[10px] sm:text-xs text-slate-600 truncate whitespace-nowrap mt-0.5">
+            <p className="text-[10px] sm:text-xs text-slate-600 line-clamp-1 sm:whitespace-nowrap mt-0.5">
               {isForeclosure ? (
                 <>
                   <span className="font-bold text-rose-700">Phát mãi</span>: Giá gốc <span className="line-through text-slate-400 mr-1">{formatCurrency(basePrice)}</span>
@@ -295,7 +295,7 @@ export function AuctionModal({
                   const isDeclined = Boolean(!isForeclosure && declinedPlayerId && p.id === declinedPlayerId);
                   return (
                     <div
-                      key={p.id}
+                      key={p.id || p.name}
                       className={`flex justify-between items-center text-xs px-2 py-0.5 rounded-lg ${
                         isPassed || isDebtorInForeclosure || isDeclined ? 'bg-slate-100/70 text-slate-500 opacity-60' : isBidder ? 'bg-amber-100/80 text-amber-950 font-bold' : 'bg-white/60 text-slate-800'
                       }`}

@@ -7,6 +7,7 @@ import { SoundEngine } from '../audio/sound_engine.js';
 import { getCellName, LEVEL_NAMES } from './activity_property_tracker.js';
 import type { DeltaPayload } from '../../server/session_manager.js';
 import { HOP_DURATION, LANDING_DURATION, BOT_STEP_DURATION } from '../3d/pawn_path.js';
+import { MIN_BAIL_AMOUNT } from '../../domain/property_rent.js';
 
 export const pendingBadgeTimers = new Set<ReturnType<typeof setTimeout>>();
 
@@ -19,7 +20,8 @@ export function getPawnLandingDelay(playerId?: string): number {
   if (!playerId) return 0;
   const state = useGameStore.getState();
   if (state.pendingPawnMove && state.pendingPawnMove.playerId === playerId) {
-    const steps = Math.abs((state.pendingPawnMove.targetCell - (state.pendingPawnMove.fromCell ?? 0)) % 40);
+    const rawDiff = (state.pendingPawnMove.targetCell - (state.pendingPawnMove.fromCell ?? 0)) % 40;
+    const steps = ((rawDiff % 40) + 40) % 40;
     const stepMs = (state.pendingPawnMove.isBot ? BOT_STEP_DURATION : (HOP_DURATION + LANDING_DURATION)) * 1000;
     const diceDelay = state.isRolling ? 1200 : 0;
     return Math.round(diceDelay + steps * stepMs);
@@ -117,10 +119,20 @@ function handleUpgradeBadge(act: ActivityLogEntry, state: GameState): void {
 }
 
 function handleBailBadge(act: ActivityLogEntry, state: GameState): void {
-  const amount = act.amount !== undefined ? -Math.abs(act.amount) : -500;
+  const amount = act.amount !== undefined ? -Math.abs(act.amount) : -MIN_BAIL_AMOUNT;
+  const isTimeout = act.message.includes('Hết 3 lượt') || act.message.includes('bắt buộc');
+  const formula = isTimeout
+    ? 'Hết 3 lượt không ra đôi: Phạt bảo lãnh bắt buộc'
+    : `Bảo lãnh sớm: 10% tài sản ròng (Sàn ${MIN_BAIL_AMOUNT} Tr.)`;
   state.addFloatingText({
-    text: formatCurrency(amount), type: FloatingTextType.Penalty, playerId: act.playerId ?? '',
-    actionType: 'bail', title: 'Bảo lãnh kiểm toán (Ô 10) ➔ Nộp Kho Bạc', cellIndex: act.cellIndex ?? 10,
+    text: formatCurrency(amount),
+    type: FloatingTextType.Penalty,
+    playerId: act.playerId ?? '',
+    actionType: 'bail',
+    title: isTimeout ? 'Cưỡng chế kiểm toán ➔ Nộp Kho Bạc' : 'Bảo lãnh kiểm toán (Ô 10) ➔ Nộp Kho Bạc',
+    cellIndex: act.cellIndex ?? 10,
+    formula,
+    bailKind: isTimeout ? 'forced' : 'voluntary',
   });
 }
 
@@ -173,7 +185,7 @@ function handleMaBuyoutBadge(act: ActivityLogEntry, state: GameState): void {
     useVfxStore.getState().triggerPawnReaction(sellerId, 'slump_recoil', 400);
     SoundEngine.playSlumpThud();
     state.addFloatingText({
-      text: `${buyerName} bồi hoàn +${formatCurrency(absAmount)}`, type: FloatingTextType.Reward, playerId: sellerId,
+      text: `+${formatCurrency(absAmount)}`, type: FloatingTextType.Reward, playerId: sellerId,
       actionType: 'ma_buyout', title: `⚠️ Bị thâu tóm: ${cellName}`, targetPlayerName: buyerName, cellIndex: act.cellIndex,
     });
   }
