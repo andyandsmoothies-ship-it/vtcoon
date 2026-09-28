@@ -2,6 +2,7 @@
 import React, { useRef, useEffect, useMemo } from 'react';
 import * as THREE from 'three';
 import type { InstancedMesh } from 'three';
+import { useSafeFrame } from './safe_frame';
 
 export interface TropicalTreeConfig {
   x: number;
@@ -52,6 +53,21 @@ export const TROPICAL_TREES: readonly TropicalTreeConfig[] = [
   { x: 45, y: -0.25, z: 12, scale: 1.15, tiltX: 0.05, tiltZ: -0.04, yaw: 2.6 },
   { x: 43, y: -0.25, z: 20, scale: 1.05, tiltX: -0.06, tiltZ: 0.05, yaw: 0.5 },
 ] as const;
+
+export const PALM_TIER_SWAY_FACTORS = { 1: 0.6, 2: 0.8, 3: 1.0 } as const;
+
+export function calculatePalmSwayAngles(
+  time: number,
+  x: number,
+  z: number,
+  tier: 1 | 2 | 3 = 3
+): { swayZ: number; swayX: number } {
+  if (!Number.isFinite(time) || !Number.isFinite(x) || !Number.isFinite(z)) return { swayZ: 0, swayX: 0 };
+  const factor = PALM_TIER_SWAY_FACTORS[tier] ?? 1.0;
+  const swayZ = Math.sin(time * 1.4 + x * 0.08 + z * 0.06) * 0.018 * factor;
+  const swayX = Math.cos(time * 1.1 + x * 0.05 + z * 0.07) * 0.012 * factor;
+  return { swayZ, swayX };
+}
 
 export function LayeredTropicalFoliage(): React.ReactElement {
   const dummy = useMemo(() => new THREE.Object3D(), []);
@@ -112,6 +128,48 @@ export function LayeredTropicalFoliage(): React.ReactElement {
     tier2.computeBoundingSphere?.();
     tier3.computeBoundingSphere?.();
   }, [dummy]);
+
+  useSafeFrame((state) => {
+    const t = state.clock.elapsedTime;
+    const tier1 = tier1Ref.current;
+    const tier2 = tier2Ref.current;
+    const tier3 = tier3Ref.current;
+    if (!tier1 || !tier2 || !tier3) return;
+
+    for (let i = 0; i < TROPICAL_TREES.length; i++) {
+      const tree = TROPICAL_TREES[i];
+      if (!tree) continue;
+      const s = tree.scale;
+
+      // Tầng 1: Đáy (tier = 1)
+      const sway1 = calculatePalmSwayAngles(t, tree.x, tree.z, 1);
+      dummy.position.set(tree.x, tree.y + 1.15 * s, tree.z);
+      dummy.rotation.set(tree.tiltX * 0.5 + sway1.swayX, tree.yaw, tree.tiltZ * 0.5 + sway1.swayZ);
+      dummy.scale.set(s, s, s);
+      dummy.updateMatrix();
+      tier1.setMatrixAt(i, dummy.matrix);
+
+      // Tầng 2: Giữa (tier = 2)
+      const sway2 = calculatePalmSwayAngles(t, tree.x, tree.z, 2);
+      dummy.position.set(tree.x, tree.y + 1.48 * s, tree.z);
+      dummy.rotation.set(tree.tiltX * 0.3 + sway2.swayX, tree.yaw + Math.PI / 6, tree.tiltZ * 0.3 + sway2.swayZ);
+      dummy.scale.set(s, s, s);
+      dummy.updateMatrix();
+      tier2.setMatrixAt(i, dummy.matrix);
+
+      // Tầng 3: Chóp đỉnh (tier = 3)
+      const sway3 = calculatePalmSwayAngles(t, tree.x, tree.z, 3);
+      dummy.position.set(tree.x, tree.y + 1.78 * s, tree.z);
+      dummy.rotation.set(tree.tiltX * 0.2 + sway3.swayX, tree.yaw + Math.PI / 3, tree.tiltZ * 0.2 + sway3.swayZ);
+      dummy.scale.set(s, s, s);
+      dummy.updateMatrix();
+      tier3.setMatrixAt(i, dummy.matrix);
+    }
+
+    tier1.instanceMatrix.needsUpdate = true;
+    tier2.instanceMatrix.needsUpdate = true;
+    tier3.instanceMatrix.needsUpdate = true;
+  });
 
   return (
     <group data-testid="layered-tropical-foliage">

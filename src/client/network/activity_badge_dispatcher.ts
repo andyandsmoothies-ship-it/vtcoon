@@ -155,13 +155,43 @@ function handleUnmortgageBadge(act: ActivityLogEntry, state: GameState): void {
 }
 
 function handleAuctionBadge(act: ActivityLogEntry, state: GameState): void {
+  const cellName = act.cellIndex !== undefined ? getCellName(act.cellIndex) : '';
+  if (act.id.startsWith('decline_auction') || act.message.includes('bỏ qua')) {
+    state.addFloatingText({
+      text: cellName, type: FloatingTextType.Penalty, playerId: act.playerId ?? '',
+      actionType: 'decline_auction', title: act.message, cellIndex: act.cellIndex,
+      formula: 'Từ chối mua quyền sử dụng đất',
+    });
+    return;
+  }
   const isWin = act.id.startsWith('auction_win') || act.message.includes('trúng đấu giá') || act.message.includes('Búa gõ');
   if (!isWin) return;
-  const cellName = act.cellIndex !== undefined ? getCellName(act.cellIndex) : '';
   const amount = act.amount !== undefined ? -Math.abs(act.amount) : 0;
   state.addFloatingText({
     text: formatCurrency(amount), type: FloatingTextType.Penalty, playerId: act.playerId ?? '',
     actionType: 'auction_win', title: cellName ? `Thắng đấu giá ${cellName} ➔ Nộp Kho Bạc` : 'Thắng đấu giá BĐS ➔ Nộp Kho Bạc', cellIndex: act.cellIndex,
+  });
+}
+
+export function handleTradeBadge(act: ActivityLogEntry, state: GameState): void {
+  const cell = act.cellIndex !== undefined ? getCellName(act.cellIndex) : 'BĐS';
+  const bId = act.playerId ?? '', sId = act.targetPlayerId;
+  const bName = act.playerName || (bId ? state.playersInfo[bId]?.name : 'Người chơi');
+  const sName = act.targetPlayerName || (sId ? state.playersInfo[sId]?.name : 'đối tác');
+  if (bId) state.addFloatingText({ text: cell, type: FloatingTextType.Reward, playerId: bId, actionType: 'trade', title: `${bName} nhận ${cell} từ ${sName}`, targetPlayerId: sId, targetPlayerName: sName, cellIndex: act.cellIndex, formula: 'Chuyển nhượng quyền sở hữu P2P' });
+  if (sId) state.addFloatingText({ text: cell, type: FloatingTextType.Penalty, playerId: sId, actionType: 'trade', title: `${sName} nhượng ${cell} cho ${bName}`, targetPlayerId: bId, targetPlayerName: bName, cellIndex: act.cellIndex, formula: 'Chuyển nhượng quyền sở hữu P2P' });
+}
+
+export function handleHoseBadge(act: ActivityLogEntry, state: GameState, delta?: DeltaPayload): void {
+  const profit = act.amount ?? 0;
+  const hr = delta?.lastHoseResult;
+  state.addFloatingText({
+    text: `${profit >= 0 ? '+' : ''}${formatCurrency(profit)}`,
+    type: profit >= 0 ? FloatingTextType.Reward : FloatingTextType.Penalty,
+    playerId: act.playerId ?? '',
+    actionType: 'hose',
+    title: act.message,
+    formula: hr ? `Khớp lệnh sàn HOSE: Mặt ${hr.roll}` : 'Giao dịch sàn chứng khoán HOSE',
   });
 }
 
@@ -191,7 +221,7 @@ function handleMaBuyoutBadge(act: ActivityLogEntry, state: GameState): void {
   }
 }
 
-const BADGE_HANDLERS: Record<string, (act: ActivityLogEntry, state: GameState) => void> = {
+const BADGE_HANDLERS: Record<string, (act: ActivityLogEntry, state: GameState, delta?: DeltaPayload) => void> = {
   rent: handleRentBadge,
   buy: handleBuyBadge,
   upgrade: handleUpgradeBadge,
@@ -200,6 +230,8 @@ const BADGE_HANDLERS: Record<string, (act: ActivityLogEntry, state: GameState) =
   mortgage: handleMortgageBadge,
   unmortgage: handleUnmortgageBadge,
   auction: handleAuctionBadge,
+  trade: handleTradeBadge,
+  hose: handleHoseBadge,
   card: (act, state) => {
     if (act.id.startsWith('ma_buyout')) handleMaBuyoutBadge(act, state);
   },
@@ -236,7 +268,7 @@ export function dispatchActivityFloatingBadges(
 ): void {
   if (typeof state?.addFloatingText !== 'function') return;
   for (const act of activities) {
-    BADGE_HANDLERS[act.type]?.(act, state);
+    BADGE_HANDLERS[act.type]?.(act, state, delta);
   }
   if (delta?.lastDiplomaticEvent) {
     handleDiplomaticEventBadge(delta.lastDiplomaticEvent, state);

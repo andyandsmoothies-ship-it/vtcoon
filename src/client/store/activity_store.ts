@@ -14,6 +14,8 @@ export type ActivityLogType =
   | 'mortgage'
   | 'unmortgage'
   | 'bankrupt'
+  | 'trade'
+  | 'hose'
   | 'system';
 
 export type ActivityFilterType = 'all' | 'money' | 'property';

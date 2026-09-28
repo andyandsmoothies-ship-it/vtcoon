@@ -45,8 +45,8 @@ export function isMobileDevice(): boolean {
   return isMobileHardware() || isSmallViewport();
 }
 
-export function getRecommendedDpr(isMobile: boolean): number | [number, number] {
-  return isMobile ? 1 : [1, 1.5];
+export function getRecommendedDpr(isMobile: boolean): [number, number] {
+  return isMobile ? [0.85, 1.0] : [1.0, 1.5];
 }
 
 export function getTileTextureBudget(isMobile: boolean, isTablet = isTabletDevice()): TileTextureBudget {

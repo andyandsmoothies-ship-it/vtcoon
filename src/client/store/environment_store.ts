@@ -17,6 +17,10 @@ export interface LightingPreset {
   readonly fogColor: string;
   readonly fogNear: number;
   readonly fogFar: number;
+  // Bổ sung bảng màu nước nhiệt đới (IMP-220)
+  readonly waterShallowColor: string;
+  readonly waterDeepColor: string;
+  readonly waterFoamColor: string;
 }
 
 export const TIME_OF_DAY_PRESETS: Record<TimeOfDayPhase, LightingPreset> = {
@@ -29,11 +33,13 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayPhase, LightingPreset> = {
     hemiSkyColor: '#BAE6FD',
     hemiGroundColor: '#DCFCE7',
     hemiIntensity: 0.14,
-
     skyColor: '#7DD3FC',
     fogColor: '#BAE6FD',
     fogNear: 85,
     fogFar: 260,
+    waterShallowColor: '#06B6D4', // Ngọc bích trong vắt
+    waterDeepColor: '#0284C7',    // Xanh đại dương
+    waterFoamColor: '#FFFFFF',    // Bọt sóng trắng tinh khôi
   },
   sunset: {
     sunPosition: [-28, 24, 18],
@@ -48,6 +54,9 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayPhase, LightingPreset> = {
     fogColor: '#FDBA74',
     fogNear: 80,
     fogFar: 250,
+    waterShallowColor: '#F59E0B', // Hổ phách ánh hoàng hôn
+    waterDeepColor: '#C2410C',    // Cam đất đại dương
+    waterFoamColor: '#FEF3C7',    // Bọt sóng ánh chiều tà
   },
   night: {
     sunPosition: [18, 32, -20],
@@ -62,6 +71,9 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayPhase, LightingPreset> = {
     fogColor: '#0F172A',
     fogNear: 75,
     fogFar: 240,
+    waterShallowColor: '#0284C7', // Xanh lam ngọc dạ quang
+    waterDeepColor: '#0B192C',    // Xanh thẳm biển đêm
+    waterFoamColor: '#38BDF8',    // Bọt sóng lân tinh xanh băng
   },
 };
 

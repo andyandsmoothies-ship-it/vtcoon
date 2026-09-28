@@ -44,6 +44,32 @@ export const LOD_CONFIGS: Record<
   },
 };
 
+export const DPR_BOUNDS = {
+  MOBILE_MIN: 0.85,
+  MOBILE_MAX: 1.0,
+  DESKTOP_MIN: 1.0,
+  DESKTOP_MAX: 1.5,
+  STEP_DOWN_DELAY_MS: 1500,
+  STEP_UP_DELAY_MS: 3000,
+  FPS_DOWN_THRESHOLD: 45,
+  FPS_UP_THRESHOLD: 55,
+} as const;
+
+export interface AdaptiveDprParams {
+  readonly isMobile: boolean;
+  readonly currentFps: number;
+  readonly currentDpr: number;
+  readonly isMotionActive?: boolean;
+  readonly degradedDurationMs: number;
+  readonly optimalDurationMs: number;
+}
+
+export interface AdaptiveDprResult {
+  readonly targetDpr: number;
+  readonly shouldUpdate: boolean;
+  readonly reason: 'MAINTAIN' | 'STEP_DOWN' | 'STEP_UP';
+}
+
 export interface PerfBudgetReport {
   drawCalls: number;
   triangles: number;
@@ -53,6 +79,7 @@ export interface PerfBudgetReport {
   status: 'optimal' | 'warning' | 'critical';
   recommendedLod: LODLevel;
   averageFps: number;
+  recommendedDpr?: number;
 }
 
 export class PerfBudgetController {
@@ -179,6 +206,14 @@ export class PerfBudgetController {
     const avgFps = this.getAverageFps();
     const recommendedLod = this.calculateAdaptiveLOD(avgFps);
 
+    const dprEval = this.calculateAdaptiveDpr({
+      isMobile: false,
+      currentFps: avgFps,
+      currentDpr: 1.5,
+      degradedDurationMs: 1500,
+      optimalDurationMs: 0,
+    });
+
     return {
       drawCalls,
       triangles,
@@ -188,7 +223,43 @@ export class PerfBudgetController {
       status: dcEval.status,
       recommendedLod,
       averageFps: avgFps,
+      recommendedDpr: dprEval.targetDpr,
     };
+  }
+
+  /**
+   * Tính toán độ phân giải kết xuất (DPR) thích ứng dựa trên FPS thực tế
+   */
+  public calculateAdaptiveDpr(params: AdaptiveDprParams): AdaptiveDprResult {
+    const {
+      isMobile,
+      currentFps,
+      currentDpr,
+      isMotionActive = false,
+      degradedDurationMs,
+      optimalDurationMs,
+    } = params;
+
+    const minDpr = isMobile ? DPR_BOUNDS.MOBILE_MIN : DPR_BOUNDS.DESKTOP_MIN;
+    const maxDpr = isMobile ? DPR_BOUNDS.MOBILE_MAX : DPR_BOUNDS.DESKTOP_MAX;
+
+    // Trường hợp cần hạ DPR (FPS thấp kéo dài)
+    if (currentFps < DPR_BOUNDS.FPS_DOWN_THRESHOLD && currentDpr > minDpr) {
+      if (degradedDurationMs >= DPR_BOUNDS.STEP_DOWN_DELAY_MS) {
+        const nextDpr = isMobile ? DPR_BOUNDS.MOBILE_MIN : Math.max(minDpr, Number((currentDpr - 0.25).toFixed(2)));
+        return { targetDpr: nextDpr, shouldUpdate: true, reason: 'STEP_DOWN' };
+      }
+    }
+
+    // Trường hợp có thể nâng DPR (FPS cao kéo dài và không có hoạt ảnh chuyển động)
+    if (currentFps >= DPR_BOUNDS.FPS_UP_THRESHOLD && currentDpr < maxDpr && !isMotionActive) {
+      if (optimalDurationMs >= DPR_BOUNDS.STEP_UP_DELAY_MS) {
+        const nextDpr = isMobile ? DPR_BOUNDS.MOBILE_MAX : Math.min(maxDpr, Number((currentDpr + 0.25).toFixed(2)));
+        return { targetDpr: nextDpr, shouldUpdate: true, reason: 'STEP_UP' };
+      }
+    }
+
+    return { targetDpr: currentDpr, shouldUpdate: false, reason: 'MAINTAIN' };
   }
 
   public reset(): void {

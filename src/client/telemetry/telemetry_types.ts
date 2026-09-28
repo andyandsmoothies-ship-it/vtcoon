@@ -8,6 +8,7 @@ export interface TelemetryMetric {
   readonly pingRttMs: number;
   readonly deltaBytes: number;
   readonly tickRate: number;
+  readonly dpr?: number;
 }
 
 type AuditLogSource = 'SERVER' | 'PLAYER' | 'BOT' | 'SYSTEM';

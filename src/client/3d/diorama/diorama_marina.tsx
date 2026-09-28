@@ -1,20 +1,74 @@
-// [UI-S02/MSS] DioramaMarina — Luxury yacht harbor, wooden piers, sculpted motorboats & heritage lighthouse
-import React from 'react';
+// [UI-S02/MSS][IMP-221] DioramaMarina — Luxury yacht harbor, wooden piers, sculpted motorboats & heritage lighthouse
+import React, { useRef } from 'react';
+import type { Group } from 'three';
+import type { ThreeEvent } from '@react-three/fiber';
 import { SoundEngine } from '../../audio/sound_engine';
+import { useSafeFrame } from '../safe_frame';
+import { useEnvironmentStore, type TimeOfDayPhase } from '../../store/environment_store';
+import { DioramaPerchingBirds } from './diorama_perching_birds';
+import { DioramaHarborCruiser } from './diorama_harbor_cruiser';
+
+export function calculateWatercraftBobbing(time: number, phaseOffset: number = 0): { y: number; rotZ: number; rotX: number } {
+  if (!Number.isFinite(time)) return { y: 0, rotZ: 0, rotX: 0 };
+  const y = Math.sin(time * 2.8 + phaseOffset) * 0.006;
+  const rotZ = Math.sin(time * 2.4 + phaseOffset) * 0.022;
+  const rotX = Math.cos(time * 2.1 + phaseOffset) * 0.015;
+  return { y, rotZ, rotX };
+}
+
+export function calculateBeaconIntensity(phase: TimeOfDayPhase): number {
+  if (phase === 'night') return 2.2;
+  if (phase === 'sunset') return 0.8;
+  return 0.1;
+}
+
+export function calculateBeaconRotation(time: number, speed: number = 1.2): number {
+  if (!Number.isFinite(time)) return 0;
+  return time * speed;
+}
 
 export function DioramaMarina(): React.ReactElement {
+  // Phase subscription: Chỉ re-render khi phase thay đổi (vài phút/lần). Không ảnh hưởng 60 FPS frame loop.
+  const phase = useEnvironmentStore((s) => s.phase);
+  const yacht1Ref = useRef<Group>(null);
+  const yacht2Ref = useRef<Group>(null);
+  const beaconRef = useRef<Group>(null);
+
+  useSafeFrame((state) => {
+    const t = state.clock.elapsedTime;
+    if (yacht1Ref.current) {
+      const b1 = calculateWatercraftBobbing(t, 0.0);
+      yacht1Ref.current.position.y = -0.01 + b1.y;
+      yacht1Ref.current.rotation.z = b1.rotZ;
+      yacht1Ref.current.rotation.x = b1.rotX;
+    }
+    if (yacht2Ref.current) {
+      const b2 = calculateWatercraftBobbing(t, 1.6);
+      yacht2Ref.current.position.y = -0.01 + b2.y;
+      yacht2Ref.current.rotation.z = b2.rotZ;
+      yacht2Ref.current.rotation.x = b2.rotX;
+    }
+    if (beaconRef.current) {
+      beaconRef.current.rotation.y = calculateBeaconRotation(t, 1.2);
+    }
+  });
+
+  const beaconIntensity = calculateBeaconIntensity(phase);
+  const isNightOrSunset = phase === 'night' || phase === 'sunset';
+
+  const handleLighthouseInteraction = (e: ThreeEvent<PointerEvent> | React.MouseEvent | { stopPropagation: () => void }) => {
+    e.stopPropagation();
+    SoundEngine.playLighthouseHorn();
+  };
+
   return (
     <group position={[4.5, 0.1, 4.2]}>
-      {/* ========================================================
-          1. CẦU CẢNG GỖ & SÀN PROMENADE VEN VỊNH
-         ======================================================== */}
-      {/* Cầu cảng chính vươn ra mép nước */}
+      {/* 1. CẦU CẢNG GỖ & SÀN PROMENADE VEN VỊNH */}
       <group position={[-1.2, 0.02, 0]}>
         <mesh receiveShadow castShadow position={[0, 0, 0]}>
           <boxGeometry args={[0.36, 0.04, 2.4]} />
           <meshStandardMaterial color="#854D0E" roughness={0.7} />
         </mesh>
-        {/* Nhánh cầu cảng nhỏ (Finger Pier) */}
         <mesh receiveShadow castShadow position={[-0.4, 0, 0.4]}>
           <boxGeometry args={[0.6, 0.035, 0.22]} />
           <meshStandardMaterial color="#854D0E" roughness={0.7} />
@@ -23,7 +77,6 @@ export function DioramaMarina(): React.ReactElement {
           <boxGeometry args={[0.6, 0.035, 0.22]} />
           <meshStandardMaterial color="#854D0E" roughness={0.7} />
         </mesh>
-        {/* 4 Cọc bích neo tàu (Mooring Bollards) mạ đồng */}
         {[-0.8, -0.2, 0.4, 0.9].map((pz) => (
           <mesh key={`bollard-${pz}`} position={[0.15, 0.035, pz]}>
             <cylinderGeometry args={[0.015, 0.02, 0.04, 6]} />
@@ -32,27 +85,20 @@ export function DioramaMarina(): React.ReactElement {
         ))}
       </group>
 
-      {/* ========================================================
-          2. CẶP DU THUYỀN SIÊU SANG ĐIÊU KHẮC (Sculpted Luxury Yachts)
-         ======================================================== */}
-      {/* Du thuyền 1: Neo đậu tại bến phía Bắc */}
-      <group position={[-1.8, -0.01, -0.6]} rotation={[0, -0.2, 0]}>
-        {/* Đáy thân tàu V-Hull trắng sứ */}
+      {/* 2. CẶP DU THUYỀN SIÊU SANG ĐIÊU KHẮC */}
+      <group ref={yacht1Ref} position={[-1.8, -0.01, -0.6]} rotation={[0, -0.2, 0]}>
         <mesh castShadow receiveShadow position={[0, 0.04, 0]}>
           <boxGeometry args={[0.42, 0.07, 1.1]} />
           <meshStandardMaterial color="#F8FAFC" roughness={0.2} metalness={0.1} />
         </mesh>
-        {/* Mũi tàu thon nhọn khí động học */}
         <mesh castShadow position={[0, 0.04, -0.62]} rotation={[0, Math.PI / 4, 0]}>
           <boxGeometry args={[0.3, 0.07, 0.3]} />
           <meshStandardMaterial color="#F8FAFC" roughness={0.2} metalness={0.1} />
         </mesh>
-        {/* Buồng lái kính sapphire vát nghiêng */}
         <mesh castShadow position={[0, 0.09, -0.05]}>
           <boxGeometry args={[0.3, 0.06, 0.52]} />
           <meshStandardMaterial color="#0284C7" roughness={0.1} metalness={0.9} />
         </mesh>
-        {/* Mui tầng trên Flybridge & Vòm radar */}
         <mesh position={[0, 0.13, 0.02]}>
           <boxGeometry args={[0.26, 0.025, 0.38]} />
           <meshStandardMaterial color="#F1F5F9" roughness={0.3} />
@@ -63,40 +109,32 @@ export function DioramaMarina(): React.ReactElement {
         </mesh>
       </group>
 
-      {/* Du thuyền 2: Du thuyền thể thao màu xanh navy */}
-      <group position={[-1.8, -0.01, 0.5]} rotation={[0, 0.1, 0]}>
+      <group ref={yacht2Ref} position={[-1.8, -0.01, 0.5]} rotation={[0, 0.1, 0]}>
         <mesh castShadow receiveShadow position={[0, 0.035, 0]}>
           <boxGeometry args={[0.36, 0.06, 0.85]} />
           <meshStandardMaterial color="#0F172A" roughness={0.3} metalness={0.3} />
         </mesh>
-        {/* Mũi tàu thể thao */}
         <mesh castShadow position={[0, 0.035, -0.48]} rotation={[0, Math.PI / 4, 0]}>
           <boxGeometry args={[0.25, 0.06, 0.25]} />
           <meshStandardMaterial color="#0F172A" roughness={0.3} metalness={0.3} />
         </mesh>
-        {/* Kính chắn gió vát cong */}
         <mesh position={[0, 0.08, -0.05]}>
           <boxGeometry args={[0.26, 0.05, 0.35]} />
           <meshStandardMaterial color="#38BDF8" roughness={0.1} metalness={0.8} />
         </mesh>
       </group>
 
-      {/* ========================================================
-          3. NGỌN HẢI ĐĂNG CỔ ĐIỂN BIỂU TƯỢNG (Heritage Lighthouse)
-         ======================================================== */}
+      {/* 3. NGỌN HẢI ĐĂNG CỔ ĐIỂN BIỂU TƯỢNG */}
       <group
         position={[0.6, 0.06, 0.5]}
         data-testid="heritage-lighthouse"
-        onClick={() => SoundEngine.playLighthouseHorn()}
-        onPointerDown={() => SoundEngine.playLighthouseHorn()}
+        onClick={handleLighthouseInteraction}
+        onPointerDown={handleLighthouseInteraction}
       >
-        {/* Móng đá tròn vững chãi trên mũi vịnh */}
         <mesh castShadow receiveShadow position={[0, 0.04, 0]}>
           <cylinderGeometry args={[0.32, 0.38, 0.08, 16]} />
           <meshStandardMaterial color="#57534E" roughness={0.8} />
         </mesh>
-
-        {/* Thân tháp hải đăng thon nhọn phân tầng Đỏ - Trắng */}
         <mesh castShadow position={[0, 0.2, 0]}>
           <cylinderGeometry args={[0.22, 0.28, 0.24, 16]} />
           <meshStandardMaterial color="#DC2626" roughness={0.4} />
@@ -109,25 +147,47 @@ export function DioramaMarina(): React.ReactElement {
           <cylinderGeometry args={[0.13, 0.17, 0.16, 16]} />
           <meshStandardMaterial color="#DC2626" roughness={0.4} />
         </mesh>
-
-        {/* Đài quan sát & Ban công lan can sắt */}
         <mesh position={[0, 0.65, 0]}>
           <cylinderGeometry args={[0.18, 0.18, 0.02, 16]} />
           <meshStandardMaterial color="#1E293B" roughness={0.5} />
         </mesh>
 
-        {/* Thấu kính đèn biển Fresnel pha lê phát sáng vàng ấm */}
+        {/* Thấu kính đèn biển Fresnel pha lê phát sáng vàng ấm (#FEF08A bảo toàn test cũ) */}
         <mesh position={[0, 0.72, 0]}>
           <cylinderGeometry args={[0.1, 0.1, 0.12, 12]} />
           <meshBasicMaterial color="#FEF08A" />
         </mesh>
 
-        {/* Mái vòm nón đỉnh tháp bằng đồng ngả rêu */}
+        {/* Tia sáng quét 360 độ đặt đúng cao độ Fresnel y = 0.72 */}
+        <group ref={beaconRef} position={[0, 0.72, 0]} visible={isNightOrSunset}>
+          <mesh position={[0, 0, 0.4]} rotation={[Math.PI / 2, 0, 0]}>
+            <coneGeometry args={[0.3, 0.8, 12, 1, true]} />
+            <meshBasicMaterial
+              color={phase === 'sunset' ? '#FDE047' : '#FFFFFF'}
+              transparent
+              opacity={beaconIntensity * 0.25}
+            />
+          </mesh>
+          <pointLight
+            color={phase === 'sunset' ? '#FDE047' : '#FFFFFF'}
+            intensity={beaconIntensity}
+            distance={4}
+            decay={2}
+            castShadow={false}
+          />
+        </group>
+
         <mesh position={[0, 0.83, 0]} castShadow>
           <coneGeometry args={[0.14, 0.14, 16]} />
           <meshStandardMaterial color="#065F46" roughness={0.3} metalness={0.6} />
         </mesh>
       </group>
+
+      {/* Đàn hải âu đậu cọc bến thuyền */}
+      <DioramaPerchingBirds />
+
+      {/* Thuyền tuần du rẽ sóng vịnh bến Bạch Đằng */}
+      <DioramaHarborCruiser />
     </group>
   );
 }

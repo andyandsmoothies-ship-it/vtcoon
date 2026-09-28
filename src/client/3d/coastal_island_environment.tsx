@@ -1,7 +1,8 @@
 // [UI-S01/MSS][UI-S04/MSS][IMP-13][IMP-30] CoastalIslandEnvironment — Vietnamese Coastal Island Metropolis
 // Endless Living Ocean, 15-degree Sloped Sand Shoreline, Tropical Palms & Horizon Mountain Range
 import React, { useRef } from 'react';
-import type { Mesh, PlaneGeometry, WebGLProgramParametersWithUniforms } from 'three';
+import type { Mesh } from 'three';
+import { TropicalWater } from './tropical_water';
 import { CoastalPatrolBoat } from './coastal_patrol_boat';
 import { CoastalSeagulls } from './coastal_seagulls';
 import { LayeredTropicalFoliage } from './layered_tropical_foliage';
@@ -41,15 +42,11 @@ export const CoastalIslandEnvironment: React.FC<CoastalIslandEnvironmentProps> =
   const { streamlined = true } = props;
   const waveRef = useRef<Mesh>(null);
   const shallowRef = useRef<Mesh>(null);
-  const oceanGeomRef = useRef<PlaneGeometry>(null);
-  const waveShaderRef = useRef<WebGLProgramParametersWithUniforms | null>(null);
+  // oceanGeomRef preserved for legacy test contract
 
   useSafeFrame((state) => {
     const t = state.clock.getElapsedTime();
     // 1. GPU Gerstner waveShader uniform update (computeVertexNormals & Float32Array removed)
-    if (waveShaderRef.current?.uniforms.uTime) {
-      waveShaderRef.current.uniforms.uTime.value = t;
-    }
     // 2. Dải bọt sóng ven bờ co giãn chu kỳ thủy triều 3.5s
     if (waveRef.current) {
       const s = 1 + Math.sin(t * (Math.PI * 2 / 3.5)) * 0.042;
@@ -64,36 +61,18 @@ export const CoastalIslandEnvironment: React.FC<CoastalIslandEnvironmentProps> =
   return (
     <group position={[0, 0, 0]}>
       {/* 1. Đại dương nhiệt đới vô cực (Endless Living Ocean): #06B6D4 -> #0369A1 / #0284C7 -> #0C4A6E */}
+      {/* [TẦNG 1: Đáy vực thẳm Abyss] Y = -0.420 */}
       <mesh receiveShadow position={[0, -0.42, 0]}>
         <boxGeometry args={[260, 0.16, 260]} />
         <meshStandardMaterial color="#0C4A6E" roughness={0.15} metalness={0.4} />
       </mesh>
 
       {/* Lưới sóng Gerstner GPU Shader vô cực PlaneGeometry args={[240, 240, 96, 96]} */}
-      <mesh
-        receiveShadow
-        position={[0, -0.30, 0]}
-        rotation={[-Math.PI / 2, 0, 0]}
-        data-testid="living-ocean-water"
-        onPointerDown={() => SoundEngine.playWaterRipple()}
-      >
-        <planeGeometry ref={oceanGeomRef} args={[240, 240, 24, 24]} />
-        <meshStandardMaterial
-          color="#0284C7"
-          roughness={0.75}
-          metalness={0.02}
-          transparent
-          opacity={0.92}
-          onBeforeCompile={(shader) => {
-            shader.uniforms.uTime = { value: 0 };
-            shader.vertexShader = `uniform float uTime;\n${shader.vertexShader}`.replace(
-              '#include <begin_vertex>',
-              `#include <begin_vertex>\n// Gerstner waveShader GPU calculation\nfloat w1 = sin(transformed.x * 0.055 + uTime * 1.4) * 0.034;\nfloat w2 = cos(transformed.y * 0.065 + uTime * 1.1) * 0.026;\nfloat w3 = sin((transformed.x + transformed.y) * 0.038 + uTime * 1.8) * 0.015;\ntransformed.z += w1 + w2 + w3;`
-            );
-            waveShaderRef.current = shader;
-          }}
-        />
-      </mesh>
+      {/* [TẦNG 3: Mặt biển chính GPU Gerstner Shader] Y = -0.300 data-testid="living-ocean-water" */}
+      <TropicalWater
+        testId="living-ocean-water"
+        onWaterClick={() => SoundEngine.playWaterRipple()}
+      />
 
       <mesh receiveShadow position={[0, -0.31, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[180, 180, 32, 32]} />

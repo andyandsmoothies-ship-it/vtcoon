@@ -715,6 +715,79 @@
 - **Phê chuẩn**: `plan-griller` (P1-P5 APPROVED), `qa-tester` (Station 1 RED), `implementer` (Station 2 GREEN), `scout` (Station 2.5 PASS & Remediation), `spec-reviewer` (SPEC_PASS APPROVED), `code-reviewer` (CODE_PASS APPROVED), `ui-craft-reviewer` (UI_CRAFT APPROVED).
 - **Trạng thái**: ✅ Hoàn thành IMP-217 (2026-09-28).
 
+---
+
+### [IMP-219] Minh Bạch Hóa Thông Báo Thao Tác Của Bot & Tối Ưu Nhịp Độ Bàn Cờ (Bot Action Pacing & Visual Feedback Hardening)
+- **Mục tiêu**: Khắc phục hiện tượng Bot đi quá nhanh làm người chơi khó theo dõi sa bàn 3D và thiếu thông báo pop-up nổi: bổ sung nhịp thở quan sát 1500ms sau khi Bot nâng cấp nhà; phân định rạch ròi giao dịch P2P sinh thẻ nổi song phương (Reward/Penalty) và triệt tiêu lỗi Ghost Rent; bổ sung phản hồi thị giác sàn HOSE với khóa chống trùng lặp badge; phát sinh thông báo khi Bot từ chối mua đất kích hoạt đấu giá (loại trừ các trường hợp phát mãi nợ); và tinh chỉnh câu văn tự nhiên chuẩn Impeccable không vấp ngữ.
+- **Hạ tầng hoàn tất**:
+  * `src/client/store/game_store_types.ts` (383 LOC — Tier 1 <= 400 LOC): Mở rộng `FloatingActionType` hỗ trợ `'trade' | 'decline_auction'`.
+  * `src/client/store/activity_store.ts` (140 LOC — Tier 1 <= 400 LOC): Mở rộng `ActivityLogType` hỗ trợ `'trade' | 'hose'`.
+  * `src/client/network/activity_property_tracker.ts` (252 LOC — Tier 1 <= 400 LOC): Cập nhật `detectCellTrade` phân định `trade` (khi có `prevOwnerId` và `winningBid === undefined`), gán `targetPlayerId`, `targetPlayerName`; bảo lưu `type: 'buy'` cho trúng đấu giá theo SSOT `TC-54.18`; `processCellOwnerDiff` tính `prevOwnerName`.
+  * `src/client/network/activity_financial_tracker.ts` (337 LOC — Tier 1 <= 400 LOC): Bổ sung `lastProcessedHoseKey` và `resetHoseActivityTracker()`; đưa `buyerId` và `prevOwnerId` từ `boughtCellIndices` vào `handledPayerIds`/`handledReceiverIds` trước `matchRentTransactions` triệt tiêu lỗi Ghost Rent; cập nhật HOSE sang `type: 'hose'`.
+  * `src/client/network/activity_tracker.ts` (354 LOC — Tier 1 <= 400 LOC): Bắt sự kiện Bot bỏ mua đất trong `detectAuctionActivities` (loại trừ `!isForeclosure && !insolvencyPlayerId`); xuất khẩu `resetHoseActivityTracker`.
+  * `src/client/network/activity_badge_dispatcher.ts` (276 LOC — Cứng <= 300 LOC `TC-193.16`): Thêm `handleTradeBadge` (phát FloatingBadge song phương cho bên mua và bên bán), `handleHoseBadge` (phát thẻ lãi/lỗ kèm icon); cập nhật `handleAuctionBadge` hỗ trợ `decline_auction`; đăng ký vào `BADGE_HANDLERS` và luân chuyển delta.
+  * `src/client/ui/transaction_narrative.ts` (268 LOC — Cứng <= 280 LOC `TC-194.18`): Thêm icon, formatters, compact inline cases; loại bỏ lặp từ cellName tạo câu tự nhiên ("Bạn nhận [Phố Huế] từ Bot 1" / "Bot 1 nhượng [Phố Huế] cho Bạn" / "Bot 1 bỏ qua [Phố Huế] để mở đấu giá").
+  * `src/server/network/turn_orchestrator.ts` (358 LOC — Tier 1 <= 400 LOC): Xuất khẩu `BOT_UPGRADE_OBSERVATION_DELAY_MS = 1500`; quản lý Map `botJustUpgraded` bảo toàn qua `clearRoom()` và chỉ xóa khi tiêu thụ trong `scheduleBotStep` hoặc giải phóng rò rỉ tại `destroyRoom`, khi chuyển sang lượt người chơi thật và khi `onGameOver`.
+- **Kiểm thử & Bất biến**:
+  * `tests/contracts/imp219_bot_action_pacing_and_visual_feedback.test.ts`: 16/16 atomic contract tests PASS 100% (5 facets: Giao dịch P2P song phương, Phản hồi thị giác HOSE & Khử trùng lặp, Bot bỏ qua đất mở đấu giá, Nhịp thở quan sát nâng cấp 1500ms, Khử Ghost Rent & Dispatcher Parity).
+  * Bảo toàn 100% các suite hồi quy: `imp193` (18 tests), `imp194` (20 tests), `imp208` (21 tests), `imp216` (16 tests), `imp217` (18 tests), `telemetry_watchdog` (24 tests), `imp205` (19 tests), `imp215` (17 tests).
+  * `npx tsc --noEmit`: 0 lỗi. `npm run lint:ui`: 0 vi phạm (201 files scanned).
+  * Evidence Snapshot: `.agents/evidence/imp219_bot_pacing_and_visual_feedback_snapshot.json` (`executed: true`, 8 physical files, 0 typecheck errors).
+- **Phê chuẩn**: `plan-griller` (P1-P5 HARDENED_APPROVED), `qa-tester` (Station 1 RED), `implementer` (Station 2 GREEN), `scout` (Station 2.5 Sweeping Audit & Remediation), `code-reviewer` (Station 3 ACCEPTANCE APPROVED), `spec-reviewer` (Station 3 SPEC APPROVED), `re-reviewer` (Station 3 FIX ROUND ALL ADDRESSED APPROVED).
+- **Trạng thái**: ✅ Hoàn thành IMP-219 (2026-09-29).
+
+---
+
+### [IMP-220] Tropical Island Water Shader & Atmospheric Lighting Lerp (Bước 2)
+- **Mục tiêu**: Nâng cấp đồ họa mặt biển sa bàn 3D nhiệt đới: Water Shader GLSL tích hợp phản xạ góc nhìn Fresnel Schlick, Gradient hấp thụ độ sâu (Depth Absorption) từ xanh ngọc bích ven bờ sang xanh thẳm đại dương, 3 sóng Gerstner GPU nhấp nhô hữu cơ, phản xạ lấp lánh Specular Glint theo mặt trời; cấu trúc phân tầng Depth Stack 5 tầng cao độ Y triệt tiêu 100% Z-fighting; thích ứng màu nước theo 3 pha ánh sáng Day/Sunset/Night với nội suy mượt mà Zero-Alloc Three.js Color.lerp trong frame loop.
+- **Hạ tầng hoàn tất**:
+  * `src/client/store/environment_store.ts` (145 LOC — Tier 1 <= 400 LOC): Bổ sung `waterShallowColor`, `waterDeepColor`, `waterFoamColor` vào `LightingPreset` và `TIME_OF_DAY_PRESETS`.
+  * `src/client/3d/shaders/tropical_water_material.ts` (117 LOC — Tier 2 <= 500 LOC): Xuất khẩu `createTropicalWaterUniforms`, `calculateFresnelFactor`, `calculateWaterWaveOffset`, `calculateDepthBlend`, `lerpWaterColor`, GLSL Vertex & Fragment Shaders.
+  * `src/client/3d/tropical_water.tsx` (99 LOC — Tier 2 <= 500 LOC): Component mặt biển GPU Shader, tự động giải phóng tài nguyên Three.js khi unmount, nội suy uniforms Zero-Alloc.
+  * `src/client/3d/coastal_island_environment.tsx` (228 LOC — Tier 2 <= 500 LOC): Thiết lập Depth Stack 5 tầng (-0.420 Abyss Box, -0.310 Mid Ocean, -0.300 TropicalWater Shader, -0.298 Shallow Jade, -0.292 Macro Foam).
+- **Kiểm thử & Bất biến**:
+  * `tests/client/tropical_water_and_lighting.test.ts`: 16/16 atomic tests PASS 100% (Universal 5-Facet Matrix).
+  * Bảo toàn 100% tests di sản: `coastal_island_environment` (11 tests), `imp107_streamlined_tabletop_diorama` (17 tests), `imp39_visual_crispness_and_lighting` (12 tests).
+  * Domain Invariant: Gotcha #13 (5-Layer Ocean Depth Stack & Zero-Alloc Shader Uniforms).
+  * Evidence Snapshot: `.agents/evidence/imp220_execution.json` (`executed: true`).
+- **Phê chuẩn**: `spec-reviewer` (APPROVED), `game-3d-visual-critic` (APPROVED 8.8/10, disposition: ship).
+- **Trạng thái**: ✅ Hoàn thành IMP-220 (2026-09-29).
+
+---
+
+### [IMP-221] Living Diorama Dynamics: Harbor Watercraft, Perching Birds & Lighthouse Sweep (Bước 3)
+- **Mục tiêu**: Thổi hồn vào sa bàn đảo ngọc lấy cảm hứng từ "Virtual Yosemite Photo Tour" (Trond Wuellner): Cặp du thuyền bến cảng nhấp nhô pitch & roll lệch pha $\Delta\phi = 1.6$ rad, thuyền gỗ bến Bạch Đằng lướt ven vịnh kéo vệt bọt rẽ sóng chữ V co giãn, đàn hải âu mini đậu cọc bến tàu với micro-FSM 4 trạng thái cất cánh/hạ cánh mượt mà tính liên tục $C^1$ chống giật hình giữa không trung, ngọn hải đăng quét chùm sáng $360^\circ$ huyền ảo vào ban đêm đặt đúng cao độ thấu kính Fresnel $y=0.72$, tối ưu Zero React re-render 60 FPS qua `useRef` và Zero `castShadow` bảo vệ GPU mobile.
+- **Hạ tầng hoàn tất**:
+  * `src/client/3d/diorama/diorama_perching_birds.tsx` (263 LOC — Tier 2 <= 500 LOC): Micro-FSM đàn chim đậu cọc (`PERCHED` -> `TAKE_OFF` -> `CIRCLING` -> `LANDING`), `landingFromRef` + `calculateCirclingExitPosition` khử giật hình đứt gãy, Zero React re-render 60 FPS (`useRef`), Zero `castShadow`.
+  * `src/client/3d/diorama/diorama_harbor_cruiser.tsx` (67 LOC — Tier 2 <= 500 LOC): Thuyền tuần du bám tiếp tuyến quỹ đạo elip ven vịnh đảo, vệt bọt nước rẽ sóng chữ V co giãn điều hòa $\pm 12\%$, Zero `castShadow`.
+  * `src/client/3d/diorama/diorama_marina.tsx` (193 LOC — Tier 2 <= 500 LOC): Cặp du thuyền bập bềnh lệch pha $1.6$ rad, cụm đèn hải đăng đặt tại tâm thấu kính Fresnel $y=0.72$ xoay quét $360^\circ$ thích ứng ban đêm/hoàng hôn, âm thanh còi tàu có `e.stopPropagation()`.
+- **Kiểm thử & Bất biến**:
+  * `tests/client/living_diorama_dynamics.test.ts`: 16/16 atomic contract tests PASS 100% (Universal 5-Facet Matrix).
+  * Bảo toàn 100% tests di sản: `miniature_city_diorama` (11 tests), `imp107_streamlined_tabletop_diorama` (17 tests).
+  * Domain Invariant: Gotcha Invariant 14 (`Living Diorama Micro-FSM & 3D Spatial Continuity`).
+  * Evidence Snapshot: `.agents/evidence/imp221_execution.json` (`executed: true`).
+- **Phê chuẩn**: `plan-griller` (REVISE_REQUIRED -> v3 HARDENED), `qa-tester` (Station 1 RED 15/16), `implementer` (Station 2 GREEN 16/16), `scout` (Station 2.5 PASS 100%), `spec-reviewer` (Station 3 APPROVED), `game-3d-visual-critic` (Station 3 APPROVED 9.2/10, disposition: ship).
+- **Trạng thái**: ✅ Hoàn thành IMP-221 (2026-09-29).
+
+---
+
+### [IMP-222] Atmospheric Immersion & Living Tropical Breeze (Bước 4)
+- **Mục tiêu**: Nâng tầm trải nghiệm điện ảnh và sức sống tự nhiên cho sa bàn 3D đảo ngọc nhiệt đới bằng 3 kỹ thuật đồ họa bổ trợ:
+  1. Auto-lerp `toneMappingExposure`: Giả lập cơ chế điều tiết võng mạc mắt người (Pupil Dilation / Exposure Adaptation) khi chuyển giao mượt mà giữa Day (1.00), Sunset (1.06), Night (1.14) và Auction (0.94) qua hàm thuần túy `lerpExposure` có guard an toàn `Number.isFinite`.
+  2. Sương Mù Kịch Nghệ Đấu Giá & Đồng Bộ Nền Trời (Theatrical Spotlight Fog & Horizon Sky): Khi đấu giá (`isAuctionActive = true`), sương mù thu hẹp từ (45m, 180m) về (18m, 55m) và đồng bộ cả `scene.fog` lẫn `scene.background` cùng lerp sang sắc tím than `#0F172A`, triệt tiêu 100% lỗi đứt gãy chân trời (Horizon Cutout Discontinuity).
+  3. Tán Dừa Đung Đưa Trong Gió Biển (Living Tropical Breeze on Palm Canopies): Vành đai 32 cây dừa (`LayeredTropicalFoliage`) đung đưa theo sóng gió biển Lissajous hai trục `swayZ, swayX` với phân tầng giảm chấn `PALM_TIER_SWAY_FACTORS = { 1: 0.6, 2: 0.8, 3: 1.0 }`, giữ thân dừa cố định cắm đất, bảo toàn 100% `useEffect` khởi tạo và 4 lệnh `computeBoundingSphere`, tối ưu 4 Draw Calls qua GPU `InstancedMesh` và Zero-GC churn.
+- **Hạ tầng hoàn tất**:
+  * `src/client/3d/time_of_day_lighting.tsx` (290 LOC — Tier 2 <= 500 LOC): Xuất khẩu `calculateTargetExposure`, `lerpExposure`, `calculateFogTargets`, tự động lerp `gl.toneMappingExposure`, `scene.fog` và `scene.background`.
+  * `src/client/3d/layered_tropical_foliage.tsx` (220 LOC — Tier 2 <= 500 LOC): Xuất khẩu `PALM_TIER_SWAY_FACTORS`, `calculatePalmSwayAngles`, bảo toàn `useEffect` và 4 lệnh `computeBoundingSphere`, thêm `useSafeFrame` đung đưa 3 tầng tán lá trên 32 cây dừa.
+- **Kiểm thử & Bất biến**:
+  * `tests/client/atmospheric_immersion_and_breeze.test.ts`: 16/16 atomic contract tests PASS 100% (Universal 5-Facet Matrix & Detroit Style).
+  * Bảo toàn 100% tests di sản: `layered_tropical_foliage` (5 tests), `imp196_golden_sunset_and_neon_night_lighting` (18 tests), `tropical_water_and_lighting` (16 tests) -> Tổng 55/55 tests PASS.
+  * Domain Invariant: Gotcha Invariant 15 (`Atmospheric Exposure Adaptation & Instanced Canopy Wind Sway`).
+  * Evidence Snapshot: `.agents/evidence/imp222_execution.json` (`executed: true`).
+- **Phê chuẩn**: `plan-griller` (P1-P5 HARDENED v2 APPROVED), `qa-tester` (Station 1 RED 13/16), `implementer` (Station 2 GREEN 16/16), `scout` (Station 2.5 PASS 100%), `spec-reviewer` (Station 3 APPROVED), `game-3d-visual-critic` (Station 3 APPROVED 9.6/10, disposition: ship).
+- **Trạng thái**: ✅ Hoàn thành IMP-222 (2026-09-29).
+
+
 
 
 

@@ -39,7 +39,7 @@ const ACTION_ICONS: Record<string, string> = {
   tax: '🏛️', bail: '🚨', mortgage: '🏦', unmortgage: '🔓', monopoly: '👑',
   debt_relief: '🎉', stimulus: '📈', chance: '⚡', market: '🎴',
   auction_win: '🔨', hose: '📊', teleport: '✈️', audit_jail: '🚨', ma_buyout: '🤝',
-  diplomatic: '🤝', bankrupt: '🚨',
+  diplomatic: '🤝', bankrupt: '🚨', trade: '🤝', decline_auction: '🔨',
 };
 
 export function resolveActionIcon(actionType?: string, isReward?: boolean): string {
@@ -111,10 +111,11 @@ const ACTION_REASON_FORMATTERS: Partial<Record<FloatingActionType, (item: Floati
   audit_jail: () => 'Vào Trạm Kiểm Toán',
   ma_buyout: (item) => item.title || 'Thương vụ M&A',
   diplomatic: () => 'Kích hoạt Thẻ Ngoại Giao',
+  trade: (item) => item.title || 'Chuyển nhượng BĐS P2P',
+  decline_auction: (item) => item.title || 'Bỏ qua BĐS ➔ Mở đấu giá',
 };
 
 export function resolveFriendlyReason(item: FloatingTextItem, _player?: PlayerHudInfo): string {
-  if (item.actionType === 'diplomatic') return 'Kích hoạt Thẻ Ngoại Giao';
   const formatter = item.actionType ? ACTION_REASON_FORMATTERS[item.actionType] : undefined;
   if (formatter) return formatter(item);
   return item.title || (item.text ? `Giao dịch ${item.text}` : 'Biến động tài chính');
@@ -167,6 +168,13 @@ export function resolveTransactionNarrative(
       }
       break;
     }
+    case 'trade':
+      category = 'GIAO DỊCH P2P'; icon = '🤝'; verb = isPositive ? 'nhận' : 'nhượng';
+      target = isPositive ? `từ ${targetName}` : `cho ${targetName}`;
+      break;
+    case 'decline_auction':
+      category = 'ĐẤU GIÁ CÔNG KHAI'; icon = '🔨'; verb = 'bỏ qua'; target = 'để mở đấu giá';
+      break;
     case 'rent_pay': {
       category = 'TIỀN THUÊ BẤT ĐỘNG SẢN';
       verb = 'trả';

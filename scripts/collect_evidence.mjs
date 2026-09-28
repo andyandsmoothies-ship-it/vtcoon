@@ -126,7 +126,13 @@ if (!sliceId || sliceId === 'LATEST' || sliceId === 'ADHOC') {
 const sliceKey = sliceId.replace(/[^A-Z0-9]/gi, '').toLowerCase();
 const matchingTests = allContractTests.filter((t) => {
   const norm = t.toLowerCase();
-  return norm.includes(sliceKey) || norm.includes(sliceId.toLowerCase());
+  if (norm.includes(sliceKey) || norm.includes(sliceId.toLowerCase())) return true;
+  try {
+    const content = fs.readFileSync(t, 'utf8');
+    return content.includes(sliceId) || content.toLowerCase().includes(sliceKey);
+  } catch {
+    return false;
+  }
 }).sort((a, b) => {
   try {
     return fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs;

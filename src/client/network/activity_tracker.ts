@@ -170,6 +170,33 @@ export function detectAuctionActivities(
     }
     return [];
   }
+
+  if (
+    delta.auction &&
+    !delta.auction.isForeclosure &&
+    !delta.auction.insolvencyPlayerId &&
+    (!prevStateOrNextState.auction || prevStateOrNextState.auction.cellIndex !== delta.auction.cellIndex) &&
+    delta.auction.declinedPlayerId
+  ) {
+    const nextState = maybeNextState ?? prevStateOrNextState;
+    const declId = delta.auction.declinedPlayerId;
+    const declPlayer = nextState.playersInfo[declId];
+    if (declPlayer?.isBot) {
+      const declName = getPlayerName(declPlayer, declId);
+      const cellName = getCellName(delta.auction.cellIndex);
+      return [{
+        id: `decline_auction_${Date.now()}_${delta.auction.cellIndex}`,
+        timestamp: Date.now(),
+        type: 'auction',
+        message: `${declName} đã bỏ qua ${cellName} ➔ Mở Đấu Giá`,
+        playerId: declId,
+        playerName: declName,
+        cellIndex: delta.auction.cellIndex,
+        ...(declPlayer.tokenColor ? { playerTokenColor: declPlayer.tokenColor } : {}),
+      }];
+    }
+  }
+
   if (!delta.auction || !delta.auction.highestBidderId) return [];
 
   const { cellIndex, currentBid, highestBidderId } = delta.auction;
@@ -322,3 +349,6 @@ export function trackDeltaActivities(
     }
   }
 }
+
+export { resetHoseActivityTracker } from './activity_financial_tracker.js';
+

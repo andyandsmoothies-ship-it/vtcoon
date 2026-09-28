@@ -6,6 +6,11 @@ import { PROPERTY_DEEDS } from '../../domain/property_data.js';
 import { BOARD_CONFIG } from '../../domain/board_config.js';
 import { formatCurrency } from '../ui/ui_helpers.js';
 
+let lastProcessedHoseKey: string | null = null;
+export function resetHoseActivityTracker(): void {
+  lastProcessedHoseKey = null;
+}
+
 export interface BalanceDelta {
   readonly id: string;
   readonly diff: number;
@@ -271,6 +276,20 @@ export function detectFinancialAndStatusActivities(
     }
   }
 
+  if (context.boughtCellIndices && delta.cells) {
+    for (const boughtIndex of context.boughtCellIndices) {
+      const cellDelta = delta.cells.find((c) => c.index === boughtIndex);
+      if (!cellDelta?.ownerId) continue;
+      const prevOwnerId = Object.keys(prevState.playersInfo).find((id) =>
+        prevState.playersInfo[id]?.ownedProperties.includes(boughtIndex),
+      );
+      if (prevOwnerId && prevOwnerId !== cellDelta.ownerId) {
+        handledPayerIds.add(cellDelta.ownerId);
+        handledReceiverIds.add(prevOwnerId);
+      }
+    }
+  }
+
   const { rentLogs, handledPayerIds: rentPayers, handledReceiverIds: rentReceivers } = matchRentTransactions(
     payers,
     receivers,
@@ -283,30 +302,34 @@ export function detectFinancialAndStatusActivities(
 
   if (delta.lastHoseResult) {
     const hr = delta.lastHoseResult;
-    const pInfo = nextState.playersInfo[hr.playerId] ?? prevState.playersInfo[hr.playerId];
-    const pName = hr.playerName ?? getPlayerName(pInfo, hr.playerId);
-    const multiplierPct = Math.round((hr.multiplier - 1) * 100);
-    const sign = multiplierPct > 0 ? `+${multiplierPct}%` : multiplierPct < 0 ? `${multiplierPct}%` : 'Hòa vốn';
-    const outcomeLabel =
-      hr.profit > 0
-        ? `Lãi +${formatCurrency(hr.profit)}`
-        : hr.profit < 0
-        ? `Lỗ -${formatCurrency(Math.abs(hr.profit))}`
-        : 'Hòa vốn';
-    const icon = hr.profit > 0 ? '📈' : hr.profit < 0 ? '📉' : '⚖️';
+    const hoseKey = `${hr.playerId}_${hr.timestamp}_${hr.roll}`;
+    if (lastProcessedHoseKey !== hoseKey) {
+      lastProcessedHoseKey = hoseKey;
+      const pInfo = nextState.playersInfo[hr.playerId] ?? prevState.playersInfo[hr.playerId];
+      const pName = hr.playerName ?? getPlayerName(pInfo, hr.playerId);
+      const multiplierPct = Math.round((hr.multiplier - 1) * 100);
+      const sign = multiplierPct > 0 ? `+${multiplierPct}%` : multiplierPct < 0 ? `${multiplierPct}%` : 'Hòa vốn';
+      const outcomeLabel =
+        hr.profit > 0
+          ? `Lãi +${formatCurrency(hr.profit)}`
+          : hr.profit < 0
+          ? `Lỗ -${formatCurrency(Math.abs(hr.profit))}`
+          : 'Hòa vốn';
+      const icon = hr.profit > 0 ? '📈' : hr.profit < 0 ? '📉' : '⚖️';
 
-    entries.push({
-      id: `hose_${hr.timestamp}_${hr.playerId}`,
-      timestamp: hr.timestamp,
-      type: 'system',
-      message: `${icon} [HOSE] ${pName} đầu tư ${formatCurrency(hr.stake)} ➔ Khớp lệnh Mặt ${hr.roll} (${sign}): Thu về ${formatCurrency(hr.payout)} (${outcomeLabel})`,
-      playerId: hr.playerId,
-      playerName: pName,
-      amount: hr.profit,
-      ...(pInfo?.tokenColor ? { playerTokenColor: pInfo.tokenColor } : {}),
-    });
-    handledPayerIds.add(hr.playerId);
-    handledReceiverIds.add(hr.playerId);
+      entries.push({
+        id: `hose_${hr.timestamp}_${hr.playerId}`,
+        timestamp: hr.timestamp,
+        type: 'hose',
+        message: `${icon} [HOSE] ${pName} đầu tư ${formatCurrency(hr.stake)} ➔ Khớp lệnh Mặt ${hr.roll} (${sign}): Thu về ${formatCurrency(hr.payout)} (${outcomeLabel})`,
+        playerId: hr.playerId,
+        playerName: pName,
+        amount: hr.profit,
+        ...(pInfo?.tokenColor ? { playerTokenColor: pInfo.tokenColor } : {}),
+      });
+      handledPayerIds.add(hr.playerId);
+      handledReceiverIds.add(hr.playerId);
+    }
   }
 
   entries.push(...extractMiscellaneousBalances(payers, receivers, handledPayerIds, handledReceiverIds, context, delta, prevState));

@@ -88,6 +88,8 @@ export type FloatingActionType =
   | 'mortgage'
   | 'unmortgage'
   | 'diplomatic'
+  | 'trade'
+  | 'decline_auction'
   | 'general';
 
 export interface FloatingTextItem {

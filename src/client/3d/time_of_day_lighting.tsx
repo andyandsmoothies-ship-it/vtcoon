@@ -44,6 +44,33 @@ export function calculateBaseEnv(phase: 'day' | 'sunset' | 'night'): number {
   return phase === 'night' ? 0.28 : phase === 'sunset' ? 0.38 : 0.75;
 }
 
+export function calculateTargetExposure(phase: string, isAuctionActive: boolean): number {
+  if (isAuctionActive) return 0.94;
+  switch (phase) {
+    case 'day': return 1.00;
+    case 'sunset': return 1.06;
+    case 'night': return 1.14;
+    default: return 1.00;
+  }
+}
+
+export function lerpExposure(current: number, target: number, rate: number): number {
+  if (!Number.isFinite(current) || !Number.isFinite(target) || !Number.isFinite(rate)) return current;
+  return current + (target - current) * rate;
+}
+
+export function calculateFogTargets(
+  phase: 'day' | 'sunset' | 'night',
+  isAuctionActive: boolean,
+  preset?: typeof TIME_OF_DAY_PRESETS['day']
+): { near: number; far: number; color: string } {
+  if (isAuctionActive) {
+    return { near: 18.0, far: 55.0, color: '#0F172A' };
+  }
+  const resolvedPreset = preset ?? TIME_OF_DAY_PRESETS[phase] ?? TIME_OF_DAY_PRESETS.day;
+  return { near: resolvedPreset.fogNear, far: resolvedPreset.fogFar, color: resolvedPreset.fogColor };
+}
+
 function isThreeFog(fog: unknown): fog is Fog {
   return typeof fog === 'object' && fog !== null && 'isFog' in fog;
 }
@@ -93,6 +120,7 @@ function updateDiffuseAndAtmosphere(
   ambient: AmbientLight | null,
   hemi: HemisphereLight | null,
   scene: (Scene & { environmentIntensity?: number }) | undefined,
+  gl: { toneMappingExposure: number } | undefined,
   preset: typeof TIME_OF_DAY_PRESETS['day'],
   phase: 'day' | 'sunset' | 'night',
   isAuctionActive: boolean,
@@ -100,6 +128,11 @@ function updateDiffuseAndAtmosphere(
   lerpRate: number,
   tempColor: Color,
 ): void {
+  if (gl && typeof gl.toneMappingExposure === 'number') {
+    const targetExposure = calculateTargetExposure(phase, isAuctionActive);
+    gl.toneMappingExposure = lerpExposure(gl.toneMappingExposure, targetExposure, lerpRate);
+  }
+
   if (ambient) {
     tempColor.set(preset.ambientColor);
     ambient.color.lerp(tempColor, lerpRate);
@@ -114,18 +147,20 @@ function updateDiffuseAndAtmosphere(
     hemi.intensity += (targetHemi - hemi.intensity) * lerpRate;
   }
   if (scene) {
+    const fogTargets = calculateFogTargets(phase, isAuctionActive, preset);
     if (!scene.fog || !isThreeFog(scene.fog)) {
-      scene.fog = new Fog(preset.fogColor, preset.fogNear, preset.fogFar);
+      scene.fog = new Fog(fogTargets.color, fogTargets.near, fogTargets.far);
     } else {
-      tempColor.set(preset.fogColor);
+      tempColor.set(fogTargets.color);
       scene.fog.color.lerp(tempColor, lerpRate);
-      scene.fog.near += (preset.fogNear - scene.fog.near) * lerpRate;
-      scene.fog.far += (preset.fogFar - scene.fog.far) * lerpRate;
+      scene.fog.near += (fogTargets.near - scene.fog.near) * lerpRate;
+      scene.fog.far += (fogTargets.far - scene.fog.far) * lerpRate;
     }
+    const targetSkyColor = isAuctionActive ? fogTargets.color : preset.skyColor;
     if (!scene.background || !isThreeColor(scene.background)) {
-      scene.background = new Color(preset.skyColor);
+      scene.background = new Color(targetSkyColor);
     } else {
-      tempColor.set(preset.skyColor);
+      tempColor.set(targetSkyColor);
       scene.background.lerp(tempColor, lerpRate);
     }
     const baseEnv = phase === 'night' ? 0.28 : phase === 'sunset' ? 0.38 : 0.75;
@@ -177,7 +212,7 @@ export function TimeOfDayLighting({ isMobile = false }: TimeOfDayLightingProps =
     const dt = Math.min(delta, 0.1);
     const lerpRate = 1 - Math.exp(-dt * 3.0);
     updateDirectLights(sunRef.current, fillRef.current, rimRef.current, preset, phase, isAuctionActive, lerpRate, tempVec, tempColor);
-    updateDiffuseAndAtmosphere(ambientRef.current, hemiRef.current, state.scene, preset, phase, isAuctionActive, dt, lerpRate, tempColor);
+    updateDiffuseAndAtmosphere(ambientRef.current, hemiRef.current, state.scene, state.gl, preset, phase, isAuctionActive, dt, lerpRate, tempColor);
     if (topDownRef.current) {
       const topDownTarget = calculateTopDownFill(phase, isAuctionActive);
       tempColor.set(topDownTarget.color);

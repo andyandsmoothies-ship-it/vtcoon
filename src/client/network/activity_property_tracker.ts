@@ -23,6 +23,7 @@ export function detectCellTrade(
   buyerName: string,
   buyerColor?: string,
   winningBid?: number,
+  prevOwnerName?: string,
 ): ActivityLogEntry {
   const cellName = getCellName(cell.index);
   const price = PROPERTY_DEEDS.get(cell.index)?.price;
@@ -30,24 +31,30 @@ export function detectCellTrade(
 
   let message: string;
   let amount: number | undefined;
+  let type: 'buy' | 'auction' | 'trade' = 'buy';
 
   if (winningBid !== undefined) {
     message = `${buyerName} đã thắng đấu giá ${cellName} với giá ${formatCurrency(winningBid)}`;
     amount = -winningBid;
+    type = 'buy';
   } else if (isDirectBuy) {
     message = `${buyerName} đã mua ${cellName}${price ? ` với giá ${formatCurrency(price)}` : ''}`;
     if (price) amount = -price;
+    type = 'buy';
   } else {
-    message = `${buyerName} đã nhận quyền sở hữu ${cellName}`;
+    const sellerStr = prevOwnerName ? ` từ ${prevOwnerName}` : '';
+    message = `${buyerName} đã nhận chuyển nhượng ${cellName}${sellerStr}`;
+    type = 'trade';
   }
 
   return {
-    id: `buy_${Date.now()}_${cell.index}_${cell.ownerId}`,
+    id: `${type}_${Date.now()}_${cell.index}_${cell.ownerId}`,
     timestamp: Date.now(),
-    type: 'buy',
+    type,
     message,
     playerId: cell.ownerId ?? undefined,
     playerName: buyerName,
+    ...(prevOwnerId ? { targetPlayerId: prevOwnerId, targetPlayerName: prevOwnerName } : {}),
     ...(amount !== undefined ? { amount } : {}),
     cellIndex: cell.index,
     ...(buyerColor ? { playerTokenColor: buyerColor } : {}),
@@ -151,6 +158,8 @@ function processCellOwnerDiff(
     }
 
     const buyer = nextState.playersInfo[cell.ownerId] ?? prevState.playersInfo[cell.ownerId];
+    const prevOwner = prevOwnerId ? (prevState.playersInfo[prevOwnerId] ?? nextState.playersInfo[prevOwnerId]) : undefined;
+    const prevOwnerName = prevOwner ? getPlayerName(prevOwner, prevOwnerId) : undefined;
     const modalAuction =
       prevState.activeModal === 'auction' && prevState.modalPayload && 'cellIndex' in prevState.modalPayload
         ? (prevState.modalPayload as { cellIndex?: number; currentBid?: number; highestBid?: number })
@@ -159,7 +168,7 @@ function processCellOwnerDiff(
     const isAuctionForThisCell = auction?.cellIndex === cell.index;
     const winningBid = isAuctionForThisCell ? (auction.highestBid ?? auction.currentBid) : undefined;
 
-    entries.push(detectCellTrade(cell, prevOwnerId, getPlayerName(buyer, cell.ownerId), buyer?.tokenColor, winningBid));
+    entries.push(detectCellTrade(cell, prevOwnerId, getPlayerName(buyer, cell.ownerId), buyer?.tokenColor, winningBid, prevOwnerName));
     boughtCellIndices.push(cell.index);
   }
 }

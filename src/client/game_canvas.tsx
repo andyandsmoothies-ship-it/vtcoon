@@ -3,6 +3,7 @@ import './3d/r3f_fiber_shield';
 import './polyfills/canvas_round_rect';
 import { clearAll3DTextureCaches } from './3d/texture_cache_manager';
 import { isMobileHardware, getRecommendedDpr } from './3d/device_detect';
+import { AdaptiveDprController } from './3d/adaptive_dpr_controller';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, ContactShadows, Environment } from '@react-three/drei';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
@@ -16,8 +17,6 @@ import { CinematicOverlay } from './3d/cinematic_effects';
 import { EventCard3D } from './3d/event_card_3d';
 import { Coronation3DStage } from './3d/coronation_3d_stage';
 import { PostProcessingPipeline } from './3d/post_processing_pipeline';
-import { PenthouseLobbyScene } from './3d/penthouse_lobby_scene';
-import { SunnyIslandLobbyScene } from './3d/sunny_island_lobby_scene';
 import { TimeOfDayLighting } from './3d/time_of_day_lighting';
 import { useEnvironmentStore, TIME_OF_DAY_PRESETS } from './store/environment_store';
 import { useVfxStore } from './store/vfx_store';
@@ -410,6 +409,7 @@ export function GameCanvas({
             )}
             <WebGLContextWatcher />
             <PerfTelemetryTracker />
+            <AdaptiveDprController isMobile={isMobileDevice} />
 
             {isLobby ? (
               <>

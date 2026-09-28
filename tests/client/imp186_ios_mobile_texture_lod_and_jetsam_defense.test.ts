@@ -377,8 +377,8 @@ describe('[TC-186/MSS][UC-IMP186] IMP-186 iOS WebKit Jetsam Defense & Mobile Tex
     expect(isMobileHardware()).toBe(false);
   });
 
-  it('[TC-186.09/MSS][UC-IMP186] getRecommendedDpr(true) returns 1 and getRecommendedDpr(false) returns [1, 1.5]', () => {
-    expect(getRecommendedDpr(true)).toBe(1);
+  it('[TC-186.09/MSS][UC-IMP186] getRecommendedDpr(true) returns [0.85, 1.0] and getRecommendedDpr(false) returns [1, 1.5]', () => {
+    expect(getRecommendedDpr(true)).toEqual([0.85, 1.0]);
     expect(getRecommendedDpr(false)).toEqual([1, 1.5]);
   });
 
