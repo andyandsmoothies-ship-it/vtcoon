@@ -155,6 +155,7 @@
 | DEBT-IMP208-01 | ui_helpers.ts đạt 445 LOC (vượt ngưỡng cảnh báo 400 LOC Tier 2) -> Bóc tách action_dock_helpers.ts | IMP-208B | Slice UI Kế Tiếp | ⏳ CHỜ BÓC TÁCH |
 | DEBT-ROOM-MGR-01 | room_manager.ts gom 10 Map phân tán vào GameRoomSession Aggregate Root, đưa file về 378 LOC (<= 400 LOC Tier 1) | IMP-205 / IMP-209 | IMP-210 (Bước 2) | ✅ ĐÃ ĐÓNG |
 | DEBT-IMP208P-01 | trade_modal.tsx:28 branch cash-only thiếu suffix "Tr." | IMP-208P | IMP-208P (Active Remediation) | ✅ ĐÃ KHẮC PHỤC (Inoculated TC-208P.09) |
+| DEBT-IMP220-01 | Chuẩn hóa magic string 'INVALID_PHASE' tại L143 (INTENT_AUTO_SOLVENCY) và L157 (INTENT_END_TURN) sang ActionRejectReason.INVALID_PHASE trong đợt refactor toàn bộ dispatcher | IMP-220 | Dispatcher Refactor Sprint | ⏳ ĐÃ GHI NHẬN |
 
 ---
 
@@ -784,10 +785,68 @@
   * Bảo toàn 100% tests di sản: `layered_tropical_foliage` (5 tests), `imp196_golden_sunset_and_neon_night_lighting` (18 tests), `tropical_water_and_lighting` (16 tests) -> Tổng 55/55 tests PASS.
   * Domain Invariant: Gotcha Invariant 15 (`Atmospheric Exposure Adaptation & Instanced Canopy Wind Sway`).
   * Evidence Snapshot: `.agents/evidence/imp222_execution.json` (`executed: true`).
-- **Phê chuẩn**: `plan-griller` (P1-P5 HARDENED v2 APPROVED), `qa-tester` (Station 1 RED 13/16), `implementer` (Station 2 GREEN 16/16), `scout` (Station 2.5 PASS 100%), `spec-reviewer` (Station 3 APPROVED), `game-3d-visual-critic` (Station 3 APPROVED 9.6/10, disposition: ship).
 - **Trạng thái**: ✅ Hoàn thành IMP-222 (2026-09-29).
 
+---
 
+### [IMP-223] Auction Theatrical FX: Bid Flash, Champagne Bloom & Focus Vignette
+- **Mục tiêu**: Đưa cảm xúc và tính kịch nghệ của sàn đấu giá BĐS lên đỉnh điểm thông qua bộ 3 hiệu ứng ánh sáng và quang học phản hồi đa tầng (Multimodal Theatrical Feedback):
+  1. Bid Flash Reaction Lighting: Mỗi khi mức giá thầu tăng (`currentBid > prevBid`), bùng nổ xung ánh sáng chớp rực trực tiếp trên hệ thống đèn sa bàn 3D (`TimeOfDayLighting`) với phân rã bậc hai $(1 - t/0.35)^2$, đồng bộ chính xác từng mili-giây với tiếng búa gõ đanh thép `AudioEngine.playSfx(SoundEffect.AUCTION_BID)`.
+  2. Hào Quang Vàng Kim Phân Tầng (Champagne Bloom Tuning): Khi `isAuctionActive = true`, hạ `bloomThreshold` từ `2.5` xuống `1.2` (trên Desktop PostProcessingPipeline), làm cho các chi tiết kim loại vàng champagne, búa gõ và đèn spotlight tỏa quầng sáng huyền ảo lộng lẫy giữa bóng tối rạp hát.
+  3. Tối Góc Tập Trung Thị Giác (Contextual Focus Vignette - 2 Tầng Song Phương): Tăng độ tối viền quang học `vignetteDarkness` từ `0.15` lên `0.35` (WebGL Desktop) kết hợp lớp phủ chuyển tiếp opacity 2 lớp tách biệt trong `CinematicOverlay` (2D DOM Mobile), loại bỏ 100% giật khựng CSS gradient và tập trung tuyệt đối ánh mắt người chơi vào sàn đấu giá.
+- **Hạ tầng hoàn tất**:
+  * `src/client/3d/time_of_day_lighting.tsx` (323 LOC — Tier 2 <= 500 LOC): Xuất khẩu `calculateBidFlashIntensity`, đọc trực tiếp `s.auction?.currentBid` (Zero Dirty Cast C1), kích hoạt xung flash $t=0$ khi giá thầu tăng và cộng hưởng ánh sáng trong render loop 60 FPS.
+  * `src/client/3d/post_processing_pipeline.tsx` (200 LOC — Tier 2 <= 500 LOC): Xuất khẩu `calculateDynamicBloomThreshold` và `calculateDynamicVignetteDarkness`, khắc phục ES6 default param shadowing (P1).
+  * `src/client/3d/cinematic_effects.tsx` (135 LOC — Tier 2 <= 500 LOC): Dual-layer 2D Vignette CSS opacity cross-fade (Cyan tiêu chuẩn vs Midnight Slate `#0F172A`).
+  * `src/client/game_canvas.tsx` (452 LOC — Tier 2 <= 500 LOC): Truyền `isAuctionActive` vào nhánh inGame (L437); nhánh preMatch (L424) giữ nguyên; bảo toàn 100% comment `{/* <PostProcessingPipeline /> */}` ở cả 2 nhánh (C2).
+- **Kiểm thử & Bất biến**:
+  * `tests/client/auction_theatrical_fx.test.ts`: 16/16 atomic contract tests PASS 100% (Universal 5-Facet Matrix & Detroit Style).
+  * Bảo toàn 100% tests di sản: `post_processing_pipeline` (9 tests), `cinematic_effects` (5 tests), `time_of_day` (11 tests), `atmospheric_immersion_and_breeze` (16 tests) -> Tổng 57/57 tests PASS.
+  * Domain Invariant: Gotcha Invariant 16 (`Auction Theatrical FX & Dual-Layer Vignette Optical Tunneling`).
+  * Evidence Snapshot: `.agents/evidence/imp223_execution.json` (`executed: true`).
+- **Phê chuẩn**: `plan-griller` (P1-P5 HARDENED v3 APPROVED), `qa-tester` (Station 1 RED 15/16), `implementer` (Station 2 GREEN 16/16), `scout` (Station 2.5 PASS 100%), `spec-reviewer` (Station 3 APPROVED), `game-3d-visual-critic` (Station 3 APPROVED 9.5/10, disposition: ship).
+- **Trạng thái**: ✅ Hoàn thành IMP-223 (2026-09-29).
 
+---
 
+### [IMP-220] Corporate Bond Issuance in InsolvencyPhase & Auto-Solvency Transition
+- **Mục tiêu**: Tái cơ cấu nợ khẩn cấp bằng Trái phiếu Doanh nghiệp trong giai đoạn nguy cấp (`TurnPhase.InsolvencyPhase`), giải quyết triệt để vấn đề người chơi có tài sản ròng lớn nhưng âm tiền mặt bị kẹt không thể tự động cân đối hay phát hành trái phiếu; đồng thời tái đóng gói server bundle và giải quyết lỗi hồi quy touch target TC-212.14.
+- **Hạ tầng hoàn tất**:
+  * `src/domain/action_reasons.ts` (44 LOC — Tier 1 <= 400 LOC): Bổ sung hằng số `CANNOT_RECOVER: 'CANNOT_RECOVER'` vào `ActionRejectReason`.
+  * `src/server/intent_dispatcher.ts` (185 LOC — Tier 1 <= 400 LOC): Cho phép `INTENT_ISSUE_BOND` trong `InsolvencyPhase`, xóa bỏ magic string `'CANNOT_RECOVER'`, bổ sung chốt bảo vệ bản quyền lượt (Off-Turn Hijack Guard) từ chối `NOT_YOUR_TURN` nếu người chơi ngoài lượt can thiệp.
+  * `src/server/bond_manager.ts` (232 LOC — Tier 1 <= 400 LOC): Tự động chuyển pha FSM từ `InsolvencyPhase` sang `PropertyManagement` khi tiền vay từ trái phiếu giúp `balance >= 0` cho người chơi hiện tại; duy trì `InsolvencyPhase` nếu thâm hụt vẫn còn (`balance < 0`).
+  * `src/client/ui/actionable_notification.ts` (356 LOC — Tier 2 <= 500 LOC): Bổ sung 4 ánh xạ mã lỗi chi tiết `BOND_NOT_ELIGIBLE`, `CANNOT_RECOVER`, `BOND_COLLATERAL_LOCKED`, `ASSET_LOCKED`.
+  * `src/client/ui/modals/bond_issuance_tab.tsx` (178 LOC — Tier 2 <= 500 LOC): Nâng sàn chạm 3 thẻ tranche lên `min-h-[46px]` (giải quyết triệt để TC-212.14), hiển thị huy hiệu tái cơ cấu nợ `bond-insolvency-restructuring-badge`, đổi nhãn nút phát hành sang `CỨU NGUY TÀI CHÍNH` khi `isInInsolvency = true`.
+  * `src/client/ui/modals/property_portfolio_modal.tsx` (471 LOC — Tier 2 <= 480 LOC): Truyền cờ `isInInsolvency={isNegative}` trên cùng dòng prop (0-delta seam).
+  * `src/client/ui/modals/insolvency_banner.tsx` (108 LOC — Tier 2 <= 500 LOC): Cập nhật văn bản hướng dẫn bao gồm phương án phát hành trái phiếu doanh nghiệp.
+  * `dist/server/index.js`: Tái đóng gói thành công (`npm run build`), đồng bộ đầy đủ các intent mới.
+- **Kiểm thử & Bất biến**:
+  * `tests/contracts/imp220_insolvency_bond_and_auto_solvency_sync.test.ts`: 18/18 atomic contract tests PASS 100% (Universal 5-Facet Matrix).
+  * `tests/contracts/imp212_portfolio_bond_and_trade_clean_affordance.test.ts`: 16/16 atomic contract tests PASS 100% (TC-212.14 resolved).
+  * Adversarial Inversion: Station 1 RED (16 failed / 2 passed) -> Station 2 GREEN (18/18 passed).
+  * Typecheck: `tsc` 0 lỗi. UI Linter: `npm run lint:ui` 0 violations (203 files scanned).
+  * Domain Invariant: Gotcha Pillar I Invariant 6 (`Corporate Bond Restructuring & Insolvency FSM Solvency Auto-Transition`).
+  * Evidence Snapshot: `.agents/evidence/imp220_snapshot.json` (`executed: true`).
+- **Phê chuẩn**: `plan-griller` (P1-P5 Stress-Test), `qa-tester` (Station 1 RED), `implementer` (Station 2 GREEN), `scout` (Station 2.5 PASS), `spec-reviewer` (Station 3 APPROVED), `ui-craft-reviewer` (Station 3 APPROVED).
+- **Tech Debt**: Ghi nhận `DEBT-IMP220-01` (Chuẩn hóa magic string `'INVALID_PHASE'` tại `intent_dispatcher.ts` L143 & L157 sang `ActionRejectReason.INVALID_PHASE` trong đợt refactor toàn bộ dispatcher).
+- **Trạng thái**: ✅ Hoàn thành IMP-220 (2026-09-29).
 
+---
+
+### [IMP-224] Dynamic Depth of Field: Tilt-Shift Macro Điện Ảnh Theo Camera State
+- **Mục tiêu**: Kích hoạt hiệu ứng Depth of Field (DoF) có điều kiện theo trạng thái camera — bảo toàn 100% độ rõ nét 40 ô cờ ở góc nhìn tổng quan (Gotcha #54), mang lại cảm xúc thị giác sa bàn đồ chơi thủ công cao cấp kiểu Townscaper khi soi ô đất/xem sổ đỏ, và không gian điện ảnh cao trào Sotheby's khi đấu giá BĐS.
+  1. Overview & Motion Gate (`off`): Khi gieo xúc xắc (`isRolling = true`) hoặc quân cờ nhảy (`isPawnAnimating = true`), DoF ngắt tức thì (`enableDof: false`, `bokehScale: 0.0`, `focusRange: 320.0m`). Khi ở chế độ tổng quan bàn cờ không modal/focus, DoF tắt 100% để giữ nét căng 40 ô cờ và biểu giá niêm yết (bảo toàn Gotcha #54).
+  2. Tile Focus & Dynamic Focal Target (`tile`): Khi xem thẻ cờ (`activeModal`) hoặc khảo sát ô đất (`cameraFocusCell`), kích hoạt DoF nhẹ (`bokehScale: 0.28`, `focusRange: 9.0m`), tiêu cự quang học bám đúng tọa độ ô cờ `cellPosition(targetCell)` thay vì khóa cứng tâm bàn cờ [0, 0, 0] gây lệch mặt phẳng nét 7.63m.
+  3. Auction Theatrical Focus (`auction`): Khi mở sàn đấu giá (`activeModal === 'auction'`), áp dụng chuẩn Sotheby's (`bokehScale: 0.45`, `focusRange: 6.0m`), focal target khóa bục đấu giá trung tâm `[0, 3.0, 0]` (`CAMERA_CONFIG.auction_focus.target`), cộng hưởng với Champagne Bloom (threshold 1.2) và Focus Vignette (darkness 0.35) từ IMP-223.
+  4. GameOver Guard: Khi trận đấu kết thúc (`activeModal === 'game_over'`), cưỡng chế tắt DoF (`DOF_PROFILES.off`) và đưa target về `[0, 0, 0]`, triệt tiêu hoàn toàn rò rỉ làm mờ bảng vàng vinh danh.
+- **Hạ tầng hoàn tất**:
+  * `src/client/3d/post_processing_pipeline.tsx` (295 LOC — Tier 2 <= 500 LOC): Xuất khẩu `calculateDofConfig`, `resolveDofTarget`, `DOF_PROFILES`, `DofConfigParams`, `DofConfig`, `DofTargetParams`; destructure `dofBokehScale: propDofBokehScale`, memoize `targetVector` an toàn qua dispatcher guard; tuân thủ nghiêm ngặt Rules of Hooks.
+  * `src/client/game_canvas.tsx` (473 LOC — Tier 2 <= 500 LOC): Kết nối selectors Zustand (`isRolling`, `activePawnAnimation`, `cameraFocusCell`, `modalPayload`, `activeModal`) tính toán `dofConfig` & `dofTarget` và truyền vào `<PostProcessingPipeline />` nhánh inGame; bảo toàn 100% `isAuctionActive` và comment kiểm thử `{/* <PostProcessingPipeline /> */}` ở cả 2 nhánh.
+- **Kiểm thử & Bất biến**:
+  * `tests/client/dynamic_dof.test.ts` (201 LOC): 16/16 atomic contract tests PASS 100% (Universal 5-Facet Matrix, Detroit Classical TDD).
+  * Bảo toàn 100% tests di sản: `post_processing_pipeline` (9 tests), `anti_aliasing_and_visual_crispness` (19 tests), `auction_theatrical_fx` (16 tests), `imp150_mobile_ios_3d_perf_hardening` (18 tests) -> Tổng 78/78 tests PASS.
+  * TypeScript typecheck: `tsc --noEmit` 0 errors. UI Linter: `npm run lint:ui` 0 violations.
+  * Domain Invariant: Gotcha Invariant 17 (`Dynamic Depth of Field, Optical Focal Grounding & GameOver Guard`).
+  * Evidence Snapshot: `.agents/evidence/imp-224_snapshot.json` (`executed: true`, `contractTestsPassed: true`).
+- **Phê chuẩn**: `plan-griller` (P1-P5 HARDENED v3 APPROVED), `qa-tester` (Station 1 RED 14/16), `implementer` (Station 2 GREEN 16/16), `scout` (Station 2.5 PASS 100%), `code-reviewer` (Station 3 APPROVED), `game-3d-visual-critic` (Station 3 APPROVED 9.5/10), `spec-reviewer` (Station 3 APPROVED).
+- **Trạng thái**: ✅ Hoàn thành IMP-224 (2026-09-29).

@@ -147,7 +147,7 @@ const INTENT_DISPATCH: Record<PlayerIntent['type'], IntentHandler> = {
       return { success: false, reason: ActionRejectReason.NOT_YOUR_TURN };
     }
     const res = executeInsolvencyAfkRecovery(m, rc, p);
-    return { success: res.rescued, reason: res.bankrupt ? 'BANKRUPT' : (res.rescued ? undefined : 'CANNOT_RECOVER') };
+    return { success: res.rescued, reason: res.bankrupt ? 'BANKRUPT' : (res.rescued ? undefined : ActionRejectReason.CANNOT_RECOVER) };
   },
   INTENT_END_TURN: (m, rc, p) => {
     const room = m.getRoom(rc);
@@ -166,11 +166,16 @@ export function dispatchPlayerIntent(
 ): { success: boolean; reason?: string; rollResult?: RollResult } {
   const room = mgr.getRoom(roomCode);
   if (room?.phase === TurnPhase.InsolvencyPhase) {
+    const current = room.players[room.currentPlayerIndex];
+    if (current && current.id !== playerId) {
+      return { success: false, reason: ActionRejectReason.NOT_YOUR_TURN };
+    }
     if (
       intent.type !== 'INTENT_MORTGAGE' &&
       intent.type !== 'INTENT_DOWNGRADE' &&
       intent.type !== 'INTENT_BANKRUPTCY' &&
-      intent.type !== 'INTENT_AUTO_SOLVENCY'
+      intent.type !== 'INTENT_AUTO_SOLVENCY' &&
+      intent.type !== 'INTENT_ISSUE_BOND'
     ) {
       return { success: false, reason: 'INVALID_PHASE' };
     }

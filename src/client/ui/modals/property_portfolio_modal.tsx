@@ -108,7 +108,7 @@ export function PropertyPortfolioModal({
             balance={currentBalance}
             isMyTurn={isMyTurn}
             playerNetWorth={playerNetWorth}
-            unmortgagedPropertiesCount={unmortgagedPropertiesCount}
+            unmortgagedPropertiesCount={unmortgagedPropertiesCount} isInInsolvency={isNegative}
             onIssueBond={onIssueBond}
             onRepayBond={onRepayBond}
           />

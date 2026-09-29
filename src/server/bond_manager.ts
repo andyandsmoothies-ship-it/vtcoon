@@ -126,6 +126,15 @@ export function handleIssueBond(
     isActive: true,
   };
   player.bondContract = contract;
+
+  if (
+    room.phase === TurnPhase.InsolvencyPhase &&
+    room.players[room.currentPlayerIndex]?.id === player.id &&
+    player.balance >= 0
+  ) {
+    room.phase = TurnPhase.PropertyManagement;
+  }
+
   return { success: true, bondContract: contract };
 }
 

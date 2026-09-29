@@ -38,6 +38,7 @@ export const ActionRejectReason = {
   BOND_ALREADY_ACTIVE:       'BOND_ALREADY_ACTIVE',
   ASSET_LOCKED:              'ASSET_LOCKED',
   TRADE_ALREADY_PENDING:     'TRADE_ALREADY_PENDING',
+  CANNOT_RECOVER:            'CANNOT_RECOVER',
 } as const;
 
 export type ActionRejectReason = (typeof ActionRejectReason)[keyof typeof ActionRejectReason];

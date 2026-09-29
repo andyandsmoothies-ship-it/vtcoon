@@ -420,11 +420,11 @@ describe('[TC-IMP102/MSS][UI-S01/MSS][BR-UI-002] Zero 2D Price Decal & Pure 3D P
       }
     );
 
-    it('[TC-IMP102.24/MSS][UI-S01/MSS] Tax tile 4 STILL renders action label "NỘP 1.000" at y=300', () => {
+    it('[TC-IMP102.24/MSS][UI-S01/MSS] Tax tile 4 STILL renders action label "10% TIỀN MẶT" at y=300', () => {
       clearTileTextureCache();
       getTileTexture(4);
       const actionText = recordedFillTexts.find(
-        (t) => t.y === 300 && t.text === 'NỘP 1.000'
+        (t) => t.y === 300 && t.text === '10% TIỀN MẶT'
       );
       expect(actionText).toBeDefined();
       expect(actionText?.fillStyle).toBe('#FFFFFF');

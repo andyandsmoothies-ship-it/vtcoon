@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import type { Group, Mesh } from 'three';
 import { useEnvironmentStore } from '../store/environment_store';
+import { useGameStore } from '../store/game_store';
 import { useSafeFrame } from './safe_frame';
 
 /**
@@ -81,16 +82,29 @@ export function CinematicLightingAccents(): React.ReactElement {
  * 2D Cinematic Overlay — Lớp phủ quang học Tilt-Shift Macro & Lens Vignette cao cấp
  */
 export function CinematicOverlay(): React.ReactElement {
+  const activeModal = useGameStore((s) => s.activeModal);
+  const isAuction = activeModal === 'auction';
+
   return (
     <div
       className="pointer-events-none absolute inset-0 z-10 overflow-hidden select-none"
       aria-hidden="true"
     >
-      {/* 1. Lens Vignette: Tối góc quang học mô phỏng ống kính máy ảnh Cine chuyên nghiệp */}
+      {/* 1A. Lens Vignette Tiêu Chuẩn (Mờ dần khi đấu giá) */}
       <div
-        className="absolute inset-0"
+        className="absolute inset-0 transition-opacity duration-500 ease-out"
         style={{
+          opacity: isAuction ? 0 : 1,
           background: 'radial-gradient(ellipse at 50% 50%, transparent 70%, rgba(14, 116, 144, 0.12) 88%, rgba(12, 74, 110, 0.32) 100%)',
+        }}
+      />
+
+      {/* 1B. Lens Vignette Đấu Giá Kịch Nghệ Tím Than (Hiện dần khi đấu giá) */}
+      <div
+        className="absolute inset-0 transition-opacity duration-500 ease-out"
+        style={{
+          opacity: isAuction ? 1 : 0,
+          background: 'radial-gradient(ellipse at 50% 50%, transparent 50%, rgba(15, 23, 42, 0.40) 78%, rgba(15, 23, 42, 0.70) 100%)',
         }}
       />
 

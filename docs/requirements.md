@@ -46,7 +46,7 @@ Bản tài liệu thiết kế hoàn chỉnh của trò chơi **"Đại Gia Đ�
 | **01** | Cần Thơ (Cái Răng) | BĐS Đô thị (Nâu) | $600$ | Trung tâm thương mại & dịch vụ miền Tây. |
 | **02** | **PHIẾU THỊ TRƯỜNG** | Sự kiện vĩ mô | — | Lật thẻ biến động kinh tế tác động toàn bàn cờ. |
 | **03** | An Giang (Châu Đốc) | BĐS Đô thị (Nâu) | $600$ | Thương mại biên mậu và dịch vụ tâm linh. |
-| **04** | **Lệ Phí Đăng Ký Đất Đai** | Thuế Nhà nước | — | Nộp 1.000 Tr. VNĐ (Thanh Nhãn Hành Động: [NỘP 1.000 TR.] đỏ hồng). |
+| **04** | **Lệ Phí Đăng Ký Đất Đai** | Thuế Nhà nước | — | Nộp 10% tiền mặt, tối đa 2.000 Tr. VNĐ (Thanh Nhãn Hành Động: [10% TIỀN MẶT] đỏ hồng). |
 | **05** | **Cảng HKQT Long Thành** | Hạ tầng Giao thông 1 | $2.000$ | Đầu mối hàng không quốc tế; thu phí lưu thông. |
 | **06** | Bình Dương (Tổ Hợp Thể Thao & Golf) | BĐS Dịch vụ & Giải trí (Xanh Da Trời) | $1.000$ | Thể thao cao cấp, ẩm thực dịch vụ ven sông. |
 | **07** | **PHIẾU CƠ HỘI** | Sự kiện cá nhân | — | Rút thẻ rủi ro, đầu tư hoặc tương tác đối kháng. |

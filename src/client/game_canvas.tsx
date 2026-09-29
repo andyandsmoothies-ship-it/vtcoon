@@ -17,6 +17,7 @@ import { CinematicOverlay } from './3d/cinematic_effects';
 import { EventCard3D } from './3d/event_card_3d';
 import { Coronation3DStage } from './3d/coronation_3d_stage';
 import { PostProcessingPipeline } from './3d/post_processing_pipeline';
+import { calculateDofConfig, resolveDofTarget } from './3d/post_processing_pipeline';
 import { TimeOfDayLighting } from './3d/time_of_day_lighting';
 import { useEnvironmentStore, TIME_OF_DAY_PRESETS } from './store/environment_store';
 import { useVfxStore } from './store/vfx_store';
@@ -356,6 +357,24 @@ export function GameCanvas({
 
   const playersInfo = useGameStore((s) => s.playersInfo);
   const playerPositions = useGameStore((s) => s.playerPositions);
+  const activeModal = useGameStore((s) => s.activeModal);
+  const isAuctionActive = activeModal === 'auction';
+  const isRolling = useGameStore((s) => s.isRolling);
+  const isPawnAnimating = useGameStore((s) => s.activePawnAnimation?.isAnimating ?? false);
+  const cameraFocusCell = useGameStore((s) => s.cameraFocusCell);
+  const modalPayload = useGameStore((s) => s.modalPayload);
+
+  const dofConfig = calculateDofConfig({
+    activeModal,
+    cameraFocusCell,
+    isRolling,
+    isPawnAnimating,
+  });
+  const dofTarget = resolveDofTarget({
+    activeModal,
+    cameraFocusCell,
+    modalPayload,
+  });
   const timeOfDayPhase = useEnvironmentStore((s) => s.phase);
   const canvasBg = TIME_OF_DAY_PRESETS[timeOfDayPhase].skyColor;
 
@@ -434,7 +453,15 @@ export function GameCanvas({
                 <EventCard3D />
                 <Coronation3DStage />
                 {/* <PostProcessingPipeline /> */}
-                <PostProcessingPipeline isMobile={isMobileDevice} enabled={!isMobileDevice} />
+                <PostProcessingPipeline
+                  isMobile={isMobileDevice}
+                  enabled={!isMobileDevice}
+                  isAuctionActive={isAuctionActive}
+                  enableDof={dofConfig.enableDof}
+                  dofBokehScale={dofConfig.bokehScale}
+                  dofFocusRange={dofConfig.focusRange}
+                  dofTarget={dofTarget}
+                />
               </>
             )}
           </>

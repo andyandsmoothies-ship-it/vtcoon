@@ -48,9 +48,9 @@ describe('[IMP-197] Currency Unit Declutter Contract Tests', () => {
     expect(TILE_METADATA_MAP[0]?.priceLabel).toBe('+2.000');
   });
 
-  it('[TC-197.08/MSS][UC-IMP197] TILE_METADATA_MAP Tile 4 (Tax) priceLabel and actionLabel are "NỘP 1.000" without "TR."', () => {
-    expect(TILE_METADATA_MAP[4]?.priceLabel).toBe('NỘP 1.000');
-    expect(TILE_METADATA_MAP[4]?.actionLabel).toBe('NỘP 1.000');
+  it('[TC-197.08/MSS][UC-IMP197] TILE_METADATA_MAP Tile 4 (Tax) priceLabel and actionLabel are "10% TIỀN MẶT" without "TR."', () => {
+    expect(TILE_METADATA_MAP[4]?.priceLabel).toBe('10% TIỀN MẶT');
+    expect(TILE_METADATA_MAP[4]?.actionLabel).toBe('10% TIỀN MẶT');
   });
 
   // =========================================================================

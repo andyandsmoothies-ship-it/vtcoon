@@ -354,14 +354,14 @@ describe('[TC-IMP90/MSS][UC-IMP90] Non-Property Tiles Distinct Format & Semantic
     }
   );
 
-  it('[TC-90.12/MSS][Facet3-Footer] Ô 04 Lệ Phí Đất kết xuất nhãn hành động "NỘP 1.000" ở đáy ô', () => {
+  it('[TC-90.12/MSS][Facet3-Footer] Ô 04 Lệ Phí Đất kết xuất nhãn hành động "10% TIỀN MẶT" ở đáy ô', () => {
     recordedFillTexts = [];
     clearTileTextureCache();
     getTileTexture(4);
 
     const actionEntry = recordedFillTexts.find((t) => t.y >= 270 && t.y <= 315);
     expect(actionEntry, 'Ô 04 Lệ Phí Đất phải có nhãn nộp phí').toBeDefined();
-    expect(actionEntry?.text).toBe('NỘP 1.000');
+    expect(actionEntry?.text).toBe('10% TIỀN MẶT');
   });
 
   it('[TC-90.13/MSS][Facet3-Footer] Ô 38 Sàn HOSE kết xuất nhãn hành động "1D6 ĐẶT CƯỢC" ở đáy ô', () => {

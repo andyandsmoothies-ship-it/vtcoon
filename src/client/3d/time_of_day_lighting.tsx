@@ -71,6 +71,25 @@ export function calculateFogTargets(
   return { near: resolvedPreset.fogNear, far: resolvedPreset.fogFar, color: resolvedPreset.fogColor };
 }
 
+/**
+ * Tính toán cường độ xung ánh sáng phản hồi khi có lượt trả giá mới (Bid Flash).
+ * Xung ánh sáng bùng nổ tại t=0 và phân rã mượt mà theo hàm bậc hai (1 - t/duration)^2.
+ */
+export function calculateBidFlashIntensity(
+  baseIntensity: number,
+  timer: number,
+  boost: number = 1.5,
+  duration: number = 0.35
+): number {
+  if (!Number.isFinite(baseIntensity)) return 0;
+  if (!Number.isFinite(timer) || !Number.isFinite(boost) || !Number.isFinite(duration)) return baseIntensity;
+  if (timer < 0 || timer >= duration || duration <= 0) return baseIntensity;
+
+  const progress = timer / duration;
+  const decay = (1.0 - progress) * (1.0 - progress);
+  return baseIntensity + boost * decay;
+}
+
 function isThreeFog(fog: unknown): fog is Fog {
   return typeof fog === 'object' && fog !== null && 'isFog' in fog;
 }
@@ -89,13 +108,14 @@ function updateDirectLights(
   lerpRate: number,
   tempVec: Vector3,
   tempColor: Color,
+  flashBoost: number = 0,
 ): void {
   if (sun) {
     tempVec.set(preset.sunPosition[0], preset.sunPosition[1], preset.sunPosition[2]);
     sun.position.lerp(tempVec, lerpRate);
     tempColor.set(preset.sunColor);
     sun.color.lerp(tempColor, lerpRate);
-    const targetSun = isAuctionActive ? preset.sunIntensity * 0.15 : preset.sunIntensity;
+    const targetSun = (isAuctionActive ? preset.sunIntensity * 0.15 : preset.sunIntensity) + flashBoost;
     sun.intensity += (targetSun - sun.intensity) * lerpRate;
   }
   if (fill) {
@@ -127,6 +147,7 @@ function updateDiffuseAndAtmosphere(
   dt: number,
   lerpRate: number,
   tempColor: Color,
+  flashBoost: number = 0,
 ): void {
   if (gl && typeof gl.toneMappingExposure === 'number') {
     const targetExposure = calculateTargetExposure(phase, isAuctionActive);
@@ -136,7 +157,7 @@ function updateDiffuseAndAtmosphere(
   if (ambient) {
     tempColor.set(preset.ambientColor);
     ambient.color.lerp(tempColor, lerpRate);
-    ambient.intensity = calculateTheatricalAmbientIntensity(ambient.intensity, isAuctionActive, dt, preset.ambientIntensity, 0.15);
+    ambient.intensity = calculateTheatricalAmbientIntensity(ambient.intensity, isAuctionActive, dt, preset.ambientIntensity, 0.15) + (isAuctionActive ? flashBoost * 0.3 : 0);
   }
   if (hemi) {
     tempColor.set(preset.hemiSkyColor);
@@ -182,6 +203,9 @@ export function TimeOfDayLighting({ isMobile = false }: TimeOfDayLightingProps =
   const setPhase = useEnvironmentStore((s) => s.setPhase);
   const activeModal = useGameStore((s) => s.activeModal);
   const isAuctionActive = activeModal === 'auction';
+  const currentBid = useGameStore((s) => s.auction?.currentBid ?? 0);
+  const prevBidRef = useRef<number>(currentBid);
+  const bidFlashTimerRef = useRef<number>(1.0);
 
   const shadowMapSize = resolveShadowMapSize(isMobile);
 
@@ -211,8 +235,17 @@ export function TimeOfDayLighting({ isMobile = false }: TimeOfDayLightingProps =
     }
     const dt = Math.min(delta, 0.1);
     const lerpRate = 1 - Math.exp(-dt * 3.0);
-    updateDirectLights(sunRef.current, fillRef.current, rimRef.current, preset, phase, isAuctionActive, lerpRate, tempVec, tempColor);
-    updateDiffuseAndAtmosphere(ambientRef.current, hemiRef.current, state.scene, state.gl, preset, phase, isAuctionActive, dt, lerpRate, tempColor);
+
+    if (isAuctionActive && currentBid > prevBidRef.current) {
+      bidFlashTimerRef.current = 0;
+    }
+    prevBidRef.current = currentBid;
+    bidFlashTimerRef.current += dt;
+
+    const flashBoost = isAuctionActive ? calculateBidFlashIntensity(0, bidFlashTimerRef.current, 1.2, 0.35) : 0;
+
+    updateDirectLights(sunRef.current, fillRef.current, rimRef.current, preset, phase, isAuctionActive, lerpRate, tempVec, tempColor, flashBoost);
+    updateDiffuseAndAtmosphere(ambientRef.current, hemiRef.current, state.scene, state.gl, preset, phase, isAuctionActive, dt, lerpRate, tempColor, flashBoost);
     if (topDownRef.current) {
       const topDownTarget = calculateTopDownFill(phase, isAuctionActive);
       tempColor.set(topDownTarget.color);

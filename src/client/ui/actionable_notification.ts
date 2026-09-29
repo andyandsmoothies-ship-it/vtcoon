@@ -297,6 +297,34 @@ const ACTIONABLE_NOTIFICATIONS_MAP: Record<string, ActionableNotification> = {
     tone: 'info',
     actionHint: 'Chờ hệ thống tự động làm mới phiên kết nối.',
   },
+  BOND_NOT_ELIGIBLE: {
+    icon: '📜',
+    title: 'Chưa Đủ Điều Kiện Phát Hành Trái Phiếu',
+    description: 'Cần tối thiểu 3.000 Net Worth và 2 bất động sản chưa thế chấp để làm tài sản bảo đảm.',
+    tone: 'warning',
+    actionHint: 'Tích lũy thêm tài sản hoặc giải chấp bớt bất động sản trước khi phát hành trái phiếu.',
+  },
+  CANNOT_RECOVER: {
+    icon: '📉',
+    title: 'Không Thể Cân Đối Tài Chính Tự Động',
+    description: 'Tổng giá trị tài sản có thể giải tỏa hoặc thế chấp không đủ để bù đắp số dư âm.',
+    tone: 'error',
+    actionHint: 'Hãy cân nhắc phát hành trái phiếu doanh nghiệp hoặc tuyên bố phá sản.',
+  },
+  BOND_COLLATERAL_LOCKED: {
+    icon: '🔒',
+    title: 'Tài Sản Bảo Đảm Trái Phiếu',
+    description: 'Bất động sản này đang dùng làm tài sản bảo đảm cho hợp đồng trái phiếu doanh nghiệp!',
+    tone: 'warning',
+    actionHint: 'Cần tất toán khoản nợ trái phiếu để giải tỏa tài sản bảo đảm.',
+  },
+  ASSET_LOCKED: {
+    icon: '🔒',
+    title: 'Tài Sản Đang Trong Giao Dịch',
+    description: 'Bất động sản này đang nằm trong đề xuất đàm phán hoặc giao dịch chờ duyệt.',
+    tone: 'warning',
+    actionHint: 'Vui lòng chờ giao dịch hiện tại hoàn tất hoặc hủy đề xuất.',
+  },
 };
 
 const DEFAULT_FALLBACK_NOTIFICATION: ActionableNotification = {

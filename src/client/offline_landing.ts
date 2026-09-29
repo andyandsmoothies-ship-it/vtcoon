@@ -172,8 +172,12 @@ export function executeCellLanding(
   } else if (tile.type === CellType.Tax || tile.type === CellType.TaxOrder) {
     AudioEngine.playSfx(SoundEffect.TAX_PENALTY);
     if (!isConnected) {
+      const curBalance = activePlayer?.balance ?? 15000;
+      const taxAmount = tile.type === CellType.Tax
+        ? Math.min(2000, Math.max(0, Math.floor(curBalance * 0.1)))
+        : 1000;
       state.addFloatingText({
-        text: '-1.000',
+        text: `-${taxAmount.toLocaleString('vi-VN')}`,
         type: FloatingTextType.Penalty,
         playerId: activeId,
         actionType: 'tax',

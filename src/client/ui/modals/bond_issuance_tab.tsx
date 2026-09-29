@@ -8,6 +8,7 @@ interface BondIssuanceTabProps {
   readonly isMyTurn?: boolean;
   readonly playerNetWorth?: number;
   readonly unmortgagedPropertiesCount?: number;
+  readonly isInInsolvency?: boolean;
   readonly onIssueBond?: (trancheId?: BondTrancheId) => void;
   readonly onRepayBond?: () => void;
 }
@@ -18,6 +19,7 @@ export function BondIssuanceTab({
   isMyTurn,
   playerNetWorth = 0,
   unmortgagedPropertiesCount = 0,
+  isInInsolvency,
   onIssueBond,
   onRepayBond,
 }: BondIssuanceTabProps): React.ReactElement {
@@ -93,7 +95,7 @@ export function BondIssuanceTab({
               key={t.id}
               type="button"
               onClick={() => setSelectedTranche(t.id)}
-              className={`p-3 rounded-xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between min-h-[96px] ${
+              className={`p-3 rounded-xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between min-h-[46px] sm:min-h-[96px] ${
                 isSelected
                   ? 'border-amber-600 bg-amber-50 shadow-sm ring-2 ring-amber-400/50'
                   : 'border-slate-300 bg-white/80 hover:bg-white text-slate-700'
@@ -141,6 +143,19 @@ export function BondIssuanceTab({
         </div>
       )}
 
+      {isInInsolvency && (
+        <div
+          data-testid="bond-insolvency-restructuring-badge"
+          className="p-3 bg-rose-50 border-2 border-rose-300 rounded-xl text-rose-900 text-xs font-semibold flex items-center gap-2"
+        >
+          <span className="text-base" aria-hidden="true">⚡</span>
+          <div>
+            <strong className="block text-rose-950 font-black">TÁI CƠ CẤU NỢ KHẨN CẤP</strong>
+            <span>Phát hành trái phiếu sẽ lập tức bơm vốn lưu động để xóa thâm hụt và khôi phục hoạt động kinh doanh!</span>
+          </div>
+        </div>
+      )}
+
       <button
         type="button"
         data-testid="issue-bond-btn"
@@ -152,7 +167,11 @@ export function BondIssuanceTab({
             : 'bg-slate-200 text-slate-400 border border-slate-300 shadow-none cursor-not-allowed'
         }`}
       >
-        {canIssue ? `PHÁT HÀNH TRÁI PHIẾU: ${trancheConfig.name.toUpperCase()} (+${formatCurrency(loanPrincipal)})` : 'PHÁT HÀNH TRÁI PHIẾU'}
+        {canIssue
+          ? (isInInsolvency
+              ? `CỨU NGUY TÀI CHÍNH: PHÁT HÀNH ${trancheConfig.name.toUpperCase()} (+${formatCurrency(loanPrincipal)})`
+              : `PHÁT HÀNH TRÁI PHIẾU: ${trancheConfig.name.toUpperCase()} (+${formatCurrency(loanPrincipal)})`)
+          : 'PHÁT HÀNH TRÁI PHIẾU'}
       </button>
     </div>
   );

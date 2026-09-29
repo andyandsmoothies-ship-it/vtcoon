@@ -69,7 +69,7 @@ export function InsolvencyBanner({
 
       {/* Hướng dẫn thoát nợ */}
       <p className="text-xs text-slate-700 leading-relaxed font-medium">
-        Bạn phải thế chấp bất động sản hoặc hạ cấp công trình để đưa số dư tài khoản về mức dương trước khi kết thúc lượt!
+        Bạn phải thế chấp bất động sản, hạ cấp công trình hoặc phát hành trái phiếu doanh nghiệp để đưa số dư tài khoản về mức dương trước khi kết thúc lượt!
       </p>
 
       {/* Các nút hành động */}

@@ -13,9 +13,12 @@ import { Vector3 } from 'three';
 import { ToneMappingMode } from 'postprocessing';
 import { resolveAdaptivePostProcessing } from '../ui/ui_helpers';
 import { useTelemetryStore } from '../telemetry/telemetry_store';
+import { CAMERA_CONFIG } from './camera_state_machine';
+import { cellPosition } from './board_coords';
 
 export interface PostProcessingPipelineProps {
   enabled?: boolean;
+  isAuctionActive?: boolean;
   enableDof?: boolean;
   enableBloom?: boolean;
   enableAo?: boolean;
@@ -30,6 +33,7 @@ export interface PostProcessingPipelineProps {
   dofBokehScale?: number;
   bloomIntensity?: number;
   bloomThreshold?: number;
+  vignetteDarkness?: number;
   aoIntensity?: number;
   aoRadius?: number;
   aoHalfRes?: boolean;
@@ -63,8 +67,109 @@ export const DEFAULT_PIPELINE_CONFIG = {
   vignetteDarkness: 0.15,
 } as const;
 
+export interface DofConfigParams {
+  readonly activeModal?: string | null;
+  readonly cameraFocusCell?: number | null;
+  readonly isRolling?: boolean;
+  readonly isPawnAnimating?: boolean;
+}
+
+export interface DofConfig {
+  readonly enableDof: boolean;
+  readonly bokehScale: number;
+  readonly focusRange: number;
+}
+
+export interface DofTargetParams {
+  readonly activeModal?: string | null;
+  readonly cameraFocusCell?: number | null;
+  readonly modalPayload?: unknown;
+}
+
+export const DOF_PROFILES = {
+  off:     { enableDof: false, bokehScale: 0.00, focusRange: 320.0 },
+  tile:    { enableDof: true,  bokehScale: 0.28, focusRange: 9.0   },
+  auction: { enableDof: true,  bokehScale: 0.45, focusRange: 6.0   },
+} as const satisfies Record<string, DofConfig>;
+
+/**
+ * Tính cấu hình DoF theo trạng thái game (pure function).
+ * Thứ tự ưu tiên: motion/rolling (OFF) > auction > tile > overview (OFF).
+ */
+export function calculateDofConfig(params?: DofConfigParams): DofConfig {
+  if (!params || params.isPawnAnimating || params.isRolling) return DOF_PROFILES.off;
+  if (params.activeModal === 'auction') return DOF_PROFILES.auction;
+  if (params.activeModal === 'game_over') return DOF_PROFILES.off;
+  if (Boolean(params.activeModal)) return DOF_PROFILES.tile;
+  if (params.cameraFocusCell !== null && params.cameraFocusCell !== undefined && Number.isFinite(params.cameraFocusCell)) {
+    return DOF_PROFILES.tile;
+  }
+  return DOF_PROFILES.off;
+}
+
+/**
+ * Tính tọa độ focal target quang học chuẩn xác (pure function).
+ * Ưu tiên: auction target [0, 3, 0] > game_over [0, 0, 0] > modalPayload.cellIndex > cameraFocusCell > [0, 0, 0].
+ */
+export function resolveDofTarget(params?: DofTargetParams): [number, number, number] {
+  if (!params) return [0, 0, 0];
+  if (params.activeModal === 'auction') {
+    const t = CAMERA_CONFIG.auction_focus.target;
+    return [t[0], t[1], t[2]];
+  }
+  if (params.activeModal === 'game_over') {
+    return [0, 0, 0];
+  }
+
+  const payloadCell =
+    params.modalPayload && typeof params.modalPayload === 'object' && 'cellIndex' in params.modalPayload
+      ? (params.modalPayload as { cellIndex?: unknown }).cellIndex
+      : undefined;
+
+  const targetCell =
+    typeof payloadCell === 'number' && Number.isFinite(payloadCell)
+      ? payloadCell
+      : params.cameraFocusCell;
+
+  if (targetCell !== null && targetCell !== undefined && Number.isFinite(targetCell)) {
+    return cellPosition(targetCell);
+  }
+  return [0, 0, 0];
+}
+
+export function calculateDynamicBloomThreshold(
+  isAuctionActive: boolean,
+  baseThreshold: number = DEFAULT_PIPELINE_CONFIG.bloomThreshold,
+  auctionThreshold: number = 1.2
+): number {
+  if (!Number.isFinite(baseThreshold) || !Number.isFinite(auctionThreshold)) return 2.5;
+  return isAuctionActive ? auctionThreshold : baseThreshold;
+}
+
+export function calculateDynamicVignetteDarkness(
+  isAuctionActive: boolean,
+  baseDarkness: number = DEFAULT_PIPELINE_CONFIG.vignetteDarkness,
+  auctionDarkness: number = 0.35
+): number {
+  if (!Number.isFinite(baseDarkness) || !Number.isFinite(auctionDarkness)) return 0.15;
+  const raw = isAuctionActive ? auctionDarkness : baseDarkness;
+  return Math.max(0.0, Math.min(1.0, raw));
+}
+
+type ReactWithDispatcher = typeof React & {
+  __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED?: {
+    ReactCurrentDispatcher?: {
+      current?: unknown;
+    };
+  };
+};
+
 function useSafeTelemetryFps(): number {
   try {
+    const dispatcher = (React as ReactWithDispatcher)?.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED?.ReactCurrentDispatcher?.current;
+    if (!dispatcher) {
+      return typeof window !== 'undefined' ? useTelemetryStore.getState().metrics.fps : 60;
+    }
     return useTelemetryStore((s) => s.metrics.fps);
   } catch {
     return typeof window !== 'undefined' ? useTelemetryStore.getState().metrics.fps : 60;
@@ -73,6 +178,7 @@ function useSafeTelemetryFps(): number {
 
 export function PostProcessingPipeline({
   enabled = DEFAULT_PIPELINE_CONFIG.enabled,
+  isAuctionActive = false,
   enableDof = DEFAULT_PIPELINE_CONFIG.enableDof,
   enableBloom = DEFAULT_PIPELINE_CONFIG.enableBloom,
   enableAo = DEFAULT_PIPELINE_CONFIG.enableAo,
@@ -84,19 +190,32 @@ export function PostProcessingPipeline({
   multisampling = DEFAULT_PIPELINE_CONFIG.multisampling,
   dofTarget = DEFAULT_PIPELINE_CONFIG.dofTarget,
   dofFocusRange = DEFAULT_PIPELINE_CONFIG.dofFocusRange,
-  dofBokehScale = DEFAULT_PIPELINE_CONFIG.dofBokehScale,
+  dofBokehScale: propDofBokehScale,
   bloomIntensity = DEFAULT_PIPELINE_CONFIG.bloomIntensity,
-  bloomThreshold = DEFAULT_PIPELINE_CONFIG.bloomThreshold,
+  bloomThreshold: propBloomThreshold,
+  vignetteDarkness: propVignetteDarkness,
   aoIntensity = DEFAULT_PIPELINE_CONFIG.aoIntensity,
   aoRadius = DEFAULT_PIPELINE_CONFIG.aoRadius,
   aoHalfRes = DEFAULT_PIPELINE_CONFIG.aoHalfRes,
   fps,
 }: PostProcessingPipelineProps): React.ReactElement<{ children?: any }> | null {
+  const currentFps = fps !== undefined ? fps : useSafeTelemetryFps();
+  const dispatcher = (React as ReactWithDispatcher)?.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED?.ReactCurrentDispatcher?.current;
+  const targetVector = dispatcher
+    ? React.useMemo(
+        () => new Vector3(dofTarget[0], dofTarget[1], dofTarget[2]),
+        [dofTarget[0], dofTarget[1], dofTarget[2]]
+      )
+    : new Vector3(dofTarget[0], dofTarget[1], dofTarget[2]);
+
   if (!enabled) {
     return null;
   }
 
-  const currentFps = fps !== undefined ? fps : useSafeTelemetryFps();
+  const resolvedBokehScale = propDofBokehScale !== undefined
+    ? propDofBokehScale
+    : DEFAULT_PIPELINE_CONFIG.dofBokehScale;
+
   const adaptiveAo = resolveAdaptivePostProcessing({
     fps: currentFps,
     isMobile: Boolean(isMobile || disableAoOnMobile),
@@ -105,8 +224,19 @@ export function PostProcessingPipeline({
   const resolvedEnableAo = adaptiveAo.enableAo;
   const resolvedAoQuality = adaptiveAo.aoQuality;
   const resolvedAoHalfRes = aoHalfRes !== undefined ? aoHalfRes : adaptiveAo.aoHalfRes;
-  const targetVector = new Vector3(dofTarget[0], dofTarget[1], dofTarget[2]);
   const resolvedEnableSmaa = enableSmaa && !isMobile;
+
+  const resolvedBloomThreshold = propBloomThreshold !== undefined
+    ? propBloomThreshold
+    : calculateDynamicBloomThreshold(Boolean(isAuctionActive), DEFAULT_PIPELINE_CONFIG.bloomThreshold, 1.2);
+
+  const resolvedVignetteDarkness = propVignetteDarkness !== undefined
+    ? propVignetteDarkness
+    : calculateDynamicVignetteDarkness(
+        Boolean(isAuctionActive),
+        DEFAULT_PIPELINE_CONFIG.vignetteDarkness,
+        0.35
+      );
 
   return (
     <EffectComposer multisampling={multisampling} autoClear={false}>
@@ -125,9 +255,9 @@ export function PostProcessingPipeline({
       {/* 2. Bloom: Ánh kim vàng champagne, đèn đỉnh tháp Landmark Bitexco, đèn ngọn hải đăng */}
       {enableBloom && (
         <Bloom
-          luminanceThreshold={bloomThreshold}
+          luminanceThreshold={resolvedBloomThreshold}
           luminanceSmoothing={DEFAULT_PIPELINE_CONFIG.bloomSmoothing}
-          intensity={isMobile ? 0.12 : bloomIntensity}
+          intensity={isMobile ? 0.12 : (isAuctionActive ? 0.30 : bloomIntensity)}
           mipmapBlur={!isMobile}
           radius={DEFAULT_PIPELINE_CONFIG.bloomRadius}
         />
@@ -138,7 +268,7 @@ export function PostProcessingPipeline({
         <DepthOfField
           target={targetVector}
           focusRange={dofFocusRange}
-          bokehScale={dofBokehScale}
+          bokehScale={resolvedBokehScale}
         />
       )}
 
@@ -146,7 +276,7 @@ export function PostProcessingPipeline({
       {enableVignette && (
         <Vignette
           offset={DEFAULT_PIPELINE_CONFIG.vignetteOffset}
-          darkness={DEFAULT_PIPELINE_CONFIG.vignetteDarkness}
+          darkness={resolvedVignetteDarkness}
           eskil={false}
         />
       )}

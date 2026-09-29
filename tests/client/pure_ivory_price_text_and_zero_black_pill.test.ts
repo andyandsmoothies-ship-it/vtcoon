@@ -536,12 +536,12 @@ describe('[TC-PIPT01/MSS..TC-PIPT04/A4][UI-S01/MSS][BR-UI-002] Pure Ivory Price 
       expect(actionText).toBeDefined();
     });
 
-    it('[TC-PIPT04.03/MSS][UI-S01/MSS][BR-UI-002][Facet4-Preservation] Ô Lệ Phí (cellIndex 4) bảo tồn Action Badge đỏ hồng #E11D48 với nhãn "NỘP 1.000"', () => {
+    it('[TC-PIPT04.03/MSS][UI-S01/MSS][BR-UI-002][Facet4-Preservation] Ô Lệ Phí (cellIndex 4) bảo tồn Action Badge đỏ hồng #E11D48 với nhãn "10% TIỀN MẶT"', () => {
       getTileTexture(4);
       const badge = recordedRoundRects.find((r) => r.y === 274);
       expect(badge).toBeDefined();
       expect(badge?.fillStyle).toBe('#E11D48');
-      const actionText = recordedFillTexts.find((t) => t.text === 'NỘP 1.000');
+      const actionText = recordedFillTexts.find((t) => t.text === '10% TIỀN MẶT');
       expect(actionText).toBeDefined();
     });
 
