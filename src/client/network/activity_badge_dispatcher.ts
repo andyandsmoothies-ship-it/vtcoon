@@ -1,4 +1,4 @@
-// [UI-S06/MSS][IMP-187][IMP-201] ActivityBadgeDispatcher — Floating badge triggers, audio & VFX synchronization
+// [UI-S06/MSS][IMP-187][IMP-201][IMP-225] ActivityBadgeDispatcher — Floating badge triggers, audio & VFX synchronization
 import { useGameStore, type GameState, FloatingTextType } from '../store/game_store.js';
 import type { ActivityLogEntry } from '../store/activity_store.js';
 import { formatCurrency } from '../ui/ui_helpers.js';
@@ -23,8 +23,7 @@ export function getPawnLandingDelay(playerId?: string): number {
     const rawDiff = (state.pendingPawnMove.targetCell - (state.pendingPawnMove.fromCell ?? 0)) % 40;
     const steps = ((rawDiff % 40) + 40) % 40;
     const stepMs = (state.pendingPawnMove.isBot ? BOT_STEP_DURATION : (HOP_DURATION + LANDING_DURATION)) * 1000;
-    const diceDelay = state.isRolling ? 1200 : 0;
-    return Math.round(diceDelay + steps * stepMs);
+    return Math.round((state.isRolling ? 1200 : 0) + steps * stepMs);
   }
   const anim = state.activePawnAnimation;
   if (!anim || anim.playerId !== playerId || !anim.waypoints?.length) return 0;
@@ -34,14 +33,8 @@ export function getPawnLandingDelay(playerId?: string): number {
 }
 
 export function scheduleAction(action: () => void, delayMs: number): ReturnType<typeof setTimeout> | null {
-  if (delayMs <= 0) {
-    action();
-    return null;
-  }
-  const timer = setTimeout(() => {
-    pendingBadgeTimers.delete(timer);
-    action();
-  }, delayMs);
+  if (delayMs <= 0) { action(); return null; }
+  const timer = setTimeout(() => { pendingBadgeTimers.delete(timer); action(); }, delayMs);
   pendingBadgeTimers.add(timer);
   return timer;
 }
@@ -85,25 +78,25 @@ export function handleBuyBadge(act: ActivityLogEntry, state: GameState): void {
   const match = act.message.match(/đã mua\s+(.+?)(?:\s+với giá|$)/);
   const cellName = match?.[1]?.trim() || (act.cellIndex !== undefined ? getCellName(act.cellIndex) : '');
   const amount = act.amount !== undefined ? -Math.abs(act.amount) : 0;
-  const delay = getPawnLandingDelay(act.playerId);
   scheduleAction(() => {
-    state.addFloatingText({
-      text: formatCurrency(amount), type: FloatingTextType.Penalty, playerId: act.playerId ?? '',
-      actionType: 'buy', title: cellName ? `Mua ${cellName}` : 'Mua BĐS', cellIndex: act.cellIndex,
-    });
-  }, delay);
+    state.addFloatingText({ text: formatCurrency(amount), type: FloatingTextType.Penalty, playerId: act.playerId ?? '', actionType: 'buy', title: cellName ? `Mua ${cellName}` : 'Mua BĐS', cellIndex: act.cellIndex });
+  }, getPawnLandingDelay(act.playerId));
 }
 
 export function handleTaxBadge(act: ActivityLogEntry, state: GameState): void {
   const amount = act.amount !== undefined ? -Math.abs(act.amount) : 0;
   const baseTitle = act.message.includes('Lệ Phí') ? 'Lệ Phí Đất Đai' : 'Thuế Đất Đai';
-  const delay = getPawnLandingDelay(act.playerId);
   scheduleAction(() => {
-    state.addFloatingText({
-      text: formatCurrency(amount), type: FloatingTextType.Penalty, playerId: act.playerId ?? '',
-      actionType: 'tax', title: `Nộp ${baseTitle} ➔ Kho Bạc`, cellIndex: act.cellIndex,
-    });
-  }, delay);
+    state.addFloatingText({ text: formatCurrency(amount), type: FloatingTextType.Penalty, playerId: act.playerId ?? '', actionType: 'tax', title: `Nộp ${baseTitle} ➔ Kho Bạc`, cellIndex: act.cellIndex });
+  }, getPawnLandingDelay(act.playerId));
+}
+
+function handleSalaryBadge(act: ActivityLogEntry, state: GameState): void {
+  const amount = act.amount ?? 2000;
+  scheduleAction(() => {
+    SoundEngine.playVictoryChime();
+    state.addFloatingText({ text: `+${formatCurrency(amount)}`, type: FloatingTextType.Reward, playerId: act.playerId ?? '', actionType: 'salary', title: 'Lương Vượt Ô Bắt Đầu', formula: 'Hoàn thành 1 vòng sa bàn (+2.000 Tr.)' });
+  }, getPawnLandingDelay(act.playerId));
 }
 
 function handleUpgradeBadge(act: ActivityLogEntry, state: GameState): void {
@@ -111,46 +104,36 @@ function handleUpgradeBadge(act: ActivityLogEntry, state: GameState): void {
   const amount = act.amount !== undefined ? -Math.abs(act.amount) : 0;
   const levelMatch = act.message.match(/(C[1-3]|Nhà Phố|Khách Sạn|Biệt Thự)/i);
   const levelStr = levelMatch ? levelMatch[0] : (act.cellIndex !== undefined && state.levelMap[act.cellIndex] ? LEVEL_NAMES[state.levelMap[act.cellIndex] as 1 | 2 | 3] : '');
-  const title = levelStr ? `Nâng cấp ${levelStr} ${cellName}`.trim() : (cellName ? `Nâng cấp ${cellName}` : 'Nâng cấp công trình');
   state.addFloatingText({
     text: formatCurrency(amount), type: FloatingTextType.Penalty, playerId: act.playerId ?? '',
-    actionType: 'upgrade', title, cellIndex: act.cellIndex,
+    actionType: 'upgrade', title: levelStr ? `Nâng cấp ${levelStr} ${cellName}`.trim() : (cellName ? `Nâng cấp ${cellName}` : 'Nâng cấp công trình'), cellIndex: act.cellIndex,
   });
 }
 
 function handleBailBadge(act: ActivityLogEntry, state: GameState): void {
   const amount = act.amount !== undefined ? -Math.abs(act.amount) : -MIN_BAIL_AMOUNT;
   const isTimeout = act.message.includes('Hết 3 lượt') || act.message.includes('bắt buộc');
-  const formula = isTimeout
-    ? 'Hết 3 lượt không ra đôi: Phạt bảo lãnh bắt buộc'
-    : `Bảo lãnh sớm: 10% tài sản ròng (Sàn ${MIN_BAIL_AMOUNT} Tr.)`;
+  const formula = isTimeout ? 'Hết 3 lượt không ra đôi: Phạt bảo lãnh bắt buộc' : `Bảo lãnh sớm: 10% tài sản ròng (Sàn ${MIN_BAIL_AMOUNT} Tr.)`;
   state.addFloatingText({
-    text: formatCurrency(amount),
-    type: FloatingTextType.Penalty,
-    playerId: act.playerId ?? '',
-    actionType: 'bail',
+    text: formatCurrency(amount), type: FloatingTextType.Penalty, playerId: act.playerId ?? '', actionType: 'bail',
     title: isTimeout ? 'Cưỡng chế kiểm toán ➔ Nộp Kho Bạc' : 'Bảo lãnh kiểm toán (Ô 10) ➔ Nộp Kho Bạc',
-    cellIndex: act.cellIndex ?? 10,
-    formula,
-    bailKind: isTimeout ? 'forced' : 'voluntary',
+    cellIndex: act.cellIndex ?? 10, formula, bailKind: isTimeout ? 'forced' : 'voluntary',
   });
 }
 
 function handleMortgageBadge(act: ActivityLogEntry, state: GameState): void {
   const cellName = act.cellIndex === 3 ? 'Bến Bạch Đằng' : (act.cellIndex !== undefined ? getCellName(act.cellIndex) : 'BĐS');
-  const amount = act.amount !== undefined ? Math.abs(act.amount) : 0;
   state.addFloatingText({
-    text: `+${formatCurrency(amount)}`, type: FloatingTextType.Reward, playerId: act.playerId ?? '',
-    actionType: 'mortgage', title: `Thế chấp ${cellName} ➔ Vay Ngân Hàng`, cellIndex: act.cellIndex,
+    text: `+${formatCurrency(act.amount !== undefined ? Math.abs(act.amount) : 0)}`, type: FloatingTextType.Reward,
+    playerId: act.playerId ?? '', actionType: 'mortgage', title: `Thế chấp ${cellName} ➔ Vay Ngân Hàng`, cellIndex: act.cellIndex,
   });
 }
 
 function handleUnmortgageBadge(act: ActivityLogEntry, state: GameState): void {
   const cellName = act.cellIndex === 3 ? 'Bến Bạch Đằng' : (act.cellIndex !== undefined ? getCellName(act.cellIndex) : 'BĐS');
-  const amount = act.amount !== undefined ? -Math.abs(act.amount) : 0;
   state.addFloatingText({
-    text: formatCurrency(amount), type: FloatingTextType.Penalty, playerId: act.playerId ?? '',
-    actionType: 'unmortgage', title: `Giải chấp ${cellName} (Phí 10% ➔ Kho Bạc)`, cellIndex: act.cellIndex,
+    text: formatCurrency(act.amount !== undefined ? -Math.abs(act.amount) : 0), type: FloatingTextType.Penalty,
+    playerId: act.playerId ?? '', actionType: 'unmortgage', title: `Giải chấp ${cellName} (Phí 10% ➔ Kho Bạc)`, cellIndex: act.cellIndex,
   });
 }
 
@@ -159,17 +142,14 @@ function handleAuctionBadge(act: ActivityLogEntry, state: GameState): void {
   if (act.id.startsWith('decline_auction') || act.message.includes('bỏ qua')) {
     state.addFloatingText({
       text: cellName, type: FloatingTextType.Penalty, playerId: act.playerId ?? '',
-      actionType: 'decline_auction', title: act.message, cellIndex: act.cellIndex,
-      formula: 'Từ chối mua quyền sử dụng đất',
+      actionType: 'decline_auction', title: act.message, cellIndex: act.cellIndex, formula: 'Từ chối mua quyền sử dụng đất',
     });
     return;
   }
-  const isWin = act.id.startsWith('auction_win') || act.message.includes('trúng đấu giá') || act.message.includes('Búa gõ');
-  if (!isWin) return;
-  const amount = act.amount !== undefined ? -Math.abs(act.amount) : 0;
+  if (!act.id.startsWith('auction_win') && !act.message.includes('trúng đấu giá') && !act.message.includes('Búa gõ')) return;
   state.addFloatingText({
-    text: formatCurrency(amount), type: FloatingTextType.Penalty, playerId: act.playerId ?? '',
-    actionType: 'auction_win', title: cellName ? `Thắng đấu giá ${cellName} ➔ Nộp Kho Bạc` : 'Thắng đấu giá BĐS ➔ Nộp Kho Bạc', cellIndex: act.cellIndex,
+    text: formatCurrency(act.amount !== undefined ? -Math.abs(act.amount) : 0), type: FloatingTextType.Penalty,
+    playerId: act.playerId ?? '', actionType: 'auction_win', title: cellName ? `Thắng đấu giá ${cellName} ➔ Nộp Kho Bạc` : 'Thắng đấu giá BĐS ➔ Nộp Kho Bạc', cellIndex: act.cellIndex,
   });
 }
 
@@ -186,12 +166,8 @@ export function handleHoseBadge(act: ActivityLogEntry, state: GameState, delta?:
   const profit = act.amount ?? 0;
   const hr = delta?.lastHoseResult;
   state.addFloatingText({
-    text: `${profit >= 0 ? '+' : ''}${formatCurrency(profit)}`,
-    type: profit >= 0 ? FloatingTextType.Reward : FloatingTextType.Penalty,
-    playerId: act.playerId ?? '',
-    actionType: 'hose',
-    title: act.message,
-    formula: hr ? `Khớp lệnh sàn HOSE: Mặt ${hr.roll}` : 'Giao dịch sàn chứng khoán HOSE',
+    text: `${profit >= 0 ? '+' : ''}${formatCurrency(profit)}`, type: profit >= 0 ? FloatingTextType.Reward : FloatingTextType.Penalty,
+    playerId: act.playerId ?? '', actionType: 'hose', title: act.message, formula: hr ? `Khớp lệnh sàn HOSE: Mặt ${hr.roll}` : 'Giao dịch sàn chứng khoán HOSE',
   });
 }
 
@@ -206,35 +182,20 @@ function handleMaBuyoutBadge(act: ActivityLogEntry, state: GameState): void {
   const sellerId = sellerName ? Object.keys(state.playersInfo).find((id) => state.playersInfo[id]?.name === sellerName) : undefined;
 
   if (buyerId) {
-    state.addFloatingText({
-      text: formatCurrency(-absAmount), type: FloatingTextType.Penalty, playerId: buyerId,
-      actionType: 'ma_buyout', title: `Thâu tóm ${cellName}`, targetPlayerName: sellerName, cellIndex: act.cellIndex,
-    });
+    state.addFloatingText({ text: formatCurrency(-absAmount), type: FloatingTextType.Penalty, playerId: buyerId, actionType: 'ma_buyout', title: `Thâu tóm ${cellName}`, targetPlayerName: sellerName, cellIndex: act.cellIndex });
   }
   if (sellerId) {
     useVfxStore.getState().triggerPawnReaction(sellerId, 'slump_recoil', 400);
     SoundEngine.playSlumpThud();
-    state.addFloatingText({
-      text: `+${formatCurrency(absAmount)}`, type: FloatingTextType.Reward, playerId: sellerId,
-      actionType: 'ma_buyout', title: `⚠️ Bị thâu tóm: ${cellName}`, targetPlayerName: buyerName, cellIndex: act.cellIndex,
-    });
+    state.addFloatingText({ text: `+${formatCurrency(absAmount)}`, type: FloatingTextType.Reward, playerId: sellerId, actionType: 'ma_buyout', title: `⚠️ Bị thâu tóm: ${cellName}`, targetPlayerName: buyerName, cellIndex: act.cellIndex });
   }
 }
 
 const BADGE_HANDLERS: Record<string, (act: ActivityLogEntry, state: GameState, delta?: DeltaPayload) => void> = {
-  rent: handleRentBadge,
-  buy: handleBuyBadge,
-  upgrade: handleUpgradeBadge,
-  tax: handleTaxBadge,
-  bail: handleBailBadge,
-  mortgage: handleMortgageBadge,
-  unmortgage: handleUnmortgageBadge,
-  auction: handleAuctionBadge,
-  trade: handleTradeBadge,
-  hose: handleHoseBadge,
-  card: (act, state) => {
-    if (act.id.startsWith('ma_buyout')) handleMaBuyoutBadge(act, state);
-  },
+  rent: handleRentBadge, buy: handleBuyBadge, upgrade: handleUpgradeBadge, tax: handleTaxBadge, bail: handleBailBadge,
+  salary: handleSalaryBadge, mortgage: handleMortgageBadge, unmortgage: handleUnmortgageBadge,
+  auction: handleAuctionBadge, trade: handleTradeBadge, hose: handleHoseBadge,
+  card: (act, state) => { if (act.id.startsWith('ma_buyout')) handleMaBuyoutBadge(act, state); },
 };
 
 export function handleDiplomaticEventBadge(
@@ -246,31 +207,15 @@ export function handleDiplomaticEventBadge(
   const lName = state.playersInfo[ev.landlordId]?.name || 'Chủ đất';
   const amt = formatCurrency(ev.savedRent);
   if (ev.playerId) {
-    state.addFloatingText({
-      text: `+${amt} Tr.`, type: FloatingTextType.Reward, playerId: ev.playerId,
-      actionType: 'diplomatic', title: 'Miễn Trừ Ngoại Giao', cellIndex: ev.cellIndex,
-      targetPlayerId: ev.landlordId, targetPlayerName: lName,
-    });
+    state.addFloatingText({ text: `+${amt} Tr.`, type: FloatingTextType.Reward, playerId: ev.playerId, actionType: 'diplomatic', title: 'Miễn Trừ Ngoại Giao', cellIndex: ev.cellIndex, targetPlayerId: ev.landlordId, targetPlayerName: lName });
   }
   if (ev.landlordId) {
-    state.addFloatingText({
-      text: `-${amt} Tr.`, type: FloatingTextType.Penalty, playerId: ev.landlordId,
-      actionType: 'diplomatic', title: `${pName} dùng Thẻ Ngoại Giao`, cellIndex: ev.cellIndex,
-      targetPlayerId: ev.playerId, targetPlayerName: pName,
-    });
+    state.addFloatingText({ text: `-${amt} Tr.`, type: FloatingTextType.Penalty, playerId: ev.landlordId, actionType: 'diplomatic', title: `${pName} dùng Thẻ Ngoại Giao`, cellIndex: ev.cellIndex, targetPlayerId: ev.playerId, targetPlayerName: pName });
   }
 }
 
-export function dispatchActivityFloatingBadges(
-  activities: readonly ActivityLogEntry[],
-  state: GameState,
-  delta?: DeltaPayload,
-): void {
+export function dispatchActivityFloatingBadges(activities: readonly ActivityLogEntry[], state: GameState, delta?: DeltaPayload): void {
   if (typeof state?.addFloatingText !== 'function') return;
-  for (const act of activities) {
-    BADGE_HANDLERS[act.type]?.(act, state, delta);
-  }
-  if (delta?.lastDiplomaticEvent) {
-    handleDiplomaticEventBadge(delta.lastDiplomaticEvent, state);
-  }
+  for (const act of activities) BADGE_HANDLERS[act.type]?.(act, state, delta);
+  if (delta?.lastDiplomaticEvent) handleDiplomaticEventBadge(delta.lastDiplomaticEvent, state);
 }

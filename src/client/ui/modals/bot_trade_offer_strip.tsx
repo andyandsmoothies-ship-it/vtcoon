@@ -175,20 +175,22 @@ export function InlineBotTradeStrip({
             </div>
           ) : (
             <div className="flex items-center gap-1 min-w-0 truncate text-[11px]">
-              <span className="text-slate-600 shrink-0">Đổi:</span>
-              <span className="font-extrabold text-slate-900 truncate">{targetName}</span>
-              <span className="text-amber-600 font-bold shrink-0">⇄</span>
-              <span className="font-extrabold text-slate-900 truncate">{offeredName}</span>
+              <span className="text-slate-600 shrink-0 font-medium">Đổi:</span>
+              <span className="font-extrabold text-slate-900 truncate" title={`Bạn chuyển nhượng: ${targetName}`}>{targetName}</span>
+              <span className="text-amber-600 font-bold shrink-0">⇄ Lấy</span>
+              <span className="font-extrabold text-slate-900 truncate" title={`Bạn nhận được: ${offeredName}`}>{offeredName}</span>
               {isNegativeCash ? (
-                <span className="text-rose-600 font-black whitespace-nowrap shrink-0">
+                <span className="text-rose-600 font-black whitespace-nowrap shrink-0" title="Bạn cần bù thêm tiền mặt cho Bot">
                   (Bù {formatCurrency(absCash)})
                 </span>
               ) : price > 0 ? (
-                <span className="shrink-0 font-black text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded border border-emerald-200">
-                  +{formatCurrency(price)}
+                <span className="shrink-0 font-black text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded border border-emerald-200" title="Tiền mặt Bot bù thêm cho bạn">
+                  +{formatCurrency(price)} tiền bù
                 </span>
               ) : (
-                <span className="text-slate-600 whitespace-nowrap shrink-0">(Ngang)</span>
+                <span className="text-slate-600 font-bold whitespace-nowrap shrink-0" title="Đổi ngang hai ô đất, không bù tiền">
+                  (Ngang giá)
+                </span>
               )}
             </div>
           )}

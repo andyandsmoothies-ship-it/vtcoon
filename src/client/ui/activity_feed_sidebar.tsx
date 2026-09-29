@@ -30,6 +30,8 @@ export function getActivityIcon(type: ActivityLogType): string {
       return '📄';
     case 'bankrupt':
       return '🚨';
+    case 'salary':
+      return '🏁';
     case 'system':
     default:
       return '⚙️';

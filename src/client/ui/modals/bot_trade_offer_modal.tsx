@@ -168,9 +168,9 @@ export function BotTradeOfferModal({
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 min-w-0">
                 <span className="font-bold text-slate-700">Chênh Lệch Tiền Mặt:</span>
                 {price > 0 ? (
-                  <span className="font-black text-emerald-700">+{formatCurrency(price)} (Bạn nhận thêm)</span>
+                  <span className="font-black text-emerald-700">+{formatCurrency(price)} (Bot bù thêm cho bạn)</span>
                 ) : price < 0 ? (
-                  <span className="font-black text-rose-700">-{formatCurrency(absPrice)} (Bạn bù thêm)</span>
+                  <span className="font-black text-rose-700">-{formatCurrency(absPrice)} (Bạn cần bù thêm)</span>
                 ) : (
                   <span className="font-black text-slate-700">0 (Ngang giá)</span>
                 )}
@@ -183,6 +183,23 @@ export function BotTradeOfferModal({
                   </span>
                 </div>
               )}
+            </div>
+
+            {/* Khối 4: Bản tóm tắt thỏa thuận trực quan (Deal Summary) */}
+            <div className="p-2.5 bg-amber-50/90 border border-amber-300 rounded-xl flex items-start gap-2 text-xs text-amber-950">
+              <span className="text-sm shrink-0">💡</span>
+              <p className="leading-snug text-[11px] font-medium">
+                <span className="font-bold text-amber-900">Tóm tắt thỏa thuận: </span>
+                Bạn sẽ nhận quyền sở hữu ô <span className="font-black text-emerald-800">{offeredCell?.name ?? `Ô #${offeredCellIndex}`}</span>
+                {price > 0 ? (
+                  <> và được Bot bù thêm <span className="font-black text-emerald-700">+{formatCurrency(price)}</span> tiền mặt</>
+                ) : price < 0 ? (
+                  <> (bạn cần bù thêm <span className="font-black text-rose-700">{formatCurrency(absPrice)}</span> tiền mặt)</>
+                ) : (
+                  <> (đổi ngang 2 ô đất, 0 đồng tiền mặt)</>
+                )}
+                , đổi lại bạn chuyển nhượng ô <span className="font-black text-amber-800">{propertyName}</span> cho <span className="font-bold text-slate-900">{buyerName}</span>.
+              </p>
             </div>
           </div>
         ) : (
