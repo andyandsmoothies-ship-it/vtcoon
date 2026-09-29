@@ -12,9 +12,25 @@ import { hasMonopoly } from './property_upgrade';
 
 const SERVICE_C2_SURCHARGE = 200;
 export const GO_PROPERTY_TAX_CAP = 1_000;
-// [IMP-216] SSOT Constants for Special Fees & Bail
+// [IMP-216][IMP-226] SSOT Constants for Special Fees & Escalating Bail
 export const TELECOM_DATA_FEE = 150;
 export const MIN_BAIL_AMOUNT = 500;
+export const ESCALATING_BAIL_TIERS = [500, 1_000, 2_000] as const;
+export const MAX_BAIL_AMOUNT = 2_000;
+
+/**
+ * [IMP-226] Tính phí bảo lãnh / tiền phạt kiểm toán theo khung chế tài tái phạm:
+ * - Lần 1: 500 Tr. VNĐ (chuẩn lệ phí hành chính, 25% lương GO)
+ * - Lần 2: 1.000 Tr. VNĐ (răn đe tái phạm)
+ * - Lần 3+: 2.000 Tr. VNĐ (khung phạt tối đa)
+ */
+export function calculateBailAmount(auditCount: number = 1): number {
+  const normalized = Math.max(1, Math.floor(Number.isFinite(auditCount) ? auditCount : 1));
+  const index = normalized - 1;
+  return ESCALATING_BAIL_TIERS[index] ?? MAX_BAIL_AMOUNT;
+}
+
+// Deprecated alias for backward compatibility
 export const BAIL_NET_WORTH_RATIO = 0.10;
 
 /** @see docs/domain/gotchas.md#1-market-modifiers-lifecycle--scope-slice-04 */

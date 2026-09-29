@@ -1,0 +1,16 @@
+{
+  "chaos-role-sandbox": {
+    "PreToolUse": [
+      {
+        "matcher": "write_to_file|replace_file_content",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .agents/scripts/use_case_guard.py --role chaos-sentinel",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

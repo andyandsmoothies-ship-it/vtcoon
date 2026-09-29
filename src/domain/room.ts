@@ -60,6 +60,7 @@ export interface Player {
   balance:              number;
   skipNextTurn:         boolean;
   auditTurnsLeft:       number;
+  auditCount?:          number;
   consecutiveDoubles:   number;
   hand:                 ChanceCardId[];
   pendingDebts:         string[];
@@ -206,7 +207,7 @@ export function generateRoomCode(): string {
 export function createPlayer(id: string): Player {
   return {
     id, position: 0, balance: INITIAL_BALANCE,
-    skipNextTurn: false, auditTurnsLeft: 0, consecutiveDoubles: 0,
+    skipNextTurn: false, auditTurnsLeft: 0, auditCount: 0, consecutiveDoubles: 0,
     hand: [], pendingDebts: [],
     extraTurns: 0, doubleNextDice: false,
     mortgagedProperties: [], bankrupt: false,

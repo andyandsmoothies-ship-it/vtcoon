@@ -5,8 +5,7 @@ import type { DiceResult } from '../domain/dice';
 import { ChanceCardId } from '../domain/event_card_types';
 import { ActionRejectReason } from '../domain/action_reasons';
 import type { PropertyRegistry, PropertyStateMap } from '../domain/property_manager';
-import { calculateNetWorth } from './insolvency_manager';
-import { MIN_BAIL_AMOUNT, BAIL_NET_WORTH_RATIO } from '../domain/property_rent';
+import { MIN_BAIL_AMOUNT, calculateBailAmount } from '../domain/property_rent';
 
 const turnStartedInAudit = new Map<string, boolean>();
 
@@ -32,6 +31,7 @@ export function sendToAudit(room: Room, playerId: string): void {
   player.position = 10;
   player.auditTurnsLeft = 3;
   player.consecutiveDoubles = 0;
+  player.auditCount = (player.auditCount ?? 0) + 1;
   room.phase = TurnPhase.PropertyManagement;
   if (room.roomCode) {
     turnStartedInAudit.set(room.roomCode, false);
@@ -54,30 +54,19 @@ export function handleTurnStart(room: Room | undefined, playerId: string): { can
   return { canRoll: true };
 }
 
-function hasOwnedProperties(playerId: string, registry?: PropertyRegistry): boolean {
-  if (!registry) return false;
-  for (const owner of registry.values()) {
-    if (owner === playerId) return true;
-  }
-  return false;
-}
-
 export function handleBailOut(
   room: Room | undefined,
   playerId: string,
   rolledThisTurn: boolean,
-  registry?: PropertyRegistry,
-  stateMap?: PropertyStateMap,
+  _registry?: PropertyRegistry,
+  _stateMap?: PropertyStateMap,
 ): { success: boolean; reason?: string } {
   if (!room?.started) return { success: false, reason: ActionRejectReason.INVALID_PLAYER };
   const current = room.players[room.currentPlayerIndex];
   if (current?.id !== playerId) return { success: false, reason: ActionRejectReason.INVALID_PLAYER };
   if (current.auditTurnsLeft <= 0) return { success: false, reason: 'NOT_IN_AUDIT' };
 
-  const netWorth = (registry && stateMap && room && hasOwnedProperties(current.id, registry))
-    ? calculateNetWorth(current.id, registry, stateMap, room.players)
-    : 0;
-  const bailAmount = Math.max(MIN_BAIL_AMOUNT, Math.floor(netWorth * BAIL_NET_WORTH_RATIO));
+  const bailAmount = calculateBailAmount(current.auditCount ?? 1);
 
   if (current.balance < bailAmount) return { success: false, reason: ActionRejectReason.INSUFFICIENT_FUNDS };
   current.balance -= bailAmount;
@@ -131,17 +120,14 @@ export function processRollDoubles(room: Room, current: Player, dice: DiceResult
 export function handleAuditTurnTransition(
   room: Room,
   player: Player,
-  registry?: PropertyRegistry,
-  stateMap?: PropertyStateMap,
+  _registry?: PropertyRegistry,
+  _stateMap?: PropertyStateMap,
 ): void {
   if (player.auditTurnsLeft > 0) {
     player.auditTurnsLeft -= 1;
     if (player.auditTurnsLeft === 0) {
       if (player.inAudit) player.inAudit = false;
-      const netWorth = (registry && stateMap && hasOwnedProperties(player.id, registry))
-        ? calculateNetWorth(player.id, registry, stateMap, room.players)
-        : 0;
-      const penaltyAmount = Math.max(MIN_BAIL_AMOUNT, Math.floor(netWorth * BAIL_NET_WORTH_RATIO));
+      const penaltyAmount = calculateBailAmount(player.auditCount ?? 1);
       player.balance -= penaltyAmount;
       room.treasury = (room.treasury ?? 0) + penaltyAmount;
     }

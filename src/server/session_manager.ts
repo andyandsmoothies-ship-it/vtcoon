@@ -32,7 +32,7 @@ export interface DiplomaticEventDelta {
 export interface PlayerDelta {
   readonly id: string; readonly position: number; readonly balance: number;
   readonly bankrupt?: boolean; readonly isBot?: boolean; readonly overdraftRoundsLeft?: number;
-  readonly inAudit?: boolean; readonly auditTurnsLeft?: number; readonly skipNextTurn?: boolean;
+  readonly inAudit?: boolean; readonly auditTurnsLeft?: number; readonly auditCount?: number; readonly skipNextTurn?: boolean;
   readonly consecutiveDoubles?: number; readonly extraTurns?: number;
   readonly bondContract?: BondContract | null; readonly hand?: readonly ChanceCardId[];
 }
@@ -143,9 +143,9 @@ function buildAuctionDelta(
 
 export function buildDeltaFromRoom(
   room: Room,
-  registry: PropertyRegistry,
-  stateMap: PropertyStateMap,
-  tick: number,
+  registry: PropertyRegistry = new Map(),
+  stateMap: PropertyStateMap = new Map(),
+  tick: number = 0,
   auctions?: Map<string, AuctionSession>,
   timeRemaining?: number,
   lastAuctionResults?: Map<string, { cellIndex: number; winnerId?: string | null; winningBid: number; isForeclosure?: boolean; finalPrice?: number }>,
@@ -176,14 +176,13 @@ export function buildDeltaFromRoom(
     balance: p.balance,
     bondContract: p.bondContract ?? null,
     hand: p.hand ?? [],
-    ...(p.bankrupt ? { bankrupt: true } : {}),
-    ...(p.isBot ? { isBot: true } : {}),
+    ...(p.bankrupt ? { bankrupt: true } : {}), ...(p.isBot ? { isBot: true } : {}),
     ...(p.overdraftRoundsLeft ? { overdraftRoundsLeft: p.overdraftRoundsLeft } : {}),
     ...(p.auditTurnsLeft > 0 ? { inAudit: true } : { inAudit: false }),
     ...(p.auditTurnsLeft !== undefined ? { auditTurnsLeft: p.auditTurnsLeft } : {}),
+    ...(p.auditCount !== undefined ? { auditCount: p.auditCount } : {}),
     ...(p.skipNextTurn !== undefined ? { skipNextTurn: p.skipNextTurn } : {}),
-    ...(p.consecutiveDoubles !== undefined ? { consecutiveDoubles: p.consecutiveDoubles } : {}),
-    ...(p.extraTurns !== undefined ? { extraTurns: p.extraTurns } : {}),
+    ...(p.consecutiveDoubles !== undefined ? { consecutiveDoubles: p.consecutiveDoubles } : {}), ...(p.extraTurns !== undefined ? { extraTurns: p.extraTurns } : {}),
   }));
 
   const auction = buildAuctionDelta(room, auctions, lastAuctionResults);

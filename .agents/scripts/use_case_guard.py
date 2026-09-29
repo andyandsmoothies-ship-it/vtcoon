@@ -186,10 +186,10 @@ def pre_tool_file_gate(payload: dict, role: str = "") -> None:
 
     if role and target_file:
         norm_path = "/" + target_file.replace("\\", "/").lstrip("/")
-        if role == "qa-tester" and any(p in norm_path for p in SRC_DIR_PATTERNS):
+        if role in ("qa-tester", "chaos-sentinel") and any(p in norm_path for p in SRC_DIR_PATTERNS):
             reason = (
-                f"ERROR [Role Gate]: qa-tester is strictly forbidden from modifying production code: '{target_file}'. "
-                "Only test files in tests/** or test/** are permitted."
+                f"ERROR [Role Gate]: {role} is strictly forbidden from modifying production code: '{target_file}'. "
+                "Only test files or probe artifacts in tests/** or .agents/** are permitted."
             )
             print(json.dumps({"decision": "deny", "reason": reason}))
             sys.exit(0)

@@ -4,7 +4,9 @@ import {
   isRollActionDisabled,
   isEndTurnDisabled,
   resolveEndTurnButtonLabel,
+  formatCurrency,
 } from './ui_helpers';
+import { calculateBailAmount } from '../../domain/property_rent';
 import { BOARD_CONFIG, CellType } from '../../domain/board_config';
 import { PROPERTY_DEEDS } from '../../domain/property_data';
 import { MarketCardId } from '../../domain/event_card_types';
@@ -88,6 +90,17 @@ export function ActionDock({
   const inAudit = Boolean(actingPlayer?.inAudit);
   const isInsolvent = Boolean(actingPlayer && actingPlayer.balance < 0);
   const storeConsecutiveDoubles = actingPlayer ? actingPlayer.consecutiveDoubles : undefined;
+  const auditCount = actingPlayer?.auditCount ?? 1;
+  const currentBailCost = calculateBailAmount(auditCount);
+  const canAffordBail = (actingPlayer?.balance ?? 0) >= currentBailCost;
+  const bailLabel = auditCount > 1
+    ? (auditCount === 2 ? `Bảo Lãnh - Lần 2 (${formatCurrency(currentBailCost)})` : `Bảo Lãnh - Tái Phạm (${formatCurrency(currentBailCost)})`)
+    : `Bảo Lãnh (${formatCurrency(currentBailCost)})`;
+  const bailTitle = !canAffordBail
+    ? `Bạn cần ít nhất ${formatCurrency(currentBailCost)} để nộp tiền bảo lãnh`
+    : (auditCount > 1
+        ? `Nộp ${formatCurrency(currentBailCost)} bảo lãnh tái phạm (Lần ${auditCount}) để rời trạm ngay`
+        : `Nộp ${formatCurrency(currentBailCost)} bảo lãnh kiểm toán để rời trạm ngay`);
   const storeCanRollAgain = (storeConsecutiveDoubles !== undefined ? storeConsecutiveDoubles > 0 : (dice[0] === dice[1] && dice[0] > 0)) &&
     !inAudit && !actingPlayer?.skipNextTurn;
   const canRollAgain = canRollAgainProp !== undefined ? canRollAgainProp : storeCanRollAgain;
@@ -254,18 +267,20 @@ export function ActionDock({
       {inAudit && isMyTurn && !isBankrupt && (
         <button
           type="button"
-          onClick={() => (actingPlayer?.balance ?? 0) >= 500 && onBailOut?.()}
-          disabled={(actingPlayer?.balance ?? 0) < 500}
-          title={(actingPlayer?.balance ?? 0) < 500 ? 'Bạn cần ít nhất 500 để nộp tiền bảo lãnh' : undefined}
+          onClick={() => canAffordBail && onBailOut?.()}
+          disabled={!canAffordBail}
+          title={bailTitle}
           className={`w-11 h-11 min-w-[44px] min-h-[44px] sm:w-auto sm:h-auto p-0 sm:px-3.5 sm:py-2 shrink-0 whitespace-nowrap flex items-center justify-center gap-1.5 rounded-2xl font-bold border text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
-            (actingPlayer?.balance ?? 0) < 500
+            !canAffordBail
               ? 'bg-slate-200 text-slate-400 border-slate-300 shadow-none cursor-not-allowed active:scale-100'
               : 'bg-amber-600 hover:bg-amber-700 text-white border-amber-800 shadow-sm active:scale-95 cursor-pointer'
           }`}
-          aria-label="Nộp 500 bảo lãnh kiểm toán để rời trạm ngay"
+          aria-label="Nộp bảo lãnh kiểm toán để rời trạm ngay"
+          data-testid="bailout-btn"
         >
           <span aria-hidden="true">⚖️</span>
-          <span className="hidden sm:inline">Bảo Lãnh (500)</span>
+          <span className="hidden sm:inline">{bailLabel}</span>
+          <span className="sm:hidden text-xs font-bold">{formatCurrency(currentBailCost)}</span>
         </button>
       )}
 

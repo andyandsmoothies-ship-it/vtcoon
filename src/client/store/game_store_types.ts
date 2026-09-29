@@ -34,6 +34,7 @@ export interface PlayerHudInfo {
   readonly mortgageLoans?: Record<number, number>;
   readonly inAudit?: boolean;
   readonly auditTurnsLeft?: number;
+  readonly auditCount?: number;
   readonly skipNextTurn?: boolean;
   readonly consecutiveDoubles?: number;
   readonly extraTurns?: number;

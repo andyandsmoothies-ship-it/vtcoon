@@ -240,7 +240,10 @@ export function processPayerFee(
   const wasInAudit = Boolean(prevP?.inAudit || (prevP?.auditTurnsLeft && prevP.auditTurnsLeft > 0));
   if (wasInAudit && absDiff >= 500) {
     const isTimeout = prevP?.auditTurnsLeft === 1 || prevP?.auditTurnsLeft === 0;
-    const bailDesc = isTimeout ? 'Hết 3 lượt không ra đôi: Phạt bảo lãnh bắt buộc' : 'Bảo Lãnh Kiểm Toán để rời Trạm';
+    const auditCount = prevP?.auditCount ?? 1;
+    const bailDesc = isTimeout
+      ? 'Hết 3 lượt không ra đôi: Phạt bảo lãnh bắt buộc'
+      : (auditCount > 1 ? `Bảo Lãnh Tái Phạm (Lần ${auditCount})` : 'Bảo Lãnh Kiểm Toán để rời Trạm');
     return {
       id: `bail_${Date.now()}_${payer.id}`, timestamp: Date.now(), type: 'bail',
       message: `⚖️ ${pName} đã nộp phí / nộp thuế ${formatCurrency(absDiff)} (${bailDesc})`,

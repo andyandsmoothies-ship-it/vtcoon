@@ -40,5 +40,14 @@
         ]
       }
     ]
+  },
+  "quality-gate-stop": {
+    "Stop": [
+      {
+        "type": "command",
+        "command": "python .agents/scripts/use_case_guard.py --stop-gate",
+        "timeout": 20
+      }
+    ]
   }
 }

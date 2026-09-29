@@ -1,6 +1,7 @@
 // [UC-SEC-003/MSS] Envelope Validator — Kiểm Chuẩn Cấu Trúc JSON & Chống Giá Trị Âm
 import type { WsClientMessage } from '../network/network_types.js';
 import { isValidEmoteId } from '../../domain/emotes.js';
+import { BondTrancheId } from '../../domain/bond_types.js';
 
 export type EnvelopeValidationResult =
   | { success: true; message: WsClientMessage }
@@ -16,12 +17,15 @@ const CELL_INTENTS = new Set([
   'INTENT_UPGRADE', 'INTENT_UPGRADE_UTILITY', 'INTENT_DOWNGRADE', 'INTENT_MORTGAGE', 'INTENT_REDEEM',
 ]);
 
-const VALID_INTENTS = new Set([
+const VALID_BOND_TRANCHES = new Set<string>(Object.values(BondTrancheId));
+
+export const VALID_INTENTS = new Set([
   ...CELL_INTENTS,
   'INTENT_ROLL', 'INTENT_BUY', 'INTENT_BUY_PROPERTY', 'INTENT_DECLINE', 'INTENT_BID',
   'INTENT_AUCTION_PASS', 'INTENT_UPGRADE_ETC', 'INTENT_TRADE_OFFER', 'INTENT_RESPOND_TRADE_OFFER', 'INTENT_END_TURN',
   'INTENT_INVEST', 'INTENT_SKIP', 'INTENT_BAIL_OUT', 'INTENT_BANKRUPTCY',
   'INTENT_EXECUTE_COMPULSORY_BUYOUT', 'INTENT_DECLINE_COMPULSORY_BUYOUT',
+  'INTENT_AUTO_SOLVENCY', 'INTENT_ISSUE_BOND', 'INTENT_REPAY_BOND',
 ]);
 
 export class EnvelopeValidator {
@@ -203,6 +207,11 @@ export class EnvelopeValidator {
     }
     if (it['type'] === 'INTENT_INVEST' && typeof it['stake'] !== 'number') {
       return { success: false, reasonCode: 'INVALID_ENVELOPE' };
+    }
+    if (it['type'] === 'INTENT_ISSUE_BOND' && it['trancheId'] !== undefined) {
+      if (typeof it['trancheId'] !== 'string' || !VALID_BOND_TRANCHES.has(it['trancheId'])) {
+        return { success: false, reasonCode: 'INVALID_ENVELOPE' };
+      }
     }
     if (it['type'] === 'INTENT_TRADE_OFFER') {
       const ok = typeof it['sellerId'] === 'string' && it['sellerId'] &&

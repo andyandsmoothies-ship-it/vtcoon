@@ -78,17 +78,17 @@ describe('[TC-192A/MSS][UC-IMP192A] IMP-192A Anti-Camping Audit & Dynamic Bailou
       expect(player.auditTurnsLeft).toBe(0);
     });
 
-    it('[TC-192A.07/MSS][UC-IMP192A] handleBailOut tính phí bảo lãnh động 10% Net Worth cho tài phiệt sở hữu BĐS', () => {
+    it('[TC-192A.07/MSS][UC-IMP192A] handleBailOut tính phí bảo lãnh chuẩn 500 Tr. cho lần 1 vào trạm', () => {
       const room = Object.assign(createRoom('player_tycoon'), { started: true, treasury: 500 });
       const player = Object.assign(room.players[0]!, { balance: 5_000, auditTurnsLeft: 3 });
       const res = callBailOut(room, player.id, false, new Map([[39, player.id]]), new Map([[39, { level: 2 }]]));
       expect(res.success).toBe(true);
-      expect(player.balance).toBe(5_000 - 1_500);
-      expect(room.treasury).toBe(500 + 1_500);
+      expect(player.balance).toBe(5_000 - 500);
+      expect(room.treasury).toBe(500 + 500);
       expect(player.auditTurnsLeft).toBe(0);
     });
 
-    it('[TC-192A.08/MSS][UC-IMP192A] RoomManager.handleBailOut ủy quyền tính đúng 10% Net Worth và nộp vào room.treasury', () => {
+    it('[TC-192A.08/MSS][UC-IMP192A] RoomManager.handleBailOut ủy quyền tính đúng 500 Tr. bảo lãnh lần 1 và nộp vào room.treasury', () => {
       const mgr = new RoomManager(42);
       const room = mgr.createRoom('player_mgr_tycoon');
       mgr.joinRoom(room.roomCode, 'player_tenant');
@@ -100,7 +100,7 @@ describe('[TC-192A/MSS][UC-IMP192A] IMP-192A Anti-Camping Audit & Dynamic Bailou
       sendToAudit(room, p1.id);
       room.phase = TurnPhase.WaitingRoll;
       const preTreasury = room.treasury ?? 0;
-      const expectedBail = Math.floor(25_000 * 0.10);
+      const expectedBail = 500;
       const res = mgr.handleBailOut(room.roomCode, p1.id);
       expect(res.success).toBe(true);
       expect(p1.balance).toBe(21_000 - expectedBail);
@@ -110,9 +110,9 @@ describe('[TC-192A/MSS][UC-IMP192A] IMP-192A Anti-Camping Audit & Dynamic Bailou
   });
 
   describe('Failure Mode 4: handleBailOut từ chối vi phạm điều kiện tiền hoặc trạng thái', () => {
-    it('[TC-192A.09/MSS][UC-IMP192A] handleBailOut từ chối khi tài phiệt không đủ tiền mặt trả 10% Net Worth', () => {
+    it('[TC-192A.09/MSS][UC-IMP192A] handleBailOut từ chối khi tài phiệt tái phạm lần 2 không đủ 1.000 Tr. tiền mặt', () => {
       const room = Object.assign(createRoom('player_cash_poor_tycoon'), { started: true, treasury: 0 });
-      const player = Object.assign(room.players[0]!, { balance: 800, auditTurnsLeft: 2 });
+      const player = Object.assign(room.players[0]!, { balance: 800, auditTurnsLeft: 2, auditCount: 2 });
       const res = callBailOut(room, player.id, false, new Map([[39, player.id]]), new Map([[39, { level: 3 }]]));
       expect(res.success).toBe(false);
       expect(res.reason).toBe(ActionRejectReason.INSUFFICIENT_FUNDS);
@@ -150,15 +150,15 @@ describe('[TC-192A/MSS][UC-IMP192A] IMP-192A Anti-Camping Audit & Dynamic Bailou
       expect(room.treasury).toBe(600);
     });
 
-    it('[TC-192A.13/MSS][UC-IMP192A] handleAuditTurnTransition khi mãn hạn tự nhiên phạt 10% Net Worth đối với tài phiệt BĐS', () => {
+    it('[TC-192A.13/MSS][UC-IMP192A] handleAuditTurnTransition khi mãn hạn tự nhiên ở lần 2 phạt 1.000 Tr. nộp Kho Bạc', () => {
       const room = Object.assign(createRoom('player_tycoon_release'), { treasury: 1_000 });
-      const player = Object.assign(room.players[0]!, { balance: 10_000, auditTurnsLeft: 1 });
+      const player = Object.assign(room.players[0]!, { balance: 10_000, auditTurnsLeft: 1, auditCount: 2 });
       const registry: PropertyRegistry = new Map([[31, player.id], [32, player.id]]);
       const stateMap: PropertyStateMap = new Map([[31, { level: 1 }], [32, { level: 1 }]]);
       callAuditTurnTransition(room, player, registry, stateMap);
       expect(player.auditTurnsLeft).toBe(0);
-      expect(player.balance).toBe(10_000 - 1_900);
-      expect(room.treasury).toBe(1_000 + 1_900);
+      expect(player.balance).toBe(10_000 - 1_000);
+      expect(room.treasury).toBe(1_000 + 1_000);
     });
   });
 
@@ -174,17 +174,17 @@ describe('[TC-192A/MSS][UC-IMP192A] IMP-192A Anti-Camping Audit & Dynamic Bailou
 
     it('[TC-192A.15/MSS][UC-IMP192A] executeTurnEnd khi mãn hạn tự nhiên làm âm số dư kích hoạt checkInsolvency chuyển phase sang InsolvencyPhase', () => {
       const room = Object.assign(createRoom('player_tycoon_insolvent'), { started: true, phase: TurnPhase.PropertyManagement });
-      const player = Object.assign(room.players[0]!, { balance: 800, auditTurnsLeft: 1 });
+      const player = Object.assign(room.players[0]!, { balance: 800, auditTurnsLeft: 1, auditCount: 2 });
       const registry: PropertyRegistry = new Map([[39, player.id]]);
       const stateMap: PropertyStateMap = new Map([[39, { level: 2 }]]);
       executeTurnEnd(room, player, true, false, room.roomCode, new Map(), registry, stateMap);
-      expect(player.balance).toBe(800 - 1_080);
+      expect(player.balance).toBe(800 - 1_000);
       expect(room.phase).toBe(TurnPhase.InsolvencyPhase);
     });
 
     it('[TC-192A.16/MSS][UC-IMP192A] handleAuditTurnTransition bảo toàn tuyệt đối tổng tiền lưu thông giữa người chơi và Kho Bạc', () => {
       const room = Object.assign(createRoom('player_audit_conserve'), { treasury: 2_000 });
-      const p1 = Object.assign(room.players[0]!, { balance: 6_000, auditTurnsLeft: 1 });
+      const p1 = Object.assign(room.players[0]!, { balance: 6_000, auditTurnsLeft: 1, auditCount: 2 });
       const p2 = Object.assign(createPlayer('player_bystander'), { balance: 8_000 });
       room.players.push(p2);
       const registry: PropertyRegistry = new Map([[39, p1.id]]);
@@ -194,8 +194,8 @@ describe('[TC-192A/MSS][UC-IMP192A] IMP-192A Anti-Camping Audit & Dynamic Bailou
       const postTotal = p1.balance + p2.balance + (room.treasury ?? 0);
       expect(postTotal).toBe(preTotal);
       expect(postTotal - preTotal).toBe(0);
-      expect(p1.balance).toBe(6_000 - 1_600);
-      expect(room.treasury).toBe(2_000 + 1_600);
+      expect(p1.balance).toBe(6_000 - 1_000);
+      expect(room.treasury).toBe(2_000 + 1_000);
     });
   });
 });

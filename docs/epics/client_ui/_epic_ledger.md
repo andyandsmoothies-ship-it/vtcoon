@@ -877,3 +877,57 @@
   * `plan-griller` (P1-P5 HARDENED v5 APPROVED), `qa-tester` (Station 1 RED 14/16), `implementer` (Station 2 GREEN 16/16), `scout` (Station 2.5 PASS 100%), `ui-craft-reviewer` (Station 3 APPROVED), `spec-reviewer` (Station 3 APPROVED), `code-reviewer` (Station 3 APPROVED).
   * Tiếp thu và hoàn tất 3 phản biện kỹ thuật (P1 DRY Notification Aliases, P2 'Đã Thế Chấp' Label, P3 Zero Dirty Casts & Type Union).
 - **Trạng thái**: ✅ Hoàn thành IMP-225 (2026-09-29).
+
+---
+
+### [IMP-227] Tuyến Cầu Cạn Metro Số 1 TP.HCM, Ga Mái Vòm Cánh Buồm Bạt Căng & Đoàn Tàu Siêu Tốc Xanh Cyan - Bạc Kim Loại
+- **Mục tiêu**: Tái thiết kế toàn diện hạ tầng đường tàu hỏa và nhà ga 3D diorama sa bàn thành tuyến Metro Số 1 TP.HCM (Tuyến Bến Thành – Suối Tiên) dựa trên 3 ảnh chụp thực tế (`media_1790673767997.jpg`, `media_1790673778059.jpg`, `media_1790673789428.jpg`):
+  1. *Cầu Cạn U-Girder & Trụ Tròn Bê Tông*: Nâng cấp bệ đá dăm phẳng cũ thành kết cấu cầu cạn U-Girder bê tông đúc sẵn với gờ lan can bảo vệ hai bên (`#94A3B8`), hệ thống 12 trụ đỡ bê tông hình trụ tròn (`#CBD5E1`) phân bổ dọc 4 cạnh sa bàn.
+  2. *Cột Cần Tiếp Điện Trên Cao (Catenary Masts)*: Bổ sung 8 cột tiếp điện OCS (`#64748B`, cột đứng cao $0.17m$, thanh vươn ngang tại cao độ $Y = 0.155m$) ôm sát đường ray, chạm khít đỉnh pantograph trên nóc toa mà không gây xuyên thấu hình học (mesh clipping).
+  3. *Ga Mái Vòm Bạt Căng Cánh Buồm Trắng Sứ & Ke Ga PSD*: Tái hiện kiến trúc Ga Khu Công Nghệ Cao / Tân Cảng với mái vòm bạt căng cánh buồm màu trắng sứ (`#F8FAFC`), khung sườn thép uốn cong than sẫm (`#1E293B`), thềm granite sáng bóng (`#E2E8F0`), và vách kính an toàn ke ga Platform Screen Doors (`#38BDF8`, opacity 0.65). Ga Landmark North bờ Bắc giữ vững viền xanh cyan thương hiệu Metro (`#0284C7`) và biển hiệu phát quang LED (`#FEF08A`).
+  4. *Đoàn Tàu Metro Tuyến 1 Xanh Cyan - Bạc Kim Loại*: Thay thế đầu máy xe lửa hơi nước đỏ thô sơ bằng đoàn tàu siêu tốc Metro: Đầu tàu vát nhọn khí động học màu xanh da trời (`#0EA5E9` / `#0284C7`), thân xe nhôm bạc ánh kim (`#E2E8F0`, metalness 0.7), dải sọc xanh cyan thương hiệu, kính buồng lái sẫm màu (`#0F172A`), đèn pha LED hoàng kim (`#FEF08A`), điểm nhấn đèn an toàn đỏ đuôi tàu (`#DC2626` - bảo vệ `TC-IMP134.21`), và cần tiếp điện nóc toa pantograph (`#64748B`).
+  5. *Tối Ưu 60 FPS & Bất Biến Kiểm Thử Di Sản*: Sử dụng vector singleton `tempVec` & `tempTangent` triệt tiêu GC allocation loop; xuất khẩu hàm thuần khiết `computeTrainPitch(speed, t)` độc lập SSR; bảo vệ thứ tự JSX (4 dải ballast chính đầu tiên khớp cửa sổ cắt chuỗi 800 ký tự); bảo tồn 4 mesh tà vẹt `#451A03` làm direct children tắt hoàn toàn `castShadow` (bảo vệ `TC-IMP142.09`).
+- **Hạ tầng hoàn tất**:
+  * `src/client/3d/diorama/diorama_train_kinematics.ts` (258 LOC — Tier 1 <= 400 LOC): Bổ sung và xuất khẩu hàm thuần khiết `computeTrainPitch(speed, elapsedTime)`.
+  * `src/client/3d/diorama/diorama_railroad.tsx` (398 LOC — Tier 2 <= 500 LOC): Hiện thực hóa toàn bộ cầu cạn U-Girder, hệ trụ tròn, cột tiếp điện, ga bạt căng cánh buồm và đoàn tàu Metro Số 1 3 toa tinh gọn; tái cấu trúc nén qua mảng cấu hình (`VIADUCT_PIER_POSITIONS`, `U_GIRDER_PARAPETS`, `CATENARY_MAST_POSITIONS`, `METALLIC_RAIL_SPECS`).
+  * `docs/domain/gotchas.md`: Ghi nhận Invariant 19 về bảo toàn thứ tự JSX cắt chuỗi và direct children cho AST inspection trong 3D diorama.
+- **Kiểm thử & Bất biến**:
+  * `tests/client/hcmc_metro_line1_infrastructure.test.ts` (362 LOC): 16/16 atomic contract tests PASS 100% (Universal 5-Facet Matrix, Adversarial Inversion PASS: Station 1 RED 9/16 -> Station 2 GREEN 16/16).
+  * Bảo toàn 100% 4 bộ test di sản: `imp134_model_train_and_stations` (21 tests), `railroad_ballast_and_waterfront_station` (28 tests), `imp142_draw_call_and_shadow_budget` (25 tests), `model_railroad_and_tactile_lobby` (26 tests) -> Tổng **116/116 tests PASS 100% (Zero Regression)**.
+  * TypeScript typecheck: `tsc --noEmit` 0 errors. UI Linter: `npm run lint:ui` 0 violations (205 files scanned).
+  * Evidence Snapshot: `.agents/evidence/imp-227_snapshot.json` (`executed: true`, `status: PASSED`, 16 tests passed).
+- **Phê chuẩn**:
+  * `plan-griller`: P1-P5 HARDENED APPROVED (giải quyết 3 Blocker P1 và 2 Warning P2).
+  * `qa-tester`: Station 1 RED verified (9/16 failures proven under Adversarial Inversion).
+  * `implementer`: Station 2 GREEN verified (16/16 tests pass, 398 LOC).
+  * `scout`: Station 2.5 PASS (0 defects qua 5 universal defect archetypes).
+  * `code-reviewer`: Station 3 APPROVED (Zero dirty casts, deep modules, 60 FPS zero-allocation).
+  * `game-3d-visual-critic`: Station 3 APPROVED (Điểm số 9.2 / 10, disposition: ship, đạt chuẩn thương mại AAA Monopoly Plus).
+  * `spec-reviewer`: Station 3 APPROVED (100% spec reconciliation, 0 scope drift).
+- **Trạng thái**: ✅ Hoàn thành IMP-227 (2026-09-29).
+
+---
+
+### [IMP-228 / IMP-224-FIX] Auto-Solvency & Corporate Bond Wire Protocol Security Parity (Khắc Phục Lỗi INVALID_INTENT)
+- **Mục tiêu**: Khắc phục dứt điểm sự cố người chơi nhấn nút **"⚡ CÂN ĐỐI TỰ ĐỘNG (CỨU NGUY NHANH)"** trong modal `InsolvencyPhase` nhưng bị chặn với banner `INVALID_INTENT`, đồng bộ 100% Wire Protocol cho Trái Phiếu Doanh Nghiệp và đóng gói lại bản build server production `dist/server/index.js`.
+  1. *Cổng an ninh mạng WebSocket*: `EnvelopeValidator` cập nhật tập hợp `VALID_INTENTS` bổ sung đầy đủ 3 intent thiếu hụt: `INTENT_AUTO_SOLVENCY`, `INTENT_ISSUE_BOND`, `INTENT_REPAY_BOND`.
+  2. *Zero-Allocation Hot Path Schema Guard*: Khởi tạo static Set tĩnh `VALID_BOND_TRANCHES = new Set<string>(Object.values(BondTrancheId))` ở cấp module, kiểm chuẩn $O(1)$ không cấp phát heap trên đường truyền WebSocket; số âm bị chặn bởi number sanity guard với `INVALID_VALUE`, string lạ bị chặn với `INVALID_ENVELOPE`.
+  3. *Insolvency Repay Guard*: Khẳng định FSM từ chối `INTENT_REPAY_BOND` trong `InsolvencyPhase` với `INVALID_PHASE` (khi đang âm vốn không thể tất toán nợ).
+  4. *2-Way Closed-Loop Parity*: Thiết lập test đối soát 2 chiều tự động đảm bảo 100% trong 24 intents nghiệp vụ được hỗ trợ đồng bộ giữa `EnvelopeValidator` và `intent_dispatcher.ts` (triệt tiêu hoàn toàn lớp lỗi silent intent drop).
+  5. *Tái đóng gói Server Bundle*: Chạy `npm run build` tái đóng gói `dist/server/index.js` (441 kB) và xác thực physical file chứa cả 3 intents mới.
+- **Hạ tầng hoàn tất**:
+  * `src/server/security/envelope_validator.ts` (239 LOC — Tier 1 <= 400 LOC): Bổ sung 3 intents vào `VALID_INTENTS`, export set, thêm `VALID_BOND_TRANCHES` và schema guard $O(1)$.
+  * `docs/domain/gotchas.md`: Ghi nhận Invariant 7 (Pillar IV: Mạng WebSocket & Đồng Bộ Delta) về Wire Protocol Intent Whitelist Parity.
+  * `dist/server/index.js`: Đã rebuild và chứa đầy đủ logic xử lý mới.
+- **Kiểm thử & Bất biến**:
+  * `tests/contracts/imp224_auto_solvency_wire_envelope.test.ts` (428 LOC): 18/18 atomic contract tests PASS 100% (Universal 5-Facet Matrix, Detroit Classical TDD).
+  * Bảo toàn 100% tests di sản: `ops03_security` (13 tests), `imp210_auto_solvency_intent` (16 tests), `imp220_insolvency_bond_and_auto_solvency_sync` (18 tests) -> Tổng **65/65 tests PASS (Zero Regression)**.
+  * TypeScript typecheck: `tsc --noEmit` 0 errors. UI Linter: `npm run lint:ui` 0 violations.
+  * Evidence Snapshot: `.agents/evidence/imp224_execution.json` (`executed: true`).
+- **Phê chuẩn**:
+  * `plan-griller`: P1-P5 HARDENED v3 APPROVED.
+  * `qa-tester`: Station 1 RED verified (11/18 tests failed as expected under Adversarial Inversion).
+  * `implementer`: Station 2 GREEN verified (18/18 tests pass, 239 LOC).
+  * `scout`: Station 2.5 PASS (0 defects qua 5 universal defect archetypes, LOC safe, binary verified).
+  * `spec-reviewer`: Station 3 APPROVED (100% spec reconciliation, 0 scope drift).
+- **Trạng thái**: ✅ Hoàn thành IMP-228 / IMP-224-FIX (2026-09-29).

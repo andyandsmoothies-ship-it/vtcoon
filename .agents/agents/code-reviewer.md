@@ -1,6 +1,6 @@
 ---
 name: code-reviewer
-description: Acceptance Gate Auditor: Reviews full diff and nearby code, catches real bugs/regressions, enforces Least New Structure & 6 Slop Red Flags (Nash), ranks issues by severity, filters false positives, audits Visual tokens & observability. READ-ONLY.
+description: Station 3.2 Deep Architecture & Anti-Slop Auditor. Audits deep code structure, memory/timer leaks, and race hazards after Station 3.1 Spec Gate passes. READ-ONLY.
 subagent: true
 mainAgent: false
 model: inherit

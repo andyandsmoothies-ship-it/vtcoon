@@ -113,7 +113,11 @@ function handleUpgradeBadge(act: ActivityLogEntry, state: GameState): void {
 function handleBailBadge(act: ActivityLogEntry, state: GameState): void {
   const amount = act.amount !== undefined ? -Math.abs(act.amount) : -MIN_BAIL_AMOUNT;
   const isTimeout = act.message.includes('Hết 3 lượt') || act.message.includes('bắt buộc');
-  const formula = isTimeout ? 'Hết 3 lượt không ra đôi: Phạt bảo lãnh bắt buộc' : `Bảo lãnh sớm: 10% tài sản ròng (Sàn ${MIN_BAIL_AMOUNT} Tr.)`;
+  const formula = isTimeout
+    ? 'Hết 3 lượt không ra đôi: Phạt bảo lãnh bắt buộc'
+    : (Math.abs(amount) > MIN_BAIL_AMOUNT
+        ? `Bảo lãnh tái phạm: Khung ${formatCurrency(Math.abs(amount))} Tr. ➔ Kho Bạc`
+        : `Bảo lãnh chuẩn: Khung ${formatCurrency(MIN_BAIL_AMOUNT)} Tr. ➔ Kho Bạc`);
   state.addFloatingText({
     text: formatCurrency(amount), type: FloatingTextType.Penalty, playerId: act.playerId ?? '', actionType: 'bail',
     title: isTimeout ? 'Cưỡng chế kiểm toán ➔ Nộp Kho Bạc' : 'Bảo lãnh kiểm toán (Ô 10) ➔ Nộp Kho Bạc',

@@ -72,6 +72,12 @@ export function computeTrainYaw(tangent: { x: number; y?: number; z: number }): 
 
 export const calculateTrainYaw = computeTrainYaw;
 
+export function computeTrainPitch(speed: number, elapsedTime: number): number {
+  return speed > 0.01 ? Math.sin(elapsedTime * 12) * 0.005 : 0;
+}
+
+export const calculateTrainPitch = computeTrainPitch;
+
 export function computeCarriageProgress(
   leadProgress: number,
   carriageOffsetMeters: number,

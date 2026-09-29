@@ -7,7 +7,9 @@ import { isPurchasable, type PropertyRegistry, type PropertyStateMap } from '../
 import { BotPersonality, DEFAULT_MIN_SAFETY_BUFFER } from './bot_types';
 import { calculateThreatHorizon } from './threat_forecaster';
 
-export const BAIL_OUT_FINE = 500;
+import { calculateBailAmount, MIN_BAIL_AMOUNT } from '../property_rent.js';
+
+export const BAIL_OUT_FINE = MIN_BAIL_AMOUNT;
 export const UNCLAIMED_EARLY_GAME_THRESHOLD = 8;
 export const AUDIT_CELL_INDEX = 10;
 
@@ -33,13 +35,14 @@ export function decideAuditBailout(
   stateMap: PropertyStateMap,
   personality?: BotPersonality,
 ): boolean {
-  if (bot.auditTurnsLeft <= 0 || bot.balance < BAIL_OUT_FINE) return false;
+  const bailCost = calculateBailAmount(bot.auditCount ?? 1);
+  if (bot.auditTurnsLeft <= 0 || bot.balance < bailCost) return false;
 
   const auditBot = bot.position === AUDIT_CELL_INDEX ? bot : { ...bot, position: AUDIT_CELL_INDEX };
   const threat = calculateThreatHorizon(auditBot, room, registry, stateMap, personality);
   const minBuffer = threat?.safetyBuffer ?? DEFAULT_MIN_SAFETY_BUFFER;
 
-  if (bot.balance - BAIL_OUT_FINE < minBuffer) return false;
+  if (bot.balance - bailCost < minBuffer) return false;
 
   const unclaimedCount = countUnclaimedProperties(registry);
   if (unclaimedCount >= UNCLAIMED_EARLY_GAME_THRESHOLD) return true;

@@ -1,6 +1,6 @@
 ---
 name: spec-reviewer
-description: Verifies diffs line-by-line against original specifications to prevent Scope Drift and ensure 100% traceability. READ-ONLY.
+description: Station 3.1 Spec & Scope Gatekeeper. Verifies diffs against plan/spec, prevents Scope Drift, and enforces 100% traceability. MUST pass before Phase 3.2 deep code review. READ-ONLY.
 subagent: true
 mainAgent: false
 model: inherit

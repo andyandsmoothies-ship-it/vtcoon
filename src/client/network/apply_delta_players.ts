@@ -5,6 +5,7 @@ import { calculatePathWaypoints, calculateJailFlightWaypoints } from '../3d/pawn
 import { useLobbyStore } from '../store/lobby_store.js';
 import { PLAYER_TOKEN_PALETTE } from '../../domain/theme.js';
 import type { DeltaPayload } from '../../server/session_manager.js';
+export type { DeltaPayload };
 import { formatCurrency } from '../ui/ui_helpers.js';
 import { AudioEngine } from '../audio/audio_engine.js';
 import { SoundEffect } from '../audio/audio_types.js';
@@ -100,7 +101,7 @@ type DeltaPlayer = NonNullable<DeltaPayload['players']>[number];
 
 const OPTIONAL_PLAYER_KEYS = [
   'bankrupt', 'overdraftRoundsLeft', 'inAudit',
-  'auditTurnsLeft', 'skipNextTurn', 'consecutiveDoubles', 'extraTurns',
+  'auditTurnsLeft', 'auditCount', 'skipNextTurn', 'consecutiveDoubles', 'extraTurns',
   'bondContract', 'hand',
 ] as const;
 
@@ -210,7 +211,7 @@ function syncPlayerBalanceDiff(
 
 function syncFinalPositions(state: GameState, nextPositions: Record<string, number>, hasPosChange: boolean, isFullSync: boolean): void {
   if (!hasPosChange && !isFullSync) return;
-  state.setPlayerPositions(nextPositions);
+  state.setPlayerPositions?.(nextPositions);
   if (isFullSync) state.setVisualPositions?.(nextPositions);
 }
 
