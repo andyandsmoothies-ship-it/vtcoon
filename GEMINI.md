@@ -37,7 +37,7 @@ A task is COMPLETE only when:
 1. Automated tests pass Adversarial Inversion, include traceability tags (`[UC-XXX/MSS]` or `[UC-XXX/A#]`), and pass fixture contracts against SSOT.
 2. Code passes `npm run lint:slop` (complexity <= 5, LOC budgets) and `npm run lint:ui` (0 violations).
 3. Reviewer gates approve via physical disk inspection (`spec-reviewer` verifies 100% spec reconciliation; `code-reviewer` verifies code quality/observability; `game-3d-visual-critic` verifies 3D; `ui-craft-reviewer` verifies 2D craft; implementer never approves own code; `.agents/evidence/` snapshot has `executed: true`).
-4. Progress and Tech Debt Ledger updated in `docs/epics/[epic]/_epic_ledger.md`.
+4. Progress and Tech Debt Ledger updated in `docs/epics/[epic]/_epic_ledger.md`, and dedicated completion report persisted automatically to `docs/reports/improvements/IMP-[ID]-[slug]_report.md` (for IMP tickets) or `docs/reports/audits/[ID]_acceptance_report.md` (for core tickets).
 5. Production resilience verified: defense against invalid intents, treasury conservation invariant, Turn N+1 state teardown, and explicit tombstone delivery.
 
 ## 3. PROJECT NFR BASELINE

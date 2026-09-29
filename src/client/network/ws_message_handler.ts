@@ -79,6 +79,13 @@ export function handleWsMessage(
   }
 }
 
+const lastErrorTimeMap = new Map<string, number>();
+const ERROR_THROTTLE_MS = 1500;
+
+export function resetWsErrorThrottle(): void {
+  lastErrorTimeMap.clear();
+}
+
 function handleWsError(
   msg: Extract<WsServerMessage, { type: 'ERROR' | 'INTENT_REJECTED' }>,
   ctx: WsMessageHandlerContext
@@ -110,6 +117,23 @@ function handleWsError(
       /* safe-ignore: socket may be disconnected or buffered */
     }
   }
+
+  // 2. Chặn lỗi của Bot (C1 Guard): Chỉ lọc khi msg.type === 'INTENT_REJECTED' && msg.playerId !== undefined
+  if (msg.type === 'INTENT_REJECTED' && msg.playerId !== undefined) {
+    const myPlayerId = useLobbyStore.getState().myPlayerId || ctx.playerId;
+    if (msg.playerId !== myPlayerId) {
+      return;
+    }
+  }
+
+  // 3. Throttle chống spam click liên tục
+  const now = Date.now();
+  const lastTime = lastErrorTimeMap.get(msg.reasonCode) ?? 0;
+  if (now - lastTime < ERROR_THROTTLE_MS) {
+    return;
+  }
+  lastErrorTimeMap.set(msg.reasonCode, now);
+
   if (msg.reasonCode === 'TradeFrozen' || msg.reasonCode === 'FREEZE_ACTIVE') {
     useGameStore.getState().addFloatingText({
       playerId: ctx.playerId,

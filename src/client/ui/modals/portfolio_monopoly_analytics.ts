@@ -136,6 +136,7 @@ export interface PropertyCardActionState {
   readonly canMortgage: boolean;
   readonly mortgageBlockedReason?: string;
   readonly mortgageButtonLabel: string;
+  readonly mortgageSubHint?: string;
   readonly canDowngrade: boolean;
   readonly downgradeBlockedReason?: string;
 }
@@ -155,22 +156,28 @@ export function resolvePropertyCardActionState(params: {
   let canMortgage = false;
   let mortgageBlockedReason: string | undefined = undefined;
   let mortgageButtonLabel = 'Thế Chấp';
+  let mortgageSubHint: string | undefined = undefined;
 
   if (isMortgaged) {
     canMortgage = false;
     mortgageBlockedReason = 'Bất động sản đã được thế chấp';
+    mortgageButtonLabel = 'Đã Thế Chấp';
+    mortgageSubHint = 'Cần chuộc nợ để khôi phục quyền thế chấp';
   } else if (level > 0) {
     canMortgage = false;
     mortgageBlockedReason = 'Phải hạ cấp hết nhà về Cấp 0 trước khi thế chấp';
     mortgageButtonLabel = 'Cần Hạ Cấp';
+    mortgageSubHint = 'Phải hạ cấp hết nhà về Cấp 0 trước khi thế chấp';
   } else if (isLiquidityFrozen) {
     canMortgage = false;
     mortgageBlockedReason = 'Bất động sản đang bị đóng băng thanh khoản';
     mortgageButtonLabel = 'Đóng Băng';
+    mortgageSubHint = 'Đang trong chu kỳ đóng băng thanh khoản';
   } else if (isTradeFrozen) {
     canMortgage = false;
     mortgageBlockedReason = 'Thị trường đang đóng băng giao dịch & thế chấp';
     mortgageButtonLabel = 'Đóng Băng';
+    mortgageSubHint = 'Thị trường đang đóng băng giao dịch & thế chấp';
   } else {
     canMortgage = true;
   }
@@ -208,6 +215,7 @@ export function resolvePropertyCardActionState(params: {
     canMortgage,
     mortgageBlockedReason,
     mortgageButtonLabel,
+    mortgageSubHint,
     canDowngrade,
     downgradeBlockedReason,
   };

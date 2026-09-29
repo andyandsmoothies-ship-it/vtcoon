@@ -226,7 +226,9 @@ export function AdaptiveCinematicCamera({
 
     if (controlsRef.current) {
       const isDragging = isUserInteractingRef.current;
-      const isActionOngoing = isRolling || isPawnMoving || activeScreenShake !== null || activeModal !== null || cameraFocusCell !== null;
+      const isActionOngoing = isRolling || isPawnMoving || activeScreenShake !== null
+        || (cameraFocusCell !== null)
+        || (!hasUserCustomCamera && activeModal !== null);
 
       if (isDragging) {
         camBaseRef.current[0] = camera.position.x;
@@ -279,7 +281,6 @@ export function AdaptiveCinematicCamera({
       maxDistance={65}
       minZoom={20}
       maxZoom={65}
-      target={defaultTarget}
       onStart={() => {
         isUserInteractingRef.current = true;
         isManualOverviewResetRef.current = false;

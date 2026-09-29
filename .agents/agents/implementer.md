@@ -48,3 +48,4 @@ hooks: [.agents/hooks_implementer.json]
 - **Adversarial Inversion**: PASS (Deliberate fault flips test to RED).
 - **Reflexion Invariant Extracted**: Gotcha #[ID] recorded in `docs/domain/gotchas.md`.
 ```
+

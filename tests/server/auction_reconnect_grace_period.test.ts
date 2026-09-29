@@ -1,6 +1,6 @@
 // [UC-GAME-006/MSS][UC-GAME-007/MSS][UC-GAME-028/MSS]
 // Kiểm thử: Rớt mạng WebSocket khi đang giữ giá cao nhất ở 3s cuối sàn đấu giá & Reconnect phục hồi
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { RoomManager } from '../../src/server/room_manager';
 import { TurnPhase } from '../../src/domain/room';
 import { ReconnectManager } from '../../src/server/network/reconnect_manager';
@@ -139,4 +139,35 @@ describe('[UC-GAME-006/MSS][UC-GAME-028/MSS] Rớt Mạng Đấu Giá 3s Cuối 
       expect(expired.reasonCode).toBe('TOKEN_EXPIRED');
     }
   });
+
+  it('[TC-SEC-01/MSS] verifyToken và isTokenValid từ chối TOKEN_EXPIRED khi token vượt quá TTL tuyệt đối (maxTokenTtlMs)', () => {
+    vi.useFakeTimers();
+    try {
+      const mgr = new RoomManager(42);
+      const sessionMgr = new SessionManager();
+      const reconnectMgr = new ReconnectManager({
+        rooms: mgr,
+        sessions: sessionMgr,
+        broadcaster: new DeltaBroadcaster(mgr, sessionMgr, () => {}),
+        broadcast: () => {},
+        maxTokenTtlMs: 1000, // 1 giây TTL
+      });
+
+      const token = reconnectMgr.generateToken('p1', 'ROOM01');
+      expect(reconnectMgr.isTokenValid(token)).toBe(true);
+
+      // Nhảy thời gian 1.5 giây về phía trước (vượt quá TTL 1000ms)
+      vi.advanceTimersByTime(1500);
+
+      expect(reconnectMgr.isTokenValid(token)).toBe(false);
+      const verifyRes = reconnectMgr.verifyToken(token, 'ROOM01');
+      expect(verifyRes.success).toBe(false);
+      if (!verifyRes.success) {
+        expect(verifyRes.reasonCode).toBe('TOKEN_EXPIRED');
+      }
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });
+

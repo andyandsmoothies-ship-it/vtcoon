@@ -24,13 +24,6 @@ const ACTIONABLE_NOTIFICATIONS_MAP: Record<string, ActionableNotification> = {
     tone: 'error',
     actionHint: 'Hãy thế chấp tài sản hoặc hạ cấp công trình để bổ sung vốn.',
   },
-  InsufficientFunds: {
-    icon: '💰',
-    title: 'Ngân Sách Không Đủ',
-    description: 'Số dư khả dụng không đủ để hoàn tất giao dịch này.',
-    tone: 'error',
-    actionHint: 'Hãy thế chấp tài sản hoặc hạ cấp công trình để bổ sung vốn.',
-  },
   CANNOT_ROLL: {
     icon: '🎲',
     title: 'Chưa Thể Đổ Xúc Xắc',
@@ -136,13 +129,6 @@ const ACTIONABLE_NOTIFICATIONS_MAP: Record<string, ActionableNotification> = {
     tone: 'warning',
     actionHint: 'Đề xuất đàm phán với chủ sở hữu để mua lại.',
   },
-  NotPurchasable: {
-    icon: '🚫',
-    title: 'Ô Không Thể Mua Bán',
-    description: 'Ô này là ô sự kiện hoặc chức năng, không thuộc danh mục mua bán.',
-    tone: 'warning',
-    actionHint: 'Chỉ có thể mua các ô đất hoặc nhà ga chưa có chủ.',
-  },
   NOT_PURCHASABLE: {
     icon: '🚫',
     title: 'Ô Không Thể Mua Bán',
@@ -172,13 +158,6 @@ const ACTIONABLE_NOTIFICATIONS_MAP: Record<string, ActionableNotification> = {
     actionHint: 'Điều chỉnh điều kiện trao đổi hấp dẫn hơn và thử lại.',
   },
   FREEZE_ACTIVE: {
-    icon: '❄️',
-    title: 'Thị Trường Đang Đóng Băng',
-    description: 'Hiệu ứng đóng băng thị trường đang hoạt động, tạm dừng mọi giao dịch mua bán và thế chấp.',
-    tone: 'warning',
-    actionHint: 'Chờ hiệu ứng đóng băng thị trường kết thúc sau các vòng quy định.',
-  },
-  TradeFrozen: {
     icon: '❄️',
     title: 'Thị Trường Đang Đóng Băng',
     description: 'Hiệu ứng đóng băng thị trường đang hoạt động, tạm dừng mọi giao dịch mua bán và thế chấp.',
@@ -327,6 +306,11 @@ const ACTIONABLE_NOTIFICATIONS_MAP: Record<string, ActionableNotification> = {
   },
 };
 
+// Aliases for legacy/alternative casing reason codes (DRY SSOT)
+ACTIONABLE_NOTIFICATIONS_MAP['InsufficientFunds'] = ACTIONABLE_NOTIFICATIONS_MAP['INSUFFICIENT_FUNDS']!;
+ACTIONABLE_NOTIFICATIONS_MAP['NotPurchasable'] = ACTIONABLE_NOTIFICATIONS_MAP['NOT_PURCHASABLE']!;
+ACTIONABLE_NOTIFICATIONS_MAP['TradeFrozen'] = ACTIONABLE_NOTIFICATIONS_MAP['FREEZE_ACTIVE']!;
+
 const DEFAULT_FALLBACK_NOTIFICATION: ActionableNotification = {
   icon: 'ℹ️',
   title: 'Hướng Dẫn Trò Chơi',
@@ -348,9 +332,12 @@ export function formatServerErrorMessage(reasonCode?: string | null): string {
   }
   const match = ACTIONABLE_NOTIFICATIONS_MAP[reasonCode];
   if (!match) {
-    return 'Hướng dẫn trò chơi: Thao tác tạm thời chưa thể thực hiện. Vui lòng kiểm tra lại tình trạng lượt chơi!';
+    return `Hướng dẫn trò chơi: Thao tác tạm thời chưa thể thực hiện (${reasonCode}). Vui lòng kiểm tra lại tình trạng lượt chơi!`;
   }
-  return match.description;
+  if (match.actionHint) {
+    return `${match.title}: ${match.description} 👉 ${match.actionHint}`;
+  }
+  return `${match.title}: ${match.description}`;
 }
 
 export default resolveActionableNotification;

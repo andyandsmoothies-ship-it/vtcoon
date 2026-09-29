@@ -7,6 +7,7 @@ import { analyzePropertyMonopolyInsight, resolvePropertyCardActionState } from '
 import { PortfolioTabHeader, type PortfolioTab } from './portfolio_tab_header';
 import { PortfolioDeficitBanner } from './portfolio_deficit_banner';
 import { BondIssuanceTab } from './bond_issuance_tab';
+import { PropertyCardActions } from './property_card_actions';
 import { type BondContract, BondTrancheId } from '../../../domain/bond_types';
 import { MacroCycleType } from '../../../domain/macro_cycle_types';
 
@@ -364,99 +365,21 @@ export function PropertyPortfolioModal({
                     )
                   )}
 
-                  {/* Cụm Nút Nâng Cấp Nhanh 1-Click */}
-                  {deed?.upgradeCosts && !isMort && (
-                    <div className="my-2">
-                      <button
-                        type="button"
-                        data-testid="property-quick-build-btn"
-                        disabled={!upgradeInfo.canUpgrade}
-                        title={upgradeInfo.blockedReason ?? upgradeInfo.reason}
-                        onClick={() => {
-                          if (upgradeInfo.canUpgrade) {
-                            onUpgrade?.(cellIndex);
-                          }
-                        }}
-                        className={`w-full min-h-[44px] px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
-                          upgradeInfo.canUpgrade
-                            ? 'bg-amber-400 hover:bg-amber-300 text-amber-950 border-2 border-amber-600 shadow-[0_3px_0_0_#d97706] active:translate-y-[2px] cursor-pointer'
-                            : 'bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed opacity-70'
-                        }`}
-                      >
-                        <span>
-                          {upgradeInfo.canUpgrade
-                            ? `🏗️ Xây C${upgradeInfo.nextLevel} (${formatCurrency(upgradeInfo.upgradeCost ?? 0)})`
-                            : (level >= 3 ? 'Cấp Tối Đa' : `🏗️ Xây C${upgradeInfo.nextLevel ?? (level + 1)}`)}
-                        </span>
-                      </button>
-                      {!upgradeInfo.canUpgrade && (upgradeInfo.blockedReason ?? upgradeInfo.reason) && (
-                        <span className="text-[11px] text-slate-500 italic mt-1 block text-center truncate" title={upgradeInfo.blockedReason ?? upgradeInfo.reason}>
-                          {upgradeInfo.blockedReason ?? upgradeInfo.reason}
-                        </span>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Nút hành động khác */}
-                  <div className="pt-2 border-t border-slate-200 grid grid-cols-2 gap-1.5 text-xs">
-                    {!isMort && (
-                      <button
-                        type="button"
-                        data-testid={`mortgage-btn-${cellIndex}`}
-                        onClick={() => actionState.canMortgage && onMortgage?.(cellIndex)}
-                        disabled={!actionState.canMortgage}
-                        title={actionState.mortgageBlockedReason}
-                        className={`col-span-2 min-h-[44px] px-3 py-2 font-bold rounded-lg border-2 text-xs transition-all inline-flex items-center justify-center ${
-                          actionState.canMortgage
-                            ? 'bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-300 shadow-[0_2px_0_0_#fecdd3] active:translate-y-[1px] cursor-pointer'
-                            : 'bg-slate-100 text-slate-400 border-slate-200 shadow-none cursor-not-allowed opacity-75'
-                        }`}
-                      >
-                        {actionState.canMortgage
-                          ? `Thế Chấp (+${formatCurrency(mortgageVal)})`
-                          : `${actionState.mortgageButtonLabel} (+${formatCurrency(mortgageVal)})`}
-                      </button>
-                    )}
-
-                    {isMort && (
-                      <button
-                        type="button"
-                        data-testid={`redeem-btn-${cellIndex}`}
-                        onClick={() => onRedeem?.(cellIndex)}
-                        disabled={currentBalance < redeemCost}
-                        className="col-span-2 min-h-[44px] px-3 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold rounded-lg border-2 border-emerald-800 shadow-[0_3px_0_0_#065f46] active:translate-y-[2px] transition-all text-xs cursor-pointer disabled:cursor-not-allowed disabled:shadow-none inline-flex items-center justify-center"
-                      >
-                        Giải Chấp (-{formatCurrency(redeemCost)})
-                      </button>
-                    )}
-
-                    {level > 0 && !isMort && onDowngrade && (
-                      <button
-                        type="button"
-                        data-testid={`downgrade-btn-${cellIndex}`}
-                        onClick={() => actionState.canDowngrade && onDowngrade(cellIndex)}
-                        disabled={!actionState.canDowngrade}
-                        title={actionState.downgradeBlockedReason}
-                        className={`col-span-1 min-h-[44px] px-3 py-2 font-bold rounded-lg border-2 text-xs transition-all inline-flex items-center justify-center ${
-                          actionState.canDowngrade
-                            ? 'bg-rose-100 hover:bg-rose-200 text-rose-800 border-rose-300 shadow-[0_2px_0_0_#fecdd3] active:translate-y-[1px] cursor-pointer'
-                            : 'bg-slate-100 text-slate-400 border-slate-200 shadow-none cursor-not-allowed opacity-75'
-                        }`}
-                      >
-                        Hạ Cấp
-                      </button>
-                    )}
-
-                    {onSelectDeed && (
-                      <button
-                        type="button"
-                        onClick={() => onSelectDeed(cellIndex)}
-                        className={`${level > 0 && !isMort && onDowngrade ? 'col-span-1' : 'col-span-2'} min-h-[44px] px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-lg border-2 border-slate-300 shadow-[0_2px_0_0_#cbd5e1] active:shadow-none active:translate-y-[1px] text-xs cursor-pointer inline-flex items-center justify-center`}
-                      >
-                        Sổ Đỏ ↗
-                      </button>
-                    )}
-                  </div>
+                  <PropertyCardActions
+                    cellIndex={cellIndex}
+                    level={level}
+                    isMort={isMort}
+                    mortgageVal={mortgageVal}
+                    redeemCost={redeemCost}
+                    currentBalance={currentBalance}
+                    actionState={actionState}
+                    upgradeInfo={deed?.upgradeCosts ? upgradeInfo : undefined}
+                    onUpgrade={onUpgrade}
+                    onMortgage={onMortgage}
+                    onRedeem={onRedeem}
+                    onDowngrade={onDowngrade}
+                    onSelectDeed={onSelectDeed}
+                  />
                 </div>
               );
             })}

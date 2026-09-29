@@ -15,12 +15,15 @@ export interface ReconnectTokenRecord {
   expired: boolean;
 }
 
+export const MAX_RECONNECT_TOKEN_TTL_MS = 2 * 60 * 60 * 1000; // 2 giờ
+
 export interface ReconnectManagerConfig {
   readonly rooms: RoomManager;
   readonly sessions: SessionManager;
   readonly broadcaster: DeltaBroadcaster;
   readonly broadcast: (roomCode: string, msg: WsServerMessage) => void;
   readonly gracePeriodMs?: number;
+  readonly maxTokenTtlMs?: number;
   readonly isSocketConnected?: (roomCode: string, playerId: string) => boolean;
   readonly onAllHumansDisconnected?: (roomCode: string) => void;
 }
@@ -35,6 +38,7 @@ export class ReconnectManager {
   private readonly broadcaster: DeltaBroadcaster;
   private readonly broadcast: (roomCode: string, msg: WsServerMessage) => void;
   private readonly gracePeriodMs: number;
+  private readonly maxTokenTtlMs: number;
   private readonly isSocketConnected?: (roomCode: string, playerId: string) => boolean;
   private readonly onAllHumansDisconnected?: (roomCode: string) => void;
 
@@ -53,6 +57,7 @@ export class ReconnectManager {
     this.broadcaster = config.broadcaster;
     this.broadcast = config.broadcast;
     this.gracePeriodMs = config.gracePeriodMs ?? GRACE_PERIOD_MS;
+    this.maxTokenTtlMs = config.maxTokenTtlMs ?? MAX_RECONNECT_TOKEN_TTL_MS;
     this.isSocketConnected = config.isSocketConnected;
     this.onAllHumansDisconnected = config.onAllHumansDisconnected;
   }
@@ -82,7 +87,8 @@ export class ReconnectManager {
     if (!record) {
       return { success: false, reasonCode: 'TOKEN_INVALID' };
     }
-    if (record.expired) {
+    if (record.expired || (Date.now() - record.createdAt > this.maxTokenTtlMs)) {
+      record.expired = true;
       return { success: false, reasonCode: 'TOKEN_EXPIRED' };
     }
     if (roomCode && record.roomCode !== roomCode) {
@@ -93,7 +99,12 @@ export class ReconnectManager {
 
   isTokenValid(token: string): boolean {
     const record = this.tokens.get(token);
-    return Boolean(record && !record.expired);
+    if (!record || record.expired) return false;
+    if (Date.now() - record.createdAt > this.maxTokenTtlMs) {
+      record.expired = true;
+      return false;
+    }
+    return true;
   }
 
   expireToken(token: string): void {

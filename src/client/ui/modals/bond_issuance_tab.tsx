@@ -63,10 +63,11 @@ export function BondIssuanceTab({
 
   const hasNetWorth = playerNetWorth >= 3000;
   const hasEnoughDeeds = unmortgagedPropertiesCount >= 2;
-  const canIssue = Boolean(isMyTurn) && hasNetWorth && hasEnoughDeeds;
+  const isTurnValid = Boolean(isMyTurn || isInInsolvency);
+  const canIssue = isTurnValid && hasNetWorth && hasEnoughDeeds;
 
-  const blockedReason = !isMyTurn
-    ? 'Chỉ có thể phát hành trong lượt của bạn'
+  const blockedReason = !isTurnValid
+    ? 'Chỉ có thể phát hành trong lượt của bạn hoặc khi giải cứu nợ'
     : !hasNetWorth
     ? 'Cần tối thiểu 3.000 Net Worth để phát hành trái phiếu'
     : !hasEnoughDeeds
@@ -127,11 +128,41 @@ export function BondIssuanceTab({
         Gói đã chọn: <strong className="text-slate-900">{trancheConfig.name}</strong>
       </div>
 
-      <ul className="space-y-1.5 list-disc pl-4 text-slate-700 text-[11px]">
-        <li>Tối thiểu Net Worth 3.000 (Hiện có: <strong className="font-mono">{formatCurrency(playerNetWorth)}</strong>).</li>
-        <li>Sở hữu ít nhất 2 Bất Động Sản chưa thế chấp (Hiện có: <strong>{unmortgagedPropertiesCount} BĐS</strong>).</li>
-        <li>Tài sản đảm bảo được ưu tiên chọn từ các ô đất rẻ nhất; vẫn được <strong>thu tiền thuê 100%</strong>.</li>
-      </ul>
+      {/* Checklist 3 Điều Kiện Phát Hành Trực Quan (Thay thế L130 - L134) */}
+      <div className="p-3 bg-white/90 rounded-xl border border-amber-200 space-y-2">
+        <h5 className="font-bold text-[11px] text-slate-700 uppercase tracking-wider">Điều Kiện Phát Hành Trái Phiếu</h5>
+        <div className="space-y-2 text-xs">
+          <div className="flex items-center justify-between gap-2 min-w-0">
+            <span className="flex items-center gap-1.5 min-w-0">
+              <span className="shrink-0">{hasNetWorth ? '✔️' : '❌'}</span>
+              <span className={`truncate ${hasNetWorth ? 'text-slate-800 font-medium' : 'text-rose-700 font-bold'}`}>
+                Tài sản ròng (Net Worth) ≥ 3.000
+              </span>
+            </span>
+            <span className="font-mono text-slate-600 shrink-0">{formatCurrency(playerNetWorth)}</span>
+          </div>
+          <div className="flex items-center justify-between gap-2 min-w-0">
+            <span className="flex items-center gap-1.5 min-w-0">
+              <span className="shrink-0">{hasEnoughDeeds ? '✔️' : '❌'}</span>
+              <span className={`truncate ${hasEnoughDeeds ? 'text-slate-800 font-medium' : 'text-rose-700 font-bold'}`}>
+                BĐS sạch chưa thế chấp ≥ 2 ô
+              </span>
+            </span>
+            <span className="font-mono text-slate-600 shrink-0">{unmortgagedPropertiesCount} / 2</span>
+          </div>
+          <div className="flex items-center justify-between gap-2 min-w-0">
+            <span className="flex items-center gap-1.5 min-w-0">
+              <span className="shrink-0">{isTurnValid ? '✔️' : '❌'}</span>
+              <span className={`truncate ${isTurnValid ? 'text-slate-800 font-medium' : 'text-rose-700 font-bold'}`}>
+                Trong lượt hoặc giải cứu nợ
+              </span>
+            </span>
+            <span className={`font-semibold shrink-0 ${isTurnValid ? 'text-emerald-700' : 'text-slate-500'}`}>
+              {isTurnValid ? 'Hợp lệ' : 'Ngoài lượt'}
+            </span>
+          </div>
+        </div>
+      </div>
 
       {blockedReason && (
         <div

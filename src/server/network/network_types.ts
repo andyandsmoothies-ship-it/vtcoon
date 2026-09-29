@@ -5,6 +5,7 @@
 import type { DeltaPayload } from '../session_manager.js';
 import type { PlayerIntent } from '../intent_dispatcher.js';
 import type { AdminRoomSummary, AdminRoomDetail, AdminRoomLogEntry, AdminArchivedRoomSummary, ServerVitals } from './admin_types.js';
+import type { ActionRejectReason } from '../../domain/action_reasons.js';
 
 export type ReasonCode =
   | 'ROOM_CODE_COLLISION'
@@ -35,8 +36,8 @@ export type ReasonCode =
   | 'LIQUIDITY_FROZEN'
   | 'BOND_COLLATERAL_LOCKED'
   | 'BOND_NOT_ELIGIBLE'
-  | 'BOND_ALREADY_ACTIVE'
-  | 'ACTION_REJECTED';
+  | 'ACTION_REJECTED'
+  | ActionRejectReason;
 
 export type WsErrorMessageReason = ReasonCode;
 

@@ -850,3 +850,30 @@
   * Evidence Snapshot: `.agents/evidence/imp-224_snapshot.json` (`executed: true`, `contractTestsPassed: true`).
 - **Phê chuẩn**: `plan-griller` (P1-P5 HARDENED v3 APPROVED), `qa-tester` (Station 1 RED 14/16), `implementer` (Station 2 GREEN 16/16), `scout` (Station 2.5 PASS 100%), `code-reviewer` (Station 3 APPROVED), `game-3d-visual-critic` (Station 3 APPROVED 9.5/10), `spec-reviewer` (Station 3 APPROVED).
 - **Trạng thái**: ✅ Hoàn thành IMP-224 (2026-09-29).
+
+---
+
+### [IMP-225] Actionable In-Game Feedback & Deep Contextual Messages System
+- **Mục tiêu**: Nâng cấp toàn diện hệ thống phản hồi ngữ cảnh trong trận đấu, giải quyết triệt để vấn đề phản hồi chung chung, silent intent rejection, các nút bị vô hiệu hóa mà không rõ nguyên nhân (như thế chấp đất có nhà C1-C3, phát hành trái phiếu thiếu điều kiện), bảo đảm công thái học di động 360px và ngăn chặn ô nhiễm thông báo lỗi từ Bot.
+  1. *Actionable Guidance 3 Tầng*: Kết hợp Tiêu đề + Mô tả chi tiết + Hướng dẫn hành động cụ thể (`actionHint` kèm icon `👉`), hiển thị qua `ServerToast` (z-50) nổi bật trên tất cả các modal.
+  2. *Bot Error Guard (C1) & Throttle Anti-Spam (C2)*: Lọc triệt để các phản hồi `INTENT_REJECTED` từ Bot (`msg.playerId !== myPlayerId`), dập tắt spam click với bộ đệm throttle 1500ms cấp module, và xuất khẩu `resetWsErrorThrottle()` để cách ly hoàn toàn trạng thái giữa các test suite.
+  3. *Subcomponent Extraction & Visual Mortgage Hint*: Trích xuất `PropertyCardActions` (150 LOC) khỏi `property_portfolio_modal.tsx`, giảm LOC modal từ 472 xuống 395 LOC (< 500 LOC ceiling); bổ sung `mortgageSubHint` cảnh báo trực quan hạ cấp nhà về C0 trước khi thế chấp; bảo toàn hợp đồng bố cục lưới 2 cột `col-span-2` cho Thế Chấp và `col-span-1` cho Hạ Cấp (IMP-208 regex).
+  4. *Visual Bond Eligibility Checklist*: Tab phát hành trái phiếu (`BondIssuanceTab`) chuyển đổi danh sách tĩnh 3 gạch đầu dòng thành cụm thẻ Checklist 3 tiêu chí trực quan UTF-8 (`✔️` / `❌`: Net Worth ≥ 3.000, BĐS sạch ≥ 2, Trong lượt hoặc giải cứu nợ `isTurnValid`), bảo đảm người chơi nhận diện tức thì điều kiện còn thiếu.
+- **Hạ tầng hoàn tất**:
+  * `src/client/ui/actionable_notification.ts` (343 LOC — Tier 2 <= 500 LOC): Nâng cấp `formatServerErrorMessage` hiển thị thông điệp 3 tầng kèm `👉 ${match.actionHint}`, fallback ngoại lệ an toàn; tái cấu trúc DRY triệt tiêu duplication bằng alias mapping (P1).
+  * `src/client/network/ws_message_handler.ts` (189 LOC — Tier 1 <= 400 LOC): Bổ sung `lastErrorTimeMap`, xuất khẩu `resetWsErrorThrottle()`, tích hợp C1 Bot Filter Guard và Throttle Anti-Spam 1500ms, bảo toàn 100% floating text `TradeFrozen` và `LIQUIDITY_FROZEN`.
+  * `src/client/ui/modals/portfolio_monopoly_analytics.ts` (222 LOC — Tier 1 <= 400 LOC): Bổ sung `mortgageSubHint?: string`, cập nhật `mortgageButtonLabel = 'Đã Thế Chấp'` khi `isMortgaged` (P2), bảo toàn `'Cần Hạ Cấp'` khi `level > 0` (hợp đồng IMP-208), đồng bộ lý do chặn dỡ nhà đều tay (Even Downgrading).
+  * `src/client/ui/modals/property_card_actions.tsx` (149 LOC — Tier 2 <= 500 LOC): Component độc lập quản trị hành động thẻ BĐS, chuẩn hóa sàn chạm cảm ứng $\ge 44$px (`min-h-[44px]`), bảo toàn data-testid và lớp cảnh báo trực quan.
+  * `src/client/ui/modals/property_portfolio_modal.tsx` (394 LOC — Tier 2 <= 500 LOC): Tái cấu trúc tinh gọn (subtractive refactoring) đưa modal về 394 LOC (giảm từ 472 LOC, an toàn dưới trần 500 LOC).
+  * `src/client/ui/modals/bond_issuance_tab.tsx` (209 LOC — Tier 2 <= 500 LOC): Đồng bộ hóa `isTurnValid = Boolean(isMyTurn || isInInsolvency)` và thay thế danh sách tĩnh bằng cụm Checklist 3 tiêu chí trực quan UTF-8 (flexbox responsive, `truncate min-w-0`, không tràn màn hình 360px).
+  * `src/server/network/network_types.ts` (205 LOC — Tier 1 <= 400 LOC): Mở rộng `ReasonCode = ... | ActionRejectReason` giải quyết triệt để type-safety gap và Zero Dirty Casts (P3).
+- **Kiểm thử & Bất biến**:
+  * `tests/client/actionable_feedback_and_messaging.test.ts` (292 LOC): 16/16 atomic contract tests PASS 100% (Universal 5-Facet Matrix, Detroit Classical TDD, 0 `as any` casts - P3).
+  * Bảo toàn 100% tests di sản: `imp208_comprehensive_button_affordance` (21 tests), `actionable_guidance_system` (41 tests), `imp193_mobile_ergonomics_auction_and_copy_polish` (18 tests), `imp220_insolvency_bond_and_auto_solvency_sync` (18 tests) -> Tổng 114/114 tests PASS.
+  * TypeScript typecheck: `tsc --noEmit` 0 errors. UI Linter: `npm run lint:ui` 0 violations (204 files scanned).
+  * Domain Invariant: Gotcha Invariant 18 (`Actionable Contextual Feedback & Deep Mobile Action Affordance [IMP-225]`).
+  * Evidence Snapshot: `.agents/evidence/imp-225_snapshot.json` & `.agents/evidence/imp225_actionable_feedback_and_messaging_snapshot.json` (`executed: true`, `contractTestsPassed: true`, 16 tests passed).
+- **Phê chuẩn & Active Remediation**:
+  * `plan-griller` (P1-P5 HARDENED v5 APPROVED), `qa-tester` (Station 1 RED 14/16), `implementer` (Station 2 GREEN 16/16), `scout` (Station 2.5 PASS 100%), `ui-craft-reviewer` (Station 3 APPROVED), `spec-reviewer` (Station 3 APPROVED), `code-reviewer` (Station 3 APPROVED).
+  * Tiếp thu và hoàn tất 3 phản biện kỹ thuật (P1 DRY Notification Aliases, P2 'Đã Thế Chấp' Label, P3 Zero Dirty Casts & Type Union).
+- **Trạng thái**: ✅ Hoàn thành IMP-225 (2026-09-29).
