@@ -1,5 +1,12 @@
-import React from 'react';
-import { useGameStore, type PlayerHudInfo } from '../store/game_store';
+import React, { useMemo } from 'react';
+import {
+  useGameStore,
+  type PlayerHudInfo,
+  type ActiveModalType,
+  type ModalPayloadMap,
+} from '../store/game_store';
+import { useLobbyStore } from '../store/lobby_store';
+import type { PendingTradeOfferDelta } from '../../server/session_manager';
 import { formatCurrency, calculatePlayerNetWorth, formatShortPlayerName } from './ui_helpers';
 import { BOARD_CONFIG, CellType, ColorGroup } from '../../domain/board_config';
 import { COLOR_GROUP_HEX } from '../../domain/theme';
@@ -46,11 +53,77 @@ export const INFRASTRUCTURE_CLUSTERS = {
   },
 } as const;
 
-interface PlayerCardProps {
+export interface PlayerTradingCellsTradeState {
+  readonly activeModal: ActiveModalType | string | null;
+  readonly modalPayload: unknown;
+  readonly pendingTradeOffer?: PendingTradeOfferDelta | {
+    readonly offerId?: string;
+    readonly cellIndex?: number;
+    readonly price?: number;
+    readonly buyerId?: string;
+    readonly sellerId?: string;
+    readonly expiresAt?: number;
+    readonly offeredCellIndex?: number;
+    readonly requesterId?: string;
+    readonly targetPlayerId?: string;
+  } | null;
+}
+
+export function resolvePlayerTradingCells(
+  tradeState: PlayerTradingCellsTradeState | null | undefined,
+  playerId: string,
+  localPlayerId?: string
+): Set<number> {
+  const result = new Set<number>();
+  if (!tradeState || !playerId) return result;
+
+  // 1. Pending trade offer
+  const pending = tradeState.pendingTradeOffer;
+  if (pending) {
+    if (pending.sellerId === playerId && typeof pending.cellIndex === 'number') {
+      result.add(pending.cellIndex);
+    }
+    if (pending.buyerId === playerId && typeof pending.offeredCellIndex === 'number') {
+      result.add(pending.offeredCellIndex);
+    }
+  }
+
+  // 2. Active modal: bot_trade_offer
+  if (tradeState.activeModal === 'bot_trade_offer' && tradeState.modalPayload) {
+    const payload = tradeState.modalPayload as ModalPayloadMap['bot_trade_offer'];
+    if (payload.sellerId === playerId && typeof payload.cellIndex === 'number') {
+      result.add(payload.cellIndex);
+    }
+    if (payload.buyerId === playerId && typeof payload.offeredCellIndex === 'number') {
+      result.add(payload.offeredCellIndex);
+    }
+  }
+
+  // 3. Active modal: trade (P2P Trade)
+  if (tradeState.activeModal === 'trade' && tradeState.modalPayload) {
+    const payload = tradeState.modalPayload as ModalPayloadMap['trade'];
+    // Khử magic string 'p1': CHỈ match khi localPlayerId có giá trị chuỗi hợp lệ
+    if (typeof localPlayerId === 'string' && localPlayerId.length > 0 && playerId === localPlayerId) {
+      if (Array.isArray(payload.offeredProperties)) {
+        payload.offeredProperties.forEach((id) => result.add(id));
+      }
+    }
+    if (payload.targetPlayerId && playerId === payload.targetPlayerId) {
+      if (Array.isArray(payload.requestedProperties)) {
+        payload.requestedProperties.forEach((id) => result.add(id));
+      }
+    }
+  }
+
+  return result;
+}
+
+export interface PlayerCardProps {
   readonly player: PlayerHudInfo;
   readonly isCurrentTurn: boolean;
   readonly levelMap: Record<number, 0 | 1 | 2 | 3>;
   readonly slotIndex?: number;
+  readonly tradingCells?: ReadonlySet<number>;
 }
 
 function getSlotFromPlayer(player: PlayerHudInfo, explicitSlot?: number): number {
@@ -72,8 +145,22 @@ export function PlayerCard({
   isCurrentTurn,
   levelMap,
   slotIndex,
+  tradingCells: propTradingCells,
 }: PlayerCardProps): React.ReactElement {
   const activeEmote = useGameStore((state) => state.activeEmotes[player.id]);
+  const storeActiveModal = useGameStore((s) => s.activeModal);
+  const storeModalPayload = useGameStore((s) => s.modalPayload);
+  const storePendingTradeOffer = useGameStore((s) => s.pendingTradeOffer);
+  const localPlayerId = useLobbyStore((s) => s.myPlayerId);
+
+  const tradingCellSet = useMemo(() => {
+    if (propTradingCells) return propTradingCells;
+    return resolvePlayerTradingCells(
+      { activeModal: storeActiveModal, modalPayload: storeModalPayload, pendingTradeOffer: storePendingTradeOffer },
+      player.id,
+      localPlayerId
+    );
+  }, [propTradingCells, storeActiveModal, storeModalPayload, storePendingTradeOffer, player.id, localPlayerId]);
   const resolvedSlot = getSlotFromPlayer(player, slotIndex);
   const pawnConfig = getPawnConfigBySlot(resolvedSlot);
 
@@ -202,18 +289,27 @@ export function PlayerCard({
               >
                 {cells.map((cell) => {
                   const isOwned = Boolean(player.ownedProperties?.includes(cell.index));
+                  const isTrading = tradingCellSet.has(cell.index);
                   return (
                     <span
                       key={cell.index}
                       data-testid={`dot-cell-${cell.index}`}
                       data-owned={isOwned ? 'true' : 'false'}
+                      data-trading={isTrading ? 'true' : 'false'}
                       className={`w-2 h-2 sm:w-[9px] sm:h-[9px] md:w-2.5 md:h-2.5 rounded-full transition-all shrink-0 ${
+                        isTrading
+                          ? 'relative z-10 scale-110 ring-1.5 ring-amber-400/90 ring-offset-1 shadow-xs animate-pulse'
+                          : ''
+                      } ${
                         isOwned
                           ? 'border border-slate-900/50 shadow-2xs'
                           : 'border border-slate-300 bg-slate-100/70'
                       }`}
-                      style={isOwned ? { backgroundColor: COLOR_GROUP_HEX[group] } : undefined}
-                      title={`${cell.name}: ${isOwned ? 'Đã sở hữu' : 'Chưa sở hữu'}`}
+                      style={{
+                        ...(isOwned ? { backgroundColor: COLOR_GROUP_HEX[group] } : {}),
+                        ...(isTrading ? ({ '--tw-ring-offset-color': '#FFFDF8' } as React.CSSProperties) : {}),
+                      }}
+                      title={`${cell.name}: ${isOwned ? 'Đã sở hữu' : 'Chưa sở hữu'}${isTrading ? ' (Đang trong giao dịch 🤝)' : ''}`}
                     />
                   );
                 })}
@@ -234,18 +330,27 @@ export function PlayerCard({
           >
             {INFRASTRUCTURE_CLUSTERS.railroads.cells.map((cell) => {
               const isOwned = Boolean(player.ownedProperties?.includes(cell.index));
+              const isTrading = tradingCellSet.has(cell.index);
               return (
                 <span
                   key={cell.index}
                   data-testid={`dot-cell-${cell.index}`}
                   data-owned={isOwned ? 'true' : 'false'}
+                  data-trading={isTrading ? 'true' : 'false'}
                   className={`w-2 h-2 sm:w-[9px] sm:h-[9px] md:w-2.5 md:h-2.5 rounded-full transition-all shrink-0 ${
+                    isTrading
+                      ? 'relative z-10 scale-110 ring-1.5 ring-amber-400/90 ring-offset-1 shadow-xs animate-pulse'
+                      : ''
+                  } ${
                     isOwned
                       ? 'border border-slate-900/50 shadow-2xs'
                       : 'border border-slate-300 bg-slate-100/70'
                   }`}
-                  style={isOwned ? { backgroundColor: INFRASTRUCTURE_CLUSTERS.railroads.color } : undefined}
-                  title={`${cell.name}: ${isOwned ? 'Đã sở hữu' : 'Chưa sở hữu'}`}
+                  style={{
+                    ...(isOwned ? { backgroundColor: INFRASTRUCTURE_CLUSTERS.railroads.color } : {}),
+                    ...(isTrading ? ({ '--tw-ring-offset-color': '#FFFDF8' } as React.CSSProperties) : {}),
+                  }}
+                  title={`${cell.name}: ${isOwned ? 'Đã sở hữu' : 'Chưa sở hữu'}${isTrading ? ' (Đang trong giao dịch 🤝)' : ''}`}
                 />
               );
             })}
@@ -261,18 +366,27 @@ export function PlayerCard({
           >
             {INFRASTRUCTURE_CLUSTERS.utilities.cells.map((cell) => {
               const isOwned = Boolean(player.ownedProperties?.includes(cell.index));
+              const isTrading = tradingCellSet.has(cell.index);
               return (
                 <span
                   key={cell.index}
                   data-testid={`dot-cell-${cell.index}`}
                   data-owned={isOwned ? 'true' : 'false'}
+                  data-trading={isTrading ? 'true' : 'false'}
                   className={`w-2 h-2 sm:w-[9px] sm:h-[9px] md:w-2.5 md:h-2.5 rounded-full transition-all shrink-0 ${
+                    isTrading
+                      ? 'relative z-10 scale-110 ring-1.5 ring-amber-400/90 ring-offset-1 shadow-xs animate-pulse'
+                      : ''
+                  } ${
                     isOwned
                       ? 'border border-slate-900/50 shadow-2xs'
                       : 'border border-slate-300 bg-slate-100/70'
                   }`}
-                  style={isOwned ? { backgroundColor: INFRASTRUCTURE_CLUSTERS.utilities.color } : undefined}
-                  title={`${cell.name}: ${isOwned ? 'Đã sở hữu' : 'Chưa sở hữu'}`}
+                  style={{
+                    ...(isOwned ? { backgroundColor: INFRASTRUCTURE_CLUSTERS.utilities.color } : {}),
+                    ...(isTrading ? ({ '--tw-ring-offset-color': '#FFFDF8' } as React.CSSProperties) : {}),
+                  }}
+                  title={`${cell.name}: ${isOwned ? 'Đã sở hữu' : 'Chưa sở hữu'}${isTrading ? ' (Đang trong giao dịch 🤝)' : ''}`}
                 />
               );
             })}

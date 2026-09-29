@@ -931,3 +931,31 @@
   * `scout`: Station 2.5 PASS (0 defects qua 5 universal defect archetypes, LOC safe, binary verified).
   * `spec-reviewer`: Station 3 APPROVED (100% spec reconciliation, 0 scope drift).
 - **Trạng thái**: ✅ Hoàn thành IMP-228 / IMP-224-FIX (2026-09-29).
+
+---
+
+### [IMP-228] Subtle Property Trading Indicators on Player Cards (Chỉ Báo BĐS Đang Giao Dịch Tinh Tế)
+- **Mục tiêu**: Hiển thị chỉ báo trực quan tinh tế, vừa đủ, dịu mắt trên các chấm đại diện BĐS (28 property dots) của 4 thẻ người chơi (PlayerCards trong Player HUD) khi các ô đất đó đang nằm trong giao dịch mua bán / trao đổi (P2P Trade hoặc Bot Trade Offer), giúp người chơi nhận biết ngay tài sản nào đang được đàm phán mà tuyệt đối không làm quá nổi bật hay gây rối mắt.
+  1. *Khử Tailwind Purge CSS (P1)*: Bỏ arbitrary class `ring-offset-[#FFFDF8]` trong template string động, dùng class tĩnh `ring-offset-1` phối hợp inline CSS variable `style={{ '--tw-ring-offset-color': '#FFFDF8' }}`. Đã kiểm chứng qua production build `npm run build` thành công 100%.
+  2. *React Pure Updater & Stale Closure (P2)*: Trong `trade_modal.tsx`, tính toán `nextOffered`/`nextRequested` trước, gọi `setOffered`/`setRequested`, sau đó gọi `updateModalPayload` đồng bộ ở ngoài callback updater của `setState`.
+  3. *Khử Magic String 'p1' (P3)*: Hàm thuần túy `resolvePlayerTradingCells` trả về Set rỗng khi `localPlayerId` là `undefined` (chưa join phòng hoặc SSR headless), bảo vệ tính tương thích đa người chơi UUID.
+  4. *Công thái học 360px & Trợ năng đa kênh*: Chống tràn ngang trên mobile 360px (chỉ chiếm 116px/300px khả dụng); `scale-110 relative z-10` là GPU Transform không làm vỡ lưới; `animate-pulse` đập êm 2s; tooltip bổ sung `(Đang trong giao dịch 🤝)`; đánh dấu DOM `data-trading="true"/"false"`.
+- **Hạ tầng hoàn tất**:
+  * `src/client/ui/player_card.tsx` (398 LOC — Tier 2 <= 500 LOC): Export `resolvePlayerTradingCells`, `PlayerTradingCellsTradeState`, thêm prop `tradingCells`, useMemo kết nối store, cập nhật cả 22 chấm BĐS màu và 6 chấm hạ tầng.
+  * `src/client/ui/modals/trade_modal.tsx` (305 LOC — Tier 2 <= 500 LOC): Tách biệt side-effect `updateModalPayload` ngoài `setState`.
+  * `docs/domain/gotchas.md`: Ghi nhận Bất biến số 20 (Pillar V: Giao diện 2D & Công thái học Retropoly).
+  * `docs/reports/improvements/IMP-228-subtle-property-trading-indicators_report.md`: Báo cáo nghiệm thu hoàn chỉnh.
+- **Kiểm thử & Bất biến**:
+  * `tests/client/imp228_subtle_property_trading_indicators.test.ts` (374 LOC): 16/16 atomic contract tests PASS (Universal 5-Facet Matrix, Detroit Classical TDD, 1-4 asserts/test, zero dirty casts).
+  * Bảo toàn 100% tests di sản: `imp173_player_card_property_clusters.test.ts` (16 tests), `imp187_player_card_compact_hud.test.ts` (7 tests) -> Tổng **39/39 tests PASS (Zero Regression)**.
+  * TypeScript typecheck: `tsc --noEmit` 0 errors. UI Linter: `npm run lint:ui` 0 violations / 205 files.
+  * Evidence Snapshot: `.agents/evidence/imp228_execution.json` (`executed: true`).
+- **Phê chuẩn**:
+  * `qa-tester`: Station 1 RED verified (15/16 tests failed as expected under Adversarial Inversion).
+  * `implementer`: Station 2 GREEN verified (16/16 tests pass, 398 LOC & 305 LOC).
+  * `scout`: Station 2.5 PASS (0 defects qua 5 universal defect archetypes, LOC safe, build safe).
+  * `spec-reviewer` & `re-reviewer`: Station 3.1 APPROVED (100% spec reconciliation, 0 scope drift, 0 dirty casts, <= 4 asserts/test).
+  * `ui-craft-reviewer`: Station 3.2 APPROVED (Điểm số 10/10, công thái học 360px hoàn hảo, visual restraint đạt chuẩn).
+  * `code-reviewer`: Station 3.2 APPROVED (7/7 tiêu chí ma trận định lượng đạt chuẩn, Deep Architecture, SRP clean, zero timer/memory leak).
+- **Trạng thái**: ✅ Hoàn thành IMP-228 (2026-09-29).
+

@@ -89,7 +89,25 @@ export function TradeModal({
   const isBotPartner = Boolean(currentPartner?.isBot || selectedPartnerId.toLowerCase().includes('bot') || availablePartners.length === 0);
 
   const toggleProperty = (cellId: number, isMine: boolean) => {
-    (isMine ? setOffered : setRequested)((prev) => (prev.includes(cellId) ? prev.filter((id) => id !== cellId) : [...prev, cellId]));
+    if (isMine) {
+      const nextOffered = offered.includes(cellId)
+        ? offered.filter((id) => id !== cellId)
+        : [...offered, cellId];
+      setOffered(nextOffered);
+      useGameStore.getState().updateModalPayload<'trade'>({
+        offeredProperties: nextOffered,
+        requestedProperties: requested,
+      });
+    } else {
+      const nextRequested = requested.includes(cellId)
+        ? requested.filter((id) => id !== cellId)
+        : [...requested, cellId];
+      setRequested(nextRequested);
+      useGameStore.getState().updateModalPayload<'trade'>({
+        offeredProperties: offered,
+        requestedProperties: nextRequested,
+      });
+    }
   };
 
   const cashDiff = Math.max(cashOffer, cashRequest);
