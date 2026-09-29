@@ -85,6 +85,7 @@ export function handleBuyBadge(act: ActivityLogEntry, state: GameState): void {
 
 export function handleTaxBadge(act: ActivityLogEntry, state: GameState): void {
   const amount = act.amount !== undefined ? -Math.abs(act.amount) : 0;
+  if (amount === 0) return;
   const baseTitle = act.message.includes('Lệ Phí') ? 'Lệ Phí Đất Đai' : 'Thuế Đất Đai';
   scheduleAction(() => {
     state.addFloatingText({ text: formatCurrency(amount), type: FloatingTextType.Penalty, playerId: act.playerId ?? '', actionType: 'tax', title: `Nộp ${baseTitle} ➔ Kho Bạc`, cellIndex: act.cellIndex });
@@ -220,6 +221,11 @@ export function handleDiplomaticEventBadge(
 
 export function dispatchActivityFloatingBadges(activities: readonly ActivityLogEntry[], state: GameState, delta?: DeltaPayload): void {
   if (typeof state?.addFloatingText !== 'function') return;
-  for (const act of activities) BADGE_HANDLERS[act.type]?.(act, state, delta);
+  for (const act of activities) {
+    if (act.amount !== undefined && Math.abs(act.amount) <= 0 && act.type !== 'trade' && act.type !== 'card') {
+      continue;
+    }
+    BADGE_HANDLERS[act.type]?.(act, state, delta);
+  }
   if (delta?.lastDiplomaticEvent) handleDiplomaticEventBadge(delta.lastDiplomaticEvent, state);
 }
