@@ -52,7 +52,11 @@ export function extractPassedGoActivities(
     if (prevPos === undefined || newPos === undefined || prevPos === newPos) continue;
 
     const prevP = prevState.playersInfo[p.id];
-    const isSentToAudit = Boolean(p.inAudit === true || (p.auditTurnsLeft && p.auditTurnsLeft > 0));
+    const isSentToAudit = Boolean(
+      p.inAudit === true ||
+      (p.auditTurnsLeft && p.auditTurnsLeft > 0) ||
+      nextState.playersInfo[p.id]?.inAudit === true,
+    );
     if (isSentToAudit) continue;
 
     if (checkPassedGo(prevPos, newPos)) {
@@ -218,6 +222,7 @@ export function processPayerFee(
   payer: BalanceDelta, context: PropertyFinancialContext, delta?: DeltaPayload, prevState?: GameState,
 ): ActivityLogEntry | null {
   const absDiff = Math.abs(payer.diff);
+  if (absDiff <= 0) return null;
   if (context.boughtCellIndices.length > 0 && delta?.cells?.some((c) => c.ownerId === payer.id && context.boughtCellIndices.includes(c.index))) return null;
   if (context.boughtCellIndices.some((idx) => PROPERTY_DEEDS.get(idx)?.price === absDiff)) return null;
   if (context.upgradedCells.some((u) => u.ownerId === payer.id && u.cost === absDiff)) return null;
@@ -264,6 +269,7 @@ export function processPayerFee(
 export function processReceiverReward(
   receiver: BalanceDelta, context: PropertyFinancialContext, delta?: DeltaPayload, prevState?: GameState,
 ): ActivityLogEntry | null {
+  if (receiver.diff <= 0) return null;
   if (context.mortgagedCells.some((m) => m.ownerId === receiver.id && m.loan === receiver.diff)) return null;
 
   const rName = getPlayerName(receiver.pInfo, receiver.id);

@@ -64,7 +64,12 @@ function collectPayersAndReceivers(
 
     const prevPos = prevState.playerPositions?.[p.id];
     const newPos = nextState.playerPositions?.[p.id] ?? p.position;
-    const hasPassedGo = prevPos !== undefined && newPos !== undefined && prevPos !== newPos && checkPassedGo(prevPos, newPos);
+    const isSentToAudit = Boolean(
+      p.inAudit === true ||
+      (p.auditTurnsLeft && p.auditTurnsLeft > 0) ||
+      nextState.playersInfo[p.id]?.inAudit === true,
+    );
+    const hasPassedGo = !isSentToAudit && prevPos !== undefined && newPos !== undefined && prevPos !== newPos && checkPassedGo(prevPos, newPos);
 
     if (prevP && (prevP.balance !== p.balance || hasPassedGo)) {
       const diff = p.balance !== undefined ? p.balance - prevP.balance : 0;
