@@ -307,6 +307,7 @@ export function TitleDeedModal({
               currentLevel={currentLevel}
               isOwner={isOwner}
               compact={canBuy && !isOwned}
+              cellIndex={cellIndex}
             />
           </div>
         </div>

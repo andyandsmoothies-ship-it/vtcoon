@@ -2,6 +2,16 @@
   "chaos-role-sandbox": {
     "PreToolUse": [
       {
+        "matcher": "run_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .agents/scripts/use_case_guard.py --check-command",
+            "timeout": 5
+          }
+        ]
+      },
+      {
         "matcher": "write_to_file|replace_file_content",
         "hooks": [
           {

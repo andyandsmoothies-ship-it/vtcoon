@@ -10,22 +10,22 @@ NGÀY THỰC HIỆN: 11/09/2026 | SEED: 202602 | TRẠNG THÁI: HOÀN TẤT TR�
 - **Tổng số lượt đi (Turns):** 60 lượt.
 - **Số vòng thi đấu (Rounds):** 31 vòng.
 - **Điều kiện kết thúc:** ĐẠT HẠN MỨC 30 VÒNG (Quyết toán Net Worth).
-- **Nhà Vô Địch Chung Cuộc:** **Bác Ba (Thực dụng / Aggressive)** (Tổng tài sản ròng: **44.227 Tr. VNĐ**).
+- **Nhà Vô Địch Chung Cuộc:** **Bác Ba (Thực dụng / Aggressive)** (Tổng tài sản ròng: **42.689 Tr. VNĐ**).
 
 ### Bảng Xếp Hạng Chung Cuộc (Final Leaderboard)
 
 | Hạng | Người chơi | Tính cách AI | Tiền mặt còn lại | Tài sản ròng (Net Worth) | Số ô đất sở hữu | Trạng thái |
 | :---: | :--- | :--- | :---: | :---: | :---: | :---: |
-| 1 | Bác Ba (Thực dụng / Aggressive) | Aggressive | 9.027 Tr. VNĐ | 44.227 Tr. VNĐ | 13 ô | 🏆 Vô địch |
-| 2 | Chú Sáu (Cân bằng / Balanced) | Balanced | 1.126 Tr. VNĐ | 14.776 Tr. VNĐ | 10 ô | ✓ Hoàn thành |
+| 1 | Bác Ba (Thực dụng / Aggressive) | Aggressive | 639 Tr. VNĐ | 42.689 Tr. VNĐ | 12 ô | 🏆 Vô địch |
+| 2 | Chú Sáu (Cân bằng / Balanced) | Balanced | 410 Tr. VNĐ | 17.310 Tr. VNĐ | 10 ô | ✓ Hoàn thành |
 
 ### Chỉ Số Tài Chính & Vận Hành Vĩ Mô (Macro Tactical Metrics)
 
-- **Tổng tiền thuê lưu chuyển:** 10.889 Tr. VNĐ.
-- **Tổng thuế & lệ phí nộp Kho Bạc:** 951 Tr. VNĐ.
+- **Tổng tiền thuê lưu chuyển:** 12.589 Tr. VNĐ.
+- **Tổng thuế & lệ phí nộp Kho Bạc:** 0 Tr. VNĐ.
 - **Tổng lương vượt mốc Khởi Hành:** 22.000 Tr. VNĐ.
-- **Tổng công trình nâng cấp:** 20 căn (C1: 8, C2: 7, C3: 5).
-- **Hoạt động sàn đấu giá:** 7 phiên phát động, 5 phiên gõ búa thành công.
+- **Tổng công trình nâng cấp:** 19 căn (C1: 10, C2: 6, C3: 3).
+- **Hoạt động sàn đấu giá:** 7 phiên phát động, 0 phiên gõ búa thành công.
 - **Bảo toàn 3 Bất biến (Invariants):** 100% HOÀN HẢO (Zero Leakage, Zero NaN, Zero Deadlock).
 
 ---
@@ -103,7 +103,7 @@ Mọi bước đi, cú gieo xúc xắc, di chuyển, tương tác ô đất và 
 - **Xúc xắc:** [5, 4] (Tổng: 9)
 - **Di chuyển:** Ô 10 ➔ Ô 19 (**Đà Nẵng (Hải Châu - Sơn Trà)**)
 - **Sự kiện ô:** Mua thành công [Đà Nẵng (Hải Châu - Sơn Trà)] giá 2000 Tr. VNĐ
-- **Số dư sau lượt:** 16.850 Tr. VNĐ | **Tài sản ròng:** 22.050 Tr. VNĐ
+- **Số dư sau lượt:** 18.800 Tr. VNĐ | **Tài sản ròng:** 24.000 Tr. VNĐ
 - **Danh mục BĐS sở hữu (3):** Đồng Nai (Đại Công Viên Chủ Đề), Nghệ An (TP. Vinh), Đà Nẵng (Hải Châu - Sơn Trà)
 
 ### === VÒNG ĐẤU #5 ===
@@ -117,11 +117,11 @@ Mọi bước đi, cú gieo xúc xắc, di chuyển, tương tác ô đất và 
 - **Danh mục BĐS sở hữu (4):** Cảng Nước Sâu Cái Mép, Đồng Nai (Đại Công Viên Chủ Đề), Thanh Hóa (Sầm Sơn), Tập Đoàn Viễn Thông (Viettel)
 
 #### Lượt #10 | Vòng #5 — Chú Sáu (Cân bằng / Balanced) (Balanced)
-- **Số dư trước lượt:** 18.150 Tr. VNĐ | **Tài sản ròng:** 22.350 Tr. VNĐ
+- **Số dư trước lượt:** 20.100 Tr. VNĐ | **Tài sản ròng:** 24.300 Tr. VNĐ
 - **Xúc xắc:** [2, 3] (Tổng: 5)
 - **Di chuyển:** Ô 19 ➔ Ô 32 (**Hà Nội (Cầu Giấy)**)
 - **Sự kiện ô:** Mua thành công [Hà Nội (Cầu Giấy)] giá 3000 Tr. VNĐ
-- **Số dư sau lượt:** 12.550 Tr. VNĐ | **Tài sản ròng:** 22.350 Tr. VNĐ
+- **Số dư sau lượt:** 14.500 Tr. VNĐ | **Tài sản ròng:** 24.300 Tr. VNĐ
 - **Danh mục BĐS sở hữu (4):** Nghệ An (TP. Vinh), Đà Nẵng (Hải Châu - Sơn Trà), Kiên Giang (Phú Quốc - Grand World), Hà Nội (Cầu Giấy)
 
 ### === VÒNG ĐẤU #6 ===
@@ -131,16 +131,15 @@ Mọi bước đi, cú gieo xúc xắc, di chuyển, tương tác ô đất và 
 - **Xúc xắc:** [3, 4] (Tổng: 7)
 - **Di chuyển:** Ô 36 ➔ Ô 3 (**An Giang (Châu Đốc)**) | *Vượt mốc Khởi Hành (+2.000 Tr. VNĐ)*
 - **Sự kiện ô:** Từ chối mua [An Giang (Châu Đốc)], phát động Đấu Giá Công Khai
-- **Sàn đấu giá:** Chốt đấu giá: Chú Sáu (Cân bằng / Balanced) sở hữu [An Giang (Châu Đốc)] giá 350 Tr. VNĐ
 - **Số dư sau lượt:** 19.900 Tr. VNĐ | **Tài sản ròng:** 26.600 Tr. VNĐ
 - **Danh mục BĐS sở hữu (4):** Cảng Nước Sâu Cái Mép, Đồng Nai (Đại Công Viên Chủ Đề), Thanh Hóa (Sầm Sơn), Tập Đoàn Viễn Thông (Viettel)
 
 #### Lượt #12 | Vòng #6 — Chú Sáu (Cân bằng / Balanced) (Balanced)
-- **Số dư trước lượt:** 12.200 Tr. VNĐ | **Tài sản ròng:** 22.600 Tr. VNĐ
+- **Số dư trước lượt:** 14.150 Tr. VNĐ | **Tài sản ròng:** 24.550 Tr. VNĐ
 - **Xúc xắc:** [3, 2] (Tổng: 5)
 - **Di chuyển:** Ô 32 ➔ Ô 37 (**TP.HCM (TP. Thủ Đức)**)
 - **Sự kiện ô:** Mua thành công [TP.HCM (TP. Thủ Đức)] giá 3500 Tr. VNĐ
-- **Số dư sau lượt:** 8.700 Tr. VNĐ | **Tài sản ròng:** 22.600 Tr. VNĐ
+- **Số dư sau lượt:** 10.650 Tr. VNĐ | **Tài sản ròng:** 24.550 Tr. VNĐ
 - **Danh mục BĐS sở hữu (6):** Nghệ An (TP. Vinh), Đà Nẵng (Hải Châu - Sơn Trà), Kiên Giang (Phú Quốc - Grand World), Hà Nội (Cầu Giấy), An Giang (Châu Đốc), TP.HCM (TP. Thủ Đức)
 
 ### === VÒNG ĐẤU #7 ===
@@ -154,11 +153,11 @@ Mọi bước đi, cú gieo xúc xắc, di chuyển, tương tác ô đất và 
 - **Danh mục BĐS sở hữu (5):** Cảng Nước Sâu Cái Mép, Đồng Nai (Đại Công Viên Chủ Đề), Thanh Hóa (Sầm Sơn), Tập Đoàn Viễn Thông (Viettel), Tập Đoàn Điện Lực (EVN)
 
 #### Lượt #14 | Vòng #7 — Chú Sáu (Cân bằng / Balanced) (Balanced)
-- **Số dư trước lượt:** 8.700 Tr. VNĐ | **Tài sản ròng:** 22.600 Tr. VNĐ
+- **Số dư trước lượt:** 10.650 Tr. VNĐ | **Tài sản ròng:** 24.550 Tr. VNĐ
 - **Xúc xắc:** [1, 2] (Tổng: 3)
 - **Di chuyển:** Ô 37 ➔ Ô 0 (**Khởi Hành (GO)**) | *Vượt mốc Khởi Hành (+2.000 Tr. VNĐ)*
 - **Sự kiện ô:** Dừng tại Khởi Hành (GO): Nhận lương định kỳ 2.000 Tr. VNĐ
-- **Số dư sau lượt:** 9.800 Tr. VNĐ | **Tài sản ròng:** 23.700 Tr. VNĐ
+- **Số dư sau lượt:** 11.750 Tr. VNĐ | **Tài sản ròng:** 25.650 Tr. VNĐ
 - **Danh mục BĐS sở hữu (6):** Nghệ An (TP. Vinh), Đà Nẵng (Hải Châu - Sơn Trà), Kiên Giang (Phú Quốc - Grand World), Hà Nội (Cầu Giấy), An Giang (Châu Đốc), TP.HCM (TP. Thủ Đức)
 
 ### === VÒNG ĐẤU #8 ===
@@ -172,11 +171,11 @@ Mọi bước đi, cú gieo xúc xắc, di chuyển, tương tác ô đất và 
 - **Danh mục BĐS sở hữu (5):** Cảng Nước Sâu Cái Mép, Đồng Nai (Đại Công Viên Chủ Đề), Thanh Hóa (Sầm Sơn), Tập Đoàn Viễn Thông (Viettel), Tập Đoàn Điện Lực (EVN)
 
 #### Lượt #16 | Vòng #8 — Chú Sáu (Cân bằng / Balanced) (Balanced)
-- **Số dư trước lượt:** 10.000 Tr. VNĐ | **Tài sản ròng:** 23.900 Tr. VNĐ
+- **Số dư trước lượt:** 11.950 Tr. VNĐ | **Tài sản ròng:** 25.850 Tr. VNĐ
 - **Xúc xắc:** [4, 6] (Tổng: 10)
 - **Di chuyển:** Ô 0 ➔ Ô 10 (**Trạm Kiểm Toán & Thanh Tra**)
 - **Sự kiện ô:** Vào trạm [Trạm Kiểm Toán & Thanh Tra]
-- **Số dư sau lượt:** 10.000 Tr. VNĐ | **Tài sản ròng:** 23.900 Tr. VNĐ
+- **Số dư sau lượt:** 11.950 Tr. VNĐ | **Tài sản ròng:** 25.850 Tr. VNĐ
 - **Danh mục BĐS sở hữu (6):** Nghệ An (TP. Vinh), Đà Nẵng (Hải Châu - Sơn Trà), Kiên Giang (Phú Quốc - Grand World), Hà Nội (Cầu Giấy), An Giang (Châu Đốc), TP.HCM (TP. Thủ Đức)
 
 ### === VÒNG ĐẤU #9 ===
@@ -186,16 +185,15 @@ Mọi bước đi, cú gieo xúc xắc, di chuyển, tương tác ô đất và 
 - **Xúc xắc:** [3, 4] (Tổng: 7)
 - **Di chuyển:** Ô 19 ➔ Ô 26 (**Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm)**)
 - **Sự kiện ô:** Từ chối mua [Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm)], phát động Đấu Giá Công Khai
-- **Sàn đấu giá:** Chốt đấu giá: Chú Sáu (Cân bằng / Balanced) sở hữu [Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm)] giá 1350 Tr. VNĐ
 - **Số dư sau lượt:** 18.200 Tr. VNĐ | **Tài sản ròng:** 26.400 Tr. VNĐ
 - **Danh mục BĐS sở hữu (5):** Cảng Nước Sâu Cái Mép, Đồng Nai (Đại Công Viên Chủ Đề), Thanh Hóa (Sầm Sơn), Tập Đoàn Viễn Thông (Viettel), Tập Đoàn Điện Lực (EVN)
 
 #### Lượt #18 | Vòng #9 — Chú Sáu (Cân bằng / Balanced) (Balanced)
-- **Số dư trước lượt:** 8.650 Tr. VNĐ | **Tài sản ròng:** 25.150 Tr. VNĐ
+- **Số dư trước lượt:** 10.600 Tr. VNĐ | **Tài sản ròng:** 27.100 Tr. VNĐ
 - **Xúc xắc:** [1, 2] (Tổng: 3)
 - **Di chuyển:** Ô 10 ➔ Ô 13 (**Lâm Đồng (Đà Lạt)**)
 - **Sự kiện ô:** Mua thành công [Lâm Đồng (Đà Lạt)] giá 1400 Tr. VNĐ
-- **Số dư sau lượt:** 7.250 Tr. VNĐ | **Tài sản ròng:** 25.150 Tr. VNĐ
+- **Số dư sau lượt:** 9.200 Tr. VNĐ | **Tài sản ròng:** 27.100 Tr. VNĐ
 - **Danh mục BĐS sở hữu (8):** Nghệ An (TP. Vinh), Đà Nẵng (Hải Châu - Sơn Trà), Kiên Giang (Phú Quốc - Grand World), Hà Nội (Cầu Giấy), An Giang (Châu Đốc), TP.HCM (TP. Thủ Đức), Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm), Lâm Đồng (Đà Lạt)
 
 ### === VÒNG ĐẤU #10 ===
@@ -209,11 +207,11 @@ Mọi bước đi, cú gieo xúc xắc, di chuyển, tương tác ô đất và 
 - **Danh mục BĐS sở hữu (5):** Cảng Nước Sâu Cái Mép, Đồng Nai (Đại Công Viên Chủ Đề), Thanh Hóa (Sầm Sơn), Tập Đoàn Viễn Thông (Viettel), Tập Đoàn Điện Lực (EVN)
 
 #### Lượt #20 | Vòng #10 — Chú Sáu (Cân bằng / Balanced) (Balanced)
-- **Số dư trước lượt:** 7.550 Tr. VNĐ | **Tài sản ròng:** 25.450 Tr. VNĐ
+- **Số dư trước lượt:** 9.500 Tr. VNĐ | **Tài sản ròng:** 27.400 Tr. VNĐ
 - **Xúc xắc:** [6, 2] (Tổng: 8)
 - **Di chuyển:** Ô 13 ➔ Ô 21 (**Thanh Hóa (Sầm Sơn)**)
 - **Sự kiện ô:** Dừng chân tại [Thanh Hóa (Sầm Sơn)]: Trả tiền thuê 220 Tr. VNĐ cho Bác Ba (Thực dụng / Aggressive)
-- **Số dư sau lượt:** 7.330 Tr. VNĐ | **Tài sản ròng:** 25.230 Tr. VNĐ
+- **Số dư sau lượt:** 9.280 Tr. VNĐ | **Tài sản ròng:** 27.180 Tr. VNĐ
 - **Danh mục BĐS sở hữu (8):** Nghệ An (TP. Vinh), Đà Nẵng (Hải Châu - Sơn Trà), Kiên Giang (Phú Quốc - Grand World), Hà Nội (Cầu Giấy), An Giang (Châu Đốc), TP.HCM (TP. Thủ Đức), Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm), Lâm Đồng (Đà Lạt)
 
 ### === VÒNG ĐẤU #11 ===
@@ -227,11 +225,11 @@ Mọi bước đi, cú gieo xúc xắc, di chuyển, tương tác ô đất và 
 - **Danh mục BĐS sở hữu (5):** Cảng Nước Sâu Cái Mép, Đồng Nai (Đại Công Viên Chủ Đề), Thanh Hóa (Sầm Sơn), Tập Đoàn Viễn Thông (Viettel), Tập Đoàn Điện Lực (EVN)
 
 #### Lượt #22 | Vòng #11 — Chú Sáu (Cân bằng / Balanced) (Balanced)
-- **Số dư trước lượt:** 7.330 Tr. VNĐ | **Tài sản ròng:** 25.230 Tr. VNĐ
+- **Số dư trước lượt:** 9.280 Tr. VNĐ | **Tài sản ròng:** 27.180 Tr. VNĐ
 - **Xúc xắc:** [2, 1] (Tổng: 3)
 - **Di chuyển:** Ô 21 ➔ Ô 24 (**Ninh Bình (Tràng An)**)
 - **Sự kiện ô:** Mua thành công [Ninh Bình (Tràng An)] giá 2400 Tr. VNĐ
-- **Số dư sau lượt:** 4.930 Tr. VNĐ | **Tài sản ròng:** 25.230 Tr. VNĐ
+- **Số dư sau lượt:** 6.880 Tr. VNĐ | **Tài sản ròng:** 27.180 Tr. VNĐ
 - **Danh mục BĐS sở hữu (9):** Nghệ An (TP. Vinh), Đà Nẵng (Hải Châu - Sơn Trà), Kiên Giang (Phú Quốc - Grand World), Hà Nội (Cầu Giấy), An Giang (Châu Đốc), TP.HCM (TP. Thủ Đức), Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm), Lâm Đồng (Đà Lạt), Ninh Bình (Tràng An)
 
 ### === VÒNG ĐẤU #12 ===
@@ -245,16 +243,14 @@ Mọi bước đi, cú gieo xúc xắc, di chuyển, tương tác ô đất và 
 - **Danh mục BĐS sở hữu (5):** Cảng Nước Sâu Cái Mép, Đồng Nai (Đại Công Viên Chủ Đề), Thanh Hóa (Sầm Sơn), Tập Đoàn Viễn Thông (Viettel), Tập Đoàn Điện Lực (EVN)
 
 #### Lượt #24 | Vòng #12 — Chú Sáu (Cân bằng / Balanced) (Balanced)
-- **Số dư trước lượt:** 5.070 Tr. VNĐ | **Tài sản ròng:** 25.370 Tr. VNĐ
+- **Số dư trước lượt:** 7.020 Tr. VNĐ | **Tài sản ròng:** 27.320 Tr. VNĐ
 - **Xúc xắc:** [3, 2] (Tổng: 5)
 - **Di chuyển:** Ô 24 ➔ Ô 29 (**Quảng Ninh (Hạ Long)**)
 - **Sự kiện ô:** Mua thành công [Quảng Ninh (Hạ Long)] giá 2800 Tr. VNĐ
 - **Nâng cấp BĐS:** Nâng cấp [Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm)] lên C1 (Shophouse)
 - **Nâng cấp BĐS:** Nâng cấp [Kiên Giang (Phú Quốc - Grand World)] lên C1 (Shophouse)
 - **Nâng cấp BĐS:** Nâng cấp [Quảng Ninh (Hạ Long)] lên C1 (Shophouse)
-- **Giải cứu tài chính:** Thế chấp tài sản ô 24
-- **Giải cứu tài chính:** Thế chấp tài sản ô 23
-- **Số dư sau lượt:** 710 Tr. VNĐ | **Tài sản ròng:** 25.510 Tr. VNĐ
+- **Số dư sau lượt:** 360 Tr. VNĐ | **Tài sản ròng:** 27.460 Tr. VNĐ
 - **Danh mục BĐS sở hữu (10):** Nghệ An (TP. Vinh), Đà Nẵng (Hải Châu - Sơn Trà), Kiên Giang (Phú Quốc - Grand World) (C1), Hà Nội (Cầu Giấy), An Giang (Châu Đốc), TP.HCM (TP. Thủ Đức), Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm) (C1), Lâm Đồng (Đà Lạt), Ninh Bình (Tràng An), Quảng Ninh (Hạ Long) (C1)
 
 ### === VÒNG ĐẤU #13 ===
@@ -268,11 +264,11 @@ Mọi bước đi, cú gieo xúc xắc, di chuyển, tương tác ô đất và 
 - **Danh mục BĐS sở hữu (5):** Cảng Nước Sâu Cái Mép, Đồng Nai (Đại Công Viên Chủ Đề), Thanh Hóa (Sầm Sơn), Tập Đoàn Viễn Thông (Viettel), Tập Đoàn Điện Lực (EVN)
 
 #### Lượt #26 | Vòng #13 — Chú Sáu (Cân bằng / Balanced) (Balanced)
-- **Số dư trước lượt:** 710 Tr. VNĐ | **Tài sản ròng:** 25.510 Tr. VNĐ
+- **Số dư trước lượt:** 360 Tr. VNĐ | **Tài sản ròng:** 27.460 Tr. VNĐ
 - **Xúc xắc:** [3, 1] (Tổng: 4)
 - **Di chuyển:** Ô 29 ➔ Ô 33 (**Phiếu Thị Trường**)
 - **Sự kiện ô:** Dừng chân tại [Phiếu Thị Trường]: Trả tiền thuê 150 Tr. VNĐ cho Bác Ba (Thực dụng / Aggressive)
-- **Số dư sau lượt:** 560 Tr. VNĐ | **Tài sản ròng:** 25.360 Tr. VNĐ
+- **Số dư sau lượt:** 210 Tr. VNĐ | **Tài sản ròng:** 27.310 Tr. VNĐ
 - **Danh mục BĐS sở hữu (10):** Nghệ An (TP. Vinh), Đà Nẵng (Hải Châu - Sơn Trà), Kiên Giang (Phú Quốc - Grand World) (C1), Hà Nội (Cầu Giấy), An Giang (Châu Đốc), TP.HCM (TP. Thủ Đức), Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm) (C1), Lâm Đồng (Đà Lạt), Ninh Bình (Tràng An), Quảng Ninh (Hạ Long) (C1)
 
 ### === VÒNG ĐẤU #14 ===
@@ -286,13 +282,13 @@ Mọi bước đi, cú gieo xúc xắc, di chuyển, tương tác ô đất và 
 - **Danh mục BĐS sở hữu (6):** Cảng Nước Sâu Cái Mép, Đồng Nai (Đại Công Viên Chủ Đề), Thanh Hóa (Sầm Sơn), Tập Đoàn Viễn Thông (Viettel), Tập Đoàn Điện Lực (EVN), Hưng Yên (Văn Giang)
 
 #### Lượt #28 | Vòng #14 — Chú Sáu (Cân bằng / Balanced) (Balanced)
-- **Số dư trước lượt:** 560 Tr. VNĐ | **Tài sản ròng:** 25.360 Tr. VNĐ
+- **Số dư trước lượt:** 210 Tr. VNĐ | **Tài sản ròng:** 27.310 Tr. VNĐ
 - **Xúc xắc:** [3, 2] (Tổng: 5)
 - **Di chuyển:** Ô 33 ➔ Ô 38 (**Sàn Giao Dịch Chứng Khoán (HOSE)**)
 - **Sự kiện ô:** Dừng tại [Sàn Giao Dịch Chứng Khoán (HOSE)] (Hose)
 - **Nâng cấp BĐS:** Nâng cấp [Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm)] lên C2 (Biệt thự)
 - **Giải cứu tài chính:** Thế chấp tài sản ô 32
-- **Số dư sau lượt:** 695 Tr. VNĐ | **Tài sản ròng:** 26.595 Tr. VNĐ
+- **Số dư sau lượt:** 345 Tr. VNĐ | **Tài sản ròng:** 28.545 Tr. VNĐ
 - **Danh mục BĐS sở hữu (10):** Nghệ An (TP. Vinh), Đà Nẵng (Hải Châu - Sơn Trà), Kiên Giang (Phú Quốc - Grand World) (C1), Hà Nội (Cầu Giấy), An Giang (Châu Đốc), TP.HCM (TP. Thủ Đức), Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm) (C2), Lâm Đồng (Đà Lạt), Ninh Bình (Tràng An), Quảng Ninh (Hạ Long) (C1)
 
 ### === VÒNG ĐẤU #15 ===
@@ -306,12 +302,11 @@ Mọi bước đi, cú gieo xúc xắc, di chuyển, tương tác ô đất và 
 - **Danh mục BĐS sở hữu (6):** Cảng Nước Sâu Cái Mép, Đồng Nai (Đại Công Viên Chủ Đề), Thanh Hóa (Sầm Sơn), Tập Đoàn Viễn Thông (Viettel), Tập Đoàn Điện Lực (EVN), Hưng Yên (Văn Giang)
 
 #### Lượt #30 | Vòng #15 — Chú Sáu (Cân bằng / Balanced) (Balanced)
-- **Số dư trước lượt:** 695 Tr. VNĐ | **Tài sản ròng:** 26.595 Tr. VNĐ
+- **Số dư trước lượt:** 345 Tr. VNĐ | **Tài sản ròng:** 28.545 Tr. VNĐ
 - **Xúc xắc:** [5, 3] (Tổng: 8)
 - **Di chuyển:** Ô 38 ➔ Ô 6 (**Bình Dương (Tổ Hợp Thể Thao & Golf)**) | *Vượt mốc Khởi Hành (+2.000 Tr. VNĐ)*
 - **Sự kiện ô:** Từ chối mua [Bình Dương (Tổ Hợp Thể Thao & Golf)], phát động Đấu Giá Công Khai
-- **Sàn đấu giá:** Chốt đấu giá: Bác Ba (Thực dụng / Aggressive) sở hữu [Bình Dương (Tổ Hợp Thể Thao & Golf)] giá 550 Tr. VNĐ
-- **Số dư sau lượt:** 1.105 Tr. VNĐ | **Tài sản ròng:** 27.005 Tr. VNĐ
+- **Số dư sau lượt:** 870 Tr. VNĐ | **Tài sản ròng:** 29.070 Tr. VNĐ
 - **Danh mục BĐS sở hữu (10):** Nghệ An (TP. Vinh), Đà Nẵng (Hải Châu - Sơn Trà), Kiên Giang (Phú Quốc - Grand World) (C1), Hà Nội (Cầu Giấy), An Giang (Châu Đốc), TP.HCM (TP. Thủ Đức), Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm) (C2), Lâm Đồng (Đà Lạt), Ninh Bình (Tràng An), Quảng Ninh (Hạ Long) (C1)
 
 ### === VÒNG ĐẤU #16 ===
@@ -325,11 +320,11 @@ Mọi bước đi, cú gieo xúc xắc, di chuyển, tương tác ô đất và 
 - **Danh mục BĐS sở hữu (8):** Cảng Nước Sâu Cái Mép, Đồng Nai (Đại Công Viên Chủ Đề), Thanh Hóa (Sầm Sơn), Tập Đoàn Viễn Thông (Viettel), Tập Đoàn Điện Lực (EVN), Hưng Yên (Văn Giang), Bình Dương (Tổ Hợp Thể Thao & Golf), Cảng HKQT Long Thành
 
 #### Lượt #32 | Vòng #16 — Chú Sáu (Cân bằng / Balanced) (Balanced)
-- **Số dư trước lượt:** 1.105 Tr. VNĐ | **Tài sản ròng:** 27.005 Tr. VNĐ
+- **Số dư trước lượt:** 870 Tr. VNĐ | **Tài sản ròng:** 29.070 Tr. VNĐ
 - **Xúc xắc:** [5, 2] (Tổng: 7)
 - **Di chuyển:** Ô 6 ➔ Ô 13 (**Lâm Đồng (Đà Lạt)**)
 - **Sự kiện ô:** Dừng tại [Lâm Đồng (Đà Lạt)] (Property)
-- **Số dư sau lượt:** 1.105 Tr. VNĐ | **Tài sản ròng:** 27.005 Tr. VNĐ
+- **Số dư sau lượt:** 870 Tr. VNĐ | **Tài sản ròng:** 29.070 Tr. VNĐ
 - **Danh mục BĐS sở hữu (10):** Nghệ An (TP. Vinh), Đà Nẵng (Hải Châu - Sơn Trà), Kiên Giang (Phú Quốc - Grand World) (C1), Hà Nội (Cầu Giấy), An Giang (Châu Đốc), TP.HCM (TP. Thủ Đức), Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm) (C2), Lâm Đồng (Đà Lạt), Ninh Bình (Tràng An), Quảng Ninh (Hạ Long) (C1)
 
 ### === VÒNG ĐẤU #17 ===
@@ -343,11 +338,11 @@ Mọi bước đi, cú gieo xúc xắc, di chuyển, tương tác ô đất và 
 - **Danh mục BĐS sở hữu (8):** Cảng Nước Sâu Cái Mép, Đồng Nai (Đại Công Viên Chủ Đề), Thanh Hóa (Sầm Sơn), Tập Đoàn Viễn Thông (Viettel), Tập Đoàn Điện Lực (EVN), Hưng Yên (Văn Giang), Bình Dương (Tổ Hợp Thể Thao & Golf), Cảng HKQT Long Thành
 
 #### Lượt #34 | Vòng #17 — Chú Sáu (Cân bằng / Balanced) (Balanced)
-- **Số dư trước lượt:** 1.105 Tr. VNĐ | **Tài sản ròng:** 27.005 Tr. VNĐ
+- **Số dư trước lượt:** 870 Tr. VNĐ | **Tài sản ròng:** 29.070 Tr. VNĐ
 - **Xúc xắc:** [5, 3] (Tổng: 8)
 - **Di chuyển:** Ô 13 ➔ Ô 21 (**Thanh Hóa (Sầm Sơn)**)
 - **Sự kiện ô:** Dừng chân tại [Thanh Hóa (Sầm Sơn)]: Trả tiền thuê 220 Tr. VNĐ cho Bác Ba (Thực dụng / Aggressive)
-- **Số dư sau lượt:** 885 Tr. VNĐ | **Tài sản ròng:** 26.785 Tr. VNĐ
+- **Số dư sau lượt:** 650 Tr. VNĐ | **Tài sản ròng:** 28.850 Tr. VNĐ
 - **Danh mục BĐS sở hữu (10):** Nghệ An (TP. Vinh), Đà Nẵng (Hải Châu - Sơn Trà), Kiên Giang (Phú Quốc - Grand World) (C1), Hà Nội (Cầu Giấy), An Giang (Châu Đốc), TP.HCM (TP. Thủ Đức), Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm) (C2), Lâm Đồng (Đà Lạt), Ninh Bình (Tràng An), Quảng Ninh (Hạ Long) (C1)
 
 ### === VÒNG ĐẤU #18 ===
@@ -361,11 +356,11 @@ Mọi bước đi, cú gieo xúc xắc, di chuyển, tương tác ô đất và 
 - **Danh mục BĐS sở hữu (8):** Cảng Nước Sâu Cái Mép, Đồng Nai (Đại Công Viên Chủ Đề), Thanh Hóa (Sầm Sơn), Tập Đoàn Viễn Thông (Viettel), Tập Đoàn Điện Lực (EVN), Hưng Yên (Văn Giang), Bình Dương (Tổ Hợp Thể Thao & Golf), Cảng HKQT Long Thành
 
 #### Lượt #36 | Vòng #18 — Chú Sáu (Cân bằng / Balanced) (Balanced)
-- **Số dư trước lượt:** 885 Tr. VNĐ | **Tài sản ròng:** 26.785 Tr. VNĐ
+- **Số dư trước lượt:** 650 Tr. VNĐ | **Tài sản ròng:** 28.850 Tr. VNĐ
 - **Xúc xắc:** [1, 2] (Tổng: 3)
 - **Di chuyển:** Ô 21 ➔ Ô 24 (**Ninh Bình (Tràng An)**)
 - **Sự kiện ô:** Dừng tại [Ninh Bình (Tràng An)] (Property)
-- **Số dư sau lượt:** 885 Tr. VNĐ | **Tài sản ròng:** 26.785 Tr. VNĐ
+- **Số dư sau lượt:** 650 Tr. VNĐ | **Tài sản ròng:** 28.850 Tr. VNĐ
 - **Danh mục BĐS sở hữu (10):** Nghệ An (TP. Vinh), Đà Nẵng (Hải Châu - Sơn Trà), Kiên Giang (Phú Quốc - Grand World) (C1), Hà Nội (Cầu Giấy), An Giang (Châu Đốc), TP.HCM (TP. Thủ Đức), Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm) (C2), Lâm Đồng (Đà Lạt), Ninh Bình (Tràng An), Quảng Ninh (Hạ Long) (C1)
 
 ### === VÒNG ĐẤU #19 ===
@@ -379,11 +374,11 @@ Mọi bước đi, cú gieo xúc xắc, di chuyển, tương tác ô đất và 
 - **Danh mục BĐS sở hữu (8):** Cảng Nước Sâu Cái Mép, Đồng Nai (Đại Công Viên Chủ Đề), Thanh Hóa (Sầm Sơn), Tập Đoàn Viễn Thông (Viettel), Tập Đoàn Điện Lực (EVN), Hưng Yên (Văn Giang), Bình Dương (Tổ Hợp Thể Thao & Golf), Cảng HKQT Long Thành
 
 #### Lượt #38 | Vòng #19 — Chú Sáu (Cân bằng / Balanced) (Balanced)
-- **Số dư trước lượt:** 885 Tr. VNĐ | **Tài sản ròng:** 26.785 Tr. VNĐ
+- **Số dư trước lượt:** 650 Tr. VNĐ | **Tài sản ròng:** 28.850 Tr. VNĐ
 - **Xúc xắc:** [6, 2] (Tổng: 8)
 - **Di chuyển:** Ô 24 ➔ Ô 32 (**Hà Nội (Cầu Giấy)**)
 - **Sự kiện ô:** Dừng tại [Hà Nội (Cầu Giấy)] (Property)
-- **Số dư sau lượt:** 885 Tr. VNĐ | **Tài sản ròng:** 26.785 Tr. VNĐ
+- **Số dư sau lượt:** 650 Tr. VNĐ | **Tài sản ròng:** 28.850 Tr. VNĐ
 - **Danh mục BĐS sở hữu (10):** Nghệ An (TP. Vinh), Đà Nẵng (Hải Châu - Sơn Trà), Kiên Giang (Phú Quốc - Grand World) (C1), Hà Nội (Cầu Giấy), An Giang (Châu Đốc), TP.HCM (TP. Thủ Đức), Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm) (C2), Lâm Đồng (Đà Lạt), Ninh Bình (Tràng An), Quảng Ninh (Hạ Long) (C1)
 
 ### === VÒNG ĐẤU #20 ===
@@ -397,37 +392,40 @@ Mọi bước đi, cú gieo xúc xắc, di chuyển, tương tác ô đất và 
 - **Danh mục BĐS sở hữu (9):** Cảng Nước Sâu Cái Mép, Đồng Nai (Đại Công Viên Chủ Đề), Thanh Hóa (Sầm Sơn), Tập Đoàn Viễn Thông (Viettel), Tập Đoàn Điện Lực (EVN), Hưng Yên (Văn Giang), Bình Dương (Tổ Hợp Thể Thao & Golf), Cảng HKQT Long Thành, Cảng HKQT Nội Bài
 
 #### Lượt #40 | Vòng #20 — Chú Sáu (Cân bằng / Balanced) (Balanced)
-- **Số dư trước lượt:** 885 Tr. VNĐ | **Tài sản ròng:** 26.785 Tr. VNĐ
+- **Số dư trước lượt:** 650 Tr. VNĐ | **Tài sản ròng:** 28.850 Tr. VNĐ
 - **Xúc xắc:** [5, 2] (Tổng: 7)
 - **Di chuyển:** Ô 32 ➔ Ô 39 (**TP.HCM (Quận 1 - Nguyễn Huệ)**)
 - **Sự kiện ô:** Từ chối mua [TP.HCM (Quận 1 - Nguyễn Huệ)], phát động Đấu Giá Công Khai
-- **Sàn đấu giá:** Chốt đấu giá: Bác Ba (Thực dụng / Aggressive) sở hữu [TP.HCM (Quận 1 - Nguyễn Huệ)] giá 2050 Tr. VNĐ
-- **Số dư sau lượt:** 2.004 Tr. VNĐ | **Tài sản ròng:** 27.904 Tr. VNĐ
+- **Số dư sau lượt:** 650 Tr. VNĐ | **Tài sản ròng:** 28.850 Tr. VNĐ
 - **Danh mục BĐS sở hữu (10):** Nghệ An (TP. Vinh), Đà Nẵng (Hải Châu - Sơn Trà), Kiên Giang (Phú Quốc - Grand World) (C1), Hà Nội (Cầu Giấy), An Giang (Châu Đốc), TP.HCM (TP. Thủ Đức), Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm) (C2), Lâm Đồng (Đà Lạt), Ninh Bình (Tràng An), Quảng Ninh (Hạ Long) (C1)
 
 ### === VÒNG ĐẤU #21 ===
 
 #### Lượt #41 | Vòng #21 — Bác Ba (Thực dụng / Aggressive) (Aggressive)
-- **Số dư trước lượt:** 14.019 Tr. VNĐ | **Tài sản ròng:** 34.219 Tr. VNĐ
+- **Số dư trước lượt:** 12.900 Tr. VNĐ | **Tài sản ròng:** 33.100 Tr. VNĐ
 - **Xúc xắc:** [5, 1] (Tổng: 6)
 - **Di chuyển:** Ô 38 ➔ Ô 4 (**Lệ Phí Đăng Ký Đất Đai**) | *Vượt mốc Khởi Hành (+2.000 Tr. VNĐ)*
-- **Sự kiện ô:** Nộp thuế/lệ phí đất đai: Khấu trừ 951 Tr. VNĐ vào Kho Bạc
-- **Số dư sau lượt:** 13.068 Tr. VNĐ | **Tài sản ròng:** 33.268 Tr. VNĐ
-- **Danh mục BĐS sở hữu (10):** Cảng Nước Sâu Cái Mép, Đồng Nai (Đại Công Viên Chủ Đề), Thanh Hóa (Sầm Sơn), Tập Đoàn Viễn Thông (Viettel), Tập Đoàn Điện Lực (EVN), Hưng Yên (Văn Giang), Bình Dương (Tổ Hợp Thể Thao & Golf), Cảng HKQT Long Thành, Cảng HKQT Nội Bài, TP.HCM (Quận 1 - Nguyễn Huệ)
+- **Sự kiện ô:** Dừng chân tại [Lệ Phí Đăng Ký Đất Đai]: Trả tiền thuê 1235 Tr. VNĐ cho Chú Sáu (Cân bằng / Balanced)
+- **Nâng cấp BĐS:** Nâng cấp [TP.HCM (TP. Thủ Đức)] lên C1 (Shophouse)
+- **Nâng cấp BĐS:** Nâng cấp [TP.HCM (Quận 1 - Nguyễn Huệ)] lên C1 (Shophouse)
+- **Nâng cấp BĐS:** Nâng cấp [TP.HCM (TP. Thủ Đức)] lên C2 (Biệt thự)
+- **Nâng cấp BĐS:** Nâng cấp [TP.HCM (Quận 1 - Nguyễn Huệ)] lên C2 (Biệt thự)
+- **Số dư sau lượt:** 1.385 Tr. VNĐ | **Tài sản ròng:** 34.135 Tr. VNĐ
+- **Danh mục BĐS sở hữu (10):** Cảng Nước Sâu Cái Mép, Đồng Nai (Đại Công Viên Chủ Đề), Tập Đoàn Viễn Thông (Viettel), TP.HCM (TP. Thủ Đức) (C2), Tập Đoàn Điện Lực (EVN), Hưng Yên (Văn Giang), Bình Dương (Tổ Hợp Thể Thao & Golf), Cảng HKQT Long Thành, Cảng HKQT Nội Bài, TP.HCM (Quận 1 - Nguyễn Huệ) (C2)
 
 #### Lượt #42 | Vòng #21 — Chú Sáu (Cân bằng / Balanced) (Balanced)
-- **Số dư trước lượt:** 2.004 Tr. VNĐ | **Tài sản ròng:** 27.904 Tr. VNĐ
+- **Số dư trước lượt:** 1.885 Tr. VNĐ | **Tài sản ròng:** 28.785 Tr. VNĐ
 - **Xúc xắc:** [4, 2] (Tổng: 6)
 - **Di chuyển:** Ô 39 ➔ Ô 5 (**Cảng HKQT Long Thành**) | *Vượt mốc Khởi Hành (+2.000 Tr. VNĐ)*
-- **Sự kiện ô:** Dừng chân tại [Cảng HKQT Long Thành]: Trả tiền thuê 3573 Tr. VNĐ cho Bác Ba (Thực dụng / Aggressive)
+- **Sự kiện ô:** Dừng chân tại [Cảng HKQT Long Thành]: Trả tiền thuê 3570 Tr. VNĐ cho Bác Ba (Thực dụng / Aggressive)
 - **Giải cứu tài chính:** Thế chấp tài sản ô 3
-- **Số dư sau lượt:** 1.473 Tr. VNĐ | **Tài sản ròng:** 27.073 Tr. VNĐ
-- **Danh mục BĐS sở hữu (10):** Nghệ An (TP. Vinh), Đà Nẵng (Hải Châu - Sơn Trà), Kiên Giang (Phú Quốc - Grand World) (C1), Hà Nội (Cầu Giấy), An Giang (Châu Đốc), TP.HCM (TP. Thủ Đức), Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm) (C2), Lâm Đồng (Đà Lạt), Ninh Bình (Tràng An), Quảng Ninh (Hạ Long) (C1)
+- **Số dư sau lượt:** 1.470 Tr. VNĐ | **Tài sản ròng:** 28.070 Tr. VNĐ
+- **Danh mục BĐS sở hữu (10):** Thanh Hóa (Sầm Sơn), Nghệ An (TP. Vinh), Đà Nẵng (Hải Châu - Sơn Trà), Kiên Giang (Phú Quốc - Grand World) (C1), Hà Nội (Cầu Giấy), An Giang (Châu Đốc), Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm) (C2), Lâm Đồng (Đà Lạt), Ninh Bình (Tràng An), Quảng Ninh (Hạ Long) (C1)
 
 ### === VÒNG ĐẤU #22 ===
 
 #### Lượt #43 | Vòng #22 — Bác Ba (Thực dụng / Aggressive) (Aggressive)
-- **Số dư trước lượt:** 16.641 Tr. VNĐ | **Tài sản ròng:** 36.841 Tr. VNĐ
+- **Số dư trước lượt:** 4.955 Tr. VNĐ | **Tài sản ròng:** 37.705 Tr. VNĐ
 - **Xúc xắc:** [1, 4] (Tổng: 5)
 - **Di chuyển:** Ô 4 ➔ Ô 9 (**Bà Rịa - Vũng Tàu**)
 - **Sự kiện ô:** Mua thành công [Bà Rịa - Vũng Tàu] giá 1200 Tr. VNĐ
@@ -436,187 +434,181 @@ Mọi bước đi, cú gieo xúc xắc, di chuyển, tương tác ô đất và 
 - **Nâng cấp BĐS:** Nâng cấp [Đồng Nai (Đại Công Viên Chủ Đề)] lên C1 (Shophouse)
 - **Nâng cấp BĐS:** Nâng cấp [Bà Rịa - Vũng Tàu] lên C2 (Biệt thự)
 - **Nâng cấp BĐS:** Nâng cấp [Bình Dương (Tổ Hợp Thể Thao & Golf)] lên C2 (Biệt thự)
-- **Nâng cấp BĐS:** Nâng cấp [Đồng Nai (Đại Công Viên Chủ Đề)] lên C2 (Biệt thự)
-- **Nâng cấp BĐS:** Nâng cấp [Bà Rịa - Vũng Tàu] lên C3 (Resort/Khách sạn)
-- **Nâng cấp BĐS:** Nâng cấp [Bình Dương (Tổ Hợp Thể Thao & Golf)] lên C3 (Resort/Khách sạn)
-- **Nâng cấp BĐS:** Nâng cấp [Đồng Nai (Đại Công Viên Chủ Đề)] lên C3 (Resort/Khách sạn)
-- **Số dư sau lượt:** 8.221 Tr. VNĐ | **Tài sản ròng:** 39.221 Tr. VNĐ
-- **Danh mục BĐS sở hữu (11):** Cảng Nước Sâu Cái Mép, Đồng Nai (Đại Công Viên Chủ Đề) (C3), Thanh Hóa (Sầm Sơn), Tập Đoàn Viễn Thông (Viettel), Tập Đoàn Điện Lực (EVN), Hưng Yên (Văn Giang), Bình Dương (Tổ Hợp Thể Thao & Golf) (C3), Cảng HKQT Long Thành, Cảng HKQT Nội Bài, TP.HCM (Quận 1 - Nguyễn Huệ), Bà Rịa - Vũng Tàu (C3)
+- **Số dư sau lượt:** 675 Tr. VNĐ | **Tài sản ròng:** 38.425 Tr. VNĐ
+- **Danh mục BĐS sở hữu (11):** Cảng Nước Sâu Cái Mép, Đồng Nai (Đại Công Viên Chủ Đề) (C1), Tập Đoàn Viễn Thông (Viettel), TP.HCM (TP. Thủ Đức) (C2), Tập Đoàn Điện Lực (EVN), Hưng Yên (Văn Giang), Bình Dương (Tổ Hợp Thể Thao & Golf) (C2), Cảng HKQT Long Thành, Cảng HKQT Nội Bài, TP.HCM (Quận 1 - Nguyễn Huệ) (C2), Bà Rịa - Vũng Tàu (C2)
 
 #### Lượt #44 | Vòng #22 — Chú Sáu (Cân bằng / Balanced) (Balanced)
-- **Số dư trước lượt:** 1.473 Tr. VNĐ | **Tài sản ròng:** 27.073 Tr. VNĐ
+- **Số dư trước lượt:** 1.470 Tr. VNĐ | **Tài sản ròng:** 28.070 Tr. VNĐ
 - **Xúc xắc:** [5, 2] (Tổng: 7)
 - **Di chuyển:** Ô 5 ➔ Ô 12 (**Tập Đoàn Điện Lực (EVN)**)
-- **Sự kiện ô:** Dừng chân tại [Tập Đoàn Điện Lực (EVN)]: Trả tiền thuê 2480 Tr. VNĐ cho Bác Ba (Thực dụng / Aggressive)
-- **Nâng cấp BĐS:** Nâng cấp [Kiên Giang (Phú Quốc - Grand World)] lên C2 (Biệt thự)
+- **Sự kiện ô:** Dừng chân tại [Tập Đoàn Điện Lực (EVN)]: Trả tiền thuê 2478 Tr. VNĐ cho Bác Ba (Thực dụng / Aggressive)
 - **Giải cứu tài chính:** Thế chấp tài sản ô 13
 - **Giải cứu tài chính:** Thế chấp tài sản ô 19
-- **Giải cứu tài chính:** Thế chấp tài sản ô 37
-- **Số dư sau lượt:** 1.610 Tr. VNĐ | **Tài sản ròng:** 26.360 Tr. VNĐ
-- **Danh mục BĐS sở hữu (10):** Nghệ An (TP. Vinh), Đà Nẵng (Hải Châu - Sơn Trà), Kiên Giang (Phú Quốc - Grand World) (C2), Hà Nội (Cầu Giấy), An Giang (Châu Đốc), TP.HCM (TP. Thủ Đức), Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm) (C2), Lâm Đồng (Đà Lạt), Ninh Bình (Tràng An), Quảng Ninh (Hạ Long) (C1)
+- **Số dư sau lượt:** 1.678 Tr. VNĐ | **Tài sản ròng:** 26.578 Tr. VNĐ
+- **Danh mục BĐS sở hữu (10):** Thanh Hóa (Sầm Sơn), Nghệ An (TP. Vinh), Đà Nẵng (Hải Châu - Sơn Trà), Kiên Giang (Phú Quốc - Grand World) (C1), Hà Nội (Cầu Giấy), An Giang (Châu Đốc), Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm) (C2), Lâm Đồng (Đà Lạt), Ninh Bình (Tràng An), Quảng Ninh (Hạ Long) (C1)
 
 ### === VÒNG ĐẤU #23 ===
 
 #### Lượt #45 | Vòng #23 — Bác Ba (Thực dụng / Aggressive) (Aggressive)
-- **Số dư trước lượt:** 10.701 Tr. VNĐ | **Tài sản ròng:** 41.701 Tr. VNĐ
+- **Số dư trước lượt:** 3.153 Tr. VNĐ | **Tài sản ròng:** 40.903 Tr. VNĐ
 - **Xúc xắc:** [6, 3] (Tổng: 9)
 - **Di chuyển:** Ô 9 ➔ Ô 18 (**Thừa Thiên Huế**)
 - **Sự kiện ô:** Từ chối mua [Thừa Thiên Huế], phát động Đấu Giá Công Khai
 - **Sàn đấu giá:** Sàn đấu giá kết thúc: Mọi người chơi bỏ qua, [Thừa Thiên Huế] phát mãi về Kho Bạc
-- **Số dư sau lượt:** 10.701 Tr. VNĐ | **Tài sản ròng:** 41.701 Tr. VNĐ
-- **Danh mục BĐS sở hữu (11):** Cảng Nước Sâu Cái Mép, Đồng Nai (Đại Công Viên Chủ Đề) (C3), Thanh Hóa (Sầm Sơn), Tập Đoàn Viễn Thông (Viettel), Tập Đoàn Điện Lực (EVN), Hưng Yên (Văn Giang), Bình Dương (Tổ Hợp Thể Thao & Golf) (C3), Cảng HKQT Long Thành, Cảng HKQT Nội Bài, TP.HCM (Quận 1 - Nguyễn Huệ), Bà Rịa - Vũng Tàu (C3)
+- **Số dư sau lượt:** 3.153 Tr. VNĐ | **Tài sản ròng:** 40.903 Tr. VNĐ
+- **Danh mục BĐS sở hữu (11):** Cảng Nước Sâu Cái Mép, Đồng Nai (Đại Công Viên Chủ Đề) (C1), Tập Đoàn Viễn Thông (Viettel), TP.HCM (TP. Thủ Đức) (C2), Tập Đoàn Điện Lực (EVN), Hưng Yên (Văn Giang), Bình Dương (Tổ Hợp Thể Thao & Golf) (C2), Cảng HKQT Long Thành, Cảng HKQT Nội Bài, TP.HCM (Quận 1 - Nguyễn Huệ) (C2), Bà Rịa - Vũng Tàu (C2)
 
 #### Lượt #46 | Vòng #23 — Chú Sáu (Cân bằng / Balanced) (Balanced)
-- **Số dư trước lượt:** 1.610 Tr. VNĐ | **Tài sản ròng:** 26.360 Tr. VNĐ
+- **Số dư trước lượt:** 1.678 Tr. VNĐ | **Tài sản ròng:** 26.578 Tr. VNĐ
 - **Xúc xắc:** [3, 5] (Tổng: 8)
 - **Di chuyển:** Ô 12 ➔ Ô 20 (**Nghỉ Dưỡng Miễn Phí**)
 - **Sự kiện ô:** Dừng tại [Nghỉ Dưỡng Miễn Phí] (FreeParking)
-- **Số dư sau lượt:** 510 Tr. VNĐ | **Tài sản ròng:** 26.260 Tr. VNĐ
-- **Danh mục BĐS sở hữu (10):** Nghệ An (TP. Vinh), Đà Nẵng (Hải Châu - Sơn Trà), Kiên Giang (Phú Quốc - Grand World) (C2), Hà Nội (Cầu Giấy), An Giang (Châu Đốc), TP.HCM (TP. Thủ Đức), Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm) (C2), Lâm Đồng (Đà Lạt), Ninh Bình (Tràng An), Quảng Ninh (Hạ Long) (C1)
+- **Nâng cấp BĐS:** Nâng cấp [Ninh Bình (Tràng An)] lên C1 (Shophouse)
+- **Số dư sau lượt:** 598 Tr. VNĐ | **Tài sản ròng:** 26.698 Tr. VNĐ
+- **Danh mục BĐS sở hữu (10):** Thanh Hóa (Sầm Sơn), Nghệ An (TP. Vinh), Đà Nẵng (Hải Châu - Sơn Trà), Kiên Giang (Phú Quốc - Grand World) (C1), Hà Nội (Cầu Giấy), An Giang (Châu Đốc), Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm) (C2), Lâm Đồng (Đà Lạt), Ninh Bình (Tràng An) (C1), Quảng Ninh (Hạ Long) (C1)
 
 ### === VÒNG ĐẤU #24 ===
 
 #### Lượt #47 | Vòng #24 — Bác Ba (Thực dụng / Aggressive) (Aggressive)
-- **Số dư trước lượt:** 10.701 Tr. VNĐ | **Tài sản ròng:** 41.701 Tr. VNĐ
+- **Số dư trước lượt:** 3.153 Tr. VNĐ | **Tài sản ròng:** 40.903 Tr. VNĐ
 - **Xúc xắc:** [4, 6] (Tổng: 10)
 - **Di chuyển:** Ô 18 ➔ Ô 28 (**Tập Đoàn Viễn Thông (Viettel)**)
 - **Sự kiện ô:** Dừng tại [Tập Đoàn Viễn Thông (Viettel)] (Utility)
-- **Số dư sau lượt:** 10.701 Tr. VNĐ | **Tài sản ròng:** 41.701 Tr. VNĐ
-- **Danh mục BĐS sở hữu (11):** Cảng Nước Sâu Cái Mép, Đồng Nai (Đại Công Viên Chủ Đề) (C3), Thanh Hóa (Sầm Sơn), Tập Đoàn Viễn Thông (Viettel), Tập Đoàn Điện Lực (EVN), Hưng Yên (Văn Giang), Bình Dương (Tổ Hợp Thể Thao & Golf) (C3), Cảng HKQT Long Thành, Cảng HKQT Nội Bài, TP.HCM (Quận 1 - Nguyễn Huệ), Bà Rịa - Vũng Tàu (C3)
+- **Nâng cấp BĐS:** Nâng cấp [Đồng Nai (Đại Công Viên Chủ Đề)] lên C2 (Biệt thự)
+- **Nâng cấp BĐS:** Nâng cấp [Bình Dương (Tổ Hợp Thể Thao & Golf)] lên C3 (Resort/Khách sạn)
+- **Nâng cấp BĐS:** Nâng cấp [Đồng Nai (Đại Công Viên Chủ Đề)] lên C3 (Resort/Khách sạn)
+- **Nâng cấp BĐS:** Nâng cấp [Bà Rịa - Vũng Tàu] lên C3 (Resort/Khách sạn)
+- **Giải cứu tài chính:** Thế chấp tài sản ô 31
+- **Số dư sau lượt:** 513 Tr. VNĐ | **Tài sản ròng:** 42.563 Tr. VNĐ
+- **Danh mục BĐS sở hữu (11):** Cảng Nước Sâu Cái Mép, Đồng Nai (Đại Công Viên Chủ Đề) (C3), Tập Đoàn Viễn Thông (Viettel), TP.HCM (TP. Thủ Đức) (C2), Tập Đoàn Điện Lực (EVN), Hưng Yên (Văn Giang), Bình Dương (Tổ Hợp Thể Thao & Golf) (C3), Cảng HKQT Long Thành, Cảng HKQT Nội Bài, TP.HCM (Quận 1 - Nguyễn Huệ) (C2), Bà Rịa - Vũng Tàu (C3)
 
 #### Lượt #48 | Vòng #24 — Chú Sáu (Cân bằng / Balanced) (Balanced)
-- **Số dư trước lượt:** 510 Tr. VNĐ | **Tài sản ròng:** 26.260 Tr. VNĐ
+- **Số dư trước lượt:** 598 Tr. VNĐ | **Tài sản ròng:** 26.698 Tr. VNĐ
 - **Xúc xắc:** [6, 2] (Tổng: 8)
 - **Di chuyển:** Ô 20 ➔ Ô 28 (**Tập Đoàn Viễn Thông (Viettel)**)
-- **Sự kiện ô:** Dừng chân tại [Tập Đoàn Viễn Thông (Viettel)]: Trả tiền thuê 510 Tr. VNĐ cho Bác Ba (Thực dụng / Aggressive)
-- **Giải cứu tài chính:** Thế chấp tài sản ô 19
+- **Sự kiện ô:** Dừng chân tại [Tập Đoàn Viễn Thông (Viettel)]: Trả tiền thuê 598 Tr. VNĐ cho Bác Ba (Thực dụng / Aggressive)
+- **Giải cứu tài chính:** Hạ cấp công trình ô 24
 - **Giải cứu tài chính:** Hạ cấp công trình ô 26
-- **Giải cứu tài chính:** Hạ cấp công trình ô 27
-- **Số dư sau lượt:** 500 Tr. VNĐ | **Tài sản ròng:** 20.350 Tr. VNĐ
-- **Danh mục BĐS sở hữu (10):** Nghệ An (TP. Vinh), Đà Nẵng (Hải Châu - Sơn Trà), Kiên Giang (Phú Quốc - Grand World) (C1), Hà Nội (Cầu Giấy), An Giang (Châu Đốc), TP.HCM (TP. Thủ Đức), Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm) (C1), Lâm Đồng (Đà Lạt), Ninh Bình (Tràng An), Quảng Ninh (Hạ Long) (C1)
+- **Giải cứu tài chính:** Hạ cấp công trình ô 26
+- **Số dư sau lượt:** 198 Tr. VNĐ | **Tài sản ròng:** 21.198 Tr. VNĐ
+- **Danh mục BĐS sở hữu (10):** Thanh Hóa (Sầm Sơn), Nghệ An (TP. Vinh), Đà Nẵng (Hải Châu - Sơn Trà), Kiên Giang (Phú Quốc - Grand World) (C1), Hà Nội (Cầu Giấy), An Giang (Châu Đốc), Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm), Lâm Đồng (Đà Lạt), Ninh Bình (Tràng An), Quảng Ninh (Hạ Long) (C1)
 
 ### === VÒNG ĐẤU #25 ===
 
 #### Lượt #49 | Vòng #25 — Bác Ba (Thực dụng / Aggressive) (Aggressive)
-- **Số dư trước lượt:** 11.211 Tr. VNĐ | **Tài sản ròng:** 42.211 Tr. VNĐ
+- **Số dư trước lượt:** 1.111 Tr. VNĐ | **Tài sản ròng:** 43.161 Tr. VNĐ
 - **Xúc xắc:** [3, 4] (Tổng: 7)
 - **Di chuyển:** Ô 28 ➔ Ô 35 (**Cảng HKQT Nội Bài**)
 - **Sự kiện ô:** Dừng tại [Cảng HKQT Nội Bài] (Railroad)
-- **Số dư sau lượt:** 11.211 Tr. VNĐ | **Tài sản ròng:** 42.211 Tr. VNĐ
-- **Danh mục BĐS sở hữu (11):** Cảng Nước Sâu Cái Mép, Đồng Nai (Đại Công Viên Chủ Đề) (C3), Thanh Hóa (Sầm Sơn), Tập Đoàn Viễn Thông (Viettel), Tập Đoàn Điện Lực (EVN), Hưng Yên (Văn Giang), Bình Dương (Tổ Hợp Thể Thao & Golf) (C3), Cảng HKQT Long Thành, Cảng HKQT Nội Bài, TP.HCM (Quận 1 - Nguyễn Huệ), Bà Rịa - Vũng Tàu (C3)
+- **Số dư sau lượt:** 1.111 Tr. VNĐ | **Tài sản ròng:** 43.161 Tr. VNĐ
+- **Danh mục BĐS sở hữu (11):** Cảng Nước Sâu Cái Mép, Đồng Nai (Đại Công Viên Chủ Đề) (C3), Tập Đoàn Viễn Thông (Viettel), TP.HCM (TP. Thủ Đức) (C2), Tập Đoàn Điện Lực (EVN), Hưng Yên (Văn Giang), Bình Dương (Tổ Hợp Thể Thao & Golf) (C3), Cảng HKQT Long Thành, Cảng HKQT Nội Bài, TP.HCM (Quận 1 - Nguyễn Huệ) (C2), Bà Rịa - Vũng Tàu (C3)
 
 #### Lượt #50 | Vòng #25 — Chú Sáu (Cân bằng / Balanced) (Balanced)
-- **Số dư trước lượt:** 500 Tr. VNĐ | **Tài sản ròng:** 20.350 Tr. VNĐ
+- **Số dư trước lượt:** 198 Tr. VNĐ | **Tài sản ròng:** 21.198 Tr. VNĐ
 - **Xúc xắc:** [4, 3] (Tổng: 7)
 - **Di chuyển:** Ô 28 ➔ Ô 35 (**Cảng HKQT Nội Bài**)
-- **Sự kiện ô:** Dừng chân tại [Cảng HKQT Nội Bài]: Trả tiền thuê 500 Tr. VNĐ cho Bác Ba (Thực dụng / Aggressive)
-- **Giải cứu tài chính:** Thế chấp tài sản ô 3
-- **Giải cứu tài chính:** Hạ cấp công trình ô 26
+- **Sự kiện ô:** Dừng chân tại [Cảng HKQT Nội Bài]: Trả tiền thuê 198 Tr. VNĐ cho Bác Ba (Thực dụng / Aggressive)
 - **Giải cứu tài chính:** Hạ cấp công trình ô 27
-- **Số dư sau lượt:** 100 Tr. VNĐ | **Tài sản ròng:** 17.050 Tr. VNĐ
-- **Danh mục BĐS sở hữu (10):** Nghệ An (TP. Vinh), Đà Nẵng (Hải Châu - Sơn Trà), Kiên Giang (Phú Quốc - Grand World), Hà Nội (Cầu Giấy), An Giang (Châu Đốc), TP.HCM (TP. Thủ Đức), Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm), Lâm Đồng (Đà Lạt), Ninh Bình (Tràng An), Quảng Ninh (Hạ Long) (C1)
+- **Giải cứu tài chính:** Hạ cấp công trình ô 29
+- **Giải cứu tài chính:** Thế chấp tài sản ô 21
+- **Số dư sau lượt:** 578 Tr. VNĐ | **Tài sản ròng:** 17.778 Tr. VNĐ
+- **Danh mục BĐS sở hữu (10):** Thanh Hóa (Sầm Sơn), Nghệ An (TP. Vinh), Đà Nẵng (Hải Châu - Sơn Trà), Kiên Giang (Phú Quốc - Grand World), Hà Nội (Cầu Giấy), An Giang (Châu Đốc), Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm), Lâm Đồng (Đà Lạt), Ninh Bình (Tràng An), Quảng Ninh (Hạ Long)
 
 ### === VÒNG ĐẤU #26 ===
 
 #### Lượt #51 | Vòng #26 — Bác Ba (Thực dụng / Aggressive) (Aggressive)
-- **Số dư trước lượt:** 11.711 Tr. VNĐ | **Tài sản ròng:** 42.711 Tr. VNĐ
+- **Số dư trước lượt:** 1.309 Tr. VNĐ | **Tài sản ròng:** 43.359 Tr. VNĐ
 - **Xúc xắc:** [4, 2] (Tổng: 6)
 - **Di chuyển:** Ô 35 ➔ Ô 1 (**Cần Thơ (Cái Răng)**) | *Vượt mốc Khởi Hành (+2.000 Tr. VNĐ)*
 - **Sự kiện ô:** Mua thành công [Cần Thơ (Cái Răng)] giá 600 Tr. VNĐ
-- **Nâng cấp BĐS:** Nâng cấp [Cần Thơ (Cái Răng)] lên C1 (Shophouse)
-- **Nâng cấp BĐS:** Nâng cấp [An Giang (Châu Đốc)] lên C1 (Shophouse)
-- **Nâng cấp BĐS:** Nâng cấp [Cần Thơ (Cái Răng)] lên C2 (Biệt thự)
-- **Nâng cấp BĐS:** Nâng cấp [An Giang (Châu Đốc)] lên C2 (Biệt thự)
-- **Nâng cấp BĐS:** Nâng cấp [Cần Thơ (Cái Răng)] lên C3 (Resort/Khách sạn)
-- **Nâng cấp BĐS:** Nâng cấp [An Giang (Châu Đốc)] lên C3 (Resort/Khách sạn)
-- **Số dư sau lượt:** 8.581 Tr. VNĐ | **Tài sản ròng:** 42.181 Tr. VNĐ
-- **Danh mục BĐS sở hữu (12):** Cảng Nước Sâu Cái Mép, Đồng Nai (Đại Công Viên Chủ Đề) (C3), Tập Đoàn Viễn Thông (Viettel), An Giang (Châu Đốc) (C3), Tập Đoàn Điện Lực (EVN), Hưng Yên (Văn Giang), Bình Dương (Tổ Hợp Thể Thao & Golf) (C3), Cảng HKQT Long Thành, Cảng HKQT Nội Bài, TP.HCM (Quận 1 - Nguyễn Huệ), Bà Rịa - Vũng Tàu (C3), Cần Thơ (Cái Răng) (C3)
+- **Số dư sau lượt:** 1.134 Tr. VNĐ | **Tài sản ròng:** 43.784 Tr. VNĐ
+- **Danh mục BĐS sở hữu (12):** Cảng Nước Sâu Cái Mép, Đồng Nai (Đại Công Viên Chủ Đề) (C3), Tập Đoàn Viễn Thông (Viettel), TP.HCM (TP. Thủ Đức) (C2), Tập Đoàn Điện Lực (EVN), Hưng Yên (Văn Giang), Bình Dương (Tổ Hợp Thể Thao & Golf) (C3), Cảng HKQT Long Thành, Cảng HKQT Nội Bài, TP.HCM (Quận 1 - Nguyễn Huệ) (C2), Bà Rịa - Vũng Tàu (C3), Cần Thơ (Cái Răng)
 
 #### Lượt #52 | Vòng #26 — Chú Sáu (Cân bằng / Balanced) (Balanced)
-- **Số dư trước lượt:** 100 Tr. VNĐ | **Tài sản ròng:** 18.950 Tr. VNĐ
+- **Số dư trước lượt:** 578 Tr. VNĐ | **Tài sản ròng:** 17.778 Tr. VNĐ
 - **Xúc xắc:** [6, 5] (Tổng: 11)
 - **Di chuyển:** Ô 35 ➔ Ô 6 (**Bình Dương (Tổ Hợp Thể Thao & Golf)**) | *Vượt mốc Khởi Hành (+2.000 Tr. VNĐ)*
-- **Sự kiện ô:** Dừng chân tại [Bình Dương (Tổ Hợp Thể Thao & Golf)]: Trả tiền thuê 1296 Tr. VNĐ cho Bác Ba (Thực dụng / Aggressive)
-- **Giải cứu tài chính:** Hạ cấp công trình ô 29
-- **Giải cứu tài chính:** Thế chấp tài sản ô 21
+- **Sự kiện ô:** Dừng chân tại [Bình Dương (Tổ Hợp Thể Thao & Golf)]: Trả tiền thuê 1885 Tr. VNĐ cho Bác Ba (Thực dụng / Aggressive)
+- **Giải cứu tài chính:** Thế chấp tài sản ô 23
+- **Giải cứu tài chính:** Thế chấp tài sản ô 24
 - **Giải cứu tài chính:** Thế chấp tài sản ô 29
-- **Giải cứu tài chính:** Thế chấp tài sản ô 26
-- **Số dư sau lượt:** 1.126 Tr. VNĐ | **Tài sản ròng:** 14.776 Tr. VNĐ
-- **Danh mục BĐS sở hữu (10):** Thanh Hóa (Sầm Sơn), Nghệ An (TP. Vinh), Đà Nẵng (Hải Châu - Sơn Trà), Kiên Giang (Phú Quốc - Grand World), Hà Nội (Cầu Giấy), TP.HCM (TP. Thủ Đức), Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm), Lâm Đồng (Đà Lạt), Ninh Bình (Tràng An), Quảng Ninh (Hạ Long)
+- **Số dư sau lượt:** 1.085 Tr. VNĐ | **Tài sản ròng:** 14.585 Tr. VNĐ
+- **Danh mục BĐS sở hữu (10):** Thanh Hóa (Sầm Sơn), Nghệ An (TP. Vinh), Đà Nẵng (Hải Châu - Sơn Trà), Kiên Giang (Phú Quốc - Grand World), Hà Nội (Cầu Giấy), An Giang (Châu Đốc), Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm), Lâm Đồng (Đà Lạt), Ninh Bình (Tràng An), Quảng Ninh (Hạ Long)
 
 ### === VÒNG ĐẤU #27 ===
 
 #### Lượt #53 | Vòng #27 — Bác Ba (Thực dụng / Aggressive) (Aggressive)
-- **Số dư trước lượt:** 9.877 Tr. VNĐ | **Tài sản ròng:** 43.477 Tr. VNĐ
+- **Số dư trước lượt:** 3.019 Tr. VNĐ | **Tài sản ròng:** 45.669 Tr. VNĐ
 - **Xúc xắc:** [3, 1] (Tổng: 4)
 - **Di chuyển:** Ô 1 ➔ Ô 5 (**Cảng HKQT Long Thành**)
-- **Sự kiện ô:** Dừng tại [Cảng HKQT Long Thành] (Railroad)
-- **Số dư sau lượt:** 9.877 Tr. VNĐ | **Tài sản ròng:** 43.477 Tr. VNĐ
-- **Danh mục BĐS sở hữu (12):** Cảng Nước Sâu Cái Mép, Đồng Nai (Đại Công Viên Chủ Đề) (C3), Tập Đoàn Viễn Thông (Viettel), An Giang (Châu Đốc) (C3), Tập Đoàn Điện Lực (EVN), Hưng Yên (Văn Giang), Bình Dương (Tổ Hợp Thể Thao & Golf) (C3), Cảng HKQT Long Thành, Cảng HKQT Nội Bài, TP.HCM (Quận 1 - Nguyễn Huệ), Bà Rịa - Vũng Tàu (C3), Cần Thơ (Cái Răng) (C3)
+- **Sự kiện ô:** Dừng chân tại [Cảng HKQT Long Thành]: Trả tiền thuê 95 Tr. VNĐ cho Chú Sáu (Cân bằng / Balanced)
+- **Nâng cấp BĐS:** Nâng cấp [Cần Thơ (Cái Răng)] lên C1 (Shophouse)
+- **Số dư sau lượt:** 639 Tr. VNĐ | **Tài sản ròng:** 42.689 Tr. VNĐ
+- **Danh mục BĐS sở hữu (12):** Cảng Nước Sâu Cái Mép, Đồng Nai (Đại Công Viên Chủ Đề) (C3), Tập Đoàn Viễn Thông (Viettel), An Giang (Châu Đốc), TP.HCM (TP. Thủ Đức) (C2), Tập Đoàn Điện Lực (EVN), Bình Dương (Tổ Hợp Thể Thao & Golf) (C3), Cảng HKQT Long Thành, Cảng HKQT Nội Bài, TP.HCM (Quận 1 - Nguyễn Huệ) (C2), Bà Rịa - Vũng Tàu (C3), Cần Thơ (Cái Răng) (C1)
 
 #### Lượt #54 | Vòng #27 — Chú Sáu (Cân bằng / Balanced) (Balanced)
-- **Số dư trước lượt:** 1.126 Tr. VNĐ | **Tài sản ròng:** 14.776 Tr. VNĐ
+- **Số dư trước lượt:** 1.180 Tr. VNĐ | **Tài sản ròng:** 17.380 Tr. VNĐ
 - **Xúc xắc:** [3, 1] (Tổng: 4)
 - **Di chuyển:** Ô 6 ➔ Ô 6 (**Bình Dương (Tổ Hợp Thể Thao & Golf)**)
 - **Sự kiện ô:** Dừng tại [Bình Dương (Tổ Hợp Thể Thao & Golf)] (Property)
-- **Số dư sau lượt:** 1.126 Tr. VNĐ | **Tài sản ròng:** 14.776 Tr. VNĐ
-- **Danh mục BĐS sở hữu (10):** Thanh Hóa (Sầm Sơn), Nghệ An (TP. Vinh), Đà Nẵng (Hải Châu - Sơn Trà), Kiên Giang (Phú Quốc - Grand World), Hà Nội (Cầu Giấy), TP.HCM (TP. Thủ Đức), Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm), Lâm Đồng (Đà Lạt), Ninh Bình (Tràng An), Quảng Ninh (Hạ Long)
+- **Số dư sau lượt:** 1.180 Tr. VNĐ | **Tài sản ròng:** 17.380 Tr. VNĐ
+- **Danh mục BĐS sở hữu (10):** Thanh Hóa (Sầm Sơn), Nghệ An (TP. Vinh), Đà Nẵng (Hải Châu - Sơn Trà), Kiên Giang (Phú Quốc - Grand World), Hà Nội (Cầu Giấy), Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm), Lâm Đồng (Đà Lạt), Ninh Bình (Tràng An), Quảng Ninh (Hạ Long), Hưng Yên (Văn Giang)
 
 ### === VÒNG ĐẤU #28 ===
 
 #### Lượt #55 | Vòng #28 — Bác Ba (Thực dụng / Aggressive) (Aggressive)
-- **Số dư trước lượt:** 9.877 Tr. VNĐ | **Tài sản ròng:** 43.477 Tr. VNĐ
+- **Số dư trước lượt:** 639 Tr. VNĐ | **Tài sản ròng:** 42.689 Tr. VNĐ
 - **Xúc xắc:** [5, 2] (Tổng: 7)
 - **Di chuyển:** Ô 5 ➔ Ô 12 (**Tập Đoàn Điện Lực (EVN)**)
 - **Sự kiện ô:** Dừng tại [Tập Đoàn Điện Lực (EVN)] (Utility)
-- **Số dư sau lượt:** 9.877 Tr. VNĐ | **Tài sản ròng:** 43.477 Tr. VNĐ
-- **Danh mục BĐS sở hữu (12):** Cảng Nước Sâu Cái Mép, Đồng Nai (Đại Công Viên Chủ Đề) (C3), Tập Đoàn Viễn Thông (Viettel), An Giang (Châu Đốc) (C3), Tập Đoàn Điện Lực (EVN), Hưng Yên (Văn Giang), Bình Dương (Tổ Hợp Thể Thao & Golf) (C3), Cảng HKQT Long Thành, Cảng HKQT Nội Bài, TP.HCM (Quận 1 - Nguyễn Huệ), Bà Rịa - Vũng Tàu (C3), Cần Thơ (Cái Răng) (C3)
+- **Số dư sau lượt:** 639 Tr. VNĐ | **Tài sản ròng:** 42.689 Tr. VNĐ
+- **Danh mục BĐS sở hữu (12):** Cảng Nước Sâu Cái Mép, Đồng Nai (Đại Công Viên Chủ Đề) (C3), Tập Đoàn Viễn Thông (Viettel), An Giang (Châu Đốc), TP.HCM (TP. Thủ Đức) (C2), Tập Đoàn Điện Lực (EVN), Bình Dương (Tổ Hợp Thể Thao & Golf) (C3), Cảng HKQT Long Thành, Cảng HKQT Nội Bài, TP.HCM (Quận 1 - Nguyễn Huệ) (C2), Bà Rịa - Vũng Tàu (C3), Cần Thơ (Cái Răng) (C1)
 
 #### Lượt #56 | Vòng #28 — Chú Sáu (Cân bằng / Balanced) (Balanced)
-- **Số dư trước lượt:** 1.126 Tr. VNĐ | **Tài sản ròng:** 14.776 Tr. VNĐ
+- **Số dư trước lượt:** 1.180 Tr. VNĐ | **Tài sản ròng:** 17.380 Tr. VNĐ
 - **Xúc xắc:** [2, 6] (Tổng: 8)
 - **Di chuyển:** Ô 6 ➔ Ô 14 (**Khánh Hòa (Nha Trang)**)
 - **Sự kiện ô:** Từ chối mua [Khánh Hòa (Nha Trang)], phát động Đấu Giá Công Khai
-- **Sàn đấu giá:** Chốt đấu giá: Bác Ba (Thực dụng / Aggressive) sở hữu [Khánh Hòa (Nha Trang)] giá 850 Tr. VNĐ
-- **Số dư sau lượt:** 1.126 Tr. VNĐ | **Tài sản ròng:** 14.776 Tr. VNĐ
-- **Danh mục BĐS sở hữu (10):** Thanh Hóa (Sầm Sơn), Nghệ An (TP. Vinh), Đà Nẵng (Hải Châu - Sơn Trà), Kiên Giang (Phú Quốc - Grand World), Hà Nội (Cầu Giấy), TP.HCM (TP. Thủ Đức), Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm), Lâm Đồng (Đà Lạt), Ninh Bình (Tràng An), Quảng Ninh (Hạ Long)
+- **Sàn đấu giá:** Sàn đấu giá kết thúc: Mọi người chơi bỏ qua, [Khánh Hòa (Nha Trang)] phát mãi về Kho Bạc
+- **Số dư sau lượt:** 1.180 Tr. VNĐ | **Tài sản ròng:** 17.380 Tr. VNĐ
+- **Danh mục BĐS sở hữu (10):** Thanh Hóa (Sầm Sơn), Nghệ An (TP. Vinh), Đà Nẵng (Hải Châu - Sơn Trà), Kiên Giang (Phú Quốc - Grand World), Hà Nội (Cầu Giấy), Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm), Lâm Đồng (Đà Lạt), Ninh Bình (Tràng An), Quảng Ninh (Hạ Long), Hưng Yên (Văn Giang)
 
 ### === VÒNG ĐẤU #29 ===
 
 #### Lượt #57 | Vòng #29 — Bác Ba (Thực dụng / Aggressive) (Aggressive)
-- **Số dư trước lượt:** 9.027 Tr. VNĐ | **Tài sản ròng:** 44.227 Tr. VNĐ
+- **Số dư trước lượt:** 639 Tr. VNĐ | **Tài sản ròng:** 42.689 Tr. VNĐ
 - **Xúc xắc:** [2, 1] (Tổng: 3)
 - **Di chuyển:** Ô 12 ➔ Ô 15 (**Cảng Nước Sâu Cái Mép**)
 - **Sự kiện ô:** Dừng tại [Cảng Nước Sâu Cái Mép] (Railroad)
-- **Số dư sau lượt:** 9.027 Tr. VNĐ | **Tài sản ròng:** 44.227 Tr. VNĐ
-- **Danh mục BĐS sở hữu (13):** Cảng Nước Sâu Cái Mép, Đồng Nai (Đại Công Viên Chủ Đề) (C3), Tập Đoàn Viễn Thông (Viettel), An Giang (Châu Đốc) (C3), Tập Đoàn Điện Lực (EVN), Hưng Yên (Văn Giang), Bình Dương (Tổ Hợp Thể Thao & Golf) (C3), Cảng HKQT Long Thành, Cảng HKQT Nội Bài, TP.HCM (Quận 1 - Nguyễn Huệ), Bà Rịa - Vũng Tàu (C3), Cần Thơ (Cái Răng) (C3), Khánh Hòa (Nha Trang)
+- **Số dư sau lượt:** 639 Tr. VNĐ | **Tài sản ròng:** 42.689 Tr. VNĐ
+- **Danh mục BĐS sở hữu (12):** Cảng Nước Sâu Cái Mép, Đồng Nai (Đại Công Viên Chủ Đề) (C3), Tập Đoàn Viễn Thông (Viettel), An Giang (Châu Đốc), TP.HCM (TP. Thủ Đức) (C2), Tập Đoàn Điện Lực (EVN), Bình Dương (Tổ Hợp Thể Thao & Golf) (C3), Cảng HKQT Long Thành, Cảng HKQT Nội Bài, TP.HCM (Quận 1 - Nguyễn Huệ) (C2), Bà Rịa - Vũng Tàu (C3), Cần Thơ (Cái Răng) (C1)
 
 #### Lượt #58 | Vòng #29 — Chú Sáu (Cân bằng / Balanced) (Balanced)
-- **Số dư trước lượt:** 1.126 Tr. VNĐ | **Tài sản ròng:** 14.776 Tr. VNĐ
+- **Số dư trước lượt:** 1.180 Tr. VNĐ | **Tài sản ròng:** 17.380 Tr. VNĐ
 - **Xúc xắc:** [3, 3] (Tổng: 6) (Đổ Đôi!)
 - **Di chuyển:** Ô 14 ➔ Ô 10 (**Trạm Kiểm Toán & Thanh Tra**) | *Vượt mốc Khởi Hành (+2.000 Tr. VNĐ)*
 - **Sự kiện ô:** Vào trạm [Trạm Kiểm Toán & Thanh Tra]
-- **Số dư sau lượt:** 1.126 Tr. VNĐ | **Tài sản ròng:** 14.776 Tr. VNĐ
-- **Danh mục BĐS sở hữu (10):** Thanh Hóa (Sầm Sơn), Nghệ An (TP. Vinh), Đà Nẵng (Hải Châu - Sơn Trà), Kiên Giang (Phú Quốc - Grand World), Hà Nội (Cầu Giấy), TP.HCM (TP. Thủ Đức), Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm), Lâm Đồng (Đà Lạt), Ninh Bình (Tràng An), Quảng Ninh (Hạ Long)
+- **Số dư sau lượt:** 410 Tr. VNĐ | **Tài sản ròng:** 17.310 Tr. VNĐ
+- **Danh mục BĐS sở hữu (10):** Thanh Hóa (Sầm Sơn), Nghệ An (TP. Vinh), Đà Nẵng (Hải Châu - Sơn Trà), Kiên Giang (Phú Quốc - Grand World), Hà Nội (Cầu Giấy), Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm), Lâm Đồng (Đà Lạt), Ninh Bình (Tràng An), Quảng Ninh (Hạ Long), Hưng Yên (Văn Giang)
 
 ### === VÒNG ĐẤU #30 ===
 
 #### Lượt #59 | Vòng #30 — Bác Ba (Thực dụng / Aggressive) (Aggressive)
-- **Số dư trước lượt:** 9.027 Tr. VNĐ | **Tài sản ròng:** 44.227 Tr. VNĐ
+- **Số dư trước lượt:** 639 Tr. VNĐ | **Tài sản ròng:** 42.689 Tr. VNĐ
 - **Xúc xắc:** [2, 1] (Tổng: 3)
 - **Di chuyển:** Ô 15 ➔ Ô 18 (**Thừa Thiên Huế**)
 - **Sự kiện ô:** Từ chối mua [Thừa Thiên Huế], phát động Đấu Giá Công Khai
 - **Sàn đấu giá:** Sàn đấu giá kết thúc: Mọi người chơi bỏ qua, [Thừa Thiên Huế] phát mãi về Kho Bạc
-- **Số dư sau lượt:** 9.027 Tr. VNĐ | **Tài sản ròng:** 44.227 Tr. VNĐ
-- **Danh mục BĐS sở hữu (13):** Cảng Nước Sâu Cái Mép, Đồng Nai (Đại Công Viên Chủ Đề) (C3), Tập Đoàn Viễn Thông (Viettel), An Giang (Châu Đốc) (C3), Tập Đoàn Điện Lực (EVN), Hưng Yên (Văn Giang), Bình Dương (Tổ Hợp Thể Thao & Golf) (C3), Cảng HKQT Long Thành, Cảng HKQT Nội Bài, TP.HCM (Quận 1 - Nguyễn Huệ), Bà Rịa - Vũng Tàu (C3), Cần Thơ (Cái Răng) (C3), Khánh Hòa (Nha Trang)
+- **Số dư sau lượt:** 639 Tr. VNĐ | **Tài sản ròng:** 42.689 Tr. VNĐ
+- **Danh mục BĐS sở hữu (12):** Cảng Nước Sâu Cái Mép, Đồng Nai (Đại Công Viên Chủ Đề) (C3), Tập Đoàn Viễn Thông (Viettel), An Giang (Châu Đốc), TP.HCM (TP. Thủ Đức) (C2), Tập Đoàn Điện Lực (EVN), Bình Dương (Tổ Hợp Thể Thao & Golf) (C3), Cảng HKQT Long Thành, Cảng HKQT Nội Bài, TP.HCM (Quận 1 - Nguyễn Huệ) (C2), Bà Rịa - Vũng Tàu (C3), Cần Thơ (Cái Răng) (C1)
 
 #### Lượt #60 | Vòng #30 — Chú Sáu (Cân bằng / Balanced) (Balanced)
-- **Số dư trước lượt:** 1.126 Tr. VNĐ | **Tài sản ròng:** 14.776 Tr. VNĐ
+- **Số dư trước lượt:** 410 Tr. VNĐ | **Tài sản ròng:** 17.310 Tr. VNĐ
 - **Xúc xắc:** [1, 6] (Tổng: 7)
 - **Di chuyển:** Ô 10 ➔ Ô 10 (**Trạm Kiểm Toán & Thanh Tra**)
 - **Sự kiện ô:** Vào trạm [Trạm Kiểm Toán & Thanh Tra]
-- **Số dư sau lượt:** 1.126 Tr. VNĐ | **Tài sản ròng:** 14.776 Tr. VNĐ
-- **Danh mục BĐS sở hữu (10):** Thanh Hóa (Sầm Sơn), Nghệ An (TP. Vinh), Đà Nẵng (Hải Châu - Sơn Trà), Kiên Giang (Phú Quốc - Grand World), Hà Nội (Cầu Giấy), TP.HCM (TP. Thủ Đức), Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm), Lâm Đồng (Đà Lạt), Ninh Bình (Tràng An), Quảng Ninh (Hạ Long)
+- **Số dư sau lượt:** 410 Tr. VNĐ | **Tài sản ròng:** 17.310 Tr. VNĐ
+- **Danh mục BĐS sở hữu (10):** Thanh Hóa (Sầm Sơn), Nghệ An (TP. Vinh), Đà Nẵng (Hải Châu - Sơn Trà), Kiên Giang (Phú Quốc - Grand World), Hà Nội (Cầu Giấy), Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm), Lâm Đồng (Đà Lạt), Ninh Bình (Tràng An), Quảng Ninh (Hạ Long), Hưng Yên (Văn Giang)
 
 ---
 

@@ -159,6 +159,7 @@ export class WssServer {
         }
       }
     }, HEARTBEAT_INTERVAL_MS);
+    this.heartbeatTimer.unref?.();
   }
 
   get isRunning(): boolean { return !this.isClosed; }
@@ -347,7 +348,10 @@ export class WssServer {
     this.cleanupScheduler.stop();
     this.turnWatchdog.stop();
     this.reconnects.clear();
-    for (const rc of this.rooms.getAllRoomCodes()) this.rooms.clearRoomTimers(rc);
+    for (const rc of this.rooms.getAllRoomCodes()) {
+      this.turnOrchestrator.destroyRoom(rc);
+      this.rooms.clearRoomTimers(rc);
+    }
     for (const client of this.wss.clients) {
       try {
         client.close(1001, 'SERVER_SHUTDOWN');

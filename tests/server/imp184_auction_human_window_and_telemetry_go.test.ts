@@ -159,14 +159,17 @@ describe('TICKET IMP-184: Auction Human Window & Telemetry GO Salary Calibration
   describe('Facet 2: Reactivity (Turn Orchestrator Pacing & Dual-Timer Synchronization)', () => {
     it('[TC-IMP184.05/MSS][UC-GAME-028] (Reactivity) Orchestrator Timer cấp cho người chơi: Khi chỉ còn người chơi thật tham gia đấu giá, Orchestrator cấp đủ 20.000ms (deadline >= 19.000ms), không bị đè bởi 1.000ms', () => {
       const room = mgr.createRoom('p1_human');
+      mgr.addBot(room.roomCode, 'bot_declined', BotPersonality.Passive);
       mgr.addBot(room.roomCode, 'bot_1', BotPersonality.Passive);
       mgr.startGame(room.roomCode);
 
-      room.players[0]!.position = 3;
+      const botDeclined = room.players.find((p) => p.id === 'bot_declined')!;
+      botDeclined.position = 3;
+      room.currentPlayerIndex = room.players.indexOf(botDeclined);
       room.phase = TurnPhase.ActionPhase;
-      mgr.handlePlayerIntent(room.roomCode, 'p1_human', { type: 'INTENT_DECLINE' });
+      mgr.handlePlayerIntent(room.roomCode, 'bot_declined', { type: 'INTENT_DECLINE' });
 
-      // Bot pass -> chỉ còn human chưa quyết định
+      // Bot 1 pass -> trong phòng chỉ còn human chưa quyết định
       mgr.handleAuctionPass(room.roomCode, 'bot_1');
 
       // Orchestrator điều phối nhịp đấu giá
@@ -181,6 +184,7 @@ describe('TICKET IMP-184: Auction Human Window & Telemetry GO Salary Calibration
       vi.useFakeTimers();
       const room = mgr.createRoom('p1_human');
       mgr.joinRoom(room.roomCode, 'p2_human');
+      mgr.joinRoom(room.roomCode, 'p3_human');
       mgr.startGame(room.roomCode);
 
       room.players[0]!.position = 3; // Ô Hàng Than giá 600, khởi điểm 300
@@ -190,7 +194,7 @@ describe('TICKET IMP-184: Auction Human Window & Telemetry GO Salary Calibration
       // Tua thời gian 17 giây (trong cửa sổ 20 giây chuẩn)
       vi.advanceTimersByTime(17_000);
 
-      // Người chơi P2 đặt giá 400 Tr
+      // Người chơi P2 đặt giá 400 Tr (đối thủ P3 vẫn chưa pass nên phiên đấu giá tiếp diễn)
       const bidRes = mgr.handleAuctionBid(room.roomCode, 'p2_human', 400);
 
       expect(bidRes.success).toBe(true);

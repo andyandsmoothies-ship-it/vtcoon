@@ -147,15 +147,14 @@ def check_command(payload: dict) -> None:
             " ".join(sys.argv[2:]) if len(sys.argv) > 2 else ""
         )
 
-    cmd_lower = cmd.lower()
-    for forbidden in FORBIDDEN_GIT_COMMANDS:
-        if forbidden in cmd_lower:
-            reason = (
-                f"ERROR [Safety Gate]: Prohibited command detected: '{forbidden}'. "
-                "AI is forbidden from modifying Git history directly. The human user controls Git."
-            )
-            print(json.dumps({"decision": "deny", "reason": reason}))
-            sys.exit(0)
+    # Rule 5 Source Control Safety: Block ALL Git executions unconditionally
+    if re.search(r"\bgit(\.exe)?(\s+|$)", cmd, re.IGNORECASE):
+        reason = (
+            "ERROR [Safety Gate]: Prohibited command detected: 'git'. "
+            "AI is strictly forbidden from executing any Git commands. Source control is strictly human-controlled."
+        )
+        print(json.dumps({"decision": "deny", "reason": reason}))
+        sys.exit(0)
 
     for pattern in FORBIDDEN_SHELL_REDIRECTS:
         if re.search(pattern, cmd, re.IGNORECASE):

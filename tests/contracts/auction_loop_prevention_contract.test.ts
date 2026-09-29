@@ -241,6 +241,7 @@ describe('[CONTRACT] IMP-48: Auction Loop Prevention & Activity Feed Dedup', () 
         const rooms = new RoomManager(1234);
         const room = rooms.createRoom('p1');
         rooms.addBot(room.roomCode, 'bot_2');
+        rooms.addBot(room.roomCode, 'bot_3');
         rooms.startGame(room.roomCode);
 
         const intentMutex: any = { runExclusive: async (_rc: any, fn: any) => await fn() };
@@ -255,11 +256,11 @@ describe('[CONTRACT] IMP-48: Auction Loop Prevention & Activity Feed Dedup', () 
           defaultTimeoutMs: 15_000,
         });
 
-        room.currentPlayerIndex = 0;
-        room.players[0]!.position = 1;
+        room.currentPlayerIndex = 2;
+        room.players[2]!.position = 1;
         room.phase = TurnPhase.ActionPhase;
-        rooms.handleDecline(room.roomCode, 'p1');
-        rooms.handleAuctionBid(room.roomCode, 'bot_2', 150);
+        rooms.handleDecline(room.roomCode, 'bot_3');
+        rooms.handleAuctionBid(room.roomCode, 'bot_2', 350);
 
         timeoutScheduler.scheduleTurnTimeout(room.roomCode);
         expect(room.phase).toBe(TurnPhase.AuctionPhase);

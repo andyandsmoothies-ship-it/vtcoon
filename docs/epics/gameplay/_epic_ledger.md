@@ -188,10 +188,28 @@
 
 ---
 
+### Cập Nhật Cải Tiến Sau Phát Hành (Post-Milestone Improvements)
+
+#### [IMP-227] Solo Auction Deadlock & Label Semantics Hardening
+- **Mã Ticket:** IMP-227 (Tier 2 Full Rigor)
+- **Use Case Ref:** UC-GAME-028, UC-IMP227
+- **Phạm vi khắc phục:**
+  - Solo Bidder Auto-Win: Sàn đấu giá đóng ngay lập tức khi không còn đối thủ nào khác (`otherPlayers.length === 0`), giải quyết triệt để lỗi kẹt đếm ngược 0s.
+  - Zero-Eligible Foreclosure: Phát mãi cưỡng chế Kho Bạc 70% tức thì khi toàn bộ đối thủ đã phá sản tại `handleDecline`.
+  - Actor Inversion Guard: `handleAuctionPass` kiểm tra `hasHumanEligible`, ngăn chặn tình trạng kẹt sàn chờ người chơi thật đã từ chối mua.
+  - Settle Timer & Turn N+1 Teardown: `orchestrate()` tự động lên lịch settle dọn dẹp `lastAuctionResult` và phát sóng delta tombstone.
+  - UI Semantics & Ergonomics: Chuẩn hóa nhãn `Giá gốc` vs `Giá khởi điểm`, phân tách EVN (Lưới điện) vs Viettel (5G), phân tầng 3 ngưỡng màu FPS di động.
+- **Báo cáo chi tiết:** [`docs/reports/improvements/IMP-227-solo-auction-deadlock-and-label-semantics_report.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/reports/improvements/IMP-227-solo-auction-deadlock-and-label-semantics_report.md)
+- **Evidence Snapshot:** [`.agents/evidence/chaos_sentinel_IMP227.json`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/evidence/chaos_sentinel_IMP227.json) (executed: true, verdict: APPROVED)
+- **Kiểm thử:** 17/17 tests PASS (`imp227_auction_solo_deadlock_and_label_semantics.test.ts`); 32/32 suites (503/503 tests) PASS 100% trên bộ lọc `vitest run auction`.
+
+---
+
 ## Tổng Kết Toàn Cục Epic Gameplay Core
 - **Trạng thái Epic:** **[CLOSED - DONE 100% (2026-09-09)]**
 - **Tổng số Lát cắt hoàn thành:** 7 Lát cắt (Slice 00, 01, 02, 03, 04, 05, 06)
 - **Độ phủ Use Case:** 58/58 Use Cases đạt chuẩn SSOT
 - **Quy mô kiểm thử:** 36 test suites, 433 tests PASS 100%
 - **Biên bản ký duyệt:** [`docs/reports/audits/milestone_deep_audit_s00_s06_signoff.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/reports/audits/milestone_deep_audit_s00_s06_signoff.md) — Phán quyết **`[MILESTONE APPROVED]`**
+
 

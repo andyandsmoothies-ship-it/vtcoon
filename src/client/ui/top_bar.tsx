@@ -150,11 +150,18 @@ export function TopBar(props: TopBarProps): React.ReactElement {
             type="button"
             data-testid="mobile-fps-badge"
             onClick={() => toggleConsole()}
-            className="hidden min-[360px]:inline-flex sm:hidden pointer-events-auto items-center gap-0.5 px-1 py-0.5 rounded-md bg-slate-900 text-emerald-400 font-mono text-[10px] font-bold border border-slate-700 shadow-2xs cursor-pointer select-none active:translate-y-px"
+            className={`hidden min-[360px]:inline-flex sm:hidden pointer-events-auto items-center gap-0.5 px-1 py-0.5 rounded-md bg-slate-900 font-mono text-[10px] font-bold border border-slate-700 shadow-2xs cursor-pointer select-none active:translate-y-px ${
+              fps >= 45 ? 'text-emerald-400' : fps >= 25 ? 'text-amber-400' : 'text-rose-400'
+            }`}
             title="Tốc độ khung hình (Bấm để mở hộp đen)"
             aria-label={`FPS: ${fps}`}
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" aria-hidden="true" />
+            <span
+              className={`w-1.5 h-1.5 rounded-full animate-pulse ${
+                fps >= 45 ? 'bg-emerald-400' : fps >= 25 ? 'bg-amber-400' : 'bg-rose-400'
+              }`}
+              aria-hidden="true"
+            />
             <span>{fps}<span className="hidden min-[400px]:inline"> FPS</span></span>
           </button>
         </div>

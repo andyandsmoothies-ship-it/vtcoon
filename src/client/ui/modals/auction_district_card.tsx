@@ -209,7 +209,9 @@ export function AuctionDistrictCard({
                 </span>
               </div>
               <div className="text-center flex-1 pl-1 min-w-0">
-                <span className="text-[10px] sm:text-[11px] text-amber-700 block font-semibold whitespace-nowrap">NÂNG CẤP 5G</span>
+                <span className="text-[10px] sm:text-[11px] text-amber-700 block font-semibold whitespace-nowrap">
+                  {cellIndex === 28 ? 'NÂNG CẤP 5G' : 'LƯỚI ĐIỆN'}
+                </span>
                 <span className="font-mono text-[11px] sm:text-xs font-bold text-amber-800 whitespace-nowrap">
                   3.500 Tr.
                 </span>

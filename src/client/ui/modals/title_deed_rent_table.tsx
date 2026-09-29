@@ -24,6 +24,7 @@ export interface TitleDeedRentTableProps {
   readonly currentLevel?: 0 | 1 | 2 | 3;
   readonly isOwner?: boolean;
   readonly compact?: boolean;
+  readonly cellIndex?: number;
 }
 
 export function TitleDeedRentTable({
@@ -35,6 +36,7 @@ export function TitleDeedRentTable({
   currentLevel,
   isOwner = false,
   compact = false,
+  cellIndex,
 }: TitleDeedRentTableProps): React.ReactElement {
   const [isExpanded, setIsExpanded] = React.useState(false);
   const tiers = isRailroad ? RAILROAD_TIERS : PROPERTY_TIERS;
@@ -108,7 +110,9 @@ export function TitleDeedRentTable({
                   </span>
                 </div>
                 <div className="text-center flex-1 pl-1 min-w-0">
-                  <span className="text-[11px] sm:text-xs text-amber-700 block font-semibold whitespace-nowrap">NÂNG CẤP 5G</span>
+                  <span className="text-[11px] sm:text-xs text-amber-700 block font-semibold whitespace-nowrap">
+                    {cellIndex === 28 ? 'NÂNG CẤP 5G' : 'LƯỚI ĐIỆN'}
+                  </span>
                   <span className="font-mono text-[11px] sm:text-xs font-bold text-amber-800 whitespace-nowrap">
                     3.500
                   </span>
@@ -171,10 +175,10 @@ export function TitleDeedRentTable({
                 <div className="flex items-center gap-1.5 min-w-0">
                   <span className="text-sm shrink-0" aria-hidden="true">👑</span>
                   <span className="text-[11px] font-black px-1.5 py-0.5 rounded border shrink-0 bg-amber-200 text-amber-900 border-amber-400">
-                    5G
+                    {cellIndex === 28 ? '5G' : 'GRID'}
                   </span>
                   <span className="font-bold text-[11px] sm:text-xs text-amber-950 truncate">
-                    Nâng Cấp Smart Grid / 5G
+                    {cellIndex === 28 ? 'Nâng Cấp Trạm Phát 5G' : 'Lưới Điện Thông Minh (Smart Grid)'}
                   </span>
                 </div>
                 <span className="font-mono font-black text-[11px] sm:text-xs text-amber-900 shrink-0">

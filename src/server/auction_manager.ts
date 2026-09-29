@@ -35,7 +35,7 @@ export function handleDecline(
   const deed = PROPERTY_DEEDS.get(current.position);
   if (!deed) return { success: false, reason: 'NOT_PURCHASABLE' };
   const startingBid = Math.floor(deed.price * 0.50);
-  auctions.set(roomCode, {
+  const session: AuctionSession = {
     cellIndex: current.position,
     declinedPlayerId: current.id,
     highestBid: startingBid,
@@ -43,8 +43,17 @@ export function handleDecline(
     currentBid: startingBid,
     passedPlayers: new Set<string>(),
     endTime: Date.now() + 20_000,
-  });
+  };
+  auctions.set(roomCode, session);
   room.phase = TurnPhase.AuctionPhase;
+
+  // [IMP-227] Zero-Ghost-Variable Guard: Nếu không còn bất kỳ ai khác đủ tư cách tham gia, lập tức cưỡng chế phát mãi Kho Bạc
+  const eligiblePlayers = room.players.filter((p) => p.id !== current.id && !p.bankrupt);
+  if (eligiblePlayers.length === 0) {
+    handleAuctionClose(room, session, undefined, auctions, roomCode, undefined);
+    return { success: true };
+  }
+
   return { success: true };
 }
 
@@ -65,6 +74,7 @@ export function handleAuctionBid(
   if (!Number.isFinite(amount) || (!isZeroFireSaleBid && amount <= 0) || amount < 0 || !Number.isInteger(amount)) return { success: false, reason: 'BID_TOO_LOW' };
   const player = room.players.find((p) => p.id === playerId);
   if (!player) return { success: false, reason: 'PLAYER_NOT_FOUND' };
+  if (player.bankrupt) return { success: false, reason: 'INVALID_PLAYER' };
   if (session.highestBidder === playerId) return { success: false, reason: 'ALREADY_HIGHEST_BIDDER' };
   if (player.balance < amount) return { success: false, reason: 'INSUFFICIENT_FUNDS' };
   const minBid = session.highestBidder !== undefined ? session.highestBid + 50 : (session.isFireSale ? 0 : session.highestBid);
@@ -86,7 +96,9 @@ export function handleAuctionBid(
 
   const eligiblePlayers = room.players.filter((p) => p.id !== session.declinedPlayerId && !p.bankrupt);
   const otherPlayers = eligiblePlayers.filter((p) => p.id !== playerId);
-  if (otherPlayers.length > 0 && otherPlayers.every((p) => session.passedPlayers?.has(p.id))) {
+  // [IMP-227] Khi không còn đối thủ nào khác (otherPlayers.length === 0) hoặc tất cả đối thủ còn lại đã Pass,
+  // bidder hợp lệ này lập tức thắng phiên đấu giá mà không cần chờ timeout đếm ngược.
+  if (otherPlayers.every((p) => session.passedPlayers?.has(p.id))) {
     handleAuctionClose(room, session, registry, auctions, roomCode, stateMap);
   }
   return { success: true };
@@ -105,6 +117,7 @@ export function handleAuctionPass(
   if (playerId === session.declinedPlayerId) return { success: false, reason: ActionRejectReason.DECLINED_PLAYER_CANNOT_BID };
   const player = room.players.find((p) => p.id === playerId);
   if (!player) return { success: false, reason: 'PLAYER_NOT_FOUND' };
+  if (player.bankrupt) return { success: false, reason: 'INVALID_PLAYER' };
   if (session.highestBidder === playerId) return { success: false, reason: 'HIGHEST_BIDDER_CANNOT_PASS' };
   if (session.passedPlayers?.has(playerId)) return { success: false, reason: 'PLAYER_ALREADY_PASSED' };
 
@@ -119,10 +132,11 @@ export function handleAuctionPass(
     ? eligiblePlayers.filter((p) => p.id !== session.highestBidder)
     : eligiblePlayers;
 
-  const hasHumanInRoom = room.players.some((p) => !p.isBot && !p.bankrupt);
+  // [IMP-227] Actor Inversion Guard: Chỉ chờ Human nếu Human THỰC SỰ ĐỦ TƯ CÁCH đấu giá (không bị declined, không phá sản)
+  const hasHumanEligible = eligiblePlayers.some((p) => !p.isBot);
   const shouldClose = session.highestBidder
     ? targetPlayers.every((p) => session.passedPlayers!.has(p.id))
-    : targetPlayers.every((p) => session.passedPlayers!.has(p.id)) && (!player.isBot || !hasHumanInRoom);
+    : targetPlayers.every((p) => session.passedPlayers!.has(p.id)) && (!player.isBot || !hasHumanEligible);
 
   if (shouldClose) {
     handleAuctionClose(room, session, registry, auctions, roomCode, stateMap);

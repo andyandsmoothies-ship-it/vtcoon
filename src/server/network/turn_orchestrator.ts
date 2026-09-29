@@ -168,6 +168,13 @@ export class TurnOrchestrator {
     const room = this.rooms.getRoom(roomCode);
     if (!room?.started) return;
 
+    // [IMP-227] Transient Settle Guard: Nếu phiên đấu giá vừa đóng đồng bộ và có lastAuctionResult chưa settle,
+    // tự động gắn bộ định thời thanh toán (settle timer) để dọn sạch state và phát sóng tombstone.
+    // Đã kiểm chứng: clearRoom() không xóa auctionSettleTimers, scheduleAuctionSettle có tính idempotent.
+    if (room.lastAuctionResult && !this.auctionSettleTimers.has(roomCode)) {
+      this.scheduleAuctionSettle(roomCode);
+    }
+
     if (room.phase === TurnPhase.AuctionPhase) {
       if (this.hasEligibleAuctionBot(room)) {
         this.scheduleBotStep(roomCode);

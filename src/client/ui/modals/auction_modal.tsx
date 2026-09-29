@@ -173,7 +173,7 @@ export function AuctionModal({
                 </>
               ) : (
                 <>
-                  <span className="font-bold text-amber-800">Đấu giá BĐS</span> • Giá khởi điểm: <span className="text-slate-900 font-bold">{formatCurrency(basePrice)}</span>
+                  <span className="font-bold text-amber-800">Đấu giá BĐS</span> • Giá gốc: <span className="text-slate-900 font-bold">{formatCurrency(basePrice)}</span> • Giá khởi điểm: <span className="text-amber-800 font-bold">{formatCurrency(startingBid ?? Math.floor(basePrice * 0.50))}</span>
                 </>
               )}
             </p>
