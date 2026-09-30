@@ -61,7 +61,7 @@ export function extractPassedGoActivities(
 
     if (checkPassedGo(prevPos, newPos)) {
       const round = delta.roundNumber ?? prevState.roundNumber ?? 1;
-      const salary = calculateGoSalary(round);
+      const salary = delta.passedGoSalary ?? calculateGoSalary(round);
       const pInfo = nextState.playersInfo[p.id] ?? prevP;
       const pName = getPlayerName(pInfo, p.id);
 
@@ -237,6 +237,26 @@ export function processPayerFee(
       id: `tax_${Date.now()}_${payer.id}`, timestamp: Date.now(), type: 'tax',
       message: `🏛️ ${pName} đã nộp phí / nộp thuế ${formatCurrency(absDiff)} (Lệ Phí Đăng Ký Đất Đai)`,
       playerId: payer.id, playerName: pName, cellIndex: 4, amount: payer.diff,
+      ...(payer.pInfo?.tokenColor ? { playerTokenColor: payer.pInfo.tokenColor } : {}),
+    };
+  }
+
+  const card = delta?.lastEventCard;
+  const isDrawnByPayer = Boolean(
+    card && (card.drawnBy === payer.id || card.playerId === payer.id)
+  );
+  const isCardPenalty = isDrawnByPayer && typeof card?.effectDelta === 'number' && card.effectDelta < 0 && Math.abs(card.effectDelta) === absDiff;
+  if (isCardPenalty && card) {
+    const cardTitle = card.title || 'Phiếu Sự Kiện';
+    return {
+      id: `card_penalty_${Date.now()}_${payer.id}`,
+      timestamp: Date.now(),
+      type: 'card',
+      message: `🎟️ ${pName} đã nộp phạt ${formatCurrency(absDiff)} (${cardTitle})`,
+      playerId: payer.id,
+      playerName: pName,
+      amount: payer.diff,
+      ...(payer.cellIndex !== undefined ? { cellIndex: payer.cellIndex } : {}),
       ...(payer.pInfo?.tokenColor ? { playerTokenColor: payer.pInfo.tokenColor } : {}),
     };
   }

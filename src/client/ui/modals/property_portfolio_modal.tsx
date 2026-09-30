@@ -152,7 +152,7 @@ export function PropertyPortfolioModal({
       )}
 
       {/* Danh sách BĐS */}
-      <div className={`p-4 pb-8 overflow-y-auto ${filteredProperties.length === 0 ? 'shrink-0' : 'flex-1'} space-y-3`}>
+      <div className={`p-4 pb-8 overflow-y-auto ${filteredProperties.length === 0 ? 'shrink-0' : 'flex-1'} space-y-3 pb-20`}>
         {filteredProperties.length === 0 ? (
           <div className="py-8 px-4 text-center flex flex-col items-center justify-center gap-2">
             <span className="text-3xl" aria-hidden="true">

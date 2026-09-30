@@ -5,7 +5,7 @@ import {
   type DistrictCellChip,
   type StrategicHintTone,
 } from './auction_intelligence';
-import { formatCurrency } from '../ui_helpers';
+import { formatCurrency, formatShortPlayerName } from '../ui_helpers';
 import { useGameStore } from '../../store/game_store';
 import type { PlayerInfo } from '../../store/game_store_types';
 
@@ -50,7 +50,7 @@ function renderCellChip(cell: DistrictCellChip): React.ReactElement {
     badgeLabel = '✓ Bạn';
   } else if (cell.isOpponent) {
     badgeClasses = 'bg-rose-100 text-rose-900 font-medium border-rose-300';
-    badgeLabel = cell.ownerName ? cell.ownerName.slice(0, 10) : 'Đối thủ';
+    badgeLabel = cell.ownerName ? formatShortPlayerName(cell.ownerName) : 'Đối thủ';
   } else {
     badgeClasses = 'border-dashed border-amber-900/20 bg-amber-50/30 text-slate-500';
   }
@@ -67,7 +67,7 @@ function renderCellChip(cell: DistrictCellChip): React.ReactElement {
         <span className="font-bold text-slate-900 line-clamp-2 leading-tight text-[10px] sm:text-xs block min-w-0 break-words" title={cell.name}>
           {cell.name}
         </span>
-        {cell.level > 0 && (
+        {!cell.isVacant && cell.level > 0 && (
           <span
             className="text-[10px] font-bold px-1 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300 shrink-0 inline-flex items-center gap-0.5"
             title={`Cấp công trình: ${cell.level}`}
@@ -130,7 +130,11 @@ export function AuctionDistrictCard({
             style={{ backgroundColor: info.hexColor }}
           />
           <h4 className="text-xs sm:text-sm font-black uppercase tracking-wider text-slate-900 whitespace-nowrap shrink-0">
-            {COLOR_GROUP_NAMES[info.districtId] ? `Nhóm ${COLOR_GROUP_NAMES[info.districtId]}` : info.districtName}
+            {info.districtId === 'Railroad'
+              ? 'HẠ TẦNG GIAO THÔNG QUỐC GIA'
+              : COLOR_GROUP_NAMES[info.districtId]
+              ? `Nhóm ${COLOR_GROUP_NAMES[info.districtId]}`
+              : info.districtName}
           </h4>
         </div>
         <div className="flex items-center gap-1 shrink-0">

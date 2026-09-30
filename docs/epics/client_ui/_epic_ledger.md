@@ -1170,6 +1170,121 @@
   * `chaos-sentinel`: Station 4 APPROVED (3 Probes passed, 2/2 sandbox mutants killed, 7/7 probe mutants killed, 0 surviving mutants).
 - **Trạng thái**: ✅ Hoàn thành IMP-232 (2026-09-30).
 
+---
+
+### [IMP-234] Khử Điểm Mù Tác Động Thẻ Sự Kiện: Viền Hào Quang 3D, Huy Hiệu Đếm Lùi Số Vòng & Đồng Bộ Đa Thiết Bị
+- **Mục tiêu**:
+  1. *3D Board Event Highlights (Viền Hào Quang 3D & Huy Hiệu Đếm Lùi)*: Cung cấp visual cue tức thì trên sa bàn 3D khi các phiếu sự kiện (Cơ hội / Thị trường) tác động vào các ô đất cụ thể (x2 tiền thuê, +50% giá đất, -50% kiểm tra cồn, đóng băng thanh khoản...). Hiển thị TileEventAuraRim tại cao độ Y = 0.042m (args={[1.82, 0.08, 2.34]}) bao trọn chân đế cờ, triệt tiêu 100% Z-fighting với OwnerBaseTrimBorder. Huy hiệu nổi TileEventFloatingBadge (SafeBillboard tại Y = 0.52m) hiển thị Icon + Nhãn chỉ số + Đếm lùi ⏳ NV (nhấp nháy ở vòng cuối).
+  2. *Zustand SRP Data/Action Separation*: Tách biệt trường dữ liệu spotlightedCellIndices trong GameState data interface khỏi action creator setSpotlightedCells trong actions layer và INITIAL_GAME_STATE.
+  3. *Ticker 1-Tap Spotlight & Teardown*: Bấm vào banner sự kiện MarketEventTicker kích hoạt spotlight chớp sáng 3000ms trên sa bàn 3D, lưu timer trong useRef, huỷ timer cũ nếu click liên tục và dọn sạch khi unmount useEffect.
+  4. *Mobile Touch & Structured Event Modal*: Ticker item đạt sàn cảm ứng min-h-[44px]. Modal thẻ sự kiện EventCardModal hiển thị khối event-affected-cells-list tra cứu tên ô đất có cấu trúc từ BOARD_CONFIG[idx]?.name thay vì parse chuỗi.
+- **Hạ tầng & Ngân sách LOC Thực tế (scripts/check_loc.mjs)**:
+  * `src/client/3d/tile_event_aura.tsx` (Total: 186 LOC, SLOC: 166 — Tier 2 <= 500 LOC): Module sâu bao gói resolveTileEventStatus, TileEventAuraRim, TileEventFloatingBadge, TileEventAura.
+  * `src/client/3d/board_tile.tsx` (Total: 448 LOC, SLOC: 414 — Tier 2 <= 500 LOC): Tích hợp <TileEventAura /> vào các ô không phải góc.
+  * `src/client/store/game_store_types.ts` (Total: 386 LOC, SLOC: 361 — Tier 1 <= 400 LOC) & `game_store.ts` (Total: 389 LOC, SLOC: 357 — Tier 1 <= 400 LOC): Bổ sung spotlightedCellIndices và setSpotlightedCells.
+  * `src/client/ui/market_event_ticker.tsx` (Total: 288 LOC, SLOC: 268 — Tier 2 <= 500 LOC): Quản lý spotlight timer an toàn với useRef, min-h-[44px].
+  * `src/client/ui/modals/event_card_modal.tsx` (Total: 263 LOC, SLOC: 241 — Tier 2 <= 500 LOC): Render danh sách ô đất chịu tác động trực tiếp từ BOARD_CONFIG.
+  * `scripts/audit_plan.mjs`: Mở rộng kiểm tra cơ học tự động (zero dirty casts, State/Action SRP, banned tests).
+  * `docs/reports/improvements/IMP-234-dynamic-board-cell-event-highlights_report.md`: Báo cáo nghiệm thu hoàn chỉnh.
+- **Kiểm thử & Bất biến**:
+  * `tests/contracts/imp234_dynamic_board_cell_event_highlights.test.ts` (Total: 394 LOC, SLOC: 339): 16/16 atomic contract tests PASS (Universal 5-Facet Matrix, Detroit Classical TDD, 1-4 asserts/test, zero dirty casts).
+  * Station 4 Chaos Sentinel: 3/3 physical probes PASS (Wire-to-Core Closed-Loop Parity với intentCount: 24, Ephemeral Boundary port 0, Mutation Sensitivity 6/6 mutants killed, 0 survived).
+  * Visual Evidence Gate: `.agents/tmp/imp-234_event_aura_board.jpg` verified by human and 3D visual critics.
+  * TypeScript typecheck: `tsc --noEmit` 0 errors. UI Linter: `npm run lint:ui` 0 violations / 207 files. Locale Portability: 0 toLocaleString detected.
+  * Evidence Snapshot: `.agents/evidence/imp234_snapshot.json` & `.agents/evidence/chaos_sentinel_IMP-234.json` (`executed: true`).
+- **Phê chuẩn**:
+  * `plan-griller`: P1-P5 AUDIT APPROVED (phát hiện và khắc phục 4 điểm mù P1–P4 trong Revision 3).
+  * `qa-tester`: Station 1 RED verified (16/16 tests failed as expected under Adversarial Inversion).
+  * `implementer`: Station 2 GREEN verified (16/16 tests pass, toàn bộ tệp đạt chuẩn LOC).
+  * `scout`: Station 2.5 PASS (0 defects qua 5 bộ lọc cơ học).
+  * `spec-reviewer`: Station 3.1 APPROVED (100% spec reconciliation, 0 scope drift, 0 dirty casts).
+  * `code-reviewer`: Station 3.2 APPROVED (Deep Architecture, clean SRP, zero timer leak, memory safe).
+  * `game-3d-visual-critic`: Station 3.2 APPROVED (Chất lượng 3D Retropoly/Monopoly Tycoon, khử Z-fighting, castShadow=false).
+  * `ui-craft-reviewer`: Station 3.2 APPROVED (Công thái học 2D xuất sắc, touch target 44px, WCAG AAA).
+  * `chaos-sentinel`: Station 4 APPROVED (3 Probes passed, 6/6 sandbox mutants killed, 0 surviving mutants).
+- **Trạng thái**: ✅ Hoàn thành IMP-234 (2026-09-30).
+
+---
+
+### [IMP-235] Đồng Bộ Toàn Diện 31 Khiếm Khuyết UI/UX Trên Edge Desktop & Cơ Chế Tombstone Serialization
+- **Mục tiêu**:
+  1. *Tombstone Serialization*: Sửa lỗi bỏ sót cấp độ công trình khi ô đất bị hạ cấp hoặc tịch thu khỏi `stateMap`. Server luôn phát hành tường minh `level: (state?.level ?? 0)` thay vì bỏ qua thuộc tính, đảm bảo client nhận diện chính xác việc xóa nhà về cấp 0. Triệt tiêu delta trùng lặp và chặn trigger lặp hiệu ứng trên client.
+  2. *Bảo Toàn FSM Vỡ Nợ Trái Phiếu*: Ghi nhận sự kiện `EVENT_BOND_DEFAULT` với thông điệp tường minh, chuyển pha sang `TurnPhase.AuctionPhase` và giữ toàn vẹn hàng đợi phát mãi `fireSaleQueue`.
+  3. *Chuẩn Hóa Sổ Đỏ & Biểu Phí*: Header nhóm Vàng `#F1C40F` (Ô 26 Hải Phòng) đạt chuẩn WCAG 2.1 AA với chữ đen than `text-slate-950 font-black` (> 11:1), tự động ẩn đinh tán trang trí khi có nút đóng để tránh chồng lấn icon `✕`. Chuẩn hóa nhãn `C3 (RESORT/TTTM)` và chip phân hạng `5G`/`GRID`. Bẻ dòng tên tỉnh và phân khu, đảm bảo sàn chữ `text-[11px]`.
+  4. *Sàn Đấu Giá Phát Mãi & Nhận Diện Hạ Tầng*: Ribbon Railroad đổi sang xám thép `#475569`, tiêu đề `HẠ TẦNG GIAO THÔNG QUỐC GIA`, hỗ trợ mức giá khởi điểm 0đ trong Fire Sale với vương miện `👑 Dẫn đầu`, chặn render nhà ma `🏠 3` trên đất trống.
+  5. *Bản Địa Hóa Bot Personality*: Việt hóa 100% tiếng Việt (`Phòng Thủ`, `Tấn Công`, `Cân Bằng`), loại bỏ ngoặc cụt `Bot AI 4 (`.
+  6. *Công Thái Học Desktop & Mobile 360px*: Căn giữa Portfolio Modal với `pb-20`; dạt toast dòng tiền sang lề phải Desktop `md:right-6`; nâng `ServerToast` lên layer `z-60`, góc phải, không gây tràn viền ngang ở màn hình 360px; nâng tương phản tài sản ròng sang `text-slate-700 font-black`.
+- **Hạ tầng & Ngân sách LOC Thực tế (scripts/check_loc.mjs)**:
+  * `src/server/session_manager.ts` (397 LOC — Tier 1 <= 400 LOC)
+  * `src/server/bond_manager.ts` (241 LOC — Tier 1 <= 400 LOC)
+  * `src/client/network/apply_delta_cells.ts` (148 LOC — Tier 1 <= 400 LOC)
+  * `src/client/ui/ui_helpers.ts` (454 LOC — Tier 2 <= 500 LOC)
+  * `src/client/ui/modals/modal_host.tsx` (493 LOC — Tier 2 <= 500 LOC)
+  * `src/client/ui/modals/title_deed_modal.tsx` (359 LOC — Tier 2 <= 500 LOC)
+  * `src/client/ui/modals/title_deed_rent_table.tsx` (267 LOC — Tier 2 <= 500 LOC)
+  * `src/client/ui/modals/purchase_decision_card.tsx` (162 LOC — Tier 2 <= 500 LOC)
+  * `src/client/ui/modals/property_portfolio_modal.tsx` (394 LOC — Tier 2 <= 500 LOC)
+  * `src/client/ui/modals/auction_modal.tsx` (459 LOC — Tier 2 <= 500 LOC)
+  * `src/client/ui/modals/auction_district_card.tsx` (229 LOC — Tier 2 <= 500 LOC)
+  * `src/client/ui/floating_numbers.tsx` (292 LOC — Tier 2 <= 500 LOC)
+  * `src/client/main.tsx` (266 LOC — Tier 2 <= 500 LOC)
+  * `src/client/ui/player_card.tsx` (398 LOC — Tier 2 <= 500 LOC)
+  * `tests/contracts/imp_uiux_engine_convergence.test.ts` (397 LOC — Contract Tests <= 600 LOC)
+  * `docs/reports/improvements/IMP-235-ui-ux-engine-convergence_report.md`: Báo cáo nghiệm thu hoàn chỉnh.
+- **Kiểm thử & Bất biến**:
+  * 15/15 atomic contract tests PASS (Universal 5-Facet Matrix, Detroit Classical TDD, 1-4 asserts/test).
+  * Station 4 Chaos Sentinel: 3/3 physical probes PASS (Wire-to-Core Closed-Loop Parity với 24/24 intents, Ephemeral Boundary port 0, Mutation Sensitivity 5/5 mutants killed, 0 survived).
+  * Visual Evidence Gate: Thẩm định thành công 4 ảnh in-game vật lý tại `.agents/tmp/` (`imp-235_title_deed_yellow.png`, `imp-235_auction_fire_sale.png`, `imp-235_property_portfolio.png`, `imp-235_mobile_toast_360px.png`).
+  * TypeScript typecheck: `tsc --noEmit` 0 errors. UI Linter: `npm run lint:ui` 0 violations / 207 files. Slop Linter: 0 new violations.
+  * Hồi quy 100%: 42/42 tests pass liên thông các suite `imp191`, `impeccable_tactile_modals`, `imp224`, `imp226`, `imp227`.
+  * Evidence Snapshot: `.agents/evidence/chaos_sentinel_IMP-235.json` (`executed: true`).
+- **Phê chuẩn**:
+  * `plan-griller`: HARDENED_APPROVED (giải quyết triệt để 7 điểm phản biện PB-1..PB-7).
+  * `qa-tester`: Station 1 RED verified (15/15 tests failed as expected under Adversarial Inversion).
+  * `implementer`: Station 2 GREEN verified (15/15 tests pass, toàn bộ 14 tệp đạt chuẩn LOC).
+  * `scout`: Station 2.5 PASS (0 defects qua 5 bộ lọc cơ học).
+  * `spec-reviewer`: Station 3.1 APPROVED (100% spec reconciliation, 0 scope drift, 0 dirty casts).
+  * `code-reviewer`: Station 3.2 APPROVED (Deep Architecture, zero leaks, SRP chuẩn, an toàn kiểu dữ liệu).
+  * `ui-craft-reviewer`: Station 3.2 APPROVED (Điểm 10/10, WCAG 2.1 AA > 11:1, touch target 44px, zero horizontal overflow @360px).
+  * `chaos-sentinel`: Station 4 APPROVED (3 Probes passed, 5/5 sandbox mutants killed, 0 surviving mutants).
+- **Trạng thái**: ✅ Hoàn thành IMP-235 (2026-09-30).
+
+---
+
+### [IMP-PERF-THREEJS-INSTANCING] Tái Cấu Trúc Hiệu Năng Three.js Sang InstancedMesh (GPU Batching & Draw Call Reduction)
+- **Mục tiêu**:
+  1. *Khắc phục Thắt Cổ Chai Draw Calls*: Gom 264 mesh nhà và khách sạn riêng rẽ phân tán trên 22 ô bất động sản thành đúng **8 cụm `THREE.InstancedMesh`** tập trung ở cấp `GameBoard` (`src/client/3d/instanced_toy_buildings.tsx`). Giảm thiểu draw calls công trình từ 264 xuống đúng 8 calls (< 12 calls với shadow passes), đưa toàn cảnh về < 85 calls và khôi phục 60 FPS mượt mà.
+  2. *Pre-baked Sub-Part Geometries*: Nướng sẵn cao độ $Y$ và góc xoay của 8 chi tiết hình học tĩnh cấp module (`HOUSE_BODY_GEOM`, `HOUSE_ROOF_GEOM`, `HOTEL_TOWER_GEOM`, v.v.), giảm 75% chi phí nhân ma trận CPU.
+  3. *Khử Rác Bộ Nhớ & Bóng Ma Trạng Thái*: Tái sử dụng scratch matrices (`_tileMat`, `_localMat`, `tempMatrix`) triệt tiêu GC pressure; hàm `calculateHouseInstanceMatrix` và `calculateHotelInstanceMatrix` tự động co scale về 0 khi ô đất về Level 0 hoặc giải tỏa/tịch thu.
+  4. *Khắc Phục Frustum Culling & Ngân Sách Bóng Đổ*: Bổ sung `frustumCulled={false}` trên 8 thẻ instancedMesh; chỉ thân và mái/tháp bật `castShadow={true}` để bảo toàn ngân sách đổ bóng GPU.
+  5. *Bảo Toàn Tương Thích Ngược & SSR Safety*: Thêm cờ `renderToyBuildings?: boolean` (mặc định `true`) vào `LayeredDioramaTile`, giữ vững 100% hoạt động của 25 unit test cũ; loại bỏ hoàn toàn `useFrame`/`useThree` ngoài `<Canvas>` để hỗ trợ SSR headless an toàn.
+- **Hạ tầng & Ngân sách LOC Thực tế (scripts/check_loc.mjs)**:
+  * `src/client/3d/board_layout.tsx` (190 LOC — Tier 2 <= 500 LOC)
+  * `src/client/3d/board_tile.tsx` (452 LOC — Tier 2 <= 500 LOC)
+  * `src/client/3d/instanced_toy_buildings.tsx` (169 LOC — Tier 2 <= 500 LOC)
+  * `tests/contracts/imp_perf_threejs_instancing.test.ts` (193 LOC — Contract Tests <= 600 LOC)
+  * `docs/reports/improvements/IMP-PERF-THREEJS-INSTANCING_report.md`: Báo cáo nghiệm thu hoàn chỉnh.
+- **Kiểm thử & Bất biến**:
+  * 16/16 atomic contract tests PASS (Universal 5-Facet Matrix, Detroit Classical TDD, 1-3 asserts/test).
+  * 141/141 regression tests PASS across 4 suites (`imp142`, `chrome_pawns`, `property_ownership_marker`, `flat_tile_art`).
+  * Station 4 Chaos Sentinel: 3/3 physical probes PASS (Closed-Loop Parity 24/24, Ephemeral Wire port 52509, Mutation Sensitivity 2/2 mutants killed).
+  * Visual Evidence Gate: Thẩm định thành công ảnh chụp in-game vật lý `.agents/tmp/imp-perf-threejs-instancing_full_board.jpg`.
+  * TypeScript typecheck: `tsc --noEmit` exit 0. UI Linter: `npm run lint:ui` 0 violations / 208 files. 0 dirty casts.
+  * Evidence Snapshot: `.agents/evidence/chaos_sentinel_IMP-PERF-THREEJS-INSTANCING.json` (`executed: true`).
+- **Phê chuẩn**:
+  * `plan-griller`: HARDENED_APPROVED (100% đóng 7 chỉ thị đối kháng G-1..G-7).
+  * `qa-tester`: Station 1 RED verified (16/16 tests failed as expected under Adversarial Inversion).
+  * `implementer`: Station 2 GREEN verified (16/16 tests pass, toàn bộ tệp đạt chuẩn LOC).
+  * `scout`: Station 2.5 PASS (0 defects qua 5 bộ lọc cơ học).
+  * `spec-reviewer`: Station 3.1 APPROVED (100% plan fidelity, 0 scope drift).
+  * `code-reviewer`: Station 3.2 APPROVED (Deep Architecture, scratch matrix reuse, clean lifecycle, zero dirty casts).
+  * `game-3d-visual-critic`: Station 3.2 APPROVED / disposition: ship (Mỹ thuật AAA, zero z-fighting/distortion, vật liệu PBR rực rỡ).
+  * `chaos-sentinel`: Station 4 APPROVED (3 Probes passed, 2/2 mutants killed, 0 survived).
+- **Trạng thái**: ✅ Hoàn thành IMP-PERF-THREEJS-INSTANCING (2026-09-30).
+
+
+
+
 
 
 

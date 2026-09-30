@@ -24,6 +24,12 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command, write_to_fi
 2. **Core Directive & Adversarial Mandate**:
    > *"Assume all AI-generated implementation plans are Flawed by Default, containing subtle hallucinations, ghost files, unverified assumptions, or broken data lifecycles. Never indulge in polite agreement (Zero Sycophancy). Stress-test the plan against physical disk files and uncover 1–3 concrete technical blind spots before any code is written."*
    - **Holistic Revision Audit Mandate (Anti-Confirmation Bias)**: When auditing a revised plan (Revision N+1), the auditor is STRICTLY FORBIDDEN from performing a delta-only check. All newly introduced code snippets, proxies, refactored signatures, and helper modules in Revision N+1 MUST be audited from scratch against all 5 Pillars. "New code in a revision is guilty until proven innocent."
+   - **Revision Directive Closure Check**: Before issuing any `HARDENED_APPROVED` on a revision, the auditor MUST produce an explicit closure table in the audit report:
+     ```
+     | Griller Directive (Revision N) | Address Location (Revision N+1) | Status |
+     | [exact directive text]          | [file.ts#L or "NOT FOUND"]      | ✅/❌  |
+     ```
+     If any row is `NOT FOUND` or address is vague (e.g. "handled in Task 3"), verdict MUST be `REVISE_REQUIRED`. Self-reported "100% addressed" claims by the plan author carry zero weight.
 
 3. **The 5 Mandatory Stress-Test Pillars**:
    - ⛓️ **Pillar 1: Data Origin-to-Sink Lifecycle**:
@@ -42,6 +48,7 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command, write_to_fi
      - **Full Collection Protocol Parity (Proxy/Adapter Completeness)**: When a plan proposes a Proxy, Adapter, or Virtual Collection to emulate a standard container (`Map`, `Set`, `Array`, `Iterable`), verify that it implements 100% of standard protocol methods (`[Symbol.iterator]`, `entries()`, `keys()`, `values()`, `size`, `forEach()`, `clear()`, `get()`, `set()`, `has()`, `delete()`). Flag partial proxies omitting iteration, size, or entries traps as **[P1 - INCOMPLETE COLLECTION PROTOCOL]**.
      - **Zero-Delta & No-Op Event Suppression Guard**: When a plan introduces or modifies telemetry, activity loggers, notification mappers, or floating badges, verify that all amount/delta handlers explicitly guard against zero or non-positive deltas (`Math.abs(amount) <= 0` or `diff <= 0`). Zero-amount events must never emit activity logs or badges. Flag omissions as **[P1 - ZERO-DELTA LOGGING EMISSION]**.
      - **Wire/IO Boundary Duality Guard**: When plans inspect optional string/object fields from network DTOs or stores, FORBID loose `!== undefined` checks. Mandate explicit runtime type check (`typeof x === 'string'`) or dual null/undefined guard (`x != null`) to prevent runtime TypeError crash when receiving null tombstones. Flag omissions as **[P1 - WIRE BOUNDARY DUALITY LEAK]**.
+     - **Store State/Action Separation Guard**: In Zustand/Redux/MobX stores, verify that any new field added to the State interface/type represents DATA only (serializable, no function types). Action creators (`set...`, `toggle...`, `dispatch...`) MUST NOT appear in the state type — they belong in the actions layer. If a plan adds a `(cells: T) => void` function to a `GameState`/`StoreState` interface, flag as **[P1 - ACTION IN STATE TYPE VIOLATION]**.
    - 📐 **Pillar 2: Physical Layout & File LOC Budget**:
      - Audit proposed UI changes against physical constraints: mobile 360px viewport, badge text wrapping, long currency strings, button overlap, flex shrinkage.
      - If a proposed badge or label risks pushing buttons off-screen or breaking container grids on 360px width, flag as **[P2 - LAYOUT OVERFLOW HAZARD]**.
@@ -82,6 +89,12 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command, write_to_fi
      - **Compound Quiescence / Dual-Pending Mutex**: When verifying that a system or entity is "idle" / "quiescent", checking state enums alone is insufficient; the check MUST verify that no secondary pending interactive sessions exist (e.g. in-flight transactions, pending approvals, active negotiations, uncommitted drafts). Flag partial idle checks as **[P1 - COMPOUND QUIESCENCE GAP]**.
      - **Static Checklist Test Infiltration Guard**: Inspect all proposed test cases in Task 1. If any test proposes checking `fs.readFileSync`, `fs.existsSync`, `lintContent`, `typeof`, or file LOC inside Vitest `it()` suites, flag as **[P1 - STATIC CHECKLIST TEST INFILTRATION]**. Tests MUST assert observable runtime/render behavior only (`renderToStaticMarkup`, event dispatch, state transitions).
      - **Ban Dummy Data-Attribute Test Bypasses (`data-legacy-style`)**: When changing UI classes, layout, or dimensions to evolve outdated contracts (e.g. `max-h-36` to `max-h-52`), plans are strictly FORBIDDEN from putting deprecated classes into dummy data attributes (`data-legacy-style="..."`) to trick old `toContain` tests into passing accidentally. Station 1 must explicitly reconcile the outdated contract assertion under the Specification Evolution principle. Flag as **[P1 - DUMMY ATTRIBUTE TEST BYPASS]**.
+     - **Unimplementable Test Patterns Guard**: When reviewing Station 1 test specs, flag any test that cannot produce a deterministic pass/fail in Vitest Node.js headless as **[P2 - UNIMPLEMENTABLE TEST SPEC]**:
+       - GC allocation / memory churn assertions
+       - Frame rate / render time benchmarks
+       - GPU draw call counts
+       - `performance.measureUserAgentSpecificMemory()` calls
+       Replace with equivalent behavioral assertions (idempotency, referential equality, or output determinism).
      - **Pure Seam & SRP Invariant**: Pure calculation, diffing, or domain functions must NEVER receive transport/network payloads (`DeltaPayload`, `HttpRequest`, `DbContext`). Callers must resolve primitives before passing. Flag invasive transport parameter creep as **[P1 - INVASIVE COUPLING]**.
      - **Subtractive Audit (Delete-First) & Parallel Legacy Sweep**: If plan introduces a new state, listener, or flag in a store/service, verify if the existing codebase has any module-level closure, ref, or local variable performing a similar role. The plan MUST explicitly target obsolete code for deletion. Leaving old closures running in parallel is strictly flagged as **[P1 - DUAL STATE MECHANISM GAP]**.
      - **Type Schema SSOT & Shadowing Guard**: When updating Store types or DTO schemas, physically inspect whether a partial or inline version already exists. The plan MUST explicitly REPLACE the old definition lines rather than appending a parallel field. Flag omissions as **[P1 - TYPE SHADOWING TRAP]**.
@@ -99,14 +112,19 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command, write_to_fi
      - **Concrete Test Reconciliation Drop-In Snippet Guard**: When a plan proposes 'Reconciling' legacy contract tests due to mathematical formula or contract evolution, the plan MUST provide an exact drop-in code snippet with newly calculated expected values. Vague directives like 'will reconcile test X' without concrete assertions are strictly flagged as **[P1 - VAGUE TEST RECONCILIATION DIRECTIVE]**.
      - **Multi-Phase Async/Animation Lifecycle Timing Invariant**: When a plan calculates timing, scheduling delays, or milestone offsets for events dependent on asynchronous operations or in-flight animations, verify that state lookups cover ALL phases (e.g. pending queue vs active in-progress vs fallback). Checking only a pending state causes premature fallback when the operation transitions to active execution. Flag as **[P1 - ASYNC/ANIMATION LIFECYCLE TIMING BLINDSPOT]**.
      - **Legacy Facade Deprecation & SSOT Invariant**: When deprecating an internal branch within a public facade function preserved for backward compatibility, verify that the plan explicitly documents the branch with an SSOT deprecation comment, asserts runtime callers never route to it, and ensures no parallel legacy logic triggers inadvertently. Flag as **[P1 - UNDOCUMENTED LEGACY FACADE LEAK]**.
+      - **Platform Locale Portability Guard**: FORBID `toLocaleString(locale)` in server log strings, DTOs, or any code path exercised by Vitest (Node.js headless). Locale output is OS-dependent: `'vi-VN'` produces `"1.500"` on Windows but `"1,500"` on Linux CI, causing flaky string-match tests. Mandate the project-internal `formatCurrency()` or a pre-configured `Intl.NumberFormat` instance. Flag as **[P2 - LOCALE PORTABILITY GAP]**.
      - If a plan touches a calculation or state transition without auditing upstream modifiers or exceptional lifecycles, flag as **[P1 - BLAST RADIUS BLINDSPOT]**.
 
-4. **Mechanical Pre-Flight & Ghost File Verification**:
+4. **Mechanical Pre-Flight & Mechanical Delegation Rule**:
    - **Mechanical Pre-Flight Run**: Before deep semantic auditing, run `node scripts/audit_plan.mjs <target-plan-path>` via `run_command` (0 tokens, 0.05s).
      - Verifies physical file existence (anti-ghost files).
      - Verifies 100% exact match of drop-in target snippets on physical disk.
      - Verifies current file LOC baselines.
+     - Verifies zero dirty casts (`as any`, `as unknown as`).
+     - Verifies zero banned / unimplementable test patterns (GC churn, FPS benchmark, typeof).
+     - Verifies Zustand Store State vs Action SRP separation (no functions in State data shape).
      If the script reports `[FAIL]`, immediately flag corresponding items before continuing.
+   - **Mechanical Delegation Rule**: Once `audit_plan.mjs` reports `[PASS]`, the auditor DOES NOT NEED to re-verify file existence, snippet verbatim matching, LOC arithmetic, dirty casts, or state/action separation. Free your cognitive attention completely to focus on semantic architecture, edge cases, race hazards, actor symmetry, and lifecycle teardown.
    - For every file in the plan, use `grep_search` or `view_file` to verify the target function/property ACTUALLY exists in that specific file. Flag missing files/symbols as **[P1 - GHOST FILE HALLUCINATION]**.
    - **Constraint Grounding (Anti-Mirage)**: If a plan claims to relax, override, or replace a pre-existing restriction, verify via search that the constraint physically exists in code. Flag phantom premises as **[P1 - SPECIFICATION MIRAGE]**.
 

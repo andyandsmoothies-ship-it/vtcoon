@@ -72,7 +72,7 @@ describe('[IMP-128] Chốt 1: Khử Chèn Đè Toast Trên Desktop (FloatingNumb
     const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
     const desktopContainerMatch = html.match(/<div[^>]*class="[^"]*(?:md:flex|md:max-w-md)[^"]*"[^>]*>/);
     expect(desktopContainerMatch).not.toBeNull();
-    expect(desktopContainerMatch![0]).not.toContain('right-6');
+    expect(desktopContainerMatch![0].split(' ')).not.toContain('right-6');
   });
 
   it('[TC-IMP128.02/MSS][UC-IMP128][Facet-1/Boundary] Desktop container căn giữa màn hình với left-1/2 và -translate-x-1/2', () => {

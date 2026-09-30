@@ -235,6 +235,7 @@ export interface GameState {
   readonly maxRounds: number;
   readonly activeModifiers: ReadonlyArray<ClientMarketModifier>;
   readonly isHeatmapActive: boolean;
+  readonly spotlightedCellIndices?: readonly number[] | null;
 
   // UI-04 Business Modals State
   readonly activeModal: ActiveModalType;
@@ -290,6 +291,7 @@ export interface GameState {
   setActiveModifiers: (modifiers: ReadonlyArray<ClientMarketModifier>) => void;
   toggleHeatmap: () => void;
   setHeatmapActive: (active: boolean) => void;
+  setSpotlightedCells: (cells: readonly number[] | null) => void;
   readonly isPlayerHudVisible: boolean;
   togglePlayerHudVisibility: () => void;
 
@@ -330,6 +332,7 @@ export type InitialGameState = Pick<
   | 'maxRounds'
   | 'activeModifiers'
   | 'isHeatmapActive'
+  | 'spotlightedCellIndices'
   | 'activeModal'
   | 'modalPayload'
   | 'lastEventCard'
@@ -366,6 +369,7 @@ export const INITIAL_GAME_STATE: InitialGameState = {
   maxRounds: 40,
   activeModifiers: [],
   isHeatmapActive: false,
+  spotlightedCellIndices: null,
   isPlayerHudVisible: true,
   activeModal: null,
   modalPayload: null,
@@ -380,5 +384,3 @@ export const INITIAL_GAME_STATE: InitialGameState = {
   cameraFocusCell: null,
   hasUserCustomCamera: false,
 };
-
-

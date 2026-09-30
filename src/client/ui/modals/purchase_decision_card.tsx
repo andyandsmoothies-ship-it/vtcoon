@@ -98,9 +98,16 @@ export function PurchaseDecisionCard({
                 title={c.ownerName ? `Sở hữu: ${c.ownerName}` : c.isTarget ? 'Ô mục tiêu' : 'Chưa có chủ'}
               >
                 <div className="flex items-center justify-between gap-1 mb-1 min-w-0">
-                  <span className="font-bold text-slate-900 line-clamp-2 leading-tight text-[11px] sm:text-xs block" title={c.name}>
-                    {c.name}
-                  </span>
+                  <div className="min-w-0 flex-1 line-clamp-2">
+                    <span className="font-black text-slate-900 text-[11px] sm:text-xs block truncate" title={c.name}>
+                      {c.name.split(' (')[0]}
+                    </span>
+                    {c.name.includes('(') && (
+                      <span className="text-[11px] font-medium text-slate-600 block truncate" title={c.name}>
+                        {c.name.slice(c.name.indexOf('('))}
+                      </span>
+                    )}
+                  </div>
                   {level > 0 && (
                     <span
                       className="text-[11px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300 shrink-0 inline-flex items-center gap-0.5"

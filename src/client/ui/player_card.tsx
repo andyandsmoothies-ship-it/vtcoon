@@ -254,7 +254,7 @@ export function PlayerCard({
             </span>
           )}
 
-          <span className="hidden sm:flex items-center text-[10px] text-slate-400 font-semibold tabular-nums shrink-0" data-testid="player-net-worth" title="Tài sản ròng">
+          <span className="hidden sm:flex items-center text-[11px] text-slate-700 font-black tabular-nums shrink-0" data-testid="player-net-worth" title="Tài sản ròng">
             ({formatCurrency(netWorth)})
           </span>
 

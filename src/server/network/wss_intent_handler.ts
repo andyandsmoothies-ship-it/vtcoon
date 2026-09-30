@@ -87,10 +87,14 @@ export async function handleIntentMsg(
     if (roll) {
       const d1 = roll.dice.dice?.[0] ?? roll.dice.die1;
       const d2 = roll.dice.dice?.[1] ?? roll.dice.die2;
+      const formatVn = (n: number): string => n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
       payloadSummary = `Người chơi ${msg.playerId}: Gieo xúc xắc [${d1}, ${d2}] -> Đến ô ${roll.player.position}`;
-      if (roll.rentCharged > 0) payloadSummary += ` (Trả tiền thuê ${roll.rentCharged.toLocaleString('vi-VN')})`;
-      if (roll.passedGo) payloadSummary += ' (Qua ô Bắt Đầu +2.000)';
-      payloadSummary += ` | Số dư: ${roll.player.balance.toLocaleString('vi-VN')}`;
+      if (roll.rentCharged > 0) payloadSummary += ` (Trả tiền thuê ${formatVn(roll.rentCharged)})`;
+      if (roll.passedGo) {
+        const sal = roll.passedGoSalary ?? 2000;
+        payloadSummary += ` (Qua ô Bắt Đầu +${formatVn(sal)})`;
+      }
+      payloadSummary += ` | Số dư: ${formatVn(roll.player.balance)}`;
     }
     deps.adminManager.recordRoomEvent(msg.roomCode, {
       source: player?.isBot ? 'BOT' : 'PLAYER',

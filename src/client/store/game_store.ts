@@ -266,6 +266,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   setActiveModifiers: (modifiers) => set({ activeModifiers: modifiers ? [...modifiers] : [] }),
   toggleHeatmap: () => set((state) => ({ isHeatmapActive: !state.isHeatmapActive })),
   setHeatmapActive: (active) => set({ isHeatmapActive: active }),
+  setSpotlightedCells: (cells) => set({ spotlightedCellIndices: cells }),
   togglePlayerHudVisibility: () => set((state) => ({ isPlayerHudVisible: !state.isPlayerHudVisible })),
 
   openModal: (type, payload) => set({ activeModal: type, modalPayload: payload }),

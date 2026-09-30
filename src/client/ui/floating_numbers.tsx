@@ -268,7 +268,7 @@ export function FloatingNumbersOverlay(): React.ReactElement | null {
       aria-label="Thông báo biến động tài chính"
       className="pointer-events-none select-none z-30"
     >
-      <div className={"fixed " + stackTopClass + " left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 w-[calc(100vw-1.5rem)] max-w-sm sm:max-w-md md:max-w-md px-1 z-30 pointer-events-none"}>
+      <div className={"fixed " + stackTopClass + " left-1/2 -translate-x-1/2 md:left-auto md:right-6 md:translate-x-0 flex flex-col items-center md:items-end gap-1.5 w-[calc(100vw-1.5rem)] max-w-sm sm:max-w-md md:max-w-md px-1 z-30 pointer-events-none"}>
         {latestMilestone && (
           <div data-testid="milestone-banner-container" className="w-full flex justify-center pointer-events-auto">
             <MilestoneBanner item={latestMilestone} />

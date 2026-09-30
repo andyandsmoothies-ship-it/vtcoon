@@ -27,8 +27,8 @@ Assume AI-generated code and superficial tests contain blind spots. Run 3 physic
 ## 2. Probe 1: Wire-to-Core Closed-Loop Parity Audit
 Inspect the perimeter gateway vs the core domain model:
 1. Automated via `scripts/station4_sentinel.ts`: Extracts `VALID_INTENTS` in `envelope_validator.ts` and maps to `PlayerIntent` / `INTENT_DISPATCH` in `intent_dispatcher.ts`.
-2. Validates bijective parity (`Size(Edge) == Size(Core) == 24`) and feeds live JSON roundtrips through the validator and dispatcher.
-3. If missing even 1 item: Verdict is **`BLOCKED: PARITY_GAP`**.
+2. **Dynamic parity check** — do NOT hardcode a count. Run the script and assert `Size(Edge) === Size(Core)` dynamically. If the counts match but differ from a prior baseline, log the new count in the evidence JSON as `intentCount`. Adding a new intent legitimately changes this number; the invariant is symmetry, not a fixed value.
+3. If `Size(Edge) !== Size(Core)`: Verdict is **`BLOCKED: PARITY_GAP`** with the exact missing/extra intent names listed.
 
 ## 3. Probe 2: Ephemeral Boundary Smoke Probe (Zero-Mock Socket/Wire)
 Automated via `scripts/station4_sentinel.ts`:
@@ -40,6 +40,7 @@ Automated via `scripts/station4_sentinel.ts`:
 
 ## 4. Probe 3: Targeted Mutation Sensitivity (Anti-Tautology Rule)
 - **BANNED INLINE MUTANTS**: Strictly forbidden to write artificial mutant variables inside the test file and assert their failure (`const m = false; expect(() => expect(m).toBe(true)).toThrow()`). This is a tautological test proving zero production resilience.
+- **Diff-Driven Target Selection**: Before writing probe assertions, read the ticket diff to identify the 3–5 highest-risk logic branches modified (e.g. guard conditions, arithmetic operators, tombstone serialization). Target mutations MUST correspond to actual changed lines in `src/**`, not arbitrary code paths.
 - **STANDARD PROTOCOL**:
   1. Prefer physical sandbox runner: `npm run sentinel -- --ticket [TICKET_ID] --test [CONTRACT_TEST_PATH]` to inject physical mutations into a test sandbox and verify exit code != 0 (KILLED).
   2. If writing dedicated probe test files in `tests/probes/`:

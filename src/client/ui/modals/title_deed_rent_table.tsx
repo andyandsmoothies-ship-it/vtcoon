@@ -78,7 +78,7 @@ export function TitleDeedRentTable({
                   </span>
                 </div>
                 <div className="text-center flex-1 pl-1">
-                  <span className="text-[11px] sm:text-xs text-amber-700 block font-semibold whitespace-nowrap">C3 (KHÁCH SẠN)</span>
+                  <span className="text-[11px] sm:text-xs text-amber-800 block font-black whitespace-nowrap" title="C3 (KHÁCH SẠN)">C3 (RESORT/TTTM)</span>
                   <span className="font-mono text-[11px] sm:text-xs font-bold text-amber-800 whitespace-nowrap">
                     {formatCurrency(rents[3] ?? 0)}
                   </span>
@@ -175,7 +175,7 @@ export function TitleDeedRentTable({
                 <div className="flex items-center gap-1.5 min-w-0">
                   <span className="text-sm shrink-0" aria-hidden="true">👑</span>
                   <span className="text-[11px] font-black px-1.5 py-0.5 rounded border shrink-0 bg-amber-200 text-amber-900 border-amber-400">
-                    {cellIndex === 28 ? '5G' : 'GRID'}
+                    {cellIndex === 12 ? 'GRID' : '5G'}
                   </span>
                   <span className="font-bold text-[11px] sm:text-xs text-amber-950 truncate">
                     {cellIndex === 28 ? 'Nâng Cấp Trạm Phát 5G' : 'Lưới Điện Thông Minh (Smart Grid)'}

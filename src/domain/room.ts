@@ -108,6 +108,7 @@ export interface EventCardInfo {
   readonly cardType?: 'chance' | 'market';
   readonly cardId?: string;
   readonly playerId?: string;
+  readonly affectedPlayerId?: string;
   readonly effectType?: string;
   readonly action?: string;
 }
@@ -199,6 +200,7 @@ export interface Room {
   fireSaleQueue?:             number[];
   lastDiplomaticEvent?:       { playerId: string; landlordId: string; cellIndex: number; savedRent: number } | null;
   lastMaBuyout?:              MaBuyoutResult;
+  passedGoSalary?:            number;
 }
 
 

@@ -201,10 +201,10 @@ async function main() {
     });
     await sleep(800);
 
-    const filename = `${opts.ticket.toLowerCase()}_${opts.name}.png`;
+    const filename = `${opts.ticket.toLowerCase()}_${opts.name}.jpg`;
     const outputPath = path.join(tmpDir, filename);
 
-    const captureParams = { format: 'png' };
+    const captureParams = { format: 'jpeg', quality: 90 };
     if (opts.crop) {
       captureParams.clip = opts.crop;
     }

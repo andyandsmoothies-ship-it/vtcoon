@@ -61,9 +61,19 @@ export function calculateAuctionMaxBid(
     ? Math.max(safetyBuffer, (room?.round ?? room?.roundCount ?? 1) * 100)
     : safetyBuffer;
 
+  const round = room?.round ?? room?.roundCount ?? 1;
+  const activePlayers = room?.players?.filter((p) => !p.bankrupt).length ?? 4;
+  const isCompetitiveDuel = activePlayers <= 2;
+  const maxSolventBid = Math.max(0, bot.balance - Math.round(effectiveBuffer * safeRatio));
+
+  const pacingPenaltyRelaxed = (round > 20 && maxSolventBid >= valEstimated * 2)
+    ? (isCompetitiveDuel ? 1.2 / 0.7 : 1.0 / 0.7)
+    : 1.0;
+  const adjustedValEstimated = Math.round(valEstimated * (isCompetitiveDuel ? Math.max(1.0, pacingPenaltyRelaxed) : pacingPenaltyRelaxed));
+
   return Math.min(
-    Math.round(valEstimated * valMultiplier),
-    Math.max(0, bot.balance - Math.round(effectiveBuffer * safeRatio)),
+    Math.round(adjustedValEstimated * valMultiplier),
+    maxSolventBid,
   );
 }
 
@@ -176,19 +186,40 @@ export function decideAuctionPhaseIntent(
 
   const cellConfig = BOARD_CONFIG[cur.cellIndex];
   let isOpponentMonopolyTarget = false;
-  if (cellConfig?.colorGroup && highestBidder && highestBidder !== bot.id) {
-    const groupCells = BOARD_CONFIG.filter((c) => c.colorGroup === cellConfig.colorGroup);
-    const otherCells = groupCells.filter((c) => c.index !== cur.cellIndex);
-    if (otherCells.length > 0 && otherCells.every((c) => registry.get(c.index) === highestBidder)) {
-      isOpponentMonopolyTarget = true;
+  if (cellConfig && room.players) {
+    if (cellConfig.colorGroup) {
+      const groupCells = BOARD_CONFIG.filter((c) => c.colorGroup === cellConfig.colorGroup);
+      const otherCells = groupCells.filter((c) => c.index !== cur.cellIndex);
+      for (const opp of room.players) {
+        if (!opp || opp.id === bot.id || opp.bankrupt) continue;
+        if (otherCells.length > 0 && otherCells.every((c) => registry.get(c.index) === opp.id)) {
+          isOpponentMonopolyTarget = true;
+          break;
+        }
+      }
+    } else if (cellConfig.type === CellType.Railroad) {
+      const allRails = BOARD_CONFIG.filter((c) => c.type === CellType.Railroad && c.index !== cur.cellIndex);
+      for (const opp of room.players) {
+        if (!opp || opp.id === bot.id || opp.bankrupt) continue;
+        if (allRails.filter((c) => registry.get(c.index) === opp.id).length >= 2) {
+          isOpponentMonopolyTarget = true;
+          break;
+        }
+      }
     }
   }
 
   if (isOpponentMonopolyTarget) {
-    if ((cur.highestBid ?? 0) >= Math.round(basePrice * 1.40)) {
+    const isCompetitiveDuel = (room.players.filter((p) => !p.bankrupt).length) <= 2;
+    const denialCapMultiplier = isCompetitiveDuel
+      ? (personality === BotPersonality.Aggressive ? 2.8 : personality === BotPersonality.Balanced ? 2.2 : 1.7)
+      : (personality === BotPersonality.Aggressive ? 2.0 : personality === BotPersonality.Balanced ? 1.6 : 1.4);
+
+    const maxDenialBid = Math.round(basePrice * denialCapMultiplier);
+    if ((cur.highestBid ?? 0) >= maxDenialBid) {
       return { type: 'INTENT_AUCTION_PASS' };
     }
-    if (bot.balance >= nextBid + Math.round(threat.safetyBuffer * 0.5) && nextBid <= Math.round(basePrice * 1.40)) {
+    if (bot.balance >= nextBid + Math.round(threat.safetyBuffer * 0.4) && nextBid <= maxDenialBid) {
       return { type: 'INTENT_BID', amount: nextBid };
     }
     return { type: 'INTENT_AUCTION_PASS' };

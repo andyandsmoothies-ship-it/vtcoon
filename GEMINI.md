@@ -15,6 +15,8 @@
 - **Risk-Based Autonomous Tiering & 4-Station Closed-Loop Pipeline**:
   - *Tier 1 (Fast-Track)*: < 50 LOC, pure visual/CSS/spacing, audio, text, or isolated fix to 1-2 files (0 Schema, 0 FSM/Server, 0 Network). Main agent executes directly in 1-2 minutes (Zero subagents, no plan). UI tweaks must NEVER bundle with network/timing.
   - *Tier 2 (Full Rigor)*: Schema, Network, FSM, or > 50 LOC. Main agent drafts plan, invokes `plan-griller` (P1-P5 audit), renders `🚦 [ACTIVATE 4-STATION CLOSED-LOOP PIPELINE]`, then executes 4-Station Pipeline:
+    - **Hard Gate**: A Tier 2 plan is NOT executable without a `HARDENED_APPROVED` verdict from `plan-griller` written to `.agents/audit/PLAN_AUDIT_[TICKET].md`. Self-attestation labels ("Phê chuẩn kỹ thuật", "Technical Approval", "Approved") carry zero weight and constitute a gate bypass. Agent MUST halt and invoke `plan-griller` if this file is missing.
+    - **Scope Bundling Ban**: Plans bundling > 2 unrelated change categories (e.g. server FSM + CSS visual + 3D rendering) MUST be split into separate tickets before grilling. Each ticket targets one domain. Bundled mega-plans are rejected at gate.
     1. Station 1 (RED Contract Test): `qa-tester` writes edge/contract tests in `tests/**` and proves failure (Adversarial Inversion). FORBIDDEN from editing `src/**`. Atomic test mandate (1-4 asserts/test, zero loops in `it()`, zero static checklist tests). Universal 5-Facet Matrix. Floor: >= 15 atomic tests / slice.
     2. Station 2 (GREEN Implementation): `implementer` writes minimum code in `src/**` to pass tests. Zero bug-codification.
     2.5. Station 2.5 (Fast Pre-Filter Sweep): `scout` (model: flash) runs mechanical filters before review: typecheck (`tsc --noEmit`), LOC budget, zero dirty casts (`as any`), and console.log purge.
@@ -30,6 +32,7 @@
   - *Treasury Conservation & Bankrupt Isolation*: System money delta = Player delta + Treasury delta. Bankrupt players: 0 income, 0 expenses, 0 actions. Insolvent entities (`balance < 0`) can only sell, never buy. Dynamic pricing queries `PROPERTY_DEEDS`.
   - *Full-Pipeline Vertical Slice*: State fields/events MUST update all 5 stations: (1) Entity/FSM, (2) DTO & Mappers, (3) Broadcaster sparse diff, (4) Client Parser, (5) Client Store & UI. Action resets drive on `turnPhase` transitions, not player ID.
   - *Plan Hygiene & Subtractive Parity*: Drop-in snippets must cite exact enclosing function name. Plans strictly forbid `as any`. Subtractive branch deletions require parity proof. Label updates must co-evolve `aria-label`.
+  - *Revision Directive Coverage (Anti-Sycophancy)*: When submitting a revised plan (Revision N+1), the author MUST include an explicit 1:1 table mapping every griller directive to the exact file/line that addresses it. Phrases like "100% addressed" or "all directives incorporated" without this table are **banned** and constitute automatic `REVISE_REQUIRED`.
 - **Domain Specialist Delegations & Craft Invariants**:
   - 3D Visual & Spatial Standards (Zero-Blank-Material, Ground Truth Anchor): Governed by `game-3d-visual-critic` (`.agents/agents/game-3d-visual-critic.md`).
   - 2D UI Craft, Mobile 360px Ergonomics & Touch Targets: Governed by `ui-craft-reviewer` (`.agents/agents/ui-craft-reviewer.md`) and `impeccable` skill. Passes `npm run lint:ui` with 0 violations.

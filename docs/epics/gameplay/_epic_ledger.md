@@ -203,6 +203,18 @@
 - **Evidence Snapshot:** [`.agents/evidence/chaos_sentinel_IMP227.json`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/evidence/chaos_sentinel_IMP227.json) (executed: true, verdict: APPROVED)
 - **Kiểm thử:** 17/17 tests PASS (`imp227_auction_solo_deadlock_and_label_semantics.test.ts`); 32/32 suites (503/503 tests) PASS 100% trên bộ lọc `vitest run auction`.
 
+#### [IMP-236] Nâng Cấp Trí Tuệ Đối Kháng Bot 1v1 (Competitive Duel AI)
+- **Mã Ticket:** IMP-236 (Tier 2 Full Rigor)
+- **Use Case Ref:** UC-BOT-02, UC-BOT-03, UC-BOT-04, UC-BOT-06, UC-IMP236
+- **Phạm vi khắc phục:**
+  - Cash Abundance Land Acquisition: Mở khóa mua đất lẻ ở late-game khi bot có lượng tiền mặt dồi dào (`hasAbundantCash` kẹp `isCompetitiveDuel = Boolean(room?.started && activePlayers <= 2)`), vượt qua rào cản pacingFactor < 1.0.
+  - Railroad & Utility Dynamic Valuation: Mở rộng guard `!cell`, tính toán hệ số sở hữu (1.3x -> 1.6x -> 2.8x) và cản phá đối thủ gom Cảng (lên tới 2.55x) và Tiện ích.
+  - Auction MaxBid & Denial Ceiling: Nới lỏng pacing penalty trong `calculateAuctionMaxBid`; quét toàn bộ đối thủ trong `decideAuctionPhaseIntent` và nâng trần cản phá 1v1 lên tới 2.8x (Aggressive), 2.2x (Balanced), 1.7x (Passive).
+  - 1v1 Zero-Cash-For-Monopoly Guard: Trong thế trận 1v1 (`activePlayers === 2`), bot từ chối tuyệt đối việc bán đất hoặc Cảng tạo độc quyền cho đối phương (`PREVENT_MONOPOLY`), bảo vệ khả năng cạnh tranh sinh tử.
+- **Báo cáo chi tiết:** [`docs/reports/improvements/IMP-236-bot-1v1-competitive-intelligence_report.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/reports/improvements/IMP-236-bot-1v1-competitive-intelligence_report.md)
+- **Evidence Snapshot:** [`.agents/evidence/chaos_sentinel_IMP-236.json`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/evidence/chaos_sentinel_IMP-236.json) (executed: true, verdict: APPROVED)
+- **Kiểm thử:** 16/16 tests PASS (`tests/domain/bot_duel_intelligence.test.ts`); 33/33 suites (505/505 tests) PASS 100% trong `tests/domain/`.
+
 ---
 
 ## Tổng Kết Toàn Cục Epic Gameplay Core

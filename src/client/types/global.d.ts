@@ -14,11 +14,28 @@ declare global {
     __orbitControls?: unknown;
     __debugCameraManual?: boolean;
     __resetCameraToDefault?: () => void;
+    __setErrorMessage?: (msg: string | null) => void;
     webkitAudioContext?: typeof AudioContext;
   }
 
   // eslint-disable-next-line no-var
   var webkitAudioContext: typeof AudioContext | undefined;
+}
+
+declare module 'react' {
+  namespace JSX {
+    interface IntrinsicElements {
+      instancedMesh: Record<string, unknown>;
+    }
+  }
+}
+
+declare module 'react/jsx-runtime' {
+  namespace JSX {
+    interface IntrinsicElements {
+      instancedMesh: Record<string, unknown>;
+    }
+  }
 }
 
 export {};

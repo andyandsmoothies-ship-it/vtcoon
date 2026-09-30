@@ -52,6 +52,7 @@ export interface RollResult {
   readonly dice: DiceResult;
   readonly player: Readonly<{ id: string; position: number; balance: number }>;
   readonly passedGo: boolean;
+  readonly passedGoSalary?: number;
   readonly rentCharged: number;
 }
 

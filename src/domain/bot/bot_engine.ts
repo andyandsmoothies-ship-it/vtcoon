@@ -143,7 +143,11 @@ function decideActionPhaseIntent(
     return { type: 'INTENT_DECLINE' };
   }
 
-  if (valuation.estimatedValue < valuation.basePrice) {
+  const activePlayers = room?.players?.filter((p) => !p.bankrupt).length ?? 4;
+  const isCompetitiveDuel = Boolean(room?.started && activePlayers <= 2);
+  const hasAbundantCash = isCompetitiveDuel && config.manualRoll === undefined && bot.balance >= basePrice * 2.5 && bot.balance - basePrice >= threat.safetyBuffer;
+
+  if (!hasAbundantCash && valuation.estimatedValue < valuation.basePrice) {
     if (valuation.pacingFactor !== undefined && valuation.pacingFactor < 1.0) {
       return { type: 'INTENT_DECLINE' };
     }
@@ -155,7 +159,7 @@ function decideActionPhaseIntent(
   if (config.manualRoll !== undefined || config.rng !== undefined || config.seed !== undefined) {
     const isMonopolyOrStrategic = (valuation.monopolyScore ?? 1.0) >= 1.6 || (valuation.denialScore ?? 1.0) > 1.0;
     const hasAbundantEarlyCash = config.manualRoll === undefined && bot.balance >= basePrice * 4 && (room?.round ?? room?.roundCount ?? 1) <= 2;
-    if (!isMonopolyOrStrategic && !hasAbundantEarlyCash) {
+    if (!isMonopolyOrStrategic && !hasAbundantEarlyCash && !hasAbundantCash) {
       const buy = sampleDecision(valuation.buyProbability ?? 0.8, actionRng, config.manualRoll);
       return buy ? { type: 'INTENT_BUY' } : { type: 'INTENT_DECLINE' };
     }

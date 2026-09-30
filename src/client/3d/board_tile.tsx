@@ -13,8 +13,9 @@ import { ToyPropertyBuildings } from './toy_property_buildings';
 import { getMascotCanvasTexture } from './mascot_canvas_texture';
 import { OwnerPricePill, TactileDeedWaxSeal } from './owner_property_markers';
 import { PROPERTY_DEEDS } from '../../domain/property_data';
+import { TileEventAura } from './tile_event_aura.js';
 
-export { ToyPropertyBuildings, OwnerPricePill, TactileDeedWaxSeal };
+export { ToyPropertyBuildings, OwnerPricePill, TactileDeedWaxSeal, TileEventAura };
 
 export interface StandeeElevationOptions {
   readonly omega?: number;
@@ -169,6 +170,7 @@ export interface LayeredDioramaTileProps {
   readonly isHeatmapActive?: boolean;
   readonly isMonopolyGroup?: boolean;
   readonly isMobile?: boolean;
+  readonly renderToyBuildings?: boolean;
 }
 
 export function tierColor(level: number): string {
@@ -189,6 +191,7 @@ export function LayeredDioramaTile({
   isHeatmapActive = false,
   isMonopolyGroup = false,
   isMobile: propIsMobile,
+  renderToyBuildings = true,
 }: LayeredDioramaTileProps): React.ReactElement {
   const textureRevision = useTextureRevision();
   const isMobile = propIsMobile !== undefined ? propIsMobile : isPhoneHardware();
@@ -225,6 +228,14 @@ export function LayeredDioramaTile({
       <RoundedBox args={[1.68, 0.2, 2.2]} radius={0.08} smoothness={4} receiveShadow>
         <meshStandardMaterial color="#EDE5D8" roughness={0.35} metalness={0.06} envMapIntensity={1.0} />
       </RoundedBox>
+
+      {/* 1.0. Viền hào quang & Huy hiệu sự kiện thị trường (IMP-234 Event Card Aura) */}
+      {!isCornerTile && (
+        <TileEventAura
+          cellIndex={cell.index}
+          isMobile={isMobile}
+        />
+      )}
 
       {/* Viền chân đế màu sở hữu (OwnerBaseTrim) khi đã có chủ */}
       {isPurchasable && ownerColor && ownerColor.length > 0 && (
@@ -282,7 +293,9 @@ export function LayeredDioramaTile({
       {cell.type === CellType.Property ? (
         <>
           <ProceduralBuilding level={currentLevel} groupColor={groupColor} cellIndex={cell.index} />
-          <ToyPropertyBuildings level={currentLevel} groupColor={groupColor} cellIndex={cell.index} />
+          {renderToyBuildings && (
+            <ToyPropertyBuildings level={currentLevel} groupColor={groupColor} cellIndex={cell.index} />
+          )}
         </>
       ) : (
         /* Fallback contract retention: READY_TILES.has(cell.index) */

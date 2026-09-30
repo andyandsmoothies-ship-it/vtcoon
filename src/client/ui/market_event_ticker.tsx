@@ -1,6 +1,6 @@
 // [IMP-128][IMP-135] MarketEventTicker — Real-time Active Market Events Banner
 // Displays macro policy, economic events, remaining round countdowns and clear effect summary below TopBar
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useGameStore } from '../store/game_store.js';
 import { MarketCardId, ChanceCardId } from '../../domain/event_card_types.js';
 import { MARKET_CARD_DETAILS, CHANCE_CARD_DETAILS } from '../../domain/event_card_metadata.js';
@@ -177,6 +177,18 @@ export function resolveMarketCompactFormula(type: string): string {
 export const MarketEventTicker: React.FC<MarketEventTickerProps> = ({
   activeModifiers: propsModifiers,
 }) => {
+  const spotlightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (spotlightTimerRef.current) {
+        clearTimeout(spotlightTimerRef.current);
+        spotlightTimerRef.current = null;
+        useGameStore.getState().setSpotlightedCells(null);
+      }
+    };
+  }, []);
+
   const isSSR = typeof window === 'undefined';
   const storeModifiers = useGameStore((state) => state.activeModifiers);
   const activeModifiers = propsModifiers ?? (isSSR ? useGameStore.getState().activeModifiers : storeModifiers);
@@ -207,6 +219,19 @@ export const MarketEventTicker: React.FC<MarketEventTickerProps> = ({
         const heroStyles = getHeroStatStyles(heroStat.variant);
 
         const handleCardClick = () => {
+          if (spotlightTimerRef.current) {
+            clearTimeout(spotlightTimerRef.current);
+            spotlightTimerRef.current = null;
+          }
+
+          if (modifier.affectedCells && modifier.affectedCells.length > 0) {
+            useGameStore.getState().setSpotlightedCells(modifier.affectedCells);
+            spotlightTimerRef.current = setTimeout(() => {
+              useGameStore.getState().setSpotlightedCells(null);
+              spotlightTimerRef.current = null;
+            }, 3000);
+          }
+
           const detail =
             MARKET_CARD_DETAILS[cardType as MarketCardId] ??
             CHANCE_CARD_DETAILS[cardType as ChanceCardId];
@@ -228,7 +253,7 @@ export const MarketEventTicker: React.FC<MarketEventTickerProps> = ({
             data-testid={`market-ticker-item-${cardType}`}
             onClick={handleCardClick}
             title={`${title}: ${formula} (Bấm xem chi tiết)`}
-            className="w-full pointer-events-auto flex items-center justify-between gap-1.5 px-2 py-0.5 sm:py-1 bg-[#FFFDF8]/95 hover:bg-amber-50/95 backdrop-blur-xs border-2 border-slate-900 rounded-lg sm:rounded-xl shadow-[0_2px_0_0_#0f172a] text-xs font-bold transition-colors cursor-pointer select-none text-slate-900 leading-none"
+            className="w-full pointer-events-auto min-h-[44px] flex items-center justify-between gap-1.5 px-2.5 py-1.5 sm:py-1 bg-[#FFFDF8]/95 hover:bg-amber-50/95 backdrop-blur-xs border-2 border-slate-900 rounded-lg sm:rounded-xl shadow-[0_2px_0_0_#0f172a] text-xs font-bold transition-colors cursor-pointer select-none text-slate-900 leading-none"
           >
             <div className="flex items-center gap-1.5 min-w-0 flex-1">
               <span className="text-sm shrink-0" aria-hidden="true">

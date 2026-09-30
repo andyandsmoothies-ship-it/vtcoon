@@ -31,8 +31,9 @@ export function updateCellLevel(
   if (cell.level === undefined) return false;
   const oldLevel = state.levelMap[cell.index] ?? 0;
   const targetLevel = Math.max(0, Math.min(3, cell.level)) as 0 | 1 | 2 | 3;
+  if (oldLevel === targetLevel && cell.index in nextLevelMap) return false;
   nextLevelMap[cell.index] = targetLevel;
-  if (!isFullSync) triggerCellLevelEffects(cell.index, targetLevel, oldLevel);
+  if (!isFullSync && targetLevel !== oldLevel) triggerCellLevelEffects(cell.index, targetLevel, oldLevel);
   return true;
 }
 

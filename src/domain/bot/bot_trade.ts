@@ -1,5 +1,5 @@
 // [UC-BOT-06/MSS][IMP-82] Bot P2P Property Trading AI & Negotiation Strategy
-import { BOARD_CONFIG, ColorGroup } from '../board_config.js';
+import { BOARD_CONFIG, CellType, ColorGroup } from '../board_config.js';
 import { PROPERTY_DEEDS, type PropertyRegistry, type PropertyStateMap } from '../property_data.js';
 import { BotPersonality, DEFAULT_MIN_SAFETY_BUFFER, type BotIntent } from './bot_types.js';
 import type { Player, Room } from '../room.js';
@@ -129,6 +129,18 @@ export function evaluateBotTradeAcceptance(
     if (otherCells.length > 0 && otherCells.every((c) => registry.get(c.index) === buyer.id)) {
       givesMonopolyToBuyer = true;
     }
+  } else if (cellConfig?.type === CellType.Railroad) {
+    const allRails = BOARD_CONFIG.filter((c) => c.type === CellType.Railroad && c.index !== cellIndex);
+    if (allRails.filter((c) => registry.get(c.index) === buyer.id).length >= 2) {
+      givesMonopolyToBuyer = true;
+    }
+  }
+
+  const activePlayers = room?.players?.filter((p) => !p.bankrupt) ?? [];
+  const isCompetitiveDuel = Boolean(room?.started && activePlayers.length === 2 && activePlayers.some((p) => !p.isBot));
+
+  if (givesMonopolyToBuyer && isCompetitiveDuel) {
+    return { accept: false, reason: 'PREVENT_MONOPOLY' };
   }
 
   if (pers === BotPersonality.Aggressive) {

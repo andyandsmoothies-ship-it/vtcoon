@@ -1,5 +1,6 @@
 // [UI-S03/MSS] offline_landing.ts — Fallback landing handlers and initial lobby configuration
 import { BOARD_CONFIG, CellType } from '../domain/board_config';
+import { calculateGoSalary } from '../domain/room';
 import { PROPERTY_DEEDS } from '../domain/property_data';
 import { AudioEngine } from './audio/audio_engine';
 import { SoundEffect } from './audio/audio_types';
@@ -176,8 +177,9 @@ export function executeCellLanding(
       const taxAmount = tile.type === CellType.Tax
         ? Math.min(2000, Math.max(0, Math.floor(curBalance * 0.1)))
         : 1000;
+      const formattedTax = taxAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
       state.addFloatingText({
-        text: `-${taxAmount.toLocaleString('vi-VN')}`,
+        text: `-${formattedTax}`,
         type: FloatingTextType.Penalty,
         playerId: activeId,
         actionType: 'tax',
@@ -187,8 +189,10 @@ export function executeCellLanding(
   } else if (tile.type === CellType.Go) {
     AudioEngine.playSfx(SoundEffect.BUY_PROPERTY);
     if (!isConnected) {
+      const salary = calculateGoSalary(state.roundNumber ?? 1);
+      const formattedSalary = salary.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
       state.addFloatingText({
-        text: '+2.000',
+        text: `+${formattedSalary}`,
         type: FloatingTextType.Reward,
         playerId: activeId,
         actionType: 'salary',
@@ -196,7 +200,7 @@ export function executeCellLanding(
       });
       const p = state.playersInfo[activeId];
       if (p) {
-        state.updatePlayerInfo(activeId, { balance: p.balance + 2000 });
+        state.updatePlayerInfo(activeId, { balance: p.balance + salary });
       }
     }
   }

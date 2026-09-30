@@ -115,7 +115,7 @@ export function GameRulesModal({
                 <div>
                   <h3 className="font-bold text-slate-900 text-sm mb-0.5">Vốn Khởi Điểm Linh Hoạt &amp; Lương Vượt GO</h3>
                   <p>
-                    Vốn khởi đầu phân tầng theo số người chơi: <strong className="text-blue-700 font-semibold">2 người: 25.000</strong>, <strong className="text-blue-700 font-semibold">3 người: 20.000</strong>, <strong className="text-blue-700 font-semibold">4 người: 18.000</strong> (mức chuẩn từ 15.000 trở lên). Khi hoàn thành một vòng quanh bàn cờ hoặc dừng tại ô Khởi Hành (GO), nhận thêm mức lương <strong className="text-emerald-700 font-semibold">+2.000</strong>.
+                    Vốn khởi đầu phân tầng theo số người chơi: <strong className="text-blue-700 font-semibold">2 người: 25.000</strong>, <strong className="text-blue-700 font-semibold">3 người: 20.000</strong>, <strong className="text-blue-700 font-semibold">4 người: 18.000</strong> (mức chuẩn từ 15.000 trở lên). Khi hoàn thành một vòng quanh bàn cờ hoặc dừng tại ô Khởi Hành (GO), nhận thêm mức lương chu kỳ: <strong className="text-emerald-700 font-semibold">Vòng 1–20: 2.000</strong>, <strong className="text-emerald-700 font-semibold">Vòng 21–30: 1.500</strong>, <strong className="text-emerald-700 font-semibold">Vòng 31+: 1.000</strong> Tr.
                   </p>
                   <p className="mt-1 text-slate-600 text-[11px]">
                     <strong className="text-slate-800 font-semibold">Thuế Đất Đai Vượt GO:</strong> Sở hữu 4–6 ô đất bị truy thu 150/ô; sở hữu từ 7 ô trở lên bị thu 400/ô kèm phụ thu 300/công trình C2-C3.

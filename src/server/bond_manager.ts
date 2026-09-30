@@ -225,6 +225,15 @@ export function processBondTurnTransition(
   room.fireSaleQueue = cells;
   player.bondContract = null;
 
+  // Bắn Event thông báo biến cố vỡ nợ đồng thời chuyển pha sang Đấu Giá Phát Mãi
+  room.lastEventCard = {
+    id: 'EVENT_BOND_DEFAULT',
+    type: 'Market',
+    title: 'VỠ NỢ TRÁI PHIẾU',
+    description: `Người chơi ${player.name} không đủ tiền tất toán trái phiếu. Tiền mặt bị thu hồi và ${cells.length} BĐS thế chấp được chuyển vào danh mục phát mãi!`,
+    playerId: player.id,
+  };
+
   if (room.fireSaleQueue.length > 0) {
     const first = room.fireSaleQueue.shift()!;
     handleStartFireSaleAuction(room, first, auctions, roomCode ?? room.roomCode, player.id);

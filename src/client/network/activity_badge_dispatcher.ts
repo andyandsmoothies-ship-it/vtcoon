@@ -130,7 +130,15 @@ export function handleTaxBadge(act: ActivityLogEntry, state: GameState): void {
 export function handleSalaryBadge(act: ActivityLogEntry, state: GameState): void {
   scheduleAction(() => {
     SoundEngine.playVictoryChime();
-    state.addFloatingText({ text: `+${formatCurrency(act.amount ?? 2000)}`, type: FloatingTextType.Reward, playerId: act.playerId ?? '', actionType: 'salary', title: 'Lương Vượt Ô Bắt Đầu', formula: 'Hoàn thành 1 vòng sa bàn (+2.000 Tr.)' });
+    const salaryAmt = act.amount ?? 2000;
+    state.addFloatingText({
+      text: `+${formatCurrency(salaryAmt)}`,
+      type: FloatingTextType.Reward,
+      playerId: act.playerId ?? '',
+      actionType: 'salary',
+      title: 'Lương Vượt Ô Bắt Đầu',
+      formula: `Hoàn thành 1 vòng sa bàn (+${formatCurrency(salaryAmt)} Tr.)`,
+    });
   }, getPawnPassGoDelay(act.playerId));
 }
 
@@ -194,11 +202,31 @@ function handleMaBuyoutBadge(act: ActivityLogEntry, state: GameState): void {
   }
 }
 
+export function handleCardPenaltyBadge(act: ActivityLogEntry, state: GameState): void {
+  const amount = act.amount !== undefined ? -Math.abs(act.amount) : 0;
+  if (amount === 0) return;
+  const match = act.message.match(/\((.+?)\)/);
+  const cardTitle = match ? match[1] : 'Phiếu Sự Kiện';
+  scheduleAction(() => {
+    state.addFloatingText({
+      text: formatCurrency(amount),
+      type: FloatingTextType.Penalty,
+      playerId: act.playerId ?? '',
+      actionType: 'chance',
+      title: `Nộp Phạt: ${cardTitle} ➔ Kho Bạc`,
+      cellIndex: act.cellIndex,
+    });
+  }, getPawnLandingDelay(act.playerId));
+}
+
 const BADGE_HANDLERS: Record<string, (act: ActivityLogEntry, state: GameState, delta?: DeltaPayload) => void> = {
   rent: handleRentBadge, buy: handleBuyBadge, upgrade: handleUpgradeBadge, tax: handleTaxBadge, bail: handleBailBadge,
   salary: handleSalaryBadge, mortgage: handleMortgageBadge, unmortgage: handleUnmortgageBadge,
   auction: handleAuctionBadge, trade: handleTradeBadge, hose: handleHoseBadge,
-  card: (act, state) => { if (act.id.startsWith('ma_buyout')) handleMaBuyoutBadge(act, state); },
+  card: (act, state) => {
+    if (act.id.startsWith('ma_buyout')) handleMaBuyoutBadge(act, state);
+    else if (act.amount && act.amount < 0) handleCardPenaltyBadge(act, state);
+  },
 };
 
 export function handleDiplomaticEventBadge(

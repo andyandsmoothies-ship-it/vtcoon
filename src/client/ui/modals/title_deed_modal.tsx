@@ -174,18 +174,28 @@ export function TitleDeedModal({
       </div>
 
       {/* Ruy-băng tiêu đề (Ribbon Header) cờ bàn */}
-      <header
-        className="px-3 py-2 text-center relative border-2 border-slate-900 shadow-[0_3px_0_0_#0f172a] rounded-b-xl mx-1 mt-1 rounded-t-lg shrink-0 z-10"
-        style={{ backgroundColor: ribbonColor }}
-      >
-        <div className="absolute top-2.5 left-2.5 w-2 h-2 rounded-full bg-white/80 border border-slate-900" aria-hidden="true" />
-        {!onClose && <div className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-white/80 border border-slate-900" aria-hidden="true" />}
-        <p className="text-[10px] uppercase tracking-widest text-white/95 font-black drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] px-12 sm:px-14">
-          {isRailroad ? 'Hạ Tầng Giao Thông' : isUtility ? 'Tiện Ích Quốc Gia' : 'Giấy Chứng Nhận Quyền Sở Hữu'}
-        </p>
-        <h2 className="tracking-wide text-xs sm:text-sm font-black uppercase text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] mt-0.5 py-1 px-12 sm:px-14 leading-snug break-words mx-auto">
-          {deed.name}
-        </h2>
+      {(() => {
+        const isBrightGroup = ribbonColor === '#F1C40F' || ribbonColor === '#EAB308' || ribbonColor === '#38BDF8' || ribbonColor === '#FACC15';
+        const textColorClass = isBrightGroup ? 'text-slate-950 font-black drop-shadow-none' : 'text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]';
+        const subTextColorClass = isBrightGroup ? 'text-slate-900/90 font-black drop-shadow-none' : 'text-white/95 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]';
+
+        return (
+          <header
+            className="px-3 py-2 text-center relative border-2 border-slate-900 shadow-[0_3px_0_0_#0f172a] rounded-b-xl mx-1 mt-1 rounded-t-lg shrink-0 z-10"
+            style={{ backgroundColor: ribbonColor }}
+          >
+            {!onClose && (
+              <>
+                <div className="absolute top-2.5 left-2.5 w-2 h-2 rounded-full bg-white/80 border border-slate-900" aria-hidden="true" />
+                <div className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-white/80 border border-slate-900" aria-hidden="true" />
+              </>
+            )}
+            <p className={`text-[10px] uppercase tracking-widest font-black px-12 sm:px-14 ${subTextColorClass}`}>
+              {isRailroad ? 'Hạ Tầng Giao Thông' : isUtility ? 'Tiện Ích Quốc Gia' : 'Giấy Chứng Nhận Quyền Sở Hữu'}
+            </p>
+            <h2 className={`tracking-wide text-xs sm:text-sm font-black uppercase ${textColorClass} mt-0.5 py-1 px-12 sm:px-14 leading-snug break-words mx-auto`}>
+              {deed.name}
+            </h2>
         {onClose && (
           <button
             type="button"
@@ -196,7 +206,9 @@ export function TitleDeedModal({
             ✕
           </button>
         )}
-      </header>
+          </header>
+        );
+      })()}
 
       {/* Bộ chọn Carousel chuyển đổi nhanh giữa các BĐS của chính chủ */}
       {showCarousel && ownedProperties && (

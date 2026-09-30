@@ -1,7 +1,8 @@
 // [UI-S04/MSS] AuctionModal — Glassmorphism Dual-Wing 3D Auction Arena Overlay & Fast Bid Carousel
 import React, { useEffect, useMemo, useState } from 'react';
+import { CellType } from '../../../domain/board_config';
 import { getDeedDisplayInfo, calculateAuctionIncrements } from './modal_helpers';
-import { formatCurrency } from '../ui_helpers';
+import { formatCurrency, formatShortPlayerName, formatLocalizedBotPersonality } from '../ui_helpers';
 import { COLOR_GROUP_HEX } from '../../../domain/theme';
 import { useGameStore } from '../../store/game_store';
 import type { PlayerInfo } from '../../store/game_store_types';
@@ -67,8 +68,15 @@ export function AuctionModal({
   );
   const isUrgent = timeRemaining <= 5;
   const timerPercent = Math.min(100, Math.max(0, (timeRemaining / Math.max(20, timeRemaining)) * 100));
-  const ribbonColor = deed?.colorGroup ? COLOR_GROUP_HEX[deed.colorGroup] : '#eab308';
-  const isLeading = Boolean(myId && highestBidderId === myId);
+  const ribbonColor = deed?.colorGroup
+    ? COLOR_GROUP_HEX[deed.colorGroup]
+    : deed?.cellType === CellType.Railroad
+    ? '#475569'
+    : deed?.cellType === CellType.Utility
+    ? '#0284C7'
+    : '#eab308';
+  const hasValidBid = Boolean(highestBidderId && (currentBid > 0 || isFireSale));
+  const isLeading = Boolean(myId && highestBidderId === myId && (currentBid > 0 || isFireSale));
   const displayName = isLeading ? 'Bạn' : (bidderName ?? (highestBidderId ? `Người Chơi (${highestBidderId})` : 'Chưa có ai'));
 
   const storePlayersInfo = useGameStore((s) => s.playersInfo);
@@ -249,15 +257,15 @@ export function AuctionModal({
             <div className="flex justify-between items-center text-xs pt-0.5 whitespace-nowrap">
               <span className="font-bold text-slate-600 text-[10px] sm:text-xs shrink-0">DẪN ĐẦU:</span>
               <div className="flex items-center gap-1 truncate max-w-[200px]">
-                {highestBidderId ? (
+                {hasValidBid ? (
                   <>
                     <span aria-hidden="true" className="shrink-0">👑</span>
                     <span className={`font-bold truncate text-[11px] sm:text-xs ${isLeading ? 'text-emerald-700 font-black' : 'text-slate-900'}`}>
-                      {displayName}
+                      {isLeading ? 'Bạn' : formatShortPlayerName(displayName)}
                     </span>
                   </>
                 ) : (
-                  <span className="text-slate-500 font-medium text-[11px] sm:text-xs">Chưa có ai</span>
+                  <span className="text-amber-800 font-bold text-[11px] sm:text-xs">Chưa có ai đặt giá</span>
                 )}
               </div>
             </div>
@@ -303,7 +311,7 @@ export function AuctionModal({
                       <div className="flex items-center gap-1.5 min-w-0">
                         <span className="w-2 h-2 rounded-full shrink-0 border border-slate-900" style={{ backgroundColor: p.tokenColor ?? '#F59E0B' }} />
                         <span className={`truncate max-w-[100px] sm:max-w-[160px] font-medium min-w-0 text-[11px] sm:text-xs ${isPassed ? 'line-through text-slate-400' : ''}`}>
-                          {p.name}
+                          {formatLocalizedBotPersonality(p.name ?? '')}
                         </span>
                         {isMe && <span className="text-[10px] font-bold text-amber-800 shrink-0">(Bạn)</span>}
                         {isBidder ? (

@@ -89,9 +89,17 @@ hooks: [.agents/hooks_qa.json]
 ### 🧪 QA TESTER REPORT: [TASK_NAME]
 - **Baseline Status**: [PASS / BLOCKED] (Existing tests verified)
 - **Test File Created**: `[tests/path/to/test.ts]`
+- **Test Count**: [N] atomic tests — [N] `expect()` calls — ratio [X.X] (must be 1.0–3.5)
 - **Contract Tags**: `[TC-xx.x/MSS]`, `[UC-xxx]`
-- **Red Verification**: ✔️ Business RED confirmed (Output: [Brief failure message])
+- **RED Classification**: Business RED _(MANDATORY: must not be Infrastructure RED)_
+- **Exact Failure Output** _(paste verbatim — no paraphrase)_:
+  ```
+  AssertionError: expected undefined to be "2.500 Tr."
+  at tests/contracts/imp234.test.ts:47
+  ```
 - **Consumer Assertion**: ✔️ Verified at consumption point (asserted execution result, not just state flag)
 - **Isolation Check**: ✔️ Zero files touched in `src/` (or production directories)
 - **Inversion Gate**: [VERIFIED RED on mutation / PENDING Implementation]
 ```
+
+> **Enforcement**: Any report omitting "Exact Failure Output" is **BLOCKED**. Downstream reviewers (spec-reviewer, code-reviewer) MUST NOT approve a Station 1 handoff without verbatim failure evidence.

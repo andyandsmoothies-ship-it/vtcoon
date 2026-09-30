@@ -57,23 +57,35 @@ export function calculateMonopolyMultiplier(
   personality?: BotPersonality,
 ): number {
   const cell = BOARD_CONFIG[cellIndex];
-  if (!cell?.colorGroup) return MONOPOLY_MULTIPLIERS.DEFAULT;
+  if (!cell) return MONOPOLY_MULTIPLIERS.DEFAULT;
 
-  const groupCells = BOARD_CONFIG.filter((c) => c.colorGroup === cell.colorGroup);
-  const totalInGroup = groupCells.length;
+  if (cell.colorGroup) {
+    const groupCells = BOARD_CONFIG.filter((c) => c.colorGroup === cell.colorGroup);
+    const totalInGroup = groupCells.length;
 
-  const botOwned = groupCells.filter(
-    (c) => c.index !== cellIndex && registry?.get(c.index) === botId,
-  ).length;
+    const botOwned = groupCells.filter(
+      (c) => c.index !== cellIndex && registry?.get(c.index) === botId,
+    ).length;
 
-  if (botOwned + 1 === totalInGroup) {
-    return personality === BotPersonality.Aggressive
-      ? MONOPOLY_MULTIPLIERS.COMPLETE_AGGRESSIVE
-      : MONOPOLY_MULTIPLIERS.COMPLETE_STANDARD;
-  }
+    if (botOwned + 1 === totalInGroup) {
+      return personality === BotPersonality.Aggressive
+        ? MONOPOLY_MULTIPLIERS.COMPLETE_AGGRESSIVE
+        : MONOPOLY_MULTIPLIERS.COMPLETE_STANDARD;
+    }
 
-  if (totalInGroup === 3 && botOwned === 1) {
-    return MONOPOLY_MULTIPLIERS.TWO_OF_THREE;
+    if (totalInGroup === 3 && botOwned === 1) {
+      return MONOPOLY_MULTIPLIERS.TWO_OF_THREE;
+    }
+  } else if (cell.type === CellType.Railroad) {
+    const allRailroads = BOARD_CONFIG.filter((c) => c.type === CellType.Railroad);
+    const botRails = allRailroads.filter((c) => c.index !== cellIndex && registry?.get(c.index) === botId).length;
+    if (botRails === 3) return MONOPOLY_MULTIPLIERS.COMPLETE_STANDARD;
+    if (botRails === 2) return MONOPOLY_MULTIPLIERS.TWO_OF_THREE;
+    if (botRails === 1) return 1.3;
+  } else if (cell.type === CellType.Utility) {
+    const allUtils = BOARD_CONFIG.filter((c) => c.type === CellType.Utility);
+    const botUtils = allUtils.filter((c) => c.index !== cellIndex && registry?.get(c.index) === botId).length;
+    if (botUtils === 1) return MONOPOLY_MULTIPLIERS.COMPLETE_STANDARD;
   }
 
   return MONOPOLY_MULTIPLIERS.DEFAULT;
@@ -87,29 +99,39 @@ export function calculateDenialMultiplier(
   personality?: BotPersonality,
 ): number {
   const cell = BOARD_CONFIG[cellIndex];
-  if (!cell?.colorGroup || !room?.players) return DENIAL_MULTIPLIER_NONE;
-
-  const groupCells = BOARD_CONFIG.filter((c) => c.colorGroup === cell.colorGroup);
-  const totalInGroup = groupCells.length;
+  if (!cell || !room?.players) return DENIAL_MULTIPLIER_NONE;
 
   let isDenialTarget = false;
-  for (const opponent of room.players) {
-    if (!opponent || opponent.id === botId || opponent.bankrupt) continue;
-    if (registry?.get(cellIndex) === opponent.id) continue;
+  let denialSeverity = 1.0;
 
-    const opponentOwned = groupCells.filter((c) => registry?.get(c.index) === opponent.id).length;
-    if (opponentOwned === totalInGroup - 1) {
-      isDenialTarget = true;
-      break;
+  for (const opp of room.players) {
+    if (!opp || opp.id === botId || opp.bankrupt) continue;
+    if (cell.colorGroup) {
+      if (registry?.get(cellIndex) === opp.id) continue;
+      const groupCells = BOARD_CONFIG.filter((c) => c.colorGroup === cell.colorGroup);
+      if (groupCells.filter((c) => registry?.get(c.index) === opp.id).length === groupCells.length - 1) {
+        isDenialTarget = true;
+        break;
+      }
+    } else if (cell.type === CellType.Railroad) {
+      const rails = BOARD_CONFIG.filter((c) => c.type === CellType.Railroad && c.index !== cellIndex && registry?.get(c.index) === opp.id).length;
+      if (rails >= 2) {
+        isDenialTarget = true;
+        denialSeverity = rails === 3 ? 1.5 : 1.15;
+        break;
+      }
+    } else if (cell.type === CellType.Utility) {
+      const utils = BOARD_CONFIG.filter((c) => c.type === CellType.Utility && c.index !== cellIndex && registry?.get(c.index) === opp.id).length;
+      if (utils >= 1) {
+        isDenialTarget = true;
+        break;
+      }
     }
   }
 
-  if (!isDenialTarget) {
-    return DENIAL_MULTIPLIER_NONE;
-  }
-
-  const resolvedPersonality = personality ?? BotPersonality.Balanced;
-  return DENIAL_MULTIPLIERS[resolvedPersonality] ?? DENIAL_MULTIPLIERS[BotPersonality.Balanced];
+  if (!isDenialTarget) return DENIAL_MULTIPLIER_NONE;
+  const baseDenial = DENIAL_MULTIPLIERS[personality ?? BotPersonality.Balanced] ?? DENIAL_MULTIPLIERS[BotPersonality.Balanced];
+  return Number((baseDenial * denialSeverity).toFixed(2));
 }
 
 export function calculateLiquidityMultiplier(remainingBalance: number, safetyBuffer: number): number {

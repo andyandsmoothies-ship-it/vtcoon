@@ -12,6 +12,7 @@ import { detectPlayerMonopolies, isCellInMonopolyGroup } from './monopoly_plaza_
 import { MonopolyPlazaFusion } from './monopoly_plaza_fusion';
 import { LUXURY_PAWN_CONFIGS } from './luxury_pawn_models';
 import { DiceTray } from './dice_tray';
+import { InstancedBoardToyBuildings } from './instanced_toy_buildings';
 import { MiniatureCityDiorama } from './miniature_city_diorama';
 import { CoastalIslandEnvironment } from './coastal_island_environment';
 import { CinematicLightingAccents } from './cinematic_effects';
@@ -158,6 +159,9 @@ export function GameBoard(): React.ReactElement {
       {/* 3. Sàn diễn xúc xắc 3D thoáng đãng trên Đại Lộ Sài Gòn */}
       <DiceTray />
 
+      {/* 3.5. Cụm InstancedMesh nhà đất đồ chơi C1-C3 toàn bàn cờ (<8 draw calls) */}
+      <InstancedBoardToyBuildings levelMap={levelMap} />
+
       {/* 4. 40 ô đất liền mạch khép kín tiếp giáp mặt nền phẳng */}
       {BOARD_CONFIG.map((cell) => (
         <LayeredDioramaTile
@@ -175,6 +179,7 @@ export function GameBoard(): React.ReactElement {
           isHeatmapActive={isHeatmapActive}
           isMonopolyGroup={isCellInMonopolyGroup(cell.index, monopolyGroups)}
           isMobile={isMobile}
+          renderToyBuildings={false}
         />
       ))}
 

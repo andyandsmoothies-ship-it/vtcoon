@@ -90,6 +90,7 @@ export interface DeltaPayload {
   readonly treasury?:            number;
   readonly activeModifiers?:     ReadonlyArray<MarketModifier>;
   readonly lastDiplomaticEvent?:  DiplomaticEventDelta | null;
+  readonly passedGoSalary?:       number;
 }
 
 function buildAuctionDelta(
@@ -163,7 +164,7 @@ export function buildDeltaFromRoom(
     cells.push({
       index: i,
       ownerId: registry.get(i) ?? null,
-      ...(state?.level !== undefined ? { level: state.level } : {}),
+      level: (state?.level ?? 0) as 0 | 1 | 2 | 3,
       ...(state?.isETC ? { isETC: true } : {}),
       ...(mortgagedSet.has(i) ? { isMortgaged: true } : {}),
       ...(state?.unbuiltRounds ? { unbuiltRounds: state.unbuiltRounds } : {}),
@@ -236,6 +237,7 @@ export function buildDeltaFromRoom(
     treasury: room.treasury ?? 0,
     ...(room.activeModifiers !== undefined ? { activeModifiers: room.activeModifiers.map((m) => ({ ...m })) } : {}),
     lastDiplomaticEvent: room.lastDiplomaticEvent ?? null,
+    ...(room.passedGoSalary !== undefined ? { passedGoSalary: room.passedGoSalary } : {}),
   });
 }
 
@@ -260,6 +262,7 @@ export interface DeltaPayloadOptions {
   treasury?: number;
   activeModifiers?: ReadonlyArray<MarketModifier>;
   lastDiplomaticEvent?: DiplomaticEventDelta | null;
+  passedGoSalary?: number;
 }
 
 export function buildDeltaPayload(options: DeltaPayloadOptions): DeltaPayload;
@@ -316,6 +319,7 @@ export function buildDeltaPayload(
       ...(tickOrOptions.treasury !== undefined ? { treasury: tickOrOptions.treasury } : {}),
       ...(tickOrOptions.activeModifiers !== undefined ? { activeModifiers: tickOrOptions.activeModifiers.map((m) => ({ ...m })) } : {}),
       ...(tickOrOptions.lastDiplomaticEvent !== undefined ? { lastDiplomaticEvent: tickOrOptions.lastDiplomaticEvent } : {}),
+      ...(tickOrOptions.passedGoSalary !== undefined ? { passedGoSalary: tickOrOptions.passedGoSalary } : {}),
     };
   }
   return {
@@ -325,17 +329,12 @@ export function buildDeltaPayload(
   };
 }
 
-
 export class SessionManager {
   private readonly sessions = new Map<string, Session>();
   private lastDelta: DeltaPayload | undefined = undefined;
 
   addSession(id: string): Session {
-    const session: Session = {
-      id,
-      state:      SessionState.Connected,
-      lastPongAt: Date.now(),
-    };
+    const session: Session = { id, state: SessionState.Connected, lastPongAt: Date.now() };
     this.sessions.set(id, session);
     return session;
   }
@@ -390,6 +389,7 @@ export class SessionManager {
       ...(payload.pendingBuyout !== undefined ? { pendingBuyout: payload.pendingBuyout } : {}),
       ...(payload.pendingTradeOffer !== undefined ? { pendingTradeOffer: payload.pendingTradeOffer } : {}),
       ...(payload.lastDiplomaticEvent !== undefined ? { lastDiplomaticEvent: payload.lastDiplomaticEvent } : {}),
+      ...(payload.passedGoSalary !== undefined ? { passedGoSalary: payload.passedGoSalary } : {}),
     };
   }
 

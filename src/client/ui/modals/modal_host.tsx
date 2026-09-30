@@ -126,7 +126,7 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
   return (
     <ModalBackdrop
       onClose={handleBackdropClose}
-      center={activeModal === 'auction' || activeModal === 'event'}
+      center={activeModal === 'auction' || activeModal === 'event' || activeModal === 'portfolio'}
       dismissible={!isCriticalDecision}
     >
       {activeModal === 'deed' && (() => {

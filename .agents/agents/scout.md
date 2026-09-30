@@ -17,13 +17,15 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command]
   2. *Station 2.5 (Fast Pre-Filter Sweep)*: High-speed mechanical filter before Station 3 deep review.
 
 ## 2. Station 2.5 Fast Pre-Filter Checklist
-When dispatched after Station 2 (Implementer GREEN), verify 4 mechanical gates using read tools and commands:
+When dispatched after Station 2 (Implementer GREEN), verify 6 mechanical gates using read tools and commands:
 1. **Typecheck Gate**: Run `npx tsc --noEmit`. Must exit with 0 errors.
 2. **LOC Budget Gate**: Run `node scripts/check_loc.mjs <modified files>`. No file may exceed tier ceiling.
-3. **Dirty Cast Scan**: Grep for `as any` or `as unknown as` in newly modified `src/**` AND `tests/**` files. Zero tolerance in `src/**`. In `tests/**`, `as any` is prohibited (exceptions must be explicitly documented, e.g. mock DOM events). Framework private internals (e.g. `__CLIENT_INTERNALS...`) are an immediate FAIL.
+3. **Dirty Cast Scan**: Grep for `as any`, `as unknown as`, or `as Record<string, any>` / `as Record<string, unknown>` in newly modified `src/**` AND `tests/**` files. Zero tolerance in `src/**`. In `tests/**`, these patterns are prohibited (exceptions must be explicitly documented, e.g. mock DOM events). Framework private internals (e.g. `__CLIENT_INTERNALS...`) are an immediate FAIL. Note: `as Record<string, any>` is semantically equivalent to `as any` in value position and must not bypass this gate.
 4. **Console/Debugger Scan**: Grep for `console.log` or `debugger;` in modified `src/**` files.
+5. **Locale Portability Scan** _(JS/TS projects only)_: Grep for `toLocaleString` in newly modified `src/**` and `tests/**` files. Any usage is an immediate FAIL — locale output is OS-dependent (`'vi-VN'` produces `"1.500"` on Windows but `"1,500"` on Linux CI), causing flaky tests. Mandate a project-internal locale-safe formatter (e.g. `formatCurrency()`, `Intl.NumberFormat` pre-configured at module level). Report as `SWEEP: REVISE [P2 - LOCALE PORTABILITY GAP]`.
+6. **Test Directory Convention Scan**: For any new test files created by the implementer or qa-tester, verify the path matches the project's declared test root (check `vitest.config.ts`, `jest.config.*`, `pytest.ini`, or `pubspec.yaml` for the configured `include` / `testMatch` / `testdir`). Files placed outside the configured test root will be silently ignored by the test runner. Report as `SWEEP: REVISE [WRONG_TEST_DIR: expected <configured-root>, got <actual-path>]`.
 
-If any mechanical check fails, report `SWEEP: REVISE` with exact `file:line` so implementer fixes it immediately before Station 3. If clean, report `SWEEP: PASS`.
+If any mechanical check fails, report `SWEEP: REVISE` with exact `file:line` so implementer fixes it immediately before Station 3. If all 6 pass, report `SWEEP: PASS`.
 
 ## 3. Output Format
 ```markdown
@@ -35,4 +37,6 @@ If any mechanical check fails, report `SWEEP: REVISE` with exact `file:line` so 
 | LOC Budget | `check_loc.mjs` | PASS / WARN | Within tier ceiling |
 | Dirty Casts | Grep `as any` (src & tests) | PASS / FAIL | Zero dirty casts |
 | Trailing Logs | Grep `console.log` | PASS / FAIL | Clean |
+| Locale Portability | Grep `toLocaleString` | PASS / FAIL | Zero usage |
+| Test Directory | Path convention check | PASS / FAIL | tests/contracts/ or tests/probes/ |
 ```

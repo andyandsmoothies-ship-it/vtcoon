@@ -23,6 +23,7 @@ interface ProbeResults {
     status: 'PASS' | 'BLOCKED: PARITY_GAP';
     gatewayCount: number;
     coreCount: number;
+    intentCount: number;
     gaps: string[];
   };
   ephemeralBoundaryProbe: {
@@ -114,6 +115,7 @@ async function runProbe1(): Promise<ProbeResults['closedLoopParity']> {
     status: gaps.length === 0 ? 'PASS' : 'BLOCKED: PARITY_GAP',
     gatewayCount: edgeIntents.length,
     coreCount: CORE_24_INTENTS.length,
+    intentCount: CORE_24_INTENTS.length,
     gaps,
   };
 }
@@ -229,10 +231,8 @@ async function runProbe3(testPath?: string): Promise<ProbeResults['mutationSensi
 
       try {
         execSync(`npx vitest run "${sandboxPath}"`, { stdio: 'pipe' });
-        // If it exited 0, mutant survived!
         survived++;
       } catch {
-        // Vitest failed as expected -> mutant killed!
         killed++;
       }
     }
@@ -241,6 +241,132 @@ async function runProbe3(testPath?: string): Promise<ProbeResults['mutationSensi
     if (originalContent.includes('.toBe(')) {
       mutantsTested++;
       const mutantContent = originalContent.replace(/\.toBe\((\d+)\)/, (_m, num) => `.toBe(${Number(num) + 9999})`);
+      fs.writeFileSync(sandboxPath, mutantContent, 'utf-8');
+
+      try {
+        execSync(`npx vitest run "${sandboxPath}"`, { stdio: 'pipe' });
+        survived++;
+      } catch {
+        killed++;
+      }
+    }
+
+    // Mutant 3: Invert isExpiringSoon boolean logic branch
+    if (originalContent.includes('isExpiringSoon).toBe(true)')) {
+      mutantsTested++;
+      const mutantContent = originalContent.replace('isExpiringSoon).toBe(true)', 'isExpiringSoon).toBe(false)');
+      fs.writeFileSync(sandboxPath, mutantContent, 'utf-8');
+
+      try {
+        execSync(`npx vitest run "${sandboxPath}"`, { stdio: 'pipe' });
+        survived++;
+      } catch {
+        killed++;
+      }
+    }
+
+    // Mutant 4: Corrupt Spotlight timeout 3000ms guard
+    if (originalContent.includes('vi.advanceTimersByTime(3000)')) {
+      mutantsTested++;
+      const mutantContent = originalContent.replace('vi.advanceTimersByTime(3000)', 'vi.advanceTimersByTime(500)');
+      fs.writeFileSync(sandboxPath, mutantContent, 'utf-8');
+
+      try {
+        execSync(`npx vitest run "${sandboxPath}"`, { stdio: 'pipe' });
+        survived++;
+      } catch {
+        killed++;
+      }
+    }
+
+    // Mutant 5: Invert isSpotlighted active state
+    if (originalContent.includes('isSpotlighted).toBe(true)')) {
+      mutantsTested++;
+      const mutantContent = originalContent.replace('isSpotlighted).toBe(true)', 'isSpotlighted).toBe(false)');
+      fs.writeFileSync(sandboxPath, mutantContent, 'utf-8');
+
+      try {
+        execSync(`npx vitest run "${sandboxPath}"`, { stdio: 'pipe' });
+        survived++;
+      } catch {
+        killed++;
+      }
+    }
+
+    // Mutant 6: Invert zero-round deactivation / inactive assertion
+    if (originalContent.includes('isActive).toBe(false)')) {
+      mutantsTested++;
+      const mutantContent = originalContent.replace('isActive).toBe(false)', 'isActive).toBe(true)');
+      fs.writeFileSync(sandboxPath, mutantContent, 'utf-8');
+
+      try {
+        execSync(`npx vitest run "${sandboxPath}"`, { stdio: 'pipe' });
+        survived++;
+      } catch {
+        killed++;
+      }
+    }
+
+    // Mutant 7: Invert generic .toBe(false)
+    if (originalContent.includes('.toBe(false)')) {
+      mutantsTested++;
+      const mutantContent = originalContent.replace('.toBe(false)', '.toBe(true)');
+      fs.writeFileSync(sandboxPath, mutantContent, 'utf-8');
+
+      try {
+        execSync(`npx vitest run "${sandboxPath}"`, { stdio: 'pipe' });
+        survived++;
+      } catch {
+        killed++;
+      }
+    }
+
+    // Mutant 8: Corrupt string containment .toContain('...')
+    if (originalContent.includes('.toContain(')) {
+      mutantsTested++;
+      const mutantContent = originalContent.replace(/\.toContain\((['"`])([^'"`]+)\1\)/, (_m, q) => `.toContain(${q}__MUTANT_INVERSION_STRING__${q})`);
+      fs.writeFileSync(sandboxPath, mutantContent, 'utf-8');
+
+      try {
+        execSync(`npx vitest run "${sandboxPath}"`, { stdio: 'pipe' });
+        survived++;
+      } catch {
+        killed++;
+      }
+    }
+
+    // Mutant 9: Corrupt literal string equality .toBe('...')
+    if (originalContent.includes(".toBe('")) {
+      mutantsTested++;
+      const mutantContent = originalContent.replace(/\.toBe\('([^']+)'\)/, ".toBe('__MUTANT_STRING_FAIL__')");
+      fs.writeFileSync(sandboxPath, mutantContent, 'utf-8');
+
+      try {
+        execSync(`npx vitest run "${sandboxPath}"`, { stdio: 'pipe' });
+        survived++;
+      } catch {
+        killed++;
+      }
+    }
+
+    // Mutant 10: Shift .toBeGreaterThanOrEqual threshold
+    if (originalContent.includes('.toBeGreaterThanOrEqual(')) {
+      mutantsTested++;
+      const mutantContent = originalContent.replace(/\.toBeGreaterThanOrEqual\((\d+(?:\.\d+)?)\)/, (_m, num) => `.toBeGreaterThanOrEqual(${Number(num) + 99999})`);
+      fs.writeFileSync(sandboxPath, mutantContent, 'utf-8');
+
+      try {
+        execSync(`npx vitest run "${sandboxPath}"`, { stdio: 'pipe' });
+        survived++;
+      } catch {
+        killed++;
+      }
+    }
+
+    // Mutant 11: Shift .toBeGreaterThan threshold
+    if (originalContent.includes('.toBeGreaterThan(')) {
+      mutantsTested++;
+      const mutantContent = originalContent.replace(/\.toBeGreaterThan\((\d+(?:\.\d+)?)\)/, (_m, num) => `.toBeGreaterThan(${Number(num) + 99999})`);
       fs.writeFileSync(sandboxPath, mutantContent, 'utf-8');
 
       try {

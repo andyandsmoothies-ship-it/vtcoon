@@ -3,6 +3,8 @@ import React from 'react';
 import { vi } from '../../../domain/i18n/vi.js';
 import { MarketCardId, ChanceCardId } from '../../../domain/event_card_types.js';
 import { MARKET_CARD_DETAILS, CHANCE_CARD_DETAILS } from '../../../domain/event_card_metadata.js';
+import { BOARD_CONFIG } from '../../../domain/board_config.js';
+import { useGameStore } from '../../store/game_store.js';
 import {
   getCardThemedEmoji,
   getCardHeroStat,
@@ -77,6 +79,17 @@ export function EventCardModal({
     isFinancialDestination(rawDestination, effectDelta) &&
     resolvedDestination !== 'Toàn thị trường'
   );
+
+  let activeModifier: import('../../store/game_store_types.js').ClientMarketModifier | undefined;
+  try {
+    activeModifier = useGameStore((s) =>
+      s.activeModifiers?.find((m) => String(m.type) === cardId && m.remainingRounds > 0)
+    );
+  } catch {
+    activeModifier = useGameStore.getState().activeModifiers?.find(
+      (m) => String(m.type) === cardId && m.remainingRounds > 0
+    );
+  }
 
   const iconEmoji = getCardThemedEmoji(cardId, cardType);
   const heroStat = getCardHeroStat(cardId, effectDelta);
@@ -211,6 +224,31 @@ export function EventCardModal({
           </span>
         )}
       </div>
+
+      {/* Khối Hiển Thị Ô Đất Bị Ảnh Hưởng (IMP-234) */}
+      {activeModifier?.affectedCells && activeModifier.affectedCells.length > 0 && (
+        <div
+          data-testid="event-affected-cells-list"
+          className="relative z-10 w-full bg-amber-50/80 border border-amber-300 rounded-xl p-2.5 mb-3 flex flex-col items-center gap-1.5 shadow-xs"
+        >
+          <span className="text-[10px] sm:text-[11px] font-black uppercase text-amber-900 tracking-wider">
+            📍 Ô đất chịu tác động trực tiếp:
+          </span>
+          <div className="flex flex-wrap items-center justify-center gap-1.5">
+            {activeModifier.affectedCells.map((idx) => {
+              const cellName = BOARD_CONFIG[idx]?.name ?? `Ô ${idx}`;
+              return (
+                <span
+                  key={idx}
+                  className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-bold bg-white text-slate-800 border border-slate-300 shadow-xs"
+                >
+                  {cellName}
+                </span>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* CTA Button */}
       <button

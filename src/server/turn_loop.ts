@@ -142,6 +142,7 @@ export function executeTurnRoll(
   room.lastEventCard = null;
   room.lastDiplomaticEvent = null;
   room.lastMaBuyout = undefined;
+  room.passedGoSalary = undefined;
   if (current.skipNextTurn) {
     current.skipNextTurn = false;
     room.phase = TurnPhase.PropertyManagement;
@@ -171,11 +172,14 @@ export function executeTurnRoll(
   const newPos = (oldPos + dice.total) % BOARD_SIZE;
   current.position = newPos;
 
-  if (checkPassedGo(oldPos, newPos)) {
+  const passed = checkPassedGo(oldPos, newPos);
+  let passedGoSalary = 0;
+  if (passed) {
     processPendingDebts(room, current);   // [DEBT-S06-01][DEBT-S06-02] TRƯỚC GO_BONUS
     const rawGoTax = calculateGoPropertyTax(current.id, reg, sm);
     const goTax = Math.min(rawGoTax, GO_PROPERTY_TAX_CAP);
     const salary = calculateGoSalary(room.roundCount ?? 1);
+    passedGoSalary = salary;
     current.balance += salary - goTax;
     if (goTax > 0) {
       room.treasury = (room.treasury ?? 0) + goTax;
@@ -185,6 +189,7 @@ export function executeTurnRoll(
     // IMP-214: Thu hóa đơn tiền điện EVN
     processGoElectricBilling(room, current, reg, sm);
   }
+  room.passedGoSalary = passed ? passedGoSalary : undefined;
 
   const cell = BOARD_CONFIG[newPos];
   let rentCharged = 0;
@@ -215,7 +220,8 @@ export function executeTurnRoll(
   return {
     dice,
     player: { id: current.id, position: current.position, balance: current.balance },
-    passedGo: checkPassedGo(oldPos, newPos),
+    passedGo: passed,
+    passedGoSalary,
     rentCharged,
   };
 }

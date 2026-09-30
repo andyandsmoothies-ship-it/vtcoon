@@ -101,6 +101,9 @@ export interface ActionDockButtonStateParams {
  * TC-UI03.5: Pure logic checking whether roll dice action is disabled
  */
 export function isRollActionDisabled(params: ActionDockButtonStateParams): boolean {
+  if (params.turnPhase === 'AuctionPhase') {
+    return true;
+  }
   if (
     !params.inAudit &&
     params.turnPhase === 'PropertyManagement' &&
@@ -441,4 +444,11 @@ export function formatShortPlayerName(name?: string, maxLength?: number): string
     return `${cleaned.slice(0, maxLength > 3 ? maxLength - 2 : maxLength)}...`;
   }
   return cleaned;
+}
+
+export function formatLocalizedBotPersonality(name: string): string {
+  return name
+    .replace(/\(Passive\)/gi, '(Phòng Thủ)')
+    .replace(/\(Aggressive\)/gi, '(Tấn Công)')
+    .replace(/\(Balanced\)/gi, '(Cân Bằng)');
 }

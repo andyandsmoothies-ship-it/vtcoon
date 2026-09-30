@@ -23,7 +23,12 @@ hooks: [.agents/hooks_implementer.json]
    - *Pass 1 (Make it Work - Adversarial TDD)*: Write failing test first (Red) -> Write minimum code to pass test (Green) -> Perform Adversarial Inversion (deliberately invert one logic line to verify test flips RED). Every test must carry traceability tags: `[UC-XXX/MSS]` or `[UC-XXX/A#]` and `[BR-XXX]`.
    - *Pass 2 (Make it Lean - Prune & Simplify)*: Audit newly written diff. Remove single-use helpers/interfaces (YAGNI). Compress LOC by 15-20% while 100% of test suite remains green.
    - *Pass 3 (Quality & Anti-Code-Golf Gate)*: Ensure Cyclomatic Complexity <= 5. Anti-Code-Golf Directive: Keep code explicit and readable.
-   - *Pass 4 (Pre-Finish Gate - Mechanical Zero-Defect Sweep)*: Before declaring completion or handoff, MUST run native compiler typecheck (`npm run typecheck` or `npx tsc --noEmit`), LOC budget check, and slop linter (`npm run lint:slop`). Proactively fix 100% of compiler warnings, dirty casts (`as any`), and linter errors before requesting Station 2.5 or Station 3. Autonomous Evidence Snapshot generation: MUST run `node scripts/collect_evidence.mjs` before sign-off to produce `.agents/evidence/` snapshot for Station 3 Reviewers (which automatically executes contract tests AND `npx tsc --noEmit` compiler typecheck gate). If typecheck or tests report `FAILED`, fix all errors before handoff. The human user NEVER executes manual evidence commands.
+   - *Pass 4 (Pre-Finish Gate - Mechanical Zero-Defect Sweep)*: Before declaring completion or handoff, MUST run:
+     1. Compiler typecheck: `npm run typecheck` or `npx tsc --noEmit` — exit 0 required.
+     2. LOC budget: `npm run check:loc <modified files>` — no ceiling breach.
+     3. Slop linter: `npm run lint:slop` — 0 violations.
+     4. **Full-Suite Regression Gate**: `npm test` (entire test suite, ALL existing contracts). If ANY pre-existing test turns RED, STOP immediately and report `BLOCKED: REGRESSION [test name] @ [file:line]`. Declaring GREEN while existing contracts regress is strictly forbidden — "acceptable regressions" and "design supersession" claims are banned.
+     5. Evidence snapshot: `node scripts/collect_evidence.mjs` — produces `.agents/evidence/` for Station 3. If snapshot reports `FAILED`, fix before handoff. The human user NEVER executes manual evidence commands.
 6. **Literal Test Data & Failure Postconditions**:
    - Use concrete, realistic literal test values (e.g., `"Can Tho"`, `600`, player ID `1`). Never use vague placeholder strings (`"test"`, `"valid_user"`).
    - For alternative flows that end with `Use case ends`, write test assertions to verify Failure Postconditions (clean rollback, zero dangling state).
@@ -40,6 +45,14 @@ hooks: [.agents/hooks_implementer.json]
 | :--- | :---: | :---: | :---: | :---: |
 | `[src/fsm/turn_machine.ts#L25-L45]` | MODIFY | +20 lines | 3 | Linter Clean |
 | `[tests/unit/turn_fsm.test.ts#L1-L30]` | NEW | +30 lines | 2 | 4 tests pass |
+
+### 🗑️ DROPPED / DEFERRED TASKS (MANDATORY — leave empty if none)
+| Plan Task | Reason Dropped | Follow-up Ticket |
+| :--- | :--- | :--- |
+| [Task N: description] | [Out of scope / Too risky / Dependency missing] | [IMP-XXX or PENDING] |
+
+> **Enforcement**: Silently omitting plan tasks without declaring them here constitutes Incomplete Pipeline.
+> Spec-reviewer MUST reject if plan tasks are missing from implementation AND missing from this table.
 
 ### 🧪 TEST & VERIFICATION EVIDENCE
 - **Pre-Flight Domain Check**: Verified against `docs/domain/gotchas.md` (Domain tags: `[NET]`, `[BOT]`).

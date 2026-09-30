@@ -58,11 +58,11 @@ export function ServerToast({ message, onClose }: ServerToastProps): React.React
   return (
     <div
       role="alert"
-      className="fixed top-18 sm:top-20 left-1/2 -translate-x-1/2 z-50 w-[92vw] max-w-[360px] sm:max-w-md bg-slate-900/95 text-white rounded-2xl shadow-xl border-2 border-amber-400/80 px-3.5 py-2.5 sm:px-4 sm:py-3 backdrop-blur-md flex items-center justify-between gap-2.5"
+      className="fixed top-20 sm:top-24 right-4 sm:right-6 z-60 w-[92vw] max-w-[360px] sm:max-w-md bg-slate-900/95 text-white rounded-2xl shadow-2xl border-2 border-amber-400 px-4 py-3 backdrop-blur-md flex items-center justify-between gap-3 pointer-events-auto"
     >
-      <div className="flex items-center gap-2 min-w-0 flex-1">
-        <span className="text-base sm:text-lg select-none shrink-0" aria-hidden="true">⚠️</span>
-        <span className="text-xs sm:text-sm font-semibold leading-snug break-words">{message}</span>
+      <div className="flex items-start gap-2.5 min-w-0 flex-1">
+        <span className="text-lg select-none shrink-0 mt-0.5" aria-hidden="true">⚠️</span>
+        <span className="text-xs sm:text-sm font-bold leading-relaxed break-words">{message}</span>
       </div>
       <button
         type="button"
@@ -84,7 +84,9 @@ export function App(): React.ReactElement {
     const handleRoute = (): void => setIsAdmin(isAdminRoute());
     window.addEventListener('popstate', handleRoute);
     window.addEventListener('hashchange', handleRoute);
+    window.__setErrorMessage = setErrorMessage;
     return () => {
+      window.__setErrorMessage = undefined;
       window.removeEventListener('popstate', handleRoute);
       window.removeEventListener('hashchange', handleRoute);
     };
