@@ -41,9 +41,9 @@ export function DioramaMicroLife(): React.ReactElement {
       {/* ========================================================
           2. CA-NÔ DU NGOẠN NHẤP NHÔ TRÊN SÔNG (Central River)
          ======================================================== */}
-      <group ref={boatRef} position={[0, 0.052, -1.8]}>
-        {/* Vỏ ca-nô trắng */}
-        <mesh castShadow position={[0, 0.015, 0]}>
+      <group ref={boatRef} position={[0, -0.030, -1.8]}>
+        {/* Vỏ ca-nô trắng - Tắt castShadow theo chuẩn Zero Shadow Budget [P3] */}
+        <mesh position={[0, 0.015, 0]}>
           <boxGeometry args={[0.16, 0.03, 0.35]} />
           <meshStandardMaterial color="#F8FAFC" roughness={0.3} />
         </mesh>

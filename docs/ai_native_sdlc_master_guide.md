@@ -16,7 +16,7 @@
 3. [CƠ CHẾ KỸ NĂNG HẠT GIỐNG (Seed Skill & JIT Dispatcher)](#3-cơ-chế-kỹ-năng-hạt-giống-seed-skill--jit-dispatcher)
 4. [SƠ ĐỒ DÒNG CHẢY KẾT HỢP CÁC KỸ NĂNG (The Artifact Pipeline)](#4-sơ-đồ-dòng-chảy-kết-hợp-các-kỹ-năng-the-artifact-pipeline)
 5. [HỆ THỐNG TRUY XUẤT NGUỒN GỐC ARTIFACTS (3-Bucket Taxonomy, 4D ADR & Universal design.md)](#5-hệ-thống-truy-xuất-nguồn-gốc-artifacts-3-bucket-taxonomy-4d-adr--universal-designmd)
-6. [13 NGUYÊN TẮC KIỂM THỬ ĐỈNH CAO & KHẢ NĂNG SINH TỒN PRODUCTION (Testing Integrity & Resilience)](#6-13-nguyên-tắc-kiểm-thử-đỉnh-cao--khả-năng-sinh-tồn-production-testing-integrity--resilience)
+6. [16 NGUYÊN TẮC KIỂM THỬ ĐỈNH CAO & KHẢ NĂNG SINH TỒN PRODUCTION (Testing Integrity & Resilience)](#6-16-nguyên-tắc-kiểm-thử-đỉnh-cao--khả-năng-sinh-tồn-production-testing-integrity--resilience)
    - [6.1 Kim Tự Tháp Kiểm Thử Thực Chiến 4 Tầng (The 4-Layer Testing Pyramid)](#61-kim-tự-tháp-kiểm-thử-thực-chiến-4-tầng-the-4-layer-testing-pyramid)
    - [6.2 Cổng Thẩm Mỹ Hai Tầng: 3D Visual Critic + 2D Tactile Craft](#62-cổng-thẩm-mỹ-hai-tầng-3d-visual-critic--2d-tactile-craft-two-tier-visual-gate)
    - [6.3 Bộ Công Cụ Local Quality Gates Chuẩn Mực Cho Junior Developer (Solo Harness)](#63-bộ-công-cụ-local-quality-gates-chuẩn-mực-cho-junior-developer-solo-harness)
@@ -708,7 +708,7 @@ graph LR
 
 ---
 
-## 6. 13 NGUYÊN TẮC KIỂM THỬ ĐỈNH CAO & KHẢ NĂNG SINH TỒN PRODUCTION (Testing Integrity & Resilience)
+## 6. 16 NGUYÊN TẮC KIỂM THỬ ĐỈNH CAO & KHẢ NĂNG SINH TỒN PRODUCTION (Testing Integrity & Resilience)
 
 1. **Thử Thách Đối Nghịch (Adversarial Inversion - Sharon Y. Barr)**: Trước khi kết luận test pass, `implementer` bắt buộc phải cố tình sửa sai 1 dòng logic để chứng minh bài test **thực sự chuyển sang màu ĐỎ**. Tránh 100% bẫy "Test Xanh Giả Tạo" (False Green).
 2. **Quy Tắc Mock Có Chọn Lọc (Selective Layered Mocking)**:
@@ -806,6 +806,30 @@ graph LR
                                           • Phí phạt vi phạm / Tịch thu bảo chứng
       ```
       Cân đối giữa dòng tài nguyên bơm thụ động (Taps) và áp lực thanh lọc tiêu hao (Sinks). Nếu Taps >> Sinks ➔ Siêu lạm phát, tài nguyên vô giá trị. Nếu Sinks >> Taps ➔ Cạn kiệt thanh khoản, luồng nghiệp vụ bế tắc.
+14. **Chặn Đứng Biến Động Rỗng Tại Cửa Ngõ Phân Giải Sự Kiện (Zero-Delta & No-Op Event Suppression at Gateways - Universal Principle)**:
+    - Trong bất kỳ kiến trúc phân tán hoặc sự kiện nào (Activity Feed, Toast Notification, WebSocket Telemetry, Billing/Audit Log):
+    - ❌ **CẤM Bẫy "Phân giải mù quáng số dư không đổi" (Zero-Delta Blindness)**: Khi tài khoản hoặc người dùng có biến động ròng bằng 0 (`diff = 0` do không phát sinh chi phí hoặc do các nguồn thu/chi bù trừ hoàn hảo), nếu hàm phân giải sự kiện (Event Mapper/Matcher) thiếu chốt chặn cửa ngõ, hệ thống sẽ sinh ra các thông báo rác: *"Người dùng A đã nộp thuế 0đ"*, *"Hệ thống đã trừ 0 xu"*, hoặc bắn popup số âm `-0`.
+    - ✅ **BẮT BUỘC chốt chặn biên độ phi dương ngay tại cửa ngõ**:
+      ```typescript
+      // Rào chắn bảo vệ ngay dòng đầu tiên của mọi hàm phân giải / tính phí
+      const absDiff = Math.abs(payer.diff);
+      if (absDiff <= 0) return null;
+      ```
+      Mọi test suite hợp đồng phải có ca kiểm thử độc lập khẳng định: Bất kỳ payload nào có `diff = 0` đều bắt buộc trả về `null` và triệt tiêu 100% việc phát sinh log hoặc badge hiển thị.
+15. **Miễn Nhiễm Dịch Chuyển Phi Tuyến & Bảo Vệ Tiến Trình Tuần Tự (Adversarial Non-Linear Teleportation / Out-of-Order Lifecycle Transitions - Universal Principle)**:
+    - Trong các hệ thống có quy luật tiến trình tuần tự (Linear Progression: Step 1 ➔ Step N, hoặc Modulo xoay vòng như bàn cờ, chu kỳ thanh toán, bậc thăng cấp VIP):
+    - ❌ **CẤM Bẫy "Modulo ngây thơ" (Modulo Wrap-Around Bias)**: Khi một thực thể bị cưỡng chế dịch chuyển tức thời ngược hoặc nhảy cóc (ví dụ: bị áp giải vào tù từ ô 28 về ô 10; tài khoản bị phong tỏa hoặc giáng cấp; đơn hàng bị can thiệp hủy bước), các hàm kiểm tra tiến trình dạng `newStep <= prevStep` sẽ lầm tưởng thực thể đã hoàn thành trọn vẹn một chu kỳ và tự động kích hoạt thưởng (như phát lương GO, cộng điểm mốc chu kỳ).
+    - ✅ **BẮT BUỘC phân lập tuyệt đối giữa Dịch chuyển Tuần tự (Linear Progression) và Can thiệp Cưỡng chế (Forced Transition)**:
+      ```typescript
+      // Chỉ kích hoạt sự kiện vượt mốc khi di chuyển tuần tự hợp lệ
+      const isForcedTransition = Boolean(entity.inAudit || entity.isSuspended);
+      const hasPassedCheckpoint = !isForcedTransition && prevPos !== undefined && newPos !== undefined && checkPassedGo(prevPos, newPos);
+      ```
+      Test suite phải mô phỏng trực diện kịch bản dịch chuyển phi tuyến đột ngột để chứng minh hệ thống không bị kích hoạt phần thưởng hoặc lệ phí tuần tự ma.
+16. **Bảo Toàn Sổ Cái Hai Đầu & Triệt Tiêu Công Nợ Ma (Double-Ended Ledger Settlement & Zero Phantom Debt Conservation - Universal Principle)**:
+    - Khi xử lý các luồng tài chính hoặc tài nguyên đa luồng bù trừ trong cùng một tick/request (vừa nhận lương vừa trả phí khiến biến động ròng bằng 0):
+    - ❌ **CẤM Bẫy "Bơm nợ ma một chiều" (Unilateral Phantom Debt Injection)**: Khi một bên có hành động bù trừ và bị gắn tạm vào danh sách con nợ (`payers.push({ diff: 0 })`), nếu bên nhận (`receivers`) bị hủy hoặc loại trừ do điều kiện nghiệp vụ khác, khoản nợ 0đ này sẽ bị kẹt lại trong mảng và trôi xuống các tầng xử lý sau, gây lỗi hiển thị hoặc lệch sổ cái đối soát.
+    - ✅ **BẮT BUỘC nguyên tắc Bút toán Kép Đối ứng (Strict Double-Entry Matching)**: Một khoản biến động chỉ được tồn tại khi có đối ứng hợp lệ. Nếu đối tượng bị loại trừ ở một đầu (ví dụ: không đủ điều kiện nhận lương vì đang bị kỷ luật), khoản ghi nhận ở đầu kia phải được giải tỏa (prune/teardown) ngay tức thì trong cùng một transaction.
 
 ### 6.1 KIM TỰ THÁP KIỂM THỬ THỰC CHIẾN 4 TẦNG (THE 4-LAYER TESTING PYRAMID)
 Để tránh "Ảo tưởng Test Xanh" (The Illusion of False Green), mọi tính năng trước khi xuất xưởng phải phân bổ kiểm thử theo 4 tầng khép kín:
@@ -1555,12 +1579,39 @@ Antigravity tự động tìm và nạp các file luật Markdown theo cơ chế
    - *Tại sao không được copy nguyên xi Rule cũ sang dự án mới?* Mỗi dự án có tech stack, ranh giới NFRs và cấu trúc domain khác nhau. Copy mù quáng sẽ tiêm các ràng buộc thừa thãi hoặc lệch pha, làm loãng sự chú ý của AI.
    - *Quy tắc phổ quát bắt buộc giữ lại (Dual Output Pattern)*:
      • **Subagent tạo tài liệu lớn** (như `docs/plans/`, `issues/` >50 dòng): BẮT BUỘC ghi trực tiếp ra đĩa bằng `write_to_file` trong `Workspace: "inherit"` và chỉ trả về bản tóm tắt <20 dòng kèm link file vào chat. Triệt tiêu 100% nguy cơ tràn context và ngăn Agent mẹ phải chạy script cào `transcript_full.jsonl` (gây lỗi nuốt dấu `$` và JSON parse).
-     • **Subagent kiểm toán** (`spec-reviewer`, `code-reviewer`, `scout`): BẮT BUỘC giữ nguyên trạng thái **STRICTLY READ-ONLY**. TUYỆT ĐỐI CẤM ép Reviewers ghi file vì chúng không có tool `write_to_file` (vi phạm phân quyền Rule 8). Reviewer chỉ xuất báo cáo 1 trang (1-page packet) trực tiếp vào cửa sổ chat.
+      • **Subagent kiểm toán** (`spec-reviewer`, `code-reviewer`, `scout`): BẮT BUỘC giữ nguyên trạng thái **STRICTLY READ-ONLY**. TUYỆT ĐỐI CẤM ép Reviewers ghi file vì chúng không có tool `write_to_file` (vi phạm phân quyền Rule 8). Reviewer chỉ xuất báo cáo 1 trang (1-page packet) trực tiếp vào cửa sổ chat.
+
+##### D. BẢNG BỐC THUỐC SETUP NHANH THEO 4 HÌNH THÁI DỰ ÁN CHO JUNIOR (ARCHETYPE SETUP COOKBOOKS)
+Trước khi tạo file `GEMINI.md`, nạp Subagents hoặc viết bài test cho Station 4 (Chaos Sentinel), Junior tra bảng dưới đây (1 phút) để cấu hình đúng trọng tâm, tránh đưa rác đồ họa vào Backend hoặc đưa quy tắc DB vào Game:
+
+| Hình Thái Dự Án | Tệp Hiến Pháp (`GEMINI.md`) Cần Chú Trọng | Bộ Subagents Cần Dùng | 3 Bài Test Của Station 4 (`chaos-sentinel`) |
+| :--- | :--- | :--- | :--- |
+| **1. Backend API / CRUD Enterprise** (NestJS, Go, Spring, .NET, FastAPI) | • Transaction Isolation (ACID), DB Migration an toàn<br>• Cấm N+1 query, bắt buộc phân trang `LIMIT <= 100`<br>• Cấm raw string parsing, bắt buộc Zod/Pydantic DTO | • `scout` (Pre-filter)<br>• `plan-griller` (P1-P5)<br>• `qa-tester` (Contract TDD)<br>• `implementer` (Builder)<br>• `spec-reviewer` (Scope)<br>• `db-sentinel` (DB Migration & SQL)<br>• `api-contract-reviewer` (REST/gRPC) | • **Probe 1**: Idempotency Probe (bắn 10 request trùng, chỉ ghi 1 lần)<br>• **Probe 2**: DB Rollback Probe (ép lỗi cuối luồng, DB sạch 100%)<br>• **Probe 3**: Concurrency Race-condition (trừ tiền đồng thời không âm) |
+| **2. Fullstack SaaS / Web Admin** (Next.js, Remix, Nuxt, Laravel) | • Phân quyền RBAC, Session & CSRF<br>• Responsive 360px ➔ 4K, Dark/Light Mode<br>• Server Action / API Route boundary guard | • `scout`<br>• `plan-griller`<br>• `qa-tester`<br>• `implementer`<br>• `spec-reviewer`<br>• `code-reviewer`<br>• `ui-craft-reviewer` | • **Probe 1**: Wire-to-Core DTO Parity<br>• **Probe 2**: Unauthenticated / Forbidden Bypass Probe<br>• **Probe 3**: Responsive Layout Overflow Probe |
+| **3. Mobile App Native / Cross-Platform** (Flutter, React Native, Swift, Kotlin) | • UI Thread 60 FPS (Zero CPU-heavy on render thread)<br>• Offline-first, SQLite/Hive sync, Network reachability<br>• Safe Area (Tai thỏ, Home bar), Native Permissions | • `scout`<br>• `plan-griller`<br>• `qa-tester`<br>• `implementer`<br>• `spec-reviewer`<br>• `code-reviewer`<br>• `ui-craft-reviewer`<br>• `flutter_a11y_agent` | • **Probe 1**: Offline-to-Online State Sync Parity<br>• **Probe 2**: Deep Link & Background Lifecycle Probe<br>• **Probe 3**: Screen Resolution & Orientation Fuzzing |
+| **4. Realtime WebGL / Canvas / Game** (VTCoOn, R3F, Phaser, Pixi) | • Tick rate, Deterministic PRNG, State delta < 10KB<br>• 60 FPS WebGL GPU draw calls & shadow budgets<br>• Intent-based player choices, Transient teardown | • `scout`<br>• `plan-griller`<br>• `qa-tester`<br>• `implementer`<br>• `spec-reviewer`<br>• `code-reviewer`<br>• `game-3d-visual-critic`<br>• `ui-craft-reviewer` | • **Probe 1**: Wire-to-Core Intent Parity<br>• **Probe 2**: Ephemeral Dynamic Port 0 Socket Smoke Probe<br>• **Probe 3**: Targeted Mutation Sensitivity Probe |
+
+##### E. BỘ 3 TIỆN ÍCH CƠ GIỚI HÓA ĐA DỰ ÁN (UNIVERSAL MECHANIZED TRIO)
+Để giảm tải nhận thức cho LLM và triệt tiêu 70% lỗi vặt cơ học ở mọi loại dự án (Web/Mobile/Backend):
+1. **Script Tiền Kiểm Kế Hoạch Cơ Học (`scripts/audit_plan.mjs` / `audit_plan.py`)**:
+   - Chạy tự động trong 0.05s (0 token) trước khi duyệt plan:
+     • Kiểm tra tệp vật lý trên đĩa (Chống Ghost Files).
+     • Kiểm tra đoạn mã thay thế (TargetContent) có khớp 100% từng dòng trên đĩa không (Chống ảo giác mã nguồn cũ).
+     • Đo lường số dòng (LOC) hiện tại để khóa trần kích thước file (Anti-Slop).
+2. **Tiện Ích Fuzzing Biên Dữ Liệu Dùng Chung (`tests/helpers/boundary_fuzzer.ts` hoặc tương đương)**:
+   - Cung cấp mảng giá trị biên kinh điển: `CANONICAL_BOUNDARIES = [undefined, null, '', '   ', NaN, -1, {}, []]`.
+   - Hàm `assertSurvivesBoundaryFuzz(handler, inputGenerator)`: Tự động bơm các giá trị biên vào DTO/Payload/Params để chứng minh không ném `TypeError` (Cannot read property of null/undefined) và không làm sập ứng dụng/process.
+3. **Cổng Tiền Kết Thúc Thi Công (Implementer Pre-Finish Gate - Pass 4)**:
+   - Trong `implementer.md`, bổ sung Pass 4: Trước khi báo hoàn thành hoặc yêu cầu Review, lập trình viên AI BẮT BUỘC tự chạy compiler check (`npm run typecheck` / `cargo check` / `dotnet build` / `go vet`) và slop linter. Tự động sửa 100% cảnh báo, dirty cast (`as any`) và lỗi linter trước khi bàn giao.
 
 ---
 
 #### 1.3.1 NỘI DUNG FILE `GEMINI.md` MẪU TẠI GỐC DỰ ÁN
 Tạo file `C:\Projects\my-app\GEMINI.md`:
+> [!NOTE]
+> **Tùy biến theo hình thái**: Dòng `Universal Visual UI/UX Governance` bên dưới chỉ áp dụng cho dự án có UI (Web/Mobile/Game). Nếu là **Backend Headless / CLI / Microservice**, thay thế bằng:  
+> `API & Data Governance: Bắt buộc tuân thủ docs/domain/api_contract.md. Mọi endpoint bắt buộc có schema validator (Zod/Pydantic/Protobuf), phân trang cứng LIMIT <= 100, và Transaction Rollback bảo toàn DB.`
+
 ```markdown
 # AGENTS CONSTITUTION (PROJECT HARNESS)
 
@@ -2101,7 +2152,12 @@ Mỗi subagent trong thư mục `.agents/agents/<name>.md` được cấu hình 
 2. **Khai báo Kỹ năng Gắn kèm (`skills: [...]`)**:
    - Khai báo mảng `skills: [tên_kỹ_năng]` trong frontmatter để subagent tự động nạp runbook chuyên sâu tương ứng theo cơ chế JIT, giảm thiểu độ dài system prompt.
 
-Tạo các file subagents chuyên trách sau trong thư mục `.agents/agents/` (6 subagents cốt lõi kỹ thuật & kiến trúc và 5 subagents chuyên biệt về đồ họa, thẩm định 2D/3D và thủ công):
+> [!TIP]
+> **Nguyên tắc chọn lọc Subagents theo loại dự án**:
+> - **Dự án có Giao diện (Web/Mobile/Game)**: Dùng trọn bộ 6 subagents cốt lõi + các subagent mỹ thuật tương ứng (`ui-craft-reviewer`, `game-3d-visual-critic`).
+> - **Dự án thuần Backend / API / Microservice**: TUYỆT ĐỐI KHÔNG tạo các subagent đồ họa (gây rác ngữ cảnh). Chỉ giữ 6 subagent cốt lõi (`scout`, `plan-griller`, `qa-tester`, `implementer`, `spec-reviewer`, `code-reviewer`) và định hướng `code-reviewer` kiểm toán SQL, Transaction Rollback, Missing Index, và Schema Validation.
+
+Tạo các file subagents chuyên trách sau trong thư mục `.agents/agents/`:
 
 ### 1. File `.agents/agents/scout.md` (Trinh Sát - Định Vị Tọa Độ & Nạp Skill JIT)
 ```markdown
@@ -2156,12 +2212,13 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command]
 # QUY TRÌNH PHẢN BIỆN ĐỐI KHÁNG KẾ HOẠCH (PLAN-GRILLER PROTOCOL)
 1. **Quyền hạn**: CHỈ ĐỌC (Strictly READ-ONLY). CẤM sửa đổi mã nguồn.
 2. **Mệnh lệnh cốt lõi**: Mặc định coi mọi plan do AI soạn thảo đều có lỗi ngầm (Flawed by Default). Nghiêm cấm đồng thuận lịch sự (Zero Sycophancy). Bắt buộc vạch trần 1–3 điểm mù kỹ thuật cụ thể bằng cách đối chiếu trực tiếp mã nguồn trên đĩa vật lý.
-3. **Ma Trận Kiểm Tra 4 Mặt**:
+3. **Tiền Kiểm Cơ Học (Mechanical Pre-Flight Run)**: Chạy `node scripts/audit_plan.mjs <path-to-plan>` (0 tokens, 0.05s) để tự động bắt ghost files, kiểm tra snippet thay thế có khớp 100% dòng trên đĩa không trước khi vào thẩm định nhận thức.
+4. **Ma Trận Kiểm Tra 4 Mặt**:
    - Facet 1 (Ghost File Verification): Quét xem từng file/hàm được đề xuất sửa có thực sự tồn tại trên đĩa không.
    - Facet 2 (Broken Causality): Kiểm tra tính toàn vẹn nghiệp vụ và chuỗi nhân quả (VD: thế chấp có đòi hỏi hạ cấp trước không?).
    - Facet 3 (Boundary & Corner Invariants): Kiểm tra ô góc (0, 10, 20, 30), chia 0, số âm, timeout, race conditions.
    - Facet 4 (Downstream Consumer Desync): Kiểm tra tính đồng bộ của shared helpers, telemetry, network delta.
-4. **Mẫu Báo Cáo**:
+5. **Mẫu Báo Cáo**:
 ```markdown
 ### 🛡️ ZERO-TRUST PLAN GRILLING REPORT: [SLICE_OR_TICKET_ID]
 | Mã Lỗi | Loại Điểm Mù | Tệp & Dòng Thực Tế | Mô Tả Rủi Ro Kỹ Thuật | Chỉ Định Khắc Phục Bắt Buộc |
@@ -2259,10 +2316,11 @@ hooks: [.agents/hooks_implementer.json]
 4. **Universal Visual UI/UX Governance**: Khi tạo đầu ra thị giác (Web, App Mobile, PDF Report, Dashboard, Chart, CLI TUI), bắt buộc đọc `docs/domain/design.md`.
    - Tuân thủ Aesthetic Archetype và quy tắc Cắt gọt Triệt để (Aggressive Subtraction).
    - Tuyệt đối CẤM dính bẫy Anti-AI-Tells (không gradient tím xanh rập khuôn, không thẻ bóng đổ rác, không copy sáo rỗng).
-5. **Quy Trình Thi Công 3-Pass (Three-Pass Implementation Loop - Anti-Slop)**:
+5. **Quy Trình Thi Công 4-Pass (Four-Pass Implementation Loop - Anti-Slop & Pre-Finish Gate)**:
    - *Pass 1 (Make it Work - Adversarial TDD)*: Viết test trước (Red) ➔ Viết code tối thiểu để test chuyển sang màu XANH (Green) ➔ Inversion Test (sửa sai 1 dòng xem test có ĐỎ không). Mọi test bắt buộc gắn nhãn truy xuất nguồn gốc `[UC-XXX/MSS]` hoặc `[UC-XXX/A#]` và `[BR-XXX]`.
    - *Pass 2 (Make it Lean - Prune & Simplify)*: Rà soát lại diff vừa viết: Xóa bỏ các helper/interface chỉ dùng 1 lần (YAGNI), nén LOC lại 15–20% mà toàn bộ test suite vẫn PASS 100%.
    - *Pass 3 (Quality & Anti-Code-Golf Gate)*: Đo lường Cyclomatic Complexity (<= 5). CẤM BẪY CODE GOLF: Giữ code rõ ràng, không viết one-liner ma thuật, không viết dòng quá dài, không gộp tắt mắt. Tests được miễn trừ khỏi áp lực giảm LOC.
+   - *Pass 4 (Pre-Finish Gate - Mechanical Zero-Defect Sweep)*: Trước khi báo hoàn thành hoặc handoff sang Review, BẮT BUỘC tự chạy compiler check (`npm run typecheck` / `cargo check` / `dotnet build` / `go vet`) và slop linter. Tự động khắc phục 100% lỗi cú pháp, cảnh báo kiểu và dirty cast (`as any`) trước khi bàn giao. Chạy script trích xuất evidence snapshot lên đĩa cứng.
 6. **Literal Test Data & Failure Postconditions**:
    - Dữ liệu test bắt buộc là dữ liệu thực tế cụ thể (Literal Data: `"Acme Corp"`, `"ISBN 978-0-13-235088-4"`, số nguyên 5). CẤM dùng string mơ hồ (`"test"`, `"valid_user"`).
    - Với các test của Alternative Flow kết thúc bằng `Use case ends`, BẮT BUỘC viết assertion kiểm tra Failure Postconditions (giao dịch DB rollback sạch sẽ, không có bản ghi dở dang).

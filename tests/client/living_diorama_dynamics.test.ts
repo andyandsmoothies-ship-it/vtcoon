@@ -108,12 +108,14 @@ describe('[IMP-221][Trạm 1 RED] Living Diorama Dynamics Contract Suite', () =>
       expect(Math.abs((b1?.rotZ ?? 0) - (b2?.rotZ ?? 0))).toBeGreaterThan(0.005);
     });
 
-    it('[TC-221.03/MSS][UC-IMP221][Facet-1/CruiserTrajectory] calculateCruiserTrajectory(time) tính (x, y, z, yaw) theo tiếp tuyến', () => {
+    it('[TC-221.03/MSS][UC-IMP221][Facet-1/CruiserTrajectory] calculateCruiserTrajectory(time) tính (x, y, z, yaw) theo tiếp tuyến lòng sông Sài Gòn', () => {
       const traj0 = calculateCruiserTrajectory?.(0);
       expect(traj0).toBeDefined();
-      expect(traj0?.x).toBeCloseTo(-0.4, 2);
-      expect(traj0?.z).toBeCloseTo(0.2, 2);
-      expect(traj0?.yaw).toBeCloseTo(0, 2);
+      // Reconcile theo công thức quỹ đạo sông Sài Gòn mới [IMP-228/P1]:
+      expect(traj0?.x).toBeCloseTo(0, 2);                      // sin(0) * 0.32 = 0
+      expect(traj0?.y).toBeCloseTo(-0.032, 3);                  // base Y ngập trong nước
+      expect(traj0?.z).toBeCloseTo(5.2, 2);                    // cos(0) * 5.2 = 5.2
+      expect(traj0?.yaw).toBeCloseTo(Math.PI / 2, 2);          // atan2(dx, dz) = atan2(0.64*speed, 0) = PI/2
     });
 
     it('[TC-221.04/MSS][UC-IMP221][Facet-1/CruiserWake] calculateCruiserWake(time) dao động điều hòa quanh 1.0 trong [0.88, 1.12]', () => {
@@ -247,13 +249,14 @@ describe('[IMP-221][Trạm 1 RED] Living Diorama Dynamics Contract Suite', () =>
       expect(cruiserHtml.toLowerCase()).not.toContain('castshadow');
     });
 
-    it('[TC-221.16/MSS][UC-IMP221][Facet-5/SSRMarkupSafety] renderToStaticMarkup(<DioramaMarina />) kết xuất trơn tru không ném ngoại lệ trong môi trường Node.js', () => {
+    it('[TC-221.16/MSS][UC-IMP221][Facet-5/SSRMarkupSafety] renderToStaticMarkup(<DioramaMarina />) và (<DioramaHarborCruiser />) kết xuất trơn tru không ném ngoại lệ trong môi trường Node.js', () => {
       let html = '';
       expect(() => {
         html = renderToStaticMarkup(React.createElement(DioramaMarina));
       }).not.toThrow();
       expect(html).toContain('data-testid="diorama-perching-birds"');
-      expect(html).toContain('data-testid="diorama-harbor-cruiser"');
+      const cruiserHtml = renderToStaticMarkup(React.createElement(DioramaHarborCruiser));
+      expect(cruiserHtml).toContain('data-testid="diorama-harbor-cruiser"');
     });
   });
 });

@@ -31,18 +31,18 @@ function SafeSphereGeometry({ args }: { readonly args: readonly number[] }): Rea
 
 // Trụ đỡ cầu cạn bê tông cốt thép hình trụ tròn (#CBD5E1)
 const VIADUCT_PIER_POSITIONS: readonly [number, number, number][] = [
-  [-3.5, 0.01, -6.9], [0, 0.01, -6.9], [3.5, 0.01, -6.9],
-  [-3.5, 0.01, 6.9], [0, 0.01, 6.9], [3.5, 0.01, 6.9],
-  [-6.9, 0.01, -3.5], [-6.9, 0.01, 0], [-6.9, 0.01, 3.5],
-  [6.9, 0.01, -3.5], [6.9, 0.01, 0], [6.9, 0.01, 3.5],
+  [-3.5, 0.22, -6.9], [0, 0.22, -6.9], [3.5, 0.22, -6.9],
+  [-3.5, 0.22, 6.9], [0, 0.22, 6.9], [3.5, 0.22, 6.9],
+  [-6.9, 0.22, -3.5], [-6.9, 0.22, 0], [-6.9, 0.22, 3.5],
+  [6.9, 0.22, -3.5], [6.9, 0.22, 0], [6.9, 0.22, 3.5],
 ];
 
 // Lan can U-Girder bê tông bảo vệ hai bên mép cầu cạn (#94A3B8)
 const U_GIRDER_PARAPETS = [
-  { pos: [0, 0.03, -7.07], args: [14.2, 0.024, 0.03] }, { pos: [0, 0.03, -6.73], args: [14.2, 0.024, 0.03] },
-  { pos: [0, 0.03, 7.07], args: [14.2, 0.024, 0.03] }, { pos: [0, 0.03, 6.73], args: [14.2, 0.024, 0.03] },
-  { pos: [-7.07, 0.03, 0], args: [0.03, 0.024, 14.2] }, { pos: [-6.73, 0.03, 0], args: [0.03, 0.024, 14.2] },
-  { pos: [7.07, 0.03, 0], args: [0.03, 0.024, 14.2] }, { pos: [6.73, 0.03, 0], args: [0.03, 0.024, 14.2] },
+  { pos: [0, 0.45, -7.07], args: [14.2, 0.024, 0.03] }, { pos: [0, 0.45, -6.73], args: [14.2, 0.024, 0.03] },
+  { pos: [0, 0.45, 7.07], args: [14.2, 0.024, 0.03] }, { pos: [0, 0.45, 6.73], args: [14.2, 0.024, 0.03] },
+  { pos: [-7.07, 0.45, 0], args: [0.03, 0.024, 14.2] }, { pos: [-6.73, 0.45, 0], args: [0.03, 0.024, 14.2] },
+  { pos: [7.07, 0.45, 0], args: [0.03, 0.024, 14.2] }, { pos: [6.73, 0.45, 0], args: [0.03, 0.024, 14.2] },
 ] as const;
 
 // Cột cần tiếp điện trên cao (Catenary Masts: cột đứng Y=0.085m cao 0.17m; thanh vươn Y=0.155m)
@@ -80,10 +80,10 @@ export function DioramaBallastBed(): React.ReactElement {
         </mesh>
       ))}
 
-      {/* Hệ thống trụ cầu bê tông cốt thép hình trụ tròn */}
+      {/* Hệ thống trụ cầu bê tông cốt thép hình trụ tròn vươn lên đỡ dầm tại Y >= 0.40 */}
       {VIADUCT_PIER_POSITIONS.map((pos, idx) => (
         <mesh key={`pier-${idx}`} receiveShadow position={pos}>
-          <SafeCylinderGeometry args={[0.07, 0.08, 0.02, 12]} />
+          <SafeCylinderGeometry args={[0.07, 0.08, 0.42, 12]} />
           <meshStandardMaterial color="#CBD5E1" roughness={0.7} />
         </mesh>
       ))}
@@ -105,97 +105,11 @@ export function DioramaBallastBed(): React.ReactElement {
   );
 }
 
-export function DioramaWaterfrontStation(): React.ReactElement {
-  return (
-    <group position={[0, 0, 0]} data-testid="diorama-waterfront-station">
-      {/* 1. Thềm ke ga granite sáng màu dọc tuyến Metro ven sông Nam */}
-      <mesh receiveShadow position={[-1.6, 0.025, 6.55]}>
-        <SafeBoxGeometry args={[2.0, 0.03, 0.36]} />
-        <meshStandardMaterial color="#E2E8F0" roughness={0.3} metalness={0.1} />
-      </mesh>
-      {/* 2. Khung vòm thép uốn cong màu than sẫm */}
-      <mesh position={[-1.6, 0.165, 6.55]}>
-        <SafeBoxGeometry args={[1.9, 0.015, 0.40]} />
-        <meshStandardMaterial color="#1E293B" metalness={0.7} roughness={0.3} />
-      </mesh>
-      {/* 3. Cột thép chịu lực đỡ kết cấu mái vòm */}
-      <mesh position={[-2.3, 0.09, 6.55]}>
-        <SafeCylinderGeometry args={[0.015, 0.015, 0.12, 8]} />
-        <meshStandardMaterial color="#64748B" metalness={0.7} roughness={0.3} />
-      </mesh>
-      <mesh position={[-0.9, 0.09, 6.55]}>
-        <SafeCylinderGeometry args={[0.015, 0.015, 0.12, 8]} />
-        <meshStandardMaterial color="#64748B" metalness={0.7} roughness={0.3} />
-      </mesh>
-      {/* 4. Ghế dài nghỉ chân cho hành khách chờ tàu */}
-      <mesh receiveShadow position={[-1.6, 0.05, 6.55]}>
-        <SafeBoxGeometry args={[0.45, 0.02, 0.12]} />
-        <meshStandardMaterial color="#78350F" roughness={0.5} />
-      </mesh>
-      {/* 5. Mái vòm bạt căng hình cánh buồm trắng sứ đặc trưng Metro Tuyến 1 */}
-      <mesh position={[-1.6, 0.175, 6.55]}>
-        <SafeBoxGeometry args={[1.95, 0.01, 0.44]} />
-        <meshStandardMaterial color="#F8FAFC" roughness={0.2} metalness={0.05} />
-      </mesh>
-      {/* 6. Vách kính an toàn ke ga mờ (Platform Screen Doors - PSD) */}
-      <mesh position={[-1.6, 0.075, 6.72]}>
-        <SafeBoxGeometry args={[1.9, 0.07, 0.02]} />
-        <meshStandardMaterial color="#38BDF8" transparent opacity={0.65} roughness={0.1} />
-      </mesh>
-      {/* 7. Đèn tín hiệu nhà ga hoàng kim */}
-      <mesh position={[-0.65, 0.13, 6.55]}>
-        <SafeSphereGeometry args={[0.025, 8, 8]} />
-        <meshStandardMaterial color="#FDE047" emissive="#FDE047" emissiveIntensity={0.8} />
-      </mesh>
-    </group>
-  );
-}
-
-export function DioramaLandmarkNorthStation(): React.ReactElement {
-  return (
-    <group position={[1.6, 0.025, -6.55]} data-testid="diorama-landmark-north-station">
-      {/* 1. Thềm ga granite sáng màu dọc bờ Bắc */}
-      <mesh receiveShadow position={[0, 0, 0]}>
-        <SafeBoxGeometry args={[2.2, 0.03, 0.38]} />
-        <meshStandardMaterial color="#E2E8F0" roughness={0.3} metalness={0.1} />
-      </mesh>
-      {/* 2. Mái vòm hiện đại viền xanh cyan thương hiệu Metro Số 1 */}
-      <mesh position={[0, 0.16, 0]}>
-        <SafeBoxGeometry args={[2.1, 0.015, 0.42]} />
-        <meshStandardMaterial color="#0284C7" metalness={0.4} roughness={0.2} transparent opacity={0.85} />
-      </mesh>
-      {/* 3. Cột thép chịu lực đỡ kết cấu mái */}
-      <mesh position={[-0.8, 0.08, 0]}>
-        <SafeCylinderGeometry args={[0.015, 0.015, 0.13, 8]} />
-        <meshStandardMaterial color="#64748B" metalness={0.7} roughness={0.3} />
-      </mesh>
-      <mesh position={[0.8, 0.08, 0]}>
-        <SafeCylinderGeometry args={[0.015, 0.015, 0.13, 8]} />
-        <meshStandardMaterial color="#64748B" metalness={0.7} roughness={0.3} />
-      </mesh>
-      {/* 4. Biển hiệu LED vàng hoàng kim Landmark Metro */}
-      <mesh position={[0, 0.19, 0]}>
-        <SafeBoxGeometry args={[0.6, 0.03, 0.04]} />
-        <meshStandardMaterial color="#FEF08A" emissive="#FEF08A" emissiveIntensity={0.8} />
-      </mesh>
-      {/* 5. Vách kính an toàn ke ga mờ (Platform Screen Doors - PSD) */}
-      <mesh position={[0, 0.075, 0.18]}>
-        <SafeBoxGeometry args={[2.0, 0.07, 0.02]} />
-        <meshStandardMaterial color="#38BDF8" transparent opacity={0.65} roughness={0.1} />
-      </mesh>
-      {/* 6. Ghế chờ hành khách */}
-      <mesh receiveShadow position={[0, 0.03, 0]}>
-        <SafeBoxGeometry args={[0.5, 0.02, 0.12]} />
-        <meshStandardMaterial color="#78350F" roughness={0.5} />
-      </mesh>
-      {/* 7. Chao đèn tín hiệu phía Bắc */}
-      <mesh position={[0.95, 0.12, 0]}>
-        <SafeSphereGeometry args={[0.025, 8, 8]} />
-        <meshStandardMaterial color="#FEF08A" emissive="#FEF08A" emissiveIntensity={0.8} />
-      </mesh>
-    </group>
-  );
-}
+// Re-export 2 ga trên cao từ diorama_elevated_stations bảo toàn 100% call-sites và backward compatibility [P4]
+export {
+  DioramaWaterfrontStation,
+  DioramaLandmarkNorthStation,
+} from './diorama_elevated_stations';
 
 interface FloraBedConfig {
   readonly x: number;
@@ -232,10 +146,10 @@ export function DioramaTropicalFlora(): React.ReactElement {
 }
 
 const METALLIC_RAIL_SPECS = [
-  { pos: [0, 0.032, -6.95], args: [13.8, 0.01, 0.02] }, { pos: [0, 0.032, -6.85], args: [13.8, 0.01, 0.02] },
-  { pos: [0, 0.032, 6.85], args: [13.8, 0.01, 0.02] }, { pos: [0, 0.032, 6.95], args: [13.8, 0.01, 0.02] },
-  { pos: [-6.95, 0.032, 0], args: [0.02, 0.01, 13.8] }, { pos: [-6.85, 0.032, 0], args: [0.02, 0.01, 13.8] },
-  { pos: [6.85, 0.032, 0], args: [0.02, 0.01, 13.8] }, { pos: [6.95, 0.032, 0], args: [0.02, 0.01, 13.8] },
+  { pos: [0, 0.45, -6.95], args: [13.8, 0.01, 0.02] }, { pos: [0, 0.45, -6.85], args: [13.8, 0.01, 0.02] },
+  { pos: [0, 0.45, 6.85], args: [13.8, 0.01, 0.02] }, { pos: [0, 0.45, 6.95], args: [13.8, 0.01, 0.02] },
+  { pos: [-6.95, 0.45, 0], args: [0.02, 0.01, 13.8] }, { pos: [-6.85, 0.45, 0], args: [0.02, 0.01, 13.8] },
+  { pos: [6.85, 0.45, 0], args: [0.02, 0.01, 13.8] }, { pos: [6.95, 0.45, 0], args: [0.02, 0.01, 13.8] },
 ] as const;
 
 const tempVec = new Vector3();
@@ -269,7 +183,7 @@ export function DioramaModelRailroad(): React.ReactElement {
       const yaw = computeTrainYaw(tempTangent);
       const pitch = computeTrainPitch(kinematics.speed, t);
 
-      grp.position.set(tempVec.x, 0.062, tempVec.z);
+      grp.position.set(tempVec.x, tempVec.y + 0.038, tempVec.z);
       grp.rotation.set(pitch, yaw, 0);
     }
   });
@@ -281,37 +195,37 @@ export function DioramaModelRailroad(): React.ReactElement {
 
       {/* 1. Móng tà vẹt gỗ sẫm màu ôm trọn 4 cạnh phía trong 40 ô cờ (X, Z ~ ±6.9m) */}
       {/* BẮT BUỘC LÀ DIRECT CHILDREN CỦA GROUP GỐC, KHÔNG CAST SHADOW ĐỂ BẢO VỆ TC-IMP142.09 */}
-      <mesh receiveShadow position={[0, 0.022, -6.9]}>
+      <mesh receiveShadow position={[0, 0.44, -6.9]}>
         <SafeBoxGeometry args={[13.8, 0.012, 0.22]} />
         <meshStandardMaterial color="#451A03" roughness={0.85} />
       </mesh>
-      <mesh receiveShadow position={[0, 0.022, 6.9]}>
+      <mesh receiveShadow position={[0, 0.44, 6.9]}>
         <SafeBoxGeometry args={[13.8, 0.012, 0.22]} />
         <meshStandardMaterial color="#451A03" roughness={0.85} />
       </mesh>
-      <mesh receiveShadow position={[-6.9, 0.022, 0]}>
+      <mesh receiveShadow position={[-6.9, 0.44, 0]}>
         <SafeBoxGeometry args={[0.22, 0.012, 13.8]} />
         <meshStandardMaterial color="#451A03" roughness={0.85} />
       </mesh>
-      <mesh receiveShadow position={[6.9, 0.022, 0]}>
+      <mesh receiveShadow position={[6.9, 0.44, 0]}>
         <SafeBoxGeometry args={[0.22, 0.012, 13.8]} />
         <meshStandardMaterial color="#451A03" roughness={0.85} />
       </mesh>
 
       {/* 1.1 Cung ray cua góc (Corner Rails) tại 4 góc nối liền mạch khép kín */}
-      <mesh receiveShadow position={[-6.85, 0.022, 6.85]} rotation={[0, Math.PI / 4, 0]}>
+      <mesh receiveShadow position={[-6.85, 0.44, 6.85]} rotation={[0, Math.PI / 4, 0]}>
         <SafeBoxGeometry args={[0.32, 0.012, 0.22]} />
         <meshStandardMaterial color="#451A03" roughness={0.85} />
       </mesh>
-      <mesh receiveShadow position={[6.85, 0.022, 6.85]} rotation={[0, -Math.PI / 4, 0]}>
+      <mesh receiveShadow position={[6.85, 0.44, 6.85]} rotation={[0, -Math.PI / 4, 0]}>
         <SafeBoxGeometry args={[0.32, 0.012, 0.22]} />
         <meshStandardMaterial color="#451A03" roughness={0.85} />
       </mesh>
-      <mesh receiveShadow position={[6.85, 0.022, -6.85]} rotation={[0, Math.PI / 4, 0]}>
+      <mesh receiveShadow position={[6.85, 0.44, -6.85]} rotation={[0, Math.PI / 4, 0]}>
         <SafeBoxGeometry args={[0.32, 0.012, 0.22]} />
         <meshStandardMaterial color="#451A03" roughness={0.85} />
       </mesh>
-      <mesh receiveShadow position={[-6.85, 0.022, -6.85]} rotation={[0, -Math.PI / 4, 0]}>
+      <mesh receiveShadow position={[-6.85, 0.44, -6.85]} rotation={[0, -Math.PI / 4, 0]}>
         <SafeBoxGeometry args={[0.32, 0.012, 0.22]} />
         <meshStandardMaterial color="#451A03" roughness={0.85} />
       </mesh>

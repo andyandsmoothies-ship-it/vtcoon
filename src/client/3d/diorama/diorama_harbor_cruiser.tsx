@@ -9,17 +9,15 @@ export function calculateCruiserWake(time: number): number {
 }
 
 export function calculateCruiserTrajectory(time: number): { x: number; y: number; z: number; yaw: number } {
-  if (!Number.isFinite(time)) return { x: -3.2, y: -0.01, z: 0.2, yaw: 0 };
-  const speed = 0.16;
+  if (!Number.isFinite(time)) return { x: 0, y: -0.032, z: 5.2, yaw: Math.PI / 2 };
+  const speed = 0.12;
   const angle = time * speed;
-  const rX = 2.8;
-  const rZ = 2.2;
-  const x = -3.2 + Math.cos(angle) * rX;
-  const z = 0.2 + Math.sin(angle) * rZ;
-  const y = -0.01 + Math.sin(time * 3.0) * 0.005;
+  const x = Math.sin(angle * 2.0) * 0.32;
+  const z = Math.cos(angle) * 5.2;
+  const y = -0.032 + Math.sin(time * 2.8) * 0.003;
 
-  const dx = -Math.sin(angle) * rX;
-  const dz = Math.cos(angle) * rZ;
+  const dx = 2.0 * 0.32 * Math.cos(angle * 2.0);
+  const dz = -5.2 * Math.sin(angle);
   const yaw = Math.atan2(dx, dz);
 
   return { x, y, z, yaw };
@@ -44,7 +42,7 @@ export function DioramaHarborCruiser(): React.ReactElement {
   });
 
   return (
-    <group ref={boatRef} position={[-3.2, -0.01, 0.2]} data-testid="diorama-harbor-cruiser">
+    <group ref={boatRef} position={[0, -0.032, 5.2]} data-testid="diorama-harbor-cruiser">
       {/* Zero castShadow theo chuẩn [TC-221.15] */}
       <mesh position={[0, 0.035, 0]}>
         <boxGeometry args={[0.26, 0.05, 0.72]} />

@@ -989,3 +989,34 @@
   * `chaos-sentinel`: Station 4 APPROVED (24/24 Intent parity, port 50144 boundary probe clean, diệt 3/3 mutants 100%).
 - **Trạng thái**: ✅ Hoàn thành IMP-229 (2026-09-30).
 
+---
+
+### [IMP-228-3D] HCMC Metro Line 1 Elevated Viaduct & Saigon River Watercraft Navigation
+- **Mục tiêu**: Khắc phục triệt để lỗi thuyền/xuồng/ca-nô chạy trên đất liền bằng cách neo quỹ đạo vào lòng sông Sài Gòn ($Y = -0.032, X \in [-0.35, 0.35]$), đồng thời nâng cấp toàn diện tuyến Metro thành Tuyến Metro Số 1 trên cao chuẩn TP. Hồ Chí Minh với dầm cầu cạn U-Girder ($Y = 0.45\text{m}$), trụ tròn bê tông ($Y \ge 0.40\text{m}$), hệ thống cầu thang bộ zíc-zắc kèm thang cuốn bọc kính dẫn lên ke ga trên cao 2 tầng, bảo tồn 100% các mô hình 3D danh thắng hiện hữu (Nhà Thờ Đức Bà, Chợ Bến Thành, Bitexco, Cầu Ba Son, Cầu Long Biên, Cảng Cát Lái).
+- **Hạ tầng hoàn tất**:
+  * `src/client/3d/diorama/diorama_harbor_cruiser.tsx` (65 LOC): Neo quỹ đạo lòng sông Sài Gòn $X \in [-0.35, 0.35], Y = -0.032$.
+  * `src/client/3d/diorama/diorama_marina.tsx` (189 LOC): Gỡ duplicate cruiser, du thuyền sát mép nước $Y = -0.032$.
+  * `src/client/3d/diorama/diorama_microlife.tsx` (63 LOC): Ca-nô hạ xuống $Y = -0.030$, tắt `castShadow={false}`.
+  * `src/client/3d/diorama/diorama_train_kinematics.ts` (255 LOC): 17 điểm Catmull-Rom trên cao $Y = 0.45\text{m}$, chu vi $51.66\text{m}$, bảo toàn ga Nam $0.12$ & Bắc $0.62$.
+  * `src/client/3d/diorama/diorama_elevated_stations.tsx` (175 LOC [NEW]): Ga trên cao 2 tầng, thang bộ zíc-zắc tay vịn `#CBD5E1`, thang cuốn bọc kính `#38BDF8`, cửa chắn PSD, mái vòm bạt căng buồm `#F8FAFC`.
+  * `src/client/3d/diorama/diorama_railroad.tsx` (311 LOC): Re-export 2 ga, trụ cầu tròn đỡ dầm vươn lên $Y \ge 0.40\text{m}$, U-Girder $Y = 0.45\text{m}$, tà vẹt $Y = 0.44\text{m}$ (giảm từ 397 LOC).
+  * `src/client/3d/miniature_city_diorama.tsx` (315 LOC): Mount `DioramaHarborCruiser` tại gốc tọa độ sa bàn.
+  * `docs/domain/gotchas.md`: Ghi nhận Bất biến số 22 (Pillar V: 3D Spline Kinematics Arc-Length Calibration & Station Progress Parity).
+  * `docs/reports/improvements/IMP-228-hcmc-metro-line1-elevated-viaduct-and-watercraft-navigation_report.md`: Báo cáo nghiệm thu hoàn chỉnh.
+- **Kiểm thử & Bất biến**:
+  * `tests/contracts/imp228_elevated_metro_and_watercraft_navigation.test.ts` (374 LOC): 16/16 atomic contract tests PASS (Universal 5-Facet Matrix, Detroit Classical TDD, 1-4 asserts/test, zero dirty casts).
+  * Bảo toàn 100% tests di sản: `living_diorama_dynamics` (16 tests), `hcmc_metro_line1_infrastructure` (16 tests), `imp134_model_train_and_stations` (16 tests), `miniature_city_diorama` (32 tests) -> Tổng **96/96 tests PASS (Zero Regression)**.
+  * TypeScript typecheck: `tsc --noEmit` 0 errors. UI Linter: `npm run lint:ui` 0 violations / 205 files.
+  * Evidence Snapshot: `.agents/evidence/chaos_sentinel_IMP-228.json` (`executed: true`).
+- **Phê chuẩn**:
+  * `plan-griller`: P1-P5 AUDIT APPROVED (giải quyết 4 phản biện P1–P4, tổng quát hóa meta-auditor).
+  * `qa-tester`: Station 1 RED verified (15/16 tests failed as expected under Adversarial Inversion).
+  * `implementer`: Station 2 GREEN verified (16/16 tests pass, LOC đạt chuẩn).
+  * `scout`: Station 2.5 PASS (0 defects qua 5 universal defect archetypes, LOC safe).
+  * `spec-reviewer`: Station 3.1 APPROVED (100% spec reconciliation, 0 scope drift).
+  * `code-reviewer`: Station 3.2 APPROVED (Deep Architecture, clean SRP, zero GC churn in useFrame).
+  * `game-3d-visual-critic`: Station 3.2 APPROVED (Chuẩn AAA Retropoly/Monopoly Plus, chiều sâu không gian vượt trội).
+  * `chaos-sentinel`: Station 4 APPROVED (24/24 Intent parity, port 60694 boundary probe clean, diệt 2/2 mutants 100%).
+- **Trạng thái**: ✅ Hoàn thành IMP-228 (2026-09-30).
+
+

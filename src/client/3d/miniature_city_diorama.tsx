@@ -8,6 +8,7 @@ import { DioramaCivicCenter } from './diorama/diorama_civic_center';
 import { DioramaWaterfrontPark } from './diorama/diorama_waterfront_park';
 import { DioramaContainerPort } from './diorama/diorama_container_port';
 import { DioramaMarina } from './diorama/diorama_marina';
+import { DioramaHarborCruiser } from './diorama/diorama_harbor_cruiser';
 import { DioramaSkyline } from './diorama/diorama_skyline';
 import { DioramaHeritageDistrict } from './diorama/diorama_heritage_district';
 import { DioramaMicroLife } from './diorama/diorama_microlife';
@@ -296,6 +297,8 @@ export function MiniatureCityDiorama(): React.ReactElement {
       {/* 4. Cảng Container Cát Lái & Bến du thuyền (Đông Nam) */}
       <DioramaContainerPort />
       <DioramaMarina />
+      {/* 4.1. Thuyền du ngoạn lòng sông Sài Gòn */}
+      <DioramaHarborCruiser />
       {/* 5. Cụm cao ốc tài chính Landmark Skyline & Tháp cao ốc nén */}
       <DioramaSkyline />
       <DioramaHighriseBlocks />

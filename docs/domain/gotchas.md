@@ -170,6 +170,13 @@
     - **Tôn Trọng Caller Explicit Formula & Wire Duality Guard**: Trong `resolveFormulaText`, phòng vệ tuyệt đối trước cả delta tombstone `null` lẫn `''` bằng `if (typeof item.formula === 'string') return item.formula.trim(); if (item.formula === null) return '';`, tôn trọng giá trị chuỗi rỗng chủ động từ caller và triệt tiêu 100% nguy cơ crash `TypeError` khi `null.trim()`.
     - **Anti-Duplication & Robust Title Scraping**: Tên ô đất chỉ xuất hiện đúng 1 lần duy nhất trong nội dung hiển thị của badge. Nhánh `buy` sử dụng regex bóc tách phòng vệ: `item.title.replace(/^Mua(?:\s+sở\s+hữu|\s+quyền\s+sử\s+dụng\s+đất:?|\s+đất|\s+BĐS)?(?:\s+|$)/i, '').trim()`, triệt tiêu hoàn toàn lỗi lặp từ ngữ ("sở hữu sở hữu", "mua sở hữu Mua") và loại bỏ đuôi câu thừa ("từ Ngân Hàng").
 
+22. **3D Spline Kinematics Arc-Length Calibration & Station Progress Parity [IMP-228]**:
+    - **Đồng Bộ Hóa Tham Số Chiều Dài Cung (Arc-Length Parameterization)**: Khi thiết kế lại hoặc thay đổi chuỗi điểm mốc (`TRACK_POINTS`) của đường ray/đường dẫn động học (`CatmullRomCurve3`), BẮT BUỘC phải đo đạc thực nghiệm và hiệu chuẩn 2 đại lượng:
+      (1) Chu vi tổng (`curve.getLength()`) phải nằm trong giới hạn kiểm thử kế thừa (ví dụ: $[50.0\text{m}, 58.0\text{m}]$ theo `TC-IMP134.01`).
+      (2) Vị trí đón trả khách tại các hằng số tiến trình dừng đỗ (`curve.getPointAt(SOUTH_STATION_PROGRESS)` tại $0.12$ và `curve.getPointAt(NORTH_STATION_PROGRESS)` tại $0.62$) bắt buộc phải trả về tọa độ vật lý nằm ngay trước thềm ke ga tương ứng (sai số $< 0.3\text{m}$).
+    - **Chống Dừng Sai Vị Trí & Silent Test Divergence**: CẤM thay đổi spline points chỉ dựa vào mắt nhìn trực quan mà không tính toán kiểm chứng $u \in [0, 1]$, vì sẽ gây ra lỗi tàu giảm tốc dừng đỗ 3.5 giây ở giữa bãi cỏ hoang nhưng lại phóng hết tốc độ vượt qua ga thật.
+    - **Zero-Shadow Watercraft Invariant**: Toàn bộ phương tiện đường thủy (thuyền du ngoạn, ca-nô, du thuyền bến cảng) khi vận hành trong lòng sông bán trong suốt bắt buộc tắt hoàn toàn `castShadow={false}` để tránh tạo vệt bóng đen giả tạo đè lên mặt nước và bảo vệ ngân sách đổ bóng GPU di động.
+
 ### Pillar VI: [KIỂM THỬ HỢP ĐỒNG DETROIT CLASSICAL]
 1. **Adversarial Inversion Gate (RED First)**: Viết test hợp đồng trước và chứng minh toàn bộ test bị FAIL (RED) vì đúng lý do nghiệp vụ trước khi được phép chạm vào mã nguồn `src/**`.
 2. **Atomic Contract Mandate**: Mỗi ca kiểm thử chỉ chứa 1–4 assertions, tập trung vào 1 hành vi duy nhất, cấm sử dụng vòng lặp trong `it()`. Cấm tuyệt đối các bài test checklist tĩnh (`fs.existsSync`, `typeof fn`, test LOC trong unit test).

@@ -25,26 +25,24 @@ export const STATION_STOP_DURATION = TRAIN_CONFIG.STATION_DWELL_SECONDS;
 export const SOUTH_STATION_PROGRESS = TRAIN_CONFIG.SOUTH_STATION_PROGRESS;
 export const NORTH_STATION_PROGRESS = TRAIN_CONFIG.NORTH_STATION_PROGRESS;
 
-const TRACK_POINTS: readonly Vector3[] = [
-  new Vector3(4.9, 0.032, 6.9),
-  new Vector3(0, 0.032, 6.9),
-  new Vector3(-1.6, 0.032, 6.9),
-  new Vector3(-6.1, 0.032, 6.9),
-  new Vector3(-6.8, 0.032, 6.8),
-  new Vector3(-6.9, 0.032, 6.1),
-  new Vector3(-6.9, 0.032, 0),
-  new Vector3(-6.9, 0.032, -6.1),
-  new Vector3(-6.8, 0.032, -6.8),
-  new Vector3(-6.1, 0.032, -6.9),
-  new Vector3(0, 0.032, -6.9),
-  new Vector3(1.6, 0.032, -6.9),
-  new Vector3(6.1, 0.032, -6.9),
-  new Vector3(6.8, 0.032, -6.8),
-  new Vector3(6.9, 0.032, -6.1),
-  new Vector3(6.9, 0.032, 0),
-  new Vector3(6.9, 0.032, 6.1),
-  new Vector3(6.8, 0.032, 6.8),
-  new Vector3(6.1, 0.032, 6.9),
+export const TRACK_POINTS: readonly Vector3[] = [
+  new Vector3(4.9, 0.45, 6.9),
+  new Vector3(0, 0.45, 6.9),
+  new Vector3(-1.6, 0.45, 6.9), // Ga Waterfront: progress = 0.12 (Vector3 {-1.30, 0.45, 6.90})
+  new Vector3(-5.8, 0.45, 6.8),
+  new Vector3(-6.6, 0.45, 5.8),
+  new Vector3(-6.8, 0.45, 2.0),
+  new Vector3(-6.7, 0.45, -2.0),
+  new Vector3(-6.6, 0.45, -5.8),
+  new Vector3(-5.8, 0.45, -6.8),
+  new Vector3(0, 0.45, -6.9),
+  new Vector3(1.6, 0.45, -6.9),  // Ga Landmark Bắc: progress = 0.62 (Vector3 {1.29, 0.45, -6.90})
+  new Vector3(5.8, 0.45, -6.8),
+  new Vector3(6.6, 0.45, -5.8),
+  new Vector3(6.8, 0.45, -2.0),
+  new Vector3(6.7, 0.45, 2.0),
+  new Vector3(6.6, 0.45, 5.8),
+  new Vector3(5.8, 0.45, 6.8),
 ];
 
 let cachedCurve: CatmullRomCurve3 | null = null;

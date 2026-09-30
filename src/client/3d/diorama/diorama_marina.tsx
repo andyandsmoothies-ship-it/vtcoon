@@ -6,7 +6,6 @@ import { SoundEngine } from '../../audio/sound_engine';
 import { useSafeFrame } from '../safe_frame';
 import { useEnvironmentStore, type TimeOfDayPhase } from '../../store/environment_store';
 import { DioramaPerchingBirds } from './diorama_perching_birds';
-import { DioramaHarborCruiser } from './diorama_harbor_cruiser';
 
 export function calculateWatercraftBobbing(time: number, phaseOffset: number = 0): { y: number; rotZ: number; rotX: number } {
   if (!Number.isFinite(time)) return { y: 0, rotZ: 0, rotX: 0 };
@@ -38,13 +37,13 @@ export function DioramaMarina(): React.ReactElement {
     const t = state.clock.elapsedTime;
     if (yacht1Ref.current) {
       const b1 = calculateWatercraftBobbing(t, 0.0);
-      yacht1Ref.current.position.y = -0.01 + b1.y;
+      yacht1Ref.current.position.y = -0.032 + b1.y;
       yacht1Ref.current.rotation.z = b1.rotZ;
       yacht1Ref.current.rotation.x = b1.rotX;
     }
     if (yacht2Ref.current) {
       const b2 = calculateWatercraftBobbing(t, 1.6);
-      yacht2Ref.current.position.y = -0.01 + b2.y;
+      yacht2Ref.current.position.y = -0.032 + b2.y;
       yacht2Ref.current.rotation.z = b2.rotZ;
       yacht2Ref.current.rotation.x = b2.rotX;
     }
@@ -86,7 +85,7 @@ export function DioramaMarina(): React.ReactElement {
       </group>
 
       {/* 2. CẶP DU THUYỀN SIÊU SANG ĐIÊU KHẮC */}
-      <group ref={yacht1Ref} position={[-1.8, -0.01, -0.6]} rotation={[0, -0.2, 0]}>
+      <group ref={yacht1Ref} position={[-1.8, -0.032, -0.6]} rotation={[0, -0.2, 0]}>
         <mesh castShadow receiveShadow position={[0, 0.04, 0]}>
           <boxGeometry args={[0.42, 0.07, 1.1]} />
           <meshStandardMaterial color="#F8FAFC" roughness={0.2} metalness={0.1} />
@@ -109,7 +108,7 @@ export function DioramaMarina(): React.ReactElement {
         </mesh>
       </group>
 
-      <group ref={yacht2Ref} position={[-1.8, -0.01, 0.5]} rotation={[0, 0.1, 0]}>
+      <group ref={yacht2Ref} position={[-1.8, -0.032, 0.5]} rotation={[0, 0.1, 0]}>
         <mesh castShadow receiveShadow position={[0, 0.035, 0]}>
           <boxGeometry args={[0.36, 0.06, 0.85]} />
           <meshStandardMaterial color="#0F172A" roughness={0.3} metalness={0.3} />
@@ -185,9 +184,6 @@ export function DioramaMarina(): React.ReactElement {
 
       {/* Đàn hải âu đậu cọc bến thuyền */}
       <DioramaPerchingBirds />
-
-      {/* Thuyền tuần du rẽ sóng vịnh bến Bạch Đằng */}
-      <DioramaHarborCruiser />
     </group>
   );
 }
