@@ -274,18 +274,23 @@ export function FloatingNumbersOverlay(): React.ReactElement | null {
             <MilestoneBanner item={latestMilestone} />
           </div>
         )}
-        {displayItems.map((item, idx) => (
-          <div
-            key={item.id}
-            className={
-              (latestMilestone || (idx === 0 && displayItems.length > 1))
-                ? "w-full justify-start sm:justify-center hidden md:flex"
-                : "w-full flex justify-start sm:justify-center"
-            }
-          >
-            <FloatingBadge item={item} />
-          </div>
-        ))}
+        {displayItems.map((item, idx) => {
+          const isHiddenOnMobile = Boolean(
+            latestMilestone && displayItems.length > 1 && idx < displayItems.length - 1
+          );
+          return (
+            <div
+              key={item.id}
+              className={
+                isHiddenOnMobile
+                  ? "w-full justify-start sm:justify-center hidden md:flex"
+                  : "w-full flex justify-start sm:justify-center"
+              }
+            >
+              <FloatingBadge item={item} />
+            </div>
+          );
+        })}
       </div>
     </aside>
   );

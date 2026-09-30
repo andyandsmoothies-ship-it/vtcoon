@@ -203,6 +203,29 @@
 - **Evidence Snapshot:** [`.agents/evidence/chaos_sentinel_IMP227.json`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/evidence/chaos_sentinel_IMP227.json) (executed: true, verdict: APPROVED)
 - **Kiểm thử:** 17/17 tests PASS (`imp227_auction_solo_deadlock_and_label_semantics.test.ts`); 32/32 suites (503/503 tests) PASS 100% trên bộ lọc `vitest run auction`.
 
+#### [IMP-234] Khử Điểm Mù Tác Động Thẻ Sự Kiện (Dynamic Board Cell Event Highlights)
+- **Mã Ticket:** IMP-234 (Tier 2 Full Rigor)
+- **Use Case Ref:** UC-IMP234
+- **Phạm vi khắc phục:**
+  - Dynamic 3D Event Aura Rim: Mesh PBR phát quang đa sắc (Vàng cam buff, Đỏ nerf, Cyan băng giá) tại cao độ Y = 0.042m bao ngoài chân đế BĐS, triệt tiêu Z-fighting.
+  - Hovering Countdown Crest: Huy hiệu 3D nổi tại Y = 0.52m bọc qua `<SafeHtml>` chuẩn R3F, hiển thị icon, nhãn chỉ số và bộ đếm vòng, tự nhấp nháy cảnh báo khi còn 1 vòng; triệt tiêu 100% crash R3F THREE namespace.
+  - 1-Tap Ticker Spotlight: Click thẻ sự kiện trên ticker lập tức spotlight các ô đất bị ảnh hưởng trên sa bàn 3D trong 3.000ms.
+- **Báo cáo chi tiết:** [`docs/reports/improvements/IMP-234-dynamic-board-cell-event-highlights_report.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/reports/improvements/IMP-234-dynamic-board-cell-event-highlights_report.md)
+- **Evidence Snapshot:** [`.agents/evidence/chaos_sentinel_IMP-234.json`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/evidence/chaos_sentinel_IMP-234.json) (executed: true, verdict: APPROVED)
+- **Kiểm thử:** 16/16 tests PASS (`tests/contracts/imp234_dynamic_board_cell_event_highlights.test.ts`).
+
+#### [IMP-235] Đồng Bộ Hóa Toàn Diện UI/UX và Server Engine (UI/UX Engine Convergence)
+- **Mã Ticket:** IMP-235 (Tier 2 Full Rigor)
+- **Use Case Ref:** UC-IMP235
+- **Phạm vi khắc phục:**
+  - Khôi phục xử lý vỡ nợ trái phiếu: Tái kích hoạt `handleStartFireSaleAuction` và lưu trữ `room.lastEventCard` khi tài sản thế chấp bị phát mãi.
+  - Chuẩn hóa C3 Sổ Đỏ: Đổi nhãn sang `RESORT/TTTM` nhưng bảo toàn title `C3 (KHÁCH SẠN)` chống hồi quy kiểm thử.
+  - Trợ năng màu sắc: Thay đổi text trên nền nhóm màu Vàng #F1C40F sang chữ tối `text-slate-950` đạt chuẩn WCAG AA.
+  - Công thái học Desktop/Mobile: Chuyển `FloatingNumbers` sang cột phải màn hình lớn, dời `ServerToast` lên z-60 không đè modal trung tâm.
+- **Báo cáo chi tiết:** [`docs/reports/improvements/IMP-235-ui-ux-engine-convergence_report.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/reports/improvements/IMP-235-ui-ux-engine-convergence_report.md)
+- **Evidence Snapshot:** [`.agents/evidence/chaos_sentinel_IMP-235.json`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/evidence/chaos_sentinel_IMP-235.json) (executed: true, verdict: APPROVED)
+- **Kiểm thử:** 15/15 tests PASS (`tests/contracts/imp_uiux_engine_convergence.test.ts`).
+
 #### [IMP-236] Nâng Cấp Trí Tuệ Đối Kháng Bot 1v1 (Competitive Duel AI)
 - **Mã Ticket:** IMP-236 (Tier 2 Full Rigor)
 - **Use Case Ref:** UC-BOT-02, UC-BOT-03, UC-BOT-04, UC-BOT-06, UC-IMP236

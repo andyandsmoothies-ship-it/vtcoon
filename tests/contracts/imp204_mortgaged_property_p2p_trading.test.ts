@@ -400,8 +400,8 @@ describe('[TC-204][UC-IMP204] Mortgaged Property P2P Trading & Debt Restructurin
           initialOffered: [1],
         })
       );
-      expect(html).toContain('100% (300');
-      expect(html).not.toContain('100% (600');
+      expect(html).toContain('100% Gốc (300');
+      expect(html).not.toContain('100% Gốc (600');
     });
   });
 });

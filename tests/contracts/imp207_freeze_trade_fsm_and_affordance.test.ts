@@ -147,7 +147,8 @@ describe('[TC-207/MSS][UC-IMP207] Freeze Trade FSM Transition & UI Affordance Co
         activeModifiers: [],
       });
       const player = createPlayer('p1', { position: 35 });
-      room.players = [player];
+      const opponent = createPlayer('p2', { position: 0 });
+      room.players = [player, opponent];
       const auctions = new Map<string, AuctionSession>();
 
       const res = handleDecline(room, player, auctions, room.roomCode);

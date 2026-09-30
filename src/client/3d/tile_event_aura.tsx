@@ -1,7 +1,7 @@
 // [IMP-234] TileEventAura — Dynamic 3D Event Highlight & Countdown Crest
 // Displays PBR glowing aura rim around affected cells and hovering billboard crest with remaining rounds
 import React from 'react';
-import { Billboard } from '@react-three/drei';
+import { Billboard, Html } from '@react-three/drei';
 import { MarketCardId, ChanceCardId } from '../../domain/event_card_types.js';
 import { useGameStore } from '../store/game_store.js';
 import type { ClientMarketModifier } from '../store/game_store_types.js';
@@ -117,6 +117,41 @@ export function TileEventAuraRim({
   );
 }
 
+/**
+ * Safe wrapper cho Billboard tránh crash khi render trong môi trường SSR/Node test không có Canvas
+ */
+export function SafeBillboard({
+  follow = true,
+  children,
+  ...props
+}: React.ComponentProps<typeof Billboard>): React.ReactElement {
+  if (typeof window === 'undefined') {
+    return React.createElement('billboard', { follow: String(follow), ...props }, children);
+  }
+  return (
+    <Billboard follow={follow} {...props}>
+      {children}
+    </Billboard>
+  );
+}
+
+/**
+ * Safe wrapper cho Drei Html tránh crash trong môi trường SSR/Node test không có Canvas
+ */
+export function SafeHtml({
+  children,
+  ...props
+}: React.ComponentProps<typeof Html>): React.ReactElement {
+  if (typeof window === 'undefined') {
+    return React.createElement(React.Fragment, null, children);
+  }
+  return (
+    <Html center distanceFactor={14} pointerEvents="none" {...props}>
+      {children}
+    </Html>
+  );
+}
+
 export interface TileEventFloatingBadgeProps {
   readonly status: TileEventStatus;
   readonly isMobile?: boolean;
@@ -134,7 +169,7 @@ export function TileEventFloatingBadge({
   const labelText = `${status.icon ?? ''} ${status.label ?? ''} • ${status.remainingRounds ?? 0}V`;
 
   return (
-    <Billboard
+    <SafeBillboard
       follow={true}
       position={[0, 0.52, 0]}
       scale={scale}
@@ -145,14 +180,16 @@ export function TileEventFloatingBadge({
         <planeGeometry args={[1.2, 0.36]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
-      <div
-        className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-black text-white bg-slate-900/90 border border-amber-400 shadow-xs select-none ${
-          status.isExpiringSoon ? 'animate-pulse' : ''
-        }`}
-      >
-        <span>{labelText}</span>
-      </div>
-    </Billboard>
+      <SafeHtml>
+        <div
+          className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-black text-white bg-slate-900/90 border border-amber-400 shadow-xs select-none pointer-events-none ${
+            status.isExpiringSoon ? 'animate-pulse' : ''
+          }`}
+        >
+          <span>{labelText}</span>
+        </div>
+      </SafeHtml>
+    </SafeBillboard>
   );
 }
 
