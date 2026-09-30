@@ -298,7 +298,7 @@ export function PlayerCard({
                       data-trading={isTrading ? 'true' : 'false'}
                       className={`w-2 h-2 sm:w-[9px] sm:h-[9px] md:w-2.5 md:h-2.5 rounded-full transition-all shrink-0 ${
                         isTrading
-                          ? 'relative z-10 scale-110 ring-1.5 ring-amber-400/90 ring-offset-1 shadow-xs animate-pulse'
+                          ? 'relative z-10 scale-110 ring-2 ring-amber-400/90 ring-offset-1 shadow-xs animate-pulse'
                           : ''
                       } ${
                         isOwned
@@ -339,7 +339,7 @@ export function PlayerCard({
                   data-trading={isTrading ? 'true' : 'false'}
                   className={`w-2 h-2 sm:w-[9px] sm:h-[9px] md:w-2.5 md:h-2.5 rounded-full transition-all shrink-0 ${
                     isTrading
-                      ? 'relative z-10 scale-110 ring-1.5 ring-amber-400/90 ring-offset-1 shadow-xs animate-pulse'
+                      ? 'relative z-10 scale-110 ring-2 ring-amber-400/90 ring-offset-1 shadow-xs animate-pulse'
                       : ''
                   } ${
                     isOwned
@@ -375,7 +375,7 @@ export function PlayerCard({
                   data-trading={isTrading ? 'true' : 'false'}
                   className={`w-2 h-2 sm:w-[9px] sm:h-[9px] md:w-2.5 md:h-2.5 rounded-full transition-all shrink-0 ${
                     isTrading
-                      ? 'relative z-10 scale-110 ring-1.5 ring-amber-400/90 ring-offset-1 shadow-xs animate-pulse'
+                      ? 'relative z-10 scale-110 ring-2 ring-amber-400/90 ring-offset-1 shadow-xs animate-pulse'
                       : ''
                   } ${
                     isOwned

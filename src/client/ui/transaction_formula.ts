@@ -11,7 +11,8 @@ export function resolveFormulaText(
   cellName: string,
   isPositive: boolean,
 ): string {
-  if (item.formula) return item.formula;
+  if (typeof item.formula === 'string') return item.formula.trim();
+  if (item.formula === null) return '';
 
   switch (item.actionType) {
     case 'bail':
@@ -50,9 +51,9 @@ export function resolveFormulaText(
     case 'salary':
       return 'Hoàn thành 1 vòng: Thưởng lương qua ô Khởi Hành';
     case 'buy':
-      return `Đầu tư mua quyền sử dụng đất: ${cellName || 'BĐS'}`;
+      return '';
     case 'upgrade':
-      return `Xây dựng phát triển dự án tại ${cellName || 'BĐS'}`;
+      return '';
     case 'mortgage':
       return 'Vay vốn tín dụng ngân hàng (50% giá trị đất)';
     case 'unmortgage':

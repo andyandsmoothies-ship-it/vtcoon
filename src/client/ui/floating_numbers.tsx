@@ -171,15 +171,17 @@ export function FloatingBadge({ item }: { readonly item: FloatingTextItem }): Re
         </button>
       </div>
 
-      {/* Tầng 2 (Dòng 1): Lý do / Công thức rõ nghĩa, súc tích */}
-      <div
-        data-testid="transaction-formula-line"
-        className="text-[11px] sm:text-xs font-medium text-slate-600 text-left leading-tight truncate flex items-center gap-1"
-        title={narrative.formula}
-      >
-        <span className="text-slate-400 text-[10px]" aria-hidden="true">📐</span>
-        <span className="truncate">{narrative.formula}</span>
-      </div>
+      {/* Tầng 2 (Dòng 1): Lý do / Công thức rõ nghĩa, súc tích (chỉ hiển thị khi có công thức thực tế) */}
+      {Boolean(narrative.formula?.trim()) ? (
+        <div
+          data-testid="transaction-formula-line"
+          className="text-[11px] sm:text-xs font-medium text-slate-600 text-left leading-tight truncate flex items-center gap-1"
+          title={narrative.formula}
+        >
+          <span className="text-slate-400 text-[10px]" aria-hidden="true">📐</span>
+          <span className="truncate">{narrative.formula}</span>
+        </div>
+      ) : null}
 
       {/* Tầng 3 (Dòng 2): Biến động tài chính & Dòng tiền tự nhiên */}
       <div

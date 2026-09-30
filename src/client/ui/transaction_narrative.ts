@@ -227,8 +227,10 @@ export function resolveTransactionNarrative(
     case 'buy':
       category = 'MUA ĐẤT ĐẦU TƯ';
       verb = 'thanh toán';
-      if (!cellName && item.title) cellName = item.title.replace(/^Mua\s+/i, '').trim();
-      target = `mua ${cellName || 'BĐS'} từ Ngân Hàng`;
+      if (!cellName && item.title) {
+        cellName = item.title.replace(/^Mua(?:\s+sở\s+hữu|\s+quyền\s+sử\s+dụng\s+đất:?|\s+đất|\s+BĐS)?(?:\s+|$)/i, '').trim();
+      }
+      target = `mua sở hữu ${cellName || 'BĐS'}`;
       break;
     case 'upgrade': {
       category = 'NÂNG CẤP CÔNG TRÌNH';

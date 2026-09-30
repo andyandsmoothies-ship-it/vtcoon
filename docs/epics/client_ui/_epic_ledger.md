@@ -959,3 +959,33 @@
   * `code-reviewer`: Station 3.2 APPROVED (7/7 tiêu chí ma trận định lượng đạt chuẩn, Deep Architecture, SRP clean, zero timer/memory leak).
 - **Trạng thái**: ✅ Hoàn thành IMP-228 (2026-09-29).
 
+---
+
+### [IMP-229] Lean Flow Financial Notifications & Conditional Formula Rendering
+- **Mục tiêu**: Tinh giản thẻ thông báo giao dịch tài chính (`FloatingBadge`), triệt tiêu 100% trùng lặp tên ô đất và động từ, chuyển đổi dòng công thức `📐` sang cơ chế hiển thị có điều kiện (`Boolean(narrative.formula?.trim())`), giảm ~32% chiều cao chiếm dụng trên màn hình di động 360px.
+  1. *Cơ chế hiển thị có điều kiện*: Bọc dòng `transaction-formula-line` bằng guard kiểm tra nội dung thực tế, tự động co về 2 tầng thanh thoát đối với các hành động niêm yết cố định (`buy`, `upgrade`).
+  2. *Tôn trọng explicit formula*: Hàm `resolveFormulaText` kiểm tra `item.formula !== undefined` để bảo toàn quyền tắt công thức trực tiếp của caller.
+  3. *Bảo tồn công thức phức tạp*: Giữ nguyên 100% dòng thước kẻ `📐` cho Thuế 10%, Độc quyền x2, Cước Viettel 150 Tr., Thế chấp 50%, Bảo lãnh kiểm toán.
+  4. *Câu văn tự nhiên & Chống lặp*: Mua đất đổi thành `"Bạn thanh toán [-4.000] mua sở hữu TP.HCM (Quận 1 - Nguyễn Huệ)"`, xóa đuôi `"từ Ngân Hàng"`, regex bóc tách phòng vệ triệt tiêu lỗi lặp từ ngữ.
+- **Hạ tầng hoàn tất**:
+  * `src/client/ui/floating_numbers.tsx` (293 LOC — Tier 2 <= 500 LOC): Conditional rendering guard với trim.
+  * `src/client/ui/transaction_formula.ts` (77 LOC — Tier 2 <= 300 LOC): Trả về `''` cho `buy`/`upgrade`.
+  * `src/client/ui/transaction_narrative.ts` (271 LOC — Tier 2 <= 300 LOC): Regex phòng vệ, target `"mua sở hữu [Tên Ô]"`.
+  * `docs/domain/gotchas.md`: Ghi nhận Bất biến số 21 (Pillar V: Giao diện 2D & Công thái học Retropoly).
+  * `docs/reports/improvements/IMP-229-lean_flow_financial_notification_report.md`: Báo cáo nghiệm thu hoàn chỉnh.
+- **Kiểm thử & Bất biến**:
+  * `tests/contracts/imp229_lean_flow_financial_notification.test.ts` (428 LOC): 18/18 atomic contract tests PASS (Universal 5-Facet Matrix, 1-4 asserts/test, zero dirty casts).
+  * Bảo toàn 100% tests di sản: `imp216` (16 tests), `imp194` (20 tests) -> Tổng **54/54 tests PASS (Zero Regression)**.
+  * TypeScript typecheck: `tsc --noEmit` 0 errors. UI Linter: `npm run lint:ui` 0 violations / 205 files.
+  * Evidence Snapshot: `.agents/evidence/chaos_sentinel_IMP229.json` (`executed: true`).
+- **Phê chuẩn**:
+  * `plan-griller`: P1-P5 AUDIT APPROVED (giải quyết 3 Blocker P1 và 1 Warning P2).
+  * `qa-tester`: Station 1 RED verified (9/18 tests failed as expected under Adversarial Inversion).
+  * `implementer`: Station 2 GREEN verified (18/18 tests pass, 293, 77, 271 LOC).
+  * `scout`: Station 2.5 PASS (0 defects qua 5 universal defect archetypes, LOC safe).
+  * `spec-reviewer`: Station 3.1 APPROVED (100% spec reconciliation, 0 scope drift).
+  * `ui-craft-reviewer`: Station 3.2 APPROVED (2-tier layout tiết kiệm 32% chiều cao, chuẩn 360px, 0 anti-patterns).
+  * `code-reviewer`: Station 3.2 APPROVED (Deep Architecture, clean SRP, zero timer/memory leak).
+  * `chaos-sentinel`: Station 4 APPROVED (24/24 Intent parity, port 50144 boundary probe clean, diệt 3/3 mutants 100%).
+- **Trạng thái**: ✅ Hoàn thành IMP-229 (2026-09-30).
+

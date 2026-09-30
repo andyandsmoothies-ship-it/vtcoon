@@ -188,7 +188,7 @@ describe('[IMP-228][Trạm 1 RED] Subtle Property Trading Indicators Contract', 
   // FACET 3: Đánh Dấu DOM & CSS Chống Purge (TC-228.08 - TC-228.10)
   // =========================================================================
   describe('Facet 3: Đánh Dấu DOM & CSS Chống Purge', () => {
-    it('[TC-228.08/MSS][UC-IMP228][Facet-3/NormalDotDOMAttributes] Chấm bình thường (isTrading = false) có data-trading="false" và không chứa class ring-1.5', () => {
+    it('[TC-228.08/MSS][UC-IMP228][Facet-3/NormalDotDOMAttributes] Chấm bình thường (isTrading = false) có data-trading="false" và không chứa class ring-2', () => {
       const html = renderToStaticMarkup(
         React.createElement(PlayerCard, {
           player: mockPlayer,
@@ -202,10 +202,10 @@ describe('[IMP-228][Trạm 1 RED] Subtle Property Trading Indicators Contract', 
       const cell1Match = html.match(/<span[^>]*data-testid="dot-cell-1"[^>]*>/);
       expect(cell1Match).not.toBeNull();
       expect(cell1Match![0]).toContain('data-trading="false"');
-      expect(cell1Match![0]).not.toContain('ring-1.5');
+      expect(cell1Match![0]).not.toContain('ring-2');
     });
 
-    it('[TC-228.09/MSS][UC-IMP228][Facet-3/TradingDotDOMAttributesAndStyle] Chấm đang giao dịch (isTrading = true qua prop tradingCells) có data-trading="true", chứa class ring-1.5 ring-amber-400/90 animate-pulse scale-110, và có inline style "--tw-ring-offset-color: #FFFDF8"', () => {
+    it('[TC-228.09/MSS][UC-IMP228][Facet-3/TradingDotDOMAttributesAndStyle] Chấm đang giao dịch (isTrading = true qua prop tradingCells) có data-trading="true", chứa class ring-2 ring-amber-400/90 animate-pulse scale-110, và có inline style "--tw-ring-offset-color: #FFFDF8"', () => {
       const html = renderToStaticMarkup(
         React.createElement(PlayerCard, {
           player: mockPlayer,
@@ -219,7 +219,7 @@ describe('[IMP-228][Trạm 1 RED] Subtle Property Trading Indicators Contract', 
       const cell1Match = html.match(/<span[^>]*data-testid="dot-cell-1"[^>]*>/);
       expect(cell1Match).not.toBeNull();
       expect(cell1Match![0]).toContain('data-trading="true"');
-      expect(cell1Match![0]).toMatch(/ring-1\.5 ring-amber-400\/90/);
+      expect(cell1Match![0]).toMatch(/ring-2 ring-amber-400\/90/);
       expect(cell1Match![0]).toMatch(/--tw-ring-offset-color:\s*#FFFDF8/);
     });
 

@@ -39,6 +39,7 @@ Automated via `scripts/station4_sentinel.ts`:
 2. Connects a live WebSocket client over TCP, sends raw JSON envelopes, and verifies state transition without mock divergence.
 3. Teardown guarantee: Closes sockets and terminates server within `< 2s` with zero lingering timers or background hangs.
 4. If socket fails or times out: Verdict is **`BLOCKED: MOCK_DIVERGENCE`**.
+5. Canonical 5-Boundary Fuzzing: Every probed endpoint/store input MUST survive the canonical boundary matrix: `[undefined, null, '', '   ', NaN]`. Any unhandled TypeError/crash is an immediate **`BLOCKED: BOUNDARY_CRASH`**.
 
 ## 4. Probe 3: Targeted Mutation Sensitivity Probe (Physical Sandbox Runner)
 Automated via `scripts/station4_sentinel.ts`:
