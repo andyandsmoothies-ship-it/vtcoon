@@ -138,6 +138,21 @@ if (contractSuite) {
   }
 }
 
+// 3. Physical Visual Screenshot Verification (Zero-Blindness Gate)
+if (evidence.visualReview || /3d|ui|viaduct|diorama|ballast|modal|hud/i.test(evidencePath) || /3d|ui/i.test(summary.contractSuite || '')) {
+  const tmpFiles = fs.existsSync(path.join(repoRoot, '.agents', 'tmp')) ? fs.readdirSync(path.join(repoRoot, '.agents', 'tmp')) : [];
+  const evFiles = fs.readdirSync(evidenceDir);
+  const ticketClean = (evidence.ticketId || targetArg || '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+  const hasImage = [...tmpFiles, ...evFiles].some((f) =>
+    /\.(png|jpe?g|webp)$/i.test(f) && (!ticketClean || f.toLowerCase().includes(ticketClean)),
+  );
+  if (!hasImage) {
+    errors.push(
+      `[Zero-Blindness Violation] Visual/3D ticket requires physical screenshot in .agents/tmp/ or .agents/evidence/. Run 'npm run capture:visual -- --ticket ${evidence.ticketId || targetArg}' before sign-off.`,
+    );
+  }
+}
+
 if (errors.length > 0) {
   console.error('\n❌ EVIDENCE AUDIT FAILED:');
   errors.forEach((e) => console.error(`  - ${e}`));

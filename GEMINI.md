@@ -18,9 +18,10 @@
     1. Station 1 (RED Contract Test): `qa-tester` writes edge/contract tests in `tests/**` and proves failure (Adversarial Inversion). FORBIDDEN from editing `src/**`. Atomic test mandate (1-4 asserts/test, zero loops in `it()`, zero static checklist tests). Universal 5-Facet Matrix. Floor: >= 15 atomic tests / slice.
     2. Station 2 (GREEN Implementation): `implementer` writes minimum code in `src/**` to pass tests. Zero bug-codification.
     2.5. Station 2.5 (Fast Pre-Filter Sweep): `scout` (model: flash) runs mechanical filters before review: typecheck (`tsc --noEmit`), LOC budget, zero dirty casts (`as any`), and console.log purge.
-    3. Station 3 (Independent Review Funnel): Two-phase review gate:
+    3. Station 3 (Independent Review Funnel): Three-phase review gate:
+       - Phase 3.0 (Physical Visual Evidence Gate): Mandatory in-game capture into `.agents/tmp/` before invoking visual review.
        - Phase 3.1 (Spec & Scope Gate): `spec-reviewer` verifies 100% plan fidelity and zero scope drift. MUST pass before Phase 3.2.
-       - Phase 3.2 (Deep Architecture & Craft Gate): `code-reviewer` audits anti-slop, memory/timer leaks, and race hazards. In parallel, `game-3d-visual-critic` (3D) and `ui-craft-reviewer` (2D) audit aesthetics and ergonomics.
+       - Phase 3.2 (Deep Architecture & Craft Gate): `code-reviewer` audits anti-slop, memory/timer leaks, and race hazards. In parallel, `game-3d-visual-critic` (3D) and `ui-craft-reviewer` (2D) audit aesthetics and ergonomics via physical screenshots.
     4. Station 4 (Adversarial Boundary & Mutation Sentinel): `chaos-sentinel` executes 3 physical probes for Tier 2 tasks: (1) Wire-to-Core Closed-Loop Parity, (2) Ephemeral Dynamic Boundary Probe (`port: 0`), (3) Targeted Mutation Sensitivity Probe (inline mutants banned; probe floor >= 14 tests). READ-ONLY on `src/**`. Signs off `.agents/evidence/chaos_sentinel_[ID].json`.
 - **Core Domain & Architectural Invariants (SSOT: `docs/domain/gotchas.md`)**:
   - *SSOT & Player Intent*: Player choices must be explicit Intent transitions (ADR-0001), never implicit side-effects. Callers opening modals MUST NOT pass duplicate boolean overrides (`canBuy`) that shadow host affordance helpers.
@@ -40,7 +41,7 @@
 A task is COMPLETE only when:
 1. Automated tests pass Adversarial Inversion, include traceability tags (`[UC-XXX/MSS]` or `[UC-XXX/A#]`), and pass fixture contracts against SSOT.
 2. Code passes `npm run lint:slop` (complexity <= 5, LOC budgets) and `npm run lint:ui` (0 violations).
-3. Reviewer gates approve in order: Phase 3.1 `spec-reviewer` approves 100% spec reconciliation; Phase 3.2 `code-reviewer` approves code quality/observability; `game-3d-visual-critic` / `ui-craft-reviewer` approve visual craft; implementer never approves own code; `.agents/evidence/` snapshot has `executed: true`.
+3. Reviewer gates approve in order: Phase 3.1 `spec-reviewer` approves 100% spec reconciliation; Phase 3.2 `code-reviewer` approves code quality/observability; `game-3d-visual-critic` / `ui-craft-reviewer` approve visual craft via physical screenshots (`view_file`); implementer never approves own code; `.agents/evidence/` snapshot has `executed: true`.
 4. Station 4 (`chaos-sentinel`) signs off 3 physical probes with zero parity gaps, zero mock divergence, and zero surviving mutants (mandatory for Tier 2; mechanically verified via `node scripts/check_evidence.mjs`).
 5. Progress and Tech Debt Ledger updated in `docs/epics/[epic]/_epic_ledger.md`, and dedicated completion report persisted automatically to `docs/reports/improvements/IMP-[ID]-[slug]_report.md` (for IMP tickets) or `docs/reports/audits/[ID]_acceptance_report.md` (for core tickets).
 6. Production resilience verified: defense against invalid intents, treasury conservation invariant, Turn N+1 state teardown, and explicit tombstone delivery.

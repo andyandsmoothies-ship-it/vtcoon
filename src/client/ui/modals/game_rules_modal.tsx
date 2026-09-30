@@ -212,7 +212,7 @@ export function GameRulesModal({
                     <span>⚡</span> 20 Phiếu Cơ Hội
                   </h4>
                   <p className="text-[11px] text-sky-800 leading-normal">
-                    Quyền Lên Thổ Cư nâng cấp thẳng C1 không cần đủ bộ màu, hoán đổi dự án chiến lược, chốt lời cổ phiếu hoặc chế tài dự án chậm tiến độ (thu hồi nếu mất thanh khoản).
+                    Quyền Lên Thổ Cư nâng cấp C1 không cần đủ bộ màu, chốt lời cổ phiếu hoặc <strong className="text-sky-950 font-semibold">Mua Lại Dự Án Tiềm Năng</strong> (chọn 01 ô C0 của đối thủ mua đứt 130%; nếu đối thủ không có ô C0 được Kho Bạc đền bù 1.000, nếu thiếu tiền được trợ cấp 800).
                   </p>
                 </div>
                 <div className="p-3 rounded-xl bg-amber-50/70 border border-amber-100">
@@ -257,7 +257,7 @@ export function GameRulesModal({
                     <span>🤝</span> Thương Lượng P2P &amp; Thâu Tóm Bắt Buộc (Buyout 130%)
                   </h3>
                   <p className="text-indigo-900 text-[11px] leading-relaxed">
-                    <strong className="font-semibold text-indigo-950">Thâu Tóm Bắt Buộc (Compulsory Buyout):</strong> Khi dừng chân tại ô đất C0 của đối thủ (chưa thế chấp, chưa đủ bộ màu), có quyền chi trả <strong className="font-semibold text-indigo-950">130% giá niêm yết</strong> để mua đứt ô đất ngay lập tức.
+                    <strong className="font-semibold text-indigo-950">Thâu Tóm Bắt Buộc (Compulsory Buyout):</strong> Khi dừng chân tại ô đất C0 của đối thủ (chưa thế chấp, chưa phong tỏa bảo đảm trái phiếu, chưa đủ bộ màu), có quyền chi trả <strong className="font-semibold text-indigo-950">130% giá niêm yết</strong> để mua đứt ô đất ngay lập tức.
                   </p>
                 </div>
                 <div className="pt-1.5 border-t border-indigo-200/60 text-[11px] text-indigo-900 space-y-1">
@@ -275,9 +275,10 @@ export function GameRulesModal({
                 <p>
                   Khi người chơi dừng tại bất động sản chưa có chủ nhưng quyết định bỏ qua không mua, quyền mua sẽ được đưa ra phiên <strong className="text-blue-700 font-semibold">Đấu Giá</strong> công khai cho toàn thể người chơi. Giá khởi điểm bằng <strong className="text-slate-900 font-semibold">50%</strong> giá niêm yết, bước giá đặt nhanh linh hoạt <strong className="text-slate-900 font-semibold">+100, +200, +500</strong>.
                 </p>
-                <p className="mt-1 text-slate-600 text-[11px]">
-                  Nếu toàn bộ người chơi đều Bỏ Cuộc (Pass), ô đất sẽ được <strong className="text-slate-800 font-semibold">Phát Mãi về Quỹ Kho Bạc với mức giá 70%</strong> để bổ sung nguồn vốn cứu trợ quốc gia.
-                </p>
+                <div className="mt-1.5 pt-1.5 border-t border-slate-200/60 text-slate-600 text-[11px] space-y-0.5">
+                  <p>• <strong className="text-slate-800 font-semibold">Người Dẫn Đầu:</strong> Không thể rút lui khi đang trả giá cao nhất. Có nút <em>"✕ Đóng / Xem Bàn Cờ"</em> để thu nhỏ sàn đấu giá xuống thanh mini theo dõi sa bàn 3D; khi bị đối thủ vượt giá, nút tự hoàn nguyên thành <em>"✕ Rút Lui"</em>.</p>
+                  <p>• <strong className="text-slate-800 font-semibold">Phát Mãi 70%:</strong> Nếu toàn bộ người chơi đều Bỏ Cuộc (Pass), ô đất sẽ được phát mãi về Quỹ Kho Bạc với mức giá 70% để bổ sung nguồn vốn cứu trợ quốc gia.</p>
+                </div>
               </div>
 
               <div className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200/80">
@@ -318,11 +319,12 @@ export function GameRulesModal({
 
               <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
                 <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2 mb-1">
-                  <span>⚠️</span> Cơ Chế Phá Sản &amp; Thoát Nợ
+                  <span>⚠️</span> Cơ Chế Phá Sản &amp; Thoát Nợ Tự Động
                 </h3>
-                <p>
-                  Nếu số dư tiền mặt bị âm và sau khi đã bán nhà, thế chấp tài sản hoặc bán BĐS thế chấp qua P2P vẫn không đủ thanh toán khoản nợ, người chơi sẽ chính thức <strong className="text-rose-700 font-semibold">Phá Sản</strong>. Toàn bộ tài sản sẽ được chuyển giao cho chủ nợ hoặc hoàn về Ngân sách.
-                </p>
+                <div className="text-slate-600 text-[11px] space-y-1">
+                  <p>• <strong className="text-emerald-700 font-semibold">Thoát Nợ Tự Động:</strong> Khi bị âm tiền (vỡ nợ tạm thời), người chơi bán nhà, thế chấp BĐS hoặc bán đất kèm nợ qua P2P để đưa tiền mặt về &ge; 0; hệ thống sẽ tự động đóng giao diện nợ và mở khóa tiếp tục ván đấu.</p>
+                  <p>• <strong className="text-rose-700 font-semibold">Phá Sản:</strong> Nếu đã thanh lý toàn bộ tài sản mà số dư vẫn âm không thể trả nợ, người chơi sẽ chính thức <strong className="text-rose-700 font-semibold">Phá Sản</strong>. Toàn bộ tài sản được chuyển giao cho chủ nợ hoặc hoàn về Ngân sách.</p>
+                </div>
               </div>
             </div>
           )}

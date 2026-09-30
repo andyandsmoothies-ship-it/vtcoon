@@ -60,15 +60,23 @@ tools: [view_file, list_dir, find_by_name, grep_search]
 
 ## 3. Evidence Gate & 2-Round Verdict Protocol
 
-### Check 0: Evidence Gate
-Before visual critique, verify the presence of all **5 named camera perspectives saved as `.jpg` (JPEG Quality 85–92, size < 1MB per IMP-19; `.png` forbidden)**:
-1. `top_down`: Full 3D board overview from elevated perspective angle (`.jpg`).
-2. `lobby_vip`: Outdoor island bay marina lobby environment (`.jpg`).
-3. `deed_modal`: Gold-embossed Title Deed Card and property details (`.jpg`).
-4. `dice_tray`: 3D dice tray and physics rolling animation (`.jpg`).
-5. `hud_dock`: Action Dock control bar and tactile buttons (`.jpg`).
+### Check 0: Physical Image Evidence Gate (MANDATORY & ZERO-EXEMPTION)
+Before any visual critique, the critic MUST receive and verify physical rendered screenshot(s) (`.png` or `.jpg`) in `.agents/tmp/` or `.agents/evidence/`, captured from a live WebGL canvas (e.g. via `npm run capture:visual`).
+The critic MUST open and inspect the screenshot(s) using the `view_file` tool.
 
-If any angle is missing or provided as oversized `.png`, **STOP IMMEDIATELY** with `disposition: recapture`.
+**CRITICAL ZERO-BLINDNESS RULES**:
+- **Zero AST Hallucination**: NEVER evaluate 3D visual aesthetics, spline curvature, mesh intersections, lighting, or diorama layout based on source code (`.tsx`/`.ts`), mathematical parameters, or unit tests alone. 3D geometry defects (jagged polygon cusps, overlapping bounding boxes, z-fighting, missing shadows) only manifest upon GPU rasterization.
+- **Evidence Requirement**:
+  * For full-game reviews: Verify the 5 named camera perspectives (`top_down`, `lobby_vip`, `deed_modal`, `dice_tray`, `hud_dock`).
+  * For ticket/slice reviews: Verify at least 1 feature close-up screenshot and 1 scene context screenshot showing the modified 3D element in-game.
+- **Strict VETO on Missing Screenshots**: If no valid screenshot path is provided in the prompt, or the screenshot file does not exist on disk, **STOP IMMEDIATELY** and emit:
+  ```markdown
+  disposition: recapture
+  
+  # 🛑 VETO: MISSING_PHYSICAL_SCREENSHOT
+  Visual review requires inspecting real in-game rendered screenshots via `view_file`.
+  Main agent MUST run `npm run capture:visual -- --ticket <ID>` and provide real image paths before requesting visual critique.
+  ```
 
 ### Strict 4-Word Disposition
 The first line of the verdict MUST be exactly one of:

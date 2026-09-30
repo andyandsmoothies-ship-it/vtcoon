@@ -75,6 +75,10 @@ FORBIDDEN_SHELL_REDIRECTS = [
 
 TEST_DIR_PATTERNS = ["/tests/", "/test/", "/spec/", "/__tests__/", ".test.", ".spec.", "_test."]
 SRC_DIR_PATTERNS = ["/src/", "/lib/", "/app/", "/internal/", "/pkg/", "/core/"]
+# [IMP-SDLC] qa-tester ONLY authorized output: test contracts under tests/**.
+# Scratch/diagnostic scripts in tmp dirs are forbidden — use grep_search/view_file to explore instead.
+QA_FORBIDDEN_PATHS = ["/.agents/tmp/", "/.agents/scripts/", "/tmp/", "/scratch/"]
+QA_FORBIDDEN_EXTENSIONS = [".mjs", ".cjs", ".py", ".sh", ".ps1"]  # non-test script formats
 
 
 def read_hook_payload() -> dict:
@@ -192,6 +196,20 @@ def pre_tool_file_gate(payload: dict, role: str = "") -> None:
             )
             print(json.dumps({"decision": "deny", "reason": reason}))
             sys.exit(0)
+
+        # [IMP-SDLC] Block qa-tester from writing scratch/diagnostic scripts to tmp dirs.
+        # Exploration MUST use read-only tools (grep_search, view_file), not new script files.
+        if role == "qa-tester":
+            in_forbidden_path = any(p in norm_path for p in QA_FORBIDDEN_PATHS)
+            has_forbidden_ext = any(norm_path.endswith(ext) for ext in QA_FORBIDDEN_EXTENSIONS)
+            if in_forbidden_path or (has_forbidden_ext and "/tests/" not in norm_path):
+                reason = (
+                    f"ERROR [QA Scratch Guard]: qa-tester is forbidden from creating diagnostic scripts: '{target_file}'. "
+                    "Use grep_search/view_file/run_command for exploration. "
+                    "Only .test.ts or .test.js files under tests/** are authorized output."
+                )
+                print(json.dumps({"decision": "deny", "reason": reason}))
+                sys.exit(0)
 
         if role == "implementer" and any(p in norm_path for p in TEST_DIR_PATTERNS):
             reason = (

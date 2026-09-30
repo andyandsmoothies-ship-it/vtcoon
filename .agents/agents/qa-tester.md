@@ -13,7 +13,9 @@ hooks: [.agents/hooks_qa.json]
 
 1. **Adversarial Sandbox Confinement (Strict Separation of Duties)**:
    - AUTHORIZED PATHS: You are ONLY permitted to create or modify test files in standard test directories (e.g., `tests/**`, `test/**`, `__tests__/**`, `spec/**`).
+   - AUTHORIZED FILE TYPES: `.test.ts`, `.test.js`, `.spec.ts`, `.spec.js`. No other file extensions are permitted as output.
    - FORBIDDEN PATHS: STRICTLY FORBIDDEN from creating or modifying any production source files (`src/**`, `lib/**`, `app/**`, `internal/**`).
+   - **FORBIDDEN SCRATCH SCRIPTS**: STRICTLY FORBIDDEN from creating exploratory/diagnostic scripts (`.mjs`, `.cjs`, `.py`, `.sh`) in `.agents/tmp/` or any temp directory. For exploration, use READ-ONLY tools: `grep_search`, `view_file`, `run_command` (with read-only commands). Writing scripts to explore source code is a waste of context and pollutes the workspace.
    - If production code needs to change, STOP and leave it to the `implementer`.
 
 2. **Phase 1: Baseline Verification (No False Assumptions)**:

@@ -44,7 +44,7 @@ interface ViaductPierData {
   readonly height: number;
 }
 
-const VIADUCT_NUM_SEGMENTS = 32;
+export const VIADUCT_NUM_SEGMENTS = 96;
 
 function buildViaductGeometry(): {
   readonly segments: readonly ViaductSegmentData[];
@@ -78,7 +78,7 @@ function buildViaductGeometry(): {
       rightRailPos: [p.x - normX * 0.05, 0.45, p.z - normZ * 0.05],
     });
 
-    if (i % 2 === 0) {
+    if (i % 6 === 0) {
       const isOverRiver = Math.abs(p.x) < 0.8;
       const baseElevation = isOverRiver ? -0.035 : 0.02;
       const pierHeight = 0.44 - baseElevation;
@@ -94,7 +94,7 @@ function buildViaductGeometry(): {
 }
 
 // Tính toán 1 lần duy nhất ở module-level để loại bỏ GC churn và tối ưu FPS [P1.4]
-const { segments: VIADUCT_CURVED_SEGMENTS, piers: VIADUCT_PIERS } = buildViaductGeometry();
+export const { segments: VIADUCT_CURVED_SEGMENTS, piers: VIADUCT_PIERS } = buildViaductGeometry();
 
 // Cột cần tiếp điện trên cao (Catenary Masts: cột đứng Y=0.085m cao 0.17m; thanh vươn Y=0.155m)
 const CATENARY_MAST_POSITIONS: readonly [number, number, number, number][] = [
@@ -107,23 +107,23 @@ export function DioramaBallastBed(): React.ReactElement {
     <group position={[0, 0, 0]} data-testid="diorama-railroad-ballast">
       {/* QUAN TRỌNG: 4 dải đá ba-lát tĩnh (#475569) PHẢI NẰM ĐẦU TIÊN để bảo vệ cửa sổ cắt chuỗi 800 ký tự [P2.1] */}
       <mesh receiveShadow position={[0, 0.018, -6.9]}>
-        <SafeBoxGeometry args={[14.2, 0.016, 0.36]} />
+        <SafeBoxGeometry args={[10.6, 0.016, 0.36]} />
         <meshStandardMaterial color="#475569" roughness={0.9} />
       </mesh>
       <mesh receiveShadow position={[0, 0.018, 6.9]}>
-        <SafeBoxGeometry args={[14.2, 0.016, 0.36]} />
+        <SafeBoxGeometry args={[10.6, 0.016, 0.36]} />
         <meshStandardMaterial color="#475569" roughness={0.9} />
       </mesh>
       <mesh receiveShadow position={[-6.9, 0.018, 0]}>
-        <SafeBoxGeometry args={[0.36, 0.016, 14.2]} />
+        <SafeBoxGeometry args={[0.36, 0.016, 10.6]} />
         <meshStandardMaterial color="#475569" roughness={0.9} />
       </mesh>
       <mesh receiveShadow position={[6.9, 0.018, 0]}>
-        <SafeBoxGeometry args={[0.36, 0.016, 14.2]} />
+        <SafeBoxGeometry args={[0.36, 0.016, 10.6]} />
         <meshStandardMaterial color="#475569" roughness={0.9} />
       </mesh>
 
-      {/* Lan can dầm U-Girder đúc sẵn (#94A3B8) uốn cong dọc 32 phân đoạn cầu cạn */}
+      {/* Lan can dầm U-Girder đúc sẵn (#94A3B8) uốn cong dọc 96 phân đoạn cầu cạn */}
       {VIADUCT_CURVED_SEGMENTS.map((seg, idx) => (
         <React.Fragment key={`girder-seg-${idx}`}>
           <mesh receiveShadow position={seg.leftParapetPos} rotation={[0, seg.yaw, 0]}>

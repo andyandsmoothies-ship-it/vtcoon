@@ -60,7 +60,7 @@ let cachedPerimeter: number | null = null;
 
 export function getRailroadTrackCurve(): CatmullRomCurve3 {
   if (!cachedCurve) {
-    cachedCurve = new CatmullRomCurve3(TRACK_POINTS.map((p) => p.clone()), true, 'catmullrom', 0.15);
+    cachedCurve = new CatmullRomCurve3(TRACK_POINTS.map((p) => p.clone()), true, 'centripetal', 0.15);
   }
   return cachedCurve;
 }

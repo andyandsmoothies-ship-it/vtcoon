@@ -21,6 +21,7 @@
     "lint:assets": "node scripts/optimize_assets.mjs",
     "evidence": "node scripts/collect_evidence.mjs",
     "check:evidence": "node scripts/check_evidence.mjs",
+    "capture:visual": "node scripts/capture_visual_evidence.mjs",
     "typecheck": "tsc --noEmit",
     "sentinel": "npx tsx scripts/station4_sentinel.ts",
     "gate:quick": "npm run lint:ui && npm run lint:slop && npm run lint:dup && npm run lint:assets && tsc --noEmit && npm run evidence",

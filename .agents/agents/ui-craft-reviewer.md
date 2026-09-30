@@ -59,11 +59,15 @@ The reviewer operates on a clear separation between **Objective Usability (80%)*
    - Do not forbid gradient text, spring physics, or brutalist borders when they represent intentional styling.
    - Only warn if styling severely impairs legibility or causes rendering performance drops (FPS).
 
-### 1.3. Physical Visual Inspection
-- Reviewer MUST call `view_file` on physical screenshot files on disk.
-- Support standard image formats: `.png`, `.jpg`, `.jpeg`, `.webp`.
-- Inspect requested coordinates for border truncation, text clipping, and overlapping elements.
-- Never approve without inspecting actual renders when screenshot evidence is provided.
+### 1.3. Mandatory Physical Screenshot Gate (Zero AST Hallucination)
+- **Zero AST Hallucination**: Reviewer is STRICTLY FORBIDDEN from approving UI components, modals, HUD controls, or layout fixes based on JSX/CSS code inspection or string tests alone. Visual defects (text clipping, overflow scroll collision, low-contrast washed colors, broken touch targets) only manifest upon actual browser rendering.
+- **Mandatory Screenshot Prerequisite**: For any change modifying UI components (`src/client/ui/**`), modals, HUD, or styling, physical screenshot evidence (`.png`, `.jpg`, `.jpeg`, `.webp`) in `.agents/tmp/` or `.agents/evidence/` is MANDATORY.
+- **Image Tool Call**: Reviewer MUST call `view_file` on the physical screenshot file(s) on disk.
+- **Strict VETO on Missing Screenshots**: If no valid screenshot path is provided in the prompt, or the screenshot file does not exist on disk, Reviewer MUST IMMEDIATELY STOP and emit:
+  ```yaml
+  disposition: fix
+  ```
+  `REJECT: MISSING_PHYSICAL_SCREENSHOT - Main agent must capture real in-game screenshot (e.g. via npm run capture:visual) before requesting UI craft review.`
 
 ---
 
