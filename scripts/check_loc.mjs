@@ -86,7 +86,7 @@ export function measureFile(filePath) {
 
 export function formatReport(results) {
   const tableRows = [];
-  tableRows.push('| Tệp Vật Lý | Phân Loại Tier | Total Lines | Non-Empty SLOC | Trần Ngân Sách | Đánh Giá |');
+  tableRows.push('| Physical File | Tier Classification | Total Lines | Non-Empty SLOC | Budget Ceiling | Status |');
   tableRows.push('| :--- | :---: | :---: | :---: | :---: | :--- |');
 
   let hasError = false;
@@ -94,16 +94,16 @@ export function formatReport(results) {
   for (const r of results) {
     const tier = TIER_RULES[r.tierKey];
     if (!r.exists) {
-      tableRows.push(`| \`${r.filePath}\` | ${tier.name} | *Tạo mới* | *Tạo mới* | <= ${tier.ceiling} | 🆕 Tạo mới |`);
+      tableRows.push(`| \`${r.filePath}\` | ${tier.name} | *New file* | *New file* | <= ${tier.ceiling} | 🆕 New file |`);
       continue;
     }
 
-    let status = '✔️ An toàn';
+    let status = '✔️ Safe';
     if (tier.ceiling < 9999 && r.totalLines > tier.ceiling) {
-      status = `❌ VƯỢT TRẦN (${r.totalLines} > ${tier.ceiling})`;
+      status = `❌ EXCEEDED (${r.totalLines} > ${tier.ceiling})`;
       hasError = true;
     } else if (tier.warn < 9999 && r.totalLines > tier.warn) {
-      status = `⚠️ Cảnh báo (${r.totalLines} > ${tier.warn})`;
+      status = `⚠️ Warning (${r.totalLines} > ${tier.warn})`;
     }
 
     tableRows.push(
@@ -128,7 +128,7 @@ if (args.length === 0) {
 const measurements = args.map((file) => measureFile(file));
 const { markdown, hasError } = formatReport(measurements);
 
-console.log('\n📊 BẢNG ĐO LƯỜNG NGÂN SÁCH LOC (Tự động bởi scripts/check_loc.mjs):\n');
+console.log('\n📊 LOC BUDGET MEASUREMENT REPORT (Automated via scripts/check_loc.mjs):\n');
 console.log(markdown);
 console.log('');
 

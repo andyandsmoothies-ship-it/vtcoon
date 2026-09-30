@@ -77,19 +77,19 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command]
 | :--- | :---: | :--- |
 | `[src/fsm/turn_machine.ts#L25-L45]` | MODIFY | Implement deterministic dice roll transition |
 
-#### 4. Structured Verification Matrix (Bảng Ma Trận Định Lượng Bắt Buộc)
-| Tiêu Chí Kiểm Tra | Tọa Độ Kiểm Tra (File:Line) | Ngưỡng Cho Phép | Số Liệu Thực Tế (Từ Snapshot) | Vi Phạm | Phán Quyết |
+#### 4. Structured Verification Matrix (Mandatory Quantitative Matrix)
+| Inspection Criteria | Coordinates (File:Line) | Threshold | Actual Metric (From Snapshot) | Violations | Verdict |
 | :--- | :--- | :--- | :--- | :---: | :---: |
-| 1. File LOC Budget | `[File coordinates]` | <= 300 LOC (Core) / 500 (UI) | `[LOC từ snapshot]` | 0 | APPROVED |
+| 1. File LOC Budget | `[File coordinates]` | <= 300 LOC (Core) / 500 (UI) | `[LOC from snapshot]` | 0 | APPROVED |
 | 2. Function Complexity | `[File:Line]` | Max 30 LOC, CC <= 5 | `[Max LOC & CC]` | 0 | APPROVED |
-| 3. 6 Slop Red Flags | `[Toàn bộ diff]` | 0 vi phạm (Anti-Slop) | 0 flags phát hiện | 0 | APPROVED |
-| 4. Zero Dirty Cast | `[Toàn bộ diff]` | 0 `as any` / dirty cast | 0 dirty cast | 0 | APPROVED |
+| 3. 6 Slop Red Flags | `[Full diff]` | 0 violations (Anti-Slop) | 0 flags detected | 0 | APPROVED |
+| 4. Zero Dirty Cast | `[Full diff]` | 0 `as any` / dirty cast | 0 dirty casts | 0 | APPROVED |
 | 5. Runtime Wire Gate | `[Entry -> Logic]` | 100% wired invocation | All mutations wired | 0 | APPROVED |
-| 6. Evidence Snapshot | `.agents/evidence/latest_snapshot.json` | Tồn tại & Đã đọc trên đĩa | Đọc qua view_file | 0 | APPROVED |
-| 7. Typecheck Gate | Toàn bộ workspace | Compiler exit 0 (`npx tsc --noEmit`) | `[typecheck status từ snapshot]` | 0 | APPROVED |
+| 6. Evidence Snapshot | `.agents/evidence/latest_snapshot.json` | Exists & physically inspected | Read via view_file | 0 | APPROVED |
+| 7. Typecheck Gate | Entire workspace | Compiler exit 0 (`npx tsc --noEmit`) | `[typecheck status from snapshot]` | 0 | APPROVED |
 
 > [!CAUTION]
-> **The Transpiler Trap Filter**: Test runners (Vitest/esbuild/SWC/tsx) transpile without typechecking. NEVER accept test passes as proof of type safety. Snapshot BẮT BUỘC có `typecheckPassed: true` với 0 lỗi biên dịch. MANDATORY REJECT nếu typecheck đỏ.
+> **The Transpiler Trap Filter**: Test runners (Vitest/esbuild/SWC/tsx) transpile without typechecking. NEVER accept test passes as proof of type safety. Snapshot MUST have `typecheckPassed: true` with 0 compiler errors. MANDATORY REJECT if typecheck fails.
 
 #### 5. Severity Findings & False Positive Filter
 - [BLOCKER]: 0 detected.

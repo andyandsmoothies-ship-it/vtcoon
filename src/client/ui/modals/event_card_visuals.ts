@@ -122,7 +122,7 @@ export const KNOWN_CARD_CTA_BUTTONS: Readonly<Record<string, string>> = {
   [ChanceCardId.CC_PORT_EXCLUSIVE]: 'Cập Cảng Nhận Tiền ⚓',
   [ChanceCardId.CC_SLOW_BUILD]: 'Cam Kết Tiến Độ 📋',
   [ChanceCardId.CC_MEDIA_CRISIS]: 'Dập Tắt Khủng Hoảng 🧯',
-  [ChanceCardId.CC_SWAP_PROJECT]: 'Chốt Mua Dự Án 🤝',
+  [ChanceCardId.CC_SWAP_PROJECT]: 'Tiến Hành Mua Lại 🤝',
 
   // Market Cards
   [MarketCardId.MC_NIGHT_ECONOMY]: 'Hòa Vào Phố Đêm 🍸',

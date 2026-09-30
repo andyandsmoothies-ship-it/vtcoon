@@ -191,28 +191,27 @@ Classic micro-TDD (increments of 5-10 lines of code) was optimized for **human w
 ### The Mental Model Shift: Human Flow vs. Agentic Flow
 
 ```
-[ HUMAN FLOW: TDD CỔ ĐIỂN ]                   [ AGENTIC FLOW: TDD KỶ NGUYÊN AGENT ]
-(Tối ưu cho nhận thức não người)              (Lặp ở cấp độ hệ thống - Iterate at system level)
+[ HUMAN FLOW: CLASSICAL TDD ]                 [ AGENTIC FLOW: AGENTIC TDD ]
+(Optimized for human cognitive load)          (Iterate at system level)
 
   ┌──────────────┐                              ┌─────────────────────────────┐
-  │ RED ➔ GREEN  │                              │ 1. SPECIFY (XÁC ĐỊNH)       │
-  │     Unit     │                              │ Yêu cầu & E2E Tests ĐỎ      │
+  │ RED ➔ GREEN  │                              │ 1. SPECIFY                  │
+  │     Unit     │                              │ Requirements & RED E2E Tests│
   └──────┬───────┘                              └──────────────┬──────────────┘
          ▼                                                     ▼
   ┌──────────────┐                              ┌─────────────────────────────┐
-  │ RED ➔ GREEN  │                              │ 2. DELEGATE (ỦY THÁC)       │
-  │     Unit     │                              │ Agent tự sinh toàn bộ:      │
-  └──────┬───────┘                              │ Code, Unit Tests trên hệ    │
-         ▼                                      │ thống trong 1 lượt duy nhất │
+  │ RED ➔ GREEN  │                              │ 2. DELEGATE                 │
+  │     Unit     │                              │ Agent generates entire:     │
+  └──────┬───────┘                              │ Code, Unit Tests in one     │
+         ▼                                      │ single system pass          │
   ┌──────────────┐                              └──────────────┬──────────────┘
   │ RED ➔ GREEN  │                                                     ▼
   │     Unit     │                              ┌─────────────────────────────┐
-  └──────────────┘                              │ 3. VALIDATE (THẨM ĐỊNH)     │
-                                                │ Chạy E2E Tests & nghiệm thu │
-  Vòng lặp vi mô 5-10 dòng code                 └──────────────┬──────────────┘
-  lặp đi lặp lại hàng chục lần.                                │
-                                                Vòng phản hồi Người + Agent
-                                                (Human + Agent feedback loop)
+  └──────────────┘                              │ 3. VALIDATE                 │
+                                                │ Run E2E tests & acceptance  │
+  Micro-loop of 5-10 LOC                        └──────────────┬──────────────┘
+  repeated dozens of times.                                    │
+                                                Human + Agent feedback loop
 ```
 
 In the Agentic Era, TDD operates as a 3-step system loop:

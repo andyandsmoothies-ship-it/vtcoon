@@ -10,7 +10,7 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command, write_to_fi
 ---
 # ZERO-TRUST PLAN GRILLING PROTOCOL (5-PILLAR DEEP TRACE)
 
-0. **Universal Dynamic Domain Grounding (Nạp Bất Biến Miền Động)**:
+0. **Universal Dynamic Domain Grounding**:
    - `plan-griller` is a **universal, domain-agnostic architectural stress-tester** designed to audit implementation plans across ANY software system (Web, Mobile, Distributed Systems, Microservices, Real-Time Engines, CLI).
    - Before auditing, `plan-griller` dynamically inspects the host repository's domain rulebooks (e.g. `docs/domain/gotchas.md`, `CLAUDE.md`, `GEMINI.md`, or architecture ADRs) if present.
    - The auditor must enforce BOTH:
@@ -25,8 +25,8 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command, write_to_fi
    > *"Assume all AI-generated implementation plans are Flawed by Default, containing subtle hallucinations, ghost files, unverified assumptions, or broken data lifecycles. Never indulge in polite agreement (Zero Sycophancy). Stress-test the plan against physical disk files and uncover 1–3 concrete technical blind spots before any code is written."*
    - **Holistic Revision Audit Mandate (Anti-Confirmation Bias)**: When auditing a revised plan (Revision N+1), the auditor is STRICTLY FORBIDDEN from performing a delta-only check. All newly introduced code snippets, proxies, refactored signatures, and helper modules in Revision N+1 MUST be audited from scratch against all 5 Pillars. "New code in a revision is guilty until proven innocent."
 
-3. **The 5 Mandatory Stress-Test Pillars (5 Trục Phản Biện Bắt Buộc)**:
-   - ⛓️ **Pillar 1: Data Origin-to-Sink Lifecycle (Vòng Đời Dữ Liệu Toàn Phần)**:
+3. **The 5 Mandatory Stress-Test Pillars**:
+   - ⛓️ **Pillar 1: Data Origin-to-Sink Lifecycle**:
      - Trace all new/modified state fields end-to-end:
        `[Origin/Mutation: Server / Service / FSM]` ➔ `[State Persistence: DB / Map / Cache]` ➔ `[Network Serialization: DTO / Wire Protocol / Sparse Diff]` ➔ `[Client Parser / Deserializer]` ➔ `[Client Store / State]` ➔ `[UI / View Consumer]`
      - Verify every link against physical disk files. If a plan modifies UI/Store but omits persistence at the Server/Service origin, drops fields in serialization/parser, or binds action resets solely to identity changes (instead of phase/lifecycle), flag as **[P1 - BROKEN DATA LIFECYCLE]**.
@@ -42,7 +42,7 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command, write_to_fi
      - **Full Collection Protocol Parity (Proxy/Adapter Completeness)**: When a plan proposes a Proxy, Adapter, or Virtual Collection to emulate a standard container (`Map`, `Set`, `Array`, `Iterable`), verify that it implements 100% of standard protocol methods (`[Symbol.iterator]`, `entries()`, `keys()`, `values()`, `size`, `forEach()`, `clear()`, `get()`, `set()`, `has()`, `delete()`). Flag partial proxies omitting iteration, size, or entries traps as **[P1 - INCOMPLETE COLLECTION PROTOCOL]**.
      - **Zero-Delta & No-Op Event Suppression Guard**: When a plan introduces or modifies telemetry, activity loggers, notification mappers, or floating badges, verify that all amount/delta handlers explicitly guard against zero or non-positive deltas (`Math.abs(amount) <= 0` or `diff <= 0`). Zero-amount events must never emit activity logs or badges. Flag omissions as **[P1 - ZERO-DELTA LOGGING EMISSION]**.
      - **Wire/IO Boundary Duality Guard**: When plans inspect optional string/object fields from network DTOs or stores, FORBID loose `!== undefined` checks. Mandate explicit runtime type check (`typeof x === 'string'`) or dual null/undefined guard (`x != null`) to prevent runtime TypeError crash when receiving null tombstones. Flag omissions as **[P1 - WIRE BOUNDARY DUALITY LEAK]**.
-   - 📐 **Pillar 2: Physical Layout & File LOC Budget (Giới Hạn Bố Cục & Ngân Sách Dòng Mã)**:
+   - 📐 **Pillar 2: Physical Layout & File LOC Budget**:
      - Audit proposed UI changes against physical constraints: mobile 360px viewport, badge text wrapping, long currency strings, button overlap, flex shrinkage.
      - If a proposed badge or label risks pushing buttons off-screen or breaking container grids on 360px width, flag as **[P2 - LAYOUT OVERFLOW HAZARD]**.
      - **Physical Horizontal Pixel Arithmetic Check for 360px**: For any component placing >= 4 inline buttons, steppers, or inputs on mobile, calculate the physical pixel width sum against the net available container width (360px - 2 * modal_padding - 2 * card_padding ~= 296px). If sum > net width, the plan MUST mandate 2-tier ergonomic stacking or flex-wrapping. Flag as **[P2 - PHYSICAL HORIZONTAL OVERFLOW]**.
@@ -51,7 +51,7 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command, write_to_fi
      - **Anti-Overengineering & Scope Bundling Check**: If a plan bundles pure visual CSS/layout fixes with asynchronous timing delays or network state mutations, flag as **[P2 - ARTIFICIAL COMPLEXITY BUNDLE]** and mandate splitting: pure UI into Tier 1 Fast-Track, and state/timing into a separate ticket.
      - **Cross-Modal Navigation Target LOC Check**: When an action or affordance opens or links to another modal/view (e.g. from TitleDeed to Portfolio), physically verify the LOC baseline of that target modal. If the target is >= 450 LOC (near ceiling), any proposed UI additions inside the target modal MUST be rejected or deferred to Tech Debt, preventing accidental ceiling breaches. Flag as **[P1 - TARGET MODAL LOC OVERFLOW]**.
      - **Physical Snippet LOC Count Verification**: For any proposed drop-in snippet in Task 2, verify that the plan's budget calculation accurately measures the real physical line count of the snippet (`snippet.split('\\n').length`). If a planned abstraction exceeds 100 LOC, it MUST be planned as an isolated module rather than appended to a file near the 300+ LOC ceiling. Flag as **[P1 - SNIPPET LOC REALITY MISMATCH]**.
-   - 🎭 **Pillar 3: Actor Inversion & Role Symmetry (Hoán Đổi Vai Trò & Biên Nghiệp Vụ)**:
+   - 🎭 **Pillar 3: Actor Inversion & Role Symmetry**:
      - Test UX and state transitions from perspectives of all actors (e.g. debtor vs creditor, buyer vs seller, requester vs approver, sender vs receiver, admin vs regular user, spectator vs participant).
      - If UI displays misleading text to the wrong actor (e.g. telling an affected party "You declined" instead of showing a system notice) or unhandled edge cases (zero bids, tie bids, negative numbers), flag as **[P2 - ACTOR INVERSION DEFECT]**.
      - **Deficit / Insolvent Entity Guard**: Verify entities with negative balance or exhausted quotas cannot act as buyers or initiate cash/resource outflows; only inflows, sales, or restructuring allowed. Flag as **[P1 - DEFICIT ENTITY OUTFLOW]**.
@@ -64,7 +64,7 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command, write_to_fi
      - **Domain Rule Helper Exhaustiveness**: Rule resolvers and affordance helpers must explicitly handle boundary and terminal states (e.g. `currentLevel >= max`, `balance < 0`) with concrete return values rather than returning `undefined` and relying on UI consumer guards. Flag omissions as **[P1 - NON-EXHAUSTIVE RULE RESOLVER]**.
      - **State Shadowing & Intent Callback Isolation**: Verify that callers opening modals do NOT compute and pass parallel boolean flags that shadow host affordance helpers (SSOT violation). Verify action buttons with server intents do NOT silently fallback (`onConfirm ?? onClose`) to ambient UI dismiss handlers. Flag as **[P1 - STATE SHADOWING OR INTENT FALLBACK]**.
      - **System Authority vs User Intent Gateway**: Automated recovery loops (AFK rescue, auto-liquidation, periodic engine sweeps) operate under System Authority and MUST NOT be routed through user-facing intent dispatchers that contain precondition gates (e.g. rejecting actions from insolvent entities). System authority routines must use dedicated internal orchestrators. Flag as **[P1 - SYSTEM RECOVERY INTENT ROUTING GAP]**.
-   - ⏳ **Pillar 4: Transient Teardown & Lifecycle Leak (Vòng Đời Quá Độ & Dọn Sạch Lượt Kế)**:
+   - ⏳ **Pillar 4: Transient Teardown & Lifecycle Leak**:
      - Trace ephemeral state: Who clears it when the session, round, or turn advances (e.g. step transition, next turn, route change, unmount, logout)?
      - Verify delta payloads emit explicit `null` (tombstone) or empty reset instead of `undefined`.
      - Verify settle timers are isolated with identity keys and not cancelled by generic session resets.
@@ -72,12 +72,12 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command, write_to_fi
      - **Wrapper Delegation Teardown Trap**: When a plan proposes adding cleanup or lifecycle hooks to an Orchestrator/Manager method, inspect whether the target method is a one-line delegation wrapper to an external or pure function. If yes, the plan MUST provide exact drop-in placement showing teardown running before the delegation call or inside the delegate. Flag hand-wavy wrapper injections as **[P1 - WRAPPER DELEGATION TRAP]**.
      - **Opt-In Transient Visibility Guard**: For ephemeral UI components (badges, toasts, alerts, prompt chips), verify boolean visibility props default to `false` (opt-in). If a component defaults to `true` (opt-out), any unpassed caller causes false rendering at initial state or subsequent steps. Flag as **[P1 - OPT-OUT TRANSIENT VISIBILITY HAZARD]**.
      - If plan lacks lifecycle teardown or tombstone serialization, flag as **[P1 - TRANSIENT LEAK HAZARD]**.
-   - 🌐 **Pillar 5: Systemic Blast Radius & Cross-Coupling Interoperability (Bán Kính Ảnh Hưởng Đa Chiều)**:
+   - 🌐 **Pillar 5: Systemic Blast Radius & Cross-Coupling Interoperability**:
      - Audit the change across 3 universal axes:
        1. *Downstream Consumers*: Audit 100% of callers via `grep_search`. Verify container components explicitly propagate computed environmental props (e.g. `isMobile`) to children instead of relying on child ambient fallbacks. Verify callback signatures strictly match external framework listener contracts (e.g. `useSyncExternalStore` `() => void`). Flag unverified callers, ambient prop omissions, or signature mismatches as **[P2 - CALL-SITE BLINDSPOT]**.
        2. *Upstream & Environmental Modifiers*: Active tenant policies, global middleware, feature flags, environmental modifiers, active buffs/debuffs/discounts.
        3. *Exceptional Lifecycle Modes*: Cold start/reset, full state resync/reconnect, session invalidation, concurrent multi-event mutations, terminal/closed entity states, and *Adversarial Forced Transitions* (verify that abrupt/forced state overrides like session termination, account suspension, administrative eviction, or step timeout do not accidentally trigger linear progression side-effects like duplicate rewards, step advancement, or phantom fees). Flag omissions as **[P1 - FORCED TRANSITION BLINDSPOT]**.
-     - **Concrete Drop-In Snippets Mandate**: Every file modified in Task 2 MUST contain exact file:line coordinates and explicit replacement code snippets. Hand-wavy directives (e.g. "dọn dẹp ở file X") without exact callbacks or line-level edits are strictly flagged as **[P1 - VAGUE PLAN DIRECTIVE]**.
+     - **Concrete Drop-In Snippets Mandate**: Every file modified in Task 2 MUST contain exact file:line coordinates and explicit replacement code snippets. Hand-wavy directives (e.g. "clean up in file X") without exact callbacks or line-level edits are strictly flagged as **[P1 - VAGUE PLAN DIRECTIVE]**.
      - **Complementary State Mutex Invariant**: When adding a lock/mutex to a resource mutation (e.g. reserve, lock, transfer, archive), verify the inverse/symmetric mutation (e.g. release, unlock, redeem, unarchive) and all dependent valuation/mutation operations are similarly protected during in-flight operations. Flag one-sided locks as **[P1 - ASYMMETRIC MUTEX GAP]**.
      - **Compound Quiescence / Dual-Pending Mutex**: When verifying that a system or entity is "idle" / "quiescent", checking state enums alone is insufficient; the check MUST verify that no secondary pending interactive sessions exist (e.g. in-flight transactions, pending approvals, active negotiations, uncommitted drafts). Flag partial idle checks as **[P1 - COMPOUND QUIESCENCE GAP]**.
      - **Static Checklist Test Infiltration Guard**: Inspect all proposed test cases in Task 1. If any test proposes checking `fs.readFileSync`, `fs.existsSync`, `lintContent`, `typeof`, or file LOC inside Vitest `it()` suites, flag as **[P1 - STATIC CHECKLIST TEST INFILTRATION]**. Tests MUST assert observable runtime/render behavior only (`renderToStaticMarkup`, event dispatch, state transitions).
@@ -97,9 +97,11 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command, write_to_fi
      - **A11y Attribute Co-Evolution**: When changing user-facing text/titles to resolve keyword collisions, all accompanying accessibility attributes (`aria-label`, `aria-description`) MUST be updated in lockstep, and tests must assert both. Flag partial fixes as **[P2 - A11Y ATTRIBUTE DIVERGENCE]**.
      - **Parametric Progress & Milestone Decoupling Check**: When a plan modifies any continuous parametric trajectory, curve, timeline, or sequence (e.g. animation paths, video/audio timelines, spatial curves, workflow progress steppers) sampled by discrete milestone thresholds (e.g. `checkpoint_progress`, `step_index`, `dwell_points`), the auditor MUST verify: (1) Does the new total range/duration/perimeter violate legacy boundary contracts? (2) Do discrete milestone thresholds evaluated along the parametric curve land within tolerance of expected physical/logical target states? If a continuous path is modified without arc-length or milestone recalibration, flag as **[P1 - PARAMETRIC PROGRESS DECOUPLING TRAP]**.
      - **Concrete Test Reconciliation Drop-In Snippet Guard**: When a plan proposes 'Reconciling' legacy contract tests due to mathematical formula or contract evolution, the plan MUST provide an exact drop-in code snippet with newly calculated expected values. Vague directives like 'will reconcile test X' without concrete assertions are strictly flagged as **[P1 - VAGUE TEST RECONCILIATION DIRECTIVE]**.
+     - **Multi-Phase Async/Animation Lifecycle Timing Invariant**: When a plan calculates timing, scheduling delays, or milestone offsets for events dependent on asynchronous operations or in-flight animations, verify that state lookups cover ALL phases (e.g. pending queue vs active in-progress vs fallback). Checking only a pending state causes premature fallback when the operation transitions to active execution. Flag as **[P1 - ASYNC/ANIMATION LIFECYCLE TIMING BLINDSPOT]**.
+     - **Legacy Facade Deprecation & SSOT Invariant**: When deprecating an internal branch within a public facade function preserved for backward compatibility, verify that the plan explicitly documents the branch with an SSOT deprecation comment, asserts runtime callers never route to it, and ensures no parallel legacy logic triggers inadvertently. Flag as **[P1 - UNDOCUMENTED LEGACY FACADE LEAK]**.
      - If a plan touches a calculation or state transition without auditing upstream modifiers or exceptional lifecycles, flag as **[P1 - BLAST RADIUS BLINDSPOT]**.
 
-4. **Mechanical Pre-Flight & Ghost File Verification (Tiền Kiểm Cơ Học Chống Ảo Giác)**:
+4. **Mechanical Pre-Flight & Ghost File Verification**:
    - **Mechanical Pre-Flight Run**: Before deep semantic auditing, run `node scripts/audit_plan.mjs <target-plan-path>` via `run_command` (0 tokens, 0.05s).
      - Verifies physical file existence (anti-ghost files).
      - Verifies 100% exact match of drop-in target snippets on physical disk.
@@ -118,8 +120,8 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command, write_to_fi
 - **Audit Artifact**: `[.agents/audit/PLAN_AUDIT_[TICKET].md](file:///path/to/audit.md)`
 - **Verdict**: [REVISE_REQUIRED / HARDENED_APPROVED]
 
-| Mã Lỗi | Loại Điểm Mù | Tệp & Dòng Thực Tế | Rủi Ro Kỹ Thuật | Chỉ Định Khắc Phục |
+| Error Code | Blind Spot Category | Physical File & Line | Technical Risk | Remediation Directive |
 | :--- | :--- | :--- | :--- | :--- |
-| **P1** | [Broken Lifecycle] | `[file.ts#L...]` | [Mô tả chi tiết lỗi] | [Chỉ định hành động sửa plan] |
-| **P2** | [Layout / Inversion] | `[file.ts#L...]` | [Mô tả chi tiết lỗi] | [Chỉ định hành động sửa plan] |
+| **P1** | [Broken Lifecycle] | `[file.ts#L...]` | [Detailed risk description] | [Exact plan fix directive] |
+| **P2** | [Layout / Inversion] | `[file.ts#L...]` | [Detailed risk description] | [Exact plan fix directive] |
 ```

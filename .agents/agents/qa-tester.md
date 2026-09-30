@@ -30,8 +30,9 @@ hooks: [.agents/hooks_qa.json]
    - **Atomic Test Mandate & Parameterized Testing**:
      - Each `it()` / `test()` verifies exactly ONE observable behavior or invariant. Maximum 1-4 `expect()` assertions per test.
      - STRICTLY FORBIDDEN: `for`, `while`, or `.forEach()` inside `it()` body. Use parameterized table testing (`it.each`, `@pytest.mark.parametrize`, `[Theory]`, Table-driven).
-   - **Banned Static Checklist Anti-Patterns**:
+   - **Banned Static Checklist & Shallow Assertions**:
      - NEVER write tests merely asserting `fs.existsSync`, `typeof fn === 'function'`, or file LOC limits. Those belong to static linters (`npm run lint:slop`, `tsc --noEmit`). Tests must verify runtime observable behavior (inputs ➔ processing ➔ outputs).
+     - BANNED SHALLOW CHANGE-DETECTORS: Strictly forbid solitary superficial assertions such as `.toBeDefined()`, `.not.toBeNull()`, or `.toHaveLength(n)` without validating concrete values. Assert exact numerical properties, types, and observable state. Follow domain gotchas for specialized validation (e.g. 3D geometry, AST).
    - **Universal 5-Facet Behavioral Matrix (Mandatory 5-Group Coverage)**:
      - Every feature slice test suite must assert across 5 facets:
        1. *Boundary & Range*: Input/model bounds, range constraints, format validity.
@@ -39,8 +40,10 @@ hooks: [.agents/hooks_qa.json]
        3. *Resource Disposal & Timer Isolation*: Memory/resource cleanup, unmount `.dispose()`, no listener leaks, and timer handle isolation (settle timers never blocked by unrelated resets).
        4. *Error Defense & Terminal Invariants*: Edge values (negative, NaN, overflow), idempotency, invalid intents, insolvent role guards (`balance < 0` cannot buy/pay), multi-agent harassment guards (target/room-scope cooldowns), terminal state immutability (concluded modals reject actions; bankrupt/deleted entities receive 0 funds, pay 0 fees, and trigger fallback), and *Zero-Delta Suppression* (assert that when delta is zero, telemetry/activity stream suppresses the event and emits zero logs or badges).
        5. *Cross-Coupling Blast Radius & Exceptional Lifecycles*: Assert behavior across 3 axes: downstream consumers update correctly; upstream environmental modifiers/policies alter outputs as specified; exceptional lifecycles (full resync/reconnect, cold start, concurrent multi-event mutations, terminal entity isolation) execute without state corruption; and *Adversarial Non-Linear Teleportation* (assert that abrupt or forced transitions, e.g. arrest to jail/audit, do NOT trigger linear progression side-effects like passing GO or phantom fees).
-   - **Test Density Floor**:
-     - Minimum 15-30 atomic tests per feature slice. Ratio of `expect()` / `it()` must stay between 1.0 and 3.5 (ratios > 4.0 indicate monolithic anti-pattern).
+   - **Test Density Floor (Hard Requirement)**:
+     - Contract suites (`tests/contracts/**`, `tests/client/**`, `tests/server/**`): MINIMUM 15 atomic tests / slice. If scope is small, add boundary, negative, zero-delta, and rollback tests to meet the floor.
+     - Probe suites (`tests/probes/**`): MINIMUM 14 tests / slice (Probe 1: >= 5, Probe 2: >= 4, Probe 3: >= 5).
+     - Ratio of `expect()` / `it()` must stay between 1.0 and 3.5 (ratios > 4.0 indicate monolithic anti-pattern).
    - **Consumer-Side Assertion (Universal Rule - Assert Effect at Point of Consumption)**:
      - In any domain (Web, REST API, Microservice, Game, Desktop), when testing an effect, policy, modifier, discount, or role permission:
      - ❌ **NEVER** assert only the storage/producer side (e.g. `expect(cart.discounts).toHaveLength(1)` or `expect(player.modifiers).toContain(...)`). That creates a "False Green" if the business logic forgets to query the state.

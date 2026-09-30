@@ -26,23 +26,33 @@ export const SOUTH_STATION_PROGRESS = TRAIN_CONFIG.SOUTH_STATION_PROGRESS;
 export const NORTH_STATION_PROGRESS = TRAIN_CONFIG.NORTH_STATION_PROGRESS;
 
 export const TRACK_POINTS: readonly Vector3[] = [
-  new Vector3(4.9, 0.45, 6.9),
-  new Vector3(0, 0.45, 6.9),
-  new Vector3(-1.6, 0.45, 6.9), // Ga Waterfront: progress = 0.12 (Vector3 {-1.30, 0.45, 6.90})
-  new Vector3(-5.8, 0.45, 6.8),
-  new Vector3(-6.6, 0.45, 5.8),
-  new Vector3(-6.8, 0.45, 2.0),
-  new Vector3(-6.7, 0.45, -2.0),
-  new Vector3(-6.6, 0.45, -5.8),
-  new Vector3(-5.8, 0.45, -6.8),
-  new Vector3(0, 0.45, -6.9),
-  new Vector3(1.6, 0.45, -6.9),  // Ga Landmark Bắc: progress = 0.62 (Vector3 {1.29, 0.45, -6.90})
-  new Vector3(5.8, 0.45, -6.8),
-  new Vector3(6.6, 0.45, -5.8),
-  new Vector3(6.8, 0.45, -2.0),
-  new Vector3(6.7, 0.45, 2.0),
-  new Vector3(6.6, 0.45, 5.8),
-  new Vector3(5.8, 0.45, 6.8),
+  // 1. Bán đảo Nam (Bến Thành - Cầu Ba Son vượt sông - Ga Waterfront bờ Nam)
+  new Vector3(3.9, 0.45, 6.95),
+  new Vector3(0.9, 0.45, 6.95),
+  new Vector3(-2.45, 0.45, 6.92),   // Ga Waterfront (progress ~0.12, 3 toa đỗ gọn trên ke ga [-2.7, -0.5])
+  new Vector3(-5.35, 0.45, 6.85),   // Uốn lượn cong mềm về phía Tây Nam
+
+  // 2. Bán đảo Tây (Chợ Lớn / Văn Thánh / Vành đai đệm di sản Nhà Thờ Đức Bà)
+  new Vector3(-6.7, 0.45, 5.85),
+  new Vector3(-7.0, 0.45, 3.6),     // Khoảng đệm an toàn > 2.4m tới Nhà Thờ Đức Bà (-4.5, 2.9)
+  new Vector3(-7.05, 0.45, 0.8),
+  new Vector3(-7.0, 0.45, -2.2),
+  new Vector3(-6.7, 0.45, -5.45),
+
+  // 3. Bán đảo Bắc (Suối Tiên / Khu Công Nghệ Cao / Ga Landmark Bắc)
+  new Vector3(-5.35, 0.45, -6.85),
+  new Vector3(-2.45, 0.45, -6.92),
+  new Vector3(0.9, 0.45, -6.95),
+  new Vector3(3.9, 0.45, -6.95),
+  new Vector3(5.35, 0.45, -6.85),
+
+  // 4. Bán đảo Đông (Landmark Skyline S-Curve / Thảo Điền - An Phú - Rạch Chiếc)
+  new Vector3(6.7, 0.45, -5.45),
+  new Vector3(7.05, 0.45, -2.8),
+  new Vector3(6.65, 0.45, -0.2),    // Uốn cong hữu cơ vào bán đảo Thảo Điền
+  new Vector3(7.05, 0.45, 2.2),     // Vòng cung Rạch Chiếc
+  new Vector3(6.85, 0.45, 4.8),
+  new Vector3(5.95, 0.45, 6.45),
 ];
 
 let cachedCurve: CatmullRomCurve3 | null = null;

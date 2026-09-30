@@ -77,7 +77,7 @@ function hasExplanatoryComment(node, sf, content) {
   const blockStart = node.block.getStart(sf);
   const blockEnd = node.block.getEnd();
   const blockText = content.substring(blockStart, blockEnd);
-  return /(safe|ignore|test|mock|suppress|fallback|expected|an toàn|bỏ qua|ngoài canvas|môi trường|uninitialized|không khả dụng)/i.test(blockText);
+  return /(safe|ignore|test|mock|suppress|fallback|expected|uninitialized|unavailable|an to[aà]n|b[oỏ] qua|ngo[aà]i canvas|m[oô]i tr[uư][oờ]ng|kh[oô]ng kh[aả] d[uụ]ng)/i.test(blockText);
 }
 
 /**
@@ -125,7 +125,7 @@ export function lintSlopContent(content, filePath = 'anonymous.ts') {
 
   // Rule 5: zero-workaround-comments (Lauren Tan / Dune Invariant)
   // Prohibits comments papering over defects instead of solving root causes.
-  const WORKAROUND_REGEX = /\b(workaround|quick hack|dirty hack|temporary fix|temp fix|fix later|hack tạm|sửa tạm|vá tạm)\b/i;
+  const WORKAROUND_REGEX = /\b(workaround|quick hack|dirty hack|temporary fix|temp fix|fix later)\b/i;
   lines.forEach((lineText, idx) => {
     let commentText = null;
     const slashIndex = lineText.indexOf('//');

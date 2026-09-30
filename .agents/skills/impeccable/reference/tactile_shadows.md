@@ -1,30 +1,30 @@
-# CÔNG THỨC ĐỔ BÓNG ĐA TẦNG XÚC GIÁC (TACTILE SHADOWS & ELEVATION)
+# TACTILE SHADOWS & ELEVATION SPECIFICATION
 
-Tài liệu tham chiếu chuyên sâu thuộc bộ kỹ năng `impeccable` của dự án `vtcoon`.
+Deep technical reference for the `impeccable` skill in `vtcoon`.
 
 ---
 
-## 1. VẤN ĐỀ CỦA NÚT BẤM MÉO GÓC (`border-accent-on-rounded`)
+## 1. THE CORNER WARPING DEFECT (`border-accent-on-rounded`)
 
-Trong thiết kế web sơ cấp, lập trình viên thường tạo cảm giác "nút bấm 3D nổi" bằng cách thêm viền đáy dày:
+In rudimentary CSS implementations, developers often mimic a 3D button press by applying a thick bottom border:
 ```html
-<!-- SAI LẦM: Viền dưới 4px trên phần tử bo góc -->
+<!-- DEFECT: 4px bottom border on rounded element -->
 <button class="rounded-xl bg-amber-500 border-b-4 border-amber-700">
-  Mua Đất
+  Buy Property
 </button>
 ```
 
-### Tại sao đây là Anti-pattern nghiêm trọng?
-1. **Lỗi Biến Dạng Góc Bo (Corner Warping)**: Thuật toán vẽ `border-radius` của CSS tính toán bán kính dựa trên độ dày đồng đều của các cạnh. Khi một cạnh có độ dày 4px trong khi 3 cạnh còn lại bằng 0 hoặc 1px, đường cong ở hai góc đáy bị kéo lệch bất đối xứng, lộ rõ vết vát dị dạng.
-2. **Thiếu Chiều Sâu Xúc Giác Đích Thực**: Khi người dùng nhấn nút (`active`), viền `border-b-4` không phản ánh được sự nén xuống theo trục Z một cách tự nhiên.
+### Why this is a severe anti-pattern:
+1. **Corner Warping**: The CSS `border-radius` calculation assumes uniform border thickness across edges. When one edge has 4px while the other three have 0px or 1px, bottom corners warp into asymmetric, sharp bevels.
+2. **Missing Z-axis Tactile Depth**: On `:active`, a `border-b-4` cannot replicate authentic physical compression along the Z-axis.
 
 ---
 
-## 2. CÔNG THỨC ĐỔ BÓNG ĐA TẦNG XÚC GIÁC THAY THẾ
+## 2. MULTI-LAYER TACTILE ELEVATION FORMULA
 
-Thay vì dùng viền đáy dày, Impeccable sử dụng **bóng đổ dập nổi đồng phẳng (hard-edge elevation drop shadow)** kết hợp với hiệu ứng dịch chuyển tọa độ khi nhấn:
+Instead of asymmetric borders, Impeccable uses **hard-edge elevation drop shadows** paired with active translation:
 
-### Công Thức Cốt Lõi (Tailwind CSS):
+### Core Tailwind CSS Pattern:
 ```html
 <button class="
   px-4 py-2.5 rounded-xl font-bold
@@ -34,48 +34,46 @@ Thay vì dùng viền đáy dày, Impeccable sử dụng **bóng đổ dập n�
   active:translate-y-[3px]
   transition-all
 ">
-  Mua Đất
+  Buy Property
 </button>
 ```
 
-### Cơ Chế Hoạt Động Xúc Giác:
-1. `shadow-[0_4px_0_0_#depth_color]`: Tạo một chân đế dày 4px hoàn hảo bám theo đúng đường cong của `rounded-xl`, không làm méo bất kỳ góc bo nào.
-2. `active:translate-y-[3px]`: Khi click/nhấn, toàn bộ nút bấm thụt xuống 3px.
-3. `active:shadow-[0_1px_0_0_#depth_color]`: Độ dày của chân đế giảm từ 4px xuống 1px, mô phỏng chuẩn xác vật lý nén cơ học của một phím bấm cao cấp.
+### Tactile Mechanics:
+1. `shadow-[0_4px_0_0_#depth_color]`: Renders a 4px footing that adheres to `rounded-xl` without corner distortion.
+2. `active:translate-y-[3px]`: On click/press, translates the button downward by 3px.
+3. `active:shadow-[0_1px_0_0_#depth_color]`: Decreases footing thickness from 4px to 1px, replicating mechanical switch depression.
 
 ---
 
-## 3. BẢNG MÃ MÀU NÚT BẤM THỰC TẾ TRONG VTCOON
+## 3. COLOR PALETTE REFERENCE FOR IN-GAME CONTROLS
 
-Dưới đây là các token hoàn chỉnh áp dụng trong giao diện 2D của trò chơi:
-
-### 1. Nút Thao Tác Cơ Bản / Xác Nhận Mua (Teal / Emerald Luxury)
+### 1. Primary Action / Confirm Investment (Teal / Emerald Luxury)
 ```html
 <button class="min-h-[44px] px-5 py-2.5 rounded-xl font-bold text-white bg-gradient-to-b from-teal-500 to-teal-600 hover:from-teal-400 hover:to-teal-500 border border-teal-800 shadow-[0_4px_0_0_#115e59] active:shadow-[0_1px_0_0_#115e59] active:translate-y-[3px] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400">
-  Xác Nhận Đầu Tư
+  Confirm Investment
 </button>
 ```
 
-### 2. Nút Hoàng Gia / Đấu Giá / Nâng Cấp Tòa Nhà (Amber / Gold Tycoon)
+### 2. High Stakes / Auction Bid / Upgrade (Amber / Gold Tycoon)
 ```html
 <button class="min-h-[44px] px-5 py-2.5 rounded-xl font-black text-amber-950 bg-gradient-to-b from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 border border-amber-700 shadow-[0_4px_0_0_#b45309] active:shadow-[0_1px_0_0_#b45309] active:translate-y-[3px] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400">
-  Đặt Giá Đấu Thầu
+  Place Bid
 </button>
 ```
 
-### 3. Nút Nguy Hiểm / Bỏ Lượt / Thế Chấp / Phá Sản (Rose / Crimson Crisis)
+### 3. Danger / Pass / Mortgage / Bankruptcy (Rose / Crimson Crisis)
 ```html
 <button class="min-h-[44px] px-5 py-2.5 rounded-xl font-bold text-rose-300 hover:text-rose-100 bg-rose-950/80 hover:bg-rose-900/90 border border-rose-700/60 shadow-[0_4px_0_0_#9f1239] active:shadow-[0_1px_0_0_#9f1239] active:translate-y-[3px] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400">
-  Bỏ Cuộc / Thế Chấp
+  Pass / Mortgage
 </button>
 ```
 
 ---
 
-## 4. CHIỀU SÂU THẺ BÀI & MODAL DIORAMA (MULTI-LAYER AMBIENT DEPTH)
+## 4. MULTI-LAYER AMBIENT DEPTH FOR MODALS & CARDS
 
-Đối với các thẻ bài lớn như Sổ Đỏ (Title Deed) hoặc Modal HOSE:
-- **Lớp 1 (Ambient Shadow)**: `shadow-2xl shadow-black/80` (tách phần tử ra khỏi không gian 3D).
-- **Lớp 2 (Contact Footing)**: `shadow-[0_4px_0_0_#0f172a]` (chân đế tiếp xúc mặt bàn cờ).
-- **Lớp 3 (Rim Light)**: `ring-1 ring-white/10` hoặc `ring-1 ring-amber-400/20` (vệt sáng cạnh viền kính cường lực/kim loại).
-- **Lớp 4 (Vật liệu nền)**: `bg-slate-900/95 backdrop-blur-md border border-slate-700/60`.
+For large cards like Title Deeds or the HOSE Exchange:
+- **Layer 1 (Ambient Shadow)**: `shadow-2xl shadow-black/80` (elevates element off 3D board).
+- **Layer 2 (Contact Footing)**: `shadow-[0_4px_0_0_#0f172a]` (anchors card baseline).
+- **Layer 3 (Rim Light)**: `ring-1 ring-white/10` or `ring-1 ring-amber-400/20` (highlights tempered-glass edges).
+- **Layer 4 (Material Surface)**: `bg-slate-900/95 backdrop-blur-md border border-slate-700/60`.

@@ -1019,4 +1019,159 @@
   * `chaos-sentinel`: Station 4 APPROVED (24/24 Intent parity, port 60694 boundary probe clean, diệt 2/2 mutants 100%).
 - **Trạng thái**: ✅ Hoàn thành IMP-228 (2026-09-30).
 
+---
+
+### [IMP-230] HCMC Metro Line 1 Organic Curved Viaduct, Continuous Spline Loop & Rolling Stock Overhaul
+- **Mục tiêu**: Nâng cấp toàn diện tuyến đường sắt sa bàn 3D (HCMC Metro Line 1) từ 4 thanh dầm hộp chữ nhật vuông vức 90° cứng nhắc sang cầu cạn cong hữu cơ (Organic Curved Viaduct) bám khít đường spline CatmullRom liên tục, uốn lượn vượt sông Sài Gòn và men theo bán đảo, với dầm U-girder, lan can bê tông đúc sẵn (#94A3B8), ray kim loại đôi (#E2E8F0, metalness 0.85), 16 trụ tròn (#CBD5E1) cắm sâu lòng sông, và đoàn tàu 3 toa đỗ trọn vẹn trong ke ga Waterfront và Landmark North.
+  1. *Đường cong hữu cơ & Vành đai di sản*: 20 điểm mốc CatmullRom ($L \approx 51.24\text{m} \in [51.0\text{m}, 54.0\text{m}]$), bảo đảm khoảng cách an toàn $> 2.4\text{m}$ tới Nhà Thờ Đức Bà (vượt ngưỡng yêu cầu $1.5\text{m}$), và tĩnh không thông thuyền nhịp vượt sông $\ge 0.45\text{m}$.
+  2. *32 Đốt dầm cong U-Girder & 16 Trụ tròn*: Đúc sẵn 32 phân đoạn cong tại module scope (chống hoàn toàn GC churn), 64 dải lan can $Y \ge 0.44\text{m}$, 16 trụ bê tông tròn cắm sâu xuống đáy sông trầm tích ($Y \le 0.00\text{m}$, chiều cao trụ $\ge 0.45\text{m}$).
+  3. *Tà vẹt AST Direct Children & Đổ bóng GPU*: 32 thanh tà vẹt gỗ sẫm màu (#451A03) bám dọc spline là con trực tiếp của `<group data-testid="diorama-model-railroad">` (bảo vệ shallow AST traversal trong `TC-IMP142.09`), tắt hoàn toàn `castShadow` theo chuẩn IMP-142.
+  4. *Đồng bộ Dừng Đỗ Ke Ga (Station Progress Parity)*: Hiệu chuẩn toán học để tại `progress = 0.12`, đầu tàu đạt $X \approx -2.26\text{m}$, kéo cả Toa 1 ($-1.40\text{m}$) và Toa 2 ($-0.55\text{m}$) đỗ trọn vẹn trên ke ga Waterfront dài $2.2\text{m}$ ($[-2.7\text{m}, -0.5\text{m}]$); tại `progress = 0.62`, đầu tàu đạt $X \approx +2.18\text{m}$, cả 3 toa nằm trọn trên ke ga Landmark North ($[0.5\text{m}, 2.7\text{m}]$).
+  5. *Bảo tồn Cửa sổ 800 Ký Tự*: 4 dải đá ba-lát `#475569` giữ nguyên ở đầu `DioramaBallastBed`, bảo vệ 100% test di sản `railroad_ballast_and_waterfront_station.test.ts`.
+- **Hạ tầng hoàn tất**:
+  * `src/client/3d/diorama/diorama_train_kinematics.ts` (266 LOC — Tier 2 <= 500 LOC): 20 điểm mốc hữu cơ, chu vi 51.24m, đỗ ga hoàn hảo.
+  * `src/client/3d/diorama/diorama_railroad.tsx` (345 LOC — Tier 2 <= 500 LOC): 32 đốt cong U-Girder, 16 trụ tròn, tà vẹt direct children.
+  * `docs/domain/gotchas.md`: Ghi nhận Bất biến số 23 (Pillar V: 3D Curved Viaduct Superstructure, AST Shallow Traversal & Pier Waterline Grounding).
+  * `docs/reports/improvements/IMP-230-hcmc_metro_line1_curved_viaduct_report.md`: Báo cáo nghiệm thu hoàn chỉnh.
+- **Kiểm thử & Bất biến**:
+  * `tests/contracts/imp230_organic_curved_viaduct.test.ts` (328 LOC): 18/18 atomic contract tests PASS (Universal 5-Facet Matrix, 1-4 asserts/test, zero dirty casts).
+  * Bảo toàn 100% tests di sản: `hcmc_metro_line1_infrastructure` (16 tests), `imp228_elevated_metro` (16 tests), `railroad_ballast` (28 tests), `imp142_draw_call` (25 tests), `imp134_model_train` (21 tests) -> Tổng **124/124 tests PASS (Zero Regression)**.
+  * TypeScript typecheck: `tsc --noEmit` 0 errors. UI Linter: `npm run lint:ui` 0 violations / 206 files. Slop Linter: 0 violations.
+  * Evidence Snapshot: `.agents/evidence/chaos_sentinel_IMP230.json` (`executed: true`).
+- **Phê chuẩn**:
+  * `plan-griller`: P1-P5 AUDIT APPROVED (giải quyết 4 Blocker P1 và 2 Warning P2).
+  * `qa-tester`: Station 1 RED verified (5/18 tests failed as expected under Adversarial Inversion).
+  * `implementer`: Station 2 GREEN verified (18/18 tests pass, 266 & 345 LOC).
+  * `scout`: Station 2.5 PASS (0 defects qua 6 mechanical checks, LOC safe, build safe).
+  * `spec-reviewer`: Station 3.1 APPROVED (100% spec reconciliation, 0 scope drift, 0 dirty casts).
+  * `code-reviewer`: Station 3.2 APPROVED (Deep Architecture, clean SRP, zero per-frame GC churn in useSafeFrame, correct normal math).
+  * `game-3d-visual-critic`: Station 3.2 APPROVED (Chuẩn AAA Retropoly/Monopoly Plus, dầm cong thanh thoát chuẩn Metro Tuyến 1 TP.HCM).
+  * `chaos-sentinel`: Station 4 APPROVED (24/24 Intent parity, port 51872 boundary probe clean, diệt 3/3 mutants 100%).
+- **Trạng thái**: ✅ Hoàn thành IMP-230 (2026-09-30).
+
+---
+
+### [IMP-229] Khắc Phục Lỗi Xung Đột Modal & Tự Động Kết Thúc Của Phiếu Cơ Hội "Mua Lại Dự Án Tiềm Năng" (CC_SWAP_PROJECT)
+- **Mục tiêu**: Loại bỏ 100% hiện tượng xung đột ghi đè modal (Modal Collision) và tự động đóng modal do lệch đồng hồ (Clock Skew Auto-Decline) khi người chơi mở trúng Thẻ cơ hội Mua Lại Dự Án Tiềm Năng (`CC_SWAP_PROJECT`).
+  1. *Sequential Modal Handover (Chuyển Tiếp Tuần Tự)*: Trong `apply_delta.ts`, chặn đứng việc cướp modal khi đang có luồng thẻ sự kiện (`isCardFlow`) hoặc quân cờ đang di chuyển (`isMoving`), chỉ lưu `pendingBuyout` vào Zustand store SSOT. Nhường quyền mở `CompulsoryBuyoutModal` cho `ModalHost` khi người chơi đóng thẻ `event`.
+  2. *Deadlock-Free Backdrop Handover*: Khi click ra ngoài backdrop hoặc bấm Esc trên `EventCardModal`, `handleBackdropClose` kiểm tra `pendingBuyout` và chuyển tiếp sang `CompulsoryBuyoutModal`, triệt tiêu hoàn toàn nguy cơ deadlock kẹt lượt trên FSM server (`turn_loop.ts#L242`).
+  3. *Khử Clock Skew & Zero Client Auto-Decline*: Khởi tạo bộ đếm an toàn với fallback 15s nếu lệch giờ client-server (`expiresAt <= Date.now()`). Sử dụng bộ đếm tương đối giảm 100ms/tick không phụ thuộc `Date.now()`. Khi timer chạm 0s, client TUYỆT ĐỐI KHÔNG tự gọi `onDecline()`, khóa nút Mua (`disabled = true`, nhãn 'Hết Thời Gian Mua') và nhường quyền timeout cho Server Watchdog.
+- **Hạ tầng hoàn tất**:
+  * `src/client/network/apply_delta.ts` (349 LOC — Tier 1 <= 400 LOC): Chặn cướp modal, lưu SSOT.
+  * `src/client/ui/modals/modal_host.tsx` (494 LOC — Tier 2 <= 500 LOC): Điều phối chuyển tiếp tuần tự cả nút CTA lẫn Backdrop.
+  * `src/client/ui/modals/compulsory_buyout_modal.tsx` (200 LOC — Tier 2 <= 500 LOC): Đếm ngược tương đối, zero client auto-decline, khóa nút hết giờ.
+  * `docs/domain/gotchas.md`: Ghi nhận Bất biến số 25 (Pillar V: Sequential Modal Handover & Server-Authoritative Expiry).
+  * `docs/reports/improvements/IMP-229-compulsory-buyout-collision-and-clock-skew_report.md`: Báo cáo nghiệm thu hoàn chỉnh.
+- **Kiểm thử & Bất biến**:
+  * `tests/client/imp229_compulsory_buyout_collision_and_clock_skew.test.ts` (554 LOC): 16/16 atomic contract tests PASS (Detroit Classical TDD, 1-4 asserts/test, zero dirty casts).
+  * `tests/probes/imp229_chaos_sentinel_probes.test.ts` (14 probe tests): 14/14 tests PASS (Closed-Loop Parity, Ephemeral Boundary, Mutation Sensitivity, 5/5 Mutants Killed).
+  * TypeScript typecheck: `tsc --noEmit` 0 errors. UI Linter: `npm run lint:ui` 0 violations / 206 files. Slop Linter: 0 violations.
+  * Evidence Snapshot: `.agents/evidence/imp229_execution.json` & `.agents/evidence/chaos_sentinel_imp229.json` (`executed: true`).
+- **Phê chuẩn**:
+  * `plan-griller`: P1-P5 AUDIT APPROVED (phát hiện và khắc phục 3 điểm mù P1.1, P1.2, P1.3).
+  * `qa-tester`: Station 1 RED verified (7/16 tests failed as expected under Adversarial Inversion).
+  * `implementer`: Station 2 GREEN verified (16/16 tests pass, 48/48 all related tests pass).
+  * `scout`: Station 2.5 PASS (0 defects qua 6 mechanical checks, LOC safe, build safe).
+  * `spec-reviewer`: Station 3.1 APPROVED (100% spec reconciliation, 0 scope drift, 0 dirty casts).
+  * `code-reviewer`: Station 3.2 APPROVED (Deep Architecture, clean SRP, zero timer leak, zombie UI defense).
+  * `ui-craft-reviewer`: Station 3.2 APPROVED (Điểm 9.8 / 10, công thái học 2D đạt chuẩn tactile 4px gờ nổi, touch target >= 48px).
+  * `chaos-sentinel`: Station 4 APPROVED (3 Probes passed, 5/5 Mutants killed, 0 surviving mutants).
+- **Trạng thái**: ✅ Hoàn thành IMP-229 (2026-09-30).
+
+---
+
+### [IMP-230-FIN] Khử Lệch Pha Dòng Tiền Vượt GO & Tách Bạch Huy Hiệu Đa Giao Dịch (Subtractive Clean)
+- **Mục tiêu**: Khắc phục triệt để lỗi người chơi nhận được 20đ khi qua GO (thay vì nhận 2.000 Tr. lương và chịu phạt 1.980 Tr.). Subtractive Refactoring dọn sạch nhánh `isSalary` legacy trong `apply_delta_players.ts`, điều phối nhịp độ vật lý 3 pha trong `activity_badge_dispatcher.ts` để hiển thị tuần tự từng giao dịch.
+- **Hạ tầng hoàn tất**:
+  * `src/client/network/apply_delta_players.ts` (268 LOC — Tier 1 <= 400 LOC): Xóa bỏ nhánh `isSalary`, gắn comment SSOT deprecation cho `notifyBalanceChange`.
+  * `src/client/network/activity_badge_dispatcher.ts` (221 LOC — Tier 1 <= 400 LOC & <= 250 LOC TC-191.16): Import `checkPassedGo`, triển khai `getPawnPassGoDelay` 3 pha (pending, active & queued) + 0ms fallback, export `handleSalaryBadge`.
+  * `docs/domain/gotchas.md`: Ghi nhận Bất biến số 24 (Pillar V: Subtractive Separation of Multi-Transaction Delta & Two-Phase Animation Pacing).
+  * `docs/reports/improvements/IMP-230-pass-go-salary-and-rent-subtractive-clean_report.md`: Báo cáo nghiệm thu hoàn chỉnh.
+- **Kiểm thử & Bất biến**:
+  * `tests/contracts/imp230_pass_go_salary_and_rent_subtractive_clean.test.ts` (423 LOC — Tier <= 600 LOC): 16/16 atomic contract tests PASS (Universal 5-Facet Matrix, Detroit Classical TDD, 1-4 asserts/test, zero dirty casts).
+  * Bảo toàn 100% tests di sản: `imp117` (17 tests), `imp191` (16 tests), `imp225` (16 tests), `activity_tracker` (16 tests) -> Tổng **81/81 tests PASS (Zero Regression)**.
+  * TypeScript typecheck: `tsc --noEmit` 0 errors. UI Linter: `npm run lint:ui` 0 violations / 206 files.
+  * Evidence Snapshot: `.agents/evidence/chaos_sentinel_IMP-230.json` (`executed: true`).
+- **Phê chuẩn**:
+  * `plan-griller`: P1-P5 AUDIT APPROVED (Hardened Approved sau khi tiếp thu 3 phản biện C1–C3).
+  * `qa-tester`: Station 1 RED verified (8/16 tests failed as expected under Adversarial Inversion).
+  * `implementer`: Station 2 GREEN verified (16/16 tests pass, LOC 268 & 221 đạt chuẩn).
+  * `scout`: Station 2.5 PASS (0 defects qua 5 bộ lọc cơ học).
+  * `spec-reviewer`: Station 3.1 APPROVED (100% spec reconciliation, 0 scope drift).
+  * `code-reviewer`: Station 3.2 APPROVED (Deep Architecture, clean SRP, zero timer leak, memory safe).
+  * `ui-craft-reviewer`: Station 3.2 APPROVED (Đạt chuẩn Antigravity 2.0 & Impeccable, 0 violations lint:ui).
+  * `chaos-sentinel`: Station 4 APPROVED (24/24 Intent parity, ephemeral boundary probe clean, diệt 1/1 mutants 100%).
+- **Trạng thái**: ✅ Hoàn thành IMP-230 (2026-09-30).
+
+---
+
+### [IMP-231] Mua Lại Dự Án Tiềm Năng (Chọn Ô Đất Mục Tiêu, Xếp Hàng Tuần Tự & Server-Authoritative Clock)
+- **Mục tiêu**: Nâng cấp toàn diện cơ chế Mua Lại Dự Án Tiềm Năng (`CC_SWAP_PROJECT`):
+  1. *Lựa Chọn Ô Đất Mục Tiêu (Target Selection)*: Người chơi được tự do click chọn 01 ô đất C0 mục tiêu từ danh sách hợp lệ của đối thủ (`eligibleTargets`), loại bỏ việc tự động gán ô đắt tiền ngoài tầm với. Bộ chọn `buyout-cell-selector` tự động ẩn khi <= 1 ô và hiển thị dạng grid khi >= 2 ô.
+  2. *Phân Định 2 Mức Trợ Cấp & Bảo Toàn Kho Bạc (Treasury Conservation)*: Khi đối thủ không có ô C0 hợp lệ (`oppC0Cells.length === 0`), Kho Bạc đền bù mất cơ hội 1.000 Tr. VNĐ (`treasury -= 1000, balance += 1000`); khi có ô nhưng người chơi/Bot không đủ tiền mua ô rẻ nhất (`balance < minCost`), Kho Bạc cấp trợ cấp thanh khoản 800 Tr. VNĐ (`treasury -= 800, balance += 800`). Khi mua đứt thành công, chuyển nhượng P2P 130% bảo toàn tuyệt đối đẳng thức kinh tế hệ thống ($\Delta \text{Treasury} = 0$).
+  3. *Loại Trừ BĐS Thế Chấp Trái Phiếu*: `isEligibleForCompulsoryBuyout` loại trừ 100% các ô đất đang bị phong tỏa làm tài sản bảo đảm trái phiếu doanh nghiệp (`owner.bondContract.collateralCells`).
+  4. *Xác Thực Phía Server (Server-Authoritative Intent Validation)*: `coordExecuteCompulsoryBuyout` xác thực nghiêm ngặt `cellIndex` người chơi gửi lên phải nằm trong `session.eligibleTargets`, ngăn chặn gian lận mua ô ngoài danh sách.
+  5. *Đồng Hồ Máy Chủ 30s & Thanh Tiến Trình Động*: Phiên buyout gia hạn 30s (`expiresAt = Date.now() + 30_000`), thanh progress bar tính toán động theo `totalMs = safeInitialMs` lúc mount, không bị kẹt ở 100%. Khi hết giờ, nút Mua bị khóa thành 'Hết Thời Gian Mua', client tuyệt đối không gọi `onDecline()`, nhường quyền timeout cho Server Watchdog.
+- **Hạ tầng hoàn tất**:
+  * `src/domain/compulsory_buyout.ts` (40 LOC — Tier 1 <= 400 LOC): Lọc bỏ ô đất phong tỏa trái phiếu.
+  * `src/domain/room.ts` (274 LOC — Tier 1 <= 400 LOC): Khai báo `BuyoutTargetOption` và `eligibleTargets` trong `PendingBuyoutSession`.
+  * `src/domain/chance_card_handlers.ts` (374 LOC — Tier 1 <= 400 LOC): Thu thập `eligibleTargets`, tính `minCost`, `defaultTarget` vừa túi tiền, đồng bộ logic trợ cấp cho Bot path.
+  * `src/server/room_property_coordinator.ts` (356 LOC — Tier 1 <= 400 LOC): Xác thực mục tiêu hợp lệ, chuyển nhượng quyền sở hữu, dọn sạch session.
+  * `src/client/ui/modals/compulsory_buyout_modal.tsx` (252 LOC — Tier 2 <= 500 LOC): Bộ chọn `buyout-cell-selector`, reactive hook `playersInfo`, dynamic progress bar, khóa nút kép khi hết giờ hoặc thiếu tiền.
+  * `src/client/ui/modals/event_card_visuals.ts` (342 LOC — Tier 2 <= 500 LOC): Chuẩn hóa nhãn CTA `'Tiến Hành Mua Lại 🤝'` cho `CC_SWAP_PROJECT`.
+  * `src/client/ui/modals/modal_host.tsx` (494 LOC — Tier 2 <= 500 LOC): Truyền inline `eligibleTargets` giữ nguyên ngân sách 494/500 dòng.
+  * `docs/domain/gotchas.md`: Ghi nhận Bất biến số 26 (Pillar V: Compulsory Buyout Target Selection & Dual-Symmetric Subsidy).
+  * `docs/reports/improvements/IMP-231-compulsory-buyout-property-selection-and-sequential-handover_report.md`: Báo cáo nghiệm thu hoàn chỉnh.
+- **Kiểm thử & Bất biến**:
+  * `tests/client/imp231_compulsory_buyout_property_selection.test.ts` (555 LOC): 16/16 atomic contract tests PASS (Universal 5-Facet Matrix, Detroit Classical TDD, 1-4 asserts/test, zero dirty casts).
+  * `tests/probes/imp231_chaos_sentinel_probes.test.ts` (12 probe tests): 12/12 tests PASS (Closed-Loop Parity, Ephemeral Boundary, Mutation Sensitivity, 5/5 Mutants Killed).
+  * Hồi quy 100%: 30/30 tests IMP-229 + 32/32 tests IMP-145/213 -> Tổng **90/90 tests PASS**.
+  * TypeScript typecheck: `tsc --noEmit` 0 errors. UI Linter: `npm run lint:ui` 0 violations / 206 files. Slop Linter: 0 violations.
+  * Evidence Snapshot: `.agents/evidence/imp231_execution.json` & `.agents/evidence/chaos_sentinel_imp231.json` (`executed: true`).
+- **Phê chuẩn**:
+  * `plan-griller`: P1-P5 AUDIT APPROVED (phát hiện và khắc phục 5 điểm mù C1–C5).
+  * `qa-tester`: Station 1 RED verified (10/16 tests failed as expected under Adversarial Inversion).
+  * `implementer`: Station 2 GREEN verified (16/16 tests pass, toàn bộ tệp đạt chuẩn LOC).
+  * `scout`: Station 2.5 PASS (0 defects qua 5 bộ lọc cơ học).
+  * `spec-reviewer`: Station 3.1 APPROVED (100% spec reconciliation, 0 scope drift, 0 dirty casts).
+  * `code-reviewer`: Station 3.2 APPROVED (Deep Architecture, clean SRP, zero timer leak, Treasury Conservation invariant).
+  * `ui-craft-reviewer`: Station 3.2 APPROVED (Điểm 9.9 / 10, công thái học 2D xuất sắc, touch target 44-48px, Retropoly tactile shadow).
+  * `chaos-sentinel`: Station 4 APPROVED (3 Probes passed, 5/5 Mutants killed, 0 surviving mutants).
+- **Trạng thái**: ✅ Hoàn thành IMP-231 (2026-09-30).
+
+---
+
+### [IMP-232] Chuyển Đổi Affordance Đóng Modal Cho Người Dẫn Đầu Đấu Giá & Việt Hóa Thông Báo Lỗi
+- **Mục tiêu**: Nâng cấp công thái học sàn đấu giá bất động sản (`AuctionModal`) và hệ thống thông báo lỗi (`actionable_notification.ts`):
+  1. *Phân Định Nút Bấm Chân Trang Khi Đang Dẫn Đầu (Leading Bidder Affordance)*: Khi người chơi là người trả giá cao nhất (`highestBidderId === myId`), nút chân trang của `AuctionModal` chuyển từ `[✕ Rút Lui]` (`onPass`, màu đỏ báo động) sang `[✕ Đóng / Xem Bàn Cờ]` (`onClose`, màu vàng hổ phách amber `bg-amber-400 text-amber-950 border-amber-600 shadow-[0_3px_0_0_#b45309]`). Ngăn chặn người chơi click nhầm gây lệnh rút lui trái luật.
+  2. *Chuyển Đổi Trạng Thái Động Khi Bị Vượt Giá (Dynamic Outbid Transition)*: Ngay khi đối thủ đặt giá cao hơn, giao diện tự động hoàn nguyên nút bấm về `[✕ Rút Lui]` (`auction-pass-btn`), đồng thời mở lại cụm phím nâng giá nhanh (+100, +200, +500).
+  3. *Bảo Toàn Thứ Tự Ưu Tiên Nghiệp Vụ (Precedence Chain)*: Thứ tự ưu tiên rẽ nhánh chân trang: `isConcluded` $\rightarrow$ `hasPassed` $\rightarrow$ `isDeclinedPlayer` $\rightarrow$ `isLeading` $\rightarrow$ Non-leading `auction-pass-btn`. Đảm bảo phiên đã kết thúc hoặc người chơi đã rút lui không bị ghi đè affordance.
+  4. *Việt Hóa Thông Báo Lỗi Máy Chủ (Actionable Notification Dictionary)*: Bổ sung mục `HIGHEST_BIDDER_CANNOT_PASS` trong `ACTIONABLE_NOTIFICATIONS_MAP` với icon 👑, tiêu đề "Đang Dẫn Đầu Đấu Giá", tone `info`, mô tả chi tiết và hướng dẫn hành động thân thiện: "Bạn có thể nhấn '✕ Đóng / Xem Bàn Cờ' để tạm ẩn và theo dõi trận đấu". Ánh xạ đầy đủ 3 alias (`highest_bidder cannot pass`, `highest_bidder_cannot_pass`, `HighestBidderCannotPass`).
+- **Hạ tầng hoàn tất**:
+  * `src/client/ui/modals/auction_modal.tsx` (451 LOC — Tier 2 <= 500 LOC): Nhánh `isLeading` render `data-testid="auction-leading-close-btn"` gọi `onClose`, bảo toàn thứ tự ưu tiên 5 cấp.
+  * `src/client/ui/actionable_notification.ts` (353 LOC — Tier 2 <= 500 LOC): Mục `HIGHEST_BIDDER_CANNOT_PASS` và 3 aliases cùng tham chiếu.
+  * `docs/domain/gotchas.md#L199-L204`: Ghi nhận Bất biến số 27 (Pillar V: Auction Leading Bidder Dismiss Affordance) và Pillar VI Điều 6 (Targeted Mutation Sensitivity & Anti-Tautology Invariant).
+  * `docs/reports/improvements/IMP-232-auction-leading-bidder-dismiss-affordance_report.md`: Báo cáo nghiệm thu hoàn chỉnh.
+- **Kiểm thử & Bất biến**:
+  * `tests/client/imp232_auction_leading_bidder_dismiss_affordance.test.ts` (422 LOC): 16/16 atomic contract tests PASS (Universal 5-Facet Matrix, Detroit Classical TDD, 1-4 asserts/test, zero dirty casts).
+  * `tests/probes/imp232_chaos_sentinel_probes.test.ts` (525 LOC): 20/20 physical probe tests PASS (Probe 1: 6 tests, Probe 2: 7 tests, Probe 3: 7 tests).
+  * Mutation Sensitivity 2 lớp: Automated sandbox runner 2/2 physical mutants killed + dedicated probe suite 7/7 mutants killed (0 surviving mutants).
+  * Hồi quy 100%: 8/8 tests `auction_modal.test.ts` + 20/20 tests `imp200_auction_dismiss_and_mini_widget.test.ts` -> Tổng **64/64 tests PASS**.
+  * TypeScript typecheck: `tsc --noEmit` 0 errors. UI Linter: `npm run lint:ui` 0 violations / 206 files. Slop Linter: 0 new violations.
+  * Evidence Snapshot: `.agents/evidence/imp232_execution.json`, `.agents/evidence/chaos_sentinel_imp232.json`, `.agents/evidence/chaos_sentinel_IMP-232.json` (`executed: true`).
+- **Phê chuẩn**:
+  * `plan-griller`: P1-P5 AUDIT APPROVED (phát hiện và khắc phục 4 điểm mù C1–C4).
+  * `qa-tester`: Station 1 RED verified (9/16 tests failed as expected under Adversarial Inversion).
+  * `implementer`: Station 2 GREEN verified (16/16 tests pass, toàn bộ tệp đạt chuẩn LOC).
+  * `scout`: Station 2.5 PASS (0 defects qua 5 bộ lọc cơ học).
+  * `spec-reviewer`: Station 3.1 APPROVED (100% spec reconciliation, 0 scope drift, 0 dirty casts).
+  * `code-reviewer`: Station 3.2 APPROVED (Deep Architecture, clean SRP, zero timer leak, memory safe).
+  * `ui-craft-reviewer`: Station 3.2 APPROVED (Điểm 10/10 tuyệt đối, công thái học 2D xuất sắc, touch target 44-48px, Retropoly tactile shadow).
+  * `chaos-sentinel`: Station 4 APPROVED (3 Probes passed, 2/2 sandbox mutants killed, 7/7 probe mutants killed, 0 surviving mutants).
+- **Trạng thái**: ✅ Hoàn thành IMP-232 (2026-09-30).
+
+
+
+
+
 

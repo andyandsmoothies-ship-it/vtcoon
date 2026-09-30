@@ -304,12 +304,22 @@ const ACTIONABLE_NOTIFICATIONS_MAP: Record<string, ActionableNotification> = {
     tone: 'warning',
     actionHint: 'Vui lòng chờ giao dịch hiện tại hoàn tất hoặc hủy đề xuất.',
   },
+  HIGHEST_BIDDER_CANNOT_PASS: {
+    icon: '👑',
+    title: 'Đang Dẫn Đầu Đấu Giá',
+    description: 'Bạn đang là người trả giá cao nhất nên không thể rút lui khỏi phiên đấu giá.',
+    tone: 'info',
+    actionHint: 'Bạn có thể nhấn "✕ Đóng / Xem Bàn Cờ" để tạm ẩn và theo dõi trận đấu.',
+  },
 };
 
 // Aliases for legacy/alternative casing reason codes (DRY SSOT)
 ACTIONABLE_NOTIFICATIONS_MAP['InsufficientFunds'] = ACTIONABLE_NOTIFICATIONS_MAP['INSUFFICIENT_FUNDS']!;
 ACTIONABLE_NOTIFICATIONS_MAP['NotPurchasable'] = ACTIONABLE_NOTIFICATIONS_MAP['NOT_PURCHASABLE']!;
 ACTIONABLE_NOTIFICATIONS_MAP['TradeFrozen'] = ACTIONABLE_NOTIFICATIONS_MAP['FREEZE_ACTIVE']!;
+ACTIONABLE_NOTIFICATIONS_MAP['highest_bidder cannot pass'] = ACTIONABLE_NOTIFICATIONS_MAP['HIGHEST_BIDDER_CANNOT_PASS']!;
+ACTIONABLE_NOTIFICATIONS_MAP['highest_bidder_cannot_pass'] = ACTIONABLE_NOTIFICATIONS_MAP['HIGHEST_BIDDER_CANNOT_PASS']!;
+ACTIONABLE_NOTIFICATIONS_MAP['HighestBidderCannotPass'] = ACTIONABLE_NOTIFICATIONS_MAP['HIGHEST_BIDDER_CANNOT_PASS']!;
 
 const DEFAULT_FALLBACK_NOTIFICATION: ActionableNotification = {
   icon: 'ℹ️',

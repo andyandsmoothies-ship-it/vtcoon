@@ -78,6 +78,8 @@ export function notifyBalanceChange(
       });
       return;
     }
+    // [IMP-230] DEPRECATED BRANCH: Nhánh isSalary nội bộ này chỉ giữ lại cho backward compatibility
+    // của unit tests kế thừa (TC-117.09). Toàn bộ luồng runtime chính tuyệt đối không được gọi vào đây.
     const isSalary = context?.isPassingGo || context?.actionType === 'salary' || diff === 2000;
     state.addFloatingText({
       text: `+${formatCurrency(diff)}`, type: FloatingTextType.Reward, playerId,
@@ -194,19 +196,18 @@ function syncPlayerBalanceDiff(
 ): void {
   if (isFullSync || !existing || existing.balance === p.balance) return;
   const diff = p.balance - existing.balance;
-  const prevPos = state.playerPositions[p.id] ?? 0;
-  const isPassingGo = prevPos > (p.position ?? prevPos) || p.position === 0;
   const isBankrupt = Boolean(p.bankrupt || existing.bankrupt);
   const isDebtRelief = !isBankrupt && existing.balance < 0 && p.balance >= 0;
-  const isSalary = isPassingGo || diff === 2000;
 
-  // [IMP-122][IMP-191] Không sinh badge generic trùng lặp khi biến động tài chính đã được
-  // activity_tracker (rent, buy, upgrade, tax, bail, auction) gắn pop-up ngữ cảnh chuyên biệt.
-  if (!isDebtRelief && !isSalary) {
+  // [IMP-122][IMP-191][IMP-230] Subtractive Refactoring: Mọi biến động tài chính
+  // (Lương qua GO, tiền thuê, nộp thuế, bảo lãnh, mua đất) do ActivityBadgeDispatcher
+  // và ActivityRentMatcher đảm nhiệm theo đúng nhịp di chuyển quân cờ và tách bạch từng dòng tiền.
+  // apply_delta_players CHỈ xử lý duy nhất sự kiện phục hồi thanh khoản (debt relief).
+  if (!isDebtRelief) {
     return;
   }
 
-  notifyBalanceChange(state, p.id, diff, existing.balance, p.balance, { cellIndex: p.position, isPassingGo, isBankrupt });
+  notifyBalanceChange(state, p.id, diff, existing.balance, p.balance, { cellIndex: p.position, isBankrupt });
 }
 
 function syncFinalPositions(state: GameState, nextPositions: Record<string, number>, hasPosChange: boolean, isFullSync: boolean): void {

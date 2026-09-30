@@ -309,19 +309,30 @@ export function coordExecuteCompulsoryBuyout(
   if (!ctx) return { success: false, reason: ActionRejectReason.INVALID_ROOM };
   const session = ctx.room.pendingBuyout;
   if (!session) return { success: false, reason: 'NO_PENDING_BUYOUT' };
-  if (session.buyerId !== playerId || session.cellIndex !== cellIndex) {
+  if (session.buyerId !== playerId) {
     return { success: false, reason: 'INVALID_BUYOUT_SESSION' };
   }
+
+  // [IMP-231] Hỗ trợ ô đất được người chơi lựa chọn từ danh sách eligibleTargets
+  const matchedTarget = session.eligibleTargets?.find((t) => t.cellIndex === cellIndex) ??
+    (session.cellIndex === cellIndex ? { cellIndex: session.cellIndex, sellerId: session.sellerId, cost: session.cost } : undefined);
+  if (!matchedTarget) {
+    return { success: false, reason: 'INVALID_BUYOUT_SESSION' };
+  }
+
+  const targetSellerId = matchedTarget.sellerId;
+  const targetCost = matchedTarget.cost;
+
   const buyer = ctx.room.players.find((p) => p.id === session.buyerId);
-  const seller = ctx.room.players.find((p) => p.id === session.sellerId);
+  const seller = ctx.room.players.find((p) => p.id === targetSellerId);
   if (!buyer || !seller) return { success: false, reason: 'PLAYER_NOT_FOUND' };
   if (seller.bondContract?.isActive && seller.bondContract.collateralCells.includes(cellIndex)) {
     return { success: false, reason: ActionRejectReason.BOND_COLLATERAL_LOCKED };
   }
-  if (buyer.balance < session.cost) return { success: false, reason: 'INSUFFICIENT_FUNDS' };
+  if (buyer.balance < targetCost) return { success: false, reason: 'INSUFFICIENT_FUNDS' };
 
-  buyer.balance -= session.cost;
-  seller.balance += session.cost;
+  buyer.balance -= targetCost;
+  seller.balance += targetCost;
   ctx.reg.set(cellIndex, buyer.id);
   ctx.room.pendingBuyout = null;
   ctx.room.phase = TurnPhase.PropertyManagement;

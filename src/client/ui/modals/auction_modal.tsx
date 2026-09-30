@@ -425,6 +425,15 @@ export function AuctionModal({
             >
               ✕ Đóng / Xem Bàn Cờ
             </button>
+          ) : isLeading ? (
+            <button
+              type="button"
+              onClick={onClose}
+              data-testid="auction-leading-close-btn"
+              className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-black text-amber-950 bg-amber-400 hover:bg-amber-300 border-2 border-amber-600 shadow-[0_3px_0_0_#b45309] active:translate-y-[2px] transition-all cursor-pointer whitespace-nowrap"
+            >
+              ✕ Đóng / Xem Bàn Cờ
+            </button>
           ) : (
             <button
               type="button"

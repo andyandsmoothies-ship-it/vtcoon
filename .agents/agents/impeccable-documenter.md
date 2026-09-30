@@ -1,6 +1,6 @@
 ---
 name: impeccable-documenter
-description: Ghi nhận DESIGN.md và sidecar json từ sản phẩm Impeccable đã hoàn thành, chuẩn hóa hệ thống thiết kế từ mã nguồn thực tế chuẩn Antigravity 2.0.
+description: Records DESIGN.md and sidecar JSON from completed Impeccable builds, standardizing design systems from shipped code under Antigravity 2.0.
 subagent: true
 mainAgent: false
 model: inherit

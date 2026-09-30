@@ -110,6 +110,14 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
   const handleBackdropClose = () => {
     if (isAuctionActive && modalPayload && 'cellIndex' in modalPayload) {
       useGameStore.getState().dismissAuction((modalPayload as ModalPayloadMap['auction']).cellIndex);
+    } else if (activeModal === 'event') {
+      const pb = useGameStore.getState().pendingBuyout;
+      const myPid = useLobbyStore.getState().myPlayerId;
+      if (pb && pb.buyerId === myPid) {
+        useGameStore.getState().openModal('compulsory_buyout', pb);
+      } else {
+        closeModal();
+      }
     } else {
       closeModal();
     }
@@ -368,21 +376,33 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
         );
       })()}
 
-      {activeModal === 'event' && (
-        <EventCardModal
-          cardType={(modalPayload as ModalPayloadMap['event']).cardType}
-          cardId={(modalPayload as ModalPayloadMap['event']).cardId}
-          title={(modalPayload as ModalPayloadMap['event']).title}
-          description={(modalPayload as ModalPayloadMap['event']).description}
-          effectDelta={(modalPayload as ModalPayloadMap['event']).effectDelta}
-          targetScope={(modalPayload as ModalPayloadMap['event']).targetScope}
-          effectDetail={(modalPayload as ModalPayloadMap['event']).effectDetail}
-          duration={(modalPayload as ModalPayloadMap['event']).duration}
-          destination={(modalPayload as ModalPayloadMap['event']).destination}
-          onConfirm={closeModal}
-          onClose={closeModal}
-        />
-      )}
+      {activeModal === 'event' && (() => {
+        const handleEventModalClose = () => {
+          const pb = useGameStore.getState().pendingBuyout;
+          const myPid = useLobbyStore.getState().myPlayerId;
+          if (pb && pb.buyerId === myPid) {
+            useGameStore.getState().openModal('compulsory_buyout', pb);
+          } else {
+            closeModal();
+          }
+        };
+
+        return (
+          <EventCardModal
+            cardType={(modalPayload as ModalPayloadMap['event']).cardType}
+            cardId={(modalPayload as ModalPayloadMap['event']).cardId}
+            title={(modalPayload as ModalPayloadMap['event']).title}
+            description={(modalPayload as ModalPayloadMap['event']).description}
+            effectDelta={(modalPayload as ModalPayloadMap['event']).effectDelta}
+            targetScope={(modalPayload as ModalPayloadMap['event']).targetScope}
+            effectDetail={(modalPayload as ModalPayloadMap['event']).effectDetail}
+            duration={(modalPayload as ModalPayloadMap['event']).duration}
+            destination={(modalPayload as ModalPayloadMap['event']).destination}
+            onConfirm={handleEventModalClose}
+            onClose={handleEventModalClose}
+          />
+        );
+      })()}
 
       {activeModal === 'hose' && (
         <HoseModal
@@ -461,7 +481,7 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
             cellIndex={p.cellIndex}
             cost={p.cost}
             basePrice={p.basePrice}
-            expiresAt={p.expiresAt}
+            expiresAt={p.expiresAt} eligibleTargets={p.eligibleTargets}
             onBuyout={(cellIndex) => { AudioEngine.playSfx(SoundEffect.BUY_PROPERTY); onIntent?.({ type: 'INTENT_EXECUTE_COMPULSORY_BUYOUT', cellIndex }); closeModal(); }}
             onDecline={() => { AudioEngine.playSfx(SoundEffect.CARD_FLIP); onIntent?.({ type: 'INTENT_DECLINE_COMPULSORY_BUYOUT' }); closeModal(); }}
             onClose={() => { onIntent?.({ type: 'INTENT_DECLINE_COMPULSORY_BUYOUT' }); closeModal(); }}

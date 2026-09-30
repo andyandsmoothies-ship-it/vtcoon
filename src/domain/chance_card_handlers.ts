@@ -1,7 +1,7 @@
 // [UC-GAME-038..041/MSS] Chance Card Handlers — 20 Chance Cards
 // Extracted from card_handlers.ts — Slice 06 refactor (DEBT-S06-06)
 
-import type { Player, MarketModifier, Room } from './room';
+import type { Player, MarketModifier, Room, BuyoutTargetOption } from './room';
 import type { PropertyRegistry, PropertyStateMap } from './property_data';
 import { PROPERTY_DEEDS } from './property_data';
 import { BOARD_CONFIG, CellType } from './board_config';
@@ -124,6 +124,11 @@ function handleMaForce(
   }
 }
 
+function applyCompensatorySubsidy(player: Player, room?: Room, amount = 800): void {
+  player.balance += amount;
+  if (room) room.treasury = Math.max(0, (room.treasury ?? 0) - amount);
+}
+
 function handleSwapProject(
   player: Player,
   registry?: PropertyRegistry,
@@ -141,48 +146,55 @@ function handleSwapProject(
   }
 
   if (oppC0Cells.length === 0) {
-    player.balance += 1000;
-    if (room) room.treasury = Math.max(0, (room.treasury ?? 0) - 1000);
+    applyCompensatorySubsidy(player, room, 1000);
     return;
   }
 
-  const target = oppC0Cells[0]!;
-  const cost = calculateCompulsoryBuyoutCost(target.cell);
+  const eligibleTargets: BuyoutTargetOption[] = oppC0Cells.map((opp) => ({
+    cellIndex: opp.cell,
+    sellerId: opp.owner,
+    cost: calculateCompulsoryBuyoutCost(opp.cell),
+    basePrice: PROPERTY_DEEDS.get(opp.cell)?.price ?? 1000,
+  }));
+
+  const minCost = Math.min(...eligibleTargets.map((t) => t.cost));
+  const defaultTarget = eligibleTargets.find((t) => player.balance >= t.cost) ?? eligibleTargets[0]!;
 
   if (!player.isBot) {
-    if (player.balance < cost) {
-      player.balance += 800;
-      if (room) room.treasury = Math.max(0, (room.treasury ?? 0) - 800);
+    if (player.balance < minCost) {
+      applyCompensatorySubsidy(player, room, 800);
       return;
     }
     if (!room) {
-      player.balance -= cost;
-      const seller = players?.find((p) => p.id === target.owner);
-      if (seller) seller.balance += cost;
-      registry.set(target.cell, player.id);
+      player.balance -= defaultTarget.cost;
+      const seller = players?.find((p) => p.id === defaultTarget.sellerId);
+      if (seller) seller.balance += defaultTarget.cost;
+      registry.set(defaultTarget.cellIndex, player.id);
       return;
     }
     room.pendingBuyout = {
       buyerId: player.id,
-      sellerId: target.owner,
-      cellIndex: target.cell,
-      cost,
-      basePrice: PROPERTY_DEEDS.get(target.cell)?.price ?? 1000,
+      sellerId: defaultTarget.sellerId,
+      cellIndex: defaultTarget.cellIndex,
+      cost: defaultTarget.cost,
+      basePrice: defaultTarget.basePrice,
       createdAt: Date.now(),
-      expiresAt: Date.now() + 15_000,
+      expiresAt: Date.now() + 30_000,
+      eligibleTargets,
     };
     return;
   }
 
-  if (player.balance - cost < 1000) {
-    player.balance += 800;
-    if (room) room.treasury = Math.max(0, (room.treasury ?? 0) - 800);
+  // Bot path: Ưu tiên ô an toàn (balance - cost >= 1000)
+  const botTarget = eligibleTargets.find((t) => player.balance - t.cost >= 1000);
+  if (!botTarget) {
+    applyCompensatorySubsidy(player, room, 800);
     return;
   }
-  player.balance -= cost;
-  const seller = room?.players.find((p) => p.id === target.owner) ?? players?.find((p) => p.id === target.owner);
-  if (seller) seller.balance += cost;
-  registry.set(target.cell, player.id);
+  player.balance -= botTarget.cost;
+  const seller = room?.players.find((p) => p.id === botTarget.sellerId) ?? players?.find((p) => p.id === botTarget.sellerId);
+  if (seller) seller.balance += botTarget.cost;
+  registry.set(botTarget.cellIndex, player.id);
   if (room) room.pendingBuyout = null;
 }
 

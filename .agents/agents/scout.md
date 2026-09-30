@@ -14,16 +14,16 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command]
 - **Permissions**: STRICTLY READ-ONLY. FORBIDDEN from modifying project source code.
 - **Dual Role**:
   1. *Pre-Coding*: Locates exact File:Line coordinates (`file.ts#L20-L45`) and dispatches JIT skills into `.agents/skills/`.
-  2. *Station 2.5 (Fast Pre-Filter Sweep)*: High-speed mechanical filter before Trạm 3 deep review.
+  2. *Station 2.5 (Fast Pre-Filter Sweep)*: High-speed mechanical filter before Station 3 deep review.
 
 ## 2. Station 2.5 Fast Pre-Filter Checklist
-When dispatched after Trạm 2 (Implementer GREEN), verify 4 mechanical gates using read tools and commands:
+When dispatched after Station 2 (Implementer GREEN), verify 4 mechanical gates using read tools and commands:
 1. **Typecheck Gate**: Run `npx tsc --noEmit`. Must exit with 0 errors.
 2. **LOC Budget Gate**: Run `node scripts/check_loc.mjs <modified files>`. No file may exceed tier ceiling.
-3. **Dirty Cast Scan**: Grep for `as any` or `as unknown as` in newly modified `src/**` files. Zero tolerance.
+3. **Dirty Cast Scan**: Grep for `as any` or `as unknown as` in newly modified `src/**` AND `tests/**` files. Zero tolerance in `src/**`. In `tests/**`, `as any` is prohibited (exceptions must be explicitly documented, e.g. mock DOM events). Framework private internals (e.g. `__CLIENT_INTERNALS...`) are an immediate FAIL.
 4. **Console/Debugger Scan**: Grep for `console.log` or `debugger;` in modified `src/**` files.
 
-If any mechanical check fails, report `SWEEP: REVISE` with exact `file:line` so implementer fixes it immediately before Trạm 3. If clean, report `SWEEP: PASS`.
+If any mechanical check fails, report `SWEEP: REVISE` with exact `file:line` so implementer fixes it immediately before Station 3. If clean, report `SWEEP: PASS`.
 
 ## 3. Output Format
 ```markdown
@@ -33,6 +33,6 @@ If any mechanical check fails, report `SWEEP: REVISE` with exact `file:line` so 
 | :--- | :--- | :---: | :--- |
 | Typecheck | `tsc --noEmit` | PASS / FAIL | Zero errors |
 | LOC Budget | `check_loc.mjs` | PASS / WARN | Within tier ceiling |
-| Dirty Casts | Grep `as any` | PASS / FAIL | Zero dirty casts |
+| Dirty Casts | Grep `as any` (src & tests) | PASS / FAIL | Zero dirty casts |
 | Trailing Logs | Grep `console.log` | PASS / FAIL | Clean |
 ```

@@ -1,143 +1,143 @@
 ---
 name: impeccable
-description: Bộ kỹ năng thiết kế, trau chuốt và thẩm định UI/UX 2D xúc giác đỉnh cao chuẩn Antigravity 2.0. Hướng dẫn các quy trình critique, audit, polish, optimize, ngân sách chuyển động motion budget, và đổ bóng xúc giác tactile shadows cho game thương mại. Tích hợp engine Impeccable 23 lệnh và launcher CLI.
+description: High-craft tactile 2D UI/UX design, review, and polish skill for commercial games under Antigravity 2.0. Directs critique, audit, polish, optimize workflows, motion budget, and tactile shadows. Integrates 23-command Impeccable engine and launcher CLI.
 ---
 
-# KỸ NĂNG THIẾT KẾ UI/UX 2D XÚC GIÁC (IMPECCABLE STANDARD)
+# TACTILE 2D UI/UX DESIGN SKILL (IMPECCABLE STANDARD)
 
-## 1. THIẾT LẬP NGỮ CẢNH ĐẦU PHIÊN (SESSION SETUP)
+## 1. SESSION CONTEXT SETUP
 
-Đầu mỗi phiên làm việc liên quan đến giao diện, thiết kế hoặc thẩm định UI/UX 2D, chạy lệnh launcher sau một lần duy nhất để nạp toàn diện ngữ cảnh dự án (`PRODUCT.md`, `DESIGN.md`, surface brief):
+At the start of any session involving 2D UI/UX design, styling, or auditing, run the launcher once to load project context (`PRODUCT.md`, `DESIGN.md`, surface brief):
 
 ```cmd
 cmd /c .agents\skills\impeccable\scripts\impeccable.cmd context
 ```
 
-*Ghi chú*:
-- Có thể truyền đường dẫn tệp cụ thể qua cờ `--target <path>` (ví dụ: `--target src/client/ui/player_card.tsx`).
-- Launcher tự động phát hiện và kết nối với nhị phân `impeccable-engine` độc lập trên hệ thống máy Windows x64.
+*Notes*:
+- Pass a target file path via `--target <path>` (e.g. `--target src/client/ui/player_card.tsx`).
+- The launcher connects to the standalone `impeccable-engine` binary on Windows x64.
 
 ---
 
-## 2. TRIẾT LÝ XÚC GIÁC THƯỢNG LƯU (TACTILE LUXURY)
+## 2. TACTILE LUXURY PHILOSOPHY
 
-Kỹ năng **Impeccable** nâng chuẩn thiết kế đồ họa 2D lên tầm thương mại quốc tế (tactile luxury), đồng bộ mỹ thuật hoàn hảo với sa bàn 3D React Three Fiber (R3F) trong dự án `vtcoon`.
+The **Impeccable** standard ensures 2D UI matches commercial game quality, synchronizing aesthetically with the 3D React Three Fiber (R3F) board in `vtcoon`.
 
-1. **Cảm Giác Cầm Nắm & Độ Nảy Vật Lý**: Các phần tử UI (thẻ Sổ Đỏ, nút bấm, khay điều khiển, modal) không phải là các mảng web phẳng 2D rẻ tiền, mà phải tạo cảm giác như những khối vật phẩm thủ công tinh xảo, có trọng lượng và độ nảy xúc giác dứt khoát.
-2. **Loại Bỏ Hoàn Toàn Giao Diện Biểu Mẫu Hành Chính**: Tuyệt đối không để UI trông như dashboard quản trị, form web thập niên 2000, hay bảng tính Excel.
-3. **Cơ Chế Progressive Disclosure**: Kỹ năng này cung cấp hướng dẫn quy trình khung. Khi cần tra cứu chi tiết công thức chuyên sâu, agent mở các tài liệu tham chiếu tương ứng:
-   - Chuyển động & Thời động: [`reference/motion_budget.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/motion_budget.md)
-   - Đổ bóng đa tầng & Nút bấm: [`reference/tactile_shadows.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/tactile_shadows.md)
-   - Sàn tiêu chuẩn chất lượng: [`reference/craft-floor.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/craft-floor.md)
+1. **Physical Weight & Tactile Snap**: UI elements (Title Deed cards, buttons, control trays, modals) are not flat 2D planes. They must feel like precision-crafted objects with physical weight and crisp tactile snap.
+2. **Zero Administrative Form Syndrome**: Ban administrative dashboard styling, 2000s-era forms, and dense spreadsheet layouts.
+3. **Progressive Disclosure**: Detailed technical guidelines are indexed in reference documents:
+   - Motion & Easing: [`reference/motion_budget.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/motion_budget.md)
+   - Multi-layer Shadows & Buttons: [`reference/tactile_shadows.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/tactile_shadows.md)
+   - Quality Floor: [`reference/craft-floor.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/craft-floor.md)
 
 ---
 
-## 3. BỐN QUY TRÌNH HÀNH ĐỘNG CỐT LÕI BẢN ĐỊA
+## 3. FOUR CORE WORKFLOWS
 
-### 1. `/impeccable critique` - Phản Biện Đối Kháng Trực Quan
-- **Mục tiêu**: Đóng vai chuyên gia phản biện UI đối kháng, soi xét từng pixel trên giao diện 2D.
-- **Các bước thực hiện**:
-  1. Xác định ngữ cảnh màn hình và thành phần UI cần đánh giá.
-  2. Phân tích 4 khía cạnh: Chiều sâu xúc giác (Tactile Depth), Phân tầng thị giác (Hierarchy), Bảng màu & Tương phản, Chuyển động & Phản hồi tương tác.
-  3. Lập danh sách tối đa 8 lỗi vật lý cụ thể (P1-P8), gắn nhãn anti-pattern nếu vi phạm kèm kích thước viewport xảy ra lỗi (`@360px`, `@768px`, `@1440px`).
-  4. Đưa ra phán quyết disposition: `recapture | rebuild | fix | ship`.
-  5. Luôn xác định mục `keep` (nét tinh hoa bắt buộc giữ lại, cấm làm mất).
+### 1. `/impeccable critique` - Adversarial Visual Review
+- **Objective**: Act as an adversarial UI critic inspecting every pixel on the 2D surface.
+- **Steps**:
+  1. Identify screen context and target UI components.
+  2. Analyze 4 facets: Tactile Depth, Visual Hierarchy, Palette & Contrast, Motion & Micro-interactions.
+  3. Compile up to 8 physical defects (P1-P8), citing anti-pattern names and viewport breakpoints (`@360px`, `@768px`, `@1440px`).
+  4. Issue a single disposition verdict: `recapture | rebuild | fix | ship`.
+  5. Identify `keep` items (core strengths to preserve).
 
-### 2. `/impeccable audit` - Kiểm Tra Toàn Diện Mã Nguồn & Bố Cục
-- **Mục tiêu**: Quét mã nguồn và bố cục giao diện để phát hiện vi phạm quy chuẩn thiết kế trước khi đưa vào sản xuất.
-- **Các bước thực hiện**:
-  1. Chạy linter nội bộ tự đứng vững: `npm run lint:ui`.
-  2. Kiểm tra các anti-patterns cấm kỵ cốt lõi:
-     - `border-accent-on-rounded` (viền directional trên phần tử bo góc).
-     - `bounce-easing` (hiệu ứng nảy lò xo rẻ tiền hoặc overshoot > 1.0).
-     - `gray-on-color` (chữ xám đen đè trực tiếp lên nền màu sặc sỡ).
-     - `gradient-text` (chữ cắt dải màu làm giảm khả năng đọc).
-     - `undersized-ui-text` (chữ chức năng hoặc nút bấm li ti < 11px).
-     - `first-viewport-column-overflow` (cột cao đẩy trôi footer hành động hoặc tràn quá viewport fold).
-     - `cramped-padding` & `text-overflow` (nội dung tràn viền hoặc viền quá sát < 8px trên mobile hẹp mà thiếu truncate/min-w-0).
-     - `nested-cards` (lồng ghép thẻ viền xám thừa thãi trên nền thẻ gây nhiễu thị giác).
-     - `unlayered-css-reset` (quy tắc CSS reset đặt ngoài `@layer base` làm triệt tiêu `@layer utilities`).
-     - `corner-clearance-violation` (khoảng cách phần tử con tới mép viền bo góc nhỏ hơn bán kính cong $R$, gây hiện tượng dính hoặc chạm mép viền bo cong).
-  3. Kiểm tra tính khả dụng và trợ năng: Kích thước vùng bấm tối thiểu 44x44px (`min-h-[44px] min-w-[44px]`), trạng thái focus-visible đầy đủ (`focus-visible:ring-2`), độ tương thích đa màn hình từ `@360px` đến `@1440px`.
+### 2. `/impeccable audit` - Source & Layout Quality Gate
+- **Objective**: Scan code and layout structure to detect anti-patterns before release.
+- **Steps**:
+  1. Run internal UI linter: `npm run lint:ui`.
+  2. Verify zero occurrences of forbidden anti-patterns:
+     - `border-accent-on-rounded`: Directional border on rounded elements causing corner distortion.
+     - `bounce-easing`: Rubber-band overshoot > 1.0.
+     - `gray-on-color`: Dark gray text placed on saturated backgrounds.
+     - `gradient-text`: Low-contrast clipped gradient text reducing legibility.
+     - `undersized-ui-text`: Functional or button text < 11px.
+     - `first-viewport-column-overflow`: Column height pushing action footers below viewport fold.
+     - `cramped-padding` & `text-overflow`: Truncation failure or padding < 8px on narrow screens.
+     - `nested-cards`: Excessive card-in-card containers creating visual mud.
+     - `unlayered-css-reset`: CSS reset outside `@layer base` overriding `@layer utilities`.
+     - `corner-clearance-violation`: Inner element spacing to rounded corner less than radius $R$.
+  3. Verify accessibility: Tap targets $\ge 44 \times 44\text{px}$ (`min-h-[44px] min-w-[44px]`), visible focus ring (`focus-visible:ring-2`), and responsive support from `@360px` to `@1440px`.
 
-### 3. `/impeccable polish` - Nâng Cấp Xúc Giác Thượng Lưu
-- **Mục tiêu**: Biến một giao diện "chạy được chức năng" thành một trải nghiệm xúc giác sang trọng.
-- **Các bước thực hiện**:
-  1. Thay thế các viền lệch thô (`border-b-4`) bằng công thức đổ bóng đa tầng:
+### 3. `/impeccable polish` - Tactile Luxury Refinement
+- **Objective**: Elevate functional UI into a tactile, high-end experience.
+- **Steps**:
+  1. Replace asymmetric bottom borders (`border-b-4`) with multi-layer drop shadows:
      `shadow-[0_4px_0_0_#color] active:shadow-[0_1px_0_0_#color] active:translate-y-[3px]`
-  2. Thêm viền ánh sáng vi mô (Rim Light) để tăng chiều sâu nổi khối:
-     `border border-white/10 ring-1 ring-white/5` hoặc `ring-1 ring-amber-400/20`
-  3. Chuẩn hóa typography: Sử dụng solid high-contrast text thay cho gradient text.
-  4. Bổ sung âm thanh và hiệu ứng phản hồi micro-interactions cho các hành vi bấm, chọn, lật thẻ.
+  2. Add micro-rim lights to accentuate physical volume:
+     `border border-white/10 ring-1 ring-white/5` or `ring-1 ring-amber-400/20`
+  3. Standardize typography: Solid high-contrast text over fragile gradient clips.
+  4. Integrate tactile sound cues and micro-interaction states on click, press, and card flip.
 
-### 4. `/impeccable optimize` - Tối Ưu Hiệu Năng Kết Xuất 2D
-- **Mục tiêu**: Đảm bảo UI 2D luôn mượt mà ở 60 FPS, không gây giật lag cho R3F Canvas.
-- **Các bước thực hiện**:
-  1. Giới hạn chuyển động theo ngân sách thời động: 100ms - 350ms (tối đa 500ms cho màn hình tổng).
-  2. Chỉ animate các thuộc tính GPU-accelerated: `transform` và `opacity`.
-  3. Ngăn chặn re-render diện rộng bằng cách cô lập state cục bộ (Zustand selectors, React memo).
-  4. Đảm bảo hỗ trợ `prefers-reduced-motion` cho người dùng nhạy cảm với chuyển động.
+### 4. `/impeccable optimize` - 2D Rendering Performance
+- **Objective**: Maintain locked 60 FPS without inducing layout thrashing or stutter in the R3F Canvas.
+- **Steps**:
+  1. Enforce motion budget: 100ms - 350ms (max 500ms for macro screens).
+  2. Animate only GPU-accelerated properties: `transform` and `opacity`.
+  3. Eliminate broad re-renders via fine-grained state isolation (Zustand selectors, React memo).
+  4. Honor user accessibility settings: `prefers-reduced-motion`.
 
 ---
 
-## 4. BẢNG QUY CHUẨN ANTI-PATTERNS & GIẢI PHÁP CHUẨN HÓA
+## 4. ANTI-PATTERNS & REMEDIATION REFERENCE
 
-| Anti-Pattern | Biểu Hiện Vi Phạm | Tại Sao Cấm | Giải Pháp Chuẩn Hóa |
+| Anti-Pattern | Manifestation | Why Forbidden | Standard Remediation |
 | :--- | :--- | :--- | :--- |
-| **`border-accent-on-rounded`** | `rounded-xl border-b-4 border-amber-600` | Thuật toán bo góc CSS bị biến dạng méo góc khi có viền lệch | Dùng bóng đa tầng: `shadow-[0_4px_0_0_#d97706] active:translate-y-[3px]` |
-| **`bounce-easing`** | `animate-bounce` hoặc `cubic-bezier` có overshoot > 1.0 | Tạo cảm giác đồ họa đồ chơi, lơ lửng, thiếu độ đanh chắc | Dùng đường cong dứt khoát: `cubic-bezier(0.16, 1, 0.3, 1)` |
-| **`gray-on-color`** | `bg-amber-400 text-slate-950` | Độ tương phản đục, thiếu hài hòa sắc độ thị giác | Dùng chữ trắng (`text-white`) hoặc chữ đậm cùng tông (`text-amber-950`) |
-| **`gradient-text`** | `bg-clip-text text-transparent bg-gradient-...` | Nhìn rẻ tiền kiểu template web quảng cáo, viền chữ răng cưa | Dùng chữ khối đồng nhất sắc nét: `text-amber-400 font-black tracking-tight` |
-| **`undersized-ui-text`** | `text-[9px]`, `text-[10px]` trên nhãn tương tác hoặc nút bấm | Khó đọc trên thiết bị di động, vi phạm sàn hiển thị thông tin | Sàn kích thước chữ tối thiểu `text-[11px]` (ưu tiên `text-xs font-bold`) |
-| **`first-viewport-column-overflow`** | Cột nội dung quá dài không có scroll riêng, đẩy cụm nút hành động rớt khỏi màn hình | Mất khả năng thao tác tức thì của người chơi trên màn hình dọc | Bố cục sticky footer độc lập ở root container, tách scroll cho vùng dữ liệu |
-| **`cramped-padding`** | Chữ hoặc phần tử con chạm sát mép viền thẻ (`px-1`, `p-0.5` trên khối lớn) hoặc tràn chữ thiếu `truncate` + `min-w-0` | Bức bối thị giác, chữ bị cắt nham nhở trên mobile 360px | Đệm tối thiểu `px-2` đến `px-3`, bọc `truncate` kèm `min-w-0` trong khối flex |
-| **`nested-cards`** | Thẻ xám lồng trong thẻ xám (`bg-slate-100` trong `bg-slate-50` với nhiều lớp `border`) | Gây nhiễu thị giác, nặng nề, làm loãng điểm nhấn của sa bàn | Phẳng hóa phân cấp bằng khoảng cách whitespace, divider mảnh hoặc nền tương phản rõ |
-| **`physical-horizontal-overflow`** | Nhồi >= 4 nút/input trên 1 hàng ngang vượt quá 296px lọt lòng của màn 360px | Tràn viền hoặc ép bẹp nút bấm cảm ứng | Tính tổng pixel $W_{\text{net}} \le 296\text{px}$, tách 2 tầng công thái học |
-| **`dummy-attribute-test-bypass`** | Dùng `data-legacy-style` nhét class cũ để lừa test assertion | Che giấu hồi quy, tạo accidental pass ảo | Reconcile đặc tả test cũ minh bạch theo Specification Evolution |
+| **`border-accent-on-rounded`** | `rounded-xl border-b-4 border-amber-600` | Asymmetric border widths distort CSS corner radius | Multi-layer drop shadow: `shadow-[0_4px_0_0_#d97706] active:translate-y-[3px]` |
+| **`bounce-easing`** | `animate-bounce` or `cubic-bezier` with overshoot > 1.0 | Toy-like, unstable animation disrupting financial legibility | Crisp luxury easing: `cubic-bezier(0.16, 1, 0.3, 1)` |
+| **`gray-on-color`** | `bg-amber-400 text-slate-950` | Muddy contrast, lacks tonal harmony | Crisp white (`text-white`) or deep tone (`text-amber-950`) |
+| **`gradient-text`** | `bg-clip-text text-transparent bg-gradient-...` | Jagged font rendering and weak readability | Solid contrast: `text-amber-400 font-black tracking-tight` |
+| **`undersized-ui-text`** | `text-[9px]`, `text-[10px]` on action labels or buttons | Illegible on mobile, breaks readability floor | Minimum font floor `text-[11px]` (prefer `text-xs font-bold`) |
+| **`first-viewport-column-overflow`** | Unscrolled tall column pushing actions below fold | Breaks player reaction loop on vertical displays | Sticky action footer at container root, scrollable data body |
+| **`cramped-padding`** | Text touching card borders (`p-0.5`) or overflow without `truncate` | Visual clutter, clipped text on 360px displays | Minimum `px-2` to `px-3`, enforce `truncate` with `min-w-0` in flex blocks |
+| **`nested-cards`** | Gray card inside gray card (`bg-slate-100` inside `bg-slate-50`) | Visual mud, dilutes emphasis of 3D board | Flatten hierarchy with whitespace, subtle dividers, or high-contrast backdrops |
+| **`physical-horizontal-overflow`** | $\ge 4$ buttons packed into 1 horizontal row exceeding 296px | Overflows boundary or crushes touch targets | Calculate $W_{\text{net}} \le 296\text{px}$, split into 2 ergonomic tiers |
+| **`dummy-attribute-test-bypass`** | Injecting `data-legacy-style` to satisfy obsolete test assertions | Hides regressions, creates accidental passes | Reconcile outdated test assertions per Specification Evolution |
 
 ---
 
-## 5. BẢNG ĐIỀU HƯỚNG 23 LỆNH IMPECCABLE ENGINE (COMMANDS TABLE)
+## 5. 23 IMPECCABLE ENGINE COMMANDS TABLE
 
-| Lệnh (`Command`) | Phân loại (`Category`) | Mô tả (`Description`) | Cẩm nang (`Reference`) |
+| Command | Category | Description | Reference |
 | :--- | :--- | :--- | :--- |
-| `craft [feature]` | Build | Bí danh cho yêu cầu tạo mới visual world | [`reference/craft.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/craft.md) |
-| `shape [feature]` | Build | Quy hoạch UX/UI trước khi viết mã nguồn | [`reference/shape.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/shape.md) |
-| `init` | Build | Ghi nhận ngữ cảnh sản phẩm bền vững vào PRODUCT.md | [`reference/init.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/init.md) |
-| `document` | Build | Trích xuất DESIGN.md từ mã nguồn hiện hữu | [`reference/document.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/document.md) |
-| `extract [target]` | Build | Trích xuất design tokens và components tái sử dụng | [`reference/extract.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/extract.md) |
-| `critique [target]` | Evaluate | Đánh giá thiết kế UX với chấm điểm heuristic | [`reference/critique.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/critique.md) |
-| `audit [target]` | Evaluate | Kiểm tra chất lượng kỹ thuật (a11y, perf, responsive) | [`reference/audit.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/audit.md) · native: [`reference/audit.native.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/audit.native.md) |
-| `polish [target]` | Refine | Hoàn thiện chất lượng xúc giác trước khi bàn giao | [`reference/polish.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/polish.md) |
-| `bolder [target]` | Refine | Tăng cường cá tính cho thiết kế mờ nhạt, an toàn | [`reference/bolder.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/bolder.md) |
-| `quieter [target]` | Refine | Tiết chế giao diện quá gắt, gây ngợp thị giác | [`reference/quieter.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/quieter.md) |
-| `distill [target]` | Refine | Tinh lọc về bản chất, loại bỏ chi tiết rườm rà | [`reference/distill.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/distill.md) |
-| `harden [target]` | Refine | Chuẩn hóa sản xuất: trạng thái lỗi, i18n, biên dữ liệu | [`reference/harden.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/harden.md) |
-| `onboard [target]` | Refine | Thiết kế luồng trải nghiệm đầu, empty states, kích hoạt | [`reference/onboard.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/onboard.md) |
-| `animate [target]` | Enhance | Bổ sung chuyển động có chủ đích và nhịp điệu | [`reference/animate.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/animate.md) |
-| `colorize [target]` | Enhance | Bổ sung màu sắc chiến lược cho UI đơn điệu | [`reference/colorize.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/colorize.md) |
-| `typeset [target]` | Enhance | Hoàn thiện phân cấp chữ (typography) và phông chữ | [`reference/typeset.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/typeset.md) |
-| `layout [target]` | Enhance | Tinh chỉnh khoảng cách, nhịp điệu và thị giác | [`reference/layout.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/layout.md) |
-| `delight [target]` | Enhance | Bổ sung chi tiết bất ngờ và điểm chạm cảm xúc | [`reference/delight.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/delight.md) |
-| `overdrive [target]` | Enhance | Đột phá vượt giới hạn quy chuẩn thông thường | [`reference/overdrive.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/overdrive.md) |
-| `clarify [target]` | Fix | Tinh chỉnh nội dung UX, nhãn và thông điệp lỗi | [`reference/clarify.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/clarify.md) |
-| `adapt [target]` | Fix | Thích ứng đa thiết bị và kích thước màn hình | [`reference/adapt.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/adapt.md) · native: [`reference/adapt.native.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/adapt.native.md) |
-| `optimize [target]` | Fix | Chẩn đoán và tối ưu hiệu năng kết xuất UI | [`reference/optimize.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/optimize.md) |
-| `live` | Iterate | Chế độ live browser: chọn phần tử và sinh biến thể | [`reference/live.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/live.md) |
+| `craft [feature]` | Build | Alias for full visual world creation | [`reference/craft.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/craft.md) |
+| `shape [feature]` | Build | UX/UI planning prior to code implementation | [`reference/shape.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/shape.md) |
+| `init` | Build | Persist durable product context into PRODUCT.md | [`reference/init.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/init.md) |
+| `document` | Build | Extract DESIGN.md from existing codebase | [`reference/document.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/document.md) |
+| `extract [target]` | Build | Extract reusable design tokens and components | [`reference/extract.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/extract.md) |
+| `critique [target]` | Evaluate | Evaluate UX design with heuristic scoring | [`reference/critique.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/critique.md) |
+| `audit [target]` | Evaluate | Verify technical quality (a11y, perf, responsive) | [`reference/audit.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/audit.md) · native: [`reference/audit.native.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/audit.native.md) |
+| `polish [target]` | Refine | Refine tactile finish prior to delivery | [`reference/polish.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/polish.md) |
+| `bolder [target]` | Refine | Inject character into timid, safe designs | [`reference/bolder.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/bolder.md) |
+| `quieter [target]` | Refine | Moderate noisy, visually overwhelming layouts | [`reference/quieter.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/quieter.md) |
+| `distill [target]` | Refine | Strip design to core essence; purge fluff | [`reference/distill.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/distill.md) |
+| `harden [target]` | Refine | Production standardization: error states, i18n, boundaries | [`reference/harden.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/harden.md) |
+| `onboard [target]` | Refine | Design first-run onboarding, empty states, triggers | [`reference/onboard.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/onboard.md) |
+| `animate [target]` | Enhance | Add purposeful motion, timing, and rhythm | [`reference/animate.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/animate.md) |
+| `colorize [target]` | Enhance | Apply strategic color hierarchy to bland UI | [`reference/colorize.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/colorize.md) |
+| `typeset [target]` | Enhance | Perfect typography hierarchy, sizing, and contrast | [`reference/typeset.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/typeset.md) |
+| `layout [target]` | Enhance | Calibrate whitespace, alignment, and cadence | [`reference/layout.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/layout.md) |
+| `delight [target]` | Enhance | Add micro-delight and emotional touchpoints | [`reference/delight.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/delight.md) |
+| `overdrive [target]` | Enhance | Push beyond conventional constraints | [`reference/overdrive.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/overdrive.md) |
+| `clarify [target]` | Fix | Clarify microcopy, labels, and error guidance | [`reference/clarify.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/clarify.md) |
+| `adapt [target]` | Fix | Adapt across device sizes and viewports | [`reference/adapt.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/adapt.md) · native: [`reference/adapt.native.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/adapt.native.md) |
+| `optimize [target]` | Fix | Profile and optimize 2D rendering efficiency | [`reference/optimize.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/optimize.md) |
+| `live` | Iterate | Live browser inspection: pick elements, generate variants | [`reference/live.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/live.md) |
 
 ---
 
-## 6. CHỈ MỤC TÀI LIỆU THAM CHIẾU & QUY TRÌNH CHUYÊN SÂU
+## 6. REFERENCE DIRECTORY INDEX
 
-Khi triển khai mã nguồn hoặc tinh chỉnh giao diện, agent mở các tài liệu sau để lấy mã mẫu và định hướng:
-- **Phân bổ ngân sách chuyển động**: [`reference/motion_budget.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/motion_budget.md)
-- **Công thức đổ bóng đa tầng xúc giác**: [`reference/tactile_shadows.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/tactile_shadows.md)
-- **Sàn chất lượng và các điều cấm kỵ**: [`reference/craft-floor.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/craft-floor.md)
-- **Hệ thống thiết kế mỹ thuật tổng thể**: [`docs/domain/design.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/design.md) hoặc [`DESIGN.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/DESIGN.md)
+When implementing or refining UI, reference these detailed guides:
+- **Motion Budget & Easing**: [`reference/motion_budget.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/motion_budget.md)
+- **Multi-layer Tactile Shadows**: [`reference/tactile_shadows.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/tactile_shadows.md)
+- **Craft Floor & Invariants**: [`reference/craft-floor.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/craft-floor.md)
+- **Overall Design System**: [`docs/domain/design.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/design.md) or [`DESIGN.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/DESIGN.md)
 
 ---
 
-## 7. BẤT BIẾN THIẾT KẾ HUD: GLANCEABLE HUD VS DASHBOARD TRAP
+## 7. HUD DESIGN INVARIANT: GLANCEABLE HUD VS DASHBOARD TRAP
 
-- **Cấm Bẫy Dashboard Hóa**: Trong game nhịp độ nhanh (lượt 15–30s), người chơi không dừng lại click/swipe để đọc từng thông báo. Cấm thu nhỏ thông báo thành icon phẳng hoặc giấu vào menu/drawer.
-- **Glanceable HUD Principle**: Không giấu thông tin, mà cô đọng văn bản thành công thức toán học/chỉ số ngoại vi (`🔥 Đất: Thuê x2.5`, `🚂 4 Ga: Cước x2`). Chiều cao dải thông báo cố định $\le 44px$, người chơi nắm bắt toàn bộ trạng thái trong 0.5s với **0 click, 0 vuốt**.
+- **Dashboard Trap Prohibited**: In fast-paced games (15-30s turns), players cannot stop to scroll or swipe notifications. Never collapse notifications into flat generic icons or bury them in drawer menus.
+- **Glanceable HUD Principle**: Do not hide information; condense it into peripheral math formulas and compact metrics (`🔥 Land: Rent x2.5`, `🚂 4 Stations: Fee x2`). Maintain fixed strip height $\le 44\text{px}$, allowing players to absorb total game state in 0.5s with **zero clicks, zero swipes**.

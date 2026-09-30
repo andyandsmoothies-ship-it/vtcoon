@@ -124,6 +124,13 @@ export interface HoseResultInfo {
   readonly diceSeq?:    number;
 }
 
+export interface BuyoutTargetOption {
+  readonly cellIndex: number;
+  readonly sellerId: string;
+  readonly cost: number;
+  readonly basePrice: number;
+}
+
 export interface PendingBuyoutSession {
   readonly buyerId: string;
   readonly sellerId: string;
@@ -132,6 +139,7 @@ export interface PendingBuyoutSession {
   readonly basePrice: number;
   readonly createdAt: number;
   readonly expiresAt: number;
+  readonly eligibleTargets?: readonly BuyoutTargetOption[];
 }
 
 export interface PendingTradeOfferInfo {

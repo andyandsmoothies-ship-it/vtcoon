@@ -23,7 +23,7 @@ if (!fs.existsSync(planPath)) {
 
 const planContent = fs.readFileSync(planPath, 'utf8');
 const snippetRegex = /`{3,}(?:typescript|tsx|javascript|json|html|css)?\s*\n<<<<\s*\n([\s\S]*?)\n====\s*\n([\s\S]*?)\n>>>>\s*\n`{3,}/g;
-const fileTargetRegex = /(?:\*\*Tệp mục tiêu\*\*|\*\*Target physical file\*\*|\*\*Target File\*\*|Tệp mục tiêu|Target file):\s*[`']?([^\n`']+\.[a-zA-Z0-9]+)[`']?/gi;
+const fileTargetRegex = /(?:\*\*Target physical file\*\*|\*\*Target File\*\*|Target physical file|Target file):\s*[`']?([^\n`']+\.[a-zA-Z0-9]+)[`']?([^\n]*)/gi;
 
 let errors = 0;
 let checkedSnippets = 0;
@@ -31,19 +31,25 @@ let checkedSnippets = 0;
 console.log(`\n🔍 [AUDIT-PLAN] Pre-flight audit for: ${path.basename(planPath)}`);
 
 // 1. Scan target files
-const targetFiles = new Set();
+const targetFiles = new Map();
 let fileMatch;
 while ((fileMatch = fileTargetRegex.exec(planContent)) !== null) {
   const filePath = fileMatch[1].trim().replace(/^[`']|[`']$/g, '');
-  targetFiles.add(filePath);
+  const trailingText = (fileMatch[2] || '').toLowerCase();
+  const isNew = trailingText.includes('new') || trailingText.includes('create');
+  targetFiles.set(filePath, isNew);
 }
 
 console.log(`\n📁 Checking ${targetFiles.size} target files for existence and line count:`);
-for (const relPath of targetFiles) {
+for (const [relPath, isNew] of targetFiles.entries()) {
   const absPath = path.resolve(process.cwd(), relPath);
   if (!fs.existsSync(absPath)) {
-    console.error(`  ❌ GHOST FILE: ${relPath} does not exist on disk!`);
-    errors++;
+    if (isNew) {
+      console.log(`  ✔️ ${relPath} (New file to be created in Station 1/2)`);
+    } else {
+      console.error(`  ❌ GHOST FILE: ${relPath} does not exist on disk!`);
+      errors++;
+    }
   } else {
     const lines = fs.readFileSync(absPath, 'utf8').split('\n').length;
     console.log(`  ✔️ ${relPath} (Physical lines: ${lines})`);
@@ -51,7 +57,7 @@ for (const relPath of targetFiles) {
 }
 
 // 2. Scan and verify concrete drop-in snippets
-const sections = planContent.split(/(?=###\s+Task|\*\*Tệp mục tiêu\*\*)/i);
+const sections = planContent.split(/(?=###\s+Task|\*\*Target physical file\*\*|\*\*Target File\*\*)/i);
 for (const sec of sections) {
   const fMatch = fileTargetRegex.exec(sec);
   fileTargetRegex.lastIndex = 0;

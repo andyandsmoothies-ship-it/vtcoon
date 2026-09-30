@@ -1,9 +1,10 @@
-// [UI-S04/MSS][IMP-145] Compulsory Buyout Modal (130% Compensation & Self-Determination)
+// [UI-S04/MSS][IMP-145][IMP-231] Compulsory Buyout Modal (130% Compensation & Target Selection)
 import React, { useEffect, useState } from 'react';
 import { BOARD_CONFIG } from '../../../domain/board_config.js';
 import { COLOR_GROUP_HEX } from '../../../domain/theme.js';
 import { formatCurrency } from '../ui_helpers.js';
 import { useGameStore } from '../../store/game_store.js';
+import type { BuyoutTargetOption } from '../../../domain/room.js';
 
 export interface CompulsoryBuyoutModalProps {
   readonly buyerId: string;
@@ -12,6 +13,7 @@ export interface CompulsoryBuyoutModalProps {
   readonly cost: number;
   readonly basePrice: number;
   readonly expiresAt: number;
+  readonly eligibleTargets?: readonly BuyoutTargetOption[];
   readonly onBuyout: (cellIndex: number) => void;
   readonly onDecline: () => void;
   readonly onClose?: () => void;
@@ -24,37 +26,58 @@ export function CompulsoryBuyoutModal({
   cost,
   basePrice,
   expiresAt,
+  eligibleTargets,
   onBuyout,
   onDecline,
 }: CompulsoryBuyoutModalProps): React.ReactElement {
+  const [selectedCell, setSelectedCell] = useState(cellIndex);
+  // [SSR & Test Harness Hydration Guard]
+  // Trong Browser (CSR): useGameStore hook reactive 100%, tự động re-render khi playersInfo thay đổi.
+  // Trong SSR / renderToStaticMarkup: useSyncExternalStore trả về getServerSnapshot (initial state rỗng),
+  // nên cần fallback về getState().playersInfo để phục vụ các bài kiểm thử headless contract.
   const storePlayersInfo = useGameStore((state) => state.playersInfo);
-  const playersInfo = (Object.keys(storePlayersInfo ?? {}).length > 0 ? storePlayersInfo : useGameStore.getState().playersInfo) ?? {};
+  const playersInfo = (storePlayersInfo && Object.keys(storePlayersInfo).length > 0
+    ? storePlayersInfo
+    : useGameStore.getState().playersInfo) ?? {};
   const buyer = playersInfo[buyerId];
-  const seller = playersInfo[sellerId];
+
+  const currentTarget = eligibleTargets?.find((t) => t.cellIndex === selectedCell) ?? {
+    cellIndex,
+    sellerId,
+    cost,
+    basePrice,
+  };
+
+  const seller = playersInfo[currentTarget.sellerId];
   const sellerName = seller?.name ?? 'Đối thủ';
 
-  const cell = BOARD_CONFIG[cellIndex];
-  const propertyName = cell?.name ?? `Ô Đất #${cellIndex}`;
+  const cell = BOARD_CONFIG[currentTarget.cellIndex];
+  const propertyName = cell?.name ?? `Ô Đất #${currentTarget.cellIndex}`;
   const cellColor = cell?.colorGroup ? COLOR_GROUP_HEX[cell.colorGroup] : '#3b82f6';
 
-  const [remainingMs, setRemainingMs] = useState(() => Math.max(0, expiresAt - Date.now()));
+  // [IMP-229][IMP-231] Relative Countdown & Dynamic Progress Bar (Server Authoritative)
+  const initialTimeLeft = Math.max(0, expiresAt - Date.now());
+  const safeInitialMs = initialTimeLeft > 0 ? initialTimeLeft : 15_000;
+  const [totalMs] = useState(safeInitialMs);
+  const [remainingMs, setRemainingMs] = useState(safeInitialMs);
 
   useEffect(() => {
     const timer = setInterval(() => {
-      const left = Math.max(0, expiresAt - Date.now());
-      setRemainingMs(left);
-      if (left <= 0) {
-        clearInterval(timer);
-        onDecline();
-      }
+      setRemainingMs((prev) => {
+        const next = Math.max(0, prev - 100);
+        if (next <= 0) {
+          clearInterval(timer);
+        }
+        return next;
+      });
     }, 100);
     return () => clearInterval(timer);
-  }, [expiresAt, onDecline]);
+  }, []);
 
   const secondsLeft = Math.ceil(remainingMs / 1000);
-  const progressPercent = Math.min(100, Math.max(0, (remainingMs / 15_000) * 100));
+  const progressPercent = totalMs > 0 ? Math.min(100, Math.max(0, (remainingMs / totalMs) * 100)) : 0;
   const isUrgent = secondsLeft <= 5;
-  const canAfford = (buyer?.balance ?? 0) >= cost;
+  const canAfford = (buyer?.balance ?? 0) >= currentTarget.cost;
 
   return (
     <div
@@ -97,7 +120,7 @@ export function CompulsoryBuyoutModal({
         </div>
       </header>
 
-      {/* Progress Bar 15s */}
+      {/* Progress Bar Dynamic */}
       <div className="w-full bg-amber-950/20 h-1.5 overflow-hidden">
         <div
           className={`h-full transition-all duration-100 ease-linear ${
@@ -108,6 +131,48 @@ export function CompulsoryBuyoutModal({
       </div>
 
       <div className="p-4 flex flex-col gap-3">
+        {/* Selector nếu có nhiều hơn 1 ô đất C0 hợp lệ */}
+        {eligibleTargets && eligibleTargets.length > 1 && (
+          <div data-testid="buyout-cell-selector" className="flex flex-col gap-1.5">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600">
+              Chọn Ô Đất Mục Tiêu ({eligibleTargets.length} ô C0):
+            </span>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+              {eligibleTargets.map((target) => {
+                const isSelected = target.cellIndex === selectedCell;
+                const targetCell = BOARD_CONFIG[target.cellIndex];
+                const targetColor = targetCell?.colorGroup ? COLOR_GROUP_HEX[targetCell.colorGroup] : '#3b82f6';
+                return (
+                  <button
+                    key={target.cellIndex}
+                    type="button"
+                    data-testid={`buyout-target-option-${target.cellIndex}`}
+                    onClick={() => setSelectedCell(target.cellIndex)}
+                    className={`min-h-[44px] p-2 rounded-xl border-2 text-left flex items-center gap-2 transition-all cursor-pointer ${
+                      isSelected
+                        ? 'border-amber-600 bg-amber-100/90 shadow-[0_2px_0_0_#d97706] text-amber-950 font-black'
+                        : 'border-amber-900/20 bg-white/80 hover:bg-amber-50 text-slate-700 font-semibold'
+                    }`}
+                  >
+                    <span
+                      className="w-2.5 h-6 rounded-full shrink-0 shadow-sm"
+                      style={{ backgroundColor: targetColor }}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="text-[11px] truncate leading-tight">
+                        {targetCell?.name ?? `Ô #${target.cellIndex}`}
+                      </div>
+                      <div className="text-[10px] font-mono font-bold text-emerald-700">
+                        {formatCurrency(target.cost)}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Chi tiết ô đất & Giá đền bù */}
         <div className="p-3.5 bg-[#F7F2E7] border border-amber-900/15 rounded-xl flex flex-col gap-2.5 shadow-sm">
           <div className="flex justify-between items-start">
@@ -125,7 +190,7 @@ export function CompulsoryBuyoutModal({
             </div>
             <div className="text-right">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Giá Gốc</span>
-              <p className="text-xs font-bold text-slate-600 line-through">{formatCurrency(basePrice)}</p>
+              <p className="text-xs font-bold text-slate-600 line-through">{formatCurrency(currentTarget.basePrice)}</p>
             </div>
           </div>
 
@@ -137,7 +202,7 @@ export function CompulsoryBuyoutModal({
               <p className="text-xs text-slate-500 font-medium">Bao gồm 30% thặng dư đền bù chủ sở hữu</p>
             </div>
             <div className="text-right">
-              <span className="text-lg font-black text-emerald-700 tracking-tight">{formatCurrency(cost)}</span>
+              <span className="text-lg font-black text-emerald-700 tracking-tight">{formatCurrency(currentTarget.cost)}</span>
             </div>
           </div>
         </div>
@@ -157,7 +222,7 @@ export function CompulsoryBuyoutModal({
             className="p-2 bg-amber-50 border border-amber-300 rounded-xl flex items-center justify-between text-xs text-amber-900 font-semibold"
           >
             <span>⚠️ Số dư ví không đủ đền bù 130%</span>
-            <span className="font-bold text-rose-700">Thiếu: {formatCurrency(cost - (buyer?.balance ?? 0))}</span>
+            <span className="font-bold text-rose-700">Thiếu: {formatCurrency(currentTarget.cost - (buyer?.balance ?? 0))}</span>
           </div>
         )}
 
@@ -166,16 +231,16 @@ export function CompulsoryBuyoutModal({
           <button
             type="button"
             data-testid="buyout-confirm-btn"
-            onClick={() => canAfford && onBuyout(cellIndex)}
-            disabled={!canAfford}
+            onClick={() => canAfford && remainingMs > 0 && onBuyout(selectedCell)}
+            disabled={!canAfford || remainingMs <= 0}
             className={`h-full min-h-[48px] px-3 py-2 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 ${
-              canAfford
+              canAfford && remainingMs > 0
                 ? 'text-white bg-emerald-600 hover:bg-emerald-700 border-2 border-emerald-800 shadow-[0_4px_0_0_#065f46] active:translate-y-[3px] cursor-pointer'
                 : 'bg-slate-200 text-slate-400 border border-slate-300 shadow-none cursor-not-allowed'
             }`}
           >
             <span>💰</span>
-            <span>Mua Lại ({formatCurrency(cost)})</span>
+            <span>{remainingMs <= 0 ? 'Hết Thời Gian Mua' : `Mua Lại (${formatCurrency(currentTarget.cost)})`}</span>
           </button>
           <button
             type="button"

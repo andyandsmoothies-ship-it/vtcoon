@@ -29,21 +29,72 @@ function SafeSphereGeometry({ args }: { readonly args: readonly number[] }): Rea
   return <sphereGeometry args={args as [number, number, number]} />;
 }
 
-// Trụ đỡ cầu cạn bê tông cốt thép hình trụ tròn (#CBD5E1)
-const VIADUCT_PIER_POSITIONS: readonly [number, number, number][] = [
-  [-3.5, 0.22, -6.9], [0, 0.22, -6.9], [3.5, 0.22, -6.9],
-  [-3.5, 0.22, 6.9], [0, 0.22, 6.9], [3.5, 0.22, 6.9],
-  [-6.9, 0.22, -3.5], [-6.9, 0.22, 0], [-6.9, 0.22, 3.5],
-  [6.9, 0.22, -3.5], [6.9, 0.22, 0], [6.9, 0.22, 3.5],
-];
+interface ViaductSegmentData {
+  readonly pos: readonly [number, number, number];
+  readonly yaw: number;
+  readonly segLength: number;
+  readonly leftParapetPos: readonly [number, number, number];
+  readonly rightParapetPos: readonly [number, number, number];
+  readonly leftRailPos: readonly [number, number, number];
+  readonly rightRailPos: readonly [number, number, number];
+}
 
-// Lan can U-Girder bê tông bảo vệ hai bên mép cầu cạn (#94A3B8)
-const U_GIRDER_PARAPETS = [
-  { pos: [0, 0.45, -7.07], args: [14.2, 0.024, 0.03] }, { pos: [0, 0.45, -6.73], args: [14.2, 0.024, 0.03] },
-  { pos: [0, 0.45, 7.07], args: [14.2, 0.024, 0.03] }, { pos: [0, 0.45, 6.73], args: [14.2, 0.024, 0.03] },
-  { pos: [-7.07, 0.45, 0], args: [0.03, 0.024, 14.2] }, { pos: [-6.73, 0.45, 0], args: [0.03, 0.024, 14.2] },
-  { pos: [7.07, 0.45, 0], args: [0.03, 0.024, 14.2] }, { pos: [6.73, 0.45, 0], args: [0.03, 0.024, 14.2] },
-] as const;
+interface ViaductPierData {
+  readonly pos: readonly [number, number, number];
+  readonly height: number;
+}
+
+const VIADUCT_NUM_SEGMENTS = 32;
+
+function buildViaductGeometry(): {
+  readonly segments: readonly ViaductSegmentData[];
+  readonly piers: readonly ViaductPierData[];
+} {
+  const curve = getRailroadTrackCurve();
+  const L = getRailroadTrackPerimeter();
+  const segs: ViaductSegmentData[] = [];
+  const pierList: ViaductPierData[] = [];
+
+  for (let i = 0; i < VIADUCT_NUM_SEGMENTS; i++) {
+    const u = (i + 0.5) / VIADUCT_NUM_SEGMENTS;
+    const p = curve.getPointAt(u);
+    const tan = curve.getTangentAt(u);
+    const yaw = Math.atan2(-tan.z, tan.x);
+    const segLength = (L / VIADUCT_NUM_SEGMENTS) * 1.05;
+
+    const nx = -tan.z;
+    const nz = tan.x;
+    const nLen = Math.sqrt(nx * nx + nz * nz) || 1;
+    const normX = nx / nLen;
+    const normZ = nz / nLen;
+
+    segs.push({
+      pos: [p.x, 0.44, p.z],
+      yaw,
+      segLength,
+      leftParapetPos: [p.x + normX * 0.17, 0.45, p.z + normZ * 0.17],
+      rightParapetPos: [p.x - normX * 0.17, 0.45, p.z - normZ * 0.17],
+      leftRailPos: [p.x + normX * 0.05, 0.45, p.z + normZ * 0.05],
+      rightRailPos: [p.x - normX * 0.05, 0.45, p.z - normZ * 0.05],
+    });
+
+    if (i % 2 === 0) {
+      const isOverRiver = Math.abs(p.x) < 0.8;
+      const baseElevation = isOverRiver ? -0.035 : 0.02;
+      const pierHeight = 0.44 - baseElevation;
+      const centerElevation = baseElevation + pierHeight / 2;
+      pierList.push({
+        pos: [p.x, centerElevation, p.z],
+        height: pierHeight,
+      });
+    }
+  }
+
+  return { segments: segs, piers: pierList };
+}
+
+// Tính toán 1 lần duy nhất ở module-level để loại bỏ GC churn và tối ưu FPS [P1.4]
+const { segments: VIADUCT_CURVED_SEGMENTS, piers: VIADUCT_PIERS } = buildViaductGeometry();
 
 // Cột cần tiếp điện trên cao (Catenary Masts: cột đứng Y=0.085m cao 0.17m; thanh vươn Y=0.155m)
 const CATENARY_MAST_POSITIONS: readonly [number, number, number, number][] = [
@@ -54,7 +105,7 @@ const CATENARY_MAST_POSITIONS: readonly [number, number, number, number][] = [
 export function DioramaBallastBed(): React.ReactElement {
   return (
     <group position={[0, 0, 0]} data-testid="diorama-railroad-ballast">
-      {/* QUAN TRỌNG: 4 dải đá ba-lát cầu cạn (#475569) PHẢI NẰM ĐẦU TIÊN để bảo vệ cửa sổ cắt chuỗi 800 ký tự */}
+      {/* QUAN TRỌNG: 4 dải đá ba-lát tĩnh (#475569) PHẢI NẰM ĐẦU TIÊN để bảo vệ cửa sổ cắt chuỗi 800 ký tự [P2.1] */}
       <mesh receiveShadow position={[0, 0.018, -6.9]}>
         <SafeBoxGeometry args={[14.2, 0.016, 0.36]} />
         <meshStandardMaterial color="#475569" roughness={0.9} />
@@ -72,18 +123,24 @@ export function DioramaBallastBed(): React.ReactElement {
         <meshStandardMaterial color="#475569" roughness={0.9} />
       </mesh>
 
-      {/* Lan can U-Girder bê tông đúc sẵn hai bên mép cầu cạn */}
-      {U_GIRDER_PARAPETS.map((p, idx) => (
-        <mesh key={`parapet-${idx}`} receiveShadow position={p.pos}>
-          <SafeBoxGeometry args={p.args} />
-          <meshStandardMaterial color="#94A3B8" roughness={0.7} />
-        </mesh>
+      {/* Lan can dầm U-Girder đúc sẵn (#94A3B8) uốn cong dọc 32 phân đoạn cầu cạn */}
+      {VIADUCT_CURVED_SEGMENTS.map((seg, idx) => (
+        <React.Fragment key={`girder-seg-${idx}`}>
+          <mesh receiveShadow position={seg.leftParapetPos} rotation={[0, seg.yaw, 0]}>
+            <SafeBoxGeometry args={[seg.segLength, 0.024, 0.03]} />
+            <meshStandardMaterial color="#94A3B8" roughness={0.7} />
+          </mesh>
+          <mesh receiveShadow position={seg.rightParapetPos} rotation={[0, seg.yaw, 0]}>
+            <SafeBoxGeometry args={[seg.segLength, 0.024, 0.03]} />
+            <meshStandardMaterial color="#94A3B8" roughness={0.7} />
+          </mesh>
+        </React.Fragment>
       ))}
 
-      {/* Hệ thống trụ cầu bê tông cốt thép hình trụ tròn vươn lên đỡ dầm tại Y >= 0.40 */}
-      {VIADUCT_PIER_POSITIONS.map((pos, idx) => (
-        <mesh key={`pier-${idx}`} receiveShadow position={pos}>
-          <SafeCylinderGeometry args={[0.07, 0.08, 0.42, 12]} />
+      {/* Hệ thống 16 trụ cầu bê tông cốt thép hình trụ tròn vươn lên đỡ dầm tại Y >= 0.40 [P2.2] */}
+      {VIADUCT_PIERS.map((pier, idx) => (
+        <mesh key={`pier-${idx}`} receiveShadow position={pier.pos}>
+          <SafeCylinderGeometry args={[0.07, 0.08, pier.height, 12]} />
           <meshStandardMaterial color="#CBD5E1" roughness={0.7} />
         </mesh>
       ))}
@@ -145,12 +202,6 @@ export function DioramaTropicalFlora(): React.ReactElement {
   );
 }
 
-const METALLIC_RAIL_SPECS = [
-  { pos: [0, 0.45, -6.95], args: [13.8, 0.01, 0.02] }, { pos: [0, 0.45, -6.85], args: [13.8, 0.01, 0.02] },
-  { pos: [0, 0.45, 6.85], args: [13.8, 0.01, 0.02] }, { pos: [0, 0.45, 6.95], args: [13.8, 0.01, 0.02] },
-  { pos: [-6.95, 0.45, 0], args: [0.02, 0.01, 13.8] }, { pos: [-6.85, 0.45, 0], args: [0.02, 0.01, 13.8] },
-  { pos: [6.85, 0.45, 0], args: [0.02, 0.01, 13.8] }, { pos: [6.95, 0.45, 0], args: [0.02, 0.01, 13.8] },
-] as const;
 
 const tempVec = new Vector3();
 const tempTangent = new Vector3();
@@ -190,52 +241,35 @@ export function DioramaModelRailroad(): React.ReactElement {
 
   return (
     <group position={[0, 0, 0]} data-testid="diorama-model-railroad">
-      {/* 0. Lớp nền đá ba-lát và kết cấu cầu cạn U-Girder ôm trọn 4 cạnh */}
+      {/* 0. Lớp nền đá ba-lát và kết cấu cầu cạn cong U-Girder ôm trọn spline */}
       <DioramaBallastBed />
 
-      {/* 1. Móng tà vẹt gỗ sẫm màu ôm trọn 4 cạnh phía trong 40 ô cờ (X, Z ~ ±6.9m) */}
-      {/* BẮT BUỘC LÀ DIRECT CHILDREN CỦA GROUP GỐC, KHÔNG CAST SHADOW ĐỂ BẢO VỆ TC-IMP142.09 */}
-      <mesh receiveShadow position={[0, 0.44, -6.9]}>
-        <SafeBoxGeometry args={[13.8, 0.012, 0.22]} />
-        <meshStandardMaterial color="#451A03" roughness={0.85} />
-      </mesh>
-      <mesh receiveShadow position={[0, 0.44, 6.9]}>
-        <SafeBoxGeometry args={[13.8, 0.012, 0.22]} />
-        <meshStandardMaterial color="#451A03" roughness={0.85} />
-      </mesh>
-      <mesh receiveShadow position={[-6.9, 0.44, 0]}>
-        <SafeBoxGeometry args={[0.22, 0.012, 13.8]} />
-        <meshStandardMaterial color="#451A03" roughness={0.85} />
-      </mesh>
-      <mesh receiveShadow position={[6.9, 0.44, 0]}>
-        <SafeBoxGeometry args={[0.22, 0.012, 13.8]} />
-        <meshStandardMaterial color="#451A03" roughness={0.85} />
-      </mesh>
-
-      {/* 1.1 Cung ray cua góc (Corner Rails) tại 4 góc nối liền mạch khép kín */}
-      <mesh receiveShadow position={[-6.85, 0.44, 6.85]} rotation={[0, Math.PI / 4, 0]}>
-        <SafeBoxGeometry args={[0.32, 0.012, 0.22]} />
-        <meshStandardMaterial color="#451A03" roughness={0.85} />
-      </mesh>
-      <mesh receiveShadow position={[6.85, 0.44, 6.85]} rotation={[0, -Math.PI / 4, 0]}>
-        <SafeBoxGeometry args={[0.32, 0.012, 0.22]} />
-        <meshStandardMaterial color="#451A03" roughness={0.85} />
-      </mesh>
-      <mesh receiveShadow position={[6.85, 0.44, -6.85]} rotation={[0, Math.PI / 4, 0]}>
-        <SafeBoxGeometry args={[0.32, 0.012, 0.22]} />
-        <meshStandardMaterial color="#451A03" roughness={0.85} />
-      </mesh>
-      <mesh receiveShadow position={[-6.85, 0.44, -6.85]} rotation={[0, -Math.PI / 4, 0]}>
-        <SafeBoxGeometry args={[0.32, 0.012, 0.22]} />
-        <meshStandardMaterial color="#451A03" roughness={0.85} />
-      </mesh>
-
-      {/* 2. Ray kim loại đôi sáng bóng mạ thép (#E2E8F0, metalness 0.85, roughness 0.2) */}
-      {METALLIC_RAIL_SPECS.map((r, idx) => (
-        <mesh key={`rail-${idx}`} receiveShadow position={r.pos}>
-          <SafeBoxGeometry args={r.args} />
-          <meshStandardMaterial color="#E2E8F0" metalness={0.85} roughness={0.2} />
+      {/* 1. Móng tà vẹt gỗ sẫm màu (#451A03) bám dọc 32 phân đoạn đường cong */}
+      {/* BẮT BUỘC LÀ DIRECT CHILDREN CỦA GROUP GỐC, KHÔNG CAST SHADOW ĐỂ BẢO VỆ TC-IMP142.09 [P1.3] */}
+      {VIADUCT_CURVED_SEGMENTS.map((seg, idx) => (
+        <mesh
+          key={`tie-${idx}`}
+          receiveShadow
+          position={seg.pos}
+          rotation={[0, seg.yaw, 0]}
+        >
+          <SafeBoxGeometry args={[seg.segLength * 0.9, 0.012, 0.22]} />
+          <meshStandardMaterial color="#451A03" roughness={0.85} />
         </mesh>
+      ))}
+
+      {/* 2. Ray kim loại đôi sáng bóng mạ thép (#E2E8F0, metalness 0.85, roughness 0.2) uốn lượn song song */}
+      {VIADUCT_CURVED_SEGMENTS.map((seg, idx) => (
+        <React.Fragment key={`rail-pair-${idx}`}>
+          <mesh receiveShadow position={seg.leftRailPos} rotation={[0, seg.yaw, 0]}>
+            <SafeBoxGeometry args={[seg.segLength, 0.01, 0.02]} />
+            <meshStandardMaterial color="#E2E8F0" metalness={0.85} roughness={0.2} />
+          </mesh>
+          <mesh receiveShadow position={seg.rightRailPos} rotation={[0, seg.yaw, 0]}>
+            <SafeBoxGeometry args={[seg.segLength, 0.01, 0.02]} />
+            <meshStandardMaterial color="#E2E8F0" metalness={0.85} roughness={0.2} />
+          </mesh>
+        </React.Fragment>
       ))}
 
       {/* 3. Đoàn tàu Metro Tuyến 1 (Bến Thành - Suối Tiên): Xanh Cyan, Thân Bạc, Mũi Vát Khí Động Học */}

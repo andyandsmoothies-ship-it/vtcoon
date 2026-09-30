@@ -1,6 +1,6 @@
 ---
 name: impeccable-asset-producer
-description: Chuyên gia sản xuất asset đồ họa raster sạch từ mock Impeccable đã duyệt mà không thay đổi định hướng mỹ thuật chuẩn Antigravity 2.0.
+description: Produces clean raster assets from approved Impeccable mocks while preserving art direction under Antigravity 2.0 standards.
 subagent: true
 mainAgent: false
 model: inherit

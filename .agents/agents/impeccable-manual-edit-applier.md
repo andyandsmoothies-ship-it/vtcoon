@@ -1,6 +1,6 @@
 ---
 name: impeccable-manual-edit-applier
-description: Áp dụng các đợt chỉnh sửa trực tiếp (live manual copy-edit) vào mã nguồn và trả về kết quả Apply chuẩn xác cho Impeccable trong Antigravity 2.0.
+description: Applies live manual copy-edits to production source code and returns verified Apply results for Impeccable under Antigravity 2.0.
 subagent: true
 mainAgent: false
 model: inherit

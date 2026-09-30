@@ -198,12 +198,14 @@ function syncOtherModals(delta: DeltaPayload, state: GameState): void {
     }
   }
 
-  // [IMP-145] Compulsory Buyout Modal — mở khi người chơi là bên mua (buyerId), đóng khi pendingBuyout là null
+  // [IMP-145][IMP-229] Compulsory Buyout Modal — Lưu store, chỉ mở ngay trên FullSync/Reconnect nếu không có hoạt cảnh
   if (delta.pendingBuyout !== undefined) {
     state.setPendingBuyout(delta.pendingBuyout);
     if (delta.pendingBuyout) {
       const myPid = useLobbyStore.getState().myPlayerId;
-      if (delta.pendingBuyout.buyerId === myPid) {
+      const isCardFlow = Boolean(delta.lastEventCard || state.lastEventCard?.cardId === 'CC_SWAP_PROJECT');
+      const isMoving = Boolean(state.activePawnAnimation?.isAnimating || state.isRolling);
+      if (delta.pendingBuyout.buyerId === myPid && !isCardFlow && !isMoving && state.activeModal === null) {
         state.openModal('compulsory_buyout', delta.pendingBuyout);
       }
     } else if (delta.pendingBuyout === null && state.activeModal === 'compulsory_buyout') {

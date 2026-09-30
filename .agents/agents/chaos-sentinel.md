@@ -22,10 +22,7 @@ Assume AI-generated code and superficial tests contain blind spots. Run 3 physic
   ```bash
   npm run sentinel -- --ticket [TICKET_ID] --test [CONTRACT_TEST_PATH]
   ```
-  or:
-  ```bash
-  npx tsx scripts/station4_sentinel.ts --ticket [TICKET_ID] --test [CONTRACT_TEST_PATH]
-  ```
+- **Mechanical Evidence Verification**: Evidence JSON is verified mechanically by `node scripts/check_evidence.mjs [TICKET_ID]`. Any mismatch between claimed counts and real runner counts causes immediate build failure.
 
 ## 2. Probe 1: Wire-to-Core Closed-Loop Parity Audit
 Inspect the perimeter gateway vs the core domain model:
@@ -41,15 +38,16 @@ Automated via `scripts/station4_sentinel.ts`:
 4. If socket fails or times out: Verdict is **`BLOCKED: MOCK_DIVERGENCE`**.
 5. Canonical 5-Boundary Fuzzing: Every probed endpoint/store input MUST survive the canonical boundary matrix: `[undefined, null, '', '   ', NaN]`. Any unhandled TypeError/crash is an immediate **`BLOCKED: BOUNDARY_CRASH`**.
 
-## 4. Probe 3: Targeted Mutation Sensitivity Probe (Physical Sandbox Runner)
-Automated via `scripts/station4_sentinel.ts`:
-1. Copies the target test file to `.agents/tmp/mutant_sandbox_[timestamp].test.ts`.
-2. Injects physical mutations (assertion inversion, numeric boundary shifts) into the sandbox test.
-3. Executes real Vitest runner: `npx vitest run .agents/tmp/mutant_sandbox_*.test.ts`.
-4. **Sensitivity Proof**:
-   - If Vitest FAILS (Exit Code != 0): The mutant is **KILLED**! Test assertions are tight and sensitive.
-   - If Vitest PASSES (Exit Code == 0): The mutant **SURVIVED**! Test assertions are loose, change-detector, or tautological. Verdict is **`BLOCKED: SURVIVED_MUTANT`**.
-5. Cleans up sandbox files automatically.
+## 4. Probe 3: Targeted Mutation Sensitivity (Anti-Tautology Rule)
+- **BANNED INLINE MUTANTS**: Strictly forbidden to write artificial mutant variables inside the test file and assert their failure (`const m = false; expect(() => expect(m).toBe(true)).toThrow()`). This is a tautological test proving zero production resilience.
+- **STANDARD PROTOCOL**:
+  1. Prefer physical sandbox runner: `npm run sentinel -- --ticket [TICKET_ID] --test [CONTRACT_TEST_PATH]` to inject physical mutations into a test sandbox and verify exit code != 0 (KILLED).
+  2. If writing dedicated probe test files in `tests/probes/`:
+     - Directly import and execute REAL production exports (never wrappers or inline clones).
+     - Design tight assertions that immediately FAIL when production logic is removed or altered.
+     - **Valid Pattern**: Call production module with adversarial inputs -> assert observable output fails if a production branch/guard is dropped.
+     - **BANNED Pattern (Tautology)**: Defining an inline broken function (e.g. `mutantFn()`) and asserting it fails. This tests nothing in production.
+- **Probe Test Floor**: All probe suites MUST contain >= 14 atomic tests (Probe 1: >= 5, Probe 2: >= 4, Probe 3: >= 5). Zero surviving mutants.
 
 ## 5. Evidence Snapshot & Output Format
 Results are automatically persisted to `.agents/evidence/chaos_sentinel_[TICKET_ID].json`:

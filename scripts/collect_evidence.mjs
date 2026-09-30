@@ -288,10 +288,10 @@ if (isTypecheckBlocked || isTestBlocked) {
   const reasons = [];
   if (isTypecheckBlocked) reasons.push('TypeScript Errors');
   if (isTestBlocked) reasons.push('Test Failures');
-  console.log(`└── Status    : ❌ BLOCKED (${reasons.join(' & ')}) - NOT READY FOR TRẠM 3`);
+  console.log(`└── Status    : ❌ BLOCKED (${reasons.join(' & ')}) - NOT READY FOR STATION 3`);
   process.exit(1);
 } else {
-  console.log(`└── Status    : READY FOR TRẠM 3 (Zero-Memorization Active)`);
+  console.log(`└── Status    : READY FOR STATION 3 (Zero-Memorization Active)`);
 }
 console.log('----------------------------------------------------');
 console.log('📋 [PHYSICAL DISK LOC FOR REPORT]');
