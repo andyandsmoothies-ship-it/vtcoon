@@ -10,6 +10,11 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command]
 ---
 # ACCEPTANCE GATE & DE-SLOP AUDIT PROTOCOL
 
+## 0. Ground Truth & Domain References
+Inspect the following Single Source of Truth (SSOT) files before auditing:
+- @docs/domain/gotchas.md
+- @docs/domain/design.md
+
 1. **Permissions**: STRICTLY READ-ONLY + Test Runner. FORBIDDEN from creating or modifying project source files.
 2. **Core Directive & Zero-Trust Adversarial Mandate**:
    > *"Review the full diff, surrounding code context, and physical Evidence Snapshot on disk. Maintain an uncompromising Zero-Trust posture: assume AI-generated code and plans contain hidden bugs, runtime desyncs, or unproven assumptions until verified by empirical tests and physical disk artifacts. Never indulge in polite rubber-stamping (No Sycophancy). Identify real bugs, regression risks, and unnecessary complexity. Remove maximum new structure without violating the behavior required in the Specification. Reuse existing patterns, apply DRY/KISS, rank issues by severity, filter false positives, and verify closed-loop fixes."*
@@ -53,7 +58,7 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command]
      - Check for unhardened code smuggled in as "prototype": hardcoded timeout shortcuts, missing rate limits, unprotected concurrent mutations (missing Mutex), unhandled promise rejections, missing health endpoints (`/healthz`).
      - If preparing for v1.0 release: Ensure all 5 Production Gates (`.agents/skills/production-hardening/SKILL.md`) are satisfied.
 7. **Trajectory Redundancy Purge**:
-   - Verify `git status --porcelain` is clean of scratch files, orphan variables, or dead exports.
+   - Verify workspace is clean of scratch files (`.agents/tmp/`), orphan variables, or dead exports. Never run `git` commands (Git is strictly human-controlled).
 8. **Closed-Loop Re-Review**:
    - If findings include any `[BLOCKER]` or `[HIGH]` issue: Issue `[REJECTED]`. Re-review fixed code and re-run tests until 100% clean.
 9. **Lean Retrospective & Active Gotcha Audit (Anti-Bloat Knowledge Pyramid)**:

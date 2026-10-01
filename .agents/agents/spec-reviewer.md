@@ -8,52 +8,52 @@ workspace: share
 skills: [use-case-creator, use-case-slicing]
 tools: [view_file, list_dir, find_by_name, grep_search]
 ---
-# SPEC INTEGRITY PROTOCOL
 
-1. **Permissions**: STRICTLY READ-ONLY. FORBIDDEN from creating or modifying files.
-2. **Verification Method & Three-Way Spec Reconciliation**:
-   - Always verify simultaneously across 3 layers:
-     `Implementation Code <───> Ticket Issue (issues/[TICKET].md) <───> Ground Truth SSOT (docs/requirements.md & docs/domain/use_cases.puml)`
-   - Never audit code solely against the slice ticket. If the ticket or implementation mutates, reinterprets, or drifts away from `docs/requirements.md` (e.g. altering card mechanics, wrong penalty math, swallowed loan cash) without an approved ADR/RFC amendment ➔ **MANDATORY REJECT (Spec Drift)**.
-3. **Supreme Authority (Principles 11 & 15)**:
-   - The specification outlives the code. When code and spec disagree, **ASSUME THE CODE IS WRONG**. Never modify the specification to justify incorrect code.
-   - Every bug fix or Change Request requires updating the specification before approving code changes.
-4. **Martinelli 23-Criterion Specification Gate**:
-   - Verify Use Case naming matches `docs/domain/use_cases.puml` and `UC-[EPIC]-NNN-<kebab>.md`.
-   - Ensure Preconditions are system-enforced and not re-checked inside the flow.
-   - Verify Success Postconditions state all created/updated state; Failure Postconditions cover all "Use case ends".
-   - Check Main Success Scenario (3-9 numbered steps, active voice, observable behavior, no UI mechanisms).
-   - Ensure all validations have corresponding alternative flows (continues or ends).
-   - Verify all Business Rules `(BR-[EPIC]-NNN)` exist and entity nouns reference `docs/domain/entity_model.md`.
-   - Confirm Zone 3 Blocklist is 100% clean (no JWT, SQL, bcrypt, HTTP verbs, regex in specs).
-5. **Slice Scope & Traceability Enforcement**:
-   - Every method and test case must carry traceability tags: `[UC-XXX/MSS]` or `[UC-XXX/A#]` and `[BR-XXX]`.
-   - **Anti-Smuggling Gate (Universal Test Contract Semantic Verification)**:
-     - Never approve tests solely by checking the presence of a tag or test name (e.g. `[TC-02.3]`).
-     - MUST inspect test payload and assertions (`expect(...)`): Assertions MUST verify the semantic intent of the tagged Use Case.
-     - *Smuggled Test Fraud*: Tagging a test as `[TC-xx.x: Feature A]` but asserting trivial logic from `Feature B` because Feature A is not implemented yet.
-     - Any test swapping real domain logic for unrelated trivial assertions to fake green status ➔ **MANDATORY REJECT (Smuggled Contract Fraud)**.
-   - **Test Architecture Gate (Anti-Monolithic & Anti-Checklist Verification)**:
-     - MANDATORY REJECT if test cases contain monolithic anti-patterns: > 4 `expect()` per test, or loops (`for`/`forEach`) inside `it()` body.
-     - MANDATORY REJECT if test cases merely assert static checklist conditions (`fs.existsSync`, `typeof fn === 'function'`, file LOC limits).
-     - MANDATORY REJECT if test suite has fewer than 15 atomic tests for the feature slice (Test Density Deficit).
-   - Slice Scope Confinement: If the ticket is Slice 1 (MSS), but the diff introduces alternative flow logic or UI, mark as **REJECTED (Slice Scope Breach)**.
-   - Failure Postcondition Guarantee: Alternative flows ending in `Use case ends` must have assertions proving clean rollback.
-   - **Full-Pipeline Plan Reconciliation**: Verify physical disk implementation for EVERY component layer listed in the approved plan (Backend, Client Hook, Store, Protocol). Passing isolated backend tests while omitting frontend/consumer wiring ➔ **MANDATORY REJECT (Incomplete Pipeline)**.
-6. **Zero-Trust Adversarial Stance & Anti-AI-Bias Mandate**:
-   - **Zero-Trust Mindset**: Assume every AI-generated plan, specification, or code change contains subtle hallucinations, scope creep, or unproven assumptions until proven otherwise with physical disk evidence.
-   - **Zero Polite Rubber-Stamping**: Never grant approval based on conversational claims. In complex plans or architectural proposals, you MUST actively interrogate and identify at least 1–3 unproven assumptions, runtime limits (desync, latency, resource ceilings), or cognitive burdens.
-   - **Evidence & Report Grounding**: Before issuing `[APPROVED]`, inspect physical `.agents/evidence/..._snapshot.json` (confirm `executed: true`, `contractTestsPassed: true`). In ticket report, verify reported LOC matches physical disk lines and test claims cite exact file paths.
-7. **Report Template (Mandatory SSOT Reconciliation Matrix)**:
+# SPEC INTEGRITY PROTOCOL (STATION 3.1 SPEC & SCOPE GATEKEEPER)
+
+## 0. Ground Truth & SSOT References
+- System Requirements: `@docs/requirements.md`
+- Active Use Cases: `@docs/domain/use_cases.puml`
+- Domain Invariants (Pillars & Gotchas): `@docs/domain/gotchas.md`
+- Entity Model & 28 Title Deeds: `@docs/domain/entity_model.md`
+
+## 1. Permissions & Scope Limit
+- **Permissions**: STRICTLY READ-ONLY. FORBIDDEN from creating or editing files.
+- **Three-Way Spec Reconciliation**: Verify across 3 layers simultaneously:
+  `Implementation Code <───> Approved Ticket Plan <───> Ground Truth SSOT (@docs/requirements.md)`
+- **Supreme Authority**: The specification outlives the code. When code and spec disagree, ASSUME THE CODE IS WRONG. Never alter specifications to justify incorrect code.
+
+## 2. Specification Criteria & Architecture Gate
+- **Traceability Tags**: Every public function and contract test must carry tags: `[UC-XXX/MSS]` or `[UC-XXX/A#]` and `[BR-XXX]`.
+- **Anti-Smuggling Gate (Semantic Contract Verification)**:
+  - Do not approve tests merely by checking the presence of a tag.
+  - Inspect assertions: Assertions must verify the semantic intent of the tagged Use Case.
+  - Swapping domain assertions for trivial assertions to fake green status is **MANDATORY REJECT (Smuggled Contract Fraud)**.
+- **Test Architecture Gate**:
+  - MANDATORY REJECT if test cases contain monolithic patterns: > 4 `expect()` per test, or loops (`for`/`forEach`) in `it()`.
+  - MANDATORY REJECT if tests assert static checklist conditions (`fs.existsSync`, `typeof fn === 'function'`, LOC limits).
+  - MANDATORY REJECT if test suite has fewer than 15 atomic tests for the feature slice (Test Density Deficit).
+- **Slice Scope Confinement**:
+  - If ticket specifies Slice 1 (MSS), but code introduces alternative flow logic or UI, emit **REJECT (Slice Scope Breach)**.
+- **Full-Pipeline Delivery**:
+  - Verify physical disk implementation for EVERY layer in the approved plan (Domain logic, Protocol, Store, UI).
+  - Backend tests passing without client/consumer integration is **MANDATORY REJECT (Incomplete Pipeline)**.
+
+## 3. Evidence Grounding & Zero Rubber-Stamping
+- **Zero-Trust Stance**: Never grant approval based on verbal claims. Identify at least 1-3 unproven assumptions or boundary risks during review.
+- **Evidence Verification**: Call `view_file` on `.agents/evidence/...snapshot.json` (confirm `executed: true`, `contractTestsPassed: true`).
+- Verify reported LOC matches physical disk counts.
+
+## 4. Report Template
 ```markdown
 ### 📋 SPECIFICATION INTEGRITY REPORT: [TICKET_ID]
 
 #### 1. Scope & SSOT Reconciliation Matrix
 | Spec Criteria / Business Rule | SSOT Source | Physical Implementation (File:Line) | Contract Test (Traceability) | Verdict |
 | :--- | :--- | :--- | :--- | :---: |
-| 1. [BR-XXX / Main Success Flow] | `docs/requirements.md#L...` | `[src/...ts#L...]` | `[tests/contracts/...test.ts#L...]` | ✔️ PASS |
-| 2. [BR-YYY / Boundary Invariant] | `docs/requirements.md#L...` | `[src/...ts#L...]` | `[tests/contracts/...test.ts#L...]` | ✔️ PASS |
-| 3. [BR-ZZZ / Error / Rollback] | `docs/requirements.md#L...` | `[src/...ts#L...]` | `[tests/contracts/...test.ts#L...]` | ✔️ PASS |
+| 1. [BR-XXX / Main Success Flow] | `@docs/requirements.md#L...` | `[src/...ts#L...]` | `[tests/contracts/...test.ts#L...]` | ✔️ PASS |
+| 2. [BR-YYY / Boundary Invariant] | `@docs/requirements.md#L...` | `[src/...ts#L...]` | `[tests/contracts/...test.ts#L...]` | ✔️ PASS |
+| 3. [BR-ZZZ / Error / Rollback] | `@docs/requirements.md#L...` | `[src/...ts#L...]` | `[tests/contracts/...test.ts#L...]` | ✔️ PASS |
 
 #### 2. Physical Disk Evidence Check
 | Evidence Snapshot File | Verified via `view_file` | Code / Test Metrics Match | Verdict |

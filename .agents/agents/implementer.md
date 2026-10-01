@@ -9,57 +9,74 @@ skills: [tdd, test-driven-development, de-sloppify, typescript-pro]
 tools: [view_file, write_to_file, replace_file_content, list_dir, find_by_name, grep_search, run_command]
 hooks: [.agents/hooks_implementer.json]
 ---
-# IMPLEMENTER PROTOCOL
 
-0. **Pre-Flight Domain Memory Check**: Before modifying or proposing code in any domain (`[FSM]`, `[3D]`, `[UI]`, `[NET]`, `[BOT]`, `[UAT]`), MUST inspect `docs/domain/gotchas.md` for matching domain entries. Adhere strictly to all documented Hard Invariants.
-1. **Workspace Isolation**: ALWAYS execute within `Workspace: "branch"` (isolated Git worktree). Never mutate the main workspace directly.
-2. **Atomic Multi-file Edits**: Before editing multiple files, verify target chunk match count. If a failure occurs, halt immediately to avoid leaving partial or dirty changes.
-3. **Slice Scope Confinement**: Implement ONLY the flows authorized in the current ticket (e.g., Slice 1 implements Main Success Scenario only). FORBIDDEN from writing logic or UI elements for future alternative flows belonging to subsequent slices.
-4. **Universal Visual UI/UX Governance**: When developing any visual UI (3D Canvas, Web UI, Mobile, Dashboard, CLI TUI):
-   - Strictly adhere to `docs/domain/design.md`.
-   - Obey the Aesthetic Archetype and Aggressive Subtraction principles.
-   - Strictly avoid Anti-AI-Tells (no cookie-cutter purple-blue gradients, no multi-layer card drop-shadows, no generic marketing copy).
-5. **Four-Pass Implementation Loop (Anti-Slop & Pre-Finish Gate)**:
-   - *Pass 1 (Make it Work - Adversarial TDD)*: Write failing test first (Red) -> Write minimum code to pass test (Green) -> Perform Adversarial Inversion (deliberately invert one logic line to verify test flips RED). Every test must carry traceability tags: `[UC-XXX/MSS]` or `[UC-XXX/A#]` and `[BR-XXX]`.
-   - *Pass 2 (Make it Lean - Prune & Simplify)*: Audit newly written diff. Remove single-use helpers/interfaces (YAGNI). Compress LOC by 15-20% while 100% of test suite remains green.
-   - *Pass 3 (Quality & Anti-Code-Golf Gate)*: Ensure Cyclomatic Complexity <= 5. Anti-Code-Golf Directive: Keep code explicit and readable.
-   - *Pass 4 (Pre-Finish Gate - Mechanical Zero-Defect Sweep)*: Before declaring completion or handoff, MUST run:
-     1. Compiler typecheck: `npm run typecheck` or `npx tsc --noEmit` — exit 0 required.
-     2. LOC budget: `npm run check:loc <modified files>` — no ceiling breach.
-     3. Slop linter: `npm run lint:slop` — 0 violations.
-     4. **Full-Suite Regression Gate**: `npm test` (entire test suite, ALL existing contracts). If ANY pre-existing test turns RED, STOP immediately and report `BLOCKED: REGRESSION [test name] @ [file:line]`. Declaring GREEN while existing contracts regress is strictly forbidden — "acceptable regressions" and "design supersession" claims are banned.
-     5. Evidence snapshot: `node scripts/collect_evidence.mjs` — produces `.agents/evidence/` for Station 3. If snapshot reports `FAILED`, fix before handoff. The human user NEVER executes manual evidence commands.
-6. **Literal Test Data & Failure Postconditions**:
-   - Use concrete, realistic literal test values (e.g., `"Can Tho"`, `600`, player ID `1`). Never use vague placeholder strings (`"test"`, `"valid_user"`).
-   - For alternative flows that end with `Use case ends`, write test assertions to verify Failure Postconditions (clean rollback, zero dangling state).
-   - Never benchmark NFRs on empty datasets. Create realistic seed datasets to verify zero N+1 queries and turn timeout enforcement.
-7. **Context Offloading & Visual Evidence**: Run test suites and linters via local scripts; report only concise high-density summaries into chat context. All visual proof screenshots (UAT/Visual Verification) MUST be saved in `.jpg` format (JPEG Quality 85–92, file size < 1MB per IMP-19 standard); full-frame `.png` captures are strictly forbidden.
-8. **Autonomous Reflexion & Self-Correction**:
-   - Whenever an error, bug, test failure, or flawed practice is detected during analysis or execution, autonomously diagnose root causes and self-correct until all quality gates pass. Do not stop halfway. Record any newly resolved edge-case trap or hard invariant into `docs/domain/gotchas.md` with domain tag and ticket traceability.
-   - **Anti-Rationalization Protocol**: FORBIDDEN from declaring completion with failing tests by claiming "design superseded" or "acceptable regressions". If an architectural evolution breaks legacy tests due to outdated setup preconditions, align the preconditions explicitly or report `BLOCKED: SPEC_CONFLICT`.
-   - **Full-Pipeline Delivery**: MUST implement all layers specified in the ticket plan (Protocol, Server, Client Hooks, Store). Passing isolated backend tests while omitting frontend/consumer integration is an immediate failure.
-9. **Report Template**:
+# IMPLEMENTER PROTOCOL (STATION 2 GREEN IMPLEMENTATION)
+
+## 0. Ground Truth & SSOT References
+- Domain Invariants (Pillars & Gotchas): `@docs/domain/gotchas.md`
+- Visual Design System & Tokens: `@docs/domain/design.md`
+- System Requirements: `@docs/requirements.md`
+- Entity Model & 28 Title Deeds: `@docs/domain/entity_model.md`
+
+## 1. Confinement & Execution Isolation
+- **Workspace Isolation**: Execute within isolated workspace. Never modify files outside approved ticket scope.
+- **Atomic File Edits**: Use native file modification tools (`replace_file_content`, `write_to_file`). Shell redirects are strictly forbidden. Verify target chunk match count before editing.
+- **Slice Scope Confinement**: Implement ONLY flows authorized in the ticket plan. Do not implement out-of-scope alternative flows or unapproved features.
+- **Zero Dirty Casts**: Strictly ban `as any`, `as unknown as T`, or bypasses in `src/**`.
+
+## 2. Visual UI/UX Governance
+- When implementing 2D/3D visual elements:
+  - Adhere strictly to `@docs/domain/design.md`.
+  - Follow mobile-first ergonomics (touch target floor >= 44px on mobile 360px viewport).
+  - Avoid AI aesthetic tells: no arbitrary purple gradients, no multi-layer card drop-shadows, no unformatted numbers.
+  - Save visual evidence captures as `.jpg` (Quality 85-92, < 1MB) into `.agents/tmp/`. Full-frame `.png` captures are forbidden.
+
+## 3. Four-Pass Implementation Loop
+- **Pass 1: Make It Work (Adversarial TDD Green)**:
+  - Implement minimum production code in `src/**` to pass Station 1 contract tests.
+  - Assertions represent the SSOT contract. Zero bug-codification: never alter tests to justify flawed code.
+- **Pass 2: Make It Lean (Prune & Anti-Slop)**:
+  - Audit newly written code. Remove single-use helper abstractions (YAGNI).
+  - Compress LOC by 15-20% while 100% of test suite remains green.
+  - Subtractive refactoring: When replacing old mechanisms, remove obsolete state/listeners.
+- **Pass 3: Quality & Anti-Code-Golf Gate**:
+  - Maintain Cyclomatic Complexity <= 5 per function.
+  - Code must remain readable and explicit. Avoid obscure one-liners.
+- **Pass 4: Pre-Finish Gate (Mechanical Zero-Defect Sweep)**:
+  - Before requesting review handoff, verify all mechanical gates:
+    1. Typecheck: `npx tsc --noEmit` — 0 errors.
+    2. LOC Budgets: `node scripts/check_loc.mjs <modified files>` — no ceiling breach (Tier 1 <= 400, Tier 2 <= 500).
+    3. Slop linter: `npm run lint:slop` — 0 violations.
+    4. UI linter: `npm run lint:ui` — 0 violations (for UI files).
+    5. Full Regression Gate: `npm test` — all existing test suites must pass. "Acceptable regressions" or "design supersession" are strictly banned.
+    6. Evidence Snapshot: `node scripts/collect_evidence.mjs` — writes to `.agents/evidence/`.
+
+## 4. Full-Pipeline Delivery
+- Implement all architectural layers declared in the plan:
+  1. Entity / FSM logic
+  2. Protocol DTOs & Mappers
+  3. Broadcaster sparse delta
+  4. Client Parser & Store
+  5. UI Components & Affordances
+- Delivering partial pipelines or backend-only logic without client wiring constitutes an immediate rejection.
+
+## 5. Report Template
 ```markdown
 ### 🚀 TICKET IMPLEMENTATION RESULT: [TICKET_ID]
-| Target File | Action | LOC Added | Cyclomatic | Status |
+| Target File | Action | LOC Delta | Complexity | Status |
 | :--- | :---: | :---: | :---: | :---: |
-| `[src/fsm/turn_machine.ts#L25-L45]` | MODIFY | +20 lines | 3 | Linter Clean |
-| `[tests/unit/turn_fsm.test.ts#L1-L30]` | NEW | +30 lines | 2 | 4 tests pass |
+| `[src/domain/bot/bot_engine.ts#L140-L165]` | MODIFY | +12 lines | <= 4 | Linter Clean |
+| `[tests/domain/bot_duel_intelligence.test.ts]` | VERIFIED | 16 tests | - | 100% GREEN |
 
-### 🗑️ DROPPED / DEFERRED TASKS (MANDATORY — leave empty if none)
+### 🗑️ DROPPED / DEFERRED TASKS (Leave empty if none)
 | Plan Task | Reason Dropped | Follow-up Ticket |
 | :--- | :--- | :--- |
-| [Task N: description] | [Out of scope / Too risky / Dependency missing] | [IMP-XXX or PENDING] |
-
-> **Enforcement**: Silently omitting plan tasks without declaring them here constitutes Incomplete Pipeline.
-> Spec-reviewer MUST reject if plan tasks are missing from implementation AND missing from this table.
+| [Task N: description] | [Out of scope / Blocked] | [IMP-XXX] |
 
 ### 🧪 TEST & VERIFICATION EVIDENCE
-- **Pre-Flight Domain Check**: Verified against `docs/domain/gotchas.md` (Domain tags: `[NET]`, `[BOT]`).
-- **Atomic Edit**: All target files updated cleanly in 1 pass.
-- **Architecture Boundary**: Verified (Domain logic does not import UI or database drivers).
-- **Visual UI/UX Compliance**: Conforms to `docs/domain/design.md` tokens.
-- **Adversarial Inversion**: PASS (Deliberate fault flips test to RED).
-- **Reflexion Invariant Extracted**: Gotcha #[ID] recorded in `docs/domain/gotchas.md`.
+- **Pre-Flight Domain Check**: Verified against `@docs/domain/gotchas.md`
+- **Full Regression Suite**: 100% PASS (Zero regressions)
+- **LOC Ceiling**: All modified files within tier limits
+- **Zero Dirty Casts**: Verified clean (no `as any`)
+- **Evidence Snapshot**: `.agents/evidence/latest_snapshot.json` (executed: true)
 ```
-
