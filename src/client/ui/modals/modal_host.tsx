@@ -126,7 +126,7 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
   return (
     <ModalBackdrop
       onClose={handleBackdropClose}
-      center={activeModal === 'auction' || activeModal === 'event' || activeModal === 'portfolio'}
+      center={activeModal !== 'deed'}
       dismissible={!isCriticalDecision}
     >
       {activeModal === 'deed' && (() => {
@@ -198,16 +198,10 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
             ownedProperties={owned}
             isTradeFrozen={isTradeFrozen}
             activeModifiers={activeModifiers}
-            propertyStates={Object.fromEntries(
-              owned.map((idx) => [
-                idx,
-                {
-                  ownerId: myId,
-                  level: useGameStore.getState().levelMap[idx] ?? 0,
-                  isMortgaged: Boolean(myPlayer?.mortgagedProperties?.includes(idx)),
-                },
-              ])
-            )}
+            propertyStates={Object.fromEntries(owned.map((idx) => [
+              idx,
+              { ownerId: myId, level: useGameStore.getState().levelMap[idx] ?? 0, isMortgaged: Boolean(myPlayer?.mortgagedProperties?.includes(idx)) },
+            ]))}
             currentBalance={myPlayer?.balance ?? 0}
             playerNetWorth={playerNW}
             unmortgagedPropertiesCount={unmortgagedCount}
@@ -220,34 +214,18 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
             onRepayBond={() => onIntent?.({ type: 'INTENT_REPAY_BOND' })}
             onQuickTrade={(targetPlayerId, targetPropertyIndex) => {
               closeModal();
-              useGameStore.getState().openModal('trade', {
-                targetPlayerId,
-                offeredProperties: [],
-                requestedProperties: [targetPropertyIndex],
-                cashOffer: 0,
-                cashRequest: 0,
-              });
+              useGameStore.getState().openModal('trade', { targetPlayerId, offeredProperties: [], requestedProperties: [targetPropertyIndex], cashOffer: 0, cashRequest: 0 });
             }}
             onViewVacantCell={(cellIndex) => {
               closeModal();
               useGameStore.getState().setCameraFocusCell(cellIndex);
-              useGameStore.getState().openModal('deed', {
-                cellIndex,
-                canBuy: false,
-                ownedProperties: myPlayer?.ownedProperties,
-              });
+              useGameStore.getState().openModal('deed', { cellIndex, canBuy: false, ownedProperties: myPlayer?.ownedProperties });
             }}
-            onUpgrade={(cellIndex) => {
-              onIntent?.({ type: 'INTENT_UPGRADE', cellIndex });
-            }}
+            onUpgrade={(cellIndex) => onIntent?.({ type: 'INTENT_UPGRADE', cellIndex })}
             onHoverCell={(cellIndex) => useGameStore.getState().setCameraFocusCell(cellIndex)}
             onSelectDeed={(cellIndex) => {
               closeModal();
-              useGameStore.getState().openModal('deed', {
-                cellIndex,
-                canBuy: false,
-                ownedProperties: myPlayer?.ownedProperties,
-              });
+              useGameStore.getState().openModal('deed', { cellIndex, canBuy: false, ownedProperties: myPlayer?.ownedProperties });
             }}
             onMortgage={(cellIndex) => onIntent?.({ type: 'INTENT_MORTGAGE', cellIndex })}
             onRedeem={(cellIndex) => onIntent?.({ type: 'INTENT_REDEEM', cellIndex })}
@@ -278,7 +256,9 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
             winnerId={payload.winnerId}
             finalPrice={payload.finalPrice}
             isForeclosure={payload.isForeclosure}
+            isFireSale={payload.isFireSale}
             insolvencyPlayerId={payload.insolvencyPlayerId}
+            isBankrupt={myPlayer?.bankrupt}
             onClose={() => { useGameStore.getState().dismissAuction(payload.cellIndex); }}
             onBid={(amount) => {
               AudioEngine.playSfx(SoundEffect.AUCTION_BID);

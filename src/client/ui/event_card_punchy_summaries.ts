@@ -4,6 +4,10 @@ import { MarketCardId, ChanceCardId } from '../../domain/event_card_types.js';
 export type PunchyEventSummariesMap = Readonly<Record<MarketCardId | ChanceCardId, string>> & Readonly<Record<string, string>>;
 
 export const PUNCHY_EVENT_SUMMARIES: PunchyEventSummariesMap = Object.freeze({
+  // Macro cycles
+  ['MACRO_LAND_FEVER']: 'Thuê x2.5 (+150%) & giảm giá xây dựng 25%',
+  ['MACRO_LIQUIDITY_FREEZE']: 'Giảm 50% tiền thuê & cấm thế chấp',
+
   // 16 Market cards
   [MarketCardId.MC_MEGA_CONCERT]: 'Di chuyển đến ô Dịch Vụ cao nhất',
   [MarketCardId.MC_FREEZE_TRADE]: 'Đóng băng mua bán & đấu giá',
@@ -15,7 +19,7 @@ export const PUNCHY_EVENT_SUMMARIES: PunchyEventSummariesMap = Object.freeze({
   [MarketCardId.MC_PUBLIC_INVEST]: 'Thưởng 400 & x2 cước Ga Tàu',
   [MarketCardId.MC_FUEL_SURGE]: 'Phụ thu 500 cước 4 Ga Tàu',
   [MarketCardId.MC_FIRE_INSPECTION]: 'Phạt PCCC công trình C1-C3',
-  [MarketCardId.MC_LAND_FEVER]: 'Tăng 50% tiền thuê & sang nhượng',
+  [MarketCardId.MC_LAND_FEVER]: 'Nhân đôi tiền thuê vùng ven (x2)',
   [MarketCardId.MC_ANTI_SPECULATE]: 'Thuế sang nhượng P2P 20%',
   [MarketCardId.MC_PEAK_TOURISM]: 'Nhân đôi thuê BĐS Nghỉ Dưỡng',
   [MarketCardId.MC_URBAN_PLANNING]: 'Tăng 20% giá trị thế chấp HN/HCM',

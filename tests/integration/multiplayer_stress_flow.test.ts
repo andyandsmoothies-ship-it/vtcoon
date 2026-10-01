@@ -264,9 +264,8 @@ describe('[TC-E2E-STRESS/MSS] Living E2E Test: Multiplayer Stress Flow (3 Player
     const p2State = room.players.find((p) => p.id === 'P2');
     expect(p2State?.bankrupt, 'P2 bi danh dau bankrupt = true').toBe(true);
 
-    // 3. Toan bo tai san cua P2 duoc giai phong sach khoi registry (khong co dat mo coi)
-    expect(mgr.getPropertyOwner(rc, 8), 'O 08 tro thanh vo chu').toBeUndefined();
-    expect(mgr.getPropertyState(rc, 8), 'StateMap o 08 bi xoa').toBeUndefined();
+    // 3. Toan bo tai san cua P2 duoc sang ten cho chu no P1 theo quy dinh pha san
+    expect(mgr.getPropertyOwner(rc, 8), 'O 08 duoc sang ten cho chu no P1').toBe('P1');
 
     // 4. Luot choi tu dong nhay muot sang P3 (bo qua P2 da pha san)
     expect(room.currentPlayerIndex, 'Luot FSM tu dong chuyen sang P3 (index 2)').toBe(2);

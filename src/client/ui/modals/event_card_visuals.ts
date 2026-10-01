@@ -1,6 +1,8 @@
 // [IMP-134] Event Card Visuals — Themed emojis, hero stat formatting & sanitizers for Fintech Card overhaul
 import { MarketCardId, ChanceCardId } from '../../../domain/event_card_types.js';
+import { MacroCycleType } from '../../../domain/macro_cycle_types.js';
 import { formatCurrency } from '../ui_helpers.js';
+import { EVENT_ICON_REGISTRY, isEventIdentifiable } from '../../domain_visual_bridge.js';
 
 export type HeroStatVariant = 'positive' | 'negative' | 'warning' | 'info';
 
@@ -17,48 +19,6 @@ export interface HeroStatStyles {
   readonly badge: string;
 }
 
-const THEMED_EMOJIS: Readonly<Record<string, string>> = {
-  // Market cards
-  [MarketCardId.MC_FUEL_SURGE]: '⛽',
-  [MarketCardId.MC_ALCOHOL_CHECK]: '🚨',
-  [MarketCardId.MC_PEAK_TOURISM]: '🏖️',
-  [MarketCardId.MC_NIGHT_ECONOMY]: '🍸',
-  [MarketCardId.MC_MEGA_CONCERT]: '🎤',
-  [MarketCardId.MC_CASINO_PILOT]: '🎰',
-  [MarketCardId.MC_RATE_HIKE]: '📈',
-  [MarketCardId.MC_CREDIT_STIMULUS]: '🏦',
-  [MarketCardId.MC_LAND_FEVER]: '🔥',
-  [MarketCardId.MC_FIRE_INSPECTION]: '🧯',
-  [MarketCardId.MC_PUBLIC_INVEST]: '🏗️',
-  [MarketCardId.MC_ANTI_SPECULATE]: '🛡️',
-  [MarketCardId.MC_FREEZE_TRADE]: '❄️',
-  [MarketCardId.MC_URBAN_PLANNING]: '🏙️',
-  [MarketCardId.MC_UTILITY_DOUBLE]: '💡',
-  [MarketCardId.MC_COASTAL_STORM]: '🌪️',
-
-  // Chance cards
-  [ChanceCardId.CC_PLATE_AUCTION]: '🚘',
-  [ChanceCardId.CC_TAX_AUDIT]: '📋',
-  [ChanceCardId.CC_STOCK_PROFIT]: '📈',
-  [ChanceCardId.CC_DIPLOMATIC]: '🤝',
-  [ChanceCardId.CC_CONTRACT_PENALTY]: '📑',
-  [ChanceCardId.CC_LAND_CHANGE]: '📜',
-  [ChanceCardId.CC_BUILD_HALT]: '🚧',
-  [ChanceCardId.CC_MA_FORCE]: '🏢',
-  [ChanceCardId.CC_COPYRIGHT]: '⚖️',
-  [ChanceCardId.CC_OVERDRAFT]: '💳',
-  [ChanceCardId.CC_JUNK_STOCK]: '📉',
-  [ChanceCardId.CC_FRANCHISE]: '🏪',
-  [ChanceCardId.CC_LAND_RECLAIM]: '🏗️',
-  [ChanceCardId.CC_VENUE_INCIDENT]: '🚨',
-  [ChanceCardId.CC_CONCERT_SPONSOR]: '🎵',
-  [ChanceCardId.CC_FREE_CREDIT]: '🎁',
-  [ChanceCardId.CC_PORT_EXCLUSIVE]: '🚢',
-  [ChanceCardId.CC_SLOW_BUILD]: '⏳',
-  [ChanceCardId.CC_MEDIA_CRISIS]: '📢',
-  [ChanceCardId.CC_SWAP_PROJECT]: '🔄',
-};
-
 const KNOWN_HERO_STATS: Readonly<Record<string, HeroStat>> = {
   // Market Cards
   [MarketCardId.MC_FUEL_SURGE]: { label: 'PHỤ PHÍ NHIÊN LIỆU', value: '-500', variant: 'negative' },
@@ -69,7 +29,9 @@ const KNOWN_HERO_STATS: Readonly<Record<string, HeroStat>> = {
   [MarketCardId.MC_MEGA_CONCERT]: { label: 'HỘI TỤ ĐÁM ĐÔNG', value: 'TẬP HỢP TẤT CẢ', variant: 'info' },
   [MarketCardId.MC_CASINO_PILOT]: { label: 'TỔ HỢP CASINO', value: 'THƯỞNG ĐẾN 3.000', variant: 'positive' },
   [MarketCardId.MC_CREDIT_STIMULUS]: { label: 'ƯU ĐÃI XÂY DỰNG', value: '-20% XÂY DỰNG', variant: 'positive' },
-  [MarketCardId.MC_LAND_FEVER]: { label: 'SỐT ĐẤT VÙNG VEN', value: '+50% THUÊ & GIÁ BÁN', variant: 'positive' },
+  [MarketCardId.MC_LAND_FEVER]: { label: 'SỐT ĐẤT VÙNG VEN', value: 'x2 TIỀN THUÊ', variant: 'positive' },
+  [MacroCycleType.MACRO_LAND_FEVER]: { label: 'SỐT ĐẤT VĨ MÔ', value: 'THUÊ x2.5 • XÂY -25%', variant: 'positive' },
+  [MacroCycleType.MACRO_LIQUIDITY_FREEZE]: { label: 'ĐÓNG BĂNG THANH KHOẢN', value: 'THUÊ -50% • CẤM VAY', variant: 'warning' },
   [MarketCardId.MC_FIRE_INSPECTION]: { label: 'THANH TRA PCCC', value: 'PHẠT C1-C3', variant: 'negative' },
   [MarketCardId.MC_PUBLIC_INVEST]: { label: 'HẠ TẦNG QUỐC GIA', value: '+400 & x2 VẬN TẢI', variant: 'positive' },
   [MarketCardId.MC_ANTI_SPECULATE]: { label: 'THUẾ CHỐNG ĐẦU CƠ', value: 'THUẾ P2P 20%', variant: 'warning' },
@@ -165,8 +127,8 @@ function formatDeltaString(delta: number): string {
 }
 
 export function getCardThemedEmoji(cardId: string, cardType: 'chance' | 'market'): string {
-  if (cardId && THEMED_EMOJIS[cardId]) {
-    return THEMED_EMOJIS[cardId];
+  if (cardId && isEventIdentifiable(cardId)) {
+    return EVENT_ICON_REGISTRY[cardId];
   }
   return cardType === 'market' ? '📰' : '⚡';
 }

@@ -13,10 +13,9 @@ hooks: [.agents/hooks_qa.json]
 # QA TESTER PROTOCOL (STATION 1 QA RED)
 
 ## 0. Ground Truth & SSOT References
-- Domain Invariants (Pillars & Gotchas): `@docs/domain/gotchas.md`
-- Entity Model & 28 Title Deeds: `@docs/domain/entity_model.md`
-- System Requirements: `@docs/requirements.md`
-- Active Use Cases: `@docs/domain/use_cases.puml`
+- Locate the project's domain invariants file (e.g. `docs/domain/gotchas.md`, `CONTEXT.md`, `docs/INVARIANTS.md`, or equivalent). Read it before writing tests.
+- Locate entity model and system requirements (e.g. `docs/domain/entity_model.md`, `docs/requirements.md`, or project-equivalent paths).
+- If the project has a GEMINI.md or AGENTS.md, read it first to discover the project's canonical SSOT paths.
 
 ## 1. Adversarial Sandbox Confinement
 - **Authorized Output**: Standard test files in `tests/**` (`*.test.ts`, `*.test.js`, `*.spec.ts`, `*.spec.js`).
@@ -44,16 +43,16 @@ hooks: [.agents/hooks_qa.json]
 - **Gotcha Pre-Check**: Before writing tests for any component or function, search `docs/domain/gotchas.md` (or equivalent domain invariants file) for entries matching the component name or domain tag. Apply all matching invariants as test constraints. If a gotcha bans a testing pattern (e.g. `toContain()` on ambiguous HTML attributes — Gotcha #33), switch to the prescribed alternative.
 - **Universal 5-Facet Behavioral Matrix**:
   1. *Boundary & Range*: Input bounds, range constraints, format validity.
-  2. *State Reactivity & Multi-Turn Teardown*: Lifecycle transitions, sparse delta serialization, turn phase resets, and Turn N+1 purge (Turn N ephemeral state 100% cleared on Turn N+1 advance).
+  2. *State Reactivity & Cycle Teardown*: Lifecycle transitions, sparse delta serialization, cycle/epoch/turn phase resets, and ephemeral state purge (state from cycle N must be 100% cleared when cycle N+1 begins).
   3. *Resource Disposal & Timer Isolation*: Cleanup on unmount (`.dispose()`), no listener leaks, timer handle isolation.
-  4. *Error Defense & Terminal Invariants*: Edge inputs, idempotency, invalid intents, insolvent guards (`balance < 0` cannot buy), terminal state immutability, and zero-delta suppression.
-  5. *Cross-Coupling Blast Radius & Exceptional Lifecycles*: Downstream consumer updates, reconnection/resync, cold start, non-linear transition isolation (e.g. arrest avoids Pass GO salary).
+  4. *Error Defense & Terminal Invariants*: Edge inputs, idempotency, invalid intents, resource-exhaustion guards (e.g. zero-balance actors cannot initiate purchases), terminal state immutability, and zero-delta suppression.
+  5. *Cross-Coupling Blast Radius & Exceptional Lifecycles*: Downstream consumer updates, reconnection/resync, cold start, non-linear transition isolation (abrupt termination must not trigger clean-completion side effects).
 - **Test Density Floor**:
   - Contract suites (`tests/contracts/**`): Minimum 15 atomic tests / slice.
   - Probe suites (`tests/probes/**`): Minimum 14 atomic tests / slice.
   - Ratio of `expect()` / `it()` must stay between 1.0 and 3.5.
 - **Consumer-Side Assertion**:
-  - Assert effect at point of consumption/execution (e.g. rent deduction, action permission), NEVER merely producer state flags or array lengths.
+  - Assert effect at point of consumption/execution (e.g. balance deduction, permission grant/deny, state transition), NEVER merely producer state flags or array lengths.
 - **Double-Entry Bookkeeping (Zero Bug-Codification)**:
   - Tests represent the SSOT contract. Never modify assertions to match buggy code.
 - **Mock Async Browser APIs**:
@@ -73,9 +72,9 @@ hooks: [.agents/hooks_qa.json]
 
 ## 6. Phase 5: Production Hardening
 - For v1.0 sign-off or stress testing, execute headless simulators (1000+ continuous cycles).
-- Assert Global Invariants:
+- Assert Global Invariants (adapt to project domain):
   - Liveness: 0.00% deadlock.
-  - Conservation Law: Total balances + escrow + treasury sum remains constant.
+  - Conservation: Key resource totals remain constant across the system (e.g. total currency = player balances + treasury + escrow).
   - Resource Stability: Zero listener leaks or unbounded memory growth.
 
 ## 7. Report Template

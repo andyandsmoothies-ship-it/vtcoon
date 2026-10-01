@@ -198,6 +198,9 @@ export interface Room {
   lastTargetTradeOfferRound?: Record<string, number>;
   activeMacroGroup?:          ColorGroup;
   fireSaleQueue?:             number[];
+  fireSaleDebtorId?:          string;
+  pendingInsolvencyCreditorId?: string;
+  pendingInsolvencyDebtorId?:   string;
   lastDiplomaticEvent?:       { playerId: string; landlordId: string; cellIndex: number; savedRent: number } | null;
   lastMaBuyout?:              MaBuyoutResult;
   passedGoSalary?:            number;

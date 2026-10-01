@@ -6,6 +6,7 @@ import { MarketCardId, ChanceCardId } from '../../domain/event_card_types.js';
 import { MARKET_CARD_DETAILS, CHANCE_CARD_DETAILS } from '../../domain/event_card_metadata.js';
 import { vi as viTranslations } from '../../domain/i18n/vi.js';
 import { getCardHeroStat, getHeroStatStyles } from './modals/event_card_visuals.js';
+import { resolveEventIcon } from '../domain_visual_bridge.js';
 
 export interface MarketEventTickerProps {
   readonly activeModifiers?: ReadonlyArray<{
@@ -18,27 +19,7 @@ export interface MarketEventTickerProps {
 }
 
 export function resolveMarketIcon(type: string): string {
-  switch (type) {
-    case MarketCardId.MC_FREEZE_TRADE: return '❄️';
-    case MarketCardId.MC_COASTAL_STORM: return '🌀';
-    case MarketCardId.MC_PUBLIC_INVEST: return '🏗️';
-    case MarketCardId.MC_RATE_HIKE: return '📈';
-    case MarketCardId.MC_CREDIT_STIMULUS: return '📉';
-    case MarketCardId.MC_PEAK_TOURISM: return '🏖️';
-    case MarketCardId.MC_NIGHT_ECONOMY: return '🌙';
-    case MarketCardId.MC_ALCOHOL_CHECK: return '🚨';
-    case MarketCardId.MC_CASINO_PILOT: return '🎰';
-    case MarketCardId.MC_LAND_FEVER: return '🔥';
-    case MarketCardId.MC_FIRE_INSPECTION: return '🧯';
-    case MarketCardId.MC_ANTI_SPECULATE: return '⚖️';
-    case MarketCardId.MC_FUEL_SURGE: return '⛽';
-    case MarketCardId.MC_URBAN_PLANNING: return '📐';
-    case MarketCardId.MC_UTILITY_DOUBLE: return '⚡';
-    case ChanceCardId.CC_PORT_EXCLUSIVE: return '🚢';
-    case 'MACRO_LAND_FEVER': return '🌋';
-    case 'MACRO_LIQUIDITY_FREEZE': return '🧊';
-    default: return '🎴';
-  }
+  return resolveEventIcon(type);
 }
 
 const ALL_MARKET_TITLES: Readonly<Record<string, string>> = {
@@ -78,7 +59,7 @@ export function resolveMarketShortTag(type: string): string {
 
 export const ACTIVE_MARKET_EFFECT_SUMMARIES: Readonly<Record<string, string>> = {
   MACRO_LAND_FEVER:
-    'Sốt đất vĩ mô: Tăng 250% tiền thuê và giảm 25% chi phí xây dựng cho nhóm màu.',
+    'Sốt đất vĩ mô: Thuê x2.5 (+150%) và giảm 25% chi phí xây dựng cho nhóm màu.',
   MACRO_LIQUIDITY_FREEZE:
     'Đóng băng thanh khoản: Giảm 50% tiền thuê và cấm thế chấp BĐS trong nhóm màu.',
   [MarketCardId.MC_PUBLIC_INVEST]:
@@ -96,7 +77,7 @@ export const ACTIVE_MARKET_EFFECT_SUMMARIES: Readonly<Record<string, string>> = 
   [MarketCardId.MC_CREDIT_STIMULUS]:
     'Giảm 20% chi phí xây nhà C1-C3 và miễn 100% lãi suất vay thế chấp.',
   [MarketCardId.MC_LAND_FEVER]:
-    'Tăng 50% tiền thuê & giá chuyển nhượng (Bình Dương, Đồng Nai, Hưng Yên).',
+    'Nhân đôi tiền thuê (x2) & giá chuyển nhượng (Bình Dương, Đồng Nai, Hưng Yên).',
   [MarketCardId.MC_FIRE_INSPECTION]:
     'Phạt 200/C1, 400/C2, 800/C3 nộp Kho Bạc. Đất C0 miễn phạt.',
   [MarketCardId.MC_ANTI_SPECULATE]:
@@ -145,7 +126,7 @@ export const ACTIVE_MARKET_COMPACT_FORMULAS: Readonly<Record<string, string>> = 
   [MarketCardId.MC_MEGA_CONCERT]: 'Đến ô Dịch vụ cấp cao nhất',
   [MarketCardId.MC_RATE_HIKE]: 'Lãi thế chấp 10% qua GO',
   [MarketCardId.MC_CREDIT_STIMULUS]: 'Xây nhà -20%, Miễn lãi vay',
-  [MarketCardId.MC_LAND_FEVER]: 'Ven đô: Thuê & Bán +50%',
+  [MarketCardId.MC_LAND_FEVER]: 'Ven đô: Cước thuê x2',
   [MarketCardId.MC_FIRE_INSPECTION]: 'Phạt PCCC 200 - 800 Tr.',
   [MarketCardId.MC_ANTI_SPECULATE]: 'Thuế chuyển nhượng P2P 20%',
   [MarketCardId.MC_PEAK_TOURISM]: 'Nghỉ dưỡng: Nhân đôi thuê',

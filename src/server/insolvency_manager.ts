@@ -9,15 +9,19 @@ const LEVEL_MULTIPLIER: Record<number, number> = { 0: 1, 1: 1.5, 2: 2.5, 3: 4 };
 
 // --- UC-GAME-053: Kiểm tra & chuyển InsolvencyPhase ---
 
-export function checkInsolvency(room: Room): void {
+export function checkInsolvency(room: Room, creditorId?: string): void {
   const player = room.players[room.currentPlayerIndex];
   if (!player || player.balance >= 0) return;
 
+  if (creditorId && creditorId !== player.id) {
+    room.pendingInsolvencyCreditorId = creditorId;
+    room.pendingInsolvencyDebtorId = player.id;
+  }
   room.phase = TurnPhase.InsolvencyPhase;
 
   console.info(JSON.stringify({
     event: 'INSOLVENCY_TRIGGERED', correlationId: room.roomCode,
-    timestamp: Date.now(), delta: { playerId: player.id, balance: player.balance },
+    timestamp: Date.now(), delta: { playerId: player.id, balance: player.balance, creditorId: room.pendingInsolvencyCreditorId },
   }));
 }
 
@@ -98,6 +102,8 @@ export function liquidateAssets(
   }
 
   if (player.balance >= 0 && room.phase === TurnPhase.InsolvencyPhase) {
+    delete room.pendingInsolvencyCreditorId;
+    delete room.pendingInsolvencyDebtorId;
     room.phase = TurnPhase.PropertyManagement;
   }
 
@@ -137,11 +143,16 @@ export function declareBankruptcy(
       room.fireSaleQueue ??= [];
       room.fireSaleQueue.push(cell);
     }
+    room.fireSaleDebtorId = playerId;
     player.bondContract = null;
   }
 
-  const creditor = creditorId && creditorId !== 'BANK'
-    ? room.players.find((p) => p.id === creditorId)
+  const effectiveCreditorId = creditorId ?? (room.pendingInsolvencyDebtorId === playerId ? room.pendingInsolvencyCreditorId : undefined);
+  delete room.pendingInsolvencyCreditorId;
+  delete room.pendingInsolvencyDebtorId;
+
+  const creditor = effectiveCreditorId && effectiveCreditorId !== 'BANK'
+    ? room.players.find((p) => p.id === effectiveCreditorId && !p.bankrupt)
     : undefined;
 
   if (creditor) {
@@ -165,7 +176,7 @@ export function declareBankruptcy(
         }
       }
     }
-  } else if (creditorId === 'BANK') {
+  } else if (effectiveCreditorId === 'BANK') {
     // Nhánh 2: Nợ ngân hàng -> đưa đất vào đấu giá phát mãi 70% sàn
     if (player.balance > 0) {
       room.treasury = (room.treasury ?? 0) + player.balance;

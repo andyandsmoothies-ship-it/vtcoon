@@ -1,6 +1,7 @@
 // [UI-S04/MSS][IMP-145][IMP-231] Compulsory Buyout Modal (130% Compensation & Target Selection)
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { BOARD_CONFIG } from '../../../domain/board_config.js';
+import { PROPERTY_DEEDS } from '../../../domain/property_data.js';
 import { COLOR_GROUP_HEX } from '../../../domain/theme.js';
 import { formatCurrency } from '../ui_helpers.js';
 import { useGameStore } from '../../store/game_store.js';
@@ -13,7 +14,7 @@ export interface CompulsoryBuyoutModalProps {
   readonly cost: number;
   readonly basePrice: number;
   readonly expiresAt: number;
-  readonly eligibleTargets?: readonly BuyoutTargetOption[];
+  readonly eligibleTargets?: readonly (BuyoutTargetOption | number)[];
   readonly onBuyout: (cellIndex: number) => void;
   readonly onDecline: () => void;
   readonly onClose?: () => void;
@@ -41,7 +42,26 @@ export function CompulsoryBuyoutModal({
     : useGameStore.getState().playersInfo) ?? {};
   const buyer = playersInfo[buyerId];
 
-  const currentTarget = eligibleTargets?.find((t) => t.cellIndex === selectedCell) ?? {
+  const normalizedTargets = useMemo(() => {
+    if (!eligibleTargets || eligibleTargets.length === 0) return undefined;
+    return eligibleTargets.map((item) => {
+      if (typeof item === 'number') {
+        const deed = PROPERTY_DEEDS.get(item);
+        const cellPrice = deed?.price ?? basePrice;
+        const currentPlayers = useGameStore.getState().playersInfo ?? {};
+        const cellSellerId = Object.entries(currentPlayers).find(([, p]) => p?.ownedProperties?.includes(item))?.[0] ?? sellerId;
+        return {
+          cellIndex: item,
+          sellerId: cellSellerId,
+          cost: Math.round(cellPrice * 1.3),
+          basePrice: cellPrice,
+        };
+      }
+      return item;
+    });
+  }, [eligibleTargets, basePrice, sellerId]);
+
+  const currentTarget = normalizedTargets?.find((t) => t.cellIndex === selectedCell) ?? {
     cellIndex,
     sellerId,
     cost,
@@ -132,13 +152,13 @@ export function CompulsoryBuyoutModal({
 
       <div className="p-4 flex flex-col gap-3">
         {/* Selector nếu có nhiều hơn 1 ô đất C0 hợp lệ */}
-        {eligibleTargets && eligibleTargets.length > 1 && (
+        {normalizedTargets && normalizedTargets.length > 1 && (
           <div data-testid="buyout-cell-selector" className="flex flex-col gap-1.5">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600">
-              Chọn Ô Đất Mục Tiêu ({eligibleTargets.length} ô C0):
+              Chọn Ô Đất Mục Tiêu ({normalizedTargets.length} ô C0):
             </span>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
-              {eligibleTargets.map((target) => {
+              {normalizedTargets.map((target) => {
                 const isSelected = target.cellIndex === selectedCell;
                 const targetCell = BOARD_CONFIG[target.cellIndex];
                 const targetColor = targetCell?.colorGroup ? COLOR_GROUP_HEX[targetCell.colorGroup] : '#3b82f6';

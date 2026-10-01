@@ -26,6 +26,7 @@ export interface AuctionModalProps {
   readonly finalPrice?: number;
   readonly isForeclosure?: boolean;
   readonly isFireSale?: boolean;
+  readonly isBankrupt?: boolean;
   readonly insolvencyPlayerId?: string;
   readonly playersInfo?: Record<string, Partial<PlayerInfo>>;
   readonly levelMap?: Record<number, number>;
@@ -51,6 +52,7 @@ export function AuctionModal({
   finalPrice,
   isForeclosure = false,
   isFireSale = false,
+  isBankrupt = false,
   insolvencyPlayerId,
   playersInfo: propPlayersInfo,
   levelMap: propLevelMap,
@@ -81,19 +83,20 @@ export function AuctionModal({
 
   const storePlayersInfo = useGameStore((s) => s.playersInfo);
   const playersInfo = propPlayersInfo ?? (Object.keys(storePlayersInfo ?? {}).length > 0 ? storePlayersInfo : useGameStore.getState().playersInfo);
+  const isMyPlayerBankrupt = isBankrupt || Boolean(myId && (playersInfo?.[myId]?.bankrupt || playersInfo?.[myId]?.isBankrupt));
   const debtor = insolvencyPlayerId ? playersInfo?.[insolvencyPlayerId] : undefined;
   const debtorName = debtor?.name;
   const [autoBid, setAutoBid] = useState<boolean>(false);
 
   // Xử lý tự động đặt giá nếu bật Auto-Bid
   useEffect(() => {
-    if (autoBid && !isConcluded && !isLeading && !hasPassed && !isDeclinedPlayer && onBid) {
+    if (autoBid && !isConcluded && !isLeading && !hasPassed && !isDeclinedPlayer && !isMyPlayerBankrupt && onBid) {
       const minBid = increments[0];
       if (minBid !== undefined && (myBalance === undefined || minBid <= myBalance)) {
         onBid(minBid);
       }
     }
-  }, [autoBid, isConcluded, isLeading, hasPassed, isDeclinedPlayer, currentBid, increments, myBalance, onBid]);
+  }, [autoBid, isConcluded, isLeading, hasPassed, isDeclinedPlayer, isMyPlayerBankrupt, currentBid, increments, myBalance, onBid]);
 
   // Tự động đóng modal sau 2.5s khi phiên đấu giá gõ búa thành công
   useEffect(() => {
@@ -293,7 +296,7 @@ export function AuctionModal({
                 Ví của bạn: <span className="font-mono font-bold text-emerald-700">{myBalance !== undefined ? formatCurrency(myBalance) : '---'}</span>
               </span>
             </div>
-            <div className="space-y-0.5 sm:space-y-1 max-h-16 sm:max-h-20 overflow-y-auto pr-1 scrollbar-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="space-y-0.5 sm:space-y-1 max-h-28 sm:max-h-32 md:max-h-36 overflow-y-auto pr-1 [scrollbar-width:thin] [scrollbar-color:#fcd34d_transparent] [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-amber-300 [&::-webkit-scrollbar-thumb]:rounded-full">
               {activePlayers.length > 0 ? (
                 activePlayers.map((p) => {
                   const isBidder = p.id === highestBidderId;
@@ -344,10 +347,12 @@ export function AuctionModal({
       {/* Footer cố định chân modal [P1]: Trạng thái, Cụm nút nâng giá & Footer Auto-Bid / Rút lui / Đóng */}
       <div className="sticky bottom-0 shrink-0 -mx-3 sm:-mx-4 md:-mx-5 -mb-3 sm:-mb-4 md:-mb-5 p-2 sm:p-3 md:p-3.5 bg-[#FFFBEB] border-t border-amber-300/80 z-20 shadow-[0_-4px_12px_rgba(0,0,0,0.06)] space-y-1.5 sm:space-y-2">
         {/* Trạng thái & Các nút nâng giá nhanh */}
-        {isDeclinedPlayer ? (
+        {(isDeclinedPlayer || isMyPlayerBankrupt) ? (
           <div className="p-1.5 sm:p-2.5 bg-amber-100 rounded-xl text-center border border-amber-300">
             <p className="text-[11px] sm:text-xs font-bold text-amber-900 leading-tight">
-              {isForeclosure
+              {isMyPlayerBankrupt
+                ? 'Bạn đã phá sản và đang theo dõi phiên đấu giá tài sản phát mãi.'
+                : isForeclosure
                 ? 'Tài sản của bạn đang được phát mãi cưỡng chế để cấn trừ nợ xấu. Bạn không thể tự đấu giá tài sản của chính mình.'
                 : 'Bạn đã từ chối mua ô đất này (Luật game cấm tham gia đấu giá). Đang chờ các đối thủ khác đặt giá...'}
             </p>
@@ -395,10 +400,10 @@ export function AuctionModal({
           <button
             type="button"
             onClick={() => setAutoBid((prev) => !prev)}
-            disabled={hasPassed || isDeclinedPlayer || isConcluded}
+            disabled={hasPassed || isDeclinedPlayer || isMyPlayerBankrupt || isConcluded}
             data-testid="auction-autobid-btn"
-            className={`min-h-[44px] px-3 py-2 rounded-xl text-xs font-bold border transition-all flex items-center justify-center gap-1.5 whitespace-nowrap ${
-              hasPassed || isDeclinedPlayer || isConcluded
+            className={`min-h-[44px] px-3 py-2 rounded-xl text-xs font-bold border transition-all flex items-center justify-center gap-1.5 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+              hasPassed || isDeclinedPlayer || isMyPlayerBankrupt || isConcluded
                 ? 'bg-slate-200 text-slate-400 border-slate-300 opacity-50 cursor-not-allowed shadow-none'
                 : autoBid
                   ? 'bg-amber-500 text-amber-950 font-black border-amber-700 shadow-[0_3px_0_0_#b45309] active:translate-y-[2px] cursor-pointer'
@@ -414,7 +419,7 @@ export function AuctionModal({
               type="button"
               onClick={onClose}
               data-testid="auction-concluded-close-btn"
-              className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-black text-amber-950 bg-amber-400 hover:bg-amber-300 border-2 border-amber-600 shadow-[0_3px_0_0_#b45309] active:translate-y-[2px] transition-all cursor-pointer whitespace-nowrap"
+              className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-black text-amber-950 bg-amber-400 hover:bg-amber-300 border-2 border-amber-600 shadow-[0_3px_0_0_#b45309] active:translate-y-[2px] transition-all cursor-pointer whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
             >
               ✕ Đóng / Xem Bàn Cờ
             </button>
@@ -423,16 +428,16 @@ export function AuctionModal({
               type="button"
               onClick={onClose}
               data-testid="auction-passed-close-btn"
-              className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-black text-slate-700 bg-slate-200 hover:bg-slate-300 border-2 border-slate-400 shadow-[0_3px_0_0_#94a3b8] active:translate-y-[2px] transition-all cursor-pointer whitespace-nowrap"
+              className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-black text-slate-700 bg-slate-200 hover:bg-slate-300 border-2 border-slate-400 shadow-[0_3px_0_0_#94a3b8] active:translate-y-[2px] transition-all cursor-pointer whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
             >
               ✕ Đã Rút Lui • Đóng
             </button>
-          ) : isDeclinedPlayer ? (
+          ) : (isDeclinedPlayer || isMyPlayerBankrupt) ? (
             <button
               type="button"
               onClick={onClose}
               data-testid="auction-declined-close-btn"
-              className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-black text-amber-950 bg-amber-100 hover:bg-amber-200 border-2 border-amber-400 shadow-[0_3px_0_0_#d97706] active:translate-y-[2px] transition-all cursor-pointer whitespace-nowrap"
+              className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-black text-amber-950 bg-amber-100 hover:bg-amber-200 border-2 border-amber-400 shadow-[0_3px_0_0_#d97706] active:translate-y-[2px] transition-all cursor-pointer whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
             >
               ✕ Đóng / Xem Bàn Cờ
             </button>
@@ -441,7 +446,7 @@ export function AuctionModal({
               type="button"
               onClick={onClose}
               data-testid="auction-leading-close-btn"
-              className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-black text-amber-950 bg-amber-400 hover:bg-amber-300 border-2 border-amber-600 shadow-[0_3px_0_0_#b45309] active:translate-y-[2px] transition-all cursor-pointer whitespace-nowrap"
+              className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-black text-amber-950 bg-amber-400 hover:bg-amber-300 border-2 border-amber-600 shadow-[0_3px_0_0_#b45309] active:translate-y-[2px] transition-all cursor-pointer whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
             >
               ✕ Đóng / Xem Bàn Cờ
             </button>
@@ -450,7 +455,7 @@ export function AuctionModal({
               type="button"
               data-testid="auction-pass-btn"
               onClick={() => onPass?.()}
-              className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-black text-rose-700 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border-2 border-rose-300 shadow-[0_3px_0_0_#fca5a5] active:translate-y-[2px] transition-all cursor-pointer whitespace-nowrap"
+              className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-black text-rose-700 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border-2 border-rose-300 shadow-[0_3px_0_0_#fca5a5] active:translate-y-[2px] transition-all cursor-pointer whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
             >
               ✕ Rút Lui
             </button>

@@ -238,7 +238,21 @@
 - **Evidence Snapshot:** [`.agents/evidence/chaos_sentinel_IMP-236.json`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/evidence/chaos_sentinel_IMP-236.json) (executed: true, verdict: APPROVED)
 - **Kiểm thử:** 16/16 tests PASS (`tests/domain/bot_duel_intelligence.test.ts`); 33/33 suites (505/505 tests) PASS 100% trong `tests/domain/`.
 
+#### [IMP-240] Khắc Phục Phát Mãi 0đ, Bảo Toàn Tài Sản Chủ Nợ & Đồng Bộ Giao Diện Phá Sản (Fire Sale & Insolvency Resilience)
+- **Mã Ticket:** IMP-240 (Tier 2 Full Rigor)
+- **Use Case Ref:** UC-GAME-056, UC-IMP240
+- **Phạm vi khắc phục:**
+  - Forward thuộc tính `isFireSale`: Bổ sung `isFireSale?: boolean` vào `ModalPayloadMap['auction']` (`game_store_types.ts`) và chuyển tiếp qua `modal_host.tsx`, bảo toàn nhận diện phát mãi của `calculateAuctionIncrements`.
+  - Chế độ Khán Giả (`AuctionModal` Spectator Mode): Ẩn toàn bộ nút đặt giá cho người chơi phá sản, hiển thị banner khán giả trang nhã, vô hiệu hóa Auto-Bid, và hiển thị nút Footer `✕ Đóng / Xem Bàn Cờ`.
+  - Công thái học Mobile/Desktop: Nâng trần container danh sách người chơi lên `max-h-28 sm:max-h-32 md:max-h-36`, chống cắt cụt người thứ 4, tích hợp thanh cuộn Tailwind v4 và viền nét focus-visible.
+  - Bảo toàn Senior Lien & Sang tên Chủ Nợ: Chuyển nhượng trực tiếp BĐS không thế chấp của con nợ sang tên chủ nợ hợp pháp (`creditor.id`); loại trừ tài sản đảm bảo trái phiếu (`collateralCells`) vào `fireSaleQueue` phát mãi bảo vệ trái chủ.
+  - Dọn dẹp biến quá độ (Turn N+1 Teardown): Xóa bỏ sạch sẽ `pendingInsolvencyCreditorId`, `pendingInsolvencyDebtorId`, và `fireSaleDebtorId` khi người chơi tự cứu nguy thành công (`balance >= 0`), khi hàng đợi phát mãi kết thúc, hoặc khi sang lượt người chơi kế tiếp qua `advanceTurnToNextPlayer`.
+- **Báo cáo chi tiết:** [`docs/reports/improvements/IMP-240-fire_sale_and_insolvency_resilience_report.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/reports/improvements/IMP-240-fire_sale_and_insolvency_resilience_report.md)
+- **Evidence Snapshot:** [`.agents/evidence/chaos_sentinel_IMP-240.json`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/evidence/chaos_sentinel_IMP-240.json) (executed: true, verdict: APPROVED)
+- **Kiểm thử:** 17/17 tests PASS (`tests/contracts/fire_sale_and_insolvency_lifecycle.test.ts`).
+
 ---
+
 
 ## Tổng Kết Toàn Cục Epic Gameplay Core
 - **Trạng thái Epic:** **[CLOSED - DONE 100% (2026-09-09)]**

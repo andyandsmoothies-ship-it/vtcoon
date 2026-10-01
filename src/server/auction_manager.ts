@@ -144,6 +144,29 @@ export function handleAuctionPass(
   return { success: true };
 }
 
+function processNextFireSaleQueueItem(
+  room: Room,
+  auctions: Map<string, AuctionSession> | undefined,
+  roomCode: string | undefined,
+  currentCellIndex: number,
+): boolean {
+  if (room.fireSaleQueue && room.fireSaleQueue.length > 0 && room.fireSaleQueue[0] === currentCellIndex) {
+    room.fireSaleQueue.shift();
+  }
+  if (room.fireSaleQueue && room.fireSaleQueue.length > 0) {
+    const nextCell = room.fireSaleQueue.shift()!;
+    handleStartFireSaleAuction(room, nextCell, auctions, roomCode, room.fireSaleDebtorId);
+    return true;
+  }
+  if (room.fireSaleQueue && room.fireSaleQueue.length === 0) {
+    delete room.fireSaleQueue;
+    delete room.fireSaleDebtorId;
+    advanceTurnToNextPlayer(room);
+    return true;
+  }
+  return false;
+}
+
 export function handleAuctionClose(
   room: Room | undefined,
   session: AuctionSession | undefined,
@@ -235,14 +258,7 @@ export function handleAuctionClose(
   }
 
   // Xử lý hàng đợi phát mãi
-  if (room.fireSaleQueue && room.fireSaleQueue.length > 0) {
-    const nextCell = room.fireSaleQueue.shift()!;
-    handleStartFireSaleAuction(room, nextCell, auctions, roomCode);
-    return { winnerId, winningBid, cellIndex: session.cellIndex, isForeclosure: !winnerId };
-  }
-  if (room.fireSaleQueue && room.fireSaleQueue.length === 0) {
-    delete room.fireSaleQueue;
-    advanceTurnToNextPlayer(room);
+  if (processNextFireSaleQueueItem(room, auctions, roomCode, session.cellIndex)) {
     return { winnerId, winningBid, cellIndex: session.cellIndex, isForeclosure: !winnerId };
   }
 

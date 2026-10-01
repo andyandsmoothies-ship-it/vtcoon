@@ -5,8 +5,10 @@ import { COLOR_GROUP_HEX } from '../../../domain/theme';
 import { CellType } from '../../../domain/board_config';
 import { getTileAssetUrl } from '../../assets/tile_assets';
 import { useGameStore } from '../../store/game_store';
-import { MarketCardId } from '../../../domain/event_card_types';
+import { MarketCardId, ChanceCardId } from '../../../domain/event_card_types';
+import { MacroCycleType } from '../../../domain/macro_cycle_types';
 import type { MarketModifier } from '../../../domain/room';
+import { EVENT_ICON_REGISTRY } from '../../domain_visual_bridge';
 import { TitleDeedArtShowcase } from './title_deed_art_showcase';
 import { TitleDeedRentTable } from './title_deed_rent_table';
 import { TitleDeedActionFooter } from './title_deed_action_footer';
@@ -47,13 +49,19 @@ export interface TitleDeedModalProps {
 }
 
 const MODIFIER_DESCS: Record<string, { icon: string; text: string }> = {
-  [MarketCardId.MC_FUEL_SURGE]: { icon: '⚡', text: 'Biến Động Xăng Dầu: Phụ thu +500 cước vận tải' },
-  [MarketCardId.MC_PEAK_TOURISM]: { icon: '🌊', text: 'Mùa Du Lịch: Nhân đôi phí thuê (x2)' },
-  [MarketCardId.MC_UTILITY_DOUBLE]: { icon: '💡', text: 'Giá Điện & Viễn Thông: Nhân đôi phí dịch vụ (x2)' },
-  [MarketCardId.MC_COASTAL_STORM]: { icon: '🌀', text: 'Bão Lũ Duyên Hải: Miễn 100% tiền thuê & cô lập giao thông' },
-  [MarketCardId.MC_NIGHT_ECONOMY]: { icon: '🌙', text: 'Kinh Tế Ban Đêm: Nhân đôi phí dịch vụ (x2)' },
-  [MarketCardId.MC_ALCOHOL_CHECK]: { icon: '🚨', text: 'Nghị Định 100: Giảm 50% tiền thuê; chốt phạt 800 & giữ xe' },
-  [MarketCardId.MC_PUBLIC_INVEST]: { icon: '🏗️', text: 'Vốn Đầu Tư Công: Nhân đôi cước phí vận tải (x2)' },
+  [MarketCardId.MC_FUEL_SURGE]: { icon: EVENT_ICON_REGISTRY[MarketCardId.MC_FUEL_SURGE], text: 'Biến Động Xăng Dầu: Phụ thu +500 cước vận tải' },
+  [MarketCardId.MC_PEAK_TOURISM]: { icon: EVENT_ICON_REGISTRY[MarketCardId.MC_PEAK_TOURISM], text: 'Mùa Du Lịch: Nhân đôi phí thuê (x2)' },
+  [MarketCardId.MC_LAND_FEVER]: { icon: EVENT_ICON_REGISTRY[MarketCardId.MC_LAND_FEVER], text: 'Sốt Đất Vệ Tinh: Nhân đôi tiền thuê (x2)' },
+  [MarketCardId.MC_UTILITY_DOUBLE]: { icon: EVENT_ICON_REGISTRY[MarketCardId.MC_UTILITY_DOUBLE], text: 'Giá Điện & Viễn Thông: Nhân đôi phí dịch vụ (x2)' },
+  [MarketCardId.MC_COASTAL_STORM]: { icon: EVENT_ICON_REGISTRY[MarketCardId.MC_COASTAL_STORM], text: 'Bão Lũ Duyên Hải: Miễn 100% tiền thuê & cô lập giao thông' },
+  [MarketCardId.MC_NIGHT_ECONOMY]: { icon: EVENT_ICON_REGISTRY[MarketCardId.MC_NIGHT_ECONOMY], text: 'Kinh Tế Ban Đêm: Nhân đôi phí dịch vụ (x2)' },
+  [MarketCardId.MC_ALCOHOL_CHECK]: { icon: EVENT_ICON_REGISTRY[MarketCardId.MC_ALCOHOL_CHECK], text: 'Nghị Định 100: Giảm 50% tiền thuê; chốt phạt 800 & giữ xe' },
+  [MarketCardId.MC_PUBLIC_INVEST]: { icon: EVENT_ICON_REGISTRY[MarketCardId.MC_PUBLIC_INVEST], text: 'Vốn Đầu Tư Công: Nhân đôi cước phí vận tải (x2)' },
+  [MarketCardId.MC_URBAN_PLANNING]: { icon: EVENT_ICON_REGISTRY[MarketCardId.MC_URBAN_PLANNING], text: 'Quy Hoạch Đô Thị: Thế chấp nhận 60%' },
+  [MarketCardId.MC_FREEZE_TRADE]: { icon: EVENT_ICON_REGISTRY[MarketCardId.MC_FREEZE_TRADE], text: 'Đóng Băng Giao Dịch: Không thể sang tên' },
+  [MacroCycleType.MACRO_LAND_FEVER]: { icon: EVENT_ICON_REGISTRY[MacroCycleType.MACRO_LAND_FEVER], text: 'Sốt Đất Vĩ Mô: Thuê x2.5, Xây nhà -25%' },
+  [MacroCycleType.MACRO_LIQUIDITY_FREEZE]: { icon: EVENT_ICON_REGISTRY[MacroCycleType.MACRO_LIQUIDITY_FREEZE], text: 'Đóng Băng Thanh Khoản: Giảm 50% tiền thuê' },
+  [ChanceCardId.CC_PORT_EXCLUSIVE]: { icon: EVENT_ICON_REGISTRY[ChanceCardId.CC_PORT_EXCLUSIVE], text: 'Hợp Tác Cảng: Hưởng 50% doanh thu cước' },
 };
 
 export function TitleDeedModal({
@@ -150,7 +158,7 @@ export function TitleDeedModal({
 
   return (
     <div
-      className="relative w-full max-w-md md:max-w-2xl max-h-[90dvh] md:max-h-[85vh] bg-[#FFFDF8] border-2 border-slate-900 rounded-2xl shadow-[0_6px_0_0_#0f172a] ring-2 ring-slate-900/10 overflow-hidden flex flex-col pointer-events-auto animate-in zoom-in-90 fade-in duration-200 ease-out select-none p-2.5 sm:p-4 text-slate-900"
+      className="relative w-full max-w-md md:max-w-[730px] max-h-[90dvh] md:max-h-[85vh] bg-[#FFFDF8] border-2 border-slate-900 rounded-2xl shadow-[0_6px_0_0_#0f172a] ring-2 ring-slate-900/10 overflow-hidden flex flex-col pointer-events-auto animate-in zoom-in-90 fade-in duration-200 ease-out select-none p-2.5 sm:p-4 text-slate-900"
       data-testid="title-deed-modal"
     >
       {/* Khung viền chỉ mực kép bên trong */}
@@ -261,7 +269,7 @@ export function TitleDeedModal({
 
       {/* Thân thẻ cuộn mượt mà (bảo toàn flex-1 min-h-0 overflow-y-auto pr-1 cho test contract) */}
       <div className="relative z-10 flex-1 min-h-0 overflow-y-auto pr-1 p-2 sm:p-3 text-xs md:text-sm text-slate-900 scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-        <div className="flex flex-col md:grid md:grid-cols-2 gap-2.5 sm:gap-3.5 items-start">
+        <div className="flex flex-col md:grid md:grid-cols-[1fr_1.15fr] gap-2.5 sm:gap-3.5 items-start">
           {/* Cột 1 (Desktop) / Phần trên (Mobile): Ảnh BĐS, Giá niêm yết, Thế chấp, Radar Quy Hoạch */}
           <div className="w-full space-y-2 sm:space-y-2.5">
             {/* Hàng Hero: Ảnh BĐS + Khối giá niêm yết & Giá trị thế chấp */}

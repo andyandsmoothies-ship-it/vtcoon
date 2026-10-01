@@ -11,6 +11,7 @@
    - [2.1 Bệnh Phình To Quy Tắc (The "Rule Bloat" & Instruction Dilution Syndrome)](#21-bệnh-phình-to-quy-tắc-the-rule-bloat--instruction-dilution-syndrome)
    - [2.2 Bản Đồ 5 Cấp Định Tuyến Tri Thức (The 5-Layer Knowledge Routing Matrix)](#22-bản-đồ-5-cấp-định-tuyến-tri-thức-the-5-layer-knowledge-routing-matrix)
    - [2.3 Quy Trình 4 Bước Định Tuyến Khi Phát Hiện Lỗi/Sai Sót (Defect-to-Layer Routing Protocol)](#23-quy-trình-4-bước-định-tuyến-khi-phát-hiện-lỗisai-sót-defect-to-layer-routing-protocol)
+   - [2.3.1 Kiến Trúc Phân Tầng Rule Trong Subagent (Rule Layering within Agent Ecosystem)](#231-kiến-trúc-phân-tầng-rule-trong-subagent-rule-layering-within-agent-ecosystem)
    - [2.4 Quy Trình "Giảm Cân" & Nén Context Định Kỳ (Periodic Context Deflation & Compaction Routine)](#24-quy-trình-giảm-cân--nén-context-định-kỳ-periodic-context-deflation--compaction-routine)
    - [2.5 Minh Họa Thực Chiến Từ Dự Án VTCOON (Case Study: Deflation & LOC Tooling)](#25-minh-họa-thực-chiến-từ-dự-án-vtcoon-case-study-deflation--loc-tooling)
 3. [CƠ CHẾ KỸ NĂNG HẠT GIỐNG (Seed Skill & JIT Dispatcher)](#3-cơ-chế-kỹ-năng-hạt-giống-seed-skill--jit-dispatcher)
@@ -460,6 +461,62 @@ Mỗi khi phát hiện một lỗi sai, một hành vi ngoài ý muốn, hoặc 
                                                                                                                        • Nếu là quy luật cốt tử: nén vào      • BẮT BUỘC giữ tổng số dòng
                                                                                                                          6 Trụ cột bất biến trong gotchas.md    của GEMINI.md dưới 80 dòng!
 ```
+
+---
+
+### 2.3.1 KIẾN TRÚC PHÂN TẦNG RULE TRONG SUBAGENT (Rule Layering within Agent Ecosystem)
+
+> **Nguồn gốc**: Đúc kết từ dự án vtcoon sau nhiều vòng refactor agent. Áp dụng cho bất kỳ dự án nào dùng multi-subagent SDLC.
+
+**Vấn đề**: Subagents (`plan-griller`, `qa-tester`, ...) được lưu vào `backup/persona_backup/agents/` để tái sử dụng cross-project. Nhưng qua thời gian, các rules domain-specific (game logic, finance rules, project-specific paths) tích lũy trong agent files, làm chúng **không thể dùng cho dự án khác**.
+
+**Kiến trúc 4 lớp trong hệ sinh thái agent**:
+
+```text
+┌─────────────────────────────────────────────────────────────────────┐
+│               AGENT RULE LAYERING ARCHITECTURE                      │
+└─────────────────────────────────────────────────────────────────────┘
+
+ LAYER A: Global OS Rules (~/.gemini/gemini.md)
+ ├── Cross ALL projects, ALL stacks
+ └── "No Magic Strings", "No Dirty Casts", "No Git", ASD-STE100
+
+ LAYER B: Base Subagent Files (backup/persona_backup/agents/)
+ ├── Universal rules only — must work for web, game, CLI, API server
+ ├── plan-griller: 5 Pillars (lifecycle, layout, actors, teardown, blast)
+ ├── qa-tester: Adversarial TDD, SSOT paths generic (detects via GEMINI.md)
+ └── code-reviewer: Architecture + type safety patterns
+
+ LAYER C: Project Constitution (GEMINI.md)
+ ├── Project-type SLAs: LOC tier ceilings, viewport targets
+ ├── Stack-specific commands: npm, cargo, flutter, pytest
+ └── Subagents cite "check project constitution" → reads GEMINI.md
+
+ LAYER D: Domain Detail (project-specific artifacts)
+ ├── docs/domain/gotchas.md  — domain invariants (balance=0, FSM rules)
+ ├── scripts/check_loc.mjs  — project LOC tool (cited by convention)
+ └── .agents/hooks_*.json   — project-specific lifecycle hooks
+```
+
+**Quy tắc định tuyến rule mới vào đúng lớp**:
+
+| Câu hỏi kiểm tra | Đặt ở đâu |
+| :--- | :--- |
+| Bất kỳ TypeScript project nào cũng cần? | Layer B (subagent persona) |
+| Chỉ game/finance domain (balance, auction, rent)? | Layer D (gotchas.md) |
+| Phụ thuộc stack hoặc SLA của project-type? | Layer C (GEMINI.md) |
+| Con số magic (360px, 450 LOC, 1000 cycles)? | Layer D (script/gotchas) |
+| Có thể biến thành Regex/AST/script? | Layer 1 Machine Guards |
+
+**Dấu hiệu nhận biết rule bị đặt sai lớp**:
+- Subagent file chứa tên hàm/biến cụ thể của project (`lastTargetInteractionTimestamp`, `formatCurrency()`, `canBuy`) → di chuyển xuống Layer D.
+- GEMINI.md chứa số magic cứng (`360px`, `#F59E0B`) → di chuyển xuống script/gotchas.
+- Gotchas.md chứa rule universal (no dirty casts, no string scraping) → di chuyển lên Layer B.
+
+**Nguyên tắc bất biến khi thêm rule vào subagent**:
+1. Nếu rule cần thay đổi khi đổi project → không thuộc Layer B.
+2. Nếu rule có thể được cơ giới hóa (grep, count, AST) → đẩy xuống Layer 1.
+3. Cross-project test: *"Rule này có áp dụng cho một e-commerce React app không?"* Nếu không → không phải Layer B.
 
 ---
 

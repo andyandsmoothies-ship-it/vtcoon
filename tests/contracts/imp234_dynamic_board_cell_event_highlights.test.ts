@@ -163,7 +163,7 @@ describe('[TC-234.01/MSS..TC-234.16/MSS][UC-IMP234] Dynamic Board Cell Event Hig
       expect(status.color).toBe('#F59E0B');
     });
 
-    it('[TC-234.02/MSS][UC-IMP234] resolveTileEventStatus khi có modifier MC_LAND_FEVER (affectedCells: [6, 8, 31], rounds: 1) -> trả về isActive: true, icon 🔥, label +50%, isExpiringSoon: true', () => {
+    it('[TC-234.02/MSS][UC-IMP234] resolveTileEventStatus khi có modifier MC_LAND_FEVER (affectedCells: [6, 8, 31], rounds: 1) -> trả về isActive: true, icon 🔥, label x2 Thuê theo SSOT, isExpiringSoon: true', () => {
       const modifiers = [
         { type: MarketCardId.MC_LAND_FEVER, remainingRounds: 1, affectedCells: [6, 8, 31] },
       ];
@@ -171,7 +171,7 @@ describe('[TC-234.01/MSS..TC-234.16/MSS][UC-IMP234] Dynamic Board Cell Event Hig
 
       expect(status.isActive).toBe(true);
       expect(status.icon).toBe('🔥');
-      expect(status.label).toBe('+50%');
+      expect(status.label).toBe('x2 Thuê');
       expect(status.isExpiringSoon).toBe(true);
     });
 

@@ -1409,4 +1409,124 @@
   * `chaos-sentinel`: Station 4 APPROVED (3 Probes passed, 4/4 mutants killed, 0 survived).
 - **Trạng thái**: ✅ Hoàn thành IMP-238 (2026-10-01).
 
+---
 
+### [2026-10-01] IMP-239: Tối Ưu Công Thái Học Không Gian & Đồng Bộ Giao Diện Desktop Toàn Diện (Desktop Full-Spectrum UI/UX & Spatial Ergonomics Harmonization)
+- **Mục tiêu**: Xử lý triệt để 7 khiếm khuyết hiển thị và công thái học không gian trên màn hình Desktop (1920×1080) được phát hiện qua đợt kiểm toán vật lý 27 ảnh chụp màn hình UAT: căn giữa đối xứng toàn bộ modal quyết định trọng yếu, neo phải duy nhất TitleDeedModal để giữ trọn tầm nhìn sa bàn 3D, mở rộng chiều cao sàn đấu giá chống cắt cụt người thứ 4, bảo vệ tên đối tác trong giao dịch P2P, khử lặp tính cách & lồng ngoặc trong TradeSentimentMeter, mở rộng Sổ Đỏ chống xén nhãn C3 Resort/TTTM khi có Độc Quyền x1.5, xóa sạch thông báo mâu thuẫn "Thiếu 0", và chuẩn hóa selector cùng chi tiết Mua Lại Cưỡng Chế.
+- **Hạng mục thi công cốt lõi**:
+  1. *Modal Centering & 3D Spatial Preservation*: Chuyển `center={activeModal !== 'deed'}` trong `modal_host.tsx`, căn giữa hoàn hảo GameOverModal, HoseModal, InsolvencyBanner, BotTradeOfferModal, CompulsoryBuyoutModal, TradeModal; bảo tồn duy nhất neo phải cho TitleDeedModal để camera 3D soi cận cảnh ô đất trên bàn cờ.
+  2. *Auction Participant Anti-Truncation*: Nâng trần container danh sách đại gia đấu giá từ `sm:max-h-20` lên `sm:max-h-28 md:max-h-32` trong `auction_modal.tsx`, hiển thị trọn vẹn 4 người chơi không bị cắt ngang thân chữ.
+  3. *P2P Trade Partner Strip Flexbox Defense*: Thêm `min-w-0` trên thẻ nút cha `button`, giữ `min-w-0` trên container tên đối tác (loại bỏ `shrink-0` để name span được phép shrink và truncate đúng flexbox defense), thêm `shrink-0` trên `needBadgeText` span và balance span trong `trade_partner_strip.tsx`, bảo tồn 100% test `imp236`.
+  4. *Khử Lặp Tính Cách & Lồng Ngoặc Sentiment Meter*: Dùng `formatShortPlayerName(partnerName)` trong `trade_sentiment_meter.tsx`, hiển thị sạch sẽ `Tâm Lý Đồng Thuận AI (Bot Alpha)` thay vì `(Bot AI 1 (Táo Bạo))` và lặp tính cách 2 lần.
+  5. *Mở Rộng Sổ Đỏ Desktop Chống Cắt Chữ C3*: Mở rộng chiều rộng modal Desktop lên `md:max-w-[730px]` và tinh chỉnh lưới 2 cột sang `md:grid-cols-[1fr_1.15fr]` trong `title_deed_modal.tsx`, hiển thị đầy đủ nhãn `Quần thể Resort/TTTM` khi có huy hiệu `x1.5 ĐỘC QUYỀN`.
+  6. *Triệt Tiêu Thông Báo Mâu Thuẫn "Thiếu 0"*: Guard `shortfall !== undefined && shortfall > 0` và dọn dead fallback thành `{formatCurrency(shortfall)}` trong `title_deed_action_footer.tsx`.
+  7. *Chuẩn Hóa normalizedTargets & Selector Mua Lại*: Dùng `useMemo` chuẩn hóa `normalizedTargets` trước khi tìm `currentTarget`, mở rộng prop type sang `(BuyoutTargetOption | number)[]`, đồng bộ cả selector nút bấm trong `compulsory_buyout_modal.tsx`.
+- **Hạ tầng & Ngân sách LOC Thực tế (`scripts/check_loc.mjs` - Total Lines / Non-Empty SLOC)**:
+  * `src/client/ui/modals/modal_host.tsx` (Total: 471 / SLOC: 454 — Tier 2 <= 500 LOC)
+  * `src/client/ui/modals/auction_modal.tsx` (Total: 462 / SLOC: 442 — Tier 2 <= 500 LOC)
+  * `src/client/ui/modals/trade/trade_partner_strip.tsx` (Total: 117 / SLOC: 109 — Tier 2 <= 500 LOC)
+  * `src/client/ui/modals/trade_sentiment_meter.tsx` (Total: 105 / SLOC: 98 — Tier 2 <= 500 LOC)
+  * `src/client/ui/modals/title_deed_modal.tsx` (Total: 363 / SLOC: 338 — Tier 2 <= 500 LOC)
+  * `src/client/ui/modals/title_deed_action_footer.tsx` (Total: 219 / SLOC: 214 — Tier 2 <= 500 LOC)
+  * `src/client/ui/modals/compulsory_buyout_modal.tsx` (Total: 277 / SLOC: 259 — Tier 2 <= 500 LOC)
+  * `tests/contracts/imp239_desktop_spatial_ergonomics.test.ts` (Total: 291 / SLOC: 273 — Contract Tests <= 600 LOC)
+  * `docs/reports/improvements/IMP-239-desktop-full-spectrum-uiux-and-spatial-ergonomics_report.md`: Báo cáo nghiệm thu hoàn chỉnh.
+- **Kiểm thử & Bất biến**:
+  * 16/16 atomic contract tests PASS (Universal 5-Facet Matrix, Detroit Classical TDD).
+  * 136/136 regression tests PASS trên 7 suites (`imp236`, `imp238`, `imp239`, `imp196`, `imp209`, `imp204`, `ui04`).
+  * Station 4 Chaos Sentinel: 3/3 physical probes PASS (Closed-Loop Parity 24/24, Ephemeral Wire port 50222, Mutation Sensitivity 3/3 mutants killed, 0 survived).
+  * Visual Evidence Gate: Thẩm định thành công 7 ảnh chụp in-game vật lý thực tế trên Desktop 1920x1080 lưu tại `.agents/tmp/`.
+  * TypeScript typecheck: `tsc --noEmit` exit 0. UI Linter: `npm run lint:ui` 0 violations / 208 files. 0 dirty casts.
+  * Evidence Snapshot: `.agents/evidence/chaos_sentinel_IMP-239.json` (`verdict: APPROVED`).
+- **Phê chuẩn**:
+  * `plan-griller`: HARDENED_APPROVED (Revision 1.2 đóng trọn vẹn 100% 6 chỉ thị đối kháng).
+  * `qa-tester`: Station 1 RED verified (9 Business RED / 7 Baseline Regression GREEN).
+  * `implementer`: Station 2 GREEN verified (16/16 tests pass, toàn bộ 7 tệp đạt chuẩn LOC).
+  * `scout`: Station 2.5 PREFILTER_PASSED (0 defects qua 5 bộ lọc cơ học).
+  * `spec-reviewer`: Station 3.1 SPEC_APPROVED (100% plan fidelity, 0 scope drift).
+  * `game-3d-visual-critic`: Station 3.2 3D_VISUAL_APPROVED (Neo phải bảo tồn 70% sa bàn 3D, chuẩn mỹ thuật AAA).
+  * `ui-craft-reviewer`: Station 3.2 UI_APPROVED (Chuẩn Dual-Viewport, WCAG 2.1 AA, centering hoàn hảo).
+  * `code-reviewer`: Station 3.2 CODE_APPROVED (Anti-slop, clean reactivity & useMemo, zero memory/timer leaks).
+  * `chaos-sentinel`: Station 4 APPROVED (3 Probes passed, 3/3 mutants killed, 0 survived).
+- **Trạng thái**: ✅ Hoàn thành IMP-239 (2026-10-01).
+
+---
+
+### [2026-10-01] IMP-VISUAL-METADATA-DESYNC: Đồng Bộ Dữ Liệu Miền & Chuẩn Hóa Kiến Trúc Trực Quan (Domain SSOT Visual Metadata Bridge & Zero-Desync Architecture)
+- **Mục tiêu**: Khắc phục triệt để hiện tượng lệch pha dữ liệu hiển thị (visual desynchronization) giữa logic miền SSOT và các bề mặt kết xuất UI/3D (như `MC_LAND_FEVER` x2 tiền thuê nhưng UI hiển thị "+50%", `MACRO_LAND_FEVER` x2.5, `MC_COASTAL_STORM` hiển thị nhầm màu buff vàng, `CC_PORT_EXCLUSIVE` bị xem thành giảm tiền thuê).
+- **Hạng mục thi công cốt lõi**:
+  1. *SSOT Visual Bridge Module (`src/client/domain_visual_bridge.ts`)*: Xây dựng cầu nối duy nhất chuẩn hóa `EVENT_ICON_REGISTRY` (toàn bộ 16 thẻ Thị Trường, 2 Chu Kỳ Vĩ Mô, 20 thẻ Cơ Hội/alias), pure type predicate guard `isEventIdentifiable(id)`, `CANONICAL_MULTIPLIERS` fallback, và bộ giải định hướng `deriveModifierVisual` với thứ tự ưu tiên nghiêm ngặt (case đặc thù -> multiplier -> fallback an toàn xám Slate `#94A3B8`).
+  2. *Subtractive Refactoring 3D Tile Event Aura (`src/client/3d/tile_event_aura.tsx`)*: Xóa sạch `EVENT_VISUAL_MAP` và `DEFAULT_EVENT_META` trùng lặp, chuyển sang dùng `deriveModifierVisual(matchingModifier)` để suy diễn động nhãn (`🔥 x2 Thuê`), màu sắc PBR và cờ buff.
+  3. *Subtractive Refactoring Event Card Visuals (`src/client/ui/modals/event_card_visuals.ts`)*: Xóa bỏ 41 dòng của bảng `THEMED_EMOJIS`, cập nhật `KNOWN_HERO_STATS` cho `MC_LAND_FEVER` ('x2 TIỀN THUÊ') và 2 Chu Kỳ Vĩ Mô (`MACRO_LAND_FEVER`: 'THUÊ x2.5 • XÂY -25%', `MACRO_LIQUIDITY_FREEZE`: 'THUÊ -50% • CẤM VAY'), chuẩn hóa `getCardThemedEmoji` qua pure type guard.
+  4. *Subtractive Refactoring Market Event Ticker (`src/client/ui/market_event_ticker.tsx`)*: Loại bỏ 22 dòng switch-case trong `resolveMarketIcon` ủy thác hoàn toàn cho `resolveEventIcon`, cập nhật mô tả hiệu ứng `MC_LAND_FEVER` sang "Nhân đôi doanh thu tiền thuê (x2)..." và công thức compact sang `'Ven đô: Cước thuê x2'`.
+  5. *Đồng Bộ Sổ Đỏ Title Deed Modal (`src/client/ui/modals/title_deed_modal.tsx`)*: Chuẩn hóa `MODIFIER_DESCS` sử dụng icon registry thống nhất và enum keys, hiển thị chuẩn xác huy hiệu `🔥 Sốt Đất Vệ Tinh: Nhân đôi tiền thuê (x2)` cho ô đất bị ảnh hưởng.
+  6. *Chuẩn Hóa Tóm Tắt Nhanh (`src/client/ui/event_card_punchy_summaries.ts`)*: Bổ sung 2 chu kỳ vĩ mô và cập nhật `MC_LAND_FEVER` sang `'Nhân đôi tiền thuê vùng ven (x2)'`.
+  7. *Chuẩn Hóa Metadata Miền (`src/domain/event_card_metadata.ts`)*: Cập nhật description và effectDetail của `MC_LAND_FEVER` đồng bộ chuẩn x2 tiền thuê.
+- **Hạ tầng & Ngân sách LOC Thực tế (`scripts/check_loc.mjs` - Total Lines / Non-Empty SLOC)**:
+  * `src/client/domain_visual_bridge.ts` (Total: 148 / SLOC: 129 — Tier 1 <= 400 LOC)
+  * `src/client/3d/tile_event_aura.tsx` (Total: 192 / SLOC: 173 — Tier 2 <= 500 LOC)
+  * `src/client/ui/modals/event_card_visuals.ts` (Total: 303 / SLOC: 280 — Tier 2 <= 500 LOC)
+  * `src/client/ui/market_event_ticker.tsx` (Total: 269 / SLOC: 248 — Tier 2 <= 500 LOC)
+  * `src/client/ui/modals/title_deed_modal.tsx` (Total: 371 / SLOC: 346 — Tier 2 <= 500 LOC)
+  * `src/client/ui/event_card_punchy_summaries.ts` (Total: 102 / SLOC: 90 — Tier 2 <= 500 LOC)
+  * `src/domain/event_card_metadata.ts` (Total: 322 / SLOC: 316 — Tier 1 <= 400 LOC)
+  * `tests/contracts/visual_metadata_parity.test.ts` (Total: 244 / SLOC: 218 — Contract Tests <= 600 LOC)
+  * `tests/contracts/imp234_dynamic_board_cell_event_highlights.test.ts` (Total: 394 / SLOC: 339 — Tests <= 600 LOC)
+  * `tests/client/imp141_market_card_clarity_and_notification_rules.test.ts` (Total: 198 / SLOC: 176 — Tests <= 600 LOC)
+- **Kiểm thử & Bất biến**:
+  * 17/17 atomic contract tests PASS trên `visual_metadata_parity.test.ts` (Universal 5-Facet Matrix, Detroit Classical TDD).
+  * 121/121 regression tests PASS trên 7 suites (`parity`, `imp234`, `imp141`, `imp239`, `imp238`, `imp237`, `imp236`).
+  * Station 4 Chaos Sentinel: 3/3 physical probes PASS (Closed-Loop Parity 24/24 Intents, Ephemeral Wire port 57503, Mutation Sensitivity 4/4 mutants killed, 0 survived).
+  * Visual Evidence Gate: Thẩm định thành công 3 ảnh chụp in-game WebGL/DOM vật lý thực tế lưu tại `.agents/tmp/`.
+  * TypeScript typecheck: `tsc --noEmit` exit 0. UI Linter: `npm run lint:ui` 0 violations / 209 files. 0 dirty casts.
+  * Evidence Snapshot: `.agents/evidence/chaos_sentinel_IMP-VISUAL-METADATA-DESYNC.json` (`verdict: APPROVED`).
+- **Phê chuẩn**:
+  * `plan-griller`: HARDENED_APPROVED (Revision 4/5 đóng trọn vẹn 100% 7 chỉ thị đối kháng).
+  * `qa-tester`: Station 1 RED verified (17/17 Business RED).
+  * `implementer`: Station 2 GREEN verified (17/17 contract pass, 54/54 tổng hợp pass).
+  * `scout`: Station 2.5 PREFILTER_PASSED (0 defects qua 5 bộ lọc cơ học).
+  * `spec-reviewer`: Station 3.1 SPEC_APPROVED (100% plan fidelity, 0 scope drift).
+  * `game-3d-visual-critic`: Station 3.2 3D_VISUAL_APPROVED (Sa bàn 3D và phù hiệu Drei HTML `🔥 x2 Thuê • 2V` sắc nét, 60 FPS).
+  * `ui-craft-reviewer`: Station 3.2 UI_APPROVED (Huy hiệu Sổ Đỏ amber-100 rõ nét, Dual-Viewport Parity hoàn hảo).
+  * `code-reviewer`: Station 3.2 CODE_APPROVED (Anti-slop, subtractive refactoring triệt để, pure functions, zero dirty casts).
+  * `chaos-sentinel`: Station 4 APPROVED (3 Probes passed, 4/4 mutants killed, 0 survived).
+- **Trạng thái**: ✅ Hoàn thành IMP-VISUAL-METADATA-DESYNC (2026-10-01).
+
+---
+
+### [2026-10-01] IMP-240: Khắc Phục Phát Mãi 0đ, Bảo Toàn Tài Sản Chủ Nợ & Đồng Bộ Giao Diện Phá Sản (Fire Sale & Insolvency Resilience)
+- **Mục tiêu**: Khắc phục dứt điểm chuỗi lỗi đấu giá phát mãi trái phiếu 0đ do rớt thuộc tính `isFireSale`, loại bỏ tình trạng người chơi phá sản vẫn hiển thị cụm nút đặt giá và Auto-Bid chạy ngầm bằng Chế độ Khán Giả (`AuctionModal` Spectator Mode), nâng trần danh sách người chơi chống cắt cụt chữ trên mobile/desktop, bảo toàn tài sản đảm bảo trái phiếu (Senior Lien) và chuyển nhượng BĐS hợp pháp cho chủ nợ khi vỡ nợ, cùng dọn dẹp các biến quá độ ở Turn N+1 và phục hồi thanh khoản.
+- **Hạng mục thi công cốt lõi**:
+  1. *Forward DTO & Wire Protocol (`game_store_types.ts`, `modal_host.tsx`)*: Bổ sung `isFireSale?: boolean` vào `ModalPayloadMap['auction']`, chuyển tiếp qua `modal_host.tsx`, bảo vệ cơ chế tính bước giá `calculateAuctionIncrements`.
+  2. *Spectator Experience & Ergonomics (`auction_modal.tsx`)*: Ẩn toàn bộ nút cược khi `isMyPlayerBankrupt = true`, hiển thị Banner thông báo màu slate trang nhã `👁️ Bạn đã phá sản — Đang theo dõi phiên đấu giá với tư cách khán giả`, vô hiệu hóa Auto-Bid, nút Footer chuyển thành `✕ Đóng / Xem Bàn Cờ` gọi `onClose`.
+  3. *Chống Cắt Cụt Người Thứ 4 & Styling Chuẩn*: Nâng trần container danh sách đại gia lên `max-h-28 sm:max-h-32 md:max-h-36`, tích hợp thanh cuộn Tailwind v4 và viền nét `focus-visible:ring-2 focus-visible:ring-amber-400`.
+  4. *Bảo Toàn Senior Lien & Sang Tên Chủ Nợ (`insolvency_manager.ts`, `bond_manager.ts`)*: Sang tên BĐS không thế chấp cho chủ nợ (`creditor.id`); loại trừ tài sản bảo đảm trái phiếu (`collateralCells`) vào `fireSaleQueue` phát mãi bảo vệ trái chủ; thanh lý đấu giá an toàn khi chủ nợ là Ngân Hàng hoặc đã phá sản.
+  5. *Dọn Dẹp Biến Quá Độ (Turn N+1 Teardown)*: Xóa sạch `pendingInsolvencyCreditorId`, `pendingInsolvencyDebtorId`, và `fireSaleDebtorId` khi cứu nguy thành công (`balance >= 0`), khi hàng đợi phát mãi kết thúc, hoặc khi sang lượt qua `advanceTurnToNextPlayer`.
+- **Hạ tầng & Ngân sách LOC Thực tế (`scripts/check_loc.mjs` - Total Lines / Non-Empty SLOC)**:
+  * `src/domain/room.ts` (Total: 278 / SLOC: 254 — Tier 1 <= 400 LOC)
+  * `src/server/insolvency_manager.ts` (Total: 295 / SLOC: 263 — Tier 1 <= 400 LOC)
+  * `src/server/turn_loop.ts` (Total: 340 / SLOC: 309 — Tier 1 <= 400 LOC)
+  * `src/server/bond_manager.ts` (Total: 243 / SLOC: 215 — Tier 1 <= 400 LOC)
+  * `src/server/auction_manager.ts` (Total: 287 / SLOC: 265 — Tier 1 <= 400 LOC)
+  * `src/server/network/afk_recovery.ts` (Total: 224 / SLOC: 210 — Tier 1 <= 400 LOC)
+  * `src/server/room_property_coordinator.ts` (Total: 361 / SLOC: 326 — Tier 1 <= 400 LOC)
+  * `src/client/store/game_store_types.ts` (Total: 387 / SLOC: 362 — Tier 1 <= 400 LOC)
+  * `src/client/ui/modals/modal_host.tsx` (Total: 473 / SLOC: 456 — Tier 2 <= 500 LOC)
+  * `src/client/ui/modals/auction_modal.tsx` (Total: 467 / SLOC: 447 — Tier 2 <= 500 LOC)
+  * `tests/contracts/fire_sale_and_insolvency_lifecycle.test.ts` (Total: 395 / SLOC: 332 — Tests <= 600 LOC)
+- **Kiểm thử & Bất biến**:
+  * 17/17 atomic contract tests PASS trên `fire_sale_and_insolvency_lifecycle.test.ts` (Universal 5-Facet Matrix, Detroit Classical TDD).
+  * Station 4 Chaos Sentinel: 3/3 physical probes PASS (Closed-Loop Parity 24/24 Intents, Ephemeral Wire port 65488, Mutation Sensitivity 8/8 mutants killed, 0 survived).
+  * Visual Evidence Gate: Thẩm định thành công ảnh chụp in-game vật lý thực tế tại `.agents/tmp/imp-240_auction_spectator.jpg`.
+  * TypeScript typecheck: `tsc --noEmit` exit 0. UI Linter: `npm run lint:ui` 0 violations / 209 files. 0 dirty casts.
+  * Evidence Snapshot: `.agents/evidence/chaos_sentinel_IMP-240.json` (`verdict: APPROVED`).
+- **Phê chuẩn**:
+  * `plan-griller`: HARDENED_APPROVED (Revision 3 đóng trọn vẹn 100% các chỉ thị đối kháng).
+  * `qa-tester`: Station 1 RED verified (14 Business RED / 3 Regression GREEN).
+  * `implementer`: Station 2 GREEN verified (17/17 contract pass).
+  * `scout`: Station 2.5 PREFILTER_PASSED (0 defects qua 5 bộ lọc cơ học).
+  * `spec-reviewer`: Station 3.1 SPEC_APPROVED (100% plan fidelity, 0 scope drift).
+  * `code-reviewer`: Station 3.2 CODE_APPROVED (Anti-slop, Treasury conservation, Senior Lien an toàn, FSM cleanup).
+  * `ui-craft-reviewer`: Station 3.2 UI_APPROVED (Trải nghiệm khán giả hoàn hảo, Dual-Viewport Parity).
+  * `chaos-sentinel`: Station 4 APPROVED (3 Probes passed, 8/8 mutants killed, 0 survived).
+- **Trạng thái**: ✅ Hoàn thành IMP-240 (2026-10-01).

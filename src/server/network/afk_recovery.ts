@@ -136,11 +136,17 @@ export function executeInsolvencyAfkRecovery(
   }
 
   if (player.balance >= 0) {
+    delete room.pendingInsolvencyCreditorId;
+    delete room.pendingInsolvencyDebtorId;
     room.phase = TurnPhase.PropertyManagement;
     return { rescued: true, bankrupt: false };
   }
 
-  rooms.handlePlayerIntent(roomCode, playerId, { type: 'INTENT_BANKRUPTCY' });
+  const effectiveCreditorId = room.pendingInsolvencyDebtorId === playerId ? room.pendingInsolvencyCreditorId : undefined;
+  rooms.handlePlayerIntent(roomCode, playerId, {
+    type: 'INTENT_BANKRUPTCY',
+    creditorId: effectiveCreditorId,
+  });
   return { rescued: false, bankrupt: true };
 }
 

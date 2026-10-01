@@ -215,7 +215,10 @@ export function executeTurnRoll(
   }
 
   // UC-053: Kiem tra mat kha nang thanh toan neu so du am sau khi thu thue / lai / phi
-  if (current.balance < 0) checkInsolvency(room);
+  if (current.balance < 0) {
+    const landlordId = reg ? reg.get(newPos) : undefined;
+    checkInsolvency(room, landlordId);
+  }
 
   return {
     dice,
@@ -307,6 +310,8 @@ export function executeTurnEnd(
 }
 
 export function advanceTurnToNextPlayer(room: Room, rng: () => number = Math.random): void {
+  delete room.pendingInsolvencyCreditorId;
+  delete room.pendingInsolvencyDebtorId;
   const total = room.players.length;
   let next = (room.currentPlayerIndex + 1) % total;
   let steps = 0;

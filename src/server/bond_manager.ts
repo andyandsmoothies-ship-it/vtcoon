@@ -173,6 +173,7 @@ export function handleStartFireSaleAuction(
     passedPlayers: new Set<string>(),
     endTime: Date.now() + 10_000,
     isFireSale: true,
+    insolvencyPlayerId: bankruptPlayerId,
   };
   if (auctions) auctions.set(code, session);
   room.phase = TurnPhase.AuctionPhase;
@@ -223,6 +224,7 @@ export function processBondTurnTransition(
   }
 
   room.fireSaleQueue = cells;
+  room.fireSaleDebtorId = player.id;
   player.bondContract = null;
 
   // Bắn Event thông báo biến cố vỡ nợ đồng thời chuyển pha sang Đấu Giá Phát Mãi

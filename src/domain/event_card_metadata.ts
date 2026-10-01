@@ -216,9 +216,9 @@ export const MARKET_CARD_DETAILS: Readonly<Record<MarketCardId, MarketCardDetail
     destination: 'Ngân sách người chơi (tiết kiệm chi phí đầu tư)',
   },
   [MarketCardId.MC_LAND_FEVER]: {
-    description: 'Quy hoạch hạ tầng liên vùng kích hoạt làn sóng sốt đất, tăng mạnh giá chuyển nhượng và tiền thuê.',
+    description: 'Quy hoạch hạ tầng liên vùng kích hoạt làn sóng sốt đất, nhân đôi doanh thu tiền thuê (x2) và tăng giá chuyển nhượng.',
     targetScope: 'Đô thị vệ tinh Bình Dương, Đồng Nai, Hưng Yên (Ô 6, 8, 31)',
-    effectDetail: 'Tăng 50% giá trị chuyển nhượng và tiền thuê tại các tâm điểm sốt đất vùng ven',
+    effectDetail: 'Nhân đôi tiền thuê (x2) và tăng giá trị chuyển nhượng tại các tâm điểm sốt đất vùng ven',
     duration: '1 vòng chơi',
     destination: 'Chủ sở hữu bất động sản tại vùng sốt đất',
   },

@@ -43,7 +43,11 @@ export function coordMortgage(
   const res = mortgageProperty(ctx.room, playerId, cellIndex, ctx.reg, ctx.sm);
   if (res.success && ctx.room.phase === TurnPhase.InsolvencyPhase) {
     const p = ctx.room.players.find((pl) => pl.id === playerId);
-    if (p && p.balance >= 0) ctx.room.phase = TurnPhase.PropertyManagement;
+    if (p && p.balance >= 0) {
+      delete ctx.room.pendingInsolvencyCreditorId;
+      delete ctx.room.pendingInsolvencyDebtorId;
+      ctx.room.phase = TurnPhase.PropertyManagement;
+    }
   }
   return res;
 }
@@ -70,6 +74,8 @@ export function coordDowngrade(
   if (!ctx) return { success: false, reason: ActionRejectReason.INVALID_ROOM };
   const res = handleDowngrade(player, ctx.room.phase, cellIndex, ctx.reg, ctx.sm, roomCode, options, ctx.room);
   if (res.success && ctx.room.phase === TurnPhase.InsolvencyPhase && player && player.balance >= 0) {
+    delete ctx.room.pendingInsolvencyCreditorId;
+    delete ctx.room.pendingInsolvencyDebtorId;
     ctx.room.phase = TurnPhase.PropertyManagement;
   }
   return res;

@@ -70,7 +70,7 @@ export function TradePartnerStrip({
                 key={partner.id}
                 type="button"
                 onClick={() => onSelectPartner(partner.id)}
-                className={`partner-selector-tab min-h-[44px] px-2 py-2 rounded-xl border-2 text-xs transition-all cursor-pointer flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+                className={`partner-selector-tab min-w-0 min-h-[44px] px-2 py-2 rounded-xl border-2 text-xs transition-all cursor-pointer flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
                   isSelected
                     ? 'bg-amber-500 text-amber-950 border-amber-700 shadow-[0_3px_0_0_#b45309] active:shadow-[0_1px_0_0_#b45309] active:translate-y-[2px] font-black'
                     : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100 shadow-sm active:translate-y-[1px]'
@@ -84,7 +84,7 @@ export function TradePartnerStrip({
                   {formatCurrency(partner.balance)}
                 </span>
                 {needBadgeText && (
-                  <span className="text-[11px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300 font-bold truncate max-w-[90px] md:max-w-none hidden sm:inline-block">
+                  <span className="text-[11px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300 font-bold truncate max-w-[90px] md:max-w-none hidden sm:inline-block shrink-0">
                     {needBadgeText}
                   </span>
                 )}

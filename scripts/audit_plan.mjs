@@ -57,7 +57,11 @@ for (const [relPath, isNew] of targetFiles.entries()) {
       errors++;
     }
   } else {
-    const lines = fs.readFileSync(absPath, 'utf8').split('\n').length;
+    const linesArr = fs.readFileSync(absPath, 'utf8').split('\n');
+    if (linesArr.length > 0 && linesArr[linesArr.length - 1] === '') {
+      linesArr.pop();
+    }
+    const lines = linesArr.length;
     console.log(`  ✔️ ${relPath} (Physical lines: ${lines})`);
   }
 }

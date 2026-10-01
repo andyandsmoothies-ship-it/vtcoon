@@ -43,9 +43,9 @@ describe('[IMP-141] Chuẩn Hóa Toàn Diện Nội Dung & Quy Tắc Luật Chơ
       expect(summary).toMatch(/(800|mất lượt)/i);
     });
 
-    it('[TC-141.05/MSS][UC-IMP141][Facet-1/Boundary] MC_LAND_FEVER nêu rõ 50% và Bình Dương, Đồng Nai, Hưng Yên hoặc ô 6, 8, 31', () => {
+    it('[TC-141.05/MSS][UC-IMP141][Facet-1/Boundary] MC_LAND_FEVER nêu rõ Nhân đôi (x2) và Bình Dương, Đồng Nai, Hưng Yên hoặc ô 6, 8, 31', () => {
       const summary = resolveMarketEffectSummary(MarketCardId.MC_LAND_FEVER);
-      expect(summary).toMatch(/50%/i);
+      expect(summary).toMatch(/(nhân đôi|x2)/i);
       expect(summary).toMatch(/(bình dương|đồng nai|hưng yên|6,\s*8,\s*31)/i);
     });
 

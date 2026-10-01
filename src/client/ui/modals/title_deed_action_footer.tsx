@@ -147,13 +147,13 @@ export function TitleDeedActionFooter({
         </>
       ) : isBuyOpportunity !== false ? (
         <>
-          {/* Cảnh báo thiếu tiền (chỉ khi thiếu tiền và thị trường không đóng băng) */}
-          {!canBuy && !isTradeFrozen && (
+          {/* Cảnh báo thiếu tiền (chỉ khi thực sự thiếu tiền > 0 và thị trường không đóng băng) */}
+          {!canBuy && !isTradeFrozen && shortfall !== undefined && shortfall > 0 && (
             <div
               className="col-span-2 w-full py-1.5 px-3 rounded-xl bg-amber-50 border border-amber-300/80 text-amber-900 text-xs font-semibold flex flex-col sm:flex-row sm:items-center justify-between gap-0.5 sm:gap-1"
               data-testid="insufficient-funds-notice"
             >
-              <span>⚠️ Số dư không đủ (Thiếu {formatCurrency(shortfall ?? 0)})</span>
+              <span>⚠️ Số dư không đủ (Thiếu {formatCurrency(shortfall)})</span>
               <span className="text-[11px] text-amber-700 font-normal">Bấm [✕] ở trên để xoay vốn</span>
             </div>
           )}

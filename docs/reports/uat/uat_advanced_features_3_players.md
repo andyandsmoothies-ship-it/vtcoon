@@ -8,24 +8,24 @@ NGÀY THỰC HIỆN: 11/09/2026 | SEED: 9920263 | CHU KỲ KIỂM ĐỊNH: ĐỘ
 
 - **Số lượng người chơi:** 3 người chơi.
 - **Tổng số lượt đi (Turns):** 109 lượt.
-- **Số vòng thi đấu (Rounds):** 31 vòng.
-- **Điều kiện kết thúc:** ĐẠT HẠN MỨC 30 VÒNG (Quyết toán Net Worth).
-- **Nhà Vô Địch Chung Cuộc:** **Bác Ba (Thực dụng / Aggressive)** (Tổng tài sản ròng: **39.076 Tr. VNĐ**).
+- **Số vòng thi đấu (Rounds):** 30 vòng.
+- **Điều kiện kết thúc:** LOẠI BỎ DO PHÁ SẢN (Chỉ còn 1 người sống sót).
+- **Nhà Vô Địch Chung Cuộc:** **Bác Ba (Thực dụng / Aggressive)** (Tổng tài sản ròng: **48.526 Tr. VNĐ**).
 
 ### Bảng Xếp Hạng Chung Cuộc (Final Leaderboard)
 
 | Hạng | Người chơi | Tính cách AI | Tiền mặt còn lại | Tài sản ròng (Net Worth) | Số ô đất sở hữu | Trạng thái |
 | :---: | :--- | :--- | :---: | :---: | :---: | :---: |
-| 1 | Bác Ba (Thực dụng / Aggressive) | Aggressive | 2.076 Tr. VNĐ | 39.076 Tr. VNĐ | 6 ô | 🏆 Vô địch |
-| 2 | Cô Tư (Thận trọng / Passive) | Passive | 160 Tr. VNĐ | 21.960 Tr. VNĐ | 9 ô | ✓ Hoàn thành |
-| 3 | Chú Sáu (Cân bằng / Balanced) | Balanced | 0 Tr. VNĐ | 0 Tr. VNĐ | 0 ô | ❌ Phá sản |
+| 1 | Bác Ba (Thực dụng / Aggressive) | Aggressive | 11.526 Tr. VNĐ | 48.526 Tr. VNĐ | 6 ô | 🏆 Vô địch |
+| 2 | Chú Sáu (Cân bằng / Balanced) | Balanced | 0 Tr. VNĐ | 0 Tr. VNĐ | 0 ô | ❌ Phá sản |
+| 3 | Cô Tư (Thận trọng / Passive) | Passive | 0 Tr. VNĐ | 0 Tr. VNĐ | 0 ô | ❌ Phá sản |
 
 ---
 
 ## II. THỐNG KÊ SỬ DỤNG CÁC TÍNH NĂNG TƯƠNG TÁC NÂNG CAO
 
 ### 1. Giao Dịch Chuyển Nhượng P2P (P2P Trade)
-- Số đề nghị đàm phán phát động: 115 lần.
+- Số đề nghị đàm phán phát động: 128 lần.
 - Số giao dịch sang tên thành công: 20 thương vụ.
 - Tổng giá trị chuyển nhượng đất: 53.560 Tr. VNĐ.
 - Thuế chuyển nhượng nộp Kho Bạc (5%): 2.678 Tr. VNĐ.
@@ -64,10 +64,11 @@ NGÀY THỰC HIỆN: 11/09/2026 | SEED: 9920263 | CHU KỲ KIỂM ĐỊNH: ĐỘ
 
 | Mã thẻ thị trường | Tác động vĩ mô | Số lần rút | Tỷ lệ xuất hiện |
 | :--- | :--- | :---: | :---: |
-| MC_URBAN_PLANNING | Thẻ Thị Trường | 1 lần | 25.0% |
-| MC_FIRE_INSPECTION | Thẻ Thị Trường | 1 lần | 25.0% |
-| MC_PUBLIC_INVEST | Thẻ Thị Trường | 1 lần | 25.0% |
-| MC_CASINO_PILOT | Thẻ Thị Trường | 1 lần | 25.0% |
+| MC_URBAN_PLANNING | Thẻ Thị Trường | 1 lần | 20.0% |
+| MC_FIRE_INSPECTION | Thẻ Thị Trường | 1 lần | 20.0% |
+| MC_PUBLIC_INVEST | Thẻ Thị Trường | 1 lần | 20.0% |
+| MC_CASINO_PILOT | Thẻ Thị Trường | 1 lần | 20.0% |
+| MC_MEGA_CONCERT | Thẻ Thị Trường | 1 lần | 20.0% |
 
 ### 3. Phân Phối Điểm Dừng Tại Các Ô Đặc Biệt
 
@@ -83,7 +84,7 @@ NGÀY THỰC HIỆN: 11/09/2026 | SEED: 9920263 | CHU KỲ KIỂM ĐỊNH: ĐỘ
 | Tuyến Cao Tốc Bắc - Nam | Đặc biệt | 3 lần | 2.8% |
 | Cảng HKQT Nội Bài | Đặc biệt | 2 lần | 1.8% |
 | Tập Đoàn Điện Lực (EVN) | Đặc biệt | 1 lần | 0.9% |
-| Tập Đoàn Viễn Thông (Viettel) | Đặc biệt | 3 lần | 2.8% |
+| Tập Đoàn Viễn Thông (Viettel) | Đặc biệt | 4 lần | 3.7% |
 
 ---
 
@@ -1204,13 +1205,13 @@ NGÀY THỰC HIỆN: 11/09/2026 | SEED: 9920263 | CHU KỲ KIỂM ĐỊNH: ĐỘ
 - **Danh mục BĐS sở hữu (0):** Chưa có
 
 #### Lượt #105 | Vòng #28 — Cô Tư (Thận trọng / Passive) (Passive)
-- **Số dư trước lượt:** 560 Tr. VNĐ | **Tài sản ròng:** 23.260 Tr. VNĐ
+- **Số dư trước lượt:** 560 Tr. VNĐ | **Tài sản ròng:** 32.810 Tr. VNĐ
 - **Xúc xắc:** [3, 2] (Tổng: 5)
 - **Di chuyển:** Ô 16 ➔ Ô 21 (**Thanh Hóa (Sầm Sơn)**)
 - **Sự kiện ô:** Dừng tại [Thanh Hóa (Sầm Sơn)]
 - **Tính năng tương tác:** Kích hoạt nút Hết Lượt (End Turn)
-- **Số dư sau lượt:** 560 Tr. VNĐ | **Tài sản ròng:** 23.260 Tr. VNĐ
-- **Danh mục BĐS sở hữu (9):** Bình Dương (Tổ Hợp Thể Thao & Golf), Đà Nẵng (Hải Châu - Sơn Trà), Thanh Hóa (Sầm Sơn) (C2), Tuyến Cao Tốc Bắc - Nam, Ninh Bình (Tràng An) (C2), Hà Nội (Cầu Giấy), An Giang (Châu Đốc) (C3), Cần Thơ (Cái Răng) (C2), Nghệ An (TP. Vinh) (C1)
+- **Số dư sau lượt:** 560 Tr. VNĐ | **Tài sản ròng:** 32.810 Tr. VNĐ
+- **Danh mục BĐS sở hữu (17):** Bình Dương (Tổ Hợp Thể Thao & Golf), Đồng Nai (Đại Công Viên Chủ Đề), Khánh Hòa (Nha Trang), Đà Nẵng (Hải Châu - Sơn Trà), Thanh Hóa (Sầm Sơn) (C2), Tuyến Cao Tốc Bắc - Nam, Ninh Bình (Tràng An) (C2), Hà Nội (Cầu Giấy), Hà Nội (Hoàn Kiếm), An Giang (Châu Đốc) (C3), Cần Thơ (Cái Răng) (C2), Bình Thuận (Mũi Né), Nghệ An (TP. Vinh) (C1), Hưng Yên (Văn Giang), TP.HCM (Quận 1 - Nguyễn Huệ), TP.HCM (TP. Thủ Đức), Lâm Đồng (Đà Lạt)
 
 ### === VÒNG ĐẤU #29 ===
 
@@ -1218,42 +1219,55 @@ NGÀY THỰC HIỆN: 11/09/2026 | SEED: 9920263 | CHU KỲ KIỂM ĐỊNH: ĐỘ
 - **Số dư trước lượt:** 616 Tr. VNĐ | **Tài sản ròng:** 37.616 Tr. VNĐ
 - **Xúc xắc:** [6, 3] (Tổng: 9)
 - **Di chuyển:** Ô 22 ➔ Ô 31 (**Hưng Yên (Văn Giang)**)
-- **Sự kiện ô:** Từ chối mua [Hưng Yên (Văn Giang)], phát động Đấu Giá Công Khai
+- **Sự kiện ô:** Dừng tại [Hưng Yên (Văn Giang)]
 - **Tính năng tương tác:** Kích hoạt nút Hết Lượt (End Turn)
-- **Sàn đấu giá:** Sàn đấu giá kết thúc: Mọi người chơi bỏ qua, [Hưng Yên (Văn Giang)] phát mãi về Kho Bạc
 - **Số dư sau lượt:** 616 Tr. VNĐ | **Tài sản ròng:** 37.616 Tr. VNĐ
 - **Danh mục BĐS sở hữu (6):** Tập Đoàn Điện Lực (EVN), Kiên Giang (Phú Quốc - Grand World) (C3), Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm) (C3), Tập Đoàn Viễn Thông (Viettel), Quảng Ninh (Hạ Long) (C3), Cảng HKQT Nội Bài
 
 #### Lượt #107 | Vòng #29 — Cô Tư (Thận trọng / Passive) (Passive)
-- **Số dư trước lượt:** 560 Tr. VNĐ | **Tài sản ròng:** 23.260 Tr. VNĐ
-- **Xúc xắc:** [5, 6] (Tổng: 11)
-- **Di chuyển:** Ô 21 ➔ Ô 32 (**Hà Nội (Cầu Giấy)**)
-- **Sự kiện ô:** Dừng tại [Hà Nội (Cầu Giấy)]
+- **Số dư trước lượt:** 560 Tr. VNĐ | **Tài sản ròng:** 32.810 Tr. VNĐ
+- **Xúc xắc:** [6, 1] (Tổng: 7)
+- **Di chuyển:** Ô 21 ➔ Ô 28 (**Tập Đoàn Viễn Thông (Viettel)**)
+- **Sự kiện ô:** Dừng chân tại [Tập Đoàn Viễn Thông (Viettel)]: Trả tiền thuê 560 Tr. VNĐ cho Bác Ba (Thực dụng / Aggressive)
 - **Tính năng tương tác:** Kích hoạt nút Hết Lượt (End Turn)
-- **Số dư sau lượt:** 560 Tr. VNĐ | **Tài sản ròng:** 23.260 Tr. VNĐ
-- **Danh mục BĐS sở hữu (9):** Bình Dương (Tổ Hợp Thể Thao & Golf), Đà Nẵng (Hải Châu - Sơn Trà), Thanh Hóa (Sầm Sơn) (C2), Tuyến Cao Tốc Bắc - Nam, Ninh Bình (Tràng An) (C2), Hà Nội (Cầu Giấy), An Giang (Châu Đốc) (C3), Cần Thơ (Cái Răng) (C2), Nghệ An (TP. Vinh) (C1)
+- **Giải cứu tài chính:** Hạ cấp công trình ô 3
+- **Giải cứu tài chính:** Hạ cấp công trình ô 1
+- **Giải cứu tài chính:** Hạ cấp công trình ô 3
+- **Giải cứu tài chính:** Hạ cấp công trình ô 1
+- **Giải cứu tài chính:** Hạ cấp công trình ô 3
+- **Giải cứu tài chính:** Hạ cấp công trình ô 21
+- **Giải cứu tài chính:** Hạ cấp công trình ô 24
+- **Số dư sau lượt:** 720 Tr. VNĐ | **Tài sản ròng:** 25.670 Tr. VNĐ
+- **Danh mục BĐS sở hữu (17):** Bình Dương (Tổ Hợp Thể Thao & Golf), Đồng Nai (Đại Công Viên Chủ Đề), Khánh Hòa (Nha Trang), Đà Nẵng (Hải Châu - Sơn Trà), Thanh Hóa (Sầm Sơn) (C1), Tuyến Cao Tốc Bắc - Nam, Ninh Bình (Tràng An) (C1), Hà Nội (Cầu Giấy), Hà Nội (Hoàn Kiếm), An Giang (Châu Đốc), Cần Thơ (Cái Răng), Bình Thuận (Mũi Né), Nghệ An (TP. Vinh) (C1), Hưng Yên (Văn Giang), TP.HCM (Quận 1 - Nguyễn Huệ), TP.HCM (TP. Thủ Đức), Lâm Đồng (Đà Lạt)
 
 ### === VÒNG ĐẤU #30 ===
 
 #### Lượt #108 | Vòng #30 — Bác Ba (Thực dụng / Aggressive) (Aggressive)
-- **Số dư trước lượt:** 616 Tr. VNĐ | **Tài sản ròng:** 37.616 Tr. VNĐ
-- **Xúc xắc:** [5, 4] (Tổng: 9)
-- **Di chuyển:** Ô 31 ➔ Ô 0 (**Khởi Hành (GO)**) | *Vượt mốc Khởi Hành (+2.000 Tr. VNĐ)*
-- **Sự kiện ô:** Dừng tại Khởi Hành (GO): Nhận lương định kỳ 2.000 Tr. VNĐ
+- **Số dư trước lượt:** 1.176 Tr. VNĐ | **Tài sản ròng:** 38.176 Tr. VNĐ
+- **Xúc xắc:** [5, 6] (Tổng: 11)
+- **Di chuyển:** Ô 31 ➔ Ô 26 (**Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm)**) | *Vượt mốc Khởi Hành (+2.000 Tr. VNĐ)*
+- **Sự kiện ô:** Rút Phiếu Thị Trường [MC_MEGA_CONCERT]: Thay đổi cục diện thị trường
 - **Tính năng tương tác:** Kích hoạt nút Hết Lượt (End Turn)
-- **Số dư sau lượt:** 1.216 Tr. VNĐ | **Tài sản ròng:** 38.216 Tr. VNĐ
+- **Số dư sau lượt:** 11.526 Tr. VNĐ | **Tài sản ròng:** 48.526 Tr. VNĐ
 - **Danh mục BĐS sở hữu (6):** Tập Đoàn Điện Lực (EVN), Kiên Giang (Phú Quốc - Grand World) (C3), Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm) (C3), Tập Đoàn Viễn Thông (Viettel), Quảng Ninh (Hạ Long) (C3), Cảng HKQT Nội Bài
 
 #### Lượt #109 | Vòng #30 — Cô Tư (Thận trọng / Passive) (Passive)
-- **Số dư trước lượt:** 560 Tr. VNĐ | **Tài sản ròng:** 23.260 Tr. VNĐ
-- **Xúc xắc:** [1, 1] (Tổng: 2) (Đổ Đôi!)
-- **Di chuyển:** Ô 32 ➔ Ô 34 (**Hà Nội (Hoàn Kiếm)**)
-- **Sự kiện ô:** Từ chối mua [Hà Nội (Hoàn Kiếm)], phát động Đấu Giá Công Khai
+- **Số dư trước lượt:** -9.030 Tr. VNĐ | **Tài sản ròng:** 15.920 Tr. VNĐ
+- **Xúc xắc:** [5, 6] (Tổng: 11)
+- **Di chuyển:** Ô 26 ➔ Ô 26 (**Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm)**)
+- **Sự kiện ô:** Dừng tại [Hải Phòng (Phố Ẩm Thực & Kinh Tế Đêm)]
 - **Tính năng tương tác:** Kích hoạt nút Hết Lượt (End Turn)
-- **Sàn đấu giá:** Sàn đấu giá kết thúc: Mọi người chơi bỏ qua, [Hà Nội (Hoàn Kiếm)] phát mãi về Kho Bạc
-- **Giải cứu tài chính:** Hạ cấp công trình ô 3
-- **Số dư sau lượt:** 160 Tr. VNĐ | **Tài sản ròng:** 21.960 Tr. VNĐ
-- **Danh mục BĐS sở hữu (9):** Bình Dương (Tổ Hợp Thể Thao & Golf), Đà Nẵng (Hải Châu - Sơn Trà), Thanh Hóa (Sầm Sơn) (C2), Tuyến Cao Tốc Bắc - Nam, Ninh Bình (Tràng An) (C2), Hà Nội (Cầu Giấy), An Giang (Châu Đốc) (C2), Cần Thơ (Cái Răng) (C2), Nghệ An (TP. Vinh) (C1)
+- **Giải cứu tài chính:** Hạ cấp công trình ô 21
+- **Giải cứu tài chính:** Hạ cấp công trình ô 23
+- **Giải cứu tài chính:** Hạ cấp công trình ô 24
+- **Giải cứu tài chính:** Thế chấp BĐS ô 1
+- **Giải cứu tài chính:** Thế chấp BĐS ô 3
+- **Giải cứu tài chính:** Thế chấp BĐS ô 21
+- **Giải cứu tài chính:** Thế chấp BĐS ô 23
+- **Giải cứu tài chính:** Thế chấp BĐS ô 24
+- **Giải cứu tài chính:** Tuyên bố Phá sản (Insolvent Bankruptcy)
+- **Số dư sau lượt:** 0 Tr. VNĐ | **Tài sản ròng:** 0 Tr. VNĐ
+- **Danh mục BĐS sở hữu (0):** Chưa có
 
 ---
 

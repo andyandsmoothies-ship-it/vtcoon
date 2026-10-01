@@ -131,6 +131,7 @@ export interface ModalPayloadMap {
     finalPrice?: number;
     insolvencyPlayerId?: string;
     isForeclosure?: boolean;
+    isFireSale?: boolean;
     startingBid?: number;
     highestBid?: number;
     highestBidder?: string;
