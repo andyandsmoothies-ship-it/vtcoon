@@ -80,8 +80,8 @@ export function HudContainer({
           <PlayerHudList />
         </div>
 
-        {/* Cụm Nút Nổi Điều Hướng Camera (Recenter Pawn & Camera Snap Overview) */}
-        <div className="pointer-events-none fixed bottom-28 sm:bottom-32 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center gap-2 max-w-[95vw]">
+        {/* Cụm Nút Nổi Điều Hướng Camera (Tránh trục giữa trên Mobile, Giữ căn giữa trên Desktop) */}
+        <div className="pointer-events-none fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] left-3 sm:bottom-32 sm:left-1/2 sm:-translate-x-1/2 z-20 flex items-center justify-start sm:justify-center gap-2 max-w-[95vw]">
         <RecenterPawnPill
           activeModal={activeModal}
           cameraFocusCell={cameraFocusCell}

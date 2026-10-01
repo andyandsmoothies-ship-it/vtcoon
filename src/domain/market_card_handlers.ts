@@ -232,7 +232,7 @@ const MARKET_HANDLERS: Partial<Record<MarketCardId, MarketHandler>> = {
   },
   [MarketCardId.MC_ALCOHOL_CHECK]:   (mods) => mods.push({ type: MarketCardId.MC_ALCOHOL_CHECK, affectedCells: SERVICE_CELLS, remainingRounds: 2, multiplier: 0.5 }),
   [MarketCardId.MC_LAND_FEVER]:      (mods) => mods.push({ type: MarketCardId.MC_LAND_FEVER, affectedCells: LAND_FEVER_CELLS, remainingRounds: 1, multiplier: 2 }),
-  [MarketCardId.MC_RATE_HIKE]:       (mods) => mods.push({ type: MarketCardId.MC_RATE_HIKE, affectedCells: BOARD_CONFIG.map((c) => c.index), remainingRounds: 1, multiplier: 0.8 }),
+  [MarketCardId.MC_RATE_HIKE]:       (mods) => mods.push({ type: MarketCardId.MC_RATE_HIKE, affectedCells: [], remainingRounds: 1, multiplier: 0.8 }),
   [MarketCardId.MC_CREDIT_STIMULUS]: (mods) => mods.push({ type: MarketCardId.MC_CREDIT_STIMULUS, affectedCells: [], remainingRounds: 2 }),
   [MarketCardId.MC_ANTI_SPECULATE]:  (mods, players, registry, _stateMap, room) => {
     mods.push({ type: MarketCardId.MC_ANTI_SPECULATE, affectedCells: [], remainingRounds: 1 });

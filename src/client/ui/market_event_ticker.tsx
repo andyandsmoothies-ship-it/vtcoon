@@ -41,23 +41,14 @@ export function resolveMarketIcon(type: string): string {
   }
 }
 
+const ALL_MARKET_TITLES: Readonly<Record<string, string>> = {
+  ...viTranslations.macroCycles,
+  ...viTranslations.marketCards,
+  ...viTranslations.chanceCards,
+};
+
 export function resolveMarketTitle(type: string): string {
-  const macroDict = viTranslations.macroCycles as Record<string, string | undefined>;
-  const macroTranslated = macroDict[type];
-  if (macroTranslated) {
-    return macroTranslated;
-  }
-  const marketDict = viTranslations.marketCards as Record<string, string | undefined>;
-  const marketTranslated = marketDict[type];
-  if (marketTranslated) {
-    return marketTranslated;
-  }
-  const chanceDict = viTranslations.chanceCards as Record<string, string | undefined>;
-  const chanceTranslated = chanceDict[type];
-  if (chanceTranslated) {
-    return chanceTranslated;
-  }
-  return type || 'Sự Kiện Thị Trường';
+  return ALL_MARKET_TITLES[type] ?? (type || 'Sự Kiện Thị Trường');
 }
 
 export function resolveMarketShortTag(type: string): string {
@@ -253,7 +244,9 @@ export const MarketEventTicker: React.FC<MarketEventTickerProps> = ({
             data-testid={`market-ticker-item-${cardType}`}
             onClick={handleCardClick}
             title={`${title}: ${formula} (Bấm xem chi tiết)`}
-            className="w-full pointer-events-auto min-h-[44px] flex items-center justify-between gap-1.5 px-2.5 py-1.5 sm:py-1 bg-[#FFFDF8]/95 hover:bg-amber-50/95 backdrop-blur-xs border-2 border-slate-900 rounded-lg sm:rounded-xl shadow-[0_2px_0_0_#0f172a] text-xs font-bold transition-colors cursor-pointer select-none text-slate-900 leading-none"
+            className={`w-full pointer-events-auto min-h-[44px] ${
+              index > 0 ? 'hidden sm:flex' : 'flex'
+            } items-center justify-between gap-1.5 px-2.5 py-1.5 sm:py-1 bg-[#FFFDF8]/95 hover:bg-amber-50/95 backdrop-blur-xs border-2 border-slate-900 rounded-lg sm:rounded-xl shadow-[0_2px_0_0_#0f172a] text-xs font-bold transition-colors cursor-pointer select-none text-slate-900 leading-none`}
           >
             <div className="flex items-center gap-1.5 min-w-0 flex-1">
               <span className="text-sm shrink-0" aria-hidden="true">
@@ -275,9 +268,16 @@ export const MarketEventTicker: React.FC<MarketEventTickerProps> = ({
                 {formula}
               </span>
             </div>
-            <span className="text-[10px] font-extrabold text-amber-900 bg-amber-100 px-1.5 py-0.5 rounded-full shrink-0 border border-amber-400 ml-1 whitespace-nowrap">
-              Còn {modifier.remainingRounds} vòng
-            </span>
+            <div className="flex items-center gap-1 shrink-0 ml-1">
+              {index === 0 && active.length > 1 && (
+                <span className="sm:hidden text-[9px] font-black bg-amber-200 text-amber-900 px-1 py-0.5 rounded-sm border border-amber-400">
+                  +{active.length - 1} sự kiện
+                </span>
+              )}
+              <span className="text-[10px] font-extrabold text-amber-900 bg-amber-100 px-1.5 py-0.5 rounded-full border border-amber-400 whitespace-nowrap">
+                Còn {modifier.remainingRounds} vòng
+              </span>
+            </div>
           </div>
         );
       })}

@@ -146,7 +146,7 @@ export function SafeHtml({
     return React.createElement(React.Fragment, null, children);
   }
   return (
-    <Html center distanceFactor={14} pointerEvents="none" {...props}>
+    <Html center pointerEvents="none" {...props}>
       {children}
     </Html>
   );
@@ -182,11 +182,12 @@ export function TileEventFloatingBadge({
       </mesh>
       <SafeHtml>
         <div
-          className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-black text-white bg-slate-900/90 border border-amber-400 shadow-xs select-none pointer-events-none ${
+          data-testid="tile-event-badge-pill"
+          className={`whitespace-nowrap inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-black text-white bg-slate-900/90 border border-amber-400 shadow-xs max-w-[140px] truncate select-none pointer-events-none ${
             status.isExpiringSoon ? 'animate-pulse' : ''
           }`}
         >
-          <span>{labelText}</span>
+          <span className="truncate">{labelText}</span>
         </div>
       </SafeHtml>
     </SafeBillboard>

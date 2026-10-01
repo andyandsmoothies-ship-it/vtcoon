@@ -266,15 +266,14 @@ export function PlayerCard({
         </div>
       </div>
 
-      {/* Cụm 28 chấm BĐS & Hạ Tầng/Tiện Ích sắp xếp 3 dòng:
-          - Dòng 1 (11 chấm): Nâu, Xanh Da Trời, Hồng, Cam
-          - Dòng 2 (11 chấm): Đỏ, Vàng, Xanh Lá, Tím
-          - Dòng 3 (6 chấm): 4 Giao Thông (Xám Thép #475569) & 2 Tiện Ích (Xanh Coban #0284C7) */}
-      <span className="sr-only">BĐS:</span>
-      <div
-        className="flex flex-col gap-1 w-full px-2 pt-1.5 pb-1 border-t border-slate-300 select-none"
-        data-testid="player-property-clusters"
-      >
+      {/* Cụm 28 chấm BĐS chỉ render khi người chơi còn hoạt động, thu gọn khi Phá Sản */}
+      {!player.bankrupt && (
+        <>
+          <span className="sr-only">BĐS:</span>
+          <div
+            className="flex flex-col gap-1 w-full px-2 pt-1.5 pb-1 border-t border-slate-300 select-none"
+            data-testid="player-property-clusters"
+          >
         {[PROPERTY_CLUSTERS.slice(0, 4), PROPERTY_CLUSTERS.slice(4, 8)].map((clusterRow, rowIdx) => (
           <div
             key={rowIdx}
@@ -393,6 +392,8 @@ export function PlayerCard({
           </div>
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 }

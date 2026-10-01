@@ -1317,3 +1317,45 @@
   * `ui-craft-reviewer`: Station 3.2 UI_APPROVED (Chuẩn Dual-Viewport, WCAG 2.1 AA, touch targets >= 44px).
   * `chaos-sentinel`: Station 4 APPROVED (3 Probes passed, 6/6 mutants killed, floor >= 5 satisfied, 0 survived).
 - **Trạng thái**: ✅ Hoàn thành IMP-236 (2026-10-01).
+
+---
+
+### [2026-10-01] IMP-237: Tối Ưu Hóa Trải Nghiệm Mobile & Desktop (3D Billboard Clamping & Viewport De-cluttering)
+- **Mục tiêu**: Xử lý triệt để 5 khuyết tật giao diện vật lý xuất hiện trên thiết bị di động (phóng đại phù hiệu 3D che 35% màn hình, rác 40 ô đất trong modal sự kiện, tháp 3 tầng đè nhau ở đáy, banner dồn toa ở đỉnh, và bảng HUD gây tụt FPS) đồng thời bảo tồn chuẩn Dual-Viewport Parity trên Desktop theo `GEMINI.md`.
+- **Hạng mục thi công cốt lõi**:
+  1. *3D Billboard Zoom Clamping & Typography*: Loại bỏ `distanceFactor={14}` trong `SafeHtml`, áp dụng kích thước pixel cố định $1:1$ cùng `whitespace-nowrap inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 max-w-[140px] truncate` ngăn chặn hoàn toàn phù hiệu phình to 20 lần và gãy dòng dọc.
+  2. *MarketCard MC_RATE_HIKE Data Sanity*: Đổi `affectedCells` từ 40 ô về `[]`, loại trừ 40 node Drei `<Html>` dư thừa trên sa bàn 3D (giải phóng nghẽn DOM, đưa tốc độ khung hình từ 27 FPS về chuẩn 60 FPS).
+  3. *Event Modal Sticky CTA & Scroll Container*: Bọc toàn bộ nội dung từ Category Badge đến danh sách ô đất trong container cuộn `event-card-scroll-container` (`overflow-y-auto max-h-[calc(85dvh-130px)]`), ghim cố định nút CTA ở đáy (`shrink-0 mt-2`) ngoài vùng cuộn, kết hợp giới hạn hiển thị tối đa 12 ô đất kèm chip `+N ô khác`.
+  4. *De-collision Trục Giữa Đáy Màn Hình*: Chuyển `CameraResetPill` sang `left-3 bottom-[calc(5rem+env(safe-area-inset-bottom))]` trên mobile, né hoàn toàn trục giữa nơi `DiceScoreBadge` và `ActionDock` hoạt động; giữ nguyên căn giữa `sm:left-1/2 sm:-translate-x-1/2 sm:bottom-32` trên Desktop.
+  5. *Mobile Event Ticker Collapse*: Trên Mobile (`sm:hidden`), banner thứ 2 trở đi mang class `hidden sm:flex` và banner 1 hiển thị badge `+{active.length - 1} sự kiện`, giảm chiều cao chiếm dụng từ 100px xuống 46px. Desktop hiển thị đầy đủ (Dual-Viewport Parity).
+  6. *PlayerHudList Mobile Backdrop & Bankrupt Card Compact*: Thêm backdrop `absolute inset-0 z-10 sm:hidden bg-slate-950/20 backdrop-blur-[0.5px]` đóng HUD bằng `useGameStore.setState({ isPlayerHudVisible: false })`; ẩn khối `player-property-clusters` khi `player.bankrupt === true`.
+- **Hạ tầng & Ngân sách LOC Thực tế (`scripts/check_loc.mjs` - Total Lines / Non-Empty SLOC)**:
+  * `src/domain/market_card_handlers.ts` (Total: 276 / SLOC: 262 — Tier 1 <= 400 LOC)
+  * `src/domain/event_card_types.ts` (Total: 56 / SLOC: 52 — Tier 1 <= 400 LOC)
+  * `src/client/3d/tile_event_aura.tsx` (Total: 224 / SLOC: 202 — Tier 2 <= 500 LOC)
+  * `src/client/ui/modals/event_card_modal.tsx` (Total: 277 / SLOC: 255 — Tier 2 <= 500 LOC)
+  * `src/client/ui/hud_container.tsx` (Total: 137 / SLOC: 125 — Tier 2 <= 500 LOC)
+  * `src/client/ui/player_card.tsx` (Total: 399 / SLOC: 373 — Tier 2 <= 500 LOC)
+  * `src/client/ui/player_hud_list.tsx` (Total: 47 / SLOC: 44 — Tier 2 <= 500 LOC)
+  * `src/client/ui/market_event_ticker.tsx` (Total: 297 / SLOC: 277 — Tier 2 <= 500 LOC)
+  * `tests/contracts/imp237_mobile_viewport_harmonics.test.ts` (Total: 435 / SLOC: 380 — Contract Tests <= 600 LOC)
+  * `docs/reports/improvements/IMP-237-mobile-viewport-harmonics-and-3d-badge-overhaul_report.md`: Báo cáo nghiệm thu hoàn chỉnh.
+- **Kiểm thử & Bất biến**:
+  * 16/16 atomic contract tests PASS (Universal 5-Facet Matrix, Detroit Classical TDD).
+  * 81/81 regression tests PASS trên 4 suites (`imp134`, `imp201`, `imp205`, `imp237`) cùng 50 tests kế thừa (`imp187`, `imp173`, `chunky_hud_layout`).
+  * Station 4 Chaos Sentinel: 3/3 physical probes PASS (Closed-Loop Parity 24/24, Ephemeral Wire port 64009, Mutation Sensitivity 6/6 mutants killed, floor >= 5 satisfied).
+  * Visual Evidence Gate: Thẩm định thành công ảnh chụp in-game vật lý `.agents/tmp/imp-237_mobile_view.jpg`.
+  * TypeScript typecheck: `tsc --noEmit` exit 0. UI Linter: `npm run lint:ui` 0 violations / 208 files. 0 dirty casts.
+  * Evidence Snapshot: `.agents/evidence/chaos_sentinel_IMP-237.json` (`verdict: APPROVED`).
+- **Phê chuẩn**:
+  * `plan-griller`: HARDENED_APPROVED (Revision 2.0 đóng trọn vẹn 100% 4 chỉ thị đối kháng).
+  * `qa-tester`: Station 1 RED verified (12/16 tests failed as expected under Adversarial Inversion).
+  * `implementer`: Station 2 GREEN verified (16/16 tests pass, toàn bộ tệp đạt chuẩn LOC).
+  * `scout`: Station 2.5 PREFILTER_PASSED (0 defects qua 5 bộ lọc cơ học).
+  * `spec-reviewer`: Station 3.1 SPEC_APPROVED (100% plan fidelity, 0 scope drift).
+  * `game-3d-visual-critic`: Station 3.2 3D_VISUAL_APPROVED (Triệt tiêu phóng đại 20x, chuẩn mỹ thuật AAA).
+  * `ui-craft-reviewer`: Station 3.2 UI_APPROVED (Chuẩn Dual-Viewport, WCAG 2.1 AA, touch targets >= 44px).
+  * `code-reviewer` & `re-reviewer`: Station 3.2 CODE_APPROVED (Active Remediation: backdrop `absolute inset-0`, modal `overflow-hidden sm:overflow-y-auto`).
+  * `chaos-sentinel`: Station 4 APPROVED (3 Probes passed, 6/6 mutants killed, floor >= 5 satisfied, 0 survived).
+- **Trạng thái**: ✅ Hoàn thành IMP-237 (2026-10-01).
+
