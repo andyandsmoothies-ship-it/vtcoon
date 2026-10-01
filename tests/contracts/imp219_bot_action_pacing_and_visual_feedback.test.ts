@@ -9,11 +9,15 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 import * as activityPropertyTrackerModule from '../../src/client/network/activity_property_tracker.js';
+import { detectCellTrade } from '../../src/client/network/activity_property_tracker.js';
 import * as activityFinancialTrackerModule from '../../src/client/network/activity_financial_tracker.js';
+import { detectFinancialAndStatusActivities } from '../../src/client/network/activity_financial_tracker.js';
 import * as activityBadgeDispatcherModule from '../../src/client/network/activity_badge_dispatcher.js';
-import * as activityTrackerModule from '../../src/client/network/activity_tracker.js';
-import * as transactionNarrativeModule from '../../src/client/ui/transaction_narrative.js';
+import { dispatchActivityFloatingBadges } from '../../src/client/network/activity_badge_dispatcher.js';
+import { detectAuctionActivities } from '../../src/client/network/activity_tracker.js';
+import { resolveTransactionNarrative } from '../../src/client/ui/transaction_narrative.js';
 import * as turnOrchestratorModule from '../../src/server/network/turn_orchestrator.js';
+import { TurnOrchestrator } from '../../src/server/network/turn_orchestrator.js';
 
 import { RoomManager } from '../../src/server/room_manager.js';
 import { SessionManager } from '../../src/server/session_manager.js';
@@ -26,14 +30,6 @@ import {
 } from '../../src/client/store/game_store.js';
 import type { CellDelta } from '../../src/server/session_manager.js';
 import type { ActivityLogEntry } from '../../src/client/store/activity_store.js';
-
-// Safe namespace accessor aliases for newly introduced symbols
-const detectCellTrade = activityPropertyTrackerModule.detectCellTrade;
-const detectFinancialAndStatusActivities = activityFinancialTrackerModule.detectFinancialAndStatusActivities;
-const detectAuctionActivities = activityTrackerModule.detectAuctionActivities;
-const dispatchActivityFloatingBadges = activityBadgeDispatcherModule.dispatchActivityFloatingBadges;
-const resolveTransactionNarrative = transactionNarrativeModule.resolveTransactionNarrative;
-const TurnOrchestrator = turnOrchestratorModule.TurnOrchestrator;
 
 // ============================================================================
 // FIXTURES
@@ -524,11 +520,7 @@ describe('[TC-219.01/MSS..TC-219.16/MSS][UC-IMP219] Bot Action Pacing & Visual F
         },
       };
       const context = {
-        boughtCellIndices: [],
-        buyoutCellIndices: [],
-        upgradedCells: [],
-        mortgagedCells: [],
-        unmortgagedCells: [],
+        boughtCellIndices: [], buyoutCellIndices: [], upgradedCells: [], mortgagedCells: [], unmortgagedCells: [],
       };
 
       // Gói delta 1: Phát sinh đúng 1 entry
@@ -590,14 +582,8 @@ describe('[TC-219.01/MSS..TC-219.16/MSS][UC-IMP219] Bot Action Pacing & Visual F
       ];
       const delta: any = {
         lastHoseResult: {
-          playerId: 'player-buyer',
-          playerName: 'Tỷ Phú Hà Thành',
-          stake: 1000,
-          payout: 1500,
-          profit: 500,
-          multiplier: 1.5,
-          roll: 4,
-          timestamp: Date.now(),
+          playerId: 'player-buyer', playerName: 'Tỷ Phú Hà Thành',
+          stake: 1000, payout: 1500, profit: 500, multiplier: 1.5, roll: 4, timestamp: Date.now(),
         },
       };
 

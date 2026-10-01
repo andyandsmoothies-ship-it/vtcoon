@@ -474,8 +474,8 @@ describe('[UC-IMP191] Financial Flow Transparency & Badge Clarity Contract Suite
       });
 
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
-      // Vị trí hiển thị trên mobile (class flex đơn độc, không bị che bởi hidden md:flex)
-      const mobileVisibleSegment = html.split('w-full flex justify-start sm:justify-center')[1] ?? html.split('w-full flex justify-center flex')[1];
+      const segments = html.split('w-full flex justify-start sm:justify-center');
+      const mobileVisibleSegment = segments[segments.length - 1];
       expect(mobileVisibleSegment).toBeDefined();
       expect(mobileVisibleSegment).toContain('-200 Tr.');
     });

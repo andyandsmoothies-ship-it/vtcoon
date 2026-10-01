@@ -25,6 +25,8 @@ export interface TitleDeedRentTableProps {
   readonly isOwner?: boolean;
   readonly compact?: boolean;
   readonly cellIndex?: number;
+  readonly isUpgradedUtility?: boolean;
+  readonly isETC?: boolean;
 }
 
 export function TitleDeedRentTable({
@@ -37,6 +39,8 @@ export function TitleDeedRentTable({
   isOwner = false,
   compact = false,
   cellIndex,
+  isUpgradedUtility = false,
+  isETC = false,
 }: TitleDeedRentTableProps): React.ReactElement {
   const [isExpanded, setIsExpanded] = React.useState(false);
   const tiers = isRailroad ? RAILROAD_TIERS : PROPERTY_TIERS;
@@ -182,10 +186,27 @@ export function TitleDeedRentTable({
                   <span className="font-bold text-[11px] sm:text-xs text-amber-950 truncate">
                     {cellIndex === 28 ? 'Nâng Cấp Trạm Phát 5G' : 'Lưới Điện Thông Minh (Smart Grid)'}
                   </span>
+                  {isUpgradedUtility && (
+                    <span className="px-1.5 py-0.5 bg-emerald-600 text-white rounded font-bold text-[9px] shrink-0">
+                      ĐÃ NÂNG CẤP
+                    </span>
+                  )}
                 </div>
                 <span className="font-mono font-black text-[11px] sm:text-xs text-amber-900 shrink-0">
                   3.500
                 </span>
+              </div>
+
+              <div className="p-2 rounded-xl bg-amber-50/90 border border-amber-300 text-slate-800 text-[11px] leading-snug">
+                <div className="font-bold flex items-center gap-1 text-amber-950 mb-0.5">
+                  <span>{cellIndex === 28 ? '📡' : '⚡'}</span>
+                  <span>{cellIndex === 28 ? 'ĐẶC QUYỀN VIỄN THÔNG VỆ TINH' : 'ĐẶC QUYỀN MẠNG LƯỚI ĐIỆN QUỐC GIA'}</span>
+                </div>
+                <p className="text-slate-700">
+                  {cellIndex === 28
+                    ? 'Thu cước data di động 150 Tr. VNĐ mỗi khi đối thủ dừng chân tại ô Cơ Hội hoặc Thị Trường.'
+                    : 'Thu tiền điện thụ động khi đối thủ vượt qua ô Bắt Đầu: C1: 100 Tr., C2: 200 Tr., C3: 300 Tr. cho mỗi ô sở hữu (tối đa 1.000 Tr.).'}
+                </p>
               </div>
             </div>
           ) : (
@@ -220,9 +241,21 @@ export function TitleDeedRentTable({
                         {tier?.chip}
                       </span>
                       <div className="flex flex-col min-w-0">
-                        <span className="font-bold text-[11px] sm:text-xs text-slate-900 truncate">
-                          {tier?.label}
-                        </span>
+                        <div className="flex items-center gap-1 min-w-0">
+                          <span className="font-bold text-[11px] sm:text-xs text-slate-900 truncate">
+                            {tier?.label}
+                          </span>
+                          {(cellIndex === 6 || cellIndex === 8 || cellIndex === 26 || cellIndex === 27) && idx === 2 && (
+                            <span className="shrink-0 text-[9px] px-1 py-0.5 bg-amber-100 text-amber-900 rounded font-black border border-amber-300">
+                              Phụ thu 1D6
+                            </span>
+                          )}
+                          {(cellIndex === 6 || cellIndex === 8 || cellIndex === 26 || cellIndex === 27) && idx === 3 && (
+                            <span className="shrink-0 text-[9px] px-1 py-0.5 bg-rose-100 text-rose-900 rounded font-black border border-rose-300">
+                              Giữ Chân Mất Lượt
+                            </span>
+                          )}
+                        </div>
                         <span className="text-[11px] text-slate-600 font-medium truncate">
                           {cost && cost > 0 ? `Nâng cấp: +${formatCurrency(cost)}` : tier?.sub}
                         </span>
@@ -248,6 +281,20 @@ export function TitleDeedRentTable({
                   </div>
                 );
               })}
+              {isRailroad && (
+                <div className="p-2 rounded-xl bg-blue-50/90 border border-blue-300 text-slate-800 text-[11px] leading-snug">
+                  <div className="font-bold flex items-center justify-between text-blue-950 mb-0.5">
+                    <div className="flex items-center gap-1">
+                      <span>🏷️</span>
+                      <span>GÓI CẢNG THÔNG MINH & ETC</span>
+                    </div>
+                    {isETC && <span className="px-1.5 py-0.5 bg-emerald-600 text-white rounded font-bold text-[9px]">ĐÃ KÍCH HOẠT (+50%)</span>}
+                  </div>
+                  <p className="text-slate-700">
+                    Sở hữu ≥ 2 ô Hạ Tầng: Chi phí 1.500 Tr./ô, tăng +50% cước phí toàn bộ hệ thống hạ tầng đang nắm giữ.
+                  </p>
+                </div>
+              )}
             </div>
           )}
 

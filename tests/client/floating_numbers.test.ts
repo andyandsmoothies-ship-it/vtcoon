@@ -111,6 +111,7 @@ describe('[TC-VFX02.3/MSS] applyDeltaToStore Tu Dong Kich Hoat Floating Text The
   });
 
   it('Kich hoat Reward (+2.000) khi so du tang do thuong Khởi Hành (GO)', () => {
+    useGameStore.setState({ playerPositions: { p1: 38 } });
     const delta: DeltaPayload = {
       tick: 1,
       cells: [],
@@ -120,6 +121,7 @@ describe('[TC-VFX02.3/MSS] applyDeltaToStore Tu Dong Kich Hoat Floating Text The
     };
 
     applyDeltaToStore(delta, useGameStore);
+    vi.advanceTimersByTime(2000);
 
     const fts = useGameStore.getState().floatingTexts;
     expect(fts).toHaveLength(1);

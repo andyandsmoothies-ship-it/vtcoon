@@ -139,6 +139,7 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
           myPlayer,
           playersInfo,
           levelMap: useGameStore.getState().levelMap,
+          propertyStates: useGameStore.getState().propertyStates,
           activeModifiers: useGameStore.getState().activeModifiers,
           turnPhase: useGameStore.getState().turnPhase,
           currentTurnPlayerId: useGameStore.getState().currentTurnPlayerId,
@@ -162,6 +163,8 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
             hasMonopoly={deedState.hasMonopoly}
             upgradeBlockedReason={deedState.upgradeBlockedReason}
             downgradeBlockedReason={deedState.downgradeBlockedReason}
+            isUpgradedUtility={deedState.isUpgradedUtility}
+            isETC={deedState.isETC}
             buyerBalance={myPlayer?.balance ?? 0}
             buyerId={myId}
             allPlayers={playersInfo}
@@ -170,7 +173,16 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
               onIntent?.({ type: 'INTENT_BUY_PROPERTY' });
               closeModal();
             }}
-            onUpgrade={() => { onIntent?.({ type: 'INTENT_UPGRADE', cellIndex: payload.cellIndex }); closeModal(); }}
+            onUpgrade={() => {
+              if (deedState.isUtility) {
+                onIntent?.({ type: 'INTENT_UPGRADE_UTILITY', cellIndex: payload.cellIndex });
+              } else if (deedState.isRailroad) {
+                onIntent?.({ type: 'INTENT_UPGRADE_ETC', cellIndex: payload.cellIndex });
+              } else {
+                onIntent?.({ type: 'INTENT_UPGRADE', cellIndex: payload.cellIndex });
+              }
+              closeModal();
+            }}
             onDowngrade={() => { onIntent?.({ type: 'INTENT_DOWNGRADE', cellIndex: payload.cellIndex }); closeModal(); }}
             onMortgage={() => { onIntent?.({ type: 'INTENT_MORTGAGE', cellIndex: payload.cellIndex }); closeModal(); }}
             onRedeem={() => { onIntent?.({ type: 'INTENT_REDEEM', cellIndex: payload.cellIndex }); closeModal(); }}

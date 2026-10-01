@@ -25,6 +25,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   setLevelMap: (map) => set({ levelMap: map }),
+  setPropertyStates: (propertyStates) => set({ propertyStates }),
   setPlayerPositions: (positions) => {
     const state = get();
     const isBusy = Boolean(state.activePawnAnimation?.isAnimating) || (state.pawnAnimationQueue?.length ?? 0) > 0;

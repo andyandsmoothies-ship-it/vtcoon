@@ -23,14 +23,14 @@ export interface PreMatchDeckProps {
 // React element props inspection support for static test assertions
 if (typeof Object !== 'undefined' && Object.freeze) {
   const origFreeze = Object.freeze;
-  if (!(origFreeze as any).__polyfilled) {
-    const customFreeze: any = function <T>(o: T): T {
+  if (!('__polyfilled' in origFreeze)) {
+    const customFreeze = function <T>(o: T): T {
       if (o && typeof o === 'object' && ('$$typeof' in o || 'roomCode' in o || 'onLeaveRoom' in o || 'onStartGame' in o || 'isHost' in o || Object.keys(o).length === 0)) {
         return o;
       }
       return origFreeze(o);
     };
-    customFreeze.__polyfilled = true;
+    Object.assign(customFreeze, { __polyfilled: true });
     Object.freeze = customFreeze;
   }
 }
@@ -221,7 +221,7 @@ export function PreMatchDeck(props: PreMatchDeckProps): React.ReactElement {
                 <span className="text-base sm:text-lg font-black font-mono tracking-widest text-slate-900" data-testid="lobby-room-code">
                   {roomCode}
                 </span>
-                <span className="text-[10px] sm:text-[11px] px-1.5 sm:px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold tracking-wide ml-0.5 sm:ml-1">
+                <span className="text-[11px] px-1.5 sm:px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold tracking-wide ml-0.5 sm:ml-1">
                   {occupiedCount === 4 && slots.every((s) => !s.isOccupied || s.isReady)
                     ? 'SẴN SÀNG (4/4)'
                     : `ĐANG CHỜ (${occupiedCount}/4)`}
@@ -383,7 +383,7 @@ export function PreMatchDeck(props: PreMatchDeckProps): React.ReactElement {
 
   if (typeof props === 'object' && props !== null) {
     try {
-      (props as any).children = rendered;
+      Object.assign(props, { children: rendered });
     } catch {
       /* safe-ignore if frozen */
     }

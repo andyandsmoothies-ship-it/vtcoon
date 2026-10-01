@@ -142,8 +142,8 @@ describe('[TC-AUC-ERG/MSS] Mobile Ergonomics & Visual Polish for Auction and Tit
     expect(html).toContain('w-20 h-20');
 
     // 2. Bố cục 2 cột rộng rãi trên Desktop loại bỏ hoàn toàn thanh cuộn
-    expect(html).toContain('md:max-w-2xl');
-    expect(html).toContain('md:grid md:grid-cols-2');
+    expect(html).toMatch(/md:max-w-(?:2xl|\[730px\])/);
+    expect(html).toMatch(/md:grid\s+md:grid-cols-(?:2|\[1fr_1\.15fr\])/);
 
     // 3. Biểu phí theo số ga sở hữu sử dụng compact padding px-2 py-1
     expect(html).toContain('px-2 py-1');

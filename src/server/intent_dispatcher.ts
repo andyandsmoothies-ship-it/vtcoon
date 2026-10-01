@@ -18,7 +18,7 @@ export type PlayerIntent =
   | { type: 'INTENT_BID'; amount: number; isBait?: boolean }
   | { type: 'INTENT_AUCTION_PASS' }
   | { type: 'INTENT_UPGRADE'; cellIndex: number }
-  | { type: 'INTENT_UPGRADE_ETC' }
+  | { type: 'INTENT_UPGRADE_ETC'; cellIndex?: number }
   | { type: 'INTENT_UPGRADE_UTILITY'; cellIndex: number }
   | { type: 'INTENT_DOWNGRADE'; cellIndex: number; stepByStep?: boolean; enforceEvenDowngrading?: boolean }
   | { type: 'INTENT_MORTGAGE'; cellIndex: number }

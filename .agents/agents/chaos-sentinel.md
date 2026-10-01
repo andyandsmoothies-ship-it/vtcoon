@@ -35,25 +35,24 @@ Inspect the perimeter gateway vs the core domain model:
 2. **Dynamic Parity Check**: Check `Size(Edge) === Size(Core)` dynamically. Log the count in evidence JSON as `intentCount`.
 3. If `Size(Edge) !== Size(Core)`: Emit verdict **`BLOCKED: PARITY_GAP`** listing missing or extra intents.
 
-## 3. Probe 2: Ephemeral Boundary Smoke Probe (Zero-Mock Socket/Wire)
+## 3. Probe 2: Ephemeral Boundary Smoke & Socket Chaos (Zero-Mock Wire, port 0)
 Automated via `scripts/station4_sentinel.ts`:
 1. Spawns `new WssServer({ port: 0 })` on a real dynamic ephemeral port assigned by the OS.
 2. Connects a live WebSocket client over TCP, sends raw JSON envelopes, and verifies state transition without mock divergence.
-3. Teardown guarantee: Closes sockets and terminates server within `< 2s` with zero lingering timers or background hangs.
-4. If socket fails or times out: Emit verdict **`BLOCKED: MOCK_DIVERGENCE`**.
-5. Boundary fuzzing: Probed inputs must survive canonical boundaries: `[undefined, null, '', '   ', NaN]`. Any unhandled crash is **`BLOCKED: BOUNDARY_CRASH`**.
+3. Chaos Sub-Probe: Executes abrupt TCP termination (RST / drop without close handshake) to verify server survives without unhandled rejections or leaked timers.
+4. Teardown guarantee: Closes sockets and terminates server within `< 2s` with zero lingering timers or background hangs.
+5. If socket fails or times out: Emit verdict **`BLOCKED: MOCK_DIVERGENCE`**.
 
-## 4. Probe 3: Targeted Mutation Sensitivity Probe
-- **BANNED INLINE MUTANTS**: Strictly forbidden to write artificial mutant variables inside the test file and assert their failure (`const m = false; expect(() => expect(m).toBe(true)).toThrow()`). This is a tautological test proving zero production resilience.
-- **Diff-Driven Target Selection**: Read the ticket diff to identify the 3–5 highest-risk modified branches (guard conditions, operators, tombstone serialization).
+## 4. Probe 3: Universal Mutation Sensitivity Probe
+- **Modular Architecture**: Uses Universal Mutation Engine (Part 1) and Stack Adapter (Part 2).
+- **Safety Rollback Guarantee**: When testing source code (`src/**`), uses `try...finally` with timestamped backup files ensuring 100% unconditional file restoration if execution aborts.
+- **Universal Semantic Operators**: Inverts comparisons (`===` <-> `!==`, `>` <-> `<=`), arithmetic (`+` <-> `-`), boolean flags, threshold limits, and error assertions. Banned stale ticket-specific hardcodes.
+- **BANNED INLINE MUTANTS**: Strictly forbidden to write artificial mutant variables inside the test file and assert their failure (`const m = false; expect(() => expect(m).toBe(true)).toThrow()`).
 - **Standard Execution**:
-  1. Use physical sandbox runner: `npm run sentinel -- --ticket [TICKET_ID] --test [CONTRACT_TEST_PATH]` to inject physical mutations into sandbox and verify exit code != 0 (KILLED).
-  2. If writing dedicated probe test files in `tests/probes/`:
-     - Import and execute REAL production exports (never wrappers or inline clones).
-     - Assertions must fail immediately when production logic is removed or altered.
-- **Probe Test Floor**:
-  - Probe 3 mutation floor: Minimum >= 5 mutants tested. All mutants must be killed (0 survived).
-  - Probe suites in `tests/probes/`: Minimum 14 atomic tests (Probe 1: >= 5, Probe 2: >= 4, Probe 3: >= 5).
+  ```bash
+  npm run sentinel -- --ticket [TICKET_ID] --test [CONTRACT_TEST_PATH] [--src [TARGET_SRC_PATH]]
+  ```
+- **Probe Test Floor**: Minimum >= 5 mutants tested. All mutants must be killed (0 survived).
 
 ## 5. Evidence Snapshot & Output Format
 Results are persisted to `.agents/evidence/chaos_sentinel_[TICKET_ID].json`:

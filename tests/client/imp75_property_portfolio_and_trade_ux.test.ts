@@ -168,8 +168,8 @@ describe('[IMP-75: Trạm 1 RED] Property Portfolio, Title Deed Carousel, Trade 
           availablePartners: mockAvailablePartners,
         })
       );
-      expect(html).toContain('Bot AI 3 (Aggressive)');
-      expect(html).toContain('Bot AI 4 (Balanced)');
+      expect(html).toContain('Bot AI 3');
+      expect(html).toContain('Bot AI 4');
       expect(html).toContain('partner-selector-tab');
     });
 

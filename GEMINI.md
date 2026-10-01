@@ -14,9 +14,12 @@
   - Pre-Coding LOC Baseline: Measure via `npm run check:loc <files>` before drafting. Delta = `[Lines Added] - [Lines Deleted]`. If Tier 1 Expected > 400 or Tier 2 > 480, Task 1 MUST extract submodules before adding features. Subtractive refactoring mandatory when replacing mechanisms.
 - **Risk-Based Autonomous Tiering & 4-Station Closed-Loop Pipeline**:
   - *Tier 1 (Fast-Track)*: < 50 LOC, pure visual/CSS/spacing, audio, text, or isolated fix to 1-2 files (0 Schema, 0 FSM/Server, 0 Network). Main agent executes directly in 1-2 minutes (Zero subagents, no plan). UI tweaks must NEVER bundle with network/timing.
-  - *Tier 2 (Full Rigor)*: Schema, Network, FSM, or > 50 LOC. Main agent drafts plan, invokes `plan-griller` (P1-P5 audit), renders `🚦 [ACTIVATE 4-STATION CLOSED-LOOP PIPELINE]`, then executes 4-Station Pipeline:
-    - **Hard Gate**: A Tier 2 plan is NOT executable without a `HARDENED_APPROVED` verdict from `plan-griller` written to `.agents/audit/PLAN_AUDIT_[TICKET].md`. Self-attestation labels ("Phê chuẩn kỹ thuật", "Technical Approval", "Approved") carry zero weight and constitute a gate bypass. Agent MUST halt and invoke `plan-griller` if this file is missing.
-    - **Human Review Gate**: Sau khi `plan-griller` duyệt `HARDENED_APPROVED`, Main Agent BẮT BUỘC DỪNG LẠI trình kế hoạch cho User, chỉ kích hoạt Trạm 1 khi User phê chuẩn rõ ràng.
+  - *Tier 2 (Full Rigor)*: Schema, Network, FSM, or > 50 LOC. Main agent drafts plan, executes Two-Stage Plan Hardening, renders `🚦 [ACTIVATE 4-STATION CLOSED-LOOP PIPELINE]`, then executes 4-Station Pipeline:
+    - **Two-Stage Plan Hardening Gate**:
+      1. Stage A (Structural & Mechanical Audit): `plan-griller` verifies 5 Pillars (P1-P5) and physical disk baseline via `node scripts/audit_plan.mjs`.
+      2. Stage B (Adversarial Challenge): `adversarial-challenger` probes novel attack vectors, concurrency/race hazards, economic exploits, and cascading failures into `.agents/audit/PLAN_CHALLENGE_[TICKET].md`.
+      3. Hard Gate Verdict: Plan author reconciles all directives. Requires `HARDENED_APPROVED` verdict in `.agents/audit/PLAN_AUDIT_[TICKET].md`. Self-attestation carries zero weight.
+    - **Human Review Gate**: After `HARDENED_APPROVED`, Main Agent MUST HALT and present plan to User. Proceed to Station 1 only upon explicit User approval.
     - **Scope Bundling Ban**: Plans bundling > 2 unrelated change categories (e.g. server FSM + CSS visual + 3D rendering) MUST be split into separate tickets before grilling. Each ticket targets one domain. Bundled mega-plans are rejected at gate.
     1. Station 1 (RED Contract Test): `qa-tester` writes edge/contract tests in `tests/**` and proves failure (Adversarial Inversion). FORBIDDEN from editing `src/**`. Atomic test mandate (1-4 asserts/test, zero loops in `it()`, zero static checklist tests). Universal 5-Facet Matrix. Floor: >= 15 atomic tests / slice.
     2. Station 2 (GREEN Implementation): `implementer` writes minimum code in `src/**` to pass tests. Zero bug-codification.
@@ -38,7 +41,7 @@
 - **Domain Specialist Delegations & Craft Invariants**:
   - 3D Visual & Spatial Standards (Zero-Blank-Material, Ground Truth Anchor): Governed by `game-3d-visual-critic` (`.agents/agents/game-3d-visual-critic.md`).
   - 2D UI Craft & Dual-Viewport Parity: Governed by `ui-craft-reviewer` (`.agents/agents/ui-craft-reviewer.md`) and `impeccable` skill. Passes `npm run lint:ui` with 0 violations.
-  - Architectural Stress-Testing & Blind Spots: Governed by `plan-griller` (`.agents/agents/plan-griller.md`).
+  - Architectural Stress-Testing & Novel Exploit Probing: Governed by `plan-griller` (`.agents/agents/plan-griller.md`) and `adversarial-challenger` (`.agents/agents/adversarial-challenger.md`).
   - Adversarial Boundary & Mutation Resilience: Governed by `chaos-sentinel` (`.agents/agents/chaos-sentinel.md`).
 
 ## 2. DEFINITION OF DONE

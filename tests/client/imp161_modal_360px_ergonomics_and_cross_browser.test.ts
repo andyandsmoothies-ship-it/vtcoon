@@ -216,7 +216,7 @@ describe('[FACET-1] Touch Target Ergonomics (>= 44px Mandate)', () => {
         initialRequested: [3],
       })
     );
-    const chipMatch = html.match(/<button[^>]*>[\s\S]*?120% \(\d+\)[\s\S]*?<\/button>/);
+    const chipMatch = html.match(/<button[^>]*>[\s\S]*?120%[^<]*\([\d\.,]+\)[\s\S]*?<\/button>/);
     expect(chipMatch).not.toBeNull();
     expect(chipMatch![0]).toContain('min-h-[44px]');
   });
@@ -237,7 +237,7 @@ describe('[FACET-1] Touch Target Ergonomics (>= 44px Mandate)', () => {
     expect(chipMatch![0]).toContain('min-h-[44px]');
   });
 
-  it('[TC-161.06e/MSS][UC-161] TradeModal: Chip gợi ý giá mua nhanh 130% có class chứa min-h-[44px]', () => {
+  it('[TC-161.06e/MSS][UC-161] TradeModal: Chip gợi ý giá mua nhanh 120% Lãi nhẹ có class chứa min-h-[44px]', () => {
     const html = renderToStaticMarkup(
       React.createElement(TradeModal, {
         targetPlayerId: 'p2',
@@ -248,7 +248,7 @@ describe('[FACET-1] Touch Target Ergonomics (>= 44px Mandate)', () => {
         initialRequested: [3],
       })
     );
-    const chipMatch = html.match(/<button[^>]*>[\s\S]*?130% \([\d\.,]+\)[\s\S]*?<\/button>/);
+    const chipMatch = html.match(/<button[^>]*>[\s\S]*?120%[^<]*\([\d\.,]+\)[\s\S]*?<\/button>/);
     expect(chipMatch).not.toBeNull();
     expect(chipMatch![0]).toContain('min-h-[44px]');
   });
@@ -264,7 +264,7 @@ describe('[FACET-1] Touch Target Ergonomics (>= 44px Mandate)', () => {
         initialRequested: [3],
       })
     );
-    const chipMatch = html.match(/<button[^>]*>[\s\S]*?150% \([\d\.,]+\)[\s\S]*?<\/button>/);
+    const chipMatch = html.match(/<button[^>]*>[\s\S]*?150%[^<]*\([\d\.,]+\)[\s\S]*?<\/button>/);
     expect(chipMatch).not.toBeNull();
     expect(chipMatch![0]).toContain('min-h-[44px]');
   });

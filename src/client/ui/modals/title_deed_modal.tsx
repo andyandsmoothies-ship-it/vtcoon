@@ -46,6 +46,8 @@ export interface TitleDeedModalProps {
   readonly canCoverWithMortgage?: boolean;
   readonly totalMortgageCapacity?: number;
   readonly onOpenMortgage?: () => void;
+  readonly isUpgradedUtility?: boolean;
+  readonly isETC?: boolean;
 }
 
 const MODIFIER_DESCS: Record<string, { icon: string; text: string }> = {
@@ -95,6 +97,8 @@ export function TitleDeedModal({
   canCoverWithMortgage,
   totalMortgageCapacity,
   onOpenMortgage,
+  isUpgradedUtility = false,
+  isETC = false,
 }: TitleDeedModalProps): React.ReactElement {
   const deed = getDeedDisplayInfo(cellIndex);
   const currentIndex = ownedProperties ? ownedProperties.indexOf(cellIndex) : -1;
@@ -150,9 +154,9 @@ export function TitleDeedModal({
   }
 
   const ribbonColor = deed.colorGroup ? COLOR_GROUP_HEX[deed.colorGroup] : '#334155';
-  const hasUpgrades = deed.upgradeCosts.some((cost) => cost > 0);
   const isRailroad = deed.cellType === CellType.Railroad;
   const isUtility = deed.cellType === CellType.Utility;
+  const hasUpgrades = isUtility ? !isUpgradedUtility : isRailroad ? !isETC : deed.upgradeCosts.some((cost) => cost > 0);
 
   const showImage = Boolean(tileAssetUrl) && !imageError;
 
@@ -332,6 +336,8 @@ export function TitleDeedModal({
               isOwner={isOwner}
               compact={canBuy && !isOwned}
               cellIndex={cellIndex}
+              isUpgradedUtility={isUpgradedUtility}
+              isETC={isETC}
             />
           </div>
         </div>
@@ -364,6 +370,11 @@ export function TitleDeedModal({
         canCoverWithMortgage={canCoverWithMortgage}
         totalMortgageCapacity={totalMortgageCapacity}
         onOpenMortgage={onOpenMortgage}
+        cellIndex={cellIndex}
+        isUtility={isUtility}
+        isRailroad={isRailroad}
+        isUpgradedUtility={isUpgradedUtility}
+        isETC={isETC}
       />
     </div>
 

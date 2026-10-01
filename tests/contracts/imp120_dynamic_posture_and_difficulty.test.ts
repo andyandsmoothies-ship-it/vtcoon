@@ -346,7 +346,7 @@ describe('[IMP-120][Trạm 1] Dynamic Context Adaptation & Anti-Leader Difficult
       expect(intent.type).toBe('INTENT_BID');
     });
 
-    it('[UC-IMP120/MSS-16] Bot dừng ép giá và Pass khi giá đấu vượt quá 1.40x giá niêm yết', () => {
+    it('[UC-IMP120/MSS-16] Bot dừng ép giá và Pass khi giá đấu vượt quá ngưỡng trần ép giá', () => {
       const bot = createMockPlayer('bot_bidder', 12000, 0, true);
       const human = createMockPlayer('human_p1', 15000, 0, false);
       const room = createMockRoom();
@@ -354,7 +354,7 @@ describe('[IMP-120][Trạm 1] Dynamic Context Adaptation & Anti-Leader Difficult
       room.currentAuction = {
         cellIndex: 3,
         declinedPlayerId: 'p_declined',
-        highestBid: 900, // Giá gốc 600 Tr. ➔ 900 là 1.50x
+        highestBid: 1400, // Giá gốc 600 Tr. ➔ 1400 vượt trần duel (2.20x = 1320 Tr.)
         highestBidderId: 'human_p1',
         highestBidder: 'human_p1',
         bidIncrement: 50,

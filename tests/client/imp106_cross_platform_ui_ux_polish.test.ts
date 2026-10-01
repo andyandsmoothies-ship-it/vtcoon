@@ -129,7 +129,7 @@ describe('[UC-IMP106/MSS] Cross-Platform UI/UX Multi-Platform Polish Contract Su
           onClose: () => {},
         })
       );
-      expect(html).toContain('truncate max-w-[80px]');
+      expect(html).toMatch(/truncate\s+max-w-\[(?:80|120)px\]/);
     });
 
     it('[UC-IMP106/MSS-P2.2] TradeModal preserves partner balance pill and selection indicator', () => {

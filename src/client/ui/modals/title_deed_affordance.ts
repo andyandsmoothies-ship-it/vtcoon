@@ -1,6 +1,6 @@
 // [IMP-204] Title Deed Affordance & Even Build Rules Calculation
 import { PROPERTY_DEEDS } from '../../../domain/property_data.js';
-import { BOARD_CONFIG, type ColorGroup } from '../../../domain/board_config.js';
+import { BOARD_CONFIG, CellType, type ColorGroup } from '../../../domain/board_config.js';
 import type { Player } from '../../../domain/types.js';
 
 export interface PurchaseAffordance {
@@ -18,6 +18,7 @@ export function resolvePurchaseAffordance(params: {
   ownedProperties?: readonly number[];
   mortgagedProperties?: readonly number[];
   levelMap?: Record<number, number>;
+  propertyStates?: Record<number, { level?: number; isETC?: boolean; isUpgradedUtility?: boolean }>;
   isTradeFrozen?: boolean;
 }): PurchaseAffordance {
   const deed = PROPERTY_DEEDS.get(params.cellIndex);
@@ -46,7 +47,7 @@ export function resolvePurchaseAffordance(params: {
   for (const idx of owned) {
     if (idx === params.cellIndex) continue;
     if (mortgaged.has(idx)) continue;
-    if ((levels[idx] ?? 0) > 0) continue; // BĐS có công trình phải hạ cấp trước
+    if ((levels[idx] ?? 0) > 0 || params.propertyStates?.[idx]?.isETC || params.propertyStates?.[idx]?.isUpgradedUtility) continue; // BĐS có công trình hoặc đã nâng cấp không thể thế chấp
     const d = PROPERTY_DEEDS.get(idx);
     if (d) {
       totalMortgageCapacity += Math.floor(d.price * 0.5);
@@ -84,31 +85,33 @@ export function resolveMonopolyGroupInfo(params: {
 }
 
 export function resolveEvenBuildRules(params: {
-  isOwner: boolean;
-  isMortgaged: boolean;
-  hasAllProperties: boolean;
-  hasAnyGroupMortgaged: boolean;
-  currentLevel: number;
-  cellIndex: number;
-  groupCells: readonly number[];
-  levelMap: Record<number, number>;
-}): { upgradeBlockedReason?: string; downgradeBlockedReason?: string } {
+  readonly isOwner: boolean;
+  readonly isMortgaged: boolean;
+  readonly hasAllProperties: boolean;
+  readonly hasAnyGroupMortgaged: boolean;
+  readonly currentLevel: number;
+  readonly cellIndex: number;
+  readonly groupCells: readonly number[];
+  readonly levelMap: Record<number, number>;
+}): { readonly upgradeBlockedReason?: string; readonly downgradeBlockedReason?: string } {
   let upgradeBlockedReason: string | undefined = undefined;
   if (params.isOwner && !params.isMortgaged) {
-    if (params.currentLevel >= 3) {
-      upgradeBlockedReason = 'Đã đạt cấp độ tối đa';
-    } else if (!params.hasAllProperties) {
-      upgradeBlockedReason = 'Cần sở hữu trọn bộ màu trước khi nâng cấp';
-    } else if (params.hasAnyGroupMortgaged) {
-      upgradeBlockedReason = 'Không thể nâng cấp khi nhóm có ô thế chấp';
-    } else if (params.groupCells.length > 0) {
-      const targetLevel = params.currentLevel + 1;
-      const laggingCells = params.groupCells
-        .filter((idx) => idx !== params.cellIndex)
-        .filter((idx) => (params.levelMap[idx] ?? 0) < targetLevel - 1);
-      if (laggingCells.length > 0) {
-        const names = laggingCells.map((idx) => BOARD_CONFIG[idx]?.name ?? `Ô ${idx}`).join(', ');
-        upgradeBlockedReason = `Quy tắc xây dựng đều tay: Cần nâng cấp ${names} lên C${targetLevel - 1} trước khi xây C${targetLevel}`;
+    if (params.groupCells.length > 0) {
+      if (params.currentLevel >= 3) {
+        upgradeBlockedReason = 'Đã đạt cấp độ tối đa';
+      } else if (!params.hasAllProperties) {
+        upgradeBlockedReason = 'Cần sở hữu trọn bộ màu trước khi nâng cấp';
+      } else if (params.hasAnyGroupMortgaged) {
+        upgradeBlockedReason = 'Không thể nâng cấp khi nhóm có ô thế chấp';
+      } else {
+        const targetLevel = params.currentLevel + 1;
+        const laggingCells = params.groupCells
+          .filter((idx) => idx !== params.cellIndex)
+          .filter((idx) => (params.levelMap[idx] ?? 0) < targetLevel - 1);
+        if (laggingCells.length > 0) {
+          const names = laggingCells.map((idx) => BOARD_CONFIG[idx]?.name ?? `Ô ${idx}`).join(', ');
+          upgradeBlockedReason = `Quy tắc xây dựng đều tay: Cần nâng cấp ${names} lên C${targetLevel - 1} trước khi xây C${targetLevel}`;
+        }
       }
     }
   }
@@ -146,6 +149,7 @@ export function resolveTitleDeedModalState(params: {
   myPlayer?: AffordancePlayer | Player | null;
   playersInfo: Record<string, AffordancePlayer | Player>;
   levelMap?: Record<number, number>;
+  propertyStates?: Record<number, { level?: number; isETC?: boolean; isUpgradedUtility?: boolean }>;
   activeModifiers?: readonly { readonly type: string; readonly remainingRounds: number }[];
   turnPhase?: string | null;
   currentTurnPlayerId?: string | null;
@@ -159,6 +163,12 @@ export function resolveTitleDeedModalState(params: {
   const upgradeCost = deed?.upgradeCosts && currentLevel < 3 ? deed.upgradeCosts[currentLevel as 0 | 1 | 2] : 0;
 
   const cell = BOARD_CONFIG[params.cellIndex];
+  const isUtility = cell?.type === CellType.Utility;
+  const isRailroad = cell?.type === CellType.Railroad;
+  const propState = params.propertyStates?.[params.cellIndex];
+  const isUpgradedUtility = Boolean(propState?.isUpgradedUtility);
+  const isETC = Boolean(propState?.isETC);
+
   const groupInfo = resolveMonopolyGroupInfo({
     colorGroup: cell?.colorGroup,
     ownerProperties: owner?.ownedProperties,
@@ -176,6 +186,29 @@ export function resolveTitleDeedModalState(params: {
     levelMap: params.levelMap ?? {},
   });
 
+  let effectiveUpgradeCost = upgradeCost;
+  let specialUpgradeBlockedReason: string | undefined;
+
+  if (isUtility && isOwner && !isMortgaged) {
+    effectiveUpgradeCost = 1000;
+    if (isUpgradedUtility) {
+      specialUpgradeBlockedReason = 'Đã nâng cấp tối đa (Smart Grid / 5G)';
+    } else if ((params.myPlayer?.balance ?? 0) < 1000) {
+      specialUpgradeBlockedReason = 'Cần 1.000 Tr. VNĐ để nâng cấp lưới điện/5G';
+    }
+  } else if (isRailroad && isOwner && !isMortgaged) {
+    const playerOwned = (params.myPlayer as AffordancePlayer)?.ownedProperties ?? owner?.ownedProperties ?? [];
+    const ownedRailroads = playerOwned.filter((idx: number) => BOARD_CONFIG[idx]?.type === CellType.Railroad);
+    effectiveUpgradeCost = 1500 * (ownedRailroads.length || 1);
+    if (isETC) {
+      specialUpgradeBlockedReason = 'Đã kích hoạt Gói Cảng Thông Minh & ETC';
+    } else if (ownedRailroads.length < 2) {
+      specialUpgradeBlockedReason = 'Cần sở hữu từ 2 ô Hạ Tầng trở lên để nâng cấp ETC';
+    } else if ((params.myPlayer?.balance ?? 0) < effectiveUpgradeCost) {
+      specialUpgradeBlockedReason = `Cần ${effectiveUpgradeCost} Tr. VNĐ để nâng cấp ETC (${ownedRailroads.length} ga)`;
+    }
+  }
+
   const isTradeFrozen = Boolean(params.activeModifiers?.some((m) => m.type === 'MC_FREEZE_TRADE' && m.remainingRounds > 0));
 
   const affordance = resolvePurchaseAffordance({
@@ -184,6 +217,7 @@ export function resolveTitleDeedModalState(params: {
     ownedProperties: (params.myPlayer as AffordancePlayer)?.ownedProperties,
     mortgagedProperties: (params.myPlayer as AffordancePlayer)?.mortgagedProperties,
     levelMap: params.levelMap ?? {},
+    propertyStates: params.propertyStates,
     isTradeFrozen,
   });
 
@@ -200,15 +234,22 @@ export function resolveTitleDeedModalState(params: {
         )
   );
 
+  const hasUpgrades = isUtility ? !isUpgradedUtility : isRailroad ? !isETC : (deed?.upgradeCosts?.some((cost) => cost > 0) ?? false);
+
   return {
     owner,
     isOwner,
     isMortgaged,
     ownerName: owner?.name,
     currentLevel,
-    upgradeCost,
+    upgradeCost: effectiveUpgradeCost,
+    hasUpgrades,
+    isUtility,
+    isRailroad,
+    isUpgradedUtility,
+    isETC,
     hasMonopoly: groupInfo.hasMonopoly,
-    upgradeBlockedReason: buildRules.upgradeBlockedReason,
+    upgradeBlockedReason: specialUpgradeBlockedReason ?? buildRules.upgradeBlockedReason,
     downgradeBlockedReason: buildRules.downgradeBlockedReason,
     canBuy: params.canBuyOverride ?? (affordance.canAffordCash && !isTradeFrozen),
     isBuyOpportunity,

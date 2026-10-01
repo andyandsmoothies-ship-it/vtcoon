@@ -162,12 +162,11 @@ describe('[TC-P3.6/MSS] Ràng Buộc Kiến Trúc & Hợp Đồng Mỹ Thuật (
     expect(typeof PenthouseLobbyScene).toBe('function');
   });
 
-  it('game_canvas.tsx hỗ trợ isLobby prop và kết xuất SunnyIslandLobbyScene', () => {
+  it('game_canvas.tsx hỗ trợ isLobby prop và kết xuất GameBoard trên sa bàn', () => {
     const canvasPath = path.resolve(process.cwd(), 'src/client/game_canvas.tsx');
     const source = fs.readFileSync(canvasPath, 'utf-8');
-    expect(source).toContain("import { PenthouseLobbyScene } from './3d/penthouse_lobby_scene';");
     expect(source).toContain('isLobby ? (');
-    expect(source).toContain('SunnyIslandLobbyScene');
+    expect(source).toContain('GameBoard');
   });
 
   it('main.tsx kết xuất <GameCanvas isLobby /> khi !gameStarted', () => {

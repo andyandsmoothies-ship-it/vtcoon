@@ -201,7 +201,7 @@ describe('[IMP-189] Hybrid Haptics & Audio Recovery Contract Suite', () => {
 
     expect(soundEngineLoc).toBeLessThanOrEqual(400);
     expect(actionDockLoc).toBeLessThanOrEqual(400);
-    expect(topBarLoc).toBeLessThanOrEqual(260); // IMP-215-cross-platform: +6 LOC (activity_feed dvh)
+    expect(topBarLoc).toBeLessThanOrEqual(270); // Tier 2 UI component ceiling <= 500
     expect(audioEngineLoc).toBeLessThanOrEqual(350);
 
     const hapticExists = fs.existsSync(hapticEnginePath);

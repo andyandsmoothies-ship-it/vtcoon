@@ -125,7 +125,7 @@ export function lintSlopContent(content, filePath = 'anonymous.ts') {
 
   // Rule 5: zero-workaround-comments (Lauren Tan / Dune Invariant)
   // Prohibits comments papering over defects instead of solving root causes.
-  const WORKAROUND_REGEX = /\b(workaround|quick hack|dirty hack|temporary fix|temp fix|fix later)\b/i;
+  const WORKAROUND_REGEX = /\b(workaround|quick hack|dirty hack|temporary fix|temp fix|fix later)\b|(sửa tạm|vá tạm|lách luật|chữa cháy|bỏ qua tạm)/i;
   lines.forEach((lineText, idx) => {
     let commentText = null;
     const slashIndex = lineText.indexOf('//');

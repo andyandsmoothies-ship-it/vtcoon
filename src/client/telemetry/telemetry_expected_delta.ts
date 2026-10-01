@@ -273,10 +273,24 @@ export function computeExpectedDelta(
     // They do not deplete total system money. We absorb auction outflows up to the deficit.
     const hasTreasuryContext = postTreasury !== undefined || delta.treasury !== undefined;
     let absorbedTreasury = 0;
-    if (cellDelta < 0 && hasTreasuryContext && treasuryGain > 0) {
+    if (cellDelta < 0 && hasTreasuryContext) {
       const hasAuction = delta.cells.some((c) => isAuctionPurchase(c, preState, delta));
       if (hasAuction) {
-        absorbedTreasury = Math.abs(cellDelta);
+        const auctionCell = delta.cells.find((c) => isAuctionPurchase(c, preState, delta));
+        const buyerId = auctionCell?.ownerId;
+        let otherGain = 0;
+        if (delta.players) {
+          for (const p of delta.players) {
+            if (p.id !== buyerId && p.balance !== undefined) {
+              const preBal = preState.playersInfo[p.id]?.balance ?? 0;
+              otherGain += (p.balance - preBal);
+            }
+          }
+        }
+        const netSystemRetained = treasuryGain + otherGain;
+        if (netSystemRetained > 0) {
+          absorbedTreasury = Math.min(Math.abs(cellDelta), netSystemRetained);
+        }
       } else if (treasuryGain === -cellDelta) {
         absorbedTreasury = treasuryGain;
       }

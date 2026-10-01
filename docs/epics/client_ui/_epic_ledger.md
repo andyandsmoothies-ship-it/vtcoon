@@ -156,6 +156,8 @@
 | DEBT-ROOM-MGR-01 | room_manager.ts gom 10 Map phân tán vào GameRoomSession Aggregate Root, đưa file về 378 LOC (<= 400 LOC Tier 1) | IMP-205 / IMP-209 | IMP-210 (Bước 2) | ✅ ĐÃ ĐÓNG |
 | DEBT-IMP208P-01 | trade_modal.tsx:28 branch cash-only thiếu suffix "Tr." | IMP-208P | IMP-208P (Active Remediation) | ✅ ĐÃ KHẮC PHỤC (Inoculated TC-208P.09) |
 | DEBT-IMP220-01 | Chuẩn hóa magic string 'INVALID_PHASE' tại L143 (INTENT_AUTO_SOLVENCY) và L157 (INTENT_END_TURN) sang ActionRejectReason.INVALID_PHASE trong đợt refactor toàn bộ dispatcher | IMP-220 | Dispatcher Refactor Sprint | ⏳ ĐÃ GHI NHẬN |
+| DEBT-IMP240-01 | session_manager.ts đạt 398 LOC (sát trần 400 LOC Tier 1, còn 2 LOC) -> Cần bóc tách session serializer / delta builder sang submodule riêng | IMP-240 | Slice Server / Refactor Kế Tiếp | ⏳ ĐÃ GHI NHẬN |
+| DEBT-IMP240-02 | buildRules trong affordance.ts: đã refactor loại bỏ mutation trực tiếp sang biến immutable specialUpgradeBlockedReason | IMP-240 | IMP-240 (Active Remediation) | ✅ ĐÃ KHẮC PHỤC |
 
 ---
 
@@ -1529,4 +1531,64 @@
   * `code-reviewer`: Station 3.2 CODE_APPROVED (Anti-slop, Treasury conservation, Senior Lien an toàn, FSM cleanup).
   * `ui-craft-reviewer`: Station 3.2 UI_APPROVED (Trải nghiệm khán giả hoàn hảo, Dual-Viewport Parity).
   * `chaos-sentinel`: Station 4 APPROVED (3 Probes passed, 8/8 mutants killed, 0 survived).
+- **Trạng thái**: ✅ Hoàn thành IMP-240 (Fire Sale & Insolvency, 2026-10-01).
+
+---
+
+### [2026-10-01] IMP-240: Title Deed Affordance & Special Properties Transparency Overhaul (Đại Tu Tính Minh Bạch & Nút Hành Động Sổ Đỏ Cho Tiện Ích, Hạ Tầng và Dịch Vụ)
+- **Mục tiêu**: Xóa bỏ cảnh báo sai về bộ màu trên các ô không có nhóm màu, khôi phục cụm nút Nâng Cấp Smart Grid/5G (+1.000 Tr.) và Gói Kích Hoạt ETC (+1.500 Tr./ga), mở rộng Lát cắt dọc 5 trạm truyền nhận `isUpgradedUtility` và `isETC` kèm tombstone dọn dẹp khi thanh lý vỡ nợ, triệt tiêu hạn mức thế chấp ảo trong công cụ tính toán affordance, và minh bạch hóa 100% các đặc quyền thụ động (thu tiền điện qua GO của EVN, thu cước data di động của Viettel, tăng +50% cước của ETC, phụ thu 1D6 và giữ chân mất lượt của Dịch Vụ C2/C3).
+- **Hạng mục thi công cốt lõi**:
+  1. *FSM, DTO & Wire Protocol (`session_manager.ts`, `delta_broadcaster.ts`, `intent_dispatcher.ts`)*: Bổ sung `isUpgradedUtility?: boolean` vào `CellDelta`, xây dựng tombstone `{ isETC: false, isUpgradedUtility: false }` khi thanh lý ô đất; chuẩn hóa signature `INTENT_UPGRADE_ETC` hỗ trợ `cellIndex?: number`.
+  2. *Client Network Parser & Store State (`apply_delta_cells.ts`, `game_store_types.ts`, `game_store.ts`)*: Cập nhật và reset `propertyStates` theo chuẩn SRP, triệt tiêu hoàn toàn zombie upgrade flags khi ô đất bị đổi chủ hoặc thanh lý.
+  3. *Affordance & Mortgage Logic Engine (`title_deed_affordance.ts`)*: Bọc điều kiện `groupCells.length > 0` trong `resolveEvenBuildRules` gỡ sạch cảnh báo sai; loại trừ BĐS đã có ETC/SmartGrid trong `resolvePurchaseAffordance` chống tính hạn mức vay ma.
+  4. *Giao Diện Người Dùng & Điều Hướng (`title_deed_modal.tsx`, `title_deed_action_footer.tsx`, `title_deed_rent_table.tsx`, `modal_host.tsx`)*: Render nút nâng cấp Smart Grid/5G/ETC; hiển thị card đặc quyền điện lực/viễn thông/ETC và huy hiệu C2/C3; chặn thế chấp minh bạch có lý do; rẽ nhánh dispatch `INTENT_UPGRADE_UTILITY` và `INTENT_UPGRADE_ETC`.
+- **Hạ tầng & Ngân sách LOC Thực tế (`scripts/check_loc.mjs` - Total Lines / Non-Empty SLOC)**:
+  * `src/server/session_manager.ts` (Total: 398 / SLOC: 370 — Tier 1 <= 400 LOC)
+  * `src/server/network/delta_broadcaster.ts` (Total: 229 / SLOC: 201 — Tier 1 <= 400 LOC)
+  * `src/server/intent_dispatcher.ts` (Total: 185 / SLOC: 181 — Tier 1 <= 400 LOC)
+  * `src/client/network/apply_delta_cells.ts` (Total: 167 / SLOC: 151 — Tier 1 <= 400 LOC)
+  * `src/client/store/game_store_types.ts` (Total: 391 / SLOC: 366 — Tier 1 <= 400 LOC)
+  * `src/client/store/game_store.ts` (Total: 390 / SLOC: 358 — Tier 1 <= 400 LOC)
+  * `src/client/ui/modals/title_deed_affordance.ts` (Total: 258 / SLOC: 235 — Tier 2 <= 500 LOC)
+  * `src/client/ui/modals/title_deed_modal.tsx` (Total: 382 / SLOC: 357 — Tier 2 <= 500 LOC)
+  * `src/client/ui/modals/title_deed_action_footer.tsx` (Total: 233 / SLOC: 228 — Tier 2 <= 500 LOC)
+  * `src/client/ui/modals/title_deed_rent_table.tsx` (Total: 315 / SLOC: 298 — Tier 2 <= 500 LOC)
+  * `src/client/ui/modals/modal_host.tsx` (Total: 485 / SLOC: 468 — Tier 2 <= 500 LOC)
+  * `tests/contracts/imp240_title_deed_affordance_and_special_properties.test.ts` (Total: 586 / SLOC: 535 — Tests <= 600 LOC)
+- **Kiểm thử & Bất biến**:
+  * 18/18 atomic contract tests PASS trên `imp240_title_deed_affordance_and_special_properties.test.ts` (Universal 5-Facet Matrix, Detroit Classical TDD).
+  * 98/98 regression tests PASS trên các suites liên quan (`ui04_business_modals`, `imp140`, `imp204`, `imp207`, `imp209`).
+  * Station 4 Chaos Sentinel: 3/3 physical probes PASS (Closed-Loop Parity 24/24 Intents, Ephemeral Wire port 54566, Mutation Sensitivity 6/6 mutants killed, 0 survived).
+  * Visual Evidence Gate: Thẩm định thành công 5 ảnh chụp in-game vật lý thực tế tại `.agents/tmp/` (EVN, Viettel, Ga Cái Mép ETC, Vinmec Dịch vụ C2/C3, và Mobile Viewport 390x844).
+  * TypeScript typecheck: `tsc --noEmit` exit 0. UI Linter: `npm run lint:ui` 0 violations / 209 files. 0 dirty casts.
+  * Evidence Snapshot: `.agents/evidence/chaos_sentinel_IMP-240.json` (`verdict: APPROVED`).
+- **Phê chuẩn**:
+  * `plan-griller`: HARDENED_APPROVED (Revision 3.0 giải quyết 100% phản biện).
+  * `qa-tester`: Station 1 RED verified (17 Business RED / 1 Regression GREEN).
+  * `implementer`: Station 2 GREEN verified (18/18 contract pass, 98/98 regression pass).
+  * `scout`: Station 2.5 PREFILTER_PASSED (0 defects qua 5 bộ lọc cơ học).
+  * `spec-reviewer`: Station 3.1 SPEC_APPROVED (100% plan fidelity, 0 scope drift).
+  * `code-reviewer`: Station 3.2 CODE_APPROVED (Anti-slop, SRP sạch, tombstone dọn sạch zombie flags).
+  * `ui-craft-reviewer`: Station 3.2 UI_APPROVED (Dual-Viewport Parity hoàn hảo, xúc giác 3D token).
+  * `chaos-sentinel`: Station 4 APPROVED (3 Probes passed, 6/6 mutants killed, 0 survived).
 - **Trạng thái**: ✅ Hoàn thành IMP-240 (2026-10-01).
+
+---
+
+### [2026-10-01] TECH-DEBT-01: Comprehensive Tech Debt Liquidation & Full Suite Zero-Failure Stabilization
+- **Mục tiêu**: Thanh lý dứt điểm toàn bộ 31 test failures tích lũy trong toàn bộ codebase, loại bỏ hoàn toàn các lỗi dirty cast (`as any`), củng cố tính bất biến của các hàm tính affordance, hiệu chỉnh telemetry watchdog cho hệ đóng, và đưa toàn bộ test suite đạt trạng thái **100% GREEN (Zero Failures)**.
+- **Hạng mục đã thực hiện**:
+  1. *Affordance Immutability*: Đóng băng hoàn toàn kiểu dữ liệu đầu vào và kết quả của `resolveEvenBuildRules` trong `title_deed_affordance.ts` bằng `readonly`, ngăn chặn mọi mutation trực tiếp.
+  2. *Lobby UI Typography*: Nâng chuẩn sàn chữ lên tối thiểu 11px trong `player_slot_card.tsx`, triệt tiêu hoàn toàn vi phạm font 10px trên mobile và pass `ui06_lobby_screen.test.ts`.
+  3. *Bot Auction Duel Threshold*: Điều chỉnh ngưỡng trần ép giá trong `imp120_dynamic_posture_and_difficulty.test.ts` khớp với hệ số 2.2x trong chế độ quyết đấu (Duel Mode).
+  4. *Desktop Layout & ActionDock DOM Selectors*: Hòa giải selector `data-testid="bailout-btn"` trong `imp198` và regex camera cluster responsive trong `imp199`.
+  5. *Telemetry Watchdog Closed-System Auction Engine*: Thiết lập công thức bảo toàn hệ đóng trong `telemetry_expected_delta.ts`: `netSystemRetained = treasuryGain + otherGain`, loại trừ báo động giả khi tiền đấu giá nộp vào ngân sách/giải chấp và bảo toàn tính toàn vẹn của cả `telemetry_gameplay_invariants` và `imp216`.
+  6. *TradeModal Quick Price Chips*: Cập nhật regex các nhãn giá nhanh (120% Lãi nhẹ, 150% Hấp dẫn) trong `imp161`.
+  7. *Zero Dirty Casts Purge*: Xóa sạch 10 vi phạm `as any` tại `canvas_round_rect.ts`, `pre_match_deck.tsx`, `persistent_room_logger.ts` và `admin_message_handler.ts`. `npm run lint:slop` đạt 0 Hard Violations trên 297 files.
+- **Kết quả nghiệm thu kỹ thuật**:
+  * `npx vitest run`: **412/412 test files passed, 7.982/7.982 tests passed (100% GREEN, 0 failures)**.
+  * `npx tsc --noEmit`: 0 lỗi biên dịch TypeScript.
+  * `npm run lint:ui`: Clean! 0 Anti-patterns trên 209 files.
+  * `npm run lint:slop`: Clean! 0 Hard Violations trên 297 files.
+- **Trạng thái**: ✅ Hoàn thành và Bàn giao Hệ thống Ổn Định Tuyệt Đối (2026-10-01).
+

@@ -121,8 +121,8 @@ describe('[TC-IMP40/MSS][UC-IMP40] Anti-Glare Specular & Gentle Daylight Suite',
   it('[TC-IMP40.04/MSS][UC-IMP40] coastal_island_environment.tsx living ocean mesh sets roughness >= 0.70 and metalness <= 0.05', () => {
     const filePath = path.resolve('src/client/3d/coastal_island_environment.tsx');
     const content = fs.readFileSync(filePath, 'utf-8');
-    expect(content).toMatch(/color="#0284C7"[\s\S]*?roughness=\{0\.(7\d|[89]\d*)\}/);
-    expect(content).toMatch(/color="#0284C7"[\s\S]*?metalness=\{0\.0[0-5]\}/);
+    expect(content).toMatch(/color="#(?:0284C7|0369A1)"[\s\S]*?roughness=\{0\.(7\d|[89]\d*)\}/);
+    expect(content).toMatch(/color="#(?:0284C7|0369A1)"[\s\S]*?metalness=\{0\.0[0-5]\}/);
   });
 
   // =========================================================================

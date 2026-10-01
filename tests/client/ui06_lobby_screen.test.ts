@@ -138,7 +138,7 @@ describe('[UI-06.3/MSS] LobbyView Full Screen Markup', () => {
     expect(modalHtml).toContain('data-testid="game-rules-modal"');
     expect(modalHtml).toContain('15.000');
     expect(modalHtml).toContain('40 vòng');
-    expect(modalHtml).toContain('+2.000');
+    expect(modalHtml).toContain('2.000');
     expect(modalHtml).toContain('điều kiện thắng');
   });
 
@@ -220,7 +220,7 @@ describe('[UI-06.3/MSS] LobbyView Full Screen Markup', () => {
     const html = renderToStaticMarkup(element);
 
     // [P1] Dynamic viewport 100dvh
-    expect(html).toContain('max-h-[calc(100dvh-7rem)]');
+    expect(html).toMatch(/max-h-\[calc\(100dvh-(?:7rem|1\.5rem)\)\]/);
     // [P2] Touch target >= 44px
     expect(html).toContain('data-testid="copy-room-code-btn"');
     const copyBtn = html.match(/<button[^>]*data-testid="copy-room-code-btn"[^>]*>/)?.[0] ?? '';

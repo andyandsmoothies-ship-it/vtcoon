@@ -27,6 +27,11 @@ export interface TitleDeedActionFooterProps {
   readonly canCoverWithMortgage?: boolean;
   readonly totalMortgageCapacity?: number;
   readonly onOpenMortgage?: () => void;
+  readonly cellIndex?: number;
+  readonly isUtility?: boolean;
+  readonly isRailroad?: boolean;
+  readonly isUpgradedUtility?: boolean;
+  readonly isETC?: boolean;
 }
 
 export function TitleDeedActionFooter({
@@ -55,19 +60,24 @@ export function TitleDeedActionFooter({
   canCoverWithMortgage,
   totalMortgageCapacity,
   onOpenMortgage,
+  cellIndex,
+  isUtility,
+  isRailroad,
+  isUpgradedUtility,
+  isETC,
 }: TitleDeedActionFooterProps): React.ReactElement {
   const showUpgrade = Boolean(isOwner && !isMortgaged && hasUpgrades && (currentLevel ?? 0) < 3 && onUpgrade);
   const showDowngrade = Boolean(isOwner && !isMortgaged && hasUpgrades && (currentLevel ?? 0) > 0 && onDowngrade);
-  const showMortgage = Boolean(isOwner && (isMortgaged ? onRedeem : onMortgage));
-  const hasBuilding = (currentLevel ?? 0) > 0;
+  const hasBuilding = (currentLevel ?? 0) > 0 || Boolean(isUpgradedUtility) || Boolean(isETC);
   const isMortgageBlocked = Boolean(!isMortgaged && (isTradeFrozen || isLiquidityFrozen || hasBuilding));
   const mortgageBlockedTitle = !isMortgaged && hasBuilding
-    ? 'Phải hạ cấp hết công trình về Cấp 0 trước khi thế chấp'
+    ? (isUpgradedUtility || isETC ? 'Bất động sản đã nâng cấp đặc quyền không thể thế chấp' : 'Phải hạ cấp hết công trình về Cấp 0 trước khi thế chấp')
     : !isMortgaged && isLiquidityFrozen
     ? 'Bất động sản đang đóng băng thanh khoản'
     : !isMortgaged && isTradeFrozen
     ? 'Thị trường đang đóng băng giao dịch'
     : undefined;
+  const showMortgage = Boolean(isOwner && (isMortgageBlocked || (isMortgaged ? onRedeem : onMortgage) || (!onMortgage && !onRedeem)));
   const actionCount = (showUpgrade ? 1 : 0) + (showDowngrade ? 1 : 0) + (showMortgage ? 1 : 0);
   const closeButtonSpan = (!isOwner || actionCount === 0 || actionCount === 2) ? 'col-span-2' : '';
 
@@ -94,7 +104,11 @@ export function TitleDeedActionFooter({
                   : 'bg-teal-600 hover:bg-teal-500 text-white border-2 border-teal-800 shadow-[0_4px_0_0_#115e59] active:shadow-[0_1px_0_0_#115e59] active:translate-y-[3px] focus-visible:ring-teal-400 cursor-pointer'
               }`}
             >
-              Nâng Cấp (+{formatCurrency(upgradeCost ?? 0)})
+              {isUtility
+                ? `Nâng Cấp ${cellIndex === 28 ? '5G' : 'Smart Grid'} (+${formatCurrency(upgradeCost || 1000)} Tr.)`
+                : isRailroad
+                ? `Kích Hoạt ETC (+${formatCurrency(upgradeCost || 1500)} Tr.)`
+                : `Nâng Cấp (+${formatCurrency(upgradeCost ?? 0)})`}
             </button>
           )}
           {showDowngrade && (

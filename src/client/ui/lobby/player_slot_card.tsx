@@ -36,11 +36,11 @@ export function PlayerSlotCard({
               <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
                 Vị Trí {slotNumber}
               </span>
-              <span className="text-[10px] sm:text-[11px] px-1.5 sm:px-2 py-0.5 rounded bg-slate-200/80 text-slate-600 font-medium">
+              <span className="text-[11px] px-1.5 sm:px-2 py-0.5 rounded bg-slate-200/80 text-slate-600 font-medium">
                 Trống
               </span>
             </div>
-            <span className="text-[10px] sm:text-[11px] italic text-slate-400 truncate">
+            <span className="text-[11px] italic text-slate-400 truncate">
               Đang đợi người chơi...
             </span>
           </div>

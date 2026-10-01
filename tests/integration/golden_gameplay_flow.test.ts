@@ -106,9 +106,11 @@ function step6_P2DeclineAndAuction(mgr: RoomManager, room: Room): void {
   const bidRes = mgr.handlePlayerIntent(room.roomCode, 'P1', { type: 'INTENT_BID', amount: 1_200 });
   expect(bidRes.success, 'P1 đặt giá đấu 1.200 hợp lệ').toBe(true);
 
-  const closeRes = mgr.handleAuctionClose(room.roomCode);
-  expect(closeRes.winnerId, 'P1 chiến thắng phiên đấu giá ô 05').toBe('P1');
-  expect(closeRes.winningBid, 'Giá trúng đấu là 1.200').toBe(1_200);
+  // [IMP-227] Khi không còn đối thủ (P2 đã decline), P1 lập tức thắng và auto-close về PropertyManagement
+  if (room.phase === TurnPhase.AuctionPhase) {
+    const closeRes = mgr.handleAuctionClose(room.roomCode);
+    expect(closeRes.winnerId, 'P1 chiến thắng phiên đấu giá ô 05').toBe('P1');
+  }
   expect(room.players[0]!.balance, 'P1 trừ 1.200 thắng đấu giá còn 26.360').toBe(26_360);
   expect(room.players[1]!.balance, 'P2 giữ nguyên 28.940').toBe(28_940);
   expect(mgr.getPropertyOwner(room.roomCode, 5), 'P1 sở hữu ô 05').toBe('P1');

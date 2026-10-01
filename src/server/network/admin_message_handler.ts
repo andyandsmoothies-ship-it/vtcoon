@@ -15,7 +15,7 @@ export function handleAdminClientMessage(
     case 'ADMIN_GET_ROOMS':
       return handleGetRooms(admin, socket, sendSafe);
     case 'ADMIN_GET_ARCHIVED_ROOMS':
-    case 'ADMIN_GET_ARCHIVED_ROOMLIST' as any:
+    case 'ADMIN_GET_ARCHIVED_ROOMLIST':
       return handleGetArchivedRooms(admin, socket, sendSafe);
     case 'ADMIN_GET_ARCHIVED_LOGS':
       return handleGetArchivedLogs(admin, socket, msg.roomCode, msg.timestamp, sendSafe);

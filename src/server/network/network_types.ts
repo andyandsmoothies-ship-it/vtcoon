@@ -47,7 +47,7 @@ export type WsClientMessage =
   | { readonly type: 'JOIN_ROOM';   readonly playerId: string; readonly roomCode: string }
   | { readonly type: 'ADMIN_AUTH';  readonly secret: string }
   | { readonly type: 'ADMIN_GET_ROOMS' }
-  | { readonly type: 'ADMIN_GET_ARCHIVED_ROOMS' }
+  | { readonly type: 'ADMIN_GET_ARCHIVED_ROOMS' | 'ADMIN_GET_ARCHIVED_ROOMLIST' }
   | { readonly type: 'ADMIN_GET_ARCHIVED_LOGS'; readonly roomCode: string; readonly timestamp?: number }
   | { readonly type: 'ADMIN_SUBSCRIBE_ROOM'; readonly roomCode: string }
   | { readonly type: 'ADMIN_UNSUBSCRIBE_ROOM'; readonly roomCode?: string }

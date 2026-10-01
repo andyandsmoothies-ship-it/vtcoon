@@ -26,33 +26,9 @@ function createMockGameState(overrides?: Partial<GameState>): GameState {
     playerPositions: { p1: 0, p2: 0, p3: 0 },
     dice: [1, 1],
     playersInfo: {
-      p1: {
-        id: 'p1',
-        name: 'Spunky Hamster',
-        balance: 10_000,
-        tokenColor: '#38BDF8',
-        ownedProperties: [],
-        mortgagedProperties: [],
-        isBot: false,
-      },
-      p2: {
-        id: 'p2',
-        name: 'Bot AI 3',
-        balance: 10_000,
-        tokenColor: '#F59E0B',
-        ownedProperties: [],
-        mortgagedProperties: [],
-        isBot: true,
-      },
-      p3: {
-        id: 'p3',
-        name: 'Tỷ Phú Ba Son',
-        balance: 10_000,
-        tokenColor: '#10B981',
-        ownedProperties: [],
-        mortgagedProperties: [],
-        isBot: false,
-      },
+      p1: { id: 'p1', name: 'Spunky Hamster', balance: 10_000, tokenColor: '#38BDF8', ownedProperties: [], mortgagedProperties: [], isBot: false },
+      p2: { id: 'p2', name: 'Bot AI 3', balance: 10_000, tokenColor: '#F59E0B', ownedProperties: [], mortgagedProperties: [], isBot: true },
+      p3: { id: 'p3', name: 'Tỷ Phú Ba Son', balance: 10_000, tokenColor: '#10B981', ownedProperties: [], mortgagedProperties: [], isBot: false },
     },
     currentTurnPlayerId: 'p1',
     turnTimeRemaining: 60,
@@ -65,6 +41,10 @@ function createMockGameState(overrides?: Partial<GameState>): GameState {
     addFloatingText: vi.fn(),
     ...overrides,
   } as unknown as GameState;
+}
+
+function createDelta(tick: number, players: { id: string; position: number; balance: number }[]): DeltaPayload {
+  return { tick, cells: [], players };
 }
 
 describe('[CONTRACT] IMP-225: Financial Activity Log & Pass GO Collision Suite', () => {
@@ -102,14 +82,7 @@ describe('[CONTRACT] IMP-225: Financial Activity Log & Pass GO Collision Suite',
           p2: { ...prevState.playersInfo.p2!, balance: 13_750 },
         },
       });
-      const delta: DeltaPayload = {
-        tick: 1,
-        cells: [],
-        players: [
-          { id: 'p1', position: 6, balance: 8_250 },
-          { id: 'p2', position: 0, balance: 13_750 },
-        ],
-      };
+      const delta = createDelta(1, [{ id: 'p1', position: 6, balance: 8_250 }, { id: 'p2', position: 0, balance: 13_750 }]);
 
       const entries = detectFinancialAndStatusActivities(delta, prevState, nextState, []);
       const salaryLog = entries.find((e) => e.type === 'salary');
@@ -136,14 +109,7 @@ describe('[CONTRACT] IMP-225: Financial Activity Log & Pass GO Collision Suite',
           p2: { ...prevState.playersInfo.p2!, balance: 10_800 },
         },
       });
-      const delta: DeltaPayload = {
-        tick: 2,
-        cells: [],
-        players: [
-          { id: 'p1', position: 1, balance: 11_200 },
-          { id: 'p2', position: 0, balance: 10_800 },
-        ],
-      };
+      const delta = createDelta(2, [{ id: 'p1', position: 1, balance: 11_200 }, { id: 'p2', position: 0, balance: 10_800 }]);
 
       const entries = detectFinancialAndStatusActivities(delta, prevState, nextState, []);
       const salaryLog = entries.find((e) => e.type === 'salary');
@@ -170,14 +136,7 @@ describe('[CONTRACT] IMP-225: Financial Activity Log & Pass GO Collision Suite',
           p2: { ...prevState.playersInfo.p2!, balance: 12_000 },
         },
       });
-      const delta: DeltaPayload = {
-        tick: 3,
-        cells: [],
-        players: [
-          { id: 'p1', position: 3, balance: 10_000 },
-          { id: 'p2', position: 0, balance: 12_000 },
-        ],
-      };
+      const delta = createDelta(3, [{ id: 'p1', position: 3, balance: 10_000 }, { id: 'p2', position: 0, balance: 12_000 }]);
 
       const entries = detectFinancialAndStatusActivities(delta, prevState, nextState, []);
       const salaryLog = entries.find((e) => e.type === 'salary');
@@ -201,11 +160,7 @@ describe('[CONTRACT] IMP-225: Financial Activity Log & Pass GO Collision Suite',
           p1: { ...prevState.playersInfo.p1!, balance: 12_000 },
         },
       });
-      const delta: DeltaPayload = {
-        tick: 4,
-        cells: [],
-        players: [{ id: 'p1', position: 2, balance: 12_000 }],
-      };
+      const delta = createDelta(4, [{ id: 'p1', position: 2, balance: 12_000 }]);
 
       const entries = detectFinancialAndStatusActivities(delta, prevState, nextState, []);
       const salaryLog = entries.find((e) => e.type === 'salary');
@@ -238,15 +193,11 @@ describe('[CONTRACT] IMP-225: Financial Activity Log & Pass GO Collision Suite',
           p3: { ...prevState.playersInfo.p3!, balance: 11_000 },
         },
       });
-      const delta: DeltaPayload = {
-        tick: 5,
-        cells: [],
-        players: [
-          { id: 'p1', position: 5, balance: 8_000 },
-          { id: 'p2', position: 0, balance: 11_000 },
-          { id: 'p3', position: 0, balance: 11_000 },
-        ],
-      };
+      const delta = createDelta(5, [
+        { id: 'p1', position: 5, balance: 8_000 },
+        { id: 'p2', position: 0, balance: 11_000 },
+        { id: 'p3', position: 0, balance: 11_000 },
+      ]);
 
       const entries = detectFinancialAndStatusActivities(delta, prevState, nextState, []);
       const portLog = entries.find((e) => e.type === 'rent');
@@ -272,14 +223,10 @@ describe('[CONTRACT] IMP-225: Financial Activity Log & Pass GO Collision Suite',
           p2: { ...prevState.playersInfo.p2!, balance: 10_600 },
         },
       });
-      const delta: DeltaPayload = {
-        tick: 6,
-        cells: [],
-        players: [
-          { id: 'p1', position: 8, balance: -900 },
-          { id: 'p2', position: 0, balance: 10_600 },
-        ],
-      };
+      const delta = createDelta(6, [
+        { id: 'p1', position: 8, balance: -900 },
+        { id: 'p2', position: 0, balance: 10_600 },
+      ]);
 
       const entries = detectFinancialAndStatusActivities(delta, prevState, nextState, []);
       const rentLog = entries.find((e) => e.type === 'rent');
@@ -305,14 +252,10 @@ describe('[CONTRACT] IMP-225: Financial Activity Log & Pass GO Collision Suite',
           p2: { ...prevState.playersInfo.p2!, balance: 10_800 },
         },
       });
-      const delta: DeltaPayload = {
-        tick: 7,
-        cells: [],
-        players: [
-          { id: 'p1', position: 14, balance: 9_200 },
-          { id: 'p2', position: 0, balance: 10_800 },
-        ],
-      };
+      const delta = createDelta(7, [
+        { id: 'p1', position: 14, balance: 9_200 },
+        { id: 'p2', position: 0, balance: 10_800 },
+      ]);
 
       const entries = detectFinancialAndStatusActivities(delta, prevState, nextState, []);
       const rentLog = entries.find((e) => e.type === 'rent');
@@ -338,14 +281,10 @@ describe('[CONTRACT] IMP-225: Financial Activity Log & Pass GO Collision Suite',
           p2: { ...prevState.playersInfo.p2!, balance: 12_500 },
         },
       });
-      const delta: DeltaPayload = {
-        tick: 8,
-        cells: [],
-        players: [
-          { id: 'p1', position: 24, balance: 7_500 },
-          { id: 'p2', position: 0, balance: 12_500 },
-        ],
-      };
+      const delta = createDelta(8, [
+        { id: 'p1', position: 24, balance: 7_500 },
+        { id: 'p2', position: 0, balance: 12_500 },
+      ]);
 
       const entries = detectFinancialAndStatusActivities(delta, prevState, nextState, []);
       const rentLog = entries.find((e) => e.type === 'rent');
@@ -376,14 +315,10 @@ describe('[CONTRACT] IMP-225: Financial Activity Log & Pass GO Collision Suite',
           p2: { ...prevState.playersInfo.p2!, balance: 11_000 },
         },
       });
-      const delta: DeltaPayload = {
-        tick: 9,
-        cells: [],
-        players: [
-          { id: 'p1', position: 12, balance: 9_000 },
-          { id: 'p2', position: 0, balance: 11_000 },
-        ],
-      };
+      const delta = createDelta(9, [
+        { id: 'p1', position: 12, balance: 9_000 },
+        { id: 'p2', position: 0, balance: 11_000 },
+      ]);
 
       const entries = detectFinancialAndStatusActivities(delta, prevState, nextState, []);
       const rentLog = entries.find((e) => e.type === 'rent');
@@ -409,14 +344,10 @@ describe('[CONTRACT] IMP-225: Financial Activity Log & Pass GO Collision Suite',
           p2: { ...prevState.playersInfo.p2!, balance: 10_150 },
         },
       });
-      const delta: DeltaPayload = {
-        tick: 10,
-        cells: [],
-        players: [
-          { id: 'p1', position: 7, balance: 9_850 },
-          { id: 'p2', position: 0, balance: 10_150 },
-        ],
-      };
+      const delta = createDelta(10, [
+        { id: 'p1', position: 7, balance: 9_850 },
+        { id: 'p2', position: 0, balance: 10_150 },
+      ]);
 
       const entries = detectFinancialAndStatusActivities(delta, prevState, nextState, []);
       const viettelLog = entries.find((e) => e.message.includes('cước data viễn thông Viettel'));
@@ -440,11 +371,7 @@ describe('[CONTRACT] IMP-225: Financial Activity Log & Pass GO Collision Suite',
           p1: { ...prevState.playersInfo.p1!, balance: 11_400 },
         },
       });
-      const delta: DeltaPayload = {
-        tick: 11,
-        cells: [],
-        players: [{ id: 'p1', position: 4, balance: 11_400 }],
-      };
+      const delta = createDelta(11, [{ id: 'p1', position: 4, balance: 11_400 }]);
 
       const entries = detectFinancialAndStatusActivities(delta, prevState, nextState, []);
       const salaryLog = entries.find((e) => e.type === 'salary');
@@ -471,14 +398,10 @@ describe('[CONTRACT] IMP-225: Financial Activity Log & Pass GO Collision Suite',
           p2: { ...prevState.playersInfo.p2!, balance: 11_500 },
         },
       });
-      const delta: DeltaPayload = {
-        tick: 12,
-        cells: [],
-        players: [
-          { id: 'p1', position: 5, balance: 8_500 },
-          { id: 'p2', position: 0, balance: 11_500 },
-        ],
-      };
+      const delta = createDelta(12, [
+        { id: 'p1', position: 5, balance: 8_500 },
+        { id: 'p2', position: 0, balance: 11_500 },
+      ]);
 
       const entries = detectFinancialAndStatusActivities(delta, prevState, nextState, []);
       const rentLog = entries.find((e) => e.type === 'rent');

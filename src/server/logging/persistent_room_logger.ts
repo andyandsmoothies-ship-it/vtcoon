@@ -256,7 +256,7 @@ export class PersistentRoomLogger {
     this.activeRoomFiles.delete(norm);
 
     if (isStorageConfigured(this.supabaseStorage)) {
-      const bucket = (this.supabaseStorage as any)?.defaultBucket ?? 'game-logs';
+      const bucket = this.supabaseStorage?.defaultBucket ?? 'game-logs';
       let logContent = '';
       try {
         if (fs.existsSync(fullPath)) {
@@ -276,8 +276,8 @@ export class PersistentRoomLogger {
         let cloudData: string | null = null;
         let cloudStatus = 200;
         try {
-          if (typeof (this.supabaseStorage as any).downloadFileWithStatus === 'function') {
-            const res = await (this.supabaseStorage as any).downloadFileWithStatus(bucket, '_manifest/rooms_manifest.json');
+          if (typeof this.supabaseStorage?.downloadFileWithStatus === 'function') {
+            const res = await this.supabaseStorage.downloadFileWithStatus(bucket, '_manifest/rooms_manifest.json');
             cloudData = res.data;
             cloudStatus = res.status;
           } else {
@@ -316,7 +316,7 @@ export class PersistentRoomLogger {
 
   async syncCloudManifest(): Promise<void> {
     if (!isStorageConfigured(this.supabaseStorage)) return;
-    const bucket = (this.supabaseStorage as any)?.defaultBucket ?? 'game-logs';
+    const bucket = this.supabaseStorage?.defaultBucket ?? 'game-logs';
     try {
       const raw = await this.supabaseStorage!.downloadFile(bucket, '_manifest/rooms_manifest.json');
       if (raw && mergeCloudManifest(this.manifest, raw)) {
@@ -369,7 +369,7 @@ export class PersistentRoomLogger {
       }
     }
 
-    const bucket = (this.supabaseStorage as any)?.defaultBucket ?? 'game-logs';
+    const bucket = this.supabaseStorage?.defaultBucket ?? 'game-logs';
     const remoteContent = await this.supabaseStorage!.downloadFile(bucket, fileName);
     if (!remoteContent) {
       return [];

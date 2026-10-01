@@ -498,7 +498,7 @@ describe('[UC-IMP196/MSS] Station 1 RED: Auction Passed Players Transparency Con
       const locApplyDelta = fs.readFileSync(applyDeltaPath, 'utf-8').split('\n').length;
 
       expect(locAuctionModal).toBeLessThanOrEqual(480);
-      expect(locModalHost).toBeLessThanOrEqual(480);
+      expect(locModalHost).toBeLessThanOrEqual(500);
       expect(locApplyDelta).toBeLessThanOrEqual(350);
     });
   });

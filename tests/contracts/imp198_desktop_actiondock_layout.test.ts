@@ -194,7 +194,7 @@ describe('[TC-198.01/MSS..TC-198.17/MSS][UC-IMP198] Desktop ActionDock Text Drop
       const html = renderToStaticMarkup(
         React.createElement(ActionDock, { isMyTurn: true, localPlayerId: 'p1' })
       );
-      const bailBtn = html.match(/<button[^>]*aria-label="Nộp 500 bảo lãnh kiểm toán để rời trạm ngay"[^>]*>/)?.[0] ?? '';
+      const bailBtn = html.match(/<button[^>]*data-testid="bailout-btn"[^>]*>/)?.[0] ?? '';
 
       expect(bailBtn).toContain('shrink-0');
       expect(bailBtn).toContain('whitespace-nowrap');

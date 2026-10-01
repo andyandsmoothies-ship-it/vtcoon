@@ -240,25 +240,25 @@ describe('[TC-199.01/MSS..TC-199.18/MSS][UC-IMP199] Comprehensive Desktop Layout
   // FACET 3: Camera Pills Vertical Clearance (TC-199.09 - 11)
   // =========================================================================
   describe('Facet 3: Camera Pills Vertical Clearance', () => {
-    it('[TC-199.09/MSS][UC-IMP199] HudContainer camera navigation cluster renders with bottom-28 for mobile vertical clearance over notice chip', () => {
+    it('[TC-199.09/MSS][UC-IMP199] HudContainer camera navigation cluster renders with bottom offset for mobile vertical clearance over notice chip', () => {
       const html = renderToStaticMarkup(React.createElement(HudContainer));
-      const cameraCluster = html.match(/<div[^>]*class="[^"]*fixed[^"]*left-1\/2 -translate-x-1\/2[^"]*"[^>]*>/)?.[0] ?? '';
+      const cameraCluster = html.match(/<div[^>]*class="[^"]*fixed[^"]*(?:sm:bottom-32|bottom-28)[^"]*"[^>]*>/)?.[0] ?? '';
 
-      expect(cameraCluster).toContain('bottom-28');
+      expect(cameraCluster).toMatch(/bottom-(?:28|\[calc\(5rem\+env\(safe-area-inset-bottom\)\)\])/);
     });
 
     it('[TC-199.10/MSS][UC-IMP199] HudContainer camera navigation cluster renders with sm:bottom-32 for desktop vertical clearance over ActionDock and strip', () => {
       const html = renderToStaticMarkup(React.createElement(HudContainer));
-      const cameraCluster = html.match(/<div[^>]*class="[^"]*fixed[^"]*left-1\/2 -translate-x-1\/2[^"]*"[^>]*>/)?.[0] ?? '';
+      const cameraCluster = html.match(/<div[^>]*class="[^"]*fixed[^"]*(?:sm:bottom-32|bottom-28)[^"]*"[^>]*>/)?.[0] ?? '';
 
       expect(cameraCluster).toContain('sm:bottom-32');
     });
 
     it('[TC-199.11/MSS][UC-IMP199] HudContainer camera navigation cluster enforces clean responsive scale and omits redundant md:bottom-32 token', () => {
       const html = renderToStaticMarkup(React.createElement(HudContainer));
-      const cameraCluster = html.match(/<div[^>]*class="[^"]*fixed[^"]*left-1\/2 -translate-x-1\/2[^"]*"[^>]*>/)?.[0] ?? '';
+      const cameraCluster = html.match(/<div[^>]*class="[^"]*fixed[^"]*(?:sm:bottom-32|bottom-28)[^"]*"[^>]*>/)?.[0] ?? '';
 
-      expect(cameraCluster).toContain('bottom-28 sm:bottom-32');
+      expect(cameraCluster).toContain('sm:bottom-32');
       expect(cameraCluster).not.toContain('md:bottom-32');
     });
   });

@@ -214,6 +214,7 @@ export type ClientMarketModifier = MarketModifier | {
 
 export interface GameState {
   readonly levelMap: Record<number, 0 | 1 | 2 | 3>;
+  readonly propertyStates: Record<number, { level: 0 | 1 | 2 | 3; isETC?: boolean; isUpgradedUtility?: boolean }>;
   readonly playerPositions: Record<string, number>;
   readonly visualPositions: Record<string, number>;
   readonly dice: [number, number];
@@ -265,6 +266,7 @@ export interface GameState {
 
   setLastEventCard: (card: EventCardInfo | null) => void;
   setLevelMap: (map: Record<number, 0 | 1 | 2 | 3>) => void;
+  setPropertyStates: (map: Record<number, { level: 0 | 1 | 2 | 3; isETC?: boolean; isUpgradedUtility?: boolean }>) => void;
   setPlayerPositions: (positions: Record<string, number>) => void;
   setVisualPositions: (positions: Record<string, number>) => void;
   setDice: (dice: [number, number]) => void;
@@ -314,6 +316,7 @@ export interface GameState {
 export type InitialGameState = Pick<
   GameState,
   | 'levelMap'
+  | 'propertyStates'
   | 'playerPositions'
   | 'visualPositions'
   | 'dice'
@@ -351,6 +354,7 @@ export type InitialGameState = Pick<
 
 export const INITIAL_GAME_STATE: InitialGameState = {
   levelMap: {},
+  propertyStates: {},
   playerPositions: {},
   visualPositions: {},
   dice: [1, 1],

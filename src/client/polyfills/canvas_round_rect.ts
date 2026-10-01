@@ -99,10 +99,10 @@ export function roundRectPolyfill(
  */
 export function installCanvasRoundRectPolyfill(): void {
   if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D.prototype.roundRect) {
-    (CanvasRenderingContext2D.prototype as any).roundRect = roundRectPolyfill;
+    Object.assign(CanvasRenderingContext2D.prototype, { roundRect: roundRectPolyfill });
   }
   if (typeof Path2D !== 'undefined' && !Path2D.prototype.roundRect) {
-    (Path2D.prototype as any).roundRect = roundRectPolyfill;
+    Object.assign(Path2D.prototype, { roundRect: roundRectPolyfill });
   }
 }
 

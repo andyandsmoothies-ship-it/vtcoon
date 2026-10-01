@@ -25,6 +25,7 @@ function isCellEqual(a: CellDelta, b: CellDelta): boolean {
     (a.ownerId ?? null) === (b.ownerId ?? null) &&
     (a.level ?? 0) === (b.level ?? 0) &&
     Boolean(a.isETC) === Boolean(b.isETC) &&
+    Boolean(a.isUpgradedUtility) === Boolean(b.isUpgradedUtility) &&
     Boolean(a.isMortgaged) === Boolean(b.isMortgaged) &&
     (a.unbuiltRounds ?? 0) === (b.unbuiltRounds ?? 0)
   );
@@ -70,6 +71,8 @@ export function buildSparseDelta(prev: DeltaPayload, next: DeltaPayload): DeltaP
       const cellToSend: CellDelta = {
         ...nextCell,
         ...(Boolean(prevCell?.isMortgaged) && !nextCell.isMortgaged ? { isMortgaged: false } : {}),
+        ...(Boolean(prevCell?.isETC) && !nextCell.isETC ? { isETC: false } : {}),
+        ...(Boolean(prevCell?.isUpgradedUtility) && !nextCell.isUpgradedUtility ? { isUpgradedUtility: false } : {}),
       };
       changedCells.push(cellToSend);
     }

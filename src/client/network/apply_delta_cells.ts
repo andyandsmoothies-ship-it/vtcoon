@@ -137,12 +137,31 @@ export function applyCellDeltas(
   let hasLevelChange = false;
   let hasInfoChange = false;
 
+  const nextPropertyStates = { ...state.propertyStates };
+  let hasPropertyStateChange = false;
+
   for (const cell of delta.cells) {
     if (updateCellLevel(cell, state, nextLevelMap, isFullSync)) hasLevelChange = true;
     if (transferCellOwnership(cell.index, cell.ownerId, playersInfoMap, state, isFullSync)) hasInfoChange = true;
     if (updateCellMortgage(cell, playersInfoMap, isFullSync)) hasInfoChange = true;
+
+    const curPS = nextPropertyStates[cell.index];
+    const newLvl = (cell.level ?? nextLevelMap[cell.index] ?? curPS?.level ?? 0) as 0 | 1 | 2 | 3;
+    const isOwnerCleared = cell.ownerId === null;
+    const newETC = cell.isETC !== undefined ? Boolean(cell.isETC) : (isFullSync || isOwnerCleared ? false : curPS?.isETC);
+    const newUtil = cell.isUpgradedUtility !== undefined ? Boolean(cell.isUpgradedUtility) : (isFullSync || isOwnerCleared ? false : curPS?.isUpgradedUtility);
+
+    if (!curPS || curPS.level !== newLvl || curPS.isETC !== newETC || curPS.isUpgradedUtility !== newUtil) {
+      nextPropertyStates[cell.index] = {
+        level: newLvl,
+        ...(newETC ? { isETC: true } : {}),
+        ...(newUtil ? { isUpgradedUtility: true } : {}),
+      };
+      hasPropertyStateChange = true;
+    }
   }
 
   if (hasLevelChange) state.setLevelMap(nextLevelMap);
+  if (hasPropertyStateChange) state.setPropertyStates(nextPropertyStates);
   return hasInfoChange;
 }

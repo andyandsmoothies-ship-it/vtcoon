@@ -84,7 +84,7 @@ describe('[TC-DSE-01/MSS..TC-DSE-16/MSS][UC-IMP239] Desktop Spatial Ergonomics C
           timeRemaining: 15,
         })
       );
-      expect(html).toContain('sm:max-h-28 md:max-h-32');
+      expect(html).toContain('sm:max-h-32 md:max-h-36');
       expect(html).not.toContain('sm:max-h-20');
     });
 
