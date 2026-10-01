@@ -247,3 +247,12 @@
 2. **Ban Pseudo-Proxies on Scalar Primitives**: CẤM tạo `Proxy` bọc các biến primitive (scalar: boolean, number, string) bên trong hàm cục bộ. Phải dùng cấu trúc dữ liệu đơn giản chuẩn mực (Local Map 1-entry `new Map([[key, value]])`) và đồng bộ ngược sau khi hàm thực thi.
 3. **Getter Allocation Churn Prohibition**: CẤM truyền getter động (vốn sinh Proxy instance mới mỗi lần truy cập như `this.auctions`) vào các hàm điều phối tuần hoàn. Phải truyền trực tiếp target state hoặc callback để tránh cấp phát rác GC liên tục.
 4. **EndTurn Direct Session Dispatch & WaitingRoll Guard Invariant [IMP-210]**: Trong mô hình Aggregate Root `GameRoomSession`, hàm điều phối lượt `doHandleEndTurnSession(session, ...)` nhận trực tiếp session và chuyển giao thẳng cho `executeTurnEnd` bằng local single-entry maps. Tại lớp Facade `RoomManager.handleEndTurn`, hệ thống bắt buộc phải kiểm tra điều kiện chặn kết thúc lượt khi chưa đổ xúc xắc (`!session.rolledThisTurn && session.room.phase === TurnPhase.WaitingRoll && (current.auditTurnsLeft ?? 0) <= 0`) trước khi dispatch, bảo toàn 100% nghiệp vụ chống skip lượt gian lận.
+
+---
+
+### Pillar VIII: [BẪY KIỂM THỬ JSX / REACT SSR]
+
+33. **JSX `title` Attribute Ghost Pass — `toContain()` Vẫn PASS Khi Nhãn Hiển Thị Đã Đổi [UI/TEST]**:
+    - **Bẫy Nguy Hiểm (Deceptive Trap)**: Khi một iteration đổi văn bản hiển thị của một element (ví dụ từ `C3 (KHÁCH SẠN)` thành `C3 (RESORT/TTTM)`) nhưng giữ nguyên `title="C3 (KHÁCH SẠN)"` làm tooltip, `renderToStaticMarkup` xuất ra HTML chứa cả hai chuỗi. Test assertion `expect(html).toContain('C3 (KHÁCH SẠN)')` vẫn **PASS** vì nó khớp với `title` attribute, không phải nội dung hiển thị — tạo ảo giác test vẫn bảo toàn contract trong khi nhãn người dùng thấy đã thay đổi hoàn toàn.
+    - **Phát Hiện Vật Lý (Physical Finding)**: `title_deed_rent_table.tsx` sau IMP-235 có `<span ... title="C3 (KHÁCH SẠN)">C3 (RESORT/TTTM)</span>`. TC-AUC-ERG.10 assert `toContain('C3 (KHÁCH SẠN)')` vẫn GREEN vì `title` attribute. IMP-236 plan review ban đầu phân loại đây là "regression" nhưng sau khi verify HTML output mới phát hiện là false positive.
+    - **Bất Biến Bắt Buộc (Verified Invariant)**: Khi test contract văn bản hiển thị người dùng thấy, **PHẢI** assert nội dung text node, không chỉ `toContain()` trên chuỗi thô. Dùng `getByText()` (Testing Library) hoặc parse HTML để lấy `textContent` của element, không dùng `toContain('chuỗi')` khi chuỗi đó có thể tồn tại ở `title`, `aria-label`, hoặc `data-*` attribute. `[UI/TEST]`

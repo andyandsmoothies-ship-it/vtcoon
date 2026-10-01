@@ -33,9 +33,10 @@
   - *Full-Pipeline Vertical Slice*: State fields/events MUST update all 5 stations: (1) Entity/FSM, (2) DTO & Mappers, (3) Broadcaster sparse diff, (4) Client Parser, (5) Client Store & UI. Action resets drive on `turnPhase` transitions, not player ID.
   - *Plan Hygiene & Subtractive Parity*: Drop-in snippets must cite exact enclosing function name. Plans strictly forbid `as any`. Subtractive branch deletions require parity proof. Label updates must co-evolve `aria-label`.
   - *Revision Directive Coverage (Anti-Sycophancy)*: When submitting a revised plan (Revision N+1), the author MUST include an explicit 1:1 table mapping every griller directive to the exact file/line that addresses it. Phrases like "100% addressed" or "all directives incorporated" without this table are **banned** and constitute automatic `REVISE_REQUIRED`.
+  - *Dual-Viewport Parity & Layout Integrity*: Banned applying mobile-constrained compression patterns (e.g. forcing compact views or hiding primary decision data behind accordions) onto desktop screens. UI components must be designed and verified across both mobile and desktop viewports, ensuring vertical column balance, complete information visibility without unnecessary nesting, and visual symmetry on interactive actions.
 - **Domain Specialist Delegations & Craft Invariants**:
   - 3D Visual & Spatial Standards (Zero-Blank-Material, Ground Truth Anchor): Governed by `game-3d-visual-critic` (`.agents/agents/game-3d-visual-critic.md`).
-  - 2D UI Craft, Mobile 360px Ergonomics & Touch Targets: Governed by `ui-craft-reviewer` (`.agents/agents/ui-craft-reviewer.md`) and `impeccable` skill. Passes `npm run lint:ui` with 0 violations.
+  - 2D UI Craft & Dual-Viewport Parity: Governed by `ui-craft-reviewer` (`.agents/agents/ui-craft-reviewer.md`) and `impeccable` skill. Passes `npm run lint:ui` with 0 violations.
   - Architectural Stress-Testing & Blind Spots: Governed by `plan-griller` (`.agents/agents/plan-griller.md`).
   - Adversarial Boundary & Mutation Resilience: Governed by `chaos-sentinel` (`.agents/agents/chaos-sentinel.md`).
 

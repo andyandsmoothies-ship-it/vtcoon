@@ -233,6 +233,8 @@ export function PropertyPortfolioModal({
                   onFocus={() => onHoverCell?.(cellIndex)}
                   onBlur={() => onHoverCell?.(null)}
                   className={`border-2 rounded-xl p-3 flex flex-col justify-between transition-all ${
+                    filteredProperties.length === 1 ? 'sm:col-span-2' : ''
+                  } ${
                     isMort
                       ? 'bg-slate-100/80 border-slate-300 opacity-90'
                       : 'bg-white border-slate-300 shadow-sm hover:border-slate-400'
@@ -318,8 +320,8 @@ export function PropertyPortfolioModal({
                             <div className="flex items-center gap-1 shrink-0">
                               {piece.isVacant ? (
                                 <span className="text-[11px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded font-medium whitespace-nowrap">
-                                  <span className="sm:hidden">{piece.price ? formatCurrency(piece.price) : 'Trống'}</span>
-                                  <span className="hidden sm:inline">Đất trống {piece.price ? `(${formatCurrency(piece.price)})` : ''}</span>
+                                  <span className="lg:hidden">{piece.price ? formatCurrency(piece.price) : 'Trống'}</span>
+                                  <span className="hidden lg:inline">Đất trống {piece.price ? `(${formatCurrency(piece.price)})` : ''}</span>
                                 </span>
                               ) : (
                                 <div className="flex items-center gap-1 text-[11px] text-slate-700 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded">

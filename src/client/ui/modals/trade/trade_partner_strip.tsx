@@ -77,12 +77,12 @@ export function TradePartnerStrip({
                 }`}
               >
                 <span>{isBot ? (persBadge?.icon ?? '🤖') : '👤'}</span>
-                <span className="truncate max-w-[120px] font-bold">{partner.name}</span>
+                <span className="truncate max-w-[120px] sm:max-w-[180px] md:max-w-none font-bold">{partner.name}</span>
                 <span className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-black/10 font-bold shrink-0">
                   {formatCurrency(partner.balance)}
                 </span>
                 {needBadgeText && (
-                  <span className="text-[11px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300 font-bold truncate max-w-[90px] hidden sm:inline-block">
+                  <span className="text-[11px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300 font-bold truncate max-w-[90px] md:max-w-none hidden sm:inline-block">
                     {needBadgeText}
                   </span>
                 )}

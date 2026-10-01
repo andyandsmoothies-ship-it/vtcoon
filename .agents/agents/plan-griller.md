@@ -61,7 +61,7 @@ Inspect the following Single Source of Truth (SSOT) files before auditing:
 
 ### 📐 Pillar 2: Physical Layout & File LOC Budget
 1. **Physical 360px Arithmetic**: Sum width of inline elements against net width (~296px). Mandate 2-tier stacking or flex-wrapping if exceeded. Flag as **[P2 - PHYSICAL HORIZONTAL OVERFLOW]**.
-2. **LOC Baseline Verification**: Baseline LOC must be physically verified via `view_file` or check:loc. If Expected > Ceiling, mandate an upfront extraction task. Flag as **[P1 - WISHFUL LOC ACCOUNTING]**.
+2. **LOC Baseline Verification**: Every file modified by the plan must declare a LOC row: `File | Baseline | Est. Delta | Post | Tier`. Baseline must be physically verified via `view_file` or check:loc. If Post > Ceiling, mandate an upfront extraction task. Missing rows for any modified file are flagged as **[P1 - MISSING LOC DELTA DECLARATION]**. If Expected > Ceiling, flag as **[P1 - WISHFUL LOC ACCOUNTING]**.
 3. **Zero-Delta Seam**: Claiming 0 LOC delta on touched container files requires specifying the exact preservation mechanism. Flag as **[P2 - UNVERIFIED ZERO-DELTA SEAM]**.
 4. **Anti-Overengineering**: Visual CSS fixes must not bundle with async timing or network mutations. Split into separate tickets. Flag as **[P2 - ARTIFICIAL COMPLEXITY BUNDLE]**.
 5. **Target Modal LOC Check**: Modals linked by new affordances must not exceed 450 LOC. Flag as **[P1 - TARGET MODAL LOC OVERFLOW]**.
@@ -106,12 +106,13 @@ Inspect the following Single Source of Truth (SSOT) files before auditing:
 16. **Ban Scalar Pseudo-Proxies**: Forbid `new Proxy` wrapping scalar primitives. Use single-entry local maps (`new Map([[key, val]])`). Flag as **[P2 - PSEUDO-PROXY OVERENGINEERING]**.
 17. **Dynamic Getter Churn**: Getters must not instantiate new proxy/wrapper objects on every property read. Flag as **[P1 - GETTER ALLOCATION CHURN]**.
 18. **Enclosing Scope Anchor**: Snippets must cite enclosing function/class names (`Inside function X()`). Flag as **[P1 - UNANCHORED SNIPPET PLACEMENT]**.
-19. **Plan-Level Zero Dirty Cast**: Proposed snippets must never contain `as any` or `as unknown as T`. Flag as **[P1 - PLAN-LEVEL DIRTY CAST]**.
-20. **Subtractive Deletion Impact**: Proving branch deletions must confirm branches are unreachable or subsumed. Flag as **[P1 - UNVERIFIED BRANCH DELETION]**.
-21. **A11y Attribute Co-Evolution**: Text updates must update `aria-label`/`aria-description` in lockstep. Flag as **[P2 - A11Y ATTRIBUTE DIVERGENCE]**.
-22. **Parametric Milestone Decoupling**: Continuous trajectory modifications must recalibrate discrete milestone thresholds. Flag as **[P1 - PARAMETRIC PROGRESS DECOUPLING TRAP]**.
-23. **Concrete Test Reconciliation Snippets**: Reconciling tests requires concrete drop-in snippets with calculated values. Flag as **[P1 - VAGUE TEST RECONCILIATION DIRECTIVE]**.
-24. **Platform Locale Portability**: Forbid `toLocaleString()` in server logs, DTOs, or Vitest code paths. Use project `formatCurrency()` or `Intl.NumberFormat`. Flag as **[P2 - LOCALE PORTABILITY GAP]**.
+19. **AFTER Block Completeness**: AFTER blocks (`====` to `>>>>`) must be syntactically complete — ending at a valid statement boundary or closing delimiter, not mid-expression or mid-tag. Truncated AFTER blocks leave the implementer unable to determine replacement scope. Flag as **[P1 - TRUNCATED AFTER BLOCK]**.
+20. **Plan-Level Zero Dirty Cast**: Proposed snippets must never contain `as any` or `as unknown as T`. Flag as **[P1 - PLAN-LEVEL DIRTY CAST]**.
+21. **Subtractive Deletion Impact**: Proving branch deletions must confirm branches are unreachable or subsumed. Flag as **[P1 - UNVERIFIED BRANCH DELETION]**.
+22. **A11y Attribute Co-Evolution**: Text updates must update `aria-label`/`aria-description` in lockstep. Flag as **[P2 - A11Y ATTRIBUTE DIVERGENCE]**.
+23. **Parametric Milestone Decoupling**: Continuous trajectory modifications must recalibrate discrete milestone thresholds. Flag as **[P1 - PARAMETRIC PROGRESS DECOUPLING TRAP]**.
+24. **Concrete Test Reconciliation Snippets**: Reconciling tests requires concrete drop-in snippets with calculated values. Flag as **[P1 - VAGUE TEST RECONCILIATION DIRECTIVE]**.
+25. **Platform Locale Portability**: Forbid `toLocaleString()` in server logs, DTOs, or Vitest code paths. Use project `formatCurrency()` or `Intl.NumberFormat`. Flag as **[P2 - LOCALE PORTABILITY GAP]**.
 
 ## 5. Dual Output Mandate
 1. **Step 1 (Disk Report)**: Use `write_to_file` to write the exhaustive audit trace to `.agents/audit/PLAN_AUDIT_[TICKET].md`.

@@ -38,6 +38,7 @@ hooks: [.agents/hooks_qa.json]
 - **Banned Assertions**:
   - Static checklist tests: Never assert `fs.existsSync`, `typeof fn === 'function'`, or LOC limits in unit tests.
   - Shallow change detectors: Never use solitary `.toBeDefined()`, `.not.toBeNull()`, or `.toHaveLength(n)` without asserting concrete values.
+  - Dirty casts in test code: Never use `as any`, `as unknown as`, or `as Record<string, any>` / `as Record<string, unknown>` — these are semantically equivalent dirty casts. Document exceptions explicitly (e.g. mock DOM events).
 - **Universal 5-Facet Behavioral Matrix**:
   1. *Boundary & Range*: Input bounds, range constraints, format validity.
   2. *State Reactivity & Multi-Turn Teardown*: Lifecycle transitions, sparse delta serialization, turn phase resets, and Turn N+1 purge (Turn N ephemeral state 100% cleared on Turn N+1 advance).

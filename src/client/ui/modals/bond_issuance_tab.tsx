@@ -139,7 +139,9 @@ export function BondIssuanceTab({
                 Tài sản ròng (Net Worth) ≥ 3.000
               </span>
             </span>
-            <span className="font-mono text-slate-600 shrink-0">{formatCurrency(playerNetWorth)}</span>
+            <span className={`font-mono shrink-0 font-bold ${hasNetWorth ? 'text-slate-600 font-normal' : 'text-rose-700'}`}>
+              {formatCurrency(playerNetWorth)}
+            </span>
           </div>
           <div className="flex items-center justify-between gap-2 min-w-0">
             <span className="flex items-center gap-1.5 min-w-0">
@@ -148,7 +150,9 @@ export function BondIssuanceTab({
                 BĐS sạch chưa thế chấp ≥ 2 ô
               </span>
             </span>
-            <span className="font-mono text-slate-600 shrink-0">{unmortgagedPropertiesCount} / 2</span>
+            <span className={`font-mono shrink-0 font-bold ${hasEnoughDeeds ? 'text-slate-600 font-normal' : 'text-rose-700'}`}>
+              {unmortgagedPropertiesCount} / 2
+            </span>
           </div>
           <div className="flex items-center justify-between gap-2 min-w-0">
             <span className="flex items-center gap-1.5 min-w-0">

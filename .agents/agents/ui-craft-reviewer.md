@@ -39,9 +39,10 @@ The reviewer operates on a clear separation between **Objective Usability (80%)*
    - Text contrast meets WCAG 2.1 AA (minimum 4.5:1 for body, 3:1 for large/bold text).
    - Avoid dark text over saturated dark backgrounds (`gray-on-color`).
    - Interactive functional text on mobile must be at least `11px` (prefer `text-xs`).
-2. **Adaptive Viewport Ergonomics**:
-   - **Mobile Touch (`@360px` - `@414px`)**: Touch target floor `min-h-[44px] min-w-[44px]`. Avoid cramming horizontal buttons; place within thumb reach.
+2. **Adaptive Viewport Ergonomics & Dual-Viewport Parity**:
+   - **Mobile Touch (`@360px` - `@414px`)**: Touch target floor `min-h-[44px] min-w-[44px]`. Avoid cramming horizontal buttons; place within thumb reach. Zero horizontal scroll overflow.
    - **Desktop Pointer (`@768px` - `@1440px`)**: High density permitted (28px - 36px for toolbars, tables, filter chips) to optimize mouse/keyboard workflows.
+   - **Banned Mobile-Constraint Leakage**: Do not apply mobile-only space-saving compromises (such as forcing compact views or hiding primary decision data behind accordions) onto desktop viewports where ample space is available. Multi-column desktop layouts must preserve vertical balance, maintain complete data visibility, and prevent dead blank voids.
 3. **Layout & Overflow Defense**:
    - Flex/Grid child text elements with overflow risk MUST have `truncate` and `min-w-0`.
    - Long data lists must have independent vertical scroll (`overflow-y-auto`) so action buttons remain visible (`sticky bottom-0`).

@@ -59,9 +59,9 @@ export function TitleDeedRentTable({
         <span className="text-[11px] text-slate-600 font-bold">VNĐ</span>
       </div>
 
-      {showCompact ? (
+      {showCompact && (
         /* Mini Rent Bar (~40px) kế thừa từ AuctionDistrictCard */
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 md:hidden">
           <div className="bg-white/90 rounded-xl p-1.5 sm:p-2 border border-slate-200 flex items-center justify-between text-xs">
             {!isRailroad && !isUtility && (
               <>
@@ -133,12 +133,14 @@ export function TitleDeedRentTable({
                 ? 'Xem chi tiết biểu phí 1 Ga - 4 Ga'
                 : isUtility
                   ? 'Xem chi tiết cước tiện ích'
-                  : 'Xem chi tiết 4 cấp nâng cấp (C0 Đất Nền, C1 Nhà Phố, C2 Khách Sạn, C3 Quần thể Resort/TTTM)'}
+                  : 'Xem chi tiết 4 cấp nâng cấp (C0 - C3)'}
             </span>
           </button>
         </div>
-      ) : (
-        <div className="space-y-1.5 sm:space-y-2">
+      )}
+
+      {/* 2. Khối Bảng Cước Đầy Đủ: Trên Desktop luôn hiển thị (hidden md:block khi showCompact), trên Mobile tuân theo toggle */}
+      <div className={`space-y-1.5 sm:space-y-2 ${showCompact ? 'hidden md:block' : ''}`}>
           {isUtility ? (
             <div className="space-y-1 sm:space-y-1.5 text-xs text-slate-900">
               <div className="flex justify-between items-center px-2 py-1.5 rounded-lg bg-white/90 border border-slate-200">
@@ -252,16 +254,15 @@ export function TitleDeedRentTable({
           {isExpanded && (
             <button
               type="button"
-              onClick={() => setIsExpanded(false)}
-              className="w-full text-center py-2 min-h-[44px] text-[11px] sm:text-xs font-bold text-slate-600 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1.5 active:scale-[0.98]"
               data-testid="collapse-rent-tiers"
+              onClick={() => setIsExpanded(false)}
+              className="w-full text-center py-2 min-h-[44px] text-[11px] sm:text-xs font-bold text-slate-600 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1.5 active:scale-[0.98] md:hidden"
             >
               <span>▴</span>
               <span>Thu gọn biểu phí</span>
             </button>
           )}
         </div>
-      )}
     </div>
   );
 }

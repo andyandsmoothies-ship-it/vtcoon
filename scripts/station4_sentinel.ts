@@ -214,9 +214,8 @@ async function runProbe3(testPath?: string): Promise<ProbeResults['mutationSensi
   }
 
   const originalContent = fs.readFileSync(testPath, 'utf-8');
-  const sandboxDir = path.resolve('.agents/tmp');
-  fs.mkdirSync(sandboxDir, { recursive: true });
-  const sandboxPath = path.join(sandboxDir, `mutant_sandbox_${Date.now()}.test.ts`);
+  const sandboxDir = path.dirname(path.resolve(testPath));
+  const sandboxPath = path.join(sandboxDir, `.tmp_mutant_sandbox_${Date.now()}.test.ts`);
 
   let mutantsTested = 0;
   let killed = 0;
@@ -238,7 +237,7 @@ async function runProbe3(testPath?: string): Promise<ProbeResults['mutationSensi
     }
 
     // Mutant 2: Shift a numeric assertion
-    if (originalContent.includes('.toBe(')) {
+    if (/\.toBe\(\d+\)/.test(originalContent)) {
       mutantsTested++;
       const mutantContent = originalContent.replace(/\.toBe\((\d+)\)/, (_m, num) => `.toBe(${Number(num) + 9999})`);
       fs.writeFileSync(sandboxPath, mutantContent, 'utf-8');
@@ -367,6 +366,62 @@ async function runProbe3(testPath?: string): Promise<ProbeResults['mutationSensi
     if (originalContent.includes('.toBeGreaterThan(')) {
       mutantsTested++;
       const mutantContent = originalContent.replace(/\.toBeGreaterThan\((\d+(?:\.\d+)?)\)/, (_m, num) => `.toBeGreaterThan(${Number(num) + 99999})`);
+      fs.writeFileSync(sandboxPath, mutantContent, 'utf-8');
+
+      try {
+        execSync(`npx vitest run "${sandboxPath}"`, { stdio: 'pipe' });
+        survived++;
+      } catch {
+        killed++;
+      }
+    }
+
+    // Mutant 12: Corrupt regex match .toMatch(/.../)
+    if (originalContent.includes('.toMatch(/')) {
+      mutantsTested++;
+      const mutantContent = originalContent.replace(/\.toMatch\(\/([^/]+)\/\)/, '.toMatch(/__MUTANT_REGEX_FAIL_NO_MATCH__/)');
+      fs.writeFileSync(sandboxPath, mutantContent, 'utf-8');
+
+      try {
+        execSync(`npx vitest run "${sandboxPath}"`, { stdio: 'pipe' });
+        survived++;
+      } catch {
+        killed++;
+      }
+    }
+
+    // Mutant 13: Invert negative regex match .not.toMatch(/.../)
+    if (originalContent.includes('.not.toMatch(')) {
+      mutantsTested++;
+      const mutantContent = originalContent.replace('.not.toMatch(', '.toMatch(');
+      fs.writeFileSync(sandboxPath, mutantContent, 'utf-8');
+
+      try {
+        execSync(`npx vitest run "${sandboxPath}"`, { stdio: 'pipe' });
+        survived++;
+      } catch {
+        killed++;
+      }
+    }
+
+    // Mutant 14: Corrupt function spy call .toHaveBeenCalledWith(...)
+    if (originalContent.includes('.toHaveBeenCalledWith(')) {
+      mutantsTested++;
+      const mutantContent = originalContent.replace(/\.toHaveBeenCalledWith\([^)]+\)/, '.toHaveBeenCalledWith("__MUTANT_CALL_FAIL__")');
+      fs.writeFileSync(sandboxPath, mutantContent, 'utf-8');
+
+      try {
+        execSync(`npx vitest run "${sandboxPath}"`, { stdio: 'pipe' });
+        survived++;
+      } catch {
+        killed++;
+      }
+    }
+
+    // Mutant 15: Invert string containment .toContain(...) to .not.toContain(...)
+    if (originalContent.includes('.toContain(')) {
+      mutantsTested++;
+      const mutantContent = originalContent.replace('.toContain(', '.not.toContain(');
       fs.writeFileSync(sandboxPath, mutantContent, 'utf-8');
 
       try {

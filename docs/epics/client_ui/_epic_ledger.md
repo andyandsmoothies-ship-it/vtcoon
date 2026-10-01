@@ -1282,11 +1282,38 @@
   * `chaos-sentinel`: Station 4 APPROVED (3 Probes passed, 2/2 mutants killed, 0 survived).
 - **Trạng thái**: ✅ Hoàn thành IMP-PERF-THREEJS-INSTANCING (2026-09-30).
 
+---
 
-
-
-
-
-
-
-
+### [2026-10-01] IMP-236: Tối Ưu Bố Cục Desktop & Dual-Viewport Parity (Anti-Truncation Polish)
+- **Mục tiêu**: Xóa bỏ hiện tượng rò rỉ ràng buộc mobile lên Desktop, triệt tiêu khoảng trắng chết (dead space void), hiển thị trọn vẹn thông tin ROI (C1/C2) và ngăn chặn cắt cụt chữ (truncation) trên màn hình rộng theo điều lệ `Dual-Viewport Parity & Layout Integrity` trong `GEMINI.md`.
+- **Hạng mục thi công cốt lõi**:
+  1. *TitleDeedRentTable Dual-Viewport*: Khối Mini Rent Bar hiển thị trên mobile (`md:hidden`); bảng cước 4 cấp (C0-C3) luôn hiển thị trên Desktop (`hidden md:block`), xóa sạch 60% khoảng trắng chết ở cột phải.
+  2. *Tinh Gọn Nút Mở Rộng Sổ Đỏ*: Nhãn `'Xem chi tiết 4 cấp nâng cấp (C0 - C3)'` bảo tồn tiền tố kiểm thử, triệt tiêu hiện tượng gãy dòng 3 hàng. Nút thu gọn `md:hidden` bảo vệ người dùng di động.
+  3. *Portfolio Single Card Span & Anti-Truncation*: Khi danh mục chỉ có 1 BĐS, thẻ đơn mở rộng `sm:col-span-2`, xóa bỏ 50% khoảng trắng chết bên phải. Đổi `hidden sm:inline` thành `hidden lg:inline` cho nhãn đất trống, giải phóng 80px bề ngang, triệt tiêu cắt cụt `#6 Bình Dương` và `#8 Đồng Nai`.
+  4. *Bảo Toàn 100% 5 Props Hover Sa Bàn 3D*: `data-onmouseenter="true"`, `onMouseEnter`, `onMouseLeave`, `onFocus`, `onBlur` trong thẻ BĐS.
+  5. *TradePartnerStrip Desktop Expansion*: Nới rộng breakpoint `truncate max-w-[120px] sm:max-w-[180px] md:max-w-none` và `max-w-[90px] md:max-w-none`, hiển thị trọn vẹn tên đối tác và badge nhu cầu trên Desktop.
+  6. *Đồng Bộ Phân Cấp Tương Phản Tab Trái Phiếu*: Cảnh báo `text-rose-700 font-bold` cho cả Net Worth và BĐS sạch khi thiếu điều kiện (WCAG 2.1 AA 4.54:1).
+- **Hạ tầng & Ngân sách LOC Thực tế (`scripts/check_loc.mjs` - Total Lines / Non-Empty SLOC)**:
+  * `src/client/ui/modals/title_deed_rent_table.tsx` (Total: 268 / SLOC: 252 — Tier 2 <= 500 LOC)
+  * `src/client/ui/modals/property_portfolio_modal.tsx` (Total: 396 / SLOC: 377 — Tier 2 <= 500 LOC, Warning: 400 LOC)
+  * `src/client/ui/modals/trade/trade_partner_strip.tsx` (Total: 115 / SLOC: 107 — Tier 2 <= 500 LOC)
+  * `src/client/ui/modals/bond_issuance_tab.tsx` (Total: 213 / SLOC: 198 — Tier 2 <= 500 LOC)
+  * `tests/contracts/imp236_desktop_uiux_viewport_harmonization.test.ts` (Total: 352 / SLOC: 312 — Contract Tests <= 600 LOC)
+  * `docs/reports/improvements/IMP-236-desktop-uiux-viewport-harmonization_report.md`: Báo cáo nghiệm thu hoàn chỉnh.
+- **Kiểm thử & Bất biến**:
+  * 17/17 atomic contract tests PASS (Universal 5-Facet Matrix, Detroit Classical TDD).
+  * 120/120 regression tests PASS trên 7 suites (`imp136`, `imp154`, `imp133`, `auction_and_title_deed`, `imp209`, `imp106`, `imp218`).
+  * Station 4 Chaos Sentinel: 3/3 physical probes PASS (Closed-Loop Parity 24/24, Ephemeral Wire port 56761, Mutation Sensitivity 6/6 mutants killed, floor >= 5 satisfied).
+  * Visual Evidence Gate: Thẩm định thành công ảnh chụp in-game vật lý `.agents/tmp/imp-236_desktop_views.jpg`.
+  * TypeScript typecheck: `tsc --noEmit` exit 0. UI Linter: `npm run lint:ui` 0 violations / 208 files. 0 dirty casts.
+  * Evidence Snapshot: `.agents/evidence/chaos_sentinel_IMP-236.json` (`verdict: APPROVED`).
+- **Phê chuẩn**:
+  * `plan-griller`: HARDENED_APPROVED (Revision 2.1 khép kín 100% chỉ thị đối kháng).
+  * `qa-tester`: Station 1 RED verified (17/17 tests failed as expected under Adversarial Inversion).
+  * `implementer`: Station 2 GREEN verified (17/17 tests pass, toàn bộ tệp đạt chuẩn LOC).
+  * `scout`: Station 2.5 PREFILTER_PASSED (0 defects qua 5 bộ lọc cơ học).
+  * `spec-reviewer`: Station 3.1 SPEC_APPROVED (100% plan fidelity, 0 scope drift).
+  * `code-reviewer`: Station 3.2 CODE_APPROVED (Deep Architecture, bảo toàn 5 hover props, zero dirty casts).
+  * `ui-craft-reviewer`: Station 3.2 UI_APPROVED (Chuẩn Dual-Viewport, WCAG 2.1 AA, touch targets >= 44px).
+  * `chaos-sentinel`: Station 4 APPROVED (3 Probes passed, 6/6 mutants killed, floor >= 5 satisfied, 0 survived).
+- **Trạng thái**: ✅ Hoàn thành IMP-236 (2026-10-01).
