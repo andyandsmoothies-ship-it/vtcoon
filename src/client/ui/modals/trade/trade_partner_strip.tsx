@@ -1,6 +1,6 @@
 // [UI-S04/MSS][IMP-200] TradePartnerStrip — Dải chọn đối tác thương lượng P2P
 import React from 'react';
-import { formatCurrency } from '../../ui_helpers';
+import { formatCurrency, formatShortPlayerName } from '../../ui_helpers';
 import {
   resolveBotPersonality,
   getBotPersonalityBadge,
@@ -70,15 +70,17 @@ export function TradePartnerStrip({
                 key={partner.id}
                 type="button"
                 onClick={() => onSelectPartner(partner.id)}
-                className={`partner-selector-tab min-h-[44px] px-2 py-2 rounded-xl border-2 text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+                className={`partner-selector-tab min-h-[44px] px-2 py-2 rounded-xl border-2 text-xs transition-all cursor-pointer flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
                   isSelected
                     ? 'bg-amber-500 text-amber-950 border-amber-700 shadow-[0_3px_0_0_#b45309] active:shadow-[0_1px_0_0_#b45309] active:translate-y-[2px] font-black'
                     : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100 shadow-sm active:translate-y-[1px]'
                 }`}
               >
-                <span>{isBot ? (persBadge?.icon ?? '🤖') : '👤'}</span>
-                <span className="truncate max-w-[120px] sm:max-w-[180px] md:max-w-none font-bold">{partner.name}</span>
-                <span className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-black/10 font-bold shrink-0">
+                <div className="flex items-center gap-1 min-w-0">
+                  <span>{isBot ? (persBadge?.icon ?? '🤖') : '👤'}</span>
+                  <span className="truncate max-w-[120px] sm:max-w-[180px] md:max-w-none font-bold">{formatShortPlayerName(partner.name)}</span>
+                </div>
+                <span className="text-[10px] sm:text-[11px] font-mono px-1 sm:px-1.5 py-0.2 sm:py-0.5 rounded bg-black/10 font-bold shrink-0">
                   {formatCurrency(partner.balance)}
                 </span>
                 {needBadgeText && (

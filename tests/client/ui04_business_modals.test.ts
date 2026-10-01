@@ -229,7 +229,7 @@ describe('[TC-UI04.6/MSS] Thẻ Bài Game Vật Lý TitleDeedModal Markup', () =
         onMortgage: () => {},
       })
     );
-    expect(html).toContain('Đã Sở Hữu (Đại Gia Hà Nội)');
+    expect(html).toContain('Bất Động Sản Của Bạn');
     expect(html).toContain('Thế Chấp');
     expect(html).toContain('Đóng');
   });

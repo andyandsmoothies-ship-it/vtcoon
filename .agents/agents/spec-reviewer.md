@@ -33,6 +33,7 @@ tools: [view_file, list_dir, find_by_name, grep_search]
   - MANDATORY REJECT if test cases contain monolithic patterns: > 4 `expect()` per test, or loops (`for`/`forEach`) in `it()`.
   - MANDATORY REJECT if tests assert static checklist conditions (`fs.existsSync`, `typeof fn === 'function'`, LOC limits).
   - MANDATORY REJECT if test suite has fewer than 15 atomic tests for the feature slice (Test Density Deficit).
+  - **Assertion Value Parity (Spot-Check)**: For ≥ 3 sampled tests per facet, verify that concrete expected values (string literals, class names, numeric results) can be directly traced to the plan's AFTER block for the corresponding task. A test with correct tags but wrong expected values is **MANDATORY REJECT (Unanchored Assertion — expected value not in AFTER block)**.
 - **Slice Scope Confinement**:
   - If ticket specifies Slice 1 (MSS), but code introduces alternative flow logic or UI, emit **REJECT (Slice Scope Breach)**.
 - **Full-Pipeline Delivery**:

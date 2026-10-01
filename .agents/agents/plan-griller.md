@@ -113,6 +113,8 @@ Inspect the following Single Source of Truth (SSOT) files before auditing:
 23. **Parametric Milestone Decoupling**: Continuous trajectory modifications must recalibrate discrete milestone thresholds. Flag as **[P1 - PARAMETRIC PROGRESS DECOUPLING TRAP]**.
 24. **Concrete Test Reconciliation Snippets**: Reconciling tests requires concrete drop-in snippets with calculated values. Flag as **[P1 - VAGUE TEST RECONCILIATION DIRECTIVE]**.
 25. **Platform Locale Portability**: Forbid `toLocaleString()` in server logs, DTOs, or Vitest code paths. Use project `formatCurrency()` or `Intl.NumberFormat`. Flag as **[P2 - LOCALE PORTABILITY GAP]**.
+26. **Cross-Task Symbol Orphan Sweep**: For plans with ≥ 2 tasks, enumerate all symbols (functions, types, named imports) that are substituted or removed by any task. Verify that no other file retains a now-dead import or reference to the substituted symbol after all tasks are applied in sequence. Flag as **[P1 - CROSS-TASK ORPHANED SYMBOL]**.
+27. **Function Semantic Equivalence**: When a task substitutes function A with function B at a callsite, verify the output category is equivalent — not just the type signature. A translator (`(Passive) → (Phòng Thủ)`) and a stripper (`(Passive) → ""`) share the same signature `(string) → string` but produce categorically different outputs. Flag undeclared output-category changes as **[P2 - SEMANTIC EQUIVALENCE GAP]**.
 
 ## 5. Dual Output Mandate
 1. **Step 1 (Disk Report)**: Use `write_to_file` to write the exhaustive audit trace to `.agents/audit/PLAN_AUDIT_[TICKET].md`.

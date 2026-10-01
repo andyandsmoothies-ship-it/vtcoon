@@ -154,7 +154,7 @@ export function HoseModal({
       className="relative bg-[#FFFDF8] border-2 border-slate-900 rounded-2xl shadow-[0_6px_0_0_#0f172a] p-5 w-full max-w-md text-slate-900 select-none flex flex-col gap-3.5 max-h-[90dvh] overflow-y-auto"
     >
       {/* Thanh Ticker Bảng Điện Tử LED Trực Tuyến */}
-      <div className="bg-[#F7F2E7] border border-slate-300 rounded-lg px-2.5 py-1 flex items-center justify-between text-[11px] font-mono tracking-wider overflow-hidden text-slate-800">
+      <div className="bg-[#F7F2E7] border border-slate-300 rounded-lg px-2.5 py-1 flex items-center justify-between text-[11px] tabular-nums overflow-hidden text-slate-800">
         <div className="flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
           <span className="text-emerald-800 font-bold">VN-INDEX</span>
@@ -174,7 +174,7 @@ export function HoseModal({
             📈
           </div>
           <div>
-            <h2 className="text-lg font-black text-slate-900 tracking-wide font-mono">
+            <h2 className="text-lg font-black text-slate-900 tracking-normal">
               SÀN CHỨNG KHOÁN HOSE
             </h2>
             <p className="text-xs text-slate-600">Ô 38 — Đầu tư lướt sóng theo xúc xắc 1D6</p>
@@ -196,7 +196,7 @@ export function HoseModal({
           <span className="text-3xl text-rose-600 font-black animate-dice-shake" aria-hidden="true">
             {DICE_ICONS[animatedFace - 1] ?? '🎲'}
           </span>
-          <span className="text-xs font-mono font-bold text-emerald-800 tracking-wider">
+          <span className="text-xs tabular-nums font-bold text-emerald-800">
             ĐANG KHỚP LỆNH 1D6... [MẶT {animatedFace}]
           </span>
         </div>
@@ -214,10 +214,10 @@ export function HoseModal({
             </span>
           </div>
           <div className="flex flex-col items-end">
-            <span className={`text-xs font-black font-mono ${payoutColor}`}>
+            <span className={`text-xs font-black tabular-nums ${payoutColor}`}>
               Tiền thu về: {formatCurrency(lastPayout ?? 0)}
             </span>
-            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider font-mono border mt-0.5 ${badgeClass}`}>
+            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tabular-nums border mt-0.5 ${badgeClass}`}>
               {outcomeLabel}
             </span>
           </div>
@@ -226,10 +226,10 @@ export function HoseModal({
 
       {/* Bảng tỷ lệ khớp lệnh HOSE 1D6 */}
       <div className="flex flex-col gap-1.5">
-        <span className="text-xs font-bold text-slate-700 uppercase tracking-wider font-mono">
+        <span className="text-xs font-bold text-slate-700 uppercase">
           Bảng Tỷ Lệ Khớp Lệnh (1D6)
         </span>
-        <div className="grid grid-cols-3 gap-1.5 text-center text-xs font-mono">
+        <div className="grid grid-cols-3 gap-1.5 text-center text-xs tabular-nums">
           {Object.entries(HOSE_OUTCOMES).map(([face, mult]) => {
             const isTargetProfit = mult > 1;
             const isTargetLoss = mult < 1;
@@ -266,7 +266,7 @@ export function HoseModal({
             Số dư: <strong className="text-slate-900 font-black">{formatCurrency(myBalance)}</strong>
           </span>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 font-mono">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 tabular-nums">
           {STAKE_PRESETS.map((amount) => {
             const isSelected = stake === amount;
             const disabled = isReviewingResult || !Number.isFinite(myBalance) || myBalance < amount;
@@ -306,7 +306,7 @@ export function HoseModal({
               onClick={onSkip}
               disabled={isRolling}
               data-testid="hose-skip-btn"
-              className={`flex-1 min-h-[46px] px-4 py-2.5 rounded-xl border-2 border-rose-300 bg-rose-50 hover:bg-rose-100 text-rose-700 font-black text-xs uppercase tracking-wider shadow-[0_4px_0_0_#fca5a5] active:translate-y-[3px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 ${
+              className={`flex-1 min-h-[46px] px-4 py-2.5 rounded-xl border-2 border-rose-300 bg-rose-50 hover:bg-rose-100 text-rose-700 font-black text-xs uppercase shadow-[0_4px_0_0_#fca5a5] active:translate-y-[3px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 ${
                 isRolling ? 'opacity-50 cursor-not-allowed shadow-none' : 'cursor-pointer'
               }`}
             >
@@ -317,7 +317,7 @@ export function HoseModal({
               disabled={!canAfford || isRolling}
               onClick={handleInvestClick}
               data-testid="hose-invest-btn"
-              className={`flex-1 min-h-[46px] px-4 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+              className={`flex-1 min-h-[46px] px-4 py-2.5 rounded-xl font-black text-xs uppercase transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
                 canAfford && !isRolling
                   ? 'bg-amber-500 hover:bg-amber-400 text-amber-950 border-2 border-amber-700 shadow-[0_4px_0_0_#b45309] active:translate-y-[3px] cursor-pointer'
                   : 'bg-slate-200 text-slate-400 border border-slate-300 shadow-none cursor-not-allowed'

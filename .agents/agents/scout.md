@@ -24,8 +24,11 @@ When dispatched after Station 2 (Implementer GREEN), verify 6 mechanical gates u
 4. **Console/Debugger Scan**: Grep for `console.log` or `debugger;` in modified `src/**` files.
 5. **Locale Portability Scan** _(JS/TS projects only)_: Grep for `toLocaleString` in newly modified `src/**` and `tests/**` files. Any usage is an immediate FAIL — locale output is OS-dependent (`'vi-VN'` produces `"1.500"` on Windows but `"1,500"` on Linux CI), causing flaky tests. Mandate a project-internal locale-safe formatter (e.g. `formatCurrency()`, `Intl.NumberFormat` pre-configured at module level). Report as `SWEEP: REVISE [P2 - LOCALE PORTABILITY GAP]`.
 6. **Test Directory Convention Scan**: For any new test files created by the implementer or qa-tester, verify the path matches the project's declared test root (check `vitest.config.ts`, `jest.config.*`, `pytest.ini`, or `pubspec.yaml` for the configured `include` / `testMatch` / `testdir`). Files placed outside the configured test root will be silently ignored by the test runner. Report as `SWEEP: REVISE [WRONG_TEST_DIR: expected <configured-root>, got <actual-path>]`.
+7. **Banned Test Pattern Scan**: Grep newly created or modified test files for:
+   - Framework internal spies: `spyOn.*useState`, `spyOn.*useEffect`, `spyOn(React,`, `spyOn(Vue,`, `spyOn(Angular,`. Any match is an immediate FAIL — these couple tests to private framework internals. Report as `[BANNED: FRAMEWORK_INTERNAL_SPY]`.
+   - Extreme assert density: Files where any single `it(` block contains `> 4` `expect(` calls (approximate grep heuristic). Flag as `[ATOMIC VIOLATION RISK: verify manually]`.
 
-If any mechanical check fails, report `SWEEP: REVISE` with exact `file:line` so implementer fixes it immediately before Station 3. If all 6 pass, report `SWEEP: PASS`.
+If any mechanical check fails, report `SWEEP: REVISE` with exact `file:line` so implementer fixes it immediately before Station 3. If all 7 pass, report `SWEEP: PASS`.
 
 ## 3. Output Format
 ```markdown
@@ -39,4 +42,5 @@ If any mechanical check fails, report `SWEEP: REVISE` with exact `file:line` so 
 | Trailing Logs | Grep `console.log` | PASS / FAIL | Clean |
 | Locale Portability | Grep `toLocaleString` | PASS / FAIL | Zero usage |
 | Test Directory | Path convention check | PASS / FAIL | tests/contracts/ or tests/probes/ |
+| Banned Test Patterns | Grep framework spies | PASS / FAIL | Zero internal spies |
 ```

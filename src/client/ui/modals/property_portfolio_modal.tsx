@@ -290,10 +290,10 @@ export function PropertyPortfolioModal({
                     {/* Thông tin Tiền Thuê & Giá */}
                     <div className="flex items-center justify-between text-[11px] text-slate-600 mb-2">
                       <span>
-                        Tiền Thuê: <strong data-testid="property-rent-val" className="font-mono text-slate-900 font-bold">{deed ? formatCurrency(deed.rents[level] ?? deed.rents[0] ?? 0) : '0'}</strong>
+                        Tiền Thuê: <strong data-testid="property-rent-val" className="font-mono text-slate-900 font-bold">{deed ? formatCurrency(deed.rents[level] ?? deed.rents[0] ?? 0) : '0'}</strong> Tr.
                       </span>
                       <span>
-                        Giá: <strong className="font-mono text-slate-900 font-bold">{deed ? formatCurrency(deed.price) : '0'}</strong>
+                        Giá: <strong className="font-mono text-slate-900 font-bold">{deed ? formatCurrency(deed.price) : '0'}</strong> Tr.
                       </span>
                     </div>
                   </div>

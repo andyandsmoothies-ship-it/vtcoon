@@ -10,6 +10,7 @@ export interface GameOverModalProps {
   readonly leaderboard?: ReadonlyArray<{ readonly id: string; readonly netWorth: number }>;
   readonly onClose: () => void;
   readonly onPlayAgain?: () => void;
+  readonly initialTab?: 'leaderboard' | 'fintech' | 'portfolio';
 }
 
 export const INITIAL_CAPITAL = 15_000 as const;
@@ -103,10 +104,11 @@ export function GameOverModal({
   leaderboard = [],
   onClose,
   onPlayAgain,
+  initialTab,
 }: GameOverModalProps): React.ReactElement {
   const playersInfo = useGameStore((s) => s.playersInfo);
   const levelMap = useGameStore((s) => s.levelMap);
-  const [activeTab, setActiveTab] = useState<'leaderboard' | 'fintech' | 'portfolio'>('leaderboard');
+  const [activeTab, setActiveTab] = React.useState<'leaderboard' | 'fintech' | 'portfolio'>(initialTab ?? 'leaderboard');
 
   const winner = leaderboard[0];
   const winnerInfo = winner ? playersInfo[winner.id] : undefined;
@@ -286,7 +288,7 @@ export function GameOverModal({
                 Xu Hướng Tăng Trưởng Tài Sản
               </span>
               <span className={chartData.isPositive ? 'text-emerald-700 font-mono font-bold' : 'text-rose-700 font-mono font-bold'}>
-                15.000k ➔ {formatCurrency(winnerNetWorth)}
+                {formatCurrency(15000)} ➔ {formatCurrency(winnerNetWorth)}
               </span>
             </div>
             <svg viewBox="0 0 400 80" className="w-full h-20 overflow-visible">

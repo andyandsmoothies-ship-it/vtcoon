@@ -1359,3 +1359,54 @@
   * `chaos-sentinel`: Station 4 APPROVED (3 Probes passed, 6/6 mutants killed, floor >= 5 satisfied, 0 survived).
 - **Trạng thái**: ✅ Hoàn thành IMP-237 (2026-10-01).
 
+---
+
+### [2026-10-01] IMP-238: Tối Ưu Công Thái Học Vi Mô, Đồng Bộ Thuật Ngữ & Chống Cắt Chữ Toàn Diện Mobile (Kèm Dual-Viewport Parity Desktop)
+- **Mục tiêu**: Xử lý triệt để 12 vấn đề công thái học vi mô, thuật ngữ và bố cục không gian trên cả hai nền tảng Mobile và Desktop được phát hiện qua đợt khảo sát 27 ảnh chụp màn hình thực tế: khử co cụt `B..` trong P2P Trade, mở rộng regex SSOT lọc nhãn tiếng Việt/Anh, de-clutter thẻ người chơi phá sản đưa `player_card.tsx` về 395 LOC, đồng bộ thuật ngữ `C3 (RESORT/TTTM)`, phân biệt con dấu Sổ Đỏ chính chủ vs đối thủ và khử lỗi lặp ngoặc `))`, chống ép vỡ 3 hàng chữ `GIÁ GỐC`, chống rớt từ "THỊ" tiêu đề Quy Hoạch Đô Thị, chuẩn hóa tiền gửi FinTech VND.
+- **Hạng mục thi công cốt lõi**:
+  1. *P2P Trade Partner Strip*: Bố cục 2 tầng trên Mobile (`flex flex-col sm:flex-row`), mở rộng `max-w-[120px] sm:max-w-[180px] md:max-w-none` cho tên và cố định `shrink-0` cho số dư, xóa sạch co cụt `B..`. Dạng hàng ngang trên Desktop (Dual-Viewport Parity).
+  2. *Player Name SSOT*: Mở rộng regex SSOT trong `ui_helpers.ts` khử sạch các nhãn bot và phòng `\s*\((?:Aggressive|Cautious|Balanced|Passive|Bot|Chủ Phòng|Dẫn Đầu|Táo Bạo|Cẩn Trọng|Cân Bằng|Phòng Thủ|Tấn Công)\)/gi`.
+  3. *PlayerCard Bankrupt De-clutter*: Tách nhánh `player.bankrupt ? (...) : (...)`, hiển thị tên và badge `Phá Sản`, ẩn sạch nợ âm và cảnh báo nợ rác; đưa Post-LOC của `player_card.tsx` về 395 dòng ($\le 400$ LOC Tier 1).
+  4. *Đồng Bộ Thuật Ngữ C3*: Đồng bộ cấp nâng cấp tối đa thành `C3 (RESORT/TTTM)` trong `auction_district_card.tsx`.
+  5. *Auction Modal Bot Name*: Dùng `formatShortPlayerName` cho tên hiển thị và gán `formatLocalizedBotPersonality` vào thuộc tính tooltip `title`.
+  6. *Danh Mục BĐS*: Bổ sung đơn vị `Tr.` ngoài thẻ `<strong>` của `property-rent-val` trong `property_portfolio_modal.tsx`.
+  7. *Sàn HOSE*: Tiêu đề `SÀN CHỨNG KHOÁN HOSE` đổi sang `tracking-normal` và cột `Giá TB` thành `Giá Vốn`.
+  8. *Con Dấu Sổ Đỏ*: Phân định chính xác quyền sở hữu trong `title_deed_modal.tsx`: Chính chủ hiện `SỔ ĐỎ CHÍNH CHỦ` (emerald), đối thủ hiện `ĐÃ CÓ CHỦ` (slate).
+  9. *Footer Sổ Đỏ*: Khử lỗi lặp ngoặc `))` qua `formatShortPlayerName`; phân biệt nút chính chủ `✓ Bất Động Sản Của Bạn` vs đối thủ `✓ Đã Có Chủ: [Tên Đối Thủ]`.
+  10. *Cưỡng Chế Mua Lại*: Tên ô đất bên trái dùng `min-w-0 flex-1 truncate`, cụm `GIÁ GỐC` bên phải cố định `shrink-0 whitespace-nowrap ml-2` trong `compulsory_buyout_modal.tsx`.
+  11. *Quy Hoạch Đô Thị*: Thêm `whitespace-nowrap text-xs sm:text-base` giữ nguyên cụm `BẢN ĐỒ QUY HOẠCH ĐÔ THỊ` trong `masterplan_modal.tsx`.
+  12. *Tổng Kết FinTech*: Chuẩn hóa tiền gửi sang `formatCurrency` trong `game_over_modal.tsx`, hỗ trợ prop `initialTab` strictly-typed.
+- **Hạ tầng & Ngân sách LOC Thực tế (`scripts/check_loc.mjs` - Total Lines / Non-Empty SLOC)**:
+  * `src/client/ui/modals/trade/trade_partner_strip.tsx` (Total: 118 / SLOC: 104 — Tier 2 <= 500 LOC)
+  * `src/client/ui/ui_helpers.ts` (Total: 454 / SLOC: 423 — Tier 2 <= 500 LOC)
+  * `src/client/ui/player_card.tsx` (Total: 395 / SLOC: 369 — Tier 1 <= 400 LOC)
+  * `src/client/ui/modals/auction_district_card.tsx` (Total: 229 / SLOC: 213 — Tier 2 <= 500 LOC)
+  * `src/client/ui/modals/auction_modal.tsx` (Total: 462 / SLOC: 432 — Tier 2 <= 500 LOC)
+  * `src/client/ui/modals/property_portfolio_modal.tsx` (Total: 396 / SLOC: 367 — Tier 2 <= 500 LOC)
+  * `src/client/ui/modals/hose_modal.tsx` (Total: 333 / SLOC: 309 — Tier 2 <= 500 LOC)
+  * `src/client/ui/modals/title_deed_modal.tsx` (Total: 363 / SLOC: 338 — Tier 2 <= 500 LOC)
+  * `src/client/ui/modals/title_deed_action_footer.tsx` (Total: 219 / SLOC: 202 — Tier 2 <= 500 LOC)
+  * `src/client/ui/modals/compulsory_buyout_modal.tsx` (Total: 257 / SLOC: 238 — Tier 2 <= 500 LOC)
+  * `src/client/ui/modals/masterplan_modal.tsx` (Total: 274 / SLOC: 254 — Tier 2 <= 500 LOC)
+  * `src/client/ui/modals/game_over_modal.tsx` (Total: 405 / SLOC: 381 — Tier 2 <= 500 LOC)
+  * `tests/contracts/imp238_mobile_typography_and_micro_ergonomics.test.ts` (Total: 317 / SLOC: 275 — Contract Tests <= 600 LOC)
+  * `docs/reports/improvements/IMP-238-mobile-typography-and-micro-ergonomics-polish_report.md`: Báo cáo nghiệm thu hoàn chỉnh.
+- **Kiểm thử & Bất biến**:
+  * 18/18 atomic contract tests PASS (Universal 5-Facet Matrix, Detroit Classical TDD).
+  * 115/115 regression tests PASS trên 5 suites (`imp236`, `ui04`, `imp140`, `imp155`, `imp106`).
+  * Station 4 Chaos Sentinel: 3/3 physical probes PASS (Closed-Loop Parity 24/24, Ephemeral Wire port 59668, Mutation Sensitivity 4/4 mutants killed, 0 survived).
+  * Visual Evidence Gate: Thẩm định thành công 7 ảnh chụp in-game vật lý trên cả Mobile và Desktop lưu tại `.agents/tmp/`.
+  * TypeScript typecheck: `tsc --noEmit` exit 0. UI Linter: `npm run lint:ui` 0 violations / 208 files. 0 dirty casts.
+  * Evidence Snapshot: `.agents/evidence/chaos_sentinel_IMP-238.json` (`verdict: APPROVED`).
+- **Phê chuẩn**:
+  * `plan-griller`: HARDENED_APPROVED (Revision 3.1 đóng trọn vẹn 100% 7 chỉ thị đối kháng).
+  * `qa-tester`: Station 1 RED verified (13 Business RED / 5 Baseline Regression GREEN: TC-MTE-02, 13, 14, 17, 18).
+  * `implementer`: Station 2 GREEN verified (18/18 tests pass, toàn bộ tệp đạt chuẩn LOC).
+  * `scout`: Station 2.5 PREFILTER_PASSED (0 defects qua 5 bộ lọc cơ học, fix vi.spyOn và as any).
+  * `spec-reviewer`: Station 3.1 SPEC_APPROVED (100% plan fidelity, 0 scope drift).
+  * `ui-craft-reviewer`: Station 3.2 UI_APPROVED (Chuẩn Dual-Viewport, WCAG 2.1 AA, touch targets >= 44px).
+  * `code-reviewer` & `re-reviewer`: Station 3.2 CODE_APPROVED (Active Remediation: bảo toàn `max-w-[120px]` chống hồi quy IMP-236).
+  * `chaos-sentinel`: Station 4 APPROVED (3 Probes passed, 4/4 mutants killed, 0 survived).
+- **Trạng thái**: ✅ Hoàn thành IMP-238 (2026-10-01).
+
+

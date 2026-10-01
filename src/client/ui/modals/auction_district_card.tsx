@@ -181,7 +181,7 @@ export function AuctionDistrictCard({
                 </span>
               </div>
               <div className="text-center flex-1 pl-1">
-                <span className="text-[10px] sm:text-[11px] text-amber-700 block font-semibold whitespace-nowrap">C3 (KHÁCH SẠN)</span>
+                <span className="text-[10px] sm:text-[11px] text-amber-700 block font-semibold whitespace-nowrap">C3 (RESORT/TTTM)</span>
                 <span className="font-mono text-[11px] sm:text-xs font-bold text-amber-800 whitespace-nowrap">
                   {formatCurrency(info.rentPreview.rentC3 ?? 0)}
                 </span>

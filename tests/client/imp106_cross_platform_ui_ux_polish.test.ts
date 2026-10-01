@@ -116,7 +116,7 @@ describe('[UC-IMP106/MSS] Cross-Platform UI/UX Multi-Platform Polish Contract Su
       expect(html).toContain('partner-selector-tab');
     });
 
-    it('[UC-IMP106/MSS-P2.1] TradeModal partner selector tabs constrain long names with truncate max-w-[120px]', () => {
+    it('[UC-IMP106/MSS-P2.1] TradeModal partner selector tabs constrain long names with truncate max-w-[80px]', () => {
       const html = renderToStaticMarkup(
         React.createElement(TradeModal, {
           targetPlayerId: 'p2',
@@ -129,7 +129,7 @@ describe('[UC-IMP106/MSS] Cross-Platform UI/UX Multi-Platform Polish Contract Su
           onClose: () => {},
         })
       );
-      expect(html).toContain('truncate max-w-[120px]');
+      expect(html).toContain('truncate max-w-[80px]');
     });
 
     it('[UC-IMP106/MSS-P2.2] TradeModal preserves partner balance pill and selection indicator', () => {

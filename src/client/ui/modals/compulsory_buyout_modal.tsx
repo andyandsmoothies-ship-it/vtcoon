@@ -175,21 +175,21 @@ export function CompulsoryBuyoutModal({
 
         {/* Chi tiết ô đất & Giá đền bù */}
         <div className="p-3.5 bg-[#F7F2E7] border border-amber-900/15 rounded-xl flex flex-col gap-2.5 shadow-sm">
-          <div className="flex justify-between items-start">
-            <div className="flex items-center gap-2.5">
+          <div className="flex justify-between items-start gap-2">
+            <div className="flex items-center gap-2.5 min-w-0 flex-1">
               {cell?.colorGroup && (
                 <span
                   className="w-3 h-8 rounded-full shrink-0 shadow-sm"
                   style={{ backgroundColor: cellColor }}
                 />
               )}
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Ô Đất C0 Mục Tiêu</span>
-                <p className="text-base font-black text-slate-900 leading-tight">{propertyName}</p>
+              <div className="min-w-0 flex-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Ô Đất C0 Mục Tiêu</span>
+                <p className="text-base font-black text-slate-900 leading-tight truncate">{propertyName}</p>
               </div>
             </div>
-            <div className="text-right">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Giá Gốc</span>
+            <div className="text-right shrink-0 whitespace-nowrap ml-2">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Giá Gốc</span>
               <p className="text-xs font-bold text-slate-600 line-through">{formatCurrency(currentTarget.basePrice)}</p>
             </div>
           </div>

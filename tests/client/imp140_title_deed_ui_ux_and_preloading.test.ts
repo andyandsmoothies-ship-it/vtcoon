@@ -222,6 +222,7 @@ describe('[UC-IMP140] Title Deed UI/UX & Asset Preloading Contract Tests', () =>
       React.createElement(TitleDeedModal, {
         cellIndex: 1,
         isOwned: true,
+        isOwner: true,
         ownerName: 'Nhà Đầu Tư Hải Phòng',
         activeModifiers: [
           {

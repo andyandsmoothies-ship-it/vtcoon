@@ -1,5 +1,5 @@
 import React from 'react';
-import { formatCurrency } from '../ui_helpers';
+import { formatCurrency, formatShortPlayerName } from '../ui_helpers';
 
 export interface TitleDeedActionFooterProps {
   readonly isOwned: boolean;
@@ -14,7 +14,7 @@ export interface TitleDeedActionFooterProps {
   readonly upgradeCost?: number;
   readonly upgradeBlockedReason?: string;
   readonly downgradeBlockedReason?: string;
-  readonly deedPrice: number;
+  readonly deedPrice?: number;
   readonly onBuy?: () => void;
   readonly onPass?: () => void;
   readonly onClose?: () => void;
@@ -42,7 +42,7 @@ export function TitleDeedActionFooter({
   upgradeCost,
   upgradeBlockedReason,
   downgradeBlockedReason,
-  deedPrice,
+  deedPrice = 0,
   onBuy,
   onPass,
   onClose,
@@ -75,8 +75,12 @@ export function TitleDeedActionFooter({
     <footer className="relative z-10 p-4 pt-2 bg-[#F7F2E7] border-t border-slate-300 grid grid-cols-2 gap-2 shrink-0">
       {isOwned ? (
         <>
-          <div className="col-span-2 min-h-[48px] py-2 px-3 rounded-xl font-bold text-emerald-800 bg-emerald-100/80 border border-emerald-400 text-xs text-center flex items-center justify-center shadow-sm truncate">
-            ✓ Đã Sở Hữu {ownerName ? `(${ownerName})` : ''}
+          <div className={`col-span-2 min-h-[48px] py-2 px-3 rounded-xl font-bold text-xs text-center flex items-center justify-center shadow-sm truncate ${
+            isOwner
+              ? 'text-emerald-800 bg-emerald-100/80 border border-emerald-400'
+              : 'text-slate-800 bg-slate-100/90 border border-slate-300'
+          }`}>
+            {isOwner ? '✓ Bất Động Sản Của Bạn' : `✓ Đã Có Chủ: ${formatShortPlayerName(ownerName) || 'Đối Thủ'}`}
           </div>
           {showUpgrade && (
             <button

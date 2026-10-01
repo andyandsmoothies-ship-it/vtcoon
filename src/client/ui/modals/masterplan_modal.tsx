@@ -117,7 +117,7 @@ export function MasterplanModal({
         <div className="flex items-center gap-2.5">
           <span className="text-2xl" aria-hidden="true">🗺️</span>
           <div>
-            <h2 className="text-base font-black uppercase text-slate-900 tracking-wider">
+            <h2 className="text-xs sm:text-base font-black uppercase text-slate-900 tracking-wide sm:tracking-wider whitespace-nowrap">
               BẢN ĐỒ QUY HOẠCH ĐÔ THỊ
             </h2>
             <p className="text-xs text-slate-600 font-semibold">

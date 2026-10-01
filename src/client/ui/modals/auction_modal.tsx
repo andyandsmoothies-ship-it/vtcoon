@@ -310,8 +310,11 @@ export function AuctionModal({
                     >
                       <div className="flex items-center gap-1.5 min-w-0">
                         <span className="w-2 h-2 rounded-full shrink-0 border border-slate-900" style={{ backgroundColor: p.tokenColor ?? '#F59E0B' }} />
-                        <span className={`truncate max-w-[100px] sm:max-w-[160px] font-medium min-w-0 text-[11px] sm:text-xs ${isPassed ? 'line-through text-slate-400' : ''}`}>
-                          {formatLocalizedBotPersonality(p.name ?? '')}
+                        <span
+                          className={`truncate max-w-[100px] sm:max-w-[160px] font-medium min-w-0 text-[11px] sm:text-xs ${isPassed ? 'line-through text-slate-400' : ''}`}
+                          title={formatLocalizedBotPersonality(p.name ?? '')}
+                        >
+                          {formatShortPlayerName(p.name ?? '')}
                         </span>
                         {isMe && <span className="text-[10px] font-bold text-amber-800 shrink-0">(Bạn)</span>}
                         {isBidder ? (

@@ -39,6 +39,9 @@ hooks: [.agents/hooks_qa.json]
   - Static checklist tests: Never assert `fs.existsSync`, `typeof fn === 'function'`, or LOC limits in unit tests.
   - Shallow change detectors: Never use solitary `.toBeDefined()`, `.not.toBeNull()`, or `.toHaveLength(n)` without asserting concrete values.
   - Dirty casts in test code: Never use `as any`, `as unknown as`, or `as Record<string, any>` / `as Record<string, unknown>` — these are semantically equivalent dirty casts. Document exceptions explicitly (e.g. mock DOM events).
+  - Framework internal spies: Never spy on framework-private APIs (`React.useState`, `React.useEffect`, hook internals, lifecycle methods). If a component state cannot be reached via props or public API, request a testability prop from implementer instead.
+- **Assertion-to-Plan Parity**: Every expected value in an assertion (string content, CSS class, aria label, numeric result) MUST be directly quoted from the corresponding AFTER block in the plan. Never infer expected values from component logic or domain knowledge — only from the plan's declared output. If the plan AFTER block does not specify a value, flag as `[UNANCHORED ASSERTION]` and consult the plan author before writing.
+- **Gotcha Pre-Check**: Before writing tests for any component or function, search `docs/domain/gotchas.md` (or equivalent domain invariants file) for entries matching the component name or domain tag. Apply all matching invariants as test constraints. If a gotcha bans a testing pattern (e.g. `toContain()` on ambiguous HTML attributes — Gotcha #33), switch to the prescribed alternative.
 - **Universal 5-Facet Behavioral Matrix**:
   1. *Boundary & Range*: Input bounds, range constraints, format validity.
   2. *State Reactivity & Multi-Turn Teardown*: Lifecycle transitions, sparse delta serialization, turn phase resets, and Turn N+1 purge (Turn N ephemeral state 100% cleared on Turn N+1 advance).

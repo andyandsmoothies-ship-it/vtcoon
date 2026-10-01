@@ -240,28 +240,24 @@ export function PlayerCard({
 
         {/* Cột phải (Căn lề phải): Số tiền mặt, Cảnh báo thấu chi, Tài sản ròng & Badge Phá Sản */}
         <div className="flex items-center justify-end gap-1.5 shrink-0 text-right">
-          <span className={`tabular-nums text-xs ${balanceColorClass} shrink-0`}>
-            {formatCurrency(player.balance)}
-          </span>
-
-          {isNegativeBalance && (
-            <span
-              className="text-[9px] font-extrabold text-rose-700 bg-rose-100 border border-rose-300 px-1.5 py-0.2 rounded shrink-0 leading-tight"
-              title={`Thấu chi: còn ${player.overdraftRoundsLeft ?? 3} vòng`}
-            >
-              <span className="inline sm:hidden">Nợ {player.overdraftRoundsLeft ?? 3}v</span>
-              <span className="hidden sm:inline">Thấu chi: còn {player.overdraftRoundsLeft ?? 3} vòng</span>
-            </span>
-          )}
-
-          <span className="hidden sm:flex items-center text-[11px] text-slate-700 font-black tabular-nums shrink-0" data-testid="player-net-worth" title="Tài sản ròng">
-            ({formatCurrency(netWorth)})
-          </span>
-
-          {player.bankrupt && (
+          {player.bankrupt ? (
             <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-rose-100 text-rose-900 border border-rose-300">
               Phá Sản
             </span>
+          ) : (
+            <>
+              <span className={`tabular-nums text-xs ${balanceColorClass} shrink-0`}>{formatCurrency(player.balance)}</span>
+              {isNegativeBalance && (
+                <span
+                  className="text-[9px] font-extrabold text-rose-700 bg-rose-100 border border-rose-300 px-1.5 py-0.2 rounded shrink-0 leading-tight"
+                  title={`Thấu chi: còn ${player.overdraftRoundsLeft ?? 3} vòng`}
+                >
+                  <span className="inline sm:hidden">Nợ {player.overdraftRoundsLeft ?? 3}v</span>
+                  <span className="hidden sm:inline">Thấu chi: còn {player.overdraftRoundsLeft ?? 3} vòng</span>
+                </span>
+              )}
+              <span className="hidden sm:flex items-center text-[11px] text-slate-700 font-black tabular-nums shrink-0" data-testid="player-net-worth" title="Tài sản ròng">({formatCurrency(netWorth)})</span>
+            </>
           )}
         </div>
       </div>

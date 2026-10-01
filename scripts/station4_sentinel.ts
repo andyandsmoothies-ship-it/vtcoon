@@ -379,7 +379,7 @@ async function runProbe3(testPath?: string): Promise<ProbeResults['mutationSensi
     // Mutant 12: Corrupt regex match .toMatch(/.../)
     if (originalContent.includes('.toMatch(/')) {
       mutantsTested++;
-      const mutantContent = originalContent.replace(/\.toMatch\(\/([^/]+)\/\)/, '.toMatch(/__MUTANT_REGEX_FAIL_NO_MATCH__/)');
+      const mutantContent = originalContent.replace(/\.toMatch\(\/((?:\\\/|[^/])+)\/[a-z]*\)/, '.toMatch(/__MUTANT_REGEX_FAIL_NO_MATCH__/)');
       fs.writeFileSync(sandboxPath, mutantContent, 'utf-8');
 
       try {

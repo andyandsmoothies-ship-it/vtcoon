@@ -243,7 +243,11 @@ export function TitleDeedModal({
               <span className="font-bold text-slate-900 text-xs truncate">Chủ sở hữu: {ownerName || 'Đã có chủ'}</span>
             </div>
           </div>
-          <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-600 text-white uppercase tracking-wider">SỔ ĐỎ CHÍNH CHỦ</span>
+          <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider ${
+            isOwner ? 'bg-emerald-600 text-white' : 'bg-slate-700 text-white'
+          }`}>
+            {isOwner ? 'SỔ ĐỎ CHÍNH CHỦ' : 'ĐÃ CÓ CHỦ'}
+          </span>
         </div>
       )}
 

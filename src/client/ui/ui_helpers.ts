@@ -439,7 +439,7 @@ export function resolveActionDockNotice(params: ActionDockNoticeParams): ActionD
  */
 export function formatShortPlayerName(name?: string, maxLength?: number): string {
   if (!name) return '';
-  const cleaned = name.replace(/\s*\((?:Aggressive|Cautious|Balanced|Passive|Bot)\)/i, '').trim();
+  const cleaned = name.replace(/\s*\((?:Aggressive|Cautious|Balanced|Passive|Bot|Chủ Phòng|Dẫn Đầu|Táo Bạo|Cẩn Trọng|Cân Bằng|Phòng Thủ|Tấn Công)\)/gi, '').trim();
   if (maxLength && cleaned.length > maxLength) {
     return `${cleaned.slice(0, maxLength > 3 ? maxLength - 2 : maxLength)}...`;
   }
