@@ -278,7 +278,7 @@ export function TitleDeedModal({
           <div className="w-full space-y-2 sm:space-y-2.5">
             {/* Hàng Hero: Ảnh BĐS + Khối giá niêm yết & Giá trị thế chấp */}
             <div className="flex flex-row gap-2 sm:gap-2.5 items-stretch">
-              <div className="w-20 h-20 shrink-0">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 shrink-0">
                 <TitleDeedArtShowcase
                   tileAssetUrl={tileAssetUrl}
                   deedName={deed.name}

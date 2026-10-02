@@ -173,16 +173,24 @@ function updateDiffuseAndAtmosphere(
       scene.fog = new Fog(fogTargets.color, fogTargets.near, fogTargets.far);
     } else {
       tempColor.set(fogTargets.color);
-      scene.fog.color.lerp(tempColor, lerpRate);
-      scene.fog.near += (fogTargets.near - scene.fog.near) * lerpRate;
-      scene.fog.far += (fogTargets.far - scene.fog.far) * lerpRate;
+      if (scene.fog.color.getHexString() !== tempColor.getHexString()) {
+        scene.fog.color.lerp(tempColor, lerpRate);
+      }
+      if (Math.abs(fogTargets.near - scene.fog.near) > 0.05) {
+        scene.fog.near += (fogTargets.near - scene.fog.near) * lerpRate;
+      }
+      if (Math.abs(fogTargets.far - scene.fog.far) > 0.05) {
+        scene.fog.far += (fogTargets.far - scene.fog.far) * lerpRate;
+      }
     }
     const targetSkyColor = isAuctionActive ? fogTargets.color : preset.skyColor;
     if (!scene.background || !isThreeColor(scene.background)) {
       scene.background = new Color(targetSkyColor);
     } else {
       tempColor.set(targetSkyColor);
-      scene.background.lerp(tempColor, lerpRate);
+      if (scene.background.getHexString() !== tempColor.getHexString()) {
+        scene.background.lerp(tempColor, lerpRate);
+      }
     }
     const baseEnv = phase === 'night' ? 0.28 : phase === 'sunset' ? 0.38 : 0.75;
     const targetEnv = isAuctionActive ? 0.12 : baseEnv;

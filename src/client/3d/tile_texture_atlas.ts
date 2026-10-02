@@ -245,8 +245,8 @@ export function getBoardTileAtlas(isMobile = isPhoneHardware()): CanvasTexture |
   });
   texture.colorSpace = SRGBColorSpace;
   texture.anisotropy = useMobile ? 2 : 16;
-  texture.generateMipmaps = true;
-  texture.minFilter = LinearMipmapLinearFilter;
+  texture.generateMipmaps = !useMobile;
+  texture.minFilter = useMobile ? LinearFilter : LinearMipmapLinearFilter;
   texture.magFilter = LinearFilter;
 
   if (useMobile) {

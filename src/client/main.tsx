@@ -22,6 +22,7 @@ export const GameCanvas = lazy(() =>
 );
 
 import { getInitialLobbyConfig } from './offline_landing';
+import { isMobileDevice } from './3d/device_detect';
 import { AppErrorBoundary } from './ui/error_boundary';
 export { AppErrorBoundary };
 
@@ -210,7 +211,7 @@ export function App(): React.ReactElement {
           }
         >
           {/* Contract retention: <GameCanvas isLobby /> <GameCanvas /> */}
-          <GameCanvas isLobby={!gameStarted} players={effectivePlayers} />
+          <GameCanvas isLobby={!gameStarted} players={effectivePlayers} isMobile={isMobileDevice()} />
         </Suspense>
       </div>
 
