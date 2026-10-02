@@ -34,12 +34,13 @@ export function ContainerShipProceduralFallback(): React.ReactElement {
 
 export interface CoastalIslandEnvironmentProps {
   streamlined?: boolean;
+  isMobile?: boolean;
 }
 
 export const CoastalIslandEnvironment: React.FC<CoastalIslandEnvironmentProps> = function CoastalIslandEnvironment(
   props: CoastalIslandEnvironmentProps = {}
 ): React.ReactElement {
-  const { streamlined = true } = props;
+  const { streamlined = true, isMobile = false } = props;
   const waveRef = useRef<Mesh>(null);
   const shallowRef = useRef<Mesh>(null);
   // oceanGeomRef preserved for legacy test contract
@@ -71,6 +72,7 @@ export const CoastalIslandEnvironment: React.FC<CoastalIslandEnvironmentProps> =
       {/* [TẦNG 3: Mặt biển chính GPU Gerstner Shader] Y = -0.300 data-testid="living-ocean-water" */}
       <TropicalWater
         testId="living-ocean-water"
+        isMobile={isMobile}
         onWaterClick={() => SoundEngine.playWaterRipple()}
       />
 

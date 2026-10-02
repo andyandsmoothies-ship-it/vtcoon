@@ -439,7 +439,7 @@ export function GameCanvas({
                 <TimeOfDayLighting isMobile={isMobileDevice} />
                 {/* Bóng tiếp xúc mâm gỗ bàn cờ đặt trên thảm nhung Ba Tư */}
                 <ContactShadows frames={1} position={[0, -0.05, 0]} opacity={0.75} scale={45} blur={2.0} far={6} />
-                <GameBoard />
+                <GameBoard isMobile={isMobileDevice} />
                 <PawnAnimator players={effectivePlayers} />
                 {/* <PostProcessingPipeline /> */}
                 <PostProcessingPipeline isMobile={isMobileDevice} enabled={!isMobileDevice} />
@@ -450,7 +450,7 @@ export function GameCanvas({
                 <TimeOfDayLighting isMobile={isMobileDevice} />
                 {/* ContactShadows contract retention: <ContactShadows frames={1} position={[0, -0.01, 0]} opacity={0.7} scale={40} blur={2} /> */}
                 <ContactShadows frames={1} position={[0, -0.05, 0]} opacity={0.75} scale={45} blur={2.0} far={6} />
-                <GameBoard />
+                <GameBoard isMobile={isMobileDevice} />
                 <PawnAnimator players={effectivePlayers} />
                 <EventCard3D />
                 <Coronation3DStage />

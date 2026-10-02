@@ -90,7 +90,11 @@ export function computeOwnerMap(
   return map;
 }
 
-export function GameBoard(): React.ReactElement {
+export interface GameBoardProps {
+  readonly isMobile?: boolean;
+}
+
+export function GameBoard({ isMobile: propIsMobile }: GameBoardProps = {}): React.ReactElement {
   const storeLevelMap = useGameStore((s) => s.levelMap);
   const levelMap = Object.keys(storeLevelMap ?? {}).length > 0 ? storeLevelMap : (useGameStore.getState()?.levelMap ?? storeLevelMap);
   const openModal = useGameStore((s) => s.openModal);
@@ -102,7 +106,7 @@ export function GameBoard(): React.ReactElement {
   const turnPhase = useGameStore((s) => s.turnPhase);
   const localPlayerId = useLobbyStore((s) => s.myPlayerId) || 'p1';
   const isHeatmapActive = useGameStore((s) => s.isHeatmapActive);
-  const isMobile = useMemo(() => isMobileHardware(), []);
+  const isMobile = propIsMobile ?? isMobileHardware();
 
   const ownerInfoMap = useMemo(() => computeOwnerMap(playersInfo), [playersInfo]);
   const monopolyGroups = useMemo(() => detectPlayerMonopolies(playersInfo), [playersInfo]);
@@ -145,7 +149,8 @@ export function GameBoard(): React.ReactElement {
       </mesh>
 
       {/* 0. Môi trường Bán đảo Đảo Ngọc nhiệt đới (Vịnh biển, bãi cát, đồi núi & mây trời) */}
-      <CoastalIslandEnvironment />
+      {/* <CoastalIslandEnvironment /> */}
+      <CoastalIslandEnvironment isMobile={isMobile} />
 
       {/* 0.1. Điểm nhấn ánh sáng điện ảnh 3D (Hải đăng, Chóp Landmark C3, Sân vận động) */}
       <CinematicLightingAccents />

@@ -1,6 +1,6 @@
 // [UI-S04/MSS] EventCardTexture — HiDPI Procedural Canvas Texture Generator for 3D Event Cards
 // Generates Dong Son Bronze Drum / Imperial Dragon Back Texture and High-Readability FinTech Front Texture
-import { CanvasTexture, SRGBColorSpace } from 'three';
+import { CanvasTexture, SRGBColorSpace, LinearFilter } from 'three';
 import { formatCurrency } from '../ui/ui_helpers';
 import { ChanceCardId } from '../../domain/event_card_types';
 
@@ -179,6 +179,8 @@ export function generateEventCardBackTexture(
 
   const texture = new CanvasTexture(canvas);
   texture.colorSpace = SRGBColorSpace;
+  texture.generateMipmaps = false;
+  texture.minFilter = LinearFilter;
   return texture;
 }
 
@@ -321,6 +323,8 @@ export function generateEventCardFrontTexture(
 
   const texture = new CanvasTexture(canvas);
   texture.colorSpace = SRGBColorSpace;
+  texture.generateMipmaps = false;
+  texture.minFilter = LinearFilter;
   return texture;
 }
 

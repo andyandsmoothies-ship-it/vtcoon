@@ -1,5 +1,5 @@
 // [UI-S04/MSS] AuctionDeedTexture — HiDPI 2D Canvas Texture Generator for 3D Collector Card
-import { CanvasTexture, SRGBColorSpace } from 'three';
+import { CanvasTexture, SRGBColorSpace, LinearFilter } from 'three';
 import { formatCurrency } from '../ui/ui_helpers';
 
 /**
@@ -139,6 +139,8 @@ export function generateAuctionDeedTexture(
 
   const texture = new CanvasTexture(canvas);
   texture.colorSpace = SRGBColorSpace;
+  texture.generateMipmaps = false;
+  texture.minFilter = LinearFilter;
   texture.needsUpdate = true;
   return texture;
 }
