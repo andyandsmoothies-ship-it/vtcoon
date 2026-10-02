@@ -195,9 +195,15 @@ export class PerfBudgetController {
   /**
    * Trích xuất báo cáo toàn diện chỉ số hiệu năng WebGL
    */
-  public getBudgetReport(glInfo?: {
-    render: { calls: number; triangles: number };
-  }): PerfBudgetReport {
+  public getBudgetReport(
+    glInfo?: {
+      render: { calls: number; triangles: number };
+    },
+    deviceContext?: {
+      isMobile?: boolean;
+      currentDpr?: number;
+    }
+  ): PerfBudgetReport {
     const drawCalls = glInfo?.render.calls ?? 0;
     const triangles = glInfo?.render.triangles ?? 0;
 
@@ -206,10 +212,13 @@ export class PerfBudgetController {
     const avgFps = this.getAverageFps();
     const recommendedLod = this.calculateAdaptiveLOD(avgFps);
 
+    const isMobile = deviceContext?.isMobile ?? false;
+    const currentDpr = deviceContext?.currentDpr ?? (isMobile ? 1.0 : 1.5);
+
     const dprEval = this.calculateAdaptiveDpr({
-      isMobile: false,
+      isMobile,
       currentFps: avgFps,
-      currentDpr: 1.5,
+      currentDpr,
       degradedDurationMs: 1500,
       optimalDurationMs: 0,
     });

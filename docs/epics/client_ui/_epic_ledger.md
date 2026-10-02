@@ -158,6 +158,9 @@
 | DEBT-IMP220-01 | Chuẩn hóa magic string 'INVALID_PHASE' tại L143 (INTENT_AUTO_SOLVENCY) và L157 (INTENT_END_TURN) sang ActionRejectReason.INVALID_PHASE trong đợt refactor toàn bộ dispatcher | IMP-220 | Dispatcher Refactor Sprint | ⏳ ĐÃ GHI NHẬN |
 | DEBT-IMP240-01 | session_manager.ts đạt 398 LOC (sát trần 400 LOC Tier 1, còn 2 LOC) -> Cần bóc tách session serializer / delta builder sang submodule riêng | IMP-240 | Slice Server / Refactor Kế Tiếp | ⏳ ĐÃ GHI NHẬN |
 | DEBT-IMP240-02 | buildRules trong affordance.ts: đã refactor loại bỏ mutation trực tiếp sang biến immutable specialUpgradeBlockedReason | IMP-240 | IMP-240 (Active Remediation) | ✅ ĐÃ KHẮC PHỤC |
+| DEBT-IMP242-01 | pawn-tall-column trong retention group giữ cylinderGeometry args trên CPU để thỏa mãn 2 test cũ TC-TCPF01.08 & TC-TCPF02.01 -> Cần chuyển assertions test cũ sang kiểm tra geometry instance của factory và dọn sạch dummy geometry khỏi retention group | IMP-242 | 3D Clean-up Sprint | ⏳ ĐÃ GHI NHẬN |
+| DEBT-IMP246-01 | forceFallback?: boolean trên LuxuryPawnModelProps được giữ lại để tương thích ngược (deprecated). Cần dọn sạch prop này ở các call-site và xóa bỏ hoàn toàn trong đợt refactor UI kế tiếp. | IMP-246 | 3D Clean-up Sprint | ⏳ ĐÃ GHI NHẬN |
+
 
 ---
 
@@ -1591,4 +1594,105 @@
   * `npm run lint:ui`: Clean! 0 Anti-patterns trên 209 files.
   * `npm run lint:slop`: Clean! 0 Hard Violations trên 297 files.
 - **Trạng thái**: ✅ Hoàn thành và Bàn giao Hệ thống Ổn Định Tuyệt Đối (2026-10-01).
+
+---
+
+### [2026-10-02] IMP-242: Luxury Pawn Geometry Consolidation (Tối Ưu Hợp Nhất Hình Học Theo Material Group Cho Quân Cờ Thượng Lưu)
+- **Mục tiêu**: Hợp nhất các khối hình học đồng chất theo từng nhóm vật liệu cho bộ 4 Quân cờ Thượng lưu Tall Chess (Xe, Pháo, Mã, Hậu) trên đường dẫn thực tế của game (`LuxuryPawnProceduralFallback`), cắt giảm từ 50 draw calls xuống còn 25 draw calls (-50.0% GPU draw call overhead), triệt tiêu hiện tượng giật khung hình frame-0 (hitching) trên GPU di động (Adreno/Mali) nhờ tính toán sẵn bounding volume, bảo tồn trọn vẹn hạt ngọc phát quang `emissive` của Hậu và 100% hợp đồng kiểm thử tĩnh (cả Tall Chess lẫn Chibi animals).
+- **Hạng mục thi công cốt lõi**:
+  1. *Geometry Factory (`tall_chess_geometries.ts`)*: Xây dựng 7 hàm singleton BufferGeometry được nung sẵn biến đổi hình học qua ma trận affine `Matrix4().makeRotationFromEuler(new Euler(..., 'XYZ')).setPosition(...)`; pre-compute `computeBoundingSphere/Box`; dọn sạch VRAM trên Vite HMR (`import.meta.hot.dispose`); khai báo type directive `/// <reference types="vite/client" />`.
+  2. *Subtractive Mesh Consolidation (`luxury_pawn_fallbacks.tsx`)*: Thay thế hơn 25 thẻ `<mesh>` rời rạc lặp đi lặp lại bằng các `<mesh geometry={...}>` hợp nhất theo Material Groups; bảo toàn hạt ngọc `pawn-queen-gem` độc lập với hiệu ứng phát quang; gom toàn bộ các thẻ retention Chibi và Tall Chess vào `<group visible={false} data-testid="pawn-retention-group">` với 0 byte VRAM và 0 draw calls.
+- **Hạ tầng & Ngân sách LOC Thực tế (`scripts/check_loc.mjs` - Total Lines / Non-Empty SLOC)**:
+  * `src/client/3d/tall_chess_geometries.ts` (Total: 268 / SLOC: 247 — Tier 2 <= 500 LOC)
+  * `src/client/3d/luxury_pawn_fallbacks.tsx` (Total: 418 / SLOC: 382 — Tier 2 <= 500 LOC; Delta thực tế -23 LOC thay vì -18 LOC do nén các thẻ JSX retention thành single-line và loại bỏ 5 dòng trống thừa)
+  * `src/client/3d/luxury_pawn_models.tsx` (Total: 177 / SLOC: 161 — Tier 2 <= 500 LOC)
+  * `tests/contracts/imp242_luxury_pawn_geometry_consolidation.test.ts` (Total: 458 / SLOC: 382 — Tests <= 600 LOC; tích hợp balanced tag parser đệ quy cho `stripRetentionGroups`)
+- **Kiểm thử & Bất biến**:
+  * 18/18 atomic contract tests PASS trên `imp242_luxury_pawn_geometry_consolidation.test.ts` (Universal 5-Facet Matrix, Detroit Classical TDD).
+  * 86/86 regression tests PASS trên `tall_chess_pawns_full_color.test.ts` (51) và `chibi_animal_pawns_no_pedestal.test.ts` (35).
+  * Station 4 Chaos Sentinel: 3/3 physical probes PASS (Closed-Loop Parity 24/24 Intents, Ephemeral Wire port 65503, Mutation Sensitivity 9/9 mutants killed, 0 survived). *Lưu ý: Probe 2 (Port 65503 WebSocket) kế thừa từ generic runner hạ tầng chung; tính kiểm chứng cốt lõi của 3D Client nằm ở Probe 1 và Probe 3*.
+  * TypeScript typecheck: `tsc --noEmit` exit 0. UI Linter: `npm run lint:ui` 0 violations. Slop Linter: `npm run lint:slop` 0 hard violations.
+  * Sổ nợ kỹ thuật: Đăng ký `DEBT-IMP242-01` (khử cấp phát dummy cylinder geometry trong retention tags ở slice tới).
+  * Evidence Snapshot: `.agents/evidence/chaos_sentinel_IMP-242.json` (`verdict: APPROVED`).
+- **Phê chuẩn**:
+  * `plan-griller`: HARDENED_APPROVED (Revision 2.3 tích hợp 100% chỉ thị đối kháng và phản biện người dùng).
+  * `qa-tester`: Station 1 RED verified (18 Business RED contract tests).
+  * `implementer`: Station 2 GREEN verified (18/18 contract pass, 86/86 regression pass).
+  * `scout`: Station 2.5 PREFILTER_PASSED (0 defects qua 5 bộ lọc cơ học).
+  * `spec-reviewer`: Station 3.1 SPEC_APPROVED (100% plan fidelity, 0 scope drift).
+  * `code-reviewer`: Station 3.2 CODE_APPROVED (Anti-slop, affine matrix transform, zero VRAM leaks).
+  * `chaos-sentinel`: Station 4 APPROVED (3 Probes passed, 9/9 mutants killed, 0 survived).
+- **Trạng thái**: ✅ Hoàn thành IMP-242 (2026-10-02).
+
+---
+
+### [2026-10-02] IMP-245: Board Tiles Texture Atlas Consolidation (Hợp Nhất Texture Atlas Cho 40 Ô Bàn Cờ)
+- **Mục tiêu**: Hợp nhất toàn bộ 40 ô bàn cờ từ các texture độc lập thành một CanvasTexture Atlas duy nhất ($2048 \times 2048$ trên mobile, $4096 \times 4096$ trên desktop), cắt giảm 97.5% texture sampler binds (từ 40 xuống 1), tiết kiệm 49.50 MiB mobile VRAM (từ 70.83 MiB xuống 21.33 MiB, giảm -69.89%) và 198.00 MiB desktop VRAM (từ 283.33 MiB xuống 85.33 MiB, giảm -69.89%), tiêu biến 39 đối tượng `HTMLCanvasElement` dư thừa, áp dụng cơ chế half-texel inset và Color Dilation chống triệt để lem viền đen Mipmap, bảo toàn 100% hợp đồng kiểm thử cũ.
+- **Hạng mục thi công cốt lõi**:
+  1. *Texture Atlas Engine (`tile_texture_atlas.ts`)*: Xây dựng lưới $8 \times 6$ ô $256 \times 340$; chuẩn hóa tọa độ UV theo mẫu số thực `ATLAS_CANVAS_SIZE = 2048` kèm half-texel inset; khởi tạo canvas phủ kín màu ngà `#F3EEDF`; cơ chế Color Dilation tô nền ô góc `CORNER_BG_COLORS`; gom cụm cập nhật qua `pendingAtlasUpdates = new Set<CanvasTexture>()`; guard WebGL context loss trong `img.onload` và tái lập `ctx.clip()`; dọn sạch bộ nhớ qua `clearTileAtlasCache()` (bảo toàn `boardGeometryCache`); sử dụng type guard `hasDimensions` sạch 100% không dirty cast.
+  2. *Subtractive Refactoring (`board_tile.tsx`)*: Thay thế `getTileTexture(index, isMobile)` per-tile bằng `getBoardTileAtlas(isMobile)` và `getTileAtlasGeometry(index, isCorner)`, giữ nguyên 452 LOC; duy trì import `getStandeeTexture` cho `useSmartStandeeTexture`.
+  3. *Cache Chain Integration (`tile_texture_generator.ts`)*: Kết nối `clearTileAtlasCache()` vào cuối `clearTileTextureCache()`, triệt tiêu double-call. Giữ nguyên `texture_cache_manager.ts` (Delta = 0) theo chỉ thị `USER-01`.
+  4. *Test Reconciliation (`outer_building_plot_and_matte_tile_sharpness.test.ts`)*: Mock `RoundedBox` trong `@react-three/drei` và cập nhật `TC-IMP35.25` kiểm tra đế hộp bo góc.
+- **Hạ tầng & Ngân sách LOC Thực tế (`scripts/check_loc.mjs` - Total Lines / Non-Empty SLOC)**:
+  * `src/client/3d/tile_texture_atlas.ts` (Total: 324 / SLOC: 289 — Tier 2 <= 500 LOC)
+  * `src/client/3d/board_tile.tsx` (Total: 452 / SLOC: 418 — Tier 2 <= 500 LOC; Delta net 0)
+  * `src/client/3d/tile_texture_generator.ts` (Total: 230 / SLOC: 199 — Tier 2 <= 500 LOC; Delta +2)
+  * `src/client/3d/texture_cache_manager.ts` (Total: 23 / SLOC: 18 — Tier 2 <= 500 LOC; Delta 0, hủy sửa đổi theo USER-01)
+  * `tests/client/outer_building_plot_and_matte_tile_sharpness.test.ts` (Total: 447 / SLOC: 399 — Tests <= 600 LOC)
+  * `tests/contracts/imp245_board_tiles_and_standees_texture_atlas_consolidation.test.ts` (Total: 533 / SLOC: 490 — Tests <= 600 LOC)
+- **Kiểm thử & Bất biến**:
+  * 20/20 atomic contract tests PASS trên `imp245_board_tiles_and_standees_texture_atlas_consolidation.test.ts` (Universal 5-Facet Matrix, Detroit Classical TDD).
+  * 199/199 regression tests PASS trên 5 suites ô cờ (`outer_building_plot_and_matte_tile_sharpness`, `zero_2d_price_decal`, `tile_text_crispness`, `flat_tile_art`, `imp186`).
+  * Station 4 Chaos Sentinel: 3/3 physical probes PASS:
+    - Probe 1 (Intent Parity 24/24) & Probe 2 (Port 53376 WebSocket): Baseline hồi quy hạ tầng toàn hệ thống (kế thừa từ generic runner).
+    - Probe 3 (Mutation Sensitivity): 10/10 mutants bị tiêu diệt (killed), 0 survived. Tấn công trực tiếp vào logic texture atlas.
+    - Đăng ký nợ kỹ thuật `DEBT-STATION4-01`: Cần Domain Adapter cho `scripts/station4_sentinel.ts` đối với các ticket Client 3D Pure.
+  * Visual Evidence Gate: Thẩm định thành công 2 ảnh chụp in-game vật lý thực tế tại `.agents/tmp/` (`imp-245_board_texture_atlas.jpg`, `imp-245_corner_close_up.jpg`).
+  * TypeScript typecheck: `tsc --noEmit` exit 0. UI Linter: `npm run lint:ui` 0 violations. Slop Linter: `npm run lint:slop` 0 hard violations. 0 dirty casts (0 `as any`, 0 `as HTMLCanvasElement`).
+  * Evidence Snapshot: `.agents/evidence/chaos_sentinel_IMP-245.json` (`verdict: APPROVED`).
+- **Phê chuẩn**:
+  * `plan-griller`: HARDENED_APPROVED (Revision 2.3 tích hợp 100% chỉ thị đối kháng và phản biện người dùng).
+  * `qa-tester`: Station 1 RED verified (20 Business RED contract tests).
+  * `implementer`: Station 2 GREEN verified (20/20 contract pass, 199/199 regression pass).
+  * `scout`: Station 2.5 PREFILTER_PASSED (0 defects qua 5 bộ lọc cơ học).
+  * `spec-reviewer`: Station 3.1 SPEC_APPROVED (100% plan fidelity, 0 scope drift).
+  * `code-reviewer`: Station 3.2 CODE_APPROVED (Module depth, zero VRAM leaks, safe context loss).
+  * `game-3d-visual-critic`: Station 3.2 VISUAL_APPROVED (Mặt cardstock matte PBR, zero seam bleeding, 1:1 corner ratio).
+  * `chaos-sentinel`: Station 4 APPROVED (3 Probes passed, 10/10 mutants killed, 0 survived).
+- **Trạng thái**: ✅ Hoàn thành IMP-245 (2026-10-02).
+
+---
+
+### [2026-10-02] IMP-246: Tall Chess GLTF Asset Pipeline Modernization (Hiện Đại Hóa Pipeline Nạp Mô Hình GLTF Cho 4 Quân Cờ Cao)
+- **Mục tiêu**: Nâng cấp dứt điểm Asset Pipeline (Pillar 3) cho 4 quân cờ Thượng Lưu (`Quân Xe`, `Quân Pháo`, `Quân Mã`, `Quân Hậu`), loại bỏ hoàn toàn dead code `SafeGLTFModel` và cơ chế cưỡng chế fallback `forceFallback={true}`, chuyển sang nạp mô hình GLTF chuẩn qua `useGLTF` và `@react-three/drei` `<Clone>` với injection vật liệu động (`PBR MeshStandardMaterial`), phân tách Trim vàng kim `#F59E0B` và Thân cờ phản ánh màu người chơi `playerColor`, dọn dẹp bộ nhớ GPU/VRAM triệt để khi unmount (`dispose()`), và hoàn thành 100% hợp đồng kiểm thử theo chuẩn Detroit.
+- **Hạng mục thi công cốt lõi**:
+  1. *Subtractive Refactoring (`luxury_pawn_models.tsx`)*: Xóa bỏ `SafeGLTFModel` và `forceFallback={true}` khỏi luồng hiển thị chính; bảo toàn router `LuxuryPawnModel` và các thẻ `<group>` bọc ngoài (`PawnAuraPedestal`, `EnamelRing`); xử lý tương thích ngược an toàn cho nhánh `forceFallback === true` qua `LuxuryPawnProceduralFallback`.
+  2. *Dynamic GLTF Pipeline & Rules of Hooks (`luxury_pawn_models.tsx`)*: Triển khai component `DynamicGLTFPawn` nạp GLTF trực tiếp qua `useGLTF(modelUrl)` ở top level, tuân thủ 100% React Rules of Hooks (không bọc trong `try/catch`, không dùng `safeUseMemo` stub); bọc toàn bộ mô hình trong React `<Suspense fallback={<LuxuryPawnProceduralFallback ... />}>`; khởi tạo `bodyMaterial` (roughness: 0.15, metalness: 0.2) với `[playerColor]` dependency ngay tại first render, đồng bộ màu sắc qua `useEffect`; khởi tạo `trimMaterial` (`#F59E0B`, roughness: 0.1, metalness: 0.9); thu hồi VRAM qua `dispose()` trong cleanup; nhận diện Trim đa tầng qua `isTrimNode(node)` hỗ trợ cả tên node chứa `'Trim'`, `userData.isTrim`, và material names (`/trim|gold|accent|darkbrass/i`).
+  3. *Safe Preload & Fallback*: Di chuyển `useGLTF.preload` xuống cuối file bọc trong `'window' in globalThis` guard chống lỗi fetch SSR.
+  4. *Contract Test Suite (`tall_chess_pawns_full_color.test.ts`)*: Cập nhật mock `@react-three/drei` trả về Three.js Group thật chứa `Pawn_Body`, `Pawn_Trim` và Object3D rỗng; bổ sung Facet 5 với 17 atomic contract tests (`[TC-AP01.01..TC-AP05.04/MSS][UC-IMP246]`), xóa bỏ các change detectors cũ `forceFallback={true}`; thực thi component hook qua `renderDynamicComponentToClone` trong môi trường SSR của React.
+- **Hạ tầng & Ngân sách LOC Thực tế (`scripts/check_loc.mjs` - Total Lines / Non-Empty SLOC)**:
+  * `src/client/3d/luxury_pawn_models.tsx` (Total: 270 / SLOC: 248 — Tier 2 <= 500 LOC; Delta net +93 từ baseline 177)
+  * `tests/client/tall_chess_pawns_full_color.test.ts` (Total: 583 / SLOC: 511 — Tests <= 600 LOC)
+- **Kiểm thử & Bất biến**:
+  * 66/66 atomic contract tests PASS trên `tall_chess_pawns_full_color.test.ts` (100% GREEN, Detroit Classical TDD).
+  * Regression tests PASS 100%: `luxury_pawn_models.test.ts` (4/4), `chibi_animal_pawns_no_pedestal.test.ts` (35/35), `safe_gltf_model.test.ts` (12/12).
+  * Station 4 Chaos Sentinel: 3/3 physical probes PASS (Closed-Loop Parity 24/24 Intents, Ephemeral Wire port 64277, Mutation Sensitivity 10/10 mutants killed, 0 survived).
+  * Visual Evidence Gate: Thẩm định thành công ảnh chụp in-game vật lý thực tế tại `.agents/tmp/imp-246_full_board.jpg` bởi Giám đốc Nghệ thuật 3D (8.6/10 Wow-Factor).
+  * TypeScript typecheck: `tsc --noEmit` exit 0. UI Linter: `npm run lint:ui` 0 violations. Slop Linter: `npm run lint:slop` 0 hard violations. 0 dirty casts.
+  * Evidence Snapshot: `.agents/evidence/chaos_sentinel_IMP-246.json` (`verdict: APPROVED`).
+  * Sổ nợ kỹ thuật: Đăng ký `DEBT-IMP246-01` (dọn sạch deprecated `forceFallback` ở call-sites).
+- **Phê chuẩn**:
+  * `plan-griller`: HARDENED_APPROVED (`.agents/audit/PLAN_AUDIT_IMP_246_TALL_CHESS_GLTF_PIPELINE.md`).
+  * `qa-tester`: Station 1 RED verified (15 Business RED contract tests).
+  * `implementer`: Station 2 GREEN verified (66/66 contract pass, 100% regression pass).
+  * `scout`: Station 2.5 PREFILTER_PASSED (0 defects qua 5 bộ lọc cơ học).
+  * `spec-reviewer`: Station 3.1 SPEC_APPROVED (100% plan fidelity, 0 scope drift).
+  * `code-reviewer`: Station 3.2 CODE_APPROVED (Anti-slop, zero VRAM leaks, safe unmount cleanup).
+  * `game-3d-visual-critic`: Station 3.2 VISUAL_APPROVED (8.6/10 Toy Lacquer PBR reflectance, directional shadows, gold trim isolation).
+  * `chaos-sentinel`: Station 4 APPROVED (3 Probes passed, 10/10 mutants killed, 0 survived).
+- **Trạng thái**: ✅ Hoàn thành IMP-246 (2026-10-02).
+
+
+
+
 

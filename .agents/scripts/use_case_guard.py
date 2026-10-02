@@ -211,6 +211,25 @@ def pre_tool_file_gate(payload: dict, role: str = "") -> None:
                 print(json.dumps({"decision": "deny", "reason": reason}))
                 sys.exit(0)
 
+            # Block banned antipatterns in tests: reading source files or silent returns
+            tool_call_args = payload.get("toolCall", {}).get("args", {}) if payload else {}
+            code_payload = tool_call_args.get("CodeContent", "") or tool_call_args.get("ReplacementContent", "")
+            if code_payload:
+                if re.search(r"\bfrom\s+['\"](?:node:)?fs['\"]|require\(['\"](?:node:)?fs['\"]\)|readFileSync", code_payload):
+                    reason = (
+                        f"ERROR [Banned Antipattern]: qa-tester cannot import 'fs' or use 'readFileSync' in '{target_file}'. "
+                        "Unit and contract tests must test runtime observable behavior, never disk source code."
+                    )
+                    print(json.dumps({"decision": "deny", "reason": reason}))
+                    sys.exit(0)
+                if re.search(r"if\s*\(![A-Za-z0-9_.]+\)\s*return\s*;", code_payload):
+                    reason = (
+                        f"ERROR [Silent Failure]: 'if (!target) return;' is strictly banned in '{target_file}'. "
+                        "Tests must fail loudly with assertions (e.g. expect(target).toBeDefined())."
+                    )
+                    print(json.dumps({"decision": "deny", "reason": reason}))
+                    sys.exit(0)
+
         if role == "implementer" and any(p in norm_path for p in TEST_DIR_PATTERNS):
             reason = (
                 f"ERROR [Role Gate]: implementer is forbidden from modifying test contracts: '{target_file}'. "
@@ -243,6 +262,9 @@ def audit_file(payload: dict) -> None:
         tool_call = payload.get("toolCall", {})
         target_file = tool_call.get("args", {}).get("TargetFile", "")
 
+    if not target_file and len(sys.argv) > 2 and sys.argv[2]:
+        target_file = sys.argv[2]
+
     if not target_file and os.path.exists(LAST_TARGET_FILE_LOG):
         try:
             with open(LAST_TARGET_FILE_LOG, "r", encoding="utf-8") as f:
@@ -251,9 +273,7 @@ def audit_file(payload: dict) -> None:
             pass
 
     if not target_file:
-        target_file = os.environ.get("AG_TOOL_TARGET_FILE", "") or (
-            sys.argv[2] if len(sys.argv) > 2 else ""
-        )
+        target_file = os.environ.get("AG_TOOL_TARGET_FILE", "")
 
     if target_file and os.path.exists(target_file):
         with open(target_file, "r", encoding="utf-8", errors="ignore") as f:
@@ -289,11 +309,23 @@ def audit_file(payload: dict) -> None:
                 if match:
                     print(f"ERROR [The Blank Check]: Detected vague decision word: '{match.group(0)}'", file=sys.stderr)
 
-        # 3. Test file traceability tag check
-        if "/tests/" in norm_path or norm_path.endswith(".test.ts") or norm_path.endswith("_test.py") or norm_path.endswith(".spec.ts"):
+        # 3. Test file traceability and antipattern check
+        if "/tests/" in norm_path or norm_path.endswith((".test.ts", ".test.js", ".spec.ts", ".spec.js")):
             content = "".join(lines)
-            if not re.search(r"\[UC-[A-Z0-9]+-\d+", content):
-                print(f"WARNING [Traceability]: Test file '{target_file}' lacks required traceability tag [UC-[EPIC]-NNN].", file=sys.stderr)
+            if not re.search(r"\[UC-[A-Z0-9]+", content):
+                print(f"WARNING [Traceability]: Test file '{target_file}' lacks required traceability tag [UC-...].", file=sys.stderr)
+            if re.search(r"\bfrom\s+['\"](?:node:)?fs['\"]|require\(['\"](?:node:)?fs['\"]\)|readFileSync", content):
+                print(
+                    f"ERROR [Banned Antipattern]: Test file '{target_file}' imports 'fs' or uses 'readFileSync'. "
+                    "Unit and contract tests must assert runtime interfaces, not disk source code.",
+                    file=sys.stderr,
+                )
+            if re.search(r"if\s*\(![A-Za-z0-9_.]+\)\s*return\s*;", content):
+                print(
+                    f"ERROR [Silent Failure]: Test file '{target_file}' contains silent return 'if (!target) return;'. "
+                    "Tests must fail loudly with assertions (e.g. expect(target).toBeDefined()).",
+                    file=sys.stderr,
+                )
 
         # 4. Source code micro-guards for src/
         if "/src/" in norm_path or "/lib/" in norm_path or "/app/" in norm_path:

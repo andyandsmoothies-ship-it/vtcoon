@@ -78,14 +78,20 @@ describe('[TC-UD01.1/MSS][UI-S02/MSS][BR-UI-002] Chốt 1: ACES Filmic ToneMappi
     expect(exposure).toBeGreaterThanOrEqual(1.0);
   });
 
-  it('[TC-UD01.1/MSS][UI-S02/MSS][BR-UI-002] GameCanvas cấu hình toneMapping là ACESFilmicToneMapping ở chế độ in-game', () => {
-    renderToStaticMarkup(React.createElement(GameCanvas, { isLobby: false }));
+  it('[TC-UD01.1/MSS][UI-S02/MSS][BR-UI-002] GameCanvas cấu hình Adaptive Tone Mapping: ACESFilmic trên mobile và NoToneMapping trên desktop', () => {
+    renderToStaticMarkup(React.createElement(GameCanvas, { isMobile: true, isLobby: false }));
     expect(capturedCanvasProps?.gl?.toneMapping).toBe(ACESFilmicToneMapping);
+
+    renderToStaticMarkup(React.createElement(GameCanvas, { isMobile: false, isLobby: false }));
+    expect(capturedCanvasProps?.gl?.toneMapping).toBe(NoToneMapping);
   });
 
-  it('[TC-UD01.1/MSS][UI-S02/MSS][BR-UI-002] GameCanvas áp dụng ACESFilmicToneMapping ở chế độ sảnh chờ isLobby=true', () => {
-    renderToStaticMarkup(React.createElement(GameCanvas, { isLobby: true }));
+  it('[TC-UD01.1/MSS][UI-S02/MSS][BR-UI-002] GameCanvas áp dụng Adaptive Tone Mapping ở chế độ sảnh chờ isLobby=true', () => {
+    renderToStaticMarkup(React.createElement(GameCanvas, { isMobile: true, isLobby: true }));
     expect(capturedCanvasProps?.gl?.toneMapping).toBe(ACESFilmicToneMapping);
+
+    renderToStaticMarkup(React.createElement(GameCanvas, { isMobile: false, isLobby: true }));
+    expect(capturedCanvasProps?.gl?.toneMapping).toBe(NoToneMapping);
   });
 
   it('[TC-UD01.1/MSS][UI-S02/MSS][BR-UI-002] GameCanvas bảo toàn cấu hình canvas dpr dải [1, 1.5] và shadows soft', () => {
@@ -94,13 +100,13 @@ describe('[TC-UD01.1/MSS][UI-S02/MSS][BR-UI-002] Chốt 1: ACES Filmic ToneMappi
     expect(capturedCanvasProps?.dpr).toEqual([1, 1.5]);
   });
 
-  it('[TC-UD01.1/MSS][UI-S02/MSS][BR-UI-002] GameCanvas loại bỏ hoàn toàn NoToneMapping khỏi cấu hình gl runtime', () => {
-    renderToStaticMarkup(React.createElement(GameCanvas));
-    expect(capturedCanvasProps?.gl?.toneMapping).not.toBe(NoToneMapping);
+  it('[TC-UD01.1/MSS][UI-S02/MSS][BR-UI-002] GameCanvas chỉ định NoToneMapping trên desktop để nhường quyền kiểm soát cho EffectComposer', () => {
+    renderToStaticMarkup(React.createElement(GameCanvas, { isMobile: false }));
+    expect(capturedCanvasProps?.gl?.toneMapping).toBe(NoToneMapping);
   });
 
-  it('[TC-UD01.1/MSS][UI-S02/MSS][BR-UI-002] GameCanvas sử dụng ACESFilmicToneMapping và khác biệt hoàn toàn với NoToneMapping', () => {
-    renderToStaticMarkup(React.createElement(GameCanvas));
+  it('[TC-UD01.1/MSS][UI-S02/MSS][BR-UI-002] GameCanvas bảo đảm ACESFilmicToneMapping và NoToneMapping phân định rạch ròi theo nền tảng', () => {
+    renderToStaticMarkup(React.createElement(GameCanvas, { isMobile: true }));
     expect(capturedCanvasProps?.gl?.toneMapping).toBe(ACESFilmicToneMapping);
     expect(capturedCanvasProps?.gl?.toneMapping).not.toBe(NoToneMapping);
   });

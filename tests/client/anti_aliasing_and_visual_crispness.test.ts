@@ -1,6 +1,15 @@
 // [TC-IMP34/MSS][UC-IMP34] Contract Test Suite: Anti-Aliasing & Visual Crispness (IMP-34)
 // Enforces 5 Facets: Subpixel SMAA, Macro DoF Crispness, Soft Shadows, Single AgX Tone Mapping, and High-Density DPR
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+
+vi.mock('react', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react')>();
+  return {
+    ...actual,
+    useState: (initial: any) => [initial, vi.fn()],
+    useEffect: vi.fn(),
+  };
+});
 import fs from 'node:fs';
 import path from 'node:path';
 import React from 'react';
@@ -128,15 +137,16 @@ describe('[TC-IMP34/MSS][UC-IMP34] Anti-Aliasing & Visual Crispness Contract Tes
     expect(source).not.toMatch(/<Canvas\s+shadows\s+dpr/);
   });
 
-  it('[TC-IMP34.11/MSS][UC-IMP34] game_canvas.tsx configures ACESFilmicToneMapping on Canvas gl for Stage 3 Cinematic Tone Mapping', () => {
+  it('[TC-IMP34.11/MSS][UC-IMP34] game_canvas.tsx configures Adaptive Tone Mapping: ACESFilmic on mobile and NoToneMapping on desktop', () => {
     const source = fs.readFileSync(gameCanvasPath, 'utf-8');
     expect(source).toContain('ACESFilmicToneMapping');
-    expect(source).toMatch(/toneMapping:\s*ACESFilmicToneMapping/);
+    expect(source).toContain('NoToneMapping');
+    expect(source).toMatch(/toneMapping:\s*isMobileDevice\s*\?\s*ACESFilmicToneMapping\s*:\s*NoToneMapping/);
   });
 
-  it('[TC-IMP34.12/MSS][UC-IMP34] game_canvas.tsx eliminates NoToneMapping from Canvas gl config', () => {
+  it('[TC-IMP34.12/MSS][UC-IMP34] game_canvas.tsx delegates desktop tone mapping to PostProcessingPipeline AGX', () => {
     const source = fs.readFileSync(gameCanvasPath, 'utf-8');
-    expect(source).not.toContain('NoToneMapping');
+    expect(source).toMatch(/import\s*\{[^}]*\bNoToneMapping\b[^}]*\}\s*from\s*['"]three['"]/);
   });
 
   it('[TC-IMP34.13/MSS][UC-IMP34] PostProcessingPipeline retains single source of truth AgX ToneMapping in EffectComposer', () => {
@@ -188,7 +198,8 @@ describe('[TC-IMP34/MSS][UC-IMP34] Anti-Aliasing & Visual Crispness Contract Tes
     const dofElement = children.find(
       (c) => c.type === DepthOfField || (c.type as { name?: string })?.name === 'DepthOfField'
     );
-    expect(dofElement).toBeUndefined();
+    expect(dofElement).toBeDefined();
+    expect(getElementProps(dofElement ?? null).bokehScale).toBe(0);
   });
 
   it('[TC-IMP34.18/MSS][UC-IMP34] PostProcessingPipeline returns null cleanly when enabled is false', () => {

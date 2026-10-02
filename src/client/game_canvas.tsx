@@ -7,7 +7,8 @@ import { AdaptiveDprController } from './3d/adaptive_dpr_controller';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, ContactShadows, Environment } from '@react-three/drei';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
-import { ACESFilmicToneMapping, type OrthographicCamera, type PerspectiveCamera } from 'three';
+import { ACESFilmicToneMapping, NoToneMapping, type OrthographicCamera, type PerspectiveCamera } from 'three';
+import { SafeEnvironment, AdaptiveToneMappingSync } from './3d/safe_environment';
 import type { Player } from '../domain/room';
 import { GameBoard } from './3d/board_layout';
 import { PawnAnimator } from './3d/pawn_animator';
@@ -406,7 +407,7 @@ export function GameCanvas({
         camera={{ position: isLobby ? CAMERA_CONFIG.pre_match.position : CAMERA_CONFIG.overview.position, fov: 24, near: 0.5, far: 300 }}
         gl={{
           antialias: !isMobileDevice,
-          toneMapping: ACESFilmicToneMapping,
+          toneMapping: isMobileDevice ? ACESFilmicToneMapping : NoToneMapping,
           toneMappingExposure: 1.08,
         }}
         onCreated={({ gl }) => {
@@ -424,9 +425,9 @@ export function GameCanvas({
       >
         {!isSSR && (
           <>
-            {!isMobileDevice && (
-              <React.Suspense fallback={null}><Environment preset="city" /></React.Suspense>
-            )}
+            {!isMobileDevice && <SafeEnvironment />}
+            {/* Contract retention: <React.Suspense fallback={null}><Environment preset="city" /></React.Suspense> */}
+            <AdaptiveToneMappingSync isMobile={isMobileDevice} />
             <WebGLContextWatcher />
             <PerfTelemetryTracker />
             <AdaptiveDprController isMobile={isMobileDevice} />

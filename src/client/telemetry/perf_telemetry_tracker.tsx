@@ -2,6 +2,7 @@
 import React, { useRef, useEffect } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { perfBudget } from '../3d/perf_budget';
+import { isMobileHardware } from '../3d/device_detect';
 import { useTelemetryStore } from './telemetry_store';
 import { watchdogMonitor } from './watchdog_monitor';
 import { useGameStore } from '../store/game_store';
@@ -36,7 +37,9 @@ export function PerfTelemetryTracker(): null {
     const now = performance.now();
     if (now - lastUpdateRef.current >= 250) {
       lastUpdateRef.current = now;
-      const report = perfBudget.getBudgetReport(gl.info);
+      const report = perfBudget.getBudgetReport(gl.info, {
+        isMobile: isMobileHardware(),
+      });
       useTelemetryStore.getState().updateMetrics({
         fps: report.averageFps,
         frameTimeMs: delta * 1000,

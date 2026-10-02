@@ -32,6 +32,11 @@ vi.mock('@react-three/drei', async (importOriginal) => {
         ...props,
         scale: Array.isArray(scale) ? scale.join(',') : scale,
       }),
+    RoundedBox: ({ args, children, ...props }: any) =>
+      React.createElement('rounded-box', {
+        ...props,
+        args: Array.isArray(args) ? args.join(',') : args,
+      }, children),
   };
 });
 
@@ -416,8 +421,8 @@ describe('[TC-IMP35/MSS][UC-IMP35] Outer Building Plot & Matte Tile Sharpness Co
         isCornerTile: false,
       })
     );
-    expect(cornerMarkup).toContain('args="2.16,2.16"');
-    expect(standardMarkup).toContain('args="1.64,2.16"');
+    expect(cornerMarkup).toContain('args="2.2,0.22,2.2"');
+    expect(standardMarkup).toContain('args="1.68,0.2,2.2"');
   });
 
   it('[TC-IMP35.26/MSS][UC-IMP35] ProceduralBuilding reactive tier upgrades preserve top boundary clearance across all levels', () => {

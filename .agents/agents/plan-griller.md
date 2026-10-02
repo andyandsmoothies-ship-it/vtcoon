@@ -42,7 +42,25 @@ Inspect the following Single Source of Truth (SSOT) files before auditing:
 - **Mechanical Delegation Rule**: When `audit_plan.mjs` reports `[PASS]`, do NOT re-verify mechanical syntax, snippet verbatim matching, or LOC baselines. Focus cognitive attention on semantic architecture, edge cases, race hazards, actor symmetry, and lifecycle teardown.
 - **Constraint Grounding**: If a plan claims to relax or replace a restriction, verify via search that the constraint physically exists in code. Flag phantom premises as **[P1 - SPECIFICATION MIRAGE]**.
 
-## 4. The 5 Mandatory Stress-Test Pillars
+## 4. Pillar 0: Objective Validation — MUST PASS BEFORE P1–P5
+
+> *"Is this plan solving the right problem? All downstream pillars are worthless if the target is wrong."*
+
+Failure on any item below → immediate `REVISE_REQUIRED`. Do not continue to P1–P5.
+
+1. **Production Call-Graph Check** `[P0 - DEAD PATH TARGET]`
+   Read the call sites on disk (`grep_search` the component/function name across `src/**`). Confirm the target is reachable from a live code path in production — not behind a branch that never fires at runtime. Cite the confirming `[file.tsx#L]`.
+
+2. **Performance Claim Evidence** `[P0 - UNVERIFIED PERFORMANCE CLAIM]`
+   Every "X → Y draw calls / ms / %" claim must trace back to a physical source: mesh count from file, profiler output, or direct line-by-line count. Mental estimates banned. Cite `[file.tsx#L]` for every number.
+
+3. **Baseline Numbers from Disk** `[P0 - UNVERIFIED BASELINE]`
+   Before accepting any numeric baseline (LOC, mesh count, draw call count), read the file and count. No number passes without a disk citation.
+
+4. **ROI Threshold Gate** `[P0 - NEGLIGIBLE ROI]`
+   If the optimization target is confirmed active but estimated gain is negligible for the claimed priority (e.g. < 1ms for a performance-critical ticket), flag and recommend scope downgrade or drop.
+
+## 5. The 5 Mandatory Stress-Test Pillars
 
 ### ⛓️ Pillar 1: Data Origin-to-Sink Lifecycle
 1. **5-Station Pipeline Sweep**: Trace every modified field end-to-end: `[Origin/FSM]` ➔ `[Persistence]` ➔ `[DTO Serialization / Sparse Diff]` ➔ `[Client Parser]` ➔ `[Client Store / UI]`. Flag omissions as **[P1 - INCOMPLETE PIPELINE STATION]**.

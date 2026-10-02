@@ -15,6 +15,7 @@ import {
   drawFooter,
   drawPriceTrayFooter,
 } from './tile_texture_drawers';
+import { clearTileAtlasCache } from './tile_texture_atlas';
 
 export { hasTileArt, getBannerTextColor, drawPriceTrayFooter };
 
@@ -225,4 +226,5 @@ export function clearTileTextureCache(): void {
   disposeTextureMap(desktopStandeeTextureCache);
   disposeTextureMap(mobileStandeeTextureCache);
   tileImageCache.clear();
+  clearTileAtlasCache();
 }

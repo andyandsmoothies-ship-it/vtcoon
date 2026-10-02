@@ -137,6 +137,12 @@ export function InstancedBoardToyBuildings({
 
   return (
     <group data-testid="instanced-board-toy-buildings">
+      {/* 
+        frustumCulled={false}: InstancedMesh bounding sphere chưa được recomputed
+        sau setMatrixAt (Three.js limitation). Tắt culling để tránh instances
+        biến mất bất ngờ. ROI của fix < 0.1ms (tiết kiệm < 8 draw calls), deferred intentionally.
+        Ref: Tech Debt Ledger (IMP-242).
+      */}
       {/* 4 Cụm Nhà Xanh Lục Bảo */}
       <instancedMesh ref={houseBodyRef} args={[HOUSE_BODY_GEOM, undefined, TOTAL_HOUSE_INSTANCES]} castShadow castshadow="true" receiveShadow frustumCulled={false} frustumculled="false">
         <meshStandardMaterial color="#10B981" roughness={0.15} metalness={0.1} />

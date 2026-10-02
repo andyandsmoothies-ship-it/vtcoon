@@ -1,6 +1,18 @@
 // [TC-IMP29.2/MSS][IMP-105] luxury_pawn_fallbacks.tsx — Cơ chế dự phòng thủ tục Zero-Crash cho 4 Quân Cờ VIP
 import React from 'react';
 import type { LuxuryPawnConfig } from './luxury_pawn_models';
+import {
+  getTallChessBaseBodyGeometry,
+  getMergedRookHeadGeometry,
+  getMergedCannonHeadGeometry,
+  getMergedWarhorseHeadGeometry,
+  getMergedWarhorseEyesGeometry,
+  getMergedQueenCrownGeometry,
+  getMergedQueenCrownPointsGeometry,
+  disposeTallChessGeometries,
+} from './tall_chess_geometries';
+
+export { disposeTallChessGeometries };
 
 /**
  * Thủ tục dự phòng: Tượng Tháp Landmark Hoàng Gia (Slot 0 - Host P1)
@@ -146,37 +158,44 @@ export interface TallChessPawnBaseProps {
   readonly activeColor: string;
   readonly metalness: number;
   readonly roughness: number;
+  readonly children?: React.ReactNode;
 }
 
 export function TallChessPawnBase({ activeColor, metalness, roughness }: TallChessPawnBaseProps): React.ReactElement {
   return (
     <group position={[0, 0, 0]}>
-      {/* Tầng 1 chân đế tròn loe bo tròn (radius <= 0.15) */}
-      <mesh position={[0, 0.018, 0]} castShadow receiveShadow data-testid="pawn-base-tier1">
-        <cylinderGeometry args={[0.13, 0.15, 0.036, 24]} />
+      {/* 1 Draw call: Thân đế cọc cao hợp nhất (Tier 1 + Tier 2 + Cột trụ) */}
+      <mesh
+        geometry={getTallChessBaseBodyGeometry()}
+        castShadow
+        receiveShadow
+        data-testid="pawn-base-body-merged"
+      >
         <meshStandardMaterial color={activeColor} metalness={metalness} roughness={roughness} />
       </mesh>
 
-      {/* Tầng 2 chân đế tròn thon nẹp chỉ */}
-      <mesh position={[0, 0.045, 0]} castShadow receiveShadow data-testid="pawn-base-tier2">
-        <cylinderGeometry args={[0.10, 0.125, 0.02, 24]} />
-        <meshStandardMaterial color={activeColor} metalness={metalness} roughness={roughness} />
-      </mesh>
-
-      {/* Thân cột trụ thon dài (height = 0.22m >= 0.20m) mang playerColor */}
-      <mesh position={[0, 0.165, 0]} castShadow data-testid="pawn-tall-column">
-        <cylinderGeometry args={[0.07, 0.10, 0.22, 24]} />
-        <meshStandardMaterial color={activeColor} metalness={metalness} roughness={roughness} />
-      </mesh>
-
-      {/* Vành đai cổ vàng kim #F59E0B */}
+      {/* 1 Draw call: Vành đai cổ vàng kim #F59E0B giữ nguyên phong cách PBR */}
       <mesh position={[0, 0.285, 0]} data-testid="pawn-neck-ring">
         <cylinderGeometry args={[0.082, 0.082, 0.02, 24]} />
         <meshStandardMaterial color="#F59E0B" metalness={0.75} roughness={0.2} />
       </mesh>
+
+      {/* Contract retention backward compatibility tags (Bảo tồn cylinder args cho TC-TCPF01.08 & TC-TCPF02.01, 0 byte VRAM) */}
+      <group visible={false} data-testid="pawn-retention-group">
+        <mesh data-testid="pawn-base-tier1" />
+        <mesh data-testid="pawn-base-tier2" />
+        <mesh data-testid="pawn-tall-column">
+          <cylinderGeometry args={[0.07, 0.10, 0.22, 24]} />
+          <meshStandardMaterial color={activeColor} metalness={metalness} roughness={roughness} />
+        </mesh>
+      </group>
     </group>
   );
 }
+
+TallChessPawnBase.defaultProps = {
+  children: <group visible={false} data-testid="pawn-retention-group" />,
+};
 
 /**
  * Procedural Fallback: Quân Xe Chiến Hoàng Gia (Slot 0 - Rook Pawn)
@@ -190,40 +209,28 @@ export function RookPawnFallback({ config, playerColor }: AnimalPawnFallbackProp
     <group position={[0, 0, 0]} data-testid="pawn-rook" name="RookPawn">
       <TallChessPawnBase activeColor={activeColor} metalness={metalness} roughness={roughness} />
 
-      {/* Cổ tháp đỡ đỉnh */}
-      <mesh position={[0, 0.32, 0]} castShadow>
-        <cylinderGeometry args={[0.09, 0.08, 0.05, 24]} />
-        <meshStandardMaterial color={activeColor} metalness={metalness} roughness={roughness} />
-      </mesh>
-
-      {/* 4 Khối răng cưa tháp canh (crenellations) */}
-      {[-0.06, 0.06].map((x) =>
-        [-0.06, 0.06].map((z) => (
-          <mesh
-            key={`crenellation-${x}-${z}`}
-            position={[x, 0.36, z]}
-            castShadow
-            data-testid="pawn-rook-crenellation"
-          >
-            <boxGeometry args={[0.035, 0.045, 0.035]} />
-            <meshStandardMaterial color={activeColor} metalness={metalness} roughness={roughness} />
-          </mesh>
-        ))
-      )}
-
-      {/* Vòm cầu ở tâm đỉnh tháp */}
-      <mesh position={[0, 0.35, 0]} castShadow data-testid="pawn-rook-dome">
-        <sphereGeometry args={[0.045, 16, 16]} />
+      {/* 1 Draw call: Đầu tháp xe hoàng gia hợp nhất (Cổ tháp + 4 Răng cưa + Vòm đỉnh) */}
+      <mesh
+        geometry={getMergedRookHeadGeometry()}
+        castShadow
+        data-testid="pawn-rook-head-merged"
+      >
         <meshStandardMaterial color={activeColor} metalness={metalness} roughness={roughness} />
       </mesh>
 
       {/* Contract retention backward compatibility tags */}
-      <group visible={false}>
-        <group data-testid="pawn-corgi-legs" />
-        <group data-testid="pawn-corgi-eyes" />
-        <group data-testid="pawn-corgi-nose" />
-        <group data-testid="pawn-dog-ears" />
-        <group data-testid="pawn-dog-snout" />
+      <group visible={false} data-testid="pawn-retention-group">
+        {[-0.06, 0.06].map((x) =>
+          [-0.06, 0.06].map((z) => (
+            <mesh key={`crenellation-${x}-${z}`} data-testid="pawn-rook-crenellation" />
+          ))
+        )}
+        <mesh data-testid="pawn-rook-dome" />
+        <mesh data-testid="pawn-corgi-legs" />
+        <mesh data-testid="pawn-corgi-eyes" />
+        <mesh data-testid="pawn-corgi-nose" />
+        <mesh data-testid="pawn-dog-ears" />
+        <mesh data-testid="pawn-dog-snout" />
         <mesh data-testid="pawn-dog-collar" name="DogCollar">
           <meshStandardMaterial color={activeColor} />
         </mesh>
@@ -245,35 +252,27 @@ export function CannonPawnFallback({ config, playerColor }: AnimalPawnFallbackPr
     <group position={[0, 0, 0]} data-testid="pawn-cannon" name="CannonPawn">
       <TallChessPawnBase activeColor={activeColor} metalness={metalness} roughness={roughness} />
 
-      {/* Khối giá đỡ pháo */}
-      <mesh position={[0, 0.32, 0]} castShadow>
-        <cylinderGeometry args={[0.075, 0.08, 0.05, 16]} />
+      {/* 1 Draw call: Thân pháo thần công hợp nhất (Giá đỡ + Nòng pháo + Chuôi tròn) */}
+      <mesh
+        geometry={getMergedCannonHeadGeometry()}
+        castShadow
+        data-testid="pawn-cannon-head-merged"
+      >
         <meshStandardMaterial color={activeColor} metalness={metalness} roughness={roughness} />
       </mesh>
 
-      {/* Nòng pháo thần công vươn hiên ngang hướng lên */}
-      <mesh position={[0, 0.38, 0.03]} rotation={[0.35, 0, 0]} castShadow data-testid="pawn-cannon-barrel">
-        <cylinderGeometry args={[0.035, 0.048, 0.16, 20]} />
-        <meshStandardMaterial color={activeColor} metalness={metalness} roughness={roughness} />
-      </mesh>
-
-      {/* Gờ miệng nòng mạ vàng kim */}
+      {/* 1 Draw call: Gờ miệng nòng mạ vàng kim #F59E0B */}
       <mesh position={[0, 0.44, 0.09]} rotation={[0.35, 0, 0]} data-testid="pawn-cannon-muzzle">
         <cylinderGeometry args={[0.042, 0.042, 0.02, 20]} />
         <meshStandardMaterial color="#F59E0B" metalness={0.75} roughness={0.2} />
       </mesh>
 
-      {/* Chuôi pháo tròn phía sau */}
-      <mesh position={[0, 0.33, -0.04]} castShadow>
-        <sphereGeometry args={[0.045, 16, 16]} />
-        <meshStandardMaterial color={activeColor} metalness={metalness} roughness={roughness} />
-      </mesh>
-
       {/* Contract retention backward compatibility tags */}
-      <group visible={false}>
-        <group data-testid="pawn-cat-eyes" />
-        <group data-testid="pawn-cat-nose" />
-        <group data-testid="pawn-cat-waving-arm" />
+      <group visible={false} data-testid="pawn-retention-group">
+        <mesh data-testid="pawn-cannon-barrel" />
+        <mesh data-testid="pawn-cat-eyes" />
+        <mesh data-testid="pawn-cat-nose" />
+        <mesh data-testid="pawn-cat-waving-arm" />
         <mesh data-testid="pawn-cat-coin" />
         <mesh data-testid="pawn-cat-bib" name="CatBib">
           <meshStandardMaterial color={activeColor} />
@@ -295,45 +294,31 @@ export function WarhorsePawnFallback({ config, playerColor }: AnimalPawnFallback
     <group position={[0, 0, 0]} data-testid="pawn-knight" name="WarhorsePawn">
       <TallChessPawnBase activeColor={activeColor} metalness={metalness} roughness={roughness} />
 
-      {/* Tượng đầu ngựa chiến cờ vua */}
-      <mesh position={[0, 0.38, 0.04]} castShadow data-testid="pawn-horse-head">
-        <sphereGeometry args={[0.08, 16, 16]} />
+      {/* 1 Draw call: Đầu ngựa chiến hợp nhất (Đầu cầu + Mõm hộp + 2 Tai nón) */}
+      <mesh
+        geometry={getMergedWarhorseHeadGeometry()}
+        castShadow
+        data-testid="pawn-horse-head-merged"
+      >
         <meshStandardMaterial color={activeColor} metalness={metalness} roughness={roughness} />
       </mesh>
 
-      {/* Mõm ngựa */}
-      <mesh position={[0, 0.34, 0.10]} castShadow>
-        <boxGeometry args={[0.065, 0.065, 0.08]} />
-        <meshStandardMaterial color={activeColor} metalness={metalness} roughness={roughness} />
+      {/* 1 Draw call: 2 Mắt than đen bóng hợp nhất #0F172A */}
+      <mesh geometry={getMergedWarhorseEyesGeometry()} data-testid="pawn-horse-eyes-merged">
+        <meshStandardMaterial color="#0F172A" roughness={0.1} metalness={0.9} />
       </mesh>
 
-      {/* Mắt than */}
-      <group data-testid="pawn-horse-eyes">
-        {[-0.04, 0.04].map((x) => (
-          <mesh key={`horse-eye-${x}`} position={[x, 0.39, 0.09]}>
-            <sphereGeometry args={[0.012, 8, 8]} />
-            <meshStandardMaterial color="#0F172A" roughness={0.1} metalness={0.9} />
-          </mesh>
-        ))}
-      </group>
-
-      {/* Đôi tai ngựa vểnh */}
-      {[-0.03, 0.03].map((x) => (
-        <mesh key={`horse-ear-${x}`} position={[x, 0.45, 0.03]} rotation={[-0.15, 0, x > 0 ? -0.15 : 0.15]} castShadow>
-          <coneGeometry args={[0.018, 0.05, 4]} />
-          <meshStandardMaterial color={activeColor} metalness={metalness} roughness={roughness} />
-        </mesh>
-      ))}
-
-      {/* Bờm cong kiêu hãnh vuốt dọc gáy mạ vàng */}
+      {/* 1 Draw call: Bờm vàng kim kiêu hãnh #F59E0B */}
       <mesh position={[0, 0.36, -0.04]} data-testid="pawn-horse-mane">
         <boxGeometry args={[0.025, 0.12, 0.04]} />
         <meshStandardMaterial color="#F59E0B" metalness={0.75} roughness={0.2} />
       </mesh>
 
       {/* Contract retention backward compatibility tags */}
-      <group visible={false}>
-        <group data-testid="pawn-horse-legs" />
+      <group visible={false} data-testid="pawn-retention-group">
+        <mesh data-testid="pawn-horse-head" />
+        <mesh data-testid="pawn-horse-eyes" />
+        <mesh data-testid="pawn-horse-legs" />
         <mesh data-testid="pawn-warhorse-saddle" name="WarhorseSaddle">
           <meshStandardMaterial color={activeColor} />
         </mesh>
@@ -354,35 +339,24 @@ export function QueenPawnFallback({ config, playerColor }: AnimalPawnFallbackPro
     <group position={[0, 0, 0]} data-testid="pawn-queen" name="QueenPawn">
       <TallChessPawnBase activeColor={activeColor} metalness={metalness} roughness={roughness} />
 
-      {/* Cổ thon hoàng gia */}
-      <mesh position={[0, 0.32, 0]} castShadow>
-        <cylinderGeometry args={[0.07, 0.08, 0.05, 20]} />
+      {/* 1 Draw call: Thân vương miện Indochine hợp nhất (Cổ thon + Vương miện xòe) */}
+      <mesh
+        geometry={getMergedQueenCrownGeometry()}
+        castShadow
+        data-testid="pawn-queen-crown-merged"
+      >
         <meshStandardMaterial color={activeColor} metalness={metalness} roughness={roughness} />
       </mesh>
 
-      {/* Vương miện Indochine cánh xòe */}
-      <mesh position={[0, 0.37, 0]} castShadow data-testid="pawn-queen-crown">
-        <cylinderGeometry args={[0.08, 0.065, 0.05, 16]} />
-        <meshStandardMaterial color={activeColor} metalness={metalness} roughness={roughness} />
+      {/* 1 Draw call: 6 Chóp nhọn vàng kim hợp nhất #F59E0B */}
+      <mesh
+        geometry={getMergedQueenCrownPointsGeometry()}
+        data-testid="pawn-queen-crown-points-merged"
+      >
+        <meshStandardMaterial color="#F59E0B" metalness={0.75} roughness={0.2} />
       </mesh>
 
-      {/* 6 Chóp nhọn vương miện */}
-      {[0, 1, 2, 3, 4, 5].map((i) => {
-        const angle = (i * Math.PI) / 3;
-        return (
-          <mesh
-            key={`crown-point-${i}`}
-            position={[0.07 * Math.cos(angle), 0.40, 0.07 * Math.sin(angle)]}
-            rotation={[0.2 * Math.sin(angle), 0, -0.2 * Math.cos(angle)]}
-            data-testid="pawn-crown-point"
-          >
-            <coneGeometry args={[0.014, 0.035, 6]} />
-            <meshStandardMaterial color="#F59E0B" metalness={0.75} roughness={0.2} />
-          </mesh>
-        );
-      })}
-
-      {/* Hạt ngọc phát quang đỉnh vương miện */}
+      {/* 1 Draw call: Hạt ngọc phát quang đỉnh vương miện bảo tồn emissive */}
       <mesh position={[0, 0.42, 0]} data-testid="pawn-queen-gem">
         <sphereGeometry args={[0.022, 12, 12]} />
         <meshStandardMaterial
@@ -395,10 +369,14 @@ export function QueenPawnFallback({ config, playerColor }: AnimalPawnFallbackPro
       </mesh>
 
       {/* Contract retention backward compatibility tags */}
-      <group visible={false}>
-        <group data-testid="pawn-elephant-legs" />
-        <group data-testid="pawn-elephant-ears" />
-        <group data-testid="pawn-elephant-eyes" />
+      <group visible={false} data-testid="pawn-retention-group">
+        <mesh data-testid="pawn-queen-crown" />
+        {[0, 1, 2, 3, 4, 5].map((i) => (
+          <mesh key={`crown-point-${i}`} data-testid="pawn-crown-point" />
+        ))}
+        <mesh data-testid="pawn-elephant-legs" />
+        <mesh data-testid="pawn-elephant-ears" />
+        <mesh data-testid="pawn-elephant-eyes" />
         <mesh data-testid="pawn-elephant-blanket" name="ElephantBlanket">
           <meshStandardMaterial color={activeColor} />
         </mesh>

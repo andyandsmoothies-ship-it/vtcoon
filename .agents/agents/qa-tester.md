@@ -35,12 +35,17 @@ hooks: [.agents/hooks_qa.json]
   - Maximum 1-4 `expect()` assertions per test.
   - FORBIDDEN: `for`, `while`, or `.forEach()` in `it()`. Use parameterized tests (`it.each`).
 - **Banned Assertions**:
-  - Static checklist tests: Never assert `fs.existsSync`, `typeof fn === 'function'`, or LOC limits in unit tests.
+  - Static checklist tests & disk reading: STRICTLY FORBIDDEN to import `fs` or `node:fs`, or call `readFileSync` in tests. Never assert `fs.existsSync`, `typeof fn === 'function'`, or LOC limits in unit tests. Tests verify runtime behavior, never disk source code.
+  - Silent early returns: STRICTLY FORBIDDEN to use `if (!target) return;` or swallow missing targets in tests. Tests must fail loudly with assertions (e.g. `expect(target).toBeDefined()`).
   - Shallow change detectors: Never use solitary `.toBeDefined()`, `.not.toBeNull()`, or `.toHaveLength(n)` without asserting concrete values.
+  - Hyper-rigid change detectors: Never assert private function calls, AST regex, or internal code syntax. Assert public props, state, or return values.
   - Dirty casts in test code: Never use `as any`, `as unknown as`, or `as Record<string, any>` / `as Record<string, unknown>` — these are semantically equivalent dirty casts. Document exceptions explicitly (e.g. mock DOM events).
   - Framework internal spies: Never spy on framework-private APIs (`React.useState`, `React.useEffect`, hook internals, lifecycle methods). If a component state cannot be reached via props or public API, request a testability prop from implementer instead.
 - **Assertion-to-Plan Parity**: Every expected value in an assertion (string content, CSS class, aria label, numeric result) MUST be directly quoted from the corresponding AFTER block in the plan. Never infer expected values from component logic or domain knowledge — only from the plan's declared output. If the plan AFTER block does not specify a value, flag as `[UNANCHORED ASSERTION]` and consult the plan author before writing.
 - **Gotcha Pre-Check**: Before writing tests for any component or function, search `docs/domain/gotchas.md` (or equivalent domain invariants file) for entries matching the component name or domain tag. Apply all matching invariants as test constraints. If a gotcha bans a testing pattern (e.g. `toContain()` on ambiguous HTML attributes — Gotcha #33), switch to the prescribed alternative.
+- **3D / R3F Component Testing**:
+  - Test pure functional logic, config mappers, and props contracts.
+  - When testing React Three Fiber components, shallow render functional components and inspect JSX props / `React.Children.toArray(rendered.props.children)` or mock WebGL context (`gl` in `useThree`). NEVER attempt full headless Canvas rendering or read file source code.
 - **Universal 5-Facet Behavioral Matrix**:
   1. *Boundary & Range*: Input bounds, range constraints, format validity.
   2. *State Reactivity & Cycle Teardown*: Lifecycle transitions, sparse delta serialization, cycle/epoch/turn phase resets, and ephemeral state purge (state from cycle N must be 100% cleared when cycle N+1 begins).
@@ -51,6 +56,14 @@ hooks: [.agents/hooks_qa.json]
   - Contract suites (`tests/contracts/**`): Minimum 15 atomic tests / slice.
   - Probe suites (`tests/probes/**`): Minimum 14 atomic tests / slice.
   - Ratio of `expect()` / `it()` must stay between 1.0 and 3.5.
+- **Tag Isolation Rule**: One traceability tag per `it()` block. If two contracts need testing, write two separate `it()` blocks. Merging `[TC-XX.01]` and `[TC-XX.02]` into one block is banned.
+- **Helper Adversarial Gate**: Any test helper function (e.g. `countVisibleMeshes`, `stripRetentionGroups`, `extractAttr`) must be validated with adversarial inputs before being used in assertions:
+  - Nested / recursive structure input (not just flat)
+  - Empty / null input
+  - Duplicate keys or ambiguous matches
+  Write at least 1 `it()` that proves the helper fails correctly on a bad input. If the helper cannot be proven correct in isolation, replace it with direct React element tree traversal (`React.isValidElement`, `findByTestId`) instead of HTML string parsing.
+- **Spec Challenge Mandate**: Before implementing any test case, read the plan's AFTER block and ask: *"Does this spec produce any unintended side effect?"* If a spec requires a retention element to hold real geometry, real event listeners, or real resource allocations — flag it back to the plan author as a design flaw. Do not implement tests that codify known leaks or harmful behavior.
+
 - **Consumer-Side Assertion**:
   - Assert effect at point of consumption/execution (e.g. balance deduction, permission grant/deny, state transition), NEVER merely producer state flags or array lengths.
 - **Double-Entry Bookkeeping (Zero Bug-Codification)**:
@@ -61,7 +74,10 @@ hooks: [.agents/hooks_qa.json]
 ## 4. Phase 3: Business RED Validation (ATDD Quality Gate)
 - Run the newly written test file using `npx vitest run <test-path>`.
 - Verify the test FAILS with a clear failure message.
-- Classify Failure: Must be **Business RED** (missing function, missing state, failed assertion). If it fails due to **Infrastructure RED** (broken import, syntax crash), fix test setup before handoff.
+- Classify Failure: Must be **Business RED** (missing function, missing state, failed assertion).
+  - Calling an un-exported function/component that fails with `undefined is not a function` or `target is not defined` IS VALID Business RED.
+  - NEVER wrap module imports in `try/catch` or use dynamic fallback to mask missing exports.
+  - **Infrastructure RED** applies ONLY to test harness defects (e.g. missing npm packages, invalid vitest config, syntax errors inside test file itself).
 
 ## 5. Phase 4: Inversion Gate Verification (Post-Implementation)
 - Conduct Adversarial Inversion Test:

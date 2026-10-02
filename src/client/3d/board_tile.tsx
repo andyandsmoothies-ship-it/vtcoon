@@ -3,7 +3,8 @@ import { Billboard, Image as DreiImage, RoundedBox } from '@react-three/drei';
 import { Texture, SRGBColorSpace, Color, type InstancedMesh } from 'three';
 import { CellType, type BoardCell } from '../../domain/board_config';
 import { COLOR_GROUP_HEX } from '../../domain/theme';
-import { getTileTexture, getStandeeTexture } from './tile_texture_generator';
+import { getStandeeTexture } from './tile_texture_generator';
+import { getBoardTileAtlas, getTileAtlasGeometry } from './tile_texture_atlas';
 import { useTextureRevision } from './texture_revision';
 import { isMobileHardware, isPhoneHardware } from './device_detect';
 import { READY_TILES, getTileAssetUrl } from '../assets/tile_assets';
@@ -195,7 +196,8 @@ export function LayeredDioramaTile({
 }: LayeredDioramaTileProps): React.ReactElement {
   const textureRevision = useTextureRevision();
   const isMobile = propIsMobile !== undefined ? propIsMobile : isPhoneHardware();
-  const tileTexture = useMemo(() => getTileTexture(cell.index, isMobile), [cell.index, isMobile, textureRevision]);
+  const tileAtlas = useMemo(() => getBoardTileAtlas(isMobile), [isMobile, textureRevision]);
+  const tileGeometry = useMemo(() => getTileAtlasGeometry(cell.index, isCornerTile), [cell.index, isCornerTile]);
 
   if (isCornerTile) {
     return (
@@ -205,10 +207,9 @@ export function LayeredDioramaTile({
           <meshStandardMaterial color="#1E293B" roughness={0.16} metalness={0.25} envMapIntensity={1.2} />
         </RoundedBox>
         {/* Inner corner accent badge with texture */}
-        <mesh position={[0, 0.115, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-          <planeGeometry args={[2.16, 2.16]} />
-          {tileTexture ? (
-            <meshStandardMaterial map={tileTexture} roughness={0.98} metalness={0.0} envMapIntensity={0.0} />
+        <mesh position={[0, 0.115, 0]} rotation={[-Math.PI / 2, 0, 0]} geometry={tileGeometry} receiveShadow>
+          {tileAtlas ? (
+            <meshStandardMaterial map={tileAtlas} roughness={0.98} metalness={0.0} envMapIntensity={0.0} />
           ) : (
             <meshStandardMaterial color="#1E293B" roughness={0.25} metalness={0.1} />
           )}
@@ -274,10 +275,9 @@ export function LayeredDioramaTile({
       )}
 
       {/* 2. Top surface information texture with subtle lacquer sheen */}
-      {tileTexture ? (
-        <mesh position={[0, 0.103, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-          <planeGeometry args={[1.64, 2.16]} />
-          <meshStandardMaterial map={tileTexture} roughness={0.98} metalness={0.0} envMapIntensity={0.0} />
+      {tileAtlas ? (
+        <mesh position={[0, 0.103, 0]} rotation={[-Math.PI / 2, 0, 0]} geometry={tileGeometry} receiveShadow>
+          <meshStandardMaterial map={tileAtlas} roughness={0.98} metalness={0.0} envMapIntensity={0.0} />
         </mesh>
       ) : (
         /* Fallback ColorStrip when texture is unavailable */

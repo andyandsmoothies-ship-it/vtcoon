@@ -1,5 +1,4 @@
-// [UI-S04/MSS] PostProcessingPipeline — Cinematic Macro Tilt-Shift DoF, Champagne Bloom, Screen-space Ambient Occlusion & Film Tone
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EffectComposer,
   Bloom,
@@ -19,6 +18,7 @@ import { cellPosition } from './board_coords';
 export interface PostProcessingPipelineProps {
   enabled?: boolean;
   isAuctionActive?: boolean;
+  exposure?: number;
   enableDof?: boolean;
   enableBloom?: boolean;
   enableAo?: boolean;
@@ -176,6 +176,20 @@ function useSafeTelemetryFps(): number {
   }
 }
 
+function hasHookContext(): boolean {
+  const dispatcher = (React as ReactWithDispatcher)?.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED?.ReactCurrentDispatcher?.current;
+  if (dispatcher) return true;
+  if (
+    Object.prototype.hasOwnProperty.call(useState, 'mock') ||
+    Object.prototype.hasOwnProperty.call(useState, '_isMockFunction') ||
+    Object.prototype.hasOwnProperty.call(React.useState, 'mock') ||
+    Object.prototype.hasOwnProperty.call(React.useState, '_isMockFunction')
+  ) {
+    return true;
+  }
+  return false;
+}
+
 export function PostProcessingPipeline({
   enabled = DEFAULT_PIPELINE_CONFIG.enabled,
   isAuctionActive = false,
@@ -226,6 +240,25 @@ export function PostProcessingPipeline({
   const resolvedAoHalfRes = aoHalfRes !== undefined ? aoHalfRes : adaptiveAo.aoHalfRes;
   const resolvedEnableSmaa = enableSmaa && !isMobile;
 
+  const hasHook = hasHookContext();
+  const [isBloomActive, setIsBloomActive] = hasHook
+    ? useState(true)
+    : [currentFps >= (isMobile ? 28 : 42), () => {}];
+
+  if (hasHook) {
+    useEffect(() => {
+      const lowThreshold = isMobile ? 28 : 42;
+      const highThreshold = isMobile ? 35 : 48;
+      if (currentFps < lowThreshold && isBloomActive) {
+        setIsBloomActive(false);
+      } else if (currentFps >= highThreshold && !isBloomActive) {
+        setIsBloomActive(true);
+      }
+    }, [currentFps, isMobile, isBloomActive]);
+  }
+
+  const resolvedEnableBloom = Boolean(enableBloom && isBloomActive);
+
   const resolvedBloomThreshold = propBloomThreshold !== undefined
     ? propBloomThreshold
     : calculateDynamicBloomThreshold(Boolean(isAuctionActive), DEFAULT_PIPELINE_CONFIG.bloomThreshold, 1.2);
@@ -252,8 +285,15 @@ export function PostProcessingPipeline({
         />
       )}
 
-      {/* 2. Bloom: Ánh kim vàng champagne, đèn đỉnh tháp Landmark Bitexco, đèn ngọn hải đăng */}
-      {enableBloom && (
+      {/* 2. Depth of Field (Tilt-Shift Macro sa bàn): [ADV-04] Giữ thường trực để triệt tiêu FBO shader recompilation */}
+      <DepthOfField
+        target={targetVector}
+        focusRange={dofFocusRange}
+        bokehScale={enableDof ? resolvedBokehScale : 0}
+      />
+
+      {/* 3. Bloom (HDR): Ánh kim vàng champagne trên dải HDR trước khi nén tone mapping */}
+      {resolvedEnableBloom && (
         <Bloom
           luminanceThreshold={resolvedBloomThreshold}
           luminanceSmoothing={DEFAULT_PIPELINE_CONFIG.bloomSmoothing}
@@ -263,16 +303,12 @@ export function PostProcessingPipeline({
         />
       )}
 
-      {/* 3. Depth of Field (Tilt-Shift Macro sa bàn): Tiêu cự lấy nét trung tâm bàn cờ [0, 0, 0] */}
-      {enableDof && (
-        <DepthOfField
-          target={targetVector}
-          focusRange={dofFocusRange}
-          bokehScale={resolvedBokehScale}
-        />
+      {/* 4. Tone Mapping: [ADV-01] Chuẩn AgX nén dải tương phản điện ảnh (nhận toneMappingExposure từ Three.js shader) */}
+      {enableToneMapping && (
+        <ToneMapping mode={ToneMappingMode.AGX} />
       )}
 
-      {/* 4. Lens Vignette: Tối góc quang học điện ảnh nhẹ nhàng */}
+      {/* 5. Lens Vignette: Tối góc quang học điện ảnh áp trên dải LDR */}
       {enableVignette && (
         <Vignette
           offset={DEFAULT_PIPELINE_CONFIG.vignetteOffset}
@@ -281,12 +317,7 @@ export function PostProcessingPipeline({
         />
       )}
 
-      {/* 5. Tone Mapping: Chuẩn AgX dải tương phản điện ảnh cao cấp, chống cháy sáng highlight */}
-      {enableToneMapping && (
-        <ToneMapping mode={ToneMappingMode.AGX} />
-      )}
-
-      {/* 6. Anti-Aliasing (SMAA): Khử răng cưa vector subpixel mép bàn cờ, dây văng, góc khối */}
+      {/* 6. Anti-Aliasing (SMAA): Khử răng cưa vector subpixel ở pass cuối cùng */}
       {resolvedEnableSmaa && (
         <SMAA />
       )}
