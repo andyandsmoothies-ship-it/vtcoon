@@ -194,7 +194,7 @@ export function SingleHopPawn({ fromCell, toCell, offset, color, onHopComplete, 
       scale={[1, 1, 1]}
     >
       {slotIndex !== undefined ? (
-        <LuxuryPawnModel slotIndex={slotIndex} playerColor={color} />
+        <LuxuryPawnModel slotIndex={slotIndex} playerColor={color} forceFallback={true} />
       ) : (
         <PawnMesh color={color} />
       )}
@@ -347,7 +347,7 @@ function StaticPawnWithReaction({
           reaction={reaction}
         />
       )}
-      <LuxuryPawnModel slotIndex={assignedSlot} playerColor={color} />
+      <LuxuryPawnModel slotIndex={assignedSlot} playerColor={color} forceFallback={true} />
       {activeEmote && <PawnEmoteBubble emoteId={activeEmote.emoteId} />}
     </group>
   );

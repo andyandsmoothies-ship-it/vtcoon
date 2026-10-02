@@ -237,7 +237,7 @@ export function parseLuxuryPawnRoot(root: unknown): ExtractedGLTFInfo {
 }
 
 export function inspectLuxuryPawnGLTF(slotIndex: number, playerColor?: string): ExtractedGLTFInfo {
-  return parseLuxuryPawnRoot(LuxuryPawnModel({ slotIndex, playerColor }));
+  return parseLuxuryPawnRoot(LuxuryPawnModel({ slotIndex, playerColor, forceFallback: false }));
 }
 
 const CHESS_TALL_ARCHETYPES = [

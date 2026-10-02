@@ -59,18 +59,22 @@ describe('[UI-S01/PBR] Smart Standee Asset Loader - Lifecycle & Resilient Fallba
     }
   }
 
+  let initialReadyTiles: number[] = [];
+
   beforeEach(() => {
     clearStandeeWebpCache();
     createdImages = [];
     (globalThis as any).window = {};
     (globalThis as any).Image = MockImage;
+    initialReadyTiles = Array.from(READY_TILES);
     [1, 2, 5, 7].forEach((id) => READY_TILES.add(id));
   });
 
   afterEach(() => {
     (globalThis as any).window = originalWindow;
     (globalThis as any).Image = originalImage;
-    [1, 2, 5, 7].forEach((id) => READY_TILES.delete(id));
+    READY_TILES.clear();
+    initialReadyTiles.forEach((id) => READY_TILES.add(id));
   });
 
   it('nạp ảnh WebP thành công: sinh Texture sRGB, bật needsUpdate và lưu cache', () => {
@@ -141,11 +145,16 @@ describe('[UI-S01/PBR] Smart Standee Asset Loader - Lifecycle & Resilient Fallba
   });
 
   it('không tải ảnh và không tạo new Image() nếu ô không nằm trong READY_TILES', () => {
-    const onResolve = vi.fn();
-    loadStandeeWebp(3, onResolve);
+    READY_TILES.delete(3);
+    try {
+      const onResolve = vi.fn();
+      loadStandeeWebp(3, onResolve);
 
-    expect(createdImages).toHaveLength(0);
-    expect(onResolve).toHaveBeenCalledWith(null);
-    expect(standeeWebpCache.get(3)).toBeNull();
+      expect(createdImages).toHaveLength(0);
+      expect(onResolve).toHaveBeenCalledWith(null);
+      expect(standeeWebpCache.get(3)).toBeNull();
+    } finally {
+      READY_TILES.add(3);
+    }
   });
 });

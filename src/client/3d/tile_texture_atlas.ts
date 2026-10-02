@@ -234,7 +234,12 @@ export function getBoardTileAtlas(isMobile = isPhoneHardware()): CanvasTexture |
     },
     set(val: boolean) {
       isNeedsUpdate = val;
-      if (val) texture.version++;
+      if (val) {
+        texture.version++;
+        if (texture.source) {
+          texture.source.needsUpdate = true;
+        }
+      }
     },
     configurable: true,
   });
@@ -243,6 +248,12 @@ export function getBoardTileAtlas(isMobile = isPhoneHardware()): CanvasTexture |
   texture.generateMipmaps = true;
   texture.minFilter = LinearMipmapLinearFilter;
   texture.magFilter = LinearFilter;
+
+  if (useMobile) {
+    mobileBoardAtlas = texture;
+  } else {
+    desktopBoardAtlas = texture;
+  }
 
   // Vẽ 40 ô cờ vào các ô lưới tương ứng
   for (let idx = 0; idx < 40; idx++) {
@@ -285,12 +296,6 @@ export function getBoardTileAtlas(isMobile = isPhoneHardware()): CanvasTexture |
   }
 
   texture.needsUpdate = true;
-
-  if (useMobile) {
-    mobileBoardAtlas = texture;
-  } else {
-    desktopBoardAtlas = texture;
-  }
   return texture;
 }
 

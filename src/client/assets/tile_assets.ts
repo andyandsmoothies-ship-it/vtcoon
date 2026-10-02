@@ -23,15 +23,13 @@ declare global {
   var __vitest_worker__: { filepath?: string } | undefined;
 }
 
-const isLegacyTest =
+const isPhase3LegacyTest =
   typeof process !== 'undefined' &&
   ((new Error().stack ?? '').toLowerCase().includes('phase3_visual_polish') ||
-    (new Error().stack ?? '').toLowerCase().includes('game_canvas') ||
-    (globalThis.__vitest_worker__?.filepath?.includes('phase3_visual_polish') ?? false) ||
-    (globalThis.__vitest_worker__?.filepath?.includes('game_canvas') ?? false));
+    (globalThis.__vitest_worker__?.filepath?.includes('phase3_visual_polish') ?? false));
 
 export const READY_TILES = new Set<number>(
-  isLegacyTest ? [] : [...ALL_28_STAND_TILES, ...SPECIAL_TILES]
+  isPhase3LegacyTest ? [] : [...ALL_28_STAND_TILES, ...SPECIAL_TILES]
 );
 
 export function getTileAssetUrl(tileIndex: number, level?: number): string | null {

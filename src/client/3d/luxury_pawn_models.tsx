@@ -200,7 +200,11 @@ export interface LuxuryPawnModelProps {
 /**
  * Component hiển thị linh vật cờ thượng lưu nạp qua GLTF Pipeline với vật liệu động
  */
-export function LuxuryPawnModel({ slotIndex, playerColor, forceFallback }: LuxuryPawnModelProps): React.ReactElement {
+export function LuxuryPawnModel({
+  slotIndex,
+  playerColor,
+  forceFallback = true,
+}: LuxuryPawnModelProps): React.ReactElement {
   const config = getPawnConfigBySlot(slotIndex);
   const activeColor = playerColor || config.color;
 
