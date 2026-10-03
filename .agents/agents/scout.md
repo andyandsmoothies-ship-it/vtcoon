@@ -43,4 +43,11 @@ If any mechanical check fails, report `SWEEP: REVISE` with exact `file:line` so 
 | Locale Portability | Grep `toLocaleString` | PASS / FAIL | Zero usage |
 | Test Directory | Path convention check | PASS / FAIL | tests/contracts/ or tests/probes/ |
 | Banned Test Patterns | Grep framework spies | PASS / FAIL | Zero internal spies |
+
+### 🩺 SDLC HARNESS TELEMETRY
+- **Scripts/Tools**: [PASS | Friction description (e.g. tsc execution speed, grep tool limits)]
+- **Rules/Gotchas**: [PASS | Friction description (e.g. false positive lints, pattern ambiguity)]
+- **Skills/Context**: [PASS | Missing/Unused skill feedback]
+- **Handoff Quality**: [PASS | Implementer cleanliness, missing files]
+- **Harness Suggestion**: [Actionable suggestion to improve pre-filter sweep or lint scripts]
 ```

@@ -62,4 +62,11 @@ tools: [view_file, list_dir, find_by_name, grep_search]
 | `.agents/evidence/latest_snapshot.json` | YES | 100% Match | APPROVED |
 
 ### 🎯 VERDICT: [APPROVED / REJECTED]
+
+### 🩺 SDLC HARNESS TELEMETRY
+- **Scripts/Tools**: [PASS | Friction description (e.g. view_file truncation, diff size)]
+- **Rules/Gotchas**: [PASS | Friction description (e.g. spec ambiguity, traceability tag confusion)]
+- **Skills/Context**: [PASS | Missing/Unused skill feedback]
+- **Handoff Quality**: [PASS | Upstream implementer/QA spec fidelity]
+- **Harness Suggestion**: [Actionable suggestion to improve specification reconciliation]
 ```

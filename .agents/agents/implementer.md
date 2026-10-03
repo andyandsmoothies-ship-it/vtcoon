@@ -79,4 +79,11 @@ hooks: [.agents/hooks_implementer.json]
 - **LOC Ceiling**: All modified files within tier limits
 - **Zero Dirty Casts**: Verified clean (no `as any`)
 - **Evidence Snapshot**: `.agents/evidence/latest_snapshot.json` (executed: true)
+
+### 🩺 SDLC HARNESS TELEMETRY
+- **Scripts/Tools**: [PASS | Friction description (e.g. check_loc, build, compiler warnings, tool lag)]
+- **Rules/Gotchas**: [PASS | Friction description (e.g. LOC budget friction, anti-slop boundary ambiguity)]
+- **Skills/Context**: [PASS | Missing/Unused skill feedback]
+- **Handoff Quality**: [PASS | Station 1 QA contract test clarity, missing precondition]
+- **Harness Suggestion**: [Actionable suggestion to improve SDLC process, implementation helpers, or settings]
 ```

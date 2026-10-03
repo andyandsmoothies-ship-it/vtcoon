@@ -190,6 +190,8 @@ export function buildDeltaFromRoom(
     ...(room.activeModifiers !== undefined ? { activeModifiers: room.activeModifiers.map((m) => ({ ...m })) } : {}),
     lastDiplomaticEvent: room.lastDiplomaticEvent ?? null,
     ...(room.passedGoSalary !== undefined ? { passedGoSalary: room.passedGoSalary } : {}),
+    pendingTransitWheel: room.pendingTransitWheel ?? null,
+    lastTransitResult: room.lastTransitResult ?? null,
   });
 }
 
@@ -251,6 +253,8 @@ export function buildDeltaPayload(
       ...(tickOrOptions.activeModifiers !== undefined ? { activeModifiers: tickOrOptions.activeModifiers.map((m) => ({ ...m })) } : {}),
       ...(tickOrOptions.lastDiplomaticEvent !== undefined ? { lastDiplomaticEvent: tickOrOptions.lastDiplomaticEvent } : {}),
       ...(tickOrOptions.passedGoSalary !== undefined ? { passedGoSalary: tickOrOptions.passedGoSalary } : {}),
+      ...(tickOrOptions.pendingTransitWheel !== undefined ? { pendingTransitWheel: tickOrOptions.pendingTransitWheel } : {}),
+      ...(tickOrOptions.lastTransitResult !== undefined ? { lastTransitResult: tickOrOptions.lastTransitResult } : {}),
     };
   }
   return {

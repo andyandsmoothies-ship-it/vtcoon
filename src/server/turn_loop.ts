@@ -212,6 +212,9 @@ export function executeTurnRoll(
     const canEnterActionPhase = landing.result === LandingResult.Unowned && !isTradeFrozen(room);
     room.phase = canEnterActionPhase ? TurnPhase.ActionPhase : TurnPhase.PropertyManagement;
     rentCharged = landing.rentAmount;
+    if ([5, 15, 25, 35].includes(newPos) && !current.hasSpunTransitThisTurn && !canEnterActionPhase && current.balance >= 0) {
+      room.pendingTransitWheel = { playerId: current.id, cellIndex: newPos, timestamp: Date.now() };
+    }
   }
 
   // UC-053: Kiem tra mat kha nang thanh toan neu so du am sau khi thu thue / lai / phi
@@ -253,6 +256,9 @@ export function executeTurnEnd(
 
   room.lastDiplomaticEvent = null;
   room.lastMaBuyout = undefined;
+  room.pendingTransitWheel = null;
+  room.lastTransitResult = null;
+  current.hasSpunTransitThisTurn = false;
   if (continueDoubles && current.consecutiveDoubles > 0 && !current.skipNextTurn) {
     room.phase = TurnPhase.WaitingRoll;
     rolledThisTurnMap.set(roomCode, false);

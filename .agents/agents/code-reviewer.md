@@ -109,4 +109,11 @@ Inspect the following Single Source of Truth (SSOT) files before auditing:
 - Action: [Encapsulation done or 2-line entry added]
 
 ### 🎯 ACCEPTANCE VERDICT: [APPROVED / REJECTED]
+
+### 🩺 SDLC HARNESS TELEMETRY
+- **Scripts/Tools**: [PASS | Friction description (e.g. check_loc, diff viewer, typecheck tool)]
+- **Rules/Gotchas**: [PASS | Friction description (e.g. anti-slop false alarm, complexity threshold friction)]
+- **Skills/Context**: [PASS | Missing/Unused skill feedback]
+- **Handoff Quality**: [PASS | Spec-reviewer handoff clarity, implementation traceability]
+- **Harness Suggestion**: [Actionable suggestion to improve architecture standards or review tools]
 ```

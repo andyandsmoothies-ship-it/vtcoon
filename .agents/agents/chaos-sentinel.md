@@ -78,4 +78,11 @@ Print summary table (< 20 lines) to the Main Agent:
 
 **Final Verdict**: APPROVED | BLOCKED (with exact file:line gap).
 **Evidence Snapshot**: .agents/evidence/chaos_sentinel_[TICKET_ID].json
+
+### 🩺 SDLC HARNESS TELEMETRY
+- **Scripts/Tools**: [PASS | Friction description (e.g. sentinel CLI, port binding, mutant sandbox execution)]
+- **Rules/Gotchas**: [PASS | Friction description (e.g. mutation probe floor, parity threshold friction)]
+- **Skills/Context**: [PASS | Missing/Unused skill feedback]
+- **Handoff Quality**: [PASS | Code/Test resilience quality from Station 1-3]
+- **Harness Suggestion**: [Actionable suggestion to improve Station 4 probes or sentinel scripts]
 ```

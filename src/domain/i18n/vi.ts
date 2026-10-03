@@ -75,6 +75,7 @@ export const vi = {
     [ActionRejectReason.MISSING_MONOPOLY]:           'Chưa độc quyền nhóm màu',
     [ActionRejectReason.MAX_LEVEL]:                  'Đã đạt cấp độ tối đa',
     [ActionRejectReason.NEED_2_RAILROADS]:           'Cần sở hữu ít nhất 2 hạ tầng',
+    [ActionRejectReason.NEED_ALL_UTILITIES]:         'Cần sở hữu trọn bộ cả 2 Tiện ích (EVN & Viettel)',
     [ActionRejectReason.NOT_UTILITY]:                'Ô không phải Tiện ích',
     [ActionRejectReason.INVALID_PLAYER]:             'Người chơi không hợp lệ',
     [ActionRejectReason.DECLINED_PLAYER_CANNOT_BID]: 'Người chơi đã bỏ qua không được đặt giá',

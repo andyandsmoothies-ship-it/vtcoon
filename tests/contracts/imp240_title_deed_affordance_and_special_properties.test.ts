@@ -227,7 +227,7 @@ describe('[CONTRACT-TEST][TC-IMP240/MSS][UC-IMP240] Title Deed Affordance & Spec
   // ==========================================================================
   describe('Facet 2: Edge Cases & Boundaries', () => {
     it('[TC-IMP240.05/A1][UC-IMP240] EVN Ô 12 và Viettel Ô 28 không hiển thị cảnh báo Cần sở hữu trọn bộ màu trước khi nâng cấp', () => {
-      const state12 = resolveTitleDeedModalState({
+      const state12Single = resolveTitleDeedModalState({
         cellIndex: 12,
         myId: 'p1',
         myPlayer: { id: 'p1', name: 'Tester', balance: 5000, ownedProperties: [12] },
@@ -235,17 +235,18 @@ describe('[CONTRACT-TEST][TC-IMP240/MSS][UC-IMP240] Title Deed Affordance & Spec
           p1: { id: 'p1', name: 'Tester', balance: 5000, ownedProperties: [12] },
         },
       });
-      expect(state12.upgradeBlockedReason).toBeUndefined();
+      expect(state12Single.upgradeBlockedReason).not.toContain('trọn bộ màu');
+      expect(state12Single.upgradeBlockedReason).toBe('Cần sở hữu trọn bộ cả 2 Tiện ích (EVN & Viettel) để nâng cấp');
 
-      const state28 = resolveTitleDeedModalState({
-        cellIndex: 28,
+      const state12Monopoly = resolveTitleDeedModalState({
+        cellIndex: 12,
         myId: 'p1',
-        myPlayer: { id: 'p1', name: 'Tester', balance: 5000, ownedProperties: [28] },
+        myPlayer: { id: 'p1', name: 'Tester', balance: 5000, ownedProperties: [12, 28] },
         playersInfo: {
-          p1: { id: 'p1', name: 'Tester', balance: 5000, ownedProperties: [28] },
+          p1: { id: 'p1', name: 'Tester', balance: 5000, ownedProperties: [12, 28] },
         },
       });
-      expect(state28.upgradeBlockedReason).toBeUndefined();
+      expect(state12Monopoly.upgradeBlockedReason).toBeUndefined();
     });
 
     it('[TC-IMP240.06/A2][UC-IMP240] 4 ô Hạ Tầng không hiển thị cảnh báo trọn bộ màu và yêu cầu sở hữu từ 2 ô Hạ Tầng để nâng cấp ETC', () => {
@@ -275,7 +276,7 @@ describe('[CONTRACT-TEST][TC-IMP240/MSS][UC-IMP240] Title Deed Affordance & Spec
         cellIndex: 12,
         myId: 'p1',
         playersInfo: {
-          p1: { id: 'p1', name: 'Tester Nghèo', balance: 500, ownedProperties: [12] },
+          p1: { id: 'p1', name: 'Tester Nghèo', balance: 500, ownedProperties: [12, 28] },
         },
       });
       expect(deedState.upgradeBlockedReason).toContain('1.000 Tr.');

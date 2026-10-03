@@ -4,6 +4,7 @@ import type { MacroCycleType } from './macro_cycle_types';
 import type { ColorGroup } from './board_config';
 import type { BondContract } from './bond_types';
 import type { BotPersonality } from './bot/bot_types';
+import type { TransitWheelOutcome } from './transit_wheel.js';
 export { ActionRejectReason } from './action_reasons';
 export type { BondContract } from './bond_types';
 
@@ -81,6 +82,8 @@ export interface Player {
   mascotName?:          string;
   personality?:        BotPersonality;
   bondContract?:        BondContract | null;
+  hasSpunTransitThisTurn?: boolean;
+  ownedProperties?:     number[];
 }
 
 export interface CurrentAuctionState {
@@ -204,6 +207,8 @@ export interface Room {
   lastDiplomaticEvent?:       { playerId: string; landlordId: string; cellIndex: number; savedRent: number } | null;
   lastMaBuyout?:              MaBuyoutResult;
   passedGoSalary?:            number;
+  pendingTransitWheel?:       { playerId: string; cellIndex: number; timestamp: number } | null;
+  lastTransitResult?:         { playerId: string; cellIndex: number; outcome: string; targetCell?: number; payout?: number } | null;
 }
 
 
@@ -228,6 +233,7 @@ export function createPlayer(id: string): Player {
     isBot: false,
     overdraftRoundsLeft: 0,
     lastTradeOfferRound: 0,
+    hasSpunTransitThisTurn: false,
   };
 }
 

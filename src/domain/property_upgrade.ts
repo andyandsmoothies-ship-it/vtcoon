@@ -10,7 +10,7 @@ import {
   MACRO_UPGRADE_COST_FLOOR,
 } from './macro_cycle_types';
 import {
-  PROPERTY_DEEDS, RAILROAD_CELLS, ETC_COST_PER_CELL, UTILITY_UPGRADE_COST,
+  PROPERTY_DEEDS, RAILROAD_CELLS, UTILITY_CELLS, ETC_COST_PER_CELL, UTILITY_UPGRADE_COST,
   type PropertyRegistry, type PropertyStateMap,
 } from './property_data';
 import { ActionRejectReason } from './action_reasons';
@@ -182,9 +182,26 @@ export function upgradeUtilityFull(
   if (registry.get(cellIndex) !== player.id) return { success: false, reason: ActionRejectReason.NOT_OWNER };
   const cell = BOARD_CONFIG[cellIndex];
   if (!cell || cell.type !== CellType.Utility) return { success: false, reason: ActionRejectReason.NOT_UTILITY };
+
+  const s = stateMap.get(cellIndex) ?? { level: 0 };
+  if (s.isUpgradedUtility) {
+    return { success: false, reason: ActionRejectReason.MAX_LEVEL };
+  }
+
+  const ownsAll = UTILITY_CELLS.every((c) => registry.get(c) === player.id);
+  if (!ownsAll) {
+    return { success: false, reason: ActionRejectReason.NEED_ALL_UTILITIES };
+  }
+
+  const hasMortgaged = UTILITY_CELLS.some((c) =>
+    Boolean(stateMap.get(c)?.isMortgaged || player.mortgagedProperties?.includes(c))
+  );
+  if (hasMortgaged) {
+    return { success: false, reason: ActionRejectReason.GROUP_MORTGAGED };
+  }
+
   if (player.balance < UTILITY_UPGRADE_COST) return { success: false, reason: ActionRejectReason.INSUFFICIENT_FUNDS };
   player.balance -= UTILITY_UPGRADE_COST;
-  const s = stateMap.get(cellIndex) ?? { level: 0 };
   stateMap.set(cellIndex, { ...s, isUpgradedUtility: true });
   return { success: true };
 }

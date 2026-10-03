@@ -1,0 +1,4 @@
+{
+  "planReviewPolicy": "review-every-plan",
+  "artifactReviewMode": "asks-for-review"
+}

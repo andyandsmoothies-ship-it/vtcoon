@@ -1,5 +1,5 @@
 // [IMP-204] Title Deed Affordance & Even Build Rules Calculation
-import { PROPERTY_DEEDS } from '../../../domain/property_data.js';
+import { PROPERTY_DEEDS, UTILITY_CELLS } from '../../../domain/property_data.js';
 import { BOARD_CONFIG, CellType, type ColorGroup } from '../../../domain/board_config.js';
 import type { Player } from '../../../domain/types.js';
 
@@ -149,7 +149,7 @@ export function resolveTitleDeedModalState(params: {
   myPlayer?: AffordancePlayer | Player | null;
   playersInfo: Record<string, AffordancePlayer | Player>;
   levelMap?: Record<number, number>;
-  propertyStates?: Record<number, { level?: number; isETC?: boolean; isUpgradedUtility?: boolean }>;
+  propertyStates?: Record<number, { level?: number; isETC?: boolean; isUpgradedUtility?: boolean; isMortgaged?: boolean }>;
   activeModifiers?: readonly { readonly type: string; readonly remainingRounds: number }[];
   turnPhase?: string | null;
   currentTurnPlayerId?: string | null;
@@ -191,8 +191,23 @@ export function resolveTitleDeedModalState(params: {
 
   if (isUtility && isOwner && !isMortgaged) {
     effectiveUpgradeCost = 1000;
+    const myAffordance = (params.myPlayer && 'ownedProperties' in params.myPlayer) ? params.myPlayer : undefined;
+    const playerOwned = myAffordance?.ownedProperties ?? owner?.ownedProperties ?? [];
+    const ownsAllUtilities = UTILITY_CELLS.every((idx: number) => playerOwned.includes(idx));
+    const hasAnyUtilityMortgaged = UTILITY_CELLS.some((idx: number) =>
+      Boolean(
+        myAffordance?.mortgagedProperties?.includes(idx) ||
+        owner?.mortgagedProperties?.includes(idx) ||
+        params.propertyStates?.[idx]?.isMortgaged
+      )
+    );
+
     if (isUpgradedUtility) {
       specialUpgradeBlockedReason = 'Đã nâng cấp tối đa (Smart Grid / 5G)';
+    } else if (!ownsAllUtilities) {
+      specialUpgradeBlockedReason = 'Cần sở hữu trọn bộ cả 2 Tiện ích (EVN & Viettel) để nâng cấp';
+    } else if (hasAnyUtilityMortgaged) {
+      specialUpgradeBlockedReason = 'Không thể nâng cấp khi có Tiện ích đang bị thế chấp';
     } else if ((params.myPlayer?.balance ?? 0) < 1000) {
       specialUpgradeBlockedReason = 'Cần 1.000 Tr. VNĐ để nâng cấp lưới điện/5G';
     }

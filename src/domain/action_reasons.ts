@@ -23,6 +23,7 @@ export const ActionRejectReason = {
   PRICE_BELOW_FLOOR:         'PRICE_BELOW_FLOOR',
   // Thêm mới (DEBT-S06-09)
   MISSING_MONOPOLY:          'MISSING_MONOPOLY',
+  NEED_ALL_UTILITIES:        'NEED_ALL_UTILITIES',
   MAX_LEVEL:                 'MAX_LEVEL',
   NEED_2_RAILROADS:          'NEED_2_RAILROADS',
   NOT_UTILITY:               'NOT_UTILITY',

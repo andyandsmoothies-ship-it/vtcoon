@@ -3,6 +3,7 @@ import type { PendingTradeOfferDelta, DiplomaticEventDelta } from '../../server/
 import type { BotPersonality } from '../../domain/bot/bot_types';
 import type { BondContract } from '../../domain/bond_types';
 import type { ChanceCardId } from '../../domain/event_card_engine';
+import type { TransitWheelOutcome } from '../../domain/transit_wheel';
 
 export interface PawnAnimationState {
   readonly playerId: string;
@@ -109,7 +110,7 @@ export interface FloatingTextItem {
   readonly bailKind?: 'voluntary' | 'forced' | 'doubles'; // [IMP-216] Phân định chính xác loại bảo lãnh (No Magic Strings)
 }
 
-export type ActiveModalType = 'deed' | 'portfolio' | 'auction' | 'trade' | 'event' | 'hose' | 'insolvency' | 'game_over' | 'rules' | 'masterplan' | 'bot_trade_offer' | 'compulsory_buyout' | null;
+export type ActiveModalType = 'deed' | 'portfolio' | 'auction' | 'trade' | 'event' | 'hose' | 'insolvency' | 'game_over' | 'rules' | 'masterplan' | 'bot_trade_offer' | 'compulsory_buyout' | 'transit_wheel' | null;
 
 export interface ModalPayloadMap {
   deed: { cellIndex: number; canBuy?: boolean; ownedProperties?: readonly number[]; isBuyOpportunity?: boolean };
@@ -188,6 +189,7 @@ export interface ModalPayloadMap {
     offeredCellIndex?: number;
   };
   compulsory_buyout: PendingBuyoutSession;
+  transit_wheel: { cellIndex: number; playerId?: string; outcome?: TransitWheelOutcome | string; targetCell?: number; payout?: number };
 }
 
 export interface PendingPawnMove {

@@ -122,6 +122,13 @@ const ACTIONABLE_NOTIFICATIONS_MAP: Record<string, ActionableNotification> = {
     tone: 'warning',
     actionHint: 'Hãy giải chấp toàn bộ các ô trong bộ màu trước khi xây dựng.',
   },
+  NEED_ALL_UTILITIES: {
+    icon: '⚡',
+    title: 'Chưa Độc Quyền Tiện Ích',
+    description: 'Bắt buộc sở hữu trọn bộ cả 2 Tiện ích (EVN & Viettel) mới có thể nâng cấp Smart Grid hoặc 5G.',
+    tone: 'warning',
+    actionHint: 'Hãy mua hoặc đàm phán P2P đổi chéo để hoàn thiện bộ đôi tiện ích.',
+  },
   AlreadyOwned: {
     icon: '🏷️',
     title: 'Bất Động Sản Đã Có Chủ Sở Hữu',

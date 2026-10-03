@@ -155,11 +155,14 @@ export function calcUtilityFee(
   ownerId: string, _diceTotal: number, registry: PropertyRegistry,
   stateMap?: PropertyStateMap, cellIndex?: number,
 ): number {
-  if (cellIndex !== undefined && stateMap?.get(cellIndex)?.isUpgradedUtility) {
+  const unmortgagedOwned = UTILITY_CELLS.filter(
+    (c) => registry.get(c) === ownerId && !stateMap?.get(c)?.isMortgaged,
+  );
+  const hasMonopoly = unmortgagedOwned.length === UTILITY_CELLS.length;
+  if (cellIndex !== undefined && stateMap?.get(cellIndex)?.isUpgradedUtility && hasMonopoly) {
     return UTILITY_FEE_UPGRADED;
   }
-  const count = UTILITY_CELLS.filter((c) => registry.get(c) === ownerId).length;
-  return count >= 2 ? UTILITY_FEE_DOUBLE : UTILITY_FEE_SINGLE;
+  return unmortgagedOwned.length >= 2 ? UTILITY_FEE_DOUBLE : UTILITY_FEE_SINGLE;
 }
 
 export const ELECTRIC_RATE_C1 = 100;

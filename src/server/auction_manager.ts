@@ -282,6 +282,9 @@ export function handleAuctionClose(
     }
   } else {
     room.phase = TurnPhase.PropertyManagement;
+    if (current && [5, 15, 25, 35].includes(current.position) && !current.hasSpunTransitThisTurn && current.balance >= 0) {
+      room.pendingTransitWheel = { playerId: current.id, cellIndex: current.position, timestamp: Date.now() };
+    }
   }
   return { winnerId, winningBid, cellIndex: session.cellIndex, isForeclosure: !winnerId };
 }

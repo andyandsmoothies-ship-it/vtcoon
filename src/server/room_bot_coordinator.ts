@@ -184,6 +184,10 @@ function executeSingleBotIntent(
 ): boolean {
   const reg = roomManager.getRegistry(roomCode) ?? new Map();
   const sm = roomManager.getPropertyStates(roomCode) ?? new Map();
+  if (currentRoom.pendingTransitWheel && currentRoom.pendingTransitWheel.playerId === active.id) {
+    roomManager.handlePlayerIntent(roomCode, active.id, { type: 'INTENT_SPIN_TRANSIT_WHEEL' });
+    return true;
+  }
   const intent = decideBotIntent(active, currentRoom, reg, sm, config);
   if (!intent) return false;
   if (intent.type === 'INTENT_ROLL') {

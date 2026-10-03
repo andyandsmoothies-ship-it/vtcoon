@@ -9,6 +9,7 @@ import {
 import { MarketCardId } from '../domain/event_card_types';
 import { PROPERTY_DEEDS } from '../domain/property_manager';
 import { ActionRejectReason } from '../domain/action_reasons';
+import { UTILITY_CELLS } from '../domain/property_data';
 
 export function handleBuyProperty(
   room: Room | undefined,
@@ -18,7 +19,12 @@ export function handleBuyProperty(
   if (!room || !current || !registry) return undefined;
   if (room.phase !== TurnPhase.ActionPhase) return undefined;
   const res = buyProperty(current, current.position, registry, room.activeModifiers);
-  if (res.result === BuyResult.Success) room.phase = TurnPhase.PropertyManagement;
+  if (res.result === BuyResult.Success) {
+    room.phase = TurnPhase.PropertyManagement;
+    if ([5, 15, 25, 35].includes(current.position) && !current.hasSpunTransitThisTurn && current.balance >= 0) {
+      room.pendingTransitWheel = { playerId: current.id, cellIndex: current.position, timestamp: Date.now() };
+    }
+  }
   return res;
 }
 
@@ -48,7 +54,7 @@ export function handleUpgradeUtility(
 ): { success: boolean; reason?: string } {
   if (!current || phase !== TurnPhase.PropertyManagement) return { success: false, reason: ActionRejectReason.INVALID_PHASE };
   if (!registry || !stateMap) return { success: false, reason: ActionRejectReason.INVALID_ROOM };
-  if (room?.pendingTradeOffer && (room.pendingTradeOffer.cellIndex === cellIndex || room.pendingTradeOffer.offeredCellIndex === cellIndex)) {
+  if (room?.pendingTradeOffer && (UTILITY_CELLS.some((c) => c === room.pendingTradeOffer?.cellIndex || c === room.pendingTradeOffer?.offeredCellIndex))) {
     return { success: false, reason: ActionRejectReason.ASSET_LOCKED };
   }
   return upgradeUtilityFull(current, cellIndex, registry, stateMap);
@@ -316,7 +322,7 @@ function checkTradeParties(
   return { valid: true, taxRate, totalCost, taxAmount, sellerNet, buyer: buyer!, seller: seller! };
 }
 
-function validateP2PTrade(
+export function validateP2PTrade(
   room: Room,
   sellerId: string,
   buyerId: string,

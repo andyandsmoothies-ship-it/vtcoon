@@ -121,7 +121,8 @@ Toàn bộ 28 ô tài sản kinh tế trên bàn cờ được phân chia thành
 - **Mức phí dừng chân phẳng (Flat Landing Fee):**
   - Sở hữu 1 Tiện ích: Phí = **1.000 Tr. VNĐ**.
   - Sở hữu cả 2 Tiện ích: Phí = **2.500 Tr. VNĐ**.
-- **Gói nâng cấp Lưới Điện Thông Minh / Trạm Dữ Liệu 5G:**
+- **Gói nâng cấp Lưới Điện Thông Minh / Trạm Dữ Liệu 5G (IMP-247):**
+  - **Điều kiện:** Phải sở hữu trọn bộ cả 2 Tiện ích (Ô 12 và Ô 28) và không có ô nào trong bộ đang bị thế chấp.
   - **Chi phí lắp đặt:** **1.000 Tr. VNĐ/tiện ích**.
   - **Hiệu lực:** Phí dừng chân phẳng nâng lên mức = **3.500 Tr. VNĐ**.
 - **Cước mạng lưới hạ tầng toàn bàn cờ:**

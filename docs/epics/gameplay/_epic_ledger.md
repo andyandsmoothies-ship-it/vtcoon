@@ -251,8 +251,45 @@
 - **Evidence Snapshot:** [`.agents/evidence/chaos_sentinel_IMP-240.json`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/evidence/chaos_sentinel_IMP-240.json) (executed: true, verdict: APPROVED)
 - **Kiểm thử:** 17/17 tests PASS (`tests/contracts/fire_sale_and_insolvency_lifecycle.test.ts`).
 
----
+#### [IMP-247] Utility Monopoly Upgrade Requirement & P2P Incentive Alignment (Yêu Cầu Độc Quyền Tiện Ích & Cân Bằng Trao Đổi P2P)
+- **Mã Ticket:** IMP-247 (Tier 2 Full Rigor)
+- **Use Case Ref:** UC-GAME-020, UC-GAME-027, UC-GAME-056, UC-IMP247
+- **Phạm vi hoàn tất:**
+  - Bắt buộc sở hữu trọn bộ cả 2 ô Tiện ích (EVN Ô 12 và Viettel Ô 28) không thế chấp mới mở khóa nâng cấp Smart Grid và 5G, xóa bỏ triệt để nghịch lý ROI (vốn 2.500 Tr. tạo bẫy 3.500 Tr.).
+  - Bổ sung cơ chế giải trừ cước tự động (rent de-escalation fallback): nếu mất thế độc quyền hoặc có ô tiện ích trong bộ bị thế chấp, cước dừng chân tự động hạ về mức cơ sở 1.000 Tr. VNĐ (`UTILITY_FEE_SINGLE`), ngăn chặn gian lận cashing-out sau khi nâng cấp.
+  - Khóa nâng cấp khi có bất kỳ ô tiện ích nào trong bộ đang trong phiên đàm phán giao dịch `pendingTradeOffer` (`ASSET_LOCKED`).
+  - Đồng bộ affordance hiển thị nút và tooltip cảnh báo trên `TitleDeedModal` với zero dirty casts.
+  - Bổ sung ActionRejectReason `NEED_ALL_UTILITIES`, bản địa hóa `i18n/vi.ts`, và thông báo hành động `actionable_notification.ts`.
+  - Cập nhật quy chuẩn kinh tế SSOT `docs/domain/entity_model.md` và Gotcha #37 trong `docs/domain/gotchas.md`.
+- **Báo cáo chi tiết:** [`docs/reports/improvements/IMP-247-utility-monopoly-upgrade-requirement_report.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/reports/improvements/IMP-247-utility-monopoly-upgrade-requirement_report.md)
+- **Evidence Snapshot:** [`.agents/evidence/chaos_sentinel_imp247.json`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/evidence/chaos_sentinel_imp247.json) (`executed: true`, `verdict: APPROVED`)
+- **Kiểm thử:** 18/18 atomic tests PASS (`tests/contracts/imp247_utility_monopoly_upgrade_requirement.test.ts`), 74/74 tests PASS trên toàn bộ 5 test suites liên quan.
+- **Tech Debt Ledger (Nợ kỹ thuật ghi nhận):**
+  - `DEBT-PROP-ACT-01`: `src/server/property_actions.ts` đạt 385 LOC (SLOC 344), vượt ngưỡng cảnh báo 300 LOC và chỉ còn cách trần cứng 400 LOC đúng 15 dòng. Kế hoạch: Lên lịch Subtractive Refactoring trong lát cắt tiếp theo để bóc tách nhóm hàm giao dịch P2P (`validateP2PTrade`, `executeP2PTrade`, v.v.) sang submodule riêng `p2p_trade_actions.ts`, đưa tệp về dưới 250 LOC.
 
+#### [IMP-248] Vòng Xoay Hành Trình Tại 4 Trạm Hạ Tầng Giao Thông (Transit Wheel / Flight Navigator)
+- **Mã Ticket:** IMP-248 (Tier 2 Full Rigor)
+- **Use Case Ref:** UC-IMP248, UC-GAME-020, UC-GAME-027
+- **Phạm vi hoàn tất:**
+  - Thiết kế 6 nhánh hành trình có kiểm soát với ma trận trọng số chuẩn xác 100%, bảo đảm nguyên lý bảo toàn quỹ Kho Bạc (`room.treasury` $\Delta = 0$ khi rút `CASH_BACK`).
+  - Khống chế trần lương GO đơn chiếc: không lạm phát x2 lương khi bay phụ qua GO (`PASS_GO_FLIGHT`), chỉ trợ cấp cố định tối đa 500 Tr. VNĐ từ Kho Bạc nếu đã nhận lương từ cú gieo xúc xắc đầu tiên.
+  - Chốt chặn đệ quy nguyên tử `hasSpunTransitThisTurn = true` ngăn chặn vòng lặp quay vô tận khi bay sang ga kế tiếp (`NEXT_PORT`), dọn sạch tombstone cờ tại `executeTurnEnd`.
+  - Hóa giải hố đen đấu giá: `handleAuctionClose` mở lại `pendingTransitWheel` cho người chơi dẫm ga từ chối mua sau khi phiên đấu giá kết thúc.
+  - Triệt tiêu desync giật cục quân cờ 3D: `apply_delta_players.ts` tạm giữ chuyển động trong `pendingPawnMove` khi `activeModal === 'transit_wheel'` và chỉ kích hoạt khi kết thúc quay đĩa.
+  - Subtractive refactoring: trích xuất `DeedModalHost` (`src/client/ui/modals/hosts/deed_modal_host.tsx`), giảm `modal_host.tsx` từ 485 xuống 439 LOC (thỏa mãn quy tắc GEMINI.md:14).
+  - Giao diện 2D Tactile SVG/CSS với 6 cánh màu, kim chỉ hướng hổ phách, đáp ứng WCAG AA, focus visible rings, touch target >= 44px, zero layout overflow trên mobile 360px.
+  - Bổ sung Invariant #38 vào `docs/domain/gotchas.md`.
+- **Báo cáo chi tiết:** [`docs/reports/improvements/IMP-248-transit-wheel-navigator_report.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/reports/improvements/IMP-248-transit-wheel-navigator_report.md)
+- **Evidence Snapshot:** [`.agents/evidence/chaos_sentinel_IMP-248.json`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/evidence/chaos_sentinel_IMP-248.json) (`executed: true`, `verdict: APPROVED`)
+- **Kiểm thử:** 20/20 atomic tests PASS (`tests/contracts/imp248_transit_wheel_navigator.test.ts`), 148 test suites passed (3,289/3,289 tests PASS).
+- **Tech Debt Ledger (Nợ kỹ thuật ghi nhận):**
+  - `DEBT-MODAL-HOST-01`: `src/client/ui/modals/modal_host.tsx` (439 LOC, Warning Tier 2 > 400). Kế hoạch: Bóc tách `AuctionModalHost` hoặc `PortfolioModalsHost` sang thư mục `hosts/` trong lát cắt tiếp theo để đưa về < 350 LOC.
+  - `DEBT-PROP-ACT-02`: `src/server/property_actions.ts` (391 LOC, Warning Tier 1 > 300). Kế hoạch: Bóc tách P2P trade sang `p2p_trade_actions.ts` để đưa về < 250 LOC.
+  - `DEBT-TURN-LOOP-01`: `src/server/turn_loop.ts` (345 LOC, Warning Tier 1 > 300). Kế hoạch: Bóc tách `jail_actions.ts` hoặc `landing_resolver.ts` để đưa về < 260 LOC.
+  - `DEBT-BOT-COORD-01`: `src/server/room_bot_coordinator.ts` (303 LOC, Warning Tier 1 > 300). Kế hoạch: Bóc tách bot heuristics sang `bot_intent_evaluator.ts` để đưa về < 250 LOC.
+  - `DEBT-APPLY-DELTA-01`: `src/client/network/apply_delta.ts` (348 LOC, Warning Tier 1 > 300). Kế hoạch: Bóc tách `apply_delta_modals.ts` để đưa về < 250 LOC.
+
+---
 
 ## Tổng Kết Toàn Cục Epic Gameplay Core
 - **Trạng thái Epic:** **[CLOSED - DONE 100% (2026-09-09)]**

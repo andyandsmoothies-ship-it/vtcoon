@@ -157,8 +157,12 @@ def check_command(payload: dict) -> None:
             print(json.dumps({"decision": "deny", "reason": reason}))
             sys.exit(0)
 
+    # Strip inline script arguments (-e "...", -c "...") and regex literals so inline code does not trigger false positives on `>`
+    unquoted_cmd = re.sub(r'(-e|-c|--eval)\s+("[^"]*"|\'[^\']*\')', r'\1 ""', cmd, flags=re.IGNORECASE)
+    unquoted_cmd = re.sub(r'\/[^\/\n]*>[^\/\n]*\/[gimsuy]*', '""', unquoted_cmd)
+
     for pattern in FORBIDDEN_SHELL_REDIRECTS:
-        if re.search(pattern, cmd, re.IGNORECASE):
+        if re.search(pattern, unquoted_cmd, re.IGNORECASE):
             reason = (
                 "ERROR [Safety Gate]: Shell redirection detected. "
                 "AI must use native write_to_file or replace_file_content instead of shell redirects."

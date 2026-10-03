@@ -9,6 +9,7 @@ import type {
 import type { PropertyRegistry, PropertyStateMap } from '../domain/property_manager.js';
 export type { PropertyRegistry, PropertyStateMap };
 import type { ChanceCardId } from '../domain/event_card_engine.js';
+import type { TransitWheelOutcome } from '../domain/transit_wheel.js';
 
 export interface CellDelta {
   readonly index: number;
@@ -98,6 +99,8 @@ export interface DeltaPayload {
   readonly activeModifiers?:     ReadonlyArray<MarketModifier>;
   readonly lastDiplomaticEvent?:  DiplomaticEventDelta | null;
   readonly passedGoSalary?:       number;
+  readonly pendingTransitWheel?:  { playerId: string; cellIndex: number; timestamp: number } | null;
+  readonly lastTransitResult?:    { playerId: string; cellIndex: number; outcome: TransitWheelOutcome | string; targetCell?: number; payout?: number } | null;
 }
 
 export interface DeltaPayloadOptions {
@@ -122,4 +125,6 @@ export interface DeltaPayloadOptions {
   activeModifiers?: ReadonlyArray<MarketModifier>;
   lastDiplomaticEvent?: DiplomaticEventDelta | null;
   passedGoSalary?: number;
+  pendingTransitWheel?: { playerId: string; cellIndex: number; timestamp: number } | null;
+  lastTransitResult?: { playerId: string; cellIndex: number; outcome: TransitWheelOutcome | string; targetCell?: number; payout?: number } | null;
 }

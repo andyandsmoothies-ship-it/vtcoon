@@ -76,6 +76,7 @@ describe('Threat Forecaster Edge Cases & Robustness', () => {
     it('o cong ich nang cap (isUpgradedUtility) nhan he so 150 Tr. * so buoc', () => {
       bot.position = 5; // buoc 7 toi o 12
       registry.set(12, opponent.id);
+      registry.set(28, opponent.id);
       stateMap.set(12, { level: 0, isUpgradedUtility: true });
 
       const horizon = calculateThreatHorizon(bot, room, registry, stateMap);

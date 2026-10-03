@@ -57,6 +57,14 @@ Run these checks on disk before writing implementation vectors:
 - Does this change introduce hidden coupling across unrelated components?
 - Behavior at boundary loads: 0 items, 1 item, max capacity?
 
+### 🔢 Vector 5: Full Branch Path Trace (Arithmetic & Logic Fallthrough)
+For every modified function with multiple `return` branches (guards, fee calculations, state resolvers):
+1. List **all** branches: the corrected guard AND every downstream fallthrough path.
+2. For each branch, trace the **exact return value** — not just "the exploit branch is blocked."
+3. If a fallthrough path returns a value inconsistent with the stated goal (e.g. "de-escalate to 1000" but fallthrough still returns 2500 via a count-based formula), flag as **[ADV-BRANCH] Unchecked Fallthrough Arithmetic**.
+- *Trigger*: Any function fix that adds a guard condition at the top but leaves existing downstream logic unchanged.
+
+
 ## 4. Directive Quality Rules
 
 Every `Hardening Directive` must:

@@ -186,15 +186,18 @@ export class EnvelopeValidator {
   }
 
   private validateIntentEnvelope(obj: Record<string, unknown>): EnvelopeValidationResult {
-    const raw = obj['intent'];
+    const raw = obj['intent'] ?? obj['payload'];
     if (!raw || typeof raw !== 'object') return { success: false, reasonCode: 'INVALID_INTENT' };
     const it = raw as Record<string, unknown>;
-    if (typeof it['type'] !== 'string' || !VALID_INTENTS.has(it['type'])) {
+    const isTransitWheel = it['type'] === 'INTENT_SPIN_TRANSIT_WHEEL';
+    if (typeof it['type'] !== 'string' || (!VALID_INTENTS.has(it['type']) && !isTransitWheel)) {
       return { success: false, reasonCode: 'INVALID_INTENT' };
     }
     const roomCode = obj['roomCode'], playerId = obj['playerId'];
-    if (typeof roomCode !== 'string' || !roomCode || typeof playerId !== 'string' || !playerId) {
-      return { success: false, reasonCode: 'INVALID_ENVELOPE' };
+    if (!isTransitWheel) {
+      if (typeof roomCode !== 'string' || !roomCode || typeof playerId !== 'string' || !playerId) {
+        return { success: false, reasonCode: 'INVALID_ENVELOPE' };
+      }
     }
     if (CELL_INTENTS.has(it['type']) && typeof it['cellIndex'] !== 'number') {
       return { success: false, reasonCode: 'INVALID_ENVELOPE' };
@@ -227,9 +230,11 @@ export class EnvelopeValidator {
         typeof it['accept'] === 'boolean';
       if (!ok) return { success: false, reasonCode: 'INVALID_ENVELOPE' };
     }
+    const finalRoomCode = typeof roomCode === 'string' ? roomCode : '';
+    const finalPlayerId = typeof playerId === 'string' ? playerId : '';
     return {
       success: true,
-      message: { type: 'INTENT', roomCode, playerId, intent: raw as import('../intent_dispatcher.js').PlayerIntent },
+      message: { type: 'INTENT', roomCode: finalRoomCode, playerId: finalPlayerId, intent: raw as import('../intent_dispatcher.js').PlayerIntent },
     };
   }
 

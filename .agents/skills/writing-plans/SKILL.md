@@ -15,8 +15,9 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 **Context:** If working in an isolated worktree, it should have been created via the `superpowers:using-git-worktrees` skill at execution time.
 
-**Save plans to:** `docs/plans/improvements/IMP-XXX-<feature-name>_plan.md`
-- (User preferences for plan location override this default)
+**Save plans to:** `.agents/plans/PLAN_[TICKET].md`
+- Active execution plans are scaffolding stored in `.agents/plans/PLAN_[TICKET].md` (Single Source of Truth, zero duplicate files).
+- Upon completion, concise reports are persisted to `docs/reports/improvements/IMP-[ID]-[slug]_report.md`.
 
 ## Scope Check
 

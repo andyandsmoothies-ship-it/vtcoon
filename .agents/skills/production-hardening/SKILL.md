@@ -67,7 +67,7 @@ Software matures through 3 distinct risk levels. Do not mix their standards:
 ### Gate 4: Ad-hoc Continuous Improvement Lifecycle (IMP Cycle)
 - **Rule**: When refining game feel, UX juice, AI intelligence, or fixing systemic bugs post-MVP, NEVER make ad-hoc unrecorded edits.
 - **Traceability Chain**:
-  1. Technical Plan: `docs/plans/improvements/IMP-[ID]-[slug]_plan.md`.
+  1. Technical Plan: `.agents/plans/PLAN_IMP_[ID]_[slug].md`.
   2. Experimental Report: `docs/reports/improvements/IMP-[ID]-[slug]_report.md`.
   3. Architectural Decision Record: `docs/domain/adr/ADR-[NNNN]-[slug].md` (if system design shifts).
   4. Registry: Register in Section 4 of `docs/master_roadmap.md`.
@@ -96,5 +96,5 @@ Before signing off v1.0, verify all 5 gates:
 | **1** | Chaos Monkey 1.000 runs | `0.00% Deadlock`, `Invariants preserved (Δ = 0)` |
 | **2** | Concurrency Mutex & Rate Limit | Out-of-turn/spam tests reject with Reason Codes |
 | **3** | Bundle & Payload audit | Main chunk < 500KB, Delta < 10KB, 60 FPS verified |
-| **4** | Ad-hoc improvements logged | Plans in `docs/plans/`, Reports in `docs/reports/` |
+| **4** | Ad-hoc improvements logged | Plans in `.agents/plans/`, Reports in `docs/reports/` |
 | **5** | Docker & Health probe | `docker build` succeeds, `/healthz` returns 200, Graceful exit works |

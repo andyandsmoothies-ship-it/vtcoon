@@ -49,7 +49,7 @@ describe('[TC-IMP214/CONTRACT][UC-GAME-020] IMP-214 Utility Mechanics Revamp Con
     it('[TC-IMP214.03/MSS][UC-GAME-020] Phí dừng chân phẳng 3.500 Tr. khi tiện ích đã nâng cấp Smart Grid hoặc 5G (isUpgradedUtility)', () => {
       const landlord = createPlayer('landlord_smart_grid');
       const tenant = createPlayer('tenant_visitor');
-      const registry: PropertyRegistry = new Map([[12, landlord.id]]);
+      const registry: PropertyRegistry = new Map([[12, landlord.id], [28, landlord.id]]);
       const stateMap: PropertyStateMap = new Map([[12, { level: 0, isUpgradedUtility: true }]]);
 
       expect(calcUtilityFee(landlord.id, 7, registry, stateMap, 12)).toBe(3_500);

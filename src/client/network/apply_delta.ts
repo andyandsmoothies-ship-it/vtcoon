@@ -27,19 +27,13 @@ export function isGameRunningDelta(delta: DeltaPayload): boolean {
 }
 
 function isDiceRollDuplicate(delta: DeltaPayload, state: GameState): boolean {
-  if (delta.diceSeq !== undefined) {
-    return state.lastDiceSeq !== undefined && delta.diceSeq <= state.lastDiceSeq;
-  }
-  if (state.hasRolledThisTurn && state.dice[0] === delta.dice?.[0] && state.dice[1] === delta.dice?.[1]) {
-    return true;
-  }
-  return false;
+  if (delta.diceSeq !== undefined) return state.lastDiceSeq !== undefined && delta.diceSeq <= state.lastDiceSeq;
+  return Boolean(state.hasRolledThisTurn && state.dice[0] === delta.dice?.[0] && state.dice[1] === delta.dice?.[1]);
 }
 
 function syncDiceRoll(delta: DeltaPayload, state: GameState): void {
   const dice = delta.dice;
-  if (!dice || (dice[0] === 0 && dice[1] === 0)) return;
-  if (isDiceRollDuplicate(delta, state)) return;
+  if (!dice || (dice[0] === 0 && dice[1] === 0) || isDiceRollDuplicate(delta, state)) return;
 
   state.triggerDiceRoll([dice[0], dice[1]], delta.diceSeq);
   try { AudioEngine.playSfx(SoundEffect.DICE_ROLL); } catch (err) { console.warn('[applyDelta] AudioEngine.playSfx error:', err); }
@@ -49,12 +43,9 @@ function resolveTurnPlayerId(delta: DeltaPayload, state?: GameState): string | u
   if (delta.currentTurnPlayerId) return delta.currentTurnPlayerId;
   if (delta.currentPlayerIndex !== undefined) {
     const playerAtIndex = delta.players?.[delta.currentPlayerIndex];
-    if (playerAtIndex?.id) {
-      return playerAtIndex.id;
-    }
+    if (playerAtIndex?.id) return playerAtIndex.id;
     if (state?.playersInfo) {
-      const playerIds = Object.keys(state.playersInfo);
-      const fallbackId = playerIds[delta.currentPlayerIndex];
+      const fallbackId = Object.keys(state.playersInfo)[delta.currentPlayerIndex];
       if (fallbackId) return fallbackId;
     }
   }
@@ -73,6 +64,7 @@ function syncTurnAndTimer(delta: DeltaPayload, state: GameState): void {
     state.setTurnTimeRemaining(delta.timeRemaining && delta.timeRemaining > 0 ? delta.timeRemaining : 60);
     state.setHasRolledThisTurn(false); // [IMP-182] Triệt tiêu Turn N+1 Leak
     state.setHasUserCustomCamera?.(false); // [IMP-190] Reset camera custom orbit on new player turn
+    if (state.activeModal === 'transit_wheel') state.closeModal();
   } else if (delta.timeRemaining !== undefined) {
     const isPhaseChange = delta.turnPhase !== undefined && delta.turnPhase !== state.turnPhase;
     const isNewDiceRoll = delta.diceSeq !== undefined && delta.diceSeq !== state.lastDiceSeq;
@@ -161,20 +153,13 @@ function syncAuctionModal(delta: DeltaPayload, state: GameState): void {
     }
   } else if (delta.auction === null) {
     state.setAuction?.(null);
-    if (state.activeModal === 'auction') {
-      state.closeModal();
-    }
+    if (state.activeModal === 'auction') state.closeModal();
     state.setDismissedAuctionCellIndex?.(null);
-  } else if (
-    delta.turnPhase !== undefined &&
-    delta.turnPhase !== TurnPhase.AuctionPhase
-  ) {
+  } else if (delta.turnPhase !== undefined && delta.turnPhase !== TurnPhase.AuctionPhase) {
     state.setAuction?.(null);
     if (state.activeModal === 'auction') {
       const currentPayload = state.modalPayload as { isConcluded?: boolean } | null;
-      if (!currentPayload?.isConcluded) {
-        state.closeModal();
-      }
+      if (!currentPayload?.isConcluded) state.closeModal();
     }
     state.setDismissedAuctionCellIndex?.(null);
   }
@@ -186,16 +171,11 @@ function syncOtherModals(delta: DeltaPayload, state: GameState): void {
     const myPid = useLobbyStore.getState().myPlayerId;
     const offer = delta.pendingTradeOffer;
     const isTargetedToMe = Boolean(
-      offer &&
-      myPid &&
-      offer.requesterId !== myPid &&
+      offer && myPid && offer.requesterId !== myPid &&
       (offer.targetPlayerId ? offer.targetPlayerId === myPid : offer.sellerId === myPid)
     );
     state.setPendingTradeOffer(isTargetedToMe ? offer : null);
-
-    if (delta.pendingTradeOffer === null && state.activeModal === 'bot_trade_offer') {
-      state.closeModal();
-    }
+    if (delta.pendingTradeOffer === null && state.activeModal === 'bot_trade_offer') state.closeModal();
   }
 
   // [IMP-145][IMP-229] Compulsory Buyout Modal — Lưu store, chỉ mở ngay trên FullSync/Reconnect nếu không có hoạt cảnh
@@ -208,7 +188,29 @@ function syncOtherModals(delta: DeltaPayload, state: GameState): void {
       if (delta.pendingBuyout.buyerId === myPid && !isCardFlow && !isMoving && state.activeModal === null) {
         state.openModal('compulsory_buyout', delta.pendingBuyout);
       }
-    } else if (delta.pendingBuyout === null && state.activeModal === 'compulsory_buyout') {
+    } else if (state.activeModal === 'compulsory_buyout') {
+      state.closeModal();
+    }
+  }
+
+  if (delta.pendingTransitWheel) {
+    const myPid = useLobbyStore.getState().myPlayerId;
+    if (!myPid || delta.pendingTransitWheel.playerId === myPid) {
+      state.openModal('transit_wheel', delta.pendingTransitWheel);
+    }
+  }
+
+  if (delta.lastTransitResult !== undefined) {
+    if (delta.lastTransitResult) {
+      const myPid = useLobbyStore.getState().myPlayerId;
+      if (!myPid || delta.lastTransitResult.playerId === myPid) {
+        state.updateModalPayload<'transit_wheel'>({
+          outcome: delta.lastTransitResult.outcome,
+          targetCell: delta.lastTransitResult.targetCell,
+          payout: delta.lastTransitResult.payout,
+        });
+      }
+    } else if (state.activeModal === 'transit_wheel') {
       state.closeModal();
     }
   }
@@ -232,19 +234,13 @@ function syncOtherModals(delta: DeltaPayload, state: GameState): void {
   }
 
   if (delta.turnPhase !== undefined) {
-    if (
-      state.activeModal === 'deed' &&
-      delta.turnPhase !== TurnPhase.ActionPhase &&
-      delta.turnPhase !== TurnPhase.PropertyManagement
-    ) {
+    if (state.activeModal === 'deed' && delta.turnPhase !== TurnPhase.ActionPhase && delta.turnPhase !== TurnPhase.PropertyManagement) {
       state.closeModal();
     } else if (state.activeModal === 'insolvency' && delta.turnPhase !== TurnPhase.InsolvencyPhase) {
       state.closeModal();
-    } else if (
-      state.activeModal === 'hose' &&
-      delta.turnPhase !== TurnPhase.HosePhase &&
-      !(state.modalPayload as ModalPayloadMap['hose'])?.isReviewingResult
-    ) {
+    } else if (state.activeModal === 'hose' && delta.turnPhase !== TurnPhase.HosePhase && !(state.modalPayload as ModalPayloadMap['hose'])?.isReviewingResult) {
+      state.closeModal();
+    } else if (state.activeModal === 'transit_wheel' && delta.turnPhase !== TurnPhase.PropertyManagement) {
       state.closeModal();
     }
   }

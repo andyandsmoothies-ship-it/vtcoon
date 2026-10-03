@@ -11,6 +11,7 @@ import {
 import { handleUpgrade, handleUpgradeETC, handleUpgradeUtility, handleBuyProperty } from './property_actions.js';
 import { handleHoseInvest, handleHoseSkip } from './hose_actions.js';
 import { executeInsolvencyAfkRecovery } from './network/afk_recovery.js';
+import { handleSpinTransitWheel } from './transit_wheel_handler.js';
 import type { BondTrancheId } from '../domain/bond_types.js';
 
 export type PlayerIntent =
@@ -35,6 +36,7 @@ export type PlayerIntent =
   | { type: 'INTENT_ISSUE_BOND'; trancheId?: BondTrancheId }
   | { type: 'INTENT_REPAY_BOND' }
   | { type: 'INTENT_AUTO_SOLVENCY' }
+  | { type: 'INTENT_SPIN_TRANSIT_WHEEL' }
   | { type: 'INTENT_ROLL' };
 
 type IntentHandler = (mgr: RoomManager, rc: string, p: string, intent: PlayerIntent) => { success: boolean; reason?: string; rollResult?: RollResult };
@@ -148,6 +150,10 @@ const INTENT_DISPATCH: Record<PlayerIntent['type'], IntentHandler> = {
     }
     const res = executeInsolvencyAfkRecovery(m, rc, p);
     return { success: res.rescued, reason: res.bankrupt ? 'BANKRUPT' : (res.rescued ? undefined : ActionRejectReason.CANNOT_RECOVER) };
+  },
+  INTENT_SPIN_TRANSIT_WHEEL: (m, rc, p) => {
+    const ctx = m.getContext(rc);
+    return ctx ? handleSpinTransitWheel(ctx.room, p, ctx.reg, ctx.sm, m.getRng()) : { success: false, reason: ActionRejectReason.INVALID_ROOM };
   },
   INTENT_END_TURN: (m, rc, p) => {
     const room = m.getRoom(rc);

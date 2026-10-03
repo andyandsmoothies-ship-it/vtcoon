@@ -2,7 +2,8 @@
 import React, { useEffect, useRef } from 'react';
 import { useGameStore, ModalPayloadMap, type ActiveModalType } from '../../store/game_store';
 import { ModalBackdrop } from './modal_backdrop';
-import { TitleDeedModal } from './title_deed_modal';
+import { DeedModalHost } from './hosts/deed_modal_host';
+import { TransitWheelModal } from './transit_wheel_modal';
 import { PropertyPortfolioModal } from './property_portfolio_modal';
 import { AuctionModal } from './auction_modal';
 import { TradeModal } from './trade_modal';
@@ -18,7 +19,6 @@ import { AudioEngine } from '../../audio/audio_engine';
 import { SoundEffect } from '../../audio/audio_types';
 import type { PlayerIntent } from '../../../server/intent_dispatcher';
 import { isAuctionDismissible, calculateAuctionTimeRemaining } from './modal_helpers';
-import { resolveTitleDeedModalState } from './title_deed_affordance';
 import { useLobbyStore } from '../../store/lobby_store';
 import { calculatePlayerNetWorth } from '../ui_helpers';
 
@@ -129,70 +129,24 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
       center={activeModal !== 'deed'}
       dismissible={!isCriticalDecision}
     >
-      {activeModal === 'deed' && (() => {
-        const payload = modalPayload as ModalPayloadMap['deed'];
-        const deedState = resolveTitleDeedModalState({
-          cellIndex: payload.cellIndex,
-          canBuyOverride: payload.canBuy,
-          isBuyOpportunityOverride: payload.isBuyOpportunity,
-          myId,
-          myPlayer,
-          playersInfo,
-          levelMap: useGameStore.getState().levelMap,
-          propertyStates: useGameStore.getState().propertyStates,
-          activeModifiers: useGameStore.getState().activeModifiers,
-          turnPhase: useGameStore.getState().turnPhase,
-          currentTurnPlayerId: useGameStore.getState().currentTurnPlayerId,
-        });
+      {activeModal === 'deed' && modalPayload && DeedModalHost({
+        payload: modalPayload as ModalPayloadMap['deed'],
+        myId,
+        myPlayer,
+        playersInfo,
+        onIntent,
+        closeModal,
+        updateModalPayload,
+      })}
 
-        return (
-          <TitleDeedModal
-            cellIndex={payload.cellIndex}
-            canBuy={deedState.canBuy}
-            isBuyOpportunity={deedState.isBuyOpportunity}
-            shortfall={deedState.shortfall}
-            canCoverWithMortgage={deedState.canCoverWithMortgage}
-            totalMortgageCapacity={deedState.totalMortgageCapacity}
-            onOpenMortgage={() => useGameStore.getState().openModal('portfolio', { playerId: myId, targetPurchaseCellIndex: payload.cellIndex })}
-            isOwned={Boolean(deedState.owner)}
-            isOwner={deedState.isOwner}
-            isMortgaged={deedState.isMortgaged}
-            ownerName={deedState.ownerName}
-            currentLevel={deedState.currentLevel}
-            upgradeCost={deedState.upgradeCost}
-            hasMonopoly={deedState.hasMonopoly}
-            upgradeBlockedReason={deedState.upgradeBlockedReason}
-            downgradeBlockedReason={deedState.downgradeBlockedReason}
-            isUpgradedUtility={deedState.isUpgradedUtility}
-            isETC={deedState.isETC}
-            buyerBalance={myPlayer?.balance ?? 0}
-            buyerId={myId}
-            allPlayers={playersInfo}
-            onBuy={() => {
-              AudioEngine.playSfx(SoundEffect.BUY_PROPERTY);
-              onIntent?.({ type: 'INTENT_BUY_PROPERTY' });
-              closeModal();
-            }}
-            onUpgrade={() => {
-              if (deedState.isUtility) {
-                onIntent?.({ type: 'INTENT_UPGRADE_UTILITY', cellIndex: payload.cellIndex });
-              } else if (deedState.isRailroad) {
-                onIntent?.({ type: 'INTENT_UPGRADE_ETC', cellIndex: payload.cellIndex });
-              } else {
-                onIntent?.({ type: 'INTENT_UPGRADE', cellIndex: payload.cellIndex });
-              }
-              closeModal();
-            }}
-            onDowngrade={() => { onIntent?.({ type: 'INTENT_DOWNGRADE', cellIndex: payload.cellIndex }); closeModal(); }}
-            onMortgage={() => { onIntent?.({ type: 'INTENT_MORTGAGE', cellIndex: payload.cellIndex }); closeModal(); }}
-            onRedeem={() => { onIntent?.({ type: 'INTENT_REDEEM', cellIndex: payload.cellIndex }); closeModal(); }}
-            onPass={() => { onIntent?.({ type: 'INTENT_DECLINE' }); closeModal(); }}
-            ownedProperties={myPlayer?.ownedProperties}
-            onSelectCell={(nextIdx) => updateModalPayload<'deed'>({ cellIndex: nextIdx })}
-            onClose={closeModal}
-          />
-        );
-      })()}
+      {activeModal === 'transit_wheel' && modalPayload && (
+        <TransitWheelModal
+          cellIndex={(modalPayload as ModalPayloadMap['transit_wheel']).cellIndex}
+          payload={modalPayload as ModalPayloadMap['transit_wheel']}
+          onSpin={() => onIntent?.({ type: 'INTENT_SPIN_TRANSIT_WHEEL' })}
+          onClose={closeModal}
+        />
+      )}
 
       {activeModal === 'portfolio' && (() => {
         const owned = myPlayer?.ownedProperties ?? [];

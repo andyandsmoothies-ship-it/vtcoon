@@ -116,6 +116,8 @@ export function buildSparseDelta(prev: DeltaPayload, next: DeltaPayload): DeltaP
     ...(next.activeModifiers !== undefined ? { activeModifiers: next.activeModifiers } : {}),
     ...(next.lastDiplomaticEvent !== undefined ? { lastDiplomaticEvent: next.lastDiplomaticEvent } : {}),
     ...(next.passedGoSalary !== undefined ? { passedGoSalary: next.passedGoSalary } : {}),
+    ...(next.pendingTransitWheel !== undefined ? { pendingTransitWheel: next.pendingTransitWheel } : {}),
+    ...(next.lastTransitResult !== undefined ? { lastTransitResult: next.lastTransitResult } : {}),
   };
 }
 

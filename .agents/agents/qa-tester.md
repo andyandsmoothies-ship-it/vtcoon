@@ -63,6 +63,7 @@ hooks: [.agents/hooks_qa.json]
   - Duplicate keys or ambiguous matches
   Write at least 1 `it()` that proves the helper fails correctly on a bad input. If the helper cannot be proven correct in isolation, replace it with direct React element tree traversal (`React.isValidElement`, `findByTestId`) instead of HTML string parsing.
 - **Spec Challenge Mandate**: Before implementing any test case, read the plan's AFTER block and ask: *"Does this spec produce any unintended side effect?"* If a spec requires a retention element to hold real geometry, real event listeners, or real resource allocations — flag it back to the plan author as a design flaw. Do not implement tests that codify known leaks or harmful behavior.
+- **Production Call-Graph Gate**: Every `it()` block must invoke at least one exported function or component from `src/**`. A test that only constructs local data structures (e.g. `new Map()`, plain objects) and asserts properties of those local constructs — without calling any production export — is a **tautological test** and is banned. Before writing any test, identify the production symbol under test and confirm it is called in the test body.
 
 - **Consumer-Side Assertion**:
   - Assert effect at point of consumption/execution (e.g. balance deduction, permission grant/deny, state transition), NEVER merely producer state flags or array lengths.
@@ -109,6 +110,13 @@ hooks: [.agents/hooks_qa.json]
 - **Consumer Assertion**: ✔️ Verified at consumption point
 - **Isolation Check**: ✔️ Zero files modified in `src/**`
 - **Inversion Gate**: [VERIFIED RED on mutation / PENDING Implementation]
+
+### 🩺 SDLC HARNESS TELEMETRY
+- **Scripts/Tools**: [PASS | Friction description (e.g. vitest latency, hook false positive)]
+- **Rules/Gotchas**: [PASS | Friction description (e.g. contract tag ambiguity, precondition conflict)]
+- **Skills/Context**: [PASS | Missing/Unused skill feedback]
+- **Handoff Quality**: [PASS | Upstream spec ambiguity or missing failure mode]
+- **Harness Suggestion**: [Actionable suggestion to improve SDLC process, test helpers, or settings]
 ```
 
 > **Enforcement**: Reports omitting "Exact Failure Output" are **BLOCKED**. Reviewers must reject Station 1 handoffs without verbatim failure evidence.

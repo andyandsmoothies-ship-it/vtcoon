@@ -135,6 +135,8 @@ Failure on any item below → immediate `REVISE_REQUIRED`. Do not continue to P1
 26. **Cross-Task Symbol Orphan Sweep**: For plans with ≥ 2 tasks, enumerate all symbols (functions, types, named imports) that are substituted or removed by any task. Verify that no other file retains a now-dead import or reference to the substituted symbol after all tasks are applied in sequence. Flag as **[P1 - CROSS-TASK ORPHANED SYMBOL]**.
 27. **Function Semantic Equivalence**: When a task substitutes function A with function B at a callsite, verify the output category is equivalent — not just the type signature. A translator (`(Passive) → (Phòng Thủ)`) and a stripper (`(Passive) → ""`) share the same signature `(string) → string` but produce categorically different outputs. Flag undeclared output-category changes as **[P2 - SEMANTIC EQUIVALENCE GAP]**.
 28. **No Magic String in AFTER Blocks**: AFTER blocks must not use raw `SCREAMING_SNAKE_CASE` string literals as object keys or lookup values when a typed enum constant exists for that value (e.g. `'MACRO_LAND_FEVER'` when `MacroCycleType.MACRO_LAND_FEVER` is available). Verify that all required enum imports are declared in the corresponding import snippet. Flag as **[P2 - MAGIC STRING IN AFTER BLOCK]** and require the missing import to be added.
+29. **Barrel Import Chain Resolution**: For every AFTER block that imports a symbol from a barrel/index file (e.g. `property_manager`, `index.ts`), `grep_search` that barrel file for an explicit `export` of each imported symbol. Existence of the symbol in a source file does NOT prove it is re-exported through the barrel. If not found in the barrel: flag as **[P1 - BARREL IMPORT GHOST]** and require a direct import from the source file.
+30. **Test Production Call-Graph Gate**: For every test case (`it()`) specified in the plan's Station 1 matrix, identify at least one `src/**` function/method being exercised. A test that only constructs local data structures and asserts on them without calling any production export is a tautological test. Flag as **[P1 - TAUTOLOGICAL TEST SPEC]** and require a replacement that invokes the intended production function.
 
 ## 5. Dual Output Mandate
 1. **Step 1 (Disk Report)**: Use `write_to_file` to write the exhaustive audit trace to `.agents/audit/PLAN_AUDIT_[TICKET].md`.
@@ -150,4 +152,11 @@ Failure on any item below → immediate `REVISE_REQUIRED`. Do not continue to P1
 | :--- | :--- | :--- | :--- | :--- |
 | **P1** | [Broken Lifecycle] | `[file.ts#L...]` | [Detailed risk description] | [Exact plan fix directive] |
 | **P2** | [Layout / Inversion] | `[file.ts#L...]` | [Detailed risk description] | [Exact plan fix directive] |
+
+### 🩺 SDLC HARNESS TELEMETRY
+- **Scripts/Tools**: [PASS | Friction description (e.g. audit_plan.mjs, grep speed, diff tools)]
+- **Rules/Gotchas**: [PASS | Friction description (e.g. 5 pillars ambiguity, gotchas applicability)]
+- **Skills/Context**: [PASS | Missing/Unused skill feedback]
+- **Handoff Quality**: [PASS | Main Agent plan clarity, unverified assumptions]
+- **Harness Suggestion**: [Actionable suggestion to improve plan auditing or plan templates]
 ```

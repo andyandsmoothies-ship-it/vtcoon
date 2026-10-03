@@ -45,7 +45,8 @@ function determineFromCell(state: GameState, playerId: string, currentPos: numbe
 }
 
 function dispatchPawnMove(state: GameState, task: PawnMoveTask, isRolling: boolean): void {
-  if (isRolling && state.setPendingPawnMove) {
+  const isHeldForModal = state.activeModal === 'transit_wheel';
+  if ((isRolling || isHeldForModal) && state.setPendingPawnMove) {
     state.setPendingPawnMove({
       playerId: task.playerId, targetCell: task.targetCell, fromCell: task.fromCell,
       ...(task.isJailFlight ? { isJailFlight: true, isBot: Boolean(task.isBot) } : {}),

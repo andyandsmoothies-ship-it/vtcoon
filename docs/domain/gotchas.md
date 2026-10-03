@@ -276,3 +276,18 @@
       1. Tài sản thế chấp đảm bảo trái phiếu (`collateralCells`) TUYỆT ĐỐI KHÔNG được sang tên cho chủ nợ cá nhân; bắt buộc phải đưa vào `fireSaleQueue` để đấu giá phát mãi bảo vệ quỹ hoàn nợ trái chủ.
       2. Mọi cờ quá độ `pendingInsolvency*` và `fireSaleDebtorId` bắt buộc phải được dọn dẹp sạch sẽ (tombstone) khi người chơi tự cứu nguy thành công (`coordMortgage`, `coordDowngrade`), khi hàng đợi phát mãi kết thúc, hoặc khi sang lượt người chơi tiếp theo qua `advanceTurnToNextPlayer`. `[DOMAIN/FSM]`
 
+37. **Utility Monopoly Upgrade Requirement & Rent De-escalation Fallback [IMP-247]**:
+    - **Bẫy Nguy Hiểm (ROI Paradox & Arbitrage Cashout)**: Nếu cho phép nâng cấp tiện ích đơn lẻ hoặc giữ nguyên giá cước 3.500 Tr. khi một ô trong bộ bị thế chấp, người chơi có thể nâng cấp EVN (1.000 Tr.) rồi thế chấp Viettel để rút tiền mặt 500 Tr., vẫn thu cước 3.500 Tr. mà không chịu rủi ro.
+    - **Bất Biến Xác Minh**: Nâng cấp Smart Grid/5G bắt buộc phải sở hữu cả 2 ô Tiện ích và không ô nào bị thế chấp. Khi một ô bị thế chấp hoặc mất quyền sở hữu, cước dừng chân tự động giải trừ (de-escalate) về 1.000 Tr. VNĐ. `[DOMAIN/ECONOMIC]`
+
+38. **Transit Wheel Auction Black Hole & Synchronized Pawn Pacing [IMP-248]**:
+    - **Bẫy Nguy Hiểm (Deceptive Trap & Race Hazards)**:
+      1. *Hố Đen Đấu Giá (Auction Black Hole)*: Nếu chỉ kích hoạt vòng xoay khi mua thẳng BĐS (`handleBuyProperty`), người chơi khi từ chối mua khiến ô ga bị đưa vào đấu giá (`handleDecline`) sẽ bị mất hoàn toàn lượt quay vòng xoay sau khi phiên đấu giá kết thúc (`handleAuctionClose`).
+      2. *Lệch Pha Động Học Quân Cờ (Pawn Movement Desync Jitter)*: Khi server giải quyết kết quả xoay vòng và phát sóng tọa độ mới của quân cờ, nếu client lập tức thực thi hoạt ảnh di chuyển 3D (`enqueuePawnMove`), quân cờ sẽ lướt đi trên sa bàn trong khi đĩa xoay 2D vẫn đang quay 3.5 giây, gây gãy vỡ cảm quan thị giác.
+      3. *Vòng Lặp Đệ Quy Vô Tận (Recursive Infinite Hop Loop)*: Khi quay trúng `NEXT_PORT`, quân cờ đáp vào ô ga tiếp theo (5, 15, 25, 35). Nếu không có chốt chặn nguyên tử, FSM sẽ tiếp tục kích hoạt `pendingTransitWheel`, tạo ra vòng lặp quay vô tận.
+    - **Bất Biến Xác Minh (Verified Invariants)**:
+      1. *Hook Đấu Giá Khép Kín*: `handleAuctionClose` bắt buộc phải kiểm tra và gán `pendingTransitWheel` cho người chơi hiện tại đang tới lượt nếu họ dẫm vào ô ga và có số dư khả dụng $\ge 0$.
+      2. *Đồng Bộ Nhịp Chuyển Động (Pawn Movement Hold)*: Trong `apply_delta_players.ts`, khi `activeModal === 'transit_wheel'`, toàn bộ chuyển động quân cờ bắt buộc phải được tạm giữ trong `pendingPawnMove` và chỉ được kích hoạt (`startPawnMove`) khi người chơi bấm đóng hoặc xác nhận kết quả trên đĩa xoay.
+      3. *Khóa Trạng Thái Đệ Quy Nguyên Tử*: `current.hasSpunTransitThisTurn = true` và `room.pendingTransitWheel = null` bắt buộc phải được thiết lập đồng bộ ngay lập tức trước khi phân giải bước nhảy thứ hai (`resolveSecondHopLanding`), và chỉ được giải phóng (`hasSpunTransitThisTurn = false`) tại `executeTurnEnd` khi kết thúc lượt. `[DOMAIN/FSM]`
+
+
