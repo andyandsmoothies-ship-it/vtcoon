@@ -129,15 +129,17 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
       center={activeModal !== 'deed'}
       dismissible={!isCriticalDecision}
     >
-      {activeModal === 'deed' && modalPayload && DeedModalHost({
-        payload: modalPayload as ModalPayloadMap['deed'],
-        myId,
-        myPlayer,
-        playersInfo,
-        onIntent,
-        closeModal,
-        updateModalPayload,
-      })}
+      {activeModal === 'deed' && modalPayload && (
+        <DeedModalHost
+          payload={modalPayload as ModalPayloadMap['deed']}
+          myId={myId}
+          myPlayer={myPlayer}
+          playersInfo={playersInfo}
+          onIntent={onIntent}
+          closeModal={closeModal}
+          updateModalPayload={updateModalPayload}
+        />
+      )}
 
       {activeModal === 'transit_wheel' && modalPayload && (
         <TransitWheelModal

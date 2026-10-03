@@ -40,6 +40,7 @@ import {
   type TitleDeedRentTableProps,
 } from '../../src/client/ui/modals/title_deed_rent_table.js';
 import { ModalHost } from '../../src/client/ui/modals/modal_host.js';
+import { DeedModalHost } from '../../src/client/ui/modals/hosts/deed_modal_host.js';
 
 declare module '../../src/client/ui/modals/title_deed_affordance.js' {
   interface AffordancePlayer {
@@ -72,6 +73,15 @@ interface InspectableVNode {
 function findVNode(node: InspectableVNode | null, predicate: (n: InspectableVNode) => boolean): InspectableVNode | null {
   if (!node) return null;
   if (predicate(node)) return node;
+  if (node.type === DeedModalHost) {
+    try {
+      const rendered = DeedModalHost(node.props as any);
+      const res = findVNode(rendered as InspectableVNode, predicate);
+      if (res) return res;
+    } catch {
+      // safe-ignore
+    }
+  }
   const children = node.props?.children;
   if (Array.isArray(children)) {
     for (const child of children) {

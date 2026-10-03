@@ -17,6 +17,7 @@ import { useLobbyStore } from '../../src/client/store/lobby_store.js';
 import { ActionDock } from '../../src/client/ui/action_dock.js';
 import { executeCellLanding } from '../../src/client/offline_landing.js';
 import { DeedModalHost, canAffordDeedPurchase, type DeedModalHostProps } from '../../src/client/ui/modals/hosts/deed_modal_host.js';
+import { ModalHost } from '../../src/client/ui/modals/modal_host.js';
 import type { TitleDeedModalProps } from '../../src/client/ui/modals/title_deed_modal.js';
 import { TransitWheelModal, getTransitWheelDismissText, type TransitWheelModalProps } from '../../src/client/ui/modals/transit_wheel_modal.js';
 import { formatServerErrorMessage } from '../../src/client/ui/actionable_notification.js';
@@ -372,6 +373,20 @@ describe('[TC-IMP249][UC-IMP249] Pawn Pacing & Transit Hop Affordance Contract S
       const delta: DeltaPayload = { roomCode: 'VTTEST', tick: 3, cells: [], turnPhase: TurnPhase.WaitingRoll };
       applyDeltaToStore(delta);
       expect(useGameStore.getState().pendingPawnMove).toBeNull();
+    });
+
+    it('[UC-IMP249/A15] [TC-IMP249.24] ModalHost bọc DeedModalHost dưới dạng JSX Component Element để cô lập Hook dispatcher và ngăn ngừa React Error #310', () => {
+      useGameStore.setState({
+        activeModal: 'deed',
+        modalPayload: { cellIndex: 1, canBuy: true },
+        playersInfo: { p1: createTestHudPlayer('p1', 'Chủ Tịch Hưng') },
+      });
+      const html = renderToStaticMarkup(React.createElement(ModalHost, {
+        activeModal: 'deed',
+        modalPayload: { cellIndex: 1, canBuy: true },
+        localPlayerId: 'p1',
+      }));
+      expect(html).toContain('title-deed-modal-stub');
     });
   });
 });
