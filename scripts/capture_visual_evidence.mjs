@@ -46,6 +46,9 @@ function parseArgs() {
     waitMs: 5000,
     port: 4173,
     debugPort: 9222,
+    dualViewport: false,
+    scenario: null,
+    scenarioExpr: null,
   };
 
   for (let i = 0; i < args.length; i++) {
@@ -56,6 +59,12 @@ function parseArgs() {
       options.url = args[++i];
     } else if (arg === '--name' && args[i + 1]) {
       options.name = args[++i];
+    } else if (arg === '--dual-viewport' || arg === '--dual') {
+      options.dualViewport = true;
+    } else if (arg === '--scenario' && args[i + 1]) {
+      options.scenario = args[++i];
+    } else if (arg === '--scenario-expr' && args[i + 1]) {
+      options.scenarioExpr = args[++i];
     } else if (arg === '--crop' && args[i + 1]) {
       const parts = args[++i].split(',').map((n) => parseInt(n.trim(), 10));
       if (parts.length === 4) {
@@ -128,7 +137,7 @@ async function main() {
     '--ignore-gpu-blocklist',
     '--no-first-run',
     '--disable-extensions',
-    '--user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1',
+    '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     opts.url,
   ], { stdio: 'ignore' });
 
@@ -182,6 +191,7 @@ async function main() {
 
     await send('Page.enable');
     await send('Runtime.enable');
+    await send('Network.enable');
 
     console.log(`⏳ Waiting ${opts.waitMs}ms for 3D/UI scene rendering...`);
     await sleep(opts.waitMs);
@@ -201,21 +211,88 @@ async function main() {
     });
     await sleep(800);
 
-    const filename = `${opts.ticket.toLowerCase()}_${opts.name}.jpg`;
-    const outputPath = path.join(tmpDir, filename);
-
-    const captureParams = { format: 'jpeg', quality: 90 };
-    if (opts.crop) {
-      captureParams.clip = opts.crop;
+    // Scenario Injection if specified
+    if (opts.scenario) {
+      console.log(`🎬 Injecting UI scenario: "${opts.scenario}"...`);
+      await send('Runtime.evaluate', {
+        expression: `
+          (function() {
+            if ('${opts.scenario}' === 'deed_modal') {
+              const buyBtn = document.querySelector('[data-testid="action-dock-buy"]');
+              if (buyBtn) buyBtn.click();
+            } else if ('${opts.scenario}' === 'transit_wheel') {
+              const wheelBtn = document.querySelector('[data-testid="action-dock-transit-wheel"]');
+              if (wheelBtn) wheelBtn.click();
+            }
+          })();
+        `,
+      });
+      await sleep(1000);
+    } else if (opts.scenarioExpr) {
+      console.log(`🎬 Evaluating scenario expression...`);
+      await send('Runtime.evaluate', { expression: opts.scenarioExpr });
+      await sleep(1000);
     }
 
-    const screenshot = await send('Page.captureScreenshot', captureParams);
-    fs.writeFileSync(outputPath, Buffer.from(screenshot.data, 'base64'));
+    if (opts.dualViewport) {
+      // 1. Desktop Capture (1280x800)
+      console.log(`📐 Setting Desktop Viewport (1280x800)...`);
+      await send('Emulation.setDeviceMetricsOverride', {
+        width: 1280,
+        height: 800,
+        deviceScaleFactor: 1,
+        mobile: false,
+      });
+      await send('Network.setUserAgentOverride', {
+        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      });
+      await sleep(1000);
 
-    console.log(`\n📸 PHYSICAL SCREENSHOT CAPTURED:`);
-    console.log(`   - File: ${outputPath}`);
-    console.log(`   - Dimensions: ${opts.crop ? `${opts.crop.width}x${opts.crop.height} (Cropped)` : '1280x800 (Full)'}`);
-    console.log(`   - Ticket: ${opts.ticket}`);
+      const desktopFile = `${opts.ticket.toLowerCase()}_desktop.jpg`;
+      const desktopPath = path.join(tmpDir, desktopFile);
+      const desktopShot = await send('Page.captureScreenshot', { format: 'jpeg', quality: 90 });
+      fs.writeFileSync(desktopPath, Buffer.from(desktopShot.data, 'base64'));
+      console.log(`\n📸 DUAL-VIEWPORT [1/2] DESKTOP CAPTURED:`);
+      console.log(`   - File: ${desktopPath}`);
+      console.log(`   - Dimensions: 1280x800`);
+
+      // 2. Mobile Capture (360x740)
+      console.log(`📐 Setting Mobile Viewport (360x740)...`);
+      await send('Emulation.setDeviceMetricsOverride', {
+        width: 360,
+        height: 740,
+        deviceScaleFactor: 2,
+        mobile: true,
+      });
+      await send('Network.setUserAgentOverride', {
+        userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1',
+      });
+      await sleep(1000);
+
+      const mobileFile = `${opts.ticket.toLowerCase()}_mobile_360.jpg`;
+      const mobilePath = path.join(tmpDir, mobileFile);
+      const mobileShot = await send('Page.captureScreenshot', { format: 'jpeg', quality: 90 });
+      fs.writeFileSync(mobilePath, Buffer.from(mobileShot.data, 'base64'));
+      console.log(`\n📸 DUAL-VIEWPORT [2/2] MOBILE CAPTURED:`);
+      console.log(`   - File: ${mobilePath}`);
+      console.log(`   - Dimensions: 360x740`);
+    } else {
+      const filename = `${opts.ticket.toLowerCase()}_${opts.name}.jpg`;
+      const outputPath = path.join(tmpDir, filename);
+
+      const captureParams = { format: 'jpeg', quality: 90 };
+      if (opts.crop) {
+        captureParams.clip = opts.crop;
+      }
+
+      const screenshot = await send('Page.captureScreenshot', captureParams);
+      fs.writeFileSync(outputPath, Buffer.from(screenshot.data, 'base64'));
+
+      console.log(`\n📸 PHYSICAL SCREENSHOT CAPTURED:`);
+      console.log(`   - File: ${outputPath}`);
+      console.log(`   - Dimensions: ${opts.crop ? `${opts.crop.width}x${opts.crop.height} (Cropped)` : '1280x800 (Full)'}`);
+      console.log(`   - Ticket: ${opts.ticket}`);
+    }
 
     ws.close();
   } finally {

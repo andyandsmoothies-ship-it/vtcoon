@@ -64,7 +64,10 @@ function syncTurnAndTimer(delta: DeltaPayload, state: GameState): void {
     state.setTurnTimeRemaining(delta.timeRemaining && delta.timeRemaining > 0 ? delta.timeRemaining : 60);
     state.setHasRolledThisTurn(false); // [IMP-182] Triệt tiêu Turn N+1 Leak
     state.setHasUserCustomCamera?.(false); // [IMP-190] Reset camera custom orbit on new player turn
-    if (state.activeModal === 'transit_wheel') state.closeModal();
+    if (state.activeModal === 'transit_wheel') {
+      state.setPendingPawnMove?.(null);
+      state.closeModal();
+    }
   } else if (delta.timeRemaining !== undefined) {
     const isPhaseChange = delta.turnPhase !== undefined && delta.turnPhase !== state.turnPhase;
     const isNewDiceRoll = delta.diceSeq !== undefined && delta.diceSeq !== state.lastDiceSeq;
@@ -240,7 +243,8 @@ function syncOtherModals(delta: DeltaPayload, state: GameState): void {
       state.closeModal();
     } else if (state.activeModal === 'hose' && delta.turnPhase !== TurnPhase.HosePhase && !(state.modalPayload as ModalPayloadMap['hose'])?.isReviewingResult) {
       state.closeModal();
-    } else if (state.activeModal === 'transit_wheel' && delta.turnPhase !== TurnPhase.PropertyManagement) {
+    } else if (state.activeModal === 'transit_wheel' && delta.turnPhase !== TurnPhase.PropertyManagement && delta.turnPhase !== TurnPhase.ActionPhase) {
+      state.setPendingPawnMove?.(null);
       state.closeModal();
     }
   }

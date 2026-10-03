@@ -184,7 +184,13 @@ async function runUniversalMutationProbe(
       if (mut.tested) {
         mutantsTested++;
         sourceLevelMutantsTested++;
-        if (mut.killed) killed++; else survived++;
+        if (mut.killed) {
+          console.log(`  [SOURCE MUTANT] ${pattern} -> KILLED`);
+          killed++;
+        } else {
+          console.log(`  [SOURCE MUTANT] ${pattern} -> SURVIVED!`);
+          survived++;
+        }
       }
     }
   }
@@ -194,19 +200,30 @@ async function runUniversalMutationProbe(
   const sandboxDir = path.dirname(path.resolve(testPath));
   const sandboxPath = path.join(sandboxDir, `.tmp_mutant_sandbox_${Date.now()}.test.ts`);
 
-  const genericMutators: Array<{ pattern: string | RegExp; replacement: string | ((...args: any[]) => string) }> = [
-    { pattern: '.toBe(true)', replacement: '.toBe(false)' },
-    { pattern: '.toBe(false)', replacement: '.toBe(true)' },
-    { pattern: /\.toBe\((\d+)\)/, replacement: (_m: string, n: string) => `.toBe(${Number(n) + 9999})` },
-    { pattern: '.toContain(', replacement: '.not.toContain(' },
-    { pattern: /\.toBe\('([^']+)'\)/, replacement: ".toBe('__CORRUPTED_MUTANT_STRING__')" },
-    { pattern: '.toBeGreaterThanOrEqual(', replacement: '.toBeLessThan(' },
-    { pattern: '.toBeGreaterThan(', replacement: '.toBeLessThan(' },
-    { pattern: '.not.toMatch(', replacement: '.toMatch(' },
-    { pattern: /\.toHaveBeenCalledWith\([^)]+\)/, replacement: '.toHaveBeenCalledWith("__MUTANT_CALL_FAIL__")' },
-    { pattern: '.toEqual(', replacement: '.not.toEqual(' },
-    { pattern: '.toBeDefined()', replacement: '.toBeUndefined()' },
-    { pattern: '.toBeTruthy()', replacement: '.toBeFalsy()' },
+  const genericMutators: Array<{ name: string; pattern: string | RegExp; replacement: string | ((...args: any[]) => string) }> = [
+    { name: 'toBe(true) -> toBe(false)', pattern: '.toBe(true)', replacement: '.toBe(false)' },
+    { name: 'toBe(false) -> toBe(true)', pattern: '.toBe(false)', replacement: '.toBe(true)' },
+    { name: 'toBe(null) -> not.toBeNull()', pattern: '.toBe(null)', replacement: '.not.toBeNull()' },
+    { name: 'toBeNull() -> not.toBeNull()', pattern: /(?<!\.not)\.toBeNull\(\)/, replacement: '.not.toBeNull()' },
+    { name: 'not.toBeNull() -> toBeNull()', pattern: /\.not\.toBeNull\(\)/, replacement: '.toBeNull()' },
+    { name: 'toBe(number) -> +9999', pattern: /\.toBe\((\d+)\)/, replacement: (_m: string, n: string) => `.toBe(${Number(n) + 9999})` },
+    { name: 'toBe(TurnPhase) -> CORRUPTED', pattern: /\.toBe\(TurnPhase\.[a-zA-Z]+\)/, replacement: ".toBe('__CORRUPTED_PHASE__')" },
+    { name: 'toBe(TransitWheelOutcome) -> CORRUPTED', pattern: /\.toBe\(TransitWheelOutcome\.[a-zA-Z]+\)/, replacement: ".toBe('__CORRUPTED_OUTCOME__')" },
+    { name: 'toBe(BuyResult) -> CORRUPTED', pattern: /\.toBe\(BuyResult\.[a-zA-Z]+\)/, replacement: ".toBe('__CORRUPTED_BUY_RESULT__')" },
+    { name: 'toContain -> not.toContain', pattern: /(?<!\.not)\.toContain\(/, replacement: '.not.toContain(' },
+    { name: 'not.toContain -> toContain', pattern: /\.not\.toContain\(/, replacement: '.toContain(' },
+    { name: 'toBe(string) -> CORRUPTED', pattern: /\.toBe\('([^']+)'\)/, replacement: ".toBe('__CORRUPTED_MUTANT_STRING__')" },
+    { name: 'toBeGreaterThan -> toBeLessThan', pattern: '.toBeGreaterThan(', replacement: '.toBeLessThan(' },
+    { name: 'toBeLessThan -> toBeGreaterThan', pattern: '.toBeLessThan(', replacement: '.toBeGreaterThan(' },
+    { name: 'toHaveBeenCalledWith -> FAIL', pattern: /\.toHaveBeenCalledWith\([^)]+\)/, replacement: '.toHaveBeenCalledWith("__MUTANT_CALL_FAIL__")' },
+    { name: 'toHaveBeenCalledTimes -> +99', pattern: /\.toHaveBeenCalledTimes\((\d+)\)/, replacement: (_m: string, n: string) => `.toHaveBeenCalledTimes(${Number(n) + 99})` },
+    { name: 'not.toHaveBeenCalled -> toHaveBeenCalled', pattern: /\.not\.toHaveBeenCalled\(\)/, replacement: '.toHaveBeenCalled()' },
+    { name: 'toHaveBeenCalled -> not.toHaveBeenCalled', pattern: /(?<!\.not)\.toHaveBeenCalled\(\)/, replacement: '.not.toHaveBeenCalled()' },
+    { name: 'toMatch -> not.toMatch', pattern: /(?<!\.not)\.toMatch\(/, replacement: '.not.toMatch(' },
+    { name: 'not.toMatch -> toMatch', pattern: /\.not\.toMatch\(/, replacement: '.toMatch(' },
+    { name: 'toEqual -> not.toEqual', pattern: /(?<!\.not)\.toEqual\(/, replacement: '.not.toEqual(' },
+    { name: 'toBeDefined -> toBeUndefined', pattern: '.toBeDefined()', replacement: '.toBeUndefined()' },
+    { name: 'toBeTruthy -> toBeFalsy', pattern: '.toBeTruthy()', replacement: '.toBeFalsy()' },
   ];
 
   try {
@@ -225,8 +242,10 @@ async function runUniversalMutationProbe(
 
         try {
           execSync(`npx vitest run "${sandboxPath}"`, { stdio: 'pipe' });
+          console.log(`  [CONTRACT MUTANT] ${pattern} -> SURVIVED!`);
           survived++;
         } catch {
+          console.log(`  [CONTRACT MUTANT] ${pattern} -> KILLED`);
           killed++;
         }
       }

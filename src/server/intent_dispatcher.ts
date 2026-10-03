@@ -153,7 +153,7 @@ const INTENT_DISPATCH: Record<PlayerIntent['type'], IntentHandler> = {
   },
   INTENT_SPIN_TRANSIT_WHEEL: (m, rc, p) => {
     const ctx = m.getContext(rc);
-    return ctx ? handleSpinTransitWheel(ctx.room, p, ctx.reg, ctx.sm, m.getRng()) : { success: false, reason: ActionRejectReason.INVALID_ROOM };
+    return ctx ? handleSpinTransitWheel(ctx.room, p, ctx.reg, ctx.sm, m.getRng(), m.getDeckRng()) : { success: false, reason: ActionRejectReason.INVALID_ROOM };
   },
   INTENT_END_TURN: (m, rc, p) => {
     const room = m.getRoom(rc);

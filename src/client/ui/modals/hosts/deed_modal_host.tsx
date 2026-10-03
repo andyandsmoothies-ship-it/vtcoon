@@ -18,6 +18,10 @@ export interface DeedModalHostProps {
   readonly updateModalPayload: <K extends keyof ModalPayloadMap>(payload: Partial<ModalPayloadMap[K]>) => void;
 }
 
+export function canAffordDeedPurchase(canBuy: boolean, isSubmitting: boolean): boolean {
+  return canBuy && !isSubmitting;
+}
+
 export function DeedModalHost({
   payload,
   myId,
@@ -27,6 +31,8 @@ export function DeedModalHost({
   closeModal,
   updateModalPayload,
 }: DeedModalHostProps): React.ReactElement {
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const submittingRef = React.useRef(false);
   const deedState = resolveTitleDeedModalState({
     cellIndex: payload.cellIndex,
     canBuyOverride: payload.canBuy,
@@ -44,7 +50,7 @@ export function DeedModalHost({
   return (
     <TitleDeedModal
       cellIndex={payload.cellIndex}
-      canBuy={deedState.canBuy}
+      canBuy={canAffordDeedPurchase(deedState.canBuy, isSubmitting)}
       isBuyOpportunity={deedState.isBuyOpportunity}
       shortfall={deedState.shortfall}
       canCoverWithMortgage={deedState.canCoverWithMortgage}
@@ -65,6 +71,9 @@ export function DeedModalHost({
       buyerId={myId}
       allPlayers={playersInfo}
       onBuy={() => {
+        if (submittingRef.current || isSubmitting) return;
+        submittingRef.current = true;
+        setIsSubmitting(true);
         AudioEngine.playSfx(SoundEffect.BUY_PROPERTY);
         onIntent?.({ type: 'INTENT_BUY_PROPERTY' });
         closeModal();

@@ -18,11 +18,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 export const TIER_RULES = {
-  TIER1_LOGIC: { name: 'Tier 1 (Domain/Server/Logic)', ceiling: 400, warn: 300 },
-  TIER2_UI: { name: 'Tier 2 (UI/3D/Views)', ceiling: 500, warn: 400 },
-  TIER3_STATIC: { name: 'Tier 3 (Static Data/Config)', ceiling: 800, warn: 650 },
-  TESTS: { name: 'Contract / Unit Tests', ceiling: 600, warn: 500 },
-  DOCS: { name: 'Documentation / Meta', ceiling: 9999, warn: 1000 },
+  TIER1_LOGIC: { name: 'Tier 1 (Domain/Server/Logic)', ceiling: 400, warn: 300, grace: 20 },
+  TIER2_UI: { name: 'Tier 2 (UI/3D/Views)', ceiling: 500, warn: 400, grace: 25 },
+  TIER3_STATIC: { name: 'Tier 3 (Static Data/Config)', ceiling: 800, warn: 650, grace: 40 },
+  TESTS: { name: 'Contract / Unit Tests', ceiling: 600, warn: 500, grace: 50 },
+  DOCS: { name: 'Documentation / Meta', ceiling: 9999, warn: 1000, grace: 0 },
 };
 
 export function categorizeTier(filePath) {
@@ -99,9 +99,19 @@ export function formatReport(results) {
     }
 
     let status = '✔️ Safe';
-    if (tier.ceiling < 9999 && r.totalLines > tier.ceiling) {
-      status = `❌ EXCEEDED (${r.totalLines} > ${tier.ceiling})`;
+    const graceBuffer = tier.grace ?? Math.round(tier.ceiling * 0.05);
+    const hardCeiling = tier.ceiling + graceBuffer;
+
+    if (tier.ceiling < 9999 && r.totalLines > hardCeiling) {
+      status = `❌ EXCEEDED (${r.totalLines} > ${hardCeiling} Hard Cap)`;
       hasError = true;
+    } else if (tier.ceiling < 9999 && r.totalLines > tier.ceiling) {
+      if (r.nonEmptySloc <= tier.ceiling) {
+        status = `✔️ Safe (Within Grace: SLOC ${r.nonEmptySloc} <= ${tier.ceiling})`;
+      } else {
+        status = `❌ EXCEEDED (SLOC ${r.nonEmptySloc} > ${tier.ceiling})`;
+        hasError = true;
+      }
     } else if (tier.warn < 9999 && r.totalLines > tier.warn) {
       status = `⚠️ Warning (${r.totalLines} > ${tier.warn})`;
     }

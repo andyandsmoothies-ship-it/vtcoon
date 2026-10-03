@@ -67,6 +67,29 @@ for (const [relPath, isNew] of targetFiles.entries()) {
 }
 
 // ==========================================
+// 1.1 Verify new production file code specification
+// ==========================================
+console.log(`\n📄 Checking code specifications for newly declared files:`);
+for (const [relPath, isNew] of targetFiles.entries()) {
+  const isProd = /^(?:src|lib|app)[\\/]/.test(relPath);
+  if (isNew && isProd) {
+    const escapedRel = relPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const escapedName = path.basename(relPath).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const newFileCodeRegex = new RegExp(
+      `(?:${escapedRel}|${escapedName})[\\s\\S]{0,500}?\`\`\`(?:typescript|tsx|javascript|json|html|css)?\\s*\\n([\\s\\S]+?)\\n\`\`\``,
+      'i'
+    );
+    const codeMatch = planContent.match(newFileCodeRegex);
+    if (!codeMatch || codeMatch[1].trim().split('\n').length < 3) {
+      console.error(`  ❌ MISSING CODE SPEC: New production file '${relPath}' has no code snippet or interface specification in plan!`);
+      errors++;
+    } else {
+      console.log(`  ✔️ Verified code specification for new file: ${relPath}`);
+    }
+  }
+}
+
+// ==========================================
 // 2. Scan drop-in snippets for verbatim match,
 //    dirty casts, and State/Action SRP
 // ==========================================
@@ -138,7 +161,7 @@ console.log(`\n🧪 Checking Station 1 test specifications for banned/unimplemen
 const testSectionMatch = planContent.match(/(?:Station 1|QA MANDATE|BỘ KIỂM THỬ HỢP ĐỒNG)[\s\S]*?(?=\n##\s+|\n===\s+|$)/i);
 if (testSectionMatch) {
   const testSection = testSectionMatch[0];
-  const testLines = testSection.split('\n').filter((l) => /^\s*(?:[-*]|\d+\.)\s*`?TC-/.test(l));
+  const testLines = testSection.split('\n').filter((l) => /^\s*(?:[-*]|\d+\.)\s*`?(?:\[[^\]]+\]\s*)*`?TC-/.test(l));
   
   const bannedRules = [
     {
@@ -170,6 +193,13 @@ if (testSectionMatch) {
 
   for (const line of testLines) {
     checkedTests++;
+    // DoD #1 Flow Taxonomy check: Every test case must have [UC-.../MSS] or [UC-.../A#]
+    if (!/\[UC-[A-Z0-9-]+\/(?:MSS|A\d+)\]/i.test(line)) {
+      console.error(`  ❌ [DOD1_MISSING_FLOW_TAXONOMY] in test spec:`);
+      console.error(`     Line: ${line.trim()}`);
+      console.error(`     Reason: DoD #1 mandates explicit flow classifier: [UC-XXX/MSS] or [UC-XXX/A#].`);
+      errors++;
+    }
     for (const rule of bannedRules) {
       if (rule.regex.test(line)) {
         console.error(`  ❌ [${rule.code}] in test spec:`);

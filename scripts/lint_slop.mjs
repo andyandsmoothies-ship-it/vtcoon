@@ -26,6 +26,7 @@ export const SLOP_RULES = {
   ZERO_WORKAROUND_COMMENTS: 'zero-workaround-comments',
   ZERO_GETTER_PROXIES: 'zero-getter-proxies',
   ZERO_PSEUDO_PROXIES: 'zero-pseudo-proxies',
+  ZERO_TEST_PROPS: 'zero-test-props',
 };
 
 export const TIER_BUDGETS = {
@@ -269,6 +270,20 @@ export function lintSlopContent(content, filePath = 'anonymous.ts') {
             message: 'Pseudo-Proxy overengineering detected on local collection/object. Use simple native collection with sync-back or overload the target function.',
           });
         }
+      }
+    }
+
+    // Rule 8: zero-test-props (Anti Test-Induced Design Damage)
+    if (ts.isPropertySignature(node) || ts.isPropertyDeclaration(node)) {
+      const propName = node.name.getText(sf);
+      if (/ForTesting\b/i.test(propName)) {
+        const { line } = sf.getLineAndCharacterOfPosition(node.getStart());
+        errors.push({
+          rule: SLOP_RULES.ZERO_TEST_PROPS,
+          file: filePath,
+          line: line + 1,
+          message: `Test-Induced Design Damage (TIDD) detected: Production interface/class exposes test prop "${propName}". Extract pure custom hooks or test helpers instead.`,
+        });
       }
     }
 

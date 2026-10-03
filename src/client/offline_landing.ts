@@ -143,7 +143,9 @@ export function executeCellLanding(
       p.ownedProperties?.includes(targetCell)
     );
     if (!ownerEntry) {
-      if (isLocal) {
+      const currentPayload = state.modalPayload as { cellIndex?: number } | null;
+      const isViewingCurrentDeed = state.activeModal === 'deed' && currentPayload?.cellIndex === targetCell;
+      if (isLocal && !isViewingCurrentDeed && state.activeModal !== 'transit_wheel') {
         state.openModal('deed', { cellIndex: targetCell, isBuyOpportunity: true });
       }
     } else if (ownerEntry[0] !== activeId) {

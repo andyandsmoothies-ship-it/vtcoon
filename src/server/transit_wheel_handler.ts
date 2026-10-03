@@ -2,8 +2,9 @@
 import { Room, TurnPhase, ActionRejectReason, checkPassedGo, calculateGoSalary, BOARD_SIZE, type Player } from '../domain/room.js';
 import { BOARD_CONFIG } from '../domain/board_config.js';
 import { handleSpecialCell } from './special_cell_handler.js';
-import { handleLanding, type PropertyRegistry, type PropertyStateMap } from '../domain/property_manager.js';
+import { handleLanding, LandingResult, type PropertyRegistry, type PropertyStateMap } from '../domain/property_manager.js';
 import { checkInsolvency } from './insolvency_manager.js';
+import { MarketCardId } from '../domain/event_card_types.js';
 import {
   TransitWheelOutcome,
   evaluateTransitWheelOutcome,
@@ -25,6 +26,7 @@ export function handleSpinTransitWheel(
   registry?: PropertyRegistry,
   stateMap?: PropertyStateMap,
   rng: () => number = Math.random,
+  deckRng?: () => number,
 ): SpinTransitWheelResult {
   if (!room || !room.started) {
     return { success: false, reason: ActionRejectReason.INVALID_ROOM };
@@ -65,7 +67,7 @@ export function handleSpinTransitWheel(
           current.balance += stipend;
         }
       }
-      resolveSecondHopLanding(room, current, targetCell, registry, stateMap, rng);
+      resolveSecondHopLanding(room, current, targetCell, registry, stateMap, rng, deckRng);
       break;
     }
     case TransitWheelOutcome.SPEED_BOOST: {
@@ -80,7 +82,7 @@ export function handleSpinTransitWheel(
           room.passedGoSalary = sal;
         }
       }
-      resolveSecondHopLanding(room, current, targetCell, registry, stateMap, rng);
+      resolveSecondHopLanding(room, current, targetCell, registry, stateMap, rng, deckRng);
       break;
     }
     case TransitWheelOutcome.SAFE_HAVEN: {
@@ -97,7 +99,7 @@ export function handleSpinTransitWheel(
           room.passedGoSalary = sal;
         }
       }
-      resolveSecondHopLanding(room, current, targetCell, registry, stateMap, rng);
+      resolveSecondHopLanding(room, current, targetCell, registry, stateMap, rng, deckRng);
       break;
     }
     case TransitWheelOutcome.CASH_BACK: {
@@ -145,6 +147,7 @@ function resolveSecondHopLanding(
   registry?: PropertyRegistry,
   stateMap?: PropertyStateMap,
   rng: () => number = Math.random,
+  deckRng?: () => number,
 ): void {
   const cell = BOARD_CONFIG[targetCell];
   if (!cell) return;
@@ -152,11 +155,11 @@ function resolveSecondHopLanding(
   const reg = registry ?? new Map<number, string>();
   const sm = stateMap ?? new Map();
 
-  if (handleSpecialCell(room, current, cell.type, reg, sm, rng)) {
+  if (handleSpecialCell(room, current, cell.type, reg, sm, deckRng ?? rng)) {
     return;
   }
 
-  handleLanding(
+  const landing = handleLanding(
     current,
     targetCell,
     reg,
@@ -170,6 +173,22 @@ function resolveSecondHopLanding(
     room.roundCount,
     room,
   );
+
+  if (landing.diplomaticCardUsed) {
+    room.lastDiplomaticEvent = {
+      playerId: current.id,
+      landlordId: landing.landlordId ?? '',
+      cellIndex: targetCell,
+      savedRent: landing.savedRentAmount ?? 0,
+    };
+  }
+
+  const tradeFrozen = (room.activeModifiers ?? []).some(
+    (m) => m.type === MarketCardId.MC_FREEZE_TRADE && m.remainingRounds > 0,
+  );
+  if (landing.result === LandingResult.Unowned && !tradeFrozen) {
+    room.phase = TurnPhase.ActionPhase;
+  }
 
   if (current.balance < 0) {
     const landlordId = reg.get(targetCell);

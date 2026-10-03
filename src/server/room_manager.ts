@@ -76,6 +76,7 @@ export class RoomManager {
   get rolledThisTurnMap(): Map<string, boolean> { return this.rolledThisTurn; }
   get activeTimers(): Map<string, Set<NodeJS.Timeout>> { return this.activeTimersMap; }
   getRng(): () => number { return this.rng; }
+  getDeckRng(): () => number { return this.deckRng; }
 
   constructor(seed?: number | (() => number)) {
     if (typeof seed === 'function') {

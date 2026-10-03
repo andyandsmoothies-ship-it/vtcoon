@@ -13,6 +13,11 @@ export interface TransitWheelModalProps {
   readonly onClose: () => void;
 }
 
+export function getTransitWheelDismissText(outcome?: TransitWheelOutcome | string): string {
+  const isStationaryOutcome = outcome === TransitWheelOutcome.CASH_BACK || outcome === TransitWheelOutcome.FLIGHT_DELAY;
+  return isStationaryOutcome ? 'Xác Nhận & Ở Lại Trạm' : 'Tiếp Tục Di Chuyển Đến Ô Mới';
+}
+
 const OUTCOME_COLORS: Record<TransitWheelOutcome, string> = {
   [TransitWheelOutcome.NEXT_PORT]: '#3b82f6',
   [TransitWheelOutcome.SPEED_BOOST]: '#f59e0b',
@@ -61,6 +66,7 @@ export const TransitWheelModal: React.FC<TransitWheelModalProps> = ({
   }, [outcome, hasFinished]);
 
   const activeConfig = TRANSIT_WHEEL_CONFIGS.find((c) => c.outcome === outcome);
+  const dismissButtonText = getTransitWheelDismissText(outcome);
 
   const handleDismiss = () => {
     // Giải phóng pendingPawnMove cho quân cờ chạy
@@ -140,7 +146,7 @@ export const TransitWheelModal: React.FC<TransitWheelModalProps> = ({
             onClick={handleDismiss}
             className="w-full min-h-[44px] py-3 bg-slate-800 hover:bg-slate-700 text-amber-400 font-semibold rounded-xl border border-amber-500/40 active:scale-95 transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
           >
-            Tiếp Tục Di Chuyển
+            {dismissButtonText}
           </button>
         ) : (
           <div className="py-2 text-xs text-amber-400 animate-pulse font-medium">

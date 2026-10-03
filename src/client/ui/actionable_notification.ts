@@ -318,6 +318,13 @@ const ACTIONABLE_NOTIFICATIONS_MAP: Record<string, ActionableNotification> = {
     tone: 'info',
     actionHint: 'Bạn có thể nhấn "✕ Đóng / Xem Bàn Cờ" để tạm ẩn và theo dõi trận đấu.',
   },
+  INTENT_REJECTED: {
+    icon: '⚠️',
+    title: 'Hành Động Chưa Thể Thực Hiện',
+    description: 'Thao tác không phù hợp với giai đoạn lượt chơi hiện tại hoặc tài sản không khả dụng.',
+    tone: 'warning',
+    actionHint: 'Vui lòng kiểm tra trạng thái lượt chơi hoặc bấm Kết Thúc Lượt.',
+  },
 };
 
 // Aliases for legacy/alternative casing reason codes (DRY SSOT)
@@ -327,6 +334,8 @@ ACTIONABLE_NOTIFICATIONS_MAP['TradeFrozen'] = ACTIONABLE_NOTIFICATIONS_MAP['FREE
 ACTIONABLE_NOTIFICATIONS_MAP['highest_bidder cannot pass'] = ACTIONABLE_NOTIFICATIONS_MAP['HIGHEST_BIDDER_CANNOT_PASS']!;
 ACTIONABLE_NOTIFICATIONS_MAP['highest_bidder_cannot_pass'] = ACTIONABLE_NOTIFICATIONS_MAP['HIGHEST_BIDDER_CANNOT_PASS']!;
 ACTIONABLE_NOTIFICATIONS_MAP['HighestBidderCannotPass'] = ACTIONABLE_NOTIFICATIONS_MAP['HIGHEST_BIDDER_CANNOT_PASS']!;
+ACTIONABLE_NOTIFICATIONS_MAP['intent_rejected'] = ACTIONABLE_NOTIFICATIONS_MAP['INTENT_REJECTED']!;
+ACTIONABLE_NOTIFICATIONS_MAP['IntentRejected'] = ACTIONABLE_NOTIFICATIONS_MAP['INTENT_REJECTED']!;
 
 const DEFAULT_FALLBACK_NOTIFICATION: ActionableNotification = {
   icon: 'ℹ️',

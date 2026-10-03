@@ -289,6 +289,27 @@
   - `DEBT-BOT-COORD-01`: `src/server/room_bot_coordinator.ts` (303 LOC, Warning Tier 1 > 300). Kế hoạch: Bóc tách bot heuristics sang `bot_intent_evaluator.ts` để đưa về < 250 LOC.
   - `DEBT-APPLY-DELTA-01`: `src/client/network/apply_delta.ts` (348 LOC, Warning Tier 1 > 300). Kế hoạch: Bóc tách `apply_delta_modals.ts` để đưa về < 250 LOC.
 
+#### [IMP-249] Đồng Bộ Nhịp Độ Quân Cờ 3D & Chuẩn Hóa FSM Bước Nhảy Thứ Hai (Pawn Pacing Synchronization and Transit Second-Hop Affordance)
+- **Mã Ticket:** IMP-249 (Tier 2 Full Rigor)
+- **Use Case Ref:** UC-IMP249, UC-GAME-020, UC-GAME-027
+- **Phạm vi hoàn tất:**
+  - Khóa nhịp độ quân cờ 3D (`isPawnBusyMoving = Boolean(isPawnMoving || isRolling || activePawnAnimation)`) trên Action Dock: ngăn chặn nút "Mua Đất" nhấp nháy sớm khi quân cờ đang nhảy trên bàn cờ.
+  - Chống mở đúp modal mua đất tại điểm hạ cánh: `executeCellLanding` trong `offline_landing.ts` không mở lại `deed` modal nếu đang mở chính ô đó hoặc đang mở Vòng Xoay Hành Trình.
+  - Khóa nguyên tử đang gửi (`submittingRef.current = true` + `isSubmitting = true`) trên nút "Mua BĐS" trong `deed_modal_host.tsx`, triệt tiêu click đúp phát sinh nhiều `INTENT_BUY_PROPERTY`.
+  - Chuẩn hóa FSM bước nhảy thứ hai từ Vòng Xoay Hành Trình: `resolveSecondHopLanding` chuyển `room.phase = TurnPhase.ActionPhase` khi đáp xuống ô đất trống chưa có chủ (và không bị đóng băng giao dịch), giải phóng triệt để lỗi `INTENT_REJECTED` khi mua đất ô 25.
+  - Đồng bộ sự kiện ngoại giao `room.lastDiplomaticEvent` khi dùng thẻ Ngoại Giao tại bước nhảy thứ hai.
+  - Phân nhánh nhãn nút động tại Transit Wheel Modal ("Xác Nhận & Ở Lại Trạm" cho `CASH_BACK`/`FLIGHT_DELAY` vs "Tiếp Tục Di Chuyển Đến Ô Mới").
+  - Đăng ký cấu hình lỗi và hướng dẫn hành động thân thiện người dùng cho `INTENT_REJECTED` kèm alias trong `actionable_notification.ts`.
+  - Bảo vệ modal `transit_wheel` không bị đóng sớm trong `ActionPhase` và dọn `pendingPawnMove = null` khi cưỡng chế đóng modal do timeout/chuyển pha.
+  - Hiệu ứng đèn xung `shouldPulseEndTurn` viền emerald dẫn dắt người chơi kết thúc lượt khi đã đổ xúc xắc mà không thể mua đất, loại trừ `AuctionPhase` và `HosePhase`.
+  - Bảo toàn 100% không chạm vào `property_actions.ts` (390 LOC).
+- **Báo cáo chi tiết:** [`docs/reports/improvements/IMP-249-pawn-pacing-and-transit-hop-affordance_report.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/reports/improvements/IMP-249-pawn-pacing-and-transit-hop-affordance_report.md)
+- **Evidence Snapshot:** [`.agents/evidence/chaos_sentinel_IMP-249.json`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/evidence/chaos_sentinel_IMP-249.json) (`executed: true`, `verdict: APPROVED`)
+- **Kiểm thử:** 23/23 atomic tests PASS (`tests/contracts/imp249_pawn_pacing_and_transit_hop_affordance.test.ts`), 15/15 mutants killed.
+- **Tech Debt Ledger (Nợ kỹ thuật ghi nhận):**
+  - `DEBT-APPLY-DELTA` [STATUS: OPEN - CARRIED OVER từ IMP-248]: `src/client/network/apply_delta.ts` (348 LOC, Warning Tier 1 > 300). Kế hoạch: Bóc tách `apply_delta_modals.ts` để đưa về < 250 LOC.
+  - `DEBT-PROP-ACTIONS` [STATUS: OPEN - CARRIED OVER từ IMP-247, IMP-248]: `src/server/property_actions.ts` (390 LOC, Warning Tier 1 > 300). Kế hoạch: Bóc tách P2P trade sang `p2p_trade_actions.ts` trước khi thêm bất kỳ tính năng nào.
+
 ---
 
 ## Tổng Kết Toàn Cục Epic Gameplay Core

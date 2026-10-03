@@ -179,8 +179,10 @@ export function ActionDock({
     (currentCell.type === CellType.Property || currentCell.type === CellType.Railroad || currentCell.type === CellType.Utility)
   );
   const isOwnedByAnyone = Object.values(playersInfo).some((p) => p.ownedProperties?.includes(currentPos));
+  const isPawnBusyMoving = Boolean(isPawnMoving || isRolling || activePawnAnimation);
   const isStandingOnBuyable = Boolean(
     isMyTurn &&
+    !isPawnBusyMoving &&
     (turnPhase === TurnPhase.ActionPhase || (hasRolledThisTurn && turnPhase !== TurnPhase.PropertyManagement && turnPhase !== TurnPhase.AuctionPhase && turnPhase !== TurnPhase.InsolvencyPhase)) &&
     isPropertyCell &&
     !isOwnedByAnyone &&
@@ -201,7 +203,18 @@ export function ActionDock({
   };
   const isSkippedTurn = Boolean(isMyTurn && turnPhase === 'PropertyManagement' && !hasRolledThisTurn && !inAudit);
   const isAuditEndTurnActive = Boolean(isMyTurn && inAudit && hasRolledThisTurn && !canRollAgain);
-  const shouldPulseEndTurn = isSkippedTurn || isAuditEndTurnActive;
+  const isDoneRollingAndNoBuy = Boolean(
+    isMyTurn &&
+    hasRolledThisTurn &&
+    !canRollAgain &&
+    !isStandingOnBuyable &&
+    !isPawnBusyMoving &&
+    !isInsolvent &&
+    !isBankrupt &&
+    turnPhase !== TurnPhase.AuctionPhase &&
+    turnPhase !== TurnPhase.HosePhase
+  );
+  const shouldPulseEndTurn = isSkippedTurn || isAuditEndTurnActive || isDoneRollingAndNoBuy;
   const isGlowActive = (isMyTurn && !isRollDisabled) || isSkippedTurn;
   return (
     <div className="relative flex flex-col items-center gap-1.5">
