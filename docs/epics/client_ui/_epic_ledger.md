@@ -1900,7 +1900,7 @@
   * TypeScript typecheck: `tsc --noEmit` exit 0. UI Linter: `npm run lint:ui` 0 violations. Slop Linter: `npm run lint:slop` 0 hard violations. 0 dirty casts (`as any`).
   * Evidence Snapshot: `.agents/evidence/chaos_sentinel_imp-256.json` (`verdict: APPROVED`).
   * Tech Debt Ledger:
-    - **`DEBT-GAME-CANVAS-PARTITION`**: `game_canvas.tsx` đạt 476 LOC (vùng cảnh báo 400..500 LOC). Đăng ký kế hoạch bóc tách các sub-components (`SceneLighting`, `SceneCameraRig`, `ScenePostProcessingWrapper`) sang submodule riêng khi có thay đổi logic tiếp theo trên GameCanvas.
+    - **`DEBT-GAME-CANVAS-PARTITION`**: [LIQUIDATED by IMP-263] Đã bóc tách `AdaptiveCinematicCamera` sang `src/client/3d/adaptive_cinematic_camera.tsx`, hạ `game_canvas.tsx` từ 476 LOC xuống 233 LOC (< 300 LOC Safe). Nợ kỹ thuật đã được thanh toán dứt điểm.
 - **Phê chuẩn**:
   * `plan-griller` & `adversarial-challenger`: HARDENED_APPROVED (`.agents/audit/PLAN_AUDIT_IMP_256.md`).
   * `qa-tester`: Station 1 RED verified & atomic contract test authored (16 tests, 5 Facets).
@@ -2008,6 +2008,55 @@
   * `game-3d-visual-critic`: Station 3.2 3D_VISUAL_APPROVED (`.agents/audit/3D_VISUAL_REVIEW_IMP-259.md` - Score: 8.6/10, disposition: ship).
   * `chaos-sentinel`: Station 4 APPROVED (`.agents/evidence/chaos_sentinel_imp-259.json` - 3 Probes passed, 15/15 mutants killed, 0 survived, 0 waivers).
 - **Trạng thái**: ✅ Hoàn thành IMP-259 (2026-10-04 - 4-Station Closed-Loop Certified).
+
+---
+
+### [2026-10-04] IMP-263: Event-Driven Semi-Cinematic Camera Engine & Subtractive Canvas Modularization (Động Cơ Camera Bán Điện Ảnh Theo Sự Kiện & Bóc Tách Canvas Subtractive)
+- **Mục tiêu**: Thiết lập hệ thống máy quay bán điện ảnh kích hoạt theo sự kiện (Event-Driven Semi-Cinematic Camera) ở góc máy "Sweet Spot" (độ cao Y = 2.8, target Y = 0.6, pitch 24.5..25.0 độ, phi = 65.0 độ) lướt theo 4 cạnh bàn cờ tôn vinh kiến trúc 3D cao tầng, giải phóng tầm nhìn không bị linh vật che khuất; giới hạn kích hoạt ở ~20% lượt biến cố lớn (nguy cơ tử thần isHighStakesRoll, 6 ô hiếm 5, 10, 15, 20, 25, 35) trong khi 80% lượt thông thường duy trì góc nhìn tổng quan nhanh 0.3s; tích hợp cơ chế chạm bỏ qua (Tap-to-Skip) tức thì với chốt giữ hasSkippedCurrentMoveRef và cooldown 600ms chống giật ngược; đồng thời bóc tách toàn diện AdaptiveCinematicCamera ra khỏi game_canvas.tsx, hạ dòng mã từ 476 LOC xuống 232 LOC (< 300 LOC Safe) và thanh toán dứt điểm DEBT-GAME-CANVAS-PARTITION.
+- **Hạng mục thi công cốt lõi**:
+  1. *Bóc Tách Subtractive Canvas (`src/client/3d/adaptive_cinematic_camera.tsx` - Task 1)*:
+     - Tách toàn bộ OrbitControls, `useFrame` render loop, lerp camera, âm thanh nhịp tim `SoundEngine.playHeartbeatPulse()` và cơ chế Tap-to-Skip sang component độc lập.
+     - Dọn sạch các import thừa trong `game_canvas.tsx`, bảo toàn cầu nối tương thích TC-190.12 `window.__resetCameraToDefault`.
+     - Hạ `game_canvas.tsx` từ 476 LOC xuống 232 LOC (< 300 LOC Tier 2 Safe).
+  2. *Động Cơ Tiếp Tuyến 4 Cạnh Bán Điện Ảnh (`src/client/3d/cinematic_chase_camera.ts` - Task 2)*:
+     - Module sâu đóng gói toàn bộ toán học tiếp tuyến 4 cạnh ở độ cao Y = 2.8, target Y = 0.6, khoảng lùi `trailDistance: 3.0`, lệch vai ngoài `outerOffset: 2.2`, đón đầu `lookAhead: 1.0`, nghiêng hướng tâm `innerTilt: 0.5`.
+     - Bộ lọc sự kiện `shouldTriggerCinematicCamera` (~20% lượt biến cố lớn, loại trừ `isJailFlight`).
+     - FOV thích ứng màn hình dọc `calculateResponsiveStreetFov` mở rộng lên đến 68 độ (aspect < 1.0) bảo toàn góc ngang >= 36 độ.
+     - Khử nhiễm số học, kiểm tra `Number.isFinite(...)` cho toàn bộ vector và tham số, fallback an toàn [0, 0, 0] chống sập render loop.
+     - Đồng bộ các ô góc (0, 10, 20, 30) với `resolveSideFromCoordinates` triệt tiêu cú lắc 90 độ.
+  3. *Tích Hợp Camera State Machine (`src/client/3d/camera_state_machine.ts` - Task 3)*:
+     - Mở rộng `TargetCameraStateOptions`.
+     - Phân luồng case `'pawn_chase'`: ủy quyền cho `calculateStreetChaseCameraState` khi `cinematicChase: true`; trả về `'overview'` nhanh 0.3s khi `cinematicChase: false` (80% lượt thường); bảo toàn tương thích ngược khi `options === undefined`.
+- **Hạ tầng & Ngân sách LOC Thực tế (`scripts/check_loc.mjs` - Total Lines / Non-Empty SLOC)**:
+  * `src/client/game_canvas.tsx` (Total: 232 / SLOC: 216 — Tier 2 <= 500 LOC; Safe < 300 LOC)
+  * `src/client/3d/adaptive_cinematic_camera.tsx` (Total: 349 / SLOC: 320 — Tier 2 <= 500 LOC; Safe < 400 LOC)
+  * `src/client/3d/cinematic_chase_camera.ts` (Total: 170 / SLOC: 155 — Tier 2 <= 500 LOC; Safe < 300 LOC)
+  * `src/client/3d/camera_state_machine.ts` (Total: 395 / SLOC: 369 — Tier 2 <= 500 LOC; Safe < 400 LOC)
+  * `tests/client/cinematic_chase_camera.test.ts` (Total: 188 / SLOC: 170 — Tests <= 600 LOC; 16 atomic tests)
+- **Kiểm thử & Bất biến**:
+  * 16/16 atomic contract tests PASS trên `tests/client/cinematic_chase_camera.test.ts` (100% GREEN, Detroit Classical TDD, tối đa <= 4 asserts/test, 0 loops, 0 dirty casts).
+  * 35/35 camera tests PASS kết hợp cùng bộ kiểm thử kế thừa `tests/client/camera_state_machine.test.ts` (19/19).
+  * 181/181 camera & diorama tests PASS trên toàn bộ blast radius (`imp190`, `urban_diorama`, `post_processing`, `phase3_visual_polish`, `webgl_spatial_probe`).
+  * Station 4 Chaos Sentinel: 3/3 physical probes PASS:
+    - Probe 1 (Domain-Adaptive Wire-to-Core Closed-Loop Parity): 34 physical assertions passed.
+    - Probe 2 (Ephemeral Dynamic Boundary Probe): 17/17 tests passed trên Headless WebGL2, physical artifact `webgl2_headless_smoke_probe.png` tách biệt sạch sẽ với Phase 3.0 evidence.
+    - Probe 3 (Mutation Sensitivity Probe): 17/17 mutants bị tiêu diệt (100% kill rate, 10 targeted source AST mutants + 7 contract inversion mutants, 0 survived, 0 waivers).
+  * Visual Evidence Gate: Thẩm định thành công 2 ảnh chụp in-game vật lý Dual-Viewport tại `.agents/tmp/` (`imp-263_desktop.jpg` 1280x800 và `imp-263_mobile_360.jpg` 360x740) xác minh góc nhìn bán điện ảnh Y = 2.8, pitch 25.0 độ, giải phóng hoàn toàn linh vật/quân cờ và tôn vinh công trình 3D, đạt 8.5/10 điểm Senior Art Director (Modern Commercial Standard, disposition: ship).
+  * TypeScript typecheck: `tsc --noEmit` exit 0. UI Linter: `npm run lint:ui` 0 violations. Slop Linter: `npm run lint:slop` 0 violations. 0 dirty casts (`as any`).
+  * Evidence Snapshot: `.agents/evidence/chaos_sentinel_imp-263.json` (`verdict: APPROVED`, cơ học `node scripts/check_evidence.mjs IMP-263` PASS).
+  * Tech Debt Ledger:
+    - **`DEBT-GAME-CANVAS-PARTITION`**: Đã giải tỏa thành công (giảm từ 476 xuống 232 LOC). Không phát sinh nợ kỹ thuật mới.
+- **Phê chuẩn**:
+  * `plan-griller` & `adversarial-challenger`: HARDENED_APPROVED & HARDENED_RESILIENT (`.agents/audit/PLAN_AUDIT_IMP-263.md` & `PLAN_CHALLENGE_IMP-263.md`).
+  * `qa-tester`: Station 1 RED verified & atomic contract test authored (16 tests, 5 Facets).
+  * `implementer`: Station 2 GREEN Implementation completed.
+  * `scout`: Station 2.5 PREFILTER_PASSED (0 typecheck errors, 0 dirty casts, 0 log leaks).
+  * `spec-reviewer`: Station 3.1 SPEC_APPROVED (`.agents/audit/SPEC_REVIEW_IMP_263.md` - 100% plan fidelity, 0 scope drift).
+  * `code-reviewer`: Station 3.2 CODE_APPROVED (`.agents/audit/CODE_REVIEW_IMP-263.md` - Anti-slop, 0 defect archetypes, deep module).
+  * `game-3d-visual-critic`: Station 3.2 3D_VISUAL_APPROVED (`.agents/audit/3D_VISUAL_REVIEW_IMP-263.md` - Score: 8.5/10, disposition: ship).
+  * `chaos-sentinel`: Station 4 APPROVED (`.agents/evidence/chaos_sentinel_imp-263.json` - 3 Probes passed, 17/17 mutants killed, 0 survived, 0 waivers).
+- **Trạng thái**: ✅ Hoàn thành IMP-263 (2026-10-04 - 4-Station Closed-Loop Certified).
+
 
 
 

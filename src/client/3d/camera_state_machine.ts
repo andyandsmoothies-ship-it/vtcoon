@@ -1,8 +1,17 @@
 // [UI-S01/MSS][UI-S04/MSS] CameraStateMachine — 2026 Cinematic Action Cam & Dynamic Follow System
 // Hỗ trợ các chế độ: Overview, Dice Roll Cinematic, Dynamic Tension Roll, Pawn Chase, và Tile Focus
 import { PROPERTY_DEEDS } from '../../domain/property_data';
+import { calculateStreetChaseCameraState } from './cinematic_chase_camera';
 
 export type CameraMode = 'overview' | 'dice_roll' | 'tension_roll' | 'pawn_chase' | 'tile_focus' | 'auction_focus' | 'pre_match';
+
+export interface TargetCameraStateOptions {
+  readonly cinematicChase?: boolean;
+  readonly cellIndex?: number;
+  readonly aspect?: number;
+  readonly isHighStakesRoll?: boolean;
+  readonly isJailFlight?: boolean;
+}
 
 interface CameraConfigItem {
   readonly position: readonly [number, number, number];
@@ -234,7 +243,8 @@ export interface TargetCameraState {
 export function calculateTargetCameraState(
   mode: CameraMode,
   pawnPosition?: readonly [number, number, number],
-  tilePosition?: readonly [number, number, number]
+  tilePosition?: readonly [number, number, number],
+  options?: TargetCameraStateOptions
 ): TargetCameraState {
   switch (mode) {
     case 'pre_match':
@@ -259,6 +269,20 @@ export function calculateTargetCameraState(
         speed: CAMERA_CONFIG.tension_roll.speed,
       };
     case 'pawn_chase': {
+      if (options?.cinematicChase) {
+        return calculateStreetChaseCameraState({
+          pawnPosition: pawnPosition ?? [0, 0, 0],
+          cellIndex: options.cellIndex,
+          aspect: options.aspect,
+          isHighStakesRoll: options.isHighStakesRoll,
+          isJailFlight: options.isJailFlight,
+        });
+      }
+      // [ADV-05] 80% luot thong thuong duy tri overview nhanh 0.3s khi cinematicChase la false
+      if (options && options.cinematicChase === false) {
+        return calculateTargetCameraState('overview');
+      }
+      // Tuong thich nguoc khi options la undefined (cac bai kiem thu cu)
       const p = pawnPosition ?? [0, 0, 0];
       const safePx = Number.isFinite(p[0]) ? p[0] : 0;
       const safePz = Number.isFinite(p[2]) ? p[2] : 0;
