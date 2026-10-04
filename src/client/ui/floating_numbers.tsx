@@ -21,7 +21,7 @@ export { formatShortPlayerName, resolveFriendlyReason, resolveActionIcon, resolv
  * Strips redundant thematic prefix before colon (e.g. "Quy hoạch trục đô thị mới: ")
  * to present punchy, actionable financial summaries without truncation.
  */
-export function cleanEventDescription(text: string): string {
+export function cleanEventDescription(text?: string | null): string {
   if (!text) return '';
   const trimmed = text.trim();
   const colonIndex = trimmed.indexOf(': ');
@@ -32,7 +32,9 @@ export function cleanEventDescription(text: string): string {
 }
 
 export function MilestoneBanner({ item }: { readonly item: FloatingTextItem }): React.ReactElement {
-  const playersInfo = useGameStore((state) => state.playersInfo);
+  const isSSR = typeof window === 'undefined';
+  const storePlayersInfo = useGameStore((state) => state.playersInfo);
+  const playersInfo = isSSR ? useGameStore.getState().playersInfo : storePlayersInfo;
   const player = playersInfo[item.playerId];
   const icon = resolveActionIcon(item.actionType, true);
 

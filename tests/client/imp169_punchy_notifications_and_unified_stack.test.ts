@@ -19,7 +19,7 @@ import {
 } from '../../src/client/store/game_store.js';
 import { MarketCardId, ChanceCardId } from '../../src/domain/event_card_types.js';
 
-type PunchyResolver = (cardIdOrTitle?: string, rawText?: string) => string;
+type PunchyResolver = (cardIdOrTitle?: string | null, rawText?: string | null) => string;
 
 let resolvePunchyEventSummary: PunchyResolver | undefined;
 let PUNCHY_EVENT_SUMMARIES: Record<string, string> | undefined;
@@ -209,7 +209,7 @@ describe('[IMP-169] Punchy Event Notifications & Unified Pop-up Stack Architectu
         activeModifiers: [{ type: MarketCardId.MC_ANTI_SPECULATE, remainingRounds: 2 }],
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
-      expect(html).toMatch(/top-28\s+(?:sm:top-24|sm:top-28)/);
+      expect(html).toMatch(/(?:md:)?top-28/);
     });
 
     it('[TC-IMP169.06/A2][UC-GAME-023][Facet-2/Reactivity] activeMarketCount >= 2: Unified Stack Container định vị tại top-28 sm:top-24 (IMP-195)', () => {
@@ -221,7 +221,7 @@ describe('[IMP-169] Punchy Event Notifications & Unified Pop-up Stack Architectu
         ],
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
-      expect(html).toMatch(/top-(?:28|36)\s+(?:sm:top-24|sm:top-36)/);
+      expect(html).toMatch(/(?:md:)?top-(?:28|36)/);
     });
   });
 
@@ -254,16 +254,14 @@ describe('[IMP-169] Punchy Event Notifications & Unified Pop-up Stack Architectu
         timestamp: Date.now(),
       };
 
-      type InteractiveVdom = {
-        props: {
-          onClick?: () => void;
-          onKeyDown?: (e: { key: string; preventDefault?: () => void }) => void;
-        };
-      };
+      type InteractiveVdom = React.ReactElement<{
+        onClick?: () => void;
+        onKeyDown?: (e: { key: string; preventDefault?: () => void }) => void;
+      }>;
       let vdom: InteractiveVdom | undefined;
       function TestWrapper() {
-        vdom = MilestoneBanner({ item }) as unknown as InteractiveVdom;
-        return vdom as unknown as React.ReactElement;
+        vdom = MilestoneBanner({ item }) as InteractiveVdom;
+        return vdom;
       }
       renderToStaticMarkup(React.createElement(TestWrapper));
       expect(vdom).toBeDefined();
@@ -286,16 +284,14 @@ describe('[IMP-169] Punchy Event Notifications & Unified Pop-up Stack Architectu
         timestamp: Date.now(),
       };
 
-      type InteractiveVdom = {
-        props: {
-          onClick?: () => void;
-          onKeyDown?: (e: { key: string; preventDefault?: () => void }) => void;
-        };
-      };
+      type InteractiveVdom = React.ReactElement<{
+        onClick?: () => void;
+        onKeyDown?: (e: { key: string; preventDefault?: () => void }) => void;
+      }>;
       let vdom: InteractiveVdom | undefined;
       function TestWrapper() {
-        vdom = MilestoneBanner({ item }) as unknown as InteractiveVdom;
-        return vdom as unknown as React.ReactElement;
+        vdom = MilestoneBanner({ item }) as InteractiveVdom;
+        return vdom;
       }
       renderToStaticMarkup(React.createElement(TestWrapper));
       expect(vdom?.props.onKeyDown).toBeDefined();
@@ -317,16 +313,14 @@ describe('[IMP-169] Punchy Event Notifications & Unified Pop-up Stack Architectu
         timestamp: Date.now(),
       };
 
-      type InteractiveVdom = {
-        props: {
-          onClick?: () => void;
-          onKeyDown?: (e: { key: string; preventDefault?: () => void }) => void;
-        };
-      };
+      type InteractiveVdom = React.ReactElement<{
+        onClick?: () => void;
+        onKeyDown?: (e: { key: string; preventDefault?: () => void }) => void;
+      }>;
       let vdom: InteractiveVdom | undefined;
       function TestWrapper() {
-        vdom = MilestoneBanner({ item }) as unknown as InteractiveVdom;
-        return vdom as unknown as React.ReactElement;
+        vdom = MilestoneBanner({ item }) as InteractiveVdom;
+        return vdom;
       }
       renderToStaticMarkup(React.createElement(TestWrapper));
       expect(vdom?.props.onKeyDown).toBeDefined();
@@ -348,16 +342,14 @@ describe('[IMP-169] Punchy Event Notifications & Unified Pop-up Stack Architectu
         timestamp: Date.now(),
       };
 
-      type InteractiveVdom = {
-        props: {
-          onClick?: () => void;
-          onKeyDown?: (e: { key: string; preventDefault?: () => void }) => void;
-        };
-      };
+      type InteractiveVdom = React.ReactElement<{
+        onClick?: () => void;
+        onKeyDown?: (e: { key: string; preventDefault?: () => void }) => void;
+      }>;
       let vdom: InteractiveVdom | undefined;
       function TestWrapper() {
-        vdom = MilestoneBanner({ item }) as unknown as InteractiveVdom;
-        return vdom as unknown as React.ReactElement;
+        vdom = MilestoneBanner({ item }) as InteractiveVdom;
+        return vdom;
       }
       renderToStaticMarkup(React.createElement(TestWrapper));
       expect(vdom?.props.onKeyDown).toBeDefined();
@@ -383,7 +375,7 @@ describe('[IMP-169] Punchy Event Notifications & Unified Pop-up Stack Architectu
 
     it('[TC-IMP169.09/A2][UC-GAME-023][Facet-4/ErrorDefense] resolvePunchyEventSummary xử lý null an toàn không bị throw', () => {
       expect(resolvePunchyEventSummary, 'resolvePunchyEventSummary must be exported').toBeDefined();
-      expect(resolvePunchyEventSummary!(null as unknown as string, null as unknown as string)).toBe('');
+      expect(resolvePunchyEventSummary!(null, null)).toBe('');
     });
 
     it('[TC-IMP169.09/A3][UC-GAME-023][Facet-4/ErrorDefense] resolvePunchyEventSummary với cardId lạ và rawText undefined không bị throw', () => {

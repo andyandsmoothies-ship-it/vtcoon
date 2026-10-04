@@ -53,7 +53,7 @@ export const PUNCHY_EVENT_SUMMARIES: PunchyEventSummariesMap = Object.freeze({
  * Strips redundant thematic prefix before colon (e.g. "Quy hoạch trục đô thị mới: ")
  * to present punchy, actionable financial summaries without truncation.
  */
-export function cleanEventDescription(text: string): string {
+export function cleanEventDescription(text?: string | null): string {
   if (!text) return '';
   const trimmed = text.trim();
   const colonIndex = trimmed.indexOf(': ');

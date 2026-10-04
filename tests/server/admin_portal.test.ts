@@ -189,13 +189,14 @@ describe('[IMP-25/MSS] Admin Central Portal Tests', () => {
 
     expect(server.getRoomManager().hasRoom('GLIT01')).toBe(true);
 
-    const termPending = collectN(ws, 1);
+    const termPending = collectN(ws, 3); // ADMIN_ROOM_LIST + ADMIN_ARCHIVED_ROOM_LIST + ADMIN_ACTION_SUCCESS
     ws.send(JSON.stringify({
       type: 'ADMIN_TERMINATE_ROOM',
       roomCode: 'GLIT01',
       reason: 'Phát hiện glitch tiền âm bất thường',
     }));
-    const [termRes] = await termPending;
+    const msgs = await termPending;
+    const termRes = msgs.find((m) => m.type === 'ADMIN_ACTION_SUCCESS');
 
     expect(termRes?.type).toBe('ADMIN_ACTION_SUCCESS');
     if (termRes?.type === 'ADMIN_ACTION_SUCCESS') {

@@ -65,7 +65,7 @@ describe('[IMP-155: Trạm 1 RED] Compact & Friendly Notification Popups Overhau
 
     it('[TC-155.03/MSS][UC-GAME-023][IMP-155][Facet-1/Boundary] cleanEventDescription xử lý an toàn chuỗi rỗng hoặc undefined', () => {
       expect(cleanEventDescription('')).toBe('');
-      expect(cleanEventDescription(undefined as unknown as string)).toBe('');
+      expect(cleanEventDescription(undefined)).toBe('');
     });
 
     it('[TC-155.04/MSS][UC-GAME-023][IMP-155][Facet-1/Boundary] formatShortPlayerName rút gọn tên Bot AI loại bỏ phần tính cách trong ngoặc', () => {
@@ -203,14 +203,18 @@ describe('[IMP-155: Trạm 1 RED] Compact & Friendly Notification Popups Overhau
         timestamp: Date.now(),
       };
 
-      let vdom: any;
+      type BannerElement = React.ReactElement<{
+        onClick?: () => void;
+        onKeyDown?: (e: { key: string; preventDefault: () => void }) => void;
+      }>;
+      let vdom: BannerElement | undefined;
       function TestWrapper() {
-        vdom = MilestoneBanner({ item });
+        vdom = MilestoneBanner({ item }) as BannerElement;
         return vdom;
       }
       renderToStaticMarkup(React.createElement(TestWrapper));
-      expect(vdom.props.onClick).toBeDefined();
-      vdom.props.onClick();
+      expect(vdom?.props.onClick).toBeDefined();
+      vdom?.props.onClick?.();
       expect(removeSpy).toHaveBeenCalledWith('ft_click_dismiss');
     });
 
@@ -228,14 +232,18 @@ describe('[IMP-155: Trạm 1 RED] Compact & Friendly Notification Popups Overhau
         timestamp: Date.now(),
       };
 
-      let vdom: any;
+      type BannerElement = React.ReactElement<{
+        onClick?: () => void;
+        onKeyDown?: (e: { key: string; preventDefault: () => void }) => void;
+      }>;
+      let vdom: BannerElement | undefined;
       function TestWrapper() {
-        vdom = MilestoneBanner({ item });
+        vdom = MilestoneBanner({ item }) as BannerElement;
         return vdom;
       }
       renderToStaticMarkup(React.createElement(TestWrapper));
-      expect(vdom.props.onKeyDown).toBeDefined();
-      vdom.props.onKeyDown({ key: 'Enter', preventDefault: vi.fn() } as unknown as React.KeyboardEvent);
+      expect(vdom?.props.onKeyDown).toBeDefined();
+      vdom?.props.onKeyDown?.({ key: 'Enter', preventDefault: vi.fn() });
       expect(removeSpy).toHaveBeenCalledWith('ft_key_dismiss');
     });
   });
