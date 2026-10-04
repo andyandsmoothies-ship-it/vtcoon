@@ -17,6 +17,7 @@ export type ActivityLogType =
   | 'trade'
   | 'hose'
   | 'salary'
+  | 'transit'
   | 'system';
 
 export type ActivityFilterType = 'all' | 'money' | 'property';

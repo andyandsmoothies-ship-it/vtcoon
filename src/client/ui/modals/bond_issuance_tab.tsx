@@ -78,14 +78,14 @@ export function BondIssuanceTab({
   const loanPrincipal = Math.floor(playerNetWorth * trancheConfig.loanRatio);
 
   return (
-    <div className="space-y-4 p-4 bg-amber-500/10 rounded-2xl border border-amber-500/30 text-slate-900 text-xs">
-      <div className="border-b border-amber-900/10 pb-2">
-        <h4 className="font-black text-sm text-amber-950 uppercase">Đòn Bẩy Trái Phiếu Doanh Nghiệp</h4>
-        <p className="text-slate-600 mt-1">Chọn gói đòn bẩy vốn phù hợp với chiến lược tài chính của bạn.</p>
+    <div className="space-y-2.5 sm:space-y-3.5 p-3 sm:p-4 bg-amber-500/10 rounded-2xl border border-amber-500/30 text-slate-900 text-xs">
+      <div className="border-b border-amber-900/10 pb-1.5">
+        <h4 className="font-black text-xs sm:text-sm text-amber-950 uppercase">Đòn Bẩy Trái Phiếu Doanh Nghiệp</h4>
+        <p className="text-[11px] text-slate-600 mt-0.5 leading-snug">Chọn gói đòn bẩy vốn phù hợp với chiến lược tài chính của bạn.</p>
       </div>
 
-      {/* 3 Tranches Cards: Dọc trên Mobile 360px, Ngang trên sm */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+      {/* 3 Tranches Cards: Dọc gọn trên Mobile 360px, Ngang trên sm */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
         {(Object.values(BOND_TRANCHES)).map((t) => {
           const isSelected = selectedTranche === t.id;
           const estPrincipal = Math.floor(playerNetWorth * t.loanRatio);
@@ -96,40 +96,52 @@ export function BondIssuanceTab({
               key={t.id}
               type="button"
               onClick={() => setSelectedTranche(t.id)}
-              className={`p-3 rounded-xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between min-h-[46px] sm:min-h-[96px] ${
+              className={`p-2.5 sm:p-3 rounded-xl border-2 text-left transition-all cursor-pointer min-h-[46px] sm:min-h-[96px] flex flex-row sm:flex-col justify-between items-center sm:items-stretch gap-2 ${
                 isSelected
                   ? 'border-amber-600 bg-amber-50 shadow-sm ring-2 ring-amber-400/50'
                   : 'border-slate-300 bg-white/80 hover:bg-white text-slate-700'
               }`}
             >
-              <div>
-                <div className="flex items-center justify-between">
-                  <span className="font-black text-xs text-slate-900">{t.name}</span>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5 flex-wrap sm:justify-between">
+                  <span className="font-black text-xs text-slate-900 truncate">{t.name}</span>
                   <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
                     t.id === BondTrancheId.ALL_IN ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800'
                   }`}>
                     {Math.round(t.loanRatio * 100)}% NW
                   </span>
                 </div>
-                <div className="mt-1 font-mono font-bold text-amber-950 text-sm">
+                <div className="text-[10px] text-slate-500 mt-0.5 sm:hidden flex items-center gap-1.5">
+                  <span>Kỳ hạn: <strong>{t.durationRounds}v</strong></span>
+                  <span>•</span>
+                  <span>Lãi: <strong className="text-rose-600">+{estInterest}%</strong></span>
+                </div>
+                <div className="hidden sm:block mt-1 font-mono font-bold text-amber-950 text-sm">
                   {formatCurrency(estPrincipal)}
                 </div>
               </div>
-              <div className="mt-2 text-[10px] text-slate-500 flex items-center justify-between border-t border-slate-200 pt-1">
-                <span>Kỳ hạn: <strong>{t.durationRounds} vòng</strong></span>
-                <span>Lãi: <strong className="text-rose-600">+{estInterest}%</strong></span>
+
+              <div className="shrink-0 text-right sm:text-left sm:mt-2 sm:border-t sm:border-slate-200 sm:pt-1">
+                <div className="sm:hidden font-mono font-black text-amber-950 text-sm">
+                  {formatCurrency(estPrincipal)}
+                </div>
+                <div className="hidden sm:flex text-[10px] text-slate-500 items-center justify-between">
+                  <span>Kỳ hạn: <strong>{t.durationRounds} vòng</strong></span>
+                  <span>Lãi: <strong className="text-rose-600">+{estInterest}%</strong></span>
+                </div>
               </div>
             </button>
           );
         })}
       </div>
 
-      <div className="text-[11px] font-semibold text-amber-900">
-        Gói đã chọn: <strong className="text-slate-900">{trancheConfig.name}</strong>
+      <div className="text-[11px] font-semibold text-amber-900 flex items-center justify-between">
+        <span>Gói đã chọn: <strong className="text-slate-900">{trancheConfig.name}</strong></span>
+        <span className="text-[10px] text-slate-600">Hạn mức: <strong className="font-mono text-amber-950 font-bold">+{formatCurrency(loanPrincipal)}</strong></span>
       </div>
 
-      {/* Checklist 3 Điều Kiện Phát Hành Trực Quan (Thay thế L130 - L134) */}
-      <div className="p-3 bg-white/90 rounded-xl border border-amber-200 space-y-2">
+      {/* Checklist 3 Điều Kiện Phát Hành Trực Quan */}
+      <div className="p-2.5 sm:p-3 bg-white/90 rounded-xl border border-amber-200 space-y-1.5 sm:space-y-2">
         <h5 className="font-bold text-[11px] text-slate-700 uppercase tracking-wider">Điều Kiện Phát Hành Trái Phiếu</h5>
         <div className="space-y-2 text-xs">
           <div className="flex items-center justify-between gap-2 min-w-0">

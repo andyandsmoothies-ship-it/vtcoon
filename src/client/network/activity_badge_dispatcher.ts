@@ -207,10 +207,24 @@ export function handleCardPenaltyBadge(act: ActivityLogEntry, state: GameState):
   }, getPawnLandingDelay(act.playerId));
 }
 
+export function handleTransitBadge(act: ActivityLogEntry, state: GameState, _delta?: DeltaPayload): void {
+  const isDelay = act.message.includes('bị hoãn');
+  state.addFloatingText({
+    text: act.message,
+    type: isDelay ? FloatingTextType.Penalty : FloatingTextType.Bonus,
+    playerId: act.playerId ?? '',
+    actionType: 'transit',
+    title: 'VÒNG XOAY VẬN TẢI',
+    cellIndex: act.cellIndex,
+    durationMs: 4000,
+  });
+}
+
 const BADGE_HANDLERS: Record<string, (act: ActivityLogEntry, state: GameState, delta?: DeltaPayload) => void> = {
   rent: handleRentBadge, buy: handleBuyBadge, upgrade: handleUpgradeBadge, tax: handleTaxBadge, bail: handleBailBadge,
   salary: handleSalaryBadge, mortgage: handleMortgageBadge, unmortgage: handleUnmortgageBadge,
   auction: handleAuctionBadge, trade: handleTradeBadge, hose: handleHoseBadge,
+  transit: handleTransitBadge,
   card: (act, state) => {
     if (act.id.startsWith('ma_buyout')) handleMaBuyoutBadge(act, state);
     else if (act.amount && act.amount < 0) handleCardPenaltyBadge(act, state);
@@ -230,8 +244,9 @@ export function handleDiplomaticEventBadge(
 export function dispatchActivityFloatingBadges(activities: readonly ActivityLogEntry[], state: GameState, delta?: DeltaPayload): void {
   if (typeof state?.addFloatingText !== 'function') return;
   for (const act of activities) {
-    if (act.amount !== undefined && Math.abs(act.amount) <= 0 && act.type !== 'trade' && act.type !== 'card') continue;
+    if (act.amount !== undefined && Math.abs(act.amount) <= 0 && act.type !== 'trade' && act.type !== 'card' && act.type !== 'transit') continue;
     BADGE_HANDLERS[act.type]?.(act, state, delta);
   }
   if (delta?.lastDiplomaticEvent) handleDiplomaticEventBadge(delta.lastDiplomaticEvent, state);
 }
+

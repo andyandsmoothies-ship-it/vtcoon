@@ -344,7 +344,28 @@
   - `DEBT-P2P-TURN-TEARDOWN`: Dọn dẹp trạng thái pending khi sang Turn N+1 (Target: IMP-255).
   - `DEBT-P2P-ZOMBIE-LOCK`: Giải phóng khóa giao dịch khi disconnect (Target: IMP-255).
   - `DEBT-ROOM-PROPERTY-COORDINATOR`: `src/server/room_property_coordinator.ts` (362 LOC, Warning Tier 1 > 300). Phân rã điều phối viên BĐS (Target: IMP-256).
-  - `DEBT-P2P-COORDINATOR-SECURITY`: Bảo mật luồng đề nghị giao thương (Target: IMP-256).
+#### [IMP-262] Minh Bạch Hóa Toàn Diện Vòng Xoay Vận Tải & Chuỗi Hệ Quả Bước 2 (Transit Wheel Transparency and Second-Hop Consequence Clarity)
+- **Mã Ticket:** IMP-262 (Tier 2 Full Rigor - Domain FSM + Broadcaster + UI Activity Feed + Bot Delay)
+- **Use Case Ref:** UC-IMP262, UC-GAME-020, UC-GAME-027
+- **Phạm vi hoàn tất:**
+  - Định dạng thông báo công khai tiếng Việt chuẩn hóa `formatTransitWheelBroadcast` cho toàn bộ 5 kết quả quay: `SPEED_BOOST` (Tốc Hành), `SAFE_HAVEN` (Vé VIP Hồi Hương), `CASH_BACK` (Hoàn Cước Cảng), `PASS_GO_FLIGHT` (Bay Xuyên Việt), `FLIGHT_DELAY` (Hoãn Chuyến).
+  - Bổ sung `ActivityLogType: 'transit'` và `FloatingActionType: 'transit'` kết nối pipeline thông báo nổi `MilestoneBanner` toàn phòng và Activity Feed với biểu tượng `🚊`.
+  - Mở rộng DTO `lastTransitResult` của `DeltaPayload` và `Room` với `boostSteps?: number` bảo toàn ô xuất phát trạm bay (`stationCell`).
+  - Hóa giải triệt để tống tiền thuê đúp (`SAFE_HAVEN` khi 0 BĐS không kích hoạt hạ cánh trên chính trạm hiện tại - ADV-01).
+  - Bảo toàn `payout` thưởng lương/trợ cấp khi trúng `PASS_GO_FLIGHT` (ADV-02).
+  - Xây dựng mô-đun sâu `src/client/network/activity_transit_tracker.ts` khử trùng lặp qua `tick`/`roundNumber` (GRILL-01) và dọn dẹp qua `resetTransitActivityTracker` khi sang match session mới (`client_session_purger.ts`).
+  - Miễn trừ bộ lọc `amount <= 0` cho huy hiệu vận tải không kèm tiền mặt trong `activity_badge_dispatcher.ts` (ADV-03).
+  - Tích hợp nhịp nghỉ quan sát tối thiểu 2000ms cho Bot (`BOT_TRANSIT_OBSERVATION_DELAY_MS`) trong `TurnOrchestrator` tại `PropertyManagement`/`ActionPhase` (GRILL-02, ADV-04).
+  - Bảo vệ khán giả không bị cướp quyền điều khiển mở modal Vòng Xoay (`apply_delta.ts` với `isTarget` check - ADV-05).
+  - Đáp ứng chuẩn Dual-Viewport Parity (1280x800 Desktop và 360x740 Mobile) với khoảng cách biên an toàn (desktop >= 16px, mobile >= 90px).
+- **Báo cáo chi tiết:** [`docs/reports/improvements/IMP-262-transit-wheel-transparency_report.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/reports/improvements/IMP-262-transit-wheel-transparency_report.md)
+- **Evidence Snapshot:** [`.agents/evidence/chaos_sentinel_IMP-262.json`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/evidence/chaos_sentinel_IMP-262.json) (`executed: true`, `verdict: APPROVED`)
+- **Kiểm thử:** 22/22 atomic tests PASS (`tests/contracts/imp262_transit_wheel_transparency.test.ts`), 20/20 mutants killed (100% kill rate, 9 source-level), 73/73 regression tests PASS.
+- **Tech Debt Ledger (Nợ kỹ thuật ghi nhận):**
+  - `DEBT-ACTIVITY-TRACKER` [STATUS: OPEN - CARRIED OVER]: `src/client/network/activity_tracker.ts` (361 LOC, Warning Tier 1 > 300). Kế hoạch: Bóc tách notification formatters/badges sang submodule riêng để đưa về < 280 LOC.
+  - `DEBT-TURN-ORCHESTRATOR` [STATUS: OPEN - CARRIED OVER]: `src/server/network/turn_orchestrator.ts` (376 LOC, Warning Tier 1 > 300). Kế hoạch: Bóc tách bot step delay timing calculator sang `turn_pacing_calculator.ts` để đưa về < 250 LOC.
+  - `DEBT-APPLY-DELTA` [STATUS: OPEN - CARRIED OVER]: `src/client/network/apply_delta.ts` (350 LOC, Warning Tier 1 > 300). Kế hoạch: Bóc tách `apply_delta_modals.ts` để đưa về < 250 LOC.
+  - `DEBT-GAME-STORE-TYPES` [STATUS: OPEN - CARRIED OVER]: `src/client/store/game_store_types.ts` (396 LOC, Warning Tier 1 > 300). Kế hoạch: Bóc tách sub-types sang `store_subtypes.ts`.
 
 ---
 

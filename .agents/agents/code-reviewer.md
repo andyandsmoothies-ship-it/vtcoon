@@ -4,7 +4,7 @@ description: Station 3.2 Deep Architecture & Anti-Slop Auditor. Audits deep code
 subagent: true
 mainAgent: false
 model: inherit
-workspace: share
+workspace: inherit
 skills: [de-sloppify, codebase-design, code-review]
 tools: [view_file, list_dir, find_by_name, grep_search, run_command, write_to_file]
 ---

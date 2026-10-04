@@ -121,7 +121,8 @@ export function FloatingBadge({ item }: { readonly item: FloatingTextItem }): Re
     item.actionType === 'debt_relief' ||
     item.actionType === 'chance' ||
     item.actionType === 'market' ||
-    item.actionType === 'bankrupt'
+    item.actionType === 'bankrupt' ||
+    item.actionType === 'transit'
   ) {
     return <MilestoneBanner item={item} />;
   }
@@ -229,7 +230,7 @@ export function FloatingNumbersOverlay(): React.ReactElement | null {
   }
 
   const isMilestone = (action?: string) =>
-    action === 'monopoly' || action === 'debt_relief' || action === 'chance' || action === 'market' || action === 'bankrupt';
+    action === 'monopoly' || action === 'debt_relief' || action === 'chance' || action === 'market' || action === 'bankrupt' || action === 'transit';
   const latestMilestone = [...floatingTexts].reverse().find((t) => isMilestone(t.actionType));
   const regularTexts = floatingTexts.filter((t) => !isMilestone(t.actionType));
 

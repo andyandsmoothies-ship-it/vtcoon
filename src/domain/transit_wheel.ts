@@ -94,3 +94,41 @@ export function findSafeHaven(currentCell: number, ownedProperties: readonly num
   const wrapOwned = [...ownedProperties].sort((a, b) => a - b);
   return wrapOwned[0]!;
 }
+
+export interface TransitWheelBroadcastParams {
+  readonly outcome: TransitWheelOutcome | string;
+  readonly playerName: string;
+  readonly stationName: string;
+  readonly targetCellName?: string;
+  readonly payout?: number;
+  readonly boostSteps?: number;
+}
+
+export function formatTransitWheelBroadcast(params: TransitWheelBroadcastParams): string {
+  const { outcome, playerName, stationName, targetCellName, payout, boostSteps } = params;
+  switch (outcome) {
+    case TransitWheelOutcome.SPEED_BOOST: {
+      const stepText = boostSteps !== undefined ? ` ${boostSteps}` : '';
+      const destText = targetCellName ? ` tới ${targetCellName}` : '';
+      return `⚡ ${playerName} quay trúng Tốc Hành! Bay thêm${stepText} ô${destText}.`;
+    }
+    case TransitWheelOutcome.SAFE_HAVEN: {
+      if (targetCellName && targetCellName !== stationName) {
+        return `🛡️ ${playerName} kích hoạt Vé VIP Hồi Hương! Bay về BĐS an toàn tại ${targetCellName}.`;
+      }
+      return `🛡️ ${playerName} kích hoạt Vé VIP Hồi Hương! An toàn ở lại ${stationName}.`;
+    }
+    case TransitWheelOutcome.CASH_BACK: {
+      const amtText = payout && payout > 0 ? ` +${payout} Tr.` : '';
+      return `💰 ${playerName} quay trúng Hoàn Cước Cảng! Nhận hoàn tiền${amtText} từ Kho Bạc.`;
+    }
+    case TransitWheelOutcome.PASS_GO_FLIGHT: {
+      const amtText = payout && payout > 0 ? ` (+${payout} Tr.)` : '';
+      return `✈️ ${playerName} quay trúng Bay Xuyên Việt! Bay thẳng về ô Khởi Hành (GO) nhận thưởng${amtText}.`;
+    }
+    case TransitWheelOutcome.FLIGHT_DELAY:
+    default:
+      return `⏳ Chuyến bay của ${playerName} bị hoãn (Delay)! Quân cờ giữ nguyên tại ${stationName}.`;
+  }
+}
+

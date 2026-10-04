@@ -25,12 +25,23 @@ export const HUMAN_PHASE_TIMEOUTS_MS: Record<TurnPhase, number> = {
 export const AUCTION_SETTLE_DELAY_MS = 2500;
 export const AUCTION_BOT_STEP_DELAY_MS = 1000;
 export const BOT_UPGRADE_OBSERVATION_DELAY_MS = 1500;
+export const BOT_TRANSIT_OBSERVATION_DELAY_MS = 2000;
 
 export function calculateBotStepDelay(
   room: Room | undefined,
   baseDelayMs: number = 1500
 ): number {
   if (!room || baseDelayMs <= 500) return baseDelayMs;
+  // [GRILL-02][ADV-04] Rào pha PropertyManagement & ActionPhase, ưu tiên tính delay quan sát Vòng Xoay
+  if (
+    (room.phase === TurnPhase.PropertyManagement || room.phase === TurnPhase.ActionPhase) &&
+    room.lastTransitResult &&
+    baseDelayMs > 500
+  ) {
+    const boost = room.lastTransitResult.boostSteps ?? 0;
+    const dynamicTransitDelay = 1200 + boost * 350 + BOT_TRANSIT_OBSERVATION_DELAY_MS;
+    return Math.max(baseDelayMs, dynamicTransitDelay);
+  }
   if (
     (room.phase === TurnPhase.PropertyManagement || room.phase === TurnPhase.ActionPhase) &&
     room.lastDice &&

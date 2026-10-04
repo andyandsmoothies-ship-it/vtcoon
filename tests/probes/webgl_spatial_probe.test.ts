@@ -4,7 +4,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import {
   validateDrawCallsBudget,
-} from '../../src/client/3d/spatial_invariants';
+} from '../../src/client/3d/perf_budget';
 import {
   validateCameraFrustum,
   validateMatrixFinite,

@@ -70,14 +70,14 @@ export function PropertyPortfolioModal({
       data-testid="property-portfolio-modal"
     >
       {/* Header */}
-      <header className="p-4 bg-[#F7F2E7] border-b border-slate-300 flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-2.5">
-          <span className="text-2xl" aria-hidden="true">🏛️</span>
+      <header className="p-3 sm:p-4 bg-[#F7F2E7] border-b border-slate-300 flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-2 sm:gap-2.5">
+          <span className="text-xl sm:text-2xl" aria-hidden="true">🏛️</span>
           <div>
-            <h2 className="text-base font-black uppercase text-slate-900 tracking-wider">
+            <h2 className="text-sm sm:text-base font-black uppercase text-slate-900 tracking-wider">
               DANH MỤC BẤT ĐỘNG SẢN
             </h2>
-            <p className="text-xs text-slate-600 font-semibold">
+            <p className="text-[11px] sm:text-xs text-slate-600 font-semibold">
               Quản lý {ownedProperties.length} tài sản sở hữu • Nâng cấp nhanh 1-click
             </p>
           </div>
@@ -94,7 +94,7 @@ export function PropertyPortfolioModal({
         )}
       </header>
 
-      <div className="px-4 pt-3 shrink-0">
+      <div className="px-3 pt-2 sm:px-4 sm:pt-3 shrink-0">
         <PortfolioTabHeader
           activeTab={activeTab}
           onTabChange={setActiveTab}
@@ -103,7 +103,7 @@ export function PropertyPortfolioModal({
       </div>
 
       {activeTab === 'bonds' ? (
-        <div className="p-4 flex-1 overflow-y-auto">
+        <div className="p-2.5 sm:p-4 flex-1 overflow-y-auto">
           <BondIssuanceTab
             bondContract={bondContract}
             balance={currentBalance}
@@ -152,7 +152,7 @@ export function PropertyPortfolioModal({
       )}
 
       {/* Danh sách BĐS */}
-      <div className={`p-4 pb-8 overflow-y-auto ${filteredProperties.length === 0 ? 'shrink-0' : 'flex-1'} space-y-3 pb-20`}>
+      <div className={`p-3 sm:p-4 overflow-y-auto ${filteredProperties.length === 0 ? 'shrink-0' : 'flex-1'} space-y-3 pb-16`}>
         {filteredProperties.length === 0 ? (
           <div className="py-8 px-4 text-center flex flex-col items-center justify-center gap-2">
             <span className="text-3xl" aria-hidden="true">

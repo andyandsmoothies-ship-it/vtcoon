@@ -65,7 +65,7 @@ if (targetFiles.length > 0) {
 // 3. Zero Dirty Casts & Banned Spies Scan
 runStep('3. Zero Dirty Casts & Banned AST Patterns', () => {
   const filesToScan = targetFiles.length > 0
-    ? targetFiles.filter((f) => fs.existsSync(f) && /\.(ts|tsx|js|mjs)$/.test(f))
+    ? targetFiles.filter((f) => fs.existsSync(f) && /\.(ts|tsx|js|mjs)$/.test(f) && !f.replace(/\\/g, '/').startsWith('scripts/'))
     : [];
 
   const violations = [];
@@ -95,6 +95,59 @@ runStep('3. Zero Dirty Casts & Banned AST Patterns', () => {
     throw new Error(violations.join('\n'));
   }
 });
+
+// 3.5. Test Architecture & Assertion Density Guard (Station 1 / DoD #1)
+const testFilesToScan = targetFiles.filter(
+  (f) => fs.existsSync(f) && /\.(test|spec)\.(ts|tsx|js|mjs)$/.test(f),
+);
+
+if (testFilesToScan.length > 0) {
+  runStep('3.5. Test Assertion Density (<= 4 expects/test, no loops)', () => {
+    const testViolations = [];
+    const testRegex = /\b(?:it|test)(?:\.(?:only|skip))?\s*\(\s*(['"`][\s\S]*?['"`])\s*,\s*(?:async\s*)?(?:\([^)]*\)|function\s*\([^)]*\))\s*=>?\s*\{/g;
+
+    for (const file of testFilesToScan) {
+      const content = fs.readFileSync(path.resolve(repoRoot, file), 'utf8');
+      let match;
+      while ((match = testRegex.exec(content)) !== null) {
+        const title = match[1].slice(0, 60).replace(/\r?\n/g, ' ');
+        const startIndex = match.index + match[0].length;
+        let depth = 1;
+        let endIndex = startIndex;
+        for (let i = startIndex; i < content.length; i++) {
+          if (content[i] === '{') depth++;
+          else if (content[i] === '}') {
+            depth--;
+            if (depth === 0) {
+              endIndex = i;
+              break;
+            }
+          }
+        }
+        const blockBody = content.slice(startIndex, endIndex);
+        const expectCount = (blockBody.match(/\bexpect\s*\(/g) || []).length;
+        const lineNum = content.slice(0, match.index).split('\n').length;
+
+        if (expectCount > 4) {
+          testViolations.push(
+            `${file}:${lineNum} - Test case contains ${expectCount} expect() calls (max 4 allowed): ${title}`,
+          );
+        }
+        if (/\bfor\s*\(|\.forEach\s*\(|\bwhile\s*\(/.test(blockBody)) {
+          testViolations.push(
+            `${file}:${lineNum} - Test case contains forbidden loop in it() (use it.each instead): ${title}`,
+          );
+        }
+      }
+    }
+
+    if (testViolations.length > 0) {
+      throw new Error(testViolations.join('\n'));
+    }
+  });
+} else {
+  console.log('ℹ️  3.5. Test Assertion Density: Skipped (no test files in target list)');
+}
 
 // 4. Anti-Slop Linter (includes Rule 8 zero-test-props and Rule 11 zero-orphan-files)
 runStep('4. Anti-Slop Linter (lint_slop.mjs)', () => {

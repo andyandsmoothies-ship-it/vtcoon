@@ -4,7 +4,7 @@ description: Adversarial Plan Challenger & Devil's Advocate. Audits implementati
 subagent: true
 mainAgent: false
 model: inherit
-workspace: share
+workspace: inherit
 skills: [grilling, codebase-design, domain-modeling]
 tools: [view_file, list_dir, find_by_name, grep_search, run_command, write_to_file]
 ---

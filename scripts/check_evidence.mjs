@@ -174,6 +174,40 @@ if (evidence.visualReview || /3d|ui|viaduct|diorama|ballast|modal|hud/i.test(evi
   }
 }
 
+// 4. Physical Review Reports Persistence Gate (Phase 3.3)
+const auditDir = path.join(repoRoot, '.agents', 'audit');
+if (fs.existsSync(auditDir)) {
+  const auditFiles = fs.readdirSync(auditDir);
+  const ticketRaw = (evidence.ticketId || targetArg || '').toLowerCase();
+  const ticketClean = ticketRaw.replace(/[^a-z0-9]/g, '');
+  const ticketNum = ticketClean.replace(/^[a-z]+/, '');
+
+  if (ticketNum) {
+    const matchesTicket = (filename) => {
+      const fl = filename.toLowerCase();
+      return fl.includes(ticketClean) || fl.includes(`imp-${ticketNum}`) || fl.includes(`imp_${ticketNum}`) || fl.includes(`imp${ticketNum}`);
+    };
+
+    const hasSpecReview = auditFiles.some((f) => f.toLowerCase().startsWith('spec_review_') && matchesTicket(f));
+    if (!hasSpecReview) {
+      errors.push(`[Phase 3.3 Persistence Violation] Missing physical Spec Review report: .agents/audit/SPEC_REVIEW_${evidence.ticketId || targetArg}.md`);
+    }
+
+    const hasCodeReview = auditFiles.some((f) => f.toLowerCase().startsWith('code_review_') && matchesTicket(f));
+    if (!hasCodeReview) {
+      errors.push(`[Phase 3.3 Persistence Violation] Missing physical Code Review report: .agents/audit/CODE_REVIEW_${evidence.ticketId || targetArg}.md`);
+    }
+
+    const isVisual = evidence.visualReview || /3d|ui|viaduct|diorama|ballast|modal|hud/i.test(evidencePath) || /3d|ui/i.test(summary.contractSuite || '');
+    if (isVisual) {
+      const hasVisualReview = auditFiles.some((f) => /^(ui_craft|game_3d|3d_visual)_review_/i.test(f) && matchesTicket(f));
+      if (!hasVisualReview) {
+        errors.push(`[Phase 3.3 Persistence Violation] Visual ticket missing UI/3D review report: .agents/audit/UI_CRAFT_REVIEW_${evidence.ticketId || targetArg}.md or 3D_VISUAL_REVIEW_${evidence.ticketId || targetArg}.md`);
+      }
+    }
+  }
+}
+
 if (errors.length > 0) {
   console.error('\n❌ EVIDENCE AUDIT FAILED:');
   errors.forEach((e) => console.error(`  - ${e}`));

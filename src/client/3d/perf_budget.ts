@@ -1,6 +1,11 @@
 // [TC-IMP10.3/MSS] PerfBudget — 60 FPS Performance Budget Controller & Adaptive LOD System
 // Enforces Draw Call Budget (<85 calls), triangle count (<150k), and target frame time (16.6ms)
-import { validateDrawCallsBudget } from './spatial_invariants';
+
+export function validateDrawCallsBudget(calls: number, limit = 85): boolean {
+  if (!Number.isFinite(calls)) return false;
+  if (!Number.isFinite(limit)) return false;
+  return calls >= 0 && calls <= limit;
+}
 
 export enum LODLevel {
   HIGH = 'HIGH',       // Full PBR detail, full particles, 512px reflections

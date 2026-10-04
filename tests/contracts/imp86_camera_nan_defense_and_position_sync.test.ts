@@ -18,6 +18,7 @@ describe('[IMP-86][CONTRACT] Camera NaN Defense & Position Sync & AppErrorBounda
 
   beforeAll(async () => {
     const candidatePaths = [
+      '../../src/client/ui/error_boundary',
       '../../src/client/ui/app_error_boundary',
       '../../src/client/app_error_boundary',
       '../../src/client/main',

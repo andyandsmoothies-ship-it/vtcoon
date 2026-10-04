@@ -4,7 +4,7 @@ description: Independent 2D UI/UX Craft Reviewer. Audits ergonomics, legibility,
 subagent: true
 mainAgent: false
 model: inherit
-workspace: share
+workspace: inherit
 skills: [impeccable, browser-testing, tailwind-design-system]
 tools: [view_file, list_dir, find_by_name, grep_search, write_to_file]
 ---

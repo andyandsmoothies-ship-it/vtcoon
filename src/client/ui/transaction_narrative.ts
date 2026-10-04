@@ -40,6 +40,7 @@ const ACTION_ICONS: Record<string, string> = {
   debt_relief: '🎉', stimulus: '📈', chance: '⚡', market: '🎴',
   auction_win: '🔨', hose: '📊', teleport: '✈️', audit_jail: '🚨', ma_buyout: '🤝',
   diplomatic: '🤝', bankrupt: '🚨', trade: '🤝', decline_auction: '🔨',
+  transit: '🚊',
 };
 
 export function resolveActionIcon(actionType?: string, isReward?: boolean): string {

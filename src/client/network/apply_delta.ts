@@ -198,7 +198,8 @@ function syncOtherModals(delta: DeltaPayload, state: GameState): void {
 
   if (delta.pendingTransitWheel) {
     const myPid = useLobbyStore.getState().myPlayerId;
-    if (!myPid || delta.pendingTransitWheel.playerId === myPid) {
+    const isTarget = myPid ? delta.pendingTransitWheel.playerId === myPid : Boolean(state.isOfflineMode);
+    if (isTarget) {
       state.openModal('transit_wheel', delta.pendingTransitWheel);
     }
   }
@@ -206,7 +207,8 @@ function syncOtherModals(delta: DeltaPayload, state: GameState): void {
   if (delta.lastTransitResult !== undefined) {
     if (delta.lastTransitResult) {
       const myPid = useLobbyStore.getState().myPlayerId;
-      if (!myPid || delta.lastTransitResult.playerId === myPid) {
+      const isTarget = myPid ? delta.lastTransitResult.playerId === myPid : Boolean(state.isOfflineMode);
+      if (isTarget) {
         state.updateModalPayload<'transit_wheel'>({
           outcome: delta.lastTransitResult.outcome,
           targetCell: delta.lastTransitResult.targetCell,

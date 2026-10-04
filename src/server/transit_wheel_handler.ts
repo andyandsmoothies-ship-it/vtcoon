@@ -46,12 +46,15 @@ export function handleSpinTransitWheel(
   current.hasSpunTransitThisTurn = true;
 
   const outcome = evaluateTransitWheelOutcome(rng());
+  const stationCell = current.position;
   let targetCell = current.position;
   let payout = 0;
+  let boostSteps: number | undefined;
 
   switch (outcome) {
     case TransitWheelOutcome.SPEED_BOOST: {
       const boost = Math.floor(rng() * 6) + 1; // 1D6
+      boostSteps = boost;
       const oldPos = current.position;
       targetCell = (oldPos + boost) % BOARD_SIZE;
       current.position = targetCell;
@@ -79,7 +82,10 @@ export function handleSpinTransitWheel(
           room.passedGoSalary = sal;
         }
       }
-      resolveSecondHopLanding(room, current, targetCell, registry, stateMap, rng, deckRng);
+      // [ADV-01] Chống phạt tiền thuê đúp: Chỉ resolve second hop nếu thực sự di chuyển sang BĐS khác
+      if (targetCell !== oldPos) {
+        resolveSecondHopLanding(room, current, targetCell, registry, stateMap, rng, deckRng);
+      }
       break;
     }
     case TransitWheelOutcome.CASH_BACK: {
@@ -96,10 +102,12 @@ export function handleSpinTransitWheel(
         const sal = calculateGoSalary(room.roundCount ?? 1);
         current.balance += sal;
         room.passedGoSalary = sal;
+        payout = sal; // [ADV-02] Bảo toàn hạch toán lương GO vào lastTransitResult
       } else {
         const stipend = Math.min(500, Math.max(0, room.treasury ?? 0));
         room.treasury = (room.treasury ?? 0) - stipend;
         current.balance += stipend;
+        payout = stipend; // [ADV-02] Bảo toàn hạch toán phụ cấp kho bạc vào lastTransitResult
       }
       break;
     }
@@ -111,10 +119,11 @@ export function handleSpinTransitWheel(
 
   room.lastTransitResult = {
     playerId: current.id,
-    cellIndex: targetCell,
+    cellIndex: stationCell,
     outcome,
     targetCell,
     payout: payout > 0 ? payout : undefined,
+    ...(boostSteps !== undefined ? { boostSteps } : {}),
   };
 
   return { success: true, outcome, targetCell, payout };

@@ -4,7 +4,7 @@ description: Adversarial Plan Auditor & Architectural Stress-Tester. Audits phys
 subagent: true
 mainAgent: false
 model: inherit
-workspace: share
+workspace: inherit
 skills: [grilling, writing-plans, codebase-design]
 tools: [view_file, list_dir, find_by_name, grep_search, run_command, write_to_file]
 ---

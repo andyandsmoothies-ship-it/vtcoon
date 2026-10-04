@@ -57,6 +57,9 @@ hooks: [.agents/hooks_qa.json]
   - Probe suites (`tests/probes/**`): Minimum 14 atomic tests / slice.
   - Ratio of `expect()` / `it()` must stay between 1.0 and 3.5.
 - **Tag Isolation Rule**: One traceability tag per `it()` block. If two contracts need testing, write two separate `it()` blocks. Merging `[TC-XX.01]` and `[TC-XX.02]` into one block is banned.
+- **Enum Outcome Exhaustiveness Rule**:
+  - When testing state machines, FSM transitions, domain handlers, or services governed by an Enum or Union of outcomes/reasons (e.g. `Outcome`, `ReasonCode`, `Status`), write at least 1 dedicated atomic test for 100% of enum values.
+  - Assert the exact state transition, side effects, treasury/balance delta, or error mapping for each branch. Never leave enum outcomes unexercised.
 - **Helper Adversarial Gate**: Any test helper function (e.g. `countVisibleMeshes`, `stripRetentionGroups`, `extractAttr`) must be validated with adversarial inputs before being used in assertions:
   - Nested / recursive structure input (not just flat)
   - Empty / null input

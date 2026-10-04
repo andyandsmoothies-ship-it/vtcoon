@@ -22,7 +22,7 @@ declare module '../../src/domain/room.js' {
   }
   interface Room {
     pendingTransitWheel?: { playerId: string; cellIndex: number; timestamp: number } | null;
-    lastTransitResult?: { playerId: string; cellIndex: number; outcome: string; targetCell?: number; payout?: number } | null;
+    lastTransitResult?: { playerId: string; cellIndex: number; outcome: string; targetCell?: number; payout?: number; boostSteps?: number } | null;
   }
 }
 

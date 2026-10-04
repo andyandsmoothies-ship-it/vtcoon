@@ -4,7 +4,7 @@ description: Verifies a fix round - verdicts each prior finding ADDRESSED or NOT
 subagent: true
 mainAgent: false
 model: inherit
-workspace: share
+workspace: inherit
 skills: [receiving-code-review, code-review]
 tools: [view_file, list_dir, find_by_name, grep_search, run_command]
 ---

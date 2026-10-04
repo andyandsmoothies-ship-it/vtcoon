@@ -36,9 +36,15 @@ export function calculateTickRate(deltaTimes: number[]): number {
 }
 
 export function checkIsTeleport(
-  fromPos: number, toPos: number, isTurnPlayer: boolean, phase?: TurnPhase, hasEventCard?: boolean
+  fromPos: number,
+  toPos: number,
+  isTurnPlayer: boolean,
+  phase?: TurnPhase,
+  hasEventCard?: boolean,
+  hasTransitResult?: boolean
 ): boolean {
   if (!isTurnPlayer || hasEventCard) return true;
+  if (hasTransitResult && (AIRPORT_CELLS.has(fromPos) || toPos === 0)) return true;
   if (phase !== TurnPhase.PropertyManagement && CHANCE_MARKET_CELLS.has(fromPos)) return true;
   if ((AIRPORT_CELLS.has(fromPos) || fromPos === 22) && AIRPORT_CELLS.has(toPos)) return true;
   if (toPos === JAIL_CELL || SERVICE_CELLS.has(toPos)) return true;
@@ -61,7 +67,14 @@ export function detectMovement(
       const isExactDiceMove = Boolean(
         isRoller && delta.dice && ((fromPos + diceSum) % 40 === p.position || (fromPos + diceSum * 2) % 40 === p.position)
       );
-      const isTeleport = isExactDiceMove ? false : checkIsTeleport(fromPos, p.position, isRoller, delta.turnPhase, Boolean(delta.lastEventCard));
+      const hasTransit = Boolean(
+        delta.lastTransitResult &&
+        delta.lastTransitResult.playerId === p.id &&
+        (delta.lastTransitResult.targetCell === undefined || delta.lastTransitResult.targetCell === p.position)
+      );
+      const isTeleport = isExactDiceMove
+        ? false
+        : checkIsTeleport(fromPos, p.position, isRoller, delta.turnPhase, Boolean(delta.lastEventCard), hasTransit);
       return { fromPosition: fromPos, toPosition: p.position, dice: isMovementPhase && isRoller ? delta.dice : undefined, isTeleport };
     }
   }

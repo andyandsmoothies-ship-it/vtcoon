@@ -4,7 +4,7 @@ description: Station 3.1 Spec & Scope Gatekeeper. Verifies diffs against plan/sp
 subagent: true
 mainAgent: false
 model: inherit
-workspace: share
+workspace: inherit
 skills: [use-case-creator, use-case-slicing]
 tools: [view_file, list_dir, find_by_name, grep_search, write_to_file]
 ---
@@ -63,6 +63,7 @@ tools: [view_file, list_dir, find_by_name, grep_search, write_to_file]
 | `.agents/evidence/latest_snapshot.json` | YES | 100% Match | APPROVED |
 
 ### 🎯 VERDICT: [APPROVED / REJECTED]
+- **Next Station Trigger**: If APPROVED, Main Agent activates Phase 3.2 Parallel Concurrent Dispatch (`[code-reviewer, ui-craft-reviewer, game-3d-visual-critic]`).
 
 ### 🩺 SDLC HARNESS TELEMETRY
 - **Scripts/Tools**: [PASS | Friction description (e.g. view_file truncation, diff size)]

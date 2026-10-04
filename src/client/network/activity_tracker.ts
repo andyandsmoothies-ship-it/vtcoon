@@ -309,6 +309,7 @@ export function trackDeltaActivities(
   activities.push(...propEntries);
   activities.push(...detectFinancialAndStatusActivities(delta, prevState, nextState, context));
   activities.push(...detectAuctionActivities(delta, prevState, nextState, activityStore));
+  activities.push(...detectTransitActivities(delta, prevState, nextState, activityStore));
 
   const store = activityStore.getState();
   for (const entry of activities) {
@@ -354,5 +355,7 @@ export function trackDeltaActivities(
   }
 }
 
+import { detectTransitActivities, resetTransitActivityTracker } from './activity_transit_tracker.js';
+export { detectTransitActivities, resetTransitActivityTracker };
 export { resetHoseActivityTracker } from './activity_financial_tracker.js';
 

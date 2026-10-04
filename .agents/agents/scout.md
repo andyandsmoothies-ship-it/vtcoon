@@ -4,7 +4,7 @@ description: Codebase scout, JIT skill dispatcher, and Station 2.5 Fast Pre-Filt
 subagent: true
 mainAgent: false
 model: flash
-workspace: share
+workspace: inherit
 skills: [skill-dispatcher, research]
 tools: [view_file, list_dir, find_by_name, grep_search, run_command]
 ---

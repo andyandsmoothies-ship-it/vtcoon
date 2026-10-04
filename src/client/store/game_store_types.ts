@@ -92,6 +92,7 @@ export type FloatingActionType =
   | 'diplomatic'
   | 'trade'
   | 'decline_auction'
+  | 'transit'
   | 'general';
 
 export interface FloatingTextItem {
@@ -240,6 +241,7 @@ export interface GameState {
   readonly maxRounds: number;
   readonly activeModifiers: ReadonlyArray<ClientMarketModifier>;
   readonly isHeatmapActive: boolean;
+  readonly isOfflineMode?: boolean;
   readonly spotlightedCellIndices?: readonly number[] | null;
 
   // UI-04 Business Modals State

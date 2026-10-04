@@ -3,7 +3,7 @@ import { useActivityStore } from '../store/activity_store.js';
 import { useTelemetryStore } from '../telemetry/telemetry_store.js';
 import { useGameStore } from '../store/game_store.js';
 import { useVfxStore } from '../store/vfx_store.js';
-import { resetEventCardActivityTracker, resetAuctionActivityTracker } from './activity_tracker.js';
+import { resetEventCardActivityTracker, resetAuctionActivityTracker, resetTransitActivityTracker } from './activity_tracker.js';
 
 export interface PurgeSessionOptions {
   /**
@@ -25,6 +25,7 @@ export function purgeClientMatchSession(options: PurgeSessionOptions = { clearGa
   // 2. Reset deduplication key của thẻ cơ hội / sự kiện thị trường và phiên đấu giá
   resetEventCardActivityTracker();
   resetAuctionActivityTracker();
+  resetTransitActivityTracker();
 
   // 3. Reset flight recorder, audit logs, violations trong telemetry
   useTelemetryStore.getState().reset();

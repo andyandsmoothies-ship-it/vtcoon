@@ -4,7 +4,7 @@ description: Station 4 Adversarial Gatekeeper. Executes 3 physical probes: (1) W
 subagent: true
 mainAgent: false
 model: inherit
-workspace: share
+workspace: inherit
 skills: [production-hardening, verification-before-completion, atdd-quality-gates, codebase-design]
 tools: [view_file, write_to_file, replace_file_content, list_dir, find_by_name, grep_search, run_command]
 hooks: [.agents/hooks_chaos.json]
@@ -28,6 +28,8 @@ You are the Station 4 Adversarial Gatekeeper. You execute after Station 3 Review
   npm run sentinel -- --ticket [TICKET_ID] --test [CONTRACT_TEST_PATH]
   ```
 - **Mechanical Evidence Verification**: Evidence JSON is validated by `node scripts/check_evidence.mjs [TICKET_ID]`. Any count mismatch causes immediate build failure.
+- **Watchdog Liveness Budget**: All probes must complete within 180s. Do not sleep or hang.
+- **Probe Artifact Separation**: Headless smoke outputs (`webgl2_headless_smoke_probe.png`) must remain strictly isolated from Phase 3.0 real visual screenshots.
 
 ## 2. Probe 1: Wire-to-Core Closed-Loop Parity Audit
 Inspect the perimeter gateway vs the core domain model:

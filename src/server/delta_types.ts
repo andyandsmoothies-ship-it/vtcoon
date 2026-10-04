@@ -100,7 +100,7 @@ export interface DeltaPayload {
   readonly lastDiplomaticEvent?:  DiplomaticEventDelta | null;
   readonly passedGoSalary?:       number;
   readonly pendingTransitWheel?:  { playerId: string; cellIndex: number; timestamp: number } | null;
-  readonly lastTransitResult?:    { playerId: string; cellIndex: number; outcome: TransitWheelOutcome | string; targetCell?: number; payout?: number } | null;
+  readonly lastTransitResult?:    { playerId: string; cellIndex: number; outcome: TransitWheelOutcome | string; targetCell?: number; payout?: number; boostSteps?: number } | null;
 }
 
 export interface DeltaPayloadOptions {
@@ -126,5 +126,5 @@ export interface DeltaPayloadOptions {
   lastDiplomaticEvent?: DiplomaticEventDelta | null;
   passedGoSalary?: number;
   pendingTransitWheel?: { playerId: string; cellIndex: number; timestamp: number } | null;
-  lastTransitResult?: { playerId: string; cellIndex: number; outcome: TransitWheelOutcome | string; targetCell?: number; payout?: number } | null;
+  lastTransitResult?: { playerId: string; cellIndex: number; outcome: TransitWheelOutcome | string; targetCell?: number; payout?: number; boostSteps?: number } | null;
 }
