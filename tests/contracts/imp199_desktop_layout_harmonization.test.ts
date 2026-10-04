@@ -163,7 +163,7 @@ describe('[TC-199.01/MSS..TC-199.18/MSS][UC-IMP199] Comprehensive Desktop Layout
       });
 
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
-      expect(html).toContain('top-20 sm:top-20');
+      expect(html).toContain('md:top-20');
     });
 
     it('[TC-199.06/MSS][UC-IMP199] FloatingNumbersOverlay container applies top-28 sm:top-28 offset when activeMarketCount === 1', () => {
@@ -185,7 +185,7 @@ describe('[TC-199.01/MSS..TC-199.18/MSS][UC-IMP199] Comprehensive Desktop Layout
       });
 
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
-      expect(html).toContain('top-28 sm:top-28');
+      expect(html).toContain('md:top-28');
     });
 
     it('[TC-199.07/MSS][UC-IMP199] FloatingNumbersOverlay container applies top-36 sm:top-36 offset when activeMarketCount === 2 preventing 44px desktop collision under 140px ticker', () => {
@@ -208,7 +208,7 @@ describe('[TC-199.01/MSS..TC-199.18/MSS][UC-IMP199] Comprehensive Desktop Layout
       });
 
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
-      expect(html).toContain('top-36 sm:top-36');
+      expect(html).toContain('md:top-36');
     });
 
     it('[TC-199.08/MSS][UC-IMP199] FloatingNumbersOverlay container applies top-44 sm:top-44 offset when activeMarketCount >= 3', () => {
@@ -232,7 +232,7 @@ describe('[TC-199.01/MSS..TC-199.18/MSS][UC-IMP199] Comprehensive Desktop Layout
       });
 
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
-      expect(html).toContain('top-44 sm:top-44');
+      expect(html).toContain('md:top-44');
     });
   });
 

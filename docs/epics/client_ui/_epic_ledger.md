@@ -1692,6 +1692,328 @@
   * `chaos-sentinel`: Station 4 APPROVED (3 Probes passed, 10/10 mutants killed, 0 survived).
 - **Trạng thái**: ✅ Hoàn thành IMP-246 (2026-10-02).
 
+---
+
+### [2026-10-03] IMP-251: Mobile Player HUD Viewport Clearance via Dead Space Elimination (Khắc Phục Khung Nhìn Thẻ Người Chơi Mobile Qua Khử Đệm Chết)
+- **Mục tiêu**: Loại bỏ triệt để bẫy đệm chết kép 128px (`pt-16 sm:pt-0` xuất hiện 2 lần trên cả `<aside>` và `<div>` danh sách con) khiến thẻ người chơi thứ 4 có nguy cơ bị chém cụt và rơi khỏi khung nhìn trên các thiết bị di động thực tế (có thanh URL trình duyệt hoặc màn hình ngắn). Nâng toàn bộ cụm 4 thẻ lên 124px sát TopBar (`pt-1 sm:pt-0`), tạo khoảng đệm an toàn 204px phía trên ActionDock trên màn hình 360x740. Bảo toàn 100% Flex Containment Guard (`overflow-hidden` trên `hud_container.tsx:78`), kích thước chấm BĐS 8px mobile / 9px desktop (Dual-Viewport Parity), và lớp nền đóng nhanh (`player-hud-backdrop`).
+- **Hạng mục thi công cốt lõi**:
+  1. *Subtractive Refactoring & Single Padding Contract (`player_hud_list.tsx`)*: Chuẩn hóa padding đỉnh tại `<aside>` thành `pt-1 sm:pt-0 relative z-20` và xóa bỏ hoàn toàn `pt-16 sm:pt-0` ở thẻ `<div>` bọc danh sách thẻ, đưa tổng padding đỉnh trên mobile từ 128px về đúng 4px (giải phóng 124px không gian dọc khả dụng).
+  2. *Containment & Invariant Preservation*: Tuyệt đối không can thiệp `hud_container.tsx` (bảo toàn `overflow-hidden` ngăn ActionDock bị đẩy khỏi viewport); tuyệt đối không can thiệp `player_card.tsx` (bảo toàn 396 LOC, giữ nguyên kích thước chấm BĐS 8px/9px, giữ vững thẩm mỹ Tactile Neo-Brutalist với bóng đổ 6px không bị cắt); bảo toàn cơ chế chạm backdrop để đóng HUD.
+  3. *Contract Testing & Specification Evolution*:
+     - Thiết lập bộ kiểm thử hợp đồng mới `tests/contracts/imp251_player_hud_viewport_harmonics.test.ts` gồm 14 atomic tests qua 5 Facets theo chuẩn Detroit Classical TDD (3 test RED hợp đồng, 11 test bảo vệ hồi quy; đã loại bỏ static checklist test cấm).
+     - Hòa giải hợp đồng kiểm thử kế thừa `TC-201.15` trong `tests/contracts/imp201_topbar_overflow_and_hud_fixes.test.ts` (xác nhận `pt-1 sm:pt-0` thay thế `pt-16`).
+- **Hạ tầng & Ngân sách LOC Thực tế (`scripts/check_loc.mjs` - Total Lines / Non-Empty SLOC)**:
+  * `src/client/ui/player_hud_list.tsx` (Total: 48 / SLOC: 44 — Tier 2 <= 500 LOC; Delta net -1)
+  * `tests/contracts/imp251_player_hud_viewport_harmonics.test.ts` (Total: 151 / SLOC: 127 — Tests <= 600 LOC)
+  * `tests/contracts/imp201_topbar_overflow_and_hud_fixes.test.ts` (Total: 454 / SLOC: 386 — Tests <= 600 LOC)
+- **Kiểm thử & Bất biến**:
+  * 14/14 atomic contract tests PASS trên `imp251_player_hud_viewport_harmonics.test.ts` (100% GREEN, Detroit Classical TDD, 0 loop in `it()`).
+  * 111/111 regression tests PASS trên 7 suites (`imp251`, `imp201`, `imp202`, `imp190`, `imp187`, `imp193`, `imp237`).
+  * Station 4 Chaos Sentinel: 3/3 physical probes PASS:
+    - Probe 1 (Intent Parity 24/24 Intent symmetric parity, 0 gaps — kiểm tra nền tảng).
+    - Probe 2 (Ephemeral Wire dynamic port 58697 TCP live WebSocket handshake & clean drop recovery — kiểm tra nền tảng).
+    - Probe 3 (Mutation Sensitivity): 6/6 mutants bị tiêu diệt (100% kill rate, 0 survived; ghi nhận phạm vi mutant cho file template JSX ngắn).
+  * Visual Evidence Gate: Thẩm định thành công 2 ảnh chụp in-game vật lý Dual-Viewport tại `.agents/tmp/` (`imp-251_mobile_360.jpg` và `imp-251_desktop.jpg`).
+  * TypeScript typecheck: `tsc --noEmit` exit 0. UI Linter: `npm run lint:ui` 0 violations. Slop Linter: `npm run lint:slop` 0 hard violations. 0 dirty casts (`as any`).
+  * Evidence Snapshot: `.agents/evidence/chaos_sentinel_IMP-251.json` (`verdict: APPROVED`).
+  * Tech Debt Ledger: Đăng ký `DEBT-PLAYER-HUD-SCROLL-CONTAINMENT` (Xây dựng container cuộn an toàn hỗ trợ `dvh` và đệm bóng đổ khi hỗ trợ màn hình cực ngắn < 640px).
+- **Trạng thái**: ✅ Hoàn thành IMP-251 (2026-10-03 - Empirically Reconciled).
+
+---
+
+### [2026-10-03] IMP-252: Financial Notification De-duplication via Transaction Grouping & Local Player Perspective (Khử Trùng Lặp Thông Báo Tài Chính P2P)
+- **Mục tiêu**: Khử triệt để hiện tượng trùng lặp thông báo biến động tài chính song phương (P2P reciprocal notifications) gây che khuất 40% sa bàn và bẫy "thẻ ma" (Zombie Badge) khi đóng hoặc hết hạn thẻ. Định danh nhóm giao dịch qua `groupId`, đồng bộ vòng đời hủy thẻ trong Zustand store, áp dụng module thuần túy lọc góc nhìn chủ thể (`notification_deduplicator.ts`), bảo toàn thứ tự thời gian, và chuẩn hóa sự kiện `bankrupt` thành `MilestoneBanner`.
+- **Hạng mục thi công cốt lõi**:
+  1. *Khóa Định Danh Nhóm Giao Dịch (`game_store_types.ts`)*: Bổ sung thuộc tính `groupId?: string` vào giao diện `FloatingTextItem`.
+  2. *Vòng Đời Store Đồng Bộ (`game_store.ts`)*:
+     - `removeFloatingText(id)`: Tìm `groupId` của thẻ mục tiêu và xóa toàn bộ các thẻ có chung `groupId`, ngăn ngừa tuyệt đối rò rỉ thẻ ma.
+     - Nhận diện `bankrupt` qua regex `/^(chance|market|monopoly|debt_relief|bankrupt)$/` để gán thời lượng `EVENT_BANNER_DURATION_MS` (4500ms).
+     - Rút gọn mã nguồn từ 390 xuống **377 LOC** (tạo vùng đệm an toàn dưới trần 400 LOC).
+  3. *Gán Nhóm Tại Dispatcher (`activity_badge_dispatcher.ts`)*:
+     - Gán `groupId` duy nhất cho cặp thẻ thuê (`rent_pay`/`rent_receive`), giao thương (`trade`), thâu tóm M&A (`ma_buyout`), và ngoại giao (`diplomatic` kèm timestamp).
+     - Bổ sung `targetPlayerId` chính xác cho `ma_buyout`.
+     - Subtractive refactoring tinh gọn từ 249 xuống **237 LOC** (an toàn dưới trần 250 LOC của `TC-191.16`).
+  4. *Module Khử Trùng Lặp Thuần Túy (`notification_deduplicator.ts`)*:
+     - Xây dựng hàm thuần túy `deduplicateFloatingTexts(items, myPlayerId)` (31 LOC).
+     - Ưu tiên thẻ của người chơi địa phương (`myPlayerId`); giữa hai Bot ưu tiên thẻ chi tiền (`Penalty`); giữ nguyên 100% các bản tin đơn lẻ không có `groupId`.
+  5. *Tích Hợp Giao Diện & Bảo Vệ Viewport (`floating_numbers.tsx`)*:
+     - Lọc `bankrupt` vào `latestMilestone` và loại khỏi `regularTexts`.
+     - Áp dụng `deduplicateFloatingTexts` trước khi cắt `slice(-2)`.
+     - Guard hoán đổi vị trí thẻ `displayItems[1]?.playerId !== myPlayerId` (DIR-ADV-03) chống đảo lộn trật tự thời gian thẻ của Bạn.
+     - Bảo toàn biểu thức `latestMilestone && displayItems.length > 1 && idx < displayItems.length - 1` bảo vệ hợp đồng sống `TC-234.11` và `PROBE-2.5`.
+- **Hạ tầng & Ngân sách LOC Thực tế (`scripts/check_loc.mjs` - Total Lines / Non-Empty SLOC)**:
+  * `src/client/store/game_store_types.ts` (Total: 394 / SLOC: 369 — Tier 1 <= 400 LOC, Warning > 300)
+  * `src/client/store/game_store.ts` (Total: 377 / SLOC: 345 — Tier 1 <= 400 LOC, Warning > 300; Delta net -13)
+  * `src/client/network/activity_badge_dispatcher.ts` (Total: 237 / SLOC: 211 — Tier 1 <= 250 LOC; Delta net -12)
+  * `src/client/ui/notification_deduplicator.ts` (Total: 31 / SLOC: 27 — Tier 2 <= 500 LOC; Mới)
+  * `src/client/ui/floating_numbers.tsx` (Total: 303 / SLOC: 277 — Tier 2 <= 390 LOC; Delta net +6)
+  * `tests/contracts/imp252_financial_notification_deduplication.test.ts` (Total: 354 / SLOC: 316 — Tests <= 600 LOC)
+- **Kiểm thử & Bất biến**:
+  * 28/28 atomic contract tests PASS trên `imp252_financial_notification_deduplication.test.ts` (100% GREEN, Detroit Classical TDD, tối đa <= 3 asserts/test, 0 loops).
+  * 166/166 regression tests PASS trên các suite liên quan (`imp252`, `imp191`, `imp194`, `imp201`, `imp234`).
+  * 3491/3491 toàn bộ living client test suites PASS sạch.
+  * Station 4 Chaos Sentinel: 3/3 physical probes PASS:
+    - Probe 1 (Intent Parity): 24/24 Intent symmetric parity, 0 gaps.
+    - Probe 2 (Ephemeral Boundary Wire): Dynamic port 60811 TCP live WebSocket handshake & clean drop recovery.
+    - Probe 3 (Mutation Sensitivity): 12/12 mutants bị tiêu diệt (100% kill rate, 3 source-level mutants; 0 survived).
+  * Visual Evidence Gate: Thẩm định thành công 2 ảnh chụp in-game vật lý Dual-Viewport tại `.agents/tmp/` (`imp-252_desktop.jpg` 1280x800 và `imp-252_mobile_360.jpg` 360x740) xác minh chỉ còn 1 thẻ duy nhất hiển thị đúng góc nhìn chủ thể.
+  * TypeScript typecheck: `tsc --noEmit` exit 0. UI Linter: `npm run lint:ui` 0 violations. Slop Linter: `npm run lint:slop` 0 hard violations. 0 dirty casts (`as any`).
+  * Evidence Snapshot: `.agents/evidence/chaos_sentinel_IMP-252.json` (`verdict: APPROVED`).
+  * Tech Debt Ledger:
+    - Đăng ký `DEBT-STORE-PARTITION`: `game_store.ts` (377 LOC) và `game_store_types.ts` (394 LOC) tiệm cận trần 400 LOC. Bắt buộc bóc tách `floating_texts_slice.ts` và `camera_slice.ts` khi chạm 400 LOC.
+    - `DEBT-FLOATING-TOAST-OVERLAP`: [ĐÃ GIẢI QUYẾT TRIỆT ĐỂ BỞI IMP-253] Floating toast neo `top-20` (Z-30) che khuất một phần HUD thẻ người chơi đầu tiên (`p1`) và nút đóng ✕ (~20px) dưới ngưỡng 44px trên mobile; đã được tái cấu trúc thành công trong IMP-253.
+- **Phê chuẩn**:
+  * `plan-griller` & `adversarial-challenger`: HARDENED_APPROVED (`.agents/audit/PLAN_AUDIT_IMP_252.md`).
+  * `qa-tester`: Station 1 RED verified & atomic test split (28 tests, max 3 asserts/test).
+  * `scout`: Station 2.5 PREFILTER_PASSED (0 errors, 0 dirty casts, 0 log leaks).
+  * `spec-reviewer`: Station 3.1 SPEC_APPROVED (100% plan fidelity, 0 scope drift).
+  * `code-reviewer`: Station 3.2 CODE_APPROVED (Anti-slop, zero closure leak, safe group teardown).
+  * `ui-craft-reviewer`: Station 3.2 UI_CRAFT_APPROVED (Dual-Viewport Parity confirmed, pre-existing overlap documented).
+  * `chaos-sentinel`: Station 4 APPROVED (3 Probes passed, 12/12 mutants killed, 0 survived).
+- **Trạng thái**: ✅ Hoàn thành IMP-252 (2026-10-03 - 4-Station Closed-Loop Certified).
+
+---
+
+### [2026-10-04] IMP-253: Floating Toast Ergonomics & Touch Target Polish (Tối Ưu Bố Cục Chống Va Chạm & Công Thái Học Thẻ Thông Báo Tài Chính)
+- **Mục tiêu**: Khắc phục triệt để hiện tượng thẻ thông báo tài chính trôi nổi (`FloatingNumbersOverlay`) che khuất thẻ người chơi trong danh sách HUD trên cả Desktop và Mobile; nâng cấp công thái học nút đóng thẻ đạt chuẩn tiếp cận WCAG 2.2 AA (vùng chạm >= 24x24px) và WCAG 2.4.7 (vòng tiêu điểm focus-visible rõ ràng); bảo toàn 100% dữ liệu tài chính (Zero Data Suppression); đồng bộ và hòa giải 100% hợp đồng kiểm thử sống.
+- **Hạng mục thi công cốt lõi**:
+  1. *Công Thái Học Nút Đóng Chuẩn WCAG 2.2 AA & 2.4.7 (`floating_numbers.tsx` - Task 1)*:
+     - Nâng cấp nút đóng ✕ tại `FloatingBadge` từ kích thước tự nhiên (~16-20px) lên `min-w-[24px] min-h-[24px] flex items-center justify-center p-1 rounded-lg hover:bg-slate-200/50 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400`.
+     - Bảo tồn `e.stopPropagation()` ngăn chặn xung đột sự kiện click với vùng thân thẻ và bảo tồn `aria-label="Đóng thông báo"`.
+  2. *Bố Cục Chống Va Chạm Đa Viewport Dual-Viewport Parity (`floating_numbers.tsx` - Task 2)*:
+     - **Desktop (>= 768px)**: Chuyển dịch vùng neo từ `md:right-6` (24px) sang `md:right-[18.5rem]` (296px), tạo khoảng hở vật lý an toàn 16px nằm hoàn toàn bên trái `PlayerHudList` (chiều rộng 256px, lề phải 24px -> vùng chiếm dụng [24, 280]px, DOM rects: Toast x=536..984 vs HUD x=1000..1256).
+     - **Mobile (< 768px)**: Thay thế hệ thống bậc thang `top-*` cố định bằng neo đáy an toàn `bottom-[calc(8rem+env(safe-area-inset-bottom))] md:bottom-auto`. Đo đạc vật lý DOM thực tế: Đáy toast ở y=612px, đỉnh Camera Navigation Pills ở y=660px, tạo khoảng cách an toàn 48px (không phải 4px tính nhẩm). Với 1 toast hoạt động, đỉnh toast ở y=527px, tạo khoảng cách an toàn +65px dưới thẻ HUD người chơi thứ 4 (y=462px). Khi hiển thị đồng thời 2 toast trên mobile (360x740), thẻ trên cùng đạt y=437px và chạm nhẹ 25px vào phần chấm tài sản của bot 4, được quản lý qua nợ kỹ thuật `DEBT-MOBILE-TOAST-STACK-HEIGHT`.
+  3. *Bảo Toàn Tuyệt Đối Dữ Liệu Tài Chính (Zero Data Loss)*:
+     - Loại bỏ hoàn toàn các ý tưởng triệt tiêu thẻ hoặc ẩn thông báo qua cờ `isHudActive`. Giữ nguyên cơ chế khử trùng lặp và nhịp độ hiển thị của IMP-252.
+  4. *Hòa Giải Hợp Đồng Kiểm Thử Kế Thừa (Living Test Reconciliation - Task 4)*:
+     - Hòa giải 14 test cases kế thừa trên 4 bộ kiểm thử sống: `imp199_desktop_layout_harmonization.test.ts`, `imp_uiux_engine_convergence.test.ts`, `imp143_notification_safe_offsets_decollision.test.ts`, `imp139_popup_decollision_and_modal_zindex.test.ts`.
+- **Hạ tầng & Ngân sách LOC Thực tế (`scripts/check_loc.mjs` - Total Lines / Non-Empty SLOC)**:
+  * `src/client/ui/floating_numbers.tsx` (Total: 288 / SLOC: 263 — Tier 2 <= 500 LOC; Safe, đã tinh gọn dưới 300 LOC)
+  * `tests/contracts/imp253_floating_toast_ergonomics.test.ts` (Total: 308 / SLOC: 279 — Tests <= 600 LOC; 17 atomic tests)
+  * `tests/contracts/imp199_desktop_layout_harmonization.test.ts` (Total: 359 / SLOC: 317 — Tests <= 600 LOC)
+  * `tests/contracts/imp_uiux_engine_convergence.test.ts` (Total: 482 / SLOC: 422 — Tests <= 600 LOC)
+  * `tests/client/imp143_notification_safe_offsets_decollision.test.ts` (Total: 407 / SLOC: 358 — Tests <= 600 LOC)
+  * `tests/client/imp139_popup_decollision_and_modal_zindex.test.ts` (Total: 281 / SLOC: 250 — Tests <= 600 LOC)
+- **Kiểm thử & Bất biến**:
+  * 17/17 atomic contract tests PASS trên `imp253_floating_toast_ergonomics.test.ts` (100% GREEN, Detroit Classical TDD, tối đa <= 3 asserts/test, 0 loops).
+  * 97/97 regression tests PASS trên 5 suites (`imp253`, `imp199`, `imp_uiux_engine_convergence`, `imp143`, `imp139`).
+  * Station 4 Chaos Sentinel: 3/3 physical probes PASS:
+    - Probe 1 (Intent Parity): 24/24 Intent symmetric parity, 0 gaps.
+    - Probe 2 (Ephemeral Boundary Wire): Dynamic port 60290 TCP live WebSocket handshake & clean drop recovery.
+    - Probe 3 (Mutation Sensitivity): 9/9 mutants bị tiêu diệt (100% kill rate, 3 source-level mutants; 0 survived). Miễn giảm sàn 14 đột biến do phạm vi ticket thuần UI CSS layout.
+  * Visual Evidence Gate: Thẩm định thành công 2 ảnh chụp in-game vật lý Dual-Viewport tại `.agents/tmp/` (`imp-253_desktop.jpg` 1280x800 và `imp-253_mobile_360.jpg` 360x740) xác minh khoảng cách an toàn 16px trên desktop và neo đáy không đè Camera Pills trên mobile.
+  * TypeScript typecheck: `tsc --noEmit` exit 0. UI Linter: `npm run lint:ui` 0 violations. Slop Linter: `npm run lint:slop` 0 hard violations. 0 dirty casts (`as any`).
+  * Evidence Snapshot: `.agents/evidence/chaos_sentinel_IMP-253.json` (`verdict: APPROVED`).
+  * Tech Debt Ledger:
+    - `DEBT-FLOATING-TOAST-OVERLAP`: [ĐÃ GIẢI QUYẾT TRIỆT ĐỂ BỞI IMP-253 TRÊN DESKTOP VÀ 1-TOAST MOBILE].
+    - `DEBT-FLOATING-NUMBERS-LOC`: [CARRIED OVER] `floating_numbers.tsx` (288 LOC, đã tối ưu xuống dưới 300 LOC). Đăng ký kế hoạch bóc tách `MilestoneBanner` sang submodule riêng nếu tệp vượt quá 350 LOC trong tương lai.
+    - `DEBT-MOBILE-TOAST-STACK-HEIGHT`: [CARRIED OVER] Trên mobile 360x740 với ván 4 người chơi khi có 2 toasts cùng xuất hiện, thẻ trên cùng chạm 25px vào phần chấm tài sản của bot 4. Kế hoạch tương lai: giới hạn mobile hiển thị tối đa 1 toast hoặc tích hợp vào cùng cột layout với PlayerHudList khi có >= 3 người chơi.
+- **Phê chuẩn**:
+  * `plan-griller` & `adversarial-challenger`: HARDENED_APPROVED (`.agents/audit/PLAN_AUDIT_IMP_253.md`, `.agents/audit/PLAN_CHALLENGE_IMP_253.md`).
+  * `qa-tester`: Station 1 RED verified & atomic contract test authored (17 tests).
+  * `implementer`: Station 2 GREEN Implementation completed.
+  * `scout`: Station 2.5 PREFILTER_PASSED (0 typecheck errors, 0 dirty casts, 0 log leaks).
+  * `spec-reviewer`: Station 3.1 SPEC_APPROVED (`.agents/audit/SPEC_REVIEW_IMP-253.md` - 100% plan fidelity, 0 scope drift).
+  * `code-reviewer`: Station 3.2 CODE_APPROVED (`.agents/audit/CODE_REVIEW_IMP-253.md` - Anti-slop, zero closure leak, clean teardown).
+  * `ui-craft-reviewer`: Station 3.2 UI_CRAFT_APPROVED (`.agents/audit/UI_CRAFT_REVIEW_IMP-253.md` - Dual-Viewport Parity confirmed, clearance measured on physical DOM rects).
+  * `chaos-sentinel`: Station 4 APPROVED (`.agents/evidence/chaos_sentinel_IMP-253.json` - 3 Probes passed, 9/9 mutants killed, 0 survived).
+- **Trạng thái**: ✅ Hoàn thành IMP-253 (2026-10-04 - 4-Station Closed-Loop Certified).
+
+---
+
+### [2026-10-04] IMP-255: 3D Label Decluttering via SAT Collision & Distance Opacity Falloff (Khử Trùng Lặp Nhãn 3D Sa Bàn Qua Va Chạm SAT & Suy Giảm Độ Đục Theo Khoảng Cách)
+- **Mục tiêu**: Loại bỏ triệt để hiện tượng che khuất chồng lấn nhãn 3D (visual clobber) trên sa bàn 40 ô đất khi góc nhìn camera thấp/nghiêng xa hoặc trên màn hình mobile hẹp (360x740); thiết lập giải thuật toán học không gian thuần túy kiểm tra va chạm 2D SAT và suy giảm độ đục theo hàm mũ tự nhiên tiệm cận 0; kết nối chuỗi dữ liệu đầu cuối (Full-Pipeline Delivery) vào phù hiệu sự kiện thị trường `TileEventFloatingBadge` / `TileEventAura`.
+- **Hạng mục thi công cốt lõi**:
+  1. *Module Toán Học Không Gian Thuần Túy (`src/client/3d/label_declutter_engine.ts` - Task 1)*:
+     - `calculateLabelOpacity`: Áp dụng hàm suy giảm mũ tiệm cận 0 ($\alpha = base \times \exp(-d / scale) \times relative^{1.5}$) không chứa hằng số sàn 0.2, đảm bảo culling sạch cự ly xa khi `opacity < 0.05` (`cullReason: 'distance'`). Khi `isSelected = true`, bảo toàn độ nét tối đa $\ge 0.90$. Kẹp chặt trong $[0.0, 1.0]$.
+     - `checkLabelsOverlap`: Lọc thô O(1) qua AABB trước; tối ưu bỏ qua SAT khi cả 2 là trục song song; SAT kiểm tra chính xác trục phân tách của các đa giác có góc xoay với padding an toàn (mặc định 4px).
+     - `lerpLabelOpacity`: Nội suy mượt theo thời gian chống giật tắt (anti-popping).
+     - `projectPointToScreen`: Chuyển đổi ma trận chiếu View-Projection 4x4 sang pixel 2D, phòng thủ $clipW \le 0.0001$.
+     - `declutterLabels`: Lọc theo thứ tự ưu tiên giảm dần và cự ly tăng dần, hỗ trợ `maxVisibleLabels` và phân loại `cullReason: 'overlap' | 'distance'`.
+  2. *Tích Hợp Sản Xuất & Chuyển Tiếp Dữ Liệu (`src/client/3d/tile_event_aura.tsx` - Task 2)*:
+     - Nhập khẩu và gọi trực tiếp `calculateLabelOpacity` trong `TileEventAura`.
+     - Mở rộng prop `opacity?: number` trên cả `TileEventAuraProps` và `TileEventFloatingBadgeProps`.
+     - `TileEventFloatingBadge` áp dụng mờ dần qua CSS transition `transition: 'opacity 0.2s ease-out'` và ẩn triệt để khi `opacity <= 0.01`.
+  3. *Bảo Tồn Tuyệt Đối Ngân Sách LOC Trên `board_tile.tsx`*:
+     - Giữ nguyên vẹn 100% `src/client/3d/board_tile.tsx` (452 LOC, Delta = 0, không chạm dead component `OwnershipMarkerInstances`).
+- **Hạ tầng & Ngân sách LOC Thực tế (`scripts/check_loc.mjs` - Total Lines / Non-Empty SLOC)**:
+  * `src/client/3d/label_declutter_engine.ts` (Total: 248 / SLOC: 218 — Tier 1 <= 400 LOC; Safe)
+  * `src/client/3d/tile_event_aura.tsx` (Total: 204 / SLOC: 184 — Tier 2 <= 500 LOC; Safe)
+  * `src/client/3d/board_tile.tsx` (Total: 452 / SLOC: 418 — Tier 2 <= 500 LOC; Warning > 400, Delta = 0)
+  * `tests/contracts/imp255_3d_label_decluttering.test.ts` (Total: 419 / SLOC: 373 — Tests <= 600 LOC; 16 atomic tests)
+- **Kiểm thử & Bất biến**:
+  * 16/16 atomic contract tests PASS trên `imp255_3d_label_decluttering.test.ts` (100% GREEN, Detroit Classical TDD, tối đa <= 4 asserts/test, 0 loops).
+  * 151/151 regression tests PASS trên 6 suites (`imp255`, `imp234`, `imp237`, `imp82`, `imp83`, `imp87`).
+  * Station 4 Chaos Sentinel: 3/3 physical probes PASS:
+    - Probe 4 (WebGL2 Spatial Sentinel): 17/17 tests passed trên Headless Three.js Scene.
+    - Probe 3 (Mutation Sensitivity): 25/25 mutants bị tiêu diệt (100% kill rate, 17 source-level mutants + 8 contract mutants, 0 survived, 0 waivers).
+    - Contract Suite Gate: 16/16 contract tests passed.
+  * Visual Evidence Gate: Thẩm định thành công 2 ảnh chụp in-game vật lý Dual-Viewport tại `.agents/tmp/` (`imp-255_desktop.jpg` 1280x800 và `imp-255_mobile_360.jpg` 360x740) xác minh sa bàn 3D thông thoáng, không bị visual clobber, đạt 8.3/10 điểm Art Director.
+  * TypeScript typecheck: `tsc --noEmit` exit 0. UI Linter: `npm run lint:ui` 0 violations. Slop Linter: `npm run lint:slop` 0 hard violations. 0 dirty casts (`as any`).
+  * Evidence Snapshot: `.agents/evidence/chaos_sentinel_imp-255.json` (`verdict: APPROVED`).
+  * Tech Debt Ledger:
+    - **`DEBT-BOARD-TILE-PARTITION`**: `board_tile.tsx` đạt 452 LOC (vùng cảnh báo 400..500 LOC). Đăng ký kế hoạch bóc tách `OwnershipMarkerInstances` và `StandeeBillboard` sang submodule riêng `board_standees.tsx` khi có thay đổi logic tiếp theo trên bàn cờ.
+    - **`DEBT-LABEL-DECLUTTER-CAMERA-INTEGRATION`**: Hoàn thành thư viện toán học không gian SAT 2D (`label_declutter_engine.ts`) và tích hợp độ đục tĩnh tại `tile_event_aura.tsx`. Hoãn việc cắm thuật toán vào vòng lặp camera `useFrame` của 40 ô cờ sang Epic 3 để tích hợp vào camera controller có throttle/worker chống tụt FPS.
+- **Phê chuẩn**:
+  * `plan-griller` & `adversarial-challenger`: HARDENED_APPROVED (`.agents/audit/PLAN_AUDIT_IMP-255.md`).
+  * `qa-tester`: Station 1 RED verified & atomic contract test authored (16 tests, 5 Facets).
+  * `implementer`: Station 2 GREEN Implementation completed.
+  * `scout`: Station 2.5 PREFILTER_PASSED (0 typecheck errors, 0 dirty casts, 0 log leaks).
+  * `spec-reviewer`: Station 3.1 SPEC_APPROVED (`.agents/audit/SPEC_REVIEW_IMP-255.md` - 100% plan fidelity, 0 scope drift).
+  * `code-reviewer`: Station 3.2 CODE_APPROVED (`.agents/audit/CODE_REVIEW_IMP-255.md` - Anti-slop, clean spatial math, full pipeline).
+  * `game-3d-visual-critic`: Station 3.2 3D_VISUAL_APPROVED (`.agents/audit/3D_VISUAL_REVIEW_IMP-255.md` - Score: 8.3/10, disposition: ship).
+  * `chaos-sentinel`: Station 4 APPROVED (`.agents/evidence/chaos_sentinel_imp-255.json` - 3 Probes passed, 25/25 mutants killed, 0 survived, 0 waivers).
+---
+
+### [2026-10-04] IMP-256: 3D Selective Reference Bloom Pipeline & Optical Isolation (Hiệu Ứng Phát Sáng Chọn Lọc 3D Bằng Lớp Selective Bloom & Phân Tách Ánh Hào Quang)
+- **Mục tiêu**: Loại bỏ triệt để hiện tượng chói lóa / vỡ sáng toàn cục (blowout bloom) trên bề mặt gạch ngà `#EDE5D8` và chữ số tài chính; cô lập hiệu ứng phát quang của vòng hào quang sự kiện `TileEventAuraRim` trên Three.js Layer 11 (`SELECTIVE_BLOOM_LAYER = 11`); tích hợp component `<SelectiveBloom>` chuyển mạch có điều kiện vào `PostProcessingPipeline`; nối thông prop `enableSelectiveBloom={!isMobileDevice}` tại `game_canvas.tsx` bảo toàn hiệu năng 60 FPS trên mobile và 100% tương thích ngược với hợp đồng IMP-241.
+- **Hạng mục thi công cốt lõi**:
+  1. *Registry Quản Lý Thẻ Bloom & Toán Học Quang Học (`src/client/3d/selective_bloom_registry.ts` - Task 1)*:
+     - Định nghĩa hằng số bất biến `SELECTIVE_BLOOM_LAYER = 11 as const`.
+     - `tagSelectiveBloom`: Duyệt đệ quy cây con `Group` / `Object3D` để kích hoạt Layer 11 cho toàn bộ mesh con (`child.layers.enable(11)`), đánh dấu `child.userData.selectiveBloom = true` mà vẫn giữ nguyên Layer 0 mặc định cho camera chính.
+     - `untagSelectiveBloom`: Khôi phục Layer 0 sạch sẽ, vô hiệu hóa Layer 11 và xóa cờ `userData.selectiveBloom`, triệt tiêu rò rỉ trạng thái.
+     - `isSelectiveBloomTagged`: Kiểm tra trạng thái Layer 11 và cờ `userData`.
+     - `calculateSelectiveBloomThreshold`: Điều tiết ngưỡng thấp dịu mắt (0.45 bình thường, 0.25 khi đấu giá), phòng thủ bằng `Number.isFinite`.
+     - `calculateSelectiveBloomIntensity`: Cân chỉnh cường độ phát sáng tối ưu (0.20 mobile, 0.45 desktop, 0.65 đấu giá), phòng thủ bằng `Number.isFinite`.
+  2. *Đường Ống Hậu Kỳ Chọn Lọc (`src/client/3d/post_processing_pipeline.tsx` - Task 2)*:
+     - Tích hợp `<SelectiveBloom>` từ `@react-three/postprocessing` với `selectionLayer={11}`.
+     - Chuyển mạch có điều kiện: Khi `enableSelectiveBloom = true`, kết xuất `<SelectiveBloom>`; khi `false` hoặc `undefined`, duy trì 100% `<Bloom>` cũ bảo toàn toàn bộ test suite IMP-241.
+     - Sắp xếp vị trí EffectComposer chuẩn xác: `DepthOfField` $\to$ `SelectiveBloom` $\to$ `ToneMapping (AgX)`.
+  3. *Vòng Đời Gắn Thẻ Phù Hiệu Sự Kiện (`src/client/3d/tile_event_aura.tsx` - Task 3)*:
+     - `TileEventAuraRim`: Dùng `React.useRef<Mesh>` và `React.useEffect` để gắn thẻ Layer 11 khi mount và dọn dẹp sạch sẽ khi unmount, bảo toàn Gotcha Hook Spying Parity & Transient Teardown.
+  4. *Nối Dây Sản Xuất Full-Pipeline Wiring (`src/client/game_canvas.tsx` - Task 4)*:
+     - Nối thông prop `enableSelectiveBloom={!isMobileDevice}` vào `<PostProcessingPipeline />`.
+- **Hạ tầng & Ngân sách LOC Thực tế (`scripts/check_loc.mjs` - Total Lines / Non-Empty SLOC)**:
+  * `src/client/3d/selective_bloom_registry.ts` (Total: 86 / SLOC: 72 — Tier 1 <= 400 LOC; Safe)
+  * `src/client/3d/post_processing_pipeline.tsx` (Total: 363 / SLOC: 319 — Tier 2 <= 500 LOC; Safe)
+  * `src/client/3d/tile_event_aura.tsx` (Total: 221 / SLOC: 198 — Tier 2 <= 500 LOC; Safe)
+  * `src/client/game_canvas.tsx` (Total: 476 / SLOC: 405 — Tier 2 <= 500 LOC; ⚠️ Warning > 400, đã đăng ký Tech Debt)
+  * `tests/contracts/imp256_selective_bloom_pipeline.test.ts` (Total: 298 / SLOC: 260 — Tests <= 600 LOC; 16 atomic tests)
+- **Kiểm thử & Bất biến**:
+  * 16/16 atomic contract tests PASS trên `imp256_selective_bloom_pipeline.test.ts` (100% GREEN, Detroit Classical TDD, tối đa <= 4 asserts/test, 0 loops, 0 dirty casts, 0 private spies).
+  * 19/19 baseline tests PASS trên `threejs_pipeline_hardening.test.ts`.
+  * Station 4 Chaos Sentinel: 3/3 physical probes PASS:
+    - Probe 1 & 2 (WebGL2 Spatial Boundary & Chaos): 17/17 tests passed trên Headless Three.js Scene.
+    - Probe 3 (Mutation Sensitivity): 15/15 mutants bị tiêu diệt (100% kill rate, 3 source-level + 12 contract mutants, 0 survived, 0 waivers).
+    - Contract Suite Gate: 16/16 contract tests passed.
+  * Visual Evidence Gate: Thẩm định thành công 2 ảnh chụp in-game vật lý Dual-Viewport tại `.agents/tmp/` (`imp-256_desktop.jpg` 1280x800 và `imp-256_mobile_360.jpg` 360x740) xác minh nền gạch ngà `#EDE5D8` sắc nét, không bị chói lóa, đạt 8.5/10 điểm Senior Art Director (Modern Commercial Standard).
+  * TypeScript typecheck: `tsc --noEmit` exit 0. UI Linter: `npm run lint:ui` 0 violations. Slop Linter: `npm run lint:slop` 0 hard violations. 0 dirty casts (`as any`).
+  * Evidence Snapshot: `.agents/evidence/chaos_sentinel_imp-256.json` (`verdict: APPROVED`).
+  * Tech Debt Ledger:
+    - **`DEBT-GAME-CANVAS-PARTITION`**: `game_canvas.tsx` đạt 476 LOC (vùng cảnh báo 400..500 LOC). Đăng ký kế hoạch bóc tách các sub-components (`SceneLighting`, `SceneCameraRig`, `ScenePostProcessingWrapper`) sang submodule riêng khi có thay đổi logic tiếp theo trên GameCanvas.
+- **Phê chuẩn**:
+  * `plan-griller` & `adversarial-challenger`: HARDENED_APPROVED (`.agents/audit/PLAN_AUDIT_IMP_256.md`).
+  * `qa-tester`: Station 1 RED verified & atomic contract test authored (16 tests, 5 Facets).
+  * `implementer`: Station 2 GREEN Implementation completed.
+  * `scout`: Station 2.5 PREFILTER_PASSED (0 typecheck errors, 0 dirty casts, 0 log leaks).
+  * `spec-reviewer`: Station 3.1 SPEC_APPROVED (`.agents/audit/SPEC_REVIEW_IMP-256.md` - 100% plan fidelity, 0 scope drift).
+  * `code-reviewer`: Station 3.2 CODE_APPROVED (`.agents/audit/CODE_REVIEW_IMP-256.md` - Anti-slop, clean WebGL layer isolation, full pipeline).
+  * `game-3d-visual-critic`: Station 3.2 3D_VISUAL_APPROVED (`.agents/audit/3D_VISUAL_REVIEW_IMP-256.md` - Score: 8.5/10, Modern Commercial Standard).
+  * `chaos-sentinel`: Station 4 APPROVED (`.agents/evidence/chaos_sentinel_imp-256.json` - 3 Probes passed, 15/15 mutants killed, 0 survived, 0 waivers).
+---
+
+### [2026-10-04] IMP-258: 3D Miniature Bin-Packing for Procedural Property Stacking (Đóng Gói Không Gian Mô Hình Nhà Đất 3D Procedural)
+- **Mục tiêu**: Loại bỏ triệt để hiện tượng tọa độ hardcode, chồng lấn hình học (mesh clipping/z-fighting) và tràn ra vỉa hè (sidewalk bleed) khi xếp các khối nhà đồ chơi (Toy Houses & Ruby Hotels) trên dải màu 22 ô tài sản; thiết lập giải thuật đóng gói kệ 3 chiều (Shelf Stacking: X hàng, Z kệ, Y tầng) với thể tích tự nhiên $\sqrt[3]{V} \cdot 1.4$ và co giãn đồng dạng khi vượt kích thước ô đất; đồng bộ 100% tọa độ giữa component đơn lẻ `ToyPropertyBuildings` và ma trận instancing `InstancedBoardToyBuildings`.
+- **Hạng mục thi công cốt lõi**:
+  1. *Module Đóng Gói Không Gian Thuần Túy (`src/client/3d/building_packer.ts` - Task 1)*:
+     - Khử nhiễm số học `sanitizeDim`: Kẹp chặt $\max(0.001, \text{isFinite}(v) ? v : 0.001)$ triệt tiêu 100% rủi ro `NaN` vào Three.js matrix.
+     - Sắp xếp ổn định tất định `id.localeCompare` bảo toàn tính nhất quán vị trí giữa các frame và replay mạng.
+     - Thuật toán xếp kệ 3 chiều (Shelf Stacking): X hàng, Z kệ, Y tầng, hỗ trợ căn giữa `center: true`, neo đáy mặt đất `baseAnchoredY: true`, và co giãn `scale` khi vượt `maxLotBounds`.
+     - Kiểm tra va chạm hình học `boxesOverlap` kết hợp giao khoảng 1D interval $\max(y_1, y_2) < \min(y_1 + h_1, y_2 + h_2)$ trên trục $Y$ neo đáy.
+     - Bộ đệm tĩnh `PACKED_SLOTS_CACHE`: Truy xuất O(1) Zero-GC trong 60 FPS render loop cho các cấp độ chuẩn 1, 2, 3.
+  2. *Component Kết Xuất Công Trình Độc Lập (`src/client/3d/building_renderer.tsx` - Task 2)*:
+     - Tạo component `BuildingRenderer` hỗ trợ `useMemo` kết nối với `packBoxes` hoặc `computePackedBuildingSlots`, hỗ trợ `customItems` cho các kịch bản mở rộng sa bàn.
+  3. *Nâng Cấp `ToyPropertyBuildings` (`src/client/3d/toy_property_buildings.tsx` - Task 3)*:
+     - Tiếp nhận props `gap` và `maxLotBounds`, tích hợp `computePackedBuildingSlots` và `createBuildingBoxItems`, kết xuất các khối nhà với khoảng cách đệm $0.14\text{m}$ ở cấp 2.
+  4. *Đồng Bộ Hóa Ma Trận Instancing (`src/client/3d/instanced_toy_buildings.tsx` - Task 4)*:
+     - Cập nhật `calculateHouseInstanceMatrix` và `calculateHotelInstanceMatrix` ánh xạ trực tiếp toạ độ $X, Y, Z$ từ `computePackedBuildingSlots(level)`, bảo đảm đồng bộ hoàn toàn giữa render đơn lẻ và batch instancing.
+  5. *Bảo Toàn Nguyên Vẹn `board_tile.tsx` (`src/client/3d/board_tile.tsx` - Task 5)*:
+     - Giữ nguyên vẹn 100% kích thước 452 dòng (Delta = +0), bảo vệ trần cảnh báo Tier 2 (<= 500 LOC).
+- **Hạ tầng & Ngân sách LOC Thực tế (`scripts/check_loc.mjs` - Total Lines / Non-Empty SLOC)**:
+  * `src/client/3d/building_packer.ts` (Total: 214 / SLOC: 181 — Tier 1 <= 400 LOC; Safe)
+  * `src/client/3d/building_renderer.tsx` (Total: 62 / SLOC: 58 — Tier 2 <= 500 LOC; Safe)
+  * `src/client/3d/toy_property_buildings.tsx` (Total: 116 / SLOC: 102 — Tier 2 <= 500 LOC; Safe)
+  * `src/client/3d/instanced_toy_buildings.tsx` (Total: 185 / SLOC: 163 — Tier 2 <= 500 LOC; Safe)
+  * `src/client/3d/board_tile.tsx` (Total: 452 / SLOC: 418 — Tier 2 <= 500 LOC; ⚠️ Warning > 400, Delta = +0, đã ghi nhận nợ)
+  * `tests/contracts/imp258_3d_miniature_bin_packing.test.ts` (Total: 379 / SLOC: 312 — Tests <= 600 LOC; 29 atomic tests)
+- **Kiểm thử & Bất biến**:
+  * 29/29 atomic contract tests PASS trên `imp258_3d_miniature_bin_packing.test.ts` (100% GREEN, Detroit Classical TDD, tối đa <= 4 asserts/test, 0 loops, 0 dirty casts).
+  * 162/162 regression tests PASS trên 5 suites (`imp258`, `chrome_pawns_and_toy_buildings`, `imp142`, `imp203`, `imp_perf_threejs_instancing`).
+  * Station 4 Chaos Sentinel: 3/3 physical probes PASS:
+    - Probe 1 & 2 (WebGL2 Spatial Boundary & Chaos): 17/17 tests passed trên Headless Three.js Scene.
+    - Probe 3 (Mutation Sensitivity): 23/23 mutants bị tiêu diệt (100% kill rate, 13 source-level + 10 contract mutants, 0 survived, 0 waivers).
+    - Contract Suite Gate: 29/29 contract tests passed.
+  * Visual Evidence Gate: Thẩm định thành công 2 ảnh chụp in-game vật lý Dual-Viewport tại `.agents/tmp/` ([`imp-258_desktop.jpg`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/tmp/imp-258_desktop.jpg) 1280x800 và [`imp-258_mobile_360.jpg`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/tmp/imp-258_mobile_360.jpg) 360x740) xác minh rasterize đầy đủ nhà cấp 1, 2, 3 trên nền ô cờ, không va chạm vỉa hè và cọc cờ, đạt 8.5/10 điểm Art Director (Modern Commercial Standard).
+  * TypeScript typecheck: `tsc --noEmit` exit 0. UI Linter: `npm run lint:ui` 0 violations. Slop Linter: `npm run lint:slop` 0 hard violations. 0 dirty casts (`as any`).
+  * Evidence Snapshot: `.agents/evidence/chaos_sentinel_imp-258.json` (`verdict: APPROVED`).
+  * Tech Debt Ledger:
+    - **`DEBT-3D-BOARD-TILE`**: `board_tile.tsx` đạt 452 LOC (vùng cảnh báo 400..500 LOC). Đăng ký kế hoạch bóc tách `OwnershipMarkerInstances` và `StandeeBillboard` sang submodule riêng `board_standees.tsx` khi có thay đổi logic tiếp theo trên bàn cờ.
+- **Phê chuẩn**:
+  * `plan-griller` & `adversarial-challenger`: HARDENED_APPROVED (`.agents/audit/PLAN_AUDIT_IMP-258.md`).
+  * `qa-tester`: Station 1 RED verified & atomic contract test authored (24 tests ban đầu, mở rộng 29 tests, 5 Facets).
+  * `implementer`: Station 2 GREEN Implementation completed.
+  * `scout`: Station 2.5 PREFILTER_PASSED (0 typecheck errors, 0 dirty casts, 0 log leaks).
+  * `spec-reviewer`: Station 3.1 SPEC_APPROVED (`.agents/audit/SPEC_REVIEW_IMP-258.md` - 100% plan fidelity, 0 scope drift).
+  * `code-reviewer`: Station 3.2 CODE_APPROVED (`.agents/audit/CODE_REVIEW_IMP-258.md` - Anti-slop, clean 3D math & Zero-GC cache).
+  * `game-3d-visual-critic`: Station 3.2 3D_VISUAL_APPROVED (`.agents/audit/3D_VISUAL_REVIEW_IMP-258.md` - Score: 8.5/10, Modern Commercial Standard, disposition: ship).
+  * `chaos-sentinel`: Station 4 APPROVED (`.agents/evidence/chaos_sentinel_imp-258.json` - 3 Probes passed, 23/23 mutants killed, 0 survived, 0 waivers).
+---
+
+### [2026-10-04] IMP-259: GPU Curve Line Buffer & Vertex Shader Dynamic Tube Expansion for 3D Rail Tracks & Hop Trajectories (Bộ Đệm Đường Cong GPU & Mở Rộng Ống Shader Động Cho Tuyến Đường Sắt & Quỹ Đạo Nhảy Quân Cờ)
+- **Mục tiêu**: Loại bỏ triệt để hiện tượng 192 mesh hộp ray rời rạc gây lạm phát 192 Draw Calls và làm lộ các góc gãy đa giác (faceted polygonal seams) thô kệch tại 4 góc cua sa bàn đảo nhiệt đới; thiết lập module toán học mảng định kiểu `CurveLineBuffer` (stride = 6, chunk 1024 segments) và shader mở rộng bán kính ống động học trên GPU (`applyTubeWidth`) thông qua thuộc tính đỉnh `attribute vec3 tubeCenter`; gom toàn bộ tuyến đường sắt sa bàn về 1 continuous dual-rail mesh duy nhất (`DioramaCurvedRails`), tiết kiệm 191 Draw Calls cho GPU; nối thông component quỹ đạo nhảy parabol động học `<PawnHopTrajectory />` vào `ActiveSpringPawn` trong `pawn_animator.tsx`, xóa bỏ hoàn toàn rủi ro mã chết (Anti-TIDD).
+- **Hạng mục thi công cốt lõi**:
+  1. *Module Toán Học Không Gian Thuần Túy (`src/client/3d/curve_line_buffer.ts` - Task 1)*:
+     - `CurveLineBuffer`: Quản lý mảng định kiểu `Float32Array` theo từng khối 1024 segments (stride = 6, packing tọa độ liên tục), `clear()` gán lại `this.current = this.chunks[0] ?? null;` bảo đảm an toàn bộ nhớ heap.
+     - `addTubeCenters`: Gán đúng thuộc tính đỉnh `attribute vec3 tubeCenter` khớp chính xác với tâm đường cong trên từng tiết diện vành ống 3D.
+     - `applyTubeWidth`: Lưu tham chiếu uniform vào `material.userData.referenceWidth` với typed `TubeUniformRef`, can thiệp vertex shader qua `onBeforeCompile`: `transformed = tubeCenter + (transformed - tubeCenter) * referenceWidth;` mở rộng bán kính ống động $O(1)$ trên GPU mà không cần tính lại hình học CPU.
+     - `createCurvedRailGeometry`: Khử điểm trùng lặp thừa $u=1.0$ khi spline khép kín (`trackCurve.closed === true`), gộp 2 ray trái và phải bằng `mergeGeometries`, tính trước `computeBoundingSphere` và `computeBoundingBox` chống giật khung hình Frame-0 hitch trên mobile.
+     - `createHopTrajectoryCurve`: Kiến tạo đường cong parabol bậc hai `QuadraticBezierCurve3` giữa 2 ô cờ.
+     - `buildCurveLineGeometry`: Tiện ích kiến tạo `BufferGeometry` từ đường cong thông qua `CurveLineBuffer`.
+  2. *Component Vệt Quỹ Đạo Nhảy Quân Cờ (`src/client/3d/pawn_hop_trajectory.tsx` - Task 2)*:
+     - Tiếp nhận props `fromCell`, `toCell`, `offset`, `color`, `arcHeight`, `width`. Bù trừ tọa độ `offset` quân cờ khi chung ô tránh lệch cung nhảy ~15cm.
+     - Tích hợp hook `useEffect` cleanup giải phóng cả `trajectoryGeometry` và `trajectoryMaterial` khi unmount hoặc thay đổi ô cờ.
+  3. *Nối Thông Quỹ Đạo Vào Quân Cờ (`src/client/3d/pawn_animator.tsx` - Task 3)*:
+     - Nhập khẩu và mount `<PawnHopTrajectory />` trực tiếp bên trong `ActiveSpringPawn`, kích hoạt vệt quỹ đạo nhảy parabol động học phát quang đồng bộ cùng nhịp nhảy của quân cờ.
+  4. *Tối Ưu Hóa Tuyến Đường Sắt Sa Bàn (`src/client/3d/diorama/diorama_railroad.tsx` - Task 4)*:
+     - Tạo component `DioramaCurvedRails` dạng self-closing `<mesh ... />` với vật liệu kim loại ánh bạc `#E2E8F0` (`metalness: 0.85`, `roughness: 0.2`).
+     - Thay thế triệt để 192 mesh hộp ray rời rạc bằng 1 mesh ray đôi uốn cong trơn tru duy nhất, tiết kiệm **191 Draw Calls** cho sa bàn diorama.
+  5. *Điều Hòa Hợp Đồng Kiểm Thử Kế Thừa (Task 5)*:
+     - Điều hòa TC-230.06 (`imp230`) và TC-233.07 (`imp233`) nhận diện component ray cong hợp nhất, PASS 100%.
+- **Hạ tầng & Ngân sách LOC Thực tế (`scripts/check_loc.mjs` - Total Lines / Non-Empty SLOC)**:
+  * `src/client/3d/curve_line_buffer.ts` (Total: 273 / SLOC: 228 — Tier 1 <= 400 LOC; Safe)
+  * `src/client/3d/pawn_hop_trajectory.tsx` (Total: 93 / SLOC: 83 — Tier 2 <= 500 LOC; Safe)
+  * `src/client/3d/pawn_animator.tsx` (Total: 458 / SLOC: 388 — Tier 2 <= 500 LOC; ⚠️ Warning > 400, đã đăng ký nợ)
+  * `src/client/3d/diorama/diorama_railroad.tsx` (Total: 375 / SLOC: 326 — Tier 2 <= 500 LOC; Safe)
+  * `tests/contracts/imp259_gpu_curve_line_buffer.test.ts` (Total: 360 / SLOC: 310 — Tests <= 600 LOC; 16 atomic tests)
+- **Kiểm thử & Bất biến**:
+  * 16/16 atomic contract tests PASS trên `imp259_gpu_curve_line_buffer.test.ts` (100% GREEN, Detroit Classical TDD, tối đa <= 4 asserts/test, 0 loops, 0 dirty casts).
+  * 34/34 regression tests PASS trên 2 suites viaduct kế thừa (`imp230`, `imp233`).
+  * 79/79 regression tests PASS trên các suites liên quan đến diorama pawns và spring animations.
+  * Station 4 Chaos Sentinel: 3/3 physical probes PASS:
+    - Probe 1 & 2 (WebGL2 Spatial Boundary & Chaos): 17/17 tests passed trên Headless Three.js Scene.
+    - Probe 3 (Mutation Sensitivity): 15/15 mutants bị tiêu diệt (100% kill rate, 9 source-level + 6 contract mutants, 0 survived, 0 waivers).
+    - Contract Suite Gate: 16/16 contract tests passed.
+  * Visual Evidence Gate: Thẩm định thành công 2 ảnh chụp in-game vật lý Dual-Viewport tại `.agents/tmp/` ([`imp-259_desktop.jpg`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/tmp/imp-259_desktop.jpg) 1280x800 và [`imp-259_mobile_360.jpg`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/tmp/imp-259_mobile_360.jpg) 360x740) xác minh tuyến ray đôi uốn lượn mượt mà 100% (0 polygonal seams), ánh kim phản quang PBR sắc nét, đạt 8.6/10 điểm Senior Art Director (Monopoly Tycoon Wow-Factor).
+  * TypeScript typecheck: `tsc --noEmit` exit 0. UI Linter: `npm run lint:ui` 0 violations. Slop Linter: `npm run lint:slop` 0 hard violations. 0 dirty casts (`as any`).
+  * Evidence Snapshot: `.agents/evidence/chaos_sentinel_imp-259.json` (`verdict: APPROVED`).
+  * Tech Debt Ledger:
+    - **`DEBT-PAWN-ANIMATOR-PARTITION`**: `pawn_animator.tsx` đạt 458 LOC (vùng cảnh báo 400..500 LOC). Đăng ký kế hoạch bóc tách `SingleHopPawn` và `ActiveSpringPawn` sang submodule riêng `pawn_spring_components.tsx` khi có thay đổi logic tiếp theo trên hoạt ảnh quân cờ.
+- **Phê chuẩn**:
+  * `plan-griller` & `adversarial-challenger`: HARDENED_APPROVED (`.agents/audit/PLAN_AUDIT_IMP-259.md`).
+  * `qa-tester`: Station 1 RED verified & atomic contract test authored (16 tests, 5 Facets).
+  * `implementer`: Station 2 GREEN Implementation completed.
+  * `scout`: Station 2.5 PREFILTER_PASSED (0 typecheck errors, 0 dirty casts, 0 log leaks).
+  * `spec-reviewer`: Station 3.1 SPEC_APPROVED (`.agents/audit/SPEC_REVIEW_IMP-259.md` - 100% plan fidelity, 0 scope drift).
+  * `code-reviewer`: Station 3.2 CODE_APPROVED (`.agents/audit/CODE_REVIEW_IMP-259.md` - Anti-slop, clean WebGL shader injection, 191 Draw Calls saved).
+  * `game-3d-visual-critic`: Station 3.2 3D_VISUAL_APPROVED (`.agents/audit/3D_VISUAL_REVIEW_IMP-259.md` - Score: 8.6/10, disposition: ship).
+  * `chaos-sentinel`: Station 4 APPROVED (`.agents/evidence/chaos_sentinel_imp-259.json` - 3 Probes passed, 15/15 mutants killed, 0 survived, 0 waivers).
+- **Trạng thái**: ✅ Hoàn thành IMP-259 (2026-10-04 - 4-Station Closed-Loop Certified).
+
+
+
+
+
+
 
 
 

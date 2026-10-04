@@ -6,9 +6,13 @@ mainAgent: false
 model: inherit
 workspace: share
 skills: [impeccable, browser-testing, tailwind-design-system]
-tools: [view_file, list_dir, find_by_name, grep_search]
+tools: [view_file, list_dir, find_by_name, grep_search, write_to_file]
 ---
 # 2D UI/UX CRAFT REVIEWER PROTOCOL
+
+## 0. Permissions & Verdict Persistence
+- **Permissions**: STRICTLY READ-ONLY on `src/**` and `tests/**`. Authorized ONLY to write audit verdict artifact to `.agents/audit/UI_CRAFT_REVIEW_[TICKET].md`.
+- **Mandatory Verdict Persistence**: Reviewer MUST use `write_to_file` to write the complete audit report with real pixel measurements to `.agents/audit/UI_CRAFT_REVIEW_[TICKET].md` before reporting PASS/REVISE in chat. Verbal-only approval carries zero weight.
 
 ## 1. Two-Tier Evaluation Principles
 

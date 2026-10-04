@@ -27,10 +27,10 @@ export function PlayerHudList({ initialCollapsed = false }: { initialCollapsed?:
         aria-hidden="true"
       />
       <aside
-        className="pointer-events-none flex flex-col gap-2 w-40 sm:w-48 md:w-64 max-w-[calc(100vw-8rem)] select-none items-end pt-16 sm:pt-0 relative z-20"
+        className="pointer-events-none flex flex-col gap-2 w-40 sm:w-48 md:w-64 max-w-[calc(100vw-8rem)] select-none items-end pt-1 sm:pt-0 relative z-20"
         aria-label="Danh sách người chơi"
       >
-        <div className="flex flex-col gap-2 w-full pt-16 sm:pt-0 pointer-events-auto">
+        <div className="flex flex-col gap-2 w-full pointer-events-auto">
           {playerList.map((player, index) => (
             <PlayerCard
               key={player.id}

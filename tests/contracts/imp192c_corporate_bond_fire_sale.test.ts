@@ -4,7 +4,7 @@ import { ActionRejectReason } from '../../src/domain/action_reasons';
 import { PROPERTY_DEEDS, type PropertyRegistry, type PropertyStateMap } from '../../src/domain/property_manager';
 import { mortgageProperty } from '../../src/server/mortgage_manager';
 import { coordTrade, coordExecuteCompulsoryBuyout, type RoomContext } from '../../src/server/room_property_coordinator';
-import { executeP2PTrade } from '../../src/server/property_actions';
+import { executeP2PTrade } from '../../src/server/p2p_trade_actions';
 import { handleAuctionBid, handleAuctionPass, handleAuctionClose, type AuctionSession } from '../../src/server/auction_manager';
 import { declareBankruptcy } from '../../src/server/insolvency_manager';
 import { calculateAuctionIncrements } from '../../src/client/ui/modals/modal_helpers';

@@ -29,10 +29,8 @@ declare module '../../src/domain/room.js' {
 // Station 1 Contract Interfaces for Pending Source Files
 interface TransitWheelModule {
   evaluateTransitWheelOutcome?: (random01: number) => string;
-  findNextPort?: (currentCell: number) => number;
   findSafeHaven?: (currentCell: number, ownedProperties?: readonly number[]) => number;
-  TRANSIT_WHEEL_CONFIGS?: readonly unknown[];
-  TRANSIT_CELLS?: readonly number[];
+  TRANSIT_WHEEL_CONFIGS?: readonly { readonly outcome: string; readonly weight: number }[];
 }
 
 interface SpinTransitResult {
@@ -60,7 +58,7 @@ const TRANSIT_HANDLER_PATH: string = '../../src/server/transit_wheel_handler.js'
 const transitWheelMod: TransitWheelModule = await import(TRANSIT_WHEEL_PATH).catch(() => ({}));
 const transitHandlerMod: TransitHandlerModule = await import(TRANSIT_HANDLER_PATH).catch(() => ({}));
 
-const { findNextPort, findSafeHaven } = transitWheelMod;
+const { findSafeHaven, TRANSIT_WHEEL_CONFIGS } = transitWheelMod;
 const { handleSpinTransitWheel } = transitHandlerMod;
 
 function setupContractRoom(playerId = 'p1', startCell = 5, startBalance = 1000): {
@@ -101,12 +99,14 @@ describe('[CONTRACT] IMP-248: Transit Wheel / Flight Navigator Suite', () => {
   // FACET 1: Outcome Mechanics & Weights ([TC-TW01.01/MSS] .. [TC-TW01.06/MSS])
   // =========================================================================
   describe('Facet 1: Outcome Mechanics & Weights', () => {
-    it('[TC-TW01.01/MSS][UC-IMP248] NEXT_PORT chuyển quân cờ tới trạm kế tiếp theo chiều kim đồng hồ (5 -> 15 và 35 -> 5)', () => {
-      const portFrom5 = findNextPort!(5);
-      const portFrom35 = findNextPort!(35);
+    it('[TC-TW01.01/MSS][UC-IMP248] Bảng cấu hình vòng xoay gồm 5 kết quả (không còn NEXT_PORT) với tổng trọng số 100', () => {
+      const configs = TRANSIT_WHEEL_CONFIGS ?? [];
+      const outcomes = configs.map((c) => c.outcome);
+      const totalWeight = configs.reduce((acc, c) => acc + c.weight, 0);
 
-      expect(portFrom5).toBe(15);
-      expect(portFrom35).toBe(5);
+      expect(outcomes).not.toContain('NEXT_PORT');
+      expect(outcomes).toHaveLength(5);
+      expect(totalWeight).toBe(100);
     });
 
     it('[TC-TW01.02/MSS][UC-IMP248] SPEED_BOOST gieo xúc xắc 1D6 và cho phép quân cờ tiến 1..6 ô từ trạm hiện tại', () => {
@@ -114,7 +114,7 @@ describe('[CONTRACT] IMP-248: Transit Wheel / Flight Navigator Suite', () => {
       let rngStep = 0;
       const customRng = () => {
         rngStep++;
-        return rngStep === 1 ? 0.35 : 0.50; // SPEED_BOOST & 4 on 1D6
+        return rngStep === 1 ? 0.15 : 0.50; // SPEED_BOOST & 4 on 1D6
       };
 
       const result = handleSpinTransitWheel!(room, player.id, registry, stateMap, customRng);
@@ -123,18 +123,18 @@ describe('[CONTRACT] IMP-248: Transit Wheel / Flight Navigator Suite', () => {
       expect(room.players[0]!.position).toBe(9);
     });
 
-    it('[TC-TW01.03/MSS][UC-IMP248] SAFE_HAVEN đưa quân cờ về BĐS gần nhất sở hữu, hoặc tiến 2 ô an toàn nếu chưa sở hữu BĐS nào', () => {
+    it('[TC-TW01.03/MSS][UC-IMP248] SAFE_HAVEN đưa quân cờ về BĐS gần nhất sở hữu, hoặc an toàn tại chỗ nếu chưa sở hữu BĐS nào', () => {
       const targetWithProperties = findSafeHaven!(5, [12, 28]);
       const targetWithoutProperties = findSafeHaven!(5, []);
 
       expect(targetWithProperties).toBe(12);
-      expect(targetWithoutProperties).toBe(7);
+      expect(targetWithoutProperties).toBe(5);
     });
 
     it('[TC-TW01.04/MSS][UC-IMP248] CASH_BACK hoàn tiền dịch vụ cảng từ Kho Bạc lên tới 300 Tr. và giữ nguyên vị trí quân cờ', () => {
       const { room, player, registry, stateMap } = setupContractRoom('p1', 5, 1000);
       room.treasury = 500;
-      const rngCashBack = () => 0.70;
+      const rngCashBack = () => 0.60;
 
       const result = handleSpinTransitWheel!(room, player.id, registry, stateMap, rngCashBack);
 
@@ -146,7 +146,7 @@ describe('[CONTRACT] IMP-248: Transit Wheel / Flight Navigator Suite', () => {
       const { room, player, registry, stateMap } = setupContractRoom('p1', 25, 1000);
       room.roundCount = 1;
       room.passedGoSalary = undefined;
-      const rngPassGo = () => 0.85;
+      const rngPassGo = () => 0.75;
 
       handleSpinTransitWheel!(room, player.id, registry, stateMap, rngPassGo);
 
@@ -174,9 +174,9 @@ describe('[CONTRACT] IMP-248: Transit Wheel / Flight Navigator Suite', () => {
       const { room, player, registry, stateMap } = setupContractRoom('p1', 35, 1000);
       room.roundCount = 1;
       room.passedGoSalary = undefined;
-      const rngNextPort = () => 0.10;
+      const rngPassGoFlight = () => 0.75;
 
-      handleSpinTransitWheel!(room, player.id, registry, stateMap, rngNextPort);
+      handleSpinTransitWheel!(room, player.id, registry, stateMap, rngPassGoFlight);
 
       expect(room.players[0]!.balance).toBe(3000);
       expect(room.passedGoSalary).toBe(2000);
@@ -187,9 +187,9 @@ describe('[CONTRACT] IMP-248: Transit Wheel / Flight Navigator Suite', () => {
       room.roundCount = 1;
       room.passedGoSalary = 2000;
       room.treasury = 2000;
-      const rngNextPort = () => 0.10;
+      const rngPassGoFlight = () => 0.75;
 
-      handleSpinTransitWheel!(room, player.id, registry, stateMap, rngNextPort);
+      handleSpinTransitWheel!(room, player.id, registry, stateMap, rngPassGoFlight);
 
       expect(room.players[0]!.balance).toBe(1500);
       expect(room.passedGoSalary).toBe(2000);
@@ -199,9 +199,9 @@ describe('[CONTRACT] IMP-248: Transit Wheel / Flight Navigator Suite', () => {
       const { room, player, registry, stateMap } = setupContractRoom('p1', 35, 1000);
       room.passedGoSalary = 2000;
       room.treasury = 200;
-      const rngNextPort = () => 0.10;
+      const rngPassGoFlight = () => 0.75;
 
-      handleSpinTransitWheel!(room, player.id, registry, stateMap, rngNextPort);
+      handleSpinTransitWheel!(room, player.id, registry, stateMap, rngPassGoFlight);
 
       expect(room.players[0]!.balance).toBe(1200);
       expect(room.treasury).toBe(0);
@@ -240,7 +240,7 @@ describe('[CONTRACT] IMP-248: Transit Wheel / Flight Navigator Suite', () => {
     it('[TC-TW04.01/MSS][UC-IMP248] CASH_BACK khi Kho Bạc >= 300 Tr. cộng đúng 300 Tr. cho người chơi và trừ 300 Tr. Kho Bạc (delta = 0)', () => {
       const { room, player, registry, stateMap } = setupContractRoom('p1', 5, 2000);
       room.treasury = 1000;
-      const rngCashBack = () => 0.70;
+      const rngCashBack = () => 0.60;
 
       handleSpinTransitWheel!(room, player.id, registry, stateMap, rngCashBack);
 
@@ -251,7 +251,7 @@ describe('[CONTRACT] IMP-248: Transit Wheel / Flight Navigator Suite', () => {
     it('[TC-TW04.02/MSS][UC-IMP248] CASH_BACK khi Kho Bạc = 100 Tr. chỉ cộng 100 Tr. cho người chơi và đưa Kho Bạc về 0', () => {
       const { room, player, registry, stateMap } = setupContractRoom('p1', 5, 2000);
       room.treasury = 100;
-      const rngCashBack = () => 0.70;
+      const rngCashBack = () => 0.60;
 
       handleSpinTransitWheel!(room, player.id, registry, stateMap, rngCashBack);
 
@@ -262,7 +262,7 @@ describe('[CONTRACT] IMP-248: Transit Wheel / Flight Navigator Suite', () => {
     it('[TC-TW04.03/MSS][UC-IMP248] CASH_BACK khi Kho Bạc = 0 Tr. cộng 0 Tr. cho người chơi và bảo toàn Kho Bạc không bị âm tiền', () => {
       const { room, player, registry, stateMap } = setupContractRoom('p1', 5, 2000);
       room.treasury = 0;
-      const rngCashBack = () => 0.70;
+      const rngCashBack = () => 0.60;
 
       handleSpinTransitWheel!(room, player.id, registry, stateMap, rngCashBack);
 
@@ -278,7 +278,7 @@ describe('[CONTRACT] IMP-248: Transit Wheel / Flight Navigator Suite', () => {
     it('[TC-TW05.01/MSS][UC-IMP248] Teardown N+1 xóa sạch pendingTransitWheel và lastTransitResult trong executeTurnEnd', () => {
       const { room, player } = setupContractRoom('p1', 5, 1000);
       room.pendingTransitWheel = { playerId: player.id, cellIndex: 5, timestamp: Date.now() };
-      room.lastTransitResult = { playerId: player.id, cellIndex: 15, outcome: 'NEXT_PORT' };
+      room.lastTransitResult = { playerId: player.id, cellIndex: 15, outcome: 'SPEED_BOOST' };
       const rolledMap = new Map<string, boolean>();
 
       executeTurnEnd(room, player, true, false, room.roomCode, rolledMap);

@@ -180,17 +180,19 @@ describe('[TC-IMP249][UC-IMP249] Pawn Pacing & Transit Hop Affordance Contract S
 
   // FACET 4: Chuẩn Hóa FSM Bước Nhảy Thứ Hai & Sự Kiện Ngoại Giao
   describe('Facet 4: Chuẩn Hóa FSM Bước Nhảy Thứ Hai & Sự Kiện Ngoại Giao', () => {
-    it('[UC-IMP249/MSS] [TC-IMP249.10] Khi quay trúng NEXT_PORT nhảy sang ô 25 chưa có chủ, resolveSecondHopLanding chuyển room.phase = TurnPhase.ActionPhase', () => {
+    it('[UC-IMP249/MSS] [TC-IMP249.10] Khi quay trúng SPEED_BOOST nhảy sang ô đất trống chưa có chủ, resolveSecondHopLanding chuyển room.phase = TurnPhase.ActionPhase', () => {
       const room: Room = createRoom('ROOM_249', 'p1');
       room.started = true;
       room.phase = TurnPhase.PropertyManagement;
       const p1 = createTestPlayer('p1', 'P1', 5000);
-      p1.position = 15;
+      p1.position = 25;
       room.players = [p1, createTestPlayer('p2', 'P2', 5000)];
       room.currentPlayerIndex = 0;
-      room.pendingTransitWheel = { playerId: 'p1', cellIndex: 15, timestamp: Date.now() };
-      const res = handleSpinTransitWheel(room, 'p1', new Map(), new Map(), () => 0.1);
-      expect(res.outcome).toBe(TransitWheelOutcome.NEXT_PORT);
+      room.pendingTransitWheel = { playerId: 'p1', cellIndex: 25, timestamp: Date.now() };
+      let step = 0;
+      // SPEED_BOOST (0.15) gieo xúc xắc 1D6 ra 1 (0.0) -> pos = 26 (ô đất trống)
+      const res = handleSpinTransitWheel(room, 'p1', new Map(), new Map(), () => (++step === 1 ? 0.15 : 0.0));
+      expect(res.outcome).toBe(TransitWheelOutcome.SPEED_BOOST);
       expect(room.phase).toBe(TurnPhase.ActionPhase);
     });
 
@@ -204,7 +206,7 @@ describe('[TC-IMP249][UC-IMP249] Pawn Pacing & Transit Hop Affordance Contract S
       room.currentPlayerIndex = 0;
       room.pendingTransitWheel = { playerId: 'p1', cellIndex: 5, timestamp: Date.now() };
       let step = 0;
-      const res = handleSpinTransitWheel(room, 'p1', new Map(), new Map(), () => (++step === 1 ? 0.35 : 0.0));
+      const res = handleSpinTransitWheel(room, 'p1', new Map(), new Map(), () => (++step === 1 ? 0.15 : 0.0));
       expect(res.outcome).toBe(TransitWheelOutcome.SPEED_BOOST);
       expect(p1.position).toBe(6);
       expect(room.phase).toBe(TurnPhase.ActionPhase);
@@ -221,7 +223,8 @@ describe('[TC-IMP249][UC-IMP249] Pawn Pacing & Transit Hop Affordance Contract S
       room.pendingTransitWheel = { playerId: 'p1', cellIndex: 15, timestamp: Date.now() };
       const reg: PropertyRegistry = new Map();
       const sm: PropertyStateMap = new Map();
-      handleSpinTransitWheel(room, 'p1', reg, sm, () => 0.1);
+      let step12 = 0;
+      handleSpinTransitWheel(room, 'p1', reg, sm, () => (++step12 === 1 ? 0.15 : 0.0)); // SPEED_BOOST +1 ô -> ô 16 (Bến Tre)
       const buyRes = handleBuyProperty(room, p1, reg);
       expect(buyRes?.result).toBe(BuyResult.Success);
     });
@@ -231,13 +234,14 @@ describe('[TC-IMP249][UC-IMP249] Pawn Pacing & Transit Hop Affordance Contract S
       room.started = true;
       room.phase = TurnPhase.PropertyManagement;
       const p1 = createTestPlayer('p1', 'P1', 5000);
-      p1.position = 15;
+      p1.position = 5;
       const p2 = createTestPlayer('p2', 'P2', 5000);
-      p2.ownedProperties = [25];
+      p2.ownedProperties = [6];
       room.players = [p1, p2];
       room.currentPlayerIndex = 0;
-      room.pendingTransitWheel = { playerId: 'p1', cellIndex: 15, timestamp: Date.now() };
-      handleSpinTransitWheel(room, 'p1', new Map([[25, 'p2']]), new Map(), () => 0.1);
+      room.pendingTransitWheel = { playerId: 'p1', cellIndex: 5, timestamp: Date.now() };
+      let step = 0;
+      handleSpinTransitWheel(room, 'p1', new Map([[6, 'p2']]), new Map(), () => (++step === 1 ? 0.15 : 0.0));
       expect(p1.balance).toBeLessThan(5000);
       expect(room.phase).toBe(TurnPhase.PropertyManagement);
     });
@@ -252,7 +256,8 @@ describe('[TC-IMP249][UC-IMP249] Pawn Pacing & Transit Hop Affordance Contract S
       room.players = [p1, createTestPlayer('p2', 'P2', 5000)];
       room.currentPlayerIndex = 0;
       room.pendingTransitWheel = { playerId: 'p1', cellIndex: 15, timestamp: Date.now() };
-      handleSpinTransitWheel(room, 'p1', new Map(), new Map(), () => 0.1);
+      let step14 = 0;
+      handleSpinTransitWheel(room, 'p1', new Map(), new Map(), () => (++step14 === 1 ? 0.15 : 0.0)); // SPEED_BOOST +1 ô -> ô 16
       expect(room.phase).toBe(TurnPhase.PropertyManagement);
     });
 
@@ -265,7 +270,8 @@ describe('[TC-IMP249][UC-IMP249] Pawn Pacing & Transit Hop Affordance Contract S
       room.players = [p1, createTestPlayer('p2', 'P2', 5000)];
       room.currentPlayerIndex = 0;
       room.pendingTransitWheel = { playerId: 'p1', cellIndex: 15, timestamp: Date.now() };
-      handleSpinTransitWheel(room, 'p1', new Map(), new Map(), () => 0.1);
+      let step15 = 0;
+      handleSpinTransitWheel(room, 'p1', new Map(), new Map(), () => (++step15 === 1 ? 0.15 : 0.0)); // SPEED_BOOST +1 ô -> ô 16
       expect(p1.hasSpunTransitThisTurn).toBe(true);
       expect(room.pendingTransitWheel).toBeNull();
     });
@@ -283,7 +289,7 @@ describe('[TC-IMP249][UC-IMP249] Pawn Pacing & Transit Hop Affordance Contract S
       room.currentPlayerIndex = 0;
       room.pendingTransitWheel = { playerId: 'p1', cellIndex: 5, timestamp: Date.now() };
       let step = 0;
-      handleSpinTransitWheel(room, 'p1', new Map([[6, 'p2']]), new Map(), () => (++step === 1 ? 0.35 : 0.0));
+      handleSpinTransitWheel(room, 'p1', new Map([[6, 'p2']]), new Map(), () => (++step === 1 ? 0.15 : 0.0));
       expect(room.lastDiplomaticEvent?.landlordId).toBe('p2');
     });
 
@@ -299,7 +305,7 @@ describe('[TC-IMP249][UC-IMP249] Pawn Pacing & Transit Hop Affordance Contract S
       let rngCalls = 0;
       const diceRng = () => {
         rngCalls++;
-        return rngCalls === 1 ? 0.35 : 0.2; // 0.35 -> SPEED_BOOST, 0.2 -> boost = floor(0.2*6)+1 = 2 -> pos = 7 (Chance)
+        return rngCalls === 1 ? 0.15 : 0.2; // 0.15 -> SPEED_BOOST, 0.2 -> boost = floor(0.2*6)+1 = 2 -> pos = 7 (Chance)
       };
       let deckRngCalls = 0;
       const deckRng = () => {
@@ -363,7 +369,7 @@ describe('[TC-IMP249][UC-IMP249] Pawn Pacing & Transit Hop Affordance Contract S
     it('[UC-IMP249/MSS] [TC-IMP249.20] getTransitWheelDismissText hiển thị "Xác Nhận & Ở Lại Trạm" cho CASH_BACK/FLIGHT_DELAY và "Tiếp Tục Di Chuyển Đến Ô Mới" cho di chuyển', () => {
       expect(getTransitWheelDismissText(TransitWheelOutcome.CASH_BACK)).toBe('Xác Nhận & Ở Lại Trạm');
       expect(getTransitWheelDismissText(TransitWheelOutcome.FLIGHT_DELAY)).toBe('Xác Nhận & Ở Lại Trạm');
-      expect(getTransitWheelDismissText(TransitWheelOutcome.NEXT_PORT)).toBe('Tiếp Tục Di Chuyển Đến Ô Mới');
+      expect(getTransitWheelDismissText(TransitWheelOutcome.PASS_GO_FLIGHT)).toBe('Tiếp Tục Di Chuyển Đến Ô Mới');
       expect(getTransitWheelDismissText(TransitWheelOutcome.SPEED_BOOST)).toBe('Tiếp Tục Di Chuyển Đến Ô Mới');
     });
 

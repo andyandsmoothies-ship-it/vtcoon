@@ -307,8 +307,44 @@
 - **Evidence Snapshot:** [`.agents/evidence/chaos_sentinel_IMP-249.json`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/evidence/chaos_sentinel_IMP-249.json) (`executed: true`, `verdict: APPROVED`)
 - **Kiểm thử:** 23/23 atomic tests PASS (`tests/contracts/imp249_pawn_pacing_and_transit_hop_affordance.test.ts`), 15/15 mutants killed.
 - **Tech Debt Ledger (Nợ kỹ thuật ghi nhận):**
-  - `DEBT-APPLY-DELTA` [STATUS: OPEN - CARRIED OVER từ IMP-248]: `src/client/network/apply_delta.ts` (348 LOC, Warning Tier 1 > 300). Kế hoạch: Bóc tách `apply_delta_modals.ts` để đưa về < 250 LOC.
-  - `DEBT-PROP-ACTIONS` [STATUS: OPEN - CARRIED OVER từ IMP-247, IMP-248]: `src/server/property_actions.ts` (390 LOC, Warning Tier 1 > 300). Kế hoạch: Bóc tách P2P trade sang `p2p_trade_actions.ts` trước khi thêm bất kỳ tính năng nào.
+#### [IMP-250] Loại Bỏ "Chuyến Bay Kế Tiếp" (NEXT_PORT) & Nâng Cấp Tactile 2D UI/UX Vòng Xoay Hành Trình
+- **Mã Ticket:** IMP-250 (Tier 2 Full Rigor)
+- **Use Case Ref:** UC-IMP250, UC-GAME-020, UC-GAME-027
+- **Phạm vi hoàn tất:**
+  - Loại bỏ hoàn toàn kết quả `NEXT_PORT` khỏi `TransitWheelOutcome` và `TRANSIT_WHEEL_CONFIGS`. Xóa bỏ các xuất khẩu chết không dùng trong sản xuất (`findNextPort`, `TRANSIT_CELLS`).
+  - Tái cân bằng xác suất 5 kết quả theo tỷ lệ chuẩn kiểm soát lạm phát: `SPEED_BOOST` (35%), `SAFE_HAVEN` (20%), `CASH_BACK` (20%), `PASS_GO_FLIGHT` (10%), `FLIGHT_DELAY` (15%).
+  - Chuẩn hóa `findSafeHaven`: khi `ownedProperties.length === 0`, người chơi an toàn ở lại trạm hiện tại (`return currentCell`), triệt tiêu hoàn toàn rủi ro văng vào BĐS đối thủ.
+  - Nâng cấp Tactile 2D SVG Wheel UI: Nan quạt chỉ chứa Icon (22px) và Tỷ lệ % (12px font-mono), loại bỏ hoàn toàn chữ lộn ngược và tràn chữ; trục la bàn `🧭` đứng yên; thẻ kết quả phía dưới hiển thị chi tiết tên tiếng Việt và mô tả.
+  - Bổ sung Watchdog Fallback Timer 5000ms trong `transit_wheel_modal.tsx`, triệt tiêu hoàn toàn nguy cơ dead-end kẹt UI khi server reject hoặc rớt mạng.
+  - Khắc phục lỗi FSM vỡ nợ tức thì tại second-hop special cell (`checkInsolvency`).
+- **Báo cáo chi tiết:** [`docs/reports/improvements/IMP-250-remove-next-port-and-tactile-transit-wheel-ui_report.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/reports/improvements/IMP-250-remove-next-port-and-tactile-transit-wheel-ui_report.md)
+- **Evidence Snapshot:** [`.agents/evidence/chaos_sentinel_IMP-250.json`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/evidence/chaos_sentinel_IMP-250.json) (`executed: true`, `verdict: APPROVED`)
+- **Kiểm thử:** 25/25 atomic tests PASS (`tests/contracts/imp250_transit_wheel_ui_craft_and_port_removal.test.ts`), 10/10 mutants killed (100%).
+- **Tech Debt Ledger (Nợ kỹ thuật ghi nhận):**
+  - `DEBT-MODAL-HOST` [STATUS: OPEN - KẾ THỪA TỪ IMP-248]: `src/client/ui/modals/modal_host.tsx` (441 LOC, Warning Tier 2 > 400). Kế hoạch: Bóc tách `modal_host_critical.ts` để đưa về < 350 LOC.
+  - `DEBT-APPLY-DELTA` [STATUS: OPEN - CARRIED OVER từ IMP-248]: `src/client/network/apply_delta.ts` (348 LOC, Warning Tier 1 > 300).
+  - `DEBT-PROP-ACTIONS` [STATUS: RESOLVED TRONG IMP-254]: `src/server/property_actions.ts` đã giảm từ 390 xuống **165 LOC** (SLOC 149, Safe < 300 LOC), dứt điểm cảnh báo trần Tier 1.
+
+#### [IMP-254] Bóc Tách Mô-đun Giao Dịch P2P (P2P Trade Subtractive Refactoring & Technical Debt Offload)
+- **Mã Ticket:** IMP-254 (Tier 2 Full Rigor - Subtractive Refactoring & Technical Debt Offload)
+- **Use Case Ref:** UC-GAME-056, UC-P2P-MOD
+- **Phạm vi hoàn tất:**
+  - Bóc tách dứt điểm logic Giao dịch P2P từ `src/server/property_actions.ts` (390 LOC) sang mô-đun độc lập `src/server/p2p_trade_actions.ts` (226 LOC, Tier 1 Safe).
+  - Giảm kích thước `src/server/property_actions.ts` từ 390 xuống **165 LOC** (SLOC 149), dứt điểm hoàn toàn cảnh báo trần Tier 1 (< 300 LOC) và xóa bỏ sạch sẽ 224 dòng mã cũ cùng các import mồ côi (`type PropertyState`, `MarketCardId`).
+  - Thiết lập Single Source of Truth (SSOT) cho hằng số thuế chuyển nhượng tại `src/domain/property_data.ts` (`P2P_TAX_RATE = 0.05` và `P2P_ANTI_SPECULATE_TAX = 0.20`).
+  - Tuân thủ nghiêm ngặt Anti-TIDD Rule 8: `src/client/ui/modals/modal_helpers.ts` import nội bộ hằng số thuế từ domain, không re-export ra ngoài.
+  - Cập nhật trực tiếp consumer sản xuất `src/server/room_property_coordinator.ts` và 10 consumer test suites trong blast radius (230 tests) import trực tiếp từ `p2p_trade_actions.js`, tuyệt đối không dùng barrel re-export mỏng.
+  - Pure Logic Waiver: 0 thay đổi DOM/CSS/layout, bảo đảm an toàn giao diện.
+- **Báo cáo chi tiết:** [`docs/reports/improvements/IMP-254-modularize-p2p-trade-actions_report.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/reports/improvements/IMP-254-modularize-p2p-trade-actions_report.md)
+- **Evidence Snapshot:** [`.agents/evidence/chaos_sentinel_IMP-254.json`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/evidence/chaos_sentinel_IMP-254.json) (`executed: true`, `verdict: APPROVED`)
+- **Kiểm thử:** 16/16 atomic contract tests PASS (`tests/contracts/imp254_p2p_trade_actions_boundary.test.ts`), 230/230 tests PASS trên 10 test suites thuộc blast radius.
+- **Tech Debt Ledger (Nợ kỹ thuật ghi nhận):**
+  - `DEBT-P2P-TAX-ROUNDING-PARITY`: Đồng bộ Math.round vs Math.floor giữa client và server (Target: IMP-255).
+  - `DEBT-P2P-SWAP-FLOOR`: Sàn định giá hoán đổi BĐS (Target: IMP-255).
+  - `DEBT-P2P-TURN-TEARDOWN`: Dọn dẹp trạng thái pending khi sang Turn N+1 (Target: IMP-255).
+  - `DEBT-P2P-ZOMBIE-LOCK`: Giải phóng khóa giao dịch khi disconnect (Target: IMP-255).
+  - `DEBT-ROOM-PROPERTY-COORDINATOR`: `src/server/room_property_coordinator.ts` (362 LOC, Warning Tier 1 > 300). Phân rã điều phối viên BĐS (Target: IMP-256).
+  - `DEBT-P2P-COORDINATOR-SECURITY`: Bảo mật luồng đề nghị giao thương (Target: IMP-256).
 
 ---
 

@@ -293,4 +293,32 @@
       2. *Đồng Bộ Nhịp Chuyển Động (Pawn Movement Hold)*: Trong `apply_delta_players.ts`, khi `activeModal === 'transit_wheel'`, toàn bộ chuyển động quân cờ bắt buộc phải được tạm giữ trong `pendingPawnMove` và chỉ được kích hoạt (`startPawnMove`) khi người chơi bấm đóng hoặc xác nhận kết quả trên đĩa xoay.
       3. *Khóa Trạng Thái Đệ Quy Nguyên Tử*: `current.hasSpunTransitThisTurn = true` và `room.pendingTransitWheel = null` bắt buộc phải được thiết lập đồng bộ ngay lập tức trước khi phân giải bước nhảy thứ hai (`resolveSecondHopLanding`), và chỉ được giải phóng (`hasSpunTransitThisTurn = false`) tại `executeTurnEnd` khi kết thúc lượt. `[DOMAIN/FSM]`
 
+39. **Headless Visual Capture vs In-Game HUD Mounting Lifecycle [IMP-252]**:
+    - **Bẫy Nguy Hiểm (Deceptive Trap)**: Khi chạy công cụ chụp ảnh bằng chứng tự động `scripts/capture_visual_evidence.mjs`, URL mặc định (`?room=VTTEST&host=true`) đưa ứng dụng vào phòng chờ Pre-Match (`gameStarted === false`). Script tự động ẩn overlay phòng chờ, nhưng vì `gameStarted` vẫn bằng `false`, component `HudContainer` (chứa TopBar, ActionDock, FloatingNumbersOverlay, PlayerHudList) **chưa từng được mount vào DOM** (`src/client/main.tsx:240`). Kết quả ảnh chụp chỉ là sa bàn 3D xanh trơn (Blank Diorama), làm trượt Phase 3.0 dù mã nguồn UI hoàn toàn chính xác.
+    - **Bất Biến Xác Minh (Verified Invariants)**:
+      1. Muốn chụp bất kỳ thành phần HUD in-game nào qua headless CDP, bắt buộc phải kích hoạt trạng thái ván đấu: `window.__lobbyStore.getState().initLobby('VTTEST', 'p1', true, 'Tester'); window.__lobbyStore.getState().setGameStarted(true);`.
+      2. `scripts/capture_visual_evidence.mjs` bắt buộc phải tự động kiểm tra và bật `gameStarted = true` mặc định trước khi tiêm scenario, trừ khi có chỉ định chụp riêng màn hình phòng chờ. `[UI/HARNESS]`
+
+40. **Spatial Ground Truth & Non-Collision Proof vs Banned Static CSS Tests [IMP-253]**:
+    - **Bẫy Nguy Hiểm (Deceptive Trap & Mental Math Fallacy)**:
+      1. *Tính Nhẩm Toạ Độ Layout*: Tính nhẩm chiều cao PlayerHudList trên mobile thành y = 60..275px, trong khi thực tế 4 thẻ người chơi chiếm y = 73..461px (do TopBar 66px + padding + 4 thẻ xấp xỉ 376px). Đặt toast ở top-72 (288px) vẫn đè lên thẻ 3 và 4 của bot.
+      2. *Bậc Thang Tĩnh Dễ Vỡ (Brittle Staircase)*: Dùng hằng số top-72/80/[22rem]/[24rem] cố định theo số lượng người chơi sẽ tạo khoảng trống vô lý khi có 2 người chơi hoặc khi thẻ phá sản thu gọn, và dễ va chạm với ActionDock trên viewport thấp (360x640).
+      3. *Ngụy Biện Ẩn Dữ Liệu Nghiệp Vụ (Data Suppression Workaround)*: Dùng (isHudActive && latestMilestone) để ẩn các toast cũ trên mobile nhằm tránh đè HUD làm mất hẳn thông báo tài chính quan trọng của người chơi mà không có nhật ký xem lại.
+      4. *Test Checklist Tĩnh (Static Change-Detector Test)*: Assert chuỗi class như toContain('top-72') hay toContain('md:left-6') để "chứng minh không va chạm". Test xanh nhưng giao diện trên trình duyệt thật vẫn bị đè.
+    - **Bất Biến Xác Minh (Verified Invariants)**:
+      1. *Số Đo Vật Lý Thực Nghiệm*: Toạ độ và kích thước UI bắt buộc trích xuất từ bounding box DOM thực tế (getBoundingClientRect()) lưu vào `.agents/evidence/bounding_box_[ticket]_[viewport].json` hoặc đo đạc pixel trên ảnh chụp dual-viewport; CẤM tính nhẩm.
+      2. *Neo Dòng Chảy Thay Vì Bậc Thang Cứng*: Thành phần nổi trên mobile phải neo theo dòng chảy layout (cùng cột dưới HUD hoặc neo đáy trên ActionDock bottom-[8rem]). Trên desktop, giữ bên phải với offset an toàn md:right-[18.5rem] để bảo toàn vùng chú ý của mắt người chơi.
+      3. *Cấm Ẩn Thông Báo Tài Chính*: Tuyệt đối không ẩn hoặc bỏ rơi sự kiện tài chính để giải quyết chật chội giao diện nếu chưa có màn hình/drawer lịch sử lưu trữ.
+      4. *Cấm Assert CSS Class Thay Cho Bằng Chứng Không Va Chạm*: Test phải assert khoảng toạ độ bounding box không giao nhau hoặc duyệt bằng chứng ảnh chụp thực tế ở 360x740, 360x640 và 1280x800. `[UI/LAYOUT]`
+
+41. **Component Utility String Slicing & SSR Fallback Mutation Blind Spots [TEST/MUTATION]**:
+    - **Bẫy Nguy Hiểm (Superficial Contract & Mutation Survival)**: Khi viết contract test cho UI component, nếu chỉ assert các selector cấp cao (data-testid, class responsive hidden md:flex, role) mà không assert văn bản đầu ra thực tế của các hàm xử lý chuỗi (cleanEventDescription) hoặc trạng thái render của selector phụ thuộc SSR (isSSR ? getState() : hook), các đột biến logic bên dưới (+ thành -, === thành !==) sẽ sống sót 100%, gây trượt Probe 3 Station 4.
+    - **Phát Hiện Vật Lý (Physical Finding)**: Tại IMP-253, cleanEventDescription cắt chuỗi bằng colonIndex + 2 và isSSR = typeof window === 'undefined' tại floating_numbers.tsx sống sót trước bộ test imp253_floating_toast_ergonomics.test.ts vì test không hề assert văn bản đã lọc hoặc tên người chơi trong MilestoneBanner.
+    - **Bất Biến Bắt Buộc (Verified Invariants)**:
+      1. *Assert Văn Bản Thực Tế (Content Assertion Parity)*: Test cho component chứa hàm xử lý dữ liệu hoặc chuỗi bắt buộc phải có ít nhất 1 assertion kiểm tra giá trị text node đã qua xử lý (ví dụ: expect(html).toContain('Giá thuê khu Đông')), không chỉ assert container wrapper rỗng.
+      2. *Bao Phủ Utility Helpers Độc Lập*: Các utility functions được export từ UI file (cleanEventDescription, formatters) phải được kiểm thử đơn vị độc lập với các case biên để triệt tiêu toàn bộ đột biến toán tử (+, -, slice). `[TEST/MUTATION]`
+
+
+
+
 

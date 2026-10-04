@@ -3,7 +3,8 @@ import { TurnPhase, ActionRejectReason, type Room, type Player } from '../domain
 import type { PropertyRegistry, PropertyStateMap } from '../domain/property_manager.js';
 import type { DowngradeOptions } from '../domain/property_upgrade.js';
 import { mortgageProperty, redeemProperty } from './mortgage_manager.js';
-import { handleDowngrade, executeP2PTrade } from './property_actions.js';
+import { handleDowngrade } from './property_actions.js';
+import { executeP2PTrade } from './p2p_trade_actions.js';
 import { liquidateAssets, declareBankruptcy } from './insolvency_manager.js';
 import type { AuctionSession } from './auction_manager.js';
 import { type BotPersonality } from '../domain/bot/bot_types.js';

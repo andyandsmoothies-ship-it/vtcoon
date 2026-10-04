@@ -5,6 +5,7 @@ import { BOARD_CONFIG, CellType } from '../../domain/board_config';
 import { cellPosition } from './board_coords';
 import { tileRotation } from './board_layout';
 import { useGameStore } from '../store/game_store';
+import { computePackedBuildingSlots } from './building_packer';
 
 export const PROPERTY_CELL_INDICES: readonly number[] = BOARD_CONFIG
   .filter((c) => c.type === CellType.Property)
@@ -63,8 +64,12 @@ export function calculateHouseInstanceMatrix(
     targetMatrix.makeScale(0, 0, 0);
     return targetMatrix;
   }
-  const localX = level === 2 ? (slot === 0 ? -0.18 : 0.18) : 0;
-  return composeToyWorldMatrix(cellIndex, localX, 0.125, -0.80, targetMatrix);
+  const slots = computePackedBuildingSlots(level);
+  const targetSlot = slots[slot];
+  const localX = targetSlot ? targetSlot.position[0] : (level === 2 ? (slot === 0 ? -0.18 : 0.18) : 0);
+  const localY = 0.125 + (targetSlot ? targetSlot.position[1] : 0);
+  const localZ = -0.80 + (targetSlot ? targetSlot.position[2] : 0);
+  return composeToyWorldMatrix(cellIndex, localX, localY, localZ, targetMatrix);
 }
 
 export function calculateHotelInstanceMatrix(
@@ -76,7 +81,12 @@ export function calculateHotelInstanceMatrix(
     targetMatrix.makeScale(0, 0, 0);
     return targetMatrix;
   }
-  return composeToyWorldMatrix(cellIndex, 0, 0.125, -0.80, targetMatrix);
+  const slots = computePackedBuildingSlots(level);
+  const targetSlot = slots[0];
+  const localX = targetSlot ? targetSlot.position[0] : 0;
+  const localY = 0.125 + (targetSlot ? targetSlot.position[1] : 0);
+  const localZ = -0.80 + (targetSlot ? targetSlot.position[2] : 0);
+  return composeToyWorldMatrix(cellIndex, localX, localY, localZ, targetMatrix);
 }
 
 export interface InstancedBoardToyBuildingsProps {

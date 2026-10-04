@@ -2,6 +2,7 @@
 import type { WebSocket } from 'ws';
 import type { WsClientMessage, WsServerMessage, ReasonCode } from './network_types.js';
 import type { AdminManager } from './admin_manager.js';
+import { normalizeRoomCode } from './admin_security.js';
 
 export function handleAdminClientMessage(
   admin: AdminManager,
@@ -22,6 +23,10 @@ export function handleAdminClientMessage(
     case 'ADMIN_SUBSCRIBE_ROOM':
       return handleSubscribe(admin, socket, msg.roomCode, sendSafe);
     case 'ADMIN_UNSUBSCRIBE_ROOM':
+      if (!admin.isAuthenticated(socket)) {
+        sendSafe(socket, { type: 'ERROR', reasonCode: 'ADMIN_UNAUTHORIZED' });
+        return true;
+      }
       admin.unsubscribeRoom(socket, msg.roomCode);
       return true;
     case 'ADMIN_TERMINATE_ROOM':
@@ -116,7 +121,7 @@ async function handleGetArchivedLogs(
   timestamp: number | undefined,
   sendSafe: (s: WebSocket, m: WsServerMessage) => void,
 ): Promise<boolean> {
-  const norm = roomCode.trim().toUpperCase();
+  const norm = normalizeRoomCode(roomCode);
   return dispatchAuthAsync(admin, socket, sendSafe, async () => {
     const logs = typeof admin.getRoomFullLogAsync === 'function'
       ? await admin.getRoomFullLogAsync(norm, timestamp)
@@ -141,7 +146,7 @@ function handleSubscribe(
   } else if (res.detail) {
     sendSafe(socket, {
       type: 'ADMIN_ROOM_DETAIL',
-      roomCode: rawRoomCode.toUpperCase(),
+      roomCode: normalizeRoomCode(rawRoomCode),
       detail: res.detail,
       recentLogs: res.recentLogs ?? [],
     });
@@ -160,13 +165,22 @@ function handleTerminate(
     sendSafe(socket, { type: 'ERROR', reasonCode: 'ADMIN_UNAUTHORIZED' });
     return true;
   }
-  const norm = rawRoomCode.toUpperCase();
+  const norm = normalizeRoomCode(rawRoomCode);
   if (!admin.hasRoom(norm)) {
     sendSafe(socket, { type: 'ADMIN_ERROR', reasonCode: 'ADMIN_ROOM_NOT_FOUND', message: 'Phòng không tồn tại' });
     return true;
   }
-  sendSafe(socket, { type: 'ADMIN_ACTION_SUCCESS', action: 'TERMINATE_ROOM', roomCode: norm });
-  admin.terminateRoom(norm, reason);
+  try {
+    const closed = admin.terminateRoom(norm, reason);
+    if (closed) {
+      sendSafe(socket, { type: 'ADMIN_ACTION_SUCCESS', action: 'TERMINATE_ROOM', roomCode: norm });
+    } else {
+      sendSafe(socket, { type: 'ADMIN_ERROR', reasonCode: 'ACTION_REJECTED', message: 'Không thể đóng phòng' });
+    }
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Lỗi khi đóng phòng';
+    sendSafe(socket, { type: 'ADMIN_ERROR', reasonCode: 'ACTION_REJECTED', message });
+  }
   return true;
 }
 
@@ -180,12 +194,15 @@ async function handleSyncCloudStorage(
     return true;
   }
   const result = await admin.syncCloudLogs();
+  const detailMsg = result.error ? `${result.reason ?? 'SYNC_FAILED'}: ${result.error}` : (result.reason ?? 'SYNC_COMPLETED');
   sendSafe(socket, {
     type: 'ADMIN_SYNC_CLOUD_RESULT',
     success: result.success,
     uploadedCount: result.uploadedCount ?? 0,
     bucket: result.bucket ?? 'game-logs',
-    message: result.reason ?? result.error,
+    message: detailMsg,
+    reason: result.reason,
+    error: result.error,
   });
   sendSafe(socket, {
     type: 'ADMIN_ROOM_LIST',

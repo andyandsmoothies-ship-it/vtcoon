@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 import { RoomManager } from '../../src/server/room_manager';
 import { TurnPhase } from '../../src/domain/room';
 import { MarketCardId } from '../../src/domain/event_card_types';
-import { executeP2PTrade } from '../../src/server/property_actions';
+import { executeP2PTrade } from '../../src/server/p2p_trade_actions';
 import { dispatchPlayerIntent } from '../../src/server/intent_dispatcher';
 import type { PropertyStateMap } from '../../src/domain/property_manager';
 

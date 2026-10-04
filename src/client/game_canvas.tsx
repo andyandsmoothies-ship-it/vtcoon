@@ -458,6 +458,7 @@ export function GameCanvas({
                 <PostProcessingPipeline
                   isMobile={isMobileDevice}
                   enabled={!isMobileDevice}
+                  enableSelectiveBloom={!isMobileDevice}
                   isAuctionActive={isAuctionActive}
                   enableDof={dofConfig.enableDof}
                   dofBokehScale={dofConfig.bokehScale}

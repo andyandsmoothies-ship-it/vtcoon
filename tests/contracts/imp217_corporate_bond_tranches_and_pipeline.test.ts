@@ -10,7 +10,7 @@ import { createRoom, createPlayer, TurnPhase, type Room, type Player } from '../
 import { ActionRejectReason } from '../../src/domain/action_reasons';
 import { PROPERTY_DEEDS, type PropertyRegistry, type PropertyStateMap } from '../../src/domain/property_manager';
 import { mortgageProperty } from '../../src/server/mortgage_manager';
-import { executeP2PTrade } from '../../src/server/property_actions';
+import { executeP2PTrade } from '../../src/server/p2p_trade_actions';
 import { RoomManager } from '../../src/server/room_manager';
 import { dispatchPlayerIntent, type PlayerIntent } from '../../src/server/intent_dispatcher';
 import { useGameStore } from '../../src/client/store/game_store.js';

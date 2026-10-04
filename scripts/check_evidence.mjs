@@ -96,7 +96,11 @@ if (probeSuite) {
 
     try {
       const vitestCmd = `npx vitest run ${summary.probeSuite} --reporter=json`;
-      const output = execSync(vitestCmd, { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] });
+      const output = execSync(vitestCmd, {
+        encoding: 'utf8',
+        stdio: ['pipe', 'pipe', 'pipe'],
+        env: { ...process.env, VITEST_PROBE: '1' },
+      });
       const jsonStart = output.indexOf('{');
       if (jsonStart !== -1) {
         const result = JSON.parse(output.slice(jsonStart));
@@ -120,7 +124,11 @@ if (contractSuite) {
   } else {
     try {
       const vitestCmd = `npx vitest run ${summary.contractSuite} --reporter=json`;
-      const output = execSync(vitestCmd, { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] });
+      const output = execSync(vitestCmd, {
+        encoding: 'utf8',
+        stdio: ['pipe', 'pipe', 'pipe'],
+        env: { ...process.env, VITEST_PROBE: '1' },
+      });
       const jsonStart = output.indexOf('{');
       if (jsonStart !== -1) {
         const result = JSON.parse(output.slice(jsonStart));
@@ -138,17 +146,30 @@ if (contractSuite) {
   }
 }
 
+// 2.5 Mutation Sensitivity Floor Verification (GEMINI.md Station 4 floor >= 14)
+if (evidence.mutationSensitivityProbe) {
+  const tested = evidence.mutationSensitivityProbe.mutantsTested ?? 0;
+  const isExempt = Boolean(evidence.mutationSensitivityProbe.waiverReason);
+  if (tested < 14 && !isExempt) {
+    errors.push(`Mutation floor violation: Probe tested ${tested} mutants, minimum requirement is 14 mutants (or specify explicit waiverReason in evidence JSON).`);
+  }
+}
+
 // 3. Physical Visual Screenshot Verification (Zero-Blindness Gate)
 if (evidence.visualReview || /3d|ui|viaduct|diorama|ballast|modal|hud/i.test(evidencePath) || /3d|ui/i.test(summary.contractSuite || '')) {
   const tmpFiles = fs.existsSync(path.join(repoRoot, '.agents', 'tmp')) ? fs.readdirSync(path.join(repoRoot, '.agents', 'tmp')) : [];
   const evFiles = fs.readdirSync(evidenceDir);
-  const ticketClean = (evidence.ticketId || targetArg || '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+  const ticketRaw = (evidence.ticketId || targetArg || '').toLowerCase();
+  const ticketClean = ticketRaw.replace(/[^a-zA-Z0-9]/g, '');
+  const isSyntheticSmokeProbe = (f) => /^(chaos_sentinel_|webgl2_headless_smoke)/i.test(f);
   const hasImage = [...tmpFiles, ...evFiles].some((f) =>
-    /\.(png|jpe?g|webp)$/i.test(f) && (!ticketClean || f.toLowerCase().includes(ticketClean)),
+    !isSyntheticSmokeProbe(f) &&
+    /\.(png|jpe?g|webp)$/i.test(f) &&
+    (!ticketClean || f.toLowerCase().includes(ticketClean) || f.toLowerCase().includes(ticketRaw)),
   );
   if (!hasImage) {
     errors.push(
-      `[Zero-Blindness Violation] Visual/3D ticket requires physical screenshot in .agents/tmp/ or .agents/evidence/. Run 'npm run capture:visual -- --ticket ${evidence.ticketId || targetArg}' before sign-off.`,
+      `[Zero-Blindness Violation] Visual/3D ticket requires physical screenshot in .agents/tmp/ or .agents/evidence/ from Phase 3.0 (e.g. ${evidence.ticketId || targetArg}_desktop.jpg). Run 'npm run capture:visual -- --ticket ${evidence.ticketId || targetArg}' before sign-off.`,
     );
   }
 }

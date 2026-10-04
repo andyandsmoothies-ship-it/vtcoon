@@ -85,7 +85,12 @@ export const vi = {
     [ActionRejectReason.BOND_ALREADY_ACTIVE]:       'Người chơi đang có hợp đồng trái phiếu chưa tất toán',
     [ActionRejectReason.ASSET_LOCKED]:              'Bất động sản đang trong phiên đàm phán giao dịch',
     [ActionRejectReason.TRADE_ALREADY_PENDING]:     'Phòng đang có một phiên đàm phán chưa giải quyết',
-  } as Record<string, string>,
+    [ActionRejectReason.EVEN_BUILDING_VIOLATION]:   'Quy tắc xây dựng đều: chênh lệch số nhà không quá 1',
+    [ActionRejectReason.EVEN_DOWNGRADE_VIOLATION]:  'Quy tắc bán nhà đều: chênh lệch số nhà không quá 1',
+    [ActionRejectReason.GROUP_MORTGAGED]:           'Không thể nâng cấp khi nhóm màu có ô đang thế chấp',
+    [ActionRejectReason.TRADE_REJECTED]:            'Đối phương đã từ chối giao dịch',
+    [ActionRejectReason.CANNOT_RECOVER]:            'Không thể phục hồi khả năng thanh toán',
+  } as Record<ActionRejectReason, string>,
 
   macroCycles: {
     [MacroCycleType.MACRO_LAND_FEVER]:        'Sốt Đất Vĩ Mô',

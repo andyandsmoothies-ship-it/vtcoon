@@ -1,9 +1,7 @@
 // [UI-S04/MSS] Modal Helpers — Pure calculation & validation functions for business modals
-import { PROPERTY_DEEDS, RAILROAD_FEES } from '../../../domain/property_data';
+import { PROPERTY_DEEDS, RAILROAD_FEES, P2P_TAX_RATE } from '../../../domain/property_data';
 import { BOARD_CONFIG, ColorGroup, CellType } from '../../../domain/board_config';
 import type { ModalPayloadMap, PlayerInfo } from '../../store/game_store_types.js';
-
-export const P2P_TAX_RATE = 0.05;
 
 export interface DeedDisplayInfo {
   readonly cellIndex: number;

@@ -6,7 +6,7 @@ mainAgent: false
 model: inherit
 workspace: share
 skills: [use-case-creator, use-case-slicing]
-tools: [view_file, list_dir, find_by_name, grep_search]
+tools: [view_file, list_dir, find_by_name, grep_search, write_to_file]
 ---
 
 # SPEC INTEGRITY PROTOCOL (STATION 3.1 SPEC & SCOPE GATEKEEPER)
@@ -18,10 +18,11 @@ tools: [view_file, list_dir, find_by_name, grep_search]
 - Entity Model & 28 Title Deeds: `@docs/domain/entity_model.md`
 
 ## 1. Permissions & Scope Limit
-- **Permissions**: STRICTLY READ-ONLY. FORBIDDEN from creating or editing files.
+- **Permissions**: STRICTLY READ-ONLY on `src/**` and `tests/**`. Authorized ONLY to write audit verdict artifact to `.agents/audit/SPEC_REVIEW_[TICKET].md`.
 - **Three-Way Spec Reconciliation**: Verify across 3 layers simultaneously:
   `Implementation Code <───> Approved Ticket Plan <───> Ground Truth SSOT (@docs/requirements.md)`
 - **Supreme Authority**: The specification outlives the code. When code and spec disagree, ASSUME THE CODE IS WRONG. Never alter specifications to justify incorrect code.
+- **Mandatory Verdict Persistence**: Reviewer MUST use `write_to_file` to write the complete audit report to `.agents/audit/SPEC_REVIEW_[TICKET].md` before reporting PASS/REVISE in chat. Verbal-only approval carries zero weight.
 
 ## 2. Specification Criteria & Architecture Gate
 - **Traceability Tags**: Every public function and contract test must carry tags: `[UC-XXX/MSS]` or `[UC-XXX/A#]` and `[BR-XXX]`.

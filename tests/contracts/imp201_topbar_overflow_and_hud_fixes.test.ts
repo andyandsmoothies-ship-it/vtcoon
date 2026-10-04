@@ -412,11 +412,12 @@ describe('[TC-201.01/MSS..TC-201.20/MSS][UC-IMP201] IMP-201 TopBar, Badge Collis
       expect(topBarHtml).toContain('Bảng Điểm');
     });
 
-    it('[TC-201.15/MSS][UC-IMP201] Khi mở bảng điểm thì container danh sách thẻ áp dụng pt-16 sm:pt-0 loại bỏ padding dư thừa pt-28', () => {
+    it('[TC-201.15/MSS][UC-IMP201] Khi mở bảng điểm thì container danh sách thẻ áp dụng pt-1 sm:pt-0 loại bỏ padding dư thừa pt-28 và pt-16 kép', () => {
       const html = renderToStaticMarkup(React.createElement(PlayerHudList));
 
       expect(html).not.toContain('pt-28');
-      expect(html).toMatch(/class="[^"]*pt-16 sm:pt-0[^"]*"/);
+      expect(html).not.toContain('pt-16');
+      expect(html).toMatch(/class="[^"]*pt-1 sm:pt-0[^"]*"/);
     });
   });
 

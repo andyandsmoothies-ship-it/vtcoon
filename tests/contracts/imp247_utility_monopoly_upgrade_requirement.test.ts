@@ -5,7 +5,8 @@ import { UTILITY_CELLS, type PropertyRegistry, type PropertyStateMap } from '../
 import { upgradeUtilityFull, hasMonopoly, checkEvenBuilding } from '../../src/domain/property_upgrade';
 import { resolveTitleDeedModalState } from '../../src/client/ui/modals/title_deed_affordance';
 import { calcUtilityFee } from '../../src/domain/property_rent';
-import { handleUpgradeUtility, validateP2PTrade } from '../../src/server/property_actions';
+import { handleUpgradeUtility } from '../../src/server/property_actions';
+import { validateP2PTrade } from '../../src/server/p2p_trade_actions';
 
 // Clean typed fallback for ActionRejectReason.NEED_ALL_UTILITIES prior to Station 2 Task 1
 const EXPECTED_NEED_ALL_UTILITIES: string =

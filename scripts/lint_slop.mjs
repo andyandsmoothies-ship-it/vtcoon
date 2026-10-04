@@ -27,12 +27,17 @@ export const SLOP_RULES = {
   ZERO_GETTER_PROXIES: 'zero-getter-proxies',
   ZERO_PSEUDO_PROXIES: 'zero-pseudo-proxies',
   ZERO_TEST_PROPS: 'zero-test-props',
+  ATOMIC_TEST_MAX_ASSERTS: 'atomic-test-max-asserts',
+  ZERO_DEAD_SSR: 'zero-dead-ssr',
+  ZERO_ORPHAN_PRODUCTION_FILES: 'zero-orphan-production-files',
+  MARKDOWN_HYGIENE_LATEX: 'markdown-hygiene-latex',
 };
 
 export const TIER_BUDGETS = {
   TIER1_LOGIC: { maxWarn: 300, maxError: 550 },
   TIER2_UI: { maxWarn: 400, maxError: 500 },
   TIER3_STATIC: { maxWarn: 650, maxError: 800 },
+  TIER_TEST: { maxWarn: 600, maxError: 650 },
 };
 
 /**
@@ -40,6 +45,9 @@ export const TIER_BUDGETS = {
  */
 export function categorizeFile(filePath) {
   const norm = filePath.replace(/\\/g, '/');
+  if (norm.includes('/tests/') || norm.startsWith('tests/')) {
+    return 'TIER_TEST';
+  }
   if (norm.includes('tile_icons.ts') || norm.includes('property_manager_data.ts') || norm.includes('board_config.ts')) {
     return 'TIER3_STATIC';
   }
@@ -57,6 +65,13 @@ export function categorizeFile(filePath) {
  */
 export function getSourceFiles(dir, fileList = []) {
   if (!fs.existsSync(dir)) return fileList;
+  const stat = fs.statSync(dir);
+  if (!stat.isDirectory()) {
+    if ((dir.endsWith('.ts') || dir.endsWith('.tsx')) && !dir.endsWith('.d.ts')) {
+      fileList.push(dir);
+    }
+    return fileList;
+  }
   const entries = fs.readdirSync(dir, { withFileTypes: true });
   for (const entry of entries) {
     const fullPath = path.join(dir, entry.name);
@@ -86,7 +101,7 @@ function hasExplanatoryComment(node, sf, content) {
  */
 function isDeclarativeOrReducerFunction(fnName, filePath) {
   const norm = filePath.replace(/\\/g, '/');
-  if (norm.endsWith('.tsx') || norm.includes('src/client/3d/') || norm.includes('src/client/ui/')) {
+  if (norm.endsWith('.tsx') || norm.includes('src/client/3d/') || norm.includes('src/client/ui/') || norm.includes('/tests/') || norm.startsWith('tests/')) {
     return true;
   }
   if (/^(use[A-Z]|generate.*Texture|draw.*Pattern|applyDelta|format[A-Z]|get[A-Z].*Texture)/.test(fnName)) {
@@ -274,15 +289,62 @@ export function lintSlopContent(content, filePath = 'anonymous.ts') {
     }
 
     // Rule 8: zero-test-props (Anti Test-Induced Design Damage)
-    if (ts.isPropertySignature(node) || ts.isPropertyDeclaration(node)) {
-      const propName = node.name.getText(sf);
-      if (/ForTesting\b/i.test(propName)) {
+    const isTestNamedMember = ts.isPropertySignature(node) ||
+                              ts.isPropertyDeclaration(node) ||
+                              ts.isMethodDeclaration(node) ||
+                              ts.isFunctionDeclaration(node);
+    if (isTestNamedMember && node.name) {
+      const memberName = node.name.getText(sf);
+      if (/(?:ForTesting|ForTest|_forTesting|_forTest)\b/i.test(memberName)) {
         const { line } = sf.getLineAndCharacterOfPosition(node.getStart());
         errors.push({
           rule: SLOP_RULES.ZERO_TEST_PROPS,
           file: filePath,
           line: line + 1,
-          message: `Test-Induced Design Damage (TIDD) detected: Production interface/class exposes test prop "${propName}". Extract pure custom hooks or test helpers instead.`,
+          message: `Test-Induced Design Damage (TIDD) detected: Production code exposes test-specific member "${memberName}". Move test-only logic to tests/** or extract pure helpers.`,
+        });
+      }
+    }
+
+    // Rule 9: atomic-test-max-asserts (Enforce <= 4 asserts per test case in tests/**)
+    const isTestCall = ts.isCallExpression(node) && node.expression &&
+      (ts.isIdentifier(node.expression) && (node.expression.text === 'it' || node.expression.text === 'test') ||
+       (ts.isPropertyAccessExpression(node.expression) && ts.isIdentifier(node.expression.name) && (node.expression.name.text === 'it' || node.expression.name.text === 'test')));
+    if (isTestCall && (filePath.replace(/\\/g, '/').includes('/tests/') || filePath.replace(/\\/g, '/').startsWith('tests/'))) {
+      let expectCount = 0;
+      function countExpects(child) {
+        if (ts.isCallExpression(child)) {
+          const childExpr = child.expression;
+          const childFn = ts.isIdentifier(childExpr) ? childExpr.text : null;
+          if (childFn === 'expect') expectCount++;
+        }
+        ts.forEachChild(child, countExpects);
+      }
+      if (node.arguments && node.arguments.length >= 2) {
+        countExpects(node.arguments[1]);
+      }
+      if (expectCount > 4) {
+        const { line } = sf.getLineAndCharacterOfPosition(node.getStart());
+        const testTitle = node.arguments[0] && ts.isStringLiteral(node.arguments[0]) ? node.arguments[0].text : 'anonymous';
+        errors.push({
+          rule: SLOP_RULES.ATOMIC_TEST_MAX_ASSERTS,
+          file: filePath,
+          line: line + 1,
+          message: `Atomic test assertion ceiling exceeded: test "${testTitle}" has ${expectCount} assertions (maximum allowed is 4 per GEMINI.md). Split into atomic tests.`,
+        });
+      }
+    }
+
+    // Rule 10: zero-dead-ssr (Warns against isSSR workarounds in client UI files)
+    if (ts.isVariableDeclaration(node) && node.name.getText(sf) === 'isSSR') {
+      const norm = filePath.replace(/\\/g, '/');
+      if (norm.includes('src/client/ui/')) {
+        const { line } = sf.getLineAndCharacterOfPosition(node.getStart());
+        warnings.push({
+          rule: SLOP_RULES.ZERO_DEAD_SSR,
+          file: filePath,
+          line: line + 1,
+          message: 'Avoid "isSSR" dead branch in client UI. Client UI runs in browser; SSR guards create unkillable mutants.',
         });
       }
     }
@@ -310,6 +372,51 @@ export function runSlopLinter(targetDir = 'src') {
     const { errors, warnings } = lintSlopContent(content, file);
     allErrors.push(...errors);
     allWarnings.push(...warnings);
+  }
+
+  // Rule 11: zero-orphan-production-files (Anti-TIDD Check)
+  if (targetDir === 'src' || targetDir.startsWith('src')) {
+    const srcFiles = files;
+    const testFiles = fs.existsSync('tests') ? getSourceFiles('tests') : [];
+    const allSrcContent = srcFiles.map(f => ({ file: f, content: fs.readFileSync(f, 'utf8') }));
+    const allTestContent = testFiles.map(f => ({ file: f, content: fs.readFileSync(f, 'utf8') }));
+    const KNOWN_ENTRYPOINTS = new Set([
+      'src/client/main.tsx',
+      'src/server/index.ts',
+      'src/client/ui/app_error_boundary.ts',
+      'src/client/ui/lobby/lobby_view.tsx',
+      'src/client/3d/r3f_fiber_shield.ts',
+      'src/client/3d/owner_price_pill.ts',
+      'src/client/3d/tactile_deed_wax_seal.ts',
+      'src/client/3d/diorama/diorama_ferris_wheel.tsx',
+      'src/client/3d/diorama/diorama_stadium.tsx',
+      'src/client/3d/centerpiece_water.tsx',
+      'src/client/ui/social_emotes_tray.tsx',
+    ]);
+
+    for (const { file } of allSrcContent) {
+      const norm = file.replace(/\\/g, '/');
+      if (norm.includes('polyfills/') || KNOWN_ENTRYPOINTS.has(norm)) continue;
+      const base = path.basename(file).replace(/\.[^.]+$/, '');
+      const isImportedInSrc = allSrcContent.some(other => {
+        if (other.file === file) return false;
+        return new RegExp(`from\\s+['"][^'"]*\\b${base}(?:\\.js)?['"]`).test(other.content) ||
+               new RegExp(`import\\s*\\(['"][^'"]*\\b${base}(?:\\.js)?['"]\\)`).test(other.content);
+      });
+      const isImportedInTests = allTestContent.some(t => {
+        return new RegExp(`from\\s+['"][^'"]*\\b${base}(?:\\.js)?['"]`).test(t.content) ||
+               new RegExp(`import\\s*\\(['"][^'"]*\\b${base}(?:\\.js)?['"]\\)`).test(t.content);
+      });
+
+      if (!isImportedInSrc && isImportedInTests) {
+        allErrors.push({
+          rule: SLOP_RULES.ZERO_ORPHAN_PRODUCTION_FILES,
+          file,
+          line: 1,
+          message: `Anti-TIDD Violation: Production file "${norm}" is imported in tests/** but has ZERO consumers in src/**. Move to tests/** or delete.`,
+        });
+      }
+    }
   }
 
   if (allWarnings.length > 0) {

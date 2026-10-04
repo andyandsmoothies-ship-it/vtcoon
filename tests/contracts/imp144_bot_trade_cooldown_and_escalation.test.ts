@@ -9,7 +9,7 @@ import {
   findEligibleBotTrade,
   calculateTradeOfferPrice,
 } from '../../src/domain/bot/bot_trade.js';
-import { executeP2PTrade } from '../../src/server/property_actions.js';
+import { executeP2PTrade } from '../../src/server/p2p_trade_actions.js';
 
 // Khai báo mở rộng giao thức thuộc tính người chơi cho IMP-144
 declare module '../../src/domain/room.js' {

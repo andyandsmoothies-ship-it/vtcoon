@@ -2,12 +2,19 @@ import React, { useState, useEffect } from 'react';
 import {
   EffectComposer,
   Bloom,
+  SelectiveBloom,
   DepthOfField,
   N8AO,
   Vignette,
   ToneMapping,
   SMAA,
 } from '@react-three/postprocessing';
+import {
+  SELECTIVE_BLOOM_LAYER,
+  SELECTIVE_BLOOM_DEFAULTS,
+  calculateSelectiveBloomThreshold,
+  calculateSelectiveBloomIntensity,
+} from './selective_bloom_registry';
 import { Vector3 } from 'three';
 import { ToneMappingMode } from 'postprocessing';
 import { resolveAdaptivePostProcessing } from '../ui/ui_helpers';
@@ -33,6 +40,9 @@ export interface PostProcessingPipelineProps {
   dofBokehScale?: number;
   bloomIntensity?: number;
   bloomThreshold?: number;
+  enableSelectiveBloom?: boolean;
+  selectiveBloomIntensity?: number;
+  selectiveBloomThreshold?: number;
   vignetteDarkness?: number;
   aoIntensity?: number;
   aoRadius?: number;
@@ -59,6 +69,9 @@ export const DEFAULT_PIPELINE_CONFIG = {
 
   bloomSmoothing: 0.25,
   bloomRadius: 0.65,
+  enableSelectiveBloom: false,
+  selectiveBloomIntensity: SELECTIVE_BLOOM_DEFAULTS.intensity,
+  selectiveBloomThreshold: SELECTIVE_BLOOM_DEFAULTS.luminanceThreshold,
   aoIntensity: 0.38,
   aoRadius: 0.85,
   aoDistanceFalloff: 2.0,
@@ -207,6 +220,9 @@ export function PostProcessingPipeline({
   dofBokehScale: propDofBokehScale,
   bloomIntensity = DEFAULT_PIPELINE_CONFIG.bloomIntensity,
   bloomThreshold: propBloomThreshold,
+  enableSelectiveBloom = DEFAULT_PIPELINE_CONFIG.enableSelectiveBloom,
+  selectiveBloomIntensity: propSelectiveBloomIntensity,
+  selectiveBloomThreshold: propSelectiveBloomThreshold,
   vignetteDarkness: propVignetteDarkness,
   aoIntensity = DEFAULT_PIPELINE_CONFIG.aoIntensity,
   aoRadius = DEFAULT_PIPELINE_CONFIG.aoRadius,
@@ -292,15 +308,36 @@ export function PostProcessingPipeline({
         bokehScale={enableDof ? resolvedBokehScale : 0}
       />
 
-      {/* 3. Bloom (HDR): Ánh kim vàng champagne trên dải HDR trước khi nén tone mapping */}
+      {/* 3. Bloom (HDR) / Selective Reference Bloom:
+          Khi enableSelectiveBloom = true: chỉ phát ánh hào quang cho các mesh được gán lớp selectiveBloomLayer (IMP-256).
+          Khi enableSelectiveBloom = false: duy trì Bloom toàn cục tương thích ngược 100% với IMP-241. */}
       {resolvedEnableBloom && (
-        <Bloom
-          luminanceThreshold={resolvedBloomThreshold}
-          luminanceSmoothing={DEFAULT_PIPELINE_CONFIG.bloomSmoothing}
-          intensity={isMobile ? 0.12 : (isAuctionActive ? 0.30 : bloomIntensity)}
-          mipmapBlur={!isMobile}
-          radius={DEFAULT_PIPELINE_CONFIG.bloomRadius}
-        />
+        enableSelectiveBloom ? (
+          <SelectiveBloom
+            selectionLayer={SELECTIVE_BLOOM_LAYER}
+            luminanceThreshold={
+              propSelectiveBloomThreshold !== undefined
+                ? propSelectiveBloomThreshold
+                : calculateSelectiveBloomThreshold(Boolean(isAuctionActive))
+            }
+            luminanceSmoothing={DEFAULT_PIPELINE_CONFIG.bloomSmoothing}
+            intensity={
+              propSelectiveBloomIntensity !== undefined
+                ? propSelectiveBloomIntensity
+                : calculateSelectiveBloomIntensity(Boolean(isMobile), Boolean(isAuctionActive))
+            }
+            mipmapBlur={!isMobile}
+            radius={DEFAULT_PIPELINE_CONFIG.bloomRadius}
+          />
+        ) : (
+          <Bloom
+            luminanceThreshold={resolvedBloomThreshold}
+            luminanceSmoothing={DEFAULT_PIPELINE_CONFIG.bloomSmoothing}
+            intensity={isMobile ? 0.12 : (isAuctionActive ? 0.30 : bloomIntensity)}
+            mipmapBlur={!isMobile}
+            radius={DEFAULT_PIPELINE_CONFIG.bloomRadius}
+          />
+        )
       )}
 
       {/* 4. Tone Mapping: [ADV-01] Chuẩn AgX nén dải tương phản điện ảnh (nhận toneMappingExposure từ Three.js shader) */}

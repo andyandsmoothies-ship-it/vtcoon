@@ -106,7 +106,7 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
 
   const isBuyModal = activeModal === 'deed' && Boolean((modalPayload as ModalPayloadMap['deed'])?.canBuy);
   const isAuctionActive = activeModal === 'auction';
-  const isCriticalDecision = isBuyModal || (isAuctionActive && !isAuctionDismissible(modalPayload as ModalPayloadMap['auction'], myId, myPlayer)) || activeModal === 'insolvency' || activeModal === 'compulsory_buyout';
+  const isCriticalDecision = isBuyModal || (isAuctionActive && !isAuctionDismissible(modalPayload as ModalPayloadMap['auction'], myId, myPlayer)) || activeModal === 'insolvency' || activeModal === 'compulsory_buyout' || activeModal === 'transit_wheel';
   const handleBackdropClose = () => {
     if (isAuctionActive && modalPayload && 'cellIndex' in modalPayload) {
       useGameStore.getState().dismissAuction((modalPayload as ModalPayloadMap['auction']).cellIndex);

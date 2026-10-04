@@ -7,7 +7,7 @@ import { RoomManager } from '../../src/server/room_manager.js';
 import { coordTrade, type RoomContext } from '../../src/server/room_property_coordinator.js';
 import { TurnPhase, ActionRejectReason, type Player, type Room } from '../../src/domain/room.js';
 import { BotPersonality } from '../../src/domain/bot/bot_types.js';
-import { executeP2PTrade } from '../../src/server/property_actions.js';
+import { executeP2PTrade } from '../../src/server/p2p_trade_actions.js';
 import { findEligibleBotTrade, type MonopolyGap } from '../../src/domain/bot/bot_trade.js';
 import * as botTradeMod from '../../src/domain/bot/bot_trade.js';
 

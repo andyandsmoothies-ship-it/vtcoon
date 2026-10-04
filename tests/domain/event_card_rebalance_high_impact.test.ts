@@ -31,7 +31,7 @@ import {
   type PropertyRegistry,
   type PropertyStateMap,
 } from '../../src/domain/property_manager.js';
-import { executeP2PTrade } from '../../src/server/property_actions.js';
+import { executeP2PTrade } from '../../src/server/p2p_trade_actions.js';
 
 // Type-safe runner for executeChanceCard with optional 8th room argument
 const runChanceCard = executeChanceCard as (

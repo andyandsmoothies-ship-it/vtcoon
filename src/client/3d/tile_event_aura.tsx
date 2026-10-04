@@ -2,9 +2,12 @@
 // Displays PBR glowing aura rim around affected cells and hovering billboard crest with remaining rounds
 import React from 'react';
 import { Billboard, Html } from '@react-three/drei';
+import type { Mesh } from 'three';
 import { deriveModifierVisual } from '../domain_visual_bridge.js';
+import { tagSelectiveBloom, untagSelectiveBloom } from './selective_bloom_registry.js';
 import { useGameStore } from '../store/game_store.js';
 import type { ClientMarketModifier } from '../store/game_store_types.js';
+import { calculateLabelOpacity } from './label_declutter_engine.js';
 
 export interface TileEventStatus {
   readonly isActive: boolean;
@@ -65,8 +68,23 @@ export function TileEventAuraRim({
   color = '#F59E0B',
   isSpotlighted = false,
 }: TileEventAuraRimProps): React.ReactElement {
+  const meshRef = React.useRef<Mesh>(null);
+
+  React.useEffect(() => {
+    const mesh = meshRef.current;
+    if (mesh) {
+      tagSelectiveBloom(mesh, true);
+    }
+    return () => {
+      if (mesh) {
+        untagSelectiveBloom(mesh);
+      }
+    };
+  }, []);
+
   return (
     <mesh
+      ref={meshRef}
       name="TileEventAuraRim"
       data-testid="tile-event-aura-rim"
       position={[0, 0.042, 0]}
@@ -123,18 +141,21 @@ export function SafeHtml({
 export interface TileEventFloatingBadgeProps {
   readonly status: TileEventStatus;
   readonly isMobile?: boolean;
+  readonly opacity?: number;
 }
 
 export function TileEventFloatingBadge({
   status,
   isMobile = false,
+  opacity,
 }: TileEventFloatingBadgeProps): React.ReactElement | null {
-  if (!status.isActive) {
+  if (!status.isActive || (opacity !== undefined && opacity <= 0.01)) {
     return null;
   }
 
   const scale: [number, number, number] = isMobile ? [1.18, 1.18, 1.18] : [1, 1, 1];
   const labelText = `${status.icon ?? ''} ${status.label ?? ''} • ${status.remainingRounds ?? 0}V`;
+  const resolvedOpacity = opacity !== undefined ? Math.max(0, Math.min(1, opacity)) : 1;
 
   return (
     <SafeBillboard
@@ -151,6 +172,7 @@ export function TileEventFloatingBadge({
       <SafeHtml>
         <div
           data-testid="tile-event-badge-pill"
+          style={{ opacity: resolvedOpacity, transition: 'opacity 0.2s ease-out' }}
           className={`whitespace-nowrap inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-black text-white bg-slate-900/90 border border-amber-400 shadow-xs max-w-[140px] truncate select-none pointer-events-none ${
             status.isExpiringSoon ? 'animate-pulse' : ''
           }`}
@@ -165,11 +187,13 @@ export function TileEventFloatingBadge({
 export interface TileEventAuraProps {
   readonly cellIndex: number;
   readonly isMobile?: boolean;
+  readonly opacity?: number;
 }
 
 export function TileEventAura({
   cellIndex,
   isMobile = false,
+  opacity: propOpacity,
 }: TileEventAuraProps): React.ReactElement | null {
   const isSSR = typeof window === 'undefined';
   const storeModifiers = useGameStore((state) => state.activeModifiers);
@@ -183,10 +207,15 @@ export function TileEventAura({
     return null;
   }
 
+  // Kết nối thực tế tới calculateLabelOpacity: Spotlight duy trì độ đục cao (isSelected=true)
+  const resolvedOpacity = propOpacity !== undefined
+    ? propOpacity
+    : (status.isSpotlighted ? calculateLabelOpacity(10, 10, 35, 1.0, true) : undefined);
+
   return (
     <group name="TileEventAura" data-testid="tile-event-aura">
       <TileEventAuraRim color={status.color} isSpotlighted={status.isSpotlighted} />
-      <TileEventFloatingBadge status={status} isMobile={isMobile} />
+      <TileEventFloatingBadge status={status} isMobile={isMobile} opacity={resolvedOpacity} />
     </group>
   );
 }

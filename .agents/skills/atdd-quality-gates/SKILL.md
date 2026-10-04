@@ -68,6 +68,12 @@ A test method must not contain more than **5 sequential HTTP calls** (or DB oper
 
 **Why 5?** It maps to realistic integration tests: register user + login + create prerequisite + perform action + verify result. Beyond 5, you're testing a workflow, not a criterion.
 
+### Rule: Assertion Ceiling ≤ 4 (Atomic Test Mandate)
+
+An atomic test case must contain at most **4 assertions** (`Assert.*`, `expect(...)`). Monolithic assertion dumps and loops (`for`, `forEach`) inside test bodies are strictly banned.
+
+**Why:** Tests with > 4 assertions mask downstream failures (an early assert aborts the rest), couple unrelated invariants together, and create brittle change-detectors. If a scenario verifies multiple independent behaviors, decompose them into distinct atomic test cases.
+
 ### Rule: One Scenario File Per Slice (Anti-Collision)
 
 When writing ATDD tests, **DO NOT** append to an existing mega-file. You must scaffold a **new, dedicated test file** for the current feature slice.

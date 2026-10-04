@@ -56,6 +56,7 @@ Run these checks on disk before writing implementation vectors:
 - What caller contracts or data cardinality assumptions are unverified?
 - Does this change introduce hidden coupling across unrelated components?
 - Behavior at boundary loads: 0 items, 1 item, max capacity?
+- Does the layout fix silently suppress or drop domain data/notifications to resolve crowding without an accessible history? Flag as **[ADV-SUPPRESS] Domain Data Suppression Workaround**.
 
 ### 🔢 Vector 5: Full Branch Path Trace (Arithmetic & Logic Fallthrough)
 For every modified function with multiple `return` branches (guards, fee calculations, state resolvers):
@@ -71,6 +72,11 @@ Every `Hardening Directive` must:
 - Target the **correct layer**: if the bug is in test methodology, fix the test — not the production component.
 - Be **actionable in 1–3 sentences**: no vague "add validation" directives.
 - Reference a **specific file or function** when possible.
+
+### 🛡️ Strict Pure-Move Quarantine Protocol
+When auditing a **Refactor, Modularization, or Pure Move** ticket (e.g., ticket title containing `MODULARIZE`, `REFACTOR`, `DECOUPLE`, or labeled Pure Move):
+- **Zero Smuggled Mutations**: ANY directive that introduces behavioral changes (input trimming/normalization, new error handling/swallowing like `try/catch`, array capping, socket pruning, new guards) is STRICTLY PROHIBITED from being injected into the refactor ticket. Refactors must remain 100% behavior-preserving.
+- **Mandatory Follow-up Hardening Ticket**: If vulnerabilities, edge cases, or missing guards are discovered during the adversarial challenge of a refactor ticket, the challenger MUST emit them as directives for a **separate follow-up hardening ticket** (e.g. `IMP-[ID+1] SECURITY & RESILIENCE HARDENING`). The challenger MUST NOT demand that the author bundle behavioral changes into the pure move refactor.
 
 ## 5. Deliverable Format
 

@@ -8,7 +8,6 @@ import { MarketCardId } from '../domain/event_card_types.js';
 import {
   TransitWheelOutcome,
   evaluateTransitWheelOutcome,
-  findNextPort,
   findSafeHaven,
 } from '../domain/transit_wheel.js';
 
@@ -51,25 +50,6 @@ export function handleSpinTransitWheel(
   let payout = 0;
 
   switch (outcome) {
-    case TransitWheelOutcome.NEXT_PORT: {
-      const oldPos = current.position;
-      targetCell = findNextPort(oldPos);
-      current.position = targetCell;
-      if (checkPassedGo(oldPos, targetCell)) {
-        if (room.passedGoSalary === undefined) {
-          const sal = calculateGoSalary(room.roundCount ?? 1);
-          current.balance += sal;
-          room.passedGoSalary = sal;
-        } else {
-          // Trợ cấp quá cảnh cố định nếu đã vượt GO trước đó
-          const stipend = Math.min(500, Math.max(0, room.treasury ?? 0));
-          room.treasury = (room.treasury ?? 0) - stipend;
-          current.balance += stipend;
-        }
-      }
-      resolveSecondHopLanding(room, current, targetCell, registry, stateMap, rng, deckRng);
-      break;
-    }
     case TransitWheelOutcome.SPEED_BOOST: {
       const boost = Math.floor(rng() * 6) + 1; // 1D6
       const oldPos = current.position;
@@ -156,6 +136,7 @@ function resolveSecondHopLanding(
   const sm = stateMap ?? new Map();
 
   if (handleSpecialCell(room, current, cell.type, reg, sm, deckRng ?? rng)) {
+    checkInsolvency(room);
     return;
   }
 

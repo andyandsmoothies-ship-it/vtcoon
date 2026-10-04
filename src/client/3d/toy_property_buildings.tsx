@@ -1,11 +1,14 @@
 // [UI-S02/MSS][BR-UI-002][IMP-93] toy_property_buildings.tsx — Toy Property Buildings (Houses & Hotels)
 import React from 'react';
+import { computePackedBuildingSlots, createBuildingBoxItems } from './building_packer';
 
 export interface ToyPropertyBuildingsProps {
   readonly level: number;
   readonly groupColor?: string;
   readonly position?: [number, number, number];
   readonly cellIndex?: number;
+  readonly gap?: number;
+  readonly maxLotBounds?: readonly [number, number];
 }
 
 interface ToyHouseMeshProps {
@@ -88,21 +91,26 @@ export function ToyHotelMesh({ position = [0, 0, 0] }: ToyHotelMeshProps): React
 export function ToyPropertyBuildings({
   level,
   position = [0, 0.125, -0.80],
+  gap,
+  maxLotBounds = [1.6, 0.35],
 }: ToyPropertyBuildingsProps): React.ReactElement | null {
   if (level <= 0) {
     return null;
   }
 
+  const items = createBuildingBoxItems(level);
+  const slots = computePackedBuildingSlots(level, { gap, maxLotBounds });
+
   return (
     <group position={position} data-testid="toy-property-building">
-      {level === 1 && <ToyHouseMesh position={[0, 0, 0]} />}
-      {level === 2 && (
-        <>
-          <ToyHouseMesh position={[-0.18, 0, 0]} />
-          <ToyHouseMesh position={[0.18, 0, 0]} />
-        </>
-      )}
-      {level >= 3 && <ToyHotelMesh position={[0, 0, 0]} />}
+      {items.map((item, idx) => {
+        const slot = slots[idx];
+        const pos: [number, number, number] = slot ? slot.position : [0, 0, 0];
+        if (item.id.startsWith('hotel')) {
+          return <ToyHotelMesh key={item.id} position={pos} />;
+        }
+        return <ToyHouseMesh key={item.id} position={pos} />;
+      })}
     </group>
   );
 }

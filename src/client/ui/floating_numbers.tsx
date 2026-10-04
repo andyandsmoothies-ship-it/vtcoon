@@ -1,11 +1,12 @@
 // [UI-S05/MSS][IMP-117][IMP-123][IMP-194][IMP-201] FloatingNumbers Component — Contextual Financial Toasts & Milestone Banners
-// Responsive layout for Desktop (top-right, max 2) & Mobile (top-center, max 1) without obscuring 3D board
+// Responsive layout for Desktop (top-right, max 2) & Mobile (bottom-center, max 1) without obscuring 3D board
 import React from 'react';
 import {
   useGameStore,
   type FloatingTextItem,
 } from '../store/game_store.js';
 import { useLobbyStore } from '../store/lobby_store.js';
+import { deduplicateFloatingTexts } from './notification_deduplicator.js';
 import { formatShortPlayerName } from './ui_helpers.js';
 import {
   resolveTransactionNarrative,
@@ -31,9 +32,7 @@ export function cleanEventDescription(text: string): string {
 }
 
 export function MilestoneBanner({ item }: { readonly item: FloatingTextItem }): React.ReactElement {
-  const isSSR = typeof window === 'undefined';
-  const storePlayersInfo = useGameStore((state) => state.playersInfo);
-  const playersInfo = isSSR ? useGameStore.getState().playersInfo : storePlayersInfo;
+  const playersInfo = useGameStore((state) => state.playersInfo);
   const player = playersInfo[item.playerId];
   const icon = resolveActionIcon(item.actionType, true);
 
@@ -47,7 +46,7 @@ export function MilestoneBanner({ item }: { readonly item: FloatingTextItem }): 
 
   const bannerClasses = [
     'pointer-events-auto cursor-pointer flex items-center gap-2.5 sm:gap-3 px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-2xl border-2',
-    'bg-[#FFFDF8] text-slate-900 select-none animate-in fade-in slide-in-from-top-3 duration-200',
+    'bg-[#FFFDF8] text-slate-900 select-none animate-in fade-in slide-in-from-bottom-3 md:slide-in-from-top-3 duration-200',
     'max-w-[88vw] sm:max-w-[380px]',
     borderShadowStyle,
   ].join(' ');
@@ -164,7 +163,7 @@ export function FloatingBadge({ item }: { readonly item: FloatingTextItem }): Re
             e.stopPropagation();
             handleDismiss();
           }}
-          className="text-slate-400 hover:text-slate-700 text-xs font-bold leading-none p-1 cursor-pointer focus-visible:outline-none"
+          className="text-slate-400 hover:text-slate-700 text-xs font-bold leading-none min-w-[24px] min-h-[24px] flex items-center justify-center p-1 rounded-lg hover:bg-slate-200/50 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
           aria-label="Đóng thông báo"
         >
           ✕
@@ -227,38 +226,30 @@ export function FloatingNumbersOverlay(): React.ReactElement | null {
     return null;
   }
 
-  const latestMilestone = [...floatingTexts].reverse().find(
-    (t) =>
-      t.actionType === 'monopoly' ||
-      t.actionType === 'debt_relief' ||
-      t.actionType === 'chance' ||
-      t.actionType === 'market',
-  );
-
-  const regularTexts = floatingTexts.filter(
-    (t) =>
-      t.actionType !== 'monopoly' &&
-      t.actionType !== 'debt_relief' &&
-      t.actionType !== 'chance' &&
-      t.actionType !== 'market',
-  );
+  const isMilestone = (action?: string) =>
+    action === 'monopoly' || action === 'debt_relief' || action === 'chance' || action === 'market' || action === 'bankrupt';
+  const latestMilestone = [...floatingTexts].reverse().find((t) => isMilestone(t.actionType));
+  const regularTexts = floatingTexts.filter((t) => !isMilestone(t.actionType));
 
   const stackTopClass =
     activeMarketCount >= 3
-      ? 'top-44 sm:top-44'
+      ? 'bottom-[calc(8rem+env(safe-area-inset-bottom))] md:bottom-auto md:top-44'
       : activeMarketCount === 2
-      ? 'top-36 sm:top-36'
+      ? 'bottom-[calc(8rem+env(safe-area-inset-bottom))] md:bottom-auto md:top-36'
       : activeMarketCount >= 1
-      ? 'top-28 sm:top-28'
-      : 'top-20 sm:top-20';
+      ? 'bottom-[calc(8rem+env(safe-area-inset-bottom))] md:bottom-auto md:top-28'
+      : 'bottom-[calc(8rem+env(safe-area-inset-bottom))] md:bottom-auto md:top-20';
 
-  const recentTwo = regularTexts.slice(-2);
+  const deduplicated = deduplicateFloatingTexts(regularTexts, myPlayerId);
+  const recentTwo = deduplicated.slice(-2);
   let displayItems = [...recentTwo];
-  if (displayItems.length === 2 && myPlayerId) {
-    const myIdx = displayItems.findIndex((it) => it.playerId === myPlayerId);
-    if (myIdx === 0) {
-      displayItems = [displayItems[1]!, displayItems[0]!];
-    }
+  if (
+    displayItems.length === 2 &&
+    myPlayerId &&
+    displayItems[0]?.playerId === myPlayerId &&
+    displayItems[1]?.playerId !== myPlayerId
+  ) {
+    displayItems = [displayItems[1]!, displayItems[0]!];
   }
 
   return (
@@ -268,7 +259,7 @@ export function FloatingNumbersOverlay(): React.ReactElement | null {
       aria-label="Thông báo biến động tài chính"
       className="pointer-events-none select-none z-30"
     >
-      <div className={"fixed " + stackTopClass + " left-1/2 -translate-x-1/2 md:left-auto md:right-6 md:translate-x-0 flex flex-col items-center md:items-end gap-1.5 w-[calc(100vw-1.5rem)] max-w-sm sm:max-w-md md:max-w-md px-1 z-30 pointer-events-none"}>
+      <div className={"fixed " + stackTopClass + " left-1/2 -translate-x-1/2 md:left-auto md:right-[18.5rem] md:translate-x-0 flex flex-col items-center md:items-end gap-1.5 w-[calc(100vw-1.5rem)] max-w-sm sm:max-w-md md:max-w-md px-1 z-30 pointer-events-none"}>
         {latestMilestone && (
           <div data-testid="milestone-banner-container" className="w-full flex justify-center pointer-events-auto">
             <MilestoneBanner item={latestMilestone} />
@@ -283,8 +274,8 @@ export function FloatingNumbersOverlay(): React.ReactElement | null {
               key={item.id}
               className={
                 isHiddenOnMobile
-                  ? "w-full justify-start sm:justify-center hidden md:flex"
-                  : "w-full flex justify-start sm:justify-center"
+                  ? 'w-full justify-start sm:justify-center hidden md:flex'
+                  : 'w-full flex justify-start sm:justify-center'
               }
             >
               <FloatingBadge item={item} />

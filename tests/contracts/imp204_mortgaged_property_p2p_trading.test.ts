@@ -7,7 +7,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { RoomManager } from '../../src/server/room_manager.js';
 import { TurnPhase } from '../../src/domain/room.js';
 import { ActionRejectReason } from '../../src/domain/action_reasons.js';
-import { executeP2PTrade } from '../../src/server/property_actions.js';
+import { executeP2PTrade } from '../../src/server/p2p_trade_actions.js';
 import { collectMortgageInterest, redeemProperty } from '../../src/server/mortgage_manager.js';
 import { upgradeProperty } from '../../src/domain/property_upgrade.js';
 import { findAllMonopolyGaps } from '../../src/domain/bot/bot_monopoly_utils.js';

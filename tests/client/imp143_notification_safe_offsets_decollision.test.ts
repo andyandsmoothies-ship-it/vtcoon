@@ -99,7 +99,7 @@ describe('[IMP-143] Tọa Độ Đa Tầng Định Lượng Chính Xác Dưới 
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
       const container = extractStackContainer(html);
-      expect(container).toContain('top-28 sm:top-28');
+      expect(container).toContain('md:top-28');
     });
 
     it('[TC-IMP143.03/MSS][UC-IMP143][Facet-1/Boundary] activeMarketCount >= 2: unified stack container có class top-36 sm:top-36 (IMP-199)', () => {
@@ -112,7 +112,7 @@ describe('[IMP-143] Tọa Độ Đa Tầng Định Lượng Chính Xác Dưới 
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
       const container = extractStackContainer(html);
-      expect(container).toContain('top-36 sm:top-36');
+      expect(container).toContain('md:top-36');
     });
   });
 
@@ -127,7 +127,7 @@ describe('[IMP-143] Tọa Độ Đa Tầng Định Lượng Chính Xác Dưới 
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
       const container = extractMobileContainer(html);
-      expect(container).toContain('top-20');
+      expect(container).toContain('bottom-[calc(8rem+env(safe-area-inset-bottom))]');
       expect(container).toMatch(/gap-(?:1\.5|2)/);
       expect(container).not.toContain('top-[11.5rem]');
     });
@@ -139,7 +139,7 @@ describe('[IMP-143] Tọa Độ Đa Tầng Định Lượng Chính Xác Dưới 
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
       const container = extractMobileContainer(html);
-      expect(container).toContain('top-28 sm:top-28');
+      expect(container).toContain('bottom-[calc(8rem+env(safe-area-inset-bottom))]');
       expect(container).toMatch(/gap-(?:1\.5|2)/);
     });
 
@@ -153,7 +153,7 @@ describe('[IMP-143] Tọa Độ Đa Tầng Định Lượng Chính Xác Dưới 
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
       const container = extractMobileContainer(html);
-      expect(container).toContain('top-36 sm:top-36');
+      expect(container).toContain('bottom-[calc(8rem+env(safe-area-inset-bottom))]');
       expect(container).toMatch(/gap-(?:1\.5|2)/);
     });
 
@@ -164,7 +164,7 @@ describe('[IMP-143] Tọa Độ Đa Tầng Định Lượng Chính Xác Dưới 
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
       const container = extractMobileContainer(html);
-      expect(container).toContain('top-20');
+      expect(container).toContain('bottom-[calc(8rem+env(safe-area-inset-bottom))]');
       expect(container).toMatch(/gap-(?:1\.5|2)/);
     });
 
@@ -175,7 +175,7 @@ describe('[IMP-143] Tọa Độ Đa Tầng Định Lượng Chính Xác Dưới 
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
       const container = extractMobileContainer(html);
-      expect(container).toContain('top-28 sm:top-28');
+      expect(container).toContain('bottom-[calc(8rem+env(safe-area-inset-bottom))]');
       expect(container).toMatch(/gap-(?:1\.5|2)/);
     });
 
@@ -189,7 +189,7 @@ describe('[IMP-143] Tọa Độ Đa Tầng Định Lượng Chính Xác Dưới 
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
       const container = extractMobileContainer(html);
-      expect(container).toContain('top-36 sm:top-36');
+      expect(container).toContain('bottom-[calc(8rem+env(safe-area-inset-bottom))]');
       expect(container).toMatch(/gap-(?:1\.5|2)/);
     });
   });
@@ -205,7 +205,7 @@ describe('[IMP-143] Tọa Độ Đa Tầng Định Lượng Chính Xác Dưới 
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
       const container = extractDesktopContainer(html);
-      expect(container).toContain('top-20');
+      expect(container).toContain('md:top-20');
       expect(container).toMatch(/gap-(?:1\.5|2)/);
     });
 
@@ -216,7 +216,7 @@ describe('[IMP-143] Tọa Độ Đa Tầng Định Lượng Chính Xác Dưới 
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
       const container = extractDesktopContainer(html);
-      expect(container).toContain('top-28 sm:top-28');
+      expect(container).toContain('md:top-28');
       expect(container).toMatch(/gap-(?:1\.5|2)/);
     });
 
@@ -230,7 +230,7 @@ describe('[IMP-143] Tọa Độ Đa Tầng Định Lượng Chính Xác Dưới 
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
       const container = extractDesktopContainer(html);
-      expect(container).toContain('top-36 sm:top-36');
+      expect(container).toContain('md:top-36');
       expect(container).toMatch(/gap-(?:1\.5|2)/);
     });
 
@@ -241,7 +241,7 @@ describe('[IMP-143] Tọa Độ Đa Tầng Định Lượng Chính Xác Dưới 
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
       const container = extractDesktopContainer(html);
-      expect(container).toContain('top-20');
+      expect(container).toContain('md:top-20');
       expect(container).toMatch(/gap-(?:1\.5|2)/);
     });
 
@@ -252,7 +252,7 @@ describe('[IMP-143] Tọa Độ Đa Tầng Định Lượng Chính Xác Dưới 
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
       const container = extractDesktopContainer(html);
-      expect(container).toContain('top-28 sm:top-28');
+      expect(container).toContain('md:top-28');
       expect(container).toMatch(/gap-(?:1\.5|2)/);
     });
 
@@ -266,7 +266,7 @@ describe('[IMP-143] Tọa Độ Đa Tầng Định Lượng Chính Xác Dưới 
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
       const container = extractDesktopContainer(html);
-      expect(container).toContain('top-36 sm:top-36');
+      expect(container).toContain('md:top-36');
       expect(container).toMatch(/gap-(?:1\.5|2)/);
     });
   });

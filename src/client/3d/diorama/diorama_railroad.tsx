@@ -1,7 +1,8 @@
 // [UI-S02/MSS][IMP-92][IMP-134][IMP-227] Diorama Railroad Infrastructure, HCMC Metro Line 1 & Rolling Stock
 import React, { useRef, useMemo } from 'react';
-import { Vector3, type Group } from 'three';
+import { Vector3, MeshStandardMaterial, type Group } from 'three';
 import { useSafeFrame } from '../safe_frame';
+import { createCurvedRailGeometry, applyTubeWidth } from '../curve_line_buffer';
 import {
   computeTrainKinematics,
   computeCarriageProgress,
@@ -203,6 +204,45 @@ export function DioramaTropicalFlora(): React.ReactElement {
 }
 
 
+export function DioramaCurvedRails(): React.ReactElement {
+  const curve = useMemo(() => getRailroadTrackCurve(), []);
+  const railGeometry = useMemo(() => {
+    return createCurvedRailGeometry(curve, {
+      segments: 96,
+      radialSegments: 4,
+      railRadius: 0.008,
+      gaugeOffset: 0.05,
+      railElevation: 0.45,
+    });
+  }, [curve]);
+
+  const railMaterial = useMemo(() => {
+    const mat = new MeshStandardMaterial({
+      color: '#E2E8F0',
+      metalness: 0.85,
+      roughness: 0.2,
+    });
+    return applyTubeWidth(mat, 1.0);
+  }, []);
+
+  React.useEffect(() => {
+    return () => {
+      railGeometry.dispose();
+      railMaterial.dispose();
+    };
+  }, [railGeometry, railMaterial]);
+
+  return (
+    <mesh
+      name="DioramaCurvedRails"
+      data-testid="diorama-curved-rails"
+      receiveShadow
+      geometry={railGeometry}
+      material={railMaterial}
+    />
+  );
+}
+
 const tempVec = new Vector3();
 const tempTangent = new Vector3();
 
@@ -258,19 +298,8 @@ export function DioramaModelRailroad(): React.ReactElement {
         </mesh>
       ))}
 
-      {/* 2. Ray kim loại đôi sáng bóng mạ thép (#E2E8F0, metalness 0.85, roughness 0.2) uốn lượn song song */}
-      {VIADUCT_CURVED_SEGMENTS.map((seg, idx) => (
-        <React.Fragment key={`rail-pair-${idx}`}>
-          <mesh receiveShadow position={seg.leftRailPos} rotation={[0, seg.yaw, 0]}>
-            <SafeBoxGeometry args={[seg.segLength, 0.01, 0.02]} />
-            <meshStandardMaterial color="#E2E8F0" metalness={0.85} roughness={0.2} />
-          </mesh>
-          <mesh receiveShadow position={seg.rightRailPos} rotation={[0, seg.yaw, 0]}>
-            <SafeBoxGeometry args={[seg.segLength, 0.01, 0.02]} />
-            <meshStandardMaterial color="#E2E8F0" metalness={0.85} roughness={0.2} />
-          </mesh>
-        </React.Fragment>
-      ))}
+      {/* 2. Ray kim loại đôi sáng bóng mạ thép (#E2E8F0, metalness 0.85, roughness 0.2) uốn lượn song song tối ưu qua GPU Tube Buffer */}
+      <DioramaCurvedRails />
 
       {/* 3. Đoàn tàu Metro Tuyến 1 (Bến Thành - Suối Tiên): Xanh Cyan, Thân Bạc, Mũi Vát Khí Động Học */}
       {/* Đầu tàu (Lead Cab): Mũi vát #0EA5E9, dải cyan #0284C7, thân bạc #E2E8F0, đèn LED #FEF08A, đèn an toàn #DC2626 */}

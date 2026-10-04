@@ -19,6 +19,7 @@ import {
 import { AudioEngine } from '../audio/audio_engine';
 import { SoundEffect } from '../audio/audio_types';
 import { LuxuryPawnModel } from './luxury_pawn_models';
+import { PawnHopTrajectory } from './pawn_hop_trajectory';
 
 export * from './pawn_path';
 
@@ -255,18 +256,27 @@ export function ActiveSpringPawn({ player, color, offset, animation, onComplete,
   }, [stepIndex, waypoints, player.id, onComplete]);
 
   return (
-    <SingleHopPawn
-      key={stepIndex}
-      fromCell={fromCell}
-      toCell={toCell}
-      offset={offset}
-      color={color}
-      onHopComplete={handleHopComplete}
-      emoteId={emoteId}
-      slotIndex={slotIndex}
-      isBot={isBot}
-      isJailFlight={Boolean(animation.isJailFlight)}
-    />
+    <>
+      <PawnHopTrajectory
+        fromCell={fromCell}
+        toCell={toCell}
+        offset={offset}
+        color={color}
+        arcHeight={Boolean(animation.isJailFlight) ? JAIL_FLIGHT_ARC : DEFAULT_JUMP_ARC}
+      />
+      <SingleHopPawn
+        key={stepIndex}
+        fromCell={fromCell}
+        toCell={toCell}
+        offset={offset}
+        color={color}
+        onHopComplete={handleHopComplete}
+        emoteId={emoteId}
+        slotIndex={slotIndex}
+        isBot={isBot}
+        isJailFlight={Boolean(animation.isJailFlight)}
+      />
+    </>
   );
 }
 

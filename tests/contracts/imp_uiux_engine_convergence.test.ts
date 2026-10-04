@@ -323,7 +323,7 @@ describe('[TC-CONV-01..20/MSS][UC-IMP235] UI/UX & Engine Convergence Contract Su
         React.createElement(FloatingNumbersOverlay)
       );
 
-      expect(html).toContain('md:right-6');
+      expect(html).toContain('md:right-[18.5rem]');
       expect(html).toContain('md:left-auto');
       expect(html).toContain('md:translate-x-0');
     });

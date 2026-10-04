@@ -12,13 +12,14 @@
  *   node scripts/capture_visual_evidence.mjs --ticket IMP-233 --crop 0,200,700,600 --name corner_close_up
  */
 
-import { spawn } from 'node:child_process';
+import { spawn, execSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import http from 'node:http';
 
 const repoRoot = process.cwd();
 const tmpDir = path.join(repoRoot, '.agents', 'tmp');
+const evidenceDir = path.join(repoRoot, '.agents', 'evidence');
 
 const BROWSER_CANDIDATES = [
   'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
@@ -100,6 +101,32 @@ async function main() {
 
   if (!fs.existsSync(tmpDir)) {
     fs.mkdirSync(tmpDir, { recursive: true });
+  }
+
+  // 0. Auto-Build Check: Check if src/client/ is newer than dist/index.html
+  const distHtml = path.join(repoRoot, 'dist', 'index.html');
+  const srcClientDir = path.join(repoRoot, 'src', 'client');
+  let needsBuild = !fs.existsSync(distHtml);
+  if (!needsBuild && fs.existsSync(srcClientDir)) {
+    const distMtime = fs.statSync(distHtml).mtimeMs;
+    function checkDirNewer(dir) {
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+      for (const ent of entries) {
+        const full = path.join(dir, ent.name);
+        if (ent.isDirectory()) {
+          if (checkDirNewer(full)) return true;
+        } else if (/\.(tsx?|css)$/.test(ent.name)) {
+          if (fs.statSync(full).mtimeMs > distMtime) return true;
+        }
+      }
+      return false;
+    }
+    needsBuild = checkDirNewer(srcClientDir);
+  }
+
+  if (needsBuild) {
+    console.log('🔄 Source files in src/client/ are newer than dist/ (or dist missing). Running "npm run build" to ensure fresh bundle...');
+    execSync('npm run build', { stdio: 'inherit' });
   }
 
   // 1. Verify Preview Server
@@ -207,9 +234,80 @@ async function main() {
             el.style.display = 'none';
           }
         });
+        // Ensure In-Game HUD mounts (gameStarted === true) for physical UI captures
+        if (window.__lobbyStore && !window.__lobbyStore.getState().gameStarted) {
+          window.__lobbyStore.getState().initLobby('VTTEST', 'p1', true, 'Tester');
+          window.__lobbyStore.getState().setGameStarted(true);
+        }
+        // Worst-case 4-player setup for HUD/Toast layout tests
+        if (window.__gameStore) {
+          const s = window.__gameStore.getState();
+          if (!s.playersInfo || Object.keys(s.playersInfo).length <= 1) {
+            window.__gameStore.setState({
+              playersInfo: {
+                p1: { id: 'p1', name: 'Tester', balance: 15000, tokenColor: '#38BDF8', ownedProperties: [] },
+                p2: { id: 'p2', name: 'Bot AI 1', balance: 12000, tokenColor: '#F43F5E', ownedProperties: [] },
+                p3: { id: 'p3', name: 'Bot AI 2', balance: 9500, tokenColor: '#10B981', ownedProperties: [] },
+                p4: { id: 'p4', name: 'Bot AI 3', balance: 7000, tokenColor: '#F59E0B', ownedProperties: [] },
+              },
+              isPlayerHudVisible: true,
+            });
+          }
+        }
       `,
     });
     await sleep(800);
+
+    // Helper to extract physical bounding boxes from browser DOM
+    async function extractBoundingBoxes(viewportName) {
+      const evalRes = await send('Runtime.evaluate', {
+        expression: `
+          (function() {
+            const getRect = (sel) => {
+              const el = document.querySelector(sel);
+              if (!el) return null;
+              const r = el.getBoundingClientRect();
+              return { x: Math.round(r.x), y: Math.round(r.y), width: Math.round(r.width), height: Math.round(r.height), top: Math.round(r.top), bottom: Math.round(r.bottom), left: Math.round(r.left), right: Math.round(r.right) };
+            };
+            const toastContainer = document.querySelector('[data-testid="floating-numbers-overlay"] > div');
+            const toastCards = Array.from(document.querySelectorAll('[data-testid="contextual-transaction-badge"]')).map(el => {
+              const r = el.getBoundingClientRect();
+              return { x: Math.round(r.x), y: Math.round(r.y), width: Math.round(r.width), height: Math.round(r.height), top: Math.round(r.top), bottom: Math.round(r.bottom), left: Math.round(r.left), right: Math.round(r.right) };
+            });
+            const pillEl = document.querySelector('[data-testid="camera-reset-pill-btn"]');
+            const cameraPillsContainer = document.querySelector('div[class*="bottom-[calc(5rem"]') || (pillEl && pillEl.parentElement);
+            return JSON.stringify({
+              viewport: '${viewportName}',
+              toastContainer: toastContainer ? {
+                top: Math.round(toastContainer.getBoundingClientRect().top),
+                bottom: Math.round(toastContainer.getBoundingClientRect().bottom),
+                left: Math.round(toastContainer.getBoundingClientRect().left),
+                right: Math.round(toastContainer.getBoundingClientRect().right),
+                width: Math.round(toastContainer.getBoundingClientRect().width),
+                height: Math.round(toastContainer.getBoundingClientRect().height)
+              } : null,
+              toastCards,
+              hud: getRect('[aria-label="Danh sách người chơi"]'),
+              cameraPills: cameraPillsContainer ? {
+                top: Math.round(cameraPillsContainer.getBoundingClientRect().top),
+                bottom: Math.round(cameraPillsContainer.getBoundingClientRect().bottom),
+                height: Math.round(cameraPillsContainer.getBoundingClientRect().height),
+                left: Math.round(cameraPillsContainer.getBoundingClientRect().left),
+                right: Math.round(cameraPillsContainer.getBoundingClientRect().right),
+              } : null,
+            });
+          })()
+        `,
+        returnByValue: true,
+      });
+      if (evalRes && evalRes.result && evalRes.result.value) {
+        const boundsJson = evalRes.result.value;
+        const boundsFile = path.join(evidenceDir, `bounding_box_${opts.ticket.toLowerCase()}_${viewportName}.json`);
+        fs.writeFileSync(boundsFile, boundsJson, 'utf8');
+        console.log(`   - Physical DOM Bounding Boxes: ${boundsFile}`);
+        console.log(`     ${boundsJson}`);
+      }
+    }
 
     // Scenario Injection if specified
     if (opts.scenario) {
@@ -230,7 +328,10 @@ async function main() {
       await sleep(1000);
     } else if (opts.scenarioExpr) {
       console.log(`🎬 Evaluating scenario expression...`);
-      await send('Runtime.evaluate', { expression: opts.scenarioExpr });
+      const res = await send('Runtime.evaluate', { expression: opts.scenarioExpr });
+      if (res && res.exceptionDetails) {
+        console.error('❌ Scenario expression failed:', JSON.stringify(res.exceptionDetails));
+      }
       await sleep(1000);
     }
 
@@ -255,6 +356,7 @@ async function main() {
       console.log(`\n📸 DUAL-VIEWPORT [1/2] DESKTOP CAPTURED:`);
       console.log(`   - File: ${desktopPath}`);
       console.log(`   - Dimensions: 1280x800`);
+      await extractBoundingBoxes('desktop');
 
       // 2. Mobile Capture (360x740)
       console.log(`📐 Setting Mobile Viewport (360x740)...`);
@@ -267,7 +369,12 @@ async function main() {
       await send('Network.setUserAgentOverride', {
         userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1',
       });
-      await sleep(1000);
+      if (opts.scenarioExpr) {
+        await send('Runtime.evaluate', { expression: opts.scenarioExpr });
+        await sleep(500);
+      } else {
+        await sleep(1000);
+      }
 
       const mobileFile = `${opts.ticket.toLowerCase()}_mobile_360.jpg`;
       const mobilePath = path.join(tmpDir, mobileFile);
@@ -276,6 +383,7 @@ async function main() {
       console.log(`\n📸 DUAL-VIEWPORT [2/2] MOBILE CAPTURED:`);
       console.log(`   - File: ${mobilePath}`);
       console.log(`   - Dimensions: 360x740`);
+      await extractBoundingBoxes('mobile');
     } else {
       const filename = `${opts.ticket.toLowerCase()}_${opts.name}.jpg`;
       const outputPath = path.join(tmpDir, filename);

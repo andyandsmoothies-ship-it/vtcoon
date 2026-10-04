@@ -28,14 +28,15 @@
    - [1.0.0 Kiến Trúc Phân Tầng 2 Cấp Luật: Global Rule (`~/.gemini/gemini.md`) vs Project Rule (`./GEMINI.md`)](#100-kiến-trúc-phân-tầng-2-cấp-luật-global-rule-geminigeminimd-vs-project-rule-geminimd)
    - [1.0.1 Quy Tắc Bản Địa Hóa Công Cụ Native AG 2.0 & Tiêu Chuẩn Kỹ Năng (Toolchain Mapping, reference/, PRODUCT.md)](#101-quy-tắc-bản-địa-hóa-công-cụ-sang-native-ag-20--tiêu-chuẩn-kỹ-năng-toolchain-mapping)
 8. [GIAI ĐOẠN 2: Trọn Bộ Subagents Chuyên Trách Native AG 2.0 Sẵn Sàng Sử Dụng](#giai-đoạn-2-trọn-bộ-subagents-chuyên-trách-native-ag-20-sẵn-sàng-sử-dụng)
-   - [8.1 Bộ 6 Subagents Cốt Lõi Kỹ Thuật & Kiến Trúc (scout, plan-griller, qa-tester, implementer, spec-reviewer, re-reviewer, code-reviewer)](#1-file-agentsagentsscoutmd-trinh-sát---định-vị-tọa-độ--nạp-skill-jit)
+   - [8.1 Bộ 8 Subagents Cốt Lõi Kỹ Thuật & Kiến Trúc (scout, plan-griller, adversarial-challenger, qa-tester, implementer, spec-reviewer, re-reviewer, code-reviewer, chaos-sentinel)](#1-file-agentsagentsscoutmd-trinh-sát---định-vị-tọa-độ--nạp-skill-jit)
    - [8.2 Bộ 5 Subagents Thẩm Mỹ, Đồ Họa & Thủ Công (ui-craft-reviewer, game-3d-visual-critic, asset-producer, documenter, manual-edit)](#5-file-agentsagentsui-craft-reviewermd-chuyên-gia-thẩm-định-thủ-công-2d-uiux)
 9. [KỊCH BẢN THỰC CHIẾN: Greenfield, Feature Slices, Bug/CR (Sign-off Test) & Brownfield](#9-kịch-bản-thực-chiến-từ-số-0-greenfield-đến-từng-tính-năng-feature)
 10. [GIAI ĐOẠN 8: Nén Bộ Nhớ & Chuyển Phiên (Session Handoff & Visual Mining)](#giai-đoạn-8-nén-bộ-nhớ--chuyển-phiên-session-handoff--visual-mining)
 11. [BẢNG TRA CỨU CÂU LỆNH NHANH (Cheat Sheet & Slash Commands)](#bảng-tra-cứu-câu-lệnh-nhanh-cheat-sheet--slash-commands)
 12. [QUY TRÌNH TUẦN TỰ TOÀN DIỆN TỪ A-Z (The Master SDLC Workflow)](#12-quy-trình-tuần-tự-toàn-diện-từ-a-z-the-master-sdlc-workflow)
     - [12.0 Phân Định Cửa 1 Chiều vs Cửa 2 Chiều (One-Way vs Two-Way Doors)](#120-phân-định-cửa-1-chiều-vs-cửa-2-chiều-one-way-vs-two-way-doors)
-    - [12.1 Sổ Tay Prompts Thực Chiến & Quy Trình 3 Trạm Mở Rộng (Trạm 1 ➔ 2 ➔ 2.5 ➔ 3 ➔ 3.5)](#121-sổ-tay-prompts-thực-chiến-4-cạnh-cho-junior-the-4-tier-step-harness-playbook)
+    - [12.1 Sổ Tay Prompts Thực Chiến & Quy Trình 4 Trạm Khép Kín (Trạm 1 ➔ 2 ➔ 2.5 ➔ 3 ➔ 4)](#121-sổ-tay-prompts-thực-chiến-4-cạnh-cho-junior-the-4-tier-step-harness-playbook)
+    - [12.2 Sổ Tay Prompts Thực Chiến Chặng 4: Production Hardening & Go-Live](#122-sổ-tay-prompts-thực-chiến-chặng-4-production-hardening--go-live)
 
 ---
 
@@ -88,9 +89,11 @@
 │        - Tier 4 (Kịch bản Test Tích Hợp / E2E Living Flow): Max 600 LOC (Unit test giữ <= 300 LOC).
 │        - Tier 5 (Schemas / DTOs / Migrations): Max 1000 LOC (hoặc miễn trừ nếu là mã tự động sinh).
 │      • SUBTRACTIVE REFACTORING: Khi thay thế cơ chế cũ (state, listener, flag), bắt buộc xác định và xóa triệt để code cũ.
-│      • CHỐNG BẪY CODE GOLF & NO-OP STUBBING:
-│        - Tuyệt đối CẤM gộp câu lệnh, xóa comment, viết tắt biến hoặc tạo hàm No-Op/Stub rỗng chỉ để né trần LOC.
-│        - Khi nghiệp vụ đòi hỏi code mở rộng, giải pháp DUY NHẤT là tách module chuyên trách (Modular Decomposition).
+│      • CHỐNG BẪY CODE GOLF & CHÍNH SÁCH ĐO LƯỜNG TRUNG THỰC (HONEST LOC ACCOUNTING):
+│        - Tuyệt đối CẤM gộp câu lệnh, nén 1 dòng getter/setter, xóa comment hoặc tạo hàm No-Op chỉ để né trần LOC.
+│        - Tệp vượt 300 dòng (Tier 1) là trạng thái trung gian hợp lệ: BẮT BUỘC gắn nhãn "⚠️ Warning" (CẤM dán nhãn "Safe")
+│          và đăng ký mã Nợ Kỹ Thuật bất biến (`DEBT-XXX`) trong Sổ Cái với kế hoạch bóc tách ở lát cắt tương lai.
+│        - Dung sai đo lường tự động (check:loc): Cho phép dung sai 5% trên Non-Empty SLOC để tránh false positive từ comment sạch và dòng trống.
 │
 ├── 6. CƯỠNG CHẾ KIẾN TRÚC TẤT ĐỊNH (DETERMINISTIC ARCHITECTURE ENFORCEMENT - NICK TUNE):
 │      "Rào chắn cơ học của Trình biên dịch/Linter luôn đánh bại rào chắn đạo đức trong Markdown."
@@ -153,8 +156,8 @@
 │          sửa mã nguồn tối thiểu + chạy test xác minh trực tiếp. Hoàn tất trong 1–2 phút, tiết kiệm 90% token.
 │      • TIER 2: FULL RIGOR (Đại Phẫu / Feature Slice / Systemic) - Nếu có ít nhất 1 câu là CÓ:
 │        - Tác vụ: Nghiệp vụ tài chính, state machine, DB migration, network protocol, slice mới > 50 LOC.
-│        - Điều phối: KÍCH HOẠT TOÀN DIỆN (Plan Grilling đối kháng qua `plan-griller` + Quy trình 3 Trạm
-│          `qa-tester` RED ➔ `implementer` GREEN ➔ `spec-reviewer` Trạm 3 Independent Physical Verification + Snapshot).
+│        - Điều phối: KÍCH HOẠT TOÀN DIỆN (Cổng thẩm định kế hoạch 2 tầng Stage A plan-griller + Stage B adversarial-challenger
+│          + Quy trình 4 Trạm khép kín: Trạm 1 qa-tester RED ➔ Trạm 2 implementer GREEN ➔ Trạm 2.5 scout ➔ Trạm 3 Reviewer ➔ Trạm 4 chaos-sentinel).
 │      • Ngưỡng Tự Động Nâng Cấp (Auto-Escalation Gate): Nếu bắt đầu ở Tier 1 mà phát hiện mã nguồn vượt 50 LOC,
 │        chạm Schema/FSM hoặc gây regression test hỏng các test suites khác, AI BẮT BUỘC DỪNG LẠI và nâng cấp lên Tier 2.
 │      • Contract-First Codegen: OpenAPI / Protobuf / JSON Schema là SSOT duy nhất. AI chỉ nối logic, CẤM tự gõ interface.
@@ -231,20 +234,24 @@
 │           cùng trỏ vào một thực thể nghiệp vụ. Gom các thao tác liên quan thành một điểm chạm hợp nhất với bộ điều hướng ngữ cảnh
 │           để tối ưu hóa tải nhận thức (Cognitive Load) cho người dùng cuối.
 │
-├── 19. QUY TRÌNH TRIỂN KHAI 3 TRẠM BẮT BUỘC & KIỂM CHỨNG ĐĨA VẬT LÝ (MANDATORY 3-STATION PIPELINE):
+├── 19. QUY TRÌNH THỰC THI 4 TRẠM KHÉP KÍN & KIỂM CHỨNG ĐĨA VẬT LÝ (MANDATORY 4-STATION CLOSED-LOOP PIPELINE):
 │       • Triệt tiêu bẫy "AI tự viết test rồi tự duyệt code" (Conversational Approval Hallucination).
 │       • Tích Hợp Plan Review Policy Tự Động Hóa (Zero-Memorization Pipeline): Với setting 'Plan Review Policy = Review every plan',
-│         Agent tự soạn plan ➔ tự gọi plan-griller phản biện đĩa cứng ➔ kích hoạt hộp thoại Plan Review của IDE.
-│         Khi người dùng bấm 'Proceed' (Approve), Agent tự động kích hoạt tuần tự: Trạm 1 (RED) ➔ Trạm 2 (GREEN) ➔ Trạm 3 (Review đĩa vật lý).
-│         Junior không cần gõ hay nhớ bất kỳ lệnh kích hoạt thủ công nào.
-│       • Pre-Flight Visual Banner: Agent bắt buộc in biểu ngữ `🚦 [KÍCH HOẠT QUY TRÌNH 3 TRẠM]` lên chat trước khi dispatch.
-│       • Trạm 1 (RED Contract Test): `qa-tester` viết contract test trong `tests/**`, chứng minh Adversarial Inversion (test đỏ thật sự).
-│         CẤM sửa `src/**`. Atomic test (1-4 asserts/test, `it.each`, cấm vòng lặp trong `it()`). Sàn mật độ >= 15 atomic tests/slice.
+│         Agent tự soạn plan ➔ tự thẩm định qua 2 tầng (griller + challenger) ➔ kích hoạt hộp thoại Plan Review của IDE.
+│         Khi người dùng bấm 'Proceed' (Approve), Agent tự động kích hoạt tuần tự chuỗi 4 Trạm khép kín.
+│       • Pre-Flight Visual Banner: Agent bắt buộc in biểu ngữ `🚦 [KÍCH HOẠT QUY TRÌNH 4 TRẠM KHÉP KÍN]` lên chat trước khi dispatch.
+│       • Trạm 1 (RED Contract Test): `qa-tester` viết contract test trong `tests/**`, chứng minh Adversarial Inversion (test đỏ thật sự),
+│         gắn Flow Taxonomy `[UC-XXX/MSS]` và `[UC-XXX/A#]`. CẤM sửa `src/**`. Sàn mật độ >= 15 atomic tests/slice.
 │       • Trạm 2 (GREEN Implementation): `implementer` viết mã tối thiểu trong `src/**` để pass test. CẤM nới lỏng assertion (Zero Bug-Codification).
-│       • Trạm 3 (Thẩm Định Độc Lập & Kiểm Chứng Đĩa Vật Lý): Read-only reviewers (`spec-reviewer`, `code-reviewer`...).
-│         CẤM implementer tự duyệt code mình. CẤM duyệt dựa trên lời nói trong chat. Reviewers BẮT BUỘC dùng công cụ đọc đĩa vật lý
-│         (`view_file`, `list_dir`, terminal execution) và kiểm tra tệp `Evidence Snapshot` vật lý trên đĩa để xác minh code thật,
-│         blast radius thật và test thật đang PASS trên đĩa cứng trước khi ký [APPROVED].
+│         Implementer Pushback Mandate: Nếu plan có snippet sai/no-op, implementer bắt buộc sửa code vật lý đúng đắn thay vì làm theo plan hỏng.
+│       • Trạm 2.5 (Fast Pre-Filter Sweep): `scout` (flash model) quét nhanh `tsc --noEmit`, `check_loc.mjs`, cấm dirty cast (`as any`), thanh trừng `console.log`.
+│       • Trạm 3 (Thẩm Định Độc Lập 3 Pha): Read-only reviewers (`spec-reviewer`, `code-reviewer`, `ui-craft-reviewer`, `game-3d-visual-critic`...).
+│         - Phase 3.0: Bằng chứng thị giác kép Dual-Viewport (Desktop 1280x800 & Mobile 360x740) vào `.agents/tmp/` hoặc cấp Pure Logic Waiver.
+│         - Phase 3.1: Spec Gatekeeper xác nhận 100% plan fidelity, 0% scope drift.
+│         - Phase 3.2: Deep Architecture & Craft Gate (deep modules, rò rỉ timer/listener, race conditions). Fix round dùng `re-reviewer`. Active Remediation.
+│       • Trạm 4 (Adversarial Boundary & Mutation Sentinel): `chaos-sentinel` chạy 3 probes vật lý: (1) Wire-to-Core Parity,
+│         (2) Live Dynamic Socket `port: 0`, và (3) Targeted Mutation Sensitivity (sàn >= 14 mutants, 100% kill rate, 0 sống sót).
+│         Xuất file pháp chứng `.agents/evidence/chaos_sentinel_[ID].json` (`executed: true`), kiểm tra bằng `node scripts/check_evidence.mjs`.
 │
 ├── 20. 4 TRỤ CỘT KIẾN TRÚC PHÒNG THỦ TOÀN DIỆN CHO HỆ THỐNG BẤT ĐỒNG BỘ (FOUR PILLARS OF ARCHITECTURE DEFENSE):
 │       • Áp dụng cho mọi hệ thống phân tán, event-driven, multi-user, stateful hoặc async:
@@ -276,26 +283,16 @@
 │         - Trạng thái hợp đồng: Minh chứng Adversarial RED (thất bại đối kháng) ➔ GREEN (100% assertions PASS).
 │       • Trạm 3 dùng tệp Snapshot này làm căn cứ pháp chứng ký duyệt độc lập (0ms độ trễ, 0 token lặp lại).
 │
-├── 23. CỔNG PHẢN BIỆN ĐỐI KHÁNG ZERO-TRUST & KHỬ THIÊN KIẾN AI (ZERO-TRUST ADVERSARIAL GRILLING & ANTI-AI-BIAS MANDATE):
-│         • Triệt tiêu hoàn toàn căn bệnh "Echo Chamber" (tác nhân này lập kế hoạch, tác nhân kia đồng thuận dễ dãi, khen ngợi sáo rỗng
-│           hoặc bỏ qua các bẫy runtime/vật lý ngầm).
-│         • MỌI Kế hoạch (Plan) hoặc Thiết kế kiến trúc do AI soạn thảo BẮT BUỘC phải chịu sự phản biện đối kháng Zero-Trust trước khi phê duyệt:
-│           - Giả định mặc định: Mọi plan của AI đều chứa lỗi ngầm (Flawed by Default), điểm mù kỹ thuật (AI Blind Spots) hoặc ảo tưởng
-│             tính khả thi (Hallucinated Feasibility).
-│           - Bắt buộc vạch trần tối thiểu 1–3 điểm bất hợp lý / giả định ngầm chưa được chứng minh:
-│             + Bất khả thi vật lý & Runtime: Sai số dấu phẩy động gây desync Server-Client (như Rapier WebAssembly vs Node.js),
-│               quá tải Draw Calls GPU (nhân bội qua N8AO/Shadows), độ trễ IPC, rò rỉ bộ nhớ heap.
-│             + Vi phạm ranh giới kiến trúc: Phá vỡ tính Server-Authoritative FSM, bòn rút/rò rỉ Kho Bạc, vi phạm Invariant đã lưu trong gotchas.
-│             + Tải nhận thức người dùng (Cognitive Overload): Nhồi nhét thao tác dư thừa, bẫy cụt chữ trên màn hình nhỏ.
-│           - CẤM ĐỒNG THUẬN LỊCH SỰ (Zero Polite Rubber-Stamping / No Sycophancy): Nghiêm cấm Subagent đồng ý 100% dễ dãi.
-│             Reviewer nào duyệt plan phức tạp mà không chỉ ra phản biện hay rủi ro kỹ thuật nào bị coi là vi phạm kỷ luật kiểm toán (bản duyệt bị vô hiệu hóa).
-│           - VÒNG LẶP PHẢN BIỆN TỰ ĐỘNG HÓA 2 CHIỀU (Autonomous Ping-Pong Plan Hardening Loop - Zero-Memorization):
-│             Trước khi Agent chính trình bản Plan cho Người Dùng phê duyệt (Planning Mode Approval), Agent chính BẮT BUỘC
-│             phải tự động kích hoạt subagent `plan-griller` qua `invoke_subagent`. Subagent `plan-griller` (Read-only) dùng
-│             công cụ đọc đĩa cứng đối chiếu mã nguồn thực tế và vạch trần 1–3 điểm mù (Ghost files, đứt gãy chuỗi nghiệp vụ,
-│             sai số biên, desync consumer). Agent chính BẮT BUỘC phải đọc báo cáo đối kháng này và tự động cập nhật lại tệp
-│             `implementation_plan.md` để giải quyết dứt điểm các điểm mù đó TRƯỚC KHI xin người dùng phê duyệt. Người dùng
-│             TUYỆT ĐỐI KHÔNG PHẢI copy-paste plan sang conversation khác để hỏi.
+├── 23. CỔNG THẨM ĐỊNH KẾ HOẠCH 2 TẦNG (TWO-STAGE PLAN HARDENING GATE):
+│         • Triệt tiêu hoàn toàn căn bệnh "Echo Chamber" (tác nhân này lập kế hoạch, tác nhân kia đồng thuận dễ dãi, khen ngợi sáo rỗng).
+│         • MỌI Kế hoạch (Plan) tại `.agents/plans/PLAN_[TICKET].md` BẮT BUỘC phải chịu sự thẩm định đối kháng 2 tầng trước khi trình người dùng:
+│           - Stage 0 (Pre-Flight Script 6ms): Chạy `node scripts/audit_plan.mjs <plan>`. Tự động kiểm tra: LOC baseline, Anti-TIDD
+│             (consumer check), Client Bundle Poisoning (`node:*`, `crypto`, `fs`), Zero No-Op snippets, Anti-Code-Golf, và Flow Taxonomy.
+│           - Stage A (Cấu Trúc & Cơ Học): `plan-griller` (Read-only) quét 5 trụ cột (P1-P5), vạch trần điểm mù trên đĩa cứng (Ghost files, broken lifecycle, blast radius).
+│           - Stage B (Tấn Công Đối Kháng - Devil's Advocate): `adversarial-challenger` tấn công bắt buộc từ ADV-OBJ (tính hợp pháp của mục tiêu),
+│             thử tải 4 attack vectors: gian lận kinh tế/thuế, bất đồng bộ/đua lệnh, trạng thái kẹt/nuốt lỗi, trôi dạt khế ước gọi hàm.
+│           - Bảng Đối Ứng 1:1 (Directive Coverage Table): Tác giả plan bắt buộc lập bảng giải quyết từng directive. Phán quyết bắt buộc: `HARDENED_APPROVED`.
+│           - Quy Tắc Cách Ly Refactor (Pure-Move Quarantine): Vé tái cấu trúc phải bảo toàn 100% hành vi; cấm nhét thêm thay đổi logic/guards. Mọi phát hiện từ Stage B phải bóc sang ticket củng cố nối tiếp.
 │
 ├── 24. KỶ LUẬT TIỀN CODE & QUY TẮC "KILL THE PREMISE" (2-FIX LIMIT & PRE-CODING DISCIPLINE):
 │       • 4 Bước Tiền Code Bắt Buộc (Pre-Coding Discipline):
@@ -311,10 +308,14 @@
 │         - WebKit Flex Ellipsis: Mọi flex-child có `truncate` bắt buộc gắn `min-w-0` chống vỡ layout trên Safari WebKit.
 │         - Grid Action Symmetry: Các nút bấm cùng hàng trong action footer bắt buộc đồng bộ `h-full min-h-[48px]`.
 │
-├── 25. DEEP MODULES & CHỐNG SLOP WRAPPERS (JOHN OUSTERHOUT / NASH):
+├── 25. DEEP MODULES, THE DELETION TEST & CHỐNG SLOP WRAPPERS (JOHN OUSTERHOUT / MATT POCOCK):
 │       • Deep Modules: Thiết kế module sâu — giao diện đơn giản (simple interfaces) che giấu độ phức tạp lớn bên trong (hiding complex logic).
-│       • CẤM Tuyệt Đối Shallow Pass-Through Wrappers: Những hàm/lớp bọc nông cạn chỉ làm nhiệm vụ chuyển tiếp tham số vô nghĩa,
-│         làm phình to bề mặt tiếp xúc và ép viết các unit test mock rác vô hồn.
+│       • The Deletion Test (Matt Pocock codebase-design): Mọi module hoặc abstraction mới phải chịu bài kiểm tra xóa:
+│         Tưởng tượng xóa module đó đi — nếu độ phức tạp biến mất hoàn toàn, đó là pass-through wrapper thừa thãi (BỊ CẤM);
+│         nếu độ phức tạp bị dồn ngược lại N nơi gọi, module đó mới thực sự có giá trị tồn tại.
+│       • Kỷ Luật Seam / Adapter (DEEPENING.md): 1 adapter = seam giả định/vẽ chuyện; >= 2 adapters thực tế (production + test in-memory) = seam hợp lệ.
+│         Bề mặt test chính là interface: callers và tests đi qua cùng một seam, cấm chọc thủng interface để test chi tiết nội bộ.
+│       • CẤM Tuyệt Đối Shallow Pass-Through Wrappers: Những hàm/lớp bọc nông cạn chỉ làm nhiệm vụ chuyển tiếp tham số vô nghĩa (1-line delegates).
 │       • Tuân thủ nghiêm ngặt Single Responsibility Principle (SRP). Giữ giao diện công khai mỏng và trực diện.
 │
 ├── 26. DIỆT 3 ANTI-PATTERNS TEST CỦA AI & KIỂM THỬ OBSERVABLE BEHAVIOR:
@@ -344,11 +345,16 @@
 │         (5) Dead-end states & dead code (nút bấm không có action, trạng thái kẹt loading/modal).
 │       • Toàn bộ 5 khuyết tật phải được giải quyết dứt điểm trước khi Trạm 3 tiến hành thẩm định.
 │
-├── 30. RETRO FEEDBACK INOCULATION & GOTCHAS 3 TẦNG THỰC NGHIỆM:
-│       • Miễn dịch phản hồi hồi cứu: Biến 100% phản hồi/sửa lỗi của con người thành: (1) Contract/Regression test tự động,
-│         (2) Rule trong linter AST, hoặc (3) Bất biến có số hiệu trong `docs/domain/gotchas.md`. Không bao giờ sửa lỗi mà không có rào chắn ngăn ngừa tái diễn.
-│       • Quy chuẩn Gotchas 3 tầng: Bất biến chỉ ghi sau khi đã qua kiểm chứng vật lý đa vòng (Sweeping audit + full tests pass):
-│         (1) Initial deceptive trap (Bẫy ảo tưởng ban đầu) ➔ (2) Physical finding (Phát hiện thực tế trên đĩa) ➔ (3) Verified invariant (Bất biến được xác minh).
+├── 30. ENCODE LESSONS IN STRUCTURE & THÁP ƯU TIÊN TẤT ĐỊNH (MATT POCOCK / KAITO):
+│       • Encode Lessons in Structure (ELIS): Khi agent lặp lại lỗi hoặc nhận feedback người dùng, TUYỆT ĐỐI KHÔNG spam thêm text vào prompt/rules.
+│         Bắt buộc cấu trúc hóa bài học thành cơ chế tất định (Deterministic Mechanism) theo thứ tự ưu tiên tuyệt đối:
+│         $$\mathbf{Types\ (Compiler\ Safety)} > \mathbf{Lint\ (AST/Scripts)} > \mathbf{Common\ Functions\ (SSOT\ Helpers)} > \mathbf{Runtime\ Checks\ (if/else)}$$
+│         1. Types (Zod/TypeScript DTOs, Enums): Bắt lỗi lúc compile, 0 token, 0ms.
+│         2. Lint (Scripts AST/check_loc/lint_slop): Chặn cơ học trước khi chạy code.
+│         3. Common Functions: Gom logic dùng chung thành hàm thuần túy duy nhất, cấm viết lại rải rác.
+│         4. Runtime Checks: Rào chắn lúc chạy (assertions, guards) chỉ khi 3 tầng trên không thể bắt.
+│       • Miễn dịch phản hồi hồi cứu: Biến 100% lỗi thành bài test/linter script tự động. Bất biến chỉ ghi vào `docs/domain/gotchas.md`
+│         khi đã qua kiểm chứng thực nghiệm 3 tầng (Deceptive Trap ➔ Physical Finding ➔ Verified Invariant).
 │
 ├── 31. TRA CỨU TÀI LIỆU NGOẠI VI BẮT BUỘC (CONTEXT7 DOCUMENTATION LOOKUP):
 │       • Bắt buộc dùng Context7 MCP (`resolve-library-id` -> `query-docs`) khi lập trình với thư viện/framework bên ngoài (React 19, Three.js/R3F, Tailwind v4, Flutter, ORM...).
@@ -587,25 +593,38 @@ Bạn gõ: nạp `use-case-creator` + `openapi`
     │   └── Vẽ sơ đồ kiến trúc trực quan (Mermaid/PlantUML)
     │
     ▼ (Sinh ra: docs/epics/[epic]/UC-[EPIC]-[NNN]-[kebab-name].md & docs/domain/adr/ADR-[NNNN]-[kebab-name].md)
-[LƯỢT 3: CẮT LÁT DỌC & PHÂN TÍCH TÁC ĐỘNG THAY ĐỔI (BROWNFIELD / GREENFIELD)]
-Bạn gõ: nạp `use-case-slicing`
-    │   ├── Nếu là Brownfield (sửa code cũ): Chạy Change Impact Analysis rà soát ripple effects
-    │   └── Bẻ lát cắt Tracer Bullets khép kín (UI -> API -> DB), gắn LOC Budget max +50 LOC
+[LƯỢT 3: CẮT LÁT DỌC & ĐIỀU PHỐI TASK GRAPH FRONTIER]
+Bạn gõ: nạp `use-case-slicing` + `implement-spec`
+    │   ├── Bẻ lát cắt Tracer Bullets khép kín (UI -> API -> DB), gắn LOC Budget max +50 LOC
+    │   ├── Xây dựng đồ thị có hướng (DAG), điều phối Frontier hàng đợi tuần tự không xung đột git
+    │   └── Soạn thảo kế hoạch duy nhất tại `.agents/plans/PLAN_[TICKET].md`
     │
-    ▼ (Sinh ra: docs/epics/[epic]/_epic_ledger.md & issues/[EPIC]-S[NN]-[kebab-name].md)
-[LƯỢT 4: SUBAGENT THI CÔNG TDD ATOMIC EDIT & QUẢN TRỊ VISUAL DESIGN]
-Bạn gõ: Gọi `implementer` (Workspace: "branch") + nạp `atdd-quality-gates` + đọc `design.md`
-    │   ├── Gọi `scout` (Model: flash) định vị [file.ts#L20-L45] + Kéo Skill chuyên sâu nếu thiếu
-    │   └── Chạy Adversarial TDD (Sửa nhiều file nguyên tử, Context Offloading qua script local)
+    ▼ (Sinh ra: docs/epics/[epic]/_epic_ledger.md & .agents/plans/PLAN_[TICKET].md)
+[LƯỢT 3.5: CỔNG THẨM ĐỊNH KẾ HOẠCH 2 TẦNG (TWO-STAGE PLAN HARDENING GATE)]
+Agent tự động: Chạy `scripts/audit_plan.mjs` (6ms) ➔ Gọi `plan-griller` (Stage A) ➔ `adversarial-challenger` (Stage B)
+    │   ├── Stage 0: Quét LOC, Anti-TIDD, Client Poisoning, Anti-Code-Golf, Flow Taxonomy
+    │   ├── Stage A: Vạch trần điểm mù P1-P5 trên đĩa cứng (.agents/audit/PLAN_AUDIT_[TICKET].md)
+    │   ├── Stage B: ADV-OBJ, tấn công kinh tế, concurrency, nuốt lỗi (.agents/audit/PLAN_CHALLENGE_[TICKET].md)
+    │   └── Lập Bảng đối ứng 1:1 ➔ Đạt HARDENED_APPROVED ➔ Người dùng bấm [Proceed] duyệt plan
     │
-    ▼ (Code hoàn tất 100% xanh trong nhánh cô lập, kiểm soát Cyclomatic <= 5, chuẩn UI/UX Tokens)
-[LƯỢT 5: KIỂM TOÁN TỐI THIỂU HÓA CẤU TRÚC (6 CỜ ĐỎ SLOP) & VISUAL AUDIT]
-Bạn gõ: Gọi `spec-reviewer` + `code-reviewer` (Chạy đồng thời tại Acceptance Gate)
-    │   ├── spec-reviewer: Đối chiếu 100% tiêu chí trong spec.md gốc
-    │   └── code-reviewer: Quét 6 Cờ Đỏ Slop (Nash) + `vertical-slice-completeness` (6 tầng) + UI `design.md`
+    ▼ (Kích hoạt tự động: 🚦 [KÍCH HOẠT QUY TRÌNH 4 TRẠM KHÉP KÍN])
+[LƯỢT 4: THI CÔNG 4 TRẠM KHÉP KÍN (4-STATION CLOSED-LOOP PIPELINE)]
+    │   ├── TRẠM 1: `qa-tester` viết contract test ĐỎ (Adversarial Inversion, sàn >= 15 atomic tests, Flow Taxonomy)
+    │   ├── TRẠM 2: `implementer` viết mã tối thiểu XANH (Implementer Pushback Mandate, Deep Modules, 0 dirty casts)
+    │   ├── TRẠM 2.5: `scout` quét sạch đĩa (tsc --noEmit, check_loc.mjs, cấm as any, xóa console.log)
+    │   ├── TRẠM 3: Phễu Thẩm định 3 Pha (3.0 Dual-Viewport Visual, 3.1 Spec Gate, 3.2 Deep Code & Craft Review)
+    │   └── TRẠM 4: `chaos-sentinel` chạy 3 probes (Wire Parity, port: 0 live socket, Mutation test >= 14, 100% kill)
     │
-    ▼ (Sinh ra: docs/reports/audits/audit_[TIMESTAMP].md & Gói Nghiệm Thu)
-[BƯỚC CUỐI CÙNG: CON NGƯỜI NGHIỆM THU & TỰ COMMIT TRÊN TERMINAL]
+    ▼ (Code hoàn tất 100% xanh, sinh .agents/evidence/chaos_sentinel_[TICKET].json)
+[LƯỢT 5: HẬU KIỂM PHẢN TỈNH, TỰ MIỄN DỊCH & ĐÓNG GÓI PR]
+Agent tự động: Chạy `retro` + `pr`
+    │   ├── `retro`: Thu thập Telemetry, chạy Cổng phản biện 2 vòng (Physical Evidence + Inversion Filter)
+    │   │           Biến lỗi cơ học thành script kiểm tra tự động; biến quy luật thành Invariants/Gotchas
+    │   ├── `pr`: Đóng gói báo cáo 3 khối chuẩn mực (Summary + Evidence + Merge Danger: Door + Blast Radius)
+    │   └── Cập nhật Sổ Cái `_epic_ledger.md` (mã nợ bất biến DEBT-XXX) & sinh `docs/reports/..._report.md`
+    │
+    ▼ (Gói nghiệm thu minh bạch, an toàn 100%)
+[BƯỚC CUỐI CÙNG: CON NGƯỜI NGHIỆM THU & TỰ COMMIT TRÊN TERMINAL (HUMAN GIT SOVEREIGNTY)]
 ```
 
 ---
@@ -630,16 +649,20 @@ docs/
 │   ├── entity_model.md              <── Mô hình thực thể DUY NHẤT (Single Source of Truth)
 │   ├── design.md                    <── Chuẩn Quản trị Visual UI/UX (Web, Mobile, PDF, CLI)
 │   └── adr/                         <── Nhật ký quyết định kiến trúc 4 chiều (ADR-0001-use-postgres.md)
-├── plans/                          <── Kế hoạch thi công chi tiết
-│   └── improvements/                <── Kế hoạch cải tiến đột xuất (IMP-[ID]-[slug]_plan.md)
 └── reports/                        <── Bucket 3: Báo cáo kiểm định, chẩn đoán & bàn giao
     ├── audits/                      <── Báo cáo audit kiến trúc, bảo mật (audit_[TIMESTAMP].md)
     ├── diagnostics/                 <── Báo cáo phân tích bug (diag_[TIMESTAMP].md)
     ├── improvements/                <── Báo cáo nghiệm thu cải tiến đột xuất (IMP-[ID]-[slug]_report.md)
     └── handoff/                     <── Báo cáo nén trạng thái bàn giao phiên (handoff_[TIMESTAMP].md)
+.agents/                            <── Thư mục Điều Phối & Bằng Chứng Của Agent (Single Source of Truth)
+├── plans/                          <── Kế hoạch thi công duy nhất (.agents/plans/PLAN_[TICKET].md, cấm tạo bản sao docs/plans/)
+├── audit/                          <── Biên bản thẩm định 2 tầng (PLAN_AUDIT_[TICKET].md, PLAN_CHALLENGE_[TICKET].md)
+├── evidence/                       <── Bằng chứng số Trạm 4 (chaos_sentinel_[ID].json) & Snapshots
+└── skills/                         <── Kỹ năng bản địa hóa (implement-spec, retro, pr, impeccable...)
 issues/                             <── Thư mục chứa ticket thi công từng lát cắt
 └── [EPIC]-S[NN]-[kebab-name].md     <── Ticket thi công lát cắt khép kín (Ví dụ: AUTH-S01-mss-registration.md)
 tests/                              <── Thư mục CHÂN LÝ KIỂM THỬ THỰC THI (Executable Truth)
+├── contracts/                       <── Hợp đồng kiểm thử Trạm 1 (Traceability [UC-XXX/MSS], [UC-XXX/A#])
 ├── domain/                          <── Unit tests cho quy tắc nghiệp vụ
 ├── integration/                     <── Integration / E2E tests luồng Use Case
 └── regressions/                     <── Kho test hồi quy tự lớn lên
@@ -1635,7 +1658,7 @@ Antigravity tự động tìm và nạp các file luật Markdown theo cơ chế
 5. **CẤM Sao chép Mù quáng (Anti-Copy-Paste Trap) & Quy tắc Lưu vết Subagent (Dual Output Pattern)**:
    - *Tại sao không được copy nguyên xi Rule cũ sang dự án mới?* Mỗi dự án có tech stack, ranh giới NFRs và cấu trúc domain khác nhau. Copy mù quáng sẽ tiêm các ràng buộc thừa thãi hoặc lệch pha, làm loãng sự chú ý của AI.
    - *Quy tắc phổ quát bắt buộc giữ lại (Dual Output Pattern)*:
-     • **Subagent tạo tài liệu lớn** (như `docs/plans/`, `issues/` >50 dòng): BẮT BUỘC ghi trực tiếp ra đĩa bằng `write_to_file` trong `Workspace: "inherit"` và chỉ trả về bản tóm tắt <20 dòng kèm link file vào chat. Triệt tiêu 100% nguy cơ tràn context và ngăn Agent mẹ phải chạy script cào `transcript_full.jsonl` (gây lỗi nuốt dấu `$` và JSON parse).
+     • **Subagent tạo tài liệu lớn** (như `.agents/plans/`, `issues/` >50 dòng): BẮT BUỘC ghi trực tiếp ra đĩa bằng `write_to_file` trong `Workspace: "inherit"` và chỉ trả về bản tóm tắt <20 dòng kèm link file vào chat. Triệt tiêu 100% nguy cơ tràn context và ngăn Agent mẹ phải chạy script cào `transcript_full.jsonl` (gây lỗi nuốt dấu `$` và JSON parse).
       • **Subagent kiểm toán** (`spec-reviewer`, `code-reviewer`, `scout`): BẮT BUỘC giữ nguyên trạng thái **STRICTLY READ-ONLY**. TUYỆT ĐỐI CẤM ép Reviewers ghi file vì chúng không có tool `write_to_file` (vi phạm phân quyền Rule 8). Reviewer chỉ xuất báo cáo 1 trang (1-page packet) trực tiếp vào cửa sổ chat.
 
 ##### D. BẢNG BỐC THUỐC SETUP NHANH THEO 4 HÌNH THÁI DỰ ÁN CHO JUNIOR (ARCHETYPE SETUP COOKBOOKS)
@@ -1684,7 +1707,7 @@ Tạo file `C:\Projects\my-app\GEMINI.md`:
 - Test State Isolation: CẤM Order-Dependent Tests (chạy test độc lập với `--randomize`). Bắt buộc Transactional Rollback sau mỗi test để DB luôn sạch 100% (chống Flaky Test lừa AI). Dữ liệu test bắt buộc dùng Literal Data cụ thể.
 - Zero-Polling & Background Offloading (Google Cloud LRO): CẤM Agent chạy vòng lặp in-loop poll/sleep chờ lệnh. Tác vụ dài (>10s như build Docker, migrate DB, test suite lớn) phải đưa vào Background Task, dừng lượt ngay để Reactive Wakeup đánh thức. Cưỡng chế kill tiến trình treo >60s.
 - Zero-Memorization Interaction: Con người giao tiếp bằng tiếng Việt tự nhiên ("Làm tiếp", "Đổi nút này"). Agent tự tra cứu Ledger, tự tìm Use Case, tự báo cáo và đề xuất (Con người chỉ cần gõ "OK").
-- Subagent Artifact Persistence (Dual Output Pattern): Subagents tạo tài liệu lớn (`docs/plans/`, `issues/`) BẮT BUỘC ghi đĩa bằng `write_to_file` trong `Workspace: "inherit"` và chỉ trả về tóm tắt <20 dòng kèm link file. Subagents kiểm toán (`spec-reviewer`, `code-reviewer`) giữ nguyên trạng thái Read-only và báo cáo 1-page packet vào chat.
+- Subagent Artifact Persistence (Dual Output Pattern): Subagents tạo tài liệu lớn (`.agents/plans/`, `issues/`) BẮT BUỘC ghi đĩa bằng `write_to_file` trong `Workspace: "inherit"` và chỉ trả về tóm tắt <20 dòng kèm link file. Subagents kiểm toán (`spec-reviewer`, `code-reviewer`) giữ nguyên trạng thái Read-only và báo cáo 1-page packet vào chat.
 - Lean Runtime Observability: CẤM nuốt lỗi âm thầm (empty catch). Mọi chuyển dịch trạng thái nghiệp vụ (FSM, transactions) bắt buộc emit structured logs ({ event, correlationId, timestamp, delta }). Rejection of actions must carry an explicit Reason Code.
 
 ## 2. DEFINITION OF DONE (TIÊU CHUẨN XUẤT XƯỞNG)
@@ -2597,6 +2620,27 @@ You re-review one task's fix round. A previous review produced findings; an impl
 ```
 ```
 
+### 4b. File `.agents/agents/chaos-sentinel.md` (Lính Canh Biên Giới & Đột Biến Đối Kháng - Chaos & Mutation Sentinel)
+```markdown
+---
+name: chaos-sentinel
+description: Station 4 Adversarial Boundary & Mutation Sentinel. Executes Wire-to-Core Closed-Loop Parity, Ephemeral Dynamic Boundary Probes (port: 0), and Targeted Mutation Sensitivity Probes (floor >= 14 mutants, 100% kill rate). Strictly READ-ONLY on production source. Signs off .agents/evidence/chaos_sentinel_[ID].json.
+subagent: true
+mainAgent: false
+model: inherit
+workspace: share
+skills: [production-hardening, concurrency-patterns, systematic-debugging]
+tools: [view_file, list_dir, grep_search, run_command, write_to_file]
+---
+# QUY TRÌNH LÍNH CANH BIÊN GIỚI & ĐỘT BIẾN (CHAOS SENTINEL PROTOCOL)
+1. **Quyền hạn**: CHỈ ĐỌC (Strictly READ-ONLY) trên mã nguồn sản xuất (`src/**`, `lib/**`, `app/**`). Chỉ được ghi file kết quả vào `.agents/evidence/`.
+2. **Nhiệm vụ cốt lõi tại Trạm 4 (Station 4)**:
+   - *Probe 1 - Domain-Adaptive Wire-to-Core Parity*: Kiểm tra tính tương thích giữa gói tin mạng/DTO và lõi xử lý FSM/Domain.
+   - *Probe 2 - Ephemeral Dynamic Boundary Probe (`port: 0`)*: Chạy live socket trên cổng ngẫu nhiên do HĐH cấp, cấm dùng mock socket.
+   - *Probe 3 - Targeted Mutation Sensitivity Probe*: Tiêm đột biến có chủ đích (đổi toán tử, bỏ guard, đảo dấu, đổi hằng số). Sàn tối thiểu >= 14 bài test đột biến, **tỷ lệ tiêu diệt mutant phải đạt 100% (0 mutant sống sót)**.
+3. **Chứng nhận nghiệm thu**: Ghi file `.agents/evidence/chaos_sentinel_[ID].json` với `"executed": true`. Kiểm tra tự động bằng `node scripts/check_evidence.mjs [ID]`.
+```
+
 ### 5. File `.agents/agents/ui-craft-reviewer.md` (Chuyên Gia Thẩm Định Thủ Công 2D UI/UX)
 ```markdown
 ---
@@ -3029,7 +3073,7 @@ tools: [view_file, write_to_file, replace_file_content, run_command, list_dir, f
 - **Quy tắc 4: Phối Hợp `/boost` Và Lệnh Thường (Độ Sâu vs Tốc Độ)**:
   - *Lệnh thường + 3 Trạm cơ học*: Dành cho tác vụ vi mô, sửa lỗi cục bộ (1-2 tệp, logic hẹp). Tối ưu tốc độ phản hồi, zero overhead.
   - *`/boost` + Kiểm chứng đĩa vật lý (Physical Disk Verification)*: Dành cho bài toán kiến trúc sâu, tính năng phức tạp hoặc tái cấu trúc đa tầng. Kích hoạt tư duy đa chiều và phản biện gắt gao, nhưng trạm Reviewer bắt buộc dùng công cụ đọc đĩa (`view_file`, `list_dir`, lệnh terminal thực tế) để nghiệm thu vật lý, triệt tiêu bẫy ảo tưởng hoàn thành.
-  - *Pre-Flight Visual Banner*: Trước khi điều phối các trạm thi công tính năng hoặc sửa lỗi, Agent BẮT BUỘC in biểu ngữ trạng thái (`🚦 [KÍCH HOẠT QUY TRÌNH 3 TRẠM]`) lên giao diện chat để người dùng giám sát minh bạch mà không cần phải nhớ nhắc lệnh.
+  - *Pre-Flight Visual Banner*: Trước khi điều phối các trạm thi công tính năng hoặc sửa lỗi, Agent BẮT BUỘC in biểu ngữ trạng thái (`🚦 [KÍCH HOẠT QUY TRÌNH 4 TRẠM KHÉP KÍN]`) lên giao diện chat để người dùng giám sát minh bạch mà không cần phải nhớ nhắc lệnh.
 
 | Vai Trò | Model Khuyên Dùng | Lý Do Kỹ Thuật |
 | :--- | :--- | :--- |
@@ -3246,7 +3290,7 @@ Khi bạn chạy lệnh trong Terminal gặp lỗi đỏ, hoặc Subagent báo t
 │    • Đạt mượt mà 60 FPS trên thiết bị tầm trung, zero logic nặng ở render thread.│
 │                                                                                  │
 │ 4. QUẢN TRỊ CẢI TIẾN ĐỘT XUẤT (AD-HOC IMP CYCLE - P-4.4):                        │
-│    • Mọi đợt polish/juice/bot AI đều có Plan & Report tại docs/plans/ & reports/ │
+│    • Mọi đợt polish/juice/bot AI đều có Plan & Report tại .agents/plans/ & reports/ │
 │    • Đăng ký mã số IMP-XX vào docs/master_roadmap.md, cập nhật ADR nếu đổi kiến trúc.│
 │                                                                                  │
 │ 5. ĐÓNG GÓI DOCKER, HEALTHCHECK & THOÁT HIỂM AN TOÀN (RELEASE - P-4.5):          │
@@ -3273,18 +3317,20 @@ Khi bạn chạy lệnh trong Terminal gặp lỗi đỏ, hoặc Subagent báo t
 | **1.3** | Lập Sổ Cái Tiến Độ | 💬 `[AG 2.0]` Dựng `docs/epics/[epic]/_epic_ledger.md` (phân bổ Use Cases vào Slices) | Flash | Sổ Cái tiến độ theo dõi |
 | **2.1** | Cắt Lát Cắt (JIT)<br>*(Song tác nhân)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.1]**: `slicer` soạn thảo ticket ➔ `spec-reviewer` quét rò rỉ Zone 3 trước khi lưu | Flash | File `issues/[TICKET].md` sạch |
 | **2.2** | Trinh sát bối cảnh<br>*(Đơn tác nhân)* | 💬 `[AG 2.0]` Gọi `scout` (Read-only) trinh sát hiện trạng mã nguồn:<br>• **Greenfield (S00):** Dùng **[Mẫu P-2.2A]** Target File Map<br>• **Brownfield (S01+):** Dùng **[Mẫu P-2.2B]** Change Impact | Flash | Báo cáo hiện trạng & tọa độ dòng |
-| **2.3a** | Lập Plan & Phản Biện Zero-Trust<br>*(Song tác nhân đối kháng)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3a]**: `architect` bẻ Task DAG <= 80 LOC ➔ `plan-griller` phản biện đối kháng Zero-Trust vạch trần 1–3 điểm mù kỹ thuật trên đĩa cứng | Sonnet 4.6 | Kế Hoạch qua Cổng Zero-Trust `[APPROVED]` |
+| **2.3a** | Lập Plan & Thẩm Định 2 Tầng<br>*(Stage A + Stage B)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3a]**: Chạy `scripts/audit_plan.mjs` (6ms) ➔ `plan-griller` (P1-P5) ➔ `adversarial-challenger` (ADV-OBJ, rủi ro kinh tế, concurrency) | Sonnet 4.6 | Kế hoạch đạt `HARDENED_APPROVED` |
 | **2.3b** | Khởi tạo Test Harness<br>*(Đơn tác nhân - S00)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3b]** gọi `implementer` dựng Test Runner tối thiểu (`package.json`, `tsconfig.json`, `vitest`...) ➔ Chạy smoke test PASS | Flash / Sonnet | Lệnh `npm test` chạy PASS trên CMD |
-| **2.3c** | Thi Công Trạm 1 & 2<br>*(RED ➔ GREEN)* | 💬 `[AG 2.0]` Dùng **[Mẫu P-2.3-STATIONS]**: QA viết test ĐỎ ➔ Implementer code XANH và TỰ ĐỘNG sinh `Evidence Snapshot` | Sonnet 4.6 | 100% Contract PASS + File Snapshot đĩa |
-| **2.3.5**| Quét Sạch Đĩa Vật Lý<br>*(Trạm 2.5 Sweeping Scout)* | 💬 `[AG 2.0]` Gọi `scout` quét 100% file vừa sửa trên đĩa tìm 5 archetypes (Stale closures, Unhandled async, Leaks, Dirty casts, Dead-ends) | Flash | Phán quyết `SWEEP: PASS` sạch 100% |
+| **2.3c** | Thi Công Trạm 1 & 2<br>*(RED ➔ GREEN)* | 💬 `[AG 2.0]` Dùng **[Mẫu P-2.3-STATIONS]**: QA viết test ĐỎ (>= 15 tests, Flow Taxonomy) ➔ Implementer code XANH (Pushback Mandate, Deep Modules) | Sonnet 4.6 | 100% Contract PASS trên đĩa vật lý |
+| **2.3.5**| Quét Sạch Đĩa Vật Lý<br>*(Trạm 2.5 Fast Pre-Filter)* | 💬 `[AG 2.0]` Gọi `scout` (Flash) quét cơ học: `tsc --noEmit` (0 lỗi), `check_loc.mjs` (ngân sách LOC), cấm dirty cast (`as any`), thanh trừng `console.log` | Flash | Phán quyết `SWEEP: PASS` sạch 100% |
 | **2.3d** | Chẩn đoán lỗi khoa học<br>*(Song tác nhân)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3d]**: `Investigator` truy nguyên nhân gốc ➔ `Implementer` sửa mã nguồn tối thiểu | Sonnet 4.6 | Báo cáo nguyên nhân & bản sửa tối thiểu |
 | **2.3e** | Nghiệm thu tích hợp<br>*(Đơn tác nhân)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3e]** gọi `implementer` chạy toàn bộ Test Suite với cờ `--randomize` (cách ly trạng thái) | Flash / Sonnet | 100% Test Contracts PASS |
-| **2.4** | Kiểm toán Đĩa & Sửa Lỗi<br>*(Trạm 3 Review & Active Remediation)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.4]** gọi `spec-reviewer` + `code-reviewer` thẩm định đĩa vật lý ➔ Trực tiếp áp dụng bản vá lỗi linter/import cơ học | Sonnet / Flash | Báo cáo APPROVED + File `docs/reports/audits/[MÃ]_acceptance_report.md` |
-| **2.4.5**| Miễn dịch phản hồi hồi cứu<br>*(Trạm 3.5 Retro Inoculation)* | 💬 `[AG 2.0]` Tự động chuyển 100% lỗi review thành test hồi quy tự động, linter AST rule, hoặc bất biến có số hiệu trong `docs/domain/gotchas.md` | Flash | Rào chắn hồi quy tự động khóa cứng |
-| **2.5** | Nghiệm thu & Commit | 💻 `[CMD]` Chạy lệnh **[Lệnh Terminal P-2.5]**: Smoke test 30s ➔ Tự gõ `git commit` trên CMD ➔ Đánh dấu `[x]` vào Sổ Cái `_epic_ledger.md` | Bạn (Human) | Git commit sạch, không lỗi |
+| **2.4** | Phễu Thẩm Định 3 Pha<br>*(Trạm 3 Review & Remediation)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.4]**: Phase 3.0 Dual-Viewport Capture ➔ Phase 3.1 Spec Gate ➔ Phase 3.2 Deep Architecture & Visual Craft. Lỗi cơ học sửa trực tiếp | Sonnet / Flash | Báo cáo APPROVED + 0% drift |
+| **2.4.4**| Lính Canh Biên Giới & Đột Biến<br>*(Trạm 4 Chaos Sentinel)* | 💬 `[AG 2.0]` Gọi `chaos-sentinel` chạy 3 probes: Wire-to-Core Parity, live socket `port: 0`, Mutation Sensitivity (>= 14 mutants, 100% kill rate) | Sonnet / Flash | Bằng chứng `.agents/evidence/chaos_sentinel_[ID].json` |
+| **2.4.5**| Hậu Kiểm Phản Tỉnh & Miễn Dịch<br>*(Retro Skill & Inoculation)* | 💬 `[AG 2.0]` Thu thập telemetry các trạm ➔ Chạy Cổng phản biện 2 vòng (Physical Evidence + Inversion Filter) ➔ Chuyển lỗi thành test/script | Flash | Gotchas cập nhật & rào chắn cơ học |
+| **2.5** | Đóng Gói PR & Nghiệm Thu | 💬 `[AG 2.0]` Dùng skill `pr` kết xuất Summary + Evidence + Merge Danger ➔ Cập nhật Sổ Cái `_epic_ledger.md` (mã nợ DEBT-XXX) ➔ Con người tự commit CMD | Bạn (Human) | Git commit sạch, không lỗi |
 | **2.6** | Chuyển phiên chat | 💬 `[AG 2.0]` Dùng **[Mẫu Lệnh P-2.6]**: Gõ `/handoff` ➔ Bấm **New Conversation** (Ngữ cảnh về 0, không bị bloat trước khi sang Slice mới) | Flash | Tài liệu bàn giao gọn, sạch |
 | **3.1** | Xử lý bài toán khó | 💬 `[AG 2.0]` Gõ `/boost [bài toán phức tạp]` để kích hoạt deep reasoning 3 pha | Sonnet / Opus | Lời giải FSM / Thuật toán sạch |
 | **3.2** | Đại phẫu cuối tuần | 💬 `[AG 2.0]` Gõ `/goal` để tự động tối ưu hóa nén độ phức tạp toàn bộ dự án | Sonnet / Flash | Codebase tinh gọn, Cyclomatic <= 4 |
+| **3.3** | Bảo trì định kỳ & Tối ưu điều hướng<br>*(Periodic Maintenance)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-3.3]**: Chạy `/retro` (quét ma sát điều hướng sau 10 phiên) và `/codebase-design` (áp dụng The Deletion Test xóa pass-through wrappers) | Sonnet / Flash | Báo cáo Navigability & Refactor Slop sạch |
 | **4.1** | Thử nghiệm sức bền Chaos | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-4.1]** chạy 1.000 kịch bản mô phỏng headless ➔ Chứng minh 0.00% Deadlock & 0 rò rỉ tài nguyên | Sonnet 4.6 | Báo cáo Chaos Simulation PASS |
 | **4.2** | Đóng rào chắn mạng & Anti-Abuse | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-4.2]** cài IntentMutex, Rate Limiting, Reconnect Token 60s và CORS | Flash / Sonnet | Bộ bảo vệ mạng & Chống gian lận |
 | **4.3** | Kiểm toán hiệu năng xuất xưởng | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-4.3]** đo Bundle Size, Payload Delta < 10KB, và 60 FPS | Flash | Báo cáo Performance Audit PASS |
@@ -3312,10 +3358,10 @@ Khi bạn chạy lệnh trong Terminal gặp lỗi đỏ, hoặc Subagent báo t
                      │                                                     │
                      ▼                                                     ▼
         [TIER 1: FAST-TRACK PIPELINE]                         [TIER 2: FULL RIGOR PIPELINE]
-        • 0 Subagent, 0 Plan file riêng                       • BẮT BUỘC lập Implementation Plan chi tiết
-        • Main Agent tự viết 1-3 test nhanh + sửa code        • BẮT BUỘC gọi plan-griller phản biện đĩa cứng
+        • 0 Subagent, 0 Plan file riêng                       • BẮT BUỘC lập Plan tại .agents/plans/PLAN_[ID].md
+        • Main Agent tự viết 1-3 test nhanh + sửa code        • BẮT BUỘC qua Cổng thẩm định 2 tầng (Stage A + B)
         • Xác minh tự động qua lệnh test in-memory            • Kích hoạt Plan Review Policy của IDE ("Proceed")
-        • Hoàn tất trong 1–2 phút, tiết kiệm 90% token        • Tự động kích hoạt Quy Trình 3 Trạm Mở Rộng
+        • Hoàn tất trong 1–2 phút, tiết kiệm 90% token        • Tự động kích hoạt Quy Trình 4 Trạm Khép Kín
 ```
 
 ---
@@ -3346,7 +3392,7 @@ Khi bạn chạy lệnh trong Terminal gặp lỗi đỏ, hoặc Subagent báo t
                                                                                ▼
 [AI Subagents] ◄───(Tự đọc từ đĩa: Files cần sửa, Code diffs, Lệnh test thật)──┘
        │
-       ▼ (Đọc trực tiếp docs/plans/[MÃ_TICKET]_plan.md trên đĩa cứng)
+       ▼ (Đọc trực tiếp .agents/plans/PLAN_[MÃ_TICKET].md trên đĩa cứng)
 [Thực thi TDD]: Viết Test ĐỎ ➔ Viết Code XANH ➔ Chạy Lệnh Test thật ➔ Báo Cáo
 ```
 
@@ -3355,7 +3401,7 @@ Khi bạn chạy lệnh trong Terminal gặp lỗi đỏ, hoặc Subagent báo t
 2. **Khử Ảo Giác Tuyệt Đối (Zero Hallucination)**: Prompt ép AI đọc trực tiếp từ `_plan.md` đã được duyệt `[APPROVED]`. AI không thể tự ý bịa thêm logic hoặc sinh code thừa (Slop).
 3. **Quy tắc 5 Giây cho Junior**: Trong toàn bộ vòng lặp, Junior không cần mở code ra đọc rồi tóm tắt lại. Bạn chỉ cần quản lý đúng 3 con trỏ đường dẫn trong dấu `[...]`:
    - Con trỏ Ticket: `[MÃ_TICKET]` (VD: `issues/GAME-S01-turn-loop.md`)
-   - Con trỏ Plan: `[ĐƯỜNG_DẪN_TỆP_PLAN]` (VD: `docs/plans/GAME-S01-turn-loop_plan.md`)
+   - Con trỏ Plan: `[ĐƯỜNG_DẪN_TỆP_PLAN]` (VD: `.agents/plans/PLAN_GAME_S01.md`)
    - Con trỏ Task: `[MÃ_TASK]` (VD: `Task 1`, `Task 2`, `Task N`)
 
 ---
@@ -3387,7 +3433,7 @@ Junior gửi prompt chi tiết phân định rõ 3 vai trò:
   │
   └── 3. [SPEC-REVIEWER] (Nghiệm thu / Gác cổng):
          Độc lập, chỉ đọc ──► Soi 5 Tiêu Chuẩn Vàng ──► Chỉ cấp chữ [APPROVED] khi hoàn hảo.
-         DỪNG LẠI tại Trạm 1 (Plan Gate) cho con người duyệt trước khi gõ 1 dòng code!
+         DỪNG LẠI tại Cổng Kế Hoạch (Two-Stage Plan Hardening Gate) cho con người duyệt trước khi gõ 1 dòng code!
 ```
 
 **Tại sao câu prompt có độ chi tiết cao lại kích hoạt được điều này?**
@@ -3506,13 +3552,16 @@ Báo cáo ngắn gọn dưới 15 dòng, TUYỆT ĐỐI KHÔNG sửa mã nguồn
 > - **Nếu là task Tiểu phẫu (Tier 1)**: Thay đổi < 50 LOC, chỉ sửa UI/CSS, hoạt cảnh/3D math, âm thanh, hoặc fix bug cục bộ 1-2 hàm (0 Schema, 0 FSM/Server, 0 Network) ➔ **BỎ QUA BƯỚC P-2.3a và P-2.4 (3 Trạm)**. Agent chính tự viết 1-3 test nhanh + sửa mã nguồn trực tiếp trong 1 lượt duy nhất (Zero Subagent, không tạo file plan/report riêng).
 > - **Nếu là task Đại phẫu (Tier 2)**: Chạm Database/Schema, Network Protocol, Logic FSM/Tài chính/Auth, hoặc tính năng mới > 50 LOC ➔ **BẮT BUỘC CHẠY ĐẦY ĐỦ P-2.3a dưới đây**.
 
-### 📋 MẪU P-2.3a: LẬP KẾ HOẠCH BẺ NHỎ & CỔNG PHẢN BIỆN ĐỐI KHÁNG ZERO-TRUST (ANTI-AI-BIAS PLAN GRILLING)
-- **🏷️ CHẾ ĐỘ THỰC THI**: `[SONG TÁC NHÂN ĐỐI KHÁNG - ZERO-TRUST PLAN GRILLING]` *(Architect bẻ nhỏ ➔ plan-griller phản biện đối kháng Zero-Trust khử bẫy ảo tưởng & thiên kiến AI)*.
-- **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Đã có báo cáo của Scout ở Bước 2.2.
-- **🛡️ RÀO CHẮN GÁC CỔNG**: Bắt buộc dùng `writing-plans` và `grilling`. Kế hoạch bắt buộc lưu vào `docs/plans/[MÃ_TICKET]_plan.md` (hoặc `implementation_plan.md`). Khi IDE Antigravity 2.0 bật `Plan Review Policy = "Review every plan"`, việc soạn thảo plan sẽ tự động kích hoạt Cổng Duyệt Kế Hoạch tương tác của IDE (Plan Review Modal). Cổng Zero-Trust Anti-AI-Bias: Triệt tiêu hiện tượng "Echo Chamber". Reviewer bắt buộc vạch trần 1–3 điểm bất hợp lý trước khi duyệt.
+### 📋 MẪU P-2.3a: LẬP KẾ HOẠCH & CỔNG THẨM ĐỊNH 2 TẦNG (TWO-STAGE PLAN HARDENING GATE)
+- **🏷️ CHẾ ĐỘ THỰC THI**: `[THẨM ĐỊNH ĐỐI KHÁNG 2 TẦNG BẮT BUỘC]` *(Stage 0: Pre-flight script ➔ Stage A: plan-griller ➔ Stage B: adversarial-challenger ➔ Bảng đối ứng 1:1)*.
+- **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Đã có báo cáo của Scout ở Bước 2.2 và xác định thứ tự trong Task Graph Frontier (`implement-spec`).
+- **🛡️ RÀO CHẮN GÁC CỔNG**:
+  * Kế hoạch bắt buộc lưu duy nhất tại `.agents/plans/PLAN_[MÃ_TICKET].md` (Single Source of Truth, cấm tạo bản sao ở `docs/plans/`).
+  * Tiền kiểm cơ học: Chạy `node scripts/audit_plan.mjs .agents/plans/PLAN_[MÃ_TICKET].md` trong 6ms (kiểm tra LOC baseline, Anti-TIDD, Client Poisoning, Anti-Code-Golf, Flow Taxonomy).
+  * Quy tắc cách ly Refactor (Pure-Move Quarantine): Vé tái cấu trúc phải bảo toàn 100% hành vi; mọi phát hiện tấn công từ Challenger phải bóc sang ticket củng cố nối tiếp.
 - **💬 CÂU LỆNH PROMPT CHUẨN (Model: Sonnet 4.6)**:
 ```text
-Hãy điều phối 2 subagent phối hợp đối kháng để thiết lập bản kế hoạch thi công docs/plans/[MÃ_TICKET]_plan.md:
+Hãy thiết lập bản kế hoạch thi công .agents/plans/PLAN_[MÃ_TICKET].md và kích hoạt Cổng thẩm định 2 tầng:
 
 1. Subagent Architect (Kỹ năng writing-plans):
    - Đọc ticket issues/[MÃ_TICKET].md và báo cáo của scout.
@@ -3521,28 +3570,24 @@ Hãy điều phối 2 subagent phối hợp đối kháng để thiết lập b�
    - [Nếu là Slice 00]: Bắt buộc đưa "Task 0: Khởi tạo Test Runner Harness" lên đầu tiên.
    - Mỗi Task phải chỉ rõ: Tệp tác động (theo Target File Map & 5-Tier Archetypes), Test Contract tương ứng, DoD.
 
-2. Subagent plan-griller (Read-only, Zero-Trust Adversarial Plan Auditor):
-   - TỰ ĐỘNG HÓA PHẢN BIỆN 2 CHIỀU (Autonomous Ping-Pong Loop - Zero-Memorization): Agent chính tự động gọi subagent plan-griller qua invoke_subagent để đối chiếu mã nguồn thực tế trên đĩa vật lý (view_file, grep_search) TRƯỚC KHI trình bản plan cho người dùng phê duyệt.
-   - BẮT BUỘC VẠCH TRẦN 1–3 ĐIỂM MÙ KỸ THUẬT:
-     * Facet 1 (Ghost File Verification): Quét xem từng file/hàm trong plan có thực sự tồn tại trên đĩa không.
-     * Facet 2 (Broken Domain Causality): Kiểm tra các điều kiện tiên quyết và chuỗi nhân quả nghiệp vụ.
-     * Facet 3 (Boundary & Corner Invariants): Kiểm tra ô góc, chia cho 0, số âm, timeout, rò rỉ bộ nhớ.
-     * Facet 4 (Downstream Consumer Desync): Kiểm tra telemetry, shared helpers, delta sync.
-   - CẤM ĐỒNG THUẬN LỊCH SỰ (No Sycophancy & Zero Blind Compliance): Phải xuất báo cáo P1-P3 cụ thể ra `.agents/audit/PLAN_AUDIT_[TICKET].md`. Agent chính BẮT BUỘC phải dùng công cụ đọc đĩa (view_file, grep_search) kiểm chứng lại từng luận điểm P1-P3 trước khi sửa plan; chỉ cập nhật implementation_plan.md khi khớp 100% với mã nguồn thực tế (nếu subagent ảo giác thì bác bỏ). Người dùng TUYỆT ĐỐI KHÔNG CẦN copy-paste plan sang conversation khác để hỏi.
-
-DỪNG LẠI sau khi lưu kế hoạch, TUYỆT ĐỐI CHƯA VIẾT CODE lúc này. Subagent chỉ trả về bản tóm tắt danh sách Micro-Tasks (<20 dòng) kèm link file docs/plans/[MÃ_TICKET]_plan.md.
+2. Tiền kiểm Cơ học & Thẩm định 2 Tầng:
+   - Chạy `node scripts/audit_plan.mjs .agents/plans/PLAN_[MÃ_TICKET].md` để xác nhận sạch 100% các quy tắc cơ học.
+   - Stage A: Gọi `plan-griller` (P1-P5, ghost files, broken causality, blast radius) xuất `.agents/audit/PLAN_AUDIT_[TICKET].md`.
+   - Stage B: Gọi `adversarial-challenger` tấn công ADV-OBJ, rủi ro kinh tế, concurrency, trạng thái kẹt/nuốt lỗi xuất `.agents/audit/PLAN_CHALLENGE_[TICKET].md`.
+   - Lập Bảng đối ứng 1:1 giải quyết mọi directive, nhận phán quyết HARDENED_APPROVED trước khi trình duyệt.
+DỪNG LẠI sau khi kế hoạch đạt HARDENED_APPROVED, TUYỆT ĐỐI CHƯA VIẾT CODE lúc này. Subagent chỉ trả về bản tóm tắt Micro-Tasks (<20 dòng) kèm link file kế hoạch.
 ```
-- **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu - TRẠM 1: PLAN GATE)**:
-  - Bản kế hoạch đã được lưu tại `docs/plans/[MÃ_TICKET]_plan.md` với xác nhận **`[APPROVED]`** từ Spec-Reviewer sau khi đã vạch trần và khắc phục 100% rủi ro phản biện Zero-Trust.
+- **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu - CỔNG KẾ HOẠCH: TWO-STAGE HARDENING GATE)**:
+  - Bản kế hoạch đã được lưu duy nhất tại `.agents/plans/PLAN_[MÃ_TICKET].md` đạt phán quyết **`[HARDENED_APPROVED]`** sau khi chạy qua tiền kiểm cơ học (`scripts/audit_plan.mjs`) và Cổng thẩm định 2 tầng (Stage A: `plan-griller` + Stage B: `adversarial-challenger`).
 - **📌 CHỈ DẪN VẠN NĂNG CHO JUNIOR (AUTOMATION WITH PLAN REVIEW POLICY)**:
-  - *Biến số cần thay thế*: `[MÃ_TICKET]` (VD: `issues/GAME-S01-turn-loop.md`).
+  - *Biến số cần thay thế*: `[MÃ_TICKET]` (VD: `issues/GAME-S01-turn-loop.md` hoặc mã cải tiến `IMP-XX`).
   - *Tự Động Hóa Không Cần Nhớ Bước (Zero-Memorization)*: Khi bạn bật `Plan Review Policy = "Review every plan"` trong cài đặt IDE AG 2.0:
     1. Bạn chỉ cần gửi prompt yêu cầu làm tính năng / ticket.
-    2. Agent tự động soạn thảo `implementation_plan.md` và tự gọi `plan-griller` để kiểm toán đối kháng trên đĩa vật lý (`.agents/audit/PLAN_AUDIT_[TICKET].md`).
+    2. Agent tự động soạn thảo `.agents/plans/PLAN_[MÃ_TICKET].md`, chạy tiền kiểm cơ học `audit_plan.mjs`, và tự kích hoạt thẩm định 2 tầng (`plan-griller` và `adversarial-challenger`).
     3. Hộp thoại Duyệt Kế Hoạch (Plan Review Modal) tự động hiển thị trên màn hình IDE kèm nút "Proceed".
     4. Bạn kiểm tra bản tóm tắt điểm mù và bấm **Proceed**.
-    5. Sau khi bấm, Agent tự động kích hoạt liền mạch **Quy Trình 3 Trạm (Station 1 RED ➔ Station 2 GREEN ➔ Station 3 Review)** mà bạn không cần phải copy-paste thêm bất kỳ prompt thủ công nào!
-  - *Giá trị sống còn*: Giúp Junior chặn đứng 90% lỗi thiết kế ngớ ngẩn do AI tưởng tượng ra trước khi bước vào gõ code. Kế hoạch đã qua cổng Zero-Trust là bản kế hoạch có tính khả thi kỹ thuật thực tế cao nhất.
+    5. Sau khi bấm, Agent tự động kích hoạt liền mạch **Quy Trình 4 Trạm Khép Kín (Trạm 1 RED ➔ Trạm 2 GREEN ➔ Trạm 2.5 Scout ➔ Trạm 3 Review ➔ Trạm 4 Chaos Sentinel)** mà bạn không cần phải copy-paste thêm bất kỳ prompt thủ công nào!
+  - *Giá trị sống còn*: Giúp Junior chặn đứng 90% lỗi thiết kế ngớ ngẩn do AI tưởng tượng ra trước khi bước vào gõ code. Kế hoạch đã qua cổng Zero-Trust 2 tầng là bản kế hoạch có tính khả thi kỹ thuật thực tế cao nhất.
 
 ---
 
@@ -3566,74 +3611,72 @@ Báo cáo kết quả lệnh test và dừng lại để tôi kiểm tra.
 
 ---
 
-### 📋 MẪU P-2.3-STATIONS: QUY TRÌNH THỰC THI ĐỐI KHÁNG MỞ RỘNG (EXPANDED 5-STATION PIPELINE)
-- **🏷️ CHẾ ĐỘ THỰC THI**: `[5 TRẠM CÔ LẬP NGUYÊN TỬ TỰ ĐỘNG HÓA]` *(Trạm 1: QA Tester ĐỎ ➔ Trạm 2: Implementer XANH ➔ Trạm 2.5: Sweeping Scout Quét Đĩa ➔ Trạm 3: Reviewer Thẩm Định Đĩa & Sửa Lỗi Trực Tiếp ➔ Trạm 3.5: Tiêm Chủng Retro)*.
-- **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Kế hoạch (`docs/plans/[MÃ_TICKET]_plan.md` hoặc `implementation_plan.md`) đã được duyệt `[APPROVED]` hoặc người dùng đã bấm **Proceed** trên modal Plan Review của IDE. Agent bắt buộc in biểu ngữ `🚦 [KÍCH HOẠT QUY TRÌNH 3 TRẠM]` ra cửa sổ chat.
+### 📋 MẪU P-2.3-STATIONS: QUY TRÌNH THỰC THI 4 TRẠM KHÉP KÍN (4-STATION CLOSED-LOOP PIPELINE)
+- **🏷️ CHẾ ĐỘ THỰC THI**: `[4 TRẠM KHÉP KÍN TỰ ĐỘNG HÓA NGUYÊN TỬ]` *(Trạm 1: QA Tester ĐỎ ➔ Trạm 2: Implementer XANH ➔ Trạm 2.5: Fast Pre-Filter Sweep ➔ Trạm 3: Phễu Thẩm Định 3 Pha ➔ Trạm 4: Chaos Sentinel & Mutation Kill)*.
+- **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Kế hoạch (`.agents/plans/PLAN_[MÃ_TICKET].md`) đã đạt `HARDENED_APPROVED` hoặc người dùng đã bấm **Proceed** trên modal Plan Review của IDE. Agent bắt buộc in biểu ngữ `🚦 [KÍCH HOẠT QUY TRÌNH 4 TRẠM KHÉP KÍN]` ra cửa sổ chat.
 - **🛡️ RÀO CHẮN GÁC CỔNG**:
-  * Trạm 1: `qa-tester` CHỈ được viết test trong `tests/**`, TUYỆT ĐỐI CẤM sửa `src/**` (rào chắn cơ học `.agents/hooks_qa.json` cưỡng chế ở 0ms, 0-token). Phải chứng minh test ĐỎ (Adversarial Inversion). Cấm viết static checklist test (`fs.existsSync`, `typeof fn`).
-  * Trạm 2: `implementer` CHỈ viết mã trong `src/**`, TUYỆT ĐỐI CẤM sửa `tests/**` (rào chắn cơ học `.agents/hooks_implementer.json` cưỡng chế). Cấm nới lỏng assertion để test pass giả tạo (Zero Bug-Codification).
-  * Trạm 2.5: `scout` quét sạch 100% tệp vật lý vừa sửa trên đĩa theo 5 Archetypes khuyết tật phổ quát (stale closures, unhandled async, leaked listeners/timers, dirty casts, dead-end states). Nếu phát hiện khuyết tật, bắt buộc implementer sửa dứt điểm trước khi chuyển sang Trạm 3.
-  * Trạm 3: `spec-reviewer` + `code-reviewer` (và Visual Critic / UI Craft Reviewer nếu có UI/3D) hoàn toàn Read-Only đối với logic nghiệp vụ. CẤM implementer tự duyệt code của chính mình. CẤM duyệt dựa trên lời nói trong chat. Reviewer BẮT BUỘC dùng công cụ đọc đĩa vật lý (`view_file`, `list_dir`, lệnh terminal thực tế) để xác minh code thật và test thật đang PASS trên đĩa cứng trước khi ký `[APPROVED]`.
-    - **Active Remediation (Sửa Thay Vì Nói)**: Reviewer không để lại comment thụ động cho các lỗi cơ học (linter, imports, formatting, type annotations). Reviewer trực tiếp áp dụng bản vá trên đĩa trước khi cấp chữ ký nghiệm thu.
-  * Trạm 3.5: Tiêm chủng phản hồi (Retro Feedback Inoculation): Mọi khiếm khuyết được phát hiện trong đợt review hoặc từ người dùng BẮT BUỘC phải được biến thành automated test (`tests/contracts/`), linter rule (`scripts/lint_*.mjs`), hoặc ghi nhận vào `docs/domain/gotchas.md` theo cấu trúc 3 lớp (ảo tưởng ban đầu ➔ phát hiện thực tế ➔ bất biến xác minh). Không sửa lỗi đơn lẻ mà không có rào chắn hồi quy tự động.
-- **💬 CÂU LỆNH PROMPT CHUẨN KÍCH HOẠT 5 TRẠM (Dùng khi kích hoạt thủ công, hoặc được Agent tự động thực thi sau khi bấm "Proceed") (Model: Sonnet 4.6 hoặc Flash)**:
+  * Trạm 1: `qa-tester` CHỈ được viết test trong `tests/**`, TUYỆT ĐỐI CẤM sửa `src/**` (khóa cơ học 0ms). Chứng minh test ĐỎ (Adversarial Inversion), chuẩn Flow Taxonomy `[UC-XXX/MSS]`, `[UC-XXX/A#]`. Cấm static checklist test (`typeof fn`, `existsSync`).
+  * Trạm 2: `implementer` CHỈ viết mã trong `src/**`, TUYỆT ĐỐI CẤM sửa `tests/**` (Zero Bug-Codification). Thực hiện **Implementer Pushback Mandate**: nếu snippet plan sai/no-op, bắt buộc sửa mã vật lý đúng đắn.
+  * Trạm 2.5: `scout` (Flash) quét cơ học 100% tệp vừa sửa: `tsc --noEmit` (0 lỗi), `check_loc.mjs` (ngân sách LOC), cấm dirty cast (`as any`), thanh trừng `console.log`.
+  * Trạm 3: Phễu Thẩm định 3 Pha (Read-Only):
+    - Phase 3.0: Chụp ảnh kép Dual-Viewport (Desktop 1280x800 & Mobile 360x740) vào `.agents/tmp/` hoặc cấp Pure Logic Waiver.
+    - Phase 3.1: `spec-reviewer` xác nhận 100% plan fidelity, 0% scope drift.
+    - Phase 3.2: `code-reviewer` (deep modules, anti-slop, rò rỉ timer/listener) + visual critics (`ui-craft-reviewer`, `game-3d-visual-critic`). Fix round giao cho `re-reviewer`. Active Remediation áp dụng trực tiếp lỗi cơ học.
+  * Trạm 4: `chaos-sentinel` chạy 3 probes: Wire-to-Core Parity, Dynamic Live Socket (`port: 0`), Targeted Mutation Sensitivity (sàn >= 14 mutants, 100% kill rate, 0 sống sót). Ký sinh file `.agents/evidence/chaos_sentinel_[ID].json`.
+- **💬 CÂU LỆNH PROMPT CHUẨN KÍCH HOẠT 4 TRẠM (Dùng khi kích hoạt thủ công, hoặc được Agent tự động thực thi sau khi bấm "Proceed") (Model: Sonnet 4.6 hoặc Flash)**:
 ```text
-Kế hoạch [ĐƯỜNG_DẪN_TỆP_PLAN] đã được duyệt. Hãy kích hoạt Quy Trình Thực Thi Đối Kháng Mở Rộng để thi công [MÃ_TICKET]:
+Kế hoạch [.agents/plans/PLAN_[MÃ_TICKET].md] đã được duyệt HARDENED_APPROVED. Hãy kích hoạt Quy Trình Thực Thi 4 Trạm Khép Kín để thi công [MÃ_TICKET]:
 
-🚦 [KÍCH HOẠT QUY TRÌNH 3 TRẠM]
+🚦 [KÍCH HOẠT QUY TRÌNH 4 TRẠM KHÉP KÍN]
 
 TRẠM 1 (RED CONTRACT TEST - Subagent qa-tester, Read-only src/):
-1. Đọc đặc tả và hợp đồng kiểm thử trong [ĐƯỜNG_DẪN_TỆP_PLAN].
+1. Đọc đặc tả và hợp đồng kiểm thử trong [.agents/plans/PLAN_[MÃ_TICKET].md].
 2. Viết bộ kiểm thử hợp đồng mới tại tests/contracts/[TÊN_CONTRACT].test.ts.
-3. Tuân thủ 4 quy chuẩn Universal Test Core: Atomic test (1-4 asserts/test, it.each, cấm for/while trong it()), cấm checklist tĩnh (existsSync, typeof, LOC count), sàn mật độ >= 15 atomic tests/slice, và assert rò rỉ bộ nhớ tất định.
-4. Bao phủ đủ Ma Trận 5 Khía Cạnh Hành Vi: Boundary & Range, State Reactivity & Teardown, Resource Disposal & Timer Isolation, Error Defense & Invariants, Cross-Coupling Blast Radius.
-5. VÙNG CÔ LẬP: TUYỆT ĐỐI CẤM sửa mã nguồn trong src/ (Hook .agents/hooks_qa.json khóa cứng).
+3. Tuân thủ Universal Test Core: Atomic test (1-4 asserts/test, it.each, cấm vòng lặp trong it()), cấm checklist tĩnh (typeof, existsSync), sàn >= 15 atomic tests/slice, gắn Flow Taxonomy [UC-XXX/MSS] và [UC-XXX/A#].
+4. Bao phủ Ma Trận 5 Khía Cạnh Hành Vi: Boundary & Range, State Reactivity & Teardown, Resource Disposal & Timer Isolation, Error Defense & Invariants, Cross-Coupling Blast Radius.
+5. VÙNG CÔ LẬP: TUYỆT ĐỐI CẤM sửa mã nguồn trong src/.
 6. Chạy lệnh kiểm thử trên Terminal CMD và chứng minh bài test BỊ LỖI (RED / Adversarial Inversion) trên nền mã nguồn hiện tại.
 
 TRẠM 2 (GREEN IMPLEMENTATION - Subagent implementer, Read-only tests/):
 1. Đọc kết quả test ĐỎ từ Trạm 1 và bản kế hoạch.
-2. VÙNG CÔ LẬP: TUYỆT ĐỐI CẤM sửa tệp test trong tests/ để che giấu lỗi (Hook .agents/hooks_implementer.json khóa cứng; Zero Bug-Codification).
+2. VÙNG CÔ LẬP: TUYỆT ĐỐI CẤM sửa tệp test trong tests/ (Zero Bug-Codification).
 3. Viết mã nguồn tối thiểu vào src/ để chuyển toàn bộ bài test sang XANH (PASS 100%).
-4. Kiểm soát chất lượng: Hàm <= 30 dòng, Cyclomatic Complexity <= 5, đúng trần 5-Tier LOC, deep modules (ban shallow pass-through wrappers), zero dirty casts, zero nuốt lỗi âm thầm.
-5. Chạy lại lệnh test và chứng minh PASS 100%.
-6. TỰ ĐỘNG HÓA BẰNG CHỨNG SỐ (Zero-Memorization): Tự động thực thi `node scripts/collect_evidence.mjs` để đóng gói tệp `.agents/evidence/[MÃ_TICKET]_snapshot.json` trước khi báo cáo hoàn tất.
+4. Tuân thủ Deep Modules (ban shallow wrappers), zero dirty casts (cấm as any), zero nuốt lỗi âm thầm.
+5. IMPLEMENTER PUSHBACK MANDATE: Nếu snippet trong plan bị no-op hoặc lỗi thời, sửa code vật lý đúng đắn thay vì làm theo plan sai.
+6. Chạy lại lệnh test và chứng minh PASS 100%.
 
-TRẠM 2.5 (SWEEPING SCOUT AUDIT - Subagent scout, Read-only src/ & tests/):
-1. Dùng view_file quét sạch 100% tệp vật lý vừa sửa trên đĩa theo 5 Archetypes khuyết tật:
-   - (1) Stale state / closure snapshots (đặc biệt trong useEffect/useCallback/setInterval).
-   - (2) Unhandled async / promises / exceptions.
-   - (3) Resource / listener / timer leaks (kiểm tra clearInterval/clearTimeout/subscription dispose).
-   - (4) Private internals or dirty bypasses (as any, as unknown, compiler bypass).
-   - (5) Dead-end states & dead code (nút bấm không có action, trạng thái đơ không thể thoát).
-2. Trả về báo cáo súc tích (<20 dòng) kèm tọa độ file:line.
-3. Nếu phát hiện khuyết tật: Bắt buộc implementer sửa sạch trước khi chuyển sang Trạm 3.
+TRẠM 2.5 (FAST PRE-FILTER SWEEP - Subagent scout, Read-only src/ & tests/):
+1. Quét cơ học 100% tệp vừa chạm:
+   - Typecheck: Chạy tsc --noEmit (0 lỗi).
+   - Ngân sách LOC: Chạy node scripts/check_loc.mjs (xác nhận trạng thái Safe hoặc Warning + ghi nợ).
+   - Dirty casts: Quét sạch `as any`, `as unknown as T`.
+   - Log purge: Xóa toàn bộ `console.log` thừa trong code sản xuất.
+2. Trả về báo cáo súc tích (<15 dòng). Nếu phát hiện lỗi cơ học, bắt buộc implementer sửa sạch trước khi chuyển Trạm 3.
 
-TRẠM 3 (INDEPENDENT REVIEW & ACTIVE REMEDIATION - Subagent spec-reviewer + code-reviewer, Read-only logic):
+TRẠM 3 (INDEPENDENT REVIEW FUNNEL - Subagent spec-reviewer + code-reviewer, Read-only):
 1. CẤM implementer tự phê duyệt code của chính mình.
-2. CẤM chấp thuận dựa trên lời nói trong chat. BẮT BUỘC dùng công cụ đọc đĩa vật lý (view_file, list_dir, terminal command) để xác minh trực tiếp trên ổ cứng:
-   - spec-reviewer: Đọc diff thực tế trên đĩa, đối chiếu 1-1 với kế hoạch và requirements.md, xác nhận 0% Scope Drift.
-   - code-reviewer: Đọc mã nguồn thực tế trên đĩa, chạy lệnh kiểm tra chất lượng (npm run gate:quick), xác nhận 0 cờ đỏ slop, đúng chuẩn kiến trúc deep module.
-   - ui-craft-reviewer / visual-critic: Soi trực tiếp pixel ảnh chụp từ đĩa (view_file), kiểm tra 4 anti-patterns và chuẩn công thái học.
-   - ACTIVE REMEDIATION: Nếu phát hiện lỗi cơ học (linter, imports, formatting, type annotation thiếu), reviewer TRỰC TIẾP SỬA TRÊN ĐĨA thay vì để lại comment thụ động.
-   - ĐỐI CHIẾU EVIDENCE SNAPSHOT: Đọc tệp `.agents/evidence/[MÃ_TICKET]_snapshot.json` trên đĩa vật lý để xác nhận bằng chứng định lượng (blast radius, delta LOC, downstream consumers, contract tests PASS).
-3. Cấp chữ ký [APPROVED] hoặc [REJECTED] kèm báo cáo ngắn gọn (<20 dòng).
+2. Phase 3.0: Xác nhận bằng chứng thị giác Dual-Viewport (Desktop 1280x800 & Mobile 360x740) trong .agents/tmp/ hoặc Pure Logic Waiver.
+3. Phase 3.1 (spec-reviewer): Đọc git diff thực tế trên đĩa, đối chiếu 1-1 với kế hoạch, xác nhận 100% plan fidelity, 0% Scope Drift.
+4. Phase 3.2 (code-reviewer + visual critics): Đọc mã nguồn thực tế, xác nhận kiến trúc Deep Modules, 0 rò rỉ listener/timer, 0 race condition.
+5. ACTIVE REMEDIATION: Reviewer trực tiếp sửa lỗi cơ học (linter, imports, formatting) trên đĩa trước khi ký [APPROVED].
 
-TRẠM 3.5 (RETRO FEEDBACK INOCULATION - Tiêm Chủng Phản Hồi):
-1. Ghi nhận mọi bài học kinh nghiệm hoặc phản hồi review thành rào chắn tự động:
-   - Tạo test hồi quy tại tests/contracts/ để lỗi không thể tái diễn vĩnh viễn.
-   - Hoặc thêm quy tắc vào scripts/lint_*.mjs nếu là lỗi cú pháp/mã nguồn phổ quát.
-   - Ghi nhận vào docs/domain/gotchas.md với 3 tầng cấu trúc: Ảo tưởng ban đầu ➔ Phát hiện thực tế trên đĩa ➔ Bất biến miền đã xác minh.
-2. Đảm bảo 100% test hồi quy mới PASS trên máy thật.
+TRẠM 4 (ADVERSARIAL BOUNDARY & MUTATION SENTINEL - Subagent chaos-sentinel, Read-only src/):
+1. Chạy 3 đầu dò vật lý thực tế:
+   - Probe 1 (Wire-to-Core Parity): Kiểm tra tính nhất quán mạng ➔ FSM.
+   - Probe 2 (Dynamic Live Socket): Chạy live socket trên cổng ngẫu nhiên `port: 0`.
+   - Probe 3 (Targeted Mutation Sensitivity): Tiêm đột biến (sàn >= 14 mutants, 100% kill rate, 0 sống sót).
+2. Ký sinh tệp pháp chứng .agents/evidence/chaos_sentinel_[MÃ_TICKET].json ("executed": true).
 ```
 - **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu - QUY TRÌNH HOÀN TẤT)**:
   - Trạm 1 có log test ĐỎ thật sự (Adversarial Inversion).
-  - Trạm 2 có mã nguồn sạch, test XANH 100%, và tệp `.agents/evidence/[MÃ_TICKET]_snapshot.json` đã được sinh tự động.
-  - Trạm 2.5 quét sạch 5 khuyết tật phổ quát với phán quyết PASS.
-  - Trạm 3 có biên bản thẩm định đĩa vật lý độc lập với chữ ký `[APPROVED]`, các lỗi cơ học đã được vá trực tiếp.
-  - Trạm 3.5 có test hồi quy / gotchas ghi nhận bất biến thực tế.
+  - Trạm 2 có mã nguồn sạch, test XANH 100%.
+  - Trạm 2.5 sạch 100% typecheck, LOC, dirty casts và logs.
+  - Trạm 3 có biên bản thẩm định đĩa vật lý độc lập với chữ ký `[APPROVED]`.
+  - Trạm 4 ký sinh file `chaos_sentinel_[MÃ_TICKET].json` với 100% mutation kill rate.
+  - Chạy kỹ năng `retro` (Cổng phản biện 2 vòng) và đóng gói PR qua `pr` skill.
 - **📌 CHỈ DẪN VẠN NĂNG CHO JUNIOR**:
-  - *Biến số cần thay thế*: `[ĐƯỜNG_DẪN_TỆP_PLAN]` (VD: `docs/plans/improvements/IMP-51_plan.md`), `[MÃ_TICKET]`, và `[TÊN_CONTRACT]`.
-  - *Quy Trình Tự Động Hóa 1 Cú Bấm (1-Click Autonomous Execution)*: Nếu bạn đã kích hoạt `Plan Review Policy = "Review every plan"` trong IDE AG 2.0, bạn thậm chí không cần gõ câu lệnh prompt P-2.3-STATIONS này. Ngay khi bạn bấm nút "Proceed" trên giao diện Plan Review Modal, Agent sẽ tự động mang nội dung chỉ dẫn dây chuyền này đi thực thi tự hành xuyên suốt từ Trạm 1 đến Trạm 3.5 mà không cần bạn can thiệp thêm.
+  - *Biến số cần thay thế*: `[MÃ_TICKET]` và `[TÊN_CONTRACT]`.
+  - *Quy Trình Tự Động Hóa 1 Cú Bấm (1-Click Autonomous Execution)*: Nếu bạn bật `Plan Review Policy = "Review every plan"` trong IDE AG 2.0, ngay khi bạn bấm nút "Proceed" trên giao diện Plan Review Modal, Agent sẽ tự động mang nội dung chỉ dẫn dây chuyền này đi thực thi tự hành xuyên suốt từ Trạm 1 đến Trạm 4 mà không cần bạn can thiệp thêm.
   - *Giá trị cốt lõi*: Loại bỏ hoàn toàn tình trạng AI "vừa đá bóng vừa thổi còi", đảm bảo mọi tính năng hay bugfix dù lớn hay nhỏ đều có test hợp đồng bảo vệ, rào chắn hooks cơ học bảo vệ ranh giới file, bằng chứng số bất biến được lưu tự động trên đĩa, quét sạch rò rỉ ngầm trước khi review, và vĩnh viễn không bao giờ lặp lại lỗi cũ nhờ cơ chế tiêm chủng phản hồi.
 
 ---
@@ -3660,17 +3703,17 @@ Hãy điều phối 2 subagent trong Workspace: "inherit" thi công [MÃ_TASK, v
    - Chạy lại lệnh test được chỉ định trong kế hoạch và chứng minh bài test chuyển sang XANH (PASS 100%).
    - Tối ưu mã nguồn (De-sloppify), đảm bảo Cyclomatic Complexity <= 5, hàm <= 30 dòng.
 
-3. Pha 3 (Nghiệm Thu Đối Kháng - TRẠM 2: INVERSION GATE):
+3. Pha 3 (Nghiệm Thu Đối Kháng - INVERSION GATE):
    - QA Tester thử sửa sai 1 dòng logic trong src/ để chứng minh bài test lập tức ĐỎ trở lại (chống pass giả tạo).
    - Khôi phục lại dòng sửa và xác nhận bài test XANH 100% dưới 1 giây.
 
 Báo cáo kết quả tổng hợp: Tệp test đã tạo, mã nguồn đã viết, bằng chứng Inversion Test, và log test PASS.
 ```
-- **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu - TRẠM 2: INVERSION GATE)**:
+- **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu - INVERSION GATE)**:
   - Báo cáo chỉ rõ bằng chứng Inversion Test (sửa sai 1 dòng test ĐỎ).
   - Tệp test và tệp mã nguồn tách biệt hoàn toàn. Lệnh test chạy PASS 100%. Nếu test ĐỎ ngoài ý muốn ➔ Chuyển sang mẫu `P-2.3d`.
 - **📌 CHỈ DẪN VẠN NĂNG CHO JUNIOR (UNIVERSAL TASK TRIGGER)**:
-  - *Biến số cần thay thế*: Đúng 2 tham số: `[ĐƯỜNG_DẪN_TỆP_PLAN]` (VD: `docs/plans/GAME-S01-turn-loop_plan.md`) và `[MÃ_TASK]` (VD: `Task 1`, `Task 2`...).
+  - *Biến số cần thay thế*: Đúng 2 tham số: `[ĐƯỜNG_DẪN_TỆP_PLAN]` (VD: `.agents/plans/PLAN_GAME_S01.md`) và `[MÃ_TASK]` (VD: `Task 1`, `Task 2`...).
   - *Thời gian tạo prompt*: 5 giây. Xong Task 1 ➔ Gõ lệnh đổi thành `Task 2` ➔ Xong Task 2 ➔ Gõ lệnh đổi thành `Task 3`.
   - *Dữ liệu AI tự động đọc*: AI tự đọc tên file, code mẫu và lệnh test từ `_plan.md`. Junior tuyệt đối KHÔNG copy-paste code hay tên file vào prompt.
 
@@ -3773,7 +3816,7 @@ Yêu cầu xuất biên bản thẩm định:
 1. In biên bản tóm tắt trực tiếp ra cửa sổ chat: Ghi rõ [APPROVED] hoặc [REJECTED] kèm chi tiết từng cổng.
 2. Khi cả 2 cổng đều [APPROVED]: Tự động lưu toàn bộ Biên Bản Thẩm Định Nghiệm Thu vào tệp docs/reports/audits/[MÃ_TICKET]_acceptance_report.md để làm bằng chứng kiểm toán vĩnh viễn (Audit Trail) cho các phiên làm việc tiếp theo.
 ```
-- **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu - TRẠM 3A: REVIEW GATE)**: 
+- **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu - TRẠM 3: REVIEW GATE)**: 
   - Nhận được biên bản báo cáo ghi chữ **`[APPROVED]`** từ cả 2 cổng trên màn hình chat.
   - Tệp `docs/reports/audits/[MÃ_TICKET]_acceptance_report.md` đã được tạo và lưu trữ đầy đủ trên đĩa. Nếu bị REJECTED ➔ Yêu cầu sửa lỗi và kiểm toán lại.
 - **📌 CHỈ DẪN VẠN NĂNG CHO JUNIOR**:
@@ -3801,7 +3844,7 @@ REM 4. Tự tay gõ lệnh commit an toàn
 git add .
 git commit -m "feat([tên_epic]): hoàn thành [MÃ_TICKET] - [TÊN_TÍNH_NĂNG]"
 ```
-- **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu - TRẠM 3B: HUMAN GATE)**: Lệnh commit thành công trên Git, thư mục làm việc sạch sẽ (Working tree clean).
+- **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu - BƯỚC 2.5: HUMAN GATE)**: Lệnh commit thành công trên Git, thư mục làm việc sạch sẽ (Working tree clean).
 - **💡 BỘ LỌC AN TÂM TUYỆT ĐỐI TRƯỚC KHI COMMIT (SANITY VERIFICATION GATE)**:
   - *Tâm lý Junior*: Thường cảm thấy bất an, sợ rằng việc sửa code ở lát cắt hiện tại vô tình làm hỏng ngầm các lát cắt trước mà không biết, hoặc code sinh ra bị thừa thãi/trùng lặp.
   - *3 Tuyệt chiêu giải tỏa bất an (Kiểm chứng bằng bằng chứng thực tế)*:
@@ -3894,6 +3937,39 @@ Yêu cầu xuất Báo cáo Đối Soát Định Kỳ (Periodic Audit Gap Report
 >    3. Giới hạn ngân sách mã nguồn dự kiến (LOC budget <= 50-100 dòng) và thiết lập 3-5 hợp đồng kiểm thử [TC-xx.x/MSS].
 >    4. CHỈ tạo tệp ticket và DỪNG LẠI để tôi duyệt phạm vi, TUYỆT ĐỐI CHƯA VIẾT CODE lúc này.
 >    ```
+
+---
+
+### 📋 MẪU P-3.3: BẢO TRÌ ĐỊNH KỲ, ĐIỀU HƯỚNG & XÓA SLOP WRAPPERS (PERIODIC MAINTENANCE & CODEBASE DESIGN)
+- **🏷️ CHẾ ĐỘ THỰC THI**: `[ĐƠN TÁC NHÂN TỔNG HỢP / READ-ONLY AUDIT TRƯỚC SỬA CHỮA]` *(Chạy định kỳ sau mỗi 10 phiên làm việc hoặc hàng tuần)*.
+- **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Toàn bộ test suites hiện tại đang GREEN. Working tree sạch (không có ticket thi công dở dang).
+- **🛡️ RÀO CHẮN GÁC CỔNG**:
+  * **Encode Lessons in Structure (ELIS)**: Mọi bài học / ma sát vận hành phải được cấu trúc hóa theo Tháp Ưu Tiên Tất Định: `Types > Lint/AST Scripts > Common Functions > Runtime Checks`. Tuyệt đối CẤM nhồi nhét quy tắc chữ suông vào prompt/rules nếu có thể tạo script cơ học.
+  * **The Deletion Test & Seam Discipline (Matt Pocock codebase-design)**: Mọi module/wrapper phải chịu thử thách xóa: nếu xóa đi mà độ phức tạp biến mất thì đó là pass-through wrapper thừa thãi (BỊ CẤM); nếu độ phức tạp phân tán ra các caller thì module mới hợp lệ. Seam bắt buộc có >= 2 adapters thực tế (production + in-memory test). Interface là bề mặt kiểm thử duy nhất.
+- **💬 CÂU LỆNH PROMPT CHUẨN (Model: Sonnet 4.6 hoặc Flash)**:
+```text
+Hãy thực hiện BẢO TRÌ ĐỊNH KỲ (Periodic Maintenance Routine) sau chu kỳ 10 phiên / hàng tuần, kích hoạt kỹ năng retro và codebase-design:
+
+1. QUÉT MA SÁT ĐIỀU HƯỚNG (NAVIGABILITY FRICTION AUDIT - /retro):
+   - Đọc lại nhật ký phiên và các file chỉ dẫn/quy tắc (GEMINI.md, AGENTS.md, docs/domain/*).
+   - Truy tìm các con trỏ tài liệu lỗi thời (stale pointers, broken links, dead rules).
+   - Kiểm tra xem Agent có bị ma sát điều hướng hoặc phải tìm kiếm lòng vòng qua nhiều lượt tool không.
+   - Áp dụng Encode Lessons in Structure theo Tháp Ưu Tiên Tất Định:
+     Types (compiler safety) > Lint/AST Scripts (pre-flight checks) > Common Functions (SSOT helpers) > Runtime Checks.
+     Tuyệt đối CẤM thêm text quy tắc vào file rules nếu có thể biến thành script kiểm tra cơ học tự động.
+
+2. THỰC HIỆN BÀI TEST XÓA & THANH TRỪNG SLOP WRAPPERS (THE DELETION TEST - /codebase-design):
+   - Rà soát các module, tệp và abstractions mới thêm gần đây trong src/.
+   - Áp dụng The Deletion Test: Thử nghiệm tưởng tượng xóa module đó đi. Nếu độ phức tạp biến mất hoàn toàn ➔ Đánh dấu là shallow pass-through wrapper vô nghĩa (1-line delegates) cần xóa sổ.
+   - Kiểm tra Seam Discipline: Các seam/interfaces hiện tại có >= 2 adapters thực tế (production + in-memory test) không? Nếu chỉ có 1 adapter giả định ➔ Xóa bỏ tầng trừu tượng thừa, gọi trực diện.
+   - Kiểm tra Bề Mặt Kiểm Thử: Caller và test phải đi qua cùng một seam, cấm chọc thủng interface để test chi tiết nội bộ.
+
+Báo cáo kết quả kiểm toán: Bảng đề xuất tối ưu điều hướng và Danh sách abstractions cần xóa bỏ/làm phẳng.
+```
+- **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu)**:
+  - Báo cáo chỉ rõ: (1) Cập nhật con trỏ điều hướng sắc bén, (2) Xóa sổ các wrappers nông bằng Subtractive Refactoring, (3) 100% test suites vẫn GREEN.
+- **📌 CHỈ DẪN VẠN NĂNG CHO JUNIOR**:
+  - *Tần suất kích hoạt*: Cứ sau mỗi 10 phiên làm việc hoặc định kỳ hàng tuần, hãy gửi prompt này. Giúp codebase luôn sâu (deep modules), sạch bóng wrappers thừa thãi và loại bỏ nguy cơ phình to tài liệu quy tắc (rule bloat).
 
 ---
 
@@ -3998,14 +4074,14 @@ Tôi muốn thực hiện đợt cải tiến đột xuất: [MÔ TẢ CẢI TI�
 Hãy áp dụng Quy Chuẩn Cải Tiến Đột Xuất (Continuous Improvement & Ad-hoc Persistence) theo GEMINI.md:
 
 1. Xác định mã số cải tiến tiếp theo: IMP-[ID]-[slug] (đối chiếu trong docs/master_roadmap.md).
-2. Tạo tệp Kế hoạch: docs/plans/improvements/IMP-[ID]-[slug]_plan.md (mục tiêu, kiến trúc đề xuất, ngân sách LOC, kế hoạch kiểm thử).
+2. Tạo tệp Kế hoạch: .agents/plans/PLAN_IMP_[ID]_[slug].md (mục tiêu, kiến trúc đề xuất, ngân sách LOC, kế hoạch kiểm thử).
 3. Thi công cải tiến bám sát kế hoạch, đảm bảo không làm hỏng các bài test cũ.
 4. Tạo tệp Báo cáo Nghiệm thu Thực nghiệm: docs/reports/improvements/IMP-[ID]-[slug]_report.md (số liệu đo đạc thực tế, test PASS, visual review).
 5. Cập nhật Section 4 trong docs/master_roadmap.md và viết ADR mới trong docs/domain/adr/ nếu có thay đổi kiến trúc lớn.
 
 Báo cáo hoàn tất và dẫn link các tệp tài liệu đã lưu trên đĩa.
 ```
-- **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu)**: Cặp tệp Plan & Report được lưu trữ tại `docs/plans/improvements/` và `docs/reports/improvements/`. Roadmap cập nhật đầy đủ.
+- **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu)**: Kế hoạch lưu trữ tại `.agents/plans/` và Báo cáo nghiệm thu tại `docs/reports/improvements/`. Roadmap cập nhật đầy đủ.
 
 ---
 

@@ -18,6 +18,9 @@ export type PropertyRegistry = Map<number, string>;
 
 // --- Bang gia 28 o tai san (Nguon: entity_model.md) ---
 
+export const P2P_TAX_RATE = 0.05;
+export const P2P_ANTI_SPECULATE_TAX = 0.20;
+
 export const PROPERTY_DEEDS: ReadonlyMap<number, PropertyDeed> = new Map([
   // Nâu — Đô thị: C0=10%, C1=35%, C2=90%, C3=220%; UC=[50%,75%,100%]
   [1,  { price:  600, rent0:  60, rent1:  210, rent2:  540, rent3: 1320, upgradeCosts: [300, 450, 600] }],

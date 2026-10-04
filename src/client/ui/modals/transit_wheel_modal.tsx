@@ -1,7 +1,7 @@
 // [IMP-248] Tactile 2D SVG/CSS Modal: Transit Wheel / Flight Navigator
 import React, { useState, useEffect } from 'react';
 import type { ModalPayloadMap } from '../../store/game_store_types';
-import { TRANSIT_WHEEL_CONFIGS, TransitWheelOutcome } from '../../../domain/transit_wheel';
+import { TRANSIT_WHEEL_CONFIGS, TransitWheelOutcome, getWheelTargetDeg } from '../../../domain/transit_wheel';
 import { AudioEngine } from '../../audio/audio_engine';
 import { SoundEffect } from '../../audio/audio_types';
 import { useGameStore } from '../../store/game_store';
@@ -17,15 +17,6 @@ export function getTransitWheelDismissText(outcome?: TransitWheelOutcome | strin
   const isStationaryOutcome = outcome === TransitWheelOutcome.CASH_BACK || outcome === TransitWheelOutcome.FLIGHT_DELAY;
   return isStationaryOutcome ? 'Xác Nhận & Ở Lại Trạm' : 'Tiếp Tục Di Chuyển Đến Ô Mới';
 }
-
-const OUTCOME_COLORS: Record<TransitWheelOutcome, string> = {
-  [TransitWheelOutcome.NEXT_PORT]: '#3b82f6',
-  [TransitWheelOutcome.SPEED_BOOST]: '#f59e0b',
-  [TransitWheelOutcome.SAFE_HAVEN]: '#10b981',
-  [TransitWheelOutcome.CASH_BACK]: '#8b5cf6',
-  [TransitWheelOutcome.PASS_GO_FLIGHT]: '#ec4899',
-  [TransitWheelOutcome.FLIGHT_DELAY]: '#64748b',
-};
 
 export const TransitWheelModal: React.FC<TransitWheelModalProps> = ({
   cellIndex,
@@ -47,13 +38,19 @@ export const TransitWheelModal: React.FC<TransitWheelModalProps> = ({
   };
 
   useEffect(() => {
+    if (isSpinning && !outcome) {
+      const fallbackTimer = setTimeout(() => {
+        setIsSpinning(false);
+      }, 5000);
+      return () => clearTimeout(fallbackTimer);
+    }
+  }, [isSpinning, outcome]);
+
+  useEffect(() => {
     if (outcome && !hasFinished) {
       setIsSpinning(true);
       const outcomeIndex = TRANSIT_WHEEL_CONFIGS.findIndex((c) => c.outcome === outcome);
-      const segmentDeg = 360 / TRANSIT_WHEEL_CONFIGS.length;
-      // Quay 5 vòng (1800 deg) + góc trúng thưởng
-      const targetDeg = 1800 + (360 - outcomeIndex * segmentDeg - segmentDeg / 2);
-      setRotation(targetDeg);
+      setRotation(getWheelTargetDeg(outcomeIndex, TRANSIT_WHEEL_CONFIGS.length));
 
       const timer = setTimeout(() => {
         setIsSpinning(false);
@@ -102,25 +99,70 @@ export const TransitWheelModal: React.FC<TransitWheelModalProps> = ({
           role="img"
           aria-label="Vòng xoay chuyển tiếp hành trình"
           viewBox="0 0 200 200"
-          className="w-full h-full transition-transform duration-[3500ms] cubic-bezier(0.15, 0.9, 0.2, 1)"
-          style={{ transform: `rotate(${rotation}deg)` }}
+          className="w-full h-full"
         >
-          {TRANSIT_WHEEL_CONFIGS.map((cfg, idx) => {
-            const step = (2 * Math.PI) / TRANSIT_WHEEL_CONFIGS.length;
-            const startAngle = idx * step;
-            const endAngle = (idx + 1) * step;
-            const x1 = 100 + 95 * Math.sin(startAngle);
-            const y1 = 100 - 95 * Math.cos(startAngle);
-            const x2 = 100 + 95 * Math.sin(endAngle);
-            const y2 = 100 - 95 * Math.cos(endAngle);
-            const pathData = `M 100 100 L ${x1} ${y1} A 95 95 0 0 1 ${x2} ${y2} Z`;
-            return (
-              <g key={cfg.outcome}>
-                <path d={pathData} fill={OUTCOME_COLORS[cfg.outcome]} stroke="#1e293b" strokeWidth="2" />
-              </g>
-            );
-          })}
-          <circle cx="100" cy="100" r="22" fill="#0f172a" stroke="#f59e0b" strokeWidth="3" />
+          {/* Nhóm nan quạt xoay động */}
+          <g
+            className="transition-transform duration-[3500ms] ease-[cubic-bezier(0.15,0.9,0.2,1)]"
+            style={{ transform: `rotate(${rotation}deg)`, transformOrigin: '100px 100px', transformBox: 'view-box' }}
+          >
+            {TRANSIT_WHEEL_CONFIGS.map((cfg, idx) => {
+              const step = (2 * Math.PI) / TRANSIT_WHEEL_CONFIGS.length;
+              const startAngle = idx * step;
+              const endAngle = (idx + 1) * step;
+              const x1 = 100 + 95 * Math.sin(startAngle);
+              const y1 = 100 - 95 * Math.cos(startAngle);
+              const x2 = 100 + 95 * Math.sin(endAngle);
+              const y2 = 100 - 95 * Math.cos(endAngle);
+              const pathData = `M 100 100 L ${x1} ${y1} A 95 95 0 0 1 ${x2} ${y2} Z`;
+              const midDeg = (idx + 0.5) * (360 / TRANSIT_WHEEL_CONFIGS.length);
+              return (
+                <g key={cfg.outcome}>
+                  <path d={pathData} fill={cfg.color} stroke="#0f172a" strokeWidth="2" />
+                  <g transform={`rotate(${midDeg} 100 100)`}>
+                    <text
+                      x="100"
+                      y="36"
+                      textAnchor="middle"
+                      dominantBaseline="central"
+                      fontSize="22"
+                      className="select-none pointer-events-none drop-shadow"
+                    >
+                      {cfg.icon}
+                    </text>
+                    <text
+                      x="100"
+                      y="64"
+                      textAnchor="middle"
+                      dominantBaseline="central"
+                      fontSize="12"
+                      fontWeight="bold"
+                      fill="#ffffff"
+                      stroke="#0f172a"
+                      strokeWidth="0.5"
+                      className="select-none pointer-events-none font-mono tracking-tight"
+                    >
+                      {cfg.weight}%
+                    </text>
+                  </g>
+                </g>
+              );
+            })}
+          </g>
+
+          {/* Trục xoay trung tâm tĩnh (Center Hub) */}
+          <circle cx="100" cy="100" r="23" fill="#0f172a" stroke="#f59e0b" strokeWidth="2.5" />
+          <circle cx="100" cy="100" r="17" fill="#1e293b" stroke="#d97706" strokeWidth="1" />
+          <text
+            x="100"
+            y="101"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fontSize="13"
+            className="select-none pointer-events-none"
+          >
+            🧭
+          </text>
         </svg>
       </div>
 

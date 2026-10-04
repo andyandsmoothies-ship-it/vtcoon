@@ -7,7 +7,7 @@ import { dispatchPlayerIntent } from '../../src/server/intent_dispatcher.js';
 import { TurnPhase, type Player } from '../../src/domain/room.js';
 import { BotPersonality } from '../../src/domain/bot/bot_types.js';
 import { ActionRejectReason } from '../../src/domain/action_reasons.js';
-import { executeP2PTrade } from '../../src/server/property_actions.js';
+import { executeP2PTrade } from '../../src/server/p2p_trade_actions.js';
 import {
   findBotSwapTrade,
   evaluateBotSwapAcceptance,

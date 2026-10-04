@@ -335,19 +335,10 @@ export const useGameStore = create<GameState>((set, get) => ({
   addFloatingText: (item) => {
     const id = item.id ?? `ft_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
     const timestamp = Date.now();
-    const isMilestone =
-      item.actionType === 'chance' ||
-      item.actionType === 'market' ||
-      item.actionType === 'monopoly' ||
-      item.actionType === 'debt_relief';
+    const isMilestone = Boolean(item.actionType && /^(chance|market|monopoly|debt_relief|bankrupt)$/.test(item.actionType));
     const duration = item.durationMs ?? (isMilestone ? EVENT_BANNER_DURATION_MS : TRANSACTION_POPUP_DURATION_MS);
     const newItem: FloatingTextItem = {
-      id,
-      text: item.text,
-      type: item.type,
-      playerId: item.playerId,
-      timestamp,
-      durationMs: duration,
+      id, text: item.text, type: item.type, playerId: item.playerId, timestamp, durationMs: duration,
       ...(item.actionType ? { actionType: item.actionType } : {}),
       ...(item.title ? { title: item.title } : {}),
       ...(item.cellIndex !== undefined ? { cellIndex: item.cellIndex } : {}),
@@ -355,21 +346,17 @@ export const useGameStore = create<GameState>((set, get) => ({
       ...(item.targetPlayerId ? { targetPlayerId: item.targetPlayerId } : {}),
       ...(item.formula ? { formula: item.formula } : {}),
       ...(item.bailKind ? { bailKind: item.bailKind } : {}),
+      ...(item.groupId ? { groupId: item.groupId } : {}),
     };
-    set((state) => ({
-      floatingTexts: [...state.floatingTexts, newItem].slice(-MAX_FLOATING_TEXTS),
-    }));
-    if (typeof setTimeout !== 'undefined') {
-      setTimeout(() => {
-        get().removeFloatingText(id);
-      }, duration);
-    }
+    set((state) => ({ floatingTexts: [...state.floatingTexts, newItem].slice(-MAX_FLOATING_TEXTS) }));
+    if (typeof setTimeout !== 'undefined') setTimeout(() => { get().removeFloatingText(id); }, duration);
   },
 
   removeFloatingText: (id) =>
-    set((state) => ({
-      floatingTexts: state.floatingTexts.filter((t) => t.id !== id),
-    })),
+    set((state) => {
+      const gId = state.floatingTexts.find((t) => t.id === id)?.groupId;
+      return { floatingTexts: state.floatingTexts.filter((t) => t.id !== id && (!gId || t.groupId !== gId)) };
+    }),
 
   clearExpiredFloatingTexts: (now = Date.now()) =>
     set((state) => ({

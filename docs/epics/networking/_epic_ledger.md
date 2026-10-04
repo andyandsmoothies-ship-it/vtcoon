@@ -477,6 +477,9 @@ Toàn bộ Epic 3 được coi là Hoàn tất khi đáp ứng 100% các tiêu c
 | TD-NET-003 | Stress test đồng thời 50–100 phòng / leak RAM | NET-03 | Phase 4 / Epic Operations |
 | TD-NET-004 | UC-GAME-005 (Bot AI 3 tính cách điều phối qua WS) — đã có BotEngine, chưa wire vào WS | NET-04 | Phase 4 |
 | TD-NET-005 | UC-GAME-010 (Tổng kết ván + giải phóng phòng 10 phút) — scope Phase 3 nhưng deferrable | NET-04 | Phase 4 |
+| DEBT-ADMIN-MANAGER | Bóc tách AdminManager (410 LOC -> 350 LOC sau khi tích hợp hardening bảo mật IMP-261), tiếp tục thu hẹp về < 300 LOC | IMP-28 | CARRIED OVER (Target: IMP-263) |
+| DEBT-ADMIN-SECURITY | Security & Resilience Hardening cho Admin Subsystem (trim secret, timing-safe auth, copy defensive logs, prune dead sockets, error bubbling guard, violation cap, room code normalization) | IMP-260 | RESOLVED TRONG IMP-261 |
+| DEBT-ADMIN-AUTH-RATE-LIMIT | Giới hạn tần suất xác thực quản trị (Rate-limiting / Exponential backoff) chống brute-force mật khẩu | IMP-261 | IMP-262 |
 
 ---
 
@@ -495,6 +498,8 @@ Toàn bộ Epic 3 được coi là Hoàn tất khi đáp ứng 100% các tiêu c
 | 2026-09-15 | **IMP-72 Sign-off** — 30 tests Framing & Clean Lobby PASS. Tổng: 175/175 suites, 2.996/2.996 tests PASS. |
 | 2026-09-15 | **IMP-73 Sign-off** — 30 tests Telephoto 24°, Auto-Fit & Reset CTA PASS. Tổng: 176/176 suites, 3.026/3.026 tests PASS. |
 | 2026-09-15 | **IMP-74 Sign-off** — 18 tests Purge Leave Lobby Button PASS. Tổng: 177/177 suites, 3.044/3.044 tests PASS. |
+| 2026-10-04 | **IMP-260 Sign-off** — Bóc tách pure-move `admin_manager.ts` (410 -> 329 LOC) thành `admin_vitals.ts` (48 LOC), `admin_cloud_sync.ts` (27 LOC), `admin_event_store.ts` (69 LOC). 17 tests PASS, 11 mutants killed. 100% Gates Approved. |
+| 2026-10-04 | **IMP-261 Sign-off** — Admin Security & Resilience Hardening: cách ly node:crypto trong admin_security.ts (20 LOC), listener leak guard, sendAndPrune socket, ACK ordering, defensive copies. 16 tests PASS, 9/9 mutants killed (100%). 100% Gates Approved. |
 
 
 ---
