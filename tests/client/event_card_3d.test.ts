@@ -9,7 +9,9 @@ import {
 import {
   generateEventCardBackTexture,
   generateEventCardFrontTexture,
+  clearEventCardTextureCaches,
 } from '../../src/client/3d/event_card_texture';
+import { clearAll3DTextureCaches } from '../../src/client/3d/texture_cache_manager';
 
 describe('[UI-S04/MSS] EventCard3D — 3D Spatial Flipping & Kinematics', () => {
   it('Phase 1: Anticipation (elapsed < 0.45s) — thẻ nâng cao dần, mặt lưng hướng về camera (rotY = Math.PI)', () => {
@@ -112,5 +114,73 @@ describe('[UI-S04/MSS] EventCard3D — VFX Classification & Golden Dimensions', 
         effectDelta: 500,
       })
     ).toBeNull();
+  });
+
+  it('Hàm clearEventCardTextureCaches thực thi an toàn mà không phát sinh ngoại lệ', () => {
+    expect(typeof clearEventCardTextureCaches).toBe('function');
+    expect(() => clearEventCardTextureCaches()).not.toThrow();
+  });
+
+  it('Tái sử dụng CanvasTexture qua cache (Back & Front) và dọn dẹp khi gọi clearEventCardTextureCaches', () => {
+    const mockCtx = new Proxy({
+      measureText: () => ({ width: 50 }),
+      createLinearGradient: () => ({ addColorStop: () => {} }),
+      createRadialGradient: () => ({ addColorStop: () => {} }),
+    } as Record<string, unknown>, {
+      get(target, prop) {
+        if (prop in target) return target[prop as string];
+        return () => {};
+      },
+      set() { return true; },
+    });
+
+    const mockCanvas = {
+      width: 1024,
+      height: 1426,
+      getContext: () => mockCtx,
+    };
+
+    const g = globalThis as Record<string, unknown>;
+    const prevDoc = g['document'];
+    g['document'] = {
+      createElement: (tag: string) => (tag === 'canvas' ? mockCanvas : {}),
+    };
+
+    try {
+      clearEventCardTextureCaches();
+      const back1 = generateEventCardBackTexture('chance');
+      const back2 = generateEventCardBackTexture('chance');
+      expect(back1).not.toBeNull();
+      expect(back1).toBe(back2);
+
+      const frontData = {
+        cardType: 'chance' as const,
+        cardId: 'CH_01',
+        title: 'Cổ tức địa ốc',
+        description: 'Nhận cổ tức 500k',
+        effectDelta: 500,
+      };
+      const front1 = generateEventCardFrontTexture(frontData);
+      const front2 = generateEventCardFrontTexture(frontData);
+      expect(front1).not.toBeNull();
+      expect(front1).toBe(front2);
+
+      clearEventCardTextureCaches();
+      const back3 = generateEventCardBackTexture('chance');
+      expect(back3).not.toBeNull();
+      expect(back3).not.toBe(back1);
+
+      clearAll3DTextureCaches();
+      const back4 = generateEventCardBackTexture('chance');
+      expect(back4).not.toBeNull();
+      expect(back4).not.toBe(back3);
+    } finally {
+      clearAll3DTextureCaches();
+      if (prevDoc !== undefined) {
+        g['document'] = prevDoc;
+      } else {
+        delete g['document'];
+      }
+    }
   });
 });

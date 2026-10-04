@@ -206,16 +206,19 @@ export function coordRespondTradeOffer(
   playerId: string,
   offerId: string,
   accept: boolean,
-): { success: boolean; reason?: string } {
+): { success: boolean; reason?: string; idempotent?: boolean } {
   if (!ctx) return { success: false, reason: ActionRejectReason.INVALID_ROOM };
 
   const session = pendingTradeManager.getSessionByOfferId(offerId);
   if (!session || session.roomCode !== ctx.room.roomCode) {
+    const recent = pendingTradeManager.getRecentlyResolved(ctx.room.roomCode, playerId, offerId);
+    if (recent) {
+      if (recent.accept === accept) {
+        return { success: true, idempotent: true };
+      }
+      return { success: false, reason: 'OFFER_ALREADY_RESOLVED' };
+    }
     return { success: false, reason: 'INVALID_OFFER_ID' };
-  }
-
-  if (session.status !== 'pending') {
-    return { success: false, reason: 'OFFER_ALREADY_RESOLVED' };
   }
 
   const pendingInfo = ctx.room.pendingTradeOffer;
@@ -272,7 +275,7 @@ export function coordRespondTradeOffer(
     buyer.lastTradeOfferRound = ctx.room.roundCount ?? ctx.room.round ?? 1;
     delete buyer.cellTradeRejections?.[session.cellIndex];
     delete buyer.cellLastRejectedRound?.[session.cellIndex];
-    pendingTradeManager.resolveSession(ctx.room.roomCode, offerId, true);
+    pendingTradeManager.resolveSession(ctx.room.roomCode, offerId, true, playerId);
     ctx.room.pendingTradeOffer = null;
     return { success: true };
   } else {
@@ -283,7 +286,7 @@ export function coordRespondTradeOffer(
     if (buyer.isBot && session.offeredCellIndex !== undefined) {
       (buyer.swapPairLastRejectedRound ??= {})[`${session.cellIndex}_${session.offeredCellIndex}`] = round;
     }
-    pendingTradeManager.resolveSession(ctx.room.roomCode, offerId, false);
+    pendingTradeManager.resolveSession(ctx.room.roomCode, offerId, false, playerId);
     ctx.room.pendingTradeOffer = null;
     return { success: true };
   }

@@ -367,6 +367,26 @@
   - `DEBT-APPLY-DELTA` [STATUS: OPEN - CARRIED OVER]: `src/client/network/apply_delta.ts` (350 LOC, Warning Tier 1 > 300). Kế hoạch: Bóc tách `apply_delta_modals.ts` để đưa về < 250 LOC.
   - `DEBT-GAME-STORE-TYPES` [STATUS: OPEN - CARRIED OVER]: `src/client/store/game_store_types.ts` (396 LOC, Warning Tier 1 > 300). Kế hoạch: Bóc tách sub-types sang `store_subtypes.ts`.
 
+#### [IMP-264] Lũy Nghiệm Phản Hồi Giao Dịch P2P, Chống Double-Tap & Đồng Bộ Watchdog Hoạt Ảnh
+- **Mã Ticket:** IMP-264 (Tier 2 Full Rigor - Server Idempotency, Network Mutex, UI Debounce & Watchdog Telemetry)
+- **Use Case Ref:** UC-IMP264, UC-GAME-056, UC-P2P-MOD
+- **Phạm vi hoàn tất:**
+  - Bộ nhớ đệm lũy nghiệm phân vùng phòng `recentlyResolvedOffers` với cơ chế dọn dẹp FIFO TTL 5000ms trong `pending_trade_manager.ts`.
+  - Xử lý lũy nghiệm trong `coordRespondTradeOffer` (`room_property_coordinator.ts`), trả về `{ success: true, idempotent: true }` cho cùng quyết định và xóa bỏ mã chết.
+  - Điều phối cờ `idempotent?: boolean` trong `intent_dispatcher.ts` và `wss_lobby_handlers.ts`.
+  - Bỏ qua đồng bộ vi sai và log sự kiện dư thừa trong `wss_intent_handler.ts` khi gói tin là idempotent.
+  - Chốt chặn debounce đơn kỳ `submittedOfferIdRef` trên cả `bot_trade_offer_strip.tsx` và `bot_trade_offer_modal.tsx`, tạm dừng timer thanh trượt khi mở modal chi tiết.
+  - Đồng bộ công thức trần giám sát hoạt ảnh `perf_telemetry_tracker.tsx` theo chuẩn `Math.max(10_000, totalWaypoints * 1500 + 8000)`.
+- **Báo cáo chi tiết:** [`docs/reports/improvements/IMP-264-p2p-trade-idempotency-and-watchdog-sync_report.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/reports/improvements/IMP-264-p2p-trade-idempotency-and-watchdog-sync_report.md)
+- **Evidence Snapshot:** [`.agents/evidence/chaos_sentinel_IMP-264.json`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/evidence/chaos_sentinel_IMP-264.json) (`executed: true`, `verdict: APPROVED`)
+- **Kiểm thử:** 17/17 atomic contract tests PASS (`tests/contracts/imp264_trade_idempotency_and_watchdog_resilience.test.ts`), 22/22 mutants killed (100% kill rate), 45/45 regression tests PASS.
+- **Tech Debt Ledger (Nợ kỹ thuật ghi nhận):**
+  - `DEBT-ROOM-PROPERTY-COORD-PARTITION` [STATUS: OPEN]: `src/server/room_property_coordinator.ts` (360 LOC, Warning Tier 1 > 300). Kế hoạch: Bóc tách trade coordination sang `room_trade_coordinator.ts`.
+  - `DEBT-WSS-LOBBY-HANDLERS-PARTITION` [STATUS: OPEN]: `src/server/network/wss_lobby_handlers.ts` (339 LOC, Warning Tier 1 > 300). Kế hoạch: Bóc tách session handling logic sang submodule.
+  - `DEBT-TURN-ORCHESTRATOR` [STATUS: OPEN - CARRIED OVER]: `src/server/network/turn_orchestrator.ts` (376 LOC, Warning Tier 1 > 300). Kế hoạch: Bóc tách bot step delay timing calculator sang `turn_pacing_calculator.ts`.
+  - `DEBT-APPLY-DELTA` [STATUS: OPEN - CARRIED OVER]: `src/client/network/apply_delta.ts` (350 LOC, Warning Tier 1 > 300).
+  - `DEBT-MODAL-HOST` [STATUS: OPEN - CARRIED OVER]: `src/client/ui/modals/modal_host.tsx` (441 LOC, Warning Tier 2 > 400).
+
 ---
 
 ## Tổng Kết Toàn Cục Epic Gameplay Core

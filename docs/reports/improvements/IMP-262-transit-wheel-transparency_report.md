@@ -158,3 +158,23 @@ Mọi tệp nằm trong vùng cảnh báo (> 300 LOC với Tier 1) được đă
    Khi `qa-tester` tạo bộ kiểm thử hợp đồng cho các domain handler có chứa Enum kết quả (ví dụ `TransitWheelOutcome`, `AuctionCloseReason`), bắt buộc phải có tối thiểu 1 test case độc lập kiểm chứng biến động trạng thái (state transition & treasury impact) cho từng giá trị enum.
 3. **Cưỡng Chế Kiểm Tra Test Nguyên Tử Tại Station 4**:
    Khi `chaos-sentinel` bổ sung các bài test đối kháng để tiêu diệt mutant, bắt buộc phải chạy bộ lọc AST kiểm tra số lượng assert trước khi xuất bằng chứng.
+
+---
+
+## 8. HẬU KIỂM VẬN HÀNH & KHẮC PHỤC KHIẾM KHUYẾT (POST-IMPLEMENTATION REMEDIATION)
+
+Sau phản biện đối kháng chuyên sâu từ người dùng, hai khiếm khuyết tiềm ẩn phát sinh từ môi trường mạng thực tế đã được phát hiện, chứng minh bằng Adversarial TDD (RED) và khắc phục triệt để (GREEN):
+
+### 8.1. Khắc Phục Lỗ Hổng Deduplication Do Tick Inflation (`activity_transit_tracker.ts`)
+- **Cơ chế lỗi cũ**: Chỉ thị phản xạ sai lầm `GRILL-01` ép đưa `delta.tick` vào key deduplication. Khi người chơi quay xong ở Tick 10, các hành động tiếp theo trong lượt (nhảy bước 2 ở Tick 11, mở modal mua đất/đấu giá ở Tick 12) làm tăng tick liên tục trong khi `room.lastTransitResult` vẫn tồn tại cho đến cuối lượt (`endTurn`). Điều này khiến key thay đổi liên tục và sinh ra hàng loạt log/banner trùng lặp.
+- **Biện pháp khắc phục**:
+  - Loại bỏ hoàn toàn `delta.tick` khỏi `key`, sử dụng định danh biến cố nội tại kết hợp `delta.roundNumber`.
+  - Bổ sung cơ chế reset `lastProcessedTransitKey = null` ngay khi nhận `delta.lastTransitResult === null`.
+- **Hợp đồng kiểm thử xác minh**: `[TC-FIX-TRANSIT.01/MSS]` và `[TC-FIX-TRANSIT.02/MSS]` trong `tests/client/transit_defect_fixes.test.ts`.
+
+### 8.2. Khắc Phục Điểm Mù UI Triệt Tiêu MilestoneBanner (`floating_numbers.tsx`)
+- **Cơ chế lỗi cũ**: Điều kiện `if (floatingTexts.length === 0 || activeModal !== null) return null;` dập tắt toàn bộ overlay thông báo nổi khi có bất kỳ modal nào mở. Khi người chơi quay Vòng Xoay và bay đến ô đất trống, client mở ngay `deed_modal` (`activeModal = 'deed'`), khiến chính người chơi vừa quay không bao giờ nhìn thấy băng thông báo của mình.
+- **Biện pháp khắc phục**:
+  - Tách bạch điều kiện chặn: Khi `activeModal !== null`, chỉ ẩn các badge biến động tiền tệ thông thường (`displayItems = []`), nhưng vẫn cho phép `MilestoneBanner` kết xuất độc lập.
+  - Trên mobile, nâng vị trí container lên `top-14 md:bottom-auto md:top-20` khi đang mở modal, bảo đảm không va chạm với DeedModal ở đáy màn hình.
+- **Hợp đồng kiểm thử xác minh**: `[TC-FIX-TRANSIT.03/MSS]` và `[TC-FIX-TRANSIT.04/MSS]` trong `tests/client/transit_defect_fixes.test.ts`.

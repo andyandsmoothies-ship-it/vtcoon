@@ -82,6 +82,9 @@ export async function handleIntentMsg(
       deps.broadcaster.broadcastRoomDelta(msg.roomCode);
       return;
     }
+    if (res.idempotent) {
+      return;
+    }
     const roll = res.rollResult;
     let payloadSummary = `Người chơi ${msg.playerId}: ${msg.intent.type}`;
     if (roll) {

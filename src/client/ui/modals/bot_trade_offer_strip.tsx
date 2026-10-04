@@ -35,6 +35,13 @@ export function InlineBotTradeStrip({
     pendingTradeOffer ? Math.max(0, pendingTradeOffer.expiresAt - Date.now()) : 0
   );
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const submittedOfferIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!pendingTradeOffer) {
+      submittedOfferIdRef.current = null;
+    }
+  }, [pendingTradeOffer?.offerId]);
 
   useEffect(() => {
     if (!pendingTradeOffer) {
@@ -43,6 +50,7 @@ export function InlineBotTradeStrip({
     }
 
     const updateTimer = () => {
+      if (activeModal === 'bot_trade_offer') return;
       if (pendingTradeOffer.sellerId !== myId) return;
       const left = Math.max(0, pendingTradeOffer.expiresAt - Date.now());
       setRemainingMs(left);
@@ -51,6 +59,8 @@ export function InlineBotTradeStrip({
           clearInterval(timerRef.current);
           timerRef.current = null;
         }
+        if (submittedOfferIdRef.current === pendingTradeOffer.offerId) return;
+        submittedOfferIdRef.current = pendingTradeOffer.offerId;
         onIntent?.({
           type: 'INTENT_RESPOND_TRADE_OFFER',
           offerId: pendingTradeOffer.offerId,
@@ -69,7 +79,7 @@ export function InlineBotTradeStrip({
         timerRef.current = null;
       }
     };
-  }, [pendingTradeOffer, onIntent, myId]);
+  }, [pendingTradeOffer, onIntent, myId, activeModal]);
 
   if (!pendingTradeOffer || pendingTradeOffer.sellerId !== myId || activeModal === 'bot_trade_offer') {
     return null;
@@ -100,6 +110,8 @@ export function InlineBotTradeStrip({
 
   const handleAccept = () => {
     if (!canAfford) return;
+    if (submittedOfferIdRef.current === pendingTradeOffer.offerId) return;
+    submittedOfferIdRef.current = pendingTradeOffer.offerId;
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
@@ -114,6 +126,8 @@ export function InlineBotTradeStrip({
   };
 
   const handleReject = () => {
+    if (submittedOfferIdRef.current === pendingTradeOffer.offerId) return;
+    submittedOfferIdRef.current = pendingTradeOffer.offerId;
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;

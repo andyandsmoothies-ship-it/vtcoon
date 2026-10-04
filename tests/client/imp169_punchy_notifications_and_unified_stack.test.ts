@@ -144,7 +144,7 @@ describe('[IMP-169] Punchy Event Notifications & Unified Pop-up Stack Architectu
   // FACET 2: Reactivity & Content Rendering
   // ============================================================================
   describe('[Facet-2/Reactivity] Reactivity & Content Rendering (MilestoneBanner & Unified Stack)', () => {
-    it('[TC-IMP169.04/MSS][UC-GAME-023][Facet-2/Reactivity] MilestoneBanner subtitle hiển thị 1 dòng với class truncate', () => {
+    it('[TC-IMP169.04/MSS][UC-GAME-023][Facet-2/Reactivity] MilestoneBanner subtitle ho tro hien thi toi da 2 dong voi class line-clamp-2 va break-words', () => {
       const item: FloatingTextItem = {
         id: 'ft_test_desc',
         type: FloatingTextType.Reward,
@@ -155,11 +155,12 @@ describe('[IMP-169] Punchy Event Notifications & Unified Pop-up Stack Architectu
         timestamp: Date.now(),
       };
       const html = renderToStaticMarkup(React.createElement(MilestoneBanner, { item }));
-      const descMatch = html.match(/<span[^>]*class="([^"]*)"[^>]*>[\s\S]*?di chuyển[\s\S]*?<\/span>/i)?.[1] ?? '';
-      expect(descMatch).toContain('truncate');
+      const descMatch = html.match(/data-testid="milestone-card-desc"[^>]*class="([^"]*)"/i)?.[1] ?? '';
+      expect(descMatch).toContain('line-clamp-2');
+      expect(descMatch).toContain('break-words');
     });
 
-    it('[TC-IMP169.04/A1][UC-GAME-023][Facet-2/Reactivity] MilestoneBanner subtitle không còn sử dụng class line-clamp-2', () => {
+    it('[TC-IMP169.04/A1][UC-GAME-023][Facet-2/Reactivity] MilestoneBanner subtitle khong con bi ep 1 dong voi class truncate gay cat cut chu tren mobile', () => {
       const item: FloatingTextItem = {
         id: 'ft_test_desc_clamp',
         type: FloatingTextType.Reward,
@@ -170,8 +171,8 @@ describe('[IMP-169] Punchy Event Notifications & Unified Pop-up Stack Architectu
         timestamp: Date.now(),
       };
       const html = renderToStaticMarkup(React.createElement(MilestoneBanner, { item }));
-      const descMatch = html.match(/<span[^>]*class="([^"]*)"[^>]*>[\s\S]*?di chuyển[\s\S]*?<\/span>/i)?.[1] ?? '';
-      expect(descMatch).not.toContain('line-clamp-2');
+      const descMatch = html.match(/data-testid="milestone-card-desc"[^>]*class="([^"]*)"/i)?.[1] ?? '';
+      expect(descMatch).not.toContain('truncate');
     });
 
     it('[TC-IMP169.05/MSS][UC-GAME-023][Facet-2/Reactivity] FloatingNumbersOverlay chứa cả milestone và regular toast trong container flexbox chung có gap-2', () => {

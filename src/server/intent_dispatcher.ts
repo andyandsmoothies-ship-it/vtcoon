@@ -39,7 +39,7 @@ export type PlayerIntent =
   | { type: 'INTENT_SPIN_TRANSIT_WHEEL' }
   | { type: 'INTENT_ROLL' };
 
-type IntentHandler = (mgr: RoomManager, rc: string, p: string, intent: PlayerIntent) => { success: boolean; reason?: string; rollResult?: RollResult };
+type IntentHandler = (mgr: RoomManager, rc: string, p: string, intent: PlayerIntent) => { success: boolean; reason?: string; rollResult?: RollResult; idempotent?: boolean };
 
 const INTENT_DISPATCH: Record<PlayerIntent['type'], IntentHandler> = {
   INTENT_ROLL: (m, rc, p) => {
@@ -169,7 +169,7 @@ export function dispatchPlayerIntent(
   roomCode: string,
   playerId: string,
   intent: PlayerIntent,
-): { success: boolean; reason?: string; rollResult?: RollResult } {
+): { success: boolean; reason?: string; rollResult?: RollResult; idempotent?: boolean } {
   const room = mgr.getRoom(roomCode);
   if (room?.phase === TurnPhase.InsolvencyPhase) {
     const current = room.players[room.currentPlayerIndex];

@@ -15,6 +15,36 @@ export interface TopBarProps {
   readonly onToggleActivityFeed?: () => void;
 }
 
+function MobileFpsBadge({ onToggleConsole }: { readonly onToggleConsole: () => void }): React.ReactElement {
+  const isSSR = typeof window === 'undefined';
+  const storeFps = useTelemetryStore((state) => state.metrics.fps);
+  const fps = isSSR ? Math.round(useTelemetryStore.getState().metrics.fps) : Math.round(storeFps);
+
+  return (
+    <>
+      <div className="h-4 w-px bg-slate-300 hidden min-[360px]:block sm:hidden" aria-hidden="true" />
+      <button
+        type="button"
+        data-testid="mobile-fps-badge"
+        onClick={onToggleConsole}
+        className={`hidden min-[360px]:inline-flex sm:hidden pointer-events-auto items-center gap-0.5 px-1 py-0.5 rounded-md bg-slate-900 font-mono text-[10px] font-bold border border-slate-700 shadow-2xs cursor-pointer select-none active:translate-y-px ${
+          fps >= 45 ? 'text-emerald-400' : fps >= 25 ? 'text-amber-400' : 'text-rose-400'
+        }`}
+        title="Tốc độ khung hình (Bấm để mở hộp đen)"
+        aria-label={`FPS: ${fps}`}
+      >
+        <span
+          className={`w-1.5 h-1.5 rounded-full animate-pulse ${
+            fps >= 45 ? 'bg-emerald-400' : fps >= 25 ? 'bg-amber-400' : 'bg-rose-400'
+          }`}
+          aria-hidden="true"
+        />
+        <span>{fps}<span className="hidden min-[400px]:inline"> FPS</span></span>
+      </button>
+    </>
+  );
+}
+
 export function TopBar(props: TopBarProps): React.ReactElement {
   const { onLeaveRoom } = props;
   const storeRoundNumber = useGameStore((state) => state.roundNumber);
@@ -58,25 +88,10 @@ export function TopBar(props: TopBarProps): React.ReactElement {
   const unreadCount = props.unreadCount ?? storeUnreadCount;
   const toggleActivityFeed = props.onToggleActivityFeed ?? storeToggleActivityFeed;
 
-  const storeFps = useTelemetryStore((state) => state.metrics.fps);
   const toggleConsole = useTelemetryStore((state) => state.toggleConsole);
-  const fps = isSSR ? Math.round(useTelemetryStore.getState().metrics.fps) : Math.round(storeFps);
 
-  const timeOfDayIcon = timeOfDayMode === 'auto'
-    ? '🌤️'
-    : timeOfDayPhase === 'night'
-    ? '🌙'
-    : timeOfDayPhase === 'sunset'
-    ? '🌅'
-    : '☀️';
-
-  const timeOfDayLabel = timeOfDayMode === 'auto'
-    ? 'Ánh Sáng: Tự Động'
-    : timeOfDayPhase === 'night'
-    ? 'Đêm'
-    : timeOfDayPhase === 'sunset'
-    ? 'Hoàng Hôn'
-    : 'Ngày';
+  const timeOfDayIcon = timeOfDayMode === 'auto' ? '🌤️' : timeOfDayPhase === 'night' ? '🌙' : timeOfDayPhase === 'sunset' ? '🌅' : '☀️';
+  const timeOfDayLabel = timeOfDayMode === 'auto' ? 'Ánh Sáng: Tự Động' : timeOfDayPhase === 'night' ? 'Đêm' : timeOfDayPhase === 'sunset' ? 'Hoàng Hôn' : 'Ngày';
 
   const isLowTime = turnTimeRemaining <= 10;
   const timerColorClass = isLowTime
@@ -144,26 +159,8 @@ export function TopBar(props: TopBarProps): React.ReactElement {
             </div>
           )}
 
-          {/* Huy hiệu FPS di động */}
-          <div className="h-4 w-px bg-slate-300 hidden min-[360px]:block sm:hidden" aria-hidden="true" />
-          <button
-            type="button"
-            data-testid="mobile-fps-badge"
-            onClick={() => toggleConsole()}
-            className={`hidden min-[360px]:inline-flex sm:hidden pointer-events-auto items-center gap-0.5 px-1 py-0.5 rounded-md bg-slate-900 font-mono text-[10px] font-bold border border-slate-700 shadow-2xs cursor-pointer select-none active:translate-y-px ${
-              fps >= 45 ? 'text-emerald-400' : fps >= 25 ? 'text-amber-400' : 'text-rose-400'
-            }`}
-            title="Tốc độ khung hình (Bấm để mở hộp đen)"
-            aria-label={`FPS: ${fps}`}
-          >
-            <span
-              className={`w-1.5 h-1.5 rounded-full animate-pulse ${
-                fps >= 45 ? 'bg-emerald-400' : fps >= 25 ? 'bg-amber-400' : 'bg-rose-400'
-              }`}
-              aria-hidden="true"
-            />
-            <span>{fps}<span className="hidden min-[400px]:inline"> FPS</span></span>
-          </button>
+          {/* Huy hiệu FPS di động (được cô lập trong subcomponent để tránh re-render toàn bộ TopBar) */}
+          <MobileFpsBadge onToggleConsole={toggleConsole} />
         </div>
 
         {/* Vách ngăn trung tâm phân định giữa Thông Tin Trận Đấu và Cụm Tiện Ích */}

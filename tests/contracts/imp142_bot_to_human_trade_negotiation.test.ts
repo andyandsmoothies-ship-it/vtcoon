@@ -366,7 +366,7 @@ describe('[TC-142][UC-IMP142] Bot-to-Human Trade Negotiation & 15s Modal Contrac
       expect(['INVALID_OFFER_ID', 'INVALID_INTENT']).toContain(res.reason);
     });
 
-    it('[TC-142.22/A8][UC-IMP142] Gửi phản hồi 2 lần liên tiếp (double click / spam) -> Lần 2 bị từ chối (OFFER_ALREADY_RESOLVED)', () => {
+    it('[TC-142.22/A8][UC-IMP142] Gửi phản hồi 2 lần liên tiếp -> Lần gửi lại cùng quyết định là lũy nghiệm (idempotent), quyết định trái ngược bị từ chối (OFFER_ALREADY_RESOLVED)', () => {
       const { mgr, room, human, bot } = setupNegotiationRoom();
       mgr.handleTradeOffer(room.roomCode, bot.id, human.id, bot.id, 3, 1050);
       const session = (mgr as any).getPendingTrade?.(room.roomCode);
@@ -378,15 +378,23 @@ describe('[TC-142][UC-IMP142] Bot-to-Human Trade Negotiation & 15s Modal Contrac
         accept: true,
       } as any);
 
-      const secondRes = dispatchPlayerIntent(mgr, room.roomCode, human.id, {
+      const duplicateRes = dispatchPlayerIntent(mgr, room.roomCode, human.id, {
         type: 'INTENT_RESPOND_TRADE_OFFER',
         offerId,
         accept: true,
       } as any);
 
+      const conflictingRes = dispatchPlayerIntent(mgr, room.roomCode, human.id, {
+        type: 'INTENT_RESPOND_TRADE_OFFER',
+        offerId,
+        accept: false,
+      } as any);
+
       expect(firstRes.success).toBe(true);
-      expect(secondRes.success).toBe(false);
-      expect(['OFFER_ALREADY_RESOLVED', 'INVALID_OFFER_ID']).toContain(secondRes.reason);
+      expect(duplicateRes.success).toBe(true);
+      expect(duplicateRes.idempotent).toBe(true);
+      expect(conflictingRes.success).toBe(false);
+      expect(conflictingRes.reason).toBe('OFFER_ALREADY_RESOLVED');
     });
 
     it('[TC-142.23/A9][UC-IMP142] Race condition: Nếu số dư Bot sụt giảm trước khi Human đồng ý -> Giao dịch thất bại an toàn, không âm tiền', () => {

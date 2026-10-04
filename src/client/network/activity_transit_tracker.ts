@@ -20,12 +20,15 @@ export function detectTransitActivities(
 ): ActivityLogEntry[] {
   const result = delta.lastTransitResult;
   if (!result || !result.playerId || !result.outcome) {
+    if (delta.lastTransitResult === null) {
+      lastProcessedTransitKey = null;
+    }
     return [];
   }
 
-  // [GRILL-01] Gắn tick và roundNumber vào key để không nuốt sự kiện giống hệt ở vòng đấu sau
-  const tickPrefix = delta.tick ?? delta.roundNumber ?? '';
-  const key = `${tickPrefix}:${result.playerId}:${result.cellIndex}:${result.outcome}:${result.targetCell ?? ''}:${result.payout ?? 0}:${result.boostSteps ?? ''}`;
+  // Khóa định danh nội tại của sự kiện Vòng Xoay (loại trừ delta.tick để miễn nhiễm với Tick Inflation trong cùng lượt)
+  const roundPrefix = delta.roundNumber ?? '';
+  const key = `${roundPrefix}:${result.playerId}:${result.cellIndex}:${result.outcome}:${result.targetCell ?? ''}:${result.payout ?? 0}:${result.boostSteps ?? ''}`;
   if (key === lastProcessedTransitKey) {
     return [];
   }

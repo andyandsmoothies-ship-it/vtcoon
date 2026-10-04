@@ -5,6 +5,7 @@ import { clearMascotTextureCache } from './mascot_canvas_texture';
 import { clearHeritageTileTextureCache } from './heritage_tile_texture';
 import { clearPriceTextureCache } from './owner_property_markers';
 import { clearEmoteCanvasCache } from './pawn_animator';
+import { clearEventCardTextureCaches } from './event_card_texture';
 import { bumpTextureRevision } from './texture_revision';
 
 /**
@@ -18,5 +19,6 @@ export function clearAll3DTextureCaches(): void {
   clearHeritageTileTextureCache();
   clearPriceTextureCache();
   clearEmoteCanvasCache();
+  clearEventCardTextureCaches();
   bumpTextureRevision();
 }

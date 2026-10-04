@@ -247,32 +247,62 @@ async function runUniversalMutationProbe(
     { name: 'not.toMatch -> toMatch', pattern: /\.not\.toMatch\(/, replacement: '.toMatch(' },
     { name: 'toEqual -> not.toEqual', pattern: /(?<!\.not)\.toEqual\(/, replacement: '.not.toEqual(' },
     { name: 'toBeDefined -> toBeUndefined', pattern: '.toBeDefined()', replacement: '.toBeUndefined()' },
+    { name: 'toBeUndefined() -> toBeDefined()', pattern: /\.toBeUndefined\(\)/, replacement: '.toBeDefined()' },
+    { name: 'toBeGreaterThanOrEqual -> toBeLessThan', pattern: '.toBeGreaterThanOrEqual(', replacement: '.toBeLessThan(' },
+    { name: 'toBeLessThanOrEqual -> toBeGreaterThan', pattern: '.toBeLessThanOrEqual(', replacement: '.toBeGreaterThan(' },
+    { name: 'toBeCloseTo -> corrupted', pattern: /\.toBeCloseTo\([^)]+\)/, replacement: '.toBeCloseTo(99999.99, 1)' },
     { name: 'toBeTruthy -> toBeFalsy', pattern: '.toBeTruthy()', replacement: '.toBeFalsy()' },
     { name: 'toHaveLength -> +99', pattern: /\.toHaveLength\((\d+)\)/, replacement: (_m: string, n: string) => `.toHaveLength(${Number(n) + 99})` },
     { name: 'toThrow -> not.toThrow', pattern: /\.toThrow\(/, replacement: '.not.toThrow(' },
     { name: 'objectContaining -> not', pattern: /expect\.objectContaining\(/, replacement: 'expect.not.objectContaining(' },
   ];
 
-  try {
-    for (const { pattern, replacement } of genericMutators) {
-      const hasMatch = typeof pattern === 'string'
-        ? originalTestContent.includes(pattern)
-        : pattern.test(originalTestContent);
+  function getMutantInstances(
+    content: string,
+    pattern: string | RegExp,
+    replacement: string | ((...args: any[]) => string),
+    maxInstances: number = 3
+  ): string[] {
+    const mutants: string[] = [];
+    if (typeof pattern === 'string') {
+      let idx = -1;
+      let count = 0;
+      while ((idx = content.indexOf(pattern, idx + 1)) !== -1 && count < maxInstances) {
+        const rep = typeof replacement === 'string' ? replacement : replacement(pattern);
+        mutants.push(content.slice(0, idx) + rep + content.slice(idx + pattern.length));
+        count++;
+      }
+    } else {
+      const gRegex = new RegExp(pattern.source, pattern.flags.includes('g') ? pattern.flags : pattern.flags + 'g');
+      let m: RegExpExecArray | null;
+      let count = 0;
+      while ((m = gRegex.exec(content)) !== null && count < maxInstances) {
+        const matchIdx = m.index;
+        const matchStr = m[0];
+        const rep = typeof replacement === 'function' ? replacement(...m) : replacement;
+        mutants.push(content.slice(0, matchIdx) + rep + content.slice(matchIdx + matchStr.length));
+        count++;
+      }
+    }
+    return mutants;
+  }
 
-      if (hasMatch) {
+  try {
+    for (const { name, pattern, replacement } of genericMutators) {
+      const instances = getMutantInstances(originalTestContent, pattern, replacement, 3);
+
+      for (let i = 0; i < instances.length; i++) {
         mutantsTested++;
-        const mutantContent = typeof replacement === 'string'
-          ? originalTestContent.replace(pattern, replacement)
-          : originalTestContent.replace(pattern, replacement as any);
+        const mutantContent = instances[i]!;
 
         fs.writeFileSync(sandboxPath, mutantContent, 'utf-8');
 
         try {
           execSync(`npx vitest run "${sandboxPath}"`, { stdio: 'pipe' });
-          console.log(`  [CONTRACT MUTANT] ${pattern} -> SURVIVED!`);
+          console.log(`  [CONTRACT MUTANT #${mutantsTested}] ${name} (instance ${i + 1}) -> SURVIVED!`);
           survived++;
         } catch {
-          console.log(`  [CONTRACT MUTANT] ${pattern} -> KILLED`);
+          console.log(`  [CONTRACT MUTANT #${mutantsTested}] ${name} (instance ${i + 1}) -> KILLED`);
           killed++;
         }
       }

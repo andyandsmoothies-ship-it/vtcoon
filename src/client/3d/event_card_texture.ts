@@ -20,6 +20,32 @@ export interface EventCardTextureData {
   readonly effectDelta?: number;
 }
 
+const backTextureCache = new Map<'chance' | 'market', CanvasTexture>();
+const frontTextureCache = new Map<string, CanvasTexture>();
+
+function disposeEventTextureMap(cache: Map<unknown, CanvasTexture>): void {
+  for (const tex of cache.values()) {
+    if (tex) {
+      if (tex.image && typeof tex.image === 'object' && 'width' in tex.image) {
+        (tex.image as HTMLCanvasElement).width = 0;
+        (tex.image as HTMLCanvasElement).height = 0;
+      }
+      if (typeof tex.dispose === 'function') {
+        tex.dispose();
+      }
+    }
+  }
+  cache.clear();
+}
+
+/**
+ * Xóa cache texture thẻ sự kiện cho WebGL context loss, memory cleanup và test suites
+ */
+export function clearEventCardTextureCaches(): void {
+  disposeEventTextureMap(backTextureCache);
+  disposeEventTextureMap(frontTextureCache);
+}
+
 /**
  * Vẽ hoa văn Trống đồng Đông Sơn mạ vàng hoàng gia lên canvas 2D
  */
@@ -112,6 +138,9 @@ export function generateEventCardBackTexture(
   cardType: 'chance' | 'market'
 ): CanvasTexture | null {
   if (typeof document === 'undefined') return null;
+  const cached = backTextureCache.get(cardType);
+  if (cached) return cached;
+
   const canvas = document.createElement('canvas');
   canvas.width = 1024;
   canvas.height = 1426;
@@ -181,6 +210,7 @@ export function generateEventCardBackTexture(
   texture.colorSpace = SRGBColorSpace;
   texture.generateMipmaps = false;
   texture.minFilter = LinearFilter;
+  backTextureCache.set(cardType, texture);
   return texture;
 }
 
@@ -191,6 +221,10 @@ export function generateEventCardFrontTexture(
   data: EventCardTextureData
 ): CanvasTexture | null {
   if (typeof document === 'undefined') return null;
+  const cacheKey = `${data.cardType}:${data.cardId}:${data.effectDelta ?? 0}:${data.title}`;
+  const cached = frontTextureCache.get(cacheKey);
+  if (cached) return cached;
+
   const canvas = document.createElement('canvas');
   canvas.width = 1024;
   canvas.height = 1426;
@@ -325,6 +359,7 @@ export function generateEventCardFrontTexture(
   texture.colorSpace = SRGBColorSpace;
   texture.generateMipmaps = false;
   texture.minFilter = LinearFilter;
+  frontTextureCache.set(cacheKey, texture);
   return texture;
 }
 

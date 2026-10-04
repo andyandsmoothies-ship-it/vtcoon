@@ -53,7 +53,7 @@ export function PerfTelemetryTracker(): null {
         const duration = Date.now() - animStartRef.current;
         const queue = useGameStore.getState().pawnAnimationQueue;
         const totalWaypoints = (activeAnim.waypoints?.length ?? 0) + (queue?.reduce((acc, q) => acc + (q.waypoints?.length ?? 0), 0) ?? 0);
-        const maxAllowedMs = Math.max(10_000, totalWaypoints * 1200 + 5000);
+        const maxAllowedMs = Math.max(10_000, totalWaypoints * 1500 + 8000);
         const params = {
           isAnimating: true,
           animatingDurationMs: duration,

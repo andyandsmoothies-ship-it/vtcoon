@@ -17,6 +17,7 @@ import { GameOverModal } from '../../src/client/ui/modals/game_over_modal';
 import { CompulsoryBuyoutModal } from '../../src/client/ui/modals/compulsory_buyout_modal';
 import { BotTradeOfferModal } from '../../src/client/ui/modals/bot_trade_offer_modal';
 import { TitleDeedActionFooter } from '../../src/client/ui/modals/title_deed_action_footer';
+import { useGameStore } from '../../src/client/store/game_store';
 
 // ============================================================================
 // FACET 1: TOUCH TARGET ERGONOMICS (>= 44PX MANDATE)
@@ -422,6 +423,65 @@ describe('[FACET-3] Viewport & Responsive Layout Constraints', () => {
     const cashRowMatch = html.match(/<div[^>]*>[\s\S]*?Chênh Lệch Tiền Mặt:[\s\S]*?<\/div>/);
     expect(cashRowMatch).not.toBeNull();
     expect(cashRowMatch![0]).toContain('flex-col sm:flex-row');
+  });
+
+  it('[TC-161.14b/MSS][UC-161] BotTradeOfferModal: Hiển thị cảnh báo độc quyền bẫy phân khu và trực quan hóa phân khu khi đối thủ chuẩn bị đạt monopoly', () => {
+    useGameStore.setState({
+      playersInfo: {
+        bot_saigon: {
+          id: 'bot_saigon',
+          name: 'Bot AI 3',
+          tokenColor: '#ef4444',
+          isBot: true,
+          balance: 10000,
+          ownedProperties: [1],
+        },
+        player_hanoi: {
+          id: 'player_hanoi',
+          name: 'Người Chơi',
+          tokenColor: '#3b82f6',
+          isBot: false,
+          balance: 5000,
+          ownedProperties: [3],
+        },
+      },
+    });
+
+    const html = renderToStaticMarkup(
+      React.createElement(BotTradeOfferModal, {
+        offerId: 'offer_single_123',
+        cellIndex: 3, // An Giang (Châu Đốc)
+        price: 990,
+        buyerId: 'bot_saigon',
+        sellerId: 'player_hanoi',
+        expiresAt: Date.now() + 30000,
+        onAccept: () => {},
+        onReject: () => {},
+      })
+    );
+
+    expect(html).toContain('CẢNH BÁO BẪY ĐỘC QUYỀN!');
+    expect(html).toContain('Đối Thủ Hỏi Mua Đất Của Bạn');
+    expect(html).toContain('Tiến độ Bot: 1/2 ô');
+    expect(html).toContain('data-testid="monopoly-warning-banner"');
+  });
+
+  it('[TC-161.14c/MSS][UC-161] BotTradeOfferModal: Nút từ chối mang nhãn phòng thủ bảo vệ đất "🛡️ TỪ CHỐI (Giữ Đất)"', () => {
+    const html = renderToStaticMarkup(
+      React.createElement(BotTradeOfferModal, {
+        offerId: 'offer_single_124',
+        cellIndex: 3,
+        price: 990,
+        buyerId: 'bot_saigon',
+        sellerId: 'player_hanoi',
+        expiresAt: Date.now() + 30000,
+        onAccept: () => {},
+        onReject: () => {},
+      })
+    );
+
+    expect(html).toContain('🛡️ TỪ CHỐI (Giữ Đất)');
+    expect(html).toContain('data-testid="reject-trade-btn"');
   });
 
   it('[TC-161.15a/MSS][UC-161] TitleDeedActionFooter: Nút "Mua BĐS" không bị ép truncate cứng hoặc whitespace-nowrap trên màn hình nhỏ', () => {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { BOARD_CONFIG } from '../../../domain/board_config.js';
 import { PROPERTY_DEEDS } from '../../../domain/property_data.js';
 import { COLOR_GROUP_HEX } from '../../../domain/theme.js';
@@ -52,6 +52,11 @@ export function BotTradeOfferModal({
   const offeredBasePrice = offeredDeed?.price ?? 1000;
 
   const [remainingMs, setRemainingMs] = useState(() => Math.max(0, expiresAt - Date.now()));
+  const submittedOfferIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    submittedOfferIdRef.current = null;
+  }, [offerId]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -59,6 +64,8 @@ export function BotTradeOfferModal({
       setRemainingMs(left);
       if (left <= 0) {
         clearInterval(timer);
+        if (submittedOfferIdRef.current === offerId) return;
+        submittedOfferIdRef.current = offerId;
         onReject(offerId);
       }
     }, 100);
@@ -275,7 +282,11 @@ export function BotTradeOfferModal({
           type="button"
           data-testid="reject-trade-btn"
           aria-label={isSwap ? 'Từ chối đổi đất' : 'Từ chối bán đất'}
-          onClick={() => onReject(offerId)}
+          onClick={() => {
+            if (submittedOfferIdRef.current === offerId) return;
+            submittedOfferIdRef.current = offerId;
+            onReject(offerId);
+          }}
           className="min-h-[46px] py-2.5 px-4 rounded-xl font-black text-xs text-rose-700 bg-rose-50 hover:bg-rose-100 border-2 border-rose-300 shadow-[0_4px_0_0_#fca5a5] active:translate-y-[3px] transition-all cursor-pointer"
         >
           {isSwap ? '✕ TỪ CHỐI ĐỔI' : '✕ TỪ CHỐI BÁN'}
@@ -285,7 +296,12 @@ export function BotTradeOfferModal({
           data-testid="accept-trade-btn"
           aria-label={isSwap ? 'Đồng ý đổi đất' : 'Đồng ý bán đất'}
           disabled={!canAccept}
-          onClick={() => canAccept && onAccept(offerId)}
+          onClick={() => {
+            if (!canAccept) return;
+            if (submittedOfferIdRef.current === offerId) return;
+            submittedOfferIdRef.current = offerId;
+            onAccept(offerId);
+          }}
           className={`min-h-[46px] py-2.5 px-4 rounded-xl font-black text-xs transition-all ${
             canAccept
               ? 'text-white bg-emerald-600 hover:bg-emerald-700 border-2 border-emerald-800 shadow-[0_4px_0_0_#065f46] active:translate-y-[3px] cursor-pointer'

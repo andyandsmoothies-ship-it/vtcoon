@@ -81,7 +81,7 @@ export function MilestoneBanner({ item }: { readonly item: FloatingTextItem }): 
       onClick={handleDismiss}
       onKeyDown={handleKeyDown}
     >
-      <span className="text-2xl shrink-0 truncate" aria-hidden="true">{icon}</span>
+      <span className="text-2xl shrink-0" aria-hidden="true">{icon}</span>
       <div className="flex flex-col min-w-0 flex-1">
         <div className="flex items-center gap-1.5 flex-wrap sm:flex-nowrap min-w-0">
           {player && (
@@ -101,7 +101,10 @@ export function MilestoneBanner({ item }: { readonly item: FloatingTextItem }): 
           </span>
         </div>
         {descText && (
-          <span className="truncate min-w-0 text-[11px] sm:text-xs text-slate-600 font-semibold leading-tight mt-0.5 pt-0.5 pb-0.5">
+          <span
+            data-testid="milestone-card-desc"
+            className="line-clamp-2 break-words min-w-0 text-[11px] sm:text-xs text-slate-600 font-semibold leading-tight mt-0.5 pt-0.5 pb-0.5"
+          >
             {descText}
           </span>
         )}
@@ -225,7 +228,7 @@ export function FloatingNumbersOverlay(): React.ReactElement | null {
   const storeMyPlayerId = useLobbyStore((state) => state.myPlayerId);
   const myPlayerId = isSSR ? useLobbyStore.getState().myPlayerId : storeMyPlayerId;
 
-  if (floatingTexts.length === 0 || activeModal !== null) {
+  if (floatingTexts.length === 0) {
     return null;
   }
 
@@ -234,8 +237,15 @@ export function FloatingNumbersOverlay(): React.ReactElement | null {
   const latestMilestone = [...floatingTexts].reverse().find((t) => isMilestone(t.actionType));
   const regularTexts = floatingTexts.filter((t) => !isMilestone(t.actionType));
 
+  // Khi đang mở modal: chỉ cho phép hiển thị MilestoneBanner (ở đỉnh màn hình), ẩn toàn bộ badge thường để chống va chạm giao diện
+  if (activeModal !== null && !latestMilestone) {
+    return null;
+  }
+
   const stackTopClass =
-    activeMarketCount >= 3
+    activeModal !== null
+      ? 'top-14 md:bottom-auto md:top-20'
+      : activeMarketCount >= 3
       ? 'bottom-[calc(8rem+env(safe-area-inset-bottom))] md:bottom-auto md:top-44'
       : activeMarketCount === 2
       ? 'bottom-[calc(8rem+env(safe-area-inset-bottom))] md:bottom-auto md:top-36'
@@ -245,7 +255,7 @@ export function FloatingNumbersOverlay(): React.ReactElement | null {
 
   const deduplicated = deduplicateFloatingTexts(regularTexts, myPlayerId);
   const recentTwo = deduplicated.slice(-2);
-  let displayItems = [...recentTwo];
+  let displayItems = activeModal !== null ? [] : [...recentTwo];
   if (
     displayItems.length === 2 &&
     myPlayerId &&

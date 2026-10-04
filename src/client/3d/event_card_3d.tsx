@@ -142,13 +142,6 @@ export function EventCard3D(): React.ReactElement | null {
     });
   }, [eventPayload, resolvedTitle]);
 
-  // Giải phóng bộ nhớ GPU CanvasTexture tránh rò rỉ WebGL
-  useEffect(() => {
-    return () => {
-      backTexture?.dispose();
-      frontTexture?.dispose();
-    };
-  }, [backTexture, frontTexture]);
 
   // Reset animation timer khi modal mở
   useEffect(() => {

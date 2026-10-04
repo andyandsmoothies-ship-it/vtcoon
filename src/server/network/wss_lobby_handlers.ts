@@ -297,7 +297,7 @@ export function executeIntentAction(
   roomCode: string,
   playerId: string,
   intent: PlayerIntent,
-): { success: boolean; reason?: string; rollResult?: RollResult } {
+): { success: boolean; reason?: string; rollResult?: RollResult; idempotent?: boolean } {
   if (intent.type === 'INTENT_ROLL') {
     const rollRes = rooms.handleRollDice(roomCode, playerId);
     return { success: rollRes !== undefined, reason: rollRes !== undefined ? undefined : 'CANNOT_ROLL', rollResult: rollRes };
