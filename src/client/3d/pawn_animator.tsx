@@ -209,9 +209,20 @@ export interface ActivePawnProps extends Pick<SingleHopProps, 'color' | 'offset'
   readonly animation: PawnAnimationState;
   readonly onComplete: (playerId: string) => void;
   readonly isBot?: boolean;
+  readonly showTrajectory?: boolean;
 }
 
-export function ActiveSpringPawn({ player, color, offset, animation, onComplete, emoteId, slotIndex, isBot: isBotProp }: ActivePawnProps): React.ReactElement | null {
+export function ActiveSpringPawn({
+  player,
+  color,
+  offset,
+  animation,
+  onComplete,
+  emoteId,
+  slotIndex,
+  isBot: isBotProp,
+  showTrajectory = false,
+}: ActivePawnProps): React.ReactElement | null {
   const [stepIndex, setStepIndex] = useState(0);
   const waypoints = animation.waypoints;
   const isBot = isBotProp !== undefined ? isBotProp : Boolean(animation.isBot || player.isBot);
@@ -263,6 +274,7 @@ export function ActiveSpringPawn({ player, color, offset, animation, onComplete,
         offset={offset}
         color={color}
         arcHeight={Boolean(animation.isJailFlight) ? JAIL_FLIGHT_ARC : DEFAULT_JUMP_ARC}
+        visible={showTrajectory}
       />
       <SingleHopPawn
         key={stepIndex}
