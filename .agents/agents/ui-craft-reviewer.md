@@ -73,6 +73,10 @@ The reviewer operates on a clear separation between **Objective Usability (80%)*
   disposition: fix
   ```
   `REJECT: MISSING_PHYSICAL_SCREENSHOT - Main agent must capture real in-game screenshot (e.g. via npm run capture:visual) before requesting UI craft review.`
+- **Active State & Affordance Inspection Gate**:
+  * If the ticket introduces or modifies an interactive component (e.g. modal, drawer, popup, floating banner, bottom sheet, or dropdown):
+    1. Screenshots MUST capture the component **active and mounted** (e.g. via `--scenario deed_modal`, `--scenario transit_wheel`, or `--scenario-expr`).
+    2. **Strict VETO on Empty Screen Reviews**: If the screenshot shows only an empty game board or idle background without the active modal/drawer open, Reviewer MUST emit `disposition: fix` with `REJECT: TARGET_COMPONENT_NOT_VISIBLE_IN_SCREENSHOT`.
 
 ---
 

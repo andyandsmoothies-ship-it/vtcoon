@@ -170,18 +170,17 @@ describe('[UC-IMP263] Semi-Cinematic Chase Camera Contract Suite', () => {
     expect(state.speed).toBe(5.8);
   });
 
-  it('[TC-263.16/A4] calculateTargetCameraState tra ve overview khi cinematicChase la false va giu tuong thich cu khi options la undefined', () => {
+  it('[TC-263.16/A4] calculateTargetCameraState duy tri standard chase camera khi cinematicChase la false va giu tuong thich cu khi options la undefined', () => {
     const disabledState = calculateTargetCameraState('pawn_chase', [0.0, 0.0, 0.0], undefined, {
       cinematicChase: false,
     });
-    expect(disabledState.position).toEqual([
-      CAMERA_CONFIG.overview.position[0],
-      CAMERA_CONFIG.overview.position[1],
-      CAMERA_CONFIG.overview.position[2],
-    ]);
-    expect(disabledState.fov).toBe(CAMERA_CONFIG.overview.fov);
+    expect(disabledState.position).toEqual([3.6, 4.2, 3.6]);
+    expect(disabledState.target).toEqual([0.0, 0.2, 0.0]);
+    expect(disabledState.fov).toBe(CAMERA_CONFIG.pawn_chase.fov);
+    expect(disabledState.speed).toBe(CAMERA_CONFIG.pawn_chase.speed);
 
     const legacyState = calculateTargetCameraState('pawn_chase', [0.0, 0.0, 0.0]);
+    expect(legacyState.position).toEqual([3.6, 4.2, 3.6]);
     expect(legacyState.fov).toBe(CAMERA_CONFIG.pawn_chase.fov);
     expect(legacyState.speed).toBe(CAMERA_CONFIG.pawn_chase.speed);
   });

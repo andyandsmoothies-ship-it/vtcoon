@@ -50,6 +50,7 @@ function parseArgs() {
     dualViewport: false,
     scenario: null,
     scenarioExpr: null,
+    assertCameraY: null, // { min, max }
   };
 
   for (let i = 0; i < args.length; i++) {
@@ -66,6 +67,11 @@ function parseArgs() {
       options.scenario = args[++i];
     } else if (arg === '--scenario-expr' && args[i + 1]) {
       options.scenarioExpr = args[++i];
+    } else if (arg === '--assert-camera-y' && args[i + 1]) {
+      const parts = args[++i].split(',').map((n) => parseFloat(n.trim()));
+      if (parts.length === 2 && !Number.isNaN(parts[0]) && !Number.isNaN(parts[1])) {
+        options.assertCameraY = { min: parts[0], max: parts[1] };
+      }
     } else if (arg === '--crop' && args[i + 1]) {
       const parts = args[++i].split(',').map((n) => parseInt(n.trim(), 10));
       if (parts.length === 4) {
@@ -309,30 +315,153 @@ async function main() {
       }
     }
 
-    // Scenario Injection if specified
-    if (opts.scenario) {
-      console.log(`🎬 Injecting UI scenario: "${opts.scenario}"...`);
-      await send('Runtime.evaluate', {
+    // Helper to inject scenario
+    async function injectScenario(scenarioName, scenarioExpr) {
+      if (scenarioName) {
+        console.log(`🎬 Injecting UI scenario: "${scenarioName}"...`);
+        await send('Runtime.evaluate', {
+          expression: `
+            (function() {
+              if ('${scenarioName}' === 'deed_modal') {
+                const buyBtn = document.querySelector('[data-testid="action-dock-buy"]');
+                if (buyBtn) buyBtn.click();
+              } else if ('${scenarioName}' === 'transit_wheel') {
+                const wheelBtn = document.querySelector('[data-testid="action-dock-transit-wheel"]');
+                if (wheelBtn) wheelBtn.click();
+              } else if ('${scenarioName}' === 'camera_chase_cinematic') {
+                if (window.__gameStore) {
+                  window.__gameStore.setState({
+                    currentTurnPlayerId: 'p1',
+                    playerPositions: { p1: 0, p2: 0, p3: 0, p4: 0 },
+                    activePawnAnimation: {
+                      isAnimating: true,
+                      playerId: 'p1',
+                      fromCell: 0,
+                      targetCell: 15,
+                      currentIndex: 0,
+                      waypoints: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+                    },
+                    isRolling: false,
+                    hasRolledThisTurn: false,
+                    activeModal: null,
+                    cameraFocusCell: null,
+                    hasUserCustomCamera: false,
+                  });
+                }
+              } else if ('${scenarioName}' === 'camera_chase_normal') {
+                if (window.__gameStore) {
+                  window.__gameStore.setState({
+                    currentTurnPlayerId: 'p1',
+                    playerPositions: { p1: 0, p2: 0, p3: 0, p4: 0 },
+                    activePawnAnimation: {
+                      isAnimating: true,
+                      playerId: 'p1',
+                      fromCell: 0,
+                      targetCell: 8,
+                      currentIndex: 0,
+                      waypoints: [1, 2, 3, 4, 5, 6, 7, 8],
+                    },
+                    isRolling: false,
+                    hasRolledThisTurn: false,
+                    activeModal: null,
+                    cameraFocusCell: null,
+                    hasUserCustomCamera: false,
+                  });
+                }
+              } else if ('${scenarioName}' === 'dice_rolling') {
+                if (window.__gameStore) {
+                  window.__gameStore.setState({
+                    currentTurnPlayerId: 'p1',
+                    isRolling: true,
+                    hasRolledThisTurn: false,
+                    activePawnAnimation: null,
+                  });
+                }
+              }
+            })();
+          `,
+        });
+        await sleep(1100);
+      } else if (scenarioExpr) {
+        console.log(`🎬 Evaluating scenario expression...`);
+        const res = await send('Runtime.evaluate', { expression: scenarioExpr });
+        if (res && res.exceptionDetails) {
+          console.error('❌ Scenario expression failed:', JSON.stringify(res.exceptionDetails));
+        }
+        await sleep(700);
+      }
+    }
+
+    // Helper to extract physical Three.js camera telemetry
+    async function extractCameraTelemetry(viewportName) {
+      const evalRes = await send('Runtime.evaluate', {
         expression: `
           (function() {
-            if ('${opts.scenario}' === 'deed_modal') {
-              const buyBtn = document.querySelector('[data-testid="action-dock-buy"]');
-              if (buyBtn) buyBtn.click();
-            } else if ('${opts.scenario}' === 'transit_wheel') {
-              const wheelBtn = document.querySelector('[data-testid="action-dock-transit-wheel"]');
-              if (wheelBtn) wheelBtn.click();
+            const cam = window.__threeCamera;
+            const controls = window.__orbitControls;
+            const gameStore = window.__gameStore ? window.__gameStore.getState() : null;
+            if (!cam) return null;
+            const pos = [
+              Number(cam.position.x.toFixed(3)),
+              Number(cam.position.y.toFixed(3)),
+              Number(cam.position.z.toFixed(3))
+            ];
+            const target = controls ? [
+              Number(controls.target.x.toFixed(3)),
+              Number(controls.target.y.toFixed(3)),
+              Number(controls.target.z.toFixed(3))
+            ] : null;
+            const fov = cam.fov ? Number(cam.fov.toFixed(1)) : null;
+            const elevationY = pos[1];
+            let pitchDeg = null;
+            if (target) {
+              const dx = pos[0] - target[0];
+              const dy = pos[1] - target[1];
+              const dz = pos[2] - target[2];
+              const horizontalDist = Math.hypot(dx, dz);
+              pitchDeg = Number((Math.atan2(dy, horizontalDist) * (180 / Math.PI)).toFixed(1));
             }
-          })();
+            return JSON.stringify({
+              ticket: '${opts.ticket}',
+              viewport: '${viewportName}',
+              cameraType: cam.isPerspectiveCamera ? 'PerspectiveCamera' : (cam.isOrthographicCamera ? 'OrthographicCamera' : 'Unknown'),
+              position: pos,
+              target,
+              elevationY,
+              pitchDeg,
+              fov,
+              gameState: gameStore ? {
+                isRolling: Boolean(gameStore.isRolling),
+                hasRolledThisTurn: Boolean(gameStore.hasRolledThisTurn),
+                currentTurnPlayerId: gameStore.currentTurnPlayerId,
+                isPawnAnimating: Boolean(gameStore.activePawnAnimation?.isAnimating),
+                activeAnimationTarget: gameStore.activePawnAnimation?.targetCell ?? null,
+                hasUserCustomCamera: Boolean(gameStore.hasUserCustomCamera),
+              } : null
+            });
+          })()
         `,
+        returnByValue: true,
       });
-      await sleep(1000);
-    } else if (opts.scenarioExpr) {
-      console.log(`🎬 Evaluating scenario expression...`);
-      const res = await send('Runtime.evaluate', { expression: opts.scenarioExpr });
-      if (res && res.exceptionDetails) {
-        console.error('❌ Scenario expression failed:', JSON.stringify(res.exceptionDetails));
+
+      if (evalRes && evalRes.result && evalRes.result.value) {
+        const telemetryJson = evalRes.result.value;
+        const telemetryData = JSON.parse(telemetryJson);
+        const telemetryFile = path.join(evidenceDir, `camera_telemetry_${opts.ticket.toLowerCase()}_${viewportName}.json`);
+        fs.writeFileSync(telemetryFile, JSON.stringify(telemetryData, null, 2), 'utf8');
+        console.log(`   - Physical Three.js Camera Telemetry: ${telemetryFile}`);
+        console.log(`     Elevation Y: ${telemetryData.elevationY}m | Pitch: ${telemetryData.pitchDeg}° | FOV: ${telemetryData.fov}°`);
+
+        if (opts.assertCameraY) {
+          const { min, max } = opts.assertCameraY;
+          if (telemetryData.elevationY < min || telemetryData.elevationY > max) {
+            throw new Error(`❌ Camera Y assertion failed for ${viewportName}: got ${telemetryData.elevationY}, expected [${min}, ${max}]`);
+          }
+          console.log(`     ✅ Camera Y assertion passed [${min} <= ${telemetryData.elevationY} <= ${max}]`);
+        }
+        return telemetryData;
       }
-      await sleep(1000);
+      return null;
     }
 
     if (opts.dualViewport) {
@@ -347,7 +476,7 @@ async function main() {
       await send('Network.setUserAgentOverride', {
         userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
       });
-      await sleep(1000);
+      await injectScenario(opts.scenario, opts.scenarioExpr);
 
       const desktopFile = `${opts.ticket.toLowerCase()}_desktop.jpg`;
       const desktopPath = path.join(tmpDir, desktopFile);
@@ -357,6 +486,7 @@ async function main() {
       console.log(`   - File: ${desktopPath}`);
       console.log(`   - Dimensions: 1280x800`);
       await extractBoundingBoxes('desktop');
+      await extractCameraTelemetry('desktop');
 
       // 2. Mobile Capture (360x740)
       console.log(`📐 Setting Mobile Viewport (360x740)...`);
@@ -369,12 +499,7 @@ async function main() {
       await send('Network.setUserAgentOverride', {
         userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1',
       });
-      if (opts.scenarioExpr) {
-        await send('Runtime.evaluate', { expression: opts.scenarioExpr });
-        await sleep(500);
-      } else {
-        await sleep(1000);
-      }
+      await injectScenario(opts.scenario, opts.scenarioExpr);
 
       const mobileFile = `${opts.ticket.toLowerCase()}_mobile_360.jpg`;
       const mobilePath = path.join(tmpDir, mobileFile);
@@ -384,9 +509,12 @@ async function main() {
       console.log(`   - File: ${mobilePath}`);
       console.log(`   - Dimensions: 360x740`);
       await extractBoundingBoxes('mobile');
+      await extractCameraTelemetry('mobile');
     } else {
       const filename = `${opts.ticket.toLowerCase()}_${opts.name}.jpg`;
       const outputPath = path.join(tmpDir, filename);
+
+      await injectScenario(opts.scenario, opts.scenarioExpr);
 
       const captureParams = { format: 'jpeg', quality: 90 };
       if (opts.crop) {
@@ -400,6 +528,7 @@ async function main() {
       console.log(`   - File: ${outputPath}`);
       console.log(`   - Dimensions: ${opts.crop ? `${opts.crop.width}x${opts.crop.height} (Cropped)` : '1280x800 (Full)'}`);
       console.log(`   - Ticket: ${opts.ticket}`);
+      await extractCameraTelemetry(opts.name);
     }
 
     ws.close();

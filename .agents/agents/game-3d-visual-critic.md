@@ -69,6 +69,18 @@ The critic MUST open and inspect the screenshot(s) using the `view_file` tool.
 - **Evidence Requirement**:
   * For full-game reviews: Verify the 5 named camera perspectives (`top_down`, `lobby_vip`, `deed_modal`, `dice_tray`, `hud_dock`).
   * For ticket/slice reviews: Verify at least 1 feature close-up screenshot and 1 scene context screenshot showing the modified 3D element in-game.
+- **Action Feature & Three.js Telemetry Invariant**:
+  * If the ticket modifies dynamic behavior, motion choreography, dice roll animations, pawn hops, or camera choreography (e.g., `pawn_chase`, `cinematic`, `dice_roll`):
+    1. Screenshots MUST capture the feature **in action** via `--scenario` (e.g. dice actively in the tray, pawn hopping along tile path, camera at street-level chase angle).
+    2. The reviewer MUST check and verify `.agents/evidence/camera_telemetry_<ticket>_<viewport>.json` to inspect physical 3D camera metrics (`elevationY`, `pitchDeg`, `fov`).
+    3. **Strict VETO on Idle Overview for Dynamic Features**: If the screenshot shows only a static, idle ambient board overview (camera at default Y > 20, pawn idle at start, dice unrolled) for a ticket that claims to implement dynamic motion or camera choreography, **STOP IMMEDIATELY** and emit:
+       ```markdown
+       disposition: recapture
+
+       # 🛑 VETO: IDLE_SCREENSHOT_CANNOT_VERIFY_ACTION_FEATURE
+       A static idle overview screenshot cannot verify dynamic motion, camera tracking angles, or dice roll states.
+       Main agent MUST run `npm run capture:visual -- --ticket <ID> --dual-viewport --scenario <scenario_name>` and provide in-action screenshots along with `.agents/evidence/camera_telemetry_<ticket>_<viewport>.json` before requesting visual critique.
+       ```
 - **Strict VETO on Missing Screenshots**: If no valid screenshot path is provided in the prompt, or the screenshot file does not exist on disk, **STOP IMMEDIATELY** and emit:
   ```markdown
   disposition: recapture

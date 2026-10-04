@@ -404,7 +404,7 @@ describe('[TC-MVH-01/MSS..TC-MVH-16/MSS][UC-IMP237] Mobile Viewport Harmonics & 
       expect(html).toContain('data-testid="cluster-railroad"');
     });
 
-    it('[TC-MVH-16/MSS][UC-IMP237] PlayerHudList tren mobile ket xuat lop phu player-hud-backdrop co su kien bam de dong danh sach nguoi choi voi useGameStore.setState', () => {
+    it('[TC-MVH-16/MSS][UC-IMP237] PlayerHudList khong ket xuat backdrop toan man hinh de tranh nuot click nut do xuc xac', () => {
       const testPlayer: PlayerHudInfo = {
         id: 'p1',
         name: 'Đại Gia Sài Thành',
@@ -425,11 +425,8 @@ describe('[TC-MVH-01/MSS..TC-MVH-16/MSS][UC-IMP237] Mobile Viewport Harmonics & 
       const vdom = captureRenderedTree(PlayerHudList);
       const backdrop = findElementByProp(vdom, (p) => p['data-testid'] === 'player-hud-backdrop');
 
-      expect(html).toContain('data-testid="player-hud-backdrop"');
-      expect(html).toContain('sm:hidden');
-
-      backdrop?.props?.onClick?.();
-      expect(useGameStore.getState().isPlayerHudVisible).toBe(false);
+      expect(html).not.toContain('data-testid="player-hud-backdrop"');
+      expect(backdrop).toBeNull();
     });
   });
 });

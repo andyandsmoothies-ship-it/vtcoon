@@ -8,17 +8,20 @@
 
 ---
 
-## 🧭 CHỈ MỤC 7 TRỤ CỘT BẤT BIẾN (INVARIANT PILLARS)
+## 🧭 CHỈ MỤC 8 TRỤ CỘT BẤT BIẾN (MODULAR INVARIANT REPOSITORIES)
 
-| Trụ Cột | Trọng Tâm Nghiệp Vụ | Phạm Vi Mã Nguồn |
-| :--- | :--- | :--- |
-| **[Pillar I: FSM & Vòng Đời]** | Phase Transitions, Reset Cờ Hành Động, Dọn Dẹp Turn N+1 | `src/domain/fsm/`, `turn_loop.ts` |
-| **[Pillar II: Kinh Tế & Kho Bạc]** | Bảo Toàn Dòng Tiền, Định Giá SSOT, Vai Trò Thực Thể Âm Vốn | `src/domain/property_*`, `treasury_*` |
-| **[Pillar III: Đàm Phán & Bot]** | Cooldown Cấp Phòng, Định Giá Thặng Dư Đa Trục, Cấm Vận Dẫn Đầu | `src/domain/bot/`, `room_property_*` |
-| **[Pillar IV: WebSocket & Delta]** | Quy Trình 5 Trạm, Array Tombstone `[]`, Khử Null vs Undefined | `src/server/`, `apply_delta.ts` |
-| **[Pillar V: Công Thái Học UI 2D]** | Phân Tầng 3 Hàng 360px, Sàn Chạm 44px, Zero Anti-Patterns, SSOT | `src/client/ui/`, `modals/` |
-| **[Pillar VI: Kiểm Thử Detroit]** | Adversarial Inversion (RED), Atomic Contracts, Tránh Mock Echo | `tests/**` |
-| **[Pillar VII: Mô-đun Sâu & DDD]** | Full Collection Protocol Parity, Ban Scalar Pseudo-Proxies | `src/server/`, `src/domain/` |
+> **Mô-đun Hóa Phục Vụ Giới Hạn Công Cụ**: Để tránh vượt trần 46 KB của `view_file`, 8 trụ cột đã được tách thành các file độc lập trong thư mục `docs/domain/gotchas/`. Các Agent hãy ưu tiên đọc trực tiếp các file mô-đun tương ứng:
+
+| Trụ Cột | Trọng Tâm Nghiệp Vụ | Phạm Vi Mã Nguồn | File Module Chi Tiết |
+| :--- | :--- | :--- | :--- |
+| **Pillar I: FSM & Vòng Đời** | Phase Transitions, Reset Cờ Hành Động, Dọn Dẹp Turn N+1 | `src/domain/fsm/`, `turn_loop.ts` | [`fsm_lifecycle.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/gotchas/fsm_lifecycle.md) |
+| **Pillar II: Kinh Tế & Kho Bạc** | Bảo Toàn Dòng Tiền, Định Giá SSOT, Vai Trò Thực Thể Âm Vốn | `src/domain/property_*`, `treasury_*` | [`economy_treasury.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/gotchas/economy_treasury.md) |
+| **Pillar III: Đàm Phán & Bot** | Cooldown Cấp Phòng, Định Giá Thặng Dư Đa Trục, Cấm Vận Dẫn Đầu | `src/domain/bot/`, `room_property_*` | [`bot_negotiation.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/gotchas/bot_negotiation.md) |
+| **Pillar IV: WebSocket & Delta** | Quy Trình 5 Trạm, Array Tombstone `[]`, Khử Null vs Undefined | `src/server/`, `apply_delta.ts` | [`network_delta.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/gotchas/network_delta.md) |
+| **Pillar V: Công Thái Học UI 2D** | Phân Tầng 3 Hàng 360px, Sàn Chạm 44px, Zero Anti-Patterns, SSOT | `src/client/ui/`, `modals/` | [`ui_ergonomics.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/gotchas/ui_ergonomics.md) |
+| **Pillar VI: Không Gian 3D & Cinematics** | 5-Layer Ocean, Splines, DoF, In-Action Capture & Telemetry | `src/client/3d/`, `game_canvas.tsx` | [`3d_cinematics.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/gotchas/3d_cinematics.md) |
+| **Pillar VII: Kiểm Thử Detroit** | Adversarial Inversion (RED), Atomic Contracts, Tránh Mock Echo | `tests/**`, `tests/probes/` | [`testing_traps.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/gotchas/testing_traps.md) |
+| **Pillar VIII: Mô-đun Sâu & DDD** | Full Collection Protocol Parity, Ban Scalar Pseudo-Proxies | `src/server/`, `src/domain/` | [`deep_modules.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/gotchas/deep_modules.md) |
 
 ---
 
@@ -318,7 +321,11 @@
       1. *Assert Văn Bản Thực Tế (Content Assertion Parity)*: Test cho component chứa hàm xử lý dữ liệu hoặc chuỗi bắt buộc phải có ít nhất 1 assertion kiểm tra giá trị text node đã qua xử lý (ví dụ: expect(html).toContain('Giá thuê khu Đông')), không chỉ assert container wrapper rỗng.
       2. *Bao Phủ Utility Helpers Độc Lập*: Các utility functions được export từ UI file (cleanEventDescription, formatters) phải được kiểm thử đơn vị độc lập với các case biên để triệt tiêu toàn bộ đột biến toán tử (+, -, slice). `[TEST/MUTATION]`
 
-
-
-
+42. **Physical Action Evidence & Three.js Telemetry Invariant [VISUAL/CINEMATICS]**:
+    - **Bẫy Nguy Hiểm & Ảo Tưởng Ban Đầu (Deceptive Trap)**: Khi thực hiện kiểm thử thị giác (Visual Review Phase 3.0 & Trạm 3) cho các tính năng chuyển động, hoạt ảnh 3D hoặc cơ chế góc quay máy ảnh (như xúc xắc lăn, quân cờ nhảy từng ô, camera street-level chase Y=2.8), subagent chỉ chụp một bức ảnh sa bàn tĩnh ở trạng thái nghỉ (Overview Y=41) và các subagent phê duyệt (ui-craft-reviewer, game-3d-visual-critic) đều đóng dấu "ship" mà không hề thấy được hành động đang diễn ra. Hậu quả là các lỗi nghiêm trọng (xúc xắc bị đóng băng ngay khi bấm quay, quân cờ không nhảy, góc máy quay kẹt ở overview, màn hình backdrop vô hình nuốt mất click đầu tiên trên mobile) hoàn toàn lọt lưới qua toàn bộ hệ thống kiểm toán tự động.
+    - **Phát Hiện Thực Tế (Physical Finding)**: Tại IMP-263, `apply_delta.ts` gọi sớm `setIsRolling(false)` khiến xúc xắc bị dừng ngay lập tức; `pawn_hop_trajectory.tsx` lấy sai tọa độ Z khiến vòm nhảy đâm xuyên tâm bàn cờ; `camera_state_machine.ts` trả về `overview` thay vì `pawn_chase`; và `player_hud_list.tsx` có backdrop toàn màn hình vô hình nuốt mất phát chạm đầu tiên. Cả 4 lỗi nghiêm trọng này đều tồn tại trên thực tế nhưng báo cáo kiểm toán thị giác ban đầu vẫn cấp chứng chỉ "ship" do chỉ chụp màn hình tĩnh không hành động.
+    - **Bất Biến Xác Minh (Verified Invariants)**:
+      1. *Chụp Ảnh Khi Đang Hành Động (In-Action Capture Prerequisite)*: Mọi tính năng can thiệp vào chuyển động, máy ảnh, xúc xắc, quân cờ hoặc modal tương tác BẮT BUỘC phải được ghi hình trong lúc đang diễn ra hành động (in-action) thông qua các kịch bản `--scenario` của `scripts/capture_visual_evidence.mjs` (ví dụ: `--scenario camera_chase_cinematic`, `--scenario camera_chase_normal`, `--scenario dice_rolling`). CẤM dùng ảnh chụp màn hình tĩnh ở chế độ nghỉ (idle overview) làm bằng chứng cho tính năng động học.
+      2. *Đo Lường Telemetry Three.js Vật Lý*: Bắt buộc trích xuất tọa độ máy ảnh thực tế từ `window.__threeCamera` (`position`, `target`, `elevationY`, `pitchDeg`, `fov`) vào `.agents/evidence/camera_telemetry_[ticket]_[viewport].json`. Script hỗ trợ cờ xác thực tự động `--assert-camera-y <min>,<max>`.
+      3. *Quyền Phủ Quyết Của Visual Critic*: Nếu ticket can thiệp vào máy ảnh/hoạt ảnh mà chỉ cung cấp ảnh chụp tĩnh ở độ cao Y > 20, `game-3d-visual-critic` BẮT BUỘC thực thi quyền phủ quyết với phán quyết: `disposition: recapture` kèm `# 🛑 VETO: IDLE_SCREENSHOT_CANNOT_VERIFY_ACTION_FEATURE`. `[VISUAL/CINEMATICS]`
 

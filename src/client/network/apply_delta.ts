@@ -98,9 +98,6 @@ function syncTurnAndTimer(delta: DeltaPayload, state: GameState): void {
     ) {
       state.setHasRolledThisTurn(true);
     }
-    if (delta.turnPhase === TurnPhase.PropertyManagement) {
-      state.setIsRolling(false);
-    }
   }
 }
 

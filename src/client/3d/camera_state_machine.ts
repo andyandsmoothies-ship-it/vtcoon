@@ -278,11 +278,8 @@ export function calculateTargetCameraState(
           isJailFlight: options.isJailFlight,
         });
       }
-      // [ADV-05] 80% luot thong thuong duy tri overview nhanh 0.3s khi cinematicChase la false
-      if (options && options.cinematicChase === false) {
-        return calculateTargetCameraState('overview');
-      }
-      // Tuong thich nguoc khi options la undefined (cac bai kiem thu cu)
+      // Luot di thong thuong (cinematicChase: false) hoac legacy fallback (options undefined):
+      // Camera luon bam theo quan co o do cao tieu chuan, khong bi kẹt o overview che khuat tam nhin
       const p = pawnPosition ?? [0, 0, 0];
       const safePx = Number.isFinite(p[0]) ? p[0] : 0;
       const safePz = Number.isFinite(p[2]) ? p[2] : 0;

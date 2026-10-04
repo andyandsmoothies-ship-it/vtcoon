@@ -36,7 +36,7 @@ export function PawnHopTrajectory({
     const ox = offset ? offset[0] : 0;
     const oy = offset ? offset[1] : 0;
     const oz = offset ? offset[2] : 0;
-    return [p[0] + ox, BASE_PAWN_Y + oy, p[1] + oz] as const;
+    return [p[0] + ox, BASE_PAWN_Y + oy, p[2] + oz] as const;
   }, [fromCell, offset]);
 
   const toPos = useMemo(() => {
@@ -44,7 +44,7 @@ export function PawnHopTrajectory({
     const ox = offset ? offset[0] : 0;
     const oy = offset ? offset[1] : 0;
     const oz = offset ? offset[2] : 0;
-    return [p[0] + ox, BASE_PAWN_Y + oy, p[1] + oz] as const;
+    return [p[0] + ox, BASE_PAWN_Y + oy, p[2] + oz] as const;
   }, [toCell, offset]);
 
   const trajectoryGeometry = useMemo(() => {

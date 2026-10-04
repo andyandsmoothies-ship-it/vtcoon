@@ -139,8 +139,8 @@ describe('IMP-251 Player HUD Viewport Harmonics', () => {
   });
 
   describe('Facet 5: Dismiss and Unmount', () => {
-    it('[UC-IMP251/MSS] TC-IMP251.13 backdrop remains for tap-outside dismiss', () => {
-      expect(renderHud()).toContain('data-testid="player-hud-backdrop"');
+    it('[UC-IMP251/MSS] TC-IMP251.13 backdrop is removed to prevent click swallowing on action dock', () => {
+      expect(renderHud()).not.toContain('data-testid="player-hud-backdrop"');
     });
 
     it('[UC-IMP251/A2] TC-IMP251.14 renders nothing when HUD is hidden', () => {

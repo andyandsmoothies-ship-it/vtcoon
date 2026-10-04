@@ -40,6 +40,7 @@ Never claim UI work is correct without visual evidence. Browser automation makes
 | Visual-only verification (no DOM check) | Always inspect DOM structure — visual can hide broken markup |
 | Submitting screenshot without looking | Agent must `view_file` the screenshot and check target element before user delivery |
 | Saying "looks correct" without proof | Take screenshot, inspect target spot via `view_file`. Verify pixels before claiming done |
+| Capturing static idle overview for dynamic action features | Trigger target scenario (`--scenario`) to capture UI/3D in action, and extract telemetry JSON |
 
 **Evidence classification in artifacts:** Use GitHub-style alerts:
 - `> [!TIP]` for passing checks
