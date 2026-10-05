@@ -15,6 +15,11 @@ import {
   isFinancialDestination,
   getCardCtaButtonText,
 } from './event_card_visuals.js';
+import {
+  resolveMarketTitle,
+  resolveMarketShortTag,
+  resolveMarketEffectSummary,
+} from '../market_event_ticker.js';
 
 export interface EventCardModalProps {
   readonly cardType: 'chance' | 'market';
@@ -53,51 +58,110 @@ export function EventCardModal({
     : 'bg-sky-100 text-sky-900 border-sky-400';
   const categoryLabel = isMarket ? 'Sự Kiện Thị Trường' : 'Cơ Hội Đầu Tư';
 
+  const storeModifiers = useGameStore((s) => s.activeModifiers);
+  const activeModifiers = (storeModifiers ?? []).filter((m) => Boolean(m && m.remainingRounds > 0));
+  const isMultiEvent = isMarket && activeModifiers.length > 1;
+  const initialIdx = Math.max(0, activeModifiers.findIndex((m) => String(m.type) === cardId));
+
+  const [activeIdx, setActiveIdx] = React.useState<number>(initialIdx);
+
+  React.useEffect(() => {
+    setActiveIdx(initialIdx);
+  }, [initialIdx]);
+
+  React.useEffect(() => {
+    if (!isMultiEvent || activeModifiers.length <= 1) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        setActiveIdx((prev) => (prev + 1) % activeModifiers.length);
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        setActiveIdx((prev) => (prev - 1 + activeModifiers.length) % activeModifiers.length);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isMultiEvent, activeModifiers.length]);
+
+  const currentIdx = isMultiEvent
+    ? Math.min(Math.max(0, activeIdx), activeModifiers.length - 1)
+    : 0;
+
+  const currentModifier = isMultiEvent ? activeModifiers[currentIdx] : undefined;
+  const currentCardId = currentModifier ? String(currentModifier.type) : cardId;
+
   const detail = isMarket
     ? MARKET_CARD_DETAILS[cardId as MarketCardId]
     : CHANCE_CARD_DETAILS[cardId as ChanceCardId];
 
-  const resolvedTitle =
-    title ||
-    (isMarket
-      ? vi.marketCards[cardId as MarketCardId]
-      : vi.chanceCards[cardId as ChanceCardId]) ||
-    cardId;
+  const currentDetail = isMultiEvent
+    ? MARKET_CARD_DETAILS[currentCardId as MarketCardId]
+    : detail;
 
-  const rawDenseScope = targetScope || detail?.targetScope || (isMarket ? 'Toàn bộ thị trường' : 'Người chơi rút thẻ');
+  const resolvedTitle = isMultiEvent
+    ? resolveMarketTitle(currentCardId)
+    : (title ||
+        (isMarket
+          ? (resolveMarketTitle(cardId) || vi.marketCards[cardId as MarketCardId])
+          : vi.chanceCards[cardId as ChanceCardId]) ||
+        cardId);
+
+  const rawDenseScope = isMultiEvent
+    ? (currentDetail?.targetScope ?? 'Toàn bộ thị trường')
+    : (targetScope || detail?.targetScope || (isMarket ? 'Toàn bộ thị trường' : 'Người chơi rút thẻ'));
+
   const isDefaultMacroMarket = isMarket && (cardId === MarketCardId.MC_RATE_HIKE || cardId === 'MC_RATE_HIKE');
-  const rawTargetScope = targetScope || (isDefaultMacroMarket ? 'Toàn bộ thị trường' : detail?.targetScope) || (isMarket ? 'Toàn bộ thị trường' : 'Người chơi rút thẻ');
+  const rawTargetScope = isMultiEvent
+    ? (currentDetail?.targetScope ?? 'Toàn bộ thị trường')
+    : (targetScope || (isDefaultMacroMarket ? 'Toàn bộ thị trường' : detail?.targetScope) || (isMarket ? 'Toàn bộ thị trường' : 'Người chơi rút thẻ'));
+
   const resolvedDenseScope = sanitizeTargetScope(rawDenseScope);
   const resolvedTargetScope = sanitizeTargetScope(rawTargetScope);
 
-  const rawDescription = effectDetail || description || detail?.effectDetail || detail?.description || '';
-  const singleTruthDescription = cleanEventDescription(rawDescription);
+  const singleTruthDescription = cleanEventDescription(
+    isMultiEvent
+      ? (currentDetail?.effectDetail ?? currentDetail?.description ?? resolveMarketEffectSummary(currentCardId))
+      : (effectDetail || description || detail?.effectDetail || detail?.description || '')
+  );
 
-  const resolvedDuration = duration || detail?.duration || (isMarket ? '1 vòng chơi' : 'Tức thì');
-  const rawDestination = destination || detail?.destination || (isMarket ? 'Toàn thị trường' : 'Kho Bạc Nhà Nước');
+  const resolvedDuration = currentModifier
+    ? `${currentModifier.remainingRounds} vòng chơi`
+    : (duration || detail?.duration || (isMarket ? '1 vòng chơi' : 'Tức thì'));
+
+  const rawDestination = isMultiEvent
+    ? (currentDetail?.destination || 'Toàn thị trường')
+    : (destination || detail?.destination || (isMarket ? 'Toàn thị trường' : 'Kho Bạc Nhà Nước'));
   const resolvedDestination = sanitizeDestination(rawDestination);
 
   const shouldShowDestination = Boolean(
-    isFinancialDestination(rawDestination, effectDelta) &&
+    isFinancialDestination(rawDestination, isMultiEvent ? undefined : effectDelta) &&
     resolvedDestination !== 'Toàn thị trường'
   );
 
-  let storeActiveModifier: import('../../store/game_store_types.js').ClientMarketModifier | undefined;
-  try {
-    storeActiveModifier = useGameStore((s) =>
-      s.activeModifiers?.find((m) => String(m.type) === cardId && m.remainingRounds > 0)
-    );
-  } catch {
-    storeActiveModifier = useGameStore.getState().activeModifiers?.find(
-      (m) => String(m.type) === cardId && m.remainingRounds > 0
-    );
-  }
-  const activeModifier = propsActiveModifier ?? storeActiveModifier;
+  const storeActiveModifier = !isMultiEvent
+    ? activeModifiers.find((m) => String(m.type) === cardId)
+    : undefined;
+  const activeModifier = isMultiEvent ? currentModifier : (propsActiveModifier ?? storeActiveModifier);
 
-  const iconEmoji = getCardThemedEmoji(cardId, cardType);
-  const heroStat = getCardHeroStat(cardId, effectDelta);
+  const iconEmoji = isMultiEvent
+    ? getCardThemedEmoji(currentCardId, 'market')
+    : getCardThemedEmoji(cardId, cardType);
+
+  const heroStat = isMultiEvent
+    ? getCardHeroStat(currentCardId)
+    : getCardHeroStat(cardId, effectDelta);
+
   const heroStyles = getHeroStatStyles(heroStat.variant);
-  const resolvedCta = ctaButtonText ?? getCardCtaButtonText(cardId, effectDelta);
+
+  const isCtaNext = isMultiEvent && currentIdx < activeModifiers.length - 1;
+  const resolvedCta = isCtaNext
+    ? `SỰ KIỆN KẾ TIẾP (${currentIdx + 2}/${activeModifiers.length}) →`
+    : (ctaButtonText ?? (isMultiEvent ? 'ĐÃ HIỂU TẤT CẢ' : getCardCtaButtonText(cardId, effectDelta)));
+
+  const handleCtaClick = isCtaNext
+    ? () => setActiveIdx((prev) => prev + 1)
+    : (onConfirm ?? onClose);
 
   return (
     <div
@@ -155,6 +219,61 @@ export function EventCardModal({
         <span className={`px-3 py-1 rounded-full text-[10px] sm:text-[11px] uppercase font-black tracking-wider border shadow-xs mb-3 ${badgeColor}`}>
           {categoryLabel}
         </span>
+
+        {/* Thanh Điều Hướng Đơn Hàng (Single-Row Carousel Nav) khi có nhiều sự kiện */}
+        {isMultiEvent && (
+          <div
+            data-testid="event-card-carousel-nav"
+            className="w-full flex items-center justify-between gap-1 mb-3 px-1.5 py-1 bg-amber-100/70 border border-amber-300/80 rounded-xl shrink-0"
+          >
+            <button
+              type="button"
+              data-testid="carousel-prev-btn"
+              onClick={() => setActiveIdx((prev) => (prev - 1 + activeModifiers.length) % activeModifiers.length)}
+              aria-label="Sự kiện trước"
+              className="relative min-w-[32px] h-[32px] flex items-center justify-center rounded-lg bg-white hover:bg-amber-50 border border-slate-300 font-black text-slate-800 text-sm shadow-xs cursor-pointer active:scale-95 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 after:absolute after:-inset-1.5 after:content-['']"
+            >
+              ‹
+            </button>
+            <div
+              role="tablist"
+              aria-label="Danh sách sự kiện thị trường"
+              className="flex items-center justify-center gap-1 overflow-x-auto py-0.5 max-w-[220px] [mask-image:linear-gradient(to_right,transparent,black_6px,black_calc(100%-6px),transparent)]"
+            >
+              {activeModifiers.map((mod, idx) => {
+                const modType = String(mod.type);
+                const tag = resolveMarketShortTag(modType);
+                const isCurrent = idx === currentIdx;
+                return (
+                  <button
+                    key={`${modType}_${idx}`}
+                    type="button"
+                    role="tab"
+                    aria-selected={isCurrent}
+                    data-testid={`carousel-tab-pill-${idx}`}
+                    onClick={() => setActiveIdx(idx)}
+                    className={`px-2 py-1 rounded-md text-[11px] font-black border transition-all cursor-pointer whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
+                      isCurrent
+                        ? 'bg-amber-600 text-white border-amber-700 shadow-xs'
+                        : 'bg-white/80 text-slate-700 border-slate-300 hover:bg-white'
+                    }`}
+                  >
+                    {tag}
+                  </button>
+                );
+              })}
+            </div>
+            <button
+              type="button"
+              data-testid="carousel-next-btn"
+              onClick={() => setActiveIdx((prev) => (prev + 1) % activeModifiers.length)}
+              aria-label="Sự kiện tiếp theo"
+              className="relative min-w-[32px] h-[32px] flex items-center justify-center rounded-lg bg-white hover:bg-amber-50 border border-slate-300 font-black text-slate-800 text-sm shadow-xs cursor-pointer active:scale-95 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 after:absolute after:-inset-1.5 after:content-['']"
+            >
+              ›
+            </button>
+          </div>
+        )}
 
         {/* Hero Icon */}
         <div className="w-16 h-16 rounded-2xl bg-[#F7F2E7] border-2 border-slate-900 flex items-center justify-center text-3xl mb-3 shadow-[0_3px_0_0_#0f172a]">
@@ -268,10 +387,20 @@ export function EventCardModal({
       <button
         type="button"
         data-testid="event-card-confirm-btn"
-        onClick={onConfirm ?? onClose}
+        onClick={handleCtaClick}
         className="relative z-10 w-full min-h-[46px] px-4 py-2.5 rounded-2xl font-black text-white text-xs sm:text-sm uppercase tracking-wider transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer bg-emerald-600 hover:bg-emerald-500 border-2 border-emerald-700 shadow-[0_4px_0_0_#065f46] active:shadow-[0_1px_0_0_#065f46] active:translate-y-[3px] shrink-0 mt-2"
         dangerouslySetInnerHTML={{ __html: resolvedCta }}
       />
+      {isCtaNext && (
+        <button
+          type="button"
+          data-testid="event-skip-all-btn"
+          onClick={onConfirm ?? onClose}
+          className="relative z-10 text-[11px] font-bold text-slate-500 hover:text-slate-800 underline decoration-slate-300 hover:decoration-slate-600 cursor-pointer mt-1.5 shrink-0 transition-colors"
+        >
+          Bỏ qua &amp; Đóng tất cả
+        </button>
+      )}
     </div>
   );
 }

@@ -93,6 +93,21 @@ runStep('3. Zero Dirty Casts & Banned AST Patterns', () => {
         violations.push(`${file}:${lineNum} - Stray console.log in production source: ${line.trim()}`);
       }
     });
+
+    // React Rules of Hooks (Anti-TIDD Workarounds): Banned hooks in try/catch or conditional blocks
+    if (!file.startsWith('tests') && !file.startsWith('scripts') && /\.(tsx|jsx|ts|js)$/.test(file)) {
+      const hookInTryCatch = /(?:try|catch\s*(?:\([^)]*\))?)\s*\{[^}]*?\b(?:React\.)?use[A-Z]\w*\s*\(/g;
+      let match;
+      while ((match = hookInTryCatch.exec(content)) !== null) {
+        const lineNum = content.slice(0, match.index).split('\n').length;
+        violations.push(`${file}:${lineNum} - Banned React Hook in try/catch block (React Rules of Hooks violation)`);
+      }
+      const hookInConditional = /(?:if|for|while)\s*\([^)]+\)\s*\{[^}]*?\b(?:React\.)?use[A-Z]\w*\s*\(/g;
+      while ((match = hookInConditional.exec(content)) !== null) {
+        const lineNum = content.slice(0, match.index).split('\n').length;
+        violations.push(`${file}:${lineNum} - Banned conditional/loop React Hook (React Rules of Hooks violation)`);
+      }
+    }
   }
 
   if (violations.length > 0) {

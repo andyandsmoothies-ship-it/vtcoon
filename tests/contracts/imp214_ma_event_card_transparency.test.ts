@@ -234,23 +234,35 @@ describe('[IMP-214] Minh Bạch Hóa Thâu Tóm M&A & Affordance Thẻ Sự Ki�
 
     it('[TC-214.11/MSS][UC-214] Bấm nút CTA trong EventCardModal đóng modal an toàn thông qua callback onConfirm hoặc onClose', () => {
       const onConfirm = vi.fn();
-      const vdomWithConfirm = EventCardModal({
-        cardType: 'chance',
-        cardId: ChanceCardId.CC_MA_FORCE,
-        effectDelta: -720,
-        onConfirm,
-      });
+      let vdomWithConfirm: any;
+      renderToStaticMarkup(
+        React.createElement(() => {
+          vdomWithConfirm = EventCardModal({
+            cardType: 'chance',
+            cardId: ChanceCardId.CC_MA_FORCE,
+            effectDelta: -720,
+            onConfirm,
+          });
+          return null;
+        })
+      );
       const ctaBtn1 = findElementByProp(vdomWithConfirm, (p: any) => p['data-testid'] === 'event-card-confirm-btn');
       ctaBtn1.props.onClick();
       expect(onConfirm).toHaveBeenCalledTimes(1);
 
       const onClose = vi.fn();
-      const vdomWithClose = EventCardModal({
-        cardType: 'chance',
-        cardId: ChanceCardId.CC_MA_FORCE,
-        effectDelta: -720,
-        onClose,
-      });
+      let vdomWithClose: any;
+      renderToStaticMarkup(
+        React.createElement(() => {
+          vdomWithClose = EventCardModal({
+            cardType: 'chance',
+            cardId: ChanceCardId.CC_MA_FORCE,
+            effectDelta: -720,
+            onClose,
+          });
+          return null;
+        })
+      );
       const ctaBtn2 = findElementByProp(vdomWithClose, (p: any) => p['data-testid'] === 'event-card-confirm-btn');
       ctaBtn2.props.onClick();
       expect(onClose).toHaveBeenCalledTimes(1);
@@ -303,7 +315,7 @@ describe('[IMP-214] Minh Bạch Hóa Thâu Tóm M&A & Affordance Thẻ Sự Ki�
       drawChanceCard(room, p1, () => 0.5, registry, stateMap);
 
       expect(room.lastEventCard?.effectDetail).toContain('An Giang (Châu Đốc)');
-      expect((room as any).lastMaBuyout).toBeUndefined();
+      expect(room.lastMaBuyout).toBeUndefined();
     });
 
     it('[TC-214.16/MSS][UC-214] Nút CTA trong EventCardModal đạt chuẩn touch target tối thiểu >= 44px (min-h-[46px])', () => {

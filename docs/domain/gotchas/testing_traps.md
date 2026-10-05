@@ -28,3 +28,7 @@
    - **Bất Biến Bắt Buộc (Verified Invariants)**:
      1. *Assert Văn Bản Thực Tế (Content Assertion Parity)*: Test cho component chứa hàm xử lý dữ liệu hoặc chuỗi bắt buộc phải có ít nhất 1 assertion kiểm tra giá trị text node đã qua xử lý (ví dụ: expect(html).toContain('Giá thuê khu Đông')), không chỉ assert container wrapper rỗng.
      2. *Bao Phủ Utility Helpers Độc Lập*: Các utility functions được export từ UI file (cleanEventDescription, formatters) phải được kiểm thử đơn vị độc lập với các case biên để triệt tiêu toàn bộ đột biến toán tử (+, -, slice).
+
+10. **React Component Invocation in Tests & Keyboard A11y Contract [UI/TEST] [IMP-267]**:
+    - **Cấm Gọi Trực Tiếp Function Component Như Hàm JS Thuần Túy**: Banned tuyệt đối việc gọi component dạng hàm JS `const vdom = MyComponent(props)` trong `tests/**`. Mọi component sử dụng React Hooks bắt buộc phải được render trong một React rendering context (ví dụ `renderToStaticMarkup(React.createElement(() => MyComponent(props)))` hoặc Testing Library `render()`). Khi gặp test cũ gọi sai chuẩn làm gãy regression, implementer phải sửa file test cũ bằng wrapper React hợp lệ; NGHIÊM CẤM đưa mã phòng vệ dị tật (`try...catch`, `isReactContext`) vào `src/**` để chiều chuộng test rác (vi phạm Anti-TIDD).
+    - **Bắt Buộc Ca Test Bàn Phím Cho Carousel / Stepper**: Khi viết test Station 1 cho thành phần có phân trang, tab hoặc lật thẻ, ma trận test bắt buộc có tối thiểu 1 ca test sự kiện bàn phím (`fireEvent.keyDown(window, { key: 'ArrowRight' })`), cấm chỉ kiểm thử sự kiện chuột `click()`.

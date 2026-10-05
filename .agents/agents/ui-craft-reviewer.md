@@ -44,7 +44,7 @@ The reviewer operates on a clear separation between **Objective Usability (80%)*
    - Avoid dark text over saturated dark backgrounds (`gray-on-color`).
    - Interactive functional text on mobile must be at least `11px` (prefer `text-xs`).
 2. **Adaptive Viewport Ergonomics & Dual-Viewport Parity**:
-   - **Mobile Touch (`@360px` - `@414px`)**: Touch target floor `min-h-[44px] min-w-[44px]`. Avoid cramming horizontal buttons; place within thumb reach. Zero horizontal scroll overflow.
+   - **Mobile Touch (`@360px` - `@414px`)**: Touch target floor `min-h-[44px] min-w-[44px]`. If visual compact sizing (< 44px) is required by layout budgets, it BẮT BUỘC must use CSS hit-slop (`after:absolute after:-inset-*`) to maintain a 44x44px physical touch area. Any interactive element < 44px without hit-slop is a hard P1 BLOCKER (`disposition: fix`), never a soft warning. Horizontal scroll strips (`overflow-x-auto`) must use gradient edge masking (`mask-image: linear-gradient(...)`) to prevent hard-clipped text. Stepper CTA buttons must provide an immediate secondary dismiss affordance ("Bỏ qua & Đóng tất cả"). Avoid cramming horizontal buttons; place within thumb reach. Zero horizontal scroll overflow.
    - **Desktop Pointer (`@768px` - `@1440px`)**: High density permitted (28px - 36px for toolbars, tables, filter chips) to optimize mouse/keyboard workflows.
    - **Banned Mobile-Constraint Leakage**: Do not apply mobile-only space-saving compromises (such as forcing compact views or hiding primary decision data behind accordions) onto desktop viewports where ample space is available. Multi-column desktop layouts must preserve vertical balance, maintain complete data visibility, and prevent dead blank voids.
 3. **Layout & Overflow Defense**:
