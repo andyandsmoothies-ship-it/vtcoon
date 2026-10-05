@@ -213,7 +213,7 @@ export function TitleDeedModal({
             type="button"
             onClick={onClose}
             aria-label="Đóng Sổ Đỏ"
-            className="absolute top-1/2 -translate-y-1/2 right-2 sm:right-2.5 min-w-[44px] min-h-[44px] w-8 h-8 rounded-full bg-black/25 hover:bg-black/45 backdrop-blur-sm border border-white/30 flex items-center justify-center text-white text-sm font-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 transition-colors cursor-pointer z-20 shadow-md"
+            className="absolute top-1/2 -translate-y-1/2 right-2 sm:right-2.5 min-w-[44px] min-h-[44px] w-8 h-8 rounded-full bg-black/35 hover:bg-black/55 backdrop-blur-sm border border-white/60 flex items-center justify-center text-white text-sm font-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 transition-all hover:scale-105 active:scale-95 cursor-pointer z-20 shadow-md"
           >
             ✕
           </button>
@@ -293,13 +293,17 @@ export function TitleDeedModal({
 
               {/* Khối giá niêm yết & giá thế chấp */}
               <div className="flex-1 grid grid-cols-2 gap-1.5 sm:gap-2 bg-[#F7F2E7] p-1.5 sm:p-2 rounded-xl border border-slate-300">
-                <div className="bg-white/90 p-1.5 sm:p-2 rounded-lg border border-slate-200 flex flex-col justify-center">
-                  <span className="text-slate-600 block text-[10px] sm:text-[11px] font-medium leading-none mb-1">Giá niêm yết</span>
-                  <span className="text-emerald-700 font-extrabold text-xs sm:text-sm leading-tight">{formatCurrency(deed.price)}</span>
+                <div className="bg-white/95 p-1.5 sm:p-2 rounded-lg border border-slate-200 shadow-xs flex flex-col justify-center">
+                  <span className="text-slate-500 block text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider leading-none mb-1">Giá niêm yết</span>
+                  <span className="text-emerald-700 font-black text-xs sm:text-sm leading-tight tracking-tight flex items-baseline gap-1">
+                    {formatCurrency(deed.price)} <span className="text-[10px] sm:text-[11px] font-bold text-emerald-600/80">Tr.</span>
+                  </span>
                 </div>
-                <div className="bg-white/90 p-1.5 sm:p-2 rounded-lg border border-slate-200 flex flex-col justify-center">
-                  <span className="text-slate-600 block text-[10px] sm:text-[11px] font-medium leading-none mb-1">Giá trị thế chấp</span>
-                  <span className="text-amber-700 font-extrabold text-xs sm:text-sm leading-tight">{formatCurrency(deed.mortgageValue)}</span>
+                <div className="bg-white/95 p-1.5 sm:p-2 rounded-lg border border-slate-200 shadow-xs flex flex-col justify-center">
+                  <span className="text-slate-500 block text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider leading-none mb-1">Giá trị thế chấp</span>
+                  <span className="text-amber-700 font-black text-xs sm:text-sm leading-tight tracking-tight flex items-baseline gap-1">
+                    {formatCurrency(deed.mortgageValue)} <span className="text-[10px] sm:text-[11px] font-bold text-amber-600/80">Tr.</span>
+                  </span>
                 </div>
               </div>
             </div>

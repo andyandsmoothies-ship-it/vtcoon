@@ -250,15 +250,17 @@ export function TitleDeedRentTable({
                               Phụ thu 1D6
                             </span>
                           )}
+                        </div>
+                        <div className="flex items-center gap-1 min-w-0">
+                          <span className="text-[11px] text-slate-600 font-medium truncate">
+                            {cost && cost > 0 ? `Nâng cấp: +${formatCurrency(cost)}` : tier?.sub}
+                          </span>
                           {(cellIndex === 6 || cellIndex === 8 || cellIndex === 26 || cellIndex === 27) && idx === 3 && (
                             <span className="shrink-0 text-[9px] px-1 py-0.5 bg-rose-100 text-rose-900 rounded font-black border border-rose-300">
                               Giữ Chân Mất Lượt
                             </span>
                           )}
                         </div>
-                        <span className="text-[11px] text-slate-600 font-medium truncate">
-                          {cost && cost > 0 ? `Nâng cấp: +${formatCurrency(cost)}` : tier?.sub}
-                        </span>
                       </div>
                     </div>
                     <div className="flex flex-col items-end shrink-0 pl-1">

@@ -212,7 +212,7 @@ export function TitleDeedActionFooter({
             <button
               type="button"
               onClick={onPass}
-              className="w-full min-h-[48px] py-2 px-3.5 sm:px-6 rounded-xl font-black text-sm sm:text-base bg-rose-50 hover:bg-rose-100 text-rose-700 border-2 border-rose-300 shadow-[0_4px_0_0_#fca5a5] active:translate-y-[3px] cursor-pointer"
+              className="w-full min-h-[48px] py-2 px-3.5 sm:px-6 rounded-xl font-black text-sm sm:text-base bg-[#FFFBF2] hover:bg-rose-50 text-rose-800 border-2 border-rose-300 shadow-[0_4px_0_0_#cbd5e1] hover:shadow-[0_4px_0_0_#fca5a5] active:translate-y-[3px] transition-all cursor-pointer"
             >
               ✕ Từ Chối Mua
             </button>

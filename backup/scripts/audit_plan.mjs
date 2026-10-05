@@ -2,9 +2,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {
-  BANNED_TEST_RULES,
   auditScopeAndSubsystems,
   auditHonestLocAccounting,
+  auditPlanSnippetHygiene,
+  auditTestSpecLine,
 } from './audit_plan_rules.mjs';
 
 /**
@@ -337,13 +338,8 @@ for (const sec of sections) {
       }
     }
 
-    // 2.9 Zero No-Op Snippet Guard (Differs semantically)
-    const cleanTarget = targetChunk.replace(/\/\/.*|\/\*[\s\S]*?\*\//g, '').replace(/\s+/g, '');
-    const cleanReplacement = replacementChunk.replace(/\/\/.*|\/\*[\s\S]*?\*\//g, '').replace(/\s+/g, '');
-    if (cleanTarget.length > 0 && cleanTarget === cleanReplacement) {
-      console.error(`  ❌ NO-OP SNIPPET in ${relPath}: Replacement chunk contains zero functional changes compared to target chunk!`);
-      errors++;
-    }
+    // 2.9 Snippet Hygiene (Zero No-Op + Ban UI/DOM code dumps)
+    errors += auditPlanSnippetHygiene(relPath, targetChunk, replacementChunk);
   }
 }
 
@@ -367,25 +363,9 @@ if (testLines.length === 0) {
 }
 
 if (testLines.length > 0) {
-  const bannedRules = BANNED_TEST_RULES;
-
   for (const line of testLines) {
     checkedTests++;
-    // DoD #1 Flow Taxonomy check: Every test case must have [UC-.../MSS] or [UC-.../A#]
-    if (!/\[UC-[A-Z0-9._-]+\/(?:MSS|A\d+)\]/i.test(line)) {
-      console.error(`  ❌ [DOD1_MISSING_FLOW_TAXONOMY] in test spec:`);
-      console.error(`     Line: ${line.trim()}`);
-      console.error(`     Reason: DoD #1 mandates explicit flow classifier: [UC-XXX/MSS] or [UC-XXX/A#].`);
-      errors++;
-    }
-    for (const rule of bannedRules) {
-      if (rule.regex.test(line)) {
-        console.error(`  ❌ [${rule.code}] in test spec:`);
-        console.error(`     Line: ${line.trim()}`);
-        console.error(`     Reason: ${rule.desc}`);
-        errors++;
-      }
-    }
+    errors += auditTestSpecLine(line);
   }
   console.log(`  ✔️ Scanned ${checkedTests} contract test specifications.`);
 } else {
