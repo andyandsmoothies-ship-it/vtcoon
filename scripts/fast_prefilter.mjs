@@ -84,6 +84,10 @@ runStep('3. Zero Dirty Casts & Banned AST Patterns', () => {
       if (/spyOn\s*\(\s*React\s*,/i.test(line)) {
         violations.push(`${file}:${lineNum} - Banned framework internal spy ('spyOn(React, ...)'): ${line.trim()}`);
       }
+      // Banned framework private internals access (Anti-TIDD)
+      if (/__CLIENT_INTERNALS_|__SECRET_|__REACT_DEVTOOLS_|__INTERNAL_/i.test(line)) {
+        violations.push(`${file}:${lineNum} - Banned framework private internals access ('${line.trim()}'): Forbidden unstable internal API.`);
+      }
       // Stray console.log in production code (allow in tests or scripts)
       if (!file.startsWith('tests') && !file.startsWith('scripts') && /console\.log\s*\(/.test(line)) {
         violations.push(`${file}:${lineNum} - Stray console.log in production source: ${line.trim()}`);
@@ -102,12 +106,13 @@ const testFilesToScan = targetFiles.filter(
 );
 
 if (testFilesToScan.length > 0) {
-  runStep('3.5. Test Assertion Density (<= 4 expects/test, no loops)', () => {
+  runStep('3.5. Test Architecture, Density & Anti-Flaky Guard (Station 1 / DoD #1)', () => {
     const testViolations = [];
     const testRegex = /\b(?:it|test)(?:\.(?:only|skip))?\s*\(\s*(['"`][\s\S]*?['"`])\s*,\s*(?:async\s*)?(?:\([^)]*\)|function\s*\([^)]*\))\s*=>?\s*\{/g;
 
     for (const file of testFilesToScan) {
       const content = fs.readFileSync(path.resolve(repoRoot, file), 'utf8');
+      const isContract = file.includes('contracts');
       let match;
       while ((match = testRegex.exec(content)) !== null) {
         const title = match[1].slice(0, 60).replace(/\r?\n/g, ' ');
@@ -136,6 +141,12 @@ if (testFilesToScan.length > 0) {
         if (/\bfor\s*\(|\.forEach\s*\(|\bwhile\s*\(/.test(blockBody)) {
           testViolations.push(
             `${file}:${lineNum} - Test case contains forbidden loop in it() (use it.each instead): ${title}`,
+          );
+        }
+        // Anti-Flaky Guard: Ban long blocking sleeps (>= 3000ms) in contract tests
+        if (isContract && /(?:sleep|delay|setTimeout)\s*\([^,)]*,\s*(?:[3-9]\d{3}|\d{5,})\)/.test(blockBody)) {
+          testViolations.push(
+            `${file}:${lineNum} - Test case contains long blocking sleep/delay >= 3000ms (violates Fast & Deterministic): ${title}`,
           );
         }
       }

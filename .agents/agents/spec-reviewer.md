@@ -34,9 +34,10 @@ tools: [view_file, list_dir, find_by_name, grep_search, write_to_file]
   - MANDATORY REJECT if test cases contain monolithic patterns: > 4 `expect()` per test, or loops (`for`/`forEach`) in `it()`.
   - MANDATORY REJECT if tests assert static checklist conditions (`fs.existsSync`, `typeof fn === 'function'`, LOC limits).
   - MANDATORY REJECT if test suite has fewer than 15 atomic tests for the feature slice (Test Density Deficit).
-  - **Assertion Value Parity (Spot-Check)**: For ≥ 3 sampled tests per facet, verify that concrete expected values (string literals, class names, numeric results) can be directly traced to the plan's AFTER block for the corresponding task. A test with correct tags but wrong expected values is **MANDATORY REJECT (Unanchored Assertion — expected value not in AFTER block)**.
-- **Slice Scope Confinement**:
-  - If ticket specifies Slice 1 (MSS), but code introduces alternative flow logic or UI, emit **REJECT (Slice Scope Breach)**.
+  - **Assertion Value Parity (Spot-Check)**: For ≥ 3 sampled tests per facet, verify that concrete expected values (string literals, enum values, error reason codes, numeric results) can be directly traced to the plan's declared Acceptance Criteria, Contract DTOs, or Given/When/Then test specifications. A test with correct tags but unanchored or invented expected values is **MANDATORY REJECT (Unanchored Assertion — expected value not in plan specifications)**.
+- **Slice Scope Confinement & Approved Discovery Protocol**:
+  - If ticket specifies Slice 1 (MSS), but code introduces unapproved feature flows, emit **REJECT (Slice Scope Breach)**.
+  - EXCEPTION: If implementer emitted an explicit `### 💡 IMPLEMENTATION DISCOVERY` block for unlisted physical constraints or defensive gap fixes within the ticket's domain, reviewer MUST evaluate legitimacy. Legitimate discoveries that harden stability without adding new user features are RECONCILED (`APPROVED_WITH_DISCOVERY`), not dogmatically rejected.
 - **Full-Pipeline Delivery**:
   - Verify physical disk implementation for EVERY layer in the approved plan (Domain logic, Protocol, Store, UI).
   - Backend tests passing without client/consumer integration is **MANDATORY REJECT (Incomplete Pipeline)**.

@@ -185,7 +185,7 @@ export function GameCanvas({
             {/* OrbitControls contract retention: minDistance={14} maxDistance={65} */}
             <AdaptiveToneMappingSync isMobile={isMobileDevice} />
             <WebGLContextWatcher />
-            <PerfTelemetryTracker />
+            <PerfTelemetryTracker isMobile={isMobileDevice} />
             <AdaptiveDprController isMobile={isMobileDevice} />
 
             {isLobby ? (
@@ -194,7 +194,7 @@ export function GameCanvas({
                 <AdaptiveCinematicCamera isPreMatch={true} />
                 <TimeOfDayLighting isMobile={isMobileDevice} />
                 {/* Bóng tiếp xúc mâm gỗ bàn cờ đặt trên thảm nhung Ba Tư */}
-                <ContactShadows frames={1} position={[0, -0.05, 0]} opacity={0.75} scale={45} blur={2.0} far={6} />
+                {!isMobileDevice && <ContactShadows frames={1} position={[0, -0.05, 0]} opacity={0.75} scale={45} blur={2.0} far={6} />}
                 <GameBoard isMobile={isMobileDevice} />
                 <PawnAnimator players={effectivePlayers} />
                 {/* <PostProcessingPipeline /> */}
@@ -205,7 +205,7 @@ export function GameCanvas({
                 <AdaptiveCinematicCamera />
                 <TimeOfDayLighting isMobile={isMobileDevice} />
                 {/* ContactShadows contract retention: <ContactShadows frames={1} position={[0, -0.01, 0]} opacity={0.7} scale={40} blur={2} /> */}
-                <ContactShadows frames={1} position={[0, -0.05, 0]} opacity={0.75} scale={45} blur={2.0} far={6} />
+                {!isMobileDevice && <ContactShadows frames={1} position={[0, -0.05, 0]} opacity={0.75} scale={45} blur={2.0} far={6} />}
                 <GameBoard isMobile={isMobileDevice} />
                 <PawnAnimator players={effectivePlayers} />
                 <EventCard3D />

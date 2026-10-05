@@ -74,12 +74,13 @@ export function CoastalPatrolBoatProceduralFallback(): React.ReactElement {
   );
 }
 
-export function CoastalPatrolBoat(): React.ReactElement {
+export function CoastalPatrolBoat({ isMobile = false }: { readonly isMobile?: boolean } = {}): React.ReactElement {
   const boatRef = useRef<Group>(null);
   const wakeLeftRef = useRef<Mesh>(null);
   const wakeRightRef = useRef<Mesh>(null);
 
   useSafeFrame((state) => {
+    if (isMobile) return;
     const t = state.clock.elapsedTime;
     if (boatRef.current) {
       const speed = 0.22;
@@ -121,26 +122,28 @@ export function CoastalPatrolBoat(): React.ReactElement {
       />
 
       {/* 5. VỆT BỌT NƯỚC RẼ SÓNG ĐUÔI TÀU (Dynamic Foam Wake V-Trails) */}
-      <group position={[0, -0.01, -0.8]}>
-        {/* Vệt bọt mạn trái */}
-        <mesh
-          ref={wakeLeftRef}
-          position={[-0.35, 0, -0.6]}
-          rotation={[-Math.PI / 2, 0, 0.35]}
-        >
-          <planeGeometry args={[0.3, 1.4]} />
-          <meshBasicMaterial color="#FFFFFF" transparent opacity={0.48} />
-        </mesh>
-        {/* Vệt bọt mạn phải */}
-        <mesh
-          ref={wakeRightRef}
-          position={[0.35, 0, -0.6]}
-          rotation={[-Math.PI / 2, 0, -0.35]}
-        >
-          <planeGeometry args={[0.3, 1.4]} />
-          <meshBasicMaterial color="#FFFFFF" transparent opacity={0.48} />
-        </mesh>
-      </group>
+      {!isMobile && (
+        <group position={[0, -0.01, -0.8]}>
+          {/* Vệt bọt mạn trái */}
+          <mesh
+            ref={wakeLeftRef}
+            position={[-0.35, 0, -0.6]}
+            rotation={[-Math.PI / 2, 0, 0.35]}
+          >
+            <planeGeometry args={[0.3, 1.4]} />
+            <meshBasicMaterial color="#FFFFFF" transparent opacity={0.48} />
+          </mesh>
+          {/* Vệt bọt mạn phải */}
+          <mesh
+            ref={wakeRightRef}
+            position={[0.35, 0, -0.6]}
+            rotation={[-Math.PI / 2, 0, -0.35]}
+          >
+            <planeGeometry args={[0.3, 1.4]} />
+            <meshBasicMaterial color="#FFFFFF" transparent opacity={0.48} />
+          </mesh>
+        </group>
+      )}
     </group>
   );
 }

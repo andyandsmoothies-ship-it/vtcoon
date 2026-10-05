@@ -55,12 +55,21 @@ The reviewer operates on a clear separation between **Objective Usability (80%)*
    - Keyboard interactive buttons, tabs, and inputs must have visible focus rings (`focus-visible:ring-2`).
    - Icon-only buttons MUST have `aria-label` and `title`.
    - Provide rich empty states with recovery actions (CTA) rather than blank screens.
+5. **Touch & Gesture Interaction Integrity**:
+   - Custom sliders, drag surfaces, and scrollable control strips must not get stuck under touch interaction.
+   - Code tells: missing `touch-action` on pointer-event drag surfaces, mouse-only event handlers, or drag states that nothing clears on cancel, lost capture, or blur. Never let drag handlers swallow page scroll unexpectedly.
 
-### 1.2. Tier 2: Project Design Intent
-1. **Project Design SSOT**:
+### 1.2. Tier 2: Project Design Intent & Surface Modes
+1. **Surface Mode Calibration** (refer to `.agents/skills/impeccable/reference/mode-*.md`):
+   - **Operate Surface** (Game HUD, Trade Trays, Modals, Controls): The visitor comes to perform an action. Standard web affordances and clear layout hierarchy take precedence. The visual theme contributes typography, palette, density, and one signature move, but must never disguise functional controls into un-clickable costume props.
+   - **Read Surface** (Rule Books, Match History, Tooltips, System Logs): The reader comes to comprehend. Calm reading column, high-contrast readable typography, and clean wayfinding take precedence over decorative background illustrations.
+   - **Persuade & Experience Surface** (Victory Celebrations, Splash Screens): Artistic flair and expressive world theme may lead the composition, but primary actions must remain unmistakably clickable.
+2. **Region Layer Decomposition** (refer to `.agents/skills/impeccable/reference/region-map.md`):
+   - Verify clean separation between: (1) Dynamic content (balances, player names), (2) Moving parts (modals, trays, wheels), and (3) Static container chrome.
+3. **Project Design SSOT**:
    - In `vtcoon`: Read [`docs/domain/design.md`](docs/domain/design.md) (or [`DESIGN.md`](DESIGN.md)) to understand design language: 3D diorama, tactile shadows, Vietnamese cultural palette, and motion budgets.
    - Other projects: Read the corresponding design documentation.
-2. **Respect Designer's Creative Style**:
+4. **Respect Designer's Creative Style**:
    - Do not forbid gradient text, spring physics, or brutalist borders when they represent intentional styling.
    - Only warn if styling severely impairs legibility or causes rendering performance drops (FPS).
 

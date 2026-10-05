@@ -44,125 +44,56 @@ Before defining tasks, use `list_dir` and `grep_search` to map out which files w
 
 This structure informs the task decomposition. Each task should produce self-contained changes that make sense independently.
 
-## Task Right-Sizing
+## Task Right-Sizing & TDD Separation
 
-A task is the smallest unit that carries its own test cycle and is worth a fresh reviewer's gate. Fold setup, configuration, scaffolding, and documentation steps into the task whose deliverable needs them; split only where a reviewer could meaningfully reject one task while approving its neighbor.
+A task is the smallest unit that carries its own contract and test cycle.
+- **Plans specify WHAT**: Architecture, State Transitions, Type/DTO Interfaces, Function Signatures, Invariants, and Test Matrices.
+- **Station 1 (QA Tester) specifies EXPECTATIONS**: Writes failing contract tests in `tests/**` (TDD RED) asserting observable outcomes.
+- **Station 2 (Implementer) implements HOW**: Writes minimal code in `src/**` to make contract tests pass (TDD GREEN).
+- **Plan Code Bloat Ban**: Full copy-pasting of entire UI components, stylesheets, dispatchers, or test function bodies into plans is strictly BANNED. Reserved code snippets (`<<<< ==== >>>>`) are strictly for subtle core math or concurrency locks (maximum 1-3 snippets per plan, each <= 30 LOC). Target plan size <= 400 lines (warning at 600 lines).
 
-## Bite-Sized Task Granularity
-
-**Each step is one action (2-5 minutes):**
-- "Write the failing test" - step
-- "Run it to make sure it fails" - step
-- "Implement the minimal code to make the test pass" - step
-- "Run the tests and make sure they pass" - step
-- "Commit" - step
-
-## Plan Document Header
-
-**Every plan MUST start with this header:**
-
-```markdown
-# [Feature Name] Implementation Plan
-
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-
-**Goal:** [One sentence describing what this builds]
-
-**Architecture:** [2-3 sentences about approach]
-
-**Architecture Diagram:**
-
-```mermaid
-graph TD
-    subgraph "Component Name"
-        A[Module A] --> B[Module B]
-    end
-```
-
-Include a Mermaid diagram showing component relationships and data flow. This diagram should match the architecture description above.
-
-**Tech Stack:** [Key technologies/libraries]
-
-**Spec:** [path to the spec/design doc this plan implements — the plan
-argues from the spec, so the spec travels with it; executors read both]
-
-## Global Constraints
-
-[Project-wide requirements — version floors, dependency limits, naming rules, platform requirements — one line each, exact values from the spec.]
-
-## System Impact & Blast Radius (3-Way Matrix)
-- **Risk Dial**: [Isolated (Level 1) | Slice-Bound (Level 2) | Systemic/Global (Level 3)]
-- **Direct Touch**: [Files/modules modified]
-- **Subtractive Audit (Delete/Cleanup)**: [Obsolete states, listeners, flags, or dead code paths to remove]
-- **Call-Site Exhaustion**: [100% of callers audited via grep_search with a call-site matrix — never rely on default parameters. Tabulate every caller when modifying signatures.]
-- **Import DAG Check**: [Verify upstream imports of modified files to prevent circular dependencies]
-- **Delta LOC Budget**: [For files >= 300 LOC: Current + Delta = Expected; extract submodule if Expected > Ceiling]
-- **Axis 1 - Downstream Consumers**: [Direct callers, UI subscribers, derived stores/caches, event observers]
-- **Axis 2 - Upstream & Environmental Modifiers**: [Active policies, interceptors, feature flags, global modifiers, buffs/debuffs]
-- **Axis 3 - Exceptional Lifecycle Modes**: [Cold start, full state resync/reconnect, session reset, concurrent multi-event mutations, terminal/closed entity states]
-- **Worst-Case Defense**: [Failure mode isolation, fallback guarantees, and blast radius regression tests]
-
----
-```
-
-## Task Structure
+## Task Structure (Lean Specification)
 
 ````markdown
-### Task N: [Component Name]
+### Task N: [Component / Seam Name]
 
 **Files:**
-- Create: `exact/path/to/file.py`
-- Modify: `exact/path/to/existing.py:123-145`
-- Delete: `exact/path/to/obsolete.py` (or obsolete states/listeners to remove)
-- Test: `tests/exact/path/to/test.py`
+- Create/Modify: `exact/path/to/file.ts`
+- Subtractive Cleanup: Delete obsolete states, listeners, flags, or dead code paths
+- Test File: `tests/contracts/exact_path.test.ts`
 
-**Interfaces:**
-- Consumes: [what this task uses from earlier tasks — exact signatures]
-- Produces: [what later tasks rely on — exact names, parameters, return types]
-
-- [ ] **Step 1: Write the failing test**
-
-```python
-def test_specific_behavior():
-    result = function(input)
-    assert result == expected
+**Contract & Signatures:**
+```typescript
+export interface TargetContract {
+  id: string;
+  payload: DtoType;
+  execute(intent: IntentDto): ResultOutcome;
+}
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+**Behavior & Acceptance Criteria:**
+- Enforces domain invariants: [Invariant 1, Invariant 2].
+- State transition: [State A] -> [State B] upon trigger.
+- Error handling: Emits [REASON_CODE] on invalid inputs.
 
-Run: `pytest tests/path/test.py::test_name -v`
-Expected: FAIL with "function not defined"
-
-- [ ] **Step 3: Write minimal implementation**
-
-```python
-def function(input):
-    return expected
-```
-
-- [ ] **Step 4: Run test to verify it passes**
-
-Run: `pytest tests/path/test.py::test_name -v`
-Expected: PASS
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add tests/path/test.py src/path/file.py
-git commit -m "feat: add specific feature"
-```
+**Station 1 Test Scenarios (Given / When / Then):**
+- `[TC-XX.01/MSS]`: Given [precondition], When [action], Then [observable outcome / state change].
+- `[TC-XX.02/A1]`: Given [boundary/error condition], When [invalid action], Then [error reason / rollback].
 ````
 
-## No Placeholders
+## No Placeholders vs. Lean Specifications
 
-Every step must contain the actual content an engineer needs. These are **plan failures** — never write them:
-- "TBD", "TODO", "implement later", "fill in details"
-- "Add appropriate error handling" / "add validation" / "handle edge cases"
-- "Write tests for the above" (without actual test code)
-- "Similar to Task N" (repeat the code — the engineer may be reading tasks out of order)
-- Steps that describe what to do without showing how (code blocks required for code steps)
-- References to types, functions, or methods not defined in any task
-- Vague quantifiers (e.g. "N test files unaffected", "several callers") without exact file paths or verified grep proof
+Every task must contain the actual contracts and acceptance criteria an engineer needs.
+
+**These are plan failures (BANNED):**
+- Vague hand-waving: "TBD", "TODO", "implement later", "fill in details", "add validation" without specifying rules or error reasons.
+- Unanchored assumptions: "several callers unaffected" without verified search counts.
+- Unreferenced symbols: References to types or functions never defined anywhere in the plan or codebase.
+
+**These are LEAN SPECIFICATIONS (MANDATORY & ENCOURAGED):**
+- Exact TypeScript/Language interfaces, DTO schemas, and function signatures.
+- Given/When/Then behavioral contracts with explicit Flow Taxonomy tags (`[TC-XX/MSS]`).
+- Do NOT write full implementation code or full test code inside the plan. Let Station 1 (`qa-tester`) and Station 2 (`implementer`) perform true TDD.
 
 ## Rich Formatting
 

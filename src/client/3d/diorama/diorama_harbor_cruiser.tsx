@@ -23,11 +23,12 @@ export function calculateCruiserTrajectory(time: number): { x: number; y: number
   return { x, y, z, yaw };
 }
 
-export function DioramaHarborCruiser(): React.ReactElement {
+export function DioramaHarborCruiser({ isMobile = false }: { readonly isMobile?: boolean } = {}): React.ReactElement {
   const boatRef = useRef<Group>(null);
   const wakeRef = useRef<Mesh>(null);
 
   useSafeFrame((state) => {
+    if (isMobile) return;
     const t = state.clock.elapsedTime;
     if (boatRef.current) {
       const traj = calculateCruiserTrajectory(t);
@@ -56,10 +57,12 @@ export function DioramaHarborCruiser(): React.ReactElement {
         <cylinderGeometry args={[0.13, 0.13, 0.38, 8, 1, false, 0, Math.PI]} />
         <meshStandardMaterial color="#FEF3C7" roughness={0.4} />
       </mesh>
-      <mesh ref={wakeRef} position={[0, -0.005, -0.45]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[0.35, 0.45]} />
-        <meshBasicMaterial color="#FFFFFF" transparent opacity={0.35} />
-      </mesh>
+      {!isMobile && (
+        <mesh ref={wakeRef} position={[0, -0.005, -0.45]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[0.35, 0.45]} />
+          <meshBasicMaterial color="#FFFFFF" transparent opacity={0.35} />
+        </mesh>
+      )}
     </group>
   );
 }

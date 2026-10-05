@@ -20,6 +20,9 @@ hooks: [.agents/hooks_implementer.json]
 
 ## 1. Confinement & Execution Isolation
 - **Workspace Isolation**: Execute within isolated workspace. Never modify files outside approved ticket scope.
+- **Test Confinement Guard**: STRICTLY FORBIDDEN from modifying or relaxing test files in `tests/**`. Tests created by Station 1 (`qa-tester`) represent the inviolable contract. All code changes must occur in production files (`src/**`). Zero bug-codification: never alter assertions to match flawed implementation.
+- **Implementer Pushback Mandate**: Do NOT blindly copy draft code from plans. If a plan snippet is a no-op, breaks a domain invariant, introduces memory leaks, or contains dead code, implementer MUST apply the real physical fix rather than executing defective plan code.
+- **Physical Discovery & Deviation Protocol**: If unlisted physical constraints, omitted siblings, or edge cases are uncovered during coding, implementer MUST resolve them in `src/**` and emit an explicit `### 💡 IMPLEMENTATION DISCOVERY` block in the handoff message citing: (1) Discovered gap, (2) Code fix applied, (3) Downstream test request. Spec Reviewer evaluates and reconciles legitimate discoveries.
 - **Atomic File Edits**: Use native file modification tools (`replace_file_content`, `write_to_file`). Shell redirects are strictly forbidden. Verify target chunk match count before editing.
 - **Slice Scope Confinement**: Implement ONLY flows authorized in the ticket plan. Do not implement out-of-scope alternative flows or unapproved features.
 - **Zero Dirty Casts**: Strictly ban `as any`, `as unknown as T`, or bypasses in `src/**`.
@@ -34,7 +37,7 @@ hooks: [.agents/hooks_implementer.json]
 ## 3. Four-Pass Implementation Loop
 - **Pass 1: Make It Work (Adversarial TDD Green)**:
   - Implement minimum production code in `src/**` to pass Station 1 contract tests.
-  - Assertions represent the SSOT contract. Zero bug-codification: never alter tests to justify flawed code.
+  - Consumes lean contracts (Type/DTO interfaces, state flows) from plan + RED tests from `qa-tester`.
 - **Pass 2: Make It Lean (Prune & Anti-Slop)**:
   - Audit newly written code. Remove single-use helper abstractions (YAGNI).
   - Compress LOC by 15-20% while 100% of test suite remains green.
@@ -43,13 +46,10 @@ hooks: [.agents/hooks_implementer.json]
   - Maintain Cyclomatic Complexity <= 5 per function.
   - Code must remain readable and explicit. Avoid obscure one-liners.
 - **Pass 4: Pre-Finish Gate (Mechanical Zero-Defect Sweep)**:
-  - Before requesting review handoff, verify all mechanical gates:
-    1. Typecheck: `npx tsc --noEmit` — 0 errors.
-    2. LOC Budgets: `node scripts/check_loc.mjs <modified files>` — no ceiling breach (Tier 1 <= 400, Tier 2 <= 500).
-    3. Slop linter: `npm run lint:slop` — 0 violations.
-    4. UI linter: `npm run lint:ui` — 0 violations (for UI files).
-    5. Full Regression Gate: `npm test` — all existing test suites must pass. "Acceptable regressions" or "design supersession" are strictly banned.
-    6. Evidence Snapshot: `node scripts/collect_evidence.mjs` — writes to `.agents/evidence/`.
+  - Before requesting review handoff, run the unified mechanical pre-filter:
+    `npm run prefilter -- <modified files>` (validates `tsc --noEmit`, LOC budgets, zero dirty casts `as any`, zero framework spies, console.log purge, and linters in one pass).
+  - Full Regression Gate: `npm test` — all existing test suites must pass. Regressions are strictly banned.
+  - Evidence Snapshot: `node scripts/collect_evidence.mjs` — writes to `.agents/evidence/`.
 
 ## 4. Full-Pipeline Delivery
 - Implement all architectural layers declared in the plan:

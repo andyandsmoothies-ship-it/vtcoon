@@ -22,7 +22,7 @@ export const GameCanvas = lazy(() =>
 );
 
 import { getInitialLobbyConfig } from './offline_landing';
-import { isMobileDevice } from './3d/device_detect';
+import { useIsMobile } from './hooks/use_is_mobile';
 import { AppErrorBoundary } from './ui/error_boundary';
 export { AppErrorBoundary };
 
@@ -78,6 +78,7 @@ export function ServerToast({ message, onClose }: ServerToastProps): React.React
 }
 
 export function App(): React.ReactElement {
+  const isMobile = useIsMobile();
   const [isAdmin, setIsAdmin] = useState<boolean>(() => isAdminRoute());
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -211,7 +212,7 @@ export function App(): React.ReactElement {
           }
         >
           {/* Contract retention: <GameCanvas isLobby /> <GameCanvas /> */}
-          <GameCanvas isLobby={!gameStarted} players={effectivePlayers} isMobile={isMobileDevice()} />
+          <GameCanvas isLobby={!gameStarted} players={effectivePlayers} isMobile={isMobile} />
         </Suspense>
       </div>
 

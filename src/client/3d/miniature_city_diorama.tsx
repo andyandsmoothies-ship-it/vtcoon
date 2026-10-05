@@ -268,13 +268,17 @@ export function DioramaUrbanCanopy(): React.ReactElement {
   );
 }
 
-export function MiniatureCityDiorama(): React.ReactElement {
+export interface MiniatureCityDioramaProps {
+  readonly isMobile?: boolean;
+}
+
+export function MiniatureCityDiorama({ isMobile = false }: MiniatureCityDioramaProps = {}): React.ReactElement {
   return (
     <group position={[0, 0, 0]} data-testid="miniature-city-diorama">
       {/* 0. Khung viền gỗ óc chó & gờ kim loại bao quanh bàn cờ */}
       <DioramaBoardRim />
       {/* 0.1. Tuyến đường sắt đô thị mô hình & đoàn tàu mini */}
-      <DioramaModelRailroad />
+      <DioramaModelRailroad isMobile={isMobile} />
       {/* 0.2. Ke ga xe lửa bến sông ven tuyến đường sắt */}
       <DioramaWaterfrontStation />
       {/* 0.25. Ke ga xe lửa Landmark Metro bờ Bắc */}
@@ -298,7 +302,7 @@ export function MiniatureCityDiorama(): React.ReactElement {
       <DioramaContainerPort />
       <DioramaMarina />
       {/* 4.1. Thuyền du ngoạn lòng sông Sài Gòn */}
-      <DioramaHarborCruiser />
+      <DioramaHarborCruiser isMobile={isMobile} />
       {/* 5. Cụm cao ốc tài chính Landmark Skyline & Tháp cao ốc nén */}
       <DioramaSkyline />
       <DioramaHighriseBlocks />
@@ -307,8 +311,8 @@ export function MiniatureCityDiorama(): React.ReactElement {
       <DioramaHeritageDistrict />
       <DioramaShophouseBlocks />
       {/* 6. Nhịp sống đô thị vi mô & Giao thông tự hành */}
-      <DioramaMicroLife />
-      <DioramaTraffic />
+      <DioramaMicroLife isMobile={isMobile} />
+      <DioramaTraffic isMobile={isMobile} />
     </group>
   );
 }

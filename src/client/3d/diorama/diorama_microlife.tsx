@@ -3,12 +3,13 @@ import React, { useRef } from 'react';
 import type { Group } from 'three';
 import { useSafeFrame } from '../safe_frame';
 
-export function DioramaMicroLife(): React.ReactElement {
+export function DioramaMicroLife({ isMobile = false }: { readonly isMobile?: boolean } = {}): React.ReactElement {
   const boatRef = useRef<Group>(null);
   const carRef = useRef<Group>(null);
 
   // Chuyển động nhấp nhô vi mô nhẹ nhàng của thuyền nước và xe cầu cạn (60 FPS diorama drift)
   useSafeFrame((state) => {
+    if (isMobile) return;
     const t = state.clock.elapsedTime;
     if (boatRef.current) {
       boatRef.current.position.z = Math.sin(t * 0.4) * 0.6;

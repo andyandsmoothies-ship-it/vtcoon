@@ -7,7 +7,11 @@ import { useTelemetryStore } from './telemetry_store';
 import { watchdogMonitor } from './watchdog_monitor';
 import { useGameStore } from '../store/game_store';
 
-export function PerfTelemetryTracker(): null {
+export interface PerfTelemetryTrackerProps {
+  readonly isMobile?: boolean;
+}
+
+export function PerfTelemetryTracker({ isMobile }: PerfTelemetryTrackerProps = {}): null {
   const { gl } = useThree();
   const lastUpdateRef = useRef(0);
   const animStartRef = useRef<number | null>(null);
@@ -35,10 +39,10 @@ export function PerfTelemetryTracker(): null {
     }
     perfBudget.recordFrameTime(delta * 1000);
     const now = performance.now();
-    if (now - lastUpdateRef.current >= 250) {
+    if (now - lastUpdateRef.current >= 500) {
       lastUpdateRef.current = now;
       const report = perfBudget.getBudgetReport(gl.info, {
-        isMobile: isMobileHardware(),
+        isMobile: isMobile ?? isMobileHardware(),
       });
       useTelemetryStore.getState().updateMetrics({
         fps: report.averageFps,

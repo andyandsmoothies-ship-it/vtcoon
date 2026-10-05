@@ -159,7 +159,7 @@ export function GameBoard({ isMobile: propIsMobile }: GameBoardProps = {}): Reac
       <ConstructionSlamVFX />
 
       {/* 2. Sa bàn đô thị thu nhỏ: Đảo tài chính, cầu vượt, sân vận động & bến du thuyền */}
-      <MiniatureCityDiorama />
+      <MiniatureCityDiorama isMobile={isMobile} />
 
       {/* 3. Sàn diễn xúc xắc 3D thoáng đãng trên Đại Lộ Sài Gòn */}
       <DiceTray />

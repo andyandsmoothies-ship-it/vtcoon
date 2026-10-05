@@ -90,6 +90,7 @@ export interface PerfBudgetReport {
 
 export class PerfBudgetController {
   private frameTimes: number[] = [];
+  private frameIndex = 0;
   private readonly maxSamples = 60;
   private currentLod: LODLevel = LODLevel.HIGH;
 
@@ -142,10 +143,14 @@ export class PerfBudgetController {
    * Ghi nhận frame time (ms) từ vòng lặp requestAnimationFrame hoặc useFrame
    */
   public recordFrameTime(frameTimeMs: number): void {
-    if (!Number.isFinite(frameTimeMs) || frameTimeMs <= 0) return;
-    this.frameTimes.push(frameTimeMs);
-    if (this.frameTimes.length > this.maxSamples) {
-      this.frameTimes.shift();
+    if (!Number.isFinite(frameTimeMs) || frameTimeMs <= 0 || frameTimeMs > 1000) return;
+    const clampedMs = Math.min(frameTimeMs, 250);
+    const times = this.frameTimes;
+    if (times.length < this.maxSamples) {
+      times.push(clampedMs);
+    } else {
+      times[this.frameIndex] = clampedMs;
+      this.frameIndex = (this.frameIndex + 1) % this.maxSamples;
     }
   }
 
@@ -153,9 +158,16 @@ export class PerfBudgetController {
    * Tính FPS trung bình trong cửa sổ trượt 60 frames gần nhất
    */
   public getAverageFps(): number {
-    if (this.frameTimes.length === 0) return PERF_BUDGET_LIMITS.targetFps;
-    const sum = this.frameTimes.reduce((acc, val) => acc + val, 0);
-    const avgMs = sum / this.frameTimes.length;
+    const len = this.frameTimes.length;
+    if (len === 0) return PERF_BUDGET_LIMITS.targetFps;
+    let sum = 0;
+    for (let i = 0; i < len; i++) {
+      const val = this.frameTimes[i];
+      if (val !== undefined) {
+        sum += val;
+      }
+    }
+    const avgMs = sum / len;
     if (avgMs <= 0) return PERF_BUDGET_LIMITS.targetFps;
     const fps = 1000 / avgMs;
     return Math.min(60, Math.max(1, Number(fps.toFixed(1))));
@@ -208,6 +220,8 @@ export class PerfBudgetController {
     deviceContext?: {
       isMobile?: boolean;
       currentDpr?: number;
+      degradedDurationMs?: number;
+      optimalDurationMs?: number;
     }
   ): PerfBudgetReport {
     const drawCalls = glInfo?.render.calls ?? 0;
@@ -225,8 +239,8 @@ export class PerfBudgetController {
       isMobile,
       currentFps: avgFps,
       currentDpr,
-      degradedDurationMs: 1500,
-      optimalDurationMs: 0,
+      degradedDurationMs: deviceContext?.degradedDurationMs ?? 0,
+      optimalDurationMs: deviceContext?.optimalDurationMs ?? 0,
     });
 
     return {
@@ -279,6 +293,7 @@ export class PerfBudgetController {
 
   public reset(): void {
     this.frameTimes = [];
+    this.frameIndex = 0;
     this.currentLod = LODLevel.HIGH;
   }
 }

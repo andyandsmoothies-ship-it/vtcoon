@@ -35,6 +35,10 @@ Run these checks on disk before writing implementation vectors:
 3. **Is there a higher-ROI alternative in the same scope?**
    If path A is the target but path B (same effort) has 3× more impact, note it as a scoping recommendation.
 
+4. **Is the physical surface area exhausted?**
+   Search for related siblings, caller variants, or shared lifecycle hooks across codebase. If the plan addresses only an arbitrary subset of affected consumers without explicit justification/waiver:
+   → flag `[ADV-OBJ] Incomplete Surface Area — [N] active consumers omitted from scope`.
+
 ## 3. The 4 Attack Vectors (After ADV-OBJ passes)
 
 ### ⚔️ Vector 1: Exploits & Economic Arbitrage

@@ -37,7 +37,7 @@ export interface CoastalIslandEnvironmentProps {
   isMobile?: boolean;
 }
 
-export const CoastalIslandEnvironment: React.FC<CoastalIslandEnvironmentProps> = function CoastalIslandEnvironment(
+export const CoastalIslandEnvironment: ((props: CoastalIslandEnvironmentProps) => React.ReactElement) & React.FC<CoastalIslandEnvironmentProps> = function CoastalIslandEnvironment(
   props: CoastalIslandEnvironmentProps = {}
 ): React.ReactElement {
   const { streamlined = true, isMobile = false } = props;
@@ -46,6 +46,7 @@ export const CoastalIslandEnvironment: React.FC<CoastalIslandEnvironmentProps> =
   // oceanGeomRef preserved for legacy test contract
 
   useSafeFrame((state) => {
+    if (isMobile) return;
     const t = state.clock.getElapsedTime();
     // 1. GPU Gerstner waveShader uniform update (computeVertexNormals & Float32Array removed)
     // 2. Dải bọt sóng ven bờ co giãn chu kỳ thủy triều 3.5s
@@ -223,8 +224,8 @@ export const CoastalIslandEnvironment: React.FC<CoastalIslandEnvironmentProps> =
 
 
       {/* 8. Hoạt cảnh hàng hải */}
-      <CoastalPatrolBoat />
-      <CoastalSeagulls />
+      <CoastalPatrolBoat isMobile={isMobile} />
+      <CoastalSeagulls isMobile={isMobile} />
     </group>
   );
 }

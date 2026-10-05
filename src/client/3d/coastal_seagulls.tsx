@@ -1,5 +1,5 @@
 // [UI-S01/MSS] CoastalSeagulls — Flock of 5 animated seagulls circling the coastal bay
-import React, { useRef } from 'react';
+import React, { useRef, useMemo } from 'react';
 import type { Group } from 'three';
 import { useSafeFrame } from './safe_frame';
 
@@ -20,12 +20,26 @@ const SEAGULL_CONFIGS: readonly SeagullFlightConfig[] = [
   { radius: 31, baseHeight: 17.6, speed: 0.32, phaseOffset: 2.55, centerX: -1, centerZ: -1 },
 ];
 
-export function CoastalSeagulls(): React.ReactElement {
+export function CoastalSeagulls({ isMobile = false }: { readonly isMobile?: boolean } = {}): React.ReactElement | null {
   const birdsRef = useRef<(Group | null)[]>([]);
   const leftWingsRef = useRef<(Group | null)[]>([]);
   const rightWingsRef = useRef<(Group | null)[]>([]);
 
+  const initialBirdTransforms = useMemo(() => {
+    return SEAGULL_CONFIGS.map((cfg) => {
+      const theta = cfg.phaseOffset;
+      const x = cfg.centerX + Math.cos(theta) * cfg.radius;
+      const z = cfg.centerZ + Math.sin(theta) * cfg.radius;
+      const y = cfg.baseHeight + Math.sin(cfg.phaseOffset) * 0.45;
+      return {
+        pos: [x, y, z] as [number, number, number],
+        rot: [0, -theta, -0.15] as [number, number, number],
+      };
+    });
+  }, []);
+
   useSafeFrame((state) => {
+    if (isMobile) return;
     const t = state.clock.elapsedTime;
 
     SEAGULL_CONFIGS.forEach((cfg, idx) => {
@@ -57,16 +71,22 @@ export function CoastalSeagulls(): React.ReactElement {
     });
   });
 
+  if (isMobile) return null;
+
   return (
     <group data-testid="coastal-seagulls">
-      {SEAGULL_CONFIGS.map((_, idx) => (
-        <group
-          key={`seagull-${idx}`}
-          ref={(el) => {
-            birdsRef.current[idx] = el;
-          }}
-          scale={[0.55, 0.55, 0.55]}
-        >
+      {SEAGULL_CONFIGS.map((_, idx) => {
+        const initial = initialBirdTransforms[idx];
+        return (
+          <group
+            key={`seagull-${idx}`}
+            position={initial?.pos}
+            rotation={initial?.rot}
+            ref={(el) => {
+              birdsRef.current[idx] = el;
+            }}
+            scale={[0.55, 0.55, 0.55]}
+          >
           {/* Thân chim thon gọn màu trắng sứ */}
           <mesh castShadow position={[0, 0, 0]}>
             <boxGeometry args={[0.14, 0.1, 0.44]} />
@@ -121,7 +141,8 @@ export function CoastalSeagulls(): React.ReactElement {
             </mesh>
           </group>
         </group>
-      ))}
+      );
+    })}
     </group>
   );
 }

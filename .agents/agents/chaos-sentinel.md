@@ -55,6 +55,10 @@ Automated via `scripts/station4_sentinel.ts`:
   npm run sentinel -- --ticket [TICKET_ID] --test [CONTRACT_TEST_PATH] [--src [TARGET_SRC_PATH]]
   ```
 - **Probe Test Floor**: Minimum >= 5 mutants tested. All mutants must be killed (0 survived).
+- **Mutation Loopback Guard**: If test files in `tests/**` are modified or newly added to kill surviving mutants:
+  1. Each new test MUST satisfy Atomic Test rules (1-4 `expect()`, zero loops in `it()`).
+  2. Subagent MUST execute fast pre-filter (`npm run prefilter -- <modified test files>`) to verify 0 linter and assert-density errors.
+  3. Signing off evidence JSON without loopback verification is STRICTLY FORBIDDEN.
 
 ## 5. Evidence Snapshot & Output Format
 Results are persisted to `.agents/evidence/chaos_sentinel_[TICKET_ID].json`:

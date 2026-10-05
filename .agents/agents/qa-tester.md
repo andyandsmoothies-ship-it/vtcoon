@@ -41,7 +41,7 @@ hooks: [.agents/hooks_qa.json]
   - Hyper-rigid change detectors: Never assert private function calls, AST regex, or internal code syntax. Assert public props, state, or return values.
   - Dirty casts in test code: Never use `as any`, `as unknown as`, or `as Record<string, any>` / `as Record<string, unknown>` — these are semantically equivalent dirty casts. Document exceptions explicitly (e.g. mock DOM events).
   - Framework internal spies: Never spy on framework-private APIs (`React.useState`, `React.useEffect`, hook internals, lifecycle methods). If a component state cannot be reached via props or public API, request a testability prop from implementer instead.
-- **Assertion-to-Plan Parity**: Every expected value in an assertion (string content, CSS class, aria label, numeric result) MUST be directly quoted from the corresponding AFTER block in the plan. Never infer expected values from component logic or domain knowledge — only from the plan's declared output. If the plan AFTER block does not specify a value, flag as `[UNANCHORED ASSERTION]` and consult the plan author before writing.
+- **Assertion-to-Plan Parity**: Every expected value in an assertion (string content, CSS class, aria label, numeric result, error reason code) MUST be derived directly from the plan's declared Acceptance Criteria, Contract DTOs, or Given/When/Then test specifications. Never infer arbitrary expected values from unanchored assumptions. If the plan does not declare an expected outcome or reason code, flag as `[UNANCHORED ASSERTION]` and consult the plan author before writing.
 - **Gotcha Pre-Check**: Before writing tests for any component or function, search `docs/domain/gotchas.md` (or equivalent domain invariants file) for entries matching the component name or domain tag. Apply all matching invariants as test constraints. If a gotcha bans a testing pattern (e.g. `toContain()` on ambiguous HTML attributes — Gotcha #33), switch to the prescribed alternative.
 - **3D / R3F Component Testing**:
   - Test pure functional logic, config mappers, and props contracts.
@@ -65,21 +65,29 @@ hooks: [.agents/hooks_qa.json]
   - Empty / null input
   - Duplicate keys or ambiguous matches
   Write at least 1 `it()` that proves the helper fails correctly on a bad input. If the helper cannot be proven correct in isolation, replace it with direct React element tree traversal (`React.isValidElement`, `findByTestId`) instead of HTML string parsing.
-- **Spec Challenge Mandate**: Before implementing any test case, read the plan's AFTER block and ask: *"Does this spec produce any unintended side effect?"* If a spec requires a retention element to hold real geometry, real event listeners, or real resource allocations — flag it back to the plan author as a design flaw. Do not implement tests that codify known leaks or harmful behavior.
+- **Spec Challenge Mandate**: Before implementing any test case, examine the plan's declared contracts and transitions. Ask: *"Does this specification produce any unintended side effect or state leakage?"* If a spec requires a retention element to hold real geometry, real event listeners, or unbounded buffers — flag it back to the plan author as a design flaw. Do not implement tests that codify known leaks or harmful behavior.
 - **Production Call-Graph Gate**: Every `it()` block must invoke at least one exported function or component from `src/**`. A test that only constructs local data structures (e.g. `new Map()`, plain objects) and asserts properties of those local constructs — without calling any production export — is a **tautological test** and is banned. Before writing any test, identify the production symbol under test and confirm it is called in the test body.
 
 - **Consumer-Side Assertion**:
   - Assert effect at point of consumption/execution (e.g. balance deduction, permission grant/deny, state transition), NEVER merely producer state flags or array lengths.
+- **Differential Testing Mandate (Old vs. New Refactoring)**:
+  - When a ticket involves modularization or subtractive refactoring (moving logic from a mother file into a submodule), QA MUST write a differential parity test comparing old vs. new modules side-by-side across representative or randomized input matrices (`expect(newFn(input)).toEqual(oldFn(input))`) before obsolete code is pruned from the mother file.
+- **Wire-to-Store Closed-Loop Integration Mandate**:
+  - For network, state, and UI features, at least one test in the contract suite MUST exercise the in-memory end-to-end pipeline (`Payload -> Ingestion/Reducer -> Store/FSM -> View Render`) to verify multi-tick continuity and prevent mock-heavy seam divergence.
+- **Fast & Deterministic Anti-Flaky Mandate**:
+  - Tests must execute deterministically using seeded PRNG and bounded in-memory clocks. Banned hardcoded `sleep` or unseeded `Math.random()`.
+  - Banned arbitrary timeout inflation (> 2500ms) and solitary assertion softening (`toBeDefined` without concrete property assertions). Blind test re-runs without code changes are strictly forbidden.
 - **Double-Entry Bookkeeping (Zero Bug-Codification)**:
   - Tests represent the SSOT contract. Never modify assertions to match buggy code.
 - **Mock Async Browser APIs**:
   - In headless Node/JSDOM runners, mock browser APIs explicitly (`requestAnimationFrame`, `AudioContext`, `img.onload`). Trigger callbacks explicitly.
 
-## 4. Phase 3: Business RED Validation (ATDD Quality Gate)
+## 4. Phase 3: Semantic Behavioral RED Validation (ATDD Quality Gate)
 - Run the newly written test file using `npx vitest run <test-path>`.
 - Verify the test FAILS with a clear failure message.
-- Classify Failure: Must be **Business RED** (missing function, missing state, failed assertion).
-  - Calling an un-exported function/component that fails with `undefined is not a function` or `target is not defined` IS VALID Business RED.
+- Classify Failure: Must be **Semantic Behavioral RED** (assertion failure against expected output, state, or contract behavior).
+  - Tests failing merely due to missing imports, TypeScript compiler errors (`Cannot find name`), or syntax errors are INCOMPLETE RED. QA must provide minimal type/interface stubs in tests so the suite compiles, then prove runtime contract assertion failure.
+  - Tests that fail because `expect(received).toEqual(expected)` or `expect(fn).toThrow()` failed represent genuine Behavioral RED.
   - NEVER wrap module imports in `try/catch` or use dynamic fallback to mask missing exports.
   - **Infrastructure RED** applies ONLY to test harness defects (e.g. missing npm packages, invalid vitest config, syntax errors inside test file itself).
 
@@ -97,21 +105,41 @@ hooks: [.agents/hooks_qa.json]
   - Conservation: Key resource totals remain constant across the system (e.g. total currency = player balances + treasury + escrow).
   - Resource Stability: Zero listener leaks or unbounded memory growth.
 
-## 7. Report Template
+## 7. Report Template & Mechanical Evidence Artifact
+- **Mandatory JSON Evidence Artifact**:
+  Before concluding, `qa-tester` MUST write `.agents/evidence/station1_[TICKET].json` to disk:
+  ```json
+  {
+    "ticketId": "IMP-XXX",
+    "station": "STATION_1_QA_RED",
+    "executed": true,
+    "testFile": "tests/contracts/impXXX.test.ts",
+    "testCount": 16,
+    "expectCount": 32,
+    "assertDensityRatio": 2.0,
+    "redVerified": true,
+    "failureReasonVerbatim": "AssertionError: expected undefined to be ...",
+    "timestamp": "2026-10-05T07:30:00.000Z"
+  }
+  ```
+  *Banned Prose-Only Handoff*: Downstream stations (Station 2, Station 3) and `node scripts/check_evidence.mjs` read this physical JSON file. Handoffs lacking this JSON evidence are automatically BLOCKED.
+
+- **Markdown Report Template**:
 ```markdown
 ### 🧪 QA TESTER REPORT: [TASK_NAME]
 - **Baseline Status**: [PASS / BLOCKED] (Existing tests verified)
 - **Test File Created**: `[tests/path/to/test.ts]`
-- **Test Count**: [N] atomic tests — [N] `expect()` calls — ratio [X.X] (1.0–3.5)
+- **Test Count**: [N] atomic tests - [N] `expect()` calls - ratio [X.X] (1.0-3.5)
 - **Contract Tags**: `[TC-xx.x/MSS]`, `[UC-xxx]`
-- **RED Classification**: Business RED (MANDATORY: not Infrastructure RED)
+- **RED Classification**: Semantic Behavioral RED (MANDATORY: not Infrastructure RED)
 - **Exact Failure Output** (paste verbatim):
   ```
   AssertionError: expected undefined to be "2.500 Tr."
   at tests/contracts/imp234.test.ts:47
   ```
-- **Consumer Assertion**: ✔️ Verified at consumption point
-- **Isolation Check**: ✔️ Zero files modified in `src/**`
+- **Evidence JSON**: `.agents/evidence/station1_[TICKET].json` (created)
+- **Consumer Assertion**: Verified at consumption point
+- **Isolation Check**: Zero files modified in `src/**`
 - **Inversion Gate**: [VERIFIED RED on mutation / PENDING Implementation]
 
 ### 🩺 SDLC HARNESS TELEMETRY
@@ -122,4 +150,5 @@ hooks: [.agents/hooks_qa.json]
 - **Harness Suggestion**: [Actionable suggestion to improve SDLC process, test helpers, or settings]
 ```
 
-> **Enforcement**: Reports omitting "Exact Failure Output" are **BLOCKED**. Reviewers must reject Station 1 handoffs without verbatim failure evidence.
+> **Enforcement**: Reports omitting "Exact Failure Output" or `.agents/evidence/station1_[TICKET].json` are **BLOCKED**. Reviewers must reject Station 1 handoffs without verbatim failure evidence and machine JSON.
+

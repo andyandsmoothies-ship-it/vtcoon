@@ -100,7 +100,7 @@ export function MicroVehicleProceduralFallback({ v }: MicroVehicleFallbackProps)
   );
 }
 
-export function DioramaTraffic(): React.ReactElement {
+export function DioramaTraffic({ isMobile = false }: { readonly isMobile?: boolean } = {}): React.ReactElement {
   const phase = useEnvironmentStore((s) => s.phase);
   const isNight = phase === 'night';
   const isSunset = phase === 'sunset';
@@ -152,8 +152,22 @@ export function DioramaTraffic(): React.ReactElement {
     return new CatmullRomCurve3(points, true, 'catmullrom', 0.15);
   }, []);
 
+  const initialTransforms = useMemo(() => {
+    return MICRO_VEHICLES.map((v) => {
+      const curve = v.track === 'outer' ? outerCurve : innerCurve;
+      const progress = ((v.offset) % 1 + 1) % 1;
+      const pos = curve.getPointAt(progress);
+      const tangent = curve.getTangentAt(progress);
+      return {
+        pos: [pos.x, pos.y, pos.z] as [number, number, number],
+        yaw: Math.atan2(tangent.x, tangent.z),
+      };
+    });
+  }, [outerCurve, innerCurve]);
+
   // Di chuyển liên tục tuần hoàn & tự động tính góc xoay yaw mượt mà khi rẽ cua
   useSafeFrame((state) => {
+    if (isMobile) return;
     const t = state.clock.elapsedTime;
     MICRO_VEHICLES.forEach((v, idx) => {
       const grp = vehicleRefs.current[idx];
@@ -184,9 +198,12 @@ export function DioramaTraffic(): React.ReactElement {
       >
         {MICRO_VEHICLES.map((v, idx) => {
           const [w, h, l] = v.size;
+          const initial = initialTransforms[idx];
           return (
             <group
               key={v.id}
+              position={initial?.pos}
+              rotation={initial ? [0, initial.yaw, 0] : undefined}
               ref={(el) => {
                 vehicleRefs.current[idx] = el;
               }}
