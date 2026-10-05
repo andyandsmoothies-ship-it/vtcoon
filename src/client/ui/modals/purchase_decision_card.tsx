@@ -92,12 +92,12 @@ export function PurchaseDecisionCard({
               <div
                 key={c.cellIndex}
                 data-testid={`district-cell-chip-${c.cellIndex}`}
-                className={`px-1 sm:px-2 py-1 rounded-xl border text-[11px] sm:text-xs min-w-0 flex flex-col justify-between transition-all min-h-[3.25rem] sm:min-h-[3.5rem] ${
+                className={`px-1.5 py-1 rounded-xl border text-[11px] min-w-0 flex flex-col justify-between transition-all min-h-[3.75rem] sm:min-h-[4rem] overflow-hidden ${
                   c.isTarget ? 'ring-2 ring-amber-400 bg-amber-50/80 border-amber-400' : 'bg-amber-50/60 border-amber-900/10'
                 }`}
                 title={c.ownerName ? `Sở hữu: ${c.ownerName}` : c.isTarget ? 'Ô mục tiêu' : 'Chưa có chủ'}
               >
-                <div className="flex items-center justify-between gap-1 mb-1 min-w-0">
+                <div className="flex items-center justify-between gap-1 mb-0.5 min-w-0">
                   <div className="min-w-0 flex-1 line-clamp-2">
                     <span className="font-black text-slate-900 text-[11px] sm:text-xs block truncate" title={c.name}>
                       {c.name.split(' (')[0]}
@@ -117,7 +117,7 @@ export function PurchaseDecisionCard({
                     </span>
                   )}
                 </div>
-                <div className={`text-[11px] sm:text-xs py-0.5 rounded-lg text-center whitespace-nowrap border mt-auto ${badgeClasses}`}>
+                <div className={`text-[11px] leading-tight font-black tracking-tighter py-0.5 px-0.5 rounded-md text-center whitespace-nowrap border mt-auto ${badgeClasses}`}>
                   {badgeLabel}
                 </div>
               </div>

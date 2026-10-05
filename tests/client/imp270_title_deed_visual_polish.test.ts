@@ -4,6 +4,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { TitleDeedModal } from '../../src/client/ui/modals/title_deed_modal';
 import { TitleDeedRentTable } from '../../src/client/ui/modals/title_deed_rent_table';
 import { TitleDeedActionFooter } from '../../src/client/ui/modals/title_deed_action_footer';
+import { PurchaseDecisionCard } from '../../src/client/ui/modals/purchase_decision_card';
 
 describe('IMP-270 TitleDeedModal Visual Polish (Desktop & Mobile 360px)', () => {
   it('[TC-270.01/MSS][UC-DEED-POLISH/MSS] Nút đóng ✕ trên ribbon header có độ tương phản nâng cao border-white/60 và bg-black/35', () => {
@@ -89,5 +90,25 @@ describe('IMP-270 TitleDeedModal Visual Polish (Desktop & Mobile 360px)', () => 
     expect(html).toContain('bg-[#FFFBF2]');
     expect(html).toContain('text-rose-800');
     expect(html).toContain('min-h-[48px]');
+  });
+
+  it('[TC-270.06/MSS][UC-DEED-POLISH/MSS] PurchaseDecisionCard chip BĐS có overflow-hidden và badge 🎯 MUA NGAY có tracking-tighter chống tràn viền', () => {
+    // Given PurchaseDecisionCard cho ô mục tiêu đủ tiền mua
+    // When render ra HTML
+    // Then chip chứa overflow-hidden bảo vệ bo góc và badge chứa tracking-tighter chống tràn ngang
+    const html = renderToStaticMarkup(
+      React.createElement(PurchaseDecisionCard, {
+        cellIndex: 6,
+        deedPrice: 1000,
+        buyerBalance: 5000,
+        buyerId: 'p1',
+        allPlayers: {
+          p1: { id: 'p1', name: 'Player 1', balance: 5000, ownedProperties: [] },
+        },
+      })
+    );
+    expect(html).toContain('overflow-hidden');
+    expect(html).toContain('tracking-tighter');
+    expect(html).toContain('🎯 MUA NGAY');
   });
 });

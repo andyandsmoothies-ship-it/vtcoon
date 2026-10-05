@@ -1,6 +1,6 @@
 ---
 name: impeccable
-description: High-craft tactile 2D UI/UX design, review, and polish skill for commercial games under Antigravity 2.0. Directs critique, audit, polish, optimize workflows, motion budget, and tactile shadows. Integrates 23-command Impeccable engine and launcher CLI.
+description: High-craft tactile 2D UI/UX design, review, and polish skill for commercial games under Antigravity 2.0. Directs critique, audit, polish, optimize workflows, motion budget, and tactile shadows. Integrates 24-command Impeccable engine and launcher CLI.
 ---
 
 # TACTILE 2D UI/UX DESIGN SKILL (IMPECCABLE STANDARD)
@@ -97,7 +97,7 @@ The **Impeccable** standard ensures 2D UI matches commercial game quality, synch
 
 ---
 
-## 5. 23 IMPECCABLE ENGINE COMMANDS TABLE
+## 5. 24 IMPECCABLE ENGINE COMMANDS TABLE
 
 | Command | Category | Description | Reference |
 | :--- | :--- | :--- | :--- |
@@ -124,6 +124,7 @@ The **Impeccable** standard ensures 2D UI matches commercial game quality, synch
 | `adapt [target]` | Fix | Adapt across device sizes and viewports | [`reference/adapt.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/adapt.md) · native: [`reference/adapt.native.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/adapt.native.md) |
 | `optimize [target]` | Fix | Profile and optimize 2D rendering efficiency | [`reference/optimize.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/optimize.md) |
 | `live` | Iterate | Live browser inspection: pick elements, generate variants | [`reference/live.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/live.md) |
+| `generate [spec]` | Iterate | Agent-driven live variant generation without manual picking | [`reference/generate.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/generate.md) |
 
 ---
 
@@ -133,6 +134,8 @@ When implementing or refining UI, reference these detailed guides:
 - **Motion Budget & Easing**: [`reference/motion_budget.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/motion_budget.md)
 - **Multi-layer Tactile Shadows**: [`reference/tactile_shadows.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/tactile_shadows.md)
 - **Craft Floor & Invariants**: [`reference/craft-floor.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/craft-floor.md)
+- **Surface Modes & Decomposition**: [`reference/mode-operate.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/mode-operate.md), [`reference/region-map.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/region-map.md)
+- **Plan & Asset Review**: [`reference/component-review.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/component-review.md)
 - **Overall Design System**: [`docs/domain/design.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/design.md) or [`DESIGN.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/DESIGN.md)
 
 ---
@@ -141,3 +144,4 @@ When implementing or refining UI, reference these detailed guides:
 
 - **Dashboard Trap Prohibited**: In fast-paced games (15-30s turns), players cannot stop to scroll or swipe notifications. Never collapse notifications into flat generic icons or bury them in drawer menus.
 - **Glanceable HUD Principle**: Do not hide information; condense it into peripheral math formulas and compact metrics (`🔥 Land: Rent x2.5`, `🚂 4 Stations: Fee x2`). Maintain fixed strip height $\le 44\text{px}$, allowing players to absorb total game state in 0.5s with **zero clicks, zero swipes**.
+
