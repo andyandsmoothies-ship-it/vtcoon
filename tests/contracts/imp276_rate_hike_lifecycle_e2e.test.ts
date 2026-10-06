@@ -14,6 +14,9 @@ import { createRoom, createPlayer, TurnPhase } from '../../src/domain/room.js';
 import { advanceRoundBoundary } from '../../src/server/turn_loop.js';
 import { getMortgageInterestRate, collectMortgageInterest } from '../../src/server/mortgage_manager.js';
 import { useGameStore } from '../../src/client/store/game_store.js';
+import { checkPropertyUpgradeEligibility } from '../../src/client/ui/modals/modal_helpers.js';
+import { detectCellUpgrade } from '../../src/client/network/activity_property_tracker.js';
+import type { CellDelta } from '../../src/server/delta_types.js';
 
 describe('[IMP-276/E2E] Multi-Turn Lifecycle & Temporal Wire-to-Store Closed-Loop Parity', () => {
   beforeEach(() => {
@@ -164,4 +167,66 @@ describe('[IMP-276/E2E] Multi-Turn Lifecycle & Temporal Wire-to-Store Closed-Loo
     collectMortgageInterest(room, 'p1');
     expect(p1.balance).toBe(2000); // Miễn 100% lãi vay
   });
+
+  // =========================================================================
+  // VÒNG 4: QUICK BUILD & ACTIVITY FEED PARITY (IMP-276 EXPANSION)
+  // =========================================================================
+  it('[TC-E2E.10/MSS][UC-IMP276/E2E] Sổ tay danh mục BĐS: Chặn Quick Build khi balance = 1100 < 1200M do MC_RATE_HIKE', () => {
+    const result = checkPropertyUpgradeEligibility({
+      cellIndex: 19,
+      ownedProperties: [16, 18, 19],
+      propertyStates: {
+        16: { level: 0 },
+        18: { level: 0 },
+        19: { level: 0 },
+      },
+      balance: 1100,
+      isMyTurn: true,
+      turnPhase: TurnPhase.PropertyManagement,
+      activeModifiers: [{ type: MarketCardId.MC_RATE_HIKE, remainingRounds: 2, affectedCells: [] }],
+    });
+
+    expect(result.upgradeCost).toBe(1200);
+    expect(result.canUpgrade).toBe(false);
+    expect(result.reason).toBe('Số dư không đủ');
+  });
+
+  it('[TC-E2E.11/MSS][UC-IMP276/E2E] Sổ tay danh mục BĐS: Cho phép Quick Build khi balance = 1200 >= 1200M do MC_RATE_HIKE', () => {
+    const result = checkPropertyUpgradeEligibility({
+      cellIndex: 19,
+      ownedProperties: [16, 18, 19],
+      propertyStates: {
+        16: { level: 0 },
+        18: { level: 0 },
+        19: { level: 0 },
+      },
+      balance: 1200,
+      isMyTurn: true,
+      turnPhase: TurnPhase.PropertyManagement,
+      activeModifiers: [{ type: MarketCardId.MC_RATE_HIKE, remainingRounds: 2, affectedCells: [] }],
+    });
+
+    expect(result.upgradeCost).toBe(1200);
+    expect(result.canUpgrade).toBe(true);
+  });
+
+  it('[TC-E2E.12/MSS][UC-IMP276/E2E] Activity Feed: Ghi nhận đúng chi phí nâng cấp động (-1200M) khi có MC_RATE_HIKE', () => {
+    const cell: CellDelta = { index: 19, level: 1, ownerId: 'p1' };
+    const p1Hud = { id: 'p1', name: 'Player 1', balance: 800, ownedProperties: [16, 18, 19], tokenColor: '#ff0000' };
+    const nextState = {
+      ...useGameStore.getState(),
+      playersInfo: { p1: p1Hud },
+      activeModifiers: [{ type: MarketCardId.MC_RATE_HIKE, remainingRounds: 2, affectedCells: [] }],
+    };
+    const prevState = {
+      ...useGameStore.getState(),
+      playersInfo: { p1: { ...p1Hud, balance: 2000 } },
+      activeModifiers: [{ type: MarketCardId.MC_RATE_HIKE, remainingRounds: 2, affectedCells: [] }],
+    };
+
+    const res = detectCellUpgrade(cell, 1, nextState, prevState);
+    expect(res?.cost).toBe(1200);
+    expect(res?.entry.amount).toBe(-1200);
+  });
 });
+

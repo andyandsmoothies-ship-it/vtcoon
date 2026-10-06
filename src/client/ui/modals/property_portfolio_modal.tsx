@@ -10,11 +10,12 @@ import { BondIssuanceTab } from './bond_issuance_tab';
 import { PropertyCardActions } from './property_card_actions';
 import { type BondContract, BondTrancheId } from '../../../domain/bond_types';
 import { MacroCycleType } from '../../../domain/macro_cycle_types';
+import { type UpgradeCostModifier } from '../../../domain/property_upgrade.js';
 
 export interface PropertyPortfolioModalProps {
   readonly ownedProperties: readonly number[];
   readonly isTradeFrozen?: boolean;
-  readonly activeModifiers?: readonly { readonly type: string; readonly remainingRounds: number; readonly affectedCells?: readonly number[] }[];
+  readonly activeModifiers?: readonly UpgradeCostModifier[];
   readonly propertyStates?: Record<number, { readonly ownerId?: string | null; readonly level?: number; readonly isMortgaged?: boolean }>;
   readonly currentBalance?: number;
   readonly playerNetWorth?: number;
@@ -54,7 +55,7 @@ export function PropertyPortfolioModal({
   const filteredProperties = ownedProperties.filter((cellIndex) => {
     if (filter === 'mortgaged') return Boolean(propertyStates[cellIndex]?.isMortgaged);
     if (filter === 'upgradeable') {
-      return checkPropertyUpgradeEligibility({ cellIndex, ownedProperties, propertyStates, balance: currentBalance, isMyTurn, turnPhase }).canUpgrade;
+      return checkPropertyUpgradeEligibility({ cellIndex, ownedProperties, propertyStates, balance: currentBalance, isMyTurn, turnPhase, activeModifiers }).canUpgrade;
     }
     if (filter === 'nearMonopoly') {
       return analyzePropertyMonopolyInsight({ cellIndex, ownedProperties, allPlayers }).isNearMonopoly;
@@ -221,6 +222,7 @@ export function PropertyPortfolioModal({
                 balance: currentBalance,
                 isMyTurn,
                 turnPhase,
+                activeModifiers,
               });
 
               return (

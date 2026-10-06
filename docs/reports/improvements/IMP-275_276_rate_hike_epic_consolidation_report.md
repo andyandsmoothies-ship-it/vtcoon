@@ -67,31 +67,31 @@ flowchart TD
 | **`IMP-275`** | `domain` | Cập nhật logic nhân 1.2x chi phí xây dựng, thời hạn 2 vòng, độ ưu tiên khi đối đầu với `MC_CREDIT_STIMULUS` | [`IMP-275_report.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/reports/improvements/IMP-275_rate_hike_upgrade_cost_report.md) | 8/8 Mutants Killed 🎯 |
 | **`IMP-276A`** | `client-ui` | Đồng bộ giá nâng cấp động trên Title Deed, bổ sung Turn/Phase Guard chống nút sáng ảo, triệt tiêu Visual Split-Brain | [`IMP-276A_report.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/reports/improvements/IMP-276A_title_deed_affordance_report.md) | 9/9 Mutants Killed 🎯 |
 | **`IMP-276B`** | `client-ui` | Gỡ bỏ hardcode `isDefaultMacroMarket`, đồng bộ Ticker, Punchy Summary và Hero Stat Box trên 1 dòng đơn | [`IMP-276B_report.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/reports/improvements/IMP-276B_event_card_sync_report.md) | 9/9 Mutants Killed 🎯 |
-| **`IMP-276-E2E`** | `integration` | Kiểm chứng toàn vẹn chu trình 3 vòng chơi (Kích hoạt $\to$ Thu lãi qua GO $\to$ Mãn hạn tự động hoàn nguyên) | [`imp276_rate_hike_lifecycle_e2e.test.ts`](file:///c:/Users/HP/Documents/GitHub/vtcoon/tests/contracts/imp276_rate_hike_lifecycle_e2e.test.ts) | 9/9 Tests GREEN 🟢 |
+| **`IMP-276-E2E`** | `integration` | Toàn vẹn chu trình 3 vòng chơi + Bịt kín Ghost Quick Build (Sổ tay BĐS) & Dynamic Activity Feed | [`imp276_rate_hike_lifecycle_e2e.test.ts`](file:///c:/Users/HP/Documents/GitHub/vtcoon/tests/contracts/imp276_rate_hike_lifecycle_e2e.test.ts) | 12/12 Tests GREEN 🟢 |
 
 ---
 
 ### 3. TỔNG HỢP CHỈ SỐ ĐỊNH LƯỢNG TOÀN DIỆN CỦA EPIC (CUMULATIVE METRICS)
 
 #### 3.1. Thống Kê Dòng Mã (Cumulative LOC Accounting)
-- **Tổng Delta Sản Xuất (`src/**`)**: **+33 net LOC** (IMP-275: +17 LOC, IMP-276A: +17 LOC, IMP-276B: -1 LOC).
+- **Tổng Delta Sản Xuất (`src/**`)**: **+37 net LOC** (IMP-275: +17 LOC, IMP-276A: +17 LOC, IMP-276B: -1 LOC, Portfolio & Activity Feed Fixes: +4 LOC).
 - **Subtractive Refactoring Đạt Chuẩn**: Việc bóc tách vi lát cắt giúp loại bỏ 1 biến cờ hardcode lỗi thời (`isDefaultMacroMarket`), giữ nguyên tắc Deep Modules và không sinh ra bất kỳ pass-through wrapper rác nào.
 - **Quản lý Nợ Kỹ Thuật (Tech Debt Registration)**:
   - `DEBT-EVENT-CARD-MODAL-407`: `event_card_modal.tsx` ở mức 406 LOC (trong ngưỡng cảnh báo Tier 2: 400 - 500 LOC). Đã thực hiện giảm dòng mã thành công (-1 LOC).
   - `DEBT-MACRO-POLICY-STACKING`: Đăng ký nợ kinh tế game về hiện tượng Net Deflation (Xem Mục 4.1).
 
 #### 3.2. Mật Độ Kiểm Thử Hợp Đồng & Kiểm Toán Đối Kháng (Testing & Mutation Sensitivity)
-- **Tổng số Atomic Contract Tests**: **43 tests** (100% PASS trên 4 test suites).
-- **Mật độ khẳng định (Assertion Density)**: Trung bình **1.74 asserts/test** (thỏa mãn tuyệt đối sàn $\le 4$ asserts/test, zero loops in `it()`).
+- **Tổng số Atomic Contract Tests**: **46 tests** (100% PASS trên 4 test suites).
+- **Mật độ khẳng định (Assertion Density)**: Trung bình **1.78 asserts/test** (thỏa mãn tuyệt đối sàn $\le 4$ asserts/test, zero loops in `it()`).
 - **Tổng số Mutants thử nghiệm tại Trạm 4**: **26 mutants** across 3 slices.
 - **Tỷ lệ tiêu diệt Mutants (Kill Rate)**: **100.0% (26/26 mutants KILLED, 0 survived)**.
 - **Kiểm toán cơ học**: Toàn bộ evidence JSON vượt qua `node scripts/check_evidence.mjs` với 0 defects.
 
 | Chỉ Số Thẩm Định | IMP-275 | IMP-276A | IMP-276B | IMP-276-E2E | **TỔNG CỘNG EPIC** |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **Contract Tests Đã Viết** | 12 | 12 | 10 | 9 | **43 Tests** |
-| **Assert Count** | 22 | 22 | 17 | 14 | **75 Asserts** |
-| **Tỷ lệ Asserts / Test** | 1.83 | 1.83 | 1.70 | 1.56 | **1.74 (Chuẩn <= 4)** |
+| **Contract Tests Đã Viết** | 12 | 12 | 10 | 12 | **46 Tests** |
+| **Assert Count** | 22 | 22 | 17 | 21 | **82 Asserts** |
+| **Tỷ lệ Asserts / Test** | 1.83 | 1.83 | 1.70 | 1.75 | **1.78 (Chuẩn <= 4)** |
 | **Mutants Tested** | 8 | 9 | 9 | N/A | **26 Mutants** |
 | **Mutants Killed** | 8 | 9 | 9 | N/A | **26 Mutants (100%)** |
 | **Pure Logic Waiver** | *Giải trình Mục 4.2* | `false` | `false` | `false` | **Tuân thủ 100%** |
@@ -125,6 +125,12 @@ Thông qua bộ test tích hợp mới [`tests/contracts/imp276_rate_hike_lifecy
 2. **Vòng 2 (Duy trì & Thu lãi qua GO)**: Người chơi đi qua ô GO bị trừ $10\%$ lãi vay thế chấp (90M thay vì 45M) $\to$ `advanceRoundBoundary` giảm `remainingRounds` từ 2 xuống 1 $\to$ Giá xây vẫn duy trì 1.2x.
 3. **Vòng 3 (Mãn hạn tự nhiên & Hoàn nguyên)**: `advanceRoundBoundary` tiêu giảm `remainingRounds` về 0 và prune sạch modifier $\to$ Client Store nhận mảng rỗng `[]` $\to$ Title Deed tự động hoàn nguyên về 1.000M $\to$ Lãi suất tại GO trở về 5% $\to$ **Zero Zombie State Leak**.
 
+#### 4.4. Bịt Kín Lỗ Hổng Quick Build (Sổ Tay BĐS) & Dynamic Activity Feed
+- **Phát hiện & Sửa chữa triệt để**:
+  1. *Sổ tay BĐS (`property_portfolio_modal.tsx` & `modal_helpers.ts`)*: Chức năng 1-Click Quick Build trước đây đọc chi phí tĩnh `deed.upgradeCosts[level]`. Khi có `MC_RATE_HIKE`, nếu người chơi có 1.100M, nút Quick Build vẫn sáng ảo vì nghĩ rằng chỉ tốn 1.000M. Đã cập nhật `checkPropertyUpgradeEligibility` tiếp nhận `activeModifiers` và tính giá qua `calculateUpgradeCost`. Kết quả: `canUpgrade = false`, nút bị chặn chuẩn xác.
+  2. *Nhật ký sự kiện (`activity_property_tracker.ts`)*: Hàm `detectCellUpgrade` trước đây tính chi phí tĩnh. Khi nâng cấp dưới `MC_RATE_HIKE`, Activity Feed chỉ hiển thị trừ 1.000M trong khi tài khoản thực tế bị trừ 1.200M. Đã sửa hàm truyền `nextState.activeModifiers` vào `calculateUpgradeCost`, đảm bảo log hiển thị chuẩn xác `-1.200M`.
+- **Kiểm chứng bổ sung**: Mở rộng 3 test cases `TC-E2E.10`, `TC-E2E.11`, `TC-E2E.12` xác nhận hành vi 100% GREEN.
+
 ---
 
 ### 5. BÀI HỌC VẬN HÀNH & KỶ LUẬT KỸ THUẬT (SDLC RETROSPECTIVE)
@@ -154,4 +160,4 @@ Thông qua bộ test tích hợp mới [`tests/contracts/imp276_rate_hike_lifecy
 ### 🎯 PHÁN QUYẾT CUỐI CÙNG (EPIC SIGN-OFF)
 
 - **Trạng thái Epic:** **CHÍNH THỨC NGHIỆM THU VÀ SẴN SÀNG MERGE VÀO NHÁNH CHÍNH (PRODUCTION READY WITH HONEST ACCOUNTING)** 🚀.
-- **Bằng chứng xác thực:** 43 tests hợp đồng GREEN, 26 mutants bị tiêu diệt 100%, 4 ảnh chụp thực địa Dual-Viewport, 1 bài test E2E 3 vòng khép kín không rò rỉ trạng thái.
+- **Bằng chứng xác thực:** 46 tests hợp đồng GREEN, 26 mutants bị tiêu diệt 100%, 4 ảnh chụp thực địa Dual-Viewport, 1 bài test E2E 3 vòng khép kín không rò rỉ trạng thái.

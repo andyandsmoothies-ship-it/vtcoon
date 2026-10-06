@@ -1,6 +1,7 @@
 // [UI-S04/MSS] Modal Helpers — Pure calculation & validation functions for business modals
 import { PROPERTY_DEEDS, RAILROAD_FEES, P2P_TAX_RATE } from '../../../domain/property_data';
 import { BOARD_CONFIG, ColorGroup, CellType } from '../../../domain/board_config';
+import { calculateUpgradeCost, type UpgradeCostModifier } from '../../../domain/property_upgrade.js';
 import type { ModalPayloadMap, PlayerInfo } from '../../store/game_store_types.js';
 
 export interface DeedDisplayInfo {
@@ -186,6 +187,7 @@ export interface CheckUpgradeParams {
   readonly balance: number;
   readonly isMyTurn?: boolean;
   readonly turnPhase?: string;
+  readonly activeModifiers?: readonly UpgradeCostModifier[];
 }
 
 export interface UpgradeEligibility {
@@ -274,7 +276,7 @@ export function checkPropertyUpgradeEligibility(params: CheckUpgradeParams): Upg
     };
   }
 
-  const upgradeCost = deed.upgradeCosts[currentLevel] ?? 0;
+  const upgradeCost = calculateUpgradeCost(cellIndex, currentLevel, params.activeModifiers);
   const nextLevel = targetLevel as 1 | 2 | 3;
 
   if (balance < upgradeCost) {

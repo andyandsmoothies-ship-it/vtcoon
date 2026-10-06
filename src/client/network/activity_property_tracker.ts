@@ -4,6 +4,7 @@ import type { GameState } from '../store/game_store.js';
 import { type ActivityLogEntry } from '../store/activity_store.js';
 import { BOARD_CONFIG } from '../../domain/board_config.js';
 import { PROPERTY_DEEDS } from '../../domain/property_data.js';
+import { calculateUpgradeCost } from '../../domain/property_upgrade.js';
 import { formatCurrency } from '../ui/ui_helpers.js';
 import { getPlayerName, type PropertyFinancialContext } from './activity_financial_tracker.js';
 
@@ -75,7 +76,7 @@ export function detectCellUpgrade(
   const owner = ownerId ? (nextState.playersInfo[ownerId] ?? prevState.playersInfo[ownerId]) : undefined;
   const ownerName = getPlayerName(owner, ownerId);
   const deed = PROPERTY_DEEDS.get(cell.index);
-  const cost = deed?.upgradeCosts?.[targetLevel - 1] ?? 0;
+  const cost = calculateUpgradeCost(cell.index, targetLevel - 1, nextState.activeModifiers);
 
   return {
     entry: {
