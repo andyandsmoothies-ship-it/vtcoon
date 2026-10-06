@@ -32,3 +32,14 @@
 10. **React Component Invocation in Tests & Keyboard A11y Contract [UI/TEST] [IMP-267]**:
     - **Cấm Gọi Trực Tiếp Function Component Như Hàm JS Thuần Túy**: Banned tuyệt đối việc gọi component dạng hàm JS `const vdom = MyComponent(props)` trong `tests/**`. Mọi component sử dụng React Hooks bắt buộc phải được render trong một React rendering context (ví dụ `renderToStaticMarkup(React.createElement(() => MyComponent(props)))` hoặc Testing Library `render()`). Khi gặp test cũ gọi sai chuẩn làm gãy regression, implementer phải sửa file test cũ bằng wrapper React hợp lệ; NGHIÊM CẤM đưa mã phòng vệ dị tật (`try...catch`, `isReactContext`) vào `src/**` để chiều chuộng test rác (vi phạm Anti-TIDD).
     - **Bắt Buộc Ca Test Bàn Phím Cho Carousel / Stepper**: Khi viết test Station 1 cho thành phần có phân trang, tab hoặc lật thẻ, ma trận test bắt buộc có tối thiểu 1 ca test sự kiện bàn phím (`fireEvent.keyDown(window, { key: 'ArrowRight' })`), cấm chỉ kiểm thử sự kiện chuột `click()`.
+
+11. **Bẫy Treo Tiến Trình Chạy Ngầm Do CLI Tương Tác & Lỗi Parse PowerShell [TOOLING/CLI] (Gotcha 42)**:
+    - **Bẫy Nguy Hiểm (Non-Interactive Subshell Hang / Empty Log)**: Khi AI hoặc CI chạy lệnh qua subshell (background process với piped stdin không có bàn phím tương tác):
+      1. Lệnh `npx <package>` khi package chưa cài sẵn trong `node_modules` sẽ hiển thị prompt ngầm `Need to install... Ok to proceed? (y)`. Vì không có bàn phím để gõ "y", tiến trình bị treo vô tận (deadlock/hang), xuất ra log rỗng (`Empty log`).
+      2. Trên Windows PowerShell, truyền code nhiều dòng chứa dấu nháy kép (`"`), nháy đơn (`'`), hoặc xuống dòng vào cờ `-e "..."` của file `.cmd` sẽ bị PowerShell ngắt/mutilate chuỗi, làm tiến trình con bị kẹt trong luồng stdin.
+      3. Chạy mã Client (React/JSX/Zustand Store) bằng Node.js thuần sẽ bị lỗi hoặc treo vì thiếu môi trường DOM/Browser.
+    - **Phát Hiện Vật Lý (Physical Finding)**: Lệnh `npx tsx -e "import ... from MarketEventTicker..."` bị treo hoàn toàn vì `tsx` không có trong `devDependencies`, `npx` đứng chờ `y`, và PowerShell parse hỏng chuỗi multi-line, khiến task bị hủy sau khi treo vô ích.
+    - **Bất Biến Bắt Buộc (Verified Invariants)**:
+      1. *Luôn dùng cờ `--yes` khi dùng `npx`*: Tuyệt đối cấm gõ `npx <pkg>` trần trong subshell; BẮT BUỘC dùng `npx --yes <pkg>` hoặc cài gói vào `devDependencies` trước khi gọi.
+      2. *Cấm Inline Code Nhiều Dòng trên PowerShell*: CẤM dùng `-e "..."` nhiều dòng trên Windows PowerShell. Muốn chạy code nhanh, BẮT BUỘC tạo file scratch tạm (ví dụ: `scratch.ts` hoặc test tạm trong `tests/`) rồi chạy qua `vitest run` hoặc `node`, sau đó xóa file.
+      3. *Mã Client Bắt Buộc Chạy Qua Test Runner*: Mã UI/Client có JSX hoặc Browser Store phải chạy qua Vitest với môi trường `happy-dom` (`vitest run <test_file>`), cấm dùng Node.js thuần để chạy.

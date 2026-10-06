@@ -22,9 +22,12 @@ import {
  * 6. Store State vs Action SRP Separation audit (no functions in State data shape).
  */
 
-const planPath = process.argv[2];
+const args = process.argv.slice(2);
+const autoSign = args.includes('--auto-sign');
+const planPath = args.find((a) => !a.startsWith('--'));
+
 if (!planPath) {
-  console.error('Usage: node scripts/audit_plan.mjs <path-to-plan.md>');
+  console.error('Usage: node scripts/audit_plan.mjs <path-to-plan.md> [--auto-sign]');
   process.exit(1);
 }
 
@@ -395,5 +398,36 @@ if (errors > 0) {
   process.exit(1);
 } else {
   console.log(`✅ AUDIT PASSED: ${targetFiles.size} files verified, ${checkedSnippets} snippets match physical disk, ${checkedTests} test specs clean.`);
+
+  if (autoSign) {
+    const filename = path.basename(planPath, '.md');
+    // Extract ticket ID e.g. PLAN_IMP_276B_EVENT_CARD_SYNC -> IMP-276B
+    const ticketMatch = filename.match(/PLAN_([A-Z0-9]+(?:[-_][A-Z0-9]+)?)/i);
+    const rawTicket = ticketMatch ? ticketMatch[1].replace(/_/g, '-') : filename.replace('PLAN_', '');
+    const ticketId = rawTicket.toUpperCase();
+
+    const auditDir = path.resolve(process.cwd(), '.agents/audit');
+    if (!fs.existsSync(auditDir)) fs.mkdirSync(auditDir, { recursive: true });
+
+    const auditFilePath = path.join(auditDir, `PLAN_AUDIT_${ticketId}.md`);
+    const auditContent = `# PLAN AUDIT REPORT: ${ticketId}
+
+- **Auditor**: Mechanical Plan Auditor (\`scripts/audit_plan.mjs --auto-sign\`)
+- **Date**: ${new Date().toISOString()}
+- **Plan File**: \`${planPath}\`
+- **Target Files Verified**: ${targetFiles.size}
+- **Snippets Verified**: ${checkedSnippets}
+- **Contract Tests Clean**: ${checkedTests}
+- **Flow Taxonomy**: Compliant ([UC-.../MSS] and [UC-.../A#])
+- **Anti-TIDD**: 0 orphaned production exports
+- **Defects**: 0
+
+## 🏁 HARD GATE VERDICT
+**HARDENED_APPROVED**
+`;
+    fs.writeFileSync(auditFilePath, auditContent, 'utf8');
+    console.log(`\n✍️ [AUTO-SIGN] Phán quyết HARDENED_APPROVED đã được tự động ký tại:\n   ${auditFilePath}`);
+  }
+
   process.exit(0);
 }

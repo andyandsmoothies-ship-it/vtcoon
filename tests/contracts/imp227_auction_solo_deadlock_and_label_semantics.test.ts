@@ -192,7 +192,7 @@ describe('[IMP-227] Auction Solo Deadlock Fix & Label Semantics Contract Test Su
 
       mgr.handleDecline(room.roomCode, 'player_1');
 
-      // Giá sàn phát mãi 70% của 1500 là 1050
+      // Giá sàn phát mãi 70% của 2000 là 1400
       const calls = infoSpy.mock.calls
         .map((c) => {
           try {
@@ -205,7 +205,7 @@ describe('[IMP-227] Auction Solo Deadlock Fix & Label Semantics Contract Test Su
 
       expect(calls.length).toBeGreaterThanOrEqual(1);
       expect(calls[0]?.delta?.foreclosureRate).toBe(0.70);
-      expect(calls[0]?.delta?.foreclosurePrice).toBe(1050);
+      expect(calls[0]?.delta?.foreclosurePrice).toBe(1400);
       infoSpy.mockRestore();
     });
   });
@@ -255,13 +255,13 @@ describe('[IMP-227] Auction Solo Deadlock Fix & Label Semantics Contract Test Su
       mgr.handleAuctionPass(room.roomCode, 'bot_2');
       mgr.handleAuctionPass(room.roomCode, 'bot_3');
 
-      // bot_4 là người cuối cùng chưa pass, đặt giá hợp lệ
-      mgr.handleAuctionBid(room.roomCode, 'bot_4', 800);
+      // bot_4 là người cuối cùng chưa pass, đặt giá hợp lệ (>= startingBid 1000)
+      mgr.handleAuctionBid(room.roomCode, 'bot_4', 1100);
 
       expect(room.phase).toBe(TurnPhase.PropertyManagement);
       const lastRes = mgr.getLastAuctionResult(room.roomCode);
       expect(lastRes?.winnerId).toBe('bot_4');
-      expect(lastRes?.winningBid).toBe(800);
+      expect(lastRes?.winningBid).toBe(1100);
     });
 
     it('[TC-227.10/MSS][UC-IMP227] Actor Inversion (Human declined, Bots passed): Khi Human từ chối mua và toàn bộ các Bot còn lại chọn Pass, sàn đóng ngay lập tức, không bị chặn bởi hasHumanInRoom', () => {
@@ -291,22 +291,22 @@ describe('[IMP-227] Auction Solo Deadlock Fix & Label Semantics Contract Test Su
   // FACET 4: UI SEMANTICS & PROPERTY DEEDS (3 atomic tests)
   // =========================================================================
   describe('Facet 4: UI Semantics & Property Deeds', () => {
-    it('[TC-227.11/MSS][UC-IMP227] AuctionModal Hero Header: Render đồng thời cả Giá gốc: 1.500 Tr. và Giá khởi điểm: 750 Tr., không mâu thuẫn ngữ nghĩa với giá thầu hiện tại', () => {
+    it('[TC-227.11/MSS][UC-IMP227] AuctionModal Hero Header: Render đồng thời cả Giá gốc: 2.000 Tr. và Giá khởi điểm: 1.000 Tr., không mâu thuẫn ngữ nghĩa với giá thầu hiện tại', () => {
       const html = renderToStaticMarkup(
         React.createElement(AuctionModal, {
-          cellIndex: 12, // EVN, basePrice = 1500
+          cellIndex: 12, // EVN, basePrice = 2000
           currentBid: 1250,
-          startingBid: 750,
+          startingBid: 1000,
           highestBidderId: 'player_1',
           timeRemaining: 15,
         })
       );
 
-      // Phải có cả Giá gốc và Giá khởi điểm, giá khởi điểm là 750 (50% của 1500)
+      // Phải có cả Giá gốc và Giá khởi điểm, giá khởi điểm là 1000 (50% của 2000)
       expect(html).toContain('Giá gốc:');
-      expect(html).toContain('1.500');
+      expect(html).toContain('2.000');
       expect(html).toContain('Giá khởi điểm:');
-      expect(html).toContain('750');
+      expect(html).toContain('1.000');
     });
 
     it('[TC-227.12/MSS][UC-IMP227] AuctionDistrictCard: Ô 12 (EVN) hiển thị nhãn LƯỚI ĐIỆN, Ô 28 (Viettel) hiển thị nhãn NÂNG CẤP 5G', () => {

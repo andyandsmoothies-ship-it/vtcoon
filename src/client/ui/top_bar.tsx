@@ -39,7 +39,7 @@ function MobileFpsBadge({ onToggleConsole }: { readonly onToggleConsole: () => v
           }`}
           aria-hidden="true"
         />
-        <span>{fps}<span className="hidden min-[400px]:inline"> FPS</span></span>
+        <span>{fps}<span className="hidden min-[480px]:inline"> FPS</span></span>
       </button>
     </>
   );
@@ -106,12 +106,12 @@ export function TopBar(props: TopBarProps): React.ReactElement {
       className="w-full max-w-full overflow-hidden flex justify-center items-center pointer-events-none px-1 sm:px-4 pt-[calc(0.375rem+env(safe-area-inset-top))] sm:pt-3"
     >
       <div
-        className="pointer-events-auto relative flex items-center justify-between gap-1.5 min-[360px]:gap-2 sm:gap-3 md:gap-4 bg-[#FFFDF8] border border-slate-300/80 shadow-lg shadow-slate-900/10 rounded-2xl p-1.5 sm:p-2 px-2 min-[360px]:px-2.5 sm:px-4 w-full sm:w-auto max-w-[calc(100vw-0.75rem)] sm:max-w-4xl text-slate-900 select-none"
+        className="pointer-events-auto relative flex items-center justify-between gap-1 min-[360px]:gap-1.5 sm:gap-3 md:gap-4 bg-[#FFFDF8] border border-slate-300/80 shadow-lg shadow-slate-900/10 rounded-2xl p-1.5 sm:p-2 pl-1.5 pr-3 min-[360px]:pl-2 min-[360px]:pr-3.5 sm:px-4 w-full sm:w-auto max-w-[calc(100vw-0.75rem)] sm:max-w-4xl text-slate-900 select-none"
       >
         {/* Cụm bên trái: Thông tin trận đấu */}
         <div
           data-testid="match-info-capsule"
-          className="flex items-center gap-1 min-[360px]:gap-1.5 sm:gap-3 text-xs md:text-sm font-medium shrink-0 px-2 min-[360px]:px-2.5 sm:px-4"
+          className="flex items-center gap-1 min-[360px]:gap-1 sm:gap-2.5 text-xs md:text-sm font-medium shrink-0 px-2 min-[360px]:px-2.5 sm:px-4"
         >
           {/* Vòng đấu */}
           <div className="flex items-center gap-1 sm:gap-2">
@@ -128,7 +128,7 @@ export function TopBar(props: TopBarProps): React.ReactElement {
           {isSubPhaseActive ? (
             <div
               data-testid="topbar-subphase-indicator"
-              className="flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-900 select-none animate-in fade-in duration-150"
+              className="flex items-center gap-1 sm:gap-1.5 px-1.5 min-[360px]:px-1.5 sm:px-2 py-0.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-900 select-none animate-in fade-in duration-150"
             >
               <span className="text-xs sm:text-sm" aria-hidden="true">
                 {isAuctionActive ? '🏛️' : isTradeActive ? '🤝' : '🏢'}

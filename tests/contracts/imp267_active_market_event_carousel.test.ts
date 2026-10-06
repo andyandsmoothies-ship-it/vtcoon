@@ -229,16 +229,16 @@ describe('[IMP-267] Modal Carousel Lật Thẻ Đa Sự Kiện Thị Trường &
     expect(onConfirm).toHaveBeenCalledTimes(1);
   });
 
-  it('[TC-267.10/MSS][UC-IMP267] MarketEventTicker với 3 active modifiers -> hiển thị tooltip xem toàn bộ và badge +2 sự kiện', () => {
+  it('[TC-267.10/MSS][UC-IMP267] MarketEventTicker với 3 active modifiers -> render cả 3 dòng sự kiện liên tiếp dưới TopBar', () => {
     useGameStore.setState({ activeModifiers: threeActiveModifiers });
     const { container } = mountComponent(
       React.createElement(MarketEventTicker, {
         activeModifiers: threeActiveModifiers,
       })
     );
-    const firstTicker = container.querySelector('[data-testid="market-ticker-item-MC_PUBLIC_INVEST"]');
-    expect(firstTicker?.getAttribute('title')).toContain('Bấm xem toàn bộ 3 sự kiện');
-    expect(container.textContent).toContain('+2 sự kiện');
+    expect(container.querySelector('[data-testid="market-ticker-item-MC_PUBLIC_INVEST"]')).not.toBeNull();
+    expect(container.querySelector('[data-testid="market-ticker-item-MACRO_LIQUIDITY_FREEZE"]')).not.toBeNull();
+    expect(container.querySelector('[data-testid="market-ticker-item-MC_COASTAL_STORM"]')).not.toBeNull();
   });
 
   it('[TC-267.11/MSS][UC-IMP267] Dynamic modifier addition while mounted -> renders carousel without React hook count mismatch error', () => {

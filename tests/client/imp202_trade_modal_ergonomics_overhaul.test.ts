@@ -127,8 +127,8 @@ describe('[IMP-202][Trạm 1 RED] Trade Modal Ergonomics Overhaul Contract', () 
           initialCashRequest: 0,
         })
       );
-      expect(html).toContain('Bạn đưa: 67%');
-      expect(html).toContain('Đối tác: 33%');
+      expect(html).toContain('Bạn đưa: 60%');
+      expect(html).toContain('Đối tác: 40%');
       expect(html).not.toContain('Chờ đề xuất');
       expect(html).toContain('data-testid="deal-cockpit"');
     });

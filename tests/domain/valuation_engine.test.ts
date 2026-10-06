@@ -263,10 +263,10 @@ describe('Valuation Engine — Dynamic Property Valuation', () => {
       expect(railVal.basePrice).toBe(2000);
       expect(railVal.estimatedValue).toBe(2800);
 
-      // Dien Luc EVN (o 12, gia 1500) o vong 1: 1500 * 1.4 = 2100
+      // Dien Luc EVN (o 12, gia 2000) o vong 1: 2000 * 1.4 = 2800
       const utilVal = evaluateTileValuation(12, bot, room, registry, stateMap, BotPersonality.Balanced, 0);
-      expect(utilVal.basePrice).toBe(1500);
-      expect(utilVal.estimatedValue).toBe(2100);
+      expect(utilVal.basePrice).toBe(2000);
+      expect(utilVal.estimatedValue).toBe(2800);
     });
 
     it('[Adversarial] Phong ve du lieu NaN va undefined khong lam he thong bi crash hoac tra ve NaN', () => {

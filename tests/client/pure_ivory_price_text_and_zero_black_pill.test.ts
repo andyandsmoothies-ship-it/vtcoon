@@ -135,7 +135,7 @@ describe('[TC-PIPT01/MSS..TC-PIPT04/A4][UI-S01/MSS][BR-UI-002] Pure Ivory Price 
   });
 
   beforeEach(() => {
-    originalDocument = (globalThis as any).document;
+    originalDocument = Reflect.get(globalThis, 'document');
     recordedRoundRects = [];
     recordedFillTexts = [];
     recordedStrokeRects = [];
@@ -228,16 +228,16 @@ describe('[TC-PIPT01/MSS..TC-PIPT04/A4][UI-S01/MSS][BR-UI-002] Pure Ivory Price 
       }),
     };
 
-    (globalThis as any).document = {
+    Reflect.set(globalThis, 'document', {
       createElement: (tag: string) => {
         if (tag.toLowerCase() === 'canvas') return mockCanvas;
         return {};
       },
-    };
+    });
   });
 
   afterEach(() => {
-    (globalThis as any).document = originalDocument;
+    Reflect.set(globalThis, 'document', originalDocument);
     clearTileTextureCache();
   });
 
@@ -448,11 +448,11 @@ describe('[TC-PIPT01/MSS..TC-PIPT04/A4][UI-S01/MSS][BR-UI-002] Pure Ivory Price 
       expect(markup).toContain('data-price-label="2.000"');
     });
 
-    it('[TC-PIPT02.16/MSS][UI-S01/MSS][BR-UI-002][Facet2-Reactivity] Dynamic price resolution khi có chủ: ô tiện ích cellIndex 12 hiển thị nhãn 1.500', () => {
+    it('[TC-PIPT02.16/MSS][UI-S01/MSS][BR-UI-002][Facet2-Reactivity] Dynamic price resolution khi có chủ: ô tiện ích cellIndex 12 hiển thị nhãn 2.000', () => {
       const markup = renderToStaticMarkup(
         React.createElement(OwnerPricePill, { cellIndex: 12, ownerColor: '#E67E22' })
       );
-      expect(markup).toContain('data-price-label="1.500"');
+      expect(markup).toContain('data-price-label="2.000"');
     });
 
     it('[TC-PIPT02.17/MSS][UI-S01/MSS][BR-UI-002][Facet2-Reactivity] Dynamic price resolution khi có chủ: ô cao cấp cellIndex 39 hiển thị nhãn 4.000', () => {

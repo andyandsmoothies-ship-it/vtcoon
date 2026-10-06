@@ -69,7 +69,7 @@ describe('[TC-IMP102/MSS][UI-S01/MSS][BR-UI-002] Zero 2D Price Decal & Pure 3D P
   let currentLineWidth = 1;
 
   beforeEach(() => {
-    originalDocument = (globalThis as any).document;
+    originalDocument = Reflect.get(globalThis, 'document');
     recordedRoundRects = [];
     recordedFillTexts = [];
     recordedStrokeRects = [];
@@ -151,16 +151,16 @@ describe('[TC-IMP102/MSS][UI-S01/MSS][BR-UI-002] Zero 2D Price Decal & Pure 3D P
       getContext: vi.fn(() => mockCtx),
     };
 
-    (globalThis as any).document = {
+    Reflect.set(globalThis, 'document', {
       createElement: (tag: string) => {
         if (tag === 'canvas') return mockCanvas;
         return {};
       },
-    };
+    });
   });
 
   afterEach(() => {
-    (globalThis as any).document = originalDocument;
+    Reflect.set(globalThis, 'document', originalDocument);
     clearTileTextureCache();
   });
 
@@ -258,11 +258,11 @@ describe('[TC-IMP102/MSS][UI-S01/MSS][BR-UI-002] Zero 2D Price Decal & Pure 3D P
       expect(markup).toContain('data-price-label="2.000"');
     });
 
-    it('[TC-IMP102.09/MSS][BR-UI-002] OwnerPricePill dynamically resolves utility deed price from cellIndex 12 (1.500)', () => {
+    it('[TC-IMP102.09/MSS][BR-UI-002] OwnerPricePill dynamically resolves utility deed price from cellIndex 12 (2.000)', () => {
       const markup = renderToStaticMarkup(
         React.createElement(OwnerPricePill, { cellIndex: 12, ownerColor: '#EF4444' })
       );
-      expect(markup).toContain('data-price-label="1.500"');
+      expect(markup).toContain('data-price-label="2.000"');
     });
 
     it('[TC-IMP102.10/MSS][BR-UI-002] OwnerPricePill resolves highest value property from cellIndex 39 (4.000)', () => {
@@ -347,7 +347,7 @@ describe('[TC-IMP102/MSS][UI-S01/MSS][BR-UI-002] Zero 2D Price Decal & Pure 3D P
     });
 
     it('[TC-IMP102.18/MSS][UI-S01/MSS] getTileTexture returns null safely when document is undefined (Headless SSR)', () => {
-      (globalThis as any).document = undefined;
+      Reflect.set(globalThis, 'document', undefined);
       expect(getTileTexture(1)).toBeNull();
     });
   });

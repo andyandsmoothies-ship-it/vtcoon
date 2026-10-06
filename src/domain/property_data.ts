@@ -35,9 +35,9 @@ export const PROPERTY_DEEDS: ReadonlyMap<number, PropertyDeed> = new Map([
   [8,  { price: 1000, rent0: 120, rent1:  400, rent2: 1000, rent3: 2500, upgradeCosts: [500, 700, 1000] }],
   // Xanh Da Trời — Nghỉ dưỡng: C0=10%, C1=30%, C2=80%, C3=250%; UC=[45%,70%,120%]
   [9,  { price: 1200, rent0: 120, rent1:  360, rent2:  960, rent3: 3000, upgradeCosts: [540, 840, 1440] }],
-  // Utility — phí phẳng cố định (IMP-214)
-  [12, { price: 1500, rent0: 1000 }],
-  [28, { price: 1500, rent0: 1000 }],
+  // Utility — phí phẳng cố định (IMP-214, nâng giá IMP-277A)
+  [12, { price: 2000, rent0: 1000 }],
+  [28, { price: 2000, rent0: 1000 }],
   // Hồng — Nghỉ dưỡng: C0=10%, C1=30%, C2=80%, C3=250%; UC=[45%,70%,120%]
   [11, { price: 1400, rent0: 140, rent1:  420, rent2: 1120, rent3: 3500, upgradeCosts: [630, 980, 1680] }],
   [13, { price: 1400, rent0: 140, rent1:  420, rent2: 1120, rent3: 3500, upgradeCosts: [630, 980, 1680] }],

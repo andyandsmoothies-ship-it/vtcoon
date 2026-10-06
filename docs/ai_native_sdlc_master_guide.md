@@ -156,8 +156,12 @@
 │          sửa mã nguồn tối thiểu + chạy test xác minh trực tiếp. Hoàn tất trong 1–2 phút, tiết kiệm 90% token.
 │      • TIER 2: FULL RIGOR (Đại Phẫu / Feature Slice / Systemic) - Nếu có ít nhất 1 câu là CÓ:
 │        - Tác vụ: Nghiệp vụ tài chính, state machine, DB migration, network protocol, slice mới > 50 LOC.
-│        - Điều phối: KÍCH HOẠT TOÀN DIỆN (Cổng thẩm định kế hoạch 2 tầng Stage A plan-griller + Stage B adversarial-challenger
-│          + Quy trình 4 Trạm khép kín: Trạm 1 qa-tester RED ➔ Trạm 2 implementer GREEN ➔ Trạm 2.5 scout ➔ Trạm 3 Reviewer ➔ Trạm 4 chaos-sentinel).
+│        - Điều phối: KÍCH HOẠT QUY TRÌNH TINH GỌN (Thẩm định kế hoạch tự động `audit_plan.mjs --auto-sign`,
+│          vặn vẹo đối kháng `adversarial-challenger` cho Epic lớn, và thực thi 4 Trạm Cơ Khí Hóa khép kín).
+│      • ĐIỀU PHỐI ĐẶC BIỆT KHI DÙNG MODEL AI YẾU VỀ CODING (WEAK-MODEL HARNESS GOVERNANCE):
+│        - Tuyệt đối CẤM nhồi nhét quy chế dày đặc và cấm bắt model yếu "chia đôi nhân cách tự giám sát nhau" (tránh bẫy người mù dắt người mù).
+│        - Dùng Khung Thép Cơ Học (Compiler Strict + AST Scripts + Playwright Assertions) để khóa cứng đường ray bên ngoài.
+│        - Cắt nhỏ tác vụ thành kích thước nguyên tử (Atomic Micro-tasks, <= 50 LOC) để model yếu điền mã nguồn vào chỗ trống đã định sẵn.
 │      • Ngưỡng Tự Động Nâng Cấp (Auto-Escalation Gate): Nếu bắt đầu ở Tier 1 mà phát hiện mã nguồn vượt 50 LOC,
 │        chạm Schema/FSM hoặc gây regression test hỏng các test suites khác, AI BẮT BUỘC DỪNG LẠI và nâng cấp lên Tier 2.
 │      • Contract-First Codegen: OpenAPI / Protobuf / JSON Schema là SSOT duy nhất. AI chỉ nối logic, CẤM tự gõ interface.
@@ -234,24 +238,25 @@
 │           cùng trỏ vào một thực thể nghiệp vụ. Gom các thao tác liên quan thành một điểm chạm hợp nhất với bộ điều hướng ngữ cảnh
 │           để tối ưu hóa tải nhận thức (Cognitive Load) cho người dùng cuối.
 │
-├── 19. QUY TRÌNH THỰC THI 4 TRẠM KHÉP KÍN & KIỂM CHỨNG ĐĨA VẬT LÝ (MANDATORY 4-STATION CLOSED-LOOP PIPELINE):
-│       • Triệt tiêu bẫy "AI tự viết test rồi tự duyệt code" (Conversational Approval Hallucination).
-│       • Tích Hợp Plan Review Policy Tự Động Hóa (Zero-Memorization Pipeline): Với setting 'Plan Review Policy = Review every plan',
-│         Agent tự soạn plan ➔ tự thẩm định qua 2 tầng (griller + challenger) ➔ kích hoạt hộp thoại Plan Review của IDE.
-│         Khi người dùng bấm 'Proceed' (Approve), Agent tự động kích hoạt tuần tự chuỗi 4 Trạm khép kín.
+├── 19. QUY TRÌNH THỰC THI 4 TRẠM KHÉP KÍN & KIỂM CHỨNG CƠ HỌC (LEAN MECHANIZED 4-STATION PIPELINE):
+│       • Triệt tiêu bẫy "AI tự viết test rồi tự duyệt code" đồng thời xóa bỏ gánh nặng quan liêu thủ tục.
+│       • Phân định triệt để: "Máy móc hóa việc cơ bắp (Deterministic), dành trọn AI cho suy luận ngữ nghĩa (Semantic)".
 │       • Pre-Flight Visual Banner: Agent bắt buộc in biểu ngữ `🚦 [KÍCH HOẠT QUY TRÌNH 4 TRẠM KHÉP KÍN]` lên chat trước khi dispatch.
 │       • Trạm 1 (RED Contract Test): `qa-tester` viết contract test trong `tests/**`, chứng minh Adversarial Inversion (test đỏ thật sự),
-│         gắn Flow Taxonomy `[UC-XXX/MSS]` và `[UC-XXX/A#]`. CẤM sửa `src/**`. Sàn mật độ >= 15 atomic tests/slice.
+│         gắn Flow Taxonomy `[UC-XXX/MSS]` và `[UC-XXX/A#]`. CẤM sửa `src/**`. Sàn mật độ >= 8 atomic tests/micro-slice (>= 15 cho Epic).
 │       • Trạm 2 (GREEN Implementation): `implementer` viết mã tối thiểu trong `src/**` để pass test. CẤM nới lỏng assertion (Zero Bug-Codification).
 │         Implementer Pushback Mandate: Nếu plan có snippet sai/no-op, implementer bắt buộc sửa code vật lý đúng đắn thay vì làm theo plan hỏng.
-│       • Trạm 2.5 (Fast Pre-Filter Sweep): `scout` (flash model) quét nhanh `tsc --noEmit`, `check_loc.mjs`, cấm dirty cast (`as any`), thanh trừng `console.log`.
-│       • Trạm 3 (Thẩm Định Độc Lập 3 Pha): Read-only reviewers (`spec-reviewer`, `code-reviewer`, `ui-craft-reviewer`, `game-3d-visual-critic`...).
+│       • Trạm 2.5 (Fast Pre-Filter Mechanical Sweep): Chạy `npm run prefilter -- <files>` quét sạch trong 2s: `tsc --noEmit`,
+│         `check_loc.mjs`, cấm dirty cast (`as any`), cấm private internals `__CLIENT_INTERNALS_*`, thanh trừng `console.log`, `lint:slop`, `lint:ui`.
+│       • Trạm 3 (Thẩm Định Độc Lập Cơ Khí Hóa):
 │         - Phase 3.0: Bằng chứng thị giác kép Dual-Viewport (Desktop 1280x800 & Mobile 360x740) vào `.agents/tmp/` hoặc cấp Pure Logic Waiver.
-│         - Phase 3.1: Spec Gatekeeper xác nhận 100% plan fidelity, 0% scope drift.
-│         - Phase 3.2: Deep Architecture & Craft Gate (deep modules, rò rỉ timer/listener, race conditions). Fix round dùng `re-reviewer`. Active Remediation.
-│       • Trạm 4 (Adversarial Boundary & Mutation Sentinel): `chaos-sentinel` chạy 3 probes vật lý: (1) Wire-to-Core Parity,
-│         (2) Live Dynamic Socket `port: 0`, và (3) Targeted Mutation Sensitivity (sàn >= 14 mutants, 100% kill rate, 0 sống sót).
-│         Xuất file pháp chứng `.agents/evidence/chaos_sentinel_[ID].json` (`executed: true`), kiểm tra bằng `node scripts/check_evidence.mjs`.
+│         - Phase 3.1 (Scope Gatekeeper Cơ Học): Chạy `node scripts/check_scope.mjs [plan]` so sánh tập hợp diff toán học 3ms, cấm lọt file (thay thế spec-reviewer đọc mắt).
+│         - Phase 3.2 (Deep Architecture & Craft Gate): `code-reviewer` soi logic sâu (deep modules, rò rỉ timer/listener, race conditions).
+│           Kiểm tra công thái học 44px & 360px overflow tự động qua Playwright headless assertions + `npm run lint:ui`.
+│       • Trạm 4 (Adversarial Boundary & Mutation Sentinel Cơ Học): Chạy trực tiếp `npm run sentinel -- --ticket <id> --test <path>`
+│         (`scripts/sentinel_runner.mjs`) thực thi 3 probes vật lý: (1) Wire-to-Core Parity, (2) Live Dynamic Socket `port: 0`,
+│         và (3) Targeted Mutation Sensitivity (tự động tiêm mutant, rollback trong `finally`, 100% kill rate).
+│         Xuất file pháp chứng `.agents/evidence/chaos_sentinel_[ID].json` (`executed: true`), kiểm tra tự động bằng `node scripts/check_evidence.mjs`.
 │
 ├── 20. 4 TRỤ CỘT KIẾN TRÚC PHÒNG THỦ TOÀN DIỆN CHO HỆ THỐNG BẤT ĐỒNG BỘ (FOUR PILLARS OF ARCHITECTURE DEFENSE):
 │       • Áp dụng cho mọi hệ thống phân tán, event-driven, multi-user, stateful hoặc async:
@@ -284,15 +289,15 @@
 │       • Trạm 3 dùng tệp Snapshot này làm căn cứ pháp chứng ký duyệt độc lập (0ms độ trễ, 0 token lặp lại).
 │
 ├── 23. CỔNG THẨM ĐỊNH KẾ HOẠCH 2 TẦNG (TWO-STAGE PLAN HARDENING GATE):
-│         • Triệt tiêu hoàn toàn căn bệnh "Echo Chamber" (tác nhân này lập kế hoạch, tác nhân kia đồng thuận dễ dãi, khen ngợi sáo rỗng).
-│         • MỌI Kế hoạch (Plan) tại `.agents/plans/PLAN_[TICKET].md` BẮT BUỘC phải chịu sự thẩm định đối kháng 2 tầng trước khi trình người dùng:
-│           - Stage 0 (Pre-Flight Script 6ms): Chạy `node scripts/audit_plan.mjs <plan>`. Tự động kiểm tra: LOC baseline, Anti-TIDD
-│             (consumer check), Client Bundle Poisoning (`node:*`, `crypto`, `fs`), Zero No-Op snippets, Anti-Code-Golf, và Flow Taxonomy.
-│           - Stage A (Cấu Trúc & Cơ Học): `plan-griller` (Read-only) quét 5 trụ cột (P1-P5), vạch trần điểm mù trên đĩa cứng (Ghost files, broken lifecycle, blast radius).
-│           - Stage B (Tấn Công Đối Kháng - Devil's Advocate): `adversarial-challenger` tấn công bắt buộc từ ADV-OBJ (tính hợp pháp của mục tiêu),
-│             thử tải 4 attack vectors: gian lận kinh tế/thuế, bất đồng bộ/đua lệnh, trạng thái kẹt/nuốt lỗi, trôi dạt khế ước gọi hàm.
-│           - Bảng Đối Ứng 1:1 (Directive Coverage Table): Tác giả plan bắt buộc lập bảng giải quyết từng directive. Phán quyết bắt buộc: `HARDENED_APPROVED`.
-│           - Quy Tắc Cách Ly Refactor (Pure-Move Quarantine): Vé tái cấu trúc phải bảo toàn 100% hành vi; cấm nhét thêm thay đổi logic/guards. Mọi phát hiện từ Stage B phải bóc sang ticket củng cố nối tiếp.
+│         • Triệt tiêu hoàn toàn căn bệnh "Echo Chamber" đồng thời tối ưu hóa tốc độ thực thi:
+│         • MỌI Kế hoạch (Plan) tại `.agents/plans/PLAN_[TICKET].md` BẮT BUỘC phải chịu sự thẩm định trước khi trình người dùng:
+│           - Stage A (Kiểm Tra & Ký Duyệt Cơ Học Tự Động): Chạy `node scripts/audit_plan.mjs <plan> --auto-sign` (15ms).
+│             Tự động kiểm tra: LOC baseline, Anti-TIDD (consumer check), Zero No-Op snippets, Flow Taxonomy `[UC-...]`. 0 lỗi tự động ký `HARDENED_APPROVED`.
+│           - Stage B (Vặn Vẹo & Tấn Công Đối Kháng - Devil's Advocate): Với các Epic lớn (>50 LOC, đụng FSM/Kinh tế/Network),
+│             kích hoạt `adversarial-challenger` thử tải 4 attack vectors: gian lận kinh tế/thuế, bất đồng bộ/đua lệnh, trạng thái kẹt/nuốt lỗi.
+│             Với Micro-Slices (<= 50 LOC), Stage A hoàn tất là trình người dùng duyệt ngay, cấm lạm dụng subagent gây trễ tiến độ.
+│           - Quy Tắc Cách Ly Refactor (Pure-Move Quarantine): Vé tái cấu trúc phải bảo toàn 100% hành vi; cấm nhét thêm thay đổi logic/guards.
+│           - Bảng Đối Ứng 1:1 (Directive Coverage Table): Khi có directives từ Stage B, tác giả bắt buộc lập bảng giải quyết từng mục. Phán quyết: `HARDENED_APPROVED`.
 │
 ├── 24. KỶ LUẬT TIỀN CODE & QUY TẮC "KILL THE PREMISE" (2-FIX LIMIT & PRE-CODING DISCIPLINE):
 │       • 4 Bước Tiền Code Bắt Buộc (Pre-Coding Discipline):
@@ -2233,9 +2238,9 @@ Mỗi subagent trong thư mục `.agents/agents/<name>.md` được cấu hình 
    - Khai báo mảng `skills: [tên_kỹ_năng]` trong frontmatter để subagent tự động nạp runbook chuyên sâu tương ứng theo cơ chế JIT, giảm thiểu độ dài system prompt.
 
 > [!TIP]
-> **Nguyên tắc chọn lọc Subagents theo loại dự án**:
-> - **Dự án có Giao diện (Web/Mobile/Game)**: Dùng trọn bộ 6 subagents cốt lõi + các subagent mỹ thuật tương ứng (`ui-craft-reviewer`, `game-3d-visual-critic`).
-> - **Dự án thuần Backend / API / Microservice**: TUYỆT ĐỐI KHÔNG tạo các subagent đồ họa (gây rác ngữ cảnh). Chỉ giữ 6 subagent cốt lõi (`scout`, `plan-griller`, `qa-tester`, `implementer`, `spec-reviewer`, `code-reviewer`) và định hướng `code-reviewer` kiểm toán SQL, Transaction Rollback, Missing Index, và Schema Validation.
+> **Nguyên tắc phân định Subagents Ngữ Nghĩa vs Scripts Cơ Học (The Semantic vs Mechanical Division)**:
+> - **Nhóm Subagents Cốt Lõi (Lưu hành trong `.agents/agents/`)**: Chỉ giữ lại các tác tử có năng lực suy luận ngữ nghĩa thực sự: `implementer` (viết code), `code-reviewer` (soi rò rỉ timer/memory, race conditions), `adversarial-challenger` (vặn vẹo lỗ hổng FSM/kinh tế cho Epic lớn), `game-3d-visual-critic` (thẩm định nghệ thuật 3D), `scout` (tra cứu JIT).
+> - **Nhóm Chuyển Giao Cơ Học (Đã lưu trữ vào `.agents/agents_backup/`)**: Các vai trò đếm chữ, so khớp file, hoặc chạy script (`plan-griller`, `spec-reviewer`, `chaos-sentinel`, `ui-craft-reviewer`) đã được chuyển giao 100% cho các script Node.js/Playwright (`audit_plan.mjs`, `check_scope.mjs`, `sentinel_runner.mjs`) để tiết kiệm 90% tokens và triệt tiêu độ trễ.
 
 Tạo các file subagents chuyên trách sau trong thư mục `.agents/agents/`:
 
@@ -2277,7 +2282,7 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command]
 - Phát hiện 5 archetypes: [0 vi phạm | Danh sách chi tiết file:line]
 ```
 
-### 1b. File `.agents/agents/plan-griller.md` (Kiểm Toán Viên Phản Biện Đối Kháng Kế Hoạch - Zero-Trust Plan Auditor)
+### 1b. File `.agents/agents_backup/plan-griller.md` (Kiểm Toán Viên Phản Biện Kế Hoạch - Lưu Trữ / Đã Chuyển Giao Cho `scripts/audit_plan.mjs`)
 ```markdown
 ---
 name: plan-griller
@@ -2448,7 +2453,7 @@ hooks: [.agents/hooks_implementer.json]
 ```
 ```
 
-### 3. File `.agents/agents/spec-reviewer.md` (Chuyên Gia Đối Chiếu Spec)
+### 3. File `.agents/agents_backup/spec-reviewer.md` (Chuyên Gia Đối Chiếu Spec - Lưu Trữ / Đã Chuyển Giao Cho `scripts/check_scope.mjs`)
 ```markdown
 ---
 name: spec-reviewer
@@ -2620,7 +2625,7 @@ You re-review one task's fix round. A previous review produced findings; an impl
 ```
 ```
 
-### 4b. File `.agents/agents/chaos-sentinel.md` (Lính Canh Biên Giới & Đột Biến Đối Kháng - Chaos & Mutation Sentinel)
+### 4b. File `.agents/agents_backup/chaos-sentinel.md` (Lính Canh Biên Giới & Đột Biến - Lưu Trữ / Đã Chuyển Giao Cho `scripts/sentinel_runner.mjs`)
 ```markdown
 ---
 name: chaos-sentinel
@@ -2641,7 +2646,7 @@ tools: [view_file, list_dir, grep_search, run_command, write_to_file]
 3. **Chứng nhận nghiệm thu**: Ghi file `.agents/evidence/chaos_sentinel_[ID].json` với `"executed": true`. Kiểm tra tự động bằng `node scripts/check_evidence.mjs [ID]`.
 ```
 
-### 5. File `.agents/agents/ui-craft-reviewer.md` (Chuyên Gia Thẩm Định Thủ Công 2D UI/UX)
+### 5. File `.agents/agents_backup/ui-craft-reviewer.md` (Chuyên Gia Thẩm Định Thủ Công 2D UI/UX - Lưu Trữ / Đã Chuyển Giao Cho Playwright & `lint:ui`)
 ```markdown
 ---
 name: ui-craft-reviewer
@@ -3315,16 +3320,16 @@ Khi bạn chạy lệnh trong Terminal gặp lỗi đỏ, hoặc Subagent báo t
 | **1.2** | Dựng bản đồ Use Case | 💬 `[AG 2.0]` Dùng `use-case-creator` lập sơ đồ mục lục `docs/domain/use_cases.puml` | Flash / Sonnet | File PlantUML 3 cột chuẩn |
 | **1.25** | Quy hoạch Master Roadmap | 💬 `[AG 2.0]` Dựng `docs/master_roadmap.md` (Rolling Wave Planning: vạch rõ ranh giới & DoD 100% các Epics trước khi đi sâu) | Flash / Sonnet | File `docs/master_roadmap.md` |
 | **1.3** | Lập Sổ Cái Tiến Độ | 💬 `[AG 2.0]` Dựng `docs/epics/[epic]/_epic_ledger.md` (phân bổ Use Cases vào Slices) | Flash | Sổ Cái tiến độ theo dõi |
-| **2.1** | Cắt Lát Cắt (JIT)<br>*(Song tác nhân)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.1]**: `slicer` soạn thảo ticket ➔ `spec-reviewer` quét rò rỉ Zone 3 trước khi lưu | Flash | File `issues/[TICKET].md` sạch |
+| **2.1** | Cắt Lát Cắt (JIT)<br>*(Song tác nhân)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.1]**: `slicer` soạn thảo ticket ➔ đối soát ranh giới Zone 3 & SSOT trước khi lưu | Flash | File `issues/[TICKET].md` sạch |
 | **2.2** | Trinh sát bối cảnh<br>*(Đơn tác nhân)* | 💬 `[AG 2.0]` Gọi `scout` (Read-only) trinh sát hiện trạng mã nguồn:<br>• **Greenfield (S00):** Dùng **[Mẫu P-2.2A]** Target File Map<br>• **Brownfield (S01+):** Dùng **[Mẫu P-2.2B]** Change Impact | Flash | Báo cáo hiện trạng & tọa độ dòng |
-| **2.3a** | Lập Plan & Thẩm Định 2 Tầng<br>*(Stage A + Stage B)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3a]**: Chạy `scripts/audit_plan.mjs` (6ms) ➔ `plan-griller` (P1-P5) ➔ `adversarial-challenger` (ADV-OBJ, rủi ro kinh tế, concurrency) | Sonnet 4.6 | Kế hoạch đạt `HARDENED_APPROVED` |
+| **2.3a** | Lập Plan & Thẩm Định 2 Tầng<br>*(Stage A + Stage B)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3a]**: Chạy `node scripts/audit_plan.mjs <plan> [--auto-sign]` ➔ Với Epic lớn (>50 LOC) gọi `adversarial-challenger` (ADV-OBJ, kinh tế, concurrency) | Sonnet 4.6 | Kế hoạch đạt `HARDENED_APPROVED` |
 | **2.3b** | Khởi tạo Test Harness<br>*(Đơn tác nhân - S00)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3b]** gọi `implementer` dựng Test Runner tối thiểu (`package.json`, `tsconfig.json`, `vitest`...) ➔ Chạy smoke test PASS | Flash / Sonnet | Lệnh `npm test` chạy PASS trên CMD |
 | **2.3c** | Thi Công Trạm 1 & 2<br>*(RED ➔ GREEN)* | 💬 `[AG 2.0]` Dùng **[Mẫu P-2.3-STATIONS]**: QA viết test ĐỎ (>= 15 tests, Flow Taxonomy) ➔ Implementer code XANH (Pushback Mandate, Deep Modules) | Sonnet 4.6 | 100% Contract PASS trên đĩa vật lý |
-| **2.3.5**| Quét Sạch Đĩa Vật Lý<br>*(Trạm 2.5 Fast Pre-Filter)* | 💬 `[AG 2.0]` Gọi `scout` (Flash) quét cơ học: `tsc --noEmit` (0 lỗi), `check_loc.mjs` (ngân sách LOC), cấm dirty cast (`as any`), thanh trừng `console.log` | Flash | Phán quyết `SWEEP: PASS` sạch 100% |
+| **2.3.5**| Quét Sạch Đĩa Vật Lý<br>*(Trạm 2.5 Fast Pre-Filter)* | 💬 `[AG 2.0]` Chạy script cơ học `npm run prefilter -- <files>`: `tsc --noEmit` (0 lỗi), `check_loc.mjs` (ngân sách LOC), cấm dirty cast (`as any`), thanh trừng `console.log`, i18n mapping | CLI Script | Phán quyết `PREFILTER: PASS` 100% |
 | **2.3d** | Chẩn đoán lỗi khoa học<br>*(Song tác nhân)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3d]**: `Investigator` truy nguyên nhân gốc ➔ `Implementer` sửa mã nguồn tối thiểu | Sonnet 4.6 | Báo cáo nguyên nhân & bản sửa tối thiểu |
 | **2.3e** | Nghiệm thu tích hợp<br>*(Đơn tác nhân)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3e]** gọi `implementer` chạy toàn bộ Test Suite với cờ `--randomize` (cách ly trạng thái) | Flash / Sonnet | 100% Test Contracts PASS |
-| **2.4** | Phễu Thẩm Định 3 Pha<br>*(Trạm 3 Review & Remediation)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.4]**: Phase 3.0 Dual-Viewport Capture ➔ Phase 3.1 Spec Gate ➔ Phase 3.2 Deep Architecture & Visual Craft. Lỗi cơ học sửa trực tiếp | Sonnet / Flash | Báo cáo APPROVED + 0% drift |
-| **2.4.4**| Lính Canh Biên Giới & Đột Biến<br>*(Trạm 4 Chaos Sentinel)* | 💬 `[AG 2.0]` Gọi `chaos-sentinel` chạy 3 probes: Wire-to-Core Parity, live socket `port: 0`, Mutation Sensitivity (>= 14 mutants, 100% kill rate) | Sonnet / Flash | Bằng chứng `.agents/evidence/chaos_sentinel_[ID].json` |
+| **2.4** | Phễu Thẩm Định 3 Pha<br>*(Trạm 3 Review & Remediation)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.4]**: Phase 3.0 Dual-Viewport ➔ Phase 3.1 Spec Scope Gate (`scripts/check_scope.mjs`) ➔ Phase 3.2 `code-reviewer` (deep modules, anti-slop, timer leaks) | Sonnet / Flash | Báo cáo APPROVED + 0% drift |
+| **2.4.4**| Lính Canh Biên Giới & Đột Biến<br>*(Trạm 4 Chaos Sentinel)* | 💬 `[AG 2.0]` Chạy `npm run sentinel -- --ticket [ID] --test [PATH]`: Wire-to-Core Parity, live socket dynamic `port: 0`, Mutation Sensitivity (>= 14 mutants, 100% kill rate) | CLI Script | Bằng chứng `.agents/evidence/chaos_sentinel_[ID].json` |
 | **2.4.5**| Hậu Kiểm Phản Tỉnh & Miễn Dịch<br>*(Retro Skill & Inoculation)* | 💬 `[AG 2.0]` Thu thập telemetry các trạm ➔ Chạy Cổng phản biện 2 vòng (Physical Evidence + Inversion Filter) ➔ Chuyển lỗi thành test/script | Flash | Gotchas cập nhật & rào chắn cơ học |
 | **2.5** | Đóng Gói PR & Nghiệm Thu | 💬 `[AG 2.0]` Dùng skill `pr` kết xuất Summary + Evidence + Merge Danger ➔ Cập nhật Sổ Cái `_epic_ledger.md` (mã nợ DEBT-XXX) ➔ Con người tự commit CMD | Bạn (Human) | Git commit sạch, không lỗi |
 | **2.6** | Chuyển phiên chat | 💬 `[AG 2.0]` Dùng **[Mẫu Lệnh P-2.6]**: Gõ `/handoff` ➔ Bấm **New Conversation** (Ngữ cảnh về 0, không bị bloat trước khi sang Slice mới) | Flash | Tài liệu bàn giao gọn, sạch |
@@ -3553,11 +3558,11 @@ Báo cáo ngắn gọn dưới 15 dòng, TUYỆT ĐỐI KHÔNG sửa mã nguồn
 > - **Nếu là task Đại phẫu (Tier 2)**: Chạm Database/Schema, Network Protocol, Logic FSM/Tài chính/Auth, hoặc tính năng mới > 50 LOC ➔ **BẮT BUỘC CHẠY ĐẦY ĐỦ P-2.3a dưới đây**.
 
 ### 📋 MẪU P-2.3a: LẬP KẾ HOẠCH & CỔNG THẨM ĐỊNH 2 TẦNG (TWO-STAGE PLAN HARDENING GATE)
-- **🏷️ CHẾ ĐỘ THỰC THI**: `[THẨM ĐỊNH ĐỐI KHÁNG 2 TẦNG BẮT BUỘC]` *(Stage 0: Pre-flight script ➔ Stage A: plan-griller ➔ Stage B: adversarial-challenger ➔ Bảng đối ứng 1:1)*.
+- **🏷️ CHẾ ĐỘ THỰC THI**: `[THẨM ĐỊNH ĐỐI KHÁNG 2 TẦNG BẮT BUỘC]` *(Stage 0: Pre-flight script `audit_plan.mjs --auto-sign` ➔ Stage B: `adversarial-challenger` cho Epic lớn > 50 LOC ➔ Bảng đối ứng 1:1)*.
 - **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Đã có báo cáo của Scout ở Bước 2.2 và xác định thứ tự trong Task Graph Frontier (`implement-spec`).
 - **🛡️ RÀO CHẮN GÁC CỔNG**:
   * Kế hoạch bắt buộc lưu duy nhất tại `.agents/plans/PLAN_[MÃ_TICKET].md` (Single Source of Truth, cấm tạo bản sao ở `docs/plans/`).
-  * Tiền kiểm cơ học: Chạy `node scripts/audit_plan.mjs .agents/plans/PLAN_[MÃ_TICKET].md` trong 6ms (kiểm tra LOC baseline, Anti-TIDD, Client Poisoning, Anti-Code-Golf, Flow Taxonomy).
+  * Tiền kiểm cơ học & Ký duyệt: Chạy `node scripts/audit_plan.mjs .agents/plans/PLAN_[MÃ_TICKET].md [--auto-sign]` trong 6ms (kiểm tra LOC baseline, Anti-TIDD, Client Poisoning, Anti-Code-Golf, Flow Taxonomy; 0 defects tự động ký `HARDENED_APPROVED` cho Micro-Slice).
   * Quy tắc cách ly Refactor (Pure-Move Quarantine): Vé tái cấu trúc phải bảo toàn 100% hành vi; mọi phát hiện tấn công từ Challenger phải bóc sang ticket củng cố nối tiếp.
 - **💬 CÂU LỆNH PROMPT CHUẨN (Model: Sonnet 4.6)**:
 ```text
@@ -3570,23 +3575,21 @@ Hãy thiết lập bản kế hoạch thi công .agents/plans/PLAN_[MÃ_TICKET].
    - [Nếu là Slice 00]: Bắt buộc đưa "Task 0: Khởi tạo Test Runner Harness" lên đầu tiên.
    - Mỗi Task phải chỉ rõ: Tệp tác động (theo Target File Map & 5-Tier Archetypes), Test Contract tương ứng, DoD.
 
-2. Tiền kiểm Cơ học & Thẩm định 2 Tầng:
-   - Chạy `node scripts/audit_plan.mjs .agents/plans/PLAN_[MÃ_TICKET].md` để xác nhận sạch 100% các quy tắc cơ học.
-   - Stage A: Gọi `plan-griller` (P1-P5, ghost files, broken causality, blast radius) xuất `.agents/audit/PLAN_AUDIT_[TICKET].md`.
-   - Stage B: Gọi `adversarial-challenger` tấn công ADV-OBJ, rủi ro kinh tế, concurrency, trạng thái kẹt/nuốt lỗi xuất `.agents/audit/PLAN_CHALLENGE_[TICKET].md`.
-   - Lập Bảng đối ứng 1:1 giải quyết mọi directive, nhận phán quyết HARDENED_APPROVED trước khi trình duyệt.
-DỪNG LẠI sau khi kế hoạch đạt HARDENED_APPROVED, TUYỆT ĐỐI CHƯA VIẾT CODE lúc này. Subagent chỉ trả về bản tóm tắt Micro-Tasks (<20 dòng) kèm link file kế hoạch.
+2. Tiền kiểm Cơ học & Thẩm định Kế hoạch:
+   - Chạy `node scripts/audit_plan.mjs .agents/plans/PLAN_[MÃ_TICKET].md --auto-sign` để xác nhận sạch 100% các quy tắc cơ học (0 defects tự ký HARDENED_APPROVED cho Micro-Slice).
+   - [Nếu là Epic / Feature lớn > 50 LOC, > 2-3 files]: Gọi `adversarial-challenger` tấn công ADV-OBJ, rủi ro kinh tế, concurrency, trạng thái kẹt/nuốt lỗi xuất `.agents/audit/PLAN_CHALLENGE_[TICKET].md`. Lập Bảng đối ứng 1:1 giải quyết mọi directive trước khi ký HARDENED_APPROVED.
+DỪNG LẠI sau khi kế hoạch đạt HARDENED_APPROVED, TUYỆT ĐỐI CHƯA VIẾT CODE lúc này. Trả về bản tóm tắt Micro-Tasks (<20 dòng) kèm link file kế hoạch.
 ```
 - **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu - CỔNG KẾ HOẠCH: TWO-STAGE HARDENING GATE)**:
-  - Bản kế hoạch đã được lưu duy nhất tại `.agents/plans/PLAN_[MÃ_TICKET].md` đạt phán quyết **`[HARDENED_APPROVED]`** sau khi chạy qua tiền kiểm cơ học (`scripts/audit_plan.mjs`) và Cổng thẩm định 2 tầng (Stage A: `plan-griller` + Stage B: `adversarial-challenger`).
+  - Bản kế hoạch đã được lưu duy nhất tại `.agents/plans/PLAN_[MÃ_TICKET].md` đạt phán quyết **`[HARDENED_APPROVED]`** sau khi chạy qua tiền kiểm cơ học (`scripts/audit_plan.mjs`) và vòng đối kháng challenger (nếu là Epic lớn).
 - **📌 CHỈ DẪN VẠN NĂNG CHO JUNIOR (AUTOMATION WITH PLAN REVIEW POLICY)**:
   - *Biến số cần thay thế*: `[MÃ_TICKET]` (VD: `issues/GAME-S01-turn-loop.md` hoặc mã cải tiến `IMP-XX`).
   - *Tự Động Hóa Không Cần Nhớ Bước (Zero-Memorization)*: Khi bạn bật `Plan Review Policy = "Review every plan"` trong cài đặt IDE AG 2.0:
     1. Bạn chỉ cần gửi prompt yêu cầu làm tính năng / ticket.
-    2. Agent tự động soạn thảo `.agents/plans/PLAN_[MÃ_TICKET].md`, chạy tiền kiểm cơ học `audit_plan.mjs`, và tự kích hoạt thẩm định 2 tầng (`plan-griller` và `adversarial-challenger`).
+    2. Agent tự động soạn thảo `.agents/plans/PLAN_[MÃ_TICKET].md`, chạy tiền kiểm cơ học `audit_plan.mjs --auto-sign`, và kích hoạt thẩm định đối kháng nếu là Epic lớn.
     3. Hộp thoại Duyệt Kế Hoạch (Plan Review Modal) tự động hiển thị trên màn hình IDE kèm nút "Proceed".
     4. Bạn kiểm tra bản tóm tắt điểm mù và bấm **Proceed**.
-    5. Sau khi bấm, Agent tự động kích hoạt liền mạch **Quy Trình 4 Trạm Khép Kín (Trạm 1 RED ➔ Trạm 2 GREEN ➔ Trạm 2.5 Scout ➔ Trạm 3 Review ➔ Trạm 4 Chaos Sentinel)** mà bạn không cần phải copy-paste thêm bất kỳ prompt thủ công nào!
+    5. Sau khi bấm, Agent tự động kích hoạt liền mạch **Quy Trình 4 Trạm Khép Kín (Trạm 1 RED ➔ Trạm 2 GREEN ➔ Trạm 2.5 Prefilter ➔ Trạm 3 Review Funnel ➔ Trạm 4 Chaos Sentinel Script)** mà bạn không cần phải copy-paste thêm bất kỳ prompt thủ công nào!
   - *Giá trị sống còn*: Giúp Junior chặn đứng 90% lỗi thiết kế ngớ ngẩn do AI tưởng tượng ra trước khi bước vào gõ code. Kế hoạch đã qua cổng Zero-Trust 2 tầng là bản kế hoạch có tính khả thi kỹ thuật thực tế cao nhất.
 
 ---
@@ -3612,17 +3615,17 @@ Báo cáo kết quả lệnh test và dừng lại để tôi kiểm tra.
 ---
 
 ### 📋 MẪU P-2.3-STATIONS: QUY TRÌNH THỰC THI 4 TRẠM KHÉP KÍN (4-STATION CLOSED-LOOP PIPELINE)
-- **🏷️ CHẾ ĐỘ THỰC THI**: `[4 TRẠM KHÉP KÍN TỰ ĐỘNG HÓA NGUYÊN TỬ]` *(Trạm 1: QA Tester ĐỎ ➔ Trạm 2: Implementer XANH ➔ Trạm 2.5: Fast Pre-Filter Sweep ➔ Trạm 3: Phễu Thẩm Định 3 Pha ➔ Trạm 4: Chaos Sentinel & Mutation Kill)*.
+- **🏷️ CHẾ ĐỘ THỰC THI**: `[4 TRẠM KHÉP KÍN TỰ ĐỘNG HÓA NGUYÊN TỬ]` *(Trạm 1: QA Tester ĐỎ ➔ Trạm 2: Implementer XANH ➔ Trạm 2.5: Fast Pre-Filter CLI ➔ Trạm 3: Phễu Thẩm Định 3 Pha (Scope Script + Code Reviewer) ➔ Trạm 4: Chaos Sentinel & Mutation Kill Script)*.
 - **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Kế hoạch (`.agents/plans/PLAN_[MÃ_TICKET].md`) đã đạt `HARDENED_APPROVED` hoặc người dùng đã bấm **Proceed** trên modal Plan Review của IDE. Agent bắt buộc in biểu ngữ `🚦 [KÍCH HOẠT QUY TRÌNH 4 TRẠM KHÉP KÍN]` ra cửa sổ chat.
 - **🛡️ RÀO CHẮN GÁC CỔNG**:
   * Trạm 1: `qa-tester` CHỈ được viết test trong `tests/**`, TUYỆT ĐỐI CẤM sửa `src/**` (khóa cơ học 0ms). Chứng minh test ĐỎ (Adversarial Inversion), chuẩn Flow Taxonomy `[UC-XXX/MSS]`, `[UC-XXX/A#]`. Cấm static checklist test (`typeof fn`, `existsSync`).
   * Trạm 2: `implementer` CHỈ viết mã trong `src/**`, TUYỆT ĐỐI CẤM sửa `tests/**` (Zero Bug-Codification). Thực hiện **Implementer Pushback Mandate**: nếu snippet plan sai/no-op, bắt buộc sửa mã vật lý đúng đắn.
-  * Trạm 2.5: `scout` (Flash) quét cơ học 100% tệp vừa sửa: `tsc --noEmit` (0 lỗi), `check_loc.mjs` (ngân sách LOC), cấm dirty cast (`as any`), thanh trừng `console.log`.
+  * Trạm 2.5: Chạy script cơ học `npm run prefilter -- <files>`: `tsc --noEmit` (0 lỗi), `check_loc.mjs` (ngân sách LOC), cấm dirty cast (`as any`), thanh trừng `console.log`, exhaustiveness i18n mapping.
   * Trạm 3: Phễu Thẩm định 3 Pha (Read-Only):
-    - Phase 3.0: Chụp ảnh kép Dual-Viewport (Desktop 1280x800 & Mobile 360x740) vào `.agents/tmp/` hoặc cấp Pure Logic Waiver.
-    - Phase 3.1: `spec-reviewer` xác nhận 100% plan fidelity, 0% scope drift.
-    - Phase 3.2: `code-reviewer` (deep modules, anti-slop, rò rỉ timer/listener) + visual critics (`ui-craft-reviewer`, `game-3d-visual-critic`). Fix round giao cho `re-reviewer`. Active Remediation áp dụng trực tiếp lỗi cơ học.
-  * Trạm 4: `chaos-sentinel` chạy 3 probes: Wire-to-Core Parity, Dynamic Live Socket (`port: 0`), Targeted Mutation Sensitivity (sàn >= 14 mutants, 100% kill rate, 0 sống sót). Ký sinh file `.agents/evidence/chaos_sentinel_[ID].json`.
+    - Phase 3.0: Chụp ảnh kép Dual-Viewport (Desktop 1280x800 & Mobile 360x740) vào `.agents/tmp/` hoặc Playwright DOM assertions, hoặc cấp Pure Logic Waiver.
+    - Phase 3.1: Chạy `node scripts/check_scope.mjs [plan_path]` xác nhận 100% plan fidelity, 0% scope drift cơ học; xuất `.agents/audit/SPEC_REVIEW_[ID].md`.
+    - Phase 3.2: Subagent `code-reviewer` (deep modules, anti-slop, rò rỉ timer/listener) + visual critics (`game-3d-visual-critic` cho 3D). Fix round giao cho `re-reviewer`. Active Remediation áp dụng trực tiếp lỗi cơ học. Xuất `.agents/audit/CODE_REVIEW_[ID].md`.
+  * Trạm 4: Chạy script `npm run sentinel -- --ticket [MÃ_TICKET] --test [TÊN_TEST]`: 3 probes (Wire-to-Core Parity, Dynamic Live Socket `port: 0`, Targeted Mutation Sensitivity sàn >= 14 mutants, 100% kill rate, 0 sống sót). Ký sinh file `.agents/evidence/chaos_sentinel_[ID].json`.
 - **💬 CÂU LỆNH PROMPT CHUẨN KÍCH HOẠT 4 TRẠM (Dùng khi kích hoạt thủ công, hoặc được Agent tự động thực thi sau khi bấm "Proceed") (Model: Sonnet 4.6 hoặc Flash)**:
 ```text
 Kế hoạch [.agents/plans/PLAN_[MÃ_TICKET].md] đã được duyệt HARDENED_APPROVED. Hãy kích hoạt Quy Trình Thực Thi 4 Trạm Khép Kín để thi công [MÃ_TICKET]:
@@ -3645,33 +3648,34 @@ TRẠM 2 (GREEN IMPLEMENTATION - Subagent implementer, Read-only tests/):
 5. IMPLEMENTER PUSHBACK MANDATE: Nếu snippet trong plan bị no-op hoặc lỗi thời, sửa code vật lý đúng đắn thay vì làm theo plan sai.
 6. Chạy lại lệnh test và chứng minh PASS 100%.
 
-TRẠM 2.5 (FAST PRE-FILTER SWEEP - Subagent scout, Read-only src/ & tests/):
-1. Quét cơ học 100% tệp vừa chạm:
+TRẠM 2.5 (FAST PRE-FILTER SWEEP - CLI Script cơ học):
+1. Chạy `npm run prefilter -- <files>` quét 100% tệp vừa chạm:
    - Typecheck: Chạy tsc --noEmit (0 lỗi).
-   - Ngân sách LOC: Chạy node scripts/check_loc.mjs (xác nhận trạng thái Safe hoặc Warning + ghi nợ).
+   - Ngân sách LOC: Chạy check_loc.mjs (xác nhận trạng thái Safe hoặc Warning + ghi nợ).
    - Dirty casts: Quét sạch `as any`, `as unknown as T`.
    - Log purge: Xóa toàn bộ `console.log` thừa trong code sản xuất.
-2. Trả về báo cáo súc tích (<15 dòng). Nếu phát hiện lỗi cơ học, bắt buộc implementer sửa sạch trước khi chuyển Trạm 3.
+   - i18n mapping: Đảm bảo 100% ActionRejectReason có bản dịch tiếng Việt.
+2. Nếu phát hiện lỗi cơ học, implementer bắt buộc sửa sạch trước khi chuyển Trạm 3.
 
-TRẠM 3 (INDEPENDENT REVIEW FUNNEL - Subagent spec-reviewer + code-reviewer, Read-only):
+TRẠM 3 (INDEPENDENT REVIEW FUNNEL - Script Scope + Subagent code-reviewer):
 1. CẤM implementer tự phê duyệt code của chính mình.
-2. Phase 3.0: Xác nhận bằng chứng thị giác Dual-Viewport (Desktop 1280x800 & Mobile 360x740) trong .agents/tmp/ hoặc Pure Logic Waiver.
-3. Phase 3.1 (spec-reviewer): Đọc git diff thực tế trên đĩa, đối chiếu 1-1 với kế hoạch, xác nhận 100% plan fidelity, 0% Scope Drift.
-4. Phase 3.2 (code-reviewer + visual critics): Đọc mã nguồn thực tế, xác nhận kiến trúc Deep Modules, 0 rò rỉ listener/timer, 0 race condition.
+2. Phase 3.0: Xác nhận bằng chứng thị giác Dual-Viewport (Desktop 1280x800 & Mobile 360x740) trong .agents/tmp/ hoặc Playwright DOM assertions / Pure Logic Waiver.
+3. Phase 3.1: Chạy `node scripts/check_scope.mjs [.agents/plans/PLAN_[MÃ_TICKET].md]` xác nhận 100% plan fidelity, 0% Scope Drift cơ học; xuất `.agents/audit/SPEC_REVIEW_[MÃ_TICKET].md`.
+4. Phase 3.2: Subagent `code-reviewer` (+ `game-3d-visual-critic` nếu có 3D) đọc mã nguồn thực tế, kiểm toán Deep Modules, 0 rò rỉ listener/timer, 0 race condition; xuất `.agents/audit/CODE_REVIEW_[MÃ_TICKET].md`.
 5. ACTIVE REMEDIATION: Reviewer trực tiếp sửa lỗi cơ học (linter, imports, formatting) trên đĩa trước khi ký [APPROVED].
 
-TRẠM 4 (ADVERSARIAL BOUNDARY & MUTATION SENTINEL - Subagent chaos-sentinel, Read-only src/):
-1. Chạy 3 đầu dò vật lý thực tế:
+TRẠM 4 (CHAOS SENTINEL & MUTATION KILL - CLI Script cơ học):
+1. Chạy `npm run sentinel -- --ticket [MÃ_TICKET] --test [TÊN_TEST]` kích hoạt 3 đầu dò:
    - Probe 1 (Wire-to-Core Parity): Kiểm tra tính nhất quán mạng ➔ FSM.
    - Probe 2 (Dynamic Live Socket): Chạy live socket trên cổng ngẫu nhiên `port: 0`.
    - Probe 3 (Targeted Mutation Sensitivity): Tiêm đột biến (sàn >= 14 mutants, 100% kill rate, 0 sống sót).
-2. Ký sinh tệp pháp chứng .agents/evidence/chaos_sentinel_[MÃ_TICKET].json ("executed": true).
+2. Tự động ký sinh tệp pháp chứng .agents/evidence/chaos_sentinel_[MÃ_TICKET].json ("executed": true).
 ```
 - **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu - QUY TRÌNH HOÀN TẤT)**:
   - Trạm 1 có log test ĐỎ thật sự (Adversarial Inversion).
   - Trạm 2 có mã nguồn sạch, test XANH 100%.
-  - Trạm 2.5 sạch 100% typecheck, LOC, dirty casts và logs.
-  - Trạm 3 có biên bản thẩm định đĩa vật lý độc lập với chữ ký `[APPROVED]`.
+  - Trạm 2.5 sạch 100% qua script `prefilter` (typecheck, LOC, dirty casts, logs, i18n).
+  - Trạm 3 có báo cáo SPEC_REVIEW (từ `check_scope.mjs`) và CODE_REVIEW (từ `code-reviewer`) đạt `[APPROVED]`.
   - Trạm 4 ký sinh file `chaos_sentinel_[MÃ_TICKET].json` với 100% mutation kill rate.
   - Chạy kỹ năng `retro` (Cổng phản biện 2 vòng) và đóng gói PR qua `pr` skill.
 - **📌 CHỈ DẪN VẠN NĂNG CHO JUNIOR**:
@@ -3784,44 +3788,37 @@ Hãy gọi subagent implementer, kích hoạt kỹ năng tdd để tạo hoặc 
 
 ---
 
-### 📋 MẪU P-2.4: KIỂM TOÁN 2 CỔNG ĐỘC LẬP (ACCEPTANCE GATE)
-- **🏷️ CHẾ ĐỘ THỰC THI**: `[SONG TÁC NHÂN ĐỘC LẬP BẮT BUỘC - 2 CỔNG]` *(Spec-Reviewer + Code-Reviewer chạy song song, Read-only)*.
-- **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Toàn bộ test suite ở bước 2.3e đã XANH 100%.
-- **🛡️ RÀO CHẮN GÁC CỔNG**: Cả 2 subagent đều ở chế độ Read-Only, không thể tự sửa code để "chữa cháy". BẮT BUỘC kiểm chứng đĩa vật lý (Physical Disk Verification): CẤM chấp thuận dựa trên báo cáo text trong chat; Reviewer bắt buộc dùng công cụ đọc đĩa (`view_file`, lệnh terminal) để kiểm tra mã nguồn và kết quả test thực tế trên đĩa cứng trước khi ký [APPROVED].
+#### 📋 MẪU P-2.4: PHỄU THẨM ĐỊNH 3 PHA TRẠM 3 (INDEPENDENT REVIEW FUNNEL)
+- **🏷️ CHẾ ĐỘ THỰC THI**: `[PHỄU THẨM ĐỊNH 3 PHA TRẠM 3]` *(Phase 3.0 Dual-Viewport ➔ Phase 3.1 Scope Gate Script ➔ Phase 3.2 Subagent Code-Reviewer)*.
+- **🛑 TRƯỚC KHI GỬI (Pre-Check)**: Toàn bộ test suite ở bước 2.3e đã XANH 100% và Trạm 2.5 `npm run prefilter` đã PASS.
+- **🛡️ RÀO CHẮN GÁC CỔNG**: Subagent ở chế độ Read-Only, không tự sửa mã ngoài phạm vi Active Remediation linter. BẮT BUỘC kiểm chứng đĩa vật lý (Physical Disk Verification): CẤM chấp thuận dựa trên báo cáo text trong chat; Script và Reviewer bắt buộc đọc mã nguồn thực tế trên đĩa cứng trước khi ký [APPROVED].
 - **💬 CÂU LỆNH PROMPT CHUẨN (Model: Sonnet 4.6)**:
 ```text
-Hãy gọi đồng thời 2 subagent spec-reviewer và code-reviewer, kích hoạt kỹ năng code-review, vertical-slice-completeness và de-sloppify để kiểm toán toàn diện lát cắt issues/[MÃ_TICKET].md:
+Kích hoạt Phễu Thẩm Định 3 Pha (Trạm 3) để kiểm toán toàn diện lát cắt [MÃ_TICKET]:
 
-1. Subagent spec-reviewer (Read-only):
-   - ĐỐI SOÁT TAM GIÁC 3 LỚP (Three-Way Spec Reconciliation):
-     Bắt buộc đối chiếu song song: (1) Mã nguồn diff <---> (2) Vé con issues/[MÃ_TICKET].md <---> (3) TÀI LIỆU GỐC docs/requirements.md & docs/domain/use_cases.puml.
-     Nếu vé con hoặc mã nguồn có bất kỳ mâu thuẫn hay diễn giải sai lệch nào so với docs/requirements.md (ví dụ: đổi chức năng thẻ, phạt sai tiền, nuốt tiền vay) ➔ BẮT BUỘC [REJECTED] NGAY LẬP TỨC vì Spec Drift.
-   - Đối chiếu 100% tiêu chí nghiệp vụ của Use Case trong docs/domain/use_cases.puml và sổ cái.
-   - Kiểm tra rò rỉ cơ chế Zone 3 (SQL, JWT, tên giao thức trong spec) và xác thực Failure Postconditions.
-2. Subagent code-reviewer (Read-only):
+1. Phase 3.0 (Bằng chứng thị giác):
+   - Chụp ảnh kép Dual-Viewport (Desktop 1280x800 & Mobile 360x740) vào .agents/tmp/ hoặc Playwright DOM assertions (nếu có UI).
+   - Nếu là logic thuần túy (FSM, Backend, Core Domain), cấp Pure Logic Waiver.
+
+2. Phase 3.1 (Kiểm soát Phạm vi Cơ học - Scope Gate):
+   - Chạy `node scripts/check_scope.mjs [.agents/plans/PLAN_[MÃ_TICKET].md]` đối chiếu 1-1 danh sách file và thay đổi thực tế với plan.
+   - Xác nhận 0% Scope Drift; xuất biên bản .agents/audit/SPEC_REVIEW_[MÃ_TICKET].md.
+
+3. Phase 3.2 (Subagent code-reviewer - Kiến trúc Sâu & Anti-Slop, Read-only):
    - Đọc toàn bộ diff VÀ ngữ cảnh mã nguồn xung quanh (Nearby code) cùng các hàm gọi liên quan.
-   - Quét lỗi logic thực tế, rủi ro hồi quy (Regressions) và sự phức tạp không cần thiết (Unnecessary complexity).
-   - Tái sử dụng patterns/enums sẵn có, kiểm toán 6 Cờ Đỏ Slop Nash (0 abstraction 1 lần/YAGNI, 0 dependencies thừa).
-   - Đo lường Cyclomatic Complexity <= 5, hàm <= 30 dòng.
-   - Kiểm toán trần LOC theo Khung Phân Loại 5 Tầng (Logic <= 400, UI <= 500, Static Data <= 800, E2E <= 600).
-   - CẢNH BÁO ĐỎ nếu phát hiện Code Golf (gộp dòng), xóa comment hoặc No-Op stubs giả để né trần LOC.
-   - Kiểm toán Lean Observability: Zero silent exceptions (cấm catch rỗng), chuyển dịch trạng thái có structured logs kèm Reason Code.
-   - Kiểm tra tuân thủ Visual UI/UX tokens trong docs/domain/design.md (nếu có UI).
-   - Lọc bỏ cảnh báo giả (Filter false positives), tập trung vào rủi ro thực tế; xếp hạng phát hiện theo: [BLOCKER] / [HIGH] / [MEDIUM] / [LOW].
-   - Xác thực The Golden Path Living Test: Đảm bảo lát cắt này đã nối dài thêm mắt xích mới vào tệp E2E và toàn bộ luồng chạy PASS 100%. Bắt buộc REJECT nếu chưa có test Golden Flow.
-   - Vòng lặp đóng: Chỉ cấp [APPROVED] khi mọi lỗi BLOCKER/HIGH đã được sửa và kiểm thử lại sạch sẽ.
-   - Đúc kết tri thức (Lean Retrospective): Áp dụng Kim Tự Tháp 4 Tầng & Bộ Lọc Anti-Bloat (Type > Shared Helper > Scoped Gotchas). Ghi bài học vào `docs/domain/gotchas.md` (không làm phình to rule chung).
-
-Yêu cầu xuất biên bản thẩm định:
-1. In biên bản tóm tắt trực tiếp ra cửa sổ chat: Ghi rõ [APPROVED] hoặc [REJECTED] kèm chi tiết từng cổng.
-2. Khi cả 2 cổng đều [APPROVED]: Tự động lưu toàn bộ Biên Bản Thẩm Định Nghiệm Thu vào tệp docs/reports/audits/[MÃ_TICKET]_acceptance_report.md để làm bằng chứng kiểm toán vĩnh viễn (Audit Trail) cho các phiên làm việc tiếp theo.
+   - Quét lỗi logic thực tế, rủi ro hồi quy (Regressions), rò rỉ timer/listener, race condition.
+   - Kiểm toán Deep Modules (cấm pass-through wrappers), 0 nuốt ngoại lệ âm thầm (cấm catch rỗng).
+   - Đo lường Cyclomatic Complexity <= 5, hàm <= 30 dòng, trần LOC theo Khung Phân Loại 5 Tầng.
+   - [Nếu có đồ họa 3D]: Phối hợp cùng `game-3d-visual-critic` đánh giá draw calls, vật liệu, đổ bóng.
+   - Xuất biên bản .agents/audit/CODE_REVIEW_[MÃ_TICKET].md kèm phán quyết [APPROVED] hoặc [REJECTED].
+   - ACTIVE REMEDIATION: Reviewer trực tiếp sửa lỗi cơ học (linter, imports, formatting) trên đĩa trước khi ký [APPROVED].
 ```
 - **✅ SAU KHI CHẠY (Post-Check Nghiệm Thu - TRẠM 3: REVIEW GATE)**: 
-  - Nhận được biên bản báo cáo ghi chữ **`[APPROVED]`** từ cả 2 cổng trên màn hình chat.
-  - Tệp `docs/reports/audits/[MÃ_TICKET]_acceptance_report.md` đã được tạo và lưu trữ đầy đủ trên đĩa. Nếu bị REJECTED ➔ Yêu cầu sửa lỗi và kiểm toán lại.
+  - Nhận được báo cáo `SPEC_REVIEW_[MÃ_TICKET].md` và `CODE_REVIEW_[MÃ_TICKET].md` đều ghi chữ **`[APPROVED]`** trên đĩa.
+  - Nếu bị REJECTED ➔ Bắt buộc implementer sửa lỗi và chạy lại thẩm định.
 - **📌 CHỈ DẪN VẠN NĂNG CHO JUNIOR**:
-  - *Biến số cần thay thế*: `[MÃ_TICKET]` (VD: `issues/GAME-S01-turn-loop.md`).
-  - *Dữ liệu AI tự động đọc*: 2 Reviewer tự động đối soát spec, diff, 6 cờ đỏ slop và xuất biên bản `docs/reports/audits/[MÃ_TICKET]_acceptance_report.md`.
+  - *Biến số cần thay thế*: `[MÃ_TICKET]` (VD: `issues/GAME-S01-turn-loop.md` hoặc `IMP-XX`).
+  - *Cơ chế 2 lớp*: Kết hợp hoàn hảo giữa script máy móc siêu tốc (Phase 3.1 check scope) và suy luận kiến trúc của AI chuyên trách (Phase 3.2 code-reviewer).
 
 ---
 

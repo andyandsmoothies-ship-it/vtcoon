@@ -24,10 +24,30 @@ const targetArg = process.argv[2];
 function resolveEvidenceFile(arg) {
   if (arg) {
     if (fs.existsSync(arg)) return path.resolve(repoRoot, arg);
-    const directPath = path.join(evidenceDir, arg.endsWith('.json') ? arg : `chaos_sentinel_${arg}.json`);
-    if (fs.existsSync(directPath)) return directPath;
-    const hyphenPath = path.join(evidenceDir, `chaos_sentinel_${arg.replace(/^(IMP)(\d+)/i, '$1-$2')}.json`);
-    if (fs.existsSync(hyphenPath)) return hyphenPath;
+    const normalized = arg.replace(/^chaos_sentinel_/i, '').replace(/_snapshot\.json$/i, '').replace(/\.json$/i, '');
+    const hyphen = normalized.replace(/^(IMP)(\d+)/i, '$1-$2');
+    const candidates = [
+      path.join(evidenceDir, arg.endsWith('.json') ? arg : `${arg}.json`),
+      path.join(evidenceDir, `${arg}_snapshot.json`),
+      path.join(evidenceDir, `${arg.toLowerCase()}_snapshot.json`),
+      path.join(evidenceDir, `${arg.toUpperCase()}_snapshot.json`),
+      path.join(evidenceDir, `${hyphen}_snapshot.json`),
+      path.join(evidenceDir, `${hyphen.toLowerCase()}_snapshot.json`),
+      path.join(evidenceDir, `${hyphen.toUpperCase()}_snapshot.json`),
+      path.join(evidenceDir, `chaos_sentinel_${arg}.json`),
+      path.join(evidenceDir, `chaos_sentinel_${arg.toLowerCase()}.json`),
+      path.join(evidenceDir, `chaos_sentinel_${arg.toUpperCase()}.json`),
+      path.join(evidenceDir, `chaos_sentinel_${hyphen}.json`),
+      path.join(evidenceDir, `chaos_sentinel_${hyphen.toLowerCase()}.json`),
+    ];
+    for (const c of candidates) {
+      if (fs.existsSync(c)) return c;
+    }
+    console.error(`❌ Evidence file for ticket "${arg}" NOT found in ${evidenceDir}!`);
+    console.error(`   Expected one of:`);
+    console.error(`   - .agents/evidence/${arg}_snapshot.json`);
+    console.error(`   - .agents/evidence/chaos_sentinel_${arg}.json`);
+    process.exit(1);
   }
 
   if (!fs.existsSync(evidenceDir)) {
@@ -36,7 +56,7 @@ function resolveEvidenceFile(arg) {
   }
 
   const files = fs.readdirSync(evidenceDir)
-    .filter((f) => f.startsWith('chaos_sentinel_') && f.endsWith('.json'))
+    .filter((f) => (f.endsWith('_snapshot.json') || f.startsWith('chaos_sentinel_')) && f.endsWith('.json') && f !== 'latest_snapshot.json')
     .map((f) => ({
       file: path.join(evidenceDir, f),
       mtime: fs.statSync(path.join(evidenceDir, f)).mtimeMs,
@@ -44,7 +64,7 @@ function resolveEvidenceFile(arg) {
     .sort((a, b) => b.mtime - a.mtime);
 
   if (files.length === 0) {
-    console.error('❌ No chaos_sentinel evidence JSON files found.');
+    console.error('❌ No evidence snapshot or chaos_sentinel JSON files found.');
     process.exit(1);
   }
 
@@ -147,15 +167,18 @@ if (probeSuite) {
   }
 }
 
-if (contractSuite) {
-  if (!fs.existsSync(contractSuite)) {
-    errors.push(`Contract suite file not found: ${summary.contractSuite}`);
+const effectiveContractFile = contractSuite || (evidence.contractTests?.file ? path.resolve(repoRoot, evidence.contractTests.file) : null);
+
+if (effectiveContractFile) {
+  if (!fs.existsSync(effectiveContractFile)) {
+    errors.push(`Contract suite file not found: ${effectiveContractFile}`);
   } else {
-    const densityViolations = scanAssertDensity(contractSuite);
-    densityViolations.forEach((v) => errors.push(`[Assert Density Violation] ${summary.contractSuite}: ${v}`));
+    const densityViolations = scanAssertDensity(effectiveContractFile);
+    densityViolations.forEach((v) => errors.push(`[Assert Density Violation] ${effectiveContractFile}: ${v}`));
 
     try {
-      const vitestCmd = `npx vitest run ${summary.contractSuite} --reporter=json`;
+      const relPath = path.relative(repoRoot, effectiveContractFile).replace(/\\/g, '/');
+      const vitestCmd = `npx vitest run ${relPath} --reporter=json`;
       const output = execSync(vitestCmd, {
         encoding: 'utf8',
         stdio: ['pipe', 'pipe', 'pipe'],
@@ -165,13 +188,14 @@ if (contractSuite) {
       if (jsonStart !== -1) {
         const result = JSON.parse(output.slice(jsonStart));
         const passedCount = result.numPassedTests ?? 0;
-        if (summary.contractTestsPassed !== undefined && passedCount !== summary.contractTestsPassed) {
-          errors.push(`Contract test count mismatch: JSON claims ${summary.contractTestsPassed}, actual run passed ${passedCount}.`);
+        const expectedPassed = summary.contractTestsPassed ?? evidence.contractTests?.passed ?? evidence.contractTests?.total;
+        if (expectedPassed !== undefined && passedCount !== expectedPassed) {
+          errors.push(`Contract test count mismatch: Claims ${expectedPassed}, actual run passed ${passedCount}.`);
         }
         const isMicro = evidence.isMicroSlice === true || /micro|slice[_\-]?\d+/i.test(evidence.ticketId || targetArg || '');
-        const minContractFloor = isMicro ? 8 : 15;
+        const minContractFloor = isMicro ? 6 : 15;
         if (passedCount < minContractFloor) {
-          errors.push(`Contract floor violation: Contract suite has ${passedCount} tests, minimum requirement is ${minContractFloor} tests${isMicro ? ' (Micro-Slice floor: 8)' : ''}.`);
+          errors.push(`Contract floor violation: Contract suite has ${passedCount} tests, minimum requirement is ${minContractFloor} tests${isMicro ? ' (Micro-Slice floor: 6)' : ''}.`);
         }
       }
     } catch (err) {

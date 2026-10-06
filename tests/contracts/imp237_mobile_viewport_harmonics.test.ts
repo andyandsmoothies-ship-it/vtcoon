@@ -298,7 +298,7 @@ describe('[TC-MVH-01/MSS..TC-MVH-16/MSS][UC-IMP237] Mobile Viewport Harmonics & 
   // FACET 4: Mobile Event Ticker Density & Desktop Parity (TC-MVH-11..13)
   // =========================================================================
   describe('Facet 4: Mobile Event Ticker Density & Desktop Parity', () => {
-    it('[TC-MVH-11/MSS][UC-IMP237] Khi co nhieu su kien thi truong, banner thu 2 mang class hidden sm:flex va the thu nhat hien thi badge +{active.length - 1} su kien', () => {
+    it('[TC-MVH-11/MSS][UC-IMP237] Khi co nhieu su kien thi truong, cac banner duoc hien thi dong thoi theo tung dong rieng biet', () => {
       useGameStore.setState({
         activeModifiers: [
           { type: MarketCardId.MC_LAND_FEVER, remainingRounds: 2, affectedCells: [1] },
@@ -307,8 +307,8 @@ describe('[TC-MVH-01/MSS..TC-MVH-16/MSS][UC-IMP237] Mobile Viewport Harmonics & 
       });
       const html = renderToStaticMarkup(React.createElement(MarketEventTicker));
 
-      expect(html).toContain('hidden sm:flex');
-      expect(html).toContain('+1 sự kiện');
+      expect(html).toContain('data-testid="market-ticker-item-MC_LAND_FEVER"');
+      expect(html).toContain('data-testid="market-ticker-item-MC_ALCOHOL_CHECK"');
     });
 
     it('[TC-MVH-12/MSS][UC-IMP237] MarketEventTicker tren Desktop (sm:) hien thi cac the su kien voi title va formula day du', () => {

@@ -22,6 +22,8 @@
     "lint:assets": "node scripts/optimize_assets.mjs",
     "evidence": "node scripts/collect_evidence.mjs",
     "check:evidence": "node scripts/check_evidence.mjs",
+    "report": "node scripts/generate_report.mjs",
+    "check:scope": "node scripts/check_scope.mjs",
     "prefilter": "node scripts/fast_prefilter.mjs",
     "capture:visual": "node scripts/capture_visual_evidence.mjs",
     "typecheck": "tsc --noEmit",

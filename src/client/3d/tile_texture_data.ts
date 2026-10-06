@@ -39,7 +39,7 @@ export const TILE_METADATA_MAP: Readonly<Record<number, TileMetadata>> = {
 
   // Cạnh 2: Ô 11 - Ô 20
   11: { title: 'BÌNH THUẬN', subtitle: 'Mũi Né', price: 1400, bannerColor: COLOR_GROUP_HEX[ColorGroup.Hong], category: 'BĐS NGHỈ DƯỠNG', icon: 'kite' },
-  12: { title: 'ĐIỆN LỰC', subtitle: 'Tập Đoàn EVN', price: 1500, bannerColor: '#2563EB', category: 'TIỆN ÍCH', icon: 'bolt' },
+  12: { title: 'ĐIỆN LỰC', subtitle: 'Tập Đoàn EVN', price: 2000, bannerColor: '#2563EB', category: 'TIỆN ÍCH', icon: 'bolt' },
   13: { title: 'LÂM ĐỒNG', subtitle: 'Đà Lạt', price: 1400, bannerColor: COLOR_GROUP_HEX[ColorGroup.Hong], category: 'BĐS NGHỈ DƯỠNG', icon: 'pine' },
   14: { title: 'KHÁNH HÒA', subtitle: 'Nha Trang', price: 1600, bannerColor: COLOR_GROUP_HEX[ColorGroup.Hong], category: 'BĐS NGHỈ DƯỠNG', icon: 'lotus_tower' },
   15: { title: 'CÁI MÉP', subtitle: 'Cảng Biển Sâu', price: 2000, bannerColor: '#334155', category: 'HẠ TẦNG', icon: 'crane' },
@@ -57,7 +57,7 @@ export const TILE_METADATA_MAP: Readonly<Record<number, TileMetadata>> = {
   25: { title: 'CAO TỐC', subtitle: 'Bắc - Nam', price: 2000, bannerColor: '#334155', category: 'HẠ TẦNG', icon: 'highway' },
   26: { title: 'HẢI PHÒNG', subtitle: 'Kinh Tế Đêm', price: 2600, bannerColor: COLOR_GROUP_HEX[ColorGroup.Vang], category: 'BĐS DỊCH VỤ', icon: 'pho' },
   27: { title: 'PHÚ QUỐC', subtitle: 'Grand World', price: 2600, bannerColor: COLOR_GROUP_HEX[ColorGroup.Vang], category: 'BĐS DỊCH VỤ', icon: 'gondola' },
-  28: { title: 'VIỄN THÔNG', subtitle: 'Viettel 5G', price: 1500, bannerColor: '#2563EB', category: 'TIỆN ÍCH', icon: 'signal' },
+  28: { title: 'VIỄN THÔNG', subtitle: 'Viettel 5G', price: 2000, bannerColor: '#2563EB', category: 'TIỆN ÍCH', icon: 'signal' },
   29: { title: 'QUẢNG NINH', subtitle: 'Vịnh Hạ Long', price: 2800, bannerColor: COLOR_GROUP_HEX[ColorGroup.Vang], category: 'BĐS NGHỈ DƯỠNG', icon: 'halong' },
   30: { title: 'THANH TRA', subtitle: 'Vào Trạm', bannerColor: '#B91C1C', category: 'THANH TRA', icon: 'gavel' },
 
