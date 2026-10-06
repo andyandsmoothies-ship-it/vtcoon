@@ -1,6 +1,8 @@
 // [IMP-134] Actionable In-Game Guidance System & Contextual Notifications
 // Universal notification model & error reason mapping
 
+import { vi } from '../../domain/i18n/vi.js';
+
 export interface ActionableNotification {
   readonly icon: string;
   readonly title: string;
@@ -10,6 +12,13 @@ export interface ActionableNotification {
 }
 
 const ACTIONABLE_NOTIFICATIONS_MAP: Record<string, ActionableNotification> = {
+  GAME_NOT_STARTED: {
+    icon: '⏳',
+    title: 'Trận Đấu Chưa Bắt Đầu',
+    description: 'Trò chơi đang ở sảnh chờ và chưa chính thức bắt đầu.',
+    tone: 'info',
+    actionHint: 'Vui lòng chờ chủ phòng khởi động ván đấu.',
+  },
   INVALID_PHASE: {
     icon: '⏱️',
     title: 'Chưa Đúng Giai Đoạn Lượt Chơi',
@@ -32,13 +41,6 @@ const ACTIONABLE_NOTIFICATIONS_MAP: Record<string, ActionableNotification> = {
     actionHint: 'Vui lòng chờ đến lượt gieo xúc xắc của bạn.',
   },
   NOT_YOUR_TURN: {
-    icon: '⏳',
-    title: 'Chưa Tới Lượt Chơi',
-    description: 'Hiện tại chưa tới lượt của bạn. Vui lòng chờ đối thủ hoàn thành lượt!',
-    tone: 'info',
-    actionHint: 'Quan sát diễn biến bàn cờ trong khi chờ đối thủ.',
-  },
-  OUT_OF_TURN: {
     icon: '⏳',
     title: 'Chưa Tới Lượt Chơi',
     description: 'Hiện tại chưa tới lượt của bạn. Vui lòng chờ đối thủ hoàn thành lượt!',
@@ -87,12 +89,40 @@ const ACTIONABLE_NOTIFICATIONS_MAP: Record<string, ActionableNotification> = {
     tone: 'warning',
     actionHint: 'Hãy hạ cấp dỡ nhà trước khi thế chấp tài sản.',
   },
-  PROPERTY_HAS_BUILDING: {
-    icon: '🏠',
-    title: 'Bất Động Sản Đang Có Công Trình',
-    description: 'Không thể thế chấp hoặc giao dịch khi vẫn còn công trình xây dựng.',
+  NOT_MORTGAGEABLE: {
+    icon: '🚫',
+    title: 'Ô Đất Không Thể Thế Chấp',
+    description: 'Bất động sản này không thuộc danh mục có thể thế chấp cho Ngân hàng.',
+    tone: 'error',
+    actionHint: 'Hãy chọn bất động sản thông thường khác để thế chấp.',
+  },
+  PROPERTY_MORTGAGED: {
+    icon: '🔒',
+    title: 'Bất Động Sản Đang Thế Chấp',
+    description: 'Không thể nâng cấp hoặc giao dịch ô đất khi đang bị thế chấp.',
     tone: 'warning',
-    actionHint: 'Hãy hạ cấp dỡ nhà trước khi thế chấp tài sản.',
+    actionHint: 'Hãy chuộc lại bất động sản trước khi thực hiện thao tác.',
+  },
+  NOT_UPGRADEABLE: {
+    icon: '🚫',
+    title: 'Không Thể Nâng Cấp',
+    description: 'Ô đất này không hỗ trợ xây dựng thêm công trình.',
+    tone: 'info',
+    actionHint: 'Chỉ có thể nâng cấp các ô đất thuộc nhóm màu độc quyền.',
+  },
+  NEED_2_RAILROADS: {
+    icon: '🚆',
+    title: 'Chưa Đủ Cơ Sở Hạ Tầng',
+    description: 'Cần sở hữu ít nhất 2 cơ sở hạ tầng giao thông (Bến xe / Cảng / Ga).',
+    tone: 'warning',
+    actionHint: 'Hãy mua thêm hoặc đàm phán đổi lấy cơ sở hạ tầng khác.',
+  },
+  NOT_UTILITY: {
+    icon: '⚡',
+    title: 'Không Phải Ô Tiện Ích',
+    description: 'Thao tác này chỉ áp dụng cho các ô Tiện Ích công cộng (EVN / Viettel).',
+    tone: 'warning',
+    actionHint: 'Vui lòng chọn đúng ô tiện ích để thao tác.',
   },
   ALREADY_MORTGAGED: {
     icon: '🔒',
@@ -255,13 +285,6 @@ const ACTIONABLE_NOTIFICATIONS_MAP: Record<string, ActionableNotification> = {
     tone: 'error',
     actionHint: 'Chờ 1-2 giây trước khi thực hiện thao tác tiếp theo.',
   },
-  ABUSE_DETECTED: {
-    icon: '🛡️',
-    title: 'Thao Tác Quá Nhanh',
-    description: 'Hệ thống phát hiện thao tác gửi đi quá nhanh. Vui lòng thử lại sau giây lát!',
-    tone: 'error',
-    actionHint: 'Chờ 1-2 giây trước khi thực hiện thao tác tiếp theo.',
-  },
   PLAYER_BANKRUPT: {
     icon: '🪦',
     title: 'Người Chơi Đã Phá Sản',
@@ -270,13 +293,6 @@ const ACTIONABLE_NOTIFICATIONS_MAP: Record<string, ActionableNotification> = {
     actionHint: 'Bạn có thể quan sát tiếp trận đấu hoặc rời phòng.',
   },
   TOKEN_INVALID: {
-    icon: '🔑',
-    title: 'Phiên Đăng Nhập Hết Hạn',
-    description: 'Phiên kết nối đã hết hạn hoặc không hợp lệ. Đang tự động kết nối lại...',
-    tone: 'info',
-    actionHint: 'Chờ hệ thống tự động làm mới phiên kết nối.',
-  },
-  TOKEN_EXPIRED: {
     icon: '🔑',
     title: 'Phiên Đăng Nhập Hết Hạn',
     description: 'Phiên kết nối đã hết hạn hoặc không hợp lệ. Đang tự động kết nối lại...',
@@ -325,6 +341,83 @@ const ACTIONABLE_NOTIFICATIONS_MAP: Record<string, ActionableNotification> = {
     tone: 'warning',
     actionHint: 'Vui lòng kiểm tra trạng thái lượt chơi hoặc bấm Kết Thúc Lượt.',
   },
+  PLAYER_NOT_FOUND: {
+    icon: '🔍',
+    title: 'Không Tìm Thấy Người Chơi',
+    description: 'Người chơi mục tiêu không tồn tại hoặc đã rời trận đấu.',
+    tone: 'error',
+    actionHint: 'Kiểm tra lại danh sách người chơi trong phòng.',
+  },
+  INVALID_PLAYER: {
+    icon: '👤',
+    title: 'Người Chơi Không Hợp Lệ',
+    description: 'Đối tượng chỉ định không hợp lệ trong ngữ cảnh này.',
+    tone: 'error',
+    actionHint: 'Vui lòng chọn lại người chơi hợp lệ trong phòng.',
+  },
+  UNAUTHORIZED: {
+    icon: '🚫',
+    title: 'Không Có Quyền Thực Hiện',
+    description: 'Bạn không có quyền hạn để thực thi hành động này.',
+    tone: 'error',
+    actionHint: 'Chỉ người chơi có quyền tương ứng mới có thể thao tác.',
+  },
+  INVALID_TRADE: {
+    icon: '🤝',
+    title: 'Đề Xuất Đàm Phán Không Hợp Lệ',
+    description: 'Điều kiện trao đổi hoặc danh mục tài sản không hợp lệ.',
+    tone: 'warning',
+    actionHint: 'Kiểm tra lại tài sản và số tiền trong đề xuất đàm phán.',
+  },
+  INVALID_PRICE: {
+    icon: '📉',
+    title: 'Mức Giá Không Hợp Lệ',
+    description: 'Mức giá đưa ra không nằm trong khung quy định của phòng chơi.',
+    tone: 'warning',
+    actionHint: 'Điều chỉnh lại mức giá phù hợp với quy định.',
+  },
+  TRADE_ALREADY_PENDING: {
+    icon: '🤝',
+    title: 'Đàm Phán Đang Diễn Ra',
+    description: 'Phòng chơi đang có một phiên đàm phán chưa giải quyết giữa các người chơi.',
+    tone: 'warning',
+    actionHint: 'Vui lòng chờ phiên đàm phán hiện tại kết thúc hoặc phản hồi đề xuất.',
+  },
+  BOND_ALREADY_ACTIVE: {
+    icon: '📜',
+    title: 'Đã Có Trái Phiếu Chưa Tất Toán',
+    description: 'Người chơi đang có hợp đồng trái phiếu doanh nghiệp đang hoạt động.',
+    tone: 'warning',
+    actionHint: 'Cần tất toán khoản nợ trái phiếu cũ trước khi phát hành mới.',
+  },
+  BID_TOO_LOW: {
+    icon: '📉',
+    title: 'Mức Giá Đấu Quá Thấp',
+    description: 'Mức giá đấu đưa ra phải cao hơn giá dẫn đầu hiện tại tối thiểu 50 Tr.',
+    tone: 'warning',
+    actionHint: 'Tăng mức đặt giá để vượt qua giá dẫn đầu.',
+  },
+  ALREADY_HIGHEST_BIDDER: {
+    icon: '👑',
+    title: 'Đang Dẫn Đầu Đấu Giá',
+    description: 'Bạn đã là người trả giá cao nhất cho tài sản này.',
+    tone: 'info',
+    actionHint: 'Chờ các người chơi khác phản hồi hoặc hết thời gian đấu giá.',
+  },
+  PLAYER_ALREADY_PASSED: {
+    icon: '⏹️',
+    title: 'Đã Bỏ Qua Đấu Giá',
+    description: 'Bạn đã chọn bỏ qua phiên đấu giá này và không thể đặt giá lại.',
+    tone: 'info',
+    actionHint: 'Theo dõi kết quả phiên đấu giá giữa các người chơi còn lại.',
+  },
+  AUCTION_EXPIRED: {
+    icon: '⌛',
+    title: 'Hết Thời Gian Đấu Giá',
+    description: 'Phiên đấu giá đã kết thúc thời gian đếm ngược.',
+    tone: 'warning',
+    actionHint: 'Đang chuyển giao quyền sở hữu tài sản cho người thắng cuộc.',
+  },
 };
 
 // Aliases for legacy/alternative casing reason codes (DRY SSOT)
@@ -336,6 +429,10 @@ ACTIONABLE_NOTIFICATIONS_MAP['highest_bidder_cannot_pass'] = ACTIONABLE_NOTIFICA
 ACTIONABLE_NOTIFICATIONS_MAP['HighestBidderCannotPass'] = ACTIONABLE_NOTIFICATIONS_MAP['HIGHEST_BIDDER_CANNOT_PASS']!;
 ACTIONABLE_NOTIFICATIONS_MAP['intent_rejected'] = ACTIONABLE_NOTIFICATIONS_MAP['INTENT_REJECTED']!;
 ACTIONABLE_NOTIFICATIONS_MAP['IntentRejected'] = ACTIONABLE_NOTIFICATIONS_MAP['INTENT_REJECTED']!;
+ACTIONABLE_NOTIFICATIONS_MAP['OUT_OF_TURN'] = ACTIONABLE_NOTIFICATIONS_MAP['NOT_YOUR_TURN']!;
+ACTIONABLE_NOTIFICATIONS_MAP['PROPERTY_HAS_BUILDING'] = ACTIONABLE_NOTIFICATIONS_MAP['HAS_BUILDING']!;
+ACTIONABLE_NOTIFICATIONS_MAP['ABUSE_DETECTED'] = ACTIONABLE_NOTIFICATIONS_MAP['RATE_LIMIT_EXCEEDED']!;
+ACTIONABLE_NOTIFICATIONS_MAP['TOKEN_EXPIRED'] = ACTIONABLE_NOTIFICATIONS_MAP['TOKEN_INVALID']!;
 
 const DEFAULT_FALLBACK_NOTIFICATION: ActionableNotification = {
   icon: 'ℹ️',
@@ -349,21 +446,34 @@ export function resolveActionableNotification(reasonCode?: string | null): Actio
   if (!reasonCode || typeof reasonCode !== 'string') {
     return DEFAULT_FALLBACK_NOTIFICATION;
   }
-  return ACTIONABLE_NOTIFICATIONS_MAP[reasonCode] ?? DEFAULT_FALLBACK_NOTIFICATION;
+  const match = ACTIONABLE_NOTIFICATIONS_MAP[reasonCode];
+  if (match) return match;
+
+  const viText = (vi.rejectReasons as Record<string, string>)[reasonCode];
+  if (viText) {
+    return {
+      icon: 'ℹ️',
+      title: 'Hướng Dẫn Trò Chơi',
+      description: viText,
+      tone: 'info',
+      actionHint: 'Vui lòng kiểm tra lại tình trạng lượt chơi trên thanh điều khiển.',
+    };
+  }
+  return DEFAULT_FALLBACK_NOTIFICATION;
 }
 
 export function formatServerErrorMessage(reasonCode?: string | null): string {
   if (!reasonCode || typeof reasonCode !== 'string') {
     return 'Hướng dẫn trò chơi: Thao tác tạm thời chưa thể thực hiện. Vui lòng kiểm tra lại tình trạng lượt chơi!';
   }
-  const match = ACTIONABLE_NOTIFICATIONS_MAP[reasonCode];
-  if (!match) {
+  const notif = resolveActionableNotification(reasonCode);
+  if (notif === DEFAULT_FALLBACK_NOTIFICATION) {
     return `Hướng dẫn trò chơi: Thao tác tạm thời chưa thể thực hiện (${reasonCode}). Vui lòng kiểm tra lại tình trạng lượt chơi!`;
   }
-  if (match.actionHint) {
-    return `${match.title}: ${match.description} 👉 ${match.actionHint}`;
+  if (notif.actionHint) {
+    return `${notif.title}: ${notif.description} 👉 ${notif.actionHint}`;
   }
-  return `${match.title}: ${match.description}`;
+  return `${notif.title}: ${notif.description}`;
 }
 
 export default resolveActionableNotification;

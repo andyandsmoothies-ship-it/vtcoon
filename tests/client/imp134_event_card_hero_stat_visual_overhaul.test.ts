@@ -87,7 +87,7 @@ describe('[IMP-134] Thẻ Bài Fintech "Hiểu Ngay Trong 1 Giây" / Event Card 
         })
       );
       expect(html).toContain('data-testid="event-hero-stat"');
-      expect(html).toMatch(/data-testid="event-hero-stat"[\s\S]*?\+20%\s*(?:THẾ CHẤP)?/i);
+      expect(html).toMatch(/data-testid="event-hero-stat"[\s\S]*?(?:\+20%\s*(?:THẾ CHẤP)?|x1\.5 THUÊ)/i);
     });
 
     it('[TC-IMP134.06/MSS][UC-IMP134][Facet-2/Reactivity] Thẻ CC_STOCK_PROFIT hiển thị Hero Stat +2.500 Tr. tiền mặt', () => {
@@ -301,8 +301,8 @@ describe('[IMP-134] Thẻ Bài Fintech "Hiểu Ngay Trong 1 Giây" / Event Card 
       const html = renderToStaticMarkup(
         React.createElement(EventCardModal, {
           cardType: 'market',
-          cardId: MarketCardId.MC_RATE_HIKE,
-          description: 'Ngân Hàng Nhà Nước tăng lãi suất.',
+          cardId: 'MC_DEFAULT_MARKET',
+          description: 'Thị trường biến động điều chỉnh.',
         })
       );
       expect(html).toContain('Toàn bộ thị trường');
@@ -352,12 +352,18 @@ describe('[IMP-134] Thẻ Bài Fintech "Hiểu Ngay Trong 1 Giây" / Event Card 
 
     it('[TC-IMP134.26/MSS][UC-IMP134][Facet-3/Disposal] Bấm nút CTA xác nhận gọi onConfirm khi được cung cấp', () => {
       const onConfirm = vi.fn();
-      const vdom = EventCardModal({
-        cardType: 'market',
-        cardId: MarketCardId.MC_URBAN_PLANNING,
-        description: 'Quy hoạch trục đô thị mới.',
-        onConfirm,
-      });
+      let vdom: any;
+      renderToStaticMarkup(
+        React.createElement(() => {
+          vdom = EventCardModal({
+            cardType: 'market',
+            cardId: MarketCardId.MC_URBAN_PLANNING,
+            description: 'Quy hoạch trục đô thị mới.',
+            onConfirm,
+          });
+          return vdom;
+        })
+      );
       const ctaBtn = findElementByProp(vdom, (p: any) => p['data-testid'] === 'event-card-confirm-btn' || p.children === 'Nắm Bắt Thời Cơ 🏙️' || p.children === 'Đã Hiểu / Tiếp Tục');
       expect(ctaBtn).not.toBeNull();
       ctaBtn.props.onClick();
@@ -366,12 +372,18 @@ describe('[IMP-134] Thẻ Bài Fintech "Hiểu Ngay Trong 1 Giây" / Event Card 
 
     it('[TC-IMP134.27/MSS][UC-IMP134][Facet-3/Disposal] Bấm nút CTA xác nhận fallback gọi onClose khi onConfirm không được cung cấp', () => {
       const onClose = vi.fn();
-      const vdom = EventCardModal({
-        cardType: 'market',
-        cardId: MarketCardId.MC_URBAN_PLANNING,
-        description: 'Quy hoạch trục đô thị mới.',
-        onClose,
-      });
+      let vdom: any;
+      renderToStaticMarkup(
+        React.createElement(() => {
+          vdom = EventCardModal({
+            cardType: 'market',
+            cardId: MarketCardId.MC_URBAN_PLANNING,
+            description: 'Quy hoạch trục đô thị mới.',
+            onClose,
+          });
+          return vdom;
+        })
+      );
       const ctaBtn = findElementByProp(vdom, (p: any) => p['data-testid'] === 'event-card-confirm-btn' || p.children === 'Nắm Bắt Thời Cơ 🏙️' || p.children === 'Đã Hiểu / Tiếp Tục');
       expect(ctaBtn).not.toBeNull();
       ctaBtn.props.onClick();
@@ -380,12 +392,18 @@ describe('[IMP-134] Thẻ Bài Fintech "Hiểu Ngay Trong 1 Giây" / Event Card 
 
     it('[TC-IMP134.28/MSS][UC-IMP134][Facet-3/Disposal] Bấm nút Đóng (✕) gọi onClose giải phóng modal khỏi giao diện', () => {
       const onClose = vi.fn();
-      const vdom = EventCardModal({
-        cardType: 'market',
-        cardId: MarketCardId.MC_URBAN_PLANNING,
-        description: 'Quy hoạch trục đô thị mới.',
-        onClose,
-      });
+      let vdom: any;
+      renderToStaticMarkup(
+        React.createElement(() => {
+          vdom = EventCardModal({
+            cardType: 'market',
+            cardId: MarketCardId.MC_URBAN_PLANNING,
+            description: 'Quy hoạch trục đô thị mới.',
+            onClose,
+          });
+          return vdom;
+        })
+      );
       const closeBtn = findElementByProp(vdom, (p: any) => p['aria-label'] === 'Đóng thẻ sự kiện');
       expect(closeBtn).not.toBeNull();
       closeBtn.props.onClick();

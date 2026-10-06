@@ -52,6 +52,11 @@ export const BANNED_TEST_RULES = [
     code: 'BANNED_META_TEST_CHECK',
     desc: 'Testing whether other tests pass or asserting test suite execution counts is a banned meta test pattern. Assert physical observable contracts instead.',
   },
+  {
+    regex: /\b(?:When|Khi)\b[^.\n]*(?:\bvà gọi\b|\bvà kích hoạt\b|\band call\b|\band invoke\b|\bgọi\s+[a-zA-Z0-9_$]+\s+và\s+[a-zA-Z0-9_$]+)/i,
+    code: 'NON_ATOMIC_TEST_SPEC',
+    desc: 'Test specification bundles multiple action calls in "When" clause. Split into distinct atomic tests (e.g. TC-XXX.YYa and TC-XXX.YYb) to satisfy Atomic Test Mandate.',
+  },
 ];
 
 export function auditScopeAndSubsystems(targetFiles) {
@@ -187,7 +192,84 @@ export function auditPlanSnippetHygiene(relPath, targetChunk, replacementChunk) 
   return errors;
 }
 
-export function auditTestSpecLine(line) {
+export function auditScopeConservation(planContent) {
+  let errors = 0;
+  if (!planContent) return errors;
+
+  const lines = planContent.split('\n');
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    // Check if line drops/waives scope without formal deferral ticket
+    if (/\b(?:WAIVE|HOÃN|DEFER|tách riêng|không sửa trong ticket này)\b/i.test(line)) {
+      // Exclude pure documentation of pureLogicWaiver setting in Station 3 table
+      if (/pure\s*logic\s*waiver\s*(?:documented|cho phép|áp dụng|:\s*true)/i.test(line) && !/(?:\.(?:ts|tsx|js|jsx)|3D|aura|nhãn|ticker)/i.test(line)) {
+        continue;
+      }
+      // Check if ticket ID is present on current line or immediate adjacent lines (e.g. intro line before list item)
+      const adjacentContext = [line, lines[i - 1] || '', lines[i + 1] || ''].join(' ');
+      const hasFormalTicket = /\[DEFERRED TO TICKET-[A-Z0-9_.-]+(?::\s*[^\]]+)?\]/i.test(adjacentContext) ||
+                              /\bTICKET-[A-Z0-9_.-]+\b/i.test(adjacentContext);
+      if (!hasFormalTicket) {
+        console.error(`  ❌ [ILLEGAL_SCOPE_DROP] Line ${i + 1} drops/waives scope without formal deferral ticket:`);
+        console.error(`     "${line.trim()}"`);
+        console.error(`     Scope Conservation Mandate requires: [DEFERRED TO TICKET-XXX: <Reason>] for any postponed surface.`);
+        errors++;
+      }
+    }
+  }
+  return errors;
+}
+
+export function auditPureLogicWaiver(targetFiles, planContent) {
+  let errors = 0;
+  if (/pure\s*logic\s*waiver\s*:\s*true/i.test(planContent)) {
+    const clientTargets = Array.from(targetFiles.keys()).filter((f) => /^(?:src\/client|src\\client)/i.test(f));
+    if (clientTargets.length > 0) {
+      console.error(`  ❌ [ILLEGAL_PURE_LOGIC_WAIVER] Plan specifies pureLogicWaiver: true but targets client/UI files:`);
+      console.error(`     ${clientTargets.join(', ')}`);
+      console.error(`     Pure Logic Waiver is strictly reserved for pure logic/types/DTO files without DOM/client footprint.`);
+      errors++;
+    }
+  }
+  return errors;
+}
+
+export function collectExportedSymbols(rootDir = 'src', planContent = '') {
+  const symbols = new Set();
+  function walk(dir) {
+    if (!fs.existsSync(dir)) return;
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        walk(full);
+      } else if (/\.(ts|tsx|js|jsx)$/.test(entry.name)) {
+        const code = fs.readFileSync(full, 'utf8');
+        const exportRegex = /export\s+(?:async\s+)?(?:function|class|const|let|var|type|interface)\s+([a-zA-Z0-9_$]+)/g;
+        let m;
+        while ((m = exportRegex.exec(code)) !== null) {
+          symbols.add(m[1]);
+        }
+      }
+    }
+  }
+  walk(rootDir);
+
+  // Also collect symbols declared in plan code blocks
+  if (planContent) {
+    const exportRegex = /export\s+(?:async\s+)?(?:function|class|const|let|var|type|interface)\s+([a-zA-Z0-9_$]+)/g;
+    let m;
+    while ((m = exportRegex.exec(planContent)) !== null) {
+      symbols.add(m[1]);
+    }
+    const methodRegex = /(?:public\s+|private\s+|protected\s+)?([a-zA-Z0-9_$]+)\s*\([^)]*\)\s*(?::\s*[^{\n]+)?\s*\{/g;
+    while ((m = methodRegex.exec(planContent)) !== null) {
+      if (m[1].length > 3) symbols.add(m[1]);
+    }
+  }
+  return symbols;
+}
+
+export function auditTestSpecLine(line, exportedSymbols = null) {
   let errors = 0;
   if (!/\[UC-[A-Z0-9._-]+\/(?:MSS|A\d+)\]/i.test(line)) {
     console.error(`  ❌ [DOD1_MISSING_FLOW_TAXONOMY] in test spec:`);
@@ -211,6 +293,21 @@ export function auditTestSpecLine(line) {
       console.error(`     Line: ${line.trim()}`);
       console.error(`     Reason: ${rule.desc}`);
       errors++;
+    }
+  }
+
+  if (exportedSymbols && exportedSymbols.size > 0) {
+    const callMatch = line.match(/\b(?:When|Khi)\b[\s\S]*?\b(?:gọi|gọi\s+hàm|kích\s+hoạt|calling|invoking)\s+`?([a-zA-Z0-9_$]+)`?/i);
+    if (callMatch) {
+      const fnName = callMatch[1];
+      const builtins = new Set(['dispatch', 'render', 'fire', 'trigger', 'mount', 'click', 'submit', 'set', 'get', 'fetch', 'getState', 'setState']);
+      if (!builtins.has(fnName) && !exportedSymbols.has(fnName)) {
+        console.error(`  ❌ [HALLUCINATED_FUNCTION_IN_TEST_SPEC] in test spec:`);
+        console.error(`     Line: ${line.trim()}`);
+        console.error(`     Symbol '${fnName}' does not exist in src/ or plan declarations (total known symbols: ${exportedSymbols.size})!`);
+        console.error(`     Physical verification required (e.g. check disk files or git grep) to avoid TS2305/ReferenceError at Station 1.`);
+        errors++;
+      }
     }
   }
 

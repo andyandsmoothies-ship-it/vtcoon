@@ -73,7 +73,7 @@ export const ACTIVE_MARKET_EFFECT_SUMMARIES: Readonly<Record<string, string>> = 
   [MarketCardId.MC_MEGA_CONCERT]:
     'Mọi người chơi lập tức di chuyển đến ô Dịch Vụ có cấp nhà cao nhất.',
   [MarketCardId.MC_RATE_HIKE]:
-    'Thu lãi vay thế chấp 10% khi người chơi đi qua ô Khởi Hành (GO).',
+    'Tăng 20% chi phí xây nhà C1-C3 và thu lãi vay thế chấp 10% khi qua GO.',
   [MarketCardId.MC_CREDIT_STIMULUS]:
     'Giảm 20% chi phí xây nhà C1-C3 và miễn 100% lãi suất vay thế chấp.',
   [MarketCardId.MC_LAND_FEVER]:
@@ -89,7 +89,7 @@ export const ACTIVE_MARKET_EFFECT_SUMMARIES: Readonly<Record<string, string>> = 
   [MarketCardId.MC_FUEL_SURGE]:
     'Phụ thu thêm 500 cước vận tải tại 4 Ga Tàu toàn bàn cờ.',
   [MarketCardId.MC_URBAN_PLANNING]:
-    'Tăng 20% giá trị khi thế chấp BĐS Hà Nội & TP.HCM (nhận 60% giá gốc).',
+    'Nhân 1.5x tiền thuê & tăng 20% giá trị khi thế chấp BĐS Hà Nội & TP.HCM.',
   [MarketCardId.MC_UTILITY_DOUBLE]:
     'Nhân đôi phí dịch vụ tiện ích công cộng (EVN và Viettel).',
   [MarketCardId.MC_CASINO_PILOT]:
@@ -124,7 +124,7 @@ export const ACTIVE_MARKET_COMPACT_FORMULAS: Readonly<Record<string, string>> = 
   [MarketCardId.MC_NIGHT_ECONOMY]: 'Dịch vụ C1+: Cước thuê x2',
   [MarketCardId.MC_ALCOHOL_CHECK]: 'Dịch vụ: Thuê -50%, Phạt 800',
   [MarketCardId.MC_MEGA_CONCERT]: 'Đến ô Dịch vụ cấp cao nhất',
-  [MarketCardId.MC_RATE_HIKE]: 'Lãi thế chấp 10% qua GO',
+  [MarketCardId.MC_RATE_HIKE]: 'Xây nhà +20%, Lãi vay 10%',
   [MarketCardId.MC_CREDIT_STIMULUS]: 'Xây nhà -20%, Miễn lãi vay',
   [MarketCardId.MC_LAND_FEVER]: 'Ven đô: Cước thuê x2',
   [MarketCardId.MC_FIRE_INSPECTION]: 'Phạt PCCC 200 - 800 Tr.',
@@ -132,7 +132,7 @@ export const ACTIVE_MARKET_COMPACT_FORMULAS: Readonly<Record<string, string>> = 
   [MarketCardId.MC_PEAK_TOURISM]: 'Nghỉ dưỡng: Nhân đôi thuê',
   [MarketCardId.MC_FREEZE_TRADE]: 'Cấm mua đất, đấu giá & P2P',
   [MarketCardId.MC_FUEL_SURGE]: '4 Ga Tàu: Phụ thu thêm 500',
-  [MarketCardId.MC_URBAN_PLANNING]: 'Thế chấp HN/HCM nhận 60%',
+  [MarketCardId.MC_URBAN_PLANNING]: 'Thuê HN/HCM x1.5 & Vay 60%',
   [MarketCardId.MC_UTILITY_DOUBLE]: 'Điện & Viễn thông: Cước x2',
   [MarketCardId.MC_CASINO_PILOT]: 'Thưởng 1.500 - 3.000 khi dừng',
   [ChanceCardId.CC_PORT_EXCLUSIVE]: 'Cảng biển: Hưởng 50% cước',

@@ -169,12 +169,12 @@ describe('[TC-PARITY.01..17][UC-IMP-VISUAL-DESYNC] Visual Metadata Parity Contra
     expect(visual.isBuff).toBe(false);
   });
 
-  it('[TC-PARITY.10/Boundary][UC-IMP-VISUAL-DESYNC][Facet-2] MC_URBAN_PLANNING suy diễn đúng icon 📐, nhãn Thế chấp 60%, màu #F59E0B và cờ isBuff = true', () => {
+  it('[TC-PARITY.10/Boundary][UC-IMP-VISUAL-DESYNC][Facet-2] MC_URBAN_PLANNING suy diễn đúng icon 📐, nhãn x1.5 Thuê, màu #F59E0B và cờ isBuff = true', () => {
     const visual = deriveModifierVisual({
       type: MarketCardId.MC_URBAN_PLANNING,
     });
     expect(visual.icon).toBe('📐');
-    expect(visual.label).toBe('Thế chấp 60%');
+    expect(visual.label).toBe('x1.5 Thuê');
     expect(visual.color).toBe('#F59E0B');
     expect(visual.isBuff).toBe(true);
   });
@@ -227,6 +227,18 @@ describe('[TC-PARITY.01..17][UC-IMP-VISUAL-DESYNC] Visual Metadata Parity Contra
     });
     expect(formula).toMatch(/x2/i);
     expect(visual.label).toMatch(/x2/i);
+  });
+
+  it('[TC-PARITY.18/MSS][UC-IMP273][Facet-4] Khớp nhãn và công thức đồng bộ cho MC_URBAN_PLANNING (1.5x Thuê & Vay 60%)', () => {
+    const summary = resolveMarketEffectSummary(MarketCardId.MC_URBAN_PLANNING);
+    const formula = resolveMarketCompactFormula(MarketCardId.MC_URBAN_PLANNING);
+    const heroStat = getCardHeroStat(MarketCardId.MC_URBAN_PLANNING);
+    const visual = deriveModifierVisual({ type: MarketCardId.MC_URBAN_PLANNING });
+
+    expect(summary).toContain('1.5x tiền thuê');
+    expect(formula).toContain('x1.5');
+    expect(heroStat.value).toContain('x1.5 THUÊ');
+    expect(visual.label).toBe('x1.5 Thuê');
   });
 
   // ==========================================================================

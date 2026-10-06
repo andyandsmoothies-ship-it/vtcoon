@@ -41,15 +41,15 @@ export function MilestoneBanner({ item }: { readonly item: FloatingTextItem }): 
   const isEventCard = item.actionType === 'chance' || item.actionType === 'market';
   const testId = isEventCard ? 'event-card-notification-banner' : 'milestone-celebration-banner';
   const borderShadowStyle = item.actionType === 'market'
-    ? 'border-cyan-500/80 shadow-md shadow-cyan-900/15'
+    ? 'border-cyan-500/80 shadow-md shadow-cyan-900/10'
     : item.actionType === 'bankrupt'
-    ? 'border-rose-500/80 shadow-md shadow-rose-900/15'
-    : 'border-amber-500/80 shadow-md shadow-amber-900/15';
+    ? 'border-rose-500/80 shadow-md shadow-rose-900/10'
+    : 'border-amber-500/80 shadow-md shadow-amber-900/10';
 
   const bannerClasses = [
-    'pointer-events-auto cursor-pointer flex items-center gap-2.5 sm:gap-3 px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-2xl border-2',
-    'bg-[#FFFDF8] text-slate-900 select-none animate-in fade-in slide-in-from-bottom-3 md:slide-in-from-top-3 duration-200',
-    'max-w-[88vw] sm:max-w-[380px]',
+    'pointer-events-auto cursor-pointer flex flex-col gap-1 px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-2xl border',
+    'bg-[#FFFDF8] text-slate-900 select-none active:scale-95 animate-in fade-in duration-200',
+    'w-full max-w-[88vw] sm:max-w-[380px] min-w-0',
     borderShadowStyle,
   ].join(' ');
 
@@ -58,6 +58,19 @@ export function MilestoneBanner({ item }: { readonly item: FloatingTextItem }): 
     (isEventCard ? (item.actionType === 'market' ? 'Sự Kiện Thị Trường' : 'Thẻ Cơ Hội') : item.text);
   const rawDescText = item.title ? item.text : null;
   const descText = rawDescText ? cleanEventDescription(rawDescText) : null;
+
+  const resolveCategory = () => {
+    switch (item.actionType) {
+      case 'market': return 'SỰ KIỆN THỊ TRƯỜNG';
+      case 'chance': return 'THẺ CƠ HỘI';
+      case 'transit': return 'VÒNG XOAY VẬN TẢI';
+      case 'monopoly': return 'CỘT MỐC ĐỘC QUYỀN';
+      case 'bankrupt': return 'THÔNG BÁO PHÁ SẢN';
+      case 'debt_relief': return 'CỨU TRỢ NỢ';
+      default: return 'CỘT MỐC SỰ KIỆN';
+    }
+  };
+  const category = resolveCategory();
 
   const handleDismiss = () => {
     useGameStore.getState().removeFloatingText(item.id);
@@ -74,41 +87,62 @@ export function MilestoneBanner({ item }: { readonly item: FloatingTextItem }): 
     <div
       role="status"
       tabIndex={0}
-      aria-label="Thông báo sự kiện: nhấn để đóng"
+      aria-label={`${category}: nhấn để đóng`}
       aria-live="polite"
       data-testid={testId}
       className={bannerClasses}
       onClick={handleDismiss}
       onKeyDown={handleKeyDown}
     >
-      <span className="text-2xl shrink-0" aria-hidden="true">{icon}</span>
-      <div className="flex flex-col min-w-0 flex-1">
-        <div className="flex items-center gap-1.5 flex-wrap sm:flex-nowrap min-w-0">
-          {player && (
-            <span
-              className="text-[11px] font-bold px-2 py-0.5 rounded-full text-white shadow-xs shrink-0 truncate max-w-[120px] sm:max-w-[150px]"
-              style={{ backgroundColor: player.tokenColor || '#64748B' }}
-            >
-              {formatShortPlayerName(player.name)}
-            </span>
-          )}
-          <span
-            data-testid="milestone-card-title"
-            className="font-extrabold text-xs sm:text-sm text-slate-900 tracking-tight min-w-0 flex-1 truncate"
-            title={titleText}
-          >
-            {titleText}
+      {/* Tầng 1: Header định danh sự kiện & nút đóng */}
+      <div className="flex items-center justify-between border-b border-slate-200/80 pb-0.5">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span className="text-sm shrink-0" aria-hidden="true">{icon}</span>
+          <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-500 truncate">
+            {category}
           </span>
         </div>
-        {descText && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleDismiss();
+          }}
+          className="text-slate-400 hover:text-slate-700 text-xs font-bold leading-none min-w-[24px] min-h-[24px] flex items-center justify-center p-1 rounded-lg hover:bg-slate-200/50 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
+          aria-label="Đóng thông báo"
+        >
+          ✕
+        </button>
+      </div>
+
+      {/* Tầng 2: Tiêu đề sự kiện & Người chơi */}
+      <div className="flex items-center gap-1.5 flex-wrap sm:flex-nowrap min-w-0">
+        {player && (
           <span
-            data-testid="milestone-card-desc"
-            className="line-clamp-2 break-words min-w-0 text-[11px] sm:text-xs text-slate-600 font-semibold leading-tight mt-0.5 pt-0.5 pb-0.5"
+            className="text-[10px] sm:text-[11px] font-bold px-1.5 py-0.5 rounded-md text-white shadow-xs shrink-0 truncate max-w-[120px] sm:max-w-[150px]"
+            style={{ backgroundColor: player.tokenColor || '#64748B' }}
           >
-            {descText}
+            {formatShortPlayerName(player.name)}
           </span>
         )}
+        <span
+          data-testid="milestone-card-title"
+          className="font-bold text-xs sm:text-[13px] text-slate-900 tracking-tight min-w-0 flex-1 truncate"
+          title={titleText}
+        >
+          {titleText}
+        </span>
       </div>
+
+      {/* Tầng 3: Chi tiết mô tả hiệu lực */}
+      {descText && (
+        <span
+          data-testid="milestone-card-desc"
+          className="line-clamp-2 break-words min-w-0 text-[11px] sm:text-xs text-slate-600 font-medium leading-tight"
+        >
+          {descText}
+        </span>
+      )}
     </div>
   );
 }
@@ -278,10 +312,8 @@ export function FloatingNumbersOverlay(): React.ReactElement | null {
             <MilestoneBanner item={latestMilestone} />
           </div>
         )}
-        {displayItems.map((item, idx) => {
-          const isHiddenOnMobile = Boolean(
-            latestMilestone && displayItems.length > 1 && idx < displayItems.length - 1
-          );
+        {displayItems.map((item) => {
+          const isHiddenOnMobile = Boolean(latestMilestone);
           return (
             <div
               key={item.id}

@@ -450,8 +450,8 @@ describe('[TC-MCH01/MSS][UI-S02/MSS] Mobile Compact HUD & Tactile Retropoly Moda
       const html = renderToStaticMarkup(
         React.createElement(EventCardModal, {
           cardType: 'market',
-          cardId: 'MC_RATE_HIKE',
-          description: 'Ngân hàng Trung Ương tăng lãi suất điều hành thêm 5%.',
+          cardId: 'MC_DEFAULT_MARKET',
+          description: 'Thị trường biến động điều chỉnh.',
         })
       );
       // Bóc tách phần HTML bên trong event-impact-summary

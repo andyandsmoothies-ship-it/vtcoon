@@ -2,7 +2,7 @@ import { MarketCardId, ChanceCardId } from '../domain/event_card_types.js';
 import { MacroCycleType } from '../domain/macro_cycle_types.js';
 import type { ClientMarketModifier } from './store/game_store_types.js';
 
-// [DIR-3]: Mở rộng kiểu nghiêm ngặt, triệt tiêu hoàn toàn dirty cast 'as any'
+// [DIR-3]: Mở rộng kiểu nghiêm ngặt, triệt tiêu hoàn toàn ép kiểu không an toàn
 export type EventIdentifiable = MarketCardId | MacroCycleType | ChanceCardId | 'BUILD_HALT';
 
 export interface EventVisualMeta {
@@ -109,9 +109,9 @@ export function deriveModifierVisual(modifier: ModifierVisualInput): EventVisual
     return { icon, label: '+500 Phí', color: '#EF4444', isBuff: false };
   }
 
-  // 1.4. Đô thị trung tâm thế chấp ưu đãi
+  // 1.4. Đô thị trung tâm thế chấp ưu đãi & tăng tiền thuê
   if (cardType === MarketCardId.MC_URBAN_PLANNING) {
-    return { icon, label: 'Thế chấp 60%', color: '#F59E0B', isBuff: true };
+    return { icon, label: 'x1.5 Thuê', color: '#F59E0B', isBuff: true };
   }
 
   // 1.5. Đình chỉ công trình

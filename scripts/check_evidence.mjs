@@ -194,7 +194,15 @@ if (evidence.mutationSensitivityProbe) {
 // 3. Physical Visual Screenshot Verification (Zero-Blindness Gate)
 const isPureLogicWaiver = evidence.pureLogicWaiver === true;
 if (isPureLogicWaiver) {
-  console.log(`ℹ️ [Pure Logic Waiver] Visual screenshot check waived: ${evidence.pureLogicWaiverReason || 'Non-visual logic/type slice'}`);
+  const targetFiles = evidence.targetFiles || evidence.modifiedFiles || [];
+  const clientFiles = targetFiles.filter((f) => /^(?:src\/client|src\\client)/i.test(f));
+  if (clientFiles.length > 0) {
+    errors.push(
+      `[ILLEGAL_PURE_LOGIC_WAIVER] pureLogicWaiver is FORBIDDEN when client/UI files are modified: ${clientFiles.join(', ')}`,
+    );
+  } else {
+    console.log(`ℹ️ [Pure Logic Waiver] Visual screenshot check waived: ${evidence.pureLogicWaiverReason || 'Non-visual logic/type slice'}`);
+  }
 } else if (evidence.visualReview || /3d|ui|viaduct|diorama|ballast|modal|hud/i.test(evidencePath) || /3d|ui/i.test(summary.contractSuite || '')) {
   const tmpFiles = fs.existsSync(path.join(repoRoot, '.agents', 'tmp')) ? fs.readdirSync(path.join(repoRoot, '.agents', 'tmp')) : [];
   const evFiles = fs.readdirSync(evidenceDir);

@@ -2,6 +2,7 @@
 import { PROPERTY_DEEDS, UTILITY_CELLS } from '../../../domain/property_data.js';
 import { BOARD_CONFIG, CellType, type ColorGroup } from '../../../domain/board_config.js';
 import type { Player } from '../../../domain/types.js';
+import { calculateUpgradeCost, type UpgradeCostModifier } from '../../../domain/property_upgrade.js';
 
 export interface PurchaseAffordance {
   readonly deedPrice: number;
@@ -10,6 +11,12 @@ export interface PurchaseAffordance {
   readonly hasMortgageableProperties: boolean;
   readonly totalMortgageCapacity: number;
   readonly canCoverWithMortgage: boolean;
+}
+
+export interface UpgradeActionEvaluation {
+  readonly canUpgrade: boolean;
+  readonly cost: number;
+  readonly blockedReason?: string;
 }
 
 export function resolvePurchaseAffordance(params: {
@@ -150,7 +157,7 @@ export function resolveTitleDeedModalState(params: {
   playersInfo: Record<string, AffordancePlayer | Player>;
   levelMap?: Record<number, number>;
   propertyStates?: Record<number, { level?: number; isETC?: boolean; isUpgradedUtility?: boolean; isMortgaged?: boolean }>;
-  activeModifiers?: readonly { readonly type: string; readonly remainingRounds: number }[];
+  activeModifiers?: readonly UpgradeCostModifier[];
   turnPhase?: string | null;
   currentTurnPlayerId?: string | null;
 }) {
@@ -160,7 +167,10 @@ export function resolveTitleDeedModalState(params: {
   const isMortgaged = Boolean(owner?.mortgagedProperties?.includes(params.cellIndex));
   const deed = PROPERTY_DEEDS.get(params.cellIndex);
   const currentLevel = (params.levelMap?.[params.cellIndex] ?? 0) as 0 | 1 | 2 | 3;
-  const upgradeCost = deed?.upgradeCosts && currentLevel < 3 ? deed.upgradeCosts[currentLevel as 0 | 1 | 2] : 0;
+  const upgradeCost = calculateUpgradeCost(params.cellIndex, currentLevel, params.activeModifiers);
+  const dynamicUpgradeCosts = deed?.upgradeCosts
+    ? deed.upgradeCosts.map((_, lvl) => calculateUpgradeCost(params.cellIndex, lvl, params.activeModifiers))
+    : [];
 
   const cell = BOARD_CONFIG[params.cellIndex];
   const isUtility = cell?.type === CellType.Utility;
@@ -222,6 +232,15 @@ export function resolveTitleDeedModalState(params: {
     } else if ((params.myPlayer?.balance ?? 0) < effectiveUpgradeCost) {
       specialUpgradeBlockedReason = `Cần ${effectiveUpgradeCost} Tr. VNĐ để nâng cấp ETC (${ownedRailroads.length} ga)`;
     }
+  } else if (isOwner && !isMortgaged && currentLevel < 3) {
+    const playerBalance = params.myPlayer?.balance ?? owner?.balance ?? 0;
+    if (params.currentTurnPlayerId && params.currentTurnPlayerId !== params.myId) {
+      specialUpgradeBlockedReason = 'Chưa đến lượt của bạn';
+    } else if (params.turnPhase && params.turnPhase !== 'PropertyManagement') {
+      specialUpgradeBlockedReason = 'Chỉ có thể nâng cấp trong giai đoạn Quản Lý Tài Sản';
+    } else if (!buildRules.upgradeBlockedReason && playerBalance < effectiveUpgradeCost) {
+      specialUpgradeBlockedReason = `Cần ${effectiveUpgradeCost} Tr. VNĐ để nâng cấp`;
+    }
   }
 
   const isTradeFrozen = Boolean(params.activeModifiers?.some((m) => m.type === 'MC_FREEZE_TRADE' && m.remainingRounds > 0));
@@ -251,6 +270,13 @@ export function resolveTitleDeedModalState(params: {
 
   const hasUpgrades = isUtility ? !isUpgradedUtility : isRailroad ? !isETC : (deed?.upgradeCosts?.some((cost) => cost > 0) ?? false);
 
+  const finalUpgradeBlockedReason = specialUpgradeBlockedReason ?? buildRules.upgradeBlockedReason;
+  const upgradeEvaluation: UpgradeActionEvaluation = {
+    canUpgrade: !finalUpgradeBlockedReason,
+    cost: effectiveUpgradeCost,
+    blockedReason: finalUpgradeBlockedReason,
+  };
+
   return {
     owner,
     isOwner,
@@ -258,13 +284,15 @@ export function resolveTitleDeedModalState(params: {
     ownerName: owner?.name,
     currentLevel,
     upgradeCost: effectiveUpgradeCost,
+    upgradeCosts: dynamicUpgradeCosts,
     hasUpgrades,
     isUtility,
     isRailroad,
     isUpgradedUtility,
     isETC,
     hasMonopoly: groupInfo.hasMonopoly,
-    upgradeBlockedReason: specialUpgradeBlockedReason ?? buildRules.upgradeBlockedReason,
+    upgradeEvaluation,
+    upgradeBlockedReason: finalUpgradeBlockedReason,
     downgradeBlockedReason: buildRules.downgradeBlockedReason,
     canBuy: params.canBuyOverride ?? (affordance.canAffordCash && !isTradeFrozen),
     isBuyOpportunity,

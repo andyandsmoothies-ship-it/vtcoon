@@ -303,5 +303,22 @@ describe('[TC-IMP253.01/MSS..TC-IMP253.17/MSS][UC-IMP253] Floating Toast Ergonom
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
       expect(html).toContain('items-center');
     });
+
+    it('[TC-IMP253.18/MSS][UC-IMP253] MilestoneBanner hiển thị header đồng bộ có nút đóng ✕ và danh mục sự kiện', () => {
+      const html = renderToStaticMarkup(React.createElement(MilestoneBanner, { item: sampleMilestoneItem }));
+      expect(html).toContain('aria-label="Đóng thông báo"');
+      expect(html).toContain('SỰ KIỆN THỊ TRƯỜNG');
+    });
+
+    it('[TC-IMP253.19/MSS][UC-IMP253] Mobile ẩn toàn bộ thẻ thường khi có MilestoneBanner hoạt động kể cả khi chỉ có 1 thẻ thường', () => {
+      useGameStore.setState({
+        activeModal: null,
+        activeModifiers: [],
+        floatingTexts: [sampleRegularItem, sampleMilestoneItem],
+      });
+      const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
+      expect(html).toContain('data-testid="milestone-banner-container"');
+      expect(html).toContain('w-full justify-start sm:justify-center hidden md:flex');
+    });
   });
 });

@@ -232,7 +232,7 @@ const MARKET_HANDLERS: Partial<Record<MarketCardId, MarketHandler>> = {
   },
   [MarketCardId.MC_ALCOHOL_CHECK]:   (mods) => mods.push({ type: MarketCardId.MC_ALCOHOL_CHECK, affectedCells: SERVICE_CELLS, remainingRounds: 2, multiplier: 0.5 }),
   [MarketCardId.MC_LAND_FEVER]:      (mods) => mods.push({ type: MarketCardId.MC_LAND_FEVER, affectedCells: LAND_FEVER_CELLS, remainingRounds: 1, multiplier: 2 }),
-  [MarketCardId.MC_RATE_HIKE]:       (mods) => mods.push({ type: MarketCardId.MC_RATE_HIKE, affectedCells: [], remainingRounds: 1, multiplier: 0.8 }),
+  [MarketCardId.MC_RATE_HIKE]:       (mods) => mods.push({ type: MarketCardId.MC_RATE_HIKE, affectedCells: [], remainingRounds: 2 }),
   [MarketCardId.MC_CREDIT_STIMULUS]: (mods) => mods.push({ type: MarketCardId.MC_CREDIT_STIMULUS, affectedCells: [], remainingRounds: 2 }),
   [MarketCardId.MC_ANTI_SPECULATE]:  (mods, players, registry, _stateMap, room) => {
     mods.push({ type: MarketCardId.MC_ANTI_SPECULATE, affectedCells: [], remainingRounds: 1 });
@@ -243,7 +243,7 @@ const MARKET_HANDLERS: Partial<Record<MarketCardId, MarketHandler>> = {
     mods.push({ type: MarketCardId.MC_FUEL_SURGE, affectedCells: INFRA_CELLS, remainingRounds: 2 });
     distributeCellPool(INFRA_CELLS, 500, 125, players, registry, room);
   },
-  [MarketCardId.MC_URBAN_PLANNING]:  (mods) => mods.push({ type: MarketCardId.MC_URBAN_PLANNING, affectedCells: HANOI_HCMC_CELLS, remainingRounds: 1 }),
+  [MarketCardId.MC_URBAN_PLANNING]:  (mods) => mods.push({ type: MarketCardId.MC_URBAN_PLANNING, affectedCells: HANOI_HCMC_CELLS, remainingRounds: 2, multiplier: 1.5 }),
   [MarketCardId.MC_UTILITY_DOUBLE]:  (mods, players, registry, _stateMap, room) => {
     mods.push({ type: MarketCardId.MC_UTILITY_DOUBLE, affectedCells: UTILITY_CELLS, remainingRounds: 2, multiplier: 2 });
     distributeCellPool(UTILITY_CELLS, 400, 200, players, registry, room);

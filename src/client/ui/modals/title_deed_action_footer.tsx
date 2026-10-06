@@ -1,5 +1,6 @@
 import React from 'react';
 import { formatCurrency, formatShortPlayerName } from '../ui_helpers';
+import type { UpgradeActionEvaluation } from './title_deed_affordance';
 
 export interface TitleDeedActionFooterProps {
   readonly isOwned: boolean;
@@ -13,6 +14,7 @@ export interface TitleDeedActionFooterProps {
   readonly currentLevel?: 0 | 1 | 2 | 3;
   readonly upgradeCost?: number;
   readonly upgradeBlockedReason?: string;
+  readonly upgradeEvaluation?: UpgradeActionEvaluation;
   readonly downgradeBlockedReason?: string;
   readonly deedPrice?: number;
   readonly onBuy?: () => void;
@@ -46,6 +48,7 @@ export function TitleDeedActionFooter({
   currentLevel,
   upgradeCost,
   upgradeBlockedReason,
+  upgradeEvaluation,
   downgradeBlockedReason,
   deedPrice = 0,
   onBuy,
@@ -66,6 +69,10 @@ export function TitleDeedActionFooter({
   isUpgradedUtility,
   isETC,
 }: TitleDeedActionFooterProps): React.ReactElement {
+  const effectiveUpgradeCost = upgradeEvaluation ? upgradeEvaluation.cost : (upgradeCost ?? 0);
+  const effectiveUpgradeBlockedReason = upgradeEvaluation ? upgradeEvaluation.blockedReason : upgradeBlockedReason;
+  const isUpgradeDisabled = upgradeEvaluation ? !upgradeEvaluation.canUpgrade : Boolean(upgradeBlockedReason);
+
   const showUpgrade = Boolean(isOwner && !isMortgaged && hasUpgrades && (currentLevel ?? 0) < 3 && onUpgrade);
   const showDowngrade = Boolean(isOwner && !isMortgaged && hasUpgrades && (currentLevel ?? 0) > 0 && onDowngrade);
   const hasBuilding = (currentLevel ?? 0) > 0 || Boolean(isUpgradedUtility) || Boolean(isETC);
@@ -96,19 +103,19 @@ export function TitleDeedActionFooter({
             <button
               type="button"
               onClick={onUpgrade}
-              disabled={Boolean(upgradeBlockedReason)}
-              title={upgradeBlockedReason}
+              disabled={isUpgradeDisabled}
+              title={effectiveUpgradeBlockedReason}
               className={`min-h-[48px] flex flex-col items-center justify-center py-2 px-3 text-center leading-tight min-w-0 rounded-xl font-bold text-xs transition-all focus-visible:outline-none focus-visible:ring-2 ${
-                upgradeBlockedReason
+                isUpgradeDisabled
                   ? 'bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed shadow-none'
                   : 'bg-teal-600 hover:bg-teal-500 text-white border-2 border-teal-800 shadow-[0_4px_0_0_#115e59] active:shadow-[0_1px_0_0_#115e59] active:translate-y-[3px] focus-visible:ring-teal-400 cursor-pointer'
               }`}
             >
               {isUtility
-                ? `Nâng Cấp ${cellIndex === 28 ? '5G' : 'Smart Grid'} (+${formatCurrency(upgradeCost || 1000)} Tr.)`
+                ? `Nâng Cấp ${cellIndex === 28 ? '5G' : 'Smart Grid'} (+${formatCurrency(effectiveUpgradeCost || 1000)} Tr.)`
                 : isRailroad
-                ? `Kích Hoạt ETC (+${formatCurrency(upgradeCost || 1500)} Tr.)`
-                : `Nâng Cấp (+${formatCurrency(upgradeCost ?? 0)})`}
+                ? `Kích Hoạt ETC (+${formatCurrency(effectiveUpgradeCost || 1500)} Tr.)`
+                : `Nâng Cấp (+${formatCurrency(effectiveUpgradeCost)})`}
             </button>
           )}
           {showDowngrade && (

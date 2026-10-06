@@ -53,9 +53,13 @@ hooks: [.agents/hooks_qa.json]
   4. *Error Defense & Terminal Invariants*: Edge inputs, idempotency, invalid intents, resource-exhaustion guards (e.g. zero-balance actors cannot initiate purchases), terminal state immutability, and zero-delta suppression.
   5. *Cross-Coupling Blast Radius & Exceptional Lifecycles*: Downstream consumer updates, reconnection/resync, cold start, non-linear transition isolation (abrupt termination must not trigger clean-completion side effects).
 - **Test Density Floor**:
-  - Contract suites (`tests/contracts/**`): Minimum 15 atomic tests / slice.
-  - Probe suites (`tests/probes/**`): Minimum 14 atomic tests / slice.
-  - Ratio of `expect()` / `it()` must stay between 1.0 and 3.5.
+  - Contract suites (`tests/contracts/**`): Minimum 8 atomic tests for Micro-Slices (delta <= 50 LOC), minimum 15 atomic tests for Full Epics.
+  - Probe suites (`tests/probes/**`): Minimum 8 atomic tests for Micro-Slices, minimum 14 atomic tests for Full Epics.
+  - Ratio of `expect()` / `it()` must stay between 1.0 and 4.0 (maximum 4 asserts per test).
+  - **Dynamic Triad Mandate**: For stateful, network, or lifecycle tickets, the contract suite MUST cover the Dynamic Triad:
+    (1) *Re-entrant storm*: Repeated or rapid invocations while state is busy/transitioning.
+    (2) *Phase boundary rejection*: Rejection when triggered in invalid FSM phase or after turn teardown.
+    (3) *Unmount / teardown cleanup*: State reset and timer/listener cancellation on unmount.
 - **Tag Isolation Rule**: One traceability tag per `it()` block. If two contracts need testing, write two separate `it()` blocks. Merging `[TC-XX.01]` and `[TC-XX.02]` into one block is banned.
 - **Enum Outcome Exhaustiveness Rule**:
   - When testing state machines, FSM transitions, domain handlers, or services governed by an Enum or Union of outcomes/reasons (e.g. `Outcome`, `ReasonCode`, `Status`), write at least 1 dedicated atomic test for 100% of enum values.

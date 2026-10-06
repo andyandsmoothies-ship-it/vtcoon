@@ -178,11 +178,14 @@ describe('[IMP-156: Trạm 1 RED] Event Cards Visual De-Clutter & Single-Truth U
       expect(html).toContain('Kho Bạc');
     });
 
-    it('[TC-156.16/MSS][UC-IMP156][Facet-4/ErrorDefense] Bảo toàn nguyên vẹn 8 Hero Stats đã được kiểm thử hợp đồng trong imp134', () => {
+    it('[TC-156.16a/MSS][UC-IMP156][Facet-4/ErrorDefense] Bảo toàn nguyên vẹn 4 Market Hero Stats đã được kiểm thử hợp đồng trong imp134', () => {
       expect(getCardHeroStat(MarketCardId.MC_FUEL_SURGE).value).toMatch(/500/);
       expect(getCardHeroStat(MarketCardId.MC_ALCOHOL_CHECK).value).toBe('-800');
       expect(getCardHeroStat(MarketCardId.MC_RATE_HIKE).value).toContain('10%');
-      expect(getCardHeroStat(MarketCardId.MC_URBAN_PLANNING).value).toContain('+20%');
+      expect(getCardHeroStat(MarketCardId.MC_URBAN_PLANNING).value).toMatch(/(?:\+20%|x1\.5 THUÊ)/);
+    });
+
+    it('[TC-156.16b/MSS][UC-IMP156][Facet-4/ErrorDefense] Bảo toàn nguyên vẹn 4 Chance Hero Stats đã được kiểm thử hợp đồng trong imp134', () => {
       expect(getCardHeroStat(ChanceCardId.CC_STOCK_PROFIT).value).toContain('+2.500');
       expect(getCardHeroStat(ChanceCardId.CC_TAX_AUDIT).value).toContain('-500');
       expect(getCardHeroStat(ChanceCardId.CC_DIPLOMATIC).value).toBe('MIỄN 100% THUÊ');

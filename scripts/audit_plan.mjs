@@ -6,6 +6,9 @@ import {
   auditHonestLocAccounting,
   auditPlanSnippetHygiene,
   auditTestSpecLine,
+  auditScopeConservation,
+  auditPureLogicWaiver,
+  collectExportedSymbols,
 } from './audit_plan_rules.mjs';
 
 /**
@@ -92,6 +95,8 @@ for (const [relPath, isNew] of targetFiles.entries()) {
 console.log(`\n📐 Checking Auto-Slicing Protocol & Scope Confinement:`);
 errors += auditScopeAndSubsystems(targetFiles);
 errors += auditHonestLocAccounting(targetFiles, planContent);
+errors += auditScopeConservation(planContent);
+errors += auditPureLogicWaiver(targetFiles, planContent);
 
 // ==========================================
 // 1.1 Verify new production file code specification
@@ -363,9 +368,10 @@ if (testLines.length === 0) {
 }
 
 if (testLines.length > 0) {
+  const exportedSymbols = collectExportedSymbols('src', planContent);
   for (const line of testLines) {
     checkedTests++;
-    errors += auditTestSpecLine(line);
+    errors += auditTestSpecLine(line, exportedSymbols);
   }
   console.log(`  ✔️ Scanned ${checkedTests} contract test specifications.`);
 } else {

@@ -66,8 +66,10 @@ export function DeedModalHost({
       ownerName={deedState.ownerName}
       currentLevel={deedState.currentLevel}
       upgradeCost={deedState.upgradeCost}
+      upgradeCosts={deedState.upgradeCosts}
       hasMonopoly={deedState.hasMonopoly}
       upgradeBlockedReason={deedState.upgradeBlockedReason}
+      upgradeEvaluation={deedState.upgradeEvaluation}
       downgradeBlockedReason={deedState.downgradeBlockedReason}
       isUpgradedUtility={deedState.isUpgradedUtility}
       isETC={deedState.isETC}

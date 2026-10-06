@@ -202,10 +202,10 @@ export const MARKET_CARD_DETAILS: Readonly<Record<MarketCardId, MarketCardDetail
     destination: 'Kho Bạc Nhà Nước chi thưởng về tài khoản cá nhân',
   },
   [MarketCardId.MC_RATE_HIKE]: {
-    description: 'Ngân hàng thắt chặt tiền tệ kiềm chế lạm phát, tăng lãi suất thế chấp khi qua ô Khởi Hành.',
-    targetScope: 'Tất cả người chơi đang có khoản vay thế chấp',
-    effectDetail: 'Tăng lãi suất vay thế chấp từ 5% lên 10% giá trị vay khi di chuyển qua ô Khởi Hành (GO)',
-    duration: '1 vòng chơi',
+    description: 'Ngân hàng thắt chặt tiền tệ kiềm chế lạm phát, tăng 20% chi phí xây nhà và tăng lãi suất thế chấp khi qua ô Khởi Hành.',
+    targetScope: 'Toàn bộ thị trường',
+    effectDetail: 'Tăng 20% chi phí xây dựng công trình C1-C3 và tăng lãi suất vay thế chấp lên 10% khi vượt GO trong 2 vòng',
+    duration: '2 vòng chơi',
     destination: 'Nộp vào Kho Bạc Nhà Nước',
   },
   [MarketCardId.MC_CREDIT_STIMULUS]: {
@@ -265,11 +265,11 @@ export const MARKET_CARD_DETAILS: Readonly<Record<MarketCardId, MarketCardDetail
     destination: 'Chủ sở hữu ô Hạ tầng giao thông / Kho Bạc',
   },
   [MarketCardId.MC_URBAN_PLANNING]: {
-    description: 'Quy hoạch trung tâm tài chính mới công bố, tăng 20% giá trị khi thế chấp các BĐS lõi trung tâm.',
+    description: 'Quy hoạch trung tâm tài chính mới công bố, nhân 1.5x tiền thuê và tăng 20% giá trị khi thế chấp các BĐS lõi trung tâm.',
     targetScope: 'Bất động sản trung tâm Hà Nội và TP.HCM (Nhóm Xanh Lá & Tím)',
-    effectDetail: 'Tăng 20% giá trị khi thế chấp (nhận 60% thay vì 50% giá niêm yết)',
-    duration: '1 vòng chơi',
-    destination: 'Ngân sách người chơi',
+    effectDetail: 'Nhân 1.5x tiền thuê (x1.5) và tăng 20% giá trị khi thế chấp (nhận 60% thay vì 50% giá niêm yết) trong 2 vòng',
+    duration: '2 vòng chơi',
+    destination: 'Chủ sở hữu BĐS Hà Nội/TP.HCM & Ngân sách người chơi',
   },
   [MarketCardId.MC_UTILITY_DOUBLE]: {
     description: 'Biểu giá điện và cước viễn thông điều chỉnh tăng, nâng chi phí tiện ích định kỳ toàn thành phố.',

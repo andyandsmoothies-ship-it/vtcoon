@@ -88,6 +88,9 @@ export function calculateUpgradeCost(
   if (modifiers?.some((m) => m.type === MarketCardId.MC_CREDIT_STIMULUS && m.remainingRounds > 0)) {
     cost = Math.floor(cost * 0.8);
   }
+  if (modifiers?.some((m) => m.type === MarketCardId.MC_RATE_HIKE && m.remainingRounds > 0)) {
+    cost = Math.floor(cost * 1.2);
+  }
   if (modifiers?.some((m) => m.type === MacroCycleType.MACRO_LAND_FEVER && m.remainingRounds > 0 && m.affectedCells?.includes(cellIndex))) {
     cost = Math.floor(cost * MACRO_FEVER_UPGRADE_COST_MULT);
   }

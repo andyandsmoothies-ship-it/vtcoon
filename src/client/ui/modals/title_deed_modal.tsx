@@ -14,6 +14,7 @@ import { TitleDeedRentTable } from './title_deed_rent_table';
 import { TitleDeedActionFooter } from './title_deed_action_footer';
 import { PurchaseDecisionCard } from './purchase_decision_card';
 import type { PurchaseDecisionPlayer } from './purchase_decision_logic';
+import type { UpgradeActionEvaluation } from './title_deed_affordance';
 
 export interface TitleDeedModalProps {
   readonly cellIndex: number;
@@ -24,6 +25,8 @@ export interface TitleDeedModalProps {
   readonly ownerName?: string;
   readonly currentLevel?: 0 | 1 | 2 | 3;
   readonly upgradeCost?: number;
+  readonly upgradeCosts?: readonly number[];
+  readonly upgradeEvaluation?: UpgradeActionEvaluation;
   readonly hasMonopoly?: boolean;
   readonly upgradeBlockedReason?: string;
   readonly downgradeBlockedReason?: string;
@@ -59,7 +62,7 @@ const MODIFIER_DESCS: Record<string, { icon: string; text: string }> = {
   [MarketCardId.MC_NIGHT_ECONOMY]: { icon: EVENT_ICON_REGISTRY[MarketCardId.MC_NIGHT_ECONOMY], text: 'Kinh Tế Ban Đêm: Nhân đôi phí dịch vụ (x2)' },
   [MarketCardId.MC_ALCOHOL_CHECK]: { icon: EVENT_ICON_REGISTRY[MarketCardId.MC_ALCOHOL_CHECK], text: 'Nghị Định 100: Giảm 50% tiền thuê; chốt phạt 800 & giữ xe' },
   [MarketCardId.MC_PUBLIC_INVEST]: { icon: EVENT_ICON_REGISTRY[MarketCardId.MC_PUBLIC_INVEST], text: 'Vốn Đầu Tư Công: Nhân đôi cước phí vận tải (x2)' },
-  [MarketCardId.MC_URBAN_PLANNING]: { icon: EVENT_ICON_REGISTRY[MarketCardId.MC_URBAN_PLANNING], text: 'Quy Hoạch Đô Thị: Thế chấp nhận 60%' },
+  [MarketCardId.MC_URBAN_PLANNING]: { icon: EVENT_ICON_REGISTRY[MarketCardId.MC_URBAN_PLANNING], text: 'Quy Hoạch Đô Thị: Thuê x1.5 & Thế chấp nhận 60%' },
   [MarketCardId.MC_FREEZE_TRADE]: { icon: EVENT_ICON_REGISTRY[MarketCardId.MC_FREEZE_TRADE], text: 'Đóng Băng Giao Dịch: Không thể sang tên' },
   [MacroCycleType.MACRO_LAND_FEVER]: { icon: EVENT_ICON_REGISTRY[MacroCycleType.MACRO_LAND_FEVER], text: 'Sốt Đất Vĩ Mô: Thuê x2.5, Xây nhà -25%' },
   [MacroCycleType.MACRO_LIQUIDITY_FREEZE]: { icon: EVENT_ICON_REGISTRY[MacroCycleType.MACRO_LIQUIDITY_FREEZE], text: 'Đóng Băng Thanh Khoản: Giảm 50% tiền thuê' },
@@ -75,6 +78,8 @@ export function TitleDeedModal({
   ownerName,
   currentLevel,
   upgradeCost,
+  upgradeCosts: propsUpgradeCosts,
+  upgradeEvaluation,
   hasMonopoly = false,
   upgradeBlockedReason,
   downgradeBlockedReason,
@@ -334,7 +339,7 @@ export function TitleDeedModal({
               isRailroad={isRailroad}
               isUtility={isUtility}
               rents={deed.rents}
-              upgradeCosts={deed.upgradeCosts}
+              upgradeCosts={propsUpgradeCosts ?? deed.upgradeCosts}
               hasMonopoly={hasMonopoly}
               currentLevel={currentLevel}
               isOwner={isOwner}
@@ -360,6 +365,7 @@ export function TitleDeedModal({
         currentLevel={currentLevel}
         upgradeCost={upgradeCost}
         upgradeBlockedReason={upgradeBlockedReason}
+        upgradeEvaluation={upgradeEvaluation}
         downgradeBlockedReason={downgradeBlockedReason}
         deedPrice={deed.price}
         onBuy={onBuy}

@@ -11,7 +11,7 @@ export const PUNCHY_EVENT_SUMMARIES: PunchyEventSummariesMap = Object.freeze({
   // 16 Market cards
   [MarketCardId.MC_MEGA_CONCERT]: 'Di chuyển đến ô Dịch Vụ cao nhất',
   [MarketCardId.MC_FREEZE_TRADE]: 'Đóng băng mua bán & đấu giá',
-  [MarketCardId.MC_RATE_HIKE]: 'Thu lãi vay thế chấp 10% tại GO',
+  [MarketCardId.MC_RATE_HIKE]: 'Tăng 20% xây nhà & thu lãi vay 10% tại GO',
   [MarketCardId.MC_CREDIT_STIMULUS]: 'Giảm 20% xây nhà, miễn lãi vay',
   [MarketCardId.MC_COASTAL_STORM]: 'Miễn thuê ven biển & mất lượt',
   [MarketCardId.MC_NIGHT_ECONOMY]: 'Nhân đôi thuê ô Dịch Vụ (C1+)',
@@ -22,7 +22,7 @@ export const PUNCHY_EVENT_SUMMARIES: PunchyEventSummariesMap = Object.freeze({
   [MarketCardId.MC_LAND_FEVER]: 'Nhân đôi tiền thuê vùng ven (x2)',
   [MarketCardId.MC_ANTI_SPECULATE]: 'Thuế sang nhượng P2P 20%',
   [MarketCardId.MC_PEAK_TOURISM]: 'Nhân đôi thuê BĐS Nghỉ Dưỡng',
-  [MarketCardId.MC_URBAN_PLANNING]: 'Tăng 20% giá trị thế chấp HN/HCM',
+  [MarketCardId.MC_URBAN_PLANNING]: 'Nhân 1.5x tiền thuê & vay 60% HN/HCM',
   [MarketCardId.MC_UTILITY_DOUBLE]: 'Nhân đôi phí EVN & Viettel',
   [MarketCardId.MC_CASINO_PILOT]: 'Thưởng ô Dịch Vụ C2+ tới 3.000',
 
