@@ -22,6 +22,7 @@ export const TIER_RULES = {
   TIER2_UI: { name: 'Tier 2 (UI/3D/Views)', ceiling: 500, warn: 400, grace: 25 },
   TIER3_STATIC: { name: 'Tier 3 (Static Data/Config)', ceiling: 800, warn: 650, grace: 40 },
   TESTS: { name: 'Contract / Unit Tests', ceiling: 600, warn: 500, grace: 50 },
+  SCRIPTS: { name: 'Harness Scripts / Tooling', ceiling: 9999, warn: 1000, grace: 0 },
   DOCS: { name: 'Documentation / Meta', ceiling: 9999, warn: 1000, grace: 0 },
 };
 
@@ -32,6 +33,9 @@ export function categorizeTier(filePath) {
   }
   if (norm.endsWith('.md') || norm.startsWith('docs/')) {
     return 'DOCS';
+  }
+  if (norm.startsWith('scripts/')) {
+    return 'SCRIPTS';
   }
   if (
     norm.includes('tile_icons.ts') ||

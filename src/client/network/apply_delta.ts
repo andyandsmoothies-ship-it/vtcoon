@@ -17,6 +17,24 @@ import { applyPlayerDeltas, initPlayersInfoMap } from './apply_delta_players.js'
 import { applyCellDeltas } from './apply_delta_cells.js';
 export { applyPlayerDeltas, initPlayersInfoMap, applyCellDeltas };
 
+let stagedTransitWheel: { playerId: string; cellIndex: number; timestamp: number } | null = null;
+
+export function consumeStagedTransitWheel(
+  targetCellIndex?: number,
+  targetPlayerId?: string
+): { playerId: string; cellIndex: number; timestamp: number } | null {
+  if (!stagedTransitWheel) return null;
+  if (targetCellIndex !== undefined && stagedTransitWheel.cellIndex !== targetCellIndex) return null;
+  if (targetPlayerId !== undefined && stagedTransitWheel.playerId !== targetPlayerId) return null;
+  const staged = stagedTransitWheel;
+  stagedTransitWheel = null;
+  return staged;
+}
+
+export function resetStagedTransitWheel(): void {
+  stagedTransitWheel = null;
+}
+
 export function isGameRunningDelta(delta: DeltaPayload): boolean {
   if (delta.roomStarted !== undefined) return delta.roomStarted;
   return (
@@ -193,11 +211,21 @@ function syncOtherModals(delta: DeltaPayload, state: GameState): void {
     }
   }
 
-  if (delta.pendingTransitWheel) {
-    const myPid = useLobbyStore.getState().myPlayerId;
-    const isTarget = myPid ? delta.pendingTransitWheel.playerId === myPid : Boolean(state.isOfflineMode);
-    if (isTarget) {
-      state.openModal('transit_wheel', delta.pendingTransitWheel);
+  if (delta.pendingTransitWheel !== undefined) {
+    if (delta.pendingTransitWheel) {
+      const myPid = useLobbyStore.getState().myPlayerId;
+      const isTarget = myPid ? delta.pendingTransitWheel.playerId === myPid : Boolean(state.isOfflineMode);
+      if (isTarget) {
+        const isMoving = Boolean(state.activePawnAnimation?.isAnimating || state.isRolling);
+        if (!isMoving && state.activeModal === null) {
+          state.openModal('transit_wheel', delta.pendingTransitWheel);
+          stagedTransitWheel = null;
+        } else {
+          stagedTransitWheel = delta.pendingTransitWheel;
+        }
+      }
+    } else {
+      stagedTransitWheel = null;
     }
   }
 
@@ -319,6 +347,7 @@ export function applyPhaseAndTimerDeltas(delta: DeltaPayload, prevState: GameSta
 }
 
 export function applyDeltaToStore(delta: DeltaPayload, store: typeof useGameStore = useGameStore): void {
+  if (delta.tick <= 1) resetStagedTransitWheel();
   const state = store.getState();
   const isFullSync = Boolean(delta.cells && delta.cells.length === BOARD_SIZE);
   if (isFullSync) {

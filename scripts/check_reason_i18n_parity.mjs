@@ -6,7 +6,9 @@
  * Asserts 100% bi-directional parity between domain ActionRejectReason
  * and Vietnamese translations in vi.rejectReasons.
  * 
- * Inspired by e2e framework's check-error-codes.ts.
+ * [SDLC VACCINE]: Also scans src/server/intent_dispatcher.ts for raw string reject reasons
+ * and asserts that every server-emitted reason has a valid translation or actionable notification mapping.
+ * 
  * Exits with code 1 if any reason is missing translation or if an orphan key exists.
  */
 
@@ -17,6 +19,8 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(fileURLToPath(import.meta.url), '../..');
 const ACTION_REASONS_FILE = path.join(ROOT, 'src/domain/action_reasons.ts');
 const VI_I18N_FILE = path.join(ROOT, 'src/domain/i18n/vi.ts');
+const INTENT_DISPATCHER_FILE = path.join(ROOT, 'src/server/intent_dispatcher.ts');
+const ACTIONABLE_NOTIFICATIONS_FILE = path.join(ROOT, 'src/client/ui/actionable_notification.ts');
 
 function getActionRejectReasons() {
   const content = fs.readFileSync(ACTION_REASONS_FILE, 'utf8');
@@ -56,12 +60,43 @@ function getViRejectReasons() {
   return reasons;
 }
 
+function getActionableNotificationKeys() {
+  if (!fs.existsSync(ACTIONABLE_NOTIFICATIONS_FILE)) return new Set();
+  const content = fs.readFileSync(ACTIONABLE_NOTIFICATIONS_FILE, 'utf8');
+  const keys = new Set();
+  const regex = /^\s*([A-Z0-9_]+)\s*:\s*\{/gm;
+  let match;
+  while ((match = regex.exec(content)) !== null) {
+    keys.add(match[1]);
+  }
+  const aliasRegex = /ACTIONABLE_NOTIFICATIONS_MAP\[['"]([A-Z0-9_]+)['"]\]/g;
+  while ((match = aliasRegex.exec(content)) !== null) {
+    keys.add(match[1]);
+  }
+  return keys;
+}
+
+function getRawServerRejectReasons() {
+  if (!fs.existsSync(INTENT_DISPATCHER_FILE)) return new Set();
+  const content = fs.readFileSync(INTENT_DISPATCHER_FILE, 'utf8');
+  const reasons = new Set();
+  const regex = /reason\s*:\s*['"]([A-Z0-9_]+)['"]/g;
+  let match;
+  while ((match = regex.exec(content)) !== null) {
+    reasons.add(match[1]);
+  }
+  return reasons;
+}
+
 function main() {
   const domainReasons = getActionRejectReasons();
   const viReasons = getViRejectReasons();
+  const actionableKeys = getActionableNotificationKeys();
+  const serverReasons = getRawServerRejectReasons();
 
   const missingInVi = [];
   const orphanInVi = [];
+  const unmappedServerReasons = [];
 
   for (const reason of domainReasons) {
     if (!viReasons.has(reason)) {
@@ -75,7 +110,16 @@ function main() {
     }
   }
 
-  if (missingInVi.length > 0 || orphanInVi.length > 0) {
+  // [SDLC VACCINE]: Ensure every raw string reject reason emitted by server has a client mapping
+  for (const sReason of serverReasons) {
+    const isCoveredInDomain = domainReasons.has(sReason) && viReasons.has(sReason);
+    const isCoveredInActionable = actionableKeys.has(sReason);
+    if (!isCoveredInDomain && !isCoveredInActionable) {
+      unmappedServerReasons.push(sReason);
+    }
+  }
+
+  if (missingInVi.length > 0 || orphanInVi.length > 0 || unmappedServerReasons.length > 0) {
     console.error('❌ [i18n Parity Check Failed]');
     if (missingInVi.length > 0) {
       console.error(`  Missing in vi.rejectReasons (${missingInVi.length}):`);
@@ -85,10 +129,16 @@ function main() {
       console.error(`  Orphan keys in vi.rejectReasons (${orphanInVi.length}):`);
       for (const o of orphanInVi) console.error(`    - ${o}`);
     }
+    if (unmappedServerReasons.length > 0) {
+      console.error(`  [SDLC VACCINE VIOLATION] Raw server reject reasons without client i18n/actionable mapping (${unmappedServerReasons.length}):`);
+      for (const u of unmappedServerReasons) console.error(`    - ${u} (in src/server/intent_dispatcher.ts)`);
+      console.error('  Action Required: Map these reasons in src/domain/action_reasons.ts or src/client/ui/actionable_notification.ts');
+    }
     return 1;
   }
 
   console.log(`✅ [i18n Parity Check] 100% parity across all ${domainReasons.size} ActionRejectReason codes.`);
+  console.log(`🛡️ [SDLC Vaccine Active] All ${serverReasons.size} raw server reject reasons verified to have client mapping.`);
   return 0;
 }
 

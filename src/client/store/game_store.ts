@@ -101,7 +101,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     set({ isRolling, ...(isRolling ? { cameraFocusCell: null, hasUserCustomCamera: false } : {}) });
     if (!isRolling) {
       const pending = get().pendingPawnMove;
-      if (pending) {
+      if (pending && get().activeModal !== 'transit_wheel') {
         set({ pendingPawnMove: null });
         get().startPawnMove(pending.playerId, pending.targetCell, pending.fromCell, pending.isBot, pending.isJailFlight);
       }

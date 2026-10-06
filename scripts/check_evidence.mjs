@@ -299,6 +299,26 @@ if (ticketNum && fs.existsSync(evidenceDir)) {
   }
 }
 
+// 6. Comprehensive Improvement Final Acceptance Report Gate (SSOT Report)
+const improvementsDir = path.join(repoRoot, 'docs', 'reports', 'improvements');
+if (ticketNum && fs.existsSync(improvementsDir)) {
+  const improvementFiles = fs.readdirSync(improvementsDir);
+  const finalReport = improvementFiles.find((f) => f.endsWith('.md') && matchesTicket(f));
+  if (!finalReport) {
+    errors.push(
+      `[Final Acceptance Report Missing] Missing final improvement report in docs/reports/improvements/ for ticket "${evidence.ticketId || targetArg}". Run 'npm run report -- ${evidence.ticketId || targetArg}' to synthesize.`
+    );
+  } else {
+    const reportPath = path.join(improvementsDir, finalReport);
+    const reportStat = fs.statSync(reportPath);
+    if (reportStat.size < 200) {
+      errors.push(
+        `[Final Acceptance Report Truncated] Report ${finalReport} is too small (${reportStat.size} bytes). Run 'npm run report -- ${evidence.ticketId || targetArg} --force' to regenerate.`
+      );
+    }
+  }
+}
+
 if (errors.length > 0) {
   console.error('\n❌ EVIDENCE AUDIT FAILED:');
   errors.forEach((e) => console.error(`  - ${e}`));

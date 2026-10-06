@@ -8,6 +8,29 @@ import { AudioEngine } from '../../audio/audio_engine.js';
 import { SoundEffect } from '../../audio/audio_types.js';
 import type { PlayerIntent } from '../../../server/intent_dispatcher.js';
 
+const MAX_RESOLVED_ENTRIES = 100;
+const resolvedTradeOfferIds = new Set<string>();
+
+/**
+ * Sentinel FIFO-100: Ghi nhận và khóa offerId đề xuất giao dịch bot.
+ * Trả về true nếu đề xuất mới được ghi nhận thành công, false nếu đã được giải quyết trước đó.
+ */
+export function markTradeOfferResolved(offerId: string): boolean {
+  if (!offerId || resolvedTradeOfferIds.has(offerId)) {
+    return false;
+  }
+  if (resolvedTradeOfferIds.size >= MAX_RESOLVED_ENTRIES) {
+    const oldest = resolvedTradeOfferIds.values().next().value;
+    if (oldest) resolvedTradeOfferIds.delete(oldest);
+  }
+  resolvedTradeOfferIds.add(offerId);
+  return true;
+}
+
+export function resetTradeOfferResolutions(): void {
+  resolvedTradeOfferIds.clear();
+}
+
 export interface InlineBotTradeStripProps {
   readonly onIntent?: (intent: PlayerIntent) => void;
   readonly localPlayerId?: string;
@@ -60,6 +83,7 @@ export function InlineBotTradeStrip({
           timerRef.current = null;
         }
         if (submittedOfferIdRef.current === pendingTradeOffer.offerId) return;
+        if (!markTradeOfferResolved(pendingTradeOffer.offerId)) return;
         submittedOfferIdRef.current = pendingTradeOffer.offerId;
         onIntent?.({
           type: 'INTENT_RESPOND_TRADE_OFFER',
@@ -111,6 +135,7 @@ export function InlineBotTradeStrip({
   const handleAccept = () => {
     if (!canAfford) return;
     if (submittedOfferIdRef.current === pendingTradeOffer.offerId) return;
+    if (!markTradeOfferResolved(pendingTradeOffer.offerId)) return;
     submittedOfferIdRef.current = pendingTradeOffer.offerId;
     if (timerRef.current) {
       clearInterval(timerRef.current);
@@ -127,6 +152,7 @@ export function InlineBotTradeStrip({
 
   const handleReject = () => {
     if (submittedOfferIdRef.current === pendingTradeOffer.offerId) return;
+    if (!markTradeOfferResolved(pendingTradeOffer.offerId)) return;
     submittedOfferIdRef.current = pendingTradeOffer.offerId;
     if (timerRef.current) {
       clearInterval(timerRef.current);

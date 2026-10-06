@@ -86,7 +86,7 @@ export function ActionDock({
   const isMyTurn = isMyTurnProp !== undefined ? isMyTurnProp : (!localPlayerId || currentTurnPlayerId === localPlayerId);
   const isPawnMoving = (isPawnMovingProp ?? Boolean(activePawnAnimation?.isAnimating)) || queueHasTasks;
   const actingPlayer = actingPlayerId ? playersInfo[actingPlayerId] : undefined;
-  const isBankrupt = Boolean(actingPlayer?.bankrupt);
+  const isBankrupt = Boolean(actingPlayer?.bankrupt || actingPlayer?.isBankrupt);
   const inAudit = Boolean(actingPlayer?.inAudit);
   const isInsolvent = Boolean(actingPlayer && actingPlayer.balance < 0);
   const storeConsecutiveDoubles = actingPlayer ? actingPlayer.consecutiveDoubles : undefined;
@@ -182,6 +182,7 @@ export function ActionDock({
   const isPawnBusyMoving = Boolean(isPawnMoving || isRolling || activePawnAnimation);
   const isStandingOnBuyable = Boolean(
     isMyTurn &&
+    !isBankrupt &&
     !isPawnBusyMoving &&
     (turnPhase === TurnPhase.ActionPhase || (hasRolledThisTurn && turnPhase !== TurnPhase.PropertyManagement && turnPhase !== TurnPhase.AuctionPhase && turnPhase !== TurnPhase.InsolvencyPhase)) &&
     isPropertyCell &&
@@ -189,6 +190,7 @@ export function ActionDock({
     !isTradeFrozen
   );
   const handleOpenManageProperty = () => {
+    if (isBankrupt) return;
     if (onOpenManageProperty) onOpenManageProperty();
     else if (onOpenProperties) onOpenProperties();
     else openModal('portfolio', { playerId: actingPlayerId ?? undefined });
@@ -303,8 +305,11 @@ export function ActionDock({
         aria-label="Quản lý và nâng cấp bất động sản"
         onClick={handleOpenManageProperty}
         disabled={isBankrupt}
-        className={`w-11 h-11 min-w-[44px] min-h-[44px] sm:w-auto sm:h-auto shrink-0 whitespace-nowrap flex items-center justify-center p-0 sm:px-4 sm:py-2.5 gap-1.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold border border-blue-800 shadow-sm active:scale-95 transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 ${
-          isBankrupt ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+        title={isBankrupt ? 'Người chơi đã phá sản' : undefined}
+        className={`w-11 h-11 min-w-[44px] min-h-[44px] sm:w-auto sm:h-auto shrink-0 whitespace-nowrap flex items-center justify-center p-0 sm:px-4 sm:py-2.5 gap-1.5 rounded-2xl font-bold border shadow-sm active:scale-95 transition-all text-sm focus-visible:outline-none focus-visible:ring-2 ${
+          isBankrupt
+            ? 'bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed opacity-50'
+            : 'bg-blue-600 hover:bg-blue-700 text-white border-blue-800 cursor-pointer focus-visible:ring-blue-400'
         }`}
       >
         <span aria-hidden="true">🏛️</span>
@@ -369,9 +374,9 @@ export function ActionDock({
               }`
         }`}
       >
-        <span aria-hidden="true">⏭️</span>
+        <span aria-hidden="true">{isBankrupt ? '👁️' : '⏭️'}</span>
         <span className="hidden sm:inline">
-          {resolveEndTurnButtonLabel(turnPhase, hasRolledThisTurn, inAudit)}
+          {resolveEndTurnButtonLabel(turnPhase, hasRolledThisTurn, inAudit, isBankrupt)}
         </span>
       </button>
     </nav>

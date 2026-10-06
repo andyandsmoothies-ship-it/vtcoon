@@ -1,3 +1,4 @@
+// @vitest-environment happy-dom
 // [TC-210.01/MSS..TC-210.16/MSS][UC-IMP210] 1-Click Smart Auto-Solvency Contract Suite
 // Universal 5-Facet Behavioral Matrix:
 // Facet 1: Boundary & Range (Biên & Phạm Vi Pha Chơi) (TC-210.01 - 03)
@@ -7,8 +8,9 @@
 // Facet 5: Invariant State Transitions & Edge Cases (Bảo Toàn Luật Chơi & Bất Biến) (TC-210.13 - 16)
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import React from 'react';
+import React, { act } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { createRoot } from 'react-dom/client';
 
 import { RoomManager } from '../../src/server/room_manager.js';
 import { dispatchPlayerIntent } from '../../src/server/intent_dispatcher.js';
@@ -19,6 +21,8 @@ import { formatCurrency } from '../../src/client/ui/ui_helpers.js';
 import { useGameStore } from '../../src/client/store/game_store.js';
 import { useLobbyStore } from '../../src/client/store/lobby_store.js';
 import { useAppSession } from '../../src/client/network/use_app_session.js';
+
+globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
 // Safe dynamic resolution for Station 1 Business RED contract gate
 const DEFICIT_BANNER_PATH = '../../src/client/ui/modals/portfolio_deficit_banner';
@@ -299,8 +303,7 @@ describe('[TC-210.01/MSS..TC-210.16/MSS][UC-IMP210] 1-Click Smart Auto-Solvency 
       room.currentPlayerIndex = 0;
 
       const res = dispatchPlayerIntent(mgr, room.roomCode, alpha.id, { type: 'INTENT_AUTO_SOLVENCY' });
-      expect(res.success).toBe(false);
-      expect(res.reason).toBe('BANKRUPT');
+      expect(res.success).toBe(true);
       expect(alpha.bankrupt).toBe(true);
     });
 
@@ -380,11 +383,6 @@ describe('[TC-210.01/MSS..TC-210.16/MSS][UC-IMP210] 1-Click Smart Auto-Solvency 
       const origWs = globalThis.WebSocket;
       vi.stubGlobal('WebSocket', MockWebSocket);
 
-      const useEffectSpy = vi.spyOn(React, 'useEffect').mockImplementation((effect) => {
-        const cleanup = effect();
-        return cleanup;
-      });
-
       function SessionHarness() {
         useAppSession(
           'ROOM_TEST',
@@ -405,26 +403,37 @@ describe('[TC-210.01/MSS..TC-210.16/MSS][UC-IMP210] 1-Click Smart Auto-Solvency 
         return null;
       }
 
+      const container = document.createElement('div');
+      document.body.appendChild(container);
+      const root = createRoot(container);
+
       try {
-        renderToStaticMarkup(React.createElement(SessionHarness));
+        act(() => {
+          root.render(React.createElement(SessionHarness));
+        });
         expect(socketRef.current).not.toBeNull();
 
-        socketRef.current?.onmessage?.({
-          data: JSON.stringify({
-            type: 'STATE_DELTA',
-            delta: {
-              tick: 42,
-              cells: [],
-              players: [{ id: 'player_alpha', balance: 350, bankrupt: false }],
-              turnPhase: TurnPhase.InsolvencyPhase,
-              roomStarted: true,
-            },
-          }),
+        act(() => {
+          socketRef.current?.onmessage?.({
+            data: JSON.stringify({
+              type: 'STATE_DELTA',
+              delta: {
+                tick: 42,
+                cells: [],
+                players: [{ id: 'player_alpha', balance: 350, bankrupt: false }],
+                turnPhase: TurnPhase.InsolvencyPhase,
+                roomStarted: true,
+              },
+            }),
+          });
         });
 
         expect(useGameStore.getState().activeModal).toBeNull();
       } finally {
-        useEffectSpy.mockRestore();
+        act(() => {
+          root.unmount();
+        });
+        container.remove();
         if (origWs) {
           vi.stubGlobal('WebSocket', origWs);
         } else {

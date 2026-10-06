@@ -149,7 +149,10 @@ const INTENT_DISPATCH: Record<PlayerIntent['type'], IntentHandler> = {
       return { success: false, reason: ActionRejectReason.NOT_YOUR_TURN };
     }
     const res = executeInsolvencyAfkRecovery(m, rc, p);
-    return { success: res.rescued, reason: res.bankrupt ? 'BANKRUPT' : (res.rescued ? undefined : ActionRejectReason.CANNOT_RECOVER) };
+    if (res.rescued || res.bankrupt) {
+      return { success: true };
+    }
+    return { success: false, reason: ActionRejectReason.CANNOT_RECOVER };
   },
   INTENT_SPIN_TRANSIT_WHEEL: (m, rc, p) => {
     const ctx = m.getContext(rc);

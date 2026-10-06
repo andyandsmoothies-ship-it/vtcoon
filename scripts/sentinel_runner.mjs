@@ -287,6 +287,38 @@ function runRealMutationProbe(testPath, srcPath, ticketId) {
         replacement: 'isMobile: false,',
       },
     ],
+    'IMP-279': [
+      {
+        file: 'src/client/network/apply_delta.ts',
+        desc: 'AST: invert kinematic presentation branching (!isMoving -> isMoving)',
+        target: '!isMoving && state.activeModal === null',
+        replacement: 'isMoving && state.activeModal === null',
+      },
+      {
+        file: 'src/client/network/apply_delta.ts',
+        desc: 'AST: disable modal staging for moving pawn',
+        target: 'stagedTransitWheel = delta.pendingTransitWheel;',
+        replacement: 'stagedTransitWheel = null;',
+      },
+      {
+        file: 'src/client/network/apply_delta.ts',
+        desc: 'AST: corrupt consumeStagedTransitWheel cell filter',
+        target: 'stagedTransitWheel.cellIndex !== targetCellIndex',
+        replacement: 'stagedTransitWheel.cellIndex === targetCellIndex',
+      },
+      {
+        file: 'src/client/store/game_store.ts',
+        desc: 'AST: remove transit_wheel modal protection from setIsRolling',
+        target: "pending && get().activeModal !== 'transit_wheel'",
+        replacement: 'pending',
+      },
+      {
+        file: 'src/client/network/use_app_session.ts',
+        desc: 'AST: drop stagedWheel consumption on pawn landing',
+        target: 'const stagedWheel = consumeStagedTransitWheel(lastLandedPawn.cellIndex, lastLandedPawn.playerId);',
+        replacement: 'const stagedWheel = null;',
+      },
+    ],
   };
 
   const targetedRules = ticketId ? ticketTargetedMutations[ticketId.toUpperCase()] : undefined;

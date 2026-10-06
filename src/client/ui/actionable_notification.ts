@@ -418,6 +418,16 @@ const ACTIONABLE_NOTIFICATIONS_MAP: Record<string, ActionableNotification> = {
     tone: 'warning',
     actionHint: 'Đang chuyển giao quyền sở hữu tài sản cho người thắng cuộc.',
   },
+  OFFER_ALREADY_RESOLVED: {
+    icon: '🤝', title: 'Đề Xuất Đã Giải Quyết',
+    description: 'Đề xuất giao dịch này đã được phản hồi hoặc đã hoàn tất trước đó.',
+    tone: 'warning', actionHint: 'Kiểm tra biến động tài sản trên bàn cờ.',
+  },
+  BANKRUPT: {
+    icon: '🚨', title: 'Đã Tuyên Bố Phá Sản',
+    description: 'Bạn đã hoàn tất thanh lý tài sản và rời cuộc chơi.',
+    tone: 'info', actionHint: 'Theo dõi ván đấu ở chế độ khán giả.',
+  },
 };
 
 // Aliases for legacy/alternative casing reason codes (DRY SSOT)
@@ -433,6 +443,8 @@ ACTIONABLE_NOTIFICATIONS_MAP['OUT_OF_TURN'] = ACTIONABLE_NOTIFICATIONS_MAP['NOT_
 ACTIONABLE_NOTIFICATIONS_MAP['PROPERTY_HAS_BUILDING'] = ACTIONABLE_NOTIFICATIONS_MAP['HAS_BUILDING']!;
 ACTIONABLE_NOTIFICATIONS_MAP['ABUSE_DETECTED'] = ACTIONABLE_NOTIFICATIONS_MAP['RATE_LIMIT_EXCEEDED']!;
 ACTIONABLE_NOTIFICATIONS_MAP['TOKEN_EXPIRED'] = ACTIONABLE_NOTIFICATIONS_MAP['TOKEN_INVALID']!;
+ACTIONABLE_NOTIFICATIONS_MAP['PLAYER_BANKRUPT'] = ACTIONABLE_NOTIFICATIONS_MAP['BANKRUPT']!;
+ACTIONABLE_NOTIFICATIONS_MAP['INVALID_INTENT'] = ACTIONABLE_NOTIFICATIONS_MAP['INTENT_REJECTED']!;
 
 const DEFAULT_FALLBACK_NOTIFICATION: ActionableNotification = {
   icon: 'ℹ️',

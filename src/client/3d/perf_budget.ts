@@ -176,8 +176,17 @@ export class PerfBudgetController {
   /**
    * Tự động điều chỉnh cấp độ phân giải LOD theo chỉ số FPS thực tế
    */
-  public calculateAdaptiveLOD(averageFps?: number): LODLevel {
+  public calculateAdaptiveLOD(averageFps?: number, isMobile?: boolean): LODLevel {
     const fps = averageFps ?? this.getAverageFps();
+
+    if (isMobile) {
+      if (fps >= 50) {
+        this.currentLod = LODLevel.MEDIUM;
+      } else {
+        this.currentLod = LODLevel.LOW;
+      }
+      return this.currentLod;
+    }
 
     if (fps >= 54) {
       this.currentLod = LODLevel.HIGH;
@@ -230,10 +239,10 @@ export class PerfBudgetController {
     const dcEval = this.evaluateDrawCallBudget(drawCalls);
     const triEval = this.evaluateTriangleBudget(triangles);
     const avgFps = this.getAverageFps();
-    const recommendedLod = this.calculateAdaptiveLOD(avgFps);
 
     const isMobile = deviceContext?.isMobile ?? false;
     const currentDpr = deviceContext?.currentDpr ?? (isMobile ? 1.0 : 1.5);
+    const recommendedLod = this.calculateAdaptiveLOD(avgFps, isMobile);
 
     const dprEval = this.calculateAdaptiveDpr({
       isMobile,

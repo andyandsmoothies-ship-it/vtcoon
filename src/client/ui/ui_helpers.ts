@@ -278,8 +278,10 @@ export function buildIntentTelemetryContext(
 export function resolveEndTurnButtonLabel(
   turnPhase?: string,
   hasRolledThisTurn?: boolean,
-  inAudit?: boolean
+  inAudit?: boolean,
+  isBankrupt?: boolean
 ): string {
+  if (isBankrupt) return '👁️ Khán Giả (Đang Xem)';
   if (turnPhase === 'PropertyManagement' && !hasRolledThisTurn && !inAudit) {
     return '⏩ Mất Lượt (Hết Lượt)';
   }
@@ -290,8 +292,10 @@ export function shouldShowSkipTurnNotice(
   turnPhase?: string,
   hasRolledThisTurn?: boolean,
   inAudit?: boolean,
-  isMyTurn?: boolean
+  isMyTurn?: boolean,
+  isBankrupt?: boolean
 ): boolean {
+  if (isBankrupt) return false;
   return Boolean(isMyTurn && turnPhase === 'PropertyManagement' && !hasRolledThisTurn && !inAudit);
 }
 
@@ -356,9 +360,12 @@ export interface ActionDockNoticeParams {
   readonly isStandingOnBuyable?: boolean;
   readonly buyableCellName?: string;
   readonly buyableCellPrice?: number;
+  readonly isBankrupt?: boolean;
 }
 
 export function resolveActionDockNotice(params: ActionDockNoticeParams): ActionDockNotice | null {
+  if (params.isBankrupt) return null;
+
   if (params.isInsolvent) {
     const bal = params.balance ?? 0;
     return {

@@ -8,12 +8,14 @@ import { AudioEngine } from '../audio/audio_engine';
 import { getInitialBalanceForPlayerCount } from '../../domain/room';
 import { PLAYER_TOKEN_PALETTE } from '../../domain/theme';
 import { executeCellLanding } from '../offline_landing';
+import { consumeStagedTransitWheel } from './apply_delta.js';
 import type { ReasonCode } from '../../server/network/network_types';
 import type { DeltaPayload } from '../../server/session_manager';
 import { formatServerErrorMessage } from '../ui/actionable_notification';
 import { preloadBaseTileImages } from '../assets/tile_assets';
 import { useTelemetryStore } from '../telemetry/telemetry_store';
 import { hashSeed } from '../../domain/pawn_assignment';
+import { purgeClientMatchSession } from './client_session_purger.js';
 
 export const SERVER_ERROR_TOAST_TIMEOUT_MS = 6000;
 
@@ -80,6 +82,7 @@ export function useAppSession(
     preloadBaseTileImages();
     return () => {
       if (landingTimerRef.current) clearTimeout(landingTimerRef.current);
+      purgeClientMatchSession({ clearGameStore: true });
     };
   }, []);
 
@@ -99,6 +102,10 @@ export function useAppSession(
       return;
     }
     lastHandledLandingTimestampRef.current = lastLandedPawn.timestamp;
+    const stagedWheel = consumeStagedTransitWheel(lastLandedPawn.cellIndex, lastLandedPawn.playerId);
+    if (stagedWheel && stagedWheel.cellIndex === lastLandedPawn.cellIndex && stagedWheel.playerId === lastLandedPawn.playerId) {
+      useGameStore.getState().openModal('transit_wheel', stagedWheel);
+    }
     handleCellLanding(lastLandedPawn.playerId, lastLandedPawn.cellIndex);
   }, [lastLandedPawn, handleCellLanding]);
 

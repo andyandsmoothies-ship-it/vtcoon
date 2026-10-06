@@ -94,12 +94,23 @@ export function MilestoneBanner({ item }: { readonly item: FloatingTextItem }): 
       onClick={handleDismiss}
       onKeyDown={handleKeyDown}
     >
-      {/* Tầng 1: Header định danh sự kiện & nút đóng */}
-      <div className="flex items-center justify-between border-b border-slate-200/80 pb-0.5">
-        <div className="flex items-center gap-1.5 min-w-0">
-          <span className="text-sm shrink-0" aria-hidden="true">{icon}</span>
-          <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-500 truncate">
-            {category}
+      {/* Hàng 1: Tiêu đề sự kiện & Người chơi + Nút đóng ✕ */}
+      <div className="flex items-start justify-between gap-1.5 min-w-0">
+        <div className="flex items-center gap-1.5 flex-wrap sm:flex-nowrap min-w-0 flex-1">
+          {player && (
+            <span
+              className="text-[10px] sm:text-[11px] font-bold px-1.5 py-0.5 rounded-md text-white shadow-xs shrink-0 truncate max-w-[120px] sm:max-w-[150px]"
+              style={{ backgroundColor: player.tokenColor || '#64748B' }}
+            >
+              {formatShortPlayerName(player.name)}
+            </span>
+          )}
+          <span
+            data-testid="milestone-card-title"
+            className="font-bold text-xs sm:text-[13px] text-slate-900 tracking-tight min-w-0 flex-1 truncate"
+            title={titleText}
+          >
+            {titleText}
           </span>
         </div>
         <button
@@ -108,33 +119,14 @@ export function MilestoneBanner({ item }: { readonly item: FloatingTextItem }): 
             e.stopPropagation();
             handleDismiss();
           }}
-          className="text-slate-400 hover:text-slate-700 text-xs font-bold leading-none min-w-[24px] min-h-[24px] flex items-center justify-center p-1 rounded-lg hover:bg-slate-200/50 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
+          className="text-slate-400 hover:text-slate-700 text-xs font-bold leading-none min-w-[24px] min-h-[24px] flex items-center justify-center p-1 rounded-lg hover:bg-slate-200/50 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 shrink-0 relative after:absolute after:-inset-2 after:content-['']"
           aria-label="Đóng thông báo"
         >
           ✕
         </button>
       </div>
 
-      {/* Tầng 2: Tiêu đề sự kiện & Người chơi */}
-      <div className="flex items-center gap-1.5 flex-wrap sm:flex-nowrap min-w-0">
-        {player && (
-          <span
-            className="text-[10px] sm:text-[11px] font-bold px-1.5 py-0.5 rounded-md text-white shadow-xs shrink-0 truncate max-w-[120px] sm:max-w-[150px]"
-            style={{ backgroundColor: player.tokenColor || '#64748B' }}
-          >
-            {formatShortPlayerName(player.name)}
-          </span>
-        )}
-        <span
-          data-testid="milestone-card-title"
-          className="font-bold text-xs sm:text-[13px] text-slate-900 tracking-tight min-w-0 flex-1 truncate"
-          title={titleText}
-        >
-          {titleText}
-        </span>
-      </div>
-
-      {/* Tầng 3: Chi tiết mô tả hiệu lực */}
+      {/* Hàng 2: Chi tiết mô tả hiệu lực (nếu có) */}
       {descText && (
         <span
           data-testid="milestone-card-desc"
@@ -143,6 +135,12 @@ export function MilestoneBanner({ item }: { readonly item: FloatingTextItem }): 
           {descText}
         </span>
       )}
+
+      {/* Hàng 3 (Dòng phụ): Định danh danh mục sự kiện */}
+      <div className="flex items-center gap-1 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-500 truncate pt-0.5">
+        <span className="text-xs shrink-0" aria-hidden="true">{icon}</span>
+        <span className="truncate">{category}</span>
+      </div>
     </div>
   );
 }
@@ -189,59 +187,59 @@ export function FloatingBadge({ item }: { readonly item: FloatingTextItem }): Re
       onKeyDown={handleKeyDown}
       className="pointer-events-auto cursor-pointer flex flex-col gap-1 px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-2xl border border-slate-300 bg-[#FFFDF8] select-none shadow-md shadow-slate-900/10 active:scale-95 animate-in fade-in duration-200 w-full min-w-0"
     >
-      {/* Tầng 1: Header định danh danh mục & nút đóng */}
-      <div className="flex items-center justify-between border-b border-slate-200/80 pb-0.5">
-        <div className="flex items-center gap-1.5 min-w-0">
-          <span className="text-sm shrink-0" aria-hidden="true">{narrative.icon}</span>
-          <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-500 truncate">
-            {narrative.category}
-          </span>
+      {/* Hàng 1: Diễn giải dòng tiền tự nhiên + Nút đóng ✕ */}
+      <div className="flex items-start justify-between gap-1.5 min-w-0">
+        <div
+          data-testid="transaction-flow-line"
+          className="text-xs sm:text-[13px] font-semibold text-slate-800 text-left leading-snug break-words flex-1 min-w-0"
+          title={item.title}
+        >
+          <span className="font-bold text-slate-900">{narrative.subject}</span>{' '}
+          <span className="text-slate-600 font-medium">{narrative.verb}</span>{' '}
+          <span
+            data-testid="floating-amount-pill"
+            title={item.text}
+            className={`px-1.5 py-0.5 rounded-lg text-xs font-extrabold font-mono tabular-nums border inline-block ${
+              narrative.isPositive
+                ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
+                : 'bg-rose-50 text-rose-700 border-rose-300'
+            }`}
+          >
+            {item.text}
+          </span>{' '}
+          <span className="font-bold text-slate-800">{narrative.target}</span>
         </div>
+
         <button
           type="button"
           onClick={(e) => {
             e.stopPropagation();
             handleDismiss();
           }}
-          className="text-slate-400 hover:text-slate-700 text-xs font-bold leading-none min-w-[24px] min-h-[24px] flex items-center justify-center p-1 rounded-lg hover:bg-slate-200/50 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
+          className="text-slate-400 hover:text-slate-700 text-xs font-bold leading-none min-w-[24px] min-h-[24px] flex items-center justify-center p-1 rounded-lg hover:bg-slate-200/50 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 shrink-0 relative after:absolute after:-inset-2 after:content-['']"
           aria-label="Đóng thông báo"
         >
           ✕
         </button>
       </div>
 
-      {/* Tầng 2 (Dòng 1): Lý do / Công thức rõ nghĩa, súc tích (chỉ hiển thị khi có công thức thực tế) */}
-      {Boolean(narrative.formula?.trim()) ? (
-        <div
-          data-testid="transaction-formula-line"
-          className="text-[11px] sm:text-xs font-medium text-slate-600 text-left leading-tight truncate flex items-center gap-1"
-          title={narrative.formula}
-        >
-          <span className="text-slate-400 text-[10px]" aria-hidden="true">📐</span>
-          <span className="truncate">{narrative.formula}</span>
+      {/* Hàng 2 (Dòng phụ): Danh mục định danh & Công thức (nếu có) */}
+      <div className="flex items-center gap-1.5 flex-wrap min-w-0 text-[10px] sm:text-[11px] text-slate-500 pt-0.5">
+        <div className="flex items-center gap-1 font-bold uppercase tracking-wider text-slate-500 truncate">
+          <span className="text-xs shrink-0" aria-hidden="true">{narrative.icon}</span>
+          <span className="truncate">{narrative.category}</span>
         </div>
-      ) : null}
 
-      {/* Tầng 3 (Dòng 2): Biến động tài chính & Dòng tiền tự nhiên */}
-      <div
-        data-testid="transaction-flow-line"
-        className="text-xs sm:text-[13px] font-semibold text-slate-800 text-left leading-snug break-words"
-        title={item.title}
-      >
-        <span className="font-bold text-slate-900">{narrative.subject}</span>{' '}
-        <span className="text-slate-600 font-medium">{narrative.verb}</span>{' '}
-        <span
-          data-testid="floating-amount-pill"
-          title={item.text}
-          className={`px-1.5 py-0.5 rounded-lg text-xs font-extrabold font-mono tabular-nums border inline-block ${
-            narrative.isPositive
-              ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
-              : 'bg-rose-50 text-rose-700 border-rose-300'
-          }`}
-        >
-          {item.text}
-        </span>{' '}
-        <span className="font-bold text-slate-800">{narrative.target}</span>
+        {Boolean(narrative.formula?.trim()) ? (
+          <div
+            data-testid="transaction-formula-line"
+            className="flex items-center gap-1 text-slate-500 font-medium truncate before:content-['•'] before:text-slate-300 before:mr-0.5"
+            title={narrative.formula}
+          >
+            <span className="text-slate-400 text-[10px]" aria-hidden="true">📐</span>
+            <span className="truncate">{narrative.formula}</span>
+          </div>
+        ) : null}
       </div>
     </div>
   );

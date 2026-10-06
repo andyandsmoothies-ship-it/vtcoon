@@ -4,6 +4,7 @@ import { PROPERTY_DEEDS } from '../../../domain/property_data.js';
 import { COLOR_GROUP_HEX } from '../../../domain/theme.js';
 import { formatCurrency } from '../ui_helpers.js';
 import { useGameStore } from '../../store/game_store.js';
+import { markTradeOfferResolved } from './bot_trade_offer_strip.js';
 
 export interface BotTradeOfferModalProps {
   readonly offerId: string;
@@ -65,6 +66,7 @@ export function BotTradeOfferModal({
       if (left <= 0) {
         clearInterval(timer);
         if (submittedOfferIdRef.current === offerId) return;
+        if (!markTradeOfferResolved(offerId)) return;
         submittedOfferIdRef.current = offerId;
         onReject(offerId);
       }
@@ -284,6 +286,7 @@ export function BotTradeOfferModal({
           aria-label={isSwap ? 'Từ chối đổi đất' : 'Từ chối bán đất'}
           onClick={() => {
             if (submittedOfferIdRef.current === offerId) return;
+            if (!markTradeOfferResolved(offerId)) return;
             submittedOfferIdRef.current = offerId;
             onReject(offerId);
           }}
@@ -299,6 +302,7 @@ export function BotTradeOfferModal({
           onClick={() => {
             if (!canAccept) return;
             if (submittedOfferIdRef.current === offerId) return;
+            if (!markTradeOfferResolved(offerId)) return;
             submittedOfferIdRef.current = offerId;
             onAccept(offerId);
           }}
