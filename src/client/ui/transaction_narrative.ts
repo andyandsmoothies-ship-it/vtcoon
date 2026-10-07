@@ -153,21 +153,30 @@ export function resolveTransactionNarrative(
   let target = item.title || 'biến động tài chính theo quy định';
   let detail: string | undefined;
 
+  let isLandlordSide = false;
+
   switch (item.actionType) {
     case 'diplomatic': {
       category = 'ĐẶC QUYỀN NGOẠI GIAO';
       icon = '🤝';
-      const isLandlordSide = item.type === FloatingTextType.Penalty ||
-        (item.title && item.title.includes('Khách dùng')) ||
-        (item.title && item.title.includes('Hụt thu'));
+      isLandlordSide = item.type === FloatingTextType.Penalty ||
+        Boolean(item.title && item.title.includes('Khách dùng')) ||
+        Boolean(item.title && item.title.includes('Hụt thu')) ||
+        Boolean(item.title && item.title.includes('dùng Thẻ Ngoại Giao'));
       if (isLandlordSide) {
         verb = 'miễn thu';
-        target = `tiền thuê ${cellName}`;
+        target = cellName ? `tiền thuê ${cellName} cho ${targetName}` : `tiền thuê cho ${targetName}`;
         detail = `(Khách dùng Thẻ Ngoại Giao - Hụt thu ${amountText})`;
       } else {
-        verb = 'kích hoạt';
-        target = 'Thẻ Ngoại Giao';
-        detail = `(Miễn 100% tiền thuê ${cellName} - Tiết kiệm ${amountText})`;
+        const hasOpponent = Boolean(item.targetPlayerId || item.targetPlayerName);
+        if (hasOpponent) {
+          verb = 'được miễn';
+          target = cellName ? `tiền thuê ${cellName} của ${targetName}` : `tiền thuê của ${targetName}`;
+        } else {
+          verb = 'kích hoạt';
+          target = 'Thẻ Ngoại Giao';
+        }
+        detail = `(Miễn 100% tiền thuê ${cellName || 'BĐS'} - Tiết kiệm ${amountText})`;
       }
       break;
     }
@@ -271,6 +280,11 @@ export function resolveTransactionNarrative(
   let formula = resolveFormulaText(item, cellName, isPositive);
   if ((!formula || formula === 'Nộp ngân sách theo quy định Kho Bạc') && item.actionType === 'tax' && item.title?.match(/tài sản/i)) {
     formula = `Thuế tài sản qua GO (Tối đa ${(GO_PROPERTY_TAX_CAP ?? 1000).toLocaleString('vi-VN')} Tr.)`;
+  }
+  if (item.actionType === 'diplomatic') {
+    formula = (isLandlordSide || !isPositive)
+      ? 'Khách dùng Thẻ Ngoại Giao: Hụt thu tiền thuê'
+      : 'Đặc quyền ngoại giao: Miễn 100% tiền thuê BĐS';
   }
   return { category, icon, subject, verb, amountText, isPositive, target, detail, formula };
 }

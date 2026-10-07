@@ -226,7 +226,7 @@ export function handleDiplomaticEventBadge(
 ): void {
   if (typeof state?.addFloatingText !== 'function') return;
   const pName = state.playersInfo[ev.playerId]?.name || 'Khách thuê', lName = state.playersInfo[ev.landlordId]?.name || 'Chủ đất', amt = formatCurrency(ev.savedRent), groupId = `diplo_${ev.cellIndex}_${ev.playerId}_${ev.landlordId}_${Date.now()}`;
-  if (ev.playerId) state.addFloatingText({ text: `+${amt} Tr.`, type: FloatingTextType.Reward, playerId: ev.playerId, actionType: 'diplomatic', title: 'Miễn Trừ Ngoại Giao', cellIndex: ev.cellIndex, targetPlayerId: ev.landlordId, targetPlayerName: lName, groupId });
+  if (ev.playerId) state.addFloatingText({ text: `${amt} Tr.`, type: FloatingTextType.Reward, playerId: ev.playerId, actionType: 'diplomatic', title: 'Miễn Trừ Ngoại Giao', cellIndex: ev.cellIndex, targetPlayerId: ev.landlordId, targetPlayerName: lName, groupId });
   if (ev.landlordId) state.addFloatingText({ text: `-${amt} Tr.`, type: FloatingTextType.Penalty, playerId: ev.landlordId, actionType: 'diplomatic', title: `${pName} dùng Thẻ Ngoại Giao`, cellIndex: ev.cellIndex, targetPlayerId: ev.playerId, targetPlayerName: pName, groupId });
 }
 

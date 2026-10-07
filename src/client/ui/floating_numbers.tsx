@@ -227,12 +227,14 @@ export function FloatingBadge({ item }: { readonly item: FloatingTextItem }): Re
               data-testid="floating-amount-pill"
               title={item.text}
               className={`px-1.5 py-0.5 rounded-lg text-xs font-extrabold font-mono tabular-nums border inline-block ${
-                narrative.isPositive
+                item.actionType === 'diplomatic' && narrative.isPositive
+                  ? 'bg-sky-50 text-sky-700 border-sky-300'
+                  : narrative.isPositive
                   ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
                   : 'bg-rose-50 text-rose-700 border-rose-300'
               }`}
             >
-              {item.text}
+              {item.actionType === 'diplomatic' && narrative.isPositive ? narrative.amountText : item.text}
             </span>{' '}
             <span className="font-bold text-slate-800">{narrative.target}</span>
           </div>
@@ -330,13 +332,13 @@ export function FloatingNumbersOverlay(): React.ReactElement | null {
             <MilestoneBanner item={latestMilestone} />
           </div>
         )}
-        {displayItems.map((item) => {
-          const isHiddenOnMobile = Boolean(latestMilestone);
+        {displayItems.map((item, index) => {
+          const isOlderWithBanner = Boolean(latestMilestone) && displayItems.length > 1 && index === 0;
           return (
             <div
               key={item.id}
               className={
-                isHiddenOnMobile
+                isOlderWithBanner
                   ? 'w-full justify-start sm:justify-center hidden md:flex'
                   : 'w-full flex justify-start sm:justify-center'
               }

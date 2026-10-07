@@ -97,3 +97,13 @@
     - **Bất Biến Xác Minh (Modal Preservation Invariant)**:
       1. *Loại trừ Modal Công Cụ Chủ Động*: Listener tự động mở nợ trong `use_app_session.ts` bắt buộc kiểm tra `currentModal !== 'portfolio'`.
       2. *Neo An Toàn Trên ActionDock*: Khi người chơi chủ động đóng modal công cụ, nút Primary Action trên ActionDock biến đổi thành `🚨 Cứu Nợ Khẩn Cấp`, đóng vai trò điểm neo an toàn để người chơi bấm mở lại modal nợ bất kỳ lúc nào mà không cần delta tự động can thiệp thô bạo. `[UI/MODAL_COEXISTENCE]`
+
+24. **Phân Định Thị Giác Giữa Dòng Tiền Nạp Vào Ví vs Đặc Quyền Miễn Trừ / Bảo Hộ [UI/NOTIFICATIONS] [IMP-290]**:
+    - **Bẫy Nguy Hiểm (The Cash-Credit Semantic Trap)**: Ghép chuỗi số tiền tiết kiệm được với dấu `+` và gán màu xanh lá nạp tiền (`bg-emerald-50 text-emerald-700`) cho các sự kiện miễn trừ (như Thẻ Ngoại Giao miễn tiền thuê, hoặc phiếu giảm giá). Ví dụ hiển thị: `Bạn kích hoạt [+6.000 Tr.] Thẻ Ngoại Giao` làm người chơi lầm tưởng họ được cộng 6.000 Tr. tiền mặt vào ví, gây hoang mang khi số dư ví không đổi.
+    - **Bất Biến Xác Minh (Exemption Notification Standard)**:
+      1. *Màu Sắc Bảo Hộ*: Mọi viên pill số tiền miễn trừ / tiết kiệm chi phí (`savedRent`) BẮT BUỘC sử dụng bảng màu xanh lam bảo hộ (`bg-sky-50 text-sky-700 border-sky-300`), TUYỆT ĐỐI CẤM dùng màu xanh lá (`emerald`) vốn chỉ dành riêng cho dòng tiền thực nạp vào ví (`salary`, `rent_receive`, `stimulus`).
+      2. *Triệt Tiêu Dấu `+` Ảo*: Chuỗi số tiền miễn trừ BẮT BUỘC bỏ dấu `+` (`6.000 Tr.` thay vì `+6.000 Tr.`). Tầng UI `FloatingBadge` phải strip phòng vệ dấu `+` nếu có.
+      3. *Cú Pháp Tự Nhiên Chuẩn*: Đồng bộ 100% với cấu trúc 2 dòng của game:
+         - Khách thuê: `[🤝] {Chủ thể} được miễn [{Số tiền}] tiền thuê {Tên Ô} của {Chủ đất}` + `[Đặc quyền ngoại giao: Miễn 100% tiền thuê BĐS]`.
+         - Chủ đất: `[🤝] {Chủ thể} miễn thu [-{Số tiền}] tiền thuê {Tên Ô} cho {Khách thuê}` + `[Khách dùng Thẻ Ngoại Giao: Hụt thu tiền thuê]`. `[UI/NOTIFICATIONS]`
+

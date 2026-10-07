@@ -351,6 +351,50 @@ function runRealMutationProbe(testPath, srcPath, ticketId) {
         replacement: 'if (false && delta.lastTradeResult) {',
       },
     ],
+    'IMP-290': [
+      {
+        file: 'src/client/network/activity_badge_dispatcher.ts',
+        desc: 'AST: mutate tenant badge text to re-introduce leading plus',
+        target: 'text: `${amt} Tr.`,',
+        replacement: 'text: `+${amt} Tr.`,',
+      },
+      {
+        file: 'src/client/ui/transaction_narrative.ts',
+        desc: 'AST: mutate tenant verb from "được miễn" to "kích hoạt"',
+        target: "verb = 'được miễn';",
+        replacement: "verb = 'kích hoạt';",
+      },
+      {
+        file: 'src/client/ui/transaction_narrative.ts',
+        desc: 'AST: mutate tenant target from natural phrasing to static card',
+        target: "target = cellName ? `tiền thuê ${cellName} của ${targetName}` : `tiền thuê của ${targetName}`;",
+        replacement: "target = 'Thẻ Ngoại Giao';",
+      },
+      {
+        file: 'src/client/ui/transaction_narrative.ts',
+        desc: 'AST: mutate landlord target to omit tenant attribution',
+        target: "target = cellName ? `tiền thuê ${cellName} cho ${targetName}` : `tiền thuê cho ${targetName}`;",
+        replacement: "target = cellName ? `tiền thuê ${cellName}` : 'tiền thuê';",
+      },
+      {
+        file: 'src/client/ui/transaction_narrative.ts',
+        desc: 'AST: corrupt landlord formula text resolution',
+        target: "formula = (isLandlordSide || !isPositive)\n      ? 'Khách dùng Thẻ Ngoại Giao: Hụt thu tiền thuê'\n      : 'Đặc quyền ngoại giao: Miễn 100% tiền thuê BĐS';",
+        replacement: "formula = 'Đặc quyền ngoại giao: Miễn 100% tiền thuê BĐS';",
+      },
+      {
+        file: 'src/client/ui/floating_numbers.tsx',
+        desc: 'AST: mutate tenant diplomatic pill style from sky-50 to emerald-50',
+        target: "item.actionType === 'diplomatic' && narrative.isPositive\n                  ? 'bg-sky-50 text-sky-700 border-sky-300'",
+        replacement: "item.actionType === 'diplomatic' && narrative.isPositive\n                  ? 'bg-emerald-50 text-emerald-700 border-emerald-300'",
+      },
+      {
+        file: 'src/client/ui/floating_numbers.tsx',
+        desc: 'AST: disable leading plus stripping on diplomatic amount pill',
+        target: "{item.actionType === 'diplomatic' && narrative.isPositive ? narrative.amountText : item.text}",
+        replacement: "{item.text}",
+      },
+    ],
   };
 
   const targetedRules = ticketId ? ticketTargetedMutations[ticketId.toUpperCase()] : undefined;
