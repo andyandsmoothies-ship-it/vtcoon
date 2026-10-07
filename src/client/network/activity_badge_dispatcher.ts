@@ -48,9 +48,7 @@ export function getPawnLandingDelay(playerId?: string): number {
 
 export function getPawnPassGoDelay(playerId?: string): number {
   if (!playerId) return 0;
-  const state = useGameStore.getState();
-  const rollLead = state.isRolling ? 1200 : 0;
-
+  const state = useGameStore.getState(), rollLead = state.isRolling ? 1200 : 0;
   if (state.pendingPawnMove && state.pendingPawnMove.playerId === playerId) {
     const fromCell = state.pendingPawnMove.fromCell ?? 0;
     if (checkPassedGo(fromCell, state.pendingPawnMove.targetCell)) {
@@ -58,18 +56,14 @@ export function getPawnPassGoDelay(playerId?: string): number {
       return Math.round(rollLead + ((40 - fromCell) % 40) * stepMs);
     }
   }
-
-  const anim = state.activePawnAnimation;
-  const activeRemainingMs = getAnimLead(anim);
+  const anim = state.activePawnAnimation, activeRemainingMs = getAnimLead(anim);
   if (anim && anim.playerId === playerId && anim.waypoints?.length) {
-    const fromCell = anim.fromCell;
-    const targetCell = anim.targetCell ?? anim.waypoints[anim.waypoints.length - 1] ?? 0;
+    const fromCell = anim.fromCell, targetCell = anim.targetCell ?? anim.waypoints[anim.waypoints.length - 1] ?? 0;
     if (checkPassedGo(fromCell, targetCell)) {
       const stepMs = (anim.isBot ? BOT_STEP_DURATION : (HOP_DURATION + LANDING_DURATION)) * 1000;
       return Math.round(Math.max(0, ((40 - fromCell) % 40) - (anim.currentIndex ?? 0)) * stepMs);
     }
   }
-
   const queued = state.pawnAnimationQueue?.find((t) => t.playerId === playerId);
   if (queued && checkPassedGo(queued.fromCell ?? 0, queued.targetCell)) {
     const stepMs = (queued.isBot ? BOT_STEP_DURATION : (HOP_DURATION + LANDING_DURATION)) * 1000;
@@ -119,24 +113,20 @@ export function handleBuyBadge(act: ActivityLogEntry, state: GameState): void {
 export function handleTaxBadge(act: ActivityLogEntry, state: GameState): void {
   const amount = act.amount !== undefined ? -Math.abs(act.amount) : 0;
   if (amount === 0) return;
-  const baseTitle = act.message.includes('Lệ Phí') ? 'Lệ Phí Đất Đai' : 'Thuế Đất Đai';
+  const isCell4 = act.cellIndex === 4, isPropTax = act.message.includes('Tài Sản');
+  const baseTitle = isCell4 ? 'Lệ Phí Đất Đai' : (isPropTax ? 'Thuế Tài Sản Qua GO' : 'Thuế Nhà Nước');
+  const cellIndex = isCell4 ? 4 : (isPropTax ? 0 : act.cellIndex);
+  const delay = isPropTax ? getPawnPassGoDelay(act.playerId) : getPawnLandingDelay(act.playerId);
   scheduleAction(() => {
-    state.addFloatingText({ text: formatCurrency(amount), type: FloatingTextType.Penalty, playerId: act.playerId ?? '', actionType: 'tax', title: `Nộp ${baseTitle} ➔ Kho Bạc`, cellIndex: act.cellIndex });
-  }, getPawnLandingDelay(act.playerId));
+    state.addFloatingText({ text: formatCurrency(amount), type: FloatingTextType.Penalty, playerId: act.playerId ?? '', actionType: 'tax', title: `Nộp ${baseTitle} ➔ Kho Bạc`, cellIndex });
+  }, delay);
 }
 
 export function handleSalaryBadge(act: ActivityLogEntry, state: GameState): void {
   scheduleAction(() => {
     SoundEngine.playVictoryChime();
     const salaryAmt = act.amount ?? 2000;
-    state.addFloatingText({
-      text: `+${formatCurrency(salaryAmt)}`,
-      type: FloatingTextType.Reward,
-      playerId: act.playerId ?? '',
-      actionType: 'salary',
-      title: 'Lương Vượt Ô Bắt Đầu',
-      formula: `Hoàn thành 1 vòng sa bàn (+${formatCurrency(salaryAmt)} Tr.)`,
-    });
+    state.addFloatingText({ text: `+${formatCurrency(salaryAmt)}`, type: FloatingTextType.Reward, playerId: act.playerId ?? '', actionType: 'salary', title: 'Lương Vượt Ô Bắt Đầu', formula: `Hoàn thành 1 vòng sa bàn (+${formatCurrency(salaryAmt)} Tr.)` });
   }, getPawnPassGoDelay(act.playerId));
 }
 
@@ -209,25 +199,24 @@ export function handleCardPenaltyBadge(act: ActivityLogEntry, state: GameState):
 
 export function handleTransitBadge(act: ActivityLogEntry, state: GameState, _delta?: DeltaPayload): void {
   const isDelay = act.message.includes('bị hoãn');
-  state.addFloatingText({
-    text: act.message,
-    type: isDelay ? FloatingTextType.Penalty : FloatingTextType.Bonus,
-    playerId: act.playerId ?? '',
-    actionType: 'transit',
-    title: 'VÒNG XOAY VẬN TẢI',
-    cellIndex: act.cellIndex,
-    durationMs: 4000,
-  });
+  state.addFloatingText({ text: act.message, type: isDelay ? FloatingTextType.Penalty : FloatingTextType.Bonus, playerId: act.playerId ?? '', actionType: 'transit', title: 'VÒNG XOAY VẬN TẢI', cellIndex: act.cellIndex, durationMs: 4000 });
 }
 
 const BADGE_HANDLERS: Record<string, (act: ActivityLogEntry, state: GameState, delta?: DeltaPayload) => void> = {
   rent: handleRentBadge, buy: handleBuyBadge, upgrade: handleUpgradeBadge, tax: handleTaxBadge, bail: handleBailBadge,
   salary: handleSalaryBadge, mortgage: handleMortgageBadge, unmortgage: handleUnmortgageBadge,
-  auction: handleAuctionBadge, trade: handleTradeBadge, hose: handleHoseBadge,
-  transit: handleTransitBadge,
+  auction: handleAuctionBadge, trade: handleTradeBadge, hose: handleHoseBadge, transit: handleTransitBadge,
   card: (act, state) => {
     if (act.id.startsWith('ma_buyout')) handleMaBuyoutBadge(act, state);
     else if (act.amount && act.amount < 0) handleCardPenaltyBadge(act, state);
+  },
+  system: (act, state) => {
+    if (act.amount && act.amount > 0) {
+      state.addFloatingText({ text: `+${formatCurrency(act.amount)}`, type: FloatingTextType.Reward, playerId: act.playerId ?? '', actionType: 'stimulus', title: act.message.includes('Kích Cầu') ? 'Trợ Cấp Kích Cầu Kho Bạc' : 'Tiền Thưởng Hệ Thống' });
+    } else if (act.amount && act.amount < 0) {
+      if (act.targetPlayerId) handleRentBadge(act, state);
+      else state.addFloatingText({ text: formatCurrency(act.amount), type: FloatingTextType.Penalty, playerId: act.playerId ?? '', actionType: 'tax', title: act.message, cellIndex: act.cellIndex });
+    }
   },
 };
 

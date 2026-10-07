@@ -158,6 +158,7 @@ describe('[TC-IMP278] Compact Floating Badges & Milestone Banners Contract Suite
   it('[TC-278.09/MSS][UC-IMP278] MilestoneBanner cho Vòng Xoay Vận Tải hiển thị tiêu đề kết quả cụ thể và mô tả không lặp lại', () => {
     const transitItem: FloatingTextItem = {
       id: 'transit_banner_1',
+      timestamp: Date.now(),
       playerId: 'p1',
       type: FloatingTextType.Bonus,
       actionType: 'transit',

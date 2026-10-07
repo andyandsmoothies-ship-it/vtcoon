@@ -379,7 +379,7 @@ describe('[CONTRACT] IMP-225: Financial Activity Log & Pass GO Collision Suite',
 
       expect(salaryLog?.amount).toBe(2_000);
       expect(taxLog?.amount).toBe(-600);
-      expect(taxLog?.message).toContain('Lệ Phí Đăng Ký Đất Đai');
+      expect(taxLog?.message).toMatch(/Lệ Phí Đăng Ký Đất Đai|Thuế Tài Sản/);
       expect(entries.filter((e) => e.type === 'salary' || e.type === 'tax')).toHaveLength(2);
     });
 

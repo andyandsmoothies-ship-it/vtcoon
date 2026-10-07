@@ -8,6 +8,7 @@ import {
 import { getCellName } from '../network/activity_property_tracker.js';
 import { formatShortPlayerName } from './ui_helpers.js';
 import { ChanceCardId } from '../../domain/event_card_engine.js';
+import { GO_PROPERTY_TAX_CAP } from '../../domain/property_rent.js';
 import { resolveFormulaText } from './transaction_formula.js';
 
 export interface TransactionNarrative {
@@ -75,6 +76,7 @@ function formatUpgrade(item: FloatingTextItem): string {
 }
 
 function formatTax(item: FloatingTextItem): string {
+  if (item.title?.includes('Tài Sản')) return 'Nộp Thuế Tài Sản Qua GO ➔ Kho Bạc';
   return `Nộp ${(item.title || 'Lệ Phí Đất Đai (Ô 04)').replace(/^Nộp\s+/i, '').replace(/\s*➔\s*(?:Vào\s+)?Kho\s+Bạc/i, '').trim()} ➔ Kho Bạc`;
 }
 
@@ -148,7 +150,7 @@ export function resolveTransactionNarrative(
   let category = isPositive ? 'THU NHẬP' : 'CHI PHÍ';
   let icon = resolveActionIcon(item.actionType, isPositive);
   let verb = isPositive ? 'nhận' : 'thanh toán';
-  let target = item.title || 'giao dịch tài chính';
+  let target = item.title || 'biến động tài chính theo quy định';
   let detail: string | undefined;
 
   switch (item.actionType) {
@@ -266,6 +268,9 @@ export function resolveTransactionNarrative(
     }
   }
 
-  const formula = resolveFormulaText(item, cellName, isPositive);
+  let formula = resolveFormulaText(item, cellName, isPositive);
+  if ((!formula || formula === 'Nộp ngân sách theo quy định Kho Bạc') && item.actionType === 'tax' && item.title?.match(/tài sản/i)) {
+    formula = `Thuế tài sản qua GO (Tối đa ${(GO_PROPERTY_TAX_CAP ?? 1000).toLocaleString('vi-VN')} Tr.)`;
+  }
   return { category, icon, subject, verb, amountText, isPositive, target, detail, formula };
 }

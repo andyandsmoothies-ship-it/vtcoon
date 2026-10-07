@@ -1,11 +1,12 @@
-// [UI-S06/MSS][IMP-225] ActivityRentMatcher — Multi-layered rent matching, GO salary & fee processor
+// [UI-S06/MSS][IMP-225][IMP-289] ActivityRentMatcher — Multi-layered rent matching, GO salary & fee processor
 import type { DeltaPayload } from '../../server/session_manager.js';
 import type { GameState, PlayerHudInfo } from '../store/game_store.js';
 import { type ActivityLogEntry } from '../store/activity_store.js';
 import { checkPassedGo, calculateGoSalary } from '../../domain/room.js';
 import { formatCurrency } from '../ui/ui_helpers.js';
-import { PROPERTY_DEEDS } from '../../domain/property_data.js';
-import { TELECOM_DATA_FEE } from '../../domain/property_rent.js';
+import { PROPERTY_DEEDS, type PropertyRegistry, type PropertyStateMap } from '../../domain/property_data.js';
+import { TELECOM_DATA_FEE, calculateGoPropertyTax, GO_PROPERTY_TAX_CAP } from '../../domain/property_rent.js';
+import { ChanceCardId } from '../../domain/event_card_types.js';
 import { AIRPORT_CELLS } from '../telemetry/telemetry_expected_delta.js';
 
 export const CHANCE_MARKET_CELLS = new Set<number>([2, 7, 17, 22, 33, 36]);
@@ -16,6 +17,22 @@ export interface PropertyFinancialContext {
   readonly upgradedCells: ReadonlyArray<{ cellIndex: number; cost: number; ownerId: string }>;
   readonly mortgagedCells: ReadonlyArray<{ cellIndex: number; loan: number; ownerId: string }>;
   readonly unmortgagedCells: ReadonlyArray<{ cellIndex: number; cost: number; ownerId: string }>;
+}
+
+export function buildPropertyRegistryAndStateMap(
+  playersInfo: Record<string, PlayerHudInfo>,
+  levelMap?: Record<number, number>,
+): { registry: PropertyRegistry; stateMap: PropertyStateMap } {
+  const registry: PropertyRegistry = new Map(), stateMap: PropertyStateMap = new Map();
+  if (playersInfo) {
+    for (const [id, info] of Object.entries(playersInfo)) {
+      for (const cell of info?.ownedProperties ?? []) registry.set(cell, id);
+    }
+  }
+  if (levelMap) {
+    for (const [cellStr, lvl] of Object.entries(levelMap)) stateMap.set(Number(cellStr), { level: lvl });
+  }
+  return { registry, stateMap };
 }
 
 export function getPlayerName(pInfo?: PlayerHudInfo, fallbackId?: string): string {
@@ -72,21 +89,66 @@ export function extractPassedGoActivities(
         ...(pInfo?.tokenColor ? { playerTokenColor: pInfo.tokenColor } : {}),
       });
 
+      const isOverdraftDue = prevP?.overdraftRoundsLeft === 1 && (!p.overdraftRoundsLeft || p.overdraftRoundsLeft === 0);
+      if (isOverdraftDue) {
+        salaryLogs.push({
+          id: `overdraft_${Date.now()}_${p.id}`, timestamp: Date.now(), type: 'card',
+          message: `💳 ${pName} đã hoàn trả 3.300 nợ thấu chi ngân hàng khi hết hạn`,
+          amount: -3300, cellIndex: 0, playerId: p.id, playerName: pName,
+          ...(pInfo?.tokenColor ? { playerTokenColor: pInfo.tokenColor } : {}),
+        });
+      }
+
+      const hasFreeCredit = Boolean(prevP?.hand?.includes(ChanceCardId.CC_FREE_CREDIT));
+      if (hasFreeCredit) {
+        salaryLogs.push({
+          id: `credit_${Date.now()}_${p.id}`, timestamp: Date.now(), type: 'card',
+          message: `🏦 ${pName} đã nộp 400 phí trích lãi tín dụng Kho Bạc (CC_FREE_CREDIT)`,
+          amount: -400, cellIndex: 0, playerId: p.id, playerName: pName,
+          ...(pInfo?.tokenColor ? { playerTokenColor: pInfo.tokenColor } : {}),
+        });
+      }
+
+      const { registry, stateMap } = buildPropertyRegistryAndStateMap(prevState.playersInfo, prevState.levelMap);
+      const rawGoTax = calculateGoPropertyTax(p.id, registry, stateMap);
+      const goTax = Math.min(rawGoTax, GO_PROPERTY_TAX_CAP);
+      if (goTax > 0) {
+        salaryLogs.push({
+          id: `tax_prop_go_${Date.now()}_${p.id}`, timestamp: Date.now(), type: 'tax',
+          message: `🏛️ ${pName} đã nộp thuế ${formatCurrency(goTax)} (Thuế Tài Sản Qua GO)`,
+          amount: -goTax, cellIndex: 0, playerId: p.id, playerName: pName,
+          ...(pInfo?.tokenColor ? { playerTokenColor: pInfo.tokenColor } : {}),
+        });
+      }
+
+      const totalGoDeductions = (isOverdraftDue ? 3300 : 0) + (hasFreeCredit ? 400 : 0) + goTax;
+      const netGoBonus = salary - totalGoDeductions;
+
       const recIdx = receivers.findIndex((r) => r.id === p.id);
       if (recIdx !== -1) {
         const currentDiff = receivers[recIdx]!.diff;
-        if (currentDiff === salary) {
+        if (currentDiff === netGoBonus) {
           handledReceiverIds.add(p.id);
-        } else if (currentDiff > salary) {
-          receivers[recIdx] = { ...receivers[recIdx]!, diff: currentDiff - salary };
+          receivers[recIdx] = { ...receivers[recIdx]!, diff: 0 };
+        } else if (currentDiff > netGoBonus) {
+          receivers[recIdx] = { ...receivers[recIdx]!, diff: currentDiff - netGoBonus };
         } else {
           receivers = receivers.filter((_, idx) => idx !== recIdx);
-          payers.push({ id: p.id, diff: currentDiff - salary, pInfo: prevP, cellIndex: newPos });
+          payers.push({ id: p.id, diff: currentDiff - netGoBonus, pInfo: prevP, cellIndex: newPos });
         }
       } else {
         const payIdx = payers.findIndex((py) => py.id === p.id);
-        if (payIdx !== -1) payers[payIdx] = { ...payers[payIdx]!, diff: payers[payIdx]!.diff - salary };
-        else payers.push({ id: p.id, diff: -salary, pInfo: prevP, cellIndex: newPos });
+        if (payIdx !== -1) {
+          const updatedDiff = payers[payIdx]!.diff - netGoBonus;
+          if (updatedDiff > 0) {
+            receivers.push({ id: p.id, diff: updatedDiff, pInfo: prevP, cellIndex: newPos });
+            payers = payers.filter((_, idx) => idx !== payIdx);
+          } else {
+            payers[payIdx] = { ...payers[payIdx]!, diff: updatedDiff };
+          }
+        } else {
+          payers.push({ id: p.id, diff: -netGoBonus, pInfo: prevP, cellIndex: newPos });
+        }
       }
     }
   }
@@ -137,7 +199,7 @@ export function matchRentTransactions(
 
   for (let i = 0; i < currentPayers.length; i++) {
     const payer = currentPayers[i]!;
-    if (handledPayerIds.has(payer.id)) continue;
+    if (handledPayerIds.has(payer.id) || Math.abs(payer.diff) <= 0) continue;
     const rentAmount = Math.abs(payer.diff);
 
     // 1. Khớp 1-1 chính xác
@@ -279,7 +341,7 @@ export function processPayerFee(
 
   return {
     id: `tax_${Date.now()}_${payer.id}`, timestamp: Date.now(), type: 'tax',
-    message: `${pName} đã nộp phí / nộp thuế ${formatCurrency(absDiff)}`,
+    message: `${pName} đã nộp phí / Khấu trừ tài chính phát sinh ${formatCurrency(absDiff)}`,
     playerId: payer.id, playerName: pName, amount: payer.diff,
     ...(payer.cellIndex !== undefined ? { cellIndex: payer.cellIndex } : {}),
     ...(payer.pInfo?.tokenColor ? { playerTokenColor: payer.pInfo.tokenColor } : {}),
