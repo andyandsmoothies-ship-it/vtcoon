@@ -197,6 +197,18 @@ export class TurnOrchestrator {
       return;
     }
 
+    if (room.phase === TurnPhase.InsolvencyPhase) {
+      const debtor = room.pendingInsolvencyDebtorId
+        ? room.players.find((p) => p.id === room.pendingInsolvencyDebtorId)
+        : room.players[room.currentPlayerIndex];
+      if (debtor && !debtor.isBot && !debtor.bankrupt) {
+        this.botJustUpgraded.delete(roomCode);
+        this.onScheduleTurnTimeout?.(roomCode);
+        this.scheduleHumanTimeoutStep(roomCode, customTimeoutMs);
+        return;
+      }
+    }
+
     const current = room.players[room.currentPlayerIndex];
     if (!current || current.bankrupt) return;
 
@@ -350,10 +362,12 @@ export class TurnOrchestrator {
           return;
         }
 
-        const curr = r.players[r.currentPlayerIndex];
-        if (!curr || curr.isBot || curr.bankrupt) return;
+        const targetPlayer = r.phase === TurnPhase.InsolvencyPhase && r.pendingInsolvencyDebtorId
+          ? r.players.find((p) => p.id === r.pendingInsolvencyDebtorId)
+          : r.players[r.currentPlayerIndex];
+        if (!targetPlayer || targetPlayer.isBot || targetPlayer.bankrupt) return;
 
-        this.executeSafeAfkAction(roomCode, r.phase, curr.id);
+        this.executeSafeAfkAction(roomCode, r.phase, targetPlayer.id);
 
         const rAfter = this.rooms.getRoom(roomCode);
         if (rAfter && isRoomGameOver(rAfter)) {

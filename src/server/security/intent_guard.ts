@@ -44,6 +44,17 @@ export class IntentGuard {
     if (intent.type === 'INTENT_BANKRUPTCY') {
       return true;
     }
+    if (room.phase === TurnPhase.InsolvencyPhase) {
+      const isDebtor = room.pendingInsolvencyDebtorId
+        ? room.pendingInsolvencyDebtorId === playerId
+        : room.players[room.currentPlayerIndex]?.id === playerId;
+      const isAllowed =
+        intent.type === 'INTENT_AUTO_SOLVENCY' ||
+        intent.type === 'INTENT_MORTGAGE' ||
+        intent.type === 'INTENT_DOWNGRADE' ||
+        intent.type === 'INTENT_ISSUE_BOND';
+      if (isDebtor && isAllowed) return true;
+    }
     if (intent.type === 'INTENT_EXECUTE_COMPULSORY_BUYOUT' || intent.type === 'INTENT_DECLINE_COMPULSORY_BUYOUT') {
       if (room.pendingBuyout && room.pendingBuyout.buyerId === playerId) {
         return true;

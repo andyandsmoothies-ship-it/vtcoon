@@ -157,6 +157,75 @@ describe('UI Linter - Impeccable Anti-patterns [UC-UI-LINT/MSS]', () => {
     });
   });
 
+  describe('Rule 5: side-tab', () => {
+    it('detects border-l-4 with chromatic border color', () => {
+      const snippet = `<div className="rounded-xl p-4 bg-white border-l-4 border-amber-500">Notice</div>`;
+      const violations = lintContent(snippet, 'test.tsx');
+      expect(violations).toHaveLength(1);
+      expect(violations[0]?.rule).toBe(RULES.SIDE_TAB);
+    });
+
+    it('detects thick directional border border-r-8 on card container', () => {
+      const snippet = `<div className="shadow-md bg-slate-900 border-r-8 p-3">Alert</div>`;
+      const violations = lintContent(snippet, 'test.tsx');
+      expect(violations).toHaveLength(1);
+      expect(violations[0]?.rule).toBe(RULES.SIDE_TAB);
+    });
+
+    it('detects thick side-tab border in css file', () => {
+      const css = `.card { border-radius: 8px; border-left: 4px solid #f59e0b; }`;
+      const violations = lintContent(css, 'style.css');
+      expect(violations).toHaveLength(1);
+      expect(violations[0]?.rule).toBe(RULES.SIDE_TAB);
+    });
+
+    it('passes thin 1px directional border', () => {
+      const snippet = `<div className="rounded-xl p-4 bg-white border-l border-slate-200">Subtle</div>`;
+      const violations = lintContent(snippet, 'test.tsx');
+      expect(violations).toHaveLength(0);
+    });
+
+    it('passes uniform 4-sided border', () => {
+      const snippet = `<div className="rounded-xl p-4 bg-white border-4 border-amber-500">Box</div>`;
+      const violations = lintContent(snippet, 'test.tsx');
+      expect(violations).toHaveLength(0);
+    });
+  });
+
+  describe('Rule 6: clipped-overflow-container', () => {
+    it('detects overflow-hidden wrapping escaping dropdown popup', () => {
+      const snippet = `<div className="relative overflow-hidden"><button>Menu</button><div className="absolute top-full left-0 dropdown">Menu Content</div></div>`;
+      const violations = lintContent(snippet, 'test.tsx');
+      expect(violations).toHaveLength(1);
+      expect(violations[0]?.rule).toBe(RULES.CLIPPED_OVERFLOW_CONTAINER);
+    });
+
+    it('detects overflow-clip wrapping tooltip with negative inset', () => {
+      const snippet = `<div className="overflow-clip"><button>Info</button><span className="absolute -top-8 tooltip" role="tooltip">Tip</span></div>`;
+      const violations = lintContent(snippet, 'test.tsx');
+      expect(violations).toHaveLength(1);
+      expect(violations[0]?.rule).toBe(RULES.CLIPPED_OVERFLOW_CONTAINER);
+    });
+
+    it('passes overflow-visible host wrapping popup', () => {
+      const snippet = `<div className="relative overflow-visible"><button>Menu</button><div className="absolute top-full left-0 dropdown">Menu Content</div></div>`;
+      const violations = lintContent(snippet, 'test.tsx');
+      expect(violations).toHaveLength(0);
+    });
+
+    it('passes scroll container with overflow-y-auto', () => {
+      const snippet = `<div className="overflow-y-auto max-h-60"><div className="dropdown absolute top-full">Content</div></div>`;
+      const violations = lintContent(snippet, 'test.tsx');
+      expect(violations).toHaveLength(0);
+    });
+
+    it('passes contained decorative element marked aria-hidden', () => {
+      const snippet = `<div className="overflow-hidden relative"><span className="absolute -top-10 -right-10 w-20 h-20 rounded-full bg-amber-400/20 blur-xl pointer-events-none" aria-hidden="true" /></div>`;
+      const violations = lintContent(snippet, 'test.tsx');
+      expect(violations).toHaveLength(0);
+    });
+  });
+
   describe('Helper Functions & Advanced Syntaxes', () => {
     it('detects anti-patterns combined across cn arguments', () => {
       const snippet = `<button className={cn('rounded-xl', isPrimary && 'border-b-4 border-amber-600')}>Click</button>`;

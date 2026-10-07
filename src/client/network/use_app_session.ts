@@ -55,6 +55,15 @@ export function handleSessionServerError(
   return () => clearTimeout(timer);
 }
 
+export function shouldAutoOpenInsolvencyModal(
+  currentModal: string | null,
+  localBalance: number,
+  isBankrupt: boolean,
+): boolean {
+  if (localBalance >= 0 || isBankrupt) return false;
+  return currentModal !== 'insolvency' && currentModal !== 'game_over' && currentModal !== 'portfolio';
+}
+
 export function useAppSession(
   roomCode: string | null,
   localPlayerId: string,
@@ -129,14 +138,10 @@ export function useAppSession(
     if (delta.players && delta.tick > 0) {
       const localP = delta.players.find((p) => p.id === localPlayerId);
       if (localP) {
-        if (localP.balance < 0) {
-          const isBankrupt = Boolean(localP.bankrupt ?? useGameStore.getState().playersInfo[localPlayerId]?.bankrupt);
-          if (!isBankrupt) {
-            const currentModal = useGameStore.getState().activeModal;
-            if (currentModal !== 'insolvency' && currentModal !== 'game_over') {
-              openModal('insolvency', { playerId: localPlayerId, deficit: -localP.balance });
-            }
-          }
+        const isBankrupt = Boolean(localP.bankrupt ?? useGameStore.getState().playersInfo[localPlayerId]?.bankrupt);
+        const currentModal = useGameStore.getState().activeModal;
+        if (shouldAutoOpenInsolvencyModal(currentModal, localP.balance, isBankrupt)) {
+          openModal('insolvency', { playerId: localPlayerId, deficit: -localP.balance });
         } else if (useGameStore.getState().activeModal === 'insolvency') {
           useGameStore.getState().closeModal();
         }

@@ -1,5 +1,5 @@
 // [UI-S06/MSS] ActivityPropertyTracker — Property acquisition, upgrade & mortgage event detection
-import type { DeltaPayload, CellDelta } from '../../server/session_manager.js';
+import type { DeltaPayload, CellDelta, TradeResultInfo } from '../../server/session_manager.js';
 import type { GameState } from '../store/game_store.js';
 import { type ActivityLogEntry } from '../store/activity_store.js';
 import { BOARD_CONFIG } from '../../domain/board_config.js';
@@ -25,6 +25,7 @@ export function detectCellTrade(
   buyerColor?: string,
   winningBid?: number,
   prevOwnerName?: string,
+  tradeResult?: TradeResultInfo | null,
 ): ActivityLogEntry {
   const cellName = getCellName(cell.index);
   const price = PROPERTY_DEEDS.get(cell.index)?.price;
@@ -33,6 +34,10 @@ export function detectCellTrade(
   let message: string;
   let amount: number | undefined;
   let type: 'buy' | 'auction' | 'trade' = 'buy';
+  let targetPlayerId = prevOwnerId;
+  let targetPlayerName = prevOwnerName;
+  let finalPlayerId = cell.ownerId ?? undefined;
+  let finalPlayerName = buyerName;
 
   if (winningBid !== undefined) {
     message = `${buyerName} đã thắng đấu giá ${cellName} với giá ${formatCurrency(winningBid)}`;
@@ -42,6 +47,28 @@ export function detectCellTrade(
     message = `${buyerName} đã mua ${cellName}${price ? ` với giá ${formatCurrency(price)}` : ''}`;
     if (price) amount = -price;
     type = 'buy';
+  } else if (tradeResult) {
+    type = 'trade';
+    finalPlayerId = tradeResult.buyerId;
+    targetPlayerId = tradeResult.sellerId;
+    const sellerStr = prevOwnerName ?? 'đối thủ';
+    if (tradeResult.offeredCellIndex !== undefined) {
+      const cell1Name = getCellName(tradeResult.cellIndex);
+      const cell2Name = getCellName(tradeResult.offeredCellIndex);
+      if (tradeResult.price > 0) {
+        const taxStr = tradeResult.taxAmount > 0 ? `, Thuế kho bạc: ${formatCurrency(tradeResult.taxAmount)}` : '';
+        message = `🤝 [Hoán Đổi] ${buyerName} và ${sellerStr} đã hoán đổi ${cell1Name} ⇄ ${cell2Name} (kèm bù ${formatCurrency(tradeResult.price)}${taxStr})`;
+        amount = -tradeResult.price;
+      } else {
+        message = `🤝 [Hoán Đổi] ${buyerName} và ${sellerStr} đã hoán đổi quyền sở hữu ${cell1Name} ⇄ ${cell2Name}`;
+      }
+    } else {
+      const taxStr = tradeResult.taxAmount > 0 ? ` (Thuế kho bạc: ${formatCurrency(tradeResult.taxAmount)})` : '';
+      message = `🤝 [Chuyển Nhượng] ${buyerName} đã mua ${cellName} từ ${sellerStr} với giá ${formatCurrency(tradeResult.price)}${taxStr}`;
+      if (tradeResult.price > 0) {
+        amount = -tradeResult.price;
+      }
+    }
   } else {
     const sellerStr = prevOwnerName ? ` từ ${prevOwnerName}` : '';
     message = `${buyerName} đã nhận chuyển nhượng ${cellName}${sellerStr}`;
@@ -53,9 +80,9 @@ export function detectCellTrade(
     timestamp: Date.now(),
     type,
     message,
-    playerId: cell.ownerId ?? undefined,
-    playerName: buyerName,
-    ...(prevOwnerId ? { targetPlayerId: prevOwnerId, targetPlayerName: prevOwnerName } : {}),
+    playerId: finalPlayerId,
+    playerName: finalPlayerName,
+    ...(targetPlayerId ? { targetPlayerId, targetPlayerName } : {}),
     ...(amount !== undefined ? { amount } : {}),
     cellIndex: cell.index,
     ...(buyerColor ? { playerTokenColor: buyerColor } : {}),
@@ -141,6 +168,7 @@ function processCellOwnerDiff(
   boughtCellIndices: number[],
   buyoutCellIndices: number[],
   delta: DeltaPayload,
+  handledTradeCellIndices?: Set<number>,
 ): void {
   if (cell.ownerId === undefined) return;
   const prevOwnerId = Object.keys(prevState.playersInfo).find((id) =>
@@ -155,6 +183,44 @@ function processCellOwnerDiff(
 
     if (isBuyout) {
       buyoutCellIndices.push(cell.index);
+      return;
+    }
+
+    if (handledTradeCellIndices?.has(cell.index)) {
+      boughtCellIndices.push(cell.index);
+      return;
+    }
+
+    const tradeResult = delta.lastTradeResult;
+    const isMatchingTrade = tradeResult && (
+      tradeResult.cellIndex === cell.index ||
+      tradeResult.offeredCellIndex === cell.index
+    );
+
+    if (isMatchingTrade && tradeResult) {
+      if (tradeResult.offeredCellIndex !== undefined) {
+        handledTradeCellIndices?.add(tradeResult.cellIndex);
+        handledTradeCellIndices?.add(tradeResult.offeredCellIndex);
+      } else {
+        handledTradeCellIndices?.add(tradeResult.cellIndex);
+      }
+      const buyer = nextState.playersInfo[tradeResult.buyerId] ?? prevState.playersInfo[tradeResult.buyerId];
+      const prevOwner = nextState.playersInfo[tradeResult.sellerId] ?? prevState.playersInfo[tradeResult.sellerId];
+      const buyerName = getPlayerName(buyer, tradeResult.buyerId);
+      const prevOwnerName = prevOwner ? getPlayerName(prevOwner, tradeResult.sellerId) : undefined;
+
+      entries.push(
+        detectCellTrade(
+          cell,
+          tradeResult.sellerId,
+          buyerName,
+          buyer?.tokenColor,
+          undefined,
+          prevOwnerName,
+          tradeResult,
+        ),
+      );
+      boughtCellIndices.push(cell.index);
       return;
     }
 
@@ -238,9 +304,10 @@ export function detectPropertyAndLevelActivities(
   const upgradedCells: Array<{ cellIndex: number; cost: number; ownerId: string }> = [];
   const mortgagedCells: Array<{ cellIndex: number; loan: number; ownerId: string }> = [];
   const unmortgagedCells: Array<{ cellIndex: number; cost: number; ownerId: string }> = [];
+  const handledTradeCellIndices = new Set<number>();
 
   for (const cell of delta.cells) {
-    processCellOwnerDiff(cell, prevState, nextState, entries, boughtCellIndices, buyoutCellIndices, delta);
+    processCellOwnerDiff(cell, prevState, nextState, entries, boughtCellIndices, buyoutCellIndices, delta, handledTradeCellIndices);
     processCellLevelDiff(cell, prevState, nextState, entries, upgradedCells);
     processCellMortgageDiff(cell, prevState, nextState, entries, mortgagedCells, unmortgagedCells);
   }

@@ -65,12 +65,15 @@ console.log(`======================================================`);
 let planTitle = `Implementation for ${ticketId}`;
 let planSubsystem = 'domain-core';
 let planPath = null;
+const planRegisteredFiles = new Set();
 
 if (fs.existsSync(plansDir)) {
   const ticketNormalized = ticketId.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+  const ticketNum = ticketId.replace(/^[A-Z]+-?/i, '');
   const planFiles = fs.readdirSync(plansDir).filter((f) => {
+    if (!f.endsWith('.md')) return false;
     const normF = f.replace(/[^A-Z0-9]/gi, '').toUpperCase();
-    return normF.includes(ticketNormalized) && f.endsWith('.md');
+    return (normF.includes(ticketNormalized) || normF.includes(`IMP${ticketNum}`)) && f.startsWith('PLAN_');
   });
   if (planFiles.length > 0) {
     planPath = path.join(plansDir, planFiles[0]);
@@ -79,6 +82,13 @@ if (fs.existsSync(plansDir)) {
     if (titleMatch) planTitle = titleMatch[1].trim();
     const subMatch = planContent.match(/>\s*\*\*Phân hệ mục tiêu:\*\*\s*`?([a-zA-Z0-9_-]+)`?/);
     if (subMatch) planSubsystem = subMatch[1].trim();
+
+    // Extract registered files from the plan specification (mirroring check_scope.mjs)
+    const regex = /(?:src|tests)\/[a-zA-Z0-9_./-]+\.(?:tsx|mjs|css|ts|js)\b/g;
+    let m;
+    while ((m = regex.exec(planContent)) !== null) {
+      planRegisteredFiles.add(m[0].replace(/\\/g, '/'));
+    }
   }
 }
 
@@ -117,6 +127,17 @@ if (snapshotData && Array.isArray(snapshotData.filesModified) && snapshotData.fi
     }
   } catch {
     // safe fallback
+  }
+}
+
+// Scope Confinement: Filter modified files against registered files in plan specification
+if (planRegisteredFiles.size > 0) {
+  const scopedFiles = modifiedFiles.filter((f) => planRegisteredFiles.has(f));
+  if (scopedFiles.length > 0) {
+    modifiedFiles = scopedFiles;
+  } else {
+    // Fallback to plan-registered files physically present on disk
+    modifiedFiles = Array.from(planRegisteredFiles).filter((f) => fs.existsSync(path.resolve(repoRoot, f)));
   }
 }
 
@@ -291,7 +312,8 @@ function findTicketFile(dir, prefix, id) {
       const pNorm = prefix.replace(/[^A-Za-z0-9]/g, '').toLowerCase();
       if (!fNorm.startsWith(pNorm)) continue;
     }
-    if (fNorm.includes(idNorm) || (idNum && fNorm.includes(idNum))) {
+    const pattern = new RegExp(`(^|[^a-z0-9])(?:imp[-_]?)?${idNum}([^a-z0-9]|$)`, 'i');
+    if (fNorm.includes(idNorm) || pattern.test(fNorm)) {
       return path.join(dir, f);
     }
   }
@@ -299,13 +321,14 @@ function findTicketFile(dir, prefix, id) {
 }
 
 let finalReportPath = null;
+const ticketNum = ticketId.replace(/^[A-Z]+-?/i, '');
 if (fs.existsSync(improvementsDir)) {
   const impFiles = fs.readdirSync(improvementsDir);
-  const idNorm = ticketId.replace(/[^A-Za-z0-9]/g, '').toLowerCase();
-  const idNum = idNorm.replace(/^[a-z]+/, '');
   const existing = impFiles.find((f) => {
-    const fn = f.replace(/[^A-Za-z0-9]/g, '').toLowerCase();
-    return f.endsWith('.md') && (fn.includes(idNorm) || (idNum && fn.includes(idNum)));
+    if (!f.endsWith('.md')) return false;
+    const fn = f.toLowerCase();
+    const pattern = new RegExp(`^imp[-_]?${ticketNum}[-_]`, 'i');
+    return pattern.test(fn);
   });
   if (existing) {
     finalReportPath = path.join(improvementsDir, existing);
@@ -316,12 +339,16 @@ if (!finalReportPath) {
   let slug = '';
   if (planPath) {
     const base = path.basename(planPath, '.md');
-    const sm = base.match(/^PLAN_[A-Za-z0-9]+_(.+)$/i);
+    const sm = base.match(/^PLAN_(?:IMP[-_]?)?[A-Za-z0-9]+_(.+)$/i) || base.match(/^PLAN_[A-Za-z0-9]+_(.+)$/i);
     if (sm) slug = sm[1].toLowerCase().replace(/_/g, '-');
   }
   if (!slug) {
     slug = planTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'report';
   }
+  slug = slug
+    .replace(new RegExp(`^(?:${ticketClean}|${ticketLower}|${ticketId}|${ticketId.replace('-', '')}|${ticketNum})-?`, 'i'), '')
+    .replace(/^-+/, '');
+  if (!slug) slug = 'report';
   finalReportPath = path.join(improvementsDir, `${ticketId}-${slug}_report.md`);
 }
 

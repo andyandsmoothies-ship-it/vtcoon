@@ -85,7 +85,9 @@ const INTENT_DISPATCH: Record<PlayerIntent['type'], IntentHandler> = {
     const ctx = m.getContext(rc);
     if (!ctx) return { success: false, reason: ActionRejectReason.INVALID_ROOM };
     const di = i as { cellIndex: number; stepByStep?: boolean; enforceEvenDowngrading?: boolean };
-    const player = getActivePlayerFn(ctx.room, p);
+    const isDebtor = ctx.room.phase === TurnPhase.InsolvencyPhase &&
+      (ctx.room.pendingInsolvencyDebtorId ? ctx.room.pendingInsolvencyDebtorId === p : ctx.room.players[ctx.room.currentPlayerIndex]?.id === p);
+    const player = isDebtor ? ctx.room.players.find((pl) => pl.id === p) : getActivePlayerFn(ctx.room, p);
     return coordDowngrade(ctx, player, di.cellIndex, rc, {
       stepByStep: di.stepByStep ?? true,
       enforceEvenDowngrading: di.enforceEvenDowngrading ?? true,
@@ -144,8 +146,11 @@ const INTENT_DISPATCH: Record<PlayerIntent['type'], IntentHandler> = {
     if (!room || room.phase !== TurnPhase.InsolvencyPhase) {
       return { success: false, reason: 'INVALID_PHASE' };
     }
-    const current = room.players[room.currentPlayerIndex];
-    if (!current || current.id !== p || current.balance >= 0) {
+    const isDebtor = room.pendingInsolvencyDebtorId
+      ? room.pendingInsolvencyDebtorId === p
+      : room.players[room.currentPlayerIndex]?.id === p;
+    const player = room.players.find((pl) => pl.id === p);
+    if (!isDebtor || !player || player.balance >= 0) {
       return { success: false, reason: ActionRejectReason.NOT_YOUR_TURN };
     }
     const res = executeInsolvencyAfkRecovery(m, rc, p);
@@ -175,8 +180,10 @@ export function dispatchPlayerIntent(
 ): { success: boolean; reason?: string; rollResult?: RollResult; idempotent?: boolean } {
   const room = mgr.getRoom(roomCode);
   if (room?.phase === TurnPhase.InsolvencyPhase) {
-    const current = room.players[room.currentPlayerIndex];
-    if (current && current.id !== playerId) {
+    const isDebtor = room.pendingInsolvencyDebtorId
+      ? room.pendingInsolvencyDebtorId === playerId
+      : room.players[room.currentPlayerIndex]?.id === playerId;
+    if (!isDebtor) {
       return { success: false, reason: ActionRejectReason.NOT_YOUR_TURN };
     }
     if (

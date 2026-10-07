@@ -28,17 +28,17 @@ function resolveEvidenceFile(arg) {
     const hyphen = normalized.replace(/^(IMP)(\d+)/i, '$1-$2');
     const candidates = [
       path.join(evidenceDir, arg.endsWith('.json') ? arg : `${arg}.json`),
+      path.join(evidenceDir, `chaos_sentinel_${arg}.json`),
+      path.join(evidenceDir, `chaos_sentinel_${arg.toLowerCase()}.json`),
+      path.join(evidenceDir, `chaos_sentinel_${arg.toUpperCase()}.json`),
+      path.join(evidenceDir, `chaos_sentinel_${hyphen}.json`),
+      path.join(evidenceDir, `chaos_sentinel_${hyphen.toLowerCase()}.json`),
       path.join(evidenceDir, `${arg}_snapshot.json`),
       path.join(evidenceDir, `${arg.toLowerCase()}_snapshot.json`),
       path.join(evidenceDir, `${arg.toUpperCase()}_snapshot.json`),
       path.join(evidenceDir, `${hyphen}_snapshot.json`),
       path.join(evidenceDir, `${hyphen.toLowerCase()}_snapshot.json`),
       path.join(evidenceDir, `${hyphen.toUpperCase()}_snapshot.json`),
-      path.join(evidenceDir, `chaos_sentinel_${arg}.json`),
-      path.join(evidenceDir, `chaos_sentinel_${arg.toLowerCase()}.json`),
-      path.join(evidenceDir, `chaos_sentinel_${arg.toUpperCase()}.json`),
-      path.join(evidenceDir, `chaos_sentinel_${hyphen}.json`),
-      path.join(evidenceDir, `chaos_sentinel_${hyphen.toLowerCase()}.json`),
     ];
     for (const c of candidates) {
       if (fs.existsSync(c)) return c;

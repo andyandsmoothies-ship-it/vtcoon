@@ -299,17 +299,22 @@ export function trackDeltaActivities(
   const diceEntry = detectDiceActivity(delta, prevState, nextState, activityStore);
   if (diceEntry) activities.push(diceEntry);
 
-  activities.push(...detectMoveActivities(delta, prevState, nextState));
+  // [IMP-187][IMP-284] Causal Timeline Ordering:
+  // 1. Nguyên nhân kích hoạt: Vòng xoay vận tải & Thẻ sự kiện/cơ hội
+  const transitEntries = detectTransitActivities(delta, prevState, nextState, activityStore);
+  activities.push(...transitEntries);
 
-  // [IMP-187] Causal Timeline Ordering: Thẻ sự kiện (Nguyên nhân) -> Chuyển giao BĐS (Đổi chủ) -> Dòng tiền (Kết quả)
   const cardEntries = detectEventCardActivities(delta, prevState, nextState, activityStore);
   activities.push(...cardEntries);
 
+  // 2. Hệ quả động học: Quân cờ di chuyển theo xúc xắc hoặc hiệu ứng vòng xoay/thẻ bay
+  activities.push(...detectMoveActivities(delta, prevState, nextState));
+
+  // 3. Hệ quả giao dịch & tài chính: Chuyển giao BĐS, Dòng tiền (lương/thuế/tiền thuê), Đấu giá
   const { entries: propEntries, context } = detectPropertyAndLevelActivities(delta, prevState, nextState);
   activities.push(...propEntries);
   activities.push(...detectFinancialAndStatusActivities(delta, prevState, nextState, context));
   activities.push(...detectAuctionActivities(delta, prevState, nextState, activityStore));
-  activities.push(...detectTransitActivities(delta, prevState, nextState, activityStore));
 
   const store = activityStore.getState();
   for (const entry of activities) {

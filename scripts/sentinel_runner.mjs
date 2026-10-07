@@ -319,6 +319,38 @@ function runRealMutationProbe(testPath, srcPath, ticketId) {
         replacement: 'const stagedWheel = null;',
       },
     ],
+    'IMP-287': [
+      {
+        file: 'src/client/network/activity_property_tracker.ts',
+        desc: 'AST: invert isMatchingTrade guard in processCellOwnerDiff',
+        target: 'if (isMatchingTrade && tradeResult) {',
+        replacement: 'if (!isMatchingTrade && tradeResult) {',
+      },
+      {
+        file: 'src/client/network/activity_property_tracker.ts',
+        desc: 'AST: invert swap branch in detectCellTrade',
+        target: 'if (tradeResult.offeredCellIndex !== undefined) {',
+        replacement: 'if (tradeResult.offeredCellIndex === undefined) {',
+      },
+      {
+        file: 'src/client/network/activity_property_tracker.ts',
+        desc: 'AST: invert trade entry amount sign in detectCellTrade',
+        target: 'amount = -tradeResult.price;',
+        replacement: 'amount = tradeResult.price;',
+      },
+      {
+        file: 'src/client/network/activity_property_tracker.ts',
+        desc: 'AST: corrupt swap deduplication in processCellOwnerDiff',
+        target: 'handledTradeCellIndices?.add(tradeResult.offeredCellIndex);',
+        replacement: '/* no offered cell deduplication */',
+      },
+      {
+        file: 'src/client/network/activity_financial_tracker.ts',
+        desc: 'AST: disable lastTradeResult payer/receiver suppression',
+        target: 'if (delta.lastTradeResult) {',
+        replacement: 'if (false && delta.lastTradeResult) {',
+      },
+    ],
   };
 
   const targetedRules = ticketId ? ticketTargetedMutations[ticketId.toUpperCase()] : undefined;

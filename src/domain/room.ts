@@ -166,6 +166,16 @@ export interface MaBuyoutResult {
   readonly cost: number;
 }
 
+export interface TradeResultInfo {
+  readonly sellerId: string;
+  readonly buyerId: string;
+  readonly cellIndex: number;
+  readonly price: number;
+  readonly offeredCellIndex?: number;
+  readonly taxAmount: number;
+  readonly timestamp: number;
+}
+
 export interface Room {
   readonly roomCode:      string;
   readonly code?:         string;
@@ -209,6 +219,7 @@ export interface Room {
   passedGoSalary?:            number;
   pendingTransitWheel?:       { playerId: string; cellIndex: number; timestamp: number } | null;
   lastTransitResult?:         { playerId: string; cellIndex: number; outcome: string; targetCell?: number; payout?: number; boostSteps?: number } | null;
+  lastTradeResult?:           TradeResultInfo | null;
 }
 
 

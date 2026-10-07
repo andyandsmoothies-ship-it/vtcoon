@@ -267,7 +267,11 @@ function syncOtherModals(delta: DeltaPayload, state: GameState): void {
     if (state.activeModal === 'deed' && delta.turnPhase !== TurnPhase.ActionPhase && delta.turnPhase !== TurnPhase.PropertyManagement) {
       state.closeModal();
     } else if (state.activeModal === 'insolvency' && delta.turnPhase !== TurnPhase.InsolvencyPhase) {
-      state.closeModal();
+      const myPid = useLobbyStore.getState().myPlayerId;
+      const modalPayload = state.modalPayload as ModalPayloadMap['insolvency'] | null;
+      const debtorId = myPid || modalPayload?.playerId;
+      const debtor = debtorId ? state.playersInfo[debtorId] : undefined;
+      if (!debtor || debtor.balance >= 0 || debtor.bankrupt) state.closeModal();
     } else if (state.activeModal === 'hose' && delta.turnPhase !== TurnPhase.HosePhase && !(state.modalPayload as ModalPayloadMap['hose'])?.isReviewingResult) {
       state.closeModal();
     } else if (state.activeModal === 'transit_wheel' && delta.turnPhase !== TurnPhase.PropertyManagement && delta.turnPhase !== TurnPhase.ActionPhase) {

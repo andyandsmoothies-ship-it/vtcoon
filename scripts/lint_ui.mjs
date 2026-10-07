@@ -21,10 +21,11 @@ import {
   CHROMATIC_BG_REGEX,
   NEUTRAL_950_TEXT_REGEX,
   checkBorderAccentOnRounded,
+  checkSideTab,
 } from './ui_linter_rules.mjs';
 import { extractClassStrings } from './ui_linter_parser.mjs';
 
-export { RULES, RULE_MESSAGES, extractClassStrings };
+export { RULES, RULE_MESSAGES, extractClassStrings, checkSideTab };
 
 /**
  * Strips comments while preserving exact line breaks and character offsets.
@@ -86,7 +87,17 @@ export function lintContent(content, filePath = 'anonymous') {
   const classStrings = extractClassStrings(cleanCode);
 
   for (const { value, index } of classStrings) {
-    if (checkBorderAccentOnRounded(value)) {
+    if (checkSideTab(value)) {
+      const { line, col } = getLineAndCol(content, index);
+      rawViolations.push({
+        rule: RULES.SIDE_TAB,
+        file: filePath,
+        line,
+        col,
+        snippet: value.trim().replace(/\s+/g, ' ').slice(0, 80),
+        advice: RULE_MESSAGES[RULES.SIDE_TAB].advice,
+      });
+    } else if (checkBorderAccentOnRounded(value)) {
       const { line, col } = getLineAndCol(content, index);
       rawViolations.push({
         rule: RULES.BORDER_ACCENT_ON_ROUNDED,
@@ -126,24 +137,92 @@ export function lintContent(content, filePath = 'anonymous') {
     }
   }
 
+  // --- Rule 6: clipped-overflow-container ---
+  const containerRegex = /<([a-zA-Z0-9_-]+)\b([^>]*\boverflow-(?:hidden|clip)\b[^>]*)>/g;
+  let cMatch;
+  while ((cMatch = containerRegex.exec(cleanCode)) !== null) {
+    const tagName = cMatch[1];
+    const attrs = cMatch[2] ?? '';
+
+    // Exempt scroll regions and carousels
+    if (/\boverflow-(?:[xy]-)?(?:auto|scroll)\b/.test(attrs)) continue;
+    if (/aria-roledescription=["'](?:carousel|ticker)["']|data-carousel|data-viewport/.test(attrs)) continue;
+
+    const startIdx = cMatch.index;
+    const tagEnd = startIdx + cMatch[0].length;
+    const searchScope = cleanCode.slice(tagEnd, tagEnd + 3000);
+
+    // Look for matching closing tag within searchScope
+    let depth = 1;
+    let endIdx = -1;
+    const tagRegex = new RegExp(`<(/?)${tagName}\\b[^>]*>`, 'g');
+    let tMatch;
+    while ((tMatch = tagRegex.exec(searchScope)) !== null) {
+      if (tMatch[1] === '/') {
+        depth--;
+        if (depth === 0) {
+          endIdx = tagEnd + tMatch.index;
+          break;
+        }
+      } else if (!tMatch[0].endsWith('/>')) {
+        depth++;
+      }
+    }
+
+    const inner = endIdx !== -1 ? cleanCode.slice(tagEnd, endIdx) : searchScope;
+
+    const hasPopupRole = /role=["'](?:tooltip|menu|dialog|listbox)["']/.test(inner);
+    const hasEscapingPopupClass = /\b(?:tooltip|popover|dropdown|flyout|modal-overlay)\b/.test(inner) &&
+      /\b(?:absolute|fixed)\b/.test(inner) &&
+      /(?:-(?:top|bottom|left|right|inset)-[0-9]|(?:top|bottom|left|right)-full)/.test(inner);
+
+    if (hasPopupRole || hasEscapingPopupClass) {
+      const isDecorativeOnly = /aria-hidden=["']true["']/.test(inner) && !hasPopupRole;
+      if (!isDecorativeOnly) {
+        const { line, col } = getLineAndCol(content, startIdx);
+        rawViolations.push({
+          rule: RULES.CLIPPED_OVERFLOW_CONTAINER,
+          file: filePath,
+          line,
+          col,
+          snippet: cMatch[0].slice(0, 80),
+          advice: RULE_MESSAGES[RULES.CLIPPED_OVERFLOW_CONTAINER].advice,
+        });
+      }
+    }
+  }
+
   // --- CSS-specific checks (.css files) ---
   if (filePath.endsWith('.css')) {
     const blockRegex = /\{([^}]+)\}/g;
     let cssBlock;
     while ((cssBlock = blockRegex.exec(cleanCode)) !== null) {
       const blockBody = cssBlock[1] ?? '';
-      const hasBorderRadius = /border-radius\s*:\s*(?!0\b)[^;]+;/i.test(blockBody);
-      const hasDirectionalBorder = /border-(?:bottom|top|left|right|block-end|inline-end)(?:-width)?\s*:\s*(?:[^;]*?\s+)?(?:[2-9]|\d{2,})px/i.test(blockBody);
-      if (hasBorderRadius && hasDirectionalBorder) {
+      const hasSideTabBorder = /border-(?:left|right|inline-start|inline-end)\s*:\s*(?:[3-9]|\d{2,})px\s+solid/i.test(blockBody);
+      if (hasSideTabBorder) {
         const { line, col } = getLineAndCol(content, cssBlock.index);
         rawViolations.push({
-          rule: RULES.BORDER_ACCENT_ON_ROUNDED,
+          rule: RULES.SIDE_TAB,
           file: filePath,
           line,
           col,
           snippet: blockBody.trim().replace(/\s+/g, ' ').slice(0, 80),
-          advice: RULE_MESSAGES[RULES.BORDER_ACCENT_ON_ROUNDED].advice,
+          advice: RULE_MESSAGES[RULES.SIDE_TAB].advice,
         });
+      } else {
+        const hasBorderRadius = /border-radius\s*:\s*(?!0\b)[^;]+;/i.test(blockBody);
+        const hasDirectionalBorder = /border-(?:bottom|top|left|right|block-end|inline-end)(?:-width)?\s*:\s*(?:[^;]*?\s+)?(?:[2-9]|\d{2,})px/i.test(blockBody);
+        if (hasBorderRadius && hasDirectionalBorder) {
+          const { line, col } = getLineAndCol(content, cssBlock.index);
+          rawViolations.push({
+            rule: RULES.BORDER_ACCENT_ON_ROUNDED,
+            file: filePath,
+            line,
+            col,
+            snippet: blockBody.trim().replace(/\s+/g, ' ').slice(0, 80),
+            advice: RULE_MESSAGES[RULES.BORDER_ACCENT_ON_ROUNDED].advice,
+          });
+        }
       }
     }
   }

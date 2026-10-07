@@ -5,17 +5,23 @@ import { advanceRoundBoundary } from './turn_loop';
 import type { AuctionSession } from './auction_manager';
 import { handleStartFireSaleAuction } from './bond_manager';
 
+declare module '../domain/room' {
+  interface Room {
+    pendingInsolvencyQueue?: string[];
+  }
+}
+
 const LEVEL_MULTIPLIER: Record<number, number> = { 0: 1, 1: 1.5, 2: 2.5, 3: 4 };
 
 // --- UC-GAME-053: Kiểm tra & chuyển InsolvencyPhase ---
 
-export function checkInsolvency(room: Room, creditorId?: string): void {
-  const player = room.players[room.currentPlayerIndex];
+export function checkInsolvency(room: Room, creditorId?: string, debtorId?: string): void {
+  const player = debtorId ? room.players.find((p) => p.id === debtorId) : room.players[room.currentPlayerIndex];
   if (!player || player.balance >= 0) return;
 
+  room.pendingInsolvencyDebtorId = player.id;
   if (creditorId && creditorId !== player.id) {
     room.pendingInsolvencyCreditorId = creditorId;
-    room.pendingInsolvencyDebtorId = player.id;
   }
   room.phase = TurnPhase.InsolvencyPhase;
 
@@ -113,6 +119,56 @@ export function liquidateAssets(
   }));
 }
 
+function transferAssetsToCreditor(
+  player: Player,
+  creditor: Player,
+  registry: PropertyRegistry,
+  collateralCells: Set<number>,
+): void {
+  if (player.balance > 0) {
+    creditor.balance += player.balance;
+  }
+  for (const [cellIndex, owner] of Array.from(registry.entries())) {
+    if (owner === player.id) {
+      if (collateralCells.has(cellIndex)) continue;
+      registry.set(cellIndex, creditor.id);
+      if (player.mortgagedProperties?.includes(cellIndex)) {
+        creditor.mortgagedProperties ??= [];
+        if (!creditor.mortgagedProperties.includes(cellIndex)) {
+          creditor.mortgagedProperties.push(cellIndex);
+        }
+        if (player.mortgageLoans?.[cellIndex] !== undefined) {
+          creditor.mortgageLoans ??= {};
+          creditor.mortgageLoans[cellIndex] = player.mortgageLoans[cellIndex];
+        }
+      }
+    }
+  }
+}
+
+function resolvePostBankruptcyInsolvency(room: Room, playerId: string): void {
+  if (room.phase !== TurnPhase.InsolvencyPhase) return;
+  if (room.pendingInsolvencyQueue && room.pendingInsolvencyQueue.length > 0) {
+    const qIdx = room.pendingInsolvencyQueue.indexOf(playerId);
+    if (qIdx !== -1) room.pendingInsolvencyQueue.splice(qIdx, 1);
+    let nextDebtor: Player | undefined;
+    while (room.pendingInsolvencyQueue.length > 0) {
+      const nextDebtorId = room.pendingInsolvencyQueue.shift();
+      const candidate = nextDebtorId ? room.players.find((p) => p.id === nextDebtorId) : undefined;
+      if (candidate && candidate.balance < 0 && !candidate.bankrupt) {
+        nextDebtor = candidate;
+        break;
+      }
+    }
+    if (nextDebtor) {
+      room.pendingInsolvencyDebtorId = nextDebtor.id;
+      return;
+    }
+  }
+  delete room.pendingInsolvencyDebtorId;
+  room.phase = TurnPhase.PropertyManagement;
+}
+
 // --- UC-GAME-054: Tuyên Bố Phá Sản ---
 export function declareBankruptcy(
   room: Room,
@@ -156,26 +212,7 @@ export function declareBankruptcy(
     : undefined;
 
   if (creditor) {
-    // Nhánh 1: Nợ người chơi khác -> sang tên toàn bộ đất và tiền mặt cho chủ nợ
-    if (player.balance > 0) {
-      creditor.balance += player.balance;
-    }
-    for (const [cellIndex, owner] of Array.from(registry.entries())) {
-      if (owner === playerId) {
-        if (collateralCells.has(cellIndex)) continue;
-        registry.set(cellIndex, creditor.id);
-        if (player.mortgagedProperties?.includes(cellIndex)) {
-          creditor.mortgagedProperties ??= [];
-          if (!creditor.mortgagedProperties.includes(cellIndex)) {
-            creditor.mortgagedProperties.push(cellIndex);
-          }
-          if (player.mortgageLoans?.[cellIndex] !== undefined) {
-            creditor.mortgageLoans ??= {};
-            creditor.mortgageLoans[cellIndex] = player.mortgageLoans[cellIndex];
-          }
-        }
-      }
-    }
+    transferAssetsToCreditor(player, creditor, registry, collateralCells);
   } else if (effectiveCreditorId === 'BANK') {
     // Nhánh 2: Nợ ngân hàng -> đưa đất vào đấu giá phát mãi 70% sàn
     if (player.balance > 0) {
@@ -218,6 +255,8 @@ export function declareBankruptcy(
     room.phase = TurnPhase.AuctionPhase;
     return { gameOver: false };
   }
+
+  resolvePostBankruptcyInsolvency(room, playerId);
 
   if (isRoomGameOver(room)) {
     const rankings = calculateRankings(room, registry, stateMap);

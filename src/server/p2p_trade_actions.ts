@@ -216,6 +216,16 @@ export function executeP2PTrade(
     transferMortgageDebt(v.buyer, v.seller, offeredCellIndex, stateMap.get(offeredCellIndex));
   }
 
+  room.lastTradeResult = {
+    sellerId,
+    buyerId,
+    cellIndex,
+    price,
+    taxAmount: v.taxAmount,
+    timestamp: Date.now(),
+    ...(offeredCellIndex !== undefined ? { offeredCellIndex } : {}),
+  };
+
   console.info(JSON.stringify({
     event: offeredCellIndex !== undefined ? 'P2P_TRADE_SWAP' : 'P2P_TRADE',
     correlationId: room.roomCode,

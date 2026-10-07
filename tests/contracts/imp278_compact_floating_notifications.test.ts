@@ -88,14 +88,15 @@ describe('[TC-IMP278] Compact Floating Badges & Milestone Banners Contract Suite
     expect(flowIndex).toBeLessThan(closeIndex);
   });
 
-  it('[TC-278.02/MSS][UC-IMP278] FloatingBadge đặt nhãn danh mục ở hàng phụ bên dưới dòng diễn giải', () => {
+  it('[TC-278.02/MSS][UC-IMP278] FloatingBadge đặt icon nhận diện ở đầu transaction-flow-line và tối ưu thẻ đơn dòng khi không có công thức', () => {
     const html = renderToStaticMarkup(React.createElement(FloatingBadge, { item: sampleBuyItem }));
     const flowIndex = html.indexOf('data-testid="transaction-flow-line"');
-    const categoryIndex = html.lastIndexOf('MUA ĐẤT ĐẦU TƯ');
+    const iconIndex = html.indexOf('🏷️');
 
     expect(flowIndex).toBeGreaterThan(-1);
-    expect(categoryIndex).toBeGreaterThan(-1);
-    expect(categoryIndex).toBeGreaterThan(flowIndex);
+    expect(iconIndex).toBeGreaterThan(-1);
+    expect(iconIndex).toBeGreaterThan(flowIndex);
+    expect(html).not.toContain('data-testid="transaction-formula-line"');
   });
 
   it('[TC-278.03/MSS][UC-IMP278] FloatingBadge đặt transaction-formula-line ở hàng phụ sau transaction-flow-line', () => {

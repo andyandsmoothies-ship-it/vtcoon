@@ -23,6 +23,8 @@ export declare const RULES: {
   readonly BOUNCE_EASING: 'bounce-easing';
   readonly GRAY_ON_COLOR: 'gray-on-color';
   readonly GRADIENT_TEXT: 'gradient-text';
+  readonly SIDE_TAB: 'side-tab';
+  readonly CLIPPED_OVERFLOW_CONTAINER: 'clipped-overflow-container';
 };
 
 export declare function stripComments(code: string): string;

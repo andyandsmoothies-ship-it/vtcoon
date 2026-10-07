@@ -230,7 +230,7 @@ async function runUniversalMutationProbe(
     { name: 'toBe(null) -> not.toBeNull()', pattern: '.toBe(null)', replacement: '.not.toBeNull()' },
     { name: 'toBeNull() -> not.toBeNull()', pattern: /(?<!\.not)\.toBeNull\(\)/, replacement: '.not.toBeNull()' },
     { name: 'not.toBeNull() -> toBeNull()', pattern: /\.not\.toBeNull\(\)/, replacement: '.toBeNull()' },
-    { name: 'toBe(number) -> +9999', pattern: /\.toBe\((\d+)\)/, replacement: (_m: string, n: string) => `.toBe(${Number(n) + 9999})` },
+    { name: 'toBe(number) -> +9999', pattern: /\.toBe\((-?\d+)\)/, replacement: (_m: string, n: string) => `.toBe(${Number(n) + 9999})` },
     { name: 'toBe(TurnPhase) -> CORRUPTED', pattern: /\.toBe\(TurnPhase\.[a-zA-Z]+\)/, replacement: ".toBe('__CORRUPTED_PHASE__')" },
     { name: 'toBe(TransitWheelOutcome) -> CORRUPTED', pattern: /\.toBe\(TransitWheelOutcome\.[a-zA-Z]+\)/, replacement: ".toBe('__CORRUPTED_OUTCOME__')" },
     { name: 'toBe(BuyResult) -> CORRUPTED', pattern: /\.toBe\(BuyResult\.[a-zA-Z]+\)/, replacement: ".toBe('__CORRUPTED_BUY_RESULT__')" },
@@ -261,7 +261,7 @@ async function runUniversalMutationProbe(
     content: string,
     pattern: string | RegExp,
     replacement: string | ((...args: any[]) => string),
-    maxInstances: number = 3
+    maxInstances: number = 5
   ): string[] {
     const mutants: string[] = [];
     if (typeof pattern === 'string') {
@@ -289,7 +289,7 @@ async function runUniversalMutationProbe(
 
   try {
     for (const { name, pattern, replacement } of genericMutators) {
-      const instances = getMutantInstances(originalTestContent, pattern, replacement, 3);
+      const instances = getMutantInstances(originalTestContent, pattern, replacement, 5);
 
       for (let i = 0; i < instances.length; i++) {
         mutantsTested++;

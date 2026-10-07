@@ -1,6 +1,6 @@
 ---
 name: pr
-description: "Write concise, high-signal Pull Request bodies or ticket completion summaries."
+description: "Use when writing a PR body or ticket completion report summary."
 metadata:
   credits:
     skill: show-me
@@ -9,48 +9,163 @@ metadata:
     url: "https://github.com/humanlayer/skills/blob/main/plugins/show-me/skills/show-me/SKILL.md"
 ---
 
-# Concise PR & Ticket Completion Specification
-
-Write concise, high-signal Pull Request descriptions and ticket completion summaries for the user. Skip verbose preambles. Use ubiquitous domain language from `docs/domain/entity_model.md` and `docs/requirements.md`.
-
-## Core Template
+Use this template for writing the PR body or ticket summary:
 
 ```markdown
 ## Summary
 
-<call-tree, component-tree, sequence diagram, or diff-sketch>
+<diagram, diff-sketch, or tree>
 
 ## Evidence
 
-- **Before:** <screenshot / failing test run / physical baseline metric>
-- **After:** <screenshot / passing test run / post-implementation metric>
+- **Before:** <screenshot/output/failing test run>
+  **After:** <screenshot/output/passing test run>
 
 ## Merge Danger
 
-- **Door:** <One-Way Door or Two-Way Door>
-  <brief justification: reversible via CSS/isolated logic, or breaking contract/schema>
-- **Blast Radius:** <Target domain / consumer files / subsystems affected>
-  <potential ramifications or dependencies>
+**Door:** <one-way or two-way>
+
+<optional: description>
+
+**Blast Radius:** <one-word or brief description>
+
+<optional: potential ramifications of merge>
 ```
 
-## Section Guidelines
+## Sections
 
-### 1. Summary
-Pick the smallest visual representation that makes the architectural change crystal clear:
-- **Runtime control flow:** Use an indented call tree.
-- **UI structure:** Use a component hierarchy with state boundaries.
-- **Broad refactoring:** Use a shallow file tree showing moved responsibilities.
-- **Component or subsystem interaction:** Use a minimal Mermaid sequence or flowchart diagram.
-- **Targeted code change:** Use a concise markdown diff block.
+Skip all preambles and keep prose brief. Use the project domain language from `docs/domain/gotchas/` and glossary.
 
-### 2. Evidence
-Always provide concrete, verifiable physical proof:
-- Before/After test outputs (`vitest` exit status and test counts).
-- Before/After dual-viewport UI screenshots (`.agents/tmp/...png`).
-- Before/After LOC measurements (`node scripts/check_loc.mjs`).
+### Summary
 
-### 3. Merge Danger
-Classify risk according to `GEMINI.md` and Global Rules §6:
-- **Two-Way Door:** Pure visual/CSS, spacing, isolated helper logic, or fully encapsulated internal refactor with 100% parity. Can be safely merged or reverted autonomously.
-- **One-Way Door:** DB schemas, wire protocols, breaking public contracts, auth/security changes, or irreversible data mutations. Mandates human review sign-off.
-- **Blast Radius:** Explicitly list downstream consumer modules and verify that zero consumer breakages occurred.
+Pick the smallest view that makes the key architectural change clear.
+
+- Show logic or an algorithm as pseudocode:
+
+```text
+on(save)
+  if content is unchanged
+    return cached result
+  write new content
+  return fresh result
+```
+
+- Show runtime control flow as a call tree:
+
+```text
+submitForm
+  createSession
+    persistPrompt
+    launchAgent
+  navigateToSession
+```
+
+- Show UI structure as a component tree, including state and module boundaries that matter:
+
+```text
+<SessionPage> (src/client/ui/routes/session.tsx)
+  useSessionEvents()
+  <SessionToolbar>
+    <RunSkillButton> (src/client/ui/components)
+```
+
+- Show file responsibility or a broad refactor as a shallow file tree:
+
+```text
+src/
+├── commands/       # parses user actions
+├── sessions/       # owns session state
+└── transport/      # sends API requests
+```
+
+- Show component interaction, control flow, or data flow with Mermaid:
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant UI
+    participant Server
+    User->>UI: choose action
+    UI->>Server: send intent
+    Server-->>UI: stream state delta
+```
+
+- Use `diff` when the point is what changes and the surrounding shape already exists. Match the diff shape to the topic.
+
+For a component change:
+
+```diff
+ <SessionPage>
+   useSessionEvents()
+   <SessionToolbar>
++    <RunSkillButton />
+   <SessionTimeline>
++    <SkillResultCard />
+```
+
+For a file-layout change:
+
+```diff
+ src/
+ ├── commands/
++│   └── show-me.ts       # expands command
+ ├── sessions/
+-└── transport.ts
++└── transport/
++    ├── client.ts
++    └── stream.ts
+```
+
+For a call-tree or call-stack change:
+
+```diff
+ submitForm
+   createSession
+     persistPrompt
++    expandSkillMention
+     launchAgent
+-  navigateToSession
++  navigateToSession
++    subscribeToEvents
+```
+
+For a state or control-flow change:
+
+```diff
+ on(save)
+-  write content
++  if content is unchanged
++    return cached result
++  write new content
++  invalidate cache
+```
+
+- Show the whole block when most of it is new, when omitted context would hide ownership or order, or when the user needs a copyable target shape:
+
+```ts
+function expandSkill(command: string): string {
+  const skillName = command.slice(1);
+  return `use the ${skillName} skill`;
+}
+```
+
+#### Guidance
+
+Place each visual next to the short text it supports. Keep only the calls, files, props, states, and boundaries needed to answer the current question or resolve the current discussion point.
+
+You may use one of these, you may use several, it is unlikely you will use all of them. Use your judgement and don't overwhelm the user.
+
+### Evidence
+
+Concrete physical evidence that the change works. Show a before and after.
+
+- **S-Tier:** Visual evidence (Dual-viewport desktop & mobile screenshots for UI changes).
+- **A-Tier:** Execution-based evidence (Vitest exit status 0, passing contract tests, terminal outputs).
+
+### Merge Danger
+
+Describe whether it's a one-way or two-way door:
+- **Two-Way Door:** Pure visual/CSS, spacing, isolated helper logic, or fully encapsulated internal refactor with 100% parity. Reversible autonomously.
+- **One-Way Door:** DB schemas, wire protocols, breaking public contracts, auth/security changes, or irreversible state mutations. Mandates human review sign-off.
+
+The blast radius is the potential impact or scope of the changes. Consider all possibilities: layout shift, breakages for downstream consumers, mobile responsiveness, socket latency.

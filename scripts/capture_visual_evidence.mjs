@@ -226,6 +226,30 @@ async function main() {
     await send('Runtime.enable');
     await send('Network.enable');
 
+    // Deterministic Clock Pinning (Impeccable CDP standard)
+    // Pins Date.now() and Date constructor to deterministic baseline for reproducible countdowns & animations
+    const CLOCK_PIN_SCRIPT = `
+      (() => {
+        const T = 1770000000000, P = performance.now(), N = Date;
+        const now = () => Math.floor(T + performance.now() - P);
+        const D = new Proxy(N, {
+          construct(t, a, nt) { return Reflect.construct(N, a.length ? a : [now()], nt); },
+          apply() { return new N(now()).toString(); },
+          get(t, k, r) { return k === "now" ? now : Reflect.get(t, k, r); }
+        });
+        try {
+          Object.defineProperty(globalThis, "Date", { value: D, writable: true, configurable: true, enumerable: false });
+          Object.defineProperty(N.prototype, "constructor", { value: D, writable: true, configurable: true, enumerable: false });
+        } catch (_) {}
+      })();
+    `;
+    try {
+      await send('Page.addScriptToEvaluateOnNewDocument', { source: CLOCK_PIN_SCRIPT });
+      await send('Runtime.evaluate', { expression: CLOCK_PIN_SCRIPT });
+    } catch (_) {
+      // Continue if browser environment restricts evaluateOnNewDocument
+    }
+
     console.log(`⏳ Waiting ${opts.waitMs}ms for 3D/UI scene rendering...`);
     await sleep(opts.waitMs);
 
@@ -377,8 +401,88 @@ async function main() {
                     activePawnAnimation: null,
                   });
                 }
+              } else if ('${scenarioName}' === 'notifications_showcase') {
+                if (window.__gameStore) {
+                  window.__gameStore.setState({
+                    activeModifiers: [
+                      { type: 'MC_RATE_HIKE', remainingRounds: 2, affectedCells: [] }
+                    ],
+                    floatingTexts: [
+                      {
+                        id: 'milestone-market-demo',
+                        text: 'Tăng 20% chi phí xây nhà C1-C3 và thu lãi vay thế chấp 10% khi qua GO.',
+                        title: 'THẮT CHẶT TIỀN TỆ',
+                        type: 2,
+                        playerId: 'p1',
+                        actionType: 'market',
+                        timestamp: Date.now(),
+                      },
+                      {
+                        id: 'floating-rent-demo',
+                        text: '+200 Tr.',
+                        title: 'Thu thuê Nhà Thờ Đức Bà',
+                        type: 1,
+                        playerId: 'p1',
+                        actionType: 'rent_receive',
+                        targetPlayerId: 'p2',
+                        targetPlayerName: 'Bot AI 1',
+                        cellIndex: 19,
+                        formula: 'Tiền thuê gốc 200 Tr.',
+                        timestamp: Date.now() + 10,
+                      },
+                    ],
+                    pendingTradeOffer: {
+                      offerId: 'trade-offer-demo',
+                      buyerId: 'p2',
+                      sellerId: 'p1',
+                      cellIndex: 19,
+                      price: 3500,
+                      expiresAt: Date.now() + 60000,
+                    },
+                  });
+                }
+              } else if ('${scenarioName}' === 'notifications_financial') {
+                if (window.__gameStore) {
+                  window.__gameStore.setState({
+                    activeModifiers: [
+                      { type: 'MC_RATE_HIKE', remainingRounds: 2, affectedCells: [] }
+                    ],
+                    floatingTexts: [
+                      {
+                        id: 'floating-rent-demo',
+                        text: '+200 Tr.',
+                        title: 'Thu thuê Nhà Thờ Đức Bà',
+                        type: 1,
+                        playerId: 'p1',
+                        actionType: 'rent_receive',
+                        targetPlayerId: 'p2',
+                        targetPlayerName: 'Bot AI 1',
+                        cellIndex: 19,
+                        formula: 'Tiền thuê gốc 200 Tr.',
+                        timestamp: Date.now(),
+                      },
+                      {
+                        id: 'floating-upgrade-demo',
+                        text: '-1.200 Tr.',
+                        title: 'Nâng cấp C1 Nhà Thờ Đức Bà',
+                        type: 2,
+                        playerId: 'p1',
+                        actionType: 'upgrade',
+                        cellIndex: 19,
+                        timestamp: Date.now() + 10,
+                      },
+                    ],
+                    pendingTradeOffer: {
+                      offerId: 'trade-offer-demo',
+                      buyerId: 'p2',
+                      sellerId: 'p1',
+                      cellIndex: 19,
+                      price: 3500,
+                      expiresAt: Date.now() + 60000,
+                    },
+                  });
+                }
               }
-            })();
           `,
         });
         await sleep(1100);

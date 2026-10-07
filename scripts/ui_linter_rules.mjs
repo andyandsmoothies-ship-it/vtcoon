@@ -9,6 +9,8 @@ export const RULES = {
   BOUNCE_EASING: 'bounce-easing',
   GRAY_ON_COLOR: 'gray-on-color',
   GRADIENT_TEXT: 'gradient-text',
+  SIDE_TAB: 'side-tab',
+  CLIPPED_OVERFLOW_CONTAINER: 'clipped-overflow-container',
 };
 
 export const RULE_MESSAGES = {
@@ -27,6 +29,14 @@ export const RULE_MESSAGES = {
   [RULES.GRADIENT_TEXT]: {
     title: 'gradient-text',
     advice: 'Gradient-clipped text reduces legibility and clashes with tactile luxury. Use solid high-contrast typography instead.',
+  },
+  [RULES.SIDE_TAB]: {
+    title: 'side-tab',
+    advice: 'Thick colored border on one side of a card (e.g. border-l-4, border-r-4) is an AI tell. Use subtle accent, soft pill badge, or layered box-shadow instead.',
+  },
+  [RULES.CLIPPED_OVERFLOW_CONTAINER]: {
+    title: 'clipped-overflow-container',
+    advice: 'Container with overflow-hidden or overflow-clip wrapping escaping elements (popovers, tooltips, or negative insets) clips interactive elements. Use overflow-visible or move the popup out of the clip.',
   },
 };
 
@@ -99,3 +109,18 @@ export function checkBorderAccentOnRounded(classString) {
 
   return false;
 }
+
+export const CHROMATIC_BORDER_REGEX = new RegExp(`\\bborder-${CHROMATIC_COLORS}(?:-[0-9]+)?(?:\\/[0-9]+)?\\b|\\bborder-(?:accent|primary)\\b`);
+export const SIDE_TAB_BORDER_REGEX = /\bborder-(?:[lrse])-(?:[3-9]|\d{2,}|\[(?:[3-9]|\d{2,})px\])\b/;
+
+/**
+ * Evaluates whether a set of class tokens exhibits side-tab anti-pattern.
+ */
+export function checkSideTab(classString) {
+  if (!SIDE_TAB_BORDER_REGEX.test(classString)) return false;
+  if (CHROMATIC_BORDER_REGEX.test(classString)) return true;
+  const hasCardTrait = /\b(?:rounded|shadow|bg-)\b/.test(classString);
+  const hasThickBorder = /\bborder-(?:[lrse])-(?:4|8|\[(?:[4-9]|\d{2,})px\])\b/.test(classString);
+  return hasCardTrait && hasThickBorder;
+}
+

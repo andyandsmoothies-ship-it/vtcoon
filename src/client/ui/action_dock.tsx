@@ -89,6 +89,13 @@ export function ActionDock({
   const isBankrupt = Boolean(actingPlayer?.bankrupt || actingPlayer?.isBankrupt);
   const inAudit = Boolean(actingPlayer?.inAudit);
   const isInsolvent = Boolean(actingPlayer && actingPlayer.balance < 0);
+  const isDebtorAlertActive = Boolean(
+    actingPlayer &&
+    !actingPlayer.isBot &&
+    actingPlayer.balance < 0 &&
+    !isBankrupt &&
+    (!localPlayerId || actingPlayerId === localPlayerId)
+  );
   const storeConsecutiveDoubles = actingPlayer ? actingPlayer.consecutiveDoubles : undefined;
   const auditCount = actingPlayer?.auditCount ?? 1;
   const currentBailCost = calculateBailAmount(auditCount);
@@ -183,6 +190,7 @@ export function ActionDock({
   const isStandingOnBuyable = Boolean(
     isMyTurn &&
     !isBankrupt &&
+    !isInsolvent &&
     !isPawnBusyMoving &&
     (turnPhase === TurnPhase.ActionPhase || (hasRolledThisTurn && turnPhase !== TurnPhase.PropertyManagement && turnPhase !== TurnPhase.AuctionPhase && turnPhase !== TurnPhase.InsolvencyPhase)) &&
     isPropertyCell &&
@@ -224,8 +232,23 @@ export function ActionDock({
         className="relative pointer-events-auto flex items-center justify-center gap-1.5 min-[360px]:gap-2 md:gap-3 bg-[#FFFDF8]/95 backdrop-blur-sm border border-slate-300/80 shadow-lg shadow-slate-900/10 rounded-2xl p-1.5 sm:p-2.5 px-2 min-[360px]:px-3 sm:px-5 max-w-[calc(100vw-1rem)] overflow-x-auto no-scrollbar"
         aria-label="Thanh điều khiển tác vụ"
       >
-        {/* Primary Action Button: Trong ActionPhase luôn ưu tiên nút Mua Đất */}
-        {isStandingOnBuyable ? (
+        {/* Primary Action Button: Cứu Nợ Khẩn Cấp khi con nợ âm tiền, hoặc Mua Đất, hoặc Đổ Xúc Xắc */}
+        {isDebtorAlertActive ? (
+          <button
+            type="button"
+            data-testid="resolve-debt-primary-btn"
+            onClick={() => {
+              if (!actingPlayer) return;
+              const deficitAmount = Math.max(0, -actingPlayer.balance);
+              openModal('insolvency', { playerId: actingPlayer.id, deficit: deficitAmount });
+            }}
+            className="w-11 h-11 min-w-[44px] min-h-[44px] sm:w-auto sm:h-auto p-0 sm:px-6 sm:py-2.5 shrink-0 whitespace-nowrap flex items-center justify-center gap-1.5 sm:gap-2 rounded-2xl font-black text-white shadow-lg transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:ring-offset-2 bg-gradient-to-b from-rose-500 via-rose-600 to-red-700 hover:from-rose-400 hover:to-rose-600 border border-rose-800 shadow-md shadow-rose-600/30 active:scale-95 ring-4 ring-rose-400/80 animate-pulse cursor-pointer"
+            aria-label="Giải quyết thâm hụt nợ khẩn cấp"
+          >
+            <span className="text-xl" aria-hidden="true">🚨</span>
+            <span className="hidden sm:inline text-sm md:text-base">Cứu Nợ Khẩn Cấp</span>
+          </button>
+        ) : isStandingOnBuyable ? (
           <button
             type="button"
             onClick={isTradeFrozen ? undefined : () => openModal('deed', { cellIndex: currentPos, isBuyOpportunity: true })}

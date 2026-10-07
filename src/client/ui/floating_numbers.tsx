@@ -49,7 +49,7 @@ export function MilestoneBanner({ item }: { readonly item: FloatingTextItem }): 
   const bannerClasses = [
     'pointer-events-auto cursor-pointer flex flex-col gap-1 px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-2xl border',
     'bg-[#FFFDF8] text-slate-900 select-none active:scale-95 animate-in fade-in duration-200',
-    'w-full max-w-[88vw] sm:max-w-[380px] min-w-0',
+    'w-full max-w-[88vw] sm:max-w-md min-w-0',
     borderShadowStyle,
   ].join(' ');
 
@@ -176,6 +176,8 @@ export function FloatingBadge({ item }: { readonly item: FloatingTextItem }): Re
     }
   };
 
+  const hasFormula = Boolean(narrative.formula?.trim());
+
   return (
     <div
       role="status"
@@ -187,27 +189,30 @@ export function FloatingBadge({ item }: { readonly item: FloatingTextItem }): Re
       onKeyDown={handleKeyDown}
       className="pointer-events-auto cursor-pointer flex flex-col gap-1 px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-2xl border border-slate-300 bg-[#FFFDF8] select-none shadow-md shadow-slate-900/10 active:scale-95 animate-in fade-in duration-200 w-full min-w-0"
     >
-      {/* Hàng 1: Diễn giải dòng tiền tự nhiên + Nút đóng ✕ */}
+      {/* Hàng 1: Diễn giải dòng tiền tự nhiên + Icon nhận diện + Nút đóng ✕ */}
       <div className="flex items-start justify-between gap-1.5 min-w-0">
         <div
           data-testid="transaction-flow-line"
-          className="text-xs sm:text-[13px] font-semibold text-slate-800 text-left leading-snug break-words flex-1 min-w-0"
+          className="text-xs sm:text-[13px] font-semibold text-slate-800 text-left leading-snug break-words flex-1 min-w-0 flex items-start gap-1.5"
           title={item.title}
         >
-          <span className="font-bold text-slate-900">{narrative.subject}</span>{' '}
-          <span className="text-slate-600 font-medium">{narrative.verb}</span>{' '}
-          <span
-            data-testid="floating-amount-pill"
-            title={item.text}
-            className={`px-1.5 py-0.5 rounded-lg text-xs font-extrabold font-mono tabular-nums border inline-block ${
-              narrative.isPositive
-                ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
-                : 'bg-rose-50 text-rose-700 border-rose-300'
-            }`}
-          >
-            {item.text}
-          </span>{' '}
-          <span className="font-bold text-slate-800">{narrative.target}</span>
+          <span className="text-xs shrink-0 mt-0.5" aria-hidden="true">{narrative.icon}</span>
+          <div className="min-w-0 flex-1">
+            <span className="font-bold text-slate-900">{narrative.subject}</span>{' '}
+            <span className="text-slate-600 font-medium">{narrative.verb}</span>{' '}
+            <span
+              data-testid="floating-amount-pill"
+              title={item.text}
+              className={`px-1.5 py-0.5 rounded-lg text-xs font-extrabold font-mono tabular-nums border inline-block ${
+                narrative.isPositive
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
+                  : 'bg-rose-50 text-rose-700 border-rose-300'
+              }`}
+            >
+              {item.text}
+            </span>{' '}
+            <span className="font-bold text-slate-800">{narrative.target}</span>
+          </div>
         </div>
 
         <button
@@ -223,24 +228,16 @@ export function FloatingBadge({ item }: { readonly item: FloatingTextItem }): Re
         </button>
       </div>
 
-      {/* Hàng 2 (Dòng phụ): Danh mục định danh & Công thức (nếu có) */}
-      <div className="flex items-center gap-1.5 flex-wrap min-w-0 text-[10px] sm:text-[11px] text-slate-500 pt-0.5">
-        <div className="flex items-center gap-1 font-bold uppercase tracking-wider text-slate-500 truncate">
-          <span className="text-xs shrink-0" aria-hidden="true">{narrative.icon}</span>
-          <span className="truncate">{narrative.category}</span>
+      {/* Hàng 2: Công thức tính / Căn cứ pháp lý (chỉ hiển thị khi có công thức thực tế) */}
+      {hasFormula && (
+        <div
+          data-testid="transaction-formula-line"
+          className="text-[10px] sm:text-[11px] text-slate-500 font-medium truncate pt-0.5 pl-5"
+          title={narrative.formula}
+        >
+          <span className="truncate">{narrative.formula}</span>
         </div>
-
-        {Boolean(narrative.formula?.trim()) ? (
-          <div
-            data-testid="transaction-formula-line"
-            className="flex items-center gap-1 text-slate-500 font-medium truncate before:content-['•'] before:text-slate-300 before:mr-0.5"
-            title={narrative.formula}
-          >
-            <span className="text-slate-400 text-[10px]" aria-hidden="true">📐</span>
-            <span className="truncate">{narrative.formula}</span>
-          </div>
-        ) : null}
-      </div>
+      )}
     </div>
   );
 }

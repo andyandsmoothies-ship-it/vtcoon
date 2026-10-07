@@ -204,6 +204,11 @@ export function detectFinancialAndStatusActivities(
   const handledPayerIds = new Set<string>();
   entries.push(...processMaBuyouts(delta, prevState, nextState, context, payers, receivers, handledPayerIds, handledReceiverIds));
 
+  if (delta.lastTradeResult) {
+    handledPayerIds.add(delta.lastTradeResult.buyerId);
+    handledReceiverIds.add(delta.lastTradeResult.sellerId);
+  }
+
   if (context.boughtCellIndices && delta.cells) {
     for (const boughtIndex of context.boughtCellIndices) {
       const cellDelta = delta.cells.find((c) => c.index === boughtIndex);

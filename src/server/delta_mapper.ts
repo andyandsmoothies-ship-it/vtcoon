@@ -192,6 +192,7 @@ export function buildDeltaFromRoom(
     ...(room.passedGoSalary !== undefined ? { passedGoSalary: room.passedGoSalary } : {}),
     pendingTransitWheel: room.pendingTransitWheel ?? null,
     lastTransitResult: room.lastTransitResult ?? null,
+    lastTradeResult: room.lastTradeResult ?? null,
   });
 }
 
@@ -255,6 +256,7 @@ export function buildDeltaPayload(
       ...(tickOrOptions.passedGoSalary !== undefined ? { passedGoSalary: tickOrOptions.passedGoSalary } : {}),
       ...(tickOrOptions.pendingTransitWheel !== undefined ? { pendingTransitWheel: tickOrOptions.pendingTransitWheel } : {}),
       ...(tickOrOptions.lastTransitResult !== undefined ? { lastTransitResult: tickOrOptions.lastTransitResult } : {}),
+      ...(tickOrOptions.lastTradeResult !== undefined ? { lastTradeResult: tickOrOptions.lastTradeResult } : {}),
     };
   }
   return {

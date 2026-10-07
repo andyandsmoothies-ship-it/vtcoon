@@ -21,7 +21,7 @@ import {
 } from './audit_manager';
 import { handleSpecialCell } from './special_cell_handler';
 import { collectMortgageInterest } from './mortgage_manager';
-import { checkInsolvency } from './insolvency_manager';
+import { checkInsolvency, liquidateAssets, declareBankruptcy } from './insolvency_manager';
 import type { RollResult } from './room_manager';
 import type { AuctionSession } from './auction_manager';
 import { ChanceCardId, MarketCardId } from '../domain/event_card_types';
@@ -217,10 +217,24 @@ export function executeTurnRoll(
     }
   }
 
-  // UC-053: Kiem tra mat kha nang thanh toan neu so du am sau khi thu thue / lai / phi
-  if (current.balance < 0) {
-    const landlordId = reg ? reg.get(newPos) : undefined;
-    checkInsolvency(room, landlordId);
+  // UC-053 & IMP-285: Tự động xử lý tức thì cho bot ngoài lượt (ADV-02 Option A), xếp hàng cho người thật
+  if (reg && sm) {
+    const outOfTurnBots = room.players.filter((p) => p.balance < 0 && !p.bankrupt && p.isBot && p.id !== current.id);
+    for (const bot of outOfTurnBots) {
+      liquidateAssets(room, bot.id, reg, sm);
+      if (bot.balance < 0) {
+        declareBankruptcy(room, bot.id, reg, sm);
+      }
+    }
+  }
+
+  // Quét toàn bộ con nợ âm tiền sau khi tiếp đất / sự kiện / thuế
+  const insolventPlayers = room.players.filter((p) => p.balance < 0 && !p.bankrupt);
+  if (insolventPlayers.length > 0) {
+    room.pendingInsolvencyQueue = insolventPlayers.map((p) => p.id);
+    const firstDebtor = insolventPlayers[0]!;
+    const landlordId = firstDebtor.id === current.id && reg ? reg.get(newPos) : undefined;
+    checkInsolvency(room, landlordId, firstDebtor.id);
   }
 
   return {
@@ -251,7 +265,19 @@ export function executeTurnEnd(
   auctions?: Map<string, AuctionSession>,
   rng: () => number = Math.random,
 ): Room | undefined {
+  // UC-053 & IMP-285: Tự động giải quyết tức thì cho bot ngoài lượt nếu có nợ treo (ADV-02 Option A)
+  if (registry && stateMap) {
+    const outOfTurnBots = room.players.filter((p) => p.balance < 0 && !p.bankrupt && p.isBot && p.id !== current.id);
+    for (const bot of outOfTurnBots) {
+      liquidateAssets(room, bot.id, registry, stateMap);
+      if (bot.balance < 0) {
+        declareBankruptcy(room, bot.id, registry, stateMap);
+      }
+    }
+  }
+
   if (room.phase === TurnPhase.AuctionPhase || room.phase === TurnPhase.InsolvencyPhase || room.pendingBuyout) return undefined;
+  if (room.players.some((p) => p.balance < 0 && !p.bankrupt)) return undefined;
   if (!rolledThisTurn && room.phase === TurnPhase.WaitingRoll && (current.auditTurnsLeft ?? 0) <= 0) return undefined;
 
   room.lastDiplomaticEvent = null;
@@ -318,6 +344,7 @@ export function executeTurnEnd(
 export function advanceTurnToNextPlayer(room: Room, rng: () => number = Math.random): void {
   delete room.pendingInsolvencyCreditorId;
   delete room.pendingInsolvencyDebtorId;
+  delete room.pendingInsolvencyQueue;
   const total = room.players.length;
   let next = (room.currentPlayerIndex + 1) % total;
   let steps = 0;

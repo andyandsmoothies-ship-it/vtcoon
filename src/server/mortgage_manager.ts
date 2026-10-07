@@ -1,11 +1,13 @@
-// [UC-GAME-051/MSS][UC-GAME-052/MSS] Mortgage Manager — Cam Co & Tin Dung
-import type { Room, Player } from '../domain/room';
-import { TurnPhase } from '../domain/room';
+import { TurnPhase, type Room, type Player } from '../domain/room';
 import { MarketCardId, HANOI_HCMC_CELLS } from '../domain/event_card_types';
 import { MacroCycleType } from '../domain/macro_cycle_types';
 import { PROPERTY_DEEDS } from '../domain/property_manager';
 import type { PropertyRegistry, PropertyStateMap, PropertyState } from '../domain/property_manager';
 import { ActionRejectReason } from '../domain/action_reasons';
+
+declare module '../domain/room' {
+  interface Room { pendingInsolvencyQueue?: string[]; }
+}
 
 const MORTGAGE_RATE                = 0.5;
 const URBAN_PLANNING_MORTGAGE_RATE = 0.60;
@@ -23,13 +25,9 @@ function isCurrentPlayer(room: Room, playerId: string): boolean {
 
 export function getMortgageInterestRate(room: Room): number {
   const mods = room.activeModifiers ?? [];
-  const stimulusActive = mods.some(
-    (m) => m.type === MarketCardId.MC_CREDIT_STIMULUS && m.remainingRounds > 0,
-  );
+  const stimulusActive = mods.some((m) => m.type === MarketCardId.MC_CREDIT_STIMULUS && m.remainingRounds > 0);
   if (stimulusActive) return 0;
-  const hikeActive = mods.some(
-    (m) => m.type === MarketCardId.MC_RATE_HIKE && m.remainingRounds > 0,
-  );
+  const hikeActive = mods.some((m) => m.type === MarketCardId.MC_RATE_HIKE && m.remainingRounds > 0);
   return hikeActive ? RATE_HIKE_RATE : DEFAULT_INTEREST_RATE;
 }
 
@@ -43,9 +41,7 @@ export function calcTotalMortgageDebt(player: Player): number {
 }
 
 function isTradeFrozen(room: Room): boolean {
-  return (room.activeModifiers ?? []).some(
-    (m) => m.type === MarketCardId.MC_FREEZE_TRADE && m.remainingRounds > 0,
-  );
+  return (room.activeModifiers ?? []).some((m) => m.type === MarketCardId.MC_FREEZE_TRADE && m.remainingRounds > 0);
 }
 
 function isMortgagePhaseValid(phase: TurnPhase): boolean {
@@ -58,7 +54,11 @@ function isMortgagePhaseValid(phase: TurnPhase): boolean {
 
 function checkMortgageRoomState(room: Room, playerId: string): ActionRejectReason | undefined {
   if (!room.started) return ActionRejectReason.GAME_NOT_STARTED;
-  if (!isCurrentPlayer(room, playerId)) return ActionRejectReason.NOT_YOUR_TURN;
+  const player = getPlayer(room, playerId);
+  const isDebtorInInsolvency = room.phase === TurnPhase.InsolvencyPhase &&
+    (room.pendingInsolvencyDebtorId ? room.pendingInsolvencyDebtorId === playerId : isCurrentPlayer(room, playerId)) &&
+    Boolean(player && player.balance < 0);
+  if (!isCurrentPlayer(room, playerId) && !isDebtorInInsolvency) return ActionRejectReason.NOT_YOUR_TURN;
   if (!isMortgagePhaseValid(room.phase)) return ActionRejectReason.INVALID_PHASE;
   if (isTradeFrozen(room)) return ActionRejectReason.FREEZE_ACTIVE;
   return undefined;
@@ -85,9 +85,7 @@ type MortgageValidation =
 
 export function getEffectiveMortgageRate(room: Room, cellIndex: number): number {
   if (!(HANOI_HCMC_CELLS as readonly number[]).includes(cellIndex)) return MORTGAGE_RATE;
-  const isUrbanPlanningActive = (room.activeModifiers ?? []).some(
-    (m) => m.type === MarketCardId.MC_URBAN_PLANNING && m.remainingRounds > 0,
-  );
+  const isUrbanPlanningActive = (room.activeModifiers ?? []).some((m) => m.type === MarketCardId.MC_URBAN_PLANNING && m.remainingRounds > 0);
   return isUrbanPlanningActive ? URBAN_PLANNING_MORTGAGE_RATE : MORTGAGE_RATE;
 }
 
@@ -127,8 +125,7 @@ function validateMortgage(
   if (roomErr) return { valid: false, reason: roomErr };
 
   const isLiquidityFrozen = (room.activeModifiers ?? []).some(
-    (m) => m.type === MacroCycleType.MACRO_LIQUIDITY_FREEZE &&
-           m.remainingRounds > 0 &&
+    (m) => m.type === MacroCycleType.MACRO_LIQUIDITY_FREEZE && m.remainingRounds > 0 &&
            (m.affectedCells as readonly number[]).includes(cellIndex),
   );
   if (isLiquidityFrozen) return { valid: false, reason: ActionRejectReason.LIQUIDITY_FROZEN };
@@ -157,6 +154,30 @@ export function mortgageProperty(
   const st = stateMap.get(cellIndex) ?? { level: 0 };
   st.isMortgaged = true;
   stateMap.set(cellIndex, st);
+
+  if (room.phase === TurnPhase.InsolvencyPhase && v.player.balance >= 0) {
+    let nextDebtorId: string | undefined;
+    if (room.pendingInsolvencyQueue?.length) {
+      const q = room.pendingInsolvencyQueue;
+      const qIdx = q.indexOf(playerId);
+      if (qIdx !== -1) q.splice(qIdx, 1);
+      while (q.length > 0) {
+        const nextId = q.shift();
+        const candidate = nextId ? room.players.find((p) => p.id === nextId) : undefined;
+        if (candidate && candidate.balance < 0 && !candidate.bankrupt) {
+          nextDebtorId = candidate.id;
+          break;
+        }
+      }
+    }
+    if (nextDebtorId) {
+      room.pendingInsolvencyDebtorId = nextDebtorId;
+    } else {
+      delete room.pendingInsolvencyDebtorId;
+      delete room.pendingInsolvencyCreditorId;
+      room.phase = TurnPhase.PropertyManagement;
+    }
+  }
 
   console.info(JSON.stringify({
     event: 'MORTGAGE_PROPERTY', correlationId: room.roomCode,
