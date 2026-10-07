@@ -154,4 +154,19 @@ describe('[TC-IMP278] Compact Floating Badges & Milestone Banners Contract Suite
     expect(htmlBadge).not.toContain('border-b border-slate-200/80');
     expect(htmlBanner).not.toContain('border-b border-slate-200/80');
   });
+
+  it('[TC-278.09/MSS][UC-IMP278] MilestoneBanner cho Vòng Xoay Vận Tải hiển thị tiêu đề kết quả cụ thể và mô tả không lặp lại', () => {
+    const transitItem: FloatingTextItem = {
+      id: 'transit_banner_1',
+      playerId: 'p1',
+      type: FloatingTextType.Bonus,
+      actionType: 'transit',
+      title: 'VÒNG XOAY VẬN TẢI',
+      text: '⚡ Bot AI 2 (Aggressive) quay trúng Tốc Hành! Bay thêm 6 ô tới Thanh Hóa (Sầm Sơn).',
+    };
+    const html = renderToStaticMarkup(React.createElement(MilestoneBanner, { item: transitItem }));
+    expect(html).toContain('⚡ Tốc Hành');
+    expect(html).toContain('Bay thêm 6 ô tới Thanh Hóa (Sầm Sơn).');
+    expect(html).toContain('VÒNG XOAY VẬN TẢI');
+  });
 });

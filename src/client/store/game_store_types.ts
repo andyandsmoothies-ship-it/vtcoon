@@ -191,7 +191,7 @@ export interface ModalPayloadMap {
     offeredCellIndex?: number;
   };
   compulsory_buyout: PendingBuyoutSession;
-  transit_wheel: { cellIndex: number; playerId?: string; outcome?: TransitWheelOutcome | string; targetCell?: number; payout?: number };
+  transit_wheel: { cellIndex: number; playerId?: string; outcome?: TransitWheelOutcome | string; targetCell?: number; payout?: number; boostSteps?: number };
 }
 
 export interface PendingPawnMove {

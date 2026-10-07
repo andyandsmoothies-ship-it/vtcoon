@@ -238,6 +238,7 @@ function syncOtherModals(delta: DeltaPayload, state: GameState): void {
           outcome: delta.lastTransitResult.outcome,
           targetCell: delta.lastTransitResult.targetCell,
           payout: delta.lastTransitResult.payout,
+          boostSteps: delta.lastTransitResult.boostSteps,
         });
       }
     } else if (state.activeModal === 'transit_wheel') {

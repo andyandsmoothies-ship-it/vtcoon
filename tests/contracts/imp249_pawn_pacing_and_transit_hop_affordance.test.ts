@@ -373,6 +373,11 @@ describe('[TC-IMP249][UC-IMP249] Pawn Pacing & Transit Hop Affordance Contract S
       expect(getTransitWheelDismissText(TransitWheelOutcome.SPEED_BOOST)).toBe('Tiếp Tục Di Chuyển Đến Ô Mới');
     });
 
+    it('[UC-IMP249/MSS] [TC-IMP249.21] getTransitWheelDismissText hiển thị "Xác Nhận & Ở Lại Trạm" khi targetCell trùng cellIndex (SAFE_HAVEN không có đất)', () => {
+      expect(getTransitWheelDismissText(TransitWheelOutcome.SAFE_HAVEN, 5, 5)).toBe('Xác Nhận & Ở Lại Trạm');
+      expect(getTransitWheelDismissText(TransitWheelOutcome.SAFE_HAVEN, 12, 5)).toBe('Tiếp Tục Di Chuyển Đến Ô Mới');
+    });
+
     it('[UC-IMP249/A13] [TC-IMP249.22] Khi cưỡng chế đóng modal transit_wheel do đổi pha/hết giờ, apply_delta giải phóng hoàn toàn pendingPawnMove = null', () => {
       const initialPendingMove: PendingPawnMove = { playerId: 'p1', fromCell: 5, targetCell: 25 };
       useGameStore.setState({ activeModal: 'transit_wheel', modalPayload: { cellIndex: 5 }, pendingPawnMove: initialPendingMove });

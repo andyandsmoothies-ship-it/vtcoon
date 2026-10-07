@@ -53,11 +53,34 @@ export function MilestoneBanner({ item }: { readonly item: FloatingTextItem }): 
     borderShadowStyle,
   ].join(' ');
 
-  const titleText =
-    item.title ||
-    (isEventCard ? (item.actionType === 'market' ? 'Sự Kiện Thị Trường' : 'Thẻ Cơ Hội') : item.text);
-  const rawDescText = item.title ? item.text : null;
-  const descText = rawDescText ? cleanEventDescription(rawDescText) : null;
+  const resolveTitleAndDesc = (): { titleText: string; descText: string | null } => {
+    if (item.actionType === 'transit' && item.title === 'VÒNG XOAY VẬN TẢI' && item.text) {
+      let title = 'VÒNG XOAY VẬN TẢI';
+      if (item.text.includes('bị hoãn')) {
+        title = '⏳ Hoãn Chuyến Bay';
+      } else {
+        const m = item.text.match(/^(\S+)\s+(?:.*?quay trúng\s+|.*?kích hoạt\s+)([^!]+)!?/i);
+        if (m && m[1] && m[2]) title = `${m[1]} ${m[2].trim()}`;
+      }
+      let desc = item.text;
+      const exIndex = item.text.indexOf('! ');
+      if (exIndex !== -1) {
+        desc = item.text.slice(exIndex + 2).trim();
+      } else if (item.text.includes('!')) {
+        desc = item.text.slice(item.text.indexOf('!') + 1).trim();
+      }
+      return { titleText: title, descText: desc };
+    }
+
+    const t =
+      item.title ||
+      (isEventCard ? (item.actionType === 'market' ? 'Sự Kiện Thị Trường' : 'Thẻ Cơ Hội') : item.text);
+    const rawDesc = item.title ? item.text : null;
+    const d = rawDesc ? cleanEventDescription(rawDesc) : null;
+    return { titleText: t, descText: d };
+  };
+
+  const { titleText, descText } = resolveTitleAndDesc();
 
   const resolveCategory = () => {
     switch (item.actionType) {

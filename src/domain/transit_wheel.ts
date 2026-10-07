@@ -25,7 +25,7 @@ export const TRANSIT_WHEEL_CONFIGS: readonly TransitWheelConfig[] = [
     shortLabelVi: 'TỐC HÀNH',
     icon: '⚡',
     color: '#f59e0b',
-    descriptionVi: 'Gieo xúc xắc tốc hành, bay thêm 1 - 6 ô về phía trước.',
+    descriptionVi: 'Gia tốc phản lực, bay thêm 1 - 6 ô về phía trước.',
   },
   {
     outcome: TransitWheelOutcome.SAFE_HAVEN,
@@ -34,16 +34,16 @@ export const TRANSIT_WHEEL_CONFIGS: readonly TransitWheelConfig[] = [
     shortLabelVi: 'HỒI HƯƠNG',
     icon: '🛡️',
     color: '#10b981',
-    descriptionVi: 'Bay thẳng về bất động sản gần nhất của bạn. Nếu chưa sở hữu BĐS, bạn an toàn ở lại trạm.',
+    descriptionVi: 'Bay thẳng về bất động sản gần nhất. Nếu chưa có BĐS, bạn an toàn ở lại trạm.',
   },
   {
     outcome: TransitWheelOutcome.CASH_BACK,
     weight: 20,
-    labelVi: 'Hoàn Cước Cảng',
+    labelVi: 'Hoàn Cước Dịch Vụ',
     shortLabelVi: 'HOÀN CƯỚC',
     icon: '💰',
     color: '#8b5cf6',
-    descriptionVi: 'Nhận hoàn tiền cước dịch vụ từ Kho Bạc lên tới 300 Tr. VNĐ.',
+    descriptionVi: 'Kho Bạc trợ cấp chi phí hành trình lên tới 300 Tr. VNĐ.',
   },
   {
     outcome: TransitWheelOutcome.PASS_GO_FLIGHT,
@@ -52,16 +52,16 @@ export const TRANSIT_WHEEL_CONFIGS: readonly TransitWheelConfig[] = [
     shortLabelVi: 'VỀ Ô GO',
     icon: '✈️',
     color: '#ec4899',
-    descriptionVi: 'Bay thẳng một mạch tới ô Khởi Hành (GO), nhận trọn vẹn lương vòng.',
+    descriptionVi: 'Bay thẳng về ô Khởi Hành (GO), nhận trọn vẹn lương vòng.',
   },
   {
     outcome: TransitWheelOutcome.FLIGHT_DELAY,
     weight: 15,
-    labelVi: 'Delay Chuyến Bay',
+    labelVi: 'Hoãn Chuyến Bay',
     shortLabelVi: 'HOÃN CHUYẾN',
     icon: '⏳',
     color: '#64748b',
-    descriptionVi: 'Thời tiết xấu, chuyến bay bị hoãn. Quân cờ giữ nguyên vị trí.',
+    descriptionVi: 'Thời tiết xấu, quân cờ tạm thời lưu lại trạm hiện tại.',
   },
 ] as const;
 

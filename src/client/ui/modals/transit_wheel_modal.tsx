@@ -13,8 +13,15 @@ export interface TransitWheelModalProps {
   readonly onClose: () => void;
 }
 
-export function getTransitWheelDismissText(outcome?: TransitWheelOutcome | string): string {
-  const isStationaryOutcome = outcome === TransitWheelOutcome.CASH_BACK || outcome === TransitWheelOutcome.FLIGHT_DELAY;
+export function getTransitWheelDismissText(
+  outcome?: TransitWheelOutcome | string,
+  targetCell?: number,
+  cellIndex?: number,
+): string {
+  const isStationaryOutcome =
+    outcome === TransitWheelOutcome.CASH_BACK ||
+    outcome === TransitWheelOutcome.FLIGHT_DELAY ||
+    (targetCell !== undefined && cellIndex !== undefined && targetCell === cellIndex);
   return isStationaryOutcome ? 'Xác Nhận & Ở Lại Trạm' : 'Tiếp Tục Di Chuyển Đến Ô Mới';
 }
 
@@ -63,7 +70,7 @@ export const TransitWheelModal: React.FC<TransitWheelModalProps> = ({
   }, [outcome, hasFinished]);
 
   const activeConfig = TRANSIT_WHEEL_CONFIGS.find((c) => c.outcome === outcome);
-  const dismissButtonText = getTransitWheelDismissText(outcome);
+  const dismissButtonText = getTransitWheelDismissText(outcome, payload?.targetCell, cellIndex);
 
   const handleDismiss = () => {
     // Giải phóng pendingPawnMove cho quân cờ chạy
@@ -85,7 +92,7 @@ export const TransitWheelModal: React.FC<TransitWheelModalProps> = ({
     >
       <div className="text-center mb-4">
         <h2 id="transit-wheel-title" className="text-xl font-bold tracking-wider text-amber-400 uppercase">
-          Vòng Xoay Hành Trình
+          Vòng Xoay Vận Tải
         </h2>
         <p className="text-xs text-slate-400 mt-1">Trạm Hạ Tầng #{cellIndex} — Chuyển Tiếp Chiến Thuật</p>
       </div>
@@ -168,9 +175,32 @@ export const TransitWheelModal: React.FC<TransitWheelModalProps> = ({
 
       {/* Thẻ hiển thị kết quả chi tiết */}
       {hasFinished && activeConfig && (
-        <div className="w-full mt-2 p-3 bg-slate-800/90 border border-amber-500/40 rounded-xl text-center animate-fade-in">
-          <div className="text-sm font-semibold text-amber-400">{activeConfig.labelVi}</div>
-          <div className="text-xs text-slate-300 mt-1">{activeConfig.descriptionVi}</div>
+        <div className="w-full mt-2 p-3 bg-slate-800/90 border border-amber-500/40 rounded-xl text-center animate-fade-in flex flex-col gap-1">
+          <div className="text-sm font-bold text-amber-400 flex items-center justify-center gap-1.5 flex-wrap">
+            <span>{activeConfig.icon}</span>
+            <span>{activeConfig.labelVi}</span>
+            {payload?.boostSteps !== undefined && payload.boostSteps > 0 && (
+              <span className="text-xs bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded font-mono font-bold">
+                +{payload.boostSteps} ô
+              </span>
+            )}
+            {payload?.payout !== undefined && payload.payout > 0 && (
+              <span className="text-xs bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded font-mono font-bold">
+                +{payload.payout} Tr.
+              </span>
+            )}
+          </div>
+          <div className="text-xs text-slate-300">{activeConfig.descriptionVi}</div>
+          {payload?.targetCell !== undefined && payload.targetCell !== cellIndex && (
+            <div className="text-[11px] font-medium text-amber-300/90 mt-0.5">
+              🚀 Đích đến tiếp theo: Ô #{payload.targetCell}
+            </div>
+          )}
+          {payload?.targetCell !== undefined && payload.targetCell === cellIndex && outcome === TransitWheelOutcome.SAFE_HAVEN && (
+            <div className="text-[11px] font-medium text-emerald-300/90 mt-0.5">
+              🛡️ Chưa sở hữu BĐS: Lưu lại an toàn tại trạm #{cellIndex}
+            </div>
+          )}
         </div>
       )}
 

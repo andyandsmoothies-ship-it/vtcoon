@@ -335,6 +335,7 @@ describe('IMP-279: Presentation Staging & Transit Wheel Sync Contract Suite', ()
 
       const buttons = container.querySelectorAll('button');
       const dismissBtn = buttons[buttons.length - 1];
+      expect(container.textContent).toContain('Vòng Xoay Vận Tải');
       act(() => {
         dismissBtn?.click();
       });
