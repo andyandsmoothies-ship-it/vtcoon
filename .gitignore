@@ -22,6 +22,8 @@ server_logs/
 .agents/tmp/
 .agents/evidence/
 .agents/audit/
+.tmp_mutant_sandbox_*
+*.sentinel_bak_*
 
 # OS / Editor
 .DS_Store

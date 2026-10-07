@@ -75,8 +75,40 @@ if (fs.existsSync(plansDir)) {
     const normF = f.replace(/[^A-Z0-9]/gi, '').toUpperCase();
     return (normF.includes(ticketNormalized) || normF.includes(`IMP${ticketNum}`)) && f.startsWith('PLAN_');
   });
-  if (planFiles.length > 0) {
+  if (planFiles.length === 1) {
     planPath = path.join(plansDir, planFiles[0]);
+  } else if (planFiles.length > 1) {
+    let currentGitFiles = [];
+    try {
+      const gitOut = execSync('git status --porcelain', { encoding: 'utf8' });
+      currentGitFiles = gitOut
+        .split('\n')
+        .map((l) => l.trim().slice(2).trim().replace(/^"|"$/g, '').replace(/\\/g, '/'))
+        .filter((f) => f.startsWith('src/') || f.startsWith('tests/'));
+    } catch {}
+
+    let bestPlan = planFiles[0];
+    let maxMatch = -1;
+
+    for (const pf of planFiles) {
+      const fullPf = path.join(plansDir, pf);
+      const content = fs.readFileSync(fullPf, 'utf8');
+      const reg = new Set();
+      const rMatch = /(?:src|tests)\/[a-zA-Z0-9_./-]+\.(?:tsx|mjs|css|ts|js)\b/g;
+      let m;
+      while ((m = rMatch.exec(content)) !== null) {
+        reg.add(m[0].replace(/\\/g, '/'));
+      }
+      const matchCount = currentGitFiles.filter((f) => reg.has(f)).length;
+      if (matchCount > maxMatch) {
+        maxMatch = matchCount;
+        bestPlan = pf;
+      }
+    }
+    planPath = path.join(plansDir, bestPlan);
+    console.log(`📌 [SMART PLAN] Selected '${bestPlan}' among ${planFiles.length} candidates (matches ${maxMatch} git files).`);
+  }
+  if (planPath) {
     const planContent = fs.readFileSync(planPath, 'utf8');
     const titleMatch = planContent.match(/^#\s*TICKET:\s*(.+)$/m) || planContent.match(/^#\s*(.+)$/m);
     if (titleMatch) planTitle = titleMatch[1].trim();

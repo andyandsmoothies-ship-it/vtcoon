@@ -91,3 +91,9 @@
     - **Bất Biến Xác Minh (Modal Dismissal Ownership Invariant)**:
       1. *Server chỉ Trigger*: Server chỉ có quyền phát tín hiệu mở modal qua delta (`pendingTransitWheel`, `lastEventCard`...).
       2. *Client toàn quyền Dismiss*: Các modal có hoạt cảnh (Vòng xoay, Rút thẻ, Đổ xúc xắc) CHỈ được phép đóng bởi 2 tác nhân: (1) Người chơi chủ động bấm nút xác nhận / tiếp tục (`handleDismiss`), hoặc (2) Chuyển lượt sang người chơi khác / đổi pha cưỡng chế (`turnPhase !== TurnPhase.PropertyManagement && turnPhase !== TurnPhase.ActionPhase`). TUYỆT ĐỐI CẤM tự động đóng modal chỉ vì một trường dữ liệu trong delta chuyển thành `null`. `[UI/MODAL_LIFECYCLE]`
+
+23. **Modal Preservation in Complex Multi-Step Workflows (Chống Đè Modal Khi Cứu Nợ / Cắm Cọc) [UI/MODAL_COEXISTENCE] [IMP-288]**:
+    - **Bẫy Nguy Hiểm (The Portfolio Kickout Trap)**: Khi người chơi trong Modal Khẩn Cấp (`insolvency`) bấm nút "Quản lý BĐS" để mở Modal Công Cụ (`portfolio`) nhằm cắm cọc, `activeModal` chuyển thành `'portfolio'`. Khi server trả delta cập nhật số dư sau một lần cắm cọc (vẫn còn âm tiền), listener tự động mở nợ nếu không loại trừ `currentModal === 'portfolio'` sẽ tự động đè lại modal `insolvency`, đá văng người chơi ra ngoài và cắt đứt chuỗi thao tác thế chấp nhiều lô đất liên tiếp!
+    - **Bất Biến Xác Minh (Modal Preservation Invariant)**:
+      1. *Loại trừ Modal Công Cụ Chủ Động*: Listener tự động mở nợ trong `use_app_session.ts` bắt buộc kiểm tra `currentModal !== 'portfolio'`.
+      2. *Neo An Toàn Trên ActionDock*: Khi người chơi chủ động đóng modal công cụ, nút Primary Action trên ActionDock biến đổi thành `🚨 Cứu Nợ Khẩn Cấp`, đóng vai trò điểm neo an toàn để người chơi bấm mở lại modal nợ bất kỳ lúc nào mà không cần delta tự động can thiệp thô bạo. `[UI/MODAL_COEXISTENCE]`

@@ -297,11 +297,14 @@ export function auditTestSpecLine(line, exportedSymbols = null) {
   }
 
   if (exportedSymbols && exportedSymbols.size > 0) {
-    const callMatch = line.match(/\b(?:When|Khi)\b[\s\S]*?\b(?:gọi|gọi\s+hàm|kích\s+hoạt|calling|invoking)\s+`?([a-zA-Z0-9_$]+)`?/i);
+    const backtickMatch = line.match(/\b(?:When|Khi)\b[\s\S]*?\b(?:gọi|gọi\s+hàm|kích\s+hoạt|calling|invoking)\s+`([a-zA-Z_$][a-zA-Z0-9_$]*)`/i);
+    const plainMatch = line.match(/\b(?:When|Khi)\b[\s\S]*?\b(?:gọi\s+hàm|calling|invoking)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/i);
+    const callMatch = backtickMatch || plainMatch;
     if (callMatch) {
       const fnName = callMatch[1];
       const builtins = new Set(['dispatch', 'render', 'fire', 'trigger', 'mount', 'click', 'submit', 'set', 'get', 'fetch', 'getState', 'setState']);
-      if (!builtins.has(fnName) && !exportedSymbols.has(fnName)) {
+      const vietnameseWords = new Set(['mở', 'nút', 'thao', 'lại', 'chuyển', 'modal', 'hàng', 'thanh', 'giao', 'bước', 'lượt', 'thẻ', 'ô', 'con', 'tiền', 'đến', 'qua', 'vào', 'ra']);
+      if (fnName.length >= 3 && !builtins.has(fnName) && !vietnameseWords.has(fnName.toLowerCase()) && !exportedSymbols.has(fnName)) {
         console.error(`  ❌ [HALLUCINATED_FUNCTION_IN_TEST_SPEC] in test spec:`);
         console.error(`     Line: ${line.trim()}`);
         console.error(`     Symbol '${fnName}' does not exist in src/ or plan declarations (total known symbols: ${exportedSymbols.size})!`);

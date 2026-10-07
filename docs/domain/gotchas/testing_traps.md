@@ -43,3 +43,11 @@
       1. *Luôn dùng cờ `--yes` khi dùng `npx`*: Tuyệt đối cấm gõ `npx <pkg>` trần trong subshell; BẮT BUỘC dùng `npx --yes <pkg>` hoặc cài gói vào `devDependencies` trước khi gọi.
       2. *Cấm Inline Code Nhiều Dòng trên PowerShell*: CẤM dùng `-e "..."` nhiều dòng trên Windows PowerShell. Muốn chạy code nhanh, BẮT BUỘC tạo file scratch tạm (ví dụ: `scratch.ts` hoặc test tạm trong `tests/`) rồi chạy qua `vitest run` hoặc `node`, sau đó xóa file.
       3. *Mã Client Bắt Buộc Chạy Qua Test Runner*: Mã UI/Client có JSX hoặc Browser Store phải chạy qua Vitest với môi trường `happy-dom` (`vitest run <test_file>`), cấm dùng Node.js thuần để chạy.
+
+12. **Bẫy Đuôi Mở Rộng `.ts` vs `.tsx` Khi Render Component & Sàn Đột Biến Station 4 [TEST/HARNESS] [IMP-288]**:
+    - **Bẫy Nguy Hiểm**:
+      1. *Đuôi Mở Rộng và JSX Parser*: Khi tạo living contract test cho React component mà đặt đuôi file là `.ts` (ví dụ `imp288_test.ts`), việc viết trực tiếp thẻ JSX `<ActionDock />` sẽ bị esbuild / Vite compiler quăng lỗi cú pháp (`Expected ">" but found "prop"`). Nếu file có đuôi `.ts`, bắt buộc dùng `React.createElement(ActionDock, props)` hoặc phải đổi tên file sang `.tsx`.
+      2. *Sàn Đột Biến Thiếu Hụt (Mutant Floor Underrun)*: Tại Station 4 Sentinel, cơ chế mutation probe bắt buộc đánh giá tối thiểu 14 mutants (`mutantsTested >= 14 && killed >= 14`). Nếu bộ contract test ở Station 1 viết quá cô đọng (< 12 asserts) và không phủ đủ các toán tử đột biến (`toBe(true)`, `toBe(false)`, `toBeNull()`, `toContain()`), test sẽ không kích hoạt đủ 14 mutants và bị chặn ở Station 4 dù mọi test đều xanh.
+    - **Bất Biến Bắt Buộc (Verified Invariants)**:
+      1. *Tên File Chứa Thẻ JSX*: Mọi living contract test có chứa thẻ JSX trực tiếp bắt buộc đặt tên file kết thúc bằng `.tsx`.
+      2. *Mật Độ Assertions Biên Độ*: Khi thiết kế test cases ở Station 1, luôn soạn thảo tối thiểu 12–14 assertions cụ thể kiểm tra cả trạng thái dương tính (`true`), âm tính (`false`), `null`, và các giá trị số học biên độ để đảm bảo vượt ngưỡng sàn đột biến 14 mutants của Station 4 ngay từ vòng đầu.

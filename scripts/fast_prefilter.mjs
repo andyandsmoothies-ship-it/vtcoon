@@ -165,6 +165,16 @@ if (testFilesToScan.length > 0) {
           );
         }
       }
+
+      // Station 4 Mutant Floor Early Warning (< 14 asserts in contract test suite)
+      if (isContract) {
+        const totalExpects = (content.match(/\bexpect\s*\(/g) || []).length;
+        if (totalExpects < 14) {
+          console.warn(`\n  ⚠️  [STATION 4 EARLY WARNING] ${file} has only ${totalExpects} expect() assertion(s) (< 14).`);
+          console.warn(`     Station 4 Sentinel requires evaluating and killing >= 14 mutants.`);
+          console.warn(`     Ensure sufficient boundary assertions (toBe, toEqual, toContain) exist before running sentinel.\n`);
+        }
+      }
     }
 
     if (testViolations.length > 0) {

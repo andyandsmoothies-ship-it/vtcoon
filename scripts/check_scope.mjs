@@ -73,8 +73,10 @@ function getModifiedFiles() {
       }
 
       filePath = filePath.replace(/\\/g, '/');
-      // Only audit production and test code
-      if (filePath.startsWith('src/') || filePath.startsWith('tests/')) {
+      // Only audit production and test code (exclude transient sentinel files)
+      if ((filePath.startsWith('src/') || filePath.startsWith('tests/')) &&
+          !filePath.includes('.tmp_mutant_sandbox_') &&
+          !filePath.includes('.sentinel_bak_')) {
         files.add(filePath);
       }
     }

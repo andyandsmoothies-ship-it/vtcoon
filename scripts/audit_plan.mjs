@@ -60,6 +60,29 @@ let checkedTests = 0;
 
 console.log(`\n🔍 [AUDIT-PLAN] Pre-flight mechanical audit for: ${path.basename(planPath)}`);
 
+// 0. Check for Ticket ID Collision in .agents/plans/
+const planBasename = path.basename(planPath);
+const plansDir = path.dirname(path.resolve(planPath));
+const currentTicketMatch = planBasename.match(/PLAN_([A-Z0-9]+(?:[-_][A-Z0-9]+)?)/i);
+if (currentTicketMatch && fs.existsSync(plansDir)) {
+  const currentTicketId = currentTicketMatch[1].replace(/_/g, '-').toUpperCase();
+  const collidingPlans = fs.readdirSync(plansDir).filter((f) => {
+    if (f === planBasename || !f.startsWith('PLAN_') || !f.endsWith('.md')) return false;
+    const match = f.match(/PLAN_([A-Z0-9]+(?:[-_][A-Z0-9]+)?)/i);
+    if (!match) return false;
+    const otherTicketId = match[1].replace(/_/g, '-').toUpperCase();
+    return otherTicketId === currentTicketId;
+  });
+
+  if (collidingPlans.length > 0) {
+    console.warn(`⚠️  [TICKET COLLISION WARNING] Ticket ID '${currentTicketId}' is already used by another plan in .agents/plans/:`);
+    for (const cp of collidingPlans) {
+      console.warn(`   - ${cp}`);
+    }
+    console.warn(`   Ensure this is intentional, or suffix the new ticket (e.g. ${currentTicketId}B) to avoid ambiguity.\n`);
+  }
+}
+
 // ==========================================
 // 1. Scan target files for existence and LOC
 // ==========================================
