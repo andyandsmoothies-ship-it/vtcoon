@@ -4,6 +4,11 @@ import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { type Camera } from 'three';
 import { useGameStore } from '../store/game_store';
 import { initSoftReturn, shouldBreakOnTouch, type SoftReturnState } from './camera_soft_return';
+import {
+  classifyGestureIntent,
+  createCameraArbitrationSession,
+  type CameraArbitrationSession,
+} from './camera_arbitration_engine';
 
 export interface GestureEndEvaluationParams {
   readonly touchDurationMs: number;
@@ -32,20 +37,25 @@ export function evaluateOrbitGestureEnd(params: GestureEndEvaluationParams): Ges
     params.currentTargetPos[2] - params.overviewTarget[2]
   );
 
-  if (params.justBrokeSoftReturn) {
-    const shouldSetCustom = distPos > 0.8 || distTarget > 0.5;
-    return { action: shouldSetCustom ? 'set_custom_camera' : 'none', shouldClearJustBroke: true };
+  const classified = classifyGestureIntent({
+    touchDurationMs: params.touchDurationMs,
+    distPos,
+    distTarget,
+    isPawnAnimating: params.isPawnAnimating,
+    justBrokeSoftReturn: params.justBrokeSoftReturn,
+  });
+
+  let action: 'skip_animation' | 'set_custom_camera' | 'none' = 'none';
+  if (classified.action === 'skip_animation') {
+    action = 'skip_animation';
+  } else if (classified.action === 'manual_inspection') {
+    action = 'set_custom_camera';
   }
 
-  if (params.isPawnAnimating && params.touchDurationMs < 220 && distPos < 0.4 && distTarget < 0.2) {
-    return { action: 'skip_animation', shouldClearJustBroke: false };
-  }
-
-  if (distPos > 0.8 || distTarget > 0.5) {
-    return { action: 'set_custom_camera', shouldClearJustBroke: false };
-  }
-
-  return { action: 'none', shouldClearJustBroke: false };
+  return {
+    action,
+    shouldClearJustBroke: classified.shouldClearJustBroke,
+  };
 }
 
 export interface CameraSkipSnapParams {
@@ -113,6 +123,7 @@ export interface UseCameraGesturesReturn {
   readonly lastSkipTimeRef: React.MutableRefObject<number>;
   readonly isSkippingCameraAnimRef: React.MutableRefObject<boolean>;
   readonly handleFrameSkip: (skipTargetState: { position: [number, number, number]; target: [number, number, number] }) => boolean;
+  readonly arbitrationSession: React.MutableRefObject<CameraArbitrationSession>;
 }
 
 export function useCameraGestures(options: UseCameraGesturesOptions): UseCameraGesturesReturn {
@@ -122,9 +133,11 @@ export function useCameraGestures(options: UseCameraGesturesOptions): UseCameraG
   const isSkippingCameraAnimRef = useRef<boolean>(false);
   const hasSkippedCurrentMoveRef = useRef<boolean>(false);
   const lastSkipTimeRef = useRef<number>(0);
+  const arbitrationSession = useRef<CameraArbitrationSession>(createCameraArbitrationSession());
 
   const onOrbitStart = () => {
-    touchStartTimeRef.current = Date.now();
+    touchStartTimeRef.current = performance.now();
+    arbitrationSession.current.cancelGracePeriod();
     if (shouldBreakOnTouch(true, options.isResettingRef.current || options.softReturnRef.current !== null)) {
       options.isResettingRef.current = false;
       options.softReturnRef.current = null;
@@ -138,7 +151,7 @@ export function useCameraGestures(options: UseCameraGesturesOptions): UseCameraG
 
   const onOrbitEnd = () => {
     isUserInteractingRef.current = false;
-    const touchDuration = Date.now() - touchStartTimeRef.current;
+    const touchDuration = performance.now() - touchStartTimeRef.current;
     const refPos = options.currentOverviewPosRef.current ?? [0, 0, 0];
     const refTarget = options.currentOverviewTargetRef.current ?? [0, 0, 0];
     // [Gotcha #64] Fallback to refTarget when controlsRef.current is null to guarantee distTarget is zero
@@ -161,9 +174,10 @@ export function useCameraGestures(options: UseCameraGesturesOptions): UseCameraG
     }
     if (result.action === 'set_custom_camera') {
       useGameStore.getState().setHasUserCustomCamera?.(true);
+      arbitrationSession.current.grantGracePeriod(performance.now());
     } else if (result.action === 'skip_animation') {
       isSkippingCameraAnimRef.current = true;
-      lastSkipTimeRef.current = Date.now();
+      lastSkipTimeRef.current = performance.now();
     }
   };
 
@@ -194,6 +208,7 @@ export function useCameraGestures(options: UseCameraGesturesOptions): UseCameraG
     lastSkipTimeRef,
     isSkippingCameraAnimRef,
     handleFrameSkip,
+    arbitrationSession,
   };
 }
 

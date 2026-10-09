@@ -26,7 +26,7 @@ export function calculateBeaconRotation(time: number, speed: number = 1.2): numb
   return time * speed;
 }
 
-export function DioramaMarina(): React.ReactElement {
+export function DioramaMarina({ isMobile = false }: { readonly isMobile?: boolean } = {}): React.ReactElement {
   // Phase subscription: Chỉ re-render khi phase thay đổi (vài phút/lần). Không ảnh hưởng 60 FPS frame loop.
   const phase = useEnvironmentStore((s) => s.phase);
   const yacht1Ref = useRef<Group>(null);
@@ -34,6 +34,7 @@ export function DioramaMarina(): React.ReactElement {
   const beaconRef = useRef<Group>(null);
 
   useSafeFrame((state) => {
+    if (isMobile) return;
     const t = state.clock.elapsedTime;
     if (yacht1Ref.current) {
       const b1 = calculateWatercraftBobbing(t, 0.0);
@@ -159,7 +160,11 @@ export function DioramaMarina(): React.ReactElement {
 
         {/* Tia sáng quét 360 độ đặt đúng cao độ Fresnel y = 0.72 */}
         <group ref={beaconRef} position={[0, 0.72, 0]} visible={isNightOrSunset}>
-          <mesh position={[0, 0, 0.4]} rotation={[Math.PI / 2, 0, 0]}>
+          <mesh
+            position={[0, 0, 0.4]}
+            rotation={[Math.PI / 2, 0, 0]}
+            visible={!isMobile && isNightOrSunset}
+          >
             <coneGeometry args={[0.3, 0.8, 12, 1, true]} />
             <meshBasicMaterial
               color={phase === 'sunset' ? '#FDE047' : '#FFFFFF'}
@@ -169,7 +174,7 @@ export function DioramaMarina(): React.ReactElement {
           </mesh>
           <pointLight
             color={phase === 'sunset' ? '#FDE047' : '#FFFFFF'}
-            intensity={beaconIntensity}
+            intensity={isMobile ? 0 : beaconIntensity}
             distance={4}
             decay={2}
             castShadow={false}
@@ -183,7 +188,7 @@ export function DioramaMarina(): React.ReactElement {
       </group>
 
       {/* Đàn hải âu đậu cọc bến thuyền */}
-      <DioramaPerchingBirds />
+      <DioramaPerchingBirds isMobile={isMobile} />
     </group>
   );
 }

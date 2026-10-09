@@ -22,6 +22,7 @@ import {
   DioramaLandmarkNorthStation,
   DioramaTropicalFlora,
 } from './diorama/diorama_railroad';
+import { isPhoneHardware } from './device_detect';
 
 export {
   DioramaModelRailroad,
@@ -274,7 +275,8 @@ export interface MiniatureCityDioramaProps {
   readonly isMobile?: boolean;
 }
 
-export function MiniatureCityDiorama({ isMobile = false }: MiniatureCityDioramaProps = {}): React.ReactElement {
+export function MiniatureCityDiorama({ isMobile: propIsMobile }: MiniatureCityDioramaProps = {}): React.ReactElement {
+  const isMobile = propIsMobile ?? isPhoneHardware();
   return (
     <group position={[0, 0, 0]} data-testid="miniature-city-diorama">
       {/* 0. Khung viền gỗ óc chó & gờ kim loại bao quanh bàn cờ */}
@@ -301,8 +303,8 @@ export function MiniatureCityDiorama({ isMobile = false }: MiniatureCityDioramaP
       <DioramaCivicCenter />
       <DioramaWaterfrontPark />
       {/* 4. Cảng Container Cát Lái & Bến du thuyền (Đông Nam) */}
-      <DioramaContainerPort />
-      <DioramaMarina />
+      <DioramaContainerPort isMobile={isMobile} />
+      <DioramaMarina isMobile={isMobile} />
       {/* 4.1. Thuyền du ngoạn lòng sông Sài Gòn */}
       <DioramaHarborCruiser isMobile={isMobile} />
       {/* 5. Cụm cao ốc tài chính Landmark Skyline & Tháp cao ốc nén */}

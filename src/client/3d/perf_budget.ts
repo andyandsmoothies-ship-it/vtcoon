@@ -51,7 +51,7 @@ export const LOD_CONFIGS: Record<
 };
 
 export const DPR_BOUNDS = {
-  MOBILE_MIN: 0.85,
+  MOBILE_MIN: 0.75,
   MOBILE_MAX: 1.0,
   DESKTOP_MIN: 1.0,
   DESKTOP_MAX: 1.5,
@@ -284,15 +284,22 @@ export class PerfBudgetController {
     // Trường hợp cần hạ DPR (FPS thấp kéo dài)
     if (currentFps < DPR_BOUNDS.FPS_DOWN_THRESHOLD && currentDpr > minDpr) {
       if (degradedDurationMs >= DPR_BOUNDS.STEP_DOWN_DELAY_MS) {
-        const nextDpr = isMobile ? DPR_BOUNDS.MOBILE_MIN : Math.max(minDpr, Number((currentDpr - 0.25).toFixed(2)));
+        const nextDpr = isMobile
+          ? (currentDpr > 0.85 ? 0.85 : DPR_BOUNDS.MOBILE_MIN)
+          : Math.max(minDpr, Number((currentDpr - 0.25).toFixed(2)));
         return { targetDpr: nextDpr, shouldUpdate: true, reason: 'STEP_DOWN' };
       }
     }
 
     // Trường hợp có thể nâng DPR (FPS cao kéo dài và không có hoạt ảnh chuyển động)
     if (currentFps >= DPR_BOUNDS.FPS_UP_THRESHOLD && currentDpr < maxDpr && !isMotionActive) {
-      if (optimalDurationMs >= DPR_BOUNDS.STEP_UP_DELAY_MS) {
-        const nextDpr = isMobile ? DPR_BOUNDS.MOBILE_MAX : Math.min(maxDpr, Number((currentDpr + 0.25).toFixed(2)));
+      const requiredOptimalMs = isMobile && currentDpr <= DPR_BOUNDS.MOBILE_MIN
+        ? DPR_BOUNDS.STEP_UP_DELAY_MS * 2
+        : DPR_BOUNDS.STEP_UP_DELAY_MS;
+      if (optimalDurationMs >= requiredOptimalMs) {
+        const nextDpr = isMobile
+          ? (currentDpr < 0.85 ? 0.85 : DPR_BOUNDS.MOBILE_MAX)
+          : Math.min(maxDpr, Number((currentDpr + 0.25).toFixed(2)));
         return { targetDpr: nextDpr, shouldUpdate: true, reason: 'STEP_UP' };
       }
     }

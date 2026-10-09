@@ -30,7 +30,7 @@ const CONTAINER_BLOCKS: readonly ContainerBlockDef[] = [
   { pos: [-0.42, 0.36, 0.05], size: [0.3, 0.14, 0.65], color: '#D97706' },
 ];
 
-export function DioramaContainerPort(): React.ReactElement {
+export function DioramaContainerPort({ isMobile = false }: { readonly isMobile?: boolean } = {}): React.ReactElement {
   const phase = useEnvironmentStore((s) => s.phase);
   const isNight = phase === 'night';
   const isSunset = phase === 'sunset';
@@ -43,6 +43,7 @@ export function DioramaContainerPort(): React.ReactElement {
   const beacon2Ref = useRef<Mesh>(null);
 
   useSafeFrame((state) => {
+    if (isMobile) return;
     const t = state.clock.elapsedTime;
     // Cần cẩu 1: Tự động xoay góc cần trục yaw từ -25 độ đến +25 độ (0.436 rad)
     if (boom1Ref.current) {
@@ -93,7 +94,7 @@ export function DioramaContainerPort(): React.ReactElement {
         </mesh>
 
         {/* Đèn cảnh báo tĩnh không đỏ nhấp nháy đỉnh cẩu 1 */}
-        <mesh ref={beacon1Ref} position={[0, 0.98, 0]}>
+        <mesh ref={beacon1Ref} position={[0, 0.98, 0]} visible={isNight}>
           <sphereGeometry args={[0.02, 6, 6]} />
           <meshBasicMaterial color="#EF4444" />
         </mesh>
@@ -144,7 +145,7 @@ export function DioramaContainerPort(): React.ReactElement {
         </mesh>
 
         {/* Đèn cảnh báo tĩnh không đỏ nhấp nháy đỉnh cẩu 2 */}
-        <mesh ref={beacon2Ref} position={[0, 0.98, 0]}>
+        <mesh ref={beacon2Ref} position={[0, 0.98, 0]} visible={isNight}>
           <sphereGeometry args={[0.02, 6, 6]} />
           <meshBasicMaterial color="#EF4444" />
         </mesh>

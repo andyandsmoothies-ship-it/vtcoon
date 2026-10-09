@@ -24,21 +24,28 @@ export function TropicalWater({
   const preset = TIME_OF_DAY_PRESETS[phase];
 
   const meshRef = React.useRef<Mesh>(null);
-  // [C4] useMemo không deps, sạch 100% ESLint rule
-  const uniforms = React.useMemo(() => createTropicalWaterUniforms(), []);
+  // [C4] useMemo với deps [isMobile] để khởi tạo baseline màu đại dương sâu cho mobile
+  const uniforms = React.useMemo(() => {
+    const u = createTropicalWaterUniforms();
+    if (isMobile && u.uDeepColor) {
+      (u.uDeepColor.value as Color).set('#0369A1');
+    }
+    return u;
+  }, [isMobile]);
   const tempColor = React.useMemo(() => new Color(), []);
   const tempVec = React.useMemo(() => new Vector3(), []);
 
-  // [C3] Gán trực tiếp Record<string, IUniform> sạch, không dirty cast
+  // [C3] ShaderMaterial với precision: 'mediump' trên mobile, 'highp' trên desktop (IMP-338)
   const material = React.useMemo(() => {
     return new ShaderMaterial({
       uniforms,
-      vertexShader: TROPICAL_WATER_VERTEX_SHADER,
+      vertexShader: TROPICAL_WATER_VERTEX_SHADER.replace('uniform float uTime;', 'uniform highp float uTime;'),
       fragmentShader: TROPICAL_WATER_FRAGMENT_SHADER,
+      precision: isMobile ? 'mediump' : 'highp',
       transparent: true,
       depthWrite: false,
     });
-  }, [uniforms]);
+  }, [uniforms, isMobile]);
 
   // [I3] Phân khúc lưới thích ứng: Mobile 24x24 (1.152 tris chuẩn), Desktop 32x32
   const segments = isMobile ? 24 : 32;
@@ -55,10 +62,10 @@ export function TropicalWater({
     const dt = Math.min(delta, 0.1);
     const lerpRate = 1.0 - Math.exp(-dt * 3.0);
 
-    // Chu kỳ sóng GPU
+    // Chu kỳ sóng GPU (Modulo 200*PI để bảo toàn độ chính xác số học trên mobile)
     const uTime = uniforms.uTime;
     if (uTime) {
-      uTime.value = (uTime.value as number) + dt;
+      uTime.value = ((uTime.value as number) + dt) % (Math.PI * 200.0);
     }
 
     // [C4] Nội suy màu sắc mượt mà về preset hiện tại (Zero-alloc)
@@ -67,7 +74,8 @@ export function TropicalWater({
       (uniforms.uShallowColor.value as Color).lerp(tempColor, lerpRate);
     }
     if (uniforms.uDeepColor && preset) {
-      tempColor.set(preset.waterDeepColor);
+      const targetDeep = isMobile && phase === 'day' ? '#0369A1' : preset.waterDeepColor;
+      tempColor.set(targetDeep);
       (uniforms.uDeepColor.value as Color).lerp(tempColor, lerpRate);
     }
     if (uniforms.uFoamColor && preset) {

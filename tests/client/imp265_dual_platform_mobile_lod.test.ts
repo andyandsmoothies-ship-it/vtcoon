@@ -346,7 +346,7 @@ describe('IMP-265: Dual-Platform 3D Performance & Mobile Thermal Invariant Contr
     );
   });
 
-  it('TC-265.18 [UC-IMP265/A4]: calculateAdaptiveDpr enforces mobile DPR ceiling at 1.0 and steps down to 0.85 under sustained low FPS without oscillation', () => {
+  it('TC-265.18 [UC-IMP265/A4]: calculateAdaptiveDpr enforces mobile DPR ceiling at 1.0 and steps down to 0.75 under sustained low FPS without oscillation', () => {
     const controller = new PerfBudgetController();
 
     const stepDownResult = controller.calculateAdaptiveDpr({
@@ -360,7 +360,7 @@ describe('IMP-265: Dual-Platform 3D Performance & Mobile Thermal Invariant Contr
     const floorResult = controller.calculateAdaptiveDpr({
       isMobile: true,
       currentFps: 25,
-      currentDpr: 0.85,
+      currentDpr: 0.75,
       degradedDurationMs: 3000,
       optimalDurationMs: 0,
     });

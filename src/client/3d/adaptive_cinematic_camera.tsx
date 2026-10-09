@@ -20,6 +20,7 @@ import {
 } from './cinematic_spline_flyby';
 import { initSoftReturn, sampleSoftReturn, type SoftReturnState } from './camera_soft_return';
 import { useCameraGestures, checkTargetOwnedByHuman, useDebugCameraGlobals } from './use_camera_gestures';
+import { resolveActiveCameraDriver } from './camera_arbitration_engine';
 import { CameraLocationBeacon } from './camera_location_beacon';
 import {
   calculateCameraZoom,
@@ -52,6 +53,7 @@ export function AdaptiveCinematicCamera({
   const lastDestinationCellRef = useRef<number | null>(null);
   const gamePhaseRef = useRef<1 | 2 | 3>(1);
   const softReturnRef = useRef<SoftReturnState | null>(null);
+  const prevTurnPlayerIdRef = useRef<string | null>(null);
 
   const flightStartTimeRef = useRef<number | null>(null);
   const currentOverviewPosRef = useRef<[number, number, number]>([defaultCfg.position[0], defaultCfg.position[1], defaultCfg.position[2]]);
@@ -68,6 +70,7 @@ export function AdaptiveCinematicCamera({
     isUserInteractingRef,
     hasSkippedCurrentMoveRef,
     handleFrameSkip,
+    arbitrationSession,
   } = useCameraGestures({
     camera,
     controlsRef,
@@ -337,8 +340,20 @@ export function AdaptiveCinematicCamera({
       }
     }
 
+    const hasTurnChanged = prevTurnPlayerIdRef.current !== null && prevTurnPlayerIdRef.current !== currentTurnPlayerId;
+    prevTurnPlayerIdRef.current = currentTurnPlayerId;
+
+    arbitrationSession.current.checkPreemption(
+      activeModal,
+      cameraFocusCell,
+      isRolling,
+      hasTurnChanged,
+      !hasUserCustomCamera && isPawnMoving
+    );
+
     if (controlsRef.current) {
       const isDragging = isUserInteractingRef.current;
+      const isGracePeriodActive = arbitrationSession.current.isGracePeriodActive(performance.now());
       const isActionOngoing = isRolling || (!hasUserCustomCamera && isPawnMoving) || activeScreenShake !== null
         || (cameraFocusCell !== null)
         || (!hasUserCustomCamera && activeModal !== null);
@@ -347,14 +362,22 @@ export function AdaptiveCinematicCamera({
         softReturnRef.current = null;
       }
 
-      if (isDragging) {
+      const activeDriver = resolveActiveCameraDriver(
+        isDragging,
+        isGracePeriodActive,
+        softReturnRef.current !== null,
+        isActionOngoing,
+        isResettingRef.current
+      );
+
+      if (activeDriver === 'user') {
         camBaseRef.current[0] = camera.position.x;
         camBaseRef.current[1] = camera.position.y;
         camBaseRef.current[2] = camera.position.z;
         targetBaseRef.current[0] = controlsRef.current.target.x;
         targetBaseRef.current[1] = controlsRef.current.target.y;
         targetBaseRef.current[2] = controlsRef.current.target.z;
-      } else if (softReturnRef.current) {
+      } else if (activeDriver === 'soft_return' && softReturnRef.current) {
         const sample = sampleSoftReturn(softReturnRef.current, performance.now());
         camBaseRef.current[0] = sample.position[0];
         camBaseRef.current[1] = sample.position[1];
@@ -371,7 +394,7 @@ export function AdaptiveCinematicCamera({
           isResettingRef.current = false;
           isManualOverviewResetRef.current = false;
         }
-      } else if (isActionOngoing || isResettingRef.current) {
+      } else if (activeDriver === 'director') {
         targetBaseRef.current[0] += (targetState.target[0] - targetBaseRef.current[0]) * lerpFactor;
         targetBaseRef.current[1] += (targetState.target[1] - targetBaseRef.current[1]) * lerpFactor;
         targetBaseRef.current[2] += (targetState.target[2] - targetBaseRef.current[2]) * lerpFactor;

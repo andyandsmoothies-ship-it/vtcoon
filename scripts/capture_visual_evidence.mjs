@@ -149,7 +149,12 @@ async function checkPortOpen(port, signal) {
   try {
     const timeout = AbortSignal.timeout(1000);
     const combinedSignal = signal ? AbortSignal.any([timeout, signal]) : timeout;
-    const res = await fetch(`http://127.0.0.1:${port}/`, { method: 'HEAD', signal: combinedSignal });
+    let res;
+    try {
+      res = await fetch(`http://localhost:${port}/`, { method: 'HEAD', signal: combinedSignal });
+    } catch {
+      res = await fetch(`http://127.0.0.1:${port}/`, { method: 'HEAD', signal: combinedSignal });
+    }
     return res.status < 500;
   } catch {
     return false;
@@ -743,6 +748,7 @@ Options:
         userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
       });
       await injectScenario(opts.scenario, opts.scenarioExpr);
+      await new Promise((r) => setTimeout(r, 600));
 
       const desktopFile = `${opts.ticket.toLowerCase()}_desktop.jpg`;
       const desktopPath = path.join(tmpDir, desktopFile);
@@ -766,6 +772,7 @@ Options:
         userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1',
       });
       await injectScenario(opts.scenario, opts.scenarioExpr);
+      await new Promise((r) => setTimeout(r, 600));
 
       const mobileFile = `${opts.ticket.toLowerCase()}_mobile_360.jpg`;
       const mobilePath = path.join(tmpDir, mobileFile);

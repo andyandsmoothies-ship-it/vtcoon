@@ -146,7 +146,7 @@ export function calculateBirdFlightPosition(
   };
 }
 
-export function DioramaPerchingBirds(): React.ReactElement {
+export function DioramaPerchingBirds({ isMobile = false }: { readonly isMobile?: boolean } = {}): React.ReactElement {
   const flightStateRef = useRef<BirdFlightState>('PERCHED');
   const stateTimeRef = useRef<number>(0);
   const idleTimeRef = useRef<number>(0);
@@ -155,6 +155,7 @@ export function DioramaPerchingBirds(): React.ReactElement {
   const wingsRef = useRef<(Group | null)[]>([]);
 
   const handlePointerDown = (e: ThreeEvent<PointerEvent> | React.PointerEvent | { stopPropagation: () => void }) => {
+    if (isMobile) return;
     e.stopPropagation();
     if (flightStateRef.current === 'PERCHED') {
       flightStateRef.current = triggerBirdScare(flightStateRef.current);
@@ -165,6 +166,7 @@ export function DioramaPerchingBirds(): React.ReactElement {
   };
 
   useSafeFrame((_, delta) => {
+    if (isMobile) return;
     const clampedDelta = Math.min(delta, 0.1);
     stateTimeRef.current += clampedDelta;
 
@@ -222,12 +224,14 @@ export function DioramaPerchingBirds(): React.ReactElement {
 
   return (
     <group data-testid="diorama-perching-birds" onPointerDown={handlePointerDown}>
-      {PERCH_SPOTS.map((_, idx) => (
+      {PERCH_SPOTS.map((spot, idx) => (
         <group
           key={`perching-bird-${idx}`}
           ref={(el) => {
             birdsRef.current[idx] = el;
           }}
+          position={isMobile ? [spot.x, spot.y, spot.z] : undefined}
+          rotation={isMobile ? [0, spot.baseRotY, 0] : undefined}
           scale={[0.22, 0.22, 0.22]}
         >
           {/* Thân chim bồ câu / hải âu mini (Zero castShadow theo [TC-221.15]) */}

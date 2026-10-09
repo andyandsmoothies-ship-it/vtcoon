@@ -36,15 +36,23 @@ function parseCliArgs() {
     }
   }
 
+  const KNOWN_3D_TICKETS = new Set(['IMP-336', 'IMP-337', 'IMP-338', 'IMP-265', 'IMP-341']);
   if (!is3D && (
     srcPath?.includes('3d') ||
     srcPath?.includes('client/3d') ||
     testPath?.includes('3d') ||
     testPath?.includes('spatial') ||
     testPath?.includes('camera') ||
-    ticketId?.toLowerCase().includes('3d')
+    ticketId?.toLowerCase().includes('3d') ||
+    (ticketId && KNOWN_3D_TICKETS.has(ticketId.toUpperCase()))
   )) {
     is3D = true;
+    if (!srcPath && ticketId?.toUpperCase() === 'IMP-338') {
+      srcPath = 'src/client/3d/tropical_water.tsx';
+    }
+    if (!srcPath && ticketId?.toUpperCase() === 'IMP-341') {
+      srcPath = 'src/client/3d/camera_arbitration_engine.ts';
+    }
   }
 
   return { ticketId, testPath, srcPath, is3D, rawArgs: args };
@@ -1139,6 +1147,272 @@ function runRealMutationProbe(testPath, srcPath, ticketId) {
         desc: 'AST: disable actor authorization in restorePostInsolvencyPhase',
         target: 'if (!isAuthorizedInsolvencyActor(room, playerId)) return;',
         replacement: '/* no auth guard */',
+      },
+    ],
+    'IMP-336': [
+      {
+        file: 'src/client/3d/board_tile.tsx',
+        desc: 'AST: invert isMobile smoothness ternary on corner tile',
+        target: '<RoundedBox args={[2.2, 0.22, 2.2]} radius={0.08} smoothness={isMobile ? 1 : 4} receiveShadow>',
+        replacement: '<RoundedBox args={[2.2, 0.22, 2.2]} radius={0.08} smoothness={isMobile ? 4 : 1} receiveShadow>',
+      },
+      {
+        file: 'src/client/3d/board_tile.tsx',
+        desc: 'AST: force static smoothness=4 on regular tile',
+        target: '<RoundedBox args={[1.68, 0.2, 2.2]} radius={0.08} smoothness={isMobile ? 1 : 4} receiveShadow>',
+        replacement: '<RoundedBox args={[1.68, 0.2, 2.2]} radius={0.08} smoothness={4} receiveShadow>',
+      },
+      {
+        file: 'src/client/3d/board_tile.tsx',
+        desc: 'AST: force static smoothness=4 on corner tile',
+        target: '<RoundedBox args={[2.2, 0.22, 2.2]} radius={0.08} smoothness={isMobile ? 1 : 4} receiveShadow>',
+        replacement: '<RoundedBox args={[2.2, 0.22, 2.2]} radius={0.08} smoothness={4} receiveShadow>',
+      },
+      {
+        file: 'src/client/3d/board_tile.tsx',
+        desc: 'AST: invert isMobile smoothness ternary on regular tile',
+        target: '<RoundedBox args={[1.68, 0.2, 2.2]} radius={0.08} smoothness={isMobile ? 1 : 4} receiveShadow>',
+        replacement: '<RoundedBox args={[1.68, 0.2, 2.2]} radius={0.08} smoothness={isMobile ? 4 : 1} receiveShadow>',
+      },
+      {
+        file: 'src/client/3d/board_tile.tsx',
+        desc: 'AST: corrupt regular tile args width dimension',
+        target: '<RoundedBox args={[1.68, 0.2, 2.2]} radius={0.08} smoothness={isMobile ? 1 : 4} receiveShadow>',
+        replacement: '<RoundedBox args={[9.99, 0.2, 2.2]} radius={0.08} smoothness={isMobile ? 1 : 4} receiveShadow>',
+      },
+      {
+        file: 'src/client/3d/board_tile.tsx',
+        desc: 'AST: corrupt corner tile args dimension',
+        target: '<RoundedBox args={[2.2, 0.22, 2.2]} radius={0.08} smoothness={isMobile ? 1 : 4} receiveShadow>',
+        replacement: '<RoundedBox args={[9.99, 0.22, 2.2]} radius={0.08} smoothness={isMobile ? 1 : 4} receiveShadow>',
+      },
+      {
+        file: 'src/client/3d/board_tile.tsx',
+        desc: 'AST: corrupt regular tile radius',
+        target: '<RoundedBox args={[1.68, 0.2, 2.2]} radius={0.08} smoothness={isMobile ? 1 : 4} receiveShadow>',
+        replacement: '<RoundedBox args={[1.68, 0.2, 2.2]} radius={0.99} smoothness={isMobile ? 1 : 4} receiveShadow>',
+      },
+      {
+        file: 'src/client/3d/board_tile.tsx',
+        desc: 'AST: corrupt corner tile radius',
+        target: '<RoundedBox args={[2.2, 0.22, 2.2]} radius={0.08} smoothness={isMobile ? 1 : 4} receiveShadow>',
+        replacement: '<RoundedBox args={[2.2, 0.22, 2.2]} radius={0.99} smoothness={isMobile ? 1 : 4} receiveShadow>',
+      },
+    ],
+    'IMP-337': [
+      {
+        file: 'src/client/3d/miniature_city_diorama.tsx',
+        desc: 'AST: omit isMobile forwarding to DioramaContainerPort',
+        target: '<DioramaContainerPort isMobile={isMobile} />',
+        replacement: '<DioramaContainerPort />',
+      },
+      {
+        file: 'src/client/3d/miniature_city_diorama.tsx',
+        desc: 'AST: omit isMobile forwarding to DioramaMarina',
+        target: '<DioramaMarina isMobile={isMobile} />',
+        replacement: '<DioramaMarina />',
+      },
+      {
+        file: 'src/client/3d/miniature_city_diorama.tsx',
+        desc: 'AST: invert isMobile forwarding to DioramaContainerPort',
+        target: '<DioramaContainerPort isMobile={isMobile} />',
+        replacement: '<DioramaContainerPort isMobile={!isMobile} />',
+      },
+      {
+        file: 'src/client/3d/miniature_city_diorama.tsx',
+        desc: 'AST: invert isMobile forwarding to DioramaMarina',
+        target: '<DioramaMarina isMobile={isMobile} />',
+        replacement: '<DioramaMarina isMobile={!isMobile} />',
+      },
+      {
+        file: 'src/client/3d/diorama/diorama_container_port.tsx',
+        desc: 'AST: invert crane beacon 1 declarative visibility',
+        target: '<mesh ref={beacon1Ref} position={[0, 0.98, 0]} visible={isNight}>',
+        replacement: '<mesh ref={beacon1Ref} position={[0, 0.98, 0]} visible={!isNight}>',
+      },
+      {
+        file: 'src/client/3d/diorama/diorama_container_port.tsx',
+        desc: 'AST: invert crane beacon 2 declarative visibility',
+        target: '<mesh ref={beacon2Ref} position={[0, 0.98, 0]} visible={isNight}>',
+        replacement: '<mesh ref={beacon2Ref} position={[0, 0.98, 0]} visible={!isNight}>',
+      },
+      {
+        file: 'src/client/3d/miniature_city_diorama.tsx',
+        desc: 'AST: corrupt isMobile fallback in MiniatureCityDiorama (force true)',
+        target: 'const isMobile = propIsMobile ?? isPhoneHardware();',
+        replacement: 'const isMobile = propIsMobile ?? true;',
+      },
+      {
+        file: 'src/client/3d/diorama/diorama_marina.tsx',
+        desc: 'AST: invert pointLight intensity ternary for mobile',
+        target: 'intensity={isMobile ? 0 : beaconIntensity}',
+        replacement: 'intensity={isMobile ? beaconIntensity : 0}',
+      },
+      {
+        file: 'src/client/3d/diorama/diorama_marina.tsx',
+        desc: 'AST: invert sweeping beacon cone visibility for mobile',
+        target: 'visible={!isMobile && isNightOrSunset}',
+        replacement: 'visible={isMobile && isNightOrSunset}',
+      },
+      {
+        file: 'src/client/3d/diorama/diorama_marina.tsx',
+        desc: 'AST: omit isMobile forwarding to DioramaPerchingBirds',
+        target: '<DioramaPerchingBirds isMobile={isMobile} />',
+        replacement: '<DioramaPerchingBirds />',
+      },
+      {
+        file: 'src/client/3d/diorama/diorama_marina.tsx',
+        desc: 'AST: invert isMobile forwarding to DioramaPerchingBirds',
+        target: '<DioramaPerchingBirds isMobile={isMobile} />',
+        replacement: '<DioramaPerchingBirds isMobile={!isMobile} />',
+      },
+      {
+        file: 'src/client/3d/diorama/diorama_perching_birds.tsx',
+        desc: 'AST: invert static position assignment for mobile birds',
+        target: 'position={isMobile ? [spot.x, spot.y, spot.z] : undefined}',
+        replacement: 'position={isMobile ? undefined : [spot.x, spot.y, spot.z]}',
+      },
+      {
+        file: 'src/client/3d/diorama/diorama_perching_birds.tsx',
+        desc: 'AST: invert static rotation assignment for mobile birds',
+        target: 'rotation={isMobile ? [0, spot.baseRotY, 0] : undefined}',
+        replacement: 'rotation={isMobile ? undefined : [0, spot.baseRotY, 0]}',
+      },
+      {
+        file: 'src/client/3d/diorama/diorama_perching_birds.tsx',
+        desc: 'AST: corrupt bird pointer down mobile guard',
+        target: 'if (isMobile) return;',
+        replacement: '/* no bird tap guard */',
+      },
+    ],
+    'IMP-338': [
+      {
+        file: 'src/client/3d/coastal_island_environment.tsx',
+        desc: 'AST: invert middle ocean plane condition for mobile',
+        target: '{!isMobile && (',
+        replacement: '{isMobile && (',
+      },
+      {
+        file: 'src/client/3d/coastal_island_environment.tsx',
+        desc: 'AST: omit isMobile guard and always render middle ocean plane',
+        target: '{!isMobile && (',
+        replacement: '{true && (',
+      },
+      {
+        file: 'src/client/3d/tropical_water.tsx',
+        desc: 'AST: invert precision ternary for mobile in ShaderMaterial',
+        target: "precision: isMobile ? 'mediump' : 'highp',",
+        replacement: "precision: isMobile ? 'highp' : 'mediump',",
+      },
+      {
+        file: 'src/client/3d/tropical_water.tsx',
+        desc: 'AST: skip highp float uTime replacement in vertexShader',
+        target: "vertexShader: TROPICAL_WATER_VERTEX_SHADER.replace('uniform float uTime;', 'uniform highp float uTime;'),",
+        replacement: 'vertexShader: TROPICAL_WATER_VERTEX_SHADER,',
+      },
+      {
+        file: 'src/client/3d/tropical_water.tsx',
+        desc: 'AST: corrupt baked deep ocean color on mobile',
+        target: "(u.uDeepColor.value as Color).set('#0369A1');",
+        replacement: "(u.uDeepColor.value as Color).set('#FF0000');",
+      },
+      {
+        file: 'src/client/3d/tropical_water.tsx',
+        desc: 'AST: corrupt modulo wrap of uTime in useSafeFrame',
+        target: '% (Math.PI * 200.0)',
+        replacement: '/* no wrap */',
+      },
+      {
+        file: 'src/client/3d/perf_budget.ts',
+        desc: 'AST: corrupt MOBILE_MIN from 0.75 to 0.85',
+        target: 'MOBILE_MIN: 0.75,',
+        replacement: 'MOBILE_MIN: 0.85,',
+      },
+      {
+        file: 'src/client/3d/perf_budget.ts',
+        desc: 'AST: disable multi-step intermediate pacing down to 0.85',
+        target: 'currentDpr > 0.85 ? 0.85 : DPR_BOUNDS.MOBILE_MIN',
+        replacement: 'DPR_BOUNDS.MOBILE_MIN',
+      },
+      {
+        file: 'src/client/3d/perf_budget.ts',
+        desc: 'AST: disable double damping (6000ms) for recovery from 0.75',
+        target: 'isMobile && currentDpr <= DPR_BOUNDS.MOBILE_MIN',
+        replacement: 'false && isMobile && currentDpr <= DPR_BOUNDS.MOBILE_MIN',
+      },
+    ],
+    'IMP-341': [
+      {
+        file: 'src/client/3d/camera_arbitration_engine.ts',
+        desc: 'AST: invert user driver check in resolveActiveCameraDriver',
+        target: "if (isDragging || isGracePeriodActive) return 'user';",
+        replacement: "if (isDragging || isGracePeriodActive) return 'director';",
+      },
+      {
+        file: 'src/client/3d/camera_arbitration_engine.ts',
+        desc: 'AST: omit isGracePeriodActive check in resolveActiveCameraDriver',
+        target: "if (isDragging || isGracePeriodActive) return 'user';",
+        replacement: "if (isDragging) return 'user';",
+      },
+      {
+        file: 'src/client/3d/camera_arbitration_engine.ts',
+        desc: 'AST: corrupt soft return driver in resolveActiveCameraDriver',
+        target: "if (hasSoftReturn) return 'soft_return';",
+        replacement: "if (hasSoftReturn) return 'idle';",
+      },
+      {
+        file: 'src/client/3d/camera_arbitration_engine.ts',
+        desc: 'AST: corrupt director driver in resolveActiveCameraDriver',
+        target: "if (isActionOngoing || isResetting) return 'director';",
+        replacement: "if (isActionOngoing || isResetting) return 'idle';",
+      },
+      {
+        file: 'src/client/3d/camera_arbitration_engine.ts',
+        desc: 'AST: corrupt tap-to-skip condition in classifyGestureIntent',
+        target: 'if (isPawnAnimating && touchDurationMs < 220 && distPos < 0.4 && distTarget < 0.2)',
+        replacement: 'if (isPawnAnimating && touchDurationMs < 10 && distPos < 0.4 && distTarget < 0.2)',
+      },
+      {
+        file: 'src/client/3d/camera_arbitration_engine.ts',
+        desc: 'AST: corrupt manual inspection displacement check',
+        target: 'if (distPos >= 0.4 || distTarget >= 0.2)',
+        replacement: 'if (distPos >= 999.0 || distTarget >= 999.0)',
+      },
+      {
+        file: 'src/client/3d/camera_arbitration_engine.ts',
+        desc: 'AST: corrupt justBrokeSoftReturn threshold',
+        target: 'const isSignificantPan = distPos > 0.8 || distTarget > 0.5;',
+        replacement: 'const isSignificantPan = distPos > 999.0;',
+      },
+      {
+        file: 'src/client/3d/camera_arbitration_engine.ts',
+        desc: 'AST: corrupt shouldClearJustBroke flag in classifyGestureIntent',
+        target: 'shouldClearJustBroke: true,',
+        replacement: 'shouldClearJustBroke: false,',
+      },
+      {
+        file: 'src/client/3d/camera_arbitration_engine.ts',
+        desc: 'AST: corrupt DEFAULT_GRACE_PERIOD_MS',
+        target: 'export const DEFAULT_GRACE_PERIOD_MS = 800;',
+        replacement: 'export const DEFAULT_GRACE_PERIOD_MS = 0;',
+      },
+      {
+        file: 'src/client/3d/camera_arbitration_engine.ts',
+        desc: 'AST: disable grace period grant in session',
+        target: 'gracePeriodEndTime = currentTimeMs + durationMs;',
+        replacement: 'gracePeriodEndTime = 0;',
+      },
+      {
+        file: 'src/client/3d/camera_arbitration_engine.ts',
+        desc: 'AST: corrupt cancelGracePeriod in session',
+        target: 'cancelGracePeriod(): void {\n      gracePeriodEndTime = 0;\n    },',
+        replacement: 'cancelGracePeriod(): void {\n      gracePeriodEndTime = 9999999999999;\n    },',
+      },
+      {
+        file: 'src/client/3d/camera_arbitration_engine.ts',
+        desc: 'AST: omit grace period clear on preemption',
+        target: 'gracePeriodEndTime = 0;\n        return true;',
+        replacement: 'return false;',
       },
     ],
   };

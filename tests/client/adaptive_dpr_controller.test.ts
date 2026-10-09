@@ -52,16 +52,16 @@ describe('[TC-DPR/MSS][UC-DPR] Ma Trận Kiểm Thử Hợp Đồng Adaptive DPR
       expect(dprRange).toEqual([1.0, 1.5]);
     });
 
-    it('[TC-DPR01.03/MSS][UC-DPR-01] calculateAdaptiveDpr không bao giờ trả về DPR < 0.85 trên mobile hoặc > 1.5 trên desktop', () => {
+    it('[TC-DPR01.03/MSS][UC-DPR-01] calculateAdaptiveDpr không bao giờ trả về DPR < 0.75 trên mobile hoặc > 1.5 trên desktop', () => {
       const controller = new PerfBudgetController();
       const mobileClamped = controller.calculateAdaptiveDpr({
         isMobile: true,
         currentFps: 10,
-        currentDpr: 0.85,
+        currentDpr: 0.75,
         degradedDurationMs: 5000,
         optimalDurationMs: 0,
       });
-      expect(mobileClamped.targetDpr).toBeGreaterThanOrEqual(0.85);
+      expect(mobileClamped.targetDpr).toBeGreaterThanOrEqual(0.75);
       expect(mobileClamped.shouldUpdate).toBe(false);
 
       const desktopClamped = controller.calculateAdaptiveDpr({

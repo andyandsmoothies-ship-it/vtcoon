@@ -60,10 +60,11 @@ function findFirstNode(
  * Executes Component inside a lightweight React render context without mounting Three.js DOM,
  * capturing the topmost returned ReactElement tree.
  */
-function captureTree<P = any>(Component: React.ComponentType<P>, props?: P): any {
-  let captured: any = null;
+function captureTree<P extends object = object>(Component: React.ComponentType<P>, props?: P): unknown {
+  let captured: unknown = null;
   function SpyComponent() {
-    captured = (Component as any)(props ?? {});
+    const Comp = Component as React.FC<P>;
+    captured = Comp(props ?? ({} as P));
     return React.createElement('div', null);
   }
   renderToStaticMarkup(React.createElement(SpyComponent));
@@ -300,8 +301,8 @@ describe('[TC-150/MSS][UC-IMP150] Mobile & iOS 60 FPS Performance Hardening Cont
 
     it('[TC-150.18/MSS] board_tile.tsx preserves exact RoundedBox geometry arguments for TC-P1.2 compatibility', () => {
       const source = fs.readFileSync(boardTilePath, 'utf-8');
-      expect(source).toContain('<RoundedBox args={[2.2, 0.22, 2.2]} radius={0.08} smoothness={4}');
-      expect(source).toContain('<RoundedBox args={[1.68, 0.2, 2.2]} radius={0.08} smoothness={4}');
+      expect(source).toMatch(/<RoundedBox[^>]*args=\{\[2\.2,\s*0\.22,\s*2\.2\]\}[^>]*radius=\{0\.08\}[^>]*smoothness=\{(?:isMobile\s*\?\s*1\s*:\s*4|4)\}/);
+      expect(source).toMatch(/<RoundedBox[^>]*args=\{\[1\.68,\s*0\.2,\s*2\.2\]\}[^>]*radius=\{0\.08\}[^>]*smoothness=\{(?:isMobile\s*\?\s*1\s*:\s*4|4)\}/);
     });
   });
 });

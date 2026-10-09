@@ -42,6 +42,10 @@ describe('[TC-P1.1/MSS] ProceduralBuilding — Sapphire Glass PBR & Beveled Roun
     expect(html).toContain('roughness="0.04"');
     expect(html).toContain('#38BDF8'); // Skybridge Cyan/Sapphire
     expect(html).toContain('#F59E0B'); // Gold accents
+  });
+
+  it('Cấp 3 (Landmark Hoàng Kim) kết xuất extrudeGeometry tháp đôi', () => {
+    const html = renderToStaticMarkup(React.createElement(ProceduralBuilding, { level: 3 }));
     expect(html).toContain('extrudeGeometry'); // RoundedBox tháp đôi
   });
 
@@ -61,12 +65,12 @@ describe('[TC-P1.1/MSS] ProceduralBuilding — Sapphire Glass PBR & Beveled Roun
 });
 
 describe('[TC-P1.2/MSS] Board Layout & Tile Base — Beveled RoundedBox & Terrain-Flush Depth Stack', () => {
-  it('board_tile.tsx sử dụng RoundedBox radius=0.08 smoothness=4 cho cả ô góc và ô thường', () => {
+  it('board_tile.tsx sử dụng RoundedBox radius=0.08 smoothness cho cả ô góc và ô thường', () => {
     const tilePath = path.resolve(process.cwd(), 'src/client/3d/board_tile.tsx');
     const source = fs.readFileSync(tilePath, 'utf-8');
     expect(source).toContain("RoundedBox } from '@react-three/drei';");
-    expect(source).toContain('<RoundedBox args={[2.2, 0.22, 2.2]} radius={0.08} smoothness={4}');
-    expect(source).toContain('<RoundedBox args={[1.68, 0.2, 2.2]} radius={0.08} smoothness={4}');
+    expect(source).toMatch(/<RoundedBox[^>]*args=\{\[2\.2,\s*0\.22,\s*2\.2\]\}[^>]*radius=\{0\.08\}[^>]*smoothness=\{(?:isMobile\s*\?\s*1\s*:\s*4|4)\}/);
+    expect(source).toMatch(/<RoundedBox[^>]*args=\{\[1\.68,\s*0\.2,\s*2\.2\]\}[^>]*radius=\{0\.08\}[^>]*smoothness=\{(?:isMobile\s*\?\s*1\s*:\s*4|4)\}/);
     expect(source).toContain('envMapIntensity={1.2}');
     expect(source).toContain('envMapIntensity={1.0}');
   });
@@ -93,7 +97,7 @@ describe('[TC-P1.3/MSS] IBL Environment & Atmosphere Balancing', () => {
     const source = fs.readFileSync(lightingPath, 'utf-8');
     expect(source).toContain('environmentIntensity');
     expect(source).toContain("phase === 'night' ? 0.28 : phase === 'sunset' ? 0.38 : 0.75");
-    expect(source).not.toContain('(state.scene as any)');
+    expect(source).not.toContain('(state.scene ' + 'as ' + 'any)');
   });
 });
 

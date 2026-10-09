@@ -13,6 +13,7 @@ import { useSafeFrame } from './safe_frame';
 import { SafeGLTFModel } from './asset_loader/safe_gltf_model';
 import { VEHICLE_MODEL_URLS } from './diorama/diorama_traffic';
 import { SoundEngine } from '../audio/sound_engine';
+import { isPhoneHardware } from './device_detect';
 
 export function ContainerShipProceduralFallback(): React.ReactElement {
   return (
@@ -40,7 +41,8 @@ export interface CoastalIslandEnvironmentProps {
 export const CoastalIslandEnvironment: ((props: CoastalIslandEnvironmentProps) => React.ReactElement) & React.FC<CoastalIslandEnvironmentProps> = function CoastalIslandEnvironment(
   props: CoastalIslandEnvironmentProps = {}
 ): React.ReactElement {
-  const { streamlined = true, isMobile = false } = props;
+  const { streamlined = true, isMobile: propIsMobile } = props;
+  const isMobile = propIsMobile ?? isPhoneHardware();
   const waveRef = useRef<Mesh>(null);
   const shallowRef = useRef<Mesh>(null);
   // oceanGeomRef preserved for legacy test contract
@@ -77,10 +79,13 @@ export const CoastalIslandEnvironment: ((props: CoastalIslandEnvironmentProps) =
         onWaterClick={() => SoundEngine.playWaterRipple()}
       />
 
-      <mesh receiveShadow position={[0, -0.31, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[180, 180, 32, 32]} />
-        <meshStandardMaterial color="#0369A1" roughness={0.75} metalness={0.02} transparent opacity={0.88} />
-      </mesh>
+      {/* [TẦNG 2: Lớp nước đại dương trung gian] Chỉ render trên Desktop để loại bỏ overdraw TBDR trên mobile */}
+      {!isMobile && (
+        <mesh receiveShadow position={[0, -0.31, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[180, 180, 32, 32]} />
+          <meshStandardMaterial color="#0369A1" roughness={0.75} metalness={0.02} transparent opacity={0.88} />
+        </mesh>
+      )}
 
       {/* Tầng nước nông ngọc bích ôm sát chân bàn cờ, triệt tiêu 100% đĩa tròn ngoại vi thừa */}
       <mesh ref={shallowRef} receiveShadow position={[0, -0.298, 0]}>
