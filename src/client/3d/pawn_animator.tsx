@@ -32,6 +32,8 @@ export {
   emoteCanvasCache,
 };
 
+const PAWN_LANDING_SETTLE_MS = 600;
+
 export const PLAYER_OFFSETS: readonly [number, number, number][] = [
   [-0.2, 0, -0.2], [0.2, 0, -0.2], [-0.2, 0, 0.2], [0.2, 0, 0.2],
 ] as const;
@@ -44,6 +46,7 @@ export interface ActivePawnProps extends Pick<SingleHopProps, 'color' | 'offset'
   readonly onComplete: (playerId: string) => void;
   readonly isBot?: boolean;
   readonly showTrajectory?: boolean;
+  readonly reaction?: PawnReactionState | null;
 }
 
 export function ActiveSpringPawn({
@@ -56,8 +59,11 @@ export function ActiveSpringPawn({
   slotIndex,
   isBot: isBotProp,
   showTrajectory = false,
+  reaction,
 }: ActivePawnProps): React.ReactElement | null {
   const [stepIndex, setStepIndex] = useState(0);
+  const [isLandedSettle, setIsLandedSettle] = useState(false);
+  const settleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const waypoints = animation.waypoints;
   const isBot = isBotProp !== undefined ? isBotProp : Boolean(animation.isBot || player.isBot);
 
@@ -66,9 +72,21 @@ export function ActiveSpringPawn({
   const prevAnimKeyRef = useRef(animKey);
 
   useEffect(() => {
+    return () => {
+      if (settleTimerRef.current) {
+        clearTimeout(settleTimerRef.current);
+        settleTimerRef.current = null;
+        // [FLUSH-ON-UNMOUNT] Dọn rác nghiệp vụ: Nếu unmount giữa lúc đang settle, flush ngay lập tức để không treo store
+        onComplete(player.id);
+      }
+    };
+  }, [onComplete, player.id]);
+
+  useEffect(() => {
     if (prevAnimKeyRef.current !== animKey) {
       prevAnimKeyRef.current = animKey;
       setStepIndex(0);
+      setIsLandedSettle(false);
     }
   }, [animKey]);
 
@@ -96,9 +114,27 @@ export function ActiveSpringPawn({
         });
       }
     } else {
-      onComplete(player.id);
+      setIsLandedSettle(true);
+      settleTimerRef.current = setTimeout(() => {
+        settleTimerRef.current = null;
+        onComplete(player.id);
+      }, PAWN_LANDING_SETTLE_MS);
     }
   }, [stepIndex, waypoints, player.id, onComplete]);
+
+  if (isLandedSettle) {
+    return (
+      <StaticPawnWithReaction
+        player={player}
+        assignedSlot={slotIndex ?? 0}
+        color={color}
+        offset={offset}
+        currentPos={toCell}
+        activeEmote={emoteId ? { emoteId } : undefined}
+        reaction={reaction ?? undefined}
+      />
+    );
+  }
 
   return (
     <>
@@ -279,6 +315,7 @@ export function PawnAnimator({ players = [] }: { readonly players?: readonly Pla
               animation={activeAnimation}
               onComplete={completePawnMove}
               emoteId={activeEmote?.emoteId}
+              reaction={reaction}
               slotIndex={assignedSlot}
               isBot={Boolean(activeAnimation.isBot || player.isBot)}
             />

@@ -1,6 +1,6 @@
 // [UC-IMP83/MSS] pawn_assignment.ts — Phân Bổ Quân Cờ Ngẫu Nhiên Xác Định Cho Người Chơi
 import { mulberry32 } from './dice.js';
-import { LUXURY_PAWN_CONFIGS, getPawnConfigBySlot, type LuxuryPawnConfig } from '../client/3d/luxury_pawn_models.js';
+import { LUXURY_PAWN_CONFIGS, getPawnConfigBySlot, type LuxuryPawnConfig } from './pawn_configs.js';
 import { PLAYER_TOKEN_PALETTE } from './theme.js';
 
 export interface PawnAssignmentResult {

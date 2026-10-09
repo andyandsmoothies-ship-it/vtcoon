@@ -12,7 +12,8 @@ declare module '../domain/room' {
   }
 }
 
-const LEVEL_MULTIPLIER: Record<number, number> = { 0: 1, 1: 1.5, 2: 2.5, 3: 4 };
+import { LEVEL_MULTIPLIER, calculateRankings, calculateNetWorth } from './room_manager_queries.js';
+export { LEVEL_MULTIPLIER, calculateRankings, calculateNetWorth };
 
 // --- UC-GAME-053: Kiểm tra & chuyển InsolvencyPhase ---
 
@@ -296,45 +297,4 @@ export function advanceTurnAfterBankruptcy(room: Room, rng: () => number = Math.
   } else {
     room.phase = TurnPhase.WaitingRoll;
   }
-}
-
-// --- UC-GAME-055: Quyết Toán Net Worth ---
-
-export function calculateNetWorth(
-  playerId: string,
-  registry: PropertyRegistry,
-  stateMap: PropertyStateMap,
-  players: Room['players'],
-): number {
-  const player = players.find((p) => p.id === playerId);
-  if (!player) return 0;
-
-  let worth = player.balance;
-  const MORTGAGE_RATE = 0.5;
-
-  for (const [cellIndex, owner] of registry) {
-    if (owner !== playerId) continue;
-    const deed  = PROPERTY_DEEDS.get(cellIndex);
-    if (!deed) continue;
-    const level = stateMap.get(cellIndex)?.level ?? 0;
-    const mult  = LEVEL_MULTIPLIER[level] ?? 1;
-    worth += Math.floor(deed.price * mult);
-
-    if (player.mortgagedProperties?.includes(cellIndex)) {
-      const loan = player.mortgageLoans?.[cellIndex] ?? Math.floor(deed.price * MORTGAGE_RATE);
-      worth -= loan;
-    }
-  }
-  return worth;
-}
-
-export function calculateRankings(
-  room: Room,
-  registry: PropertyRegistry,
-  stateMap: PropertyStateMap,
-): Array<{ id: string; netWorth: number }> {
-  return room.players
-    .map((p) => ({ id: p.id, netWorth: calculateNetWorth(p.id, registry, stateMap, room.players), bankrupt: Boolean(p.bankrupt) }))
-    .sort((a, b) => (b.netWorth !== a.netWorth ? b.netWorth - a.netWorth : (a.bankrupt ? 1 : 0) - (b.bankrupt ? 1 : 0)))
-    .map(({ id, netWorth }) => ({ id, netWorth }));
 }

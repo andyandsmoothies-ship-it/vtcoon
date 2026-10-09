@@ -97,6 +97,11 @@ function scanForTautology(filePath) {
   if (tautologyPattern.test(content)) {
     return 'Inline mutant self-throw detected. Probe 3 must test real production code with adversarial inputs.';
   }
+  // Detects tautological timer pattern: local setTimeout tested with advanceTimersByTime without component/store
+  const tautologicalTimerPattern = /(?:const|let|var)\s+\w+\s*=\s*setTimeout\s*\([^)]*=>\s*\{[^}]*\}\s*,\s*[A-Za-z0-9_]+\s*\)[\s\S]*?vi\.advanceTimersByTime/;
+  if (tautologicalTimerPattern.test(content) && !/(?:render\(|createRoot|act\(|useGameStore)/.test(content)) {
+    return 'Tautological timer test detected: file defines local setTimeout() without mounting a component or invoking a production store/function.';
+  }
   return null;
 }
 

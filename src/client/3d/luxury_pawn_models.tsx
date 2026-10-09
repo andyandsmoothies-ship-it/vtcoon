@@ -22,6 +22,11 @@ import {
   hashSeed,
   type PawnAssignmentResult,
 } from '../../domain/pawn_assignment';
+import {
+  LUXURY_PAWN_CONFIGS,
+  getPawnConfigBySlot,
+  type LuxuryPawnConfig,
+} from '../../domain/pawn_configs';
 
 export {
   RookPawnFallback as RookPawn,
@@ -37,84 +42,10 @@ export {
   ClassicCarPawn,
   assignRandomPlayerPawns,
   hashSeed,
+  LUXURY_PAWN_CONFIGS,
+  getPawnConfigBySlot,
+  type LuxuryPawnConfig,
 };
-
-export interface LuxuryPawnConfig {
-  readonly slot: number;
-  readonly name: string;
-  readonly title: string;
-  readonly color: string;
-  readonly metalness: number;
-  readonly roughness: number;
-  readonly modelUrl: string;
-  readonly icon: string;
-  readonly scale: readonly [number, number, number];
-  readonly yOffset?: number;
-}
-
-export const LUXURY_PAWN_CONFIGS: readonly LuxuryPawnConfig[] = [
-  {
-    slot: 0,
-    name: 'Quân Xe Chiến Hoàng Gia',
-    title: 'Đại Gia Sài Gòn (Host)',
-    color: '#DC2626',
-    metalness: 0.25,
-    roughness: 0.28,
-    modelUrl: '/models/pawns/pawn_rook.glb',
-    icon: '🏰',
-    scale: [1.0, 1.0, 1.0],
-    yOffset: 0.03,
-  },
-  {
-    slot: 1,
-    name: 'Quân Pháo Thần Công Cổ Điển',
-    title: 'Chú Sáu',
-    color: '#27AE60',
-    metalness: 0.25,
-    roughness: 0.28,
-    modelUrl: '/models/pawns/pawn_cannon.glb',
-    icon: '💣',
-    scale: [1.0, 1.0, 1.0],
-    yOffset: 0.03,
-  },
-  {
-    slot: 2,
-    name: 'Quân Mã Phong Vân Thượng Lưu',
-    title: 'Cô Tư',
-    color: '#E67E22',
-    metalness: 0.25,
-    roughness: 0.28,
-    modelUrl: '/models/pawns/pawn_horse.glb',
-    icon: '🐎',
-    scale: [1.0, 1.0, 1.0],
-    yOffset: 0.03,
-  },
-  {
-    slot: 3,
-    name: 'Quân Hậu Quyền Quý Indochine',
-    title: 'Bé Bo',
-    color: '#10B981',
-    metalness: 0.25,
-    roughness: 0.28,
-    modelUrl: '/models/pawns/pawn_queen.glb',
-    icon: '👑',
-    scale: [1.0, 1.0, 1.0],
-    yOffset: 0.03,
-  },
-];
-
-/**
- * Lấy cấu hình linh vật quân cờ theo chỉ số slot (0-3), fallback an toàn về slot 0 nếu ngoài biên
- */
-export function getPawnConfigBySlot(slotIndex: number): LuxuryPawnConfig {
-  if (slotIndex === 0) {
-    return LUXURY_PAWN_CONFIGS[0]!;
-  }
-  if (!Number.isFinite(slotIndex) || slotIndex < 0 || slotIndex >= LUXURY_PAWN_CONFIGS.length) {
-    return LUXURY_PAWN_CONFIGS[0]!;
-  }
-  return LUXURY_PAWN_CONFIGS[Math.floor(slotIndex)] ?? LUXURY_PAWN_CONFIGS[0]!;
-}
 
 function isTrimNode(node: Mesh): boolean {
   if (node.name.includes('Trim') || Boolean(node.userData?.isTrim)) {
@@ -259,7 +190,8 @@ export function LuxuryPawnModel({
   );
 }
 
-if (typeof globalThis !== 'undefined' && 'window' in globalThis) {
+const isTestEnv = typeof process !== 'undefined' && (process.env.NODE_ENV === 'test' || Boolean(process.env.VITEST));
+if (typeof globalThis !== 'undefined' && 'window' in globalThis && !isTestEnv) {
   useGLTF.preload('/models/pawns/pawn_rook.glb');
   useGLTF.preload('/models/pawns/pawn_cannon.glb');
   useGLTF.preload('/models/pawns/pawn_horse.glb');

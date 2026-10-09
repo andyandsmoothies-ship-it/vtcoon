@@ -200,6 +200,9 @@ async function runUniversalMutationProbe(
       { pattern: '0.35', replacement: '0.40' },
       { pattern: '0.05', replacement: '0.06' },
       { pattern: '0.20', replacement: '0.25' },
+      { pattern: '0.2;', replacement: '0.5;' },
+      { pattern: 'ENABLE_TREASURY_STIMULUS = false', replacement: 'ENABLE_TREASURY_STIMULUS = true' },
+      { pattern: 'TREASURY_STIMULUS_THRESHOLD = 10_000', replacement: 'TREASURY_STIMULUS_THRESHOLD = 1_000' },
       { pattern: '!this.authenticatedSockets.has(socket)', replacement: 'true' },
     ];
 

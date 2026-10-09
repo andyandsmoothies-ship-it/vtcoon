@@ -17,6 +17,8 @@ interface PipDef {
   readonly isRed?: boolean;
 }
 
+const DICE_SETTLE_DWELL_MS = 600;
+
 const FACE_OFFSET = 0.292;
 const PIP_GAP = 0.11;
 
@@ -92,7 +94,7 @@ function SingleDie({
           if (useGameStore.getState().isRolling) {
             onRest();
           }
-        }, 250);
+        }, DICE_SETTLE_DWELL_MS);
       }
     },
   });

@@ -38,7 +38,7 @@ export interface AdaptiveCinematicCameraProps {
 export function AdaptiveCinematicCamera({
   isPreMatch = false,
 }: AdaptiveCinematicCameraProps = {}): React.ReactElement {
-  const { camera, scene } = useThree();
+  const { camera, scene, gl } = useThree();
   const controlsRef = useRef<OrbitControlsImpl>(null);
   const defaultCfg = CAMERA_CONFIG[isPreMatch ? 'pre_match' : 'overview'];
   const defaultPos: [number, number, number] = [defaultCfg.position[0], defaultCfg.position[1], defaultCfg.position[2]];
@@ -128,6 +128,21 @@ export function AdaptiveCinematicCamera({
     softReturnRef,
     isUserInteractingRef,
   });
+
+  useEffect(() => {
+    const dom = gl?.domElement;
+    if (!dom) return;
+    const handleWheel = () => {
+      if (softReturnRef.current) {
+        softReturnRef.current = null;
+        isResettingRef.current = false;
+      }
+    };
+    dom.addEventListener('wheel', handleWheel, { passive: true });
+    return () => {
+      dom.removeEventListener('wheel', handleWheel);
+    };
+  }, [gl]);
 
   useFrame((_, delta) => {
     if (typeof window !== 'undefined' && window.__debugCameraManual) {
@@ -254,6 +269,24 @@ export function AdaptiveCinematicCamera({
     }
 
     if (mode !== prevModeRef.current) {
+      if (
+        mode === 'overview' &&
+        prevModeRef.current &&
+        prevModeRef.current !== 'overview' &&
+        prevModeRef.current !== 'pre_match' &&
+        !hasUserCustomCamera
+      ) {
+        softReturnRef.current = initSoftReturn(
+          camBaseRef.current,
+          targetBaseRef.current,
+          targetState.position,
+          targetState.target,
+          performance.now(),
+          1200
+        );
+      } else if (mode !== 'overview') {
+        softReturnRef.current = null;
+      }
       prevModeRef.current = mode;
       isResettingRef.current = true;
     }
@@ -309,6 +342,10 @@ export function AdaptiveCinematicCamera({
       const isActionOngoing = isRolling || (!hasUserCustomCamera && isPawnMoving) || activeScreenShake !== null
         || (cameraFocusCell !== null)
         || (!hasUserCustomCamera && activeModal !== null);
+
+      if (isActionOngoing && softReturnRef.current) {
+        softReturnRef.current = null;
+      }
 
       if (isDragging) {
         camBaseRef.current[0] = camera.position.x;

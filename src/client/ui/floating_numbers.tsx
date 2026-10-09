@@ -6,7 +6,12 @@ import {
   type FloatingTextItem,
 } from '../store/game_store.js';
 import { useLobbyStore } from '../store/lobby_store.js';
-import { deduplicateFloatingTexts } from './notification_deduplicator.js';
+import {
+  useVisibleFloatingTexts,
+  DESKTOP_MAX_FLOATING_TEXTS,
+  MOBILE_MAX_FLOATING_TEXTS,
+} from './notification_deduplicator.js';
+import { useIsMobile } from '../hooks/use_is_mobile.js';
 import { formatShortPlayerName } from './ui_helpers.js';
 import {
   resolveTransactionNarrative,
@@ -315,9 +320,15 @@ export function FloatingNumbersOverlay(): React.ReactElement | null {
       ? 'bottom-[calc(8rem+env(safe-area-inset-bottom))] md:bottom-auto md:top-28'
       : 'bottom-[calc(8rem+env(safe-area-inset-bottom))] md:bottom-auto md:top-20';
 
-  const deduplicated = deduplicateFloatingTexts(regularTexts, myPlayerId);
-  const recentTwo = deduplicated.slice(-2);
-  let displayItems = activeModal !== null ? [] : [...recentTwo];
+  const storeIsMobile = useIsMobile();
+  const isMobile = isSSR ? false : storeIsMobile;
+
+  const maxRegularVisible = isMobile
+    ? (latestMilestone ? 1 : MOBILE_MAX_FLOATING_TEXTS)
+    : (latestMilestone ? 2 : DESKTOP_MAX_FLOATING_TEXTS);
+
+  const visibleItems = useVisibleFloatingTexts(regularTexts, maxRegularVisible, myPlayerId, isSSR);
+  let displayItems = activeModal !== null ? [] : [...visibleItems];
   if (
     displayItems.length === 2 &&
     myPlayerId &&

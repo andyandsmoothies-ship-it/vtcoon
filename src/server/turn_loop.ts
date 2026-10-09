@@ -8,7 +8,7 @@ import type { PropertyRegistry, PropertyStateMap } from '../domain/property_mana
 import { handleLanding, LandingResult, calculateGoPropertyTax, GO_PROPERTY_TAX_CAP } from '../domain/property_manager';
 import { BOARD_CONFIG } from '../domain/board_config';
 import { decayModifiers } from '../domain/event_card_engine';
-import { processTreasuryStimulus } from '../domain/treasury_stimulus';
+import { processTreasuryStimulus, ENABLE_TREASURY_STIMULUS } from '../domain/treasury_stimulus';
 import { evaluateMacroCycle } from '../domain/macro_cycle_engine';
 import {
   processRollDoubles,
@@ -159,7 +159,9 @@ export function advanceRoundBoundary(room: Room, rng: () => number = Math.random
   room.roundCount = (room.roundCount ?? 1) + 1;
   room.activeModifiers = decayModifiers(room.activeModifiers ?? []);
   evaluateMacroCycle(room, rng);
-  processTreasuryStimulus(room);
+  if (ENABLE_TREASURY_STIMULUS) {
+    processTreasuryStimulus(room);
+  }
 }
 
 export function executeTurnEnd(

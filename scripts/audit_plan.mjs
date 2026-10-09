@@ -458,6 +458,23 @@ if (errors > 0) {
     const rawTicket = ticketMatch ? ticketMatch[1].replace(/_/g, '-') : filename.replace('PLAN_', '');
     const ticketId = rawTicket.toUpperCase();
 
+    // [STATION 0 ADVERSARIAL GATE] Mechanical check for State/FSM/Lifecycle/Coordinator files
+    const SENSITIVE_PATTERNS = /(?:fsm|state|store|pawn_animator|adaptive_cinematic_camera|turn_loop|turn_flow|insolvency|room_manager|treasury|economy|dice_tray)/i;
+    const sensitiveFiles = Array.from(targetFiles.keys()).filter((f) => SENSITIVE_PATTERNS.test(f));
+
+    if (sensitiveFiles.length > 0) {
+      const challengeFile = path.resolve(process.cwd(), `.agents/audit/PLAN_CHALLENGE_${ticketId}.md`);
+      const hasChallenge = fs.existsSync(challengeFile) && fs.readFileSync(challengeFile, 'utf8').trim().length > 100;
+      if (!hasChallenge) {
+        console.error(`\n🚨 [ADVERSARIAL GATE ENFORCED] Auto-sign is strictly FORBIDDEN!`);
+        console.error(`   Ticket touches sensitive State/FSM/Lifecycle/Coordinator files:`);
+        for (const sf of sensitiveFiles) console.error(`     - ${sf}`);
+        console.error(`   Constitution mandates running 1 adversarial round with subagent 'adversarial-challenger'`);
+        console.error(`   generating: .agents/audit/PLAN_CHALLENGE_${ticketId}.md (>= 100 bytes) before plan signoff.\n`);
+        process.exit(1);
+      }
+    }
+
     const auditDir = path.resolve(process.cwd(), '.agents/audit');
     if (!fs.existsSync(auditDir)) fs.mkdirSync(auditDir, { recursive: true });
 

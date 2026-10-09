@@ -309,7 +309,7 @@ export function GameRulesModal({
                   • <strong className="font-semibold text-emerald-950">Chu Kỳ Vĩ Mô 6 Vòng:</strong> Vòng 1–3 Sốt Đất (tiền thuê x2.5, giảm 25% giá xây dựng) ➔ Vòng 4–5 Đóng Băng Thanh Khoản (tiền thuê giảm 50%, cấm mở khoản vay thế chấp mới) ➔ Vòng 6 Thị trường hạ nhiệt bình thường.
                 </p>
                 <p className="text-emerald-800 text-[11px]">
-                  • <strong className="font-semibold text-emerald-950">Gói Cứu Cầu Quốc Gia:</strong> Khi Quỹ Kho Bạc đạt &ge; {TREASURY_STIMULUS_THRESHOLD.toLocaleString('vi-VN')} Tr., đầu vòng mới tự động giải ngân {Math.round(TREASURY_STIMULUS_RATE * 100)}% quỹ chia đều hỗ trợ người chơi có số dư thấp nhất.
+                  • <strong className="font-semibold text-emerald-950">Gói Cứu Cầu Quốc Gia (Đã tắt):</strong> Trước đây khi Quỹ Kho Bạc đạt &ge; {TREASURY_STIMULUS_THRESHOLD.toLocaleString('vi-VN')} Tr., đầu vòng mới tự động giải ngân {Math.round(TREASURY_STIMULUS_RATE * 100)}% quỹ chia đều hỗ trợ người chơi có số dư thấp nhất. Cơ chế này hiện đã được vô hiệu hóa hoàn toàn để tăng tính cạnh tranh thương trường sinh tồn.
                 </p>
               </div>
 

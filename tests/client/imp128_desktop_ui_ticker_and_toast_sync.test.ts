@@ -102,16 +102,18 @@ describe('[IMP-128] Chốt 1: Khử Chèn Đè Toast Trên Desktop (FloatingNumb
     expect(html).toContain('-500 Tr.');
   });
 
-  it('[TC-IMP128.05/MSS][UC-IMP128][Facet-2/Reactivity] Desktop container cắt tỉa chỉ hiển thị tối đa 2 thông báo mới nhất', () => {
+  it('[TC-IMP128.05/MSS][UC-IMP128][Facet-2/Reactivity][IMP-324] Desktop container cắt tỉa chỉ hiển thị tối đa 3 thông báo mới nhất', () => {
     useGameStore.setState({
       floatingTexts: [
+        { id: 'ft_0', text: '+50 Tr.', type: FloatingTextType.Reward, playerId: 'p1', actionType: 'buy', timestamp: Date.now() },
         { id: 'ft_1', text: '+100 Tr.', type: FloatingTextType.Reward, playerId: 'p1', actionType: 'buy', timestamp: Date.now() },
         { id: 'ft_2', text: '+200 Tr.', type: FloatingTextType.Reward, playerId: 'p1', actionType: 'buy', timestamp: Date.now() },
         { id: 'ft_3', text: '+300 Tr.', type: FloatingTextType.Reward, playerId: 'p1', actionType: 'buy', timestamp: Date.now() },
       ],
     });
     const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
-    expect(html).not.toContain('+100 Tr.');
+    expect(html).not.toContain('+50 Tr.');
+    expect(html).toContain('+100 Tr.');
     expect(html).toContain('+200 Tr.');
     expect(html).toContain('+300 Tr.');
   });

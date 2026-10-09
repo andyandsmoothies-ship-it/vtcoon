@@ -171,6 +171,13 @@ if (testFilesToScan.length > 0) {
             `${file}:${lineNum} - Test case contains long blocking sleep/delay >= 3000ms (violates Fast & Deterministic): ${title}`,
           );
         }
+        // Anti-Tautology Guard: Ban local setTimeout() testing fake timers against itself
+        if (/(?:const|let|var)\s+\w+\s*=\s*setTimeout\s*\(/.test(blockBody) &&
+            !/(?:render|createRoot|act|useGameStore|use[A-Z]\w*)/.test(blockBody)) {
+          testViolations.push(
+            `${file}:${lineNum} - Tautological Test Anti-Pattern: Test defines local setTimeout() without mounting a component or invoking a production store/function: ${title}`,
+          );
+        }
       }
 
       // Station 4 Mutant Floor Early Warning (< 14 asserts in contract test suite)

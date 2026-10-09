@@ -14,6 +14,7 @@ export interface TreasuryStimulusResult {
 
 export const TREASURY_STIMULUS_THRESHOLD = 10_000;
 export const TREASURY_STIMULUS_RATE = 0.2;
+export const ENABLE_TREASURY_STIMULUS = false;
 
 export function processTreasuryStimulus(room: Room): TreasuryStimulusResult | null {
   if (!room || (room.treasury ?? 0) < TREASURY_STIMULUS_THRESHOLD) return null;
