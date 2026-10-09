@@ -9,11 +9,13 @@ declare module '../domain/room' {
   interface Room { pendingInsolvencyQueue?: string[]; }
 }
 
-const MORTGAGE_RATE                = 0.5;
-const URBAN_PLANNING_MORTGAGE_RATE = 0.60;
-const REDEEM_FEE_RATE              = 1.1;
-const DEFAULT_INTEREST_RATE        = 0.05;
-const RATE_HIKE_RATE               = 0.10;
+import {
+  MORTGAGE_DEFAULT_INTEREST_RATE as DEFAULT_INTEREST_RATE,
+  MORTGAGE_RATE_HIKE_INTEREST_RATE as RATE_HIKE_RATE,
+  MORTGAGE_LOAN_RATE as MORTGAGE_RATE,
+  URBAN_PLANNING_MORTGAGE_RATE,
+  MORTGAGE_REDEEM_FEE_RATE as REDEEM_FEE_RATE,
+} from '../domain/mortgage_constants.js';
 
 function getPlayer(room: Room, playerId: string): Player | undefined {
   return room.players.find((p) => p.id === playerId);
@@ -175,7 +177,9 @@ export function mortgageProperty(
     } else {
       delete room.pendingInsolvencyDebtorId;
       delete room.pendingInsolvencyCreditorId;
-      room.phase = TurnPhase.PropertyManagement;
+      const isTurnPlayer = room.players[room.currentPlayerIndex]?.id === playerId;
+      room.phase = isTurnPlayer ? TurnPhase.PropertyManagement : (room.preInsolvencyPhase ?? TurnPhase.PropertyManagement);
+      delete room.preInsolvencyPhase;
     }
   }
 

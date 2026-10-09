@@ -12,13 +12,16 @@ export interface TreasuryStimulusResult {
   readonly recipients: readonly TreasuryRecipient[];
 }
 
+export const TREASURY_STIMULUS_THRESHOLD = 10_000;
+export const TREASURY_STIMULUS_RATE = 0.2;
+
 export function processTreasuryStimulus(room: Room): TreasuryStimulusResult | null {
-  if (!room || (room.treasury ?? 0) < 10_000) return null;
+  if (!room || (room.treasury ?? 0) < TREASURY_STIMULUS_THRESHOLD) return null;
 
   const activePlayers = room.players.filter((p) => !p.bankrupt);
   if (activePlayers.length === 0) return null;
 
-  const totalDisbursement = Math.floor((room.treasury ?? 0) * 0.2);
+  const totalDisbursement = Math.floor((room.treasury ?? 0) * TREASURY_STIMULUS_RATE);
   if (totalDisbursement <= 0) return null;
 
   activePlayers.sort((a, b) => a.balance - b.balance);

@@ -159,6 +159,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       ...(item.formula ? { formula: item.formula } : {}),
       ...(item.bailKind ? { bailKind: item.bailKind } : {}),
       ...(item.groupId ? { groupId: item.groupId } : {}),
+      ...(item.isBoardWide !== undefined ? { isBoardWide: item.isBoardWide } : {}),
     };
     set((state) => ({ floatingTexts: [...state.floatingTexts, newItem].slice(-MAX_FLOATING_TEXTS) }));
     if (typeof setTimeout !== 'undefined') setTimeout(() => { get().removeFloatingText(id); }, duration);

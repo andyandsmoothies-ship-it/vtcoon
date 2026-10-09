@@ -1,0 +1,6 @@
+// [UC-GAME-052/MSS] Mortgage Economic Constants — SSOT
+export const MORTGAGE_DEFAULT_INTEREST_RATE = 0.05;
+export const MORTGAGE_RATE_HIKE_INTEREST_RATE = 0.10;
+export const MORTGAGE_LOAN_RATE = 0.5;
+export const URBAN_PLANNING_MORTGAGE_RATE = 0.60;
+export const MORTGAGE_REDEEM_FEE_RATE = 1.1;

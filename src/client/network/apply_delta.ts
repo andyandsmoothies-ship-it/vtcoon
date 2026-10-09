@@ -147,6 +147,21 @@ function syncTelemetryAndActivities(delta: DeltaPayload, state: GameState, store
   }
 }
 
+export const BOARD_WIDE_CARDS: ReadonlySet<string> = new Set([
+  'MC_MEGA_CONCERT', 'MC_FIRE_INSPECTION', 'MC_RATE_HIKE',
+  'MC_FREEZE_TRADE', 'MC_ANTI_SPECULATE', 'MC_FUEL_SURGE',
+  'MC_CREDIT_STIMULUS', 'MC_PUBLIC_INVEST', 'MC_COASTAL_STORM',
+  'MC_PEAK_TOURISM', 'MC_CASINO_PILOT', 'MC_NIGHT_ECONOMY',
+  'MC_ALCOHOL_CHECK', 'MC_LAND_FEVER', 'MC_URBAN_PLANNING',
+  'MC_UTILITY_DOUBLE',
+  'CC_FRANCHISE', 'CC_CONTRACT_PENALTY', 'CC_PORT_EXCLUSIVE',
+  'CC_MA_FORCE', 'CC_SWAP_PROJECT',
+]);
+
+export function isBoardWideCard(cardId?: string): boolean {
+  return Boolean(cardId && BOARD_WIDE_CARDS.has(cardId));
+}
+
 export function syncEventCard(
   cardOrDelta: DeltaPayload['lastEventCard'] | DeltaPayload,
   state: GameState,
@@ -160,15 +175,17 @@ export function syncEventCard(
 
   if (card && card.cardId && card.cardId !== prevCard?.cardId) {
     const myPid = useLobbyStore.getState().myPlayerId || 'p1';
-    const turnPlayerId = card.drawnBy ?? card.playerId ?? delta?.currentTurnPlayerId ?? delta?.diceRollerId ?? state.currentTurnPlayerId;
-    if (turnPlayerId && turnPlayerId !== myPid) {
+    const turnPlayerId = card.drawnBy ?? card.playerId ?? delta?.currentTurnPlayerId ?? delta?.diceRollerId ?? state.currentTurnPlayerId ?? myPid;
+    const isBoardWide = isBoardWideCard(card.cardId);
+    if (isBoardWide || turnPlayerId !== myPid) {
       state.addFloatingText({
         actionType: card.cardType ?? 'chance',
         playerId: turnPlayerId,
         title: card.title,
-        text: card.description || card.effectDetail || '',
+        text: card.effectDetail || card.description || '',
         type: (card.effectDelta ?? 0) >= 0 ? FloatingTextType.Bonus : FloatingTextType.Penalty,
-        durationMs: 2500,
+        durationMs: isBoardWide ? 5000 : 2500,
+        isBoardWide,
       });
     }
   }

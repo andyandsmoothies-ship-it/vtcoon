@@ -219,7 +219,9 @@ export class RoomManager {
   handlePlayerIntent(roomCode: string, playerId: string, intent: PlayerIntent) { this.touchActivity(roomCode); return dispatchPlayerIntent(this, roomCode, playerId, intent); }
   handleMortgage(roomCode: string, playerId: string, cellIndex: number) { return coordMortgage(this.getContext(roomCode), playerId, cellIndex); }
   handleRedeem(roomCode: string, playerId: string, cellIndex: number) { return coordRedeem(this.getContext(roomCode), playerId, cellIndex); }
-  handleDowngrade(roomCode: string, playerId: string, cellIndex: number, options?: import('../domain/property_upgrade.js').DowngradeOptions) { const ctx = this.getContext(roomCode); return coordDowngrade(ctx, this.getActivePlayer(ctx?.room, playerId), cellIndex, roomCode, options); }
+  handleDowngrade(roomCode: string, playerId: string, cellIndex: number, options?: import('../domain/property_upgrade.js').DowngradeOptions) {
+    return coordDowngrade(this.getContext(roomCode), playerId, cellIndex, roomCode, options);
+  }
   handleLiquidate(roomCode: string, playerId: string) { return coordLiquidate(this.getContext(roomCode), playerId, this.auctions, roomCode); }
   handleRespondTradeOffer(roomCode: string, playerId: string, offerId: string, accept: boolean) { return coordRespondTradeOffer(this.getContext(roomCode), playerId, offerId, accept); }
   hasPendingTrade(roomCode: string): boolean { return pendingTradeManager.hasSession(roomCode); }

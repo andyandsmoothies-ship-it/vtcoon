@@ -5,6 +5,7 @@ import {
   MIN_BAIL_AMOUNT,
   GO_PROPERTY_TAX_CAP,
 } from '../../domain/property_rent.js';
+import { PROPERTY_DEEDS } from '../../domain/property_data.js';
 
 export function resolveFormulaText(
   item: FloatingTextItem,
@@ -29,6 +30,9 @@ export function resolveFormulaText(
       if (item.cellIndex === 4 || item.title?.includes('Đất Đai')) {
         return 'Lệ phí trước bạ: 10% tiền mặt (Tối đa 2.000 Tr.)';
       }
+      if (item.title?.includes('thế chấp') || item.title?.includes('lãi vay') || item.title?.includes('lãi thế chấp') || item.title?.includes('Lãi Thế Chấp')) {
+        return 'Lãi vay thế chấp qua GO (5%-10% nợ)';
+      }
       if (item.title?.includes('vượt GO') || item.title?.includes('tài sản')) {
         return `Thuế tài sản qua GO (Tối đa ${(GO_PROPERTY_TAX_CAP ?? 1000).toLocaleString('vi-VN')} Tr.)`;
       }
@@ -40,6 +44,30 @@ export function resolveFormulaText(
       }
       if (item.cellIndex === 28 || item.title?.includes('Viettel') || item.title?.includes('viễn thông') || item.title?.includes('data')) {
         return `Cước data viễn thông Viettel (${TELECOM_DATA_FEE} Tr.)`;
+      }
+      if (item.cellIndex !== undefined) {
+        const deed = PROPERTY_DEEDS.get(item.cellIndex);
+        if (deed) {
+          const rawAmount = parseInt(item.text.replace(/[^\d]/g, ''), 10);
+          if (deed.rent3 && rawAmount === Math.floor(deed.rent3 * 1.5)) {
+            return `C3 (${deed.rent3.toLocaleString('vi-VN')} Tr.) × Độc quyền 1.5x: ${cellName}`;
+          }
+          if (deed.rent3 && rawAmount === deed.rent3) {
+            return `Công trình C3 (${deed.rent3.toLocaleString('vi-VN')} Tr.): ${cellName}`;
+          }
+          if (deed.rent2 && rawAmount === deed.rent2) {
+            return `Công trình C2 (${deed.rent2.toLocaleString('vi-VN')} Tr.): ${cellName}`;
+          }
+          if (deed.rent1 && rawAmount === deed.rent1) {
+            return `Công trình C1 (${deed.rent1.toLocaleString('vi-VN')} Tr.): ${cellName}`;
+          }
+          if (deed.rent0 && rawAmount === deed.rent0 * 2) {
+            return `C0 (${deed.rent0.toLocaleString('vi-VN')} Tr.) × Độc quyền 2x: ${cellName}`;
+          }
+          if (deed.rent0 && rawAmount === deed.rent0) {
+            return `Đất trống C0 (${deed.rent0.toLocaleString('vi-VN')} Tr.): ${cellName}`;
+          }
+        }
       }
       if (item.title?.includes('Độc quyền') || item.title?.includes('x2')) {
         const rawTitle = item.title?.replace(/^Độc\s+quyền\s+nhóm\s+màu\s*(?:\(x2\s+tiền\s+thuê\))?:\s*/i, '').replace(/^Tiền\s+thuê\s*/i, '').trim();
@@ -68,7 +96,7 @@ export function resolveFormulaText(
     case 'hose':
       return isPositive ? 'Chi trả cổ tức từ sàn HOSE' : 'Đầu tư mua chứng khoán HOSE';
     case 'stimulus':
-      return 'Nhận gói trợ cấp an sinh từ Quỹ Kho Bạc';
+      return 'Quỹ Kho Bạc ≥10k Tr. ➔ 20% hộ nghèo';
     case 'debt_relief':
       return 'Hoàn tất thanh toán nợ: Thoát bờ vực phá sản';
     default:

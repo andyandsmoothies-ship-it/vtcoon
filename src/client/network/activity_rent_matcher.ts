@@ -236,9 +236,12 @@ export function processReceiverReward(
   const rName = getPlayerName(receiver.pInfo, receiver.id);
 
   if (delta?.treasury !== undefined && prevState && prevState.treasuryPool > delta.treasury) {
+    const causalText = prevState.treasuryPool >= 10_000
+      ? '(Quỹ ≥10k Tr. ➔ 20% hộ nghèo)'
+      : 'phục hồi kinh tế';
     return {
       id: `stimulus_${Date.now()}_${receiver.id}`, timestamp: Date.now(), type: 'system',
-      message: `🏛️ [Kích Cầu Kho Bạc] ${rName} đã nhận được ${formatCurrency(receiver.diff)} trợ cấp phục hồi kinh tế`,
+      message: `🏛️ [Kích Cầu Kho Bạc] ${rName} đã nhận được ${formatCurrency(receiver.diff)} trợ cấp ${causalText}`,
       playerId: receiver.id, playerName: rName, amount: receiver.diff,
       ...(receiver.pInfo?.tokenColor ? { playerTokenColor: receiver.pInfo.tokenColor } : {}),
     };

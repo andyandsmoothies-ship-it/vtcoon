@@ -1,5 +1,13 @@
 // [IMP-72] GameRulesModal — Hướng Dẫn & Thể Lệ Game Toàn Diện (Clean & Modern Style)
 import React, { useState, useRef, useEffect } from 'react';
+import { TREASURY_STIMULUS_THRESHOLD, TREASURY_STIMULUS_RATE } from '../../../domain/treasury_stimulus.js';
+import {
+  MORTGAGE_DEFAULT_INTEREST_RATE,
+  MORTGAGE_RATE_HIKE_INTEREST_RATE,
+  MORTGAGE_LOAN_RATE,
+  MORTGAGE_REDEEM_FEE_RATE,
+} from '../../../domain/mortgage_constants.js';
+import { DOWNGRADE_REFUND_RATE } from '../../../domain/property_upgrade.js';
 
 type GameRulesTab = 'core' | 'cards' | 'mechanics';
 
@@ -301,7 +309,7 @@ export function GameRulesModal({
                   • <strong className="font-semibold text-emerald-950">Chu Kỳ Vĩ Mô 6 Vòng:</strong> Vòng 1–3 Sốt Đất (tiền thuê x2.5, giảm 25% giá xây dựng) ➔ Vòng 4–5 Đóng Băng Thanh Khoản (tiền thuê giảm 50%, cấm mở khoản vay thế chấp mới) ➔ Vòng 6 Thị trường hạ nhiệt bình thường.
                 </p>
                 <p className="text-emerald-800 text-[11px]">
-                  • <strong className="font-semibold text-emerald-950">Gói Cứu Cầu Quốc Gia:</strong> Khi Quỹ Kho Bạc đạt &ge; 10.000, đầu vòng mới tự động giải ngân 20% quỹ chia đều hỗ trợ người chơi có số dư thấp nhất.
+                  • <strong className="font-semibold text-emerald-950">Gói Cứu Cầu Quốc Gia:</strong> Khi Quỹ Kho Bạc đạt &ge; {TREASURY_STIMULUS_THRESHOLD.toLocaleString('vi-VN')} Tr., đầu vòng mới tự động giải ngân {Math.round(TREASURY_STIMULUS_RATE * 100)}% quỹ chia đều hỗ trợ người chơi có số dư thấp nhất.
                 </p>
               </div>
 
@@ -310,10 +318,10 @@ export function GameRulesModal({
                   <span>🏛️</span> Thế Chấp Bất Động Sản &amp; Lãi Vay Vượt GO
                 </h3>
                 <p>
-                  Khi gặp khó khăn tài chính, người chơi có thể <strong className="text-slate-900 font-semibold">Thế Chấp</strong> đất cấp 0 cho Ngân hàng để nhận về khoản vay bằng <strong className="text-slate-900 font-semibold">50%</strong> giá niêm yết. Đất thế chấp không thể thu tiền thuê và khóa xây cả nhóm màu, nhưng <strong className="text-slate-900 font-semibold">vẫn được phép chuyển nhượng P2P kèm nợ</strong>.
+                  Khi gặp khó khăn tài chính, người chơi có thể <strong className="text-slate-900 font-semibold">Thế Chấp</strong> đất cấp 0 cho Ngân hàng để nhận về khoản vay bằng <strong className="text-slate-900 font-semibold">{Math.round(MORTGAGE_LOAN_RATE * 100)}%</strong> giá niêm yết. Đất thế chấp không thể thu tiền thuê và khóa xây cả nhóm màu, nhưng <strong className="text-slate-900 font-semibold">vẫn được phép chuyển nhượng P2P kèm nợ</strong>.
                 </p>
                 <p className="mt-1 text-slate-600 text-[11px]">
-                  Khi đang có dư nợ thế chấp, mỗi lần vượt qua ô Khởi Hành (GO), Ngân hàng sẽ tự động trích thu 5% lãi suất định kỳ nộp về Kho Bạc. Chuộc đất với giá gốc vay kèm 10% phí giải chấp.
+                  Khi đang có dư nợ thế chấp, mỗi lần vượt qua ô Khởi Hành (GO), Ngân hàng sẽ tự động trích thu {Math.round(MORTGAGE_DEFAULT_INTEREST_RATE * 100)}% lãi suất định kỳ nộp về Kho Bạc (tăng lên {Math.round(MORTGAGE_RATE_HIKE_INTEREST_RATE * 100)}% khi có biến động Tăng Lãi Suất hoặc siết tín dụng, miễn lãi 0% khi có Kích Cầu Tín Dụng). Ngoài ra, người chơi sở hữu nhiều BĐS còn phải nộp thuế đất đai qua GO. Chuộc đất với giá gốc vay kèm {Math.round((MORTGAGE_REDEEM_FEE_RATE - 1) * 100)}% phí giải chấp.
                 </p>
               </div>
 
@@ -322,8 +330,8 @@ export function GameRulesModal({
                   <span>⚠️</span> Cơ Chế Phá Sản &amp; Thoát Nợ Tự Động
                 </h3>
                 <div className="text-slate-600 text-[11px] space-y-1">
-                  <p>• <strong className="text-emerald-700 font-semibold">Thoát Nợ Tự Động:</strong> Khi bị âm tiền (vỡ nợ tạm thời), người chơi bán nhà, thế chấp BĐS hoặc bán đất kèm nợ qua P2P để đưa tiền mặt về &ge; 0; hệ thống sẽ tự động đóng giao diện nợ và mở khóa tiếp tục ván đấu.</p>
-                  <p>• <strong className="text-rose-700 font-semibold">Phá Sản:</strong> Nếu đã thanh lý toàn bộ tài sản mà số dư vẫn âm không thể trả nợ, người chơi sẽ chính thức <strong className="text-rose-700 font-semibold">Phá Sản</strong>. Toàn bộ tài sản được chuyển giao cho chủ nợ hoặc hoàn về Ngân sách.</p>
+                  <p>• <strong className="text-emerald-700 font-semibold">Hạ Cấp &amp; Thoát Nợ 1 Chạm:</strong> Khi bị âm tiền (vỡ nợ tạm thời), người chơi được quyền hạ cấp công trình (thu hồi {Math.round(DOWNGRADE_REFUND_RATE * 100)}% chi phí nâng cấp), thế chấp BĐS hoặc bán đất kèm nợ qua P2P để đưa tiền mặt về &ge; 0; hệ thống sẽ tự động đóng giao diện nợ và mở khóa tiếp tục ván đấu.</p>
+                  <p>• <strong className="text-rose-700 font-semibold">Điều Kiện Phá Sản:</strong> Nếu đã thanh lý toàn bộ tài sản (hạ cấp hết nhà, thế chấp hết đất) mà số dư vẫn âm không thể trả nợ, người chơi sẽ chính thức <strong className="text-rose-700 font-semibold">Phá Sản</strong>. Toàn bộ tài sản được chuyển giao cho chủ nợ hoặc hoàn về Ngân sách.</p>
                 </div>
               </div>
             </div>

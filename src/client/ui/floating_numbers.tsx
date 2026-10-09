@@ -38,9 +38,16 @@ export function MilestoneBanner({ item }: { readonly item: FloatingTextItem }): 
   const player = playersInfo[item.playerId];
   const icon = resolveActionIcon(item.actionType, true);
 
+  const isBoardWide = Boolean(item.isBoardWide);
   const isEventCard = item.actionType === 'chance' || item.actionType === 'market';
-  const testId = isEventCard ? 'event-card-notification-banner' : 'milestone-celebration-banner';
-  const borderShadowStyle = item.actionType === 'market'
+  const testId = isBoardWide
+    ? 'global-event-banner'
+    : isEventCard
+    ? 'event-card-notification-banner'
+    : 'milestone-celebration-banner';
+  const borderShadowStyle = isBoardWide
+    ? 'border-indigo-500/90 shadow-lg shadow-indigo-900/15 bg-gradient-to-r from-amber-50/95 via-white to-indigo-50/95'
+    : item.actionType === 'market'
     ? 'border-cyan-500/80 shadow-md shadow-cyan-900/10'
     : item.actionType === 'bankrupt'
     ? 'border-rose-500/80 shadow-md shadow-rose-900/10'
@@ -83,6 +90,7 @@ export function MilestoneBanner({ item }: { readonly item: FloatingTextItem }): 
   const { titleText, descText } = resolveTitleAndDesc();
 
   const resolveCategory = () => {
+    if (isBoardWide) return 'SỰ KIỆN TOÀN BÀN CỜ';
     switch (item.actionType) {
       case 'market': return 'SỰ KIỆN THỊ TRƯỜNG';
       case 'chance': return 'THẺ CƠ HỘI';

@@ -8,6 +8,7 @@ import { handleStartFireSaleAuction } from './bond_manager';
 declare module '../domain/room' {
   interface Room {
     pendingInsolvencyQueue?: string[];
+    preInsolvencyPhase?: TurnPhase;
   }
 }
 
@@ -22,6 +23,9 @@ export function checkInsolvency(room: Room, creditorId?: string, debtorId?: stri
   room.pendingInsolvencyDebtorId = player.id;
   if (creditorId && creditorId !== player.id) {
     room.pendingInsolvencyCreditorId = creditorId;
+  }
+  if (room.phase !== TurnPhase.InsolvencyPhase) {
+    room.preInsolvencyPhase = room.phase;
   }
   room.phase = TurnPhase.InsolvencyPhase;
 
@@ -166,7 +170,9 @@ function resolvePostBankruptcyInsolvency(room: Room, playerId: string): void {
     }
   }
   delete room.pendingInsolvencyDebtorId;
-  room.phase = TurnPhase.PropertyManagement;
+  const isTurnPlayer = room.players[room.currentPlayerIndex]?.id === playerId;
+  room.phase = isTurnPlayer ? TurnPhase.PropertyManagement : (room.preInsolvencyPhase ?? TurnPhase.PropertyManagement);
+  delete room.preInsolvencyPhase;
 }
 
 // --- UC-GAME-054: Tuyên Bố Phá Sản ---

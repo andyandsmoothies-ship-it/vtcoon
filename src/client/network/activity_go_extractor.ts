@@ -4,7 +4,7 @@ import type { GameState, PlayerHudInfo } from '../store/game_store.js';
 import { type ActivityLogEntry } from '../store/activity_store.js';
 import { checkPassedGo, calculateGoSalary } from '../../domain/room.js';
 import { formatCurrency } from '../ui/ui_helpers.js';
-import { type PropertyRegistry, type PropertyStateMap } from '../../domain/property_data.js';
+import { type PropertyRegistry, type PropertyStateMap, PROPERTY_DEEDS } from '../../domain/property_data.js';
 import { calculateGoPropertyTax, GO_PROPERTY_TAX_CAP } from '../../domain/property_rent.js';
 import { ChanceCardId } from '../../domain/event_card_types.js';
 
@@ -41,6 +41,28 @@ export function buildPropertyRegistryAndStateMap(
 
 export function getPlayerName(pInfo?: PlayerHudInfo, fallbackId?: string): string {
   return pInfo?.name || (fallbackId ? fallbackId.toUpperCase() : 'Người chơi');
+}
+
+import {
+  MORTGAGE_DEFAULT_INTEREST_RATE,
+  MORTGAGE_RATE_HIKE_INTEREST_RATE,
+  MORTGAGE_LOAN_RATE,
+} from '../../domain/mortgage_constants.js';
+
+function calculateGoMortgageInterest(
+  prevP: PlayerHudInfo | undefined,
+  activeMods: readonly { readonly type: string; readonly remainingRounds: number }[],
+): { mortInterest: number; isRateHike: boolean } {
+  const mortDebt = (prevP?.mortgagedProperties ?? []).reduce((sum, cell) => {
+    const loan = prevP?.mortgageLoans?.[cell];
+    if (loan !== undefined) return sum + loan;
+    const deed = PROPERTY_DEEDS.get(cell);
+    return sum + (deed ? Math.floor(deed.price * MORTGAGE_LOAN_RATE) : 0);
+  }, 0);
+  const isStimulus = activeMods.some((m) => m.type === 'MC_CREDIT_STIMULUS' && m.remainingRounds > 0);
+  const isRateHike = activeMods.some((m) => m.type === 'MC_RATE_HIKE' && m.remainingRounds > 0);
+  const mortRate = isStimulus ? 0 : (isRateHike ? MORTGAGE_RATE_HIKE_INTEREST_RATE : MORTGAGE_DEFAULT_INTEREST_RATE);
+  return { mortInterest: Math.floor(mortDebt * mortRate), isRateHike };
 }
 
 export function extractPassedGoActivities(
@@ -118,7 +140,20 @@ export function extractPassedGoActivities(
         });
       }
 
-      const totalGoDeductions = (isOverdraftDue ? 3300 : 0) + (hasFreeCredit ? 400 : 0) + goTax;
+      const { mortInterest, isRateHike } = calculateGoMortgageInterest(
+        prevP,
+        delta.activeModifiers ?? prevState.activeModifiers ?? [],
+      );
+      if (mortInterest > 0) {
+        salaryLogs.push({
+          id: `mort_interest_${Date.now()}_${p.id}`, timestamp: Date.now(), type: 'tax',
+          message: `🏦 ${pName} đã nộp ${formatCurrency(mortInterest)} lãi thế chấp qua GO (${isRateHike ? '10%' : '5%'} nợ)`,
+          amount: -mortInterest, cellIndex: 0, playerId: p.id, playerName: pName,
+          ...(pInfo?.tokenColor ? { playerTokenColor: pInfo.tokenColor } : {}),
+        });
+      }
+
+      const totalGoDeductions = (isOverdraftDue ? 3300 : 0) + (hasFreeCredit ? 400 : 0) + goTax + mortInterest;
       const netGoBonus = salary - totalGoDeductions;
 
       const recIdx = receivers.findIndex((r) => r.id === p.id);

@@ -33,12 +33,7 @@ function MobileFpsBadge({ onToggleConsole }: { readonly onToggleConsole: () => v
         title="Tốc độ khung hình (Bấm để mở hộp đen)"
         aria-label={`FPS: ${fps}`}
       >
-        <span
-          className={`w-1.5 h-1.5 rounded-full animate-pulse ${
-            fps >= 45 ? 'bg-emerald-400' : fps >= 25 ? 'bg-amber-400' : 'bg-rose-400'
-          }`}
-          aria-hidden="true"
-        />
+        <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${fps >= 45 ? 'bg-emerald-400' : fps >= 25 ? 'bg-amber-400' : 'bg-rose-400'}`} aria-hidden="true" />
         <span>{fps}<span className="hidden min-[480px]:inline"> FPS</span></span>
       </button>
     </>
@@ -134,7 +129,7 @@ export function TopBar(props: TopBarProps): React.ReactElement {
                 {isAuctionActive ? '🏛️' : isTradeActive ? '🤝' : '🏢'}
               </span>
               <span className="text-xs font-semibold whitespace-nowrap">
-                <span className="inline sm:hidden">
+                <span className="hidden min-[380px]:inline sm:hidden">
                   {isAuctionActive ? 'Đấu giá' : isTradeActive ? 'Thương lượng' : 'Mua đứt'}
                 </span>
                 <span className="hidden sm:inline">
@@ -175,7 +170,7 @@ export function TopBar(props: TopBarProps): React.ReactElement {
           <button
             type="button"
             onClick={togglePlayerHudVisibility}
-            className={`relative w-8 h-8 min-h-[36px] min-w-[36px] sm:w-auto sm:h-8 sm:min-w-[36px] inline-flex items-center justify-center gap-1.5 p-0 sm:px-3 rounded-xl transition-all cursor-pointer text-xs font-semibold border shadow-xs active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 after:absolute after:-inset-1.5 after:content-[''] ${
+            className={`shrink-0 relative w-8 h-8 min-h-[36px] min-w-[36px] sm:w-auto sm:h-8 sm:min-w-[36px] inline-flex items-center justify-center gap-1.5 p-0 sm:px-3 rounded-xl transition-all cursor-pointer text-xs font-semibold border shadow-xs active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 after:absolute after:-inset-1.5 after:content-[''] ${
               isPlayerHudVisible
                 ? 'bg-amber-100 text-amber-900 border-amber-400 ring-1 ring-amber-400/50'
                 : 'bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 border-slate-300/80'
@@ -192,7 +187,7 @@ export function TopBar(props: TopBarProps): React.ReactElement {
           <button
             type="button"
             onClick={toggleNextTimeOfDay}
-            className="hidden min-[440px]:inline-flex sm:inline-flex relative w-8 h-8 min-h-[36px] min-w-[36px] sm:w-auto sm:h-8 sm:min-w-[36px] items-center justify-center gap-1.5 p-0 sm:px-3 rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-all cursor-pointer text-xs font-semibold border border-slate-300/80 shadow-xs active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 after:absolute after:-inset-1.5 after:content-['']"
+            className="shrink-0 hidden min-[440px]:inline-flex sm:inline-flex relative w-8 h-8 min-h-[36px] min-w-[36px] sm:w-auto sm:h-8 sm:min-w-[36px] items-center justify-center gap-1.5 p-0 sm:px-3 rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-all cursor-pointer text-xs font-semibold border border-slate-300/80 shadow-xs active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 after:absolute after:-inset-1.5 after:content-['']"
             title={`Ánh sáng: ${timeOfDayLabel} (Bấm để đổi)`}
             aria-label={`Chuyển chu kỳ ánh sáng (Hiện tại: ${timeOfDayLabel})`}
             data-testid="time-of-day-toggle-button"
@@ -205,7 +200,7 @@ export function TopBar(props: TopBarProps): React.ReactElement {
           <button
             type="button"
             onClick={toggleMute}
-            className="relative w-8 h-8 min-h-[36px] min-w-[36px] sm:w-auto sm:h-8 sm:min-w-[36px] inline-flex items-center justify-center gap-1.5 p-0 sm:px-3 rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-all cursor-pointer text-xs font-semibold border border-slate-300/80 shadow-xs active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 after:absolute after:-inset-1.5 after:content-['']"
+            className="shrink-0 relative w-8 h-8 min-h-[36px] min-w-[36px] sm:w-auto sm:h-8 sm:min-w-[36px] inline-flex items-center justify-center gap-1.5 p-0 sm:px-3 rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-all cursor-pointer text-xs font-semibold border border-slate-300/80 shadow-xs active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 after:absolute after:-inset-1.5 after:content-['']"
             title={isMuted ? 'Bật âm thanh' : 'Tắt âm thanh'}
             aria-label={isMuted ? 'Bật âm thanh trò chơi' : 'Tắt âm thanh trò chơi'}
             data-testid="mute-toggle-button"
@@ -214,11 +209,24 @@ export function TopBar(props: TopBarProps): React.ReactElement {
             <span className="hidden sm:inline">{isMuted ? 'Tắt' : 'Bật'}</span>
           </button>
 
+          {/* Nút Hướng Dẫn & Thể Lệ Trò Chơi */}
+          <button
+            type="button"
+            onClick={() => useGameStore.getState().openModal('rules', { initialTab: 'mechanics' })}
+            className="shrink-0 relative w-8 h-8 min-h-[36px] min-w-[36px] sm:w-auto sm:h-8 sm:min-w-[36px] inline-flex items-center justify-center gap-1.5 p-0 sm:px-3 rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-all cursor-pointer text-xs font-semibold border border-slate-300/80 shadow-xs active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 after:absolute after:-inset-1.5 after:content-['']"
+            title="Xem Luật Chơi & Cơ Chế Game"
+            aria-label="Xem Luật Chơi & Cơ Chế Game"
+            data-testid="quick-rules-topbar-btn"
+          >
+            <span className="text-sm" aria-hidden="true">📖</span>
+            <span className="hidden sm:inline">Luật Chơi</span>
+          </button>
+
           {/* Nút Bật / Tắt Nhật Ký Hành Động */}
           <button
             type="button"
             onClick={toggleActivityFeed}
-            className="relative w-8 h-8 min-h-[36px] min-w-[36px] sm:w-auto sm:h-8 sm:min-w-[36px] inline-flex items-center justify-center gap-1.5 p-0 sm:px-3 rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-all cursor-pointer text-xs font-semibold border border-slate-300/80 shadow-xs active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 after:absolute after:-inset-1.5 after:content-['']"
+            className="shrink-0 relative w-8 h-8 min-h-[36px] min-w-[36px] sm:w-auto sm:h-8 sm:min-w-[36px] inline-flex items-center justify-center gap-1.5 p-0 sm:px-3 rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-all cursor-pointer text-xs font-semibold border border-slate-300/80 shadow-xs active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 after:absolute after:-inset-1.5 after:content-['']"
             title={isActivityFeedOpen ? 'Đóng nhật ký' : 'Mở nhật ký hoạt động'}
             aria-label={`Nhật ký hoạt động${unreadCount > 0 ? ` (${unreadCount} mới)` : ''}`}
             data-testid="activity-feed-toggle-button"
@@ -242,7 +250,7 @@ export function TopBar(props: TopBarProps): React.ReactElement {
               <button
                 type="button"
                 onClick={onLeaveRoom}
-                className="relative w-8 h-8 min-h-[36px] min-w-[36px] sm:w-auto sm:h-8 sm:min-w-[36px] inline-flex items-center justify-center gap-1.5 p-0 sm:px-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-800 transition-all cursor-pointer text-xs font-bold border border-rose-300 shadow-xs active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 after:absolute after:-inset-1.5 after:content-['']"
+                className="shrink-0 relative w-8 h-8 min-h-[36px] min-w-[36px] sm:w-auto sm:h-8 sm:min-w-[36px] inline-flex items-center justify-center gap-1.5 p-0 sm:px-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-800 transition-all cursor-pointer text-xs font-bold border border-rose-300 shadow-xs active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 after:absolute after:-inset-1.5 after:content-['']"
                 title="Thoát bàn và trở về sảnh chờ"
                 aria-label="Thoát bàn và trở về sảnh chờ"
                 data-testid="leave-room-button"

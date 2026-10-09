@@ -127,6 +127,8 @@ export function upgradeProperty(
   return { success: true };
 }
 
+export const DOWNGRADE_REFUND_RATE = 0.5;
+
 export interface DowngradeOptions {
   readonly stepByStep?: boolean;
   readonly enforceEvenDowngrading?: boolean;

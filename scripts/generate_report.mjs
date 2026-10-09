@@ -133,18 +133,25 @@ if (fs.existsSync(plansDir)) {
     const planContent = fs.readFileSync(planPath, 'utf8');
     const titleMatch = planContent.match(/^#\s*TICKET:\s*(.+)$/m) || planContent.match(/^#\s*(.+)$/m);
     if (titleMatch) planTitle = titleMatch[1].trim();
-    const subMatch = planContent.match(/>\s*\*\*Phân hệ mục tiêu:\*\*\s*`?([a-zA-Z0-9_-]+)`?/);
+    const subMatch = planContent.match(/>\s*\*\*Phân hệ mục tiêu:\*\*\s*`?([a-zA-Z0-9_-]+)`?/) ||
+                     planContent.match(/[-*]\s*\*\*(?:Subsystem|Phân hệ(?: mục tiêu)?):\*\*\s*`?([a-zA-Z0-9_-]+)`?/i);
     if (subMatch) planSubsystem = subMatch[1].trim();
 
-    // Extract registered files from the plan specification (mirroring check_scope.mjs, excluding predecessor baselines)
-    const cleanedContentForDirectFiles = planContent
-      .split('\n')
-      .filter((line) => !line.includes('Baseline Working Tree Dependencies'))
-      .join('\n');
-    const regex = /(?:src|tests)\/[a-zA-Z0-9_./-]+\.(?:tsx|mjs|css|ts|js)\b/g;
-    let m;
-    while ((m = regex.exec(cleanedContentForDirectFiles)) !== null) {
-      planRegisteredFiles.add(m[0].replace(/\\/g, '/'));
+    // Extract registered files from the plan specification (strictly isolating direct scope from baseline dependencies)
+    const directScopeMatch = planContent.match(/[-*]\s*\*\*Direct Scope\*\*:\s*([\s\S]*?)(?:\n\s*[-*]\s*\*\*Baseline Working Tree|\n\s*##|$)/i);
+    if (directScopeMatch) {
+      const dRegex = /(?:src|tests)\/[a-zA-Z0-9_./-]+\.(?:tsx|mjs|css|ts|js)\b/g;
+      let dm;
+      while ((dm = dRegex.exec(directScopeMatch[1])) !== null) {
+        planRegisteredFiles.add(dm[0].replace(/\\/g, '/'));
+      }
+    } else {
+      const contentWithoutBaselines = planContent.replace(/(?:>|\s)*[-*]?\s*\*\*Baseline Working Tree Dependencies[\s\S]*?(?=\n\s*(?:[-*]\s*\*\*|##|$))/i, '');
+      const regex = /(?:src|tests)\/[a-zA-Z0-9_./-]+\.(?:tsx|mjs|css|ts|js)\b/g;
+      let m;
+      while ((m = regex.exec(contentWithoutBaselines)) !== null) {
+        planRegisteredFiles.add(m[0].replace(/\\/g, '/'));
+      }
     }
 
     const baselineMatch = planContent.match(/>\s*\*\*Baseline Working Tree Dependencies[^*]*:\*\*\s*(.+)$/m);
@@ -214,6 +221,9 @@ if (planRegisteredFiles.size > 0 && (!snapshotData || !snapshotData.files)) {
   }
 }
 
+// Deduplicate modifiedFiles to prevent duplicate rows in LOC table
+modifiedFiles = Array.from(new Set(modifiedFiles));
+
 // Resilient Subsystem Detection: fallback to real modified physical files if plan did not specify
 if (!planPath || planSubsystem === 'domain-core') {
   const prodFile = modifiedFiles.find((f) => f.startsWith('src/'));
@@ -222,6 +232,7 @@ if (!planPath || planSubsystem === 'domain-core') {
     else if (prodFile.startsWith('src/client/3d/')) planSubsystem = 'client-3d';
     else if (prodFile.startsWith('src/client/')) planSubsystem = 'client-state';
     else if (prodFile.startsWith('src/domain/')) planSubsystem = 'domain-core';
+    else if (prodFile.startsWith('src/server/insolvency') || prodFile.startsWith('src/server/room_property_coordinator') || prodFile.startsWith('src/server/turn_loop')) planSubsystem = 'server-lifecycle';
     else if (prodFile.startsWith('src/server/')) planSubsystem = 'server-network';
   }
 }
@@ -474,9 +485,21 @@ if (!fs.existsSync(finalReportPath) || force) {
   if (planChallengeFile) {
     const pcContent = fs.readFileSync(planChallengeFile, 'utf8');
     const lines = pcContent.split('\n');
+    let currentAdv = null;
     for (const l of lines) {
-      if (/^-\s*\*\*(?:P\d|Point\s*\d|Phản biện|Lỗ hổng|Rủi ro)/i.test(l.trim())) {
-        planChallengeNotes.push(l.trim());
+      const trimmed = l.trim();
+      const advMatch = trimmed.match(/^##\s*\[(ADV-[A-Z0-9_-]+)\]\s*(.+)$/i);
+      if (advMatch) {
+        currentAdv = advMatch[1];
+        planChallengeNotes.push(`- **[${advMatch[1]}] ${advMatch[2]}**`);
+        continue;
+      }
+      if (/^-\s*\*\*(?:P\d|Point\s*\d|Phản biện|Lỗ hổng|Rủi ro|Vector|Scenario|Consequence|Hardening Directive|Verdict|Target reachable\?|Baselines verified\?|Physical surface area exhausted\?)/i.test(trimmed)) {
+        if (currentAdv) {
+          planChallengeNotes.push(`  ${trimmed}`);
+        } else {
+          planChallengeNotes.push(trimmed);
+        }
       }
     }
   }

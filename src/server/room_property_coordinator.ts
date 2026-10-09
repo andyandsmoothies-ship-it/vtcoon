@@ -43,9 +43,11 @@ export function coordMortgage(
   if (res.success && ctx.room.phase === TurnPhase.InsolvencyPhase) {
     const p = ctx.room.players.find((pl) => pl.id === playerId);
     if (p && p.balance >= 0) {
+      const isTurnPlayer = ctx.room.players[ctx.room.currentPlayerIndex]?.id === playerId;
       delete ctx.room.pendingInsolvencyCreditorId;
       delete ctx.room.pendingInsolvencyDebtorId;
-      ctx.room.phase = TurnPhase.PropertyManagement;
+      ctx.room.phase = isTurnPlayer ? TurnPhase.PropertyManagement : (ctx.room.preInsolvencyPhase ?? TurnPhase.PropertyManagement);
+      delete ctx.room.preInsolvencyPhase;
     }
   }
   return res;
@@ -65,17 +67,43 @@ export function coordRedeem(
 
 export function coordDowngrade(
   ctx: RoomContext | undefined,
+  playerId: string,
+  cellIndex: number,
+  roomCode: string,
+  options?: DowngradeOptions,
+): { success: boolean; reason?: string };
+export function coordDowngrade(
+  ctx: RoomContext | undefined,
   player: Player | undefined,
+  cellIndex: number,
+  roomCode: string,
+  options?: DowngradeOptions,
+): { success: boolean; reason?: string };
+export function coordDowngrade(
+  ctx: RoomContext | undefined,
+  playerIdOrPlayer: string | Player | undefined,
   cellIndex: number,
   roomCode: string,
   options?: DowngradeOptions,
 ): { success: boolean; reason?: string } {
   if (!ctx) return { success: false, reason: ActionRejectReason.INVALID_ROOM };
+  if (playerIdOrPlayer === undefined) return { success: false, reason: ActionRejectReason.INVALID_PHASE };
+  const playerId = typeof playerIdOrPlayer === 'string' ? playerIdOrPlayer : playerIdOrPlayer.id;
+  const player = ctx.room.players.find((pl) => pl.id === playerId);
+  if (!player) return { success: false, reason: ActionRejectReason.PLAYER_NOT_FOUND };
+
+  const isCurrent = ctx.room.players[ctx.room.currentPlayerIndex]?.id === playerId;
+  const isDebtor = ctx.room.phase === TurnPhase.InsolvencyPhase &&
+    (ctx.room.pendingInsolvencyDebtorId ? ctx.room.pendingInsolvencyDebtorId === playerId : isCurrent);
+  if (!isCurrent && !isDebtor) return { success: false, reason: ActionRejectReason.INVALID_PHASE };
+
   const res = handleDowngrade(player, ctx.room.phase, cellIndex, ctx.reg, ctx.sm, roomCode, options, ctx.room);
-  if (res.success && ctx.room.phase === TurnPhase.InsolvencyPhase && player && player.balance >= 0) {
+  if (res.success && ctx.room.phase === TurnPhase.InsolvencyPhase && player.balance >= 0) {
+    const isTurnPlayer = ctx.room.players[ctx.room.currentPlayerIndex]?.id === playerId;
     delete ctx.room.pendingInsolvencyCreditorId;
     delete ctx.room.pendingInsolvencyDebtorId;
-    ctx.room.phase = TurnPhase.PropertyManagement;
+    ctx.room.phase = isTurnPlayer ? TurnPhase.PropertyManagement : (ctx.room.preInsolvencyPhase ?? TurnPhase.PropertyManagement);
+    delete ctx.room.preInsolvencyPhase;
   }
   return res;
 }

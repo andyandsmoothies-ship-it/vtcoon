@@ -111,6 +111,7 @@ export interface FloatingTextItem {
   readonly formula?: string;
   readonly bailKind?: 'voluntary' | 'forced' | 'doubles';
   readonly groupId?: string;
+  readonly isBoardWide?: boolean;
 }
 
 export type ActiveModalType = 'deed' | 'portfolio' | 'auction' | 'trade' | 'event' | 'hose' | 'insolvency' | 'game_over' | 'rules' | 'masterplan' | 'bot_trade_offer' | 'compulsory_buyout' | 'transit_wheel' | null;

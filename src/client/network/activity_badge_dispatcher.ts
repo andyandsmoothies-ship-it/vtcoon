@@ -113,10 +113,10 @@ export function handleBuyBadge(act: ActivityLogEntry, state: GameState): void {
 export function handleTaxBadge(act: ActivityLogEntry, state: GameState): void {
   const amount = act.amount !== undefined ? -Math.abs(act.amount) : 0;
   if (amount === 0) return;
-  const isCell4 = act.cellIndex === 4, isPropTax = act.message.includes('Tài Sản');
-  const baseTitle = isCell4 ? 'Lệ Phí Đất Đai' : (isPropTax ? 'Thuế Tài Sản Qua GO' : 'Thuế Nhà Nước');
-  const cellIndex = isCell4 ? 4 : (isPropTax ? 0 : act.cellIndex);
-  const delay = isPropTax ? getPawnPassGoDelay(act.playerId) : getPawnLandingDelay(act.playerId);
+  const isCell4 = act.cellIndex === 4, isPropTax = act.message.includes('Tài Sản'), isMortInterest = act.message.includes('lãi thế chấp');
+  const baseTitle = isCell4 ? 'Lệ Phí Đất Đai' : (isMortInterest ? 'Lãi Thế Chấp Qua GO' : (isPropTax ? 'Thuế Tài Sản Qua GO' : 'Thuế Nhà Nước'));
+  const cellIndex = isCell4 ? 4 : ((isPropTax || isMortInterest) ? 0 : act.cellIndex);
+  const delay = (isPropTax || isMortInterest) ? getPawnPassGoDelay(act.playerId) : getPawnLandingDelay(act.playerId);
   scheduleAction(() => {
     state.addFloatingText({ text: formatCurrency(amount), type: FloatingTextType.Penalty, playerId: act.playerId ?? '', actionType: 'tax', title: `Nộp ${baseTitle} ➔ Kho Bạc`, cellIndex });
   }, delay);
