@@ -24,7 +24,11 @@ function parseCliArgs() {
     if (args[i] === '--ticket' && args[i + 1]) {
       ticketId = args[++i];
     } else if (args[i] === '--test' && args[i + 1]) {
-      testPath = args[++i];
+      const tests = [];
+      while (args[i + 1] && !args[i + 1].startsWith('--')) {
+        tests.push(args[++i]);
+      }
+      testPath = tests.join(' ');
     } else if (args[i] === '--src' && args[i + 1]) {
       srcPath = args[++i];
     } else if (args[i] === '--3d') {
@@ -1429,7 +1433,7 @@ function runWebGlProbe(ticketId, testPath, srcPath) {
 function delegateToStation4Server(rawArgs) {
   const tsxCmd = process.platform === 'win32' ? 'cmd.exe' : 'npx';
   const tsxArgs = process.platform === 'win32'
-    ? ['/c', `npx --yes tsx scripts/station4_sentinel.ts ${rawArgs.join(' ')}`]
+    ? ['/c', `npx --yes tsx scripts/station4_sentinel.ts ${rawArgs.map((a) => (a.includes(' ') ? `"${a}"` : a)).join(' ')}`]
     : ['tsx', 'scripts/station4_sentinel.ts', ...rawArgs];
 
   const res = spawnSync(tsxCmd, tsxArgs, { stdio: 'inherit' });

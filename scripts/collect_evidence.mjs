@@ -242,6 +242,8 @@ const snapshot = {
   sliceId,
   timestamp: new Date().toISOString(),
   environment: 'Antigravity 2.0 Physical Worktree (Zero-Memorization Automated)',
+  executed: Boolean(testExecution && testExecution.executed),
+  verdict: testExecution && testExecution.status === 'PASSED' ? 'PASSED' : 'FAILED',
   summary: {
     filesCount: fileReports.length,
     totalLoc,

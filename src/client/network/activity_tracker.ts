@@ -198,11 +198,16 @@ export function detectEventCardActivities(
   ];
 }
 
+export interface TrackDeltaActivitiesOptions {
+  readonly suppressFinancialAndProperty?: boolean;
+}
+
 export function trackDeltaActivities(
   delta: DeltaPayload,
   prevState: GameState,
   nextState: GameState,
   activityStore: typeof useActivityStore = useActivityStore,
+  options?: TrackDeltaActivitiesOptions,
 ): void {
   if (Boolean(delta.cells && delta.cells.length === BOARD_SIZE)) return;
 
@@ -222,17 +227,22 @@ export function trackDeltaActivities(
   activities.push(...detectMoveActivities(delta, prevState, nextState));
 
   // 3. Hệ quả giao dịch & tài chính: Chuyển giao BĐS, Dòng tiền (lương/thuế/tiền thuê), Đấu giá
-  const { entries: propEntries, context } = detectPropertyAndLevelActivities(delta, prevState, nextState);
-  activities.push(...propEntries);
-  activities.push(...detectFinancialAndStatusActivities(delta, prevState, nextState, context));
-  activities.push(...detectAuctionActivities(delta, prevState, nextState, activityStore));
+  // [IMP-333] Khi suppressFinancialAndProperty=true, toàn bộ logging và badge của nhóm này đã do GameEventBus đảm nhiệm.
+  if (!options?.suppressFinancialAndProperty) {
+    const { entries: propEntries, context } = detectPropertyAndLevelActivities(delta, prevState, nextState);
+    const financialEntries = detectFinancialAndStatusActivities(delta, prevState, nextState, context);
+    const auctionEntries = detectAuctionActivities(delta, prevState, nextState, activityStore);
+    activities.push(...propEntries, ...financialEntries, ...auctionEntries);
+  }
 
   const store = activityStore.getState();
   for (const entry of activities) {
     store.addActivityLog(entry);
   }
 
+  // Floating badges: Giao việc phát huy hiệu cho dispatchActivityFloatingBadges với mảng activities đã lọc
   dispatchActivityFloatingBadges(activities, nextState, delta);
+
 
   if (cardEntries.length > 0 && delta.lastEventCard) {
     const card = delta.lastEventCard;

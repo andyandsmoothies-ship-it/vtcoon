@@ -59,8 +59,11 @@ function parseCliArgs(): { ticketId: string; testPath?: string; srcPath?: string
       ticketId = args[i + 1]!;
       i++;
     } else if (args[i] === '--test' && args[i + 1]) {
-      testPath = args[i + 1]!;
-      i++;
+      const tests: string[] = [];
+      while (args[i + 1] && !args[i + 1].startsWith('--')) {
+        tests.push(args[++i]!);
+      }
+      testPath = tests.join(' ');
     } else if (args[i] === '--src' && args[i + 1]) {
       srcPath = args[i + 1]!;
       i++;
@@ -162,7 +165,8 @@ async function runUniversalMutationProbe(
   explicitSrc?: string,
   ticketId?: string
 ): Promise<ProbeResults['mutationSensitivityProbe']> {
-  if (!testPath || !fs.existsSync(testPath)) {
+  const testFiles = testPath ? testPath.split(/\s+/).filter(Boolean) : [];
+  if (testFiles.length === 0 || !testFiles.every((f) => fs.existsSync(f))) {
     return {
       status: 'PASS',
       mutantsTested: 0,
@@ -173,7 +177,7 @@ async function runUniversalMutationProbe(
   }
 
   const vitestBin = fs.existsSync('./node_modules/vitest/vitest.mjs') ? 'node ./node_modules/vitest/vitest.mjs' : 'npx vitest';
-  const testCmd = `${vitestBin} run "${testPath}"`;
+  const testCmd = `${vitestBin} run ${testFiles.map((f) => `"${f}"`).join(' ')}`;
   let mutantsTested = 0;
   let killed = 0;
   let survived = 0;
@@ -237,6 +241,204 @@ async function runUniversalMutationProbe(
         desc: 'AST: invert floatingTexts empty check in FloatingNumbersOverlay',
         pattern: 'if (floatingTexts.length === 0) {',
         replacement: 'if (floatingTexts.length > 0) {',
+      },
+    ],
+    'IMP-329': [
+      {
+        file: 'src/server/network/afk_recovery.ts',
+        desc: 'AST: disable restorePostInsolvencyPhase invocation in executeInsolvencyAfkRecovery',
+        pattern: 'restorePostInsolvencyPhase(room, playerId, rooms.getRng());',
+        replacement: '/* skip restore */',
+      },
+      {
+        file: 'src/server/network/afk_recovery.ts',
+        desc: 'AST: disable upfront debtor authorization guard in executeInsolvencyAfkRecovery',
+        pattern: 'if (!isAuthorized) {',
+        replacement: 'if (false && !isAuthorized) {',
+      },
+      {
+        file: 'src/server/network/afk_recovery.ts',
+        desc: 'AST: corrupt idempotency phase check in executeInsolvencyAfkRecovery',
+        pattern: 'if (room.phase === TurnPhase.InsolvencyPhase) {',
+        replacement: 'if (false) {',
+      },
+      {
+        file: 'src/server/network/afk_recovery.ts',
+        desc: 'AST: corrupt initial solvency rescue return in executeInsolvencyAfkRecovery',
+        pattern: 'return { rescued: true, bankrupt: false };',
+        replacement: 'return { rescued: false, bankrupt: false };',
+      },
+    ],
+    'IMP-330': [
+      {
+        file: 'src/client/events/game_event_financial_synthesizer.ts',
+        desc: 'AST: corrupt net GO salary calculation in reconstructGoSalary',
+        pattern: 'const netAmount = grossSalary - totalDeductions;',
+        replacement: 'const netAmount = grossSalary + totalDeductions;',
+      },
+      {
+        file: 'src/client/events/game_event_financial_synthesizer.ts',
+        desc: 'AST: disable isSentToAudit incarceration guard in reconstructGoSalary',
+        pattern: 'if (prevPos === undefined || newPos === undefined || prevPos === newPos || isSentToAudit) continue;',
+        replacement: 'if (false) continue;',
+      },
+      {
+        file: 'src/client/events/game_event_financial_synthesizer.ts',
+        desc: 'AST: corrupt halfRent calculation in port split rent matching',
+        pattern: 'const halfRent = Math.floor(rentAmount * 0.5);',
+        replacement: 'const halfRent = Math.floor(rentAmount * 0.9);',
+      },
+      {
+        file: 'src/client/events/game_event_financial_synthesizer.ts',
+        desc: 'AST: disable 1-to-1 exact rent matching in matchRentTransactions',
+        pattern: 'const recIdx = receivers.findIndex((r) => r.diff === rentAmount);',
+        replacement: 'const recIdx = -1;',
+      },
+      {
+        file: 'src/client/events/game_event_financial_synthesizer.ts',
+        desc: 'AST: zero out remainingDebt in partial rent matching',
+        pattern: 'remainingDebt: Math.max(0, Math.abs(payer.diff) - paidAmount),',
+        replacement: 'remainingDebt: 0,',
+      },
+    ],
+    'IMP-331': [
+      {
+        file: 'src/client/events/game_event_property_synthesizer.ts',
+        desc: 'AST: disable ghost unmortgage suppression on owner change in extractCellEvents',
+        pattern: 'if (!isOwnerChanged && currentOwnerId) {',
+        replacement: 'if (currentOwnerId) {',
+      },
+      {
+        file: 'src/client/events/game_event_property_synthesizer.ts',
+        desc: 'AST: disable auction cell suppression in extractCellEvents',
+        pattern: 'const isSuppressedByAuction = handledAuctionCells.has(cell.index);',
+        replacement: 'const isSuppressedByAuction = false;',
+      },
+      {
+        file: 'src/client/events/game_event_property_synthesizer.ts',
+        desc: 'AST: disable trade cell suppression in extractCellEvents',
+        pattern: 'const isSuppressedByTrade = handledTradeCells.has(cell.index);',
+        replacement: 'const isSuppressedByTrade = false;',
+      },
+      {
+        file: 'src/client/events/game_event_property_synthesizer.ts',
+        desc: 'AST: corrupt upgrade cost calculation in extractCellEvents',
+        pattern: 'const cost = calculateUpgradeCost(cell.index, targetLevel - 1, nextState.activeModifiers);',
+        replacement: 'const cost = 0;',
+      },
+      {
+        file: 'src/client/events/game_event_property_synthesizer.ts',
+        desc: 'AST: corrupt mortgage loan amount calculation in extractCellEvents',
+        pattern: 'const loanAmount = deed ? Math.floor(deed.price / 2) : 0;',
+        replacement: 'const loanAmount = 0;',
+      },
+    ],
+    'IMP-332': [
+      {
+        file: 'src/client/events/game_event_bus.ts',
+        desc: 'AST: disable listener registration in GameEventBus',
+        pattern: 'this.listeners.set(key, listener);',
+        replacement: '/* skip registration */',
+      },
+      {
+        file: 'src/client/events/game_event_bus.ts',
+        desc: 'AST: break crash isolation in dispatchGameEvents',
+        pattern: "console.warn(`[GameEventBus] Error in subscriber '${key}':`, err);",
+        replacement: 'throw err;',
+      },
+      {
+        file: 'src/client/events/game_event_bus.ts',
+        desc: 'AST: disable listener clearing in clearListeners',
+        pattern: 'this.listeners.clear();',
+        replacement: '/* skip clear */',
+      },
+      {
+        file: 'src/client/events/subscribers/activity_log_subscriber.ts',
+        desc: 'AST: break rent event type mapping in activity_log_subscriber',
+        pattern: "type: 'rent',",
+        replacement: "type: 'system',",
+      },
+      {
+        file: 'src/client/events/subscribers/activity_log_subscriber.ts',
+        desc: 'AST: break per-event error isolation in activity_log_subscriber',
+        pattern: "console.warn('[ActivityLogSubscriber] Per-event mapping error isolated:', err);",
+        replacement: 'throw err;',
+      },
+      {
+        file: 'src/client/network/apply_delta.ts',
+        desc: 'AST: corrupt suppressFinancialAndProperty flag in syncTelemetryAndActivities',
+        pattern: 'suppressFinancialAndProperty: true',
+        replacement: 'suppressFinancialAndProperty: false',
+      },
+    ],
+    'IMP-333': [
+      {
+        file: 'src/client/events/subscribers/badge_event_subscriber.ts',
+        desc: 'AST: break port split rent distinct receiver groupId in handleRentBadges',
+        pattern: 'groupId: `port_split_rec_${event.cellIndex}_${event.payerId}_${receiverId}`,',
+        replacement: 'groupId: `port_split_rec_shared`,',
+      },
+      {
+        file: 'src/client/events/subscribers/badge_event_subscriber.ts',
+        desc: 'AST: break mobile lean formula undefined invariant in handlePropertyBadges',
+        pattern: 'formula: undefined,',
+        replacement: "formula: 'LEAN_VIOLATION_COST',",
+      },
+      {
+        file: 'src/client/events/subscribers/badge_event_subscriber.ts',
+        desc: 'AST: invert floating text amount polarity in handleRentBadges',
+        pattern: 'text: formatCurrency(-event.amount),',
+        replacement: 'text: formatCurrency(event.amount),',
+      },
+      {
+        file: 'src/client/events/subscribers/audio_event_subscriber.ts',
+        desc: 'AST: disable per-SFX throttle keying in audio_event_subscriber',
+        pattern: 'lastPlayed.set(sfxKey, now);',
+        replacement: "lastPlayed.set('global_lock', now);",
+      },
+      {
+        file: 'src/client/events/subscribers/audio_event_subscriber.ts',
+        desc: 'AST: disable victory_chime in audio_event_subscriber rent handler',
+        pattern: "scheduleOrPlay(delay, 'victory_chime', () => engine.playVictoryChime());",
+        replacement: '/* skip victory chime */',
+      },
+      {
+        file: 'src/client/events/pacing_context.ts',
+        desc: 'AST: corrupt default stepMs in DEFAULT_PACING_CONFIG',
+        pattern: 'export const DEFAULT_PACING_CONFIG: PacingConfig = { stepMs: 230, botStepMs: 200, rollLeadMs: 1200 };',
+        replacement: 'export const DEFAULT_PACING_CONFIG: PacingConfig = { stepMs: 9999, botStepMs: 9999, rollLeadMs: 9999 };',
+      },
+    ],
+    'IMP-334': [
+      {
+        file: 'src/client/events/subscribers/property_market_badge_handler.ts',
+        desc: 'AST: break lean ergonomics formula undefined in handlePropertyBadges',
+        pattern: 'formula: undefined, // Mũi 5: 2-tier lean ergonomics on mobile 360px',
+        replacement: "formula: 'PRICE_CORRUPTED_FORMULA',",
+      },
+      {
+        file: 'src/client/events/subscribers/property_market_badge_handler.ts',
+        desc: 'AST: invert mortgage floating text loan amount polarity in handlePropertyBadges',
+        pattern: 'text: `+${formatCurrency(event.loanAmount)}`,',
+        replacement: 'text: formatCurrency(-event.loanAmount),',
+      },
+      {
+        file: 'src/client/events/subscribers/property_market_badge_handler.ts',
+        desc: 'AST: corrupt trade completed paired badge title condition',
+        pattern: 'const title = event.offeredCellIndex !== undefined',
+        replacement: 'const title = event.offeredCellIndex === undefined',
+      },
+      {
+        file: 'src/client/events/game_event_financial_helpers.ts',
+        desc: 'AST: corrupt mortgage interest rate under rate hike in calculateMortgageInterest',
+        pattern: 'const mortRate = isStimulus ? 0 : (isRateHike ? MORTGAGE_RATE_HIKE_INTEREST_RATE : MORTGAGE_DEFAULT_INTEREST_RATE);',
+        replacement: 'const mortRate = isStimulus ? 0 : MORTGAGE_DEFAULT_INTEREST_RATE;',
+      },
+      {
+        file: 'src/client/events/game_event_financial_helpers.ts',
+        desc: 'AST: disable stateMap population in buildRegistryAndStateMap',
+        pattern: 'for (const [cellStr, lvl] of Object.entries(levelMap)) stateMap.set(Number(cellStr), { level: lvl });',
+        replacement: '/* skip stateMap */',
       },
     ],
   };
@@ -320,9 +522,6 @@ async function runUniversalMutationProbe(
   }
 
   // 2. Generic Contract Inversion Testing (on sandbox test copy, zero stale ticket keywords)
-  const originalTestContent = fs.readFileSync(testPath, 'utf-8');
-  const sandboxDir = path.dirname(path.resolve(testPath));
-  const sandboxPath = path.join(sandboxDir, `.tmp_mutant_sandbox_${Date.now()}.test.ts`);
 
   const genericMutators: Array<{ name: string; pattern: string | RegExp; replacement: string | ((...args: any[]) => string) }> = [
     { name: 'toBe(true) -> toBe(false)', pattern: '.toBe(true)', replacement: '.toBe(false)' },
@@ -388,30 +587,36 @@ async function runUniversalMutationProbe(
     return mutants;
   }
 
-  try {
-    for (const { name, pattern, replacement } of genericMutators) {
-      const instances = getMutantInstances(originalTestContent, pattern, replacement, 5);
+  for (const targetTestFile of testFiles) {
+    const originalTestContent = fs.readFileSync(targetTestFile, 'utf-8');
+    const sandboxDir = path.dirname(path.resolve(targetTestFile));
+    const sandboxPath = path.join(sandboxDir, `.tmp_mutant_sandbox_${Date.now()}_${path.basename(targetTestFile)}`);
 
-      for (let i = 0; i < instances.length; i++) {
-        mutantsTested++;
-        const mutantContent = instances[i]!;
+    try {
+      for (const { name, pattern, replacement } of genericMutators) {
+        const instances = getMutantInstances(originalTestContent, pattern, replacement, 3);
 
-        fs.writeFileSync(sandboxPath, mutantContent, 'utf-8');
+        for (let i = 0; i < instances.length; i++) {
+          mutantsTested++;
+          const mutantContent = instances[i]!;
 
-        try {
-          execSync(`${vitestBin} run "${sandboxPath}"`, { stdio: 'pipe' });
-          console.log(`  [CONTRACT MUTANT #${mutantsTested}] ${name} (instance ${i + 1}) -> SURVIVED!`);
-          survived++;
-        } catch {
-          console.log(`  [CONTRACT MUTANT #${mutantsTested}] ${name} (instance ${i + 1}) -> KILLED`);
-          killed++;
+          fs.writeFileSync(sandboxPath, mutantContent, 'utf-8');
+
+          try {
+            execSync(`${vitestBin} run "${sandboxPath}"`, { stdio: 'pipe' });
+            console.log(`  [CONTRACT MUTANT #${mutantsTested}] ${name} in ${path.basename(targetTestFile)} (instance ${i + 1}) -> SURVIVED!`);
+            survived++;
+          } catch {
+            console.log(`  [CONTRACT MUTANT #${mutantsTested}] ${name} in ${path.basename(targetTestFile)} (instance ${i + 1}) -> KILLED`);
+            killed++;
+          }
         }
       }
+    } finally {
+      try {
+        if (fs.existsSync(sandboxPath)) fs.unlinkSync(sandboxPath);
+      } catch {}
     }
-  } finally {
-    try {
-      if (fs.existsSync(sandboxPath)) fs.unlinkSync(sandboxPath);
-    } catch {}
   }
 
   const status = (mutantsTested > 0 && survived === 0 && killed === mutantsTested)

@@ -3,6 +3,13 @@
 import type { RoomManager } from '../room_manager.js';
 import { TurnPhase, type Player } from '../../domain/room.js';
 import { PROPERTY_DEEDS, type PropertyState } from '../../domain/property_data.js';
+import { restorePostInsolvencyPhase } from '../insolvency_manager.js';
+
+declare module '../../domain/room.js' {
+  interface Room {
+    pendingInsolvencyQueue?: string[];
+  }
+}
 
 export interface AfkRecoveryResult {
   readonly rescued: boolean;
@@ -113,15 +120,24 @@ export function executeInsolvencyAfkRecovery(
   if (!player) {
     return { rescued: false, bankrupt: false };
   }
+  const currentDebtorId = room.pendingInsolvencyDebtorId ?? room.players[room.currentPlayerIndex]?.id;
+  const isAuthorized = playerId === currentDebtorId || Boolean(room.pendingInsolvencyQueue?.includes(playerId));
+  if (!isAuthorized) {
+    return { rescued: false, bankrupt: false };
+  }
   if (player.balance >= 0) {
-    room.phase = TurnPhase.PropertyManagement;
+    if (room.phase === TurnPhase.InsolvencyPhase) {
+      restorePostInsolvencyPhase(room, playerId, rooms.getRng());
+    }
     return { rescued: true, bankrupt: false };
   }
 
   downgradeUntilSolvent(rooms, roomCode, player);
 
   if (player.balance >= 0) {
-    room.phase = TurnPhase.PropertyManagement;
+    if (room.phase === TurnPhase.InsolvencyPhase) {
+      restorePostInsolvencyPhase(room, playerId, rooms.getRng());
+    }
     return { rescued: true, bankrupt: false };
   }
 
@@ -136,9 +152,9 @@ export function executeInsolvencyAfkRecovery(
   }
 
   if (player.balance >= 0) {
-    delete room.pendingInsolvencyCreditorId;
-    delete room.pendingInsolvencyDebtorId;
-    room.phase = TurnPhase.PropertyManagement;
+    if (room.phase === TurnPhase.InsolvencyPhase) {
+      restorePostInsolvencyPhase(room, playerId, rooms.getRng());
+    }
     return { rescued: true, bankrupt: false };
   }
 

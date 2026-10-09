@@ -2,6 +2,7 @@
 // Đồng bộ hóa DeltaPayload (kể cả Sparse Diff) vào Zustand useGameStore
 // [IMP-64] Player & Cell sections extracted to apply_delta_players.ts and apply_delta_cells.ts
 import { useGameStore, type GameState, FloatingTextType } from '../store/game_store.js';
+import { useActivityStore } from '../store/activity_store.js';
 import { useLobbyStore } from '../store/lobby_store.js';
 import { BOARD_SIZE, TurnPhase } from '../../domain/room.js';
 import type { DeltaPayload } from '../../server/session_manager.js';
@@ -11,6 +12,8 @@ import { trackDeltaActivities } from './activity_tracker.js';
 import { handleDeltaTelemetry } from '../telemetry/telemetry_delta_hook.js';
 import { HapticEngine } from '../haptics/haptic_engine.js';
 import { purgeClientMatchSession } from './client_session_purger.js';
+import { synthesizeGameEvents } from '../events/game_event_synthesizer.js';
+import { dispatchGameEvents, ensureDefaultSubscribers } from '../events/game_event_bus.js';
 
 import { applyPlayerDeltas, initPlayersInfoMap } from './apply_delta_players.js';
 import { applyCellDeltas } from './apply_delta_cells.js';
@@ -140,12 +143,26 @@ function syncGameStarted(delta: DeltaPayload, state: GameState): void {
 
 function syncTelemetryAndActivities(delta: DeltaPayload, state: GameState, store: typeof useGameStore): void {
   try {
-    trackDeltaActivities(delta, state, store.getState());
-    handleDeltaTelemetry(delta, state, store.getState());
+    ensureDefaultSubscribers();
+    const isFullSync = Boolean(delta.cells && delta.cells.length === BOARD_SIZE);
+    const nextState = store.getState();
+    if (!isFullSync) {
+      const events = synthesizeGameEvents(state, nextState, delta);
+      if (events.length > 0) {
+        dispatchGameEvents(events, {
+          prevState: state,
+          nextState,
+          delta,
+        });
+      }
+    }
+    trackDeltaActivities(delta, state, nextState, useActivityStore, { suppressFinancialAndProperty: true });
+    handleDeltaTelemetry(delta, state, nextState);
   } catch {
     // safe fallback: Telemetry and activity tracking must never break game store state
   }
 }
+
 
 export const BOARD_WIDE_CARDS: ReadonlySet<string> = new Set([
   'MC_MEGA_CONCERT', 'MC_FIRE_INSPECTION', 'MC_RATE_HIKE',

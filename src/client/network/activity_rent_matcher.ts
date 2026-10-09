@@ -27,6 +27,9 @@ export {
   extractPassedGoActivities,
 };
 
+import { synthesizeGameEvents } from '../events/game_event_synthesizer.js';
+export { synthesizeGameEvents };
+
 export interface PropertyFinancialContext {
   readonly boughtCellIndices: readonly number[]; readonly buyoutCellIndices?: readonly number[];
   readonly upgradedCells: ReadonlyArray<{ cellIndex: number; cost: number; ownerId: string }>;

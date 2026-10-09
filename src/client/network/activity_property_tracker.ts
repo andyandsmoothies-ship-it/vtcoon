@@ -7,6 +7,8 @@ import { PROPERTY_DEEDS } from '../../domain/property_data.js';
 import { calculateUpgradeCost } from '../../domain/property_upgrade.js';
 import { formatCurrency } from '../ui/ui_helpers.js';
 import { getPlayerName, type PropertyFinancialContext } from './activity_financial_tracker.js';
+import { synthesizePropertyAndMarketEvents } from '../events/game_event_property_synthesizer.js';
+export { synthesizePropertyAndMarketEvents };
 
 export const LEVEL_NAMES: Record<1 | 2 | 3, string> = {
   1: 'C1 (Nhà Phố)',

@@ -3,10 +3,10 @@ import React, { useEffect, useRef } from 'react';
 import { useGameStore, ModalPayloadMap, type ActiveModalType } from '../../store/game_store';
 import { ModalBackdrop } from './modal_backdrop';
 import { DeedModalHost } from './hosts/deed_modal_host';
+import { PortfolioModalHost } from './hosts/portfolio_modal_host';
+import { AuctionModalHost } from './hosts/auction_modal_host';
+import { TradeModalHost } from './hosts/trade_modal_host';
 import { TransitWheelModal } from './transit_wheel_modal';
-import { PropertyPortfolioModal } from './property_portfolio_modal';
-import { AuctionModal } from './auction_modal';
-import { TradeModal } from './trade_modal';
 import { EventCardModal } from './event_card_modal';
 import { HoseModal } from './hose_modal';
 import { InsolvencyBanner } from './insolvency_banner';
@@ -18,9 +18,8 @@ import { CompulsoryBuyoutModal } from './compulsory_buyout_modal';
 import { AudioEngine } from '../../audio/audio_engine';
 import { SoundEffect } from '../../audio/audio_types';
 import type { PlayerIntent } from '../../../server/intent_dispatcher';
-import { isAuctionDismissible, calculateAuctionTimeRemaining } from './modal_helpers';
+import { isAuctionDismissible } from './modal_helpers';
 import { useLobbyStore } from '../../store/lobby_store';
-import { calculatePlayerNetWorth } from '../ui_helpers';
 
 export interface ModalHostProps {
   readonly activeModal?: ActiveModalType;
@@ -43,35 +42,24 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
   const activeModifiers = useGameStore((state) => state.activeModifiers);
   const isTradeFrozen = Boolean(activeModifiers?.some((m) => m.type === 'MC_FREEZE_TRADE' && m.remainingRounds > 0));
   const hoseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   useEffect(() => {
     return () => {
       if (hoseTimerRef.current) clearTimeout(hoseTimerRef.current);
     };
   }, []);
-  // [UC-GAME-022] Đồng hồ đếm ngược sàn đấu giá tự động (đồng bộ theo deadline chuẩn xác)
-  useEffect(() => {
-    if (activeModal !== 'auction') return;
-    const timer = setInterval(() => {
-      const state = useGameStore.getState();
-      if (state.activeModal !== 'auction') return;
-      const payload = state.modalPayload as ModalPayloadMap['auction'] | null;
-      if (!payload) return;
-      const targetTime = calculateAuctionTimeRemaining(payload);
-      if (targetTime !== payload.timeRemaining) {
-        state.updateModalPayload<'auction'>({ timeRemaining: targetTime });
-      }
-    }, 250);
-    return () => clearInterval(timer);
-  }, [activeModal]);
+
   // SFX khi mở thẻ sự kiện hoặc đề xuất mua đất từ Bot / mua lại C0
   useEffect(() => {
     if (activeModal === 'event' || activeModal === 'bot_trade_offer' || activeModal === 'compulsory_buyout') {
       AudioEngine.playSfx(SoundEffect.CARD_DRAW);
     }
   }, [activeModal]);
+
   if (!activeModal) {
     return null;
   }
+
   if (activeModal === 'rules') {
     return (
       <GameRulesModal
@@ -81,6 +69,7 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
       />
     );
   }
+
   if (activeModal === 'masterplan') {
     const payload = (modalPayload as ModalPayloadMap['masterplan']) || {};
     return (
@@ -97,9 +86,11 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
       </ModalBackdrop>
     );
   }
+
   if (!modalPayload && activeModal !== 'portfolio') {
     return null;
   }
+
   const lobbyPid = useLobbyStore.getState().myPlayerId;
   const myId = props.localPlayerId || (lobbyPid && lobbyPid.length > 0 ? lobbyPid : undefined) || 'p1';
   const myPlayer = playersInfo[myId];
@@ -107,6 +98,7 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
   const isBuyModal = activeModal === 'deed' && Boolean((modalPayload as ModalPayloadMap['deed'])?.canBuy);
   const isAuctionActive = activeModal === 'auction';
   const isCriticalDecision = isBuyModal || (isAuctionActive && !isAuctionDismissible(modalPayload as ModalPayloadMap['auction'], myId, myPlayer)) || activeModal === 'insolvency' || activeModal === 'compulsory_buyout' || activeModal === 'transit_wheel';
+
   const handleBackdropClose = () => {
     if (isAuctionActive && modalPayload && 'cellIndex' in modalPayload) {
       useGameStore.getState().dismissAuction((modalPayload as ModalPayloadMap['auction']).cellIndex);
@@ -150,179 +142,42 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
         />
       )}
 
-      {activeModal === 'portfolio' && (() => {
-        const owned = myPlayer?.ownedProperties ?? [];
-        const unmortgagedCount = owned.filter((idx) => !myPlayer?.mortgagedProperties?.includes(idx)).length;
-        const playerNW = calculatePlayerNetWorth(
-          myPlayer?.balance ?? 0,
-          owned,
-          useGameStore.getState().levelMap,
-          myPlayer?.mortgagedProperties ?? [],
-          myPlayer?.mortgageLoans,
-        );
+      {activeModal === 'portfolio' && (
+        <PortfolioModalHost
+          myId={myId}
+          myPlayer={myPlayer}
+          playersInfo={playersInfo}
+          isTradeFrozen={isTradeFrozen}
+          activeModifiers={activeModifiers}
+          currentTurnPlayerId={currentTurnPlayerId}
+          onIntent={onIntent}
+          closeModal={closeModal}
+        />
+      )}
 
-        return (
-          <PropertyPortfolioModal
-            ownedProperties={owned}
-            isTradeFrozen={isTradeFrozen}
-            activeModifiers={activeModifiers}
-            propertyStates={Object.fromEntries(owned.map((idx) => [
-              idx,
-              { ownerId: myId, level: useGameStore.getState().levelMap[idx] ?? 0, isMortgaged: Boolean(myPlayer?.mortgagedProperties?.includes(idx)) },
-            ]))}
-            currentBalance={myPlayer?.balance ?? 0}
-            playerNetWorth={playerNW}
-            unmortgagedPropertiesCount={unmortgagedCount}
-            bondContract={myPlayer?.bondContract}
-            isInInsolvency={useGameStore.getState().activeModal === 'insolvency' || (myPlayer?.balance ?? 0) < 0}
-            isMyTurn={currentTurnPlayerId === myId}
-            turnPhase={useGameStore.getState().turnPhase}
-            allPlayers={playersInfo}
-            onIssueBond={(trancheId) => onIntent?.({ type: 'INTENT_ISSUE_BOND', trancheId })}
-            onRepayBond={() => onIntent?.({ type: 'INTENT_REPAY_BOND' })}
-            onQuickTrade={(targetPlayerId, targetPropertyIndex) => {
-              closeModal();
-              useGameStore.getState().openModal('trade', { targetPlayerId, offeredProperties: [], requestedProperties: [targetPropertyIndex], cashOffer: 0, cashRequest: 0 });
-            }}
-            onViewVacantCell={(cellIndex) => {
-              closeModal();
-              useGameStore.getState().setCameraFocusCell(cellIndex);
-              useGameStore.getState().openModal('deed', { cellIndex, canBuy: false, ownedProperties: myPlayer?.ownedProperties });
-            }}
-            onUpgrade={(cellIndex) => onIntent?.({ type: 'INTENT_UPGRADE', cellIndex })}
-            onHoverCell={(cellIndex) => useGameStore.getState().setCameraFocusCell(cellIndex)}
-            onSelectDeed={(cellIndex) => {
-              closeModal();
-              useGameStore.getState().openModal('deed', { cellIndex, canBuy: false, ownedProperties: myPlayer?.ownedProperties });
-            }}
-            onMortgage={(cellIndex) => onIntent?.({ type: 'INTENT_MORTGAGE', cellIndex })}
-            onRedeem={(cellIndex) => onIntent?.({ type: 'INTENT_REDEEM', cellIndex })}
-            onDowngrade={(cellIndex) => onIntent?.({ type: 'INTENT_DOWNGRADE', cellIndex })}
-            onAutoSolvency={() => onIntent?.({ type: 'INTENT_AUTO_SOLVENCY' })}
-            onClose={() => { useGameStore.getState().setCameraFocusCell(null); closeModal(); }}
-          />
-        );
-      })()}
+      {activeModal === 'auction' && modalPayload && (
+        <AuctionModalHost
+          payload={modalPayload as ModalPayloadMap['auction']}
+          myId={myId}
+          myPlayer={myPlayer}
+          playersInfo={playersInfo}
+          onIntent={onIntent}
+          onClose={closeModal}
+          updateModalPayload={updateModalPayload}
+        />
+      )}
 
-      {activeModal === 'auction' && (() => {
-        const payload = modalPayload as ModalPayloadMap['auction'];
-        return (
-          <AuctionModal
-            cellIndex={payload.cellIndex}
-            currentBid={payload.currentBid ?? 0}
-            startingBid={payload.startingBid}
-            highestBidderId={payload.highestBidderId ?? null}
-            timeRemaining={payload.timeRemaining ?? 15}
-            hasPassed={payload.hasPassed}
-            passedPlayerIds={payload.passedPlayerIds}
-            declinedPlayerId={payload.declinedPlayerId}
-            isDeclinedPlayer={payload.declinedPlayerId === myId || payload.insolvencyPlayerId === myId}
-            bidderName={payload.highestBidderId ? playersInfo[payload.highestBidderId]?.name : undefined}
-            myBalance={myPlayer?.balance}
-            myId={myId}
-            isConcluded={payload.isConcluded}
-            winnerId={payload.winnerId}
-            finalPrice={payload.finalPrice}
-            isForeclosure={payload.isForeclosure}
-            isFireSale={payload.isFireSale}
-            insolvencyPlayerId={payload.insolvencyPlayerId}
-            isBankrupt={myPlayer?.bankrupt}
-            onClose={() => { useGameStore.getState().dismissAuction(payload.cellIndex); }}
-            onBid={(amount) => {
-              AudioEngine.playSfx(SoundEffect.AUCTION_BID);
-              onIntent?.({ type: 'INTENT_BID', amount });
-              const curTime = payload.timeRemaining ?? 15;
-              const nextTime = curTime <= 3 ? curTime + 3 : curTime;
-              const nextDeadline = Date.now() + nextTime * 1000;
-              updateModalPayload<'auction'>({ currentBid: amount, highestBidderId: myId, timeRemaining: nextTime, deadline: nextDeadline });
-            }}
-            onPass={() => {
-              onIntent?.({ type: 'INTENT_AUCTION_PASS' });
-              updateModalPayload<'auction'>({ hasPassed: true });
-            }}
-          />
-        );
-      })()}
-
-      {activeModal === 'trade' && (() => {
-        const tradePayload = modalPayload as ModalPayloadMap['trade'];
-        const currentTargetId = tradePayload.targetPlayerId;
-        const slots = useLobbyStore.getState().slots;
-        const availablePartners = Object.keys(playersInfo)
-          .filter((id) => id !== myId)
-          .map((id) => {
-            const slot = slots?.find((s) => s.playerId === id);
-            return {
-              id,
-              name: playersInfo[id]?.name ?? id,
-              balance: playersInfo[id]?.balance ?? 0,
-              isBot: Boolean(playersInfo[id]?.isBot),
-              personality: playersInfo[id]?.personality ?? slot?.botPersonality,
-              properties: playersInfo[id]?.ownedProperties ?? [],
-            };
-          });
-        const targetPlayer = playersInfo[currentTargetId];
-
-        return (
-          <TradeModal
-            targetPlayerId={currentTargetId}
-            myProperties={myPlayer?.ownedProperties ?? []}
-            targetProperties={targetPlayer?.ownedProperties ?? []}
-            myMortgagedProperties={myPlayer?.mortgagedProperties ?? []}
-            targetMortgagedProperties={targetPlayer?.mortgagedProperties ?? []}
-            myBalance={myPlayer?.balance ?? 0}
-            targetPlayerName={targetPlayer?.name}
-            targetBalance={targetPlayer?.balance ?? 0}
-            availablePartners={availablePartners}
-            onSelectPartner={(partnerId) => {
-              updateModalPayload<'trade'>({
-                targetPlayerId: partnerId,
-                requestedProperties: [],
-                cashRequest: 0,
-              });
-            }}
-            initialOffered={tradePayload.offeredProperties}
-            initialRequested={tradePayload.requestedProperties}
-            initialCashOffer={tradePayload.cashOffer}
-            initialCashRequest={tradePayload.cashRequest}
-            onSubmitTrade={(tradeData) => {
-              AudioEngine.playSfx(SoundEffect.TRADE_SUCCESS);
-              if (tradeData) {
-                const off0 = tradeData.offeredProperties[0];
-                const req0 = tradeData.requestedProperties[0];
-                if (off0 !== undefined && req0 !== undefined) {
-                  onIntent?.({
-                    type: 'INTENT_TRADE_OFFER',
-                    sellerId: tradeData.targetPlayerId,
-                    buyerId: myId,
-                    cellIndex: req0,
-                    offeredCellIndex: off0,
-                    price: (tradeData.cashOffer || 0) - (tradeData.cashRequest || 0),
-                  });
-                } else if (off0 !== undefined) {
-                  onIntent?.({
-                    type: 'INTENT_TRADE_OFFER',
-                    sellerId: myId,
-                    buyerId: tradeData.targetPlayerId,
-                    cellIndex: off0,
-                    price: tradeData.cashRequest || tradeData.cashOffer || 1000,
-                  });
-                } else if (req0 !== undefined) {
-                  onIntent?.({
-                    type: 'INTENT_TRADE_OFFER',
-                    sellerId: tradeData.targetPlayerId,
-                    buyerId: myId,
-                    cellIndex: req0,
-                    price: tradeData.cashOffer || tradeData.cashRequest || 1000,
-                  });
-                }
-              }
-              closeModal();
-            }}
-            onClose={closeModal}
-          />
-        );
-      })()}
+      {activeModal === 'trade' && modalPayload && (
+        <TradeModalHost
+          payload={modalPayload as ModalPayloadMap['trade']}
+          myId={myId}
+          myPlayer={myPlayer}
+          playersInfo={playersInfo}
+          onIntent={onIntent}
+          closeModal={closeModal}
+          updateModalPayload={updateModalPayload}
+        />
+      )}
 
       {activeModal === 'event' && (() => {
         const handleEventModalClose = () => {

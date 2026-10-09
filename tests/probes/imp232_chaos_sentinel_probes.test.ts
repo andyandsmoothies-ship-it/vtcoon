@@ -28,6 +28,19 @@ import { buildDeltaFromRoom } from '../../src/server/session_manager';
 function findVNode(node: any, predicate: (n: any) => boolean): any {
   if (!node) return null;
   if (predicate(node)) return node;
+  if (typeof node?.type === 'function') {
+    try {
+      let unrolled: any = null;
+      renderToStaticMarkup(
+        React.createElement(() => {
+          unrolled = node.type(node.props);
+          return null;
+        })
+      );
+      const res = findVNode(unrolled, predicate);
+      if (res) return res;
+    } catch {}
+  }
   const children = node.props?.children;
   if (Array.isArray(children)) {
     for (const child of children) {

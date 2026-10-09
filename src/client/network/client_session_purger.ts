@@ -1,10 +1,13 @@
-// [IMP-201/MSS] Client Session Lifecycle Purge & Cross-Match State Isolation
+// [IMP-201/MSS][IMP-332] Client Session Lifecycle Purge & Cross-Match State Isolation
 import { useActivityStore } from '../store/activity_store.js';
 import { useTelemetryStore } from '../telemetry/telemetry_store.js';
 import { useGameStore } from '../store/game_store.js';
 import { useVfxStore } from '../store/vfx_store.js';
 import { resetEventCardActivityTracker, resetAuctionActivityTracker, resetTransitActivityTracker } from './activity_tracker.js';
 import { resetTradeOfferResolutions } from '../ui/modals/bot_trade_offer_strip.js';
+import { clearGameEventListeners, registerDefaultSubscribers } from '../events/game_event_bus.js';
+import { clearPendingPacingTimers } from '../events/pacing_context.js';
+import { clearPendingBadgeTimers } from './activity_badge_dispatcher.js';
 
 export interface PurgeSessionOptions {
   /**
@@ -42,4 +45,13 @@ export function purgeClientMatchSession(options: PurgeSessionOptions = { clearGa
     useGameStore.getState().resetGameState();
     useGameStore.getState().closeModal();
   }
+
+  // 6. [IMP-332] Dọn dẹp listeners của GameEventBus và khôi phục default presentation subscribers
+  clearGameEventListeners();
+  registerDefaultSubscribers();
+
+  // 7. [IMP-333] Xóa sạch các bộ đếm thời gian pacing và badge còn đang hẹn giờ
+  clearPendingPacingTimers();
+  clearPendingBadgeTimers();
 }
+
