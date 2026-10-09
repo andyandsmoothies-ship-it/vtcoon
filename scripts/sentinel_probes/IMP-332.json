@@ -1,0 +1,38 @@
+[
+  {
+    "file": "src/client/events/game_event_bus.ts",
+    "desc": "AST: disable listener registration in GameEventBus",
+    "target": "this.listeners.set(key, listener);",
+    "replacement": "/* skip registration */"
+  },
+  {
+    "file": "src/client/events/game_event_bus.ts",
+    "desc": "AST: break crash isolation in dispatchGameEvents",
+    "target": "console.warn(`[GameEventBus] Error in subscriber '${key}':`, err);",
+    "replacement": "throw err;"
+  },
+  {
+    "file": "src/client/events/game_event_bus.ts",
+    "desc": "AST: disable listener clearing in clearListeners",
+    "target": "this.listeners.clear();",
+    "replacement": "/* skip clear */"
+  },
+  {
+    "file": "src/client/events/subscribers/activity_log_subscriber.ts",
+    "desc": "AST: break rent event type mapping in activity_log_subscriber",
+    "target": "type: 'rent',",
+    "replacement": "type: 'system',"
+  },
+  {
+    "file": "src/client/events/subscribers/activity_log_subscriber.ts",
+    "desc": "AST: break per-event error isolation in activity_log_subscriber",
+    "target": "console.warn('[ActivityLogSubscriber] Per-event mapping error isolated:', err);",
+    "replacement": "throw err;"
+  },
+  {
+    "file": "src/client/network/apply_delta.ts",
+    "desc": "AST: corrupt suppressFinancialAndProperty flag in syncTelemetryAndActivities",
+    "target": "suppressFinancialAndProperty: true",
+    "replacement": "suppressFinancialAndProperty: false"
+  }
+]

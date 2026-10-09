@@ -1,0 +1,62 @@
+[
+  {
+    "file": "src/client/3d/camera_soft_return.ts",
+    "desc": "AST: corrupt cubic-out easing formula u = 1 - Math.pow(1 - tau, 3)",
+    "target": "const u = 1 - Math.pow(1 - tau, 3);",
+    "replacement": "const u = tau;"
+  },
+  {
+    "file": "src/client/3d/camera_soft_return.ts",
+    "desc": "AST: invert shouldBreakOnTouch logic (return isInteracting && isResetting)",
+    "target": "return isInteracting && isResetting;",
+    "replacement": "return false;"
+  },
+  {
+    "file": "src/client/3d/camera_soft_return.ts",
+    "desc": "AST: corrupt shortest-arc wrap boundary dTheta < -Math.PI",
+    "target": "while (dTheta < -Math.PI) dTheta += 2 * Math.PI;",
+    "replacement": "while (dTheta < -Math.PI) dTheta -= 2 * Math.PI;"
+  },
+  {
+    "file": "src/client/3d/camera_soft_return.ts",
+    "desc": "AST: corrupt spherical radius conservation currentR in sampleSoftReturn",
+    "target": "const currentR = r0 + (r1 - r0) * u;",
+    "replacement": "const currentR = 0.0;"
+  },
+  {
+    "file": "src/client/3d/camera_soft_return.ts",
+    "desc": "AST: corrupt fallback position in sampleSoftReturn NaN guard",
+    "target": "position: safeDestPos,",
+    "replacement": "position: [0, 0, 0],"
+  },
+  {
+    "file": "src/client/3d/camera_soft_return.ts",
+    "desc": "AST: corrupt safeDestPos default fallback [24.6, 25.3, 24.6] -> [0, 0, 0]",
+    "target": "DEFAULT_FALLBACK_POS[0]",
+    "replacement": "0"
+  },
+  {
+    "file": "src/client/3d/camera_location_beacon.tsx",
+    "desc": "AST: mutate beacon pulse opacity formula baseOpacity * pulseFactor",
+    "target": "return Math.min(1, Math.max(0, baseOpacity * pulseFactor));",
+    "replacement": "return 0.99;"
+  },
+  {
+    "file": "src/client/3d/camera_location_beacon.tsx",
+    "desc": "AST: corrupt resolveBeaconCoordinates output to [0, 0, 0]",
+    "target": "return [pos[0], 0, pos[2]];",
+    "replacement": "return [0, 0, 0];"
+  },
+  {
+    "file": "src/client/3d/camera_kinematic_helpers.ts",
+    "desc": "AST: corrupt side-aware camera offset tz < 0 [-1.8, height, -6.8] -> [0, 0, 0]",
+    "target": "if (tz < 0) return [-1.8, height, -6.8];",
+    "replacement": "if (tz < 0) return [0, 0, 0];"
+  },
+  {
+    "file": "src/client/3d/camera_kinematic_helpers.ts",
+    "desc": "AST: corrupt calculateTileFocusCameraPosition return vector to [0, 0, 0]",
+    "target": "return [tx + finalOffset[0], ty + finalOffset[1], tz + finalOffset[2]];",
+    "replacement": "return [0, 0, 0];"
+  }
+]

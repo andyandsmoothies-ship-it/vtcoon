@@ -1,0 +1,44 @@
+[
+  {
+    "file": "src/client/ui/modals/auction_bid_controls.tsx",
+    "desc": "AST: corrupt canAfford condition in AuctionBidControls",
+    "target": "const canAfford = !isConcluded && (myBalance === undefined || targetBid <= myBalance);",
+    "replacement": "const canAfford = isConcluded && (myBalance === undefined || targetBid <= myBalance);"
+  },
+  {
+    "file": "src/client/ui/modals/auction_bid_controls.tsx",
+    "desc": "AST: corrupt fire sale catch label in AuctionBidControls",
+    "target": "targetBid === 0 ? 'Bắt Đáy (0)' :",
+    "replacement": "targetBid !== 0 ? 'Bắt Đáy (0)' :"
+  },
+  {
+    "file": "src/client/ui/modals/auction_bid_controls.tsx",
+    "desc": "AST: corrupt autoBid button label in AuctionBidControls",
+    "target": "autoBid ? 'TỰ ĐỘNG ĐẶT GIÁ: BẬT' : 'TỰ ĐỘNG ĐẶT GIÁ: TẮT'",
+    "replacement": "!autoBid ? 'TỰ ĐỘNG ĐẶT GIÁ: BẬT' : 'TỰ ĐỘNG ĐẶT GIÁ: TẮT'"
+  },
+  {
+    "file": "src/client/ui/modals/auction_bid_controls.tsx",
+    "desc": "AST: corrupt concluded close button testid in AuctionBidControls",
+    "target": "data-testid=\"auction-concluded-close-btn\"",
+    "replacement": "data-testid=\"auction-concluded-corrupted-btn\""
+  },
+  {
+    "file": "src/client/ui/modals/auction_bid_controls.tsx",
+    "desc": "AST: corrupt pass button testid in AuctionBidControls",
+    "target": "data-testid=\"auction-pass-btn\"",
+    "replacement": "data-testid=\"auction-pass-corrupted-btn\""
+  },
+  {
+    "file": "src/client/ui/modals/auction_bid_controls.tsx",
+    "desc": "AST: corrupt bankrupt notice message in AuctionBidControls",
+    "target": "'Bạn đã phá sản và đang theo dõi phiên đấu giá tài sản phát mãi.'",
+    "replacement": "'Thông báo phá sản bị lỗi'"
+  },
+  {
+    "file": "src/client/ui/modals/auction_bid_controls.tsx",
+    "desc": "AST: corrupt passed withdrawal message in AuctionBidControls",
+    "target": "'Bạn đã rút lui khỏi phiên đấu giá này.'",
+    "replacement": "'Thông báo rút lui bị lỗi'"
+  }
+]

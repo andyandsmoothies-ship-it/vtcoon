@@ -1,0 +1,38 @@
+[
+  {
+    "file": "src/client/store/game_store_pawn_actions.ts",
+    "desc": "AST: corrupt enqueuePawnMove self-move guard",
+    "target": "if (task.fromCell === task.targetCell) {\n        return;\n      }",
+    "replacement": "/* AST_MUTANT_REMOVED */"
+  },
+  {
+    "file": "src/client/store/game_store_pawn_actions.ts",
+    "desc": "AST: corrupt enqueuePawnMove bounds check",
+    "target": "if (!Number.isInteger(task.targetCell) || task.targetCell < 0 || task.targetCell >= BOARD_TOTAL_CELLS) {",
+    "replacement": "if (false) {"
+  },
+  {
+    "file": "src/client/store/game_store_pawn_actions.ts",
+    "desc": "AST: corrupt triggerDiceRoll isRolling assignment",
+    "target": "isRolling: true,",
+    "replacement": "isRolling: false,"
+  },
+  {
+    "file": "src/client/store/game_store_pawn_actions.ts",
+    "desc": "AST: corrupt triggerDiceRoll stale sequence guard",
+    "target": "if (diceSeq !== undefined && state.lastDiceSeq !== undefined && diceSeq <= state.lastDiceSeq) {",
+    "replacement": "if (false) {"
+  },
+  {
+    "file": "src/client/store/game_store_pawn_actions.ts",
+    "desc": "AST: corrupt completePawnMove animation clearing",
+    "target": "activePawnAnimation: null,",
+    "replacement": "activePawnAnimation: state.activePawnAnimation,"
+  },
+  {
+    "file": "src/client/store/game_store_pawn_actions.ts",
+    "desc": "AST: corrupt setPlayerPositions busy visualPositions branch",
+    "target": "const visualPositions = isBusy ? { ...state.visualPositions } : { ...positions };",
+    "replacement": "const visualPositions = { ...positions };"
+  }
+]

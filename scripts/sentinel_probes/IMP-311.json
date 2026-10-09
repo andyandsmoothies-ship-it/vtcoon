@@ -1,0 +1,44 @@
+[
+  {
+    "file": "src/client/3d/single_hop_pawn.tsx",
+    "desc": "AST: corrupt delta clamping in computeHopFrame",
+    "target": "const dt = Math.min(params.delta, 0.1);",
+    "replacement": "const dt = Math.max(params.delta, 0.1);"
+  },
+  {
+    "file": "src/client/3d/single_hop_pawn.tsx",
+    "desc": "AST: corrupt hop phase predicate in computeHopFrame",
+    "target": "if (t <= params.hopDuration) {",
+    "replacement": "if (t > params.hopDuration) {"
+  },
+  {
+    "file": "src/client/3d/single_hop_pawn.tsx",
+    "desc": "AST: corrupt jail flight landing sound in computeHopFrame",
+    "target": "soundToPlay = SoundEffect.TAX_PENALTY;",
+    "replacement": "soundToPlay = SoundEffect.PAWN_STEP;"
+  },
+  {
+    "file": "src/client/3d/single_hop_pawn.tsx",
+    "desc": "AST: corrupt completion state flag in computeHopFrame",
+    "target": "isComplete: true,",
+    "replacement": "isComplete: false,"
+  },
+  {
+    "file": "src/client/3d/single_hop_pawn.tsx",
+    "desc": "AST: corrupt completion rest scale in computeHopFrame",
+    "target": "scale: [1, 1, 1],",
+    "replacement": "scale: [2, 2, 2],"
+  },
+  {
+    "file": "src/client/3d/single_hop_pawn.tsx",
+    "desc": "AST: corrupt cache clear in clearEmoteCanvasCache",
+    "target": "emoteCanvasCache.clear();",
+    "replacement": "/* no clear */"
+  },
+  {
+    "file": "src/client/3d/single_hop_pawn.tsx",
+    "desc": "AST: corrupt immediate self hop in SingleHopPawn",
+    "target": "if (fromCell === toCell && !completedRef.current) {",
+    "replacement": "if (false) {"
+  }
+]

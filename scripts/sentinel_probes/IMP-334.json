@@ -1,0 +1,32 @@
+[
+  {
+    "file": "src/client/events/subscribers/property_market_badge_handler.ts",
+    "desc": "AST: break lean ergonomics formula undefined in handlePropertyBadges",
+    "target": "formula: undefined, // Mũi 5: 2-tier lean ergonomics on mobile 360px",
+    "replacement": "formula: 'PRICE_CORRUPTED_FORMULA',"
+  },
+  {
+    "file": "src/client/events/subscribers/property_market_badge_handler.ts",
+    "desc": "AST: invert mortgage floating text loan amount polarity in handlePropertyBadges",
+    "target": "text: `+${formatCurrency(event.loanAmount)}`,",
+    "replacement": "text: formatCurrency(-event.loanAmount),"
+  },
+  {
+    "file": "src/client/events/subscribers/property_market_badge_handler.ts",
+    "desc": "AST: corrupt trade completed paired badge title condition",
+    "target": "const title = event.offeredCellIndex !== undefined",
+    "replacement": "const title = event.offeredCellIndex === undefined"
+  },
+  {
+    "file": "src/client/events/game_event_financial_helpers.ts",
+    "desc": "AST: corrupt mortgage interest rate under rate hike in calculateMortgageInterest",
+    "target": "const mortRate = isStimulus ? 0 : (isRateHike ? MORTGAGE_RATE_HIKE_INTEREST_RATE : MORTGAGE_DEFAULT_INTEREST_RATE);",
+    "replacement": "const mortRate = isStimulus ? 0 : MORTGAGE_DEFAULT_INTEREST_RATE;"
+  },
+  {
+    "file": "src/client/events/game_event_financial_helpers.ts",
+    "desc": "AST: disable stateMap population in buildRegistryAndStateMap",
+    "target": "for (const [cellStr, lvl] of Object.entries(levelMap)) stateMap.set(Number(cellStr), { level: lvl });",
+    "replacement": "/* skip stateMap */"
+  }
+]

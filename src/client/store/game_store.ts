@@ -96,6 +96,8 @@ export const useGameStore = create<GameState>((set, get) => ({
       };
     }),
   setLastEventCard: (card) => set({ lastEventCard: card }),
+  lastTransitResult: null,
+  setLastTransitResult: (result) => set({ lastTransitResult: result }),
   setPendingBuyout: (pendingBuyout) => set({ pendingBuyout }),
   setPendingTradeOffer: (pendingTradeOffer) => set({ pendingTradeOffer }),
   updateModalPayload: (patch) =>

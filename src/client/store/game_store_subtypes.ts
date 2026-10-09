@@ -6,6 +6,15 @@ import type { BondContract } from '../../domain/bond_types.js';
 import type { ChanceCardId } from '../../domain/event_card_engine.js';
 import type { TransitWheelOutcome } from '../../domain/transit_wheel.js';
 
+export interface TransitWheelResultInfo {
+  readonly playerId: string;
+  readonly cellIndex: number;
+  readonly outcome: TransitWheelOutcome | string;
+  readonly targetCell?: number;
+  readonly payout?: number;
+  readonly boostSteps?: number;
+}
+
 export interface PawnAnimationState {
   readonly playerId: string;
   readonly fromCell: number;

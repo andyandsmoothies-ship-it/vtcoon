@@ -5,13 +5,14 @@ import type { DeltaPayload } from '../../server/session_manager.js';
 import type { SynthesizedGameEvent, SynthesizerOptions } from './game_event_types.js';
 import { synthesizeFinancialEvents } from './game_event_financial_synthesizer.js';
 import { synthesizePropertyAndMarketEvents } from './game_event_property_synthesizer.js';
+import { synthesizeKinematicEvents } from './game_event_kinematics_synthesizer.js';
 
-export { synthesizeFinancialEvents, synthesizePropertyAndMarketEvents };
+export { synthesizeFinancialEvents, synthesizePropertyAndMarketEvents, synthesizeKinematicEvents };
 export * from './game_event_types.js';
 
 /**
  * Synthesizes typed domain events from network state deltas in causal temporal order:
- * Financial events (Waiver, Salary, Fees, Rent) precede Property/Market events (Trades, Auctions, Purchases, Upgrades, Mortgages).
+ * Kinematics (Dice, Moves, Cards, Transit) -> Financial (Waiver, Salary, Fees, Rent) -> Property/Market (Trades, Auctions, Purchases, Upgrades, Mortgages).
  */
 export function synthesizeGameEvents(
   prevState: GameState,
@@ -19,8 +20,9 @@ export function synthesizeGameEvents(
   delta: DeltaPayload,
   options?: SynthesizerOptions,
 ): readonly SynthesizedGameEvent[] {
+  const kinematicEvents = synthesizeKinematicEvents(prevState, nextState, delta, options);
   const financialEvents = synthesizeFinancialEvents(prevState, nextState, delta, options);
   const propertyEvents = synthesizePropertyAndMarketEvents(prevState, nextState, delta, options);
 
-  return [...financialEvents, ...propertyEvents];
+  return [...kinematicEvents, ...financialEvents, ...propertyEvents];
 }

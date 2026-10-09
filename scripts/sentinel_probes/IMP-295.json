@@ -1,0 +1,62 @@
+[
+  {
+    "file": "src/client/audio/synth_recipes_gameplay.ts",
+    "desc": "AST: remove volume <= 0 zero allocation guard in synthesizeDiceRoll",
+    "target": "if (volume <= 0) return;",
+    "replacement": "/* AST_MUTANT_REMOVED_GUARD */"
+  },
+  {
+    "file": "src/client/audio/synth_recipes_gameplay.ts",
+    "desc": "AST: mutate filter type bandpass -> lowpass in synthesizeDiceRoll",
+    "target": "filter.type = 'bandpass';",
+    "replacement": "filter.type = 'lowpass';"
+  },
+  {
+    "file": "src/client/audio/synth_recipes_gameplay.ts",
+    "desc": "AST: mutate strikes array [0, 0.14] -> [0] in synthesizeAuctionGavel",
+    "target": "const strikes = [0, 0.14];",
+    "replacement": "const strikes = [0];"
+  },
+  {
+    "file": "src/client/audio/synth_recipes_gameplay.ts",
+    "desc": "AST: mutate subOsc type sine -> square in synthesizeConstructionSlam",
+    "target": "subOsc.type = 'sine';",
+    "replacement": "subOsc.type = 'square';"
+  },
+  {
+    "file": "src/client/audio/synth_recipes_gameplay.ts",
+    "desc": "AST: mutate baseFreq 380 -> 200 in synthesizePawnStep",
+    "target": "const baseFreq = 380 * pitchVariation;",
+    "replacement": "const baseFreq = 200 * pitchVariation;"
+  },
+  {
+    "file": "src/client/audio/synth_recipes_ambient.ts",
+    "desc": "AST: mutate ocean LFO frequency 0.1 -> 0.5 in createOceanAmbientGraph",
+    "target": "lfo.frequency.setValueAtTime(0.1, context.currentTime);",
+    "replacement": "lfo.frequency.setValueAtTime(0.5, context.currentTime);"
+  },
+  {
+    "file": "src/client/audio/synth_recipes_ambient.ts",
+    "desc": "AST: mutate foghorn osc type sawtooth -> sine in synthesizeLighthouseFoghorn",
+    "target": "osc.type = 'sawtooth';",
+    "replacement": "osc.type = 'sine';"
+  },
+  {
+    "file": "src/client/audio/synth_recipes_ambient.ts",
+    "desc": "AST: mutate splash lowpass end frequency 200 -> 50 in synthesizeWaterSplash",
+    "target": "filter.frequency.exponentialRampToValueAtTime(200, now + 0.35);",
+    "replacement": "filter.frequency.exponentialRampToValueAtTime(50, now + 0.35);"
+  },
+  {
+    "file": "src/client/audio/synth_recipes_ui.ts",
+    "desc": "AST: mutate card flip snap osc type triangle -> sawtooth in synthesizeCardFlip",
+    "target": "snapOsc.type = 'triangle';",
+    "replacement": "snapOsc.type = 'sawtooth';"
+  },
+  {
+    "file": "src/client/audio/synth_recipes_ui.ts",
+    "desc": "AST: mutate coronation chime notes array to single note in synthesizeCoronationChime",
+    "target": "const notes = [523.25, 659.25, 783.99, 1046.5, 1318.51];",
+    "replacement": "const notes = [523.25];"
+  }
+]

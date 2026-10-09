@@ -1,11 +1,12 @@
 // [UC-GAME-028/MSS] Auction Manager — Bỏ Qua & Đấu Giá Tự Động
 import type { Room, Player } from '../domain/room';
-import { TurnPhase } from '../domain/room';
+import { TurnPhase, isRoomGameOver } from '../domain/room';
 import { PROPERTY_DEEDS, type PropertyRegistry, type PropertyStateMap } from '../domain/property_manager';
 import { ActionRejectReason } from '../domain/action_reasons';
 import { handleStartFireSaleAuction } from './bond_manager';
-import { advanceTurnToNextPlayer } from './turn_loop';
+import { advanceTurnAfterBankruptcy } from './insolvency_manager';
 import { MarketCardId } from '../domain/event_card_types';
+
 
 
 export interface AuctionSession {
@@ -144,11 +145,38 @@ export function handleAuctionPass(
   return { success: true };
 }
 
+function drainPendingInsolvencyQueue(room: Room): boolean {
+  if (isRoomGameOver(room)) {
+    delete room.pendingInsolvencyQueue;
+    delete room.pendingInsolvencyDebtorId;
+    delete room.pendingInsolvencyCreditorId;
+    return false;
+  }
+  if (room.pendingInsolvencyQueue && room.pendingInsolvencyQueue.length > 0) {
+    while (room.pendingInsolvencyQueue.length > 0) {
+      const nextId = room.pendingInsolvencyQueue.shift()!;
+      const candidate = room.players.find((p) => p.id === nextId);
+      if (candidate && candidate.balance < 0 && !candidate.bankrupt) {
+        if (!room.preInsolvencyPhase) {
+          room.preInsolvencyPhase = TurnPhase.PropertyManagement;
+        }
+        room.phase = TurnPhase.InsolvencyPhase;
+        room.pendingInsolvencyDebtorId = candidate.id;
+        delete room.pendingInsolvencyCreditorId;
+        return true;
+      }
+    }
+    delete room.pendingInsolvencyQueue;
+  }
+  return false;
+}
+
 function processNextFireSaleQueueItem(
   room: Room,
   auctions: Map<string, AuctionSession> | undefined,
   roomCode: string | undefined,
   currentCellIndex: number,
+  session?: AuctionSession,
 ): boolean {
   if (room.fireSaleQueue && room.fireSaleQueue.length > 0 && room.fireSaleQueue[0] === currentCellIndex) {
     room.fireSaleQueue.shift();
@@ -159,9 +187,25 @@ function processNextFireSaleQueueItem(
     return true;
   }
   if (room.fireSaleQueue && room.fireSaleQueue.length === 0) {
+    const debtorId = room.fireSaleDebtorId ?? session?.insolvencyPlayerId ?? session?.declinedPlayerId;
     delete room.fireSaleQueue;
     delete room.fireSaleDebtorId;
-    advanceTurnToNextPlayer(room);
+
+    if (isRoomGameOver(room)) {
+      return false;
+    }
+
+    if (drainPendingInsolvencyQueue(room)) {
+      return true;
+    }
+
+    if ((debtorId && room.players[room.currentPlayerIndex]?.id === debtorId) || room.players[room.currentPlayerIndex]?.bankrupt) {
+      advanceTurnAfterBankruptcy(room);
+      return true;
+    }
+
+    room.phase = room.preInsolvencyPhase ?? TurnPhase.PropertyManagement;
+    delete room.preInsolvencyPhase;
     return true;
   }
   return false;
@@ -258,28 +302,17 @@ export function handleAuctionClose(
   }
 
   // Xử lý hàng đợi phát mãi
-  if (processNextFireSaleQueueItem(room, auctions, roomCode, session.cellIndex)) {
+  if (processNextFireSaleQueueItem(room, auctions, roomCode, session.cellIndex, session)) {
+    return { winnerId, winningBid, cellIndex: session.cellIndex, isForeclosure: !winnerId };
+  }
+
+  if (drainPendingInsolvencyQueue(room)) {
     return { winnerId, winningBid, cellIndex: session.cellIndex, isForeclosure: !winnerId };
   }
 
   const current = room.players[room.currentPlayerIndex];
   if (current?.bankrupt) {
-    const total = room.players.length;
-    let next = (room.currentPlayerIndex + 1) % total;
-    let steps = 0;
-    while (steps < total) {
-      if (!room.players[next]?.bankrupt) break;
-      next = (next + 1) % total;
-      steps++;
-    }
-    room.currentPlayerIndex = next;
-    const nextPlayer = room.players[next];
-    if (nextPlayer?.skipNextTurn) {
-      nextPlayer.skipNextTurn = false;
-      room.phase = TurnPhase.PropertyManagement;
-    } else {
-      room.phase = TurnPhase.WaitingRoll;
-    }
+    advanceTurnAfterBankruptcy(room);
   } else {
     room.phase = TurnPhase.PropertyManagement;
     if (current && [5, 15, 25, 35].includes(current.position) && !current.hasSpunTransitThisTurn && current.balance >= 0) {

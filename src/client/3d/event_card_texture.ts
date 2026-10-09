@@ -303,14 +303,14 @@ export function generateEventCardFrontTexture(
   ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
   ctx.shadowBlur = 4;
   ctx.shadowOffsetY = 1;
-  wrapText(ctx, data.title.toUpperCase(), w / 2, 156, w - 40, 16);
+  wrapText(ctx, (data.title || '').toUpperCase(), w / 2, 156, w - 40, 16);
   ctx.restore();
 
   // 6. Mô tả sự kiện
   ctx.font = '10px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
   ctx.fillStyle = '#CBD5E1';
   ctx.textAlign = 'center';
-  wrapText(ctx, data.description, w / 2, 205, w - 44, 15);
+  wrapText(ctx, data.description || '', w / 2, 205, w - 44, 15);
 
   // 7. Badge biến động tài chính (+/- VNĐ)
   if (typeof data.effectDelta === 'number' && data.effectDelta !== 0) {
@@ -365,13 +365,13 @@ export function generateEventCardFrontTexture(
 
 function wrapText(
   ctx: CanvasRenderingContext2D,
-  text: string,
+  text: string = '',
   x: number,
   y: number,
   maxWidth: number,
   lineHeight: number
 ): void {
-  const words = text.split(' ');
+  const words = (text || '').split(' ');
   let line = '';
   let curY = y;
 

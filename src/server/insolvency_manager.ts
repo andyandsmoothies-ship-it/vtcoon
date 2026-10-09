@@ -27,6 +27,8 @@ export function checkInsolvency(room: Room, creditorId?: string, debtorId?: stri
   }
   if (room.phase !== TurnPhase.InsolvencyPhase) {
     room.preInsolvencyPhase = room.phase;
+  } else if (!room.preInsolvencyPhase) {
+    room.preInsolvencyPhase = TurnPhase.WaitingRoll;
   }
   room.phase = TurnPhase.InsolvencyPhase;
 
@@ -177,11 +179,22 @@ function finalizeInsolvencyPhase(room: Room, playerId: string, rng: () => number
   }
 
   const isTurnPlayer = room.players[room.currentPlayerIndex]?.id === playerId;
-  room.phase = isTurnPlayer ? TurnPhase.PropertyManagement : (room.preInsolvencyPhase ?? TurnPhase.PropertyManagement);
+  room.phase = isTurnPlayer
+    ? (room.preInsolvencyPhase === TurnPhase.WaitingRoll ? TurnPhase.WaitingRoll : TurnPhase.PropertyManagement)
+    : (room.preInsolvencyPhase ?? TurnPhase.PropertyManagement);
   delete room.preInsolvencyPhase;
 }
 
 export function restorePostInsolvencyPhase(room: Room, playerId: string, rng: () => number = Math.random): void {
+  if (isRoomGameOver(room)) {
+    delete room.pendingInsolvencyDebtorId;
+    delete room.pendingInsolvencyCreditorId;
+    delete room.pendingInsolvencyQueue;
+    room.phase = room.preInsolvencyPhase ?? TurnPhase.PropertyManagement;
+    delete room.preInsolvencyPhase;
+    return;
+  }
+
   if (!isAuthorizedInsolvencyActor(room, playerId)) return;
 
   if (room.pendingInsolvencyQueue) {
@@ -241,6 +254,16 @@ export function declareBankruptcy(
 
   if (creditor) {
     transferAssetsToCreditor(player, creditor, registry, collateralCells);
+    if (creditor.balance < 0 && !isRoomGameOver(room)) {
+      if (room.phase !== TurnPhase.InsolvencyPhase) {
+        checkInsolvency(room, undefined, creditor.id);
+      } else {
+        room.pendingInsolvencyQueue ??= [];
+        if (!room.pendingInsolvencyQueue.includes(creditor.id)) {
+          room.pendingInsolvencyQueue.push(creditor.id);
+        }
+      }
+    }
   } else {
     if (effectiveCreditorId === 'BANK') {
       if (player.balance > 0) room.treasury = (room.treasury ?? 0) + player.balance;
@@ -277,6 +300,12 @@ export function declareBankruptcy(
     return { gameOver: false };
   }
 
+  if (room.phase === TurnPhase.AuctionPhase) {
+    delete room.pendingInsolvencyCreditorId;
+    delete room.pendingInsolvencyDebtorId;
+    return { gameOver: false };
+  }
+
   restorePostInsolvencyPhase(room, playerId, rng);
 
   if (isRoomGameOver(room)) {
@@ -285,13 +314,21 @@ export function declareBankruptcy(
   }
 
   // Chuyển lượt sang người chơi tiếp theo còn sống nếu người phá sản đang giữ lượt
-  if (room.players[room.currentPlayerIndex]?.id === playerId && room.phase !== TurnPhase.AuctionPhase && room.phase !== TurnPhase.InsolvencyPhase) {
+  if (room.players[room.currentPlayerIndex]?.id === playerId && room.phase !== TurnPhase.InsolvencyPhase) {
     advanceTurnAfterBankruptcy(room, rng);
   }
   return { gameOver: false };
 }
 
 export function advanceTurnAfterBankruptcy(room: Room, rng: () => number = Math.random): void {
+  if (isRoomGameOver(room)) {
+    delete room.pendingInsolvencyDebtorId;
+    delete room.pendingInsolvencyCreditorId;
+    delete room.pendingInsolvencyQueue;
+    delete room.preInsolvencyPhase;
+    return;
+  }
+
   const total = room.players.length;
   let next    = (room.currentPlayerIndex + 1) % total;
   let steps   = 0;
@@ -305,7 +342,10 @@ export function advanceTurnAfterBankruptcy(room: Room, rng: () => number = Math.
   }
   room.currentPlayerIndex = next;
   const nextPlayer = room.players[next];
-  if (nextPlayer?.skipNextTurn) {
+  if ((nextPlayer?.balance ?? 0) < 0) {
+    room.phase = TurnPhase.WaitingRoll;
+    checkInsolvency(room);
+  } else if (nextPlayer?.skipNextTurn) {
     nextPlayer.skipNextTurn = false;
     room.phase = TurnPhase.PropertyManagement;
   } else {

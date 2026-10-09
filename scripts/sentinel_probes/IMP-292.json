@@ -1,0 +1,80 @@
+[
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: invert isTargetOwnedByHuman guard in resolveCameraMode",
+    "target": "params.isTargetOwnedByHuman === false",
+    "replacement": "params.isTargetOwnedByHuman === true"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: invert !options?.isBotTurn in dice pan overview branch",
+    "target": "!options?.isBotTurn",
+    "replacement": "options?.isBotTurn"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: invert isRolling guard in calculateTargetCameraState overview",
+    "target": "options?.isRolling && !options?.isHighStakesRoll",
+    "replacement": "!options?.isRolling && !options?.isHighStakesRoll"
+  },
+  {
+    "file": "src/client/3d/cinematic_chase_camera.ts",
+    "desc": "AST: mutate elevation Y 19.8 -> 25.3 in calculateDicePanCameraState",
+    "target": "19.5 + biasX * 0.8, 19.8, 19.5 + biasZ * 0.8",
+    "replacement": "19.5 + biasX * 0.8, 25.3, 19.5 + biasZ * 0.8"
+  },
+  {
+    "file": "src/client/3d/cinematic_chase_camera.ts",
+    "desc": "AST: invert mobile aspect guard safeAspect < 1.0",
+    "target": "safeAspect < 1.0",
+    "replacement": "safeAspect >= 1.0"
+  },
+  {
+    "file": "src/client/3d/cinematic_chase_camera.ts",
+    "desc": "AST: mutate side 2 north biasZ -1.0 -> 1.0",
+    "target": "else if (side === 2) biasZ = -1.0;",
+    "replacement": "else if (side === 2) biasZ = 1.0;"
+  },
+  {
+    "file": "src/client/3d/cinematic_chase_camera.ts",
+    "desc": "AST: mutate side 0 south biasZ 1.0 -> -1.0",
+    "target": "if (side === 0) biasZ = 1.0;",
+    "replacement": "if (side === 0) biasZ = -1.0;"
+  },
+  {
+    "file": "src/client/3d/cinematic_chase_camera.ts",
+    "desc": "AST: mutate side 1 west biasX -1.0 -> 1.0",
+    "target": "else if (side === 1) biasX = -1.0;",
+    "replacement": "else if (side === 1) biasX = 1.0;"
+  },
+  {
+    "file": "src/client/3d/cinematic_chase_camera.ts",
+    "desc": "AST: mutate target vector in calculateDicePanCameraState",
+    "target": "1.5 + biasX * 0.6, 0.2, 1.5 + biasZ * 0.6",
+    "replacement": "1.5 + biasX * 0.6, 99.9, 1.5 + biasZ * 0.6"
+  },
+  {
+    "file": "src/client/3d/cinematic_chase_camera.ts",
+    "desc": "AST: mutate mobile FOV calculation in calculateDicePanCameraState",
+    "target": "Math.round(28 / Math.max(0.60, safeAspect))",
+    "replacement": "28"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: mutate default overview state in calculateTargetCameraState",
+    "target": "return configToCameraState(CAMERA_CONFIG.overview);",
+    "replacement": "return configToCameraState(CAMERA_CONFIG.tension_roll);"
+  },
+  {
+    "file": "src/client/3d/cinematic_chase_camera.ts",
+    "desc": "AST: mutate side 3 east biasX 1.0 -> -1.0",
+    "target": "else biasX = 1.0;",
+    "replacement": "else biasX = -1.0;"
+  },
+  {
+    "file": "src/client/3d/cinematic_chase_camera.ts",
+    "desc": "AST: mutate speed 4.8 -> 99.9 in calculateDicePanCameraState",
+    "target": "speed: 4.8,",
+    "replacement": "speed: 99.9,"
+  }
+]

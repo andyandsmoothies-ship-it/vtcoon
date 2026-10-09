@@ -1,0 +1,68 @@
+[
+  {
+    "file": "src/client/events/game_event_kinematics_synthesizer.ts",
+    "desc": "AST: corrupt dice total calculation in synthesizeKinematicEvents",
+    "target": "total: d1 + d2,",
+    "replacement": "total: d1 - d2,"
+  },
+  {
+    "file": "src/client/events/game_event_kinematics_synthesizer.ts",
+    "desc": "AST: invert isDouble check in synthesizeKinematicEvents",
+    "target": "isDouble: d1 === d2,",
+    "replacement": "isDouble: d1 !== d2,"
+  },
+  {
+    "file": "src/client/events/game_event_kinematics_synthesizer.ts",
+    "desc": "AST: corrupt pawn move target cell in synthesizeKinematicEvents",
+    "target": "toCell: p.position,",
+    "replacement": "toCell: prevPos,"
+  },
+  {
+    "file": "src/client/events/game_event_kinematics_synthesizer.ts",
+    "desc": "AST: corrupt cardId in EVENT_CARD_DRAWN synthesis",
+    "target": "cardId: currentCardId,",
+    "replacement": "cardId: '__CORRUPTED_CARD__',"
+  },
+  {
+    "file": "src/client/events/game_event_kinematics_synthesizer.ts",
+    "desc": "AST: corrupt outcome in TRANSIT_WHEEL_LANDED synthesis",
+    "target": "outcome: tr.outcome,",
+    "replacement": "outcome: '__CORRUPTED_OUTCOME__',"
+  },
+  {
+    "file": "src/client/events/subscribers/activity_log_kinematics_formatter.ts",
+    "desc": "AST: corrupt dice message in formatKinematicActivityLog",
+    "target": "đã gieo xúc xắc được",
+    "replacement": "đã gieo xúc xắc thất bại"
+  },
+  {
+    "file": "src/client/events/subscribers/activity_log_kinematics_formatter.ts",
+    "desc": "AST: corrupt double dice celebration suffix in formatKinematicActivityLog",
+    "target": "' (Đổ đôi! 🎉)'",
+    "replacement": "''"
+  },
+  {
+    "file": "src/client/events/subscribers/activity_log_kinematics_formatter.ts",
+    "desc": "AST: corrupt pawn move format in formatKinematicActivityLog",
+    "target": "đã di chuyển đến",
+    "replacement": "đã đứng yên tại"
+  },
+  {
+    "file": "src/client/events/subscribers/activity_log_kinematics_formatter.ts",
+    "desc": "AST: corrupt chance card tag in formatKinematicActivityLog",
+    "target": "⚡ [Cơ Hội]",
+    "replacement": "⚡ [Xui Xẻo]"
+  },
+  {
+    "file": "src/client/events/game_event_synthesizer.ts",
+    "desc": "AST: invert causal event order in synthesizeGameEvents",
+    "target": "return [...kinematicEvents, ...financialEvents, ...propertyEvents];",
+    "replacement": "return [...propertyEvents, ...financialEvents, ...kinematicEvents];"
+  },
+  {
+    "file": "src/client/events/subscribers/activity_log_subscriber.ts",
+    "desc": "AST: disable kinematic activity mapping in mapEventToActivityLog",
+    "target": "const kinematicEntry = mapKinematicEventToActivityLog(event, context, id, timestamp);",
+    "replacement": "const kinematicEntry = null;"
+  }
+]

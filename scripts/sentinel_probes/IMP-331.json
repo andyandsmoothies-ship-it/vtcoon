@@ -1,0 +1,32 @@
+[
+  {
+    "file": "src/client/events/game_event_property_synthesizer.ts",
+    "desc": "AST: disable ghost unmortgage suppression on owner change in extractCellEvents",
+    "target": "if (!isOwnerChanged && currentOwnerId) {",
+    "replacement": "if (currentOwnerId) {"
+  },
+  {
+    "file": "src/client/events/game_event_property_synthesizer.ts",
+    "desc": "AST: disable auction cell suppression in extractCellEvents",
+    "target": "const isSuppressedByAuction = handledAuctionCells.has(cell.index);",
+    "replacement": "const isSuppressedByAuction = false;"
+  },
+  {
+    "file": "src/client/events/game_event_property_synthesizer.ts",
+    "desc": "AST: disable trade cell suppression in extractCellEvents",
+    "target": "const isSuppressedByTrade = handledTradeCells.has(cell.index);",
+    "replacement": "const isSuppressedByTrade = false;"
+  },
+  {
+    "file": "src/client/events/game_event_property_synthesizer.ts",
+    "desc": "AST: corrupt upgrade cost calculation in extractCellEvents",
+    "target": "const cost = calculateUpgradeCost(cell.index, targetLevel - 1, nextState.activeModifiers);",
+    "replacement": "const cost = 0;"
+  },
+  {
+    "file": "src/client/events/game_event_property_synthesizer.ts",
+    "desc": "AST: corrupt mortgage loan amount calculation in extractCellEvents",
+    "target": "const loanAmount = deed ? Math.floor(deed.price / 2) : 0;",
+    "replacement": "const loanAmount = 0;"
+  }
+]

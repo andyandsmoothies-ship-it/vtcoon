@@ -12,6 +12,7 @@ import type {
   PendingPawnMove,
   LastLandedPawn,
   ClientMarketModifier,
+  TransitWheelResultInfo,
 } from './game_store_subtypes.js';
 
 export interface GameState {
@@ -59,6 +60,8 @@ export interface GameState {
   readonly activeEmotes: Record<string, ActiveEmote>;
   readonly floatingTexts: readonly FloatingTextItem[];
   readonly lastDiplomaticEvent?: DiplomaticEventDelta | null;
+  readonly lastTransitResult: TransitWheelResultInfo | null;
+  setLastTransitResult: (result: TransitWheelResultInfo | null) => void;
 
   // IMP-133 Camera Sticky Focus & IMP-190 Custom Orbit Camera
   readonly cameraFocusCell: number | null;
@@ -150,6 +153,7 @@ export type InitialGameState = Pick<
   | 'activeEmotes'
   | 'floatingTexts'
   | 'lastDiplomaticEvent'
+  | 'lastTransitResult'
   | 'cameraFocusCell'
   | 'hasUserCustomCamera'
   | 'isPlayerHudVisible'
@@ -182,6 +186,7 @@ export const INITIAL_GAME_STATE: InitialGameState = {
   activeModal: null,
   modalPayload: null,
   lastEventCard: null,
+  lastTransitResult: null,
   pendingBuyout: null,
   pendingTradeOffer: null,
   auction: null,

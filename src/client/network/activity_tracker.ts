@@ -200,6 +200,7 @@ export function detectEventCardActivities(
 
 export interface TrackDeltaActivitiesOptions {
   readonly suppressFinancialAndProperty?: boolean;
+  readonly suppressKinematicLogging?: boolean;
 }
 
 export function trackDeltaActivities(
@@ -237,6 +238,12 @@ export function trackDeltaActivities(
 
   const store = activityStore.getState();
   for (const entry of activities) {
+    if (
+      options?.suppressKinematicLogging &&
+      (entry.type === 'dice' || entry.type === 'move' || entry.type === 'card' || entry.type === 'transit')
+    ) {
+      continue;
+    }
     store.addActivityLog(entry);
   }
 

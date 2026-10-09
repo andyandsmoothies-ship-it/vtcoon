@@ -1,0 +1,74 @@
+[
+  {
+    "file": "src/server/bond_manager.ts",
+    "desc": "AST: break post-bond insolvency restoration in handleIssueBond",
+    "target": "if (room.phase === TurnPhase.InsolvencyPhase && player.balance >= 0) {",
+    "replacement": "if (false && player.balance >= 0) {"
+  },
+  {
+    "file": "src/server/bond_manager.ts",
+    "desc": "AST: invert balance threshold in handleIssueBond insolvency check",
+    "target": "player.balance >= 0",
+    "replacement": "player.balance < 0"
+  },
+  {
+    "file": "src/server/insolvency_manager.ts",
+    "desc": "AST: break terminal game over short-circuit in restorePostInsolvencyPhase",
+    "target": "if (isRoomGameOver(room)) {",
+    "replacement": "if (false && isRoomGameOver(room)) {"
+  },
+  {
+    "file": "src/server/insolvency_manager.ts",
+    "desc": "AST: break nextDebtor assignment in restorePostInsolvencyPhase",
+    "target": "room.pendingInsolvencyDebtorId = nextDebtor.id;",
+    "replacement": "/* skip debtor assignment */"
+  },
+  {
+    "file": "src/server/insolvency_manager.ts",
+    "desc": "AST: corrupt WaitingRoll restoration in finalizeInsolvencyPhase",
+    "target": "room.preInsolvencyPhase === TurnPhase.WaitingRoll",
+    "replacement": "room.preInsolvencyPhase !== TurnPhase.WaitingRoll"
+  },
+  {
+    "file": "src/server/insolvency_manager.ts",
+    "desc": "AST: break self-healing preInsolvencyPhase fallback in checkInsolvency",
+    "target": "if (room.preInsolvencyPhase === undefined && room.phase === TurnPhase.InsolvencyPhase) {\n    room.preInsolvencyPhase = TurnPhase.WaitingRoll;\n  }",
+    "replacement": "/* no self healing */"
+  },
+  {
+    "file": "src/server/insolvency_manager.ts",
+    "desc": "AST: break creditor cascade check condition in declareBankruptcy",
+    "target": "if (creditor.balance < 0 && !isRoomGameOver(room)) {",
+    "replacement": "if (false && creditor.balance < 0) {"
+  },
+  {
+    "file": "src/server/insolvency_manager.ts",
+    "desc": "AST: break creditor enqueue in declareBankruptcy",
+    "target": "room.pendingInsolvencyQueue.push(creditor.id);",
+    "replacement": "/* skip creditor enqueue */"
+  },
+  {
+    "file": "src/server/insolvency_manager.ts",
+    "desc": "AST: break game over clean up in advanceTurnAfterBankruptcy",
+    "target": "if (isRoomGameOver(room)) {\n    delete room.pendingInsolvencyDebtorId;",
+    "replacement": "if (false) {\n    delete room.pendingInsolvencyDebtorId;"
+  },
+  {
+    "file": "src/server/insolvency_manager.ts",
+    "desc": "AST: break checkInsolvency enforcement on negative balance in advanceTurnAfterBankruptcy",
+    "target": "if ((nextPlayer?.balance ?? 0) < 0) {",
+    "replacement": "if (false && (nextPlayer?.balance ?? 0) < 0) {"
+  },
+  {
+    "file": "src/server/auction_manager.ts",
+    "desc": "AST: break advanceTurnAfterBankruptcy call in handleAuctionClose",
+    "target": "if (current?.bankrupt) {\n    advanceTurnAfterBankruptcy(room);",
+    "replacement": "if (false) {\n    advanceTurnAfterBankruptcy(room);"
+  },
+  {
+    "file": "src/server/auction_manager.ts",
+    "desc": "AST: break isRoomGameOver guard in drainPendingInsolvencyQueue",
+    "target": "if (isRoomGameOver(room)) {\n    delete room.pendingInsolvencyQueue;",
+    "replacement": "if (false) {\n    delete room.pendingInsolvencyQueue;"
+  }
+]

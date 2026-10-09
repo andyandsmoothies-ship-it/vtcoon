@@ -13,6 +13,8 @@ import {
   auditStateDependencyScope,
   auditFunctionToTestParity,
   auditFsmQueueCombinatorialCoverage,
+  auditShallowModulePropsExplosion,
+  auditCohesionOrphanFiles,
 } from './audit_plan_rules.mjs';
 
 /**
@@ -153,6 +155,8 @@ errors += auditPureLogicWaiver(targetFiles, planContent);
 errors += auditPhysicalVisualMandate(targetFiles, planContent);
 errors += auditStateDependencyScope(targetFiles, planContent);
 errors += auditFsmQueueCombinatorialCoverage(planContent);
+errors += auditShallowModulePropsExplosion(planContent);
+errors += auditCohesionOrphanFiles(targetFiles);
 
 // ==========================================
 // 1.1 Verify new production file code specification

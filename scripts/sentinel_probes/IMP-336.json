@@ -1,0 +1,50 @@
+[
+  {
+    "file": "src/client/3d/board_tile.tsx",
+    "desc": "AST: invert isMobile smoothness ternary on corner tile",
+    "target": "<RoundedBox args={[2.2, 0.22, 2.2]} radius={0.08} smoothness={isMobile ? 1 : 4} receiveShadow>",
+    "replacement": "<RoundedBox args={[2.2, 0.22, 2.2]} radius={0.08} smoothness={isMobile ? 4 : 1} receiveShadow>"
+  },
+  {
+    "file": "src/client/3d/board_tile.tsx",
+    "desc": "AST: force static smoothness=4 on regular tile",
+    "target": "<RoundedBox args={[1.68, 0.2, 2.2]} radius={0.08} smoothness={isMobile ? 1 : 4} receiveShadow>",
+    "replacement": "<RoundedBox args={[1.68, 0.2, 2.2]} radius={0.08} smoothness={4} receiveShadow>"
+  },
+  {
+    "file": "src/client/3d/board_tile.tsx",
+    "desc": "AST: force static smoothness=4 on corner tile",
+    "target": "<RoundedBox args={[2.2, 0.22, 2.2]} radius={0.08} smoothness={isMobile ? 1 : 4} receiveShadow>",
+    "replacement": "<RoundedBox args={[2.2, 0.22, 2.2]} radius={0.08} smoothness={4} receiveShadow>"
+  },
+  {
+    "file": "src/client/3d/board_tile.tsx",
+    "desc": "AST: invert isMobile smoothness ternary on regular tile",
+    "target": "<RoundedBox args={[1.68, 0.2, 2.2]} radius={0.08} smoothness={isMobile ? 1 : 4} receiveShadow>",
+    "replacement": "<RoundedBox args={[1.68, 0.2, 2.2]} radius={0.08} smoothness={isMobile ? 4 : 1} receiveShadow>"
+  },
+  {
+    "file": "src/client/3d/board_tile.tsx",
+    "desc": "AST: corrupt regular tile args width dimension",
+    "target": "<RoundedBox args={[1.68, 0.2, 2.2]} radius={0.08} smoothness={isMobile ? 1 : 4} receiveShadow>",
+    "replacement": "<RoundedBox args={[9.99, 0.2, 2.2]} radius={0.08} smoothness={isMobile ? 1 : 4} receiveShadow>"
+  },
+  {
+    "file": "src/client/3d/board_tile.tsx",
+    "desc": "AST: corrupt corner tile args dimension",
+    "target": "<RoundedBox args={[2.2, 0.22, 2.2]} radius={0.08} smoothness={isMobile ? 1 : 4} receiveShadow>",
+    "replacement": "<RoundedBox args={[9.99, 0.22, 2.2]} radius={0.08} smoothness={isMobile ? 1 : 4} receiveShadow>"
+  },
+  {
+    "file": "src/client/3d/board_tile.tsx",
+    "desc": "AST: corrupt regular tile radius",
+    "target": "<RoundedBox args={[1.68, 0.2, 2.2]} radius={0.08} smoothness={isMobile ? 1 : 4} receiveShadow>",
+    "replacement": "<RoundedBox args={[1.68, 0.2, 2.2]} radius={0.99} smoothness={isMobile ? 1 : 4} receiveShadow>"
+  },
+  {
+    "file": "src/client/3d/board_tile.tsx",
+    "desc": "AST: corrupt corner tile radius",
+    "target": "<RoundedBox args={[2.2, 0.22, 2.2]} radius={0.08} smoothness={isMobile ? 1 : 4} receiveShadow>",
+    "replacement": "<RoundedBox args={[2.2, 0.22, 2.2]} radius={0.99} smoothness={isMobile ? 1 : 4} receiveShadow>"
+  }
+]

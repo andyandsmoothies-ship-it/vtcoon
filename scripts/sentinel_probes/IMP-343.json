@@ -1,0 +1,26 @@
+[
+  {
+    "file": "src/client/ui/modals/event_card_visuals.ts",
+    "desc": "AST: break isCtaNext calculation in resolveEventCardDisplayData",
+    "target": "const isCtaNext = isMultiEvent && currentIdx < activeModifiers.length - 1;",
+    "replacement": "const isCtaNext = false;"
+  },
+  {
+    "file": "src/client/ui/modals/event_card_visuals.ts",
+    "desc": "AST: invert shouldShowDestination in resolveEventCardDisplayData",
+    "target": "isFinancialDestination(rawDestination, isMultiEvent ? undefined : effectDelta) &&\n    resolvedDestination !== 'Toàn thị trường'",
+    "replacement": "false"
+  },
+  {
+    "file": "src/client/ui/modals/event_card_visuals.ts",
+    "desc": "AST: break multi-event remaining rounds duration resolution in resolveEventCardDisplayData",
+    "target": "const resolvedDuration = currentModifier\n    ? `${currentModifier.remainingRounds} vòng chơi`",
+    "replacement": "const resolvedDuration = currentModifier\n    ? '1 vòng chơi'"
+  },
+  {
+    "file": "src/client/ui/modals/event_card_visuals.ts",
+    "desc": "AST: corrupt resolvedDuration resolution in resolveEventCardDisplayData",
+    "target": "const resolvedDuration = currentModifier\n    ? `${currentModifier.remainingRounds} vòng chơi`\n    : (duration || detail?.duration || (isMarket ? '1 vòng chơi' : 'Tức thì'));",
+    "replacement": "const resolvedDuration = 'Vĩnh viễn';"
+  }
+]

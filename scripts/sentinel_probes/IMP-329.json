@@ -1,0 +1,26 @@
+[
+  {
+    "file": "src/server/network/afk_recovery.ts",
+    "desc": "AST: disable restorePostInsolvencyPhase invocation in executeInsolvencyAfkRecovery",
+    "target": "restorePostInsolvencyPhase(room, playerId, rooms.getRng());",
+    "replacement": "/* skip restore */"
+  },
+  {
+    "file": "src/server/network/afk_recovery.ts",
+    "desc": "AST: disable upfront debtor authorization guard in executeInsolvencyAfkRecovery",
+    "target": "if (!isAuthorized) {",
+    "replacement": "if (false && !isAuthorized) {"
+  },
+  {
+    "file": "src/server/network/afk_recovery.ts",
+    "desc": "AST: corrupt idempotency phase check in executeInsolvencyAfkRecovery",
+    "target": "if (room.phase === TurnPhase.InsolvencyPhase) {",
+    "replacement": "if (false) {"
+  },
+  {
+    "file": "src/server/network/afk_recovery.ts",
+    "desc": "AST: corrupt initial solvency rescue return in executeInsolvencyAfkRecovery",
+    "target": "return { rescued: true, bankrupt: false };",
+    "replacement": "return { rescued: false, bankrupt: false };"
+  }
+]

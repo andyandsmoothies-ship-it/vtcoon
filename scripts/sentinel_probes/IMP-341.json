@@ -1,0 +1,74 @@
+[
+  {
+    "file": "src/client/3d/camera_arbitration_engine.ts",
+    "desc": "AST: invert user driver check in resolveActiveCameraDriver",
+    "target": "if (isDragging || isGracePeriodActive) return 'user';",
+    "replacement": "if (isDragging || isGracePeriodActive) return 'director';"
+  },
+  {
+    "file": "src/client/3d/camera_arbitration_engine.ts",
+    "desc": "AST: omit isGracePeriodActive check in resolveActiveCameraDriver",
+    "target": "if (isDragging || isGracePeriodActive) return 'user';",
+    "replacement": "if (isDragging) return 'user';"
+  },
+  {
+    "file": "src/client/3d/camera_arbitration_engine.ts",
+    "desc": "AST: corrupt soft return driver in resolveActiveCameraDriver",
+    "target": "if (hasSoftReturn) return 'soft_return';",
+    "replacement": "if (hasSoftReturn) return 'idle';"
+  },
+  {
+    "file": "src/client/3d/camera_arbitration_engine.ts",
+    "desc": "AST: corrupt director driver in resolveActiveCameraDriver",
+    "target": "if (isActionOngoing || isResetting) return 'director';",
+    "replacement": "if (isActionOngoing || isResetting) return 'idle';"
+  },
+  {
+    "file": "src/client/3d/camera_arbitration_engine.ts",
+    "desc": "AST: corrupt tap-to-skip condition in classifyGestureIntent",
+    "target": "if (isPawnAnimating && touchDurationMs < 220 && distPos < 0.4 && distTarget < 0.2)",
+    "replacement": "if (isPawnAnimating && touchDurationMs < 10 && distPos < 0.4 && distTarget < 0.2)"
+  },
+  {
+    "file": "src/client/3d/camera_arbitration_engine.ts",
+    "desc": "AST: corrupt manual inspection displacement check",
+    "target": "if (distPos >= 0.4 || distTarget >= 0.2)",
+    "replacement": "if (distPos >= 999.0 || distTarget >= 999.0)"
+  },
+  {
+    "file": "src/client/3d/camera_arbitration_engine.ts",
+    "desc": "AST: corrupt justBrokeSoftReturn threshold",
+    "target": "const isSignificantPan = distPos > 0.8 || distTarget > 0.5;",
+    "replacement": "const isSignificantPan = distPos > 999.0;"
+  },
+  {
+    "file": "src/client/3d/camera_arbitration_engine.ts",
+    "desc": "AST: corrupt shouldClearJustBroke flag in classifyGestureIntent",
+    "target": "shouldClearJustBroke: true,",
+    "replacement": "shouldClearJustBroke: false,"
+  },
+  {
+    "file": "src/client/3d/camera_arbitration_engine.ts",
+    "desc": "AST: corrupt DEFAULT_GRACE_PERIOD_MS",
+    "target": "export const DEFAULT_GRACE_PERIOD_MS = 800;",
+    "replacement": "export const DEFAULT_GRACE_PERIOD_MS = 0;"
+  },
+  {
+    "file": "src/client/3d/camera_arbitration_engine.ts",
+    "desc": "AST: disable grace period grant in session",
+    "target": "gracePeriodEndTime = currentTimeMs + durationMs;",
+    "replacement": "gracePeriodEndTime = 0;"
+  },
+  {
+    "file": "src/client/3d/camera_arbitration_engine.ts",
+    "desc": "AST: corrupt cancelGracePeriod in session",
+    "target": "cancelGracePeriod(): void {\n      gracePeriodEndTime = 0;\n    },",
+    "replacement": "cancelGracePeriod(): void {\n      gracePeriodEndTime = 9999999999999;\n    },"
+  },
+  {
+    "file": "src/client/3d/camera_arbitration_engine.ts",
+    "desc": "AST: omit grace period clear on preemption",
+    "target": "gracePeriodEndTime = 0;\n        return true;",
+    "replacement": "return false;"
+  }
+]

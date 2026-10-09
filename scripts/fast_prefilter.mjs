@@ -216,7 +216,16 @@ if (testFilesToScan.length > 0) {
 
 // 4. Anti-Slop Linter (includes Rule 8 zero-test-props and Rule 11 zero-orphan-files)
 runStep('4. Anti-Slop Linter (lint_slop.mjs)', () => {
-  execSync('node scripts/lint_slop.mjs', { stdio: 'pipe', encoding: 'utf8' });
+  const srcTargets = targetFiles.filter((f) => f.startsWith('src/'));
+  let slopTarget = 'src';
+  if (srcTargets.length > 0 && srcTargets.every((f) => f.startsWith('src/server/'))) {
+    slopTarget = 'src/server';
+  } else if (srcTargets.length > 0 && srcTargets.every((f) => f.startsWith('src/client/'))) {
+    slopTarget = 'src/client';
+  } else if (srcTargets.length > 0 && srcTargets.every((f) => f.startsWith('src/domain/'))) {
+    slopTarget = 'src/domain';
+  }
+  execSync(`node scripts/lint_slop.mjs ${slopTarget}`, { stdio: 'pipe', encoding: 'utf8' });
 });
 
 // 5. 2D UI Craft Linter (lint_ui.mjs)

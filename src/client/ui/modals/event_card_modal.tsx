@@ -1,25 +1,9 @@
 // [UI-S04/MSS][IMP-134] EventCardModal — Vietnamese Chance & Market event card display with tactile borders and Hero Stat Box
 import React from 'react';
-import { vi } from '../../../domain/i18n/vi.js';
-import { MarketCardId, ChanceCardId } from '../../../domain/event_card_types.js';
-import { MARKET_CARD_DETAILS, CHANCE_CARD_DETAILS } from '../../../domain/event_card_metadata.js';
 import { BOARD_CONFIG } from '../../../domain/board_config.js';
 import { useGameStore } from '../../store/game_store.js';
-import {
-  getCardThemedEmoji,
-  getCardHeroStat,
-  getHeroStatStyles,
-  sanitizeTargetScope,
-  sanitizeDestination,
-  cleanEventDescription,
-  isFinancialDestination,
-  getCardCtaButtonText,
-} from './event_card_visuals.js';
-import {
-  resolveMarketTitle,
-  resolveMarketShortTag,
-  resolveMarketEffectSummary,
-} from '../market_event_ticker.js';
+import { resolveEventCardDisplayData } from './event_card_visuals.js';
+import { resolveMarketShortTag } from '../market_event_ticker.js';
 
 export interface EventCardModalProps {
   readonly cardType: 'chance' | 'market';
@@ -88,75 +72,38 @@ export function EventCardModal({
     ? Math.min(Math.max(0, activeIdx), activeModifiers.length - 1)
     : 0;
 
-  const currentModifier = isMultiEvent ? activeModifiers[currentIdx] : undefined;
-  const currentCardId = currentModifier ? String(currentModifier.type) : cardId;
+  const displayData = resolveEventCardDisplayData({
+    cardType,
+    cardId,
+    isMultiEvent,
+    currentIdx,
+    activeModifiers,
+    propsActiveModifier,
+    title,
+    description,
+    effectDelta,
+    targetScope,
+    effectDetail,
+    duration,
+    destination,
+    ctaButtonText,
+  });
 
-  const detail = isMarket
-    ? MARKET_CARD_DETAILS[cardId as MarketCardId]
-    : CHANCE_CARD_DETAILS[cardId as ChanceCardId];
-
-  const currentDetail = isMultiEvent
-    ? MARKET_CARD_DETAILS[currentCardId as MarketCardId]
-    : detail;
-
-  const resolvedTitle = isMultiEvent
-    ? resolveMarketTitle(currentCardId)
-    : (title ||
-        (isMarket
-          ? (resolveMarketTitle(cardId) || vi.marketCards[cardId as MarketCardId])
-          : vi.chanceCards[cardId as ChanceCardId]) ||
-        cardId);
-
-  const rawDenseScope = isMultiEvent
-    ? (currentDetail?.targetScope ?? 'Toàn bộ thị trường')
-    : (targetScope || detail?.targetScope || (isMarket ? 'Toàn bộ thị trường' : 'Người chơi rút thẻ'));
-
-  const rawTargetScope = isMultiEvent
-    ? (currentDetail?.targetScope ?? 'Toàn bộ thị trường')
-    : (targetScope || detail?.targetScope || (isMarket ? 'Toàn bộ thị trường' : 'Người chơi rút thẻ'));
-
-  const resolvedDenseScope = sanitizeTargetScope(rawDenseScope);
-  const resolvedTargetScope = sanitizeTargetScope(rawTargetScope);
-
-  const singleTruthDescription = cleanEventDescription(
-    isMultiEvent
-      ? (currentDetail?.effectDetail ?? currentDetail?.description ?? resolveMarketEffectSummary(currentCardId))
-      : (effectDetail || description || detail?.effectDetail || detail?.description || '')
-  );
-
-  const resolvedDuration = currentModifier
-    ? `${currentModifier.remainingRounds} vòng chơi`
-    : (duration || detail?.duration || (isMarket ? '1 vòng chơi' : 'Tức thì'));
-
-  const rawDestination = isMultiEvent
-    ? (currentDetail?.destination || 'Toàn thị trường')
-    : (destination || detail?.destination || (isMarket ? 'Toàn thị trường' : 'Kho Bạc Nhà Nước'));
-  const resolvedDestination = sanitizeDestination(rawDestination);
-
-  const shouldShowDestination = Boolean(
-    isFinancialDestination(rawDestination, isMultiEvent ? undefined : effectDelta) &&
-    resolvedDestination !== 'Toàn thị trường'
-  );
-
-  const storeActiveModifier = !isMultiEvent
-    ? activeModifiers.find((m) => String(m.type) === cardId)
-    : undefined;
-  const activeModifier = isMultiEvent ? currentModifier : (propsActiveModifier ?? storeActiveModifier);
-
-  const iconEmoji = isMultiEvent
-    ? getCardThemedEmoji(currentCardId, 'market')
-    : getCardThemedEmoji(cardId, cardType);
-
-  const heroStat = isMultiEvent
-    ? getCardHeroStat(currentCardId)
-    : getCardHeroStat(cardId, effectDelta);
-
-  const heroStyles = getHeroStatStyles(heroStat.variant);
-
-  const isCtaNext = isMultiEvent && currentIdx < activeModifiers.length - 1;
-  const resolvedCta = isCtaNext
-    ? `SỰ KIỆN KẾ TIẾP (${currentIdx + 2}/${activeModifiers.length}) →`
-    : (ctaButtonText ?? (isMultiEvent ? 'ĐÃ HIỂU TẤT CẢ' : getCardCtaButtonText(cardId, effectDelta)));
+  const {
+    title: resolvedTitle,
+    denseScope: resolvedDenseScope,
+    targetScope: resolvedTargetScope,
+    description: singleTruthDescription,
+    duration: resolvedDuration,
+    destination: resolvedDestination,
+    shouldShowDestination,
+    activeModifier,
+    iconEmoji,
+    heroStat,
+    heroStyles,
+    ctaText: resolvedCta,
+    isCtaNext,
+  } = displayData;
 
   const handleCtaClick = isCtaNext
     ? () => setActiveIdx((prev) => prev + 1)

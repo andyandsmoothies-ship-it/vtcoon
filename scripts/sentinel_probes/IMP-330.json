@@ -1,0 +1,32 @@
+[
+  {
+    "file": "src/client/events/game_event_financial_synthesizer.ts",
+    "desc": "AST: corrupt net GO salary calculation in reconstructGoSalary",
+    "target": "const netAmount = grossSalary - totalDeductions;",
+    "replacement": "const netAmount = grossSalary + totalDeductions;"
+  },
+  {
+    "file": "src/client/events/game_event_financial_synthesizer.ts",
+    "desc": "AST: disable isSentToAudit incarceration guard in reconstructGoSalary",
+    "target": "if (prevPos === undefined || newPos === undefined || prevPos === newPos || isSentToAudit) continue;",
+    "replacement": "if (false) continue;"
+  },
+  {
+    "file": "src/client/events/game_event_financial_synthesizer.ts",
+    "desc": "AST: corrupt halfRent calculation in port split rent matching",
+    "target": "const halfRent = Math.floor(rentAmount * 0.5);",
+    "replacement": "const halfRent = Math.floor(rentAmount * 0.9);"
+  },
+  {
+    "file": "src/client/events/game_event_financial_synthesizer.ts",
+    "desc": "AST: disable 1-to-1 exact rent matching in matchRentTransactions",
+    "target": "const recIdx = receivers.findIndex((r) => r.diff === rentAmount);",
+    "replacement": "const recIdx = -1;"
+  },
+  {
+    "file": "src/client/events/game_event_financial_synthesizer.ts",
+    "desc": "AST: zero out remainingDebt in partial rent matching",
+    "target": "remainingDebt: Math.max(0, Math.abs(payer.diff) - paidAmount),",
+    "replacement": "remainingDebt: 0,"
+  }
+]

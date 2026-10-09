@@ -1,0 +1,56 @@
+[
+  {
+    "file": "src/client/3d/coastal_island_environment.tsx",
+    "desc": "AST: invert middle ocean plane condition for mobile",
+    "target": "{!isMobile && (",
+    "replacement": "{isMobile && ("
+  },
+  {
+    "file": "src/client/3d/coastal_island_environment.tsx",
+    "desc": "AST: omit isMobile guard and always render middle ocean plane",
+    "target": "{!isMobile && (",
+    "replacement": "{true && ("
+  },
+  {
+    "file": "src/client/3d/tropical_water.tsx",
+    "desc": "AST: invert precision ternary for mobile in ShaderMaterial",
+    "target": "precision: isMobile ? 'mediump' : 'highp',",
+    "replacement": "precision: isMobile ? 'highp' : 'mediump',"
+  },
+  {
+    "file": "src/client/3d/tropical_water.tsx",
+    "desc": "AST: skip highp float uTime replacement in vertexShader",
+    "target": "vertexShader: TROPICAL_WATER_VERTEX_SHADER.replace('uniform float uTime;', 'uniform highp float uTime;'),",
+    "replacement": "vertexShader: TROPICAL_WATER_VERTEX_SHADER,"
+  },
+  {
+    "file": "src/client/3d/tropical_water.tsx",
+    "desc": "AST: corrupt baked deep ocean color on mobile",
+    "target": "(u.uDeepColor.value as Color).set('#0369A1');",
+    "replacement": "(u.uDeepColor.value as Color).set('#FF0000');"
+  },
+  {
+    "file": "src/client/3d/tropical_water.tsx",
+    "desc": "AST: corrupt modulo wrap of uTime in useSafeFrame",
+    "target": "% (Math.PI * 200.0)",
+    "replacement": "/* no wrap */"
+  },
+  {
+    "file": "src/client/3d/perf_budget.ts",
+    "desc": "AST: corrupt MOBILE_MIN from 0.75 to 0.85",
+    "target": "MOBILE_MIN: 0.75,",
+    "replacement": "MOBILE_MIN: 0.85,"
+  },
+  {
+    "file": "src/client/3d/perf_budget.ts",
+    "desc": "AST: disable multi-step intermediate pacing down to 0.85",
+    "target": "currentDpr > 0.85 ? 0.85 : DPR_BOUNDS.MOBILE_MIN",
+    "replacement": "DPR_BOUNDS.MOBILE_MIN"
+  },
+  {
+    "file": "src/client/3d/perf_budget.ts",
+    "desc": "AST: disable double damping (6000ms) for recovery from 0.75",
+    "target": "isMobile && currentDpr <= DPR_BOUNDS.MOBILE_MIN",
+    "replacement": "false && isMobile && currentDpr <= DPR_BOUNDS.MOBILE_MIN"
+  }
+]

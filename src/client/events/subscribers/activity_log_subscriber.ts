@@ -4,6 +4,7 @@ import { SynthesizedGameEventType, type SynthesizedGameEvent } from '../game_eve
 import type { GameEventContext, GameEventListener } from '../game_event_bus.js';
 import { BOARD_CONFIG } from '../../../domain/board_config.js';
 import { formatCurrency } from '../../ui/ui_helpers.js';
+import { formatKinematicActivityLog } from './activity_log_kinematics_formatter.js';
 
 function getCellName(cellIndex: number): string {
   return BOARD_CONFIG[cellIndex]?.name ?? `Ô #${cellIndex}`;
@@ -282,12 +283,40 @@ function mapMarketEventToActivityLog(
 
 let activitySequence = 0;
 
+function mapKinematicEventToActivityLog(
+  event: SynthesizedGameEvent,
+  context: GameEventContext,
+  id: string,
+  timestamp: number,
+): ActivityLogEntry | null {
+  const playerId = 'playerId' in event ? event.playerId : undefined;
+  const playerName = resolvePlayerName(context, playerId);
+  const cellIndex = 'cellIndex' in event ? event.cellIndex : ('toCell' in event ? event.toCell : undefined);
+  const cellName = cellIndex !== undefined ? getCellName(cellIndex) : undefined;
+  const formatted = formatKinematicActivityLog(event, playerName, cellName);
+  if (!formatted) return null;
+
+  return {
+    id,
+    timestamp,
+    type: formatted.type,
+    message: formatted.message,
+    playerId,
+    playerName,
+    cellIndex,
+    playerTokenColor: resolvePlayerTokenColor(context, playerId),
+  };
+}
+
 export function mapEventToActivityLog(
   event: SynthesizedGameEvent,
   context: GameEventContext,
 ): ActivityLogEntry | null {
   const timestamp = event.timestamp ?? Date.now();
   const id = `act_${event.type}_${timestamp}_${++activitySequence}`;
+
+  const kinematicEntry = mapKinematicEventToActivityLog(event, context, id, timestamp);
+  if (kinematicEntry) return kinematicEntry;
 
   const financialEntry = mapFinancialEventToActivityLog(event, context, id, timestamp);
   if (financialEntry) return financialEntry;

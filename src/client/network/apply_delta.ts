@@ -156,7 +156,10 @@ function syncTelemetryAndActivities(delta: DeltaPayload, state: GameState, store
         });
       }
     }
-    trackDeltaActivities(delta, state, nextState, useActivityStore, { suppressFinancialAndProperty: true });
+    trackDeltaActivities(delta, state, nextState, useActivityStore, {
+      suppressFinancialAndProperty: true,
+      suppressKinematicLogging: true,
+    });
     handleDeltaTelemetry(delta, state, nextState);
   } catch {
     // safe fallback: Telemetry and activity tracking must never break game store state
@@ -214,6 +217,9 @@ export function applyPhaseAndTimerDeltas(delta: DeltaPayload, prevState: GameSta
   syncTreasuryPool(delta, currentState);
   syncRoundAndModifiers(delta, currentState);
   syncBusinessModals(delta, currentState);
+  if (delta.lastTransitResult !== undefined) {
+    currentState.setLastTransitResult(delta.lastTransitResult ?? null);
+  }
   syncEventCard(delta.lastEventCard, currentState, delta);
   syncGameStarted(delta, currentState);
   syncTelemetryAndActivities(delta, prevState, store);

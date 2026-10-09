@@ -1,0 +1,86 @@
+[
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: omit isMobile forwarding to DioramaContainerPort",
+    "target": "<DioramaContainerPort isMobile={isMobile} />",
+    "replacement": "<DioramaContainerPort />"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: omit isMobile forwarding to DioramaMarina",
+    "target": "<DioramaMarina isMobile={isMobile} />",
+    "replacement": "<DioramaMarina />"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: invert isMobile forwarding to DioramaContainerPort",
+    "target": "<DioramaContainerPort isMobile={isMobile} />",
+    "replacement": "<DioramaContainerPort isMobile={!isMobile} />"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: invert isMobile forwarding to DioramaMarina",
+    "target": "<DioramaMarina isMobile={isMobile} />",
+    "replacement": "<DioramaMarina isMobile={!isMobile} />"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_container_port.tsx",
+    "desc": "AST: invert crane beacon 1 declarative visibility",
+    "target": "<mesh ref={beacon1Ref} position={[0, 0.98, 0]} visible={isNight}>",
+    "replacement": "<mesh ref={beacon1Ref} position={[0, 0.98, 0]} visible={!isNight}>"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_container_port.tsx",
+    "desc": "AST: invert crane beacon 2 declarative visibility",
+    "target": "<mesh ref={beacon2Ref} position={[0, 0.98, 0]} visible={isNight}>",
+    "replacement": "<mesh ref={beacon2Ref} position={[0, 0.98, 0]} visible={!isNight}>"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: corrupt isMobile fallback in MiniatureCityDiorama (force true)",
+    "target": "const isMobile = propIsMobile ?? isPhoneHardware();",
+    "replacement": "const isMobile = propIsMobile ?? true;"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_marina.tsx",
+    "desc": "AST: invert pointLight intensity ternary for mobile",
+    "target": "intensity={isMobile ? 0 : beaconIntensity}",
+    "replacement": "intensity={isMobile ? beaconIntensity : 0}"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_marina.tsx",
+    "desc": "AST: invert sweeping beacon cone visibility for mobile",
+    "target": "visible={!isMobile && isNightOrSunset}",
+    "replacement": "visible={isMobile && isNightOrSunset}"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_marina.tsx",
+    "desc": "AST: omit isMobile forwarding to DioramaPerchingBirds",
+    "target": "<DioramaPerchingBirds isMobile={isMobile} />",
+    "replacement": "<DioramaPerchingBirds />"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_marina.tsx",
+    "desc": "AST: invert isMobile forwarding to DioramaPerchingBirds",
+    "target": "<DioramaPerchingBirds isMobile={isMobile} />",
+    "replacement": "<DioramaPerchingBirds isMobile={!isMobile} />"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_perching_birds.tsx",
+    "desc": "AST: invert static position assignment for mobile birds",
+    "target": "position={isMobile ? [spot.x, spot.y, spot.z] : undefined}",
+    "replacement": "position={isMobile ? undefined : [spot.x, spot.y, spot.z]}"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_perching_birds.tsx",
+    "desc": "AST: invert static rotation assignment for mobile birds",
+    "target": "rotation={isMobile ? [0, spot.baseRotY, 0] : undefined}",
+    "replacement": "rotation={isMobile ? undefined : [0, spot.baseRotY, 0]}"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_perching_birds.tsx",
+    "desc": "AST: corrupt bird pointer down mobile guard",
+    "target": "if (isMobile) return;",
+    "replacement": "/* no bird tap guard */"
+  }
+]

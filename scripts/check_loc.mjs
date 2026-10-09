@@ -126,7 +126,7 @@ export function formatReport(results) {
         hasError = true;
       }
     } else if (tier.warn < 9999 && r.totalLines > tier.warn) {
-      status = `⚠️ Warning (${r.totalLines} > ${tier.warn})`;
+      status = `⚠️ Soft Notice: ${r.totalLines} LOC (Trần cứng ${tier.name} là ${tier.ceiling} LOC. KHÔNG refactor chia nhỏ nếu không có lý do kiến trúc thực sự)`;
     }
 
     tableRows.push(

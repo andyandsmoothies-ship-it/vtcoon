@@ -58,7 +58,7 @@ function extractRegisteredFiles(planContent) {
 
 function getModifiedFiles(stagedOnly = false) {
   try {
-    const statusOutput = execSync('git status --porcelain', { encoding: 'utf-8' });
+    const statusOutput = execSync('git status --porcelain -uall', { encoding: 'utf-8' });
     const files = new Set();
 
     for (const rawLine of statusOutput.split('\n')) {

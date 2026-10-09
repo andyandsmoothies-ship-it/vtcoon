@@ -1,0 +1,38 @@
+[
+  {
+    "file": "src/client/network/apply_delta_modals.ts",
+    "desc": "AST: mutate consumeStagedTransitWheel targetCellIndex filter",
+    "target": "if (targetCellIndex !== undefined && stagedTransitWheel.cellIndex !== targetCellIndex) return null;",
+    "replacement": "if (false && targetCellIndex !== undefined) return null;"
+  },
+  {
+    "file": "src/client/network/apply_delta_modals.ts",
+    "desc": "AST: mutate syncAuctionModal deadline calculation",
+    "target": "const deadline = delta.auction.timeRemaining !== undefined\n      ? Date.now() + delta.auction.timeRemaining * 1000\n      : undefined;",
+    "replacement": "const deadline = undefined;"
+  },
+  {
+    "file": "src/client/network/apply_delta_modals.ts",
+    "desc": "AST: mutate syncAuctionModal openModal call to no-op",
+    "target": "state.openModal('auction', auctionData);",
+    "replacement": "/* AST_MUTANT_REMOVED */"
+  },
+  {
+    "file": "src/client/network/apply_delta_modals.ts",
+    "desc": "AST: mutate syncOtherModals pendingTradeOffer targeted check",
+    "target": "state.setPendingTradeOffer(isTargetedToMe ? offer : null);",
+    "replacement": "state.setPendingTradeOffer(null);"
+  },
+  {
+    "file": "src/client/network/apply_delta_modals.ts",
+    "desc": "AST: mutate syncOtherModals compulsory_buyout trigger",
+    "target": "state.openModal('compulsory_buyout', delta.pendingBuyout);",
+    "replacement": "/* AST_MUTANT_REMOVED */"
+  },
+  {
+    "file": "src/client/network/apply_delta_modals.ts",
+    "desc": "AST: mutate syncOtherModals insolvency solvency check",
+    "target": "if (!debtor || debtor.balance >= 0 || debtor.bankrupt) state.closeModal();",
+    "replacement": "if (!debtor || debtor.balance < 0 || debtor.bankrupt) state.closeModal();"
+  }
+]

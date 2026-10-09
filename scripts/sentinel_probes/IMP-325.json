@@ -1,0 +1,62 @@
+[
+  {
+    "file": "src/domain/treasury_stimulus.ts",
+    "desc": "AST: flip ENABLE_TREASURY_STIMULUS to true",
+    "target": "export const ENABLE_TREASURY_STIMULUS = false;",
+    "replacement": "export const ENABLE_TREASURY_STIMULUS = true;"
+  },
+  {
+    "file": "src/server/turn_loop.ts",
+    "desc": "AST: invert ENABLE_TREASURY_STIMULUS guard to negated",
+    "target": "if (ENABLE_TREASURY_STIMULUS) {",
+    "replacement": "if (!ENABLE_TREASURY_STIMULUS) {"
+  },
+  {
+    "file": "src/server/turn_loop.ts",
+    "desc": "AST: force true branch in ENABLE_TREASURY_STIMULUS guard",
+    "target": "if (ENABLE_TREASURY_STIMULUS) {",
+    "replacement": "if (true) {"
+  },
+  {
+    "file": "src/domain/treasury_stimulus.ts",
+    "desc": "AST: corrupt stimulus threshold to 1_000",
+    "target": "export const TREASURY_STIMULUS_THRESHOLD = 10_000;",
+    "replacement": "export const TREASURY_STIMULUS_THRESHOLD = 1_000;"
+  },
+  {
+    "file": "src/domain/treasury_stimulus.ts",
+    "desc": "AST: corrupt stimulus rate to 0.5",
+    "target": "export const TREASURY_STIMULUS_RATE = 0.2;",
+    "replacement": "export const TREASURY_STIMULUS_RATE = 0.5;"
+  },
+  {
+    "file": "src/server/turn_loop.ts",
+    "desc": "AST: corrupt roundCount increment in advanceRoundBoundary",
+    "target": "room.roundCount = (room.roundCount ?? 1) + 1;",
+    "replacement": "room.roundCount = (room.roundCount ?? 1) + 0;"
+  },
+  {
+    "file": "src/domain/treasury_stimulus.ts",
+    "desc": "AST: corrupt stimulus disbursement calculation to zero",
+    "target": "const totalDisbursement = Math.floor((room.treasury ?? 0) * TREASURY_STIMULUS_RATE);",
+    "replacement": "const totalDisbursement = 0;"
+  },
+  {
+    "file": "src/domain/treasury_stimulus.ts",
+    "desc": "AST: corrupt stimulus recipient count to 1",
+    "target": "const count = Math.min(2, activePlayers.length);",
+    "replacement": "const count = 1;"
+  },
+  {
+    "file": "src/domain/treasury_stimulus.ts",
+    "desc": "AST: skip treasury deduction in processTreasuryStimulus",
+    "target": "room.treasury = Math.max(0, (room.treasury ?? 0) - actualDisbursed);",
+    "replacement": "/* no deduction */"
+  },
+  {
+    "file": "src/domain/treasury_stimulus.ts",
+    "desc": "AST: corrupt processTreasuryStimulus return to null",
+    "target": "return { activated: true, amount: actualDisbursed, recipients };",
+    "replacement": "return null;"
+  }
+]

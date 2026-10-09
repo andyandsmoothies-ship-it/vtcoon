@@ -1,4 +1,6 @@
 // [IMP-330][IMP-331] Synthesized Game Event Types
+import type { TransitWheelOutcome } from '../../domain/transit_wheel.js';
+
 export enum SynthesizedGameEventType {
   RENT_PAID = 'RENT_PAID',
   GO_SALARY = 'GO_SALARY',
@@ -13,6 +15,10 @@ export enum SynthesizedGameEventType {
   TRADE_COMPLETED = 'TRADE_COMPLETED',
   AUCTION_WON = 'AUCTION_WON',
   AUCTION_BID_PLACED = 'AUCTION_BID_PLACED',
+  DICE_ROLLED = 'DICE_ROLLED',
+  PAWN_MOVED = 'PAWN_MOVED',
+  EVENT_CARD_DRAWN = 'EVENT_CARD_DRAWN',
+  TRANSIT_WHEEL_LANDED = 'TRANSIT_WHEEL_LANDED',
 }
 
 export interface BaseSynthesizedEvent {
@@ -132,6 +138,41 @@ export interface AuctionBidPlacedEvent extends BaseSynthesizedEvent {
   readonly bidAmount: number;
 }
 
+export interface DiceRolledEvent extends BaseSynthesizedEvent {
+  readonly type: SynthesizedGameEventType.DICE_ROLLED;
+  readonly playerId: string;
+  readonly dice: readonly [number, number];
+  readonly total: number;
+  readonly isDouble: boolean;
+}
+
+export interface PawnMovedEvent extends BaseSynthesizedEvent {
+  readonly type: SynthesizedGameEventType.PAWN_MOVED;
+  readonly playerId: string;
+  readonly fromCell: number;
+  readonly toCell: number;
+}
+
+export interface EventCardDrawnEvent extends BaseSynthesizedEvent {
+  readonly type: SynthesizedGameEventType.EVENT_CARD_DRAWN;
+  readonly playerId: string;
+  readonly cardId: string;
+  readonly cardType: 'chance' | 'market' | string;
+  readonly title: string;
+  readonly description: string;
+  readonly effectDelta?: number;
+}
+
+export interface TransitWheelLandedEvent extends BaseSynthesizedEvent {
+  readonly type: SynthesizedGameEventType.TRANSIT_WHEEL_LANDED;
+  readonly playerId: string;
+  readonly cellIndex: number;
+  readonly outcome: TransitWheelOutcome | string;
+  readonly targetCell?: number;
+  readonly payout?: number;
+  readonly boostSteps?: number;
+}
+
 export interface SynthesizerOptions {
   readonly baseTimestamp?: number;
 }
@@ -149,4 +190,8 @@ export type SynthesizedGameEvent =
   | PropertyUnmortgagedEvent
   | TradeCompletedEvent
   | AuctionWonEvent
-  | AuctionBidPlacedEvent;
+  | AuctionBidPlacedEvent
+  | DiceRolledEvent
+  | PawnMovedEvent
+  | EventCardDrawnEvent
+  | TransitWheelLandedEvent;

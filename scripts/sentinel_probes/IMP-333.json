@@ -1,0 +1,38 @@
+[
+  {
+    "file": "src/client/events/subscribers/badge_event_subscriber.ts",
+    "desc": "AST: break port split rent distinct receiver groupId in handleRentBadges",
+    "target": "groupId: `port_split_rec_${event.cellIndex}_${event.payerId}_${receiverId}`,",
+    "replacement": "groupId: `port_split_rec_shared`,"
+  },
+  {
+    "file": "src/client/events/subscribers/badge_event_subscriber.ts",
+    "desc": "AST: break mobile lean formula undefined invariant in handlePropertyBadges",
+    "target": "formula: undefined,",
+    "replacement": "formula: 'LEAN_VIOLATION_COST',"
+  },
+  {
+    "file": "src/client/events/subscribers/badge_event_subscriber.ts",
+    "desc": "AST: invert floating text amount polarity in handleRentBadges",
+    "target": "text: formatCurrency(-event.amount),",
+    "replacement": "text: formatCurrency(event.amount),"
+  },
+  {
+    "file": "src/client/events/subscribers/audio_event_subscriber.ts",
+    "desc": "AST: disable per-SFX throttle keying in audio_event_subscriber",
+    "target": "lastPlayed.set(sfxKey, now);",
+    "replacement": "lastPlayed.set('global_lock', now);"
+  },
+  {
+    "file": "src/client/events/subscribers/audio_event_subscriber.ts",
+    "desc": "AST: disable victory_chime in audio_event_subscriber rent handler",
+    "target": "scheduleOrPlay(delay, 'victory_chime', () => engine.playVictoryChime());",
+    "replacement": "/* skip victory chime */"
+  },
+  {
+    "file": "src/client/events/pacing_context.ts",
+    "desc": "AST: corrupt default stepMs in DEFAULT_PACING_CONFIG",
+    "target": "export const DEFAULT_PACING_CONFIG: PacingConfig = { stepMs: 230, botStepMs: 200, rollLeadMs: 1200 };",
+    "replacement": "export const DEFAULT_PACING_CONFIG: PacingConfig = { stepMs: 9999, botStepMs: 9999, rollLeadMs: 9999 };"
+  }
+]

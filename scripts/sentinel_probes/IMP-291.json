@@ -1,0 +1,44 @@
+[
+  {
+    "file": "src/client/3d/cinematic_chase_camera.ts",
+    "desc": "AST: mutate resolveStandardChaseOffset side 1 from -3.6 to 3.6",
+    "target": "case 1: return [-3.6, 4.2, 3.6];",
+    "replacement": "case 1: return [3.6, 4.2, 3.6];"
+  },
+  {
+    "file": "src/client/3d/cinematic_chase_camera.ts",
+    "desc": "AST: mutate resolveStandardChaseOffset side 2 from -3.6 to 3.6",
+    "target": "case 2: return [-3.6, 4.2, -3.6];",
+    "replacement": "case 2: return [-3.6, 4.2, 3.6];"
+  },
+  {
+    "file": "src/client/3d/cinematic_chase_camera.ts",
+    "desc": "AST: invert isCorner condition Boolean(params.isTransientTurnCorner...)",
+    "target": "const isCorner = Boolean(params.isTransientTurnCorner && isCornerCellIndex(params.cellIndex));",
+    "replacement": "const isCorner = false;"
+  },
+  {
+    "file": "src/client/3d/cinematic_chase_camera.ts",
+    "desc": "AST: mutate north-framing factor 0.20 -> 0.50",
+    "target": "const factor = 1.0 - 0.20 * northProgress;",
+    "replacement": "const factor = 1.0 - 0.50 * northProgress;"
+  },
+  {
+    "file": "src/client/3d/cinematic_chase_camera.ts",
+    "desc": "AST: mutate enableNorthFraming condition from pz < -3.0 to pz < -100.0",
+    "target": "if (params.enableNorthFraming && pz < -3.0) {",
+    "replacement": "if (params.enableNorthFraming && pz < -100.0) {"
+  },
+  {
+    "file": "src/client/3d/cinematic_chase_camera.ts",
+    "desc": "AST: mutate resolveStandardChaseOffset side 3 from 3.6 to -3.6",
+    "target": "case 3: return [3.6, 4.2, -3.6];",
+    "replacement": "case 3: return [-3.6, 4.2, -3.6];"
+  },
+  {
+    "file": "src/client/3d/cinematic_chase_camera.ts",
+    "desc": "AST: mutate resolveCornerSigns norm 20 from signX -1 to signX 1",
+    "target": "if (norm === 20) return { signX: -1, signZ: -1 };",
+    "replacement": "if (norm === 20) return { signX: 1, signZ: -1 };"
+  }
+]

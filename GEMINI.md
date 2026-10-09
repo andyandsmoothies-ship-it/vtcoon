@@ -28,6 +28,7 @@ Every ticket must pass 100% of automated gates before handoff:
 - **R3F Transient Unmount Invariant**: FORBIDDEN returning `null` on transient state when `useFrame` is registered. Must use `<group visible={...}>` to prevent GPU buffer/shader reallocation churn on mobile.
 - **Function-to-Test Parity & Scaffolding Protocol**: FORBIDDEN omitting test specs for declared exported functions. When new production files are introduced, empty stubs MUST be scaffolded before Station 1 to guarantee Semantic Behavioral RED (runtime assertions fail, never loader `Cannot find module`).
 - **Symmetric State Exit Invariant**: FORBIDDEN altering an FSM phase exit or recovery logic on one action (e.g. `downgrade`) without auditing and harmonizing all symmetric actions leading to that same exit (e.g. `mortgage`, `bankruptcy`). Any shared state exit MUST use a centralized helper or symmetric FSM restoration logic.
+- **Anti-Shallow UI Refactoring & Props Explosion**: FORBIDDEN decomposing React components by moving JSX chunks into shallow stateless subcomponents with wide interfaces (>= 4 props). Any effort to de-escalate UI component LOC must prioritize extracting Pure Data Derivation Logic (formatting, sanitization, label resolution) into existing domain helper/visual files (*_visuals.ts, *_helpers.ts) before modifying the presentation component tree.
 
 ## 3. LEAN PIPELINE
 - **Tier 1 (Fast-Track)**: < 50 LOC, visual/CSS/spacing, copy, isolated fix (0 Schema, 0 FSM, 0 Net). Main Agent executes directly in 1-2 min, 0 subagents, 0 plan.

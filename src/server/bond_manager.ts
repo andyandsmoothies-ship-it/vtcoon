@@ -2,7 +2,7 @@
 import { TurnPhase, type Room, type Player } from '../domain/room';
 import { ActionRejectReason } from '../domain/action_reasons';
 import { PROPERTY_DEEDS, type PropertyRegistry, type PropertyStateMap } from '../domain/property_manager';
-import { calculateNetWorth } from './insolvency_manager';
+import { calculateNetWorth, restorePostInsolvencyPhase } from './insolvency_manager';
 import type { AuctionSession } from './auction_manager';
 import {
   type BondContract,
@@ -127,12 +127,8 @@ export function handleIssueBond(
   };
   player.bondContract = contract;
 
-  if (
-    room.phase === TurnPhase.InsolvencyPhase &&
-    room.players[room.currentPlayerIndex]?.id === player.id &&
-    player.balance >= 0
-  ) {
-    room.phase = TurnPhase.PropertyManagement;
+  if (room.phase === TurnPhase.InsolvencyPhase && player.balance >= 0) {
+    restorePostInsolvencyPhase(room, player.id);
   }
 
   return { success: true, bondContract: contract };

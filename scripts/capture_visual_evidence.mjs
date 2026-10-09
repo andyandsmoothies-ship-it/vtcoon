@@ -16,7 +16,10 @@ import { spawn, execSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import http from 'node:http';
+import { fileURLToPath } from 'node:url';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const repoRoot = process.cwd();
 const tmpDir = path.join(repoRoot, '.agents', 'tmp');
 const evidenceDir = path.join(repoRoot, '.agents', 'evidence');
@@ -443,215 +446,16 @@ Options:
     async function injectScenario(scenarioName, scenarioExpr) {
       if (scenarioName) {
         console.log(`🎬 Injecting UI scenario: "${scenarioName}"...`);
-        await send('Runtime.evaluate', {
-          expression: `
-            (function() {
-              if ('${scenarioName}' === 'deed_modal') {
-                const buyBtn = document.querySelector('[data-testid="action-dock-buy"]');
-                if (buyBtn) buyBtn.click();
-              } else if ('${scenarioName}' === 'transit_wheel') {
-                const wheelBtn = document.querySelector('[data-testid="action-dock-transit-wheel"]');
-                if (wheelBtn) wheelBtn.click();
-              } else if ('${scenarioName}' === 'camera_chase_dice_pan') {
-                if (window.__lobbyStore) {
-                  window.__lobbyStore.getState().setGameStarted(true);
-                }
-                if (window.__gameStore) {
-                  window.__gameStore.setState({
-                    currentTurnPlayerId: 'p1',
-                    playerPositions: { p1: 25, p2: 0, p3: 0, p4: 0 },
-                    activePawnAnimation: null,
-                    isRolling: true,
-                    hasRolledThisTurn: false,
-                    activeModal: null,
-                    cameraFocusCell: null,
-                    hasUserCustomCamera: false,
-                  });
-                }
-              } else if ('${scenarioName}' === 'camera_soft_return_and_beacon') {
-                if (window.__lobbyStore) {
-                  window.__lobbyStore.getState().setGameStarted(true);
-                }
-                if (window.__gameStore) {
-                  window.__gameStore.setState({
-                    currentTurnPlayerId: 'p1',
-                    playerPositions: { p1: 10, p2: 0, p3: 0, p4: 0 },
-                    activePawnAnimation: {
-                      isAnimating: true,
-                      playerId: 'p1',
-                      fromCell: 10,
-                      targetCell: 15,
-                      currentIndex: 2,
-                      waypoints: [11, 12, 13, 14, 15],
-                    },
-                    isRolling: false,
-                    hasRolledThisTurn: false,
-                    activeModal: null,
-                    cameraFocusCell: null,
-                    hasUserCustomCamera: true,
-                  });
-                }
-              } else if ('${scenarioName}' === 'camera_spline_arc_flyby') {
-                if (window.__lobbyStore) {
-                  window.__lobbyStore.getState().setGameStarted(true);
-                }
-                if (window.__gameStore) {
-                  window.__gameStore.setState({
-                    currentTurnPlayerId: 'p1',
-                    playerPositions: { p1: 30, p2: 0, p3: 0, p4: 0 },
-                    activePawnAnimation: {
-                      isAnimating: true,
-                      playerId: 'p1',
-                      fromCell: 30,
-                      targetCell: 10,
-                      currentIndex: 1,
-                      waypoints: [30, 0, 10],
-                      isJailFlight: true,
-                    },
-                    isRolling: false,
-                    hasRolledThisTurn: false,
-                    activeModal: null,
-                    cameraFocusCell: null,
-                    hasUserCustomCamera: false,
-                  });
-                }
-              } else if ('${scenarioName}' === 'camera_chase_cinematic') {
-                if (window.__lobbyStore) {
-                  window.__lobbyStore.getState().setGameStarted(true);
-                }
-                if (window.__gameStore) {
-                  window.__gameStore.setState({
-                    currentTurnPlayerId: 'p1',
-                    playerPositions: { p1: 0, p2: 0, p3: 0, p4: 0 },
-                    activePawnAnimation: {
-                      isAnimating: true,
-                      playerId: 'p1',
-                      fromCell: 0,
-                      targetCell: 15,
-                      currentIndex: 0,
-                      waypoints: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
-                    },
-                    isRolling: false,
-                    hasRolledThisTurn: false,
-                    activeModal: null,
-                    cameraFocusCell: null,
-                    hasUserCustomCamera: false,
-                  });
-                }
-              } else if ('${scenarioName}' === 'camera_chase_normal') {
-                if (window.__gameStore) {
-                  window.__gameStore.setState({
-                    currentTurnPlayerId: 'p1',
-                    playerPositions: { p1: 0, p2: 0, p3: 0, p4: 0 },
-                    activePawnAnimation: {
-                      isAnimating: true,
-                      playerId: 'p1',
-                      fromCell: 0,
-                      targetCell: 8,
-                      currentIndex: 0,
-                      waypoints: [1, 2, 3, 4, 5, 6, 7, 8],
-                    },
-                    isRolling: false,
-                    hasRolledThisTurn: false,
-                    activeModal: null,
-                    cameraFocusCell: null,
-                    hasUserCustomCamera: false,
-                  });
-                }
-              } else if ('${scenarioName}' === 'dice_rolling') {
-                if (window.__gameStore) {
-                  window.__gameStore.setState({
-                    currentTurnPlayerId: 'p1',
-                    isRolling: true,
-                    hasRolledThisTurn: false,
-                    activePawnAnimation: null,
-                  });
-                }
-              } else if ('${scenarioName}' === 'notifications_showcase') {
-                if (window.__gameStore) {
-                  window.__gameStore.setState({
-                    activeModifiers: [
-                      { type: 'MC_RATE_HIKE', remainingRounds: 2, affectedCells: [] }
-                    ],
-                    floatingTexts: [
-                      {
-                        id: 'milestone-market-demo',
-                        text: 'Tăng 20% chi phí xây nhà C1-C3 và thu lãi vay thế chấp 10% khi qua GO.',
-                        title: 'THẮT CHẶT TIỀN TỆ',
-                        type: 2,
-                        playerId: 'p1',
-                        actionType: 'market',
-                        timestamp: Date.now(),
-                      },
-                      {
-                        id: 'floating-rent-demo',
-                        text: '+200 Tr.',
-                        title: 'Thu thuê Nhà Thờ Đức Bà',
-                        type: 1,
-                        playerId: 'p1',
-                        actionType: 'rent_receive',
-                        targetPlayerId: 'p2',
-                        targetPlayerName: 'Bot AI 1',
-                        cellIndex: 19,
-                        formula: 'Tiền thuê gốc 200 Tr.',
-                        timestamp: Date.now() + 10,
-                      },
-                    ],
-                    pendingTradeOffer: {
-                      offerId: 'trade-offer-demo',
-                      buyerId: 'p2',
-                      sellerId: 'p1',
-                      cellIndex: 19,
-                      price: 3500,
-                      expiresAt: Date.now() + 60000,
-                    },
-                  });
-                }
-              } else if ('${scenarioName}' === 'notifications_financial') {
-                if (window.__gameStore) {
-                  window.__gameStore.setState({
-                    activeModifiers: [
-                      { type: 'MC_RATE_HIKE', remainingRounds: 2, affectedCells: [] }
-                    ],
-                    floatingTexts: [
-                      {
-                        id: 'floating-rent-demo',
-                        text: '+200 Tr.',
-                        title: 'Thu thuê Nhà Thờ Đức Bà',
-                        type: 1,
-                        playerId: 'p1',
-                        actionType: 'rent_receive',
-                        targetPlayerId: 'p2',
-                        targetPlayerName: 'Bot AI 1',
-                        cellIndex: 19,
-                        formula: 'Tiền thuê gốc 200 Tr.',
-                        timestamp: Date.now(),
-                      },
-                      {
-                        id: 'floating-upgrade-demo',
-                        text: '-1.200 Tr.',
-                        title: 'Nâng cấp C1 Nhà Thờ Đức Bà',
-                        type: 2,
-                        playerId: 'p1',
-                        actionType: 'upgrade',
-                        cellIndex: 19,
-                        timestamp: Date.now() + 10,
-                      },
-                    ],
-                    pendingTradeOffer: {
-                      offerId: 'trade-offer-demo',
-                      buyerId: 'p2',
-                      sellerId: 'p1',
-                      cellIndex: 19,
-                      price: 3500,
-                      expiresAt: Date.now() + 60000,
-                    },
-                  });
-                }
-              }
-            })();
-          `,
-        });
+        const scenarioPath = path.resolve(__dirname, 'visual_scenarios', `${scenarioName}.js`);
+        if (fs.existsSync(scenarioPath)) {
+          const scenarioCode = fs.readFileSync(scenarioPath, 'utf8');
+          await send('Runtime.evaluate', {
+            expression: `(function() {\n${scenarioCode}\n})()`,
+            returnByValue: true,
+          });
+        } else {
+          console.warn(`⚠️ Scenario file not found: ${scenarioPath}`);
+        }
         await sleep(1500);
       } else if (scenarioExpr) {
         console.log(`🎬 Evaluating scenario expression...`);

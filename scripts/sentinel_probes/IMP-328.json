@@ -1,0 +1,26 @@
+[
+  {
+    "file": "src/client/3d/post_processing_pipeline.tsx",
+    "desc": "AST: invert enabled shell guard in PostProcessingPipeline",
+    "target": "if (props.enabled === false) {",
+    "replacement": "if (props.enabled === true) {"
+  },
+  {
+    "file": "src/client/3d/post_processing_pipeline.tsx",
+    "desc": "AST: break ActivePostProcessingPipeline delegation in PostProcessingPipeline",
+    "target": "return (\n    <ActivePostProcessingPipeline",
+    "replacement": "return null; return (\n    <ActivePostProcessingPipeline"
+  },
+  {
+    "file": "src/client/3d/owner_property_markers.tsx",
+    "desc": "AST: invert hasOwner guard in OwnerPricePill",
+    "target": "if (!hasOwner) {",
+    "replacement": "if (hasOwner) {"
+  },
+  {
+    "file": "src/client/ui/floating_numbers.tsx",
+    "desc": "AST: invert floatingTexts empty check in FloatingNumbersOverlay",
+    "target": "if (floatingTexts.length === 0) {",
+    "replacement": "if (floatingTexts.length > 0) {"
+  }
+]

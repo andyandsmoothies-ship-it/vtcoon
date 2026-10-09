@@ -1,0 +1,62 @@
+[
+  {
+    "file": "src/client/3d/cinematic_spline_flyby.ts",
+    "desc": "AST: mutate jail flight duration (670/570 -> 999)",
+    "target": "return isBot ? 570 : 670;",
+    "replacement": "return isBot ? 999 : 999;"
+  },
+  {
+    "file": "src/client/3d/cinematic_spline_flyby.ts",
+    "desc": "AST: invert seaward peak Z trajectory in calculateSplineArcCameraState",
+    "target": "const targetPeakZ = isNorthArc ? -24.0 : 24.0;",
+    "replacement": "const targetPeakZ = isNorthArc ? 24.0 : -24.0;"
+  },
+  {
+    "file": "src/client/3d/cinematic_spline_flyby.ts",
+    "desc": "AST: disable scenic dip over south bay in calculateSplineArcCameraState",
+    "target": "const dip = isSouthFlightArc ? 1.5 * Math.sin(Math.PI * t) : 0;",
+    "replacement": "const dip = 0;"
+  },
+  {
+    "file": "src/client/3d/cinematic_spline_flyby.ts",
+    "desc": "AST: disable mobile portrait FOV dynamic expansion",
+    "target": "Math.min(46, Math.max(30, Math.round(30 / Math.max(0.60, safeAspect))))",
+    "replacement": "30"
+  },
+  {
+    "file": "src/client/3d/cinematic_spline_flyby.ts",
+    "desc": "AST: corrupt start tile focus camera position matching at t=0",
+    "target": "const startCamPos = calculateTileFocusCameraPosition(startPos);",
+    "replacement": "const startCamPos = [0, 0, 0];"
+  },
+  {
+    "file": "src/client/3d/cinematic_spline_flyby.ts",
+    "desc": "AST: corrupt phase 2 overview camera FOV 26 -> 99",
+    "target": "fov: 26,",
+    "replacement": "fov: 99,"
+  },
+  {
+    "file": "src/client/3d/cinematic_spline_flyby.ts",
+    "desc": "AST: corrupt phase 3 overview camera FOV 28 -> 99",
+    "target": "fov: 28,",
+    "replacement": "fov: 99,"
+  },
+  {
+    "file": "src/client/3d/cinematic_spline_flyby.ts",
+    "desc": "AST: break monotonic non-decreasing invariant in resolveDynamicGamePhase",
+    "target": "const highest = Math.max(prev, rPhase, bPhase);",
+    "replacement": "const highest = Math.max(rPhase, bPhase);"
+  },
+  {
+    "file": "src/client/3d/cinematic_spline_flyby.ts",
+    "desc": "AST: mutate camera flight speed 4.5 -> 99.9",
+    "target": "speed: 4.5,",
+    "replacement": "speed: 99.9,"
+  },
+  {
+    "file": "src/client/3d/cinematic_spline_flyby.ts",
+    "desc": "AST: corrupt overview config speed baseConfig.speed -> 0.1",
+    "target": "speed: baseConfig.speed,",
+    "replacement": "speed: 0.1,"
+  }
+]

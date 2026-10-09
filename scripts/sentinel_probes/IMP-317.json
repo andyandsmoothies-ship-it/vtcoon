@@ -1,0 +1,92 @@
+[
+  {
+    "file": "src/client/3d/board_tile_ownership_marker.tsx",
+    "desc": "AST: corrupt SafeBillboard follow SSR attribute",
+    "target": "return React.createElement('billboard', { follow: String(follow), ...props }, children);",
+    "replacement": "return React.createElement('billboard', { follow: 'corrupted', ...props }, children);"
+  },
+  {
+    "file": "src/client/3d/board_tile_ownership_marker.tsx",
+    "desc": "AST: corrupt default ownerColor in OwnershipMarkerInstances",
+    "target": "ownerColor = '#DC2626',",
+    "replacement": "ownerColor = '#000000',"
+  },
+  {
+    "file": "src/client/3d/board_tile_ownership_marker.tsx",
+    "desc": "AST: corrupt clampedLevel min guard in TierIndicatorRings",
+    "target": "clampedLevel > 0",
+    "replacement": "clampedLevel >= 0"
+  },
+  {
+    "file": "src/client/3d/board_tile_ownership_marker.tsx",
+    "desc": "AST: corrupt clampedLevel max clamp (level > 3)",
+    "target": "Math.min(3,",
+    "replacement": "Math.min(99,"
+  },
+  {
+    "file": "src/client/3d/board_tile_ownership_marker.tsx",
+    "desc": "AST: corrupt mascotIcon resolution fallback",
+    "target": ": '🏰');",
+    "replacement": ": '❌');"
+  },
+  {
+    "file": "src/client/3d/board_tile_ownership_marker.tsx",
+    "desc": "AST: corrupt FlagPole totem pillar cylinderGeometry dimensions",
+    "target": "<cylinderGeometry args={[0.016, 0.022, 0.45, 12]} />",
+    "replacement": "<cylinderGeometry args={[0.999, 0.999, 0.99, 12]} />"
+  },
+  {
+    "file": "src/client/3d/board_tile_ownership_marker.tsx",
+    "desc": "AST: corrupt FlagCloth boxGeometry args",
+    "target": "<boxGeometry args={[0.18, 0.10, 0.01]} />",
+    "replacement": "<boxGeometry args={[0.99, 0.99, 0.99]} />"
+  },
+  {
+    "file": "src/client/3d/board_tile_ownership_marker.tsx",
+    "desc": "AST: corrupt TierIndicatorRings position offset",
+    "target": "position={[0, 0.08 + idx * 0.035, 0]}",
+    "replacement": "position={[0, 99.0, 0]}"
+  },
+  {
+    "file": "src/client/3d/board_tile_ownership_marker.tsx",
+    "desc": "AST: corrupt MascotCrestShield data-testid",
+    "target": "data-testid=\"mascot-crest-shield\"",
+    "replacement": "data-testid=\"corrupted-crest-shield\""
+  },
+  {
+    "file": "src/client/3d/board_tile_ownership_marker.tsx",
+    "desc": "AST: corrupt OwnershipBillboardPin data-testid",
+    "target": "data-testid=\"ownership-billboard-pin\"",
+    "replacement": "data-testid=\"corrupted-billboard-pin\""
+  },
+  {
+    "file": "src/client/3d/board_tile_ownership_marker.tsx",
+    "desc": "AST: corrupt TierRing cylinderGeometry args",
+    "target": "<cylinderGeometry args={[0.022, 0.022, 0.014, 12]} />",
+    "replacement": "<cylinderGeometry args={[0.999, 0.999, 0.999, 12]} />"
+  },
+  {
+    "file": "src/client/3d/board_tile_ownership_marker.tsx",
+    "desc": "AST: corrupt MascotCrestShield gold rim color",
+    "target": "<meshStandardMaterial color=\"#F59E0B\" roughness={0.2} metalness={0.9} />",
+    "replacement": "<meshStandardMaterial color=\"#000000\" roughness={0.2} metalness={0.9} />"
+  },
+  {
+    "file": "src/client/3d/board_tile_ownership_marker.tsx",
+    "desc": "AST: corrupt FlagPole castShadow attribute",
+    "target": "<instancedMesh args={[undefined, undefined, 1]} castShadow position={[0, 0.225, 0]} name=\"FlagPole\">",
+    "replacement": "<instancedMesh args={[undefined, undefined, 1]} position={[0, 0.225, 0]} name=\"FlagPole\">"
+  },
+  {
+    "file": "src/client/3d/board_tile_ownership_marker.tsx",
+    "desc": "AST: corrupt FlagCloth castShadow attribute",
+    "target": "<instancedMesh ref={clothRef} args={[undefined, undefined, 1]} castShadow position={[0.10, 0.28, 0]} name=\"FlagCloth\">",
+    "replacement": "<instancedMesh ref={clothRef} args={[undefined, undefined, 1]} position={[0.10, 0.28, 0]} name=\"FlagCloth\">"
+  },
+  {
+    "file": "src/client/3d/board_tile_ownership_marker.tsx",
+    "desc": "AST: corrupt MascotIcon planeGeometry dimensions",
+    "target": "<planeGeometry args={[0.08, 0.08]} />",
+    "replacement": "<planeGeometry args={[0.99, 0.99]} />"
+  }
+]

@@ -1,0 +1,62 @@
+[
+  {
+    "file": "src/client/3d/cinematic_chase_camera.ts",
+    "desc": "AST: mutate cameraHeight: 2.8 -> 2.5",
+    "target": "cameraHeight: 2.8,",
+    "replacement": "cameraHeight: 2.5,"
+  },
+  {
+    "file": "src/client/3d/cinematic_chase_camera.ts",
+    "desc": "AST: mutate targetHeight: 0.6 -> 0.8",
+    "target": "targetHeight: 0.6,",
+    "replacement": "targetHeight: 0.8,"
+  },
+  {
+    "file": "src/client/3d/cinematic_chase_camera.ts",
+    "desc": "AST: mutate event cells CINEMATIC_EVENT_CELLS (remove cell 5, 20)",
+    "target": "5, 10, 15, 20, 25, 35,",
+    "replacement": "10, 15, 25, 35,"
+  },
+  {
+    "file": "src/client/3d/cinematic_chase_camera.ts",
+    "desc": "AST: invert corner resolution norm % 10 === 0 -> norm % 10 !== 0",
+    "target": "norm % 10 === 0",
+    "replacement": "norm % 10 !== 0"
+  },
+  {
+    "file": "src/client/3d/cinematic_chase_camera.ts",
+    "desc": "AST: remove NaN guard in coordinate resolution",
+    "target": "const px = Number.isFinite(p[0]) ? p[0] : 0;",
+    "replacement": "const px = p[0];"
+  },
+  {
+    "file": "src/client/3d/cinematic_chase_camera.ts",
+    "desc": "AST: invert mobile FOV aspect condition aspect >= 1.0 -> aspect < 1.0",
+    "target": "aspect >= 1.0",
+    "replacement": "aspect < 1.0"
+  },
+  {
+    "file": "src/client/3d/cinematic_chase_camera.ts",
+    "desc": "AST: mutate trailDistance: 3.0 -> 4.5",
+    "target": "trailDistance: 3.0,",
+    "replacement": "trailDistance: 4.5,"
+  },
+  {
+    "file": "src/client/3d/cinematic_chase_camera.ts",
+    "desc": "AST: invert jail flight guard",
+    "target": "return false; // Chuyen bay vao tu tren khong",
+    "replacement": "return true; // Chuyen bay vao tu tren khong"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: invert cinematicChase option condition in pawn_chase",
+    "target": "if (options?.cinematicChase) {",
+    "replacement": "if (!options?.cinematicChase) {"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: invert non-cinematic overview fallback in pawn_chase",
+    "target": "if (options && options.cinematicChase === false) {",
+    "replacement": "if (options && options.cinematicChase === true) {"
+  }
+]

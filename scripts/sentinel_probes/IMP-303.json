@@ -1,0 +1,32 @@
+[
+  {
+    "file": "src/client/network/activity_go_extractor.ts",
+    "desc": "AST: mutate overdraft fee deduction 3300 -> 0",
+    "target": "isOverdraftDue ? 3300 : 0",
+    "replacement": "isOverdraftDue ? 0 : 0"
+  },
+  {
+    "file": "src/client/network/activity_go_extractor.ts",
+    "desc": "AST: mutate credit card fee deduction 400 -> 0",
+    "target": "hasFreeCredit ? 400 : 0",
+    "replacement": "hasFreeCredit ? 0 : 0"
+  },
+  {
+    "file": "src/client/network/activity_go_extractor.ts",
+    "desc": "AST: invert checkPassedGo guard",
+    "target": "if (checkPassedGo(prevPos, newPos)) {",
+    "replacement": "if (!checkPassedGo(prevPos, newPos)) {"
+  },
+  {
+    "file": "src/client/network/activity_go_extractor.ts",
+    "desc": "AST: invert isSentToAudit guard",
+    "target": "if (isSentToAudit) continue;",
+    "replacement": "if (!isSentToAudit) continue;"
+  },
+  {
+    "file": "src/client/network/activity_go_extractor.ts",
+    "desc": "AST: corrupt handledReceiverIds registration",
+    "target": "handledReceiverIds.add(p.id);",
+    "replacement": "/* AST_MUTANT_REMOVED */"
+  }
+]

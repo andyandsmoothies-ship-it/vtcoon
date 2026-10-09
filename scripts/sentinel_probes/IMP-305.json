@@ -1,0 +1,44 @@
+[
+  {
+    "file": "src/server/room_auction_coordinator.ts",
+    "desc": "AST: mutate coordAuctionDecline delegation",
+    "target": "const res = handleDecline(s.room, player, auctions, s.roomCode);",
+    "replacement": "const res = { success: false, reason: 'MUTATED' };"
+  },
+  {
+    "file": "src/server/room_auction_coordinator.ts",
+    "desc": "AST: mutate coordAuctionBid delegation",
+    "target": "const res = handleAuctionBid(s.room, s.auction, playerId, amount, s.registry, auctions, s.roomCode, s.propertyStates);",
+    "replacement": "const res = { success: false, reason: 'MUTATED' };"
+  },
+  {
+    "file": "src/server/room_auction_coordinator.ts",
+    "desc": "AST: mutate coordAuctionPass delegation",
+    "target": "const res = handleAuctionPass(s.room, s.auction, playerId, s.registry, auctions, s.roomCode, s.propertyStates);",
+    "replacement": "const res = { success: false, reason: 'MUTATED' };"
+  },
+  {
+    "file": "src/server/room_auction_coordinator.ts",
+    "desc": "AST: mutate coordAuctionClose result caching",
+    "target": "s.lastAuctionResult = result;",
+    "replacement": "/* AST_MUTANT_REMOVED */"
+  },
+  {
+    "file": "src/server/room_auction_coordinator.ts",
+    "desc": "AST: mutate coordGetLastAuctionResult return",
+    "target": "return s?.room.lastAuctionResult ?? s?.lastAuctionResult;",
+    "replacement": "return undefined;"
+  },
+  {
+    "file": "src/server/room_auction_coordinator.ts",
+    "desc": "AST: mutate coordClearLastAuctionResult reset",
+    "target": "s.lastAuctionResult = undefined;",
+    "replacement": "/* AST_MUTANT_REMOVED */"
+  },
+  {
+    "file": "src/server/room_auction_coordinator.ts",
+    "desc": "AST: mutate coordGetAuctionSession return",
+    "target": "return s?.auction;",
+    "replacement": "return undefined;"
+  }
+]
