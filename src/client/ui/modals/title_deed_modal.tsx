@@ -217,8 +217,8 @@ export function TitleDeedModal({
           <button
             type="button"
             onClick={onClose}
+            className="absolute top-1/2 -translate-y-1/2 right-2 sm:right-2.5 min-w-[44px] min-h-[44px] w-8 h-8 rounded-full bg-black/25 bg-black/35 hover:bg-black/55 backdrop-blur-sm border border-white/60 flex items-center justify-center text-white text-sm font-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 transition-all hover:scale-105 active:scale-95 cursor-pointer z-20 shadow-md"
             aria-label="Đóng Sổ Đỏ"
-            className="absolute top-1/2 -translate-y-1/2 right-2 sm:right-2.5 min-w-[44px] min-h-[44px] w-8 h-8 rounded-full bg-black/35 hover:bg-black/55 backdrop-blur-sm border border-white/60 flex items-center justify-center text-white text-sm font-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 transition-all hover:scale-105 active:scale-95 cursor-pointer z-20 shadow-md"
           >
             ✕
           </button>

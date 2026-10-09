@@ -294,6 +294,8 @@ describe('[TC-207/MSS][UC-IMP207] Freeze Trade FSM Transition & UI Affordance Co
         activeModifiers: [{ type: MarketCardId.MC_FREEZE_TRADE, affectedCells: [], remainingRounds: 2 }],
       });
 
+      useGameStore.getState().setIsRolling(false);
+
       const html = renderToStaticMarkup(
         React.createElement(ActionDock, {
           localPlayerId: 'p1',

@@ -11,15 +11,15 @@ import { useWsLivenessWatchdog } from './ws_liveness_watchdog.js';
 export { saveReconnectToken, getReconnectToken, clearReconnectToken };
 export { applyDeltaToStore, isGameRunningDelta };
 
-interface WebSocketLike {
-  readyState: number;
-  send(data: string): void;
-  close(): void;
-  onopen: WebSocket['onopen'];
-  onmessage: WebSocket['onmessage'];
-  onerror: WebSocket['onerror'];
-  onclose: WebSocket['onclose'];
-}
+import {
+  type WebSocketLike,
+  resolveWsUrl,
+  computeReconnectBackoff,
+  dispatchWsIntent,
+  dispatchWsEmote,
+  dispatchWsMessage,
+  dispatchWsResync,
+} from './game_ws_dispatcher.js';
 
 const clearRef = <T>(ref: { current: T | null }) => { ref.current = null; };
 
@@ -61,7 +61,6 @@ import {
 } from './ws_message_handler.js';
 import { useTelemetryStore } from '../telemetry/telemetry_store.js';
 import { useGameStore } from '../store/game_store.js';
-import { buildIntentTelemetryContext } from '../ui/ui_helpers.js';
 
 export { handleWsMessage, performWsHandshake };
 export type { WsMessageHandlerContext };
@@ -120,17 +119,7 @@ export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
       reconnectTimerRef.current = null;
     }
 
-    const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:';
-    const isLocalDev =
-      typeof window !== 'undefined' &&
-      (window.location.host === 'localhost:3000' || window.location.host === '127.0.0.1:3000');
-    const wsProto = isHttps ? 'wss:' : 'ws:';
-    const defaultUrl = typeof window !== 'undefined'
-      ? (isLocalDev
-          ? `ws://${window.location.hostname || 'localhost'}:3001`
-          : `${wsProto}//${window.location.host}/rooms/${roomCode}`)
-      : 'ws://localhost:3001';
-    const targetUrl = url ?? defaultUrl;
+    const targetUrl = resolveWsUrl(url, roomCode);
 
     const socket: WebSocketLike = webSocketFactory
       ? webSocketFactory(targetUrl)
@@ -193,7 +182,7 @@ export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
       if (wsRef.current && wsRef.current !== socket) return;
       setIsConnected(false);
       if (!isManualDisconnectRef.current) {
-        const delay = Math.min(1000 * Math.pow(1.5, reconnectAttemptsRef.current), 5000);
+        const delay = computeReconnectBackoff(reconnectAttemptsRef.current);
         reconnectAttemptsRef.current += 1;
         reconnectTimerRef.current = setTimeout(() => {
           connect();
@@ -220,77 +209,47 @@ export function useGameWs(options: UseGameWsOptions): UseGameWsReturn {
 
   const sendIntent = useCallback(
     (intent: PlayerIntent): boolean => {
-      if (!wsRef.current || wsRef.current.readyState !== 1) return false;
       // [IMP-165/P1.1] Dùng playerIdRef.current để chống stale closure khi server đổi slot
       const effectivePid = playerIdRef.current || playerId;
-      const msg: WsClientMessage = {
-        type: 'INTENT',
+      return dispatchWsIntent(wsRef.current, {
         roomCode: activeRoomCodeRef.current || roomCode,
         playerId: effectivePid,
         intent,
-      };
-      const gameState = useGameStore.getState();
-      const player = gameState.playersInfo[effectivePid];
-      const telemetryContext = buildIntentTelemetryContext({
-        intentType: intent.type,
-        dice: gameState.dice,
-        consecutiveDoubles: player?.consecutiveDoubles,
-        balance: player?.balance,
-        position: gameState.playerPositions[effectivePid],
-        currentTurnPlayerId: gameState.currentTurnPlayerId,
-        localPlayerId: effectivePid,
+        onAfterSend: () => {
+          lastActionTimeRef.current = Date.now();
+        },
       });
-      useTelemetryStore.getState().recordIntent(effectivePid, intent, telemetryContext);
-      useTelemetryStore.getState().addAuditLog({
-        tick: 0,
-        source: 'PLAYER',
-        action: intent.type,
-        payloadSummary: JSON.stringify({ ...intent, ...telemetryContext }),
-      });
-      lastActionTimeRef.current = Date.now();
-      wsRef.current.send(JSON.stringify(msg));
-      return true;
     },
     [roomCode, playerId],
   );
 
   const sendEmote = useCallback(
     (emoteId: string): boolean => {
-      if (!wsRef.current || wsRef.current.readyState !== 1) return false;
       // [IMP-165/P1.1] Dùng playerIdRef.current để chống stale closure
-      const msg: WsClientMessage = {
-        type: 'EMOTE',
+      return dispatchWsEmote(wsRef.current, {
         roomCode: activeRoomCodeRef.current || roomCode,
         playerId: playerIdRef.current || playerId,
         emoteId,
-      };
-      wsRef.current.send(JSON.stringify(msg));
-      return true;
+      });
     },
     [roomCode, playerId],
   );
 
   const sendWsMessage = useCallback(
     (msg: WsClientMessage): boolean => {
-      if (!wsRef.current || wsRef.current.readyState !== 1) return false;
-      const targetCode = activeRoomCodeRef.current || ('roomCode' in msg && msg.roomCode ? msg.roomCode : roomCode);
-      const activeMsg = 'roomCode' in msg && msg.roomCode ? { ...msg, roomCode: targetCode } : msg;
-      wsRef.current.send(JSON.stringify(activeMsg));
-      return true;
+      return dispatchWsMessage(wsRef.current, msg, activeRoomCodeRef.current || roomCode);
     },
     [roomCode],
   );
 
   const requestResync = useCallback((): boolean => {
-    if (!wsRef.current || wsRef.current.readyState !== 1) return false;
-    const msg: WsClientMessage = {
-      type: 'INTENT_REQUEST_RESYNC',
+    return dispatchWsResync(wsRef.current, {
       roomCode: activeRoomCodeRef.current || roomCode,
       playerId,
-    };
-    wsRef.current.send(JSON.stringify(msg));
-    watchdogRef.current.startResyncWatchdog();
-    return true;
+      onWatchdogStart: () => {
+        watchdogRef.current.startResyncWatchdog();
+      },
+    });
   }, [roomCode, playerId]);
 
   const connectRef = useRef(connect);

@@ -66,7 +66,7 @@ export function EventCardModal({
   const [activeIdx, setActiveIdx] = React.useState<number>(initialIdx);
 
   React.useEffect(() => {
-    setActiveIdx(initialIdx);
+    setActiveIdx((prev) => (prev !== initialIdx ? initialIdx : prev));
   }, [initialIdx]);
 
   React.useEffect(() => {

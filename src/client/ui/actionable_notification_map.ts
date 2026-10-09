@@ -1,0 +1,37 @@
+// [IMP-134/IMP-297] Actionable Guidance System Unified Map Facade
+// Combines gameplay and system dictionaries with zero semantic divergence
+
+import { type ActionableNotification, GAMEPLAY_NOTIFICATIONS_MAP } from './actionable_notification_gameplay.js';
+import { SYSTEM_NOTIFICATIONS_MAP } from './actionable_notification_system.js';
+
+export { type ActionableNotification } from './actionable_notification_gameplay.js';
+
+export const ACTIONABLE_NOTIFICATIONS_MAP: Record<string, ActionableNotification> = {
+  ...GAMEPLAY_NOTIFICATIONS_MAP,
+  ...SYSTEM_NOTIFICATIONS_MAP,
+};
+
+// Aliases for legacy/alternative casing reason codes (DRY SSOT)
+ACTIONABLE_NOTIFICATIONS_MAP['InsufficientFunds'] = ACTIONABLE_NOTIFICATIONS_MAP['INSUFFICIENT_FUNDS']!;
+ACTIONABLE_NOTIFICATIONS_MAP['NotPurchasable'] = ACTIONABLE_NOTIFICATIONS_MAP['NOT_PURCHASABLE']!;
+ACTIONABLE_NOTIFICATIONS_MAP['TradeFrozen'] = ACTIONABLE_NOTIFICATIONS_MAP['FREEZE_ACTIVE']!;
+ACTIONABLE_NOTIFICATIONS_MAP['highest_bidder cannot pass'] = ACTIONABLE_NOTIFICATIONS_MAP['HIGHEST_BIDDER_CANNOT_PASS']!;
+ACTIONABLE_NOTIFICATIONS_MAP['highest_bidder_cannot_pass'] = ACTIONABLE_NOTIFICATIONS_MAP['HIGHEST_BIDDER_CANNOT_PASS']!;
+ACTIONABLE_NOTIFICATIONS_MAP['HighestBidderCannotPass'] = ACTIONABLE_NOTIFICATIONS_MAP['HIGHEST_BIDDER_CANNOT_PASS']!;
+ACTIONABLE_NOTIFICATIONS_MAP['intent_rejected'] = ACTIONABLE_NOTIFICATIONS_MAP['INTENT_REJECTED']!;
+ACTIONABLE_NOTIFICATIONS_MAP['IntentRejected'] = ACTIONABLE_NOTIFICATIONS_MAP['INTENT_REJECTED']!;
+ACTIONABLE_NOTIFICATIONS_MAP['OUT_OF_TURN'] = ACTIONABLE_NOTIFICATIONS_MAP['NOT_YOUR_TURN']!;
+ACTIONABLE_NOTIFICATIONS_MAP['PROPERTY_HAS_BUILDING'] = ACTIONABLE_NOTIFICATIONS_MAP['HAS_BUILDING']!;
+ACTIONABLE_NOTIFICATIONS_MAP['ABUSE_DETECTED'] = ACTIONABLE_NOTIFICATIONS_MAP['RATE_LIMIT_EXCEEDED']!;
+ACTIONABLE_NOTIFICATIONS_MAP['TOKEN_EXPIRED'] = ACTIONABLE_NOTIFICATIONS_MAP['TOKEN_INVALID']!;
+ACTIONABLE_NOTIFICATIONS_MAP['PLAYER_BANKRUPT'] = ACTIONABLE_NOTIFICATIONS_MAP['BANKRUPT']!;
+ACTIONABLE_NOTIFICATIONS_MAP['INVALID_INTENT'] = ACTIONABLE_NOTIFICATIONS_MAP['INTENT_REJECTED']!;
+
+export const DEFAULT_FALLBACK_NOTIFICATION: ActionableNotification = {
+  icon: 'ℹ️',
+  title: 'Hướng Dẫn Trò Chơi',
+  description: 'Thao tác tạm thời chưa thể thực hiện. Vui lòng kiểm tra lại tình trạng lượt chơi của bạn!',
+  tone: 'info',
+  actionHint: 'Kiểm tra trạng thái lượt chơi trên thanh điều khiển.',
+};
+

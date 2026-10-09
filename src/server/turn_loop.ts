@@ -4,9 +4,8 @@
 import type { Room, Player } from '../domain/room';
 import { checkPassedGo, calculateGoSalary, BOARD_SIZE, TurnPhase } from '../domain/room';
 import { rollDice } from '../domain/dice';
-import type { PropertyRegistry, PropertyStateMap, PropertyState } from '../domain/property_manager';
-import { handleLanding, LandingResult, calculateGoPropertyTax, PROPERTY_DEEDS, GO_PROPERTY_TAX_CAP } from '../domain/property_manager';
-import { calculateElectricBill } from '../domain/property_rent';
+import type { PropertyRegistry, PropertyStateMap } from '../domain/property_manager';
+import { handleLanding, LandingResult, calculateGoPropertyTax, GO_PROPERTY_TAX_CAP } from '../domain/property_manager';
 import { BOARD_CONFIG } from '../domain/board_config';
 import { decayModifiers } from '../domain/event_card_engine';
 import { processTreasuryStimulus } from '../domain/treasury_stimulus';
@@ -24,110 +23,20 @@ import { collectMortgageInterest } from './mortgage_manager';
 import { checkInsolvency, liquidateAssets, declareBankruptcy } from './insolvency_manager';
 import type { RollResult } from './room_manager';
 import type { AuctionSession } from './auction_manager';
-import { ChanceCardId, MarketCardId } from '../domain/event_card_types';
 import { processBondTurnTransition } from './bond_manager';
+import {
+  isTradeFrozen,
+  processPendingDebts,
+  processGoElectricBilling,
+  processUnbuiltRounds,
+} from './turn_loop_maintenance.js';
 
-function isTradeFrozen(room: Room): boolean {
-  return (room.activeModifiers ?? []).some(
-    (m) => m.type === MarketCardId.MC_FREEZE_TRADE && m.remainingRounds > 0,
-  );
-}
-
-// [DEBT-S06-01][DEBT-S06-02] Xử lý nợ định kỳ khi player vượt GO (TRƯỚC GO_BONUS)
-function processPendingDebts(room: Room, player: Player): void {
-  // CC_FREE_CREDIT: trích lãi 400 vào kho bạc
-  if (player.hand.includes(ChanceCardId.CC_FREE_CREDIT)) {
-    player.balance -= 400;
-    room.treasury = (room.treasury ?? 0) + 400;
-  }
-
-  // CC_OVERDRAFT: đếm ngược, thu hồi 3.300 khi hết hạn
-  if ((player.overdraftRoundsLeft ?? 0) > 0) {
-    player.overdraftRoundsLeft! -= 1;
-    if (player.overdraftRoundsLeft === 0) {
-      player.balance -= 3_300;
-      player.pendingDebts = player.pendingDebts.filter(
-        (d) => d !== ChanceCardId.CC_OVERDRAFT,
-      );
-      if (player.balance < 0) checkInsolvency(room);
-    }
-  }
-}
-
-// IMP-214: Thu hóa đơn tiền điện EVN khi đối thủ vượt GO
-function processGoElectricBilling(
-  room: Room,
-  player: Player,
-  registry: PropertyRegistry,
-  stateMap?: PropertyStateMap,
-): void {
-  const evnOwnerId = registry.get(12);
-  if (!evnOwnerId || evnOwnerId === player.id) return;
-  const evnOwner = room.players.find((p) => p.id === evnOwnerId);
-  if (!evnOwner || evnOwner.bankrupt) return;
-  if (evnOwner.inAudit || (evnOwner.auditTurnsLeft ?? 0) > 0) return;
-  const isMortgaged = Boolean(
-    evnOwner.mortgagedProperties?.includes(12) || stateMap?.get(12)?.isMortgaged,
-  );
-  if (isMortgaged) return;
-
-  const electricBill = calculateElectricBill(player.id, registry, stateMap);
-  if (electricBill <= 0) return;
-
-  const actualPaid = Math.max(0, player.balance);
-  player.balance -= electricBill;
-  evnOwner.balance += Math.min(electricBill, actualPaid);
-}
-
-// [DEBT-S06-03] CC_SLOW_BUILD: kiểm tra và xử lý unbuiltRounds sau mỗi lượt
-function processUnbuiltRounds(
-  room: Room,
-  current: Player,
-  registry: PropertyRegistry,
-  stateMap: PropertyStateMap,
-  auctions: Map<string, AuctionSession>,
-  roomCode: string,
-): void {
-  for (const [cellIndex, ownerId] of registry.entries()) {
-    if (ownerId !== current.id) continue;
-    const state = stateMap.get(cellIndex);
-    if (!state || state.level !== 0 || state.unbuiltRounds === undefined) continue;
-
-    const nextRounds = state.unbuiltRounds + 1;
-    stateMap.set(cellIndex, { ...state, unbuiltRounds: nextRounds });
-
-    if (nextRounds > 2) {
-      // Thu hồi ô đất và mở auction 50%
-      registry.delete(cellIndex);
-      const nextState: PropertyState = { ...state, isMortgaged: false };
-      delete (nextState as { unbuiltRounds?: number }).unbuiltRounds;
-      stateMap.set(cellIndex, nextState);
-
-      if (current.mortgagedProperties?.includes(cellIndex)) {
-        current.mortgagedProperties = current.mortgagedProperties.filter((c) => c !== cellIndex);
-      }
-      if (current.mortgageLoans?.[cellIndex] !== undefined) {
-        delete current.mortgageLoans[cellIndex];
-      }
-
-      const deed = PROPERTY_DEEDS.get(cellIndex);
-      if (deed) {
-        const startingBid = Math.floor(deed.price * 0.50);
-        auctions.set(roomCode, {
-          cellIndex,
-          declinedPlayerId: '',
-          highestBid: startingBid,
-          startingBid,
-          currentBid: startingBid,
-          endTime: Date.now() + 20_000,
-          passedPlayers: new Set<string>(),
-        });
-        room.phase = TurnPhase.AuctionPhase;
-      }
-      break; // [P2-DEFENSE] Chỉ mở 1 auction tại một thời điểm, chống đè session
-    }
-  }
-}
+export {
+  isTradeFrozen,
+  processPendingDebts,
+  processGoElectricBilling,
+  processUnbuiltRounds,
+};
 
 export function executeTurnRoll(
   room: Room,
@@ -277,7 +186,11 @@ export function executeTurnEnd(
   }
 
   if (room.phase === TurnPhase.AuctionPhase || room.phase === TurnPhase.InsolvencyPhase || room.pendingBuyout) return undefined;
-  if (room.players.some((p) => p.balance < 0 && !p.bankrupt)) return undefined;
+  const insolventDebtor = room.players.find((p) => p.balance < 0 && !p.bankrupt);
+  if (insolventDebtor) {
+    checkInsolvency(room, undefined, insolventDebtor.id);
+    return undefined;
+  }
   if (!rolledThisTurn && room.phase === TurnPhase.WaitingRoll && (current.auditTurnsLeft ?? 0) <= 0) return undefined;
 
   room.lastDiplomaticEvent = null;

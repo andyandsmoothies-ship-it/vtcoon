@@ -11,7 +11,22 @@ import { AIRPORT_CELLS } from '../telemetry/telemetry_expected_delta.js';
 
 export const CHANCE_MARKET_CELLS = new Set<number>([2, 7, 17, 22, 33, 36]);
 
-export interface BalanceDelta { readonly id: string; readonly diff: number; readonly pInfo?: PlayerHudInfo; readonly cellIndex?: number; }
+import {
+  type BalanceDelta,
+  type PassedGoExtractionResult,
+  buildPropertyRegistryAndStateMap,
+  getPlayerName,
+  extractPassedGoActivities,
+} from './activity_go_extractor.js';
+
+export {
+  type BalanceDelta,
+  type PassedGoExtractionResult,
+  buildPropertyRegistryAndStateMap,
+  getPlayerName,
+  extractPassedGoActivities,
+};
+
 export interface PropertyFinancialContext {
   readonly boughtCellIndices: readonly number[]; readonly buyoutCellIndices?: readonly number[];
   readonly upgradedCells: ReadonlyArray<{ cellIndex: number; cost: number; ownerId: string }>;
@@ -19,142 +34,6 @@ export interface PropertyFinancialContext {
   readonly unmortgagedCells: ReadonlyArray<{ cellIndex: number; cost: number; ownerId: string }>;
 }
 
-export function buildPropertyRegistryAndStateMap(
-  playersInfo: Record<string, PlayerHudInfo>,
-  levelMap?: Record<number, number>,
-): { registry: PropertyRegistry; stateMap: PropertyStateMap } {
-  const registry: PropertyRegistry = new Map(), stateMap: PropertyStateMap = new Map();
-  if (playersInfo) {
-    for (const [id, info] of Object.entries(playersInfo)) {
-      for (const cell of info?.ownedProperties ?? []) registry.set(cell, id);
-    }
-  }
-  if (levelMap) {
-    for (const [cellStr, lvl] of Object.entries(levelMap)) stateMap.set(Number(cellStr), { level: lvl });
-  }
-  return { registry, stateMap };
-}
-
-export function getPlayerName(pInfo?: PlayerHudInfo, fallbackId?: string): string {
-  return pInfo?.name || (fallbackId ? fallbackId.toUpperCase() : 'Người chơi');
-}
-
-export interface PassedGoExtractionResult {
-  readonly salaryLogs: ActivityLogEntry[]; readonly payers: BalanceDelta[]; readonly receivers: BalanceDelta[]; readonly handledReceiverIds: Set<string>;
-}
-
-/**
- * Tách độc lập dòng tiền Lương Vượt GO bằng các phép biến đổi thuần hàm (Immutable).
- */
-export function extractPassedGoActivities(
-  delta: DeltaPayload,
-  prevState: GameState,
-  nextState: GameState,
-  initialPayers: readonly BalanceDelta[],
-  initialReceivers: readonly BalanceDelta[],
-  initialHandledReceiverIds: ReadonlySet<string>,
-): PassedGoExtractionResult {
-  if (!delta.players || delta.players.length === 0) {
-    return { salaryLogs: [], payers: [...initialPayers], receivers: [...initialReceivers], handledReceiverIds: new Set(initialHandledReceiverIds) };
-  }
-
-  const salaryLogs: ActivityLogEntry[] = [];
-  let payers = [...initialPayers];
-  let receivers = [...initialReceivers];
-  const handledReceiverIds = new Set(initialHandledReceiverIds);
-
-  for (const p of delta.players) {
-    const prevPos = prevState.playerPositions?.[p.id];
-    const newPos = nextState.playerPositions?.[p.id] ?? p.position;
-    if (prevPos === undefined || newPos === undefined || prevPos === newPos) continue;
-
-    const prevP = prevState.playersInfo[p.id];
-    const isSentToAudit = Boolean(
-      p.inAudit === true ||
-      (p.auditTurnsLeft && p.auditTurnsLeft > 0) ||
-      nextState.playersInfo[p.id]?.inAudit === true,
-    );
-    if (isSentToAudit) continue;
-
-    if (checkPassedGo(prevPos, newPos)) {
-      const round = delta.roundNumber ?? prevState.roundNumber ?? 1;
-      const salary = delta.passedGoSalary ?? calculateGoSalary(round);
-      const pInfo = nextState.playersInfo[p.id] ?? prevP;
-      const pName = getPlayerName(pInfo, p.id);
-
-      salaryLogs.push({
-        id: `salary_${Date.now()}_${p.id}`, timestamp: Date.now(), type: 'salary',
-        message: `🏁 ${pName} đã vượt qua ô Bắt Đầu và nhận ${formatCurrency(salary)} tiền lương`,
-        playerId: p.id, playerName: pName, amount: salary,
-        ...(pInfo?.tokenColor ? { playerTokenColor: pInfo.tokenColor } : {}),
-      });
-
-      const isOverdraftDue = prevP?.overdraftRoundsLeft === 1 && (!p.overdraftRoundsLeft || p.overdraftRoundsLeft === 0);
-      if (isOverdraftDue) {
-        salaryLogs.push({
-          id: `overdraft_${Date.now()}_${p.id}`, timestamp: Date.now(), type: 'card',
-          message: `💳 ${pName} đã hoàn trả 3.300 nợ thấu chi ngân hàng khi hết hạn`,
-          amount: -3300, cellIndex: 0, playerId: p.id, playerName: pName,
-          ...(pInfo?.tokenColor ? { playerTokenColor: pInfo.tokenColor } : {}),
-        });
-      }
-
-      const hasFreeCredit = Boolean(prevP?.hand?.includes(ChanceCardId.CC_FREE_CREDIT));
-      if (hasFreeCredit) {
-        salaryLogs.push({
-          id: `credit_${Date.now()}_${p.id}`, timestamp: Date.now(), type: 'card',
-          message: `🏦 ${pName} đã nộp 400 phí trích lãi tín dụng Kho Bạc (CC_FREE_CREDIT)`,
-          amount: -400, cellIndex: 0, playerId: p.id, playerName: pName,
-          ...(pInfo?.tokenColor ? { playerTokenColor: pInfo.tokenColor } : {}),
-        });
-      }
-
-      const { registry, stateMap } = buildPropertyRegistryAndStateMap(prevState.playersInfo, prevState.levelMap);
-      const rawGoTax = calculateGoPropertyTax(p.id, registry, stateMap);
-      const goTax = Math.min(rawGoTax, GO_PROPERTY_TAX_CAP);
-      if (goTax > 0) {
-        salaryLogs.push({
-          id: `tax_prop_go_${Date.now()}_${p.id}`, timestamp: Date.now(), type: 'tax',
-          message: `🏛️ ${pName} đã nộp thuế ${formatCurrency(goTax)} (Thuế Tài Sản Qua GO)`,
-          amount: -goTax, cellIndex: 0, playerId: p.id, playerName: pName,
-          ...(pInfo?.tokenColor ? { playerTokenColor: pInfo.tokenColor } : {}),
-        });
-      }
-
-      const totalGoDeductions = (isOverdraftDue ? 3300 : 0) + (hasFreeCredit ? 400 : 0) + goTax;
-      const netGoBonus = salary - totalGoDeductions;
-
-      const recIdx = receivers.findIndex((r) => r.id === p.id);
-      if (recIdx !== -1) {
-        const currentDiff = receivers[recIdx]!.diff;
-        if (currentDiff === netGoBonus) {
-          handledReceiverIds.add(p.id);
-          receivers[recIdx] = { ...receivers[recIdx]!, diff: 0 };
-        } else if (currentDiff > netGoBonus) {
-          receivers[recIdx] = { ...receivers[recIdx]!, diff: currentDiff - netGoBonus };
-        } else {
-          receivers = receivers.filter((_, idx) => idx !== recIdx);
-          payers.push({ id: p.id, diff: currentDiff - netGoBonus, pInfo: prevP, cellIndex: newPos });
-        }
-      } else {
-        const payIdx = payers.findIndex((py) => py.id === p.id);
-        if (payIdx !== -1) {
-          const updatedDiff = payers[payIdx]!.diff - netGoBonus;
-          if (updatedDiff > 0) {
-            receivers.push({ id: p.id, diff: updatedDiff, pInfo: prevP, cellIndex: newPos });
-            payers = payers.filter((_, idx) => idx !== payIdx);
-          } else {
-            payers[payIdx] = { ...payers[payIdx]!, diff: updatedDiff };
-          }
-        } else {
-          payers.push({ id: p.id, diff: -netGoBonus, pInfo: prevP, cellIndex: newPos });
-        }
-      }
-    }
-  }
-
-  return { salaryLogs, payers, receivers, handledReceiverIds };
-}
 
 export interface MatchRentResult {
   readonly rentLogs: ActivityLogEntry[]; readonly handledPayerIds: Set<string>; readonly handledReceiverIds: Set<string>; readonly remainingPayers?: readonly BalanceDelta[];

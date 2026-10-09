@@ -51,11 +51,14 @@ function parseArgs() {
     scenario: null,
     scenarioExpr: null,
     assertCameraY: null, // { min, max }
+    help: false,
   };
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
-    if (arg === '--ticket' && args[i + 1]) {
+    if (arg === '--help' || arg === '-h') {
+      options.help = true;
+    } else if (arg === '--ticket' && args[i + 1]) {
       options.ticket = args[++i];
     } else if (arg === '--url' && args[i + 1]) {
       options.url = args[++i];
@@ -84,21 +87,106 @@ function parseArgs() {
   return options;
 }
 
-async function checkPortOpen(port) {
+const abortController = new AbortController();
+const globalSignal = abortController.signal;
+
+let activeBrowserProc = null;
+let activePreviewProc = null;
+let activeWs = null;
+let isCleanedUp = false;
+
+function killProcessTree(proc) {
+  if (!proc || !proc.pid) return;
   try {
-    const res = await fetch(`http://localhost:${port}/`, { method: 'HEAD', signal: AbortSignal.timeout(1000) });
+    if (process.platform === 'win32') {
+      execSync(`taskkill /pid ${proc.pid} /T /F`, { stdio: 'ignore' });
+    } else {
+      proc.kill('SIGTERM');
+    }
+  } catch {
+    try {
+      proc.kill('SIGKILL');
+    } catch {}
+  }
+}
+
+function cleanup() {
+  if (isCleanedUp) return;
+  isCleanedUp = true;
+  abortController.abort();
+
+  if (activeWs) {
+    try {
+      activeWs.close();
+    } catch {}
+    activeWs = null;
+  }
+
+  if (activeBrowserProc) {
+    killProcessTree(activeBrowserProc);
+    activeBrowserProc = null;
+  }
+
+  if (activePreviewProc) {
+    killProcessTree(activePreviewProc);
+    activePreviewProc = null;
+  }
+}
+
+process.on('SIGINT', () => {
+  console.log('\n🛑 Interrupted by user (SIGINT). Terminating active browser and preview processes cleanly...');
+  cleanup();
+  process.exit(1);
+});
+
+process.on('SIGTERM', () => {
+  console.log('\n🛑 Interrupted by system (SIGTERM). Terminating active browser and preview processes cleanly...');
+  cleanup();
+  process.exit(1);
+});
+
+async function checkPortOpen(port, signal) {
+  try {
+    const timeout = AbortSignal.timeout(1000);
+    const combinedSignal = signal ? AbortSignal.any([timeout, signal]) : timeout;
+    const res = await fetch(`http://127.0.0.1:${port}/`, { method: 'HEAD', signal: combinedSignal });
     return res.status < 500;
   } catch {
     return false;
   }
 }
 
-function sleep(ms) {
-  return new Promise((res) => setTimeout(res, ms));
+function sleep(ms, signal) {
+  return new Promise((res) => {
+    if (signal?.aborted) return res();
+    const timer = setTimeout(res, ms);
+    signal?.addEventListener('abort', () => {
+      clearTimeout(timer);
+      res();
+    }, { once: true });
+  });
 }
 
 async function main() {
   const opts = parseArgs();
+  if (opts.help) {
+    console.log(`
+Usage: node scripts/capture_visual_evidence.mjs [options]
+Options:
+  --ticket <ID>         Ticket ID (e.g. IMP-233)
+  --dual-viewport       Capture both mobile (360x740) and desktop (1280x800)
+  --name <name>         Output filename slug (default: full_board)
+  --url <url>           Target URL (default: http://localhost:4173/?room=VTTEST&host=true)
+  --port <port>         Vite preview port (default: 4173)
+  --debugPort <port>    Chrome remote debugging port (default: 9222)
+  --wait <ms>           Wait time after page load in ms (default: 5000)
+  --crop <x,y,w,h>      Crop rectangle [x, y, width, height]
+  --scenario <name>     Pre-capture scenario to inject
+  --help, -h            Show this help message
+`);
+    return;
+  }
+
   const browserPath = findBrowser();
   if (!browserPath) {
     console.error('❌ No suitable Chrome or Edge browser executable found on system.');
@@ -137,25 +225,27 @@ async function main() {
 
   // 1. Verify Preview Server
   let previewProc = null;
-  const isServerRunning = await checkPortOpen(opts.port);
+  const isServerRunning = await checkPortOpen(opts.port, globalSignal);
   if (!isServerRunning) {
-    console.log(`📡 Preview server not detected on port ${opts.port}. Launching 'npx vite preview --port ${opts.port}'...`);
-    previewProc = spawn('cmd.exe', ['/c', `npx vite preview --port ${opts.port}`], {
+    console.log(`📡 Preview server not detected on port ${opts.port}. Launching 'npx --yes vite preview --port ${opts.port}'...`);
+    previewProc = spawn('cmd.exe', ['/c', `npx --yes vite preview --port ${opts.port}`], {
       stdio: 'ignore',
       detached: false,
     });
+    activePreviewProc = previewProc;
 
     let opened = false;
     for (let i = 0; i < 20; i++) {
-      await sleep(500);
-      if (await checkPortOpen(opts.port)) {
+      if (globalSignal.aborted) break;
+      await sleep(500, globalSignal);
+      if (await checkPortOpen(opts.port, globalSignal)) {
         opened = true;
         break;
       }
     }
     if (!opened) {
       console.error(`❌ Failed to start vite preview server on port ${opts.port}.`);
-      if (previewProc) previewProc.kill();
+      cleanup();
       process.exit(1);
     }
   }
@@ -173,13 +263,17 @@ async function main() {
     '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     opts.url,
   ], { stdio: 'ignore' });
+  activeBrowserProc = browserProc;
 
   try {
     let wsUrl = null;
     for (let i = 0; i < 30; i++) {
-      await sleep(400);
+      if (globalSignal.aborted) break;
+      await sleep(400, globalSignal);
       try {
-        const res = await fetch(`http://127.0.0.1:${opts.debugPort}/json/list`);
+        const timeout = AbortSignal.timeout(1000);
+        const combined = AbortSignal.any([timeout, globalSignal]);
+        const res = await fetch(`http://127.0.0.1:${opts.debugPort}/json/list`, { signal: combined });
         const pages = await res.json();
         const target = pages.find((p) => p.url && p.url.includes(String(opts.port))) || pages[0];
         if (target?.webSocketDebuggerUrl) {
@@ -197,6 +291,7 @@ async function main() {
 
     const { WebSocket } = await import('ws');
     const ws = new WebSocket(wsUrl);
+    activeWs = ws;
     await new Promise((resolve, reject) => {
       ws.on('open', resolve);
       ws.on('error', reject);
@@ -352,7 +447,73 @@ async function main() {
               } else if ('${scenarioName}' === 'transit_wheel') {
                 const wheelBtn = document.querySelector('[data-testid="action-dock-transit-wheel"]');
                 if (wheelBtn) wheelBtn.click();
+              } else if ('${scenarioName}' === 'camera_chase_dice_pan') {
+                if (window.__lobbyStore) {
+                  window.__lobbyStore.getState().setGameStarted(true);
+                }
+                if (window.__gameStore) {
+                  window.__gameStore.setState({
+                    currentTurnPlayerId: 'p1',
+                    playerPositions: { p1: 25, p2: 0, p3: 0, p4: 0 },
+                    activePawnAnimation: null,
+                    isRolling: true,
+                    hasRolledThisTurn: false,
+                    activeModal: null,
+                    cameraFocusCell: null,
+                    hasUserCustomCamera: false,
+                  });
+                }
+              } else if ('${scenarioName}' === 'camera_soft_return_and_beacon') {
+                if (window.__lobbyStore) {
+                  window.__lobbyStore.getState().setGameStarted(true);
+                }
+                if (window.__gameStore) {
+                  window.__gameStore.setState({
+                    currentTurnPlayerId: 'p1',
+                    playerPositions: { p1: 10, p2: 0, p3: 0, p4: 0 },
+                    activePawnAnimation: {
+                      isAnimating: true,
+                      playerId: 'p1',
+                      fromCell: 10,
+                      targetCell: 15,
+                      currentIndex: 2,
+                      waypoints: [11, 12, 13, 14, 15],
+                    },
+                    isRolling: false,
+                    hasRolledThisTurn: false,
+                    activeModal: null,
+                    cameraFocusCell: null,
+                    hasUserCustomCamera: true,
+                  });
+                }
+              } else if ('${scenarioName}' === 'camera_spline_arc_flyby') {
+                if (window.__lobbyStore) {
+                  window.__lobbyStore.getState().setGameStarted(true);
+                }
+                if (window.__gameStore) {
+                  window.__gameStore.setState({
+                    currentTurnPlayerId: 'p1',
+                    playerPositions: { p1: 30, p2: 0, p3: 0, p4: 0 },
+                    activePawnAnimation: {
+                      isAnimating: true,
+                      playerId: 'p1',
+                      fromCell: 30,
+                      targetCell: 10,
+                      currentIndex: 1,
+                      waypoints: [30, 0, 10],
+                      isJailFlight: true,
+                    },
+                    isRolling: false,
+                    hasRolledThisTurn: false,
+                    activeModal: null,
+                    cameraFocusCell: null,
+                    hasUserCustomCamera: false,
+                  });
+                }
               } else if ('${scenarioName}' === 'camera_chase_cinematic') {
+                if (window.__lobbyStore) {
+                  window.__lobbyStore.getState().setGameStarted(true);
+                }
                 if (window.__gameStore) {
                   window.__gameStore.setState({
                     currentTurnPlayerId: 'p1',
@@ -483,9 +644,10 @@ async function main() {
                   });
                 }
               }
+            })();
           `,
         });
-        await sleep(1100);
+        await sleep(1500);
       } else if (scenarioExpr) {
         console.log(`🎬 Evaluating scenario expression...`);
         const res = await send('Runtime.evaluate', { expression: scenarioExpr });
@@ -635,12 +797,11 @@ async function main() {
       await extractCameraTelemetry(opts.name);
     }
 
-    ws.close();
+    try {
+      ws.close();
+    } catch {}
   } finally {
-    browserProc.kill();
-    if (previewProc) {
-      previewProc.kill();
-    }
+    cleanup();
   }
 }
 

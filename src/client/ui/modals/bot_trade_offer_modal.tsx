@@ -31,7 +31,8 @@ export function BotTradeOfferModal({
   onReject,
   onClose,
 }: BotTradeOfferModalProps): React.ReactElement {
-  const playersInfo = useGameStore((state) => state.playersInfo);
+  const storePlayers = useGameStore((state) => state.playersInfo);
+  const playersInfo = Object.keys(storePlayers).length > 0 ? storePlayers : useGameStore.getState().playersInfo;
   const buyer = playersInfo[buyerId];
   const buyerName = buyer?.name ?? 'Bot AI';
   const seller = playersInfo[sellerId];
@@ -46,6 +47,11 @@ export function BotTradeOfferModal({
   const cellColor = cell?.colorGroup ? COLOR_GROUP_HEX[cell.colorGroup] : '#f59e0b';
   const basePrice = deed?.price ?? 1000;
   const premiumPercent = basePrice > 0 ? Math.round(((price - basePrice) / basePrice) * 100) : 0;
+
+  const groupCells = cell?.colorGroup ? BOARD_CONFIG.filter((c) => c.colorGroup === cell.colorGroup) : [];
+  const totalInGroup = groupCells.length;
+  const buyerOwnedInGroup = groupCells.filter((c) => buyer?.ownedProperties?.includes(c.index)).length;
+  const isMonopolyThreat = totalInGroup > 1 && buyerOwnedInGroup + 1 === totalInGroup;
 
   const offeredCell = isSwap && offeredCellIndex !== undefined ? BOARD_CONFIG[offeredCellIndex] : undefined;
   const offeredDeed = isSwap && offeredCellIndex !== undefined ? PROPERTY_DEEDS.get(offeredCellIndex) : undefined;
@@ -97,7 +103,7 @@ export function BotTradeOfferModal({
           </div>
           <div>
             <h2 id="bot-trade-modal-title" className="text-sm font-black uppercase tracking-wider text-white">
-              {isSwap ? 'Đề Xuất Đổi Đất 2 Chiều 🤝' : 'Đề Xuất Mua Đất Độc Quyền'}
+              {isSwap ? 'Đề Xuất Đổi Đất 2 Chiều 🤝' : 'Đối Thủ Hỏi Mua Đất Của Bạn'}
             </h2>
             <p className="text-[11px] text-amber-100 font-medium">
               Từ đối thủ <span className="font-bold text-white">{buyerName}</span>
@@ -257,7 +263,14 @@ export function BotTradeOfferModal({
         >
           <span className="text-base shrink-0">⚠️</span>
           <div className="flex flex-col gap-0.5">
-            <span className="font-bold text-amber-950">LƯU Ý CHIẾN LƯỢC:</span>
+            <span className="font-bold text-amber-950">
+              {isMonopolyThreat ? 'CẢNH BÁO BẪY ĐỘC QUYỀN!' : 'LƯU Ý CHIẾN LƯỢC:'}
+            </span>
+            {isMonopolyThreat && (
+              <span className="text-[11px] font-semibold text-amber-800">
+                Tiến độ Bot: {buyerOwnedInGroup}/{totalInGroup} ô
+              </span>
+            )}
             <p className="text-[11px] text-amber-900 leading-snug">
               {isSwap
                 ? 'Hãy cân nhắc kỹ phân khu của ô đất nhận và nhượng trước khi chốt thỏa thuận đổi đất!'
@@ -292,7 +305,7 @@ export function BotTradeOfferModal({
           }}
           className="min-h-[46px] py-2.5 px-4 rounded-xl font-black text-xs text-rose-700 bg-rose-50 hover:bg-rose-100 border-2 border-rose-300 shadow-[0_4px_0_0_#fca5a5] active:translate-y-[3px] transition-all cursor-pointer"
         >
-          {isSwap ? '✕ TỪ CHỐI ĐỔI' : '✕ TỪ CHỐI BÁN'}
+          {isSwap ? '✕ TỪ CHỐI ĐỔI' : '🛡️ TỪ CHỐI (Giữ Đất)'}
         </button>
         <button
           type="button"

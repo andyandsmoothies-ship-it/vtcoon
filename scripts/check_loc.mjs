@@ -48,7 +48,9 @@ export function categorizeTier(filePath) {
   // Explicit Tier 1 logic / controller overrides residing under UI/3D directories
   if (
     norm.includes('perf_budget.ts') ||
-    norm.includes('camera_telemetry_tracker.ts')
+    norm.includes('camera_telemetry_tracker.ts') ||
+    norm.includes('camera_state_machine.ts') ||
+    norm.includes('cinematic_chase_camera.ts')
   ) {
     return 'TIER1_LOGIC';
   }

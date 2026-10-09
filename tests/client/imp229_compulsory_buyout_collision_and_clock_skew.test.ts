@@ -1,92 +1,64 @@
+// @vitest-environment happy-dom
 // [CONTRACT TEST] IMP-229: Khắc Phục Lỗi Xung Đột Modal & Tự Động Kết Thúc Của Phiếu Cơ Hội "Mua Lại Dự Án Tiềm Năng"
 // Universal 5-Facet Behavioral Matrix & Detroit Style
 // Traceability Tags: [TC-229.01/MSS..TC-229.16/MSS] & [UC-IMP229]
 // Architecture: Modal Sequencing, Clock Skew Resilience, Zero Auto-Decline, Buyer Identity Isolation & Commercial Affordance
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import React from 'react';
-import { renderToStaticMarkup } from 'react-dom/server';
+import React, { act } from 'react';
+import { createRoot, type Root } from 'react-dom/client';
 
 import { applyDelta } from '../../src/client/network/apply_delta.js';
 import { ModalHost } from '../../src/client/ui/modals/modal_host.js';
-import { EventCardModal } from '../../src/client/ui/modals/event_card_modal.js';
 import { CompulsoryBuyoutModal } from '../../src/client/ui/modals/compulsory_buyout_modal.js';
 import { useGameStore } from '../../src/client/store/game_store.js';
 import { useLobbyStore } from '../../src/client/store/lobby_store.js';
+import type { DeltaPayload } from '../../src/server/delta_types.js';
+import type { PendingBuyoutSession, EventCardInfo } from '../../src/domain/room.js';
 
-// VDOM traversal helper (defined outside it() to enforce Detroit style: zero loops in it())
-function findVNode(node: any, predicate: (n: any) => boolean): any {
-  if (!node) return null;
-  if (predicate(node)) return node;
-  const children = node.props?.children;
-  if (Array.isArray(children)) {
-    for (const child of children) {
-      const res = findVNode(child, predicate);
-      if (res) return res;
-    }
-  } else if (children) {
-    return findVNode(children, predicate);
-  }
-  return null;
+declare global {
+  // eslint-disable-next-line no-var
+  var IS_REACT_ACT_ENVIRONMENT: boolean | undefined;
+}
+globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+
+interface MountResult {
+  readonly container: HTMLDivElement;
+  readonly unmount: () => void;
 }
 
-// React 19 SSR effect execution harness for headless Node testing
-function renderWithEffects(
-  element: React.ReactElement,
-  options?: { mockRemainingMs?: number }
-): {
-  html: string;
-  vdom: any;
-  cleanup?: () => void;
-  getLastStateUpdateArg: () => any;
-} {
-  const internals = (React as any).__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE;
-  let cleanup: (() => void) | undefined;
-  let lastStateUpdateArg: any;
-  let vdom: any;
+const activeMounts: MountResult[] = [];
 
-  function EffectHarness() {
-    if (internals?.H) {
-      const origUseEffect = internals.H.useEffect;
-      internals.H.useEffect = (create: any, deps: any) => {
-        if (origUseEffect) origUseEffect(create, deps);
-        const res = create();
-        if (typeof res === 'function') {
-          cleanup = res;
-        }
-      };
-
-      const origUseState = internals.H.useState;
-      if (options?.mockRemainingMs !== undefined) {
-        internals.H.useState = (_initial: any) => {
-          return [options.mockRemainingMs, (arg: any) => { lastStateUpdateArg = arg; }];
-        };
-      } else if (typeof origUseState === 'function') {
-        internals.H.useState = (initial: any) => {
-          const [val, setter] = origUseState(initial);
-          const wrappedSetter = (arg: any) => {
-            lastStateUpdateArg = arg;
-            return setter(arg);
-          };
-          return [val, wrappedSetter];
-        };
-      }
-    }
-    vdom = element;
-    return vdom;
-  }
-
-  const html = renderToStaticMarkup(React.createElement(EffectHarness));
-  return {
-    html,
-    vdom,
-    cleanup,
-    getLastStateUpdateArg: () => lastStateUpdateArg,
+function mountComponent(element: React.ReactElement): MountResult {
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  const root: Root = createRoot(container);
+  act(() => {
+    root.render(element);
+  });
+  const res: MountResult = {
+    container,
+    unmount: () => {
+      act(() => {
+        root.unmount();
+      });
+      container.remove();
+    },
   };
+  activeMounts.push(res);
+  return res;
+}
+
+function applyDeltaTest(delta: Partial<DeltaPayload>): void {
+  applyDelta({
+    tick: 1,
+    cells: [],
+    ...delta,
+  });
 }
 
 describe('[IMP-229][Trạm 1 RED] Compulsory Buyout Modal Collision & Clock Skew Contract Suite', () => {
-  const sampleBuyoutSession = {
+  const sampleBuyoutSession: PendingBuyoutSession = {
     buyerId: 'player_alpha',
     sellerId: 'player_beta',
     cellIndex: 6, // Hải Phòng
@@ -96,8 +68,10 @@ describe('[IMP-229][Trạm 1 RED] Compulsory Buyout Modal Collision & Clock Skew
     expiresAt: 1790000015000,
   };
 
-  const sampleEventCardPayload = {
-    cardType: 'chance' as const,
+  const sampleEventCardPayload: EventCardInfo = {
+    id: 'CC_SWAP_PROJECT',
+    type: 'Chance',
+    cardType: 'chance',
     cardId: 'CC_SWAP_PROJECT',
     title: 'Mua Lại Dự Án Tiềm Năng',
     description: 'Nhận quyền thu hồi và mua lại 01 BĐS của đối thủ với giá đền bù 130%.',
@@ -110,13 +84,6 @@ describe('[IMP-229][Trạm 1 RED] Compulsory Buyout Modal Collision & Clock Skew
 
   beforeEach(() => {
     vi.restoreAllMocks();
-
-    if (typeof globalThis.window === 'undefined') {
-      (globalThis as any).window = {
-        addEventListener: vi.fn(),
-        removeEventListener: vi.fn(),
-      };
-    }
 
     useLobbyStore.setState({
       myPlayerId: 'player_alpha',
@@ -139,7 +106,7 @@ describe('[IMP-229][Trạm 1 RED] Compulsory Buyout Modal Collision & Clock Skew
           mortgagedProperties: [],
           isBot: false,
           bankrupt: false,
-        } as any,
+        },
         player_beta: {
           id: 'player_beta',
           name: 'Đại Gia Phố Cổ',
@@ -149,13 +116,17 @@ describe('[IMP-229][Trạm 1 RED] Compulsory Buyout Modal Collision & Clock Skew
           mortgagedProperties: [],
           isBot: false,
           bankrupt: false,
-        } as any,
+        },
       },
     });
   });
 
   afterEach(() => {
+    while (activeMounts.length > 0) {
+      activeMounts.pop()?.unmount();
+    }
     vi.restoreAllMocks();
+    vi.useRealTimers();
   });
 
   // =========================================================================
@@ -169,10 +140,10 @@ describe('[IMP-229][Trạm 1 RED] Compulsory Buyout Modal Collision & Clock Skew
         isRolling: true,
       });
 
-      applyDelta({
+      applyDeltaTest({
         pendingBuyout: sampleBuyoutSession,
         lastEventCard: sampleEventCardPayload,
-      } as any);
+      });
 
       expect(useGameStore.getState().activeModal).toBe('event');
       expect(useGameStore.getState().activeModal).not.toBe('compulsory_buyout');
@@ -185,10 +156,10 @@ describe('[IMP-229][Trạm 1 RED] Compulsory Buyout Modal Collision & Clock Skew
         isRolling: true,
       });
 
-      applyDelta({
+      applyDeltaTest({
         pendingBuyout: sampleBuyoutSession,
         lastEventCard: sampleEventCardPayload,
-      } as any);
+      });
 
       const storedBuyout = useGameStore.getState().pendingBuyout;
       expect(storedBuyout).not.toBeNull();
@@ -203,17 +174,14 @@ describe('[IMP-229][Trạm 1 RED] Compulsory Buyout Modal Collision & Clock Skew
         pendingBuyout: sampleBuyoutSession,
       });
 
-      let hostVNode: any;
-      function TestHostWrapper() {
-        hostVNode = ModalHost({});
-        return hostVNode;
-      }
-      renderToStaticMarkup(React.createElement(TestHostWrapper));
+      const mounted = mountComponent(React.createElement(ModalHost));
 
-      const eventCardNode = findVNode(hostVNode, (n) => n?.type === EventCardModal);
-      expect(eventCardNode).not.toBeNull();
+      const confirmBtn = mounted.container.querySelector('button[data-testid="event-card-confirm-btn"]');
+      expect(confirmBtn).not.toBeNull();
 
-      eventCardNode.props.onConfirm();
+      act(() => {
+        confirmBtn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      });
 
       expect(useGameStore.getState().activeModal).toBe('compulsory_buyout');
       expect(useGameStore.getState().modalPayload).toEqual(sampleBuyoutSession);
@@ -226,15 +194,14 @@ describe('[IMP-229][Trạm 1 RED] Compulsory Buyout Modal Collision & Clock Skew
         pendingBuyout: sampleBuyoutSession,
       });
 
-      let hostVNode: any;
-      function TestHostWrapper() {
-        hostVNode = ModalHost({});
-        return hostVNode;
-      }
-      renderToStaticMarkup(React.createElement(TestHostWrapper));
+      const mounted = mountComponent(React.createElement(ModalHost));
 
-      expect(hostVNode?.props?.onClose).toBeDefined();
-      hostVNode.props.onClose();
+      const closeBtn = mounted.container.querySelector('button[aria-label="Đóng thẻ sự kiện"]');
+      expect(closeBtn).not.toBeNull();
+
+      act(() => {
+        closeBtn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      });
 
       expect(useGameStore.getState().activeModal).toBe('compulsory_buyout');
       expect(useGameStore.getState().modalPayload).toEqual(sampleBuyoutSession);
@@ -247,7 +214,7 @@ describe('[IMP-229][Trạm 1 RED] Compulsory Buyout Modal Collision & Clock Skew
   describe('Facet 2: Phòng Vệ Lệch Đồng Hồ & Đếm Ngược Tương Đối (Clock Skew Resilience)', () => {
     it('[TC-229.05/MSS][UC-IMP229][Facet-2/ClockSkewFallbackTo15s] Khi expiresAt <= Date.now() (lệch giờ máy tính so với server), CompulsoryBuyoutModal tự động fallback về 15.000ms (15s), không bị hiển thị 0s hay đóng tức thì', () => {
       const pastExpiresAt = Date.now() - 5000; // Client clock is 5 seconds behind server
-      const html = renderToStaticMarkup(
+      const mounted = mountComponent(
         React.createElement(CompulsoryBuyoutModal, {
           buyerId: 'player_alpha',
           sellerId: 'player_beta',
@@ -260,18 +227,14 @@ describe('[IMP-229][Trạm 1 RED] Compulsory Buyout Modal Collision & Clock Skew
         })
       );
 
-      expect(html).toContain('15s');
-      expect(html).not.toContain('>0s<');
+      const timerEl = mounted.container.querySelector('[data-testid="buyout-timer"]');
+      expect(timerEl?.textContent).toContain('15s');
+      expect(timerEl?.textContent).not.toContain('0s');
     });
 
     it('[TC-229.06/MSS][UC-IMP229][Facet-2/RelativeTickDecrement] Đếm ngược tương đối giảm chính xác theo nhịp timer mà không phụ thuộc vào Date.now() (dùng vi.useFakeTimers())', () => {
-      let tickFn: (() => void) | undefined;
-      const setIntervalSpy = vi.spyOn(globalThis, 'setInterval').mockImplementation(((fn: any) => {
-        tickFn = fn;
-        return 888 as any;
-      }) as any);
-
-      const harness = renderWithEffects(
+      vi.useFakeTimers();
+      const mounted = mountComponent(
         React.createElement(CompulsoryBuyoutModal, {
           buyerId: 'player_alpha',
           sellerId: 'player_beta',
@@ -284,26 +247,21 @@ describe('[IMP-229][Trạm 1 RED] Compulsory Buyout Modal Collision & Clock Skew
         })
       );
 
-      setIntervalSpy.mockRestore();
+      const timerEl = mounted.container.querySelector('[data-testid="buyout-timer"]');
+      expect(timerEl?.textContent).toContain('15s');
 
-      expect(typeof tickFn).toBe('function');
-      tickFn?.();
+      act(() => {
+        vi.advanceTimersByTime(1100);
+      });
 
-      const lastArg = harness.getLastStateUpdateArg();
-      expect(typeof lastArg).toBe('function');
-      expect(lastArg(15000)).toBe(14900);
+      expect(timerEl?.textContent).toContain('14s');
     });
 
     it('[TC-229.07/MSS][UC-IMP229][Facet-2/ZeroAutoDeclineOnZero] Khi timer đếm về 0ms, onDecline TUYỆT ĐỐI KHÔNG được gọi (spy onDecline có toHaveBeenCalledTimes(0))', () => {
+      vi.useFakeTimers();
       const onDeclineSpy = vi.fn();
-      let tickFn: (() => void) | undefined;
 
-      const setIntervalSpy = vi.spyOn(globalThis, 'setInterval').mockImplementation(((fn: any) => {
-        tickFn = fn;
-        return 999 as any;
-      }) as any);
-
-      renderWithEffects(
+      mountComponent(
         React.createElement(CompulsoryBuyoutModal, {
           buyerId: 'player_alpha',
           sellerId: 'player_beta',
@@ -316,10 +274,9 @@ describe('[IMP-229][Trạm 1 RED] Compulsory Buyout Modal Collision & Clock Skew
         })
       );
 
-      setIntervalSpy.mockRestore();
-
-      expect(typeof tickFn).toBe('function');
-      tickFn?.();
+      act(() => {
+        vi.advanceTimersByTime(16000);
+      });
 
       expect(onDeclineSpy).toHaveBeenCalledTimes(0);
     });
@@ -333,9 +290,9 @@ describe('[IMP-229][Trạm 1 RED] Compulsory Buyout Modal Collision & Clock Skew
       useLobbyStore.setState({ myPlayerId: 'player_gamma' });
       useGameStore.setState({ activeModal: null });
 
-      applyDelta({
+      applyDeltaTest({
         pendingBuyout: sampleBuyoutSession,
-      } as any);
+      });
 
       expect(useGameStore.getState().activeModal).toBeNull();
     });
@@ -348,17 +305,19 @@ describe('[IMP-229][Trạm 1 RED] Compulsory Buyout Modal Collision & Clock Skew
         lastEventCard: null,
       });
 
-      applyDelta({
+      applyDeltaTest({
         pendingBuyout: sampleBuyoutSession,
-      } as any);
+      });
 
       expect(useGameStore.getState().activeModal).toBe('compulsory_buyout');
       expect(useGameStore.getState().modalPayload).toEqual(sampleBuyoutSession);
     });
 
     it('[TC-229.10/MSS][UC-IMP229][Facet-3/StandardEventModalClosesNormally] Thẻ sự kiện thông thường không có pendingBuyout đóng bình thường mà không mở modal nào khác', () => {
-      const standardMarketCard = {
-        cardType: 'market' as const,
+      const standardMarketCard: EventCardInfo = {
+        id: 'MC_BOOM_TIMES',
+        type: 'Market',
+        cardType: 'market',
         cardId: 'MC_BOOM_TIMES',
         title: 'Thị Trường Bùng Nổ',
         description: 'Giá đất toàn thị trường tăng trưởng mạnh.',
@@ -370,17 +329,14 @@ describe('[IMP-229][Trạm 1 RED] Compulsory Buyout Modal Collision & Clock Skew
         pendingBuyout: null,
       });
 
-      let hostVNode: any;
-      function TestHostWrapper() {
-        hostVNode = ModalHost({});
-        return hostVNode;
-      }
-      renderToStaticMarkup(React.createElement(TestHostWrapper));
+      const mounted = mountComponent(React.createElement(ModalHost));
 
-      const eventCardNode = findVNode(hostVNode, (n) => n?.type === EventCardModal);
-      expect(eventCardNode).not.toBeNull();
+      const confirmBtn = mounted.container.querySelector('button[data-testid="event-card-confirm-btn"]');
+      expect(confirmBtn).not.toBeNull();
 
-      eventCardNode.props.onConfirm();
+      act(() => {
+        confirmBtn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      });
 
       expect(useGameStore.getState().activeModal).toBeNull();
       expect(useGameStore.getState().modalPayload).toBeNull();
@@ -398,9 +354,9 @@ describe('[IMP-229][Trạm 1 RED] Compulsory Buyout Modal Collision & Clock Skew
         pendingBuyout: sampleBuyoutSession,
       });
 
-      applyDelta({
+      applyDeltaTest({
         pendingBuyout: null,
-      } as any);
+      });
 
       expect(useGameStore.getState().activeModal).toBeNull();
       expect(useGameStore.getState().pendingBuyout).toBeNull();
@@ -409,7 +365,7 @@ describe('[IMP-229][Trạm 1 RED] Compulsory Buyout Modal Collision & Clock Skew
     it('[TC-229.12/MSS][UC-IMP229][Facet-4/UnmountClearsInterval] Component CompulsoryBuyoutModal unmount dọn sạch clearInterval (zero timer leak)', () => {
       const clearIntervalSpy = vi.spyOn(globalThis, 'clearInterval');
 
-      const harness = renderWithEffects(
+      const mounted = mountComponent(
         React.createElement(CompulsoryBuyoutModal, {
           buyerId: 'player_alpha',
           sellerId: 'player_beta',
@@ -422,17 +378,14 @@ describe('[IMP-229][Trạm 1 RED] Compulsory Buyout Modal Collision & Clock Skew
         })
       );
 
-      expect(typeof harness.cleanup).toBe('function');
-      harness.cleanup?.();
+      mounted.unmount();
       expect(clearIntervalSpy).toHaveBeenCalled();
     });
 
     it('[TC-229.13/MSS][UC-IMP229][Facet-4/ManualDeclineEmitsIntent] Khi người chơi bấm "✕ Từ Chối Mua", onDecline được gọi đúng 1 lần', () => {
       const onDeclineSpy = vi.fn();
-      let vdom: any;
-
-      function TestWrapper() {
-        vdom = CompulsoryBuyoutModal({
+      const mounted = mountComponent(
+        React.createElement(CompulsoryBuyoutModal, {
           buyerId: 'player_alpha',
           sellerId: 'player_beta',
           cellIndex: 6,
@@ -441,14 +394,15 @@ describe('[IMP-229][Trạm 1 RED] Compulsory Buyout Modal Collision & Clock Skew
           expiresAt: Date.now() + 15000,
           onBuyout: vi.fn(),
           onDecline: onDeclineSpy,
-        });
-        return vdom;
-      }
-      renderToStaticMarkup(React.createElement(TestWrapper));
+        })
+      );
 
-      const declineBtn = findVNode(vdom, (n) => n?.props?.['data-testid'] === 'buyout-decline-btn');
+      const declineBtn = mounted.container.querySelector('button[data-testid="buyout-decline-btn"]');
       expect(declineBtn).not.toBeNull();
-      declineBtn.props.onClick();
+
+      act(() => {
+        declineBtn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      });
 
       expect(onDeclineSpy).toHaveBeenCalledTimes(1);
     });
@@ -460,10 +414,8 @@ describe('[IMP-229][Trạm 1 RED] Compulsory Buyout Modal Collision & Clock Skew
   describe('Facet 5: Khả Năng Mua & Bảo Toàn Giao Diện (Commercial Affordance & UI)', () => {
     it('[TC-229.14/MSS][UC-IMP229][Facet-5/ManualBuyoutEmitsIntent] Khi người chơi đủ tiền bấm "Mua Lại", onBuyout được gọi với đúng cellIndex', () => {
       const onBuyoutSpy = vi.fn();
-      let vdom: any;
-
-      function TestWrapper() {
-        vdom = CompulsoryBuyoutModal({
+      const mounted = mountComponent(
+        React.createElement(CompulsoryBuyoutModal, {
           buyerId: 'player_alpha',
           sellerId: 'player_beta',
           cellIndex: 6,
@@ -472,24 +424,24 @@ describe('[IMP-229][Trạm 1 RED] Compulsory Buyout Modal Collision & Clock Skew
           expiresAt: Date.now() + 15000,
           onBuyout: onBuyoutSpy,
           onDecline: vi.fn(),
-        });
-        return vdom;
-      }
-      renderToStaticMarkup(React.createElement(TestWrapper));
+        })
+      );
 
-      const confirmBtn = findVNode(vdom, (n) => n?.props?.['data-testid'] === 'buyout-confirm-btn');
+      const confirmBtn = mounted.container.querySelector('button[data-testid="buyout-confirm-btn"]');
       expect(confirmBtn).not.toBeNull();
-      confirmBtn.props.onClick();
+
+      act(() => {
+        confirmBtn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      });
 
       expect(onBuyoutSpy).toHaveBeenCalledTimes(1);
       expect(onBuyoutSpy).toHaveBeenCalledWith(6);
     });
 
     it('[TC-229.15/MSS][UC-IMP229][Facet-5/BuyoutDisabledOnTimeExpiry] Khi remainingMs <= 0, nút Mua Lại bị disabled và chuyển nhãn thành "Hết Thời Gian Mua"', () => {
-      let vdom: any;
-
-      function TestWrapper() {
-        vdom = CompulsoryBuyoutModal({
+      vi.useFakeTimers();
+      const mounted = mountComponent(
+        React.createElement(CompulsoryBuyoutModal, {
           buyerId: 'player_alpha',
           sellerId: 'player_beta',
           cellIndex: 6,
@@ -498,16 +450,17 @@ describe('[IMP-229][Trạm 1 RED] Compulsory Buyout Modal Collision & Clock Skew
           expiresAt: Date.now() + 15000,
           onBuyout: vi.fn(),
           onDecline: vi.fn(),
-        });
-        return vdom;
-      }
+        })
+      );
 
-      const harness = renderWithEffects(React.createElement(TestWrapper), { mockRemainingMs: 0 });
+      act(() => {
+        vi.advanceTimersByTime(15500);
+      });
 
-      const confirmBtn = findVNode(vdom, (n) => n?.props?.['data-testid'] === 'buyout-confirm-btn');
+      const confirmBtn = mounted.container.querySelector('button[data-testid="buyout-confirm-btn"]');
       expect(confirmBtn).not.toBeNull();
-      expect(confirmBtn.props.disabled).toBe(true);
-      expect(harness.html).toContain('Hết Thời Gian Mua');
+      expect(confirmBtn?.hasAttribute('disabled')).toBe(true);
+      expect(confirmBtn?.textContent).toContain('Hết Thời Gian Mua');
     });
 
     it('[TC-229.16/MSS][UC-IMP229][Facet-5/ShortfallNoticeIntegrity] Khi người chơi thiếu tiền, hiển thị đầy đủ thông báo thiếu tiền và vô hiệu hóa nút mua', () => {
@@ -517,18 +470,21 @@ describe('[IMP-229][Trạm 1 RED] Compulsory Buyout Modal Collision & Clock Skew
             id: 'player_alpha',
             name: 'Chủ Tịch Hải Phòng',
             balance: 500, // Shortfall: 1300 - 500 = 800
-          } as any,
+            tokenColor: '#38BDF8',
+            ownedProperties: [],
+          },
           player_beta: {
             id: 'player_beta',
             name: 'Đại Gia Phố Cổ',
             balance: 20000,
-          } as any,
+            tokenColor: '#10B981',
+            ownedProperties: [6],
+          },
         },
       });
 
-      let vdom: any;
-      function TestWrapper() {
-        vdom = CompulsoryBuyoutModal({
+      const mounted = mountComponent(
+        React.createElement(CompulsoryBuyoutModal, {
           buyerId: 'player_alpha',
           sellerId: 'player_beta',
           cellIndex: 6,
@@ -537,17 +493,16 @@ describe('[IMP-229][Trạm 1 RED] Compulsory Buyout Modal Collision & Clock Skew
           expiresAt: Date.now() + 15000,
           onBuyout: vi.fn(),
           onDecline: vi.fn(),
-        });
-        return vdom;
-      }
-      const html = renderToStaticMarkup(React.createElement(TestWrapper));
+        })
+      );
 
-      const confirmBtn = findVNode(vdom, (n) => n?.props?.['data-testid'] === 'buyout-confirm-btn');
+      const confirmBtn = mounted.container.querySelector('button[data-testid="buyout-confirm-btn"]');
       expect(confirmBtn).not.toBeNull();
-      expect(confirmBtn.props.disabled).toBe(true);
+      expect(confirmBtn?.hasAttribute('disabled')).toBe(true);
 
-      expect(html).toContain('data-testid="buyout-shortfall-notice"');
-      expect(html).toContain('Thiếu: 800');
+      const shortfallNotice = mounted.container.querySelector('[data-testid="buyout-shortfall-notice"]');
+      expect(shortfallNotice).not.toBeNull();
+      expect(shortfallNotice?.textContent).toContain('Thiếu: 800');
     });
   });
 });

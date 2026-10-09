@@ -30,12 +30,13 @@ Inspect the following Single Source of Truth (SSOT) files before auditing:
    - **Context Inspection**: Never inspect diff hunks in isolation; read 20-30 lines before and after every modification to detect caller mismatch, state leakage, or broken invariants.
    - **Real Bug & Regression Hunt**: Target edge-case boundary errors, off-by-one arithmetic, concurrency/async race hazards, and unintended breakage of legacy contracts.
    - **Pattern Reuse & DRY/KISS**: Prioritize existing enums, domain entities, and data structures. Eliminate redundancy without creating speculative shared abstractions.
-   - **Runtime Wire Gate (Universal Anti-Orphan Mutation Rule)**:
+   - **Runtime Wire Gate (Universal Anti-Orphan Mutation & Presentation Wire Rule)**:
      - In layered, event-driven, or client-server systems, trace the complete call chain from Entry Point to Domain Logic.
      - Every new or modified public business mutation method in a Domain Service, Manager, Aggregate, or Repository MUST be wired to an active invocation path:
        - Web/API: Mapped to a Route / Controller / Resolver.
        - Event/FSM: Mapped to an Event / Intent Dispatcher / FSM Transition.
        - CLI/Desktop: Mapped to a Command / Handler.
+     - In UI/3D/Client systems, any new capability, parameter, or calculation branch MUST be actively passed by the presentation component or render loop (`useFrame`, top-level hooks). If new options exist only in unit tests but are omitted by the live caller, flag as **[BLOCKER] Unwired Presentation Seam (Dead Code)**.
      - If a domain mutation function exists without an active invocation path, it is an **Orphan Mutation** (Dead Code or Unwired Feature causing runtime deadlock) ➔ **MANDATORY REJECT**.
    - **Zero Magic String & Strict Domain Enum**: Forbid loose `string` typing or string literal comparisons for lifecycle, FSM, or domain category fields. Must strictly use domain enums across DTOs, stores, and props.
    - **Transient UI Opt-In Default Guard**: Ephemeral feedback components (badges, toasts, chips) must default visibility flags to `false` (opt-in), never `true` (opt-out), preventing premature or ghost renders.

@@ -213,21 +213,14 @@ export function resolveTransactionNarrative(
       detail = isPositive ? (cellName ? `(Chuyển nhượng ${cellName})` : '(Bồi hoàn M&A)') : (cellName ? `(${cellName})` : '(Thâu tóm M&A)');
       break;
     case 'auction_win': {
-      category = 'ĐẤU GIÁ BẤT ĐỘNG SẢN';
-      verb = 'nộp';
-      target = 'vào Kho Bạc';
-      let aucProp = cellName;
-      if (item.title && item.title.includes('Thắng đấu giá')) {
-        const m = item.title.match(/Thắng\s+đấu\s+giá\s+(.+?)(?:\s*➔|$)/i);
-        if (m && m[1]) aucProp = m[1].trim();
-      }
+      category = 'ĐẤU GIÁ BẤT ĐỘNG SẢN'; verb = 'nộp'; target = 'vào Kho Bạc';
+      const m = item.title?.match(/Thắng\s+đấu\s+giá\s+(.+?)(?:\s*➔|$)/i);
+      const aucProp = (m && m[1]) ? m[1].trim() : cellName;
       detail = aucProp ? `(Trúng đấu giá ${aucProp})` : '(Trúng đấu giá)';
       break;
     }
     case 'tax': {
-      category = 'KHO BẠC NHÀ NƯỚC';
-      verb = 'nộp';
-      target = 'vào Kho Bạc';
+      category = 'KHO BẠC NHÀ NƯỚC'; verb = 'nộp'; target = 'vào Kho Bạc';
       const cleanTax = item.title ? item.title.replace(/^Nộp\s+/i, '').replace(/\s*➔\s*(?:Vào\s+)?Kho\s+Bạc/i, '').trim() : '';
       detail = cleanTax ? `(${cleanTax})` : '(Nộp thuế)';
       break;
@@ -237,20 +230,14 @@ export function resolveTransactionNarrative(
     case 'mortgage': category = 'TÍN DỤNG NGÂN HÀNG'; verb = 'vay'; target = 'từ Ngân Hàng'; detail = cellName ? `(Thế chấp ${cellName})` : '(Thế chấp BĐS)'; break;
     case 'unmortgage': category = 'GIẢI CHẤP BẤT ĐỘNG SẢN'; verb = 'trả'; target = `giải chấp ${cellName || 'BĐS'}`; detail = '(Phí 10% ➔ Kho Bạc)'; break;
     case 'buy':
-      category = 'MUA ĐẤT ĐẦU TƯ';
-      verb = 'thanh toán';
-      if (!cellName && item.title) {
-        cellName = item.title.replace(/^Mua(?:\s+sở\s+hữu|\s+quyền\s+sử\s+dụng\s+đất:?|\s+đất|\s+BĐS)?(?:\s+|$)/i, '').trim();
-      }
+      category = 'MUA ĐẤT ĐẦU TƯ'; verb = 'thanh toán';
+      if (!cellName && item.title) cellName = item.title.replace(/^Mua(?:\s+sở\s+hữu|\s+quyền\s+sử\s+dụng\s+đất:?|\s+đất|\s+BĐS)?(?:\s+|$)/i, '').trim();
       target = `mua sở hữu ${cellName || 'BĐS'}`;
       break;
     case 'upgrade': {
-      category = 'NÂNG CẤP CÔNG TRÌNH';
-      verb = 'thanh toán';
+      category = 'NÂNG CẤP CÔNG TRÌNH'; verb = 'thanh toán';
       if (!cellName && item.title) {
-        cellName = item.title.replace(/^Nâng\s+(?:cấp\s+)?/i, '')
-          .replace(/(C[1-3]|\((?:Nhà Phố|Khách Sạn|Biệt Thự)\)|Nhà Phố|Khách Sạn|Biệt Thự)/gi, '')
-          .replace(/^(?:tại|ở)\s+/i, '').trim();
+        cellName = item.title.replace(/^Nâng\s+(?:cấp\s+)?/i, '').replace(/(C[1-3]|\((?:Nhà Phố|Khách Sạn|Biệt Thự)\)|Nhà Phố|Khách Sạn|Biệt Thự)/gi, '').replace(/^(?:tại|ở)\s+/i, '').trim();
       }
       const levelStr = item.title?.match(/(C[1-3]|Nhà Phố|Khách Sạn|Biệt Thự)/i)?.[0];
       target = `nâng cấp nhà ${cellName || 'công trình'}`;
@@ -259,10 +246,8 @@ export function resolveTransactionNarrative(
     }
     case 'salary': category = 'LƯƠNG KHỞI HÀNH'; verb = 'nhận'; target = 'tiền lương qua ô Khởi Hành'; break;
     case 'hose':
-      category = 'THỊ TRƯỜNG CHỨNG KHOÁN';
-      verb = isPositive ? 'nhận cổ tức' : 'đầu tư cổ phiếu';
-      target = isPositive ? 'từ sàn HOSE' : 'vào sàn HOSE';
-      detail = item.title ? `(${item.title})` : undefined;
+      category = 'THỊ TRƯỜNG CHỨNG KHOÁN'; verb = isPositive ? 'nhận cổ tức' : 'đầu tư cổ phiếu';
+      target = isPositive ? 'từ sàn HOSE' : 'vào sàn HOSE'; detail = item.title ? `(${item.title})` : undefined;
       break;
     case 'stimulus': category = 'TRỢ CẤP QUỸ KHO BẠC'; verb = 'nhận'; target = 'từ Quỹ Kho Bạc'; detail = item.title ? `(${item.title})` : undefined; break;
     case 'teleport': category = 'DỊCH CHUYỂN BẾN BÃI'; verb = 'thanh toán'; target = 'vé dịch chuyển'; detail = item.title ? `(${item.title})` : undefined; break;

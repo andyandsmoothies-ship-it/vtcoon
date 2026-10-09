@@ -166,30 +166,8 @@ describe('[CONTRACT] IMP-264 P2P Trade Idempotency & Watchdog Resilience Suite',
       activePawnAnimation: null,
       pawnAnimationQueue: [],
       playersInfo: {
-        p1: {
-          id: 'p1',
-          name: 'Player 1',
-          balance: 20000,
-          tokenColor: '#38BDF8',
-          ownedProperties: [1],
-          mortgagedProperties: [],
-          mortgageLoans: {},
-          isBot: false,
-          bankrupt: false,
-          inAudit: false,
-        },
-        bot1: {
-          id: 'bot1',
-          name: 'Bot Tấn Công',
-          balance: 30000,
-          tokenColor: '#F59E0B',
-          ownedProperties: [3],
-          mortgagedProperties: [],
-          mortgageLoans: {},
-          isBot: true,
-          bankrupt: false,
-          inAudit: false,
-        },
+        p1: { id: 'p1', name: 'Player 1', balance: 20000, tokenColor: '#38BDF8', ownedProperties: [1], mortgagedProperties: [], mortgageLoans: {}, isBot: false, bankrupt: false, inAudit: false },
+        bot1: { id: 'bot1', name: 'Bot Tấn Công', balance: 30000, tokenColor: '#F59E0B', ownedProperties: [3], mortgagedProperties: [], mortgageLoans: {}, isBot: true, bankrupt: false, inAudit: false },
       },
     });
     useTelemetryStore.setState({ violations: [] });
@@ -289,16 +267,7 @@ describe('[CONTRACT] IMP-264 P2P Trade Idempotency & Watchdog Resilience Suite',
     it('[TC-264.08][UC-COORD-001/MSS] coordRespondTradeOffer: Trả về success: true và idempotent: true khi intent gửi trùng lặp hợp lệ từ cùng người chơi', () => {
       const { ctx, room, seller } = setupCoordinatorContext();
       const session = pendingTradeManager.createSession(room.roomCode, 'p2_buyer', seller.id, 1, 800, 1000);
-      room.pendingTradeOffer = {
-        offerId: session.offerId,
-        sellerId: seller.id,
-        buyerId: 'p2_buyer',
-        cellIndex: 1,
-        price: 800,
-        expiresAt: session.expiresAt,
-        requesterId: 'p2_buyer',
-        targetPlayerId: seller.id,
-      };
+      room.pendingTradeOffer = { offerId: session.offerId, sellerId: seller.id, buyerId: 'p2_buyer', cellIndex: 1, price: 800, expiresAt: session.expiresAt, requesterId: 'p2_buyer', targetPlayerId: seller.id };
 
       const firstRes = coordRespondTradeOffer(ctx, seller.id, session.offerId, true);
       expect(firstRes.success).toBe(true);
@@ -312,16 +281,7 @@ describe('[CONTRACT] IMP-264 P2P Trade Idempotency & Watchdog Resilience Suite',
     it('[TC-264.09][UC-COORD-001/A1] coordRespondTradeOffer: Trả về OFFER_ALREADY_RESOLVED khi quyết định gửi lại trái ngược với quyết định đã chốt', () => {
       const { ctx, room, seller } = setupCoordinatorContext();
       const session = pendingTradeManager.createSession(room.roomCode, 'p2_buyer', seller.id, 1, 800, 1000);
-      room.pendingTradeOffer = {
-        offerId: session.offerId,
-        sellerId: seller.id,
-        buyerId: 'p2_buyer',
-        cellIndex: 1,
-        price: 800,
-        expiresAt: session.expiresAt,
-        requesterId: 'p2_buyer',
-        targetPlayerId: seller.id,
-      };
+      room.pendingTradeOffer = { offerId: session.offerId, sellerId: seller.id, buyerId: 'p2_buyer', cellIndex: 1, price: 800, expiresAt: session.expiresAt, requesterId: 'p2_buyer', targetPlayerId: seller.id };
 
       coordRespondTradeOffer(ctx, seller.id, session.offerId, true);
       const secondRes = coordRespondTradeOffer(ctx, seller.id, session.offerId, false);
@@ -333,16 +293,7 @@ describe('[CONTRACT] IMP-264 P2P Trade Idempotency & Watchdog Resilience Suite',
     it('[TC-264.10][UC-COORD-001/A2] coordRespondTradeOffer: Trả về INVALID_OFFER_ID khi người chơi khác hoặc phòng khác gửi lại offerId đã resolve', () => {
       const { ctx, room, seller } = setupCoordinatorContext();
       const session = pendingTradeManager.createSession(room.roomCode, 'p2_buyer', seller.id, 1, 800, 1000);
-      room.pendingTradeOffer = {
-        offerId: session.offerId,
-        sellerId: seller.id,
-        buyerId: 'p2_buyer',
-        cellIndex: 1,
-        price: 800,
-        expiresAt: session.expiresAt,
-        requesterId: 'p2_buyer',
-        targetPlayerId: seller.id,
-      };
+      room.pendingTradeOffer = { offerId: session.offerId, sellerId: seller.id, buyerId: 'p2_buyer', cellIndex: 1, price: 800, expiresAt: session.expiresAt, requesterId: 'p2_buyer', targetPlayerId: seller.id };
 
       coordRespondTradeOffer(ctx, seller.id, session.offerId, true);
       const intruderRes = coordRespondTradeOffer(ctx, 'p3_intruder', session.offerId, true);
@@ -380,16 +331,8 @@ describe('[CONTRACT] IMP-264 P2P Trade Idempotency & Watchdog Resilience Suite',
       });
 
       const deps: IntentHandlerDeps = {
-        rooms,
-        intentGuard,
-        intentMutex,
-        broadcaster,
-        adminManager,
-        sockets,
-        sendSafe: vi.fn(),
-        bindSocket: vi.fn(),
-        scheduleBotTurn: vi.fn(),
-        broadcastGameOver: vi.fn(),
+        rooms, intentGuard, intentMutex, broadcaster, adminManager, sockets,
+        sendSafe: vi.fn(), bindSocket: vi.fn(), scheduleBotTurn: vi.fn(), broadcastGameOver: vi.fn(),
       };
 
       vi.spyOn(lobbyHandlers, 'isSocketOwner').mockReturnValue(true);
@@ -401,14 +344,8 @@ describe('[CONTRACT] IMP-264 P2P Trade Idempotency & Watchdog Resilience Suite',
 
       const fakeSocket = {} as WebSocket;
       const msg: Extract<WsClientMessage, { type: 'INTENT' }> = {
-        type: 'INTENT',
-        roomCode: 'ROOM_WSS',
-        playerId: 'p1_seller',
-        intent: {
-          type: 'INTENT_RESPOND_TRADE_OFFER',
-          offerId: 'trade_resolved_id',
-          accept: true,
-        },
+        type: 'INTENT', roomCode: 'ROOM_WSS', playerId: 'p1_seller',
+        intent: { type: 'INTENT_RESPOND_TRADE_OFFER', offerId: 'trade_resolved_id', accept: true },
       };
 
       await handleIntentMsg(deps, fakeSocket, msg);

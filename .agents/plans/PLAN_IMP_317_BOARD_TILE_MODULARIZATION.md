@@ -1,0 +1,196 @@
+# Kế hoạch Tinh gọn & Bóc tách Mô-đun: Board Tile 3D Ownership Marker (IMP-317)
+
+## 1. Bối cảnh & Mục tiêu Kỹ thuật
+- **Tệp mục tiêu**: `src/client/3d/board_tile.tsx` (Tier 2, hiện tại 453 LOC, ngân sách <= 500 LOC).
+- **Vấn đề**: Tệp này chứa mã nguồn render ô cờ 3D (`LayeredDioramaTile`), cấu hình Standee 2.5D (`StandeeBillboard`), và toàn bộ cấu trúc cọc cờ sở hữu vật lý 3D Totem Pillar / Mascot Crest Shield / Flag Cloth / Billboard Pin (`OwnershipMarkerInstances`, `SafeBillboard`).
+- **Mục tiêu**: Bóc tách toàn bộ thành phần `OwnershipMarkerInstances`, `SafeBillboard`, và kiểu dữ liệu `OwnershipMarkerInstancesProps` sang mô-đun chuyên biệt `src/client/3d/board_tile_ownership_marker.tsx` (~135 LOC), re-export lại từ `board_tile.tsx` để bảo toàn tương thích ngược 100%. Đưa `src/client/3d/board_tile.tsx` xuống ~325 LOC (giảm ~128 dòng, nằm sâu trong vùng an toàn <= 500 LOC).
+
+## 2. Phạm vi Trực tiếp (Direct Scope)
+- `src/client/3d/board_tile.tsx`: Chuyển giao `SafeBillboard`, `OwnershipMarkerInstances`, và `OwnershipMarkerInstancesProps` sang mô-đun mới, re-export để giữ vững hợp đồng kiểm thử.
+- `src/client/3d/board_tile_ownership_marker.tsx`: Mô-đun mới tiếp nhận `SafeBillboard`, `OwnershipMarkerInstancesProps`, `OwnershipMarkerInstances`.
+- `tests/client/board_tile_ownership_marker.test.ts`: Bộ test hợp đồng sống động mới kiểm thử 100% các nhánh hành vi của `SafeBillboard` và `OwnershipMarkerInstances`.
+
+## 3. Danh sách Phụ thuộc Kế thừa (Baseline Dependencies)
+Các tệp đã được tạo hoặc sửa đổi từ các đợt tối ưu hóa trước (IMP-291 đến IMP-316), cần được bảo lưu trạng thái:
+- `.agents/agents/adversarial-challenger.md`
+- `.agents/agents/code-reviewer.md`
+- `.agents/agents/implementer.md`
+- `.agents/agents/qa-tester.md`
+- `.agents/agents/scout.md`
+- `GEMINI.md`
+- `docs/domain/gotchas/3d_cinematics.md`
+- `scripts/audit_plan.mjs`
+- `scripts/audit_plan_rules.mjs`
+- `scripts/capture_visual_evidence.mjs`
+- `scripts/check_evidence.mjs`
+- `scripts/check_loc.mjs`
+- `scripts/check_reason_i18n_parity.mjs`
+- `scripts/collect_evidence.mjs`
+- `scripts/fast_prefilter.mjs`
+- `scripts/generate_report.mjs`
+- `scripts/lint_slop.mjs`
+- `scripts/sentinel_runner.mjs`
+- `src/client/3d/adaptive_cinematic_camera.tsx`
+- `src/client/3d/camera_state_machine.ts`
+- `src/client/3d/cinematic_chase_camera.ts`
+- `src/client/3d/pawn_animator.tsx`
+- `src/client/audio/sound_engine.ts`
+- `src/client/audio/sound_synth_recipes.ts`
+- `src/client/network/activity_rent_matcher.ts`
+- `src/client/network/activity_tracker.ts`
+- `src/client/network/apply_delta.ts`
+- `src/client/network/use_game_ws.ts`
+- `src/client/store/game_store.ts`
+- `src/client/store/game_store_types.ts`
+- `src/client/ui/actionable_notification.ts`
+- `src/client/ui/modals/auction_modal.tsx`
+- `src/client/ui/modals/masterplan_components.tsx`
+- `src/client/ui/ui_helpers.ts`
+- `src/domain/bot/bot_engine.ts`
+- `src/domain/chance_card_handlers.ts`
+- `src/server/logging/persistent_room_logger.ts`
+- `src/server/network/turn_orchestrator.ts`
+- `src/server/network/wss_server.ts`
+- `src/server/room_manager.ts`
+- `src/server/room_property_coordinator.ts`
+- `src/server/turn_loop.ts`
+- `.agents/plans/PLAN_IMP_291_SPATIAL_KINEMATICS_CAMERA.md`
+- `.agents/plans/PLAN_IMP_292_DRAMATIC_PACING_AND_DICE_PAN.md`
+- `.agents/plans/PLAN_IMP_293_CINEMATIC_FLIGHT_AND_MACRO_PACING.md`
+- `.agents/plans/PLAN_IMP_294_SOFT_RETURN_AND_FREE_ROAM_LOCK.md`
+- `.agents/plans/PLAN_IMP_295_MODULARIZE_SOUND_SYNTH_RECIPES.md`
+- `.agents/plans/PLAN_IMP_296_CAMERA_GESTURE_MODULARIZATION.md`
+- `.agents/plans/PLAN_IMP_297_ACTIONABLE_NOTIFICATION_MODULARIZATION.md`
+- `.agents/plans/PLAN_IMP_298_GAME_STORE_TYPES_MODULARIZATION.md`
+- `.agents/plans/PLAN_IMP_299_SOUND_ENGINE_MODULARIZATION.md`
+- `.agents/plans/PLAN_IMP_300_ROOM_LOGGER_MODULARIZATION.md`
+- `.agents/plans/PLAN_IMP_301_TURN_BOT_TIMER_SCHEDULER.md`
+- `.agents/plans/PLAN_IMP_302_BOT_ACTION_EVALUATOR.md`
+- `.agents/plans/PLAN_IMP_303_ACTIVITY_GO_EXTRACTOR.md`
+- `.agents/plans/PLAN_IMP_304_APPLY_DELTA_MODALS.md`
+- `.agents/plans/PLAN_IMP_305_ROOM_AUCTION_COORDINATOR.md`
+- `.agents/plans/PLAN_IMP_306_GAME_STORE_PAWN_ACTIONS.md`
+- `.agents/plans/PLAN_IMP_307_WSS_SERVER_LIFECYCLE.md`
+- `.agents/plans/PLAN_IMP_308_MASTERPLAN_DISTRICT_CARD.md`
+- `.agents/plans/PLAN_IMP_309_CHANCE_MA_HANDLERS.md`
+- `.agents/plans/PLAN_IMP_310_TURN_LOOP_MAINTENANCE.md`
+- `.agents/plans/PLAN_IMP_311_SINGLE_HOP_PAWN.md`
+- `.agents/plans/PLAN_IMP_312_AUCTION_BID_CONTROLS.md`
+- `.agents/plans/PLAN_IMP_313_ACTIVITY_AUCTION_TRACKER.md`
+- `.agents/plans/PLAN_IMP_314_ROOM_TRADE_COORDINATOR.md`
+- `.agents/plans/PLAN_IMP_315_USE_GAME_WS_MODULARIZATION.md`
+- `.agents/plans/PLAN_IMP_316_UI_ACTION_DOCK_HELPERS.md`
+- `docs/reports/audits/loc_debt_decomposition_master_plan_report.md`
+- `docs/reports/improvements/IMP-291-spatial-kinematics-camera_report.md`
+- `docs/reports/improvements/IMP-292-dramatic-pacing-and-dice-pan_report.md`
+- `docs/reports/improvements/IMP-293-cinematic-flight-and-macro-pacing_report.md`
+- `docs/reports/improvements/IMP-294-soft-return-and-free-roam-lock_report.md`
+- `docs/reports/improvements/IMP-295-modularize-sound-synth-recipes_report.md`
+- `docs/reports/improvements/IMP-296-camera-gesture-modularization_report.md`
+- `docs/reports/improvements/IMP-297-actionable-notification-modularization_report.md`
+- `docs/reports/improvements/IMP-298-game-store-types-modularization_report.md`
+- `docs/reports/improvements/IMP-299-sound-engine-modularization_report.md`
+- `docs/reports/improvements/IMP-300-room-logger-modularization_report.md`
+- `docs/reports/improvements/IMP-301-turn-bot-timer-scheduler_report.md`
+- `docs/reports/improvements/IMP-302-bot-action-evaluator_report.md`
+- `docs/reports/improvements/IMP-303-activity-go-extractor_report.md`
+- `docs/reports/improvements/IMP-304-apply-delta-modals_report.md`
+- `docs/reports/improvements/IMP-305-room-auction-coordinator_report.md`
+- `docs/reports/improvements/IMP-306-game-store-pawn-actions_report.md`
+- `docs/reports/improvements/IMP-307-wss-server-lifecycle_report.md`
+- `docs/reports/improvements/IMP-308-masterplan-district-card_report.md`
+- `docs/reports/improvements/IMP-309-chance-ma-handlers_report.md`
+- `docs/reports/improvements/IMP-310-turn-loop-maintenance_report.md`
+- `docs/reports/improvements/IMP-311-single-hop-pawn_report.md`
+- `docs/reports/improvements/IMP-312-auction-bid-controls_report.md`
+- `docs/reports/improvements/IMP-313-activity-auction-tracker_report.md`
+- `docs/reports/improvements/IMP-314-room-trade-coordinator_report.md`
+- `docs/reports/improvements/IMP-315-use-game-ws-modularization_report.md`
+- `docs/reports/improvements/IMP-316-ui-action-dock-helpers_report.md`
+- `scripts/dispatch_gotchas.mjs`
+- `src/client/3d/camera_kinematic_helpers.ts`
+- `src/client/3d/camera_location_beacon.tsx`
+- `src/client/3d/camera_soft_return.ts`
+- `src/client/3d/cinematic_spline_flyby.ts`
+- `src/client/3d/single_hop_pawn.tsx`
+- `src/client/3d/use_camera_gestures.ts`
+- `src/client/audio/sound_engine_context.ts`
+- `src/client/audio/synth_recipes_ambient.ts`
+- `src/client/audio/synth_recipes_gameplay.ts`
+- `src/client/audio/synth_recipes_ui.ts`
+- `src/client/network/activity_auction_tracker.ts`
+- `src/client/network/activity_go_extractor.ts`
+- `src/client/network/apply_delta_modals.ts`
+- `src/client/network/game_ws_dispatcher.ts`
+- `src/client/store/game_store_pawn_actions.ts`
+- `src/client/store/game_store_state_types.ts`
+- `src/client/store/game_store_subtypes.ts`
+- `src/client/ui/actionable_notification_gameplay.ts`
+- `src/client/ui/actionable_notification_map.ts`
+- `src/client/ui/actionable_notification_system.ts`
+- `src/client/ui/modals/auction_bid_controls.tsx`
+- `src/client/ui/modals/masterplan_district_card.tsx`
+- `src/client/ui/ui_action_dock_helpers.ts`
+- `src/domain/bot/bot_action_evaluator.ts`
+- `src/domain/chance_ma_handlers.ts`
+- `src/server/logging/room_logger_cloud_sync.ts`
+- `src/server/network/turn_bot_timer_scheduler.ts`
+- `src/server/network/wss_server_lifecycle.ts`
+- `src/server/room_auction_coordinator.ts`
+- `src/server/room_trade_coordinator.ts`
+- `src/server/turn_loop_maintenance.ts`
+- `tests/client/actionable_notification_modular.test.ts`
+- `tests/client/activity_auction_tracker.test.ts`
+- `tests/client/activity_go_extractor.test.ts`
+- `tests/client/apply_delta_modals.test.ts`
+- `tests/client/auction_bid_controls.test.ts`
+- `tests/client/camera_gestures.test.ts`
+- `tests/client/camera_soft_return_and_beacon.test.ts`
+- `tests/client/cinematic_spline_flyby.test.ts`
+- `tests/client/dramatic_pacing_camera.test.ts`
+- `tests/client/game_store_pawn_actions.test.ts`
+- `tests/client/game_store_types_modular.test.ts`
+- `tests/client/game_ws_dispatcher.test.ts`
+- `tests/client/masterplan_district_card.test.ts`
+- `tests/client/single_hop_pawn.test.ts`
+- `tests/client/sound_engine_modular.test.ts`
+- `tests/client/sound_synth_recipes_modular.test.ts`
+- `tests/client/spatial_kinematics_camera.test.ts`
+- `tests/client/ui_action_dock_helpers.test.ts`
+- `tests/domain/bot_action_evaluator.test.ts`
+- `tests/domain/chance_ma_handlers.test.ts`
+- `tests/server/room_auction_coordinator.test.ts`
+- `tests/server/room_logger_cloud_sync.test.ts`
+- `tests/server/room_trade_coordinator.test.ts`
+- `tests/server/turn_bot_timer_scheduler.test.ts`
+- `tests/server/turn_loop_maintenance.test.ts`
+- `tests/server/wss_server_lifecycle.test.ts`
+
+## 4. Kỷ luật Ranh giới & Luật Thép (Iron Laws Compliance)
+1. **Zero Dirty Casts**: Tuyệt đối không dùng `as any`, `as unknown as T` trong `src/**` và `tests/**`.
+2. **Pure-Move Quarantine**: Di chuyển nguyên trạng logic JSX, mesh hierarchy, material properties, colors, và clamping của OwnershipMarkerInstances.
+3. **Seam Discipline**: Giao diện JSX React Three Fiber là ranh giới kiểm thử chuẩn mực.
+4. **Scaffolding Protocol (Trạm 1 RED)**: Khởi tạo stub type-safe `board_tile_ownership_marker.tsx` trước khi chạy bộ kiểm thử để bảo đảm Semantic Behavioral RED (thất bại tại runtime assertions, không bao giờ lỗi loader).
+5. **LOC Budget Protection**:
+   - `src/client/3d/board_tile.tsx`: Giảm từ 453 xuống ~325 LOC (ngân sách <= 500 LOC Tier 2).
+   - `src/client/3d/board_tile_ownership_marker.tsx`: ~135 LOC (ngân sách <= 500 LOC Tier 2).
+   - `tests/client/board_tile_ownership_marker.test.ts`: ~220 LOC (ngân sách <= 600 LOC).
+
+## 5. Quy trình Triển khai Chi tiết (Station Workflow)
+- **Trạm 1 (RED)**:
+  - Tạo stub type-safe rỗng tại `src/client/3d/board_tile_ownership_marker.tsx`.
+  - Viết bộ living tests `tests/client/board_tile_ownership_marker.test.ts`.
+  - Chạy Vitest xác thực Semantic Behavioral RED.
+- **Trạm 2 (GREEN)**:
+  - Chuyển `SafeBillboard`, `OwnershipMarkerInstancesProps`, `OwnershipMarkerInstances` sang `src/client/3d/board_tile_ownership_marker.tsx`.
+  - Re-export trong `src/client/3d/board_tile.tsx`.
+  - Chạy toàn bộ test suites (`vitest run`).
+- **Trạm 2.5 (Prefilter & Scope)**:
+  - Chạy `npm run prefilter -- src/client/3d/board_tile.tsx src/client/3d/board_tile_ownership_marker.tsx tests/client/board_tile_ownership_marker.test.ts`.
+  - Kiểm tra `check_scope.mjs`.
+- **Trạm 4 (Sentinel)**:
+  - Chạy `npm run sentinel -- --ticket IMP-317 --test tests/client/board_tile_ownership_marker.test.ts --src src/client/3d/board_tile_ownership_marker.tsx`.
+- **Trạm 3 & 5 (Audits & Report)**:
+  - Lập biên bản kiểm toán `SPEC_REVIEW_IMP-317.md` và `CODE_REVIEW_IMP-317.md`.
+  - Xuất báo cáo tổng kết `docs/reports/improvements/IMP-317-board-tile-modularization_report.md`.
+  - Xác thực bằng chứng vật lý `node scripts/check_evidence.mjs IMP-317`.

@@ -333,7 +333,7 @@ export function FloatingNumbersOverlay(): React.ReactElement | null {
           </div>
         )}
         {displayItems.map((item, index) => {
-          const isOlderWithBanner = Boolean(latestMilestone) && displayItems.length > 1 && index === 0;
+          const isOlderWithBanner = Boolean(latestMilestone) && (displayItems.length === 1 || index === 0);
           return (
             <div
               key={item.id}

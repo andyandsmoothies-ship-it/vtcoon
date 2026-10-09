@@ -78,6 +78,10 @@ hooks: [.agents/hooks_qa.json]
   - When a ticket involves modularization or subtractive refactoring (moving logic from a mother file into a submodule), QA MUST write a differential parity test comparing old vs. new modules side-by-side across representative or randomized input matrices (`expect(newFn(input)).toEqual(oldFn(input))`) before obsolete code is pruned from the mother file.
 - **Wire-to-Store Closed-Loop Integration Mandate**:
   - For network, state, and UI features, at least one test in the contract suite MUST exercise the in-memory end-to-end pipeline (`Payload -> Ingestion/Reducer -> Store/FSM -> View Render`) to verify multi-tick continuity and prevent mock-heavy seam divergence.
+- **Full Lifecycle Sequence Rule (Anti-Static-Mock Trap)**:
+  - For camera, pawn movement, beacon, audio, and viewport features, contract tests MUST NOT merely inject synthetic static state (`useGameStore.setState({ hasUserCustomCamera: true, activePawnAnimation: ... })`).
+  - At least one integration test in the contract suite MUST execute the **canonical game lifecycle sequence**: `triggerDiceRoll(...)` -> `startPawnMove(...)` -> verify that required state flags (e.g. `hasUserCustomCamera`, `isRolling`, camera modes) persist or transition as specified.
+  - If an intermediate action in the lifecycle unconditionally erases or resets a required flag, the test must expose it immediately as an Inversion / Behavioral failure in RED phase, preventing dead-feature code from reaching implementation.
 - **Fast & Deterministic Anti-Flaky Mandate**:
   - Tests must execute deterministically using seeded PRNG and bounded in-memory clocks. Banned hardcoded `sleep` or unseeded `Math.random()`.
   - Banned arbitrary timeout inflation (> 2500ms) and solitary assertion softening (`toBeDefined` without concrete property assertions). Blind test re-runs without code changes are strictly forbidden.

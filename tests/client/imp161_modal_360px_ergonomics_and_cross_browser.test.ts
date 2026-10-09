@@ -17,7 +17,7 @@ import { GameOverModal } from '../../src/client/ui/modals/game_over_modal';
 import { CompulsoryBuyoutModal } from '../../src/client/ui/modals/compulsory_buyout_modal';
 import { BotTradeOfferModal } from '../../src/client/ui/modals/bot_trade_offer_modal';
 import { TitleDeedActionFooter } from '../../src/client/ui/modals/title_deed_action_footer';
-import { useGameStore } from '../../src/client/store/game_store';
+import { useGameStore } from '../../src/client/store/game_store.js';
 
 // ============================================================================
 // FACET 1: TOUCH TARGET ERGONOMICS (>= 44PX MANDATE)

@@ -3,22 +3,31 @@ import { PROPERTY_DEEDS } from '../../domain/property_data';
 import { BOARD_CONFIG, ColorGroup } from '../../domain/board_config';
 import type { RecordedIntentContext } from '../telemetry/telemetry_types';
 import { TurnPhase } from '../../domain/room';
+import {
+  formatCurrency,
+  isRollActionDisabled,
+  isEndTurnDisabled,
+  resolveEndTurnButtonLabel,
+  shouldShowSkipTurnNotice,
+  resolveActionDockNotice,
+  type ActionDockButtonStateParams,
+  type ActionDockNotice,
+  type ActionDockNoticeParams,
+} from './ui_action_dock_helpers.js';
+
+export {
+  formatCurrency,
+  isRollActionDisabled,
+  isEndTurnDisabled,
+  resolveEndTurnButtonLabel,
+  shouldShowSkipTurnNotice,
+  resolveActionDockNotice,
+  type ActionDockButtonStateParams,
+  type ActionDockNotice,
+  type ActionDockNoticeParams,
+};
 
 const LEVEL_MULTIPLIER: Record<number, number> = { 0: 1, 1: 1.5, 2: 2.5, 3: 4 };
-
-/**
- * Format currency to Vietnamese standard format ("12.500" or "-1.200")
- * Clamps negative rounding to zero (e.g. -0.2 -> "0") to prevent "-0"
- */
-export function formatCurrency(amount: number): string {
-  if (!Number.isFinite(amount)) {
-    return '0';
-  }
-  const absVal = Math.abs(Math.round(amount));
-  const isNegative = amount < 0 && absVal > 0;
-  const formatted = absVal.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  return `${isNegative ? '-' : ''}${formatted}`;
-}
 
 /**
  * Format remaining turn seconds to MM:SS string ("00:45", "01:15")
@@ -84,65 +93,6 @@ export function getOwnedColorGroups(ownedCellIndices: readonly number[] = []): r
   return Array.from(groups);
 }
 
-export interface ActionDockButtonStateParams {
-  readonly isRolling: boolean;
-  readonly isPawnMoving: boolean;
-  readonly isMyTurn: boolean;
-  readonly isBankrupt?: boolean;
-  readonly hasRolledThisTurn?: boolean;
-  readonly canRollAgain?: boolean;
-  readonly isRollPending?: boolean;
-  readonly isInsolvent?: boolean;
-  readonly inAudit?: boolean;
-  readonly turnPhase?: string;
-}
-
-/**
- * TC-UI03.5: Pure logic checking whether roll dice action is disabled
- */
-export function isRollActionDisabled(params: ActionDockButtonStateParams): boolean {
-  if (params.turnPhase === 'AuctionPhase') {
-    return true;
-  }
-  if (
-    !params.inAudit &&
-    params.turnPhase === 'PropertyManagement' &&
-    (!params.canRollAgain || !params.hasRolledThisTurn)
-  ) {
-    return true;
-  }
-  return (
-    Boolean(params.isRollPending) ||
-    Boolean(params.inAudit && params.hasRolledThisTurn && !params.canRollAgain) ||
-    Boolean(params.isRolling) ||
-    Boolean(params.isPawnMoving) ||
-    !params.isMyTurn ||
-    Boolean(params.isBankrupt) ||
-    (Boolean(params.hasRolledThisTurn) && !params.canRollAgain)
-  );
-}
-
-/**
- * Pure logic checking whether end turn action is disabled
- */
-export function isEndTurnDisabled(params: ActionDockButtonStateParams): boolean {
-  if (
-    !params.isMyTurn ||
-    params.isRolling ||
-    params.isPawnMoving ||
-    Boolean(params.isBankrupt) ||
-    Boolean(params.isInsolvent)
-  ) {
-    return true;
-  }
-  if (!params.canRollAgain && (params.inAudit || (params.turnPhase === 'PropertyManagement' && !params.hasRolledThisTurn))) {
-    return false;
-  }
-  return (
-    (params.hasRolledThisTurn !== undefined ? !params.hasRolledThisTurn : false) ||
-    Boolean(params.canRollAgain)
-  );
-}
 
 /**
  * Resolve target cell and purchase eligibility for Manage Property modal
@@ -275,29 +225,6 @@ export function buildIntentTelemetryContext(
   };
 }
 
-export function resolveEndTurnButtonLabel(
-  turnPhase?: string,
-  hasRolledThisTurn?: boolean,
-  inAudit?: boolean,
-  isBankrupt?: boolean
-): string {
-  if (isBankrupt) return '👁️ Khán Giả (Đang Xem)';
-  if (turnPhase === 'PropertyManagement' && !hasRolledThisTurn && !inAudit) {
-    return '⏩ Mất Lượt (Hết Lượt)';
-  }
-  return 'Hết Lượt';
-}
-
-export function shouldShowSkipTurnNotice(
-  turnPhase?: string,
-  hasRolledThisTurn?: boolean,
-  inAudit?: boolean,
-  isMyTurn?: boolean,
-  isBankrupt?: boolean
-): boolean {
-  if (isBankrupt) return false;
-  return Boolean(isMyTurn && turnPhase === 'PropertyManagement' && !hasRolledThisTurn && !inAudit);
-}
 
 export interface AdaptivePostProcessingParams {
   readonly fps?: number;
@@ -339,106 +266,6 @@ export function resolveAdaptivePostProcessing(
   };
 }
 
-export interface ActionDockNotice {
-  readonly type: 'insolvent' | 'audit' | 'skip_turn' | 'bot_pacing' | 'buy_opportunity';
-  readonly icon: string;
-  readonly desktopText: string;
-  readonly mobileText: string;
-  readonly tone: 'error' | 'warning' | 'info';
-}
-
-export interface ActionDockNoticeParams {
-  readonly isMyTurn?: boolean;
-  readonly isInsolvent?: boolean;
-  readonly inAudit?: boolean;
-  readonly auditTurnsLeft?: number;
-  readonly balance?: number;
-  readonly turnPhase?: string;
-  readonly hasRolledThisTurn?: boolean;
-  readonly isSkippedTurn?: boolean;
-  readonly botPacing?: { readonly displayText: string; readonly isBotTurn?: boolean } | null;
-  readonly isStandingOnBuyable?: boolean;
-  readonly buyableCellName?: string;
-  readonly buyableCellPrice?: number;
-  readonly isBankrupt?: boolean;
-}
-
-export function resolveActionDockNotice(params: ActionDockNoticeParams): ActionDockNotice | null {
-  if (params.isBankrupt) return null;
-
-  if (params.isInsolvent) {
-    const bal = params.balance ?? 0;
-    return {
-      type: 'insolvent',
-      icon: '🚨',
-      desktopText: `Ngân sách âm (${bal}): Hãy thế chấp hoặc thanh lý tài sản để cứu nợ!`,
-      mobileText: `Âm vốn (${bal}): Cần thế chấp cứu nợ`,
-      tone: 'error',
-    };
-  }
-
-  const isActorTurn = params.isMyTurn ?? true;
-  if (params.inAudit && (isActorTurn || !params.botPacing?.isBotTurn)) {
-    const turns = params.auditTurnsLeft ?? 0;
-    if (params.hasRolledThisTurn) {
-      return {
-        type: 'audit',
-        icon: '⚖️',
-        desktopText: `Gieo không ra đôi (còn ${turns} lượt): Nộp tiền bảo lãnh hoặc kết thúc lượt.`,
-        mobileText: 'Không ra đôi: Nộp bảo lãnh hoặc Xong lượt',
-        tone: 'warning',
-      };
-    }
-    return {
-      type: 'audit',
-      icon: '⚖️',
-      desktopText: `Đang thụ án kiểm toán (còn ${turns} lượt): Gieo đôi để tự do, nộp bảo lãnh hoặc chấp hành án.`,
-      mobileText: `Ô 10 (còn ${turns} lượt): Gieo đôi hoặc bảo lãnh`,
-      tone: 'warning',
-    };
-  }
-
-  const isSkipped = Boolean(
-    params.isSkippedTurn ||
-      (params.isMyTurn &&
-        params.turnPhase === 'PropertyManagement' &&
-        !params.hasRolledThisTurn &&
-        !params.inAudit)
-  );
-  if (isSkipped) {
-    return {
-      type: 'skip_turn',
-      icon: '🌪️',
-      desktopText: 'Bạn bị hoãn gieo xúc xắc lượt này (Bão duyên hải / Kiểm tra cồn)',
-      mobileText: 'Hoãn gieo xúc xắc lượt này',
-      tone: 'warning',
-    };
-  }
-
-  if (params.isStandingOnBuyable && params.isMyTurn) {
-    const priceText = params.buyableCellPrice ? ` (${formatCurrency(params.buyableCellPrice)})` : '';
-    return {
-      type: 'buy_opportunity',
-      icon: '🏷️',
-      desktopText: `Bạn đang ở ${params.buyableCellName ?? 'ô đất'}${priceText}: Bấm Mua Đất hoặc Cầm Cố để sở hữu!`,
-      mobileText: `Đứng tại ${params.buyableCellName ?? 'ô đất'}: Bấm Mua Đất để chốt`,
-      tone: 'warning',
-    };
-  }
-
-  if (!params.isMyTurn && params.botPacing) {
-    const text = params.botPacing.displayText;
-    return {
-      type: 'bot_pacing',
-      icon: '🤖',
-      desktopText: text,
-      mobileText: text.slice(0, 45),
-      tone: 'info',
-    };
-  }
-
-  return null;
-}
 
 /**
  * Formats player names for compact displays, stripping bot personality tags like (Aggressive).

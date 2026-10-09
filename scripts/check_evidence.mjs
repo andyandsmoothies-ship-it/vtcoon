@@ -144,7 +144,7 @@ if (probeSuite) {
     densityViolations.forEach((v) => errors.push(`[Assert Density Violation] ${summary.probeSuite}: ${v}`));
 
     try {
-      const vitestCmd = `npx vitest run ${summary.probeSuite} --reporter=json`;
+      const vitestCmd = `npx --yes vitest run ${summary.probeSuite} --reporter=json`;
       const output = execSync(vitestCmd, {
         encoding: 'utf8',
         stdio: ['pipe', 'pipe', 'pipe'],
@@ -178,7 +178,7 @@ if (effectiveContractFile) {
 
     try {
       const relPath = path.relative(repoRoot, effectiveContractFile).replace(/\\/g, '/');
-      const vitestCmd = `npx vitest run ${relPath} --reporter=json`;
+      const vitestCmd = `npx --yes vitest run ${relPath} --reporter=json`;
       const output = execSync(vitestCmd, {
         encoding: 'utf8',
         stdio: ['pipe', 'pipe', 'pipe'],
@@ -256,6 +256,30 @@ const matchesTicket = (filename) => {
   const flClean = fl.replace(/[^a-z0-9]/g, '');
   return fl.includes(ticketRaw) || flClean.includes(ticketClean) || (ticketNum && (fl.includes(`imp-${ticketNum}`) || fl.includes(`imp_${ticketNum}`) || flClean.includes(ticketNum)));
 };
+
+// 3.1 Physical Action Telemetry Gate (Gotcha #13 Enforcement)
+const isMotionTicket = !isPureLogicWaiver && (/camera|chase|kinematics|pawn_hop|trajectory/i.test(evidencePath) || /camera|chase|kinematics/i.test(summary.contractSuite || ''));
+if (isMotionTicket) {
+  const telemetryFiles = fs.readdirSync(evidenceDir).filter((f) => f.startsWith('camera_telemetry_') && matchesTicket(f));
+  if (telemetryFiles.length === 0) {
+    errors.push(
+      `[Gotcha #13 Violation] Camera/kinematics ticket requires camera telemetry in .agents/evidence/camera_telemetry_${ticketRaw}_*.json`
+    );
+  } else {
+    for (const tf of telemetryFiles) {
+      try {
+        const tel = JSON.parse(fs.readFileSync(path.join(evidenceDir, tf), 'utf8'));
+        if (typeof tel.elevationY === 'number' && tel.elevationY > 20.0) {
+          errors.push(
+            `[Gotcha #13 Violation] ${tf}: elevationY (${tel.elevationY}m) represents an idle overview (> 20m). Must capture in-action telemetry (elevationY <= 5.0m) during camera chase/motion.`
+          );
+        }
+      } catch (err) {
+        errors.push(`[Gotcha #13 Error] Failed to parse ${tf}: ${err.message}`);
+      }
+    }
+  }
+}
 
 if (fs.existsSync(auditDir) && ticketNum) {
   const auditFiles = fs.readdirSync(auditDir);

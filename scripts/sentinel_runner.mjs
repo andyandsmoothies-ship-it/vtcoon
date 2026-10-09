@@ -37,6 +37,7 @@ function parseCliArgs() {
     srcPath?.includes('client/3d') ||
     testPath?.includes('3d') ||
     testPath?.includes('spatial') ||
+    testPath?.includes('camera') ||
     ticketId?.toLowerCase().includes('3d')
   )) {
     is3D = true;
@@ -60,6 +61,11 @@ function cleanupStaleBackups(targetDir) {
         fs.unlinkSync(fullPath);
         console.log(`[RECOVERY] Restored orphaned backup: ${originalPath}`);
       }
+    } else if (entry.name.includes('.tmp_mutant_sandbox_')) {
+      try {
+        fs.unlinkSync(fullPath);
+        console.log(`[RECOVERY] Removed orphaned mutant sandbox: ${fullPath}`);
+      } catch {}
     }
   }
 }
@@ -128,7 +134,7 @@ function runRealMutationProbe(testPath, srcPath, ticketId) {
     };
   }
 
-  const testCmd = `npx vitest run ${testPath}`;
+  const testCmd = `npx --yes vitest run ${testPath}`;
   const isWin = process.platform === 'win32';
   const shellCmd = isWin ? 'cmd.exe' : 'npx';
 
@@ -395,6 +401,648 @@ function runRealMutationProbe(testPath, srcPath, ticketId) {
         replacement: "{item.text}",
       },
     ],
+    'IMP-291': [
+      {
+        file: 'src/client/3d/cinematic_chase_camera.ts',
+        desc: 'AST: mutate resolveStandardChaseOffset side 1 from -3.6 to 3.6',
+        target: 'case 1: return [-3.6, 4.2, 3.6];',
+        replacement: 'case 1: return [3.6, 4.2, 3.6];',
+      },
+      {
+        file: 'src/client/3d/cinematic_chase_camera.ts',
+        desc: 'AST: mutate resolveStandardChaseOffset side 2 from -3.6 to 3.6',
+        target: 'case 2: return [-3.6, 4.2, -3.6];',
+        replacement: 'case 2: return [-3.6, 4.2, 3.6];',
+      },
+      {
+        file: 'src/client/3d/cinematic_chase_camera.ts',
+        desc: 'AST: invert isCorner condition Boolean(params.isTransientTurnCorner...)',
+        target: 'const isCorner = Boolean(params.isTransientTurnCorner && isCornerCellIndex(params.cellIndex));',
+        replacement: 'const isCorner = false;',
+      },
+      {
+        file: 'src/client/3d/cinematic_chase_camera.ts',
+        desc: 'AST: mutate north-framing factor 0.20 -> 0.50',
+        target: 'const factor = 1.0 - 0.20 * northProgress;',
+        replacement: 'const factor = 1.0 - 0.50 * northProgress;',
+      },
+      {
+        file: 'src/client/3d/cinematic_chase_camera.ts',
+        desc: 'AST: mutate enableNorthFraming condition from pz < -3.0 to pz < -100.0',
+        target: 'if (params.enableNorthFraming && pz < -3.0) {',
+        replacement: 'if (params.enableNorthFraming && pz < -100.0) {',
+      },
+      {
+        file: 'src/client/3d/cinematic_chase_camera.ts',
+        desc: 'AST: mutate resolveStandardChaseOffset side 3 from 3.6 to -3.6',
+        target: 'case 3: return [3.6, 4.2, -3.6];',
+        replacement: 'case 3: return [-3.6, 4.2, -3.6];',
+      },
+      {
+        file: 'src/client/3d/cinematic_chase_camera.ts',
+        desc: 'AST: mutate resolveCornerSigns norm 20 from signX -1 to signX 1',
+        target: 'if (norm === 20) return { signX: -1, signZ: -1 };',
+        replacement: 'if (norm === 20) return { signX: 1, signZ: -1 };',
+      },
+    ],
+    'IMP-292': [
+      {
+        file: 'src/client/3d/camera_state_machine.ts',
+        desc: 'AST: invert isTargetOwnedByHuman guard in resolveCameraMode',
+        target: 'params.isTargetOwnedByHuman === false',
+        replacement: 'params.isTargetOwnedByHuman === true',
+      },
+      {
+        file: 'src/client/3d/camera_state_machine.ts',
+        desc: 'AST: invert !options?.isBotTurn in dice pan overview branch',
+        target: '!options?.isBotTurn',
+        replacement: 'options?.isBotTurn',
+      },
+      {
+        file: 'src/client/3d/camera_state_machine.ts',
+        desc: 'AST: invert isRolling guard in calculateTargetCameraState overview',
+        target: 'options?.isRolling && !options?.isHighStakesRoll',
+        replacement: '!options?.isRolling && !options?.isHighStakesRoll',
+      },
+      {
+        file: 'src/client/3d/cinematic_chase_camera.ts',
+        desc: 'AST: mutate elevation Y 19.8 -> 25.3 in calculateDicePanCameraState',
+        target: '19.5 + biasX * 0.8, 19.8, 19.5 + biasZ * 0.8',
+        replacement: '19.5 + biasX * 0.8, 25.3, 19.5 + biasZ * 0.8',
+      },
+      {
+        file: 'src/client/3d/cinematic_chase_camera.ts',
+        desc: 'AST: invert mobile aspect guard safeAspect < 1.0',
+        target: 'safeAspect < 1.0',
+        replacement: 'safeAspect >= 1.0',
+      },
+      {
+        file: 'src/client/3d/cinematic_chase_camera.ts',
+        desc: 'AST: mutate side 2 north biasZ -1.0 -> 1.0',
+        target: 'else if (side === 2) biasZ = -1.0;',
+        replacement: 'else if (side === 2) biasZ = 1.0;',
+      },
+      {
+        file: 'src/client/3d/cinematic_chase_camera.ts',
+        desc: 'AST: mutate side 0 south biasZ 1.0 -> -1.0',
+        target: 'if (side === 0) biasZ = 1.0;',
+        replacement: 'if (side === 0) biasZ = -1.0;',
+      },
+      {
+        file: 'src/client/3d/cinematic_chase_camera.ts',
+        desc: 'AST: mutate side 1 west biasX -1.0 -> 1.0',
+        target: 'else if (side === 1) biasX = -1.0;',
+        replacement: 'else if (side === 1) biasX = 1.0;',
+      },
+      {
+        file: 'src/client/3d/cinematic_chase_camera.ts',
+        desc: 'AST: mutate target vector in calculateDicePanCameraState',
+        target: '1.5 + biasX * 0.6, 0.2, 1.5 + biasZ * 0.6',
+        replacement: '1.5 + biasX * 0.6, 99.9, 1.5 + biasZ * 0.6',
+      },
+      {
+        file: 'src/client/3d/cinematic_chase_camera.ts',
+        desc: 'AST: mutate mobile FOV calculation in calculateDicePanCameraState',
+        target: 'Math.round(28 / Math.max(0.60, safeAspect))',
+        replacement: '28',
+      },
+      {
+        file: 'src/client/3d/camera_state_machine.ts',
+        desc: 'AST: mutate default overview state in calculateTargetCameraState',
+        target: 'return configToCameraState(CAMERA_CONFIG.overview);',
+        replacement: 'return configToCameraState(CAMERA_CONFIG.tension_roll);',
+      },
+      {
+        file: 'src/client/3d/cinematic_chase_camera.ts',
+        desc: 'AST: mutate side 3 east biasX 1.0 -> -1.0',
+        target: 'else biasX = 1.0;',
+        replacement: 'else biasX = -1.0;',
+      },
+      {
+        file: 'src/client/3d/cinematic_chase_camera.ts',
+        desc: 'AST: mutate speed 4.8 -> 99.9 in calculateDicePanCameraState',
+        target: 'speed: 4.8,',
+        replacement: 'speed: 99.9,',
+      },
+    ],
+    'IMP-293': [
+      {
+        file: 'src/client/3d/cinematic_spline_flyby.ts',
+        desc: 'AST: mutate jail flight duration (670/570 -> 999)',
+        target: 'return isBot ? 570 : 670;',
+        replacement: 'return isBot ? 999 : 999;',
+      },
+      {
+        file: 'src/client/3d/cinematic_spline_flyby.ts',
+        desc: 'AST: invert seaward peak Z trajectory in calculateSplineArcCameraState',
+        target: 'const targetPeakZ = isNorthArc ? -24.0 : 24.0;',
+        replacement: 'const targetPeakZ = isNorthArc ? 24.0 : -24.0;',
+      },
+      {
+        file: 'src/client/3d/cinematic_spline_flyby.ts',
+        desc: 'AST: disable scenic dip over south bay in calculateSplineArcCameraState',
+        target: 'const dip = isSouthFlightArc ? 1.5 * Math.sin(Math.PI * t) : 0;',
+        replacement: 'const dip = 0;',
+      },
+      {
+        file: 'src/client/3d/cinematic_spline_flyby.ts',
+        desc: 'AST: disable mobile portrait FOV dynamic expansion',
+        target: 'Math.min(46, Math.max(30, Math.round(30 / Math.max(0.60, safeAspect))))',
+        replacement: '30',
+      },
+      {
+        file: 'src/client/3d/cinematic_spline_flyby.ts',
+        desc: 'AST: corrupt start tile focus camera position matching at t=0',
+        target: 'const startCamPos = calculateTileFocusCameraPosition(startPos);',
+        replacement: 'const startCamPos = [0, 0, 0];',
+      },
+      {
+        file: 'src/client/3d/cinematic_spline_flyby.ts',
+        desc: 'AST: corrupt phase 2 overview camera FOV 26 -> 99',
+        target: 'fov: 26,',
+        replacement: 'fov: 99,',
+      },
+      {
+        file: 'src/client/3d/cinematic_spline_flyby.ts',
+        desc: 'AST: corrupt phase 3 overview camera FOV 28 -> 99',
+        target: 'fov: 28,',
+        replacement: 'fov: 99,',
+      },
+      {
+        file: 'src/client/3d/cinematic_spline_flyby.ts',
+        desc: 'AST: break monotonic non-decreasing invariant in resolveDynamicGamePhase',
+        target: 'const highest = Math.max(prev, rPhase, bPhase);',
+        replacement: 'const highest = Math.max(rPhase, bPhase);',
+      },
+      {
+        file: 'src/client/3d/cinematic_spline_flyby.ts',
+        desc: 'AST: mutate camera flight speed 4.5 -> 99.9',
+        target: 'speed: 4.5,',
+        replacement: 'speed: 99.9,',
+      },
+      {
+        file: 'src/client/3d/cinematic_spline_flyby.ts',
+        desc: 'AST: corrupt overview config speed baseConfig.speed -> 0.1',
+        target: 'speed: baseConfig.speed,',
+        replacement: 'speed: 0.1,',
+      },
+    ],
+    'IMP-294': [
+      {
+        file: 'src/client/3d/camera_soft_return.ts',
+        desc: 'AST: corrupt cubic-out easing formula u = 1 - Math.pow(1 - tau, 3)',
+        target: 'const u = 1 - Math.pow(1 - tau, 3);',
+        replacement: 'const u = tau;',
+      },
+      {
+        file: 'src/client/3d/camera_soft_return.ts',
+        desc: 'AST: invert shouldBreakOnTouch logic (return isInteracting && isResetting)',
+        target: 'return isInteracting && isResetting;',
+        replacement: 'return false;',
+      },
+      {
+        file: 'src/client/3d/camera_soft_return.ts',
+        desc: 'AST: corrupt shortest-arc wrap boundary dTheta < -Math.PI',
+        target: 'while (dTheta < -Math.PI) dTheta += 2 * Math.PI;',
+        replacement: 'while (dTheta < -Math.PI) dTheta -= 2 * Math.PI;',
+      },
+      {
+        file: 'src/client/3d/camera_soft_return.ts',
+        desc: 'AST: corrupt spherical radius conservation currentR in sampleSoftReturn',
+        target: 'const currentR = r0 + (r1 - r0) * u;',
+        replacement: 'const currentR = 0.0;',
+      },
+      {
+        file: 'src/client/3d/camera_soft_return.ts',
+        desc: 'AST: corrupt fallback position in sampleSoftReturn NaN guard',
+        target: 'position: safeDestPos,',
+        replacement: 'position: [0, 0, 0],',
+      },
+      {
+        file: 'src/client/3d/camera_soft_return.ts',
+        desc: 'AST: corrupt safeDestPos default fallback [24.6, 25.3, 24.6] -> [0, 0, 0]',
+        target: 'DEFAULT_FALLBACK_POS[0]',
+        replacement: '0',
+      },
+      {
+        file: 'src/client/3d/camera_location_beacon.tsx',
+        desc: 'AST: mutate beacon pulse opacity formula baseOpacity * pulseFactor',
+        target: 'return Math.min(1, Math.max(0, baseOpacity * pulseFactor));',
+        replacement: 'return 0.99;',
+      },
+      {
+        file: 'src/client/3d/camera_location_beacon.tsx',
+        desc: 'AST: corrupt resolveBeaconCoordinates output to [0, 0, 0]',
+        target: 'return [pos[0], 0, pos[2]];',
+        replacement: 'return [0, 0, 0];',
+      },
+      {
+        file: 'src/client/3d/camera_kinematic_helpers.ts',
+        desc: 'AST: corrupt side-aware camera offset tz < 0 [-1.8, height, -6.8] -> [0, 0, 0]',
+        target: 'if (tz < 0) return [-1.8, height, -6.8];',
+        replacement: 'if (tz < 0) return [0, 0, 0];',
+      },
+      {
+        file: 'src/client/3d/camera_kinematic_helpers.ts',
+        desc: 'AST: corrupt calculateTileFocusCameraPosition return vector to [0, 0, 0]',
+        target: 'return [tx + finalOffset[0], ty + finalOffset[1], tz + finalOffset[2]];',
+        replacement: 'return [0, 0, 0];',
+      },
+    ],
+    'IMP-295': [
+      {
+        file: 'src/client/audio/synth_recipes_gameplay.ts',
+        desc: 'AST: remove volume <= 0 zero allocation guard in synthesizeDiceRoll',
+        target: 'if (volume <= 0) return;',
+        replacement: '/* AST_MUTANT_REMOVED_GUARD */',
+      },
+      {
+        file: 'src/client/audio/synth_recipes_gameplay.ts',
+        desc: 'AST: mutate filter type bandpass -> lowpass in synthesizeDiceRoll',
+        target: "filter.type = 'bandpass';",
+        replacement: "filter.type = 'lowpass';",
+      },
+      {
+        file: 'src/client/audio/synth_recipes_gameplay.ts',
+        desc: 'AST: mutate strikes array [0, 0.14] -> [0] in synthesizeAuctionGavel',
+        target: 'const strikes = [0, 0.14];',
+        replacement: 'const strikes = [0];',
+      },
+      {
+        file: 'src/client/audio/synth_recipes_gameplay.ts',
+        desc: 'AST: mutate subOsc type sine -> square in synthesizeConstructionSlam',
+        target: "subOsc.type = 'sine';",
+        replacement: "subOsc.type = 'square';",
+      },
+      {
+        file: 'src/client/audio/synth_recipes_gameplay.ts',
+        desc: 'AST: mutate baseFreq 380 -> 200 in synthesizePawnStep',
+        target: 'const baseFreq = 380 * pitchVariation;',
+        replacement: 'const baseFreq = 200 * pitchVariation;',
+      },
+      {
+        file: 'src/client/audio/synth_recipes_ambient.ts',
+        desc: 'AST: mutate ocean LFO frequency 0.1 -> 0.5 in createOceanAmbientGraph',
+        target: 'lfo.frequency.setValueAtTime(0.1, context.currentTime);',
+        replacement: 'lfo.frequency.setValueAtTime(0.5, context.currentTime);',
+      },
+      {
+        file: 'src/client/audio/synth_recipes_ambient.ts',
+        desc: 'AST: mutate foghorn osc type sawtooth -> sine in synthesizeLighthouseFoghorn',
+        target: "osc.type = 'sawtooth';",
+        replacement: "osc.type = 'sine';",
+      },
+      {
+        file: 'src/client/audio/synth_recipes_ambient.ts',
+        desc: 'AST: mutate splash lowpass end frequency 200 -> 50 in synthesizeWaterSplash',
+        target: 'filter.frequency.exponentialRampToValueAtTime(200, now + 0.35);',
+        replacement: 'filter.frequency.exponentialRampToValueAtTime(50, now + 0.35);',
+      },
+      {
+        file: 'src/client/audio/synth_recipes_ui.ts',
+        desc: 'AST: mutate card flip snap osc type triangle -> sawtooth in synthesizeCardFlip',
+        target: "snapOsc.type = 'triangle';",
+        replacement: "snapOsc.type = 'sawtooth';",
+      },
+      {
+        file: 'src/client/audio/synth_recipes_ui.ts',
+        desc: 'AST: mutate coronation chime notes array to single note in synthesizeCoronationChime',
+        target: 'const notes = [523.25, 659.25, 783.99, 1046.5, 1318.51];',
+        replacement: 'const notes = [523.25];',
+      },
+    ],
+    'IMP-303': [
+      {
+        file: 'src/client/network/activity_go_extractor.ts',
+        desc: 'AST: mutate overdraft fee deduction 3300 -> 0',
+        target: 'isOverdraftDue ? 3300 : 0',
+        replacement: 'isOverdraftDue ? 0 : 0',
+      },
+      {
+        file: 'src/client/network/activity_go_extractor.ts',
+        desc: 'AST: mutate credit card fee deduction 400 -> 0',
+        target: 'hasFreeCredit ? 400 : 0',
+        replacement: 'hasFreeCredit ? 0 : 0',
+      },
+      {
+        file: 'src/client/network/activity_go_extractor.ts',
+        desc: 'AST: invert checkPassedGo guard',
+        target: 'if (checkPassedGo(prevPos, newPos)) {',
+        replacement: 'if (!checkPassedGo(prevPos, newPos)) {',
+      },
+      {
+        file: 'src/client/network/activity_go_extractor.ts',
+        desc: 'AST: invert isSentToAudit guard',
+        target: 'if (isSentToAudit) continue;',
+        replacement: 'if (!isSentToAudit) continue;',
+      },
+      {
+        file: 'src/client/network/activity_go_extractor.ts',
+        desc: 'AST: corrupt handledReceiverIds registration',
+        target: 'handledReceiverIds.add(p.id);',
+        replacement: '/* AST_MUTANT_REMOVED */',
+      },
+    ],
+    'IMP-304': [
+      {
+        file: 'src/client/network/apply_delta_modals.ts',
+        desc: 'AST: mutate consumeStagedTransitWheel targetCellIndex filter',
+        target: 'if (targetCellIndex !== undefined && stagedTransitWheel.cellIndex !== targetCellIndex) return null;',
+        replacement: 'if (false && targetCellIndex !== undefined) return null;',
+      },
+      {
+        file: 'src/client/network/apply_delta_modals.ts',
+        desc: 'AST: mutate syncAuctionModal deadline calculation',
+        target: 'const deadline = delta.auction.timeRemaining !== undefined\n      ? Date.now() + delta.auction.timeRemaining * 1000\n      : undefined;',
+        replacement: 'const deadline = undefined;',
+      },
+      {
+        file: 'src/client/network/apply_delta_modals.ts',
+        desc: 'AST: mutate syncAuctionModal openModal call to no-op',
+        target: "state.openModal('auction', auctionData);",
+        replacement: '/* AST_MUTANT_REMOVED */',
+      },
+      {
+        file: 'src/client/network/apply_delta_modals.ts',
+        desc: 'AST: mutate syncOtherModals pendingTradeOffer targeted check',
+        target: 'state.setPendingTradeOffer(isTargetedToMe ? offer : null);',
+        replacement: 'state.setPendingTradeOffer(null);',
+      },
+      {
+        file: 'src/client/network/apply_delta_modals.ts',
+        desc: 'AST: mutate syncOtherModals compulsory_buyout trigger',
+        target: "state.openModal('compulsory_buyout', delta.pendingBuyout);",
+        replacement: '/* AST_MUTANT_REMOVED */',
+      },
+      {
+        file: 'src/client/network/apply_delta_modals.ts',
+        desc: 'AST: mutate syncOtherModals insolvency solvency check',
+        target: 'if (!debtor || debtor.balance >= 0 || debtor.bankrupt) state.closeModal();',
+        replacement: 'if (!debtor || debtor.balance < 0 || debtor.bankrupt) state.closeModal();',
+      },
+    ],
+    'IMP-305': [
+      {
+        file: 'src/server/room_auction_coordinator.ts',
+        desc: 'AST: mutate coordAuctionDecline delegation',
+        target: 'const res = handleDecline(s.room, player, auctions, s.roomCode);',
+        replacement: "const res = { success: false, reason: 'MUTATED' };",
+      },
+      {
+        file: 'src/server/room_auction_coordinator.ts',
+        desc: 'AST: mutate coordAuctionBid delegation',
+        target: 'const res = handleAuctionBid(s.room, s.auction, playerId, amount, s.registry, auctions, s.roomCode, s.propertyStates);',
+        replacement: "const res = { success: false, reason: 'MUTATED' };",
+      },
+      {
+        file: 'src/server/room_auction_coordinator.ts',
+        desc: 'AST: mutate coordAuctionPass delegation',
+        target: 'const res = handleAuctionPass(s.room, s.auction, playerId, s.registry, auctions, s.roomCode, s.propertyStates);',
+        replacement: "const res = { success: false, reason: 'MUTATED' };",
+      },
+      {
+        file: 'src/server/room_auction_coordinator.ts',
+        desc: 'AST: mutate coordAuctionClose result caching',
+        target: 's.lastAuctionResult = result;',
+        replacement: '/* AST_MUTANT_REMOVED */',
+      },
+      {
+        file: 'src/server/room_auction_coordinator.ts',
+        desc: 'AST: mutate coordGetLastAuctionResult return',
+        target: 'return s?.room.lastAuctionResult ?? s?.lastAuctionResult;',
+        replacement: 'return undefined;',
+      },
+      {
+        file: 'src/server/room_auction_coordinator.ts',
+        desc: 'AST: mutate coordClearLastAuctionResult reset',
+        target: 's.lastAuctionResult = undefined;',
+        replacement: '/* AST_MUTANT_REMOVED */',
+      },
+      {
+        file: 'src/server/room_auction_coordinator.ts',
+        desc: 'AST: mutate coordGetAuctionSession return',
+        target: 'return s?.auction;',
+        replacement: 'return undefined;',
+      },
+    ],
+    'IMP-306': [
+      {
+        file: 'src/client/store/game_store_pawn_actions.ts',
+        desc: 'AST: corrupt enqueuePawnMove self-move guard',
+        target: 'if (task.fromCell === task.targetCell) {\n        return;\n      }',
+        replacement: '/* AST_MUTANT_REMOVED */',
+      },
+      {
+        file: 'src/client/store/game_store_pawn_actions.ts',
+        desc: 'AST: corrupt enqueuePawnMove bounds check',
+        target: 'if (!Number.isInteger(task.targetCell) || task.targetCell < 0 || task.targetCell >= BOARD_TOTAL_CELLS) {',
+        replacement: 'if (false) {',
+      },
+      {
+        file: 'src/client/store/game_store_pawn_actions.ts',
+        desc: 'AST: corrupt triggerDiceRoll isRolling assignment',
+        target: 'isRolling: true,',
+        replacement: 'isRolling: false,',
+      },
+      {
+        file: 'src/client/store/game_store_pawn_actions.ts',
+        desc: 'AST: corrupt triggerDiceRoll stale sequence guard',
+        target: 'if (diceSeq !== undefined && state.lastDiceSeq !== undefined && diceSeq <= state.lastDiceSeq) {',
+        replacement: 'if (false) {',
+      },
+      {
+        file: 'src/client/store/game_store_pawn_actions.ts',
+        desc: 'AST: corrupt completePawnMove animation clearing',
+        target: 'activePawnAnimation: null,',
+        replacement: 'activePawnAnimation: state.activePawnAnimation,',
+      },
+      {
+        file: 'src/client/store/game_store_pawn_actions.ts',
+        desc: 'AST: corrupt setPlayerPositions busy visualPositions branch',
+        target: 'const visualPositions = isBusy ? { ...state.visualPositions } : { ...positions };',
+        replacement: 'const visualPositions = { ...positions };',
+      },
+    ],
+    'IMP-311': [
+      {
+        file: 'src/client/3d/single_hop_pawn.tsx',
+        desc: 'AST: corrupt delta clamping in computeHopFrame',
+        target: 'const dt = Math.min(params.delta, 0.1);',
+        replacement: 'const dt = Math.max(params.delta, 0.1);',
+      },
+      {
+        file: 'src/client/3d/single_hop_pawn.tsx',
+        desc: 'AST: corrupt hop phase predicate in computeHopFrame',
+        target: 'if (t <= params.hopDuration) {',
+        replacement: 'if (t > params.hopDuration) {',
+      },
+      {
+        file: 'src/client/3d/single_hop_pawn.tsx',
+        desc: 'AST: corrupt jail flight landing sound in computeHopFrame',
+        target: 'soundToPlay = SoundEffect.TAX_PENALTY;',
+        replacement: 'soundToPlay = SoundEffect.PAWN_STEP;',
+      },
+      {
+        file: 'src/client/3d/single_hop_pawn.tsx',
+        desc: 'AST: corrupt completion state flag in computeHopFrame',
+        target: 'isComplete: true,',
+        replacement: 'isComplete: false,',
+      },
+      {
+        file: 'src/client/3d/single_hop_pawn.tsx',
+        desc: 'AST: corrupt completion rest scale in computeHopFrame',
+        target: 'scale: [1, 1, 1],',
+        replacement: 'scale: [2, 2, 2],',
+      },
+      {
+        file: 'src/client/3d/single_hop_pawn.tsx',
+        desc: 'AST: corrupt cache clear in clearEmoteCanvasCache',
+        target: 'emoteCanvasCache.clear();',
+        replacement: '/* no clear */',
+      },
+      {
+        file: 'src/client/3d/single_hop_pawn.tsx',
+        desc: 'AST: corrupt immediate self hop in SingleHopPawn',
+        target: 'if (fromCell === toCell && !completedRef.current) {',
+        replacement: 'if (false) {',
+      },
+    ],
+    'IMP-312': [
+      {
+        file: 'src/client/ui/modals/auction_bid_controls.tsx',
+        desc: 'AST: corrupt canAfford condition in AuctionBidControls',
+        target: 'const canAfford = !isConcluded && (myBalance === undefined || targetBid <= myBalance);',
+        replacement: 'const canAfford = isConcluded && (myBalance === undefined || targetBid <= myBalance);',
+      },
+      {
+        file: 'src/client/ui/modals/auction_bid_controls.tsx',
+        desc: 'AST: corrupt fire sale catch label in AuctionBidControls',
+        target: "targetBid === 0 ? 'Bắt Đáy (0)' :",
+        replacement: "targetBid !== 0 ? 'Bắt Đáy (0)' :",
+      },
+      {
+        file: 'src/client/ui/modals/auction_bid_controls.tsx',
+        desc: 'AST: corrupt autoBid button label in AuctionBidControls',
+        target: "autoBid ? 'TỰ ĐỘNG ĐẶT GIÁ: BẬT' : 'TỰ ĐỘNG ĐẶT GIÁ: TẮT'",
+        replacement: "!autoBid ? 'TỰ ĐỘNG ĐẶT GIÁ: BẬT' : 'TỰ ĐỘNG ĐẶT GIÁ: TẮT'",
+      },
+      {
+        file: 'src/client/ui/modals/auction_bid_controls.tsx',
+        desc: 'AST: corrupt concluded close button testid in AuctionBidControls',
+        target: 'data-testid="auction-concluded-close-btn"',
+        replacement: 'data-testid="auction-concluded-corrupted-btn"',
+      },
+      {
+        file: 'src/client/ui/modals/auction_bid_controls.tsx',
+        desc: 'AST: corrupt pass button testid in AuctionBidControls',
+        target: 'data-testid="auction-pass-btn"',
+        replacement: 'data-testid="auction-pass-corrupted-btn"',
+      },
+      {
+        file: 'src/client/ui/modals/auction_bid_controls.tsx',
+        desc: 'AST: corrupt bankrupt notice message in AuctionBidControls',
+        target: "'Bạn đã phá sản và đang theo dõi phiên đấu giá tài sản phát mãi.'",
+        replacement: "'Thông báo phá sản bị lỗi'",
+      },
+      {
+        file: 'src/client/ui/modals/auction_bid_controls.tsx',
+        desc: 'AST: corrupt passed withdrawal message in AuctionBidControls',
+        target: "'Bạn đã rút lui khỏi phiên đấu giá này.'",
+        replacement: "'Thông báo rút lui bị lỗi'",
+      },
+    ],
+    'IMP-317': [
+      {
+        file: 'src/client/3d/board_tile_ownership_marker.tsx',
+        desc: 'AST: corrupt SafeBillboard follow SSR attribute',
+        target: "return React.createElement('billboard', { follow: String(follow), ...props }, children);",
+        replacement: "return React.createElement('billboard', { follow: 'corrupted', ...props }, children);",
+      },
+      {
+        file: 'src/client/3d/board_tile_ownership_marker.tsx',
+        desc: 'AST: corrupt default ownerColor in OwnershipMarkerInstances',
+        target: "ownerColor = '#DC2626',",
+        replacement: "ownerColor = '#000000',",
+      },
+      {
+        file: 'src/client/3d/board_tile_ownership_marker.tsx',
+        desc: 'AST: corrupt clampedLevel min guard in TierIndicatorRings',
+        target: 'clampedLevel > 0',
+        replacement: 'clampedLevel >= 0',
+      },
+      {
+        file: 'src/client/3d/board_tile_ownership_marker.tsx',
+        desc: 'AST: corrupt clampedLevel max clamp (level > 3)',
+        target: 'Math.min(3,',
+        replacement: 'Math.min(99,',
+      },
+      {
+        file: 'src/client/3d/board_tile_ownership_marker.tsx',
+        desc: 'AST: corrupt mascotIcon resolution fallback',
+        target: ": '🏰');",
+        replacement: ": '❌');",
+      },
+      {
+        file: 'src/client/3d/board_tile_ownership_marker.tsx',
+        desc: 'AST: corrupt FlagPole totem pillar cylinderGeometry dimensions',
+        target: '<cylinderGeometry args={[0.016, 0.022, 0.45, 12]} />',
+        replacement: '<cylinderGeometry args={[0.999, 0.999, 0.99, 12]} />',
+      },
+      {
+        file: 'src/client/3d/board_tile_ownership_marker.tsx',
+        desc: 'AST: corrupt FlagCloth boxGeometry args',
+        target: '<boxGeometry args={[0.18, 0.10, 0.01]} />',
+        replacement: '<boxGeometry args={[0.99, 0.99, 0.99]} />',
+      },
+      {
+        file: 'src/client/3d/board_tile_ownership_marker.tsx',
+        desc: 'AST: corrupt TierIndicatorRings position offset',
+        target: 'position={[0, 0.08 + idx * 0.035, 0]}',
+        replacement: 'position={[0, 99.0, 0]}',
+      },
+      {
+        file: 'src/client/3d/board_tile_ownership_marker.tsx',
+        desc: 'AST: corrupt MascotCrestShield data-testid',
+        target: 'data-testid="mascot-crest-shield"',
+        replacement: 'data-testid="corrupted-crest-shield"',
+      },
+      {
+        file: 'src/client/3d/board_tile_ownership_marker.tsx',
+        desc: 'AST: corrupt OwnershipBillboardPin data-testid',
+        target: 'data-testid="ownership-billboard-pin"',
+        replacement: 'data-testid="corrupted-billboard-pin"',
+      },
+      {
+        file: 'src/client/3d/board_tile_ownership_marker.tsx',
+        desc: 'AST: corrupt TierRing cylinderGeometry args',
+        target: '<cylinderGeometry args={[0.022, 0.022, 0.014, 12]} />',
+        replacement: '<cylinderGeometry args={[0.999, 0.999, 0.999, 12]} />',
+      },
+      {
+        file: 'src/client/3d/board_tile_ownership_marker.tsx',
+        desc: 'AST: corrupt MascotCrestShield gold rim color',
+        target: '<meshStandardMaterial color="#F59E0B" roughness={0.2} metalness={0.9} />',
+        replacement: '<meshStandardMaterial color="#000000" roughness={0.2} metalness={0.9} />',
+      },
+      {
+        file: 'src/client/3d/board_tile_ownership_marker.tsx',
+        desc: 'AST: corrupt FlagPole castShadow attribute',
+        target: '<instancedMesh args={[undefined, undefined, 1]} castShadow position={[0, 0.225, 0]} name="FlagPole">',
+        replacement: '<instancedMesh args={[undefined, undefined, 1]} position={[0, 0.225, 0]} name="FlagPole">',
+      },
+      {
+        file: 'src/client/3d/board_tile_ownership_marker.tsx',
+        desc: 'AST: corrupt FlagCloth castShadow attribute',
+        target: '<instancedMesh ref={clothRef} args={[undefined, undefined, 1]} castShadow position={[0.10, 0.28, 0]} name="FlagCloth">',
+        replacement: '<instancedMesh ref={clothRef} args={[undefined, undefined, 1]} position={[0.10, 0.28, 0]} name="FlagCloth">',
+      },
+      {
+        file: 'src/client/3d/board_tile_ownership_marker.tsx',
+        desc: 'AST: corrupt MascotIcon planeGeometry dimensions',
+        target: '<planeGeometry args={[0.08, 0.08]} />',
+        replacement: '<planeGeometry args={[0.99, 0.99]} />',
+      },
+    ],
   };
 
   const targetedRules = ticketId ? ticketTargetedMutations[ticketId.toUpperCase()] : undefined;
@@ -479,6 +1127,15 @@ function runRealMutationProbe(testPath, srcPath, ticketId) {
     { name: 'toBeTruthy -> toBeFalsy', pattern: '.toBeTruthy()', replacement: '.toBeFalsy()' },
   ];
 
+  const sigintSandboxHandler = () => {
+    try {
+      if (fs.existsSync(sandboxPath)) fs.unlinkSync(sandboxPath);
+    } catch {}
+    process.exit(1);
+  };
+  process.on('SIGINT', sigintSandboxHandler);
+  process.on('SIGTERM', sigintSandboxHandler);
+
   try {
     for (const { name, pattern, replacement } of genericMutators) {
       const hasMatch = typeof pattern === 'string'
@@ -494,7 +1151,7 @@ function runRealMutationProbe(testPath, srcPath, ticketId) {
         fs.writeFileSync(sandboxPath, mutantContent, 'utf-8');
 
         try {
-          const shellArgs = isWin ? ['/c', `npx vitest run "${sandboxPath}"`] : ['vitest', 'run', sandboxPath];
+          const shellArgs = isWin ? ['/c', `npx --yes vitest run "${sandboxPath}"`] : ['vitest', 'run', sandboxPath];
           const res = spawnSync(shellCmd, shellArgs, {
             encoding: 'utf-8',
             stdio: ['pipe', 'pipe', 'pipe'],
@@ -515,6 +1172,8 @@ function runRealMutationProbe(testPath, srcPath, ticketId) {
       }
     }
   } finally {
+    process.removeListener('SIGINT', sigintSandboxHandler);
+    process.removeListener('SIGTERM', sigintSandboxHandler);
     try {
       if (fs.existsSync(sandboxPath)) fs.unlinkSync(sandboxPath);
     } catch {}
@@ -552,7 +1211,7 @@ function runWebGlProbe(ticketId, testPath, srcPath) {
   const probeFile = 'tests/probes/webgl_spatial_probe.test.ts';
   const vitestCmd = process.platform === 'win32' ? 'cmd.exe' : 'npx';
   const vitestArgs = process.platform === 'win32'
-    ? ['/c', `npx vitest run ${probeFile} --reporter=json`]
+    ? ['/c', `npx --yes vitest run ${probeFile} --reporter=json`]
     : ['vitest', 'run', probeFile, '--reporter=json'];
 
   const execRes = spawnSync(vitestCmd, vitestArgs, {
@@ -586,7 +1245,7 @@ function runWebGlProbe(ticketId, testPath, srcPath) {
   let contractPassedCount = 0;
   let contractPassed = false;
   const contractRes = spawnSync(vitestCmd, process.platform === 'win32'
-    ? ['/c', `npx vitest run ${testPath} --reporter=json`]
+    ? ['/c', `npx --yes vitest run ${testPath} --reporter=json`]
     : ['vitest', 'run', testPath, '--reporter=json'], {
     encoding: 'utf8',
     stdio: ['pipe', 'pipe', 'pipe'],
@@ -676,7 +1335,7 @@ function runWebGlProbe(ticketId, testPath, srcPath) {
 function delegateToStation4Server(rawArgs) {
   const tsxCmd = process.platform === 'win32' ? 'cmd.exe' : 'npx';
   const tsxArgs = process.platform === 'win32'
-    ? ['/c', `npx tsx scripts/station4_sentinel.ts ${rawArgs.join(' ')}`]
+    ? ['/c', `npx --yes tsx scripts/station4_sentinel.ts ${rawArgs.join(' ')}`]
     : ['tsx', 'scripts/station4_sentinel.ts', ...rawArgs];
 
   const res = spawnSync(tsxCmd, tsxArgs, { stdio: 'inherit' });

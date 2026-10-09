@@ -18,6 +18,7 @@
     "lint:slop": "node scripts/lint_slop.mjs",
     "check:loc": "node scripts/check_loc.mjs",
     "check:i18n": "node scripts/check_reason_i18n_parity.mjs",
+    "audit:ssot-drift": "node scripts/audit_ssot_drift.mjs",
     "lint:dup": "jscpd src/ --config .jscpd.json",
     "lint:assets": "node scripts/optimize_assets.mjs",
     "evidence": "node scripts/collect_evidence.mjs",
@@ -29,8 +30,8 @@
     "typecheck": "tsc --noEmit",
     "sentinel": "node scripts/sentinel_runner.mjs",
     "test:probes": "cross-env VITEST_PROBE=1 vitest run tests/probes/",
-    "gate:quick": "node scripts/check_reason_i18n_parity.mjs && npm run lint:ui && npm run lint:slop && npm run lint:dup && npm run lint:assets && tsc --noEmit && npm run evidence",
-    "gate": "node scripts/check_reason_i18n_parity.mjs && npm run lint:ui && npm run lint:slop && npm run lint:dup && npm run lint:assets && tsc --noEmit && vitest run && npm run evidence && npm run check:evidence"
+    "gate:quick": "node scripts/check_reason_i18n_parity.mjs && node scripts/audit_ssot_drift.mjs && npm run lint:ui && npm run lint:slop && npm run lint:dup && npm run lint:assets && tsc --noEmit && npm run evidence",
+    "gate": "node scripts/check_reason_i18n_parity.mjs && node scripts/audit_ssot_drift.mjs && npm run lint:ui && npm run lint:slop && npm run lint:dup && npm run lint:assets && tsc --noEmit && vitest run && npm run evidence && npm run check:evidence"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",

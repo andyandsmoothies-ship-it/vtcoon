@@ -146,7 +146,7 @@ if (shouldRunContract && matchingTests.length > 0) {
   const targetSuite = matchingTests[0];
   const testFileRel = path.relative(repoRoot, targetSuite).replace(/\\/g, '/');
   try {
-    const testOut = execSync(`npx vitest run "${testFileRel}"`, {
+    const testOut = execSync(`npx --yes vitest run "${testFileRel}"`, {
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'pipe'],
       timeout: 30000,
@@ -175,7 +175,7 @@ let typecheckExecution = { executed: false, status: 'SKIPPED' };
 const tsConfigPath = path.join(repoRoot, 'tsconfig.json');
 if (fs.existsSync(tsConfigPath) && !flags.includes('--no-typecheck') && !flags.includes('--skip-typecheck')) {
   try {
-    execSync('npx tsc --noEmit', {
+    execSync('npx --yes tsc --noEmit', {
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'pipe'],
       timeout: 60000,

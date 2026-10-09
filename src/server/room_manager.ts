@@ -5,8 +5,18 @@ import {
   resolveAuctionBots as coordResolveAuctionBots,
   runBotTurn as coordRunBotTurn,
   stepBotTurn as coordStepBotTurn,
-  stepAuctionBot as coordStepAuctionBot,
 } from './room_bot_coordinator.js';
+import {
+  coordAuctionDecline,
+  coordAuctionBid,
+  coordAuctionPass,
+  coordAuctionClose,
+  coordGetLastAuctionResult,
+  coordClearLastAuctionResult,
+  coordStepAuctionBot,
+  coordGetAuctionSession,
+  syncAuctionSession,
+} from './room_auction_coordinator.js';
 import { mulberry32, type DiceResult } from '../domain/dice.js';
 import {
   BuyResult,
@@ -15,7 +25,7 @@ import {
   type PropertyState,
 } from '../domain/property_manager.js';
 import { handleTurnStart, handleBailOut, handleUseDiplomatic } from './audit_manager.js';
-import { handleDecline, handleAuctionBid, handleAuctionPass, handleAuctionClose, type AuctionSession } from './auction_manager.js';
+import { type AuctionSession } from './auction_manager.js';
 import { handleBuyProperty, handleUpgrade, handleUpgradeETC, handleUpgradeUtility } from './property_actions.js';
 import { handleHoseInvest, handleHoseSkip } from './hose_actions.js';
 import { handleIssueBond, handleRepayBond } from './bond_manager.js';
@@ -157,72 +167,32 @@ export class RoomManager {
     return handleBuyProperty(s?.room, this.getActivePlayer(s?.room, playerId), s?.registry);
   }
 
-  private syncAuction(roomCode: string): void {
-    const s = this.getSession(roomCode);
-    if (s) s.auction = s.auction;
-  }
-
   getContext(roomCode: string): RoomContext | undefined {
     return this.getSession(roomCode)?.toContext();
   }
 
-  handleDecline(roomCode: string, playerId: string): { success: boolean; reason?: string } {
-    const s = this.getSession(roomCode);
-    if (!s) return { success: false, reason: 'INVALID_ROOM' };
-    const res = handleDecline(s.room, this.getActivePlayer(s.room, playerId), this.auctions, s.roomCode);
-    this.syncAuction(roomCode);
-    return res;
+  handleDecline(roomCode: string, playerId: string) {
+    return coordAuctionDecline(this.getSession(roomCode), playerId, this.auctions);
   }
 
-  handleAuctionBid(roomCode: string, playerId: string, amount: number): { success: boolean; reason?: string } {
-    const s = this.getSession(roomCode);
-    if (!s) return { success: false, reason: 'INVALID_ROOM' };
-    const res = handleAuctionBid(s.room, s.auction, playerId, amount, s.registry, this.auctions, s.roomCode, s.propertyStates);
-    this.syncAuction(roomCode);
-    if (s.room.lastAuctionResult) s.lastAuctionResult = s.room.lastAuctionResult;
-    return res;
+  handleAuctionBid(roomCode: string, playerId: string, amount: number) {
+    return coordAuctionBid(this.getSession(roomCode), playerId, amount, this.auctions);
   }
 
-  handleAuctionPass(roomCode: string, playerId: string): { success: boolean; reason?: string } {
-    const s = this.getSession(roomCode);
-    if (!s) return { success: false, reason: 'INVALID_ROOM' };
-    const res = handleAuctionPass(s.room, s.auction, playerId, s.registry, this.auctions, s.roomCode, s.propertyStates);
-    this.syncAuction(roomCode);
-    if (s.room.lastAuctionResult) s.lastAuctionResult = s.room.lastAuctionResult;
-    return res;
+  handleAuctionPass(roomCode: string, playerId: string) {
+    return coordAuctionPass(this.getSession(roomCode), playerId, this.auctions);
   }
 
-  handleAuctionClose(roomCode: string): { winnerId?: string; winningBid: number; cellIndex: number; isForeclosure: boolean } {
-    const s = this.getSession(roomCode);
-    const session = s?.auction;
-    const cellIndex = session?.cellIndex ?? 0;
-    const res = handleAuctionClose(s?.room, session, s?.registry, this.auctions, s?.roomCode ?? roomCode, s?.propertyStates);
-    this.syncAuction(roomCode);
-    const result: AuctionResult = {
-      cellIndex,
-      winnerId: res.winnerId ?? null,
-      winningBid: res.winningBid,
-      finalPrice: res.winningBid,
-      isForeclosure: !res.winnerId,
-    };
-    if (s) {
-      s.lastAuctionResult = result;
-      s.room.lastAuctionResult = result;
-    }
-    return res;
+  handleAuctionClose(roomCode: string) {
+    return coordAuctionClose(this.getSession(roomCode), this.auctions, roomCode);
   }
 
   getLastAuctionResult(roomCode: string): AuctionResult | undefined {
-    const s = this.getSession(roomCode);
-    return s?.room.lastAuctionResult ?? s?.lastAuctionResult;
+    return coordGetLastAuctionResult(this.getSession(roomCode));
   }
 
   clearLastAuctionResult(roomCode: string): void {
-    const s = this.getSession(roomCode);
-    if (s) {
-      s.lastAuctionResult = undefined;
-      s.room.lastAuctionResult = undefined;
-    }
+    coordClearLastAuctionResult(this.getSession(roomCode));
   }
 
   settleAuction(roomCode: string): void {
@@ -234,13 +204,11 @@ export class RoomManager {
   }
 
   stepAuctionBot(roomCode: string): { changed: boolean; finished: boolean } {
-    const res = coordStepAuctionBot(this, roomCode);
-    this.syncAuction(roomCode);
-    return res;
+    return coordStepAuctionBot(this, roomCode);
   }
 
   getAuctionSession(roomCode: string): AuctionSession | undefined {
-    return this.getSession(roomCode)?.auction;
+    return coordGetAuctionSession(this.getSession(roomCode));
   }
 
   handleUpgradeETC(roomCode: string, playerId: string) { const s = this.getSession(roomCode); return handleUpgradeETC(this.getActivePlayer(s?.room, playerId), s?.room.phase, s?.registry, s?.propertyStates, s?.room); }
@@ -329,7 +297,7 @@ export class RoomManager {
       }
     }
     const res = doHandleEndTurnSession(session, playerId, continueDoubles, this.deckRng, (rc) => this.touchActivity(rc));
-    this.syncAuction(session.roomCode);
+    syncAuctionSession(session);
     return res;
   }
 

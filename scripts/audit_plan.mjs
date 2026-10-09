@@ -9,6 +9,9 @@ import {
   auditScopeConservation,
   auditPureLogicWaiver,
   collectExportedSymbols,
+  auditPhysicalVisualMandate,
+  auditStateDependencyScope,
+  auditFunctionToTestParity,
 } from './audit_plan_rules.mjs';
 
 /**
@@ -89,7 +92,7 @@ if (currentTicketMatch && fs.existsSync(plansDir)) {
 const targetFiles = new Map();
 let fileMatch;
 while ((fileMatch = fileTargetRegex.exec(planContent)) !== null) {
-  const filePath = fileMatch[1].trim().replace(/^[`']|[`']$/g, '');
+  const filePath = fileMatch[1].trim().replace(/^[`'\s]+|[`'\s]+$/g, '');
   const trailingText = (fileMatch[2] || '').toLowerCase();
   const isNew = trailingText.includes('new') || trailingText.includes('create') || trailingText.includes('mới');
   targetFiles.set(filePath, isNew);
@@ -115,14 +118,39 @@ for (const [relPath, isNew] of targetFiles.entries()) {
   }
 }
 
+// Pre-scan all snippets per file to compute physical LOC deltas
+const fileSnippetsMap = new Map();
+const snippetDeltaByFile = new Map();
+const preSections = planContent.split(/(?=#{2,4}\s+Task|\*\*Target physical file\*\*|\*\*Target File\*\*)/i);
+for (const sec of preSections) {
+  const fMatch = fileTargetRegex.exec(sec);
+  fileTargetRegex.lastIndex = 0;
+  if (!fMatch) continue;
+  const relPath = fMatch[1].trim().replace(/^[`'\s]+|[`'\s]+$/g, '');
+  if (!fileSnippetsMap.has(relPath)) fileSnippetsMap.set(relPath, []);
+  let snipMatch;
+  while ((snipMatch = snippetRegex.exec(sec)) !== null) {
+    const targetChunk = snipMatch[1];
+    const replacementChunk = snipMatch[2];
+    fileSnippetsMap.get(relPath).push(replacementChunk);
+    const targetLines = targetChunk.replace(/\r\n/g, '\n').split('\n').length;
+    const repLines = replacementChunk.replace(/\r\n/g, '\n').split('\n').length;
+    const delta = repLines - targetLines;
+    snippetDeltaByFile.set(relPath, (snippetDeltaByFile.get(relPath) || 0) + delta);
+  }
+  snippetRegex.lastIndex = 0;
+}
+
 // ==========================================
 // 1.0.1 Auto-Slicing, Scope & LOC Accounting
 // ==========================================
 console.log(`\n📐 Checking Auto-Slicing Protocol & Scope Confinement:`);
 errors += auditScopeAndSubsystems(targetFiles);
-errors += auditHonestLocAccounting(targetFiles, planContent);
+errors += auditHonestLocAccounting(targetFiles, planContent, snippetDeltaByFile);
 errors += auditScopeConservation(planContent);
 errors += auditPureLogicWaiver(targetFiles, planContent);
+errors += auditPhysicalVisualMandate(targetFiles, planContent);
+errors += auditStateDependencyScope(targetFiles, planContent);
 
 // ==========================================
 // 1.1 Verify new production file code specification
@@ -200,12 +228,12 @@ for (const [relPath, isNew] of targetFiles.entries()) {
 
       // Collect all production code in plan (replacement snippets in other files + other new files)
       const otherProductionCodeChunks = [];
-      const tempSections = planContent.split(/(?=###\s+Task|\*\*Target physical file\*\*|\*\*Target File\*\*)/i);
+      const tempSections = planContent.split(/(?=#{2,4}\s+Task|\*\*Target physical file\*\*|\*\*Target File\*\*)/i);
       for (const tSec of tempSections) {
         const tfMatch = fileTargetRegex.exec(tSec);
         fileTargetRegex.lastIndex = 0;
         if (!tfMatch) continue;
-        const targetRel = tfMatch[1].trim().replace(/^[`']|[`']$/g, '');
+        const targetRel = tfMatch[1].trim().replace(/^[`'\s]+|[`'\s]+$/g, '');
         if (targetRel !== relPath && /^(?:src|lib|app)[\\/]/.test(targetRel)) {
           let sMatch;
           while ((sMatch = snippetRegex.exec(tSec)) !== null) {
@@ -268,12 +296,12 @@ for (const [relPath, isNew] of targetFiles.entries()) {
 //    dirty casts, and State/Action SRP
 // ==========================================
 console.log(`\n🧩 Checking drop-in snippets and replacement integrity:`);
-const sections = planContent.split(/(?=###\s+Task|\*\*Target physical file\*\*|\*\*Target File\*\*)/i);
+const sections = planContent.split(/(?=#{2,4}\s+Task|\*\*Target physical file\*\*|\*\*Target File\*\*)/i);
 for (const sec of sections) {
   const fMatch = fileTargetRegex.exec(sec);
   fileTargetRegex.lastIndex = 0;
   if (!fMatch) continue;
-  const relPath = fMatch[1].trim().replace(/^[`']|[`']$/g, '');
+  const relPath = fMatch[1].trim().replace(/^[`'\s]+|[`'\s]+$/g, '');
   const absPath = path.resolve(process.cwd(), relPath);
   if (!fs.existsSync(absPath)) continue;
 
@@ -369,8 +397,8 @@ for (const sec of sections) {
       }
     }
 
-    // 2.9 Snippet Hygiene (Zero No-Op + Ban UI/DOM code dumps)
-    errors += auditPlanSnippetHygiene(relPath, targetChunk, replacementChunk);
+    // 2.9 Snippet Hygiene (Zero No-Op + Ban UI/DOM code dumps + Undeclared Refs + Aspect ratio)
+    errors += auditPlanSnippetHygiene(relPath, targetChunk, replacementChunk, fileSnippetsMap.get(relPath) || []);
   }
 }
 
@@ -400,6 +428,7 @@ if (testLines.length > 0) {
     errors += auditTestSpecLine(line, exportedSymbols);
   }
   console.log(`  ✔️ Scanned ${checkedTests} contract test specifications.`);
+  errors += auditFunctionToTestParity(targetFiles, planContent);
 } else {
   console.log(`  ℹ️ No Station 1 test specifications block detected in plan.`);
 }

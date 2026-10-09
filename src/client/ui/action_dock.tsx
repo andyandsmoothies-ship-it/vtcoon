@@ -6,8 +6,8 @@ import {
   resolveEndTurnButtonLabel,
   formatCurrency,
 } from './ui_helpers';
-import { calculateBailAmount } from '../../domain/property_rent';
-import { BOARD_CONFIG, CellType } from '../../domain/board_config';
+import { resolveBailInfo, isStandingOnBuyableCell } from './ui_action_dock_helpers';
+import { BOARD_CONFIG } from '../../domain/board_config';
 import { PROPERTY_DEEDS } from '../../domain/property_data';
 import { MarketCardId } from '../../domain/event_card_types';
 import { TurnPhase } from '../../domain/room';
@@ -98,16 +98,7 @@ export function ActionDock({
   );
   const storeConsecutiveDoubles = actingPlayer ? actingPlayer.consecutiveDoubles : undefined;
   const auditCount = actingPlayer?.auditCount ?? 1;
-  const currentBailCost = calculateBailAmount(auditCount);
-  const canAffordBail = (actingPlayer?.balance ?? 0) >= currentBailCost;
-  const bailLabel = auditCount > 1
-    ? (auditCount === 2 ? `Bảo Lãnh - Lần 2 (${formatCurrency(currentBailCost)})` : `Bảo Lãnh - Tái Phạm (${formatCurrency(currentBailCost)})`)
-    : `Bảo Lãnh (${formatCurrency(currentBailCost)})`;
-  const bailTitle = !canAffordBail
-    ? `Bạn cần ít nhất ${formatCurrency(currentBailCost)} để nộp tiền bảo lãnh`
-    : (auditCount > 1
-        ? `Nộp ${formatCurrency(currentBailCost)} bảo lãnh tái phạm (Lần ${auditCount}) để rời trạm ngay`
-        : `Nộp ${formatCurrency(currentBailCost)} bảo lãnh kiểm toán để rời trạm ngay`);
+  const { cost: currentBailCost, canAfford: canAffordBail, label: bailLabel, title: bailTitle } = resolveBailInfo(auditCount, actingPlayer?.balance);
   const storeCanRollAgain = (storeConsecutiveDoubles !== undefined ? storeConsecutiveDoubles > 0 : (dice[0] === dice[1] && dice[0] > 0)) &&
     !inAudit && !actingPlayer?.skipNextTurn;
   const canRollAgain = canRollAgainProp !== undefined ? canRollAgainProp : storeCanRollAgain;
@@ -180,23 +171,19 @@ export function ActionDock({
   };
 
   const currentPos = actingPlayerId ? (playerPositions[actingPlayerId] ?? 0) : 0;
-  const currentCell = BOARD_CONFIG[currentPos];
-  const isPropertyCell = Boolean(
-    currentCell &&
-    (currentCell.type === CellType.Property || currentCell.type === CellType.Railroad || currentCell.type === CellType.Utility)
-  );
   const isOwnedByAnyone = Object.values(playersInfo).some((p) => p.ownedProperties?.includes(currentPos));
   const isPawnBusyMoving = Boolean(isPawnMoving || isRolling || activePawnAnimation);
-  const isStandingOnBuyable = Boolean(
-    isMyTurn &&
-    !isBankrupt &&
-    !isInsolvent &&
-    !isPawnBusyMoving &&
-    (turnPhase === TurnPhase.ActionPhase || (hasRolledThisTurn && turnPhase !== TurnPhase.PropertyManagement && turnPhase !== TurnPhase.AuctionPhase && turnPhase !== TurnPhase.InsolvencyPhase)) &&
-    isPropertyCell &&
-    !isOwnedByAnyone &&
-    !isTradeFrozen
-  );
+  const isStandingOnBuyable = isStandingOnBuyableCell({
+    isMyTurn,
+    isBankrupt,
+    isInsolvent,
+    isPawnBusyMoving,
+    turnPhase,
+    hasRolledThisTurn,
+    currentPos,
+    isOwnedByAnyone,
+    isTradeFrozen,
+  });
   const handleOpenManageProperty = () => {
     if (isBankrupt) return;
     if (onOpenManageProperty) onOpenManageProperty();

@@ -3,7 +3,7 @@
 import http from 'node:http';
 import { WebSocketServer, WebSocket } from 'ws';
 import { RoomManager } from '../room_manager.js';
-import { SessionManager, SessionState, HEARTBEAT_INTERVAL_MS } from '../session_manager.js';
+import { SessionManager, HEARTBEAT_INTERVAL_MS } from '../session_manager.js';
 import { RoomCleanupScheduler } from '../room_cleanup_scheduler.js';
 import { IntentMutex } from './intent_mutex.js';
 import { DeltaBroadcaster } from './delta_broadcaster.js';
@@ -17,10 +17,15 @@ import { TurnOrchestrator } from './turn_orchestrator.js';
 import { TurnWatchdog } from './turn_watchdog.js';
 import { SocketRegistry } from './socket_registry.js';
 import { encodeMsg } from './network_types.js';
-import type { WsServerMessage, WsClientMessage, ReasonCode } from './network_types.js';
-import { isRoomGameOver } from '../../domain/room.js';
+import type { WsServerMessage, WsClientMessage } from './network_types.js';
 import { AdminManager } from './admin_manager.js';
 import type { RoomFinishSummary } from '../logging/persistent_room_logger.js';
+import {
+  performHeartbeatSweep,
+  closeRoomWithCleanup,
+  broadcastGameOverSummary,
+  shutdownWssServer,
+} from './wss_server_lifecycle.js';
 import {
   handleCreateRoom,
   handleJoinRoom,
@@ -139,25 +144,12 @@ export class WssServer {
     this.rooms.onCloseRoom((rc) => this.closeRoom(rc));
     this.wss.on('connection', (socket) => this.handleConnection(socket));
     this.heartbeatTimer = setInterval(() => {
-      for (const [s, info] of this.sockets.getAllBoundSockets()) this.sendSafe(s, { type: 'PING', roomCode: info.roomCode });
-      this.sessions.checkHeartbeats();
-      for (const [sock, info] of this.sockets.getAllBoundSockets()) {
-        const s = this.sessions.getSession(info.playerId);
-        if (s && s.state === SessionState.GracePeriod) {
-          if (sock.readyState === WebSocket.OPEN) {
-            const elapsed = Date.now() - s.lastPongAt;
-            if (elapsed > 2 * HEARTBEAT_INTERVAL_MS) {
-              try {
-                sock.close(1001, 'HEARTBEAT_TIMEOUT');
-              } catch {
-                /* safe-ignore */
-              }
-            }
-          } else if (!this.reconnects.isPlayerInGrace(info.roomCode, info.playerId)) {
-            this.reconnects.startGracePeriod(info.roomCode, info.playerId);
-          }
-        }
-      }
+      performHeartbeatSweep({
+        sockets: this.sockets,
+        sessions: this.sessions,
+        reconnects: this.reconnects,
+        sendSafe: (s, m) => this.sendSafe(s, m),
+      });
     }, HEARTBEAT_INTERVAL_MS);
     this.heartbeatTimer.unref?.();
   }
@@ -297,41 +289,35 @@ export class WssServer {
   }
 
   broadcastGameOver(roomCode: string, leaderboard?: Array<{ id: string; netWorth: number }>): void {
-    const rankings = leaderboard ?? this.rooms.getRankings(roomCode);
-    this.broadcast(roomCode, { type: 'GAME_OVER', roomCode, leaderboard: rankings });
-    this.adminManager.recordRoomEvent(roomCode, {
-      source: 'SYSTEM',
-      action: 'GAME_OVER_SUMMARY',
-      payloadSummary: `Ván đấu kết thúc. Người thắng: ${rankings[0]?.id ?? 'Không xác định'}`,
-    });
-    this.closeRoom(roomCode, { status: 'FINISHED', winner: rankings[0]?.id });
+    broadcastGameOverSummary(
+      {
+        rooms: this.rooms,
+        broadcast: (rc, m) => this.broadcast(rc, m),
+        adminManager: this.adminManager,
+        closeRoom: (rc, s) => this.closeRoom(rc, s),
+      },
+      roomCode,
+      leaderboard,
+    );
   }
 
   closeRoom(roomCode: string, summary?: RoomFinishSummary): void {
-    if (this.closingRooms.has(roomCode)) return;
-    this.closingRooms.add(roomCode);
-    try {
-      this.turnOrchestrator.destroyRoom(roomCode);
-      this.turnWatchdog.clearRoom(roomCode);
-      this.sockets.clearRoomSockets(roomCode);
-      this.reconnects.clearRoom(roomCode);
-      const room = this.rooms.getRoom(roomCode);
-      if (room) {
-        for (const p of room.players) this.sessions.removeSession(p.id);
-      }
-      const playerCount = room?.players.length ?? 1;
-      this.broadcaster.clearRoom(roomCode);
-      this.intentMutex.clear(roomCode);
-      this.rooms.closeRoom(roomCode);
-      this.adminManager.handleRoomClosed(roomCode, {
-        status: summary?.status ?? 'TERMINATED',
-        winner: summary?.winner,
-        endTime: summary?.endTime ?? Date.now(),
-        playerCount: summary?.playerCount ?? playerCount,
-      });
-    } finally {
-      this.closingRooms.delete(roomCode);
-    }
+    closeRoomWithCleanup(
+      {
+        closingRooms: this.closingRooms,
+        turnOrchestrator: this.turnOrchestrator,
+        turnWatchdog: this.turnWatchdog,
+        sockets: this.sockets,
+        reconnects: this.reconnects,
+        rooms: this.rooms,
+        sessions: this.sessions,
+        broadcaster: this.broadcaster,
+        intentMutex: this.intentMutex,
+        adminManager: this.adminManager,
+      },
+      roomCode,
+      summary,
+    );
   }
 
   broadcast(roomCode: string, msg: WsServerMessage): void {
@@ -344,31 +330,14 @@ export class WssServer {
   close(): Promise<void> {
     if (this.isClosed) return Promise.resolve();
     this.isClosed = true;
-    clearInterval(this.heartbeatTimer);
-    this.cleanupScheduler.stop();
-    this.turnWatchdog.stop();
-    this.reconnects.clear();
-    for (const rc of this.rooms.getAllRoomCodes()) {
-      this.turnOrchestrator.destroyRoom(rc);
-      this.rooms.clearRoomTimers(rc);
-    }
-    for (const client of this.wss.clients) {
-      try {
-        client.close(1001, 'SERVER_SHUTDOWN');
-      } catch {
-        /* safe-ignore */
-      }
-    }
-    return new Promise((resolve, reject) => {
-      this.wss.close((err) => {
-        if (err && (err.message?.includes('not running') || err.message?.includes('closed'))) {
-          resolve();
-        } else if (err) {
-          reject(err);
-        } else {
-          resolve();
-        }
-      });
+    return shutdownWssServer({
+      heartbeatTimer: this.heartbeatTimer,
+      cleanupScheduler: this.cleanupScheduler,
+      turnWatchdog: this.turnWatchdog,
+      reconnects: this.reconnects,
+      rooms: this.rooms,
+      turnOrchestrator: this.turnOrchestrator,
+      wss: this.wss,
     });
   }
 

@@ -22,7 +22,7 @@ export const PUNCHY_EVENT_SUMMARIES: PunchyEventSummariesMap = Object.freeze({
   [MarketCardId.MC_LAND_FEVER]: 'Nhân đôi tiền thuê vùng ven (x2)',
   [MarketCardId.MC_ANTI_SPECULATE]: 'Thuế sang nhượng P2P 20%',
   [MarketCardId.MC_PEAK_TOURISM]: 'Nhân đôi thuê BĐS Nghỉ Dưỡng',
-  [MarketCardId.MC_URBAN_PLANNING]: 'Nhân 1.5x tiền thuê & vay 60% HN/HCM',
+  [MarketCardId.MC_URBAN_PLANNING]: 'Nhân 1.5x thuê & vay 60% HN/HCM',
   [MarketCardId.MC_UTILITY_DOUBLE]: 'Nhân đôi phí EVN & Viettel',
   [MarketCardId.MC_CASINO_PILOT]: 'Thưởng ô Dịch Vụ C2+ tới 3.000',
 

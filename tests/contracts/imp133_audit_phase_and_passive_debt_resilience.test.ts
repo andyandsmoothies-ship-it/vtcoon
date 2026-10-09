@@ -293,7 +293,7 @@ describe('IMP-133 Audit Phase Resolution & Passive Debt Resilience Contract Suit
 
       dispatchPlayerIntent(mgr, roomCode, 'p1', { type: 'INTENT_END_TURN' });
 
-      expect(room.currentPlayerIndex).toBe(1);
+      expect(room.pendingInsolvencyDebtorId).toBe(p2.id);
       expect(room.phase).toBe(TurnPhase.InsolvencyPhase);
     });
 
@@ -323,7 +323,7 @@ describe('IMP-133 Audit Phase Resolution & Passive Debt Resilience Contract Suit
 
       dispatchPlayerIntent(mgr, roomCode, 'p1', { type: 'INTENT_END_TURN' });
 
-      expect(room.currentPlayerIndex).toBe(1);
+      expect(room.pendingInsolvencyDebtorId).toBe(p2.id);
       expect(room.phase).toBe(TurnPhase.InsolvencyPhase);
     });
 
@@ -338,7 +338,7 @@ describe('IMP-133 Audit Phase Resolution & Passive Debt Resilience Contract Suit
 
       dispatchPlayerIntent(mgr, roomCode, 'p1', { type: 'INTENT_END_TURN' });
 
-      expect(room.currentPlayerIndex).toBe(1);
+      expect(room.pendingInsolvencyDebtorId).toBe(p2.id);
       expect(room.phase).toBe(TurnPhase.InsolvencyPhase);
     });
 

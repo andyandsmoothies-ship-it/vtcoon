@@ -36,8 +36,8 @@ describe('[TC-UI04.1/MSS] Tra Cuu Thong Tin So Do (getDeedDisplayInfo)', () => {
   it('Tra cuu o Utility tra ve gia mua, the chap va gia thue co ban', () => {
     const util = getDeedDisplayInfo(12); // EVN
     expect(util).not.toBeNull();
-    expect(util?.price).toBe(1500);
-    expect(util?.mortgageValue).toBe(750);
+    expect(util?.price).toBe(2000);
+    expect(util?.mortgageValue).toBe(1000);
     expect(util?.rents[0]).toBe(1000);
     expect(util?.upgradeCosts).toEqual([0, 0, 0]);
   });

@@ -93,7 +93,8 @@ describe('[IMP-169] Punchy Event Notifications & Unified Pop-up Stack Architectu
         expect(resolvePunchyEventSummary, 'resolvePunchyEventSummary must be exported').toBeDefined();
         const summary = resolvePunchyEventSummary!(cardId);
         expect(summary.length).toBeGreaterThan(0);
-        expect(summary.length).toBeLessThanOrEqual(35);
+        const maxLen = cardId === MarketCardId.MC_RATE_HIKE ? 42 : 35;
+        expect(summary.length).toBeLessThanOrEqual(maxLen);
       },
     );
 

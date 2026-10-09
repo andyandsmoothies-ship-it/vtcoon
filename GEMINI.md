@@ -23,6 +23,10 @@ Every ticket must pass 100% of automated gates before handoff:
 - **Pure-Move Quarantine**: Refactors must preserve 100% behavior. No semantic changes, no error swallowing (`try...catch`).
 - **Poka-Yoke UI Affordance**: Button enabled/disabled states and displayed costs MUST derive directly from Domain Validators (`canDo`, `evaluation`), never recalculated independently.
 - **i18n Exhaustiveness**: Every `ActionRejectReason` code must map 100% in `src/domain/i18n/vi.ts` typed `Record<ActionRejectReason, string>`.
+- **Causal Root Scope Invariant**: FORBIDDEN resolving plan challenges with verbal claims or isolated expression tweaks. If file $A$ causes state erasure, file $A$ MUST be in scope, or the feature must be architecturally decoupled.
+- **Full Lifecycle Testing**: FORBIDDEN solitary static mocking of store state for lifecycle/camera/pawn features. Contract suites MUST exercise the canonical sequence (`triggerDiceRoll` -> `startPawnMove`).
+- **R3F Transient Unmount Invariant**: FORBIDDEN returning `null` on transient state when `useFrame` is registered. Must use `<group visible={...}>` to prevent GPU buffer/shader reallocation churn on mobile.
+- **Function-to-Test Parity & Scaffolding Protocol**: FORBIDDEN omitting test specs for declared exported functions. When new production files are introduced, empty stubs MUST be scaffolded before Station 1 to guarantee Semantic Behavioral RED (runtime assertions fail, never loader `Cannot find module`).
 
 ## 3. LEAN PIPELINE
 - **Tier 1 (Fast-Track)**: < 50 LOC, visual/CSS/spacing, copy, isolated fix (0 Schema, 0 FSM, 0 Net). Main Agent executes directly in 1-2 min, 0 subagents, 0 plan.
@@ -30,7 +34,7 @@ Every ticket must pass 100% of automated gates before handoff:
   1. Draft Lean Plan: `.agents/plans/PLAN_[ID].md` (<= 200 lines, 0 code-dump).
   2. Machine Plan Audit: `node scripts/audit_plan.mjs <plan> --auto-sign` (0 defects auto-signs `HARDENED_APPROVED`).
   3. Human Gate: User approves ("đồng ý").
-  4. Station 1 (RED): `qa-tester` writes contract tests in `tests/**` (Adversarial Inversion: fails on runtime assertions).
+  4. Station 1 (RED): Scaffold empty stubs in `src/**` for new files; `qa-tester` writes contract tests in `tests/**` (Adversarial Inversion: fails strictly on runtime assertions).
   5. Station 2 (GREEN): `implementer` writes minimal code in `src/**`.
   6. Mechanical Gates: Run `npm run prefilter -- <files>` and `npm run check:scope`.
   7. Audit & Delivery Reports: Main Agent runs `npm run report -- [ID]` to synthesize physical station audits (`.agents/audit/SPEC_REVIEW_[ID].md`, `CODE_REVIEW_[ID].md`) and the comprehensive acceptance report (`docs/reports/improvements/IMP-[ID]-[slug]_report.md`) embedding all subagent comments/verdicts, captures Dual-Viewport (for UI changes), and delivers to User.

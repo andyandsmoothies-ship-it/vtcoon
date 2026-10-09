@@ -38,7 +38,8 @@ function runStep(title, fn) {
     return result;
   } catch (err) {
     console.log('❌ FAIL');
-    console.error(`\n[ERROR in ${title}]:\n${err.message || err}\n`);
+    const detailedOutput = (err.stdout ? String(err.stdout) : '') + (err.stderr ? String(err.stderr) : '');
+    console.error(`\n[ERROR in ${title}]:\n${detailedOutput.trim() || err.message || err}\n`);
     totalErrors++;
     return null;
   }
@@ -46,7 +47,7 @@ function runStep(title, fn) {
 
 // 1. TypeScript Strict Compilation
 runStep('1. Typecheck (tsc --noEmit)', () => {
-  execSync('npx tsc --noEmit', { stdio: 'pipe', encoding: 'utf8' });
+  execSync('npx --yes tsc --noEmit', { stdio: 'pipe', encoding: 'utf8' });
 });
 
 // 2. LOC Budgets for Target Files
@@ -153,9 +154,15 @@ if (testFilesToScan.length > 0) {
             `${file}:${lineNum} - Test case contains ${expectCount} expect() calls (max 4 allowed): ${title}`,
           );
         }
-        if (/\bfor\s*\(|\.forEach\s*\(|\bwhile\s*\(/.test(blockBody)) {
+        if (/\bfor\s*\(|\.forEach\s*\(|\bwhile\s*\(|\bdo\s*\{/.test(blockBody)) {
           testViolations.push(
             `${file}:${lineNum} - Test case contains forbidden loop in it() (use it.each instead): ${title}`,
+          );
+        }
+        // Fast & Deterministic Testing Iron Law: Ban unseeded Math.random() in tests
+        if (/\bMath\.random\s*\(/.test(blockBody)) {
+          testViolations.push(
+            `${file}:${lineNum} - Test case contains unseeded Math.random() (violates Fast & Deterministic Testing Iron Law, use seeded PRNG): ${title}`,
           );
         }
         // Anti-Flaky Guard: Ban long blocking sleeps (>= 3000ms) in contract tests
@@ -198,6 +205,12 @@ runStep('5. UI Impeccable Linter (lint_ui.mjs)', () => {
 // 6. i18n Rejection Reason Parity (check_reason_i18n_parity.mjs)
 runStep('6. i18n Rejection Reason Parity', () => {
   execSync('node scripts/check_reason_i18n_parity.mjs', { stdio: 'pipe', encoding: 'utf8' });
+});
+
+// 7. SSOT Economic Data Drift (audit_ssot_drift.mjs)
+runStep('7. SSOT Economic Data Drift', () => {
+  const quotedFiles = targetFiles.length > 0 ? targetFiles.map((f) => `"${f}"`).join(' ') : '';
+  execSync(`node scripts/audit_ssot_drift.mjs ${quotedFiles}`, { stdio: 'pipe', encoding: 'utf8' });
 });
 
 console.log('\n======================================================');

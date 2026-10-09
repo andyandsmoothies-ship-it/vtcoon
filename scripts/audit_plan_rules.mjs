@@ -126,7 +126,7 @@ export function auditScopeAndSubsystems(targetFiles) {
   return errors;
 }
 
-export function auditHonestLocAccounting(targetFiles, planContent) {
+export function auditHonestLocAccounting(targetFiles, planContent, snippetDeltaByFile = new Map()) {
   let errors = 0;
   const locTableRowRegex = /\|\s*`?([^\n|`']+\.[a-zA-Z0-9]+)`?\s*\|\s*([^|]+)\|\s*(\d+)[^|]*\|\s*(\d+)[^|]*\|\s*[^|]+\|\s*[^|]+\|\s*([^|]+)\|/g;
   let locRowMatch;
@@ -135,6 +135,20 @@ export function auditHonestLocAccounting(targetFiles, planContent) {
     const tier = locRowMatch[2].trim();
     const expectedLOC = parseInt(locRowMatch[4].trim(), 10);
     const status = locRowMatch[5].trim();
+
+    const absPath = path.resolve(process.cwd(), filePath);
+    if (fs.existsSync(absPath)) {
+      const rawLines = fs.readFileSync(absPath, 'utf8').split('\n');
+      if (rawLines.length > 0 && rawLines[rawLines.length - 1] === '') rawLines.pop();
+      const diskLines = rawLines.length;
+      const snippetDelta = snippetDeltaByFile.get(filePath) ?? snippetDeltaByFile.get(filePath.replace(/\\/g, '/')) ?? 0;
+      const computedExpected = diskLines + snippetDelta;
+      if (Math.abs(computedExpected - expectedLOC) > 1) {
+        console.error(`  ❌ [LOC_ACCOUNTING_FRAUD] File '${filePath}' claims expected LOC of ${expectedLOC}, but physical lines (${diskLines}) + snippet delta (${snippetDelta >= 0 ? '+' : ''}${snippetDelta}) = ${computedExpected} lines (mismatch of ${Math.abs(computedExpected - expectedLOC)} lines)!`);
+        console.error(`     Plan Table 2 must reflect physical disk reality plus verbatim snippet deltas.`);
+        errors++;
+      }
+    }
 
     if (tier.includes('Tier 1') && expectedLOC >= 300) {
       if (/safe/i.test(status) && !/warning/i.test(status)) {
@@ -172,7 +186,7 @@ export function auditHonestLocAccounting(targetFiles, planContent) {
   return errors;
 }
 
-export function auditPlanSnippetHygiene(relPath, targetChunk, replacementChunk) {
+export function auditPlanSnippetHygiene(relPath, targetChunk, replacementChunk, allFileSnippets = []) {
   let errors = 0;
   const cleanTarget = targetChunk.replace(/\/\/.*|\/\*[\s\S]*?\*\//g, '').replace(/\s+/g, '');
   const cleanReplacement = replacementChunk.replace(/\/\/.*|\/\*[\s\S]*?\*\//g, '').replace(/\s+/g, '');
@@ -189,6 +203,34 @@ export function auditPlanSnippetHygiene(relPath, targetChunk, replacementChunk) 
       errors++;
     }
   }
+
+  const refUsageRegex = /\b([a-zA-Z0-9_$]+Ref)\.current\b/g;
+  let refMatch;
+  const absPath = path.resolve(process.cwd(), relPath);
+  const diskContent = fs.existsSync(absPath) ? fs.readFileSync(absPath, 'utf8') : '';
+  while ((refMatch = refUsageRegex.exec(replacementChunk)) !== null) {
+    const refName = refMatch[1];
+    const declaredOnDisk = new RegExp(`\\b(?:const|let|var)\\s+${refName}\\b`).test(diskContent);
+    const declaredInSnippets = allFileSnippets.some((snip) =>
+      new RegExp(`\\b(?:const|let|var)\\s+${refName}\\b`).test(snip)
+    );
+    if (!declaredOnDisk && !declaredInSnippets) {
+      console.error(`  ❌ [UNDECLARED_REF_IDENTIFIER_IN_PLAN] in ${relPath}: Reference '${refName}.current' is used in snippet but '${refName}' is not declared in disk file or any plan replacement snippet!`);
+      errors++;
+    }
+  }
+
+  const camFnRegex = /export\s+function\s+(calculate[A-Za-z0-9_]*Cam[A-Za-z0-9_]*)\s*\(([^)]*)\)/g;
+  let camFnMatch;
+  while ((camFnMatch = camFnRegex.exec(replacementChunk)) !== null) {
+    const fnName = camFnMatch[1];
+    const fnArgs = camFnMatch[2];
+    if (!/\baspect\b/i.test(fnArgs)) {
+      console.error(`  ❌ [MISSING_RESPONSIVE_ASPECT_RATIO] in ${relPath}: Camera state calculation function '${fnName}' does not accept 'aspect' parameter! Dual-Viewport Parity requires camera functions to accept 'aspect' for Mobile Portrait FOV compensation.`);
+      errors++;
+    }
+  }
+
   return errors;
 }
 
@@ -197,8 +239,15 @@ export function auditScopeConservation(planContent) {
   if (!planContent) return errors;
 
   const lines = planContent.split('\n');
+  let inCodeBlock = false;
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
+    if (line.trim().startsWith('```')) {
+      inCodeBlock = !inCodeBlock;
+      continue;
+    }
+    if (inCodeBlock) continue;
+
     // Check if line drops/waives scope without formal deferral ticket
     if (/\b(?:WAIVE|HOÃN|DEFER|tách riêng|không sửa trong ticket này)\b/i.test(line)) {
       // Exclude pure documentation of pureLogicWaiver setting in Station 3 table
@@ -297,8 +346,8 @@ export function auditTestSpecLine(line, exportedSymbols = null) {
   }
 
   if (exportedSymbols && exportedSymbols.size > 0) {
-    const backtickMatch = line.match(/\b(?:When|Khi)\b[\s\S]*?\b(?:gọi|gọi\s+hàm|kích\s+hoạt|calling|invoking)\s+`([a-zA-Z_$][a-zA-Z0-9_$]*)`/i);
-    const plainMatch = line.match(/\b(?:When|Khi)\b[\s\S]*?\b(?:gọi\s+hàm|calling|invoking)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/i);
+    const backtickMatch = line.match(/\b(?:When|Khi)\b[\s\S]*?\b(?:gọi(?:\s+hàm)?|goi(?:\s+ham)?|kích\s+hoạt|kich\s+hoat|calling|invoking)\s+`([a-zA-Z_$][a-zA-Z0-9_$]*)`/i);
+    const plainMatch = line.match(/\b(?:When|Khi)\b[\s\S]*?\b(?:gọi(?:\s+hàm)?|goi(?:\s+ham)?|kích\s+hoạt|kich\s+hoat|calling|invoking)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/i);
     const callMatch = backtickMatch || plainMatch;
     if (callMatch) {
       const fnName = callMatch[1];
@@ -312,6 +361,115 @@ export function auditTestSpecLine(line, exportedSymbols = null) {
         errors++;
       }
     }
+  }
+
+  return errors;
+}
+
+export function auditPhysicalVisualMandate(targetFiles, planContent) {
+  let errors = 0;
+  const isVisualSubsystem = Array.from(targetFiles.keys()).some((f) =>
+    /^(?:src\/client\/3d|src\/client\/ui|src\\client\\3d|src\\client\\ui)/i.test(f)
+  );
+  if (isVisualSubsystem) {
+    const hasVisualVerification = /capture:visual|check_evidence/i.test(planContent);
+    if (!hasVisualVerification) {
+      console.error(`  ❌ [MISSING_PHYSICAL_VISUAL_VERIFICATION] Plan targets 3D/UI subsystems but Station 3 lacks 'capture:visual' or 'check_evidence' verification!`);
+      console.error(`     Gotcha #13 / UI Governance mandates physical action evidence before sign-off.`);
+      errors++;
+    } else {
+      console.log(`  ✔️ Physical visual verification registered in plan for 3D/UI scope.`);
+    }
+
+    const isCameraOrMotion = Array.from(targetFiles.keys()).some((f) =>
+      /camera|chase|kinematics|trajectory|hop/i.test(f)
+    ) || /camera|chase|kinematics/i.test(planContent);
+    if (isCameraOrMotion) {
+      const scenarioMatch = planContent.match(/--scenario\s+([a-zA-Z0-9_]+)/);
+      if (!scenarioMatch) {
+        console.error(`  ❌ [MISSING_ACTION_SCENARIO_IN_PLAN] Camera/motion plan must specify an in-action scenario via '--scenario <name>' in Station 3!`);
+        console.error(`     Gotcha #13 mandates in-action capture (elevation <= 20.0m) to prevent idle overview trap.`);
+        errors++;
+      } else {
+        const scenarioName = scenarioMatch[1];
+        const captureScriptPath = path.resolve(process.cwd(), 'scripts/capture_visual_evidence.mjs');
+        if (fs.existsSync(captureScriptPath)) {
+          const captureContent = fs.readFileSync(captureScriptPath, 'utf8');
+          if (!captureContent.includes(`'${scenarioName}'`)) {
+            console.error(`  ❌ [UNKNOWN_CAPTURE_SCENARIO] Scenario '${scenarioName}' specified in plan does not exist in 'scripts/capture_visual_evidence.mjs'!`);
+            errors++;
+          } else {
+            console.log(`  ✔️ Verified in-action capture scenario '${scenarioName}' exists in capture runner.`);
+          }
+        }
+      }
+    }
+  }
+  return errors;
+}
+
+export function auditStateDependencyScope(targetFiles, planContent) {
+  let errors = 0;
+  const stateFlagMatches = planContent.match(/\b(hasUserCustomCamera)\b/g);
+  if (stateFlagMatches) {
+    const hasBranchingSnippet = /(!hasUserCustomCamera|hasUserCustomCamera\s*&&|hasUserCustomCamera\s*\?)/.test(planContent);
+    const touchesStore = Array.from(targetFiles.keys()).some((f) => f.includes('src/client/store/'));
+    if (hasBranchingSnippet && !touchesStore) {
+      console.warn(`  ⚠️  [STATE_MUTATION_BOUNDARY_WARNING] Plan branches on 'hasUserCustomCamera' in presentation code without modifying 'src/client/store/'.`);
+      console.warn(`     WARNING: Upstream flows (e.g. triggerDiceRoll in game_store.ts) may unconditionally reset this flag to false.`);
+      console.warn(`     Verify that your feature does not become a dead path during dice roll or pawn animation.`);
+    }
+  }
+  return errors;
+}
+
+export function auditFunctionToTestParity(targetFiles, planContent) {
+  let errors = 0;
+  const exportFuncRegex = /export\s+(?:async\s+)?function\s+([a-zA-Z0-9_$]+)\s*[\(<]/g;
+  const declaredFunctions = new Set();
+  
+  const sections = planContent.split(/(?=#{2,4}\s+Task|\*\*Target physical file\*\*|\*\*Target File\*\*)/i);
+  for (const sec of sections) {
+    const isProd = /(?:\*\*Target physical file\*\*|\*\*Target File\*\*|Target physical file|Target file):\s*[`']?(?:src|lib|app)[\\/]/i.test(sec);
+    if (!isProd) continue;
+    
+    const codeBlockRegex = /```(?:typescript|tsx|javascript)?\s*\n([\s\S]+?)\n```/g;
+    let cbMatch;
+    while ((cbMatch = codeBlockRegex.exec(sec)) !== null) {
+      const code = cbMatch[1];
+      let fnMatch;
+      while ((fnMatch = exportFuncRegex.exec(code)) !== null) {
+        declaredFunctions.add(fnMatch[1]);
+      }
+    }
+  }
+
+  if (declaredFunctions.size === 0) return errors;
+
+  const testSectionHeaderRegex = /(?:^|\n)#{1,4}\s+[^\n]*?(?:Station 1|QA|KIỂM THỬ|CONTRACT TEST|TEST SPEC)[^\n]*\n([\s\S]*?)(?=\n#{1,2}\s+[^\n]+|\n===\s+|$)/gi;
+  let testLines = [];
+  let tMatch;
+  while ((tMatch = testSectionHeaderRegex.exec(planContent)) !== null) {
+    const secLines = tMatch[1].split('\n').filter((l) => /^\s*(?:[-*]|\d+\.)\s*.*?\bTC-[0-9A-Z_.]+/i.test(l));
+    testLines.push(...secLines);
+  }
+  if (testLines.length === 0) {
+    testLines = planContent.split('\n').filter((l) => /^\s*(?:[-*]|\d+\.)\s*.*?\bTC-[0-9A-Z_.]+/i.test(l));
+  }
+
+  const allTestText = testLines.join('\n');
+
+  for (const fnName of declaredFunctions) {
+    const fnRegex = new RegExp(`\\b${fnName}\\b`);
+    if (!fnRegex.test(allTestText)) {
+      console.error(`  ❌ [FUNCTION_TEST_PARITY_VIOLATION] Exported function '${fnName}' declared in production scope has NO test case in Station 1!`);
+      console.error(`     Every exported production function must have at least one explicit contract test in Station 1.`);
+      errors++;
+    }
+  }
+
+  if (errors === 0) {
+    console.log(`  ✔️ Function-to-Test Parity verified: All ${declaredFunctions.size} exported production function(s) have dedicated test specs.`);
   }
 
   return errors;

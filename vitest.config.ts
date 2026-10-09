@@ -22,6 +22,9 @@ export default defineConfig({
     ],
     environment: 'node',
     globals: false,
+    isolate: true,
+    clearMocks: true,
+    restoreMocks: true,
   },
   resolve: {
     alias: {

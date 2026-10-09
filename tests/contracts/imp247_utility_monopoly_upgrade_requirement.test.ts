@@ -211,7 +211,7 @@ describe('[TC-IMP247/CONTRACT][UC-IMP247] Utility Monopoly Upgrade Requirement &
         buyerId: 'p2',
         requesterId: p.id,
         targetPlayerId: 'p2',
-        price: 1500,
+        price: 2000,
         expiresAt: Date.now() + 15000,
       };
       const res = handleUpgradeUtility(p, room.phase, 12, reg, sm, room);

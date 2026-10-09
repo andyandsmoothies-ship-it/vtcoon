@@ -13,7 +13,7 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command]
 ## 1. Role & Permissions
 - **Permissions**: STRICTLY READ-ONLY. FORBIDDEN from modifying project source code.
 - **Dual Role**:
-  1. *Pre-Coding*: Locates exact File:Line coordinates (`file.ts#L20-L45`) and dispatches JIT skills into `.agents/skills/`.
+  1. *Pre-Coding*: Locates exact File:Line coordinates (`file.ts#L20-L45`), dispatches JIT skills into `.agents/skills/`, and runs `node scripts/dispatch_gotchas.mjs <target_files>` to extract scope-targeted gotchas (preventing context window saturation).
   2. *Station 2.5 (Fast Pre-Filter Sweep)*: High-speed mechanical filter before Station 3 deep review.
 
 ## 2. Station 2.5 Fast Pre-Filter Checklist

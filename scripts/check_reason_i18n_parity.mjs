@@ -61,17 +61,25 @@ function getViRejectReasons() {
 }
 
 function getActionableNotificationKeys() {
-  if (!fs.existsSync(ACTIONABLE_NOTIFICATIONS_FILE)) return new Set();
-  const content = fs.readFileSync(ACTIONABLE_NOTIFICATIONS_FILE, 'utf8');
   const keys = new Set();
-  const regex = /^\s*([A-Z0-9_]+)\s*:\s*\{/gm;
-  let match;
-  while ((match = regex.exec(content)) !== null) {
-    keys.add(match[1]);
-  }
-  const aliasRegex = /ACTIONABLE_NOTIFICATIONS_MAP\[['"]([A-Z0-9_]+)['"]\]/g;
-  while ((match = aliasRegex.exec(content)) !== null) {
-    keys.add(match[1]);
+  const files = [
+    ACTIONABLE_NOTIFICATIONS_FILE,
+    path.join(ROOT, 'src/client/ui/actionable_notification_map.ts'),
+    path.join(ROOT, 'src/client/ui/actionable_notification_gameplay.ts'),
+    path.join(ROOT, 'src/client/ui/actionable_notification_system.ts'),
+  ];
+  for (const file of files) {
+    if (!fs.existsSync(file)) continue;
+    const content = fs.readFileSync(file, 'utf8');
+    const regex = /^\s*([A-Z0-9_]+)\s*:\s*\{/gm;
+    let match;
+    while ((match = regex.exec(content)) !== null) {
+      keys.add(match[1]);
+    }
+    const aliasRegex = /ACTIONABLE_NOTIFICATIONS_MAP\[['"]([A-Z0-9_]+)['"]\]/g;
+    while ((match = aliasRegex.exec(content)) !== null) {
+      keys.add(match[1]);
+    }
   }
   return keys;
 }

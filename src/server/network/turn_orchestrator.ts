@@ -23,39 +23,18 @@ export const HUMAN_PHASE_TIMEOUTS_MS: Record<TurnPhase, number> = {
 };
 
 export const AUCTION_SETTLE_DELAY_MS = 2500;
-export const AUCTION_BOT_STEP_DELAY_MS = 1000;
-export const BOT_UPGRADE_OBSERVATION_DELAY_MS = 1500;
-export const BOT_TRANSIT_OBSERVATION_DELAY_MS = 2000;
-
-export function calculateBotStepDelay(
-  room: Room | undefined,
-  baseDelayMs: number = 1500
-): number {
-  if (!room || baseDelayMs <= 500) return baseDelayMs;
-  // [GRILL-02][ADV-04] Rào pha PropertyManagement & ActionPhase, ưu tiên tính delay quan sát Vòng Xoay
-  if (
-    (room.phase === TurnPhase.PropertyManagement || room.phase === TurnPhase.ActionPhase) &&
-    room.lastTransitResult &&
-    baseDelayMs > 500
-  ) {
-    const boost = room.lastTransitResult.boostSteps ?? 0;
-    const dynamicTransitDelay = 1200 + boost * 350 + BOT_TRANSIT_OBSERVATION_DELAY_MS;
-    return Math.max(baseDelayMs, dynamicTransitDelay);
-  }
-  if (
-    (room.phase === TurnPhase.PropertyManagement || room.phase === TurnPhase.ActionPhase) &&
-    room.lastDice &&
-    (room.lastDice[0] > 0 || room.lastDice[1] > 0)
-  ) {
-    const steps = (room.lastDice[0] ?? 0) + (room.lastDice[1] ?? 0);
-    const dynamicDelay = 1100 + steps * 200 + 800;
-    return Math.max(baseDelayMs, dynamicDelay);
-  }
-  if (room.lastEventCard && baseDelayMs > 500) {
-    return Math.max(baseDelayMs, 2500);
-  }
-  return baseDelayMs;
-}
+export {
+  calculateBotStepDelay,
+  AUCTION_BOT_STEP_DELAY_MS,
+  BOT_UPGRADE_OBSERVATION_DELAY_MS,
+  BOT_TRANSIT_OBSERVATION_DELAY_MS,
+  TurnBotTimerScheduler,
+  type TurnBotSchedulerDelegate,
+} from './turn_bot_timer_scheduler.js';
+import {
+  AUCTION_BOT_STEP_DELAY_MS,
+  TurnBotTimerScheduler,
+} from './turn_bot_timer_scheduler.js';
 
 export interface TurnOrchestratorOptions {
   readonly rooms: RoomManager;
@@ -72,19 +51,19 @@ export class TurnOrchestrator {
   public static readonly AUCTION_SETTLE_DELAY_MS = AUCTION_SETTLE_DELAY_MS;
   public static readonly AUCTION_BOT_STEP_DELAY_MS = AUCTION_BOT_STEP_DELAY_MS;
 
-  private readonly rooms: RoomManager;
-  private readonly intentMutex: IntentMutex;
-  private readonly broadcaster: DeltaBroadcaster;
-  private readonly onGameOver: (roomCode: string) => void;
-  private readonly onScheduleTurnTimeout?: (roomCode: string) => void;
-  private readonly onScheduleBotTurn?: (roomCode: string) => void;
-  private readonly botTurnDelayMs: number;
+  readonly rooms: RoomManager;
+  readonly intentMutex: IntentMutex;
+  readonly broadcaster: DeltaBroadcaster;
+  readonly onGameOver: (roomCode: string) => void;
+  readonly onScheduleTurnTimeout?: (roomCode: string) => void;
+  readonly onScheduleBotTurn?: (roomCode: string) => void;
+  readonly botTurnDelayMs: number;
   private readonly defaultTimeoutMs: number;
   private readonly customDefaultTimeoutMs?: number;
   private readonly activeTimers = new Map<string, NodeJS.Timeout>();
   private readonly deadlines = new Map<string, number>();
   private readonly auctionSettleTimers = new Map<string, { timer: NodeJS.Timeout; auctionKey: string }>();
-  private readonly botJustUpgraded = new Map<string, boolean>();
+  private readonly botScheduler: TurnBotTimerScheduler;
 
   constructor(options: TurnOrchestratorOptions) {
     this.rooms = options.rooms;
@@ -96,6 +75,27 @@ export class TurnOrchestrator {
     this.botTurnDelayMs = options.botTurnDelayMs ?? 1500;
     this.customDefaultTimeoutMs = options.defaultTimeoutMs;
     this.defaultTimeoutMs = options.defaultTimeoutMs ?? 60_000;
+    this.botScheduler = new TurnBotTimerScheduler(this);
+  }
+
+  public get botJustUpgraded(): Map<string, boolean> {
+    return this.botScheduler.botJustUpgraded;
+  }
+
+  registerActiveTimer(roomCode: string, timer: NodeJS.Timeout, deadline: number): void {
+    this.deadlines.set(roomCode, deadline);
+    this.activeTimers.set(roomCode, timer);
+    this.rooms.registerTimer(roomCode, timer);
+  }
+
+  clearActiveTimer(roomCode: string): void {
+    this.deadlines.delete(roomCode);
+    this.activeTimers.delete(roomCode);
+  }
+
+  setDeadline(roomCode: string, deadline: number): void {
+    if (deadline <= 0) return;
+    this.deadlines.set(roomCode, deadline);
   }
 
   getTimeRemaining(roomCode: string): number {
@@ -118,7 +118,7 @@ export class TurnOrchestrator {
     this.clearRoom(roomCode);
   }
 
-  private clearAuctionSettleTimer(roomCode: string): void {
+  clearAuctionSettleTimer(roomCode: string): void {
     const existing = this.auctionSettleTimers.get(roomCode);
     if (existing) {
       clearTimeout(existing.timer);
@@ -132,7 +132,7 @@ export class TurnOrchestrator {
     this.activeTimers.delete(roomCode);
     this.deadlines.delete(roomCode);
     this.auctionSettleTimers.delete(roomCode);
-    this.botJustUpgraded.delete(roomCode);
+    this.botScheduler.clearUpgradeFlag(roomCode);
   }
 
   scheduleAuctionSettle(roomCode: string, auctionKey?: string): void {
@@ -188,7 +188,7 @@ export class TurnOrchestrator {
 
     if (room.phase === TurnPhase.AuctionPhase) {
       if (this.hasEligibleAuctionBot(room)) {
-        this.scheduleBotStep(roomCode);
+        this.botScheduler.scheduleBotStep(roomCode);
       } else {
         this.onScheduleTurnTimeout?.(roomCode);
         const timeoutMs = customTimeoutMs && customTimeoutMs > 5000 ? customTimeoutMs : undefined;
@@ -202,7 +202,7 @@ export class TurnOrchestrator {
         ? room.players.find((p) => p.id === room.pendingInsolvencyDebtorId)
         : room.players[room.currentPlayerIndex];
       if (debtor && !debtor.isBot && !debtor.bankrupt) {
-        this.botJustUpgraded.delete(roomCode);
+        this.botScheduler.clearUpgradeFlag(roomCode);
         this.onScheduleTurnTimeout?.(roomCode);
         this.scheduleHumanTimeoutStep(roomCode, customTimeoutMs);
         return;
@@ -213,12 +213,12 @@ export class TurnOrchestrator {
     if (!current || current.bankrupt) return;
 
     if (current.isBot) {
-      this.scheduleBotStep(roomCode);
-    } else {
-      this.botJustUpgraded.delete(roomCode);
-      this.onScheduleTurnTimeout?.(roomCode);
-      this.scheduleHumanTimeoutStep(roomCode, customTimeoutMs);
+      this.botScheduler.scheduleBotStep(roomCode);
+      return;
     }
+    this.botScheduler.clearUpgradeFlag(roomCode);
+    this.onScheduleTurnTimeout?.(roomCode);
+    this.scheduleHumanTimeoutStep(roomCode, customTimeoutMs);
   }
 
   scheduleTurn(roomCode: string): void {
@@ -233,67 +233,7 @@ export class TurnOrchestrator {
     this.orchestrate(roomCode, customTimeoutMs);
   }
 
-  private scheduleBotStep(roomCode: string): void {
-    this.onScheduleBotTurn?.(roomCode);
-    const room = this.rooms.getRoom(roomCode);
-    const phaseTimeoutMs = (room?.phase ? PHASE_TIMEOUTS_MS[room.phase] : undefined) ?? 25_000;
-    this.deadlines.set(roomCode, Date.now() + phaseTimeoutMs);
-    const hasUpgradeDelay = this.botJustUpgraded.get(roomCode) === true;
-    if (hasUpgradeDelay) {
-      this.botJustUpgraded.delete(roomCode);
-    }
-    const delayMs = hasUpgradeDelay
-      ? BOT_UPGRADE_OBSERVATION_DELAY_MS
-      : calculateBotStepDelay(room, this.botTurnDelayMs);
-    const timer = setTimeout(() => {
-      this.activeTimers.delete(roomCode);
-      this.deadlines.delete(roomCode);
-      void this.intentMutex.runExclusive(roomCode, async () => {
-        const r = this.rooms.getRoom(roomCode);
-        if (!r?.started) return;
-        if (isRoomGameOver(r)) {
-          this.botJustUpgraded.delete(roomCode);
-          this.onGameOver(roomCode);
-          return;
-        }
-
-        const curr = r.players[r.currentPlayerIndex];
-        const hasBots =
-          r.phase === TurnPhase.AuctionPhase ? this.hasEligibleAuctionBot(r) : Boolean(curr?.isBot && !curr.bankrupt);
-        if (!hasBots) return;
-
-        if (r.phase === TurnPhase.AuctionPhase) {
-          const stepRes = this.rooms.stepAuctionBot(roomCode);
-          if (stepRes.finished) {
-            this.scheduleAuctionSettle(roomCode);
-            this.deadlines.set(roomCode, Date.now() + AUCTION_SETTLE_DELAY_MS + 500);
-          } else {
-            this.orchestrate(roomCode);
-          }
-          this.broadcaster.broadcastRoomDelta(roomCode);
-        } else {
-          const prevLevelSum = Array.from(this.rooms.getPropertyStates?.(roomCode)?.values() ?? []).reduce((acc, st) => acc + (st.level ?? 0), 0);
-          this.rooms.stepBotTurn(roomCode);
-          const nextLevelSum = Array.from(this.rooms.getPropertyStates?.(roomCode)?.values() ?? []).reduce((acc, st) => acc + (st.level ?? 0), 0);
-          if (nextLevelSum > prevLevelSum) {
-            this.botJustUpgraded.set(roomCode, true);
-          }
-          const rAfter = this.rooms.getRoom(roomCode);
-          if (rAfter && isRoomGameOver(rAfter)) {
-            this.clearAuctionSettleTimer(roomCode);
-            this.botJustUpgraded.delete(roomCode);
-            this.onGameOver(roomCode);
-          } else {
-            this.orchestrate(roomCode);
-            this.broadcaster.broadcastRoomDelta(roomCode);
-          }
-        }
-      });
-    }, delayMs);
-
-    this.activeTimers.set(roomCode, timer);
-    this.rooms.registerTimer(roomCode, timer);
-  }
+  // Bot step scheduling delegated to TurnBotTimerScheduler
 
   private scheduleAuctionTimeoutStep(roomCode: string, customTimeoutMs?: number): void {
     const ms = customTimeoutMs ?? this.customDefaultTimeoutMs ?? PHASE_TIMEOUTS_MS[TurnPhase.AuctionPhase];

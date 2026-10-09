@@ -100,7 +100,7 @@ describe('IMP-187 Contract Tests: Telemetry Unmortgage & M&A Transparency', () =
     });
 
     it('[TC-187.03/MSS] Fallback unmortgage without recorded mortgageLoans uses 50% deed price', () => {
-      // Cell 28 deed price is 1500 -> 50% = 750
+      // Cell 28 deed price is 2000 (IMP-277A) -> 50% = 1000
       const preState = createMockGameState({
         playersInfo: {
           bot_2: mockHudPlayer({ id: 'bot_2', name: 'Bot AI 2', balance: 5000, ownedProperties: [28], mortgagedProperties: [28], isBot: true }),
@@ -117,7 +117,7 @@ describe('IMP-187 Contract Tests: Telemetry Unmortgage & M&A Transparency', () =
       };
 
       const expected = computeExpectedDelta(delta, preState, undefined, 5075);
-      expect(expected).toBe(-750);
+      expect(expected).toBe(-1000);
     });
   });
 

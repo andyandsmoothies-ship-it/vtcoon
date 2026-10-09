@@ -22,6 +22,7 @@ hooks: [.agents/hooks_implementer.json]
 - **Workspace Isolation**: Execute within isolated workspace. Never modify files outside approved ticket scope.
 - **Test Confinement & Legacy Caller Guard**: STRICTLY FORBIDDEN from modifying or relaxing Station 1 contract tests for the current ticket. However, if a pre-existing legacy test from past tickets fails during regression sweeps due to an invalid caller pattern (such as invoking a React component directly as a bare JS function outside React context), implementer MUST wrap the legacy test invocation in a proper React rendering context (`renderToStaticMarkup(React.createElement(...))`). STRICTLY FORBIDDEN from introducing defensive deformities (`try...catch`, conditional hooks, fallback dummy contexts) into production code `src/**` to appease malformed tests (Anti-TIDD Rule).
 - **Implementer Pushback Mandate**: Do NOT blindly copy draft code from plans. If a plan snippet is a no-op, breaks a domain invariant, introduces memory leaks, or contains dead code, implementer MUST apply the real physical fix rather than executing defective plan code.
+- **Zero Magic Numbers & SSOT Verification Mandate**: Implementer MUST cross-check all physical constants, durations, and coordinates against existing SSOT files (`pawn_path.ts`, `camera_state_machine.ts`). NEVER accept arbitrary magic numbers (e.g. `1200ms`, `0.5m`) from draft plans when physical SSOT constants exist.
 - **Physical Discovery & Deviation Protocol**: If unlisted physical constraints, omitted siblings, or edge cases are uncovered during coding, implementer MUST resolve them cleanly in `src/**` and emit an explicit `### 💡 IMPLEMENTATION DISCOVERY` block in the handoff message citing: (1) Discovered gap, (2) Code fix applied, (3) Downstream test request. Spec Reviewer evaluates and reconciles legitimate discoveries. Banned using 'Implementation Discovery' to justify hacky workarounds or linter bypasses.
 - **Atomic File Edits**: Use native file modification tools (`replace_file_content`, `write_to_file`). Shell redirects are strictly forbidden. Verify target chunk match count before editing.
 - **Slice Scope Confinement**: Implement ONLY flows authorized in the ticket plan. Do not implement out-of-scope alternative flows or unapproved features.
@@ -59,6 +60,9 @@ hooks: [.agents/hooks_implementer.json]
   4. Client Parser & Store
   5. UI Components & Affordances
 - Delivering partial pipelines or backend-only logic without client wiring constitutes an immediate rejection.
+- **Runtime Wire Gate (Zero-Orphan Seam & Presentation Wire Rule)**:
+  - When introducing or modifying parameters, options, or flags in domain / mathematical engines (e.g. `TargetCameraStateOptions`, `StreetChaseParams`, `ActionIntent`), implementer MUST trace and actively wire them to production callers / render loops (`adaptive_cinematic_camera.tsx`, `game_canvas.tsx`, or API controllers).
+  - Leaving new parameters unwired in production while only calling them in unit tests constitutes Dead Code (Orphan Seam) and results in MANDATORY Station 3.2 REJECTION.
 
 ## 5. Report Template
 ```markdown

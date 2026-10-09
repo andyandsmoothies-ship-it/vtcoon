@@ -31,6 +31,12 @@ export const SLOP_RULES = {
   ZERO_DEAD_SSR: 'zero-dead-ssr',
   ZERO_ORPHAN_PRODUCTION_FILES: 'zero-orphan-production-files',
   MARKDOWN_HYGIENE_LATEX: 'markdown-hygiene-latex',
+  ZERO_RAW_CANVAS_DOM: 'zero-raw-canvas-dom',
+  EULER_YAW_CLAMP: 'euler-yaw-clamp',
+  CLIENT_SERVER_BOUNDARY: 'client-server-boundary',
+  ZERO_ALLOCATION_RENDER_LOOP: 'zero-allocation-render-loop',
+  R3F_NO_CONDITIONAL_RETURN_NULL: 'r3f-no-conditional-return-null',
+  KINEMATICS_FINITE_DEFENSE: 'kinematics-finite-defense',
 };
 
 export const TIER_BUDGETS = {
@@ -116,6 +122,7 @@ function isDeclarativeOrReducerFunction(fnName, filePath) {
 export function lintSlopContent(content, filePath = 'anonymous.ts') {
   const errors = [];
   const warnings = [];
+  const normPath = filePath.replace(/\\/g, '/');
 
   const lines = content.split('\n');
   const lineCount = lines.length;
@@ -346,6 +353,186 @@ export function lintSlopContent(content, filePath = 'anonymous.ts') {
           line: line + 1,
           message: 'Avoid "isSSR" dead branch in client UI. Client UI runs in browser; SSR guards create unkillable mutants.',
         });
+      }
+    }
+
+    // Rule 11: ZERO_RAW_CANVAS_DOM (Gotcha #12: Prohibit raw DOM tags inside 3D Canvas without SafeHtml/Html)
+    const normPath = filePath.replace(/\\/g, '/');
+    if (normPath.includes('src/client/3d/') && !normPath.includes('cinematic_effects.tsx')) {
+      const isRawDomElement = (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) &&
+        ts.isIdentifier(node.tagName) &&
+        ['div', 'span', 'p', 'button', 'input', 'h1', 'h2', 'h3'].includes(node.tagName.text);
+
+      if (isRawDomElement) {
+        let parent = node.parent;
+        let isWrapped = false;
+        while (parent) {
+          if (ts.isJsxElement(parent) && ts.isIdentifier(parent.openingElement.tagName)) {
+            const parentTag = parent.openingElement.tagName.text;
+            if (parentTag === 'SafeHtml' || parentTag === 'Html') {
+              isWrapped = true;
+              break;
+            }
+          }
+          parent = parent.parent;
+        }
+
+        if (!isWrapped) {
+          const { line } = sf.getLineAndCharacterOfPosition(node.getStart());
+          errors.push({
+            rule: SLOP_RULES.ZERO_RAW_CANVAS_DOM,
+            file: filePath,
+            line: line + 1,
+            message: `Gotcha #12 Violation: Raw DOM element <${node.tagName.text}> placed directly in 3D Canvas without <SafeHtml> wrapper (causes fatal R3F crash in browser).`,
+          });
+        }
+      }
+    }
+
+    // Rule 12: EULER_YAW_CLAMP (Gotcha #11: Three.js Euler order must be 'YXZ' when reading yaw)
+    if (normPath.includes('src/client/3d/')) {
+      if (ts.isNewExpression(node) && ts.isPropertyAccessExpression(node.expression)) {
+        if (node.expression.expression.getText(sf) === 'THREE' && node.expression.name.text === 'Euler') {
+          if (node.arguments && node.arguments.length === 3) {
+            const { line } = sf.getLineAndCharacterOfPosition(node.getStart());
+            warnings.push({
+              rule: SLOP_RULES.EULER_YAW_CLAMP,
+              file: filePath,
+              line: line + 1,
+              message: "Gotcha #11 Warning: 'new THREE.Euler(x, y, z)' defaults to 'XYZ' order which clamps Yaw to [-PI/2, PI/2]. Use 'YXZ' order if tracking yaw/rotation.",
+            });
+          }
+        }
+      }
+    }
+
+    // Rule 13: CLIENT_SERVER_BOUNDARY (GEMINI.md Iron Law: Prohibit Node built-ins and server packages in client bundles)
+    if (normPath.includes('src/client/') || normPath.startsWith('src/client/')) {
+      let importedModule = null;
+      if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier)) {
+        importedModule = node.moduleSpecifier.text;
+      } else if (ts.isCallExpression(node) && node.expression) {
+        const isDynamicImport = node.expression.kind === ts.SyntaxKind.ImportKeyword;
+        const isRequire = ts.isIdentifier(node.expression) && node.expression.text === 'require';
+        if ((isDynamicImport || isRequire) && node.arguments && node.arguments.length > 0 && ts.isStringLiteral(node.arguments[0])) {
+          importedModule = node.arguments[0].text;
+        }
+      }
+
+      if (importedModule) {
+        const BANNED_CLIENT_MODULES = new Set([
+          'ws', 'child_process', 'fs', 'path', 'os', 'crypto', 'net', 'http', 'https', 'stream', 'buffer', 'cluster', 'dgram', 'dns', 'readline', 'tls', 'v8', 'vm', 'worker_threads', 'zlib',
+        ]);
+        if (importedModule.startsWith('node:') || BANNED_CLIENT_MODULES.has(importedModule)) {
+          const { line } = sf.getLineAndCharacterOfPosition(node.getStart());
+          errors.push({
+            rule: SLOP_RULES.CLIENT_SERVER_BOUNDARY,
+            file: filePath,
+            line: line + 1,
+            message: `Client/Server Boundary Violation: Importing server/Node runtime package "${importedModule}" in client bundle is strictly forbidden by GEMINI.md Iron Law.`,
+          });
+        }
+      }
+    }
+
+    // Rule 14: ZERO_ALLOCATION_RENDER_LOOP (Gotcha #22 & 3D Perf: Prohibit array allocations and reductions inside 60 FPS useFrame/useSafeFrame)
+    if (normPath.includes('src/client/3d/')) {
+      if (ts.isCallExpression(node) && ts.isIdentifier(node.expression)) {
+        const fnName = node.expression.text;
+        if (fnName === 'useFrame' || fnName === 'useSafeFrame') {
+          const callback = node.arguments && node.arguments[0];
+          if (callback && (ts.isArrowFunction(callback) || ts.isFunctionExpression(callback))) {
+            const checkFrameBody = (frameNode) => {
+              if (ts.isCallExpression(frameNode) && ts.isPropertyAccessExpression(frameNode.expression)) {
+                const propAccess = frameNode.expression;
+                const methodName = propAccess.name.text;
+                // Check .reduce()
+                if (methodName === 'reduce') {
+                  const { line } = sf.getLineAndCharacterOfPosition(frameNode.getStart());
+                  errors.push({
+                    rule: SLOP_RULES.ZERO_ALLOCATION_RENDER_LOOP,
+                    file: filePath,
+                    line: line + 1,
+                    message: `Zero-Allocation Render Loop Violation: Calling .reduce() inside 60 FPS ${fnName} callback causes memory churn/GC pressure on mobile. Pre-calculate or cache state instead.`,
+                  });
+                }
+                // Check Object.values, Object.keys, Object.entries
+                if (ts.isIdentifier(propAccess.expression) && propAccess.expression.text === 'Object') {
+                  if (methodName === 'values' || methodName === 'keys' || methodName === 'entries') {
+                    const { line } = sf.getLineAndCharacterOfPosition(frameNode.getStart());
+                    errors.push({
+                      rule: SLOP_RULES.ZERO_ALLOCATION_RENDER_LOOP,
+                      file: filePath,
+                      line: line + 1,
+                      message: `Zero-Allocation Render Loop Violation: Calling Object.${methodName}() inside 60 FPS ${fnName} callback allocates temporary arrays every frame. Use for..in, cached state, or reactive store selectors instead.`,
+                    });
+                  }
+                }
+              }
+              ts.forEachChild(frameNode, checkFrameBody);
+            };
+            if (callback.body) {
+              ts.forEachChild(callback.body, checkFrameBody);
+            }
+          }
+        }
+      }
+    }
+
+    // Rule 15: R3F_NO_CONDITIONAL_RETURN_NULL (Gotcha #23: Prohibit returning null on transient state in 3D components)
+    if (normPath.includes('src/client/3d/') && normPath.endsWith('.tsx')) {
+      if (ts.isIfStatement(node) && node.thenStatement) {
+        let hasReturnNull = false;
+        if (ts.isReturnStatement(node.thenStatement)) {
+          if (node.thenStatement.expression && node.thenStatement.expression.kind === ts.SyntaxKind.NullKeyword) {
+            hasReturnNull = true;
+          }
+        } else if (ts.isBlock(node.thenStatement)) {
+          for (const stmt of node.thenStatement.statements) {
+            if (ts.isReturnStatement(stmt) && stmt.expression && stmt.expression.kind === ts.SyntaxKind.NullKeyword) {
+              hasReturnNull = true;
+              break;
+            }
+          }
+        }
+        if (hasReturnNull) {
+          const condText = node.expression.getText(sf);
+          if (/(isAnimating|activeAnimation|isPawnMoving|hasUserCustomCamera|pawnAnimationQueue)/i.test(condText)) {
+            const { line } = sf.getLineAndCharacterOfPosition(node.getStart());
+            errors.push({
+              rule: SLOP_RULES.R3F_NO_CONDITIONAL_RETURN_NULL,
+              file: filePath,
+              line: line + 1,
+              message: `R3F Transient Unmount Violation: Returning null on transient condition "${condText}" in 3D component causes continuous GPU buffer/shader re-allocation churn on mobile. Keep component mounted and control visibility via <group visible={...}>.`,
+            });
+          }
+        }
+      }
+    }
+
+    // Rule 16: KINEMATICS_FINITE_DEFENSE (Kinematics tuples must guard against NaN fallthrough)
+    if (normPath.includes('src/client/3d/') && /(?:camera|kinematic|flyby|return)\b/i.test(normPath)) {
+      if (ts.isPropertyAssignment(node) && ts.isIdentifier(node.name)) {
+        const propName = node.name.text;
+        if ((propName === 'position' || propName === 'target') && ts.isArrayLiteralExpression(node.initializer)) {
+          const elements = node.initializer.elements;
+          if (elements.length === 3) {
+            for (const el of elements) {
+              if (ts.isIdentifier(el)) {
+                const idName = el.text;
+                if (/^(?:tx|ty|tz|cx|cy|cz)$/.test(idName)) {
+                  const { line } = sf.getLineAndCharacterOfPosition(el.getStart());
+                  errors.push({
+                    rule: SLOP_RULES.KINEMATICS_FINITE_DEFENSE,
+                    file: filePath,
+                    line: line + 1,
+                    message: `Kinematics Finite Defense: Property '${propName}' directly assigns unguarded arithmetic intermediate identifier '${idName}' in 3D tuple. Wrap in Number.isFinite(${idName}) ? ${idName} : safeFallback to prevent Three.js Matrix4 Inversion crashes.`,
+                  });
+                }
+              }
+            }
+          }
+        }
       }
     }
 

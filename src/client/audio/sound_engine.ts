@@ -22,25 +22,11 @@ import {
   synthesizeMonopolyFanfare,
 } from './pawn_tension_sound_recipes';
 
-type AudioContextClass = typeof AudioContext;
+import { SoundEngineContextManager, resolveAudioContext } from './sound_engine_context.js';
 
-function resolveAudioContext(): AudioContextClass | null {
-  if (typeof window !== 'undefined') {
-    const ctx = window.AudioContext || window.webkitAudioContext;
-    if (ctx) return ctx;
-  }
-  if (typeof globalThis !== 'undefined' && 'AudioContext' in globalThis) {
-    return globalThis.AudioContext;
-  }
-  return null;
-}
+export { SoundEngineContextManager, resolveAudioContext };
 
-export class SoundEngineImpl {
-  private ctx: AudioContext | null = null;
-  public masterGain: GainNode | null = null;
-  public sfxBus: GainNode | null = null;
-  public bgmBus: GainNode | null = null;
-  private unsubscribeStore: (() => void) | null = null;
+export class SoundEngineImpl extends SoundEngineContextManager {
   private lastGavelTime = 0;
   private heartbeatInterval: ReturnType<typeof setInterval> | null = null;
   private oceanAmbientNodes: {
@@ -49,84 +35,6 @@ export class SoundEngineImpl {
     gain: GainNode;
     lfo?: OscillatorNode;
   } | null = null;
-
-  public getContext(): AudioContext | null {
-    if (!this.ctx) {
-      const CtxClass = resolveAudioContext();
-      if (CtxClass) {
-        try {
-          this.ctx = new CtxClass();
-          this.initAudioGraph(this.ctx);
-        } catch {
-          this.ctx = null;
-        }
-      }
-    }
-    return this.ctx;
-  }
-
-  private initAudioGraph(context: AudioContext): void {
-    try {
-      this.masterGain = context.createGain();
-      this.sfxBus = context.createGain();
-      this.bgmBus = context.createGain();
-
-      this.sfxBus.connect(this.masterGain);
-      this.bgmBus.connect(this.masterGain);
-      this.masterGain.connect(context.destination);
-
-      this.syncVolumesWithStore(context.currentTime);
-
-      if (!this.unsubscribeStore) {
-        this.unsubscribeStore = useAudioStore.subscribe(() => {
-          if (this.ctx) {
-            this.syncVolumesWithStore(this.ctx.currentTime);
-          }
-        });
-      }
-    } catch {
-      // Safe fallback in restricted environments
-    }
-  }
-
-  public syncVolumesWithStore(atTime?: number): void {
-    const { isMuted, masterVolume, sfxVolume, bgmVolume } = useAudioStore.getState();
-    const t = atTime ?? this.ctx?.currentTime ?? 0;
-
-    if (this.masterGain) {
-      const effectiveMaster = isMuted ? 0 : Math.max(0, Math.min(1, masterVolume));
-      this.masterGain.gain.setValueAtTime(effectiveMaster, t);
-    }
-    if (this.sfxBus) {
-      const effectiveSfx = Math.max(0, Math.min(1, sfxVolume));
-      this.sfxBus.gain.setValueAtTime(effectiveSfx, t);
-    }
-    if (this.bgmBus) {
-      const effectiveBgm = Math.max(0, Math.min(1, bgmVolume));
-      this.bgmBus.gain.setValueAtTime(effectiveBgm, t);
-    }
-  }
-
-  public async resumeAudioContext(): Promise<void> {
-    const context = this.getContext();
-    if (context && context.state === 'suspended') {
-      try {
-        await context.resume();
-      } catch {
-        // Fallback im lặng khi trình duyệt chặn tương tác
-      }
-    }
-  }
-
-  private getEffectiveSfxVolume(): number {
-    const { isMuted, masterVolume, sfxVolume } = useAudioStore.getState();
-    return isMuted ? 0 : Math.max(0, Math.min(1, masterVolume * sfxVolume));
-  }
-
-  private getEffectiveBgmVolume(): number {
-    const { isMuted, masterVolume, bgmVolume } = useAudioStore.getState();
-    return isMuted ? 0 : Math.max(0, Math.min(1, masterVolume * bgmVolume));
-  }
 
   public playDiceRoll(): void {
     const context = this.getContext();
@@ -369,21 +277,7 @@ export class SoundEngineImpl {
 
   public dispose(): void {
     this.stopAll();
-    if (this.unsubscribeStore) {
-      this.unsubscribeStore();
-      this.unsubscribeStore = null;
-    }
-    if (this.ctx && this.ctx.state !== 'closed') {
-      try {
-        void this.ctx.close();
-      } catch {
-        // Safe close
-      }
-    }
-    this.ctx = null;
-    this.masterGain = null;
-    this.sfxBus = null;
-    this.bgmBus = null;
+    this.disposeContext();
   }
 }
 

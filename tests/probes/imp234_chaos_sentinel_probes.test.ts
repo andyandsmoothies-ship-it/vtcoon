@@ -407,8 +407,8 @@ describe('IMP-234: Chaos-Sentinel Physical Adversarial Boundary & Mutation Senti
       });
 
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
-      // Neither badge is hidden on mobile
-      expect(html).not.toContain('hidden md:flex');
+      // Under IMP-253, regular badge is hidden on mobile (hidden md:flex) when milestone banner is active
+      expect(html).toContain('hidden md:flex');
       expect(html).toContain('+1.500');
       expect(html).toContain('-500');
     });
