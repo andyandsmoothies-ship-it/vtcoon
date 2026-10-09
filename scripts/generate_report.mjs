@@ -591,6 +591,16 @@ if (!fs.existsSync(finalReportPath) || force) {
     }
   }
 
+  const stage0ReviewerStr = planChallengeFile
+    ? '`adversarial-challenger` & `audit_plan.mjs`'
+    : '`audit_plan.mjs --auto-sign` (Máy duyệt)';
+  const stage0HeadingStr = planChallengeFile
+    ? 'Thẩm Định Đối Kháng Kế Hoạch (`adversarial-challenger` & `audit_plan.mjs`)'
+    : 'Thẩm Định Kế Hoạch Tự Động (`audit_plan.mjs --auto-sign`)';
+  const stage0ProcessNote = planChallengeFile
+    ? '- **Xác nhận**: Kế hoạch đã vượt qua 100% các tiêu chí kiểm tra về State Invariants, Seam Discipline, Boundary Control và Symmetric Verification.'
+    : '- **Lưu ý quy trình**: Kế hoạch được thẩm định cơ học bằng `audit_plan.mjs --auto-sign`. Chưa kích hoạt vòng phản biện đối kháng chuyên sâu từ subagent `adversarial-challenger`.';
+
   const finalReportContent = `# BÁO CÁO NGHIỆM THU HOÀN THÀNH TICKET ${ticketId}
 ## ${planTitle}
 
@@ -623,7 +633,7 @@ ${planSubsystem === 'client-audio'
 
 | Trạm Kiểm Soát | Vai Trò & Tệp Bằng Chứng | Chỉ Số Đạt Được | Kết Quả Thẩm Định |
 | :--- | :--- | :--- | :---: |
-| **Stage 0: Plan Review** | \`plan-griller\` / Máy duyệt<br>[\`.agents/audit/PLAN_AUDIT_${ticketId}.md\`](file:///${repoRoot.replace(/\\/g, '/')}/.agents/audit/PLAN_AUDIT_${ticketId}.md) | ${planAuditSummary} | **${planGrillerVerdict}** |
+| **Stage 0: Plan Review** | ${stage0ReviewerStr}<br>[\`.agents/audit/PLAN_AUDIT_${ticketId}.md\`](file:///${repoRoot.replace(/\\/g, '/')}/.agents/audit/PLAN_AUDIT_${ticketId}.md) | ${planAuditSummary} | **${planGrillerVerdict}** |
 | **Trạm 1: RED Contract Test** | \`qa-tester\`<br>[\`${contractFile || 'tests/contracts'}\`](file:///${contractFile ? path.resolve(repoRoot, contractFile).replace(/\\/g, '/') : ''}) | ${station1TestCount} atomic tests, ${contractAssertCount} asserts, 0 loops. Adversarial Inversion: ${station1RedVerified ? 'Đã chứng minh RED runtime' : 'Verified'} | **VERIFIED RED** 🎯 |
 | **Trạm 2: GREEN Implementation** | \`implementer\`<br>[\`${fs.existsSync(path.join(evidenceDir, `${ticketId}_snapshot.json`)) ? `.agents/evidence/${ticketId}_snapshot.json` : (fs.existsSync(path.join(evidenceDir, `chaos_sentinel_${ticketId}.json`)) ? `.agents/evidence/chaos_sentinel_${ticketId}.json` : `.agents/audit/station1_${ticketId}.json`)}\`](file:///${repoRoot.replace(/\\/g, '/')}/${fs.existsSync(path.join(evidenceDir, `${ticketId}_snapshot.json`)) ? `.agents/evidence/${ticketId}_snapshot.json` : (fs.existsSync(path.join(evidenceDir, `chaos_sentinel_${ticketId}.json`)) ? `.agents/evidence/chaos_sentinel_${ticketId}.json` : `.agents/audit/station1_${ticketId}.json`)}) | ${srcFiles.length} production files modified, 100% tests chuyển sang GREEN | **VERIFIED GREEN** 🟢 |
 | **Trạm 2.5: Fast Pre-Filter** | \`scout\` & \`fast_prefilter.mjs\` | Typecheck \`tsc --noEmit\` exit 0, 0 dirty casts (\`as any\`), LOC budgets đạt chuẩn | **100% PASS** 🚀 |
@@ -635,10 +645,10 @@ ${uiCraftFile || visual3dFile ? `| **Trạm 3.2: UI/UX Craft Review** | \`ui-cra
 
 ## 3. KẾT QUẢ VẬN HÀNH 4 TRẠM KHÉP KÍN & PHẢN HỒI THẨM ĐỊNH (AUDIT & SUBAGENT FEEDBACK)
 
-### Trạm 0: Thẩm Định Đối Kháng Kế Hoạch (\`plan-griller\` / \`adversarial-challenger\`)
+### Trạm 0: ${stage0HeadingStr}
 - **Phán quyết**: **${planGrillerVerdict}**
 - **Nhật ký thẩm tra**: ${planAuditSummary}
-${planChallengeNotes.length > 0 ? `- **Điểm mù kiến trúc / phản biện đối kháng đã giải tỏa**:\n${planChallengeNotes.map((n) => `  ${n}`).join('\n')}` : '- **Xác nhận**: Kế hoạch đã vượt qua 100% các tiêu chí kiểm tra về State Invariants, Seam Discipline, Boundary Control và Symmetric Verification.'}
+${planChallengeNotes.length > 0 ? `- **Điểm mù kiến trúc / phản biện đối kháng đã giải tỏa**:\n${planChallengeNotes.map((n) => `  ${n}`).join('\n')}` : stage0ProcessNote}
 
 ### Trạm 1: Bộ Kiểm Thử Hợp Đồng Độc Lập (\`qa-tester\`)
 - **Tệp kiểm thử hợp đồng**: [\`${contractFile || 'tests/contracts'}\`](file:///${contractFile ? path.resolve(repoRoot, contractFile).replace(/\\/g, '/') : ''})

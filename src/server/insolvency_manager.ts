@@ -113,9 +113,7 @@ export function liquidateAssets(
   }
 
   if (player.balance >= 0 && room.phase === TurnPhase.InsolvencyPhase) {
-    delete room.pendingInsolvencyCreditorId;
-    delete room.pendingInsolvencyDebtorId;
-    room.phase = TurnPhase.PropertyManagement;
+    restorePostInsolvencyPhase(room, playerId);
   }
 
   console.info(JSON.stringify({
@@ -151,29 +149,54 @@ function transferAssetsToCreditor(
   }
 }
 
-function resolvePostBankruptcyInsolvency(room: Room, playerId: string): void {
-  if (room.phase !== TurnPhase.InsolvencyPhase) return;
-  if (room.pendingInsolvencyQueue && room.pendingInsolvencyQueue.length > 0) {
-    const qIdx = room.pendingInsolvencyQueue.indexOf(playerId);
-    if (qIdx !== -1) room.pendingInsolvencyQueue.splice(qIdx, 1);
-    let nextDebtor: Player | undefined;
-    while (room.pendingInsolvencyQueue.length > 0) {
-      const nextDebtorId = room.pendingInsolvencyQueue.shift();
-      const candidate = nextDebtorId ? room.players.find((p) => p.id === nextDebtorId) : undefined;
-      if (candidate && candidate.balance < 0 && !candidate.bankrupt) {
-        nextDebtor = candidate;
-        break;
-      }
-    }
-    if (nextDebtor) {
-      room.pendingInsolvencyDebtorId = nextDebtor.id;
-      return;
-    }
+function isAuthorizedInsolvencyActor(room: Room, playerId: string): boolean {
+  if (room.phase !== TurnPhase.InsolvencyPhase) return false;
+  const currentDebtor = room.pendingInsolvencyDebtorId ?? room.players[room.currentPlayerIndex]?.id;
+  if (playerId === currentDebtor) return true;
+  return Boolean(room.pendingInsolvencyQueue?.includes(playerId));
+}
+
+function findNextInsolventDebtor(room: Room): Player | undefined {
+  while (room.pendingInsolvencyQueue?.length) {
+    const nextId = room.pendingInsolvencyQueue.shift();
+    const candidate = room.players.find((p) => p.id === nextId);
+    if (candidate && candidate.balance < 0 && !candidate.bankrupt) return candidate;
   }
+  return undefined;
+}
+
+function finalizeInsolvencyPhase(room: Room, playerId: string, rng: () => number): void {
   delete room.pendingInsolvencyDebtorId;
+  delete room.pendingInsolvencyCreditorId;
+  delete room.pendingInsolvencyQueue;
+
+  if (room.players[room.currentPlayerIndex]?.bankrupt) {
+    delete room.preInsolvencyPhase;
+    advanceTurnAfterBankruptcy(room, rng);
+    return;
+  }
+
   const isTurnPlayer = room.players[room.currentPlayerIndex]?.id === playerId;
   room.phase = isTurnPlayer ? TurnPhase.PropertyManagement : (room.preInsolvencyPhase ?? TurnPhase.PropertyManagement);
   delete room.preInsolvencyPhase;
+}
+
+export function restorePostInsolvencyPhase(room: Room, playerId: string, rng: () => number = Math.random): void {
+  if (!isAuthorizedInsolvencyActor(room, playerId)) return;
+
+  if (room.pendingInsolvencyQueue) {
+    const qIdx = room.pendingInsolvencyQueue.indexOf(playerId);
+    if (qIdx !== -1) room.pendingInsolvencyQueue.splice(qIdx, 1);
+
+    const nextDebtor = findNextInsolventDebtor(room);
+    if (nextDebtor) {
+      room.pendingInsolvencyDebtorId = nextDebtor.id;
+      delete room.pendingInsolvencyCreditorId;
+      return;
+    }
+  }
+
+  finalizeInsolvencyPhase(room, playerId, rng);
 }
 
 // --- UC-GAME-054: Tuyên Bố Phá Sản ---
@@ -211,8 +234,6 @@ export function declareBankruptcy(
   }
 
   const effectiveCreditorId = creditorId ?? (room.pendingInsolvencyDebtorId === playerId ? room.pendingInsolvencyCreditorId : undefined);
-  delete room.pendingInsolvencyCreditorId;
-  delete room.pendingInsolvencyDebtorId;
 
   const creditor = effectiveCreditorId && effectiveCreditorId !== 'BANK'
     ? room.players.find((p) => p.id === effectiveCreditorId && !p.bankrupt)
@@ -220,23 +241,14 @@ export function declareBankruptcy(
 
   if (creditor) {
     transferAssetsToCreditor(player, creditor, registry, collateralCells);
-  } else if (effectiveCreditorId === 'BANK') {
-    // Nhánh 2: Nợ ngân hàng -> đưa đất vào đấu giá phát mãi 70% sàn
-    if (player.balance > 0) {
-      room.treasury = (room.treasury ?? 0) + player.balance;
-    }
-    const otherPlayers = room.players.filter((p) => p.id !== playerId && !p.bankrupt);
-    if (auctions && roomCode && otherPlayers.length > 0) {
-      liquidateAssets(room, playerId, registry, stateMap, auctions, roomCode);
-    }
-    for (const [cellIndex, owner] of Array.from(registry.entries())) {
-      if (owner === playerId) {
-        registry.delete(cellIndex);
-        stateMap.delete(cellIndex);
+  } else {
+    if (effectiveCreditorId === 'BANK') {
+      if (player.balance > 0) room.treasury = (room.treasury ?? 0) + player.balance;
+      const otherPlayers = room.players.filter((p) => p.id !== playerId && !p.bankrupt);
+      if (auctions && roomCode && otherPlayers.length > 0) {
+        liquidateAssets(room, playerId, registry, stateMap, auctions, roomCode);
       }
     }
-  } else {
-    // Mặc định: giải phóng toàn bộ tài sản
     for (const [cellIndex, owner] of Array.from(registry.entries())) {
       if (owner === playerId) {
         registry.delete(cellIndex);
@@ -260,10 +272,12 @@ export function declareBankruptcy(
     const first = room.fireSaleQueue.shift()!;
     handleStartFireSaleAuction(room, first, auctions, roomCode, playerId);
     room.phase = TurnPhase.AuctionPhase;
+    delete room.pendingInsolvencyCreditorId;
+    delete room.pendingInsolvencyDebtorId;
     return { gameOver: false };
   }
 
-  resolvePostBankruptcyInsolvency(room, playerId);
+  restorePostInsolvencyPhase(room, playerId, rng);
 
   if (isRoomGameOver(room)) {
     const rankings = calculateRankings(room, registry, stateMap);
@@ -271,7 +285,7 @@ export function declareBankruptcy(
   }
 
   // Chuyển lượt sang người chơi tiếp theo còn sống nếu người phá sản đang giữ lượt
-  if (room.players[room.currentPlayerIndex]?.id === playerId && room.phase !== TurnPhase.AuctionPhase) {
+  if (room.players[room.currentPlayerIndex]?.id === playerId && room.phase !== TurnPhase.AuctionPhase && room.phase !== TurnPhase.InsolvencyPhase) {
     advanceTurnAfterBankruptcy(room, rng);
   }
   return { gameOver: false };

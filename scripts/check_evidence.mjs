@@ -218,6 +218,12 @@ if (evidence.mutationSensitivityProbe) {
   if (tested < minMutantFloor && !isExempt) {
     errors.push(`Mutation floor violation: Probe tested ${tested} mutants, minimum requirement is ${minMutantFloor} mutants${isMicro ? ' (Micro-Slice floor: 8)' : ''} (or specify explicit waiverReason in evidence JSON).`);
   }
+  const srcMutants = evidence.mutationSensitivityProbe.sourceLevelMutantsTested ?? 0;
+  const targetFiles = evidence.targetFiles || evidence.modifiedFiles || [];
+  const hasModifiedSrc = targetFiles.some((f) => /^(?:src\/|src\\)/i.test(f));
+  if (hasModifiedSrc && srcMutants === 0 && !isExempt && !evidence.pureLogicWaiver) {
+    errors.push(`Source-level mutation floor violation: Probe tested 0 mutants on production source files (sourceLevelMutantsTested: 0). Contract inversion alone is insufficient; mutants must directly challenge modified production code.`);
+  }
 }
 
 // 3. Physical Visual Screenshot Verification (Zero-Blindness Gate)

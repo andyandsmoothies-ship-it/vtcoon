@@ -1105,6 +1105,38 @@ function runRealMutationProbe(testPath, srcPath, ticketId) {
         replacement: 'return null;',
       },
     ],
+    'IMP-327': [
+      {
+        file: 'src/server/insolvency_manager.ts',
+        desc: 'AST: disable turn-player bankruptcy deadlock prevention in finalizeInsolvencyPhase',
+        target: 'if (room.players[room.currentPlayerIndex]?.bankrupt) {',
+        replacement: 'if (false && room.players[room.currentPlayerIndex]?.bankrupt) {',
+      },
+      {
+        file: 'src/server/insolvency_manager.ts',
+        desc: 'AST: leak pendingInsolvencyCreditorId across debtors in restorePostInsolvencyPhase',
+        target: 'delete room.pendingInsolvencyCreditorId;',
+        replacement: '/* leak creditor */',
+      },
+      {
+        file: 'src/server/insolvency_manager.ts',
+        desc: 'AST: corrupt preInsolvencyPhase restoration in finalizeInsolvencyPhase',
+        target: 'room.phase = isTurnPlayer ? TurnPhase.PropertyManagement : (room.preInsolvencyPhase ?? TurnPhase.PropertyManagement);',
+        replacement: 'room.phase = TurnPhase.PropertyManagement;',
+      },
+      {
+        file: 'src/server/insolvency_manager.ts',
+        desc: 'AST: skip ghost debtor filtering in findNextInsolventDebtor',
+        target: 'if (candidate && candidate.balance < 0 && !candidate.bankrupt) return candidate;',
+        replacement: 'if (candidate) return candidate;',
+      },
+      {
+        file: 'src/server/insolvency_manager.ts',
+        desc: 'AST: disable actor authorization in restorePostInsolvencyPhase',
+        target: 'if (!isAuthorizedInsolvencyActor(room, playerId)) return;',
+        replacement: '/* no auth guard */',
+      },
+    ],
   };
 
   const targetedRules = ticketId ? ticketTargetedMutations[ticketId.toUpperCase()] : undefined;

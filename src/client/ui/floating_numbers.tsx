@@ -185,6 +185,8 @@ export function FloatingBadge({ item }: { readonly item: FloatingTextItem }): Re
   const isSSR = typeof window === 'undefined';
   const storePlayersInfo = useGameStore((state) => state.playersInfo);
   const playersInfo = isSSR ? useGameStore.getState().playersInfo : storePlayersInfo;
+  const storeMyPlayerId = useLobbyStore((state) => state.myPlayerId);
+  const myPlayerId = isSSR ? useLobbyStore.getState().myPlayerId : storeMyPlayerId;
   const player = playersInfo[item.playerId];
 
   if (
@@ -198,8 +200,6 @@ export function FloatingBadge({ item }: { readonly item: FloatingTextItem }): Re
     return <MilestoneBanner item={item} />;
   }
 
-  const storeMyPlayerId = useLobbyStore((state) => state.myPlayerId);
-  const myPlayerId = isSSR ? useLobbyStore.getState().myPlayerId : storeMyPlayerId;
   const narrative = resolveTransactionNarrative(item, player, playersInfo, myPlayerId);
 
   const handleDismiss = () => {
@@ -295,14 +295,23 @@ export function FloatingNumbersOverlay(): React.ReactElement | null {
   const storeMyPlayerId = useLobbyStore((state) => state.myPlayerId);
   const myPlayerId = isSSR ? useLobbyStore.getState().myPlayerId : storeMyPlayerId;
 
-  if (floatingTexts.length === 0) {
-    return null;
-  }
+  const storeIsMobile = useIsMobile();
+  const isMobile = isSSR ? false : storeIsMobile;
 
   const isMilestone = (action?: string) =>
     action === 'monopoly' || action === 'debt_relief' || action === 'chance' || action === 'market' || action === 'bankrupt' || action === 'transit';
   const latestMilestone = [...floatingTexts].reverse().find((t) => isMilestone(t.actionType));
   const regularTexts = floatingTexts.filter((t) => !isMilestone(t.actionType));
+
+  const maxRegularVisible = isMobile
+    ? (latestMilestone ? 1 : MOBILE_MAX_FLOATING_TEXTS)
+    : (latestMilestone ? 2 : DESKTOP_MAX_FLOATING_TEXTS);
+
+  const visibleItems = useVisibleFloatingTexts(regularTexts, maxRegularVisible, myPlayerId, isSSR);
+
+  if (floatingTexts.length === 0) {
+    return null;
+  }
 
   // Khi đang mở modal: chỉ cho phép hiển thị MilestoneBanner (ở đỉnh màn hình), ẩn toàn bộ badge thường để chống va chạm giao diện
   if (activeModal !== null && !latestMilestone) {
@@ -320,14 +329,6 @@ export function FloatingNumbersOverlay(): React.ReactElement | null {
       ? 'bottom-[calc(8rem+env(safe-area-inset-bottom))] md:bottom-auto md:top-28'
       : 'bottom-[calc(8rem+env(safe-area-inset-bottom))] md:bottom-auto md:top-20';
 
-  const storeIsMobile = useIsMobile();
-  const isMobile = isSSR ? false : storeIsMobile;
-
-  const maxRegularVisible = isMobile
-    ? (latestMilestone ? 1 : MOBILE_MAX_FLOATING_TEXTS)
-    : (latestMilestone ? 2 : DESKTOP_MAX_FLOATING_TEXTS);
-
-  const visibleItems = useVisibleFloatingTexts(regularTexts, maxRegularVisible, myPlayerId, isSSR);
   let displayItems = activeModal !== null ? [] : [...visibleItems];
   if (
     displayItems.length === 2 &&

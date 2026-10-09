@@ -95,7 +95,7 @@ runStep('3. Zero Dirty Casts & Banned AST Patterns', () => {
       }
     });
 
-    // React Rules of Hooks (Anti-TIDD Workarounds): Banned hooks in try/catch or conditional blocks
+    // React Rules of Hooks (Anti-TIDD Workarounds): Banned hooks in try/catch, conditionals, ternary, short-circuit
     if (!file.startsWith('tests') && !file.startsWith('scripts') && /\.(tsx|jsx|ts|js)$/.test(file)) {
       const hookInTryCatch = /(?:try|catch\s*(?:\([^)]*\))?)\s*\{[^}]*?\b(?:React\.)?use[A-Z]\w*\s*\(/g;
       let match;
@@ -107,6 +107,21 @@ runStep('3. Zero Dirty Casts & Banned AST Patterns', () => {
       while ((match = hookInConditional.exec(content)) !== null) {
         const lineNum = content.slice(0, match.index).split('\n').length;
         violations.push(`${file}:${lineNum} - Banned conditional/loop React Hook (React Rules of Hooks violation)`);
+      }
+      const hookInTernary = /(?:\?|:)\s*(?:React\.)?use[A-Z]\w*\s*\(/g;
+      while ((match = hookInTernary.exec(content)) !== null) {
+        const lineNum = content.slice(0, match.index).split('\n').length;
+        violations.push(`${file}:${lineNum} - Banned ternary conditional React Hook call (React Rules of Hooks violation)`);
+      }
+      const hookInShortCircuit = /(?:&&|\|\|)\s*(?:React\.)?use[A-Z]\w*\s*\(/g;
+      while ((match = hookInShortCircuit.exec(content)) !== null) {
+        const lineNum = content.slice(0, match.index).split('\n').length;
+        violations.push(`${file}:${lineNum} - Banned short-circuit conditional React Hook call (React Rules of Hooks violation)`);
+      }
+      const testMockDetection = /\b['"]mock['"]\s+in\s+(?:React\.)?use[A-Z]\w*/g;
+      while ((match = testMockDetection.exec(content)) !== null) {
+        const lineNum = content.slice(0, match.index).split('\n').length;
+        violations.push(`${file}:${lineNum} - Forbidden test framework mock sniffing in production code (Anti-TIDD violation)`);
       }
     }
   }

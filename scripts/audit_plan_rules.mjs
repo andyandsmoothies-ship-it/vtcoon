@@ -475,3 +475,32 @@ export function auditFunctionToTestParity(targetFiles, planContent) {
   return errors;
 }
 
+export function auditFsmQueueCombinatorialCoverage(planContent) {
+  let errors = 0;
+  const touchesQueueFsm = /pendingInsolvencyQueue|multi-debtor|con nợ|insolvency queue/i.test(planContent);
+  if (!touchesQueueFsm) return errors;
+
+  // 1. Check for Turn Player Bankruptcy Deadlock test specification
+  const hasDeadlockPreventionTest = /(?:deadlock|kẹt\s+lượt|turn\s+player.*bankrupt.*advance|p0.*bankrupt.*advance|UC-DEADLOCK)/i.test(planContent);
+  if (!hasDeadlockPreventionTest) {
+    console.error(`  ❌ [MISSING_DEADLOCK_PREVENTION_TEST_SPEC] Plan touches multi-debtor queue but lacks test spec for turn player bankruptcy deadlock prevention (P0 bankrupt + P1 solvent -> advance turn)!`);
+    console.error(`     Gotcha Pillar I (Item 12) mandates combinatorial test coverage for [B, S] branch.`);
+    errors++;
+  }
+
+  // 2. Check for Cascade Bankruptcy test specification
+  const hasCascadeBankruptcyTest = /(?:cascade|liên\s+hoàn|consecutive.*bankrupt|multi.*bankrupt|UC-CASCADE)/i.test(planContent);
+  if (!hasCascadeBankruptcyTest) {
+    console.error(`  ❌ [MISSING_CASCADE_BANKRUPTCY_TEST_SPEC] Plan touches multi-debtor queue but lacks test spec for cascade bankruptcy (P1 bankrupt + P2 bankrupt -> game over / advance turn)!`);
+    console.error(`     Gotcha Pillar I (Item 12) mandates combinatorial test coverage for [B, B] branch.`);
+    errors++;
+  }
+
+  if (errors === 0) {
+    console.log(`  ✔️ FSM Queue Combinatorial Coverage verified: Plan includes mandatory specs for Deadlock Prevention [B, S] and Cascade Bankruptcy [B, B].`);
+  }
+
+  return errors;
+}
+
+

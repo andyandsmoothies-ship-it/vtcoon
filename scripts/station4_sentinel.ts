@@ -139,7 +139,11 @@ function resolveSourceFilesFromTest(testPath: string): string[] {
       const resolved = path.resolve(path.dirname(testPath), relImport);
       const possibleExtensions = ['', '.ts', '.tsx', '.js'];
       for (const ext of possibleExtensions) {
-        const full = (resolved + ext).replace(/\.js\.ts$/, '.ts');
+        let full = (resolved + ext).replace(/\.js\.ts$/, '.ts');
+        if (full.endsWith('.js') && !fs.existsSync(full)) {
+          const tsCandidate = full.slice(0, -3) + '.ts';
+          if (fs.existsSync(tsCandidate)) full = tsCandidate;
+        }
         if (fs.existsSync(full) && full.includes(path.sep + 'src' + path.sep)) {
           files.push(full);
           break;
@@ -155,7 +159,8 @@ function resolveSourceFilesFromTest(testPath: string): string[] {
  */
 async function runUniversalMutationProbe(
   testPath?: string,
-  explicitSrc?: string
+  explicitSrc?: string,
+  ticketId?: string
 ): Promise<ProbeResults['mutationSensitivityProbe']> {
   if (!testPath || !fs.existsSync(testPath)) {
     return {
@@ -167,16 +172,106 @@ async function runUniversalMutationProbe(
     };
   }
 
-  const testCmd = `npx vitest run "${testPath}"`;
+  const vitestBin = fs.existsSync('./node_modules/vitest/vitest.mjs') ? 'node ./node_modules/vitest/vitest.mjs' : 'npx vitest';
+  const testCmd = `${vitestBin} run "${testPath}"`;
   let mutantsTested = 0;
   let killed = 0;
   let survived = 0;
   let sourceLevelMutantsTested = 0;
 
-  // 1. Physical Source-Level Mutation Testing (when explicit --src is provided)
-  if (explicitSrc && fs.existsSync(explicitSrc)) {
-    const srcFile = path.resolve(explicitSrc);
+  // 1. Physical Source-Level Mutation Testing
+  const ticketTargetedSourceMutations: Record<string, Array<{ file?: string; desc: string; pattern: string; replacement: string }>> = {
+    'IMP-327': [
+      {
+        file: 'src/server/insolvency_manager.ts',
+        desc: 'AST: disable turn-player bankruptcy deadlock prevention in finalizeInsolvencyPhase',
+        pattern: 'if (room.players[room.currentPlayerIndex]?.bankrupt) {',
+        replacement: 'if (false && room.players[room.currentPlayerIndex]?.bankrupt) {',
+      },
+      {
+        file: 'src/server/insolvency_manager.ts',
+        desc: 'AST: leak pendingInsolvencyCreditorId across debtors in restorePostInsolvencyPhase',
+        pattern: 'room.pendingInsolvencyDebtorId = nextDebtor.id;\n      delete room.pendingInsolvencyCreditorId;',
+        replacement: 'room.pendingInsolvencyDebtorId = nextDebtor.id;',
+      },
+      {
+        file: 'src/server/insolvency_manager.ts',
+        desc: 'AST: corrupt preInsolvencyPhase restoration in finalizeInsolvencyPhase',
+        pattern: 'room.phase = isTurnPlayer ? TurnPhase.PropertyManagement : (room.preInsolvencyPhase ?? TurnPhase.PropertyManagement);',
+        replacement: 'room.phase = TurnPhase.PropertyManagement;',
+      },
+      {
+        file: 'src/server/insolvency_manager.ts',
+        desc: 'AST: skip ghost debtor filtering in findNextInsolventDebtor',
+        pattern: 'if (candidate && candidate.balance < 0 && !candidate.bankrupt) return candidate;',
+        replacement: 'if (candidate) return candidate;',
+      },
+      {
+        file: 'src/server/insolvency_manager.ts',
+        desc: 'AST: break next debtor discovery in restorePostInsolvencyPhase',
+        pattern: 'const nextDebtor = findNextInsolventDebtor(room);',
+        replacement: 'const nextDebtor = undefined;',
+      },
+    ],
+    'IMP-328': [
+      {
+        file: 'src/client/3d/post_processing_pipeline.tsx',
+        desc: 'AST: invert enabled shell guard in PostProcessingPipeline',
+        pattern: 'if (props.enabled === false) {',
+        replacement: 'if (props.enabled === true) {',
+      },
+      {
+        file: 'src/client/3d/post_processing_pipeline.tsx',
+        desc: 'AST: break ActivePostProcessingPipeline delegation in PostProcessingPipeline',
+        pattern: 'return (\n    <ActivePostProcessingPipeline',
+        replacement: 'return null; return (\n    <ActivePostProcessingPipeline',
+      },
+      {
+        file: 'src/client/3d/owner_property_markers.tsx',
+        desc: 'AST: invert hasOwner guard in OwnerPricePill',
+        pattern: 'if (!hasOwner) {',
+        replacement: 'if (hasOwner) {',
+      },
+      {
+        file: 'src/client/ui/floating_numbers.tsx',
+        desc: 'AST: invert floatingTexts empty check in FloatingNumbersOverlay',
+        pattern: 'if (floatingTexts.length === 0) {',
+        replacement: 'if (floatingTexts.length > 0) {',
+      },
+    ],
+  };
+
+  const targetedRules = ticketId ? ticketTargetedSourceMutations[ticketId.toUpperCase()] : undefined;
+
+  if (targetedRules && targetedRules.length > 0) {
+    for (const rule of targetedRules) {
+      const srcFile = path.resolve(rule.file ?? explicitSrc ?? '');
+      const mut = testSourceMutantSafely(srcFile, rule.pattern, rule.replacement, testCmd);
+      if (mut.tested) {
+        mutantsTested++;
+        sourceLevelMutantsTested++;
+        if (mut.killed) {
+          console.log(`  [AST SOURCE MUTANT] ${rule.desc}: KILLED`);
+          killed++;
+        } else {
+          console.log(`  [AST SOURCE MUTANT] ${rule.desc}: SURVIVED!`);
+          survived++;
+        }
+      }
+    }
+  } else {
+    const srcFilesToMutate: string[] = [];
+    if (explicitSrc && fs.existsSync(explicitSrc)) {
+      srcFilesToMutate.push(path.resolve(explicitSrc));
+    } else if (testPath) {
+      srcFilesToMutate.push(...resolveSourceFilesFromTest(testPath));
+    }
+
     const sourceMutations = [
+      { pattern: ' === false', replacement: ' === true' },
+      { pattern: ' === true', replacement: ' === false' },
+      { pattern: ' === 0', replacement: ' > 0' },
+      { pattern: 'Boolean(ownerColor)', replacement: '!Boolean(ownerColor)' },
       { pattern: ' === ', replacement: ' !== ' },
       { pattern: ' !== ', replacement: ' === ' },
       { pattern: ' >= ', replacement: ' < ' },
@@ -206,17 +301,19 @@ async function runUniversalMutationProbe(
       { pattern: '!this.authenticatedSockets.has(socket)', replacement: 'true' },
     ];
 
-    for (const { pattern, replacement } of sourceMutations) {
-      const mut = testSourceMutantSafely(srcFile, pattern, replacement, testCmd);
-      if (mut.tested) {
-        mutantsTested++;
-        sourceLevelMutantsTested++;
-        if (mut.killed) {
-          console.log(`  [SOURCE MUTANT] ${pattern} -> KILLED`);
-          killed++;
-        } else {
-          console.log(`  [SOURCE MUTANT] ${pattern} -> SURVIVED!`);
-          survived++;
+    for (const srcFile of srcFilesToMutate) {
+      for (const { pattern, replacement } of sourceMutations) {
+        const mut = testSourceMutantSafely(srcFile, pattern, replacement, testCmd);
+        if (mut.tested) {
+          mutantsTested++;
+          sourceLevelMutantsTested++;
+          if (mut.killed) {
+            console.log(`  [SOURCE MUTANT] ${path.basename(srcFile)}: ${pattern} -> KILLED`);
+            killed++;
+          } else {
+            console.log(`  [SOURCE MUTANT] ${path.basename(srcFile)}: ${pattern} -> SURVIVED!`);
+            survived++;
+          }
         }
       }
     }
@@ -256,7 +353,8 @@ async function runUniversalMutationProbe(
     { name: 'toBeCloseTo -> corrupted', pattern: /\.toBeCloseTo\([^)]+\)/, replacement: '.toBeCloseTo(99999.99, 1)' },
     { name: 'toBeTruthy -> toBeFalsy', pattern: '.toBeTruthy()', replacement: '.toBeFalsy()' },
     { name: 'toHaveLength -> +99', pattern: /\.toHaveLength\((\d+)\)/, replacement: (_m: string, n: string) => `.toHaveLength(${Number(n) + 99})` },
-    { name: 'toThrow -> not.toThrow', pattern: /\.toThrow\(/, replacement: '.not.toThrow(' },
+    { name: 'not.toThrow -> toThrow', pattern: /\.not\.toThrow\(/, replacement: '.toThrow(' },
+    { name: 'toThrow -> not.toThrow', pattern: /(?<!\.not)\.toThrow\(/, replacement: '.not.toThrow(' },
     { name: 'objectContaining -> not', pattern: /expect\.objectContaining\(/, replacement: 'expect.not.objectContaining(' },
   ];
 
@@ -301,7 +399,7 @@ async function runUniversalMutationProbe(
         fs.writeFileSync(sandboxPath, mutantContent, 'utf-8');
 
         try {
-          execSync(`npx vitest run "${sandboxPath}"`, { stdio: 'pipe' });
+          execSync(`${vitestBin} run "${sandboxPath}"`, { stdio: 'pipe' });
           console.log(`  [CONTRACT MUTANT #${mutantsTested}] ${name} (instance ${i + 1}) -> SURVIVED!`);
           survived++;
         } catch {
@@ -512,7 +610,7 @@ async function main() {
   const p2 = await runProbe2();
   console.log(`[PROBE 2] Ephemeral Wire (port 0): ${p2.status} (Port: ${p2.port}, Abrupt Drop: ${p2.abruptTeardownSurvives ? 'SURVIVED' : 'FAILED'})`);
 
-  const p3 = await runUniversalMutationProbe(testPath, srcPath);
+  const p3 = await runUniversalMutationProbe(testPath, srcPath, ticketId);
   console.log(`[PROBE 3] Mutation Sensitivity: ${p3.status} (Tested: ${p3.mutantsTested} [Source: ${p3.sourceLevelMutantsTested}], Killed: ${p3.killed}, Survived: ${p3.survived})`);
 
   // Enforce mutation floor >= 14 without automatic fake waivers

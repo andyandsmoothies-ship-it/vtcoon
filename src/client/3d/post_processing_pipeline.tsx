@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   EffectComposer,
   Bloom,
@@ -49,6 +49,7 @@ export interface PostProcessingPipelineProps {
   aoHalfRes?: boolean;
   multisampling?: number;
   fps?: number;
+  isBloomActive?: boolean;
 }
 
 export const DEFAULT_PIPELINE_CONFIG = {
@@ -169,85 +170,48 @@ export function calculateDynamicVignetteDarkness(
   return Math.max(0.0, Math.min(1.0, raw));
 }
 
-type ReactWithDispatcher = typeof React & {
-  __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED?: {
-    ReactCurrentDispatcher?: {
-      current?: unknown;
-    };
-  };
-};
-
 function useSafeTelemetryFps(): number {
-  try {
-    const dispatcher = (React as ReactWithDispatcher)?.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED?.ReactCurrentDispatcher?.current;
-    if (!dispatcher) {
-      return typeof window !== 'undefined' ? useTelemetryStore.getState().metrics.fps : 60;
-    }
-    return useTelemetryStore((s) => s.metrics.fps);
-  } catch {
-    return typeof window !== 'undefined' ? useTelemetryStore.getState().metrics.fps : 60;
+  if (typeof window === 'undefined') {
+    return useTelemetryStore.getState().metrics.fps;
   }
+  return useTelemetryStore((s) => s.metrics.fps);
 }
 
-function hasHookContext(): boolean {
-  const dispatcher = (React as ReactWithDispatcher)?.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED?.ReactCurrentDispatcher?.current;
-  if (dispatcher) return true;
-  if (
-    Object.prototype.hasOwnProperty.call(useState, 'mock') ||
-    Object.prototype.hasOwnProperty.call(useState, '_isMockFunction') ||
-    Object.prototype.hasOwnProperty.call(React.useState, 'mock') ||
-    Object.prototype.hasOwnProperty.call(React.useState, '_isMockFunction')
-  ) {
-    return true;
-  }
-  return false;
-}
-
-export function PostProcessingPipeline({
-  enabled = DEFAULT_PIPELINE_CONFIG.enabled,
-  isAuctionActive = false,
-  enableDof = DEFAULT_PIPELINE_CONFIG.enableDof,
-  enableBloom = DEFAULT_PIPELINE_CONFIG.enableBloom,
-  enableAo = DEFAULT_PIPELINE_CONFIG.enableAo,
-  isMobile = false,
-  disableAoOnMobile = false,
-  enableVignette = DEFAULT_PIPELINE_CONFIG.enableVignette,
-  enableToneMapping = DEFAULT_PIPELINE_CONFIG.enableToneMapping,
-  enableSmaa = DEFAULT_PIPELINE_CONFIG.enableSmaa,
-  multisampling = DEFAULT_PIPELINE_CONFIG.multisampling,
-  dofTarget = DEFAULT_PIPELINE_CONFIG.dofTarget,
-  dofFocusRange = DEFAULT_PIPELINE_CONFIG.dofFocusRange,
-  dofBokehScale: propDofBokehScale,
-  bloomIntensity = DEFAULT_PIPELINE_CONFIG.bloomIntensity,
-  bloomThreshold: propBloomThreshold,
-  enableSelectiveBloom = DEFAULT_PIPELINE_CONFIG.enableSelectiveBloom,
-  selectiveBloomIntensity: propSelectiveBloomIntensity,
-  selectiveBloomThreshold: propSelectiveBloomThreshold,
-  vignetteDarkness: propVignetteDarkness,
-  aoIntensity = DEFAULT_PIPELINE_CONFIG.aoIntensity,
-  aoRadius = DEFAULT_PIPELINE_CONFIG.aoRadius,
-  aoHalfRes = DEFAULT_PIPELINE_CONFIG.aoHalfRes,
-  fps,
-}: PostProcessingPipelineProps): React.ReactElement<{ children?: any }> | null {
-  const currentFps = fps !== undefined ? fps : useSafeTelemetryFps();
-  const dispatcher = (React as ReactWithDispatcher)?.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED?.ReactCurrentDispatcher?.current;
-  const targetVector = dispatcher
-    ? React.useMemo(
-        () => new Vector3(dofTarget[0], dofTarget[1], dofTarget[2]),
-        [dofTarget[0], dofTarget[1], dofTarget[2]]
-      )
-    : new Vector3(dofTarget[0], dofTarget[1], dofTarget[2]);
-
-  if (!enabled) {
-    return null;
-  }
+export function renderPostProcessingPasses(
+  props: PostProcessingPipelineProps,
+  targetVector: Vector3,
+  isBloomActive: boolean = true
+): React.ReactElement[] {
+  const {
+    isAuctionActive = false,
+    enableDof = DEFAULT_PIPELINE_CONFIG.enableDof,
+    enableBloom = DEFAULT_PIPELINE_CONFIG.enableBloom,
+    enableAo = DEFAULT_PIPELINE_CONFIG.enableAo,
+    isMobile = false,
+    disableAoOnMobile = false,
+    enableVignette = DEFAULT_PIPELINE_CONFIG.enableVignette,
+    enableToneMapping = DEFAULT_PIPELINE_CONFIG.enableToneMapping,
+    enableSmaa = DEFAULT_PIPELINE_CONFIG.enableSmaa,
+    dofFocusRange = DEFAULT_PIPELINE_CONFIG.dofFocusRange,
+    dofBokehScale: propDofBokehScale,
+    bloomIntensity = DEFAULT_PIPELINE_CONFIG.bloomIntensity,
+    bloomThreshold: propBloomThreshold,
+    enableSelectiveBloom = DEFAULT_PIPELINE_CONFIG.enableSelectiveBloom,
+    selectiveBloomIntensity: propSelectiveBloomIntensity,
+    selectiveBloomThreshold: propSelectiveBloomThreshold,
+    vignetteDarkness: propVignetteDarkness,
+    aoIntensity = DEFAULT_PIPELINE_CONFIG.aoIntensity,
+    aoRadius = DEFAULT_PIPELINE_CONFIG.aoRadius,
+    aoHalfRes = DEFAULT_PIPELINE_CONFIG.aoHalfRes,
+    fps,
+  } = props;
 
   const resolvedBokehScale = propDofBokehScale !== undefined
     ? propDofBokehScale
     : DEFAULT_PIPELINE_CONFIG.dofBokehScale;
 
   const adaptiveAo = resolveAdaptivePostProcessing({
-    fps: currentFps,
+    fps: fps ?? 60,
     isMobile: Boolean(isMobile || disableAoOnMobile),
     enableAo,
   });
@@ -255,23 +219,6 @@ export function PostProcessingPipeline({
   const resolvedAoQuality = adaptiveAo.aoQuality;
   const resolvedAoHalfRes = aoHalfRes !== undefined ? aoHalfRes : adaptiveAo.aoHalfRes;
   const resolvedEnableSmaa = enableSmaa && !isMobile;
-
-  const hasHook = hasHookContext();
-  const [isBloomActive, setIsBloomActive] = hasHook
-    ? useState(true)
-    : [currentFps >= (isMobile ? 28 : 42), () => {}];
-
-  if (hasHook) {
-    useEffect(() => {
-      const lowThreshold = isMobile ? 28 : 42;
-      const highThreshold = isMobile ? 35 : 48;
-      if (currentFps < lowThreshold && isBloomActive) {
-        setIsBloomActive(false);
-      } else if (currentFps >= highThreshold && !isBloomActive) {
-        setIsBloomActive(true);
-      }
-    }, [currentFps, isMobile, isBloomActive]);
-  }
 
   const resolvedEnableBloom = Boolean(enableBloom && isBloomActive);
 
@@ -287,77 +234,146 @@ export function PostProcessingPipeline({
         0.35
       );
 
+  const passes: React.ReactElement[] = [];
+
+  if (resolvedEnableAo) {
+    passes.push(
+      <N8AO
+        key="ao"
+        aoRadius={aoRadius}
+        intensity={aoIntensity}
+        distanceFalloff={DEFAULT_PIPELINE_CONFIG.aoDistanceFalloff}
+        halfRes={resolvedAoHalfRes}
+        quality={resolvedAoQuality}
+        color="#1E293B"
+      />
+    );
+  }
+
+  passes.push(
+    <DepthOfField
+      key="dof"
+      target={targetVector}
+      focusRange={dofFocusRange}
+      bokehScale={enableDof ? resolvedBokehScale : 0}
+    />
+  );
+
+  if (resolvedEnableBloom) {
+    passes.push(
+      enableSelectiveBloom ? (
+        <SelectiveBloom
+          key="bloom"
+          selectionLayer={SELECTIVE_BLOOM_LAYER}
+          luminanceThreshold={
+            propSelectiveBloomThreshold !== undefined
+              ? propSelectiveBloomThreshold
+              : calculateSelectiveBloomThreshold(Boolean(isAuctionActive))
+          }
+          luminanceSmoothing={DEFAULT_PIPELINE_CONFIG.bloomSmoothing}
+          intensity={
+            propSelectiveBloomIntensity !== undefined
+              ? propSelectiveBloomIntensity
+              : calculateSelectiveBloomIntensity(Boolean(isMobile), Boolean(isAuctionActive))
+          }
+          mipmapBlur={!isMobile}
+          radius={DEFAULT_PIPELINE_CONFIG.bloomRadius}
+        />
+      ) : (
+        <Bloom
+          key="bloom"
+          luminanceThreshold={resolvedBloomThreshold}
+          luminanceSmoothing={DEFAULT_PIPELINE_CONFIG.bloomSmoothing}
+          intensity={isMobile ? 0.12 : (isAuctionActive ? 0.30 : bloomIntensity)}
+          mipmapBlur={!isMobile}
+          radius={DEFAULT_PIPELINE_CONFIG.bloomRadius}
+        />
+      )
+    );
+  }
+
+  if (enableToneMapping) {
+    passes.push(
+      <ToneMapping key="tonemapping" mode={ToneMappingMode.AGX} />
+    );
+  }
+
+  if (enableVignette) {
+    passes.push(
+      <Vignette
+        key="vignette"
+        offset={DEFAULT_PIPELINE_CONFIG.vignetteOffset}
+        darkness={resolvedVignetteDarkness}
+        eskil={false}
+      />
+    );
+  }
+
+  if (resolvedEnableSmaa) {
+    passes.push(
+      <SMAA key="smaa" />
+    );
+  }
+
+  return passes;
+}
+
+export function PostProcessingPipeline(
+  props: PostProcessingPipelineProps
+): React.ReactElement<{ children?: React.ReactNode }> | null {
+  if (props.enabled === false) {
+    return null;
+  }
+
+  const dofTarget = props.dofTarget ?? DEFAULT_PIPELINE_CONFIG.dofTarget;
+  const targetVector = new Vector3(dofTarget[0], dofTarget[1], dofTarget[2]);
+  const defaultBloomActive = props.fps !== undefined
+    ? props.fps >= (props.isMobile ? 28 : 42)
+    : true;
+  const initialBloom = props.isBloomActive ?? defaultBloomActive;
+
+  return (
+    <ActivePostProcessingPipeline
+      multisampling={props.multisampling ?? DEFAULT_PIPELINE_CONFIG.multisampling}
+      {...props}
+    >
+      {renderPostProcessingPasses(props, targetVector, initialBloom)}
+    </ActivePostProcessingPipeline>
+  );
+}
+
+export function ActivePostProcessingPipeline(
+  props: PostProcessingPipelineProps & { children?: React.ReactNode }
+): React.ReactElement<{ children?: React.ReactNode }> {
+  const {
+    multisampling = DEFAULT_PIPELINE_CONFIG.multisampling,
+    dofTarget = DEFAULT_PIPELINE_CONFIG.dofTarget,
+    isMobile = false,
+    fps,
+    children,
+  } = props;
+
+  const telemetryFps = useSafeTelemetryFps();
+  const currentFps = fps !== undefined ? fps : telemetryFps;
+  const targetVector = new Vector3(dofTarget[0], dofTarget[1], dofTarget[2]);
+
+  const [isBloomActive, setIsBloomActive] = useState(true);
+
+  useEffect(() => {
+    const lowThreshold = isMobile ? 28 : 42;
+    const highThreshold = isMobile ? 35 : 48;
+    if (currentFps < lowThreshold && isBloomActive) {
+      setIsBloomActive(false);
+    } else if (currentFps >= highThreshold && !isBloomActive) {
+      setIsBloomActive(true);
+    }
+  }, [currentFps, isMobile, isBloomActive]);
+
+  const passes = renderPostProcessingPasses({ ...props, fps: currentFps }, targetVector, isBloomActive);
+
   return (
     <EffectComposer multisampling={multisampling} autoClear={false}>
-      {/* 1. SSAO / Contact AO: Khóa chặt chân cọc C0, nhà C1-C3, xúc xắc và viền sa bàn */}
-      {resolvedEnableAo && (
-        <N8AO
-          aoRadius={aoRadius}
-          intensity={aoIntensity}
-          distanceFalloff={DEFAULT_PIPELINE_CONFIG.aoDistanceFalloff}
-          halfRes={resolvedAoHalfRes}
-          quality={resolvedAoQuality}
-          color="#1E293B"
-        />
-      )}
-
-      {/* 2. Depth of Field (Tilt-Shift Macro sa bàn): [ADV-04] Giữ thường trực để triệt tiêu FBO shader recompilation */}
-      <DepthOfField
-        target={targetVector}
-        focusRange={dofFocusRange}
-        bokehScale={enableDof ? resolvedBokehScale : 0}
-      />
-
-      {/* 3. Bloom (HDR) / Selective Reference Bloom:
-          Khi enableSelectiveBloom = true: chỉ phát ánh hào quang cho các mesh được gán lớp selectiveBloomLayer (IMP-256).
-          Khi enableSelectiveBloom = false: duy trì Bloom toàn cục tương thích ngược 100% với IMP-241. */}
-      {resolvedEnableBloom && (
-        enableSelectiveBloom ? (
-          <SelectiveBloom
-            selectionLayer={SELECTIVE_BLOOM_LAYER}
-            luminanceThreshold={
-              propSelectiveBloomThreshold !== undefined
-                ? propSelectiveBloomThreshold
-                : calculateSelectiveBloomThreshold(Boolean(isAuctionActive))
-            }
-            luminanceSmoothing={DEFAULT_PIPELINE_CONFIG.bloomSmoothing}
-            intensity={
-              propSelectiveBloomIntensity !== undefined
-                ? propSelectiveBloomIntensity
-                : calculateSelectiveBloomIntensity(Boolean(isMobile), Boolean(isAuctionActive))
-            }
-            mipmapBlur={!isMobile}
-            radius={DEFAULT_PIPELINE_CONFIG.bloomRadius}
-          />
-        ) : (
-          <Bloom
-            luminanceThreshold={resolvedBloomThreshold}
-            luminanceSmoothing={DEFAULT_PIPELINE_CONFIG.bloomSmoothing}
-            intensity={isMobile ? 0.12 : (isAuctionActive ? 0.30 : bloomIntensity)}
-            mipmapBlur={!isMobile}
-            radius={DEFAULT_PIPELINE_CONFIG.bloomRadius}
-          />
-        )
-      )}
-
-      {/* 4. Tone Mapping: [ADV-01] Chuẩn AgX nén dải tương phản điện ảnh (nhận toneMappingExposure từ Three.js shader) */}
-      {enableToneMapping && (
-        <ToneMapping mode={ToneMappingMode.AGX} />
-      )}
-
-      {/* 5. Lens Vignette: Tối góc quang học điện ảnh áp trên dải LDR */}
-      {enableVignette && (
-        <Vignette
-          offset={DEFAULT_PIPELINE_CONFIG.vignetteOffset}
-          darkness={resolvedVignetteDarkness}
-          eskil={false}
-        />
-      )}
-
-      {/* 6. Anti-Aliasing (SMAA): Khử răng cưa vector subpixel ở pass cuối cùng */}
-      {resolvedEnableSmaa && (
-        <SMAA />
-      )}
+      {children ?? passes}
     </EffectComposer>
   );
 }

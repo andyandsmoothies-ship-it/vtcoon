@@ -1,13 +1,24 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { ACESFilmicToneMapping, NoToneMapping, Scene } from 'three';
+import { ACESFilmicToneMapping, NoToneMapping, Scene, Texture } from 'three';
 
 // 1. Mock dependencies
-let mockUseStateValue: any = null;
+let mockUseStateValue: unknown = null;
+let capturedEffectCb: (() => (() => void) | void) | null = null;
 export const reactTestState = {
-  lastEffectCb: null as any,
-  setUseStateValue: (val: any) => { mockUseStateValue = val; }
+  get lastEffectCb(): (() => (() => void) | void) | null {
+    return capturedEffectCb;
+  },
+  set lastEffectCb(cb: (() => (() => void) | void) | null) {
+    capturedEffectCb = cb;
+  },
+  runLastEffect(): (() => void) | void {
+    if (typeof capturedEffectCb === 'function') {
+      return capturedEffectCb();
+    }
+  },
+  setUseStateValue: (val: unknown) => { mockUseStateValue = val; }
 };
 
 vi.mock('react', async (importOriginal) => {
@@ -71,7 +82,7 @@ vi.mock('../../src/client/store/environment_store', () => ({
 // Component imports
 import { GameCanvas } from '../../src/client/game_canvas';
 import { SafeEnvironment, AdaptiveToneMappingSync, EnvironmentFallbackLighting } from '../../src/client/3d/safe_environment';
-import { PostProcessingPipeline } from '../../src/client/3d/post_processing_pipeline';
+import { PostProcessingPipeline, ActivePostProcessingPipeline } from '../../src/client/3d/post_processing_pipeline';
 import { perfBudget } from '../../src/client/3d/perf_budget';
 import { Bloom, DepthOfField, N8AO, SMAA, ToneMapping, Vignette } from '@react-three/postprocessing';
 import { ToneMappingMode } from 'postprocessing';
@@ -119,11 +130,11 @@ describe('Three.js Pipeline Hardening Contracts (IMP-241)', () => {
     reactTestState.lastEffectCb = null;
     AdaptiveToneMappingSync({ isMobile: true });
     expect(reactTestState.lastEffectCb).toBeDefined();
-    reactTestState.lastEffectCb();
+    reactTestState.runLastEffect();
     expect(mockGl.toneMapping).toBe(ACESFilmicToneMapping);
     
     AdaptiveToneMappingSync({ isMobile: false });
-    reactTestState.lastEffectCb();
+    reactTestState.runLastEffect();
     expect(mockGl.toneMapping).toBe(NoToneMapping);
   });
 
@@ -134,7 +145,12 @@ describe('Three.js Pipeline Hardening Contracts (IMP-241)', () => {
     expect(el).toBeDefined();
     const children = getElementChildren(el);
     expect(children.length).toBeGreaterThan(0);
-    const suspense = children.find(c => (c.type as any)?.name === 'Suspense' || c.type === React.Suspense);
+    const suspense = children.find(c => {
+      const type = c.type;
+      const typeName = typeof type === 'object' && type !== null && 'name' in type ? (type as { name?: string }).name : undefined;
+      const fnName = typeof type === 'function' ? type.name : undefined;
+      return typeName === 'Suspense' || fnName === 'Suspense' || type === React.Suspense;
+    });
     expect(suspense).toBeDefined();
   });
 
@@ -147,14 +163,14 @@ describe('Three.js Pipeline Hardening Contracts (IMP-241)', () => {
   it('[TC-3D.06/Lifecycle][UC-IMP241] SafeEnvironment dọn sạch scene.environment = null và phục hồi lỗi khi có mạng', () => {
     reactTestState.lastEffectCb = null;
     
-    mockScene.environment = {} as any;
+    mockScene.environment = new Texture();
     SafeEnvironment({ preset: 'city' });
     
     expect(reactTestState.lastEffectCb).toBeDefined();
-    const cleanup = reactTestState.lastEffectCb();
+    const cleanup = reactTestState.runLastEffect();
     expect(cleanup).toBeInstanceOf(Function);
     
-    cleanup();
+    if (typeof cleanup === 'function') cleanup();
     expect(mockScene.environment).toBeNull();
   });
 
@@ -217,7 +233,7 @@ describe('Three.js Pipeline Hardening Contracts (IMP-241)', () => {
   // Facet 5: Mobile Bloom Hysteresis LOD Gating, MIPMAP Performance & Dynamic Exposure
   it('[TC-3D.13/MSS][UC-IMP241] Bloom Hysteresis: Mobile bật >=35 tắt <28, Desktop bật >=48 tắt <42', () => {
      reactTestState.setUseStateValue(false);
-     const el = PostProcessingPipeline({ enabled: true, enableBloom: true }) as AnyReactElement;
+     const el = ActivePostProcessingPipeline({ enabled: true, enableBloom: true }) as AnyReactElement;
      const children = getElementChildren(el);
      const bloom = children.find(c => c.type === Bloom || (c.type as {name?: string})?.name === 'Bloom');
      expect(bloom).toBeUndefined(); 

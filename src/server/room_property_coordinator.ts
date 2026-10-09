@@ -4,7 +4,7 @@ import type { PropertyRegistry, PropertyStateMap } from '../domain/property_mana
 import type { DowngradeOptions } from '../domain/property_upgrade.js';
 import { mortgageProperty, redeemProperty } from './mortgage_manager.js';
 import { handleDowngrade } from './property_actions.js';
-import { liquidateAssets, declareBankruptcy } from './insolvency_manager.js';
+import { liquidateAssets, declareBankruptcy, restorePostInsolvencyPhase } from './insolvency_manager.js';
 import type { AuctionSession } from './auction_manager.js';
 import { type BotPersonality } from '../domain/bot/bot_types.js';
 import {
@@ -39,18 +39,7 @@ export function coordMortgage(
   if (isCellLockedInPendingTrade(ctx.room, cellIndex)) {
     return { success: false, reason: ActionRejectReason.ASSET_LOCKED };
   }
-  const res = mortgageProperty(ctx.room, playerId, cellIndex, ctx.reg, ctx.sm);
-  if (res.success && ctx.room.phase === TurnPhase.InsolvencyPhase) {
-    const p = ctx.room.players.find((pl) => pl.id === playerId);
-    if (p && p.balance >= 0) {
-      const isTurnPlayer = ctx.room.players[ctx.room.currentPlayerIndex]?.id === playerId;
-      delete ctx.room.pendingInsolvencyCreditorId;
-      delete ctx.room.pendingInsolvencyDebtorId;
-      ctx.room.phase = isTurnPlayer ? TurnPhase.PropertyManagement : (ctx.room.preInsolvencyPhase ?? TurnPhase.PropertyManagement);
-      delete ctx.room.preInsolvencyPhase;
-    }
-  }
-  return res;
+  return mortgageProperty(ctx.room, playerId, cellIndex, ctx.reg, ctx.sm);
 }
 
 export function coordRedeem(
@@ -99,11 +88,7 @@ export function coordDowngrade(
 
   const res = handleDowngrade(player, ctx.room.phase, cellIndex, ctx.reg, ctx.sm, roomCode, options, ctx.room);
   if (res.success && ctx.room.phase === TurnPhase.InsolvencyPhase && player.balance >= 0) {
-    const isTurnPlayer = ctx.room.players[ctx.room.currentPlayerIndex]?.id === playerId;
-    delete ctx.room.pendingInsolvencyCreditorId;
-    delete ctx.room.pendingInsolvencyDebtorId;
-    ctx.room.phase = isTurnPlayer ? TurnPhase.PropertyManagement : (ctx.room.preInsolvencyPhase ?? TurnPhase.PropertyManagement);
-    delete ctx.room.preInsolvencyPhase;
+    restorePostInsolvencyPhase(ctx.room, playerId);
   }
   return res;
 }

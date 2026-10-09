@@ -62,23 +62,25 @@ flowchart TD
   - Nơi nào rò rỉ seam (ví dụ: UI component trực tiếp can thiệp hoặc tính toán lại logic domain)?
   - Nơi nào vi phạm trần LOC của dự án (ví dụ: Tier 1 $> 400$ LOC, Tier 2 $> 500$ LOC trong `GEMINI.md`)?
 
-### Bước 2: Xuất Báo Cáo Trực Quan Dạng HTML (Visual HTML Report)
+### Bước 2: Xuất Báo Cáo Trực Quan (Visual Report: Native IDE Artifact & HTML)
 
-- **Vị trí lưu trữ**: Ghi file HTML độc lập vào thư mục tạm của hệ điều hành để không làm ô nhiễm git tree:
-  - Windows: `%TEMP%\architecture-review-<timestamp>.html`
-  - Linux/macOS: `$TMPDIR/architecture-review-<timestamp>.html` (hoặc `/tmp/`)
+Skill hỗ trợ 2 định dạng xuất báo cáo trực quan, trong đó **Artifact Markdown trên Antigravity IDE là định dạng ưu tiên số 1**:
+
+- **1. Định dạng Ưu Tiên Số 1: Native Antigravity Artifact (`.md` với Mermaid)**:
+  - **Vị trí lưu trữ**: Ghi trực tiếp vào thư mục artifact của hội thoại: `<appDataDir>\brain\<conversation-id>\architecture_review.md` thông qua công cụ `write_to_file` kèm `ArtifactMetadata` (`UserFacing: true`).
+  - **Trải nghiệm**: Antigravity 2.0 tự động kích hoạt giao diện xem tài liệu ở khung bên phải (Split View / Side Pane), **kết xuất trực tiếp toàn bộ sơ đồ Mermaid Before/After, bảng biểu, hộp cảnh báo Alert Card** mà người dùng **không phải mở thư mục temp, không phải nhìn code HTML thô**.
+- **2. Định dạng Bổ Trợ: Standalone HTML (Khi người dùng yêu cầu xem trên trình duyệt ngoài)**:
+  - Ghi file HTML độc lập vào thư mục tạm của hệ điều hành:
+    - Windows: `%TEMP%\architecture-review-<timestamp>.html`
+    - Linux/macOS: `$TMPDIR/architecture-review-<timestamp>.html` (hoặc `/tmp/`)
+  - Mở trình duyệt ngoài tự động bằng lệnh hệ điều hành (`start <path>` trên Windows, `open <path>` trên macOS, `xdg-open <path>` trên Linux).
 - **Ngôn ngữ hiển thị**: Tuân thủ chính sách ngôn ngữ của dự án. Với dự án quy định tiếng Việt (`GEMINI.md`), toàn bộ tiêu đề, mô tả điểm nghẽn (Problem), giải pháp (Solution) và lợi ích (Wins) hiển thị bằng **tiếng Việt** (giữ nguyên các danh từ kỹ thuật chuẩn: `module`, `interface`, `seam`, `adapter`, `depth`, `locality`, `leverage`).
 - **Nội dung thẻ Candidate Card**:
   - Tên đề xuất và danh sách file liên quan.
-  - Sơ đồ **Before vs. After** trực quan (sử dụng Mermaid flowchart/sequence hoặc CSS/SVG tùy biến theo mẫu tại [`HTML-REPORT.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/improve-codebase-architecture/HTML-REPORT.md)).
+  - Sơ đồ **Before vs. After** trực quan (sử dụng Mermaid flowchart/sequence).
   - Badge độ tự tin: `Strong` (khuyến nghị cao), `Worth exploring` (đáng cân nhắc), `Speculative` (thử nghiệm).
   - Badge phân loại phụ thuộc: `in-process`, `local-substitutable`, `ports & adapters`, `mock`.
   - Mục **Top Recommendation**: Đề xuất ứng viên số 1 nên ưu tiên xử lý trước kèm lý do.
-- **Mở trình duyệt tự động**:
-  - Windows: `start <path>`
-  - macOS: `open <path>`
-  - Linux: `xdg-open <path>`
-  - Thông báo đường dẫn tuyệt đối cho người dùng trong phản hồi.
 
 ### Bước 3: Vòng lặp Phản biện & Thẩm vấn (Grilling Loop)
 

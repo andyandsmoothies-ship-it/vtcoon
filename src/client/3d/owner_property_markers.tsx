@@ -58,9 +58,6 @@ export function OwnerPricePill({
   position = [0, 0.115, 0.70],
 }: OwnerPricePillProps): React.ReactElement | null {
   const hasOwner = Boolean(ownerColor && ownerColor.length > 0);
-  if (!hasOwner) {
-    return null;
-  }
   const resolvedPrice =
     price ??
     (cellIndex !== undefined
@@ -75,9 +72,13 @@ export function OwnerPricePill({
 
   const priceColor = hasOwner ? '#FFFFFF' : '#FBBF24';
   const priceTexture = useMemo(
-    () => getPriceCanvasTexture(resolvedPriceText, priceColor),
-    [resolvedPriceText, priceColor]
+    () => (hasOwner ? getPriceCanvasTexture(resolvedPriceText, priceColor) : null),
+    [hasOwner, resolvedPriceText, priceColor]
   );
+
+  if (!hasOwner) {
+    return null;
+  }
 
   return (
     <group

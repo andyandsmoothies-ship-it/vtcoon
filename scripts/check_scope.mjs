@@ -56,15 +56,16 @@ function extractRegisteredFiles(planContent) {
   return registered;
 }
 
-function getModifiedFiles() {
+function getModifiedFiles(stagedOnly = false) {
   try {
     const statusOutput = execSync('git status --porcelain', { encoding: 'utf-8' });
     const files = new Set();
 
-    for (const line of statusOutput.split('\n')) {
-      const trimmed = line.trim();
-      if (!trimmed) continue;
+    for (const rawLine of statusOutput.split('\n')) {
+      if (!rawLine.trim()) continue;
+      if (stagedOnly && (rawLine[0] === ' ' || rawLine[0] === '?')) continue;
 
+      const trimmed = rawLine.trim();
       // Extract file path (format: " M path/to/file" or "?? path/to/file" or "R  old -> new")
       const parts = trimmed.substring(2).trim();
       let filePath = parts;
@@ -99,7 +100,8 @@ function main() {
   console.log('======================================================\n');
 
   const registeredFiles = extractRegisteredFiles(planContent);
-  const modifiedFiles = getModifiedFiles();
+  const stagedOnly = process.argv.includes('--staged');
+  const modifiedFiles = getModifiedFiles(stagedOnly);
 
   console.log(`📌 Registered files in Plan: ${registeredFiles.size}`);
   for (const f of registeredFiles) {

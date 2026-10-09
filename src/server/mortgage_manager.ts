@@ -4,6 +4,7 @@ import { MacroCycleType } from '../domain/macro_cycle_types';
 import { PROPERTY_DEEDS } from '../domain/property_manager';
 import type { PropertyRegistry, PropertyStateMap, PropertyState } from '../domain/property_manager';
 import { ActionRejectReason } from '../domain/action_reasons';
+import { restorePostInsolvencyPhase } from './insolvency_manager.js';
 
 declare module '../domain/room' {
   interface Room { pendingInsolvencyQueue?: string[]; }
@@ -158,29 +159,7 @@ export function mortgageProperty(
   stateMap.set(cellIndex, st);
 
   if (room.phase === TurnPhase.InsolvencyPhase && v.player.balance >= 0) {
-    let nextDebtorId: string | undefined;
-    if (room.pendingInsolvencyQueue?.length) {
-      const q = room.pendingInsolvencyQueue;
-      const qIdx = q.indexOf(playerId);
-      if (qIdx !== -1) q.splice(qIdx, 1);
-      while (q.length > 0) {
-        const nextId = q.shift();
-        const candidate = nextId ? room.players.find((p) => p.id === nextId) : undefined;
-        if (candidate && candidate.balance < 0 && !candidate.bankrupt) {
-          nextDebtorId = candidate.id;
-          break;
-        }
-      }
-    }
-    if (nextDebtorId) {
-      room.pendingInsolvencyDebtorId = nextDebtorId;
-    } else {
-      delete room.pendingInsolvencyDebtorId;
-      delete room.pendingInsolvencyCreditorId;
-      const isTurnPlayer = room.players[room.currentPlayerIndex]?.id === playerId;
-      room.phase = isTurnPlayer ? TurnPhase.PropertyManagement : (room.preInsolvencyPhase ?? TurnPhase.PropertyManagement);
-      delete room.preInsolvencyPhase;
-    }
+    restorePostInsolvencyPhase(room, playerId);
   }
 
   console.info(JSON.stringify({
