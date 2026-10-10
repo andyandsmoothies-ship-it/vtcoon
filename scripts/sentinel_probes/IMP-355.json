@@ -1,0 +1,86 @@
+[
+  {
+    "file": "src/client/3d/shaders/tropical_water_material.ts",
+    "desc": "AST: Invert inner clamp return in calculateShoreDampening from 0.0 to 1.0",
+    "target": "if (boxDist <= innerDist) return 0.0;",
+    "replacement": "if (boxDist <= innerDist) return 1.0;"
+  },
+  {
+    "file": "src/client/3d/shaders/tropical_water_material.ts",
+    "desc": "AST: Invert outer clamp return in calculateShoreDampening from 1.0 to 0.0",
+    "target": "if (boxDist >= outerDist) return 1.0;",
+    "replacement": "if (boxDist >= outerDist) return 0.0;"
+  },
+  {
+    "file": "src/client/3d/shaders/tropical_water_material.ts",
+    "desc": "AST: Corrupt Chebyshev box metric to min instead of max in calculateShoreDampening",
+    "target": "const boxDist = Math.max(Math.abs(x), Math.abs(y));",
+    "replacement": "const boxDist = Math.min(Math.abs(x), Math.abs(y));"
+  },
+  {
+    "file": "src/client/3d/shaders/tropical_water_material.ts",
+    "desc": "AST: Corrupt smoothstep hermite polynomial return to 0.0 in calculateShoreDampening",
+    "target": "return t * t * (3.0 - 2.0 * t);",
+    "replacement": "return 0.0;"
+  },
+  {
+    "file": "src/client/3d/shaders/tropical_water_material.ts",
+    "desc": "AST: Corrupt default innerDist from 9.6 to 4.0 in calculateShoreDampening",
+    "target": "innerDist: number = 9.6,",
+    "replacement": "innerDist: number = 4.0,"
+  },
+  {
+    "file": "src/client/3d/shaders/tropical_water_material.ts",
+    "desc": "AST: Corrupt Chebyshev metric in TROPICAL_WATER_VERTEX_SHADER",
+    "target": "float boxDist = max(abs(transformed.x), abs(transformed.y));",
+    "replacement": "float boxDist = min(abs(transformed.x), abs(transformed.y));"
+  },
+  {
+    "file": "src/client/3d/shaders/tropical_water_material.ts",
+    "desc": "AST: Corrupt smoothstep threshold in TROPICAL_WATER_VERTEX_SHADER",
+    "target": "float shoreDamp = smoothstep(9.6, 12.0, boxDist);",
+    "replacement": "float shoreDamp = smoothstep(15.0, 20.0, boxDist);"
+  },
+  {
+    "file": "src/client/3d/shaders/tropical_water_material.ts",
+    "desc": "AST: Remove shoreDamp factor in TROPICAL_WATER_VERTEX_SHADER",
+    "target": "transformed.z += (w1 + w2 + w3) * shoreDamp;",
+    "replacement": "transformed.z += (w1 + w2 + w3) * 1.0;"
+  },
+  {
+    "file": "src/client/3d/shaders/tropical_water_material.ts",
+    "desc": "AST: Invert innerRadius return in calculateDepthBlend from 0.0 to 1.0",
+    "target": "if (distFromCenter <= innerRadius) return 0.0;",
+    "replacement": "if (distFromCenter <= innerRadius) return 1.0;"
+  },
+  {
+    "file": "src/client/3d/shaders/tropical_water_material.ts",
+    "desc": "AST: Invert outerRadius return in calculateDepthBlend from 1.0 to 0.0",
+    "target": "if (distFromCenter >= outerRadius) return 1.0;",
+    "replacement": "if (distFromCenter >= outerRadius) return 0.0;"
+  },
+  {
+    "file": "src/client/3d/shaders/tropical_water_material.ts",
+    "desc": "AST: Corrupt calculateWaterWaveOffset to exceed amplitude limit",
+    "target": "return w1 + w2 + w3;",
+    "replacement": "return (w1 + w2 + w3) * 10.0;"
+  },
+  {
+    "file": "src/client/3d/shaders/tropical_water_material.ts",
+    "desc": "AST: Corrupt calculateFresnelFactor to return 1.0",
+    "target": "return Math.max(0.0, Math.min(1.0, fresnel));",
+    "replacement": "return 1.0;"
+  },
+  {
+    "file": "src/client/3d/shaders/tropical_water_material.ts",
+    "desc": "AST: Corrupt lerpWaterColor to return un-interpolated color",
+    "target": "return currentColor.lerp(targetColor, lerpRate);",
+    "replacement": "return currentColor;"
+  },
+  {
+    "file": "src/client/3d/shaders/tropical_water_material.ts",
+    "desc": "AST: Corrupt createTropicalWaterUniforms uTime definition",
+    "target": "uTime: { value: 0 },",
+    "replacement": "/* uTime omitted */"
+  }
+]

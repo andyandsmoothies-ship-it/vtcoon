@@ -41,6 +41,19 @@ export function calculateWaterWaveOffset(x: number, y: number, time: number): nu
   return w1 + w2 + w3;
 }
 
+export function calculateShoreDampening(
+  x: number,
+  y: number,
+  innerDist: number = 9.6,
+  outerDist: number = 12.0
+): number {
+  const boxDist = Math.max(Math.abs(x), Math.abs(y));
+  if (boxDist <= innerDist) return 0.0;
+  if (boxDist >= outerDist) return 1.0;
+  const t = (boxDist - innerDist) / (outerDist - innerDist);
+  return t * t * (3.0 - 2.0 * t);
+}
+
 export function calculateDepthBlend(
   distFromCenter: number,
   innerRadius: number = 9.6,
@@ -65,11 +78,13 @@ export const TROPICAL_WATER_VERTEX_SHADER = `
     vUv = uv;
     vec3 transformed = position;
     
-    // Sóng Gerstner GPU đa tần (biên độ tối đa 0.052)
+    // Sóng Gerstner GPU đa tần triệt tiêu tại chân bàn cờ 19.2x19.2m (nửa cạnh 9.6m)
     float w1 = sin(transformed.x * 0.055 + uTime * 1.4) * 0.024;
     float w2 = cos(transformed.y * 0.065 + uTime * 1.1) * 0.018;
     float w3 = sin((transformed.x + transformed.y) * 0.038 + uTime * 1.8) * 0.010;
-    transformed.z += w1 + w2 + w3;
+    float boxDist = max(abs(transformed.x), abs(transformed.y));
+    float shoreDamp = smoothstep(9.6, 12.0, boxDist);
+    transformed.z += (w1 + w2 + w3) * shoreDamp;
 
     vec4 worldPos = modelMatrix * vec4(transformed, 1.0);
     vWorldPosition = worldPos.xyz;
