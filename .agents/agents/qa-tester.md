@@ -24,7 +24,8 @@ hooks: [.agents/hooks_qa.json]
 - **Separation of Duties**: If production code must change, halt immediately and hand off to `implementer`.
 
 ## 2. Phase 1: Baseline Verification
-- Run existing test suite before writing tests (`npm test` or target test runner).
+- Run baseline verification tests before writing tests.
+- **Subagent Timebox & Targeted Scope Invariant**: In large codebases, subagents MUST execute strictly the target slice test or immediate dependent tests (e.g. `npx vitest run <target_suite>`), timebox <= 3-5 min per dispatch. FORBIDDEN running naked repo-wide `vitest run` across the entire repo. Full regression belongs to Station 4 executed by Main Agent via native background OS task (`run_command`).
 - Verify baseline is 100% PASS. If existing tests fail, report `BLOCKED: Baseline Failure`.
 
 ## 3. Phase 2: Red Test Construction (Contract & Traceability)

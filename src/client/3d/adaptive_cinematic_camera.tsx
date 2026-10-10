@@ -10,6 +10,7 @@ import {
   calculateTargetCameraState,
   calculateScreenShake,
   checkHighStakesRoll,
+  resolveSoftReturnDuration,
   CAMERA_CONFIG,
 } from './camera_state_machine';
 import {
@@ -279,13 +280,14 @@ export function AdaptiveCinematicCamera({
         prevModeRef.current !== 'pre_match' &&
         !hasUserCustomCamera
       ) {
+        const returnDuration = resolveSoftReturnDuration(isBotTurn || isAnimatingPawnBot);
         softReturnRef.current = initSoftReturn(
           camBaseRef.current,
           targetBaseRef.current,
           targetState.position,
           targetState.target,
           performance.now(),
-          1200
+          returnDuration
         );
       } else if (mode !== 'overview') {
         softReturnRef.current = null;

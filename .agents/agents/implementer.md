@@ -49,7 +49,7 @@ hooks: [.agents/hooks_implementer.json]
 - **Pass 4: Pre-Finish Gate (Mechanical Zero-Defect Sweep)**:
   - Before requesting review handoff, run the unified mechanical pre-filter:
     `npm run prefilter -- <modified files>` (validates `tsc --noEmit`, LOC budgets, zero dirty casts `as any`, zero framework spies, console.log purge, and linters in one pass).
-  - Full Regression Gate: `npm test` — all existing test suites must pass. Regressions are strictly banned.
+  - **Subagent Timebox & Targeted Scope Invariant**: In subagents, execute strictly targeted slice tests and immediate dependents (timebox <= 3-5 min per dispatch). FORBIDDEN running naked repo-wide `vitest run` across the entire repo. Full regression belongs to Station 4 executed by Main Agent via native background OS task (`run_command`).
   - Evidence Snapshot: `node scripts/collect_evidence.mjs` — writes to `.agents/evidence/`.
 
 ## 4. Full-Pipeline Delivery

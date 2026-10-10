@@ -121,6 +121,9 @@ export function resolveCameraMode(params: CameraResolveParams): CameraMode {
   }
   // 2. Quân cờ đang di chuyển: Bám đuổi theo quân cờ
   if (params.isPawnAnimating) {
+    if ((params.isBotTurn || params.isAnimatingPawnBot) && params.isTargetOwnedByHuman === false && !params.isHighStakesRoll && params.activeModal === null) {
+      return 'overview';
+    }
     return 'pawn_chase';
   }
   // 3. Mở modal tương tác hoặc dừng chân tại ô đất sau khi di chuyển
@@ -169,6 +172,10 @@ function configToCameraState(cfg: { readonly position: readonly [number, number,
     fov: cfg.fov,
     speed: cfg.speed,
   };
+}
+
+export function resolveSoftReturnDuration(isBot?: boolean): number {
+  return isBot ? 650 : 1200;
 }
 
 /**

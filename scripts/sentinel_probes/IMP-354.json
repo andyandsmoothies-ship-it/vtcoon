@@ -1,0 +1,86 @@
+[
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Invert bot pawn animating mode return from overview to pawn_chase",
+    "target": "params.isTargetOwnedByHuman === false && !params.isHighStakesRoll && params.activeModal === null) {\n      return 'overview';",
+    "replacement": "params.isTargetOwnedByHuman === false && !params.isHighStakesRoll && params.activeModal === null) {\n      return 'pawn_chase';"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Corrupt resolveSoftReturnDuration for bot from 650 to 999",
+    "target": "return isBot ? 650 : 1200;",
+    "replacement": "return isBot ? 999 : 1200;"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Corrupt resolveSoftReturnDuration for human from 1200 to 888",
+    "target": "return isBot ? 650 : 1200;",
+    "replacement": "return isBot ? 650 : 888;"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Invert isTargetOwnedByHuman comparison from false to true",
+    "target": "params.isTargetOwnedByHuman === false",
+    "replacement": "params.isTargetOwnedByHuman === true"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Invert high stakes check in bot pawn animating guard",
+    "target": "!params.isHighStakesRoll && params.activeModal === null",
+    "replacement": "params.isHighStakesRoll && params.activeModal === null"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Corrupt activeModal null check in bot pawn animating guard",
+    "target": "params.activeModal === null",
+    "replacement": "params.activeModal !== null"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Narrow bot recognition check to require both flags",
+    "target": "if ((params.isBotTurn || params.isAnimatingPawnBot) && params.isTargetOwnedByHuman === false && !params.isHighStakesRoll",
+    "replacement": "if ((params.isBotTurn && params.isAnimatingPawnBot) && params.isTargetOwnedByHuman === false && !params.isHighStakesRoll"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Invert auction focus return in resolveCameraMode",
+    "target": "if (params.activeModal === 'auction') {\n    return 'auction_focus';\n  }",
+    "replacement": "if (params.activeModal === 'auction') {\n    return 'overview';\n  }"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Swap ternary branches in resolveSoftReturnDuration",
+    "target": "return isBot ? 650 : 1200;",
+    "replacement": "return isBot ? 1200 : 650;"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Zero out resolveSoftReturnDuration",
+    "target": "return isBot ? 650 : 1200;",
+    "replacement": "return 0;"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Corrupt overview fov in CAMERA_CONFIG",
+    "target": "fov: 24,",
+    "replacement": "fov: 99,"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Corrupt overview speed in CAMERA_CONFIG",
+    "target": "speed: 3.2,",
+    "replacement": "speed: 99.9,"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Corrupt overview position in CAMERA_CONFIG",
+    "target": "position: [24.6, 25.3, 24.6] as const,",
+    "replacement": "position: [0.0, 0.0, 0.0] as const,"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Corrupt overview target in CAMERA_CONFIG",
+    "target": "target: [2.2, 0.0, 2.2] as const,",
+    "replacement": "target: [99.0, 99.0, 99.0] as const,"
+  }
+]

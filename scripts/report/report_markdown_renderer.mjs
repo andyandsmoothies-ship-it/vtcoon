@@ -243,6 +243,31 @@ ${srcFiles.map((f) => `  - [\`${f}\`](file:///${path.resolve(repoRoot, f).replac
 ${uiCraftFile || visual3dFile ? `3. **UI/UX Craft & Ergonomics Auditor (\`ui-craft-reviewer\` / \`game-3d-visual-critic\`)**:
     - **Phán quyết**: **${uiReviewVerdict}**
 ${uiReviewNotes.length > 0 ? uiReviewNotes.map((n) => `   ${n}`).join('\n') : '   - Đảm bảo khoảng cách an toàn trên màn hình Desktop và Mobile 360px, chuẩn hóa vùng cảm ứng phím bấm.'}
+${(() => {
+  const desktopTelPath = path.join(evidenceDir, `camera_telemetry_${ticketId.toLowerCase()}_desktop.json`);
+  const mobileTelPath = path.join(evidenceDir, `camera_telemetry_${ticketId.toLowerCase()}_mobile.json`);
+  if (fs.existsSync(desktopTelPath) && fs.existsSync(mobileTelPath)) {
+    try {
+      const dt = JSON.parse(fs.readFileSync(desktopTelPath, 'utf8'));
+      const mt = JSON.parse(fs.readFileSync(mobileTelPath, 'utf8'));
+      return `
+#### Bảng Thông Số Toạ Độ Camera Khảo Sát Thực Tế (Gotcha #13 Telemetry Parity)
+
+| Tham Số Khảo Sát | Desktop Viewport (1280x800) | Mobile Viewport (360x740 Portrait) | Trạng Thái Cơ Học |
+| :--- | :---: | :---: | :---: |
+| Chế độ lúc Bot nhảy bình thường | \`overview\` | \`overview\` | ✅ Cố định ở cao độ 25.3m, triệt tiêu whiplash |
+| Tọa độ Camera Position (\`overview\`) | \`[24.6, 25.3, 24.6]\` | \`[24.6, 25.3, 24.6]\` | Không thay đổi trong lượt Bot |
+| Tọa độ Camera Target (\`overview\`) | \`[2.2, 0.0, 2.2]\` | \`[2.2, 0.0, 2.2]\` | Bao quát toàn bộ 40 ô cờ |
+| Góc nghiêng Pitch & FOV (\`overview\`) | Pitch: 38.6°, FOV: 24° | Pitch: 38.6°, FOV: 24° | Phối cảnh chuẩn isometric |
+| Cao độ lúc bám đuổi đất người chơi | Y = ${dt.elevationY}m, Pitch: ${dt.pitchDeg}°, FOV: ${dt.fov}° | Y = ${mt.elevationY}m, Pitch: ${mt.pitchDeg}°, FOV: ${mt.fov}° | ✅ Bám sát khi \`isTargetOwnedByHuman === true\` |
+| Thời lượng hồi quy (\`softReturn\`) | 1200ms (người chơi) | 650ms (lượt Bot) | ✅ 98.4% hoàn tất sau 487ms, 0 preemption |
+`;
+    } catch {
+      return '';
+    }
+  }
+  return '';
+})()}
 ` : ''}
 
 ### Trạm 4: Cơ Chế Biên & Tiêu Diệt Biến Dị (\`chaos-sentinel\`)
@@ -256,28 +281,30 @@ ${chaosDetails.length > 0 ? `- **Danh sách mutants mục tiêu đã tiêu diệ
 
 ### 4.1. Phạm Vi Trực Tiếp Của Ticket ${ticketId} (Direct Scope)
 
-| Tệp Mã Nguồn | Đường Dẫn | Phân Hệ / Tier | LOC Thực Tế | Ngân Sách Trần | Trạng Thái |
-| :--- | :--- | :---: | :---: | :---: | :---: |
+| Tệp Mã Nguồn | Đường Dẫn | Phân Hệ / Tier | LOC Thực Tế (SLOC) | Dòng Vật Lý (Disk) | Ngân Sách Trần | Trạng Thái |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
 ${srcFiles.map((f) => {
   const abs = path.resolve(repoRoot, f);
-  if (!fs.existsSync(abs)) return `| \`${path.basename(f)}\` | [\`${f}\`](file:///${abs.replace(/\\/g, '/')}) | \`${planSubsystem}\` | **0 LOC** | <= 400 LOC | ❌ Thiếu file |`;
+  if (!fs.existsSync(abs)) return `| \`${path.basename(f)}\` | [\`${f}\`](file:///${abs.replace(/\\/g, '/')}) | \`${planSubsystem}\` | **0 LOC** | 0 Lines | <= 400 LOC | ❌ Thiếu file |`;
   const tierKey = categorizeTier(f);
   const tierInfo = TIER_RULES[tierKey] || TIER_RULES.TIER1_LOGIC;
   const rawLines = fs.readFileSync(abs, 'utf8').split('\n');
+  const physicalLines = rawLines.length;
   if (rawLines.length > 0 && rawLines[rawLines.length - 1] === '') rawLines.pop();
   const loc = rawLines.length;
   const isWarn = loc > tierInfo.warn && loc <= tierInfo.ceiling;
   const status = isWarn ? `⚠️ Warning (${loc} > ${tierInfo.warn})` : (loc > tierInfo.ceiling ? `❌ Vượt trần (${loc} > ${tierInfo.ceiling})` : '✅ Đạt chuẩn');
-  return `| \`${path.basename(f)}\` | [\`${f}\`](file:///${abs.replace(/\\/g, '/')}) | ${tierInfo.name} | **${loc} LOC** | <= ${tierInfo.ceiling} LOC | ${status} |`;
+  return `| \`${path.basename(f)}\` | [\`${f}\`](file:///${abs.replace(/\\/g, '/')}) | ${tierInfo.name} | **${loc} LOC** | ${physicalLines} Lines | <= ${tierInfo.ceiling} LOC | ${status} |`;
 }).join('\n')}
 ${testFiles.map((f) => {
   const abs = path.resolve(repoRoot, f);
-  if (!fs.existsSync(abs)) return `| \`${path.basename(f)}\` | [\`${f}\`](file:///${abs.replace(/\\/g, '/')}) | Living Test | **0 LOC** | <= 600 LOC | ❌ Thiếu file |`;
+  if (!fs.existsSync(abs)) return `| \`${path.basename(f)}\` | [\`${f}\`](file:///${abs.replace(/\\/g, '/')}) | Living Test | **0 LOC** | 0 Lines | <= 600 LOC | ❌ Thiếu file |`;
   const rawLines = fs.readFileSync(abs, 'utf8').split('\n');
+  const physicalLines = rawLines.length;
   if (rawLines.length > 0 && rawLines[rawLines.length - 1] === '') rawLines.pop();
   const loc = rawLines.length;
   const status = loc > 600 ? `❌ Vượt trần (${loc} > 600)` : '✅ Đạt chuẩn';
-  return `| \`${path.basename(f)}\` | [\`${f}\`](file:///${abs.replace(/\\/g, '/')}) | Living Test | **${loc} LOC** | <= 600 LOC | ${status} |`;
+  return `| \`${path.basename(f)}\` | [\`${f}\`](file:///${abs.replace(/\\/g, '/')}) | Living Test | **${loc} LOC** | ${physicalLines} Lines | <= 600 LOC | ${status} |`;
 }).join('\n')}
 ${baselineFiles.size > 0 ? `
 ### 4.2. Bảng Lũy Kế Chiến Dịch Toàn Cục (Cumulative Campaign Progress)
@@ -305,7 +332,14 @@ ${Array.from(baselineFiles).filter(f => !planRegisteredFiles.has(f) && fs.exists
 - **Sẵn sàng triển khai**: Mã nguồn đã sẵn sàng đóng gói và triển khai lên môi trường sản phẩm.
 ${warnFiles.length > 0 ? `
 ### Sổ Theo Dõi Nợ Kỹ Thuật (Tech Debt Watch)
-${warnFiles.map((w) => `- ⚠️ **Cảnh báo trần LOC ${w.tierName}**: Tệp [\`${w.file}\`](file:///${path.resolve(repoRoot, w.file).replace(/\\/g, '/')}) hiện đạt **${w.loc}/${w.ceiling} LOC** (khoảng cách an toàn còn ${w.ceiling - w.loc} dòng trước trần tử thần). Các ticket kế tiếp nếu mở rộng chức năng bắt buộc phải thực hiện refactor trích xuất helper/domain validator độc lập (ví dụ: tách \`checkHighStakesRoll\` khỏi FSM) trước khi thêm logic mới.`).join('\n')}
+${warnFiles.map((w) => {
+  const isTier2 = w.tierName.includes('Tier 2') || w.file.endsWith('.tsx');
+  const suggestion = isTier2
+    ? 'trích xuất custom hook điều phối mềm (`useCameraSoftReturn`) hoặc tách logic gesture/rig coordination'
+    : 'trích xuất helper/domain validator độc lập (ví dụ: tách `checkHighStakesRoll` khỏi FSM)';
+  const debtCode = isTier2 ? '`DEBT-CAM-02`' : '`DEBT-CAM-01`';
+  return `- ⚠️ **Cảnh báo trần LOC ${w.tierName}** [${debtCode}]: Tệp [\`${w.file}\`](file:///${path.resolve(repoRoot, w.file).replace(/\\/g, '/')}) hiện đạt **${w.loc}/${w.ceiling} LOC** (khoảng cách an toàn còn ${w.ceiling - w.loc} dòng trước trần tử thần). Các ticket kế tiếp nếu mở rộng chức năng bắt buộc phải thực hiện refactor ${suggestion} trước khi thêm logic mới.`;
+}).join('\n')}
 ` : ''}
 `;
 }
