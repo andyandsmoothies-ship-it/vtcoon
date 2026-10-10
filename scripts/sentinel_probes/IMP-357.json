@@ -1,0 +1,44 @@
+[
+  {
+    "file": "src/client/3d/tropical_water.tsx",
+    "desc": "AST: Corrupt ShaderMaterial precision from highp to mediump",
+    "target": "precision: 'highp',",
+    "replacement": "precision: 'mediump',"
+  },
+  {
+    "file": "src/client/3d/tropical_water.tsx",
+    "desc": "AST: Corrupt uTime modulo from 20*PI to 999.0",
+    "target": "% (Math.PI * 20.0);",
+    "replacement": "% 999.0;"
+  },
+  {
+    "file": "src/client/3d/tropical_water.tsx",
+    "desc": "AST: Break R3F Transient Unmount Invariant when ocean is hidden",
+    "target": "if (!isOceanVisible) {\n    return <group visible={false} data-testid={testId} />;\n  }",
+    "replacement": "if (!isOceanVisible) {\n    return <mesh visible={true} data-testid={testId} />;\n  }"
+  },
+  {
+    "file": "src/client/3d/diagnostic_3d_store.ts",
+    "desc": "AST: Corrupt isDebugEnabled initial resolution to always false",
+    "target": "isDebugEnabled: resolveInitialDebugEnabled(),",
+    "replacement": "isDebugEnabled: false,"
+  },
+  {
+    "file": "src/client/3d/diagnostic_3d_store.ts",
+    "desc": "AST: Break toggleOcean by leaving isOceanVisible unchanged",
+    "target": "toggleOcean: () => set((s) => ({ isOceanVisible: !s.isOceanVisible })),",
+    "replacement": "toggleOcean: () => {},"
+  },
+  {
+    "file": "src/client/3d/diagnostic_3d_store.ts",
+    "desc": "AST: Break toggleTable by leaving isTableVisible unchanged",
+    "target": "toggleTable: () => set((s) => ({ isTableVisible: !s.isTableVisible })),",
+    "replacement": "toggleTable: () => {},"
+  },
+  {
+    "file": "src/client/3d/board_layout.tsx",
+    "desc": "AST: Remove Diagnostic3DPanel mounting from GameBoard",
+    "target": "{/* 0.05. Bảng Điều Khiển Chẩn Đoán 3D (Kích hoạt khi có ?debug=3d) */}\n      <Diagnostic3DPanel />",
+    "replacement": "{/* Diagnostic3DPanel removed */}"
+  }
+]

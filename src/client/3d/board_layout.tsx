@@ -22,6 +22,8 @@ import {
   createWalnutRoughnessTexture,
 } from './tabletop_texture_generator';
 import { isMobileHardware } from './device_detect';
+import { useDiagnostic3DStore } from './diagnostic_3d_store';
+import { Diagnostic3DPanel } from './diagnostic_3d_panel';
 
 // Depth Layer Stack triệt tiêu Z-Fighting (IMP-30 Terrain Flush & IMP-32 Executive Tabletop Master Plan)
 export const WALNUT_TABLE_Y = -0.350;
@@ -108,6 +110,15 @@ export function GameBoard({ isMobile: propIsMobile }: GameBoardProps = {}): Reac
   const isHeatmapActive = useGameStore((s) => s.isHeatmapActive);
   const isMobile = propIsMobile ?? isMobileHardware();
 
+  const storeTableVisible = useDiagnostic3DStore((s) => s.isTableVisible);
+  const isTableVisible = useDiagnostic3DStore.getState()?.isTableVisible ?? storeTableVisible;
+
+  const storeCityVisible = useDiagnostic3DStore((s) => s.isCityVisible);
+  const isCityVisible = useDiagnostic3DStore.getState()?.isCityVisible ?? storeCityVisible;
+
+  const storeOceanVisible = useDiagnostic3DStore((s) => s.isOceanVisible);
+  const isOceanVisible = useDiagnostic3DStore.getState()?.isOceanVisible ?? storeOceanVisible;
+
   const ownerInfoMap = useMemo(() => computeOwnerMap(playersInfo), [playersInfo]);
   const monopolyGroups = useMemo(() => detectPlayerMonopolies(playersInfo), [playersInfo]);
   const walnutDiffuse = useMemo(() => createWalnutTabletopTexture(), []);
@@ -135,9 +146,9 @@ export function GameBoard({ isMobile: propIsMobile }: GameBoardProps = {}): Reac
   );
 
   return (
-    <group position={[0, 0, 0]}>
+    <group position={[0, 0, 0]} visible={isTableVisible ? undefined : false}>
       {/* Khung Bàn Gỗ Óc Chó Thượng Lưu (Walnut Tabletop) y = -0.350 */}
-      <mesh receiveShadow position={[0, WALNUT_TABLE_Y, 0]}>
+      <mesh receiveShadow visible={isTableVisible} position={[0, WALNUT_TABLE_Y, 0]}>
         <boxGeometry args={[19.2, 0.2, 19.2]} />
         <meshStandardMaterial
           map={walnutDiffuse}
@@ -150,7 +161,12 @@ export function GameBoard({ isMobile: propIsMobile }: GameBoardProps = {}): Reac
 
       {/* 0. Môi trường Bán đảo Đảo Ngọc nhiệt đới (Vịnh biển, bãi cát, đồi núi & mây trời) */}
       {/* <CoastalIslandEnvironment /> */}
-      <CoastalIslandEnvironment isMobile={isMobile} />
+      <group visible={isOceanVisible}>
+        <CoastalIslandEnvironment isMobile={isMobile} />
+      </group>
+
+      {/* 0.05. Bảng Điều Khiển Chẩn Đoán 3D (Kích hoạt khi có ?debug=3d) */}
+      <Diagnostic3DPanel />
 
       {/* 0.1. Điểm nhấn ánh sáng điện ảnh 3D (Hải đăng, Chóp Landmark C3, Sân vận động) */}
       <CinematicLightingAccents />
@@ -159,7 +175,9 @@ export function GameBoard({ isMobile: propIsMobile }: GameBoardProps = {}): Reac
       <ConstructionSlamVFX />
 
       {/* 2. Sa bàn đô thị thu nhỏ: Đảo tài chính, cầu vượt, sân vận động & bến du thuyền */}
-      <MiniatureCityDiorama isMobile={isMobile} />
+      <group visible={isCityVisible}>
+        <MiniatureCityDiorama isMobile={isMobile} />
+      </group>
 
       {/* 3. Sàn diễn xúc xắc 3D thoáng đãng trên Đại Lộ Sài Gòn */}
       <DiceTray />

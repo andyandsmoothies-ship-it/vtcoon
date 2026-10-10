@@ -108,13 +108,13 @@ describe('Living Contract Suite: IMP-338 Ocean Overdraw Elimination & Proactive 
   // FACET 2: TropicalWater Shader Precision & Single-Layer Color Baking
   // =========================================================================
   describe('Facet 2: Single-Layer Ocean Color Baking & Material Precision (TropicalWater)', () => {
-    it('TC-338.04 [UC-WATER/MSS]: Given TropicalWater rendered with isMobile true, When inspecting material properties via captureTree, Then configures precision mediump on ShaderMaterial for FP16 mobile ALU efficiency', () => {
+    it('TC-338.04 [UC-WATER/MSS]: Given TropicalWater rendered with isMobile true, When inspecting material properties via captureTree, Then configures precision highp on ShaderMaterial to prevent Android FP16 vertex jitter', () => {
       const tree = captureTree(TropicalWater, { isMobile: true });
       const mesh = findNode(tree, (n) => n.props['data-testid'] === 'living-ocean-water');
       const mat = mesh?.props.material as ShaderMaterial | undefined;
       const geom = mesh?.props.geometry as { parameters?: { widthSegments: number; heightSegments: number } } | undefined;
       expect(mat).toBeDefined();
-      expect(mat?.precision).toBe('mediump');
+      expect(mat?.precision).toBe('highp');
       expect([geom?.parameters?.widthSegments, geom?.parameters?.heightSegments]).toEqual([24, 24]);
     });
 
