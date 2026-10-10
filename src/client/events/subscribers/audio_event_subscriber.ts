@@ -102,6 +102,19 @@ export function createAudioEventSubscriber(
         break;
       }
 
+      case SynthesizedGameEventType.EVENT_CARD_DRAWN: {
+        scheduleOrPlay(0, 'card_draw', () => engine.playCardFlip());
+        break;
+      }
+
+      case SynthesizedGameEventType.TRANSIT_WHEEL_LANDED: {
+        const isDelay = event.outcome === 'FLIGHT_DELAY';
+        scheduleOrPlay(0, 'transit_land', () => {
+          if (isDelay) engine.playSlumpThud(); else engine.playVictoryChime();
+        });
+        break;
+      }
+
       default:
         break;
     }

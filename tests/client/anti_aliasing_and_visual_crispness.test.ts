@@ -17,6 +17,7 @@ import { SMAA, DepthOfField, ToneMapping, EffectComposer } from '@react-three/po
 import { ToneMappingMode } from 'postprocessing';
 import {
   PostProcessingPipeline,
+  ActivePostProcessingPipeline,
   DEFAULT_PIPELINE_CONFIG,
   type PostProcessingPipelineProps,
 } from '../../src/client/3d/post_processing_pipeline';
@@ -208,7 +209,7 @@ describe('[TC-IMP34/MSS][UC-IMP34] Anti-Aliasing & Visual Crispness Contract Tes
   });
 
   it('[TC-IMP34.19/MSS][UC-IMP34] PostProcessingPipeline configures EffectComposer with multisampling and autoClear=false', () => {
-    const rendered = PostProcessingPipeline({});
+    const rendered = ActivePostProcessingPipeline({});
     expect(rendered).not.toBeNull();
     expect(rendered?.type).toBe(EffectComposer);
     const props = getElementProps(rendered);

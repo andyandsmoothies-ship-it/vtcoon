@@ -7,6 +7,9 @@ import type { GameEventContext } from '../game_event_bus.js';
 import type { PacingContext } from '../pacing_context.js';
 import { BOARD_CONFIG } from '../../../domain/board_config.js';
 import { formatCurrency } from '../../ui/ui_helpers.js';
+import { useLobbyStore } from '../../store/lobby_store.js';
+import { BOARD_WIDE_CARDS } from '../../network/apply_delta.js';
+import { formatTransitWheelBroadcast, TransitWheelOutcome } from '../../../domain/transit_wheel.js';
 
 export function getCellName(cellIndex?: number): string {
   if (cellIndex === undefined) return 'BĐS';
@@ -143,6 +146,48 @@ export function handleMarketBadges(
         actionType: 'auction_win',
         title: `Thắng đấu giá ${cellName} ➔ Nộp Kho Bạc`,
         cellIndex: event.cellIndex,
+      });
+      break;
+    }
+
+    case SynthesizedGameEventType.EVENT_CARD_DRAWN: {
+      const myPid = useLobbyStore.getState().myPlayerId || 'p1';
+      const isBoardWide = BOARD_WIDE_CARDS.has(event.cardId);
+      const isBotCard = Boolean(event.playerId && event.playerId !== myPid);
+      if (!isBotCard && !isBoardWide) {
+        state.addFloatingText({
+          actionType: event.cardType === 'market' ? 'market' : 'chance',
+          playerId: event.playerId,
+          title: event.title,
+          text: event.description || '',
+          type: (event.effectDelta ?? 0) >= 0 ? FloatingTextType.Bonus : FloatingTextType.Penalty,
+          durationMs: 4800,
+        });
+      }
+      break;
+    }
+
+    case SynthesizedGameEventType.TRANSIT_WHEEL_LANDED: {
+      const isDelay = event.outcome === TransitWheelOutcome.FLIGHT_DELAY;
+      const pName = resolvePlayerName(context, event.playerId);
+      const stName = getCellName(event.cellIndex);
+      const targetName = event.targetCell !== undefined ? getCellName(event.targetCell) : undefined;
+      const text = formatTransitWheelBroadcast({
+        outcome: event.outcome,
+        playerName: pName,
+        stationName: stName,
+        targetCellName: targetName,
+        payout: event.payout,
+        boostSteps: event.boostSteps,
+      });
+      state.addFloatingText({
+        text,
+        type: isDelay ? FloatingTextType.Penalty : FloatingTextType.Bonus,
+        playerId: event.playerId,
+        actionType: 'transit',
+        title: 'VÒNG XOAY VẬN TẢI',
+        cellIndex: event.targetCell ?? event.cellIndex,
+        durationMs: 4000,
       });
       break;
     }

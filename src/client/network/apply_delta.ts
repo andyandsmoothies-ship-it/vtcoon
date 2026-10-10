@@ -1,14 +1,10 @@
 // [UC-GAME-009/MSS][TC-NET03.1/MSS][TC-NET03.2/MSS][UC-GAME-008/MSS]
 // Đồng bộ hóa DeltaPayload (kể cả Sparse Diff) vào Zustand useGameStore
 // [IMP-64] Player & Cell sections extracted to apply_delta_players.ts and apply_delta_cells.ts
-import { useGameStore, type GameState, FloatingTextType } from '../store/game_store.js';
-import { useActivityStore } from '../store/activity_store.js';
+import { useGameStore, type GameState, FloatingTextType, type FloatingActionType } from '../store/game_store.js';
 import { useLobbyStore } from '../store/lobby_store.js';
 import { BOARD_SIZE, TurnPhase } from '../../domain/room.js';
 import type { DeltaPayload } from '../../server/session_manager.js';
-import { AudioEngine } from '../audio/audio_engine.js';
-import { SoundEffect } from '../audio/audio_types.js';
-import { trackDeltaActivities } from './activity_tracker.js';
 import { handleDeltaTelemetry } from '../telemetry/telemetry_delta_hook.js';
 import { HapticEngine } from '../haptics/haptic_engine.js';
 import { purgeClientMatchSession } from './client_session_purger.js';
@@ -49,7 +45,6 @@ function syncDiceRoll(delta: DeltaPayload, state: GameState): void {
   if (!dice || (dice[0] === 0 && dice[1] === 0) || isDiceRollDuplicate(delta, state)) return;
 
   state.triggerDiceRoll([dice[0], dice[1]], delta.diceSeq);
-  try { AudioEngine.playSfx(SoundEffect.DICE_ROLL); } catch (err) { console.warn('[applyDelta] AudioEngine.playSfx error:', err); }
 }
 
 function resolveTurnPlayerId(delta: DeltaPayload, state?: GameState): string | undefined {
@@ -156,10 +151,6 @@ function syncTelemetryAndActivities(delta: DeltaPayload, state: GameState, store
         });
       }
     }
-    trackDeltaActivities(delta, state, nextState, useActivityStore, {
-      suppressFinancialAndProperty: true,
-      suppressKinematicLogging: true,
-    });
     handleDeltaTelemetry(delta, state, nextState);
   } catch {
     // safe fallback: Telemetry and activity tracking must never break game store state
@@ -193,13 +184,17 @@ export function syncEventCard(
   const prevCard = state.lastEventCard;
   if (card !== undefined) state.setLastEventCard(card ?? null);
 
-  if (card && card.cardId && card.cardId !== prevCard?.cardId) {
+  const prevCardId = prevCard?.cardId || prevCard?.id;
+  const currentCardId = card?.cardId || card?.id;
+
+  if (card && currentCardId && currentCardId !== prevCardId) {
     const myPid = useLobbyStore.getState().myPlayerId || 'p1';
     const turnPlayerId = card.drawnBy ?? card.playerId ?? delta?.currentTurnPlayerId ?? delta?.diceRollerId ?? state.currentTurnPlayerId ?? myPid;
-    const isBoardWide = isBoardWideCard(card.cardId);
+    const isBoardWide = isBoardWideCard(currentCardId);
     if (isBoardWide || turnPlayerId !== myPid) {
+      const actionType = (card.cardType ?? (card.type?.toLowerCase() === 'market' ? 'market' : 'chance')) as FloatingActionType;
       state.addFloatingText({
-        actionType: card.cardType ?? 'chance',
+        actionType,
         playerId: turnPlayerId,
         title: card.title,
         text: card.effectDetail || card.description || '',

@@ -103,7 +103,7 @@ export function evaluateBotTradeAcceptance(
   const pers = personality ?? BotPersonality.Balanced;
 
   if (isLeadingPlayer(buyer.id, room?.players ?? [buyer, sellerBot], registry, stateMap)) {
-    if (pers === BotPersonality.Balanced && (room?.players?.length ?? 0) >= 3 && buyer.balance > 30000) {
+    if (!buyer.isBot && pers === BotPersonality.Balanced && (room?.players?.length ?? 0) >= 3 && buyer.balance > 30000) {
       return { accept: false, reason: 'KINGMAKING_DEFENSE' };
     }
     return { accept: false, reason: 'EMBARGO_LEADER' };

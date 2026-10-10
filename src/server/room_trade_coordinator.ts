@@ -4,6 +4,10 @@ import { executeP2PTrade } from './p2p_trade_actions.js';
 import { PROPERTY_DEEDS } from '../domain/property_data.js';
 import { pendingTradeManager } from './pending_trade_manager.js';
 import { handleBotRecipientTrade } from './trade_coordinator_helper.js';
+import {
+  recordTradeRejection,
+  clearTradeRejectionForCell,
+} from '../domain/bot/bot_negotiation_brain.js';
 import type { RoomContext } from './room_property_coordinator.js';
 
 export function isRoomQuiescentForTrade(room: Room): boolean {
@@ -134,6 +138,9 @@ export function coordRespondTradeOffer(
   accept: boolean,
 ): { success: boolean; reason?: string; idempotent?: boolean } {
   if (!ctx) return { success: false, reason: ActionRejectReason.INVALID_ROOM };
+  if (!isRoomQuiescentForTrade(ctx.room)) {
+    return { success: false, reason: ActionRejectReason.INVALID_PHASE };
+  }
 
   const session = pendingTradeManager.getSessionByOfferId(offerId);
   if (!session || session.roomCode !== ctx.room.roomCode) {
@@ -199,19 +206,16 @@ export function coordRespondTradeOffer(
       return { success: false, reason: res.reason };
     }
     buyer.lastTradeOfferRound = ctx.room.roundCount ?? ctx.room.round ?? 1;
-    delete buyer.cellTradeRejections?.[session.cellIndex];
-    delete buyer.cellLastRejectedRound?.[session.cellIndex];
+    clearTradeRejectionForCell(ctx.room.players, session.cellIndex);
+    if (session.offeredCellIndex !== undefined) {
+      clearTradeRejectionForCell(ctx.room.players, session.offeredCellIndex);
+    }
     pendingTradeManager.resolveSession(ctx.room.roomCode, offerId, true, playerId);
     ctx.room.pendingTradeOffer = null;
     return { success: true };
   } else {
     const round = ctx.room.roundCount ?? ctx.room.round ?? 1;
-    buyer.lastTradeOfferRound = round;
-    (buyer.cellTradeRejections ??= {})[session.cellIndex] = ((buyer.cellTradeRejections ??= {})[session.cellIndex] ?? 0) + 1;
-    (buyer.cellLastRejectedRound ??= {})[session.cellIndex] = round;
-    if (buyer.isBot && session.offeredCellIndex !== undefined) {
-      (buyer.swapPairLastRejectedRound ??= {})[`${session.cellIndex}_${session.offeredCellIndex}`] = round;
-    }
+    recordTradeRejection(buyer, session.cellIndex, round, session.offeredCellIndex);
     pendingTradeManager.resolveSession(ctx.room.roomCode, offerId, false, playerId);
     ctx.room.pendingTradeOffer = null;
     return { success: true };

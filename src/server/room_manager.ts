@@ -37,6 +37,7 @@ import {
   coordDeclineCompulsoryBuyout, type RoomContext,
 } from './room_property_coordinator.js';
 import { pendingTradeManager, type PendingTradeSession } from './pending_trade_manager.js';
+import { recordTradeRejection } from '../domain/bot/bot_negotiation_brain.js';
 import { executeTurnRoll } from './turn_loop.js';
 import {
   getActivePlayerFn, doCreateRoomSession, doHandleEndTurnSession, doJoinRoom,
@@ -254,9 +255,7 @@ export class RoomManager {
         const buyer = room.players.find((p) => p.id === res.session?.buyerId);
         if (buyer) {
           const round = room.roundCount ?? room.round ?? 1;
-          buyer.lastTradeOfferRound = round;
-          (buyer.cellTradeRejections ??= {})[res.session.cellIndex] = ((buyer.cellTradeRejections ??= {})[res.session.cellIndex] ?? 0) + 1;
-          (buyer.cellLastRejectedRound ??= {})[res.session.cellIndex] = round;
+          recordTradeRejection(buyer, res.session.cellIndex, round, res.session.offeredCellIndex);
         }
       }
     }

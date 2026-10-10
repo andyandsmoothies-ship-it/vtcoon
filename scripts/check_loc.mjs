@@ -16,6 +16,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 export const TIER_RULES = {
   TIER1_LOGIC: { name: 'Tier 1 (Domain/Server/Logic)', ceiling: 400, warn: 300, grace: 20 },
@@ -28,13 +29,13 @@ export const TIER_RULES = {
 
 export function categorizeTier(filePath) {
   const norm = filePath.replace(/\\/g, '/');
-  if (norm.startsWith('tests/') || norm.includes('.test.') || norm.includes('.spec.')) {
+  if (norm.startsWith('tests/') || norm.includes('/tests/') || norm.includes('.test.') || norm.includes('.spec.')) {
     return 'TESTS';
   }
-  if (norm.endsWith('.md') || norm.startsWith('docs/')) {
+  if (norm.endsWith('.md') || norm.startsWith('docs/') || norm.includes('/docs/')) {
     return 'DOCS';
   }
-  if (norm.startsWith('scripts/')) {
+  if (norm.startsWith('scripts/') || norm.includes('/scripts/')) {
     return 'SCRIPTS';
   }
   if (
@@ -141,20 +142,23 @@ export function formatReport(results) {
 }
 
 // CLI Execution
-const args = process.argv.slice(2).filter((arg) => !arg.startsWith('--'));
+if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
+  const args = process.argv.slice(2).filter((arg) => !arg.startsWith('--'));
 
-if (args.length === 0) {
-  console.log('Usage: node scripts/check_loc.mjs <file1> <file2> ...');
-  process.exit(0);
+  if (args.length === 0) {
+    console.log('Usage: node scripts/check_loc.mjs <file1> <file2> ...');
+    process.exit(0);
+  }
+
+  const measurements = args.map((file) => measureFile(file));
+  const { markdown, hasError } = formatReport(measurements);
+
+  console.log('\n📊 LOC BUDGET MEASUREMENT REPORT (Automated via scripts/check_loc.mjs):\n');
+  console.log(markdown);
+  console.log('');
+
+  if (hasError) {
+    process.exit(1);
+  }
 }
 
-const measurements = args.map((file) => measureFile(file));
-const { markdown, hasError } = formatReport(measurements);
-
-console.log('\n📊 LOC BUDGET MEASUREMENT REPORT (Automated via scripts/check_loc.mjs):\n');
-console.log(markdown);
-console.log('');
-
-if (hasError) {
-  process.exit(1);
-}

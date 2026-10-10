@@ -1,0 +1,44 @@
+[
+  {
+    "file": "src/client/events/subscribers/audio_event_subscriber.ts",
+    "desc": "AST: disable card flip sound in EVENT_CARD_DRAWN handler",
+    "target": "scheduleOrPlay(0, 'card_draw', () => engine.playCardFlip());",
+    "replacement": "/* skip card flip */"
+  },
+  {
+    "file": "src/client/events/subscribers/audio_event_subscriber.ts",
+    "desc": "AST: invert transit wheel audio outcome logic",
+    "target": "if (isDelay) engine.playSlumpThud(); else engine.playVictoryChime();",
+    "replacement": "if (isDelay) engine.playVictoryChime(); else engine.playSlumpThud();"
+  },
+  {
+    "file": "src/client/events/subscribers/property_market_badge_handler.ts",
+    "desc": "AST: corrupt card durationMs in handleMarketBadges",
+    "target": "durationMs: 4800,",
+    "replacement": "durationMs: 99999,"
+  },
+  {
+    "file": "src/client/events/subscribers/property_market_badge_handler.ts",
+    "desc": "AST: corrupt card title in handleMarketBadges",
+    "target": "title: event.title,",
+    "replacement": "title: 'CORRUPTED_CARD_TITLE',"
+  },
+  {
+    "file": "src/client/events/subscribers/property_market_badge_handler.ts",
+    "desc": "AST: corrupt transit wheel title in handleMarketBadges",
+    "target": "title: 'VÒNG XOAY VẬN TẢI',",
+    "replacement": "title: 'CORRUPTED_TRANSIT_TITLE',"
+  },
+  {
+    "file": "src/client/events/subscribers/property_market_badge_handler.ts",
+    "desc": "AST: corrupt transit wheel actionType in handleMarketBadges",
+    "target": "actionType: 'transit',",
+    "replacement": "actionType: 'general',"
+  },
+  {
+    "file": "src/client/network/apply_delta.ts",
+    "desc": "AST: skip syncEventCard in applyPhaseAndTimerDeltas",
+    "target": "syncEventCard(delta.lastEventCard, currentState, delta);",
+    "replacement": "/* skip syncEventCard */"
+  }
+]

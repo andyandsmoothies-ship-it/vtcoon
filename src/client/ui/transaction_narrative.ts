@@ -5,7 +5,7 @@ import {
   type PlayerHudInfo,
   type FloatingActionType,
 } from '../store/game_store.js';
-import { getCellName } from '../network/activity_property_tracker.js';
+import { getCellName } from '../events/subscribers/property_market_badge_handler.js';
 import { formatShortPlayerName } from './ui_helpers.js';
 import { ChanceCardId } from '../../domain/event_card_engine.js';
 import { GO_PROPERTY_TAX_CAP } from '../../domain/property_rent.js';

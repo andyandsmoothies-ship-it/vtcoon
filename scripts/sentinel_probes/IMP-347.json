@@ -1,0 +1,38 @@
+[
+  {
+    "file": "src/domain/bot/bot_negotiation_brain.ts",
+    "desc": "AST: corrupt Net Equity Floor ratio in evaluateBotTradeDecision",
+    "target": "if (totalValueReceived < Math.round(baseOffered * 0.65)) {",
+    "replacement": "if (totalValueReceived < Math.round(baseOffered * 0.01)) {"
+  },
+  {
+    "file": "src/domain/bot/bot_negotiation_brain.ts",
+    "desc": "AST: corrupt Parity 1.60x whitelist condition in evaluateBotTradeDecision",
+    "target": "if (decision.reason === 'PRICE_TOO_LOW') {",
+    "replacement": "if (true) {"
+  },
+  {
+    "file": "src/domain/bot/bot_negotiation_brain.ts",
+    "desc": "AST: disable swapPairLastRejectedRound recording in recordTradeRejection",
+    "target": "(buyer.swapPairLastRejectedRound ??= {})[`${cellIndex}_${offeredCellIndex}`] = round;",
+    "replacement": "/* skip swapPairLastRejectedRound */"
+  },
+  {
+    "file": "src/domain/bot/bot_negotiation_brain.ts",
+    "desc": "AST: disable clearTradeRejectionForCell deletions",
+    "target": "if (p.cellTradeRejections) delete p.cellTradeRejections[cellIndex];",
+    "replacement": "/* skip delete cellTradeRejections */"
+  },
+  {
+    "file": "src/server/room_trade_coordinator.ts",
+    "desc": "AST: disable quiescence guard in coordRespondTradeOffer",
+    "target": "export function coordRespondTradeOffer(\n  ctx: RoomContext | undefined,\n  playerId: string,\n  offerId: string,\n  accept: boolean,\n): { success: boolean; reason?: string; idempotent?: boolean } {\n  if (!ctx) return { success: false, reason: ActionRejectReason.INVALID_ROOM };\n  if (!isRoomQuiescentForTrade(ctx.room)) {",
+    "replacement": "export function coordRespondTradeOffer(\n  ctx: RoomContext | undefined,\n  playerId: string,\n  offerId: string,\n  accept: boolean,\n): { success: boolean; reason?: string; idempotent?: boolean } {\n  if (!ctx) return { success: false, reason: ActionRejectReason.INVALID_ROOM };\n  if (false) {"
+  },
+  {
+    "file": "src/domain/bot/bot_negotiation_brain.ts",
+    "desc": "AST: disable kingmaking defense in evaluateBotTradeDecision",
+    "target": "if (givesMonopoly && (buyer.balance >= 30_000 || buyer.balance > seller.balance * 3)) {",
+    "replacement": "if (false) {"
+  }
+]

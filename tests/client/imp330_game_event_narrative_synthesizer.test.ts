@@ -3,7 +3,7 @@
 // Universal 5-Facet Behavioral Matrix & Dynamic Triad Coverage
 
 import { describe, it, expect } from 'vitest';
-import { synthesizeGameEvents } from '../../src/client/events/game_event_synthesizer.js';
+import { synthesizeFinancialEvents as synthesizeGameEvents } from '../../src/client/events/game_event_synthesizer.js';
 import {
   SynthesizedGameEventType,
   type SynthesizerOptions,

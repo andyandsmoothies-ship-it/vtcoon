@@ -10,6 +10,7 @@ export const MAX_FLOATING_TEXTS = 6;
 
 export * from './game_store_types.js';
 import { type GameState, type FloatingTextItem, FloatingTextType, INITIAL_GAME_STATE } from './game_store_types.js';
+import { clearPendingPacingTimers } from '../events/pacing_context.js';
 import { clearPendingBadgeTimers } from '../network/activity_badge_dispatcher.js';
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -19,6 +20,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   setCameraFocusCell: (cellIndex) => set({ cameraFocusCell: cellIndex }),
   setHasUserCustomCamera: (hasUserCustomCamera) => set({ hasUserCustomCamera }),
   resetGameState: () => {
+    clearPendingPacingTimers();
     clearPendingBadgeTimers();
     set(INITIAL_GAME_STATE);
   },

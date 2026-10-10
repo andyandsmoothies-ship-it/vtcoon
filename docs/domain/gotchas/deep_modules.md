@@ -17,3 +17,15 @@
    - *Ngộ nhận trần LOC (False Motivation)*: Cần phân biệt rạch ròi giữa Trần cứng Hiến pháp (`Tier 2 UI <= 500 LOC`) và Cảnh báo mềm (`warn: 400 LOC`). CẤM vội vã chia nhỏ component chỉ để dập cảnh báo mềm khi chưa có bài toán nghiệp vụ rõ ràng (Refactoring Mania).
    - *Cấm Shallow Sub-components*: CẤM chia nhỏ React component bằng cách cắt khúc JSX ném sang sub-component mới nếu sub-component đó nhận >= 4 props suy diễn từ cha mà bên trong chỉ bọc vài thẻ HTML/CSS thuần túy (Mô đun Nông: Giao diện rộng, ruột nông, phân mảnh nhận thức).
    - *Deep Data Derivation First (Trích xuất Logic Dữ liệu Sâu)*: Khi một UI component bị dài do gánh cả logic suy diễn dữ liệu (Data Derivation & Sanitization) lẫn presentation, BẮT BUỘC phải khảo sát các tệp lân cận (`*_visuals.ts`, `*_helpers.ts`) để đóng gói toàn bộ logic suy diễn này vào một Pure Function trả về ViewModel/DisplayData hoàn chỉnh. Giữ nguyên 100% cây DOM JSX, không sinh file component mới, không làm phân mảnh tương tác bàn phím (A11y/Tablist). Pure function này phải được kiểm thử độc lập bằng Unit Test (Adversarial TDD) với tốc độ thực thi tính bằng mili-giây.
+
+7. **Harness & Toolchain Modularization Invariant (Nguyên Tắc Bóc Tách Công Cụ SDLC & Facade Pattern) [IMP-348-352]**:
+   - *Facade Re-export Pattern*: Khi các tệp công cụ tự động hóa SDLC trong `scripts/` phình to quá trần kiểm soát, BẮT BUỘC áp dụng mô hình Facade Re-export:
+     - Tệp đầu vào tại gốc `scripts/<tool>.mjs` đóng vai trò Facade điều phối mỏng (mục tiêu <= 200 LOC), bảo lưu 100% cờ dòng lệnh CLI, exit code, và các symbol export truyền thống cho các tệp kiểm thử và prefilter.
+     - Toàn bộ logic chuyên sâu được phân rã thành các Deep Modules (<= 400 LOC) nằm trong thư mục con chuyên biệt tương ứng:
+       - `scripts/report/`: Đo lường, đọc bằng chứng 4 trạm và sinh markdown báo cáo (`report_git_inspector.mjs`, `report_station_collector.mjs`, `report_markdown_renderer.mjs`).
+       - `scripts/slop_linter/`: Quản lý quy tắc và duyệt AST linter (`slop_constants.mjs`, `slop_text_rules.mjs`, `slop_ast_rules.mjs`, `slop_reporter.mjs`).
+       - `scripts/visual_capture/`: Quản lý tiến trình preview, giao thức CDP trình duyệt, kịch bản chụp ảnh (`preview_server_manager.mjs`, `cdp_browser_client.mjs`, `scenario_evaluator.mjs`).
+       - `scripts/plan_audit/`: Phân tích markdown kế hoạch, kiểm chứng drop-in snippet và auto-signer (`plan_markdown_parser.mjs`, `plan_snippet_verifier.mjs`, `plan_auto_signer.mjs`, `rules_*.mjs`).
+       - `scripts/sentinel/`: Nạp cấu hình probe, tiêm biến dị AST và phục hồi sao lưu nguyên tử (`probe_config_loader.mjs`, `source_mutant_injector.mjs`).
+   - *Future Implementations Guard*: Mọi cải tiến, bổ sung quy tắc hoặc tính năng mới cho bộ công cụ SDLC trong tương lai BẮT BUỘC phải đặt vào đúng mô-đun con chuyên biệt trong các thư mục trên, TUYỆT ĐỐI KHÔNG nhồi nhét mã nguồn trở lại vào các tệp facade gốc `scripts/*.mjs`.
+
