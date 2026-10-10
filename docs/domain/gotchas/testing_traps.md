@@ -51,3 +51,11 @@
     - **Bất Biến Bắt Buộc (Verified Invariants)**:
       1. *Tên File Chứa Thẻ JSX*: Mọi living contract test có chứa thẻ JSX trực tiếp bắt buộc đặt tên file kết thúc bằng `.tsx`.
       2. *Mật Độ Assertions Biên Độ*: Khi thiết kế test cases ở Station 1, luôn soạn thảo tối thiểu 12–14 assertions cụ thể kiểm tra cả trạng thái dương tính (`true`), âm tính (`false`), `null`, và các giá trị số học biên độ để đảm bảo vượt ngưỡng sàn đột biến 14 mutants của Station 4 ngay từ vòng đầu.
+
+13. **Subagent Timebox & Targeted Test Execution Invariant [TOOLING/SUBAGENT]**:
+    - **Bẫy Nguy Hiểm (Subagent Context Choke & Heavy Tool Bloat)**: Khi dispatch subagent (`qa-tester` hoặc `implementer`), nếu subagent chạy lệnh test trần không đường dẫn (`npx vitest run`), hệ thống sẽ chạy toàn bộ hơn 5.400 bài test của toàn bộ dự án thay vì chỉ test file của ticket. Việc này gây ra 3 hệ quả tai hại: (1) Thời gian thực thi kéo dài > 5 phút dễ gây timeout hoặc treo subagent; (2) Toàn bộ log test khổng lồ bị xả ngược vào context window của Main Agent khi subagent kết thúc; (3) Tốn hàng chục nghìn tokens suy luận vô ích cho một tác vụ thi hành cơ học.
+    - **Bất Biến Bắt Buộc (Verified Invariants)**:
+      1. *Subagent Chỉ Chạy Test Chỉ Định (Targeted Tests Only)*: `qa-tester` và `implementer` TUYỆT ĐỐI CHỈ ĐƯỢC chạy đúng file test được giao (`npx vitest run tests/<subsystem>/<target_test>.test.ts`, thời gian chạy < 1 giây). CẤM chạy `vitest run` trần không có đường dẫn trong subagent.
+      2. *Full Regression Thuộc Về Main Agent & OS Process*: Việc chạy full regression toàn bộ dự án hoặc quét đột biến Chaos Sentinel thuộc trách nhiệm của Main Agent tại Station 4 qua native OS background process (`run_command`), không bao giờ khoán cho subagent.
+      3. *Timebox $\le 3$ Phút*: Mọi lượt dispatch subagent phải hoàn tất trong vòng 3 phút. Nếu subagent cần sửa nhiều file hoặc suy luận kéo dài, đó là tín hiệu của việc phạm vi quá lớn $\to$ BẮT BUỘC chẻ nhỏ thành các Micro-Slice $\le 50$ LOC trước khi dispatch.
+

@@ -88,6 +88,7 @@
 │        - Tier 3 (Dữ liệu Tĩnh / Bảng Tra Cứu / Config): Max 800 LOC. Dành cho danh mục phẳng, hằng số, Cyclomatic Complexity = 1.
 │        - Tier 4 (Kịch bản Test Tích Hợp / E2E Living Flow): Max 600 LOC (Unit test giữ <= 300 LOC).
 │        - Tier 5 (Schemas / DTOs / Migrations): Max 1000 LOC (hoặc miễn trừ nếu là mã tự động sinh).
+│        - Toolchain Facades (scripts/*.mjs): Max 200 LOC. Entrypoint gốc là facade mỏng; bóc tách logic chuyên biệt sang thư mục con (scripts/report/, scripts/slop_linter/, scripts/visual_capture/, scripts/plan_audit/, scripts/sentinel/).
 │      • SUBTRACTIVE REFACTORING: Khi thay thế cơ chế cũ (state, listener, flag), bắt buộc xác định và xóa triệt để code cũ.
 │      • CHỐNG BẪY CODE GOLF & CHÍNH SÁCH ĐO LƯỜNG TRUNG THỰC (HONEST LOC ACCOUNTING):
 │        - Tuyệt đối CẤM gộp câu lệnh, nén 1 dòng getter/setter, xóa comment hoặc tạo hàm No-Op chỉ để né trần LOC.
@@ -132,6 +133,7 @@
 │        (0 Token trong thời gian chờ). AG 2.0 Harness tự động nạp kết quả và đánh thức Agent khi tiến trình kết thúc.
 │      • Rào Chắn Treo Lệnh (Hanging Process Gate): Tự động cưỡng chế hủy (Kill) mọi tiến trình terminal không xuất log sau 60 giây.
 │      • Thiết Kế Tool/API Hướng Agent: Khi viết API nội bộ cho Agent gọi, cung cấp webhook/callback hoặc timeout rõ ràng kèm `operation_id`.
+│      • SUBAGENT TIMEBOX & TARGETED SCOPE INVARIANT: CẤM subagent (`qa-tester`, `implementer`) chạy test suite diện rộng toàn repo (naked `vitest run`). Subagent CHỈ ĐƯỢC chạy đúng file test được giao (`npx vitest run <target_test_file>`) với timebox <= 3-5 phút/dispatch. Tác vụ nặng (full regression suite 5,400+ tests, build, mutation testing) thuộc về Trạm 4 do Main Agent điều phối qua native background OS task (`run_command`).
 │
 ├── 11. TRẢI NGHIỆM KHÔNG CẦN GHI NHỚ & THÍCH ỨNG LINH HOẠT (ZERO-MEMORIZATION & FLUID ADAPTATION):
 │      • Con người là Giám đốc Sản phẩm, Agent là Thư ký Kỹ thuật: Con người tuyệt đối KHÔNG phải nhớ mã ID (`UC-XXX-NNN`),
@@ -243,9 +245,9 @@
 │       • Phân định triệt để: "Máy móc hóa việc cơ bắp (Deterministic), dành trọn AI cho suy luận ngữ nghĩa (Semantic)".
 │       • Pre-Flight Visual Banner: Agent bắt buộc in biểu ngữ `🚦 [KÍCH HOẠT QUY TRÌNH 4 TRẠM KHÉP KÍN]` lên chat trước khi dispatch.
 │       • Trạm 1 (RED Contract Test): `qa-tester` viết contract test trong `tests/**`, chứng minh Adversarial Inversion (test đỏ thật sự),
-│         gắn Flow Taxonomy `[UC-XXX/MSS]` và `[UC-XXX/A#]`. CẤM sửa `src/**`. Sàn mật độ >= 8 atomic tests/micro-slice (>= 15 cho Epic).
+│         gắn Flow Taxonomy `[UC-XXX/MSS]` và `[UC-XXX/A#]`. CẤM sửa `src/**`. Chạy đúng file test được giao (`vitest run <target_path>`), timebox <= 3-5 phút. Sàn mật độ >= 8 atomic tests/micro-slice (>= 15 cho Epic).
 │       • Trạm 2 (GREEN Implementation): `implementer` viết mã tối thiểu trong `src/**` để pass test. CẤM nới lỏng assertion (Zero Bug-Codification).
-│         Implementer Pushback Mandate: Nếu plan có snippet sai/no-op, implementer bắt buộc sửa code vật lý đúng đắn thay vì làm theo plan hỏng.
+│         Chạy đúng file test được giao, timebox <= 3-5 phút. Implementer Pushback Mandate: Nếu plan có snippet sai/no-op, implementer bắt buộc sửa code vật lý đúng đắn thay vì làm theo plan hỏng.
 │       • Trạm 2.5 (Fast Pre-Filter Mechanical Sweep): Chạy `npm run prefilter -- <files>` quét sạch trong 2s: `tsc --noEmit`,
 │         `check_loc.mjs`, cấm dirty cast (`as any`), cấm private internals `__CLIENT_INTERNALS_*`, thanh trừng `console.log`, `lint:slop`, `lint:ui`.
 │       • Trạm 3 (Thẩm Định Độc Lập Cơ Khí Hóa):
@@ -1009,28 +1011,28 @@ graph LR
 
 *(Giải quyết triệt để vấn đề: Lập trình độc lập hoặc làm việc cùng AI không cần thiết lập pipeline CI/CD GitHub Actions rườm rà nhưng vẫn đảm bảo 100% kỷ luật kỹ thuật và chống suy thoái kiến trúc)*:
 
-#### 1. Kiến Trúc 4 Cổng Kiểm Soát Cục Bộ Siêu Tốc (<3 Giây)
-Thay vì đẩy code lên GitHub và chờ đợi 3-5 phút trong hàng đợi CI/CD, Junior developer đóng gói toàn bộ Khung Tiêu Chuẩn Quality Gates thành các script cục bộ:
+#### 1. Kiến Trúc 5 Cổng Kiểm Soát Cơ Học Bắt Buộc (Mandatory Mechanical Gates)
+Thay vì đẩy code lên GitHub và chờ đợi 3-5 phút trong hàng đợi CI/CD, Junior developer đóng gói toàn bộ Khung Tiêu Chuẩn Quality Gates thành 5 cổng cơ học tất định chạy cục bộ:
 
 ```text
-[Mã nguồn src/]
+[Kế hoạch & Mã nguồn]
        │
-       ├──> [npm run lint:ui]   ──> Quét 4 Anti-patterns 2D UI (0 vi phạm)
+       ├──> [node scripts/audit_plan.mjs <plan> --auto-sign]  ──> 1. Plan Audit & Signoff (0 lỗi cơ học tự ký HARDENED)
        │
-       ├──> [npm run lint:dup]  ──> jscpd quét trùng lặp mã (Khóa trần <= 4%)
+       ├──> [node scripts/check_scope.mjs <plan>]             ──> 2. Scope Confinement (100% plan fidelity, 0% drift)
        │
-       ├──> [npm run lint:slop] ──> TypeScript AST linter (0 dependency ngoài):
-       │                             ├── Zero Swallowed Exceptions (empty catch)
-       │                             ├── Zero Dirty Casts (as any / as unknown as)
-       │                             ├── Categorized LOC (Logic <= 400, UI <= 500)
-       │                             └── Function SLOC (Cảnh báo > 50, Chặn > 80)
+       ├──> [npm run prefilter -- <files>]                    ──> 3. Fast Pre-Filter Sweep (2s):
+       │                                                           ├── tsc --noEmit (0 lỗi kiểu)
+       │                                                           ├── check_loc.mjs (ngân sách 5 tầng LOC, cấm code golf)
+       │                                                           ├── lint_slop.mjs (cấm as any, cấm swallow catch)
+       │                                                           └── check_reason_i18n_parity.mjs (100% i18n mapping)
        │
-       ├──> [npx tsc --noEmit]  ──> TypeScript Strict Mode Check (0 lỗi)
+       ├──> [npm run sentinel -- --ticket <id> --test <path>] ──> 4. Chaos Sentinel (Wire parity, Port 0, Mutation kill 100%)
        │
-       └──> [npm test]          ──> Vitest Suites (PASS 100%, Randomize)
-       
-                              ▲
-                              │
+       └──> [node scripts/check_evidence.mjs <id>]            ──> 5. Comprehensive Evidence Audit (Pháp chứng số bất biến)
+        
+                               ▲
+                               │
      Lệnh nhanh trước commit (2s): [npm run gate:quick]
      Lệnh đầy đủ trước handoff:    [npm run gate]
 ```
@@ -1042,9 +1044,16 @@ Thay vì đẩy code lên GitHub và chờ đợi 3-5 phút trong hàng đợi C
     "lint:ui": "node scripts/lint_ui.mjs",
     "lint:slop": "node scripts/lint_slop.mjs",
     "lint:dup": "jscpd src/ --config .jscpd.json",
+    "lint:assets": "node scripts/optimize_assets.mjs",
+    "check:loc": "node scripts/check_loc.mjs",
+    "check:scope": "node scripts/check_scope.mjs",
+    "prefilter": "node scripts/fast_prefilter.mjs",
+    "sentinel": "node scripts/sentinel_runner.mjs",
     "evidence": "node scripts/collect_evidence.mjs",
-    "gate:quick": "npm run lint:ui && npm run lint:slop && npm run lint:dup && tsc --noEmit && npm run evidence",
-    "gate": "npm run lint:ui && npm run lint:slop && npm run lint:dup && tsc --noEmit && vitest run && npm run evidence"
+    "check:evidence": "node scripts/check_evidence.mjs",
+    "report": "node scripts/generate_report.mjs",
+    "gate:quick": "node scripts/check_reason_i18n_parity.mjs && node scripts/audit_ssot_drift.mjs && npm run lint:ui && npm run lint:slop && npm run lint:dup && npm run lint:assets && tsc --noEmit && npm run evidence",
+    "gate": "node scripts/check_reason_i18n_parity.mjs && node scripts/audit_ssot_drift.mjs && npm run lint:ui && npm run lint:slop && npm run lint:dup && npm run lint:assets && tsc --noEmit && vitest run && npm run evidence && npm run check:evidence"
   },
   "devDependencies": {
     "jscpd": "^5.2.0"
@@ -1065,8 +1074,12 @@ Thay vì đẩy code lên GitHub và chờ đợi 3-5 phút trong hàng đợi C
 }
 ```
 
-#### 3.1 Mẫu Script Anti-Slop AST Linter Tự Động (`scripts/lint_slop.mjs`)
-Để kiểm soát Zero Swallowed Catch, Zero Dirty Casts và Giới Hạn 5 Tầng LOC mà không cần phụ thuộc các dịch vụ CI/CD đắt tiền, Junior developer chỉ cần một script Node.js siêu nhẹ dùng trực tiếp TypeScript Compiler API (`typescript` có sẵn trong dự án):
+#### 3.1 Mẫu Script Anti-Slop AST Linter Tự Động (`scripts/lint_slop.mjs`) & Toolchain Facade Pattern
+Để kiểm soát Zero Swallowed Catch, Zero Dirty Casts và Giới Hạn 5 Tầng LOC mà không cần phụ thuộc các dịch vụ CI/CD đắt tiền, Junior developer dùng script Node.js siêu nhẹ dùng trực tiếp TypeScript Compiler API (`typescript` có sẵn trong dự án).
+
+*Quy tắc Kiến trúc Toolchain Facade (scripts/*.mjs <= 200 LOC)*: Tệp gốc `scripts/lint_slop.mjs` đóng vai trò Facade mỏng, ủy nhiệm việc thực thi cho các submodule trong `scripts/slop_linter/` (`ast_slop_rules.mjs`, `loc_budget_rules.mjs`, `slop_orchestrator.mjs`). Tương tự, `scripts/generate_report.mjs` phân rã về `scripts/report/`, `scripts/sentinel_runner.mjs` về `scripts/sentinel/`, `scripts/audit_plan.mjs` về `scripts/plan_audit/`, và `scripts/capture_visual_evidence.mjs` về `scripts/visual_capture/`. Toàn bộ submodule được kiểm thử qua `tests/scripts/toolchain_submodules.test.ts`.
+
+Dưới đây là phần trích xuất luật quét AST lõi (nằm trong `scripts/slop_linter/ast_slop_rules.mjs`):
 
 ```javascript
 #!/usr/bin/env node
@@ -3324,10 +3337,10 @@ Khi bạn chạy lệnh trong Terminal gặp lỗi đỏ, hoặc Subagent báo t
 | **2.2** | Trinh sát bối cảnh<br>*(Đơn tác nhân)* | 💬 `[AG 2.0]` Gọi `scout` (Read-only) trinh sát hiện trạng mã nguồn:<br>• **Greenfield (S00):** Dùng **[Mẫu P-2.2A]** Target File Map<br>• **Brownfield (S01+):** Dùng **[Mẫu P-2.2B]** Change Impact | Flash | Báo cáo hiện trạng & tọa độ dòng |
 | **2.3a** | Lập Plan & Thẩm Định 2 Tầng<br>*(Stage A + Stage B)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3a]**: Chạy `node scripts/audit_plan.mjs <plan> [--auto-sign]` ➔ Với Epic lớn (>50 LOC) gọi `adversarial-challenger` (ADV-OBJ, kinh tế, concurrency) | Sonnet 4.6 | Kế hoạch đạt `HARDENED_APPROVED` |
 | **2.3b** | Khởi tạo Test Harness<br>*(Đơn tác nhân - S00)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3b]** gọi `implementer` dựng Test Runner tối thiểu (`package.json`, `tsconfig.json`, `vitest`...) ➔ Chạy smoke test PASS | Flash / Sonnet | Lệnh `npm test` chạy PASS trên CMD |
-| **2.3c** | Thi Công Trạm 1 & 2<br>*(RED ➔ GREEN)* | 💬 `[AG 2.0]` Dùng **[Mẫu P-2.3-STATIONS]**: QA viết test ĐỎ (>= 15 tests, Flow Taxonomy) ➔ Implementer code XANH (Pushback Mandate, Deep Modules) | Sonnet 4.6 | 100% Contract PASS trên đĩa vật lý |
+| **2.3c** | Thi Công Trạm 1 & 2<br>*(RED ➔ GREEN)* | 💬 `[AG 2.0]` Dùng **[Mẫu P-2.3-STATIONS]**: QA viết test ĐỎ (>= 15 tests, Flow Taxonomy) ➔ Implementer code XANH (Subagent chạy đúng test slice <= 3-5 phút, cấm naked vitest) | Sonnet 4.6 | 100% Contract PASS trên đĩa vật lý |
 | **2.3.5**| Quét Sạch Đĩa Vật Lý<br>*(Trạm 2.5 Fast Pre-Filter)* | 💬 `[AG 2.0]` Chạy script cơ học `npm run prefilter -- <files>`: `tsc --noEmit` (0 lỗi), `check_loc.mjs` (ngân sách LOC), cấm dirty cast (`as any`), thanh trừng `console.log`, i18n mapping | CLI Script | Phán quyết `PREFILTER: PASS` 100% |
 | **2.3d** | Chẩn đoán lỗi khoa học<br>*(Song tác nhân)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3d]**: `Investigator` truy nguyên nhân gốc ➔ `Implementer` sửa mã nguồn tối thiểu | Sonnet 4.6 | Báo cáo nguyên nhân & bản sửa tối thiểu |
-| **2.3e** | Nghiệm thu tích hợp<br>*(Đơn tác nhân)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3e]** gọi `implementer` chạy toàn bộ Test Suite với cờ `--randomize` (cách ly trạng thái) | Flash / Sonnet | 100% Test Contracts PASS |
+| **2.3e** | Nghiệm thu tích hợp slice<br>*(Đơn tác nhân)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3e]** gọi `implementer` chạy test slice với cờ `--randomize` (Full regression chạy ở Trạm 4 qua OS process) | Flash / Sonnet | 100% Test Contracts PASS |
 | **2.4** | Phễu Thẩm Định 3 Pha<br>*(Trạm 3 Review & Remediation)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.4]**: Phase 3.0 Dual-Viewport ➔ Phase 3.1 Spec Scope Gate (`scripts/check_scope.mjs`) ➔ Phase 3.2 `code-reviewer` (deep modules, anti-slop, timer leaks) | Sonnet / Flash | Báo cáo APPROVED + 0% drift |
 | **2.4.4**| Lính Canh Biên Giới & Đột Biến<br>*(Trạm 4 Chaos Sentinel)* | 💬 `[AG 2.0]` Chạy `npm run sentinel -- --ticket [ID] --test [PATH]`: Wire-to-Core Parity, live socket dynamic `port: 0`, Mutation Sensitivity (>= 14 mutants, 100% kill rate) | CLI Script | Bằng chứng `.agents/evidence/chaos_sentinel_[ID].json` |
 | **2.4.5**| Hậu Kiểm Phản Tỉnh & Miễn Dịch<br>*(Retro Skill & Inoculation)* | 💬 `[AG 2.0]` Thu thập telemetry các trạm ➔ Chạy Cổng phản biện 2 vòng (Physical Evidence + Inversion Filter) ➔ Chuyển lỗi thành test/script | Flash | Gotchas cập nhật & rào chắn cơ học |
@@ -3638,7 +3651,7 @@ TRẠM 1 (RED CONTRACT TEST - Subagent qa-tester, Read-only src/):
 3. Tuân thủ Universal Test Core: Atomic test (1-4 asserts/test, it.each, cấm vòng lặp trong it()), cấm checklist tĩnh (typeof, existsSync), sàn >= 15 atomic tests/slice, gắn Flow Taxonomy [UC-XXX/MSS] và [UC-XXX/A#].
 4. Bao phủ Ma Trận 5 Khía Cạnh Hành Vi: Boundary & Range, State Reactivity & Teardown, Resource Disposal & Timer Isolation, Error Defense & Invariants, Cross-Coupling Blast Radius.
 5. VÙNG CÔ LẬP: TUYỆT ĐỐI CẤM sửa mã nguồn trong src/.
-6. Chạy lệnh kiểm thử trên Terminal CMD và chứng minh bài test BỊ LỖI (RED / Adversarial Inversion) trên nền mã nguồn hiện tại.
+6. Chạy ĐÚNG file test được giao (`npx vitest run <target_test_file>`), CẤM chạy naked `vitest run` toàn repo (timebox <= 3-5 phút); chứng minh bài test BỊ LỖI (RED / Adversarial Inversion) trên nền mã nguồn hiện tại.
 
 TRẠM 2 (GREEN IMPLEMENTATION - Subagent implementer, Read-only tests/):
 1. Đọc kết quả test ĐỎ từ Trạm 1 và bản kế hoạch.
@@ -3646,7 +3659,7 @@ TRẠM 2 (GREEN IMPLEMENTATION - Subagent implementer, Read-only tests/):
 3. Viết mã nguồn tối thiểu vào src/ để chuyển toàn bộ bài test sang XANH (PASS 100%).
 4. Tuân thủ Deep Modules (ban shallow wrappers), zero dirty casts (cấm as any), zero nuốt lỗi âm thầm.
 5. IMPLEMENTER PUSHBACK MANDATE: Nếu snippet trong plan bị no-op hoặc lỗi thời, sửa code vật lý đúng đắn thay vì làm theo plan sai.
-6. Chạy lại lệnh test và chứng minh PASS 100%.
+6. Chạy lại ĐÚNG file test được giao và chứng minh PASS 100% (timebox <= 3-5 phút).
 
 TRẠM 2.5 (FAST PRE-FILTER SWEEP - CLI Script cơ học):
 1. Chạy `npm run prefilter -- <files>` quét 100% tệp vừa chạm:
