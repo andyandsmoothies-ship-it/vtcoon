@@ -83,14 +83,38 @@ export function CentralMonumentPlaza(): React.ReactElement {
 export function DioramaBoardRim(): React.ReactElement {
   return (
     <group position={[0, -0.08, 0]} data-testid="diorama-board-rim">
-      {/* Khung viền ngoài gỗ óc chó ôm trọn chu vi bàn cờ */}
-      <mesh receiveShadow position={[0, 0, 0]}>
-        <boxGeometry args={[18.4, 0.06, 18.4]} />
+      {/* Khung viền 4 cạnh gỗ óc chó rỗng ruột ghép mộng chìm (butt-joint), 0% chồng lấn góc */}
+      <mesh receiveShadow position={[0, 0, -8.9]}>
+        <boxGeometry args={[17.2, 0.06, 0.6]} />
         <meshStandardMaterial color="#78350F" roughness={0.4} metalness={0.2} />
       </mesh>
-      {/* Gờ viền trang trí bo cạnh hoàng kim đồng thau */}
-      <mesh receiveShadow position={[0, 0.032, 0]}>
-        <boxGeometry args={[18.44, 0.01, 18.44]} />
+      <mesh receiveShadow position={[0, 0, 8.9]}>
+        <boxGeometry args={[17.2, 0.06, 0.6]} />
+        <meshStandardMaterial color="#78350F" roughness={0.4} metalness={0.2} />
+      </mesh>
+      <mesh receiveShadow position={[-8.9, 0, 0]}>
+        <boxGeometry args={[0.6, 0.06, 18.4]} />
+        <meshStandardMaterial color="#78350F" roughness={0.4} metalness={0.2} />
+      </mesh>
+      <mesh receiveShadow position={[8.9, 0, 0]}>
+        <boxGeometry args={[0.6, 0.06, 18.4]} />
+        <meshStandardMaterial color="#78350F" roughness={0.4} metalness={0.2} />
+      </mesh>
+      {/* Gờ viền trang trí bo cạnh hoàng kim đồng thau ghép mộng chìm flush mép ngoài [-9.22, +9.22] */}
+      <mesh receiveShadow position={[0, 0.032, -9.145]}>
+        <boxGeometry args={[18.44, 0.01, 0.15]} />
+        <meshStandardMaterial color="#D97706" roughness={0.3} metalness={0.7} />
+      </mesh>
+      <mesh receiveShadow position={[0, 0.032, 9.145]}>
+        <boxGeometry args={[18.44, 0.01, 0.15]} />
+        <meshStandardMaterial color="#D97706" roughness={0.3} metalness={0.7} />
+      </mesh>
+      <mesh receiveShadow position={[-9.145, 0.032, 0]}>
+        <boxGeometry args={[0.15, 0.01, 18.14]} />
+        <meshStandardMaterial color="#D97706" roughness={0.3} metalness={0.7} />
+      </mesh>
+      <mesh receiveShadow position={[9.145, 0.032, 0]}>
+        <boxGeometry args={[0.15, 0.01, 18.14]} />
         <meshStandardMaterial color="#D97706" roughness={0.3} metalness={0.7} />
       </mesh>
     </group>

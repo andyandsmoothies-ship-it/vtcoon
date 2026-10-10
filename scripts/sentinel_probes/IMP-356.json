@@ -1,0 +1,68 @@
+[
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Corrupt North wood rail width from 17.2 to 12.0",
+    "target": "<boxGeometry args={[17.2, 0.06, 0.6]} />",
+    "replacement": "<boxGeometry args={[12.0, 0.06, 0.6]} />"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Corrupt East wood rail depth from 18.4 to 12.0",
+    "target": "<boxGeometry args={[0.6, 0.06, 18.4]} />",
+    "replacement": "<boxGeometry args={[0.6, 0.06, 12.0]} />"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Overhang brass rail North position beyond perimeter to -10.5",
+    "target": "<mesh receiveShadow position={[0, 0.032, -9.145]}>",
+    "replacement": "<mesh receiveShadow position={[0, 0.032, -10.5]}>"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Re-introduce solid center slab spanning across interior",
+    "target": "<mesh receiveShadow position={[0, 0, -8.9]}>",
+    "replacement": "<mesh receiveShadow position={[0, 0, 0]}><boxGeometry args={[18.4, 0.06, 18.4]} /></mesh><mesh receiveShadow position={[0, 0, -8.9]}>"
+  },
+  {
+    "file": "src/client/3d/dice_tray.tsx",
+    "desc": "AST: Revert flat dice rotation [0, 0, 0] back to 20-degree tilt [0.35, 0, -0.35]",
+    "target": "<group rotation={[0, 0, 0]}>",
+    "replacement": "<group rotation={[0.35, 0, -0.35]}>"
+  },
+  {
+    "file": "src/client/3d/dice_tray.tsx",
+    "desc": "AST: Disable turn-boundary unmount by keeping isVisible and fadeOpacity active",
+    "target": "setIsVisible(false);\n      setFadeOpacity(0);",
+    "replacement": "setIsVisible(true);\n      setFadeOpacity(1.0);"
+  },
+  {
+    "file": "src/client/3d/dice_tray.tsx",
+    "desc": "AST: Break rolling state cancellation on turn advance",
+    "target": "if (isRolling) {\n        setIsRolling(false);\n      }",
+    "replacement": "// disabled rolling reset"
+  },
+  {
+    "file": "src/client/3d/dice_tray.tsx",
+    "desc": "AST: Corrupt idle dice tray render condition",
+    "target": "{/* 2 Xúc xắc 3D đỏ Ruby chỉ render khi đang quay hoặc mờ dần */}\n      {Boolean(isRolling || (isVisible && fadeOpacity > 0)) && (\n        <group rotation={[0, 0, 0]}>",
+    "replacement": "{/* 2 Xúc xắc 3D đỏ Ruby chỉ render khi đang quay hoặc mờ dần */}\n      {Boolean(!isRolling || (isVisible && fadeOpacity > 0)) && (\n        <group rotation={[0, 0, 0]}>"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Force overview mode when pawn is animating instead of pawn_chase",
+    "target": "if (params.isPawnAnimating) {\n    return 'pawn_chase';\n  }",
+    "replacement": "if (params.isPawnAnimating) {\n    return 'overview';\n  }"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Corrupt tile_focus landing mode to overview",
+    "target": "if (params.activeModal !== null || params.hasTargetTile || params.hasRolledThisTurn) {\n    return 'tile_focus';\n  }",
+    "replacement": "if (params.activeModal !== null || params.hasTargetTile || params.hasRolledThisTurn) {\n    return 'overview';\n  }"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Corrupt bot chase speed damping to 99.0",
+    "target": "speed: options?.isBotTurn ? 2.4 : CAMERA_CONFIG.pawn_chase.speed,",
+    "replacement": "speed: options?.isBotTurn ? 99.0 : CAMERA_CONFIG.pawn_chase.speed,"
+  }
+]

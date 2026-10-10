@@ -50,7 +50,7 @@ function extractMaxMeshPositionY(markup: string): number {
 // Helper: Extract dimensions of board rim (data-testid="diorama-board-rim")
 function extractBoardRimDimensions(markup: string): { widthX: number; depthZ: number; heightY: number } {
   const rimMatch = markup.match(
-    /<(?:group|mesh)[^>]*data-testid="diorama-board-rim"[^>]*>([\s\S]*?)<\/(?:group|mesh)>/i
+    /<(group|mesh)[^>]*data-testid="diorama-board-rim"[^>]*>([\s\S]*?)<\/\1>/i
   ) || markup.match(/<mesh[^>]*data-testid="diorama-board-rim"[^>]*\/?>/i);
 
   const content = rimMatch ? rimMatch[0] : '';

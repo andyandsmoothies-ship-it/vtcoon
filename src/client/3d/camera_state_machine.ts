@@ -106,11 +106,6 @@ export function resolveCameraMode(params: CameraResolveParams): CameraMode {
   if (params.activeModal === 'auction') {
     return 'auction_focus';
   }
-  // [IMP-103] Cho phép camera bám đuổi theo quân cờ Bot khi đang nhảy và zoom vào ô đất khi Bot hạ cánh
-  // Chỉ giữ góc nhìn overview khi Bot chưa gieo xúc xắc hoặc khi lượt chơi đang chờ
-  if ((params.isBotTurn || params.isAnimatingPawnBot) && !params.isPawnAnimating && !params.hasTargetTile && !params.hasRolledThisTurn) {
-    return 'overview';
-  }
   // [IMP-125-P2] Khi gieo xúc xắc ở thế cờ kịch tính (High-Stakes): chuyển sang góc máy căng thẳng
   if (params.isRolling && params.isHighStakesRoll) {
     return 'tension_roll';
@@ -119,18 +114,17 @@ export function resolveCameraMode(params: CameraResolveParams): CameraMode {
   if (params.isRolling) {
     return 'overview';
   }
-  // 2. Quân cờ đang di chuyển: Bám đuổi theo quân cờ
+  // 2. Quân cờ đang di chuyển: Bám đuổi theo quân cờ (cả người chơi và Bot để khôi phục góc quay sống động)
   if (params.isPawnAnimating) {
-    if ((params.isBotTurn || params.isAnimatingPawnBot) && params.isTargetOwnedByHuman === false && !params.isHighStakesRoll && params.activeModal === null) {
-      return 'overview';
-    }
     return 'pawn_chase';
+  }
+  // [IMP-354 / IMP-356] Hài hòa nhịp độ: Khi Bot hạ cánh không mở modal và không vào đất người chơi,
+  // giữ overview để triệt tiêu giật cục góc máy (Camera Whiplash - Gotcha 63)
+  if ((params.isBotTurn || params.isAnimatingPawnBot) && params.isTargetOwnedByHuman === false && params.activeModal === null) {
+    return 'overview';
   }
   // 3. Mở modal tương tác hoặc dừng chân tại ô đất sau khi di chuyển
   if (params.activeModal !== null || params.hasTargetTile || params.hasRolledThisTurn) {
-    if ((params.isBotTurn || params.isAnimatingPawnBot) && params.isTargetOwnedByHuman === false && params.activeModal === null) {
-      return 'overview';
-    }
     return 'tile_focus';
   }
   // 4. Mặc định: Phối cảnh bao quát bán đảo (khi chưa gieo xúc xắc hoặc khi lượt chơi kết thúc)
@@ -215,7 +209,7 @@ export function calculateTargetCameraState(
         position: calculateChaseCameraPosition(p),
         target: [safePx, 0.2, safePz],
         fov: CAMERA_CONFIG.pawn_chase.fov,
-        speed: CAMERA_CONFIG.pawn_chase.speed,
+        speed: options?.isBotTurn ? 2.4 : CAMERA_CONFIG.pawn_chase.speed,
       };
     }
     case 'tile_focus': {
@@ -226,7 +220,7 @@ export function calculateTargetCameraState(
         position: calculateTileFocusCameraPosition(t),
         target: [safeTx, 0.15, safeTz],
         fov: CAMERA_CONFIG.tile_focus.fov,
-        speed: CAMERA_CONFIG.tile_focus.speed,
+        speed: options?.isBotTurn ? 2.2 : CAMERA_CONFIG.tile_focus.speed,
       };
     }
     case 'auction_focus':

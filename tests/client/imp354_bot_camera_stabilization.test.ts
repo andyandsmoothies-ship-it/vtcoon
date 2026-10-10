@@ -21,7 +21,7 @@ import {
 } from '../../src/client/3d/camera_state_machine';
 
 describe('IMP-354: Bot Turn Camera Stabilization & Pacing Contracts', () => {
-  it('TC-354.01 [UC-CAM-BOT/MSS]: Given Bot turn parameters where isPawnAnimating is true and isTargetOwnedByHuman is false and isHighStakesRoll is false, When calling resolveCameraMode, Then returns "overview"', () => {
+  it('TC-354.01 [UC-CAM-BOT/MSS]: Given Bot turn parameters where isPawnAnimating is true and isTargetOwnedByHuman is false and isHighStakesRoll is false, When calling resolveCameraMode, Then returns "pawn_chase"', () => {
     const params: CameraResolveParams = {
       isRolling: false,
       isPawnAnimating: true,
@@ -32,10 +32,10 @@ describe('IMP-354: Bot Turn Camera Stabilization & Pacing Contracts', () => {
       activeModal: null,
     };
     const mode = resolveCameraMode(params);
-    expect(mode).toBe('overview');
+    expect(mode).toBe('pawn_chase');
   });
 
-  it('TC-354.01b [UC-CAM-BOT/A6]: Given isBotTurn true with isAnimatingPawnBot false, When calling resolveCameraMode, Then returns "overview"', () => {
+  it('TC-354.01b [UC-CAM-BOT/A6]: Given isBotTurn true with isAnimatingPawnBot false, When calling resolveCameraMode, Then returns "pawn_chase"', () => {
     const mode = resolveCameraMode({
       isRolling: false,
       isPawnAnimating: true,
@@ -45,10 +45,10 @@ describe('IMP-354: Bot Turn Camera Stabilization & Pacing Contracts', () => {
       isHighStakesRoll: false,
       activeModal: null,
     });
-    expect(mode).toBe('overview');
+    expect(mode).toBe('pawn_chase');
   });
 
-  it('TC-354.01c [UC-CAM-BOT/A7]: Given isBotTurn false with isAnimatingPawnBot true, When calling resolveCameraMode, Then returns "overview"', () => {
+  it('TC-354.01c [UC-CAM-BOT/A7]: Given isBotTurn false with isAnimatingPawnBot true, When calling resolveCameraMode, Then returns "pawn_chase"', () => {
     const mode = resolveCameraMode({
       isRolling: false,
       isPawnAnimating: true,
@@ -58,7 +58,7 @@ describe('IMP-354: Bot Turn Camera Stabilization & Pacing Contracts', () => {
       isHighStakesRoll: false,
       activeModal: null,
     });
-    expect(mode).toBe('overview');
+    expect(mode).toBe('pawn_chase');
   });
 
   it('TC-354.02 [UC-CAM-BOT/A1]: Given Bot turn parameters where isPawnAnimating is true and isTargetOwnedByHuman is true, When calling resolveCameraMode, Then returns "pawn_chase"', () => {
@@ -179,7 +179,7 @@ describe('IMP-354: Bot Turn Camera Stabilization & Pacing Contracts', () => {
     expect(mode).toBe('tile_focus');
   });
 
-  it('TC-354.12 [UC-CAM-BOT/A10]: Given Bot landing on unowned property with hasRolledThisTurn true, When calling resolveCameraMode, Then returns "overview"', () => {
+  it('TC-354.12 [UC-CAM-BOT/A10]: Given Bot landing on unowned property with hasRolledThisTurn true, When calling resolveCameraMode, Then returns "overview" to avoid camera whiplash', () => {
     const mode = resolveCameraMode({
       isRolling: false,
       isPawnAnimating: false,

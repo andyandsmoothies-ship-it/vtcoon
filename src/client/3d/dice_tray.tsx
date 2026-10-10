@@ -151,11 +151,20 @@ export function DiceTray(): React.ReactElement {
   const diceStore = useGameStore((s) => s.dice);
   const isRollingStore = useGameStore((s) => s.isRolling);
   const setIsRolling = useGameStore((s) => s.setIsRolling);
+  const currentTurnPlayerIdStore = useGameStore((s) => s.currentTurnPlayerId);
+  const lastDiceSeqStore = useGameStore((s) => s.lastDiceSeq);
 
   const dice = ssrState ? ssrState.dice : diceStore;
   const isRolling = ssrState ? ssrState.isRolling : isRollingStore;
+  const currentTurnPlayerId = ssrState ? ssrState.currentTurnPlayerId : currentTurnPlayerIdStore;
+  const lastDiceSeq = ssrState ? ssrState.lastDiceSeq : lastDiceSeqStore;
 
   const prevRollingRef = useRef(false);
+  const prevDiceSeqRef = useRef<number | undefined>(lastDiceSeq);
+  const prevTurnPlayerIdRef = useRef(currentTurnPlayerId);
+  const fadeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const [fadeOpacity, setFadeOpacity] = useState(1.0);
   const [isVisible, setIsVisible] = useState(Boolean(isRolling));
 
@@ -166,34 +175,52 @@ export function DiceTray(): React.ReactElement {
     [-Math.PI * 8, Math.PI * 6, -Math.PI * 8],
   ]);
 
-  if (isRolling && !prevRollingRef.current) {
-    spinOffsetsRef.current = [generateRandomDiceSpin(), generateRandomDiceSpin()];
-  }
+  // ADV-02 & ADV-03: Turn transition reset & orphaned timer cancellation
+  useEffect(() => {
+    if (prevTurnPlayerIdRef.current !== currentTurnPlayerId) {
+      prevTurnPlayerIdRef.current = currentTurnPlayerId;
+      if (fadeTimerRef.current) { clearTimeout(fadeTimerRef.current); fadeTimerRef.current = null; }
+      if (hideTimerRef.current) { clearTimeout(hideTimerRef.current); hideTimerRef.current = null; }
+      if (isRolling) {
+        setIsRolling(false);
+      }
+      setIsVisible(false);
+      setFadeOpacity(0);
+    }
+  }, [currentTurnPlayerId, isRolling, setIsRolling]);
 
+  // ADV-04: Pure render lifecycle & doubles spin offset re-randomization in commit phase
   useEffect(() => {
     if (isRolling) {
+      const isNewRoll = !prevRollingRef.current || (lastDiceSeq !== undefined && lastDiceSeq !== prevDiceSeqRef.current);
+      if (isNewRoll) {
+        spinOffsetsRef.current = [generateRandomDiceSpin(), generateRandomDiceSpin()];
+        prevDiceSeqRef.current = lastDiceSeq;
+      }
+      if (fadeTimerRef.current) { clearTimeout(fadeTimerRef.current); fadeTimerRef.current = null; }
+      if (hideTimerRef.current) { clearTimeout(hideTimerRef.current); hideTimerRef.current = null; }
       setIsVisible(true);
       setFadeOpacity(1.0);
       AudioEngine.playSfx(SoundEffect.DICE_ROLL);
     } else if (!isRolling && prevRollingRef.current) {
-      // Dừng quay -> chờ 1.5s rồi mờ dần trong 300ms
-      let hideTimer: ReturnType<typeof setTimeout> | undefined;
-      const timer = setTimeout(() => {
+      if (fadeTimerRef.current) clearTimeout(fadeTimerRef.current);
+      fadeTimerRef.current = setTimeout(() => {
         setFadeOpacity(0);
-        hideTimer = setTimeout(() => {
+        if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+        hideTimerRef.current = setTimeout(() => {
           setIsVisible(false);
         }, 300);
       }, 1500);
-      return () => {
-        clearTimeout(timer);
-        if (hideTimer) clearTimeout(hideTimer);
-      };
     }
     prevRollingRef.current = isRolling;
-  }, [isRolling]);
+  }, [isRolling, lastDiceSeq]);
 
-  const lastDiceSeqStore = useGameStore((s) => s.lastDiceSeq);
-  const lastDiceSeq = ssrState ? ssrState.lastDiceSeq : lastDiceSeqStore;
+  useEffect(() => {
+    return () => {
+      if (fadeTimerRef.current) clearTimeout(fadeTimerRef.current);
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    };
+  }, []);
 
   const isDoubles = dice[0] === dice[1];
 
@@ -223,7 +250,7 @@ export function DiceTray(): React.ReactElement {
 
       {/* 2 Xúc xắc 3D đỏ Ruby chỉ render khi đang quay hoặc mờ dần */}
       {Boolean(isRolling || (isVisible && fadeOpacity > 0)) && (
-        <group rotation={!isRolling ? [0.35, 0, -0.35] : [0, 0, 0]}>
+        <group rotation={[0, 0, 0]}>
           <SingleDie
             face={dice[0]}
             targetX={-0.65}
