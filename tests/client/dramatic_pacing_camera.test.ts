@@ -121,13 +121,13 @@ describe('[UC-DRAMA] Dramatic Pacing & Player-Oriented Dice Pan Contract Suite',
     expect(state.fov).toBe(28);
   });
 
-  it('[TC-DRAMA.06/A2][UC-DRAMA] Luot gieo xuc xac cua Bot giu nguyen Overview tinh tai Y = 25.3 chong say xe (Gotcha 63)', () => {
+  it('[TC-DRAMA.06/A2][UC-DRAMA] Luot gieo xuc xac cua Bot kich hoat dice pan camera tai Y = 19.8 chong tre goc nhin', () => {
     const state = calculateTargetCameraState('overview', undefined, undefined, {
       isRolling: true,
       isBotTurn: true,
     });
-    expect(state.position[1]).toBe(25.3);
-    expect(state.fov).toBe(24);
+    expect(state.position[1]).toBe(19.8);
+    expect(state.fov).toBe(28);
   });
 
   it('[TC-DRAMA.07/MSS][UC-DRAMA] Nguoi choi gieo xuc xac o man Bac (o 25, side 2) tra ve targetZ = 0.9', () => {

@@ -241,16 +241,24 @@ export function calculateStreetChaseCameraState(params: StreetChaseParams): Targ
  * Tinh toan offset tieu chuan bam duoi quan co (Standard Chase Offset) theo 4 canh ban co.
  */
 export function resolveStandardChaseOffset(
-  pawnCoords: readonly [number, number, number]
+  pawnCoords: readonly [number, number, number],
+  aspect?: number
 ): readonly [number, number, number] {
   const px = Number.isFinite(pawnCoords[0]) ? pawnCoords[0] : 0;
   const pz = Number.isFinite(pawnCoords[2]) ? pawnCoords[2] : 0;
-  if (px === 0 && pz === 0) return [3.6, 4.2, 3.6];
+  const safeAspect = typeof aspect === 'number' && Number.isFinite(aspect) && aspect > 0 ? aspect : 1.77;
+  const isPortrait = safeAspect < 1.0;
+  const clampedAspect = Math.max(0.35, safeAspect);
+  const ky = isPortrait ? Math.min(1.35, Math.max(1.0, 0.95 / Math.sqrt(clampedAspect))) : 1.0;
+  const kDist = isPortrait ? Math.min(1.25, Math.max(1.0, 0.88 / Math.sqrt(clampedAspect))) : 1.0;
+  const offH = 3.6 * kDist;
+  const offY = 4.2 * ky;
+  if (px === 0 && pz === 0) return [offH, offY, offH];
   const side = resolveSideFromCoordinates(px, pz);
   switch (side) {
-    case 1: return [-3.6, 4.2, 3.6];
-    case 2: return [-3.6, 4.2, -3.6];
-    case 3: return [3.6, 4.2, -3.6];
-    default: return [3.6, 4.2, 3.6];
+    case 1: return [-offH, offY, offH];
+    case 2: return [-offH, offY, -offH];
+    case 3: return [offH, offY, -offH];
+    default: return [offH, offY, offH];
   }
 }

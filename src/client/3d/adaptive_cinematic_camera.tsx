@@ -361,6 +361,14 @@ export function AdaptiveCinematicCamera({
         || (!hasUserCustomCamera && activeModal !== null);
 
       if (isActionOngoing && softReturnRef.current) {
+        camBaseRef.current[0] = camera.position.x;
+        camBaseRef.current[1] = camera.position.y;
+        camBaseRef.current[2] = camera.position.z;
+        if (controlsRef.current) {
+          targetBaseRef.current[0] = controlsRef.current.target.x;
+          targetBaseRef.current[1] = controlsRef.current.target.y;
+          targetBaseRef.current[2] = controlsRef.current.target.z;
+        }
         softReturnRef.current = null;
       }
 

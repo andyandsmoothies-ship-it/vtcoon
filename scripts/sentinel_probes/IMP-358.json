@@ -1,0 +1,74 @@
+[
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Corrupt bot chase speed boost from 7.2 to 2.4",
+    "target": "speed: options?.isBotTurn ? 7.2 : CAMERA_CONFIG.pawn_chase.speed,",
+    "replacement": "speed: options?.isBotTurn ? 2.4 : CAMERA_CONFIG.pawn_chase.speed,"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Corrupt tile_focus mobile portrait target Y from 0.85 to 0.15",
+    "target": "const targetY = isPortrait ? 0.85 : 0.15;",
+    "replacement": "const targetY = 0.15;"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Corrupt bot tile_focus speed from 4.0 to 1.5",
+    "target": "speed: options?.isBotTurn ? 4.0 : CAMERA_CONFIG.tile_focus.speed,",
+    "replacement": "speed: options?.isBotTurn ? 1.5 : CAMERA_CONFIG.tile_focus.speed,"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Re-introduce bot block on overview dice pan roll",
+    "target": "if (options?.isRolling && !options?.isHighStakesRoll) {",
+    "replacement": "if (options?.isRolling && !options?.isHighStakesRoll && !options?.isBotTurn) {"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Ignore responsive aspect for pawn chase FOV in state machine",
+    "target": "fov: calculateResponsiveChaseFov(options?.aspect),",
+    "replacement": "fov: CAMERA_CONFIG.pawn_chase.fov,"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Ignore responsive aspect for tile focus FOV in state machine",
+    "target": "fov: calculateResponsiveFocusFov(options?.aspect),",
+    "replacement": "fov: CAMERA_CONFIG.tile_focus.fov,"
+  },
+  {
+    "file": "src/client/3d/camera_kinematic_helpers.ts",
+    "desc": "AST: Corrupt side aware camera height scaling on portrait",
+    "target": "const height = baseHeight * ky;",
+    "replacement": "const height = baseHeight;"
+  },
+  {
+    "file": "src/client/3d/camera_kinematic_helpers.ts",
+    "desc": "AST: Ignore aspect in calculateTileFocusCameraPosition",
+    "target": "const finalOffset = offset ?? resolveSideAwareCameraOffset(tileCoords, undefined, aspect);",
+    "replacement": "const finalOffset = offset ?? resolveSideAwareCameraOffset(tileCoords);"
+  },
+  {
+    "file": "src/client/3d/camera_kinematic_helpers.ts",
+    "desc": "AST: Disable responsive focus FOV optical calculation",
+    "target": "return Math.min(45, Math.max(baseFov, calculatedFov));",
+    "replacement": "return baseFov;"
+  },
+  {
+    "file": "src/client/3d/camera_kinematic_helpers.ts",
+    "desc": "AST: Disable responsive chase FOV optical calculation",
+    "target": "return Math.min(48, Math.max(baseFov, calculatedFov));",
+    "replacement": "return baseFov;"
+  },
+  {
+    "file": "src/client/3d/cinematic_chase_camera.ts",
+    "desc": "AST: Disable mobile portrait distance scaling on standard chase offset",
+    "target": "const offH = 3.6 * kDist;",
+    "replacement": "const offH = 3.6;"
+  },
+  {
+    "file": "src/client/3d/cinematic_chase_camera.ts",
+    "desc": "AST: Disable mobile portrait elevation scaling on standard chase offset",
+    "target": "const offY = 4.2 * ky;",
+    "replacement": "const offY = 4.2;"
+  }
+]

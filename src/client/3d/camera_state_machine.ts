@@ -9,6 +9,8 @@ import {
   calculateScreenShake,
   dampValue,
   calculateResponsiveCameraDistance,
+  calculateResponsiveFocusFov,
+  calculateResponsiveChaseFov,
 } from './camera_kinematic_helpers';
 
 export type CameraMode = 'overview' | 'dice_roll' | 'tension_roll' | 'pawn_chase' | 'tile_focus' | 'auction_focus' | 'pre_match';
@@ -136,12 +138,13 @@ export function resolveCameraMode(params: CameraResolveParams): CameraMode {
  */
 export function calculateChaseCameraPosition(
   pawnCoords: readonly [number, number, number],
-  offset?: readonly [number, number, number]
+  offset?: readonly [number, number, number],
+  aspect?: number
 ): [number, number, number] {
   const px = Number.isFinite(pawnCoords[0]) ? pawnCoords[0] : 0;
   const py = Number.isFinite(pawnCoords[1]) ? pawnCoords[1] : 0;
   const pz = Number.isFinite(pawnCoords[2]) ? pawnCoords[2] : 0;
-  const off = offset ?? resolveStandardChaseOffset(pawnCoords);
+  const off = offset ?? resolveStandardChaseOffset(pawnCoords, aspect);
   return [px + off[0], py + off[1], pz + off[2]];
 }
 
@@ -206,28 +209,30 @@ export function calculateTargetCameraState(
       const safePx = Number.isFinite(p[0]) ? p[0] : 0;
       const safePz = Number.isFinite(p[2]) ? p[2] : 0;
       return {
-        position: calculateChaseCameraPosition(p),
+        position: calculateChaseCameraPosition(p, undefined, options?.aspect),
         target: [safePx, 0.2, safePz],
-        fov: CAMERA_CONFIG.pawn_chase.fov,
-        speed: options?.isBotTurn ? 2.4 : CAMERA_CONFIG.pawn_chase.speed,
+        fov: calculateResponsiveChaseFov(options?.aspect),
+        speed: options?.isBotTurn ? 7.2 : CAMERA_CONFIG.pawn_chase.speed,
       };
     }
     case 'tile_focus': {
       const t = tilePosition ?? [0, 0, 0];
       const safeTx = Number.isFinite(t[0]) ? t[0] : 0;
       const safeTz = Number.isFinite(t[2]) ? t[2] : 0;
+      const isPortrait = typeof options?.aspect === 'number' && Number.isFinite(options.aspect) && options.aspect < 1.0;
+      const targetY = isPortrait ? 0.85 : 0.15;
       return {
-        position: calculateTileFocusCameraPosition(t),
-        target: [safeTx, 0.15, safeTz],
-        fov: CAMERA_CONFIG.tile_focus.fov,
-        speed: options?.isBotTurn ? 2.2 : CAMERA_CONFIG.tile_focus.speed,
+        position: calculateTileFocusCameraPosition(t, undefined, options?.aspect),
+        target: [safeTx, targetY, safeTz],
+        fov: calculateResponsiveFocusFov(options?.aspect),
+        speed: options?.isBotTurn ? 4.0 : CAMERA_CONFIG.tile_focus.speed,
       };
     }
     case 'auction_focus':
       return configToCameraState(CAMERA_CONFIG.auction_focus);
     case 'overview':
     default:
-      if (options?.isRolling && !options?.isHighStakesRoll && !options?.isBotTurn) {
+      if (options?.isRolling && !options?.isHighStakesRoll) {
         return calculateDicePanCameraState(options?.rollingPlayerPos, options?.aspect);
       }
       if (options?.gamePhase) {
