@@ -1,0 +1,62 @@
+[
+  {
+    "file": "src/client/ui/player_card.tsx",
+    "desc": "AST: Re-introduce amber background tint on active turn card",
+    "target": "isCurrentTurn\n          ? 'border-amber-500 bg-[#FFFDF8] ring-2 ring-amber-400 shadow-[0_6px_0_0_#0f172a]'",
+    "replacement": "isCurrentTurn\n          ? 'border-amber-500 bg-amber-50/70 ring-2 ring-amber-400 shadow-[0_6px_0_0_#0f172a]'"
+  },
+  {
+    "file": "src/client/ui/player_card.tsx",
+    "desc": "AST: Re-introduce opaque grey background on unowned dots",
+    "target": "export const UNOWNED_DOT_CLASS = 'border border-slate-300 bg-transparent';",
+    "replacement": "export const UNOWNED_DOT_CLASS = 'border border-slate-300 bg-slate-100/70';"
+  },
+  {
+    "file": "src/client/ui/player_card.tsx",
+    "desc": "AST: Corrupt unowned dot border from border-slate-300 to border-transparent",
+    "target": "export const UNOWNED_DOT_CLASS = 'border border-slate-300 bg-transparent';",
+    "replacement": "export const UNOWNED_DOT_CLASS = 'border border-transparent bg-transparent';"
+  },
+  {
+    "file": "src/client/ui/player_card.tsx",
+    "desc": "AST: Drop amber active turn ring indicator",
+    "target": "ring-2 ring-amber-400 shadow-[0_6px_0_0_#0f172a]'",
+    "replacement": "shadow-[0_6px_0_0_#0f172a]'"
+  },
+  {
+    "file": "src/client/ui/player_net_worth_badge.tsx",
+    "desc": "AST: Drop hidden sm:flex from PlayerNetWorthBadge causing mobile height bloat",
+    "target": "className=\"hidden sm:flex items-center text-[11px] text-slate-700 font-black tabular-nums shrink-0\"",
+    "replacement": "className=\"flex items-center text-[11px] text-slate-700 font-black tabular-nums shrink-0\""
+  },
+  {
+    "file": "src/client/ui/player_net_worth_badge.tsx",
+    "desc": "AST: Omit desktop parenthesized format on Net Worth",
+    "target": "({formatCurrency(netWorth)})",
+    "replacement": "{formatCurrency(netWorth)}"
+  },
+  {
+    "file": "src/client/ui/player_net_worth_badge.tsx",
+    "desc": "AST: Corrupt player-net-worth data-testid",
+    "target": "data-testid=\"player-net-worth\"",
+    "replacement": "data-testid=\"player-nw-corrupted\""
+  },
+  {
+    "file": "src/client/ui/top_bar.tsx",
+    "desc": "AST: Drop hidden min-[400px]:inline-flex from quick-rules causing mobile leave button overflow",
+    "target": "className=\"shrink-0 hidden min-[400px]:inline-flex sm:inline-flex",
+    "replacement": "className=\"shrink-0 inline-flex sm:inline-flex"
+  },
+  {
+    "file": "src/client/ui/top_bar.tsx",
+    "desc": "AST: Corrupt symmetric container padding to asymmetric padding",
+    "target": "min-[360px]:px-2 sm:px-4",
+    "replacement": "min-[360px]:px-8 sm:px-4"
+  },
+  {
+    "file": "src/client/ui/top_bar.tsx",
+    "desc": "AST: Drop shrink-0 on leave-room-button door icon",
+    "target": "<span className=\"text-sm shrink-0\" aria-hidden=\"true\">🚪</span>",
+    "replacement": "<span className=\"text-sm\" aria-hidden=\"true\">🚪</span>"
+  }
+]

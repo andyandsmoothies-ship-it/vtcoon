@@ -107,3 +107,10 @@
          - Khách thuê: `[🤝] {Chủ thể} được miễn [{Số tiền}] tiền thuê {Tên Ô} của {Chủ đất}` + `[Đặc quyền ngoại giao: Miễn 100% tiền thuê BĐS]`.
          - Chủ đất: `[🤝] {Chủ thể} miễn thu [-{Số tiền}] tiền thuê {Tên Ô} cho {Khách thuê}` + `[Khách dùng Thẻ Ngoại Giao: Hụt thu tiền thuê]`. `[UI/NOTIFICATIONS]`
 
+25. **Tactile Corner Arc & Viewport Margin Symmetry Standard [UI/TACTILE_ERGONOMICS] [IMP-359]**:
+    - **Bẫy Nguy Hiểm (The Rectangular Bounding Box Blindness)**: Các công cụ kiểm thử tự động (`getBoundingClientRect`) chỉ đo hình chữ nhật vuông vức 4 góc. Khi container dùng bo góc lớn (`rounded-2xl` bán kính $R=16\text{px}$), một nút con nằm cách mép $17\text{px}$ về mặt số học là "ở bên trong" ($1115 \le 1132$), nhưng tại góc cong của hình tròn, không gian chéo bị thu hẹp $\Delta x = R - \sqrt{R^2 - \Delta y^2}$. Kết quả: góc nút gần như dính sát vào đường viền cong, tạo cảm giác chật chội, dồn cục và lệch trọng tâm thị giác.
+    - **Bất Biến Xác Minh (Tactile Corner Arc & Symmetry Invariant)**:
+      1. *Vùng Đệm Góc Cong ($\text{Clearance} \ge R + 4\text{px}$)*: Mọi container có bo góc bán kính $R$, phần tử con bên trong bắt buộc phải có khoảng cách lề tới mép ngoài $\ge R + 4\text{px}$ (ví dụ: với `rounded-2xl` $R=16\text{px}$, khoảng lề tối thiểu phải đạt $\ge 20\text{px}$ trên desktop). Tuyệt đối cấm để phần tử con chạm vào cung tròn đang lượn vào.
+      2. *Đối Xứng Lề 2 Đầu ($|\Delta\text{margin}| \le 8\text{px}$)*: Các thanh điều khiển nằm ngang (TopBar, ActionDock, ModalHeader) bắt buộc đối xứng giữa lề trái và lề phải: $|\text{Lề trái} - \text{Lề phải}| \le 8\text{px}$ trên Desktop. Cấm tình trạng đầu trái rộng thênh thang ($32\text{px}$) còn đầu phải bị dồn sát mép ($13\text{px}$).
+      3. *Tự Soi Ảnh Bằng Mắt (Visual Self-Critique Gate)*: Nghiêm cấm bàn giao UI chỉ dựa trên kết quả test text terminal. Sau khi chụp ảnh bằng chứng, kỹ sư/agent bắt buộc phải phóng to 1:1 các góc vừa sửa để tự đánh giá thẩm mỹ thị giác trước khi xuất báo cáo nghiệm thu. `[UI/TACTILE_ERGONOMICS]`
+

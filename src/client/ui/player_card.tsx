@@ -13,6 +13,9 @@ import { COLOR_GROUP_HEX } from '../../domain/theme';
 import { getEmoteDef } from '../../domain/emotes';
 import { getPawnConfigBySlot } from '../3d/luxury_pawn_models';
 import { ChanceCardId } from '../../domain/event_card_engine';
+import { PlayerNetWorthBadge } from './player_net_worth_badge';
+
+export const UNOWNED_DOT_CLASS = 'border border-slate-300 bg-transparent';
 
 const PROPERTY_COLOR_GROUP_ORDER: readonly ColorGroup[] = [
   ColorGroup.Nau,
@@ -183,7 +186,7 @@ export function PlayerCard({
       data-in-turn={isCurrentTurn ? 'true' : 'false'}
       className={`pointer-events-auto relative flex flex-col gap-1.5 p-2.5 sm:p-3 rounded-xl border-2 transition-all duration-200 w-full ${
         isCurrentTurn
-          ? 'border-amber-500 bg-amber-50/70 ring-2 ring-amber-400 shadow-[0_6px_0_0_#0f172a]'
+          ? 'border-amber-500 bg-[#FFFDF8] ring-2 ring-amber-400 shadow-[0_6px_0_0_#0f172a]'
           : 'border-slate-900 bg-[#FFFDF8] shadow-[0_4px_0_0_#0f172a]'
       } text-slate-900 ${player.bankrupt ? 'opacity-50 grayscale' : ''}`}
       role="region"
@@ -239,7 +242,7 @@ export function PlayerCard({
         </div>
 
         {/* Cột phải (Căn lề phải): Số tiền mặt, Cảnh báo thấu chi, Tài sản ròng & Badge Phá Sản */}
-        <div className="flex items-center justify-end gap-1.5 shrink-0 text-right">
+        <div className="flex items-center justify-end gap-1 shrink-0 text-right">
           {player.bankrupt ? (
             <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-rose-100 text-rose-900 border border-rose-300">
               Phá Sản
@@ -256,7 +259,7 @@ export function PlayerCard({
                   <span className="hidden sm:inline">Thấu chi: còn {player.overdraftRoundsLeft ?? 3} vòng</span>
                 </span>
               )}
-              <span className="hidden sm:flex items-center text-[11px] text-slate-700 font-black tabular-nums shrink-0" data-testid="player-net-worth" title="Tài sản ròng">({formatCurrency(netWorth)})</span>
+              <PlayerNetWorthBadge netWorth={netWorth} />
             </>
           )}
         </div>
@@ -298,7 +301,7 @@ export function PlayerCard({
                       } ${
                         isOwned
                           ? 'border border-slate-900/50 shadow-2xs'
-                          : 'border border-slate-300 bg-slate-100/70'
+                          : UNOWNED_DOT_CLASS
                       }`}
                       style={{
                         ...(isOwned ? { backgroundColor: COLOR_GROUP_HEX[group] } : {}),
@@ -339,7 +342,7 @@ export function PlayerCard({
                   } ${
                     isOwned
                       ? 'border border-slate-900/50 shadow-2xs'
-                      : 'border border-slate-300 bg-slate-100/70'
+                      : UNOWNED_DOT_CLASS
                   }`}
                   style={{
                     ...(isOwned ? { backgroundColor: INFRASTRUCTURE_CLUSTERS.railroads.color } : {}),
@@ -375,7 +378,7 @@ export function PlayerCard({
                   } ${
                     isOwned
                       ? 'border border-slate-900/50 shadow-2xs'
-                      : 'border border-slate-300 bg-slate-100/70'
+                      : UNOWNED_DOT_CLASS
                   }`}
                   style={{
                     ...(isOwned ? { backgroundColor: INFRASTRUCTURE_CLUSTERS.utilities.color } : {}),

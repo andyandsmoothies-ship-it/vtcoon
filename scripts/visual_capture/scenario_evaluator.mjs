@@ -110,6 +110,9 @@ export async function extractBoundingBoxes(send, evidenceDir, ticket, viewportNa
           } : null,
           toastCards,
           hud: getRect('[aria-label="Danh sách người chơi"]'),
+          topbarCapsule: getRect('[data-testid="top-bar"] > div'),
+          matchInfo: getRect('[data-testid="match-info-capsule"]'),
+          leaveBtn: getRect('[data-testid="leave-room-button"]'),
           cameraPills: cameraPillsContainer ? {
             top: Math.round(cameraPillsContainer.getBoundingClientRect().top),
             bottom: Math.round(cameraPillsContainer.getBoundingClientRect().bottom),

@@ -1,0 +1,20 @@
+[
+  {
+    "file": "src/domain/event_card_metadata.ts",
+    "desc": "Mutant: Inflate MC_FUEL_SURGE effectDetail beyond 78 chars",
+    "target": "effectDetail: 'Nộp ngay 500 phụ phí nhiên liệu. Cước 4 Ga Tàu tăng +500 trong 2 vòng.',",
+    "replacement": "effectDetail: 'Mỗi người nộp ngay 500 phụ phí nhiên liệu do giá xăng dầu tăng cao trên toàn bộ mạng lưới vận tải. Cước 4 Ga Tàu tăng +500 trong 2 vòng.',"
+  },
+  {
+    "file": "src/domain/event_card_metadata.ts",
+    "desc": "Mutant: Corrupt MC_RATE_HIKE statutory percentages",
+    "target": "effectDetail: 'Tăng 20% chi phí xây dựng và thu lãi vay 10% khi vượt GO trong 2 vòng.',",
+    "replacement": "effectDetail: 'Tăng 50% chi phí xây dựng và thu lãi vay 5% khi vượt GO trong 2 vòng.',"
+  },
+  {
+    "file": "src/domain/event_card_metadata.ts",
+    "desc": "Mutant: Inject forbidden Tr. unit into CC_CONTRACT_PENALTY",
+    "target": "effectDetail: 'Chậm tiến độ: Bồi thường vi phạm hợp đồng 1.000 cho người nghèo nhất.',",
+    "replacement": "effectDetail: 'Chậm tiến độ: Bồi thường vi phạm hợp đồng 1.000 Tr. cho người nghèo nhất.',"
+  }
+]

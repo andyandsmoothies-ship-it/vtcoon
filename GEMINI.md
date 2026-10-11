@@ -35,6 +35,9 @@ Every ticket must pass 100% of automated gates before handoff:
 - **Anti-Conjectural Root Cause Invariant**: FORBIDDEN resolving runtime anomalies, visual artifacts, or platform-specific glitches (WebGL strobing, GPU precision overflow, thermal throttling, camera lag) solely by conjectural inspection of `.tsx`/source files. If the root cause cannot be statically proven, an empirical observability tool (diagnostic HUD `?debug=3d`, layer isolation, live telemetry) MUST be used in Station 0.5 to physically isolate the culprit before drafting a plan or writing Station 1 tests.
 - **Flight Recorder & Forensic Invariant**: FORBIDDEN resolving gameplay, balance, bankruptcy, or state machine desync bugs solely through static code speculation. The agent MUST request or ingest the Flight Recorder dump (`npm run analyze:log <dump.json>` or `window.__vtcoon.exportFlightRecorder()`) to inspect tick timelines and invariant violations before planning.
 - **Economic Characterization Baseline Invariant**: FORBIDDEN modifying core property pricing, rent curves, mortgage rates, tax brackets, or auction settlement logic without establishing/verifying a 40-cell characterization snapshot baseline test to prevent unannounced economic drift across building tiers.
+- **Tactile Corner Arc & Viewport Margin Symmetry Invariant**: FORBIDDEN signing off UI components inside curved/pill containers (border-radius $R$) using simple rectangular bounding box inclusion ($X_1 \le X_2$). Any child element must maintain clearance $\ge R + 4\text{px}$ from container edges to prevent corner arc crowding, and opposing horizontal margins must satisfy $|\text{margin}_{left} - \text{margin}_{right}| \le 8\text{px}$ on desktop. FORBIDDEN submitting visual UI delivery without 1:1 zoomed visual self-critique of modified components.
+- **Knowledge Fold Invariant**: Any ticket/IMP modifying domain rules, economic models, FSM phase transitions, network protocols, or UI affordances MUST update `docs/FEATURE_MAP.md` before Station 3 sign-off to keep the 1-page system matrix authoritative and prevent context drift across future updates.
+- **SSOT Primacy Invariant**: When researching current gameplay rules, economic variables, FSM phases, or subsystem boundaries, agents MUST treat `docs/FEATURE_MAP.md` as the authoritative Single Source of Truth. Historical plans in `.agents/plans/` represent past point-in-time diffs (deltas) and MUST NOT be used to deduce current architectural truth.
 
 ## 3. LEAN PIPELINE
 - **Tier 1 (Fast-Track)**: < 50 LOC, visual/CSS/spacing, copy, isolated fix (0 Schema, 0 FSM, 0 Net). Main Agent executes directly in 1-2 min, 0 subagents, 0 plan.
@@ -56,6 +59,7 @@ Every ticket must pass 100% of automated gates before handoff:
 
 ## 4. SSOT DOMAIN GOTCHAS (docs/domain/gotchas/)
 Consult the respective pillar before planning or modifying code:
+- Master Feature Map (SSOT Matrix): [`FEATURE_MAP.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/FEATURE_MAP.md)
 - FSM & Game Lifecycle: [`fsm_lifecycle.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/gotchas/fsm_lifecycle.md)
 - Economy & Treasury: [`economy_treasury.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/gotchas/economy_treasury.md)
 - Bot AI Negotiation: [`bot_negotiation.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/gotchas/bot_negotiation.md)

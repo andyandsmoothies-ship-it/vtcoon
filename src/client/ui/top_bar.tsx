@@ -101,12 +101,12 @@ export function TopBar(props: TopBarProps): React.ReactElement {
       className="w-full max-w-full overflow-hidden flex justify-center items-center pointer-events-none px-1 sm:px-4 pt-[calc(0.375rem+env(safe-area-inset-top))] sm:pt-3"
     >
       <div
-        className="pointer-events-auto relative flex items-center justify-between gap-1 min-[360px]:gap-1.5 sm:gap-3 md:gap-4 bg-[#FFFDF8] border border-slate-300/80 shadow-lg shadow-slate-900/10 rounded-2xl p-1.5 sm:p-2 pl-1.5 pr-3 min-[360px]:pl-2 min-[360px]:pr-3.5 sm:px-4 w-full sm:w-auto max-w-[calc(100vw-0.75rem)] sm:max-w-4xl text-slate-900 select-none"
+        className="pointer-events-auto relative flex items-center justify-between gap-1 min-[360px]:gap-1.5 sm:gap-3 md:gap-4 bg-[#FFFDF8] border border-slate-300/80 shadow-lg shadow-slate-900/10 rounded-2xl p-1.5 sm:p-2 min-[360px]:px-2 sm:px-4 w-full sm:w-auto max-w-[calc(100vw-0.75rem)] sm:max-w-5xl text-slate-900 select-none"
       >
         {/* Cụm bên trái: Thông tin trận đấu */}
         <div
           data-testid="match-info-capsule"
-          className="flex items-center gap-1 min-[360px]:gap-1 sm:gap-2.5 text-xs md:text-sm font-medium shrink-0 px-2 min-[360px]:px-2.5 sm:px-4"
+          className="flex items-center gap-1 min-[360px]:gap-1 sm:gap-2.5 text-xs md:text-sm font-medium shrink-0 px-1 min-[360px]:px-1.5 sm:pl-3 sm:pr-2"
         >
           {/* Vòng đấu */}
           <div className="flex items-center gap-1 sm:gap-2">
@@ -164,7 +164,7 @@ export function TopBar(props: TopBarProps): React.ReactElement {
         {/* Cụm bên phải: Tiện ích HUD */}
         <div
           data-testid="hud-utilities-cluster"
-          className="flex items-center gap-1 sm:gap-1.5 shrink-0"
+          className="flex items-center gap-1 sm:gap-1.5 shrink-0 px-1 min-[360px]:px-1.5 sm:pl-2 sm:pr-1"
         >
           {/* Nút Bật / Tắt Bảng Điểm người chơi */}
           <button
@@ -213,7 +213,7 @@ export function TopBar(props: TopBarProps): React.ReactElement {
           <button
             type="button"
             onClick={() => useGameStore.getState().openModal('rules', { initialTab: 'mechanics' })}
-            className="shrink-0 relative w-8 h-8 min-h-[36px] min-w-[36px] sm:w-auto sm:h-8 sm:min-w-[36px] inline-flex items-center justify-center gap-1.5 p-0 sm:px-3 rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-all cursor-pointer text-xs font-semibold border border-slate-300/80 shadow-xs active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 after:absolute after:-inset-1.5 after:content-['']"
+            className="shrink-0 hidden min-[400px]:inline-flex sm:inline-flex relative w-8 h-8 min-h-[36px] min-w-[36px] sm:w-auto sm:h-8 sm:min-w-[36px] items-center justify-center gap-1.5 p-0 sm:px-3 rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-all cursor-pointer text-xs font-semibold border border-slate-300/80 shadow-xs active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 after:absolute after:-inset-1.5 after:content-['']"
             title="Xem Luật Chơi & Cơ Chế Game"
             aria-label="Xem Luật Chơi & Cơ Chế Game"
             data-testid="quick-rules-topbar-btn"
@@ -255,7 +255,7 @@ export function TopBar(props: TopBarProps): React.ReactElement {
                 aria-label="Thoát bàn và trở về sảnh chờ"
                 data-testid="leave-room-button"
               >
-                <span className="text-sm" aria-hidden="true">🚪</span>
+                <span className="text-sm shrink-0" aria-hidden="true">🚪</span>
                 <span className="hidden sm:inline">Thoát</span>
               </button>
             </>
