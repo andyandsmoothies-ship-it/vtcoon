@@ -31,9 +31,9 @@ export function auditScopeAndSubsystems(targetFiles) {
   for (const relPath of targetFiles.keys()) {
     const norm = relPath.replace(/\\/g, '/');
     if (norm.startsWith('scripts/')) detectedSubsystems.add('tooling-scripts');
-    else if (norm.startsWith('src/client/3d/')) detectedSubsystems.add('client-3d');
+    else if (norm.startsWith('src/client/3d/') || norm === 'src/client/game_canvas.tsx') detectedSubsystems.add('client-3d');
     else if (norm.startsWith('src/client/ui/')) detectedSubsystems.add('client-ui');
-    else if (norm.startsWith('src/client/store/') || norm.startsWith('src/client/network/') || norm.startsWith('src/client/hooks/') || norm === 'src/client/main.tsx' || norm === 'src/client/game_canvas.tsx') detectedSubsystems.add('client-state');
+    else if (norm.startsWith('src/client/store/') || norm.startsWith('src/client/network/') || norm.startsWith('src/client/hooks/') || norm === 'src/client/main.tsx') detectedSubsystems.add('client-state');
     else if (norm.startsWith('src/client/types/')) detectedSubsystems.add('client-types');
     else if (norm.startsWith('src/domain/')) detectedSubsystems.add('domain-core');
     else if (norm.startsWith('src/server/')) detectedSubsystems.add('server-network');

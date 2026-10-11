@@ -45,8 +45,27 @@ export function isMobileDevice(): boolean {
   return isMobileHardware() || isSmallViewport();
 }
 
-export function getRecommendedDpr(isMobile: boolean): [number, number] {
+export function isIOSPhone(): boolean {
+  return isIOSDevice() && isPhoneHardware();
+}
+
+export function getRecommendedDpr(isMobile: boolean, isIOSPhoneDevice = isIOSPhone()): [number, number] {
+  if (isIOSPhoneDevice) return [0.75, 0.82];
   return isMobile ? [0.85, 1.0] : [1.0, 1.5];
+}
+
+export interface CanvasGlProfile {
+  readonly antialias: boolean;
+  readonly powerPreference: 'high-performance';
+  readonly precision: 'mediump' | 'highp';
+}
+
+export function getRecommendedGlProfile(isMobile: boolean): CanvasGlProfile {
+  return {
+    antialias: !isMobile,
+    powerPreference: 'high-performance',
+    precision: isMobile ? 'mediump' : 'highp',
+  };
 }
 
 export function getTileTextureBudget(isMobile: boolean, isTablet = isTabletDevice()): TileTextureBudget {

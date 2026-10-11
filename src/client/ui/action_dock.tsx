@@ -216,7 +216,7 @@ export function ActionDock({
   return (
     <div className="relative flex flex-col items-center gap-1.5">
       <nav
-        className="relative pointer-events-auto flex items-center justify-center gap-1.5 min-[360px]:gap-2 md:gap-3 bg-[#FFFDF8]/95 backdrop-blur-sm border border-slate-300/80 shadow-lg shadow-slate-900/10 rounded-2xl p-1.5 sm:p-2.5 px-2 min-[360px]:px-3 sm:px-5 max-w-[calc(100vw-1rem)] overflow-x-auto no-scrollbar"
+        className="relative pointer-events-auto flex items-center justify-center gap-1.5 min-[360px]:gap-2 md:gap-3 bg-[#FFFDF8]/95 backdrop-blur-none md:backdrop-blur-sm border border-slate-300/80 shadow-lg shadow-slate-900/10 rounded-2xl p-1.5 sm:p-2.5 px-2 min-[360px]:px-3 sm:px-5 max-w-[calc(100vw-1rem)] overflow-x-auto no-scrollbar"
         aria-label="Thanh điều khiển tác vụ"
       >
         {/* Primary Action Button: Cứu Nợ Khẩn Cấp khi con nợ âm tiền, hoặc Mua Đất, hoặc Đổ Xúc Xắc */}

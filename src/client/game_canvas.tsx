@@ -2,7 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import './3d/r3f_fiber_shield';
 import './polyfills/canvas_round_rect';
 import { clearAll3DTextureCaches } from './3d/texture_cache_manager';
-import { isMobileHardware, getRecommendedDpr } from './3d/device_detect';
+import { isMobileHardware, getRecommendedDpr, getRecommendedGlProfile } from './3d/device_detect';
 import { AdaptiveDprController } from './3d/adaptive_dpr_controller';
 import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, ContactShadows, Environment } from '@react-three/drei';
@@ -161,7 +161,7 @@ export function GameCanvas({
         dpr={getRecommendedDpr(isMobileDevice)} /* dpr={[1, 1.5]} */
         camera={{ position: isLobby ? CAMERA_CONFIG.pre_match.position : CAMERA_CONFIG.overview.position, fov: 24, near: 0.5, far: 300 }}
         gl={{
-          antialias: !isMobileDevice,
+          ...getRecommendedGlProfile(isMobileDevice),
           toneMapping: isMobileDevice ? ACESFilmicToneMapping : NoToneMapping,
           toneMappingExposure: 1.08,
         }}

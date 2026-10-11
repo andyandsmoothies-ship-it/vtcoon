@@ -1,6 +1,8 @@
 // [TC-IMP10.3/MSS] PerfBudget — 60 FPS Performance Budget Controller & Adaptive LOD System
 // Enforces Draw Call Budget (<85 calls), triangle count (<150k), and target frame time (16.6ms)
 
+import { isIOSPhone as isIOSPhoneDevice } from './device_detect';
+
 export function validateDrawCallsBudget(calls: number, limit = 85): boolean {
   if (!Number.isFinite(calls)) return false;
   if (!Number.isFinite(limit)) return false;
@@ -53,6 +55,7 @@ export const LOD_CONFIGS: Record<
 export const DPR_BOUNDS = {
   MOBILE_MIN: 0.75,
   MOBILE_MAX: 1.0,
+  IOS_PHONE_MAX: 0.82,
   DESKTOP_MIN: 1.0,
   DESKTOP_MAX: 1.5,
   STEP_DOWN_DELAY_MS: 1500,
@@ -63,6 +66,7 @@ export const DPR_BOUNDS = {
 
 export interface AdaptiveDprParams {
   readonly isMobile: boolean;
+  readonly isIOSPhone?: boolean;
   readonly currentFps: number;
   readonly currentDpr: number;
   readonly isMotionActive?: boolean;
@@ -271,6 +275,7 @@ export class PerfBudgetController {
   public calculateAdaptiveDpr(params: AdaptiveDprParams): AdaptiveDprResult {
     const {
       isMobile,
+      isIOSPhone = isIOSPhoneDevice(),
       currentFps,
       currentDpr,
       isMotionActive = false,
@@ -279,7 +284,9 @@ export class PerfBudgetController {
     } = params;
 
     const minDpr = isMobile ? DPR_BOUNDS.MOBILE_MIN : DPR_BOUNDS.DESKTOP_MIN;
-    const maxDpr = isMobile ? DPR_BOUNDS.MOBILE_MAX : DPR_BOUNDS.DESKTOP_MAX;
+    const maxDpr = isIOSPhone
+      ? DPR_BOUNDS.IOS_PHONE_MAX
+      : (isMobile ? DPR_BOUNDS.MOBILE_MAX : DPR_BOUNDS.DESKTOP_MAX);
 
     // Trường hợp cần hạ DPR (FPS thấp kéo dài)
     if (currentFps < DPR_BOUNDS.FPS_DOWN_THRESHOLD && currentDpr > minDpr) {
@@ -297,9 +304,11 @@ export class PerfBudgetController {
         ? DPR_BOUNDS.STEP_UP_DELAY_MS * 2
         : DPR_BOUNDS.STEP_UP_DELAY_MS;
       if (optimalDurationMs >= requiredOptimalMs) {
-        const nextDpr = isMobile
-          ? (currentDpr < 0.85 ? 0.85 : DPR_BOUNDS.MOBILE_MAX)
-          : Math.min(maxDpr, Number((currentDpr + 0.25).toFixed(2)));
+        const nextDpr = isIOSPhone
+          ? DPR_BOUNDS.IOS_PHONE_MAX
+          : (isMobile
+            ? (currentDpr < 0.85 ? 0.85 : DPR_BOUNDS.MOBILE_MAX)
+            : Math.min(maxDpr, Number((currentDpr + 0.25).toFixed(2))));
         return { targetDpr: nextDpr, shouldUpdate: true, reason: 'STEP_UP' };
       }
     }

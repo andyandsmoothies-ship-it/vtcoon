@@ -1,0 +1,50 @@
+[
+  {
+    "file": "src/client/ui/action_dock.tsx",
+    "desc": "Mutant 1: Revert ActionDock responsive blur to unconditional blur",
+    "target": "bg-[#FFFDF8]/95 backdrop-blur-none md:backdrop-blur-sm border",
+    "replacement": "bg-[#FFFDF8]/95 backdrop-blur-sm border"
+  },
+  {
+    "file": "src/client/ui/action_dock.tsx",
+    "desc": "Mutant 2: Corrupt ActionDock desktop blur variant to none",
+    "target": "md:backdrop-blur-sm",
+    "replacement": "md:backdrop-blur-none"
+  },
+  {
+    "file": "src/client/ui/modals/modal_backdrop.tsx",
+    "desc": "Mutant 3: Revert ModalBackdrop responsive blur to unconditional blur",
+    "target": "backdrop-blur-none md:backdrop-blur-xs",
+    "replacement": "backdrop-blur-xs"
+  },
+  {
+    "file": "src/client/ui/modals/modal_backdrop.tsx",
+    "desc": "Mutant 4: Corrupt ModalBackdrop desktop blur variant to none",
+    "target": "md:backdrop-blur-xs",
+    "replacement": "md:backdrop-blur-none"
+  },
+  {
+    "file": "src/client/ui/modals/modal_backdrop.tsx",
+    "desc": "Mutant 5: Corrupt modal mobile contrast background from 80 to 60",
+    "target": "bg-slate-950/80 md:bg-slate-950/60",
+    "replacement": "bg-slate-950/60"
+  },
+  {
+    "file": "src/client/ui/modals/modal_backdrop.tsx",
+    "desc": "Mutant 6: Corrupt modal desktop background opacity to 90",
+    "target": "md:bg-slate-950/60",
+    "replacement": "md:bg-slate-950/90"
+  },
+  {
+    "file": "src/client/index.css",
+    "desc": "Mutant 7: Invert global mobile blur purge rule for backdrop-filter",
+    "target": "backdrop-filter: none !important;",
+    "replacement": "backdrop-filter: blur(12px) !important;"
+  },
+  {
+    "file": "src/client/index.css",
+    "desc": "Mutant 8: Invert global mobile blur purge rule for webkit-backdrop-filter",
+    "target": "-webkit-backdrop-filter: none !important;",
+    "replacement": "-webkit-backdrop-filter: blur(12px) !important;"
+  }
+]

@@ -127,3 +127,13 @@ button, a, input, select {
   }
 }
 
+/* Mobile WebKit GPU Compositor Stall Defense: Purge backdrop-filter blur on mobile viewports (< 768px) */
+@media (max-width: 767px) {
+  *,
+  ::before,
+  ::after {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+}
+

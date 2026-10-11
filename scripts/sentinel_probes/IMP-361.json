@@ -1,0 +1,32 @@
+[
+  {
+    "file": "src/client/3d/device_detect.ts",
+    "desc": "Mutant: Invert phone hardware check in isIOSPhone",
+    "target": "return isIOSDevice() && isPhoneHardware();",
+    "replacement": "return isIOSDevice() && !isPhoneHardware();"
+  },
+  {
+    "file": "src/client/3d/device_detect.ts",
+    "desc": "Mutant: Corrupt iOS phone DPR from [0.75, 0.82] to [1.0, 1.5]",
+    "target": "if (isIOSPhoneDevice) return [0.75, 0.82];",
+    "replacement": "if (isIOSPhoneDevice) return [1.0, 1.5];"
+  },
+  {
+    "file": "src/client/3d/device_detect.ts",
+    "desc": "Mutant: Invert shader precision ternary",
+    "target": "precision: isMobile ? 'mediump' : 'highp',",
+    "replacement": "precision: isMobile ? 'highp' : 'mediump',"
+  },
+  {
+    "file": "src/client/3d/device_detect.ts",
+    "desc": "Mutant: Corrupt powerPreference from high-performance to default",
+    "target": "powerPreference: 'high-performance',",
+    "replacement": "powerPreference: 'default' as any,"
+  },
+  {
+    "file": "src/client/3d/perf_budget.ts",
+    "desc": "Mutant: Corrupt IOS_PHONE_MAX ceiling to 1.0",
+    "target": "IOS_PHONE_MAX: 0.82,",
+    "replacement": "IOS_PHONE_MAX: 1.0,"
+  }
+]
