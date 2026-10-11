@@ -16,6 +16,7 @@ import {
   calculateMortgageInterest,
   deductInflowFromDeltas,
   adjustNetDeltaForTrade,
+  adjustNetDeltaForPropertyTransactions,
   type InternalBalanceDelta,
 } from './game_event_financial_helpers.js';
 
@@ -251,6 +252,7 @@ export function synthesizeFinancialEvents(
     adjustNetDeltaForTrade(delta.lastTradeResult, payers, receivers);
   }
   const salaryEvents = reconstructGoSalary(delta, prevState, nextState, payers, receivers, timestamp);
+  adjustNetDeltaForPropertyTransactions(delta, prevState, nextState, payers);
   const feeEvents = extractGovernmentAndTelecomFees(payers, receivers, prevState, timestamp);
   const rentEvents = matchRentTransactions(payers, receivers, prevState, delta, nextState, timestamp);
   for (const payer of payers) {

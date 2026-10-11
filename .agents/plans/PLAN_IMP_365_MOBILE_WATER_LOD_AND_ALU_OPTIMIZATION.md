@@ -5,9 +5,6 @@
   - Ticket `IMP-361`: iOS WebGL Performance, clamped Retina DPR ceiling [0.75, 0.82] for `isIOSPhone()`, and high-performance profile.
   - Ticket `IMP-362`: Mobile backdrop-filter purge to eliminate WebKit GPU compositor framebuffer readback stalls.
   - Ticket `IMP-363`: Board tiles merged batching, collapsing 80 static terrain draw calls to <= 3 (-96.25%) to eliminate WebKit IPC message bottleneck.
-- **Baseline Working Tree Dependencies (Uncommitted Prior In-Flight Tickets Pending User Commit)**:
-  - `IMP-363`: `src/client/3d/batched_board_tiles.tsx`, `src/client/3d/board_layout.tsx`, `src/client/3d/board_tile.tsx`, `tests/client/imp363_batched_board_tiles.test.ts`
-  - `IMP-364`: `src/client/3d/shadow_cache_helpers.ts`, `src/client/3d/time_of_day_lighting.tsx`, `src/client/3d/diorama/diorama_railroad.tsx`, `src/client/3d/diorama/diorama_traffic.tsx`, `tests/client/imp364_static_shadow_caching.test.ts`
 - **Problem Statement & Physical Root Cause (Boulder 2: Procedural Water Shader)**:
   - `TropicalWater` (`src/client/3d/tropical_water.tsx`) renders a 240x240m ocean plane covering ~70% of the viewport.
   - On iPhone Super Retina screens (~2M pixels at clamped DPR), the ocean fragment shader executes ~84 million times per second at 60 FPS.

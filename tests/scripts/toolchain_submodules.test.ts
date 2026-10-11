@@ -16,6 +16,11 @@ import { renderSpecReview } from '../../scripts/report/report_markdown_renderer.
 import { parseCaptureArgs } from '../../scripts/visual_capture/viewport_capture_runner.mjs';
 import { categorizeFile, SLOP_RULES } from '../../scripts/slop_linter/slop_constants.mjs';
 import { lintSlopContent } from '../../scripts/lint_slop.mjs';
+import {
+  extractTicketTag,
+  extractPriorTicketsFiles,
+  detectActiveSliceId
+} from '../../scripts/plan_audit/worktree_scope_resolver.mjs';
 
 describe('Toolchain Submodules Contract Test Suite (IMP-353)', () => {
   describe('Sentinel Submodule (scripts/sentinel/)', () => {
@@ -142,6 +147,27 @@ describe('Toolchain Submodules Contract Test Suite (IMP-353)', () => {
       const dirtyCode = 'const val = (x ' + 'as ' + 'any).toString();';
       const { errors } = lintSlopContent(dirtyCode, 'src/domain/test_dirty.ts');
       expect(errors.some((e) => e.rule === SLOP_RULES.ZERO_DIRTY_CASTS)).toBe(true);
+    });
+  });
+
+  describe('Worktree Scope Resolver Submodule (scripts/plan_audit/worktree_scope_resolver.mjs)', () => {
+    it('[TC-365.10/MSS] extractTicketTag normalizes ticket IDs from various file name formats', () => {
+      expect(extractTicketTag('PLAN_IMP_363_BOARD_TILES.md')).toBe('IMP-363');
+      expect(extractTicketTag('imp-364_snapshot.json')).toBe('IMP-364');
+      expect(extractTicketTag('IMP-365-mobile-water_report.md')).toBe('IMP-365');
+    });
+
+    it('[TC-365.11/MSS] extractPriorTicketsFiles discovers files belonging to other tickets in worktree', () => {
+      const priorMap = extractPriorTicketsFiles('.agents/plans/PLAN_IMP_365_MOBILE_WATER_LOD_AND_ALU_OPTIMIZATION.md');
+      expect(priorMap instanceof Map).toBe(true);
+      expect(priorMap.has('src/client/3d/batched_board_tiles.tsx')).toBe(true);
+      expect(priorMap.get('src/client/3d/batched_board_tiles.tsx')).toContain('IMP-363');
+    });
+
+    it('[TC-365.12/MSS] detectActiveSliceId detects newest plan ticket ID', () => {
+      const activeSlice = detectActiveSliceId(process.cwd());
+      expect(typeof activeSlice).toBe('string');
+      expect(activeSlice).toMatch(/^IMP-\d+/);
     });
   });
 });

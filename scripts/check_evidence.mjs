@@ -456,9 +456,93 @@ if (ticketNum && fs.existsSync(improvementsDir)) {
           errors.push(`[Zero-Boilerplate Violation] Final report ${finalReport} contains template placeholder "${name}". Must customize with authentic technical findings.`);
         }
       }
+
+      // 6.1 Honest Station 4 Mutation Reporting Check
+      const claimsMutants = /(?:zero mutant|mutants? (?:mục tiêu |đã )?bị tiêu diệt|tiêu diệt biến dị)/i.test(repContent);
+      if (claimsMutants) {
+        const hasRealMutationTesting =
+          Boolean(evidence.mutationSensitivityProbe && (evidence.mutationSensitivityProbe.mutantsTested ?? 0) > 0) ||
+          fs.existsSync(path.join(evidenceDir, `chaos_sentinel_${evidence.ticketId || targetArg}.json`)) ||
+          fs.existsSync(path.join(evidenceDir, `chaos_sentinel_${(evidence.ticketId || targetArg || '').toLowerCase()}.json`));
+        if (!hasRealMutationTesting) {
+          errors.push(
+            `[False Mutation Claim Violation] Final report ${finalReport} claims mutation testing results (e.g. "zero mutant / tiêu diệt biến dị"), but no physical mutation testing was executed (only snapshot verification was performed). Station 4 in the report must state "SNAPSHOT VERIFIED" honestly without claiming mutant destruction.`
+          );
+        }
+      }
+
+      // 6.2 Anti-Truncation Check for Adversarial Vectors
+      const advBlocks = repContent.split(/(?=- \*\*\[ADV-[A-Z0-9_-]+\])/i);
+      for (const block of advBlocks) {
+        const advMatch = block.match(/^- \*\*\[(ADV-[A-Z0-9_-]+)\]/i);
+        if (advMatch) {
+          const advId = advMatch[1];
+          if (advId.toUpperCase() === 'ADV-OBJ') continue;
+          const hasSubstance =
+            /(?:Scenario|Consequence|Hardening Directive|Invariant|Audit|Lỗ hổng|Rủi ro)/i.test(block) &&
+            block.split('\n').filter((l) => l.trim().startsWith('- **')).length >= 2;
+          if (!hasSubstance) {
+            errors.push(
+              `[Report Truncation Violation] Section [${advId}] in ${finalReport} is truncated! Every adversarial finding must contain detailed Scenario and Hardening Directive.`
+            );
+          }
+        }
+      }
+
+      // 6.3 Anti-Unescaped Code Blob Check
+      const repLines = repContent.split('\n');
+      let inCodeBlock = false;
+      for (let lineIdx = 0; lineIdx < repLines.length; lineIdx++) {
+        const line = repLines[lineIdx];
+        if (line.trim().startsWith('```')) {
+          inCodeBlock = !inCodeBlock;
+          continue;
+        }
+        if (!inCodeBlock && line.length > 280) {
+          const hasCodeBlob = /(?:const|let|function)\s+\w+[\s\S]*?(?:===|!==|=>|\.join\(|\.map\()/i.test(line);
+          if (hasCodeBlob) {
+            errors.push(
+              `[Unescaped Code Blob Violation] Final report ${finalReport} line ${lineIdx + 1} contains a flattened, unescaped code blob (> 280 chars). Wrap code snippets in code blocks or inline backticks!`
+            );
+          }
+        }
+      }
     } catch {}
   }
 }
+
+// 7. Mechanical Knowledge Fold Invariant Gate (GEMINI.md Invariant)
+try {
+  const targetFilesToCheck = evidence.targetFiles || evidence.modifiedFiles || [];
+  let gitModifiedFiles = [];
+  try {
+    const gitOutput = execSync('git status --porcelain', { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
+    gitModifiedFiles = gitOutput.split('\n').map((l) => l.slice(3).trim()).filter(Boolean);
+  } catch {}
+
+  const allRelevantFiles = [...new Set([...targetFilesToCheck, ...gitModifiedFiles])];
+  const touchesDomainOrState = allRelevantFiles.some((f) =>
+    /^(?:src[/\\])?(domain[/\\]|server[/\\]|client[/\\](?:events|store)[/\\])/i.test(f.replace(/^[AMDRCU?\s]+/, ''))
+  );
+
+  if (touchesDomainOrState) {
+    const isFeatureMapModified = gitModifiedFiles.some((f) => /docs[/\\]FEATURE_MAP\.md/i.test(f)) ||
+      (() => {
+        try {
+          const diff = execSync('git diff HEAD --name-only docs/FEATURE_MAP.md', { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
+          return Boolean(diff.trim());
+        } catch {
+          return false;
+        }
+      })();
+
+    if (!isFeatureMapModified) {
+      errors.push(
+        `[Knowledge Fold Invariant Violation] Ticket touches core domain/state/server files, but docs/FEATURE_MAP.md has NOT been updated! Per GEMINI.md Knowledge Fold Invariant, update docs/FEATURE_MAP.md to maintain SSOT before completing Station 4.`
+      );
+    }
+  }
+} catch {}
 
 if (errors.length > 0) {
   console.error(`\n❌ EVIDENCE AUDIT FAILED (${errors.length} issue${errors.length > 1 ? 's' : ''}):`);

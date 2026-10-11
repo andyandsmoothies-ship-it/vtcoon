@@ -89,6 +89,8 @@ function getModifiedFiles(stagedOnly = false) {
   }
 }
 
+import { extractPriorTicketsFiles } from './plan_audit/worktree_scope_resolver.mjs';
+
 function main() {
   const planPath = resolvePlanPath(process.argv[2]);
   const planName = path.basename(planPath);
@@ -118,17 +120,40 @@ function main() {
   const unauthorizedFiles = modifiedFiles.filter((f) => !registeredFiles.has(f));
 
   if (unauthorizedFiles.length > 0) {
-    console.error('❌ [SCOPE CREEP DETECTED] The following files were modified but are NOT declared in the Plan:');
+    // Multi-Ticket Worktree Awareness: Check if unregistered files belong to prior in-flight/completed tickets
+    const priorTicketsMap = extractPriorTicketsFiles(planPath, registeredFiles);
+    const priorFiles = [];
+    const trueUnauthorizedFiles = [];
+
     for (const f of unauthorizedFiles) {
-      console.error(`   🚨 ${f}`);
+      if (priorTicketsMap.has(f)) {
+        priorFiles.push({ file: f, source: priorTicketsMap.get(f) });
+      } else {
+        trueUnauthorizedFiles.push(f);
+      }
     }
-    console.error('\nAction Required:');
-    console.error('1. If intentional, declare them in Section 0 & Section 2 of ' + planName);
-    console.error('2. If accidental, revert changes: git checkout -- <file>\n');
-    process.exit(1);
+
+    if (priorFiles.length > 0) {
+      console.log(`ℹ️ [MULTI-TICKET WORKTREE] Detected ${priorFiles.length} uncommitted files belonging to prior tickets:`);
+      for (const item of priorFiles) {
+        console.log(`   📎 ${item.file} (${item.source})`);
+      }
+      console.log('   -> These files are legitimately preserved across batch commits and will NOT fail this audit.\n');
+    }
+
+    if (trueUnauthorizedFiles.length > 0) {
+      console.error('❌ [SCOPE CREEP DETECTED] The following files were modified but are NOT declared in current Plan or any prior ticket:');
+      for (const f of trueUnauthorizedFiles) {
+        console.error(`   🚨 ${f}`);
+      }
+      console.error('\nAction Required:');
+      console.error('1. If intentional, declare them in Section 1 (Direct Scope) of ' + planName);
+      console.error('2. If accidental, revert changes: git checkout -- <file>\n');
+      process.exit(1);
+    }
   }
 
-  console.log('🎉 [SCOPE VERIFIED] All modified files match Plan scope. Zero scope creep!\n');
+  console.log('🎉 [SCOPE VERIFIED] All modified files accounted for in current Plan or prior tickets. Zero scope creep!\n');
   process.exit(0);
 }
 

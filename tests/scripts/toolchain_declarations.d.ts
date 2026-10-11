@@ -137,3 +137,12 @@ declare module '*scripts/log_analyzer/flight_recorder_analyzer.mjs' {
   export function formatConsoleReport(analysis: Record<string, unknown>, options?: { verbose?: boolean; timeline?: boolean }): string;
 }
 
+declare module '*scripts/plan_audit/worktree_scope_resolver.mjs' {
+  export function extractTicketTag(filename: string): string;
+  export function extractPriorTicketsFiles(
+    currentPlanPath?: string,
+    currentRegisteredFiles?: Set<string>
+  ): Map<string, string>;
+  export function detectActiveSliceId(repoRoot: string): string | null;
+}
+

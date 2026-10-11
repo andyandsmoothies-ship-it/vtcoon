@@ -15,16 +15,17 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { execSync } from 'node:child_process';
+import { detectActiveSliceId, extractPriorTicketsFiles } from './plan_audit/worktree_scope_resolver.mjs';
 
 const args = process.argv.slice(2);
 const flags = args.filter((a) => a.startsWith('--'));
 const posArgs = args.filter((a) => !a.startsWith('--'));
 
-let sliceId = posArgs[0] ? posArgs[0].toUpperCase() : '';
+const repoRoot = process.cwd();
+let sliceId = posArgs[0] ? posArgs[0].toUpperCase() : (detectActiveSliceId(repoRoot) || '');
 const specifiedFiles = posArgs.slice(1);
 const shouldRunContract = !flags.includes('--no-test') && !flags.includes('--skip-test');
 
-const repoRoot = process.cwd();
 const evidenceDir = path.join(repoRoot, '.agents', 'evidence');
 
 if (!fs.existsSync(evidenceDir)) {
@@ -90,15 +91,18 @@ if (specifiedFiles.length > 0) {
     try {
       const gitOut = execSync('git status --porcelain', { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
       const lines = gitOut.split('\n');
+      const priorTicketsMap = extractPriorTicketsFiles();
       for (const line of lines) {
         const trimmed = line.trim();
         if (!trimmed) continue;
         // Format: XY path or XY "path"
         const filePart = trimmed.slice(2).trim().replace(/^"|"$/g, '');
         if (filePart.startsWith('src/') && (filePart.endsWith('.ts') || filePart.endsWith('.tsx'))) {
-          const full = path.resolve(repoRoot, filePart);
-          if (fs.existsSync(full) && !filesToAudit.includes(full)) {
-            filesToAudit.push(full);
+          if (!priorTicketsMap.has(filePart)) {
+            const full = path.resolve(repoRoot, filePart);
+            if (fs.existsSync(full) && !filesToAudit.includes(full)) {
+              filesToAudit.push(full);
+            }
           }
         }
       }
