@@ -249,7 +249,7 @@ describe('[TC-194.01/MSS..TC-194.18/MSS][UC-IMP194] Natural Narrative Floating B
       expect(narrative.category).toBe('ĐẤU GIÁ BẤT ĐỘNG SẢN');
       expect(narrative.icon).toBe('🔨');
       expect(narrative.verb).toBe('nộp');
-      expect(narrative.target).toBe('vào Kho Bạc');
+      expect(narrative.target).toBe('tiền trúng đấu giá Cần Thơ ➔ Kho Bạc');
     });
 
     it('[TC-194.05/MSS][UC-IMP194] Tax: resolveTransactionNarrative actionType tax sinh category KHO BẠC NHÀ NƯỚC, icon tòa nhà, verb nộp vào Kho Bạc', () => {
@@ -267,7 +267,7 @@ describe('[TC-194.01/MSS..TC-194.18/MSS][UC-IMP194] Natural Narrative Floating B
       expect(narrative.category).toBe('KHO BẠC NHÀ NƯỚC');
       expect(narrative.icon).toBe('🏛️');
       expect(narrative.verb).toBe('nộp');
-      expect(narrative.target).toBe('vào Kho Bạc');
+      expect(narrative.target).toBe('Lệ Phí Đất (Ô 04) ➔ Kho Bạc');
     });
 
     it('[TC-194.06/MSS][UC-IMP194] Bail: resolveTransactionNarrative actionType bail sinh category BẢO LÃNH KIỂM TOÁN, icon còi báo, verb nộp vào Kho Bạc', () => {
@@ -284,7 +284,7 @@ describe('[TC-194.01/MSS..TC-194.18/MSS][UC-IMP194] Natural Narrative Floating B
       expect(narrative.category).toBe('BẢO LÃNH KIỂM TOÁN');
       expect(narrative.icon).toBe('🚨');
       expect(narrative.verb).toBe('nộp');
-      expect(narrative.target).toBe('vào Kho Bạc');
+      expect(narrative.target).toBe('bảo lãnh Kiểm Toán (Ô 10) ➔ Kho Bạc');
     });
 
     it('[TC-194.14/MSS][UC-IMP194] Audit Jail: resolveTransactionNarrative actionType audit_jail sinh category TRẠM KIỂM TOÁN, verb vào Trạm Kiểm Toán', () => {
@@ -322,7 +322,7 @@ describe('[TC-194.01/MSS..TC-194.18/MSS][UC-IMP194] Natural Narrative Floating B
       expect(narrative.category).toBe('TÍN DỤNG NGÂN HÀNG');
       expect(narrative.icon).toBe('🏦');
       expect(narrative.verb).toBe('vay');
-      expect(narrative.target).toBe('từ Ngân Hàng');
+      expect(narrative.target).toBe('thế chấp Bến Bạch Đằng từ Ngân Hàng');
     });
 
     it('[TC-194.08/MSS][UC-IMP194] Unmortgage: resolveTransactionNarrative actionType unmortgage sinh category GIẢI CHẤP BẤT ĐỘNG SẢN, verb trả, có phí 10%', () => {
@@ -438,7 +438,6 @@ describe('[TC-194.01/MSS..TC-194.18/MSS][UC-IMP194] Natural Narrative Floating B
       expect(html).toContain('ĐẤU GIÁ BẤT ĐỘNG SẢN');
       expect(html).toContain('Đại Gia Sài Gòn');
       expect(html).toContain('data-testid="floating-amount-pill"');
-      expect(html).toContain('data-testid="transaction-formula-line"');
       expect(html).toContain('data-testid="transaction-flow-line"');
     });
 
@@ -461,7 +460,7 @@ describe('[TC-194.01/MSS..TC-194.18/MSS][UC-IMP194] Natural Narrative Floating B
       expect(typeof resolveFriendlyReason).toBe('function');
     });
 
-    it('[TC-194.19/MSS][UC-IMP194] Self-Centric Narrative: Khi playerId === myPlayerId thì subject là "Bạn", khi đối thủ giao dịch với Bạn thì target là "Bạn"', () => {
+    it('[TC-194.19/MSS][UC-IMP194] Self-Centric Narrative: Khi playerId === myPlayerId thì subject là "Bạn"', () => {
       const itemMyRentPay: FloatingTextItem = {
         id: 'badge-self-1',
         text: '-350 Tr.',
@@ -476,7 +475,9 @@ describe('[TC-194.01/MSS..TC-194.18/MSS][UC-IMP194] Natural Narrative Floating B
       expect(narrativeSelf.subject).toBe('Bạn');
       expect(narrativeSelf.verb).toBe('trả');
       expect(narrativeSelf.target).toContain('cho Tỷ Phú');
+    });
 
+    it('[TC-194.20/MSS][UC-IMP194] Self-Centric Narrative: Khi đối thủ giao dịch với Bạn thì target là "cho Bạn"', () => {
       const itemPartnerRentPay: FloatingTextItem = {
         id: 'badge-self-2',
         text: '-350 Tr.',

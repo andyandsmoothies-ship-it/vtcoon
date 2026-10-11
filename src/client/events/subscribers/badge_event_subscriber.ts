@@ -169,6 +169,8 @@ function handleSalaryAndFeeBadges(
         : `Nộp ${event.feeType} ➔ Kho Bạc`;
       const formula = isBail
         ? `Bảo lãnh chuẩn: Khung ${formatCurrency(event.amount)} Tr. ➔ Kho Bạc`
+        : isLandTax
+        ? 'Lệ phí trước bạ: 10% tiền mặt (Tối đa 2.000 Tr.)'
         : 'Nộp ngân sách nhà nước';
 
       pacing.scheduleAction(() => {

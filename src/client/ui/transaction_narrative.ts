@@ -213,21 +213,25 @@ export function resolveTransactionNarrative(
       detail = isPositive ? (cellName ? `(Chuyển nhượng ${cellName})` : '(Bồi hoàn M&A)') : (cellName ? `(${cellName})` : '(Thâu tóm M&A)');
       break;
     case 'auction_win': {
-      category = 'ĐẤU GIÁ BẤT ĐỘNG SẢN'; verb = 'nộp'; target = 'vào Kho Bạc';
+      category = 'ĐẤU GIÁ BẤT ĐỘNG SẢN'; verb = 'nộp';
       const m = item.title?.match(/Thắng\s+đấu\s+giá\s+(.+?)(?:\s*➔|$)/i);
       const aucProp = (m && m[1]) ? m[1].trim() : cellName;
+      target = `tiền trúng đấu giá ${aucProp || 'BĐS'} ➔ Kho Bạc`;
       detail = aucProp ? `(Trúng đấu giá ${aucProp})` : '(Trúng đấu giá)';
       break;
     }
     case 'tax': {
-      category = 'KHO BẠC NHÀ NƯỚC'; verb = 'nộp'; target = 'vào Kho Bạc';
+      category = 'KHO BẠC NHÀ NƯỚC'; verb = 'nộp';
       const cleanTax = item.title ? item.title.replace(/^Nộp\s+/i, '').replace(/\s*➔\s*(?:Vào\s+)?Kho\s+Bạc/i, '').trim() : '';
-      detail = cleanTax ? `(${cleanTax})` : '(Nộp thuế)';
+      const isLandTax = item.cellIndex === 4 || cleanTax.includes('Đất Đai');
+      const isGoTax = cleanTax.includes('Tài Sản') || cleanTax.includes('GO');
+      target = isLandTax ? 'Lệ Phí Đất (Ô 04) ➔ Kho Bạc' : isGoTax ? 'thuế tài sản qua GO ➔ Kho Bạc' : cleanTax ? `${cleanTax} ➔ Kho Bạc` : 'vào Kho Bạc';
+      detail = isLandTax ? '(Lệ Phí Đất Ô 04)' : isGoTax ? '(Thuế tài sản qua GO)' : cleanTax ? `(${cleanTax})` : '(Nộp thuế)';
       break;
     }
-    case 'bail': category = 'BẢO LÃNH KIỂM TOÁN'; verb = 'nộp'; target = 'vào Kho Bạc'; detail = '(Rời Trạm Kiểm Toán)'; break;
+    case 'bail': category = 'BẢO LÃNH KIỂM TOÁN'; verb = 'nộp'; target = 'bảo lãnh Kiểm Toán (Ô 10) ➔ Kho Bạc'; detail = '(Bảo lãnh Kiểm Toán - Ô 10)'; break;
     case 'audit_jail': category = 'TRẠM KIỂM TOÁN'; verb = 'vào'; target = 'Trạm Kiểm Toán'; detail = '(Bị kiểm toán thuế)'; break;
-    case 'mortgage': category = 'TÍN DỤNG NGÂN HÀNG'; verb = 'vay'; target = 'từ Ngân Hàng'; detail = cellName ? `(Thế chấp ${cellName})` : '(Thế chấp BĐS)'; break;
+    case 'mortgage': category = 'TÍN DỤNG NGÂN HÀNG'; verb = 'vay'; target = cellName ? `thế chấp ${cellName} từ Ngân Hàng` : 'từ Ngân Hàng'; detail = cellName ? `(Thế chấp ${cellName})` : '(Thế chấp BĐS)'; break;
     case 'unmortgage': category = 'GIẢI CHẤP BẤT ĐỘNG SẢN'; verb = 'trả'; target = `giải chấp ${cellName || 'BĐS'}`; detail = '(Phí 10% ➔ Kho Bạc)'; break;
     case 'buy':
       category = 'MUA ĐẤT ĐẦU TƯ'; verb = 'thanh toán';
