@@ -79,7 +79,7 @@ describe('Station 1 (RED): Financial Narrative Clarity & Disambiguation [IMP-367
     expect(narrative.category).toBe('BẢO LÃNH KIỂM TOÁN');
     expect(narrative.icon).toBe('🚨');
     expect(narrative.verb).toBe('nộp');
-    expect(narrative.target).toBe('bảo lãnh Kiểm Toán (Ô 10) ➔ Kho Bạc');
+    expect(narrative.target).toBe('bảo lãnh Trạm Kiểm Toán (Ô 10)');
   });
 
   it('[TC-367.03/MSS][UC-IMP367] Thắng Đấu Giá BĐS: resolveTransactionNarrative actionType auction_win formats target with property name', () => {
@@ -96,8 +96,8 @@ describe('Station 1 (RED): Financial Narrative Clarity & Disambiguation [IMP-367
 
     const narrative = resolveTransactionNarrative(item, mockPlayer, mockPlayersInfo, 'human_1');
     expect(narrative.category).toBe('ĐẤU GIÁ BẤT ĐỘNG SẢN');
-    expect(narrative.verb).toBe('nộp');
-    expect(narrative.target).toBe('tiền trúng đấu giá Cần Thơ ➔ Kho Bạc');
+    expect(narrative.verb).toBe('thanh toán');
+    expect(narrative.target).toBe('tiền trúng đấu giá Cần Thơ');
   });
 
   it('[TC-367.04/MSS][UC-IMP367] Thế Chấp Ngân Hàng: resolveTransactionNarrative actionType mortgage formats target with mortgaged property name', () => {

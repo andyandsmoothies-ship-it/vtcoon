@@ -52,12 +52,12 @@ Every ticket must pass 100% of automated gates before handoff:
      - For gameplay, balance, bankruptcy, or state machine desync bugs, the agent MUST request or ingest the In-Game Flight Recorder dump (`npm run analyze:log <dump.json>`) to inspect tick timelines and invariant violations before drafting the plan.
   1. Draft Lean Plan: `.agents/plans/PLAN_[ID].md` (<= 200 lines, 0 code-dump).
   2. Machine Plan Audit: `node scripts/audit_plan.mjs <plan> --auto-sign` (0 defects auto-signs `HARDENED_APPROVED`).
-  3. Adversarial Gate (Mandatory for State/FSM/Economy/Coordinators): Run 1 adversarial round (`adversarial-challenger`) writing to `.agents/audit/PLAN_CHALLENGE_[TICKET].md` whenever touching FSM lifecycle, State transitions, or Economy to block blind spots before implementation.
+  3. Adversarial Gate (Mandatory for State/FSM/Economy/Coordinators): Run 1 adversarial round (`adversarial-challenger` or `forensic-challenger`) writing to `.agents/audit/PLAN_CHALLENGE_[TICKET].md` whenever touching FSM lifecycle, State transitions, or Economy to block blind spots before implementation.
   4. Human Gate: User approves ("đồng ý").
   5. Station 1 (RED): Scaffold empty stubs in `src/**` for new files; `qa-tester` writes contract tests in `tests/**` (Adversarial Inversion: fails strictly on runtime assertions).
   6. Station 2 (GREEN): `implementer` writes minimal code in `src/**`.
   7. Mechanical Gates: Run `npm run prefilter -- <files>` and `npm run check:scope`.
-  8. Audit & Delivery Reports: Main Agent runs `npm run report -- [ID]` to synthesize physical station audits (`.agents/audit/SPEC_REVIEW_[ID].md`, `CODE_REVIEW_[ID].md`, and `.agents/audit/PLAN_CHALLENGE_[ID].md`) and the comprehensive acceptance report (`docs/reports/improvements/IMP-[ID]-[slug]_report.md`) embedding all subagent comments/verdicts, captures Dual-Viewport (for UI changes), and delivers to User.
+  8. Audit & Delivery Reports: Main Agent runs `npm run report -- [ID]` to synthesize physical station audits (`.agents/audit/SPEC_REVIEW_[ID].md`, `CODE_REVIEW_[ID].md`, and `.agents/audit/PLAN_CHALLENGE_[ID].md` / `FORENSIC_AUDIT_[ID].md`) and the comprehensive acceptance report (`docs/reports/improvements/IMP-[ID]-[slug]_report.md`) embedding all subagent comments/verdicts. For deep forensic signoff, run 1 adversarial verification round (`forensic-challenger`) against the final report to eliminate artifact contamination before delivery.
 - **Epic / Large Feature (> 50 LOC, > 2-3 files)**:
   - Must run **Auto-Slicing Protocol** emitting Micro-Slices Roadmap (< 10 lines) before planning.
   - Must run 1 adversarial round (`adversarial-challenger`) writing to `.agents/audit/PLAN_CHALLENGE_[TICKET].md` to block game design / economic exploits.

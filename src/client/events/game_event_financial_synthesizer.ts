@@ -240,7 +240,7 @@ export function synthesizeFinancialEvents(
   delta: DeltaPayload,
   options?: SynthesizerOptions,
 ): readonly SynthesizedGameEvent[] {
-  const timestamp = options?.baseTimestamp ?? delta.tick ?? 0;
+  const timestamp = options?.baseTimestamp ?? Date.now();
   const waiverEvents = extractDiplomaticWaiver(delta, timestamp);
 
   if (!delta.players || delta.players.length === 0) {

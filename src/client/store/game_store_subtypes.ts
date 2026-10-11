@@ -103,6 +103,7 @@ export type FloatingActionType =
   | 'trade'
   | 'decline_auction'
   | 'transit'
+  | 'utility'
   | 'general';
 
 export interface FloatingTextItem {

@@ -85,7 +85,7 @@ export function resolveFormulaText(
     case 'mortgage':
       return 'Vay vốn tín dụng ngân hàng (50% giá trị đất)';
     case 'unmortgage':
-      return 'Chuộc lại đất thế chấp (Gốc + 10% phí Kho Bạc)';
+      return 'Chuộc lại đất thế chấp (Gốc + 10% phí giải chấp Ngân Hàng)';
     case 'diplomatic':
       if (item.title?.includes('Hụt thu') || item.title?.includes('Khách dùng')) {
         return 'Khách dùng Thẻ Ngoại Giao: Hụt thu tiền thuê';

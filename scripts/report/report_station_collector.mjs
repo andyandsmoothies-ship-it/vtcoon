@@ -195,6 +195,35 @@ export function parseStation4Chaos(evidenceDir, ticketId) {
 }
 
 /**
+ * Parses Forensic Auditor review (forensic-challenger).
+ */
+export function parseForensicAudit(auditDir, ticketId) {
+  const forensicFile = findTicketFile(auditDir, 'FORENSIC_AUDIT', ticketId) || findTicketFile(auditDir, 'REPORT_CHALLENGE', ticketId);
+  const forensicFindings = [];
+  const forensicRetro = [];
+  let forensicVerdict = null;
+
+  if (forensicFile) {
+    try {
+      const content = fs.readFileSync(forensicFile, 'utf8');
+      const verdictMatch = content.match(/-\s*\*\*Status\*\*:\s*\[?([A-Za-z0-9_ -]+)\]?/i);
+      if (verdictMatch) forensicVerdict = verdictMatch[1].trim();
+
+      const lines = content.split('\n');
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (/^-\s*(?:🚨|⚡|⚠️)\s*\*\*\[(?:CRITICAL|ARCHITECTURAL|EDGE-CASE)[^\]]*\]\*\*/i.test(trimmed)) {
+          forensicFindings.push(trimmed);
+        } else if (/^-\s*💡\s*\*\*\[SDLC-RETRO[^\]]*\]\*\*/i.test(trimmed)) {
+          forensicRetro.push(trimmed);
+        }
+      }
+    } catch {}
+  }
+  return { forensicFile, forensicVerdict, forensicFindings, forensicRetro };
+}
+
+/**
  * Collects visual screenshot paths if available.
  */
 export function collectVisualScreenshots(repoRoot, ticketLower, ticketClean) {

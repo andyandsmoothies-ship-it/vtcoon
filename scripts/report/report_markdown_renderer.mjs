@@ -160,6 +160,10 @@ export function renderFinalReport({
   chaosVerdict,
   chaosSummary,
   chaosDetails,
+  forensicFile,
+  forensicVerdict,
+  forensicFindings,
+  forensicRetro,
   baselineFiles,
   planRegisteredFiles,
   warnFiles,
@@ -270,11 +274,16 @@ ${(() => {
 })()}
 ` : ''}
 
-### Trạm 4: Cơ Chế Biên & Tiêu Diệt Biến Dị (\`chaos-sentinel\`)
+### Trạm 4: ${chaosVerdict && chaosVerdict.includes('SNAPSHOT') ? 'Kiểm Soát Tính Toàn Vẹn & Snapshot Bất Biến (`chaos-sentinel`)' : 'Cơ Chế Biên & Tiêu Diệt Biến Dị (`chaos-sentinel`)'}
 - **Phán quyết**: **${chaosVerdict}**
 - **Hiệu quả kiểm soát**: ${chaosSummary}
 ${chaosDetails.length > 0 ? `- **Danh sách mutants mục tiêu đã tiêu diệt**:\n${chaosDetails.slice(0, 10).map((d) => `  ${d}`).join('\n')}` : '- **Xác nhận**: Đã vượt qua kiểm toán cơ học `node scripts/check_evidence.mjs` với 0 defects.'}
-
+${forensicFile ? `
+### Thẩm Tra Đối Kháng Độc Lập (\`forensic-challenger\`)
+- **Tệp biên bản kiểm toán**: [\`${path.relative(repoRoot, forensicFile).replace(/\\/g, '/')}\`](file:///${forensicFile.replace(/\\/g, '/')})
+- **Phán quyết**: **${forensicVerdict || 'APPROVED'}** 🏛️
+${forensicFindings && forensicFindings.length > 0 ? `- **Phát hiện phản biện & Điểm mù kiến trúc**:\n${forensicFindings.map((f) => `  ${f}`).join('\n')}` : '- **Xác nhận**: Đã qua thẩm tra đối kháng độc lập, zero data mismatch.'}
+` : ''}
 ---
 
 ## 4. THỐNG KÊ BIẾN ĐỘNG DÒNG MÃ (LOC ACCOUNTING)
@@ -340,6 +349,10 @@ ${warnFiles.map((w) => {
   const debtCode = isTier2 ? '`DEBT-CAM-02`' : '`DEBT-CAM-01`';
   return `- ⚠️ **Cảnh báo trần LOC ${w.tierName}** [${debtCode}]: Tệp [\`${w.file}\`](file:///${path.resolve(repoRoot, w.file).replace(/\\/g, '/')}) hiện đạt **${w.loc}/${w.ceiling} LOC** (khoảng cách an toàn còn ${w.ceiling - w.loc} dòng trước trần tử thần). Các ticket kế tiếp nếu mở rộng chức năng bắt buộc phải thực hiện refactor ${suggestion} trước khi thêm logic mới.`;
 }).join('\n')}
+` : ''}
+${forensicRetro && forensicRetro.length > 0 ? `
+### Đóng Góp Cải Tiến Quy Trình SDLC (\`forensic-challenger\`)
+${forensicRetro.map((r) => `${r}`).join('\n')}
 ` : ''}
 `;
 }

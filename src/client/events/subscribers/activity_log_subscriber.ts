@@ -1,10 +1,13 @@
-// [IMP-332] Activity Log Subscriber — Maps SynthesizedGameEvent to ActivityLogEntry
-import type { ActivityLogEntry, useActivityStore } from '../../store/activity_store.js';
+import type { ActivityLogEntry, ActivityLogType, useActivityStore } from '../../store/activity_store.js';
 import { SynthesizedGameEventType, type SynthesizedGameEvent } from '../game_event_types.js';
 import type { GameEventContext, GameEventListener } from '../game_event_bus.js';
 import { BOARD_CONFIG } from '../../../domain/board_config.js';
 import { formatCurrency } from '../../ui/ui_helpers.js';
 import { formatKinematicActivityLog } from './activity_log_kinematics_formatter.js';
+import {
+  formatGoSalaryDeductionSuffix,
+  resolveFeePaidDetails,
+} from './activity_log_financial_formatter.js';
 
 function getCellName(cellIndex: number): string {
   return BOARD_CONFIG[cellIndex]?.name ?? `Ô #${cellIndex}`;
@@ -21,6 +24,7 @@ function resolvePlayerTokenColor(context: GameEventContext, playerId?: string): 
   const p = context.nextState.playersInfo[playerId] ?? context.prevState.playersInfo[playerId];
   return p?.tokenColor;
 }
+
 
 function mapFinancialEventToActivityLog(
   event: SynthesizedGameEvent,
@@ -85,12 +89,12 @@ function mapFinancialEventToActivityLog(
 
     case SynthesizedGameEventType.GO_SALARY: {
       const playerName = resolvePlayerName(context, event.playerId);
-      const taxStr = event.taxDeduction > 0 ? ` (khấu trừ thuế: ${formatCurrency(event.taxDeduction)})` : '';
+      const deductionStr = formatGoSalaryDeductionSuffix(event.deductions, event.taxDeduction);
       return {
         id,
         timestamp,
         type: 'salary',
-        message: `${playerName} nhận lương vượt GO ${formatCurrency(event.grossSalary)}${taxStr}`,
+        message: `${playerName} nhận lương vượt GO ${formatCurrency(event.grossSalary)}${deductionStr}`,
         playerId: event.playerId,
         playerName,
         amount: event.netAmount,
@@ -100,16 +104,17 @@ function mapFinancialEventToActivityLog(
 
     case SynthesizedGameEventType.FEE_PAID: {
       const playerName = resolvePlayerName(context, event.payerId);
-      const isTaxOrBail = event.feeType === 'LAND_TAX' || event.feeType === 'BAIL';
+      const targetPlayerName = resolvePlayerName(context, event.receiverId);
+      const { logType, message } = resolveFeePaidDetails(event, context, playerName, targetPlayerName);
       return {
         id,
         timestamp,
-        type: isTaxOrBail ? 'tax' : 'system',
-        message: `${playerName} đã nộp ${event.feeType} ${formatCurrency(event.amount)}`,
+        type: logType,
+        message,
         playerId: event.payerId,
         playerName,
         targetPlayerId: event.receiverId,
-        targetPlayerName: resolvePlayerName(context, event.receiverId),
+        targetPlayerName,
         amount: -event.amount,
         cellIndex: event.cellIndex,
         playerTokenColor: resolvePlayerTokenColor(context, event.payerId),
@@ -312,7 +317,7 @@ export function mapEventToActivityLog(
   event: SynthesizedGameEvent,
   context: GameEventContext,
 ): ActivityLogEntry | null {
-  const timestamp = event.timestamp ?? Date.now();
+  const timestamp = event.timestamp ? event.timestamp : Date.now();
   const id = `act_${event.type}_${timestamp}_${++activitySequence}`;
 
   const kinematicEntry = mapKinematicEventToActivityLog(event, context, id, timestamp);

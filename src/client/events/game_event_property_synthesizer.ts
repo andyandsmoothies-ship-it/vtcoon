@@ -195,7 +195,7 @@ export function synthesizePropertyAndMarketEvents(
   delta: DeltaPayload,
   options?: SynthesizerOptions,
 ): readonly SynthesizedGameEvent[] {
-  const timestamp = options?.baseTimestamp ?? delta.tick ?? 0;
+  const timestamp = options?.baseTimestamp ?? Date.now();
   const handledAuctionCells = new Set<number>();
   const handledTradeCells = new Set<number>();
 

@@ -541,7 +541,7 @@ describe('Station 1 Contract Tests: GameEventNarrativeSynthesizer (IMP-330)', ()
     expect(firstRun[0]).toEqual(secondRun[0]);
   });
 
-  it('TC-330.15 [UC-SYNTH/A14] Timestamp fallback precedence respects options.baseTimestamp over delta.tick', () => {
+  it('TC-330.15 [UC-SYNTH/A14] Timestamp fallback precedence respects options.baseTimestamp over real-time Date.now() wall clock', () => {
     const prev = createMockGameState();
     const next = createMockGameState();
     const delta: DeltaPayload = {
@@ -556,11 +556,12 @@ describe('Station 1 Contract Tests: GameEventNarrativeSynthesizer (IMP-330)', ()
     };
     const options: SynthesizerOptions = { baseTimestamp: 1728000000000 };
 
+    const nowBefore = Date.now();
     const withExplicitTimestamp = synthesizeGameEvents(prev, next, delta, options);
     const withTickFallback = synthesizeGameEvents(prev, next, delta);
 
     expect(withExplicitTimestamp[0]?.timestamp).toBe(1728000000000);
-    expect(withTickFallback[0]?.timestamp).toBe(999);
+    expect(withTickFallback[0]?.timestamp).toBeGreaterThanOrEqual(nowBefore);
   });
 
   it('TC-330.16 [UC-SYNTH/A15] Causal order invariant guarantees GO_SALARY precedes FEE_PAID in complex tick', () => {

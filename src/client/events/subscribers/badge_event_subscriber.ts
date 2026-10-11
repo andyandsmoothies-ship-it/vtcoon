@@ -12,6 +12,7 @@ import {
   getCellName,
   resolvePlayerName,
 } from './property_market_badge_handler.js';
+import { isCardPenaltyForPayer } from './activity_log_financial_formatter.js';
 
 function handleRentBadges(
   event: SynthesizedGameEvent,
@@ -143,7 +144,14 @@ function handleSalaryAndFeeBadges(
   switch (event.type) {
     case SynthesizedGameEventType.GO_SALARY: {
       const delay = pacing.getPawnPassGoDelay(event.playerId);
-      const taxFormula = event.taxDeduction > 0 ? ` (thuế: -${formatCurrency(event.taxDeduction)})` : '';
+      const parts: string[] = [];
+      const d = event.deductions;
+      const tax = d?.propertyTax ?? event.taxDeduction;
+      if (tax > 0) parts.push(`thuế: -${formatCurrency(tax)}`);
+      if (d?.mortgageInterest && d.mortgageInterest > 0) parts.push(`lãi thế chấp: -${formatCurrency(d.mortgageInterest)}`);
+      if (d?.overdraft && d.overdraft > 0) parts.push(`thấu chi: -${formatCurrency(d.overdraft)}`);
+      if (d?.creditFee && d.creditFee > 0) parts.push(`phí thẻ: -${formatCurrency(d.creditFee)}`);
+      const deductionFormula = parts.length > 0 ? ` (${parts.join(', ')})` : '';
 
       pacing.scheduleAction(() => {
         state.addFloatingText({
@@ -152,7 +160,7 @@ function handleSalaryAndFeeBadges(
           playerId: event.playerId,
           actionType: 'salary',
           title: 'Lương Vượt Ô Bắt Đầu',
-          formula: `Hoàn thành 1 vòng sa bàn (+${formatCurrency(event.grossSalary)} Tr.)${taxFormula}`,
+          formula: `Hoàn thành 1 vòng sa bàn (+${formatCurrency(event.grossSalary)} Tr.)${deductionFormula}`,
         });
       }, delay);
       break;
@@ -160,28 +168,47 @@ function handleSalaryAndFeeBadges(
 
     case SynthesizedGameEventType.FEE_PAID: {
       const delay = pacing.getPawnLandingDelay(event.payerId);
-      const isBail = event.feeType === 'BAIL';
-      const isLandTax = event.feeType === 'LAND_TAX';
-      const title = isBail
+      const isTelecom = event.feeType === 'TELECOM_DATA';
+      const isBail = event.feeType === 'BAIL' || event.cellIndex === 10;
+      const isLandTax = event.feeType === 'LAND_TAX' || event.cellIndex === 4;
+      const card = context.delta.lastEventCard;
+      const hasValidCardPenalty = isCardPenaltyForPayer(card, event.payerId);
+      const cardTitle = hasValidCardPenalty ? card?.title : undefined;
+      const receiverName = event.receiverId ? resolvePlayerName(context, event.receiverId) : undefined;
+
+      const title = isTelecom
+        ? (receiverName ? `Cước Viễn Thông cho ${receiverName} (Viettel Post)` : 'Cước Viễn Thông Viettel (Ô 28)')
+        : isBail
         ? 'Bảo lãnh kiểm toán (Ô 10) ➔ Nộp Kho Bạc'
         : isLandTax
         ? 'Lệ Phí Đất Đai ➔ Kho Bạc'
-        : `Nộp ${event.feeType} ➔ Kho Bạc`;
-      const formula = isBail
+        : cardTitle
+        ? `Phạt (${cardTitle}) ➔ Kho Bạc`
+        : 'Nộp Thuế/Phạt ➔ Kho Bạc';
+
+      const formula = isTelecom
+        ? (receiverName ? `Thanh toán cước data cho ${receiverName}` : 'Thanh toán cước data cho chủ sở hữu')
+        : isBail
         ? `Bảo lãnh chuẩn: Khung ${formatCurrency(event.amount)} Tr. ➔ Kho Bạc`
         : isLandTax
         ? 'Lệ phí trước bạ: 10% tiền mặt (Tối đa 2.000 Tr.)'
+        : cardTitle
+        ? `Nộp phạt sự kiện: ${cardTitle}`
         : 'Nộp ngân sách nhà nước';
+
+      const actionType = isTelecom ? 'utility' : isBail ? 'bail' : cardTitle ? 'market' : 'tax';
 
       pacing.scheduleAction(() => {
         state.addFloatingText({
           text: formatCurrency(-event.amount),
           type: FloatingTextType.Penalty,
           playerId: event.payerId,
-          actionType: isBail ? 'bail' : 'tax',
+          actionType,
           title,
           formula,
           cellIndex: event.cellIndex,
+          targetPlayerId: event.receiverId,
+          targetPlayerName: receiverName,
         });
       }, delay);
       break;

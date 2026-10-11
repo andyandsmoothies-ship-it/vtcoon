@@ -41,7 +41,7 @@ const ACTION_ICONS: Record<string, string> = {
   debt_relief: '🎉', stimulus: '📈', chance: '⚡', market: '🎴',
   auction_win: '🔨', hose: '📊', teleport: '✈️', audit_jail: '🚨', ma_buyout: '🤝',
   diplomatic: '🤝', bankrupt: '🚨', trade: '🤝', decline_auction: '🔨',
-  transit: '🚊',
+  transit: '🚊', utility: '📡',
 };
 
 export function resolveActionIcon(actionType?: string, isReward?: boolean): string {
@@ -85,11 +85,11 @@ function formatMortgage(item: FloatingTextItem): string {
 }
 
 function formatUnmortgage(item: FloatingTextItem): string {
-  return `Giải chấp ${resolveCellName(item.cellIndex) || item.title?.replace(/^Giải\s+chấp\s+/i, '').replace(/\s*\(Phí\s+10%\s*➔\s*(?:Vào\s+)?Kho\s+Bạc\)/i, '').trim() || 'BĐS'} (Phí 10% ➔ Kho Bạc)`;
+  return `Giải chấp ${resolveCellName(item.cellIndex) || item.title?.replace(/^Giải\s+chấp\s+/i, '').replace(/\s*\(Phí\s+10%\s*➔\s*(?:Vào\s+)?(?:Kho\s+Bạc|Ngân\s+Hàng)\)/i, '').trim() || 'BĐS'} (Phí 10% ➔ Ngân Hàng)`;
 }
 
 function formatAuction(item: FloatingTextItem): string {
-  return `Thắng đấu giá ${resolveCellName(item.cellIndex) || item.title?.replace(/^(?:Thắng\s+)?(?:đấu\s+giá|Đấu\s+Giá)\s+/i, '').replace(/\s*➔\s*(?:Vào\s+|Nộp\s+)?Kho\s+Bạc/i, '').trim() || 'BĐS'} ➔ Nộp Kho Bạc`;
+  return `Thắng đấu giá ${resolveCellName(item.cellIndex) || item.title?.replace(/^(?:Thắng\s+)?(?:đấu\s+giá|Đấu\s+Giá)\s+/i, '').replace(/\s*➔\s*(?:Vào\s+|Nộp\s+)?(?:Kho\s+Bạc|Ngân\s+Hàng)/i, '').trim() || 'BĐS'}`;
 }
 
 const ACTION_REASON_FORMATTERS: Partial<Record<FloatingActionType, (item: FloatingTextItem) => string>> = {
@@ -116,6 +116,7 @@ const ACTION_REASON_FORMATTERS: Partial<Record<FloatingActionType, (item: Floati
   diplomatic: () => 'Kích hoạt Thẻ Ngoại Giao',
   trade: (item) => item.title || 'Chuyển nhượng BĐS P2P',
   decline_auction: (item) => item.title || 'Bỏ qua BĐS ➔ Mở đấu giá',
+  utility: (item) => item.title || 'Cước viễn thông (Viettel Post)',
 };
 
 export function resolveFriendlyReason(item: FloatingTextItem, _player?: PlayerHudInfo): string {
@@ -213,10 +214,10 @@ export function resolveTransactionNarrative(
       detail = isPositive ? (cellName ? `(Chuyển nhượng ${cellName})` : '(Bồi hoàn M&A)') : (cellName ? `(${cellName})` : '(Thâu tóm M&A)');
       break;
     case 'auction_win': {
-      category = 'ĐẤU GIÁ BẤT ĐỘNG SẢN'; verb = 'nộp';
+      category = 'ĐẤU GIÁ BẤT ĐỘNG SẢN'; verb = 'thanh toán';
       const m = item.title?.match(/Thắng\s+đấu\s+giá\s+(.+?)(?:\s*➔|$)/i);
       const aucProp = (m && m[1]) ? m[1].trim() : cellName;
-      target = `tiền trúng đấu giá ${aucProp || 'BĐS'} ➔ Kho Bạc`;
+      target = `tiền trúng đấu giá ${aucProp || 'BĐS'}`;
       detail = aucProp ? `(Trúng đấu giá ${aucProp})` : '(Trúng đấu giá)';
       break;
     }
@@ -229,10 +230,10 @@ export function resolveTransactionNarrative(
       detail = isLandTax ? '(Lệ Phí Đất Ô 04)' : isGoTax ? '(Thuế tài sản qua GO)' : cleanTax ? `(${cleanTax})` : '(Nộp thuế)';
       break;
     }
-    case 'bail': category = 'BẢO LÃNH KIỂM TOÁN'; verb = 'nộp'; target = 'bảo lãnh Kiểm Toán (Ô 10) ➔ Kho Bạc'; detail = '(Bảo lãnh Kiểm Toán - Ô 10)'; break;
+    case 'bail': category = 'BẢO LÃNH KIỂM TOÁN'; verb = 'nộp'; target = 'bảo lãnh Trạm Kiểm Toán (Ô 10)'; detail = '(Bảo lãnh Kiểm Toán - Ô 10)'; break;
     case 'audit_jail': category = 'TRẠM KIỂM TOÁN'; verb = 'vào'; target = 'Trạm Kiểm Toán'; detail = '(Bị kiểm toán thuế)'; break;
     case 'mortgage': category = 'TÍN DỤNG NGÂN HÀNG'; verb = 'vay'; target = cellName ? `thế chấp ${cellName} từ Ngân Hàng` : 'từ Ngân Hàng'; detail = cellName ? `(Thế chấp ${cellName})` : '(Thế chấp BĐS)'; break;
-    case 'unmortgage': category = 'GIẢI CHẤP BẤT ĐỘNG SẢN'; verb = 'trả'; target = `giải chấp ${cellName || 'BĐS'}`; detail = '(Phí 10% ➔ Kho Bạc)'; break;
+    case 'unmortgage': category = 'GIẢI CHẤP BẤT ĐỘNG SẢN'; verb = 'trả'; target = `giải chấp ${cellName || 'BĐS'}`; detail = '(Phí 10% ➔ Ngân Hàng)'; break;
     case 'buy':
       category = 'MUA ĐẤT ĐẦU TƯ'; verb = 'thanh toán';
       if (!cellName && item.title) cellName = item.title.replace(/^Mua(?:\s+sở\s+hữu|\s+quyền\s+sử\s+dụng\s+đất:?|\s+đất|\s+BĐS)?(?:\s+|$)/i, '').trim();

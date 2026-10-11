@@ -1,0 +1,44 @@
+[
+  {
+    "file": "src/client/ui/transaction_narrative.ts",
+    "desc": "AST: Corrupt auction_win verb from 'thanh toán' back to 'nộp'",
+    "target": "category = 'ĐẤU GIÁ BẤT ĐỘNG SẢN'; verb = 'thanh toán';",
+    "replacement": "category = 'ĐẤU GIÁ BẤT ĐỘNG SẢN'; verb = 'nộp';"
+  },
+  {
+    "file": "src/client/ui/transaction_narrative.ts",
+    "desc": "AST: Re-introduce spurious '➔ Kho Bạc' to auction_win target",
+    "target": "target = `tiền trúng đấu giá ${aucProp || 'BĐS'}`;",
+    "replacement": "target = `tiền trúng đấu giá ${aucProp || 'BĐS'} ➔ Kho Bạc`;"
+  },
+  {
+    "file": "src/client/ui/transaction_narrative.ts",
+    "desc": "AST: Corrupt unmortgage fee destination from Ngân Hàng to Kho Bạc",
+    "target": "detail = '(Phí 10% ➔ Ngân Hàng)';",
+    "replacement": "detail = '(Phí 10% ➔ Kho Bạc)';"
+  },
+  {
+    "file": "src/client/ui/transaction_narrative.ts",
+    "desc": "AST: Re-introduce spurious '➔ Kho Bạc' to bail target",
+    "target": "target = 'bảo lãnh Trạm Kiểm Toán (Ô 10)';",
+    "replacement": "target = 'bảo lãnh Trạm Kiểm Toán (Ô 10) ➔ Kho Bạc';"
+  },
+  {
+    "file": "src/client/ui/transaction_narrative.ts",
+    "desc": "AST: Re-introduce '➔ Nộp Kho Bạc' suffix to formatAuction friendly title",
+    "target": "return `Thắng đấu giá ${resolveCellName(item.cellIndex) || item.title?.replace(/^(?:Thắng\\s+)?(?:đấu\\s+giá|Đấu\\s+Giá)\\s+/i, '').replace(/\\s*➔\\s*(?:Vào\\s+|Nộp\\s+)?(?:Kho\\s+Bạc|Ngân\\s+Hàng)/i, '').trim() || 'BĐS'}`;",
+    "replacement": "return `Thắng đấu giá ${resolveCellName(item.cellIndex) || item.title?.replace(/^(?:Thắng\\s+)?(?:đấu\\s+giá|Đấu\\s+Giá)\\s+/i, '').replace(/\\s*➔\\s*(?:Vào\\s+|Nộp\\s+)?(?:Kho\\s+Bạc|Ngân\\s+Hàng)/i, '').trim() || 'BĐS'} ➔ Nộp Kho Bạc`;"
+  },
+  {
+    "file": "src/client/ui/transaction_formula.ts",
+    "desc": "AST: Corrupt unmortgage formula citing Kho Bạc instead of Ngân Hàng",
+    "target": "return 'Chuộc lại đất thế chấp (Gốc + 10% phí giải chấp Ngân Hàng)';",
+    "replacement": "return 'Chuộc lại đất thế chấp (Gốc + 10% phí Kho Bạc)';"
+  },
+  {
+    "file": "src/client/ui/floating_numbers.tsx",
+    "desc": "AST: Bypass narrative.amountText in FloatingBadge causing double-negative display",
+    "target": "{narrative.amountText || item.text}",
+    "replacement": "{item.text}"
+  }
+]

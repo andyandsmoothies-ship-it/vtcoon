@@ -25,6 +25,7 @@ import {
   parseStation1,
   parseStation3Reviews,
   parseStation4Chaos,
+  parseForensicAudit,
   collectVisualScreenshots,
   collectLocWarnings
 } from './report/report_station_collector.mjs';
@@ -135,6 +136,7 @@ if (!fs.existsSync(finalReportPath) || force) {
   const station1 = parseStation1(evidenceDir, auditDir, ticketId, contractTestCount);
   const station3 = parseStation3Reviews(auditDir, ticketId);
   const station4 = parseStation4Chaos(evidenceDir, ticketId);
+  const forensic = parseForensicAudit(auditDir, ticketId);
   const { desktopImg, mobileImg } = collectVisualScreenshots(repoRoot, ticketLower, ticketClean);
   const warnFiles = collectLocWarnings(repoRoot, srcFiles);
 
@@ -167,6 +169,10 @@ if (!fs.existsSync(finalReportPath) || force) {
     chaosVerdict: station4.chaosVerdict,
     chaosSummary: station4.chaosSummary,
     chaosDetails: station4.chaosDetails,
+    forensicFile: forensic.forensicFile,
+    forensicVerdict: forensic.forensicVerdict,
+    forensicFindings: forensic.forensicFindings,
+    forensicRetro: forensic.forensicRetro,
     baselineFiles,
     planRegisteredFiles,
     warnFiles,

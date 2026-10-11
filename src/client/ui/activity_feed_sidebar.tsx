@@ -22,6 +22,16 @@ export function getActivityIcon(type: ActivityLogType): string {
       return '💸';
     case 'tax':
       return '🏛️';
+    case 'bail':
+      return '🚨';
+    case 'utility':
+      return '📡';
+    case 'trade':
+      return '🤝';
+    case 'unmortgage':
+      return '📑';
+    case 'hose':
+      return '📈';
     case 'card':
       return '🎴';
     case 'auction':
@@ -124,6 +134,8 @@ export function ActivityFeedSidebar(props: ActivityFeedSidebarProps): React.Reac
         (log) =>
           log.type === 'rent' ||
           log.type === 'tax' ||
+          log.type === 'bail' ||
+          log.type === 'utility' ||
           log.type === 'buy' ||
           log.type === 'auction' ||
           log.amount !== undefined,

@@ -142,7 +142,7 @@ function syncTelemetryAndActivities(delta: DeltaPayload, state: GameState, store
     const isFullSync = Boolean(delta.cells && delta.cells.length === BOARD_SIZE);
     const nextState = store.getState();
     if (!isFullSync) {
-      const events = synthesizeGameEvents(state, nextState, delta);
+      const events = synthesizeGameEvents(state, nextState, delta, { baseTimestamp: Date.now() });
       if (events.length > 0) {
         dispatchGameEvents(events, {
           prevState: state,

@@ -9,6 +9,7 @@ export type ActivityLogType =
   | 'rent'
   | 'tax'
   | 'bail'
+  | 'utility'
   | 'card'
   | 'auction'
   | 'mortgage'

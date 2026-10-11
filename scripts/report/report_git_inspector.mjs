@@ -201,6 +201,7 @@ export function resolveModifiedFilesAndTests(repoRoot, evidenceDir, ticketId, ti
     if (prodFile) {
       if (prodFile.startsWith('src/client/ui/')) planSubsystem = 'client-ui';
       else if (prodFile.startsWith('src/client/3d/')) planSubsystem = 'client-3d';
+      else if (prodFile.startsWith('src/client/events/')) planSubsystem = 'client-events';
       else if (prodFile.startsWith('src/client/')) planSubsystem = 'client-state';
       else if (prodFile.startsWith('src/domain/')) planSubsystem = 'domain-core';
       else if (prodFile.startsWith('src/server/insolvency') || prodFile.startsWith('src/server/room_property_coordinator') || prodFile.startsWith('src/server/turn_loop')) planSubsystem = 'server-lifecycle';
@@ -225,29 +226,32 @@ export function resolveModifiedFilesAndTests(repoRoot, evidenceDir, ticketId, ti
     contractFile = station1EarlyData.testFile.replace(/\\/g, '/');
     contractTestCount = station1EarlyData.testCount ?? 0;
     contractAssertCount = station1EarlyData.expectCount ?? 0;
-    if (contractAssertCount === 0 && fs.existsSync(path.resolve(repoRoot, contractFile))) {
+    if (fs.existsSync(path.resolve(repoRoot, contractFile))) {
       const testContent = fs.readFileSync(path.resolve(repoRoot, contractFile), 'utf8');
-      contractAssertCount = (testContent.match(/\bexpect\s*\(/g) || []).length;
-      if (contractTestCount === 0) {
-        contractTestCount = (testContent.match(/\bit\s*\(/g) || []).length;
-      }
+      const physicalAsserts = (testContent.match(/\bexpect\s*\(/g) || []).length;
+      if (physicalAsserts > 0) contractAssertCount = physicalAsserts;
+      const physicalTests = (testContent.match(/\bit\s*\(/g) || []).length;
+      if (physicalTests > 0) contractTestCount = physicalTests;
     }
   } else if (snapshotData?.contractTests?.file) {
     contractFile = snapshotData.contractTests.file.replace(/\\/g, '/');
     contractTestCount = snapshotData.contractTests.total ?? 0;
     if (fs.existsSync(path.resolve(repoRoot, contractFile))) {
       const testContent = fs.readFileSync(path.resolve(repoRoot, contractFile), 'utf8');
-      contractAssertCount = (testContent.match(/\bexpect\s*\(/g) || []).length;
-      if (contractTestCount === 0) {
-        contractTestCount = (testContent.match(/\bit\s*\(/g) || []).length;
-      }
+      const physicalAsserts = (testContent.match(/\bexpect\s*\(/g) || []).length;
+      if (physicalAsserts > 0) contractAssertCount = physicalAsserts;
+      const physicalTests = (testContent.match(/\bit\s*\(/g) || []).length;
+      if (physicalTests > 0) contractTestCount = physicalTests;
     }
   } else if (snapshotData?.testExecution?.suite) {
     contractFile = snapshotData.testExecution.suite.replace(/\\/g, '/');
     contractTestCount = snapshotData.testExecution.passedCount ?? 0;
     if (fs.existsSync(path.resolve(repoRoot, contractFile))) {
       const testContent = fs.readFileSync(path.resolve(repoRoot, contractFile), 'utf8');
-      contractAssertCount = (testContent.match(/\bexpect\s*\(/g) || []).length;
+      const physicalAsserts = (testContent.match(/\bexpect\s*\(/g) || []).length;
+      if (physicalAsserts > 0) contractAssertCount = physicalAsserts;
+      const physicalTests = (testContent.match(/\bit\s*\(/g) || []).length;
+      if (physicalTests > 0) contractTestCount = physicalTests;
     }
   }
 

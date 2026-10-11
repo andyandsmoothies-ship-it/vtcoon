@@ -248,8 +248,8 @@ describe('[TC-194.01/MSS..TC-194.18/MSS][UC-IMP194] Natural Narrative Floating B
       const narrative = resolveTransactionNarrative(item, mockPlayerPayer);
       expect(narrative.category).toBe('ĐẤU GIÁ BẤT ĐỘNG SẢN');
       expect(narrative.icon).toBe('🔨');
-      expect(narrative.verb).toBe('nộp');
-      expect(narrative.target).toBe('tiền trúng đấu giá Cần Thơ ➔ Kho Bạc');
+      expect(narrative.verb).toBe('thanh toán');
+      expect(narrative.target).toBe('tiền trúng đấu giá Cần Thơ');
     });
 
     it('[TC-194.05/MSS][UC-IMP194] Tax: resolveTransactionNarrative actionType tax sinh category KHO BẠC NHÀ NƯỚC, icon tòa nhà, verb nộp vào Kho Bạc', () => {
@@ -284,7 +284,7 @@ describe('[TC-194.01/MSS..TC-194.18/MSS][UC-IMP194] Natural Narrative Floating B
       expect(narrative.category).toBe('BẢO LÃNH KIỂM TOÁN');
       expect(narrative.icon).toBe('🚨');
       expect(narrative.verb).toBe('nộp');
-      expect(narrative.target).toBe('bảo lãnh Kiểm Toán (Ô 10) ➔ Kho Bạc');
+      expect(narrative.target).toBe('bảo lãnh Trạm Kiểm Toán (Ô 10)');
     });
 
     it('[TC-194.14/MSS][UC-IMP194] Audit Jail: resolveTransactionNarrative actionType audit_jail sinh category TRẠM KIỂM TOÁN, verb vào Trạm Kiểm Toán', () => {
@@ -339,7 +339,7 @@ describe('[TC-194.01/MSS..TC-194.18/MSS][UC-IMP194] Natural Narrative Floating B
       expect(narrative.category).toBe('GIẢI CHẤP BẤT ĐỘNG SẢN');
       expect(narrative.icon).toBe('🔓');
       expect(narrative.verb).toBe('trả');
-      expect(narrative.target + (narrative.detail ? ` ${narrative.detail}` : '')).toMatch(/giải chấp.*10%.*Kho Bạc/i);
+      expect(narrative.target + (narrative.detail ? ` ${narrative.detail}` : '')).toMatch(/giải chấp.*10%.*Ngân Hàng/i);
     });
 
     it('[TC-194.09/MSS][UC-IMP194] Buy: resolveTransactionNarrative actionType buy sinh category MUA ĐẤT ĐẦU TƯ, icon thẻ giá, verb thanh toán mua', () => {

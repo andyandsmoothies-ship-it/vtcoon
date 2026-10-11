@@ -247,7 +247,7 @@ export function FloatingBadge({ item }: { readonly item: FloatingTextItem }): Re
                   : 'bg-rose-50 text-rose-700 border-rose-300'
               }`}
             >
-              {item.actionType === 'diplomatic' && narrative.isPositive ? narrative.amountText : item.text}
+              {narrative.amountText || item.text}
             </span>{' '}
             <span className="font-bold text-slate-800">{narrative.target}</span>
           </div>
