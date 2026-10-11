@@ -29,6 +29,7 @@ import {
   auditFsmQueueCombinatorialCoverage,
   auditShallowModulePropsExplosion,
   auditCohesionOrphanFiles,
+  auditDefinitionOfDone,
 } from './audit_plan_rules.mjs';
 import {
   findSourceFiles,
@@ -128,6 +129,8 @@ if (testLines.length > 0) {
 } else {
   console.log(`  ℹ️ No Station 1 test specifications block detected in plan.`);
 }
+
+errors += auditDefinitionOfDone(planContent);
 
 // 4. Summary & Plan Size Hygiene
 console.log(`\n========================================`);

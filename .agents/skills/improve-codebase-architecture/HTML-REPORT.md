@@ -4,7 +4,7 @@ The architectural review is rendered as a single self-contained HTML file in the
 
 - **Storage Location**: OS temp directory (`%TEMP%` on Windows, `$TMPDIR` or `/tmp` on Linux/macOS) as `<tmpdir>/architecture-review-<timestamp>.html`.
 - **Technologies**: Tailwind CSS CDN and Mermaid.js ESM import. Mermaid handles graph-shaped dependencies; custom HTML/SVG handles editorial mass and cross-section diagrams.
-- **Language Policy**: When run in projects governed by Vietnamese reporting requirements (such as `vtcoon` under `GEMINI.md`), user-facing titles, problems, solutions, and wins are in Vietnamese (or bilingual), with technical terms (`module`, `interface`, `seam`, `adapter`, `depth`, `locality`, `leverage`) preserved concisely.
+- **Language Policy**: Core technical terms (`module`, `interface`, `seam`, `adapter`, `depth`, `locality`, `leverage`) are preserved concisely.
 
 ---
 
@@ -12,7 +12,7 @@ The architectural review is rendered as a single self-contained HTML file in the
 
 ```html
 <!doctype html>
-<html lang="vi">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -37,14 +37,14 @@ The architectural review is rendered as a single self-contained HTML file in the
             Architectural Discovery
           </span>
           <h1 class="text-2xl md:text-3xl font-bold text-slate-900 mt-2">
-            Đánh Giá Kiến Trúc & Cơ Hội Đào Sâu (Deepening Review)
+            Architecture Review & Deepening Candidates
           </h1>
-          <p class="text-sm text-slate-500 mt-1">Dự án: <span class="font-mono text-slate-700 font-medium">{{repo_name}}</span> | Thời điểm quét: {{timestamp}}</p>
+          <p class="text-sm text-slate-500 mt-1">Project: <span class="font-mono text-slate-700 font-medium">{{repo_name}}</span> | Scanned at: {{timestamp}}</p>
         </div>
         <!-- Legend -->
         <div class="flex flex-wrap items-center gap-3 text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
-          <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-slate-200 border border-slate-400"></span> Module Nông (Shallow)</span>
-          <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-slate-900 border border-slate-700"></span> Module Sâu (Deep)</span>
+          <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-slate-200 border border-slate-400"></span> Shallow Module</span>
+          <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-slate-900 border border-slate-700"></span> Deep Module</span>
           <span class="inline-flex items-center gap-1.5"><span class="w-4 border-t-2 border-dashed border-slate-400"></span> Seam</span>
           <span class="inline-flex items-center gap-1.5"><span class="w-4 border-t-2 border-red-500"></span> Leak</span>
         </div>
@@ -68,7 +68,7 @@ The architectural review is rendered as a single self-contained HTML file in the
 
 ## Candidate Card Template
 
-Mỗi ứng viên đào sâu được đóng gói trong một thẻ `<article>` độc lập:
+Each deepening candidate is contained in an independent `<article>` card:
 
 ```html
 <article class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden p-6 md:p-8 space-y-6">
@@ -76,7 +76,7 @@ Mỗi ứng viên đào sâu được đóng gói trong một thẻ `<article>` 
   <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100 pb-4">
     <div>
       <h2 class="text-xl font-bold text-slate-900">1. {{candidate_title}}</h2>
-      <p class="text-xs text-slate-500 mt-0.5">Phạm vi tệp tin liên quan:</p>
+      <p class="text-xs text-slate-500 mt-0.5">Target files scope:</p>
       <div class="flex flex-wrap gap-1.5 mt-1.5">
         <code class="text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-mono border border-slate-200">{{file_path}}</code>
       </div>
@@ -98,7 +98,7 @@ Mỗi ứng viên đào sâu được đóng gói trong một thẻ `<article>` 
     <!-- Before Diagram -->
     <div class="rounded-lg border border-red-200 bg-red-50/30 p-4 space-y-2">
       <div class="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-red-700">
-        <span>Hiện trạng (Before: Shallow / Leaky)</span>
+        <span>Current State (Before: Shallow / Leaky)</span>
       </div>
       <div class="min-h-[260px] flex items-center justify-center">
         <pre class="mermaid">
@@ -115,7 +115,7 @@ Mỗi ứng viên đào sâu được đóng gói trong một thẻ `<article>` 
     <!-- After Diagram -->
     <div class="rounded-lg border border-emerald-200 bg-emerald-50/30 p-4 space-y-2">
       <div class="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-emerald-700">
-        <span>Đề xuất (After: Consolidated Deep Module)</span>
+        <span>Proposed (After: Consolidated Deep Module)</span>
       </div>
       <div class="min-h-[260px] flex items-center justify-center">
         <pre class="mermaid">
@@ -135,34 +135,34 @@ Mỗi ứng viên đào sâu được đóng gói trong một thẻ `<article>` 
   <!-- Problem & Solution Statements -->
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm bg-slate-50 p-4 rounded-lg border border-slate-200">
     <div>
-      <span class="font-semibold text-slate-900 block mb-1">Điểm nghẽn kiến trúc (Friction):</span>
+      <span class="font-semibold text-slate-900 block mb-1">Architectural Friction:</span>
       <p class="text-slate-600">{{one_sentence_problem}}</p>
     </div>
     <div>
-      <span class="font-semibold text-slate-900 block mb-1">Giải pháp đào sâu (Deepening Solution):</span>
+      <span class="font-semibold text-slate-900 block mb-1">Deepening Solution:</span>
       <p class="text-slate-600">{{one_sentence_solution}}</p>
     </div>
   </div>
 
   <!-- Architectural Wins (Bullet Points) -->
   <div>
-    <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 block mb-2">Giá trị kiến trúc đạt được (Architectural Wins):</span>
+    <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 block mb-2">Architectural Wins:</span>
     <ul class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
       <li class="flex items-center gap-2 text-slate-700">
         <span class="text-emerald-500 font-bold">✓</span>
-        <span><b>Locality:</b> Gom toàn bộ quy tắc vào 1 chỗ duy nhất.</span>
+        <span><b>Locality:</b> Consolidates all related business invariants into a single source.</span>
       </li>
       <li class="flex items-center gap-2 text-slate-700">
         <span class="text-emerald-500 font-bold">✓</span>
-        <span><b>Leverage:</b> 1 giao diện gọn phục vụ N nơi gọi.</span>
+        <span><b>Leverage:</b> A compact interface serves $N$ callers cleanly.</span>
       </li>
       <li class="flex items-center gap-2 text-slate-700">
         <span class="text-emerald-500 font-bold">✓</span>
-        <span><b>Test Surface:</b> Xóa unit tests nông; test trực tiếp qua seam interface.</span>
+        <span><b>Test Surface:</b> Removes shallow unit tests; tests run directly through seam interface.</span>
       </li>
       <li class="flex items-center gap-2 text-slate-700">
         <span class="text-emerald-500 font-bold">✓</span>
-        <span><b>LOC Ceilings:</b> Tuân thủ hạn mức LOC quy định (Tier 1 $\le 400$, Tier 2 $\le 500$).</span>
+        <span><b>LOC Ceilings:</b> Complies with configured line count budgets (Tier 1 $\le 400$, Tier 2 $\le 500$).</span>
       </li>
     </ul>
   </div>
@@ -170,7 +170,7 @@ Mỗi ứng viên đào sâu được đóng gói trong một thẻ `<article>` 
   <!-- ADR or Domain Gotcha Callout (If applicable) -->
   {{if_conflict_or_domain_gotcha}}
   <div class="bg-amber-50 border-l-4 border-amber-500 p-3 rounded-r-lg text-xs text-amber-800">
-    <b>Lưu ý Domain Gotcha / ADR:</b> {{gotcha_context_and_rationale}}
+    <b>Domain Gotcha / ADR Note:</b> {{gotcha_context_and_rationale}}
   </div>
   {{/if}}
 </article>
@@ -179,13 +179,13 @@ Mỗi ứng viên đào sâu được đóng gói trong một thẻ `<article>` 
 ---
 
 ## Recommendation Strength Badges
-- **Strong** (Đề xuất cao): `bg-emerald-100 text-emerald-800 border border-emerald-300`
-- **Worth exploring** (Đáng cân nhắc): `bg-amber-100 text-amber-800 border border-amber-300`
-- **Speculative** (Thử nghiệm / Dài hạn): `bg-slate-100 text-slate-700 border border-slate-300`
+- **Strong**: `bg-emerald-100 text-emerald-800 border border-emerald-300`
+- **Worth exploring**: `bg-amber-100 text-amber-800 border border-amber-300`
+- **Speculative**: `bg-slate-100 text-slate-700 border border-slate-300`
 
 ---
 
 ## Editorial Guidelines
-- Súc tích, trực diện, không dài dòng.
-- Sơ đồ Before/After là trái tim của mỗi Candidate Card. Nếu lời giải thích cần hơn 2 câu thì hãy vẽ lại sơ đồ cho rõ ràng hơn.
-- Luôn sử dụng từ vựng chuẩn mực từ skill `codebase-design`: `module`, `interface`, `seam`, `adapter`, `depth`, `locality`, `leverage`.
+- Concise, direct, and zero fluff.
+- The Before/After visual comparison is the core of each Candidate Card. If explanation exceeds 2 sentences, refine the diagram.
+- Strictly use standard design vocabulary: `module`, `interface`, `seam`, `adapter`, `depth`, `locality`, `leverage`.

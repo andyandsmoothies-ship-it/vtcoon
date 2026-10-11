@@ -100,7 +100,7 @@ Every `Hardening Directive` must:
 - Reference a **specific file, function, and line number** for any constant, timing, or formula recommendation. FORBIDDEN from recommending arbitrary numbers without checking existing SSOT files.
 
 ### 🔒 Causal Root Scope Invariant & Anti-Ghost Resolution (Zero Hand-Waving)
-- When auditing any Revision of a Plan, the Challenger is **STRICTLY FORBIDDEN** from marking any prior finding as `[RESOLVED]` or `[ĐÃ GIẢI QUYẾT]` based merely on verbal assurances, philosophy/invariants, or downstream expression tweaks.
+- When auditing any Revision of a Plan, the Challenger is **STRICTLY FORBIDDEN** from marking any prior finding as `[RESOLVED]` based merely on verbal assurances, philosophy/invariants, or downstream expression tweaks.
 - If finding `[ADV-XX]` demonstrated that File $A$ causes state erasure or failure, the Plan **MUST physically include File $A$ in its target files and drop-in replacements**, OR provide an architectural decoupling that completely removes reliance on File $A$.
 - If the Plan leaves File $A$ out of scope while continuing to rely on that state, the Challenger MUST retain verdict `CHALLENGE_ISSUED: Unresolved Causal Root in [file#L]`.
 

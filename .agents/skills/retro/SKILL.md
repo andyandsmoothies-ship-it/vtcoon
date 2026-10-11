@@ -43,4 +43,4 @@ Feed findings directly into:
    - **Handoff Quality**: [PASS | Upstream ambiguity or missing context]
    - **Harness Suggestion**: [1 actionable suggestion to improve SDLC process, scripts, or settings]
    ```
-2. **The Ticket Completion Report:** `docs/reports/improvements/IMP-[ID]-[slug]_report.md` (§ "ĐÁNH GIÁ VẬN HÀNH & ĐỀ XUẤT CẢI TIẾN SETTING SDLC").
+2. **The Ticket Completion Report:** `docs/reports/improvements/IMP-[ID]-[slug]_report.md` (§ "Operational Evaluation & SDLC Improvements" / "ĐÁNH GIÁ VẬN HÀNH & ĐỀ XUẤT CẢI TIẾN SETTING SDLC").

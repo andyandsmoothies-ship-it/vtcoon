@@ -221,3 +221,16 @@ export function auditFsmQueueCombinatorialCoverage(planContent) {
 
   return errors;
 }
+
+export function auditDefinitionOfDone(planContent) {
+  let errors = 0;
+  const hasDoD = /(?:Definition of Done|DoD|Tiêu chí hoàn thành|Stopping Criteria|Biên giới dừng|Tiêu chí nghiệm thu)/i.test(planContent);
+  if (!hasDoD) {
+    console.error(`  ❌ [MISSING_DEFINITION_OF_DONE] Plan lacks explicit 'Definition of Done (DoD)' or 'Stopping Criteria' section!`);
+    console.error(`     arXiv:2609.20804 & GEMINI.md mandate an explicit stopping boundary to prevent redundant verification churn.`);
+    errors++;
+  } else {
+    console.log(`  ✔️ Definition of Done (DoD) verified: Plan specifies explicit stopping boundary.`);
+  }
+  return errors;
+}

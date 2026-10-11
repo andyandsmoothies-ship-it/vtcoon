@@ -13,116 +13,113 @@ Surface architectural friction across the codebase and propose **deepening oppor
 ## 1. Role in the Engineering Ecosystem & SDLC Boundary
 
 > [!IMPORTANT]
-> **Vị trí trong quy trình SDLC**: Skill này là **Công cụ Thăm dò & Chẩn đoán Chiến lược (Pre-SDLC / On-Demand Discovery)**.
-> - **KHÔNG** tự ý kích hoạt ở giữa vòng lặp của một ticket đang chạy (Station 1 RED $\rightarrow$ Station 2 GREEN $\rightarrow$ Station 3 $\rightarrow$ Station 4).
-> - **CHỈ chạy thủ công (Manual / On-Demand)** khi:
->   1. Người dùng yêu cầu rà soát kiến trúc ("quét kiến trúc", "cải thiện cấu trúc", "tìm module nông").
->   2. Chuẩn bị khởi động một Epic lớn hoặc đợt tái cấu trúc diện rộng (Tech Debt Paydown).
->   3. Đánh giá lại độ sâu của các module sau nhiều vòng thêm tính năng mới.
+> **Position in SDLC Lifecycle**: This skill operates as an **Architectural Discovery & Strategic Diagnostic Tool (Pre-SDLC / On-Demand Discovery)**.
+> - **DO NOT** invoke autonomously in the middle of an active implementation ticket loop (Station 1 RED $\rightarrow$ Station 2 GREEN $\rightarrow$ Station 3 $\rightarrow$ Station 4).
+> - **ONLY invoke manually (On-Demand)** when:
+>   1. The user explicitly requests an architecture scan ("scan architecture", "improve structure", "find shallow modules").
+>   2. Preparing to launch a major Epic or broad refactoring campaign (Tech Debt Paydown).
+>   3. Re-evaluating module depth after multiple iterative feature additions.
 
 ---
 
 ## 2. Shared Vocabulary & Principles
 
-Skill này bắt buộc dựa trên hệ từ vựng và nguyên lý thiết kế chuẩn từ skill **`codebase-design`** (và [`docs/domain/gotchas/deep_modules.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/gotchas/deep_modules.md) nếu có):
+This skill strictly adheres to standard design vocabulary and principles from the **`codebase-design`** skill (and [`docs/domain/gotchas/deep_modules.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/gotchas/deep_modules.md)):
 
-- **Module**: Bất kỳ thực thể nào có interface và implementation (hàm, class, package, subsystem). Cấm gọi chung chung là "component", "service", "unit".
-- **Interface**: Toàn bộ bề mặt caller cần biết để sử dụng đúng: chữ ký hàm, invariants, thứ tự gọi, error modes, cấu hình.
-- **Seam**: Vị trí giao diện tồn tại nơi hành vi có thể thay đổi mà không phải chỉnh sửa tại chỗ. Cấm gọi là "boundary".
-- **Adapter**: Vật cụ thể thỏa mãn interface tại seam. *Quy tắc: 1 adapter = seam giả định/thừa; 2 adapters = seam thực thụ*.
-- **Depth**: Đòn bẩy (*leverage*) tại interface: tỷ lệ giữa hành vi ẩn giấu bên trong so với độ phức tạp của interface phải học.
-- **Locality**: Thay đổi, lỗi và kiến thức gom về 1 chỗ duy nhất thay vì rải rác khắp caller.
-- **The Deletion Test**: Tưởng tượng xóa module đó đi. Nếu độ phức tạp biến mất $\rightarrow$ đó là module nông (pass-through). Nếu độ phức tạp bùng phát và phân tán ra $N$ nơi gọi $\rightarrow$ module đó thực sự có giá trị.
+- **Module**: Any entity with an interface and an implementation (function, class, package, subsystem). Avoid generic labels like "component", "service", or "unit".
+- **Interface**: The complete surface a caller must understand to use the module correctly: signatures, invariants, call order, error modes, configuration.
+- **Seam**: An interface where behavior can be varied without editing call sites. Avoid calling this a "boundary".
+- **Adapter**: A concrete object satisfying an interface at a seam. *Rule: 1 adapter = speculative seam; 2 adapters = genuine seam*.
+- **Depth**: Interface leverage: ratio of internal behavior hidden behind the interface relative to the complexity of learning the interface.
+- **Locality**: Changes, error modes, and knowledge consolidate in one place rather than dispersing across callers.
+- **The Deletion Test**: Imagine deleting the module. If complexity disappears $\rightarrow$ shallow module (pass-through). If complexity explodes and scatters across $N$ callers $\rightarrow$ the module provides genuine depth.
 
 ---
 
-## 3. Quy Trình Vận Hành 4 Bước (Execution Workflow)
+## 3. Four-Step Execution Workflow
 
 ```mermaid
 flowchart TD
-    A["1. Scoping & Hotspots Discovery<br/>(Git logs, friction, deletion test)"] --> B["2. HTML Visual Report<br/>(Tailwind + Mermaid Before/After in %TEMP%)"]
-    B --> C["3. Grilling Loop with User<br/>(Chất vấn, chọn candidate, chốt interface)"]
-    C --> D{"Dự án có SDLC Harness?<br/>(vd: vtcoon / GEMINI.md)"}
-    D -- Có --> E["4a. Handover to Lean Pipeline<br/>(Tạo PLAN_[ID].md -> audit_plan -> Station 1)"]
-    D -- Không --> F["4b. Handover to Standard Spec<br/>(Tạo ADR / GitHub Issue / Branch)"]
+    A["1. Scoping & Hotspots Discovery<br/>(Git logs, friction, deletion test)"] --> B["2. Visual Report Generation<br/>(Antigravity Artifact & HTML in %TEMP%)"]
+    B --> C["3. Grilling Loop with User<br/>(Challenge, select candidate, lock interface)"]
+    C --> D{"Project has SDLC Harness?<br/>(e.g., vtcoon / GEMINI.md)"}
+    D -- Yes --> E["4a. Handover to Lean Pipeline<br/>(PLAN_[ID].md -> audit_plan -> Station 1)"]
+    D -- No --> F["4b. Handover to Standard Spec<br/>(Create ADR / GitHub Issue / Branch)"]
 ```
 
-### Bước 1: Khảo sát & Nhận diện Điểm nóng (Scoping & Hotspot Discovery)
+### Step 1: Scoping & Hotspot Discovery
 
-- **YAGNI & Hotspots First**: Đào sâu module mang lại lợi nhuận cao nhất cho những phần code thường xuyên biến động.
-  - Nếu người dùng chỉ định một module/subsystem cụ thể: Tập trung quét ngay khu vực đó.
-  - Nếu quét toàn diện repo: Kiểm tra lịch sử commit (`git log --oneline -n 100`) để định vị các file "điểm nóng" (hotspots) bị sửa đổi liên tục.
-- **Tra cứu Tri thức Miền (Domain Knowledge)**:
-  - Nếu dự án có [`docs/domain/gotchas/`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/gotchas/): Đọc ngay các gotcha liên quan trước khi quét (đặc biệt là `deep_modules.md`, `fsm_lifecycle.md`, `economy_treasury.md`, `ui_ergonomics.md`).
-  - Nếu dự án có `GLOSSARY.md` hoặc `docs/adr/`: Đọc để nắm vững thuật ngữ nghiệp vụ và các quyết định kiến trúc đã chốt.
-- **Phát hiện Mùi Mã Nguồn (Architectural Smells)**:
-  - Nơi nào hiểu 1 logic nghiệp vụ phải nhảy qua 4-5 file wrapper mỏng dính?
-  - Nơi nào interface to gần bằng implementation (shallow)?
-  - Nơi nào trích xuất hàm pure chỉ để dễ viết unit test, nhưng bug thật sự nằm ở cách lắp ghép các hàm đó (mất tính locality)?
-  - Nơi nào rò rỉ seam (ví dụ: UI component trực tiếp can thiệp hoặc tính toán lại logic domain)?
-  - Nơi nào vi phạm trần LOC của dự án (ví dụ: Tier 1 $> 400$ LOC, Tier 2 $> 500$ LOC trong `GEMINI.md`)?
+- **YAGNI & Hotspots First**: Deepening delivers the highest return in frequently changing code areas.
+  - If the user specifies a targeted module/subsystem: Scan that area immediately.
+  - If performing a repo-wide audit: Inspect commit history (`git log --oneline -n 100`) to locate high-churn hotspots.
+- **Consult Domain Knowledge**:
+  - In projects with [`docs/domain/gotchas/`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/gotchas/): Review relevant gotchas before scanning (especially `deep_modules.md`, `fsm_lifecycle.md`, `economy_treasury.md`, `ui_ergonomics.md`).
+  - Check `GLOSSARY.md` or `docs/adr/` to understand established domain terminology and architectural decisions.
+- **Detect Architectural Smells**:
+  - Does understanding a single business rule require traversing 4–5 thin wrapper files?
+  - Is the interface nearly as wide as the implementation (shallow module)?
+  - Were pure functions extracted solely for unit test convenience while the real failure modes live in coordination wiring (lost locality)?
+  - Are seams leaking (e.g., UI component recalculating domain validation rules)?
+  - Are LOC ceilings exceeded (e.g., Tier 1 $> 400$ LOC, Tier 2 $> 500$ LOC in `GEMINI.md`)?
 
-### Bước 2: Xuất Báo Cáo Trực Quan (Visual Report: Native IDE Artifact & HTML)
+### Step 2: Visual Report Generation (Native Artifact & HTML)
 
-Skill hỗ trợ 2 định dạng xuất báo cáo trực quan, trong đó **Artifact Markdown trên Antigravity IDE là định dạng ưu tiên số 1**:
+The skill supports two presentation formats, with **Antigravity IDE Native Artifact (`.md` with Mermaid) as primary**:
 
-- **1. Định dạng Ưu Tiên Số 1: Native Antigravity Artifact (`.md` với Mermaid)**:
-  - **Vị trí lưu trữ**: Ghi trực tiếp vào thư mục artifact của hội thoại: `<appDataDir>\brain\<conversation-id>\architecture_review.md` thông qua công cụ `write_to_file` kèm `ArtifactMetadata` (`UserFacing: true`).
-  - **Trải nghiệm**: Antigravity 2.0 tự động kích hoạt giao diện xem tài liệu ở khung bên phải (Split View / Side Pane), **kết xuất trực tiếp toàn bộ sơ đồ Mermaid Before/After, bảng biểu, hộp cảnh báo Alert Card** mà người dùng **không phải mở thư mục temp, không phải nhìn code HTML thô**.
-- **2. Định dạng Bổ Trợ: Standalone HTML (Khi người dùng yêu cầu xem trên trình duyệt ngoài)**:
-  - Ghi file HTML độc lập vào thư mục tạm của hệ điều hành:
+- **1. Primary: Native Antigravity Artifact (`.md` with Mermaid)**:
+  - **Location**: Write directly to the conversation artifact directory: `<appDataDir>\brain\<conversation-id>\architecture_review.md` using `write_to_file` with `ArtifactMetadata` (`UserFacing: true`).
+  - **Experience**: Antigravity renders in the side pane with full Mermaid Before/After diagrams, tables, and alert cards without opening external files.
+- **2. Secondary: Standalone HTML (When external browser viewing is requested)**:
+  - Write standalone HTML file to OS temp directory:
     - Windows: `%TEMP%\architecture-review-<timestamp>.html`
-    - Linux/macOS: `$TMPDIR/architecture-review-<timestamp>.html` (hoặc `/tmp/`)
-  - Mở trình duyệt ngoài tự động bằng lệnh hệ điều hành (`start <path>` trên Windows, `open <path>` trên macOS, `xdg-open <path>` trên Linux).
-- **Ngôn ngữ hiển thị**: Tuân thủ chính sách ngôn ngữ của dự án. Với dự án quy định tiếng Việt (`GEMINI.md`), toàn bộ tiêu đề, mô tả điểm nghẽn (Problem), giải pháp (Solution) và lợi ích (Wins) hiển thị bằng **tiếng Việt** (giữ nguyên các danh từ kỹ thuật chuẩn: `module`, `interface`, `seam`, `adapter`, `depth`, `locality`, `leverage`).
-- **Nội dung thẻ Candidate Card**:
-  - Tên đề xuất và danh sách file liên quan.
-  - Sơ đồ **Before vs. After** trực quan (sử dụng Mermaid flowchart/sequence).
-  - Badge độ tự tin: `Strong` (khuyến nghị cao), `Worth exploring` (đáng cân nhắc), `Speculative` (thử nghiệm).
-  - Badge phân loại phụ thuộc: `in-process`, `local-substitutable`, `ports & adapters`, `mock`.
-  - Mục **Top Recommendation**: Đề xuất ứng viên số 1 nên ưu tiên xử lý trước kèm lý do.
+    - Linux/macOS: `$TMPDIR/architecture-review-<timestamp>.html` (or `/tmp/`)
+  - Open automatically with platform command (`start <path>` on Windows, `open <path>` on macOS, `xdg-open <path>` on Linux).
+- **Candidate Card Structure**:
+  - Proposed title and target file scope.
+  - Visual **Before vs. After** diagram (Mermaid flowchart/sequence).
+  - Confidence badge: `Strong` (high recommendation), `Worth exploring`, `Speculative`.
+  - Dependency category badge: `in-process`, `local-substitutable`, `ports & adapters`, `mock`.
+  - **Top Recommendation**: Identify the #1 priority candidate with rationale.
 
-### Bước 3: Vòng lặp Phản biện & Thẩm vấn (Grilling Loop)
+### Step 3: Grilling Loop with User
 
-Sau khi mở báo cáo HTML, **KHÔNG tự ý sửa code ngay**. Hỏi người dùng:
-> *"Bạn muốn đi sâu thảo luận và triển khai ứng viên nào trong báo cáo trên?"*
+After presenting the report, **DO NOT modify code automatically**. Solicit user input:
+> *"Which candidate would you like to drill into or implement first?"*
 
-Khi người dùng chọn một ứng viên:
-1. Thực hiện grilling loop: Xác định rõ ràng các ràng buộc, phân loại phụ thuộc, interface dự kiến sẽ che giấu những gì, và những test nào sẽ tồn tại sau khi refactor.
-2. Nếu cần khám phá nhiều phương án thiết kế interface khác nhau, kích hoạt quy trình **"Design It Twice"** từ skill `codebase-design`.
-3. Nếu phát sinh thuật ngữ mới $\rightarrow$ cập nhật vào `GLOSSARY.md` hoặc domain doc.
+Once the user selects a candidate:
+1. Conduct grilling loop: Clarify constraints, dependency classification, hidden internals, and surviving test contracts.
+2. If multiple interface designs compete, execute the **"Design It Twice"** workflow from `codebase-design`.
+3. If new terminology arises, record in `GLOSSARY.md` or domain docs.
 
-### Bước 4: Ráp nối mượt mà vào Quy Trình SDLC (Seamless SDLC Handover)
+### Step 4: Seamless SDLC Handover
 
-Đây là điểm mấu chốt để skill ăn khớp hoàn hảo với hệ thống quản trị dự án:
+#### Scenario A: Harness-Governed Project (e.g. `vtcoon`)
+- **Emit Micro-Slice Roadmap or Ticket Proposal**:
+  - Assign canonical ticket ID (e.g. `IMP-[ID]-[slug]`).
+  - Draft Lean Plan at `.agents/plans/PLAN_[ID].md` ($\le 200$ lines, zero code dumps, explicit Causal Root Scope, LOC budget).
+- **Execute Mechanical Plan Audit**:
+  - Run `node scripts/audit_plan.mjs .agents/plans/PLAN_[ID].md --auto-sign`.
+- **Trigger Adversarial Gate** (mandatory for FSM, State, or Economy).
+- **Await Human Gate**: User approves ("đồng ý" / approve).
+- **Handoff to 4-Station SDLC**:
+  - Station 1 (RED): `qa-tester` writes contract tests (Adversarial Inversion).
+  - Station 2 (GREEN): `implementer` writes minimal code.
+  - Station 3: Run `npm run prefilter` and deep architecture review.
+  - Station 4: Run `npm run sentinel` and synthesize completion report via `npm run report -- [ID]`.
 
-#### Trường hợp A: Dự án có Hệ Thống Harness / SDLC (như `vtcoon`)
-- **Sinh Micro-Slice Roadmap hoặc Đề xuất Ticket**:
-  - Gán mã ticket chuẩn (ví dụ: `IMP-[ID]-[slug]`).
-  - Soạn thảo Lean Plan tại `.agents/plans/PLAN_[ID].md` ($\le 200$ dòng, không code-dump, xác định rõ Causal Root Scope và tuân thủ trần LOC).
-- **Chạy Mechanical Plan Audit**:
-  - Chạy `node scripts/audit_plan.mjs .agents/plans/PLAN_[ID].md --auto-sign`.
-- **Kích hoạt Adversarial Gate** (nếu chạm FSM, State, hoặc Kinh tế).
-- **Chờ Human Gate**: Người dùng duyệt ("đồng ý").
-- **Chuyển giao cho 4 Trạm SDLC**:
-  - Station 1 (RED): `qa-tester` viết contract test (Adversarial Inversion).
-  - Station 2 (GREEN): `implementer` viết minimal code.
-  - Station 3: Chạy `npm run prefilter` và architecture review.
-  - Station 4: Chạy `npm run sentinel` và sinh báo cáo nghiệm thu bằng `npm run report -- [ID]`.
-
-#### Trường hợp B: Dự án Tiêu Chuẩn (Generic Project không có Harness)
-- Ghi nhận quyết định kiến trúc vào `docs/adr/ADR-xxxx.md`.
-- Tạo GitHub Issue hoặc branch mới để thực hiện TDD theo quy trình thông thường.
+#### Scenario B: Standard Project (Generic / No Harness)
+- Record architectural decision in `docs/adr/ADR-xxxx.md`.
+- File a GitHub Issue or branch to execute standard TDD workflow.
 
 ---
 
-## 4. Bảng Tra Cứu Xử Lý Phụ Thuộc (Dependency Treatment)
+## 4. Dependency Treatment Reference
 
-Khi đề xuất giải pháp đào sâu trong Candidate Card, luôn phân loại theo 4 nhóm sau:
+When proposing deepening solutions in Candidate Cards, classify dependencies into 4 categories:
 
-| Nhóm Phụ Thuộc | Bản chất | Chiến lược Đào Sâu (Deepening Strategy) | Chiến lược Kiểm Thử (Testing Strategy) |
+| Dependency Category | Nature | Deepening Strategy | Testing Strategy |
 | :--- | :--- | :--- | :--- |
-| **1. In-process** | Tính toán thuần túy, in-memory, 0 I/O | Hợp nhất thẳng các module nông vào module sâu. Không cần adapter. | Test trực tiếp qua interface mới. |
-| **2. Local-substitutable** | Database/Storage có bản chạy local (PGLite, SQLite in-memory, mock FS) | Module sâu nuốt trọn logic truy vấn. Seam nằm nội bộ. | Test với local stand-in chạy trực tiếp trong test runner. |
-| **3. Remote but owned** | Microservice nội bộ, API backend cùng đội ngũ | Định nghĩa 1 **Port** tại seam. Production dùng HTTP/gRPC adapter, test dùng In-Memory adapter. | Test module sâu với In-Memory adapter; 1 bộ contract test riêng cho Network adapter. |
-| **4. True external** | Dịch vụ bên thứ ba không kiểm soát (Stripe, Twilio, OAuth) | Inject external port tại seam. | Test cung cấp mock adapter mô phỏng hành vi bên ngoài. |
+| **1. In-process** | Pure computation, in-memory, 0 I/O | Merge shallow modules directly into deep module. No adapters needed. | Test directly through the unified interface. |
+| **2. Local-substitutable** | Storage with local in-memory counterpart (PGLite, SQLite in-memory, mock FS) | Deep module encapsulates query logic. Seam remains internal. | Test with local stand-in running in test runner. |
+| **3. Remote but owned** | Internal microservice, backend API within team boundary | Define a single **Port** at seam. Production uses HTTP/gRPC adapter; test uses in-memory adapter. | Test deep module with in-memory adapter; separate contract test suite for network adapter. |
+| **4. True external** | Third-party uncontrolled service (Stripe, Twilio, OAuth) | Inject external port at seam. | Test provides mock adapter simulating third-party behavior. |

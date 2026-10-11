@@ -10,6 +10,7 @@
     "start": "cross-env NODE_ENV=production node dist/server/index.js",
     "tunnel": "docker run --rm -it --name vtcoon_tunnel --network vtcoon_internal cloudflare/cloudflared:latest tunnel --no-autoupdate --url http://nginx:80",
     "test": "vitest run",
+    "test:slice": "node scripts/run_test_elided.mjs",
     "test:watch": "vitest",
     "test:chaos": "cross-env CHAOS_GAMES=1000 vitest run tests/simulation/chaos_monkey_simulator.test.ts",
     "benchmark:trends": "npx tsx scripts/benchmark_gameplay_trends.ts",
