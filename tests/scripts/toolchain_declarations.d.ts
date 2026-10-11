@@ -52,6 +52,26 @@ declare module '*scripts/plan_audit/plan_markdown_parser.mjs' {
   export function extractTestLines(planContent: string): string[];
 }
 
+declare module '*scripts/plan_audit/plan_snippet_verifier.mjs' {
+  export function auditDropInSnippets(
+    planContent: string,
+    fileTargetRegex: RegExp,
+    snippetRegex: RegExp,
+    fileSnippetsMap: Map<string, string[]>,
+    findSourceFiles: (dir: string) => string[],
+    auditPlanSnippetHygiene: (relPath: string, targetChunk: string, replacementChunk: string, priorSnippets: string[]) => number,
+    targetFiles?: Map<string, boolean>
+  ): { errors: number; checkedSnippets: number };
+  export function auditNewFileDeclarations(
+    targetFiles: Map<string, boolean>,
+    planContent: string,
+    fileTargetRegex: RegExp,
+    snippetRegex: RegExp,
+    findSourceFiles: (dir: string) => string[]
+  ): number;
+}
+
+
 declare module '*scripts/report/report_station_collector.mjs' {
   export function collectLocWarnings(
     repoRoot: string,
@@ -98,3 +118,22 @@ declare module '*scripts/slop_linter/slop_constants.mjs' {
   export function categorizeFile(filePath: string): string;
   export function getSourceFiles(dir: string, fileList?: string[]): string[];
 }
+
+declare module '*scripts/log_analyzer/board_cell_names.mjs' {
+  export const BOARD_CELL_NAMES: readonly string[];
+  export function getCellLabel(index: number | undefined): string;
+}
+
+declare module '*scripts/log_analyzer/flight_recorder_analyzer.mjs' {
+  export function analyzeFlightRecorder(dump: unknown, options?: { verbose?: boolean; timeline?: boolean }): {
+    overview: Record<string, unknown>;
+    violations: readonly unknown[];
+    players: readonly Array<{ id: string; startBalance: number; endBalance: number; netChange: number; status: string; finalPos: number }>;
+    timelineEvents: readonly Array<{ tick: number; type: string; message: string }>;
+    bankruptcyInvestigations: readonly Array<{ tick: number; debtor: string; deficit: number; creditor: string; note: string }>;
+    propertyEvents: readonly Array<{ tick: number; cellIndex: number; label: string; ownerId: string; level: number }>;
+    userIntentsByType: Record<string, number>;
+  };
+  export function formatConsoleReport(analysis: Record<string, unknown>, options?: { verbose?: boolean; timeline?: boolean }): string;
+}
+

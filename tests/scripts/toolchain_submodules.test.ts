@@ -7,6 +7,7 @@ import {
   extractTestLines,
   parseTargetFiles
 } from '../../scripts/plan_audit/plan_markdown_parser.mjs';
+import { auditDropInSnippets } from '../../scripts/plan_audit/plan_snippet_verifier.mjs';
 import {
   collectLocWarnings,
   collectVisualScreenshots
@@ -74,6 +75,23 @@ describe('Toolchain Submodules Contract Test Suite (IMP-353)', () => {
     it('[TC-353.07/A2] findSourceFiles returns empty array for non-existent directory', () => {
       const files = findSourceFiles('non_existent_dir_9999');
       expect(files).toEqual([]);
+    });
+
+    it('[TC-353.07B/MSS] auditDropInSnippets fails if existing production file has 0 snippets', () => {
+      const targetMap = new Map<string, boolean>([
+        ['src/server/room_manager.ts', false]
+      ]);
+      const res = auditDropInSnippets(
+        '# Some plan without snippets',
+        /Target file/g,
+        /`{3,}<<<<[\s\S]*?====[\s\S]*?>>>>`{3,}/g,
+        new Map(),
+        () => [],
+        () => 0,
+        targetMap
+      );
+      expect(res.errors).toBe(1);
+      expect(res.checkedSnippets).toBe(0);
     });
   });
 

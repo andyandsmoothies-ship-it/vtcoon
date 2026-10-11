@@ -27,6 +27,7 @@
     "check:scope": "node scripts/check_scope.mjs",
     "prefilter": "node scripts/fast_prefilter.mjs",
     "capture:visual": "node scripts/capture_visual_evidence.mjs",
+    "analyze:log": "node scripts/analyze_gameplay_log.mjs",
     "typecheck": "tsc --noEmit",
     "sentinel": "node scripts/sentinel_runner.mjs",
     "test:probes": "cross-env VITEST_PROBE=1 vitest run tests/probes/",

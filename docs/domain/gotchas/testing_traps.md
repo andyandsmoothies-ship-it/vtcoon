@@ -59,3 +59,10 @@
       2. *Full Regression Thuộc Về Main Agent & OS Process*: Việc chạy full regression toàn bộ dự án hoặc quét đột biến Chaos Sentinel thuộc trách nhiệm của Main Agent tại Station 4 qua native OS background process (`run_command`), không bao giờ khoán cho subagent.
       3. *Timebox $\le 3$ Phút*: Mọi lượt dispatch subagent phải hoàn tất trong vòng 3 phút. Nếu subagent cần sửa nhiều file hoặc suy luận kéo dài, đó là tín hiệu của việc phạm vi quá lớn $\to$ BẮT BUỘC chẻ nhỏ thành các Micro-Slice $\le 50$ LOC trước khi dispatch.
 
+14. **Flight Recorder Auto-Ingestion & Forensic Invariant [TOOLING/OBSERVABILITY]**:
+    - **Bẫy Nguy Hiểm (Conjectural Debugging & Amnesia)**: Khi gặp bug liên quan đến trình tự lượt chơi, đồng bộ FSM, tranh chấp tài chính hoặc phá sản bất thường, thói quen suy đoán mã nguồn tĩnh hoặc yêu cầu người dùng miêu tả lại bằng lời thường bỏ sót các race condition ngầm giữa các tick.
+    - **Bất Biến Bắt Buộc (Verified Invariants)**:
+      1. *Tự Động Phân Tích Flight Recorder*: Mọi ca lỗi hành vi gameplay, kinh tế hoặc FSM desync, Agent BẮT BUỘC ưu tiên trích xuất hoặc yêu cầu dump Flight Recorder từ client (`npm run analyze:log <dump.json>` hoặc `window.__vtcoon.exportFlightRecorder()`).
+      2. *Dòng Thời Gian Bất Biến (Tick Timeline)*: Sử dụng công cụ `scripts/analyze_gameplay_log.mjs` để kiểm tra toàn bộ dòng thời gian các tick, intent của người chơi/bot và các vi phạm bất biến (Invariant Violations) được tự động ghi nhận trước khi đưa ra bất kỳ giả định hay giải pháp nào.
+
+

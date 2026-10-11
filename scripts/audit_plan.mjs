@@ -109,7 +109,7 @@ errors += auditCohesionOrphanFiles(targetFiles);
 errors += auditNewFileDeclarations(targetFiles, planContent, fileTargetRegex, snippetRegex, findSourceFiles);
 
 // 2. Scan drop-in snippets for verbatim match, dirty casts, and State/Action SRP
-const snippetResult = auditDropInSnippets(planContent, fileTargetRegex, snippetRegex, fileSnippetsMap, findSourceFiles, auditPlanSnippetHygiene);
+const snippetResult = auditDropInSnippets(planContent, fileTargetRegex, snippetRegex, fileSnippetsMap, findSourceFiles, auditPlanSnippetHygiene, targetFiles);
 errors += snippetResult.errors;
 const checkedSnippets = snippetResult.checkedSnippets;
 

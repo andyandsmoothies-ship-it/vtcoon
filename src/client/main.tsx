@@ -8,6 +8,8 @@ import { useGameStore } from './store/game_store';
 import { useLobbyStore } from './store/lobby_store';
 import { useEnvironmentStore } from './store/environment_store';
 import { useVfxStore } from './store/vfx_store';
+import { useTelemetryStore } from './telemetry/telemetry_store';
+import { useDiagnostic3DStore } from './3d/diagnostic_3d_store';
 import { PreMatchDeck } from './ui/lobby/pre_match_deck';
 import { WelcomeHubModal } from './ui/lobby/welcome_hub_modal';
 import { getInitialBalanceForPlayerCount, type Player } from '../domain/room';
@@ -38,6 +40,18 @@ if (typeof window !== 'undefined') {
   window.__lobbyStore = useLobbyStore;
   window.__environmentStore = useEnvironmentStore;
   window.__vfxStore = useVfxStore;
+
+  window.__vtcoon = {
+    gameStore: useGameStore,
+    lobbyStore: useLobbyStore,
+    environmentStore: useEnvironmentStore,
+    vfxStore: useVfxStore,
+    diagnostic3DStore: useDiagnostic3DStore,
+    telemetryStore: useTelemetryStore,
+    exportFlightRecorder: () => useTelemetryStore.getState().exportFlightRecorderDump(),
+    openTelemetryConsole: () => useTelemetryStore.getState().toggleConsole(true),
+    open3DDiagnostics: () => useDiagnostic3DStore.getState().toggleOpen(),
+  };
 
   if (!useLobbyStore.getState().roomCode) {
     const initCfg = getInitialLobbyConfig();

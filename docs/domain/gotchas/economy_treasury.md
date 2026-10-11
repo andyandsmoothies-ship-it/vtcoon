@@ -48,4 +48,9 @@
       (1) *Sequential Accounting Decomposition*: Mọi nghĩa vụ tài chính phát sinh do Vượt GO BẮT BUỘC được bóc tách tuần tự trong `extractPassedGoActivities` (trích xuất Lương, Thấu chi, Lãi tín dụng, Thuế tài sản, Lãi thế chấp và trừ dần khỏi `diff` của payer). CẤM triệt tiêu số dư chéo hoặc dựa vào `absDiff` tại `processPayerFee`.
       (2) *Zero-Falsy Numeric Guard*: Mọi trường dạng số có thể bằng 0 (như `overdraftRoundsLeft`) BẮT BUỘC kiểm tra `!== undefined`, CẤM dùng toán tử chân trị ngầm `?(prop)`.
       (3) *Causal Spatio-Temporal Binding*: Các khoản khấu trừ qua GO bắt buộc neo hiển thị vào mốc `getPawnPassGoDelay` với nhịp so le nhẹ (+200ms), cấm trôi dạt sang `getPawnLandingDelay`. `[DOMAIN/ECONOMIC]`
+17. **Characterization Baseline Invariant & 40-Cell Snapshot [IMP-OBSERVABILITY]**:
+    - **Bẫy Nguy Hiểm (Silent Economic Drift)**: Các công thức tính tiền thuê, đấu giá, thế chấp, phí tiện ích và thuế tài sản trải dài trên 40 ô cờ với nhiều cấp độ công trình (Cấp 0 đến Cấp 4 / Resort). Khi refactor hoặc bổ sung hiệu ứng kinh tế mới, việc chỉ kiểm thử 1-2 ô mẫu (ví dụ Ô 1 hoặc Ô 39) rất dễ gây biến dạng ngầm (silent drift) biểu phí của các ô còn lại, phá vỡ thế cân bằng trò chơi.
+    - **Bất Biến Xác Minh**:
+      (1) *Snapshot Ma Trận 40 Ô*: Mọi thay đổi đối với biểu phí, công thức tính tiền thuê (`calculateRent`), đấu giá (`auction`), thế chấp (`mortgage`) hoặc thuế đất BẮT BUỘC phải chạy hoặc tạo bài test characterization snapshot toàn bộ 40 ô cờ trước khi sửa đổi để làm mốc đối chứng (baseline).
+      (2) *Bảo Toàn 100% Hành Vi Tuyệt Đối*: Kết quả sau khi refactor phải khớp 100% baseline cũ đối với mọi trạng thái thông thường (0 modifier). Nếu có thay đổi có chủ đích về mặt cân bằng game, delta sai khác phải được khai báo tường minh trong bản đặc tả kỹ thuật và có sự đồng ý của Product Owner. `[DOMAIN/ECONOMIC]`
 

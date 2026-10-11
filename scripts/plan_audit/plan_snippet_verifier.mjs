@@ -145,7 +145,7 @@ export function auditNewFileDeclarations(targetFiles, planContent, fileTargetReg
 /**
  * Scans drop-in snippets for verbatim match, dirty casts, and SRP violations.
  */
-export function auditDropInSnippets(planContent, fileTargetRegex, snippetRegex, fileSnippetsMap, findSourceFiles, auditPlanSnippetHygiene) {
+export function auditDropInSnippets(planContent, fileTargetRegex, snippetRegex, fileSnippetsMap, findSourceFiles, auditPlanSnippetHygiene, targetFiles = new Map()) {
   let errors = 0;
   let checkedSnippets = 0;
 
@@ -252,6 +252,17 @@ export function auditDropInSnippets(planContent, fileTargetRegex, snippetRegex, 
       // 2.9 Snippet Hygiene
       errors += auditPlanSnippetHygiene(relPath, targetChunk, replacementChunk, fileSnippetsMap.get(relPath) || []);
     }
+  }
+
+  // 2.10 Mandatory Drop-in Snippets Enforcement for existing production files
+  const existingProdFiles = Array.from(targetFiles.entries())
+    .filter(([f, isNew]) => !isNew && /^(?:src|lib|app)[\\/]/.test(f))
+    .map(([f]) => f);
+
+  if (existingProdFiles.length > 0 && checkedSnippets === 0) {
+    console.error(`  ❌ MISSING DROP-IN SNIPPETS: Plan modifies existing production files (${existingProdFiles.join(', ')}), but contains 0 drop-in code snippets (<<<< ==== >>>>) in Station 2!`);
+    console.error(`     Prose descriptions alone are forbidden. Exact code diffs are required to prevent implementer drift.`);
+    errors++;
   }
 
   return { errors, checkedSnippets };

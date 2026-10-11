@@ -69,3 +69,8 @@
       2. *Cổng Thoát Phá Sản Đơn Nhất (Single Bankruptcy Exit Point Mandate)*: Mọi kịch bản chuyển lượt sau khi người chơi phá sản (bao gồm cả sau khi phiên đấu giá `fireSaleQueue` kết thúc trong `auction_manager.ts`) BẮT BUỘC 100% phải gọi hàm tập trung `advanceTurnAfterBankruptcy(room)`. Nghiêm cấm tự viết lại vòng lặp tìm `nextPlayer` ở bất kỳ đâu khác.
       3. *Lõi SSOT Tự Chữa Lành (Self-Healing SSOT)*: `checkInsolvency` bắt buộc phải tự fallback `room.preInsolvencyPhase = TurnPhase.WaitingRoll` nếu `room.phase === TurnPhase.InsolvencyPhase` nhưng chưa có `preInsolvencyPhase`. `finalizeInsolvencyPhase` bắt buộc phải khôi phục `TurnPhase.WaitingRoll` cho người chơi trong lượt nếu trước khi nợ họ chưa gieo xúc xắc. `[DOMAIN/FSM]`
 
+15. **Flight Recorder Diagnostics & Race Hazard Forensic Invariant [FSM/FORENSIC]**:
+    - **Bẫy Nguy Hiểm (Heisenbug Speculation)**: Khi kiểm tra các lỗi vỡ nợ, tranh chấp FSM, hoặc kẹt chuyển lượt N+1, phán đoán nguyên nhân qua đọc mã tĩnh thường bỏ sót trình tự micro-ticks và intent đến từ bot/người chơi.
+    - **Bất Biến Bắt Buộc**: Khi điều tra lỗi FSM, Agent BẮT BUỘC ingest dump Flight Recorder (`window.__vtcoon.exportFlightRecorder()` hoặc file JSON log) và dùng `node scripts/analyze_gameplay_log.mjs <dump.json>` để kiểm tra tuần tự các tick FSM, phân giải đúng race condition thực tế thay vì suy đoán cảm tính. `[DOMAIN/FSM]`
+
+
