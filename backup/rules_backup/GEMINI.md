@@ -1,71 +1,72 @@
 # AGENTS CONSTITUTION (PROJECT HARNESS)
 
 > Precedence: This project harness specializes Global AG OS Rules. Project rules strictly override global rules in case of conflict.
-> Target Market: Viet Nam. All user-facing documents and game artifacts must be in Vietnamese.
+> Language Policy: All settings, instructions, and harness files must be in concise English. User-facing reports (`docs/reports/**`) and game artifacts must be in Vietnamese.
 
-## 1. HARD CONSTRAINTS & CODE QUALITY
+## 1. MANDATORY MECHANICAL GATES
+Every ticket must pass 100% of automated gates before handoff:
+1. **Plan Audit & Signoff**: `node scripts/audit_plan.mjs <plan_path> [--auto-sign]`
+2. **Scope Confinement**: `node scripts/check_scope.mjs [plan_path]`
+3. **Fast Pre-Filter (Type, LOC, Linters, Assert Density)**: `npm run prefilter -- <files>`
+4. **Live Socket Port 0 & Mutation**: `npm run sentinel -- --ticket <id> --test <test_path>`
+5. **Comprehensive Evidence Audit**: `node scripts/check_evidence.mjs <ticket>`
+*(All toolchain scripts adhere to the Facade Re-export Pattern: root `scripts/*.mjs` are lean facades <= 200 LOC; specialized logic lives in `scripts/report/`, `scripts/slop_linter/`, `scripts/visual_capture/`, `scripts/plan_audit/`, `scripts/sentinel/`).*
 
-- **Deep Modules & Anti-Slop (lint:slop & check:loc)**:
-  - Architecture: Deep modules only (simple interfaces hiding complex logic). Zero single-use wrappers, zero 1-line delegate methods. Newly added production exports MUST have at least one caller outside `tests/**` (mechanically audited via `scripts/audit_plan.mjs` Rule 1.2 and `scripts/lint_slop.mjs`).
-  - Seam Discipline & Anti-TIDD: The interface is the test seam. Banned exposing test-only properties/methods (`ForTesting` suffix), test backdoors, or monkey-patching framework internals (`__CLIENT_INTERNALS_*`, `__SECRET_*`, `Object` prototypes) in `src/**`.
-  - Poka-Yoke Affordance Invariant: UI Affordance helpers MUST NEVER duplicate economic or domain logic. All button enabled/disabled states and cost displays MUST derive directly from Domain Validators (`canDo`, `evaluation`).
-  - Pure-Move Quarantine: Refactor tickets must be 100% behavior-preserving. Zero semantic mutations, zero input normalization, zero silenced errors. Refactor tickets require differential parity testing before pruning old code.
-  - LOC Ceilings: Tier 1 (Domain Logic / FSM / Server) <= 400 LOC (warn 300, hard error 550); Tier 2 (UI / 3D Canvas / Views) <= 500 LOC (warn 400); Tier 3 (Static Data / Config) <= 800 LOC; Living Tests <= 600 LOC. Measure via `npm run check:loc`. Ban code-golfing.
-  - Client/Server Boundary & Zero Dirty Casts: Banned `as any`, `as unknown as T` across ALL files. Banned importing platform built-ins (`node:*`, ws) into client/browser bundles. Dynamic live sockets (`port: 0`) in integration tests.
-  - Fast & Deterministic: Seeded PRNG, bounded zero-delay sockets, fake timers. Banned unseeded `Math.random()` and long blocking sleeps (>= 3000ms in contracts).
+## 2. IRON LAWS (NEGATIVE CONSTRAINTS - VIOLATION = EXIT 1)
+- **Zero Dirty Casts**: FORBIDDEN `as any`, `as unknown as T` across `src/**` and `tests/**`.
+- **Anti-TIDD**: FORBIDDEN test-only exports, props, methods (`ForTesting`). All new exports in `src/**` must have consumers outside `tests/**`.
+- **Seam Discipline**: Interface is the test boundary. FORBIDDEN monkey-patching frameworks (`spyOn(React)`, `__CLIENT_INTERNALS_*`, `Object.prototype`).
+- **LOC Ceilings**: Tier 1 (Domain/FSM/Server) <= 400 LOC; Tier 2 (UI/3D/Views) <= 500 LOC; Tier 3 (Static Config) <= 800 LOC; Living Tests <= 600 LOC. Measure via `npm run check:loc`. Code-golfing banned.
+- **Toolchain Facade Invariant**: Root entrypoints in `scripts/*.mjs` MUST remain thin orchestrator facades (<= 200 LOC). All new script logic, AST rules, or telemetry extractors MUST be implemented in the corresponding subdirectories (`scripts/report/`, `scripts/slop_linter/`, `scripts/visual_capture/`, `scripts/plan_audit/`, `scripts/sentinel/`).
+- **Assertion Density**: 1-4 asserts (`expect`) per atomic test. FORBIDDEN loops (`for`, `forEach`) in `it()`.
+- **Fast & Deterministic Testing**: Use seeded PRNG, zero-delay sockets, fake timers. FORBIDDEN unseeded `Math.random()` and arbitrary sleeps (>= 3000ms).
+- **Non-Interactive CLI Guard**: FORBIDDEN naked `npx <pkg>` without `--yes` in subshells. FORBIDDEN inline multiline PowerShell in `-e "..."`.
+- **Client/Server Boundary**: FORBIDDEN importing Node runtime built-ins (`node:*`, ws) into client bundles. Sockets must use dynamic `port: 0`.
+- **Pure-Move Quarantine**: Refactors must preserve 100% behavior. No semantic changes, no error swallowing (`try...catch`).
+- **Poka-Yoke UI Affordance**: Button enabled/disabled states and displayed costs MUST derive directly from Domain Validators (`canDo`, `evaluation`), never recalculated independently.
+- **i18n Exhaustiveness**: Every `ActionRejectReason` code must map 100% in `src/domain/i18n/vi.ts` typed `Record<ActionRejectReason, string>`.
+- **Causal Root Scope Invariant**: FORBIDDEN resolving plan challenges with verbal claims or isolated expression tweaks. If file $A$ causes state erasure, file $A$ MUST be in scope, or the feature must be architecturally decoupled.
+- **Full Lifecycle Testing**: FORBIDDEN solitary static mocking of store state for lifecycle/camera/pawn features. Contract suites MUST exercise the canonical sequence (`triggerDiceRoll` -> `startPawnMove`).
+- **R3F Transient Unmount Invariant**: FORBIDDEN returning `null` on transient state when `useFrame` is registered. Must use `<group visible={...}>` to prevent GPU buffer/shader reallocation churn on mobile.
+- **Function-to-Test Parity & Scaffolding Protocol**: FORBIDDEN omitting test specs for declared exported functions. When new production files are introduced, empty stubs MUST be scaffolded before Station 1 to guarantee Semantic Behavioral RED (runtime assertions fail, never loader `Cannot find module`).
+- **Symmetric State Exit Invariant**: FORBIDDEN altering an FSM phase exit or recovery logic on one action (e.g. `downgrade`) without auditing and harmonizing all symmetric actions leading to that same exit (e.g. `mortgage`, `bankruptcy`). Any shared state exit MUST use a centralized helper or symmetric FSM restoration logic.
+- **Anti-Shallow UI Refactoring & Props Explosion**: FORBIDDEN decomposing React components by moving JSX chunks into shallow stateless subcomponents with wide interfaces (>= 4 props). Any effort to de-escalate UI component LOC must prioritize extracting Pure Data Derivation Logic (formatting, sanitization, label resolution) into existing domain helper/visual files (*_visuals.ts, *_helpers.ts) before modifying the presentation component tree.
+- **Subagent Timebox & Targeted Scope Invariant**: FORBIDDEN subagents running broad un-targeted test suites (naked `vitest run` across the entire repo). Subagents (`qa-tester`, `implementer`) MUST execute strictly their assigned slice test (`npx vitest run <specific_test_path>`). Subagent tasks MUST be timeboxed to fast cognitive execution (<= 3-5 min per dispatch). Heavy full regression test suites, global builds, and mutation testing belong strictly to Station 4 executed by the Main Agent via native background OS processes (`run_command`).
+- **Anti-Conjectural Root Cause Invariant**: FORBIDDEN resolving runtime anomalies, visual artifacts, or platform-specific glitches (WebGL strobing, GPU precision overflow, thermal throttling, camera lag) solely by conjectural inspection of `.tsx`/source files. If the root cause cannot be statically proven, an empirical observability tool (diagnostic HUD `?debug=3d`, layer isolation, live telemetry) MUST be used in Station 0.5 to physically isolate the culprit before drafting a plan or writing Station 1 tests.
+- **Flight Recorder & Forensic Invariant**: FORBIDDEN resolving gameplay, balance, bankruptcy, or state machine desync bugs solely through static code speculation. The agent MUST request or ingest the Flight Recorder dump (`npm run analyze:log <dump.json>` or `window.__vtcoon.exportFlightRecorder()`) to inspect tick timelines and invariant violations before planning.
+- **Economic Characterization Baseline Invariant**: FORBIDDEN modifying core property pricing, rent curves, mortgage rates, tax brackets, or auction settlement logic without establishing/verifying a 40-cell characterization snapshot baseline test to prevent unannounced economic drift across building tiers.
+- **Tactile Corner Arc & Viewport Margin Symmetry Invariant**: FORBIDDEN signing off UI components inside curved/pill containers (border-radius $R$) using simple rectangular bounding box inclusion ($X_1 \le X_2$). Any child element must maintain clearance $\ge R + 4\text{px}$ from container edges to prevent corner arc crowding, and opposing horizontal margins must satisfy $|\text{margin}_{left} - \text{margin}_{right}| \le 8\text{px}$ on desktop. FORBIDDEN submitting visual UI delivery without 1:1 zoomed visual self-critique of modified components.
+- **Definition of Done (DoD) Stopping Boundary Invariant**: FORBIDDEN continuing exploratory iterations or running redundant post-edit verification turns once declared contract test assertions in Station 1 (RED) turn green in Station 2 (GREEN) and Station 3 pre-filters succeed. Planning serves as a hard stopping boundary to prevent hyper-verification loops and token wastage.
+- **Earliest Failure Attribution & Coarse-Grained Batching Invariant**: Root-cause diagnosis in Station 0.5 must identify the earliest failed stage (`Localization -> Layout/Architecture -> Patch Implementation -> Verification`) rather than patching downstream symptoms. When modifying CSS/UI layouts, agents are FORBIDDEN from generating repetitive micro-string patches (`re-patch` streaks); modifications must be expressed as cohesive component blocks.
+- **Knowledge Fold Invariant**: Any ticket/IMP modifying domain rules, economic models, FSM phase transitions, network protocols, or UI affordances MUST update `docs/FEATURE_MAP.md` before Station 3 sign-off to keep the 1-page system matrix authoritative and prevent context drift across future updates.
+- **SSOT Primacy Invariant**: When researching current gameplay rules, economic variables, FSM phases, or subsystem boundaries, agents MUST treat `docs/FEATURE_MAP.md` as the authoritative Single Source of Truth. Historical plans in `.agents/plans/` represent past point-in-time diffs (deltas) and MUST NOT be used to deduce current architectural truth.
 
-## 2. RISK-BASED TIERING & 4-STATION CLOSED-LOOP PIPELINE
+## 3. LEAN PIPELINE
+- **Tier 1 (Fast-Track)**: < 50 LOC, visual/CSS/spacing, copy, isolated fix (0 Schema, 0 FSM, 0 Net). Main Agent executes directly in 1-2 min, 0 subagents, 0 plan.
+- **Micro-Slice (<= 50 LOC, 1 subsystem)**:
+  0. Station 0.5 (Empirical Root-Cause Gate - Mandatory for Runtime Anomalies, Heisenbugs & State Desync):
+     - For non-deterministic visual/runtime glitches (flickering, GPU precision overflow, thermal throttling, camera desync), planning based on static code speculation is FORBIDDEN. The agent MUST isolate the physical culprit via observability hooks (e.g. `?debug=3d`, layer toggles, console traces, `window.__vtcoon`) and confirm the exact root cause with physical evidence before drafting the plan.
+     - For gameplay, balance, bankruptcy, or state machine desync bugs, the agent MUST request or ingest the In-Game Flight Recorder dump (`npm run analyze:log <dump.json>`) to inspect tick timelines and invariant violations before drafting the plan.
+  1. Draft Lean Plan: `.agents/plans/PLAN_[ID].md` (<= 200 lines, 0 code-dump).
+  2. Machine Plan Audit: `node scripts/audit_plan.mjs <plan> --auto-sign` (0 defects auto-signs `HARDENED_APPROVED`).
+  3. Adversarial Gate (Mandatory for State/FSM/Economy/Coordinators): Run 1 adversarial round (`adversarial-challenger`) writing to `.agents/audit/PLAN_CHALLENGE_[TICKET].md` whenever touching FSM lifecycle, State transitions, or Economy to block blind spots before implementation.
+  4. Human Gate: User approves ("đồng ý").
+  5. Station 1 (RED): Scaffold empty stubs in `src/**` for new files; `qa-tester` writes contract tests in `tests/**` (Adversarial Inversion: fails strictly on runtime assertions).
+  6. Station 2 (GREEN): `implementer` writes minimal code in `src/**`.
+  7. Mechanical Gates: Run `npm run prefilter -- <files>` and `npm run check:scope`.
+  8. Audit & Delivery Reports: Main Agent runs `npm run report -- [ID]` to synthesize physical station audits (`.agents/audit/SPEC_REVIEW_[ID].md`, `CODE_REVIEW_[ID].md`, and `.agents/audit/PLAN_CHALLENGE_[ID].md`) and the comprehensive acceptance report (`docs/reports/improvements/IMP-[ID]-[slug]_report.md`) embedding all subagent comments/verdicts, captures Dual-Viewport (for UI changes), and delivers to User.
+- **Epic / Large Feature (> 50 LOC, > 2-3 files)**:
+  - Must run **Auto-Slicing Protocol** emitting Micro-Slices Roadmap (< 10 lines) before planning.
+  - Must run 1 adversarial round (`adversarial-challenger`) writing to `.agents/audit/PLAN_CHALLENGE_[TICKET].md` to block game design / economic exploits.
 
-- **Tier 1 (Fast-Track)**: < 50 LOC, pure visual/CSS/spacing, audio, text, or isolated fix to 1-2 files (0 Schema, 0 FSM/Server, 0 Network). Executed directly by Main Agent in 1-2 minutes (Zero subagents, no plan, exempt from diagramming).
-- **Tier 2 (Full Rigor)**: Schema, Network, FSM, or > 50 LOC. Main agent drafts plan in `.agents/plans/PLAN_[TICKET].md`, executes Two-Stage Plan Hardening, then runs 4-Station Pipeline:
-  - **Auto-Slicing Protocol**: Cross-subsystem features or tasks spanning > 2-3 logic files MUST halt and present a Micro-Slices Roadmap (< 10 lines) before drafting. Slices must be independent, deployable, delta <= 50 LOC, strictly 1 subsystem, with dedicated contract tests. Scope Conservation: 100% of affected files must be assigned to a slice or explicitly deferred.
-  - **Lean Plan Specification**: Architectural blueprint only (Types, Signatures, Invariants, Test Matrices). Target <= 250 lines. Full code copy-pasting is strictly banned (maximum 1-3 snippets <= 30 LOC for subtle algorithms). Validate mechanically via `node scripts/audit_plan.mjs <plan>`.
-  - **Two-Stage Plan Hardening**: Stage A (`plan-griller` verifies 5 Pillars & physical disk via `audit_plan.mjs`), Stage B (`adversarial-challenger` probes novel exploit vectors into `.agents/audit/PLAN_CHALLENGE_[TICKET].md`). Requires `HARDENED_APPROVED` before Human Review Gate.
-  - **Station 1 (RED Contract Test)**: `qa-tester` writes atomic contract tests in `tests/**` (1-4 asserts/test, zero loops in `it()`). Adversarial Inversion: tests must fail on runtime assertions, not missing imports. Emits `.agents/evidence/station1_[TICKET].json`.
-  - **Station 2 (GREEN Implementation)**: `implementer` writes minimum code in `src/**` to pass tests. Zero bug-codification. Implementer Pushback & Discovery Mandate: report unforeseen physical constraints via `### 💡 IMPLEMENTATION DISCOVERY`.
-  - **Station 2.5 (Fast Pre-Filter Sweep)**: Single-pass mechanical filter via `npm run prefilter -- <files>` (`tsc --noEmit`, LOC budget, zero dirty casts, console.log purge, linters: `lint:slop`, `lint:ui`, `check:i18n`).
-  - **Station 3 (Independent Review Funnel)**:
-    - *Phase 3.0 (Physical Visual Evidence)*: Mandatory dual-viewport screenshots (`scripts/capture_visual_evidence.mjs --dual-viewport`) unless explicit `pureLogicWaiver` applies.
-    - *Phase 3.1 (Spec Gate)*: `spec-reviewer` verifies 100% plan fidelity & reconciles discoveries.
-    - *Phase 3.2 (Craft Gate)*: Parallel concurrent dispatch via single tool call (`code-reviewer` + visual critic: `game-3d-visual-critic` for 3D, `ui-craft-reviewer` for 2D).
-    - *Phase 3.3 (Persistence)*: Reports physically persisted to `.agents/audit/*_REVIEW_[TICKET].md`.
-  - **Station 4 (Adversarial Boundary & Mutation Sentinel)**: `chaos-sentinel` executes 3 physical probes: (1) Wire-to-Core Closed-Loop Parity, (2) Ephemeral Dynamic Boundary (`port: 0`), (3) Targeted Mutation Sensitivity (floor >= 8 tests for micro-slices, >= 14 for epics, 100% kill rate, 0 survived). READ-ONLY on `src/**`. Emits `.agents/evidence/chaos_sentinel_[TICKET].json`.
-  - **Epic Consolidation Gate**: Final slice of a roadmap MUST generate an Epic Consolidation Report in `docs/reports/...` validating cumulative metrics and end-to-end integration.
-
-## 3. DOMAIN INVARIANTS SSOT (docs/domain/gotchas/)
-
-Always consult the relevant pillar before drafting plans or modifying target code:
-
-| Target Subsystem / Directory | Domain Scope | Modular Invariants SSOT |
-| :--- | :--- | :--- |
-| `src/domain/fsm/`, `src/domain/turn_loop.ts` | Phase FSM, Turn N+1 Teardown, Solvency, PRNG Streams | [`fsm_lifecycle.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/gotchas/fsm_lifecycle.md) |
-| `src/domain/property_*`, `treasury_*`, `bond_*` | Treasury Conservation, Pricing, Utilities, Bonds | [`economy_treasury.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/gotchas/economy_treasury.md) |
-| `src/domain/bot/`, `src/domain/p2p_trade.ts` | Multi-Agent Harassment, Valuation, Pacing, Duel Denial | [`bot_negotiation.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/gotchas/bot_negotiation.md) |
-| `src/server/network/`, `src/client/network/` | 5-Station Vertical Slice, Tombstones, Timers, Intents | [`network_delta.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/gotchas/network_delta.md) |
-| `src/client/ui/`, `src/client/modal_host.tsx` | Mobile 360px 3-Tier, 44px Touch Targets, Spatial Bounds | [`ui_ergonomics.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/gotchas/ui_ergonomics.md) |
-| `src/client/3d/`, `src/client/game_canvas.tsx` | Ocean Depth, Splines, In-Action Capture & Telemetry | [`3d_cinematics.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/gotchas/3d_cinematics.md) |
-| `tests/**`, `tests/probes/` | Detroit Classical, Atomic Contract, Mutation Sensitivity | [`testing_traps.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/gotchas/testing_traps.md) |
-| `src/server/`, `src/domain/` | Deep Modules, Collection Protocol Parity, Aggregate Root | [`deep_modules.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/gotchas/deep_modules.md) |
-
-- **Cross-Domain Rules**:
-  - *Error Code & Dictionary Exhaustiveness*: Every `ActionRejectReason` code must have 100% bi-directional mapping in `src/domain/i18n/vi.ts` typed strictly as `Record<ActionRejectReason, string>` (Enforced via `npm run check:i18n`).
-  - *No Invariant Displacement*: Adding new edge or boundary tests MUST NOT displace, drop, or replace previously verified domain invariants.
-  - *Dual-Platform 3D Performance & Mobile Thermal Invariant (IMP-265)*: 3D scenes must conditionally freeze continuous micro-animations and omit heavy passes (`ContactShadows`) when `isMobile === true` (See details in `3d_cinematics.md` Gotcha #14).
-
-## 4. DEFINITION OF DONE & MECHANICAL GATES
-
-A task is COMPLETE only when:
-1. `npm run prefilter -- <files>` passes 100% (tsc, LOC, zero dirty casts, zero orphan files, linters).
-2. Automated tests pass Adversarial Inversion with flow tags (`[UC-XXX/MSS]` or `[UC-XXX/A#]`), assertion density <= 4 per test, and zero living test mutations.
-3. Reviewer gates approve in order: Phase 3.1 `spec-reviewer`, Phase 3.2 `code-reviewer` + visual critic; all reports physically persisted to `.agents/audit/*.md`.
-4. Station 4 (`chaos-sentinel`) signs off 3 physical probes with zero surviving mutants and machine JSON evidence validated via `node scripts/check_evidence.mjs [TICKET]`.
-5. Progress & Tech Debt ledger updated in `docs/epics/[epic]/_epic_ledger.md` and dedicated completion report persisted to `docs/reports/...`.
-6. Honest Merge Danger Accounting: Stateful or UI affordance changes carry an objective risk floor of >= 1-2/10.
-
-## 5. MECHANICAL COMMAND REFERENCE
-
-- **Fast Pre-Filter (Station 2.5)**: `npm run prefilter -- <files>`
-- **Plan Mechanical Auditor**: `node scripts/audit_plan.mjs <plan_path>`
-- **Evidence & Gate Checker**: `node scripts/check_evidence.mjs <ticket>`
-- **Anti-Slop & LOC Linters**: `npm run lint:slop` | `npm run check:loc <files>`
-- **UI Craft & i18n Checks**: `npm run lint:ui` | `npm run check:i18n`
+## 4. SSOT DOMAIN GOTCHAS (docs/domain/gotchas/)
+Consult the respective pillar before planning or modifying code:
+- Master Feature Map (SSOT Matrix): [`FEATURE_MAP.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/FEATURE_MAP.md)
+- FSM & Game Lifecycle: [`fsm_lifecycle.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/gotchas/fsm_lifecycle.md)
+- Economy & Treasury: [`economy_treasury.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/gotchas/economy_treasury.md)
+- Bot AI Negotiation: [`bot_negotiation.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/gotchas/bot_negotiation.md)
+- Network & Live Sockets: [`network_delta.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/gotchas/network_delta.md)
+- UI & Touch Ergonomics: [`ui_ergonomics.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/gotchas/ui_ergonomics.md)
+- 3D Graphics & Mobile: [`3d_cinematics.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/gotchas/3d_cinematics.md)
+- Testing Traps: [`testing_traps.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/gotchas/testing_traps.md)
+- Deep Module Design: [`deep_modules.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/gotchas/deep_modules.md)
