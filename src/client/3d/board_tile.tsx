@@ -184,6 +184,8 @@ export interface LayeredDioramaTileProps {
   readonly isMonopolyGroup?: boolean;
   readonly isMobile?: boolean;
   readonly renderToyBuildings?: boolean;
+  readonly renderBasePlinth?: boolean;
+  readonly renderAtlasSurface?: boolean;
 }
 
 export function tierColor(level: number): string {
@@ -205,6 +207,8 @@ export function LayeredDioramaTile({
   isMonopolyGroup = false,
   isMobile: propIsMobile,
   renderToyBuildings = true,
+  renderBasePlinth = true,
+  renderAtlasSurface = true,
 }: LayeredDioramaTileProps): React.ReactElement {
   const textureRevision = useTextureRevision();
   const isMobile = propIsMobile !== undefined ? propIsMobile : isPhoneHardware();
@@ -215,17 +219,21 @@ export function LayeredDioramaTile({
     return (
       <group position={position} rotation={rotation} onClick={onClick}>
         {/* Corner tile — larger square base with polished stone PBR and rounded beveled edges */}
-        <RoundedBox args={[2.2, 0.22, 2.2]} radius={0.08} smoothness={isMobile ? 1 : 4} receiveShadow>
-          <meshStandardMaterial color="#1E293B" roughness={0.16} metalness={0.25} envMapIntensity={1.2} />
-        </RoundedBox>
+        {renderBasePlinth && (
+          <RoundedBox args={[2.2, 0.22, 2.2]} radius={0.08} smoothness={isMobile ? 1 : 4} receiveShadow>
+            <meshStandardMaterial color="#1E293B" roughness={0.16} metalness={0.25} envMapIntensity={1.2} />
+          </RoundedBox>
+        )}
         {/* Inner corner accent badge with texture */}
-        <mesh position={[0, 0.115, 0]} rotation={[-Math.PI / 2, 0, 0]} geometry={tileGeometry} receiveShadow>
-          {tileAtlas ? (
-            <meshStandardMaterial map={tileAtlas} roughness={0.98} metalness={0.0} envMapIntensity={0.0} />
-          ) : (
-            <meshStandardMaterial color="#1E293B" roughness={0.25} metalness={0.1} />
-          )}
-        </mesh>
+        {renderAtlasSurface && (
+          <mesh position={[0, 0.115, 0]} rotation={[-Math.PI / 2, 0, 0]} geometry={tileGeometry} receiveShadow>
+            {tileAtlas ? (
+              <meshStandardMaterial map={tileAtlas} roughness={0.98} metalness={0.0} envMapIntensity={0.0} />
+            ) : (
+              <meshStandardMaterial color="#1E293B" roughness={0.25} metalness={0.1} />
+            )}
+          </mesh>
+        )}
       </group>
     );
   }
@@ -238,9 +246,11 @@ export function LayeredDioramaTile({
   return (
     <group position={position} rotation={rotation} onClick={onClick}>
       {/* 1. Base tile — Polished ivory cream parchment PBR with rounded beveled edges */}
-      <RoundedBox args={[1.68, 0.2, 2.2]} radius={0.08} smoothness={isMobile ? 1 : 4} receiveShadow>
-        <meshStandardMaterial color="#EDE5D8" roughness={0.35} metalness={0.06} envMapIntensity={1.0} />
-      </RoundedBox>
+      {renderBasePlinth && (
+        <RoundedBox args={[1.68, 0.2, 2.2]} radius={0.08} smoothness={isMobile ? 1 : 4} receiveShadow>
+          <meshStandardMaterial color="#EDE5D8" roughness={0.35} metalness={0.06} envMapIntensity={1.0} />
+        </RoundedBox>
+      )}
 
       {/* 1.0. Viền hào quang & Huy hiệu sự kiện thị trường (IMP-234 Event Card Aura) */}
       {!isCornerTile && (
@@ -287,11 +297,11 @@ export function LayeredDioramaTile({
       )}
 
       {/* 2. Top surface information texture with subtle lacquer sheen */}
-      {tileAtlas ? (
+      {renderAtlasSurface && tileAtlas ? (
         <mesh position={[0, 0.103, 0]} rotation={[-Math.PI / 2, 0, 0]} geometry={tileGeometry} receiveShadow>
           <meshStandardMaterial map={tileAtlas} roughness={0.98} metalness={0.0} envMapIntensity={0.0} />
         </mesh>
-      ) : (
+      ) : !renderAtlasSurface ? null : (
         /* Fallback ColorStrip when texture is unavailable */
         cell.colorGroup != null && (
           <mesh position={[0, 0.105, -0.82]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>

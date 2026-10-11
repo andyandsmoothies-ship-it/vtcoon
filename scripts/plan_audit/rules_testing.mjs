@@ -234,3 +234,40 @@ export function auditDefinitionOfDone(planContent) {
   }
   return errors;
 }
+
+export function auditWiringParityInPlan(targetFiles, planContent) {
+  let errors = 0;
+  const targetList = Array.from(targetFiles.keys());
+  const helperFiles = targetList.filter((f) => /_(?:helpers|detect|math|calc)\.[a-z]+$/i.test(f));
+  const consumerFiles = targetList.filter((f) => /\.(?:tsx|ts)$/i.test(f) && !/_(?:helpers|detect|math|calc)\.[a-z]+$/i.test(f) && !/types?\.[a-z]+$/i.test(f) && !f.includes('test'));
+
+  if (helperFiles.length > 0 && consumerFiles.length > 0) {
+    const testSectionHeaderRegex = /(?:^|\n)#{1,4}\s+[^\n]*?(?:Station 1|QA|KIỂM THỬ|CONTRACT TEST|TEST SPEC)[^\n]*\n([\s\S]*?)(?=\n#{1,2}\s+[^\n]+|\n===\s+|$)/gi;
+    let testLines = [];
+    let tMatch;
+    while ((tMatch = testSectionHeaderRegex.exec(planContent)) !== null) {
+      const secLines = tMatch[1].split('\n').filter((l) => /^\s*(?:[-*]|\d+\.)\s*.*?\bTC-[0-9A-Z_.]+/i.test(l));
+      testLines.push(...secLines);
+    }
+    if (testLines.length === 0) {
+      testLines = planContent.split('\n').filter((l) => /^\s*(?:[-*]|\d+\.)\s*.*?\bTC-[0-9A-Z_.]+/i.test(l));
+    }
+    const allTestText = testLines.join('\n');
+
+    const hasWiringTest = consumerFiles.some((cf) => {
+      const baseName = path.basename(cf, path.extname(cf));
+      const compName = baseName.split('_').map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join('');
+      return new RegExp(`(?:${baseName}|${compName}|wiring|mount|call-site|integration)`, 'i').test(allTestText);
+    });
+
+    if (!hasWiringTest) {
+      console.error(`  ❌ [WIRING_PARITY_VIOLATION] Plan modifies helper (${helperFiles.map((f) => path.basename(f)).join(', ')}) and consumer (${consumerFiles.map((f) => path.basename(f)).join(', ')}), but Station 1 test specifications lack integration/wiring tests asserting consumer call-site execution!`);
+      console.error(`     GEMINI.md mandates at least one contract test verifying physical integration/wiring with consumer components.`);
+      errors++;
+    } else {
+      console.log(`  ✔️ Wiring Parity verified: Station 1 contains integration/wiring test specs for consumer call-sites.`);
+    }
+  }
+  return errors;
+}
+

@@ -13,6 +13,7 @@ import { MonopolyPlazaFusion } from './monopoly_plaza_fusion';
 import { LUXURY_PAWN_CONFIGS } from './luxury_pawn_models';
 import { DiceTray } from './dice_tray';
 import { InstancedBoardToyBuildings } from './instanced_toy_buildings';
+import { BatchedBoardTiles } from './batched_board_tiles';
 import { MiniatureCityDiorama } from './miniature_city_diorama';
 import { CoastalIslandEnvironment } from './coastal_island_environment';
 import { CinematicLightingAccents } from './cinematic_effects';
@@ -185,7 +186,13 @@ export function GameBoard({ isMobile: propIsMobile }: GameBoardProps = {}): Reac
       {/* 3.5. Cụm InstancedMesh nhà đất đồ chơi C1-C3 toàn bàn cờ (<8 draw calls) */}
       <InstancedBoardToyBuildings levelMap={levelMap} />
 
-      {/* 4. 40 ô đất liền mạch khép kín tiếp giáp mặt nền phẳng */}
+      {/* 3.8. Cụm BatchedBoardTiles gộp 40 bề mặt và đế ô cờ vào 3 draw calls (IMP-363) */}
+      <BatchedBoardTiles
+        isMobile={isMobile}
+        onTileClick={handleTileClick}
+      />
+
+      {/* 4. 40 ô đất liền mạch khép kín tiếp giáp mặt nền phẳng (render động các lớp trang trí) */}
       {BOARD_CONFIG.map((cell) => (
         <LayeredDioramaTile
           key={cell.index}
@@ -198,11 +205,13 @@ export function GameBoard({ isMobile: propIsMobile }: GameBoardProps = {}): Reac
           ownerColor={ownerInfoMap[cell.index]?.tokenColor}
           ownerSlot={ownerInfoMap[cell.index]?.ownerSlot}
           mascotIcon={ownerInfoMap[cell.index]?.mascotIcon}
-          onClick={() => handleTileClick(cell.index)}
+          onClick={undefined}
           isHeatmapActive={isHeatmapActive}
           isMonopolyGroup={isCellInMonopolyGroup(cell.index, monopolyGroups)}
           isMobile={isMobile}
           renderToyBuildings={false}
+          renderBasePlinth={false}
+          renderAtlasSurface={false}
         />
       ))}
 

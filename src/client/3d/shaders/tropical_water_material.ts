@@ -130,3 +130,78 @@ export const TROPICAL_WATER_FRAGMENT_SHADER = `
     gl_FragColor = vec4(finalColor, uOpacity);
   }
 `;
+
+// [UI-S01/MSS][IMP-365] Mobile Water LOD Shaders — Lightweight ALU Profile for Mobile/TBDR
+export const TROPICAL_WATER_MOBILE_VERTEX_SHADER = `
+  uniform highp float uTime;
+  varying vec2 vWorldPosXZ;
+  varying float vFresnel;
+
+  void main() {
+    vec3 transformed = position;
+    
+    // Sóng nhẹ nhàng tại đỉnh (Vertex Wave)
+    float w1 = sin(transformed.x * 0.055 + uTime * 1.4) * 0.024;
+    float w2 = cos(transformed.y * 0.065 + uTime * 1.1) * 0.018;
+    float boxDist = max(abs(transformed.x), abs(transformed.y));
+    float shoreDamp = smoothstep(9.6, 12.0, boxDist);
+    transformed.z += (w1 + w2) * shoreDamp;
+
+    vec4 worldPos = modelMatrix * vec4(transformed, 1.0);
+    vWorldPosXZ = worldPos.xz;
+    
+    vec3 worldNormal = normalize(normalMatrix * normal);
+    vec3 viewDir = normalize(cameraPosition - worldPos.xyz);
+    vFresnel = clamp(pow(1.0 - max(dot(viewDir, worldNormal), 0.0), 3.0), 0.0, 1.0);
+
+    gl_Position = projectionMatrix * viewMatrix * worldPos;
+  }
+`;
+
+export const TROPICAL_WATER_MOBILE_FRAGMENT_SHADER = `
+  precision mediump float;
+  uniform vec3 uShallowColor;
+  uniform vec3 uDeepColor;
+  uniform vec3 uSunColor;
+  uniform float uOpacity;
+
+  varying vec2 vWorldPosXZ;
+  varying float vFresnel;
+
+  void main() {
+    // 1. Phản xạ độ sâu bằng khoảng cách phẳng 2D (Euclidean Distance)
+    float dist = length(vWorldPosXZ);
+    float depthFactor = clamp((dist - 9.6) / 60.0, 0.0, 1.0);
+    vec3 baseWaterColor = mix(uShallowColor, uDeepColor, depthFactor);
+
+    // 2. Hòa trộn Fresnel đã nội suy từ Vertex Shader (0 dot product, 0 pow, 0 normalize)
+    vec3 finalColor = mix(baseWaterColor, uSunColor, vFresnel * 0.35);
+    gl_FragColor = vec4(finalColor, uOpacity);
+  }
+`;
+
+export interface TropicalWaterShaderConfig {
+  readonly vertexShader: string;
+  readonly fragmentShader: string;
+  readonly depthWrite: boolean;
+}
+
+export function getTropicalWaterShaders(isMobile: boolean): TropicalWaterShaderConfig {
+  if (isMobile) {
+    return {
+      vertexShader: TROPICAL_WATER_MOBILE_VERTEX_SHADER,
+      fragmentShader: TROPICAL_WATER_MOBILE_FRAGMENT_SHADER,
+      depthWrite: false,
+    };
+  }
+
+  return {
+    vertexShader: TROPICAL_WATER_VERTEX_SHADER.replace(
+      'uniform float uTime;',
+      'uniform highp float uTime;'
+    ),
+    fragmentShader: TROPICAL_WATER_FRAGMENT_SHADER,
+    depthWrite: false,
+  };
+}
+

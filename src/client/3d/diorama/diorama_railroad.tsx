@@ -306,11 +306,11 @@ export function DioramaModelRailroad({ isMobile = false }: { readonly isMobile?:
       {/* 3. Đoàn tàu Metro Tuyến 1 (Bến Thành - Suối Tiên): Xanh Cyan, Thân Bạc, Mũi Vát Khí Động Học */}
       {/* Đầu tàu (Lead Cab): Mũi vát #0EA5E9, dải cyan #0284C7, thân bạc #E2E8F0, đèn LED #FEF08A, đèn an toàn #DC2626 */}
       <group ref={leadRef} position={[-2.2, carriageY, 6.9]}>
-        <mesh castShadow position={[0, 0, 0]}>
+        <mesh position={[0, 0, 0]}>
           <SafeBoxGeometry args={[0.65, 0.07, 0.14]} />
           <meshStandardMaterial color="#E2E8F0" metalness={0.7} roughness={0.3} />
         </mesh>
-        <mesh castShadow position={[0.26, -0.005, 0]}>
+        <mesh position={[0.26, -0.005, 0]}>
           <SafeBoxGeometry args={[0.16, 0.06, 0.135]} />
           <meshStandardMaterial color="#0EA5E9" metalness={0.5} roughness={0.3} />
         </mesh>
@@ -334,7 +334,7 @@ export function DioramaModelRailroad({ isMobile = false }: { readonly isMobile?:
 
       {/* Toa khách 1 (Passenger Coach 1): Thân bạc #E2E8F0, sọc cyan #0284C7, pantograph / điều hòa #64748B */}
       <group ref={coach1Ref} position={[-1.4, carriageY, 6.9]}>
-        <mesh castShadow position={[0, 0, 0]}>
+        <mesh position={[0, 0, 0]}>
           <SafeBoxGeometry args={[0.75, 0.07, 0.14]} />
           <meshStandardMaterial color="#E2E8F0" metalness={0.7} roughness={0.3} />
         </mesh>
@@ -354,7 +354,7 @@ export function DioramaModelRailroad({ isMobile = false }: { readonly isMobile?:
 
       {/* Toa khách 2 (Passenger Coach 2): Thân bạc #E2E8F0, sọc cyan #0284C7, pantograph / điều hòa #64748B */}
       <group ref={coach2Ref} position={[-0.55, carriageY, 6.9]}>
-        <mesh castShadow position={[0, 0, 0]}>
+        <mesh position={[0, 0, 0]}>
           <SafeBoxGeometry args={[0.75, 0.07, 0.14]} />
           <meshStandardMaterial color="#E2E8F0" metalness={0.7} roughness={0.3} />
         </mesh>

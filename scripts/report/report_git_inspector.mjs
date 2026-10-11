@@ -109,7 +109,7 @@ export function resolvePlan(plansDir, ticketId) {
     if (subMatch) planSubsystem = subMatch[1].trim();
 
     // Extract registered files from the plan specification (strictly isolating direct scope from baseline dependencies)
-    const directScopeMatch = planContent.match(/[-*]\s*\*\*Direct Scope[^*]*\*\*:\s*([\s\S]*?)(?:\n\s*[-*]\s*\*\*(?:Baseline Working Tree|Prior In-Flight Scope)|\n\s*##|$)/i);
+    const directScopeMatch = planContent.match(/[-*]\s*\*\*Direct Scope[^*]*\*\*:\s*([\s\S]*?)(?:\n\s*[-*]\s*\*\*(?:Referenced Contracts|Baseline Working Tree|Prior In-Flight Scope)|\n\s*##|$)/i);
     if (directScopeMatch) {
       const dRegex = /(?:src|tests)\/[a-zA-Z0-9_./-]+\.(?:tsx|mjs|css|ts|js)\b/g;
       let dm;
@@ -182,7 +182,7 @@ export function resolveModifiedFilesAndTests(repoRoot, evidenceDir, ticketId, ti
   }
 
   // Scope Confinement: Filter modified files against registered files in plan specification
-  if (planRegisteredFiles.size > 0 && (!snapshotData || !snapshotData.files)) {
+  if (planRegisteredFiles.size > 0) {
     const scopedFiles = modifiedFiles.filter((f) => planRegisteredFiles.has(f));
     if (scopedFiles.length > 0) {
       modifiedFiles = scopedFiles;

@@ -30,7 +30,7 @@ export function renderSpecReview({
 
 | Spec Criteria / Business Rule | SSOT Source | Physical Implementation (File:Line) | Contract Test (Traceability) | Verdict |
 | :--- | :--- | :--- | :--- | :---: |
-${srcFiles.map((f, i) => `| ${i + 1}. **[BR-0${i + 1} / Feature Invariant]** Đồng bộ và bảo toàn logic nghiệp vụ | \`${f}\`<br>Plan ${ticketId} | [\`${path.basename(f)}\`](file:///${path.resolve(repoRoot, f).replace(/\\/g, '/')}) | [\`${contractFile ? path.basename(contractFile) : 'contract.test.ts'}\`](file:///${contractFile ? path.resolve(repoRoot, contractFile).replace(/\\/g, '/') : ''}) | ✔️ PASS |`).join('\n') || `| 1. **[BR-01 / Core Invariant]** Đồng bộ toàn diện theo yêu cầu | Plan ${ticketId} | SSOT Core | [\`${contractFile || 'test'}\`](file:///${contractFile || ''}) | ✔️ PASS |`}
+${srcFiles.map((f, i) => `| ${i + 1}. **[BR-0${i + 1} / Feature Invariant]** TODO_REVIEW_REQUIRED: Đặc tả quy tắc nghiệp vụ cho \`${path.basename(f)}\` | \`${f}\`<br>Plan ${ticketId} | [\`${path.basename(f)}\`](file:///${path.resolve(repoRoot, f).replace(/\\/g, '/')}) | [\`${contractFile ? path.basename(contractFile) : 'contract.test.ts'}\`](file:///${contractFile ? path.resolve(repoRoot, contractFile).replace(/\\/g, '/') : ''}) | ✔️ PASS |`).join('\n') || `| 1. **[BR-01 / Core Invariant]** TODO_REVIEW_REQUIRED: Đặc tả quy tắc nghiệp vụ | Plan ${ticketId} | SSOT Core | [\`${contractFile || 'test'}\`](file:///${contractFile || ''}) | ✔️ PASS |`}
 
 ---
 
@@ -85,17 +85,17 @@ export function renderCodeReview({
 #### 1. Authorized Scope & Intent
 - **Use Case / Slice**: \`[UC-${ticketClean}/MSS]\` — ${planTitle}
 - **Software Domain**: \`${planSubsystem}\`
-- **Summary (ELI5)**: Thực hiện cập nhật logic tối thiểu, đồng bộ hóa dữ liệu và bảo toàn toàn vẹn các ràng buộc kiến trúc.
+- **Summary (ELI5)**: TODO_REVIEW_REQUIRED: Tóm tắt 1 câu mục tiêu kỹ thuật thực tế của lát cắt.
 
 #### 2. Blast Radius (What Could Break?)
 - **Direct Blast Radius**: 
 ${srcFiles.map((f) => `  - \`${f}\``).join('\n') || '  - Direct modified source files'}
-- **Highest-Risk Scenario**: Lệch pha giữa dữ liệu hiển thị và logic tính toán nội bộ. Đã được rà soát và bao phủ bằng bộ kiểm thử hợp đồng.
+- **Highest-Risk Scenario**: TODO_REVIEW_REQUIRED: Kịch bản rủi ro cao nhất và phương án giải tỏa.
 
 #### 3. Change Map & Rationale
 | Exact Coordinates (File:Lines) | Action | Why Changed? |
 | :--- | :---: | :--- |
-${srcFiles.map((f) => `| [\`${f}\`](file:///${path.resolve(repoRoot, f).replace(/\\/g, '/')}) | MODIFY | Cập nhật logic và bảo toàn bất biến phân hệ \`${planSubsystem}\` |`).join('\n')}
+${srcFiles.map((f) => `| [\`${f}\`](file:///${path.resolve(repoRoot, f).replace(/\\/g, '/')}) | MODIFY | TODO_REVIEW_REQUIRED: Lý do thay đổi cụ thể cho \`${path.basename(f)}\` |`).join('\n')}
 ${testFiles.map((f) => `| [\`${f}\`](file:///${path.resolve(repoRoot, f).replace(/\\/g, '/')}) | UPDATE | Đảm bảo bao phủ 100% kiểm thử hành vi và ràng buộc |`).join('\n')}
 
 #### 4. Structured Verification Matrix (Mandatory Quantitative Matrix)
@@ -289,9 +289,9 @@ ${srcFiles.map((f) => {
   const tierKey = categorizeTier(f);
   const tierInfo = TIER_RULES[tierKey] || TIER_RULES.TIER1_LOGIC;
   const rawLines = fs.readFileSync(abs, 'utf8').split('\n');
-  const physicalLines = rawLines.length;
   if (rawLines.length > 0 && rawLines[rawLines.length - 1] === '') rawLines.pop();
   const loc = rawLines.length;
+  const physicalLines = loc;
   const isWarn = loc > tierInfo.warn && loc <= tierInfo.ceiling;
   const status = isWarn ? `⚠️ Warning (${loc} > ${tierInfo.warn})` : (loc > tierInfo.ceiling ? `❌ Vượt trần (${loc} > ${tierInfo.ceiling})` : '✅ Đạt chuẩn');
   return `| \`${path.basename(f)}\` | [\`${f}\`](file:///${abs.replace(/\\/g, '/')}) | ${tierInfo.name} | **${loc} LOC** | ${physicalLines} Lines | <= ${tierInfo.ceiling} LOC | ${status} |`;
@@ -300,9 +300,9 @@ ${testFiles.map((f) => {
   const abs = path.resolve(repoRoot, f);
   if (!fs.existsSync(abs)) return `| \`${path.basename(f)}\` | [\`${f}\`](file:///${abs.replace(/\\/g, '/')}) | Living Test | **0 LOC** | 0 Lines | <= 600 LOC | ❌ Thiếu file |`;
   const rawLines = fs.readFileSync(abs, 'utf8').split('\n');
-  const physicalLines = rawLines.length;
   if (rawLines.length > 0 && rawLines[rawLines.length - 1] === '') rawLines.pop();
   const loc = rawLines.length;
+  const physicalLines = loc;
   const status = loc > 600 ? `❌ Vượt trần (${loc} > 600)` : '✅ Đạt chuẩn';
   return `| \`${path.basename(f)}\` | [\`${f}\`](file:///${abs.replace(/\\/g, '/')}) | Living Test | **${loc} LOC** | ${physicalLines} Lines | <= 600 LOC | ${status} |`;
 }).join('\n')}

@@ -11,6 +11,12 @@ import {
 import { useGameStore } from '../store/game_store';
 import { calculateTheatricalAmbientIntensity } from './auction_3d_stage';
 import { resolveShadowMapSize } from '../ui/ui_helpers';
+import {
+  shouldUpdateShadows,
+  isSunPositionMoving,
+  calculateShadowGraceRemaining,
+  applyShadowAutoUpdate,
+} from './shadow_cache_helpers';
 
 
 export function calculateBaseFill(phase: 'day' | 'sunset' | 'night'): number {
@@ -201,6 +207,49 @@ function updateDiffuseAndAtmosphere(
   }
 }
 
+export interface LightingShadowCacheParams {
+  readonly isRolling: boolean;
+  readonly isPawnMoving: boolean;
+  readonly isBuildingDirty: boolean;
+  readonly targetSunPosition: [number, number, number];
+  readonly lastMotionTimeMs: number;
+  readonly nowMs: number;
+  readonly gracePeriodMs?: number;
+}
+
+export function updateLightingShadowCache(
+  sun: DirectionalLight | null,
+  params: LightingShadowCacheParams
+): {
+  readonly lastMotionTimeMs: number;
+  readonly autoUpdate: boolean;
+  readonly needsShadows: boolean;
+} {
+  if (!sun) {
+    return { lastMotionTimeMs: params.lastMotionTimeMs, autoUpdate: false, needsShadows: false };
+  }
+  const isSunMoving = isSunPositionMoving(sun.position, params.targetSunPosition);
+  const needsShadows = shouldUpdateShadows({
+    isRolling: params.isRolling,
+    isPawnMoving: params.isPawnMoving,
+    isSunMoving,
+    isBuildingDirty: params.isBuildingDirty,
+  });
+  const updatedMotionTime = needsShadows ? params.nowMs : params.lastMotionTimeMs;
+  const graceRemaining = calculateShadowGraceRemaining(
+    updatedMotionTime,
+    params.nowMs,
+    params.gracePeriodMs ?? 800
+  );
+  const activeUpdate = needsShadows || graceRemaining > 0;
+  const autoUpdate = applyShadowAutoUpdate(sun, activeUpdate);
+  return {
+    lastMotionTimeMs: updatedMotionTime,
+    autoUpdate,
+    needsShadows,
+  };
+}
+
 export interface TimeOfDayLightingProps {
   readonly isMobile?: boolean;
 }
@@ -212,8 +261,13 @@ export function TimeOfDayLighting({ isMobile = false }: TimeOfDayLightingProps =
   const activeModal = useGameStore((s) => s.activeModal);
   const isAuctionActive = activeModal === 'auction';
   const currentBid = useGameStore((s) => s.auction?.currentBid ?? 0);
+  const isRolling = useGameStore((s) => s.isRolling);
+  const isPawnMoving = useGameStore((s) => Boolean(s.activePawnAnimation?.isAnimating));
+  const levelMap = useGameStore((s) => s.levelMap);
   const prevBidRef = useRef<number>(currentBid);
   const bidFlashTimerRef = useRef<number>(1.0);
+  const prevLevelMapRef = useRef(levelMap);
+  const lastMotionTimeRef = useRef<number>(performance.now());
 
   const shadowMapSize = resolveShadowMapSize(isMobile);
 
@@ -253,6 +307,20 @@ export function TimeOfDayLighting({ isMobile = false }: TimeOfDayLightingProps =
     const flashBoost = isAuctionActive ? calculateBidFlashIntensity(0, bidFlashTimerRef.current, 1.2, 0.35) : 0;
 
     updateDirectLights(sunRef.current, fillRef.current, rimRef.current, preset, phase, isAuctionActive, lerpRate, tempVec, tempColor, flashBoost);
+    if (sunRef.current?.shadow) {
+      const isBuildingDirty = prevLevelMapRef.current !== levelMap;
+      prevLevelMapRef.current = levelMap;
+      const cacheState = updateLightingShadowCache(sunRef.current, {
+        isRolling,
+        isPawnMoving,
+        isBuildingDirty,
+        targetSunPosition: preset.sunPosition,
+        lastMotionTimeMs: lastMotionTimeRef.current,
+        nowMs: performance.now(),
+        gracePeriodMs: 800,
+      });
+      lastMotionTimeRef.current = cacheState.lastMotionTimeMs;
+    }
     updateDiffuseAndAtmosphere(ambientRef.current, hemiRef.current, state.scene, state.gl, preset, phase, isAuctionActive, dt, lerpRate, tempColor, flashBoost);
     if (topDownRef.current) {
       const topDownTarget = calculateTopDownFill(phase, isAuctionActive);

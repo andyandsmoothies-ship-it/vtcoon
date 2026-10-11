@@ -56,24 +56,55 @@ let filesToAudit = [];
 if (specifiedFiles.length > 0) {
   filesToAudit = specifiedFiles.map((f) => path.resolve(repoRoot, f)).filter((f) => fs.existsSync(f));
 } else {
-  // Try git status first (fast, 100% accurate on worktree delta)
-  try {
-    const gitOut = execSync('git status --porcelain', { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
-    const lines = gitOut.split('\n');
-    for (const line of lines) {
-      const trimmed = line.trim();
-      if (!trimmed) continue;
-      // Format: XY path or XY "path"
-      const filePart = trimmed.slice(2).trim().replace(/^"|"$/g, '');
-      if (filePart.startsWith('src/') && (filePart.endsWith('.ts') || filePart.endsWith('.tsx'))) {
-        const full = path.resolve(repoRoot, filePart);
-        if (fs.existsSync(full) && !filesToAudit.includes(full)) {
-          filesToAudit.push(full);
+  // If sliceId is provided, check if a PLAN_[SLICE_ID] exists to enforce scope confinement
+  if (sliceId) {
+    const plansDir = path.join(repoRoot, '.agents', 'plans');
+    if (fs.existsSync(plansDir)) {
+      const ticketNum = sliceId.replace(/^[A-Z]+-?/i, '');
+      const planFile = fs.readdirSync(plansDir).find((f) => {
+        const norm = f.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+        return (norm.includes(sliceId) || norm.includes(`IMP${ticketNum}`)) && f.startsWith('PLAN_') && f.endsWith('.md');
+      });
+      if (planFile) {
+        const planContent = fs.readFileSync(path.join(plansDir, planFile), 'utf8');
+        const directScopeMatch = planContent.match(/[-*]\s*\*\*Direct Scope[^*]*\*\*:\s*([\s\S]*?)(?:\n\s*[-*]\s*\*\*(?:Referenced Contracts|Baseline Working Tree|Prior In-Flight Scope)|\n\s*##|$)/i);
+        const searchContent = directScopeMatch ? directScopeMatch[1] : planContent;
+        const pRegex = /src\/[a-zA-Z0-9_./-]+\.(?:tsx|ts)\b/g;
+        let pm;
+        const planSrc = [];
+        while ((pm = pRegex.exec(searchContent)) !== null) {
+          const full = path.resolve(repoRoot, pm[0]);
+          if (fs.existsSync(full) && !planSrc.includes(full)) {
+            planSrc.push(full);
+          }
+        }
+        if (planSrc.length > 0) {
+          filesToAudit = planSrc;
         }
       }
     }
-  } catch {
-    // safe ignore
+  }
+
+  // Fallback: Try git status if no plan direct scope found (fast, 100% accurate on worktree delta)
+  if (filesToAudit.length === 0) {
+    try {
+      const gitOut = execSync('git status --porcelain', { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
+      const lines = gitOut.split('\n');
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed) continue;
+        // Format: XY path or XY "path"
+        const filePart = trimmed.slice(2).trim().replace(/^"|"$/g, '');
+        if (filePart.startsWith('src/') && (filePart.endsWith('.ts') || filePart.endsWith('.tsx'))) {
+          const full = path.resolve(repoRoot, filePart);
+          if (fs.existsSync(full) && !filesToAudit.includes(full)) {
+            filesToAudit.push(full);
+          }
+        }
+      }
+    } catch {
+      // safe ignore
+    }
   }
 
   // Fallback: If git status returned empty (e.g. all committed or non-git), scan recent mtime

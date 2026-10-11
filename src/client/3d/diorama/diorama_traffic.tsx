@@ -65,8 +65,8 @@ export function MicroVehicleProceduralFallback({ v }: MicroVehicleFallbackProps)
   const [w, h, l] = v.size;
   return (
     <group>
-      {/* 1. Thân vỏ xe chính bo cong khí động học */}
-      <RoundedBox args={[w, h * 0.7, l]} radius={0.008} smoothness={2} castShadow position={[0, h / 2, 0]}>
+      {/* 1. Thân vỏ xe chính bo cong khí động học (Zero castShadow theo chuẩn [P3]) */}
+      <RoundedBox args={[w, h * 0.7, l]} radius={0.008} smoothness={2} position={[0, h / 2, 0]}>
         <meshStandardMaterial color={v.color} roughness={0.35} metalness={0.2} />
       </RoundedBox>
 
@@ -212,7 +212,6 @@ export function DioramaTraffic({ isMobile = false }: { readonly isMobile?: boole
               <SafeGLTFModel
                 url={getVehicleModelUrl(v.type)}
                 fallback={<MicroVehicleProceduralFallback v={v} />}
-                castShadow
                 receiveShadow
               />
 

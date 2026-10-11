@@ -54,10 +54,10 @@ export function parseStation0(auditDir, ticketId, contractTestCount) {
             const cleaned = nextTrim.replace(/^[-*]\s*/, '').replace(/^\d+\.\s*/, '');
             if (cleaned) {
               collected.push(cleaned);
-              if (collected.join(' ').length > 200) break;
+              if (collected.join(' ').length > 1200) break;
             }
           }
-          fieldVal = collected.join(' ').slice(0, 220);
+          fieldVal = collected.join(' ');
         }
         if (fieldVal) {
           const formatted = `- **${fieldName}**: ${fieldVal}`;

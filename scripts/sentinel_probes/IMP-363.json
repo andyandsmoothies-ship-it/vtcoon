@@ -1,0 +1,50 @@
+[
+  {
+    "file": "src/client/3d/batched_board_tiles.tsx",
+    "desc": "Mutant 1: Invert guard ring return in resolveCellFromBoardClick",
+    "target": "if (maxCoord < 7.6 || maxCoord > 10.5) return -1;",
+    "replacement": "if (maxCoord < 7.6 || maxCoord > 10.5) return 0;"
+  },
+  {
+    "file": "src/client/3d/batched_board_tiles.tsx",
+    "desc": "Mutant 2: Corrupt batched-tile-surfaces testid",
+    "target": "data-testid=\"batched-tile-surfaces\"",
+    "replacement": "data-testid=\"corrupted-surfaces\""
+  },
+  {
+    "file": "src/client/3d/batched_board_tiles.tsx",
+    "desc": "Mutant 3: Corrupt batched-standard-bases testid",
+    "target": "data-testid=\"batched-standard-bases\"",
+    "replacement": "data-testid=\"corrupted-standard-bases\""
+  },
+  {
+    "file": "src/client/3d/batched_board_tiles.tsx",
+    "desc": "Mutant 4: Corrupt batched-corner-bases testid",
+    "target": "data-testid=\"batched-corner-bases\"",
+    "replacement": "data-testid=\"corrupted-corner-bases\""
+  },
+  {
+    "file": "src/client/3d/board_tile.tsx",
+    "desc": "Mutant 5: Invert default renderBasePlinth prop to false",
+    "target": "renderBasePlinth = true,",
+    "replacement": "renderBasePlinth = false,"
+  },
+  {
+    "file": "src/client/3d/board_tile.tsx",
+    "desc": "Mutant 6: Corrupt tierColor gold return value",
+    "target": "if (level === 3) return '#D4AF37';",
+    "replacement": "if (level === 3) return '#000000';"
+  },
+  {
+    "file": "src/client/3d/board_tile.tsx",
+    "desc": "Mutant 7: Corrupt tierColor teal return value",
+    "target": "return '#008080';",
+    "replacement": "return '#FF0000';"
+  },
+  {
+    "file": "src/client/3d/batched_board_tiles.tsx",
+    "desc": "Mutant 8: Corrupt batched-board-tiles root testid",
+    "target": "<group data-testid=\"batched-board-tiles\">",
+    "replacement": "<group data-testid=\"corrupted-board-tiles\">"
+  }
+]

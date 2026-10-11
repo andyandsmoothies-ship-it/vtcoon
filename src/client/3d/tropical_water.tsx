@@ -6,8 +6,7 @@ import { useEnvironmentStore, TIME_OF_DAY_PRESETS } from '../store/environment_s
 import { useDiagnostic3DStore } from './diagnostic_3d_store';
 import {
   createTropicalWaterUniforms,
-  TROPICAL_WATER_VERTEX_SHADER,
-  TROPICAL_WATER_FRAGMENT_SHADER,
+  getTropicalWaterShaders,
 } from './shaders/tropical_water_material';
 
 export interface TropicalWaterProps {
@@ -38,17 +37,19 @@ export function TropicalWater({
   const tempColor = React.useMemo(() => new Color(), []);
   const tempVec = React.useMemo(() => new Vector3(), []);
 
-  // [C3] ShaderMaterial cưỡng chế 'highp' trên mọi nền tảng loại bỏ trôi mantissa 16-bit (IMP-357)
+  // [C3][IMP-365] Phân giải cấu hình Shader LOD (Mobile vs Desktop) & bảo toàn depthWrite: false
+  const shaderConfig = React.useMemo(() => getTropicalWaterShaders(isMobile), [isMobile]);
+
   const material = React.useMemo(() => {
     return new ShaderMaterial({
       uniforms,
-      vertexShader: TROPICAL_WATER_VERTEX_SHADER.replace('uniform float uTime;', 'uniform highp float uTime;'),
-      fragmentShader: TROPICAL_WATER_FRAGMENT_SHADER,
+      vertexShader: shaderConfig.vertexShader,
+      fragmentShader: shaderConfig.fragmentShader,
       precision: 'highp',
       transparent: true,
-      depthWrite: false,
+      depthWrite: shaderConfig.depthWrite,
     });
-  }, [uniforms]);
+  }, [uniforms, shaderConfig]);
 
   // [I3] Phân khúc lưới thích ứng: Mobile 24x24 (1.152 tris chuẩn), Desktop 32x32
   const segments = isMobile ? 24 : 32;

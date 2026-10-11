@@ -1,0 +1,50 @@
+[
+  {
+    "file": "src/client/3d/shadow_cache_helpers.ts",
+    "desc": "Mutant 1: Invert isRolling in shouldUpdateShadows",
+    "target": "params.isRolling ||",
+    "replacement": "!params.isRolling ||"
+  },
+  {
+    "file": "src/client/3d/shadow_cache_helpers.ts",
+    "desc": "Mutant 2: Invert distance threshold comparison in isSunPositionMoving",
+    "target": "> thresholdSq;",
+    "replacement": "<= thresholdSq;"
+  },
+  {
+    "file": "src/client/3d/shadow_cache_helpers.ts",
+    "desc": "Mutant 3: Corrupt remaining grace in calculateShadowGraceRemaining",
+    "target": "return remaining > 0 ? remaining : 0;",
+    "replacement": "return remaining > 0 ? 0 : remaining;"
+  },
+  {
+    "file": "src/client/3d/shadow_cache_helpers.ts",
+    "desc": "Mutant 4: Corrupt return value in applyShadowAutoUpdate",
+    "target": "return light.shadow.autoUpdate;",
+    "replacement": "return !light.shadow.autoUpdate;"
+  },
+  {
+    "file": "src/client/3d/shadow_cache_helpers.ts",
+    "desc": "Mutant 5: Invert needsUpdate assignment in applyShadowAutoUpdate",
+    "target": "light.shadow.needsUpdate = true;",
+    "replacement": "light.shadow.needsUpdate = false;"
+  },
+  {
+    "file": "src/client/3d/shadow_cache_helpers.ts",
+    "desc": "Mutant 6: Corrupt negative elapsed return in calculateShadowGraceRemaining",
+    "target": "if (elapsed < 0) return gracePeriodMs;",
+    "replacement": "if (elapsed < 0) return 0;"
+  },
+  {
+    "file": "src/client/3d/shadow_cache_helpers.ts",
+    "desc": "Mutant 7: Invert null light defense in applyShadowAutoUpdate",
+    "target": "if (!light || !light.shadow) return false;",
+    "replacement": "if (!light || !light.shadow) return true;"
+  },
+  {
+    "file": "src/client/3d/time_of_day_lighting.tsx",
+    "desc": "Mutant 8: Corrupt updateLightingShadowCache activeUpdate trigger",
+    "target": "const activeUpdate = needsShadows || graceRemaining > 0;",
+    "replacement": "const activeUpdate = false;"
+  }
+]

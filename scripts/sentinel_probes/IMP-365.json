@@ -1,0 +1,44 @@
+[
+  {
+    "file": "src/client/3d/shaders/tropical_water_material.ts",
+    "desc": "Mutant 1: Invert isMobile branch in getTropicalWaterShaders",
+    "target": "if (isMobile) {",
+    "replacement": "if (!isMobile) {"
+  },
+  {
+    "file": "src/client/3d/shaders/tropical_water_material.ts",
+    "desc": "Mutant 2: Corrupt depthWrite to true in mobile shader config",
+    "target": "fragmentShader: TROPICAL_WATER_MOBILE_FRAGMENT_SHADER,\n      depthWrite: false,",
+    "replacement": "fragmentShader: TROPICAL_WATER_MOBILE_FRAGMENT_SHADER,\n      depthWrite: true,"
+  },
+  {
+    "file": "src/client/3d/shaders/tropical_water_material.ts",
+    "desc": "Mutant 3: Corrupt highp uTime in mobile vertex shader",
+    "target": "uniform highp float uTime;",
+    "replacement": "uniform float uTime;"
+  },
+  {
+    "file": "src/client/3d/shaders/tropical_water_material.ts",
+    "desc": "Mutant 4: Corrupt precision mediump float declaration in mobile fragment shader",
+    "target": "precision mediump float;",
+    "replacement": "precision highp float;"
+  },
+  {
+    "file": "src/client/3d/shaders/tropical_water_material.ts",
+    "desc": "Mutant 5: Corrupt vFresnel varying in mobile vertex shader",
+    "target": "varying float vFresnel;",
+    "replacement": "varying float vCorruptedFresnel;"
+  },
+  {
+    "file": "src/client/3d/shaders/tropical_water_material.ts",
+    "desc": "Mutant 6: Corrupt length(vWorldPosXZ) calculation in mobile fragment shader",
+    "target": "float dist = length(vWorldPosXZ);",
+    "replacement": "float dist = 0.0;"
+  },
+  {
+    "file": "src/client/3d/tropical_water.tsx",
+    "desc": "Mutant 7: Corrupt default testId in TropicalWater",
+    "target": "testId = 'living-ocean-water',",
+    "replacement": "testId = 'corrupted-water',"
+  }
+]

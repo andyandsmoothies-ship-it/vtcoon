@@ -222,6 +222,30 @@ if (evidence.mutationSensitivityProbe) {
   if (hasModifiedSrc && srcMutants === 0 && !isExempt && !evidence.pureLogicWaiver) {
     errors.push(`Source-level mutation floor violation: Probe tested 0 mutants on production source files (sourceLevelMutantsTested: 0). Contract inversion alone is insufficient; mutants must directly challenge modified production code.`);
   }
+
+  // 2.6 Wiring Parity & Call-Site Mutation Verification
+  const helperFiles = targetFiles.filter((f) => /_(?:helpers|detect|math|calc)\.[a-z]+$/i.test(f));
+  const consumerFiles = targetFiles.filter((f) => /\.(?:tsx|ts)$/i.test(f) && !/_(?:helpers|detect|math|calc)\.[a-z]+$/i.test(f) && !/types?\.[a-z]+$/i.test(f));
+  if (helperFiles.length > 0 && consumerFiles.length > 0) {
+    const probeFileCandidates = [
+      path.join(repoRoot, 'scripts', 'sentinel_probes', `${(evidence.ticketId || targetArg || '').toUpperCase()}.json`),
+      path.join(repoRoot, 'scripts', 'sentinel_probes', `${(evidence.ticketId || targetArg || '')}.json`),
+    ];
+    const probeFilePath = probeFileCandidates.find((p) => fs.existsSync(p));
+    if (probeFilePath) {
+      try {
+        const probeList = JSON.parse(fs.readFileSync(probeFilePath, 'utf8'));
+        if (Array.isArray(probeList) && probeList.length > 0) {
+          const hasConsumerMutant = probeList.some((p) => consumerFiles.some((cf) => p.file && p.file.replace(/\\/g, '/').endsWith(cf.replace(/\\/g, '/'))));
+          if (!hasConsumerMutant) {
+            errors.push(
+              `[Wiring Parity Violation] Ticket modifies both helper (${helperFiles.map((f) => path.basename(f)).join(', ')}) and consumer (${consumerFiles.map((f) => path.basename(f)).join(', ')}), but scripts/sentinel_probes contains 0 mutants targeting consumer call-sites! At least 1 mutant must challenge the consumer call-site to prevent tautological testing.`
+            );
+          }
+        }
+      } catch (err) {}
+    }
+  }
 }
 
 // 3. Physical Visual Screenshot Verification (Zero-Blindness Gate)
@@ -359,6 +383,26 @@ if (fs.existsSync(auditDir) && ticketNum) {
       errors.push(`[Phase 3.3 Persistence Violation] Visual ticket missing UI/3D review report: .agents/audit/UI_CRAFT_REVIEW_${evidence.ticketId || targetArg}.md or 3D_VISUAL_REVIEW_${evidence.ticketId || targetArg}.md`);
     }
   }
+
+  // 4.1 Anti-Boilerplate Audit Gate (Zero-Template Invariant)
+  const BANNED_BOILERPLATE_PATTERNS = [
+    { pattern: /Đồng bộ và bảo toàn logic nghiệp vụ/i, name: 'Generic Spec Table Placeholder' },
+    { pattern: /Thực hiện cập nhật logic tối thiểu, đồng bộ hóa dữ liệu/i, name: 'Generic Code Review Summary Placeholder' },
+    { pattern: /Cập nhật logic và bảo toàn bất biến phân hệ/i, name: 'Generic Change Map Rationale Placeholder' },
+    { pattern: /TODO_REVIEW_REQUIRED/i, name: 'Unfilled Review Todo' },
+    { pattern: /Đảm bảo bao phủ 100% kiểm thử hành vi/i, name: 'Generic Test Coverage Placeholder' },
+  ];
+
+  for (const af of auditFiles.filter((f) => matchesTicket(f) && f.endsWith('.md'))) {
+    try {
+      const content = fs.readFileSync(path.join(auditDir, af), 'utf8');
+      for (const { pattern, name } of BANNED_BOILERPLATE_PATTERNS) {
+        if (pattern.test(content)) {
+          errors.push(`[Zero-Boilerplate Violation] ${af} contains template placeholder "${name}". Must write concrete business rules, blast radius scenarios, and change rationales!`);
+        }
+      }
+    } catch {}
+  }
 }
 
 // 5. Station 1 Mechanical Evidence Handoff Verification (Step 1 Mechanical Gate)
@@ -398,6 +442,21 @@ if (ticketNum && fs.existsSync(improvementsDir)) {
         `[Final Acceptance Report Truncated] Report ${finalReport} is too small (${reportStat.size} bytes). Run 'npm run report -- ${evidence.ticketId || targetArg} --force' to regenerate.`
       );
     }
+    try {
+      const repContent = fs.readFileSync(reportPath, 'utf8');
+      const BANNED_BOILERPLATE_PATTERNS = [
+        { pattern: /Đồng bộ và bảo toàn logic nghiệp vụ/i, name: 'Generic Spec Table Placeholder' },
+        { pattern: /Thực hiện cập nhật logic tối thiểu, đồng bộ hóa dữ liệu/i, name: 'Generic Code Review Summary Placeholder' },
+        { pattern: /Cập nhật logic và bảo toàn bất biến phân hệ/i, name: 'Generic Change Map Rationale Placeholder' },
+        { pattern: /TODO_REVIEW_REQUIRED/i, name: 'Unfilled Review Todo' },
+        { pattern: /Đảm bảo bao phủ 100% kiểm thử hành vi/i, name: 'Generic Test Coverage Placeholder' },
+      ];
+      for (const { pattern, name } of BANNED_BOILERPLATE_PATTERNS) {
+        if (pattern.test(repContent)) {
+          errors.push(`[Zero-Boilerplate Violation] Final report ${finalReport} contains template placeholder "${name}". Must customize with authentic technical findings.`);
+        }
+      }
+    } catch {}
   }
 }
 
