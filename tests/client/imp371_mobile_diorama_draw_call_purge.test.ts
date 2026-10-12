@@ -120,13 +120,22 @@ describe('IMP-371: WebGL Mobile TBDR Draw Call Purge & Living Contract Preservat
     expect(desktopMarkup).toContain('miniature-city-diorama');
   });
 
-  it('TC-371.06 [UC-DIORAMA-MOBILE-DISTRICTS-CULL/MSS]: Given isMobile=true, When inspecting MiniatureCityDiorama, Then elides DioramaHeritageDistrict, DioramaWaterfrontPark, and DioramaLandmarkNorthStation', () => {
+  it('TC-371.06 [UC-DIORAMA-MOBILE-DISTRICTS-CULL/MSS]: Given isMobile=true, When inspecting MiniatureCityDiorama, Then preserves DioramaHeritageDistrict with isMobile=true while eliding DioramaWaterfrontPark and DioramaLandmarkNorthStation', () => {
     const tree = captureTree<MiniatureCityDioramaProps>(MiniatureCityDiorama, { isMobile: true });
     const heritageNode = findReactNode(tree, (n) => n.type === DioramaHeritageDistrict);
     const waterfrontParkNode = findReactNode(tree, (n) => n.type === DioramaWaterfrontPark);
     const landmarkNorthNode = findReactNode(tree, (n) => n.type === DioramaLandmarkNorthStation);
-    expect(heritageNode).toBeNull();
+    expect(heritageNode).not.toBeNull();
+    expect(heritageNode?.props?.isMobile).toBe(true);
     expect(waterfrontParkNode).toBeNull();
     expect(landmarkNorthNode).toBeNull();
+  });
+
+  it('TC-371.07 [UC-DIORAMA-MOBILE-HERITAGE-SHADOWS/MSS]: Given DioramaHeritageDistrict with isMobile=true, When rendered, Then disables castShadow across models and fallback geometries to protect mobile GPU', () => {
+    const mobileTree = captureTree<{ isMobile: boolean }>(DioramaHeritageDistrict, { isMobile: true });
+    const gltfModel = findReactNode(mobileTree, (n) => n.props?.url === '/models/landmarks/landmark_cathedral.glb');
+    expect(gltfModel).not.toBeNull();
+    expect(gltfModel?.props?.castShadow).toBe(false);
+    expect(gltfModel?.props?.receiveShadow).toBe(true);
   });
 });

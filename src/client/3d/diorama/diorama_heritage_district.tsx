@@ -14,6 +14,7 @@ export const LANDMARK_MODEL_URLS = {
 interface LandmarkFallbackProps {
   readonly isNight: boolean;
   readonly isSunset: boolean;
+  readonly isMobile?: boolean;
 }
 
 /**
@@ -101,6 +102,7 @@ export function BenThanhProceduralFallback({
 export function CathedralProceduralFallback({
   isNight,
   isSunset,
+  isMobile = false,
 }: LandmarkFallbackProps): React.ReactElement {
   return (
     <group>
@@ -111,11 +113,11 @@ export function CathedralProceduralFallback({
       </mesh>
 
       {/* Gian thánh đường chính bằng gạch đỏ trần bo viền */}
-      <RoundedBox args={[0.62, 0.4, 0.7]} radius={0.015} smoothness={2} castShadow receiveShadow position={[0, 0.22, 0.1]}>
+      <RoundedBox args={[0.62, 0.4, 0.7]} radius={0.015} smoothness={2} castShadow={!isMobile} receiveShadow position={[0, 0.22, 0.1]}>
         <meshStandardMaterial color="#B45309" roughness={0.65} />
       </RoundedBox>
       {/* Mái ngói thánh đường chữ V vát dốc */}
-      <mesh castShadow position={[0, 0.48, 0.1]} rotation={[0, 0, 0]}>
+      <mesh castShadow={!isMobile} position={[0, 0.48, 0.1]} rotation={[0, 0, 0]}>
         <coneGeometry args={[0.48, 0.2, 4]} />
         <meshStandardMaterial color="#78350F" roughness={0.5} />
       </mesh>
@@ -140,11 +142,11 @@ export function CathedralProceduralFallback({
       {[-0.24, 0.24].map((tx) => (
         <group key={`cathedral-spire-${tx}`} position={[tx, 0, -0.2]}>
           {/* Thân tháp vuông bo viền */}
-          <RoundedBox args={[0.2, 0.68, 0.2]} radius={0.01} smoothness={2} castShadow receiveShadow position={[0, 0.35, 0]}>
+          <RoundedBox args={[0.2, 0.68, 0.2]} radius={0.01} smoothness={2} castShadow={!isMobile} receiveShadow position={[0, 0.35, 0]}>
             <meshStandardMaterial color="#B45309" roughness={0.65} />
           </RoundedBox>
           {/* Chóp nhọn Gothic vươn lên bầu trời */}
-          <mesh castShadow position={[0, 0.82, 0]}>
+          <mesh castShadow={!isMobile} position={[0, 0.82, 0]}>
             <coneGeometry args={[0.16, 0.32, 4]} />
             <meshStandardMaterial color="#451A03" roughness={0.4} />
           </mesh>
@@ -173,11 +175,17 @@ export function CathedralProceduralFallback({
   );
 }
 
+export interface DioramaHeritageDistrictProps {
+  readonly isMobile?: boolean;
+}
+
 /**
  * Phân Khu Di Sản Bến Thành & Nhà Thờ Cổ (Diorama Heritage District)
  * Tích hợp SafeGLTFModel nạp mô hình .glb chuẩn PBR và thềm gạch bông Đông Dương
  */
-export function DioramaHeritageDistrict(): React.ReactElement {
+export function DioramaHeritageDistrict({
+  isMobile = false,
+}: DioramaHeritageDistrictProps = {}): React.ReactElement {
   const phase = useEnvironmentStore((s) => s.phase);
   const isNight = phase === 'night';
   const isSunset = phase === 'sunset';
@@ -206,8 +214,8 @@ export function DioramaHeritageDistrict(): React.ReactElement {
       <group position={[0.2, 0, 0.75]} name="HeritageCathedralGroup" data-model-url={LANDMARK_MODEL_URLS.cathedral}>
         <SafeGLTFModel
           url={LANDMARK_MODEL_URLS.cathedral}
-          fallback={<CathedralProceduralFallback isNight={isNight} isSunset={isSunset} />}
-          castShadow
+          fallback={<CathedralProceduralFallback isNight={isNight} isSunset={isSunset} isMobile={isMobile} />}
+          castShadow={!isMobile}
           receiveShadow
         />
       </group>
@@ -251,7 +259,7 @@ export function DioramaHeritageDistrict(): React.ReactElement {
           [0.32, 0.32],
         ] as const).map(([lx, lz], li) => (
           <group key={`heritage-lamp-${li}`} position={[lx, 0, lz]}>
-            <mesh position={[0, 0.08, 0]} castShadow>
+            <mesh position={[0, 0.08, 0]} castShadow={!isMobile}>
               <cylinderGeometry args={[0.006, 0.01, 0.16, 6]} />
               <meshStandardMaterial color="#334155" roughness={0.4} />
             </mesh>
@@ -267,11 +275,11 @@ export function DioramaHeritageDistrict(): React.ReactElement {
         ))}
 
         {/* Bệ đá cẩm thạch Tượng Đức Mẹ Hòa Bình */}
-        <RoundedBox args={[0.10, 0.09, 0.10]} radius={0.01} smoothness={2} castShadow receiveShadow position={[0, 0.045, 0]}>
+        <RoundedBox args={[0.10, 0.09, 0.10]} radius={0.01} smoothness={2} castShadow={!isMobile} receiveShadow position={[0, 0.045, 0]}>
           <meshStandardMaterial color="#CBD5E1" roughness={0.35} />
         </RoundedBox>
         {/* Tượng điêu khắc cẩm thạch trắng */}
-        <mesh castShadow position={[0, 0.14, 0]}>
+        <mesh castShadow={!isMobile} position={[0, 0.14, 0]}>
           <cylinderGeometry args={[0.022, 0.038, 0.11, 8]} />
           <meshStandardMaterial color="#F8FAFC" roughness={0.25} />
         </mesh>

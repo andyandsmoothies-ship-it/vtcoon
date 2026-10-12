@@ -336,7 +336,7 @@ export function MiniatureCityDiorama(props: MiniatureCityDioramaProps = {}): Rea
       {!isMobile && <DioramaHighriseBlocks />}
       {!isMobile && <DioramaResidentialPool />}
       {/* 5.1. Khu di sản văn hóa Chợ Lớn & Shophouse phố cổ */}
-      {!isMobile && <DioramaHeritageDistrict />}
+      <DioramaHeritageDistrict isMobile={isMobile} />
       {!isMobile && <DioramaShophouseBlocks />}
       {/* 6. Nhịp sống đô thị vi mô & Giao thông tự hành (Bảo tồn hợp đồng TC-265.04 & TC-265.06) */}
       <DioramaMicroLife isMobile={isMobile} />
