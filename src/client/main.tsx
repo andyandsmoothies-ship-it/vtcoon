@@ -10,6 +10,7 @@ import { useEnvironmentStore } from './store/environment_store';
 import { useVfxStore } from './store/vfx_store';
 import { useTelemetryStore } from './telemetry/telemetry_store';
 import { useDiagnostic3DStore } from './3d/diagnostic_3d_store';
+import { Diagnostic3DOverlay } from './ui/diagnostic_3d_overlay';
 import { PreMatchDeck } from './ui/lobby/pre_match_deck';
 import { WelcomeHubModal } from './ui/lobby/welcome_hub_modal';
 import { getInitialBalanceForPlayerCount, type Player } from '../domain/room';
@@ -210,6 +211,7 @@ export function App(): React.ReactElement {
   return (
     <div className="fixed inset-0 w-full h-full overflow-hidden bg-slate-950 select-none">
       <ServerToast message={errorMessage} onClose={() => setErrorMessage(null)} />
+      <Diagnostic3DOverlay />
 
       {/* 1. Nền sa bàn 3D duy nhất chạy liên tục không gián đoạn / zero-loading */}
       <div className="absolute inset-0 z-0 pointer-events-auto">

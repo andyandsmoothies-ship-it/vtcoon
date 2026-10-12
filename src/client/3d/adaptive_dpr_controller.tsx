@@ -15,12 +15,25 @@ export function AdaptiveDprController({ isMobile }: AdaptiveDprControllerProps):
   const degradedTimeRef = useRef<number>(0);
   const optimalTimeRef = useRef<number>(0);
   const forcedLowDpr = useDiagnostic3DStore((s) => s.forcedLowDpr);
+  const prevForcedLowDprRef = useRef(forcedLowDpr);
 
   // [C3 & C4] Trích xuất live renderer và live setDpr từ useFrame, khởi tạo initialDpr từ gl.getPixelRatio()
   useFrame(({ gl, setDpr }, delta) => {
     // [I2] Guard chống tụt FPS ảo khi tab trình duyệt chạy nền hoặc khi đang force low DPR
     if (typeof document !== 'undefined' && document.hidden) return;
-    if (forcedLowDpr) return;
+    if (forcedLowDpr) {
+      if (currentDprRef.current !== 0.5) {
+        currentDprRef.current = 0.5;
+        setDpr(0.5);
+      }
+      prevForcedLowDprRef.current = true;
+      return;
+    }
+    if (prevForcedLowDprRef.current) {
+      prevForcedLowDprRef.current = false;
+      currentDprRef.current = null;
+      setDpr(isMobile ? DPR_BOUNDS.MOBILE_MAX : 1.0);
+    }
 
     // Đọc chính xác DPR ban đầu từ WebGL Renderer nếu chưa thiết lập
     if (currentDprRef.current === null && gl && typeof gl.getPixelRatio === 'function') {
