@@ -120,6 +120,9 @@ export function GameBoard({ isMobile: propIsMobile }: GameBoardProps = {}): Reac
   const storeOceanVisible = useDiagnostic3DStore((s) => s.isOceanVisible);
   const isOceanVisible = useDiagnostic3DStore.getState()?.isOceanVisible ?? storeOceanVisible;
 
+  const storeBoardVisible = useDiagnostic3DStore((s) => s.isBoardVisible);
+  const isBoardVisible = useDiagnostic3DStore.getState()?.isBoardVisible ?? storeBoardVisible;
+
   const ownerInfoMap = useMemo(() => computeOwnerMap(playersInfo), [playersInfo]);
   const monopolyGroups = useMemo(() => detectPlayerMonopolies(playersInfo), [playersInfo]);
   const walnutDiffuse = useMemo(() => createWalnutTabletopTexture(), []);
@@ -183,40 +186,42 @@ export function GameBoard({ isMobile: propIsMobile }: GameBoardProps = {}): Reac
       {/* 3. Sàn diễn xúc xắc 3D thoáng đãng trên Đại Lộ Sài Gòn */}
       <DiceTray />
 
-      {/* 3.5. Cụm InstancedMesh nhà đất đồ chơi C1-C3 toàn bàn cờ (<8 draw calls) */}
-      <InstancedBoardToyBuildings levelMap={levelMap} />
+      <group visible={isBoardVisible}>
+        {/* 3.5. Cụm InstancedMesh nhà đất đồ chơi C1-C3 toàn bàn cờ (<8 draw calls) */}
+        <InstancedBoardToyBuildings levelMap={levelMap} />
 
-      {/* 3.8. Cụm BatchedBoardTiles gộp 40 bề mặt và đế ô cờ vào 3 draw calls (IMP-363) */}
-      <BatchedBoardTiles
-        isMobile={isMobile}
-        onTileClick={handleTileClick}
-      />
-
-      {/* 4. 40 ô đất liền mạch khép kín tiếp giáp mặt nền phẳng (render động các lớp trang trí) */}
-      {BOARD_CONFIG.map((cell) => (
-        <LayeredDioramaTile
-          key={cell.index}
-          cell={cell}
-          position={cellPosition(cell.index)}
-          rotation={tileRotation(cell.index)}
-          currentLevel={(levelMap[cell.index] ?? 0) as 0 | 1 | 2 | 3}
-          isCornerTile={CORNER_INDICES.has(cell.index)}
-          enableStandee={false}
-          ownerColor={ownerInfoMap[cell.index]?.tokenColor}
-          ownerSlot={ownerInfoMap[cell.index]?.ownerSlot}
-          mascotIcon={ownerInfoMap[cell.index]?.mascotIcon}
-          onClick={undefined}
-          isHeatmapActive={isHeatmapActive}
-          isMonopolyGroup={isCellInMonopolyGroup(cell.index, monopolyGroups)}
+        {/* 3.8. Cụm BatchedBoardTiles gộp 40 bề mặt và đế ô cờ vào 3 draw calls (IMP-363) */}
+        <BatchedBoardTiles
           isMobile={isMobile}
-          renderToyBuildings={false}
-          renderBasePlinth={false}
-          renderAtlasSurface={false}
+          onTileClick={handleTileClick}
         />
-      ))}
 
-      {/* 5. Dải cờ hoa vỉa hè cho các cụm độc quyền Monopoly Plaza */}
-      <MonopolyPlazaFusion monopolyGroups={monopolyGroups} isHeatmapActive={isHeatmapActive} />
+        {/* 4. 40 ô đất liền mạch khép kín tiếp giáp mặt nền phẳng (render động các lớp trang trí) */}
+        {BOARD_CONFIG.map((cell) => (
+          <LayeredDioramaTile
+            key={cell.index}
+            cell={cell}
+            position={cellPosition(cell.index)}
+            rotation={tileRotation(cell.index)}
+            currentLevel={(levelMap[cell.index] ?? 0) as 0 | 1 | 2 | 3}
+            isCornerTile={CORNER_INDICES.has(cell.index)}
+            enableStandee={false}
+            ownerColor={ownerInfoMap[cell.index]?.tokenColor}
+            ownerSlot={ownerInfoMap[cell.index]?.ownerSlot}
+            mascotIcon={ownerInfoMap[cell.index]?.mascotIcon}
+            onClick={undefined}
+            isHeatmapActive={isHeatmapActive}
+            isMonopolyGroup={isCellInMonopolyGroup(cell.index, monopolyGroups)}
+            isMobile={isMobile}
+            renderToyBuildings={false}
+            renderBasePlinth={false}
+            renderAtlasSurface={false}
+          />
+        ))}
+
+        {/* 5. Dải cờ hoa vỉa hè cho các cụm độc quyền Monopoly Plaza */}
+        <MonopolyPlazaFusion monopolyGroups={monopolyGroups} isHeatmapActive={isHeatmapActive} />
+      </group>
     </group>
   );
 }

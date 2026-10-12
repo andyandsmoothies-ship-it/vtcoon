@@ -9,6 +9,7 @@ import {
   calculatePhaseFromProgress,
 } from '../store/environment_store';
 import { useGameStore } from '../store/game_store';
+import { useDiagnostic3DStore } from './diagnostic_3d_store';
 import { calculateTheatricalAmbientIntensity } from './auction_3d_stage';
 import { resolveShadowMapSize } from '../ui/ui_helpers';
 import {
@@ -268,6 +269,7 @@ export function TimeOfDayLighting({ isMobile = false }: TimeOfDayLightingProps =
   const bidFlashTimerRef = useRef<number>(1.0);
   const prevLevelMapRef = useRef(levelMap);
   const lastMotionTimeRef = useRef<number>(performance.now());
+  const isShadowsEnabled = useDiagnostic3DStore((s) => s.isShadowsEnabled);
 
   const shadowMapSize = resolveShadowMapSize(isMobile);
 
@@ -308,18 +310,22 @@ export function TimeOfDayLighting({ isMobile = false }: TimeOfDayLightingProps =
 
     updateDirectLights(sunRef.current, fillRef.current, rimRef.current, preset, phase, isAuctionActive, lerpRate, tempVec, tempColor, flashBoost);
     if (sunRef.current?.shadow) {
-      const isBuildingDirty = prevLevelMapRef.current !== levelMap;
-      prevLevelMapRef.current = levelMap;
-      const cacheState = updateLightingShadowCache(sunRef.current, {
-        isRolling,
-        isPawnMoving,
-        isBuildingDirty,
-        targetSunPosition: preset.sunPosition,
-        lastMotionTimeMs: lastMotionTimeRef.current,
-        nowMs: performance.now(),
-        gracePeriodMs: 800,
-      });
-      lastMotionTimeRef.current = cacheState.lastMotionTimeMs;
+      if (!isShadowsEnabled) {
+        sunRef.current.shadow.autoUpdate = false;
+      } else {
+        const isBuildingDirty = prevLevelMapRef.current !== levelMap;
+        prevLevelMapRef.current = levelMap;
+        const cacheState = updateLightingShadowCache(sunRef.current, {
+          isRolling,
+          isPawnMoving,
+          isBuildingDirty,
+          targetSunPosition: preset.sunPosition,
+          lastMotionTimeMs: lastMotionTimeRef.current,
+          nowMs: performance.now(),
+          gracePeriodMs: 800,
+        });
+        lastMotionTimeRef.current = cacheState.lastMotionTimeMs;
+      }
     }
     updateDiffuseAndAtmosphere(ambientRef.current, hemiRef.current, state.scene, state.gl, preset, phase, isAuctionActive, dt, lerpRate, tempColor, flashBoost);
     if (topDownRef.current) {

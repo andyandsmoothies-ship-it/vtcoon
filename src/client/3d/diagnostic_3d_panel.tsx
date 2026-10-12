@@ -52,11 +52,17 @@ function Diagnostic3DContent(): React.ReactElement | null {
   const isOceanVisible = useDiagnostic3DStore((s) => s.isOceanVisible);
   const isTableVisible = useDiagnostic3DStore((s) => s.isTableVisible);
   const isCityVisible = useDiagnostic3DStore((s) => s.isCityVisible);
+  const isBoardVisible = useDiagnostic3DStore((s) => s.isBoardVisible);
+  const isShadowsEnabled = useDiagnostic3DStore((s) => s.isShadowsEnabled);
+  const forcedLowDpr = useDiagnostic3DStore((s) => s.forcedLowDpr);
   const gpuRenderer = useDiagnostic3DStore((s) => s.gpuRenderer);
   const depthBits = useDiagnostic3DStore((s) => s.depthBits);
   const toggleOcean = useDiagnostic3DStore((s) => s.toggleOcean);
   const toggleTable = useDiagnostic3DStore((s) => s.toggleTable);
   const toggleCity = useDiagnostic3DStore((s) => s.toggleCity);
+  const toggleBoard = useDiagnostic3DStore((s) => s.toggleBoard);
+  const toggleShadows = useDiagnostic3DStore((s) => s.toggleShadows);
+  const toggleLowDpr = useDiagnostic3DStore((s) => s.toggleLowDpr);
   const toggleOpen = useDiagnostic3DStore((s) => s.toggleOpen);
   const setHardwareMetrics = useDiagnostic3DStore((s) => s.setHardwareMetrics);
 
@@ -67,6 +73,23 @@ function Diagnostic3DContent(): React.ReactElement | null {
     if (!glContext) return;
     setHardwareMetrics(queryHardwareMetrics(glContext));
   }, [glContext, setHardwareMetrics]);
+
+  // Dynamic Shadow Map hardware control
+  useEffect(() => {
+    if (!three?.gl) return;
+    three.gl.shadowMap.enabled = isShadowsEnabled;
+    three.gl.shadowMap.needsUpdate = true;
+  }, [isShadowsEnabled, three]);
+
+  // Dynamic Canvas DPR control
+  useEffect(() => {
+    if (typeof three?.setDpr !== 'function') return;
+    if (forcedLowDpr) {
+      three.setDpr(0.5);
+    } else {
+      three.setDpr(0.75);
+    }
+  }, [forcedLowDpr, three]);
 
   if (!isDebugEnabled || typeof document === 'undefined') return null;
 
@@ -93,17 +116,29 @@ function Diagnostic3DContent(): React.ReactElement | null {
           ),
           React.createElement('div', { className: 'grid grid-cols-1 gap-1.5 pt-1' },
             React.createElement('button', {
+              onClick: toggleShadows,
+              className: `px-2 py-1 rounded border text-left flex justify-between cursor-pointer ${isShadowsEnabled ? 'bg-cyan-950/60 border-cyan-500/60 text-cyan-300' : 'bg-red-950/40 border-red-500/40 text-red-400'}`,
+            }, React.createElement('span', null, 'Shadow Maps'), React.createElement('span', null, isShadowsEnabled ? 'ON' : 'OFF (Pure)')),
+            React.createElement('button', {
+              onClick: toggleLowDpr,
+              className: `px-2 py-1 rounded border text-left flex justify-between cursor-pointer ${forcedLowDpr ? 'bg-amber-950/60 border-amber-500/60 text-amber-300' : 'bg-slate-900/60 border-slate-700 text-slate-300'}`,
+            }, React.createElement('span', null, 'Force Low DPR'), React.createElement('span', null, forcedLowDpr ? '0.5x' : 'Normal')),
+            React.createElement('button', {
+              onClick: toggleBoard,
+              className: `px-2 py-1 rounded border text-left flex justify-between cursor-pointer ${isBoardVisible ? 'bg-cyan-950/60 border-cyan-500/60 text-cyan-300' : 'bg-red-950/40 border-red-500/40 text-red-400'}`,
+            }, React.createElement('span', null, 'Board & Tiles'), React.createElement('span', null, isBoardVisible ? 'ON' : 'OFF')),
+            React.createElement('button', {
+              onClick: toggleCity,
+              className: `px-2 py-1 rounded border text-left flex justify-between cursor-pointer ${isCityVisible ? 'bg-cyan-950/60 border-cyan-500/60 text-cyan-300' : 'bg-red-950/40 border-red-500/40 text-red-400'}`,
+            }, React.createElement('span', null, 'City Diorama'), React.createElement('span', null, isCityVisible ? 'ON' : 'OFF')),
+            React.createElement('button', {
               onClick: toggleOcean,
               className: `px-2 py-1 rounded border text-left flex justify-between cursor-pointer ${isOceanVisible ? 'bg-cyan-950/60 border-cyan-500/60 text-cyan-300' : 'bg-red-950/40 border-red-500/40 text-red-400'}`,
             }, React.createElement('span', null, 'Ocean & Waves'), React.createElement('span', null, isOceanVisible ? 'ON' : 'OFF')),
             React.createElement('button', {
               onClick: toggleTable,
               className: `px-2 py-1 rounded border text-left flex justify-between cursor-pointer ${isTableVisible ? 'bg-cyan-950/60 border-cyan-500/60 text-cyan-300' : 'bg-red-950/40 border-red-500/40 text-red-400'}`,
-            }, React.createElement('span', null, 'Walnut Table'), React.createElement('span', null, isTableVisible ? 'ON' : 'OFF')),
-            React.createElement('button', {
-              onClick: toggleCity,
-              className: `px-2 py-1 rounded border text-left flex justify-between cursor-pointer ${isCityVisible ? 'bg-cyan-950/60 border-cyan-500/60 text-cyan-300' : 'bg-red-950/40 border-red-500/40 text-red-400'}`,
-            }, React.createElement('span', null, 'City Diorama'), React.createElement('span', null, isCityVisible ? 'ON' : 'OFF'))
+            }, React.createElement('span', null, 'Walnut Table'), React.createElement('span', null, isTableVisible ? 'ON' : 'OFF'))
           )
         )
       )

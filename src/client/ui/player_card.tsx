@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import {
   useGameStore,
   type PlayerHudInfo,
@@ -143,6 +143,18 @@ function getSlotFromPlayer(player: PlayerHudInfo, explicitSlot?: number): number
   return 0;
 }
 
+function renderCardExpandChevron(isExpanded: boolean): React.ReactElement {
+  return React.createElement(
+    'span',
+    {
+      'data-testid': 'player-card-expand-indicator',
+      className: 'inline-block sm:hidden text-[10px] text-slate-400 select-none transition-transform duration-200 shrink-0',
+      'aria-hidden': true,
+    },
+    isExpanded ? '▲' : '▼'
+  );
+}
+
 export function PlayerCard({
   player,
   isCurrentTurn,
@@ -175,6 +187,25 @@ export function PlayerCard({
     player.mortgageLoans
   );
 
+  const userExpandedState = useState(false);
+  const isUserExpanded = userExpandedState[0];
+  const setIsUserExpanded = userExpandedState[1];
+  const currentTurnPlayerId = useGameStore((s) => s.currentTurnPlayerId);
+  useEffect(() => {
+    setIsUserExpanded(false);
+  }, [currentTurnPlayerId]);
+
+  const isTradingParty = Boolean(
+    tradingCellSet.size > 0 ||
+    (storePendingTradeOffer && (storePendingTradeOffer.buyerId === player.id || storePendingTradeOffer.sellerId === player.id))
+  );
+  const isExpandedOnMobile = isCurrentTurn || isTradingParty || isUserExpanded;
+
+  const handleToggleExpand = () => {
+    if (player.bankrupt || isCurrentTurn || isTradingParty) return;
+    setIsUserExpanded((prev) => !prev);
+  };
+
   const isNegativeBalance = player.balance < 0;
   const balanceColorClass = isNegativeBalance
     ? 'text-rose-700 font-black'
@@ -184,11 +215,26 @@ export function PlayerCard({
     <div
       data-testid="player-ribbon"
       data-in-turn={isCurrentTurn ? 'true' : 'false'}
-      className={`pointer-events-auto relative flex flex-col gap-1.5 p-2.5 sm:p-3 rounded-xl border-2 transition-all duration-200 w-full ${
+      onClick={handleToggleExpand}
+      aria-expanded={isExpandedOnMobile}
+      tabIndex={player.bankrupt ? -1 : 0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleToggleExpand();
+        }
+      }}
+      className={`pointer-events-auto relative flex flex-col gap-1.5 p-2.5 sm:p-3 rounded-xl border-2 transition-all duration-200 w-full select-none ${
+        player.bankrupt
+          ? 'opacity-50 grayscale cursor-default'
+          : isCurrentTurn || isTradingParty
+          ? 'cursor-default'
+          : 'cursor-pointer sm:cursor-default'
+      } ${
         isCurrentTurn
           ? 'border-amber-500 bg-[#FFFDF8] ring-2 ring-amber-400 shadow-[0_6px_0_0_#0f172a]'
           : 'border-slate-900 bg-[#FFFDF8] shadow-[0_4px_0_0_#0f172a]'
-      } text-slate-900 ${player.bankrupt ? 'opacity-50 grayscale' : ''}`}
+      } text-slate-900`}
       role="region"
       aria-label={`Thông tin ${player.name}`}
     >
@@ -239,6 +285,11 @@ export function PlayerCard({
           >
             {formatShortPlayerName(player.name)}
           </span>
+          {!player.bankrupt && !isCurrentTurn && !isTradingParty && (
+            <span className="ml-1 shrink-0">
+              {renderCardExpandChevron(isExpandedOnMobile)}
+            </span>
+          )}
         </div>
 
         {/* Cột phải (Căn lề phải): Số tiền mặt, Cảnh báo thấu chi, Tài sản ròng & Badge Phá Sản */}
@@ -270,8 +321,9 @@ export function PlayerCard({
         <>
           <span className="sr-only">BĐS:</span>
           <div
-            className={`flex-col gap-1 w-full px-2 pt-1.5 pb-1 border-t border-slate-300 select-none ${!isCurrentTurn ? 'hidden sm:flex' : 'flex'}`}
+            className={`flex-col gap-1 w-full px-2 pt-1.5 pb-1 border-t border-slate-300 select-none ${!isExpandedOnMobile ? 'hidden sm:flex' : 'flex'}`}
             data-testid="player-property-clusters"
+            onClick={(e) => e.stopPropagation()}
           >
         {[PROPERTY_CLUSTERS.slice(0, 4), PROPERTY_CLUSTERS.slice(4, 8)].map((clusterRow, rowIdx) => (
           <div

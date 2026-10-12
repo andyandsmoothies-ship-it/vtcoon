@@ -1,0 +1,38 @@
+[
+  {
+    "file": "src/client/ui/player_card.tsx",
+    "desc": "AST: Corrupt isExpandedOnMobile to ignore isTradingParty and isUserExpanded",
+    "target": "const isExpandedOnMobile = isCurrentTurn || isTradingParty || isUserExpanded;",
+    "replacement": "const isExpandedOnMobile = isCurrentTurn;"
+  },
+  {
+    "file": "src/client/ui/player_card.tsx",
+    "desc": "AST: Corrupt isTradingParty to permanently evaluate to false",
+    "target": "const isTradingParty = Boolean(",
+    "replacement": "const isTradingParty = false && Boolean("
+  },
+  {
+    "file": "src/client/ui/player_card.tsx",
+    "desc": "AST: Corrupt handleToggleExpand to no-op (never toggle isUserExpanded)",
+    "target": "setIsUserExpanded((prev) => !prev);",
+    "replacement": "/* no-op toggle */"
+  },
+  {
+    "file": "src/client/ui/player_card.tsx",
+    "desc": "AST: Corrupt handleToggleExpand to allow bankrupt player tap",
+    "target": "if (player.bankrupt || isCurrentTurn || isTradingParty) return;",
+    "replacement": "if (isCurrentTurn || isTradingParty) return;"
+  },
+  {
+    "file": "src/client/ui/player_card.tsx",
+    "desc": "AST: Corrupt chevron glyph from ▼ to ■",
+    "target": "isExpanded ? '▲' : '▼'",
+    "replacement": "isExpanded ? '▲' : '■'"
+  },
+  {
+    "file": "src/client/ui/player_card.tsx",
+    "desc": "AST: Corrupt global turn reset effect to never reset isUserExpanded",
+    "target": "setIsUserExpanded(false);",
+    "replacement": "/* no turn reset */"
+  }
+]

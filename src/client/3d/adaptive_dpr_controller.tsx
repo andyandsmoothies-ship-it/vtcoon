@@ -4,6 +4,7 @@ import { useFrame } from '@react-three/fiber';
 import { perfBudget, DPR_BOUNDS } from './perf_budget';
 import { useTelemetryStore } from '../telemetry/telemetry_store';
 import { useGameStore } from '../store/game_store';
+import { useDiagnostic3DStore } from './diagnostic_3d_store';
 
 export interface AdaptiveDprControllerProps {
   readonly isMobile: boolean;
@@ -13,11 +14,13 @@ export function AdaptiveDprController({ isMobile }: AdaptiveDprControllerProps):
   const currentDprRef = useRef<number | null>(null);
   const degradedTimeRef = useRef<number>(0);
   const optimalTimeRef = useRef<number>(0);
+  const forcedLowDpr = useDiagnostic3DStore((s) => s.forcedLowDpr);
 
   // [C3 & C4] Trích xuất live renderer và live setDpr từ useFrame, khởi tạo initialDpr từ gl.getPixelRatio()
   useFrame(({ gl, setDpr }, delta) => {
-    // [I2] Guard chống tụt FPS ảo khi tab trình duyệt chạy nền
+    // [I2] Guard chống tụt FPS ảo khi tab trình duyệt chạy nền hoặc khi đang force low DPR
     if (typeof document !== 'undefined' && document.hidden) return;
+    if (forcedLowDpr) return;
 
     // Đọc chính xác DPR ban đầu từ WebGL Renderer nếu chưa thiết lập
     if (currentDprRef.current === null && gl && typeof gl.getPixelRatio === 'function') {

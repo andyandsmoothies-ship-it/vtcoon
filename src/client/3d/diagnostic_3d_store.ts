@@ -17,12 +17,18 @@ export interface Diagnostic3DState {
   readonly isOceanVisible: boolean;
   readonly isTableVisible: boolean;
   readonly isCityVisible: boolean;
+  readonly isBoardVisible: boolean;
+  readonly isShadowsEnabled: boolean;
+  readonly forcedLowDpr: boolean;
   readonly gpuRenderer: string;
   readonly depthBits: number;
   readonly toggleOpen: () => void;
   readonly toggleOcean: () => void;
   readonly toggleTable: () => void;
   readonly toggleCity: () => void;
+  readonly toggleBoard: () => void;
+  readonly toggleShadows: () => void;
+  readonly toggleLowDpr: () => void;
   readonly setHardwareMetrics: (metrics: DiagnosticHardwareMetrics) => void;
 }
 
@@ -43,12 +49,18 @@ export const useDiagnostic3DStore = create<Diagnostic3DState>((set) => ({
   isOceanVisible: true,
   isTableVisible: true,
   isCityVisible: true,
+  isBoardVisible: true,
+  isShadowsEnabled: true,
+  forcedLowDpr: false,
   gpuRenderer: 'Detecting...',
   depthBits: 24,
   toggleOpen: () => set((s) => ({ isOpen: !s.isOpen })),
   toggleOcean: () => set((s) => ({ isOceanVisible: !s.isOceanVisible })),
   toggleTable: () => set((s) => ({ isTableVisible: !s.isTableVisible })),
   toggleCity: () => set((s) => ({ isCityVisible: !s.isCityVisible })),
+  toggleBoard: () => set((s) => ({ isBoardVisible: !s.isBoardVisible })),
+  toggleShadows: () => set((s) => ({ isShadowsEnabled: !s.isShadowsEnabled })),
+  toggleLowDpr: () => set((s) => ({ forcedLowDpr: !s.forcedLowDpr })),
   setHardwareMetrics: (metrics) => set(metrics),
 }));
 
