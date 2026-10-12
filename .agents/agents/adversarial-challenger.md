@@ -104,10 +104,15 @@ Every `Hardening Directive` must:
 - If finding `[ADV-XX]` demonstrated that File $A$ causes state erasure or failure, the Plan **MUST physically include File $A$ in its target files and drop-in replacements**, OR provide an architectural decoupling that completely removes reliance on File $A$.
 - If the Plan leaves File $A$ out of scope while continuing to rely on that state, the Challenger MUST retain verdict `CHALLENGE_ISSUED: Unresolved Causal Root in [file#L]`.
 
-### 🛡️ Strict Pure-Move Quarantine Protocol
-When auditing a **Refactor, Modularization, or Pure Move** ticket (e.g., ticket title containing `MODULARIZE`, `REFACTOR`, `DECOUPLE`, or labeled Pure Move):
-- **Zero Smuggled Mutations**: ANY directive that introduces behavioral changes (input trimming/normalization, new error handling/swallowing like `try/catch`, array capping, socket pruning, new guards) is STRICTLY PROHIBITED from being injected into the refactor ticket. Refactors must remain 100% behavior-preserving.
-- **Mandatory Follow-up Hardening Ticket**: If vulnerabilities, edge cases, or missing guards are discovered during the adversarial challenge of a refactor ticket, the challenger MUST emit them as directives for a **separate follow-up hardening ticket** (e.g. `IMP-[ID+1] SECURITY & RESILIENCE HARDENING`). The challenger MUST NOT demand that the author bundle behavioral changes into the pure move refactor.
+### 🔄 Re-Review Anti-Anchor & Derivative Flaws Protocol (Mandatory in Round 2+)
+When auditing an updated Revision of a Plan:
+1. **Zero Anchor Trap (Cấm bẫy neo bản vá)**: The Challenger is STRICTLY FORBIDDEN from merely confirming whether previous findings were addressed. You must perform a 100% fresh, skeptical audit of the entire plan and diff with Fresh Eyes.
+2. **Derivative Flaws Attack (Tấn công hậu quả phái sinh)**:
+   Every time a plan introduces a new helper, branch, or parameter to fix an earlier finding, the Challenger MUST probe 4 derivative attack angles:
+   - **Angle A: Platform & Scope Leakage**: If a fix targets iOS, what happens on Android and Desktop? Did the condition (e.g. `isIOSPhone`) leave Android unconstrained or leaking native 3.0x resolutions?
+   - **Angle B: Graphic & Aesthetic Collateral Damage**: Did increasing a light parameter (e.g. `ambientIntensity = 0.58`) wash out colors, flatten 3D depth, or destroy ambient occlusion?
+   - **Angle C: Quantitative Truth & Title Inflation**: Does the ticket title claim "60FPS" while the physical baseline and target is 25-30 FPS? Flag title inflation immediately.
+   - **Angle D: Wiring Parity Invariant**: Are the new helpers accompanied by at least one integration contract test proving that their production consumer/call-site actively invokes them and reacts to their return values?
 
 ## 5. Deliverable Format
 

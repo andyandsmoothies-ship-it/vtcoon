@@ -159,6 +159,19 @@ function resolveSourceFilesFromTest(testPath: string): string[] {
   return Array.from(new Set(files));
 }
 
+function loadTargetedProbes(tid?: string): Array<{ file?: string; desc: string; pattern?: string; target?: string; replacement: string }> | undefined {
+  if (!tid) return undefined;
+  const probeFile = path.resolve(process.cwd(), 'scripts', 'sentinel_probes', `${tid.toUpperCase()}.json`);
+  if (fs.existsSync(probeFile)) {
+    try {
+      return JSON.parse(fs.readFileSync(probeFile, 'utf8'));
+    } catch (err) {
+      console.warn(`⚠️ Failed to parse probe file: ${probeFile}`, err);
+    }
+  }
+  return undefined;
+}
+
 /**
  * Universal Mutation Runner: Executes both Source-Level Mutations and Contract Inversions.
  */
@@ -186,19 +199,6 @@ async function runUniversalMutationProbe(
   let sourceLevelMutantsTested = 0;
 
   // 1. Physical Source-Level Mutation Testing
-  function loadTargetedProbes(tid?: string): Array<{ file?: string; desc: string; pattern?: string; target?: string; replacement: string }> | undefined {
-    if (!tid) return undefined;
-    const probeFile = path.resolve(process.cwd(), 'scripts', 'sentinel_probes', `${tid.toUpperCase()}.json`);
-    if (fs.existsSync(probeFile)) {
-      try {
-        return JSON.parse(fs.readFileSync(probeFile, 'utf8'));
-      } catch (err) {
-        console.warn(`⚠️ Failed to parse probe file: ${probeFile}`, err);
-      }
-    }
-    return undefined;
-  }
-
   const targetedRules = loadTargetedProbes(ticketId);
 
   if (targetedRules && targetedRules.length > 0) {
@@ -593,6 +593,17 @@ async function main() {
   const targetFiles: string[] = [];
   if (srcPath) {
     targetFiles.push(srcPath.replace(/\\/g, '/'));
+  }
+  const targetedRules = loadTargetedProbes(ticketId);
+  if (targetedRules && targetedRules.length > 0) {
+    for (const rule of targetedRules) {
+      if (rule.file) {
+        const norm = rule.file.replace(/\\/g, '/');
+        if (!targetFiles.includes(norm)) {
+          targetFiles.push(norm);
+        }
+      }
+    }
   }
   const isVisualTarget = targetFiles.some((f) => /src[/\\]client[/\\](3d|ui)/i.test(f));
 

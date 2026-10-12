@@ -36,14 +36,29 @@ export function calculateBaseRim(phase: 'day' | 'sunset' | 'night'): number {
   }
 }
 
-export function calculateTopDownFill(phase: 'day' | 'sunset' | 'night', isAuctionActive: boolean): { intensity: number; color: string } {
+export function calculateMobileNightAmbientIntensity(
+  phase: string,
+  isMobile: boolean,
+  baseAmbient: number
+): number {
+  if (isMobile && phase === 'night') {
+    return Math.max(baseAmbient, 0.50);
+  }
+  return baseAmbient;
+}
+
+export function calculateTopDownFill(
+  phase: 'day' | 'sunset' | 'night',
+  isAuctionActive: boolean,
+  isMobile: boolean = false
+): { intensity: number; color: string } {
   switch (phase) {
     case 'day':
       return { intensity: isAuctionActive ? 0.05 : 0.25, color: '#F8FAFC' };
     case 'sunset':
       return { intensity: isAuctionActive ? 0.05 : 0.18, color: '#FEF3C7' };
     case 'night':
-      return { intensity: isAuctionActive ? 0.05 : 0.14, color: '#BAE6FD' };
+      return { intensity: isAuctionActive ? 0.05 : (isMobile ? 0.26 : 0.14), color: '#BAE6FD' };
   }
 }
 
@@ -155,6 +170,7 @@ function updateDiffuseAndAtmosphere(
   lerpRate: number,
   tempColor: Color,
   flashBoost: number = 0,
+  isMobile: boolean = false,
 ): void {
   if (gl && typeof gl.toneMappingExposure === 'number') {
     const targetExposure = calculateTargetExposure(phase, isAuctionActive);
@@ -164,7 +180,8 @@ function updateDiffuseAndAtmosphere(
   if (ambient) {
     tempColor.set(preset.ambientColor);
     ambient.color.lerp(tempColor, lerpRate);
-    ambient.intensity = calculateTheatricalAmbientIntensity(ambient.intensity, isAuctionActive, dt, preset.ambientIntensity, 0.15) + (isAuctionActive ? flashBoost * 0.3 : 0);
+    const targetAmbient = calculateMobileNightAmbientIntensity(phase, isMobile, preset.ambientIntensity);
+    ambient.intensity = calculateTheatricalAmbientIntensity(ambient.intensity, isAuctionActive, dt, targetAmbient, 0.15) + (isAuctionActive ? flashBoost * 0.3 : 0);
   }
   if (hemi) {
     tempColor.set(preset.hemiSkyColor);
@@ -282,7 +299,11 @@ export function TimeOfDayLighting({ isMobile = false }: TimeOfDayLightingProps =
 
   const preset = TIME_OF_DAY_PRESETS[phase];
   const initialPreset = useMemo(() => TIME_OF_DAY_PRESETS[useEnvironmentStore.getState().phase], []);
-  const initialTopDown = useMemo(() => calculateTopDownFill(useEnvironmentStore.getState().phase, false), []);
+  const initialAmbientIntensity = useMemo(
+    () => calculateMobileNightAmbientIntensity(useEnvironmentStore.getState().phase, isMobile, initialPreset.ambientIntensity),
+    [isMobile, initialPreset.ambientIntensity]
+  );
+  const initialTopDown = useMemo(() => calculateTopDownFill(useEnvironmentStore.getState().phase, false, isMobile), [isMobile]);
 
   // Temporary Three.js math objects for GC-free smooth lerp
   const tempColor = useMemo(() => new Color(), []);
@@ -310,7 +331,7 @@ export function TimeOfDayLighting({ isMobile = false }: TimeOfDayLightingProps =
 
     updateDirectLights(sunRef.current, fillRef.current, rimRef.current, preset, phase, isAuctionActive, lerpRate, tempVec, tempColor, flashBoost);
     if (sunRef.current?.shadow) {
-      if (!isShadowsEnabled) {
+      if (!isShadowsEnabled || isMobile) {
         sunRef.current.shadow.autoUpdate = false;
       } else {
         const isBuildingDirty = prevLevelMapRef.current !== levelMap;
@@ -327,9 +348,9 @@ export function TimeOfDayLighting({ isMobile = false }: TimeOfDayLightingProps =
         lastMotionTimeRef.current = cacheState.lastMotionTimeMs;
       }
     }
-    updateDiffuseAndAtmosphere(ambientRef.current, hemiRef.current, state.scene, state.gl, preset, phase, isAuctionActive, dt, lerpRate, tempColor, flashBoost);
+    updateDiffuseAndAtmosphere(ambientRef.current, hemiRef.current, state.scene, state.gl, preset, phase, isAuctionActive, dt, lerpRate, tempColor, flashBoost, isMobile);
     if (topDownRef.current) {
-      const topDownTarget = calculateTopDownFill(phase, isAuctionActive);
+      const topDownTarget = calculateTopDownFill(phase, isAuctionActive, isMobile);
       tempColor.set(topDownTarget.color);
       topDownRef.current.color.lerp(tempColor, lerpRate);
       topDownRef.current.intensity += (topDownTarget.intensity - topDownRef.current.intensity) * lerpRate;
@@ -347,7 +368,7 @@ export function TimeOfDayLighting({ isMobile = false }: TimeOfDayLightingProps =
       <group data-testid="time-of-day-lighting">
 
       {/* 3. Ánh sáng tán xạ không gian (Ambient Light) */}
-      <ambientLight ref={ambientRef} color={initialPreset.ambientColor} intensity={initialPreset.ambientIntensity} />
+      <ambientLight ref={ambientRef} color={initialPreset.ambientColor} intensity={initialAmbientIntensity} />
 
       {/* 4. Ánh sáng vòm trời & phản xạ mặt đất (Hemisphere Light) */}
       <hemisphereLight

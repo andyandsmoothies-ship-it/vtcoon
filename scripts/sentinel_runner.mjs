@@ -32,7 +32,7 @@ export {
   runRealMutationProbe
 };
 
-function runWebGlProbe(ticketId, testPath, srcPath) {
+function runWebGlProbe(ticketId, testPath, srcPath, is3D = true) {
   console.log(`=== RUNNING STATION 4 WEBGL2 SPATIAL SENTINEL [${ticketId}] ===\n`);
 
   if (!testPath || !srcPath) {
@@ -172,7 +172,7 @@ function runWebGlProbe(ticketId, testPath, srcPath) {
 function main() {
   const { ticketId, testPath, srcPath, is3D, rawArgs } = parseCliArgs();
   if (is3D) {
-    runWebGlProbe(ticketId, testPath, srcPath);
+    runWebGlProbe(ticketId, testPath, srcPath, is3D);
   } else {
     delegateToStation4Server(rawArgs);
   }

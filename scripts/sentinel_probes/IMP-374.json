@@ -1,0 +1,50 @@
+[
+  {
+    "file": "src/client/3d/adaptive_dpr_controller.tsx",
+    "desc": "Mutant: Invert maxBound selection in resolveClampedDpr",
+    "target": "const maxBound = isIOSPhoneDevice ? DPR_BOUNDS.IOS_PHONE_MAX : DPR_BOUNDS.MOBILE_MAX;",
+    "replacement": "const maxBound = isIOSPhoneDevice ? DPR_BOUNDS.MOBILE_MAX : DPR_BOUNDS.IOS_PHONE_MAX;"
+  },
+  {
+    "file": "src/client/3d/adaptive_dpr_controller.tsx",
+    "desc": "Mutant: Invert isMobile check in resolveClampedDpr",
+    "target": "if (!isMobile) return rawDpr;",
+    "replacement": "if (isMobile) return rawDpr;"
+  },
+  {
+    "file": "src/client/3d/adaptive_dpr_controller.tsx",
+    "desc": "AST Call-Site Wiring: Disable setDpr call on frame 0 clamp",
+    "target": "if (actualDpr !== rawDpr && typeof setDpr === 'function') {",
+    "replacement": "if (false && typeof setDpr === 'function') {"
+  },
+  {
+    "file": "src/client/3d/adaptive_dpr_controller.tsx",
+    "desc": "Mutant: Corrupt Android clamp to 2.0 in resolveClampedDpr",
+    "target": "DPR_BOUNDS.MOBILE_MAX",
+    "replacement": "2.0"
+  },
+  {
+    "file": "src/client/3d/time_of_day_lighting.tsx",
+    "desc": "Mutant: Corrupt calculateMobileNightAmbientIntensity night boost",
+    "target": "return Math.max(baseAmbient, 0.50);",
+    "replacement": "return Math.max(baseAmbient, 0.20);"
+  },
+  {
+    "file": "src/client/3d/time_of_day_lighting.tsx",
+    "desc": "AST Call-Site Wiring: Disconnect initialAmbientIntensity from calculateMobileNightAmbientIntensity",
+    "target": "const initialAmbientIntensity = useMemo(\n    () => calculateMobileNightAmbientIntensity(useEnvironmentStore.getState().phase, isMobile, initialPreset.ambientIntensity),\n    [isMobile, initialPreset.ambientIntensity]\n  );",
+    "replacement": "const initialAmbientIntensity = useMemo(\n    () => initialPreset.ambientIntensity,\n    [initialPreset.ambientIntensity]\n  );"
+  },
+  {
+    "file": "src/client/3d/time_of_day_lighting.tsx",
+    "desc": "Mutant: Corrupt mobile top-down fill intensity in calculateTopDownFill",
+    "target": "isMobile ? 0.26 : 0.14",
+    "replacement": "isMobile ? 0.14 : 0.14"
+  },
+  {
+    "file": "src/client/3d/procedural_building.tsx",
+    "desc": "Mutant: Invert shouldBypassPlotFrame logic",
+    "target": "return level !== 3 && !hasActiveSlam && !wasSlamming;",
+    "replacement": "return level === 3 || hasActiveSlam || wasSlamming;"
+  }
+]

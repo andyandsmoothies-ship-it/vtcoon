@@ -2,12 +2,20 @@
 import React, { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { perfBudget, DPR_BOUNDS } from './perf_budget';
+import { isIOSPhone } from './device_detect';
+// isIOSPhone: helper for iOS phone hardware resolution clamp
 import { useTelemetryStore } from '../telemetry/telemetry_store';
 import { useGameStore } from '../store/game_store';
 import { useDiagnostic3DStore } from './diagnostic_3d_store';
 
 export interface AdaptiveDprControllerProps {
   readonly isMobile: boolean;
+}
+
+export function resolveClampedDpr(rawDpr: number, isMobile: boolean, isIOSPhoneDevice: boolean): number {
+  if (!isMobile) return rawDpr;
+  const maxBound = isIOSPhoneDevice ? DPR_BOUNDS.IOS_PHONE_MAX : DPR_BOUNDS.MOBILE_MAX;
+  return Math.min(rawDpr, maxBound);
 }
 
 export function AdaptiveDprController({ isMobile }: AdaptiveDprControllerProps): null {
@@ -29,20 +37,27 @@ export function AdaptiveDprController({ isMobile }: AdaptiveDprControllerProps):
       prevForcedLowDprRef.current = true;
       return;
     }
+    const isIOSPhoneActive = isIOSPhone();
+    const defaultMobileMax = isIOSPhoneActive ? DPR_BOUNDS.IOS_PHONE_MAX : DPR_BOUNDS.MOBILE_MAX;
+
     if (prevForcedLowDprRef.current) {
       prevForcedLowDprRef.current = false;
       currentDprRef.current = null;
-      setDpr(isMobile ? DPR_BOUNDS.MOBILE_MAX : 1.0);
+      setDpr(isMobile ? defaultMobileMax : 1.0);
     }
 
     // Đọc chính xác DPR ban đầu từ WebGL Renderer nếu chưa thiết lập
     if (currentDprRef.current === null && gl && typeof gl.getPixelRatio === 'function') {
-      const actualDpr = Number(gl.getPixelRatio().toFixed(2));
+      const rawDpr = Number(gl.getPixelRatio().toFixed(2));
+      const actualDpr = resolveClampedDpr(rawDpr, isMobile, isIOSPhoneActive);
+      if (actualDpr !== rawDpr && typeof setDpr === 'function') {
+        setDpr(actualDpr);
+      }
       currentDprRef.current = actualDpr;
       useTelemetryStore.getState().updateMetrics({ dpr: actualDpr });
     }
 
-    const currentDpr = currentDprRef.current ?? (isMobile ? DPR_BOUNDS.MOBILE_MAX : 1.0);
+    const currentDpr = currentDprRef.current ?? (isMobile ? defaultMobileMax : 1.0);
     const deltaMs = delta * 1000;
     const avgFps = perfBudget.getAverageFps();
     const isPawnAnimating = Boolean(useGameStore.getState().activePawnAnimation?.isAnimating);

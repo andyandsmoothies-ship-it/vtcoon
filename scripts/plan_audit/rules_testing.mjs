@@ -240,8 +240,10 @@ export function auditWiringParityInPlan(targetFiles, planContent) {
   const targetList = Array.from(targetFiles.keys());
   const helperFiles = targetList.filter((f) => /_(?:helpers|detect|math|calc)\.[a-z]+$/i.test(f));
   const consumerFiles = targetList.filter((f) => /\.(?:tsx|ts)$/i.test(f) && !/_(?:helpers|detect|math|calc)\.[a-z]+$/i.test(f) && !/types?\.[a-z]+$/i.test(f) && !f.includes('test'));
+  const hasInlineExportedHelpers = /export\s+function\s+(?:calculate|resolve|should|is|format|get)[A-Za-z0-9_]+/i.test(planContent);
+  const uiConsumerFiles = consumerFiles.filter((f) => /\.(?:tsx|jsx)$/i.test(f));
 
-  if (helperFiles.length > 0 && consumerFiles.length > 0) {
+  if ((helperFiles.length > 0 && consumerFiles.length > 0) || (hasInlineExportedHelpers && uiConsumerFiles.length > 0)) {
     const testSectionHeaderRegex = /(?:^|\n)#{1,4}\s+[^\n]*?(?:Station 1|QA|KIỂM THỬ|CONTRACT TEST|TEST SPEC)[^\n]*\n([\s\S]*?)(?=\n#{1,2}\s+[^\n]+|\n===\s+|$)/gi;
     let testLines = [];
     let tMatch;
@@ -254,14 +256,15 @@ export function auditWiringParityInPlan(targetFiles, planContent) {
     }
     const allTestText = testLines.join('\n');
 
-    const hasWiringTest = consumerFiles.some((cf) => {
+    const activeConsumers = helperFiles.length > 0 ? consumerFiles : uiConsumerFiles;
+    const hasWiringTest = activeConsumers.some((cf) => {
       const baseName = path.basename(cf, path.extname(cf));
       const compName = baseName.split('_').map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join('');
-      return new RegExp(`(?:${baseName}|${compName}|wiring|mount|call-site|integration)`, 'i').test(allTestText);
+      return new RegExp(`(?:${baseName}|${compName}|wiring|call-site|callsite|mount|integration)`, 'i').test(allTestText);
     });
 
     if (!hasWiringTest) {
-      console.error(`  ❌ [WIRING_PARITY_VIOLATION] Plan modifies helper (${helperFiles.map((f) => path.basename(f)).join(', ')}) and consumer (${consumerFiles.map((f) => path.basename(f)).join(', ')}), but Station 1 test specifications lack integration/wiring tests asserting consumer call-site execution!`);
+      console.error(`  ❌ [WIRING_PARITY_VIOLATION] Plan introduces/modifies helper functions alongside UI components (${activeConsumers.map((f) => path.basename(f)).join(', ')}), but Station 1 test specifications lack integration/wiring tests asserting consumer call-site execution!`);
       console.error(`     GEMINI.md mandates at least one contract test verifying physical integration/wiring with consumer components.`);
       errors++;
     } else {

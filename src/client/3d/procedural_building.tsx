@@ -16,6 +16,10 @@ import {
   getRegionalTypology,
 } from './building_typology';
 
+export function shouldBypassPlotFrame(level: number, hasActiveSlam: boolean, wasSlamming: boolean): boolean {
+  return level !== 3 && !hasActiveSlam && !wasSlamming;
+}
+
 export interface ProceduralBuildingProps {
   readonly level: 0 | 1 | 2 | 3;
   readonly groupColor?: string;
@@ -178,6 +182,7 @@ export function ProceduralBuilding({
   const lotTransform = getBuildingLotTransform(cellIndex);
 
   useSafeFrame((_, delta) => {
+    if (shouldBypassPlotFrame(level, Boolean(activeSlam), wasSlammingRef.current)) return;
     if (level === 3 && crownRef.current) {
       crownRef.current.rotation.y += delta * 0.8;
     }

@@ -43,6 +43,13 @@ Execute the adversarial plan challenge:
    - Does it adhere to the Symmetric State Exit Invariant across FSM phases?
 4. **Scope Confinement**:
    - Does the plan stay strictly within declared cohesive units (<= 3 units, <= 2-3 files)?
+5. **Re-Review Anti-Anchor & Derivative Flaws Protocol (Round 2+)**:
+   - In revisions (Round 2+), NEVER merely verify that prior findings were resolved (Anchor Trap).
+   - Must independently probe 4 derivative flaw vectors:
+     - *Platform Scope Leakage*: Did an iOS/desktop fix leave Android/tablet unconstrained or leaking native 3.0x resolutions?
+     - *Visual Side-Effects*: Did increasing lighting parameters wash out colors, flatten 3D depth, or destroy micro-shadows?
+     - *Objective Realism & Title Inflation*: Does the ticket title claim "60FPS" while the physical baseline and target is 25-30 FPS?
+     - *Wiring Parity Invariant*: Are newly exported calculation helpers accompanied by at least one integration contract test proving their consumer call-site execution in Station 1?
 
 ### MODE B: Acceptance Report Forensic Audit (Target: `docs/reports/improvements/*_report.md`)
 Execute forensic verification against physical reality:
