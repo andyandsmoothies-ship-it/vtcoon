@@ -248,6 +248,8 @@ ${uiCraftFile || visual3dFile ? `3. **UI/UX Craft & Ergonomics Auditor (\`ui-cra
     - **Phán quyết**: **${uiReviewVerdict}**
 ${uiReviewNotes.length > 0 ? uiReviewNotes.map((n) => `   ${n}`).join('\n') : '   - Đảm bảo khoảng cách an toàn trên màn hình Desktop và Mobile 360px, chuẩn hóa vùng cảm ứng phím bấm.'}
 ${(() => {
+  const isCameraTicket = srcFiles.some((f) => /camera|cinematic|kinematics/i.test(f)) || /camera|cinematic|kinematics/i.test(ticketId);
+  if (!isCameraTicket) return '';
   const desktopTelPath = path.join(evidenceDir, `camera_telemetry_${ticketId.toLowerCase()}_desktop.json`);
   const mobileTelPath = path.join(evidenceDir, `camera_telemetry_${ticketId.toLowerCase()}_mobile.json`);
   if (fs.existsSync(desktopTelPath) && fs.existsSync(mobileTelPath)) {
@@ -294,26 +296,26 @@ ${forensicFindings && forensicFindings.length > 0 ? `- **Phát hiện phản bi�
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: |
 ${srcFiles.map((f) => {
   const abs = path.resolve(repoRoot, f);
-  if (!fs.existsSync(abs)) return `| \`${path.basename(f)}\` | [\`${f}\`](file:///${abs.replace(/\\/g, '/')}) | \`${planSubsystem}\` | **0 LOC** | 0 Lines | <= 400 LOC | ❌ Thiếu file |`;
+  if (!fs.existsSync(abs)) return `| \`${path.basename(f)}\` | [\`${f}\`](file:///${abs.replace(/\\/g, '/')}) | \`${planSubsystem}\` | **0 SLOC** | 0 Lines | <= 400 LOC | ❌ Thiếu file |`;
   const tierKey = categorizeTier(f);
   const tierInfo = TIER_RULES[tierKey] || TIER_RULES.TIER1_LOGIC;
   const rawLines = fs.readFileSync(abs, 'utf8').split('\n');
   if (rawLines.length > 0 && rawLines[rawLines.length - 1] === '') rawLines.pop();
-  const loc = rawLines.length;
-  const physicalLines = loc;
-  const isWarn = loc > tierInfo.warn && loc <= tierInfo.ceiling;
-  const status = isWarn ? `⚠️ Warning (${loc} > ${tierInfo.warn})` : (loc > tierInfo.ceiling ? `❌ Vượt trần (${loc} > ${tierInfo.ceiling})` : '✅ Đạt chuẩn');
-  return `| \`${path.basename(f)}\` | [\`${f}\`](file:///${abs.replace(/\\/g, '/')}) | ${tierInfo.name} | **${loc} LOC** | ${physicalLines} Lines | <= ${tierInfo.ceiling} LOC | ${status} |`;
+  const physicalLines = rawLines.length;
+  const sloc = rawLines.filter((l) => l.trim().length > 0).length;
+  const isWarn = sloc > tierInfo.warn && sloc <= tierInfo.ceiling;
+  const status = isWarn ? `⚠️ Warning (${sloc} > ${tierInfo.warn})` : (sloc > tierInfo.ceiling ? `❌ Vượt trần (${sloc} > ${tierInfo.ceiling})` : '✅ Đạt chuẩn');
+  return `| \`${path.basename(f)}\` | [\`${f}\`](file:///${abs.replace(/\\/g, '/')}) | ${tierInfo.name} | **${sloc} SLOC** | ${physicalLines} Lines | <= ${tierInfo.ceiling} LOC | ${status} |`;
 }).join('\n')}
 ${testFiles.map((f) => {
   const abs = path.resolve(repoRoot, f);
-  if (!fs.existsSync(abs)) return `| \`${path.basename(f)}\` | [\`${f}\`](file:///${abs.replace(/\\/g, '/')}) | Living Test | **0 LOC** | 0 Lines | <= 600 LOC | ❌ Thiếu file |`;
+  if (!fs.existsSync(abs)) return `| \`${path.basename(f)}\` | [\`${f}\`](file:///${abs.replace(/\\/g, '/')}) | Living Test | **0 SLOC** | 0 Lines | <= 600 LOC | ❌ Thiếu file |`;
   const rawLines = fs.readFileSync(abs, 'utf8').split('\n');
   if (rawLines.length > 0 && rawLines[rawLines.length - 1] === '') rawLines.pop();
-  const loc = rawLines.length;
-  const physicalLines = loc;
-  const status = loc > 600 ? `❌ Vượt trần (${loc} > 600)` : '✅ Đạt chuẩn';
-  return `| \`${path.basename(f)}\` | [\`${f}\`](file:///${abs.replace(/\\/g, '/')}) | Living Test | **${loc} LOC** | ${physicalLines} Lines | <= 600 LOC | ${status} |`;
+  const physicalLines = rawLines.length;
+  const sloc = rawLines.filter((l) => l.trim().length > 0).length;
+  const status = sloc > 600 ? `❌ Vượt trần (${sloc} > 600)` : '✅ Đạt chuẩn';
+  return `| \`${path.basename(f)}\` | [\`${f}\`](file:///${abs.replace(/\\/g, '/')}) | Living Test | **${sloc} SLOC** | ${physicalLines} Lines | <= 600 LOC | ${status} |`;
 }).join('\n')}
 ${baselineFiles.size > 0 ? `
 ### 4.2. Bảng Lũy Kế Chiến Dịch Toàn Cục (Cumulative Campaign Progress)

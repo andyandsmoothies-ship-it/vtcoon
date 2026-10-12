@@ -1,0 +1,86 @@
+[
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Invert DioramaShophouseBlocks mobile culling guard",
+    "target": "{!isMobile && <DioramaShophouseBlocks />}",
+    "replacement": "{true && <DioramaShophouseBlocks />}"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Invert DioramaHighriseBlocks mobile culling guard",
+    "target": "{!isMobile && <DioramaHighriseBlocks />}",
+    "replacement": "{true && <DioramaHighriseBlocks />}"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Invert DioramaCivicCenter mobile culling guard",
+    "target": "{!isMobile && <DioramaCivicCenter />}",
+    "replacement": "{true && <DioramaCivicCenter />}"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Invert DioramaWaterfrontStation mobile culling guard",
+    "target": "{!isMobile && <DioramaWaterfrontStation />}",
+    "replacement": "{true && <DioramaWaterfrontStation />}"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Invert DioramaHeritageDistrict mobile culling guard",
+    "target": "{!isMobile && <DioramaHeritageDistrict />}",
+    "replacement": "{true && <DioramaHeritageDistrict />}"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Invert DioramaTraffic mobile prop propagation",
+    "target": "<DioramaTraffic isMobile={isMobile} />",
+    "replacement": "<DioramaTraffic isMobile={!isMobile} />"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Invert DioramaModelRailroad mobile prop propagation",
+    "target": "<DioramaModelRailroad isMobile={isMobile} />",
+    "replacement": "<DioramaModelRailroad isMobile={!isMobile} />"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Invert DioramaMicroLife mobile prop propagation",
+    "target": "<DioramaMicroLife isMobile={isMobile} />",
+    "replacement": "<DioramaMicroLife isMobile={!isMobile} />"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Invert DioramaHarborCruiser mobile prop propagation",
+    "target": "<DioramaHarborCruiser isMobile={isMobile} />",
+    "replacement": "<DioramaHarborCruiser isMobile={!isMobile} />"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Delete CentralMonumentPlaza landmark",
+    "target": "<CentralMonumentPlaza />",
+    "replacement": "{/* Deleted CentralMonumentPlaza */}"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Delete DioramaSkyline landmark",
+    "target": "<DioramaSkyline />",
+    "replacement": "{/* Deleted DioramaSkyline */}"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Delete DioramaTerrain landmark",
+    "target": "<DioramaTerrain />",
+    "replacement": "{/* Deleted DioramaTerrain */}"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Delete DioramaBridges landmark",
+    "target": "<DioramaBridges />",
+    "replacement": "{/* Deleted DioramaBridges */}"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Invert desktop parity for DioramaCivicCenter",
+    "target": "{!isMobile && <DioramaCivicCenter />}",
+    "replacement": "{false && <DioramaCivicCenter />}"
+  }
+]

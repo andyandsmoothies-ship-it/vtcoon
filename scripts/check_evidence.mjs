@@ -507,6 +507,28 @@ if (ticketNum && fs.existsSync(improvementsDir)) {
           }
         }
       }
+
+      // 6.4 Anti-Truncated Bullet / Dangling Colon Gate
+      for (let lineIdx = 0; lineIdx < repLines.length; lineIdx++) {
+        const line = repLines[lineIdx].trim();
+        if (/^-\s*(?:💡|⚠️|🚨|\*)\s*\*\*\[[^\]]+\]\*\*:\s*$/.test(line)) {
+          const nextLine = repLines[lineIdx + 1] ? repLines[lineIdx + 1].trim() : '';
+          if (!nextLine || nextLine.startsWith('- ') || nextLine.startsWith('###') || nextLine.startsWith('---')) {
+            errors.push(
+              `[Template Truncation Violation] Final report ${finalReport} line ${lineIdx + 1} contains an empty dangling bullet without body text: "${line}". Must provide substantive findings or remove!`
+            );
+          }
+        }
+      }
+
+      // 6.5 Irrelevant Telemetry Table Gate (Anti-Contamination)
+      const targetSrcFiles = evidence.targetFiles || evidence.modifiedFiles || [];
+      const touchesMotion = targetSrcFiles.some((f) => /camera|cinematic|kinematics/i.test(f)) || /camera|cinematic|kinematics/i.test(evidence.ticketId || targetArg || '');
+      if (!touchesMotion && /Bảng Thông Số Toạ Độ Camera Khảo Sát Thực Tế/i.test(repContent)) {
+        errors.push(
+          `[Artifact Contamination Violation] Final report ${finalReport} contains Camera Telemetry table (Gotcha #13), but ticket does NOT modify camera/motion files! Remove irrelevant telemetry table to uphold the Mandatory Shortening Pass Invariant.`
+        );
+      }
     } catch {}
   }
 }

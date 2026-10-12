@@ -210,14 +210,37 @@ export function parseForensicAudit(auditDir, ticketId) {
       if (verdictMatch) forensicVerdict = verdictMatch[1].trim();
 
       const lines = content.split('\n');
-      for (const line of lines) {
+      let currentSection = null;
+      let currentItem = [];
+
+      const flushItem = () => {
+        if (!currentSection || currentItem.length === 0) return;
+        const joined = currentItem.join('\n').trim();
+        if (currentSection === 'finding') forensicFindings.push(joined);
+        if (currentSection === 'retro') forensicRetro.push(joined);
+        currentItem = [];
+      };
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
         const trimmed = line.trim();
-        if (/^-\s*(?:🚨|⚡|⚠️)\s*\*\*\[(?:CRITICAL|ARCHITECTURAL|EDGE-CASE)[^\]]*\]\*\*/i.test(trimmed)) {
-          forensicFindings.push(trimmed);
-        } else if (/^-\s*💡\s*\*\*\[SDLC-RETRO[^\]]*\]\*\*/i.test(trimmed)) {
-          forensicRetro.push(trimmed);
+
+        if (/^-\s*(?:🚨|⚡|⚠️)\s*\*\*\[/i.test(trimmed) || /^###\s*(?:🚨|⚡|⚠️)\s*\[/i.test(trimmed)) {
+          flushItem();
+          currentSection = 'finding';
+          currentItem.push(trimmed.startsWith('###') ? trimmed.replace(/^###\s*/, '- ') : trimmed);
+        } else if (/^-\s*💡\s*\*\*\[SDLC-RETRO/i.test(trimmed)) {
+          flushItem();
+          currentSection = 'retro';
+          currentItem.push(trimmed);
+        } else if (/^(?:#|---|##\s*\d)/.test(trimmed)) {
+          flushItem();
+          currentSection = null;
+        } else if (currentSection && (line.startsWith('  ') || line.startsWith('\t') || (trimmed.length > 0 && !trimmed.startsWith('#')))) {
+          currentItem.push(line);
         }
       }
+      flushItem();
     } catch {}
   }
   return { forensicFile, forensicVerdict, forensicFindings, forensicRetro };

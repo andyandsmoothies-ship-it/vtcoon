@@ -27,6 +27,9 @@ export function getCardCtaButtonText(cardId?: string, effectDelta?: number): str
     }
     return 'Đã Thâu Tóm BĐS • Đóng';
   }
+  if (cardId === MarketCardId.MC_FIRE_INSPECTION && typeof effectDelta === 'number' && effectDelta === 0) {
+    return 'Tiếp Tục (Miễn Phạt) 🧯';
+  }
   if (cardId && KNOWN_CARD_CTA_BUTTONS[cardId]) {
     return KNOWN_CARD_CTA_BUTTONS[cardId];
   }

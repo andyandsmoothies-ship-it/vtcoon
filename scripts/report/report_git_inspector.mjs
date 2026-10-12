@@ -117,7 +117,8 @@ export function resolvePlan(plansDir, ticketId) {
         planRegisteredFiles.add(dm[0].replace(/\\/g, '/'));
       }
     } else {
-      const contentWithoutBaselines = planContent.replace(/(?:>|\s)*[-*]?\s*\*\*(?:Baseline Working Tree Dependencies|Prior In-Flight Scope)[^*]*\*\*[\s\S]*?(?=\n\s*(?:[-*]\s*\*\*|##|$))/i, '');
+      let contentWithoutBaselines = planContent.replace(/(?:>|\s)*[-*]?\s*\*\*(?:Baseline Working Tree Dependencies|Prior In-Flight Scope|Bảo toàn môi trường làm việc|Baseline)[^*]*\*\*[\s\S]*?(?=\n\s*(?:[-*]\s*\*\*|##|$))/gi, '');
+      contentWithoutBaselines = contentWithoutBaselines.replace(/(?:^|\n)\s*(?:\d+\.|\*|-)?\s*Bảo toàn môi trường làm việc[\s\S]*?(?=\n\s*(?:[-*]\s*\*\*|##|\d+\.)|$)/gi, '');
       const regex = /(?:src|tests)\/[a-zA-Z0-9_./-]+\.(?:tsx|mjs|css|ts|js)\b/g;
       let m;
       while ((m = regex.exec(contentWithoutBaselines)) !== null) {
@@ -125,11 +126,13 @@ export function resolvePlan(plansDir, ticketId) {
       }
     }
 
-    const baselineMatch = planContent.match(/>\s*\*\*Baseline Working Tree Dependencies[^*]*:\*\*\s*(.+)$/m);
+    const baselineMatch = planContent.match(/(?:>|\s)*[-*]?\s*\*\*(?:Baseline Working Tree Dependencies|Prior In-Flight Scope|Bảo toàn môi trường làm việc)[^*]*:\*\*\s*(.+)$/m) ||
+                          planContent.match(/(?:^|\n)\s*(?:\d+\.|\*|-)?\s*Bảo toàn môi trường làm việc[^\n]*:\s*([\s\S]*?)(?=\n\s*(?:##|\d+\.)|$)/i);
     if (baselineMatch) {
       const bRegex = /(?:src|tests)\/[a-zA-Z0-9_./-]+\.(?:tsx|mjs|css|ts|js)\b/g;
       let bm;
-      while ((bm = bRegex.exec(baselineMatch[1])) !== null) {
+      const targetStr = baselineMatch[1] || baselineMatch[0];
+      while ((bm = bRegex.exec(targetStr)) !== null) {
         baselineFiles.add(bm[0].replace(/\\/g, '/'));
       }
     }

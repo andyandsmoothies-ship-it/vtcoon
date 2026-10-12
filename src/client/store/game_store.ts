@@ -149,6 +149,9 @@ export const useGameStore = create<GameState>((set, get) => ({
     }),
 
   addFloatingText: (item) => {
+    if (item.groupId && get().floatingTexts.some((t) => t.groupId === item.groupId && Date.now() - t.timestamp < 2000)) {
+      return;
+    }
     const id = item.id ?? `ft_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
     const timestamp = Date.now();
     const isMilestone = Boolean(item.actionType && /^(chance|market|monopoly|debt_relief|bankrupt)$/.test(item.actionType));

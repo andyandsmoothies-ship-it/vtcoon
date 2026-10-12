@@ -103,7 +103,15 @@ function handleMortgageBadge(act: ActivityLogEntry, state: GameState): void {
 
 function handleUnmortgageBadge(act: ActivityLogEntry, state: GameState): void {
   const cellName = act.cellIndex === 3 ? 'Bến Bạch Đằng' : (act.cellIndex !== undefined ? getCellName(act.cellIndex) : 'BĐS');
-  state.addFloatingText({ text: formatCurrency(act.amount !== undefined ? -Math.abs(act.amount) : 0), type: FloatingTextType.Penalty, playerId: act.playerId ?? '', actionType: 'unmortgage', title: `Giải chấp ${cellName} (Phí 10% ➔ Kho Bạc)`, cellIndex: act.cellIndex });
+  state.addFloatingText({
+    text: formatCurrency(act.amount !== undefined ? -Math.abs(act.amount) : 0),
+    type: FloatingTextType.Penalty,
+    playerId: act.playerId ?? '',
+    actionType: 'unmortgage',
+    title: `Giải chấp ${cellName} (Phí 10% ➔ Ngân Hàng)`,
+    cellIndex: act.cellIndex,
+    groupId: act.cellIndex !== undefined ? `unmortgage_${act.cellIndex}` : undefined,
+  });
 }
 
 function handleAuctionBadge(act: ActivityLogEntry, state: GameState): void {
@@ -113,7 +121,15 @@ function handleAuctionBadge(act: ActivityLogEntry, state: GameState): void {
     return;
   }
   if (!act.id.startsWith('auction_win') && !act.message.includes('trúng đấu giá') && !act.message.includes('Búa gõ')) return;
-  state.addFloatingText({ text: formatCurrency(act.amount !== undefined ? -Math.abs(act.amount) : 0), type: FloatingTextType.Penalty, playerId: act.playerId ?? '', actionType: 'auction_win', title: cellName ? `Thắng đấu giá ${cellName} ➔ Nộp Kho Bạc` : 'Thắng đấu giá BĐS ➔ Nộp Kho Bạc', cellIndex: act.cellIndex });
+  state.addFloatingText({
+    text: formatCurrency(act.amount !== undefined ? -Math.abs(act.amount) : 0),
+    type: FloatingTextType.Penalty,
+    playerId: act.playerId ?? '',
+    actionType: 'auction_win',
+    title: cellName ? `Thắng đấu giá ${cellName}` : 'Thắng đấu giá BĐS',
+    cellIndex: act.cellIndex,
+    groupId: act.cellIndex !== undefined ? `auction_win_${act.cellIndex}` : undefined,
+  });
 }
 
 export function handleTradeBadge(act: ActivityLogEntry, state: GameState): void {

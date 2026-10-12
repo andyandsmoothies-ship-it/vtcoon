@@ -272,9 +272,7 @@ export function resolveTransactionNarrative(
     formula = `Thuế tài sản qua GO (Tối đa ${(GO_PROPERTY_TAX_CAP ?? 1000).toLocaleString('vi-VN')} Tr.)`;
   }
   if (item.actionType === 'diplomatic') {
-    formula = (isLandlordSide || !isPositive)
-      ? 'Khách dùng Thẻ Ngoại Giao: Hụt thu tiền thuê'
-      : 'Đặc quyền ngoại giao: Miễn 100% tiền thuê BĐS';
+    formula = (isLandlordSide || !isPositive) ? 'Khách dùng Thẻ Ngoại Giao: Hụt thu tiền thuê' : 'Đặc quyền ngoại giao: Miễn 100% tiền thuê BĐS';
   }
   return { category, icon, subject, verb, amountText, isPositive, target, detail, formula };
 }

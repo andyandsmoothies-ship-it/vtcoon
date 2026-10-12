@@ -82,8 +82,9 @@ export function handlePropertyBadges(
         type: FloatingTextType.Penalty,
         playerId: event.ownerId,
         actionType: 'unmortgage',
-        title: `Giải chấp ${cellName} (Phí 10% ➔ Kho Bạc)`,
+        title: `Giải chấp ${cellName} (Phí 10% ➔ Ngân Hàng)`,
         cellIndex: event.cellIndex,
+        groupId: `unmortgage_${event.cellIndex}`,
       });
       break;
     }
@@ -144,8 +145,9 @@ export function handleMarketBadges(
         type: FloatingTextType.Penalty,
         playerId: event.winnerId,
         actionType: 'auction_win',
-        title: `Thắng đấu giá ${cellName} ➔ Nộp Kho Bạc`,
+        title: `Thắng đấu giá ${cellName}`,
         cellIndex: event.cellIndex,
+        groupId: `auction_win_${event.cellIndex}`,
       });
       break;
     }

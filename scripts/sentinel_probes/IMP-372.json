@@ -1,0 +1,50 @@
+[
+  {
+    "file": "src/client/ui/player_hud_list.tsx",
+    "desc": "AST: Revert PlayerHudList mobile width back to w-40",
+    "target": "w-44 sm:w-48 md:w-64 max-w-[calc(100vw-6rem)]",
+    "replacement": "w-40 sm:w-48 md:w-64 max-w-[calc(100vw-8rem)]"
+  },
+  {
+    "file": "src/client/ui/player_net_worth_badge.tsx",
+    "desc": "AST: Revert PlayerNetWorthBadge mobile collapse back to unconditional inline-flex",
+    "target": "className=\"hidden sm:inline-flex items-center",
+    "replacement": "className=\"inline-flex items-center"
+  },
+  {
+    "file": "src/client/ui/player_card.tsx",
+    "desc": "AST: Revert non-turn property dot container to unconditional flex",
+    "target": "${!isCurrentTurn ? 'hidden sm:flex' : 'flex'}",
+    "replacement": "flex"
+  },
+  {
+    "file": "src/client/ui/floating_numbers.tsx",
+    "desc": "AST: Corrupt MilestoneBanner header nowrap back to flex-wrap",
+    "target": "className=\"flex items-center gap-1.5 flex-nowrap min-w-0 flex-1\"",
+    "replacement": "className=\"flex items-center gap-1.5 flex-wrap sm:flex-nowrap min-w-0 flex-1\""
+  },
+  {
+    "file": "src/client/ui/floating_numbers.tsx",
+    "desc": "AST: Corrupt MilestoneBanner desc clamp from line-clamp-1 to line-clamp-2",
+    "target": "line-clamp-1 sm:line-clamp-2 break-words",
+    "replacement": "line-clamp-2 break-words"
+  },
+  {
+    "file": "src/client/ui/floating_numbers.tsx",
+    "desc": "AST: Revert MilestoneBanner category mobile collapse to unconditional flex",
+    "target": "className=\"hidden sm:flex items-center gap-1 text-[10px]",
+    "replacement": "className=\"flex items-center gap-1 text-[10px]"
+  },
+  {
+    "file": "src/client/ui/floating_numbers.tsx",
+    "desc": "AST: Corrupt isOlderWithBanner to hide single regular toast under banner",
+    "target": "const isOlderWithBanner = Boolean(latestMilestone) && displayItems.length > 1 && index === 0;",
+    "replacement": "const isOlderWithBanner = Boolean(latestMilestone) && (displayItems.length === 1 || index === 0);"
+  },
+  {
+    "file": "src/client/ui/floating_numbers.tsx",
+    "desc": "AST: Corrupt bottom clearance from 8.5rem to 8rem",
+    "target": ": 'bottom-[calc(8.5rem+env(safe-area-inset-bottom))] md:bottom-auto md:top-20';",
+    "replacement": ": 'bottom-[calc(8rem+env(safe-area-inset-bottom))] md:bottom-auto md:top-20';"
+  }
+]

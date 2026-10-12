@@ -132,7 +132,7 @@ export function MilestoneBanner({ item }: { readonly item: FloatingTextItem }): 
     >
       {/* Hàng 1: Tiêu đề sự kiện & Người chơi + Nút đóng ✕ */}
       <div className="flex items-start justify-between gap-1.5 min-w-0">
-        <div className="flex items-center gap-1.5 flex-wrap sm:flex-nowrap min-w-0 flex-1">
+        <div className="flex items-center gap-1.5 flex-nowrap min-w-0 flex-1">
           {player && (
             <span
               className="text-[10px] sm:text-[11px] font-bold px-1.5 py-0.5 rounded-md text-white shadow-xs shrink-0 truncate max-w-[120px] sm:max-w-[150px]"
@@ -166,14 +166,14 @@ export function MilestoneBanner({ item }: { readonly item: FloatingTextItem }): 
       {descText && (
         <span
           data-testid="milestone-card-desc"
-          className="line-clamp-2 break-words min-w-0 text-[11px] sm:text-xs text-slate-600 font-medium leading-tight"
+          className="line-clamp-1 sm:line-clamp-2 break-words min-w-0 text-[11px] sm:text-xs text-slate-600 font-medium leading-tight"
         >
           {descText}
         </span>
       )}
 
       {/* Hàng 3 (Dòng phụ): Định danh danh mục sự kiện */}
-      <div className="flex items-center gap-1 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-500 truncate pt-0.5">
+      <div className="hidden sm:flex items-center gap-1 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-500 truncate pt-0.5">
         <span className="text-xs shrink-0" aria-hidden="true">{icon}</span>
         <span className="truncate">{category}</span>
       </div>
@@ -322,12 +322,12 @@ export function FloatingNumbersOverlay(): React.ReactElement | null {
     activeModal !== null
       ? 'top-14 md:bottom-auto md:top-20'
       : activeMarketCount >= 3
-      ? 'bottom-[calc(8rem+env(safe-area-inset-bottom))] md:bottom-auto md:top-44'
+      ? 'bottom-[calc(8.5rem+env(safe-area-inset-bottom))] md:bottom-auto md:top-44'
       : activeMarketCount === 2
-      ? 'bottom-[calc(8rem+env(safe-area-inset-bottom))] md:bottom-auto md:top-36'
+      ? 'bottom-[calc(8.5rem+env(safe-area-inset-bottom))] md:bottom-auto md:top-36'
       : activeMarketCount >= 1
-      ? 'bottom-[calc(8rem+env(safe-area-inset-bottom))] md:bottom-auto md:top-28'
-      : 'bottom-[calc(8rem+env(safe-area-inset-bottom))] md:bottom-auto md:top-20';
+      ? 'bottom-[calc(8.5rem+env(safe-area-inset-bottom))] md:bottom-auto md:top-28'
+      : 'bottom-[calc(8.5rem+env(safe-area-inset-bottom))] md:bottom-auto md:top-20';
 
   let displayItems = activeModal !== null ? [] : [...visibleItems];
   if (
@@ -353,7 +353,7 @@ export function FloatingNumbersOverlay(): React.ReactElement | null {
           </div>
         )}
         {displayItems.map((item, index) => {
-          const isOlderWithBanner = Boolean(latestMilestone) && (displayItems.length === 1 || index === 0);
+          const isOlderWithBanner = Boolean(latestMilestone) && displayItems.length > 1 && index === 0;
           return (
             <div
               key={item.id}

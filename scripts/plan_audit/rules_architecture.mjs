@@ -40,6 +40,20 @@ export function auditPlanSnippetHygiene(relPath, targetChunk, replacementChunk, 
     }
   }
 
+  const condIdentifierRegex = /\b(?:!|Boolean\(|typeof\s+)?(is[A-Z][a-zA-Z0-9_$]+)\b/g;
+  let condMatch;
+  while ((condMatch = condIdentifierRegex.exec(replacementChunk)) !== null) {
+    const identName = condMatch[1];
+    const declaredOnDisk = new RegExp(`\\b(?:const|let|var|function|type|interface|import)\\s+${identName}\\b|\\b${identName}\\s*[:=]|\\b(?:props|state|params|options)\\.${identName}\\b`).test(diskContent);
+    const declaredInSnippets = allFileSnippets.some((snip) =>
+      new RegExp(`\\b(?:const|let|var|function|type|interface|import)\\s+${identName}\\b|\\b${identName}\\s*[:=]`).test(snip)
+    );
+    if (!declaredOnDisk && !declaredInSnippets) {
+      console.error(`  ❌ [UNDECLARED_CONDITION_IDENTIFIER_IN_PLAN] in ${relPath}: Conditional flag '${identName}' is used in snippet but is never declared or imported in physical disk file or plan snippets!`);
+      errors++;
+    }
+  }
+
   const camFnRegex = /export\s+function\s+(calculate[A-Za-z0-9_]*Cam[A-Za-z0-9_]*)\s*\(([^)]*)\)/g;
   let camFnMatch;
   while ((camFnMatch = camFnRegex.exec(replacementChunk)) !== null) {

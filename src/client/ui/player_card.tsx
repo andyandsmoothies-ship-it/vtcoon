@@ -270,7 +270,7 @@ export function PlayerCard({
         <>
           <span className="sr-only">BĐS:</span>
           <div
-            className="flex flex-col gap-1 w-full px-2 pt-1.5 pb-1 border-t border-slate-300 select-none"
+            className={`flex-col gap-1 w-full px-2 pt-1.5 pb-1 border-t border-slate-300 select-none ${!isCurrentTurn ? 'hidden sm:flex' : 'flex'}`}
             data-testid="player-property-clusters"
           >
         {[PROPERTY_CLUSTERS.slice(0, 4), PROPERTY_CLUSTERS.slice(4, 8)].map((clusterRow, rowIdx) => (

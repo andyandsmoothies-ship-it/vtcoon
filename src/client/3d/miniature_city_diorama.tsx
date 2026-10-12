@@ -22,7 +22,7 @@ import {
   DioramaLandmarkNorthStation,
   DioramaTropicalFlora,
 } from './diorama/diorama_railroad';
-import { isPhoneHardware } from './device_detect';
+import { isMobileDevice } from './device_detect';
 
 export {
   DioramaModelRailroad,
@@ -299,18 +299,18 @@ export interface MiniatureCityDioramaProps {
   readonly isMobile?: boolean;
 }
 
-export function MiniatureCityDiorama({ isMobile: propIsMobile }: MiniatureCityDioramaProps = {}): React.ReactElement {
-  const isMobile = propIsMobile ?? isPhoneHardware();
+export function MiniatureCityDiorama(props: MiniatureCityDioramaProps = {}): React.ReactElement {
+  const isMobile = props.isMobile ?? isMobileDevice();
   return (
     <group position={[0, 0, 0]} data-testid="miniature-city-diorama">
       {/* 0. Khung viền gỗ óc chó & gờ kim loại bao quanh bàn cờ */}
       <DioramaBoardRim />
-      {/* 0.1. Tuyến đường sắt đô thị mô hình & đoàn tàu mini */}
+      {/* 0.1. Tuyến đường sắt đô thị mô hình & đoàn tàu mini (Bảo tồn hợp đồng TC-265.05) */}
       <DioramaModelRailroad isMobile={isMobile} />
       {/* 0.2. Ke ga xe lửa bến sông ven tuyến đường sắt */}
-      <DioramaWaterfrontStation />
+      {!isMobile && <DioramaWaterfrontStation />}
       {/* 0.25. Ke ga xe lửa Landmark Metro bờ Bắc */}
-      <DioramaLandmarkNorthStation />
+      {!isMobile && <DioramaLandmarkNorthStation />}
       {/* 0.3. Dải luống hoa và bụi cây cảnh nhiệt đới ven bờ kênh */}
       {!isMobile && <DioramaTropicalFlora />}
       {/* 1. Bán đảo đôi liền khối & Bậc thềm kết nối quảng trường trung tâm */}
@@ -324,21 +324,21 @@ export function MiniatureCityDiorama({ isMobile: propIsMobile }: MiniatureCityDi
       {/* 2. Cầu Ba Son (Bắc) và Cầu Long Biên (Nam) nối liền hai bờ sông */}
       <DioramaBridges />
       {/* 3. Trung tâm Văn hóa Triển lãm & Công viên Cảnh quan Bờ sông */}
-      <DioramaCivicCenter />
-      <DioramaWaterfrontPark />
+      {!isMobile && <DioramaCivicCenter />}
+      {!isMobile && <DioramaWaterfrontPark />}
       {/* 4. Cảng Container Cát Lái & Bến du thuyền (Đông Nam) */}
       <DioramaContainerPort isMobile={isMobile} />
       <DioramaMarina isMobile={isMobile} />
-      {/* 4.1. Thuyền du ngoạn lòng sông Sài Gòn */}
+      {/* 4.1. Thuyền du ngoạn lòng sông Sài Gòn (Bảo tồn hợp đồng TC-265.07) */}
       <DioramaHarborCruiser isMobile={isMobile} />
       {/* 5. Cụm cao ốc tài chính Landmark Skyline & Tháp cao ốc nén */}
       <DioramaSkyline />
-      <DioramaHighriseBlocks />
+      {!isMobile && <DioramaHighriseBlocks />}
       {!isMobile && <DioramaResidentialPool />}
       {/* 5.1. Khu di sản văn hóa Chợ Lớn & Shophouse phố cổ */}
-      <DioramaHeritageDistrict />
-      <DioramaShophouseBlocks />
-      {/* 6. Nhịp sống đô thị vi mô & Giao thông tự hành */}
+      {!isMobile && <DioramaHeritageDistrict />}
+      {!isMobile && <DioramaShophouseBlocks />}
+      {/* 6. Nhịp sống đô thị vi mô & Giao thông tự hành (Bảo tồn hợp đồng TC-265.04 & TC-265.06) */}
       <DioramaMicroLife isMobile={isMobile} />
       <DioramaTraffic isMobile={isMobile} />
     </group>

@@ -83,11 +83,23 @@ Write the complete report to `.agents/audit/FORENSIC_AUDIT_[TICKET].md` using th
 - ⚠️ **[EDGE-CASE-BLINDSPOT]**: [Uncovered extreme boundary scenario, mobile viewport risk]
 
 ## 3. Continuous SDLC Process Improvement Retrospective
-- 💡 **[SDLC-RETRO]**: Concrete suggestions to improve the toolchain, prevent future copy-paste contamination, or refine project invariants.
+- 💡 **[SDLC-RETRO]**: Concrete suggestions to improve the toolchain, prevent future copy-paste contamination, or refine project invariants. Must include full explanatory prose; NEVER leave dangling empty headers.
 
 ## 4. Final Verdict & Actionable Remediation Directives
 [Explicit directives on what must be changed before sign-off]
 ```
+
+### FORENSIC VETO INVARIANT (ZERO DEFECT ACCEPTANCE)
+You are STRICTLY FORBIDDEN from issuing `HARDENED_APPROVED` if ANY of the following exist:
+1. Any 🚨 `[DATA-MISMATCH]`, test count discrepancy, or SLOC vs Total Lines confusion.
+2. Any template truncation or empty bullet points (e.g. `[SDLC-RETRO]:` with no text).
+3. Any copied boilerplate or irrelevant tables/data (e.g. camera telemetry in a diorama ticket).
+4. Any ⚡ `[ARCHITECTURAL-RISK]` or device predicate mismatch (`isPhoneHardware` vs `isMobileDevice`).
+5. Any test coverage gap (e.g. declaring 7 components culled but only asserting 5).
+6. Any Reality Gap between title claims (e.g. 1,355 draw calls) and physical slice reality (195 calls) without transparent disclosure.
+
+If EVEN A SINGLE finding from the above list is detected, your verdict MUST BE `REJECT_WITH_FINDINGS`.
+Issuing `HARDENED_APPROVED` while listing findings is an SDLC CONSTITUTIONAL CRIME. You MUST REJECT and mandate that Main Agent fixes all items before re-audit.
 
 ### Step 2: Message Main Agent
 Return a concise, high-signal summary to the Main Agent containing:
