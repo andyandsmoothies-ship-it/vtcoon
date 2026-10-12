@@ -1,0 +1,50 @@
+[
+  {
+    "file": "src/client/3d/diorama/diorama_terrain.tsx",
+    "desc": "Mutant 1: Remove BatchedDioramaLandmasses from DioramaTerrain call-site",
+    "target": "<BatchedDioramaLandmasses />",
+    "replacement": "{/* Call-site omitted */}"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_terrain.tsx",
+    "desc": "Mutant 2: Corrupt diorama-river-waves testid in DioramaTerrain",
+    "target": "data-testid=\"diorama-river-waves\"",
+    "replacement": "data-testid=\"corrupted-river-waves\""
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_terrain.tsx",
+    "desc": "Mutant 3: Corrupt diorama-park-relief testid in DioramaTerrain",
+    "target": "data-testid=\"diorama-park-relief\"",
+    "replacement": "data-testid=\"corrupted-park-relief\""
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_terrain.tsx",
+    "desc": "Mutant 4: Corrupt park relief stone color #64748B in DioramaTerrain",
+    "target": "color=\"#64748B\"",
+    "replacement": "color=\"#000000\""
+  },
+  {
+    "file": "src/client/3d/diorama/batched_diorama_terrain.tsx",
+    "desc": "Mutant 5: Bypass singleton cache in createBatchedTerrainGeometries",
+    "target": "if (cachedTerrainGeoms) return cachedTerrainGeoms;",
+    "replacement": "if (false && cachedTerrainGeoms) return cachedTerrainGeoms;"
+  },
+  {
+    "file": "src/client/3d/diorama/batched_diorama_terrain.tsx",
+    "desc": "Mutant 6: Corrupt West Boulevard asphalt color #1E293B",
+    "target": "color=\"#1E293B\"",
+    "replacement": "color=\"#000000\""
+  },
+  {
+    "file": "src/client/3d/diorama/batched_diorama_terrain.tsx",
+    "desc": "Mutant 7: Corrupt East Promenade color #334155",
+    "target": "color=\"#334155\"",
+    "replacement": "color=\"#000000\""
+  },
+  {
+    "file": "src/client/3d/diorama/batched_diorama_terrain.tsx",
+    "desc": "Mutant 8: Corrupt West Boulevard offset causing center collapse",
+    "target": "createBoxWithOffset(0.7, 0.005, 11.6, -4.8, 0.020, 0)",
+    "replacement": "createBoxWithOffset(0.7, 0.005, 11.6, 0, 0.020, 0)"
+  }
+]
