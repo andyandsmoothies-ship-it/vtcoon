@@ -66,8 +66,10 @@ function Diagnostic3DContent(): React.ReactElement | null {
   const toggleOpen = useDiagnostic3DStore((s) => s.toggleOpen);
   const setHardwareMetrics = useDiagnostic3DStore((s) => s.setHardwareMetrics);
 
-  const three = useThree();
-  const glContext = resolveGlContext(three?.gl);
+  const gl = useThree((s) => s.gl);
+  const setDpr = useThree((s) => s.setDpr);
+  const glContext = resolveGlContext(gl);
+  const prevLowDprRef = React.useRef(forcedLowDpr);
 
   useEffect(() => {
     if (!glContext) return;
@@ -76,20 +78,21 @@ function Diagnostic3DContent(): React.ReactElement | null {
 
   // Dynamic Shadow Map hardware control
   useEffect(() => {
-    if (!three?.gl) return;
-    three.gl.shadowMap.enabled = isShadowsEnabled;
-    three.gl.shadowMap.needsUpdate = true;
-  }, [isShadowsEnabled, three]);
+    if (!gl?.shadowMap) return;
+    gl.shadowMap.enabled = isShadowsEnabled;
+    gl.shadowMap.needsUpdate = true;
+  }, [isShadowsEnabled, gl]);
 
-  // Dynamic Canvas DPR control
+  // Dynamic Canvas DPR control - only modify DPR when user toggles forcedLowDpr
   useEffect(() => {
-    if (typeof three?.setDpr !== 'function') return;
+    if (typeof setDpr !== 'function') return;
     if (forcedLowDpr) {
-      three.setDpr(0.5);
-    } else {
-      three.setDpr(0.75);
+      setDpr(0.5);
+    } else if (prevLowDprRef.current) {
+      setDpr(1.0);
     }
-  }, [forcedLowDpr, three]);
+    prevLowDprRef.current = forcedLowDpr;
+  }, [forcedLowDpr, setDpr]);
 
   if (!isDebugEnabled || typeof document === 'undefined') return null;
 
@@ -148,6 +151,7 @@ function Diagnostic3DContent(): React.ReactElement | null {
 }
 
 export function Diagnostic3DPanel(): React.ReactElement | null {
-  if (typeof window === 'undefined' || typeof document === 'undefined') return null;
+  const isDebugEnabled = useDiagnostic3DStore((s) => s.isDebugEnabled);
+  if (!isDebugEnabled || typeof window === 'undefined' || typeof document === 'undefined') return null;
   return <Diagnostic3DContent />;
 }

@@ -391,6 +391,9 @@ if (fs.existsSync(auditDir) && ticketNum) {
     { pattern: /Cập nhật logic và bảo toàn bất biến phân hệ/i, name: 'Generic Change Map Rationale Placeholder' },
     { pattern: /TODO_REVIEW_REQUIRED/i, name: 'Unfilled Review Todo' },
     { pattern: /Đảm bảo bao phủ 100% kiểm thử hành vi/i, name: 'Generic Test Coverage Placeholder' },
+    { pattern: /Bảo toàn 100% logic nghiệp vụ cốt lõi và các ràng buộc/i, name: 'Generic Intro Policy Placeholder' },
+    { pattern: /Phân bổ cấu trúc hiển thị tối ưu, bảo vệ trải nghiệm công thái học/i, name: 'Generic Ergonomics Placeholder' },
+    { pattern: /Tuân thủ nghiêm ngặt các ranh giới kiểm thử, Zero Dirty Casts/i, name: 'Generic Boundary Linter Placeholder' },
   ];
 
   for (const af of auditFiles.filter((f) => matchesTicket(f) && f.endsWith('.md'))) {
@@ -450,6 +453,9 @@ if (ticketNum && fs.existsSync(improvementsDir)) {
         { pattern: /Cập nhật logic và bảo toàn bất biến phân hệ/i, name: 'Generic Change Map Rationale Placeholder' },
         { pattern: /TODO_REVIEW_REQUIRED/i, name: 'Unfilled Review Todo' },
         { pattern: /Đảm bảo bao phủ 100% kiểm thử hành vi/i, name: 'Generic Test Coverage Placeholder' },
+        { pattern: /Bảo toàn 100% logic nghiệp vụ cốt lõi và các ràng buộc/i, name: 'Generic Intro Policy Placeholder' },
+        { pattern: /Phân bổ cấu trúc hiển thị tối ưu, bảo vệ trải nghiệm công thái học/i, name: 'Generic Ergonomics Placeholder' },
+        { pattern: /Tuân thủ nghiêm ngặt các ranh giới kiểm thử, Zero Dirty Casts/i, name: 'Generic Boundary Linter Placeholder' },
       ];
       for (const { pattern, name } of BANNED_BOILERPLATE_PATTERNS) {
         if (pattern.test(repContent)) {

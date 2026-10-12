@@ -22,6 +22,8 @@ import { TurnPhase } from '../src/domain/room.js';
 interface ProbeResults {
   ticketId: string;
   executed: boolean;
+  targetFiles?: string[];
+  visualReview?: boolean;
   closedLoopParity: {
     status: 'PASS' | 'BLOCKED: PARITY_GAP';
     gatewayCount: number;
@@ -588,9 +590,17 @@ async function main() {
       ? 'APPROVED'
       : 'BLOCKED';
 
+  const targetFiles: string[] = [];
+  if (srcPath) {
+    targetFiles.push(srcPath.replace(/\\/g, '/'));
+  }
+  const isVisualTarget = targetFiles.some((f) => /src[/\\]client[/\\](3d|ui)/i.test(f));
+
   const results: ProbeResults = {
     ticketId,
     executed: true,
+    targetFiles: targetFiles.length > 0 ? targetFiles : undefined,
+    visualReview: isVisualTarget ? true : undefined,
     closedLoopParity: p1,
     ephemeralBoundaryProbe: p2,
     mutationSensitivityProbe: p3,

@@ -11,12 +11,16 @@
 
 ## 1. TỔNG QUAN & BỐI CẢNH VẤN ĐỀ
 
-Triển khai gói hoàn thiện và đồng bộ kỹ thuật cho ticket `IMP-373` thuộc phân hệ `client-ui`.
+Gói cải tiến `IMP-373` giải quyết trực tiếp 2 khiếm khuyết hiển thị và công thái học phát sinh sau khi triển khai `IMP-372`:
 
-- **Mục tiêu kỹ thuật**:
-  - Bảo toàn 100% logic nghiệp vụ cốt lõi và các ràng buộc FSM/Domain.
-  - Phân bổ cấu trúc hiển thị tối ưu, bảo vệ trải nghiệm công thái học (ergonomics) trên cả Desktop và Mobile.
-  - Tuân thủ nghiêm ngặt các ranh giới kiểm thử, Zero Dirty Casts (`as any`), và các trần giới hạn LOC.
+- **Bối cảnh & Điểm mù sau IMP-372**:
+  - Tại vé `IMP-372`, để nén 46% chiều cao `PlayerHudList` trên mobile (tránh che lấp ô đất 10–20 và không gian xoay sa bàn 3D), thuộc tính `${!isCurrentTurn ? 'hidden sm:flex' : 'flex'}` đã được áp dụng, chỉ hiển thị cụm 28 chấm BĐS cho người chơi đang có lượt.
+  - **Hệ quả 1 (Mù thông tin BĐS đối thủ khi đàm phán P2P Trade)**: Khi Bot AI gửi đề xuất đổi đất (`pendingTradeOffer`), chỉ thẻ của bot (bên gửi đề xuất) đang có lượt nên hiển thị 28 chấm, trong khi thẻ của người chơi chính (Peppy Panda - bên nhận) bị ẩn cụm 28 chấm. Người chơi bị mù hoàn toàn danh mục BĐS của chính mình, không thể đối chiếu xem ô đất bị đòi đổi có phá vỡ thế độc quyền hay không.
+  - **Hệ quả 2 (Mất khả năng chủ động trinh sát tài sản đối thủ)**: Người chơi không có cách nào xem danh mục BĐS của các bot khác chưa tới lượt (Bot 2, Bot 3) do thẻ bị khóa thu gọn cứng nhắc.
+
+- **Cơ Chế 2 Đòn Bẩy Cốt Lõi Triển Khai Trong IMP-373**:
+  1. **Dual-Party Trade Inspection (Bung thẻ song phương tự động)**: Mở rộng điều kiện hiển thị Section 2 của `PlayerCard` trên mobile: tự động bung mở cụm 28 chấm khi thẻ thuộc về người chơi đang có lượt (`isCurrentTurn`) **HOẶC** là một trong hai bên tham gia giao dịch (`isTradingParty`).
+  2. **Tap-to-Expand Progressive Disclosure (Chạm mở rộng linh hoạt)**: Cho phép người chơi chạm vào bất kỳ thẻ bot ngoài lượt nào để xem chi tiết 28 chấm BĐS, chạm lại để thu gọn; tích hợp chỉ báo thị giác chevron `▲`/`▼` (`renderCardExpandChevron`) trên mobile; tự động reset thu gọn khi đổi lượt toàn cục (`currentTurnPlayerId`).
 
 ---
 
@@ -112,7 +116,14 @@ AssertionError: expected 'flex-col gap-1 w-full px-2 pt-1.5 pb-…' not to conta
 - **Tính toàn vẹn hệ thống**: Gói cải tiến hoàn thành theo đúng nguyên tắc Zero-Blindness, cung cấp đầy đủ bằng chứng vật lý từ mã nguồn, kiểm thử, hình ảnh trực quan đến biên bản kiểm toán độc lập.
 - **Sẵn sàng triển khai**: Mã nguồn đã sẵn sàng đóng gói và triển khai lên môi trường sản phẩm.
 
+### Phân Tích Va Chạm Không Gian & Rủi Ro Accordion (Blast Radius)
+- **Kịch bản va chạm cực đoan**: Mỗi thẻ `PlayerCard` hiện duy trì local state `isUserExpanded`. Khi người dùng mobile lần lượt tap vào cả 3 thẻ bot ngoài lượt, mỗi thẻ mở thêm $+55\text{px}$.
+- **Tính toán chiều cao dồn tích**:
+  $$\text{Chiều cao tổng} = 188\text{px} + (3 \times 55\text{px}) = 353\text{px}$$
+- **Đánh giá rủi ro**: Con số $353\text{px}$ này chiếm $47.7\%$ chiều dọc viewport $360 \times 740\text{px}$, tiềm ẩn nguy cơ tái sinh lỗi `DEF-04` (che khuất một phần các ô đất 10–20 trên bàn cờ và chiếm không gian vuốt xoay camera của ngón cái bên phải). Mặc dù hook `useEffect` đã bảo đảm dọn dẹp sạch sẽ toàn bộ thẻ mở khi chuyển lượt (`currentTurnPlayerId`), trải nghiệm trong cùng một lượt vẫn có thể bị dày cộm nếu người dùng không chủ động đóng lại.
+- **Cam kết giải pháp kiến trúc**: Thiết lập cơ chế **Single-Accordion Guard** (tối đa chỉ cho phép 1 thẻ ngoài lượt bung mở tại một thời điểm; khi mở Thẻ B thì Thẻ A tự động co lại) trong đợt refactor tách helper sắp tới.
+
 ### Sổ Theo Dõi Nợ Kỹ Thuật (Tech Debt Watch)
-- ⚠️ **Cảnh báo trần LOC Tier 2 (UI/3D/Views)** [`DEBT-UI-01`]: Tệp [`src/client/ui/player_card.tsx`](file:///C:/Users/HP/Documents/GitHub/vtcoon/src/client/ui/player_card.tsx) hiện đạt **450/500 Lines** (422 SLOC, khoảng cách an toàn còn 50 dòng trước trần tử thần). Các ticket kế tiếp nếu mở rộng chức năng bắt buộc phải thực hiện trích xuất Pure Data Derivation Logic (cụm 28 chấm, formatting, net worth) sang helper/visuals riêng theo quy tắc Anti-Shallow UI Refactoring trước khi thêm logic mới.
+- ⚠️ **Cảnh báo trần LOC Tier 2 (UI/3D/Views)** [`DEBT-UI-01`]: Tệp [`src/client/ui/player_card.tsx`](file:///C:/Users/HP/Documents/GitHub/vtcoon/src/client/ui/player_card.tsx) hiện đạt **450/500 Lines** (422 SLOC, khoảng cách an toàn còn 50 dòng trước trần tử thần). Các ticket kế tiếp nếu mở rộng chức năng bắt buộc phải thực hiện trích xuất Pure Data Derivation Logic (cụm 28 chấm, formatting, net worth) sang `player_card_visuals.ts` và cơ chế Single-Accordion lên cấp `player_hud_list.tsx` theo quy tắc Anti-Shallow UI Refactoring để kéo giảm LOC xuống $< 350$ dòng.
 
 

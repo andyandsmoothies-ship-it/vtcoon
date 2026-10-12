@@ -77,7 +77,7 @@ export async function startServer(config?: ServerConfig): Promise<RunningServer>
   );
 
   await new Promise<void>((resolve, reject) => {
-    httpServer.listen(port, () => resolve());
+    httpServer.listen(port, '0.0.0.0', () => resolve());
     httpServer.once('error', reject);
   });
 
@@ -116,7 +116,7 @@ const isDirectExecution =
 if (isDirectExecution) {
   startServer()
     .then((server) => {
-      console.log('[Server] VTCoOn Production Server running successfully.');
+      console.info('[Server] VTCoOn Production Server running successfully.');
       const shutdown = async () => {
         await server.close();
         process.exit(0);

@@ -103,6 +103,8 @@ function runWebGlProbe(ticketId, testPath, srcPath) {
   const results = {
     ticketId,
     executed: true,
+    targetFiles: srcPath ? [srcPath.replace(/\\/g, '/')] : undefined,
+    visualReview: is3D || Boolean(srcPath && /src[/\\]client[/\\](3d|ui)/i.test(srcPath)),
     closedLoopParity: ticketId.toUpperCase().includes('265') ? {
       status: 'PASS',
       pipelineVerified: true,

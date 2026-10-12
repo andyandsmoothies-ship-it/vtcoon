@@ -182,18 +182,9 @@ export function renderFinalReport({
 
 ## 1. TỔNG QUAN & BỐI CẢNH VẤN ĐỀ
 
-${typeof snapshotData?.summary === 'string' ? `> **Mô tả cốt lõi**: ${snapshotData.summary}` : `Triển khai gói hoàn thiện và đồng bộ kỹ thuật cho ticket \`${ticketId}\` thuộc phân hệ \`${planSubsystem}\`.`}
-
-- **Mục tiêu kỹ thuật**:
-  - Bảo toàn 100% logic nghiệp vụ cốt lõi và các ràng buộc FSM/Domain.
-${planSubsystem === 'client-audio'
-  ? '  - Bảo toàn 100% công thức tổng hợp dao động âm thanh Web Audio (tần số, envelope, LFO), không làm thay đổi hành vi âm thanh và giải phóng 106 dòng nợ kỹ thuật tiệm cận trần Tier 1.'
-  : (planSubsystem === 'server' || planSubsystem === 'server-network'
-    ? '  - Đảm bảo tính toán mạng / socket I/O tách bạch, chịu tải ngắt kết nối đột ngột (abrupt drop) và bảo toàn tính toàn vẹn trạng thái phòng chơi.'
-    : (planSubsystem === 'domain-core' || planSubsystem === 'bot-domain'
-      ? '  - Thống nhất não đàm phán AI, bảo vệ tính bất biến của FSM state machine và kho bạc kinh tế, 100% đối xứng giữa Wire và Core.'
-      : '  - Phân bổ cấu trúc hiển thị tối ưu, bảo vệ trải nghiệm công thái học (ergonomics) trên cả Desktop và Mobile.'))}
-  - Tuân thủ nghiêm ngặt các ranh giới kiểm thử, Zero Dirty Casts (\`as any\`), và các trần giới hạn LOC.
+${typeof snapshotData?.summary === 'string' 
+  ? `> **Mô tả cốt lõi**: ${snapshotData.summary}` 
+  : `TODO_REVIEW_REQUIRED: Cung cấp bối cảnh nghiệp vụ thực tế, điểm mù cần giải quyết và cơ chế kỹ thuật cốt lõi của ticket \`${ticketId}\`. Tuyệt đối cấm văn mẫu rập khuôn.`}
 
 ---
 
