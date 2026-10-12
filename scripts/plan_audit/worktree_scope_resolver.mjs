@@ -122,6 +122,37 @@ export function extractPriorTicketsFiles(currentPlanPath = '', currentRegistered
     } catch {}
   }
 
+  // 4. Resolve twin helper / decomposed files imported by recognized prior files
+  for (const [priorFile, tag] of Array.from(priorMap.entries())) {
+    const priorAbs = path.resolve(repoRoot, priorFile);
+    if (fs.existsSync(priorAbs)) {
+      try {
+        const text = fs.readFileSync(priorAbs, 'utf8');
+        const importRegex = /(?:from\s+['"]|import\s+['"])(?:\.\/|\.\.\/)([^'"]+)['"]/g;
+        let m;
+        while ((m = importRegex.exec(text)) !== null) {
+          const importRel = m[1];
+          const dir = path.dirname(priorAbs);
+          const candidates = [
+            path.resolve(dir, importRel),
+            path.resolve(dir, `${importRel}.ts`),
+            path.resolve(dir, `${importRel}.tsx`),
+            path.resolve(dir, `${importRel}.js`),
+            path.resolve(dir, `${importRel}.mjs`),
+          ];
+          for (const cand of candidates) {
+            if (fs.existsSync(cand) && !fs.statSync(cand).isDirectory()) {
+              const rel = path.relative(repoRoot, cand).replace(/\\/g, '/');
+              if (!currentRegisteredFiles.has(rel) && !priorMap.has(rel)) {
+                priorMap.set(rel, `${tag} (Helper)`);
+              }
+            }
+          }
+        }
+      } catch {}
+    }
+  }
+
   return priorMap;
 }
 

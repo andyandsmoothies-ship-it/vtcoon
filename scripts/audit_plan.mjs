@@ -137,11 +137,11 @@ errors += auditDefinitionOfDone(planContent);
 // 4. Summary & Plan Size Hygiene
 console.log(`\n========================================`);
 const planLines = planContent.split('\n').length;
-if (planLines > 600) {
-  console.warn(`⚠️  PLAN SIZE WARNING: Plan has ${planLines} lines (> 600 lines).`);
-  console.warn(`   Consider using Lean Contract Specifications (Type signatures & DTOs instead of full code implementations) to conserve tokens and speed up review.`);
+if (planLines > 250) {
+  console.warn(`⚠️  PLAN SIZE WARNING: Plan has ${planLines} lines (> 250 lines). Target <= 200 lines.`);
+  console.warn(`   Mandatory Lean Plan Protocol: Use Lean Contract Specifications (Type signatures, DTOs & Call-Site Wiring instead of full code implementations) to conserve tokens and prevent white-box test bias.`);
 } else {
-  console.log(`📄 Plan length: ${planLines} lines (Lean Specification).`);
+  console.log(`📄 Plan length: ${planLines} lines (Lean Specification <= 250 lines).`);
 }
 
 if (errors > 0) {

@@ -6,7 +6,8 @@ import { TurnPhase } from '../../domain/room';
 import { useGameStore } from '../store/game_store';
 import type { PlayerHudInfo } from '../store/game_store_types';
 import { useLobbyStore } from '../store/lobby_store';
-import { cellPosition } from './board_coords';
+import { cellPosition, tileRotation } from './board_coords';
+export { tileRotation };
 import { LayeredDioramaTile } from './board_tile';
 import { detectPlayerMonopolies, isCellInMonopolyGroup } from './monopoly_plaza_math';
 import { MonopolyPlazaFusion } from './monopoly_plaza_fusion';
@@ -14,6 +15,7 @@ import { LUXURY_PAWN_CONFIGS } from './luxury_pawn_models';
 import { DiceTray } from './dice_tray';
 import { InstancedBoardToyBuildings } from './instanced_toy_buildings';
 import { BatchedBoardTiles } from './batched_board_tiles';
+import { InstancedCellBordersAndTrays } from './instanced_cell_borders_and_trays';
 import { MiniatureCityDiorama } from './miniature_city_diorama';
 import { CoastalIslandEnvironment } from './coastal_island_environment';
 import { CinematicLightingAccents } from './cinematic_effects';
@@ -53,21 +55,6 @@ export const DEPTH_LAYER_STACK = {
 
 const CORNER_INDICES = new Set([0, 10, 20, 30]);
 
-export function tileRotation(index: number): [number, number, number] {
-  if (typeof index !== 'number' || Number.isNaN(index) || index < 0 || index > 39) {
-    return [0, 0, 0];
-  }
-  if (index === 0) {
-    return [0, Math.PI / 4, 0];
-  }
-  const side = Math.floor(index / 10);
-  switch (side) {
-    case 0: return [0, 0, 0];
-    case 1: return [0, -Math.PI / 2, 0];
-    case 2: return [0, Math.PI, 0];
-    default: return [0, Math.PI / 2, 0];
-  }
-}
 
 export function computeOwnerMap(
   playersInfo: Record<string, PlayerHudInfo>
@@ -190,6 +177,13 @@ export function GameBoard({ isMobile: propIsMobile }: GameBoardProps = {}): Reac
         {/* 3.5. Cụm InstancedMesh nhà đất đồ chơi C1-C3 toàn bàn cờ (<8 draw calls) */}
         <InstancedBoardToyBuildings levelMap={levelMap} />
 
+        {/* 3.6. Cụm InstancedCellBordersAndTrays: 28 viền chân đế ô đất và khay giá tiền O(1) */}
+        <InstancedCellBordersAndTrays
+          ownerInfoMap={ownerInfoMap}
+          monopolyGroups={monopolyGroups}
+          isHeatmapActive={isHeatmapActive}
+        />
+
         {/* 3.8. Cụm BatchedBoardTiles gộp 40 bề mặt và đế ô cờ vào 3 draw calls (IMP-363) */}
         <BatchedBoardTiles
           isMobile={isMobile}
@@ -216,6 +210,8 @@ export function GameBoard({ isMobile: propIsMobile }: GameBoardProps = {}): Reac
             renderToyBuildings={false}
             renderBasePlinth={false}
             renderAtlasSurface={false}
+            renderOwnerBorders={false}
+            renderPricePillTray={false}
           />
         ))}
 

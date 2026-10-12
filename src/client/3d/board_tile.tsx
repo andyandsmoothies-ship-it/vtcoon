@@ -186,6 +186,8 @@ export interface LayeredDioramaTileProps {
   readonly renderToyBuildings?: boolean;
   readonly renderBasePlinth?: boolean;
   readonly renderAtlasSurface?: boolean;
+  readonly renderOwnerBorders?: boolean;
+  readonly renderPricePillTray?: boolean;
 }
 
 export function tierColor(level: number): string {
@@ -209,6 +211,8 @@ export function LayeredDioramaTile({
   renderToyBuildings = true,
   renderBasePlinth = true,
   renderAtlasSurface = true,
+  renderOwnerBorders = true,
+  renderPricePillTray = true,
 }: LayeredDioramaTileProps): React.ReactElement {
   const textureRevision = useTextureRevision();
   const isMobile = propIsMobile !== undefined ? propIsMobile : isPhoneHardware();
@@ -263,27 +267,31 @@ export function LayeredDioramaTile({
       {/* Viền chân đế màu sở hữu (OwnerBaseTrim) khi đã có chủ */}
       {isPurchasable && ownerColor && ownerColor.length > 0 && (
         <group name="OwnerBaseGroup">
-          {/* Viền đai ánh kim PlazaTrimBorder khi đạt độc quyền */}
-          {isMonopolyGroup && (
-            <mesh position={[0, 0.038, 0]} name="PlazaTrimBorder" data-testid="plaza-trim-border" receiveShadow>
-              <boxGeometry args={[1.76, 0.10, 2.28]} />
-              <meshStandardMaterial color="#F59E0B" roughness={0.2} metalness={0.9} />
-            </mesh>
+          {renderOwnerBorders && (
+            <>
+              {/* Viền đai ánh kim PlazaTrimBorder khi đạt độc quyền */}
+              {isMonopolyGroup && (
+                <mesh position={[0, 0.038, 0]} name="PlazaTrimBorder" data-testid="plaza-trim-border" receiveShadow>
+                  <boxGeometry args={[1.76, 0.10, 2.28]} />
+                  <meshStandardMaterial color="#F59E0B" roughness={0.2} metalness={0.9} />
+                </mesh>
+              )}
+              <mesh position={[0, 0.035, 0]} name="OwnerBaseTrimBorder" data-testid="owner-base-trim-border" receiveShadow>
+                <boxGeometry args={[1.78, 0.10, 2.30]} />
+                <meshStandardMaterial color="#0F172A" roughness={0.7} metalness={0.2} />
+              </mesh>
+              <mesh position={[0, 0.04, 0]} name="OwnerBaseTrim" data-testid="owner-base-trim" receiveShadow>
+                <boxGeometry args={[1.74, 0.10, 2.26]} />
+                <meshStandardMaterial
+                  color={ownerColor}
+                  roughness={0.3}
+                  metalness={0.4}
+                  emissive={ownerColor}
+                  emissiveIntensity={isHeatmapActive ? 1.4 : (isMonopolyGroup ? 0.65 : 0)}
+                />
+              </mesh>
+            </>
           )}
-          <mesh position={[0, 0.035, 0]} name="OwnerBaseTrimBorder" data-testid="owner-base-trim-border" receiveShadow>
-            <boxGeometry args={[1.78, 0.10, 2.30]} />
-            <meshStandardMaterial color="#0F172A" roughness={0.7} metalness={0.2} />
-          </mesh>
-          <mesh position={[0, 0.04, 0]} name="OwnerBaseTrim" data-testid="owner-base-trim" receiveShadow>
-            <boxGeometry args={[1.74, 0.10, 2.26]} />
-            <meshStandardMaterial
-              color={ownerColor}
-              roughness={0.3}
-              metalness={0.4}
-              emissive={ownerColor}
-              emissiveIntensity={isHeatmapActive ? 1.4 : (isMonopolyGroup ? 0.65 : 0)}
-            />
-          </mesh>
           {/* Huy hiệu vương miện mạ vàng MonopolyCrownCrest khi đạt độc quyền */}
           {isMonopolyGroup && (
             <group name="MonopolyCrownCrest" data-testid="monopoly-crown-crest" position={[0, 0.12, -0.65]}>
@@ -335,6 +343,7 @@ export function LayeredDioramaTile({
             ownerColor={ownerColor}
             price={deedPrice}
             cellIndex={cell.index}
+            renderTrayFrame={renderPricePillTray}
           />
         </group>
       )}

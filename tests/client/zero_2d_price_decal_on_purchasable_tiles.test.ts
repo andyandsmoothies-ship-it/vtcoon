@@ -272,11 +272,12 @@ describe('[TC-IMP102/MSS][UI-S01/MSS][BR-UI-002] Zero 2D Price Decal & Pure 3D P
       expect(markup).toContain('data-price-label="4.000"');
     });
 
-    it('[TC-IMP102.11/MSS][BR-UI-002] OwnerPricePill does NOT render dark slate tone #090D1A when ownerColor is omitted', () => {
+    it('[TC-IMP102.11/MSS][BR-UI-002] OwnerPricePill renders dark slate tone #090D1A and gold price text when ownerColor is omitted', () => {
       const markup = renderToStaticMarkup(
         React.createElement(OwnerPricePill, { cellIndex: 1 })
       );
-      expect(markup).not.toContain('color="#090D1A"');
+      expect(markup).toContain('color="#090D1A"');
+      expect(markup).toContain('color="#FBBF24"');
     });
 
     it('[TC-IMP102.12/MSS][BR-UI-002] OwnerPricePill reacts to player ownership by adopting ownerColor #EF4444', () => {

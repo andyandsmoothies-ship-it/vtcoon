@@ -77,3 +77,10 @@
 15. **Flight Recorder Diagnostics & Race Hazard Forensic Invariant [FSM/FORENSIC]**:
     - **Deceptive Trap (Heisenbug Speculation)**: For insolvency anomalies, FSM deadlocks, or N+1 turn transitions, speculative static code reading consistently misses micro-tick ordering and concurrent bot/player intents.
     - **Verified Invariant**: When investigating FSM bugs, agents MUST ingest Flight Recorder dumps (`window.__vtcoon.exportFlightRecorder()` or JSON logs) and run `node scripts/analyze_gameplay_log.mjs <dump.json>` to trace sequential FSM ticks, identifying true race hazards empirically. `[DOMAIN/FSM]`
+16. **Full Lifecycle Testing Invariant**:
+    - FORBIDDEN solitary static mocking of store state for lifecycle, camera, or pawn features. Contract suites MUST exercise the canonical sequence (`triggerDiceRoll` -> `startPawnMove`).
+17. **Stall Guard & FSM Progress Invariant**:
+    - In FSM coordinators, bot simulators, and turn loops, actions resulting in execution errors or `ActionRejectReason` count as NO PROGRESS, even if background tick clocks (`delta.tick`) or timers advance. A sequence of 3 consecutive errored or no-op actions MUST trigger a stall break, fallback recovery, or blocked verdict rather than spinning.
+18. **Active Self-Healing & Ephemeral State TTL Invariant [IMP-376]**:
+    - **Deceptive Trap (Naïve Event-Pairing)**: Assuming that every `down/start/open` event will receive a matching `up/end/close` terminator. OS lock-screen suspensions, app blur, or `e.stopPropagation()` drop terminator events, trapping flags and locking frameloops indefinitely.
+    - **Verified Invariant**: Ephemeral state flags, touch collections, and subsystem locks MUST implement an authoritative Dead Man's Switch (TTL 3s–5s). Client watchdogs MUST trigger a deterministic self-healing action (state clear, fallback view, emergency advance) rather than passively logging telemetry. `[DOMAIN/FSM]`

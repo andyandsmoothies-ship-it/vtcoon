@@ -1,6 +1,6 @@
 // [UI-S01/MSS][UI-S04/MSS] TimeOfDayLighting — Dynamic Day-Sunset-Night Lighting & Atmosphere Coordinator
 import React, { useRef, useMemo } from 'react';
-import { Color, Vector3, Fog, type DirectionalLight, type AmbientLight, type HemisphereLight, type Scene } from 'three';
+import { Color, Vector3, type DirectionalLight, type AmbientLight, type HemisphereLight } from 'three';
 import { useSafeFrame } from './safe_frame';
 import {
   useEnvironmentStore,
@@ -10,87 +10,47 @@ import {
 } from '../store/environment_store';
 import { useGameStore } from '../store/game_store';
 import { useDiagnostic3DStore } from './diagnostic_3d_store';
-import { calculateTheatricalAmbientIntensity } from './auction_3d_stage';
 import { resolveShadowMapSize } from '../ui/ui_helpers';
 import {
-  shouldUpdateShadows,
-  isSunPositionMoving,
-  calculateShadowGraceRemaining,
-  applyShadowAutoUpdate,
-} from './shadow_cache_helpers';
+  calculateBaseFill,
+  calculateBaseRim,
+  calculateMobileNightAmbientIntensity,
+  calculateTopDownFill,
+  calculateTargetExposure,
+  lerpExposure,
+  calculateFogTargets,
+  calculateBidFlashIntensity as calculateBidFlashIntensityHelper,
+  updateDirectLights,
+  updateDiffuseAndAtmosphere,
+  updateLightingShadowCache,
+  type LightingShadowCacheParams,
+} from './time_of_day_lighting_helpers';
 
+// Re-export pure helpers for seamless backward compatibility across test suites
+export {
+  calculateBaseFill,
+  calculateBaseRim,
+  calculateMobileNightAmbientIntensity,
+  calculateTopDownFill,
+  calculateTargetExposure,
+  lerpExposure,
+  calculateFogTargets,
+  updateLightingShadowCache,
+  type LightingShadowCacheParams,
+};
 
-export function calculateBaseFill(phase: 'day' | 'sunset' | 'night'): number {
-  switch (phase) {
-    case 'day': return 0.12;
-    case 'sunset': return 0.35;
-    case 'night': return 0.22;
-  }
-}
-
-export function calculateBaseRim(phase: 'day' | 'sunset' | 'night'): number {
-  switch (phase) {
-    case 'day': return 0.12;
-    case 'sunset': return 0.40;
-    case 'night': return 0.25;
-  }
-}
-
-export function calculateMobileNightAmbientIntensity(
-  phase: string,
-  isMobile: boolean,
-  baseAmbient: number
-): number {
-  if (isMobile && phase === 'night') {
-    return Math.max(baseAmbient, 0.50);
-  }
-  return baseAmbient;
-}
-
-export function calculateTopDownFill(
-  phase: 'day' | 'sunset' | 'night',
-  isAuctionActive: boolean,
-  isMobile: boolean = false
-): { intensity: number; color: string } {
-  switch (phase) {
-    case 'day':
-      return { intensity: isAuctionActive ? 0.05 : 0.25, color: '#F8FAFC' };
-    case 'sunset':
-      return { intensity: isAuctionActive ? 0.05 : 0.18, color: '#FEF3C7' };
-    case 'night':
-      return { intensity: isAuctionActive ? 0.05 : (isMobile ? 0.26 : 0.14), color: '#BAE6FD' };
-  }
-}
-
+/**
+ * Base environmentIntensity regulator preserved across day, sunset, and night phases.
+ */
 export function calculateBaseEnv(phase: 'day' | 'sunset' | 'night'): number {
   return phase === 'night' ? 0.28 : phase === 'sunset' ? 0.38 : 0.75;
 }
 
-export function calculateTargetExposure(phase: string, isAuctionActive: boolean): number {
-  if (isAuctionActive) return 0.94;
-  switch (phase) {
-    case 'day': return 1.00;
-    case 'sunset': return 1.06;
-    case 'night': return 1.14;
-    default: return 1.00;
-  }
-}
-
-export function lerpExposure(current: number, target: number, rate: number): number {
-  if (!Number.isFinite(current) || !Number.isFinite(target) || !Number.isFinite(rate)) return current;
-  return current + (target - current) * rate;
-}
-
-export function calculateFogTargets(
-  phase: 'day' | 'sunset' | 'night',
-  isAuctionActive: boolean,
-  preset?: typeof TIME_OF_DAY_PRESETS['day']
-): { near: number; far: number; color: string } {
-  if (isAuctionActive) {
-    return { near: 18.0, far: 55.0, color: '#0F172A' };
-  }
-  const resolvedPreset = preset ?? TIME_OF_DAY_PRESETS[phase] ?? TIME_OF_DAY_PRESETS.day;
-  return { near: resolvedPreset.fogNear, far: resolvedPreset.fogFar, color: resolvedPreset.fogColor };
+/**
+ * Preservation of IMP-80/IMP-196 daytime and twilight rim light color formula.
+ */
+export function calculateRimColor(phase: 'day' | 'sunset' | 'night'): string {
+  return phase === 'night' ? '#38BDF8' : phase === 'sunset' ? '#EA580C' : '#F8FAFC';
 }
 
 /**
@@ -103,169 +63,7 @@ export function calculateBidFlashIntensity(
   boost: number = 1.5,
   duration: number = 0.35
 ): number {
-  if (!Number.isFinite(baseIntensity)) return 0;
-  if (!Number.isFinite(timer) || !Number.isFinite(boost) || !Number.isFinite(duration)) return baseIntensity;
-  if (timer < 0 || timer >= duration || duration <= 0) return baseIntensity;
-
-  const progress = timer / duration;
-  const decay = (1.0 - progress) * (1.0 - progress);
-  return baseIntensity + boost * decay;
-}
-
-function isThreeFog(fog: unknown): fog is Fog {
-  return typeof fog === 'object' && fog !== null && 'isFog' in fog;
-}
-
-function isThreeColor(bg: unknown): bg is Color {
-  return typeof bg === 'object' && bg !== null && 'isColor' in bg;
-}
-
-function updateDirectLights(
-  sun: DirectionalLight | null,
-  fill: DirectionalLight | null,
-  rim: DirectionalLight | null,
-  preset: typeof TIME_OF_DAY_PRESETS['day'],
-  phase: 'day' | 'sunset' | 'night',
-  isAuctionActive: boolean,
-  lerpRate: number,
-  tempVec: Vector3,
-  tempColor: Color,
-  flashBoost: number = 0,
-): void {
-  if (sun) {
-    tempVec.set(preset.sunPosition[0], preset.sunPosition[1], preset.sunPosition[2]);
-    sun.position.lerp(tempVec, lerpRate);
-    tempColor.set(preset.sunColor);
-    sun.color.lerp(tempColor, lerpRate);
-    const targetSun = (isAuctionActive ? preset.sunIntensity * 0.15 : preset.sunIntensity) + flashBoost;
-    sun.intensity += (targetSun - sun.intensity) * lerpRate;
-  }
-  if (fill) {
-    const baseFill = calculateBaseFill(phase);
-    const targetFill = isAuctionActive ? baseFill * 0.15 : baseFill;
-    const fillColor = phase === 'night' ? '#38BDF8' : phase === 'sunset' ? '#FDBA74' : '#CCFBF1';
-    tempColor.set(fillColor);
-    fill.color.lerp(tempColor, lerpRate);
-    fill.intensity += (targetFill - fill.intensity) * lerpRate;
-  }
-  if (rim) {
-    const baseRim = calculateBaseRim(phase);
-    const targetRim = isAuctionActive ? baseRim * 0.15 : baseRim;
-    const rimColor = phase === 'night' ? '#38BDF8' : phase === 'sunset' ? '#EA580C' : '#F8FAFC';
-    tempColor.set(rimColor);
-    rim.color.lerp(tempColor, lerpRate);
-    rim.intensity += (targetRim - rim.intensity) * lerpRate;
-  }
-}
-
-function updateDiffuseAndAtmosphere(
-  ambient: AmbientLight | null,
-  hemi: HemisphereLight | null,
-  scene: (Scene & { environmentIntensity?: number }) | undefined,
-  gl: { toneMappingExposure: number } | undefined,
-  preset: typeof TIME_OF_DAY_PRESETS['day'],
-  phase: 'day' | 'sunset' | 'night',
-  isAuctionActive: boolean,
-  dt: number,
-  lerpRate: number,
-  tempColor: Color,
-  flashBoost: number = 0,
-  isMobile: boolean = false,
-): void {
-  if (gl && typeof gl.toneMappingExposure === 'number') {
-    const targetExposure = calculateTargetExposure(phase, isAuctionActive);
-    gl.toneMappingExposure = lerpExposure(gl.toneMappingExposure, targetExposure, lerpRate);
-  }
-
-  if (ambient) {
-    tempColor.set(preset.ambientColor);
-    ambient.color.lerp(tempColor, lerpRate);
-    const targetAmbient = calculateMobileNightAmbientIntensity(phase, isMobile, preset.ambientIntensity);
-    ambient.intensity = calculateTheatricalAmbientIntensity(ambient.intensity, isAuctionActive, dt, targetAmbient, 0.15) + (isAuctionActive ? flashBoost * 0.3 : 0);
-  }
-  if (hemi) {
-    tempColor.set(preset.hemiSkyColor);
-    hemi.color.lerp(tempColor, lerpRate);
-    tempColor.set(preset.hemiGroundColor);
-    hemi.groundColor.lerp(tempColor, lerpRate);
-    const targetHemi = isAuctionActive ? preset.hemiIntensity * 0.15 : preset.hemiIntensity;
-    hemi.intensity += (targetHemi - hemi.intensity) * lerpRate;
-  }
-  if (scene) {
-    const fogTargets = calculateFogTargets(phase, isAuctionActive, preset);
-    if (!scene.fog || !isThreeFog(scene.fog)) {
-      scene.fog = new Fog(fogTargets.color, fogTargets.near, fogTargets.far);
-    } else {
-      tempColor.set(fogTargets.color);
-      if (scene.fog.color.getHexString() !== tempColor.getHexString()) {
-        scene.fog.color.lerp(tempColor, lerpRate);
-      }
-      if (Math.abs(fogTargets.near - scene.fog.near) > 0.05) {
-        scene.fog.near += (fogTargets.near - scene.fog.near) * lerpRate;
-      }
-      if (Math.abs(fogTargets.far - scene.fog.far) > 0.05) {
-        scene.fog.far += (fogTargets.far - scene.fog.far) * lerpRate;
-      }
-    }
-    const targetSkyColor = isAuctionActive ? fogTargets.color : preset.skyColor;
-    if (!scene.background || !isThreeColor(scene.background)) {
-      scene.background = new Color(targetSkyColor);
-    } else {
-      tempColor.set(targetSkyColor);
-      if (scene.background.getHexString() !== tempColor.getHexString()) {
-        scene.background.lerp(tempColor, lerpRate);
-      }
-    }
-    const baseEnv = phase === 'night' ? 0.28 : phase === 'sunset' ? 0.38 : 0.75;
-    const targetEnv = isAuctionActive ? 0.12 : baseEnv;
-    if (typeof scene.environmentIntensity !== 'number') {
-      scene.environmentIntensity = 1.0;
-    }
-    scene.environmentIntensity += (targetEnv - scene.environmentIntensity) * lerpRate;
-  }
-}
-
-export interface LightingShadowCacheParams {
-  readonly isRolling: boolean;
-  readonly isPawnMoving: boolean;
-  readonly isBuildingDirty: boolean;
-  readonly targetSunPosition: [number, number, number];
-  readonly lastMotionTimeMs: number;
-  readonly nowMs: number;
-  readonly gracePeriodMs?: number;
-}
-
-export function updateLightingShadowCache(
-  sun: DirectionalLight | null,
-  params: LightingShadowCacheParams
-): {
-  readonly lastMotionTimeMs: number;
-  readonly autoUpdate: boolean;
-  readonly needsShadows: boolean;
-} {
-  if (!sun) {
-    return { lastMotionTimeMs: params.lastMotionTimeMs, autoUpdate: false, needsShadows: false };
-  }
-  const isSunMoving = isSunPositionMoving(sun.position, params.targetSunPosition);
-  const needsShadows = shouldUpdateShadows({
-    isRolling: params.isRolling,
-    isPawnMoving: params.isPawnMoving,
-    isSunMoving,
-    isBuildingDirty: params.isBuildingDirty,
-  });
-  const updatedMotionTime = needsShadows ? params.nowMs : params.lastMotionTimeMs;
-  const graceRemaining = calculateShadowGraceRemaining(
-    updatedMotionTime,
-    params.nowMs,
-    params.gracePeriodMs ?? 800
-  );
-  const activeUpdate = needsShadows || graceRemaining > 0;
-  const autoUpdate = applyShadowAutoUpdate(sun, activeUpdate);
-  return {
-    lastMotionTimeMs: updatedMotionTime,
-    autoUpdate,
-    needsShadows,
-  };
+  return calculateBidFlashIntensityHelper(baseIntensity, timer, boost, duration);
 }
 
 export interface TimeOfDayLightingProps {
@@ -366,61 +164,60 @@ export function TimeOfDayLighting({ isMobile = false }: TimeOfDayLightingProps =
       <fog attach="fog" args={[initialPreset.fogColor, initialPreset.fogNear, initialPreset.fogFar]} />
 
       <group data-testid="time-of-day-lighting">
+        {/* 3. Ánh sáng tán xạ không gian (Ambient Light) */}
+        <ambientLight ref={ambientRef} color={initialPreset.ambientColor} intensity={initialAmbientIntensity} />
 
-      {/* 3. Ánh sáng tán xạ không gian (Ambient Light) */}
-      <ambientLight ref={ambientRef} color={initialPreset.ambientColor} intensity={initialAmbientIntensity} />
+        {/* 4. Ánh sáng vòm trời & phản xạ mặt đất (Hemisphere Light) */}
+        <hemisphereLight
+          ref={hemiRef}
+          color={initialPreset.hemiSkyColor}
+          groundColor={initialPreset.hemiGroundColor}
+          intensity={initialPreset.hemiIntensity}
+        />
 
-      {/* 4. Ánh sáng vòm trời & phản xạ mặt đất (Hemisphere Light) */}
-      <hemisphereLight
-        ref={hemiRef}
-        color={initialPreset.hemiSkyColor}
-        groundColor={initialPreset.hemiGroundColor}
-        intensity={initialPreset.hemiIntensity}
-      />
+        {/* 5. Nguồn sáng chính: Mặt trời nhiệt đới / Mặt trăng ánh bạc (Directional Light với Shadow Mapping) */}
+        <directionalLight
+          ref={sunRef}
+          position={initialPreset.sunPosition}
+          color={initialPreset.sunColor}
+          intensity={initialPreset.sunIntensity}
+          castShadow={!isMobile}
+          shadow-mapSize-width={shadowMapSize}
+          shadow-mapSize-height={shadowMapSize}
+          shadow-camera-left={-14}
+          shadow-camera-right={14}
+          shadow-camera-top={14}
+          shadow-camera-bottom={-14}
+          shadow-camera-near={0.5}
+          shadow-camera-far={95}
+          shadow-bias={-0.00005}
+          shadow-normalBias={0.003}
+        />
 
-      {/* 5. Nguồn sáng chính: Mặt trời nhiệt đới / Mặt trăng ánh bạc (Directional Light với Shadow Mapping) */}
-      <directionalLight
-        ref={sunRef}
-        position={initialPreset.sunPosition}
-        color={initialPreset.sunColor}
-        intensity={initialPreset.sunIntensity}
-        castShadow={!isMobile}
-        shadow-mapSize-width={shadowMapSize}
-        shadow-mapSize-height={shadowMapSize}
-        shadow-camera-left={-14}
-        shadow-camera-right={14}
-        shadow-camera-top={14}
-        shadow-camera-bottom={-14}
-        shadow-camera-near={0.5}
-        shadow-camera-far={95}
-        shadow-bias={-0.00005}
-        shadow-normalBias={0.003}
-      />
+        {/* 6. Fill Light: Ánh phản chiếu từ vịnh biển ngọc bích */}
+        <directionalLight
+          ref={fillRef}
+          position={[20, 16, -18]}
+          color="#CCFBF1"
+          intensity={0.12}
+        />
 
-      {/* 6. Fill Light: Ánh phản chiếu từ vịnh biển ngọc bích */}
-      <directionalLight
-        ref={fillRef}
-        position={[20, 16, -18]}
-        color="#CCFBF1"
-        intensity={0.12}
-      />
+        {/* 7. Rim Light: Ánh nắng viền trên chóp tháp và ngọn sóng */}
+        <directionalLight
+          ref={rimRef}
+          position={[-10, 18, -24]}
+          color="#F8FAFC"
+          intensity={0.12}
+        />
 
-      {/* 7. Rim Light: Ánh nắng viền trên chóp tháp và ngọn sóng */}
-      <directionalLight
-        ref={rimRef}
-        position={[-10, 18, -24]}
-        color="#F8FAFC"
-        intensity={0.12}
-      />
-
-      {/* 8. Balanced Top-down Fill Light: Khử triệt để bóng tối sầm mọi thời điểm */}
-      <directionalLight
-        ref={topDownRef}
-        position={[0, 30, 0]}
-        intensity={initialTopDown.intensity}
-        color={initialTopDown.color}
-      />
-    </group>
-  </>
+        {/* 8. Balanced Top-down Fill Light: Khử triệt để bóng tối sầm mọi thời điểm */}
+        <directionalLight
+          ref={topDownRef}
+          position={[0, 30, 0]}
+          intensity={initialTopDown.intensity}
+          color={initialTopDown.color}
+        />
+      </group>
+    </>
   );
 }

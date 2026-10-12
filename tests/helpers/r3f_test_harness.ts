@@ -1,5 +1,7 @@
 // [TEST-HARNESS][INFRA] Standardized React Three Fiber (R3F) & WebGL Test Seam
 // Eliminates bespoke local mocking of useFrame/Canvas across test files and provides deterministic frame stepping.
+import React from 'react';
+import { vi } from 'vitest';
 import type { Object3D } from 'three';
 
 export type R3FFrameCallback = (state: MockR3FRootState, delta: number) => void;
@@ -7,6 +9,7 @@ export type R3FFrameCallback = (state: MockR3FRootState, delta: number) => void;
 export interface MockR3FGl {
   readonly getPixelRatio: () => number;
   readonly setPixelRatio?: (dpr: number) => void;
+  readonly render?: (scene?: unknown, camera?: unknown) => void;
   readonly info?: {
     readonly render: {
       readonly calls: number;
@@ -30,6 +33,7 @@ export interface MockR3FRootState {
   size: { width: number; height: number; top: number; left: number };
   viewport: { width: number; height: number; factor: number; distance: number; aspect: number };
   scene?: Object3D;
+  camera?: unknown;
 }
 
 export interface R3FTestHarnessOptions {
@@ -43,6 +47,7 @@ export class R3FTestHarness {
   private lastSetDpr: number | null = null;
   private currentElapsedTime = 0;
   private pixelRatio = 1.0;
+  public renderCallCount = 0;
 
   public readonly state: MockR3FRootState;
 
@@ -57,6 +62,9 @@ export class R3FTestHarness {
         setPixelRatio: (dpr: number) => {
           this.pixelRatio = dpr;
           this.lastSetDpr = dpr;
+        },
+        render: () => {
+          this.renderCallCount++;
         },
         info: {
           render: {
@@ -82,6 +90,7 @@ export class R3FTestHarness {
         distance: 10,
         aspect: width / (height > 0 ? height : 1),
       },
+      camera: { position: { set: () => {} } },
     };
   }
 
@@ -137,6 +146,7 @@ export class R3FTestHarness {
   public reset(): void {
     this.callbacks = [];
     this.lastSetDpr = null;
+    this.renderCallCount = 0;
     this.currentElapsedTime = 0;
     this.state.clock.elapsedTime = 0;
   }
@@ -153,3 +163,27 @@ export const sharedR3FHarness = new R3FTestHarness();
 export function createR3FTestHarness(options?: R3FTestHarnessOptions): R3FTestHarness {
   return new R3FTestHarness(options);
 }
+
+/**
+ * Standardized mock factory for vi.mock('@react-three/fiber').
+ * Provides useFrame, useThree, and Canvas wired directly to R3FTestHarness.
+ */
+export function createR3FMock(harness: R3FTestHarness = sharedR3FHarness) {
+  return {
+    useFrame: (cb: R3FFrameCallback) => harness.registerFrameCallback(cb),
+    useThree: () => harness.state,
+    Canvas: ({ children }: { readonly children?: React.ReactNode }) =>
+      React.createElement('div', { 'data-testid': 'r3f-canvas' }, children),
+  };
+}
+
+/**
+ * Standardized graphics fixture seam: automatically bridges @react-three/fiber
+ * across test suites that import r3f_test_harness.
+ */
+vi.mock('@react-three/fiber', () => ({
+  useFrame: (cb: R3FFrameCallback) => sharedR3FHarness.registerFrameCallback(cb),
+  useThree: () => sharedR3FHarness.state,
+  Canvas: ({ children }: { readonly children?: React.ReactNode }) =>
+    React.createElement('div', { 'data-testid': 'r3f-canvas' }, children),
+}));

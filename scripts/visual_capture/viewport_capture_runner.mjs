@@ -37,7 +37,7 @@ export async function executeDualViewportCapture({
     userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
   });
   await injectScenario(send, opts.scenario, opts.scenarioExpr, visualScenariosDir);
-  await sleep(600, globalSignal);
+  await sleep(2500, globalSignal);
 
   const desktopFile = `${opts.ticket.toLowerCase()}_desktop.jpg`;
   const desktopPath = path.join(tmpDir, desktopFile);
@@ -110,7 +110,7 @@ export function parseCaptureArgs() {
   const args = process.argv.slice(2);
   const options = {
     ticket: 'MANUAL',
-    url: 'http://localhost:4173/?room=VTTEST&host=true',
+    url: 'http://localhost:4173/?room=VTTEST&host=true&postprocessing=false',
     name: 'full_board',
     crop: null, // [x, y, width, height]
     waitMs: 5000,

@@ -12,6 +12,7 @@ export interface OwnerPricePillProps {
   readonly cellIndex?: number;
   readonly isPurchasable?: boolean;
   readonly position?: [number, number, number];
+  readonly renderTrayFrame?: boolean;
 }
 
 const priceTextureCache = new Map<string, CanvasTexture>();
@@ -56,6 +57,7 @@ export function OwnerPricePill({
   cellIndex,
   isPurchasable: _isPurchasable = true,
   position = [0, 0.115, 0.70],
+  renderTrayFrame = true,
 }: OwnerPricePillProps): React.ReactElement | null {
   const hasOwner = Boolean(ownerColor && ownerColor.length > 0);
   const resolvedPrice =
@@ -72,11 +74,11 @@ export function OwnerPricePill({
 
   const priceColor = hasOwner ? '#FFFFFF' : '#FBBF24';
   const priceTexture = useMemo(
-    () => (hasOwner ? getPriceCanvasTexture(resolvedPriceText, priceColor) : null),
-    [hasOwner, resolvedPriceText, priceColor]
+    () => (resolvedPriceText ? getPriceCanvasTexture(resolvedPriceText, priceColor) : null),
+    [resolvedPriceText, priceColor]
   );
 
-  if (!hasOwner) {
+  if (!resolvedPriceText) {
     return null;
   }
 
@@ -86,25 +88,28 @@ export function OwnerPricePill({
       position={position}
       name="OwnerPricePill"
     >
-      {/* 1. Nền chính: Mang màu ownerColor khi có chủ, than đen #090D1A khi chưa mua */}
-      <mesh position={[0, 0, 0]} receiveShadow>
-        <boxGeometry args={[1.38, 0.012, 0.30]} />
-        <meshStandardMaterial
-          color={hasOwner ? ownerColor : '#090D1A'}
-          roughness={0.35}
-          metalness={hasOwner ? 0.25 : 0.1}
-        />
-      </mesh>
+      {/* 1. Nền chính & 2. Viền ngoài khay giá tiền 3D */}
+      {renderTrayFrame && (
+        <>
+          <mesh position={[0, 0, 0]} receiveShadow data-testid="owner-price-pill-tray-base">
+            <boxGeometry args={[1.38, 0.012, 0.30]} />
+            <meshStandardMaterial
+              color={hasOwner ? ownerColor : '#090D1A'}
+              roughness={0.35}
+              metalness={hasOwner ? 0.25 : 0.1}
+            />
+          </mesh>
 
-      {/* 2. Viền ngoài: Kim loại vàng hoàng kim #F59E0B khi có chủ, viền than sẫm #1E293B khi chưa mua */}
-      <mesh position={[0, -0.001, 0]} receiveShadow>
-        <boxGeometry args={[1.42, 0.010, 0.34]} />
-        <meshStandardMaterial
-          color={hasOwner ? '#F59E0B' : '#1E293B'}
-          roughness={0.3}
-          metalness={hasOwner ? 0.85 : 0.1}
-        />
-      </mesh>
+          <mesh position={[0, -0.001, 0]} receiveShadow data-testid="owner-price-pill-tray-frame">
+            <boxGeometry args={[1.42, 0.010, 0.34]} />
+            <meshStandardMaterial
+              color={hasOwner ? '#F59E0B' : '#1E293B'}
+              roughness={0.3}
+              metalness={hasOwner ? 0.85 : 0.1}
+            />
+          </mesh>
+        </>
+      )}
 
       {/* 3. Plane icon con vật bên trái khi có chủ */}
       {hasOwner && mascotIcon && (

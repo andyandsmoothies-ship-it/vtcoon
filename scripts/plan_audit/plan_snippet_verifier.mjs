@@ -127,11 +127,20 @@ export function auditNewFileDeclarations(targetFiles, planContent, fileTargetReg
             }
           }
 
+          let mentionedInWiringOrConsumer = false;
+          if (!calledInOtherPlanFiles) {
+            const planSections = planContent.split(/(?=#{1,4}\s+[^\n]*(?:Call-Site|Wiring|Integration|Consumer|Task|Target))/i);
+            mentionedInWiringOrConsumer = planSections.some((sec) => {
+              const isOtherTarget = !sec.includes(relPath) && /(?:\*\*Target physical file\*\*|\*\*Target File\*\*|Call-Site|Wiring|Integration|Consumer)/i.test(sec);
+              return isOtherTarget && new RegExp(`\\b${entityName}\\b`).test(sec);
+            });
+          }
+
           const internalOccurrences = (newCode.match(new RegExp(`\\b${entityName}\\b`, 'g')) || []).length;
           const calledInternally = internalOccurrences > 1;
 
-          if (!calledInOtherPlanFiles && !foundInExistingSrc && !calledInternally) {
-            console.error(`  ❌ DEAD CODE / ZERO PRODUCTION CONSUMER: ${kind} '${entityName}' in '${relPath}' has no callers in any other production file, plan replacement snippets, or within the module! (Anti-TIDD Rule 8)`);
+          if (!calledInOtherPlanFiles && !foundInExistingSrc && !calledInternally && !mentionedInWiringOrConsumer) {
+            console.error(`  ❌ DEAD CODE / ZERO PRODUCTION CONSUMER: ${kind} '${entityName}' in '${relPath}' has no callers in any other production file, plan replacement snippets, call-site wiring specifications, or within the module! (Anti-TIDD Rule 8)`);
             errors++;
           }
         }
@@ -260,9 +269,23 @@ export function auditDropInSnippets(planContent, fileTargetRegex, snippetRegex, 
     .map(([f]) => f);
 
   if (existingProdFiles.length > 0 && checkedSnippets === 0) {
-    console.error(`  ❌ MISSING DROP-IN SNIPPETS: Plan modifies existing production files (${existingProdFiles.join(', ')}), but contains 0 drop-in code snippets (<<<< ==== >>>>) in Station 2!`);
-    console.error(`     Prose descriptions alone are forbidden. Exact code diffs are required to prevent implementer drift.`);
-    errors++;
+    const hasCallSiteWiring = /(?:Call-Site Wiring|Callsite Wiring|Integration Anchor|Điểm Tích Hợp|Vị Trí Tích Hợp)/i.test(planContent);
+    if (hasCallSiteWiring) {
+      const missingFiles = existingProdFiles.filter((f) => {
+        const base = path.basename(f);
+        return !new RegExp(`\\b${base}\\b`).test(planContent);
+      });
+      if (missingFiles.length === 0) {
+        console.log(`  ✔️ Verified Lean Call-Site Wiring specification for existing file(s): ${existingProdFiles.join(', ')}`);
+      } else {
+        console.error(`  ❌ MISSING DROP-IN SNIPPETS OR CALL-SITE WIRING: Plan modifies existing production files, but lacks snippets or Call-Site Wiring for: ${missingFiles.join(', ')}`);
+        errors++;
+      }
+    } else {
+      console.error(`  ❌ MISSING DROP-IN SNIPPETS: Plan modifies existing production files (${existingProdFiles.join(', ')}), but contains 0 drop-in code snippets (<<<< ==== >>>>) or Call-Site Wiring sections!`);
+      console.error(`     Exact code diffs or explicit Call-Site Wiring anchors are required to prevent implementer drift.`);
+      errors++;
+    }
   }
 
   return { errors, checkedSnippets };

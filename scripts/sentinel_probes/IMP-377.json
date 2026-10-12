@@ -1,0 +1,62 @@
+[
+  {
+    "file": "src/client/3d/board_layout.tsx",
+    "desc": "Mutant 1: Omit InstancedCellBordersAndTrays from board_layout call-site",
+    "target": "<InstancedCellBordersAndTrays",
+    "replacement": "{/* omit */ <group data-omitted=\"instanced\""
+  },
+  {
+    "file": "src/client/3d/board_layout.tsx",
+    "desc": "Mutant 2: Invert renderOwnerBorders={false} to true in board_layout",
+    "target": "renderOwnerBorders={false}",
+    "replacement": "renderOwnerBorders={true}"
+  },
+  {
+    "file": "src/client/3d/board_layout.tsx",
+    "desc": "Mutant 3: Invert renderPricePillTray={false} to true in board_layout",
+    "target": "renderPricePillTray={false}",
+    "replacement": "renderPricePillTray={true}"
+  },
+  {
+    "file": "src/client/3d/instanced_cell_markers_helpers.ts",
+    "desc": "Mutant 4: Corrupt TOTAL_PURCHASABLE_CELLS by decrementing by 1",
+    "target": "export const TOTAL_PURCHASABLE_CELLS = PURCHASABLE_CELL_INDICES.length;",
+    "replacement": "export const TOTAL_PURCHASABLE_CELLS = PURCHASABLE_CELL_INDICES.length - 1;"
+  },
+  {
+    "file": "src/client/3d/instanced_cell_markers_helpers.ts",
+    "desc": "Mutant 5: Corrupt unowned pricePillOuterFrame scale to zero",
+    "target": "composeCellMarkerWorldMatrix(cellIndex, 0, 0.114, 0.70, target.pricePillOuterFrame);",
+    "replacement": "target.pricePillOuterFrame.makeScale(0, 0, 0);"
+  },
+  {
+    "file": "src/client/3d/instanced_cell_borders_and_trays.tsx",
+    "desc": "Mutant 6: Corrupt instanced-cell-borders-and-trays testid",
+    "target": "data-testid=\"instanced-cell-borders-and-trays\"",
+    "replacement": "data-testid=\"corrupted-instanced-cell-borders\""
+  },
+  {
+    "file": "src/client/3d/instanced_cell_borders_and_trays.tsx",
+    "desc": "Mutant 7: Corrupt emissiveIntensity default from 0.0 to 1.0",
+    "target": "emissiveIntensity={isHeatmapActive ? 1.4 : 0.0}",
+    "replacement": "emissiveIntensity={isHeatmapActive ? 1.4 : 1.0}"
+  },
+  {
+    "file": "src/client/3d/owner_property_markers.tsx",
+    "desc": "Mutant 8: Corrupt renderTrayFrame default from true to false",
+    "target": "renderTrayFrame = true,",
+    "replacement": "renderTrayFrame = false,"
+  },
+  {
+    "file": "src/client/3d/board_tile.tsx",
+    "desc": "Mutant 9: Corrupt renderOwnerBorders default from true to false",
+    "target": "renderOwnerBorders = true,",
+    "replacement": "renderOwnerBorders = false,"
+  },
+  {
+    "file": "src/client/3d/board_tile.tsx",
+    "desc": "Mutant 10: Corrupt renderPricePillTray default from true to false",
+    "target": "renderPricePillTray = true,",
+    "replacement": "renderPricePillTray = false,"
+  }
+]

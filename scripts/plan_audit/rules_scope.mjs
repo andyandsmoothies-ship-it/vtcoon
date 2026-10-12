@@ -75,25 +75,54 @@ export function auditScopeAndSubsystems(targetFiles) {
 
 export function auditHonestLocAccounting(targetFiles, planContent, snippetDeltaByFile = new Map()) {
   let errors = 0;
-  const locTableRowRegex = /\|\s*`?([^\n|`']+\.[a-zA-Z0-9]+)`?\s*\|\s*([^|]+)\|\s*(\d+)[^|]*\|\s*(\d+)[^|]*\|\s*[^|]+\|\s*[^|]+\|\s*([^|]+)\|/g;
+  const locTableRowRegex = /\|\s*`?([^\n|`']+\.[a-zA-Z0-9]+)`?\s*\|\s*([^|]+)\|\s*(\d+)[^|]*\|\s*(\d+)[^|]*\|\s*([^|]+)\|\s*[^|]+\|\s*([^|]+)\|/g;
   let locRowMatch;
   while ((locRowMatch = locTableRowRegex.exec(planContent)) !== null) {
     const filePath = locRowMatch[1].trim();
     const tier = locRowMatch[2].trim();
+    const declaredCurrent = parseInt(locRowMatch[3].trim(), 10);
     const expectedLOC = parseInt(locRowMatch[4].trim(), 10);
-    const status = locRowMatch[5].trim();
+    const netDeltaStr = locRowMatch[5].trim();
+    const status = locRowMatch[6].trim();
 
+    const isDeclaredNew = (targetFiles.get(filePath) || targetFiles.get(filePath.replace(/\\/g, '/'))) === true || declaredCurrent === 0;
     const absPath = path.resolve(process.cwd(), filePath);
+    const hasSnippetsInPlan = snippetDeltaByFile.has(filePath) || snippetDeltaByFile.has(filePath.replace(/\\/g, '/'));
+
     if (fs.existsSync(absPath)) {
       const rawLines = fs.readFileSync(absPath, 'utf8').split('\n');
       if (rawLines.length > 0 && rawLines[rawLines.length - 1] === '') rawLines.pop();
       const diskLines = rawLines.length;
-      const snippetDelta = snippetDeltaByFile.get(filePath) ?? snippetDeltaByFile.get(filePath.replace(/\\/g, '/')) ?? 0;
-      const computedExpected = diskLines + snippetDelta;
-      if (Math.abs(computedExpected - expectedLOC) > 1) {
-        console.error(`  ❌ [LOC_ACCOUNTING_FRAUD] File '${filePath}' claims expected LOC of ${expectedLOC}, but physical lines (${diskLines}) + snippet delta (${snippetDelta >= 0 ? '+' : ''}${snippetDelta}) = ${computedExpected} lines (mismatch of ${Math.abs(computedExpected - expectedLOC)} lines)!`);
-        console.error(`     Plan Table 2 must reflect physical disk reality plus verbatim snippet deltas.`);
-        errors++;
+
+      if (isDeclaredNew) {
+        // Newly created file. If already implemented on disk, verify it respects expected budget and tier limits
+        const maxAllowed = expectedLOC + 60;
+        if (diskLines > maxAllowed) {
+          console.error(`  ❌ [LOC_BUDGET_OVERRUN] Newly created file '${filePath}' has ${diskLines} physical lines, exceeding planned budget (${expectedLOC} + allowance = ${maxAllowed})!`);
+          errors++;
+        }
+      } else if (hasSnippetsInPlan) {
+        // Plan provides verbatim drop-in snippets: verify exact snippet line deltas
+        const snippetDelta = snippetDeltaByFile.get(filePath) ?? snippetDeltaByFile.get(filePath.replace(/\\/g, '/')) ?? 0;
+        const computedExpected = diskLines + snippetDelta;
+        if (Math.abs(computedExpected - expectedLOC) > 1) {
+          console.error(`  ❌ [LOC_ACCOUNTING_FRAUD] File '${filePath}' claims expected LOC of ${expectedLOC}, but physical lines (${diskLines}) + snippet delta (${snippetDelta >= 0 ? '+' : ''}${snippetDelta}) = ${computedExpected} lines (mismatch of ${Math.abs(computedExpected - expectedLOC)} lines)!`);
+          console.error(`     Plan Table 2 must reflect physical disk reality plus verbatim snippet deltas.`);
+          errors++;
+        }
+      } else {
+        // Lean Contract Plan without verbatim snippets: verify declaredCurrent and honest delta arithmetic
+        if (Math.abs(declaredCurrent - diskLines) > 1) {
+          console.error(`  ❌ [LOC_ACCOUNTING_FRAUD] File '${filePath}' claims current LOC of ${declaredCurrent}, but physical disk has ${diskLines} lines!`);
+          errors++;
+        }
+        const deltaMatch = netDeltaStr.match(/^[~≈+\-]?\s*([+-]?\d+)/);
+        const parsedDelta = deltaMatch ? parseInt(deltaMatch[1], 10) : (expectedLOC - diskLines);
+        const computedExpected = diskLines + parsedDelta;
+        if (Math.abs(computedExpected - expectedLOC) > 1) {
+          console.error(`  ❌ [LOC_ACCOUNTING_FRAUD] File '${filePath}' claims expected LOC of ${expectedLOC}, but current (${diskLines}) + declared delta (${parsedDelta >= 0 ? '+' : ''}${parsedDelta}) = ${computedExpected} lines!`);
+          errors++;
+        }
       }
     }
 

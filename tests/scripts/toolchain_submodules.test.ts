@@ -21,6 +21,7 @@ import {
   extractPriorTicketsFiles,
   detectActiveSliceId
 } from '../../scripts/plan_audit/worktree_scope_resolver.mjs';
+import { resolveEvidenceFile } from '../../scripts/evidence_audit/evidence_resolver.mjs';
 
 describe('Toolchain Submodules Contract Test Suite (IMP-353)', () => {
   describe('Sentinel Submodule (scripts/sentinel/)', () => {
@@ -168,6 +169,18 @@ describe('Toolchain Submodules Contract Test Suite (IMP-353)', () => {
       const activeSlice = detectActiveSliceId(process.cwd());
       expect(typeof activeSlice).toBe('string');
       expect(activeSlice).toMatch(/^IMP-\d+/);
+    });
+  });
+
+  describe('Evidence Audit Submodule (scripts/evidence_audit/)', () => {
+    it('[TC-EVD.01/MSS] resolveEvidenceFile resolves path for ticket id', () => {
+      const res = resolveEvidenceFile('376');
+      expect(res).toBeTruthy();
+      expect(res).toContain('chaos_sentinel_376.json');
+    });
+
+    it('[TC-EVD.02/A1] resolveEvidenceFile throws error when evidence file does not exist', () => {
+      expect(() => resolveEvidenceFile('99999')).toThrow(/not found/i);
     });
   });
 });

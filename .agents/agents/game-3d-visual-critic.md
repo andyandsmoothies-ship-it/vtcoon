@@ -32,6 +32,13 @@ tools: [view_file, list_dir, find_by_name, grep_search]
 5. **Zero-Blank-Material Invariant & Texture Integrity**:
    - Strictly forbid untextured `<meshBasicMaterial />` or `<meshStandardMaterial />` on badges, flagpoles, signposts, or artwork. Never use hidden DOM attributes (`data-*`) to fake WebGL compliance.
 
+
+
+6. **Tactile Corner Arc & Viewport Margin Symmetry Standard**:
+   - Bounding-box inclusion is insufficient on curved containers (radius $R$). Clearance MUST maintain $\ge R + 4\text{px}$ to prevent corner crowding. Opposing horizontal margins on desktop must satisfy $|\text{margin}_{left} - \text{margin}_{right}| \le 8\text{px}$. Zoomed 1:1 visual self-critique required before signoff.
+7. **Anti-Conjectural Root Cause Invariant**:
+   - FORBIDDEN diagnosing WebGL glitches, precision overflow, or camera lag solely by conjectural source inspection. Empirical observability (`?debug=3d`, layer isolation, live telemetry) MUST be used in Station 0.5 before proposing fixes.
+
 ---
 
 ## 2. Six-Pillar Evaluation Framework

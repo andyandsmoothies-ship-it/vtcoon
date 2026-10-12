@@ -27,4 +27,10 @@
        - `scripts/visual_capture/`: Preview server lifecycle, browser CDP client, and scenario injection (`preview_server_manager.mjs`, `cdp_browser_client.mjs`, `scenario_evaluator.mjs`).
        - `scripts/plan_audit/`: Markdown plan parser, drop-in replacement snippet verifier, auto-signer, and rule validators (`plan_markdown_parser.mjs`, `plan_snippet_verifier.mjs`, `plan_auto_signer.mjs`, `rules_*.mjs`).
        - `scripts/sentinel/`: Probe configuration loader, AST mutant injection, and atomic backup restore (`probe_config_loader.mjs`, `source_mutant_injector.mjs`).
+       - `scripts/evidence_audit/`: Evidence resolution, test execution audit, mutation & wiring parity, visual & telemetry bounds, review persistence and SSOT acceptance report (`evidence_resolver.mjs`, `audit_test_execution.mjs`, `audit_mutation_and_wiring.mjs`, `audit_visual_and_telemetry.mjs`, `audit_reports_and_ssot.mjs`).
    - *Future Implementations Guard*: All future rules, AST checks, or telemetry extractors MUST be implemented in the corresponding subdirectories above, NEVER bloated back into root facade files `scripts/*.mjs`.
+
+8. **Fault-Domain Bulkheading & Active Self-Healing Invariant [IMP-376]**:
+   - *Fault-Domain Bulkheading*: Peripheral subsystems (3D canvas, WebGL shaders, audio managers, particle effects, analytics) MUST be isolated via robust error boundaries or non-throwing wrappers. A rendering or audio failure must never crash core match state or block gameplay progression.
+   - *Active Self-Healing over Passive Telemetry*: Watchdogs and health-check loops must not merely log warnings (`console.warn`, telemetry). They MUST trigger deterministic recovery actions (force-clearing stuck locks, falling back to 2D view, degrading frameloop gracefully, or restoring degraded state).
+

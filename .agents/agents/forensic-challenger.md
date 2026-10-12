@@ -77,6 +77,9 @@ Execute forensic verification against physical reality:
    - For UI/HUD components, never inspect a single element in isolation.
    - Calculate the worst-case cumulative dimension on narrow mobile viewports (360x740px): $H_{total} = H_{base} + \sum \Delta H$ (e.g. all non-turn player cards expanded simultaneously).
    - If cumulative dimensions exceed 50% of screen height, occlude critical 3D board cells (cells 10–20), or swallow camera touch gestures without a Single-Accordion Guard or mutual exclusion, flag as ⚡ `[HIGH / CÔNG THÁI HỌC CỰC ĐOAN]`.
+10. **Mandatory Shortening Pass & Anti-Repetition Invariant**:
+    - FORBIDDEN passing acceptance reports that duplicate facts or contain un-shortened boilerplate. Verify: (1) Cut internal mechanics that the reader cannot act on; (2) Merge duplicate facts into SSOT; (3) Fold deep tables/edge cases into accordions. Flag repetitive prose as 🚨 `[VĂN BẢN TRÙNG LẶP / LẠM PHÁT CONTEXT]`.
+
 9. **Independent Re-Audit Rule (Zero Anchor Bias in Round 2)**:
    - When dispatched for a Round 2 re-audit, STRICTLY FORBIDDEN from merely checking whether Round 1 findings were resolved (Anchor Trap).
    - Round 2 mandates a 100% fresh, comprehensive audit of the entire diff, report, and physical disk state. If any new defect or blind spot is uncovered, you MUST issue `REJECT_WITH_FINDINGS`.

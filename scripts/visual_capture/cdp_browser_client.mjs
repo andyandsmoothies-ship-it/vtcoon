@@ -27,6 +27,7 @@ export function findBrowser() {
 export function launchBrowser(browserPath, debugPort, url) {
   return spawn(browserPath, [
     '--headless=new',
+    '--enable-automation',
     `--remote-debugging-port=${debugPort}`,
     '--window-size=1280,800',
     '--enable-webgl',

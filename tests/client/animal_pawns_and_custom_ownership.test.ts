@@ -455,7 +455,7 @@ describe('[TC-APCO01/MSS][UI-S02/MSS][BR-UI-002] Animal Pawns & Custom Ownership
       );
       expect(markup).toContain('data-testid="owner-price-pill"');
       const pillIdx = markup.indexOf('data-testid="owner-price-pill"');
-      const section = markup.slice(pillIdx, pillIdx + 600);
+      const section = markup.slice(pillIdx, pillIdx + 800);
       expect(section).toContain('color="#27ae60"');
       expect(section).toContain('data-testid="owner-price-label"');
     });

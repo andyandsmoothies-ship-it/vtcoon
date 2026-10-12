@@ -146,3 +146,7 @@ declare module '*scripts/plan_audit/worktree_scope_resolver.mjs' {
   export function detectActiveSliceId(repoRoot: string): string | null;
 }
 
+declare module '*scripts/evidence_audit/evidence_resolver.mjs' {
+  export function resolveEvidenceFile(rawArg: string): string;
+}
+

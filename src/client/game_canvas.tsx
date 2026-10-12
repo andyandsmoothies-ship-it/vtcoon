@@ -4,6 +4,7 @@ import './polyfills/canvas_round_rect';
 import { clearAll3DTextureCaches } from './3d/texture_cache_manager';
 import { isMobileHardware, getRecommendedDpr, getRecommendedGlProfile } from './3d/device_detect';
 import { AdaptiveDprController } from './3d/adaptive_dpr_controller';
+import { AdaptiveIdleCoolingController } from './3d/adaptive_idle_cooling_controller';
 import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, ContactShadows, Environment } from '@react-three/drei';
 import { ACESFilmicToneMapping, NoToneMapping } from 'three';
@@ -97,12 +98,14 @@ export interface GameCanvasProps {
   readonly players?: readonly Player[];
   readonly isLobby?: boolean;
   readonly isMobile?: boolean;
+  readonly enablePostProcessing?: boolean;
 }
 
 export function GameCanvas({
   players = [],
   isLobby = false,
   isMobile: propIsMobile,
+  enablePostProcessing,
 }: GameCanvasProps): React.ReactElement {
   useEffect(() => {
     return () => {
@@ -111,6 +114,13 @@ export function GameCanvas({
   }, []);
 
   const isMobileDevice = propIsMobile ?? isMobileHardware();
+  const isPostProcessingActive = enablePostProcessing ?? (
+    !isMobileDevice && (
+      typeof window === 'undefined' ||
+      (new URLSearchParams(window.location.search).get('postprocessing') !== 'false' &&
+       (!navigator.webdriver || new URLSearchParams(window.location.search).get('postprocessing') === 'true'))
+    )
+  );
 
   const playersInfo = useGameStore((s) => s.playersInfo);
   const playerPositions = useGameStore((s) => s.playerPositions);
@@ -187,6 +197,7 @@ export function GameCanvas({
             <WebGLContextWatcher />
             <PerfTelemetryTracker isMobile={isMobileDevice} />
             <AdaptiveDprController isMobile={isMobileDevice} />
+            <AdaptiveIdleCoolingController isMobile={isMobileDevice} />
 
             {isLobby ? (
               <>
@@ -198,7 +209,7 @@ export function GameCanvas({
                 <GameBoard isMobile={isMobileDevice} />
                 <PawnAnimator players={effectivePlayers} />
                 {/* <PostProcessingPipeline /> */}
-                <PostProcessingPipeline isMobile={isMobileDevice} enabled={!isMobileDevice} />
+                <PostProcessingPipeline isMobile={isMobileDevice} enabled={isPostProcessingActive} />
               </>
             ) : (
               <>
@@ -213,7 +224,7 @@ export function GameCanvas({
                 {/* <PostProcessingPipeline /> */}
                 <PostProcessingPipeline
                   isMobile={isMobileDevice}
-                  enabled={!isMobileDevice}
+                  enabled={isPostProcessingActive}
                   enableSelectiveBloom={!isMobileDevice}
                   isAuctionActive={isAuctionActive}
                   enableDof={dofConfig.enableDof}

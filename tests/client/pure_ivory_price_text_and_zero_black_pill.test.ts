@@ -325,62 +325,63 @@ describe('[TC-PIPT01/MSS..TC-PIPT04/A4][UI-S01/MSS][BR-UI-002] Pure Ivory Price 
   // =========================================================================
   // FACET 2: STATE REACTIVITY — CHỐT 2 & CHỐT 3: ZERO BLACK PILL & 3D RECOLOR
   // =========================================================================
-  describe('Facet 2: State Reactivity — [CHỐT 2] Triệt tiêu khay hộp đen 3D khi chưa mua & [CHỐT 3] Khay 3D đổi màu khi có chủ', () => {
-    // Chốt 2: Triệt tiêu 100% khay hộp đen 3D khi chưa mua (Zero Black Pill Invariant)
-    it('[TC-PIPT02.01/MSS][UI-S01/MSS][BR-UI-002][Facet2-Reactivity] Khi ownerColor bị bỏ qua (unowned), OwnerPricePill KHÔNG render mesh màu than đen #090D1A', () => {
+  describe('Facet 2: State Reactivity — [CHỐT 2] Khay 3D với chữ vàng #FBBF24 khi chưa mua & [CHỐT 3] Khay 3D đổi màu khi có chủ', () => {
+    // Chốt 2: Khay 3D đồng nhất với chữ vàng #FBBF24 khi chưa mua (Phương án A)
+    it('[TC-PIPT02.01/MSS][UI-S01/MSS][BR-UI-002][Facet2-Reactivity] Khi ownerColor bị bỏ qua (unowned), OwnerPricePill render mesh nền màu than đen #090D1A', () => {
       const markup = renderToStaticMarkup(
         React.createElement(OwnerPricePill, { cellIndex: 1 })
       );
-      expect(markup).not.toContain('color="#090D1A"');
+      expect(markup).toContain('color="#090D1A"');
     });
 
-    it('[TC-PIPT02.02/MSS][UI-S01/MSS][BR-UI-002][Facet2-Reactivity] Khi ownerColor bị bỏ qua (unowned), OwnerPricePill KHÔNG render viền than sẫm #1E293B', () => {
+    it('[TC-PIPT02.02/MSS][UI-S01/MSS][BR-UI-002][Facet2-Reactivity] Khi ownerColor bị bỏ qua (unowned), OwnerPricePill render viền than sẫm #1E293B', () => {
       const markup = renderToStaticMarkup(
         React.createElement(OwnerPricePill, { cellIndex: 1 })
       );
-      expect(markup).not.toContain('color="#1E293B"');
+      expect(markup).toContain('color="#1E293B"');
     });
 
-    it('[TC-PIPT02.03/MSS][UI-S01/MSS][BR-UI-002][Facet2-Reactivity] Khi ownerColor bị bỏ qua (unowned), OwnerPricePill trả về null hoặc không chứa root group data-testid="owner-price-pill"', () => {
+    it('[TC-PIPT02.03/MSS][UI-S01/MSS][BR-UI-002][Facet2-Reactivity] Khi ownerColor bị bỏ qua (unowned), OwnerPricePill render nhãn giá chữ vàng #FBBF24', () => {
       const markup = renderToStaticMarkup(
         React.createElement(OwnerPricePill, { cellIndex: 1 })
       );
-      expect(markup).not.toContain('data-testid="owner-price-pill"');
+      expect(markup).toContain('data-testid="owner-price-pill"');
+      expect(markup).toContain('color="#FBBF24"');
     });
 
-    it('[TC-PIPT02.04/MSS][UI-S01/MSS][BR-UI-002][Facet2-Reactivity] Khi ownerColor là chuỗi rỗng (""), OwnerPricePill không render hộp đen #090D1A', () => {
+    it('[TC-PIPT02.04/MSS][UI-S01/MSS][BR-UI-002][Facet2-Reactivity] Khi ownerColor là chuỗi rỗng (""), OwnerPricePill render khay unowned với nhãn giá chữ vàng #FBBF24', () => {
       const markup = renderToStaticMarkup(
         React.createElement(OwnerPricePill, { cellIndex: 1, ownerColor: '' })
       );
-      expect(markup).not.toContain('color="#090D1A"');
-      expect(markup).not.toContain('data-testid="owner-price-pill"');
+      expect(markup).toContain('color="#090D1A"');
+      expect(markup).toContain('color="#FBBF24"');
     });
 
-    it('[TC-PIPT02.05/MSS][UI-S01/MSS][BR-UI-002][Facet2-Reactivity] Khi ô hạ tầng (cellIndex 5) chưa mua, OwnerPricePill không render hộp đen #090D1A hay viền #1E293B', () => {
+    it('[TC-PIPT02.05/MSS][UI-S01/MSS][BR-UI-002][Facet2-Reactivity] Khi ô hạ tầng (cellIndex 5) chưa mua, OwnerPricePill render nhãn giá chữ vàng #FBBF24', () => {
       const markup = renderToStaticMarkup(
         React.createElement(OwnerPricePill, { cellIndex: 5 })
       );
-      expect(markup).not.toContain('color="#090D1A"');
-      expect(markup).not.toContain('color="#1E293B"');
+      expect(markup).toContain('color="#FBBF24"');
+      expect(markup).toContain('data-price-label="2.000"');
     });
 
-    it('[TC-PIPT02.06/MSS][UI-S01/MSS][BR-UI-002][Facet2-Reactivity] Khi ô tiện ích (cellIndex 12) chưa mua, OwnerPricePill không render hộp đen #090D1A hay viền #1E293B', () => {
+    it('[TC-PIPT02.06/MSS][UI-S01/MSS][BR-UI-002][Facet2-Reactivity] Khi ô tiện ích (cellIndex 12) chưa mua, OwnerPricePill render nhãn giá chữ vàng #FBBF24', () => {
       const markup = renderToStaticMarkup(
         React.createElement(OwnerPricePill, { cellIndex: 12 })
       );
-      expect(markup).not.toContain('color="#090D1A"');
-      expect(markup).not.toContain('color="#1E293B"');
+      expect(markup).toContain('color="#FBBF24"');
+      expect(markup).toContain('data-price-label="2.000"');
     });
 
-    it('[TC-PIPT02.07/MSS][UI-S01/MSS][BR-UI-002][Facet2-Reactivity] Khi ô cao cấp (cellIndex 39) chưa mua, OwnerPricePill không render hộp đen #090D1A', () => {
+    it('[TC-PIPT02.07/MSS][UI-S01/MSS][BR-UI-002][Facet2-Reactivity] Khi ô cao cấp (cellIndex 39) chưa mua, OwnerPricePill render nhãn giá chữ vàng #FBBF24', () => {
       const markup = renderToStaticMarkup(
         React.createElement(OwnerPricePill, { cellIndex: 39 })
       );
-      expect(markup).not.toContain('color="#090D1A"');
-      expect(markup).not.toContain('data-testid="owner-price-pill"');
+      expect(markup).toContain('color="#FBBF24"');
+      expect(markup).toContain('data-price-label="4.000"');
     });
 
-    it('[TC-PIPT02.08/MSS][UI-S01/MSS][BR-UI-002][Facet2-Reactivity] LayeredDioramaTile khi chưa mua không render bất kỳ khối hộp đen #090D1A nào ở khay giá', () => {
+    it('[TC-PIPT02.08/MSS][UI-S01/MSS][BR-UI-002][Facet2-Reactivity] LayeredDioramaTile khi chưa mua render khay giá với nhãn chữ vàng #FBBF24', () => {
       const markup = renderToStaticMarkup(
         React.createElement(LayeredDioramaTile, {
           cell: sampleCanThoCell,
@@ -389,8 +390,8 @@ describe('[TC-PIPT01/MSS..TC-PIPT04/A4][UI-S01/MSS][BR-UI-002] Pure Ivory Price 
           isCornerTile: false,
         })
       );
-      expect(markup).not.toContain('color="#090D1A"');
-      expect(markup).not.toContain('color="#1E293B"');
+      expect(markup).toContain('data-testid="owner-price-pill"');
+      expect(markup).toContain('color="#FBBF24"');
     });
 
     // Chốt 3: Bảo tồn khay 3D đổi màu khi ĐÃ CÓ CHỦ (Active Ownership Reactivity)

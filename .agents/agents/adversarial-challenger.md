@@ -56,6 +56,7 @@ Run these checks on disk before writing implementation vectors:
 ### 💥 Vector 3: Partial Failure & Trapped States
 - If execution fails mid-operation, does state roll back cleanly or stay half-baked?
 - Can an error leave locks, overlays, or flags permanently stuck?
+- Does the design assume external event pairs (`down/up`, `start/end`, `open/close`) will arrive without loss? If an OS suspension, blur, lock screen, or `stopPropagation()` swallows the terminator, does the state remain permanently trapped? Banned relying on perfect event pairing without an authoritative Dead Man's Switch (TTL 3s–5s) or background watchdog.
 - Are retry routines immune to infinite loops?
 
 ### 🕸️ Vector 4: Unstated Assumptions & Subsystem Drift

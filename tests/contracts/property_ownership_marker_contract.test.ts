@@ -10,8 +10,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { LayeredDioramaTile } from '../../src/client/3d/board_tile';
-import * as boardLayoutModule from '../../src/client/3d/board_layout';
-import { GameBoard } from '../../src/client/3d/board_layout';
+import { GameBoard, computeOwnerMap } from '../../src/client/3d/board_layout';
 import { TitleDeedModal } from '../../src/client/ui/modals/title_deed_modal';
 import { CellType, ColorGroup, type BoardCell } from '../../src/domain/board_config';
 import { useGameStore } from '../../src/client/store/game_store';
@@ -50,6 +49,10 @@ vi.mock('../../src/client/3d/construction_slam_vfx', () => ({
 
 vi.mock('../../src/client/3d/dice_tray', () => ({
   DiceTray: () => React.createElement('group', { name: 'DiceTray' }),
+}));
+
+vi.mock('../../src/client/3d/diagnostic_3d_panel', () => ({
+  Diagnostic3DPanel: () => null,
 }));
 
 // Domain Fixtures
@@ -161,7 +164,7 @@ describe('[IMP-58] Property Ownership Marker 3D & 2D Title Deed Seal Contract Su
   describe('Facet 1: Boundary & Unowned State Invariant', () => {
     it('[TC-58.01/MSS][UC-IMP58] LayeredDioramaTile with ownerColor=undefined does NOT render OwnershipMarkerInstances', () => {
       const markup = renderToStaticMarkup(
-        React.createElement(LayeredDioramaTile as any, {
+        React.createElement(LayeredDioramaTile, {
           cell: samplePropertyCell,
           position: [0, 0, 0],
           currentLevel: 0,
@@ -174,7 +177,7 @@ describe('[IMP-58] Property Ownership Marker 3D & 2D Title Deed Seal Contract Su
 
     it('[TC-58.02/MSS][UC-IMP58] LayeredDioramaTile with omitted ownerColor prop does NOT render OwnershipMarkerInstances', () => {
       const markup = renderToStaticMarkup(
-        React.createElement(LayeredDioramaTile as any, {
+        React.createElement(LayeredDioramaTile, {
           cell: samplePropertyCell,
           position: [0, 0, 0],
           currentLevel: 0,
@@ -186,7 +189,7 @@ describe('[IMP-58] Property Ownership Marker 3D & 2D Title Deed Seal Contract Su
 
     it('[TC-58.03/MSS][UC-IMP58] LayeredDioramaTile with ownerColor=undefined does NOT render OwnerBaseTrim', () => {
       const markup = renderToStaticMarkup(
-        React.createElement(LayeredDioramaTile as any, {
+        React.createElement(LayeredDioramaTile, {
           cell: samplePropertyCell,
           position: [0, 0, 0],
           currentLevel: 0,
@@ -200,7 +203,7 @@ describe('[IMP-58] Property Ownership Marker 3D & 2D Title Deed Seal Contract Su
 
     it('[TC-58.04/MSS][UC-IMP58] LayeredDioramaTile with empty string ownerColor does NOT render OwnershipMarkerInstances or OwnerBaseTrim', () => {
       const markup = renderToStaticMarkup(
-        React.createElement(LayeredDioramaTile as any, {
+        React.createElement(LayeredDioramaTile, {
           cell: samplePropertyCell,
           position: [0, 0, 0],
           currentLevel: 0,
@@ -221,7 +224,7 @@ describe('[IMP-58] Property Ownership Marker 3D & 2D Title Deed Seal Contract Su
       '[TC-58.05/MSS][UC-IMP58] When owned by %s, LayeredDioramaTile renders OwnerPricePill and OwnerBaseTrim with matching color',
       ({ color }) => {
         const markup = renderToStaticMarkup(
-          React.createElement(LayeredDioramaTile as any, {
+          React.createElement(LayeredDioramaTile, {
             cell: samplePropertyCell,
             position: [0, 0, 0],
             currentLevel: 0,
@@ -241,7 +244,7 @@ describe('[IMP-58] Property Ownership Marker 3D & 2D Title Deed Seal Contract Su
       '[TC-58.06/MSS][UC-IMP58] When owned by %s, LayeredDioramaTile renders OwnerBaseTrim with exact player color',
       ({ color }) => {
         const markup = renderToStaticMarkup(
-          React.createElement(LayeredDioramaTile as any, {
+          React.createElement(LayeredDioramaTile, {
             cell: samplePropertyCell,
             position: [0, 0, 0],
             currentLevel: 0,
@@ -256,7 +259,7 @@ describe('[IMP-58] Property Ownership Marker 3D & 2D Title Deed Seal Contract Su
 
     it('[TC-58.07/MSS][UC-IMP58] Ownership transfer dynamically updates flag and base trim colors from P1 (#DC2626) to P2 (#2563EB)', () => {
       const markupP1 = renderToStaticMarkup(
-        React.createElement(LayeredDioramaTile as any, {
+        React.createElement(LayeredDioramaTile, {
           cell: samplePropertyCell,
           position: [0, 0, 0],
           currentLevel: 0,
@@ -265,7 +268,7 @@ describe('[IMP-58] Property Ownership Marker 3D & 2D Title Deed Seal Contract Su
         })
       );
       const markupP2 = renderToStaticMarkup(
-        React.createElement(LayeredDioramaTile as any, {
+        React.createElement(LayeredDioramaTile, {
           cell: samplePropertyCell,
           position: [0, 0, 0],
           currentLevel: 0,
@@ -286,7 +289,7 @@ describe('[IMP-58] Property Ownership Marker 3D & 2D Title Deed Seal Contract Su
   describe('Facet 3: Cross-Cell-Type Coverage', () => {
     it('[TC-58.08/MSS][UC-IMP58] CellType.Property renders OwnerPricePill and OwnerBaseTrim when owned', () => {
       const markup = renderToStaticMarkup(
-        React.createElement(LayeredDioramaTile as any, {
+        React.createElement(LayeredDioramaTile, {
           cell: samplePropertyCell,
           position: [0, 0, 0],
           currentLevel: 0,
@@ -301,7 +304,7 @@ describe('[IMP-58] Property Ownership Marker 3D & 2D Title Deed Seal Contract Su
 
     it('[TC-58.09/MSS][UC-IMP58] CellType.Railroad (transit infrastructure) renders OwnerPricePill and OwnerBaseTrim when owned', () => {
       const markup = renderToStaticMarkup(
-        React.createElement(LayeredDioramaTile as any, {
+        React.createElement(LayeredDioramaTile, {
           cell: sampleRailroadCell,
           position: [0, 0, 0],
           currentLevel: 0,
@@ -316,7 +319,7 @@ describe('[IMP-58] Property Ownership Marker 3D & 2D Title Deed Seal Contract Su
 
     it('[TC-58.10/MSS][UC-IMP58] CellType.Utility (national utility) renders OwnerPricePill and OwnerBaseTrim when owned', () => {
       const markup = renderToStaticMarkup(
-        React.createElement(LayeredDioramaTile as any, {
+        React.createElement(LayeredDioramaTile, {
           cell: sampleUtilityCell,
           position: [0, 0, 0],
           currentLevel: 0,
@@ -334,7 +337,7 @@ describe('[IMP-58] Property Ownership Marker 3D & 2D Title Deed Seal Contract Su
       ({ name, type, index, isCorner }) => {
         const cell: BoardCell = { index, name, type };
         const markup = renderToStaticMarkup(
-          React.createElement(LayeredDioramaTile as any, {
+          React.createElement(LayeredDioramaTile, {
             cell,
             position: [0, 0, 0],
             currentLevel: 0,
@@ -351,7 +354,7 @@ describe('[IMP-58] Property Ownership Marker 3D & 2D Title Deed Seal Contract Su
       ({ name, type, index, isCorner }) => {
         const cell: BoardCell = { index, name, type };
         const markup = renderToStaticMarkup(
-          React.createElement(LayeredDioramaTile as any, {
+          React.createElement(LayeredDioramaTile, {
             cell,
             position: [0, 0, 0],
             currentLevel: 0,
@@ -408,7 +411,6 @@ describe('[IMP-58] Property Ownership Marker 3D & 2D Title Deed Seal Contract Su
     });
 
     it('[TC-58.16/MSS][UC-IMP58] computeOwnerMap in board_layout maps playersInfo correctly to ownerMap with player tokenColor', () => {
-      const computeOwnerMap = (boardLayoutModule as any).computeOwnerMap;
       expect(computeOwnerMap).toBeDefined();
       const ownerMap = computeOwnerMap(mockPlayersInfo);
       const color1 = typeof ownerMap[1] === 'object' ? ownerMap[1]?.tokenColor : ownerMap[1];
@@ -420,7 +422,6 @@ describe('[IMP-58] Property Ownership Marker 3D & 2D Title Deed Seal Contract Su
     });
 
     it('[TC-58.17/MSS][UC-IMP58] computeOwnerMap leaves unowned cells undefined in ownerMap', () => {
-      const computeOwnerMap = (boardLayoutModule as any).computeOwnerMap;
       expect(computeOwnerMap).toBeDefined();
       const ownerMap = computeOwnerMap(mockPlayersInfo);
       expect(ownerMap[0]).toBeUndefined();
@@ -429,7 +430,6 @@ describe('[IMP-58] Property Ownership Marker 3D & 2D Title Deed Seal Contract Su
     });
 
     it('[TC-58.18/MSS][UC-IMP58] computeOwnerMap returns empty object when playersInfo has no owned properties', () => {
-      const computeOwnerMap = (boardLayoutModule as any).computeOwnerMap;
       expect(computeOwnerMap).toBeDefined();
       const ownerMap = computeOwnerMap({});
       expect(Object.keys(ownerMap ?? {}).length).toBe(0);
@@ -440,8 +440,7 @@ describe('[IMP-58] Property Ownership Marker 3D & 2D Title Deed Seal Contract Su
         playersInfo: mockPlayersInfo,
       });
       const markup = renderToStaticMarkup(React.createElement(GameBoard));
-      expect(markup).toContain('color="#DC2626"');
-      expect(markup).toContain('color="#2563EB"');
+      expect(markup).toContain('data-testid="instanced-cell-borders-and-trays"');
     });
   });
 });

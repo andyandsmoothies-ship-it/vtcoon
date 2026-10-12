@@ -1,0 +1,92 @@
+[
+  {
+    "file": "src/client/3d/idle_cooling_helpers.ts",
+    "desc": "Mutant 1: Corrupt idleTargetFps to 10 in IDLE_COOLING_CONFIG",
+    "target": "idleTargetFps: 30,",
+    "replacement": "idleTargetFps: 10,"
+  },
+  {
+    "file": "src/client/3d/idle_cooling_helpers.ts",
+    "desc": "Mutant 2: Corrupt gracePeriodMs to 5000 in IDLE_COOLING_CONFIG",
+    "target": "gracePeriodMs: 1200,",
+    "replacement": "gracePeriodMs: 5000,"
+  },
+  {
+    "file": "src/client/3d/idle_cooling_helpers.ts",
+    "desc": "Mutant 3: Invert is3DModalActive for auction and event",
+    "target": "return modal === 'auction' || modal === 'event';",
+    "replacement": "return modal === 'corrupted';"
+  },
+  {
+    "file": "src/client/3d/idle_cooling_helpers.ts",
+    "desc": "Mutant 4: Corrupt hasActiveDictionaryKeys to always return false",
+    "target": "for (const _ in dict) return true;",
+    "replacement": "for (const _ in dict) return false;"
+  },
+  {
+    "file": "src/client/3d/idle_cooling_helpers.ts",
+    "desc": "Mutant 5: Corrupt isGameMotionActive isRolling check",
+    "target": "params.isRolling ||",
+    "replacement": "false ||"
+  },
+  {
+    "file": "src/client/3d/idle_cooling_helpers.ts",
+    "desc": "Mutant 6: Invert isMobile check in calculateIdleCoolingMode",
+    "target": "if (!params.isMobile) {\n    return 'ACTIVE_60FPS';\n  }",
+    "replacement": "if (params.isMobile) {\n    return 'ACTIVE_60FPS';\n  }"
+  },
+  {
+    "file": "src/client/3d/idle_cooling_helpers.ts",
+    "desc": "Mutant 7: Corrupt remainder lag spike math in shouldRenderFrame",
+    "target": "remainder > 0 && remainder < activeInterval ? remainder : 0",
+    "replacement": "remainder > 0 || remainder < activeInterval ? remainder : 0"
+  },
+  {
+    "file": "src/client/3d/idle_cooling_helpers.ts",
+    "desc": "Mutant 8: Corrupt JITTER_SLACK_SEC to 0.05",
+    "target": "export const JITTER_SLACK_SEC = 0.002;",
+    "replacement": "export const JITTER_SLACK_SEC = 0.05;"
+  },
+  {
+    "file": "src/client/3d/adaptive_idle_cooling_controller.tsx",
+    "desc": "Mutant 9: Invert !isMobile early bypass in AdaptiveIdleCoolingController",
+    "target": "if (!isMobile) return;",
+    "replacement": "if (isMobile) return;"
+  },
+  {
+    "file": "src/client/3d/adaptive_idle_cooling_controller.tsx",
+    "desc": "Mutant 10: Invert isRolling store selector in AdaptiveIdleCoolingController",
+    "target": "const isRolling = useGameStore.getState().isRolling;",
+    "replacement": "const isRolling = false;"
+  },
+  {
+    "file": "src/client/3d/adaptive_idle_cooling_controller.tsx",
+    "desc": "Mutant 11: Call-site Wiring: Omit gl.render call in AdaptiveIdleCoolingController",
+    "target": "gl.render(scene, camera);",
+    "replacement": "/* gl.render omitted */"
+  },
+  {
+    "file": "src/client/3d/adaptive_idle_cooling_controller.tsx",
+    "desc": "Mutant 12: Call-site Wiring: Zero out graceRemaining in AdaptiveIdleCoolingController",
+    "target": "const graceRemaining = isMotion ? 0 : calculateIdleGraceRemaining(lastMotionTimeRef.current, now);",
+    "replacement": "const graceRemaining = 0;"
+  },
+  {
+    "file": "src/client/3d/adaptive_idle_cooling_controller.tsx",
+    "desc": "Mutant 13: Call-site Wiring: Break isMotionActive parameter in calculateIdleCoolingMode",
+    "target": "isMotionActive: isMotion,",
+    "replacement": "isMotionActive: false,"
+  },
+  {
+    "file": "src/client/3d/adaptive_idle_cooling_controller.tsx",
+    "desc": "Mutant 14: Call-site Wiring: Corrupt pacing.shouldRender check before gl.render",
+    "target": "if (pacing.shouldRender && gl && typeof gl.render === 'function') {",
+    "replacement": "if (!pacing.shouldRender && gl && typeof gl.render === 'function') {"
+  },
+  {
+    "file": "src/client/game_canvas.tsx",
+    "desc": "Mutant 15: Call-site Wiring: Omit AdaptiveIdleCoolingController from GameCanvas tree",
+    "target": "<AdaptiveIdleCoolingController isMobile={isMobileDevice} />",
+    "replacement": "{/* AdaptiveIdleCoolingController omitted */}"
+  }
+]

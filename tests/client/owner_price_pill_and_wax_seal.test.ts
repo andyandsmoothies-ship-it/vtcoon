@@ -400,8 +400,9 @@ describe('[TC-OPWS01/MSS..TC-OPWS04/A4][UI-S02/MSS][BR-UI-002] Pure Color Owner 
       expect(pos![1]).toBeCloseTo(0.008, 3);
     });
 
-    it('[TC-OPWS01.06/MSS][UI-S02/MSS][BR-UI-002][Facet1-Boundary] owner-price-label nhãn giá tiền khi chưa mua không render trên 3D (Zero Black Pill Invariant)', () => {
-      expect(unownedTileCanThoMarkup).not.toContain('data-testid="owner-price-label"');
+    it('[TC-OPWS01.06/MSS][UI-S02/MSS][BR-UI-002][Facet1-Boundary] owner-price-label nhãn giá tiền khi chưa mua render nhãn giá chữ vàng #FBBF24 trên 3D', () => {
+      expect(unownedTileCanThoMarkup).toContain('data-testid="owner-price-label"');
+      expect(unownedTileCanThoMarkup).toContain('color="#FBBF24"');
     });
 
     it('[TC-OPWS01.07/MSS][UI-S02/MSS][BR-UI-002][Facet1-Boundary] Kích thước planeGeometry của nhãn giá tiền trên khay giá đạt chuẩn hiển thị (width >= 0.7m, height >= 0.15m)', () => {
@@ -484,10 +485,10 @@ describe('[TC-OPWS01/MSS..TC-OPWS04/A4][UI-S02/MSS][BR-UI-002] Pure Color Owner 
       expect(hasPrice).toBe(true);
     });
 
-    it('[TC-OPWS02.10/MSS][UI-S02/MSS][BR-UI-002][Facet2-Reactivity] Khi ô đất chưa mua, không render nền than đen #090D1A hay viền than #1E293B', () => {
+    it('[TC-OPWS02.10/MSS][UI-S02/MSS][BR-UI-002][Facet2-Reactivity] Khi ô đất chưa mua, render nền than đen #090D1A và viền than #1E293B', () => {
       const pillSection = extractElementSection(unownedTileCanThoMarkup, 'owner-price-pill', 800);
-      expect(pillSection).not.toContain('#090D1A');
-      expect(pillSection).not.toContain('#1E293B');
+      expect(pillSection).toContain('#090D1A');
+      expect(pillSection).toContain('#1E293B');
     });
 
     it('[TC-OPWS02.11/MSS][UI-S02/MSS][BR-UI-002][Facet2-Reactivity] Chuyển đổi chủ sở hữu giữa các lượt chơi cập nhật phản ứng màu nền tức thì và không tạo ra bất kỳ icon linh vật nào', () => {
