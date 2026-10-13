@@ -25,9 +25,12 @@ export const HUMAN_PHASE_TIMEOUTS_MS: Record<TurnPhase, number> = {
 export const AUCTION_SETTLE_DELAY_MS = 2500;
 export {
   calculateBotStepDelay,
+  resolveBotStepDelay,
   AUCTION_BOT_STEP_DELAY_MS,
   BOT_UPGRADE_OBSERVATION_DELAY_MS,
   BOT_TRANSIT_OBSERVATION_DELAY_MS,
+  BOT_START_TURN_BREATHING_ROOM_MS,
+  BOT_KINEMATIC_DWELL_COMPENSATION_MS,
   TurnBotTimerScheduler,
   type TurnBotSchedulerDelegate,
 } from './turn_bot_timer_scheduler.js';
@@ -132,7 +135,7 @@ export class TurnOrchestrator {
     this.activeTimers.delete(roomCode);
     this.deadlines.delete(roomCode);
     this.auctionSettleTimers.delete(roomCode);
-    this.botScheduler.clearUpgradeFlag(roomCode);
+    this.botScheduler.clearRoomState(roomCode);
   }
 
   scheduleAuctionSettle(roomCode: string, auctionKey?: string): void {

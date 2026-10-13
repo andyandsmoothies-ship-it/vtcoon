@@ -8,6 +8,40 @@ import { PHASE_TIMEOUTS_MS, AUCTION_SETTLE_DELAY_MS } from './turn_orchestrator.
 export const AUCTION_BOT_STEP_DELAY_MS = 1000;
 export const BOT_UPGRADE_OBSERVATION_DELAY_MS = 1500;
 export const BOT_TRANSIT_OBSERVATION_DELAY_MS = 2000;
+// 1200ms Camera Soft Return (camera_soft_return.ts#L26) + 1000ms Idle Overview Settling = 2200ms
+export const BOT_START_TURN_BREATHING_ROOM_MS = 2200;
+// 600ms DICE_SETTLE_DWELL_MS (dice_tray.tsx#L20) + 600ms PAWN_LANDING_SETTLE_MS (pawn_animator.tsx#L35) = 1200ms
+export const BOT_KINEMATIC_DWELL_COMPENSATION_MS = 1200;
+
+export function resolveBotStepDelay(
+  room: Room | undefined,
+  baseDelayMs: number,
+  hasUpgradeDelay: boolean = false,
+  kinematicsServed: boolean = false
+): number {
+  if (hasUpgradeDelay) return BOT_UPGRADE_OBSERVATION_DELAY_MS;
+  if (!room || baseDelayMs <= 500) return calculateBotStepDelay(room, baseDelayMs);
+
+  if (room.phase === TurnPhase.WaitingRoll) {
+    return Math.max(calculateBotStepDelay(room, baseDelayMs), BOT_START_TURN_BREATHING_ROOM_MS);
+  }
+
+  if (kinematicsServed) {
+    return baseDelayMs;
+  }
+
+  const legacyDelay = calculateBotStepDelay(room, baseDelayMs);
+  if (
+    (room.phase === TurnPhase.PropertyManagement || room.phase === TurnPhase.ActionPhase) &&
+    !room.lastTransitResult &&
+    room.lastDice &&
+    (room.lastDice[0] > 0 || room.lastDice[1] > 0)
+  ) {
+    return legacyDelay + BOT_KINEMATIC_DWELL_COMPENSATION_MS;
+  }
+
+  return legacyDelay;
+}
 
 export function calculateBotStepDelay(
   room: Room | undefined,
@@ -56,12 +90,18 @@ export interface TurnBotSchedulerDelegate {
 
 export class TurnBotTimerScheduler {
   public readonly botJustUpgraded = new Map<string, boolean>();
+  public readonly botKinematicsServedSeq = new Map<string, number>();
 
   constructor(private readonly delegate: TurnBotSchedulerDelegate) {}
 
   clearUpgradeFlag(roomCode: string): void {
     if (!this.botJustUpgraded.has(roomCode)) return;
     this.botJustUpgraded.delete(roomCode);
+  }
+
+  clearRoomState(roomCode: string): void {
+    this.botJustUpgraded.delete(roomCode);
+    this.botKinematicsServedSeq.delete(roomCode);
   }
 
   scheduleBotStep(roomCode: string): void {
@@ -75,9 +115,25 @@ export class TurnBotTimerScheduler {
       const isConsumed = true;
       if (!isConsumed) return;
     }
-    const delayMs = hasUpgradeDelay
-      ? BOT_UPGRADE_OBSERVATION_DELAY_MS
-      : calculateBotStepDelay(room, this.delegate.botTurnDelayMs);
+
+    if (room?.phase === TurnPhase.WaitingRoll) {
+      this.botKinematicsServedSeq.delete(roomCode);
+    }
+    const currentDiceSeq = room?.diceSeq;
+    const kinematicsServed =
+      currentDiceSeq !== undefined && this.botKinematicsServedSeq.get(roomCode) === currentDiceSeq;
+
+    const delayMs = resolveBotStepDelay(
+      room,
+      this.delegate.botTurnDelayMs,
+      hasUpgradeDelay,
+      kinematicsServed
+    );
+
+    if (currentDiceSeq !== undefined && !kinematicsServed && (room?.phase === TurnPhase.ActionPhase || room?.phase === TurnPhase.PropertyManagement)) {
+      this.botKinematicsServedSeq.set(roomCode, currentDiceSeq);
+    }
+
     const timer = setTimeout(() => {
       this.delegate.clearActiveTimer(roomCode);
       void this.delegate.intentMutex.runExclusive(roomCode, async () => {

@@ -307,7 +307,7 @@ describe('TurnBotTimerScheduler Contract Suites', () => {
     });
 
     scheduler.scheduleBotStep(room.roomCode);
-    await vi.advanceTimersByTimeAsync(2000);
+    await vi.advanceTimersByTimeAsync(2500);
 
     expect(scheduler.botJustUpgraded.get(room.roomCode)).toBe(true);
   });

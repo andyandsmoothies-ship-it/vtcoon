@@ -8,8 +8,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { Room } from '../../src/domain/room.js';
 import { TurnPhase } from '../../src/domain/room.js';
-import * as turnOrchestratorModule from '../../src/server/network/turn_orchestrator.js';
-import { TurnOrchestrator } from '../../src/server/network/turn_orchestrator.js';
+import { TurnOrchestrator, calculateBotStepDelay } from '../../src/server/network/turn_orchestrator.js';
 import { resolveCameraMode, type CameraResolveParams } from '../../src/client/3d/camera_state_machine.js';
 import { useGameStore } from '../../src/client/store/game_store.js';
 import { applyDeltaToStore } from '../../src/client/network/apply_delta.js';
@@ -17,10 +16,6 @@ import { RoomManager } from '../../src/server/room_manager.js';
 import { IntentMutex } from '../../src/server/network/intent_mutex.js';
 import { DeltaBroadcaster } from '../../src/server/network/delta_broadcaster.js';
 import { SessionManager } from '../../src/server/session_manager.js';
-
-// Dynamic resolver for calculateBotStepDelay (to be exported in Trạm 2)
-const calculateBotStepDelay: (room: Room, baseDelayMs: number) => number =
-  (turnOrchestratorModule as unknown as { calculateBotStepDelay: (room: Room, baseDelayMs: number) => number }).calculateBotStepDelay;
 
 function createTestRoom(phase: TurnPhase, lastDice?: readonly [number, number]): Room {
   return {
@@ -187,15 +182,15 @@ describe('[TC-IMP55/MSS] Bot Pacing & Camera Lock Contract Test Suite', () => {
       expect(mode).toBe('overview');
     });
 
-    it.each([
+    it.each<readonly [CameraResolveParams, string]>([
       [{ isRolling: false, isPawnAnimating: true, activeModal: null, isBotTurn: true, isAnimatingPawnBot: true }, 'pawn_chase'],
       [{ isRolling: false, isPawnAnimating: true, activeModal: null, isBotTurn: true, isAnimatingPawnBot: false }, 'pawn_chase'],
       [{ isRolling: false, isPawnAnimating: true, activeModal: null, isBotTurn: false, isAnimatingPawnBot: true }, 'pawn_chase'],
       [{ isRolling: false, isPawnAnimating: true, activeModal: null, isBotTurn: false, isAnimatingPawnBot: false }, 'pawn_chase'],
-    ] as const)(
+    ])(
       '[TC-IMP55.15/MSS][IMP-103][UC-GAME-016] resolveCameraMode bang tham so bao ve Bot: %j -> %s',
       (params, expectedMode) => {
-        expect(resolveCameraMode(params as any)).toBe(expectedMode);
+        expect(resolveCameraMode(params)).toBe(expectedMode);
       }
     );
   });
@@ -342,18 +337,18 @@ describe('[TC-IMP55/MSS] Bot Pacing & Camera Lock Contract Test Suite', () => {
       const stepSpy = vi.spyOn(rooms, 'stepBotTurn');
       orchestrator.orchestrate(room.roomCode);
 
-      // Truoc 3300ms (tai t = 2000ms): Bot chua duoc phep thuc hien buoc ke tiep
+      // Truoc 4500ms (tai t = 2000ms): Bot chua duoc phep thuc hien buoc ke tiep
       await vi.advanceTimersByTimeAsync(2000);
       expect(stepSpy).not.toHaveBeenCalled();
 
-      // Sau 3400ms: Bot da hoan tat do tre va thuc hien buoc di
-      await vi.advanceTimersByTimeAsync(1400);
+      // Sau 4600ms (IMP-390: 3300ms + 1200ms dwell compensation): Bot da hoan tat do tre va thuc hien buoc di
+      await vi.advanceTimersByTimeAsync(2600);
       expect(stepSpy).toHaveBeenCalled();
 
       orchestrator.clearRoom(room.roomCode);
     });
 
-    it('[TC-IMP55.22/MSS][UC-GAME-008] TurnOrchestrator hoan buoc tiep theo cua Bot it nhat 2300ms khi dice [1, 1] trong PropertyManagement', async () => {
+    it('[TC-IMP55.22/MSS][UC-GAME-008] TurnOrchestrator hoan buoc tiep theo cua Bot it nhat 3500ms khi dice [1, 1] trong PropertyManagement', async () => {
       vi.useFakeTimers();
       const orchestrator = new TurnOrchestrator({
         rooms,
@@ -374,18 +369,18 @@ describe('[TC-IMP55/MSS] Bot Pacing & Camera Lock Contract Test Suite', () => {
       const stepSpy = vi.spyOn(rooms, 'stepBotTurn');
       orchestrator.orchestrate(room.roomCode);
 
-      // Truoc 2300ms (tai t = 1800ms): chua chay
+      // Truoc 3500ms (tai t = 1800ms): chua chay
       await vi.advanceTimersByTimeAsync(1800);
       expect(stepSpy).not.toHaveBeenCalled();
 
-      // Sau 2400ms: da chay
-      await vi.advanceTimersByTimeAsync(600);
+      // Sau 3600ms (IMP-390: 2300ms + 1200ms dwell compensation): da chay
+      await vi.advanceTimersByTimeAsync(1800);
       expect(stepSpy).toHaveBeenCalled();
 
       orchestrator.clearRoom(room.roomCode);
     });
 
-    it('[TC-IMP55.23/MSS][UC-GAME-008] TurnOrchestrator giu baseDelayMs (1500ms) cho Bot o WaitingRoll', async () => {
+    it('[TC-IMP55.23/MSS][UC-GAME-008] TurnOrchestrator giu BOT_START_TURN_BREATHING_ROOM_MS (2200ms) cho Bot o WaitingRoll', async () => {
       vi.useFakeTimers();
       const orchestrator = new TurnOrchestrator({
         rooms,
@@ -409,8 +404,8 @@ describe('[TC-IMP55/MSS] Bot Pacing & Camera Lock Contract Test Suite', () => {
       await vi.advanceTimersByTimeAsync(1000);
       expect(stepSpy).not.toHaveBeenCalled();
 
-      // Tai t = 1600ms: da chay vi baseDelay la 1500ms
-      await vi.advanceTimersByTimeAsync(600);
+      // Tai t = 2300ms: da chay vi breathing room la 2200ms (IMP-390)
+      await vi.advanceTimersByTimeAsync(1300);
       expect(stepSpy).toHaveBeenCalled();
 
       orchestrator.clearRoom(room.roomCode);

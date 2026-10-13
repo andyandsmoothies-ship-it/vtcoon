@@ -205,7 +205,7 @@ export function auditDropInSnippets(planContent, fileTargetRegex, snippetRegex, 
       }
 
       // 2.4 Shallow 1-line pass-through wrapper check
-      const shallowWrapperRegex = /(?:async\s+)?(?:public\s+|private\s+|protected\s+)?(?:static\s+)?\w+\s*\([^)]*\)\s*(?::\s*[^{\n]+)?\s*\{\s*(?:return\s+)?this\.[a-zA-Z0-9_$]+\.[a-zA-Z0-9_$]+\([^)]*\);\s*\}/g;
+      const shallowWrapperRegex = /(?:async\s+)?(?:public\s+|private\s+|protected\s+)?(?:static\s+)?(?!(?:if|for|while|switch|catch)\b)\w+\s*\([^)]*\)\s*(?::\s*[^{\n]+)?\s*\{\s*(?:return\s+)?this\.[a-zA-Z0-9_$]+\.[a-zA-Z0-9_$]+\([^)]*\);\s*\}/g;
       let shallowMatch;
       while ((shallowMatch = shallowWrapperRegex.exec(replacementChunk)) !== null) {
         console.error(`  ❌ SHALLOW PASS-THROUGH WRAPPER in ${relPath}:`);

@@ -186,7 +186,7 @@ describe('[CONTRACT-TEST][TC-IMP51/MSS][UC-IMP51] Bot Pacing & Dice Runway Reloc
       onGameOver: vi.fn(),
     });
 
-    expect((orchestrator as any).botTurnDelayMs).toBeGreaterThanOrEqual(1200);
+    expect(orchestrator.botTurnDelayMs).toBeGreaterThanOrEqual(1200);
   });
 
   it('[TC-IMP51.16/MSS][Facet4-Pacing] Nhịp 1: Khi Bot ở WaitingRoll, 1 nhịp step chỉ thực thi INTENT_ROLL và currentTurnPlayerId vẫn là Bot', async () => {
@@ -246,7 +246,7 @@ describe('[CONTRACT-TEST][TC-IMP51/MSS][UC-IMP51] Bot Pacing & Dice Runway Reloc
       });
 
       orchestrator.scheduleBotTurn(room.roomCode);
-      await vi.advanceTimersByTimeAsync(1500);
+      await vi.advanceTimersByTimeAsync(2300);
 
       // FSM không được nhảy thẳng sang người tiếp theo (WaitingRoll của P1)
       expect([TurnPhase.ActionPhase, TurnPhase.PropertyManagement]).toContain(room.phase);
@@ -355,7 +355,7 @@ describe('[CONTRACT-TEST][TC-IMP51/MSS][UC-IMP51] Bot Pacing & Dice Runway Reloc
       });
 
       orchestrator.scheduleBotTurn(room.roomCode);
-      await vi.advanceTimersByTimeAsync(1500);
+      await vi.advanceTimersByTimeAsync(2300);
 
       // Nhịp 1 chỉ lăn xúc xắc, bot vẫn đang là người chơi hiện tại
       expect(room.players[room.currentPlayerIndex]?.id).toBe('bot_2');
