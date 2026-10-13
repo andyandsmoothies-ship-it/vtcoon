@@ -27,6 +27,7 @@
   - `tests/domain/imp347_bot_negotiation_brain.test.ts`
   - `tests/client/anti_aliasing_and_visual_crispness.test.ts`
   - `tests/client/imp330_game_event_narrative_synthesizer.test.ts`
+  - `tests/scripts/doctor_and_harness.test.ts`
 
 ## 1. Metadata & Architecture Boundary
 - **Ticket ID**: `IMP-353`

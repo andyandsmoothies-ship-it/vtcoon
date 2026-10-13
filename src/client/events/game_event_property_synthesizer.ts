@@ -16,6 +16,7 @@ import {
 } from './game_event_types.js';
 import { PROPERTY_DEEDS } from '../../domain/property_data.js';
 import { calculateUpgradeCost } from '../../domain/property_upgrade.js';
+import type { AuctionWonServerEvent, AuctionBidServerEvent } from '../../domain/room.js';
 
 function extractTradeEvents(
   delta: DeltaPayload,
@@ -47,10 +48,38 @@ function extractAuctionEvents(
   timestamp: number,
   handledAuctionCells: Set<number>,
 ): Array<AuctionWonEvent | AuctionBidPlacedEvent> {
-  const events: Array<AuctionWonEvent | AuctionBidPlacedEvent> = [];
-  const isAuctionConcluded = Boolean(delta.auction?.isConcluded || delta.auction?.winnerId !== undefined);
+  const serverEvents = delta.domainEvents ?? [];
+  const wonEvents = serverEvents.filter((e): e is AuctionWonServerEvent => e.type === 'AUCTION_WON');
+  const bidEvents = serverEvents.filter((e): e is AuctionBidServerEvent => e.type === 'AUCTION_BID_PLACED');
+  if (wonEvents.length > 0 || bidEvents.length > 0) {
+    const res: Array<AuctionWonEvent | AuctionBidPlacedEvent> = [];
+    for (const b of bidEvents) {
+      res.push({
+        type: SynthesizedGameEventType.AUCTION_BID_PLACED,
+        timestamp: b.timestamp ?? timestamp,
+        cellIndex: b.cellIndex,
+        bidderId: b.playerId,
+        bidAmount: b.bidAmount,
+      });
+    }
+    for (const w of wonEvents) {
+      handledAuctionCells.add(w.cellIndex);
+      res.push({
+        type: SynthesizedGameEventType.AUCTION_WON,
+        timestamp: w.timestamp ?? timestamp,
+        cellIndex: w.cellIndex,
+        winnerId: w.playerId,
+        winningBid: w.winningBid,
+      });
+    }
+    return res;
+  }
 
-  if (isAuctionConcluded && delta.auction) {
+  const events: Array<AuctionWonEvent | AuctionBidPlacedEvent> = [];
+  const isConcluded = Boolean(delta.auction?.isConcluded);
+  const isAuctionConcluded = Boolean(isConcluded || delta.auction?.winnerId !== undefined);
+
+  if (isAuctionConcluded && delta.auction && !prevState.auction?.isConcluded) {
     const cellIndex = delta.auction.cellIndex ?? prevState.auction?.cellIndex ?? 0;
     const winnerId = delta.auction.winnerId ?? delta.auction.highestBidderId ?? '';
     const winningBid = delta.auction.finalPrice ?? delta.auction.currentBid ?? 0;
@@ -64,7 +93,7 @@ function extractAuctionEvents(
         winningBid,
       });
     }
-  } else if (delta.auction === null && prevState.auction?.highestBidderId && nextState.auction === null) {
+  } else if (delta.auction === null && prevState.auction?.highestBidderId && !prevState.auction?.isConcluded && nextState.auction === null) {
     const cellIndex = prevState.auction.cellIndex;
     const winnerId = prevState.auction.highestBidderId;
     const winningBid = prevState.auction.currentBid ?? 0;

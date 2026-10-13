@@ -11,6 +11,7 @@ import {
 } from '../../domain/property_data.js';
 import { calculateUpgradeCost, type UpgradeCostModifier } from '../../domain/property_upgrade.js';
 import type { DeltaPayload } from '../../server/session_manager.js';
+import type { AuctionWonServerEvent } from '../../domain/room.js';
 import { MORTGAGE_DEFAULT_INTEREST_RATE, MORTGAGE_RATE_HIKE_INTEREST_RATE, MORTGAGE_LOAN_RATE } from '../../domain/mortgage_constants.js';
 
 
@@ -137,7 +138,7 @@ export function adjustNetDeltaForPropertyTransactions(
     readonly levelMap?: Record<number, number>;
     readonly propertyStates?: Record<number, { readonly isETC?: boolean; readonly isUpgradedUtility?: boolean }>;
     readonly activeModifiers?: readonly UpgradeCostModifier[];
-    readonly auction?: { readonly cellIndex?: number; readonly highestBidderId?: string | null; readonly currentBid?: number } | null;
+    readonly auction?: { readonly cellIndex?: number; readonly highestBidderId?: string | null; readonly currentBid?: number; readonly isConcluded?: boolean } | null;
   },
   nextState: {
     readonly playersInfo: Record<string, PlayerHudInfo>;
@@ -145,17 +146,28 @@ export function adjustNetDeltaForPropertyTransactions(
     readonly auction?: unknown;
   },
   payers: InternalBalanceDelta[],
+  receivers: InternalBalanceDelta[] = [],
 ): void {
   // 1. Auction settlement deduction
-  const auctionWinnerId = delta.auction && (delta.auction.isConcluded || delta.auction.winnerId !== undefined)
-    ? (delta.auction.winnerId ?? delta.auction.highestBidderId)
-    : (delta.auction === null && prevState.auction?.highestBidderId && nextState.auction === null)
-    ? prevState.auction.highestBidderId
-    : undefined;
-  const winningBid = delta.auction
-    ? (delta.auction.finalPrice ?? delta.auction.currentBid ?? 0)
-    : (prevState.auction?.currentBid ?? 0);
-  if (auctionWinnerId && winningBid > 0) creditPayerDiff(payers, auctionWinnerId, winningBid);
+  const auctionEvents = (delta.domainEvents ?? []).filter(
+    (e): e is AuctionWonServerEvent => e.type === 'AUCTION_WON',
+  );
+  if (auctionEvents.length > 0) {
+    for (const ev of auctionEvents) {
+      if (ev.winningBid > 0) restoreDeltaOutflow(ev.playerId, ev.winningBid, payers, receivers);
+    }
+  } else {
+    const isConcluded = Boolean(delta.auction?.isConcluded);
+    const auctionWinnerId = delta.auction && (isConcluded || delta.auction.winnerId !== undefined) && !prevState.auction?.isConcluded
+      ? (delta.auction.winnerId ?? delta.auction.highestBidderId)
+      : (delta.auction === null && prevState.auction?.highestBidderId && !prevState.auction?.isConcluded && nextState.auction === null)
+      ? prevState.auction.highestBidderId
+      : undefined;
+    const winningBid = delta.auction
+      ? (delta.auction.finalPrice ?? delta.auction.currentBid ?? 0)
+      : (prevState.auction?.currentBid ?? 0);
+    if (auctionWinnerId && winningBid > 0) restoreDeltaOutflow(auctionWinnerId, winningBid, payers, receivers);
+  }
 
   const activeMods: readonly UpgradeCostModifier[] = delta.activeModifiers ?? nextState.activeModifiers ?? prevState.activeModifiers ?? [];
 
@@ -166,7 +178,11 @@ export function adjustNetDeltaForPropertyTransactions(
     );
 
     const isDirectBankPurchase = prevOwnerId === undefined && Boolean(cell.ownerId);
-    const isAuction = Boolean(delta.auction?.cellIndex === cell.index || prevState.auction?.cellIndex === cell.index);
+    const isAuction = Boolean(
+      auctionEvents.some((e) => e.cellIndex === cell.index) ||
+      delta.auction?.cellIndex === cell.index ||
+      prevState.auction?.cellIndex === cell.index,
+    );
     const isTrade = Boolean(delta.lastTradeResult?.cellIndex === cell.index || delta.lastTradeResult?.offeredCellIndex === cell.index);
     const isBuyoutCard = delta.lastEventCard?.cardId === 'CC_MA_FORCE' || delta.lastEventCard?.cardId === 'CC_SWAP_PROJECT';
 
@@ -203,6 +219,23 @@ export function adjustNetDeltaForPropertyTransactions(
   // 3. Clean up neutralized payers
   for (let i = payers.length - 1; i >= 0; i--) {
     if (payers[i]!.diff === 0) payers.splice(i, 1);
+  }
+}
+
+export function restoreDeltaOutflow(playerId: string, amount: number, payers: InternalBalanceDelta[], receivers: InternalBalanceDelta[]): void {
+  const payIdx = payers.findIndex((py) => py.id === playerId);
+  if (payIdx !== -1) {
+    const newDiff = payers[payIdx]!.diff + amount;
+    if (newDiff === 0) payers.splice(payIdx, 1);
+    else if (newDiff > 0) {
+      const payerObj = payers[payIdx]!;
+      payers.splice(payIdx, 1);
+      receivers.push({ id: playerId, diff: newDiff, cellIndex: payerObj.cellIndex, prevP: payerObj.prevP, hasPassedGo: payerObj.hasPassedGo, isSentToAudit: payerObj.isSentToAudit });
+    } else payers[payIdx]!.diff = newDiff;
+  } else {
+    const recIdx = receivers.findIndex((r) => r.id === playerId);
+    if (recIdx !== -1) receivers[recIdx]!.diff += amount;
+    else if (amount > 0) receivers.push({ id: playerId, diff: amount, cellIndex: undefined, prevP: undefined, hasPassedGo: false, isSentToAudit: false });
   }
 }
 

@@ -31,6 +31,18 @@ export function handleHoseInvest(
   };
   room.lastHoseResult = hoseResult;
   room.diceSeq = hoseResult.diceSeq;
+  if (!room.pendingDomainEvents) room.pendingDomainEvents = [];
+  room.pendingDomainEvents.push({
+    type: 'HOSE_SETTLED',
+    playerId: current.id,
+    stake,
+    roll: face,
+    payout,
+    multiplier,
+    profit,
+    diceSeq: hoseResult.diceSeq,
+    timestamp: hoseResult.timestamp,
+  });
   room.phase = TurnPhase.PropertyManagement;
   return { success: true };
 }

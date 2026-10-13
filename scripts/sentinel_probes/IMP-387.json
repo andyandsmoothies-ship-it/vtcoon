@@ -1,0 +1,32 @@
+[
+  {
+    "file": "src/server/hose_actions.ts",
+    "desc": "AST: Suppress handleHoseInvest pendingDomainEvents emission",
+    "target": "  if (!room.pendingDomainEvents) room.pendingDomainEvents = [];\n  room.pendingDomainEvents.push({\n    type: 'HOSE_SETTLED',\n    playerId: current.id,\n    stake,\n    roll: face,\n    payout,\n    multiplier,\n    profit,\n    diceSeq: hoseResult.diceSeq,\n    timestamp: hoseResult.timestamp,\n  });",
+    "replacement": "  /* Suppressed handleHoseInvest pendingDomainEvents emission */"
+  },
+  {
+    "file": "src/client/events/game_event_hose_helpers.ts",
+    "desc": "AST: Suppress authoritative serverEvents extraction in extractHoseEvents",
+    "target": "  const serverEvents = (delta.domainEvents ?? []).filter(\n    (e): e is HoseSettledServerEvent => e.type === 'HOSE_SETTLED',\n  );",
+    "replacement": "  const serverEvents: HoseSettledServerEvent[] = [];"
+  },
+  {
+    "file": "src/client/events/game_event_hose_helpers.ts",
+    "desc": "AST: Suppress restoreDeltaOutflow on negative profit in serverEvents",
+    "target": "      if (ev.profit < 0) {\n        restoreDeltaOutflow(ev.playerId, Math.abs(ev.profit), payers, receivers);\n      }",
+    "replacement": "      if (ev.profit < 0) {\n        /* Suppressed restoreDeltaOutflow on HOSE loss */\n      }"
+  },
+  {
+    "file": "src/client/events/game_event_hose_helpers.ts",
+    "desc": "AST: Suppress lastProcessedHoseKey sync with delta.lastHoseResult",
+    "target": "    if (delta.lastHoseResult) {\n      const hr = delta.lastHoseResult;\n      lastProcessedHoseKey = `${hr.playerId}_${hr.timestamp}_${hr.roll}_${hr.diceSeq ?? 0}`;\n    }",
+    "replacement": "    /* Suppressed lastProcessedHoseKey sync with lastHoseResult */"
+  },
+  {
+    "file": "src/client/events/game_event_hose_helpers.ts",
+    "desc": "AST: Suppress deductInflowFromDeltas on positive profit in serverEvents",
+    "target": "      } else if (ev.profit > 0) {\n        deductInflowFromDeltas(ev.playerId, ev.profit, undefined, undefined, payers, receivers);\n      }",
+    "replacement": "      } else if (ev.profit > 0) {\n        /* Suppressed deductInflowFromDeltas on HOSE profit */\n      }"
+  }
+]

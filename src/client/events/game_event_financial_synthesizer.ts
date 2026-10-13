@@ -258,7 +258,7 @@ export function synthesizeFinancialEvents(
   const buyoutEvents = extractCompulsoryBuyoutEvents(delta, prevState, nextState, payers, receivers, timestamp);
   const hoseEvents = extractHoseEvents(delta, payers, receivers, timestamp);
   const salaryEvents = reconstructGoSalary(delta, prevState, nextState, payers, receivers, timestamp);
-  adjustNetDeltaForPropertyTransactions(delta, prevState, nextState, payers);
+  adjustNetDeltaForPropertyTransactions(delta, prevState, nextState, payers, receivers);
   const feeEvents = extractGovernmentAndTelecomFees(payers, receivers, prevState, timestamp);
   const rentEvents = matchRentTransactions(payers, receivers, prevState, delta, nextState, timestamp);
   for (const payer of payers) {

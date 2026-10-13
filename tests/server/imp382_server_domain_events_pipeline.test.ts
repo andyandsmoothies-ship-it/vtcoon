@@ -32,9 +32,12 @@ describe('IMP-382: Authoritative Server Domain Events Wire Pipeline Contract Sui
     room.pendingDomainEvents = [bondRepaidEvent];
 
     expect(room.pendingDomainEvents).toHaveLength(1);
-    expect(room.pendingDomainEvents?.[0]?.type).toBe('BOND_REPAID');
-    expect(room.pendingDomainEvents?.[0]?.principal).toBe(2000);
-    expect(room.pendingDomainEvents?.[0]?.repayAmount).toBe(2200);
+    const event = room.pendingDomainEvents?.[0];
+    expect(event?.type).toBe('BOND_REPAID');
+    if (event?.type === 'BOND_REPAID') {
+      expect(event.principal).toBe(2000);
+      expect(event.repayAmount).toBe(2200);
+    }
   });
 
   it('[TC-382.02/MSS][UC-DELTA-MAPPER-PURE-CQS-PROJECTION/MSS] Given Room with pendingDomainEvents, When buildRoomDelta runs multiple times consecutively, Then returns identical domainEvents without mutating or clearing room.pendingDomainEvents', () => {
@@ -78,8 +81,11 @@ describe('IMP-382: Authoritative Server Domain Events Wire Pipeline Contract Sui
 
     expect(payload.domainEvents).toBeDefined();
     expect(payload.domainEvents).toEqual([bondDefaultEvent]);
-    expect(payload.domainEvents?.[0]?.type).toBe('BOND_DEFAULT');
-    expect(payload.domainEvents?.[0]?.principal).toBe(5000);
+    const event = payload.domainEvents?.[0];
+    expect(event?.type).toBe('BOND_DEFAULT');
+    if (event?.type === 'BOND_DEFAULT') {
+      expect(event.principal).toBe(5000);
+    }
   });
 
   it('[TC-382.04/MSS][UC-SPARSE-DELTA-DOMAIN-EVENTS-RETENTION/MSS] Given previous and next DeltaPayload where next contains domainEvents, When buildSparseDelta computes diff, Then returned sparse delta preserves domainEvents intact', () => {

@@ -150,3 +150,110 @@ declare module '*scripts/evidence_audit/evidence_resolver.mjs' {
   export function resolveEvidenceFile(rawArg: string): string;
 }
 
+declare module '*scripts/doctor/system_env.mjs' {
+  export function checkSystemEnvironment(): Array<{
+    category: string;
+    name: string;
+    status: 'PASS' | 'WARN' | 'FAIL';
+    message: string;
+    details?: string;
+  }>;
+}
+
+declare module '*scripts/doctor/network_ports.mjs' {
+  export function probePort(port: number, host?: string): Promise<{ port: number; available: boolean; error?: string }>;
+  export function verifyDynamicPort0(): Promise<{ success: boolean; allocatedPort?: number; error?: string }>;
+  export function checkNetworkPorts(): Promise<Array<{
+    category: string;
+    name: string;
+    status: 'PASS' | 'WARN' | 'FAIL';
+    message: string;
+    details?: string;
+  }>>;
+}
+
+declare module '*scripts/doctor/workspace_integrity.mjs' {
+  export function findFilesRecursively(dir: string, predicate: (name: string) => boolean, maxDepth?: number): string[];
+  export function checkWorkspaceIntegrity(repoRoot?: string): Array<{
+    category: string;
+    name: string;
+    status: 'PASS' | 'WARN' | 'FAIL';
+    message: string;
+    details?: string;
+  }>;
+}
+
+declare module '*scripts/doctor/graphics_context.mjs' {
+  export function checkGraphicsContext(repoRoot?: string): Array<{
+    category: string;
+    name: string;
+    status: 'PASS' | 'WARN' | 'FAIL';
+    message: string;
+    details?: string;
+  }>;
+}
+
+declare module '*scripts/doctor.mjs' {
+  export function runDoctor(repoRoot?: string): Promise<boolean>;
+}
+
+declare module '*scripts/harness/managed_process.mjs' {
+  export function answersPort(port: number, host?: string, timeoutMs?: number): Promise<boolean>;
+  export function answersHttp(url: string, timeoutMs: number, signal?: AbortSignal): Promise<boolean>;
+  export function killAllManagedProcesses(): void;
+  export class ManagedProcess {
+    constructor(
+      label: string,
+      command: {
+        executable: string;
+        args?: string[];
+        cwd?: string;
+        env?: Record<string, string>;
+        startupTimeout?: number;
+        shutdownTimeout?: number;
+        reuseExisting?: boolean;
+        log?: string;
+      },
+      readiness?: { readyUrl?: string; readyPort?: number },
+      projectRoot?: string
+    );
+    readonly label: string;
+    readonly spawned: boolean;
+    readonly isReused: boolean;
+    readonly processId: number | undefined;
+    start(signal?: AbortSignal): Promise<void>;
+    stop(timeout?: number): Promise<void>;
+  }
+}
+
+declare module '*scripts/sentinel/stall_guard.mjs' {
+  export const DEFAULT_EPHEMERAL_KEYS: string[];
+  export function filterEphemeralState(state: unknown, ignoreKeys?: string[]): string;
+  export function detectStateProgress(prevState: unknown, nextState: unknown, ignoreKeys?: string[]): boolean;
+  export class StallGuard {
+    constructor(options?: { maxStalledSteps?: number; ignoreKeys?: string[] });
+    readonly maxStalledSteps: number;
+    readonly history: Array<{
+      action: string;
+      error?: string;
+      phase?: string;
+      progress: boolean;
+      timestamp: number;
+      details?: Record<string, unknown>;
+    }>;
+    recordStep(entry: {
+      action: string;
+      error?: string | Error;
+      phase?: string;
+      state?: Record<string, unknown>;
+      pageChanged?: boolean;
+      progress?: boolean;
+      details?: Record<string, unknown>;
+    }): boolean;
+    isStalled(): boolean;
+    getStallSummary(): string;
+    reset(): void;
+  }
+  export function createStallGuard(options?: { maxStalledSteps?: number; ignoreKeys?: string[] }): StallGuard;
+}
+

@@ -223,17 +223,56 @@ export interface Room {
   pendingDomainEvents?:       ServerDomainEvent[];
 }
 
-export interface ServerDomainEvent {
-  readonly type: 'BOND_REPAID' | 'BOND_DEFAULT';
+export interface BondRepaidServerEvent {
+  readonly type: 'BOND_REPAID';
   readonly playerId: string;
   readonly principal: number;
   readonly interest?: number;
+  readonly repayAmount?: number;
+  readonly trancheId?: BondTrancheId | string;
+  readonly timestamp: number;
+}
+export interface BondDefaultServerEvent {
+  readonly type: 'BOND_DEFAULT';
+  readonly playerId: string;
+  readonly principal: number;
   readonly repayAmount?: number;
   readonly cashSeized?: number;
   readonly trancheId?: BondTrancheId | string;
   readonly timestamp: number;
 }
-
+export interface HoseSettledServerEvent {
+  readonly type: 'HOSE_SETTLED';
+  readonly playerId: string;
+  readonly stake: number;
+  readonly roll: number;
+  readonly payout: number;
+  readonly multiplier: number;
+  readonly profit: number;
+  readonly diceSeq?: number;
+  readonly timestamp: number;
+}
+export interface AuctionWonServerEvent {
+  readonly type: 'AUCTION_WON';
+  readonly playerId: string;
+  readonly cellIndex: number;
+  readonly winningBid: number;
+  readonly isForeclosure?: boolean; // isForeclosure: optional flag
+  readonly timestamp: number;
+}
+export interface AuctionBidServerEvent {
+  readonly type: 'AUCTION_BID_PLACED';
+  readonly playerId: string;
+  readonly cellIndex: number;
+  readonly bidAmount: number;
+  readonly timestamp: number;
+}
+export type ServerDomainEvent =
+  | BondRepaidServerEvent
+  | BondDefaultServerEvent
+  | HoseSettledServerEvent
+  | AuctionWonServerEvent
+  | AuctionBidServerEvent;
 
 const CHARSET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 

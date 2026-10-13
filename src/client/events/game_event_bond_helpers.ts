@@ -11,40 +11,11 @@ import { BOND_TRANCHES, BondTrancheId } from '../../domain/bond_types.js';
 import {
   type InternalBalanceDelta,
   deductInflowFromDeltas,
+  restoreDeltaOutflow,
 } from './game_event_financial_helpers.js';
 
 function isValidBondTrancheId(val: unknown): val is BondTrancheId {
   return val === BondTrancheId.WORKING_CAPITAL || val === BondTrancheId.EXPANSION || val === BondTrancheId.ALL_IN;
-}
-
-function restoreDeltaOutflow(playerId: string, amount: number, payers: InternalBalanceDelta[], receivers: InternalBalanceDelta[]): void {
-  const payIdx = payers.findIndex((py) => py.id === playerId);
-  if (payIdx !== -1) {
-    const newDiff = payers[payIdx]!.diff + amount;
-    if (newDiff === 0) {
-      payers.splice(payIdx, 1);
-    } else if (newDiff > 0) {
-      const payerObj = payers[payIdx]!;
-      payers.splice(payIdx, 1);
-      receivers.push({
-        id: playerId,
-        diff: newDiff,
-        cellIndex: payerObj.cellIndex,
-        prevP: payerObj.prevP,
-        hasPassedGo: payerObj.hasPassedGo,
-        isSentToAudit: payerObj.isSentToAudit,
-      });
-    } else {
-      payers[payIdx]!.diff = newDiff;
-    }
-  } else {
-    const recIdx = receivers.findIndex((r) => r.id === playerId);
-    if (recIdx !== -1) {
-      receivers[recIdx]!.diff += amount;
-    } else if (amount > 0) {
-      receivers.push({ id: playerId, diff: amount, cellIndex: undefined, prevP: undefined, hasPassedGo: false, isSentToAudit: false });
-    }
-  }
 }
 
 export function extractBondEvents(

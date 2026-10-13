@@ -1,0 +1,44 @@
+[
+  {
+    "file": "src/server/auction_manager.ts",
+    "desc": "AST: Suppress handleAuctionBid AUCTION_BID_PLACED pendingDomainEvents emission",
+    "target": "  if (!room.pendingDomainEvents) room.pendingDomainEvents = [];\n  room.pendingDomainEvents.push({\n    type: 'AUCTION_BID_PLACED',\n    playerId,\n    cellIndex: session.cellIndex,\n    bidAmount: amount,\n    timestamp: Date.now(),\n  });",
+    "replacement": "  /* Suppressed AUCTION_BID_PLACED emission */"
+  },
+  {
+    "file": "src/server/auction_manager.ts",
+    "desc": "AST: Suppress handleAuctionClose AUCTION_WON pendingDomainEvents emission",
+    "target": "      const isFireSale = Boolean(session.isFireSale);\n      const isForeclosure = Boolean(session.insolvencyPlayerId || isFireSale);\n      if (!room.pendingDomainEvents) room.pendingDomainEvents = [];\n      room.pendingDomainEvents.push({\n        type: 'AUCTION_WON',\n        playerId: winner.id,\n        cellIndex: session.cellIndex,\n        winningBid: session.highestBid,\n        isForeclosure,\n        timestamp: Date.now(),\n      });",
+    "replacement": "      /* Suppressed AUCTION_WON emission */"
+  },
+  {
+    "file": "src/server/auction_manager.ts",
+    "desc": "AST: Invert isForeclosure calculation in handleAuctionClose",
+    "target": "      const isForeclosure = Boolean(session.insolvencyPlayerId || isFireSale);",
+    "replacement": "      const isForeclosure = false;"
+  },
+  {
+    "file": "src/server/auction_manager.ts",
+    "desc": "AST: Corrupt winningBid in handleAuctionClose AUCTION_WON emission",
+    "target": "        winningBid: session.highestBid,",
+    "replacement": "        winningBid: 0,"
+  },
+  {
+    "file": "src/client/events/game_event_property_synthesizer.ts",
+    "desc": "AST: Suppress authoritative serverEvents extraction in extractAuctionEvents",
+    "target": "  const serverEvents = delta.domainEvents ?? [];\n  const wonEvents = serverEvents.filter((e): e is AuctionWonServerEvent => e.type === 'AUCTION_WON');\n  const bidEvents = serverEvents.filter((e): e is AuctionBidServerEvent => e.type === 'AUCTION_BID_PLACED');",
+    "replacement": "  const serverEvents: Array<AuctionWonServerEvent | AuctionBidServerEvent> = [];\n  const wonEvents: AuctionWonServerEvent[] = [];\n  const bidEvents: AuctionBidServerEvent[] = [];"
+  },
+  {
+    "file": "src/client/events/game_event_financial_helpers.ts",
+    "desc": "AST: Suppress restoreDeltaOutflow on AUCTION_WON in adjustNetDeltaForPropertyTransactions",
+    "target": "  if (auctionEvents.length > 0) {\n    for (const ev of auctionEvents) {\n      if (ev.winningBid > 0) restoreDeltaOutflow(ev.playerId, ev.winningBid, payers, receivers);\n    }\n  }",
+    "replacement": "  if (auctionEvents.length > 0) {\n    /* Suppressed restoreDeltaOutflow on AUCTION_WON */\n  }"
+  },
+  {
+    "file": "src/client/events/game_event_property_synthesizer.ts",
+    "desc": "AST: Remove !prevState.auction?.isConcluded stale immunity guard in legacy fallback",
+    "target": "  if (isAuctionConcluded && delta.auction && !prevState.auction?.isConcluded) {",
+    "replacement": "  if (isAuctionConcluded && delta.auction) {"
+  }
+]

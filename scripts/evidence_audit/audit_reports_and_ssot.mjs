@@ -24,7 +24,7 @@ export function auditReportsAndSSOT(evidence, repoRoot, targetArg, evidencePath)
   const summary = evidence.testExecutionSummary || {};
   const isPureLogicWaiver = evidence.pureLogicWaiver === true;
 
-  const { ticketNum, matchesTicket } = createTicketMatcher(evidence, targetArg);
+  const { ticketRaw, ticketClean, ticketNum, matchesTicket } = createTicketMatcher(evidence, targetArg);
 
   // 1. Physical Review Reports Persistence Gate
   if (fs.existsSync(auditDir) && ticketNum) {
@@ -181,7 +181,10 @@ export function auditReportsAndSSOT(evidence, repoRoot, targetArg, evidencePath)
         gitModifiedFiles.some((f) => /docs[/\\]FEATURE_MAP\.md/i.test(f)) ||
         (() => {
           try {
-            const diff = execSync('git diff HEAD --name-only docs/FEATURE_MAP.md', { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
+            const content = fs.readFileSync(path.join(repoRoot, 'docs', 'FEATURE_MAP.md'), 'utf8');
+            if (ticketClean && content.includes(ticketClean)) return true;
+            if (ticketNum && content.includes(`IMP-${ticketNum}`)) return true;
+            const diff = execSync('git diff HEAD~1 HEAD --name-only docs/FEATURE_MAP.md', { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
             return Boolean(diff.trim());
           } catch {
             return false;

@@ -91,6 +91,15 @@ export function handleAuctionBid(
   session.currentBid = amount;
   session.highestBidder = playerId;
 
+  if (!room.pendingDomainEvents) room.pendingDomainEvents = [];
+  room.pendingDomainEvents.push({
+    type: 'AUCTION_BID_PLACED',
+    playerId,
+    cellIndex: session.cellIndex,
+    bidAmount: amount,
+    timestamp: Date.now(),
+  });
+
   if (player.isBot) {
     session.endTime = Date.now() + 20_000;
   }
@@ -229,6 +238,18 @@ export function handleAuctionClose(
       registry?.set(session.cellIndex, winner.id);
       winnerId = session.highestBidder;
       winningBid = session.highestBid;
+
+      const isFireSale = Boolean(session.isFireSale);
+      const isForeclosure = Boolean(session.insolvencyPlayerId || isFireSale);
+      if (!room.pendingDomainEvents) room.pendingDomainEvents = [];
+      room.pendingDomainEvents.push({
+        type: 'AUCTION_WON',
+        playerId: winner.id,
+        cellIndex: session.cellIndex,
+        winningBid: session.highestBid,
+        isForeclosure,
+        timestamp: Date.now(),
+      });
 
       if (stateMap) {
         const st = stateMap.get(session.cellIndex);
