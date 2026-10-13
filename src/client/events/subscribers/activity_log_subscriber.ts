@@ -1,4 +1,4 @@
-import type { ActivityLogEntry, ActivityLogType, useActivityStore } from '../../store/activity_store.js';
+import { useActivityStore, type ActivityLogEntry, type ActivityLogType } from '../../store/activity_store.js';
 import { SynthesizedGameEventType, type SynthesizedGameEvent } from '../game_event_types.js';
 import type { GameEventContext, GameEventListener } from '../game_event_bus.js';
 import { BOARD_CONFIG } from '../../../domain/board_config.js';
@@ -7,6 +7,10 @@ import { formatKinematicActivityLog } from './activity_log_kinematics_formatter.
 import {
   formatGoSalaryDeductionSuffix,
   resolveFeePaidDetails,
+  formatBondRepaidMessage,
+  formatBondIssuedMessage,
+  formatCompulsoryBuyoutMessage,
+  formatHoseSettledMessage,
 } from './activity_log_financial_formatter.js';
 
 function getCellName(cellIndex: number): string {
@@ -25,6 +29,27 @@ function resolvePlayerTokenColor(context: GameEventContext, playerId?: string): 
   return p?.tokenColor;
 }
 
+function createFinancialLogEntry(
+  id: string,
+  timestamp: number,
+  type: ActivityLogType,
+  message: string,
+  playerId: string,
+  playerName: string,
+  amount: number | undefined,
+  playerTokenColor: string | undefined,
+  targetPlayerId?: string,
+  targetPlayerName?: string,
+  cellIndex?: number,
+): ActivityLogEntry {
+  return {
+    id, timestamp, type, message, playerId, playerName, amount, playerTokenColor,
+    ...(targetPlayerId ? { targetPlayerId } : {}),
+    ...(targetPlayerName ? { targetPlayerName } : {}),
+    ...(cellIndex !== undefined ? { cellIndex } : {}),
+  };
+}
+
 
 function mapFinancialEventToActivityLog(
   event: SynthesizedGameEvent,
@@ -37,106 +62,71 @@ function mapFinancialEventToActivityLog(
       const payerName = resolvePlayerName(context, event.payerId);
       const receiverName = resolvePlayerName(context, event.receiverId);
       const cellName = getCellName(event.cellIndex);
-      return {
-        id,
-        timestamp,
-        type: 'rent',
-        message: `${payerName} đã trả ${formatCurrency(event.amount)} tiền thuê tại ${cellName} cho ${receiverName}`,
-        playerId: event.payerId,
-        playerName: payerName,
-        targetPlayerId: event.receiverId,
-        targetPlayerName: receiverName,
-        amount: -event.amount,
-        cellIndex: event.cellIndex,
-        playerTokenColor: resolvePlayerTokenColor(context, event.payerId),
-      };
+      const message = `${payerName} đã trả ${formatCurrency(event.amount)} tiền thuê tại ${cellName} cho ${receiverName}`;
+      return createFinancialLogEntry(id, timestamp, 'rent', message, event.payerId, payerName, -event.amount, resolvePlayerTokenColor(context, event.payerId), event.receiverId, receiverName, event.cellIndex);
     }
 
     case SynthesizedGameEventType.PARTIAL_RENT: {
       const payerName = resolvePlayerName(context, event.payerId);
       const receiverName = resolvePlayerName(context, event.receiverId);
       const cellName = event.cellIndex !== undefined ? getCellName(event.cellIndex) : 'BĐS';
-      return {
-        id,
-        timestamp,
-        type: 'rent',
-        message: `${payerName} vỡ nợ, chỉ trả được ${formatCurrency(event.paidAmount)} tiền thuê tại ${cellName} cho ${receiverName} (còn nợ ${formatCurrency(event.remainingDebt)})`,
-        playerId: event.payerId,
-        playerName: payerName,
-        targetPlayerId: event.receiverId,
-        targetPlayerName: receiverName,
-        amount: -event.paidAmount,
-        cellIndex: event.cellIndex,
-        playerTokenColor: resolvePlayerTokenColor(context, event.payerId),
-      };
+      const message = `${payerName} vỡ nợ, chỉ trả được ${formatCurrency(event.paidAmount)} tiền thuê tại ${cellName} cho ${receiverName} (còn nợ ${formatCurrency(event.remainingDebt)})`;
+      return createFinancialLogEntry(id, timestamp, 'rent', message, event.payerId, payerName, -event.paidAmount, resolvePlayerTokenColor(context, event.payerId), event.receiverId, receiverName, event.cellIndex);
     }
 
     case SynthesizedGameEventType.PORT_SPLIT_RENT: {
       const payerName = resolvePlayerName(context, event.payerId);
       const cellName = getCellName(event.cellIndex);
-      return {
-        id,
-        timestamp,
-        type: 'rent',
-        message: `${payerName} đã trả ${formatCurrency(event.totalAmount)} phí cảng biển tại ${cellName} (chia đều ${formatCurrency(event.amountPerReceiver)})`,
-        playerId: event.payerId,
-        playerName: payerName,
-        amount: -event.totalAmount,
-        cellIndex: event.cellIndex,
-        playerTokenColor: resolvePlayerTokenColor(context, event.payerId),
-      };
+      const message = `${payerName} đã trả ${formatCurrency(event.totalAmount)} phí cảng biển tại ${cellName} (chia đều ${formatCurrency(event.amountPerReceiver)})`;
+      return createFinancialLogEntry(id, timestamp, 'rent', message, event.payerId, payerName, -event.totalAmount, resolvePlayerTokenColor(context, event.payerId), undefined, undefined, event.cellIndex);
     }
 
     case SynthesizedGameEventType.GO_SALARY: {
       const playerName = resolvePlayerName(context, event.playerId);
       const deductionStr = formatGoSalaryDeductionSuffix(event.deductions, event.taxDeduction);
-      return {
-        id,
-        timestamp,
-        type: 'salary',
-        message: `${playerName} nhận lương vượt GO ${formatCurrency(event.grossSalary)}${deductionStr}`,
-        playerId: event.playerId,
-        playerName,
-        amount: event.netAmount,
-        playerTokenColor: resolvePlayerTokenColor(context, event.playerId),
-      };
+      const message = `${playerName} nhận lương vượt GO ${formatCurrency(event.grossSalary)}${deductionStr}`;
+      return createFinancialLogEntry(id, timestamp, 'salary', message, event.playerId, playerName, event.netAmount, resolvePlayerTokenColor(context, event.playerId));
     }
 
     case SynthesizedGameEventType.FEE_PAID: {
       const playerName = resolvePlayerName(context, event.payerId);
       const targetPlayerName = resolvePlayerName(context, event.receiverId);
       const { logType, message } = resolveFeePaidDetails(event, context, playerName, targetPlayerName);
-      return {
-        id,
-        timestamp,
-        type: logType,
-        message,
-        playerId: event.payerId,
-        playerName,
-        targetPlayerId: event.receiverId,
-        targetPlayerName,
-        amount: -event.amount,
-        cellIndex: event.cellIndex,
-        playerTokenColor: resolvePlayerTokenColor(context, event.payerId),
-      };
+      return createFinancialLogEntry(id, timestamp, logType, message, event.payerId, playerName, -event.amount, resolvePlayerTokenColor(context, event.payerId), event.receiverId, targetPlayerName, event.cellIndex);
     }
 
     case SynthesizedGameEventType.DIPLOMATIC_WAIVER: {
       const payerName = resolvePlayerName(context, event.payerId);
       const landlordName = resolvePlayerName(context, event.landlordId);
       const cellName = getCellName(event.cellIndex);
-      return {
-        id,
-        timestamp,
-        type: 'system',
-        message: `${payerName} dùng Thẻ Ngoại Giao, được miễn trừ ${formatCurrency(event.waivedAmount)} tiền thuê tại ${cellName} của ${landlordName}`,
-        playerId: event.payerId,
-        playerName: payerName,
-        targetPlayerId: event.landlordId,
-        targetPlayerName: landlordName,
-        cellIndex: event.cellIndex,
-        playerTokenColor: resolvePlayerTokenColor(context, event.payerId),
-      };
+      const message = `${payerName} dùng Thẻ Ngoại Giao, được miễn trừ ${formatCurrency(event.waivedAmount)} tiền thuê tại ${cellName} của ${landlordName}`;
+      return createFinancialLogEntry(id, timestamp, 'system', message, event.payerId, payerName, undefined, resolvePlayerTokenColor(context, event.payerId), event.landlordId, landlordName, event.cellIndex);
+    }
+
+    case SynthesizedGameEventType.BOND_REPAID: {
+      const playerName = resolvePlayerName(context, event.playerId);
+      const message = formatBondRepaidMessage(playerName, event.repayAmount, event.principal, event.interest);
+      return createFinancialLogEntry(id, timestamp, 'bond', message, event.playerId, playerName, -event.repayAmount, resolvePlayerTokenColor(context, event.playerId));
+    }
+
+    case SynthesizedGameEventType.BOND_ISSUED: {
+      const playerName = resolvePlayerName(context, event.playerId);
+      const message = formatBondIssuedMessage(playerName, event.principal, event.roundsLeft, event.interestRate, event.trancheId);
+      return createFinancialLogEntry(id, timestamp, 'bond', message, event.playerId, playerName, event.principal, resolvePlayerTokenColor(context, event.playerId));
+    }
+
+    case SynthesizedGameEventType.COMPULSORY_BUYOUT: {
+      const buyerName = resolvePlayerName(context, event.buyerId);
+      const sellerName = resolvePlayerName(context, event.sellerId);
+      const cellName = getCellName(event.cellIndex);
+      const message = formatCompulsoryBuyoutMessage(buyerName, sellerName, cellName, event.cost, event.premiumRatio);
+      return createFinancialLogEntry(id, timestamp, 'trade', message, event.buyerId, buyerName, -event.cost, resolvePlayerTokenColor(context, event.buyerId), event.sellerId, sellerName, event.cellIndex);
+    }
+
+    case SynthesizedGameEventType.HOSE_SETTLED: {
+      const playerName = resolvePlayerName(context, event.playerId);
+      const message = formatHoseSettledMessage(playerName, event.profit, event.stake, event.roll, event.multiplier);
+      return createFinancialLogEntry(id, timestamp, 'hose', message, event.playerId, playerName, event.profit !== 0 ? event.profit : undefined, resolvePlayerTokenColor(context, event.playerId));
     }
 
     default:
@@ -335,13 +325,14 @@ export function mapEventToActivityLog(
 export function createActivityLogSubscriber(
   store?: typeof useActivityStore,
 ): GameEventListener {
+  const targetStore = store ?? useActivityStore;
   return (events: readonly SynthesizedGameEvent[], context: GameEventContext) => {
     if (!events || events.length === 0) return;
     for (const ev of events) {
       try {
         const entry = mapEventToActivityLog(ev, context);
-        if (entry && store) {
-          store.getState().addActivityLog(entry);
+        if (entry) {
+          targetStore.getState().addActivityLog(entry);
         }
       } catch (err) {
         console.warn('[ActivityLogSubscriber] Per-event mapping error isolated:', err);

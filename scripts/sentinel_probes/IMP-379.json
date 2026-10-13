@@ -1,0 +1,104 @@
+[
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "Mutant 1: Invert isMobile check in CentralMonumentPlaza",
+    "target": "if (desc.isMobile) {",
+    "replacement": "if (!desc.isMobile) {"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "Mutant 2: Corrupt mobile plinth color in CentralMonumentPlaza",
+    "target": "<meshStandardMaterial color={desc.plinth.color} roughness={0.3} metalness={0.1} />",
+    "replacement": "<meshStandardMaterial color=\"#000000\" roughness={0.3} metalness={0.1} />"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "Mutant 3: Corrupt mobile spire color in CentralMonumentPlaza",
+    "target": "<meshStandardMaterial color={desc.spire.color} metalness={0.85} roughness={0.18} />",
+    "replacement": "<meshStandardMaterial color=\"#FFFFFF\" metalness={0.85} roughness={0.18} />"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "Mutant 4: Corrupt isMobile prop to CentralMonumentPlaza in MiniatureCityDiorama",
+    "target": "<CentralMonumentPlaza isMobile={isMobile} />",
+    "replacement": "<CentralMonumentPlaza isMobile={false} />"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "Mutant 5: Corrupt isMobile prop to DioramaBridges in MiniatureCityDiorama",
+    "target": "<DioramaBridges isMobile={isMobile} />",
+    "replacement": "<DioramaBridges isMobile={false} />"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "Mutant 6: Corrupt isMobile prop to DioramaSkyline in MiniatureCityDiorama",
+    "target": "<DioramaSkyline isMobile={isMobile} />",
+    "replacement": "<DioramaSkyline isMobile={false} />"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "Mutant 7: Corrupt DioramaModelRailroad preservation in MiniatureCityDiorama",
+    "target": "<DioramaModelRailroad isMobile={isMobile} />",
+    "replacement": "{/* DioramaModelRailroad stripped */}"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "Mutant 8: Corrupt DioramaHarborCruiser preservation in MiniatureCityDiorama",
+    "target": "<DioramaHarborCruiser isMobile={isMobile} />",
+    "replacement": "{/* DioramaHarborCruiser stripped */}"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_skyline.tsx",
+    "desc": "Mutant 9: Invert streetlamps culling in DioramaSkyline",
+    "target": "{!isMobile && STREETLAMP_LOCATIONS.map(([lx, lz], i) => (",
+    "replacement": "{isMobile && STREETLAMP_LOCATIONS.map(([lx, lz], i) => ("
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_skyline.tsx",
+    "desc": "Mutant 10: Always render streetlamps regardless of isMobile in DioramaSkyline",
+    "target": "{!isMobile && STREETLAMP_LOCATIONS.map(([lx, lz], i) => (",
+    "replacement": "{true && STREETLAMP_LOCATIONS.map(([lx, lz], i) => ("
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_skyline.tsx",
+    "desc": "Mutant 11: Corrupt bitexco-tower testid in DioramaSkyline",
+    "target": "data-testid=\"bitexco-tower\"",
+    "replacement": "data-testid=\"corrupted-bitexco\""
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_skyline.tsx",
+    "desc": "Mutant 12: Corrupt colonial-waterfront-heritage testid in DioramaSkyline",
+    "target": "data-testid=\"colonial-waterfront-heritage\"",
+    "replacement": "data-testid=\"corrupted-heritage\""
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_bridges.tsx",
+    "desc": "Mutant 13: Invert Ba Son cables mode switch in DioramaBridges",
+    "target": "{isMobile ? (",
+    "replacement": "{!isMobile ? ("
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_bridges.tsx",
+    "desc": "Mutant 14: Always render Long Bien top crossbeam regardless of isMobile in DioramaBridges",
+    "target": "{!isMobile && (\n              <mesh position={[0, 0.15, 0]}>",
+    "replacement": "{true && (\n              <mesh position={[0, 0.15, 0]}>"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_bridges.tsx",
+    "desc": "Mutant 15: Always render Long Bien truss struts regardless of isMobile in DioramaBridges",
+    "target": "{!isMobile && [-0.8, -0.4, 0, 0.4, 0.8].map((tx, ti) => (",
+    "replacement": "{true && [-0.8, -0.4, 0, 0.4, 0.8].map((tx, ti) => ("
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_bridges.tsx",
+    "desc": "Mutant 16: Corrupt instanced-bason-cables testid in DioramaBridges",
+    "target": "data-testid=\"instanced-bason-cables\"",
+    "replacement": "data-testid=\"corrupted-instanced-cables\""
+  },
+  {
+    "file": "src/client/3d/sunny_island_lobby_scene.tsx",
+    "desc": "Mutant 17: Corrupt isMobile prop propagation in SunnyIslandLobbyScene",
+    "target": "<MiniatureCityDiorama isMobile={isMobile} />",
+    "replacement": "<MiniatureCityDiorama isMobile={false} />"
+  }
+]

@@ -5,6 +5,7 @@ import { useGameStore } from '../store/game_store.js';
 import { useVfxStore } from '../store/vfx_store.js';
 import { resetEventCardActivityTracker, resetAuctionActivityTracker, resetTransitActivityTracker } from './activity_tracker.js';
 import { resetTradeOfferResolutions } from '../ui/modals/bot_trade_offer_strip.js';
+import { resetHoseEventTracker } from '../events/game_event_financial_helpers.js';
 import { clearGameEventListeners, registerDefaultSubscribers } from '../events/game_event_bus.js';
 import { clearPendingPacingTimers } from '../events/pacing_context.js';
 import { clearPendingBadgeTimers } from './activity_badge_dispatcher.js';
@@ -31,6 +32,7 @@ export function purgeClientMatchSession(options: PurgeSessionOptions = { clearGa
   resetAuctionActivityTracker();
   resetTransitActivityTracker();
   resetTradeOfferResolutions();
+  resetHoseEventTracker();
 
   // 3. Reset flight recorder, audit logs, violations trong telemetry
   useTelemetryStore.getState().reset();

@@ -665,6 +665,27 @@ async function main() {
       }
     }
   }
+
+  // Auto-reconcile targetFiles from plan file to maintain 100% parity with physical scope
+  const normTid = ticketId.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const planDir = path.resolve('.agents/plans');
+  if (fs.existsSync(planDir)) {
+    const planFiles = fs.readdirSync(planDir);
+    const matchedPlan = planFiles.find((f) => f.toLowerCase().replace(/[^a-z0-9]/g, '').includes(normTid));
+    if (matchedPlan) {
+      const planContent = fs.readFileSync(path.join(planDir, matchedPlan), 'utf8');
+      const matches = planContent.match(/`src\/[^`]+\.[a-z]+`/g);
+      if (matches) {
+        for (const m of matches) {
+          const filePath = m.replace(/`/g, '').replace(/\\/g, '/');
+          if (!targetFiles.includes(filePath) && fs.existsSync(path.resolve(filePath))) {
+            targetFiles.push(filePath);
+          }
+        }
+      }
+    }
+  }
+
   const isVisualTarget = targetFiles.some((f) => /src[/\\]client[/\\](3d|ui)/i.test(f));
 
   const results: ProbeResults = {

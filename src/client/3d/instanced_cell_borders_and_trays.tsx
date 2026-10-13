@@ -1,5 +1,5 @@
 // [UI-S02/MSS][IMP-377] Instanced Cell Borders & Price Pill Trays Component
-import React, { useRef, useLayoutEffect, useEffect } from 'react';
+import React, { useRef, useLayoutEffect, useEffect, useMemo } from 'react';
 import * as THREE from 'three';
 import {
   PURCHASABLE_CELL_INDICES,
@@ -11,14 +11,17 @@ import {
   PRICE_PILL_OUTER_FRAME_GEOM,
   PRICE_PILL_BASE_GEOM,
   computeCellMarkerMatrices,
+  PRICE_PILL_LABELS_BATCHED_GEOM,
 } from './instanced_cell_markers_helpers';
 import { isCellInMonopolyGroup, type MonopolyGroupInfo } from './monopoly_plaza_math';
+import { getPricePillAtlasTexture, clearPricePillAtlasCache } from './price_pill_texture_atlas';
 
 export interface InstancedCellBordersAndTraysProps {
-  readonly ownerInfoMap: Record<number, { tokenColor: string }>;
+  readonly ownerInfoMap: Record<number, { tokenColor: string; mascotIcon?: string; ownerSlot?: number }>;
   readonly monopolyGroups: Record<string, MonopolyGroupInfo> | null | undefined;
   readonly isHeatmapActive?: boolean;
 }
+
 
 export function InstancedCellBordersAndTrays({
   ownerInfoMap,
@@ -32,8 +35,13 @@ export function InstancedCellBordersAndTrays({
   const pricePillBaseRef = useRef<THREE.InstancedMesh>(null);
   const prevFingerprintRef = useRef<string>('');
 
+  const atlasTexture = useMemo(() => getPricePillAtlasTexture(ownerInfoMap), [ownerInfoMap]);
+
+  useEffect(() => () => clearPricePillAtlasCache(), []);
+
   // 1. Khởi tạo sẵn instanceColor buffer trên mount trong useLayoutEffect để Three.js inject #define USE_INSTANCING_COLOR ngay từ frame 0
   useLayoutEffect(() => {
+
     const initBuffer = (ref: React.RefObject<THREE.InstancedMesh | null>, hex: string) => {
       const mesh = ref.current;
       if (!mesh) return;
@@ -190,6 +198,18 @@ export function InstancedCellBordersAndTrays({
       >
         <meshStandardMaterial roughness={0.35} metalness={0.25} />
       </instancedMesh>
+
+      {/* 6. Nhãn giá tiền & linh vật gộp chung qua 1 Texture Atlas POT 1024x512 */}
+      <mesh geometry={PRICE_PILL_LABELS_BATCHED_GEOM} data-testid="instanced-price-pill-labels">
+        <meshBasicMaterial
+          map={atlasTexture ?? undefined}
+          transparent
+          alphaTest={0.05}
+          depthWrite={false}
+          toneMapped={false}
+        />
+      </mesh>
     </group>
   );
 }
+

@@ -23,6 +23,7 @@ import {
   DioramaTropicalFlora,
 } from './diorama/diorama_railroad';
 import { isMobileDevice } from './device_detect';
+import { getCentralMonumentLODDescriptor } from './diorama/diorama_lod_helpers';
 
 export {
   DioramaModelRailroad,
@@ -31,7 +32,26 @@ export {
   DioramaTropicalFlora,
 } from './diorama/diorama_railroad';
 
-export function CentralMonumentPlaza(): React.ReactElement {
+export interface CentralMonumentPlazaProps {
+  readonly isMobile?: boolean;
+}
+
+export function CentralMonumentPlaza({ isMobile = false }: CentralMonumentPlazaProps = {}): React.ReactElement {
+  const desc = getCentralMonumentLODDescriptor(isMobile);
+  if (desc.isMobile) {
+    return (
+      <group position={[0, 0.02, 0]} data-testid="central-monument-plaza">
+        <mesh receiveShadow position={desc.plinth.position}>
+          <cylinderGeometry args={[desc.plinth.radiusTop, desc.plinth.radiusBottom, desc.plinth.height, 24]} />
+          <meshStandardMaterial color={desc.plinth.color} roughness={0.3} metalness={0.1} />
+        </mesh>
+        <mesh receiveShadow position={desc.spire.position}>
+          <cylinderGeometry args={[desc.spire.radiusTop, desc.spire.radiusBottom, desc.spire.height, 16]} />
+          <meshStandardMaterial color={desc.spire.color} metalness={0.85} roughness={0.18} />
+        </mesh>
+      </group>
+    );
+  }
   return (
     <group position={[0, 0.02, 0]} data-testid="central-monument-plaza">
       {/* 1. Bệ đá cẩm thạch vòng ngoài */}
@@ -316,13 +336,13 @@ export function MiniatureCityDiorama(props: MiniatureCityDioramaProps = {}): Rea
       {/* 1. Bán đảo đôi liền khối & Bậc thềm kết nối quảng trường trung tâm */}
       <DioramaTerrain />
       {/* 1.1. Quảng trường Tượng đài Biểu tượng Trung tâm */}
-      <CentralMonumentPlaza />
+      <CentralMonumentPlaza isMobile={isMobile} />
       {/* 1.2. Tuyến hành lang đi bộ lát đá hoa cương & tiểu cảnh công viên */}
       <DioramaPedestrianPromenades isMobile={isMobile} />
       {/* 1.3. Tán cây xanh cảnh quan đô thị nhiệt đới đa tầng */}
       <DioramaUrbanCanopy isMobile={isMobile} />
       {/* 2. Cầu Ba Son (Bắc) và Cầu Long Biên (Nam) nối liền hai bờ sông */}
-      <DioramaBridges />
+      <DioramaBridges isMobile={isMobile} />
       {/* 3. Trung tâm Văn hóa Triển lãm & Công viên Cảnh quan Bờ sông */}
       {!isMobile && <DioramaCivicCenter />}
       {!isMobile && <DioramaWaterfrontPark />}
@@ -332,7 +352,7 @@ export function MiniatureCityDiorama(props: MiniatureCityDioramaProps = {}): Rea
       {/* 4.1. Thuyền du ngoạn lòng sông Sài Gòn (Bảo tồn hợp đồng TC-265.07) */}
       <DioramaHarborCruiser isMobile={isMobile} />
       {/* 5. Cụm cao ốc tài chính Landmark Skyline & Tháp cao ốc nén */}
-      <DioramaSkyline />
+      <DioramaSkyline isMobile={isMobile} />
       {!isMobile && <DioramaHighriseBlocks />}
       {!isMobile && <DioramaResidentialPool />}
       {/* 5.1. Khu di sản văn hóa Chợ Lớn & Shophouse phố cổ */}

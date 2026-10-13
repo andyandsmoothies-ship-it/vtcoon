@@ -260,10 +260,14 @@ export function SunnyIslandCameraController(): React.ReactElement {
   );
 }
 
+export interface SunnyIslandLobbySceneProps {
+  readonly isMobile?: boolean;
+}
+
 /**
  * Root Coordinator Sảnh Chờ Sa Bàn Đảo Vịnh Nhiệt Đới (Sunny Island Metropolis)
  */
-export function SunnyIslandLobbyScene(): React.ReactElement {
+export function SunnyIslandLobbyScene({ isMobile = false }: SunnyIslandLobbySceneProps = {}): React.ReactElement {
   const storeSlots = useLobbyStore((s) => s.slots);
 
   useEffect(() => {
@@ -294,7 +298,7 @@ export function SunnyIslandLobbyScene(): React.ReactElement {
       <CoastalIslandEnvironment />
 
       {/* 2. Đô thị sa bàn đồ chơi cao ốc Landmark, cầu Ba Son & Long Biên */}
-      <MiniatureCityDiorama />
+      <MiniatureCityDiorama isMobile={isMobile} />
 
       {/* 3. Kỳ Đài Bến Cảng Du Thuyền Đảo Ngọc */}
       <MarinaWaterfrontPlaza />

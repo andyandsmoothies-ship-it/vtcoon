@@ -274,3 +274,37 @@ export function auditWiringParityInPlan(targetFiles, planContent) {
   return errors;
 }
 
+export function auditCompositeTransactionAndSemanticBorrowing(targetFiles, planContent) {
+  let errors = 0;
+  const targetList = Array.from(targetFiles.keys());
+  const isFinancialPlan = targetList.some((f) =>
+    /game_event_financial|balance|treasury|economy|salary|rent|bond|buyout/i.test(f)
+  );
+
+  if (isFinancialPlan) {
+    // 1. Composite Transaction Testing Invariant (GEMINI.md)
+    const hasCompositeTest = /(?:composite|đa dòng tiền|hỗn hợp|đồng thời|inflow.*outflow|salary.*bond|bond.*salary|rent.*bond)/i.test(planContent);
+    if (!hasCompositeTest) {
+      console.error(`  ❌ [COMPOSITE_TRANSACTION_TEST_MISSING] Plan modifies financial/balance event processors, but Station 1 test specifications omit Composite Cashflow integration tests!`);
+      console.error(`     GEMINI.md Composite Transaction Testing Invariant mandates testing simultaneous bidirectional cashflows (e.g. GO Salary + Debt Repayment) to prevent Netting Collision.`);
+      errors++;
+    } else {
+      console.log(`  ✔️ Composite Transaction Testing verified: Station 1 tests simultaneous bidirectional cashflows.`);
+    }
+
+    // 2. Zero Semantic Borrowing Invariant (GEMINI.md)
+    const hasSemanticBorrowing = /actionType:\s*['"](?:unmortgage|mortgage)['"].*?bond|actionType:\s*['"]tax['"].*?bond/i.test(planContent) ||
+      /mượn\s+tạm\s+type|ép\s+kiểu\s+tiện\s+tay/i.test(planContent);
+    if (hasSemanticBorrowing) {
+      console.error(`  ❌ [SEMANTIC_BORROWING_VIOLATION] Plan borrows existing actionType ('unmortgage'/'mortgage'/'tax') for bond transactions!`);
+      console.error(`     GEMINI.md Zero Semantic Borrowing Invariant mandates introducing canonical first-class types ('bond') in ActivityLogType and FloatingActionType.`);
+      errors++;
+    } else {
+      console.log(`  ✔️ Zero Semantic Borrowing verified: Canonical first-class types are utilized.`);
+    }
+  }
+
+  return errors;
+}
+
+

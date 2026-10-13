@@ -65,6 +65,20 @@ export function auditPlanSnippetHygiene(relPath, targetChunk, replacementChunk, 
     }
   }
 
+  // 3D Geometry Allocation Guard: Ban inline factory calls in JSX geometry={...}
+  if (/\.(tsx|jsx)$/.test(relPath) && /src[\\/]client[\\/]3d/i.test(relPath)) {
+    if (/geometry=\{\s*(?:create[A-Za-z0-9_$]*Geometry|new\s+[A-Za-z0-9_$]*Geometry)\s*\(/i.test(replacementChunk)) {
+      console.error(`  ❌ [BANNED_INLINE_GEOMETRY_ALLOCATION] in ${relPath}: Inline geometry allocation inside JSX 'geometry={...}' detected!`);
+      console.error(`     Gotcha Pillar VI (Item 14) mandates pre-baking geometries as module-level static singletons to prevent GPU VRAM buffer leaks.`);
+      errors++;
+    }
+    if (/<mesh\b[^>]*\breceiveShadow\b[^>]*>[\s\S]*?<meshBasicMaterial/i.test(replacementChunk)) {
+      console.error(`  ❌ [BANNED_UNLIT_SHADOW_PROP] in ${relPath}: 'receiveShadow' detected on a mesh with unlit 'MeshBasicMaterial'!`);
+      console.error(`     MeshBasicMaterial is unlit and ignores shadow maps. Remove receiveShadow to eliminate code slop.`);
+      errors++;
+    }
+  }
+
   return errors;
 }
 

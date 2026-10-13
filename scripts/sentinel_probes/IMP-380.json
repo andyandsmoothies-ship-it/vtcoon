@@ -1,0 +1,38 @@
+[
+  {
+    "file": "src/client/events/game_event_financial_synthesizer.ts",
+    "desc": "AST: Suppress extractBondEvents in financial synthesizer",
+    "target": "const bondEvents = extractBondEvents(delta, prevState, nextState, payers, receivers, timestamp);",
+    "replacement": "const bondEvents: any[] = [];"
+  },
+  {
+    "file": "src/client/events/game_event_financial_synthesizer.ts",
+    "desc": "AST: Suppress extractCompulsoryBuyoutEvents in financial synthesizer",
+    "target": "const buyoutEvents = extractCompulsoryBuyoutEvents(delta, prevState, nextState, payers, receivers, timestamp);",
+    "replacement": "const buyoutEvents: any[] = [];"
+  },
+  {
+    "file": "src/client/events/game_event_financial_synthesizer.ts",
+    "desc": "AST: Suppress extractHoseEvents in financial synthesizer",
+    "target": "const hoseEvents = extractHoseEvents(delta, payers, receivers, timestamp);",
+    "replacement": "const hoseEvents: any[] = [];"
+  },
+  {
+    "file": "src/client/events/game_event_property_synthesizer.ts",
+    "desc": "AST: Bypass isPendingBuyout suppression guard in property synthesizer",
+    "target": "if (isOwnerTransferred && !isSuppressedByAuction && !isSuppressedByTrade && !isBuyoutCard && !isPendingBuyout && cell.ownerId) {",
+    "replacement": "if (isOwnerTransferred && !isSuppressedByAuction && !isSuppressedByTrade && !isBuyoutCard && cell.ownerId) {"
+  },
+  {
+    "file": "src/client/events/game_event_bond_helpers.ts",
+    "desc": "AST: Disable default guard in bond repayment extractor",
+    "target": "if (isPrevActive && !isCurrActive && !isDefault && prevBond) {",
+    "replacement": "if (isPrevActive && !isCurrActive && prevBond) {"
+  },
+  {
+    "file": "src/client/events/subscribers/activity_log_financial_formatter.ts",
+    "desc": "AST: Corrupt bond issuance formatter text",
+    "target": "return `${playerName} đã phát hành Trái Phiếu ${trancheLabel}+${formatCurrency(principal)} (kỳ hạn ${roundsLeft} vòng, lãi suất ${percent}%)`;",
+    "replacement": "return `${playerName} đã nộp phạt Trái Phiếu ${trancheLabel}+${formatCurrency(principal)} (kỳ hạn ${roundsLeft} vòng, lãi suất ${percent}%)`;"
+  }
+]

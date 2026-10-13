@@ -81,7 +81,11 @@ export function InstancedDioramaTrees(): React.ReactElement {
   );
 }
 
-export function DioramaSkyline(): React.ReactElement {
+export interface DioramaSkylineProps {
+  readonly isMobile?: boolean;
+}
+
+export function DioramaSkyline({ isMobile = false }: DioramaSkylineProps = {}): React.ReactElement {
   const phase = useEnvironmentStore((s) => s.phase);
   const isNight = phase === 'night';
   const isSunset = phase === 'sunset';
@@ -99,7 +103,7 @@ export function DioramaSkyline(): React.ReactElement {
   return (
     <group position={[0, 0, 0]} data-contract-heritage="#B91C1C">
       {/* 1. Tháp Landmark Búp Sen (Bitexco Financial Landmark Tower) */}
-      <group position={[-4.5, 0.16, -4.4]}>
+      <group position={[-4.5, 0.16, -4.4]} data-testid="bitexco-tower">
         {/* Khối đế thương mại Podium giật cấp vát cong cánh sen (Commercial Podium Base) */}
         <group data-testid="bitexco-podium" position={[0, 0, 0]}>
           {/* Tầng 1-2 khối đế thương mại rộng */}
@@ -356,7 +360,7 @@ export function DioramaSkyline(): React.ReactElement {
       <InstancedDioramaTrees />
 
       {/* 4. Cột đèn đường đô thị vi mô (Micro Streetlamps) */}
-      {STREETLAMP_LOCATIONS.map(([lx, lz], i) => (
+      {!isMobile && STREETLAMP_LOCATIONS.map(([lx, lz], i) => (
         <group key={`lamp-${i}`} position={[lx, 0.16, lz]}>
           <mesh position={[0, 0.14, 0]}>
             <cylinderGeometry args={[0.008, 0.012, 0.28, 5]} />

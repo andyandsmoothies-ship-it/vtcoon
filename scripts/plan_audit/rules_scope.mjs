@@ -132,6 +132,15 @@ export function auditHonestLocAccounting(targetFiles, planContent, snippetDeltaB
         console.error(`     Tier 1 files >= 300 LOC MUST be marked 'Warning' and register a Tech Debt item.`);
         errors++;
       }
+      if (expectedLOC >= 350) {
+        const hasDecomposition = /(?:refactor|sub-helper|tách|decompose|trích xuất)/i.test(planContent);
+        if (!hasDecomposition) {
+          console.error(`  ❌ [LOC_BUFFER_ZONE_VIOLATION] File '${filePath}' has ${expectedLOC} expected lines (>= 350 Tier 1 Buffer Zone Ceiling)!`);
+          console.error(`     Files >= 350 LOC are in the Red Buffer Zone (within 50 lines of hard 400 ceiling).`);
+          console.error(`     GEMINI.md LOC Buffer Zone Guard mandates declaring Refactor-First sub-helper decomposition before adding new logic.`);
+          errors++;
+        }
+      }
     }
     if (tier.includes('Tier 2') && expectedLOC >= 400) {
       if (/safe/i.test(status) && !/warning/i.test(status)) {

@@ -1,0 +1,80 @@
+[
+  {
+    "file": "src/client/3d/price_pill_texture_atlas.ts",
+    "desc": "Mutant 1: Corrupt atlas column count",
+    "target": "export const PILL_ATLAS_COLS = 4;",
+    "replacement": "export const PILL_ATLAS_COLS = 8;"
+  },
+  {
+    "file": "src/client/3d/price_pill_texture_atlas.ts",
+    "desc": "Mutant 2: Corrupt atlas width constant",
+    "target": "export const PILL_ATLAS_WIDTH = 1024;",
+    "replacement": "export const PILL_ATLAS_WIDTH = 512;"
+  },
+  {
+    "file": "src/client/3d/price_pill_texture_atlas.ts",
+    "desc": "Mutant 3: Corrupt atlas height constant",
+    "target": "export const PILL_ATLAS_HEIGHT = 512;",
+    "replacement": "export const PILL_ATLAS_HEIGHT = 256;"
+  },
+  {
+    "file": "src/client/3d/price_pill_texture_atlas.ts",
+    "desc": "Mutant 4: Bypass texture disposal in clearPricePillAtlasCache",
+    "target": "cachedAtlasTexture.dispose();",
+    "replacement": "/* bypassed dispose */"
+  },
+  {
+    "file": "src/client/3d/price_pill_texture_atlas.ts",
+    "desc": "Mutant 5: Return null from getPricePillAtlasTexture unconditionally",
+    "target": "return texture;",
+    "replacement": "return null;"
+  },
+  {
+    "file": "src/client/3d/price_pill_texture_atlas.ts",
+    "desc": "Mutant 6: Corrupt getPricePillAtlasUVs uMax calculation",
+    "target": "uMax: (col + 1) / PILL_ATLAS_COLS,",
+    "replacement": "uMax: 0,"
+  },
+  {
+    "file": "src/client/3d/instanced_cell_markers_helpers.ts",
+    "desc": "Mutant 7: Corrupt batched plane geometry creation",
+    "target": "new THREE.PlaneGeometry(1.10, 0.22);",
+    "replacement": "new THREE.BufferGeometry();"
+  },
+  {
+    "file": "src/client/3d/instanced_cell_markers_helpers.ts",
+    "desc": "Mutant 8: Corrupt batched geometry singleton export",
+    "target": "export const PRICE_PILL_LABELS_BATCHED_GEOM = createBatchedPricePillLabelsGeometry();",
+    "replacement": "export const PRICE_PILL_LABELS_BATCHED_GEOM = new THREE.BufferGeometry();"
+  },
+  {
+    "file": "src/client/3d/instanced_cell_borders_and_trays.tsx",
+    "desc": "Mutant 9: Corrupt instanced-price-pill-labels testid",
+    "target": "data-testid=\"instanced-price-pill-labels\"",
+    "replacement": "data-testid=\"corrupted-price-pill-labels\""
+  },
+  {
+    "file": "src/client/3d/instanced_cell_borders_and_trays.tsx",
+    "desc": "Mutant 10: Omit batched price pill labels mesh in InstancedCellBordersAndTrays",
+    "target": "<mesh geometry={PRICE_PILL_LABELS_BATCHED_GEOM} data-testid=\"instanced-price-pill-labels\">",
+    "replacement": "{/* omitted batched labels */ <mesh geometry={undefined} data-testid=\"omitted-labels\">}"
+  },
+  {
+    "file": "src/client/3d/board_tile.tsx",
+    "desc": "Mutant 11: Invert renderPricePill condition in board_tile.tsx",
+    "target": "{isPurchasable && renderPricePill && (",
+    "replacement": "{isPurchasable && !renderPricePill && ("
+  },
+  {
+    "file": "src/client/3d/board_tile.tsx",
+    "desc": "Mutant 12: Corrupt default renderPricePill in LayeredDioramaTile",
+    "target": "renderPricePill = true,",
+    "replacement": "renderPricePill = false,"
+  },
+  {
+    "file": "src/client/3d/board_layout.tsx",
+    "desc": "Mutant 13 (Consumer Call-Site Wiring Parity): Fail to pass renderPricePill={false} in GameBoard",
+    "target": "renderPricePill={false}",
+    "replacement": "renderPricePill={true}"
+  }
+]

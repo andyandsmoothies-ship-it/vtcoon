@@ -64,3 +64,52 @@ export function resolveFeePaidDetails(
     : `${playerName} đã nộp ${formatCurrency(event.amount)} thuế/phạt vào Kho Bạc Nhà Nước`;
   return { logType, message };
 }
+
+export function formatBondRepaidMessage(
+  playerName: string,
+  repayAmount: number,
+  principal: number,
+  interest: number,
+): string {
+  return `${playerName} đã tất toán Trái Phiếu Doanh Nghiệp ${formatCurrency(repayAmount)} (gốc ${formatCurrency(principal)} + lãi ${formatCurrency(interest)})`;
+}
+
+export function formatBondIssuedMessage(
+  playerName: string,
+  principal: number,
+  roundsLeft: number,
+  interestRate: number,
+  trancheId?: string,
+): string {
+  const trancheLabel = trancheId ? `[${trancheId}] ` : '';
+  const percent = Math.round(interestRate * 100);
+  return `${playerName} đã phát hành Trái Phiếu ${trancheLabel}+${formatCurrency(principal)} (kỳ hạn ${roundsLeft} vòng, lãi suất ${percent}%)`;
+}
+
+export function formatCompulsoryBuyoutMessage(
+  buyerName: string,
+  sellerName: string,
+  cellName: string,
+  cost: number,
+  premiumRatio: number,
+): string {
+  const percent = Math.round(premiumRatio * 100);
+  return `🤝 ${buyerName} đã thâu tóm cưỡng bức ${cellName} từ ${sellerName} với giá ${formatCurrency(cost)} (${percent}% giá gốc)`;
+}
+
+export function formatHoseSettledMessage(
+  playerName: string,
+  profit: number,
+  stake: number,
+  roll: number,
+  multiplier: number,
+): string {
+  if (profit > 0) {
+    return `📈 ${playerName} khớp lệnh HOSE: Mặt ${roll} (x${multiplier}) - LÃI +${formatCurrency(profit)}`;
+  }
+  if (profit < 0) {
+    return `📉 ${playerName} khớp lệnh HOSE: Mặt ${roll} (x${multiplier}) - THUA LỖ ${formatCurrency(Math.abs(profit))}`;
+  }
+  return `📊 ${playerName} khớp lệnh HOSE: Mặt ${roll} (x${multiplier}) - HÒA VỐN (hoàn ${formatCurrency(stake)})`;
+}
+

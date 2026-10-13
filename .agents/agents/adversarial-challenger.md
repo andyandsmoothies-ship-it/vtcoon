@@ -92,6 +92,12 @@ When a plan alters presentation/UI/3D behavior based on a reactive state flag (e
 3. If the upstream reset is OUTSIDE the plan's declared scope (or prevented by subsystem boundary), the feature is a **Dead-Path Phantom**. Flag as:
    **[ADV-STATE] Cross-Subsystem State Erasure — [flag] is unconditionally reset by [file#L] outside plan scope, rendering feature dead code.**
 
+### 🧊 Vector 9: R3F & Three.js GPU Memory Leaks & Call-Site Grounding (ADV-GPU)
+When a plan touches 3D graphics or R3F (`src/client/3d/**`):
+1. **Geometry Allocation inside JSX**: Probe whether `create*Geometry()` or `new *Geometry()` is called inside component render bodies or JSX `geometry={...}` props. In React/R3F, replacing geometry props does NOT auto-dispose previous buffers, causing GPU VRAM buffer leaks and eventual mobile WebGL context loss. All static procedural/batched geometries MUST be module-level singletons or strictly memoized.
+2. **Unlit Material Shadow Slop**: Check if `receiveShadow` or `castShadow` are placed on meshes using unlit materials (`MeshBasicMaterial`).
+3. **Call-Site Grounded Draw Call Accounting**: Compare leaf mesh counts against parent call-site visibility/conditional props (`render*={false}`) to ensure claimed draw call reductions reflect physical disk reality rather than leaf isolation counts.
+
 ## 4. Directive Quality Rules
 
 Every `Hardening Directive` must:

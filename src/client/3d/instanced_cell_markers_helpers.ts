@@ -1,7 +1,10 @@
 // [UI-S02/MSS][IMP-377] instanced_cell_markers_helpers.ts — Pure helper logic for instanced cell borders & price pill trays
 import * as THREE from 'three';
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { BOARD_CONFIG, CellType } from '../../domain/board_config';
 import { cellPosition, tileRotation } from './board_coords';
+import { getPricePillAtlasUVs } from './price_pill_texture_atlas';
+
 
 export const PURCHASABLE_CELL_INDICES: readonly number[] = BOARD_CONFIG
   .filter((c) => c.type === CellType.Property || c.type === CellType.Railroad || c.type === CellType.Utility)
@@ -83,3 +86,29 @@ export function computeCellMarkerMatrices(
   composeCellMarkerWorldMatrix(cellIndex, 0, 0.114, 0.70, target.pricePillOuterFrame);
   composeCellMarkerWorldMatrix(cellIndex, 0, 0.115, 0.70, target.pricePillBase);
 }
+
+export function createBatchedPricePillLabelsGeometry(): THREE.BufferGeometry {
+  const geometries: THREE.BufferGeometry[] = [];
+  const rotX = new THREE.Matrix4().makeRotationX(-Math.PI / 2);
+  PURCHASABLE_CELL_INDICES.forEach((cellIndex) => {
+    const geom = new THREE.PlaneGeometry(1.08, 0.27);
+    const uvs = getPricePillAtlasUVs(cellIndex);
+    const uvAttr = geom.getAttribute('uv');
+    if (uvAttr instanceof THREE.BufferAttribute) {
+      uvAttr.setXY(0, uvs.uMin, uvs.vMax);
+      uvAttr.setXY(1, uvs.uMax, uvs.vMax);
+      uvAttr.setXY(2, uvs.uMin, uvs.vMin);
+      uvAttr.setXY(3, uvs.uMax, uvs.vMin);
+    }
+    const matrix = new THREE.Matrix4();
+    composeCellMarkerWorldMatrix(cellIndex, 0, 0.123, 0.70, matrix);
+    matrix.multiply(rotX);
+    geom.applyMatrix4(matrix);
+    geometries.push(geom);
+  });
+  return mergeGeometries(geometries, false) ?? new THREE.BufferGeometry();
+}
+
+export const PRICE_PILL_LABELS_BATCHED_GEOM = createBatchedPricePillLabelsGeometry();
+
+

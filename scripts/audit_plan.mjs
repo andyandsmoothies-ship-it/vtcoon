@@ -31,6 +31,7 @@ import {
   auditCohesionOrphanFiles,
   auditDefinitionOfDone,
   auditWiringParityInPlan,
+  auditCompositeTransactionAndSemanticBorrowing,
 } from './audit_plan_rules.mjs';
 import {
   findSourceFiles,
@@ -128,6 +129,7 @@ if (testLines.length > 0) {
   console.log(`  ✔️ Scanned ${checkedTests} contract test specifications.`);
   errors += auditFunctionToTestParity(targetFiles, planContent);
   errors += auditWiringParityInPlan(targetFiles, planContent);
+  errors += auditCompositeTransactionAndSemanticBorrowing(targetFiles, planContent);
 } else {
   console.log(`  ℹ️ No Station 1 test specifications block detected in plan.`);
 }

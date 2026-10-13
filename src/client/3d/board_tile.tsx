@@ -188,7 +188,9 @@ export interface LayeredDioramaTileProps {
   readonly renderAtlasSurface?: boolean;
   readonly renderOwnerBorders?: boolean;
   readonly renderPricePillTray?: boolean;
+  readonly renderPricePill?: boolean;
 }
+
 
 export function tierColor(level: number): string {
   return level === 3 ? '#D4AF37' : '#008080';
@@ -212,8 +214,15 @@ export function LayeredDioramaTile({
   renderBasePlinth = true,
   renderAtlasSurface = true,
   renderOwnerBorders = true,
-  renderPricePillTray = true,
+  renderPricePillTray: propRenderPricePillTray,
+  renderPricePill: propRenderPricePill,
 }: LayeredDioramaTileProps): React.ReactElement {
+
+  const renderPricePillTray =
+    propRenderPricePillTray !== undefined ? propRenderPricePillTray : (renderBasePlinth || renderAtlasSurface);
+  const renderPricePill =
+    propRenderPricePill !== undefined ? propRenderPricePill : (renderBasePlinth || renderAtlasSurface);
+
   const textureRevision = useTextureRevision();
   const isMobile = propIsMobile !== undefined ? propIsMobile : isPhoneHardware();
   const tileAtlas = useMemo(() => getBoardTileAtlas(isMobile), [isMobile, textureRevision]);
@@ -337,8 +346,9 @@ export function LayeredDioramaTile({
       )}
 
       {/* 4. Khay giá sở hữu (OwnerPricePill) cho các ô có thể mua */}
-      {isPurchasable && (
+      {isPurchasable && renderPricePill && (
         <group name="DioramaPricePillIsolationAnchor_BufferSpacing_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789">
+
           <OwnerPricePill
             ownerColor={ownerColor}
             price={deedPrice}

@@ -116,3 +116,21 @@
       2. *Peripheral Diorama Buildings*: Sit behind the board perimeter ($Z \approx -1.35\text{m}$, $> 50\text{cm}$ spatial separation), providing urban miniature context and diorama atmosphere.
     - **Verified Invariant**: Disabling `InstancedBoardToyBuildings` when a diorama building exists breaks the core board state affordance and violates regression test contracts. Subsystems must remain cleanly decoupled: peripheral diorama LODs must never touch or suppress board-strip toy building instances.
 
+26. **R3F Procedural BufferGeometry Singleton & VRAM Leak Invariant [IMP-381]**:
+    - **Deceptive Trap (Inline Procedural Geometry Factory)**: Invoking procedural geometry factories or constructors inline inside JSX (`<mesh geometry={createBatchedGeometry()} />` or `geometry={new THREE.BufferGeometry()}`). Developers assume React/R3F automatically manages WebGL memory or cleans up previous instances when components re-render.
+    - **Physical Finding**: In Three.js and `@react-three/fiber`, replacing a `geometry` prop does NOT trigger `.dispose()` on the previously attached BufferGeometry. On every component re-render (state changes, camera moves, turn advance), a new geometry buffer is created and uploaded to the GPU, leaving the orphaned vertex, UV, and index buffers permanently trapped in GPU VRAM. On mobile devices with unified memory, this causes rapid garbage collection spikes, thermal throttling, and eventually crashes the renderer with `WebGL context was lost`.
+    - **Verified Invariants**:
+      1. *Module-Level Static Geometry Singleton*: Geometries whose vertex coordinates and topologies are constant across runtime MUST be baked once at the module top level (`export const GEOM = ...;`), referenced statically by components.
+      2. *Dynamic Geometry Lifecycle Discipline*: If geometry must vary dynamically, it MUST be created inside `useMemo` with an explicit disposal hook, or managed via persistent ref with manual `.dispose()` in `useEffect` cleanup.
+      3. *Zero Inline Allocation Guard*: Calling `new *Geometry()` or `create*Geometry()` directly inside JSX props is strictly forbidden and checked mechanically by AST plan audit (`rules_architecture.mjs`).
+
+27. **Call-Site Grounded Draw Call Accounting & Unlit Material Discipline [IMP-381]**:
+    - **Deceptive Trap (Leaf Isolation Accounting & Unlit Shadows)**:
+      (1) Calculating draw call savings purely by counting meshes inside a leaf component in isolation (e.g. counting 4 meshes in `OwnerPricePill` and multiplying by 28 tiles to claim saving 112 calls) without verifying whether the active parent caller (`board_layout.tsx`) has already disabled or bypassed those meshes via props.
+      (2) Applying `receiveShadow` or `castShadow` onto meshes using unlit materials (`MeshBasicMaterial`).
+    - **Physical Finding**: In production, parent components often already pass flags such as `renderPricePillTray={false}`, meaning only 1 mesh ran per tile. Promising a reduction of 112 draw calls creates an ungrounded performance claim. Furthermore, `MeshBasicMaterial` completely ignores Three.js shadow maps; setting `receiveShadow` is dead code slop.
+    - **Verified Invariants**:
+      1. *Call-Site Grounded Accounting*: Performance and draw call metrics MUST be verified at the top-level active production call-site, taking into account all parent prop suppressions.
+      2. *Unlit Material Shadow Ban*: Meshes using `MeshBasicMaterial` MUST NOT declare `receiveShadow` or `castShadow`.
+
+

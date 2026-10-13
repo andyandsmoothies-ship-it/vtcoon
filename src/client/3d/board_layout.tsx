@@ -216,8 +216,10 @@ export function GameBoard({
             renderAtlasSurface={false}
             renderOwnerBorders={false}
             renderPricePillTray={false}
+            renderPricePill={false}
           />
         ))}
+
 
         {/* 5. Dải cờ hoa vỉa hè cho các cụm độc quyền Monopoly Plaza */}
         <MonopolyPlazaFusion monopolyGroups={monopolyGroups} isHeatmapActive={isHeatmapActive} />

@@ -1,6 +1,6 @@
 // [UI-S02/MSS][IMP-53] DioramaBridges — Cầu Ba Son (Cable-stayed) & Cầu Long Biên (Steel truss)
-import React, { useRef, useMemo } from 'react';
-import { Color, Vector3, Quaternion, type MeshStandardMaterial as ThreeMeshStandardMaterial } from 'three';
+import React, { useRef, useMemo, useEffect } from 'react';
+import { Color, Vector3, Quaternion, Object3D, type InstancedMesh, type MeshStandardMaterial as ThreeMeshStandardMaterial } from 'three';
 import { useEnvironmentStore } from '../../store/environment_store';
 import { useSafeFrame } from '../safe_frame';
 
@@ -50,7 +50,58 @@ export function calculateCableTransform(
   };
 }
 
-export function DioramaBridges(): React.ReactElement {
+export function InstancedBasonStayCables(): React.ReactElement {
+  const meshRef = useRef<InstancedMesh>(null);
+
+  useEffect(() => {
+    if (!meshRef.current) return;
+    const dummy = new Object3D();
+    const pylonAnchor: [number, number, number] = [-0.8, 0.95, 0];
+    const deckAnchorsX = [-2.0, -1.5, -0.2, 0.4, 1.0, 1.6];
+    let idx = 0;
+
+    deckAnchorsX.forEach((cx) => {
+      const west = calculateCableTransform(pylonAnchor, [cx, 0.12, 0.18]);
+      dummy.position.set(west.position[0], west.position[1], west.position[2]);
+      if (west.quaternion) {
+        dummy.quaternion.set(west.quaternion[0], west.quaternion[1], west.quaternion[2], west.quaternion[3]);
+      }
+      dummy.scale.set(1, west.length, 1);
+      dummy.updateMatrix();
+      meshRef.current?.setMatrixAt(idx++, dummy.matrix);
+
+      const east = calculateCableTransform(pylonAnchor, [cx, 0.12, -0.18]);
+      dummy.position.set(east.position[0], east.position[1], east.position[2]);
+      if (east.quaternion) {
+        dummy.quaternion.set(east.quaternion[0], east.quaternion[1], east.quaternion[2], east.quaternion[3]);
+      }
+      dummy.scale.set(1, east.length, 1);
+      dummy.updateMatrix();
+      meshRef.current?.setMatrixAt(idx++, dummy.matrix);
+    });
+
+    if (meshRef.current) {
+      meshRef.current.instanceMatrix.needsUpdate = true;
+    }
+  }, []);
+
+  return (
+    <instancedMesh
+      ref={meshRef}
+      args={[undefined, undefined, 12]}
+      data-testid="instanced-bason-cables"
+    >
+      <cylinderGeometry args={[0.005, 0.005, 1, 6]} />
+      <meshStandardMaterial color="#E2E8F0" metalness={0.9} roughness={0.2} />
+    </instancedMesh>
+  );
+}
+
+export interface DioramaBridgesProps {
+  readonly isMobile?: boolean;
+}
+
+export function DioramaBridges({ isMobile = false }: DioramaBridgesProps = {}): React.ReactElement {
   const phase = useEnvironmentStore((s) => s.phase);
   const isNight = phase === 'night';
   const isSunset = phase === 'sunset';
@@ -60,6 +111,7 @@ export function DioramaBridges(): React.ReactElement {
   const tempColor = useMemo(() => new Color(), []);
 
   useSafeFrame((state) => {
+    if (isMobile) return;
     const t = state.clock.getElapsedTime();
     if (isNight && basonLedRef1.current && basonLedRef2.current) {
       tempColor.setHSL(0.5 + Math.sin(t * 0.5) * 0.12, 0.95, 0.55);
@@ -71,13 +123,14 @@ export function DioramaBridges(): React.ReactElement {
   });
 
   const basonCables = useMemo(() => {
+    if (isMobile) return [];
     const pylonAnchor: [number, number, number] = [-0.8, 0.95, 0];
     const deckAnchorsX = [-2.0, -1.5, -0.2, 0.4, 1.0, 1.6];
     return deckAnchorsX.map((cx) => ({
       west: calculateCableTransform(pylonAnchor, [cx, 0.12, 0.18]),
       east: calculateCableTransform(pylonAnchor, [cx, 0.12, -0.18]),
     }));
-  }, []);
+  }, [isMobile]);
 
   return (
     <group position={[0, 0, 0]}>
@@ -106,25 +159,29 @@ export function DioramaBridges(): React.ReactElement {
           <meshStandardMaterial color="#CBD5E1" metalness={0.8} roughness={0.2} />
         </mesh>
 
-        {/* Dải đèn LED nghệ thuật viền thành cầu Ba Son đổi sắc lung linh trong đêm */}
-        <mesh position={[0, 0.192, 0.24]}>
-          <boxGeometry args={[5.38, 0.012, 0.012]} />
-          <meshStandardMaterial
-            ref={basonLedRef1}
-            color="#06B6D4"
-            emissive="#00F5FF"
-            emissiveIntensity={isNight ? 3.2 : isSunset ? 0.8 : 0.0}
-          />
-        </mesh>
-        <mesh position={[0, 0.192, -0.24]}>
-          <boxGeometry args={[5.38, 0.012, 0.012]} />
-          <meshStandardMaterial
-            ref={basonLedRef2}
-            color="#06B6D4"
-            emissive="#00F5FF"
-            emissiveIntensity={isNight ? 3.2 : isSunset ? 0.8 : 0.0}
-          />
-        </mesh>
+        {/* Dải đèn LED nghệ thuật viền thành cầu Ba Son đổi sắc lung linh trong đêm (ẩn trên mobile để triệt tiêu 2 draw calls & sub-pixel noise) */}
+        {!isMobile && (
+          <>
+            <mesh position={[0, 0.192, 0.24]}>
+              <boxGeometry args={[5.38, 0.012, 0.012]} />
+              <meshStandardMaterial
+                ref={basonLedRef1}
+                color="#06B6D4"
+                emissive="#00F5FF"
+                emissiveIntensity={isNight ? 3.2 : isSunset ? 0.8 : 0.0}
+              />
+            </mesh>
+            <mesh position={[0, 0.192, -0.24]}>
+              <boxGeometry args={[5.38, 0.012, 0.012]} />
+              <meshStandardMaterial
+                ref={basonLedRef2}
+                color="#06B6D4"
+                emissive="#00F5FF"
+                emissiveIntensity={isNight ? 3.2 : isSunset ? 0.8 : 0.0}
+              />
+            </mesh>
+          </>
+        )}
 
         {/* Mố cầu bờ kênh (Abutments): Bờ Tây và Bờ Đông */}
         <mesh
@@ -172,25 +229,29 @@ export function DioramaBridges(): React.ReactElement {
           </mesh>
         </group>
 
-        {/* 6 cặp Dây văng rẻ quạt (Stay Cables) đan từ đỉnh tháp xuống mặt cầu */}
-        {basonCables.map((cable, i) => (
-          <group key={`bason-cable-pair-${i}`}>
-            <mesh
-              position={cable.west.position}
-              quaternion={cable.west.quaternion}
-            >
-              <cylinderGeometry args={[0.005, 0.005, cable.west.length, 6]} />
-              <meshStandardMaterial color="#E2E8F0" metalness={0.9} roughness={0.2} />
-            </mesh>
-            <mesh
-              position={cable.east.position}
-              quaternion={cable.east.quaternion}
-            >
-              <cylinderGeometry args={[0.005, 0.005, cable.east.length, 6]} />
-              <meshStandardMaterial color="#E2E8F0" metalness={0.9} roughness={0.2} />
-            </mesh>
-          </group>
-        ))}
+        {/* 6 cặp Dây văng rẻ quạt (Stay Cables): Mobile dùng 1 InstancedMesh (1 Draw Call duy nhất), Desktop giữ 12 meshes bảo vệ Living Contract TC-IMP142.08 */}
+        {isMobile ? (
+          <InstancedBasonStayCables />
+        ) : (
+          basonCables.map((cable, i) => (
+            <group key={`bason-cable-pair-${i}`} data-testid={`bason-cable-pair-${i}`}>
+              <mesh
+                position={cable.west.position}
+                quaternion={cable.west.quaternion}
+              >
+                <cylinderGeometry args={[0.005, 0.005, cable.west.length, 6]} />
+                <meshStandardMaterial color="#E2E8F0" metalness={0.9} roughness={0.2} />
+              </mesh>
+              <mesh
+                position={cable.east.position}
+                quaternion={cable.east.quaternion}
+              >
+                <cylinderGeometry args={[0.005, 0.005, cable.east.length, 6]} />
+                <meshStandardMaterial color="#E2E8F0" metalness={0.9} roughness={0.2} />
+              </mesh>
+            </group>
+          ))
+        )}
 
         {/* 3 Trụ mố đá hoa cương đỡ nhịp cầu */}
         {[-1.8, 0.6, 1.8].map((px, i) => (
@@ -235,8 +296,8 @@ export function DioramaBridges(): React.ReactElement {
               <meshStandardMaterial color="#334155" roughness={0.5} metalness={0.6} />
             </mesh>
             {/* Các thanh chéo giàn thép */}
-            {[-0.8, -0.4, 0, 0.4, 0.8].map((tx, ti) => (
-              <mesh key={`truss-strut-f-${ti}`} position={[tx, 0.04, 0.23]} rotation={[0, 0, (ti % 2 === 0 ? 1 : -1) * 0.45]} castShadow>
+            {!isMobile && [-0.8, -0.4, 0, 0.4, 0.8].map((tx, ti) => (
+              <mesh key={`truss-strut-f-${ti}`} data-testid={`truss-strut-f-${ti}`} position={[tx, 0.04, 0.23]} rotation={[0, 0, (ti % 2 === 0 ? 1 : -1) * 0.45]} castShadow>
                 <boxGeometry args={[0.02, 0.16, 0.02]} />
                 <meshStandardMaterial color="#475569" roughness={0.5} metalness={0.6} />
               </mesh>
@@ -247,7 +308,7 @@ export function DioramaBridges(): React.ReactElement {
               <boxGeometry args={[2.2, 0.03, 0.02]} />
               <meshStandardMaterial color="#334155" roughness={0.5} metalness={0.6} />
             </mesh>
-            {[-0.8, -0.4, 0, 0.4, 0.8].map((tx, ti) => (
+            {!isMobile && [-0.8, -0.4, 0, 0.4, 0.8].map((tx, ti) => (
               <mesh key={`truss-strut-b-${ti}`} position={[tx, 0.04, -0.23]} rotation={[0, 0, (ti % 2 === 0 ? 1 : -1) * 0.45]} castShadow>
                 <boxGeometry args={[0.02, 0.16, 0.02]} />
                 <meshStandardMaterial color="#475569" roughness={0.5} metalness={0.6} />
@@ -255,10 +316,12 @@ export function DioramaBridges(): React.ReactElement {
             ))}
 
             {/* Giàn thanh ngang kết nối đỉnh vòm */}
-            <mesh position={[0, 0.15, 0]}>
-              <boxGeometry args={[2.0, 0.02, 0.46]} />
-              <meshStandardMaterial color="#334155" roughness={0.5} metalness={0.6} />
-            </mesh>
+            {!isMobile && (
+              <mesh position={[0, 0.15, 0]}>
+                <boxGeometry args={[2.0, 0.02, 0.46]} />
+                <meshStandardMaterial color="#334155" roughness={0.5} metalness={0.6} />
+              </mesh>
+            )}
           </group>
         ))}
 

@@ -17,6 +17,9 @@ import {
   deductInflowFromDeltas,
   adjustNetDeltaForTrade,
   adjustNetDeltaForPropertyTransactions,
+  extractBondEvents,
+  extractCompulsoryBuyoutEvents,
+  extractHoseEvents,
   type InternalBalanceDelta,
 } from './game_event_financial_helpers.js';
 
@@ -251,6 +254,9 @@ export function synthesizeFinancialEvents(
   if (delta.lastTradeResult) {
     adjustNetDeltaForTrade(delta.lastTradeResult, payers, receivers);
   }
+  const bondEvents = extractBondEvents(delta, prevState, nextState, payers, receivers, timestamp);
+  const buyoutEvents = extractCompulsoryBuyoutEvents(delta, prevState, nextState, payers, receivers, timestamp);
+  const hoseEvents = extractHoseEvents(delta, payers, receivers, timestamp);
   const salaryEvents = reconstructGoSalary(delta, prevState, nextState, payers, receivers, timestamp);
   adjustNetDeltaForPropertyTransactions(delta, prevState, nextState, payers);
   const feeEvents = extractGovernmentAndTelecomFees(payers, receivers, prevState, timestamp);
@@ -265,5 +271,5 @@ export function synthesizeFinancialEvents(
       payer.diff = 0;
     }
   }
-  return [...salaryEvents, ...feeEvents, ...rentEvents, ...waiverEvents];
+  return [...salaryEvents, ...feeEvents, ...rentEvents, ...waiverEvents, ...bondEvents, ...buyoutEvents, ...hoseEvents];
 }

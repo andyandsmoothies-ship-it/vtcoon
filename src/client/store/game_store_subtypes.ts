@@ -104,6 +104,7 @@ export type FloatingActionType =
   | 'decline_auction'
   | 'transit'
   | 'utility'
+  | 'bond'
   | 'general';
 
 export interface FloatingTextItem {

@@ -173,8 +173,9 @@ function extractCellEvents(
     const isSuppressedByAuction = handledAuctionCells.has(cell.index);
     const isSuppressedByTrade = handledTradeCells.has(cell.index);
     const isBuyoutCard = delta.lastEventCard?.cardId === 'CC_MA_FORCE' || delta.lastEventCard?.cardId === 'CC_SWAP_PROJECT';
+    const isPendingBuyout = Boolean(prevState.pendingBuyout && prevState.pendingBuyout.buyerId === cell.ownerId);
 
-    if (isOwnerTransferred && !isSuppressedByAuction && !isSuppressedByTrade && !isBuyoutCard && cell.ownerId) {
+    if (isOwnerTransferred && !isSuppressedByAuction && !isSuppressedByTrade && !isBuyoutCard && !isPendingBuyout && cell.ownerId) {
       const price = PROPERTY_DEEDS.get(cell.index)?.price ?? 0;
       events.push({
         type: SynthesizedGameEventType.PROPERTY_BOUGHT,

@@ -13,6 +13,7 @@ import {
   resolvePlayerName,
 } from './property_market_badge_handler.js';
 import { isCardPenaltyForPayer } from './activity_log_financial_formatter.js';
+import { handleBondAndInvestmentBadges } from './badge_financial_helpers.js';
 
 function handleRentBadges(
   event: SynthesizedGameEvent,
@@ -251,6 +252,8 @@ function handleSalaryAndFeeBadges(
   }
 }
 
+
+
 function handleFinancialBadges(
   event: SynthesizedGameEvent,
   context: GameEventContext,
@@ -260,6 +263,7 @@ function handleFinancialBadges(
 ): void {
   handleRentBadges(event, context, state, pacing, vfx);
   handleSalaryAndFeeBadges(event, context, state, pacing);
+  handleBondAndInvestmentBadges(event, context, state, pacing);
 }
 
 

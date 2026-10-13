@@ -41,7 +41,7 @@ const ACTION_ICONS: Record<string, string> = {
   debt_relief: '🎉', stimulus: '📈', chance: '⚡', market: '🎴',
   auction_win: '🔨', hose: '📊', teleport: '✈️', audit_jail: '🚨', ma_buyout: '🤝',
   diplomatic: '🤝', bankrupt: '🚨', trade: '🤝', decline_auction: '🔨',
-  transit: '🚊', utility: '📡',
+  transit: '🚊', utility: '📡', bond: '📜',
 };
 
 export function resolveActionIcon(actionType?: string, isReward?: boolean): string {
@@ -117,6 +117,7 @@ const ACTION_REASON_FORMATTERS: Partial<Record<FloatingActionType, (item: Floati
   trade: (item) => item.title || 'Chuyển nhượng BĐS P2P',
   decline_auction: (item) => item.title || 'Bỏ qua BĐS ➔ Mở đấu giá',
   utility: (item) => item.title || 'Cước viễn thông (Viettel Post)',
+  bond: (item) => item.title || 'Trái Phiếu Doanh Nghiệp',
 };
 
 export function resolveFriendlyReason(item: FloatingTextItem, _player?: PlayerHudInfo): string {
@@ -256,6 +257,13 @@ export function resolveTransactionNarrative(
       break;
     case 'stimulus': category = 'TRỢ CẤP QUỸ KHO BẠC'; verb = 'nhận'; target = 'từ Quỹ Kho Bạc'; detail = item.title ? `(${item.title})` : undefined; break;
     case 'teleport': category = 'DỊCH CHUYỂN BẾN BÃI'; verb = 'thanh toán'; target = 'vé dịch chuyển'; detail = item.title ? `(${item.title})` : undefined; break;
+    case 'bond': {
+      category = 'TRÁI PHIẾU DOANH NGHIỆP';
+      verb = isPositive ? 'phát hành' : 'tất toán';
+      target = item.title || 'Trái Phiếu Doanh Nghiệp';
+      detail = item.formula ? `(${item.formula})` : isPositive ? '(Vốn lưu động)' : '(Tất toán nợ)';
+      break;
+    }
     default: break;
   }
 

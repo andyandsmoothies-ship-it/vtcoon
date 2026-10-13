@@ -1,5 +1,6 @@
-// [IMP-330][IMP-331] Synthesized Game Event Types
+// [IMP-330][IMP-331][IMP-380] Synthesized Game Event Types
 import type { TransitWheelOutcome } from '../../domain/transit_wheel.js';
+import type { BondTrancheId } from '../../domain/bond_types.js';
 
 export enum SynthesizedGameEventType {
   RENT_PAID = 'RENT_PAID',
@@ -19,6 +20,10 @@ export enum SynthesizedGameEventType {
   PAWN_MOVED = 'PAWN_MOVED',
   EVENT_CARD_DRAWN = 'EVENT_CARD_DRAWN',
   TRANSIT_WHEEL_LANDED = 'TRANSIT_WHEEL_LANDED',
+  BOND_REPAID = 'BOND_REPAID',
+  BOND_ISSUED = 'BOND_ISSUED',
+  COMPULSORY_BUYOUT = 'COMPULSORY_BUYOUT',
+  HOSE_SETTLED = 'HOSE_SETTLED',
 }
 
 export interface BaseSynthesizedEvent {
@@ -173,6 +178,46 @@ export interface TransitWheelLandedEvent extends BaseSynthesizedEvent {
   readonly boostSteps?: number;
 }
 
+export interface BondRepaidEvent extends BaseSynthesizedEvent {
+  readonly type: SynthesizedGameEventType.BOND_REPAID;
+  readonly playerId: string;
+  readonly principal: number;
+  readonly interest: number;
+  readonly totalRepaid: number;
+  readonly repayAmount: number;
+  readonly trancheId?: BondTrancheId;
+}
+
+export interface BondIssuedEvent extends BaseSynthesizedEvent {
+  readonly type: SynthesizedGameEventType.BOND_ISSUED;
+  readonly playerId: string;
+  readonly principal: number;
+  readonly repayAmount: number;
+  readonly roundsLeft: number;
+  readonly interestRate: number;
+  readonly trancheId?: BondTrancheId;
+}
+
+export interface CompulsoryBuyoutEvent extends BaseSynthesizedEvent {
+  readonly type: SynthesizedGameEventType.COMPULSORY_BUYOUT;
+  readonly buyerId: string;
+  readonly sellerId: string;
+  readonly cellIndex: number;
+  readonly cost: number;
+  readonly basePrice: number;
+  readonly premiumRatio: number;
+}
+
+export interface HoseSettledEvent extends BaseSynthesizedEvent {
+  readonly type: SynthesizedGameEventType.HOSE_SETTLED;
+  readonly playerId: string;
+  readonly stake: number;
+  readonly roll: number;
+  readonly payout: number;
+  readonly multiplier: number;
+  readonly profit: number;
+}
+
 export interface SynthesizerOptions {
   readonly baseTimestamp?: number;
 }
@@ -194,4 +239,9 @@ export type SynthesizedGameEvent =
   | DiceRolledEvent
   | PawnMovedEvent
   | EventCardDrawnEvent
-  | TransitWheelLandedEvent;
+  | TransitWheelLandedEvent
+  | BondRepaidEvent
+  | BondIssuedEvent
+  | CompulsoryBuyoutEvent
+  | HoseSettledEvent;
+
