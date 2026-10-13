@@ -83,25 +83,27 @@ export function InstancedDioramaTrees(): React.ReactElement {
 
 export interface DioramaSkylineProps {
   readonly isMobile?: boolean;
+  readonly isVisible?: boolean;
 }
 
-export function DioramaSkyline({ isMobile = false }: DioramaSkylineProps = {}): React.ReactElement {
+export function DioramaSkyline({
+  isMobile = false,
+  isVisible = true,
+}: DioramaSkylineProps = {}): React.ReactElement {
   const phase = useEnvironmentStore((s) => s.phase);
   const isNight = phase === 'night';
   const isSunset = phase === 'sunset';
 
   const beaconRef = useRef<Mesh>(null);
 
-  useSafeFrame((state) => {
-    const t = state.clock.getElapsedTime();
-    if (beaconRef.current) {
-      const isStrobe = calculateAviationStrobe(t, 1.3);
-      beaconRef.current.visible = isNight ? isStrobe : false;
-    }
-  });
-
   return (
     <group position={[0, 0, 0]} data-contract-heritage="#B91C1C">
+      {!isMobile && isNight && (
+        <DioramaSkylineFrameLoop
+          isVisible={isVisible}
+          beaconRef={beaconRef}
+        />
+      )}
       {/* 1. Tháp Landmark Búp Sen (Bitexco Financial Landmark Tower) */}
       <group position={[-4.5, 0.16, -4.4]} data-testid="bitexco-tower">
         {/* Khối đế thương mại Podium giật cấp vát cong cánh sen (Commercial Podium Base) */}
@@ -256,7 +258,7 @@ export function DioramaSkyline({ isMobile = false }: DioramaSkylineProps = {}): 
               <meshStandardMaterial color="#F59E0B" metalness={0.95} roughness={0.1} />
             </mesh>
             {/* Đèn cảnh báo tĩnh không đỏ nhấp nháy trên đỉnh tháp */}
-            <mesh ref={beaconRef} position={[0, 2.95, 0]}>
+            <mesh ref={beaconRef} position={[0, 2.95, 0]} visible={isNight}>
               <sphereGeometry args={[0.03, 8, 8]} />
               <meshBasicMaterial color="#EF4444" />
             </mesh>
@@ -385,3 +387,25 @@ export function DioramaSkyline({ isMobile = false }: DioramaSkylineProps = {}): 
     </group>
   );
 }
+
+export interface DioramaSkylineFrameLoopProps {
+  readonly isVisible?: boolean;
+  readonly beaconRef: React.RefObject<Mesh | null>;
+}
+
+export function DioramaSkylineFrameLoop({
+  isVisible = true,
+  beaconRef,
+}: DioramaSkylineFrameLoopProps): null {
+  useSafeFrame((state) => {
+    if (!isVisible) return;
+    const t = state.clock.getElapsedTime();
+    if (beaconRef.current) {
+      beaconRef.current.visible = calculateAviationStrobe(t, 1.3);
+    }
+  });
+
+  return null;
+}
+
+

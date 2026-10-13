@@ -1,6 +1,6 @@
 // [UI-S02/MSS][IMP-92][IMP-134][IMP-227] Diorama Railroad Infrastructure, HCMC Metro Line 1 & Rolling Stock
 import React, { useRef, useMemo } from 'react';
-import { Vector3, MeshStandardMaterial, type Group } from 'three';
+import { Vector3, MeshStandardMaterial, type Group, type CatmullRomCurve3 } from 'three';
 import { useSafeFrame } from '../safe_frame';
 import { createCurvedRailGeometry, applyTubeWidth } from '../curve_line_buffer';
 import {
@@ -246,7 +246,10 @@ export function DioramaCurvedRails(): React.ReactElement {
 const tempVec = new Vector3();
 const tempTangent = new Vector3();
 
-export function DioramaModelRailroad({ isMobile = false }: { readonly isMobile?: boolean } = {}): React.ReactElement {
+export function DioramaModelRailroad({
+  isMobile = false,
+  isVisible = true,
+}: DioramaModelRailroadProps = {}): React.ReactElement {
   const leadRef = useRef<Group>(null);
   const coach1Ref = useRef<Group>(null);
   const coach2Ref = useRef<Group>(null);
@@ -255,34 +258,19 @@ export function DioramaModelRailroad({ isMobile = false }: { readonly isMobile?:
   const trackLength = useMemo(() => getRailroadTrackPerimeter(), []);
   const carriageY = isMobile ? 0.488 : 0.062;
 
-  useSafeFrame((state) => {
-    if (isMobile) return;
-    const t = state.clock.elapsedTime;
-    const kinematics = computeTrainKinematics(t);
-    const leadProgress = kinematics.progress;
-
-    const carItems = [
-      { ref: leadRef, offset: TRAIN_CARRIAGE_OFFSETS[0] },
-      { ref: coach1Ref, offset: TRAIN_CARRIAGE_OFFSETS[1] },
-      { ref: coach2Ref, offset: TRAIN_CARRIAGE_OFFSETS[2] },
-    ] as const;
-
-    for (const item of carItems) {
-      const grp = item.ref.current;
-      if (!grp) continue;
-      const p = computeCarriageProgress(leadProgress, item.offset, trackLength);
-      trackCurve.getPointAt(p, tempVec);
-      trackCurve.getTangentAt(p, tempTangent);
-      const yaw = computeTrainYaw(tempTangent);
-      const pitch = computeTrainPitch(kinematics.speed, t);
-
-      grp.position.set(tempVec.x, tempVec.y + 0.038, tempVec.z);
-      grp.rotation.set(pitch, yaw, 0);
-    }
-  });
-
   return (
     <group position={[0, 0, 0]} data-testid="diorama-model-railroad">
+      {!isMobile && (
+        <DioramaModelRailroadFrameLoop
+          isVisible={isVisible}
+          leadRef={leadRef}
+          coach1Ref={coach1Ref}
+          coach2Ref={coach2Ref}
+          trackCurve={trackCurve}
+          trackLength={trackLength}
+          carriageY={carriageY}
+        />
+      )}
       {/* 0. Lớp nền đá ba-lát và kết cấu cầu cạn cong U-Girder ôm trọn spline */}
       <DioramaBallastBed />
 
@@ -306,7 +294,7 @@ export function DioramaModelRailroad({ isMobile = false }: { readonly isMobile?:
       {/* 3. Đoàn tàu Metro Tuyến 1 (Bến Thành - Suối Tiên): Xanh Cyan, Thân Bạc, Mũi Vát Khí Động Học */}
       {/* Đầu tàu (Lead Cab): Mũi vát #0EA5E9, dải cyan #0284C7, thân bạc #E2E8F0, đèn LED #FEF08A, đèn an toàn #DC2626 */}
       <group ref={leadRef} position={[-2.2, carriageY, 6.9]}>
-        <mesh position={[0, 0, 0]}>
+        <mesh castShadow={!isMobile} position={[0, 0, 0]}>
           <SafeBoxGeometry args={[0.65, 0.07, 0.14]} />
           <meshStandardMaterial color="#E2E8F0" metalness={0.7} roughness={0.3} />
         </mesh>
@@ -334,7 +322,7 @@ export function DioramaModelRailroad({ isMobile = false }: { readonly isMobile?:
 
       {/* Toa khách 1 (Passenger Coach 1): Thân bạc #E2E8F0, sọc cyan #0284C7, pantograph / điều hòa #64748B */}
       <group ref={coach1Ref} position={[-1.4, carriageY, 6.9]}>
-        <mesh position={[0, 0, 0]}>
+        <mesh castShadow={!isMobile} position={[0, 0, 0]}>
           <SafeBoxGeometry args={[0.75, 0.07, 0.14]} />
           <meshStandardMaterial color="#E2E8F0" metalness={0.7} roughness={0.3} />
         </mesh>
@@ -354,7 +342,7 @@ export function DioramaModelRailroad({ isMobile = false }: { readonly isMobile?:
 
       {/* Toa khách 2 (Passenger Coach 2): Thân bạc #E2E8F0, sọc cyan #0284C7, pantograph / điều hòa #64748B */}
       <group ref={coach2Ref} position={[-0.55, carriageY, 6.9]}>
-        <mesh position={[0, 0, 0]}>
+        <mesh castShadow={!isMobile} position={[0, 0, 0]}>
           <SafeBoxGeometry args={[0.75, 0.07, 0.14]} />
           <meshStandardMaterial color="#E2E8F0" metalness={0.7} roughness={0.3} />
         </mesh>
@@ -374,3 +362,62 @@ export function DioramaModelRailroad({ isMobile = false }: { readonly isMobile?:
     </group>
   );
 }
+
+export interface DioramaModelRailroadProps {
+  readonly isMobile?: boolean;
+  readonly isVisible?: boolean;
+}
+
+export interface DioramaModelRailroadFrameLoopProps {
+  readonly isVisible?: boolean;
+  readonly leadRef: React.RefObject<Group | null>;
+  readonly coach1Ref: React.RefObject<Group | null>;
+  readonly coach2Ref: React.RefObject<Group | null>;
+  readonly trackCurve: CatmullRomCurve3;
+  readonly trackLength: number;
+  readonly carriageY: number;
+}
+
+export function DioramaModelRailroadFrameLoop({
+  isVisible = true,
+  leadRef,
+  coach1Ref,
+  coach2Ref,
+  trackCurve,
+  trackLength,
+  carriageY,
+}: DioramaModelRailroadFrameLoopProps): null {
+  const timeAccumRef = useRef<number>(0);
+
+  useSafeFrame((_, delta) => {
+    if (!isVisible) return;
+    const clampedDelta = Math.min(delta, 0.1);
+    timeAccumRef.current += clampedDelta;
+    const t = timeAccumRef.current;
+    const kinematics = computeTrainKinematics(t);
+    const leadProgress = kinematics.progress;
+
+    const carItems = [
+      { ref: leadRef, offset: TRAIN_CARRIAGE_OFFSETS[0] },
+      { ref: coach1Ref, offset: TRAIN_CARRIAGE_OFFSETS[1] },
+      { ref: coach2Ref, offset: TRAIN_CARRIAGE_OFFSETS[2] },
+    ] as const;
+
+    for (const item of carItems) {
+      const grp = item.ref.current;
+      if (!grp) continue;
+      const p = computeCarriageProgress(leadProgress, item.offset, trackLength);
+      trackCurve.getPointAt(p, tempVec);
+      trackCurve.getTangentAt(p, tempTangent);
+      const yaw = computeTrainYaw(tempTangent);
+      const pitch = computeTrainPitch(kinematics.speed, t);
+
+      grp.position.set(tempVec.x, carriageY + 0.038, tempVec.z);
+      grp.rotation.set(pitch, yaw, 0);
+    }
+  });
+
+  return null;
+}
+
+

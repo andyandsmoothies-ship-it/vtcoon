@@ -146,7 +146,10 @@ export function calculateBirdFlightPosition(
   };
 }
 
-export function DioramaPerchingBirds({ isMobile = false }: { readonly isMobile?: boolean } = {}): React.ReactElement {
+export function DioramaPerchingBirds({
+  isMobile = false,
+  isVisible = true,
+}: DioramaPerchingBirdsProps = {}): React.ReactElement {
   const flightStateRef = useRef<BirdFlightState>('PERCHED');
   const stateTimeRef = useRef<number>(0);
   const idleTimeRef = useRef<number>(0);
@@ -165,8 +168,87 @@ export function DioramaPerchingBirds({ isMobile = false }: { readonly isMobile?:
     }
   };
 
+  return (
+    <group data-testid="diorama-perching-birds" onPointerDown={handlePointerDown}>
+      {PERCH_SPOTS.map((spot, idx) => (
+        <group
+          key={`perching-bird-${idx}`}
+          ref={(el) => {
+            birdsRef.current[idx] = el;
+          }}
+          position={isMobile ? [spot.x, spot.y, spot.z] : undefined}
+          rotation={isMobile ? [0, spot.baseRotY, 0] : undefined}
+          scale={[0.22, 0.22, 0.22]}
+        >
+          {idx === 0 && !isMobile && (
+            <DioramaPerchingBirdsFrameLoop
+              isVisible={isVisible}
+              flightStateRef={flightStateRef}
+              stateTimeRef={stateTimeRef}
+              idleTimeRef={idleTimeRef}
+              landingFromRef={landingFromRef}
+              birdsRef={birdsRef}
+              wingsRef={wingsRef}
+            />
+          )}
+          {/* Thân chim bồ câu / hải âu mini (Zero castShadow theo [TC-221.15]) */}
+          <mesh position={[0, 0.08, 0]}>
+            <boxGeometry args={[0.12, 0.1, 0.28]} />
+            <meshStandardMaterial color="#F8FAFC" roughness={0.5} />
+          </mesh>
+          {/* Mỏ chim vàng cam */}
+          <mesh position={[0, 0.08, 0.16]} rotation={[Math.PI / 2, 0, 0]}>
+            <coneGeometry args={[0.03, 0.08, 4]} />
+            <meshStandardMaterial color="#F59E0B" roughness={0.3} />
+          </mesh>
+          {/* Cánh chim */}
+          <group
+            ref={(el) => {
+              wingsRef.current[idx] = el;
+            }}
+            position={[0, 0.11, 0]}
+          >
+            <mesh position={[-0.14, 0, 0]}>
+              <boxGeometry args={[0.22, 0.015, 0.14]} />
+              <meshStandardMaterial color="#E2E8F0" roughness={0.4} />
+            </mesh>
+            <mesh position={[0.14, 0, 0]}>
+              <boxGeometry args={[0.22, 0.015, 0.14]} />
+              <meshStandardMaterial color="#E2E8F0" roughness={0.4} />
+            </mesh>
+          </group>
+        </group>
+      ))}
+    </group>
+  );
+}
+
+export interface DioramaPerchingBirdsProps {
+  readonly isMobile?: boolean;
+  readonly isVisible?: boolean;
+}
+
+export interface DioramaPerchingBirdsFrameLoopProps {
+  readonly isVisible?: boolean;
+  readonly flightStateRef: React.MutableRefObject<BirdFlightState>;
+  readonly stateTimeRef: React.MutableRefObject<number>;
+  readonly idleTimeRef: React.MutableRefObject<number>;
+  readonly landingFromRef: React.MutableRefObject<(BirdVector3Rot | null)[]>;
+  readonly birdsRef: React.MutableRefObject<(Group | null)[]>;
+  readonly wingsRef: React.MutableRefObject<(Group | null)[]>;
+}
+
+export function DioramaPerchingBirdsFrameLoop({
+  isVisible = true,
+  flightStateRef,
+  stateTimeRef,
+  idleTimeRef,
+  landingFromRef,
+  birdsRef,
+  wingsRef,
+}: DioramaPerchingBirdsFrameLoopProps): null {
   useSafeFrame((_, delta) => {
-    if (isMobile) return;
+    if (!isVisible) return;
     const clampedDelta = Math.min(delta, 0.1);
     stateTimeRef.current += clampedDelta;
 
@@ -222,46 +304,7 @@ export function DioramaPerchingBirds({ isMobile = false }: { readonly isMobile?:
     });
   });
 
-  return (
-    <group data-testid="diorama-perching-birds" onPointerDown={handlePointerDown}>
-      {PERCH_SPOTS.map((spot, idx) => (
-        <group
-          key={`perching-bird-${idx}`}
-          ref={(el) => {
-            birdsRef.current[idx] = el;
-          }}
-          position={isMobile ? [spot.x, spot.y, spot.z] : undefined}
-          rotation={isMobile ? [0, spot.baseRotY, 0] : undefined}
-          scale={[0.22, 0.22, 0.22]}
-        >
-          {/* Thân chim bồ câu / hải âu mini (Zero castShadow theo [TC-221.15]) */}
-          <mesh position={[0, 0.08, 0]}>
-            <boxGeometry args={[0.12, 0.1, 0.28]} />
-            <meshStandardMaterial color="#F8FAFC" roughness={0.5} />
-          </mesh>
-          {/* Mỏ chim vàng cam */}
-          <mesh position={[0, 0.08, 0.16]} rotation={[Math.PI / 2, 0, 0]}>
-            <coneGeometry args={[0.03, 0.08, 4]} />
-            <meshStandardMaterial color="#F59E0B" roughness={0.3} />
-          </mesh>
-          {/* Cánh chim */}
-          <group
-            ref={(el) => {
-              wingsRef.current[idx] = el;
-            }}
-            position={[0, 0.11, 0]}
-          >
-            <mesh position={[-0.14, 0, 0]}>
-              <boxGeometry args={[0.22, 0.015, 0.14]} />
-              <meshStandardMaterial color="#E2E8F0" roughness={0.4} />
-            </mesh>
-            <mesh position={[0.14, 0, 0]}>
-              <boxGeometry args={[0.22, 0.015, 0.14]} />
-              <meshStandardMaterial color="#E2E8F0" roughness={0.4} />
-            </mesh>
-          </group>
-        </group>
-      ))}
-    </group>
-  );
+  return null;
 }
+
+

@@ -26,32 +26,15 @@ export function calculateBeaconRotation(time: number, speed: number = 1.2): numb
   return time * speed;
 }
 
-export function DioramaMarina({ isMobile = false }: { readonly isMobile?: boolean } = {}): React.ReactElement {
+export function DioramaMarina({
+  isMobile = false,
+  isVisible = true,
+}: DioramaMarinaProps = {}): React.ReactElement {
   // Phase subscription: Chỉ re-render khi phase thay đổi (vài phút/lần). Không ảnh hưởng 60 FPS frame loop.
   const phase = useEnvironmentStore((s) => s.phase);
   const yacht1Ref = useRef<Group>(null);
   const yacht2Ref = useRef<Group>(null);
   const beaconRef = useRef<Group>(null);
-
-  useSafeFrame((state) => {
-    if (isMobile) return;
-    const t = state.clock.elapsedTime;
-    if (yacht1Ref.current) {
-      const b1 = calculateWatercraftBobbing(t, 0.0);
-      yacht1Ref.current.position.y = -0.032 + b1.y;
-      yacht1Ref.current.rotation.z = b1.rotZ;
-      yacht1Ref.current.rotation.x = b1.rotX;
-    }
-    if (yacht2Ref.current) {
-      const b2 = calculateWatercraftBobbing(t, 1.6);
-      yacht2Ref.current.position.y = -0.032 + b2.y;
-      yacht2Ref.current.rotation.z = b2.rotZ;
-      yacht2Ref.current.rotation.x = b2.rotX;
-    }
-    if (beaconRef.current) {
-      beaconRef.current.rotation.y = calculateBeaconRotation(t, 1.2);
-    }
-  });
 
   const beaconIntensity = calculateBeaconIntensity(phase);
   const isNightOrSunset = phase === 'night' || phase === 'sunset';
@@ -63,6 +46,14 @@ export function DioramaMarina({ isMobile = false }: { readonly isMobile?: boolea
 
   return (
     <group position={[4.5, 0.1, 4.2]}>
+      {!isMobile && (
+        <DioramaMarinaFrameLoop
+          isVisible={isVisible}
+          yacht1Ref={yacht1Ref}
+          yacht2Ref={yacht2Ref}
+          beaconRef={beaconRef}
+        />
+      )}
       {/* 1. CẦU CẢNG GỖ & SÀN PROMENADE VEN VỊNH */}
       <group position={[-1.2, 0.02, 0]}>
         <mesh receiveShadow castShadow position={[0, 0, 0]}>
@@ -188,7 +179,55 @@ export function DioramaMarina({ isMobile = false }: { readonly isMobile?: boolea
       </group>
 
       {/* Đàn hải âu đậu cọc bến thuyền */}
-      <DioramaPerchingBirds isMobile={isMobile} />
+      <DioramaPerchingBirds isMobile={isMobile} isVisible={isVisible} />
     </group>
   );
 }
+
+export interface DioramaMarinaProps {
+  readonly isMobile?: boolean;
+  readonly isVisible?: boolean;
+}
+
+export interface DioramaMarinaFrameLoopProps {
+  readonly isVisible?: boolean;
+  readonly yacht1Ref: React.RefObject<Group | null>;
+  readonly yacht2Ref: React.RefObject<Group | null>;
+  readonly beaconRef: React.RefObject<Group | null>;
+}
+
+export function DioramaMarinaFrameLoop({
+  isVisible = true,
+  yacht1Ref,
+  yacht2Ref,
+  beaconRef,
+}: DioramaMarinaFrameLoopProps): null {
+  const timeAccumRef = useRef<number>(0);
+
+  useSafeFrame((_, delta) => {
+    if (!isVisible) return;
+    const clampedDelta = Math.min(delta, 0.1);
+    timeAccumRef.current += clampedDelta;
+    const t = timeAccumRef.current;
+
+    if (yacht1Ref.current) {
+      const b1 = calculateWatercraftBobbing(t, 0.0);
+      yacht1Ref.current.position.y = -0.032 + b1.y;
+      yacht1Ref.current.rotation.z = b1.rotZ;
+      yacht1Ref.current.rotation.x = b1.rotX;
+    }
+    if (yacht2Ref.current) {
+      const b2 = calculateWatercraftBobbing(t, 1.6);
+      yacht2Ref.current.position.y = -0.032 + b2.y;
+      yacht2Ref.current.rotation.z = b2.rotZ;
+      yacht2Ref.current.rotation.x = b2.rotX;
+    }
+    if (beaconRef.current) {
+      beaconRef.current.rotation.y = calculateBeaconRotation(t, 1.2);
+    }
+  });
+
+  return null;
+}
+
+

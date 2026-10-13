@@ -1,0 +1,62 @@
+[
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "Mutant 1: Corrupt isVisible propagation to DioramaModelRailroad in MiniatureCityDiorama",
+    "target": "<DioramaModelRailroad isMobile={isMobile} isVisible={isVisible} />",
+    "replacement": "<DioramaModelRailroad isMobile={isMobile} isVisible={true} />"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "Mutant 2: Corrupt isVisible propagation to DioramaContainerPort in MiniatureCityDiorama",
+    "target": "<DioramaContainerPort isMobile={isMobile} isVisible={isVisible} />",
+    "replacement": "<DioramaContainerPort isMobile={isMobile} isVisible={true} />"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "Mutant 3: Corrupt isVisible propagation to DioramaMarina in MiniatureCityDiorama",
+    "target": "<DioramaMarina isMobile={isMobile} isVisible={isVisible} />",
+    "replacement": "<DioramaMarina isMobile={isMobile} isVisible={true} />"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "Mutant 4: Corrupt isVisible propagation to DioramaBridges in MiniatureCityDiorama",
+    "target": "<DioramaBridges isMobile={isMobile} isVisible={isVisible} />",
+    "replacement": "<DioramaBridges isMobile={isMobile} isVisible={true} />"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "Mutant 5: Corrupt isVisible propagation to DioramaSkyline in MiniatureCityDiorama",
+    "target": "<DioramaSkyline isMobile={isMobile} isVisible={isVisible} />",
+    "replacement": "<DioramaSkyline isMobile={isMobile} isVisible={true} />"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_railroad.tsx",
+    "desc": "Mutant 6: Unconditionally mount DioramaModelRailroadFrameLoop on mobile",
+    "target": "{!isMobile && (",
+    "replacement": "{/* mutant: always mount loop */ true && ("
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_container_port.tsx",
+    "desc": "Mutant 7: Unconditionally mount DioramaContainerPortFrameLoop on mobile",
+    "target": "{!isMobile && (",
+    "replacement": "{/* mutant: always mount loop */ true && ("
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_marina.tsx",
+    "desc": "Mutant 8: Unconditionally mount DioramaMarinaFrameLoop on mobile",
+    "target": "{!isMobile && (",
+    "replacement": "{/* mutant: always mount loop */ true && ("
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_bridges.tsx",
+    "desc": "Mutant 9: Mount DioramaBridgesFrameLoop during daytime",
+    "target": "{!isMobile && isNight && (",
+    "replacement": "{/* mutant: daytime mount */ !isMobile && true && ("
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_skyline.tsx",
+    "desc": "Mutant 10: Mount DioramaSkylineFrameLoop during daytime",
+    "target": "{!isMobile && isNight && (",
+    "replacement": "{/* mutant: daytime mount */ !isMobile && true && ("
+  }
+]

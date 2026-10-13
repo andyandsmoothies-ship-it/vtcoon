@@ -99,28 +99,19 @@ export function InstancedBasonStayCables(): React.ReactElement {
 
 export interface DioramaBridgesProps {
   readonly isMobile?: boolean;
+  readonly isVisible?: boolean;
 }
 
-export function DioramaBridges({ isMobile = false }: DioramaBridgesProps = {}): React.ReactElement {
+export function DioramaBridges({
+  isMobile = false,
+  isVisible = true,
+}: DioramaBridgesProps = {}): React.ReactElement {
   const phase = useEnvironmentStore((s) => s.phase);
   const isNight = phase === 'night';
   const isSunset = phase === 'sunset';
 
   const basonLedRef1 = useRef<ThreeMeshStandardMaterial>(null);
   const basonLedRef2 = useRef<ThreeMeshStandardMaterial>(null);
-  const tempColor = useMemo(() => new Color(), []);
-
-  useSafeFrame((state) => {
-    if (isMobile) return;
-    const t = state.clock.getElapsedTime();
-    if (isNight && basonLedRef1.current && basonLedRef2.current) {
-      tempColor.setHSL(0.5 + Math.sin(t * 0.5) * 0.12, 0.95, 0.55);
-      basonLedRef1.current.color.copy(tempColor);
-      basonLedRef1.current.emissive.copy(tempColor);
-      basonLedRef2.current.color.copy(tempColor);
-      basonLedRef2.current.emissive.copy(tempColor);
-    }
-  });
 
   const basonCables = useMemo(() => {
     if (isMobile) return [];
@@ -134,6 +125,13 @@ export function DioramaBridges({ isMobile = false }: DioramaBridgesProps = {}): 
 
   return (
     <group position={[0, 0, 0]}>
+      {!isMobile && isNight && (
+        <DioramaBridgesFrameLoop
+          isVisible={isVisible}
+          basonLedRef1={basonLedRef1}
+          basonLedRef2={basonLedRef2}
+        />
+      )}
       {/* ========================================================
           1. CẦU BA SON (Phía Bắc: Z = -3.8, nối Tây Bắc & Đông Bắc)
           Kiến trúc cầu dây văng hiện đại với tháp nghiêng thanh thoát
@@ -336,3 +334,49 @@ export function DioramaBridges({ isMobile = false }: DioramaBridgesProps = {}): 
     </group>
   );
 }
+
+export interface DioramaBridgesFrameLoopProps {
+  readonly isVisible?: boolean;
+  readonly basonLedRef1: React.RefObject<ThreeMeshStandardMaterial | null>;
+  readonly basonLedRef2: React.RefObject<ThreeMeshStandardMaterial | null>;
+}
+
+const DEFAULT_LED_COLOR = new Color('#06B6D4');
+const DEFAULT_LED_EMISSIVE = new Color('#00F5FF');
+
+export function DioramaBridgesFrameLoop({
+  isVisible = true,
+  basonLedRef1,
+  basonLedRef2,
+}: DioramaBridgesFrameLoopProps): null {
+  const tempColor = useMemo(() => new Color(), []);
+
+  useEffect(() => {
+    return () => {
+      if (basonLedRef1.current) {
+        basonLedRef1.current.color.copy(DEFAULT_LED_COLOR);
+        basonLedRef1.current.emissive.copy(DEFAULT_LED_EMISSIVE);
+      }
+      if (basonLedRef2.current) {
+        basonLedRef2.current.color.copy(DEFAULT_LED_COLOR);
+        basonLedRef2.current.emissive.copy(DEFAULT_LED_EMISSIVE);
+      }
+    };
+  }, [basonLedRef1, basonLedRef2]);
+
+  useSafeFrame((state) => {
+    if (!isVisible) return;
+    const t = state.clock.getElapsedTime();
+    if (basonLedRef1.current && basonLedRef2.current) {
+      tempColor.setHSL(0.5 + Math.sin(t * 0.5) * 0.12, 0.95, 0.55);
+      basonLedRef1.current.color.copy(tempColor);
+      basonLedRef1.current.emissive.copy(tempColor);
+      basonLedRef2.current.color.copy(tempColor);
+      basonLedRef2.current.emissive.copy(tempColor);
+    }
+  });
+
+  return null;
+}
+
+

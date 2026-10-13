@@ -30,7 +30,10 @@ const CONTAINER_BLOCKS: readonly ContainerBlockDef[] = [
   { pos: [-0.42, 0.36, 0.05], size: [0.3, 0.14, 0.65], color: '#D97706' },
 ];
 
-export function DioramaContainerPort({ isMobile = false }: { readonly isMobile?: boolean } = {}): React.ReactElement {
+export function DioramaContainerPort({
+  isMobile = false,
+  isVisible = true,
+}: DioramaContainerPortProps = {}): React.ReactElement {
   const phase = useEnvironmentStore((s) => s.phase);
   const isNight = phase === 'night';
   const isSunset = phase === 'sunset';
@@ -42,35 +45,20 @@ export function DioramaContainerPort({ isMobile = false }: { readonly isMobile?:
   const beacon1Ref = useRef<Mesh>(null);
   const beacon2Ref = useRef<Mesh>(null);
 
-  useSafeFrame((state) => {
-    if (isMobile) return;
-    const t = state.clock.elapsedTime;
-    // Cần cẩu 1: Tự động xoay góc cần trục yaw từ -25 độ đến +25 độ (0.436 rad)
-    if (boom1Ref.current) {
-      boom1Ref.current.rotation.y = Math.sin(t * 0.7) * 0.436;
-    }
-    // Cáp cẩu container 1 nhấp nhô dưới dầm cẩu theo chu kỳ thời gian thực
-    if (hoist1Ref.current) {
-      hoist1Ref.current.position.y = -0.27 + Math.sin(t * 1.5) * 0.08;
-    }
-
-    // Cần cẩu 2: Xoay yaw lệch pha
-    if (boom2Ref.current) {
-      boom2Ref.current.rotation.y = Math.sin(t * 0.6 + 1.2) * 0.436;
-    }
-    // Cáp cẩu container 2 nâng hạ dưới dầm cẩu
-    if (hoist2Ref.current) {
-      hoist2Ref.current.position.y = -0.32 + Math.cos(t * 1.3) * 0.07;
-    }
-
-    // Đèn chớp cảnh báo tĩnh không đỏ trên đỉnh cẩu
-    const isStrobe = calculateAviationStrobe(t, 1.25);
-    if (beacon1Ref.current) beacon1Ref.current.visible = isNight ? isStrobe : false;
-    if (beacon2Ref.current) beacon2Ref.current.visible = isNight ? isStrobe : false;
-  });
-
   return (
     <group position={[4.8, 0.16, 4.5]} data-testid="diorama-container-port">
+      {!isMobile && (
+        <DioramaContainerPortFrameLoop
+          isVisible={isVisible}
+          isNight={isNight}
+          boom1Ref={boom1Ref}
+          hoist1Ref={hoist1Ref}
+          boom2Ref={boom2Ref}
+          hoist2Ref={hoist2Ref}
+          beacon1Ref={beacon1Ref}
+          beacon2Ref={beacon2Ref}
+        />
+      )}
       {/* 1. MẶT BẰNG CẦU CẢNG BÊ TÔNG (Seaport Concrete Apron với Bo Viền) */}
       <RoundedBox args={[1.8, 0.08, 2.2]} radius={0.016} smoothness={2} receiveShadow position={[0, 0.04, 0]}>
         <meshStandardMaterial color="#475569" roughness={0.7} envMapIntensity={0.6} />
@@ -236,3 +224,66 @@ export function DioramaContainerPort({ isMobile = false }: { readonly isMobile?:
     </group>
   );
 }
+
+export interface DioramaContainerPortProps {
+  readonly isMobile?: boolean;
+  readonly isVisible?: boolean;
+}
+
+export interface DioramaContainerPortFrameLoopProps {
+  readonly isVisible?: boolean;
+  readonly isNight?: boolean;
+  readonly boom1Ref: React.RefObject<Group | null>;
+  readonly hoist1Ref: React.RefObject<Group | null>;
+  readonly boom2Ref: React.RefObject<Group | null>;
+  readonly hoist2Ref: React.RefObject<Group | null>;
+  readonly beacon1Ref: React.RefObject<Mesh | null>;
+  readonly beacon2Ref: React.RefObject<Mesh | null>;
+}
+
+export function DioramaContainerPortFrameLoop({
+  isVisible = true,
+  isNight = false,
+  boom1Ref,
+  hoist1Ref,
+  boom2Ref,
+  hoist2Ref,
+  beacon1Ref,
+  beacon2Ref,
+}: DioramaContainerPortFrameLoopProps): null {
+  const timeAccumRef = useRef<number>(0);
+
+  useSafeFrame((_, delta) => {
+    if (!isVisible) return;
+    const clampedDelta = Math.min(delta, 0.1);
+    timeAccumRef.current += clampedDelta;
+    const t = timeAccumRef.current;
+
+    // Cần cẩu 1: Tự động xoay góc cần trục yaw từ -25 độ đến +25 độ (0.436 rad)
+    if (boom1Ref.current) {
+      boom1Ref.current.rotation.y = Math.sin(t * 0.7) * 0.436;
+    }
+    // Cáp cẩu container 1 nhấp nhô dưới dầm cẩu theo chu kỳ thời gian thực
+    if (hoist1Ref.current) {
+      hoist1Ref.current.position.y = -0.27 + Math.sin(t * 1.5) * 0.08;
+    }
+
+    // Cần cẩu 2: Xoay yaw lệch pha
+    if (boom2Ref.current) {
+      boom2Ref.current.rotation.y = Math.sin(t * 0.6 + 1.2) * 0.436;
+    }
+    // Cáp cẩu container 2 nâng hạ dưới dầm cẩu
+    if (hoist2Ref.current) {
+      hoist2Ref.current.position.y = -0.32 + Math.cos(t * 1.3) * 0.07;
+    }
+
+    // Đèn chớp cảnh báo tĩnh không đỏ trên đỉnh cẩu
+    const isStrobe = calculateAviationStrobe(t, 1.25);
+    if (beacon1Ref.current) beacon1Ref.current.visible = isNight ? isStrobe : false;
+    if (beacon2Ref.current) beacon2Ref.current.visible = isNight ? isStrobe : false;
+  });
+
+  return null;
+}
+
+
