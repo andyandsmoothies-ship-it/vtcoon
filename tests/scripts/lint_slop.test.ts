@@ -85,11 +85,14 @@ describe('Local Anti-Slop AST Linter (lint_slop.mjs)', () => {
   });
 
   describe('Rule 3: file-loc-budget & categorization', () => {
-    it('categorizes paths into proper tiers', () => {
+    it('categorizes domain and UI paths into proper tiers', () => {
       expect(categorizeFile('src/domain/room.ts')).toBe('TIER1_LOGIC');
       expect(categorizeFile('src/server/turn_loop.ts')).toBe('TIER1_LOGIC');
       expect(categorizeFile('src/client/ui/top_bar.tsx')).toBe('TIER2_UI');
       expect(categorizeFile('src/client/3d/board.tsx')).toBe('TIER2_UI');
+    });
+
+    it('categorizes static config paths into TIER3_STATIC', () => {
       expect(categorizeFile('src/client/3d/tile_icons.ts')).toBe('TIER3_STATIC');
     });
 
@@ -168,6 +171,38 @@ describe('Local Anti-Slop AST Linter (lint_slop.mjs)', () => {
       `;
       const { errors } = lintSlopContent(code, 'src/domain/sample.ts');
       expect(errors.some((e) => e.rule === SLOP_RULES.ZERO_WORKAROUND_COMMENTS)).toBe(false);
+    });
+  });
+
+  describe('Rule 12 & 13: Deep Modules & Seam Rules (IMP-389)', () => {
+    it('catches micro-splintered logic file with < 30 LOC', () => {
+      const code = 'export function calc(x: number) { return x * 2; }';
+      const { errors } = lintSlopContent(code, 'src/domain/tiny_calc.ts');
+      expect(errors.some((e) => e.rule === SLOP_RULES.ZERO_MICRO_SPLINTERING)).toBe(true);
+    });
+
+    it('whitelists pure types, constants, and barrel files with < 30 LOC', () => {
+      const typeCode = 'export interface Config { timeout: number; }';
+      const { errors } = lintSlopContent(typeCode, 'src/domain/sample_types.ts');
+      expect(errors.some((e) => e.rule === SLOP_RULES.ZERO_MICRO_SPLINTERING)).toBe(false);
+    });
+
+    it('catches 1-line exact middle-man passthrough proxies', () => {
+      const code = 'function compute(a: number, b: number) { return innerCompute(a, b); }';
+      const { errors } = lintSlopContent(code, 'src/domain/service.ts');
+      expect(errors.some((e) => e.rule === SLOP_RULES.ZERO_PASSTHROUGH_PROXIES)).toBe(true);
+    });
+
+    it('catches arrow function 1-line exact middle-man passthrough proxies', () => {
+      const code = 'const compute = (a: number, b: number) => innerCompute(a, b);';
+      const { errors } = lintSlopContent(code, 'src/domain/service.ts');
+      expect(errors.some((e) => e.rule === SLOP_RULES.ZERO_PASSTHROUGH_PROXIES)).toBe(true);
+    });
+
+    it('allows passthrough with transforms or facade comments', () => {
+      const code = 'function compute(a: number, b: number) { /* facade */ return innerCompute(a, b); }';
+      const { errors } = lintSlopContent(code, 'src/domain/service.ts');
+      expect(errors.some((e) => e.rule === SLOP_RULES.ZERO_PASSTHROUGH_PROXIES)).toBe(false);
     });
   });
 });

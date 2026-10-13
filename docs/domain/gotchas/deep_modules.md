@@ -34,3 +34,11 @@
    - *Fault-Domain Bulkheading*: Peripheral subsystems (3D canvas, WebGL shaders, audio managers, particle effects, analytics) MUST be isolated via robust error boundaries or non-throwing wrappers. A rendering or audio failure must never crash core match state or block gameplay progression.
    - *Active Self-Healing over Passive Telemetry*: Watchdogs and health-check loops must not merely log warnings (`console.warn`, telemetry). They MUST trigger deterministic recovery actions (force-clearing stuck locks, falling back to 2D view, degrading frameloop gracefully, or restoring degraded state).
 
+9. **Deep Modules, Seam Discipline & The Deletion Test [IMP-389]**:
+   - *Deep Module Primacy*: Per John Ousterhout, a deep module provides powerful functionality behind a simple, cohesive interface. The number of consumers alone does NOT measure module depth: a module with 1 consumer (e.g. 3D kinematic solver, peninsula terrain generator, or complex trade evaluation) is an exemplary deep module if it encapsulates significant mathematical/business complexity behind pure, deterministic functions.
+   - *Test Seams as Legitimate Consumers*: Per Michael Feathers, extracting pure calculation/view-model logic into a companion file (`*_visuals.ts`, `*_math.ts`) to enable isolated, deterministic Station 1 TDD without WebGL/DOM mocking creates a valid architectural seam. The test suite is the legitimate 2nd consumer justifying the seam's boundary.
+   - *Mechanical Slop Guards*:
+     - `zero-micro-splintering`: FORBIDDEN creating micro-files (< 30 LOC) solely to evade LOC budgets. Whitelist: pure types (`types.ts`, `*_types.ts`), constants (`*_constants.ts`), barrel re-exports (`card_handlers.ts`), and UI micro-components.
+     - `zero-passthrough-proxies`: FORBIDDEN 1-line exact middle-man functions that delegate without transformation or validation. Whitelist: default parameter wrappers and public API boundary facades.
+
+

@@ -20,10 +20,11 @@ import {
 } from './slop_linter/slop_constants.mjs';
 import { lintTextRules, lintOrphanProductionFiles } from './slop_linter/slop_text_rules.mjs';
 import { lintAstRules } from './slop_linter/slop_ast_rules.mjs';
+import { lintSeamRules } from './slop_linter/slop_seam_rules.mjs';
 import { formatSlopResults } from './slop_linter/slop_reporter.mjs';
 
 // Re-exports for downstream consumers and test suites
-export { SLOP_RULES, TIER_BUDGETS, categorizeFile, getSourceFiles };
+export { SLOP_RULES, TIER_BUDGETS, categorizeFile, getSourceFiles, lintSeamRules };
 
 /**
  * Inspects a source code string and returns errors and warnings.
@@ -38,6 +39,7 @@ export function lintSlopContent(content, filePath = 'anonymous.ts') {
   // 2. AST-based traversal rules
   const sf = ts.createSourceFile(filePath, content, ts.ScriptTarget.Latest, true);
   lintAstRules(sf, content, filePath, errors, warnings);
+  lintSeamRules(sf, content, filePath, errors);
 
   return { errors, warnings };
 }
@@ -52,15 +54,17 @@ export function runSlopLinter(targetDir = 'src') {
 
   console.log(`\n🔍 [Anti-Slop Linter] Scanning ${files.length} files in "${targetDir}" via TypeScript AST...`);
 
+  const sharedFileCache = new Map();
   for (const file of files) {
     const content = fs.readFileSync(file, 'utf8');
+    sharedFileCache.set(file, content);
     const { errors, warnings } = lintSlopContent(content, file);
     allErrors.push(...errors);
     allWarnings.push(...warnings);
   }
 
-  // Multi-file Rule: zero-orphan-production-files (Anti-TIDD Check)
-  lintOrphanProductionFiles(targetDir, files, allErrors);
+  // Multi-file Rule: zero-orphan-production-files (Anti-TIDD Check with shared cache)
+  lintOrphanProductionFiles(targetDir, files, allErrors, sharedFileCache);
 
   return formatSlopResults(files, allErrors, allWarnings);
 }

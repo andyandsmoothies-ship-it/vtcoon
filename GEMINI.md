@@ -4,7 +4,7 @@
 > Language Policy: All settings, instructions, and harness files must be in concise English. User-facing reports (`docs/reports/**`) and game artifacts must be in Vietnamese.
 
 ## 1. MANDATORY MECHANICAL GATES
-Every ticket must pass 100% of automated gates before handoff:
+Every ticket (outside Fast-Track) must pass 100% of automated gates before handoff:
 1. **Plan Audit & Signoff**: `node scripts/audit_plan.mjs <plan_path> [--auto-sign]`
 2. **Scope Confinement**: `node scripts/check_scope.mjs [plan_path]`
 3. **Fast Pre-Filter (Type, LOC, Linters, Assert Density)**: `npm run prefilter -- <files>`
@@ -37,27 +37,29 @@ Every ticket must pass 100% of automated gates before handoff:
 - **Runtime Self-Healing & Ephemeral TTL Invariant**: FORBIDDEN trusting that external event pairs (`down/up`, `start/end`, `open/close`) will complete unconditionally. Ephemeral flags (`isRolling`, `isPawnAnimating`), gesture tracking collections (`activePointers`), and modal/subsystem locks MUST implement an authoritative Dead Man's Switch (TTL 3s–5s) or background watchdog that auto-clears stalled state. Client watchdogs MUST trigger a deterministic self-healing recovery action rather than merely logging telemetry.
 - **Composite Transaction Testing Invariant**: FORBIDDEN financial, economic, or balance-processing implementation tickets omitting composite integration tests. When modifying event synthesizers or balance delta processors, contract test suites MUST include at least one scenario verifying simultaneous bidirectional cashflows within the same tick (e.g. Inflow such as Go Salary alongside Outflow such as Debt Repayment or Tax) to eliminate Netting Collision blindspots.
 - **Zero Semantic Borrowing Invariant**: FORBIDDEN borrowing existing unrelated enum tokens or action types (`unmortgage`, `tax`) to represent newly introduced economic behaviors. New financial or domain operations MUST introduce canonical first-class types across `ActivityLogType`, `FloatingActionType`, and UI narrative formatters.
-- **LOC Buffer Zone Guard**: When a target file reaches >= 350 LOC (Tier 1 ceiling 400), adding new logic directly into the file is FORBIDDEN. Plans touching files >= 350 LOC MUST declare a `Refactor-First` step decomposing logic into sub-helpers (<= 250 LOC) before introducing new features.
+- **LOC Buffer Zone Guard**: When a target file reaches >= 350 LOC (Tier 1 ceiling 400), adding new logic directly into the file is FORBIDDEN. Plans touching files >= 350 LOC MUST declare a `Refactor-First` step decomposing logic into autonomous Deep Modules, sub-domain services, or pure test seams (<= 250 LOC) before introducing new features. FORBIDDEN extracting shallow single-function micro-files solely to evade the LOC ceiling.
+- **Deep Modules & Seam Discipline (Anti-Micro-Splintering & Middle-Man Ban)**: Pure calculation and view-model test seams (twin files like `*_visuals.ts` or pure calculation functions) are fully legitimate architectural seams where test suites serve as the valid 2nd consumer (per Michael Feathers). FORBIDDEN micro-splintering logic into trivial files (< 30 LOC) solely to evade LOC ceilings (exempt: pure types, constants, barrel re-exports, UI components). FORBIDDEN creating 1-line exact middle-man passthrough proxies that delegate without transformation or validation (exempt: default parameter wrappers and public API boundary facades).
 *(Specialized domain invariants and subagent review protocols are strictly delegated to `docs/domain/gotchas/*.md` and `.agents/agents/*.md`).*
 
 
-## 3. LEAN PIPELINE
-- **Tier 1 (Fast-Track)**: < 50 LOC, visual/CSS/spacing, copy, isolated fix (0 Schema, 0 FSM, 0 Net). Main Agent executes directly in 1-2 min, 0 subagents, 0 plan.
-- **Micro-Slice (<= 50 LOC, 1 subsystem)**:
-  0. Station 0.5 (Empirical Root-Cause Gate - Mandatory for Runtime Anomalies, Heisenbugs & State Desync):
-     - For non-deterministic visual/runtime glitches (flickering, GPU precision overflow, thermal throttling, camera desync), planning based on static code speculation is FORBIDDEN. The agent MUST isolate the physical culprit via observability hooks (e.g. `?debug=3d`, layer toggles, console traces, `window.__vtcoon`) and confirm the exact root cause with physical evidence before drafting the plan.
-     - For gameplay, balance, bankruptcy, or state machine desync bugs, the agent MUST request or ingest the In-Game Flight Recorder dump (`npm run analyze:log <dump.json>`) to inspect tick timelines and invariant violations before drafting the plan.
-  1. Draft Lean Plan: `.agents/plans/PLAN_[ID].md` (<= 200 lines, 0 code-dump).
-  2. Machine Plan Audit: `node scripts/audit_plan.mjs <plan> --auto-sign` (0 defects auto-signs `HARDENED_APPROVED`).
-  3. Adversarial Gate (Mandatory for State/FSM/Economy/Coordinators/3D-Graphics/Financial-UI/Mobile-Ergonomics): Run 1 blind adversarial round (`adversarial-challenger` or `forensic-challenger`) writing to `.agents/audit/PLAN_CHALLENGE_[TICKET].md` whenever touching FSM lifecycle, State transitions, Economy, Financial UI notifications, Mobile ergonomics, or 3D Graphics/Performance/Culling/Shaders to block blind spots before implementation. Neutral Blind Dispatch Protocol: Main Agent is FORBIDDEN from feeding leading checklists or biased hints to the auditor.
-  4. Human Gate: User approves ("đồng ý").
-  5. Station 1 (RED): Scaffold empty stubs in `src/**` for new files; `qa-tester` writes contract tests in `tests/**` (Adversarial Inversion: fails strictly on runtime assertions).
-  6. Station 2 (GREEN): `implementer` writes minimal code in `src/**`.
-  7. Mechanical Gates: Run `npm run prefilter -- <files>` and `npm run check:scope`.
-  8. Audit & Delivery Reports: Main Agent runs `npm run report -- [ID]` to synthesize physical station audits (`.agents/audit/SPEC_REVIEW_[ID].md`, `CODE_REVIEW_[ID].md`, and `.agents/audit/PLAN_CHALLENGE_[ID].md` / `FORENSIC_AUDIT_[ID].md`) and the comprehensive acceptance report (`docs/reports/improvements/IMP-[ID]-[slug]_report.md`) embedding all subagent comments/verdicts. For deep forensic signoff, run 1 adversarial verification round (`forensic-challenger`) against the final report to eliminate artifact contamination before delivery.
-- **Epic / Large Feature (> 50 LOC, > 2-3 files)**:
-  - Must run **Auto-Slicing Protocol** emitting Micro-Slices Roadmap (< 10 lines) before planning.
-  - Must run 1 adversarial round (`adversarial-challenger`) writing to `.agents/audit/PLAN_CHALLENGE_[TICKET].md` to block game design / economic exploits.
+## 3. FULL RIGOR SDLC PIPELINE (COHESIVE BATCHING)
+- **Tier 1 (Fast-Track)**: < 50 LOC, visual/CSS/spacing, copy, minor isolated tweak (0 Schema, 0 FSM, 0 Net). Main Agent executes directly in 1-2 min, 0 subagents, 0 plans, 0 reports. Must pass `npm run prefilter` and unit tests.
+- **Standard Feature Slice (Cohesive Batching - 50 to 250 LOC)**:
+  - **Cohesive Batching Invariant**: Tightly coupled domain logic (e.g. Server Domain Events across Bond + HOSE + Auction) MUST be designed and implemented as ONE cohesive slice. Arbitrary over-slicing into multiple micro-tickets that forces repeating the full 8-station pipeline is FORBIDDEN.
+  - **Station 0.5 (Empirical Root-Cause Gate)**:
+    - For non-deterministic visual/runtime glitches: isolate physical culprit via observability hooks (`?debug=3d`, layer toggles, console traces, `window.__vtcoon`) before drafting plan.
+    - For gameplay, balance, bankruptcy, or state machine desync bugs: inspect In-Game Flight Recorder dump (`npm run analyze:log <dump.json>`) before drafting plan.
+  1. **Station 1 (Draft Lean Plan)**: `.agents/plans/PLAN_[ID].md` (<= 250 lines, 0 code-dump).
+  2. **Station 1.2 (Machine Plan Audit)**: `node scripts/audit_plan.mjs <plan> --auto-sign` (0 defects auto-signs `HARDENED_APPROVED`).
+  3. **Station 1.5 (Mandatory Adversarial Gate)**: Run 1 blind adversarial round (`adversarial-challenger` or `forensic-challenger`) writing to `.agents/audit/PLAN_CHALLENGE_[TICKET].md` whenever touching FSM lifecycle, State transitions, Economy, Financial UI notifications, Mobile ergonomics, or 3D Graphics. Neutral Blind Dispatch Protocol: Main Agent is FORBIDDEN from feeding leading checklists or biased hints to the auditor.
+  4. **Station 1.8 (Human Gate)**: User approves ("đồng ý").
+  5. **Station 2 (RED - Contract Specification)**: Scaffold empty stubs in `src/**` for new files; `qa-tester` writes contract tests in `tests/**` (Adversarial Inversion: fails strictly on runtime assertions).
+  6. **Station 2.5 (GREEN - Implementation)**: `implementer` writes minimal code in `src/**`.
+  7. **Station 3 (Mechanical Gates & Scope)**: Run `npm run prefilter -- <files>` and `node scripts/check_scope.mjs`.
+  8. **Station 3.5 (Chaos Sentinel Mutation Testing)**: Run `npm run sentinel -- --ticket <id> --test <test_path>` on live dynamic port 0 WebSocket.
+  9. **Station 4 (Audit & Delivery Reports)**: Main Agent runs `npm run report -- [ID]` to synthesize physical station audits (`.agents/audit/SPEC_REVIEW_[ID].md`, `CODE_REVIEW_[ID].md`, `PLAN_CHALLENGE_[ID].md`) and final acceptance report (`docs/reports/improvements/IMP-[ID]-[slug]_report.md`). Pass `node scripts/check_evidence.mjs <ticket>`. Perform 1:1 physical disk self-audit before presenting.
+- **Epic / Major Multi-Subsystem (> 250 LOC, > 3-4 files across different subsystems)**:
+  - Sliced only at natural architectural boundaries into cohesive feature slices. Roadmaps emit high-level milestones before planning.
 
 ## 4. SSOT DOMAIN GOTCHAS (docs/domain/gotchas/)
 Consult the respective pillar before planning or modifying code:

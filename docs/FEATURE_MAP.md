@@ -90,4 +90,4 @@ For technical details and historical design traps across each subsystem, consult
 - [UI Ergonomics & Tactile Controls (`ui_ergonomics.md`)](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/gotchas/ui_ergonomics.md)
 - [3D Graphics & Mobile Kinematics (`3d_cinematics.md`)](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/gotchas/3d_cinematics.md)
 - [Testing Traps & Anti-Flakiness (`testing_traps.md`)](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/gotchas/testing_traps.md)
-- [Deep Module Architecture (`deep_modules.md`)](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/gotchas/deep_modules.md)
+- [Deep Module Architecture, Seam Discipline & Anti-Shallow Linters (`deep_modules.md`)](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/gotchas/deep_modules.md) [IMP-389]

@@ -25,7 +25,10 @@ Inspect the following Single Source of Truth (SSOT) files before auditing:
    - 🚩 **Flag 4: Unnecessary Dependencies**: External packages added when minimal standard code suffices.
    - 🚩 **Flag 5: Outside Causal Path**: Modifying files unrelated to the specific ticket scope.
    - 🚩 **Flag 6: Self-introduced Complexity**: Comments, wrappers, or complex types written solely to justify complexity created by the change itself.
-   - 🚩 **Flag 7: Shallow Module / Failed Deletion Test (Matt Pocock codebase-design)**: Any newly introduced module, file, or wrapper where deleting it causes complexity to vanish rather than dispersing across callers. A seam requires at least two adapters (e.g. production + test in-memory); single-adapter seams are banned indirection. The interface is the test surface. Flag as **[BLOCKER] Shallow Module / Failed Deletion Test**.
+   - 🚩 **Flag 7: Shallow Module, Micro-Splintering & Middle-Man Ban [IMP-389]**:
+     - *Deletion Test & Deep Modules*: A deep module hides significant complexity behind a cohesive interface (Ousterhout). Pure calculation and view-model test seams (`*_visuals.ts`, `*_math.ts`) are legitimate seams where the test suite is a valid 2nd consumer (Feathers).
+     - *Micro-Splintering Ban*: Flag any newly introduced logic file with < 30 LOC created solely to evade LOC ceilings as **[BLOCKER] Micro-Splintering Slop** (exempt: pure types, constants, barrel re-exports, UI components).
+     - *Middle-Man Ban*: Flag any 1-line exact passthrough function that delegates without data transformation or validation as **[BLOCKER] Middle-Man Passthrough** (exempt: default parameter wrappers and public API boundary facades).
 4. **Nearby Context, Bug & Regression Analysis**:
    - **Context Inspection**: Never inspect diff hunks in isolation; read 20-30 lines before and after every modification to detect caller mismatch, state leakage, or broken invariants.
    - **Real Bug & Regression Hunt**: Target edge-case boundary errors, off-by-one arithmetic, concurrency/async race hazards, and unintended breakage of legacy contracts.

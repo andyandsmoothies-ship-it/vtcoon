@@ -14,6 +14,7 @@
    - [2.3.1 Kiến Trúc Phân Tầng Rule Trong Subagent (Rule Layering within Agent Ecosystem)](#231-kiến-trúc-phân-tầng-rule-trong-subagent-rule-layering-within-agent-ecosystem)
    - [2.4 Quy Trình "Giảm Cân" & Nén Context Định Kỳ (Periodic Context Deflation & Compaction Routine)](#24-quy-trình-giảm-cân--nén-context-định-kỳ-periodic-context-deflation--compaction-routine)
    - [2.5 Minh Họa Thực Chiến Từ Dự Án VTCOON (Case Study: Deflation & LOC Tooling)](#25-minh-họa-thực-chiến-từ-dự-án-vtcoon-case-study-deflation--loc-tooling)
+   - [2.6 Quy Chuẩn Quản Trị Tinh Gọn Dự Án Mới & Cân Bằng Tracking Thực Chiến (Lean Greenfield & Human-Centric Tracking)](#26-quy-chuẩn-quản-trị-tinh-gọn-dự-án-mới--cân-bằng-tracking-thực-chiến-lean-greenfield--human-centric-tracking)
 3. [CƠ CHẾ KỸ NĂNG HẠT GIỐNG (Seed Skill & JIT Dispatcher)](#3-cơ-chế-kỹ-năng-hạt-giống-seed-skill--jit-dispatcher)
 4. [SƠ ĐỒ DÒNG CHẢY KẾT HỢP CÁC KỸ NĂNG (The Artifact Pipeline)](#4-sơ-đồ-dòng-chảy-kết-hợp-các-kỹ-năng-the-artifact-pipeline)
 5. [HỆ THỐNG TRUY XUẤT NGUỒN GỐC ARTIFACTS (3-Bucket Taxonomy, 4D ADR & Universal design.md)](#5-hệ-thống-truy-xuất-nguồn-gốc-artifacts-3-bucket-taxonomy-4d-adr--universal-designmd)
@@ -581,6 +582,67 @@ Dự án VTCOON (Game Monopoly 3D/2D kiến trúc Server-Authoritative) là minh
 | **`docs/domain/gotchas.md`** | 3,383 dòng (chứa 289 gotchas tích tụ qua hàng trăm commits). Gây bão hòa prompt mỗi khi Agent đọc. | **61 dòng** (Cô đọng thành **6 Trụ Cột Bất Biến**: SSOT Intent, Transient Teardown, Strict Intent Isolation, Treasury Conservation, Full-Pipeline Slice, Spatial/Touch Standards). | **Giảm 98.2% dung lượng context!** Toàn bộ 289 gotchas lịch sử được chuyển an toàn sang `gotchas_archive.md` (4,801 dòng) làm tài liệu tra cứu thụ động (Layer 4). |
 | **`GEMINI.md` (Project Rule)** | 101 dòng (chứa nhiều hướng dẫn lặp lại và chi tiết thừa). | **59 dòng** (Bao gồm: Hard Constraints, Definition of Done, NFR Baseline, và 8 Index Memory Pointers). | Nằm gọn trong ngân sách vàng <= 80 dòng (Layer 5). |
 | **Đo Lường Dòng Mã (LOC Checks)** | Agent tự đếm dòng bằng PowerShell `Measure-Object` hoặc phỏng đoán, dẫn đến sai lệch delta (báo −32 nhưng thực tế −9 do xóa và thêm code xen kẽ). | Tạo tệp `scripts/check_loc.mjs` (Layer 1) phân định rõ ràng giữa **Total Lines (Độ dài vật lý tệp)** và **Non-Empty SLOC (Dòng code thực tế)**, tự động so khớp với trần ngân sách 5 Tầng (Tier 1-5). | Triệt tiêu 100% ảo giác đếm dòng của AI trong 0.2 giây! |
+
+---
+
+### 2.6 QUY CHUẨN QUẢN TRỊ TINH GỌN DỰ ÁN MỚI & CÂN BẰNG TRACKING THỰC CHIẾN (Lean Greenfield & Human-Centric Tracking)
+
+*(Ngăn chặn triệt để nguy cơ "Meta-Work Bloat", "AI Bureaucracy" và "Rác hóa Codebase" khi khởi tạo hoặc chuyển giao sang các dự án mới).*
+
+#### 2.6.1 NGUY CƠ NỢ QUẢN TRỊ KHI RẬP KHUÔN SANG DỰ ÁN MỚI (Harness Cargo-Culting Hazard)
+Khi phát triển một hệ thống lớn như Vtcoon, bộ công cụ quản trị (hàng chục scripts, rules, gates, subagents) được tôi luyện để giải quyết các bài toán đặc thù cực đoan (Realtime 3D, WebGL, Dynamic Sockets, FSM). Tuy nhiên, nếu **rập khuôn máy móc** bộ khung đồ sộ này sang một dự án mới (Greenfield / Web thông thường / Microservice), dự án sẽ đối mặt với 3 hiểm họa:
+1. **Instruction Fatigue & Attention Dilution**: AI bị ngộ độc context bởi hàng trăm dòng quy chế không liên quan, dẫn đến giảm sút năng lực giải quyết logic nghiệp vụ cốt lõi.
+2. **AI Process Bureaucracy (Bệnh quan liêu hóa AI)**: AI dành 80% token để làm thủ tục giấy tờ (soạn plan, tự audit, tự viết báo cáo khen mình) thay vì tập trung viết code và living tests.
+3. **Dead Meta-Code & Toolchain Maintenance Debt**: Bộ scripts linter tự chế bị lỗi thời hoặc không tương thích với stack công nghệ mới, biến thành gánh nặng bảo trì vô ích.
+
+#### 2.6.2 BỐN QUY TẮC CỐT TỬ CÂN BẰNG GIỮA QUẢN TRỊ TINH GỌN VÀ TRACKING CON NGƯỜI
+
+```text
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│              4 NGUYÊN TẮC QUẢN TRỊ DỰ ÁN MỚI: TINH GỌN MÁY MÓC - MINH BẠCH CON NGƯỜI   │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+
+ [1. PROJECT RULE TỐI GIẢN]  ──► GEMINI.md / AGENTS.md giữ <= 80-100 dòng.
+                                 Chỉ giữ Rào chắn Sinh tử + Con trỏ SSOT. Không spam text.
+
+ [2. QUẢN TRỊ TIỆM TIẾN &    ──► Heuristic: Quy tắc số 3 (Rule of Three) - Lỗi lặp >= 2 lần
+     HUMAN OVERRIDE GATE]        mới tạo thêm rule/gate cơ học. Cấm tạo rule giả định đón đầu.
+                                 NGOẠI LỆ TỐI CAO: Khi Con Người (User/Tech Lead) yêu cầu thêm
+                                 rule/gotcha/script, AI BẮT BUỘC thực thi ngay lập tức!
+
+ [3. HUMAN-CENTRIC TRACKING] ──► VẪN DUY TRÌ các file theo dõi chuẩn (.agents/plans/,
+                                 .agents/audit/, docs/reports/) để con người theo dõi tiến độ,
+                                 tra cứu lịch sử và kiểm soát chất lượng minh bạch.
+
+ [4. TINH GIẢN SCRIPT BÁO    ──► Giữ trọn 100% thông tin quan trọng & có giá trị thực tế
+     CÁO (ZERO-BOILERPLATE)]     (LOC delta, mutant kill rate, living tests, call-site wiring).
+                                 Chỉ cắt bỏ văn mẫu rỗng, giữ văn phong đanh thép, súc tích.
+```
+
+1. **Nguyên Tắc 1: Project Rule Tối Giản (Lean Project Constitution $\le 80-100$ LOC)**:
+   - Tại thư mục gốc dự án mới, file `./GEMINI.md` (hoặc `AGENTS.md`) phải giữ thật đơn giản.
+   - Chỉ quy định những rào chắn mang tính sống còn: Zero Dirty Casts, Seam Discipline, trần LOC phân tầng, ranh giới client/server và con trỏ liên kết đến SSOT.
+   - Ưu tiên tối đa cấu hình chuẩn công nghiệp (`tsconfig.json` bật `strict`, `biome.json` / `.eslintrc`) thay vì viết văn xuôi markdown răn đe AI.
+
+2. **Nguyên Tắc 2: Quản Trị Tiệm Tiến theo Quy Tắc Số 3 & Cổng Can Thiệp Con Người (Rule of Three with Human Override)**:
+   - **Cấm tạo rào chắn đón đầu giả định (Zero Preemptive Over-Regulation)**: Tuyệt đối không nghĩ ra hàng chục điều luật phòng ngừa khi lỗi chưa từng xảy ra trên thực tế.
+   - **Quy tắc số 3 (Rule of Three)**: AI chỉ tự động đề xuất tạo thêm một rule mới, gotcha mới hoặc script kiểm tra cơ học khi một dạng lỗi kiến trúc thực tế đã lọt lưới từ 2 lần trở lên ($\ge 2$).
+   - **Cổng Can Thiệp Tối Cao Của Con Người (Human Override Gate)**:
+     > [!IMPORTANT]
+     > Bất cứ khi nào Con Người (Tech Lead / User) yêu cầu cập nhật rule, bổ sung gotcha, hoặc tạo script tự động hóa cho một trường hợp cụ thể, **AI BẮT BUỘC thực hiện ngay lập tức mà không cần chờ điều kiện lặp lại $\ge 2$ lần**. Quyết định định hướng của con người luôn là Single Source of Truth tối cao.
+
+3. **Nguyên Tắc 3: Bảo Tồn Dấu Vết Pháp Chứng Cho Con Người (Human-Centric Traceability & Tracking Artifacts)**:
+   - Không được cực đoan xóa bỏ các file tài liệu theo dõi tiến độ. Hệ thống **vẫn tạo đầy đủ các file cấu trúc chuẩn**:
+     - Kế hoạch lát cắt: `.agents/plans/PLAN_[TICKET].md`
+     - Biên bản phản biện đối kháng: `.agents/audit/PLAN_CHALLENGE_[TICKET].md` hoặc `SPEC_REVIEW_[TICKET].md`
+     - Báo cáo bàn giao nghiệm thu: `docs/reports/improvements/IMP-[ID]-[slug]_report.md`
+   - **Mục đích sống còn**: Đây là giao diện thông tin phục vụ **nhận thức của con người** (Human Cognition), giúp người dùng dễ dàng tracking, đối chiếu lịch sử phát triển, kiểm tra tính toàn vẹn của mã nguồn và tự tin nghiệm thu sản phẩm.
+
+4. **Nguyên Tắc 4: Tiêu Chuẩn Tinh Giản Script Báo Cáo (High-Signal, Zero-Boilerplate Reporting Engine)**:
+   - Khi cập nhật hoặc tái cấu trúc các script sinh báo cáo (`scripts/report/`, `scripts/evidence_audit/`):
+     - **Bảo toàn 100% nội dung quan trọng và có giá trị**: Tuyệt đối không cắt xén các thông tin pháp chứng cốt tử (Delta LOC vật lý thực tế, tỷ lệ diệt mutant của Chaos Sentinel, danh sách living test suites đã chạy, ma trận call-site wiring, các giải pháp chống xung đột luồng/kinh tế). Có thể bổ sung thêm các trường dữ liệu nếu thấy cần thiết cho việc kiểm thử.
+     - **Chỉ loại bỏ những gì không có giá trị (Zero-Boilerplate Elimination)**: Xóa sổ triệt để các đoạn văn mẫu tự động sinh ra nhưng vô nghĩa (như các câu generic summaries, lời tự khen, hoặc placeholder `TODO_REVIEW_REQUIRED`).
+     - **Văn phong đanh thép, súc tích**: Trình bày báo cáo dưới dạng bảng số liệu, bullet points trực diện và trích dẫn mã nguồn chính xác, giúp file `.md` ngắn gọn, cô đọng, dễ đọc mà vẫn đầy đủ dữ liệu pháp chứng.
 
 ---
 

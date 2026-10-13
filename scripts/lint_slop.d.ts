@@ -19,6 +19,9 @@ export declare const SLOP_RULES: {
   readonly ZERO_WORKAROUND_COMMENTS: 'zero-workaround-comments';
   readonly ZERO_GETTER_PROXIES: 'zero-getter-proxies';
   readonly ZERO_PSEUDO_PROXIES: 'zero-pseudo-proxies';
+  readonly ZERO_MICRO_SPLINTERING: 'zero-micro-splintering';
+  readonly ZERO_PASSTHROUGH_PROXIES: 'zero-passthrough-proxies';
+  readonly [key: string]: string;
 };
 
 export declare const TIER_BUDGETS: {

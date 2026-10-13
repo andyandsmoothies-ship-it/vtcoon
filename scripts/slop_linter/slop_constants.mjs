@@ -20,6 +20,8 @@ export const SLOP_RULES = {
   ZERO_ALLOCATION_RENDER_LOOP: 'zero-allocation-render-loop',
   R3F_NO_CONDITIONAL_RETURN_NULL: 'r3f-no-conditional-return-null',
   KINEMATICS_FINITE_DEFENSE: 'kinematics-finite-defense',
+  ZERO_MICRO_SPLINTERING: 'zero-micro-splintering',
+  ZERO_PASSTHROUGH_PROXIES: 'zero-passthrough-proxies',
 };
 
 export const TIER_BUDGETS = {

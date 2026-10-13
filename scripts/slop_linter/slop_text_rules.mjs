@@ -55,15 +55,15 @@ export function lintTextRules(content, filePath, errors, warnings) {
 /**
  * Checks for production files imported only in tests with zero consumers in src.
  */
-export function lintOrphanProductionFiles(targetDir, files, errors) {
+export function lintOrphanProductionFiles(targetDir, files, errors, fileCache = null) {
   if (targetDir !== 'src' && !targetDir.startsWith('src')) return;
 
   const srcFiles = files.filter(f => f.replace(/\\/g, '/').startsWith('src/'));
   if (srcFiles.length === 0) return;
   const testFiles = fs.existsSync('tests') ? getSourceFiles('tests') : [];
   const allSrcFiles = fs.existsSync('src') ? getSourceFiles('src') : srcFiles;
-  const allSrcContent = allSrcFiles.map((f) => ({ file: f, content: fs.readFileSync(f, 'utf8') }));
-  const allTestContent = testFiles.map((f) => ({ file: f, content: fs.readFileSync(f, 'utf8') }));
+  const allSrcContent = allSrcFiles.map((f) => ({ file: f, content: fileCache?.get(f) ?? fs.readFileSync(f, 'utf8') }));
+  const allTestContent = testFiles.map((f) => ({ file: f, content: fileCache?.get(f) ?? fs.readFileSync(f, 'utf8') }));
   const KNOWN_ENTRYPOINTS = new Set([
     'src/client/main.tsx',
     'src/server/index.ts',
