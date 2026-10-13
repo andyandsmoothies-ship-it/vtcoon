@@ -40,7 +40,7 @@ export class AppErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundar
       return (
         <div
           role="alert"
-          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950/95 p-6 text-center text-slate-100 backdrop-blur-md"
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950/98 p-6 text-center text-slate-100 backdrop-blur-none md:backdrop-blur-md"
         >
           <div className="max-w-md rounded-2xl border border-rose-500/40 bg-slate-900/90 p-6 shadow-2xl">
             <div className="mb-3 text-4xl">⚠️</div>

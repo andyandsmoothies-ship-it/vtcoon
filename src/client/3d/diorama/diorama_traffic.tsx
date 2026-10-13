@@ -100,7 +100,12 @@ export function MicroVehicleProceduralFallback({ v }: MicroVehicleFallbackProps)
   );
 }
 
-export function DioramaTraffic({ isMobile = false }: { readonly isMobile?: boolean } = {}): React.ReactElement {
+export interface DioramaTrafficProps {
+  readonly isMobile?: boolean;
+  readonly isVisible?: boolean;
+}
+
+export function DioramaTraffic({ isMobile = false, isVisible = true }: DioramaTrafficProps = {}): React.ReactElement {
   const phase = useEnvironmentStore((s) => s.phase);
   const isNight = phase === 'night';
   const isSunset = phase === 'sunset';
@@ -165,37 +170,26 @@ export function DioramaTraffic({ isMobile = false }: { readonly isMobile?: boole
     });
   }, [outerCurve, innerCurve]);
 
-  // Di chuyển liên tục tuần hoàn & tự động tính góc xoay yaw mượt mà khi rẽ cua
-  useSafeFrame((state) => {
-    if (isMobile) return;
-    const t = state.clock.elapsedTime;
-    MICRO_VEHICLES.forEach((v, idx) => {
-      const grp = vehicleRefs.current[idx];
-      if (!grp) return;
-
-      const curve = v.track === 'outer' ? outerCurve : innerCurve;
-      const progress = ((t * v.speed + v.offset) % 1 + 1) % 1;
-
-      curve.getPointAt(progress, tempVec);
-      curve.getTangentAt(progress, tempTangent);
-      const yaw = Math.atan2(tempTangent.x, tempTangent.z);
-
-      grp.position.copy(tempVec);
-      grp.rotation.set(0, yaw, 0);
-    });
-  });
-
   return (
     <group
       data-testid="diorama-traffic"
       onClick={() => SoundEngine.playCarHorn()}
       onPointerDown={() => SoundEngine.playCarHorn()}
     >
+      {!isMobile && (
+        <DioramaTrafficFrameLoop
+          isVisible={isVisible}
+          vehicleRefs={vehicleRefs}
+          outerCurve={outerCurve}
+          innerCurve={innerCurve}
+        />
+      )}
       <group
         data-testid="micro-traffic-group"
         onClick={() => SoundEngine.playCarHorn()}
         onPointerDown={() => SoundEngine.playCarHorn()}
       >
+
         {MICRO_VEHICLES.map((v, idx) => {
           const [w, h, l] = v.size;
           const initial = initialTransforms[idx];
@@ -261,3 +255,49 @@ export function DioramaTraffic({ isMobile = false }: { readonly isMobile?: boole
     </group>
   );
 }
+
+export interface DioramaTrafficFrameLoopProps {
+  readonly isVisible?: boolean;
+  readonly vehicleRefs: React.MutableRefObject<(Group | null)[]>;
+  readonly outerCurve: CatmullRomCurve3;
+  readonly innerCurve: CatmullRomCurve3;
+}
+
+export function DioramaTrafficFrameLoop({
+  isVisible = true,
+  vehicleRefs,
+  outerCurve,
+  innerCurve,
+}: DioramaTrafficFrameLoopProps): null {
+  const progressRef = useRef<number[]>(MICRO_VEHICLES.map((v) => v.offset));
+
+  useSafeFrame((_, delta) => {
+    if (!isVisible) {
+      return;
+    }
+
+    // Enforce ADV-03: Clamped delta spike on tab focus or modal dismissal
+    const clampedDelta = Math.min(delta, 0.1);
+
+    MICRO_VEHICLES.forEach((v, idx) => {
+      const grp = vehicleRefs.current[idx];
+      if (!grp) return;
+
+      const curve = v.track === 'outer' ? outerCurve : innerCurve;
+      const currentProgress = progressRef.current[idx] ?? v.offset;
+      const progress = ((currentProgress + clampedDelta * v.speed) % 1 + 1) % 1;
+      progressRef.current[idx] = progress;
+
+      curve.getPointAt(progress, tempVec);
+      curve.getTangentAt(progress, tempTangent);
+      const yaw = Math.atan2(tempTangent.x, tempTangent.z);
+
+      grp.position.copy(tempVec);
+      grp.rotation.set(0, yaw, 0);
+    });
+  });
+
+  return null;
+}
+
+

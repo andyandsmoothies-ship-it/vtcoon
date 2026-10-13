@@ -65,7 +65,7 @@ export function TelemetryConsoleModal(): React.ReactElement | null {
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-6 bg-slate-950/75 backdrop-blur-sm pointer-events-auto select-none"
+      className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-6 bg-slate-950/95 md:bg-slate-950/75 backdrop-blur-none md:backdrop-blur-sm pointer-events-auto select-none"
       role="dialog"
       aria-modal="true"
       aria-label="Hộp Đen & Giám Sát Thời Gian Thực"

@@ -82,7 +82,7 @@ function feedFrameSamples(controller: PerfBudgetController, count: number, sampl
 
 describe('IMP-265: Dual-Platform 3D Performance & Mobile Thermal Invariant Contract Suite', () => {
   beforeEach(() => {
-    vi.stubGlobal('window', globalThis);
+    vi.stubGlobal('window', { ...globalThis, location: { search: '' } });
     lastRegisteredSafeFrameCallback = null;
     registeredSafeFrameCallbacks = [];
   });

@@ -23,27 +23,24 @@ export function calculateCruiserTrajectory(time: number): { x: number; y: number
   return { x, y, z, yaw };
 }
 
-export function DioramaHarborCruiser({ isMobile = false }: { readonly isMobile?: boolean } = {}): React.ReactElement {
+export interface DioramaHarborCruiserProps {
+  readonly isMobile?: boolean;
+  readonly isVisible?: boolean;
+}
+
+export function DioramaHarborCruiser({ isMobile = false, isVisible = true }: DioramaHarborCruiserProps = {}): React.ReactElement {
   const boatRef = useRef<Group>(null);
   const wakeRef = useRef<Mesh>(null);
 
-  useSafeFrame((state) => {
-    if (isMobile) return;
-    const t = state.clock.elapsedTime;
-    if (boatRef.current) {
-      const traj = calculateCruiserTrajectory(t);
-      boatRef.current.position.set(traj.x, traj.y, traj.z);
-      boatRef.current.rotation.y = traj.yaw;
-      boatRef.current.rotation.z = Math.sin(t * 2.8) * 0.02;
-    }
-    if (wakeRef.current) {
-      const s = calculateCruiserWake(t);
-      wakeRef.current.scale.set(s, 1, s);
-    }
-  });
-
   return (
     <group ref={boatRef} position={[0, -0.032, 5.2]} data-testid="diorama-harbor-cruiser">
+      {!isMobile && (
+        <DioramaHarborCruiserFrameLoop
+          isVisible={isVisible}
+          boatRef={boatRef}
+          wakeRef={wakeRef}
+        />
+      )}
       {/* Zero castShadow theo chuẩn [TC-221.15] */}
       <mesh position={[0, 0.035, 0]}>
         <boxGeometry args={[0.26, 0.05, 0.72]} />
@@ -66,3 +63,43 @@ export function DioramaHarborCruiser({ isMobile = false }: { readonly isMobile?:
     </group>
   );
 }
+
+export interface DioramaHarborCruiserFrameLoopProps {
+  readonly isVisible?: boolean;
+  readonly boatRef: React.RefObject<Group | null>;
+  readonly wakeRef?: React.RefObject<Mesh | null>;
+}
+
+export function DioramaHarborCruiserFrameLoop({
+  isVisible = true,
+  boatRef,
+  wakeRef,
+}: DioramaHarborCruiserFrameLoopProps): null {
+  const timeAccumRef = useRef<number>(0);
+
+  useSafeFrame((_, delta) => {
+    if (!isVisible) {
+      return;
+    }
+
+    // Enforce ADV-03: Clamped delta spike on tab focus or modal dismissal
+    const clampedDelta = Math.min(delta, 0.1);
+    timeAccumRef.current += clampedDelta;
+    const t = timeAccumRef.current;
+
+    if (boatRef.current) {
+      const traj = calculateCruiserTrajectory(t);
+      boatRef.current.position.set(traj.x, traj.y, traj.z);
+      boatRef.current.rotation.y = traj.yaw;
+      boatRef.current.rotation.z = Math.sin(t * 2.8) * 0.02;
+    }
+    if (wakeRef?.current) {
+      const s = calculateCruiserWake(t);
+      wakeRef.current.scale.set(s, 1, s);
+    }
+  });
+
+  return null;
+}
+
+

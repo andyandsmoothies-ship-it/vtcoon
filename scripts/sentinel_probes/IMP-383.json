@@ -1,0 +1,62 @@
+[
+  {
+    "file": "src/client/3d/board_layout.tsx",
+    "desc": "Mutant 1: Corrupt isVisible propagation from GameBoard to MiniatureCityDiorama",
+    "target": "<MiniatureCityDiorama isMobile={isMobile} isVisible={isCityVisible} />",
+    "replacement": "<MiniatureCityDiorama isMobile={isMobile} isVisible={true} />"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "Mutant 2: Corrupt isVisible propagation to DioramaTraffic in MiniatureCityDiorama",
+    "target": "<DioramaTraffic isMobile={isMobile} isVisible={isVisible} />",
+    "replacement": "<DioramaTraffic isMobile={isMobile} isVisible={true} />"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "Mutant 3: Corrupt isVisible propagation to DioramaHarborCruiser in MiniatureCityDiorama",
+    "target": "<DioramaHarborCruiser isMobile={isMobile} isVisible={isVisible} />",
+    "replacement": "<DioramaHarborCruiser isMobile={isMobile} isVisible={true} />"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "Mutant 4: Corrupt isVisible propagation to DioramaMicroLife in MiniatureCityDiorama",
+    "target": "<DioramaMicroLife isMobile={isMobile} isVisible={isVisible} />",
+    "replacement": "<DioramaMicroLife isMobile={isMobile} isVisible={true} />"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_traffic.tsx",
+    "desc": "Mutant 5: Unconditionally mount DioramaTrafficFrameLoop on mobile",
+    "target": "{!isMobile && (",
+    "replacement": "{/* mutant: always mount loop */ true && ("
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_harbor_cruiser.tsx",
+    "desc": "Mutant 6: Unconditionally mount DioramaHarborCruiserFrameLoop on mobile",
+    "target": "{!isMobile && (",
+    "replacement": "{/* mutant: always mount loop */ true && ("
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_microlife.tsx",
+    "desc": "Mutant 7: Unconditionally mount DioramaMicroLifeFrameLoop on mobile",
+    "target": "{!isMobile && (",
+    "replacement": "{/* mutant: always mount loop */ true && ("
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_traffic.tsx",
+    "desc": "Mutant 8: Bypass isVisible early return in DioramaTrafficFrameLoop",
+    "target": "if (!isVisible) {",
+    "replacement": "if (false) {"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_harbor_cruiser.tsx",
+    "desc": "Mutant 9: Bypass isVisible early return in DioramaHarborCruiserFrameLoop",
+    "target": "if (!isVisible) {",
+    "replacement": "if (false) {"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_traffic.tsx",
+    "desc": "Mutant 10: Bypass delta clamping in DioramaTrafficFrameLoop",
+    "target": "const clampedDelta = Math.min(delta, 0.1);",
+    "replacement": "const clampedDelta = delta;"
+  }
+]

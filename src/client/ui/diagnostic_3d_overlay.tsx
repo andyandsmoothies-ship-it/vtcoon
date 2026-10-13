@@ -28,12 +28,12 @@ export function Diagnostic3DOverlay(): React.ReactElement | null {
         <button
           type="button"
           onClick={toggleOpen}
-          className="px-2 py-1 bg-slate-900/80 text-cyan-400 border border-cyan-500/40 rounded shadow backdrop-blur cursor-pointer"
+          className="px-2 py-1 bg-slate-900/95 text-cyan-400 border border-cyan-500/40 rounded shadow backdrop-blur-none md:backdrop-blur cursor-pointer"
         >
           🛠️ 3D DEBUG
         </button>
       ) : (
-        <div className="p-3 bg-slate-950/95 text-slate-200 border border-cyan-500/60 rounded-lg shadow-2xl backdrop-blur max-w-xs space-y-2">
+        <div className="p-3 bg-slate-950/98 text-slate-200 border border-cyan-500/60 rounded-lg shadow-2xl backdrop-blur-none md:backdrop-blur max-w-xs space-y-2">
           <div className="flex justify-between items-center border-b border-slate-800 pb-1">
             <span className="font-bold text-cyan-400">3D DIAGNOSTICS</span>
             <button

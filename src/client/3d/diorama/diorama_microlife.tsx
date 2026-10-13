@@ -3,26 +3,24 @@ import React, { useRef } from 'react';
 import type { Group } from 'three';
 import { useSafeFrame } from '../safe_frame';
 
-export function DioramaMicroLife({ isMobile = false }: { readonly isMobile?: boolean } = {}): React.ReactElement {
+export interface DioramaMicroLifeProps {
+  readonly isMobile?: boolean;
+  readonly isVisible?: boolean;
+}
+
+export function DioramaMicroLife({ isMobile = false, isVisible = true }: DioramaMicroLifeProps = {}): React.ReactElement {
   const boatRef = useRef<Group>(null);
   const carRef = useRef<Group>(null);
 
-  // Chuyển động nhấp nhô vi mô nhẹ nhàng của thuyền nước và xe cầu cạn (60 FPS diorama drift)
-  useSafeFrame((state) => {
-    if (isMobile) return;
-    const t = state.clock.elapsedTime;
-    if (boatRef.current) {
-      boatRef.current.position.z = Math.sin(t * 0.4) * 0.6;
-      boatRef.current.rotation.z = Math.sin(t * 0.8) * 0.04;
-    }
-    if (carRef.current) {
-      // Động cơ xe buýt rung nhẹ tại trạm dừng ngắm cảnh ven đại lộ
-      carRef.current.position.y = 0.145 + Math.sin(t * 2.5) * 0.001;
-    }
-  });
-
   return (
     <group position={[0, 0, 0]}>
+      {!isMobile && (
+        <DioramaMicroLifeFrameLoop
+          isVisible={isVisible}
+          boatRef={boatRef}
+          carRef={carRef}
+        />
+      )}
       {/* ========================================================
           1. XE BUÝT TÍ HON ĐẬU VEN VỈA HÈ ĐẠI LỘ TÂY
          ======================================================== */}
@@ -62,3 +60,37 @@ export function DioramaMicroLife({ isMobile = false }: { readonly isMobile?: boo
     </group>
   );
 }
+
+export interface DioramaMicroLifeFrameLoopProps {
+  readonly isVisible?: boolean;
+  readonly boatRef: React.RefObject<Group | null>;
+  readonly carRef: React.RefObject<Group | null>;
+}
+
+export function DioramaMicroLifeFrameLoop({
+  isVisible = true,
+  boatRef,
+  carRef,
+}: DioramaMicroLifeFrameLoopProps): null {
+  const timeAccumRef = useRef<number>(0);
+
+  useSafeFrame((_, delta) => {
+    if (!isVisible) return;
+    const clampedDelta = Math.min(delta, 0.1);
+    timeAccumRef.current += clampedDelta;
+    const t = timeAccumRef.current;
+
+    if (boatRef.current) {
+      boatRef.current.position.z = Math.sin(t * 0.4) * 0.6;
+      boatRef.current.rotation.z = Math.sin(t * 0.8) * 0.04;
+    }
+    if (carRef.current) {
+      // Động cơ xe buýt rung nhẹ tại trạm dừng ngắm cảnh ven đại lộ
+      carRef.current.position.y = 0.145 + Math.sin(t * 2.5) * 0.001;
+    }
+  });
+
+  return null;
+}
+
+

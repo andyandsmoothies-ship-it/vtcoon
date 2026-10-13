@@ -74,7 +74,7 @@ export function ServerToast({ message, onClose }: ServerToastProps): React.React
   return (
     <div
       role="alert"
-      className="fixed top-20 sm:top-24 right-4 sm:right-6 z-60 w-[92vw] max-w-[360px] sm:max-w-md bg-slate-900/95 text-white rounded-2xl shadow-2xl border-2 border-amber-400 px-4 py-3 backdrop-blur-md flex items-center justify-between gap-3 pointer-events-auto"
+      className="fixed top-20 sm:top-24 right-4 sm:right-6 z-60 w-[92vw] max-w-[360px] sm:max-w-md bg-slate-900/98 text-white rounded-2xl shadow-2xl border-2 border-amber-400 px-4 py-3 backdrop-blur-none md:backdrop-blur-md flex items-center justify-between gap-3 pointer-events-auto"
     >
       <div className="flex items-start gap-2.5 min-w-0 flex-1">
         <span className="text-lg select-none shrink-0 mt-0.5" aria-hidden="true">⚠️</span>

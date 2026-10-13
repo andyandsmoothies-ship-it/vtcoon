@@ -181,7 +181,7 @@ export function ActivityFeedSidebar(props: ActivityFeedSidebarProps): React.Reac
         <div
           data-testid="activity-feed-backdrop"
           onClick={() => setOpen(false)}
-          className="fixed inset-0 bg-black/40 backdrop-blur-2xs z-20 pointer-events-auto"
+          className="fixed inset-0 bg-black/60 md:bg-black/40 backdrop-blur-none md:backdrop-blur-2xs z-20 pointer-events-auto"
           aria-hidden="true"
         />
       )}

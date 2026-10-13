@@ -317,10 +317,11 @@ export function DioramaUrbanCanopy({ isMobile = false }: { readonly isMobile?: b
 
 export interface MiniatureCityDioramaProps {
   readonly isMobile?: boolean;
+  readonly isVisible?: boolean;
 }
 
-export function MiniatureCityDiorama(props: MiniatureCityDioramaProps = {}): React.ReactElement {
-  const isMobile = props.isMobile ?? isMobileDevice();
+export function MiniatureCityDiorama({ isMobile: propIsMobile, isVisible = true }: MiniatureCityDioramaProps = {}): React.ReactElement {
+  const isMobile = propIsMobile ?? isMobileDevice();
   return (
     <group position={[0, 0, 0]} data-testid="miniature-city-diorama">
       {/* 0. Khung viền gỗ óc chó & gờ kim loại bao quanh bàn cờ */}
@@ -350,7 +351,7 @@ export function MiniatureCityDiorama(props: MiniatureCityDioramaProps = {}): Rea
       <DioramaContainerPort isMobile={isMobile} />
       <DioramaMarina isMobile={isMobile} />
       {/* 4.1. Thuyền du ngoạn lòng sông Sài Gòn (Bảo tồn hợp đồng TC-265.07) */}
-      <DioramaHarborCruiser isMobile={isMobile} />
+      <DioramaHarborCruiser isMobile={isMobile} isVisible={isVisible} />
       {/* 5. Cụm cao ốc tài chính Landmark Skyline & Tháp cao ốc nén */}
       <DioramaSkyline isMobile={isMobile} />
       {!isMobile && <DioramaHighriseBlocks />}
@@ -359,8 +360,8 @@ export function MiniatureCityDiorama(props: MiniatureCityDioramaProps = {}): Rea
       <DioramaHeritageDistrict isMobile={isMobile} />
       {!isMobile && <DioramaShophouseBlocks />}
       {/* 6. Nhịp sống đô thị vi mô & Giao thông tự hành (Bảo tồn hợp đồng TC-265.04 & TC-265.06) */}
-      <DioramaMicroLife isMobile={isMobile} />
-      <DioramaTraffic isMobile={isMobile} />
+      <DioramaMicroLife isMobile={isMobile} isVisible={isVisible} />
+      <DioramaTraffic isMobile={isMobile} isVisible={isVisible} />
     </group>
   );
 }

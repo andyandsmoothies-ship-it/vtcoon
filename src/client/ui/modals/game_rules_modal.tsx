@@ -38,7 +38,7 @@ export function GameRulesModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 pointer-events-auto animate-in fade-in duration-200 select-none"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 md:bg-slate-900/60 backdrop-blur-none md:backdrop-blur-xs p-4 pointer-events-auto animate-in fade-in duration-200 select-none"
       onClick={(e) => {
         if (e.target === e.currentTarget && onClose) {
           onClose();
