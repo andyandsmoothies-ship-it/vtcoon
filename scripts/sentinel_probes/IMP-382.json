@@ -1,0 +1,26 @@
+[
+  {
+    "file": "src/server/delta_mapper.ts",
+    "desc": "AST: Suppress room.pendingDomainEvents projection in buildDeltaFromRoom",
+    "target": "...(room.pendingDomainEvents && room.pendingDomainEvents.length > 0 ? { domainEvents: [...room.pendingDomainEvents] } : {}),",
+    "replacement": "/* Suppressed domainEvents projection */"
+  },
+  {
+    "file": "src/server/delta_mapper.ts",
+    "desc": "AST: Suppress domainEvents forwarding in buildDeltaPayload options",
+    "target": "...(tickOrOptions.domainEvents !== undefined ? { domainEvents: tickOrOptions.domainEvents } : {}),",
+    "replacement": "/* Suppressed domainEvents options forwarding */"
+  },
+  {
+    "file": "src/server/network/delta_broadcaster.ts",
+    "desc": "AST: Suppress domainEvents retention in buildSparseDelta diff",
+    "target": "...(next.domainEvents !== undefined ? { domainEvents: next.domainEvents } : {}),",
+    "replacement": "/* Suppressed domainEvents sparse retention */"
+  },
+  {
+    "file": "src/server/network/delta_broadcaster.ts",
+    "desc": "AST: Suppress pendingDomainEvents cleanup after broadcastRoomDelta",
+    "target": "delete ctx.room.pendingDomainEvents;",
+    "replacement": "/* Suppressed pendingDomainEvents cleanup */"
+  }
+]

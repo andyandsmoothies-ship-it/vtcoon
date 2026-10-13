@@ -86,6 +86,16 @@ export function formatBondIssuedMessage(
   return `${playerName} đã phát hành Trái Phiếu ${trancheLabel}+${formatCurrency(principal)} (kỳ hạn ${roundsLeft} vòng, lãi suất ${percent}%)`;
 }
 
+export function formatBondDefaultMessage(
+  playerName: string,
+  principal: number,
+  repayAmount: number,
+  cashSeized?: number,
+): string {
+  const seizedPart = cashSeized && cashSeized > 0 ? `, bị tịch thu ${formatCurrency(cashSeized)} tiền mặt` : '';
+  return `${playerName} vỡ nợ gói Trái Phiếu ${formatCurrency(principal)} (phải trả ${formatCurrency(repayAmount)}${seizedPart})`;
+}
+
 export function formatCompulsoryBuyoutMessage(
   buyerName: string,
   sellerName: string,

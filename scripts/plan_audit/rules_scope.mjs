@@ -13,8 +13,13 @@ export function auditScopeAndSubsystems(targetFiles) {
   // Group cohesive subcomponents/files sharing directory and common prefix stem
   const cohesiveFamilies = new Set();
   for (const f of prodTargets) {
-    const dir = path.dirname(f).replace(/\\/g, '/');
-    const base = path.basename(f, path.extname(f)).split('_')[0];
+    const norm = f.replace(/\\/g, '/');
+    if (norm.startsWith('src/client/events/')) {
+      cohesiveFamilies.add('src/client/events');
+      continue;
+    }
+    const dir = path.dirname(norm);
+    const base = path.basename(norm, path.extname(norm)).split('_')[0];
     cohesiveFamilies.add(`${dir}/${base}`);
   }
 

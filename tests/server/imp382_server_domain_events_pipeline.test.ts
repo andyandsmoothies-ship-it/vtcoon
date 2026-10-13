@@ -13,31 +13,7 @@ import {
 } from '../../src/server/network/delta_broadcaster.js';
 import type { WsServerMessage } from '../../src/server/network/network_types.js';
 import type { DeltaPayload, DeltaPayloadOptions } from '../../src/server/delta_types.js';
-
-export interface ServerDomainEvent {
-  readonly type: 'BOND_REPAID' | 'BOND_DEFAULT';
-  readonly playerId: string;
-  readonly principal: number;
-  readonly interest?: number;
-  readonly repayAmount?: number;
-  readonly trancheId?: string;
-  readonly timestamp: number;
-}
-
-declare module '../../src/domain/room.js' {
-  interface Room {
-    pendingDomainEvents?: ServerDomainEvent[];
-  }
-}
-
-declare module '../../src/server/delta_types.js' {
-  interface DeltaPayload {
-    readonly domainEvents?: ReadonlyArray<ServerDomainEvent>;
-  }
-  interface DeltaPayloadOptions {
-    domainEvents?: ReadonlyArray<ServerDomainEvent>;
-  }
-}
+import type { ServerDomainEvent } from '../../src/domain/room.js';
 
 describe('IMP-382: Authoritative Server Domain Events Wire Pipeline Contract Suite', () => {
   it('[TC-382.01/MSS][UC-ROOM-DOMAIN-EVENTS-HOLDER/MSS] Given Room with pendingDomainEvents containing canonical ServerDomainEvent (type: BOND_REPAID), When inspected, Then matches readonly ServerDomainEvent schema with zero dirty casts', () => {

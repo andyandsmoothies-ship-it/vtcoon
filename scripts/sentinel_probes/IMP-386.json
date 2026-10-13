@@ -1,0 +1,26 @@
+[
+  {
+    "file": "src/server/bond_manager.ts",
+    "desc": "AST: Suppress handleRepayBond pendingDomainEvents emission",
+    "target": "  (room.pendingDomainEvents ??= []).push({\n    type: 'BOND_REPAID',\n    playerId: player.id,\n    principal: player.bondContract.principal,\n    interest: interestPaid,\n    repayAmount: player.bondContract.repayAmount,\n    ...(player.bondContract.trancheId ? { trancheId: player.bondContract.trancheId } : {}),\n    timestamp: Date.now(),\n  });",
+    "replacement": "  /* Suppressed handleRepayBond pendingDomainEvents emission */"
+  },
+  {
+    "file": "src/server/bond_manager.ts",
+    "desc": "AST: Suppress processBondTurnTransition BOND_DEFAULT pendingDomainEvents emission",
+    "target": "  (room.pendingDomainEvents ??= []).push({\n    type: 'BOND_DEFAULT',\n    playerId: player.id,\n    principal: player.bondContract.principal,\n    repayAmount: player.bondContract.repayAmount,\n    cashSeized: cash,\n    ...(player.bondContract.trancheId ? { trancheId: player.bondContract.trancheId } : {}),\n    timestamp: Date.now(),\n  });",
+    "replacement": "  /* Suppressed processBondTurnTransition BOND_DEFAULT emission */"
+  },
+  {
+    "file": "src/client/events/game_event_bond_helpers.ts",
+    "desc": "AST: Suppress restoreDeltaOutflow on BOND_DEFAULT",
+    "target": "        if (ev.cashSeized && ev.cashSeized > 0) {\n          restoreDeltaOutflow(ev.playerId, ev.cashSeized, payers, receivers);\n        }",
+    "replacement": "        /* Suppressed restoreDeltaOutflow on BOND_DEFAULT */"
+  },
+  {
+    "file": "src/client/events/game_event_bond_helpers.ts",
+    "desc": "AST: Suppress same-turn BOND_ISSUED preservation after bond settlement",
+    "target": "    if ((!isPrevActive || handledBondPlayerIds.has(p.id)) && isCurrActive && currBond) {",
+    "replacement": "    if (!isPrevActive && isCurrActive && currBond) {"
+  }
+]

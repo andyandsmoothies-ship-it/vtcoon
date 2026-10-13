@@ -43,6 +43,22 @@ export function handleBondAndInvestmentBadges(
       break;
     }
 
+    case SynthesizedGameEventType.BOND_DEFAULT: {
+      const delay = pacing.getPawnLandingDelay(event.playerId);
+      const seized = event.cashSeized ?? 0;
+      pacing.scheduleAction(() => {
+        state.addFloatingText({
+          text: seized > 0 ? formatCurrency(-seized) : 'VỠ NỢ',
+          type: FloatingTextType.Penalty,
+          playerId: event.playerId,
+          actionType: 'bond',
+          title: 'Vỡ Nợ Trái Phiếu Doanh Nghiệp',
+          formula: `Nợ: ${formatCurrency(event.repayAmount)} Tr. (Gốc: ${formatCurrency(event.principal)} Tr.)`,
+        });
+      }, delay);
+      break;
+    }
+
     case SynthesizedGameEventType.COMPULSORY_BUYOUT: {
       const delay = pacing.getPawnLandingDelay(event.buyerId);
       const cellName = getCellName(event.cellIndex);

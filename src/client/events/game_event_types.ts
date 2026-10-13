@@ -22,6 +22,7 @@ export enum SynthesizedGameEventType {
   TRANSIT_WHEEL_LANDED = 'TRANSIT_WHEEL_LANDED',
   BOND_REPAID = 'BOND_REPAID',
   BOND_ISSUED = 'BOND_ISSUED',
+  BOND_DEFAULT = 'BOND_DEFAULT',
   COMPULSORY_BUYOUT = 'COMPULSORY_BUYOUT',
   HOSE_SETTLED = 'HOSE_SETTLED',
 }
@@ -188,6 +189,15 @@ export interface BondRepaidEvent extends BaseSynthesizedEvent {
   readonly trancheId?: BondTrancheId;
 }
 
+export interface BondDefaultEvent extends BaseSynthesizedEvent {
+  readonly type: SynthesizedGameEventType.BOND_DEFAULT;
+  readonly playerId: string;
+  readonly principal: number;
+  readonly repayAmount: number;
+  readonly cashSeized?: number;
+  readonly trancheId?: BondTrancheId;
+}
+
 export interface BondIssuedEvent extends BaseSynthesizedEvent {
   readonly type: SynthesizedGameEventType.BOND_ISSUED;
   readonly playerId: string;
@@ -242,6 +252,7 @@ export type SynthesizedGameEvent =
   | TransitWheelLandedEvent
   | BondRepaidEvent
   | BondIssuedEvent
+  | BondDefaultEvent
   | CompulsoryBuyoutEvent
   | HoseSettledEvent;
 

@@ -193,6 +193,7 @@ export function buildDeltaFromRoom(
     pendingTransitWheel: room.pendingTransitWheel ?? null,
     lastTransitResult: room.lastTransitResult ?? null,
     lastTradeResult: room.lastTradeResult ?? null,
+    ...(room.pendingDomainEvents && room.pendingDomainEvents.length > 0 ? { domainEvents: [...room.pendingDomainEvents] } : {}),
   });
 }
 
@@ -257,6 +258,7 @@ export function buildDeltaPayload(
       ...(tickOrOptions.pendingTransitWheel !== undefined ? { pendingTransitWheel: tickOrOptions.pendingTransitWheel } : {}),
       ...(tickOrOptions.lastTransitResult !== undefined ? { lastTransitResult: tickOrOptions.lastTransitResult } : {}),
       ...(tickOrOptions.lastTradeResult !== undefined ? { lastTradeResult: tickOrOptions.lastTradeResult } : {}),
+      ...(tickOrOptions.domainEvents !== undefined ? { domainEvents: tickOrOptions.domainEvents } : {}),
     };
   }
   return {

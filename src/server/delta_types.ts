@@ -6,8 +6,9 @@ import type {
   PendingBuyoutSession,
   BondContract,
   TradeResultInfo,
+  ServerDomainEvent,
 } from '../domain/room.js';
-export type { TradeResultInfo };
+export type { TradeResultInfo, ServerDomainEvent };
 import type { PropertyRegistry, PropertyStateMap } from '../domain/property_manager.js';
 export type { PropertyRegistry, PropertyStateMap };
 import type { ChanceCardId } from '../domain/event_card_engine.js';
@@ -104,6 +105,7 @@ export interface DeltaPayload {
   readonly pendingTransitWheel?:  { playerId: string; cellIndex: number; timestamp: number } | null;
   readonly lastTransitResult?:    { playerId: string; cellIndex: number; outcome: TransitWheelOutcome | string; targetCell?: number; payout?: number; boostSteps?: number } | null;
   readonly lastTradeResult?:      TradeResultInfo | null;
+  readonly domainEvents?:         ReadonlyArray<ServerDomainEvent>;
 }
 
 export interface DeltaPayloadOptions {
@@ -131,4 +133,5 @@ export interface DeltaPayloadOptions {
   pendingTransitWheel?: { playerId: string; cellIndex: number; timestamp: number } | null;
   lastTransitResult?: { playerId: string; cellIndex: number; outcome: TransitWheelOutcome | string; targetCell?: number; payout?: number; boostSteps?: number } | null;
   lastTradeResult?: TradeResultInfo | null;
+  domainEvents?: ReadonlyArray<ServerDomainEvent>;
 }

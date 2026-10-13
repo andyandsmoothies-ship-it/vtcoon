@@ -1,5 +1,4 @@
-// [UC-IMP192C] Corporate Bond Manager — Phát Hành, Đáo Hạn & Sàn Phát Mãi
-import { TurnPhase, type Room, type Player } from '../domain/room';
+import { TurnPhase, type Room, type Player, type ServerDomainEvent } from '../domain/room';
 import { ActionRejectReason } from '../domain/action_reasons';
 import { PROPERTY_DEEDS, type PropertyRegistry, type PropertyStateMap } from '../domain/property_manager';
 import { calculateNetWorth, restorePostInsolvencyPhase } from './insolvency_manager';
@@ -148,6 +147,15 @@ export function handleRepayBond(
   player.balance -= player.bondContract.repayAmount;
   const interestPaid = Math.max(0, player.bondContract.repayAmount - player.bondContract.principal);
   room.treasury = (room.treasury ?? 0) + interestPaid;
+  (room.pendingDomainEvents ??= []).push({
+    type: 'BOND_REPAID',
+    playerId: player.id,
+    principal: player.bondContract.principal,
+    interest: interestPaid,
+    repayAmount: player.bondContract.repayAmount,
+    ...(player.bondContract.trancheId ? { trancheId: player.bondContract.trancheId } : {}),
+    timestamp: Date.now(),
+  });
   player.bondContract = null;
   return { success: true };
 }
@@ -204,6 +212,15 @@ export function processBondTurnTransition(
     player.balance -= player.bondContract.repayAmount;
     const interestPaid = Math.max(0, player.bondContract.repayAmount - player.bondContract.principal);
     room.treasury = (room.treasury ?? 0) + interestPaid;
+    (room.pendingDomainEvents ??= []).push({
+      type: 'BOND_REPAID',
+      playerId: player.id,
+      principal: player.bondContract.principal,
+      interest: interestPaid,
+      repayAmount: player.bondContract.repayAmount,
+      ...(player.bondContract.trancheId ? { trancheId: player.bondContract.trancheId } : {}),
+      timestamp: Date.now(),
+    });
     player.bondContract = null;
     return;
   }
@@ -221,6 +238,15 @@ export function processBondTurnTransition(
 
   room.fireSaleQueue = cells;
   room.fireSaleDebtorId = player.id;
+  (room.pendingDomainEvents ??= []).push({
+    type: 'BOND_DEFAULT',
+    playerId: player.id,
+    principal: player.bondContract.principal,
+    repayAmount: player.bondContract.repayAmount,
+    cashSeized: cash,
+    ...(player.bondContract.trancheId ? { trancheId: player.bondContract.trancheId } : {}),
+    timestamp: Date.now(),
+  });
   player.bondContract = null;
 
   // Bắn Event thông báo biến cố vỡ nợ đồng thời chuyển pha sang Đấu Giá Phát Mãi

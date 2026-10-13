@@ -118,6 +118,7 @@ export function buildSparseDelta(prev: DeltaPayload, next: DeltaPayload): DeltaP
     ...(next.passedGoSalary !== undefined ? { passedGoSalary: next.passedGoSalary } : {}),
     ...(next.pendingTransitWheel !== undefined ? { pendingTransitWheel: next.pendingTransitWheel } : {}),
     ...(next.lastTransitResult !== undefined ? { lastTransitResult: next.lastTransitResult } : {}),
+    ...(next.domainEvents !== undefined ? { domainEvents: next.domainEvents } : {}),
   };
 }
 
@@ -196,6 +197,11 @@ export class DeltaBroadcaster {
         delta: payloadToSend,
       };
       this.broadcastFn(roomCode, msg);
+    }
+
+    const ctx = this.roomManager?.getContext?.(roomCode);
+    if (ctx?.room.pendingDomainEvents) {
+      delete ctx.room.pendingDomainEvents;
     }
 
     return {

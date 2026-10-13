@@ -2,9 +2,9 @@
 
 ## 0. Auto-Slicing Roadmap (Sprint 1 Architecture)
 - **Slice 1A (IMP-382 - THIS TICKET)**: Authoritative Server Domain Events Wire Pipeline (Domain Core Schema, Pure CQS Delta Mapper, Sparse Broadcaster Retention, and Post-Broadcast Lifecycle Cleanup).
-- **Slice 1B (IMP-383 - NEXT TICKET)**: Authoritative Bond Lifecycle Emission (`bond_manager.ts` dual emission: `BOND_REPAID` & `BOND_DEFAULT`) & Client Zero-Heuristic Financial Dispatch (`game_event_financial_synthesizer.ts`).
-- **Sprint 2 (IMP-384)**: 3D Board Unified Overlay (<BoardPropertyMarkersOverlay />) and legacy single-mesh deletion.
-- **Sprint 3 (IMP-385)**: AGENTS CONSTITUTION upgrade: Anti-Single-Consumer Helper rule and Deep Module exemption.
+- **Slice 1B (IMP-386 - NEXT TICKET)**: Authoritative Bond Lifecycle Emission (`bond_manager.ts` dual emission: `BOND_REPAID` & `BOND_DEFAULT`) & Client Zero-Heuristic Financial Dispatch (`game_event_financial_synthesizer.ts`).
+- **Sprint 2 (IMP-387)**: 3D Board Unified Overlay (<BoardPropertyMarkersOverlay />) and legacy single-mesh deletion.
+- **Sprint 3 (IMP-388)**: AGENTS CONSTITUTION upgrade: Anti-Single-Consumer Helper rule and Deep Module exemption.
 
 ## 0.1. Context & Architectural Rationale
 - **Vấn đề cốt lõi**: Khắc phục các khiếm khuyết trong đường ống vận chuyển sự kiện mạng: Loại bỏ hoàn toàn Hố đen Sparse Delta (`buildSparseDelta` làm rơi rụng sự kiện), bảo toàn nguyên lý Command-Query Separation (CQS) cho Mapper, thanh lọc Domain Model (không rò rỉ cờ mạng `emittedTick`), và loại trừ triệt để Race Condition "cướp sự kiện" giữa `resyncClient` và `broadcastRoomDelta`.
@@ -16,9 +16,9 @@
 | `src/domain/room.ts` | Tier 1 (Domain/Server/Logic) | 295 | 306 | +11 | <= 400 | Warning (>= 300 LOC) |
 | `src/server/delta_types.ts` | Tier 1 (Domain/Server/Logic) | 134 | 137 | +3 | <= 400 | Safe (< 160 LOC) |
 | `src/server/delta_mapper.ts` | Tier 1 (Domain/Server/Logic) | 267 | 269 | +2 | <= 400 | Safe (< 300 LOC) |
-| `src/server/network/delta_broadcaster.ts` | Tier 1 (Domain/Server/Logic) | 232 | 238 | +6 | <= 400 | Safe (< 280 LOC) |
-| `tests/server/imp382_server_domain_events_pipeline.test.ts` | Living Test | 0 | 140 | +140 | <= 600 | 🆕 Tệp mới |
-| `docs/FEATURE_MAP.md` | SSOT Matrix | 91 | 93 | +2 | N/A | Cập nhật Pillar 10 |
+| `src/server/network/delta_broadcaster.ts` | Tier 1 (Domain/Server/Logic) | 231 | 237 | +6 | <= 400 | Safe (< 280 LOC) |
+| `tests/server/imp382_server_domain_events_pipeline.test.ts` | Living Test | 190 | 190 | 0 | <= 600 | Đã scaffold (RED verified) |
+| `docs/FEATURE_MAP.md` | SSOT Matrix | 93 | 93 | 0 | N/A | Cập nhật Pillar 11 |
 
 ## 2. In-Action Visual Capture Registration
 - Scenario: Non-UI (Server Domain Events Wire Architecture). Visual capture bypassed per Gotcha 13; mechanical verification via check_evidence.mjs.

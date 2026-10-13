@@ -9,6 +9,7 @@ import {
   resolveFeePaidDetails,
   formatBondRepaidMessage,
   formatBondIssuedMessage,
+  formatBondDefaultMessage,
   formatCompulsoryBuyoutMessage,
   formatHoseSettledMessage,
 } from './activity_log_financial_formatter.js';
@@ -113,6 +114,12 @@ function mapFinancialEventToActivityLog(
       const playerName = resolvePlayerName(context, event.playerId);
       const message = formatBondIssuedMessage(playerName, event.principal, event.roundsLeft, event.interestRate, event.trancheId);
       return createFinancialLogEntry(id, timestamp, 'bond', message, event.playerId, playerName, event.principal, resolvePlayerTokenColor(context, event.playerId));
+    }
+
+    case SynthesizedGameEventType.BOND_DEFAULT: {
+      const playerName = resolvePlayerName(context, event.playerId);
+      const message = formatBondDefaultMessage(playerName, event.principal, event.repayAmount, event.cashSeized);
+      return createFinancialLogEntry(id, timestamp, 'bond', message, event.playerId, playerName, event.cashSeized ? -event.cashSeized : undefined, resolvePlayerTokenColor(context, event.playerId));
     }
 
     case SynthesizedGameEventType.COMPULSORY_BUYOUT: {

@@ -2,11 +2,11 @@
 import type { MarketCardId, ChanceCardId } from './event_card_engine';
 import type { MacroCycleType } from './macro_cycle_types';
 import type { ColorGroup } from './board_config';
-import type { BondContract } from './bond_types';
+import type { BondContract, BondTrancheId } from './bond_types';
 import type { BotPersonality } from './bot/bot_types';
 import type { TransitWheelOutcome } from './transit_wheel.js';
 export { ActionRejectReason } from './action_reasons';
-export type { BondContract } from './bond_types';
+export type { BondContract, BondTrancheId } from './bond_types';
 
 export const BOARD_SIZE       = 40;
 export const GO_BONUS         = 2_000;
@@ -220,6 +220,18 @@ export interface Room {
   pendingTransitWheel?:       { playerId: string; cellIndex: number; timestamp: number } | null;
   lastTransitResult?:         { playerId: string; cellIndex: number; outcome: string; targetCell?: number; payout?: number; boostSteps?: number } | null;
   lastTradeResult?:           TradeResultInfo | null;
+  pendingDomainEvents?:       ServerDomainEvent[];
+}
+
+export interface ServerDomainEvent {
+  readonly type: 'BOND_REPAID' | 'BOND_DEFAULT';
+  readonly playerId: string;
+  readonly principal: number;
+  readonly interest?: number;
+  readonly repayAmount?: number;
+  readonly cashSeized?: number;
+  readonly trancheId?: BondTrancheId | string;
+  readonly timestamp: number;
 }
 
 
