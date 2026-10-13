@@ -1,0 +1,62 @@
+[
+  {
+    "file": "src/client/3d/board_layout.tsx",
+    "desc": "Mutant 1: Invert GameBoard renderToyBuildings default from false to true",
+    "target": "renderToyBuildings = false,",
+    "replacement": "renderToyBuildings = true,"
+  },
+  {
+    "file": "src/client/3d/board_layout.tsx",
+    "desc": "Mutant 2: Force renderToyBuildings to always render toy buildings",
+    "target": "{renderToyBuildings && <InstancedBoardToyBuildings levelMap={levelMap} />}",
+    "replacement": "{true && <InstancedBoardToyBuildings levelMap={levelMap} />}"
+  },
+  {
+    "file": "src/client/3d/board_tile.tsx",
+    "desc": "Mutant 3: Corrupt isMobile wiring in LayeredDioramaTile to always pass false",
+    "target": "<ProceduralBuilding level={currentLevel} groupColor={groupColor} cellIndex={cell.index} isMobile={isMobile} />",
+    "replacement": "<ProceduralBuilding level={currentLevel} groupColor={groupColor} cellIndex={cell.index} isMobile={false} />"
+  },
+  {
+    "file": "src/client/3d/procedural_building.tsx",
+    "desc": "Mutant 4: Corrupt shophouse-mobile-lod testid in ShophouseFallback",
+    "target": "data-testid=\"shophouse-mobile-lod\"",
+    "replacement": "data-testid=\"corrupted-shophouse-lod\""
+  },
+  {
+    "file": "src/client/3d/procedural_building.tsx",
+    "desc": "Mutant 5: Invert isMobile branch in ShophouseFallback",
+    "target": "const glow = isNight ? 0.45 : isSunset ? 0.25 : 0.0;\n  if (isMobile) {",
+    "replacement": "const glow = isNight ? 0.45 : isSunset ? 0.25 : 0.0;\n  if (!isMobile) {"
+  },
+  {
+    "file": "src/client/3d/procedural_building.tsx",
+    "desc": "Mutant 6: Corrupt complex-mobile-lod testid in ComplexFallback",
+    "target": "data-testid=\"complex-mobile-lod\"",
+    "replacement": "data-testid=\"corrupted-complex-lod\""
+  },
+  {
+    "file": "src/client/3d/procedural_building.tsx",
+    "desc": "Mutant 7: Invert isMobile branch in ComplexFallback",
+    "target": "function ComplexFallback({ groupColor, isNight, isSunset, isMobile }: FallbackProps): React.ReactElement {\n  const glow = isNight ? 0.45 : isSunset ? 0.25 : 0.0;\n  if (isMobile) {",
+    "replacement": "function ComplexFallback({ groupColor, isNight, isSunset, isMobile }: FallbackProps): React.ReactElement {\n  const glow = isNight ? 0.45 : isSunset ? 0.25 : 0.0;\n  if (!isMobile) {"
+  },
+  {
+    "file": "src/client/3d/procedural_building.tsx",
+    "desc": "Mutant 8: Corrupt fallback property to null in ProceduralBuilding",
+    "target": "fallback={",
+    "replacement": "fallback={null} ignored={"
+  },
+  {
+    "file": "src/client/3d/procedural_building.tsx",
+    "desc": "Mutant 9: Corrupt isMobile prop passed to ShophouseFallback in ProceduralBuilding",
+    "target": "{level === 1 && <ShophouseFallback groupColor={groupColor} isNight={isNight} isSunset={isSunset} isMobile={isMobile} />}",
+    "replacement": "{level === 1 && <ShophouseFallback groupColor={groupColor} isNight={isNight} isSunset={isSunset} isMobile={false} />}"
+  },
+  {
+    "file": "src/client/3d/procedural_building.tsx",
+    "desc": "Mutant 10: Corrupt isMobile prop passed to ComplexFallback in ProceduralBuilding",
+    "target": "{level === 2 && <ComplexFallback groupColor={groupColor} isNight={isNight} isSunset={isSunset} isMobile={isMobile} />}",
+    "replacement": "{level === 2 && <ComplexFallback groupColor={groupColor} isNight={isNight} isSunset={isSunset} isMobile={false} />}"
+  }
+]

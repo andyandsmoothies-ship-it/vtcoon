@@ -82,9 +82,13 @@ export function computeOwnerMap(
 
 export interface GameBoardProps {
   readonly isMobile?: boolean;
+  readonly renderToyBuildings?: boolean;
 }
 
-export function GameBoard({ isMobile: propIsMobile }: GameBoardProps = {}): React.ReactElement {
+export function GameBoard({
+  isMobile: propIsMobile,
+  renderToyBuildings = false,
+}: GameBoardProps = {}): React.ReactElement {
   const storeLevelMap = useGameStore((s) => s.levelMap);
   const levelMap = Object.keys(storeLevelMap ?? {}).length > 0 ? storeLevelMap : (useGameStore.getState()?.levelMap ?? storeLevelMap);
   const openModal = useGameStore((s) => s.openModal);
@@ -174,8 +178,8 @@ export function GameBoard({ isMobile: propIsMobile }: GameBoardProps = {}): Reac
       <DiceTray />
 
       <group visible={isBoardVisible}>
-        {/* 3.5. Cụm InstancedMesh nhà đất đồ chơi C1-C3 toàn bàn cờ (<8 draw calls) */}
-        <InstancedBoardToyBuildings levelMap={levelMap} />
+        {/* 3.5. Cụm InstancedMesh nhà đồ chơi chỉ render khi yêu cầu tường minh (mặc định tắt để nhường cho ProceduralBuilding) */}
+        {renderToyBuildings && <InstancedBoardToyBuildings levelMap={levelMap} />}
 
         {/* 3.6. Cụm InstancedCellBordersAndTrays: 28 viền chân đế ô đất và khay giá tiền O(1) */}
         <InstancedCellBordersAndTrays

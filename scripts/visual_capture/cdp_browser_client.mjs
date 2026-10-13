@@ -1,5 +1,7 @@
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
+import path from 'node:path';
+import os from 'node:os';
 import { sleep } from './preview_server_manager.mjs';
 
 export const BROWSER_CANDIDATES = [
@@ -25,9 +27,14 @@ export function findBrowser() {
  * Spawns headless browser with remote debugging enabled.
  */
 export function launchBrowser(browserPath, debugPort, url) {
+  const userDataDir = path.join(os.tmpdir(), `vtcoon_chrome_cdp_${debugPort}`);
+  if (!fs.existsSync(userDataDir)) {
+    fs.mkdirSync(userDataDir, { recursive: true });
+  }
   return spawn(browserPath, [
     '--headless=new',
     '--enable-automation',
+    `--user-data-dir=${userDataDir}`,
     `--remote-debugging-port=${debugPort}`,
     '--window-size=1280,800',
     '--enable-webgl',
@@ -78,15 +85,21 @@ export async function connectCdp(debugPort, port, globalSignal) {
   const send = (method, params = {}) =>
     new Promise((resolve, reject) => {
       const id = msgId++;
+      const timer = setTimeout(() => {
+        ws.removeListener('message', handler);
+        reject(new Error(`Timeout (20000ms) waiting for CDP response to '${method}'`));
+      }, 20000);
       const handler = (raw) => {
         try {
           const data = JSON.parse(raw.toString());
           if (data.id === id) {
+            clearTimeout(timer);
             ws.removeListener('message', handler);
             if (data.error) reject(data.error);
             else resolve(data.result);
           }
         } catch (err) {
+          clearTimeout(timer);
           reject(err);
         }
       };

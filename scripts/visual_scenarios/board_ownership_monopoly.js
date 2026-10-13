@@ -11,6 +11,30 @@ if (window.__gameStore) {
     cameraFocusCell: null,
     hasUserCustomCamera: false,
     isHeatmapActive: false,
+    levelMap: {
+      1: 1, // Shophouse C1
+      3: 2, // Complex C2
+      6: 1, // Shophouse C1
+      8: 2, // Complex C2
+      9: 3, // Landmark C3
+      11: 1, // Shophouse C1
+      13: 2, // Complex C2
+      14: 1, // Shophouse C1
+      16: 1, // Shophouse C1
+      18: 2, // Complex C2
+      19: 2, // Complex C2
+      21: 1, // Shophouse C1
+      23: 2, // Complex C2
+      24: 1, // Shophouse C1
+      26: 1, // Shophouse C1
+      27: 2, // Complex C2
+      29: 3, // Landmark C3
+      31: 1, // Shophouse C1
+      32: 2, // Complex C2
+      34: 1, // Shophouse C1
+      37: 2, // Complex C2
+      39: 3, // Landmark C3
+    },
     playersInfo: {
       p1: {
         id: 'p1',

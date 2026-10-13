@@ -9,6 +9,7 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach, vi } from 'vitest';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import '../helpers/r3f_test_harness';
 import { ProceduralBuilding } from '../../src/client/3d/procedural_building';
 import { LayeredDioramaTile } from '../../src/client/3d/board_tile';
 import { GameBoard } from '../../src/client/3d/board_layout';

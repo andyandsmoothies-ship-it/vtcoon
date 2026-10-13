@@ -106,11 +106,13 @@ export function CathedralProceduralFallback({
 }: LandmarkFallbackProps): React.ReactElement {
   return (
     <group>
-      {/* Tấm tiếp xúc bóng chân nhà thờ (Contact Shadow Plinth) */}
-      <mesh position={[0, 0.002, 0.1]} receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[0.72, 0.8]} />
-        <meshBasicMaterial color="#0F172A" transparent opacity={0.38} />
-      </mesh>
+      {/* Tấm tiếp xúc bóng chân nhà thờ (Contact Shadow Plinth - chỉ dùng trên desktop có 24-bit depth) */}
+      {!isMobile && (
+        <mesh position={[0, 0.002, 0.1]} receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[0.72, 0.8]} />
+          <meshBasicMaterial color="#0F172A" transparent opacity={0.38} />
+        </mesh>
+      )}
 
       {/* Gian thánh đường chính bằng gạch đỏ trần bo viền */}
       <RoundedBox args={[0.62, 0.4, 0.7]} radius={0.015} smoothness={2} castShadow={!isMobile} receiveShadow position={[0, 0.22, 0.1]}>
@@ -133,10 +135,12 @@ export function CathedralProceduralFallback({
           emissiveIntensity={isNight ? 1.1 : isSunset ? 0.45 : 0.0}
         />
       </mesh>
-      <mesh position={[0, 0.3, -0.262]}>
-        <ringGeometry args={[0.085, 0.095, 16]} />
-        <meshBasicMaterial color="#F59E0B" />
-      </mesh>
+      {!isMobile && (
+        <mesh position={[0, 0.3, -0.262]}>
+          <ringGeometry args={[0.085, 0.095, 16]} />
+          <meshBasicMaterial color="#F59E0B" />
+        </mesh>
+      )}
 
       {/* Hai tháp chuông đối xứng vút cao */}
       {[-0.24, 0.24].map((tx) => (
@@ -225,31 +229,52 @@ export function DioramaHeritageDistrict({
              Mặt tiền mở toang với hoa viên tròn, thảm hoa đỏ vàng & Tượng Đức Mẹ
          ======================================================== */}
       <group position={[0.2, 0, 0.15]} data-testid="cong-xa-paris-plaza">
-        {/* Thềm đá hoa viên tròn trung tâm */}
-        <mesh position={[0, 0.004, 0]} receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
-          <circleGeometry args={[0.55, 32]} />
-          <meshStandardMaterial color="#E2E8F0" roughness={0.6} />
-        </mesh>
-        {/* Thảm cỏ xanh đại công viên */}
-        <mesh position={[0, 0.005, 0]} receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[0.26, 0.52, 32]} />
-          <meshStandardMaterial color="#166534" roughness={0.7} />
-        </mesh>
-        {/* Thảm hoa đỏ rực rỡ (Salvia) biểu trưng di sản Sài Gòn (#DC2626) */}
-        <mesh position={[0, 0.006, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[0.20, 0.25, 24]} />
-          <meshStandardMaterial color="#DC2626" roughness={0.5} />
-        </mesh>
-        {/* Vành hoa cúc vạn thọ vàng hoàng gia (#FDE047 / #FEF3C7) */}
-        <mesh position={[0, 0.007, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[0.15, 0.19, 24]} />
-          <meshStandardMaterial color="#FDE047" roughness={0.45} />
-        </mesh>
-        {/* Vòng cỏ điểm xuyết tươi mát */}
-        <mesh position={[0, 0.008, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[0.10, 0.14, 24]} />
-          <meshStandardMaterial color="#15803D" roughness={0.65} />
-        </mesh>
+        {!isMobile ? (
+          <>
+            {/* Thềm đá hoa viên tròn trung tâm (Desktop 24-bit depth) */}
+            <mesh position={[0, 0.004, 0]} receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
+              <circleGeometry args={[0.55, 32]} />
+              <meshStandardMaterial color="#E2E8F0" roughness={0.6} />
+            </mesh>
+            {/* Thảm cỏ xanh đại công viên */}
+            <mesh position={[0, 0.005, 0]} receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
+              <ringGeometry args={[0.26, 0.52, 32]} />
+              <meshStandardMaterial color="#166534" roughness={0.7} />
+            </mesh>
+            {/* Thảm hoa đỏ rực rỡ (Salvia) biểu trưng di sản Sài Gòn (#DC2626) */}
+            <mesh position={[0, 0.006, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+              <ringGeometry args={[0.20, 0.25, 24]} />
+              <meshStandardMaterial color="#DC2626" roughness={0.5} />
+            </mesh>
+            {/* Vành hoa cúc vạn thọ vàng hoàng gia (#FDE047 / #FEF3C7) */}
+            <mesh position={[0, 0.007, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+              <ringGeometry args={[0.15, 0.19, 24]} />
+              <meshStandardMaterial color="#FDE047" roughness={0.45} />
+            </mesh>
+            {/* Vòng cỏ điểm xuyết tươi mát */}
+            <mesh position={[0, 0.008, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+              <ringGeometry args={[0.10, 0.14, 24]} />
+              <meshStandardMaterial color="#15803D" roughness={0.65} />
+            </mesh>
+          </>
+        ) : (
+          <>
+            {/* Mobile: Thềm hoa viên 3D tròn nguyên khối & thảm cỏ nổi (0% chồng lấn 2D, triệt tiêu 100% Z-fighting trên GPU Android 16-bit depth) */}
+            <mesh position={[0, 0.012, 0]} receiveShadow>
+              <cylinderGeometry args={[0.55, 0.55, 0.024, 24]} />
+              <meshStandardMaterial color="#E2E8F0" roughness={0.6} />
+            </mesh>
+            <mesh position={[0, 0.026, 0]} receiveShadow>
+              <cylinderGeometry args={[0.48, 0.48, 0.008, 24]} />
+              <meshStandardMaterial color="#166534" roughness={0.7} />
+            </mesh>
+            {/* Điểm nhấn hoa đỏ di sản 3D */}
+            <mesh position={[0, 0.031, 0]}>
+              <cylinderGeometry args={[0.20, 0.20, 0.006, 16]} />
+              <meshStandardMaterial color="#DC2626" roughness={0.5} />
+            </mesh>
+          </>
+        )}
 
         {/* 4 Cột đèn đường cổ điển Indochine với chụp đèn vàng ấm (#FDE047) */}
         {([
@@ -258,7 +283,7 @@ export function DioramaHeritageDistrict({
           [-0.32, 0.32],
           [0.32, 0.32],
         ] as const).map(([lx, lz], li) => (
-          <group key={`heritage-lamp-${li}`} position={[lx, 0, lz]}>
+          <group key={`heritage-lamp-${li}`} position={[lx, isMobile ? 0.024 : 0, lz]}>
             <mesh position={[0, 0.08, 0]} castShadow={!isMobile}>
               <cylinderGeometry args={[0.006, 0.01, 0.16, 6]} />
               <meshStandardMaterial color="#334155" roughness={0.4} />
@@ -275,15 +300,22 @@ export function DioramaHeritageDistrict({
         ))}
 
         {/* Bệ đá cẩm thạch Tượng Đức Mẹ Hòa Bình */}
-        <RoundedBox args={[0.10, 0.09, 0.10]} radius={0.01} smoothness={2} castShadow={!isMobile} receiveShadow position={[0, 0.045, 0]}>
+        <RoundedBox
+          args={[0.10, 0.09, 0.10]}
+          radius={0.01}
+          smoothness={2}
+          castShadow={!isMobile}
+          receiveShadow
+          position={[0, isMobile ? 0.075 : 0.045, 0]}
+        >
           <meshStandardMaterial color="#CBD5E1" roughness={0.35} />
         </RoundedBox>
         {/* Tượng điêu khắc cẩm thạch trắng */}
-        <mesh castShadow={!isMobile} position={[0, 0.14, 0]}>
+        <mesh castShadow={!isMobile} position={[0, isMobile ? 0.17 : 0.14, 0]}>
           <cylinderGeometry args={[0.022, 0.038, 0.11, 8]} />
           <meshStandardMaterial color="#F8FAFC" roughness={0.25} />
         </mesh>
-        <mesh position={[0, 0.20, 0]}>
+        <mesh position={[0, isMobile ? 0.23 : 0.20, 0]}>
           <sphereGeometry args={[0.024, 10, 10]} />
           <meshStandardMaterial color="#F8FAFC" roughness={0.2} />
         </mesh>

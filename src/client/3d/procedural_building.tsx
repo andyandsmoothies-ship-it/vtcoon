@@ -25,6 +25,7 @@ export interface ProceduralBuildingProps {
   readonly groupColor?: string;
   readonly cellIndex?: number;
   readonly showEmptyPlotBoundary?: boolean;
+  readonly isMobile?: boolean;
 }
 
 export { BUILDING_MODEL_URLS, BUILDING_BASE_PLINTH_WIDTH, BespokeLandmarkFallback };
@@ -69,19 +70,32 @@ interface FallbackProps {
   readonly groupColor?: string;
   readonly isNight: boolean;
   readonly isSunset: boolean;
+  readonly isMobile?: boolean;
 }
 
 /**
  * Cấp 1 Fallback: Nhà Phố Đông Dương (Indochine Shophouse)
  */
-function ShophouseFallback({ groupColor, isNight, isSunset }: FallbackProps): React.ReactElement {
+function ShophouseFallback({ groupColor, isNight, isSunset, isMobile }: FallbackProps): React.ReactElement {
   const glow = isNight ? 0.45 : isSunset ? 0.25 : 0.0;
+  if (isMobile) {
+    return (
+      <group data-testid="shophouse-mobile-lod">
+        <RoundedBox args={[0.54, 0.30, 0.44]} radius={0.012} smoothness={1} position={[0, 0.16, 0]}>
+          <meshStandardMaterial color="#FEF3C7" roughness={0.45} />
+        </RoundedBox>
+        <mesh position={[0, 0.44, 0]} rotation={[0, Math.PI / 4, 0]}>
+          <cylinderGeometry args={[0, 0.46, 0.22, 4]} />
+          <meshStandardMaterial color="#B91C1C" roughness={0.38} />
+        </mesh>
+        <RoundedBox args={[0.36, 0.045, 0.02]} radius={0.008} smoothness={1} position={[0, 0.3, 0.22]}>
+          <meshStandardMaterial color={groupColor} roughness={0.3} emissive={groupColor} emissiveIntensity={glow} />
+        </RoundedBox>
+      </group>
+    );
+  }
   return (
     <group>
-      <mesh receiveShadow position={[0, 0.002, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[0.62, 0.52]} />
-        <meshBasicMaterial color="#0F172A" transparent opacity={0.35} />
-      </mesh>
       <RoundedBox args={[0.58, 0.05, 0.48]} radius={0.012} smoothness={2} position={[0, 0.025, 0]} castShadow receiveShadow>
         <meshStandardMaterial color="#475569" roughness={0.7} envMapIntensity={0.8} />
       </RoundedBox>
@@ -118,14 +132,25 @@ function ShophouseFallback({ groupColor, isNight, isSunset }: FallbackProps): Re
 /**
  * Cấp 2 Fallback: Khối Cao Ốc Kính Sapphire Hiện Đại
  */
-function ComplexFallback({ groupColor, isNight, isSunset }: FallbackProps): React.ReactElement {
+function ComplexFallback({ groupColor, isNight, isSunset, isMobile }: FallbackProps): React.ReactElement {
   const glow = isNight ? 0.45 : isSunset ? 0.25 : 0.0;
+  if (isMobile) {
+    return (
+      <group data-testid="complex-mobile-lod">
+        <RoundedBox args={[0.6, 0.16, 0.5]} radius={0.02} smoothness={1} position={[0, 0.08, 0]}>
+          <meshStandardMaterial color={groupColor} roughness={0.3} metalness={0.3} />
+        </RoundedBox>
+        <RoundedBox args={[0.52, 0.52, 0.42]} radius={0.025} smoothness={1} position={[0, 0.418, 0]}>
+          <meshStandardMaterial color="#0284C7" roughness={0.15} metalness={0.7} envMapIntensity={1.4} emissive="#0284C7" emissiveIntensity={glow * 0.4} />
+        </RoundedBox>
+        <RoundedBox args={[0.2, 0.1, 0.2]} radius={0.01} smoothness={1} position={[-0.08, 0.72, 0]}>
+          <meshStandardMaterial color="#475569" roughness={0.5} />
+        </RoundedBox>
+      </group>
+    );
+  }
   return (
     <group>
-      <mesh position={[0, 0.002, 0]} receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[0.66, 0.56]} />
-        <meshBasicMaterial color="#0F172A" transparent opacity={0.38} />
-      </mesh>
       <RoundedBox args={[0.6, 0.16, 0.5]} radius={0.02} smoothness={3} position={[0, 0.08, 0]} castShadow receiveShadow>
         <meshStandardMaterial color={groupColor} roughness={0.3} metalness={0.3} envMapIntensity={1.0} />
       </RoundedBox>
@@ -171,6 +196,7 @@ export function ProceduralBuilding({
   groupColor = '#DC2626',
   cellIndex,
   showEmptyPlotBoundary = false,
+  isMobile = false,
 }: ProceduralBuildingProps): React.ReactElement {
   const rootGroupRef = useRef<Group>(null);
   const crownRef = useRef<Group>(null);
@@ -268,10 +294,11 @@ export function ProceduralBuilding({
       )}
       <SafeGLTFModel
         url={modelUrl}
+        forceFallback={isMobile ? true : undefined}
         fallback={
           <>
-            {level === 1 && <ShophouseFallback groupColor={groupColor} isNight={isNight} isSunset={isSunset} />}
-            {level === 2 && <ComplexFallback groupColor={groupColor} isNight={isNight} isSunset={isSunset} />}
+            {level === 1 && <ShophouseFallback groupColor={groupColor} isNight={isNight} isSunset={isSunset} isMobile={isMobile} />}
+            {level === 2 && <ComplexFallback groupColor={groupColor} isNight={isNight} isSunset={isSunset} isMobile={isMobile} />}
             {level === 3 && (
               <BespokeLandmarkFallback
                 cellIndex={cellIndex ?? 0}

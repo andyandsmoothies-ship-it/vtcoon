@@ -2,6 +2,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import '../helpers/r3f_test_harness';
 import * as THREE from 'three';
 import {
   PROPERTY_CELL_INDICES,
@@ -11,7 +12,7 @@ import {
   calculateHotelInstanceMatrix,
   InstancedBoardToyBuildings,
 } from '../../src/client/3d/instanced_toy_buildings';
-import { GameBoard } from '../../src/client/3d/board_layout';
+import { GameBoard, type GameBoardProps } from '../../src/client/3d/board_layout';
 import { BOARD_CONFIG, CellType } from '../../src/domain/board_config';
 import { useGameStore } from '../../src/client/store/game_store';
 
@@ -185,8 +186,8 @@ describe('[TC-INST-01..16/MSS][UC-IMP-INST] Three.js InstancedMesh Batching & Ma
       expect(markup).toContain('castshadow="true"');
     });
 
-    it('[TC-INST-16/MSS][UC-IMP-INST] GameBoard render trơn tru trong môi trường headless SSR không crash và chứa cụm instanced', () => {
-      const markup = renderToStaticMarkup(React.createElement(GameBoard));
+    it('[TC-INST-16/MSS][UC-IMP-INST] GameBoard hỗ trợ render cụm instanced khi bật cờ renderToyBuildings={true}', () => {
+      const markup = renderToStaticMarkup(React.createElement<GameBoardProps>(GameBoard, { renderToyBuildings: true }));
       expect(markup).toContain('data-testid="instanced-board-toy-buildings"');
     });
   });

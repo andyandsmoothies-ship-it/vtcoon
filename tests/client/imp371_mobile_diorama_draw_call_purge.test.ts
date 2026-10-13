@@ -138,4 +138,13 @@ describe('IMP-371: WebGL Mobile TBDR Draw Call Purge & Living Contract Preservat
     expect(gltfModel?.props?.castShadow).toBe(false);
     expect(gltfModel?.props?.receiveShadow).toBe(true);
   });
+
+  it('TC-371.08 [UC-DIORAMA-MOBILE-HERITAGE-ZERO-ZFIGHTING/MSS]: Given DioramaHeritageDistrict with isMobile=true, When rendered, Then eliminates all 2D coplanar ringGeometry to prevent Android 16-bit depth strobing while preserving 3D garden terrace', () => {
+    const mobileMarkup = renderToStaticMarkup(React.createElement(() => DioramaHeritageDistrict({ isMobile: true })));
+    const desktopMarkup = renderToStaticMarkup(React.createElement(() => DioramaHeritageDistrict({ isMobile: false })));
+
+    expect(mobileMarkup).toContain('data-testid="cong-xa-paris-plaza"');
+    expect(mobileMarkup).not.toContain('<ringGeometry');
+    expect(desktopMarkup).toContain('<ringGeometry');
+  });
 });

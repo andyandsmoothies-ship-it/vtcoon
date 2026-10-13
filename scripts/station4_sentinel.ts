@@ -81,6 +81,63 @@ function parseCliArgs(): { ticketId: string; testPath?: string; srcPath?: string
 // PART 1: UNIVERSAL SOURCE & CONTRACT MUTATION ENGINE (PORTABLE CORE)
 // ============================================================================
 
+const activeBackups = new Map<string, string>(); // backupPath -> filePath
+
+function rollbackAllActiveBackups(): void {
+  for (const [backupPath, filePath] of activeBackups.entries()) {
+    try {
+      if (fs.existsSync(backupPath)) {
+        fs.writeFileSync(filePath, fs.readFileSync(backupPath, 'utf-8'), 'utf-8');
+        fs.unlinkSync(backupPath);
+        console.warn(`🛡️ [EMERGENCY ROLLBACK] Restored ${filePath} from ${backupPath}`);
+      }
+    } catch (e) {
+      console.error(`CRITICAL: Failed emergency rollback for ${filePath}:`, e);
+    }
+  }
+  activeBackups.clear();
+}
+
+/**
+ * Scans for and restores any orphaned Sentinel backup files left behind by interrupted runs.
+ */
+export function autoRecoverOrphanedBackups(dir: string = path.join(process.cwd(), 'src')): void {
+  try {
+    if (!fs.existsSync(dir)) return;
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const ent of entries) {
+      const fullPath = path.join(dir, ent.name);
+      if (ent.isDirectory()) {
+        if (ent.name !== 'node_modules' && ent.name !== '.git' && ent.name !== 'dist') {
+          autoRecoverOrphanedBackups(fullPath);
+        }
+      } else if (ent.name.includes('.sentinel_bak_')) {
+        const targetFile = fullPath.replace(/\.sentinel_bak_\d+$/, '');
+        try {
+          fs.writeFileSync(targetFile, fs.readFileSync(fullPath, 'utf-8'), 'utf-8');
+          fs.unlinkSync(fullPath);
+          console.warn(`🛡️ [SELF-HEALING] Restored orphaned file: ${targetFile} from ${ent.name}`);
+        } catch (e) {
+          console.error(`CRITICAL: Failed to auto-recover ${targetFile}:`, e);
+        }
+      }
+    }
+  } catch {}
+}
+
+// Global process interceptors to guarantee unconditional rollback on Ctrl+C or kill
+process.on('SIGINT', () => {
+  rollbackAllActiveBackups();
+  process.exit(130);
+});
+process.on('SIGTERM', () => {
+  rollbackAllActiveBackups();
+  process.exit(143);
+});
+process.on('exit', () => {
+  rollbackAllActiveBackups();
+});
+
 /**
  * Safely applies a mutation to a production source file with an unconditional
  * rollback guarantee via try...finally. If tests fail, the mutant is KILLED.
@@ -102,13 +159,14 @@ function testSourceMutantSafely(
 
   const backupPath = `${filePath}.sentinel_bak_${Date.now()}`;
   fs.writeFileSync(backupPath, originalContent, 'utf-8');
+  activeBackups.set(backupPath, filePath);
 
   try {
     const mutated = originalContent.replace(targetPattern, replacement);
     fs.writeFileSync(filePath, mutated, 'utf-8');
 
     try {
-      execSync(testCmd, { stdio: 'pipe' });
+      execSync(testCmd, { stdio: 'pipe', timeout: 15000 });
       // If tests pass despite source corruption, mutant survived (bad)
       return { tested: true, killed: false };
     } catch {
@@ -125,6 +183,7 @@ function testSourceMutantSafely(
     } catch (e) {
       console.error(`CRITICAL: Failed to restore backup ${backupPath}:`, e);
     }
+    activeBackups.delete(backupPath);
   }
 }
 
@@ -360,7 +419,7 @@ async function runUniversalMutationProbe(
           fs.writeFileSync(sandboxPath, mutantContent, 'utf-8');
 
           try {
-            execSync(`${vitestBin} run "${sandboxPath}"`, { stdio: 'pipe' });
+            execSync(`${vitestBin} run "${sandboxPath}"`, { stdio: 'pipe', timeout: 15000 });
             console.log(`  [CONTRACT MUTANT #${mutantsTested}] ${name} in ${path.basename(targetTestFile)} (instance ${i + 1}) -> SURVIVED!`);
             survived++;
           } catch {
@@ -563,6 +622,7 @@ async function runProbe2(): Promise<ProbeResults['ephemeralBoundaryProbe']> {
 // MAIN RUNNER & EVIDENCE PERSISTENCE
 // ============================================================================
 async function main() {
+  autoRecoverOrphanedBackups();
   const { ticketId, testPath, srcPath, allowWaiver } = parseCliArgs();
   console.log(`=== RUNNING STATION 4 SENTINEL PROBES [${ticketId}] ===\n`);
 

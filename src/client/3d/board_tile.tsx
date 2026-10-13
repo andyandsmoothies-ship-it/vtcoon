@@ -322,7 +322,7 @@ export function LayeredDioramaTile({
       {/* 3. Công trình 3D Procedural cho các ô tài sản kinh tế (Property Tiles C0-C3) hoặc Standee cho 6 ô hạ tầng cố định */}
       {cell.type === CellType.Property ? (
         <>
-          <ProceduralBuilding level={currentLevel} groupColor={groupColor} cellIndex={cell.index} />
+          <ProceduralBuilding level={currentLevel} groupColor={groupColor} cellIndex={cell.index} isMobile={isMobile} />
           {renderToyBuildings && (
             <ToyPropertyBuildings level={currentLevel} groupColor={groupColor} cellIndex={cell.index} />
           )}

@@ -55,11 +55,40 @@ export function sleep(ms, signal) {
 
 /**
  * Automatically builds the client bundle if src/client/ is newer than dist/index.html.
+ * Self-healing guard: Checks for and restores any orphaned Sentinel backup files before building.
  */
 export function ensureFreshBuild(repoRoot) {
+  // 1. Self-healing check for orphaned Sentinel backup files
+  function recoverBackups(dir) {
+    let recoveredCount = 0;
+    try {
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+      for (const ent of entries) {
+        const full = path.join(dir, ent.name);
+        if (ent.isDirectory()) {
+          if (ent.name !== 'node_modules' && ent.name !== '.git' && ent.name !== 'dist') {
+            recoveredCount += recoverBackups(full);
+          }
+        } else if (ent.name.includes('.sentinel_bak_')) {
+          const original = full.replace(/\.sentinel_bak_\d+$/, '');
+          try {
+            fs.writeFileSync(original, fs.readFileSync(full, 'utf-8'), 'utf-8');
+            fs.unlinkSync(full);
+            console.warn(`🛡️ [SELF-HEALING] Restored orphaned Sentinel file: ${original}`);
+            recoveredCount++;
+          } catch (e) {
+            console.error(`CRITICAL: Failed to recover ${original}:`, e);
+          }
+        }
+      }
+    } catch {}
+    return recoveredCount;
+  }
+
+  const restored = recoverBackups(path.join(repoRoot, 'src'));
   const distHtml = path.join(repoRoot, 'dist', 'index.html');
   const srcClientDir = path.join(repoRoot, 'src', 'client');
-  let needsBuild = !fs.existsSync(distHtml);
+  let needsBuild = !fs.existsSync(distHtml) || restored > 0;
 
   if (!needsBuild && fs.existsSync(srcClientDir)) {
     const distMtime = fs.statSync(distHtml).mtimeMs;
