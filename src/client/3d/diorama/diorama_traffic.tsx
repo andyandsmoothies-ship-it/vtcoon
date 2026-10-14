@@ -228,6 +228,7 @@ export function DioramaTraffic({ isMobile = false, isVisible = true }: DioramaTr
                   color="#FEF08A"
                   transparent
                   opacity={isNight ? 0.65 : isSunset ? 0.42 : 0.28}
+                  depthWrite={false}
                 />
               </mesh>
 

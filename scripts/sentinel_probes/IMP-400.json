@@ -1,0 +1,74 @@
+[
+  {
+    "file": "src/client/3d/diorama/batched_diorama_terrain.tsx",
+    "desc": "Mutant 1: Sunk foundation soil elevation corrupted",
+    "target": "createBoxWithOffset(5.4, 0.040, 13.8, -3.8, -0.035, 0)",
+    "replacement": "createBoxWithOffset(5.4, 0.040, 13.8, -3.8, 0.000, 0)"
+  },
+  {
+    "file": "src/client/3d/diorama/batched_diorama_terrain.tsx",
+    "desc": "Mutant 2: Grass volumetric slab depth corrupted causing floating gap",
+    "target": "const grassParts = [\n    createBoxWithOffset(5.2, 0.035, 13.6, -3.8, -0.0125, 0),\n    createBoxWithOffset(5.2, 0.035, 13.6, 3.8, -0.0125, 0),\n  ];",
+    "replacement": "const grassParts = [\n    createBoxWithOffset(5.2, 0.010, 13.6, -3.8, 0.0500, 0),\n    createBoxWithOffset(5.2, 0.010, 13.6, 3.8, 0.0500, 0),\n  ];"
+  },
+  {
+    "file": "src/client/3d/diorama/batched_diorama_terrain.tsx",
+    "desc": "Mutant 3: Markings polygonOffset omitted",
+    "target": "polygonOffset\n          polygonOffsetFactor={-1.0}",
+    "replacement": "polygonOffsetFactor={-1.0}"
+  },
+  {
+    "file": "src/client/3d/diorama/batched_diorama_terrain.tsx",
+    "desc": "Mutant 4: Markings polygonOffsetFactor corrupted",
+    "target": "polygonOffsetFactor={-1.0}",
+    "replacement": "polygonOffsetFactor={0.0}"
+  },
+  {
+    "file": "src/client/3d/diorama/batched_diorama_terrain.tsx",
+    "desc": "Mutant 5: Markings polygonOffsetUnits corrupted",
+    "target": "polygonOffsetUnits={-4.0}",
+    "replacement": "polygonOffsetUnits={0.0}"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_heritage_district.tsx",
+    "desc": "Mutant 6: Invert isMobile branch for Heritage Plaza",
+    "target": "{isMobile ? (",
+    "replacement": "{!isMobile ? ("
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_heritage_district.tsx",
+    "desc": "Mutant 7: Cathedral forceFallback bypassed on mobile",
+    "target": "forceFallback={isMobile ? true : undefined}",
+    "replacement": "forceFallback={undefined}"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_traffic.tsx",
+    "desc": "Mutant 8: Headlight fan depthWrite omitted",
+    "target": "depthWrite={false}",
+    "replacement": "depthWrite={true}"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_container_port.tsx",
+    "desc": "Mutant 9: Container port shadow plane not omitted on mobile",
+    "target": "{!isMobile && (\n          <mesh receiveShadow position={[-0.25, 0.003, 0.05]}",
+    "replacement": "{true && (\n          <mesh receiveShadow position={[-0.25, 0.003, 0.05]}"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_terrain.tsx",
+    "desc": "Mutant 10: TERRAIN_BASE_Y datum corrupted causing embankment misalignment",
+    "target": "const TERRAIN_BASE_Y = 0.000;",
+    "replacement": "const TERRAIN_BASE_Y = -0.015;"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_container_port.tsx",
+    "desc": "Mutant 11: Container port mobile safety curb height flattened",
+    "target": "isMobile ? 0.025 : 0.005",
+    "replacement": "0.005"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_heritage_district.tsx",
+    "desc": "Mutant 12: Mobile plaza tier height flattened causing Z-fighting",
+    "target": "<cylinderGeometry args={[0.48, 0.48, 0.020, 24]} />",
+    "replacement": "<cylinderGeometry args={[0.48, 0.48, 0.005, 24]} />"
+  }
+]

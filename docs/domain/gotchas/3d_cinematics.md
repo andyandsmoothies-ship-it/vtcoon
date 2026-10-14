@@ -133,4 +133,7 @@
       1. *Call-Site Grounded Accounting*: Performance and draw call metrics MUST be verified at the top-level active production call-site, taking into account all parent prop suppressions.
       2. *Unlit Material Shadow Ban*: Meshes using `MeshBasicMaterial` MUST NOT declare `receiveShadow` or `castShadow`.
 
-
+28. **Lean 3D Plan Guardrails: Batching-in-Signature, Full Exclusion Map & SSR Instancing [IMP-399]**:
+    - **Batching-in-Signature**: Repeating static 3D props ($> 3$ instances) MUST declare a `createBatched*Geometries` (`mergeGeometries` + immediate `.dispose()`) or `populate*InstancedMesh` signature in Task 1, budgeting 5–6 lines per `<mesh>` in `.tsx` consumers without code-golfing.
+    - **Full Diorama Exclusion Map**: Inner-city additions MUST clear Saigon River & Promenades ($|X| \le 2.0\text{m}$), Cathedral (`[-4.3, 3.65]`), Bitexco (`[-4.5, -4.4]`), West Park (`[-2.7, -2.5]`) by $\ge 1.0\text{m}$, and SE Port/Marina ($X > 3.6, Z > 3.2$), with `[bottomY, topY]` embedding $\ge 0.02\text{m}$.
+    - **SSR-Safe Instancing**: `InstancedMesh` color buffers MUST use `useIsomorphicLayoutEffect`, allocate `InstancedBufferAttribute` when `instanceColor === null`, and set both `frustumCulled={false}` and `frustumculled="false"`.

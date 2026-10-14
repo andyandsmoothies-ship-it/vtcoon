@@ -37,36 +37,36 @@ export function createBatchedTerrainGeometries(): {
 } {
   if (cachedTerrainGeoms) return cachedTerrainGeoms;
 
-  // 1. Foundation Soil (West Peninsula at X = -3.8, East Peninsula at X = 3.8)
+  // 1. Foundation Soil (West Peninsula at X = -3.8, East Peninsula at X = 3.8) - Sunk to prevent Z-fighting
   const soilParts = [
-    createBoxWithOffset(5.4, 0.04, 13.8, -3.8, -0.02, 0),
-    createBoxWithOffset(5.4, 0.04, 13.8, 3.8, -0.02, 0),
+    createBoxWithOffset(5.4, 0.040, 13.8, -3.8, -0.035, 0),
+    createBoxWithOffset(5.4, 0.040, 13.8, 3.8, -0.035, 0),
   ];
   const soilGeom = mergeAndDispose(soilParts);
 
-  // 2. Green Grass Lawns (West Peninsula at X = -3.8, East Peninsula at X = 3.8)
+  // 2. Green Grass Lawns (West Peninsula at X = -3.8, East Peninsula at X = 3.8) - Top face preserved at +0.005m, embeds 15mm into soil
   const grassParts = [
-    createBoxWithOffset(5.2, 0.01, 13.6, -3.8, 0, 0),
-    createBoxWithOffset(5.2, 0.01, 13.6, 3.8, 0, 0),
+    createBoxWithOffset(5.2, 0.035, 13.6, -3.8, -0.0125, 0),
+    createBoxWithOffset(5.2, 0.035, 13.6, 3.8, -0.0125, 0),
   ];
   const grassGeom = mergeAndDispose(grassParts);
 
-  // 3. Grand West Boulevard (X = -4.8, Y = 0.020)
-  const westBoulevardGeom = createBoxWithOffset(0.7, 0.005, 11.6, -4.8, 0.020, 0);
+  // 3. Grand West Boulevard (X = -4.8, Y = 0.022, top face 0.025)
+  const westBoulevardGeom = createBoxWithOffset(0.7, 0.006, 11.6, -4.8, 0.022, 0);
   westBoulevardGeom.computeBoundingBox();
   westBoulevardGeom.computeBoundingSphere();
 
-  // 4. Coastal Promenade East (X = 4.8, Y = 0.020)
-  const eastPromenadeGeom = createBoxWithOffset(0.7, 0.005, 11.6, 4.8, 0.020, 0);
+  // 4. Coastal Promenade East (X = 4.8, Y = 0.022, top face 0.025)
+  const eastPromenadeGeom = createBoxWithOffset(0.7, 0.006, 11.6, 4.8, 0.022, 0);
   eastPromenadeGeom.computeBoundingBox();
   eastPromenadeGeom.computeBoundingSphere();
 
-  // 5. Granite Sidewalks (West at X = -5.22, -4.38; East at X = 4.38, 5.22)
+  // 5. Granite Sidewalks (West at X = -5.22, -4.38; East at X = 4.38, 5.22, elevated curb)
   const sidewalkParts = [
-    createBoxWithOffset(0.14, 0.005, 11.6, -5.22, 0.015, 0),
-    createBoxWithOffset(0.14, 0.005, 11.6, -4.38, 0.015, 0),
-    createBoxWithOffset(0.14, 0.005, 11.6, 4.38, 0.015, 0),
-    createBoxWithOffset(0.14, 0.005, 11.6, 5.22, 0.015, 0),
+    createBoxWithOffset(0.14, 0.010, 11.6, -5.22, 0.025, 0),
+    createBoxWithOffset(0.14, 0.010, 11.6, -4.38, 0.025, 0),
+    createBoxWithOffset(0.14, 0.010, 11.6, 4.38, 0.025, 0),
+    createBoxWithOffset(0.14, 0.010, 11.6, 5.22, 0.025, 0),
   ];
   const sidewalksGeom = mergeAndDispose(sidewalkParts);
 
@@ -74,18 +74,18 @@ export function createBatchedTerrainGeometries(): {
   const markingParts: BufferGeometry[] = [];
   // 7 West lane stripes
   for (const pz of [-4.5, -3.0, -1.5, 0, 1.5, 3.0, 4.5]) {
-    markingParts.push(createBoxWithOffset(0.04, 0.002, 0.5, -4.8, 0.022, pz));
+    markingParts.push(createBoxWithOffset(0.04, 0.002, 0.5, -4.8, 0.0255, pz));
   }
   // 4 West zebra crossings (20 stripes)
   for (const cz of [-3.75, -0.75, 0.75, 3.75]) {
     for (const ox of [-0.24, -0.12, 0, 0.12, 0.24]) {
-      markingParts.push(createBoxWithOffset(0.07, 0.002, 0.28, -4.8 + ox, 0.022, cz));
+      markingParts.push(createBoxWithOffset(0.07, 0.002, 0.28, -4.8 + ox, 0.0255, cz));
     }
   }
   // 2 East zebra crossings (10 stripes)
   for (const cz of [-3.75, 3.75]) {
     for (const ox of [-0.24, -0.12, 0, 0.12, 0.24]) {
-      markingParts.push(createBoxWithOffset(0.07, 0.002, 0.28, 4.8 + ox, 0.022, cz));
+      markingParts.push(createBoxWithOffset(0.07, 0.002, 0.28, 4.8 + ox, 0.0255, cz));
     }
   }
   const markingsGeom = mergeAndDispose(markingParts);
@@ -122,7 +122,13 @@ export function BatchedDioramaLandmasses(): React.ReactElement {
         <meshStandardMaterial color="#CBD5E1" roughness={0.35} />
       </mesh>
       <mesh geometry={geoms.markingsGeom} raycast={noopRaycast}>
-        <meshStandardMaterial color="#FFFFFF" roughness={0.2} />
+        <meshStandardMaterial
+          color="#FFFFFF"
+          roughness={0.2}
+          polygonOffset
+          polygonOffsetFactor={-1.0}
+          polygonOffsetUnits={-4.0}
+        />
       </mesh>
     </group>
   );

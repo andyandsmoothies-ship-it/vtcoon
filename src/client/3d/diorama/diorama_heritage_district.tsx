@@ -202,14 +202,25 @@ export function DioramaHeritageDistrict({
       {/* ========================================================
           THỀM QUẢNG TRƯỜNG GẠCH BÔNG ĐÔNG DƯƠNG (Heritage Plaza)
          ======================================================== */}
-      <mesh position={[0.35, 0.003, 0.02]} receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[1.7, 2.6]} />
-        <meshStandardMaterial
-          color="#FAF5EE"
-          roughness={0.6}
-          map={encausticTexture ?? undefined}
-        />
-      </mesh>
+      {isMobile ? (
+        <mesh position={[0.35, -0.009, 0.02]} receiveShadow>
+          <boxGeometry args={[1.7, 0.024, 2.6]} />
+          <meshStandardMaterial
+            color="#FAF5EE"
+            roughness={0.6}
+            map={encausticTexture ?? undefined}
+          />
+        </mesh>
+      ) : (
+        <mesh position={[0.35, 0.003, 0.02]} receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[1.7, 2.6]} />
+          <meshStandardMaterial
+            color="#FAF5EE"
+            roughness={0.6}
+            map={encausticTexture ?? undefined}
+          />
+        </mesh>
+      )}
 
       {/* ========================================================
           1. NHÀ THỜ ĐỨC BÀ CỔ GẠCH ĐỎ ĐÔNG DƯƠNG (Heritage Cathedral)
@@ -221,6 +232,7 @@ export function DioramaHeritageDistrict({
           fallback={<CathedralProceduralFallback isNight={isNight} isSunset={isSunset} isMobile={isMobile} />}
           castShadow={!isMobile}
           receiveShadow
+          forceFallback={isMobile ? true : undefined}
         />
       </group>
 
@@ -264,13 +276,13 @@ export function DioramaHeritageDistrict({
               <cylinderGeometry args={[0.55, 0.55, 0.024, 24]} />
               <meshStandardMaterial color="#E2E8F0" roughness={0.6} />
             </mesh>
-            <mesh position={[0, 0.026, 0]} receiveShadow>
-              <cylinderGeometry args={[0.48, 0.48, 0.008, 24]} />
+            <mesh position={[0, 0.032, 0]} receiveShadow>
+              <cylinderGeometry args={[0.48, 0.48, 0.020, 24]} />
               <meshStandardMaterial color="#166534" roughness={0.7} />
             </mesh>
             {/* Điểm nhấn hoa đỏ di sản 3D */}
-            <mesh position={[0, 0.031, 0]}>
-              <cylinderGeometry args={[0.20, 0.20, 0.006, 16]} />
+            <mesh position={[0, 0.050, 0]}>
+              <cylinderGeometry args={[0.20, 0.20, 0.020, 16]} />
               <meshStandardMaterial color="#DC2626" roughness={0.5} />
             </mesh>
           </>
@@ -306,16 +318,16 @@ export function DioramaHeritageDistrict({
           smoothness={2}
           castShadow={!isMobile}
           receiveShadow
-          position={[0, isMobile ? 0.075 : 0.045, 0]}
+          position={[0, isMobile ? 0.085 : 0.045, 0]}
         >
           <meshStandardMaterial color="#CBD5E1" roughness={0.35} />
         </RoundedBox>
         {/* Tượng điêu khắc cẩm thạch trắng */}
-        <mesh castShadow={!isMobile} position={[0, isMobile ? 0.17 : 0.14, 0]}>
+        <mesh castShadow={!isMobile} position={[0, isMobile ? 0.18 : 0.14, 0]}>
           <cylinderGeometry args={[0.022, 0.038, 0.11, 8]} />
           <meshStandardMaterial color="#F8FAFC" roughness={0.25} />
         </mesh>
-        <mesh position={[0, isMobile ? 0.23 : 0.20, 0]}>
+        <mesh position={[0, isMobile ? 0.24 : 0.20, 0]}>
           <sphereGeometry args={[0.024, 10, 10]} />
           <meshStandardMaterial color="#F8FAFC" roughness={0.2} />
         </mesh>

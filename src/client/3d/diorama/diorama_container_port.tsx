@@ -63,9 +63,9 @@ export function DioramaContainerPort({
       <RoundedBox args={[1.8, 0.08, 2.2]} radius={0.016} smoothness={2} receiveShadow position={[0, 0.04, 0]}>
         <meshStandardMaterial color="#475569" roughness={0.7} envMapIntensity={0.6} />
       </RoundedBox>
-      {/* Vạch sơn cảnh báo an toàn màu vàng ở mép bến */}
-      <mesh position={[-0.85, 0.082, 0]}>
-        <boxGeometry args={[0.06, 0.005, 2.16]} />
+      {/* Vạch sơn cảnh báo an toàn màu vàng ở mép bến (Mobile: gờ chặn bánh xe 3D dày 2.5cm chống Z-fighting) */}
+      <mesh position={[-0.85, isMobile ? 0.0925 : 0.082, 0]}>
+        <boxGeometry args={[isMobile ? 0.08 : 0.06, isMobile ? 0.025 : 0.005, 2.16]} />
         <meshBasicMaterial color="#FACC15" />
       </mesh>
 
@@ -170,11 +170,13 @@ export function DioramaContainerPort({
 
       {/* 3. BÃI CONTAINER XẾP CHỒNG (Intermodal Container Stacks với Beveled Edges) */}
       <group position={[0.2, 0.08, 0]}>
-        {/* Đệm mặt sàn bãi tối màu tạo độ sâu và bóng tiếp xúc chân bãi */}
-        <mesh receiveShadow position={[-0.25, 0.003, 0.05]} rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[1.25, 1.7]} />
-          <meshStandardMaterial color="#1E293B" roughness={0.9} />
-        </mesh>
+        {/* Đệm mặt sàn bãi tối màu tạo độ sâu và bóng tiếp xúc chân bãi (Desktop 24-bit depth) */}
+        {!isMobile && (
+          <mesh receiveShadow position={[-0.25, 0.003, 0.05]} rotation={[-Math.PI / 2, 0, 0]}>
+            <planeGeometry args={[1.25, 1.7]} />
+            <meshStandardMaterial color="#1E293B" roughness={0.9} />
+          </mesh>
+        )}
         {CONTAINER_BLOCKS.map((cb, idx) => (
           <group key={`container-${idx}`} position={cb.pos}>
             {/* Khối hộp container chính bo viền vát cạnh */}

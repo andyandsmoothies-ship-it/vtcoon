@@ -97,6 +97,9 @@ When a plan touches 3D graphics or R3F (`src/client/3d/**`):
 1. **Geometry Allocation inside JSX**: Probe whether `create*Geometry()` or `new *Geometry()` is called inside component render bodies or JSX `geometry={...}` props. In React/R3F, replacing geometry props does NOT auto-dispose previous buffers, causing GPU VRAM buffer leaks and eventual mobile WebGL context loss. All static procedural/batched geometries MUST be module-level singletons or strictly memoized.
 2. **Unlit Material Shadow Slop**: Check if `receiveShadow` or `castShadow` are placed on meshes using unlit materials (`MeshBasicMaterial`).
 3. **Call-Site Grounded Draw Call Accounting**: Compare leaf mesh counts against parent call-site visibility/conditional props (`render*={false}`) to ensure claimed draw call reductions reflect physical disk reality rather than leaf isolation counts.
+4. **Unbatched Multi-Instance Ban & SSR-Safe Instancing**: Flag any plan rendering $> 8$ static meshes via `.map()` without `mergeGeometries` (`createBatched*`) or `InstancedMesh` (`useIsomorphicLayoutEffect`, `instanceColor` null-init guard, `frustumCulled={false}` + `frustumculled="false"`).
+5. **Inter-Volume Embedding & Full Exclusion Map**: Verify both `[bottomY, topY]` ($\ge 0.02\text{m}$ overlap) and check spatial coordinates against ALL active sibling landmarks/waterways on the board (not just 1–2 hero landmarks).
+6. **100% DTO Property Consumption & Non-Golfing LOC**: Flag any new DTO/interface field not wired at the consumer call-site, and verify living test raw line limits (`split('\n').length`) assuming 5–6 lines per standard `<mesh>`.
 
 ## 4. Directive Quality Rules
 
