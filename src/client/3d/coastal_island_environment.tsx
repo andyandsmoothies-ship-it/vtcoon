@@ -1,6 +1,6 @@
 // [UI-S01/MSS][UI-S04/MSS][IMP-13][IMP-30] CoastalIslandEnvironment — Vietnamese Coastal Island Metropolis
 // Endless Living Ocean, 15-degree Sloped Sand Shoreline, Tropical Palms & Horizon Mountain Range
-import React, { useRef } from 'react';
+import React, { useMemo, useRef } from 'react';
 import type { Mesh } from 'three';
 import { TropicalWater } from './tropical_water';
 import { CoastalPatrolBoat } from './coastal_patrol_boat';
@@ -14,6 +14,8 @@ import { SafeGLTFModel } from './asset_loader/safe_gltf_model';
 import { VEHICLE_MODEL_URLS } from './diorama/diorama_traffic';
 import { SoundEngine } from '../audio/sound_engine';
 import { isPhoneHardware } from './device_detect';
+import { perfBudget } from './perf_budget';
+import { createBatchedSanctuaryGeometries, getBayArchipelagoDescriptors, getCornerSanctuaryDescriptors, resolveDesktopQualityTier } from './coastal_sanctuary_visuals';
 
 export function ContainerShipProceduralFallback(): React.ReactElement {
   return (
@@ -36,6 +38,35 @@ export function ContainerShipProceduralFallback(): React.ReactElement {
 export interface CoastalIslandEnvironmentProps {
   streamlined?: boolean;
   isMobile?: boolean;
+  readonly deviceMemoryGb?: number;
+}
+
+export function CornerTycoonSanctuaries(props?: { readonly isMobile?: boolean; readonly deviceMemoryGb?: number }): React.ReactElement {
+  const isMobile = props?.isMobile ?? isPhoneHardware();
+  const quality = resolveDesktopQualityTier(perfBudget.getCurrentLOD(), props?.deviceMemoryGb, isMobile);
+  const geoms = useMemo(
+    () => createBatchedSanctuaryGeometries(quality.palmInstanceCount, getCornerSanctuaryDescriptors(), getBayArchipelagoDescriptors(quality.palmInstanceCount)),
+    [quality.palmInstanceCount]
+  );
+  return (
+    <group data-testid="corner-tycoon-sanctuaries">
+      <mesh geometry={geoms.sandBasesGeom} receiveShadow>
+        <meshStandardMaterial color="#EFE5D8" roughness={0.85} metalness={0.02} />
+      </mesh>
+      <mesh geometry={geoms.walnutDecksGeom} castShadow={quality.castSanctuaryShadows} receiveShadow>
+        <meshStandardMaterial color="#2B1D14" roughness={quality.deckRoughness} metalness={quality.usePhysicalClearcoat ? 0.14 : 0.05} />
+      </mesh>
+      <mesh geometry={geoms.brassRimsGeom} castShadow={quality.castSanctuaryShadows}>
+        <meshStandardMaterial color="#D97706" roughness={0.28} metalness={0.78} />
+      </mesh>
+      <mesh geometry={geoms.isletsAndCrownsGeom} castShadow={quality.castSanctuaryShadows} receiveShadow>
+        <meshStandardMaterial color="#15803D" roughness={0.72} metalness={0.04} />
+      </mesh>
+      <mesh geometry={geoms.palmTrunksGeom} castShadow={quality.castSanctuaryShadows}>
+        <meshStandardMaterial color="#78350F" roughness={0.78} metalness={0.05} />
+      </mesh>
+    </group>
+  );
 }
 
 export const CoastalIslandEnvironment: ((props: CoastalIslandEnvironmentProps) => React.ReactElement) & React.FC<CoastalIslandEnvironmentProps> = function CoastalIslandEnvironment(
@@ -227,8 +258,8 @@ export const CoastalIslandEnvironment: ((props: CoastalIslandEnvironmentProps) =
         </mesh>
       </group>
 
-
-      {/* 8. Hoạt cảnh hàng hải */}
+      {/* 8. Hoạt cảnh hàng hải & 4 Bán đảo Góc Tycoon Sanctuaries (IMP-399) */}
+      <CornerTycoonSanctuaries isMobile={isMobile} deviceMemoryGb={props.deviceMemoryGb} />
       <CoastalPatrolBoat isMobile={isMobile} />
       <CoastalSeagulls isMobile={isMobile} />
     </group>

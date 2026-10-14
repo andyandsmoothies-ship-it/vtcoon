@@ -1,0 +1,86 @@
+[
+  {
+    "file": "src/client/3d/coastal_sanctuary_visuals.ts",
+    "desc": "AST: Invert isMobile branch in resolveDesktopQualityTier",
+    "target": "if (isMobile === true) {",
+    "replacement": "if (isMobile === false) {"
+  },
+  {
+    "file": "src/client/3d/coastal_sanctuary_visuals.ts",
+    "desc": "AST: Corrupt low-RAM threshold rawMemory < 8 to rawMemory < 1",
+    "target": "rawMemory < 8",
+    "replacement": "rawMemory < 1"
+  },
+  {
+    "file": "src/client/3d/coastal_sanctuary_visuals.ts",
+    "desc": "AST: Corrupt DESKTOP_ULTRA usePhysicalClearcoat to false",
+    "target": "tier: 'DESKTOP_ULTRA',\n    usePhysicalClearcoat: true,",
+    "replacement": "tier: 'DESKTOP_ULTRA',\n    usePhysicalClearcoat: false,"
+  },
+  {
+    "file": "src/client/3d/coastal_sanctuary_visuals.ts",
+    "desc": "AST: Corrupt DESKTOP_ULTRA palmInstanceCount from 20 to 8",
+    "target": "palmInstanceCount: 20,",
+    "replacement": "palmInstanceCount: 8,"
+  },
+  {
+    "file": "src/client/3d/coastal_sanctuary_visuals.ts",
+    "desc": "AST: Corrupt sanctuary-nw inter-volume embedding baseTopY to coplanar -0.25",
+    "target": "id: 'sanctuary-nw',\n    position: [-12.2, -0.28, -12.2],\n    baseBottomY: -0.38,\n    baseTopY: -0.22,",
+    "replacement": "id: 'sanctuary-nw',\n    position: [-12.2, -0.28, -12.2],\n    baseBottomY: -0.38,\n    baseTopY: -0.25,"
+  },
+  {
+    "file": "src/client/3d/coastal_sanctuary_visuals.ts",
+    "desc": "AST: Corrupt islet-nw topElevation below wave crest (-0.28m)",
+    "target": "id: 'islet-nw',\n    position: [-16.5, -0.27, -15.8],\n    scale: [3.2, 0.22, 2.8],\n    bottomElevation: -0.38,\n    topElevation: -0.16,",
+    "replacement": "id: 'islet-nw',\n    position: [-16.5, -0.27, -15.8],\n    scale: [3.2, 0.22, 2.8],\n    bottomElevation: -0.38,\n    topElevation: -0.28,"
+  },
+  {
+    "file": "src/client/3d/coastal_sanctuary_visuals.ts",
+    "desc": "AST: Corrupt palm trunk embedding depth from 0.02m to 0.0m",
+    "target": "const trunkBottomY = Number((anchor.surfaceTopY - 0.02).toFixed(4));",
+    "replacement": "const trunkBottomY = Number((anchor.surfaceTopY - 0.0).toFixed(4));"
+  },
+  {
+    "file": "src/client/3d/coastal_island_environment.tsx",
+    "desc": "AST Call-Site: Corrupt walnutDecksGeom metalness clearcoat binding",
+    "target": "metalness={quality.usePhysicalClearcoat ? 0.14 : 0.05}",
+    "replacement": "metalness={quality.usePhysicalClearcoat ? 0.99 : 0.99}"
+  },
+  {
+    "file": "src/client/3d/coastal_island_environment.tsx",
+    "desc": "AST Call-Site: Sever deviceMemoryGb forwarding on CornerTycoonSanctuaries",
+    "target": "<CornerTycoonSanctuaries isMobile={isMobile} deviceMemoryGb={props.deviceMemoryGb} />",
+    "replacement": "<CornerTycoonSanctuaries isMobile={true} deviceMemoryGb={0} />"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_lod_helpers.ts",
+    "desc": "AST: Corrupt mobile silhouette bottomElevation from 0.012m to coplanar 0.005m",
+    "target": "bottomElevation: 0.012,",
+    "replacement": "bottomElevation: 0.005,"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_lod_helpers.ts",
+    "desc": "AST: Place sil-nw-1 inside Saigon River channel (x = 0.0)",
+    "target": "{ id: 'sil-nw-1', x: -5.4, z: -5.8, w: 0.52, h: 2.2, d: 0.52, color: '#38BDF8' },",
+    "replacement": "{ id: 'sil-nw-1', x: 0.0, z: -5.8, w: 0.52, h: 2.2, d: 0.52, color: '#38BDF8' },"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_lod_helpers.ts",
+    "desc": "AST: Short-circuit populateMobileCitySilhouetteInstancedMesh before populating instances",
+    "target": "if (!mesh) return 0;",
+    "replacement": "if (true) return 0;"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST Call-Site: Corrupt BatchedMobileCitySilhouette frustumCulled to true",
+    "target": "frustumCulled={false} frustumculled=\"false\" castShadow={false}",
+    "replacement": "frustumCulled={true} frustumculled=\"true\" castShadow={true}"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST Call-Site: Invert isMobile branch for BatchedMobileCitySilhouette vs DioramaShophouseBlocks",
+    "target": "{isMobile ? <BatchedMobileCitySilhouette /> : <DioramaShophouseBlocks />}",
+    "replacement": "{!isMobile ? <BatchedMobileCitySilhouette /> : <DioramaShophouseBlocks />}"
+  }
+]

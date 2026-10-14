@@ -36,6 +36,7 @@ export interface MasterplanModalProps {
     readonly isMortgaged?: boolean;
   }>;
   readonly levelMap?: Record<number, number>;
+  readonly playerPositions?: Record<string, number>;
   readonly onClose?: () => void;
   readonly myPlayerId?: string;
   readonly districtFilter?: 'all' | 'near-monopoly' | 'monopoly' | 'vacant';
@@ -57,14 +58,17 @@ export function MasterplanModal({
   playersInfo: propPlayersInfo,
   propertyStates: propPropertyStates,
   levelMap: propLevelMap,
+  playerPositions: propPlayerPositions,
   onClose,
 }: MasterplanModalProps): React.ReactElement {
   const storePlayersInfo = useGameStore((s) => s.playersInfo);
   const storeLevelMap = useGameStore((s) => s.levelMap);
+  const storePlayerPositions = useGameStore((s) => s.playerPositions);
 
   const players = propPlayersInfo !== undefined ? propPlayersInfo : (storePlayersInfo ?? {});
   const propStates = propPropertyStates ?? {};
   const levels = propLevelMap !== undefined ? propLevelMap : (storeLevelMap ?? {});
+  const positions = propPlayerPositions !== undefined ? propPlayerPositions : (storePlayerPositions ?? {});
 
   const [inspectedIndex, setInspectedIndex] = useState<number | null>(initialSelectedCellIndex ?? null);
   const contentContainerRef = React.useRef<HTMLDivElement>(null);
@@ -101,6 +105,24 @@ export function MasterplanModal({
     }
     return { ownedCount, vacantCount: totalPurchasable - ownedCount, totalPurchasable };
   }, [players, propStates, levels]);
+
+  const cellToPlayers = useMemo(() => {
+    const map: Record<number, Array<{ id: string; name: string; tokenColor: string }>> = {};
+    for (const p of Object.values(players)) {
+      if (!p || p.bankrupt || p.isBankrupt) continue;
+      const rawPos = positions[p.id] ?? p.position ?? 0;
+      const pos = typeof rawPos === 'number' ? rawPos : 0;
+      if (!map[pos]) {
+        map[pos] = [];
+      }
+      map[pos].push({
+        id: String(p.id ?? ''),
+        name: String(p.name ?? p.id ?? ''),
+        tokenColor: String(p.tokenColor ?? '#3B82F6'),
+      });
+    }
+    return map;
+  }, [players, positions]);
 
   const inspectedDeedInfo = currentInspected !== null ? getDeedDisplayInfo(currentInspected) : null;
   const inspectedOwnership = currentInspected !== null ? getCellOwnership(currentInspected) : null;
@@ -152,6 +174,7 @@ export function MasterplanModal({
             const isPurchasable = Boolean(deedInfo);
             const isOwned = Boolean(owner);
             const isSelected = currentInspected === cell.index;
+            const cellPlayers = cellToPlayers[cell.index] ?? [];
 
             return (
               <button
@@ -177,6 +200,24 @@ export function MasterplanModal({
                     className="w-full h-1 sm:h-1.5 shrink-0"
                     style={{ backgroundColor: COLOR_GROUP_HEX[cell.colorGroup] }}
                   />
+                )}
+
+                {/* Vị trí quân cờ người chơi đang đứng tại ô */}
+                {cellPlayers.length > 0 && (
+                  <div
+                    data-testid={`cell-pawns-${cell.index}`}
+                    className="absolute top-0.5 right-0.5 z-20 flex items-center -space-x-1 pointer-events-none"
+                  >
+                    {cellPlayers.map((p) => (
+                      <span
+                        key={p.id}
+                        data-testid={`cell-pawn-${p.id}`}
+                        className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full border border-white shadow-xs inline-block shrink-0"
+                        style={{ backgroundColor: p.tokenColor }}
+                        title={`Quân cờ: ${p.name}`}
+                      />
+                    ))}
+                  </div>
                 )}
 
                 {/* Nội dung ô */}

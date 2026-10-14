@@ -23,7 +23,8 @@ import {
   DioramaTropicalFlora,
 } from './diorama/diorama_railroad';
 import { isMobileDevice } from './device_detect';
-import { getCentralMonumentLODDescriptor } from './diorama/diorama_lod_helpers';
+import { getCentralMonumentLODDescriptor, getMobileCitySilhouetteDescriptors, populateMobileCitySilhouetteInstancedMesh } from './diorama/diorama_lod_helpers';
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? React.useLayoutEffect : useEffect;
 
 export {
   DioramaModelRailroad,
@@ -315,6 +316,20 @@ export function DioramaUrbanCanopy({ isMobile = false }: { readonly isMobile?: b
   );
 }
 
+export function BatchedMobileCitySilhouette(): React.ReactElement {
+  const meshRef = useRef<InstancedMesh>(null);
+  const descriptors = getMobileCitySilhouetteDescriptors();
+  useIsomorphicLayoutEffect(() => {
+    populateMobileCitySilhouetteInstancedMesh(meshRef.current, descriptors);
+  }, [descriptors]);
+  return (
+    <instancedMesh ref={meshRef} data-testid="batched-mobile-city-silhouette" args={[undefined, undefined, descriptors.length]} frustumCulled={false} frustumculled="false" castShadow={false} receiveShadow>
+      <boxGeometry args={[1, 1, 1]} />
+      <meshStandardMaterial color="#FFFFFF" roughness={0.45} metalness={0.15} />
+    </instancedMesh>
+  );
+}
+
 export interface MiniatureCityDioramaProps {
   readonly isMobile?: boolean;
   readonly isVisible?: boolean;
@@ -358,11 +373,10 @@ export function MiniatureCityDiorama({ isMobile: propIsMobile, isVisible = true 
       {!isMobile && <DioramaResidentialPool />}
       {/* 5.1. Khu di sản văn hóa Chợ Lớn & Shophouse phố cổ */}
       <DioramaHeritageDistrict isMobile={isMobile} />
-      {!isMobile && <DioramaShophouseBlocks />}
+      {isMobile ? <BatchedMobileCitySilhouette /> : <DioramaShophouseBlocks />}
       {/* 6. Nhịp sống đô thị vi mô & Giao thông tự hành (Bảo tồn hợp đồng TC-265.04 & TC-265.06) */}
       <DioramaMicroLife isMobile={isMobile} isVisible={isVisible} />
       <DioramaTraffic isMobile={isMobile} isVisible={isVisible} />
     </group>
   );
 }
-

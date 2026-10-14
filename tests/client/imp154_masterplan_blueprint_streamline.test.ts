@@ -167,4 +167,51 @@ describe('[IMP-154: Trạm 1 RED] Urban Masterplan Minimap Streamline & Blueprin
       expect(html).toMatch(/shadow-\[0_\d+px_0_0_#\w+\]/);
     });
   });
+
+  // =========================================================================
+  // Facet 5: Minimap Pawn Presence & Player Position Dots
+  // =========================================================================
+  describe('Facet 5: Minimap Pawn Presence & Player Position Dots', () => {
+    it('[TC-IMP154.16/MSS][UC-GAME-009] Render chấm màu quân cờ tương ứng tại ô người chơi đang đứng', () => {
+      const html = renderMasterplan({
+        playersInfo: MOCK_PLAYERS_INFO,
+        playerPositions: { p1: 14, p2: 24 },
+      });
+
+      expect(html).toContain('data-testid="cell-pawns-14"');
+      expect(html).toContain('data-testid="cell-pawn-p1"');
+      expect(html).toContain('data-testid="cell-pawns-24"');
+      expect(html).toContain('data-testid="cell-pawn-p2"');
+    });
+
+    it('[TC-IMP154.17/MSS][UC-GAME-009] Khi nhiều người cùng đứng 1 ô, gom cụm các chấm màu tương ứng', () => {
+      const html = renderMasterplan({
+        playersInfo: MOCK_PLAYERS_INFO,
+        playerPositions: { p1: 0, p2: 0 },
+      });
+
+      expect(html).toContain('data-testid="cell-pawns-0"');
+      expect(html).toContain('data-testid="cell-pawn-p1"');
+      expect(html).toContain('data-testid="cell-pawn-p2"');
+      expect(html).not.toContain('data-testid="cell-pawns-1"');
+    });
+
+    it('[TC-IMP154.18/MSS][UC-GAME-009] Bỏ qua người chơi đã phá sản khỏi hiển thị quân cờ', () => {
+      const html = renderMasterplan({
+        playersInfo: {
+          ...MOCK_PLAYERS_INFO,
+          p3: {
+            id: 'p3',
+            name: 'Phá Sản',
+            tokenColor: '#e74c3c',
+            bankrupt: true,
+          },
+        },
+        playerPositions: { p3: 10 },
+      });
+
+      expect(html).not.toContain('data-testid="cell-pawns-10"');
+      expect(html).not.toContain('data-testid="cell-pawn-p3"');
+    });
+  });
 });
