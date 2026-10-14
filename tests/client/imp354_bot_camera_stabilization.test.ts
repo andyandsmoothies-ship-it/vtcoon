@@ -131,9 +131,9 @@ describe('IMP-354: Bot Turn Camera Stabilization & Pacing Contracts', () => {
     expect(mode).toBe('pawn_chase');
   });
 
-  it('TC-354.07 [UC-CAM-PACING/MSS]: Given soft return duration calculation for bot turn with isBot true, When calling resolveSoftReturnDuration, Then returns 650 avoiding preemption collision', () => {
+  it('TC-354.07 [UC-CAM-PACING/MSS]: Given soft return duration calculation for bot turn with isBot true, When calling resolveSoftReturnDuration, Then returns 950 avoiding preemption collision', () => {
     const duration = resolveSoftReturnDuration(true);
-    expect(duration).toBe(650);
+    expect(duration).toBe(950);
   });
 
   it('TC-354.08 [UC-CAM-PACING/A1]: Given soft return duration calculation for human manual reset with isBot false or undefined, When calling resolveSoftReturnDuration, Then returns 1200', () => {

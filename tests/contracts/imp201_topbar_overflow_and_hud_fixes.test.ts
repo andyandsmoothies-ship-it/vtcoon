@@ -165,11 +165,11 @@ describe('[TC-201.01/MSS..TC-201.20/MSS][UC-IMP201] IMP-201 TopBar, Badge Collis
       expect(tag).not.toContain('min-[390px]:inline-flex');
     });
 
-    it('[TC-201.02/MSS][UC-IMP201] TopBar capsule bên trái match-info-capsule có class px-2 min-[360px]:px-2.5 giải phóng tối thiểu 16px cho mobile 360px', () => {
+    it('[TC-201.02/MSS][UC-IMP201] TopBar capsule bên trái match-info-capsule có class px-1 min-[360px]:px-1.5 giải phóng tối thiểu 16px cho mobile 360px', () => {
       const html = renderToStaticMarkup(React.createElement(TopBar));
       const tag = extractTagByTestId(html, 'match-info-capsule');
 
-      expect(tag).toContain('px-2');
+      expect(tag).toContain('px-1');
       expect(tag).not.toContain('px-3 sm:px-4');
     });
 
@@ -244,7 +244,7 @@ describe('[TC-201.01/MSS..TC-201.20/MSS][UC-IMP201] IMP-201 TopBar, Badge Collis
       expect(delay).toBe(0);
     });
 
-    it('[TC-201.10/MSS][UC-IMP201] Khi isRolling hoặc có pendingPawnMove thì getPawnLandingDelay tính toán thời gian chờ xúc xắc dừng và bước nhảy chuẩn SSOT (230ms người chơi, 200ms bot)', () => {
+    it('[TC-201.10/MSS][UC-IMP201] Khi isRolling hoặc có pendingPawnMove thì getPawnLandingDelay tính toán thời gian chờ xúc xắc dừng và bước nhảy chuẩn SSOT (300ms người chơi, 260ms bot)', () => {
       useGameStore.setState({
         isRolling: true,
         pendingPawnMove: {
@@ -289,14 +289,22 @@ describe('[TC-201.01/MSS..TC-201.20/MSS][UC-IMP201] IMP-201 TopBar, Badge Collis
         floatingTexts: [],
       });
 
-      handleRentBadge(rentAct, useGameStore.getState());
+      const addSpy = vi.fn((item) => {
+        useGameStore.setState((s) => ({ floatingTexts: [...s.floatingTexts, item] }));
+      });
+
+      handleRentBadge(rentAct, {
+        ...useGameStore.getState(),
+        addFloatingText: addSpy,
+      });
 
       // At t = 0 (before landing), zero floating texts should be visible
       expect(useGameStore.getState().floatingTexts.length).toBe(0);
 
-      // Advance time to landing point: 3 steps * 230ms = 690ms
-      vi.advanceTimersByTime(690);
+      // Advance time to landing point: 3 steps * 300ms = 900ms
+      vi.advanceTimersByTime(900);
 
+      expect(addSpy).toHaveBeenCalledTimes(2);
       const texts = useGameStore.getState().floatingTexts;
       expect(texts.some((t) => t.playerId === 'p1')).toBe(true);
       expect(texts.some((t) => t.playerId === 'p2')).toBe(true);
@@ -349,7 +357,7 @@ describe('[TC-201.01/MSS..TC-201.20/MSS][UC-IMP201] IMP-201 TopBar, Badge Collis
       handleBuyBadge(buyAct, useGameStore.getState());
       expect(useGameStore.getState().floatingTexts.length).toBe(0);
 
-      vi.advanceTimersByTime(2 * 230);
+      vi.advanceTimersByTime(2 * 300);
       expect(useGameStore.getState().floatingTexts.length).toBe(1);
     });
 
@@ -379,7 +387,7 @@ describe('[TC-201.01/MSS..TC-201.20/MSS][UC-IMP201] IMP-201 TopBar, Badge Collis
       handleTaxBadge(taxAct, useGameStore.getState());
       expect(useGameStore.getState().floatingTexts.length).toBe(0);
 
-      vi.advanceTimersByTime(4 * 230);
+      vi.advanceTimersByTime(4 * 300);
       expect(useGameStore.getState().floatingTexts.length).toBe(1);
     });
   });

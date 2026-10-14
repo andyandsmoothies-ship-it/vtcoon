@@ -241,8 +241,8 @@ describe('[CONTRACT] IMP-230: Pass GO Salary & Rent Subtractive Clean Suite', ()
       const passGoDelay = getPawnPassGoDelay!('p1');
       const landingDelay = ActivityBadgeDispatcher.getPawnLandingDelay('p1');
 
-      expect(passGoDelay).toBe(460); // 2 steps * 230ms
-      expect(landingDelay).toBe(1840); // 8 steps * 230ms
+      expect(passGoDelay).toBe(600); // 2 steps * 300ms
+      expect(landingDelay).toBe(2400); // 8 steps * 300ms
       expect(passGoDelay).toBeLessThan(landingDelay);
     });
 
@@ -261,7 +261,7 @@ describe('[CONTRACT] IMP-230: Pass GO Salary & Rent Subtractive Clean Suite', ()
       const passGoDelay = getPawnPassGoDelay!('p1');
       const landingDelay = ActivityBadgeDispatcher.getPawnLandingDelay('p1');
 
-      expect(passGoDelay).toBe(460); // 2 steps * 230ms
+      expect(passGoDelay).toBe(600); // 2 steps * 300ms
       expect(passGoDelay).not.toBe(Math.round(landingDelay * 0.5));
     });
 
@@ -276,7 +276,7 @@ describe('[CONTRACT] IMP-230: Pass GO Salary & Rent Subtractive Clean Suite', ()
       expect(getPawnPassGoDelay).toBeDefined();
       const passGoDelay = getPawnPassGoDelay!('p1');
       const landingDelay = ActivityBadgeDispatcher.getPawnLandingDelay('p1');
-      expect(passGoDelay).toBe(460); // 2 steps to 0
+      expect(passGoDelay).toBe(600); // 2 steps to 0
       expect(passGoDelay).toBe(landingDelay);
 
       // 2. [Phản biện 1] Hoạt ảnh nằm trong pawnAnimationQueue (Pha 3)
@@ -287,7 +287,7 @@ describe('[CONTRACT] IMP-230: Pass GO Salary & Rent Subtractive Clean Suite', ()
           { playerId: 'p1', fromCell: 38, targetCell: 6, waypoints: [39, 0, 1, 2, 3, 4, 5, 6], isBot: false },
         ],
       });
-      expect(getPawnPassGoDelay!('p1')).toBe(460);
+      expect(getPawnPassGoDelay!('p1')).toBe(600);
 
       // 3. [Phản biện 1] Fallback an toàn: Không có hoạt ảnh hoặc không qua GO -> trả về 0 ms
       useGameStore.setState({ pendingPawnMove: null, activePawnAnimation: null, pawnAnimationQueue: [] });
@@ -306,12 +306,12 @@ describe('[CONTRACT] IMP-230: Pass GO Salary & Rent Subtractive Clean Suite', ()
         message: 'Hoàn thành 1 vòng', playerId: 'p1', amount: 2000,
       }, mockState);
 
-      // Before delay (at t = 459ms), not called yet
-      vi.advanceTimersByTime(459);
+      // Before delay (at t = 599ms), not called yet
+      vi.advanceTimersByTime(599);
       expect(chimeSpy).not.toHaveBeenCalled();
       expect(mockState.addFloatingText).not.toHaveBeenCalled();
 
-      // At t = 460ms, called!
+      // At t = 600ms, called!
       vi.advanceTimersByTime(1);
       expect(chimeSpy).toHaveBeenCalledTimes(1);
       expect(mockState.addFloatingText).toHaveBeenCalledWith(expect.objectContaining({

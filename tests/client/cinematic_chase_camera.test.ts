@@ -167,7 +167,7 @@ describe('[UC-IMP263] Semi-Cinematic Chase Camera Contract Suite', () => {
     expect(state.position).toEqual([3.0, 2.8, 2.2]);
     expect(state.target).toEqual([-1.0, 0.6, -0.5]);
     expect(state.fov).toBe(42);
-    expect(state.speed).toBe(5.8);
+    expect(state.speed).toBe(3.8);
   });
 
   it('[TC-263.16/A4] calculateTargetCameraState duy tri standard chase camera khi cinematicChase la false va giu tuong thich cu khi options la undefined', () => {

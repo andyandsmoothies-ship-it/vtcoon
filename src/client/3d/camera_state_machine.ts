@@ -60,7 +60,7 @@ export const CAMERA_CONFIG = {
   },
   pawn_chase: {
     fov: 38,
-    speed: 5.2,
+    speed: 3.2,
     offset: [3.6, 4.2, 3.6] as const,
   },
   tile_focus: {
@@ -171,8 +171,9 @@ function configToCameraState(cfg: { readonly position: readonly [number, number,
   };
 }
 
-export function resolveSoftReturnDuration(isBot?: boolean): number {
-  return isBot ? 650 : 1200;
+export function resolveSoftReturnDuration(isBot: boolean = false): number {
+  const isBotTarget = Boolean(isBot);
+  return isBotTarget ? 950 : 1200;
 }
 
 /**
@@ -201,6 +202,7 @@ export function calculateTargetCameraState(
           isJailFlight: options.isJailFlight,
           isTransientTurnCorner: options.isTransientTurnCorner,
           enableNorthFraming: options.enableNorthFraming,
+          speed: options?.isBotTurn && options?.aspect !== undefined && options.aspect < 1.0 ? 5.2 : 3.8,
         });
       }
       // Luot di thong thuong (cinematicChase: false) hoac legacy fallback (options undefined):
@@ -212,7 +214,9 @@ export function calculateTargetCameraState(
         position: calculateChaseCameraPosition(p, undefined, options?.aspect),
         target: [safePx, 0.2, safePz],
         fov: calculateResponsiveChaseFov(options?.aspect),
-        speed: options?.isBotTurn ? 7.2 : CAMERA_CONFIG.pawn_chase.speed,
+        speed: options?.isBotTurn
+          ? (options?.aspect !== undefined && options.aspect < 1.0 ? 5.2 : 3.8)
+          : CAMERA_CONFIG.pawn_chase.speed,
       };
     }
     case 'tile_focus': {

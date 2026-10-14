@@ -1,0 +1,86 @@
+[
+  {
+    "file": "src/client/3d/pawn_path.ts",
+    "desc": "AST: Corrupt HOP_DURATION back to rushed 0.15s",
+    "target": "export const HOP_DURATION = 0.22 as const;",
+    "replacement": "export const HOP_DURATION = 0.15 as const;"
+  },
+  {
+    "file": "src/client/3d/pawn_path.ts",
+    "desc": "AST: Corrupt BOT_HOP_DURATION back to rushed 0.13s",
+    "target": "export const BOT_HOP_DURATION = 0.18 as const;",
+    "replacement": "export const BOT_HOP_DURATION = 0.13 as const;"
+  },
+  {
+    "file": "src/client/3d/pawn_path.ts",
+    "desc": "AST: Corrupt BOT_STEP_DURATION back to rushed 0.20s",
+    "target": "export const BOT_STEP_DURATION = 0.26 as const;",
+    "replacement": "export const BOT_STEP_DURATION = 0.20 as const;"
+  },
+  {
+    "file": "src/client/3d/pawn_path.ts",
+    "desc": "AST: Corrupt LANDING_DURATION to break human step sum",
+    "target": "export const LANDING_DURATION = 0.08 as const;",
+    "replacement": "export const LANDING_DURATION = 0.18 as const;"
+  },
+  {
+    "file": "src/client/3d/pawn_path.ts",
+    "desc": "AST: Corrupt BOT_LANDING_DURATION to break bot step sum",
+    "target": "export const BOT_LANDING_DURATION = 0.08 as const;",
+    "replacement": "export const BOT_LANDING_DURATION = 0.18 as const;"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Corrupt CAMERA_CONFIG.pawn_chase.speed back to 5.2",
+    "target": "  pawn_chase: {\n    fov: 38,\n    speed: 3.2,\n    offset: [3.6, 4.2, 3.6] as const,\n  },",
+    "replacement": "  pawn_chase: {\n    fov: 38,\n    speed: 5.2,\n    offset: [3.6, 4.2, 3.6] as const,\n  },"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Corrupt CAMERA_CONFIG.pawn_chase.fov to 60",
+    "target": "  pawn_chase: {\n    fov: 38,\n    speed: 3.2,",
+    "replacement": "  pawn_chase: {\n    fov: 60,\n    speed: 3.2,"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Corrupt resolveSoftReturnDuration bot duration back to 650ms",
+    "target": "export function resolveSoftReturnDuration(isBot: boolean = false): number {\n  const isBotTarget = Boolean(isBot);\n  return isBotTarget ? 950 : 1200;\n}",
+    "replacement": "export function resolveSoftReturnDuration(isBot: boolean = false): number {\n  const isBotTarget = Boolean(isBot);\n  return isBotTarget ? 650 : 1200;\n}"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Corrupt resolveSoftReturnDuration human duration to 800ms",
+    "target": "  return isBotTarget ? 950 : 1200;",
+    "replacement": "  return isBotTarget ? 950 : 800;"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Corrupt bot chase speed on landscape back to 7.2",
+    "target": "        speed: options?.isBotTurn\n          ? (options?.aspect !== undefined && options.aspect < 1.0 ? 5.2 : 3.8)\n          : CAMERA_CONFIG.pawn_chase.speed,",
+    "replacement": "        speed: options?.isBotTurn\n          ? (options?.aspect !== undefined && options.aspect < 1.0 ? 5.2 : 7.2)\n          : CAMERA_CONFIG.pawn_chase.speed,"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Corrupt bot mobile portrait chase speed floor from 5.2 to 2.0",
+    "target": "options?.aspect !== undefined && options.aspect < 1.0 ? 5.2 : 3.8",
+    "replacement": "options?.aspect !== undefined && options.aspect < 1.0 ? 2.0 : 3.8"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Corrupt cinematic chase speed back to 7.2",
+    "target": "          speed: 3.8,\n        });\n      }",
+    "replacement": "          speed: 7.2,\n        });\n      }"
+  },
+  {
+    "file": "src/client/events/pacing_context.ts",
+    "desc": "AST: Corrupt DEFAULT_PACING_CONFIG stepMs back to 230ms",
+    "target": "export const DEFAULT_PACING_CONFIG: PacingConfig = { stepMs: 300, botStepMs: 260, rollLeadMs: 1200 };",
+    "replacement": "export const DEFAULT_PACING_CONFIG: PacingConfig = { stepMs: 230, botStepMs: 260, rollLeadMs: 1200 };"
+  },
+  {
+    "file": "src/client/events/pacing_context.ts",
+    "desc": "AST: Corrupt DEFAULT_PACING_CONFIG botStepMs to 150ms",
+    "target": "export const DEFAULT_PACING_CONFIG: PacingConfig = { stepMs: 300, botStepMs: 260, rollLeadMs: 1200 };",
+    "replacement": "export const DEFAULT_PACING_CONFIG: PacingConfig = { stepMs: 300, botStepMs: 150, rollLeadMs: 1200 };"
+  }
+]

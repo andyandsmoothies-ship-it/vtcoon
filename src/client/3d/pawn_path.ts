@@ -5,11 +5,11 @@ import { cellPosition } from './board_coords';
 export const BOARD_TOTAL_CELLS = 40 as const;
 export const DEFAULT_JUMP_ARC = 0.8 as const;
 export const BASE_PAWN_Y = 0.45 as const;
-export const HOP_DURATION = 0.15 as const;
+export const HOP_DURATION = 0.22 as const;
 export const LANDING_DURATION = 0.08 as const;
-export const BOT_HOP_DURATION = 0.13 as const;
-export const BOT_LANDING_DURATION = 0.07 as const;
-export const BOT_STEP_DURATION = 0.20 as const;
+export const BOT_HOP_DURATION = 0.18 as const;
+export const BOT_LANDING_DURATION = 0.08 as const;
+export const BOT_STEP_DURATION = 0.26 as const;
 
 export const JAIL_FLIGHT_ARC = 2.8 as const;
 export const JAIL_FLIGHT_DURATION = 0.55 as const;

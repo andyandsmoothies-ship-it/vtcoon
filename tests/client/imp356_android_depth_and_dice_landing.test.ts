@@ -256,12 +256,12 @@ describe('[TC-356/MSS] Diorama Hollow Rim, Flat Dice Landing & Bot Action Camera
     expect(mode).toBe('pawn_chase');
   });
 
-  it('[TC-356.08/MSS] [UC-CAM-BOT-SPEED]: Given Bot turn in pawn_chase mode, When calling calculateTargetCameraState, Then uses catch-up speed 7.2 overcoming bot hop velocity', () => {
+  it('[TC-356.08/MSS] [UC-CAM-BOT-SPEED]: Given Bot turn in pawn_chase mode, When calling calculateTargetCameraState, Then uses catch-up speed 3.8 matching golden cinematic pacing', () => {
     const resultState = calculateTargetCameraState('pawn_chase', [0, 0, 0], [0, 0, 0], {
       isBotTurn: true,
     });
 
-    expect(resultState.speed).toBe(7.2);
+    expect(resultState.speed).toBe(3.8);
     expect(resultState.fov).toBe(38);
   });
 

@@ -76,11 +76,11 @@ describe('[IMP-358] Bot Camera Lead, Kinematic Boost & Mobile Framing Contract S
     expect(state.speed).toBe(4.8);
   });
 
-  it('[TC-358.02/MSS][UC-CAM-BOT-SPEED-PARITY] Given Bot turn in pawn_chase mode, When calling calculateTargetCameraState, Then returns catch-up boost speed 7.2 overcoming 13.85m/s bot hop velocity', () => {
+  it('[TC-358.02/MSS][UC-CAM-BOT-SPEED-PARITY] Given Bot turn in pawn_chase mode, When calling calculateTargetCameraState, Then returns catch-up boost speed 3.8 matching golden cinematic pacing', () => {
     const state = calculateTargetCameraState('pawn_chase', [0, 0, 0], [0, 0, 0], {
       isBotTurn: true,
     });
-    expect(state.speed).toBe(7.2);
+    expect(state.speed).toBe(3.8);
   });
 
   it('[TC-358.03/MSS][UC-CAM-BOT-FOCUS-SPEED] Given Bot turn in tile_focus mode, When calling calculateTargetCameraState, Then returns speed: 4.0 matching CAMERA_CONFIG.tile_focus.speed', () => {
@@ -127,11 +127,11 @@ describe('[IMP-358] Bot Camera Lead, Kinematic Boost & Mobile Framing Contract S
     expect(state.target[0]).toBeLessThan(1.5);
   });
 
-  it('[TC-358.09/MSS][UC-CAM-BOT-SPEED] Given Bot turn in pawn_chase mode, When calling calculateTargetCameraState, Then uses restored speed 7.2 to eliminate camera lag behind pawn', () => {
+  it('[TC-358.09/MSS][UC-CAM-BOT-SPEED] Given Bot turn in pawn_chase mode, When calling calculateTargetCameraState, Then uses restored speed 3.8 to eliminate camera lag behind pawn', () => {
     const state = calculateTargetCameraState('pawn_chase', [5, 0, 5], [5, 0, 5], {
       isBotTurn: true,
     });
-    expect(state.speed).toBe(7.2);
+    expect(state.speed).toBe(3.8);
   });
 
   it('[TC-358.10/MSS][UC-CAM-BOT-DICE-PAN] Given Bot turn with isRolling true, When calling calculateTargetCameraState, Then returns dice pan position with Y=19.8 and FOV=28 eliminating bot camera freeze', () => {

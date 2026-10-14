@@ -201,7 +201,7 @@ describe('Station 1 Contract Tests: Audio & Pacing Presentation Subscribers (IMP
     const p2LandingDelay = pacing.getPawnLandingDelay('p2');
     const unknownLandingDelay = pacing.getPawnLandingDelay(undefined);
 
-    expect(p1LandingDelay).toBe(2350);
+    expect(p1LandingDelay).toBe(2700);
     expect(p2LandingDelay).toBe(0);
     expect(unknownLandingDelay).toBe(0);
   });

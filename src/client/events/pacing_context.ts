@@ -8,7 +8,15 @@ export interface PacingConfig {
   readonly rollLeadMs?: number;
 }
 
-export const DEFAULT_PACING_CONFIG: PacingConfig = { stepMs: 230, botStepMs: 200, rollLeadMs: 1200 };
+export const DEFAULT_HUMAN_STEP_MS = 300;
+export const DEFAULT_BOT_STEP_MS = 260;
+export const DEFAULT_ROLL_LEAD_MS = 1200;
+
+export const DEFAULT_PACING_CONFIG: PacingConfig = {
+  stepMs: DEFAULT_HUMAN_STEP_MS,
+  botStepMs: DEFAULT_BOT_STEP_MS,
+  rollLeadMs: DEFAULT_ROLL_LEAD_MS,
+};
 
 export interface PacingContext {
   getPawnLandingDelay(playerId?: string): number;
@@ -27,7 +35,10 @@ export function clearPendingPacingTimers(): void {
 function getAnimLead(anim: GameState['activePawnAnimation'], config: PacingConfig): number {
   if (!anim || !anim.waypoints?.length) return 0;
   const steps = Math.max(1, anim.waypoints.length - (anim.currentIndex ?? 0));
-  const ms = anim.isBot ? (config.botStepMs ?? 200) : (config.stepMs ?? 230);
+  const isBot = Boolean(anim.isBot);
+  const ms = isBot
+    ? (config.botStepMs ?? DEFAULT_BOT_STEP_MS)
+    : (config.stepMs ?? DEFAULT_HUMAN_STEP_MS);
   return Math.round(steps * ms);
 }
 
@@ -38,9 +49,9 @@ export function getPawnLandingDelay(
 ): number {
   if (!playerId) return 0;
   const state = storeState ?? useGameStore.getState();
-  const humanMs = config.stepMs ?? 230;
-  const botMs = config.botStepMs ?? 200;
-  const rollLead = config.rollLeadMs ?? 1200;
+  const humanMs = config.stepMs ?? DEFAULT_HUMAN_STEP_MS;
+  const botMs = config.botStepMs ?? DEFAULT_BOT_STEP_MS;
+  const rollLead = config.rollLeadMs ?? DEFAULT_ROLL_LEAD_MS;
 
   if (state.pendingPawnMove && state.pendingPawnMove.playerId === playerId) {
     const rawDiff = (state.pendingPawnMove.targetCell - (state.pendingPawnMove.fromCell ?? 0)) % 40;
@@ -68,9 +79,9 @@ export function getPawnPassGoDelay(
 ): number {
   if (!playerId) return 0;
   const state = storeState ?? useGameStore.getState();
-  const humanMs = config.stepMs ?? 230;
-  const botMs = config.botStepMs ?? 200;
-  const rollLead = state.isRolling ? (config.rollLeadMs ?? 1200) : 0;
+  const humanMs = config.stepMs ?? DEFAULT_HUMAN_STEP_MS;
+  const botMs = config.botStepMs ?? DEFAULT_BOT_STEP_MS;
+  const rollLead = state.isRolling ? (config.rollLeadMs ?? DEFAULT_ROLL_LEAD_MS) : 0;
 
   if (state.pendingPawnMove && state.pendingPawnMove.playerId === playerId) {
     const fromCell = state.pendingPawnMove.fromCell ?? 0;
