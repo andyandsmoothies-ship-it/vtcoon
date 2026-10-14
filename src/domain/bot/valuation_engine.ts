@@ -11,10 +11,13 @@ import {
 } from '../property_data';
 import {
   BotPersonality,
+  JITTER_BOUNDS,
   type TileValuation,
 } from './bot_types';
 import { calculateThreatHorizon } from './threat_forecaster';
 import { calculateBuyProbability, resolveSeededJitter } from './bot_softmax';
+
+export { JITTER_BOUNDS };
 
 export const PACING_STAGE_MULTIPLIERS = Object.freeze({
   EARLY: 1.4, // Round 1..8: Expansion phase
@@ -37,11 +40,6 @@ export const DENIAL_MULTIPLIERS: Readonly<Record<BotPersonality, number>> = Obje
 
 const DENIAL_MULTIPLIER_NONE = 1.0;
 const MIN_LIQUIDITY_MULTIPLIER = 0.25;
-
-export const JITTER_BOUNDS = Object.freeze({
-  MIN: -0.12,
-  MAX:  0.12,
-});
 
 export function getPacingMultiplier(round?: number): number {
   const currentRound = typeof round === 'number' && round > 0 ? round : 1;

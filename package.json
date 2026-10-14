@@ -17,6 +17,7 @@
     "test:uat": "vitest run --config vitest.uat.config.ts",
     "lint:ui": "node scripts/lint_ui.mjs",
     "lint:slop": "node scripts/lint_slop.mjs",
+    "lint:boundaries": "node scripts/lint_boundaries.mjs",
     "check:loc": "node scripts/check_loc.mjs",
     "check:i18n": "node scripts/check_reason_i18n_parity.mjs",
     "audit:ssot-drift": "node scripts/audit_ssot_drift.mjs",

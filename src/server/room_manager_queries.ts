@@ -1,12 +1,10 @@
 // [IMP-64] Extracted pure query functions from RoomManager
 // ZERO LOGIC CHANGE — code moved verbatim from room_manager.ts & insolvency_manager.ts
-import { resolveRent, PROPERTY_DEEDS, type PropertyRegistry, type PropertyStateMap } from '../domain/property_manager.js';
-import { BOARD_CONFIG } from '../domain/board_config.js';
+import { BOARD_CONFIG, resolveRent, LEVEL_MULTIPLIER, calculateCellNetWorth, type Room, type PropertyRegistry, type PropertyStateMap } from '../domain/index.js';
 import { buildDeltaFromRoom, type DeltaPayload } from './session_manager.js';
-import type { Room } from '../domain/room.js';
 import type { AuctionSession } from './auction_manager.js';
 
-export const LEVEL_MULTIPLIER: Record<number, number> = { 0: 1, 1: 1.5, 2: 2.5, 3: 4 };
+export { LEVEL_MULTIPLIER };
 
 export function calcPropertyRent(
   reg: PropertyRegistry | undefined,
@@ -30,20 +28,14 @@ export function calculateNetWorth(
   if (!player) return 0;
 
   let worth = player.balance;
-  const MORTGAGE_RATE = 0.5;
 
   for (const [cellIndex, owner] of registry) {
     if (owner !== playerId) continue;
-    const deed = PROPERTY_DEEDS.get(cellIndex);
-    if (!deed) continue;
     const level = stateMap.get(cellIndex)?.level ?? 0;
-    const mult = LEVEL_MULTIPLIER[level] ?? 1;
-    worth += Math.floor(deed.price * mult);
-
-    if (player.mortgagedProperties?.includes(cellIndex)) {
-      const loan = player.mortgageLoans?.[cellIndex] ?? Math.floor(deed.price * MORTGAGE_RATE);
-      worth -= loan;
-    }
+    const isMortgaged = Boolean(
+      player.mortgagedProperties?.includes(cellIndex) || stateMap.get(cellIndex)?.isMortgaged,
+    );
+    worth += calculateCellNetWorth(cellIndex, level, isMortgaged, player.mortgageLoans?.[cellIndex]);
   }
   return worth;
 }

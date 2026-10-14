@@ -4,7 +4,7 @@ import { PROPERTY_DEEDS, type PropertyRegistry, type PropertyStateMap } from '..
 import { BotPersonality, DEFAULT_MIN_SAFETY_BUFFER } from './bot_types.js';
 import type { Player, Room } from '../room.js';
 import { isLeadingPlayer } from './bot_posture.js';
-import type { BotSwapTradeIntent, BotTradeDecision } from './bot_trade.js';
+import type { BotSwapTradeIntent, BotTradeDecision } from './bot_types.js';
 import { findAllMonopolyGaps, type MonopolyGap } from './bot_monopoly_utils.js';
 
 export function completesMonopoly(cellIndex: number, ownerId: string, registry: PropertyRegistry): boolean {

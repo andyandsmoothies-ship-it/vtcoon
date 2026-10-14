@@ -1,7 +1,7 @@
 // [IMP-331] Game Event Financial Synthesizer
 // Pure, deterministic domain module for synthesizing financial game events (Salary, Fees, Rent, Diplomatic Waiver)
 import type { GameState, PlayerHudInfo } from '../store/game_store.js';
-import type { DeltaPayload } from '../../server/session_manager.js';
+import type { DeltaPayload } from '../../domain/protocol/index.js';
 import {
   type SynthesizedGameEvent, type SynthesizerOptions, SynthesizedGameEventType,
   type RentPaidEvent, type GoSalaryEvent, type FeePaidEvent,

@@ -1,5 +1,5 @@
 // [UI-S06/MSS] ActivityTracker — Event Extraction Facade from DeltaPayload & GameState transitions
-import type { DeltaPayload } from '../../server/session_manager.js';
+import type { DeltaPayload } from '../../domain/protocol/index.js';
 import { type GameState, FloatingTextType } from '../store/game_store.js';
 import { useLobbyStore } from '../store/lobby_store.js';
 import { useActivityStore, type ActivityLogEntry } from '../store/activity_store.js';

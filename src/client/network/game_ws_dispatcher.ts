@@ -1,6 +1,5 @@
 // [IMP-315] Modular Game WS Dispatcher & URL / Backoff Computation
-import type { PlayerIntent } from '../../server/intent_dispatcher.js';
-import type { WsClientMessage } from '../../server/network/network_types.js';
+import type { PlayerIntent, WsClientMessage } from '../../domain/protocol/index.js';
 import { useTelemetryStore } from '../telemetry/telemetry_store.js';
 import { useGameStore } from '../store/game_store.js';
 import { buildIntentTelemetryContext } from '../ui/ui_helpers.js';

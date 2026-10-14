@@ -1,9 +1,8 @@
 // [TC-NET02.1/MSS][TC-NET02.2/MSS] Lobby Zustand Store — Quản lý sảnh chờ, slot người chơi & kiểm soát quyền Host
 // Nguồn: docs/epics/networking/_epic_ledger.md § Slice NET-02
 import { create } from 'zustand';
-import { BotPersonality } from '../../domain/bot/bot_engine';
-import { assignRandomPlayerPawns } from '../../domain/pawn_assignment';
-import { generateRandomAnimalName } from '../../domain/name_generator';
+import { BotPersonality } from '../../domain/bot/index.js';
+import { assignRandomPlayerPawns, generateRandomAnimalName } from '../../domain/index.js';
 import {
   MAX_LOBBY_SLOTS,
   ROOM_CODE_REGEX,

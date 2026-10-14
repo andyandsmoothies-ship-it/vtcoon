@@ -1,0 +1,46 @@
+{
+  "probes": [
+    {
+      "id": "M1_BOARD_CELL_UPPER_BOUND",
+      "file": "src/domain/protocol/index.ts",
+      "target": "val >= 0 && val < 40",
+      "replacement": "val >= 0 && val <= 99"
+    },
+    {
+      "id": "M2_NON_NEGATIVE_INT_BYPASS",
+      "file": "src/domain/protocol/index.ts",
+      "target": "typeof val === 'number' && Number.isInteger(val) && val >= 0",
+      "replacement": "typeof val === 'number' && Number.isInteger(val)"
+    },
+    {
+      "id": "M3_POSITIVE_PRICE_BYPASS",
+      "file": "src/domain/protocol/index.ts",
+      "target": "typeof val === 'number' && Number.isInteger(val) && val > 0",
+      "replacement": "typeof val === 'number' && Number.isInteger(val) && val >= 0"
+    },
+    {
+      "id": "M4_UPGRADE_ETC_CELL_GUARD_BYPASS",
+      "file": "src/domain/protocol/index.ts",
+      "target": "if (type === 'INTENT_UPGRADE_ETC') return it['cellIndex'] === undefined || isValidBoardCellIndex(it['cellIndex']);",
+      "replacement": "if (type === 'INTENT_UPGRADE_ETC') return true;"
+    },
+    {
+      "id": "M5_BOND_TRANCHE_WHITELIST_BYPASS",
+      "file": "src/domain/protocol/index.ts",
+      "target": "typeof it['trancheId'] === 'string' && VALID_BOND_TRANCHES.has(it['trancheId'])",
+      "replacement": "typeof it['trancheId'] === 'string'"
+    },
+    {
+      "id": "M6_ENVELOPE_VALIDATOR_CALLSITE_BYPASS",
+      "file": "src/server/security/envelope_validator.ts",
+      "target": "if (!isValidPlayerIntentFields(it)) {\n      return { success: false, reasonCode: 'INVALID_ENVELOPE' };\n    }",
+      "replacement": "if (!isValidPlayerIntentFields(it) && false) {\n      return { success: false, reasonCode: 'INVALID_ENVELOPE' };\n    }"
+    },
+    {
+      "id": "M7_VALID_INTENTS_TRANSIT_OMISSION",
+      "file": "src/domain/protocol/index.ts",
+      "target": "'INTENT_SPIN_TRANSIT_WHEEL',",
+      "replacement": ""
+    }
+  ]
+}

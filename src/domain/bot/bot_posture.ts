@@ -4,12 +4,12 @@
 import type { Player, Room } from '../room';
 import { BOARD_SIZE } from '../room';
 import { BOARD_CONFIG, CellType } from '../board_config';
-import { PROPERTY_DEEDS, type PropertyRegistry, type PropertyStateMap } from '../property_data';
+import { PROPERTY_DEEDS, LEVEL_MULTIPLIER, calculateCellNetWorth, type PropertyRegistry, type PropertyStateMap } from '../property_data';
 import { hasMonopoly } from '../property_upgrade';
 import { MacroCycleType } from '../macro_cycle_types';
 import { BotPosture, DICE_2D6_PROBABILITIES } from './bot_types';
 
-const LEVEL_MULTIPLIER: Record<number, number> = { 0: 1, 1: 1.5, 2: 2.5, 3: 4 };
+export { LEVEL_MULTIPLIER };
 
 /**
  * Lấy danh sách các nhóm màu đã hoàn thành độc quyền và đủ điều kiện xây dựng (không có ô nào bị thế chấp).
@@ -50,20 +50,11 @@ export function evaluatePlayerNetWorth(
   let total = p.balance;
   for (const [cellIdx, ownerId] of registry.entries()) {
     if (ownerId !== playerId) continue;
-    const deed = PROPERTY_DEEDS.get(cellIdx);
-    if (!deed) continue;
-
     const isMortgaged = Boolean(
       p.mortgagedProperties?.includes(cellIdx) || stateMap.get(cellIdx)?.isMortgaged,
     );
-
-    if (isMortgaged) {
-      total += Math.floor(deed.price * 0.5);
-    } else {
-      const level = stateMap.get(cellIdx)?.level ?? 0;
-      const mult = LEVEL_MULTIPLIER[level] ?? 1;
-      total += Math.floor(deed.price * mult);
-    }
+    const level = stateMap.get(cellIdx)?.level ?? 0;
+    total += calculateCellNetWorth(cellIdx, level, isMortgaged, p.mortgageLoans?.[cellIdx]);
   }
 
   return total;

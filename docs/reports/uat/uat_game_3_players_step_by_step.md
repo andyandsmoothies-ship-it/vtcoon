@@ -579,7 +579,7 @@ Mọi bước đi, cú gieo xúc xắc, di chuyển, tương tác ô đất và 
 - **Xúc xắc:** [5, 4] (Tổng: 9)
 - **Di chuyển:** Ô 38 ➔ Ô 7 (**Phiếu Cơ Hội**) | *Vượt mốc Khởi Hành (+2.000 Tr. VNĐ)*
 - **Sự kiện ô:** Dừng chân tại [Phiếu Cơ Hội]: Trả tiền thuê 1150 Tr. VNĐ cho Cô Tư (Thận trọng / Passive)
-- **Số dư sau lượt:** 317 Tr. VNĐ | **Tài sản ròng:** 30.067 Tr. VNĐ
+- **Số dư sau lượt:** 317 Tr. VNĐ | **Tài sản ròng:** 29.167 Tr. VNĐ
 - **Danh mục BĐS sở hữu (7):** Cảng HKQT Long Thành, Cần Thơ (Cái Răng) (C3), TP.HCM (TP. Thủ Đức) (C2), An Giang (Châu Đốc) (C3), Bình Định (Quy Nhơn) (C1), Ninh Bình (Tràng An), TP.HCM (Quận 1 - Nguyễn Huệ) (C2)
 
 #### Lượt #62 | Vòng #20 — Chú Sáu (Cân bằng / Balanced) (Balanced)
@@ -601,7 +601,7 @@ Mọi bước đi, cú gieo xúc xắc, di chuyển, tương tác ô đất và 
 ### === VÒNG ĐẤU #21 ===
 
 #### Lượt #64 | Vòng #21 — Bác Ba (Thực dụng / Aggressive) (Aggressive)
-- **Số dư trước lượt:** 317 Tr. VNĐ | **Tài sản ròng:** 30.067 Tr. VNĐ
+- **Số dư trước lượt:** 317 Tr. VNĐ | **Tài sản ròng:** 29.167 Tr. VNĐ
 - **Xúc xắc:** [3, 5] (Tổng: 8)
 - **Di chuyển:** Ô 7 ➔ Ô 15 (**Cảng Nước Sâu Cái Mép**)
 - **Sự kiện ô:** Dừng chân tại [Cảng Nước Sâu Cái Mép]: Trả tiền thuê 317 Tr. VNĐ cho Cô Tư (Thận trọng / Passive)

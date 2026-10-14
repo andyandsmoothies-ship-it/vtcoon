@@ -1,7 +1,7 @@
 // [UC-GAME-038..041/MSS] Event Card Engine — Enums, Constants & Deck
 import type { Player, MarketModifier, Room } from './room';
 import { TurnPhase } from './room';
-import type { PropertyRegistry, PropertyStateMap } from './property_manager';
+import type { PropertyRegistry, PropertyStateMap } from './property_data';
 import { executeMarketCard, executeChanceCard } from './card_handlers';
 import { getChanceCardInfo, getMarketCardInfo } from './event_card_metadata.js';
 import {

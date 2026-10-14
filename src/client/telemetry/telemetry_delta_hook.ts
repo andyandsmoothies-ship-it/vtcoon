@@ -1,5 +1,5 @@
 // [IMP-216] Telemetry Delta Hook — Bridges applyDelta to Invariant Verifiers & Flight Recorder
-import type { DeltaPayload } from '../../server/session_manager.js';
+import type { DeltaPayload } from '../../domain/protocol/index.js';
 import type { GameState, PlayerHudInfo } from '../store/game_store.js';
 import { BOARD_SIZE, TurnPhase } from '../../domain/room.js';
 import { verifyAllInvariants } from './invariant_checker.js';

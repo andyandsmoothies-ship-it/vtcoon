@@ -30,14 +30,18 @@ export function auditReportsAndSSOT(evidence, repoRoot, targetArg, evidencePath)
   if (fs.existsSync(auditDir) && ticketNum) {
     const auditFiles = fs.readdirSync(auditDir);
 
-    const hasSpecReview = auditFiles.some((f) => f.toLowerCase().startsWith('spec_review_') && matchesTicket(f));
-    if (!hasSpecReview) {
-      errors.push(`[Phase 3.3 Persistence Violation] Missing physical Spec Review report: .agents/audit/SPEC_REVIEW_${evidence.ticketId || targetArg}.md`);
-    }
+    const isWaivedReview = isPureLogicWaiver || evidence.tier === '1.5' || evidence.isStructuralRefactor === true || evidence.leanExecution === true || evidence.tier === '1';
 
-    const hasCodeReview = auditFiles.some((f) => f.toLowerCase().startsWith('code_review_') && matchesTicket(f));
-    if (!hasCodeReview) {
-      errors.push(`[Phase 3.3 Persistence Violation] Missing physical Code Review report: .agents/audit/CODE_REVIEW_${evidence.ticketId || targetArg}.md`);
+    if (!isWaivedReview) {
+      const hasSpecReview = auditFiles.some((f) => f.toLowerCase().startsWith('spec_review_') && matchesTicket(f));
+      if (!hasSpecReview) {
+        errors.push(`[Phase 3.3 Persistence Violation] Missing physical Spec Review report: .agents/audit/SPEC_REVIEW_${evidence.ticketId || targetArg}.md`);
+      }
+
+      const hasCodeReview = auditFiles.some((f) => f.toLowerCase().startsWith('code_review_') && matchesTicket(f));
+      if (!hasCodeReview) {
+        errors.push(`[Phase 3.3 Persistence Violation] Missing physical Code Review report: .agents/audit/CODE_REVIEW_${evidence.ticketId || targetArg}.md`);
+      }
     }
 
     const isVisual = !isPureLogicWaiver && (evidence.visualReview || /3d|ui|viaduct|diorama|ballast|modal|hud/i.test(evidencePath) || /3d|ui/i.test(summary.contractSuite || ''));

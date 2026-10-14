@@ -2,6 +2,7 @@
 // Extracted from property_manager.ts — Slice 06 refactor (DEBT-S06-05)
 
 import { CellType, BOARD_CONFIG } from './board_config';
+import { MORTGAGE_LOAN_RATE } from './mortgage_constants';
 
 // --- Kieu du lieu ---
 
@@ -94,3 +95,24 @@ export const RAILROAD_FEES: Record<number, number> = { 1: 500, 2: 1000, 3: 2000,
 export const UTILITY_CELLS = [12, 28] as const;
 export const ETC_COST_PER_CELL = 1500;
 export const UTILITY_UPGRADE_COST = 1000;
+
+// --- [IMP-391] Authoritative Net Worth Valuation SSOT ---
+export const LEVEL_MULTIPLIER: Record<number, number> = { 0: 1, 1: 1.5, 2: 2.5, 3: 4 };
+
+export function calculateCellNetWorth(
+  cellIndex: number,
+  level: number = 0,
+  isMortgaged: boolean = false,
+  customLoanAmount?: number,
+): number {
+  const deed = PROPERTY_DEEDS.get(cellIndex);
+  if (!deed) return 0;
+  const effectiveLevel = isMortgaged ? 0 : level;
+  const mult = LEVEL_MULTIPLIER[effectiveLevel] ?? 1;
+  let worth = Math.floor(deed.price * mult);
+  if (isMortgaged) {
+    const loan = customLoanAmount ?? Math.floor(deed.price * MORTGAGE_LOAN_RATE);
+    worth -= loan;
+  }
+  return worth;
+}

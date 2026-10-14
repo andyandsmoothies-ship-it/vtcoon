@@ -9,7 +9,7 @@ import { BotPersonality, type LobbySlot } from '../../store/lobby_types';
 import { useAudioStore } from '../../store/audio_store';
 import { AudioEngine } from '../../audio/audio_engine';
 import { SoundEffect } from '../../audio/audio_types';
-import type { WsClientMessage } from '../../../server/network/network_types';
+import type { WsClientMessage } from '../../../domain/protocol/index.js';
 
 export interface PreMatchDeckProps {
   readonly onStartGame?: () => void;

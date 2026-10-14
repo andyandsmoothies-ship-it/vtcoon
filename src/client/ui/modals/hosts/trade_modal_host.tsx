@@ -1,7 +1,7 @@
 // [IMP-335] TradeModalHost — Extracted sub-host for player-to-player trade modal
 import React from 'react';
 import type { PlayerHudInfo } from '../../../store/game_store_types';
-import type { PlayerIntent } from '../../../../server/intent_dispatcher';
+import type { PlayerIntent } from '../../../../domain/protocol/index.js';
 import type { ModalPayloadMap } from '../../../store/game_store';
 import { useLobbyStore } from '../../../store/lobby_store';
 import { AudioEngine } from '../../../audio/audio_engine';

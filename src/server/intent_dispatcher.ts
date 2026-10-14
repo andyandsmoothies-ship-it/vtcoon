@@ -13,31 +13,8 @@ import { handleHoseInvest, handleHoseSkip } from './hose_actions.js';
 import { executeInsolvencyAfkRecovery } from './network/afk_recovery.js';
 import { handleSpinTransitWheel } from './transit_wheel_handler.js';
 import type { BondTrancheId } from '../domain/bond_types.js';
-
-export type PlayerIntent =
-  | { type: 'INTENT_BUY' } | { type: 'INTENT_BUY_PROPERTY' } | { type: 'INTENT_DECLINE' }
-  | { type: 'INTENT_BID'; amount: number; isBait?: boolean }
-  | { type: 'INTENT_AUCTION_PASS' }
-  | { type: 'INTENT_UPGRADE'; cellIndex: number }
-  | { type: 'INTENT_UPGRADE_ETC'; cellIndex?: number }
-  | { type: 'INTENT_UPGRADE_UTILITY'; cellIndex: number }
-  | { type: 'INTENT_DOWNGRADE'; cellIndex: number; stepByStep?: boolean; enforceEvenDowngrading?: boolean }
-  | { type: 'INTENT_MORTGAGE'; cellIndex: number }
-  | { type: 'INTENT_REDEEM'; cellIndex: number }
-  | { type: 'INTENT_TRADE_OFFER'; sellerId: string; buyerId: string; cellIndex: number; price: number; offeredCellIndex?: number }
-  | { type: 'INTENT_RESPOND_TRADE_OFFER'; offerId: string; accept: boolean }
-  | { type: 'INTENT_EXECUTE_COMPULSORY_BUYOUT'; cellIndex: number }
-  | { type: 'INTENT_DECLINE_COMPULSORY_BUYOUT' }
-  | { type: 'INTENT_END_TURN' }
-  | { type: 'INTENT_INVEST'; stake: number }
-  | { type: 'INTENT_SKIP' }
-  | { type: 'INTENT_BAIL_OUT' }
-  | { type: 'INTENT_BANKRUPTCY'; creditorId?: string }
-  | { type: 'INTENT_ISSUE_BOND'; trancheId?: BondTrancheId }
-  | { type: 'INTENT_REPAY_BOND' }
-  | { type: 'INTENT_AUTO_SOLVENCY' }
-  | { type: 'INTENT_SPIN_TRANSIT_WHEEL' }
-  | { type: 'INTENT_ROLL' };
+import type { PlayerIntent } from '../domain/protocol/index.js';
+export type { PlayerIntent };
 
 type IntentHandler = (mgr: RoomManager, rc: string, p: string, intent: PlayerIntent) => { success: boolean; reason?: string; rollResult?: RollResult; idempotent?: boolean };
 

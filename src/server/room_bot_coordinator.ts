@@ -1,8 +1,7 @@
 // [UC-GAME-005/MSS][UC-GAME-008/MSS] Room Bot Coordinator — Decoupled Bot AI loop & Auction bot resolution
-import { TurnPhase, type Room, type Player } from '../domain/room.js';
-import { decideBotIntent, type BotConfig } from '../domain/bot/bot_engine.js';
+import { TurnPhase, type Room, type Player, type PropertyRegistry, type PropertyStateMap } from '../domain/index.js';
+import { decideBotIntent, type BotConfig } from '../domain/bot/index.js';
 import { getBotConfig } from './room_bot_manager.js';
-import type { PropertyRegistry, PropertyStateMap } from '../domain/property_manager.js';
 import type { RoomManager, AuctionSession, PlayerIntent } from './room_manager.js';
 
 const MAX_AUCTION_ITERATIONS = 30;

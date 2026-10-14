@@ -6,7 +6,7 @@ import { BOARD_CONFIG } from '../../../domain/board_config.js';
 import { formatCurrency, formatShortPlayerName } from '../ui_helpers.js';
 import { AudioEngine } from '../../audio/audio_engine.js';
 import { SoundEffect } from '../../audio/audio_types.js';
-import type { PlayerIntent } from '../../../server/intent_dispatcher.js';
+import type { PlayerIntent } from '../../../domain/protocol/index.js';
 
 const MAX_RESOLVED_ENTRIES = 100;
 const resolvedTradeOfferIds = new Set<string>();

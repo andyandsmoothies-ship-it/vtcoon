@@ -3,7 +3,7 @@
 
 import type { Player, MarketModifier } from './room';
 import { CellType, BOARD_CONFIG } from './board_config';
-import { MarketCardId, ChanceCardId, COASTAL_CELLS, SERVICE_CELLS } from './event_card_engine';
+import { MarketCardId, ChanceCardId, COASTAL_CELLS, SERVICE_CELLS } from './event_card_types';
 import {
   PROPERTY_DEEDS, RAILROAD_CELLS, RAILROAD_FEES, UTILITY_CELLS,
   type PropertyRegistry, type PropertyStateMap,

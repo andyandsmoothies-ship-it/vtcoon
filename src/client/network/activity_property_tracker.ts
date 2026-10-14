@@ -1,5 +1,5 @@
 // [UI-S06/MSS] ActivityPropertyTracker — Property acquisition, upgrade & mortgage event detection
-import type { DeltaPayload, CellDelta, TradeResultInfo } from '../../server/session_manager.js';
+import type { DeltaPayload, CellDelta, TradeResultInfo } from '../../domain/protocol/index.js';
 import type { GameState } from '../store/game_store.js';
 import { type ActivityLogEntry } from '../store/activity_store.js';
 import { BOARD_CONFIG } from '../../domain/board_config.js';

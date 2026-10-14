@@ -5,12 +5,6 @@ import { TurnPhase, type Player } from '../../domain/room.js';
 import { PROPERTY_DEEDS, type PropertyState } from '../../domain/property_data.js';
 import { restorePostInsolvencyPhase } from '../insolvency_manager.js';
 
-declare module '../../domain/room.js' {
-  interface Room {
-    pendingInsolvencyQueue?: string[];
-  }
-}
-
 export interface AfkRecoveryResult {
   readonly rescued: boolean;
   readonly bankrupt: boolean;

@@ -1,5 +1,5 @@
 // [IMP-262] ActivityTransitTracker — Trích xuất nhật ký & thông báo Vòng Xoay Vận Tải
-import type { DeltaPayload } from '../../server/session_manager.js';
+import type { DeltaPayload } from '../../domain/protocol/index.js';
 import type { GameState } from '../store/game_store.js';
 import { useActivityStore, type ActivityLogEntry } from '../store/activity_store.js';
 import { formatTransitWheelBroadcast } from '../../domain/transit_wheel.js';

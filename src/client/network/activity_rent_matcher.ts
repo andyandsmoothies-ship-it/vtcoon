@@ -1,5 +1,5 @@
 // [UI-S06/MSS][IMP-225][IMP-289] ActivityRentMatcher — Multi-layered rent matching, GO salary & fee processor
-import type { DeltaPayload } from '../../server/session_manager.js';
+import type { DeltaPayload } from '../../domain/protocol/index.js';
 import type { GameState, PlayerHudInfo } from '../store/game_store.js';
 import { type ActivityLogEntry } from '../store/activity_store.js';
 import { checkPassedGo, calculateGoSalary } from '../../domain/room.js';

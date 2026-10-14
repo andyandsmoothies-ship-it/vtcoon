@@ -1,13 +1,12 @@
 // [UC-GAME-051..057/MSS] Room Trade Coordinator
-import { TurnPhase, ActionRejectReason, type Room } from '../domain/room.js';
+import { TurnPhase, ActionRejectReason, PROPERTY_DEEDS, type Room } from '../domain/index.js';
 import { executeP2PTrade } from './p2p_trade_actions.js';
-import { PROPERTY_DEEDS } from '../domain/property_data.js';
 import { pendingTradeManager } from './pending_trade_manager.js';
 import { handleBotRecipientTrade } from './trade_coordinator_helper.js';
 import {
   recordTradeRejection,
   clearTradeRejectionForCell,
-} from '../domain/bot/bot_negotiation_brain.js';
+} from '../domain/bot/index.js';
 import type { RoomContext } from './room_property_coordinator.js';
 
 export function isRoomQuiescentForTrade(room: Room): boolean {

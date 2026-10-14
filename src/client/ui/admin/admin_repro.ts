@@ -1,5 +1,5 @@
 // [IMP-25/MSS] Admin Forensic Helpers — Tải Hộp Đen JSON & Sinh Mã Test Repro
-import type { AdminRoomDetail, AdminRoomLogEntry } from '../../../server/network/admin_manager';
+import type { AdminRoomDetail, AdminRoomLogEntry } from '../../../domain/protocol/index.js';
 
 export function copyText(text: string): Promise<boolean> {
   if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {

@@ -1,0 +1,38 @@
+[
+  {
+    "file": "src/server/trade_coordinator_helper.ts",
+    "desc": "Bot trade acceptance inversion check in handleBotRecipientTrade",
+    "target": "if (!decision.accept) {",
+    "replacement": "if (decision.accept) {"
+  },
+  {
+    "file": "src/server/trade_coordinator_helper.ts",
+    "desc": "Buyer isBot gate before recordTradeRejection in handleBotRecipientTrade",
+    "target": "if (buyer.isBot) {",
+    "replacement": "if (!buyer.isBot) {"
+  },
+  {
+    "file": "src/server/trade_coordinator_helper.ts",
+    "desc": "offeredCellIndex forwarding to recordTradeRejection in handleBotRecipientTrade ([LOW-02])",
+    "target": "recordTradeRejection(buyer, cellIndex, round, offeredCellIndex);",
+    "replacement": "recordTradeRejection(buyer, cellIndex, round, undefined);"
+  },
+  {
+    "file": "src/server/trade_coordinator_helper.ts",
+    "desc": "Round fallback resolution in handleBotRecipientTrade",
+    "target": "const round = ctx.room.roundCount ?? ctx.room.round ?? 1;",
+    "replacement": "const round = 99;"
+  },
+  {
+    "file": "src/server/game_room_session.ts",
+    "desc": "Case-insensitive roomCode prefix stripping in RoomBotPersonalityMap.normalizeKey",
+    "target": "return key.slice(prefix.length);",
+    "replacement": "return '';"
+  },
+  {
+    "file": "src/server/session_proxy_facade.ts",
+    "desc": "BotPersonalityMapFacade unprefixed botId lookup across sessions",
+    "target": "if (found !== undefined) return found;",
+    "replacement": "if (false) return found;"
+  }
+]

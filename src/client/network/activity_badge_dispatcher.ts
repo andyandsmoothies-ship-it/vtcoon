@@ -5,7 +5,7 @@ import { formatCurrency } from '../ui/ui_helpers.js';
 import { useVfxStore } from '../store/vfx_store.js';
 import { SoundEngine } from '../audio/sound_engine.js';
 import { getCellName, LEVEL_NAMES } from './activity_property_tracker.js';
-import type { DeltaPayload } from '../../server/session_manager.js';
+import type { DeltaPayload } from '../../domain/protocol/index.js';
 import { MIN_BAIL_AMOUNT } from '../../domain/property_rent.js';
 import {
   getPawnLandingDelay,

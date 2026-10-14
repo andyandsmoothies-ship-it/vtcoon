@@ -1,11 +1,10 @@
 // [IMP-210] GameRoomSession Aggregate Root
 // Encapsulates room state, registries, property states, auctions, timers, and bot personalities.
-import type { Room, CurrentAuctionState } from '../domain/room.js';
-import type { PropertyRegistry, PropertyStateMap } from '../domain/property_manager.js';
+import type { Room, PropertyRegistry, PropertyStateMap } from '../domain/index.js';
 import type { AuctionSession } from './auction_manager.js';
 import type { AuctionResult } from './room_manager.js';
 import type { RoomContext } from './room_property_coordinator.js';
-import { BotPersonality } from '../domain/bot/bot_engine.js';
+import { BotPersonality } from '../domain/bot/index.js';
 
 export class RoomBotPersonalityMap extends Map<string, BotPersonality> {
   private readonly roomCode: string;

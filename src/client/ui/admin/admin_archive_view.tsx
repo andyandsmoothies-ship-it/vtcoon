@@ -1,6 +1,6 @@
 // [IMP-28/MSS] Admin Historical Match Viewer & Downloader View
 import React from 'react';
-import type { AdminArchivedRoomSummary, AdminRoomLogEntry } from '../../../server/network/admin_manager';
+import type { AdminArchivedRoomSummary, AdminRoomLogEntry } from '../../../domain/protocol/index.js';
 import { downloadLogFile } from './admin_repro';
 import { AdminLogRow } from './admin_log_row';
 

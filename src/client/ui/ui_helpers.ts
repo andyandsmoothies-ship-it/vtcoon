@@ -1,5 +1,5 @@
 // [UI-S03/MSS] Pure UI helpers — Currency, countdown timer, net worth calculations & dock states
-import { PROPERTY_DEEDS } from '../../domain/property_data';
+import { LEVEL_MULTIPLIER, calculateCellNetWorth } from '../../domain/property_data';
 import { BOARD_CONFIG, ColorGroup } from '../../domain/board_config';
 import type { RecordedIntentContext } from '../telemetry/telemetry_types';
 import { TurnPhase } from '../../domain/room';
@@ -16,6 +16,7 @@ import {
 } from './ui_action_dock_helpers.js';
 
 export {
+  LEVEL_MULTIPLIER,
   formatCurrency,
   isRollActionDisabled,
   isEndTurnDisabled,
@@ -26,8 +27,6 @@ export {
   type ActionDockNotice,
   type ActionDockNoticeParams,
 };
-
-const LEVEL_MULTIPLIER: Record<number, number> = { 0: 1, 1: 1.5, 2: 2.5, 3: 4 };
 
 /**
  * Format remaining turn seconds to MM:SS string ("00:45", "01:15")
@@ -62,17 +61,8 @@ export function calculatePlayerNetWorth(
   const uniqueOwned = Array.from(new Set(ownedCellIndices ?? []));
 
   for (const cellIndex of uniqueOwned) {
-    const deed = PROPERTY_DEEDS.get(cellIndex);
-    if (!deed) continue;
-
     const level = (levelMap ?? {})[cellIndex] ?? 0;
-    const mult = LEVEL_MULTIPLIER[level] ?? 1;
-    worth += Math.floor(deed.price * mult);
-
-    if (mortgagedSet.has(cellIndex)) {
-      const loan = mortgageLoans?.[cellIndex] ?? Math.floor(deed.price * 0.5);
-      worth -= loan;
-    }
+    worth += calculateCellNetWorth(cellIndex, level, mortgagedSet.has(cellIndex), mortgageLoans?.[cellIndex]);
   }
 
   return worth;

@@ -1,4 +1,7 @@
 // [UC-GAME-038..041/MSS] Event Card Types & Constants — SSOT Enums & Tile Sets
+import type { MacroCycleType } from './macro_cycle_types.js';
+import type { ColorGroup } from './board_config.js';
+
 export enum MarketCardId {
   MC_NIGHT_ECONOMY   = 'MC_NIGHT_ECONOMY',
   MC_MEGA_CONCERT    = 'MC_MEGA_CONCERT',
@@ -53,4 +56,11 @@ export const HOSE_OUTCOMES: Readonly<Record<number, number>> = {
   1: 0.50, 2: 0.75, 3: 1.00, 4: 1.20, 5: 1.50, 6: 2.00,
 };
 
-export type { MarketModifier } from './room.js';
+export interface MarketModifier {
+  readonly type: MarketCardId | ChanceCardId | MacroCycleType;
+  readonly affectedCells: readonly number[];
+  remainingRounds: number;
+  readonly multiplier?: number;
+  readonly beneficiaryId?: string;
+  readonly colorGroup?: ColorGroup;
+}

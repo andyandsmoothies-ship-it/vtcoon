@@ -17,7 +17,7 @@ import { BotTradeOfferModal } from './bot_trade_offer_modal';
 import { CompulsoryBuyoutModal } from './compulsory_buyout_modal';
 import { AudioEngine } from '../../audio/audio_engine';
 import { SoundEffect } from '../../audio/audio_types';
-import type { PlayerIntent } from '../../../server/intent_dispatcher';
+import type { PlayerIntent } from '../../../domain/protocol/index.js';
 import { isAuctionDismissible } from './modal_helpers';
 import { useLobbyStore } from '../../store/lobby_store';
 

@@ -40,6 +40,10 @@ export function isPlayerEqual(a: PlayerDelta, b: PlayerDelta): boolean {
   const aHand = a.hand ?? [];
   const bHand = b.hand ?? [];
   const handEqual = aHand.length === bHand.length && aHand.every((c, i) => c === bHand[i]);
+  const aLoans = a.mortgageLoans ?? {};
+  const bLoans = b.mortgageLoans ?? {};
+  const aLoanKeys = Object.keys(aLoans);
+  const loansEqual = aLoanKeys.length === Object.keys(bLoans).length && aLoanKeys.every((k) => aLoans[Number(k)] === bLoans[Number(k)]);
   return (
     a.id === b.id &&
     a.position === b.position &&
@@ -54,7 +58,8 @@ export function isPlayerEqual(a: PlayerDelta, b: PlayerDelta): boolean {
     (a.consecutiveDoubles ?? 0) === (b.consecutiveDoubles ?? 0) &&
     (a.extraTurns ?? 0) === (b.extraTurns ?? 0) &&
     bondEqual &&
-    handEqual
+    handEqual &&
+    loansEqual
   );
 }
 

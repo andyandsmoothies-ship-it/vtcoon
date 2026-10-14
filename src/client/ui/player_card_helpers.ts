@@ -1,6 +1,6 @@
 import React from 'react';
 import type { PlayerHudInfo, ActiveModalType, ModalPayloadMap } from '../store/game_store';
-import type { PendingTradeOfferDelta } from '../../server/session_manager';
+import type { PendingTradeOfferDelta } from '../../domain/protocol/index.js';
 import { BOARD_CONFIG, CellType, ColorGroup } from '../../domain/board_config';
 
 export const UNOWNED_DOT_CLASS = 'border border-slate-300 bg-transparent';

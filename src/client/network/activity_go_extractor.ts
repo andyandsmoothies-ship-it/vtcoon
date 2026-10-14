@@ -1,5 +1,5 @@
 // [IMP-303] Activity GO Salary & Financial Deduction Extractor
-import type { DeltaPayload } from '../../server/session_manager.js';
+import type { DeltaPayload } from '../../domain/protocol/index.js';
 import type { GameState, PlayerHudInfo } from '../store/game_store.js';
 import { type ActivityLogEntry } from '../store/activity_store.js';
 import { checkPassedGo, calculateGoSalary } from '../../domain/room.js';

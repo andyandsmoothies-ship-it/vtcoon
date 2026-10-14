@@ -4,7 +4,7 @@
 import { useGameStore, type GameState, FloatingTextType, type FloatingActionType } from '../store/game_store.js';
 import { useLobbyStore } from '../store/lobby_store.js';
 import { BOARD_SIZE, TurnPhase } from '../../domain/room.js';
-import type { DeltaPayload } from '../../server/session_manager.js';
+import type { DeltaPayload } from '../../domain/protocol/index.js';
 import { handleDeltaTelemetry } from '../telemetry/telemetry_delta_hook.js';
 import { HapticEngine } from '../haptics/haptic_engine.js';
 import { purgeClientMatchSession } from './client_session_purger.js';

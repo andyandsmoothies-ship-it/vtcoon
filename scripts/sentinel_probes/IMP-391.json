@@ -1,0 +1,86 @@
+[
+  {
+    "file": "src/domain/property_data.ts",
+    "desc": "Non-purchasable deed guard in calculateCellNetWorth",
+    "target": "if (!deed) return 0;",
+    "replacement": "if (!deed) return 999;"
+  },
+  {
+    "file": "src/domain/property_data.ts",
+    "desc": "Mortgage effectiveLevel = 0 clamp invariant ([CRITICAL-01])",
+    "target": "const effectiveLevel = isMortgaged ? 0 : level;",
+    "replacement": "const effectiveLevel = isMortgaged ? level : level;"
+  },
+  {
+    "file": "src/domain/property_data.ts",
+    "desc": "Upgraded building level propagation when unmortgaged",
+    "target": "const effectiveLevel = isMortgaged ? 0 : level;",
+    "replacement": "const effectiveLevel = isMortgaged ? 0 : 0;"
+  },
+  {
+    "file": "src/domain/property_data.ts",
+    "desc": "Deed price * level multiplier arithmetic",
+    "target": "let worth = Math.floor(deed.price * mult);",
+    "replacement": "let worth = Math.floor(deed.price + mult);"
+  },
+  {
+    "file": "src/domain/property_data.ts",
+    "desc": "Mortgage deduction branch condition",
+    "target": "if (isMortgaged) {",
+    "replacement": "if (!isMortgaged) {"
+  },
+  {
+    "file": "src/domain/property_data.ts",
+    "desc": "Custom 60% MC_URBAN_PLANNING mortgage loan precedence",
+    "target": "const loan = customLoanAmount ?? Math.floor(deed.price * MORTGAGE_LOAN_RATE);",
+    "replacement": "const loan = Math.floor(deed.price * MORTGAGE_LOAN_RATE);"
+  },
+  {
+    "file": "src/domain/property_data.ts",
+    "desc": "Mortgage loan subtraction operator",
+    "target": "worth -= loan;",
+    "replacement": "worth += loan;"
+  },
+  {
+    "file": "src/domain/property_data.ts",
+    "desc": "LEVEL_MULTIPLIER SSOT progression table",
+    "target": "export const LEVEL_MULTIPLIER: Record<number, number> = { 0: 1, 1: 1.5, 2: 2.5, 3: 4 };",
+    "replacement": "export const LEVEL_MULTIPLIER: Record<number, number> = { 0: 1, 1: 1, 2: 1, 3: 1 };"
+  },
+  {
+    "file": "src/server/room_manager_queries.ts",
+    "desc": "Server calculateNetWorth base balance initialization",
+    "target": "let worth = player.balance;",
+    "replacement": "let worth = 0;"
+  },
+  {
+    "file": "src/server/room_manager_queries.ts",
+    "desc": "Server calculateNetWorth owner filter guard",
+    "target": "if (owner !== playerId) continue;",
+    "replacement": "if (owner === playerId) continue;"
+  },
+  {
+    "file": "src/server/room_manager_queries.ts",
+    "desc": "Server calculateNetWorth stateMap.isMortgaged OR-fallback wiring",
+    "target": "player.mortgagedProperties?.includes(cellIndex) || stateMap.get(cellIndex)?.isMortgaged",
+    "replacement": "player.mortgagedProperties?.includes(cellIndex) && stateMap.get(cellIndex)?.isMortgaged"
+  },
+  {
+    "file": "src/server/room_manager_queries.ts",
+    "desc": "Server calculateNetWorth custom mortgageLoans call-site argument wiring",
+    "target": "worth += calculateCellNetWorth(cellIndex, level, isMortgaged, player.mortgageLoans?.[cellIndex]);",
+    "replacement": "worth += calculateCellNetWorth(cellIndex, level, isMortgaged, undefined);"
+  },
+  {
+    "file": "src/domain/bot/bot_posture.ts",
+    "desc": "Bot evaluatePlayerNetWorth base balance initialization",
+    "target": "let total = p.balance;",
+    "replacement": "let total = 0;"
+  },
+  {
+    "file": "src/domain/bot/bot_posture.ts",
+    "desc": "Bot evaluatePlayerNetWorth custom mortgageLoans call-site argument wiring",
+    "target": "total += calculateCellNetWorth(cellIdx, level, isMortgaged, p.mortgageLoans?.[cellIdx]);",
+    "replacement": "total += calculateCellNetWorth(cellIdx, level, isMortgaged, undefined);"
+  }
+]

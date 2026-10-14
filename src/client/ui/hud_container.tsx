@@ -17,7 +17,7 @@ import { MiniAuctionStrip } from './modals/mini_auction_strip.js';
 import { DiceScoreBadge } from './dice_score_badge';
 import { useGameStore } from '../store/game_store';
 import { useLobbyStore } from '../store/lobby_store';
-import type { PlayerIntent } from '../../server/intent_dispatcher';
+import type { PlayerIntent } from '../../domain/protocol/index.js';
 
 export interface HudContainerProps extends ActionDockProps {
   readonly children?: React.ReactNode;
@@ -41,17 +41,15 @@ export function HudContainer({
   onBailOut: onBailOutProp,
 }: HudContainerProps): React.ReactElement {
   const handleBailOut = onBailOutProp ?? (() => onIntent?.({ type: 'INTENT_BAIL_OUT' }));
-  const isSSR = typeof window === 'undefined';
-  const ssrState = isSSR ? useGameStore.getState() : null;
-  const activeModal = ssrState ? ssrState.activeModal : useGameStore((s) => s.activeModal);
-  const cameraFocusCell = ssrState ? ssrState.cameraFocusCell : useGameStore((s) => s.cameraFocusCell);
+  const activeModal = useGameStore((s) => s.activeModal);
+  const cameraFocusCell = useGameStore((s) => s.cameraFocusCell);
   const setCameraFocusCell = useGameStore((s) => s.setCameraFocusCell);
-  const playerPositions = ssrState ? ssrState.playerPositions : useGameStore((s) => s.playerPositions);
-  const currentTurnPlayerId = ssrState ? ssrState.currentTurnPlayerId : useGameStore((s) => s.currentTurnPlayerId);
-  const dice = ssrState ? ssrState.dice : useGameStore((s) => s.dice);
-  const isRolling = ssrState ? ssrState.isRolling : useGameStore((s) => s.isRolling);
-  const hasRolledThisTurn = ssrState ? ssrState.hasRolledThisTurn : useGameStore((s) => s.hasRolledThisTurn);
-  const turnPhase = ssrState ? ssrState.turnPhase : useGameStore((s) => s.turnPhase);
+  const playerPositions = useGameStore((s) => s.playerPositions);
+  const currentTurnPlayerId = useGameStore((s) => s.currentTurnPlayerId);
+  const dice = useGameStore((s) => s.dice);
+  const isRolling = useGameStore((s) => s.isRolling);
+  const hasRolledThisTurn = useGameStore((s) => s.hasRolledThisTurn);
+  const turnPhase = useGameStore((s) => s.turnPhase);
   const lobbyPid = useLobbyStore((s) => s.myPlayerId);
   const myId = localPlayerId || (lobbyPid && lobbyPid.length > 0 ? lobbyPid : undefined) || currentTurnPlayerId || 'p1';
   const pawnPos = playerPositions[myId] ?? 0;

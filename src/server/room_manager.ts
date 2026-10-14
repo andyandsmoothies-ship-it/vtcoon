@@ -1,6 +1,9 @@
 // [UC-GAME-001..003,005,007,008/MSS][UC-GAME-051..057/MSS] Room Manager & FSM Turn Loop
-import { ActionRejectReason, TurnPhase, type Room, type Player, type PendingBuyoutSession } from '../domain/room.js';
-import { BotPersonality } from '../domain/bot/bot_engine.js';
+import {
+  ActionRejectReason, TurnPhase, BuyResult, mulberry32, type Room, type Player, type PendingBuyoutSession,
+  type DiceResult, type PropertyRegistry, type PropertyStateMap, type PropertyState, type BondTrancheId,
+} from '../domain/index.js';
+import { BotPersonality, recordTradeRejection } from '../domain/bot/index.js';
 import {
   resolveAuctionBots as coordResolveAuctionBots,
   runBotTurn as coordRunBotTurn,
@@ -17,19 +20,11 @@ import {
   coordGetAuctionSession,
   syncAuctionSession,
 } from './room_auction_coordinator.js';
-import { mulberry32, type DiceResult } from '../domain/dice.js';
-import {
-  BuyResult,
-  type PropertyRegistry,
-  type PropertyStateMap,
-  type PropertyState,
-} from '../domain/property_manager.js';
 import { handleTurnStart, handleBailOut, handleUseDiplomatic } from './audit_manager.js';
 import { type AuctionSession } from './auction_manager.js';
 import { handleBuyProperty, handleUpgrade, handleUpgradeETC, handleUpgradeUtility } from './property_actions.js';
 import { handleHoseInvest, handleHoseSkip } from './hose_actions.js';
 import { handleIssueBond, handleRepayBond } from './bond_manager.js';
-import type { BondTrancheId } from '../domain/bond_types.js';
 import { dispatchPlayerIntent, type PlayerIntent } from './intent_dispatcher.js';
 import {
   coordMortgage, coordRedeem, coordDowngrade, coordLiquidate, coordTrade,
@@ -37,7 +32,6 @@ import {
   coordDeclineCompulsoryBuyout, type RoomContext,
 } from './room_property_coordinator.js';
 import { pendingTradeManager, type PendingTradeSession } from './pending_trade_manager.js';
-import { recordTradeRejection } from '../domain/bot/bot_negotiation_brain.js';
 import { executeTurnRoll } from './turn_loop.js';
 import {
   getActivePlayerFn, doCreateRoomSession, doHandleEndTurnSession, doJoinRoom,

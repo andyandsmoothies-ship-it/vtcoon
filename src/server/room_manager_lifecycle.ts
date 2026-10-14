@@ -1,20 +1,15 @@
 // [IMP-64] Extracted lifecycle & state management functions from RoomManager
 // ZERO LOGIC CHANGE â code moved verbatim from room_manager.ts
 import {
-  createRoom as domainCreateRoom, createPlayer, TurnPhase,
-  getInitialBalanceForPlayerCount,
-} from '../domain/room.js';
-import { BotPersonality } from '../domain/bot/bot_engine.js';
+  createRoom as domainCreateRoom, createPlayer, TurnPhase, getInitialBalanceForPlayerCount,
+  createMarketDeck, createChanceDeck, generateRandomAnimalName,
+  type Room, type Player, type PropertyRegistry, type PropertyStateMap,
+} from '../domain/index.js';
+import { BotPersonality } from '../domain/bot/index.js';
 import { initRoomBots, addBotToRoom, removeBotFromRoom, type RoomBotSpec } from './room_bot_manager.js';
-import {
-  createMarketDeck, createChanceDeck,
-} from '../domain/event_card_engine.js';
 import { executeTurnEnd } from './turn_loop.js';
-import type { Room, Player } from '../domain/room.js';
-import type { PropertyRegistry, PropertyStateMap } from '../domain/property_manager.js';
 import type { AuctionSession } from './auction_manager.js';
 import { pendingTradeManager } from './pending_trade_manager.js';
-import { generateRandomAnimalName } from '../domain/name_generator.js';
 import { GameRoomSession } from './game_room_session.js';
 
 export function getActivePlayerFn(room: Room | undefined, playerId: string): Player | undefined {

@@ -1,6 +1,6 @@
 // [UI-S01/MSS][UI-S02/MSS][UI-S03/MSS][UI-S04/MSS] Zustand Store — State, 3D animations, HUD, player turns & modals
 import { create } from 'zustand';
-import { EMOTE_DISPLAY_DURATION_MS } from '../../domain/emotes';
+import { EMOTE_DISPLAY_DURATION_MS } from '../../domain/index.js';
 import { createPawnActions } from './game_store_pawn_actions.js';
 
 export const FLOATING_TEXT_DURATION_MS = 2200;

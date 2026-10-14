@@ -1,0 +1,56 @@
+[
+  {
+    "file": "src/client/ui/ui_helpers.ts",
+    "desc": "Base cash finite rounding in calculatePlayerNetWorth",
+    "target": "let worth = Number.isFinite(cash) ? Math.round(cash) : 0;",
+    "replacement": "let worth = 0;"
+  },
+  {
+    "file": "src/client/ui/ui_helpers.ts",
+    "desc": "Mortgaged flag forwarding to calculateCellNetWorth in calculatePlayerNetWorth",
+    "target": "worth += calculateCellNetWorth(cellIndex, level, mortgagedSet.has(cellIndex), mortgageLoans?.[cellIndex]);",
+    "replacement": "worth += calculateCellNetWorth(cellIndex, level, false, mortgageLoans?.[cellIndex]);"
+  },
+  {
+    "file": "src/client/ui/ui_helpers.ts",
+    "desc": "Custom mortgageLoans[cellIndex] argument forwarding to calculateCellNetWorth",
+    "target": "worth += calculateCellNetWorth(cellIndex, level, mortgagedSet.has(cellIndex), mortgageLoans?.[cellIndex]);",
+    "replacement": "worth += calculateCellNetWorth(cellIndex, level, mortgagedSet.has(cellIndex), undefined);"
+  },
+  {
+    "file": "src/client/ui/ui_helpers.ts",
+    "desc": "Upgraded building level lookup in calculatePlayerNetWorth",
+    "target": "const level = (levelMap ?? {})[cellIndex] ?? 0;",
+    "replacement": "const level = 0;"
+  },
+  {
+    "file": "src/client/ui/modals/hosts/portfolio_modal_host.tsx",
+    "desc": "PortfolioModalHost myPlayer.mortgageLoans call-site argument wiring ([ADV-01])",
+    "target": "myPlayer?.mortgageLoans,",
+    "replacement": "undefined,"
+  },
+  {
+    "file": "src/server/delta_mapper.ts",
+    "desc": "Server buildPlayersDelta mortgageLoans serialization ([ADV-01])",
+    "target": "...(p.mortgageLoans !== undefined ? { mortgageLoans: { ...p.mortgageLoans } } : {}),",
+    "replacement": "...(false ? { mortgageLoans: { ...p.mortgageLoans } } : {}),"
+  },
+  {
+    "file": "src/server/network/delta_broadcaster.ts",
+    "desc": "Server isPlayerEqual mortgageLoans equality check ([ADV-01])",
+    "target": "aLoanKeys.every((k) => aLoans[Number(k)] === bLoans[Number(k)])",
+    "replacement": "true"
+  },
+  {
+    "file": "src/client/network/apply_delta_players.ts",
+    "desc": "Client OPTIONAL_PLAYER_KEYS mortgageLoans store hydration ([ADV-01])",
+    "target": "'bondContract', 'hand', 'mortgageLoans',",
+    "replacement": "'bondContract', 'hand',"
+  },
+  {
+    "file": "src/client/ui/modals/hosts/portfolio_modal_host.tsx",
+    "desc": "PortfolioModalHost myPlayer.mortgagedProperties call-site argument wiring ([ADV-01])",
+    "target": "myPlayer?.mortgagedProperties ?? [],",
+    "replacement": "[],"
+  }
+]

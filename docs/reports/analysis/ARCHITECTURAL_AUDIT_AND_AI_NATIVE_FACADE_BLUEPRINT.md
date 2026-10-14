@@ -283,10 +283,30 @@ graph LR
 
 ---
 
-### KẾT LUẬN & ĐỀ XUẤT PHÊ DUYỆT
+## 5. CẬP NHẬT TIẾN ĐỘ HOÀN TẤT GÓI "NỀN TẢNG VÀNG" (`IMP-391`, `IMP-392`, `IMP-393`) & 4 ĐIỂM NỢ KIẾN TRÚC BỘC LỘ HẬU KIỂM
 
-Báo cáo kiểm toán này đã xác định chính xác các điểm nghẽn cản trở hiệu năng của AI và đưa ra giải pháp toàn diện theo chuẩn `codebase-design`. 
+Sau khi hoàn thành trọn vẹn 3 lát cắt của **Gói Nền Tảng Vàng** (**Slice 1A `IMP-391`**, **Slice 1B `IMP-392`**, và **Slice 1C `IMP-393`**), toàn bộ 44 tệp Client đã sạch bóng `BOUNDARY-01` (`0` vi phạm gọi sang Server, `KNOWN_LEGACY_CLIENT_SERVER_VIOLATIONS = new Set([])`), và công thức Net Worth đã đồng bộ 1:1:1 giữa Server, Bot AI và Client 2D UI. Đồng thời, kết quả hậu kiểm `IMP-393` đã làm lộ diện **4 vấn đề kiến trúc & rào chắn tiếp theo**:
 
-Tài liệu đã được lưu trữ vĩnh viễn tại: [`docs/reports/analysis/ARCHITECTURAL_AUDIT_AND_AI_NATIVE_FACADE_BLUEPRINT.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/reports/analysis/ARCHITECTURAL_AUDIT_AND_AI_NATIVE_FACADE_BLUEPRINT.md).
+1. **`[DEBT-SCC-EXPOSED]` Hiệu ứng phụ tích cực khi sửa Linter: 14 Chu trình phụ thuộc vòng (`SCCs`) lộ diện**:
+   - **Hiện thực vật lý**: Khi `resolveImport` (`scripts/boundary_linter/boundary_rules.mjs`) được sửa để bóc tách đuôi ESM `.js`/`.jsx`, thuật toán Tarjan không còn bị "mù" trước các đường dẫn import chứa đuôi `.js`. Kết quả chạy `npm run lint:boundaries` phát hiện **14 Strongly Connected Components (`SCC-1` .. `SCC-14`)** thay vì 8–10 như trước đây:
+     - **`SCC-1` (2 tệp Domain)**: Vòng lặp re-export kiểu giữa `src/domain/event_card_types.ts` (`export type { MarketModifier } from './room.js'`) và `src/domain/room.ts`.
+     - **`SCC-2` (16 tệp Client Events / Network / Store)**: Vòng xoắn giữa `game_event_synthesizer.ts`, các event helpers, `activity_*` trackers và `game_store.ts`.
+     - **`SCC-4` (15 tệp Client Subscribers / Delta / Lobby Store)**: Vòng xoắn giữa các event subscribers, `apply_delta.ts`, `bot_trade_offer_strip.tsx` và `lobby_store.ts`.
+     - **`SCC-11` (21 tệp Server)**: Khối điều phối Server (`room_manager.ts`, `delta_mapper.ts`, `intent_dispatcher.ts`, `turn_loop.ts`,...).
+   - **Đánh giá phản biện**: Việc số chu trình tăng lên không phải do `IMP-393` gây ra, mà là do `IMP-393` đã trả lại sự trung thực 100% cho công cụ đo lường AST. Điều này khẳng định việc cắt đứt các chu trình `SCCs` (Phase 2 mở rộng cho Client Events/Store & Domain) là nhiệm vụ trọng tâm tiếp theo.
 
-Xin ý kiến định hướng từ bạn: **Bạn có đồng ý phê duyệt triển khai Giai đoạn 1 (Tách Protocol Seam xử lý 18 vi phạm Client/Server) theo đúng quy trình SDLC chuẩn hay không?**
+2. **`[DEBT-SEAM-01]` Vi phạm ranh giới sâu vào Domain (`SEAM-01` Deep Relative Imports)**:
+   - **Hiện thực vật lý**: Dù đã sạch bóng `BOUNDARY-01`, hàng loạt modal trong `src/client/ui/modals/` vẫn đang dùng deep relative import ($\ge 3$ cấp thư mục: `../../../domain/property_upgrade.js`, `../../../domain/board_config.js`, `../../../domain/property_data.js`) chọc sâu vào các tệp lá của `src/domain/`.
+   - **Chỉ thị kiến trúc**: Cần triển khai **Phase 3 (Unified Domain Facade — `src/domain/index.ts` & Path Alias `@domain`)** để tầng UI chỉ tương tác qua mặt tiền chuẩn hóa của Domain.
+
+3. **`[DEBT-LOC-BUFFER]` Cảnh báo Vùng đệm LOC (Buffer Zone) tại các tệp UI & Facade**:
+   - **Hiện thực vật lý**:
+     - `src/client/ui/lobby/pre_match_deck.tsx`: **393 dòng vật lý** (`367 SLOC`) trên hạn mức trần `500 LOC`.
+     - `src/client/ui/admin/admin_live_view.tsx`: **336 dòng vật lý** (`319 SLOC`).
+     - `src/domain/protocol/index.ts`: **154 dòng vật lý** (gom chung 4 nhóm hợp đồng Delta, Intent, WS, Admin).
+   - **Chỉ thị kiến trúc**: Bất kỳ ticket nào tiếp tục thêm logic vào `pre_match_deck.tsx` hoặc `admin_live_view.tsx` bắt buộc phải kích hoạt điều khoản **`Refactor-First`** trong Hiến pháp để tách component con trước khi mở rộng; khi `src/domain/protocol/` tiệm cận `300–350 LOC`, tách nội bộ thành `wire_delta.ts`, `wire_intent.ts`, `wire_ws.ts`, `wire_admin.ts`.
+
+4. **`[DEBT-SERVER-SHIMS]` Quản lý vòng đời "Middle-Man Passthrough Shims" ở Server (`< 30 LOC`)**:
+   - **Hiện thực vật lý**: Các tệp `src/server/delta_types.ts` (`15 LOC`), `src/server/network/network_types.ts` (`23 LOC`), và `src/server/network/admin_types.ts` (`25 LOC`) hiện đóng vai trò Lớp Đệm Chuyển Tiếp (Transitional Shims `< 30 LOC`) thuần túy re-export từ `src/domain/protocol/index.js` nhằm bảo vệ tương thích ngược.
+   - **Chỉ thị kiến trúc**: Lên lịch trình thu hồi và xóa bỏ hoàn toàn các Transitional Shims này sau khi toàn bộ các tệp nội bộ `src/server/**` và `tests/**` đã chuyển sang import trực tiếp từ `src/domain/protocol/index.js` (hoặc `@protocol`).
+

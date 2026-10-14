@@ -5,8 +5,7 @@ import type React from 'react';
 import { useGameStore } from '../store/game_store';
 import { useLobbyStore } from '../store/lobby_store';
 import { clearReconnectToken } from './use_game_ws';
-import type { PlayerIntent } from '../../server/intent_dispatcher';
-import type { WsClientMessage } from '../../server/network/network_types';
+import type { PlayerIntent, WsClientMessage } from '../../domain/protocol/index.js';
 
 export interface TurnControlHandlers {
   handleRollDice: () => boolean;

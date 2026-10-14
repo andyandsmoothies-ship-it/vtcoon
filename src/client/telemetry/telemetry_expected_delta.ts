@@ -1,5 +1,5 @@
 // [IMP-216] Telemetry Expected Delta Engine — Pure Invariant Delta Modeling
-import type { DeltaPayload, CellDelta, PlayerDelta } from '../../server/session_manager.js';
+import type { DeltaPayload, CellDelta, PlayerDelta } from '../../domain/protocol/index.js';
 import type { GameState } from '../store/game_store.js';
 import {
   PROPERTY_DEEDS,

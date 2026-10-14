@@ -7,8 +7,8 @@ import {
   BotPersonality,
   SOFTMAX_TEMPERATURE,
   PERSONALITY_BUY_BIAS,
+  JITTER_BOUNDS,
 } from './bot_types';
-import { JITTER_BOUNDS } from './valuation_engine';
 
 export function createDeterministicRng(seed: number): () => number {
   return mulberry32(seed);

@@ -69,7 +69,7 @@ const EXPECTED_24_INTENTS = [
   'INTENT_RESPOND_TRADE_OFFER', 'INTENT_END_TURN', 'INTENT_INVEST', 'INTENT_SKIP',
   'INTENT_BAIL_OUT', 'INTENT_BANKRUPTCY', 'INTENT_EXECUTE_COMPULSORY_BUYOUT',
   'INTENT_DECLINE_COMPULSORY_BUYOUT', 'INTENT_AUTO_SOLVENCY', 'INTENT_ISSUE_BOND',
-  'INTENT_REPAY_BOND',
+  'INTENT_REPAY_BOND', 'INTENT_SPIN_TRANSIT_WHEEL',
 ] as const;
 
 describe('[TC-224.01..16/MSS][UC-IMP224] Auto-Solvency & Corporate Bond Wire Envelope Suite', () => {
@@ -401,7 +401,7 @@ describe('[TC-224.01..16/MSS][UC-IMP224] Auto-Solvency & Corporate Bond Wire Env
       const exportedValidIntents = (EnvelopeValidatorModule as { VALID_INTENTS?: Set<string> }).VALID_INTENTS;
 
       expect(exportedValidIntents).toBeDefined();
-      expect(exportedValidIntents?.size).toBe(24);
+      expect(exportedValidIntents?.size).toBe(25);
 
       const missingInValidator = EXPECTED_24_INTENTS.filter((type) => !exportedValidIntents?.has(type));
       expect(missingInValidator).toEqual([]);

@@ -1,6 +1,6 @@
 // [IMP-332] Game Event Bus — Central decoupled in-process event distribution
 import type { GameState } from '../store/game_store.js';
-import type { DeltaPayload } from '../../server/session_manager.js';
+import type { DeltaPayload } from '../../domain/protocol/index.js';
 import type { SynthesizedGameEvent } from './game_event_types.js';
 import { createActivityLogSubscriber } from './subscribers/activity_log_subscriber.js';
 import { createBadgeEventSubscriber } from './subscribers/badge_event_subscriber.js';

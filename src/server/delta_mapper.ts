@@ -107,6 +107,7 @@ function buildPlayersDelta(
     ...(p.skipNextTurn !== undefined ? { skipNextTurn: p.skipNextTurn } : {}),
     ...(p.consecutiveDoubles !== undefined ? { consecutiveDoubles: p.consecutiveDoubles } : {}),
     ...(p.extraTurns !== undefined ? { extraTurns: p.extraTurns } : {}),
+    ...(p.mortgageLoans !== undefined ? { mortgageLoans: { ...p.mortgageLoans } } : {}),
   }));
 }
 

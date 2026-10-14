@@ -1,5 +1,5 @@
 // [UI-S06/MSS][IMP-225] ActivityFinancialTracker — Financial event dispatcher & M&A tracker
-import type { DeltaPayload } from '../../server/session_manager.js';
+import type { DeltaPayload } from '../../domain/protocol/index.js';
 import type { GameState } from '../store/game_store.js';
 import { type ActivityLogEntry } from '../store/activity_store.js';
 import { PROPERTY_DEEDS } from '../../domain/property_data.js';

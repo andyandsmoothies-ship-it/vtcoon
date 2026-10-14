@@ -1,7 +1,7 @@
 // [IMP-335] AuctionModalHost — Extracted sub-host for real-time auction modal
 import React, { useEffect } from 'react';
 import type { PlayerHudInfo } from '../../../store/game_store_types';
-import type { PlayerIntent } from '../../../../server/intent_dispatcher';
+import type { PlayerIntent } from '../../../../domain/protocol/index.js';
 import { useGameStore, type ModalPayloadMap } from '../../../store/game_store';
 import { calculateAuctionTimeRemaining } from '../modal_helpers';
 import { AudioEngine } from '../../../audio/audio_engine';

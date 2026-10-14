@@ -1,12 +1,13 @@
 // [UC-GAME-007/MSS][UC-GAME-051..057/MSS] Room Property & Insolvency Coordinator
-import { TurnPhase, ActionRejectReason, type Room, type Player } from '../domain/room.js';
-import type { PropertyRegistry, PropertyStateMap } from '../domain/property_manager.js';
-import type { DowngradeOptions } from '../domain/property_upgrade.js';
+import {
+  TurnPhase, ActionRejectReason,
+  type Room, type Player, type PropertyRegistry, type PropertyStateMap, type DowngradeOptions,
+} from '../domain/index.js';
 import { mortgageProperty, redeemProperty } from './mortgage_manager.js';
 import { handleDowngrade } from './property_actions.js';
 import { liquidateAssets, declareBankruptcy, restorePostInsolvencyPhase } from './insolvency_manager.js';
 import type { AuctionSession } from './auction_manager.js';
-import { type BotPersonality } from '../domain/bot/bot_types.js';
+import { type BotPersonality } from '../domain/bot/index.js';
 import {
   isRoomQuiescentForTrade,
   isCellLockedInPendingTrade,

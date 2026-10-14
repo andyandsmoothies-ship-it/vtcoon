@@ -244,6 +244,12 @@ runStep('7. SSOT Economic Data Drift', () => {
   execSync(`node scripts/audit_ssot_drift.mjs ${quotedFiles}`, { stdio: 'pipe', encoding: 'utf8' });
 });
 
+// 8. Subsystem Boundary & Seam Linter (lint_boundaries.mjs)
+runStep('8. Subsystem Boundary & Seam Linter', () => {
+  const quotedFiles = targetFiles.length > 0 ? targetFiles.map((f) => `"${f}"`).join(' ') : '';
+  execSync(`node scripts/lint_boundaries.mjs ${quotedFiles}`, { stdio: 'pipe', encoding: 'utf8' });
+});
+
 console.log('\n======================================================');
 if (totalErrors > 0) {
   console.error(`❌ FAST PRE-FILTER FAILED: ${totalErrors} check(s) violated.`);

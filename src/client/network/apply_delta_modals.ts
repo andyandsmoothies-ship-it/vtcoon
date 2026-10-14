@@ -3,7 +3,7 @@ import type { GameState } from '../store/game_store.js';
 import type { ModalPayloadMap } from '../store/game_store_types.js';
 import { useLobbyStore } from '../store/lobby_store.js';
 import { TurnPhase } from '../../domain/room.js';
-import type { DeltaPayload } from '../../server/session_manager.js';
+import type { DeltaPayload } from '../../domain/protocol/index.js';
 
 let stagedTransitWheel: { playerId: string; cellIndex: number; timestamp: number } | null = null;
 

@@ -145,8 +145,19 @@ flowchart LR
   * Tại Server: [src/server/room_manager_queries.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/room_manager_queries.ts#L9-L49) (và re-export qua [insolvency_manager.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/insolvency_manager.ts#L15-L16)) định nghĩa lại y hệt `export const LEVEL_MULTIPLIER: Record<number, number> = { 0: 1, 1: 1.5, 2: 2.5, 3: 4 }` và hàm `calculateNetWorth(...)` (27 LOC).
 * **Hệ lụy**: Nếu thay đổi hệ số nhân cấp công trình hoặc cách khấu trừ khoản vay thế chấp/trái phiếu ở một nơi mà quên nơi kia, bảng xếp hạng trên HUD của người chơi sẽ lệch với kết quả xét thắng thua/phá sản của Server.
 
-#### C. Rò rỉ Sâu vào Ruột `src/domain/**` (189 Lệnh Import từ Client vào 20/28 Files Domain)
+#### C. Rò rỉ Sâu vào Ruột `src/domain/**` (189 Lệnh Import từ Client vào 20/28 Files Domain) & 345 Deep Relative Imports
 * Do `src/domain/` không có `index.ts` Facade, các file UI và Event của Client đang phải nhớ chính xác tên của 20 file con trong `src/domain/` để lấy hằng số (ví dụ: [game_rules_modal.tsx](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/client/ui/modals/game_rules_modal.tsx) phải mở cùng lúc `treasury_stimulus.ts`, `mortgage_constants.ts`, `property_upgrade.ts`; [player_card.tsx](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/client/ui/player_card.tsx) import `ChanceCardId` từ `event_card_engine.ts` thay vì `event_card_types.ts`).
+* Toàn bộ `src/**` hiện có **345 vị trí dùng đường dẫn tương đối sâu ($\ge 2$ cấp `../../`, `../../../`, `../../../../`)**, khiến AI dễ đếm nhầm bậc thư mục khi tạo file mới hoặc di chuyển component.
+
+#### D. Monkey-Patch Schema `Room` bằng Module Augmentation trong `src/server/insolvency_manager.ts`
+* Tại [src/server/insolvency_manager.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/insolvency_manager.ts#L8-L13), Server đang dùng `declare module '../domain/room'` để tiêm ngầm 2 trường `pendingInsolvencyQueue?: string[]` và `preInsolvencyPhase?: TurnPhase` vào interface `Room`. Cách làm này khiến định nghĩa thực sự của `Room` bị phân mảnh giữa `src/domain/` và `src/server/`, vi phạm tính toàn vẹn của Domain Model.
+
+#### E. Cảnh báo Chạm Trần "LOC Buffer Zone Guard" ($\ge 350$ LOC) tại 3 Điểm Nóng
+* Theo luật **LOC Buffer Zone Guard** trong [GEMINI.md](file:///c:/Users/HP/Documents/GitHub/vtcoon/GEMINI.md) (*"When a target file reaches >= 350 LOC (Tier 1 ceiling 400), adding new logic directly into the file is FORBIDDEN. Plans touching files >= 350 LOC MUST declare a Refactor-First step"*), hiện có **4 files cốt lõi** đang chạm hoặc vượt ngưỡng 350 LOC:
+  1. [src/server/insolvency_manager.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/insolvency_manager.ts): **355 LOC** *(Đã vượt ngưỡng khóa 350 LOC)*
+  2. [src/server/room_manager.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/room_manager.ts): **351 LOC** *(Đã vượt ngưỡng khóa 350 LOC)*
+  3. [src/server/network/admin_manager.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/network/admin_manager.ts): **351 LOC** *(Đã vượt ngưỡng khóa 350 LOC)*
+  4. [src/client/audio/audio_engine.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/client/audio/audio_engine.ts): **350 LOC** & [src/domain/room.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/room.ts): **347 LOC** *(Sát ngưỡng khóa)*
 
 ---
 
@@ -176,9 +187,9 @@ flowchart TD
         C5 --> C1
     end
 
-    subgraph Tier2["TẦNG 2: CLIENT STATE & EVENT PIPELINE"]
+    subgraph Tier2["TẦNG 2: CLIENT STATE, AUDIO & EVENT PIPELINE"]
         C6A["Cụm 6A: Client Stores<br/>src/client/store/index.ts"]
-        C6B["Cụm 6B: Event Synthesizer & Bus<br/>src/client/events/index.ts"]
+        C6B["Cụm 6B: Event Synthesizer & Audio<br/>src/client/events/index.ts & audio/index.ts"]
         C6C["Cụm 6C: Network & Delta Sync<br/>src/client/network/index.ts"]
         C6C --> C6B --> C6A
         C6A --> C2
@@ -193,10 +204,12 @@ flowchart TD
         C7["Cụm 7: 2D Tactile UI & Modals<br/>src/client/ui/index.ts & modals/index.ts"]
         C8["Cụm 8: 3D Tabletop, Diorama & Camera<br/>src/client/3d/{camera,board,environment,pawns}/index.ts"]
         C7 --> C6A
+        C7 --> C6B
         C7 --> C6C
         C7 --> C2
         C7 --> C1
         C8 --> C6A
+        C8 --> C6B
         C8 --> C2
     end
 ```
@@ -210,10 +223,10 @@ Bảng dưới đây xác định rõ **Public Interface** (những gì được
 | Cụm Phân hệ | Mặt tiền Public Facade (`index.ts`) — Symbols Công khai | Thành phần Nội bộ Cần Ẩn Giấu (Internal Implementation) | Tỷ lệ Thu hẹp Bề mặt (Surface Reduction) |
 | :--- | :--- | :--- | :---: |
 | **C1. Wire Protocol**<br/>`src/domain/protocol/index.ts` | • **Delta Contracts**: `DeltaPayload`, `CellDelta`, `PlayerDelta`, `AuctionDelta`, `PendingTradeOfferDelta`, `DiplomaticEventDelta`<br/>• **Intent & WS**: `PlayerIntent`, `WsClientMessage`, `WsServerMessage`, `ReasonCode`<br/>• **Admin Contracts**: `AdminRoomSummary`, `AdminRoomDetail`, `AdminRoomLogEntry`, `AdminArchivedRoomSummary`, `ServerVitals` | • Ẩn hoàn toàn [session_manager.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/session_manager.ts), [delta_mapper.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/delta_mapper.ts), [intent_dispatcher.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/intent_dispatcher.ts), [admin_manager.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/network/admin_manager.ts) khỏi toàn bộ `src/client/**`. | **Xóa 52/52 (100%)** lệnh import từ Client sang Server |
-| **C2. Core Domain**<br/>`src/domain/index.ts` | • **Core Entities & Enums**: `Room`, `Player`, `TurnPhase`, `ActionRejectReason`, `CellType`, `ColorGroup`, `MacroCycleType`, `MarketCardId`, `ChanceCardId`, `BondTrancheId`, `BondContract`, `TransitWheelOutcome`<br/>• **Static Registries**: `BOARD_CONFIG`, `PROPERTY_DEEDS`, `TABLETOP_THEME`, `COLOR_GROUP_HEX`, `PLAYER_TOKEN_PALETTE`, `BOND_TRANCHES`, `TRANSIT_WHEEL_CONFIGS`, `VI_MESSAGES`<br/>• **Authoritative Calculators (SSOT)**: `calculateNetWorth` (hợp nhất Client/Server), `calculateRent`, `calculateUpgradeCost`, `calculateBailAmount`, `calculateGoSalary`, `checkPassedGo`, `evaluateMacroCycle` | • **Ẩn 18/28 files nội bộ**: [chance_card_handlers.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/chance_card_handlers.ts), [chance_ma_handlers.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/chance_ma_handlers.ts), [market_card_handlers.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/market_card_handlers.ts), [card_handlers.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/card_handlers.ts), [compulsory_buyout.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/compulsory_buyout.ts), [mortgage_constants.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/mortgage_constants.ts), [types.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/types.ts). | **Từ 28 files (207 exports)** $\to$ **1 Facade (~28 exports)** |
+| **C2. Core Domain**<br/>`src/domain/index.ts` | • **Core Entities & Enums**: `Room` (đã hợp nhất `pendingInsolvencyQueue`, `preInsolvencyPhase`), `Player`, `TurnPhase`, `ActionRejectReason`, `CellType`, `ColorGroup`, `MacroCycleType`, `MarketCardId`, `ChanceCardId`, `BondTrancheId`, `BondContract`, `TransitWheelOutcome`<br/>• **Static Registries**: `BOARD_CONFIG`, `PROPERTY_DEEDS`, `LEVEL_MULTIPLIER`, `TABLETOP_THEME`, `COLOR_GROUP_HEX`, `PLAYER_TOKEN_PALETTE`, `BOND_TRANCHES`, `TRANSIT_WHEEL_CONFIGS`, `VI_MESSAGES`<br/>• **Authoritative Calculators (SSOT)**: `calculateNetWorth` (hợp nhất Client/Server), `calculateRent`, `calculateUpgradeCost`, `calculateBailAmount`, `calculateGoSalary`, `checkPassedGo`, `evaluateMacroCycle` | • **Ẩn 18/28 files nội bộ**: [chance_card_handlers.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/chance_card_handlers.ts), [chance_ma_handlers.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/chance_ma_handlers.ts), [market_card_handlers.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/market_card_handlers.ts), [card_handlers.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/card_handlers.ts), [compulsory_buyout.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/compulsory_buyout.ts), [mortgage_constants.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/mortgage_constants.ts), [types.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/types.ts). | **Từ 28 files (207 exports)** $\to$ **1 Facade (~28 exports)** |
 | **C3. Bot Brain**<br/>`src/domain/bot/index.ts` | • **6 Public Symbols**: `BotPersonality`, `decideBotAction`, `decideBotAuctionAction`, `evaluateBotTradeOffer`, `decideBotProactiveTrade`, `recordTradeRejection` | • **Ẩn 13/15 files (`2,431 LOC`)**: [threat_forecaster.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/bot/threat_forecaster.ts), [valuation_engine.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/bot/valuation_engine.ts), [solvency_solver.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/bot/solvency_solver.ts), [bot_softmax.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/bot/bot_softmax.ts), [bot_posture.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/bot/bot_posture.ts), [bot_redeem.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/bot/bot_redeem.ts), [bot_audit.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/bot/bot_audit.ts), [bot_auction.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/bot/bot_auction.ts), [bot_trade.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/bot/bot_trade.ts), [bot_hybrid_trade.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/bot/bot_hybrid_trade.ts), [bot_action_evaluator.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/bot/bot_action_evaluator.ts). | **Từ 15 files (106 exports)** $\to$ **1 Facade (6 exports — giảm 94.3%)** |
 | **C4. Server Engine**<br/>`src/server/index.ts` | • **Core Entrypoints**: `startServer`, `RoomManager`, `GameRoomSession`, `SessionManager`, `RoomCleanupScheduler`, `dispatchPlayerIntent` | • **Ẩn 25/31 files (`4,768 LOC`)**: [turn_loop.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/turn_loop.ts), [turn_loop_maintenance.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/turn_loop_maintenance.ts), [insolvency_manager.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/insolvency_manager.ts), [bond_manager.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/bond_manager.ts), [mortgage_manager.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/mortgage_manager.ts), [auction_manager.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/auction_manager.ts), [audit_manager.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/audit_manager.ts), [special_cell_handler.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/special_cell_handler.ts), các file `room_*_coordinator.ts` và `session_proxy_facade.ts`. | **Từ 31 files (180 exports)** $\to$ **1 Facade (12 exports — giảm 93.3%)** |
-| **C6. Client Pipeline**<br/>`src/client/{store,events,network}/index.ts` | • `store/index.ts`: `useGameStore`, `useLobbyStore`, `useEnvironmentStore`, `useVfxStore` + State Types<br/>• `events/index.ts`: `gameEventBus`, `synthesizeAndPublishDeltaEvents`, `initEventSubscribers`, `clearPendingPacingTimers`<br/>• `network/index.ts`: `useAppSession`, `useAppTurnControls`, `applyDeltaToStore`, `purgeClientSession` | • **Ẩn 41/49 files (`7,265 LOC`)**: Toàn bộ `game_event_*_synthesizer.ts`, `game_event_*_helpers.ts`, `subscribers/*`, `apply_delta_*.ts`, `activity_*_tracker.ts`, `ws_message_handler.ts`. | **Từ 49 files (268 exports)** $\to$ **3 Facades (18 exports — giảm 93.2%)** |
+| **C6. Client Pipeline & Audio**<br/>`src/client/{store,events,network,audio}/index.ts` | • `store/index.ts`: `useGameStore`, `useLobbyStore`, `useEnvironmentStore`, `useVfxStore` + State Types<br/>• `events/index.ts`: `gameEventBus`, `synthesizeAndPublishDeltaEvents`, `initEventSubscribers`<br/>• `network/index.ts`: `useAppSession`, `useAppTurnControls`, `applyDeltaToStore`, `purgeClientSession`<br/>• `audio/index.ts`: `audioEngine`, `soundEngine`, `SoundEffect`, `MusicTrack` | • **Ẩn 47/58 files (`8,616 LOC`)**: Toàn bộ `game_event_*_synthesizer.ts`, `game_event_*_helpers.ts`, `subscribers/*`, `apply_delta_*.ts`, `activity_*_tracker.ts`, `ws_message_handler.ts`, `audio_bgm_synth.ts`, `audio_sfx_synth.ts`. | **Từ 58 files (300 exports)** $\to$ **4 Facades (22 exports — giảm 92.7%)** |
 | **C7. 2D UI & Modals**<br/>`src/client/ui/modals/index.ts` | • `modals/index.ts`: `ModalHost`, `BotTradeOfferStrip`, `MiniAuctionStrip`<br/>• `ui/index.ts`: `HudContainer`, `ErrorBoundary`, `Diagnostic3dOverlay`, `formatCurrency`, `formatTimeRemaining` | • **Ẩn 37/40 files trong `modals/` (`9,150 LOC`)** và **22/27 files trong `ui/`**: Toàn bộ 15 modal con, rent tables, art showcases, purchase decision cards. | **Từ 67 files (322 exports)** $\to$ **2 Facades (10 exports — giảm 96.9%)** |
 | **C8. 3D Tabletop & Diorama**<br/>`src/client/3d/{camera,board,environment,pawns}/index.ts` | • `camera/index.ts`: `AdaptiveCinematicCamera`, `useGameCamera`<br/>• `board/index.ts`: `BoardLayout`, `getCellWorldCoords`<br/>• `environment/index.ts`: `MiniatureCityDiorama`, `CoastalIslandEnvironment`, `TimeOfDayLighting`, `PostProcessingPipeline`<br/>• `pawns/index.ts`: `PawnAnimator`, `DiceTray`, `EventCard3D`, `Coronation3DStage` | • **Ẩn 114/126 files (`21,450 LOC`)**: Toàn bộ 22 files `diorama/*`, `cinematic_spline_flyby.ts`, `camera_arbitration_engine.ts`, `batched_board_tiles.tsx`, `tile_texture_atlas.ts`, `luxury_pawn_fallbacks.tsx`, v.v. | **Từ 126 files (813 exports)** $\to$ **4 Facades (14 exports — giảm 98.2%)** |
 
@@ -234,33 +247,99 @@ Bảng dưới đây xác định rõ **Public Interface** (những gì được
 
 ---
 
-### 2.4. Lộ trình Triển khai Khuyến nghị (Step-by-Step Roadmap)
+## 3. ĐÁNH GIÁ CHUYÊN SÂU LỘ TRÌNH 5 PHA (PROS, CONS, ĐỘ PHỨC TẠP & ĐỘ PHỤ THUỘC GIỮA CÁC FILE)
 
-Lộ trình được chia làm **5 Pha độc lập**, sắp xếp từ **rủi ro thấp nhất đến cao nhất**, đảm bảo tuân thủ 100% **Pure-Move Quarantine** (giữ re-export tương thích ngược tại vị trí cũ để không làm gãy bất kỳ bài test nào đang có trong `tests/**`):
+### 3.1. Ma trận Tổng hợp So sánh 5 Pha Triển khai
 
-#### Pha 1: Tách Cụm `src/domain/protocol/` & Xóa sổ 52 Vi phạm Ranh giới Client $\to$ Server *(Rủi ro: Rất Thấp — Ưu tiên #1)*
-1. Tạo `src/domain/protocol/index.ts` tập hợp các pure types giao thức mạng: `DeltaPayload`, `CellDelta`, `PlayerDelta`, `AuctionDelta`, `PendingTradeOfferDelta`, `DiplomaticEventDelta`, `PlayerIntent`, `WsClientMessage`, `WsServerMessage`, `ReasonCode`, `AdminRoomSummary`, `AdminRoomDetail`, `AdminRoomLogEntry`, `ServerVitals`.
-2. Tại [session_manager.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/session_manager.ts), [delta_types.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/delta_types.ts), [intent_dispatcher.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/intent_dispatcher.ts), [network_types.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/network/network_types.ts), [admin_types.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/network/admin_types.ts): re-export lại từ `src/domain/protocol` để bảo toàn 100% các bài test Server hiện hữu.
-3. Chuyển toàn bộ **52 lệnh import** trong `src/client/**` sang import từ `src/domain/protocol`.
+| Pha | Mục tiêu Cốt lõi | Độ phức tạp | Rủi ro Regression | Số File Hạt nhân (Core) | Số File Gọi (Call-sites) | Phụ thuộc vào Pha trước? | Cổng Kiểm định Quan trọng nhất |
+| :-: | :--- | :---: | :---: | :---: | :---: | :---: | :--- |
+| **Pha 1** | Tách `src/domain/protocol/` & Xóa 52 vi phạm `Client -> Server` | **2 / 10**<br/>*(Rất Thấp)* | **Cực Thấp**<br/>*(100% Type-Level)* | **5 files** (`delta_types`, `session_manager`, `intent_dispatcher`, `network_types`, `admin_types`) | **42 files** trên Client *(có thể chia làm 2 đợt)* | **Độc lập 100%** (Làm ngay được) | `npm run prefilter` (TypeScript check + Bundle boundary check) |
+| **Pha 2** | Chặt đứt 12 Chu trình Runtime (`SCC-01..16`) & Xóa `declare module` | **4 / 10**<br/>*(Thấp – TB)* | **Thấp**<br/>*(Chú ý `resetGameState`)* | **3 cụm độc lập**:<br/>• 2A (Domain): 7 files<br/>• 2B (Client Store/Event): 9 files<br/>• 2C (3D): 8 files | **0 files ngoài cụm** *(nhờ re-export tại chỗ)* | **Độc lập** (Nên làm sau Pha 1 để `protocol` đã sạch) | Unit tests của `game_store`, `lobby_store`, `domain` + AST Cycle Check = 0 |
+| **Pha 3** | Thiết lập Facade `domain/`, `domain/bot/`, `client/audio/` + Hợp nhất Net Worth SSOT | **5 / 10**<br/>*(Trung bình)* | **Trung bình**<br/>*(Đụng phép tính Net Worth)* | **6 files** (`domain/index.ts`, `bot/index.ts`, `audio/index.ts`, `property_data.ts`, `ui_helpers.ts`, `room_manager_queries.ts`) | **8–12 Orchestrators** chuyển sang dùng Facade | Cần **Pha 2A** hoàn tất trước (để `domain/` không còn cycle khi gom vào `index.ts`) | Contract tests tính Net Worth + `npm run sentinel` tại `ui_helpers.ts` & `room_manager_queries.ts` |
+| **Pha 4** | Thiết lập Facades cho Client (`store/`, `events/`, `network/`, `modals/`) & 4 Cụm con `3d/` | **6.5 / 10**<br/>*(Khá)* | **Trung bình**<br/>*(Cẩn trọng Barrel Cycle & Lazy Chunks)* | **8 files `index.ts`** + **5 Orchestrators** (`game_canvas`, `board_layout`, `modal_host`, `main`, `miniature_city_diorama`) | **5–10 files** điều phối cấp cao | Cần **Pha 2B & 2C** hoàn tất trước (không tạo `index.ts` trên thư mục đang có vòng lặp) | `npm run build` (kiểm tra Vite bundle chunks) + R3F Harness Tests |
+| **Pha 5** | Làm sâu (Deepening) `GameRoomSession` & Giải cứu `room_manager.ts` (351 LOC), `insolvency_manager.ts` (355 LOC) | **8.5 / 10**<br/>*(Cao)* | **Cao**<br/>*(Chạm trực tiếp FSM & Proxy Maps)* | **10 files** trong `src/server/` (`room_manager`, `game_room_session`, `turn_loop`, `insolvency_manager`, `bond_manager`, `room_*_coordinator`) | **0–2 files** (Giữ nguyên chữ ký public của `RoomManager`) | Nên làm sau **Pha 1 & Pha 3** | **Full Chaos Sentinel (`port: 0`)** + Adversarial Gate (Station 1.5) |
 
-#### Pha 2: Chặt đứt 12 Chu trình Phụ thuộc Vòng tròn Runtime (Runtime Cycles) *(Rủi ro: Thấp — Ưu tiên #2)*
-1. **Tại `src/domain/` (SCC-01, SCC-02, SCC-03)**:
-   * Đổi import `MarketCardId`, `ChanceCardId` trong [room.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/room.ts#L2), [property_rent.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/property_rent.ts), [property_upgrade.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/property_upgrade.ts) từ `event_card_engine.ts` sang leaf file [event_card_types.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/event_card_types.ts).
-   * Chuyển hằng số/types dùng chung giữa [valuation_engine.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/bot/valuation_engine.ts) và [bot_softmax.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/bot/bot_softmax.ts) về [bot_types.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/bot/bot_types.ts).
-2. **Tại `src/client/` (SCC-08, SCC-09, SCC-10, SCC-16)**:
-   * Tách cơ chế dọn timer ra khỏi [game_store.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/client/store/game_store.ts#L13-L14) và gỡ phụ thuộc ngược từ [lobby_store.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/client/store/lobby_store.ts) sang `offline_landing.ts` / `client_session_purger.ts`.
-   * Đảo chiều import giữa [event_card_visuals.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/client/ui/modals/event_card_visuals.ts) và [market_event_ticker.tsx](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/client/ui/market_event_ticker.tsx).
-3. **Tại `src/client/3d/` (SCC-11 đến SCC-15)**:
-   * Đưa hằng số tọa độ dùng chung giữa [board_layout.tsx](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/client/3d/board_layout.tsx) và [batched_board_tiles.tsx](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/client/3d/batched_board_tiles.tsx) về [board_coords.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/client/3d/board_coords.ts); đưa hằng số camera về leaf file.
+---
 
-#### Pha 3: Thiết lập Public Facade `src/domain/index.ts` & `src/domain/bot/index.ts` + Hợp nhất Net Worth SSOT *(Rủi ro: Thấp – Trung bình — Ưu tiên #3)*
-1. Hợp nhất `LEVEL_MULTIPLIER` và hàm tính Net Worth đang bị nhân bản giữa [ui_helpers.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/client/ui/ui_helpers.ts#L30-L79) và [room_manager_queries.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/room_manager_queries.ts#L9-L49) về một hàm chuẩn duy nhất trong `src/domain/`.
-2. Tạo `src/domain/bot/index.ts` (chỉ công khai 6 symbols) và `src/domain/index.ts` để đóng gói 44 files của tầng Domain.
+### 3.2. Phân tích Chi tiết Từng Pha (Pros, Cons, Liên kết File & Bẫy Kỹ thuật)
 
-#### Pha 4: Thiết lập Facades cho Client Pipeline (`store/`, `events/`, `network/`) & 4 Cụm Con `src/client/3d/` *(Rủi ro: Trung bình — Ưu tiên #4)*
-1. Tạo `index.ts` cho `src/client/store/`, `src/client/events/`, `src/client/network/` và `src/client/ui/modals/`.
-2. Tổ chức 97 files trong `src/client/3d/` dưới 4 Facades (`camera`, `board`, `environment`, `pawns`), rút gọn Fan-Out của [game_canvas.tsx](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/client/game_canvas.tsx) và [board_layout.tsx](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/client/3d/board_layout.tsx) từ 22–23 imports xuống còn 5–7 imports.
+#### PHA 1: Tách `src/domain/protocol/` & Xóa sổ 52 Vi phạm Ranh giới Client $\to$ Server
 
-#### Pha 5: Làm sâu (Deepening) Aggregate Root `GameRoomSession` & Thu gọn Passthrough Coordinators trong `src/server/` *(Rủi ro: Trung bình – Cao — Ưu tiên #5)*
-1. Chuyển trọng tâm điều phối về [game_room_session.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/game_room_session.ts) (hiện mới 131 LOC), giảm tải cho [room_manager.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/room_manager.ts) (đang ở mức 351 LOC — chạm ngưỡng cảnh báo Buffer Zone 350 LOC).
-2. Khử chu trình phụ thuộc 5 files giữa [turn_loop.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/turn_loop.ts), [insolvency_manager.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/insolvency_manager.ts) và [bond_manager.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/bond_manager.ts), kiểm chứng qua cổng Chaos Sentinel (`npm run sentinel`).
+* **Cấu trúc Phụ thuộc Giữa Các File**:
+  * **5 File Nguồn trên Server**:
+    1. [src/server/delta_types.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/delta_types.ts) (138 LOC) $\to$ đang được re-export qua [src/server/delta_mapper.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/delta_mapper.ts) $\to$ [src/server/session_manager.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/session_manager.ts) và bị **30 files Client** import. Bản thân `delta_types.ts` chỉ phụ thuộc `src/domain/room.ts` và `src/domain/property_data.ts`.
+    2. `PlayerIntent` trong [src/server/intent_dispatcher.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/intent_dispatcher.ts) (202 LOC) $\to$ bị **10 files Client** import. Bản thân `PlayerIntent` chỉ phụ thuộc `BondTrancheId` của `src/domain/bond_types.ts`.
+    3. [src/server/network/network_types.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/network/network_types.ts) (145 LOC) & [src/server/network/admin_types.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/network/admin_types.ts) $\to$ bị **12 files Client** import.
+* **Ưu điểm (Pros)**:
+  * **Rủi ro bằng 0 đối với Runtime**: Toàn bộ các symbol di chuyển đều là `interface` và `type` (bị xóa hoàn toàn khi biên dịch sang JavaScript).
+  * **Tương thích ngược 100% với Test Suites**: Nhờ giữ `export type * from '../domain/protocol/index.js'` tại `session_manager.ts` và `intent_dispatcher.ts`, toàn bộ các file test trong `tests/**` vẫn chạy xanh 100% mà không cần sửa 1 dòng test nào.
+  * **Ngăn chặn đứt gãy Bundle**: Loại bỏ hoàn toàn khả năng một lập trình viên hay AI vô tình xóa chữ `type` trong `import type { ... } from '../../server/session_manager'` làm Vite kéo code Server vào trình duyệt.
+* **Nhược điểm & Bẫy cần lưu ý (Cons / Gotchas)**:
+  * Số lượng file Client cần đổi đường dẫn import là **42 files** (52 dòng import). Nếu đưa cả 42 files vào 1 ticket duy nhất sẽ làm phạm vi `check_scope.mjs` quá rộng.
+  * **Giải pháp khắc phục**: Chia Pha 1 thành **2 Slice nhỏ gọn**:
+    * *Slice 1A*: Tạo `src/domain/protocol/` + cập nhật 5 file Server gốc + sửa **15 files trong `src/client/ui/**` và `src/client/store/**`**.
+    * *Slice 1B*: Sửa nốt **27 files trong `src/client/events/**`, `src/client/network/**` và `src/client/telemetry/**`**.
+
+---
+
+#### PHA 2: Chặt đứt 12 Chu trình Phụ thuộc Vòng tròn Runtime & Xóa `declare module '../domain/room'`
+
+* **Cấu trúc Phụ thuộc Giữa Các File**:
+  * Pha này gồm **3 cụm hoàn toàn cô lập với nhau** (có thể triển khai độc lập từng cụm một):
+    * **Cụm 2A (Domain & Bot — 7 files)**: [room.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/room.ts) (Fan-In: 91), [property_rent.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/property_rent.ts) (Fan-In: 17), [property_upgrade.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/property_upgrade.ts) (Fan-In: 16), [insolvency_manager.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/insolvency_manager.ts) (Fan-In: 8), [valuation_engine.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/bot/valuation_engine.ts), [bot_softmax.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/bot/bot_softmax.ts), [bot_types.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/domain/bot/bot_types.ts).
+    * **Cụm 2B (Client Store $\leftrightarrow$ Events $\leftrightarrow$ Network — 9 files)**: [game_store.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/client/store/game_store.ts) (Fan-In: 83), [lobby_store.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/client/store/lobby_store.ts) (Fan-In: 24), [pacing_context.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/client/events/pacing_context.ts), [activity_badge_dispatcher.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/client/network/activity_badge_dispatcher.ts), 4 files `game_event_*_helpers.ts`, [event_card_visuals.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/client/ui/modals/event_card_visuals.ts).
+    * **Cụm 2C (3D Camera & Board — 8 files)**: [camera_state_machine.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/client/3d/camera_state_machine.ts), [cinematic_spline_flyby.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/client/3d/cinematic_spline_flyby.ts), [board_layout.tsx](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/client/3d/board_layout.tsx), [batched_board_tiles.tsx](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/client/3d/batched_board_tiles.tsx), [instanced_toy_buildings.tsx](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/client/3d/instanced_toy_buildings.tsx), [board_coords.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/client/3d/board_coords.ts).
+* **Ưu điểm (Pros)**:
+  * **Xóa bỏ nguy cơ lỗi khởi tạo ESM (`ReferenceError`)**: Khi không còn chu trình Runtime, việc tạo `index.ts` Facade ở Pha 3 và Pha 4 sẽ an toàn tuyệt đối (nếu tạo `index.ts` trên một thư mục đang có vòng lặp Runtime, thứ tự nạp module qua barrel file rất dễ làm phát nổ `undefined` lúc khởi chạy!).
+  * **Không ảnh hưởng Callers bên ngoài**: Dù `room.ts` có Fan-In = 91 và `game_store.ts` có Fan-In = 83, ta chỉ sửa các lệnh `import` **bên trong** chúng mà không đổi bất kỳ `export` nào của chúng.
+* **Nhược điểm & Bẫy cần lưu ý (Cons / Gotchas)**:
+  * **Bẫy tại `game_store.resetGameState()` (Cụm 2B)**: Hiện tại `resetGameState()` trong [game_store.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/client/store/game_store.ts#L22-L26) gọi trực tiếp `clearPendingPacingTimers()` và `clearPendingBadgeTimers()`. Nếu chỉ xóa 2 lệnh gọi này khỏi `resetGameState()`, các bài unit test gọi `useGameStore.getState().resetGameState()` sẽ bị rò rỉ timer!
+  * **Giải pháp khắc phục**: Dùng mẫu **Store Reset Hook Registry** ngay trong `game_store_types.ts` (`registerStoreResetCleanup(fn: () => void)`). Khi `pacing_context.ts` và `activity_badge_dispatcher.ts` được nạp, chúng tự đăng ký hàm cleanup của mình vào store. Nhờ đó, `game_store.ts` **không cần import** `pacing_context.ts` hay `activity_badge_dispatcher.ts` (cắt đứt hoàn toàn chu trình 16 files), trong khi `resetGameState()` vẫn gọi dọn sạch 100% timers như cũ!
+
+---
+
+#### PHA 3: Thiết lập Public Facades (`domain/`, `domain/bot/`, `client/audio/`) & Hợp nhất Net Worth SSOT
+
+* **Cấu trúc Phụ thuộc Giữa Các File**:
+  * `src/domain/bot/index.ts` gom 15 files trong `src/domain/bot/`, chỉ phục vụ 4 callers bên ngoài ([room_manager.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/room_manager.ts), [room_bot_coordinator.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/room_bot_coordinator.ts), [room_bot_manager.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/room_bot_manager.ts), [lobby_store.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/client/store/lobby_store.ts)).
+  * `src/client/audio/index.ts` gom 9 files trong `src/client/audio/`, phục vụ 20 callers trên Client.
+  * Hợp nhất `LEVEL_MULTIPLIER` và công thức tính Net Worth giữa [ui_helpers.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/client/ui/ui_helpers.ts#L30-L79) (52 callers) và [room_manager_queries.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/room_manager_queries.ts#L9-L49) (9 callers).
+* **Ưu điểm (Pros)**:
+  * **Đạt chuẩn Poka-Yoke 100% cho Net Worth**: Đảm bảo công thức tính tổng tài sản trên HUD của người chơi và công thức xét thắng/thua trên Server lấy từ 1 nguồn duy nhất trong `src/domain/`.
+  * **Đóng kín toàn bộ hộp đen Bot AI (`2,633 LOC`)**: AI khi làm việc ở Server hoặc Client chỉ nhìn thấy đúng 6 hàm giao diện của Bot.
+* **Nhược điểm & Bẫy cần lưu ý (Cons / Gotchas)**:
+  * **Bẫy Khác biệt Cấu trúc Dữ liệu giữa Client và Server khi tính Net Worth**:
+    * Server lưu quyền sở hữu bằng `Map<number, string>` (`PropertyRegistry`), trong khi Client lưu bằng mảng `readonly number[]` (`ownedCellIndices`).
+    * **Giải pháp**: Đặt hằng số `LEVEL_MULTIPLIER` và hàm toán học nguyên tử `calculatePropertyCellNetValue(cellIndex, level, isMortgaged, customLoanAmount)` tại `src/domain/property_data.ts`. Cả `ui_helpers.ts` (duyệt mảng) và `room_manager_queries.ts` (duyệt Map) đều ủy quyền phép tính từng ô đất cho hàm Domain chuẩn này, vừa tránh cấp phát bộ nhớ chuyển đổi `Map <-> Array`, vừa giữ nguyên chữ ký hàm cho 52 callers ở Client và 9 callers ở Server.
+  * **Bẫy Luật `Anti-TIDD` & `zero-passthrough-proxies` của Dự án**:
+    * Theo luật [GEMINI.md](file:///c:/Users/HP/Documents/GitHub/vtcoon/GEMINI.md), mọi export mới trong `src/**` phải có consumer thực sự ngoài `tests/**`. Do đó, ngay khi tạo `src/domain/bot/index.ts`, `src/domain/index.ts` và `src/client/audio/index.ts`, phải cập nhật ngay các file gọi chính (`room_bot_coordinator.ts`, `modal_host.tsx`, `main.tsx`) trỏ vào `index.ts` trong cùng ticket.
+  * **Cảnh báo về TypeScript Path Aliases (`@domain`, `@store`)**:
+    * Báo cáo Cũ từng đề xuất thêm `@domain/*`, `@store/*` vào `tsconfig.json`. **Khuyến nghị kỹ thuật**: **KHÔNG NÊN bật Path Aliases ở giai đoạn này**, vì các script kiểm định cơ khí của dự án (`scripts/check_scope.mjs`, `scripts/sentinel/`, `scripts/slop_linter/`) và Node ESM runtime trên Server đang phân giải đường dẫn tương đối (`./`, `../`). Dùng chuẩn `index.ts` với đường dẫn tương đối (`../domain/index.js`) vừa giải phóng 87% Context cho AI, vừa tương thích 100% với toàn bộ toolchain hiện có mà không cần sửa script hệ thống!
+
+---
+
+#### PHA 4: Thiết lập Facades cho Client Pipeline (`store/`, `events/`, `network/`, `modals/`) & 4 Cụm Con `src/client/3d/`
+
+* **Cấu trúc Phụ thuộc Giữa Các File**:
+  * Tác động vào các Orchestrator có Fan-Out lớn nhất hệ thống: [board_layout.tsx](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/client/3d/board_layout.tsx) (23 imports), [game_canvas.tsx](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/client/game_canvas.tsx) (22 imports), [modal_host.tsx](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/client/ui/modals/modal_host.tsx) (20 imports), [main.tsx](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/client/main.tsx) (20 imports), [miniature_city_diorama.tsx](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/client/3d/miniature_city_diorama.tsx) (17 imports).
+* **Ưu điểm (Pros)**:
+  * **Giải phóng lượng Context lớn nhất (`-7,729 LOC` ở 3D và `-4,998 LOC` ở Events/Network)**: Giúp AI chỉnh sửa giao diện 2D/3D nhanh và chuẩn xác hơn gấp nhiều lần.
+* **Nhược điểm & Bẫy cần lưu ý (Cons / Gotchas)**:
+  * **Bẫy Tự Import Qua Barrel (Self-Barrel Circular Trap)**:
+    * Nếu một file con bên trong `src/client/3d/` lại import một file anh em cùng thư mục thông qua `./index.ts`, nó sẽ tạo ra chu trình phụ thuộc giả qua file `index.ts`!
+    * **Quy tắc bắt buộc**: Các file **bên trong** cùng một cụm chỉ import trực tiếp nhau; file `index.ts` chỉ dành cho các phân hệ **bên ngoài** cụm gọi vào.
+
+---
+
+#### PHA 5: Làm sâu (Deepening) Aggregate Root `GameRoomSession` & Thu gọn Passthrough Coordinators trong `src/server/`
+
+* **Cấu trúc Phụ thuộc Giữa Các File**:
+  * Trọng tâm là cụm 10 files có độ kết dính chặt nhất Server: [room_manager.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/room_manager.ts) (351 LOC — vượt ngưỡng 350 LOC), [game_room_session.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/game_room_session.ts) (131 LOC), [insolvency_manager.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/insolvency_manager.ts) (355 LOC — vượt ngưỡng 350 LOC), [turn_loop.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/turn_loop.ts) (289 LOC), [bond_manager.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/bond_manager.ts) (266 LOC) và 5 files `room_*_coordinator.ts`.
+* **Ưu điểm (Pros)**:
+  * **Giải phóng khóa `LOC Buffer Zone Guard` ($\ge 350$ LOC)** cho cả `room_manager.ts` (351 LOC $\to$ ~220 LOC) và `insolvency_manager.ts` (355 LOC $\to$ ~240 LOC), mở đường cho mọi tính năng gameplay mới trên Server trong tương lai mà không bị chặn bởi trần LOC.
+  * **Xóa bỏ chu trình Runtime 5 files trên Server (`SCC-04`)** giữa `turn_loop.ts`, `insolvency_manager.ts`, `bond_manager.ts`.
+* **Nhược điểm & Bẫy cần lưu ý (Cons / Gotchas)**:
+  * **Độ phức tạp và rủi ro cao nhất (8.5/10)**:
+    * `RoomManager` đang duy trì **9 Proxy Maps** (`registries`, `propertyStates`, `auctions`, `rolledThisTurn`, `activeTimersMap`, `lastAuctionResults`, `roomMap`, `rooms`, `botPersonalities`) qua [session_proxy_facade.ts](file:///c:/Users/HP/Documents/GitHub/vtcoon/src/server/session_proxy_facade.ts) để phục vụ các bài test trực tiếp thao tác trên Map (theo [`deep_modules.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/gotchas/deep_modules.md) §1–4).
+    * Bắt buộc phải giữ nguyên 100% các thuộc tính Proxy Map này trên `RoomManager` và kiểm chứng bằng **Adversarial Gate (Station 1.5)** + **Chaos Sentinel (`npm run sentinel`)**.
+

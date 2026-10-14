@@ -1,7 +1,8 @@
 // [UC-SEC-003/MSS] Envelope Validator — Kiểm Chuẩn Cấu Trúc JSON & Chống Giá Trị Âm
 import type { WsClientMessage } from '../network/network_types.js';
 import { isValidEmoteId } from '../../domain/emotes.js';
-import { BondTrancheId } from '../../domain/bond_types.js';
+import { VALID_INTENTS, isValidPlayerIntentFields } from '../../domain/protocol/index.js';
+export { VALID_INTENTS };
 
 export type EnvelopeValidationResult =
   | { success: true; message: WsClientMessage }
@@ -11,21 +12,6 @@ export type EnvelopeValidationResult =
 const VALID_CLIENT_TYPES = new Set([
   'CREATE_ROOM', 'JOIN_ROOM', 'START_GAME', 'PONG', 'RECONNECT', 'INTENT', 'INTENT_REQUEST_RESYNC', 'EMOTE', 'LEAVE_ROOM',
   'ADMIN_AUTH', 'ADMIN_GET_ROOMS', 'ADMIN_GET_ARCHIVED_ROOMS', 'ADMIN_GET_ARCHIVED_LOGS', 'ADMIN_SUBSCRIBE_ROOM', 'ADMIN_UNSUBSCRIBE_ROOM', 'ADMIN_TERMINATE_ROOM', 'ADMIN_SYNC_CLOUD_STORAGE',
-]);
-
-const CELL_INTENTS = new Set([
-  'INTENT_UPGRADE', 'INTENT_UPGRADE_UTILITY', 'INTENT_DOWNGRADE', 'INTENT_MORTGAGE', 'INTENT_REDEEM',
-]);
-
-const VALID_BOND_TRANCHES = new Set<string>(Object.values(BondTrancheId));
-
-export const VALID_INTENTS = new Set([
-  ...CELL_INTENTS,
-  'INTENT_ROLL', 'INTENT_BUY', 'INTENT_BUY_PROPERTY', 'INTENT_DECLINE', 'INTENT_BID',
-  'INTENT_AUCTION_PASS', 'INTENT_UPGRADE_ETC', 'INTENT_TRADE_OFFER', 'INTENT_RESPOND_TRADE_OFFER', 'INTENT_END_TURN',
-  'INTENT_INVEST', 'INTENT_SKIP', 'INTENT_BAIL_OUT', 'INTENT_BANKRUPTCY',
-  'INTENT_EXECUTE_COMPULSORY_BUYOUT', 'INTENT_DECLINE_COMPULSORY_BUYOUT',
-  'INTENT_AUTO_SOLVENCY', 'INTENT_ISSUE_BOND', 'INTENT_REPAY_BOND',
 ]);
 
 export class EnvelopeValidator {
@@ -189,52 +175,24 @@ export class EnvelopeValidator {
     const raw = obj['intent'] ?? obj['payload'];
     if (!raw || typeof raw !== 'object') return { success: false, reasonCode: 'INVALID_INTENT' };
     const it = raw as Record<string, unknown>;
-    const isTransitWheel = it['type'] === 'INTENT_SPIN_TRANSIT_WHEEL';
-    if (typeof it['type'] !== 'string' || (!VALID_INTENTS.has(it['type']) && !isTransitWheel)) {
+    if (typeof it['type'] !== 'string' || !VALID_INTENTS.has(it['type'])) {
       return { success: false, reasonCode: 'INVALID_INTENT' };
     }
+    const isTransitWheel = it['type'] === 'INTENT_SPIN_TRANSIT_WHEEL';
     const roomCode = obj['roomCode'], playerId = obj['playerId'];
     if (!isTransitWheel) {
       if (typeof roomCode !== 'string' || !roomCode || typeof playerId !== 'string' || !playerId) {
         return { success: false, reasonCode: 'INVALID_ENVELOPE' };
       }
     }
-    if (CELL_INTENTS.has(it['type']) && typeof it['cellIndex'] !== 'number') {
+    if (!isValidPlayerIntentFields(it)) {
       return { success: false, reasonCode: 'INVALID_ENVELOPE' };
-    }
-    if (it['type'] === 'INTENT_EXECUTE_COMPULSORY_BUYOUT' && typeof it['cellIndex'] !== 'number') {
-      return { success: false, reasonCode: 'INVALID_ENVELOPE' };
-    }
-    if (it['type'] === 'INTENT_BID' && typeof it['amount'] !== 'number') {
-      return { success: false, reasonCode: 'INVALID_ENVELOPE' };
-    }
-    if (it['type'] === 'INTENT_INVEST' && typeof it['stake'] !== 'number') {
-      return { success: false, reasonCode: 'INVALID_ENVELOPE' };
-    }
-    if (it['type'] === 'INTENT_ISSUE_BOND' && it['trancheId'] !== undefined) {
-      if (typeof it['trancheId'] !== 'string' || !VALID_BOND_TRANCHES.has(it['trancheId'])) {
-        return { success: false, reasonCode: 'INVALID_ENVELOPE' };
-      }
-    }
-    if (it['type'] === 'INTENT_TRADE_OFFER') {
-      const ok = typeof it['sellerId'] === 'string' && it['sellerId'] &&
-        typeof it['buyerId'] === 'string' && it['buyerId'] &&
-        typeof it['cellIndex'] === 'number' && typeof it['price'] === 'number';
-      if (!ok) return { success: false, reasonCode: 'INVALID_ENVELOPE' };
-      if (it['offeredCellIndex'] !== undefined && (typeof it['offeredCellIndex'] !== 'number' || !Number.isInteger(it['offeredCellIndex']))) {
-        return { success: false, reasonCode: 'INVALID_ENVELOPE' };
-      }
-    }
-    if (it['type'] === 'INTENT_RESPOND_TRADE_OFFER') {
-      const ok = typeof it['offerId'] === 'string' && it['offerId'] &&
-        typeof it['accept'] === 'boolean';
-      if (!ok) return { success: false, reasonCode: 'INVALID_ENVELOPE' };
     }
     const finalRoomCode = typeof roomCode === 'string' ? roomCode : '';
     const finalPlayerId = typeof playerId === 'string' ? playerId : '';
     return {
       success: true,
-      message: { type: 'INTENT', roomCode: finalRoomCode, playerId: finalPlayerId, intent: raw as import('../intent_dispatcher.js').PlayerIntent },
+      message: { type: 'INTENT', roomCode: finalRoomCode, playerId: finalPlayerId, intent: it },
     };
   }
 

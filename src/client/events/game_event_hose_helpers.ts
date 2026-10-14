@@ -1,5 +1,5 @@
 // [IMP-380] Game Event HOSE Helpers — Dedicated HOSE trading event synthesis with lifecycle reset
-import type { DeltaPayload } from '../../server/session_manager.js';
+import type { DeltaPayload } from '../../domain/protocol/index.js';
 import {
   type HoseSettledEvent,
   SynthesizedGameEventType,

@@ -6,7 +6,7 @@ import { useGameStore, type ModalPayloadMap } from '../../../store/game_store';
 import type { PlayerHudInfo } from '../../../store/game_store_types';
 import { AudioEngine } from '../../../audio/audio_engine';
 import { SoundEffect } from '../../../audio/audio_types';
-import type { PlayerIntent } from '../../../../server/intent_dispatcher';
+import type { PlayerIntent } from '../../../../domain/protocol/index.js';
 
 export interface DeedModalHostProps {
   readonly payload: ModalPayloadMap['deed'];

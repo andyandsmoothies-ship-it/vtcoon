@@ -1,5 +1,5 @@
 // [UI-S06/MSS] ActivityAuctionTracker — Auction Log Generation & Deduplication Subsystem
-import type { DeltaPayload } from '../../server/session_manager.js';
+import type { DeltaPayload } from '../../domain/protocol/index.js';
 import type { GameState } from '../store/game_store.js';
 import { useActivityStore, type ActivityLogEntry } from '../store/activity_store.js';
 import { formatCurrency } from '../ui/ui_helpers.js';

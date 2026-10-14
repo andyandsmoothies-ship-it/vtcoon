@@ -1,8 +1,8 @@
 // [TC-NET02.1/MSS] Lobby Types & Data Definitions
 // Nguồn: docs/epics/networking/_epic_ledger.md § Slice NET-02
-import { PLAYER_TOKEN_PALETTE } from '../../domain/theme';
-import { BotPersonality } from '../../domain/bot/bot_engine';
-export { BotPersonality } from '../../domain/bot/bot_engine';
+import { PLAYER_TOKEN_PALETTE } from '../../domain/index.js';
+import { BotPersonality } from '../../domain/bot/index.js';
+export { BotPersonality } from '../../domain/bot/index.js';
 
 export const MAX_LOBBY_SLOTS = 4;
 export const ROOM_CODE_REGEX = /^[A-Z0-9]{6}$/;

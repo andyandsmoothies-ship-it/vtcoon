@@ -1,7 +1,7 @@
 // [IMP-334][IMP-380] Financial Synthesizer Helpers
 // Pure deterministic helper functions for registry mapping, mortgage interest, and balance delta tracking
 import type { PlayerHudInfo, GameState } from '../store/game_store.js';
-import type { TradeResultInfo } from '../../server/session_manager.js';
+import type { TradeResultInfo, DeltaPayload } from '../../domain/protocol/index.js';
 import {
   PROPERTY_DEEDS,
   type PropertyRegistry,
@@ -10,7 +10,6 @@ import {
   UTILITY_UPGRADE_COST,
 } from '../../domain/property_data.js';
 import { calculateUpgradeCost, type UpgradeCostModifier } from '../../domain/property_upgrade.js';
-import type { DeltaPayload } from '../../server/session_manager.js';
 import type { AuctionWonServerEvent } from '../../domain/room.js';
 import { MORTGAGE_DEFAULT_INTEREST_RATE, MORTGAGE_RATE_HIKE_INTEREST_RATE, MORTGAGE_LOAN_RATE } from '../../domain/mortgage_constants.js';
 

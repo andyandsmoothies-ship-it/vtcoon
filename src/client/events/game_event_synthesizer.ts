@@ -1,7 +1,7 @@
 // [IMP-330][IMP-331] Game Event Narrative Synthesizer
 // Lightweight composite façade combining financial and property/market narrative synthesis
 import type { GameState } from '../store/game_store.js';
-import type { DeltaPayload } from '../../server/session_manager.js';
+import type { DeltaPayload } from '../../domain/protocol/index.js';
 import type { SynthesizedGameEvent, SynthesizerOptions } from './game_event_types.js';
 import { synthesizeFinancialEvents } from './game_event_financial_synthesizer.js';
 import { synthesizePropertyAndMarketEvents } from './game_event_property_synthesizer.js';

@@ -1,12 +1,12 @@
 // [UC-GAME-001/MSS][UC-GAME-008/MSS] Room & Player Domain Types
-import type { MarketCardId, ChanceCardId } from './event_card_engine';
-import type { MacroCycleType } from './macro_cycle_types';
+import type { MarketCardId, ChanceCardId, MarketModifier } from './event_card_types';
 import type { ColorGroup } from './board_config';
 import type { BondContract, BondTrancheId } from './bond_types';
 import type { BotPersonality } from './bot/bot_types';
 import type { TransitWheelOutcome } from './transit_wheel.js';
 export { ActionRejectReason } from './action_reasons';
 export type { BondContract, BondTrancheId } from './bond_types';
+export type { MarketModifier } from './event_card_types';
 
 export const BOARD_SIZE       = 40;
 export const GO_BONUS         = 2_000;
@@ -41,15 +41,6 @@ export enum TurnPhase {
   BankruptcyCheck    = 'BankruptcyCheck',
   TurnEnd            = 'TurnEnd',
   HosePhase          = 'HosePhase',
-}
-
-export interface MarketModifier {
-  readonly type: MarketCardId | ChanceCardId | MacroCycleType;
-  readonly affectedCells: readonly number[];
-  remainingRounds: number;
-  readonly multiplier?: number;
-  readonly beneficiaryId?: string;
-  readonly colorGroup?: ColorGroup;
 }
 
 export interface Player {
@@ -214,6 +205,8 @@ export interface Room {
   fireSaleDebtorId?:          string;
   pendingInsolvencyCreditorId?: string;
   pendingInsolvencyDebtorId?:   string;
+  pendingInsolvencyQueue?:      string[];
+  preInsolvencyPhase?:          TurnPhase;
   lastDiplomaticEvent?:       { playerId: string; landlordId: string; cellIndex: number; savedRent: number } | null;
   lastMaBuyout?:              MaBuyoutResult;
   passedGoSalary?:            number;

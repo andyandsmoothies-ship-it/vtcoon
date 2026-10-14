@@ -1,7 +1,7 @@
 // [UC-GAME-002/MSS][UC-GAME-005/MSS][UC-GAME-008/MSS] Room Bot Manager
 // Quản lý bot AI trong phòng: khởi tạo, thêm/xóa bot và cấu hình tính cách
-import { createPlayer, type Player, type Room } from '../domain/room.js';
-import { BotPersonality, type BotConfig } from '../domain/bot/bot_engine.js';
+import { createPlayer, type Player, type Room } from '../domain/index.js';
+import { BotPersonality, type BotConfig } from '../domain/bot/index.js';
 
 export interface RoomBotSpec {
   readonly id: string;

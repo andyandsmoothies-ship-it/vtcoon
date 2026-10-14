@@ -3,7 +3,7 @@
 import type { RoomManager } from '../room_manager.js';
 import type { SessionManager } from '../session_manager.js';
 import { SessionState, GRACE_PERIOD_MS } from '../session_manager.js';
-import { BotEngine } from '../../domain/bot/bot_engine.js';
+import { BotEngine } from '../../domain/bot/index.js';
 import type { DeltaBroadcaster } from './delta_broadcaster.js';
 import type { WsServerMessage, ReasonCode } from './network_types.js';
 

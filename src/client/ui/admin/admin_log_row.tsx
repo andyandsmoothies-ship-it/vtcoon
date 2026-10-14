@@ -1,6 +1,6 @@
 // [IMP-25/MSS][IMP-28/MSS] Reusable Admin Log Row Component
 import React from 'react';
-import type { AdminRoomLogEntry } from '../../../server/network/admin_manager';
+import type { AdminRoomLogEntry } from '../../../domain/protocol/index.js';
 
 export interface AdminLogRowProps {
   readonly log: AdminRoomLogEntry;

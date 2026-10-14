@@ -7,8 +7,9 @@ import type {
   AdminArchivedRoomSummary,
   RoomHealthStatus,
   ServerVitals,
-} from '../../../server/network/admin_types';
-import type { WsServerMessage, WsClientMessage } from '../../../server/network/network_types';
+  WsServerMessage,
+  WsClientMessage,
+} from '../../../domain/protocol/index.js';
 
 export const STORAGE_KEY = 'vtcoon_admin_secret';
 export const DEFAULT_SECRET = '';

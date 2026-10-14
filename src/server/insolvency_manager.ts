@@ -4,14 +4,6 @@ import { PROPERTY_DEEDS, type PropertyRegistry, type PropertyStateMap } from '..
 import { advanceRoundBoundary } from './turn_loop';
 import type { AuctionSession } from './auction_manager';
 import { handleStartFireSaleAuction } from './bond_manager';
-
-declare module '../domain/room' {
-  interface Room {
-    pendingInsolvencyQueue?: string[];
-    preInsolvencyPhase?: TurnPhase;
-  }
-}
-
 import { LEVEL_MULTIPLIER, calculateRankings, calculateNetWorth } from './room_manager_queries.js';
 export { LEVEL_MULTIPLIER, calculateRankings, calculateNetWorth };
 

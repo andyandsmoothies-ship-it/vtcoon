@@ -2,7 +2,7 @@
 // 100% Map protocol parity ([Symbol.iterator], entries, keys, values, size, forEach, clear, get, set, has, delete)
 import type { GameRoomSession } from './game_room_session.js';
 import type { AuctionResult } from './room_manager.js';
-import { BotPersonality } from '../domain/bot/bot_engine.js';
+import { BotPersonality } from '../domain/bot/index.js';
 
 interface Clearable {
   clear(): void;

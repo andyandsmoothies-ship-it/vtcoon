@@ -1,7 +1,6 @@
 // [UC-GAME-009/MSS][TC-NET03.1/MSS][IMP-24/MSS]
 // WebSocket Message Handler & Handshake Subroutines with Telemetry Hook
-import type { DeltaPayload } from '../../server/session_manager.js';
-import type { WsClientMessage, WsServerMessage, ReasonCode } from '../../server/network/network_types.js';
+import type { DeltaPayload, WsClientMessage, WsServerMessage, ReasonCode } from '../../domain/protocol/index.js';
 import { saveReconnectToken, getReconnectToken, clearReconnectToken } from './reconnect_token.js';
 import { applyDeltaToStore, isGameRunningDelta } from './apply_delta.js';
 import { useGameStore, FloatingTextType } from '../store/game_store.js';

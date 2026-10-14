@@ -1,7 +1,7 @@
 // [IMP-331] Property, Auction & Trade Event Synthesizer
 // Pure, deterministic domain module for synthesizing property ownership, upgrade, trade, and auction events
 import type { GameState } from '../store/game_store.js';
-import type { DeltaPayload } from '../../server/session_manager.js';
+import type { DeltaPayload } from '../../domain/protocol/index.js';
 import {
   type SynthesizedGameEvent,
   type SynthesizerOptions,

@@ -1,6 +1,6 @@
 // [IMP-380] Game Event Bond Helpers — Dedicated corporate bond lifecycle event synthesis
 import type { GameState } from '../store/game_store.js';
-import type { DeltaPayload } from '../../server/session_manager.js';
+import type { DeltaPayload } from '../../domain/protocol/index.js';
 import {
   type BondRepaidEvent,
   type BondIssuedEvent,

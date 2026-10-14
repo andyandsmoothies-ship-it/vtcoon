@@ -1,6 +1,6 @@
 // [IMP-298] Game Store State & Action Type Definitions (Station 1 Stub)
-import { TurnPhase, type EventCardInfo, type PendingBuyoutSession } from '../../domain/room.js';
-import type { PendingTradeOfferDelta, DiplomaticEventDelta } from '../../server/session_manager.js';
+import { TurnPhase, type EventCardInfo, type PendingBuyoutSession } from '../../domain/index.js';
+import type { PendingTradeOfferDelta, DiplomaticEventDelta } from '../../domain/protocol/index.js';
 import type {
   PawnAnimationState,
   PawnMoveTask,

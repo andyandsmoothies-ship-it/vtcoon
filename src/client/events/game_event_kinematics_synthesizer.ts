@@ -1,7 +1,7 @@
 // [IMP-344] Kinematic & Chance Game Event Synthesizer
 // Pure, deterministic domain module for synthesizing kinematic game events (Dice rolls, Pawn moves, Event cards, Transit wheel)
 import type { GameState } from '../store/game_store.js';
-import type { DeltaPayload } from '../../server/session_manager.js';
+import type { DeltaPayload } from '../../domain/protocol/index.js';
 import {
   SynthesizedGameEventType,
   type SynthesizedGameEvent,

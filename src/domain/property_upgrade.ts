@@ -3,7 +3,7 @@
 
 import type { Player, MarketModifier } from './room';
 import { CellType, BOARD_CONFIG } from './board_config';
-import { MarketCardId } from './event_card_engine';
+import { MarketCardId } from './event_card_types';
 import {
   MacroCycleType,
   MACRO_FEVER_UPGRADE_COST_MULT,

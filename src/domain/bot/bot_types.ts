@@ -134,3 +134,31 @@ export interface BotConfig {
   manualRoll?: number;
 }
 
+export const JITTER_BOUNDS = Object.freeze({
+  MIN: -0.12,
+  MAX:  0.12,
+});
+
+export interface BotTradeDecision {
+  readonly accept: boolean;
+  readonly reason?: string;
+}
+
+export interface BotTradeIntent extends BotIntent {
+  readonly type: 'INTENT_TRADE_OFFER';
+  readonly cellIndex: number;
+  readonly sellerId: string;
+  readonly targetPlayerId: string;
+  readonly buyerId: string;
+  readonly price: number;
+}
+
+export interface BotSwapTradeIntent extends BotIntent {
+  readonly type: 'INTENT_TRADE_OFFER';
+  readonly cellIndex: number;
+  readonly offeredCellIndex: number;
+  readonly sellerId: string;
+  readonly targetPlayerId: string;
+  readonly buyerId: string;
+  readonly price: number;
+}

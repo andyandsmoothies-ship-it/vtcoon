@@ -4,7 +4,7 @@ import { type GameState, type PlayerHudInfo, type PawnMoveTask, FloatingTextType
 import { calculatePathWaypoints, calculateJailFlightWaypoints } from '../3d/pawn_path.js';
 import { useLobbyStore } from '../store/lobby_store.js';
 import { PLAYER_TOKEN_PALETTE } from '../../domain/theme.js';
-import type { DeltaPayload } from '../../server/session_manager.js';
+import type { DeltaPayload } from '../../domain/protocol/index.js';
 export type { DeltaPayload };
 import { formatCurrency } from '../ui/ui_helpers.js';
 import { AudioEngine } from '../audio/audio_engine.js';
@@ -105,7 +105,7 @@ type DeltaPlayer = NonNullable<DeltaPayload['players']>[number];
 const OPTIONAL_PLAYER_KEYS = [
   'bankrupt', 'overdraftRoundsLeft', 'inAudit',
   'auditTurnsLeft', 'auditCount', 'skipNextTurn', 'consecutiveDoubles', 'extraTurns',
-  'bondContract', 'hand',
+  'bondContract', 'hand', 'mortgageLoans',
 ] as const;
 
 function assignPlayerOptionalFlags(target: PlayerHudInfo, p: DeltaPlayer): PlayerHudInfo {

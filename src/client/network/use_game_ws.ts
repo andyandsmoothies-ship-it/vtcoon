@@ -1,9 +1,7 @@
 // [UC-GAME-009/MSS][TC-NET03.1/MSS][TC-NET03.2/MSS][UC-GAME-006..008/MSS]
 // Client Hook kết nối WebSocket, gửi Intent, nhận STATE_DELTA và tự động Reconnect
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import type { DeltaPayload } from '../../server/session_manager.js';
-import type { PlayerIntent } from '../../server/intent_dispatcher.js';
-import type { WsClientMessage, WsServerMessage, ReasonCode } from '../../server/network/network_types.js';
+import type { DeltaPayload, PlayerIntent, WsClientMessage, WsServerMessage, ReasonCode } from '../../domain/protocol/index.js';
 import { saveReconnectToken, getReconnectToken, clearReconnectToken } from './reconnect_token.js';
 import { applyDeltaToStore, isGameRunningDelta } from './apply_delta.js';
 import { useWsLivenessWatchdog } from './ws_liveness_watchdog.js';

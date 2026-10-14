@@ -1,10 +1,10 @@
 // [IMP-298] Game Store Subsystem Types & DTO Definitions (Station 1 Stub)
-import { TurnPhase, type EventCardInfo, type MarketModifier, type PendingBuyoutSession } from '../../domain/room.js';
-import type { PendingTradeOfferDelta, DiplomaticEventDelta } from '../../server/session_manager.js';
-import type { BotPersonality } from '../../domain/bot/bot_types.js';
-import type { BondContract } from '../../domain/bond_types.js';
-import type { ChanceCardId } from '../../domain/event_card_engine.js';
-import type { TransitWheelOutcome } from '../../domain/transit_wheel.js';
+import {
+  TurnPhase, type EventCardInfo, type MarketModifier, type PendingBuyoutSession,
+  type BondContract, type ChanceCardId, type TransitWheelOutcome,
+} from '../../domain/index.js';
+import type { PendingTradeOfferDelta, DiplomaticEventDelta } from '../../domain/protocol/index.js';
+import type { BotPersonality } from '../../domain/bot/index.js';
 
 export interface TransitWheelResultInfo {
   readonly playerId: string;

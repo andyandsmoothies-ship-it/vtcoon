@@ -10,7 +10,7 @@ Every ticket (outside Fast-Track) must pass 100% of automated gates before hando
 3. **Fast Pre-Filter (Type, LOC, Linters, Assert Density)**: `npm run prefilter -- <files>`
 4. **Live Socket Port 0 & Mutation**: `npm run sentinel -- --ticket <id> --test <test_path>`
 5. **Comprehensive Evidence Audit**: `node scripts/check_evidence.mjs <ticket>`
-*(All toolchain scripts adhere to the Facade Re-export Pattern: root `scripts/*.mjs` are lean facades <= 200 LOC; specialized logic lives in `scripts/report/`, `scripts/slop_linter/`, `scripts/visual_capture/`, `scripts/plan_audit/`, `scripts/sentinel/`, `scripts/evidence_audit/`).*
+*(All toolchain scripts adhere to the Facade Re-export Pattern: root `scripts/*.mjs` are lean facades <= 200 LOC; specialized logic lives in `scripts/report/`, `scripts/slop_linter/`, `scripts/boundary_linter/`, `scripts/visual_capture/`, `scripts/plan_audit/`, `scripts/sentinel/`, `scripts/evidence_audit/`).*
 
 ## 2. IRON LAWS (NEGATIVE CONSTRAINTS - VIOLATION = EXIT 1)
 - **Zero Dirty Casts**: FORBIDDEN `as any`, `as unknown as T` across `src/**` and `tests/**`.
@@ -39,12 +39,18 @@ Every ticket (outside Fast-Track) must pass 100% of automated gates before hando
 - **Zero Semantic Borrowing Invariant**: FORBIDDEN borrowing existing unrelated enum tokens or action types (`unmortgage`, `tax`) to represent newly introduced economic behaviors. New financial or domain operations MUST introduce canonical first-class types across `ActivityLogType`, `FloatingActionType`, and UI narrative formatters.
 - **LOC Buffer Zone Guard**: When a target file reaches >= 350 LOC (Tier 1 ceiling 400), adding new logic directly into the file is FORBIDDEN. Plans touching files >= 350 LOC MUST declare a `Refactor-First` step decomposing logic into autonomous Deep Modules, sub-domain services, or pure test seams (<= 250 LOC) before introducing new features. FORBIDDEN extracting shallow single-function micro-files solely to evade the LOC ceiling.
 - **Deep Modules & Seam Discipline (Anti-Micro-Splintering & Middle-Man Ban)**: Pure calculation and view-model test seams (twin files like `*_visuals.ts` or pure calculation functions) are fully legitimate architectural seams where test suites serve as the valid 2nd consumer (per Michael Feathers). FORBIDDEN micro-splintering logic into trivial files (< 30 LOC) solely to evade LOC ceilings (exempt: pure types, constants, barrel re-exports, UI components). FORBIDDEN creating 1-line exact middle-man passthrough proxies that delegate without transformation or validation (exempt: default parameter wrappers and public API boundary facades).
+- **Subsystem Facade Invariant**: Primary subsystems (`src/domain/`, `src/client/store/`, `src/client/audio/`, `src/client/events/`, `src/client/network/`, `src/client/ui/`, `src/client/3d/`, `src/domain/protocol/`) MUST expose an authoritative `index.ts` public facade. External consumers MUST import exclusively via the subsystem facade or TypeScript path alias, never reaching deep into internal leaf files (`*_helpers.ts`, `*_calc.ts`, etc.).
+- **Mechanical Boundary & Protocol Seam Invariant**: Client components (`src/client/**`) MUST NEVER import directly from `src/server/**`. All shared network envelopes, player intents, and match snapshots MUST reside in `src/domain/protocol/` (or `@protocol`). Deep relative imports crossing >= 3 directory levels (`../../../../`) bypassing facades are prohibited.
+- **Zero Circular Dependency Invariant**: Introducing new circular dependency loops (SCCs) across `src/**` is strictly FORBIDDEN. Enforced mechanically via `npm run lint:boundaries` and prefilter.
 *(Specialized domain invariants and subagent review protocols are strictly delegated to `docs/domain/gotchas/*.md` and `.agents/agents/*.md`).*
 
 
 ## 3. FULL RIGOR SDLC PIPELINE (COHESIVE BATCHING)
 - **Tier 1 (Fast-Track)**: < 50 LOC, visual/CSS/spacing, copy, minor isolated tweak (0 Schema, 0 FSM, 0 Net). Main Agent executes directly in 1-2 min, 0 subagents, 0 plans, 0 reports. Must pass `npm run prefilter` and unit tests.
-- **Standard Feature Slice (Cohesive Batching - 50 to 250 LOC)**:
+- **Tier 1.5 (Structural & Type Refactor)**: Pure compile-time types/interfaces, optional schema fields without runtime mutation, subsystem facade re-exports (`index.ts`), import path rewiring, and `declare module` purges (0 FSM transitions, 0 Economic/Cashflow math changes). Main Agent executes directly:
+  - **Exemptions**: FORBIDDEN running Chaos Sentinel (`npm run sentinel`) on pure type/barrel files. Exempt from Station 1.5 Adversarial Gate and separate QA/Implementer subagent handoffs.
+  - **Required Gates**: MUST pass `tsc --noEmit` (exit 0), `npm run lint:boundaries` (0 hard violations, 0 new SCCs), `npm run prefilter`, and 100% existing regression unit tests (`npm test`). Lean summary report only.
+- **Standard Feature Slice (Cohesive Batching - 50 to 250 LOC - Behavioral & Economic)**:
   - **Cohesive Batching Invariant**: Tightly coupled domain logic (e.g. Server Domain Events across Bond + HOSE + Auction) MUST be designed and implemented as ONE cohesive slice. Arbitrary over-slicing into multiple micro-tickets that forces repeating the full 8-station pipeline is FORBIDDEN.
   - **Station 0.5 (Empirical Root-Cause Gate)**:
     - For non-deterministic visual/runtime glitches: isolate physical culprit via observability hooks (`?debug=3d`, layer toggles, console traces, `window.__vtcoon`) before drafting plan.
@@ -53,11 +59,11 @@ Every ticket (outside Fast-Track) must pass 100% of automated gates before hando
   2. **Station 1.2 (Machine Plan Audit)**: `node scripts/audit_plan.mjs <plan> --auto-sign` (0 defects auto-signs `HARDENED_APPROVED`).
   3. **Station 1.5 (Mandatory Adversarial Gate)**: Run 1 blind adversarial round (`adversarial-challenger` or `forensic-challenger`) writing to `.agents/audit/PLAN_CHALLENGE_[TICKET].md` whenever touching FSM lifecycle, State transitions, Economy, Financial UI notifications, Mobile ergonomics, or 3D Graphics. Neutral Blind Dispatch Protocol: Main Agent is FORBIDDEN from feeding leading checklists or biased hints to the auditor.
   4. **Station 1.8 (Human Gate)**: User approves ("đồng ý").
-  5. **Station 2 (RED - Contract Specification)**: Scaffold empty stubs in `src/**` for new files; `qa-tester` writes contract tests in `tests/**` (Adversarial Inversion: fails strictly on runtime assertions).
+  5. **Station 2 (RED - Contract Specification)**: Scaffold empty stubs in `src/**` for new files; `qa-tester` writes contract tests in `tests/**` based on acceptance criteria & invariants (Adversarial Inversion: fails strictly on runtime assertions, ensuring independent cognitive anti-bias).
   6. **Station 2.5 (GREEN - Implementation)**: `implementer` writes minimal code in `src/**`.
-  7. **Station 3 (Mechanical Gates & Scope)**: Run `npm run prefilter -- <files>` and `node scripts/check_scope.mjs`.
-  8. **Station 3.5 (Chaos Sentinel Mutation Testing)**: Run `npm run sentinel -- --ticket <id> --test <test_path>` on live dynamic port 0 WebSocket.
-  9. **Station 4 (Audit & Delivery Reports)**: Main Agent runs `npm run report -- [ID]` to synthesize physical station audits (`.agents/audit/SPEC_REVIEW_[ID].md`, `CODE_REVIEW_[ID].md`, `PLAN_CHALLENGE_[ID].md`) and final acceptance report (`docs/reports/improvements/IMP-[ID]-[slug]_report.md`). Pass `node scripts/check_evidence.mjs <ticket>`. Perform 1:1 physical disk self-audit before presenting.
+  7. **Station 3 (Mechanical Verification Gate)**: Run `npm run prefilter -- <files>` and `node scripts/check_scope.mjs`. Review subagents (`spec-reviewer`, `code-reviewer`) are RETIRED in favor of deterministic mechanical verification (Typecheck, LOC, zeroDirtyCasts, Linters, Boundaries, SCC cycles).
+  8. **Station 3.5 (Chaos Sentinel Mutation Testing)**: Run `npm run sentinel -- --ticket <id> --test <test_path>` on live dynamic port 0 WebSocket (authoritative proof against tautological test bias).
+  9. **Station 4 (Evidence Synthesis & Delivery Reports)**: Main Agent deterministically synthesizes station audits (`.agents/audit/SPEC_REVIEW_[ID].md`, `CODE_REVIEW_[ID].md`, `PLAN_CHALLENGE_[ID].md`) and final acceptance report (`docs/reports/improvements/IMP-[ID]-[slug]_report.md`) via `npm run report -- [ID]`. Pass `node scripts/check_evidence.mjs <ticket>`. Perform 1:1 physical disk self-audit before presenting.
 - **Epic / Major Multi-Subsystem (> 250 LOC, > 3-4 files across different subsystems)**:
   - Sliced only at natural architectural boundaries into cohesive feature slices. Roadmaps emit high-level milestones before planning.
 

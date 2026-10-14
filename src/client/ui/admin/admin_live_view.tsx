@@ -1,6 +1,6 @@
 // [IMP-25/MSS][IMP-28/MSS][IMP-166/MSS] Admin Live Room Inspector & Terminal View
 import React, { useState } from 'react';
-import type { AdminRoomDetail, AdminRoomLogEntry, AdminPlayerSummary } from '../../../server/network/admin_types';
+import type { AdminRoomDetail, AdminRoomLogEntry, AdminPlayerSummary } from '../../../domain/protocol/index.js';
 import { copyText, downloadBlackBox, downloadLogFile, buildReproCode } from './admin_repro';
 import { AdminLogRow } from './admin_log_row';
 

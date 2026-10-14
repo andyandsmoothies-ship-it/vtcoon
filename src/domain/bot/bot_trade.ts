@@ -1,7 +1,13 @@
 // [UC-BOT-06/MSS][IMP-82] Bot P2P Property Trading AI & Negotiation Strategy
 import { BOARD_CONFIG, CellType, ColorGroup } from '../board_config.js';
 import { PROPERTY_DEEDS, type PropertyRegistry, type PropertyStateMap } from '../property_data.js';
-import { BotPersonality, DEFAULT_MIN_SAFETY_BUFFER, type BotIntent } from './bot_types.js';
+import {
+  BotPersonality,
+  DEFAULT_MIN_SAFETY_BUFFER,
+  type BotTradeDecision,
+  type BotTradeIntent,
+  type BotSwapTradeIntent,
+} from './bot_types.js';
 import type { Player, Room } from '../room.js';
 import { isLeadingPlayer } from './bot_posture.js';
 import { type MonopolyGap, findAllMonopolyGaps, findMonopolyGap } from './bot_monopoly_utils.js';
@@ -9,30 +15,7 @@ import { findEligibleBotHybridTrade, findBotSwapTrade, evaluateBotSwapAcceptance
 
 export { type MonopolyGap, findAllMonopolyGaps, findMonopolyGap };
 export { findBotSwapTrade, evaluateBotSwapAcceptance };
-
-export interface BotTradeDecision {
-  readonly accept: boolean;
-  readonly reason?: string;
-}
-
-export interface BotTradeIntent extends BotIntent {
-  readonly type: 'INTENT_TRADE_OFFER';
-  readonly cellIndex: number;
-  readonly sellerId: string;
-  readonly targetPlayerId: string;
-  readonly buyerId: string;
-  readonly price: number;
-}
-
-export interface BotSwapTradeIntent extends BotIntent {
-  readonly type: 'INTENT_TRADE_OFFER';
-  readonly cellIndex: number;
-  readonly offeredCellIndex: number;
-  readonly sellerId: string;
-  readonly targetPlayerId: string;
-  readonly buyerId: string;
-  readonly price: number;
-}
+export type { BotTradeDecision, BotTradeIntent, BotSwapTradeIntent };
 
 
 /**

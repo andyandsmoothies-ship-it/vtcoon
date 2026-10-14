@@ -5,7 +5,7 @@ import { BOARD_CONFIG } from '../../domain/board_config.js';
 import { AudioEngine } from '../audio/audio_engine.js';
 import { SoundEffect } from '../audio/audio_types.js';
 import { useVfxStore } from '../store/vfx_store.js';
-import type { DeltaPayload } from '../../server/session_manager.js';
+import type { DeltaPayload } from '../../domain/protocol/index.js';
 
 type DeltaCell = NonNullable<DeltaPayload['cells']>[number];
 

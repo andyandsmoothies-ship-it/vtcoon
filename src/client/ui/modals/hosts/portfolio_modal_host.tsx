@@ -1,7 +1,7 @@
 // [IMP-335] PortfolioModalHost — Extracted sub-host for player property & bond portfolio modal
 import React from 'react';
 import type { PlayerHudInfo } from '../../../store/game_store_types';
-import type { PlayerIntent } from '../../../../server/intent_dispatcher';
+import type { PlayerIntent } from '../../../../domain/protocol/index.js';
 import type { ClientMarketModifier } from '../../../store/game_store_subtypes';
 import { useGameStore } from '../../../store/game_store';
 import { PropertyPortfolioModal } from '../property_portfolio_modal';
