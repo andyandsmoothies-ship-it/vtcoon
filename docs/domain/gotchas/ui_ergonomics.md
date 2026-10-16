@@ -1,115 +1,101 @@
 # PILLAR V: 2D UI & VIEWPORT ERGONOMICS
 
-> **Scope**: `src/client/ui/`, `src/client/components/`, `src/client/modal_host.tsx`, `src/client/hud_container.tsx`
+> **Scope**: `src/client/ui/`, `src/client/components/`, `src/client/modal_host.tsx`, `src/client/hud_container.tsx`  
+> **Gotchas SSOT Rule**: Concise architectural invariant rulebook. Anti-Changelog: Keep technical formulas, limits, and negative constraints; omit narrative stories. Size ceiling: <= 15 KB.
 
 ---
 
-1. **Mobile 360px 3-Tier Ergonomic Hierarchy**: Financial decision modals must partition into 3 distinct tiers: Row 1 (Financial state buffer: wallet/deficit balance) $\rightarrow$ Row 2 (Primary CTA action button: Buy or Mortgage) $\rightarrow$ Row 3 (Escape action button pair: Dismiss Deficit vs. Decline/Pass).
-2. **Touch Targets Floor**: Every interactive touch target on the UI must reach at least $\ge 44$px (`min-h-[44px]`); primary CTA buttons must reach $\ge 48$px (`min-h-[48px]`).
-3. **Root-Level Sticky Action Footer**: Modal action button clusters must be direct children of the root container (`sticky bottom-0`), never nested within an inner scroll container, preventing loss of action controls on mobile.
-4. **4 Anti-Pattern Filter**: Strictly forbidden: (1) `border-accent-on-rounded`, (2) `bounce-easing`, (3) `gray-on-color`, (4) `gradient-text`. Enforced mechanically via `npm run lint:ui`.
-5. **Strict Intent Callback Isolation**: Action buttons that dispatch server intents (e.g. `onBuy`, `onPass`, `onBid`) are FORBIDDEN from using silent fallback to UI closing handlers (`onPass ?? onClose`). Intent buttons only dispatch their specific intent; UI dismissal buttons call `onClose` separately.
-6. **Authoritative State Shadowing Prohibition**: When Host/Container provides an authoritative affordance helper (`resolvePurchaseAffordance`), callers (Dock, BoardClick) are FORBIDDEN from precalculating booleans and passing overrides (`canBuy`) through modal payloads.
-7. **A11y Attribute Co-Evolution**: When changing UI labels or titles to avoid keyword conflicts (e.g. changing "Time" to "Lighting"), simultaneously update 100% of corresponding `aria-label`/`aria-description` attributes, and assert both in unit tests to ensure screen-reader accessibility parity.
-8. **Mobile Real Estate 360px Ergonomics & Grid Action Standard [IMP-208P]**: Property card action clusters in the portfolio modal (`PropertyPortfolioModal`) must align to a 2-column grid `grid grid-cols-2 gap-1.5`. The primary action button (Mortgage / Redeem) occupies `col-span-2 min-h-[44px]`; secondary buttons (Downgrade / Title Deed) occupy `col-span-1 min-h-[44px]` (or `col-span-2` when downgrade is unavailable). All labels, chips, and subtexts in property modals must meet an $\ge 11$px typography floor (zero micro-text $< 11$px). Cash shortcut and price suggestion chips require 3D tactile bevels (`shadow-[0_2px_0_0_...]`) and mechanical travel `active:translate-y-[2px]`.
-9. **Financial Notification 3-Tier Hierarchy & Mobile Full-Width Standard [IMP-216]**:
-   - Mobile financial change cards (`FloatingBadge`) must expand near full-width (`w-[calc(100vw-1.5rem)] max-w-sm sm:max-w-md`), centered with `left-1/2 -translate-x-1/2`, eliminating half-screen cramped cutoffs (`max-w-[calc(100vw-11.5rem)]`).
-   - Visual 3-tier hierarchy: Tier 1 (Header: Icon + Category + Dismiss button `✕` with `aria-label="Close notification"`); Tier 2 (`data-testid="transaction-formula-line"`: Clear and concise cause/formula); Tier 3 (`data-testid="transaction-flow-line"`: Natural ergonomic phrasing without static reverse arrows `➔` that invert perceived cash flow or truncate player names).
-   - Single Source of Truth (SSOT): Fee constants (`TELECOM_DATA_FEE = 150`, `MIN_BAIL_AMOUNT = 500`, `BAIL_NET_WORTH_RATIO = 0.10`) must reside centrally in `src/domain/property_rent.ts`. The submodule `src/client/ui/transaction_formula.ts` is extracted to maintain `transaction_narrative.ts` LOC budget $\le 280$ LOC (`TC-194.18`).
-10. **Cross-Platform Viewport & Safari Zoom Immunity [IMP-215]**:
-    - **Safari Auto-Zoom Immunity**: All mobile input fields must have font size $\ge 16$px (`text-base sm:text-sm` or `text-base sm:text-xs`) to prevent iOS Safari auto-zooming from decentering the 3D diorama.
-    - **Dynamic Viewport (`dvh`)**: Full-screen modal or drawer heights should prioritize dynamic `dvh` units (`h-[100dvh]`, `h-[88dvh] max-h-[92dvh] min-h-0 sm:min-h-[480px]`) to adapt seamlessly to mobile browser address bars.
-    - **Mobile Backdrop Touch Clearance**: Drawer sidebars (`ActivityFeedSidebar`) on mobile must cap width to `w-[85vw] max-w-xs sm:w-80 md:w-96`, preserving $\ge 15\text{vw}$ backdrop clearance for easy tap-to-dismiss.
-    - **Zero Truncate Conflicts**: FORBIDDEN combining `truncate` (`white-space: nowrap`) with `line-clamp-*`. Use `line-clamp-2 break-words` or `line-clamp-1 sm:whitespace-nowrap` for clean line wraps.
-    - **Tactile Compound Shadow Backwards Compatibility**: When applying multi-layer compound shadows, retain the leading single shadow class `shadow-[0_8px_0_0_#0f172a]` to satisfy tactile regex contract tests.
-11. **Trade Modal Ergonomics & Symmetrical 2x2 Valuation Grid [IMP-218]**:
-    - **Adaptive Partner Strip**: P2P partner selector strips eliminate horizontal scrolling (`overflow-x-auto`), utilizing adaptive CSS grids `grid ${getPartnerGridColsClass(count)}` (1->grid-cols-1, 2->grid-cols-2, 3->grid-cols-3, 4+->grid-cols-4) across the 360px viewport.
-    - **Strategic Synergy Pinning**: Properties that complete an opponent's color monopoly (`getPropertySynergyTag`) must be pinned at the top under `⭐ MONOPOLY OPPORTUNITY (WIN-WIN)` before `📁 OTHER PROPERTIES (BY COLOR)`.
-    - **Subtractive Pricing Parity**: Eliminate asymmetric odd tiers like `reqPrice130`. Standardize to a 2x2 symmetrical 4-tier grid: Buy (100% Base, 120% Fair, 150% Attractive, 200% Compulsory) and Sell (70% Floor, 100% Base, 120% Standard, 150% Big Win), all buttons meeting touch floor `min-h-[44px]`, 3D bevels (`shadow-[0_2px_0_0_...]`), and mechanical travel `active:translate-y-[2px]`.
-    - **Vertical Slice Data Source Parity**: Real estate data for `TradePartnerStrip` (`TradePartnerInfo.properties`) must map directly from `playersInfo[id].ownedProperties` in `modal_host.tsx`, ensuring sub-banners reflect accurate Bot needs and postures before click selection.
-12. **ModalHost Stateless Modals & Empty Payload Rendering Invariant [IMP-217]**:
-    - **Payload vs. Store Selector Separation**: Independent asset management modals (`PropertyPortfolioModal` / `portfolio`) query Zustand stores or derived selectors directly (`calculatePlayerNetWorth`, `levelMap`, `mortgagedProperties`), and DO NOT require an external payload. The `ModalHost` router MUST NOT early-abort with `if (!modalPayload) return null;` when `activeModal === 'portfolio'`, ensuring instant opening even with empty payloads.
-    - **React Hook Spying Parity**: Components with internal hooks (`useState`) under VDOM unit tests must invoke `React.useState` (instead of named `useState`), ensuring `vi.spyOn(React, 'useState')` correctly intercepts tab state without subtle bypasses.
-13. **Actionable Contextual Feedback & Deep Mobile Action Affordance [IMP-225]**:
-    - **Format Error Action Hint Integration**: `formatServerErrorMessage` combines 3 tiers: Title + Description + Action Hint (`actionHint`), formatting as `${title}: ${description} 👉 ${actionHint}` when `actionHint` is present, guiding the player immediately toward recovery.
-    - **Bot Error Guard & Throttle Anti-Spam (C1 & C2)**: `handleWsError` in `ws_message_handler.ts` only surfaces errors for the local player (`msg.playerId === myPlayerId || msg.type === 'ERROR'`), ignoring Bot `INTENT_REJECTED` errors. Applies 1500ms anti-spam throttling per `reasonCode` and exports `resetWsErrorThrottle()` for complete test isolation across Vitest runs.
-    - **Subcomponent Extraction for LOC Governance**: The property card action cluster is extracted into `PropertyCardActions` subcomponent, keeping `property_portfolio_modal.tsx` < 400 LOC, preserving the 2-column layout (`col-span-2` for Mortgage, `col-span-1` for Downgrade), and providing visual warning `mortgageSubHint` when improvements remain (`level > 0`).
-    - **Bond Eligibility Visual Checklist**: The bond issuance tab replaces static bullet points with a 3-criterion visual checklist card (Net Worth ≥ 3,000, Unencumbered Properties ≥ 2, and In Turn / Debt Recovery `isTurnValid`), enabling immediate identification of missing criteria.
-14. **Subtle Property Trading Indicators & CSS Purge Immunity [IMP-228]**:
-    - **Arbitrary Class Purge Elimination**: When displaying dynamic glow outlines on property dots during active trades (`isTrading = true`), DO NOT use template strings containing arbitrary Tailwind classes (`ring-offset-[#FFFDF8]`), as they are purged by the Tailwind compiler during `npm run build`. Use static Tailwind class `ring-offset-1` combined with inline CSS variable: `style={{ '--tw-ring-offset-color': '#FFFDF8' }}`.
-    - **React Pure Updater & Stale Closure Defense**: Updates to `useGameStore.modalPayload` (e.g. toggling properties in `TradeModal`) must execute outside React state updater callbacks (`setOffered`, `setRequested`) to eliminate duplicate side effects in Strict Mode and prevent stale closures.
-    - **Zero Magic String Local Player**: In pure function `resolvePlayerTradingCells`, when `localPlayerId` is absent or empty (`undefined` / `""`), the local player filter branch must return an empty set rather than falling back to `'p1'`, ensuring safety for UUID multiplayer and headless SSR environments.
-15. **Lean Flow Financial Notifications & Conditional Formula Rendering [IMP-229]**:
-    - **Conditional Formula Rendering**: The formula explanation line `data-testid="transaction-formula-line"` is ONLY rendered when `Boolean(narrative.formula?.trim()) === true`. For direct transactions without multiplier formulas (`buy`, `upgrade`), `resolveFormulaText` must return empty string `''`, allowing the card to collapse cleanly to 2 tiers on mobile 360px.
-    - **Caller Explicit Formula & Wire Duality Guard**: In `resolveFormulaText`, guard against both delta tombstone `null` and `''`: `if (typeof item.formula === 'string') return item.formula.trim(); if (item.formula === null) return '';`, respecting explicit caller strings and eliminating crash risk `TypeError` on `null.trim()`.
-    - **Anti-Duplication & Robust Title Scraping**: Property name appears strictly once in badge content. The `buy` branch uses defensive regex stripping: `item.title.replace(/^Mua(?:\s+sở\s+hữu|\s+quyền\s+sử\s+dụng\s+đất:?|\s+đất|\s+BĐS)?(?:\s+|$)/i, '').trim()`, eliminating repeated phrases and redundant trailing text.
-16. **Compulsory Buyout Target Selection & Dual-Symmetric Subsidy [IMP-231]**:
-    - **Bond Property Exclusion & Multi-C0 Tile Selection**: When activating `CC_SWAP_PROJECT`, `isEligibleForCompulsoryBuyout` must exclude properties encumbered as bond collateral (`owner.bondContract?.isActive && owner.bondContract.collateralCells?.includes(cellIndex)`). Collect `eligibleTargets: BuyoutTargetOption[]` and select the most affordable property (`player.balance >= t.cost`) as default with a 30s expiration (`expiresAt = Date.now() + 30_000`).
-    - **Dual Subsidy Tiers & Treasury Conservation**:
-      * *1,000 M VND Tier*: Opportunity loss compensation when opponents own zero valid C0 tiles (`oppC0Cells.length === 0`), Treasury covers `treasury -= 1000`, `balance += 1000`.
-      * *800 M VND Tier*: Liquidity salvage subsidy for Human and Bot when C0 tiles exist but player cannot afford the cheapest (`balance < minCost` or bot cannot retain safety reserve $\ge 1,000$ M), `treasury -= 800`, `balance += 800`.
-      * *130% P2P Transfer Conservation*: Upon successful buyout, cash transfers directly from Buyer to Seller (`buyer -= cost, seller += cost`), leaving Treasury neutral ($\Delta \text{Treasury} = 0$).
-    - **Server-Authoritative Target Resolution**: `coordExecuteCompulsoryBuyout` verifies `cellIndex` resides within `session.eligibleTargets` (or matches `session.cellIndex`), binding `targetSellerId` and `targetCost`, preventing out-of-scope buyout exploits.
-    - **SSR React Shared Internals & Reactive Store Guard**: In client `CompulsoryBuyoutModal`, read `playersInfo` via Zustand hook; in headless SSR test environments without event loops, fall back to `getState().playersInfo` to bypass React `useSyncExternalStore`'s empty `getServerSnapshot`.
-17. **Auction Leading Bidder Dismiss Affordance & Server Rejection Immunity [IMP-232]**:
-    - **Affordance Separation**: When the player holds the highest bid (`isLeading = Boolean(myId && highestBidderId === myId)`), the footer button of `AuctionModal` must transition from `[✕ Withdraw]` (`onPass`) to `[✕ Close / View Board]` (`onClose`). This prevents misinterpretation where the player intends to inspect the board but mistakenly sends an invalid `INTENT_AUCTION_PASS`.
-    - **Dynamic Role Transition**: When outbid by another player (`highestBidderId` changes to opponent), the footer button automatically reverts to `[✕ Withdraw]`, allowing the player to voluntarily exit the auction.
-    - **Server Rule Preservation**: Server function `handleAuctionPass` preserves the core auction invariant: rejecting leading bidder withdrawals with error `HIGHEST_BIDDER_CANNOT_PASS`.
-    - **Actionable Notification Dictionary**: Provide full mapping for `HIGHEST_BIDDER_CANNOT_PASS` and aliases (`highest_bidder cannot pass`, `highest_bidder_cannot_pass`, `HighestBidderCannotPass`) in `actionable_notification.ts`, guiding players to close the modal for background monitoring instead of showing raw error codes.
-18. **Headless Visual Capture vs. In-Game HUD Mounting Lifecycle [IMP-252]**:
-    - **Deceptive Trap**: When executing automated screenshot tool `scripts/capture_visual_evidence.mjs`, default URL (`?room=VTTEST&host=true`) places the app in Pre-Match lobby (`gameStarted === false`). The script hides the lobby overlay, but because `gameStarted` remains `false`, `HudContainer` (containing TopBar, ActionDock, FloatingNumbersOverlay, PlayerHudList) **was never mounted into the DOM** (`src/client/main.tsx:240`). Screenshots show a blank 3D diorama, failing visual audits despite correct UI implementation.
-    - **Verified Invariants**:
-      1. To capture any in-game HUD component via headless CDP, initialize match state: `window.__lobbyStore.getState().initLobby('VTTEST', 'p1', true, 'Tester'); window.__lobbyStore.getState().setGameStarted(true);`.
-      2. `scripts/capture_visual_evidence.mjs` must verify and enable `gameStarted = true` by default before scenario injection, unless lobby screen is explicitly requested. `[UI/HARNESS]`
-19. **Spatial Ground Truth & Non-Collision Proof vs. Banned Static CSS Tests [IMP-253]**:
-    - **Deceptive Trap & Mental Math Fallacy**:
-      1. *Mental Math Layout Calculations*: Estimating PlayerHudList height on mobile as $y = 60..275$px, when 4 player cards actually occupy $y = 73..461$px (due to TopBar 66px + padding + 4 cards $\approx 376$px). Placing toasts at `top-72` (288px) collides with cards 3 and 4.
-      2. *Brittle Staircase Offsets*: Hardcoding `top-72/80/[22rem]/[24rem]` per player count leaves awkward gaps with 2 players or collapsed spectator cards, colliding with ActionDock on short viewports (360x640).
-      3. *Data Suppression Workaround*: Using `(isHudActive && latestMilestone)` to suppress past toasts on mobile avoids collision but silently erases financial notifications without an activity log.
-      4. *Static Change-Detector Tests*: Asserting class strings like `toContain('top-72')` or `toContain('md:left-6')` to "prove non-collision". Tests pass green while components overlap in real browsers.
-    - **Verified Invariants**:
-      1. *Empirical Physical Measurements*: UI coordinates and dimensions MUST derive from real DOM bounding boxes (`getBoundingClientRect()`) recorded in `.agents/evidence/bounding_box_[ticket]_[viewport].json` or pixel measurements on dual-viewport screenshots; mental math is FORBIDDEN.
-      2. *Flow-Anchored Positioning*: Mobile floating components must anchor to layout flow (same column below HUD or bottom-anchored above ActionDock `bottom-[8rem]`). On desktop, preserve right alignment with safe offset `md:right-[18.5rem]`.
-      3. *Zero Financial Event Suppression*: FORBIDDEN hiding financial events to resolve space constraints unless a persistent history drawer is provided.
-      4. *Non-Collision Proof Mandate*: Tests must assert non-intersecting bounding box coordinate ranges or verify actual visual screenshots at 360x740, 360x640, and 1280x800. `[UI/LAYOUT]`
+1. **Mobile 360px 3-Tier Ergonomic Hierarchy**:
+   - Financial decision modals partition into 3 tiers: Row 1 (Financial buffer: wallet/deficit balance) $\rightarrow$ Row 2 (Primary CTA action: Buy/Mortgage) $\rightarrow$ Row 3 (Escape action pair: Dismiss Deficit vs Decline/Pass).
 
-20. **Carousel, Stepper & Mobile Touch Affordances [UI/CAROUSEL/A11Y] [IMP-267]**:
-    - **Visual Size vs. Touch Area (Hit-Slop Mandate)**: When compressing vertical height (< 40px) on mobile, visual elements smaller than 44px MUST use CSS Hit-Slop (e.g. `after:absolute after:-inset-1.5 after:content-['']`) to ensure physical touch targets meet $\ge 44\times 44$px floor (WCAG 2.5.5 / Apple HIG). FORBIDDEN sacrificing physical touch targets for visual sizing.
-    - **Scroll Edge Softening**: Horizontal scroll containers (`overflow-x-auto`) holding tabs or chips MUST apply CSS mask gradients (`[mask-image:linear-gradient(to_right,transparent,black_8px,black_calc(100%-8px),transparent)]`) to soften scroll boundaries and eliminate hard-crop text clipping.
-    - **WAI-ARIA Carousel Keyboard Navigation**: Modals or views utilizing Carousel / Stepper / Tabs MUST register keyboard event listeners (`keydown`) for arrow navigation (`ArrowLeft` / `ArrowRight`) with complete unmount cleanup.
-    - **Stepper-in-CTA Fast-Dismiss Escape Hatch**: When a bottom CTA functions as a multi-step stepper ("Next (1/2) ➔"), a secondary fast-dismiss action ("Skip & Close All") MUST be positioned adjacent or below to prevent trapped-modal fatigue.
+2. **Touch Targets Floor**:
+   - Every interactive touch target MUST be $\ge 44\text{px}$ (`min-h-[44px]`); primary CTA buttons MUST be $\ge 48\text{px}$ (`min-h-[48px]`).
 
-21. **Poka-Yoke UI Affordance Invariant & Domain Validator Consumption [IMP-276A]**:
-    - **Deceptive Trap (Phantom Affordance & UI Math)**: UI layer independently calculating costs or conditions using local math (e.g. `player.balance >= upgradeCost`). When Domain rules evolve (e.g. Urban Planning cost surges, or Macro Freeze liquidity blocks), UI remains unaware, displaying active buttons that reject with `INTENT_REJECTED` upon click, degrading player trust.
-    - **Verified Invariants (Poka-Yoke Affordance Invariant)**:
-      1. *Zero Independent UI Calculations*: UI Affordance helpers (e.g. `title_deed_affordance.ts`) MUST NOT calculate costs, conditions, or disabled states locally.
-      2. *Direct Domain Evaluation Consumption*: Button disabled states and displayed costs MUST derive directly from Domain Validators (`canUpgradeProperty`, `canBuyProperty` -> `upgradeEvaluation { canUpgrade, cost, blockedReason }`).
-      3. *Pure Presentation Derivation*: UI components (`TitleDeedActionFooter`, `ModalFooter`) receive evaluation objects and render `disabled = !evaluation.canDo` with tooltip `blockedReason`, eliminating phantom active states and Client-Server desync. `[UI/AFFORDANCE]`
+3. **Root-Level Sticky Action Footer**:
+   - Modal action button clusters MUST be direct children of the root container (`sticky bottom-0`), never nested within inner scroll containers.
 
-22. **Modal Dismissal Ownership Invariant: Server Trigger — Client Dismiss [UI/MODAL_LIFECYCLE] [IMP-279]**:
-    - **Deceptive Trap (Local Pattern Copying & Instant Dismount)**: Mechanically copying `else { if (activeModal === 'x') closeModal(); }` whenever a delta field becomes `null`. For example: server sets `pendingTransitWheel = null` on the first millisecond when player clicks "Spin" to lock against double-clicks; if client closes modal on `pendingTransitWheel === null`, the modal slams shut within 20ms, abruptly truncating the 3.5s spin animation!
-    - **Verified Invariants (Modal Dismissal Ownership Invariant)**:
-      1. *Server Triggers Only*: Server only broadcasts signals to open modals via delta (`pendingTransitWheel`, `lastEventCard`...).
-      2. *Client Dismisses Autonomously*: Modals with visual animations (Wheel, Card Draw, Dice Roll) may ONLY be dismissed by 2 events: (1) Player explicitly confirms/proceeds (`handleDismiss`), or (2) Turn advances to another player / forced phase transition (`turnPhase !== TurnPhase.PropertyManagement && turnPhase !== TurnPhase.ActionPhase`). FORBIDDEN auto-closing modals solely because a delta field transitions to `null`. `[UI/MODAL_LIFECYCLE]`
+4. **4 Anti-Pattern Filter**:
+   - FORBIDDEN: (1) `border-accent-on-rounded`, (2) `bounce-easing`, (3) `gray-on-color`, (4) `gradient-text`. Enforced mechanically via `npm run lint:ui`.
 
-23. **Modal Preservation in Complex Multi-Step Workflows [UI/MODAL_COEXISTENCE] [IMP-288]**:
-    - **Deceptive Trap (The Portfolio Kickout Trap)**: When a player in the Emergency Insolvency Modal (`insolvency`) clicks "Manage Properties" to open the Portfolio Tool (`portfolio`) to mortgage assets, `activeModal` becomes `'portfolio'`. When server returns delta updating cash balance after mortgaging (still in deficit), an unconstrained insolvency auto-open listener kicks the player back to `insolvency`, disrupting consecutive multi-property mortgage actions!
-    - **Verified Invariants (Modal Preservation Invariant)**:
-      1. *Preserve Active Utility Modals*: Auto-insolvency modal listeners in `use_app_session.ts` must check `currentModal !== 'portfolio'`.
-      2. *Safe Anchor on ActionDock*: When player manually closes the utility modal, the Primary Action button on ActionDock transforms to `🚨 Emergency Debt Relief`, serving as a stable manual anchor to re-enter insolvency without abrupt delta interruptions. `[UI/MODAL_COEXISTENCE]`
+5. **Strict Intent Callback Isolation**:
+   - Action buttons dispatching server intents (`onBuy`, `onPass`, `onBid`) are FORBIDDEN from using silent fallback to UI closing handlers (`onPass ?? onClose`). UI dismissal buttons call `onClose` separately.
 
-24. **Visual Differentiation Between Wallet Inflow vs. Exemption/Protection [UI/NOTIFICATIONS] [IMP-290]**:
-    - **Deceptive Trap (The Cash-Credit Semantic Trap)**: Prefixing saved amounts with `+` and applying wallet-deposit green styling (`bg-emerald-50 text-emerald-700`) to exemption events (e.g. Diplomacy Card rent waivers or discount vouchers). Displaying `Activated [+6,000 M] Diplomacy Card` causes players to mistake it for direct wallet cash injection, leading to confusion when wallet balance does not change.
-    - **Verified Invariants (Exemption Notification Standard)**:
-      1. *Protective Color Palette*: All exemption / saved expense pills (`savedRent`) MUST use sky blue protective styling (`bg-sky-50 text-sky-700 border-sky-300`). FORBIDDEN using green (`emerald`), which is reserved exclusively for real cash wallet deposits (`salary`, `rent_receive`, `stimulus`).
-      2. *Zero Phantom `+` Prefix*: Exemption amounts MUST omit the `+` sign (`6,000 M` instead of `+6,000 M`). The `FloatingBadge` UI layer strips leading `+` defensibly.
-      3. *Standardized Two-Line Phrasing*:
-         - Tenant: `[🤝] {Entity} exempt from [{Amount}] rent at {Tile} owned by {Owner}` + `[Diplomatic Immunity: 100% rent waived]`.
-         - Landlord: `[🤝] {Entity} waived [-{Amount}] rent at {Tile} for {Tenant}` + `[Tenant used Diplomacy Card: Foregone rent]`. `[UI/NOTIFICATIONS]`
+6. **Authoritative State Shadowing Prohibition**:
+   - When Host/Container provides an authoritative affordance helper (`resolvePurchaseAffordance`), callers are FORBIDDEN from precalculating booleans and passing overrides (`canBuy`) through modal payloads.
 
-25. **Tactile Corner Arc & Viewport Margin Symmetry Standard [UI/TACTILE_ERGONOMICS] [IMP-359]**:
-    - **Deceptive Trap (The Rectangular Bounding Box Blindness)**: Automated tests (`getBoundingClientRect`) only measure 4-corner bounding boxes. When a container uses large corner rounding (`rounded-2xl` radius $R=16\text{px}$), a child element placed $17\text{px}$ from the outer box edge is mathematically inside ($1115 \le 1132$), but along the diagonal arc, clearance compresses by $\Delta x = R - \sqrt{R^2 - \Delta y^2}$. Consequently, the child button crowds the curving border, causing visual crowding and off-center balance.
-    - **Verified Invariants (Tactile Corner Arc & Symmetry Invariant)**:
-      1. *Corner Arc Buffer ($\text{Clearance} \ge R + 4\text{px}$)*: Any container with corner radius $R$ requires internal children to maintain clearance to outer edge $\ge R + 4\text{px}$ (e.g. for `rounded-2xl` $R=16\text{px}$, minimum desktop clearance is $\ge 20\text{px}$). Children must not crowd into the curving arc.
-      2. *Opposing Margin Symmetry ($|\Delta\text{margin}| \le 8\text{px}$)*: Horizontal control bars (TopBar, ActionDock, ModalHeader) must balance left and right margins: $|\text{margin}_{left} - \text{margin}_{right}| \le 8\text{px}$ on Desktop. FORBIDDEN having asymmetrical margins (e.g. left $32\text{px}$ vs. right $13\text{px}$).
-      3. *Visual Self-Critique Gate*: FORBIDDEN signing off UI changes solely via terminal test logs. Following screenshot capture, engineers/agents must zoom 1:1 into modified corners to evaluate visual balance before submitting acceptance reports. `[UI/TACTILE_ERGONOMICS]`
+7. **A11y Attribute Co-Evolution**:
+   - Updating UI labels/titles requires updating 100% of corresponding `aria-label`/`aria-description` attributes, verified in unit tests.
+
+8. **Mobile Real Estate 360px Grid Action Standard**:
+   - Portfolio action clusters (`PropertyPortfolioModal`) align to 2-column grid `grid grid-cols-2 gap-1.5`. Primary action (Mortgage/Redeem) occupies `col-span-2 min-h-[44px]`; secondary actions occupy `col-span-1 min-h-[44px]`. Typography floor $\ge 11\text{px}$. Tactile chips require 3D bevels (`shadow-[0_2px_0_0_...]`) and mechanical travel `active:translate-y-[2px]`.
+
+9. **Financial Notification 3-Tier Hierarchy & Full-Width Standard**:
+   - Mobile financial change cards (`FloatingBadge`) expand near full-width (`w-[calc(100vw-1.5rem)] max-w-sm sm:max-w-md`), centered `left-1/2 -translate-x-1/2`.
+   - 3-tier structure: Tier 1 (Icon + Category + Dismiss `✕`); Tier 2 (Formula/cause `data-testid="transaction-formula-line"`); Tier 3 (Natural phrasing flow line `data-testid="transaction-flow-line"`).
+   - Fee constants (`TELECOM_DATA_FEE = 150`, `MIN_BAIL_AMOUNT = 500`, `BAIL_NET_WORTH_RATIO = 0.10`) reside centrally in `src/domain/property_rent.ts`.
+
+10. **Cross-Platform Viewport & Safari Zoom Immunity**:
+    - **Safari Auto-Zoom Immunity**: Mobile input fields MUST declare font size $\ge 16\text{px}$ (`text-base sm:text-sm`) to prevent iOS Safari auto-zoom from decentering the 3D diorama.
+    - **Dynamic Viewport (`dvh`)**: Full-screen modals prioritize dynamic `dvh` units (`h-[88dvh] max-h-[92dvh] min-h-0 sm:min-h-[480px]`).
+    - **Backdrop Clearance**: Drawers (`ActivityFeedSidebar`) cap width to `w-[85vw] max-w-xs`, preserving $\ge 15\text{vw}$ backdrop clearance for tap-to-dismiss.
+    - **Zero Truncate Conflicts**: FORBIDDEN combining `truncate` with `line-clamp-*`. Use `line-clamp-2 break-words`.
+
+11. **Trade Modal Ergonomics & Symmetrical 2x2 Valuation Grid**:
+    - **Adaptive Grid**: P2P partner selector uses adaptive CSS grids `grid-cols-${count}` across 360px viewports (zero horizontal overflow).
+    - **Monopoly Synergy Pinning**: Properties completing an opponent's color monopoly MUST be pinned top under `⭐ MONOPOLY OPPORTUNITY (WIN-WIN)`.
+    - **Symmetrical 2x2 Grid**: Standardize pricing tiers: Buy (100% Base, 120% Fair, 150% Attractive, 200% Compulsory) and Sell (70% Floor, 100% Base, 120% Standard, 150% Big Win).
+
+12. **ModalHost Stateless Modals & Empty Payload Invariant**:
+    - Asset management modals (`portfolio`) query Zustand stores directly. `ModalHost` MUST NOT early-abort with `if (!modalPayload) return null;` when `activeModal === 'portfolio'`, ensuring instant opening with empty payloads.
+
+13. **Actionable Contextual Feedback & Subcomponents**:
+    - Error messages format as `${title}: ${description} 👉 ${actionHint}` when `actionHint` is present.
+    - WS error handlers only surface errors for the local player (`msg.playerId === myPlayerId || msg.type === 'ERROR'`), with 1500ms anti-spam throttling per `reasonCode`.
+    - Bond issuance tab provides a 3-criterion checklist card (Net Worth $\ge 3,000$, Unencumbered Properties $\ge 2$, In Turn / Debt Recovery `isTurnValid`).
+
+14. **Property Trading Indicators & Tailwind Purge Immunity**:
+    - Avoid arbitrary template string colors (`ring-offset-[#FFFDF8]`) purged at build time. Use static Tailwind class `ring-offset-1` with inline CSS variable: `style={{ '--tw-ring-offset-color': '#FFFDF8' }}`.
+    - Store updates to `modalPayload` MUST execute outside React state updater callbacks.
+    - Missing `localPlayerId` returns an empty set rather than falling back to hardcoded strings like `'p1'`.
+
+15. **Conditional Formula Rendering in Financial Badges**:
+    - The formula line `data-testid="transaction-formula-line"` is ONLY rendered when `Boolean(narrative.formula?.trim()) === true`. Direct transactions (`buy`, `upgrade`) return empty string `''`, cleanly collapsing badge to 2 tiers.
+
+16. **Compulsory Buyout Target Selection & Subsidy Invariants**:
+    - `isEligibleForCompulsoryBuyout` excludes properties pledged as bond collateral. Default selects most affordable property with 30s expiration.
+    - Subsidies: 1,000 M VND (opponents own zero C0 tiles); 800 M VND (liquidity salvage when player cannot afford cheapest). Direct P2P buyouts transfer cash from Buyer to Seller ($\Delta\text{Treasury} = 0$).
+
+17. **Auction Leading Bidder Dismiss Affordance**:
+    - When player holds highest bid (`highestBidderId === myId`), footer button switches from `[✕ Withdraw]` (`onPass`) to `[✕ Close / View Board]` (`onClose`). Reverts to `[✕ Withdraw]` when outbid.
+    - Server `handleAuctionPass` preserves the invariant: rejecting leading bidder withdrawals with `HIGHEST_BIDDER_CANNOT_PASS`.
+
+18. **Headless Visual Capture HUD Mounting Lifecycle**:
+    - To capture in-game HUD components via headless CDP, initialize match state: `window.__lobbyStore.getState().initLobby('VTTEST', 'p1', true, 'Tester'); window.__lobbyStore.getState().setGameStarted(true);`.
+
+19. **Spatial Ground Truth & Non-Collision Proof**:
+    - Layout dimensions MUST derive from real DOM bounding boxes (`getBoundingClientRect()`); mental math is FORBIDDEN.
+    - Floating badges anchor to layout flow (below HUD or `bottom-[8rem]` above ActionDock). Desktop safe offset `md:right-[18.5rem]`.
+    - Tests must assert non-intersecting bounding box ranges or verify actual visual screenshots at 360x740, 360x640, and 1280x800.
+
+20. **Carousel, Stepper & Touch Area Standards**:
+    - Visual elements smaller than 44px MUST use CSS Hit-Slop (e.g. `after:absolute after:-inset-1.5`) to satisfy the $\ge 44\times 44\text{px}$ touch target floor.
+    - Horizontal scroll containers apply CSS mask gradients to soften edges.
+    - Stepper CTAs ("Next ➔") require an adjacent fast-dismiss escape action ("Skip & Close All").
+
+21. **Poka-Yoke UI Affordance Invariant**:
+    - Zero independent UI cost/condition calculations. Button disabled states and displayed costs MUST derive directly from Domain Validators (`canUpgradeProperty`, `canBuyProperty` -> `evaluation { canDo, cost, blockedReason }`).
+
+22. **Modal Dismissal Ownership Invariant (Server Trigger — Client Dismiss)**:
+    - Server only broadcasts signals to open modals via delta (`pendingTransitWheel`, `lastEventCard`).
+    - Animated modals (Wheel, Card, Dice) may ONLY be dismissed by explicit player confirmation or turn advance. Auto-closing modals solely because a delta field transitions to `null` is FORBIDDEN.
+
+23. **Modal Preservation in Multi-Step Workflows**:
+    - Auto-insolvency modal listeners must check `currentModal !== 'portfolio'`. When player manually closes the portfolio modal, ActionDock transforms to `🚨 Emergency Debt Relief` as a stable manual re-entry anchor.
+
+24. **Exemption vs Wallet Inflow Semantic Distinction**:
+    - Exemption / saved expense pills (`savedRent`) MUST use sky blue protective styling (`bg-sky-50 text-sky-700 border-sky-300`). FORBIDDEN using emerald green (reserved exclusively for actual cash deposits).
+    - Exemption amounts MUST omit the `+` prefix (`6,000 M`, not `+6,000 M`).
+
+25. **Tactile Corner Arc & Margin Symmetry Standard**:
+    - **Corner Arc Buffer ($\text{Clearance} \ge R + 4\text{px}$)**: Container with corner radius $R$ requires internal children to maintain clearance to outer edge $\ge R + 4\text{px}$ (e.g. for `rounded-2xl` $R=16\text{px}$, minimum clearance is $\ge 20\text{px}$).
+    - **Margin Symmetry**: Horizontal control bars MUST balance left and right margins: $|\text{margin}_{left} - \text{margin}_{right}| \le 8\text{px}$ on Desktop.

@@ -242,10 +242,18 @@ export function lintContent(content, filePath = 'anonymous') {
 }
 
 /**
- * Recursively collects candidate source files in directory.
+/**
+ * Recursively collects candidate source files in directory or returns single file.
  */
 function collectFiles(dirPath, fileList = []) {
   if (!fs.existsSync(dirPath)) return fileList;
+  const stat = fs.statSync(dirPath);
+  if (!stat.isDirectory()) {
+    if (/\.(?:tsx?|jsx?|css|html)$/.test(dirPath)) {
+      fileList.push(dirPath);
+    }
+    return fileList;
+  }
   const entries = fs.readdirSync(dirPath, { withFileTypes: true });
   for (const entry of entries) {
     const fullPath = path.join(dirPath, entry.name);
@@ -261,21 +269,24 @@ function collectFiles(dirPath, fileList = []) {
 }
 
 /**
- * Runs the linter on target directory.
+ * Runs the linter on target directory or list of files.
  */
-export function runLinter(targetDir = 'src/client') {
+export function runLinter(target = 'src/client') {
   const rootDir = process.cwd();
-  const absTarget = path.isAbsolute(targetDir) ? targetDir : path.join(rootDir, targetDir);
+  const targetList = Array.isArray(target) ? target : [target];
+  const files = [];
 
-  if (!fs.existsSync(absTarget)) {
-    console.error(`[UI Linter Error] Target directory does not exist: ${absTarget}`);
-    return { totalViolations: 0, fileCount: 0, violations: [] };
+  for (const t of targetList) {
+    const absTarget = path.isAbsolute(t) ? t : path.join(rootDir, t);
+    if (fs.existsSync(absTarget)) {
+      files.push(...collectFiles(absTarget));
+    }
   }
 
-  const files = collectFiles(absTarget);
+  const uniqueFiles = [...new Set(files)];
   const allViolations = [];
 
-  for (const file of files) {
+  for (const file of uniqueFiles) {
     const relPath = path.relative(rootDir, file).replace(/\\/g, '/');
     const content = fs.readFileSync(file, 'utf8');
     allViolations.push(...lintContent(content, relPath));
@@ -283,7 +294,7 @@ export function runLinter(targetDir = 'src/client') {
 
   return {
     totalViolations: allViolations.length,
-    fileCount: files.length,
+    fileCount: uniqueFiles.length,
     violations: allViolations,
   };
 }
@@ -294,8 +305,10 @@ const isDirectCli = process.argv[1] && (
 );
 
 if (isDirectCli) {
-  const targetDir = process.argv[2] || 'src/client';
-  console.log(`\n🔍 [UI Linter] Scanning ${targetDir} for Impeccable Anti-patterns...`);
+  const cliTargets = process.argv.slice(2);
+  const targetDir = cliTargets.length > 0 ? cliTargets : ['src/client'];
+  const desc = cliTargets.length > 0 && cliTargets.length <= 3 ? cliTargets.join(', ') : `${cliTargets.length || 'src/client'} targets`;
+  console.log(`\n🔍 [UI Linter] Scanning ${desc} for Impeccable Anti-patterns...`);
 
   const { totalViolations, fileCount, violations } = runLinter(targetDir);
 
@@ -303,7 +316,7 @@ if (isDirectCli) {
     console.log(`✅ [UI Linter] Clean! 0 Anti-patterns detected across ${fileCount} files.\n`);
     process.exit(0);
   } else {
-    console.error(`\n❌ [UI Linter] Found ${totalViolations} Anti-pattern violations in ${targetDir}:\n`);
+    console.error(`\n❌ [UI Linter] Found ${totalViolations} Anti-pattern violations in ${desc}:\n`);
     for (const v of violations) {
       console.error(`  - [${v.rule}] ${v.file}:${v.line}:${v.col}`);
       console.error(`    Snippet: "${v.snippet}"`);

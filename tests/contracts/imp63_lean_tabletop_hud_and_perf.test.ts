@@ -177,7 +177,7 @@ describe('[TC-63/MSS][UC-IMP63] Lean Tabletop HUD & GPU Optimization Contract Su
           levelMap: {},
         })
       );
-      expect(html).toContain('bg-amber-50/70');
+      expect(html).toContain('bg-[#FFFDF8]');
       expect(html).toContain('border-amber-500');
     });
 

@@ -4,7 +4,7 @@ import { MacroCycleType } from '../domain/macro_cycle_types';
 import { PROPERTY_DEEDS } from '../domain/property_manager';
 import type { PropertyRegistry, PropertyStateMap, PropertyState } from '../domain/property_manager';
 import { ActionRejectReason } from '../domain/action_reasons';
-import { restorePostInsolvencyPhase } from './insolvency_manager.js';
+import { restorePostInsolvencyPhase } from './fsm_transition_coordinator.js';
 import {
   MORTGAGE_DEFAULT_INTEREST_RATE as DEFAULT_INTEREST_RATE,
   MORTGAGE_RATE_HIKE_INTEREST_RATE as RATE_HIKE_RATE,

@@ -1,6 +1,6 @@
-// [UI-S04/MSS][IMP-134] EventCardModal — Vietnamese Chance & Market event card display with tactile borders and Hero Stat Box
 import React from 'react';
-import { BOARD_CONFIG } from '../../../domain/board_config.js';
+import { BOARD_CONFIG } from '../../../domain/index.js';
+
 import { useGameStore } from '../../store/game_store.js';
 import { resolveEventCardDisplayData } from './event_card_visuals.js';
 import { resolveMarketShortTag } from '../market_event_ticker.js';

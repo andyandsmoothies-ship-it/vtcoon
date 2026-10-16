@@ -22,6 +22,7 @@ export const SLOP_RULES = {
   KINEMATICS_FINITE_DEFENSE: 'kinematics-finite-defense',
   ZERO_MICRO_SPLINTERING: 'zero-micro-splintering',
   ZERO_PASSTHROUGH_PROXIES: 'zero-passthrough-proxies',
+  NO_FS_IN_CLIENT_TESTS: 'no-fs-in-client-tests',
 };
 
 export const TIER_BUDGETS = {

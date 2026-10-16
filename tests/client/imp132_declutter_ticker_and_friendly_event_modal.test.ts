@@ -230,8 +230,8 @@ describe('IMP-132: Desktop UI De-clutter, Streamlined Ticker & Friendly Modal Co
 
     it('[TC-IMP132.22/MSS][UC-IMP132][Facet-1/Boundary] match-info-capsule sử dụng đệm lề responsive an toàn chống tràn mobile và cấn chữ desktop', () => {
       const html = renderToStaticMarkup(React.createElement(TopBar));
-      expect(html).toContain('min-[360px]:px-2.5');
-      expect(html).toContain('sm:px-4');
+      expect(html).toContain('min-[360px]:px-1.5');
+      expect(html).toContain('sm:pl-3');
     });
 
     it('[TC-IMP132.23/MSS][UC-IMP132][Facet-4/ErrorDefense] TopBar render an toàn không throw exception khi gọi trực tiếp', () => {

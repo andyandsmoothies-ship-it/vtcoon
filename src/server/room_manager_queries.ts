@@ -2,7 +2,7 @@
 // ZERO LOGIC CHANGE — code moved verbatim from room_manager.ts & insolvency_manager.ts
 import { BOARD_CONFIG, resolveRent, LEVEL_MULTIPLIER, calculateCellNetWorth, type Room, type PropertyRegistry, type PropertyStateMap } from '../domain/index.js';
 import { buildDeltaFromRoom, type DeltaPayload } from './session_manager.js';
-import type { AuctionSession } from './auction_manager.js';
+import type { AuctionSession } from './auction_types.js';
 
 export { LEVEL_MULTIPLIER };
 

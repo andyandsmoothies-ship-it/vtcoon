@@ -1,13 +1,15 @@
 // [IMP-72] GameRulesModal — Hướng Dẫn & Thể Lệ Game Toàn Diện (Clean & Modern Style)
 import React, { useState, useRef, useEffect } from 'react';
-import { TREASURY_STIMULUS_THRESHOLD, TREASURY_STIMULUS_RATE } from '../../../domain/treasury_stimulus.js';
 import {
+  TREASURY_STIMULUS_THRESHOLD,
+  TREASURY_STIMULUS_RATE,
   MORTGAGE_DEFAULT_INTEREST_RATE,
   MORTGAGE_RATE_HIKE_INTEREST_RATE,
   MORTGAGE_LOAN_RATE,
   MORTGAGE_REDEEM_FEE_RATE,
-} from '../../../domain/mortgage_constants.js';
-import { DOWNGRADE_REFUND_RATE } from '../../../domain/property_upgrade.js';
+  DOWNGRADE_REFUND_RATE,
+} from '../../../domain/index.js';
+
 
 type GameRulesTab = 'core' | 'cards' | 'mechanics';
 

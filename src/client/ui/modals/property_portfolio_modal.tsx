@@ -2,15 +2,18 @@
 import React, { useState } from 'react';
 import { getDeedDisplayInfo, checkPropertyUpgradeEligibility, sortPropertiesByRegion } from './modal_helpers';
 import { formatCurrency } from '../ui_helpers';
-import { COLOR_GROUP_HEX } from '../../../domain/theme';
+import {
+  COLOR_GROUP_HEX,
+  BondTrancheId,
+  MacroCycleType,
+  type BondContract,
+  type UpgradeCostModifier,
+} from '../../../domain/index.js';
 import { analyzePropertyMonopolyInsight, resolvePropertyCardActionState } from './portfolio_monopoly_analytics';
 import { PortfolioTabHeader, type PortfolioTab } from './portfolio_tab_header';
 import { PortfolioDeficitBanner } from './portfolio_deficit_banner';
 import { BondIssuanceTab } from './bond_issuance_tab';
 import { PropertyCardActions } from './property_card_actions';
-import { type BondContract, BondTrancheId } from '../../../domain/bond_types';
-import { MacroCycleType } from '../../../domain/macro_cycle_types';
-import { type UpgradeCostModifier } from '../../../domain/property_upgrade.js';
 
 export interface PropertyPortfolioModalProps {
   readonly ownedProperties: readonly number[];

@@ -2,7 +2,7 @@
 import React, { useMemo, useEffect } from 'react';
 import { DoubleSide } from 'three';
 import { RoundedBox, MeshReflectorMaterial, Text } from '@react-three/drei';
-import { PENTHOUSE_COLORS, PENTHOUSE_DIMENSIONS } from './penthouse_lobby_scene';
+import { PENTHOUSE_COLORS, PENTHOUSE_DIMENSIONS } from './penthouse_constants.js';
 import { generateSunsetBackdropTexture } from './penthouse_texture_generator';
 
 export const PANORAMA_WINDOW_CONFIG = {

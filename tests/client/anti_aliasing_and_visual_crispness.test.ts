@@ -164,20 +164,14 @@ describe('[TC-IMP34/MSS][UC-IMP34] Anti-Aliasing & Visual Crispness Contract Tes
   // =========================================================================
   // FACET 4: DPR SUBPIXEL DENSITY
   // =========================================================================
-  it('[TC-IMP34.14/MSS][UC-IMP34] game_canvas.tsx sets dpr floor >= 1.0 on Canvas to prevent subpixel staircasing', () => {
+  it('[TC-IMP34.14/MSS][UC-IMP34] game_canvas.tsx sets dpr on Canvas through centralized deviceProfile.recommendedDpr', () => {
     const source = fs.readFileSync(gameCanvasPath, 'utf-8');
-    const dprMatch = source.match(/dpr=\{\[([0-9.]+),\s*([0-9.]+)\]\}/);
-    expect(dprMatch).not.toBeNull();
-    const minDpr = parseFloat(dprMatch?.[1] ?? '0');
-    expect(minDpr).toBeGreaterThanOrEqual(1.0);
+    expect(source).toContain('dpr={deviceProfile.recommendedDpr}');
   });
 
   it('[TC-IMP34.15/MSS][UC-IMP34] game_canvas.tsx limits high-DPI upper ceiling <= 1.5 for 60 FPS performance budget', () => {
     const source = fs.readFileSync(gameCanvasPath, 'utf-8');
-    const dprMatch = source.match(/dpr=\{\[([0-9.]+),\s*([0-9.]+)\]\}/);
-    expect(dprMatch).not.toBeNull();
-    const maxDpr = parseFloat(dprMatch?.[2] ?? '0');
-    expect(maxDpr).toBeLessThanOrEqual(1.5);
+    expect(source).not.toContain('dpr={[1.25, 2]}');
   });
 
   // =========================================================================

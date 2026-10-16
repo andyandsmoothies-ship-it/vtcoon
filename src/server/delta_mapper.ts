@@ -4,7 +4,7 @@ import {
   type Room,
   type PendingBuyoutSession,
 } from '../domain/room.js';
-import type { AuctionSession } from './auction_manager.js';
+import type { AuctionSession } from './auction_types.js';
 import { pendingTradeManager, type PendingTradeManager } from './pending_trade_manager.js';
 import type {
   CellDelta,
@@ -15,9 +15,9 @@ import type {
   DeltaPayloadOptions,
   PropertyRegistry,
   PropertyStateMap,
-} from './delta_types.js';
+} from '../domain/protocol/index.js';
 
-export * from './delta_types.js';
+export * from '../domain/protocol/index.js';
 
 export function buildAuctionDelta(
   room: Room,

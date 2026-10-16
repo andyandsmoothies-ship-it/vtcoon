@@ -2,10 +2,9 @@
 import React from 'react';
 import { TitleDeedModal } from '../title_deed_modal';
 import { resolveTitleDeedModalState } from '../title_deed_affordance';
-import { useGameStore, type ModalPayloadMap } from '../../../store/game_store';
-import type { PlayerHudInfo } from '../../../store/game_store_types';
-import { AudioEngine } from '../../../audio/audio_engine';
-import { SoundEffect } from '../../../audio/audio_types';
+import { useGameStore, type ModalPayloadMap, type PlayerHudInfo } from '../../../store/index.js';
+
+import { audio, SoundEffect } from '../../../audio/index.js';
 import type { PlayerIntent } from '../../../../domain/protocol/index.js';
 
 export interface DeedModalHostProps {
@@ -79,7 +78,7 @@ export function DeedModalHost({
       onBuy={() => {
         if (isBuySubmitting) return;
         isBuySubmitting = true;
-        AudioEngine.playSfx(SoundEffect.BUY_PROPERTY);
+        audio.playSfx(SoundEffect.BUY_PROPERTY);
         onIntent?.({ type: 'INTENT_BUY_PROPERTY' });
         closeModal();
         setTimeout(() => { isBuySubmitting = false; }, 300);

@@ -1,10 +1,9 @@
 // [UC-ADM-MOD] Admin Event & Invariant Violations Store
 import type { PersistentRoomLogger } from '../logging/persistent_room_logger.js';
-import {
-  MAX_ROOM_LOGS,
-  type AdminRoomLogEntry,
-} from './admin_types.js';
+import type { AdminRoomLogEntry } from '../../domain/protocol/index.js';
 import { normalizeRoomCode } from './admin_security.js';
+
+export const MAX_ROOM_LOGS = 100;
 
 export class AdminEventStore {
   private readonly roomLogs = new Map<string, AdminRoomLogEntry[]>();

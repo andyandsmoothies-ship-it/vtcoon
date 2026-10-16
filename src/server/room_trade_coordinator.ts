@@ -7,7 +7,7 @@ import {
   recordTradeRejection,
   clearTradeRejectionForCell,
 } from '../domain/bot/index.js';
-import type { RoomContext } from './room_property_coordinator.js';
+import type { RoomContext } from './room_context_types.js';
 
 export function isRoomQuiescentForTrade(room: Room): boolean {
   if (room.phase === TurnPhase.AuctionPhase || Boolean(room.currentAuction)) return false;

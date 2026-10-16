@@ -1,6 +1,6 @@
 // [UI-S01/MSS][UI-S04/MSS][IMP-263] Event-Driven Semi-Cinematic Camera Engine
 // Tinh toan goc may ban dien anh luot theo su kien (khoang 20% luot di lon) o do cao Y = 2.8 (pitch 25.0 do)
-import type { TargetCameraState } from './camera_state_machine';
+import type { TargetCameraState } from './camera_types';
 
 export interface StreetChaseParams {
   readonly pawnPosition: readonly [number, number, number];

@@ -396,7 +396,7 @@ describe('[UC-IMP191] Financial Flow Transparency & Badge Clarity Contract Suite
       }));
       expect(mockAddFloatingText).toHaveBeenCalledWith(expect.objectContaining({
         actionType: 'unmortgage',
-        title: expect.stringMatching(/Giải chấp.*Phí 10%.*➔ Kho Bạc/),
+        title: expect.stringMatching(/Giải chấp.*Phí 10%.*➔ Ngân Hàng/),
       }));
     });
   });
@@ -441,7 +441,7 @@ describe('[UC-IMP191] Financial Flow Transparency & Badge Clarity Contract Suite
 
       expect(rentPayReason).toContain('Nguyễn V...');
       expect(mortgageReason).toContain('Thế chấp Bến Bạch Đằng ➔ Vay Ngân Hàng');
-      expect(unmortgageReason).toContain('Giải chấp Bến Bạch Đằng (Phí 10% ➔ Kho Bạc)');
+      expect(unmortgageReason).toContain('Giải chấp Bến Bạch Đằng (Phí 10% ➔ Ngân Hàng)');
     });
 
     it('[TC-191.15/MSS][UC-IMP191] FloatingNumbersOverlay: Đảo thứ tự ưu tiên badge của myPlayerId lên vị trí hiển thị trên mobile viewport', () => {

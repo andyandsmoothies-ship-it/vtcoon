@@ -1,9 +1,10 @@
 // [IMP-369] Activity Log Financial Formatter — Decoupled financial narrative formatting and card guard
-import type { EventCardInfo } from '../../../domain/room.js';
+import type { EventCardInfo } from '../../../domain/index.js';
+
 import type { ActivityLogType } from '../../store/activity_store.js';
 import type { SynthesizedGameEvent } from '../game_event_types.js';
 import { SynthesizedGameEventType } from '../game_event_types.js';
-import type { GameEventContext } from '../game_event_bus.js';
+import type { GameEventContext } from '../game_event_bus_types.js';
 import { formatCurrency } from '../../ui/ui_helpers.js';
 
 export function isCardPenaltyForPayer(card: EventCardInfo | null | undefined, payerId: string): boolean {

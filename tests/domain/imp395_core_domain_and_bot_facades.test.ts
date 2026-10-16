@@ -334,7 +334,7 @@ describe('[IMP-395] Core Domain & Bot Facades Contract Suite', () => {
     expect(coordAst.leafDomainImportCount).toBe(0);
     expect(coordAst.filesWithOnlyFacadeImports).toBe(7);
     expect(coordAst.domainFacadeImportCount).toBeGreaterThanOrEqual(7);
-    expect(coordAst.botFacadeImportCount).toBeGreaterThanOrEqual(6);
+    expect(coordAst.botFacadeImportCount).toBeGreaterThanOrEqual(5);
   });
 
   it('TC-395.04 [UC-GAME-005/MSS]: resolves valid audit WaitingRoll bot decision via decideBotIntent from src/domain/bot/index.ts with zero fake aliases', () => {

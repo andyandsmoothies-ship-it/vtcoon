@@ -1,0 +1,38 @@
+[
+  {
+    "file": "src/server/fsm_transition_coordinator.ts",
+    "desc": "AST: Suppress round increment in advanceRoundBoundary",
+    "target": "room.round += 1;",
+    "replacement": "/* room.round += 1; */"
+  },
+  {
+    "file": "src/server/fsm_transition_coordinator.ts",
+    "desc": "AST: Invert balance check in checkInsolvency",
+    "target": "if (!player || player.balance >= 0) return;",
+    "replacement": "if (!player || player.balance <= 0) return;"
+  },
+  {
+    "file": "src/server/fsm_transition_coordinator.ts",
+    "desc": "AST: Corrupt waiting roll phase in advanceTurnToNextPlayer",
+    "target": "room.phase = TurnPhase.WaitingRoll;",
+    "replacement": "room.phase = TurnPhase.AuctionPhase;"
+  },
+  {
+    "file": "src/server/fsm_transition_coordinator.ts",
+    "desc": "AST: Corrupt next player index in advanceTurnAfterBankruptcy",
+    "target": "room.currentPlayerIndex = next;",
+    "replacement": "room.currentPlayerIndex = -1;"
+  },
+  {
+    "file": "src/server/turn_loop.ts",
+    "desc": "AST: Call-site mutation omitting advanceTurnToNextPlayer in handleEndTurn",
+    "target": "advanceTurnToNextPlayer(room, rng);",
+    "replacement": "/* advanceTurnToNextPlayer(room, rng); */"
+  },
+  {
+    "file": "src/server/insolvency_manager.ts",
+    "desc": "AST: Call-site mutation omitting advanceTurnAfterBankruptcy in resolveBankruptcy",
+    "target": "advanceTurnAfterBankruptcy(room, rng);",
+    "replacement": "/* advanceTurnAfterBankruptcy(room, rng); */"
+  }
+]

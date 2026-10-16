@@ -1,9 +1,9 @@
 // [IMP-60][UC-GAME-008/MSS] Safe AFK Insolvency Recovery
 // Tự động hạ cấp công trình & thế chấp tài sản rẻ nhất cứu nguy khi người chơi AFK ở InsolvencyPhase
-import type { RoomManager } from '../room_manager.js';
+import type { IRoomManager as RoomManager } from '../room_manager_types.js';
 import { TurnPhase, type Player } from '../../domain/room.js';
 import { PROPERTY_DEEDS, type PropertyState } from '../../domain/property_data.js';
-import { restorePostInsolvencyPhase } from '../insolvency_manager.js';
+import { restorePostInsolvencyPhase } from '../fsm_transition_coordinator.js';
 
 export interface AfkRecoveryResult {
   readonly rescued: boolean;

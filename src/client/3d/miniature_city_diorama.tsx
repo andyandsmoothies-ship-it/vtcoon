@@ -1,7 +1,7 @@
 // [UI-S02/MSS] MiniatureCityDiorama — Unified Sculpted Tabletop Diorama Root Coordinator
 // Assembles terrain, iconic bridges, modern stadium, marina, skyline & micro-life
 import React, { useEffect, useRef } from 'react';
-import { Color, InstancedMesh, Object3D } from 'three';
+import { Color, type Group, InstancedMesh, Object3D } from 'three';
 import { DioramaTerrain } from './diorama/diorama_terrain';
 import { DioramaBridges } from './diorama/diorama_bridges';
 import { DioramaCivicCenter } from './diorama/diorama_civic_center';
@@ -23,8 +23,13 @@ import {
   DioramaTropicalFlora,
 } from './diorama/diorama_railroad';
 import { isMobileDevice } from './device_detect';
-import { getCentralMonumentLODDescriptor, getMobileCitySilhouetteDescriptors, populateMobileCitySilhouetteInstancedMesh } from './diorama/diorama_lod_helpers';
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? React.useLayoutEffect : useEffect;
+import { getCentralMonumentLODDescriptor } from './diorama/diorama_lod_helpers';
+import {
+  URBAN_TREES,
+  getBatchedBoardRimGeometries,
+  disposeDioramaStaticBlenderBatches,
+} from './diorama/diorama_static_blender_batches';
+import { DioramaChainReaction } from './diorama_chain_reaction';
 
 export {
   DioramaModelRailroad,
@@ -80,19 +85,16 @@ export function CentralMonumentPlaza({ isMobile = false }: CentralMonumentPlazaP
       </mesh>
 
       {/* 5. Tượng đài trung tâm vươn cao */}
-      {/* Bệ tượng đài */}
       <mesh castShadow receiveShadow position={[0, 0.18, 0]}>
         <cylinderGeometry args={[0.16, 0.22, 0.24, 16]} />
         <meshStandardMaterial color="#F59E0B" metalness={0.8} roughness={0.2} />
       </mesh>
 
-      {/* Thân tượng đài mạ vàng/đồng */}
       <mesh castShadow receiveShadow position={[0, 0.38, 0]}>
         <cylinderGeometry args={[0.08, 0.14, 0.26, 16]} />
         <meshStandardMaterial color="#F59E0B" metalness={0.85} roughness={0.18} />
       </mesh>
 
-      {/* Đỉnh tượng hoàng kim */}
       <mesh castShadow position={[0, 0.54, 0]}>
         <sphereGeometry args={[0.11, 16, 16]} />
         <meshStandardMaterial color="#F59E0B" metalness={0.9} roughness={0.15} />
@@ -101,7 +103,20 @@ export function CentralMonumentPlaza({ isMobile = false }: CentralMonumentPlazaP
   );
 }
 
-export function DioramaBoardRim(): React.ReactElement {
+export function DioramaBoardRim({ isMobile = false }: { readonly isMobile?: boolean } = {}): React.ReactElement {
+  if (isMobile) {
+    const { walnutRimGeom, brassTrimGeom } = getBatchedBoardRimGeometries();
+    return (
+      <group position={[0, -0.08, 0]} data-testid="diorama-board-rim">
+        <mesh geometry={walnutRimGeom} receiveShadow>
+          <meshStandardMaterial color="#78350F" roughness={0.4} metalness={0.2} />
+        </mesh>
+        <mesh geometry={brassTrimGeom} receiveShadow>
+          <meshStandardMaterial color="#D97706" roughness={0.3} metalness={0.7} />
+        </mesh>
+      </group>
+    );
+  }
   return (
     <group position={[0, -0.08, 0]} data-testid="diorama-board-rim">
       {/* Khung viền 4 cạnh gỗ óc chó rỗng ruột ghép mộng chìm (butt-joint), 0% chồng lấn góc */}
@@ -204,36 +219,6 @@ export function DioramaPedestrianPromenades({ isMobile = false }: { readonly isM
   );
 }
 
-
-
-const URBAN_TREES = [
-  // Dọc bờ kênh sông Sài Gòn (Bán đảo Tây, X = -1.35)
-  { x: -1.35, z: -3.8, color: '#15803D', height: 0.28, radius: 0.14 },
-  { x: -1.35, z: -2.3, color: '#22C55E', height: 0.32, radius: 0.16 },
-  { x: -1.35, z: -0.8, color: '#F59E0B', height: 0.26, radius: 0.13 },
-  { x: -1.35, z: 0.8, color: '#10B981', height: 0.30, radius: 0.15 },
-  { x: -1.35, z: 2.3, color: '#15803D', height: 0.34, radius: 0.17 },
-  { x: -1.35, z: 3.8, color: '#22C55E', height: 0.29, radius: 0.14 },
-
-  // Dọc bờ kênh sông Sài Gòn (Bán đảo Đông, X = 1.35)
-  { x: 1.35, z: -3.8, color: '#22C55E', height: 0.30, radius: 0.15 },
-  { x: 1.35, z: -2.3, color: '#10B981', height: 0.33, radius: 0.16 },
-  { x: 1.35, z: -0.8, color: '#15803D', height: 0.27, radius: 0.14 },
-  { x: 1.35, z: 0.8, color: '#F59E0B', height: 0.31, radius: 0.15 },
-  { x: 1.35, z: 2.3, color: '#22C55E', height: 0.28, radius: 0.14 },
-  { x: 1.35, z: 3.8, color: '#15803D', height: 0.35, radius: 0.17 },
-
-  // Phân khu shophouse Chợ Lớn (Tây Nam, X in [-4.8, -3.8])
-  { x: -4.8, z: 2.2, color: '#15803D', height: 0.28, radius: 0.14 },
-  { x: -3.8, z: 2.8, color: '#F59E0B', height: 0.26, radius: 0.13 },
-  { x: -4.8, z: 4.2, color: '#22C55E', height: 0.32, radius: 0.16 },
-  { x: -3.8, z: 5.0, color: '#10B981', height: 0.30, radius: 0.15 },
-
-  // Phân khu shophouse bến du thuyền & ẩm thực (Đông Nam, X = 3.6)
-  { x: 3.6, z: 3.2, color: '#F59E0B', height: 0.29, radius: 0.15 },
-  { x: 3.6, z: 4.4, color: '#15803D', height: 0.33, radius: 0.16 },
-];
-
 export function DioramaUrbanCanopy({ isMobile = false }: { readonly isMobile?: boolean } = {}): React.ReactElement {
   const trunkRef = useRef<InstancedMesh>(null);
   const lowerCanopyRef = useRef<InstancedMesh>(null);
@@ -282,51 +267,19 @@ export function DioramaUrbanCanopy({ isMobile = false }: { readonly isMobile?: b
 
   return (
     <group position={[0, 0.02, 0]} data-testid="diorama-urban-canopy">
-      {/* Thân cây gỗ tự nhiên */}
-      <instancedMesh
-        ref={trunkRef}
-        args={[undefined, undefined, URBAN_TREES.length]}
-        castShadow={!isMobile}
-        receiveShadow
-      >
+      <instancedMesh ref={trunkRef} args={[undefined, undefined, URBAN_TREES.length]} castShadow={!isMobile} receiveShadow>
         <cylinderGeometry args={[0.025, 0.04, 0.24, 8]} />
         <meshStandardMaterial color="#78350F" roughness={0.8} />
       </instancedMesh>
-
-      {/* Tầng tán dưới */}
-      <instancedMesh
-        ref={lowerCanopyRef}
-        args={[undefined, undefined, URBAN_TREES.length]}
-        castShadow={!isMobile}
-      >
+      <instancedMesh ref={lowerCanopyRef} args={[undefined, undefined, URBAN_TREES.length]} castShadow={!isMobile}>
         <sphereGeometry args={[0.15, 12, 12]} />
         <meshStandardMaterial color="#15803D" roughness={0.65} />
       </instancedMesh>
-
-      {/* Tầng tán trên đan xen đa tầng */}
-      <instancedMesh
-        ref={upperCanopyRef}
-        args={[undefined, undefined, URBAN_TREES.length]}
-        castShadow={!isMobile}
-      >
+      <instancedMesh ref={upperCanopyRef} args={[undefined, undefined, URBAN_TREES.length]} castShadow={!isMobile}>
         <sphereGeometry args={[0.11, 10, 10]} />
         <meshStandardMaterial color="#15803D" roughness={0.6} />
       </instancedMesh>
     </group>
-  );
-}
-
-export function BatchedMobileCitySilhouette(): React.ReactElement {
-  const meshRef = useRef<InstancedMesh>(null);
-  const descriptors = getMobileCitySilhouetteDescriptors();
-  useIsomorphicLayoutEffect(() => {
-    populateMobileCitySilhouetteInstancedMesh(meshRef.current, descriptors);
-  }, [descriptors]);
-  return (
-    <instancedMesh ref={meshRef} data-testid="batched-mobile-city-silhouette" args={[undefined, undefined, descriptors.length]} frustumCulled={false} frustumculled="false" castShadow={false} receiveShadow>
-      <boxGeometry args={[1, 1, 1]} />
-      <meshStandardMaterial color="#FFFFFF" roughness={0.45} metalness={0.15} />
-    </instancedMesh>
   );
 }
 
@@ -337,46 +290,39 @@ export interface MiniatureCityDioramaProps {
 
 export function MiniatureCityDiorama({ isMobile: propIsMobile, isVisible = true }: MiniatureCityDioramaProps = {}): React.ReactElement {
   const isMobile = propIsMobile ?? isMobileDevice();
+  const landmarkGroupRefs = useRef<Array<Group | null>>([]);
   return (
     <group position={[0, 0, 0]} data-testid="miniature-city-diorama">
-      {/* 0. Khung viền gỗ óc chó & gờ kim loại bao quanh bàn cờ */}
-      <DioramaBoardRim />
-      {/* 0.1. Tuyến đường sắt đô thị mô hình & đoàn tàu mini (Bảo tồn hợp đồng TC-265.05) */}
-      <DioramaModelRailroad isMobile={isMobile} isVisible={isVisible} />
-      {/* 0.2. Ke ga xe lửa bến sông ven tuyến đường sắt */}
+      <DioramaBoardRim isMobile={isMobile} />
+      <group name="ChainLandmark_metro-line-station" ref={(el) => { landmarkGroupRefs.current[1] = el; }}><DioramaModelRailroad isMobile={isMobile} isVisible={isVisible} /></group>
       {!isMobile && <DioramaWaterfrontStation />}
-      {/* 0.25. Ke ga xe lửa Landmark Metro bờ Bắc */}
       {!isMobile && <DioramaLandmarkNorthStation />}
-      {/* 0.3. Dải luống hoa và bụi cây cảnh nhiệt đới ven bờ kênh */}
       {!isMobile && <DioramaTropicalFlora />}
-      {/* 1. Bán đảo đôi liền khối & Bậc thềm kết nối quảng trường trung tâm */}
       <DioramaTerrain />
-      {/* 1.1. Quảng trường Tượng đài Biểu tượng Trung tâm */}
       <CentralMonumentPlaza isMobile={isMobile} />
-      {/* 1.2. Tuyến hành lang đi bộ lát đá hoa cương & tiểu cảnh công viên */}
       <DioramaPedestrianPromenades isMobile={isMobile} />
-      {/* 1.3. Tán cây xanh cảnh quan đô thị nhiệt đới đa tầng */}
       <DioramaUrbanCanopy isMobile={isMobile} />
-      {/* 2. Cầu Ba Son (Bắc) và Cầu Long Biên (Nam) nối liền hai bờ sông */}
-      <DioramaBridges isMobile={isMobile} isVisible={isVisible} />
-      {/* 3. Trung tâm Văn hóa Triển lãm & Công viên Cảnh quan Bờ sông */}
+      <group name="ChainLandmark_bason-bridge" ref={(el) => { landmarkGroupRefs.current[3] = el; }}><DioramaBridges isMobile={isMobile} isVisible={isVisible} /></group>
       {!isMobile && <DioramaCivicCenter />}
       {!isMobile && <DioramaWaterfrontPark />}
-      {/* 4. Cảng Container Cát Lái & Bến du thuyền (Đông Nam) */}
       <DioramaContainerPort isMobile={isMobile} isVisible={isVisible} />
       <DioramaMarina isMobile={isMobile} isVisible={isVisible} />
-      {/* 4.1. Thuyền du ngoạn lòng sông Sài Gòn (Bảo tồn hợp đồng TC-265.07) */}
-      <DioramaHarborCruiser isMobile={isMobile} isVisible={isVisible} />
-      {/* 5. Cụm cao ốc tài chính Landmark Skyline & Tháp cao ốc nén */}
-      <DioramaSkyline isMobile={isMobile} isVisible={isVisible} />
+      <group name="ChainLandmark_saigon-river-cruiser" ref={(el) => { landmarkGroupRefs.current[0] = el; }}><DioramaHarborCruiser isMobile={isMobile} isVisible={isVisible} /></group>
+      <group name="ChainLandmark_bitexco-tower" ref={(el) => { landmarkGroupRefs.current[2] = el; }}><DioramaSkyline isMobile={isMobile} isVisible={isVisible} /></group>
       {!isMobile && <DioramaHighriseBlocks />}
       {!isMobile && <DioramaResidentialPool />}
-      {/* 5.1. Khu di sản văn hóa Chợ Lớn & Shophouse phố cổ */}
-      <DioramaHeritageDistrict isMobile={isMobile} />
-      {isMobile ? <BatchedMobileCitySilhouette /> : <DioramaShophouseBlocks />}
-      {/* 6. Nhịp sống đô thị vi mô & Giao thông tự hành (Bảo tồn hợp đồng TC-265.04 & TC-265.06) */}
+      <group name="ChainLandmark_notre-dame-cathedral" ref={(el) => { landmarkGroupRefs.current[4] = el; }}><DioramaHeritageDistrict isMobile={isMobile} /></group>
+      {!isMobile && <DioramaShophouseBlocks />}
       <DioramaMicroLife isMobile={isMobile} isVisible={isVisible} />
       <DioramaTraffic isMobile={isMobile} isVisible={isVisible} />
+      {!isMobile && <DioramaChainReaction isMobile={isMobile} isVisible={isVisible} landmarkGroupRefs={landmarkGroupRefs} />}
     </group>
   );
 }
+
+if (import.meta.hot) {
+  import.meta.hot.dispose(() => {
+    disposeDioramaStaticBlenderBatches();
+  });
+}
+

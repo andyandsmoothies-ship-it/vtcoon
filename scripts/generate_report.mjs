@@ -86,9 +86,12 @@ const {
   planSubsystem
 } = resolveModifiedFilesAndTests(repoRoot, evidenceDir, ticketId, ticketLower, planRegisteredFiles, planPath, initialSubsystem);
 
+const forceAudit = args.includes('--force-audit');
+
 // 3. Generate SPEC_REVIEW_[ID].md
 const specReviewPath = path.join(auditDir, `SPEC_REVIEW_${ticketId}.md`);
-if (!fs.existsSync(specReviewPath) || force) {
+const specNeedsGen = !fs.existsSync(specReviewPath) || forceAudit || (force && /TODO_REVIEW_REQUIRED/.test(fs.readFileSync(specReviewPath, 'utf8')));
+if (specNeedsGen) {
   const specContent = renderSpecReview({
     ticketId,
     planTitle,
@@ -104,12 +107,13 @@ if (!fs.existsSync(specReviewPath) || force) {
   fs.writeFileSync(specReviewPath, specContent, 'utf8');
   console.log(`✅ Generated: .agents/audit/SPEC_REVIEW_${ticketId}.md`);
 } else {
-  console.log(`ℹ️  Preserved existing: .agents/audit/SPEC_REVIEW_${ticketId}.md (Use --force to overwrite)`);
+  console.log(`ℹ️  Preserved existing: .agents/audit/SPEC_REVIEW_${ticketId}.md (Use --force-audit to overwrite)`);
 }
 
 // 4. Generate CODE_REVIEW_[ID].md
 const codeReviewPath = path.join(auditDir, `CODE_REVIEW_${ticketId}.md`);
-if (!fs.existsSync(codeReviewPath) || force) {
+const codeNeedsGen = !fs.existsSync(codeReviewPath) || forceAudit || (force && /TODO_REVIEW_REQUIRED/.test(fs.readFileSync(codeReviewPath, 'utf8')));
+if (codeNeedsGen) {
   const codeContent = renderCodeReview({
     ticketId,
     ticketClean,
@@ -125,7 +129,7 @@ if (!fs.existsSync(codeReviewPath) || force) {
   fs.writeFileSync(codeReviewPath, codeContent, 'utf8');
   console.log(`✅ Generated: .agents/audit/CODE_REVIEW_${ticketId}.md`);
 } else {
-  console.log(`ℹ️  Preserved existing: .agents/audit/CODE_REVIEW_${ticketId}.md (Use --force to overwrite)`);
+  console.log(`ℹ️  Preserved existing: .agents/audit/CODE_REVIEW_${ticketId}.md (Use --force-audit to overwrite)`);
 }
 
 // 5. Generate Final Comprehensive Improvement Report

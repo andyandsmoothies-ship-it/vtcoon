@@ -1,8 +1,8 @@
 // [IMP-132/IMP-154] MasterplanModal — Sa Bàn Quy Hoạch Đô Thị 40 Ô (Urban Masterplan Minimap Blueprint)
 // Tuân thủ chuẩn Antigravity 2.0, Tabletop tactile depth, WCAG touch targets >= 44px
 import React, { useState, useMemo } from 'react';
-import { BOARD_CONFIG, CellType } from '../../../domain/board_config';
-import { COLOR_GROUP_HEX } from '../../../domain/theme';
+import { BOARD_CONFIG, CellType, COLOR_GROUP_HEX } from '../../../domain/index.js';
+
 import { getDeedDisplayInfo } from './modal_helpers';
 import { useGameStore } from '../../store/game_store';
 import {

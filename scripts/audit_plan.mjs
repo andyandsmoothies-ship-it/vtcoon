@@ -32,6 +32,9 @@ import {
   auditDefinitionOfDone,
   auditWiringParityInPlan,
   auditCompositeTransactionAndSemanticBorrowing,
+  auditAmbientModuleAugmentation,
+  auditExportParityAndCallers,
+  auditGhostTestPaths,
 } from './audit_plan_rules.mjs';
 import {
   findSourceFiles,
@@ -75,6 +78,11 @@ checkTicketCollision(path.basename(planPath), path.dirname(path.resolve(planPath
 // 1. Scan target files for existence and LOC
 const targetFiles = parseTargetFiles(planContent, fileTargetRegex);
 
+if (targetFiles.size === 0) {
+  console.error('❌ CRITICAL: 0 target files parsed! Plan must explicitly declare target files via Markdown Table or Target physical file: syntax.');
+  errors++;
+}
+
 console.log(`\n📁 Checking ${targetFiles.size} target files for existence and line count:`);
 for (const [relPath, isNew] of targetFiles.entries()) {
   const absPath = path.resolve(process.cwd(), relPath);
@@ -107,6 +115,8 @@ errors += auditStateDependencyScope(targetFiles, planContent);
 errors += auditFsmQueueCombinatorialCoverage(planContent);
 errors += auditShallowModulePropsExplosion(planContent);
 errors += auditCohesionOrphanFiles(targetFiles);
+errors += auditAmbientModuleAugmentation(targetFiles, planContent);
+errors += auditExportParityAndCallers(targetFiles, planContent);
 
 // 1.1 Verify new production file code specification
 errors += auditNewFileDeclarations(targetFiles, planContent, fileTargetRegex, snippetRegex, findSourceFiles);
@@ -135,6 +145,7 @@ if (testLines.length > 0) {
 }
 
 errors += auditDefinitionOfDone(planContent);
+errors += auditGhostTestPaths(planContent, process.cwd(), path.basename(planPath));
 
 // 4. Summary & Plan Size Hygiene
 console.log(`\n========================================`);

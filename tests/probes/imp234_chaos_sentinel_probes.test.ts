@@ -384,6 +384,15 @@ describe('IMP-234: Chaos-Sentinel Physical Adversarial Boundary & Mutation Senti
       useGameStore.setState({
         floatingTexts: [
           {
+            id: 'badge_sal_e2e_older',
+            playerId: player.id,
+            text: '+2.000',
+            type: FloatingTextType.Reward,
+            actionType: 'salary',
+            title: 'Lương Vượt Ô Bắt Đầu',
+            timestamp: Date.now() - 10,
+          },
+          {
             id: 'badge_sal_e2e',
             playerId: player.id,
             text: '+1.500',

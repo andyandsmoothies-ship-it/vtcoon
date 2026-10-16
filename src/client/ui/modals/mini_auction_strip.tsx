@@ -1,9 +1,9 @@
 // [IMP-200] MiniAuctionStrip — Unobtrusive Floating Auction Status Bar for Non-Involved / Minimized Bidders
 import React, { useState, useEffect } from 'react';
 import { useGameStore } from '../../store/game_store.js';
-import { BOARD_CONFIG } from '../../../domain/board_config.js';
+import { BOARD_CONFIG, TurnPhase } from '../../../domain/index.js';
 import { formatCurrency, formatShortPlayerName } from '../ui_helpers.js';
-import { TurnPhase } from '../../../domain/room.js';
+
 import { calculateAuctionTimeRemaining } from './modal_helpers.js';
 
 export function MiniAuctionStrip(): React.ReactElement | null {

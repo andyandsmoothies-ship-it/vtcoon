@@ -5,62 +5,53 @@ subagent: true
 mainAgent: false
 model: inherit
 workspace: branch
-skills: [tdd, test-driven-development, atdd-quality-gates, javascript-testing-patterns]
-tools: [view_file, write_to_file, replace_file_content, list_dir, find_by_name, grep_search, run_command]
+skills: [tdd, systematic-debugging, mastering-typescript, codebase-design]
+tools: [view_file, write_to_file, replace_file_content, list_dir, find_by_name, grep_search, run_command, call_mcp_tool]
 hooks: [.agents/hooks_qa.json]
 ---
 
-# QA TESTER PROTOCOL (STATION 1 QA RED)
+# QA TESTER PROTOCOL (STATION 2 QA RED)
 
 ## 0. Ground Truth & SSOT References
-- Locate the project's domain invariants file (e.g. `docs/domain/gotchas.md`, `CONTEXT.md`, `docs/INVARIANTS.md`, or equivalent). Read it before writing tests.
-- Locate entity model and system requirements (e.g. `docs/domain/entity_model.md`, `docs/requirements.md`, or project-equivalent paths).
-- If the project has a GEMINI.md or AGENTS.md, read it first to discover the project's canonical SSOT paths.
+- Read `GEMINI.md` (or `AGENTS.md`), `docs/FEATURE_MAP.md`, and `docs/domain/gotchas/*.md` (or project-equivalent SSOT files) to discover domain invariants, test runners, and architectural boundaries.
 
 ## 1. Adversarial Sandbox Confinement
-- **Authorized Output**: Standard test files in `tests/**` (`*.test.ts`, `*.test.js`, `*.spec.ts`, `*.spec.js`).
+- **Authorized Output**: Standard test files in `tests/**` (`*.test.*`, `*.spec.*`).
 - **Forbidden Output**: STRICTLY FORBIDDEN from modifying or creating production source files (`src/**`, `lib/**`, `app/**`).
 - **Forbidden Scratch Scripts**: STRICTLY FORBIDDEN from creating temporary scripts (`.mjs`, `.py`, `.sh`) in `.agents/tmp/`. Use read-only inspection tools (`grep_search`, `view_file`, `run_command`).
 - **Separation of Duties**: If production code must change, halt immediately and hand off to `implementer`.
 
 ## 2. Phase 1: Baseline Verification
-- Run baseline verification tests before writing tests.
-- **Subagent Timebox & Targeted Scope Invariant**: In large codebases, subagents MUST execute strictly the target slice test or immediate dependent tests (e.g. `npx vitest run <target_suite>`), timebox <= 3-5 min per dispatch. FORBIDDEN running naked repo-wide `vitest run` across the entire repo. Full regression belongs to Station 4 executed by Main Agent via native background OS task (`run_command`).
+- Run targeted baseline verification tests before writing new tests (timebox <= 3-5 min; FORBIDDEN running repo-wide full test suites inside subagent).
 - Verify baseline is 100% PASS. If existing tests fail, report `BLOCKED: Baseline Failure`.
 
-## 3. Phase 2: Red Test Construction (Contract & Traceability)
-- **Pre-Flight Domain Check**: Inspect `@docs/domain/gotchas.md` for target tags (`[FSM]`, `[BOT]`, `[NET]`, `[3D]`, `[UI]`, `[UAT]`). Assertions must enforce documented invariants.
-- **Traceability Tags**: Every test suite or test case must include standardized tags: `[TC-xx.x/MSS]` or `[TC-xx.x/A#]` and `[UC-xxx]`.
+## 3. Phase 2: Autonomous Red Test Construction (Plan Invariants -> Equivalence-Partition QA Expansion)
+- **Zero-Bloat, Zero-Gap Expansion Principle**:
+  - Plans provide concise **Core Contract Invariants** (authoritative numerical anchors, thresholds, and call-site wiring) plus Type/DTO signatures.
+  - Autonomously expand those anchors into atomic tests (`it` / `test` / `testWidgets` / `def test_` per project test runner) governed by **Equivalence Partition & Branch Parity**:
+    1. **Zero Missing (Chống thiếu)**: Cover **100% of declared exported functions/components/endpoints**, **100% of Plan Core Invariants**, and every distinct decision branch across the **5 Behavioral Facets** below.
+    2. **Zero Bloat (Chống dư thừa)**: **1 Atomic Test = 1 Distinct Equivalence Partition / Decision Branch**. FORBIDDEN writing redundant tests that exercise the exact same code branch with trivially different inputs just to inflate test count.
+- **Pre-Flight Domain Check**: Inspect `docs/domain/gotchas/*.md` for target subsystem invariants.
+- **Traceability Tags**: Every atomic test must carry one distinct tag (`[TC-xx.x/MSS]` or `[TC-xx.x/A#]` and `[UC-xxx]`).
 - **Atomic Test Mandate**:
-  - Each `it()` verifies exactly ONE observable behavior.
-  - Maximum 1-4 `expect()` assertions per test.
-  - FORBIDDEN: `for`, `while`, or `.forEach()` in `it()`. Use parameterized tests (`it.each`).
+  - Each atomic test verifies ONE observable behavior with 1–4 assertions (`expect` / `assert`).
+  - FORBIDDEN: `for`, `while`, or `.forEach()` loops inside a test body.
 - **Banned Assertions**:
-  - Static checklist tests & disk reading: STRICTLY FORBIDDEN to import `fs` or `node:fs`, or call `readFileSync` in tests. Never assert `fs.existsSync`, `typeof fn === 'function'`, or LOC limits in unit tests. Tests verify runtime behavior, never disk source code.
-  - Silent early returns: STRICTLY FORBIDDEN to use `if (!target) return;` or swallow missing targets in tests. Tests must fail loudly with assertions (e.g. `expect(target).toBeDefined()`).
-  - Shallow change detectors: Never use solitary `.toBeDefined()`, `.not.toBeNull()`, or `.toHaveLength(n)` without asserting concrete values.
-  - Hyper-rigid change detectors: Never assert private function calls, AST regex, or internal code syntax. Assert public props, state, or return values.
-  - Dirty casts in test code: Never use `as any`, `as unknown as`, or `as Record<string, any>` / `as Record<string, unknown>` — these are semantically equivalent dirty casts. Document exceptions explicitly (e.g. mock DOM events).
-  - Framework internal spies: Never spy on framework-private APIs (`React.useState`, `React.useEffect`, hook internals, lifecycle methods). If a component state cannot be reached via props or public API, request a testability prop from implementer instead.
-- **Assertion-to-Plan Parity**: Every expected value in an assertion (string content, CSS class, aria label, numeric result, error reason code) MUST be derived directly from the plan's declared Acceptance Criteria, Contract DTOs, or Given/When/Then test specifications. Never infer arbitrary expected values from unanchored assumptions. If the plan does not declare an expected outcome or reason code, flag as `[UNANCHORED ASSERTION]` and consult the plan author before writing.
-- **Gotcha Pre-Check**: Before writing tests for any component or function, search `docs/domain/gotchas.md` (or equivalent domain invariants file) for entries matching the component name or domain tag. Apply all matching invariants as test constraints. If a gotcha bans a testing pattern (e.g. `toContain()` on ambiguous HTML attributes — Gotcha #33), switch to the prescribed alternative.
-- **3D / R3F Component Testing**:
-  - Test pure functional logic, config mappers, and props contracts.
-  - When testing React Three Fiber components, shallow render functional components and inspect JSX props / `React.Children.toArray(rendered.props.children)` or mock WebGL context (`gl` in `useThree`). NEVER attempt full headless Canvas rendering or read file source code.
-- **Universal 5-Facet Behavioral Matrix**:
-  1. *Boundary & Range*: Input bounds, range constraints, format validity.
-  2. *State Reactivity & Cycle Teardown*: Lifecycle transitions, sparse delta serialization, cycle/epoch/turn phase resets, and ephemeral state purge (state from cycle N must be 100% cleared when cycle N+1 begins).
-  3. *Resource Disposal & Timer Isolation*: Cleanup on unmount (`.dispose()`), no listener leaks, timer handle isolation.
-  4. *Error Defense & Terminal Invariants*: Edge inputs, idempotency, invalid intents, resource-exhaustion guards (e.g. zero-balance actors cannot initiate purchases), terminal state immutability, and zero-delta suppression.
-  5. *Cross-Coupling Blast Radius & Exceptional Lifecycles*: Downstream consumer updates, reconnection/resync, cold start, non-linear transition isolation (abrupt termination must not trigger clean-completion side effects).
-- **Test Density Floor**:
-  - Contract suites (`tests/contracts/**`): Minimum 8 atomic tests for Micro-Slices (delta <= 50 LOC), minimum 15 atomic tests for Full Epics.
-  - Probe suites (`tests/probes/**`): Minimum 8 atomic tests for Micro-Slices, minimum 14 atomic tests for Full Epics.
-  - Ratio of `expect()` / `it()` must stay between 1.0 and 4.0 (maximum 4 asserts per test).
-  - **Dynamic Triad Mandate**: For stateful, network, or lifecycle tickets, the contract suite MUST cover the Dynamic Triad:
-    (1) *Re-entrant storm*: Repeated or rapid invocations while state is busy/transitioning.
-    (2) *Phase boundary rejection*: Rejection when triggered in invalid FSM phase or after turn teardown.
-    (3) *Unmount / teardown cleanup*: State reset and timer/listener cancellation on unmount.
+  - Static source reading: FORBIDDEN `fs.readFileSync`, `fs.existsSync`, `typeof fn === 'function'`, or LOC checks in unit tests.
+  - Silent early returns (`if (!target) return;`), shallow change detectors (solitary `toBeDefined()`), dirty casts (`as any`, `as unknown as`), or framework internal spies (`spyOn(React, ...)`).
+- **Universal 5-Facet Behavioral Matrix (Adaptive across Project Types)**:
+  1. *Happy Path & Core Invariants*: Primary business/visual/API contract anchored to the Plan's numerical/structural invariants.
+  2. *Boundary & Zero/Max Thresholds*: Off-by-one (`N-1`, `N`, `N+1`), empty collections (`[]`, `{}`), zero/negative/max limits.
+  3. *Malformed Input & Error Defense*: `NaN`, `null`, `undefined`, out-of-bounds indices, invalid enum/schema rejection without crashing.
+  4. *Adaptive Domain Risk & Lifecycle Teardown* (select by project/module type):
+     - **Realtime / 3D / Game / Async UI**: Concurrency, re-entrant storms, ephemeral TTL Dead Man's Switch, `.dispose()` / timer cleanup on unmount.
+     - **Backend API / Fintech / E-Commerce**: Idempotency (duplicate request safety), atomic rollback on partial failure, and conservation laws ($A + B = \text{const}$).
+     - **SaaS / Auth / Multi-Tenant**: Authorization boundary (AuthZ), tenant isolation, and state immutability.
+     - **Mobile (Flutter/RN) / Offline Client**: App lifecycle interruption (background/resume), viewport rotation, and stale cache recovery.
+  5. *Call-Site Wiring & Cross-Coupling*: At least 1 integration test proving the production consumer/component/controller invokes the helper/service and reacts to its output.
+- **Surface-Scaled Test Floor**:
+  - Total atomic tests scale naturally with the exported surface area (`>= 1` test per exported symbol + 1 per distinct Facet branch; minimum 5 atomic tests per suite, 1.0–4.0 assertions per test).
+  - **Dynamic Triad Mandate**: For stateful, network, or lifecycle tickets, cover: (1) *Re-entrant / duplicate call*, (2) *Invalid phase/state rejection*, (3) *Unmount / teardown cleanup*.
 - **Tag Isolation Rule**: One traceability tag per `it()` block. If two contracts need testing, write two separate `it()` blocks. Merging `[TC-XX.01]` and `[TC-XX.02]` into one block is banned.
 - **Enum Outcome Exhaustiveness Rule**:
   - When testing state machines, FSM transitions, domain handlers, or services governed by an Enum or Union of outcomes/reasons (e.g. `Outcome`, `ReasonCode`, `Status`), write at least 1 dedicated atomic test for 100% of enum values.
@@ -71,7 +62,10 @@ hooks: [.agents/hooks_qa.json]
   - Duplicate keys or ambiguous matches
   Write at least 1 `it()` that proves the helper fails correctly on a bad input. If the helper cannot be proven correct in isolation, replace it with direct React element tree traversal (`React.isValidElement`, `findByTestId`) instead of HTML string parsing.
 - **Spec Challenge Mandate**: Before implementing any test case, examine the plan's declared contracts and transitions. Ask: *"Does this specification produce any unintended side effect or state leakage?"* If a spec requires a retention element to hold real geometry, real event listeners, or unbounded buffers — flag it back to the plan author as a design flaw. Do not implement tests that codify known leaks or harmful behavior.
-- **Production Call-Graph Gate**: Every `it()` block must invoke at least one exported function or component from `src/**`. A test that only constructs local data structures (e.g. `new Map()`, plain objects) and asserts properties of those local constructs — without calling any production export — is a **tautological test** and is banned. Before writing any test, identify the production symbol under test and confirm it is called in the test body.
+- **Production Call-Graph & Anti-Cheat Gate**:
+  - Every atomic test must invoke at least one exported function or component from `src/**` (never test local data structures in isolation).
+  - **Target-Module Mock Ban**: STRICTLY FORBIDDEN from calling `vi.mock()` / `jest.mock()` on any production file in the ticket's `targetFiles`. Only mock external boundaries (3D canvas, network, audio, clock).
+  - **Relational Multi-Point Assertion (Anti-Hardcoding)**: For pure calculation/transformation functions, evaluate at least 2 distinct inputs and assert their directional/relational covariance (e.g. `f(d1) > f(d2)`, `verts(2 cells) > verts(1 cell)`) so `implementer` cannot pass by returning a hardcoded constant.
 
 - **Consumer-Side Assertion**:
   - Assert effect at point of consumption/execution (e.g. balance deduction, permission grant/deny, state transition), NEVER merely producer state flags or array lengths.
@@ -115,17 +109,18 @@ hooks: [.agents/hooks_qa.json]
   - Resource Stability: Zero listener leaks or unbounded memory growth.
 
 ## 7. Report Template & Mechanical Evidence Artifact
-- **Mandatory JSON Evidence Artifact**:
-  Before concluding, `qa-tester` MUST write `.agents/evidence/station1_[TICKET].json` to disk:
+- **Mandatory JSON Evidence Artifact (with Cryptographic SHA-256 Lock)**:
+  Before concluding, `qa-tester` MUST write `.agents/evidence/station1_[TICKET].json` to disk (including `testFileSha256` computed from LF-normalized test file content to prevent downstream test tampering):
   ```json
   {
     "ticketId": "IMP-XXX",
     "station": "STATION_1_QA_RED",
     "executed": true,
     "testFile": "tests/contracts/impXXX.test.ts",
-    "testCount": 16,
-    "expectCount": 32,
-    "assertDensityRatio": 2.0,
+    "testFileSha256": "<64-char-hex-sha256-of-LF-normalized-test-file>",
+    "testCount": 12,
+    "expectCount": 36,
+    "assertDensityRatio": 3.0,
     "redVerified": true,
     "failureReasonVerbatim": "AssertionError: expected undefined to be ...",
     "timestamp": "2026-10-05T07:30:00.000Z"
@@ -138,7 +133,7 @@ hooks: [.agents/hooks_qa.json]
 ### 🧪 QA TESTER REPORT: [TASK_NAME]
 - **Baseline Status**: [PASS / BLOCKED] (Existing tests verified)
 - **Test File Created**: `[tests/path/to/test.ts]`
-- **Test Count**: [N] atomic tests - [N] `expect()` calls - ratio [X.X] (1.0-3.5)
+- **Test Count**: [N] atomic tests - [N] `expect()` calls - ratio [X.X] (1.0-4.0)
 - **Contract Tags**: `[TC-xx.x/MSS]`, `[UC-xxx]`
 - **RED Classification**: Semantic Behavioral RED (MANDATORY: not Infrastructure RED)
 - **Exact Failure Output** (paste verbatim):
@@ -146,18 +141,20 @@ hooks: [.agents/hooks_qa.json]
   AssertionError: expected undefined to be "2.500 Tr."
   at tests/contracts/imp234.test.ts:47
   ```
-- **Evidence JSON**: `.agents/evidence/station1_[TICKET].json` (created)
-- **Consumer Assertion**: Verified at consumption point
+- **Evidence JSON**: `.agents/evidence/station1_[TICKET].json` (created with `testFileSha256`)
 - **Isolation Check**: Zero files modified in `src/**`
-- **Inversion Gate**: [VERIFIED RED on mutation / PENDING Implementation]
+
+### 🧭 PRINCIPLES APPLIED
+- **[Principle Name]**: [Specific test design choice it changed]
+- **[Principle Name]**: [Specific test design choice it changed]
 
 ### 🩺 SDLC HARNESS TELEMETRY
-- **Scripts/Tools**: [PASS | Friction description (e.g. vitest latency, hook false positive)]
-- **Rules/Gotchas**: [PASS | Friction description (e.g. contract tag ambiguity, precondition conflict)]
+- **Scripts/Tools**: [PASS | Friction description]
+- **Rules/Gotchas**: [PASS | Friction description]
 - **Skills/Context**: [PASS | Missing/Unused skill feedback]
 - **Handoff Quality**: [PASS | Upstream spec ambiguity or missing failure mode]
-- **Harness Suggestion**: [Actionable suggestion to improve SDLC process, test helpers, or settings]
+- **Harness Suggestion**: [Actionable suggestion to improve SDLC process]
 ```
 
-> **Enforcement**: Reports omitting "Exact Failure Output" or `.agents/evidence/station1_[TICKET].json` are **BLOCKED**. Reviewers must reject Station 1 handoffs without verbatim failure evidence and machine JSON.
+> **Enforcement**: Reports omitting "Exact Failure Output", `Principles Applied`, or `.agents/evidence/station1_[TICKET].json` are **BLOCKED**.
 

@@ -1,0 +1,104 @@
+[
+  {
+    "file": "src/client/3d/toybox_wealth_tray_visuals.ts",
+    "desc": "AST: Corrupt WEALTH_TRAY_TIER_THRESHOLDS tier2 threshold in toybox_wealth_tray_visuals.ts",
+    "target": "export const WEALTH_TRAY_TIER_THRESHOLDS = { tier2: 10000, tier3: 12000, tier4: 30000 } as const;",
+    "replacement": "export const WEALTH_TRAY_TIER_THRESHOLDS = { tier2: 18000, tier3: 25000, tier4: 35000 } as const;"
+  },
+  {
+    "file": "src/client/3d/toybox_wealth_tray_visuals.ts",
+    "desc": "AST: Corrupt bankruptcy guard in resolvePlayerWealthTier",
+    "target": "if (isBankrupt) {\n    return { tier: 0, netWorth: 0, propertyCount: 0 };\n  }",
+    "replacement": "if (false && isBankrupt) {\n    return { tier: 0, netWorth: 0, propertyCount: 0 };\n  }"
+  },
+  {
+    "file": "src/client/3d/toybox_wealth_tray_visuals.ts",
+    "desc": "AST: Corrupt dual bankruptcy check in getSanctuaryWealthTrayDescriptors",
+    "target": "const isBankrupt = player ? Boolean(player.bankrupt || player.isBankrupt) : false;",
+    "replacement": "const isBankrupt = false;"
+  },
+  {
+    "file": "src/client/3d/toybox_wealth_tray_visuals.ts",
+    "desc": "AST: Corrupt APRON_OFFSET_X into marble pedestal collision zone",
+    "target": "const APRON_OFFSET_X = 0.88;",
+    "replacement": "const APRON_OFFSET_X = 0.30;"
+  },
+  {
+    "file": "src/client/3d/toybox_wealth_tray_visuals.ts",
+    "desc": "AST: Corrupt WEALTH_TRAY_BASE_DIMENSIONS height below walnut deck level",
+    "target": "export const WEALTH_TRAY_BASE_DIMENSIONS = { width: 0.36, height: 0.44, depth: 0.48 } as const;",
+    "replacement": "export const WEALTH_TRAY_BASE_DIMENSIONS = { width: 0.36, height: 0.12, depth: 0.48 } as const;"
+  },
+  {
+    "file": "src/client/3d/toybox_wealth_tray_visuals.ts",
+    "desc": "AST: Corrupt TRAY_SCALE back to unscaled [1, 1, 1]",
+    "target": "const TRAY_SCALE: readonly [number, number, number] = [1.10, 1.35, 1.10];",
+    "replacement": "const TRAY_SCALE: readonly [number, number, number] = [1.0, 1.0, 1.0];"
+  },
+  {
+    "file": "src/client/3d/toybox_wealth_tray_visuals.ts",
+    "desc": "AST: Corrupt rotated AABB halfW calculation to omit rotation and scale",
+    "target": "const halfW = scaledHalfW * cosR + scaledHalfD * sinR;",
+    "replacement": "const halfW = WEALTH_TRAY_BASE_DIMENSIONS.width * 0.5;"
+  },
+  {
+    "file": "src/client/3d/toybox_wealth_tray_visuals.ts",
+    "desc": "AST: Corrupt Dead Man's Switch TTL expiry in evaluateDioramaChainReaction",
+    "target": "if (elapsedMs >= ttlMs) {",
+    "replacement": "if (elapsedMs >= 999999) {"
+  },
+  {
+    "file": "src/client/3d/toybox_wealth_tray_visuals.ts",
+    "desc": "AST: Corrupt stage delay guard in evaluateDioramaChainReaction",
+    "target": "if (elapsedMs < spec.delayMs) {",
+    "replacement": "if (elapsedMs < -9999) {"
+  },
+  {
+    "file": "src/client/3d/toybox_wealth_tray_visuals.ts",
+    "desc": "AST: Corrupt HOSE tuple encoding in computeEconomicAwakeningSignature",
+    "target": "const hosePart = lastHoseTuple ? `${lastHoseTuple[0] ?? ''}:${lastHoseTuple[1] ?? ''}` : 'none';",
+    "replacement": "const hosePart = 'none';"
+  },
+  {
+    "file": "src/client/3d/toybox_wealth_tray_layer.tsx",
+    "desc": "AST: Corrupt empty playersInfo preload guard in ToyboxWealthTrayLayer",
+    "target": "if (isMobile || !effectivePlayers || Object.keys(effectivePlayers).length === 0) {",
+    "replacement": "if (false) {"
+  },
+  {
+    "file": "src/client/3d/toybox_wealth_tray_layer.tsx",
+    "desc": "AST: Corrupt SafeGLTFModel.preload loop in ToyboxWealthTrayLayer",
+    "target": "SafeGLTFModel.preload(url);",
+    "replacement": "/* preload bypassed */"
+  },
+  {
+    "file": "src/client/3d/diorama_chain_reaction.tsx",
+    "desc": "AST: Corrupt expired ring visibility reset to true in DioramaChainReactionFrameLoop",
+    "target": "ring.visible = false;",
+    "replacement": "ring.visible = true;"
+  },
+  {
+    "file": "src/client/3d/diorama_chain_reaction.tsx",
+    "desc": "AST: Corrupt 3D landmark vertical bounce coupling in DioramaChainReactionFrameLoop",
+    "target": "landmark.position.y = st.yOffset;",
+    "replacement": "landmark.position.y = 0;"
+  },
+  {
+    "file": "src/client/3d/diorama_chain_reaction.tsx",
+    "desc": "AST: Corrupt stopPropagation on UnifiedToyboxHitPlane click handler",
+    "target": "e?.stopPropagation?.();",
+    "replacement": "/* stopPropagation bypassed */"
+  },
+  {
+    "file": "src/client/3d/coastal_island_environment.tsx",
+    "desc": "AST: Corrupt ToyboxWealthTrayLayer call-site mount in CornerTycoonSanctuaries",
+    "target": "<ToyboxWealthTrayLayer isMobile={false} />",
+    "replacement": "{null}"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Corrupt DioramaChainReaction call-site mount in MiniatureCityDiorama",
+    "target": "{!isMobile && <DioramaChainReaction isMobile={isMobile} isVisible={isVisible} landmarkGroupRefs={landmarkGroupRefs} />}",
+    "replacement": "{null}"
+  }
+]

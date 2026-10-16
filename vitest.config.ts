@@ -25,6 +25,15 @@ export default defineConfig({
     isolate: true,
     clearMocks: true,
     restoreMocks: true,
+    onConsoleLog(log: string, type: 'stdout' | 'stderr'): boolean | void {
+      if (
+        log.includes('is using incorrect casing') ||
+        log.includes('React does not recognize the') ||
+        log.includes('for a non-boolean attribute')
+      ) {
+        return false;
+      }
+    },
   },
   resolve: {
     alias: {

@@ -5,9 +5,11 @@ import {
 } from '../domain/index.js';
 import { mortgageProperty, redeemProperty } from './mortgage_manager.js';
 import { handleDowngrade } from './property_actions.js';
-import { liquidateAssets, declareBankruptcy, restorePostInsolvencyPhase } from './insolvency_manager.js';
-import type { AuctionSession } from './auction_manager.js';
-import { type BotPersonality } from '../domain/bot/index.js';
+import { liquidateAssets, declareBankruptcy } from './insolvency_manager.js';
+import { restorePostInsolvencyPhase } from './fsm_transition_coordinator.js';
+import type { AuctionSession } from './auction_types.js';
+import type { RoomContext } from './room_context_types.js';
+export type { RoomContext } from './room_context_types.js';
 import {
   isRoomQuiescentForTrade,
   isCellLockedInPendingTrade,
@@ -23,13 +25,6 @@ export {
   coordTradeOffer,
   coordRespondTradeOffer,
 };
-
-export interface RoomContext {
-  readonly room: Room;
-  readonly reg: PropertyRegistry;
-  readonly sm: PropertyStateMap;
-  readonly botPersonalities?: Map<string, BotPersonality>;
-}
 
 export function coordMortgage(
   ctx: RoomContext | undefined,

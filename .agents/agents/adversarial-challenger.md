@@ -5,18 +5,18 @@ subagent: true
 mainAgent: false
 model: inherit
 workspace: inherit
-skills: [grilling, codebase-design, domain-modeling]
-tools: [view_file, list_dir, find_by_name, grep_search, run_command, write_to_file]
+skills: [codebase-design, systematic-debugging, improve-codebase-architecture]
+tools: [view_file, list_dir, find_by_name, grep_search, run_command, write_to_file, call_mcp_tool]
 ---
 
 # ADVERSARIAL CHALLENGER PROTOCOL
 
-You run after `plan-griller` completes. Do NOT repeat its checklist items (syntax, LOC, file paths). Your job: find failure modes that structural audits miss.
+You run after `audit_plan.mjs` completes. Do NOT repeat its syntax/LOC checklist items. Your job: find failure modes that structural audits miss, grounded in `GEMINI.md`, `docs/FEATURE_MAP.md`, and `docs/domain/gotchas/*.md`.
 
 ## 1. Confinement
 - READ-ONLY: `src/**`, `tests/**`, `lib/**`, `app/**`.
 - Output: `.agents/audit/PLAN_CHALLENGE_[TICKET].md` only.
-- No git commands.
+- No git mutation commands.
 
 ## 2. Mandatory First Step — Objective Attack (ADV-OBJ)
 
@@ -29,9 +29,7 @@ Run these checks on disk before writing implementation vectors:
    → If dead path: flag `[ADV-OBJ] Dead Path Target — optimization yields 0 real gain`.
 
 2. **Are numeric & physical claims verified from disk (Zero Ungrounded Claims)?**
-   Every "X draw calls / ms / LOC" claim must have a matching physical count: read the file, count the meshes/lines, cite `[file.tsx#L]`. Do not accept plan-author estimates.
-   Every kinematic parameter (animation duration, jump arc height, camera offset/FOV, speed, tile coordinates) MUST be verified against existing SSOT code (`pawn_path.ts`, `camera_state_machine.ts`).
-   FORBIDDEN from guessing constants (e.g. assuming 1.2s or 0.5m). Any directive proposing a numeric threshold or timing MUST cite the authoritative file and line on physical disk.
+   Every metric claim (draw calls, ms, LOC, coordinates, durations) must have a matching physical count from disk (`[file#L]`) and conform to the project's SSOT constants in `docs/FEATURE_MAP.md` and `docs/domain/gotchas/*.md`.
    → If unverified: flag `[ADV-OBJ] Unverified Baseline — cite [file#L] or retract claim`.
 
 3. **Is there a higher-ROI alternative in the same scope?**
@@ -41,65 +39,40 @@ Run these checks on disk before writing implementation vectors:
    Search for related siblings, caller variants, or shared lifecycle hooks across codebase. If the plan addresses only an arbitrary subset of affected consumers without explicit justification/waiver:
    → flag `[ADV-OBJ] Incomplete Surface Area — [N] active consumers omitted from scope`.
 
-## 3. The 4 Attack Vectors (After ADV-OBJ passes)
+## 3. The Attack Vectors (After ADV-OBJ passes)
 
-### ⚔️ Vector 1: Exploits & Economic Arbitrage
-- Can an actor duplicate money, bypass costs, or escape penalties via the new code path?
+### ⚔️ Vector 1: Exploits & Domain Conservation
+- Can an actor bypass validation, duplicate resources, or violate domain conservation invariants via the new code path?
 - Can actions be spammed or replayed to create illegitimate state?
-- What happens on intentional disconnect or out-of-order intents?
 
 ### ⚡ Vector 2: Concurrency & Re-entrancy
-- What if two conflicting intents arrive in the same tick?
+- What if two conflicting intents arrive in the same tick/frame?
 - If an async call yields, what state can mutate before it resumes?
-- Are optimistic client states vulnerable to race conditions against server broadcasts?
 
 ### 💥 Vector 3: Partial Failure & Trapped States
-- If execution fails mid-operation, does state roll back cleanly or stay half-baked?
-- Can an error leave locks, overlays, or flags permanently stuck?
-- Does the design assume external event pairs (`down/up`, `start/end`, `open/close`) will arrive without loss? If an OS suspension, blur, lock screen, or `stopPropagation()` swallows the terminator, does the state remain permanently trapped? Banned relying on perfect event pairing without an authoritative Dead Man's Switch (TTL 3s–5s) or background watchdog.
-- Are retry routines immune to infinite loops?
+- If execution fails mid-operation, does state roll back cleanly?
+- Does the design rely on external event pairs (`down/up`, `start/end`, `open/close`) arriving without loss? Banned relying on perfect event pairing without an authoritative Dead Man's Switch (TTL 3s–5s) or watchdog.
 
 ### 🕸️ Vector 4: Unstated Assumptions & Subsystem Drift
-- What caller contracts or data cardinality assumptions are unverified?
-- Does this change introduce hidden coupling across unrelated components?
-- Behavior at boundary loads: 0 items, 1 item, max capacity?
-- Does the layout fix silently suppress or drop domain data/notifications to resolve crowding without an accessible history? Flag as **[ADV-SUPPRESS] Domain Data Suppression Workaround**.
+- What caller contracts or data cardinality assumptions are unverified (0 items, 1 item, max capacity)?
+- Does a layout fix silently drop domain data/notifications (`[ADV-SUPPRESS]`)?
 
 ### 🔢 Vector 5: Full Branch Path Trace (Arithmetic & Logic Fallthrough)
-For every modified function with multiple `return` branches (guards, fee calculations, state resolvers):
-1. List **all** branches: the corrected guard AND every downstream fallthrough path.
-2. For each branch, trace the **exact return value** — not just "the exploit branch is blocked."
-3. If a fallthrough path returns a value inconsistent with the stated goal (e.g. "de-escalate to 1000" but fallthrough still returns 2500 via a count-based formula), flag as **[ADV-BRANCH] Unchecked Fallthrough Arithmetic**.
-- *Trigger*: Any function fix that adds a guard condition at the top but leaves existing downstream logic unchanged.
+- Trace **all** branches of modified functions (both the new guard and every downstream fallthrough path) to verify exact return values (`[ADV-BRANCH]`).
 
 ### 🧪 Vector 6: Living Test Collision & Contract Regression (ADV-REG)
-Before approving plan changes to existing functions, formulas, or coordinates:
-1. Scan `tests/**` for living assertions against modified functions (`git grep <fnName> tests/`).
-2. Verify if existing hard assertions (e.g. `toBeCloseTo`, `toEqual`) will fail under the new calculation.
-3. If values diverge and the plan lacks a backward-compatible parameter (`enableFeature?: boolean`) or an explicit contract migration section, flag as **[ADV-REG] Unmitigated Living Contract Regression**.
+- Scan `tests/**` for living assertions against modified functions (`git grep <fnName> tests/`). Flag unmitigated breaking changes as `[ADV-REG]`.
 
 ### 🔌 Vector 7: Closed-Loop Presentation Wire (ADV-WIRE)
-When a plan adds parameters, flags, or calculations to core domain/math/state engines:
-1. Trace upstream callers to the top-level consumer (UI component, render loop, event hook, or network dispatcher).
-2. Confirm the top-level consumer is registered in the plan's target files.
-3. Verify the plan demonstrates how the consumer actively passes the new options at runtime.
-4. If unwired or omitted from scope, flag as **[ADV-WIRE] Severed Presentation Wire — new engine capabilities are dead code without wiring [consumerFile#L]**.
+- Trace new helpers/parameters up to the top-level consumer and verify active runtime wiring and 100% DTO property consumption (`[ADV-WIRE]`).
 
 ### 🚫 Vector 8: Cross-Subsystem State Erasure & Dead-Path Lock (ADV-STATE)
-When a plan alters presentation/UI/3D behavior based on a reactive state flag (e.g. `hasUserCustomCamera`, `isRolling`, `activeModal`):
-1. Trace ALL call sites across `src/**` where that flag is mutated (especially `set(...)`, `setState(...)`, reset handlers, turn transitions, roll handlers).
-2. If ANY upstream flow unconditionally resets or overwrites that flag to false/null before or during the feature's active window (e.g. during dice roll or pawn move), verify whether the plan alters that upstream reset.
-3. If the upstream reset is OUTSIDE the plan's declared scope (or prevented by subsystem boundary), the feature is a **Dead-Path Phantom**. Flag as:
-   **[ADV-STATE] Cross-Subsystem State Erasure — [flag] is unconditionally reset by [file#L] outside plan scope, rendering feature dead code.**
+- Trace all mutation sites of reactive flags across `src/**`. Flag upstream resets outside plan scope that render the feature dead code (`[ADV-STATE]`).
 
-### 🧊 Vector 9: R3F & Three.js GPU Memory Leaks & Call-Site Grounding (ADV-GPU)
-When a plan touches 3D graphics or R3F (`src/client/3d/**`):
-1. **Geometry Allocation inside JSX**: Probe whether `create*Geometry()` or `new *Geometry()` is called inside component render bodies or JSX `geometry={...}` props. In React/R3F, replacing geometry props does NOT auto-dispose previous buffers, causing GPU VRAM buffer leaks and eventual mobile WebGL context loss. All static procedural/batched geometries MUST be module-level singletons or strictly memoized.
-2. **Unlit Material Shadow Slop**: Check if `receiveShadow` or `castShadow` are placed on meshes using unlit materials (`MeshBasicMaterial`).
-3. **Call-Site Grounded Draw Call Accounting**: Compare leaf mesh counts against parent call-site visibility/conditional props (`render*={false}`) to ensure claimed draw call reductions reflect physical disk reality rather than leaf isolation counts.
-4. **Unbatched Multi-Instance Ban & SSR-Safe Instancing**: Flag any plan rendering $> 8$ static meshes via `.map()` without `mergeGeometries` (`createBatched*`) or `InstancedMesh` (`useIsomorphicLayoutEffect`, `instanceColor` null-init guard, `frustumCulled={false}` + `frustumculled="false"`).
-5. **Inter-Volume Embedding & Full Exclusion Map**: Verify both `[bottomY, topY]` ($\ge 0.02\text{m}$ overlap) and check spatial coordinates against ALL active sibling landmarks/waterways on the board (not just 1–2 hero landmarks).
-6. **100% DTO Property Consumption & Non-Golfing LOC**: Flag any new DTO/interface field not wired at the consumer call-site, and verify living test raw line limits (`split('\n').length`) assuming 5–6 lines per standard `<mesh>`.
+### 🧊 Vector 9: 3D/UI GPU Memory, Spatial Frustum & Asset Craft (ADV-GPU)
+- When touching 3D/UI (`src/client/3d/**`, `src/client/ui/**`), enforce all spatial, frustum NDC, stepped podium, `.glb`/Blender asset craft, batching, and mobile isolation invariants defined in `docs/domain/gotchas/3d_cinematics.md` and `docs/domain/gotchas/ui_ergonomics.md`.
+
+
 
 ## 4. Directive Quality Rules
 

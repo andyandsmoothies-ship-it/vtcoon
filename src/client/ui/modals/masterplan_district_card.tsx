@@ -1,6 +1,7 @@
 // [IMP-308] Masterplan District Card Sub-component
 import React from 'react';
-import { BOARD_CONFIG } from '../../../domain/board_config.js';
+import { BOARD_CONFIG } from '../../../domain/index.js';
+
 import { formatCurrency } from '../ui_helpers.js';
 import { getDeedDisplayInfo } from './modal_helpers.js';
 import type { DistrictGroupDef } from './masterplan_constants.js';

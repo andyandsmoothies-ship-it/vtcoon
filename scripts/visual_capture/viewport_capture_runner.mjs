@@ -36,7 +36,7 @@ export async function executeDualViewportCapture({
   await send('Network.setUserAgentOverride', {
     userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
   });
-  await injectScenario(send, opts.scenario, opts.scenarioExpr, visualScenariosDir);
+  await injectScenario(send, opts.scenario, opts.scenarioExpr, visualScenariosDir, opts.cameraOverride);
   await sleep(2500, globalSignal);
 
   const desktopFile = `${opts.ticket.toLowerCase()}_desktop.jpg`;
@@ -60,7 +60,7 @@ export async function executeDualViewportCapture({
   await send('Network.setUserAgentOverride', {
     userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1',
   });
-  await injectScenario(send, opts.scenario, opts.scenarioExpr, visualScenariosDir);
+  await injectScenario(send, opts.scenario, opts.scenarioExpr, visualScenariosDir, opts.cameraOverride);
   await sleep(600, globalSignal);
 
   const mobileFile = `${opts.ticket.toLowerCase()}_mobile_360.jpg`;
@@ -87,7 +87,7 @@ export async function executeSingleViewportCapture({
   const filename = `${opts.ticket.toLowerCase()}_${opts.name}.jpg`;
   const outputPath = path.join(tmpDir, filename);
 
-  await injectScenario(send, opts.scenario, opts.scenarioExpr, visualScenariosDir);
+  await injectScenario(send, opts.scenario, opts.scenarioExpr, visualScenariosDir, opts.cameraOverride);
 
   const captureParams = { format: 'jpeg', quality: 90 };
   if (opts.crop) {
@@ -120,6 +120,7 @@ export function parseCaptureArgs() {
     scenario: null,
     scenarioExpr: null,
     assertCameraY: null, // { min, max }
+    cameraOverride: { pos: null, target: null },
     help: false,
   };
 
@@ -139,6 +140,16 @@ export function parseCaptureArgs() {
       options.scenario = args[++i];
     } else if (arg === '--scenario-expr' && args[i + 1]) {
       options.scenarioExpr = args[++i];
+    } else if (arg === '--camera-pos' && args[i + 1]) {
+      const parts = args[++i].split(',').map((n) => parseFloat(n.trim()));
+      if (parts.length === 3 && parts.every((n) => !Number.isNaN(n))) {
+        options.cameraOverride.pos = parts;
+      }
+    } else if (arg === '--camera-target' && args[i + 1]) {
+      const parts = args[++i].split(',').map((n) => parseFloat(n.trim()));
+      if (parts.length === 3 && parts.every((n) => !Number.isNaN(n))) {
+        options.cameraOverride.target = parts;
+      }
     } else if (arg === '--assert-camera-y' && args[i + 1]) {
       const parts = args[++i].split(',').map((n) => parseFloat(n.trim()));
       if (parts.length === 2 && !Number.isNaN(parts[0]) && !Number.isNaN(parts[1])) {

@@ -8,6 +8,12 @@ import { useGameStore } from '../../src/client/store/game_store';
 import { INITIAL_GAME_STATE } from '../../src/client/store/game_store_types';
 import { TurnPhase } from '../../src/domain/room';
 
+// Ensure Zustand stores evaluate live state instead of stale initial snapshot during Node.js SSR test rendering
+const origUseSyncExternalStore = React.useSyncExternalStore;
+React.useSyncExternalStore = ((subscribe, getSnapshot, _getServerSnapshot) => {
+  return origUseSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+}) as typeof React.useSyncExternalStore;
+
 describe('[UC-IMP196-BUGFIX] DiceScoreBadge Visibility & Entry Guard Tests', () => {
   beforeEach(() => {
     useGameStore.setState({

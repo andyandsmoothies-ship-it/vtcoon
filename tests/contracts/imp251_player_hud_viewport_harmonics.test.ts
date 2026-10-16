@@ -132,9 +132,9 @@ describe('IMP-251 Player HUD Viewport Harmonics', () => {
       expect(html).toContain('sm:w-[9px] sm:h-[9px]');
     });
 
-    it('[UC-IMP251/MSS] TC-IMP251.12 aside keeps w-40 sm:w-48 md:w-64', () => {
+    it('[UC-IMP251/MSS] TC-IMP251.12 aside keeps w-44 sm:w-48 md:w-64', () => {
       const cls = asideClass(renderHud()).split(/\s+/);
-      expect(cls).toEqual(expect.arrayContaining(['w-40', 'sm:w-48', 'md:w-64']));
+      expect(cls).toEqual(expect.arrayContaining(['w-44', 'sm:w-48', 'md:w-64']));
     });
   });
 

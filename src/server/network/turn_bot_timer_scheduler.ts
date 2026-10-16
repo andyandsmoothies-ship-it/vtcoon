@@ -3,7 +3,7 @@ import type { RoomManager } from '../room_manager.js';
 import type { IntentMutex } from './intent_mutex.js';
 import type { DeltaBroadcaster } from './delta_broadcaster.js';
 import { TurnPhase, isRoomGameOver, type Room } from '../../domain/room.js';
-import { PHASE_TIMEOUTS_MS, AUCTION_SETTLE_DELAY_MS } from './turn_orchestrator.js';
+import { PHASE_TIMEOUTS_MS, AUCTION_SETTLE_DELAY_MS } from './turn_timer_constants.js';
 
 export const AUCTION_BOT_STEP_DELAY_MS = 1000;
 export const BOT_UPGRADE_OBSERVATION_DELAY_MS = 1500;

@@ -37,27 +37,28 @@ export function parseStation0(auditDir, ticketId, contractTestCount) {
         planChallengeNotes.push(`- **[${advMatch[1]}] ${advMatch[2]}**`);
         continue;
       }
-      const fieldMatch = trimmed.match(/^-\s*\*\*([A-Za-z0-9_ ?/-]+)\*\*:\s*(.*)$/i);
+      const fieldMatch = !/^\s{2,}/.test(lines[i]) ? trimmed.match(/^-\s*\*\*([A-Za-z0-9_ ?/-]+)\*\*:\s*(.*)$/i) : null;
       if (fieldMatch) {
         const fieldName = fieldMatch[1];
         if (!/^(?:P\d|Point\s*\d|Phản biện|Lỗ hổng|Rủi ro|Vector|Scenario|Consequence|.*Hardening Directive|Verdict|.*Invariant|.*Audit|Target reachable\?|Baselines verified\?|Physical surface area exhausted\?)/i.test(fieldName)) {
           continue;
         }
         let fieldVal = fieldMatch[2].trim();
-        if (!fieldVal) {
-          const collected = [];
-          for (let j = i + 1; j < lines.length; j++) {
-            const nextLine = lines[j];
-            const nextTrim = nextLine.trim();
-            if (nextTrim.startsWith('- **') || nextTrim.startsWith('## ') || nextTrim.startsWith('---')) break;
-            if (!nextTrim || nextTrim.startsWith('```')) continue;
-            const cleaned = nextTrim.replace(/^[-*]\s*/, '').replace(/^\d+\.\s*/, '');
-            if (cleaned) {
-              collected.push(cleaned);
-              if (collected.join(' ').length > 1200) break;
-            }
+        const collected = [];
+        for (let j = i + 1; j < lines.length; j++) {
+          const nextLine = lines[j];
+          const nextTrim = nextLine.trim();
+          const isTopLevelField = /^-\s*\*\*[A-Za-z0-9_ ?/-]+\*\*:/i.test(nextTrim) && !/^\s{2,}/.test(nextLine);
+          if (isTopLevelField || nextTrim.startsWith('## ') || nextTrim.startsWith('---') || nextTrim.startsWith('</')) break;
+          if (!nextTrim || nextTrim.startsWith('```')) continue;
+          const cleaned = nextTrim.replace(/^[-*]\s*/, '').replace(/^\d+\.\s*/, '');
+          if (cleaned) {
+            collected.push(cleaned);
+            if (collected.join(' ').length > 1200) break;
           }
-          fieldVal = collected.join(' ');
+        }
+        if (collected.length > 0) {
+          fieldVal = fieldVal ? `${fieldVal} ${collected.join('; ')}` : collected.join(' ');
         }
         if (fieldVal) {
           const formatted = `- **${fieldName}**: ${fieldVal}`;
@@ -146,6 +147,15 @@ export function parseStation3Reviews(auditDir, ticketId) {
     const v3Content = fs.readFileSync(visual3dFile, 'utf8');
     const scoreMatch = v3Content.match(/(?:\*\*)?(\d+(?:\.\d+)?\s*\/\s*10)(?:\*\*)?/);
     if (scoreMatch) uiReviewVerdict = `${scoreMatch[1]} (3D AAA Verified) 🎨`;
+    const lines = v3Content.split('\n');
+    for (const l of lines) {
+      const trimmed = l.trim();
+      if (/^-\s*\*\*(?:Core Milestone|Pillar \d|Spatial Sector|Camera|Lobby|3D Diorama|K\d|Priority)/i.test(trimmed) && trimmed.length > 25) {
+        uiReviewNotes.push(trimmed);
+      } else if (/^-\s*`?(?:top_down|lobby_vip|deed_modal|dice_tray|hud_dock|mobile_viewport)`?:/i.test(trimmed) && trimmed.length > 25) {
+        uiReviewNotes.push(trimmed);
+      }
+    }
   }
 
   return {
@@ -279,4 +289,34 @@ export function collectLocWarnings(repoRoot, srcFiles) {
     }
   }
   return warnFiles;
+}
+
+/**
+ * Collects harness, plan, audit, probe, and evidence files for a ticket.
+ */
+export function collectHarnessFiles(repoRoot, ticketId) {
+  const ticketClean = ticketId.replace(/^IMP-/i, '');
+  const harnessFiles = [];
+  const searchDirs = [
+    { dir: path.join(repoRoot, '.agents', 'plans'), role: 'Kế hoạch triển khai (Lean Plan)' },
+    { dir: path.join(repoRoot, '.agents', 'audit'), role: 'Biên bản kiểm toán độc lập' },
+    { dir: path.join(repoRoot, 'scripts', 'sentinel_probes'), role: 'Đặc tả đột biến Chaos Sentinel' },
+    { dir: path.join(repoRoot, '.agents', 'evidence'), role: 'Bằng chứng thực thi & snapshot' }
+  ];
+
+  for (const { dir, role } of searchDirs) {
+    if (!fs.existsSync(dir)) continue;
+    const entries = fs.readdirSync(dir);
+    for (const file of entries) {
+      const fLower = file.toLowerCase();
+      const tLower = ticketId.toLowerCase();
+      const cLower = `imp-${ticketClean.toLowerCase()}`;
+      const nLower = `imp${ticketClean.toLowerCase()}`;
+      if (fLower.includes(tLower) || fLower.includes(cLower) || fLower.includes(nLower)) {
+        const relPath = path.relative(repoRoot, path.join(dir, file)).replace(/\\/g, '/');
+        harnessFiles.push({ file: relPath, name: file, role });
+      }
+    }
+  }
+  return harnessFiles;
 }

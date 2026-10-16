@@ -1,13 +1,13 @@
 // [UC-GAME-001..003/MSS][UC-GAME-051..057/MSS] Player Intent Dispatcher — ADR-0001
 import { TurnPhase, ActionRejectReason } from '../domain/room.js';
 import { BuyResult } from '../domain/property_manager.js';
-import type { RoomManager, RollResult } from './room_manager.js';
+import type { IRoomManager as RoomManager, RollResult } from './room_manager_types.js';
 import { getActivePlayerFn } from './room_manager_lifecycle.js';
 import {
-  coordMortgage, coordRedeem, coordDowngrade, coordTrade,
-  coordRespondTradeOffer, coordBankruptcy, coordExecuteCompulsoryBuyout,
+  coordMortgage, coordRedeem, coordDowngrade, coordBankruptcy, coordExecuteCompulsoryBuyout,
   coordDeclineCompulsoryBuyout,
 } from './room_property_coordinator.js';
+import { coordTrade, coordRespondTradeOffer } from './room_trade_coordinator.js';
 import { handleUpgrade, handleUpgradeETC, handleUpgradeUtility, handleBuyProperty } from './property_actions.js';
 import { handleHoseInvest, handleHoseSkip } from './hose_actions.js';
 import { executeInsolvencyAfkRecovery } from './network/afk_recovery.js';

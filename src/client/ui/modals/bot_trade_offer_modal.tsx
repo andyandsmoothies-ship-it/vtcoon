@@ -1,8 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { BOARD_CONFIG } from '../../../domain/board_config.js';
-import { PROPERTY_DEEDS } from '../../../domain/property_data.js';
-import { COLOR_GROUP_HEX } from '../../../domain/theme.js';
+import { BOARD_CONFIG, PROPERTY_DEEDS, COLOR_GROUP_HEX } from '../../../domain/index.js';
 import { formatCurrency } from '../ui_helpers.js';
+
 import { useGameStore } from '../../store/game_store.js';
 import { markTradeOfferResolved } from './bot_trade_offer_strip.js';
 

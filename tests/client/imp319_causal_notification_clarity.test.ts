@@ -220,7 +220,7 @@ describe('[IMP-319][UC-CAUSAL] Layout-Safe Causal Disclosures & Notification Cla
     const mItem: FloatingTextItem = { id: 'm1', text: '+1.000 Tr.', playerId: 'p1', timestamp: 1000, actionType: 'mortgage', type: FloatingTextType.Reward };
     const uItem: FloatingTextItem = { id: 'u1', text: '-1.100 Tr.', playerId: 'p1', timestamp: 1000, actionType: 'unmortgage', type: FloatingTextType.Penalty };
     expect(resolveFormulaText(mItem, '', true)).toBe('Vay vốn tín dụng ngân hàng (50% giá trị đất)');
-    expect(resolveFormulaText(uItem, '', false)).toBe('Chuộc lại đất thế chấp (Gốc + 10% phí Kho Bạc)');
+    expect(resolveFormulaText(uItem, '', false)).toBe('Chuộc lại đất thế chấp (Gốc + 10% phí giải chấp Ngân Hàng)');
   });
 
   it('[TC-319.13/A10][UC-CAUSAL] Given tax at cell 4 or property tax, When resolveFormulaText is called, Then returns respective tax formulas', () => {

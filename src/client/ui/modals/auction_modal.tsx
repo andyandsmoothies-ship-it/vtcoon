@@ -1,9 +1,9 @@
 // [UI-S04/MSS] AuctionModal — Glassmorphism Dual-Wing 3D Auction Arena Overlay & Fast Bid Carousel
 import React, { useEffect, useMemo, useState } from 'react';
-import { CellType } from '../../../domain/board_config';
+import { CellType, COLOR_GROUP_HEX } from '../../../domain/index.js';
 import { getDeedDisplayInfo, calculateAuctionIncrements } from './modal_helpers';
 import { formatCurrency, formatShortPlayerName, formatLocalizedBotPersonality } from '../ui_helpers';
-import { COLOR_GROUP_HEX } from '../../../domain/theme';
+
 import { useGameStore } from '../../store/game_store';
 import type { PlayerInfo } from '../../store/game_store_types';
 import { AuctionDistrictCard } from './auction_district_card';

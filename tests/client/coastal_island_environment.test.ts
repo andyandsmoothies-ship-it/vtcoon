@@ -85,7 +85,7 @@ describe('[UI-S01/MSS][IMP-13] CoastalIslandEnvironment — Structure & Visual A
   it('GameBoard tich hop CoastalIslandEnvironment thay the cho TabletopEnvironment', () => {
     const boardPath = path.resolve(process.cwd(), 'src', 'client', '3d', 'board_layout.tsx');
     const boardSource = fs.readFileSync(boardPath, 'utf-8');
-    expect(boardSource).toContain('<CoastalIslandEnvironment />');
+    expect(boardSource).toMatch(/<CoastalIslandEnvironment(\s+[^>]*)?\/>/);
     expect(boardSource).toContain("import { CoastalIslandEnvironment } from './coastal_island_environment';");
     expect(boardSource).not.toContain('<TabletopEnvironment />');
   });

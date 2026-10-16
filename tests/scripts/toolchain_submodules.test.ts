@@ -22,6 +22,8 @@ import {
   detectActiveSliceId
 } from '../../scripts/plan_audit/worktree_scope_resolver.mjs';
 import { resolveEvidenceFile } from '../../scripts/evidence_audit/evidence_resolver.mjs';
+import { auditAmbientModuleAugmentation, probeTargetFilesSurface } from '../../scripts/plan_audit/rules_surface.mjs';
+import { auditGhostTestPaths } from '../../scripts/plan_audit/rules_testing.mjs';
 
 describe('Toolchain Submodules Contract Test Suite (IMP-353)', () => {
   describe('Sentinel Submodule (scripts/sentinel/)', () => {
@@ -183,4 +185,61 @@ describe('Toolchain Submodules Contract Test Suite (IMP-353)', () => {
       expect(() => resolveEvidenceFile('99999')).toThrow(/not found/i);
     });
   });
+
+  describe('Surface Area & Prober Submodule (scripts/plan_audit/rules_surface.mjs)', () => {
+    it('[TC-353.13/MSS] probeTargetFilesSurface returns physical lines, callers, and ambient augmentations for disk file', () => {
+      const results = probeTargetFilesSurface(['src/server/delta_types.ts']);
+      const res = results[0];
+      if (!res) throw new Error('Expected probe result');
+      expect(res.exists && (res.physicalLines ?? 0) >= 1).toBe(true);
+      expect((res.testCallers ?? []).length).toBeGreaterThan(0);
+      expect((res.ambientAugmentations ?? []).some((a: string) => a.includes('imp286'))).toBe(true);
+    });
+
+    it('[TC-353.14/MSS] auditAmbientModuleAugmentation detects ambient module deletion trap when plan deletes file without export * stub', () => {
+      const targetMap = new Map([['src/server/delta_types.ts', false]]);
+      const badPlan = `
+Target physical file: src/server/delta_types.ts (Decommissioned & Deleted)
+File deleted completely.
+      `;
+      const errors = auditAmbientModuleAugmentation(targetMap, badPlan);
+      expect(errors).toBeGreaterThan(0);
+    });
+
+    it('[TC-353.15/MSS] auditAmbientModuleAugmentation passes when plan specifies export * from stub', () => {
+      const targetMap = new Map([['src/server/delta_types.ts', false]]);
+      const goodPlan = `
+Target physical file: src/server/delta_types.ts (Transformed to Minimal Pure Re-Export Stub)
+\`\`\`typescript
+export * from '../domain/protocol/index.js';
+\`\`\`
+      `;
+      const errors = auditAmbientModuleAugmentation(targetMap, goodPlan);
+      expect(errors).toBe(0);
+    });
+  });
+
+  describe('Ghost Test Path Auditor (scripts/plan_audit/rules_testing.mjs)', () => {
+    it('[TC-353.16/MSS] auditGhostTestPaths detects non-existent regression test files in plan', () => {
+      const planWithGhost = `
+# Ticket IMP-999
+### Station 3 & 4 Verification
+\`npx vitest run tests/client/imp999_test.test.ts tests/client/ghost_nonexistent_suite.test.ts\`
+      `;
+      const errors = auditGhostTestPaths(planWithGhost, process.cwd(), 'PLAN_IMP_999.md');
+      expect(errors).toBe(1);
+    });
+
+    it('[TC-353.17/MSS] auditGhostTestPaths allows new target test file for current ticket', () => {
+      const planValid = `
+# Ticket IMP-999
+### Station 1: Contract Testing (tests/client/imp999_test.test.ts)
+- TC-999.01 [UC-TEST/MSS]: Given state, When action, Then outcome.
+      `;
+      const errors = auditGhostTestPaths(planValid, process.cwd(), 'PLAN_IMP_999.md');
+      expect(errors).toBe(0);
+    });
+  });
 });
+
+

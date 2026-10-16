@@ -127,7 +127,7 @@ describe('[IMP-143] Tọa Độ Đa Tầng Định Lượng Chính Xác Dưới 
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
       const container = extractMobileContainer(html);
-      expect(container).toContain('bottom-[calc(8rem+env(safe-area-inset-bottom))]');
+      expect(container).toContain('bottom-[calc(8.5rem+env(safe-area-inset-bottom))]');
       expect(container).toMatch(/gap-(?:1\.5|2)/);
       expect(container).not.toContain('top-[11.5rem]');
     });
@@ -139,7 +139,7 @@ describe('[IMP-143] Tọa Độ Đa Tầng Định Lượng Chính Xác Dưới 
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
       const container = extractMobileContainer(html);
-      expect(container).toContain('bottom-[calc(8rem+env(safe-area-inset-bottom))]');
+      expect(container).toContain('bottom-[calc(8.5rem+env(safe-area-inset-bottom))]');
       expect(container).toMatch(/gap-(?:1\.5|2)/);
     });
 
@@ -153,7 +153,7 @@ describe('[IMP-143] Tọa Độ Đa Tầng Định Lượng Chính Xác Dưới 
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
       const container = extractMobileContainer(html);
-      expect(container).toContain('bottom-[calc(8rem+env(safe-area-inset-bottom))]');
+      expect(container).toContain('bottom-[calc(8.5rem+env(safe-area-inset-bottom))]');
       expect(container).toMatch(/gap-(?:1\.5|2)/);
     });
 
@@ -164,7 +164,7 @@ describe('[IMP-143] Tọa Độ Đa Tầng Định Lượng Chính Xác Dưới 
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
       const container = extractMobileContainer(html);
-      expect(container).toContain('bottom-[calc(8rem+env(safe-area-inset-bottom))]');
+      expect(container).toContain('bottom-[calc(8.5rem+env(safe-area-inset-bottom))]');
       expect(container).toMatch(/gap-(?:1\.5|2)/);
     });
 
@@ -175,7 +175,7 @@ describe('[IMP-143] Tọa Độ Đa Tầng Định Lượng Chính Xác Dưới 
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
       const container = extractMobileContainer(html);
-      expect(container).toContain('bottom-[calc(8rem+env(safe-area-inset-bottom))]');
+      expect(container).toContain('bottom-[calc(8.5rem+env(safe-area-inset-bottom))]');
       expect(container).toMatch(/gap-(?:1\.5|2)/);
     });
 
@@ -189,7 +189,7 @@ describe('[IMP-143] Tọa Độ Đa Tầng Định Lượng Chính Xác Dưới 
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
       const container = extractMobileContainer(html);
-      expect(container).toContain('bottom-[calc(8rem+env(safe-area-inset-bottom))]');
+      expect(container).toContain('bottom-[calc(8.5rem+env(safe-area-inset-bottom))]');
       expect(container).toMatch(/gap-(?:1\.5|2)/);
     });
   });

@@ -1,5 +1,4 @@
-import { BOARD_CONFIG, CellType, type BoardCell } from '../../../domain/board_config';
-import { PROPERTY_DEEDS } from '../../../domain/property_data';
+import { BOARD_CONFIG, CellType, type BoardCell, PROPERTY_DEEDS } from '../../../domain/index.js';
 
 export type StrategicHintType = 'complete_monopoly' | 'block_opponent' | 'first_piece' | 'progress_monopoly' | 'contested';
 

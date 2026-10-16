@@ -11,7 +11,7 @@ import type { IntentMutex } from './intent_mutex.js';
 import type { AdminManager } from './admin_manager.js';
 import type { RoomFinishSummary } from '../logging/persistent_room_logger.js';
 import type { RoomCleanupScheduler } from '../room_cleanup_scheduler.js';
-import type { WsServerMessage } from './network_types.js';
+import type { WsServerMessage } from '../../domain/protocol/index.js';
 
 export interface HeartbeatSweepDeps {
   readonly sockets: SocketRegistry;

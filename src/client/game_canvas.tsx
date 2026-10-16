@@ -2,7 +2,8 @@ import React, { useRef, useEffect } from 'react';
 import './3d/r3f_fiber_shield';
 import './polyfills/canvas_round_rect';
 import { clearAll3DTextureCaches } from './3d/texture_cache_manager';
-import { isMobileHardware, getRecommendedDpr, getRecommendedGlProfile } from './3d/device_detect';
+import { isMobileHardware } from './3d/device_detect';
+import { DeviceProfileProvider, resolveDeviceProfile } from './3d/device_profile_context';
 import { AdaptiveDprController } from './3d/adaptive_dpr_controller';
 import { AdaptiveIdleCoolingController } from './3d/adaptive_idle_cooling_controller';
 import { Canvas, useThree } from '@react-three/fiber';
@@ -113,7 +114,11 @@ export function GameCanvas({
     };
   }, []);
 
-  const isMobileDevice = propIsMobile ?? isMobileHardware();
+  const deviceProfile = React.useMemo(
+    () => resolveDeviceProfile(propIsMobile !== undefined ? { isMobile: propIsMobile } : undefined),
+    [propIsMobile]
+  );
+  const isMobileDevice = deviceProfile.isMobile;
   const isPostProcessingActive = enablePostProcessing ?? (
     !isMobileDevice && (
       typeof window === 'undefined' ||
@@ -165,79 +170,81 @@ export function GameCanvas({
   const isSSR = typeof window === 'undefined';
 
   return (
-    <div className="relative w-full h-full overflow-hidden">
-      <Canvas
-        shadows={isMobileDevice ? false : "soft"} /* shadows="soft" */
-        dpr={getRecommendedDpr(isMobileDevice)} /* dpr={[1, 1.5]} */
-        camera={{ position: isLobby ? CAMERA_CONFIG.pre_match.position : CAMERA_CONFIG.overview.position, fov: 24, near: 0.5, far: 300 }}
-        gl={{
-          ...getRecommendedGlProfile(isMobileDevice),
-          toneMapping: isMobileDevice ? ACESFilmicToneMapping : NoToneMapping,
-          toneMappingExposure: 1.08,
-        }}
-        onCreated={({ gl }) => {
-          if (gl?.info) {
-            gl.info.autoReset = false;
-          }
-        }}
-        style={{
-          width: '100%',
-          height: '100%',
-          display: 'block',
-          background: canvasBg,
-          transition: 'background-color 2.5s ease',
-        }}
-      >
-        {!isSSR && (
-          <>
-            {!isMobileDevice && <SafeEnvironment />}
-            {/* Contract retention: <React.Suspense fallback={null}><Environment preset="city" /></React.Suspense> */}
-            {/* OrbitControls contract retention: minDistance={14} maxDistance={65} */}
-            <AdaptiveToneMappingSync isMobile={isMobileDevice} />
-            <WebGLContextWatcher />
-            <PerfTelemetryTracker isMobile={isMobileDevice} />
-            <AdaptiveDprController isMobile={isMobileDevice} />
-            <AdaptiveIdleCoolingController isMobile={isMobileDevice} />
+    <DeviceProfileProvider profile={deviceProfile}>
+      <div className="relative w-full h-full overflow-hidden">
+        <Canvas
+          shadows={isMobileDevice ? false : "soft"} /* shadows="soft" */
+          dpr={deviceProfile.recommendedDpr}
+          camera={{ position: isLobby ? CAMERA_CONFIG.pre_match.position : CAMERA_CONFIG.overview.position, fov: 24, near: 0.5, far: 300 }}
+          gl={{
+            ...deviceProfile.glProfile,
+            toneMapping: isMobileDevice ? ACESFilmicToneMapping : NoToneMapping,
+            toneMappingExposure: 1.08,
+          }}
+          onCreated={({ gl }) => {
+            if (gl?.info) {
+              gl.info.autoReset = false;
+            }
+          }}
+          style={{
+            width: '100%',
+            height: '100%',
+            display: 'block',
+            background: canvasBg,
+            transition: 'background-color 2.5s ease',
+          }}
+        >
+          {!isSSR && (
+            <DeviceProfileProvider profile={deviceProfile}>
+              {!isMobileDevice && <SafeEnvironment />}
+              {/* Contract retention: <React.Suspense fallback={null}><Environment preset="city" /></React.Suspense> */}
+              {/* OrbitControls contract retention: minDistance={14} maxDistance={65} */}
+              <AdaptiveToneMappingSync isMobile={isMobileDevice} />
+              <WebGLContextWatcher />
+              <PerfTelemetryTracker isMobile={isMobileDevice} />
+              <AdaptiveDprController isMobile={isMobileDevice} />
+              <AdaptiveIdleCoolingController isMobile={isMobileDevice} />
 
-            {isLobby ? (
-              <>
-                {/* Tabletop-first Stage 1: Render GameBoard trực tiếp trên sa bàn đảo ngọc thay thế SunnyIslandLobbyScene */}
-                <AdaptiveCinematicCamera isPreMatch={true} />
-                <TimeOfDayLighting isMobile={isMobileDevice} />
-                {/* Bóng tiếp xúc mâm gỗ bàn cờ đặt trên thảm nhung Ba Tư */}
-                {!isMobileDevice && <ContactShadows frames={1} position={[0, -0.05, 0]} opacity={0.75} scale={45} blur={2.0} far={6} />}
-                <GameBoard isMobile={isMobileDevice} />
-                <PawnAnimator players={effectivePlayers} />
-                {/* <PostProcessingPipeline /> */}
-                <PostProcessingPipeline isMobile={isMobileDevice} enabled={isPostProcessingActive} />
-              </>
-            ) : (
-              <>
-                <AdaptiveCinematicCamera />
-                <TimeOfDayLighting isMobile={isMobileDevice} />
-                {/* ContactShadows contract retention: <ContactShadows frames={1} position={[0, -0.01, 0]} opacity={0.7} scale={40} blur={2} /> */}
-                {!isMobileDevice && <ContactShadows frames={1} position={[0, -0.05, 0]} opacity={0.75} scale={45} blur={2.0} far={6} />}
-                <GameBoard isMobile={isMobileDevice} />
-                <PawnAnimator players={effectivePlayers} />
-                <EventCard3D />
-                <Coronation3DStage />
-                {/* <PostProcessingPipeline /> */}
-                <PostProcessingPipeline
-                  isMobile={isMobileDevice}
-                  enabled={isPostProcessingActive}
-                  enableSelectiveBloom={!isMobileDevice}
-                  isAuctionActive={isAuctionActive}
-                  enableDof={dofConfig.enableDof}
-                  dofBokehScale={dofConfig.bokehScale}
-                  dofFocusRange={dofConfig.focusRange}
-                  dofTarget={dofTarget}
-                />
-              </>
-            )}
-          </>
-        )}
-      </Canvas>
-      <CinematicOverlay />
-    </div>
+              {isLobby ? (
+                <>
+                  {/* Tabletop-first Stage 1: Render GameBoard trực tiếp trên sa bàn đảo ngọc thay thế SunnyIslandLobbyScene */}
+                  <AdaptiveCinematicCamera isPreMatch={true} />
+                  <TimeOfDayLighting isMobile={isMobileDevice} />
+                  {/* Bóng tiếp xúc mâm gỗ bàn cờ đặt trên thảm nhung Ba Tư */}
+                  {!isMobileDevice && <ContactShadows frames={1} position={[0, -0.05, 0]} opacity={0.75} scale={45} blur={2.0} far={6} />}
+                  <GameBoard isMobile={isMobileDevice} />
+                  <PawnAnimator players={effectivePlayers} />
+                  {/* <PostProcessingPipeline /> */}
+                  <PostProcessingPipeline isMobile={isMobileDevice} enabled={isPostProcessingActive} />
+                </>
+              ) : (
+                <>
+                  <AdaptiveCinematicCamera />
+                  <TimeOfDayLighting isMobile={isMobileDevice} />
+                  {/* ContactShadows contract retention: <ContactShadows frames={1} position={[0, -0.01, 0]} opacity={0.7} scale={40} blur={2} /> */}
+                  {!isMobileDevice && <ContactShadows frames={1} position={[0, -0.05, 0]} opacity={0.75} scale={45} blur={2.0} far={6} />}
+                  <GameBoard isMobile={isMobileDevice} />
+                  <PawnAnimator players={effectivePlayers} />
+                  <EventCard3D />
+                  <Coronation3DStage />
+                  {/* <PostProcessingPipeline /> */}
+                  <PostProcessingPipeline
+                    isMobile={isMobileDevice}
+                    enabled={isPostProcessingActive}
+                    enableSelectiveBloom={!isMobileDevice}
+                    isAuctionActive={isAuctionActive}
+                    enableDof={dofConfig.enableDof}
+                    dofBokehScale={dofConfig.bokehScale}
+                    dofFocusRange={dofConfig.focusRange}
+                    dofTarget={dofTarget}
+                  />
+                </>
+              )}
+            </DeviceProfileProvider>
+          )}
+        </Canvas>
+        <CinematicOverlay />
+      </div>
+    </DeviceProfileProvider>
   );
 }

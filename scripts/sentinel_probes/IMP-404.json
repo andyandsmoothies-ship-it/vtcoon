@@ -1,0 +1,104 @@
+[
+  {
+    "file": "src/client/3d/procedural_mobile_blender_meshes.ts",
+    "desc": "AST: Corrupt IOS_WEBKIT_TBDR maxDpr cap above ANDROID_MOBILE",
+    "target": "tierId: 'IOS_WEBKIT_TBDR', maxDpr: 0.82, activeFpsCap: 60, idleFpsCap: 30,",
+    "replacement": "tierId: 'IOS_WEBKIT_TBDR', maxDpr: 1.50, activeFpsCap: 60, idleFpsCap: 30,"
+  },
+  {
+    "file": "src/client/3d/procedural_mobile_blender_meshes.ts",
+    "desc": "AST: Corrupt ANDROID_MOBILE buildingRenderMode to desktop GLB",
+    "target": "tierId: 'ANDROID_MOBILE', maxDpr: 1.0, activeFpsCap: 60, idleFpsCap: 30,\n    buildingRenderMode: 'INSTANCED_POOL_VERTEX_AO',",
+    "replacement": "tierId: 'ANDROID_MOBILE', maxDpr: 1.0, activeFpsCap: 60, idleFpsCap: 30,\n    buildingRenderMode: 'BLENDER_GLB_STANDARD',"
+  },
+  {
+    "file": "src/client/3d/procedural_mobile_blender_meshes.ts",
+    "desc": "AST: Corrupt DESKTOP_BALANCED minVerticalStepMm below 20mm Z-fighting threshold",
+    "target": "enableOuterBaySanctuaries: true, enableDominoShockwave: true, minVerticalStepMm: 20,",
+    "replacement": "enableOuterBaySanctuaries: true, enableDominoShockwave: true, minVerticalStepMm: 5,"
+  },
+  {
+    "file": "src/client/3d/procedural_mobile_blender_meshes.ts",
+    "desc": "AST: Corrupt isDesktopUltraCapable RAM check in resolveRenderTierProfile",
+    "target": "if (!Number.isFinite(ramGb) || ramGb < ULTRA_MIN_MEMORY_GB) return false;",
+    "replacement": "if (false) return false;"
+  },
+  {
+    "file": "src/client/3d/procedural_mobile_blender_meshes.ts",
+    "desc": "AST: Corrupt COLOR_0 vertex color and Baked AO emission in appendQuadFace",
+    "target": "colors.push(clampUnit(rgb[0] * s), clampUnit(rgb[1] * s), clampUnit(rgb[2] * s));",
+    "replacement": "colors.push(0.5, 0.5, 0.5);"
+  },
+  {
+    "file": "src/client/3d/procedural_mobile_blender_meshes.ts",
+    "desc": "AST: Corrupt singleton BufferGeometry cache lookup in getMobileArchetypeGeometry",
+    "target": "const cached = archetypeGeometryCache.get(key);\n  if (cached) return cached;",
+    "replacement": "const cached = archetypeGeometryCache.get(key);\n  if (false && cached) return cached;"
+  },
+  {
+    "file": "src/client/3d/procedural_mobile_blender_meshes.ts",
+    "desc": "AST: Corrupt GPU buffer disposal in disposeMobileArchetypeGeometries",
+    "target": "for (const geom of archetypeGeometryCache.values()) geom.dispose();",
+    "replacement": "/* archetypeGeometryCache dispose bypassed */"
+  },
+  {
+    "file": "src/client/3d/instanced_regional_buildings_pool.tsx",
+    "desc": "AST: Corrupt level 0 and level 3 scale collapse in buildCellDescriptor ([ADV-01])",
+    "target": "if (level !== 1 && level !== 2) {",
+    "replacement": "if (level === 0) {"
+  },
+  {
+    "file": "src/client/3d/instanced_regional_buildings_pool.tsx",
+    "desc": "AST: Corrupt construction slam drop modulation in resolveSlamTransform",
+    "target": "worldY: baseY + drop.yOffset,",
+    "replacement": "worldY: baseY,"
+  },
+  {
+    "file": "src/client/3d/instanced_regional_buildings_pool.tsx",
+    "desc": "AST: Corrupt wasSlammingRef settlement pass in InstancedRegionalBuildingsPool ([ADV-02])",
+    "target": "if (!hasSlams && !wasSlammingRef.current) return;",
+    "replacement": "if (!hasSlams) return;"
+  },
+  {
+    "file": "src/client/3d/instanced_regional_buildings_pool.tsx",
+    "desc": "AST: Corrupt desktop early-return guard in InstancedRegionalBuildingsPool ([ADV-03])",
+    "target": "if (!isPoolActive) {\n    return null;\n  }",
+    "replacement": "if (false) {\n    return null;\n  }"
+  },
+  {
+    "file": "src/client/3d/instanced_regional_buildings_pool.tsx",
+    "desc": "AST: Corrupt frustumCulled={false} on regional body instancedMesh",
+    "target": "args={[getMobileArchetypeGeometry(bucket.typology, bucket.level), undefined, POOL_CAPACITY]}\n          frustumCulled={false}",
+    "replacement": "args={[getMobileArchetypeGeometry(bucket.typology, bucket.level), undefined, POOL_CAPACITY]}\n          frustumCulled={true}"
+  },
+  {
+    "file": "src/client/3d/procedural_building.tsx",
+    "desc": "AST: Corrupt DefaultBuildingBoxFallback level-scaled height",
+    "target": "const height = FALLBACK_BOX_HEIGHTS[level] ?? 0.34;",
+    "replacement": "const height = 0.34;"
+  },
+  {
+    "file": "src/client/3d/procedural_building.tsx",
+    "desc": "AST: Corrupt ShophouseFallback mobile shared archetype geometry call-site",
+    "target": "<mesh geometry={geom}>",
+    "replacement": "<mesh>"
+  },
+  {
+    "file": "src/client/3d/board_tile.tsx",
+    "desc": "AST: Corrupt Level-3 Landmark preservation guard in LayeredDioramaTile ([ADV-01])",
+    "target": "{(renderProceduralBuilding || currentLevel === 0 || currentLevel === 3) && (",
+    "replacement": "{renderProceduralBuilding && ("
+  },
+  {
+    "file": "src/client/3d/board_layout.tsx",
+    "desc": "AST: Corrupt InstancedRegionalBuildingsPool call-site mount in GameBoard",
+    "target": "<InstancedRegionalBuildingsPool levelMap={levelMap} isMobile={isMobile} isIOS={isIOS} />",
+    "replacement": "{null}"
+  },
+  {
+    "file": "src/client/3d/board_layout.tsx",
+    "desc": "AST: Corrupt renderProceduralBuilding Level-3 delegation in GameBoard ([ADV-01], [ADV-03])",
+    "target": "renderProceduralBuilding={tierProfile.buildingRenderMode !== 'INSTANCED_POOL_VERTEX_AO' || (cellLevel !== 1 && cellLevel !== 2)}",
+    "replacement": "renderProceduralBuilding={true}"
+  }
+]

@@ -32,7 +32,7 @@ describe('[TC-P1.1/MSS] ProceduralBuilding — Sapphire Glass PBR & Beveled Roun
     const html = renderToStaticMarkup(React.createElement(ProceduralBuilding, { level: 2 }));
     expect(html).toContain('ior="1.52"');
     expect(html).toContain('roughness="0.04"');
-    expect(html).toContain('extrudeGeometry'); // RoundedBox tạo ra extrudeGeometry
+    expect(html).toContain('boxGeometry');
     expect(html).toContain('#0284C7'); // Màu Sapphire Blue
   });
 
@@ -51,7 +51,7 @@ describe('[TC-P1.1/MSS] ProceduralBuilding — Sapphire Glass PBR & Beveled Roun
 
   it('Cấp 1 (Nhà phố Đông Dương) kết xuất RoundedBox bo mép chân móng và thân nhà', () => {
     const html = renderToStaticMarkup(React.createElement(ProceduralBuilding, { level: 1 }));
-    expect(html).toContain('extrudeGeometry');
+    expect(html).toContain('boxGeometry');
     expect(html).toContain('#FEF3C7');
     expect(html).toContain('#451A03');
   });

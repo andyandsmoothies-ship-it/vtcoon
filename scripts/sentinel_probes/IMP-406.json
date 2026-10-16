@@ -1,0 +1,140 @@
+[
+  {
+    "file": "src/client/3d/monopoly_mobile_archway_visuals.ts",
+    "desc": "AST: Corrupt MAX_MONOPOLY_PROMENADE_SLOTS 16-slot capacity ([ADV-01])",
+    "target": "export const MAX_MONOPOLY_PROMENADE_SLOTS = 16 as const;",
+    "replacement": "export const MAX_MONOPOLY_PROMENADE_SLOTS = 12 as const;"
+  },
+  {
+    "file": "src/client/3d/monopoly_mobile_archway_visuals.ts",
+    "desc": "AST: Corrupt COLOR_0 vertex color and Baked AO luminance shading in appendArchwayQuad",
+    "target": "colors.push(Math.min(1, rgb[0] * s), Math.min(1, rgb[1] * s), Math.min(1, rgb[2] * s));",
+    "replacement": "colors.push(0.5, 0.5, 0.5);"
+  },
+  {
+    "file": "src/client/3d/monopoly_mobile_archway_visuals.ts",
+    "desc": "AST: Corrupt singleton cache lookup in getMobileMonopolyArchwayGeometry",
+    "target": "if (cachedMobileArchwayGeom) return cachedMobileArchwayGeom;",
+    "replacement": "if (false && cachedMobileArchwayGeom) return cachedMobileArchwayGeom;"
+  },
+  {
+    "file": "src/client/3d/monopoly_mobile_archway_visuals.ts",
+    "desc": "AST: Corrupt promenade thickness 0.024m >= 20mm in getMobileMonopolyPromenadeSlotGeometry",
+    "target": "const geom = new BoxGeometry(1.0, 0.024, 0.16);",
+    "replacement": "const geom = new BoxGeometry(1.0, 0.008, 0.16);"
+  },
+  {
+    "file": "src/client/3d/monopoly_mobile_archway_visuals.ts",
+    "desc": "AST: Corrupt wrap-around circular distance in getCircularCellDistance",
+    "target": "return Math.min(diff, BOARD_TILE_COUNT - diff);",
+    "replacement": "return diff;"
+  },
+  {
+    "file": "src/client/3d/monopoly_mobile_archway_visuals.ts",
+    "desc": "AST: Corrupt distance attenuation in calculateDominoRippleTransform",
+    "target": "const distFactor = 1 / (1 + 0.35 * (distanceInCells - 1));",
+    "replacement": "const distFactor = 1;"
+  },
+  {
+    "file": "src/client/3d/monopoly_mobile_archway_visuals.ts",
+    "desc": "AST: Corrupt 900ms Auto-TTL expiration guard in resolveMobilePoolDominoSlam",
+    "target": "if (elapsedSinceImpact >= 900) continue;",
+    "replacement": "if (elapsedSinceImpact >= 9000) continue;"
+  },
+  {
+    "file": "src/client/3d/monopoly_mobile_archway_visuals.ts",
+    "desc": "AST: Corrupt TC-401.03c mobile suppression guard in resolveNeighborDominoSlam",
+    "target": "if (isMobile) return null;",
+    "replacement": "if (false && isMobile) return null;"
+  },
+  {
+    "file": "src/client/3d/monopoly_mobile_archway_visuals.ts",
+    "desc": "AST: Corrupt unoccluded 4-quad frame aperture over recessed cavities in getMobileMonopolyArchwayGeometry",
+    "target": "if (frontCavity) {",
+    "replacement": "if (false && frontCavity) {"
+  },
+  {
+    "file": "src/client/3d/monopoly_mobile_archway_visuals.ts",
+    "desc": "AST: Corrupt promenade width scaling in computeMobileMonopolyPromenadePoolSlots ([ADV-01])",
+    "target": "position: seg.worldPosition, rotationY: seg.rotationY, pitchX: 0, scale: [seg.promenadeWidth, 1, 1],",
+    "replacement": "position: seg.worldPosition, rotationY: seg.rotationY, pitchX: 0, scale: [1, 1, 1],"
+  },
+  {
+    "file": "src/client/3d/monopoly_mobile_archway_visuals.ts",
+    "desc": "AST: Corrupt GPU buffer disposal and null reset in disposeMobileMonopolyArchwayGeometries",
+    "target": "cachedMobileArchwayGeom.dispose();\n    cachedMobileArchwayGeom = null;",
+    "replacement": "/* archway dispose bypassed */"
+  },
+  {
+    "file": "src/client/3d/monopoly_plaza_fusion.tsx",
+    "desc": "AST: Corrupt pitchX rotation wiring in applySlotsToInstancedMesh",
+    "target": "_euler.set(slot.pitchX, slot.rotationY, 0, 'YXZ');",
+    "replacement": "_euler.set(0, slot.rotationY, 0, 'YXZ');"
+  },
+  {
+    "file": "src/client/3d/monopoly_plaza_fusion.tsx",
+    "desc": "AST: Corrupt Dual-Seam enableMobileInstancedPool guard in MonopolyPlazaFusion (TC-401.04c parity)",
+    "target": "if (!enableMobileInstancedPool || !monopolyGroups || Object.keys(monopolyGroups).length === 0) return null;",
+    "replacement": "if (!monopolyGroups || Object.keys(monopolyGroups).length === 0) return null;"
+  },
+  {
+    "file": "src/client/3d/monopoly_plaza_fusion.tsx",
+    "desc": "AST: Corrupt mobile triggerConstructionSlam firing on new monopoly acquisition",
+    "target": "if ((!isMobile || enableMobileInstancedPool) && monopolyGroups && hasNewMonopolyGroup(prevGroupsRef.current, monopolyGroups)) {",
+    "replacement": "if (!isMobile && monopolyGroups && hasNewMonopolyGroup(prevGroupsRef.current, monopolyGroups)) {"
+  },
+  {
+    "file": "src/client/3d/monopoly_plaza_fusion.tsx",
+    "desc": "AST: Corrupt wasRipplingRef post-TTL instanceMatrix settlement pass in useSafeFrame ([ADV-02])",
+    "target": "if (wasRipplingRef.current) {\n        const settledSlots = computeMobileMonopolyArchwayPoolSlots(monopolyGroups, null, nowMs);\n        applySlotsToInstancedMesh(archwayInstancedRef.current, settledSlots, false);\n        wasRipplingRef.current = false;\n      }",
+    "replacement": "if (false && wasRipplingRef.current) { wasRipplingRef.current = false; }"
+  },
+  {
+    "file": "src/client/3d/monopoly_plaza_fusion.tsx",
+    "desc": "AST: Corrupt frustumCulled={false} on mobile-instanced-monopoly-archways ([ADV-03])",
+    "target": "args={[archwayGeom, undefined, MAX_MONOPOLY_ARCHWAY_SLOTS]} frustumCulled={false} data-testid=\"mobile-instanced-monopoly-archways\"",
+    "replacement": "args={[archwayGeom, undefined, MAX_MONOPOLY_ARCHWAY_SLOTS]} frustumCulled={true} data-testid=\"mobile-instanced-monopoly-archways\""
+  },
+  {
+    "file": "src/client/3d/monopoly_plaza_fusion.tsx",
+    "desc": "AST: Corrupt frustumCulled={false} on mobile-instanced-monopoly-promenades ([ADV-03])",
+    "target": "args={[promenadeGeom, undefined, MAX_MONOPOLY_PROMENADE_SLOTS]} frustumCulled={false} data-testid=\"mobile-instanced-monopoly-promenades\"",
+    "replacement": "args={[promenadeGeom, undefined, MAX_MONOPOLY_PROMENADE_SLOTS]} frustumCulled={true} data-testid=\"mobile-instanced-monopoly-promenades\""
+  },
+  {
+    "file": "src/client/3d/war_room_stage_visuals.ts",
+    "desc": "AST: Corrupt MONOPOLY_OVERLORD institutional financial slogan in resolveTycoonDiplomacyPosture",
+    "target": "return { isVisible: true, posture: BotPosture.Leading, tacticalMode: 'MONOPOLY_OVERLORD', viSlogan: 'Vị Thế Chi Phối', accentColor: '#F59E0B', netWorth };",
+    "replacement": "return { isVisible: true, posture: BotPosture.Leading, tacticalMode: 'MONOPOLY_OVERLORD', viSlogan: '👑 Bá Chủ Độc Quyền', accentColor: '#F59E0B', netWorth };"
+  },
+  {
+    "file": "src/client/3d/war_room_stage_visuals.ts",
+    "desc": "AST: Corrupt HUD-safe unclipped bubbleWorldPosition on sanctuary-west-south",
+    "target": ": sanctuary.id === 'sanctuary-west-south' ? [cx + 1.95, cz - 0.65]",
+    "replacement": ": sanctuary.id === 'sanctuary-west-south' ? [cx, cz]"
+  },
+  {
+    "file": "src/client/3d/war_room_stage_visuals.ts",
+    "desc": "AST: Corrupt obsidian-slate #0F172A nameplate background in createDiplomacySpeechBubbleTexture",
+    "target": "const backgroundHex = '#0F172A';",
+    "replacement": "const backgroundHex = '#2B1D14';"
+  },
+  {
+    "file": "src/client/3d/war_room_stage_layer.tsx",
+    "desc": "AST: Corrupt Option B showSpeechBubbles default false visibility gate in WarRoomStageLayer ([ADV-03])",
+    "target": "const showSpeechBubbles = Boolean(props?.showSpeechBubbles);",
+    "replacement": "const showSpeechBubbles = true;"
+  },
+  {
+    "file": "src/client/3d/monopoly_plaza_fusion.tsx",
+    "desc": "AST: Corrupt Desktop Domino Shockwave pitchRad rotation.x wiring in MonopolyPlazaFusion ([ADV-04])",
+    "target": "fusionGroupRef.current.rotation.x = ripple.pitchRad;",
+    "replacement": "fusionGroupRef.current.rotation.x = 0;"
+  },
+  {
+    "file": "src/client/3d/board_layout.tsx",
+    "desc": "AST: Corrupt enableMobileInstancedPool call-site wiring in GameBoard",
+    "target": "enableMobileInstancedPool={tierProfile.monopolyArchwayMode === 'INSTANCED_POOL_SINGLE_MAT'}",
+    "replacement": "enableMobileInstancedPool={false}"
+  }
+]

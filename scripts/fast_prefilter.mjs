@@ -11,6 +11,9 @@
  * 4. Anti-Slop & Orphan Production Files (scripts/lint_slop.mjs)
  * 5. 2D UI Impeccable Craft Linter (scripts/lint_ui.mjs)
  * 6. i18n Rejection Reason Parity (scripts/check_reason_i18n_parity.mjs)
+ * 7. SSOT Economic Data Drift (scripts/audit_ssot_drift.mjs)
+ * 8. Subsystem Boundary & Seam Linter (scripts/lint_boundaries.mjs)
+ * 9. Knowledge Fold SSOT Size Invariant (docs/FEATURE_MAP.md <= 30KB)
  * 
  * Usage:
  *   node scripts/fast_prefilter.mjs [target_files...]
@@ -92,6 +95,19 @@ runStep('3. Zero Dirty Casts & Banned AST Patterns', () => {
       // Stray console.log in production code (allow in tests or scripts)
       if (!file.startsWith('tests') && !file.startsWith('scripts') && /console\.log\s*\(/.test(line)) {
         violations.push(`${file}:${lineNum} - Stray console.log in production source: ${line.trim()}`);
+      }
+      // Anti-TIDD: Ad-hoc human language word replacement in production source outside i18n
+      // Catches kludges like .replace(/Đọc Quyền/gu, 'Độc Quyền') hardcoded in production to bypass test typos
+      if (
+        !file.startsWith('tests') &&
+        !file.startsWith('scripts') &&
+        !file.includes('i18n') &&
+        !file.startsWith('src/client/ui') &&
+        /\.replace\s*\(\s*\/[\p{L}\s]{3,}\/[a-z]*\s*,\s*['"][^'"]*['"]\s*\)/u.test(line)
+      ) {
+        violations.push(
+          `${file}:${lineNum} - Anti-TIDD Violation: Forbidden ad-hoc word replacement regex in production source: ${line.trim()}. Fix dictionary or contract test instead of mutating production strings.`
+        );
       }
     });
 
@@ -195,6 +211,17 @@ if (testFilesToScan.length > 0) {
         }
       }
 
+      // Rule 17: NO_FS_IN_CLIENT_TESTS Guard in Step 3.5 (Client/Server Seam Discipline)
+      const normFile = file.replace(/\\/g, '/');
+      if (normFile.startsWith('tests/client/') || normFile.includes('/tests/client/')) {
+        if (/\b(?:from\s+['"](?:node:)?fs(?:\/promises)?['"]|require\(['"](?:node:)?fs(?:\/promises)?['"]\))/.test(content) ||
+            /\b(?:fs\.(?:readFileSync|existsSync|statSync|readdirSync)|readFileSync\(|existsSync\()/.test(content)) {
+          testViolations.push(
+            `${file} - [Rule 17: NO_FS_IN_CLIENT_TESTS] Tautological Testing Violation: Banned file system module (fs) in client test. Tests in tests/client/** must verify behavioral runtime logic or use the R3F test harness, not scan source strings via fs.`
+          );
+        }
+      }
+
       // Station 4 Mutant Floor Early Warning (< 14 asserts in contract test suite)
       if (isContract) {
         const totalExpects = (content.match(/\bexpect\s*\(/g) || []).length;
@@ -214,24 +241,27 @@ if (testFilesToScan.length > 0) {
   console.log('ℹ️  3.5. Test Assertion Density: Skipped (no test files in target list)');
 }
 
-// 4. Anti-Slop Linter (includes Rule 8 zero-test-props and Rule 11 zero-orphan-files)
-runStep('4. Anti-Slop Linter (lint_slop.mjs)', () => {
-  const srcTargets = targetFiles.filter((f) => f.startsWith('src/'));
-  let slopTarget = 'src';
-  if (srcTargets.length > 0 && srcTargets.every((f) => f.startsWith('src/server/'))) {
-    slopTarget = 'src/server';
-  } else if (srcTargets.length > 0 && srcTargets.every((f) => f.startsWith('src/client/'))) {
-    slopTarget = 'src/client';
-  } else if (srcTargets.length > 0 && srcTargets.every((f) => f.startsWith('src/domain/'))) {
-    slopTarget = 'src/domain';
-  }
-  execSync(`node scripts/lint_slop.mjs ${slopTarget}`, { stdio: 'pipe', encoding: 'utf8' });
-});
+// 4. Anti-Slop Linter (includes Rule 8 zero-test-props, Rule 11 zero-orphan-files, Rule 17 no-fs-in-client-tests)
+const slopTargets = targetFiles.filter((f) => f.startsWith('src/') || f.startsWith('tests/client/'));
+if (targetFiles.length > 0 && slopTargets.length === 0) {
+  console.log('ℹ️  4. Anti-Slop Linter: Skipped (no src/ or tests/client/ files in target list)');
+} else {
+  runStep('4. Anti-Slop Linter (lint_slop.mjs)', () => {
+    const slopArg = slopTargets.length > 0 ? slopTargets.map((f) => `"${f}"`).join(' ') : 'src';
+    execSync(`node scripts/lint_slop.mjs ${slopArg}`, { stdio: 'pipe', encoding: 'utf8' });
+  });
+}
 
 // 5. 2D UI Craft Linter (lint_ui.mjs)
-runStep('5. UI Impeccable Linter (lint_ui.mjs)', () => {
-  execSync('node scripts/lint_ui.mjs', { stdio: 'pipe', encoding: 'utf8' });
-});
+const clientTargets = targetFiles.filter((f) => f.startsWith('src/client/'));
+if (targetFiles.length > 0 && clientTargets.length === 0) {
+  console.log('ℹ️  5. UI Impeccable Linter: Skipped (no src/client/ files in target list)');
+} else {
+  runStep('5. UI Impeccable Linter (lint_ui.mjs)', () => {
+    const uiArg = clientTargets.length > 0 ? clientTargets.map((f) => `"${f}"`).join(' ') : 'src/client';
+    execSync(`node scripts/lint_ui.mjs ${uiArg}`, { stdio: 'pipe', encoding: 'utf8' });
+  });
+}
 
 // 6. i18n Rejection Reason Parity (check_reason_i18n_parity.mjs)
 runStep('6. i18n Rejection Reason Parity', () => {
@@ -248,6 +278,25 @@ runStep('7. SSOT Economic Data Drift', () => {
 runStep('8. Subsystem Boundary & Seam Linter', () => {
   const quotedFiles = targetFiles.length > 0 ? targetFiles.map((f) => `"${f}"`).join(' ') : '';
   execSync(`node scripts/lint_boundaries.mjs ${quotedFiles}`, { stdio: 'pipe', encoding: 'utf8' });
+});
+
+// 9. Knowledge Fold SSOT Size Invariant (FEATURE_MAP.md <= 30KB)
+runStep('9. Knowledge Fold SSOT Size Invariant (FEATURE_MAP.md <= 30KB)', () => {
+  const featureMapPath = path.resolve(repoRoot, 'docs/FEATURE_MAP.md');
+  if (fs.existsSync(featureMapPath)) {
+    const stats = fs.statSync(featureMapPath);
+    const maxBytes = 30 * 1024; // 30,720 bytes
+    const warnBytes = 28.5 * 1024; // 29,184 bytes
+    if (stats.size > maxBytes) {
+      throw new Error(
+        `docs/FEATURE_MAP.md size is ${stats.size} bytes (${(stats.size / 1024).toFixed(2)} KB), exceeding the 30 KB (30,720 bytes) Knowledge Fold ceiling! Prune narrative fluff or compress table rows.`
+      );
+    } else if (stats.size >= warnBytes) {
+      console.warn(
+        `\n⚠️  [FEATURE_MAP EARLY WARNING BUFFER] docs/FEATURE_MAP.md size is ${(stats.size / 1024).toFixed(2)} KB (>= 28.5 KB). Approaching the 30.0 KB hard ceiling! Engineers must prune narrative fluff before adding new features.`
+      );
+    }
+  }
 });
 
 console.log('\n======================================================');

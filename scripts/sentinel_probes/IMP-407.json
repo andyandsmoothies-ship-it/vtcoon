@@ -1,0 +1,62 @@
+[
+  {
+    "file": "src/client/3d/spatial_geometry_helpers.ts",
+    "desc": "AST: Corrupt extX calculation in computeTransformedAABB2D",
+    "target": "const extX = halfW * cosR + halfD * sinR;",
+    "replacement": "const extX = halfW;"
+  },
+  {
+    "file": "src/client/3d/spatial_geometry_helpers.ts",
+    "desc": "AST: Corrupt extZ calculation in computeTransformedAABB2D",
+    "target": "const extZ = halfW * sinR + halfD * cosR;",
+    "replacement": "const extZ = halfD;"
+  },
+  {
+    "file": "src/client/3d/spatial_geometry_helpers.ts",
+    "desc": "AST: Corrupt clearance margin addition in checkAABBCollision2D",
+    "target": "boxA.maxX + clearanceM > boxB.minX &&",
+    "replacement": "boxA.maxX > boxB.minX &&"
+  },
+  {
+    "file": "src/client/3d/spatial_geometry_helpers.ts",
+    "desc": "AST: Corrupt Overview camera projection coordinates in projectToOverviewNdc",
+    "target": "tempProjectVec.set(x, y, zCoord).project(cachedOverviewCamera);",
+    "replacement": "tempProjectVec.set(0, 0, 0);"
+  },
+  {
+    "file": "src/client/3d/spatial_geometry_helpers.ts",
+    "desc": "AST: Corrupt isOverviewFrustumSafe threshold evaluation to always true",
+    "target": "return Math.abs(ndcX) <= maxNdcX && Math.abs(ndcY) <= maxNdcY;",
+    "replacement": "return true;"
+  },
+  {
+    "file": "src/client/3d/canvas_text_sanitizer.ts",
+    "desc": "AST: Corrupt emoji stripping in sanitizeCanvasText",
+    "target": "const stripped = normalized.replace(EMOJI_REPLACE_PATTERN, '');",
+    "replacement": "const stripped = normalized;"
+  },
+  {
+    "file": "src/client/3d/canvas_text_sanitizer.ts",
+    "desc": "AST: Corrupt hasMissingGlyphEmoji to always return false",
+    "target": "return EMOJI_PATTERN.test(rawText);",
+    "replacement": "return false;"
+  },
+  {
+    "file": "src/client/3d/canvas_text_sanitizer.ts",
+    "desc": "AST: Corrupt fallback returned on empty sanitized text",
+    "target": "return cleaned.length > 0 ? cleaned : fallback;",
+    "replacement": "return cleaned;"
+  },
+  {
+    "file": "src/client/3d/war_room_stage_visuals.ts",
+    "desc": "AST: Corrupt isEquipmentClearanceSafe in getWarRoomStageDescriptor",
+    "target": "isEquipmentClearanceSafe: !checkAABBCollision2D(gavelBox, scaleBox, 0.20),",
+    "replacement": "isEquipmentClearanceSafe: false,"
+  },
+  {
+    "file": "src/client/3d/war_room_stage_visuals.ts",
+    "desc": "AST: Corrupt speech bubble texture cache key to raw viSlogan",
+    "target": "const key = `${tacticalMode}:${accentColor}:${renderedText}`;",
+    "replacement": "const key = `${tacticalMode}:${accentColor}:${viSlogan}`;"
+  }
+]

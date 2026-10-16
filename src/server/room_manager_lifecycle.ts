@@ -8,7 +8,7 @@ import {
 import { BotPersonality } from '../domain/bot/index.js';
 import { initRoomBots, addBotToRoom, removeBotFromRoom, type RoomBotSpec } from './room_bot_manager.js';
 import { executeTurnEnd } from './turn_loop.js';
-import type { AuctionSession } from './auction_manager.js';
+import type { AuctionSession } from './auction_types.js';
 import { pendingTradeManager } from './pending_trade_manager.js';
 import { GameRoomSession } from './game_room_session.js';
 

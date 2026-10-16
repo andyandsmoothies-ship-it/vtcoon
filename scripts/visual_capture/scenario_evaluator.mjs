@@ -4,12 +4,18 @@ import { sleep } from './preview_server_manager.mjs';
 
 export const DEFAULT_SCENARIOS = [
   'default',
-  'high-roller',
-  'property-tycoon',
-  'auction-fever',
-  'jail-bird',
-  'tile-aura',
-  'street-chase'
+  'board_ownership_monopoly',
+  'camera_chase_cinematic',
+  'camera_chase_dice_pan',
+  'camera_chase_normal',
+  'camera_soft_return_and_beacon',
+  'camera_spline_arc_flyby',
+  'deed_modal',
+  'dice_rolling',
+  'event_card_modal',
+  'notifications_financial',
+  'notifications_showcase',
+  'transit_wheel',
 ];
 
 /**
@@ -54,27 +60,57 @@ export async function cleanOverlayBanners(send) {
 /**
  * Injects scenario script or executes custom expression in the browser context.
  */
-export async function injectScenario(send, scenarioName, scenarioExpr, visualScenariosDir) {
-  if (scenarioName) {
+export async function injectScenario(send, scenarioName, scenarioExpr, visualScenariosDir, cameraOverride = null) {
+  if (scenarioName && scenarioName !== 'default') {
     console.log(`🎬 Injecting UI scenario: "${scenarioName}"...`);
     const scenarioPath = path.resolve(visualScenariosDir, `${scenarioName}.js`);
     if (fs.existsSync(scenarioPath)) {
       const scenarioCode = fs.readFileSync(scenarioPath, 'utf8');
-      await send('Runtime.evaluate', {
+      const res = await send('Runtime.evaluate', {
         expression: `(function() {\n${scenarioCode}\n})()`,
         returnByValue: true,
       });
+      if (res && res.exceptionDetails) {
+        throw new Error(`❌ Scenario "${scenarioName}" threw runtime exception: ${JSON.stringify(res.exceptionDetails)}`);
+      }
     } else {
-      console.warn(`⚠️ Scenario file not found: ${scenarioPath}`);
+      throw new Error(`❌ Scenario file not found: ${scenarioPath}. Refusing to capture uninitialized default board!`);
     }
     await sleep(1500);
   } else if (scenarioExpr) {
     console.log(`🎬 Evaluating scenario expression...`);
     const res = await send('Runtime.evaluate', { expression: scenarioExpr });
     if (res && res.exceptionDetails) {
-      console.error('❌ Scenario expression failed:', JSON.stringify(res.exceptionDetails));
+      throw new Error(`❌ Scenario expression failed: ${JSON.stringify(res.exceptionDetails)}`);
     }
     await sleep(700);
+  }
+
+  if (cameraOverride && (cameraOverride.pos || cameraOverride.target)) {
+    const posExpr = cameraOverride.pos ? `cam.position.set(${cameraOverride.pos.join(', ')});` : '';
+    const targetExpr = cameraOverride.target
+      ? `if (controls && controls.target) { controls.target.set(${cameraOverride.target.join(', ')}); } cam.lookAt(${cameraOverride.target.join(', ')});`
+      : '';
+    console.log(`🎥 Applying custom 3D camera override: pos=${JSON.stringify(cameraOverride.pos)} target=${JSON.stringify(cameraOverride.target)}`);
+    await send('Runtime.evaluate', {
+      expression: `(function() {
+        if (window.__gameStore) {
+          window.__gameStore.setState({ hasUserCustomCamera: true, cameraFocusCell: null, isRolling: false });
+        }
+        const cam = window.__threeCamera;
+        const controls = window.__orbitControls;
+        if (cam) {
+          ${posExpr}
+          ${targetExpr}
+          cam.updateProjectionMatrix();
+        }
+        if (controls && typeof controls.update === 'function') {
+          controls.update();
+        }
+      })()`,
+      returnByValue: true,
+    });
+    await sleep(600);
   }
 }
 

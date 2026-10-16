@@ -140,7 +140,7 @@ describe('[TC-VFX02.3/MSS] applyDeltaToStore Tu Dong Kich Hoat Floating Text The
     };
 
     applyDeltaToStore(delta, useGameStore);
-    vi.advanceTimersByTime(1900);
+    vi.advanceTimersByTime(2500);
 
     const fts = useGameStore.getState().floatingTexts;
     expect(fts).toHaveLength(1);
@@ -198,7 +198,7 @@ describe('[TC-VFX02.3/MSS] applyDeltaToStore Tu Dong Kich Hoat Floating Text The
     };
 
     applyDeltaToStore(penaltyDelta, useGameStore);
-    vi.advanceTimersByTime(1000);
+    vi.advanceTimersByTime(2000);
 
     const fts = useGameStore.getState().floatingTexts;
     expect(fts.length).toBeGreaterThanOrEqual(1);

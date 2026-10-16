@@ -1,7 +1,7 @@
 // [UC-SEC-001/MSS] Intent Guard — Kiểm Tra Quyền Sở Hữu Lượt & Chống Gian Lận (Turn Ownership Guard)
 import { TurnPhase, type Room } from '../../domain/room.js';
 import type { PlayerIntent } from '../intent_dispatcher.js';
-import type { ReasonCode } from '../network/network_types.js';
+import type { ReasonCode } from '../../domain/protocol/index.js';
 
 export interface IntentGuardResult {
   readonly allowed: boolean;

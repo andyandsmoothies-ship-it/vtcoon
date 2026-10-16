@@ -5,8 +5,8 @@ subagent: true
 mainAgent: false
 model: flash
 workspace: inherit
-skills: [skill-dispatcher, research]
-tools: [view_file, list_dir, find_by_name, grep_search, run_command]
+skills: [codebase-design, systematic-debugging]
+tools: [view_file, list_dir, find_by_name, grep_search, run_command, call_mcp_tool]
 ---
 # SCOUT PROTOCOL
 

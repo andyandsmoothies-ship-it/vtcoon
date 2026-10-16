@@ -9,7 +9,7 @@ import { RoundedBoxGeometry } from 'three-stdlib';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { BOARD_CONFIG } from '../../domain/board_config';
 import { cellPosition } from './board_coords';
-import { tileRotation } from './board_layout';
+import { tileRotation } from './board_layout_math.js';
 import { getTileAtlasGeometry, getBoardTileAtlas } from './tile_texture_atlas';
 import { useTextureRevision } from './texture_revision';
 

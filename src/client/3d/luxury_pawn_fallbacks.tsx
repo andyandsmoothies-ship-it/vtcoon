@@ -1,6 +1,6 @@
 // [TC-IMP29.2/MSS][IMP-105] luxury_pawn_fallbacks.tsx — Cơ chế dự phòng thủ tục Zero-Crash cho 4 Quân Cờ VIP
 import React from 'react';
-import type { LuxuryPawnConfig } from './luxury_pawn_models';
+import type { LuxuryPawnConfig } from '../../domain';
 import {
   getTallChessBaseBodyGeometry,
   getMergedRookHeadGeometry,

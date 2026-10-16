@@ -1,7 +1,6 @@
 // [UC-SEC-003/MSS] Envelope Validator — Kiểm Chuẩn Cấu Trúc JSON & Chống Giá Trị Âm
-import type { WsClientMessage } from '../network/network_types.js';
 import { isValidEmoteId } from '../../domain/emotes.js';
-import { VALID_INTENTS, isValidPlayerIntentFields } from '../../domain/protocol/index.js';
+import { VALID_INTENTS, isValidPlayerIntentFields, type WsClientMessage } from '../../domain/protocol/index.js';
 export { VALID_INTENTS };
 
 export type EnvelopeValidationResult =

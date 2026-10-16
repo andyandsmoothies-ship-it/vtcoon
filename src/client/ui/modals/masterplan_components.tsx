@@ -1,7 +1,7 @@
 // [IMP-132/IMP-137] Masterplan Sub-components — Inspector Card & District Cards
 import React from 'react';
-import { COLOR_GROUP_HEX } from '../../../domain/theme';
-import { BOARD_CONFIG } from '../../../domain/board_config';
+import { COLOR_GROUP_HEX, BOARD_CONFIG } from '../../../domain/index.js';
+
 import { formatCurrency } from '../ui_helpers';
 import { getDeedDisplayInfo, type DeedDisplayInfo } from './modal_helpers';
 import type { DistrictGroupDef } from './masterplan_constants';

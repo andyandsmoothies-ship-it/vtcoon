@@ -1,11 +1,10 @@
 // [IMP-335] AuctionModalHost — Extracted sub-host for real-time auction modal
 import React, { useEffect } from 'react';
-import type { PlayerHudInfo } from '../../../store/game_store_types';
+import { useGameStore, type PlayerHudInfo, type ModalPayloadMap } from '../../../store/index.js';
 import type { PlayerIntent } from '../../../../domain/protocol/index.js';
-import { useGameStore, type ModalPayloadMap } from '../../../store/game_store';
+
 import { calculateAuctionTimeRemaining } from '../modal_helpers';
-import { AudioEngine } from '../../../audio/audio_engine';
-import { SoundEffect } from '../../../audio/audio_types';
+import { audio, SoundEffect } from '../../../audio/index.js';
 import { AuctionModal } from '../auction_modal';
 
 export interface AuctionModalHostProps {
@@ -64,7 +63,7 @@ export function AuctionModalHost(props: AuctionModalHostProps): React.ReactEleme
         onClose?.();
       }}
       onBid={(amount) => {
-        AudioEngine.playSfx(SoundEffect.AUCTION_BID);
+        audio.playSfx(SoundEffect.AUCTION_BID);
         onIntent?.({ type: 'INTENT_BID', amount });
         const curTime = payload.timeRemaining ?? 15;
         const nextTime = curTime <= 3 ? curTime + 3 : curTime;

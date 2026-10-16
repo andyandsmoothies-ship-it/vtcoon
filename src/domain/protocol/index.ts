@@ -150,3 +150,7 @@ export type WsServerMessage =
   | { readonly type: 'ADMIN_ACTION_SUCCESS'; readonly action: string; readonly roomCode: string }
   | { readonly type: 'ADMIN_ERROR'; readonly reasonCode: string; readonly message: string }
   | { readonly type: 'ADMIN_SYNC_CLOUD_RESULT'; readonly success: boolean; readonly uploadedCount: number; readonly bucket: string; readonly message?: string; readonly error?: string; readonly reason?: string };
+
+export function encodeMsg(msg: WsServerMessage): string {
+  return JSON.stringify(msg);
+}

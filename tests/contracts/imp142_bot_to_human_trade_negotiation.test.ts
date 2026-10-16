@@ -98,7 +98,7 @@ describe('[TC-142][UC-IMP142] Bot-to-Human Trade Negotiation & 15s Modal Contrac
 
     it('[TC-142.04/MSS][UC-IMP142] Giao dịch Bot-to-Bot vẫn diễn ra đồng bộ tức thì 0ms (giữ nguyên tương thích IMP-82, IMP-118)', () => {
       const { mgr, room, reg, sm } = setupNegotiationRoom();
-      mgr.addBot(room.roomCode, 'bot_seller', BotPersonality.Passive);
+      mgr.addBot(room.roomCode, 'bot_seller', BotPersonality.Balanced);
       const botSeller = room.players.find((p) => p.id === 'bot_seller')!;
       reg.set(3, botSeller.id);
       sm.set(3, { level: 0, isMortgaged: false });

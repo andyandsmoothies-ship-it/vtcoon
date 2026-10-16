@@ -1,7 +1,14 @@
 // [UI-S04/MSS] Modal Helpers — Pure calculation & validation functions for business modals
-import { PROPERTY_DEEDS, RAILROAD_FEES, P2P_TAX_RATE } from '../../../domain/property_data';
-import { BOARD_CONFIG, ColorGroup, CellType } from '../../../domain/board_config';
-import { calculateUpgradeCost, type UpgradeCostModifier } from '../../../domain/property_upgrade.js';
+import {
+  PROPERTY_DEEDS,
+  RAILROAD_FEES,
+  P2P_TAX_RATE,
+  BOARD_CONFIG,
+  ColorGroup,
+  CellType,
+  calculateUpgradeCost,
+  type UpgradeCostModifier,
+} from '../../../domain/index.js';
 import type { ModalPayloadMap, PlayerInfo } from '../../store/game_store_types.js';
 
 export interface DeedDisplayInfo {

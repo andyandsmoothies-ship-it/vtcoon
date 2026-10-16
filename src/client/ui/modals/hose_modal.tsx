@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { HOSE_OUTCOMES } from '../../../domain/event_card_types';
+import { HOSE_OUTCOMES } from '../../../domain/index.js';
+
 import { formatCurrency } from '../ui_helpers';
 import { useAudioStore } from '../../store/audio_store';
 

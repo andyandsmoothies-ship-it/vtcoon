@@ -3,7 +3,7 @@ import { Room, TurnPhase, ActionRejectReason, checkPassedGo, calculateGoSalary, 
 import { BOARD_CONFIG } from '../domain/board_config.js';
 import { handleSpecialCell } from './special_cell_handler.js';
 import { handleLanding, LandingResult, type PropertyRegistry, type PropertyStateMap } from '../domain/property_manager.js';
-import { checkInsolvency } from './insolvency_manager.js';
+import { checkInsolvency } from './fsm_transition_coordinator.js';
 import { MarketCardId } from '../domain/event_card_types.js';
 import {
   TransitWheelOutcome,

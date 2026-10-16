@@ -130,6 +130,16 @@ export function formatReport(results) {
       status = `⚠️ Soft Notice: ${r.totalLines} LOC (Trần cứng ${tier.name} là ${tier.ceiling} LOC. KHÔNG refactor chia nhỏ nếu không có lý do kiến trúc thực sự)`;
     }
 
+    // Explicit LOC Buffer Zone Hard Lock for critical files approaching 350 LOC
+    if (r.filePath.includes('activity_log_subscriber.ts')) {
+      if (r.totalLines >= 350) {
+        status = `❌ HARD ERROR: activity_log_subscriber.ts is at ${r.totalLines} LOC (>= 350 LOC Buffer Zone Guard). Banned adding code! Must Refactor-First to <= 250 LOC.`;
+        hasError = true;
+      } else if (r.totalLines === 349) {
+        status = `⚠️ BUFFER ZONE HARD LOCK: activity_log_subscriber.ts is at 349 LOC (max allowed 349). Any additional line without Refactor-First will trigger hard error!`;
+      }
+    }
+
     tableRows.push(
       `| \`${r.filePath}\` | ${tier.name} | **${r.totalLines}** | ${r.nonEmptySloc} | <= ${tier.ceiling} | ${status} |`
     );

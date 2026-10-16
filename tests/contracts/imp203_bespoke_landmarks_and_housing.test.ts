@@ -87,19 +87,29 @@ describe('[TC-203/MSS][UC-IMP203] Chuẩn Hóa Nhà Cấp 1-2 & Kiến Trúc Tò
   // FACET 1: URL RESOLUTION & HIERARCHY SSOT
   // =========================================================================
   describe('Facet 1: URL Resolution & Hierarchy SSOT', () => {
-    it.each([1, 9, 18, 39] as const)(
-      '[TC-203.01/MSS][UC-IMP203] getBuildingModelUrl(cell %i, 1) resolves standardized house C1 GLB URL',
-      (cellIndex) => {
+    it.each([
+      [1, '/models/buildings/bld_riverine_c1.glb'],
+      [9, '/models/buildings/bld_resort_c1.glb'],
+      [18, '/models/buildings/bld_heritage_c1.glb'],
+      [39, '/models/buildings/bld_metropolis_c1.glb'],
+    ] as const)(
+      '[TC-203.01/MSS][UC-IMP203] getBuildingModelUrl(cell %i, 1) resolves regional C1 GLB URL %s',
+      (cellIndex, expectedUrl) => {
         const url = getBuildingModelUrl(cellIndex, 1);
-        expect(url).toBe('/models/buildings/building_c1.glb');
+        expect(url).toBe(expectedUrl);
       }
     );
 
-    it.each([1, 9, 18, 39] as const)(
-      '[TC-203.02/MSS][UC-IMP203] getBuildingModelUrl(cell %i, 2) resolves standardized house C2 GLB URL',
-      (cellIndex) => {
+    it.each([
+      [1, '/models/buildings/bld_riverine_c2.glb'],
+      [9, '/models/buildings/bld_resort_c2.glb'],
+      [18, '/models/buildings/bld_heritage_c2.glb'],
+      [39, '/models/buildings/bld_metropolis_c2.glb'],
+    ] as const)(
+      '[TC-203.02/MSS][UC-IMP203] getBuildingModelUrl(cell %i, 2) resolves regional C2 GLB URL %s',
+      (cellIndex, expectedUrl) => {
         const url = getBuildingModelUrl(cellIndex, 2);
-        expect(url).toBe('/models/buildings/building_c2.glb');
+        expect(url).toBe(expectedUrl);
       }
     );
 

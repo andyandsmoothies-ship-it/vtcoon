@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { type BondContract, BondTrancheId, BOND_TRANCHES } from '../../../domain/bond_types';
+import { type BondContract, BondTrancheId, BOND_TRANCHES } from '../../../domain/index.js';
+
 import { formatCurrency } from '../ui_helpers';
 
 interface BondIssuanceTabProps {

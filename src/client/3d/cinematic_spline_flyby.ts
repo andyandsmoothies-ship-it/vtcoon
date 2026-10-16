@@ -1,5 +1,6 @@
 // [UI-S01/MSS][UI-S04/MSS][IMP-293] Cinematic Spline Flyby & Macro Pacing
-import { type TargetCameraState, calculateTileFocusCameraPosition } from './camera_state_machine';
+import type { TargetCameraState } from './camera_types';
+import { calculateTileFocusCameraPosition } from './camera_kinematic_helpers';
 import { cellPosition } from './board_coords';
 
 export interface SplineArcParams {

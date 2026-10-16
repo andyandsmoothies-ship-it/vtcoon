@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: vtcoon
+    runtime: node
+    plan: free
+    buildCommand: npm run build
+    startCommand: npm run start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: GRACE_PERIOD_MS
+        value: "15000"
+      - key: VTCOON_ADMIN_SECRET
+        generateValue: true

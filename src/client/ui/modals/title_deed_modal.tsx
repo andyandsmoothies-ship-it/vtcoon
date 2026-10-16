@@ -1,13 +1,16 @@
 import React from 'react';
 import { getDeedDisplayInfo } from './modal_helpers';
 import { formatCurrency } from '../ui_helpers';
-import { COLOR_GROUP_HEX } from '../../../domain/theme';
-import { CellType } from '../../../domain/board_config';
+import {
+  COLOR_GROUP_HEX,
+  CellType,
+  MarketCardId,
+  ChanceCardId,
+  MacroCycleType,
+  type MarketModifier,
+} from '../../../domain/index.js';
 import { getTileAssetUrl } from '../../assets/tile_assets';
 import { useGameStore } from '../../store/game_store';
-import { MarketCardId, ChanceCardId } from '../../../domain/event_card_types';
-import { MacroCycleType } from '../../../domain/macro_cycle_types';
-import type { MarketModifier } from '../../../domain/room';
 import { EVENT_ICON_REGISTRY } from '../../domain_visual_bridge';
 import { TitleDeedArtShowcase } from './title_deed_art_showcase';
 import { TitleDeedRentTable } from './title_deed_rent_table';

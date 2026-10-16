@@ -8,3 +8,4 @@
 export * from './plan_audit/rules_testing.mjs';
 export * from './plan_audit/rules_scope.mjs';
 export * from './plan_audit/rules_architecture.mjs';
+export * from './plan_audit/rules_surface.mjs';

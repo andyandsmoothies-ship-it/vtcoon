@@ -12,22 +12,17 @@ import {
   calculateResponsiveFocusFov,
   calculateResponsiveChaseFov,
 } from './camera_kinematic_helpers';
+import type {
+  CameraMode,
+  TargetCameraState,
+  TargetCameraStateOptions,
+} from './camera_types';
 
-export type CameraMode = 'overview' | 'dice_roll' | 'tension_roll' | 'pawn_chase' | 'tile_focus' | 'auction_focus' | 'pre_match';
-
-export interface TargetCameraStateOptions {
-  readonly cinematicChase?: boolean;
-  readonly cellIndex?: number;
-  readonly aspect?: number;
-  readonly isHighStakesRoll?: boolean;
-  readonly isJailFlight?: boolean;
-  readonly isTransientTurnCorner?: boolean;
-  readonly enableNorthFraming?: boolean;
-  readonly isRolling?: boolean;
-  readonly isBotTurn?: boolean;
-  readonly rollingPlayerPos?: number;
-  readonly gamePhase?: 1 | 2 | 3;
-}
+export type {
+  CameraMode,
+  TargetCameraState,
+  TargetCameraStateOptions,
+};
 
 export const CAMERA_CONFIG = {
   overview: {
@@ -154,13 +149,6 @@ export {
   calculateScreenShake,
   dampValue,
 };
-
-export interface TargetCameraState {
-  readonly position: [number, number, number];
-  readonly target: [number, number, number];
-  readonly fov: number;
-  readonly speed: number;
-}
 
 function configToCameraState(cfg: { readonly position: readonly [number, number, number]; readonly target: readonly [number, number, number]; readonly fov: number; readonly speed: number }): TargetCameraState {
   return {

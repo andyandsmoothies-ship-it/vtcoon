@@ -1,7 +1,7 @@
 import React from 'react';
 import { useGameStore } from '../../store/game_store';
 import { formatCurrency } from '../ui_helpers';
-import { PROPERTY_DEEDS } from '../../../domain/property_data';
+import { PROPERTY_DEEDS } from '../../../domain/index.js';
 import {
   resolvePurchaseDecisionInsight,
   resolveCashBufferSafety,

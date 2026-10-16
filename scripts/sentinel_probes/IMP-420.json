@@ -1,0 +1,104 @@
+[
+  {
+    "file": "src/client/3d/spatial_geometry_helpers.ts",
+    "desc": "AST: invert condition in getSpatialQuadrant for x",
+    "target": "if (normX < 0) {",
+    "replacement": "if (normX > 0) {"
+  },
+  {
+    "file": "src/client/3d/spatial_geometry_helpers.ts",
+    "desc": "AST: invert condition in getSpatialQuadrant for negative x branch",
+    "target": "return normZ < 0 ? 'NW' : 'SW';",
+    "replacement": "return normZ > 0 ? 'NW' : 'SW';"
+  },
+  {
+    "file": "src/client/3d/spatial_geometry_helpers.ts",
+    "desc": "AST: invert condition in getSpatialQuadrant for positive x branch",
+    "target": "return normZ < 0 ? 'NE' : 'SE';",
+    "replacement": "return normZ > 0 ? 'NE' : 'SE';"
+  },
+  {
+    "file": "src/client/3d/spatial_geometry_helpers.ts",
+    "desc": "AST: corrupt negative zero normalization in getSpatialQuadrant",
+    "target": "const normX = Object.is(x, -0) ? 0 : x;",
+    "replacement": "const normX = -1;"
+  },
+  {
+    "file": "src/client/3d/spatial_geometry_helpers.ts",
+    "desc": "AST: corrupt initial counts in computeQuadrantCounts",
+    "target": "const counts: Record<SpatialQuadrant, number> = { NW: 0, NE: 0, SW: 0, SE: 0 };",
+    "replacement": "const counts: Record<SpatialQuadrant, number> = { NW: 1, NE: 0, SW: 0, SE: 0 };"
+  },
+  {
+    "file": "src/client/3d/spatial_geometry_helpers.ts",
+    "desc": "AST: skip quadrant counting increment in computeQuadrantCounts",
+    "target": "counts[getSpatialQuadrant(x, z)]++;",
+    "replacement": "/* no-op */"
+  },
+  {
+    "file": "src/client/3d/spatial_geometry_helpers.ts",
+    "desc": "AST: omit NaN guard in computeQuadrantCounts",
+    "target": "x !== x || z !== z",
+    "replacement": "false"
+  },
+  {
+    "file": "src/client/3d/spatial_geometry_helpers.ts",
+    "desc": "AST: tighten sector balance threshold from 2 to 1 in validateSectorBalance",
+    "target": "return max - min <= 2;",
+    "replacement": "return max - min <= 1;"
+  },
+  {
+    "file": "src/client/3d/spatial_geometry_helpers.ts",
+    "desc": "AST: loosen sector balance threshold from 2 to 3 in validateSectorBalance",
+    "target": "return max - min <= 2;",
+    "replacement": "return max - min <= 3;"
+  },
+  {
+    "file": "src/client/3d/spatial_geometry_helpers.ts",
+    "desc": "AST: bypass negative count check in validateSectorBalance",
+    "target": "v < 0 || Math.floor(v) !== v",
+    "replacement": "false"
+  },
+  {
+    "file": "src/client/3d/spatial_geometry_helpers.ts",
+    "desc": "AST: bypass fractional check in validateSectorBalance",
+    "target": "Math.floor(v) !== v",
+    "replacement": "false"
+  },
+  {
+    "file": "src/client/3d/spatial_geometry_helpers.ts",
+    "desc": "AST: invert validateSectorBalance return to unconditional true",
+    "target": "return max - min <= 2;",
+    "replacement": "return true;"
+  },
+  {
+    "file": "src/client/3d/spatial_geometry_helpers.ts",
+    "desc": "AST: invert validateSectorBalance return to unconditional false",
+    "target": "return max - min <= 2;",
+    "replacement": "return false;"
+  },
+  {
+    "file": "src/client/3d/coastal_island_environment.tsx",
+    "desc": "AST: corrupt sector balance validation at consumer call-site",
+    "target": "const isBalanced = validateSectorBalance(quadrantCounts);",
+    "replacement": "const isBalanced = false;"
+  },
+  {
+    "file": "src/client/3d/coastal_island_environment.tsx",
+    "desc": "AST: corrupt resolved props at consumer call-site",
+    "target": "props: DEFAULT_COASTAL_ISLAND_PROPS,",
+    "replacement": "props: [],"
+  },
+  {
+    "file": "src/client/3d/coastal_island_environment.tsx",
+    "desc": "AST: corrupt quadrantCounts computation at consumer call-site",
+    "target": "const quadrantCounts = computeQuadrantCounts(DEFAULT_COASTAL_ISLAND_PROPS.map((p) => p.position));",
+    "replacement": "const quadrantCounts = { NW: 0, NE: 0, SW: 0, SE: 0 };"
+  },
+  {
+    "file": "src/client/3d/coastal_island_environment.tsx",
+    "desc": "AST: corrupt default cape count in DEFAULT_COASTAL_ISLAND_PROPS",
+    "target": "{ id: 'cape-northeast', position: [16.5, -0.45, -14.0], topRadius: 4.2, bottomRadius: 6.0, height: 0.20, segments: 32 },",
+    "replacement": "/* cape omitted */"
+  }
+]

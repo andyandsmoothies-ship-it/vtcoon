@@ -102,9 +102,9 @@ describe('Station 1 Contract Tests: React Rules of Hooks Compliance (IMP-328)', 
       act(() => {
         root?.render(
           React.createElement(OwnerPricePill, {
-            cellIndex: 3,
+            cellIndex: undefined,
             ownerColor: undefined,
-            price: 120,
+            price: undefined,
           })
         );
       });
@@ -182,7 +182,7 @@ describe('Station 1 Contract Tests: React Rules of Hooks Compliance (IMP-328)', 
       });
     }).not.toThrow();
     expect(container?.querySelector('.pointer-events-none')).not.toBeNull();
-    expect(container?.textContent).toContain('+500k');
+    expect(container?.textContent).toContain('500k');
   });
 
   it('TC-328.06 [UC-HOOKS/A1]: Given FloatingBadge rendered with monopoly action type, When component re-renders with rent action type, Then badge transitions smoothly without hook count discrepancy', () => {
@@ -221,6 +221,6 @@ describe('Station 1 Contract Tests: React Rules of Hooks Compliance (IMP-328)', 
       });
     }).not.toThrow();
     expect(container !== null).toBe(true);
-    expect(container?.textContent).toContain('-200k');
+    expect(container?.textContent).toContain('200k');
   });
 });

@@ -16,8 +16,7 @@ import { TurnTimeoutScheduler } from './turn_timeout_scheduler.js';
 import { TurnOrchestrator } from './turn_orchestrator.js';
 import { TurnWatchdog } from './turn_watchdog.js';
 import { SocketRegistry } from './socket_registry.js';
-import { encodeMsg } from './network_types.js';
-import type { WsServerMessage, WsClientMessage } from './network_types.js';
+import { encodeMsg, type WsServerMessage, type WsClientMessage } from '../../domain/protocol/index.js';
 import { AdminManager } from './admin_manager.js';
 import type { RoomFinishSummary } from '../logging/persistent_room_logger.js';
 import {

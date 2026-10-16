@@ -12,7 +12,7 @@ import {
   createDefaultSlots,
   getNextBotPersonality,
 } from './lobby_types';
-import { createNewRoomConfig } from '../offline_landing';
+import { createNewRoomConfig } from '../network/room_config_helpers.js';
 import { purgeClientMatchSession } from '../network/client_session_purger.js';
 
 export * from './lobby_types';

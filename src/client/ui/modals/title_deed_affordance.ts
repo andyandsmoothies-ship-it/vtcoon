@@ -1,8 +1,14 @@
 // [IMP-204] Title Deed Affordance & Even Build Rules Calculation
-import { PROPERTY_DEEDS, UTILITY_CELLS } from '../../../domain/property_data.js';
-import { BOARD_CONFIG, CellType, type ColorGroup } from '../../../domain/board_config.js';
-import type { Player } from '../../../domain/types.js';
-import { calculateUpgradeCost, type UpgradeCostModifier } from '../../../domain/property_upgrade.js';
+import {
+  PROPERTY_DEEDS,
+  UTILITY_CELLS,
+  BOARD_CONFIG,
+  CellType,
+  calculateUpgradeCost,
+  type ColorGroup,
+  type Player,
+  type UpgradeCostModifier,
+} from '../../../domain/index.js';
 
 export interface PurchaseAffordance {
   readonly deedPrice: number;

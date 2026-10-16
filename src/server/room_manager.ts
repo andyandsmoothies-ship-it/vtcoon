@@ -21,7 +21,9 @@ import {
   syncAuctionSession,
 } from './room_auction_coordinator.js';
 import { handleTurnStart, handleBailOut, handleUseDiplomatic } from './audit_manager.js';
-import { type AuctionSession } from './auction_manager.js';
+import type { AuctionSession, AuctionResult } from './auction_types.js';
+import type { RoomContext } from './room_context_types.js';
+import type { IRoomManager, RollResult } from './room_manager_types.js';
 import { handleBuyProperty, handleUpgrade, handleUpgradeETC, handleUpgradeUtility } from './property_actions.js';
 import { handleHoseInvest, handleHoseSkip } from './hose_actions.js';
 import { handleIssueBond, handleRepayBond } from './bond_manager.js';
@@ -29,7 +31,7 @@ import { dispatchPlayerIntent, type PlayerIntent } from './intent_dispatcher.js'
 import {
   coordMortgage, coordRedeem, coordDowngrade, coordLiquidate, coordTrade,
   coordRespondTradeOffer, coordBankruptcy, coordExecuteCompulsoryBuyout,
-  coordDeclineCompulsoryBuyout, type RoomContext,
+  coordDeclineCompulsoryBuyout,
 } from './room_property_coordinator.js';
 import { pendingTradeManager, type PendingTradeSession } from './pending_trade_manager.js';
 import { executeTurnRoll } from './turn_loop.js';
@@ -44,24 +46,10 @@ import { GameRoomSession } from './game_room_session.js';
 import { createSessionFieldProxy, createBotPersonalityMapFacade } from './session_proxy_facade.js';
 
 export type { AuctionSession, PlayerIntent, PendingTradeSession, PendingBuyoutSession };
+export type { AuctionResult } from './auction_types.js';
+export type { RollResult, IRoomManager } from './room_manager_types.js';
 
-export interface AuctionResult {
-  winnerId: string | null;
-  winningBid: number;
-  finalPrice?: number;
-  isForeclosure?: boolean;
-  cellIndex?: number;
-}
-
-export interface RollResult {
-  readonly dice: DiceResult;
-  readonly player: Readonly<{ id: string; position: number; balance: number }>;
-  readonly passedGo: boolean;
-  readonly passedGoSalary?: number;
-  readonly rentCharged: number;
-}
-
-export class RoomManager {
+export class RoomManager implements IRoomManager {
   private readonly sessions = new Map<string, GameRoomSession>();
   private readonly rng: () => number;
   private readonly deckRng: () => number;

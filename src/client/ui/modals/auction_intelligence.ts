@@ -1,7 +1,7 @@
 // [IMP-138] Auction District Intelligence & Monopoly Radar
 // Pure calculation engine for auction district ownership & strategic hint reactivity
-import { PROPERTY_DEEDS } from '../../../domain/property_data';
-import { BOARD_CONFIG } from '../../../domain/board_config';
+import { PROPERTY_DEEDS, BOARD_CONFIG } from '../../../domain/index.js';
+
 import { DISTRICT_GROUPS, type DistrictGroupDef } from './masterplan_constants';
 
 export type StrategicHintType =

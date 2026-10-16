@@ -1,0 +1,44 @@
+[
+  {
+    "file": "src/client/3d/hooks/use_managed_geometry.ts",
+    "desc": "AST: Corrupt StrictMode detection to never trigger",
+    "target": "if (renderCountRef.current > 1) {",
+    "replacement": "if (renderCountRef.current > 999) {"
+  },
+  {
+    "file": "src/client/3d/hooks/use_managed_geometry.ts",
+    "desc": "AST: Corrupt StrictMode absorption to always dispose on initial cleanup",
+    "target": "if (isStrictModeRef.current && !isSettledRef.current) {",
+    "replacement": "if (false) {"
+  },
+  {
+    "file": "src/client/3d/hooks/use_managed_geometry.ts",
+    "desc": "AST: Corrupt settled tracking condition",
+    "target": "if (!isStrictModeRef.current || cleanupCountRef.current > 0) {",
+    "replacement": "if (false) {"
+  },
+  {
+    "file": "src/client/3d/hooks/use_managed_geometry.ts",
+    "desc": "AST: Bypass executedDisposals idempotency check",
+    "target": "if (executedDisposals.has(res)) {",
+    "replacement": "if (false) {"
+  },
+  {
+    "file": "src/client/3d/hooks/use_managed_geometry.ts",
+    "desc": "AST: Invert isDisposable predicate check",
+    "target": "return 'dispose' in value && typeof Reflect.get(value, 'dispose') === 'function';",
+    "replacement": "return false;"
+  },
+  {
+    "file": "src/client/3d/penthouse_hologram.tsx",
+    "desc": "AST Call-Site: Corrupt particleGeometry useManagedBufferGeometry hook return",
+    "target": "return geo;\n  }, []);",
+    "replacement": "return undefined;\n  }, []);"
+  },
+  {
+    "file": "src/client/3d/penthouse_hologram.tsx",
+    "desc": "AST Call-Site: Corrupt hudScreenTexture useManagedCanvasTexture hook return",
+    "target": "const hudScreenTexture = useManagedCanvasTexture(() => generateHologramScreenTexture(), []);",
+    "replacement": "const hudScreenTexture = useManagedCanvasTexture(() => null, []);"
+  }
+]

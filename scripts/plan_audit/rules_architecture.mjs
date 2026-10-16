@@ -44,9 +44,9 @@ export function auditPlanSnippetHygiene(relPath, targetChunk, replacementChunk, 
   let condMatch;
   while ((condMatch = condIdentifierRegex.exec(replacementChunk)) !== null) {
     const identName = condMatch[1];
-    const declaredOnDisk = new RegExp(`\\b(?:const|let|var|function|type|interface|import)\\s+${identName}\\b|\\b${identName}\\s*[:=]|\\b(?:props|state|params|options)\\.${identName}\\b`).test(diskContent);
+    const declaredOnDisk = new RegExp(`\\b(?:const|let|var|function|type|interface)\\s+${identName}\\b|import\\s*(?:\\{[^}]*)?\\b${identName}\\b|\\b${identName}\\s*[:=]|\\b(?:props|state|params|options)\\.${identName}\\b`).test(diskContent);
     const declaredInSnippets = allFileSnippets.some((snip) =>
-      new RegExp(`\\b(?:const|let|var|function|type|interface|import)\\s+${identName}\\b|\\b${identName}\\s*[:=]`).test(snip)
+      new RegExp(`\\b(?:const|let|var|function|type|interface)\\s+${identName}\\b|import\\s*(?:\\{[^}]*)?\\b${identName}\\b|\\b${identName}\\s*[:=]`).test(snip)
     );
     if (!declaredOnDisk && !declaredInSnippets) {
       console.error(`  ❌ [UNDECLARED_CONDITION_IDENTIFIER_IN_PLAN] in ${relPath}: Conditional flag '${identName}' is used in snippet but is never declared or imported in physical disk file or plan snippets!`);
@@ -98,29 +98,21 @@ export function auditPhysicalVisualMandate(targetFiles, planContent) {
     }
 
     const isCameraOrMotion = Array.from(targetFiles.keys()).some((f) =>
-      /camera|chase|kinematics|trajectory|hop/i.test(f)
-    ) || /camera|chase|kinematics/i.test(planContent);
-    if (isCameraOrMotion) {
-      const scenarioMatch = planContent.match(/--scenario\s+([a-zA-Z0-9_]+)/);
-      if (!scenarioMatch) {
-        console.error(`  ❌ [MISSING_ACTION_SCENARIO_IN_PLAN] Camera/motion plan must specify an in-action scenario via '--scenario <name>' in Station 3!`);
-        console.error(`     Gotcha #13 mandates in-action capture (elevation <= 20.0m) to prevent idle overview trap.`);
+      /\b(camera|chase|kinematics|trajectory|hop)\b/i.test(f.replace(/[/\\_.]/g, ' '))
+    ) || /\b(camera|chase|kinematics)\b/i.test(planContent);
+    const scenarioMatch = planContent.match(/--scenario\s+([a-zA-Z0-9_-]+)/);
+    if (isCameraOrMotion && !scenarioMatch) {
+      console.error(`  ❌ [MISSING_ACTION_SCENARIO_IN_PLAN] Camera/motion plan must specify an in-action scenario via '--scenario <name>' in Station 3!`);
+      console.error(`     Gotcha #13 mandates in-action capture (elevation <= 20.0m) to prevent idle overview trap.`);
+      errors++;
+    } else if (scenarioMatch) {
+      const scenarioName = scenarioMatch[1];
+      const scenarioPath = path.resolve(process.cwd(), 'scripts/visual_scenarios', `${scenarioName}.js`);
+      if (scenarioName !== 'default' && !fs.existsSync(scenarioPath)) {
+        console.error(`  ❌ [UNKNOWN_CAPTURE_SCENARIO] Scenario '${scenarioName}' specified in plan does not exist at 'scripts/visual_scenarios/${scenarioName}.js'!`);
         errors++;
       } else {
-        const scenarioName = scenarioMatch[1];
-        const scenarioPath = path.resolve(process.cwd(), 'scripts/visual_scenarios', `${scenarioName}.js`);
-        const captureScriptPath = path.resolve(process.cwd(), 'scripts/capture_visual_evidence.mjs');
-        if (fs.existsSync(scenarioPath)) {
-          console.log(`  ✔️ Verified in-action capture scenario '${scenarioName}' exists in 'scripts/visual_scenarios/'.`);
-        } else if (fs.existsSync(captureScriptPath)) {
-          const captureContent = fs.readFileSync(captureScriptPath, 'utf8');
-          if (!captureContent.includes(`'${scenarioName}'`)) {
-            console.error(`  ❌ [UNKNOWN_CAPTURE_SCENARIO] Scenario '${scenarioName}' specified in plan does not exist in 'scripts/visual_scenarios/' or 'scripts/capture_visual_evidence.mjs'!`);
-            errors++;
-          } else {
-            console.log(`  ✔️ Verified in-action capture scenario '${scenarioName}' exists in capture runner.`);
-          }
-        }
+        console.log(`  ✔️ Verified capture scenario '${scenarioName}' exists in 'scripts/visual_scenarios/'.`);
       }
     }
   }

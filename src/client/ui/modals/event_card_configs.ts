@@ -1,7 +1,7 @@
 // [IMP-343] Event Card Static Configs & Style Mappers
 // Pure domain dictionary and presentation styling rules extracted from event_card_visuals
-import { MarketCardId, ChanceCardId } from '../../../domain/event_card_types.js';
-import { MacroCycleType } from '../../../domain/macro_cycle_types.js';
+import { MarketCardId, ChanceCardId, MacroCycleType } from '../../../domain/index.js';
+
 
 export type HeroStatVariant = 'positive' | 'negative' | 'warning' | 'info';
 

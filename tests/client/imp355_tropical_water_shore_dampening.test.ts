@@ -17,6 +17,7 @@ import {
   lerpWaterColor,
 } from '../../src/client/3d/shaders/tropical_water_material';
 import { Color, Vector3 } from 'three';
+import '../helpers/r3f_test_harness';
 import { GameBoard, WALNUT_TABLE_Y, DEPTH_LAYER_STACK } from '../../src/client/3d/board_layout';
 
 // Safe dynamic accessor to verify calculateShoreDampening without compilation crash before Station 2

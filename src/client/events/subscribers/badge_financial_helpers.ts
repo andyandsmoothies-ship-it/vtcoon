@@ -1,7 +1,7 @@
 // [IMP-380] Badge Financial Helpers — Dedicated floating text badge handlers for bonds, buyouts, and investments
 import { type GameState, FloatingTextType } from '../../store/game_store.js';
 import { SynthesizedGameEventType, type SynthesizedGameEvent } from '../game_event_types.js';
-import type { GameEventContext } from '../game_event_bus.js';
+import type { GameEventContext } from '../game_event_bus_types.js';
 import type { PacingContext } from '../pacing_context.js';
 import { formatCurrency } from '../../ui/ui_helpers.js';
 import { getCellName, resolvePlayerName } from './property_market_badge_handler.js';

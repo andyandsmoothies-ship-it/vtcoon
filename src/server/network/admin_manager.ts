@@ -4,7 +4,18 @@ import type { RoomManager } from '../room_manager.js';
 import type { SessionManager } from '../session_manager.js';
 import type { ReconnectManager } from './reconnect_manager.js';
 import type { Room } from '../../domain/room.js';
-import { encodeMsg, type WsServerMessage, type WsClientMessage } from './network_types.js';
+import {
+  encodeMsg,
+  type WsServerMessage,
+  type WsClientMessage,
+  type RoomHealthStatus,
+  type AdminPlayerSummary,
+  type AdminRoomSummary,
+  type AdminRoomDetail,
+  type AdminRoomLogEntry,
+  type AdminArchivedRoomSummary,
+  type ServerVitals,
+} from '../../domain/protocol/index.js';
 import { PersistentRoomLogger, type RoomLogMeta, type RoomFinishSummary } from '../logging/persistent_room_logger.js';
 import {
   evaluateRoomHealth,
@@ -17,28 +28,19 @@ import { collectServerVitals } from './admin_vitals.js';
 import { syncAdminCloudLogs } from './admin_cloud_sync.js';
 import { AdminEventStore } from './admin_event_store.js';
 
-import {
-  MAX_ROOM_LOGS,
-  type RoomHealthStatus,
-  type AdminPlayerSummary,
-  type AdminRoomSummary,
-  type AdminRoomDetail,
-  type AdminRoomLogEntry,
-  type AdminArchivedRoomSummary,
-  type AdminManagerOptions,
-  type ServerVitals,
-} from './admin_types.js';
-
-export {
-  MAX_ROOM_LOGS,
-  type RoomHealthStatus,
-  type AdminRoomSummary,
-  type AdminRoomDetail,
-  type AdminRoomLogEntry,
-  type AdminArchivedRoomSummary,
-  type AdminManagerOptions,
-  type ServerVitals,
+export { MAX_ROOM_LOGS } from './admin_event_store.js';
+export type {
+  RoomHealthStatus,
+  AdminPlayerSummary,
+  AdminRoomSummary,
+  AdminRoomDetail,
+  AdminRoomLogEntry,
+  AdminArchivedRoomSummary,
+  ServerVitals,
 };
+
+import { type AdminManagerOptions } from './admin_manager_types.js';
+export type { AdminManagerOptions };
 
 export class AdminManager {
   private readonly rooms: RoomManager;

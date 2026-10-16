@@ -257,3 +257,202 @@ declare module '*scripts/sentinel/stall_guard.mjs' {
   export function createStallGuard(options?: { maxStalledSteps?: number; ignoreKeys?: string[] }): StallGuard;
 }
 
+declare module '*scripts/blender/resolve_blender.mjs' {
+  export interface ResolveBlenderOptions {
+    env?: Record<string, string | undefined>;
+    platform?: string;
+    existsSyncFn?: (p: string) => boolean;
+    execFileSyncFn?: (bin: string, args: string[], options?: unknown) => string | Buffer;
+    whichFn?: ((cmd: string) => string | null) | null;
+  }
+
+  export interface BlenderResolution {
+    exists: boolean;
+    path: string | null;
+    version: string | null;
+    source: 'env' | 'candidate' | 'path' | 'none';
+  }
+
+  export interface RunBlenderOptions extends ResolveBlenderOptions {
+    dryRun?: boolean;
+    resolveFn?: (options?: ResolveBlenderOptions) => BlenderResolution;
+    timeoutMs?: number;
+    cwd?: string;
+    stdio?: string;
+  }
+
+  export interface DryRunBlenderResult {
+    executed: boolean;
+    binary: string;
+    args: string[];
+  }
+
+  export function resolveBlenderExecutable(options?: ResolveBlenderOptions): BlenderResolution;
+  export function formatBlenderDiagnosticInstructions(platform?: string): string;
+  export function runBlenderPythonScript(
+    scriptPath: string,
+    scriptArgs: string[] | undefined,
+    options: RunBlenderOptions & { dryRun: true }
+  ): DryRunBlenderResult;
+  export function runBlenderPythonScript(
+    scriptPath: string,
+    scriptArgs?: string[],
+    options?: RunBlenderOptions
+  ): unknown;
+}
+
+declare module '*scripts/resolve_blender.mjs' {
+  export interface ResolveBlenderOptions {
+    env?: Record<string, string | undefined>;
+    platform?: string;
+    existsSyncFn?: (p: string) => boolean;
+    execFileSyncFn?: (bin: string, args: string[], options?: unknown) => string | Buffer;
+    whichFn?: ((cmd: string) => string | null) | null;
+  }
+
+  export interface BlenderResolution {
+    exists: boolean;
+    path: string | null;
+    version: string | null;
+    source: 'env' | 'candidate' | 'path' | 'none';
+  }
+
+  export interface RunBlenderOptions extends ResolveBlenderOptions {
+    dryRun?: boolean;
+    resolveFn?: (options?: ResolveBlenderOptions) => BlenderResolution;
+    timeoutMs?: number;
+    cwd?: string;
+    stdio?: string;
+  }
+
+  export interface DryRunBlenderResult {
+    executed: boolean;
+    binary: string;
+    args: string[];
+  }
+
+  export function resolveBlenderExecutable(options?: ResolveBlenderOptions): BlenderResolution;
+  export function formatBlenderDiagnosticInstructions(platform?: string): string;
+  export function runBlenderPythonScript(
+    scriptPath: string,
+    scriptArgs: string[] | undefined,
+    options: RunBlenderOptions & { dryRun: true }
+  ): DryRunBlenderResult;
+  export function runBlenderPythonScript(
+    scriptPath: string,
+    scriptArgs?: string[],
+    options?: RunBlenderOptions
+  ): unknown;
+}
+
+declare module '*scripts/plan_audit/rules_spatial_bounds.mjs' {
+  export interface AuditSpatialBoundsOptions {
+    isLegacyBaseline?: boolean;
+  }
+
+  export interface SpatialBoundsAuditResult {
+    errors: string[];
+    warnings: string[];
+    checkedCount: number;
+  }
+
+  export function auditDualBoundSpatialAssertions(
+    testContent: string,
+    filePath?: string,
+    options?: AuditSpatialBoundsOptions
+  ): SpatialBoundsAuditResult;
+}
+
+declare module '*scripts/lint_spatial_bounds.mjs' {
+  export interface AuditSpatialBoundsOptions {
+    isLegacyBaseline?: boolean;
+  }
+
+  export interface SpatialBoundsAuditResult {
+    errors: string[];
+    warnings: string[];
+    checkedCount: number;
+  }
+
+  export function auditDualBoundSpatialAssertions(
+    testContent: string,
+    filePath?: string,
+    options?: AuditSpatialBoundsOptions
+  ): SpatialBoundsAuditResult;
+}
+
+declare module '*scripts/plan_audit/rules_surface.mjs' {
+  export interface TargetSurfaceProbeResult {
+    path: string;
+    exists: boolean;
+    physicalLines?: number;
+    sloc?: number;
+    srcCallers?: string[];
+    testCallers?: string[];
+    ambientAugmentations?: string[];
+  }
+
+  export function auditAmbientModuleAugmentation(
+    targetFiles: Map<string, boolean>,
+    planContent: string
+  ): number;
+
+  export function probeTargetFilesSurface(
+    targetFilePaths: string[]
+  ): TargetSurfaceProbeResult[];
+}
+
+declare module '*scripts/plan_audit/rules_testing.mjs' {
+  export function auditGhostTestPaths(
+    planContent: string,
+    repoRoot?: string,
+    planFilename?: string
+  ): number;
+}
+
+declare module '*scripts/slop_linter/slop_constants.mjs' {
+  export const SLOP_RULES: Record<string, string>;
+  export const TIER_BUDGETS: Record<string, { maxWarn: number; maxError: number }>;
+  export function categorizeFile(filePath: string): string;
+  export function getSourceFiles(dir: string, extensions?: string[]): string[];
+}
+
+declare module '*scripts/check_loc.mjs' {
+  export interface FileMeasurement {
+    filePath: string;
+    exists: boolean;
+    tierKey: string;
+    totalLines: number;
+    nonEmptySloc: number;
+  }
+  export function measureFile(filePath: string): FileMeasurement;
+  export function formatReport(results: FileMeasurement[]): { markdown: string; hasError: boolean };
+}
+
+declare module '*scripts/evidence_audit/audit_visual_and_telemetry.mjs' {
+  export function auditVisualAndTelemetry(
+    evidence: Record<string, any>,
+    repoRoot: string,
+    targetArg: string,
+    evidencePath: string
+  ): string[];
+}
+
+declare module '*scripts/report/report_git_inspector.mjs' {
+  export function extractContractTestCounts(
+    repoRoot: string,
+    contractFile: string,
+    ticketId?: string,
+    snapshotData?: any
+  ): { testCount: number; assertCount: number };
+}
+
+declare module '*scripts/evidence_audit/audit_reports_and_ssot.mjs' {
+  export function auditReportsAndSSOT(
+    evidence: Record<string, any>,
+    repoRoot: string,
+    targetArg: string,
+    evidencePath: string
+  ): string[];
+}
+

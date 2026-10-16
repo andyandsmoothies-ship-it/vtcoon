@@ -14,6 +14,17 @@ const BANNED_BOILERPLATE_PATTERNS = [
   { pattern: /Tuân thủ nghiêm ngặt các ranh giới kiểm thử, Zero Dirty Casts/i, name: 'Generic Boundary Linter Placeholder' },
 ];
 
+export const BANNED_SLOP_WORDS = [
+  {
+    pattern: /(?:an toàn\s+)?đa luồng/i,
+    reason: 'False claim: JavaScript runtime is single-threaded (browser and Node.js event loop); claiming multi-threading ("đa luồng") or multi-threaded safety is technical slop.',
+  },
+  {
+    pattern: /bằng chứng trực quan trên vé State/i,
+    reason: 'False claim: Pure State/Network/FSM tickets do not produce visual rendering deltas.',
+  },
+];
+
 /**
  * Audits review report persistence, final improvement acceptance report, and Knowledge Fold invariant.
  */
@@ -90,6 +101,26 @@ export function auditReportsAndSSOT(evidence, repoRoot, targetArg, evidencePath)
           }
         }
 
+        // Banned Slop Words Check
+        for (const { pattern, reason } of BANNED_SLOP_WORDS) {
+          if (pattern.test(repContent)) {
+            errors.push(
+              `[Banned Slop Word Violation] Final report ${finalReport} contains misleading slop phrase matching "${pattern}": ${reason}`
+            );
+          }
+        }
+
+        // Non-Visual Ticket False Visual Claim Guard
+        const isNonVisualTicket = isPureLogicWaiver || evidence.tier === '1.5' || evidence.isStructuralRefactor === true;
+        if (isNonVisualTicket) {
+          const visualClaimMatch = repContent.match(/(?:hình ảnh|bằng chứng)\s+trực quan/i);
+          if (visualClaimMatch) {
+            errors.push(
+              `[False Visual Claim Violation] Final report ${finalReport} claims visual evidence ("${visualClaimMatch[0]}"), but ticket is a non-visual / pure logic refactor with visual checks waived!`
+            );
+          }
+        }
+
         // Honest Station 4 Mutation Reporting Check
         const claimsMutants = /(?:zero mutant|mutants? (?:mục tiêu |đã )?bị tiêu diệt|tiêu diệt biến dị)/i.test(repContent);
         if (claimsMutants) {
@@ -143,12 +174,21 @@ export function auditReportsAndSSOT(evidence, repoRoot, targetArg, evidencePath)
 
         // Anti-Truncated Bullet / Dangling Colon Gate
         for (let lineIdx = 0; lineIdx < repLines.length; lineIdx++) {
-          const line = repLines[lineIdx].trim();
+          const rawLine = repLines[lineIdx];
+          const line = rawLine.trim();
+          const nextRaw = repLines[lineIdx + 1] || '';
+          const nextLine = nextRaw.trim();
           if (/^-\s*(?:💡|⚠️|🚨|\*)\s*\*\*\[[^\]]+\]\*\*:\s*$/.test(line)) {
-            const nextLine = repLines[lineIdx + 1] ? repLines[lineIdx + 1].trim() : '';
             if (!nextLine || nextLine.startsWith('- ') || nextLine.startsWith('###') || nextLine.startsWith('---')) {
               errors.push(
                 `[Template Truncation Violation] Final report ${finalReport} line ${lineIdx + 1} contains an empty dangling bullet without body text: "${line}". Must provide substantive findings or remove!`
+              );
+            }
+          } else if (/^-\s*\*\*[^*]+\*\*:\s*.+:\s*$/.test(line)) {
+            const hasIndentedContinuation = /^\s{2,}[-*\d]/.test(nextRaw) && !/^\s{0,3}-\s*\*\*(?:Target reachable\?|Baselines verified\?|Verdict|Vector|Scenario|Consequence|Hardening Directive)\*\*:/i.test(nextRaw);
+            if (!hasIndentedContinuation) {
+              errors.push(
+                `[Dangling Colon Truncation Violation] Final report ${finalReport} line ${lineIdx + 1} ends with a dangling colon without sub-bullets: "${line}". Regenerate report via 'npm run report -- ${evidence.ticketId || targetArg} --force'!`
               );
             }
           }
@@ -177,28 +217,63 @@ export function auditReportsAndSSOT(evidence, repoRoot, targetArg, evidencePath)
 
     const allRelevantFiles = [...new Set([...targetFilesToCheck, ...gitModifiedFiles])];
     const touchesDomainOrState = allRelevantFiles.some((f) =>
-      /^(?:src[/\\])?(domain[/\\]|server[/\\]|client[/\\](?:events|store)[/\\])/i.test(f.replace(/^[AMDRCU?\s]+/, ''))
+      /^(?:src[/\\])?(domain[/\\]|server[/\\]|client[/\\](?:events|store|3d|ui)[/\\])/i.test(f.replace(/^[AMDRCU?\s]+/, ''))
     );
 
     if (touchesDomainOrState) {
-      const isFeatureMapModified =
-        gitModifiedFiles.some((f) => /docs[/\\]FEATURE_MAP\.md/i.test(f)) ||
-        (() => {
-          try {
-            const content = fs.readFileSync(path.join(repoRoot, 'docs', 'FEATURE_MAP.md'), 'utf8');
-            if (ticketClean && content.includes(ticketClean)) return true;
-            if (ticketNum && content.includes(`IMP-${ticketNum}`)) return true;
-            const diff = execSync('git diff HEAD~1 HEAD --name-only docs/FEATURE_MAP.md', { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
-            return Boolean(diff.trim());
-          } catch {
-            return false;
-          }
-        })();
+      const featureMapPath = path.join(repoRoot, 'docs', 'FEATURE_MAP.md');
+      if (fs.existsSync(featureMapPath)) {
+        const stats = fs.statSync(featureMapPath);
+        if (stats.size > 30 * 1024) {
+          errors.push(
+            `[Knowledge Fold Invariant Violation] docs/FEATURE_MAP.md is ${(stats.size / 1024).toFixed(1)}KB, exceeding the 30KB SSOT ceiling! Purge changelog/ticket narrative bloat; FEATURE_MAP.md must remain a lean matrix of active rules and source files.`
+          );
+        } else if (stats.size >= 28.5 * 1024) {
+          console.warn(
+            `⚠️  [FEATURE_MAP EARLY WARNING BUFFER] docs/FEATURE_MAP.md is ${(stats.size / 1024).toFixed(2)} KB (>= 28.5 KB). Approaching the 30.0 KB hard ceiling! Engineers must prune narrative fluff before adding new features.`
+          );
+        }
+      }
 
-      if (!isFeatureMapModified) {
+      const isFeatureMapSatisfied = (() => {
+        try {
+          if (gitModifiedFiles.some((f) => /docs[/\\]FEATURE_MAP\.md/i.test(f))) {
+            return true;
+          }
+          const content = fs.readFileSync(featureMapPath, 'utf8');
+          const prodTargetBasenames = targetFilesToCheck
+            .filter((f) => /^src[/\\]/i.test(f))
+            .map((f) => path.basename(f));
+          if (prodTargetBasenames.length > 0 && prodTargetBasenames.some((b) => content.includes(b))) {
+            return true;
+          }
+          return false;
+        } catch {
+          return false;
+        }
+      })();
+
+      if (!isFeatureMapSatisfied) {
         errors.push(
-          `[Knowledge Fold Invariant Violation] Ticket touches core domain/state/server files, but docs/FEATURE_MAP.md has NOT been updated! Per GEMINI.md Knowledge Fold Invariant, update docs/FEATURE_MAP.md to maintain SSOT before completing Station 4.`
+          `[Knowledge Fold Invariant Violation] Ticket touches core domain/state/server/3d/ui files, but docs/FEATURE_MAP.md neither references modified production files nor was updated! Per GEMINI.md Knowledge Fold Invariant, ensure docs/FEATURE_MAP.md maintains SSOT coverage before completing Station 4.`
         );
+      }
+    }
+
+    // 4. Mechanical Gotchas Bloat Ceiling Gate (GEMINI.md Gotchas Invariant Density)
+    const gotchasDir = path.join(repoRoot, 'docs', 'domain', 'gotchas');
+    if (fs.existsSync(gotchasDir)) {
+      const gotchaFiles = fs.readdirSync(gotchasDir);
+      for (const file of gotchaFiles) {
+        if (!file.endsWith('.md')) continue;
+        const filePath = path.join(gotchasDir, file);
+        const stats = fs.statSync(filePath);
+        const ceilingKb = file === '3d_cinematics.md' ? 20 : 15;
+        if (stats.size > ceilingKb * 1024) {
+          errors.push(
+            `[Gotcha Bloat Violation] docs/domain/gotchas/${file} is ${(stats.size / 1024).toFixed(1)}KB, exceeding the ${ceilingKb}KB ceiling! Condense narrative bug stories into concise, quantified invariant rules.`
+          );
+        }
       }
     }
   } catch {}

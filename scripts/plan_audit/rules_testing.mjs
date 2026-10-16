@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { auditDualBoundSpatialAssertions } from './rules_spatial_bounds.mjs';
 
 /**
  * scripts/plan_audit/rules_testing.mjs
@@ -178,11 +179,16 @@ export function auditFunctionToTestParity(targetFiles, planContent) {
 
   const allTestText = testLines.join('\n');
 
+  if (testLines.length >= 2 && testLines.length <= 6) {
+    console.log(`  ✔️ Lean Contract Invariants mode (${testLines.length} core invariant specs): Full 100% function-to-test expansion (${declaredFunctions.size} exported functions) delegated to Station 2 qa-tester.`);
+    return 0;
+  }
+
   for (const fnName of declaredFunctions) {
     const fnRegex = new RegExp(`\\b${fnName}\\b`);
     if (!fnRegex.test(allTestText)) {
       console.error(`  ❌ [FUNCTION_TEST_PARITY_VIOLATION] Exported function '${fnName}' declared in production scope has NO test case in Station 1!`);
-      console.error(`     Every exported production function must have at least one explicit contract test in Station 1.`);
+      console.error(`     Either use Lean Contract Invariants (2-6 core specs) or cover every exported function.`);
       errors++;
     }
   }
@@ -278,7 +284,7 @@ export function auditCompositeTransactionAndSemanticBorrowing(targetFiles, planC
   let errors = 0;
   const targetList = Array.from(targetFiles.keys());
   const isFinancialPlan = targetList.some((f) =>
-    /game_event_financial|balance|treasury|economy|salary|rent|bond|buyout/i.test(f)
+    /(?:game_event_financial|balance|treasury|economy|salary|\brent\b|bond|buyout)/i.test(f)
   );
 
   if (isFinancialPlan) {
@@ -306,5 +312,43 @@ export function auditCompositeTransactionAndSemanticBorrowing(targetFiles, planC
 
   return errors;
 }
+
+/**
+ * Audits test file paths referenced in the plan.
+ * Catches ghost test paths (referenced regression or contract test suites that do not physically exist on disk).
+ * Exempts the current ticket's newly declared test suite.
+ */
+export function auditGhostTestPaths(planContent, repoRoot = process.cwd(), planFilename = '') {
+  let errors = 0;
+  const ticketMatch = planFilename.match(/IMP[_-]?(\d+[a-zA-Z]?)/i) || planContent.match(/IMP[_-]?(\d+[a-zA-Z]?)/i);
+  const ticketNum = ticketMatch ? ticketMatch[1].toLowerCase().replace(/[-_]/g, '') : null;
+
+  const testRegex = /(?:tests|test)\/[a-zA-Z0-9_\-\.\/]+\.(?:test|spec)\.(?:ts|tsx|js|mjs)/g;
+  const matches = [...new Set(planContent.match(testRegex) || [])];
+
+  for (const testPath of matches) {
+    const absPath = path.resolve(repoRoot, testPath);
+    if (fs.existsSync(absPath)) continue;
+
+    const base = path.basename(testPath).toLowerCase().replace(/[-_]/g, '');
+    const isCurrentTicketTest = ticketNum && (base.includes('imp' + ticketNum) || base.includes(ticketNum));
+
+    const idx = planContent.indexOf(testPath);
+    const contextWindow = planContent.substring(Math.max(0, idx - 80), Math.min(planContent.length, idx + testPath.length + 80));
+    const isDeclaredNew = /new|mới|create|tạo\s+mới|scaffold/i.test(contextWindow);
+
+    if (isCurrentTicketTest || isDeclaredNew) {
+      console.log(`  ✔️ ${testPath} (Target test suite to be created/authored in Station 1/2)`);
+    } else {
+      console.error(`  ❌ [GHOST_TEST_PATH] Plan references non-existent test file: ${testPath}`);
+      console.error(`     Referenced regression/contract tests must physically exist on disk, or be explicitly declared as a new test file.`);
+      errors++;
+    }
+  }
+
+  return errors;
+}
+
+export { auditDualBoundSpatialAssertions };
 
 

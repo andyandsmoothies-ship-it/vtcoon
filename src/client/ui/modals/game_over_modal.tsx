@@ -2,8 +2,8 @@
 import React, { useState, useMemo } from 'react';
 import { formatCurrency } from '../ui_helpers';
 import { useGameStore, type PlayerHudInfo } from '../../store/game_store';
-import { BOARD_CONFIG } from '../../../domain/board_config';
-import { COLOR_GROUP_HEX } from '../../../domain/theme';
+import { BOARD_CONFIG, COLOR_GROUP_HEX } from '../../../domain/index.js';
+
 import { getDeedDisplayInfo } from './modal_helpers';
 
 export interface GameOverModalProps {

@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { execSync } from 'node:child_process';
 import { createTicketMatcher } from './evidence_resolver.mjs';
 
 /**
@@ -17,7 +18,52 @@ export function auditVisualAndTelemetry(evidence, repoRoot, targetArg, evidenceP
 
   const { ticketRaw, ticketClean, matchesTicket } = createTicketMatcher(evidence, targetArg);
 
-  if (isPureLogicWaiver) {
+  // Auto-detect or respect isReExportSeamWaiver for UI/3D files
+  let isReExportSeamWaiver = evidence.isReExportSeamWaiver === true;
+  if (!isReExportSeamWaiver && hasClientVisualFiles) {
+    try {
+      const visualFiles = targetFilesForVisual.filter((f) => /src[/\\]client[/\\](3d|ui)/i.test(f));
+      let allPureSeams = visualFiles.length > 0;
+      for (const vf of visualFiles) {
+        let diffText = '';
+        try {
+          diffText = execSync(`git diff HEAD -- "${path.resolve(repoRoot, vf)}"`, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
+          if (!diffText) {
+            diffText = execSync(`git diff HEAD~1..HEAD -- "${path.resolve(repoRoot, vf)}"`, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
+          }
+        } catch {}
+        if (!diffText && fs.existsSync(path.resolve(repoRoot, vf))) {
+          diffText = fs.readFileSync(path.resolve(repoRoot, vf), 'utf8');
+        }
+        if (diffText) {
+          const lines = diffText.split('\n').filter((l) => l.startsWith('+') && !l.startsWith('+++'));
+          for (const line of lines) {
+            const trimmed = line.slice(1).trim();
+            if (!trimmed || trimmed.startsWith('//') || trimmed.startsWith('/*') || trimmed.startsWith('*')) continue;
+            const isSeamLine = /^(?:import\s+|export\s+|type\s+|interface\s+|const\s+[A-Z0-9_]+\s*[:=]|as\s+const)/.test(trimmed);
+            const hasJsxOrCss = /<[a-zA-Z]|className\s*=|style\s*=|css\s*=/i.test(trimmed);
+            if (!isSeamLine || hasJsxOrCss) {
+              allPureSeams = false;
+              break;
+            }
+          }
+        }
+        if (!allPureSeams) break;
+      }
+      if (allPureSeams) {
+        isReExportSeamWaiver = true;
+      }
+    } catch {}
+  }
+
+  if (isReExportSeamWaiver) {
+    console.log(`ℹ️ [Re-Export Seam Waiver] Visual screenshot check waived: UI/3D modifications are pure type/export seams without JSX/CSS presentation deltas.`);
+    if (evidence.visualCriticDispatched) {
+      errors.push(
+        `[Sân khấu hóa Visual Critic Violation] Dispatching 'game-3d-visual-critic' is FORBIDDEN on pure State/Network tickets with isReExportSeamWaiver!`
+      );
+    }
+  } else if (isPureLogicWaiver) {
     if (clientFiles.length > 0) {
       errors.push(
         `[ILLEGAL_PURE_LOGIC_WAIVER] pureLogicWaiver is FORBIDDEN when client/UI files are modified: ${clientFiles.join(', ')}`

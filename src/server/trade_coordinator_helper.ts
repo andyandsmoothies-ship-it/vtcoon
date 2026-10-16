@@ -1,7 +1,7 @@
 // [UC-GAME-007/MSS][IMP-203] Trade Coordinator Bot Recipient & Rejection Handler
 import { ActionRejectReason, type Player } from '../domain/index.js';
 import { evaluateBotTradeDecision, recordTradeRejection } from '../domain/bot/index.js';
-import type { RoomContext } from './room_property_coordinator.js';
+import type { RoomContext } from './room_context_types.js';
 
 export function handleBotRecipientTrade(
   ctx: RoomContext,

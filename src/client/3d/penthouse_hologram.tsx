@@ -4,6 +4,7 @@ import { useFrame } from '@react-three/fiber';
 import { RoundedBox } from '@react-three/drei';
 import { AdditiveBlending, DoubleSide, type Group, BufferAttribute, BufferGeometry } from 'three';
 import { generateHologramScreenTexture } from './penthouse_texture_generator';
+import { useManagedBufferGeometry, useManagedCanvasTexture } from './hooks/use_managed_geometry';
 
 export const HOLOGRAM_COLORS = {
   cyan: '#06B6D4',
@@ -127,23 +128,14 @@ export function CentralHologram(): React.ReactElement {
   const ring2Ref = useRef<Group>(null);
   const ring3Ref = useRef<Group>(null);
 
-  const hudScreenTexture = useMemo(() => generateHologramScreenTexture(), []);
+  const hudScreenTexture = useManagedCanvasTexture(() => generateHologramScreenTexture(), []);
 
-  const particleGeometry = useMemo(() => {
+  const particleGeometry = useManagedBufferGeometry(() => {
     const geo = new BufferGeometry();
     const positions = generateLaserNanoParticles(120);
     geo.setAttribute('position', new BufferAttribute(positions, 3));
     return geo;
   }, []);
-
-  useEffect(() => {
-    return () => {
-      if (typeof hudScreenTexture?.dispose === 'function') {
-        hudScreenTexture.dispose();
-      }
-      particleGeometry.dispose();
-    };
-  }, [hudScreenTexture, particleGeometry]);
 
   useFrame(({ clock }) => {
     const t = clock.elapsedTime;

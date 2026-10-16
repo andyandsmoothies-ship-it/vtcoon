@@ -1,5 +1,6 @@
 // [UI-S06/MSS][IMP-187][IMP-201][IMP-225] ActivityBadgeDispatcher — Floating badge triggers, audio & VFX synchronization
 import { useGameStore, type GameState, FloatingTextType } from '../store/game_store.js';
+import { registerGameResetCleanup } from '../store/game_store_cleanup.js';
 import type { ActivityLogEntry } from '../store/activity_store.js';
 import { formatCurrency } from '../ui/ui_helpers.js';
 import { useVfxStore } from '../store/vfx_store.js';
@@ -22,6 +23,8 @@ export function clearPendingBadgeTimers(): void {
   pendingBadgeTimers.clear();
   clearPendingPacingTimers();
 }
+
+registerGameResetCleanup(clearPendingBadgeTimers);
 
 
 export function scheduleAction(action: () => void, delayMs: number): ReturnType<typeof setTimeout> | null {

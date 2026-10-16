@@ -4,8 +4,8 @@ import { TurnPhase } from '../domain/room.js';
 import type { PropertyRegistry, PropertyStateMap, PropertyState } from '../domain/property_manager.js';
 import { PROPERTY_DEEDS } from '../domain/property_manager.js';
 import { calculateElectricBill } from '../domain/property_rent.js';
-import { checkInsolvency } from './insolvency_manager.js';
-import type { AuctionSession } from './auction_manager.js';
+import { checkInsolvency } from './fsm_transition_coordinator.js';
+import type { AuctionSession } from './auction_types.js';
 import { ChanceCardId, MarketCardId } from '../domain/event_card_types.js';
 
 export function isTradeFrozen(room: Room): boolean {

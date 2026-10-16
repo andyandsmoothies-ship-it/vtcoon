@@ -1,6 +1,6 @@
 // [UI-S04/MSS][IMP-154] Trade Bot Intelligence & Sentiment Analysis
 import { DISTRICT_GROUPS } from './masterplan_constants';
-import { PROPERTY_DEEDS } from '../../../domain/property_data';
+import { PROPERTY_DEEDS } from '../../../domain/index.js';
 
 export type BotPersonality = 'Aggressive' | 'Balanced' | 'Passive';
 

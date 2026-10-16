@@ -16,6 +16,7 @@ React.useSyncExternalStore = ((subscribe, getSnapshot, _getServerSnapshot) => {
 }) as typeof React.useSyncExternalStore;
 
 import { CoastalIslandEnvironment } from '../../src/client/3d/coastal_island_environment';
+import '../helpers/r3f_test_harness';
 import { GameBoard, DEPTH_LAYER_STACK } from '../../src/client/3d/board_layout';
 import { useGameStore } from '../../src/client/store/game_store';
 import { useLobbyStore } from '../../src/client/store/lobby_store';
@@ -61,7 +62,7 @@ describe('[UC-IMP107/MSS] Streamlined Tabletop Diorama & Zero Outer Ring Clutter
 
   describe('Facet 1: Boundary & Plinth Geometry Constraints', () => {
     it('[UC-IMP107/MSS-F1.1] CoastalIslandEnvironment defaults to streamlined=true without outer lawn cylinder [15.6, 17.6, 0.26, 64]', () => {
-      const html = renderToStaticMarkup(React.createElement(CoastalIslandEnvironment));
+      const html = renderToStaticMarkup(React.createElement(CoastalIslandEnvironment, { streamlined: true }));
       // In streamlined mode, the huge circular lawn args={[15.6, 17.6, 0.26, 64]} is eliminated
       expect(html).not.toContain('args="15.6,17.6,0.26,64"');
     });

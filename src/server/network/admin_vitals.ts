@@ -1,7 +1,7 @@
 // [UC-ADM-MOD] Server Vitals Collector Module
 import type { RoomManager } from '../room_manager.js';
 import type { PersistentRoomLogger } from '../logging/persistent_room_logger.js';
-import type { ServerVitals } from './admin_types.js';
+import type { ServerVitals } from '../../domain/protocol/index.js';
 
 export function collectServerVitals(
   rooms: RoomManager,

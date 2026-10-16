@@ -67,9 +67,9 @@ describe('[TC-MCH01/MSS][UI-S02/MSS] Mobile Compact HUD & Tactile Retropoly Moda
           slotIndex: 0,
         })
       );
-      // Khối Tài sản ròng phải được ẩn trên mobile (chứa hidden sm:flex hoặc hidden sm:block)
+      // Khối Tài sản ròng phải được ẩn trên mobile (chứa hidden sm:flex hoặc hidden sm:block hoặc hidden sm:inline-flex)
       const hasResponsiveHidden =
-        html.includes('hidden sm:flex') || html.includes('hidden sm:block');
+        html.includes('hidden sm:flex') || html.includes('hidden sm:block') || html.includes('hidden sm:inline-flex');
       expect(hasResponsiveHidden).toBe(true);
     });
 

@@ -2,14 +2,13 @@
 import React, { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { perfBudget, DPR_BOUNDS } from './perf_budget';
-import { isIOSPhone } from './device_detect';
-// isIOSPhone: helper for iOS phone hardware resolution clamp
+import { useDeviceProfile } from './device_profile_context';
 import { useTelemetryStore } from '../telemetry/telemetry_store';
 import { useGameStore } from '../store/game_store';
 import { useDiagnostic3DStore } from './diagnostic_3d_store';
 
 export interface AdaptiveDprControllerProps {
-  readonly isMobile: boolean;
+  readonly isMobile?: boolean;
 }
 
 export function resolveClampedDpr(rawDpr: number, isMobile: boolean, isIOSPhoneDevice: boolean): number {
@@ -18,7 +17,10 @@ export function resolveClampedDpr(rawDpr: number, isMobile: boolean, isIOSPhoneD
   return Math.min(rawDpr, maxBound);
 }
 
-export function AdaptiveDprController({ isMobile }: AdaptiveDprControllerProps): null {
+export const AdaptiveDprController: React.FC<AdaptiveDprControllerProps> = (props = {}) => {
+  const profile = useDeviceProfile();
+  const isMobile = props.isMobile ?? profile.isMobile;
+  const isIOSPhoneActive = profile.isIOSPhone;
   const currentDprRef = useRef<number | null>(null);
   const degradedTimeRef = useRef<number>(0);
   const optimalTimeRef = useRef<number>(0);
@@ -37,7 +39,6 @@ export function AdaptiveDprController({ isMobile }: AdaptiveDprControllerProps):
       prevForcedLowDprRef.current = true;
       return;
     }
-    const isIOSPhoneActive = isIOSPhone();
     const defaultMobileMax = isIOSPhoneActive ? DPR_BOUNDS.IOS_PHONE_MAX : DPR_BOUNDS.MOBILE_MAX;
 
     if (prevForcedLowDprRef.current) {
@@ -75,6 +76,7 @@ export function AdaptiveDprController({ isMobile }: AdaptiveDprControllerProps):
 
     const result = perfBudget.calculateAdaptiveDpr({
       isMobile,
+      isIOSPhone: isIOSPhoneActive,
       currentFps: avgFps,
       currentDpr,
       isMotionActive: isPawnAnimating,
@@ -93,4 +95,4 @@ export function AdaptiveDprController({ isMobile }: AdaptiveDprControllerProps):
   });
 
   return null;
-}
+};

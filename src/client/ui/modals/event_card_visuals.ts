@@ -1,11 +1,16 @@
 // [IMP-134] Event Card Visuals — Themed emojis, hero stat formatting & sanitizers for Fintech Card overhaul
-import { MarketCardId, ChanceCardId } from '../../../domain/event_card_types.js';
-import { MacroCycleType } from '../../../domain/macro_cycle_types.js';
+import {
+  MarketCardId,
+  ChanceCardId,
+  MacroCycleType,
+  MARKET_CARD_DETAILS,
+  CHANCE_CARD_DETAILS,
+  vi,
+} from '../../../domain/index.js';
 import { formatCurrency } from '../ui_helpers.js';
 import { EVENT_ICON_REGISTRY, isEventIdentifiable } from '../../domain_visual_bridge.js';
-import { MARKET_CARD_DETAILS, CHANCE_CARD_DETAILS } from '../../../domain/event_card_metadata.js';
-import { vi } from '../../../domain/i18n/vi.js';
-import { resolveMarketTitle, resolveMarketEffectSummary } from '../market_event_ticker.js';
+
+import { resolveMarketTitle, resolveMarketEffectSummary } from '../market_event_helpers.js';
 import type { ClientMarketModifier } from '../../store/game_store_types.js';
 
 import {

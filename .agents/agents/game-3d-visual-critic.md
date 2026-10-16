@@ -5,7 +5,7 @@ subagent: true
 mainAgent: false
 model: inherit
 workspace: inherit
-skills: [threejs-fundamentals, threejs-lighting, threejs-materials, threejs-textures]
+skills: [threejs-fundamentals, threejs-geometry, threejs-lighting, threejs-materials, threejs-textures, impeccable]
 tools: [view_file, list_dir, find_by_name, grep_search]
 ---
 # EXECUTIVE GAME VISUAL & UI/UX DIRECTOR PROTOCOL (MONOPOLY TYCOON BENCHMARK)

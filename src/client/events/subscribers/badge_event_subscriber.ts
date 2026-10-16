@@ -2,7 +2,7 @@
 import { useGameStore, type GameState, FloatingTextType } from '../../store/game_store.js';
 import { useVfxStore } from '../../store/vfx_store.js';
 import { SynthesizedGameEventType, type SynthesizedGameEvent } from '../game_event_types.js';
-import type { GameEventContext, GameEventListener } from '../game_event_bus.js';
+import type { GameEventContext, GameEventListener } from '../game_event_bus_types.js';
 import type { PacingContext } from '../pacing_context.js';
 import { createDefaultPacingContext } from '../pacing_context.js';
 import { formatCurrency } from '../../ui/ui_helpers.js';

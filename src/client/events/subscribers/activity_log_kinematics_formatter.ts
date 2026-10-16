@@ -1,6 +1,7 @@
 // [IMP-344] Activity Log Kinematics Formatter
 // Pure formatting helper converting kinematic & chance domain events into localized activity log messages
-import { formatTransitWheelBroadcast } from '../../../domain/transit_wheel.js';
+import { formatTransitWheelBroadcast } from '../../../domain/index.js';
+
 import { SynthesizedGameEventType, type SynthesizedGameEvent } from '../game_event_types.js';
 
 export function formatKinematicActivityLog(

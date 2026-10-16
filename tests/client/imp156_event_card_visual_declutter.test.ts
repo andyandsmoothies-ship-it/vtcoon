@@ -71,7 +71,7 @@ describe('[IMP-156: Trạm 1 RED] Event Cards Visual De-Clutter & Single-Truth U
         })
       );
       expect(html).toContain('hidden sm:block');
-      expect(html).toContain('Tạm ngưng mua ô đất mới');
+      expect(html).toContain('Cấm mua đất, đấu giá, thế chấp và chuyển nhượng 2 vòng.');
     });
 
     it('[TC-156.08/MSS][UC-IMP156][Facet-2/Reactivity] Thẻ MC_FREEZE_TRADE đổi Hero Stat từ ĐÓNG BĂNG THỊ TRƯỜNG sang HIỆU LỰC để tránh lặp từ', () => {

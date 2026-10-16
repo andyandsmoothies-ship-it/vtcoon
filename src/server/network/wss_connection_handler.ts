@@ -10,7 +10,7 @@ import type { SocketRegistry } from './socket_registry.js';
 import type { AdminManager } from './admin_manager.js';
 import type { RateLimiter } from '../security/rate_limiter.js';
 import type { EnvelopeValidator } from '../security/envelope_validator.js';
-import type { WsServerMessage, WsClientMessage } from './network_types.js';
+import type { WsServerMessage, WsClientMessage } from '../../domain/protocol/index.js';
 
 export interface ConnectionHandlerDeps {
   readonly rateLimiter: RateLimiter;

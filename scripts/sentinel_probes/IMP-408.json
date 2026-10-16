@@ -1,0 +1,62 @@
+[
+  {
+    "file": "scripts/blender/resolve_blender.mjs",
+    "desc": "AST: Corrupt source detection on env override in resolveBlenderExecutable",
+    "target": "source = 'env';",
+    "replacement": "source = 'none';"
+  },
+  {
+    "file": "scripts/blender/resolve_blender.mjs",
+    "desc": "AST: Corrupt candidate fallback source in resolveBlenderExecutable",
+    "target": "source = 'candidate';",
+    "replacement": "source = 'none';"
+  },
+  {
+    "file": "scripts/blender/resolve_blender.mjs",
+    "desc": "AST: Corrupt whichFn PATH source in resolveBlenderExecutable",
+    "target": "source = 'path';",
+    "replacement": "source = 'none';"
+  },
+  {
+    "file": "scripts/blender/resolve_blender.mjs",
+    "desc": "AST: Corrupt existence return in resolveBlenderExecutable",
+    "target": "return { exists: true, path: resolvedPath, version, source };",
+    "replacement": "return { exists: false, path: null, version: null, source: 'none' };"
+  },
+  {
+    "file": "scripts/blender/resolve_blender.mjs",
+    "desc": "AST: Corrupt argument sequence in runBlenderPythonScript",
+    "target": "const args = ['--background', '--python', scriptPath, ...(scriptArgs.length ? ['--', ...scriptArgs] : [])];",
+    "replacement": "const args = ['--python', scriptPath];"
+  },
+  {
+    "file": "scripts/blender/resolve_blender.mjs",
+    "desc": "AST: Corrupt missing blender error throw in runBlenderPythonScript",
+    "target": "if (!resolved || !resolved.exists || !resolved.path) {",
+    "replacement": "if (false) {"
+  },
+  {
+    "file": "scripts/plan_audit/rules_spatial_bounds.mjs",
+    "desc": "AST: Corrupt violation code prefix in auditDualBoundSpatialAssertions",
+    "target": "[DUAL_BOUND_SPATIAL_VIOLATION]",
+    "replacement": "[WRONG_VIOLATION_CODE]"
+  },
+  {
+    "file": "scripts/plan_audit/rules_spatial_bounds.mjs",
+    "desc": "AST: Corrupt symmetric Math.abs bounds recognition in auditDualBoundSpatialAssertions",
+    "target": "if (mathAbsMethod || mathAbsCompare) {",
+    "replacement": "if (false) {"
+  },
+  {
+    "file": "scripts/plan_audit/rules_spatial_bounds.mjs",
+    "desc": "AST: Corrupt Ratchet protocol check for legacy baselines",
+    "target": "if (isLegacy) {",
+    "replacement": "if (false) {"
+  },
+  {
+    "file": "scripts/generate_high_fidelity_models.mjs",
+    "desc": "AST: Corrupt call to resolveBlenderExecutable in generateAllModels",
+    "target": "const blender = resolveBlenderExecutable();",
+    "replacement": "const blender = { exists: false, path: null };"
+  }
+]

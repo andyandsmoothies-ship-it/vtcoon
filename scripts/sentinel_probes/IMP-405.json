@@ -1,0 +1,110 @@
+[
+  {
+    "file": "src/client/3d/diorama/diorama_static_blender_batches.ts",
+    "desc": "AST: Corrupt COLOR_0 vertex color and Baked AO luminance shading in appendQuad",
+    "target": "colors.push(clamp01(rgb[0] * s), clamp01(rgb[1] * s), clamp01(rgb[2] * s));",
+    "replacement": "colors.push(0.5, 0.5, 0.5);"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_static_blender_batches.ts",
+    "desc": "AST: Corrupt singleton cache lookup in getBatchedBoardRimGeometries",
+    "target": "if (cachedBoardRimGeoms) return cachedBoardRimGeoms;",
+    "replacement": "if (false && cachedBoardRimGeoms) return cachedBoardRimGeoms;"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_static_blender_batches.ts",
+    "desc": "AST: Corrupt singleton cache lookup in getBatchedMobileContainerPortGeometries",
+    "target": "if (cachedPortGeoms) return cachedPortGeoms;",
+    "replacement": "if (false && cachedPortGeoms) return cachedPortGeoms;"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_static_blender_batches.ts",
+    "desc": "AST: Corrupt singleton cache lookup in getBatchedMobileHeritageGeometries",
+    "target": "if (cachedHeritageGeoms) return cachedHeritageGeoms;",
+    "replacement": "if (false && cachedHeritageGeoms) return cachedHeritageGeoms;"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_static_blender_batches.ts",
+    "desc": "AST: Corrupt recessed cavity emission in buildGeomFromSpecs",
+    "target": "for (const c of cavities) appendRecessedCavity(positions, normals, colors, indices, c);",
+    "replacement": "/* recessed cavities bypassed */"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_static_blender_batches.ts",
+    "desc": "AST: Corrupt Saigon Cathedral spire height in getBatchedMobileHeritageGeometries",
+    "target": "{ center: [-0.21, 1.15, -0.25], sizeBottom: [0.15, 0.54, 0.15], sizeTop: [0.014, 0.014], color: '#334155', aoBottom: 0.74, aoTop: 1.08, openBottom: true },\n    { center: [0.21, 1.15, -0.25], sizeBottom: [0.15, 0.54, 0.15], sizeTop: [0.014, 0.014], color: '#334155', aoBottom: 0.74, aoTop: 1.08, openBottom: true },",
+    "replacement": "{ center: [-0.21, 0.65, -0.25], sizeBottom: [0.15, 0.24, 0.15], sizeTop: [0.014, 0.014], color: '#334155', aoBottom: 0.74, aoTop: 1.08, openBottom: true },\n    { center: [0.21, 0.65, -0.25], sizeBottom: [0.15, 0.24, 0.15], sizeTop: [0.014, 0.014], color: '#334155', aoBottom: 0.74, aoTop: 1.08, openBottom: true },"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_static_blender_batches.ts",
+    "desc": "AST: Corrupt GPU buffer disposal and null reset in disposeDioramaStaticBlenderBatches ([ADV-03])",
+    "target": "cachedBoardRimGeoms.walnutRimGeom.dispose();\n    cachedBoardRimGeoms.brassTrimGeom.dispose();\n    cachedBoardRimGeoms = null;",
+    "replacement": "/* board rim dispose bypassed */"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Corrupt mobile batched rim guard in DioramaBoardRim ([ADV-01])",
+    "target": "if (isMobile) {\n    const { walnutRimGeom, brassTrimGeom } = getBatchedBoardRimGeometries();",
+    "replacement": "if (false && isMobile) {\n    const { walnutRimGeom, brassTrimGeom } = getBatchedBoardRimGeometries();"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Corrupt DioramaBoardRim isMobile prop wiring in MiniatureCityDiorama",
+    "target": "<DioramaBoardRim isMobile={isMobile} />",
+    "replacement": "<DioramaBoardRim isMobile={false} />"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_container_port.tsx",
+    "desc": "AST: Corrupt mobile batched container port guard in DioramaContainerPort ([ADV-02])",
+    "target": "if (isMobile) {\n    const { portStructuresVertexAoGeom, gantryCranesVertexAoGeom } = getBatchedMobileContainerPortGeometries();",
+    "replacement": "if (false && isMobile) {\n    const { portStructuresVertexAoGeom, gantryCranesVertexAoGeom } = getBatchedMobileContainerPortGeometries();"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_container_port.tsx",
+    "desc": "AST: Corrupt mobile night-gated aviation strobes in DioramaContainerPort ([ADV-02])",
+    "target": "<mesh position={[-0.8, 1.06, -0.6]} visible={isNight}>\n          <sphereGeometry args={[0.02, 6, 6]} />\n          <meshBasicMaterial color=\"#EF4444\" />\n        </mesh>",
+    "replacement": "{null}"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_heritage_district.tsx",
+    "desc": "AST: Corrupt HeritageCathedralGroup Z separation from cong-xa-paris-plaza",
+    "target": "<group position={[0.2, 0, 0.88]} name=\"HeritageCathedralGroup\" data-model-url={LANDMARK_MODEL_URLS.cathedral}>",
+    "replacement": "<group position={[0.2, 0, 0.55]} name=\"HeritageCathedralGroup\" data-model-url={LANDMARK_MODEL_URLS.cathedral}>"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_heritage_district.tsx",
+    "desc": "AST: Corrupt mobile batched CathedralProceduralFallback guard",
+    "target": "if (isMobile) {\n    const { cathedralBodyVertexAoGeom, cathedralAccentsGeom } = getBatchedMobileHeritageGeometries();",
+    "replacement": "if (false && isMobile) {\n    const { cathedralBodyVertexAoGeom, cathedralAccentsGeom } = getBatchedMobileHeritageGeometries();"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_heritage_district.tsx",
+    "desc": "AST: Corrupt mobile batched cong-xa-paris-plaza statue and streetlamps",
+    "target": "{mobileHeritageGeoms && (",
+    "replacement": "{false && mobileHeritageGeoms && ("
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_shophouse_blocks.tsx",
+    "desc": "AST: Corrupt CHO_LON_SHOPHOUSES low-rise height cycles above 0.34m",
+    "target": "const heightCycles = [0.22, 0.25, 0.28, 0.30, 0.24, 0.32, 0.26, 0.29];",
+    "replacement": "const heightCycles = [0.42, 0.45, 0.48, 0.50, 0.44, 0.52, 0.46, 0.49];"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_shophouse_blocks.tsx",
+    "desc": "AST: Corrupt CHO_LON_SHOPHOUSES Block 2 clearance from Cathedral [-4.3, 3.65]",
+    "target": "const x = -5.75;",
+    "replacement": "const x = -5.15;"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_highrise_blocks.tsx",
+    "desc": "AST: Corrupt HIGHRISE_CONFIGS slim tower width above 0.38m",
+    "target": "{ id: 'tower-1', x: -5.4, y: 0.025, z: -5.8, width: 0.36, height: 2.3, depth: 0.36, rotationY: 0, typology: 'prismatic' },",
+    "replacement": "{ id: 'tower-1', x: -5.4, y: 0.025, z: -5.8, width: 0.48, height: 2.3, depth: 0.48, rotationY: 0, typology: 'prismatic' },"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_highrise_blocks.tsx",
+    "desc": "AST: Corrupt HIGHRISE_CONFIGS foreground tower Z recession above -3.3m",
+    "target": "{ id: 'tower-8', x: -5.3, y: 0.025, z: -3.35, width: 0.32, height: 0.9, depth: 0.32, rotationY: 0, typology: 'stepped' },",
+    "replacement": "{ id: 'tower-8', x: -5.3, y: 0.025, z: -3.10, width: 0.32, height: 0.9, depth: 0.32, rotationY: 0, typology: 'stepped' },"
+  }
+]

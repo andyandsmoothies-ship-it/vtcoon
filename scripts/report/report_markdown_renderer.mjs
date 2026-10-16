@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { categorizeTier, TIER_RULES } from '../check_loc.mjs';
+import { collectHarnessFiles } from './report_station_collector.mjs';
 
 /**
  * Renders the SPEC_REVIEW markdown content.
@@ -182,9 +183,20 @@ export function renderFinalReport({
 
 ## 1. TỔNG QUAN & BỐI CẢNH VẤN ĐỀ
 
-${typeof snapshotData?.summary === 'string' 
-  ? `> **Mô tả cốt lõi**: ${snapshotData.summary}` 
-  : `TODO_REVIEW_REQUIRED: Cung cấp bối cảnh nghiệp vụ thực tế, điểm mù cần giải quyết và cơ chế kỹ thuật cốt lõi của ticket \`${ticketId}\`. Tuyệt đối cấm văn mẫu rập khuôn.`}
+${(() => {
+  if (typeof snapshotData?.summary === 'string' && !/TODO_REVIEW_REQUIRED/.test(snapshotData.summary)) {
+    return `> **Mô tả cốt lõi**: ${snapshotData.summary}`;
+  }
+  const crPath = path.join(repoRoot, '.agents', 'audit', `CODE_REVIEW_${ticketId}.md`);
+  if (fs.existsSync(crPath)) {
+    const crText = fs.readFileSync(crPath, 'utf8');
+    const sumMatch = crText.match(/-\s*\*\*Summary \(ELI5\)\*\*:\s*([^\r\n]+)/i);
+    if (sumMatch && sumMatch[1].trim() && !/TODO_REVIEW_REQUIRED/.test(sumMatch[1])) {
+      return `> **Mô tả cốt lõi**: ${sumMatch[1].trim()}`;
+    }
+  }
+  return `TODO_REVIEW_REQUIRED: Cung cấp bối cảnh nghiệp vụ thực tế, điểm mù cần giải quyết và cơ chế kỹ thuật cốt lõi của ticket \`${ticketId}\`. Tuyệt đối cấm văn mẫu rập khuôn.`;
+})()}
 
 ---
 
@@ -198,7 +210,7 @@ ${typeof snapshotData?.summary === 'string'
 | **Trạm 2.5: Fast Pre-Filter** | \`scout\` & \`fast_prefilter.mjs\` | Typecheck \`tsc --noEmit\` exit 0, 0 dirty casts (\`as any\`), LOC budgets đạt chuẩn | **100% PASS** 🚀 |
 ${desktopImg || mobileImg ? `| **Trạm 3.0: Dual-Viewport** | Puppeteer Headless Probe | Desktop (1280x800) ${desktopImg ? `[\`${path.basename(desktopImg)}\`](file:///${path.resolve(repoRoot, desktopImg).replace(/\\/g, '/')})` : ''} & Mobile (360x740) ${mobileImg ? `[\`${path.basename(mobileImg)}\`](file:///${path.resolve(repoRoot, mobileImg).replace(/\\/g, '/')})` : ''} | **CAPTURED** 📸 |\n` : ''}| **Trạm 3.1: Spec & Scope Gate** | \`spec-reviewer\`<br>[\`.agents/audit/SPEC_REVIEW_${ticketId}.md\`](file:///${repoRoot.replace(/\\/g, '/')}/.agents/audit/SPEC_REVIEW_${ticketId}.md) | 100% Plan fidelity, zero scope creep, kiểm soát ranh giới phân hệ \`${planSubsystem}\` | **APPROVED** 📋 |
 | **Trạm 3.2: Architecture & Anti-Slop** | \`code-reviewer\`<br>[\`.agents/audit/CODE_REVIEW_${ticketId}.md\`](file:///${repoRoot.replace(/\\/g, '/')}/.agents/audit/CODE_REVIEW_${ticketId}.md) | 0 Slop red flags, Zero TIDD, an toàn bộ nhớ/timer, assertion density ${(contractAssertCount / (station1TestCount || 1)).toFixed(2)} | **APPROVED** 🛡️ |
-${uiCraftFile || visual3dFile ? `| **Trạm 3.2: UI/UX Craft Review** | \`ui-craft-reviewer\`<br>[\`${uiCraftFile ? path.relative(repoRoot, uiCraftFile).replace(/\\/g, '/') : (visual3dFile ? path.relative(repoRoot, visual3dFile).replace(/\\/g, '/') : '')}\`](file:///${uiCraftFile ? uiCraftFile.replace(/\\/g, '/') : (visual3dFile ? visual3dFile.replace(/\\/g, '/') : '')}) | Công thái học touch target, khoảng cách an toàn (clearance), không tràn viền màn hình 360px | **${uiReviewVerdict}** |\n` : ''}| **Trạm 4: Chaos & Mutation Sentinel** | \`chaos-sentinel\`<br>[\`scripts/check_evidence.mjs\`](file:///${repoRoot.replace(/\\/g, '/')}/scripts/check_evidence.mjs) | ${chaosSummary} | **${chaosVerdict}** |
+${uiCraftFile || visual3dFile ? `| **Trạm 3.2: ${visual3dFile ? '3D Visual & Spatial Review' : 'UI/UX Craft Review'}** | \`${visual3dFile ? 'game-3d-visual-critic' : 'ui-craft-reviewer'}\`<br>[\`${uiCraftFile ? path.relative(repoRoot, uiCraftFile).replace(/\\/g, '/') : (visual3dFile ? path.relative(repoRoot, visual3dFile).replace(/\\/g, '/') : '')}\`](file:///${uiCraftFile ? uiCraftFile.replace(/\\/g, '/') : (visual3dFile ? visual3dFile.replace(/\\/g, '/') : '')}) | ${visual3dFile ? 'Góc nhìn camera frustum, khoảng cách an toàn (clearance), không tràn viền màn hình 360px' : 'Công thái học touch target, khoảng cách an toàn (clearance), không tràn viền màn hình 360px'} | **${uiReviewVerdict}** |\n` : ''}| **Trạm 4: Chaos & Mutation Sentinel** | \`chaos-sentinel\`<br>[\`scripts/check_evidence.mjs\`](file:///${repoRoot.replace(/\\/g, '/')}/scripts/check_evidence.mjs) | ${chaosSummary} | **${chaosVerdict}** |
 
 ---
 
@@ -234,10 +246,10 @@ ${srcFiles.map((f) => `  - [\`${f}\`](file:///${path.resolve(repoRoot, f).replac
 2. **Deep Architecture & Anti-Slop Auditor (\`code-reviewer\`)**:
     - **Phán quyết**: **APPROVED** 🛡️
     - **Chỉ số Anti-Slop**: 0 violations trên 6 cờ cảnh báo (Deep modules, Zero pass-through wrappers, Zero TIDD).
-    - **Bộ nhớ & Timer**: Không rò rỉ listener, không bỏ sót timer cleanup, an toàn đa luồng/bất đồng bộ.
-${uiCraftFile || visual3dFile ? `3. **UI/UX Craft & Ergonomics Auditor (\`ui-craft-reviewer\` / \`game-3d-visual-critic\`)**:
+    - **Bộ nhớ & Timer**: Không rò rỉ listener, không bỏ sót timer cleanup, an toàn bất đồng bộ.
+${uiCraftFile || visual3dFile ? `3. **${visual3dFile ? '3D Visual & Spatial Auditor (`game-3d-visual-critic`)' : 'UI/UX Craft & Ergonomics Auditor (`ui-craft-reviewer`)'}**:
     - **Phán quyết**: **${uiReviewVerdict}**
-${uiReviewNotes.length > 0 ? uiReviewNotes.map((n) => `   ${n}`).join('\n') : '   - Đảm bảo khoảng cách an toàn trên màn hình Desktop và Mobile 360px, chuẩn hóa vùng cảm ứng phím bấm.'}
+${uiReviewNotes.length > 0 ? uiReviewNotes.map((n) => `   ${n}`).join('\n') : (visual3dFile ? '   - Đảm bảo góc nhìn camera frustum, khoảng cách an toàn (clearance), không gây nghẽn rendering trên thiết bị di động 360px.' : '   - Đảm bảo khoảng cách an toàn trên màn hình Desktop và Mobile 360px, tối ưu công thái học touch target.')}
 ${(() => {
   const isCameraTicket = srcFiles.some((f) => /camera|cinematic|kinematics/i.test(f)) || /camera|cinematic|kinematics/i.test(ticketId);
   if (!isCameraTicket) return '';
@@ -283,11 +295,11 @@ ${forensicFindings && forensicFindings.length > 0 ? `- **Phát hiện phản bi�
 
 ### 4.1. Phạm Vi Trực Tiếp Của Ticket ${ticketId} (Direct Scope)
 
-| Tệp Mã Nguồn | Đường Dẫn | Phân Hệ / Tier | LOC Thực Tế (SLOC) | Dòng Vật Lý (Disk) | Ngân Sách Trần | Trạng Thái |
-| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
+| Tệp Mã Nguồn | Phân Hệ / Tier | LOC Thực Tế (SLOC) | Ngân Sách Trần | Trạng Thái |
+| :--- | :---: | :---: | :---: | :---: |
 ${srcFiles.map((f) => {
   const abs = path.resolve(repoRoot, f);
-  if (!fs.existsSync(abs)) return `| \`${path.basename(f)}\` | [\`${f}\`](file:///${abs.replace(/\\/g, '/')}) | \`${planSubsystem}\` | **0 SLOC** | 0 Lines | <= 400 LOC | ❌ Thiếu file |`;
+  if (!fs.existsSync(abs)) return `| [\`${path.basename(f)}\`](file:///${abs.replace(/\\/g, '/')}) | \`${planSubsystem}\` | **0 SLOC** | <= 400 LOC | ❌ Thiếu file |`;
   const tierKey = categorizeTier(f);
   const tierInfo = TIER_RULES[tierKey] || TIER_RULES.TIER1_LOGIC;
   const rawLines = fs.readFileSync(abs, 'utf8').split('\n');
@@ -296,20 +308,35 @@ ${srcFiles.map((f) => {
   const sloc = rawLines.filter((l) => l.trim().length > 0).length;
   const isWarn = sloc > tierInfo.warn && sloc <= tierInfo.ceiling;
   const status = isWarn ? `⚠️ Warning (${sloc} > ${tierInfo.warn})` : (sloc > tierInfo.ceiling ? `❌ Vượt trần (${sloc} > ${tierInfo.ceiling})` : '✅ Đạt chuẩn');
-  return `| \`${path.basename(f)}\` | [\`${f}\`](file:///${abs.replace(/\\/g, '/')}) | ${tierInfo.name} | **${sloc} SLOC** | ${physicalLines} Lines | <= ${tierInfo.ceiling} LOC | ${status} |`;
+  return `| [\`${path.basename(f)}\`](file:///${abs.replace(/\\/g, '/')}) | ${tierInfo.name} | **${sloc} SLOC** (${physicalLines} L) | <= ${tierInfo.ceiling} LOC | ${status} |`;
 }).join('\n')}
 ${testFiles.map((f) => {
   const abs = path.resolve(repoRoot, f);
-  if (!fs.existsSync(abs)) return `| \`${path.basename(f)}\` | [\`${f}\`](file:///${abs.replace(/\\/g, '/')}) | Living Test | **0 SLOC** | 0 Lines | <= 600 LOC | ❌ Thiếu file |`;
+  if (!fs.existsSync(abs)) return `| [\`${path.basename(f)}\`](file:///${abs.replace(/\\/g, '/')}) | Living Test | **0 SLOC** | <= 600 LOC | ❌ Thiếu file |`;
   const rawLines = fs.readFileSync(abs, 'utf8').split('\n');
   if (rawLines.length > 0 && rawLines[rawLines.length - 1] === '') rawLines.pop();
   const physicalLines = rawLines.length;
   const sloc = rawLines.filter((l) => l.trim().length > 0).length;
   const status = sloc > 600 ? `❌ Vượt trần (${sloc} > 600)` : '✅ Đạt chuẩn';
-  return `| \`${path.basename(f)}\` | [\`${f}\`](file:///${abs.replace(/\\/g, '/')}) | Living Test | **${sloc} SLOC** | ${physicalLines} Lines | <= 600 LOC | ${status} |`;
+  return `| [\`${path.basename(f)}\`](file:///${abs.replace(/\\/g, '/')}) | Living Test | **${sloc} SLOC** (${physicalLines} L) | <= 600 LOC | ${status} |`;
 }).join('\n')}
+${(() => {
+  const harnessFiles = collectHarnessFiles(repoRoot, ticketId);
+  if (!harnessFiles || harnessFiles.length === 0) return '';
+  return `
+### 4.2. Danh Mục Tệp Quy Trình & Bằng Chứng (Harness & Evidence Scope)
+*(Giải trình ${harnessFiles.length} tệp siêu dữ liệu kiểm soát chất lượng, hợp nhất 100% với Git Summary)*
+
+| Tệp Quy Trình / Bằng Chứng | Phân Loại / Vai Trò | Trạng Thái |
+| :--- | :--- | :---: |
+${harnessFiles.map(h => {
+  const abs = path.resolve(repoRoot, h.file);
+  return `| [\`${h.name}\`](file:///${abs.replace(/\\/g, '/')}) | ${h.role} | ✅ Đã xác minh |`;
+}).join('\n')}
+`;
+})()}
 ${baselineFiles.size > 0 ? `
-### 4.2. Bảng Lũy Kế Chiến Dịch Toàn Cục (Cumulative Campaign Progress)
+### 4.3. Bảng Lũy Kế Chiến Dịch Toàn Cục (Cumulative Campaign Progress)
 *(Ghi nhận các tệp đã được tối ưu hóa trong các ticket tiền nhiệm trên cùng branch làm việc)*
 
 | Tệp Tiền Nhiệm | Phân Hệ / Tier | LOC Hiện Tại | Trần Ngân Sách | Trạng Thái |

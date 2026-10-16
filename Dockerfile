@@ -10,6 +10,9 @@ RUN npm run build
 FROM node:24-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
+ENV PORT=3000
+ENV WSS_PORT=3000
+ENV GRACE_PERIOD_MS=15000
 COPY package*.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 COPY --from=builder /app/dist ./dist

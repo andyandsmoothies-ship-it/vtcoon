@@ -2,7 +2,7 @@
 // Delta Broadcaster — Trích xuất DeltaPayload, tính toán Sparse Diff (< 10KB) và phát sóng WSS
 import type { RoomManager } from '../room_manager.js';
 import type { SessionManager, DeltaPayload, CellDelta, PlayerDelta } from '../session_manager.js';
-import type { WsServerMessage } from './network_types.js';
+import type { WsServerMessage } from '../../domain/protocol/index.js';
 
 export const MAX_DELTA_BYTES = 10_240; // 10KB NFR Baseline
 

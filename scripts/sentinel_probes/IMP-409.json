@@ -1,0 +1,44 @@
+[
+  {
+    "file": "src/client/3d/monopoly_plaza_math.ts",
+    "desc": "AST: Corrupt wrap-around circular distance in getCircularCellDistance",
+    "target": "return Math.min(diff, BOARD_TILE_COUNT - diff);",
+    "replacement": "return diff;"
+  },
+  {
+    "file": "src/client/3d/monopoly_plaza_math.ts",
+    "desc": "AST: Corrupt distance attenuation in calculateDominoRippleTransform",
+    "target": "const distFactor = 1 / (1 + 0.35 * (distanceInCells - 1));",
+    "replacement": "const distFactor = 1;"
+  },
+  {
+    "file": "src/client/3d/monopoly_plaza_math.ts",
+    "desc": "AST: Corrupt wave damping decay in calculateDominoRippleTransform",
+    "target": "const decay = Math.exp(-dampingRatio * localT);",
+    "replacement": "const decay = 1;"
+  },
+  {
+    "file": "src/client/3d/monopoly_plaza_math.ts",
+    "desc": "AST: Corrupt mobile suppression guard in resolveNeighborDominoSlam",
+    "target": "if (isMobile) return null;",
+    "replacement": "if (false && isMobile) return null;"
+  },
+  {
+    "file": "src/client/3d/monopoly_plaza_math.ts",
+    "desc": "AST: Corrupt 900ms TTL expiration guard in resolveMobilePoolDominoSlam",
+    "target": "if (elapsedSinceImpact >= 900) continue;",
+    "replacement": "if (elapsedSinceImpact >= 9000) continue;"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Corrupt dice_roll camera state to return overview in calculateTargetCameraState",
+    "target": "return configToCameraState(CAMERA_CONFIG.dice_roll);",
+    "replacement": "return configToCameraState(CAMERA_CONFIG.overview);"
+  },
+  {
+    "file": "src/client/3d/cinematic_spline_flyby.ts",
+    "desc": "AST: Corrupt baseCamY altitude interpolation in calculateSplineArcCameraState",
+    "target": "const baseCamY = (1 - t) * startCamPos[1] + t * destCamPos[1];",
+    "replacement": "const baseCamY = 0;"
+  }
+]

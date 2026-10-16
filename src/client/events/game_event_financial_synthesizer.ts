@@ -17,11 +17,11 @@ import {
   deductInflowFromDeltas,
   adjustNetDeltaForTrade,
   adjustNetDeltaForPropertyTransactions,
-  extractBondEvents,
-  extractCompulsoryBuyoutEvents,
-  extractHoseEvents,
   type InternalBalanceDelta,
 } from './game_event_financial_helpers.js';
+import { extractBondEvents } from './game_event_bond_helpers.js';
+import { extractCompulsoryBuyoutEvents } from './game_event_buyout_helpers.js';
+import { extractHoseEvents } from './game_event_hose_helpers.js';
 
 const CHANCE_MARKET_CELLS = new Set<number>([2, 7, 17, 22, 33, 36]);
 

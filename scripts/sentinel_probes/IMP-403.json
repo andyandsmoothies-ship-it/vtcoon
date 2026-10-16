@@ -1,0 +1,104 @@
+[
+  {
+    "file": "src/client/3d/war_room_stage_visuals.ts",
+    "desc": "AST: Corrupt daisPosition out of Overview frustum NDC bounds",
+    "target": "const daisPosition: readonly [number, number, number] = [11.5, -0.28, 2.2];",
+    "replacement": "const daisPosition: readonly [number, number, number] = [-8.5, -0.28, 11.6];"
+  },
+  {
+    "file": "src/client/3d/war_room_stage_visuals.ts",
+    "desc": "AST: Corrupt gavelScale back to unscaled [1, 1, 1]",
+    "target": "gavelScale: [1.4, 1.4, 1.4],",
+    "replacement": "gavelScale: [1.0, 1.0, 1.0],"
+  },
+  {
+    "file": "src/client/3d/war_room_stage_visuals.ts",
+    "desc": "AST: Corrupt EMBARGO_LEADER to KINGMAKING_DEFENSE normalization in evaluateWarRoomTradeScale",
+    "target": "normalizedReason = 'KINGMAKING_DEFENSE';",
+    "replacement": "normalizedReason = 'EMBARGO_LEADER';"
+  },
+  {
+    "file": "src/client/3d/war_room_stage_visuals.ts",
+    "desc": "AST: Corrupt scaleTiltRad polarity in evaluateWarRoomTradeScale",
+    "target": "const scaleTiltRad = decision.accept ? 0.24 : -0.26;",
+    "replacement": "const scaleTiltRad = decision.accept ? -0.24 : 0.26;"
+  },
+  {
+    "file": "src/client/3d/war_room_stage_visuals.ts",
+    "desc": "AST: Corrupt Dead Man's Switch TTL expiry in evaluateWarRoomAuctionGavel",
+    "target": "if (elapsedMs >= ttlMs) return EXPIRED_AUCTION_GAVEL_STATE;",
+    "replacement": "if (elapsedMs >= 999999) return EXPIRED_AUCTION_GAVEL_STATE;"
+  },
+  {
+    "file": "src/client/3d/war_room_stage_visuals.ts",
+    "desc": "AST: Corrupt dual bankruptcy guard in resolveTycoonDiplomacyPosture",
+    "target": "if (!hud || Boolean(hud.bankrupt || hud.isBankrupt)) {",
+    "replacement": "if (!hud) {"
+  },
+  {
+    "file": "src/client/3d/war_room_stage_visuals.ts",
+    "desc": "AST: Corrupt MONOPOLY_OVERLORD netWorth threshold in resolveTycoonDiplomacyPosture",
+    "target": "if (netWorth >= 30000) {",
+    "replacement": "if (netWorth >= 999999) {"
+  },
+  {
+    "file": "src/client/3d/war_room_stage_visuals.ts",
+    "desc": "AST: Corrupt EXPANSION netWorth threshold in resolveTycoonDiplomacyPosture",
+    "target": "if (netWorth >= 12000) {",
+    "replacement": "if (netWorth >= 50000) {"
+  },
+  {
+    "file": "src/client/3d/war_room_stage_visuals.ts",
+    "desc": "AST: Corrupt outerRadius of diplomacy halo into wealth tray collision zone",
+    "target": "outerRadius: 0.46,",
+    "replacement": "outerRadius: 0.72,"
+  },
+  {
+    "file": "src/client/3d/war_room_stage_visuals.ts",
+    "desc": "AST: Corrupt aabbMaxX calculation in getTycoonDiplomacyHaloDescriptors",
+    "target": "aabbMaxX: Number((cx + 0.46).toFixed(4)),",
+    "replacement": "aabbMaxX: Number((cx + 0.72).toFixed(4)),"
+  },
+  {
+    "file": "src/client/3d/war_room_stage_visuals.ts",
+    "desc": "AST: Corrupt CanvasTexture cache lookup in createDiplomacySpeechBubbleTexture",
+    "target": "if (cached) return cached;",
+    "replacement": "if (false && cached) return cached;"
+  },
+  {
+    "file": "src/client/3d/war_room_stage_visuals.ts",
+    "desc": "AST: Corrupt emoji stripping in createDiplomacySpeechBubbleTexture",
+    "target": "const renderedText = viSlogan.replace(/^[^\\p{L}\\p{N}]+/u, '').trim();",
+    "replacement": "const renderedText = viSlogan;"
+  },
+  {
+    "file": "src/client/3d/war_room_stage_layer.tsx",
+    "desc": "AST: Corrupt empty playersInfo preload guard in WarRoomStageLayer",
+    "target": "if (isMobile || !effectivePlayers || Object.keys(effectivePlayers).length === 0) {",
+    "replacement": "if (false) {"
+  },
+  {
+    "file": "src/client/3d/war_room_stage_layer.tsx",
+    "desc": "AST: Corrupt SafeGLTFModel.preload gavel in WarRoomStageLayer",
+    "target": "SafeGLTFModel.preload(WAR_ROOM_MODEL_URLS.gavel);",
+    "replacement": "/* preload gavel bypassed */"
+  },
+  {
+    "file": "src/client/3d/war_room_stage_layer.tsx",
+    "desc": "AST: Corrupt expired auction gavel pose reset in WarRoomStageFrameLoop",
+    "target": "auctionStartMsRef.current = null;",
+    "replacement": "/* auctionStartMsRef reset bypassed */"
+  },
+  {
+    "file": "src/client/3d/war_room_stage_layer.tsx",
+    "desc": "AST: Corrupt trade balance scale tilt application in WarRoomStageFrameLoop",
+    "target": "scaleGroup.rotation.z = scaleState.isActive ? scaleState.scaleTiltRad : 0;",
+    "replacement": "scaleGroup.rotation.z = 0;"
+  },
+  {
+    "file": "src/client/3d/coastal_island_environment.tsx",
+    "desc": "AST: Corrupt WarRoomStageLayer call-site mount in CornerTycoonSanctuaries",
+    "target": "<WarRoomStageLayer isMobile={false} />",
+    "replacement": "{null}"
+  }
+]

@@ -13,22 +13,10 @@ import { ToyPropertyBuildings } from './toy_property_buildings';
 import { OwnerPricePill, TactileDeedWaxSeal } from './owner_property_markers';
 import { PROPERTY_DEEDS } from '../../domain/property_data';
 import { TileEventAura } from './tile_event_aura.js';
-import {
-  SafeBillboard,
-  OwnershipMarkerInstances,
-  type OwnershipMarkerInstancesProps,
-} from './board_tile_ownership_marker.js';
+import { SafeBillboard, OwnershipMarkerInstances, type OwnershipMarkerInstancesProps } from './board_tile_ownership_marker.js';
 
 // FlagPole & FlagCloth ownership markers modularized into board_tile_ownership_marker.js
-export {
-  ToyPropertyBuildings,
-  OwnerPricePill,
-  TactileDeedWaxSeal,
-  TileEventAura,
-  SafeBillboard,
-  OwnershipMarkerInstances,
-  type OwnershipMarkerInstancesProps,
-};
+export { ToyPropertyBuildings, OwnerPricePill, TactileDeedWaxSeal, TileEventAura, SafeBillboard, OwnershipMarkerInstances, type OwnershipMarkerInstancesProps };
 
 export interface StandeeElevationOptions {
   readonly omega?: number;
@@ -189,6 +177,7 @@ export interface LayeredDioramaTileProps {
   readonly renderOwnerBorders?: boolean;
   readonly renderPricePillTray?: boolean;
   readonly renderPricePill?: boolean;
+  readonly renderProceduralBuilding?: boolean;
 }
 
 
@@ -197,32 +186,14 @@ export function tierColor(level: number): string {
 }
 
 export function LayeredDioramaTile({
-  cell,
-  position,
-  rotation = [0, 0, 0],
-  currentLevel,
-  isCornerTile,
-  onClick,
-  enableStandee = true,
-  ownerColor,
-  ownerSlot: _ownerSlot,
-  mascotIcon: _mascotIcon,
-  isHeatmapActive = false,
-  isMonopolyGroup = false,
-  isMobile: propIsMobile,
-  renderToyBuildings = true,
-  renderBasePlinth = true,
-  renderAtlasSurface = true,
-  renderOwnerBorders = true,
-  renderPricePillTray: propRenderPricePillTray,
-  renderPricePill: propRenderPricePill,
+  cell, position, rotation = [0, 0, 0], currentLevel, isCornerTile, onClick, enableStandee = true,
+  ownerColor, ownerSlot: _ownerSlot, mascotIcon: _mascotIcon, isHeatmapActive = false, isMonopolyGroup = false,
+  isMobile: propIsMobile, renderToyBuildings = true, renderBasePlinth = true, renderAtlasSurface = true,
+  renderOwnerBorders = true, renderPricePillTray: propRenderPricePillTray, renderPricePill: propRenderPricePill,
+  renderProceduralBuilding = true,
 }: LayeredDioramaTileProps): React.ReactElement {
-
-  const renderPricePillTray =
-    propRenderPricePillTray !== undefined ? propRenderPricePillTray : (renderBasePlinth || renderAtlasSurface);
-  const renderPricePill =
-    propRenderPricePill !== undefined ? propRenderPricePill : (renderBasePlinth || renderAtlasSurface);
-
+  const renderPricePillTray = propRenderPricePillTray !== undefined ? propRenderPricePillTray : (renderBasePlinth || renderAtlasSurface);
+  const renderPricePill = propRenderPricePill !== undefined ? propRenderPricePill : (renderBasePlinth || renderAtlasSurface);
   const textureRevision = useTextureRevision();
   const isMobile = propIsMobile !== undefined ? propIsMobile : isPhoneHardware();
   const tileAtlas = useMemo(() => getBoardTileAtlas(isMobile), [isMobile, textureRevision]);
@@ -331,7 +302,9 @@ export function LayeredDioramaTile({
       {/* 3. Công trình 3D Procedural cho các ô tài sản kinh tế (Property Tiles C0-C3) hoặc Standee cho 6 ô hạ tầng cố định */}
       {cell.type === CellType.Property ? (
         <>
-          <ProceduralBuilding level={currentLevel} groupColor={groupColor} cellIndex={cell.index} isMobile={isMobile} />
+          {(renderProceduralBuilding || currentLevel === 0 || currentLevel === 3) && (
+            <ProceduralBuilding level={currentLevel} groupColor={groupColor} cellIndex={cell.index} showEmptyPlotBoundary={isMonopolyGroup} isMobile={isMobile} />
+          )}
           {renderToyBuildings && (
             <ToyPropertyBuildings level={currentLevel} groupColor={groupColor} cellIndex={cell.index} />
           )}
@@ -347,8 +320,7 @@ export function LayeredDioramaTile({
 
       {/* 4. Khay giá sở hữu (OwnerPricePill) cho các ô có thể mua */}
       {isPurchasable && renderPricePill && (
-        <group name="DioramaPricePillIsolationAnchor_BufferSpacing_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789">
-
+        <group name="DioramaPricePillIsolationAnchor">
           <OwnerPricePill
             ownerColor={ownerColor}
             price={deedPrice}

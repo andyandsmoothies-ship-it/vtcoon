@@ -38,7 +38,7 @@ import {
 } from './visual_capture/viewport_capture_runner.mjs';
 
 // Registered In-Action Scenarios (re-exported for plan audit compatibility)
-export const REGISTERED_SCENARIOS = ['default', 'high-roller', 'property-tycoon', 'auction-fever', 'jail-bird', 'tile-aura', 'street-chase'];
+export const REGISTERED_SCENARIOS = DEFAULT_SCENARIOS;
 export { DEFAULT_SCENARIOS };
 
 const __filename = fileURLToPath(import.meta.url);
@@ -97,16 +97,18 @@ async function main() {
     console.log(`
 Usage: node scripts/capture_visual_evidence.mjs [options]
 Options:
-  --ticket <ID>         Ticket ID (e.g. IMP-233)
-  --dual-viewport       Capture both mobile (360x740) and desktop (1280x800)
-  --name <name>         Output filename slug (default: full_board)
-  --url <url>           Target URL (default: http://localhost:4173/?room=VTTEST&host=true)
-  --port <port>         Vite preview port (default: 4173)
-  --debugPort <port>    Chrome remote debugging port (default: 9222)
-  --wait <ms>           Wait time after page load in ms (default: 5000)
-  --crop <x,y,w,h>      Crop rectangle [x, y, width, height]
-  --scenario <name>     Pre-capture scenario to inject
-  --help, -h            Show this help message
+  --ticket <ID>             Ticket ID (e.g. IMP-233)
+  --dual-viewport           Capture both mobile (360x740) and desktop (1280x800)
+  --name <name>             Output filename slug (default: full_board)
+  --url <url>               Target URL (default: http://localhost:4173/?room=VTTEST&host=true)
+  --port <port>             Vite preview port (default: 4173)
+  --debugPort <port>        Chrome remote debugging port (default: 9222)
+  --wait <ms>               Wait time after page load in ms (default: 5000)
+  --crop <x,y,w,h>          Crop rectangle [x, y, width, height]
+  --scenario <name>         Pre-capture scenario in scripts/visual_scenarios/<name>.js
+  --camera-pos <x,y,z>      Override Three.js camera position for close-up inspection
+  --camera-target <x,y,z>   Override Three.js camera target for close-up inspection
+  --help, -h                Show this help message
 `);
     return;
   }

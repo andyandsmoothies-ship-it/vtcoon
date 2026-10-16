@@ -1,0 +1,50 @@
+[
+  {
+    "file": "src/client/network/room_config_helpers.ts",
+    "desc": "AST: Invert player ID assignment between host and guest",
+    "target": "const targetPid = isHost ? 'p1' : 'p2';",
+    "replacement": "const targetPid = isHost ? 'p2' : 'p1';"
+  },
+  {
+    "file": "src/client/network/room_config_helpers.ts",
+    "desc": "AST: Corrupt room code prefix in generateRandomRoomCode",
+    "target": "let code = 'VT';",
+    "replacement": "let code = 'XX';"
+  },
+  {
+    "file": "src/client/events/event_card_constants.ts",
+    "desc": "AST: Corrupt isBoardWideCard predicate to always return false",
+    "target": "return Boolean(cardId && BOARD_WIDE_CARDS.has(cardId));",
+    "replacement": "return false;"
+  },
+  {
+    "file": "src/client/network/trade_offer_tracker.ts",
+    "desc": "AST: Disable duplicate offer suppression in markTradeOfferResolved",
+    "target": "if (!offerId || resolvedTradeOfferIds.has(offerId)) {",
+    "replacement": "if (!offerId) {"
+  },
+  {
+    "file": "src/client/network/trade_offer_tracker.ts",
+    "desc": "AST: Suppress clear operation in resetTradeOfferResolutions",
+    "target": "resolvedTradeOfferIds.clear();",
+    "replacement": "/* clear skipped */"
+  },
+  {
+    "file": "src/client/events/subscribers/property_market_badge_handler.ts",
+    "desc": "AST: Hardcode myPid to p1 ignoring context.myPlayerId in handleMarketBadges",
+    "target": "const myPid = context.myPlayerId || 'p1';",
+    "replacement": "const myPid = 'p1';"
+  },
+  {
+    "file": "src/client/network/activity_tracker.ts",
+    "desc": "AST: Hardcode myPid to p1 ignoring options.myPlayerId in trackDeltaActivities",
+    "target": "const myPid = options?.myPlayerId || 'p1';",
+    "replacement": "const myPid = 'p1';"
+  },
+  {
+    "file": "src/client/network/apply_delta.ts",
+    "desc": "AST: Call-site mutation omitting myPlayerId in dispatchGameEvents context",
+    "target": "myPlayerId: useLobbyStore.getState().myPlayerId,",
+    "replacement": "myPlayerId: undefined,"
+  }
+]

@@ -1,6 +1,6 @@
 // [TC-IMP29.2/MSS][IMP-105] legacy_pawn_fallbacks.tsx — Procedural 3D Fallback Meshes for Host & Early Slots
 import React from 'react';
-import type { LuxuryPawnConfig } from './luxury_pawn_models';
+import type { LuxuryPawnConfig } from '../../domain';
 
 /**
  * Thủ tục dự phòng: Tượng Tháp Landmark Hoàng Gia (Slot 0 - Host P1)

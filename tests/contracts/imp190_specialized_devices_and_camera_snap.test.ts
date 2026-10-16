@@ -420,9 +420,8 @@ describe('[IMP-190] Specialized Devices & Camera Snap Universal Contract Suite',
       expect(asideMatch, 'PlayerHudList aside element must exist').not.toBeNull();
 
       const asideClass = asideMatch![1];
-      expect(asideClass).toContain('w-40');
+      expect(asideClass).toContain('w-44');
       expect(asideClass).toContain('sm:w-48');
-      expect(asideClass).not.toContain('w-44');
     });
 
     it('[TC-190.16/MSS][UC-IMP190] Ngân sách LOC: device_detect.ts <= 80 LOC, tile_texture_generator.ts <= 240 LOC, board_tile.tsx <= 450 LOC, camera_reset_pill.tsx <= 60 LOC, game_canvas.tsx <= 450 LOC, top_bar.tsx <= 220 LOC, player_hud_list.tsx <= 55 LOC', () => {

@@ -2,7 +2,7 @@
 import React from 'react';
 import { getDeedDisplayInfo } from '../modal_helpers';
 import { formatCurrency } from '../../ui_helpers';
-import { COLOR_GROUP_HEX } from '../../../../domain/theme';
+import { COLOR_GROUP_HEX } from '../../../../domain/index.js';
 import { getPropertySynergyTag } from '../trade_intelligence';
 
 export interface TradeColumnProps {

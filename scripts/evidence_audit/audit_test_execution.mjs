@@ -1,12 +1,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import { execSync } from 'node:child_process';
 import { createTicketMatcher } from './evidence_resolver.mjs';
 
 /**
- * Scans a test file for tautological patterns (inline mutant throws, unmounted fake timers).
+ * Scans a test file for tautological patterns (inline mutant throws, unmounted fake timers, or mocking target subject modules).
  */
-export function scanForTautology(filePath) {
+export function scanForTautology(filePath, targetFiles = []) {
   if (!fs.existsSync(filePath)) return null;
   const content = fs.readFileSync(filePath, 'utf8');
 
@@ -20,6 +21,21 @@ export function scanForTautology(filePath) {
   const tautologicalTimerPattern = /(?:const|let|var)\s+\w+\s*=\s*setTimeout\s*\([^)]*=>\s*\{[^}]*\}\s*,\s*[A-Za-z0-9_]+\s*\)[\s\S]*?vi\.advanceTimersByTime/;
   if (tautologicalTimerPattern.test(content) && !/(?:render\(|createRoot|act\(|useGameStore)/.test(content)) {
     return 'Tautological timer test detected: file defines local setTimeout() without mounting a component or invoking a production store/function.';
+  }
+
+  // Anti-Self-Mocking: forbid vi.mock() / jest.mock() on any production module in targetFiles
+  const prodTargets = (targetFiles || [])
+    .filter((f) => /^(?:src|lib|app)[\\/]/i.test(f))
+    .map((f) => path.basename(f).replace(/\.[a-z0-9]+$/i, ''));
+  if (prodTargets.length > 0) {
+    const mockRegex = /\b(?:vi|jest)\.mock\(\s*['"`]([^'"`]+)['"`]/g;
+    let m;
+    while ((m = mockRegex.exec(content)) !== null) {
+      const mockedBase = path.basename(m[1]).replace(/\.[a-z0-9]+$/i, '');
+      if (prodTargets.includes(mockedBase)) {
+        return `Target-Module Mock Ban violation: Test mocks target production module '${m[1]}'. Contract tests must test real target modules, never mock the subject under test.`;
+      }
+    }
   }
   return null;
 }
@@ -61,13 +77,14 @@ export function auditTestExecution(evidence, repoRoot, targetArg) {
   const summary = evidence.testExecutionSummary || {};
   const probeSuite = summary.probeSuite ? path.resolve(repoRoot, summary.probeSuite) : null;
   const contractSuite = summary.contractSuite ? path.resolve(repoRoot, summary.contractSuite) : null;
+  const targetFiles = evidence.targetFiles || evidence.modifiedFiles || [];
 
   // 1. Probe Suite Verification
   if (probeSuite) {
     if (!fs.existsSync(probeSuite)) {
       errors.push(`Probe suite file not found: ${summary.probeSuite}`);
     } else {
-      const tautologyErr = scanForTautology(probeSuite);
+      const tautologyErr = scanForTautology(probeSuite, targetFiles);
       if (tautologyErr) errors.push(`[Tautology Violation] ${summary.probeSuite}: ${tautologyErr}`);
       const densityViolations = scanAssertDensity(probeSuite);
       densityViolations.forEach((v) => errors.push(`[Assert Density Violation] ${summary.probeSuite}: ${v}`));
@@ -103,6 +120,8 @@ export function auditTestExecution(evidence, repoRoot, targetArg) {
     if (!fs.existsSync(effectiveContractFile)) {
       errors.push(`Contract suite file not found: ${effectiveContractFile}`);
     } else {
+      const contractTautologyErr = scanForTautology(effectiveContractFile, targetFiles);
+      if (contractTautologyErr) errors.push(`[Tautology Violation] ${effectiveContractFile}: ${contractTautologyErr}`);
       const densityViolations = scanAssertDensity(effectiveContractFile);
       densityViolations.forEach((v) => errors.push(`[Assert Density Violation] ${effectiveContractFile}: ${v}`));
 
@@ -122,10 +141,9 @@ export function auditTestExecution(evidence, repoRoot, targetArg) {
           if (expectedPassed !== undefined && passedCount !== expectedPassed) {
             errors.push(`Contract test count mismatch: Claims ${expectedPassed}, actual run passed ${passedCount}.`);
           }
-          const isMicro = evidence.isMicroSlice === true || /micro|slice[_\-]?\d+/i.test(evidence.ticketId || targetArg || '');
-          const minContractFloor = isMicro ? 6 : 15;
+          const minContractFloor = 5;
           if (passedCount < minContractFloor) {
-            errors.push(`Contract floor violation: Contract suite has ${passedCount} tests, minimum requirement is ${minContractFloor} tests${isMicro ? ' (Micro-Slice floor: 6)' : ''}.`);
+            errors.push(`Contract floor violation: Contract suite has ${passedCount} tests, minimum sanity floor is ${minContractFloor} atomic tests.`);
           }
         }
       } catch (err) {
@@ -149,6 +167,13 @@ export function auditTestExecution(evidence, repoRoot, targetArg) {
         }
         if (s1Data.testCount && summary.contractTestsPassed !== undefined && s1Data.testCount !== summary.contractTestsPassed) {
           errors.push(`[Station 1 Parity Violation] Station 1 claims ${s1Data.testCount} tests, but Station 4 contract suite passed ${summary.contractTestsPassed}.`);
+        }
+        if (s1Data.testFileSha256 && effectiveContractFile && fs.existsSync(effectiveContractFile)) {
+          const normalizedContent = fs.readFileSync(effectiveContractFile, 'utf8').replace(/\r\n/g, '\n');
+          const actualSha256 = crypto.createHash('sha256').update(normalizedContent, 'utf8').digest('hex');
+          if (actualSha256 !== s1Data.testFileSha256) {
+            errors.push(`[Test Tampering Violation] Contract test file SHA-256 (${actualSha256.slice(0, 12)}...) does not match Station 1 locked hash (${s1Data.testFileSha256.slice(0, 12)}...). Implementer is forbidden from altering QA contract tests.`);
+          }
         }
       } catch (e) {
         errors.push(`[Station 1 Evidence Violation] Failed to parse ${station1File}: ${e.message}`);

@@ -55,6 +55,19 @@ export function parseTargetFiles(planContent, fileTargetRegex) {
     const isNew = trailingText.includes('new') || trailingText.includes('create') || trailingText.includes('mới');
     targetFiles.set(filePath, isNew);
   }
+
+  // Support Markdown table rows under Target Files section or general plan tables
+  const tableRowRegex = /\|\s*[`']?((?:src|tests|scripts|lib|app|public)\/[^`'|\s]+\.[a-zA-Z0-9]+)[`']?\s*\|([^|\n]*)\|/g;
+  let tableMatch;
+  while ((tableMatch = tableRowRegex.exec(planContent)) !== null) {
+    const filePath = tableMatch[1].trim().replace(/^[`'\s]+|[`'\s]+$/g, '');
+    if (!targetFiles.has(filePath)) {
+      const lineDetails = (tableMatch[0] || '').toLowerCase();
+      const isNew = lineDetails.includes('new') || lineDetails.includes('create') || lineDetails.includes('mới') || lineDetails.includes('+');
+      targetFiles.set(filePath, isNew);
+    }
+  }
+
   return targetFiles;
 }
 

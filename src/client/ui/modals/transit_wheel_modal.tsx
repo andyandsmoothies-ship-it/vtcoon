@@ -1,9 +1,8 @@
 // [IMP-248] Tactile 2D SVG/CSS Modal: Transit Wheel / Flight Navigator
 import React, { useState, useEffect } from 'react';
 import type { ModalPayloadMap } from '../../store/game_store_types';
-import { TRANSIT_WHEEL_CONFIGS, TransitWheelOutcome, getWheelTargetDeg } from '../../../domain/transit_wheel';
-import { AudioEngine } from '../../audio/audio_engine';
-import { SoundEffect } from '../../audio/audio_types';
+import { TRANSIT_WHEEL_CONFIGS, TransitWheelOutcome, getWheelTargetDeg } from '../../../domain/index.js';
+import { audio, SoundEffect } from '../../audio/index.js';
 import { useGameStore } from '../../store/game_store';
 
 export interface TransitWheelModalProps {
@@ -40,7 +39,7 @@ export const TransitWheelModal: React.FC<TransitWheelModalProps> = ({
   const handleStartSpin = () => {
     if (isSpinning || hasFinished) return;
     setIsSpinning(true);
-    try { AudioEngine.playSfx(SoundEffect.DICE_ROLL); } catch { /* Ignore */ }
+    try { audio.playSfx(SoundEffect.DICE_ROLL); } catch { /* Ignore */ }
     onSpin();
   };
 
@@ -62,7 +61,7 @@ export const TransitWheelModal: React.FC<TransitWheelModalProps> = ({
       const timer = setTimeout(() => {
         setIsSpinning(false);
         setHasFinished(true);
-        try { AudioEngine.playSfx(SoundEffect.CARD_DRAW); } catch { /* Ignore */ }
+        try { audio.playSfx(SoundEffect.CARD_DRAW); } catch { /* Ignore */ }
       }, 3500);
 
       return () => clearTimeout(timer);

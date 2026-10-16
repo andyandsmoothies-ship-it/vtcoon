@@ -1,6 +1,6 @@
 // [IMP-132] Masterplan Constants — Static definitions, 11x11 coordinates & 8 district groups
-import { ColorGroup, CellType } from '../../../domain/board_config';
-import { COLOR_GROUP_HEX } from '../../../domain/theme';
+import { ColorGroup, CellType, COLOR_GROUP_HEX } from '../../../domain/index.js';
+
 
 export interface DistrictGroupDef {
   readonly id: string;

@@ -107,14 +107,14 @@ describe('[TC-IMP253.01/MSS..TC-IMP253.17/MSS][UC-IMP253] Floating Toast Ergonom
       expect(html).not.toContain('md:right-6');
     });
 
-    it('[TC-IMP253.02/MSS][UC-IMP253] Mobile container định vị bottom-[calc(8rem+env(safe-area-inset-bottom))] căn giữa left-1/2 -translate-x-1/2', () => {
+    it('[TC-IMP253.02/MSS][UC-IMP253] Mobile container định vị bottom-[calc(8.5rem+env(safe-area-inset-bottom))] căn giữa left-1/2 -translate-x-1/2', () => {
       useGameStore.setState({
         activeModal: null,
         activeModifiers: [],
         floatingTexts: [sampleRegularItem],
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
-      expect(html).toContain('bottom-[calc(8rem+env(safe-area-inset-bottom))]');
+      expect(html).toContain('bottom-[calc(8.5rem+env(safe-area-inset-bottom))]');
       expect(html).toContain('left-1/2 -translate-x-1/2');
     });
 
@@ -314,7 +314,7 @@ describe('[TC-IMP253.01/MSS..TC-IMP253.17/MSS][UC-IMP253] Floating Toast Ergonom
       useGameStore.setState({
         activeModal: null,
         activeModifiers: [],
-        floatingTexts: [sampleRegularItem, sampleMilestoneItem],
+        floatingTexts: [sampleRegularItem, sampleRegularItem2, sampleMilestoneItem],
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
       expect(html).toContain('data-testid="milestone-banner-container"');

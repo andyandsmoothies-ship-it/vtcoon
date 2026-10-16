@@ -83,8 +83,8 @@ describe('[IMP-276B] Event Card Modal, Ticker & Visual Badges Sync for MC_RATE_H
         cardId: MarketCardId.MC_RATE_HIKE,
       })
     );
-    expect(container.textContent).toContain('Tăng 20% chi phí xây dựng công trình C1-C3');
-    expect(container.textContent).toContain('tăng lãi suất vay thế chấp lên 10% khi vượt GO trong 2 vòng');
+    expect(container.textContent).toContain('Tăng 20% chi phí xây dựng');
+    expect(container.textContent).toContain('thu lãi vay 10% khi vượt GO trong 2 vòng');
   });
 
   it('[TC-276B.03/MSS][UC-IMP276B] Given cardId là MarketCardId.MC_RATE_HIKE, When render EventCardModal, Then badge thời hạn hiển thị 2 vòng chơi', () => {
@@ -154,7 +154,7 @@ describe('[IMP-276B] Event Card Modal, Ticker & Visual Badges Sync for MC_RATE_H
 
     expect(container.querySelector('[data-testid="event-card-carousel-nav"]')).not.toBeNull();
     expect(container.textContent).toContain('Toàn bộ thị trường');
-    expect(container.textContent).toContain('Tăng 20% chi phí xây dựng công trình C1-C3');
+    expect(container.textContent).toContain('Tăng 20% chi phí xây dựng');
   });
 
   it('[TC-276B.10/MSS][UC-IMP276B] Given activeModifiers chứa MC_RATE_HIKE, When render MarketEventTicker, Then thanh ticker hiển thị item chứa công thức Xây nhà +20%, Lãi vay 10%', () => {

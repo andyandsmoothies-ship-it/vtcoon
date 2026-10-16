@@ -56,8 +56,6 @@ export function lintTextRules(content, filePath, errors, warnings) {
  * Checks for production files imported only in tests with zero consumers in src.
  */
 export function lintOrphanProductionFiles(targetDir, files, errors, fileCache = null) {
-  if (targetDir !== 'src' && !targetDir.startsWith('src')) return;
-
   const srcFiles = files.filter(f => f.replace(/\\/g, '/').startsWith('src/'));
   if (srcFiles.length === 0) return;
   const testFiles = fs.existsSync('tests') ? getSourceFiles('tests') : [];
@@ -78,7 +76,7 @@ export function lintOrphanProductionFiles(targetDir, files, errors, fileCache = 
     'src/client/ui/social_emotes_tray.tsx',
   ]);
 
-  for (const { file } of allSrcContent) {
+  for (const file of srcFiles) {
     const norm = file.replace(/\\/g, '/');
     if (norm.includes('polyfills/') || KNOWN_ENTRYPOINTS.has(norm)) continue;
     const base = path.basename(file).replace(/\.[^.]+$/, '');

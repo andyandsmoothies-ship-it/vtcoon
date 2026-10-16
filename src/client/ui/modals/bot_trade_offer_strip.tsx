@@ -2,34 +2,17 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useGameStore } from '../../store/game_store.js';
 import { useLobbyStore } from '../../store/lobby_store.js';
-import { BOARD_CONFIG } from '../../../domain/board_config.js';
+import { BOARD_CONFIG } from '../../../domain/index.js';
+
 import { formatCurrency, formatShortPlayerName } from '../ui_helpers.js';
-import { AudioEngine } from '../../audio/audio_engine.js';
-import { SoundEffect } from '../../audio/audio_types.js';
+import { audio, SoundEffect } from '../../audio/index.js';
 import type { PlayerIntent } from '../../../domain/protocol/index.js';
 
-const MAX_RESOLVED_ENTRIES = 100;
-const resolvedTradeOfferIds = new Set<string>();
-
-/**
- * Sentinel FIFO-100: Ghi nhận và khóa offerId đề xuất giao dịch bot.
- * Trả về true nếu đề xuất mới được ghi nhận thành công, false nếu đã được giải quyết trước đó.
- */
-export function markTradeOfferResolved(offerId: string): boolean {
-  if (!offerId || resolvedTradeOfferIds.has(offerId)) {
-    return false;
-  }
-  if (resolvedTradeOfferIds.size >= MAX_RESOLVED_ENTRIES) {
-    const oldest = resolvedTradeOfferIds.values().next().value;
-    if (oldest) resolvedTradeOfferIds.delete(oldest);
-  }
-  resolvedTradeOfferIds.add(offerId);
-  return true;
-}
-
-export function resetTradeOfferResolutions(): void {
-  resolvedTradeOfferIds.clear();
-}
+import {
+  markTradeOfferResolved,
+  resetTradeOfferResolutions,
+} from '../../network/trade_offer_tracker.js';
+export { markTradeOfferResolved, resetTradeOfferResolutions };
 
 export interface InlineBotTradeStripProps {
   readonly onIntent?: (intent: PlayerIntent) => void;
@@ -141,7 +124,7 @@ export function InlineBotTradeStrip({
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
-    AudioEngine.playSfx(SoundEffect.BUY_PROPERTY);
+    audio.playSfx(SoundEffect.BUY_PROPERTY);
     onIntent?.({
       type: 'INTENT_RESPOND_TRADE_OFFER',
       offerId: pendingTradeOffer.offerId,
@@ -158,7 +141,7 @@ export function InlineBotTradeStrip({
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
-    AudioEngine.playSfx(SoundEffect.CARD_FLIP);
+    audio.playSfx(SoundEffect.CARD_FLIP);
     onIntent?.({
       type: 'INTENT_RESPOND_TRADE_OFFER',
       offerId: pendingTradeOffer.offerId,

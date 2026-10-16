@@ -1,0 +1,110 @@
+[
+  {
+    "file": "src/client/3d/monopoly_plaza_visuals.ts",
+    "desc": "AST: Corrupt contiguous sub-span adjacency check in splitContiguousMonopolySegments",
+    "target": "if (cell - prev === 1 && sameSide) {",
+    "replacement": "if (cell - prev <= 5 && sameSide) {"
+  },
+  {
+    "file": "src/client/3d/monopoly_plaza_visuals.ts",
+    "desc": "AST: Corrupt MarblePromenade localZ inward into card title header",
+    "target": "const DEFAULT_PROMENADE_LOCAL_Z = -1.16;",
+    "replacement": "const DEFAULT_PROMENADE_LOCAL_Z = -0.80;"
+  },
+  {
+    "file": "src/client/3d/monopoly_plaza_visuals.ts",
+    "desc": "AST: Corrupt 1-cell archway tangent offset outside the 0.84m promenade slab",
+    "target": "const SINGLE_CELL_ARCHWAY_TANGENT_X = -0.56;",
+    "replacement": "const SINGLE_CELL_ARCHWAY_TANGENT_X = 0.92;"
+  },
+  {
+    "file": "src/client/3d/monopoly_plaza_visuals.ts",
+    "desc": "AST: Corrupt archwayScale above inter-building gap ceiling",
+    "target": "const DEFAULT_ARCHWAY_SCALE: readonly [number, number, number] = [1.25, 1.25, 1.25];",
+    "replacement": "const DEFAULT_ARCHWAY_SCALE: readonly [number, number, number] = [2.50, 2.50, 2.50];"
+  },
+  {
+    "file": "src/client/3d/monopoly_plaza_visuals.ts",
+    "desc": "AST: Corrupt inter-cell brass joint inlay loop in createBatchedMonopolyPromenadeGeometries",
+    "target": "for (let i = 1; i < seg.cells.length; i++) {",
+    "replacement": "for (let i = 99; i < seg.cells.length; i++) {"
+  },
+  {
+    "file": "src/client/3d/monopoly_plaza_visuals.ts",
+    "desc": "AST: Corrupt fingerprint cache hit return in createBatchedMonopolyPromenadeGeometries",
+    "target": "if (hasGroupsInput && cachedPromenadeGeometries && cachedPromenadeFingerprint === fingerprint) {",
+    "replacement": "if (false && hasGroupsInput && cachedPromenadeGeometries && cachedPromenadeFingerprint === fingerprint) {"
+  },
+  {
+    "file": "src/client/3d/monopoly_plaza_visuals.ts",
+    "desc": "AST: Corrupt superseded geometry disposal on fingerprint mutation",
+    "target": "if (hasGroupsInput && cachedPromenadeGeometries && cachedPromenadeFingerprint !== fingerprint) {\n    disposeBatchedMonopolyPromenadeGeometries();\n  }",
+    "replacement": "if (false) {\n    disposeBatchedMonopolyPromenadeGeometries();\n  }"
+  },
+  {
+    "file": "src/client/3d/monopoly_plaza_visuals.ts",
+    "desc": "AST: Corrupt circular wrap-around distance in getCircularCellDistance",
+    "target": "return Math.min(diff, BOARD_TILE_COUNT - diff);",
+    "replacement": "return diff;"
+  },
+  {
+    "file": "src/client/3d/monopoly_plaza_visuals.ts",
+    "desc": "AST: Corrupt waveDelayPerCellMs guard in calculateDominoRippleTransform",
+    "target": "if (elapsedMs < delayMs) {\n    return { yOffset: 0, scaleY: 1, pitchRad: 0, isSettled: false };\n  }",
+    "replacement": "if (elapsedMs < -99999) {\n    return { yOffset: 0, scaleY: 1, pitchRad: 0, isSettled: false };\n  }"
+  },
+  {
+    "file": "src/client/3d/monopoly_plaza_visuals.ts",
+    "desc": "AST: Corrupt expired slam TTL filter in resolveNeighborDominoSlam",
+    "target": "if (elapsedSinceImpact >= 900) continue;",
+    "replacement": "if (elapsedSinceImpact >= 99999) continue;"
+  },
+  {
+    "file": "src/client/3d/monopoly_plaza_fusion.tsx",
+    "desc": "AST: Corrupt mobile bypass guard in MonopolyPlazaFusion useMemo call-site",
+    "target": "if (isMobile || !monopolyGroups || Object.keys(monopolyGroups).length === 0) {",
+    "replacement": "if (!monopolyGroups || Object.keys(monopolyGroups).length === 0) {"
+  },
+  {
+    "file": "src/client/3d/monopoly_plaza_fusion.tsx",
+    "desc": "AST: Corrupt SafeGLTFModel.preload call-site in MonopolyPlazaFusion",
+    "target": "SafeGLTFModel.preload(MONOPOLY_ARCHWAY_MODEL_URL);",
+    "replacement": "/* SafeGLTFModel.preload bypassed */"
+  },
+  {
+    "file": "src/client/3d/monopoly_plaza_fusion.tsx",
+    "desc": "AST: Corrupt triggerConstructionSlam on new monopoly formation in MonopolyPlazaFusion",
+    "target": "useVfxStore.getState().triggerConstructionSlam(anchorCell, 1);",
+    "replacement": "/* triggerConstructionSlam bypassed */"
+  },
+  {
+    "file": "src/client/3d/board_layout.tsx",
+    "desc": "AST: Corrupt isMobile prop forwarding to MonopolyPlazaFusion in GameBoard",
+    "target": "<MonopolyPlazaFusion monopolyGroups={monopolyGroups} isHeatmapActive={isHeatmapActive} isMobile={isMobile} />",
+    "replacement": "<MonopolyPlazaFusion monopolyGroups={monopolyGroups} isHeatmapActive={isHeatmapActive} isMobile={false} />"
+  },
+  {
+    "file": "src/client/3d/board_tile.tsx",
+    "desc": "AST: Corrupt showEmptyPlotBoundary prop forwarding to ProceduralBuilding on Monopoly level-0 tiles",
+    "target": "<ProceduralBuilding level={currentLevel} groupColor={groupColor} cellIndex={cell.index} showEmptyPlotBoundary={isMonopolyGroup && !isMobile} isMobile={isMobile} />",
+    "replacement": "<ProceduralBuilding level={currentLevel} groupColor={groupColor} cellIndex={cell.index} showEmptyPlotBoundary={false} isMobile={isMobile} />"
+  },
+  {
+    "file": "src/client/3d/procedural_building.tsx",
+    "desc": "AST: Corrupt neighborDomino pitchRad application in ProceduralBuilding useSafeFrame",
+    "target": "rootGroupRef.current.rotation.x = lotTransform.rotation[0] + ripple.pitchRad;",
+    "replacement": "rootGroupRef.current.rotation.x = lotTransform.rotation[0];"
+  },
+  {
+    "file": "src/client/3d/building_typology.ts",
+    "desc": "AST: Corrupt regional C1/C2 .glb URL routing in getBuildingModelUrl back to hardcoded building_c1.glb",
+    "target": "return `/models/buildings/bld_${typology}_c${level}.glb`;",
+    "replacement": "return BUILDING_MODEL_URLS[level];"
+  },
+  {
+    "file": "src/client/3d/procedural_building.tsx",
+    "desc": "AST: Corrupt resolvedTypology wiring in ProceduralBuilding back to hardcoded metropolis",
+    "target": "const resolvedTypology = getRegionalTypology(cellIndex ?? 0) ?? 'metropolis';",
+    "replacement": "const resolvedTypology = 'metropolis';"
+  }
+]

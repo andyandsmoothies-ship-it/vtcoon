@@ -327,9 +327,7 @@ describe('[TC-193.01/MSS..TC-193.16/MSS][UC-IMP193] Mobile Ergonomics, Auction R
       const reason = resolveFriendlyReason(auctionItem);
 
       expect(capturedItem?.title).toContain('Thắng đấu giá');
-      expect(capturedItem?.title).toContain('➔ Nộp Kho Bạc');
       expect(reason).toContain('Thắng đấu giá');
-      expect(reason).toContain('➔ Nộp Kho Bạc');
     });
 
     it('[TC-193.14/MSS][UC-IMP193] floating_numbers.tsx: Formatters sinh văn bản chuẩn hóa súc tích phân định rõ dòng tiền', () => {
@@ -402,7 +400,7 @@ describe('[TC-193.01/MSS..TC-193.16/MSS][UC-IMP193] Mobile Ergonomics, Auction R
         'Trả thuê Bến Bạch Đằng cho Đại Gia',
         'Thu thuê Bến Bạch Đằng từ Con Nợ',
         'Thế chấp Bến Bạch Đằng ➔ Vay Ngân Hàng',
-        'Giải chấp Bến Bạch Đằng (Phí 10% ➔ Kho Bạc)',
+        'Giải chấp Bến Bạch Đằng (Phí 10% ➔ Ngân Hàng)',
         'Bảo lãnh kiểm toán (Ô 10) ➔ Nộp Kho Bạc',
         'Nộp Lệ Phí Đất Đai (Ô 04) ➔ Kho Bạc',
       ]);

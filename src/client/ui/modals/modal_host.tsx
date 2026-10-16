@@ -15,8 +15,7 @@ import { GameRulesModal } from './game_rules_modal';
 import { MasterplanModal } from './masterplan_modal';
 import { BotTradeOfferModal } from './bot_trade_offer_modal';
 import { CompulsoryBuyoutModal } from './compulsory_buyout_modal';
-import { AudioEngine } from '../../audio/audio_engine';
-import { SoundEffect } from '../../audio/audio_types';
+import { audio, SoundEffect } from '../../audio/index.js';
 import type { PlayerIntent } from '../../../domain/protocol/index.js';
 import { isAuctionDismissible } from './modal_helpers';
 import { useLobbyStore } from '../../store/lobby_store';
@@ -52,7 +51,7 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
   // SFX khi mở thẻ sự kiện hoặc đề xuất mua đất từ Bot / mua lại C0
   useEffect(() => {
     if (activeModal === 'event' || activeModal === 'bot_trade_offer' || activeModal === 'compulsory_buyout') {
-      AudioEngine.playSfx(SoundEffect.CARD_DRAW);
+      audio.playSfx(SoundEffect.CARD_DRAW);
     }
   }, [activeModal]);
 
@@ -215,7 +214,7 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
           lastPayout={(modalPayload as ModalPayloadMap['hose']).lastPayout}
           isReviewingResult={(modalPayload as ModalPayloadMap['hose']).isReviewingResult}
           onInvest={(stake) => {
-            AudioEngine.playSfx(SoundEffect.DICE_ROLL);
+            audio.playSfx(SoundEffect.DICE_ROLL);
             const chosenStake = stake ?? 500;
             updateModalPayload<'hose'>({ isReviewingResult: true });
             onIntent?.({ type: 'INTENT_INVEST', stake: chosenStake });
@@ -241,7 +240,7 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
           onAutoSolvency={() => onIntent?.({ type: 'INTENT_AUTO_SOLVENCY' })}
           onManageProperties={() => useGameStore.getState().openModal('portfolio', {})}
           onDeclareBankruptcy={() => {
-            AudioEngine.playSfx(SoundEffect.BANKRUPT);
+            audio.playSfx(SoundEffect.BANKRUPT);
             onIntent?.({ type: 'INTENT_BANKRUPTCY' });
             closeModal();
           }}
@@ -268,8 +267,8 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
             sellerId={p.sellerId}
             expiresAt={p.expiresAt}
             offeredCellIndex={p.offeredCellIndex}
-            onAccept={(offerId) => { AudioEngine.playSfx(SoundEffect.BUY_PROPERTY); onIntent?.({ type: 'INTENT_RESPOND_TRADE_OFFER', offerId, accept: true }); useGameStore.getState().setPendingTradeOffer(null); closeModal(); }}
-            onReject={(offerId) => { AudioEngine.playSfx(SoundEffect.CARD_FLIP); onIntent?.({ type: 'INTENT_RESPOND_TRADE_OFFER', offerId, accept: false }); useGameStore.getState().setPendingTradeOffer(null); closeModal(); }}
+            onAccept={(offerId) => { audio.playSfx(SoundEffect.BUY_PROPERTY); onIntent?.({ type: 'INTENT_RESPOND_TRADE_OFFER', offerId, accept: true }); useGameStore.getState().setPendingTradeOffer(null); closeModal(); }}
+            onReject={(offerId) => { audio.playSfx(SoundEffect.CARD_FLIP); onIntent?.({ type: 'INTENT_RESPOND_TRADE_OFFER', offerId, accept: false }); useGameStore.getState().setPendingTradeOffer(null); closeModal(); }}
             onClose={() => { onIntent?.({ type: 'INTENT_RESPOND_TRADE_OFFER', offerId: p.offerId, accept: false }); useGameStore.getState().setPendingTradeOffer(null); closeModal(); }}
           />
         );
@@ -285,8 +284,8 @@ export const ModalHost: React.FC<ModalHostProps> = (props = {}) => {
             cost={p.cost}
             basePrice={p.basePrice}
             expiresAt={p.expiresAt} eligibleTargets={p.eligibleTargets}
-            onBuyout={(cellIndex) => { AudioEngine.playSfx(SoundEffect.BUY_PROPERTY); onIntent?.({ type: 'INTENT_EXECUTE_COMPULSORY_BUYOUT', cellIndex }); closeModal(); }}
-            onDecline={() => { AudioEngine.playSfx(SoundEffect.CARD_FLIP); onIntent?.({ type: 'INTENT_DECLINE_COMPULSORY_BUYOUT' }); closeModal(); }}
+            onBuyout={(cellIndex) => { audio.playSfx(SoundEffect.BUY_PROPERTY); onIntent?.({ type: 'INTENT_EXECUTE_COMPULSORY_BUYOUT', cellIndex }); closeModal(); }}
+            onDecline={() => { audio.playSfx(SoundEffect.CARD_FLIP); onIntent?.({ type: 'INTENT_DECLINE_COMPULSORY_BUYOUT' }); closeModal(); }}
             onClose={() => { onIntent?.({ type: 'INTENT_DECLINE_COMPULSORY_BUYOUT' }); closeModal(); }}
           />
         );

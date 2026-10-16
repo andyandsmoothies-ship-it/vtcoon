@@ -3,7 +3,7 @@ import React, { useRef, useEffect } from 'react';
 import * as THREE from 'three';
 import { BOARD_CONFIG, CellType } from '../../domain/board_config';
 import { cellPosition } from './board_coords';
-import { tileRotation } from './board_layout';
+import { tileRotation } from './board_layout_math.js';
 import { useGameStore } from '../store/game_store';
 import { computePackedBuildingSlots } from './building_packer';
 

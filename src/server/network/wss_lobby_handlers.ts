@@ -6,7 +6,7 @@ import type { ReconnectManager } from './reconnect_manager.js';
 import type { SocketRegistry } from './socket_registry.js';
 import type { DeltaBroadcaster } from './delta_broadcaster.js';
 import type { AdminManager } from './admin_manager.js';
-import type { WsClientMessage, WsServerMessage, ReasonCode } from './network_types.js';
+import type { WsClientMessage, WsServerMessage, ReasonCode } from '../../domain/protocol/index.js';
 import type { Room, Player } from '../../domain/room.js';
 import type { IntentGuard } from '../security/intent_guard.js';
 import type { PlayerIntent } from '../intent_dispatcher.js';

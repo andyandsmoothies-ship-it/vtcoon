@@ -1,7 +1,7 @@
 // [IMP-28/MSS] Persistent Room Logger — Real-Time Crash-Resilient Event Logging
 import fs from 'node:fs';
 import path from 'node:path';
-import type { AdminRoomLogEntry, AdminArchivedRoomSummary, ArchivedRoomStatus } from '../network/admin_types.js';
+import type { AdminRoomLogEntry, AdminArchivedRoomSummary, ArchivedRoomStatus } from '../../domain/protocol/index.js';
 import {
   type ISupabaseStorageService,
   SupabaseStorageService,
@@ -20,18 +20,8 @@ export interface PersistentRoomLoggerOptions {
   readonly supabaseStorage?: ISupabaseStorageService;
 }
 
-export interface RoomLogMeta {
-  readonly hostId?: string;
-  readonly playerCount?: number;
-  readonly timestamp?: number;
-}
-
-export interface RoomFinishSummary {
-  readonly status?: ArchivedRoomStatus;
-  readonly winner?: string;
-  readonly endTime?: number;
-  readonly playerCount?: number;
-}
+import type { RoomLogMeta, RoomFinishSummary } from './room_logger_types.js';
+export type { RoomLogMeta, RoomFinishSummary };
 
 export class PersistentRoomLogger {
   private readonly logDir: string;

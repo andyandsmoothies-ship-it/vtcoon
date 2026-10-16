@@ -1,7 +1,7 @@
 // [IMP-332] Game Event Bus — Central decoupled in-process event distribution
-import type { GameState } from '../store/game_store.js';
-import type { DeltaPayload } from '../../domain/protocol/index.js';
 import type { SynthesizedGameEvent } from './game_event_types.js';
+import type { GameEventContext, GameEventListener } from './game_event_bus_types.js';
+export type { GameEventContext, GameEventListener } from './game_event_bus_types.js';
 import { createActivityLogSubscriber } from './subscribers/activity_log_subscriber.js';
 import { createBadgeEventSubscriber } from './subscribers/badge_event_subscriber.js';
 import { createAudioEventSubscriber } from './subscribers/audio_event_subscriber.js';
@@ -10,17 +10,6 @@ import { useActivityStore } from '../store/activity_store.js';
 import { useGameStore } from '../store/game_store.js';
 import { useVfxStore } from '../store/vfx_store.js';
 import { SoundEngine, type SoundEngineImpl } from '../audio/sound_engine.js';
-
-export interface GameEventContext {
-  readonly prevState: GameState;
-  readonly nextState: GameState;
-  readonly delta: DeltaPayload;
-}
-
-export type GameEventListener = (
-  events: readonly SynthesizedGameEvent[],
-  context: GameEventContext,
-) => void;
 
 export class GameEventBus {
   private readonly listeners = new Map<string, GameEventListener>();

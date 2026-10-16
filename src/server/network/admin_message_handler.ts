@@ -1,11 +1,11 @@
 // [IMP-25/MSS][IMP-28/MSS] Admin WebSocket Message Dispatcher & Handlers
 import type { WebSocket } from 'ws';
-import type { WsClientMessage, WsServerMessage, ReasonCode } from './network_types.js';
-import type { AdminManager } from './admin_manager.js';
+import type { WsClientMessage, WsServerMessage, ReasonCode } from '../../domain/protocol/index.js';
+import type { IAdminManager } from './admin_manager_types.js';
 import { normalizeRoomCode } from './admin_security.js';
 
 export function handleAdminClientMessage(
-  admin: AdminManager,
+  admin: IAdminManager,
   socket: WebSocket,
   msg: WsClientMessage,
   sendSafe: (s: WebSocket, m: WsServerMessage) => void,
@@ -42,7 +42,7 @@ export const handleAdminMessage = handleAdminClientMessage;
 export const handleClientMessage = handleAdminClientMessage;
 
 function handleAuth(
-  admin: AdminManager,
+  admin: IAdminManager,
   socket: WebSocket,
   secret: string,
   sendSafe: (s: WebSocket, m: WsServerMessage) => void,
@@ -58,7 +58,7 @@ function handleAuth(
 }
 
 function dispatchAuth(
-  admin: AdminManager,
+  admin: IAdminManager,
   socket: WebSocket,
   sendSafe: (s: WebSocket, m: WsServerMessage) => void,
   factory: () => WsServerMessage,
@@ -72,7 +72,7 @@ function dispatchAuth(
 }
 
 async function dispatchAuthAsync(
-  admin: AdminManager,
+  admin: IAdminManager,
   socket: WebSocket,
   sendSafe: (s: WebSocket, m: WsServerMessage) => void,
   factory: () => Promise<WsServerMessage>,
@@ -87,7 +87,7 @@ async function dispatchAuthAsync(
 }
 
 function handleGetRooms(
-  admin: AdminManager,
+  admin: IAdminManager,
   socket: WebSocket,
   sendSafe: (s: WebSocket, m: WsServerMessage) => void,
 ): boolean {
@@ -99,7 +99,7 @@ function handleGetRooms(
 }
 
 async function handleGetArchivedRooms(
-  admin: AdminManager,
+  admin: IAdminManager,
   socket: WebSocket,
   sendSafe: (s: WebSocket, m: WsServerMessage) => void,
 ): Promise<boolean> {
@@ -115,7 +115,7 @@ async function handleGetArchivedRooms(
 }
 
 async function handleGetArchivedLogs(
-  admin: AdminManager,
+  admin: IAdminManager,
   socket: WebSocket,
   roomCode: string,
   timestamp: number | undefined,
@@ -135,7 +135,7 @@ async function handleGetArchivedLogs(
 }
 
 function handleSubscribe(
-  admin: AdminManager,
+  admin: IAdminManager,
   socket: WebSocket,
   rawRoomCode: string,
   sendSafe: (s: WebSocket, m: WsServerMessage) => void,
@@ -155,7 +155,7 @@ function handleSubscribe(
 }
 
 function handleTerminate(
-  admin: AdminManager,
+  admin: IAdminManager,
   socket: WebSocket,
   rawRoomCode: string,
   reason: string | undefined,
@@ -185,7 +185,7 @@ function handleTerminate(
 }
 
 async function handleSyncCloudStorage(
-  admin: AdminManager,
+  admin: IAdminManager,
   socket: WebSocket,
   sendSafe: (s: WebSocket, m: WsServerMessage) => void,
 ): Promise<boolean> {

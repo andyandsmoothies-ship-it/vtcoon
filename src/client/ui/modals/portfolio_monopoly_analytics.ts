@@ -1,7 +1,6 @@
 // [IMP-136] Portfolio Monopoly Analytics & Missing Piece Resolution
 // Traceability: [UC-IMP136], [TC-IMP136.01..TC-IMP136.04], Gotcha #179
-import { BOARD_CONFIG, CellType } from '../../../domain/board_config';
-import { PROPERTY_DEEDS } from '../../../domain/property_data';
+import { BOARD_CONFIG, CellType, PROPERTY_DEEDS } from '../../../domain/index.js';
 
 export interface MissingPieceInfo {
   readonly cellIndex: number;

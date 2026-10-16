@@ -184,11 +184,43 @@ def check_command(payload: dict) -> None:
 
 
 def pre_tool_file_gate(payload: dict, role: str = "") -> None:
-    """PreToolUse: Enforces role sandbox and registers target file before edit."""
+    """PreToolUse: Enforces role sandbox on both file tools and shell commands."""
+    tool_call = payload.get("toolCall", {}) if payload else {}
+    args = tool_call.get("args", {}) if isinstance(tool_call, dict) else {}
+    cmd = args.get("CommandLine", "")
+    if cmd:
+        has_inline_write = bool(
+            re.search(
+                r"(?:writeFileSync|writeFile|appendFileSync|copyFileSync|Set-Content|Add-Content|Out-File|\bcp\b|\bmv\b|Copy-Item|Move-Item|open\([^)]+['\"][wa]['\"])",
+                cmd,
+                re.IGNORECASE,
+            )
+        )
+        if role == "implementer" and has_inline_write and re.search(r"(?:tests?[/\\]|\.test\.|\.spec\.|station1_)", cmd, re.IGNORECASE):
+            print(
+                json.dumps(
+                    {
+                        "decision": "deny",
+                        "reason": "ERROR [Role Shell Gate]: implementer is strictly forbidden from modifying test files or station1 evidence via run_command.",
+                    }
+                )
+            )
+            sys.exit(0)
+        if role in ("qa-tester", "chaos-sentinel") and has_inline_write and re.search(r"(?:src[/\\]|lib[/\\]|app[/\\])", cmd, re.IGNORECASE):
+            print(
+                json.dumps(
+                    {
+                        "decision": "deny",
+                        "reason": f"ERROR [Role Shell Gate]: {role} is strictly forbidden from modifying production source code via run_command.",
+                    }
+                )
+            )
+            sys.exit(0)
+        check_command(payload)
+
     target_file = ""
     if payload:
-        tool_call = payload.get("toolCall", {})
-        target_file = tool_call.get("args", {}).get("TargetFile", "")
+        target_file = args.get("TargetFile", "")
 
     if not target_file:
         target_file = os.environ.get("AG_TOOL_TARGET_FILE", "") or (

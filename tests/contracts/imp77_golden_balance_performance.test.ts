@@ -51,7 +51,7 @@ describe('[TC-IMP77.3/MSS] Balanced Device Pixel Ratio (dpr={[1, 1.5]})', () => 
 
   it('game_canvas.tsx cấu hình dpr trần 1.5 để tối ưu 43.75% pixel fillrate trên màn hình HiDPI', () => {
     const source = fs.readFileSync(gameCanvasPath, 'utf-8');
-    expect(source).toContain('dpr={[1, 1.5]}');
+    expect(source).toContain('dpr={deviceProfile.recommendedDpr}');
     expect(source).not.toContain('dpr={[1.25, 2]}');
   });
 

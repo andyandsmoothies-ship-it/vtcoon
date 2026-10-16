@@ -2,7 +2,7 @@
 // Extracted from persistent_room_logger.ts to isolate cloud network I/O and manifest synchronization.
 import fs from 'node:fs';
 import path from 'node:path';
-import type { AdminArchivedRoomSummary } from '../network/admin_types.js';
+import type { AdminArchivedRoomSummary } from '../../domain/protocol/index.js';
 import {
   type ISupabaseStorageService,
 } from '../storage/supabase_storage.js';
@@ -12,7 +12,7 @@ import {
   reindexLocalLogs,
   resolveLogFileName,
 } from './room_logger_reindexer.js';
-import type { RoomFinishSummary } from './persistent_room_logger.js';
+import type { RoomFinishSummary } from './room_logger_types.js';
 
 export function isStorageConfigured(storage?: ISupabaseStorageService): boolean {
   if (!storage) return false;

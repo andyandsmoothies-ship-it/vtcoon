@@ -7,7 +7,7 @@ import type {
   AdminRoomSummary,
   AdminRoomDetail,
   AdminRoomLogEntry,
-} from './admin_types.js';
+} from '../../domain/protocol/index.js';
 import type { ReconnectManager } from './reconnect_manager.js';
 
 export function evaluateRoomHealth(

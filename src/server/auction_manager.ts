@@ -4,23 +4,10 @@ import { TurnPhase, isRoomGameOver } from '../domain/room';
 import { PROPERTY_DEEDS, type PropertyRegistry, type PropertyStateMap } from '../domain/property_manager';
 import { ActionRejectReason } from '../domain/action_reasons';
 import { handleStartFireSaleAuction } from './bond_manager';
-import { advanceTurnAfterBankruptcy } from './insolvency_manager';
+import { advanceTurnAfterBankruptcy } from './fsm_transition_coordinator.js';
 import { MarketCardId } from '../domain/event_card_types';
-
-
-
-export interface AuctionSession {
-  readonly cellIndex: number;
-  readonly declinedPlayerId: string;
-  highestBid: number;
-  startingBid?: number;
-  currentBid?: number;
-  highestBidder?: string;
-  passedPlayers?: Set<string>;
-  insolvencyPlayerId?: string;  // [DEBT-S06-04] set when auction is a forced liquidation
-  endTime?: number;
-  isFireSale?: boolean;
-}
+import type { AuctionSession } from './auction_types.js';
+export type { AuctionSession, AuctionResult } from './auction_types.js';
 
 export function handleDecline(
   room: Room | undefined,

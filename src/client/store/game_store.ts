@@ -10,8 +10,7 @@ export const MAX_FLOATING_TEXTS = 6;
 
 export * from './game_store_types.js';
 import { type GameState, type FloatingTextItem, FloatingTextType, INITIAL_GAME_STATE } from './game_store_types.js';
-import { clearPendingPacingTimers } from '../events/pacing_context.js';
-import { clearPendingBadgeTimers } from '../network/activity_badge_dispatcher.js';
+import { executeGameResetCleanups } from './game_store_cleanup.js';
 
 export const useGameStore = create<GameState>((set, get) => ({
   ...INITIAL_GAME_STATE,
@@ -20,8 +19,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   setCameraFocusCell: (cellIndex) => set({ cameraFocusCell: cellIndex }),
   setHasUserCustomCamera: (hasUserCustomCamera) => set({ hasUserCustomCamera }),
   resetGameState: () => {
-    clearPendingPacingTimers();
-    clearPendingBadgeTimers();
+    executeGameResetCleanups();
     set(INITIAL_GAME_STATE);
   },
 
@@ -149,7 +147,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     }),
 
   addFloatingText: (item) => {
-    if (item.groupId && get().floatingTexts.some((t) => t.groupId === item.groupId && Date.now() - t.timestamp < 2000)) {
+    if (item.groupId && get().floatingTexts.some((t) => t.groupId === item.groupId && t.playerId === item.playerId && Date.now() - t.timestamp < 2000)) {
       return;
     }
     const id = item.id ?? `ft_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;

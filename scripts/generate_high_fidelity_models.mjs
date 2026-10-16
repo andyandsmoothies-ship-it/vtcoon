@@ -1,6 +1,7 @@
 // [IMP-62] Generator for Photorealistic Miniature Diorama Tabletop 3D Assets (.glb)
 // Builds 15 models: 3 Buildings (C1-C3), 4 Luxury Pawns, 2 Landmarks, 6 Micro Vehicles
 import * as THREE from 'three';
+import { resolveBlenderExecutable, formatBlenderDiagnosticInstructions, runBlenderPythonScript } from './resolve_blender.mjs';
 import { exportSceneToGlb } from './model_generators/exporter.mjs';
 import {
   buildRiverineC1,
@@ -82,16 +83,10 @@ export async function generateAllModels() {
     { scene: buildBuildingC2(), path: 'public/models/buildings/building_c2.glb' },
     { scene: buildBuildingC3(), path: 'public/models/buildings/building_c3.glb' },
 
-    // Luxury Pawns (IMP-83 Silver Animals)
+    // Luxury Pawns (IMP-83 Silver Animals + IMP-399 Blender 5.2 Sculpted Monuments)
     { scene: buildPawnDog(), path: 'public/models/pawns/pawn_dog.glb' },
     { scene: buildPawnCat(), path: 'public/models/pawns/pawn_cat.glb' },
-    { scene: buildPawnHorse(), path: 'public/models/pawns/pawn_horse.glb' },
     { scene: buildPawnElephant(), path: 'public/models/pawns/pawn_elephant.glb' },
-
-    // Legacy Luxury Pawns (Retained for Contract & Backward-Compatibility)
-    { scene: buildPawnTower(), path: 'public/models/pawns/pawn_tower.glb' },
-    { scene: buildPawnYacht(), path: 'public/models/pawns/pawn_yacht.glb' },
-    { scene: buildPawnCar(), path: 'public/models/pawns/pawn_car.glb' },
 
     // Landmarks
     { scene: buildBenThanhLandmark(), path: 'public/models/landmarks/landmark_ben_thanh.glb' },
@@ -118,7 +113,16 @@ export async function generateAllModels() {
     await exportSceneToGlb(scene, m.path);
   }
 
-  console.log(`\n✓ Successfully generated all ${models.length} high-fidelity models.`);
+  // [IMP-408] Preserve or regenerate Blender sculpted sanctuary/pawn GLBs
+  const blender = resolveBlenderExecutable();
+  if (blender.exists) {
+    runBlenderPythonScript('scripts/model_generators/blender_sanctuary_assets.py', [], { stdio: 'inherit' });
+    console.log(`\n✓ Successfully generated all ${models.length + 4} high-fidelity models (including 4 Blender monuments).`);
+  } else {
+    console.warn(`\n⚠️ Blender executable not detected on ${process.platform}.`);
+    console.warn(formatBlenderDiagnosticInstructions(process.platform));
+    console.log(`\n✓ Generated ${models.length} procedural high-fidelity models (skipping 4 Blender monuments).`);
+  }
 }
 
 // Auto-run when executed directly via CLI

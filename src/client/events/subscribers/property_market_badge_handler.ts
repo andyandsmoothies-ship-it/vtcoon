@@ -3,13 +3,12 @@
 import { type GameState, FloatingTextType } from '../../store/game_store.js';
 import type { useVfxStore } from '../../store/vfx_store.js';
 import { SynthesizedGameEventType, type SynthesizedGameEvent } from '../game_event_types.js';
-import type { GameEventContext } from '../game_event_bus.js';
+import type { GameEventContext } from '../game_event_bus_types.js';
 import type { PacingContext } from '../pacing_context.js';
-import { BOARD_CONFIG } from '../../../domain/board_config.js';
+import { BOARD_CONFIG, formatTransitWheelBroadcast, TransitWheelOutcome } from '../../../domain/index.js';
 import { formatCurrency } from '../../ui/ui_helpers.js';
-import { useLobbyStore } from '../../store/lobby_store.js';
-import { BOARD_WIDE_CARDS } from '../../network/apply_delta.js';
-import { formatTransitWheelBroadcast, TransitWheelOutcome } from '../../../domain/transit_wheel.js';
+import { isBoardWideCard } from '../event_card_constants.js';
+
 
 export function getCellName(cellIndex?: number): string {
   if (cellIndex === undefined) return 'BĐS';
@@ -153,8 +152,8 @@ export function handleMarketBadges(
     }
 
     case SynthesizedGameEventType.EVENT_CARD_DRAWN: {
-      const myPid = useLobbyStore.getState().myPlayerId || 'p1';
-      const isBoardWide = BOARD_WIDE_CARDS.has(event.cardId);
+      const myPid = context.myPlayerId || 'p1';
+      const isBoardWide = isBoardWideCard(event.cardId);
       const isBotCard = Boolean(event.playerId && event.playerId !== myPid);
       if (!isBotCard && !isBoardWide) {
         state.addFloatingText({

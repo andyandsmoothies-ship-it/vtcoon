@@ -105,6 +105,7 @@ export function resolvePlan(plansDir, ticketId) {
     const titleMatch = planContent.match(/^#\s*TICKET:\s*(.+)$/m) || planContent.match(/^#\s*(.+)$/m);
     if (titleMatch) planTitle = titleMatch[1].trim();
     const subMatch = planContent.match(/>\s*\*\*Phân hệ mục tiêu:\*\*\s*`?([a-zA-Z0-9_-]+)`?/) ||
+                     planContent.match(/[-*]\s*\*\*(?:Target Subsystem|Subsystem Boundary Isolation|Subsystem|Phân hệ(?: mục tiêu)?)[^*]*\*\*:[^`\n]*`([a-zA-Z0-9_-]+)`/i) ||
                      planContent.match(/[-*]\s*\*\*(?:Subsystem|Phân hệ(?: mục tiêu)?):\*\*\s*`?([a-zA-Z0-9_-]+)`?/i);
     if (subMatch) planSubsystem = subMatch[1].trim();
 
@@ -186,11 +187,15 @@ export function resolveModifiedFilesAndTests(repoRoot, evidenceDir, ticketId, ti
 
   // Scope Confinement: Filter modified files against registered files in plan specification
   if (planRegisteredFiles.size > 0) {
+    const registeredProdFiles = Array.from(planRegisteredFiles).filter((f) => f.startsWith('src/') && fs.existsSync(path.resolve(repoRoot, f)));
     const scopedFiles = modifiedFiles.filter((f) => planRegisteredFiles.has(f));
-    if (scopedFiles.length > 0) {
+    const hasProdFiles = scopedFiles.some((f) => f.startsWith('src/'));
+
+    if (hasProdFiles) {
       modifiedFiles = scopedFiles;
     } else {
-      modifiedFiles = Array.from(planRegisteredFiles).filter((f) => fs.existsSync(path.resolve(repoRoot, f)));
+      // Snapshot only captured test files: combine scoped files with registered production files
+      modifiedFiles = Array.from(new Set([...scopedFiles, ...registeredProdFiles]));
     }
   }
 
@@ -214,8 +219,6 @@ export function resolveModifiedFilesAndTests(repoRoot, evidenceDir, ticketId, ti
 
   // Locate Contract Test Suite
   let contractFile = null;
-  let contractTestCount = 0;
-  let contractAssertCount = 0;
 
   const station1EarlyFile = findTicketFile(evidenceDir, 'station1', ticketId);
   let station1EarlyData = null;
@@ -227,35 +230,10 @@ export function resolveModifiedFilesAndTests(repoRoot, evidenceDir, ticketId, ti
 
   if (station1EarlyData?.testFile) {
     contractFile = station1EarlyData.testFile.replace(/\\/g, '/');
-    contractTestCount = station1EarlyData.testCount ?? 0;
-    contractAssertCount = station1EarlyData.expectCount ?? 0;
-    if (fs.existsSync(path.resolve(repoRoot, contractFile))) {
-      const testContent = fs.readFileSync(path.resolve(repoRoot, contractFile), 'utf8');
-      const physicalAsserts = (testContent.match(/\bexpect\s*\(/g) || []).length;
-      if (physicalAsserts > 0) contractAssertCount = physicalAsserts;
-      const physicalTests = (testContent.match(/\bit\s*\(/g) || []).length;
-      if (physicalTests > 0) contractTestCount = physicalTests;
-    }
   } else if (snapshotData?.contractTests?.file) {
     contractFile = snapshotData.contractTests.file.replace(/\\/g, '/');
-    contractTestCount = snapshotData.contractTests.total ?? 0;
-    if (fs.existsSync(path.resolve(repoRoot, contractFile))) {
-      const testContent = fs.readFileSync(path.resolve(repoRoot, contractFile), 'utf8');
-      const physicalAsserts = (testContent.match(/\bexpect\s*\(/g) || []).length;
-      if (physicalAsserts > 0) contractAssertCount = physicalAsserts;
-      const physicalTests = (testContent.match(/\bit\s*\(/g) || []).length;
-      if (physicalTests > 0) contractTestCount = physicalTests;
-    }
   } else if (snapshotData?.testExecution?.suite) {
     contractFile = snapshotData.testExecution.suite.replace(/\\/g, '/');
-    contractTestCount = snapshotData.testExecution.passedCount ?? 0;
-    if (fs.existsSync(path.resolve(repoRoot, contractFile))) {
-      const testContent = fs.readFileSync(path.resolve(repoRoot, contractFile), 'utf8');
-      const physicalAsserts = (testContent.match(/\bexpect\s*\(/g) || []).length;
-      if (physicalAsserts > 0) contractAssertCount = physicalAsserts;
-      const physicalTests = (testContent.match(/\bit\s*\(/g) || []).length;
-      if (physicalTests > 0) contractTestCount = physicalTests;
-    }
   }
 
   if (!contractFile) {
@@ -264,9 +242,6 @@ export function resolveModifiedFilesAndTests(repoRoot, evidenceDir, ticketId, ti
       const contractFiles = fs.readdirSync(testDir).filter((f) => f.toLowerCase().includes(ticketLower.replace('-', '')) || f.toLowerCase().includes(ticketLower));
       if (contractFiles.length > 0) {
         contractFile = `tests/contracts/${contractFiles[0]}`;
-        const testContent = fs.readFileSync(path.join(repoRoot, contractFile), 'utf8');
-        contractTestCount = (testContent.match(/\bit\s*\(/g) || []).length;
-        contractAssertCount = (testContent.match(/\bexpect\s*\(/g) || []).length;
       }
     }
   }
@@ -275,11 +250,15 @@ export function resolveModifiedFilesAndTests(repoRoot, evidenceDir, ticketId, ti
     const candidateTest = modifiedFiles.find((f) => f.startsWith('tests/') && f.endsWith('.test.ts'));
     if (candidateTest && fs.existsSync(path.resolve(repoRoot, candidateTest))) {
       contractFile = candidateTest;
-      const testContent = fs.readFileSync(path.resolve(repoRoot, contractFile), 'utf8');
-      contractTestCount = (testContent.match(/\bit\s*\(/g) || []).length;
-      contractAssertCount = (testContent.match(/\bexpect\s*\(/g) || []).length;
     }
   }
+
+  const { testCount: contractTestCount, assertCount: contractAssertCount } = extractContractTestCounts(
+    repoRoot,
+    contractFile,
+    ticketId,
+    snapshotData || station1EarlyData
+  );
 
   const srcFiles = modifiedFiles.filter((f) => f.startsWith('src/'));
   const testFiles = modifiedFiles.filter((f) => f.startsWith('tests/'));
@@ -330,4 +309,96 @@ export function resolveFinalReportPath(repoRoot, ticketId, ticketClean, ticketLo
     .replace(/^-+/, '');
   if (!slug) slug = 'report';
   return path.join(improvementsDir, `${ticketId}-${slug}_report.md`);
+}
+
+/**
+ * Authoritatively extracts contract test counts and assertions from JSON or Vitest execution,
+ * completely avoiding raw regex matches on commented-out code.
+ */
+export function extractContractTestCounts(repoRoot, contractFile, ticketId = '', snapshotData = null) {
+  let testCount = 0;
+  let assertCount = 0;
+
+  // 1. Check evidence json snapshot first
+  const evidenceDir = path.join(repoRoot, '.agents', 'evidence');
+  const station1File = ticketId ? findTicketFile(evidenceDir, 'station1', ticketId) : null;
+  if (station1File && fs.existsSync(station1File)) {
+    try {
+      const s1Data = JSON.parse(fs.readFileSync(station1File, 'utf8'));
+      if (s1Data.testCount !== undefined) testCount = s1Data.testCount;
+      if (s1Data.expectCount !== undefined) assertCount = s1Data.expectCount;
+    } catch {}
+  }
+
+  if (testCount === 0 && snapshotData) {
+    if (snapshotData.testExecution?.passedCount !== undefined) {
+      testCount = snapshotData.testExecution.passedCount;
+    } else if (snapshotData.contractTests?.total !== undefined) {
+      testCount = snapshotData.contractTests.total;
+    } else if (snapshotData.testCount !== undefined) {
+      testCount = snapshotData.testCount;
+    }
+    if (snapshotData.testExecution?.expectCount !== undefined) {
+      assertCount = snapshotData.testExecution.expectCount;
+    } else if (snapshotData.assertCount !== undefined) {
+      assertCount = snapshotData.assertCount;
+    }
+  }
+
+  // Check chaos sentinel file if testCount is still 0
+  if (testCount === 0 && ticketId && fs.existsSync(evidenceDir)) {
+    const sentinelCandidates = [
+      path.join(evidenceDir, `chaos_sentinel_${ticketId}.json`),
+      path.join(evidenceDir, `chaos_sentinel_${ticketId.toLowerCase()}.json`),
+      path.join(evidenceDir, `chaos_sentinel_${ticketId.toUpperCase()}.json`),
+    ];
+    for (const sc of sentinelCandidates) {
+      if (fs.existsSync(sc)) {
+        try {
+          const sentData = JSON.parse(fs.readFileSync(sc, 'utf8'));
+          if (sentData.testExecutionSummary?.passedCount !== undefined) {
+            testCount = sentData.testExecutionSummary.passedCount;
+          }
+          if (sentData.closedLoopParity?.intentCount !== undefined && testCount === 0) {
+            testCount = sentData.closedLoopParity.intentCount;
+          }
+        } catch {}
+      }
+    }
+  }
+
+  // 2. If testCount is still 0, run Vitest with --reporter=json
+  if (testCount === 0 && contractFile && fs.existsSync(path.resolve(repoRoot, contractFile))) {
+    try {
+      const vitestCmd = `npx --yes vitest run "${path.resolve(repoRoot, contractFile)}" --reporter=json`;
+      const vitestRaw = execSync(vitestCmd, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
+      const jsonStart = vitestRaw.indexOf('{');
+      const jsonEnd = vitestRaw.lastIndexOf('}');
+      if (jsonStart !== -1 && jsonEnd !== -1) {
+        const vitestJson = JSON.parse(vitestRaw.slice(jsonStart, jsonEnd + 1));
+        if (typeof vitestJson.numTotalTests === 'number') {
+          testCount = vitestJson.numTotalTests;
+        }
+      }
+    } catch {
+      // Fallback: If vitest CLI fails or is unavailable in subshell, strip comments before matching
+      try {
+        const fileContent = fs.readFileSync(path.resolve(repoRoot, contractFile), 'utf8');
+        const stripped = fileContent.replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/g, '');
+        const activeMatches = stripped.match(/\b(?:it|test)(?:\.(?:only|skip))?\s*\(/g) || [];
+        testCount = activeMatches.length;
+      } catch {}
+    }
+  }
+
+  // Count assertions safely (from stripped code if assertCount is 0)
+  if (assertCount === 0 && contractFile && fs.existsSync(path.resolve(repoRoot, contractFile))) {
+    try {
+      const fileContent = fs.readFileSync(path.resolve(repoRoot, contractFile), 'utf8');
+      const stripped = fileContent.replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/g, '');
+      assertCount = (stripped.match(/\bexpect\s*\(/g) || []).length;
+    } catch {}
+  }
+
+  return { testCount, assertCount };
 }

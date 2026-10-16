@@ -18,6 +18,22 @@ export function auditScopeAndSubsystems(targetFiles) {
       cohesiveFamilies.add('src/client/events');
       continue;
     }
+    if (norm.startsWith('src/client/network/') || norm.startsWith('src/client/store/') || norm === 'src/client/offline_landing.ts') {
+      cohesiveFamilies.add('src/client/state-and-network');
+      continue;
+    }
+    if (norm.startsWith('src/client/ui/modals/')) {
+      cohesiveFamilies.add('src/client/ui/modals');
+      continue;
+    }
+    if (norm.startsWith('src/server/')) {
+      cohesiveFamilies.add('src/server');
+      continue;
+    }
+    if (norm.startsWith('src/domain/protocol/')) {
+      cohesiveFamilies.add('src/domain/protocol');
+      continue;
+    }
     const dir = path.dirname(norm);
     const base = path.basename(norm, path.extname(norm)).split('_')[0];
     cohesiveFamilies.add(`${dir}/${base}`);
@@ -38,7 +54,7 @@ export function auditScopeAndSubsystems(targetFiles) {
     if (norm.startsWith('scripts/')) detectedSubsystems.add('tooling-scripts');
     else if (norm.startsWith('src/client/3d/') || norm === 'src/client/game_canvas.tsx') detectedSubsystems.add('client-3d');
     else if (norm.startsWith('src/client/ui/')) detectedSubsystems.add('client-ui');
-    else if (norm.startsWith('src/client/store/') || norm.startsWith('src/client/network/') || norm.startsWith('src/client/hooks/') || norm === 'src/client/main.tsx') detectedSubsystems.add('client-state');
+    else if (norm.startsWith('src/client/store/') || norm.startsWith('src/client/network/') || norm.startsWith('src/client/hooks/') || norm === 'src/client/main.tsx' || norm === 'src/client/offline_landing.ts') detectedSubsystems.add('client-state');
     else if (norm.startsWith('src/client/types/')) detectedSubsystems.add('client-types');
     else if (norm.startsWith('src/domain/')) detectedSubsystems.add('domain-core');
     else if (norm.startsWith('src/server/')) detectedSubsystems.add('server-network');
@@ -121,7 +137,7 @@ export function auditHonestLocAccounting(targetFiles, planContent, snippetDeltaB
           console.error(`  ❌ [LOC_ACCOUNTING_FRAUD] File '${filePath}' claims current LOC of ${declaredCurrent}, but physical disk has ${diskLines} lines!`);
           errors++;
         }
-        const deltaMatch = netDeltaStr.match(/^[~≈+\-]?\s*([+-]?\d+)/);
+        const deltaMatch = netDeltaStr.match(/^[~≈]?\s*([+-]?\d+)/);
         const parsedDelta = deltaMatch ? parseInt(deltaMatch[1], 10) : (expectedLOC - diskLines);
         const computedExpected = diskLines + parsedDelta;
         if (Math.abs(computedExpected - expectedLOC) > 1) {

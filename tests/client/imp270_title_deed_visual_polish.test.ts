@@ -20,7 +20,7 @@ describe('IMP-270 TitleDeedModal Visual Polish (Desktop & Mobile 360px)', () => 
       })
     );
     expect(html).toContain('border-white/60');
-    expect(html).toContain('bg-black/35');
+    expect(html).toContain('bg-black/65');
     expect(html).toContain('hover:scale-105 active:scale-95');
     expect(html).toContain('aria-label="Đóng Sổ Đỏ"');
   });

@@ -2,7 +2,9 @@
 import { TurnPhase, type Room, type Player, type PropertyRegistry, type PropertyStateMap } from '../domain/index.js';
 import { decideBotIntent, type BotConfig } from '../domain/bot/index.js';
 import { getBotConfig } from './room_bot_manager.js';
-import type { RoomManager, AuctionSession, PlayerIntent } from './room_manager.js';
+import type { IRoomManager as RoomManager } from './room_manager_types.js';
+import type { AuctionSession } from './auction_types.js';
+import type { PlayerIntent } from '../domain/protocol/index.js';
 
 const MAX_AUCTION_ITERATIONS = 30;
 const MAX_BOT_INTENTS = 50;

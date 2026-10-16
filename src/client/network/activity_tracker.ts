@@ -1,7 +1,6 @@
 // [UI-S06/MSS] ActivityTracker — Event Extraction Facade from DeltaPayload & GameState transitions
 import type { DeltaPayload } from '../../domain/protocol/index.js';
 import { type GameState, FloatingTextType } from '../store/game_store.js';
-import { useLobbyStore } from '../store/lobby_store.js';
 import { useActivityStore, type ActivityLogEntry } from '../store/activity_store.js';
 import { BOARD_SIZE } from '../../domain/room.js';
 import { formatCurrency } from '../ui/ui_helpers.js';
@@ -115,10 +114,11 @@ export function detectDiceActivity(
 }
 
 export function detectMoveActivities(delta: DeltaPayload, prevState: GameState, nextState: GameState): ActivityLogEntry[] {
-  if (!delta.players || delta.players.length === 0) return [];
+  const players = delta.players;
+  if (!players || players.length === 0) return [];
   const entries: ActivityLogEntry[] = [];
 
-  for (const p of delta.players) {
+  for (const p of players) {
     const prevPos = prevState.playerPositions[p.id];
     if (prevPos !== undefined && prevPos !== p.position) {
       const pInfo = nextState.playersInfo[p.id] ?? prevState.playersInfo[p.id];
@@ -201,6 +201,7 @@ export function detectEventCardActivities(
 export interface TrackDeltaActivitiesOptions {
   readonly suppressFinancialAndProperty?: boolean;
   readonly suppressKinematicLogging?: boolean;
+  readonly myPlayerId?: string;
 }
 
 export function trackDeltaActivities(
@@ -266,7 +267,7 @@ export function trackDeltaActivities(
     const isInvestment = INVESTMENT_OR_FEE_CARDS.has(cardKey);
     const isReward = isInvestment || (effectDelta !== undefined ? effectDelta >= 0 : true);
 
-    const myPid = useLobbyStore.getState().myPlayerId || 'p1';
+    const myPid = options?.myPlayerId || 'p1';
     const isBotCard = Boolean(playerId && playerId !== myPid);
 
     if (!isBotCard && typeof nextState?.addFloatingText === 'function') {

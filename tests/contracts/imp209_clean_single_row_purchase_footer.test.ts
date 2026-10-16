@@ -377,7 +377,7 @@ describe('[TC-209.01/MSS..TC-209.16/MSS][UC-IMP209] Clean Single-Row Purchase Fo
     const headerCloseBtn = findVNode(vdom, (n) => n?.type === 'button' && n.props?.['aria-label'] === 'Đóng Sổ Đỏ');
 
     expect(headerCloseBtn).toBeTruthy();
-    expect(headerCloseBtn?.props?.className).toContain('bg-black/25');
+    expect(headerCloseBtn?.props?.className).toContain('bg-black/65');
     expect(headerCloseBtn?.props?.className).toContain('min-w-[44px]');
     expect(headerCloseBtn?.props?.className).not.toContain('bg-slate-900/80');
   });

@@ -6,7 +6,8 @@ import { TurnPhase } from '../../domain/room';
 import { useGameStore } from '../store/game_store';
 import type { PlayerHudInfo } from '../store/game_store_types';
 import { useLobbyStore } from '../store/lobby_store';
-import { cellPosition, tileRotation } from './board_coords';
+import { cellPosition } from './board_coords';
+import { tileRotation } from './board_layout_math.js';
 export { tileRotation };
 import { LayeredDioramaTile } from './board_tile';
 import { detectPlayerMonopolies, isCellInMonopolyGroup } from './monopoly_plaza_math';
@@ -24,9 +25,11 @@ import {
   createWalnutTabletopTexture,
   createWalnutRoughnessTexture,
 } from './tabletop_texture_generator';
-import { isMobileHardware } from './device_detect';
+import { isMobileHardware, isIOSPhone } from './device_detect';
 import { useDiagnostic3DStore } from './diagnostic_3d_store';
 import { Diagnostic3DPanel } from './diagnostic_3d_panel';
+import { InstancedRegionalBuildingsPool } from './instanced_regional_buildings_pool';
+import { resolveRenderTierProfile } from './procedural_mobile_blender_meshes';
 
 // Depth Layer Stack triệt tiêu Z-Fighting (IMP-30 Terrain Flush & IMP-32 Executive Tabletop Master Plan)
 export const WALNUT_TABLE_Y = -0.350;
@@ -82,11 +85,15 @@ export function computeOwnerMap(
 
 export interface GameBoardProps {
   readonly isMobile?: boolean;
+  readonly isIOS?: boolean;
   readonly renderToyBuildings?: boolean;
 }
 
+export function GameBoard(props: GameBoardProps): React.ReactElement;
+export function GameBoard(): React.ReactElement;
 export function GameBoard({
   isMobile: propIsMobile,
+  isIOS: propIsIOS,
   renderToyBuildings = false,
 }: GameBoardProps = {}): React.ReactElement {
   const storeLevelMap = useGameStore((s) => s.levelMap);
@@ -101,6 +108,13 @@ export function GameBoard({
   const localPlayerId = useLobbyStore((s) => s.myPlayerId) || 'p1';
   const isHeatmapActive = useGameStore((s) => s.isHeatmapActive);
   const isMobile = propIsMobile ?? isMobileHardware();
+  const isIOS = propIsIOS ?? isIOSPhone();
+  const tierProfile = useMemo(() => {
+    const nav = typeof navigator !== 'undefined' ? navigator : undefined;
+    const deviceMemoryGb = nav && 'deviceMemory' in nav && typeof nav.deviceMemory === 'number' ? nav.deviceMemory : undefined;
+    const hardwareConcurrency = nav && typeof nav.hardwareConcurrency === 'number' ? nav.hardwareConcurrency : undefined;
+    return resolveRenderTierProfile({ isMobile, isIOS, deviceMemoryGb, hardwareConcurrency });
+  }, [isMobile, isIOS]);
 
   const storeTableVisible = useDiagnostic3DStore((s) => s.isTableVisible);
   const isTableVisible = useDiagnostic3DStore.getState()?.isTableVisible ?? storeTableVisible;
@@ -155,9 +169,11 @@ export function GameBoard({
       </mesh>
 
       {/* 0. Môi trường Bán đảo Đảo Ngọc nhiệt đới (Vịnh biển, bãi cát, đồi núi & mây trời) */}
-      {/* <CoastalIslandEnvironment /> */}
       <group visible={isOceanVisible}>
-        <CoastalIslandEnvironment isMobile={isMobile} />
+        <CoastalIslandEnvironment
+          isMobile={isMobile}
+          streamlined={!tierProfile.enableOuterBaySanctuaries}
+        />
       </group>
 
       {/* 0.05. Bảng Điều Khiển Chẩn Đoán 3D (Kích hoạt khi có ?debug=3d) */}
@@ -173,7 +189,6 @@ export function GameBoard({
       <group visible={isCityVisible}>
         <MiniatureCityDiorama isMobile={isMobile} isVisible={isCityVisible} />
       </group>
-
 
       {/* 3. Sàn diễn xúc xắc 3D thoáng đãng trên Đại Lộ Sài Gòn */}
       <DiceTray />
@@ -195,35 +210,46 @@ export function GameBoard({
           onTileClick={handleTileClick}
         />
 
-        {/* 4. 40 ô đất liền mạch khép kín tiếp giáp mặt nền phẳng (render động các lớp trang trí) */}
-        {BOARD_CONFIG.map((cell) => (
-          <LayeredDioramaTile
-            key={cell.index}
-            cell={cell}
-            position={cellPosition(cell.index)}
-            rotation={tileRotation(cell.index)}
-            currentLevel={(levelMap[cell.index] ?? 0) as 0 | 1 | 2 | 3}
-            isCornerTile={CORNER_INDICES.has(cell.index)}
-            enableStandee={false}
-            ownerColor={ownerInfoMap[cell.index]?.tokenColor}
-            ownerSlot={ownerInfoMap[cell.index]?.ownerSlot}
-            mascotIcon={ownerInfoMap[cell.index]?.mascotIcon}
-            onClick={undefined}
-            isHeatmapActive={isHeatmapActive}
-            isMonopolyGroup={isCellInMonopolyGroup(cell.index, monopolyGroups)}
-            isMobile={isMobile}
-            renderToyBuildings={false}
-            renderBasePlinth={false}
-            renderAtlasSurface={false}
-            renderOwnerBorders={false}
-            renderPricePillTray={false}
-            renderPricePill={false}
-          />
-        ))}
+        {/* 3.9. Cụm InstancedRegionalBuildingsPool gom 22 công trình vùng miền C1-C2 trên Mobile (IMP-404) */}
+        <InstancedRegionalBuildingsPool levelMap={levelMap} isMobile={isMobile} isIOS={isIOS} />
 
+        {/* 4. 40 ô đất liền mạch khép kín tiếp giáp mặt nền phẳng (render động các lớp trang trí) */}
+        {BOARD_CONFIG.map((cell) => {
+          const cellLevel = (levelMap[cell.index] ?? 0) as 0 | 1 | 2 | 3;
+          return (
+            <LayeredDioramaTile
+              key={cell.index}
+              cell={cell}
+              position={cellPosition(cell.index)}
+              rotation={tileRotation(cell.index)}
+              currentLevel={cellLevel}
+              isCornerTile={CORNER_INDICES.has(cell.index)}
+              enableStandee={false}
+              ownerColor={ownerInfoMap[cell.index]?.tokenColor}
+              ownerSlot={ownerInfoMap[cell.index]?.ownerSlot}
+              mascotIcon={ownerInfoMap[cell.index]?.mascotIcon}
+              onClick={undefined}
+              isHeatmapActive={isHeatmapActive}
+              isMonopolyGroup={isCellInMonopolyGroup(cell.index, monopolyGroups)}
+              isMobile={isMobile}
+              renderToyBuildings={false}
+              renderBasePlinth={false}
+              renderAtlasSurface={false}
+              renderOwnerBorders={false}
+              renderPricePillTray={false}
+              renderPricePill={false}
+              renderProceduralBuilding={tierProfile.buildingRenderMode !== 'INSTANCED_POOL_VERTEX_AO' || (cellLevel !== 1 && cellLevel !== 2)}
+            />
+          );
+        })}
 
         {/* 5. Dải cờ hoa vỉa hè cho các cụm độc quyền Monopoly Plaza */}
-        <MonopolyPlazaFusion monopolyGroups={monopolyGroups} isHeatmapActive={isHeatmapActive} />
+        <MonopolyPlazaFusion
+          monopolyGroups={monopolyGroups}
+          isHeatmapActive={isHeatmapActive}
+          isMobile={tierProfile.monopolyArchwayMode === 'INSTANCED_POOL_SINGLE_MAT'}
+          enableMobileInstancedPool={tierProfile.monopolyArchwayMode === 'INSTANCED_POOL_SINGLE_MAT'}
+        />
       </group>
     </group>
   );

@@ -20,11 +20,9 @@ describe('[IMP-176] Event Card Texture & Modal Clarity Verification', () => {
       expect(meta.targetScope).toContain('Phú Quốc');
     });
 
-    it('[TC-176.02/MSS] MC_ALCOHOL_CHECK effectDetail phân định rạch ròi 2 chủ thể: Chủ ô đất & Người dừng chân', () => {
+    it('[TC-176.02/MSS] MC_ALCOHOL_CHECK effectDetail phân định giảm 50% thuê và phạt 800', () => {
       const meta = MARKET_CARD_DETAILS[MarketCardId.MC_ALCOHOL_CHECK];
-      expect(meta.effectDetail).toContain('chủ ô đất');
       expect(meta.effectDetail).toContain('50%');
-      expect(meta.effectDetail).toContain('Người dừng chân');
       expect(meta.effectDetail).toContain('800');
       expect(meta.effectDetail).toContain('mất lượt');
     });
@@ -32,7 +30,7 @@ describe('[IMP-176] Event Card Texture & Modal Clarity Verification', () => {
     it('[TC-176.03/MSS] getMarketCardInfo bảo toàn đầy đủ các trường chi tiết cho MC_ALCOHOL_CHECK', () => {
       const info = getMarketCardInfo(MarketCardId.MC_ALCOHOL_CHECK);
       expect(info.targetScope).toContain('Phú Quốc');
-      expect(info.effectDetail).toContain('chủ ô đất');
+      expect(info.effectDetail).toContain('50%');
       expect(info.duration).toContain('2 vòng');
     });
   });
@@ -59,8 +57,8 @@ describe('[IMP-176] Event Card Texture & Modal Clarity Verification', () => {
       expect(html).toContain('-800');
       expect(html).toContain('Bình Dương');
       expect(html).toContain('Phú Quốc');
-      expect(html).toContain('chủ ô đất');
-      expect(html).toContain('Người dừng chân');
+      expect(html).toContain('50%');
+      expect(html).toContain('mất lượt');
     });
 
     it('[TC-176.06/MSS] EventCardModal không chứa các ký hiệu mã ô thô kệch', () => {

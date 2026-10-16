@@ -299,7 +299,7 @@ describe('[TC-216.01/MSS..TC-216.16/MSS][UC-IMP216] Financial Notification Formu
       expect(landlordNarrative.formula).toBe('Khách dùng Thẻ Ngoại Giao: Hụt thu tiền thuê');
     });
 
-    it('[TC-216.13/MSS][UC-IMP216] Thế chấp & Giải chấp ngân hàng: Vay vốn tín dụng ngân hàng (50% giá trị đất) vs Chuộc lại đất thế chấp (Gốc + 10% phí Kho Bạc)', () => {
+    it('[TC-216.13/MSS][UC-IMP216] Thế chấp & Giải chấp ngân hàng: Vay vốn tín dụng ngân hàng (50% giá trị đất) vs Chuộc lại đất thế chấp (Gốc + 10% phí giải chấp Ngân Hàng)', () => {
       const mortgageItem: FloatingTextItem = {
         id: 'float-mortgage',
         text: '+300 Tr.',
@@ -320,11 +320,11 @@ describe('[TC-216.01/MSS..TC-216.16/MSS][UC-IMP216] Financial Notification Formu
         playerId: 'player-1',
         actionType: 'unmortgage',
         cellIndex: 3,
-        title: 'Giải chấp Bến Bạch Đằng (Phí 10% ➔ Kho Bạc)',
+        title: 'Giải chấp Bến Bạch Đằng (Phí 10% ➔ Ngân Hàng)',
         timestamp: Date.now(),
       };
       const unmortgageNarrative = resolveTransactionNarrative(unmortgageItem, mockPlayerPayer, mockPlayersInfo, 'player-1');
-      expect(unmortgageNarrative.formula).toBe('Chuộc lại đất thế chấp (Gốc + 10% phí Kho Bạc)');
+      expect(unmortgageNarrative.formula).toBe('Chuộc lại đất thế chấp (Gốc + 10% phí giải chấp Ngân Hàng)');
     });
   });
 

@@ -1,139 +1,115 @@
 # PILLAR VI: 3D GRAPHICS, SHADERS & CINEMATOGRAPHY
 
-> **Scope**: `src/client/3d/`, `src/client/game_canvas.tsx`, `scripts/capture_visual_evidence.mjs`
+> **Scope**: `src/client/3d/`, `src/client/game_canvas.tsx`, `scripts/capture_visual_evidence.mjs`  
+> **Gotchas SSOT Rule**: Concise architectural invariant rulebook. Anti-Changelog: Keep technical formulas, limits, and negative constraints; omit narrative stories. Size ceiling: <= 20 KB.
 
 ---
 
-1. **5-Layer Ocean Depth Stack & Zero-Alloc Shader Uniforms [IMP-220]**:
-   - **5-Layer Z-Fighting Elimination**: The diorama ocean water system separates into 5 distinct vertical elevation tiers (Tier 1: Abyss trench bottom $Y = -0.420$ `#0C4A6E`; Tier 2: Mid-ocean depth $Y = -0.310$ `#0369A1`; Tier 3: Primary GPU Gerstner Shader surface $Y = -0.300$ `TropicalWater`; Tier 4: Shallow turquoise board skirt $Y = -0.298$ `#06B6D4`; Tier 5: Shoreline surf foam band $Y = -0.292$ `#FFFFFF`). Vertical offsets between adjacent tiers maintain at least 0.002 to 0.010 Three.js units, eliminating 100% of z-fighting flickering while preserving existing test contracts.
-   - **Zero-Alloc Shader Uniforms & React Lifecycle**: `TropicalWater` instantiates standard TypeScript uniforms `createTropicalWaterUniforms(): Record<string, IUniform>` without dirty casts (`as unknown as ...`), reuses static `Color.lerp` and `Vector3.lerp` buffers within the render loop without allocating `new Color()`, and executes proper `material.dispose()` and `geometry.dispose()` on unmount.
-2. **Living Diorama Micro-FSM & 3D Spatial Continuity [IMP-221]**:
-   - **Zero Mid-Air Teleportation ($C^1$ Continuity)**: In microscopic fauna animation (harbor seagulls), phase transitions from `CIRCLING` $\rightarrow$ `LANDING` MUST anchor the landing start point to the actual terminal circling position (`landingFromRef` or `calculateCirclingExitPosition`) rather than snapping to origin, eliminating mid-air coordinate snapping.
-   - **Zero React Re-render at 60 FPS**: All continuous animation updates (boat pitch/roll wave bobbing, seagull wing flapping, lighthouse beacon rotation) MUST operate via `useRef` and Three.js object mutations inside `useSafeFrame`. Calling `setState` or triggering React reconciliation at 60 FPS is strictly forbidden.
-   - **Interaction & Shadow Budget Isolation**: Bird takeoff click handlers must invoke `e.stopPropagation()` independently without triggering lighthouse horns or board tile clicks. Micro-fauna meshes (birds, harbor boats) are forbidden from enabling `castShadow` to preserve mobile GPU render budgets.
-3. **Atmospheric Exposure Adaptation & Instanced Canopy Wind Sway [IMP-222]**:
-   - **Tone Mapping Exposure Pupil Adaptation**: Update `gl.toneMappingExposure` via pure function `lerpExposure` (Day: 1.00, Sunset: 1.06, Night: 1.14, Auction Spotlight: 0.94), guarded by `Number.isFinite` to prevent `NaN` crashes and blinding glare flashes.
-   - **Theatrical Auction Fog & Horizon Sky Alignment**: During active auctions (`isAuctionActive`), atmospheric fog pulls in to `near = 18.0m`, `far = 55.0m`, synchronously lerping both `scene.fog` and `scene.background` toward deep slate `#0F172A`, eliminating horizon cutout discontinuity.
-   - **Instanced Foliage Wind Sway & Matrix Independence**: Preserve 100% of static matrix initialization in `useEffect` and 4 `computeBoundingSphere` calls protecting frustum culling. Inside `useSafeFrame`, only update tilt across 3 canopy tiers (`tier1Ref`, `tier2Ref`, `tier3Ref`) derived from static origin `tree.x, tree.z` and tier scaling `PALM_TIER_SWAY_FACTORS = { 1: 0.6, 2: 0.8, 3: 1.0 }`, keeping trunks stationary with zero allocations in the frame loop.
-4. **Auction Theatrical FX & Dual-Layer Vignette Optical Tunneling [IMP-223]**:
-   - **Bid Flash Reaction Lighting & Quadratic Decay**: Upon new highest bids (`currentBid > prevBid`), an intense lighting burst explodes at $t=0$ and decays quadratically $(1 - t/d)^2$ over $0.35$s. Read directly via selector `useGameStore((s) => s.auction?.currentBid ?? 0)` (Zero Dirty Cast), guarded with `Number.isFinite` and zero frame-loop allocations.
-   - **Champagne Bloom & Contextual Vignette Tuning**: When `isAuctionActive = true`, lower `bloomThreshold` to $1.2$ to emphasize golden highlights and raise `vignetteDarkness` to $0.35$ to tunnel visual focus onto the auction floor. Avoid default param shadowing by renaming props to `propBloomThreshold`, `propVignetteDarkness`.
-   - **Dual-Layer 2D Vignette CSS Opacity Interpolation**: In `CinematicOverlay`, separate into 2 independent gradient `div` elements (Standard Cyan and Auction Deep Slate `rgba(15, 23, 42, 0.70)`), transitioning via `opacity` combined with `transition-opacity duration-500 ease-out`, eliminating CSS gradient snapping artifacts.
-   - **Canvas Subtree Isolation & Legacy Comment Preservation**: Only wire prop `isAuctionActive` into the `inGame` branch (L437) of `game_canvas.tsx`; keep `preMatch` (L424) intact. Preserve comments `{/* <PostProcessingPipeline /> */}` in both branches to protect static test contracts.
-5. **Dynamic Depth of Field (Tilt-Shift Macro) & Optical Focal Grounding [IMP-224]**:
-   - **Motion & Overview Crispness Gate**: During pawn motion (`isPawnAnimating = true`) or dice rolling (`isRolling = true`), DoF MUST be fully disabled (`enableDof = false`, `bokehScale = 0.0`). At overview angle (`activeModal = null` and `cameraFocusCell = null`), DoF remains disabled to guarantee 100% pin-sharp clarity across all 40 tiles.
-   - **GameOver Modal DoF Leak Guard**: When the match concludes (`activeModal === 'game_over'`), `calculateDofConfig` MUST disable DoF (`DOF_PROFILES.off`) and `resolveDofTarget` must return `[0, 0, 0]`, preventing `cameraFocusCell` leaks from blurring the victory leaderboard.
-   - **Dynamic Optical Focal Target Grounding & Vector3 Memoization**: Sharp focal coordinates (`dofTarget`) calculate dynamically via `resolveDofTarget`: tracking tile coordinates `cellPosition(targetCell)` during tile inspection or title deed view (rather than fixed origin [0,0,0] causing 7.63m blur offsets), and tracking the central podium `[0, 3.0, 0]` during auctions. In `PostProcessingPipeline`, `targetVector` is memoized via `React.useMemo` with safe dispatcher guards, eliminating GC churn and R3F re-renders.
-   - **Rules of Hooks Lifecycle Integrity**: All hooks (`useSafeTelemetryFps`, `useMemo`) MUST execute at the top of the component BEFORE early exit conditions `if (!enabled) return null;`, ensuring hook call count consistency across pipeline toggles.
-   - **Optical Scale & Range Hierarchy**: Auctions use `bokehScale = 0.45`, `focusRange = 6.0m` (focusing on cards with cinematic distant blur). Tile inspection uses `bokehScale = 0.28`, `focusRange = 9.0m` (Townscaper style: crisp buildings with subtle diorama rim blur).
-6. **HCMC Metro Line 1 Viaduct Architecture & AST String-Slice Preservation [IMP-227]**:
-   - **JSX Element Ordering for String-Slice Windows**: In `DioramaBallastBed`, the 4 primary ballast meshes (`#475569`) MUST reside first directly under `<group>` to fall within the 800-character window of regression test contracts `TC-RBWS01.02-04`. Circular piers (`#CBD5E1`), U-girder railings (`#94A3B8`), and catenary mast poles (`#64748B`, arm reach $Y \ge 0.15$m) render immediately after.
-   - **Canopy Tensile Membrane Station**: In `DioramaWaterfrontStation`, platform bed (`#E2E8F0`), structural steel (`#1E293B`), columns (`#64748B`), and benches (`#78350F`) reside in the first 1000 characters (`TC-RBWS01.06-08`), with white tensile membrane canopy (`#F8FAFC`) and platform screen door glass (`#38BDF8`) following.
-   - **AST Direct Children & Shadow Budget Immunity**: At least 4 railroad tie meshes (`#451A03`) MUST be direct children of `<group data-testid="diorama-model-railroad">` (wrapping in functional subcomponents is forbidden to keep `captureRenderedTree` visible in `TC-IMP142.09`). `castShadow` must be strictly disabled on ties, ballast, piers, and railings to preserve mobile GPU shadow budgets.
-7. **3D Spline Kinematics Arc-Length Calibration & Station Progress Parity [IMP-228]**:
-   - **Arc-Length Parameterization Calibration**: When redesigning or modifying waypoint sequences (`TRACK_POINTS`) for kinematic rail splines (`CatmullRomCurve3`), 2 properties MUST be empirically measured and verified:
-     (1) Total circumference (`curve.getLength()`) must fall within contract boundaries ($[50.0\text{m}, 58.0\text{m}]$ per `TC-IMP134.01`).
-     (2) Station stopping waypoints at progress constants (`curve.getPointAt(SOUTH_STATION_PROGRESS)` at $0.12$ and `curve.getPointAt(NORTH_STATION_PROGRESS)` at $0.62$) MUST return physical coordinates directly in front of the respective station platforms (error margin $< 0.3\text{m}$).
-   - **Anti-Divergence Mandate**: Changing spline points purely by visual estimation without mathematical verification of $u \in [0, 1]$ is forbidden, as it causes trains to decelerate in empty fields while speeding past actual stations.
-8. **Curved Viaduct Modular Geometry & Static Precomputation Invariant [IMP-230]**:
-   - **Module-Level Static Geometry Precomputation**: 32 curved girder segments (`VIADUCT_CURVED_SEGMENTS`) and 16 piers (`VIADUCT_PIERS`) MUST be precomputed once at module scope (`buildViaductGeometry()`), eliminating garbage collection churn and frame rate jitter in Three.js/R3F render loops.
-   - **AST Direct Children & Parapet Windows**: Wooden ties (`#451A03`) must render as direct children of `<group data-testid="diorama-model-railroad">` via inline `.map()`, avoiding functional subcomponents to preserve shallow traversal in `captureRenderedTree` (TC-IMP142.09). The 4 static ground ballast strips (`#475569`) must lead within `DioramaBallastBed` to preserve the 800-character contract window.
-9. **3D Spline Centripetal Parameterization & Ballast De-collision [IMP-233]**:
-   - **Centripetal Spline Curve Parameterization**: When generating 3D paths from waypoints (`TRACK_POINTS`), `CatmullRomCurve3` with `'catmullrom'` (uniform) creates corner cusping with tangent angle spikes up to $38^\circ - 45^\circ$ across non-uniform point intervals. MUST use `'centripetal'` with `tension = 0.15` to distribute tangent derivatives proportionally to chord square roots, limiting angle variation to $< 6.0^\circ$ and eliminating $45^\circ$ kinks.
-   - **High-Resolution Discretization Scaling**: A $\approx 51.5\text{m}$ viaduct requires at least 96 segments (`VIADUCT_NUM_SEGMENTS = 96`), maintaining segment length $\approx 0.56\text{m}$ with 5% overlap to prevent visible seams between segment boxes during curvature.
-   - **Ground Ballast De-collision & 800-Character Contract Window**: The 4 ground ballast meshes in `DioramaBallastBed` must truncate from $14.2\text{m}$ to $10.6\text{m}$ (matching diorama straight edges $X/Z \in [-5.3, +5.3]$), eliminating 4 protruding $90^\circ$ corners at $(\pm 7.1, \pm 7.1)$. The leading mesh must maintain color `#475569`, width $0.36\text{m}$, and elevation $Y = 0.018\text{m}$ within the first 800 characters to protect `TC-230.18` and `TC-RBWS01.02-04`.
-10. **Physical Visual Evidence & Anti-AST-Hallucination Gate [IMP-233]**:
-    - **Zero AST Hallucination**: WebGL geometric defects (polygon clipping, spline cusping, mesh intersections, overlapping ballast, CSS layout overflows) are invisible to AST string assertions and static code review. Reviewers are FORBIDDEN from approving visual deliverables based solely on `.tsx` files or geometry math.
-    - **Automated Physical Screenshot Prerequisite**: For any change touching 3D (`src/client/3d/**`) or 2D UI (`src/client/ui/**`), the Main Agent MUST execute `npm run capture:visual -- --ticket <ID>` to generate physical WebGL/DOM screenshots saved to `.agents/tmp/` prior to Station 3. Subagents `game-3d-visual-critic` and `ui-craft-reviewer` MUST inspect screenshot files via `view_file`. If physical evidence is missing, subagents MUST VETO immediately with `REJECT: MISSING_PHYSICAL_SCREENSHOT`.
-11. **Three.js Euler Yaw Gimbal Clamp & SSR Custom Tag Parity [IMP-PERF-THREEJS-INSTANCING]**:
-    - **Euler Order 'XYZ' Yaw Clamp**: In Three.js, default rotation order is `'XYZ'`. When extracting Y-axis rotation (yaw) from matrix/quaternion, Three.js applies `_y = Math.asin(clamp(te[8]))`, clamped to $[-\pi/2, \pi/2]$. Rotating $180^\circ$ ($\pi$) collapses Y to 0 and flips $X=-\pi, Z=-\pi$ (gimbal lock). When calculating yaw on North-facing tiles ($\text{yaw} = \pi$), MUST use `'YXZ'` order (`new THREE.Euler(0, 0, 0, 'YXZ').setFromQuaternion(quat)`) to preserve $\pi$.
-    - **React SSR Custom Tag Attribute Parity**: In headless SSR tests via `renderToStaticMarkup`, React DOM Server treats `<instancedMesh>` as an unknown tag and strips camelCase Three.js props (`castShadow`, `frustumCulled`). Declare lowercase props (`castshadow="true"`, `frustumculled="false"`) with type augmentation in `global.d.ts` to satisfy static markup contracts without TypeScript errors.
-12. **Zero Raw DOM Elements Inside R3F Canvas Without `<Html>` Wrapper [IMP-234/CRASH-FIX]**:
-    - **Deceptive Trap**: In Vitest/SSR test environments (`renderToStaticMarkup` with `@react-three/drei` mocks), placing raw HTML DOM elements (`<div>`, `<span>`, `<p>`) as children of 3D components (`<Billboard>`, `<group>`, `<mesh>`) outputs valid HTML, giving a false sense of safety.
-    - **Physical Finding**: On real browsers (`typeof window !== 'undefined'`) inside `<Canvas>`, the `@react-three/fiber` reconciler searches for lowercase JSX tags in the Three.js namespace (`THREE.div`, `THREE.span`). Because Three.js lacks these classes, the application crashes fatally: `R3F: Span is not part of the THREE namespace! Did you forget to extend?`.
-    - **Verified Invariant**: Raw HTML DOM tags (`div`, `span`, `p`, `button`) inside Three.js/R3F trees MUST be wrapped with `<SafeHtml>` (delegating to `@react-three/drei` `<Html>` on browsers and `React.Fragment` in SSR/Node). 3D badges and labels require: `<SafeBillboard><SafeHtml center pointerEvents="none"><div ...><span>...</span></div></SafeHtml></SafeBillboard>`.
-13. **Physical Action Evidence & Three.js Telemetry Invariant [IMP-263 / Gotcha 42]**:
-    - **Deceptive Trap**: During visual review for kinematic, animation, or camera features (rolling dice, hopping pawns, street chase camera at Y=2.8), subagents capturing idle overview shots (Overview Y=41) and signing off "ship" leave critical defects unobserved (frozen dice rolls, motionless pawns, camera locked at overview, invisible backdrop blocking initial mobile taps).
-    - **Physical Finding**: In IMP-263, `apply_delta.ts` called `setIsRolling(false)` prematurely, freezing dice immediately; `pawn_hop_trajectory.tsx` used incorrect Z coordinates, piercing board geometry; `camera_state_machine.ts` returned `overview` instead of `pawn_chase`; and `player_hud_list.tsx` had an invisible full-screen backdrop swallowing the first touch. All 4 critical bugs passed static visual checks because idle screenshots were accepted.
-    - **Verified Invariants**:
-      1. *In-Action Capture Prerequisite*: Any feature modifying kinematics, cameras, dice, pawns, or interactive modals MUST be captured in-action via `--scenario` in `scripts/capture_visual_evidence.mjs` (e.g. `--scenario camera_chase_cinematic`, `--scenario camera_chase_normal`, `--scenario dice_rolling`). Idle overview screenshots are FORBIDDEN as evidence for dynamic features.
-      2. *Physical Three.js Telemetry*: Camera coordinates MUST be extracted from `window.__threeCamera` (`position`, `target`, `elevationY`, `pitchDeg`, `fov`) into `.agents/evidence/camera_telemetry_[ticket]_[viewport].json`. Automated validation is supported via `--assert-camera-y <min>,<max>`.
-      3. *Visual Critic VETO Authority*: If a ticket touching cameras/animations provides only idle shots at elevation Y > 22 (or Y > 6.0m for `pawn_chase`), `game-3d-visual-critic` MUST VETO with: `disposition: recapture` and `# 🛑 VETO: IDLE_SCREENSHOT_CANNOT_VERIFY_ACTION_FEATURE`. Note: For dice pan states (`calculateDicePanCameraState`), design elevation $Y \in [18.0\text{m}, 22.0\text{m}]$ is valid in-action telemetry; for `pawn_chase`, standard elevation is $Y \le 5.0\text{m}$ (Desktop) and $Y \le 6.0\text{m}$ (Mobile portrait).
-14. **Dual-Platform 3D Performance & Mobile Thermal Throttling Invariant [IMP-265]**:
-    - **Deceptive Trap**: Testing exclusively on desktop with dedicated GPUs hides thermal issues. Running continuous per-frame animations (`useSafeFrame`), dozens of viaduct segments, moving vehicles, trains, contact shadows (`ContactShadows`), and GPU ocean shaders maintains 60 FPS on desktop but drives mobile chips past 42°C–45°C. This triggers Android Thermal Engine / iOS DVFS throttling, producing a sawtooth frame drop loop (40 $\rightarrow$ 30 $\rightarrow$ 20 FPS), causing severe lag, overheating, and battery drain.
-    - **Physical Finding**: `ContactShadows` introduces an extra render-target pass that consumes mobile GPU fillrate. `MiniatureCityDiorama` executed simultaneous Catmull-Rom animations (`DioramaTraffic`), Metro Line 1 trains (`DioramaModelRailroad`), cruise boats (`DioramaHarborCruiser`), patrol boats (`CoastalPatrolBoat`), seagulls (`CoastalSeagulls`), and ocean waves (`CoastalIslandEnvironment`) that are indistinguishable on small mobile screens. Failing to propagate `isMobile` violated explicit environmental prop propagation.
-    - **Verified Invariants**:
-      1. *Mandatory Dual-Platform Performance Awareness*: Prior to implementing 3D, shader, or visual effects, design a 2-tier architecture: Desktop (Full Fidelity) and Mobile (Performance & Thermal First).
-      2. *Explicit `isMobile` Prop Propagation*: Propagate `isMobile` explicitly: `GameCanvas` -> `GameBoard` -> `MiniatureCityDiorama`, `CoastalIslandEnvironment` and subcomponents (`DioramaHarborCruiser`, `CoastalPatrolBoat`, `CoastalSeagulls`). Subcomponents must not guess ambient fallbacks when parent components have `isMobile`.
-      3. *Mobile LOD & Micro-Animation Static Freeze*: On mobile (`isMobile === true`), DISABLE or freeze non-essential micro-animations (`DioramaTraffic`, `DioramaModelRailroad`, `DioramaMicroLife`, `DioramaHarborCruiser`, `CoastalPatrolBoat`, `CoastalSeagulls`, `CoastalIslandEnvironment` wave scaling), pinning static parked coordinates in JSX to keep mobile draw calls $\le 45$.
-      4. *Contact Shadows Omission on Mobile*: `ContactShadows` renders exclusively on Desktop (`{!isMobile && <ContactShadows ... />}`). On mobile, boards utilize flat ground geometry to conserve fillrate.
-15. **Spatial Kinematics, Transient Corner Banking & Dual-Vector Continuity [IMP-291]**:
-    - **Transient vs. Landing Settle Gate**: Hermite/Bezier corner banking only activates while pawns traverse intermediate corners ($v > 0$). When $v = 0$ or the corner is the landing destination (Go to Jail, Ben Thanh, Festival), camera must snap/lerp directly perpendicular to the tile facade, never stranding diagonally at $45^\circ$.
-    - **Dual-Vector $C^1$ Continuity**: Synchronously bank both `position` and `target` to eliminate angular whiplash.
-    - **Living Test Regression Co-existence**: New perspective formulas (e.g. North Framing) must preserve legacy test contracts via optional configuration (`enableNorthFraming?: boolean`) or provide an explicit migration plan.
-16. **Cinematic Spline Flight & Dynamic Macro Game Phase Scaling [IMP-293]**:
-   - **Seaward Peak Radius ($R \ge 22\text{m}$)**: The circular ocean flight path during Go-to-Jail must curve outside board perimeter ($|Z| \ge 22.0\text{m}$) to eliminate mesh clipping through the center diorama and back-face culling artifacts.
-   - **Scenic Dip Elevation Modulation**: When flight trajectories cross South / South-West sectors ($Z > 0$), lower altitude by $1.5\text{m}$ to skim the ocean surface alongside `CoastalSeagulls`, enhancing cinematic depth.
-   - **Monotonic Non-Decreasing Phase Progression**: Altitude and FOV across the 3 match acts ($P_1$: Y=25.3m/FOV 24°, $P_2$: Y=22.0m/FOV 26°, $P_3$: Y=18.5m/FOV 28°) must obey monotonic non-decreasing progression $P_{\text{eff}} = \max(P_{\text{prev}}, P_{\text{rounds}}, P_{\text{buildings}})$, preventing jarring view regressions when players declare bankruptcy or downgrade properties.
-17. **OrbitControls Spherical Slerp, Decoupled Free-Roam & Gesture Break-on-Touch [IMP-294]**:
-    - **Spherical Orbit Slerp ($R \approx \text{const}$)**: Camera return from free-roam to default view must use spherical orbit slerp with shortest-arc azimuth ($|\Delta\theta| \le \pi$), polar angle $\phi \in [0.02, \pi - 0.02]$ preventing gimbal singularity, and linear radius damping preventing center-board collapse ($R(0.5) \ge 0.95 R_0$).
-    - **Break-on-Touch Early Return Latch**: Touching the screen to interrupt a soft return (`shouldBreakOnTouch === true`) requires `onEnd` to check `justBrokeSoftReturnRef` and return early, preventing accidental tap-to-skip snaps to destination tiles.
-    - **Permanent Beacon Mounting (Zero GPU Buffer Churn)**: The 3D pawn locator beacon (`CameraLocationBeacon`) must remain permanently mounted in the Three.js tree via `<group visible={isVisible}>`. Returning `null` mid-component causes mobile GPU shader/buffer reallocation churn. On the first frame of appearance (`currentXRef === null`), snap immediately to tile coordinates to eliminate spawn warp artifacts.
-18. **Cinematic Camera Arbitration, 3D Euclidean Gesture Decoupling & Preemption [IMP-341]**:
-    - **Camera Fighting UX Trap**: Releasing touch after a gentle pan (`distPos < 0.8m`) must not trigger immediate camera snapping to the moving pawn, which causes disorienting "rubber-banding". Rapid successive swipes (100–200ms apart) cause camera fighting between user input and kinematic director.
-    - **3D World Euclidean Gesture Classification**: `OrbitControls` only surfaces `onStart` and `onEnd` without 2D pixel coordinates ($X, Y$). Avoid manual DOM listeners that leak memory or conflict with UI clicks. Classify gestures purely by 3D Euclidean displacement in world space (`distPos`, `distTarget`) and contact duration (`touchDurationMs`).
-    - **Inspection Grace Period & Mandatory Preemption Invariant**: Grant an 800ms grace period (`DEFAULT_GRACE_PERIOD_MS = 800`) after free panning to hold camera position. To prevent livelocks, grace periods MUST preempt immediately (`checkPreemption === true`) upon priority events: System modal opens (`activeModal !== null`), tile focus targeted (`cameraFocusCell !== null`), dice rolling begins (`isRolling === true`), or turn advances (`hasTurnChanged === true`).
-    - **Zero-Alloc Hot Path**: The driver resolver inside the 60 FPS loop (`resolveActiveCameraDriver`) must receive primitive boolean scalars instead of object literals to prevent GC churn (7,200 allocations/minute) and mobile WebKit frame drops.
-19. **Optical Trigonometry FOV & Screen-Space Target Framing Invariant [IMP-358]**:
-    - **Optical Trigonometry vs. $1/\sqrt{aspect}$**: Naive aspect ratio formulas like $1/\sqrt{aspect}$ distort perspective and clip board edges in portrait viewports ($aspect < 1.0$). MUST calculate vertical lens trigonometry: $\tan(vFOV / 2) = \tan(hFOV_{\text{base}} / 2) / \max(0.42, aspect)$, dynamically scaling $38^\circ \to 48^\circ$ (`pawn_chase`) and $35^\circ \to 45^\circ$ (`tile_focus`) on mobile portrait.
-    - **Screen-Space Target Framing Offset**: In mobile portrait, the Top HUD consumes $22\%$ of the upper screen ($Y_{\text{screen}} \in [0.78, 1.0]$). The camera target point during close tile focus (`tile_focus`) MUST elevate from ground level ($Y = 0.15\text{m}$) to building center of mass ($Y = 0.85\text{m}$), applying a $1.25\times$ camera altitude multiplier ($Y \approx 8.0\text{m}$) to frame 2–3m buildings within safe bounds $Y_{\text{screen}} \in [0.35, 0.65]$.
-    - **Bot Kinematic Parity & Catch-up Boost**: Bots travel at high velocity $v_{\text{bot}} = 1.8 / 0.13 \approx 13.85\text{m/s}$ (3x human speed). To prevent the camera from lagging behind, bot camera chase MUST engage Catch-up Boost (`speed: 7.2` instead of 2.4/5.2), engaging `calculateDicePanCameraState` anticipate vectors upon dice roll initiation.
-    - **$C^0$ Continuity on Soft Return Preemption (ADV-05)**: When canceling `softReturn` due to bot doubles or rapid turn advance, synchronously copy active Three.js coordinates from `camera.position` and `controls.target` into `camBaseRef` and `targetBaseRef` before setting `softReturnRef.current = null;`, eliminating position glitch jumping.
-20. **Mobile Water Shader LOD, Vertex Fresnel & TBDR Depth Buffer Invariant [IMP-365]**:
-    - **TBDR Depth Buffer & Pass Order Discipline**: Transparent ocean water (`TropicalWater`) MUST strictly preserve `transparent: true` and `depthWrite: false` across all platforms. In Three.js, transparent meshes execute strictly in Pass 2 (back-to-front), rendering *after* all opaque geometry (Pass 1). Setting `depthWrite: true` in Pass 2 yields 0% Early-Z culling benefit against Pass 1 meshes, forces Apple Silicon TBDR tile memory serialization flushes, and clips transparent shoreline foam (`waveRef` at $Y = -0.292$) and shallow plinth skirts (`shallowRef` at $Y = -0.298$).
-    - **Vertex-Evaluated Fresnel & Fragment ALU Elision**: Mobile WebGL fragment shaders executing across the full 240x240m ocean domain (~70% screen fill) suffer severe GPU thermal throttling if calculating per-pixel trigonometric functions or 3D vector normalizations. Evaluating view-dependent Fresnel (`vFresnel`) in the vertex shader in `highp` FP32 elides per-pixel `normalize()` and specular `pow()` loops, saving ~75%–80% fragment ALU while completely preventing FP16 mantissa overflow ($> 65,504$) on wide camera angles.
-    - **Unused Varying Register Discipline**: Unused varying variables (such as `varying vec2 vUv`) declared in vertex shaders without matching fragment consumers consume hardware interpolator registers on mobile GPUs (Apple TBDR, PowerVR, Mali). Mobile shader templates MUST purge unused varyings to eliminate shader linkage warnings and conserve tile register space.
+1. **5-Layer Ocean Depth Stack & Zero-Alloc Shader Uniforms**:
+   - **5-Layer Z-Fighting Separation**: Ocean water separates into 5 vertical tiers: (1) Abyss trench bottom $Y = -0.420$ `#0C4A6E`; (2) Mid-ocean depth $Y = -0.310$ `#0369A1`; (3) Primary GPU Gerstner surface $Y = -0.300$ `TropicalWater`; (4) Turquoise board skirt $Y = -0.298$ `#06B6D4`; (5) Shoreline surf foam band $Y = -0.292$ `#FFFFFF`. Adjacent tiers maintain $\Delta Y \ge 0.002\text{m} - 0.010\text{m}$ separation.
+   - **Zero-Alloc Uniforms & Lifecycle**: Reuse static `Color.lerp` and `Vector3.lerp` buffers inside render loops without allocating `new Color()`. Dispose material and geometry on unmount.
+
+2. **Living Diorama Micro-FSM & 3D Spatial Continuity**:
+   - **Zero Mid-Air Teleportation ($C^1$ Continuity)**: Fauna animation phase transitions (`CIRCLING` $\rightarrow$ `LANDING`) MUST anchor landing start point to terminal circling coordinates (`landingFromRef`), never snapping to origin.
+   - **Zero React Re-render at 60 FPS**: Continuous animations (wave bobbing, wing flapping, beacon rotation) MUST operate via `useRef` and Three.js object mutations in `useSafeFrame`. Calling `setState` at 60 FPS is strictly forbidden.
+   - **Shadow Budget Isolation**: Micro-fauna meshes (seagulls, boats) are forbidden from enabling `castShadow` to preserve mobile GPU fillrate.
+
+3. **Atmospheric Exposure Adaptation & Foliage Wind Sway**:
+   - **Tone Mapping Pupil Adaptation**: Update `gl.toneMappingExposure` via pure function `lerpExposure` (Day: 1.00, Sunset: 1.06, Night: 1.14, Auction Spotlight: 0.94), guarded by `Number.isFinite` to prevent `NaN` flashes.
+   - **Theatrical Auction Fog**: During auctions (`isAuctionActive`), pull atmospheric fog to `near = 18.0m`, `far = 55.0m`, synchronously lerping `scene.fog` and `scene.background` toward deep slate `#0F172A`.
+   - **Instanced Foliage Wind Sway**: Inside `useSafeFrame`, only update tilt across 3 canopy tiers (`PALM_TIER_SWAY_FACTORS = { 1: 0.6, 2: 0.8, 3: 1.0 }`), keeping trunks stationary with zero allocations in the frame loop.
+
+4. **Auction Theatrical FX & Dual-Layer Vignette**:
+   - **Bid Flash Reaction**: New highest bid triggers light burst decaying quadratically $(1 - t/d)^2$ over $0.35$s. Read selector directly via `useGameStore((s) => s.auction?.currentBid ?? 0)`.
+   - **Champagne Bloom & Vignette**: On `isAuctionActive = true`, lower `bloomThreshold` to $1.2$ and raise `vignetteDarkness` to $0.35$.
+   - **Dual-Layer 2D Vignette**: In `CinematicOverlay`, separate into 2 gradient divs (Cyan and Slate `rgba(15, 23, 42, 0.70)`), transitioning via CSS `opacity duration-500 ease-out`.
+
+5. **Dynamic Depth of Field (Tilt-Shift Macro) & Focal Grounding**:
+   - **Motion & Overview Crispness Gate**: During pawn motion (`isPawnAnimating = true`) or dice roll (`isRolling = true`), DoF MUST be fully disabled (`bokehScale = 0.0`). Overview angle also disables DoF for pin-sharp tile clarity.
+   - **GameOver Modal DoF Leak Guard**: On match conclusion (`activeModal === 'game_over'`), disable DoF (`DOF_PROFILES.off`) and reset focal target to `[0, 0, 0]`.
+   - **Dynamic Optical Focal Target**: Focal coordinates (`dofTarget`) calculate dynamically via `resolveDofTarget`: track tile coordinates `cellPosition(targetCell)` during inspection, and track central podium `[0, 3.0, 0]` during auctions.
+   - **Optical Scale Hierarchy**: Auctions use `bokehScale = 0.45`, `focusRange = 6.0m`. Tile inspection uses `bokehScale = 0.28`, `focusRange = 9.0m`.
+
+6. **HCMC Metro Line 1 Viaduct Architecture & AST Contracts**:
+   - **JSX Direct Ordering**: In `DioramaBallastBed`, the 4 primary ballast meshes (`#475569`) MUST reside first directly under `<group>` to satisfy contract string-slice windows (`TC-RBWS01.02-04`).
+   - **Direct Children & Shadow Budget**: At least 4 railroad tie meshes (`#451A03`) MUST be direct children of `<group data-testid="diorama-model-railroad">`. Disable `castShadow` on ties, ballast, piers, and railings.
+
+7. **3D Spline Kinematics Arc-Length Calibration**:
+   - **Arc-Length Verification**: Kinematic rail splines (`CatmullRomCurve3`) must verify: (1) Total circumference `curve.getLength() \in [50.0m, 58.0m]` (`TC-IMP134.01`); (2) Station stopping points at progress 0.12 (South) and 0.62 (North) align with platforms (error $< 0.3\text{m}$).
+
+8. **Curved Viaduct Modular Geometry & Static Precomputation**:
+   - **Module-Level Static Geometry**: 32 curved girder segments and 16 piers MUST be precomputed once at module scope (`buildViaductGeometry()`), eliminating GC churn in frame loops.
+
+9. **3D Spline Centripetal Parameterization & Ballast De-collision**:
+   - **Centripetal Spline**: Waypoint paths (`TRACK_POINTS`) MUST use `'centripetal'` with `tension = 0.15` to limit tangent variation to $< 6.0^\circ$ and eliminate $45^\circ$ corner kinks. Viaduct requires 96 segments. Ground ballast meshes truncate to $10.6\text{m}$ to eliminate protruding corner overlap.
+
+10. **Physical Visual Evidence & Anti-AST-Hallucination Gate**:
+    - **Visual Defects Invisible to AST**: Polygon clipping, spline cusping, and layout overflows cannot be verified via AST string assertions.
+    - **Mandatory Screenshot Prerequisite**: Any UI/3D ticket MUST execute `npm run capture:visual -- --ticket <ID>` prior to Station 3. Subagents must VETO if physical screenshots are missing.
+
+11. **Three.js Euler Yaw Gimbal Clamp**:
+    - **Euler Order 'YXZ'**: Default rotation order `'XYZ'` clamps Y-yaw to $[-\pi/2, \pi/2]$, causing gimbal flip on North-facing tiles ($180^\circ$). MUST use `'YXZ'` order: `new THREE.Euler(0, 0, 0, 'YXZ').setFromQuaternion(quat)`.
+
+12. **Zero Raw DOM Elements Inside R3F Canvas Without `<SafeHtml>`**:
+    - **Physical Crash**: Placing raw HTML tags (`div`, `span`, `p`, `button`) as children of Three.js components crashes fataly on real browsers (`Span is not part of the THREE namespace!`).
+    - **Invariant**: Raw HTML inside Three.js trees MUST be wrapped with `<SafeHtml>` (delegating to `@react-three/drei` `<Html>` on browsers, `React.Fragment` in SSR).
+
+13. **In-Action Visual Evidence & Camera Telemetry**:
+    - **In-Action Capture Prerequisite**: Features modifying kinematics, cameras, dice, or pawns MUST be captured in-action via `--scenario` in `capture_visual_evidence.mjs` (e.g. `--scenario camera_chase_normal`). Idle overview screenshots (elevation $Y > 22$) are FORBIDDEN as evidence for dynamic features.
+    - **Camera Telemetry**: Extract coordinates from `window.__threeCamera` into `.agents/evidence/camera_telemetry_[ticket]_[viewport].json`.
+
+14. **Dual-Platform 3D Performance & Mobile Thermal Throttling**:
+    - **2-Tier Architecture**: Desktop (Full Fidelity) vs Mobile (Performance & Thermal First).
+    - **Explicit Prop Propagation**: Propagate `isMobile` explicitly down component trees. Subcomponents must not execute redundant device sniffers.
+    - **Mobile Micro-Animation Freeze**: On `isMobile === true`, freeze non-essential background animations (traffic, cruisers, boats, birds) to keep mobile draw calls $\le 45$.
+    - **Contact Shadows Omission**: `ContactShadows` renders exclusively on Desktop (`{!isMobile && <ContactShadows />}`).
+
+15. **Spatial Kinematics Corner Banking & Dual-Vector Continuity**:
+    - **Transient vs Landing Gate**: Corner banking only activates while pawns traverse intermediate corners ($v > 0$). When $v = 0$ (landing destination), camera snaps perpendicular to tile facade. Bank both `position` and `target` synchronously.
+
+16. **Cinematic Spline Flight & Macro Game Phase Scaling**:
+    - **Seaward Peak Radius ($R \ge 22\text{m}$)**: Go-to-Jail circular flight path curves outside board ($|Z| \ge 22.0\text{m}$) to eliminate center mesh clipping.
+    - **Monotonic Phase Progression**: Camera altitude across match acts ($P_1$: 25.3m, $P_2$: 22.0m, $P_3$: 18.5m) obeys monotonic non-decreasing progression $P_{\text{eff}} = \max(P_{\text{prev}}, P_{\text{rounds}}, P_{\text{buildings}})$.
+
+17. **OrbitControls Slerp & Gesture Break-on-Touch**:
+    - **Spherical Orbit Slerp**: Return from free-roam uses spherical orbit slerp ($|\Delta\theta| \le \pi, \phi \in [0.02, \pi - 0.02]$).
+    - **Break-on-Touch**: Touching screen to interrupt soft return sets `justBrokeSoftReturnRef` and returns early.
+    - **Permanent Beacon Mounting**: Mount locator beacon permanently via `<group visible={isVisible}>`. Returning `null` triggers GPU shader reallocation churn.
+
+18. **Cinematic Camera Arbitration & Preemption**:
+    - **Inspection Grace Period**: 800ms grace period after free panning holds camera position. Preempts immediately upon priority events: modal open, tile focus, dice roll, or turn advance. Driver resolver uses primitive boolean scalars.
+
+19. **Optical Lens Trigonometry & Screen-Space Target Framing**:
+    - **Lens Trigonometry**: Calculate vertical lens trigonometry: $\tan(vFOV / 2) = \tan(hFOV_{\text{base}} / 2) / \max(0.42, aspect)$, scaling $38^\circ \to 48^\circ$ (`pawn_chase`) on mobile portrait. Camera target elevates to building center of mass ($Y = 0.85\text{m}$). Bot chase boost engages `speed: 7.2`.
+
+20. **Mobile Water Shader LOD, Vertex Fresnel & TBDR Depth Buffer**:
+    - **TBDR Depth Buffer**: Transparent ocean water MUST maintain `transparent: true` and `depthWrite: false` across all platforms to prevent early-Z depth clipping of shoreline foam.
+    - **Vertex-Evaluated Fresnel**: Evaluating `vFresnel` in the vertex shader elides 75%–80% fragment ALU and avoids FP16 mantissa overflow ($> 65,504$). Purge unused varying registers.
+
 21. **R3F Transient Unmount & Shader Churn Invariant**:
-    - FORBIDDEN returning `null` on transient state when `useFrame` is registered. Must use `<group visible={...}>` to prevent GPU buffer and shader reallocation churn on mobile.
-22. **Anti-Conjectural Root Cause & Diagnostic Telemetry Invariant**:
-    - FORBIDDEN resolving runtime anomalies, visual artifacts, or platform-specific glitches (WebGL strobing, GPU precision overflow, thermal throttling, camera lag) solely by conjectural inspection of `.tsx`/source files. Empirical observability tools (diagnostic HUD `?debug=3d`, layer isolation, live telemetry) MUST be used in Station 0.5 to physically isolate the culprit before drafting a plan or writing Station 1 tests.
-23. **Interaction Dead Man's Switch & Event-Pairing Resilience [IMP-376]**:
-    - **Deceptive Trap (Trapped Interaction Locks)**: Assuming mobile touch gestures (`pointerdown`/`pointerup`) or animation loops cleanly complete their end events. OS multitasking, lock-screen sleep, and component `e.stopPropagation()` drop release events, leaving active pointer collections trapped and locking frameloops at 60 FPS indefinitely.
-    - **Verified Invariant**: Touch/gesture tracking collections (`activePointersRef`) MUST clear on `window.blur` and `document.hidden`. Furthermore, interaction controllers MUST enforce an inactivity Dead Man's Switch: if `activePointersRef.size > 0` but no new interaction occurs for > 3000ms, the collection MUST auto-purge to self-heal.
-24. **Mobile 16-Bit Depth Buffer & 2D Planar Z-Fighting Invariant [IMP-371 / IMP-378]**:
-    - **Deceptive Trap**: Stacking flat 2D geometries (`planeGeometry`, `circleGeometry`, `ringGeometry`) or fake contact shadow planes with sub-centimeter vertical separation ($\le 0.005\text{m}$, e.g. $1\text{mm} - 5\text{mm}$) appears visually acceptable on desktop (24-bit or 32-bit depth buffers with standard FP32 floating point precision). However, on mobile GPUs (TBDR architectures like Mali, Adreno, PowerVR, Apple Silicon) using 16-bit depth buffers and `mediump` float precision, depth precision collapses beyond $1\text{cm}$ at isometric/tilted camera distances ($R \approx 30\text{m} - 45\text{m}$). This causes violent yellow/white flickering, color strobing, and polygon edge tearing (Z-fighting) across overlapping planes.
-    - **Physical Finding**: In `cong-xa-paris-plaza` and `CathedralProceduralFallback`, 5 concentric flat 2D rings at $Y \in [0.003\text{m}, 0.007\text{m}]$ and a contact shadow plane at $Y = 0.001\text{m}$ caused intense yellow/white flashing on Android Chrome. Attempting to fix this by hiding 3D objects destroys visual fidelity, while minute 1mm height tweaks fail completely on mobile GPUs.
-    - **Verified Invariants**:
-      1. *Zero 2D Planar Stacking on Mobile*: When `isMobile === true`, flat 2D geometries (`planeGeometry`, `circleGeometry`, `ringGeometry`) MUST NOT be stacked vertically with $\Delta Y < 0.02\text{m}$ ($2\text{cm}$).
-      2. *Solid 3D Volumetric Extrusions*: Replace flat decorative ground rings with solid 3D geometries (`cylinderGeometry`, `boxGeometry`) having physical height $\ge 0.02\text{m}$ ($2\text{cm}$), raised stone podiums, and elevated curbs.
-      3. *Zero Flat Fake Contact Shadow Planes on Mobile*: Drop-shadow or contact-shadow planes positioned immediately above ground ($Y \le 0.005\text{m}$) are strictly banned on mobile; omit them or bake shading into the terrain/podium material.
-      4. *Facade Trimming Stand-off Distance*: Exterior trimmings (signboards, banners, frames, awnings) MUST project forward at least $\ge 0.006\text{m}$ ($6\text{mm}$) from wall faces, never sharing coincident coplanar surfaces ($Z_{\text{sign}} = Z_{\text{wall}}$).
-      5. *Inter-Volume Embedding*: Stacked architectural volumes (e.g. tower shaft resting on base podium) MUST embed slightly into the lower volume ($\ge 0.002\text{m}$) rather than sharing exact coplanar surface boundaries.
-25. **Spatial Separation: Board Toy Indicators vs. Peripheral Diorama Architecture [IMP-378 / SSOT]**:
-    - **Deceptive Trap (False "Double-Render" Premise)**: Mistaking board-level instanced indicators (`InstancedBoardToyBuildings` rendering plastic houses/hotels) and peripheral procedural/landmark diorama buildings (`ProceduralBuilding` / `diorama_landmarks.tsx`) for "duplicate redundant renders" of the same entity.
-    - **Physical Finding**: Board toy buildings and peripheral diorama buildings serve two completely distinct gameplay and spatial functions:
-      1. *Toy Buildings*: Sit on the active tile color strip ($Z = -0.80\text{m}$), representing player property investment levels (L1/L2 houses, L3 hotel) in the classic Monopoly visual language. They are covered by living test contracts (e.g. `TC-INST-16`).
-      2. *Peripheral Diorama Buildings*: Sit behind the board perimeter ($Z \approx -1.35\text{m}$, $> 50\text{cm}$ spatial separation), providing urban miniature context and diorama atmosphere.
-    - **Verified Invariant**: Disabling `InstancedBoardToyBuildings` when a diorama building exists breaks the core board state affordance and violates regression test contracts. Subsystems must remain cleanly decoupled: peripheral diorama LODs must never touch or suppress board-strip toy building instances.
+    - FORBIDDEN returning `null` when `useFrame` is registered. Use `<group visible={...}>` to prevent GPU buffer and shader reallocation churn.
 
-26. **R3F Procedural BufferGeometry Singleton & VRAM Leak Invariant [IMP-381]**:
-    - **Deceptive Trap (Inline Procedural Geometry Factory)**: Invoking procedural geometry factories or constructors inline inside JSX (`<mesh geometry={createBatchedGeometry()} />` or `geometry={new THREE.BufferGeometry()}`). Developers assume React/R3F automatically manages WebGL memory or cleans up previous instances when components re-render.
-    - **Physical Finding**: In Three.js and `@react-three/fiber`, replacing a `geometry` prop does NOT trigger `.dispose()` on the previously attached BufferGeometry. On every component re-render (state changes, camera moves, turn advance), a new geometry buffer is created and uploaded to the GPU, leaving the orphaned vertex, UV, and index buffers permanently trapped in GPU VRAM. On mobile devices with unified memory, this causes rapid garbage collection spikes, thermal throttling, and eventually crashes the renderer with `WebGL context was lost`.
-    - **Verified Invariants**:
-      1. *Module-Level Static Geometry Singleton*: Geometries whose vertex coordinates and topologies are constant across runtime MUST be baked once at the module top level (`export const GEOM = ...;`), referenced statically by components.
-      2. *Dynamic Geometry Lifecycle Discipline*: If geometry must vary dynamically, it MUST be created inside `useMemo` with an explicit disposal hook, or managed via persistent ref with manual `.dispose()` in `useEffect` cleanup.
-      3. *Zero Inline Allocation Guard*: Calling `new *Geometry()` or `create*Geometry()` directly inside JSX props is strictly forbidden and checked mechanically by AST plan audit (`rules_architecture.mjs`).
+22. **Anti-Conjectural Root Cause & Diagnostic Telemetry**:
+    - FORBIDDEN resolving visual glitches solely by inspecting `.tsx` source code. Use diagnostic observability tools (`?debug=3d`, layer toggles, live telemetry) in Station 0.5 to isolate the physical cause.
 
-27. **Call-Site Grounded Draw Call Accounting & Unlit Material Discipline [IMP-381]**:
-    - **Deceptive Trap (Leaf Isolation Accounting & Unlit Shadows)**:
-      (1) Calculating draw call savings purely by counting meshes inside a leaf component in isolation (e.g. counting 4 meshes in `OwnerPricePill` and multiplying by 28 tiles to claim saving 112 calls) without verifying whether the active parent caller (`board_layout.tsx`) has already disabled or bypassed those meshes via props.
-      (2) Applying `receiveShadow` or `castShadow` onto meshes using unlit materials (`MeshBasicMaterial`).
-    - **Physical Finding**: In production, parent components often already pass flags such as `renderPricePillTray={false}`, meaning only 1 mesh ran per tile. Promising a reduction of 112 draw calls creates an ungrounded performance claim. Furthermore, `MeshBasicMaterial` completely ignores Three.js shadow maps; setting `receiveShadow` is dead code slop.
-    - **Verified Invariants**:
-      1. *Call-Site Grounded Accounting*: Performance and draw call metrics MUST be verified at the top-level active production call-site, taking into account all parent prop suppressions.
-      2. *Unlit Material Shadow Ban*: Meshes using `MeshBasicMaterial` MUST NOT declare `receiveShadow` or `castShadow`.
+23. **Interaction Dead Man's Switch & Gesture Resilience**:
+    - Trapped pointer collections (`activePointersRef`) MUST clear on `window.blur` and `document.hidden`. Inactivity TTL > 3000ms auto-purges trapped pointers to restore frameloop cooldown.
 
-28. **Lean 3D Plan Guardrails: Batching-in-Signature, Full Exclusion Map & SSR Instancing [IMP-399]**:
-    - **Batching-in-Signature**: Repeating static 3D props ($> 3$ instances) MUST declare a `createBatched*Geometries` (`mergeGeometries` + immediate `.dispose()`) or `populate*InstancedMesh` signature in Task 1, budgeting 5–6 lines per `<mesh>` in `.tsx` consumers without code-golfing.
-    - **Full Diorama Exclusion Map**: Inner-city additions MUST clear Saigon River & Promenades ($|X| \le 2.0\text{m}$), Cathedral (`[-4.3, 3.65]`), Bitexco (`[-4.5, -4.4]`), West Park (`[-2.7, -2.5]`) by $\ge 1.0\text{m}$, and SE Port/Marina ($X > 3.6, Z > 3.2$), with `[bottomY, topY]` embedding $\ge 0.02\text{m}$.
-    - **SSR-Safe Instancing**: `InstancedMesh` color buffers MUST use `useIsomorphicLayoutEffect`, allocate `InstancedBufferAttribute` when `instanceColor === null`, and set both `frustumCulled={false}` and `frustumculled="false"`.
+24. **Volumetric Mobile Terrain & Anti-Z-Fighting**:
+    - **Zero 2D Planar Stacking on Mobile**: On mobile 16-bit depth buffers, flat 2D geometries MUST NOT be stacked with $\Delta Y < 0.02\text{m}$ ($2\text{cm}$).
+    - **Volumetric Extrusions**: Use solid 3D geometries (`cylinderGeometry`, `boxGeometry`) with physical height $\ge 0.02\text{m}$. Omit flat fake contact shadow planes on mobile.
+    - **Clearances**: Facade trimmings project forward $\ge 0.006\text{m}$ ($6\text{mm}$). Inter-volume embedding $\ge 0.002\text{m}$ ($2\text{mm}$). Road markings use `polygonOffset: true` (factor -1.0, units -4.0). Translucent headlight fans require `depthWrite: false`.
+
+25. **Spatial Separation: Board Toy Indicators vs. Peripheral Diorama**:
+    - Decoupled Subsystems: Board toy buildings ($Z = -0.80\text{m}$, property levels) and peripheral diorama buildings ($Z \approx -1.35\text{m}$, urban miniature context) are distinct entities. Disabling toy buildings when diorama buildings exist is forbidden.
+
+26. **R3F Procedural BufferGeometry Singleton & VRAM Leak Invariant**:
+    - Static procedural geometries MUST be pre-baked once as module-level singletons (`export const GEOM = ...`). Dynamic geometries belong in `useMemo` with disposal hooks. Zero inline `new *Geometry()` in JSX.
+
+27. **Call-Site Grounded Draw Call Accounting & Unlit Materials**:
+    - Draw call metrics MUST be verified at the top-level production call-site, accounting for parent prop suppressions. Meshes using `MeshBasicMaterial` MUST NOT declare `receiveShadow` or `castShadow`.
+
+28. **Desktop Bay Sanctuaries & Stepped Podium Invariant**:
+    - **Frustum & Clearance**: Outer edge clearance $\ge 10.60\text{m}$ ($\max(|X|, |Z|) - R_{\text{lagoon}} \ge 10.60\text{m}$) outside board outer edge $\pm 10.15\text{m}$. Sited on West/North flanks ($X \le -12\text{m}$ or $Z \le -12\text{m}$) within `overview` frustum (`|ndcX| <= 0.85, |ndcY| <= 0.82`), with zero foreground South/East occlusion.
+    - **Stepped Stacking**: Upward tapering ($W_{\text{lower}} > W_{\text{upper}}$) with ascending elevations and $\ge 0.02\text{m}$ inter-volume embedding. Mount real `.glb` monuments via `<SafeGLTFModel fallback={null} />`.
+    - **Mobile Zero-Allocation**: Desktop Ultra components MUST be gated by `!isMobile` and short-circuit `useMemo` to `null` on mobile (0 mobile draw calls, 0 allocations).

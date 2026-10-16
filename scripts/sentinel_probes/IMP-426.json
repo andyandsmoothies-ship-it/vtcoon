@@ -1,0 +1,50 @@
+[
+  {
+    "file": "src/client/3d/coastal_island_environment.tsx",
+    "desc": "AST: Corrupt streamlined inference to always be true (reintroducing placebo bug)",
+    "target": "const streamlined = propStreamlined ?? isMobile;",
+    "replacement": "const streamlined = true;"
+  },
+  {
+    "file": "src/client/3d/coastal_island_environment.tsx",
+    "desc": "AST: Corrupt streamlined inference to always be false (TBDR mobile regression)",
+    "target": "const streamlined = propStreamlined ?? isMobile;",
+    "replacement": "const streamlined = false;"
+  },
+  {
+    "file": "src/client/3d/coastal_island_environment.tsx",
+    "desc": "AST: Ignore propStreamlined override and force isMobile",
+    "target": "const streamlined = propStreamlined ?? isMobile;",
+    "replacement": "const streamlined = isMobile;"
+  },
+  {
+    "file": "src/client/3d/board_layout.tsx",
+    "desc": "AST Call-Site: Corrupt board_layout streamlined wiring to always true",
+    "target": "streamlined={!tierProfile.enableOuterBaySanctuaries}",
+    "replacement": "streamlined={true}"
+  },
+  {
+    "file": "src/client/3d/board_layout.tsx",
+    "desc": "AST Call-Site: Corrupt board_layout isMobile prop to inverted value",
+    "target": "isMobile={isMobile}",
+    "replacement": "isMobile={!isMobile}"
+  },
+  {
+    "file": "src/client/3d/sunny_island_lobby_scene.tsx",
+    "desc": "AST Call-Site: Corrupt sunny_island_lobby_scene streamlined prop to false",
+    "target": "<CoastalIslandEnvironment isMobile={isMobile} streamlined={isMobile} />",
+    "replacement": "<CoastalIslandEnvironment isMobile={isMobile} streamlined={false} />"
+  },
+  {
+    "file": "src/client/3d/sunny_island_lobby_scene.tsx",
+    "desc": "AST Call-Site: Corrupt sunny_island_lobby_scene isMobile prop to inverted value",
+    "target": "<CoastalIslandEnvironment isMobile={isMobile} streamlined={isMobile} />",
+    "replacement": "<CoastalIslandEnvironment isMobile={!isMobile} streamlined={isMobile} />"
+  },
+  {
+    "file": "src/client/3d/coastal_island_landmarks.tsx",
+    "desc": "AST: Revert steel train rail color to banned #94A3B8 token",
+    "target": "<meshStandardMaterial color=\"#64748B\" metalness={0.9} roughness={0.15} />",
+    "replacement": "<meshStandardMaterial color=\"#94A3B8\" metalness={0.9} roughness={0.15} />"
+  }
+]

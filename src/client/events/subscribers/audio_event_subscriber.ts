@@ -1,6 +1,6 @@
 // [IMP-333] Audio Event Subscriber — Tactical acoustic feedback for synthesized game events
 import { SoundEngine as DefaultSoundEngine, type SoundEngineImpl } from '../../audio/sound_engine.js';
-import type { GameEventListener } from '../game_event_bus.js';
+import type { GameEventListener } from '../game_event_bus_types.js';
 import type { PacingContext } from '../pacing_context.js';
 import {
   SynthesizedGameEventType,

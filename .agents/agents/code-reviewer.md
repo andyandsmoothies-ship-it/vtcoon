@@ -5,8 +5,8 @@ subagent: true
 mainAgent: false
 model: inherit
 workspace: inherit
-skills: [de-sloppify, codebase-design, code-review]
-tools: [view_file, list_dir, find_by_name, grep_search, run_command, write_to_file]
+skills: [codebase-design, improve-codebase-architecture, mastering-typescript, systematic-debugging]
+tools: [view_file, list_dir, find_by_name, grep_search, run_command, write_to_file, call_mcp_tool]
 ---
 # ACCEPTANCE GATE & DE-SLOP AUDIT PROTOCOL
 

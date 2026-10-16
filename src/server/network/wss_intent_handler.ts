@@ -12,7 +12,7 @@ import type { ReconnectManager } from './reconnect_manager.js';
 import type { SocketRegistry } from './socket_registry.js';
 import type { AdminManager } from './admin_manager.js';
 import type { IntentGuard } from '../security/intent_guard.js';
-import type { WsServerMessage, WsClientMessage, ReasonCode } from './network_types.js';
+import type { WsServerMessage, WsClientMessage, ReasonCode } from '../../domain/protocol/index.js';
 
 export interface IntentHandlerDeps {
   readonly rooms: RoomManager;

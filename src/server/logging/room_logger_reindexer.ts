@@ -2,7 +2,7 @@
 // Scans local disk for uncataloged .jsonl log files and reconstructs metadata
 import fs from 'node:fs';
 import path from 'node:path';
-import type { AdminArchivedRoomSummary, ArchivedRoomStatus, AdminRoomLogEntry } from '../network/admin_types.js';
+import type { AdminArchivedRoomSummary, ArchivedRoomStatus, AdminRoomLogEntry } from '../../domain/protocol/index.js';
 
 export function reindexLocalLogs(
   logDir: string,

@@ -5,7 +5,7 @@ import type { SessionManager } from '../session_manager.js';
 import { SessionState, GRACE_PERIOD_MS } from '../session_manager.js';
 import { BotEngine } from '../../domain/bot/index.js';
 import type { DeltaBroadcaster } from './delta_broadcaster.js';
-import type { WsServerMessage, ReasonCode } from './network_types.js';
+import type { WsServerMessage, ReasonCode } from '../../domain/protocol/index.js';
 
 export interface ReconnectTokenRecord {
   readonly token: string;

@@ -391,6 +391,40 @@ export function lintAstRules(sf, content, filePath, errors, warnings) {
       }
     }
 
+    // Rule 17: NO_FS_IN_CLIENT_TESTS (Prohibit fs.readFileSync/fs.existsSync in tests/client/**)
+    if (normPath.startsWith('tests/client/') || normPath.includes('/tests/client/')) {
+      if (ts.isImportDeclaration(node)) {
+        const modSpec = node.moduleSpecifier.getText(sf).replace(/['"]/g, '');
+        if (modSpec === 'fs' || modSpec === 'node:fs' || modSpec === 'fs/promises' || modSpec === 'node:fs/promises') {
+          const { line } = sf.getLineAndCharacterOfPosition(node.getStart());
+          errors.push({
+            rule: SLOP_RULES.NO_FS_IN_CLIENT_TESTS,
+            file: filePath,
+            line: line + 1,
+            message: `Tautological Testing Violation: Banned file system module import "${modSpec}" in client test. Tests in tests/client/** must verify behavioral runtime logic or use the R3F test harness, not scan source strings via fs.`,
+          });
+        }
+      }
+
+      if (ts.isCallExpression(node)) {
+        let callName = '';
+        if (ts.isPropertyAccessExpression(node.expression)) {
+          callName = node.expression.name.text;
+        } else if (ts.isIdentifier(node.expression)) {
+          callName = node.expression.text;
+        }
+        if (callName === 'readFileSync' || callName === 'existsSync') {
+          const { line } = sf.getLineAndCharacterOfPosition(node.getStart());
+          errors.push({
+            rule: SLOP_RULES.NO_FS_IN_CLIENT_TESTS,
+            file: filePath,
+            line: line + 1,
+            message: `Tautological Testing Violation: Direct call to fs.${callName} in client test. Tests in tests/client/** must not inspect physical files as text strings (use real consumer assertions).`,
+          });
+        }
+      }
+    }
+
     ts.forEachChild(node, visit);
   }
 

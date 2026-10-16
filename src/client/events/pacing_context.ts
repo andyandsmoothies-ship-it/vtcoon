@@ -1,5 +1,6 @@
 // [IMP-333] Pacing Context Adapter — Canonical SSOT for Kinematic Delays & Presentation Timing
 import { useGameStore, type GameState } from '../store/game_store.js';
+import { registerGameResetCleanup } from '../store/game_store_cleanup.js';
 import { checkPassedGo } from '../../domain/room.js';
 
 export interface PacingConfig {
@@ -31,6 +32,8 @@ export function clearPendingPacingTimers(): void {
   for (const t of pendingPacingTimers) clearTimeout(t);
   pendingPacingTimers.clear();
 }
+
+registerGameResetCleanup(clearPendingPacingTimers);
 
 function getAnimLead(anim: GameState['activePawnAnimation'], config: PacingConfig): number {
   if (!anim || !anim.waypoints?.length) return 0;

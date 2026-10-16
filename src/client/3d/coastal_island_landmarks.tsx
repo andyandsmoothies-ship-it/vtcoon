@@ -185,11 +185,11 @@ export function TrainStationLandmark(): React.ReactElement {
         </mesh>
         <mesh position={[0, 0.04, -0.28]}>
           <boxGeometry args={[12.8, 0.03, 0.08]} />
-          <meshStandardMaterial color="#94A3B8" metalness={0.9} roughness={0.15} />
+          <meshStandardMaterial color="#64748B" metalness={0.9} roughness={0.15} />
         </mesh>
         <mesh position={[0, 0.04, 0.28]}>
           <boxGeometry args={[12.8, 0.03, 0.08]} />
-          <meshStandardMaterial color="#94A3B8" metalness={0.9} roughness={0.15} />
+          <meshStandardMaterial color="#64748B" metalness={0.9} roughness={0.15} />
         </mesh>
       </group>
 

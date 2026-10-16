@@ -1,8 +1,9 @@
 import { TurnPhase, type Room, type Player, type ServerDomainEvent } from '../domain/room';
 import { ActionRejectReason } from '../domain/action_reasons';
 import { PROPERTY_DEEDS, type PropertyRegistry, type PropertyStateMap } from '../domain/property_manager';
-import { calculateNetWorth, restorePostInsolvencyPhase } from './insolvency_manager';
-import type { AuctionSession } from './auction_manager';
+import { calculateNetWorth } from './room_manager_queries.js';
+import { restorePostInsolvencyPhase } from './fsm_transition_coordinator.js';
+import type { AuctionSession } from './auction_types.js';
 import {
   type BondContract,
   BondTrancheId,

@@ -385,7 +385,8 @@ describe('[TC-CONV-01..20/MSS][UC-IMP235] UI/UX & Engine Convergence Contract Su
         })
       );
 
-      expect(html).toContain('text-slate-700 font-black');
+      expect(html).toContain('sm:text-slate-700');
+      expect(html).toContain('sm:font-black');
     });
 
     it('[TC-CONV-14/MSS][UC-IMP235] ServerToast container có class z-60 và vị trí cố định góc phải màn hình', () => {

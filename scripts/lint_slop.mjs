@@ -47,15 +47,29 @@ export function lintSlopContent(content, filePath = 'anonymous.ts') {
 /**
  * Main execution runner.
  */
-export function runSlopLinter(targetDir = 'src') {
-  const files = getSourceFiles(targetDir);
+export function runSlopLinter(target = 'src') {
+  const rootDir = process.cwd();
+  const targetList = Array.isArray(target) ? target : [target];
+  const files = [];
+
+  for (const t of targetList) {
+    const absTarget = path.isAbsolute(t) ? t : path.join(rootDir, t);
+    if (fs.existsSync(absTarget)) {
+      files.push(...getSourceFiles(absTarget));
+    }
+  }
+
+  const uniqueFiles = [...new Set(files)];
   const allErrors = [];
   const allWarnings = [];
 
-  console.log(`\n🔍 [Anti-Slop Linter] Scanning ${files.length} files in "${targetDir}" via TypeScript AST...`);
+  const targetDesc = targetList.length > 0 && targetList.length <= 3
+    ? targetList.join(', ')
+    : `${uniqueFiles.length} files`;
+  console.log(`\n🔍 [Anti-Slop Linter] Scanning ${uniqueFiles.length} files (${targetDesc}) via TypeScript AST...`);
 
   const sharedFileCache = new Map();
-  for (const file of files) {
+  for (const file of uniqueFiles) {
     const content = fs.readFileSync(file, 'utf8');
     sharedFileCache.set(file, content);
     const { errors, warnings } = lintSlopContent(content, file);
@@ -64,15 +78,16 @@ export function runSlopLinter(targetDir = 'src') {
   }
 
   // Multi-file Rule: zero-orphan-production-files (Anti-TIDD Check with shared cache)
-  lintOrphanProductionFiles(targetDir, files, allErrors, sharedFileCache);
+  lintOrphanProductionFiles(targetList, uniqueFiles, allErrors, sharedFileCache);
 
-  return formatSlopResults(files, allErrors, allWarnings);
+  return formatSlopResults(uniqueFiles, allErrors, allWarnings);
 }
 
 // Direct CLI entry point
 const isDirectExecution = process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1]);
 if (isDirectExecution) {
-  const target = process.argv[2] || 'src';
+  const cliTargets = process.argv.slice(2);
+  const target = cliTargets.length > 0 ? cliTargets : 'src';
   const result = runSlopLinter(target);
   if (!result.success) {
     process.exit(1);

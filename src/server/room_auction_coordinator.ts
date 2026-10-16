@@ -4,12 +4,12 @@ import {
   handleAuctionBid,
   handleAuctionPass,
   handleAuctionClose,
-  type AuctionSession,
 } from './auction_manager.js';
+import type { AuctionSession, AuctionResult } from './auction_types.js';
 import { stepAuctionBot as delegateStepAuctionBot } from './room_bot_coordinator.js';
 import { getActivePlayerFn } from './room_manager_lifecycle.js';
 import type { GameRoomSession } from './game_room_session.js';
-import type { RoomManager, AuctionResult } from './room_manager.js';
+import type { IRoomManager as RoomManager } from './room_manager_types.js';
 
 export function syncAuctionSession(s: GameRoomSession | undefined): void {
   if (s) s.auction = s.auction;

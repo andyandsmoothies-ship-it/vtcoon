@@ -295,7 +295,7 @@ export function SunnyIslandLobbyScene({ isMobile = false }: SunnyIslandLobbyScen
       <pointLight position={[0, 4.0, 0]} color={SUNNY_LOBBY_COLORS.sunlight} intensity={1.4} distance={12} />
 
       {/* 1. Đại dương nhiệt đới vô cực, bãi cát vát nghiêng 15 độ, ca-nô & hải âu */}
-      <CoastalIslandEnvironment />
+      <CoastalIslandEnvironment isMobile={isMobile} streamlined={isMobile} />
 
       {/* 2. Đô thị sa bàn đồ chơi cao ốc Landmark, cầu Ba Son & Long Biên */}
       <MiniatureCityDiorama isMobile={isMobile} />

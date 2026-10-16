@@ -3,7 +3,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import type { AdminArchivedRoomSummary } from '../network/admin_types.js';
+import type { AdminArchivedRoomSummary } from '../../domain/protocol/index.js';
 import type { ISupabaseStorageService } from './supabase_storage.js';
 
 export interface SyncCloudLogsOptions {

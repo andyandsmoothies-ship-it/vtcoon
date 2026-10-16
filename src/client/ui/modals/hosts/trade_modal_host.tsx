@@ -1,11 +1,13 @@
 // [IMP-335] TradeModalHost — Extracted sub-host for player-to-player trade modal
 import React from 'react';
-import type { PlayerHudInfo } from '../../../store/game_store_types';
+import {
+  useLobbyStore,
+  type PlayerHudInfo,
+  type ModalPayloadMap,
+} from '../../../store/index.js';
 import type { PlayerIntent } from '../../../../domain/protocol/index.js';
-import type { ModalPayloadMap } from '../../../store/game_store';
-import { useLobbyStore } from '../../../store/lobby_store';
-import { AudioEngine } from '../../../audio/audio_engine';
-import { SoundEffect } from '../../../audio/audio_types';
+
+import { audio, SoundEffect } from '../../../audio/index.js';
 import { TradeModal } from '../trade_modal';
 
 export interface TradeModalHostProps {
@@ -120,7 +122,7 @@ export function TradeModalHost(props: TradeModalHostProps): React.ReactElement {
       initialCashOffer={payload.cashOffer}
       initialCashRequest={payload.cashRequest}
       onSubmitTrade={(tradeData) => {
-        AudioEngine.playSfx(SoundEffect.TRADE_SUCCESS);
+        audio.playSfx(SoundEffect.TRADE_SUCCESS);
         const intent = buildTradeOfferIntent(myId, tradeData);
         if (intent) {
           onIntent?.(intent);

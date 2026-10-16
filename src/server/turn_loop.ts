@@ -20,9 +20,27 @@ import {
 } from './audit_manager';
 import { handleSpecialCell } from './special_cell_handler';
 import { collectMortgageInterest } from './mortgage_manager';
-import { checkInsolvency, liquidateAssets, declareBankruptcy } from './insolvency_manager';
-import type { RollResult } from './room_manager';
-import type { AuctionSession } from './auction_manager';
+import { liquidateAssets, declareBankruptcy } from './insolvency_manager';
+import {
+  advanceRoundBoundary,
+  advanceTurnToNextPlayer,
+  advanceTurnAfterBankruptcy,
+  restorePostInsolvencyPhase,
+  checkInsolvency,
+  drainPendingInsolvencyQueue,
+} from './fsm_transition_coordinator.js';
+import type { RollResult } from './room_manager_types.js';
+import type { AuctionSession } from './auction_types.js';
+
+export type { RollResult } from './room_manager_types.js';
+export {
+  advanceRoundBoundary,
+  advanceTurnToNextPlayer,
+  advanceTurnAfterBankruptcy,
+  restorePostInsolvencyPhase,
+  checkInsolvency,
+  drainPendingInsolvencyQueue,
+};
 import { processBondTurnTransition } from './bond_manager';
 import {
   isTradeFrozen,
@@ -155,14 +173,6 @@ export function executeTurnRoll(
   };
 }
 
-export function advanceRoundBoundary(room: Room, rng: () => number = Math.random): void {
-  room.roundCount = (room.roundCount ?? 1) + 1;
-  room.activeModifiers = decayModifiers(room.activeModifiers ?? []);
-  evaluateMacroCycle(room, rng);
-  if (ENABLE_TREASURY_STIMULUS) {
-    processTreasuryStimulus(room);
-  }
-}
 
 export function executeTurnEnd(
   room: Room,
@@ -256,33 +266,4 @@ export function executeTurnEnd(
   return room;
 }
 
-export function advanceTurnToNextPlayer(room: Room, rng: () => number = Math.random): void {
-  delete room.pendingInsolvencyCreditorId;
-  delete room.pendingInsolvencyDebtorId;
-  delete room.pendingInsolvencyQueue;
-  const total = room.players.length;
-  let next = (room.currentPlayerIndex + 1) % total;
-  let steps = 0;
-  while (steps < total) {
-    if (next === 0) {
-      advanceRoundBoundary(room, rng);
-    }
-    if (!room.players[next]?.bankrupt) break;
-    next = (next + 1) % total;
-    steps++;
-  }
-  room.currentPlayerIndex = next;
-
-  const nextPlayer = room.players[room.currentPlayerIndex];
-  if ((nextPlayer?.balance ?? 0) < 0) {
-    room.phase = TurnPhase.InsolvencyPhase;
-    checkInsolvency(room);
-  } else if (nextPlayer?.skipNextTurn) {
-    nextPlayer.skipNextTurn = false;
-    room.phase = TurnPhase.PropertyManagement;
-  } else {
-    room.phase = TurnPhase.WaitingRoll;
-  }
-  room.lastEventCard = null;
-}
 
