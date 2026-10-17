@@ -1,0 +1,62 @@
+[
+  {
+    "file": "src/client/3d/diorama/diorama_terrain.tsx",
+    "desc": "AST: Corrupt SAIGON_RIVER_SPLINE_MODEL_URL to dummy path",
+    "target": "export const SAIGON_RIVER_SPLINE_MODEL_URL = '/models/board/saigon_river_spline.glb';",
+    "replacement": "export const SAIGON_RIVER_SPLINE_MODEL_URL = '/models/board/corrupted_river.glb';"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_terrain.tsx",
+    "desc": "AST: Invert DioramaTerrain isSereneTabletop condition",
+    "target": "{isSereneTabletop ? (",
+    "replacement": "{!isSereneTabletop ? ("
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_terrain.tsx",
+    "desc": "AST: Sever SafeGLTFModel URL wiring in DioramaTerrain",
+    "target": "url={SAIGON_RIVER_SPLINE_MODEL_URL}",
+    "replacement": "url=\"/models/board/corrupted_river.glb\""
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Corrupt INDOCHINE_BIOME_MODEL_URL to dummy path",
+    "target": "export const INDOCHINE_BIOME_MODEL_URL = '/models/board/indochine_botanical_biome.glb';",
+    "replacement": "export const INDOCHINE_BIOME_MODEL_URL = '/models/board/corrupted_biome.glb';"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Invert DioramaUrbanCanopy isSereneTabletop ternary",
+    "target": "{isSereneTabletop ? (",
+    "replacement": "{!isSereneTabletop ? ("
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Sever SafeGLTFModel URL wiring in DioramaUrbanCanopy",
+    "target": "url={INDOCHINE_BIOME_MODEL_URL}",
+    "replacement": "url=\"/models/board/corrupted_biome.glb\""
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Sever DioramaTerrain isSereneTabletop wiring",
+    "target": "<DioramaTerrain isSereneTabletop={isSerene} />",
+    "replacement": "<DioramaTerrain isSereneTabletop={false} />"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Sever DioramaUrbanCanopy isSereneTabletop wiring",
+    "target": "<DioramaUrbanCanopy isMobile={isMobile} isSereneTabletop={isSerene} />",
+    "replacement": "<DioramaUrbanCanopy isMobile={isMobile} isSereneTabletop={false} />"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_harbor_cruiser.tsx",
+    "desc": "AST: Corrupt DioramaHarborCruiser initialX mooring position",
+    "target": "const initialX = isMoored ? 1.6 : 0;",
+    "replacement": "const initialX = isMoored ? 0 : 0;"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_harbor_cruiser.tsx",
+    "desc": "AST: Corrupt DioramaHarborCruiser frame loop mooring position",
+    "target": "boatRef.current.position.set(1.6, y, 2.2);",
+    "replacement": "boatRef.current.position.set(0, y, 2.2);"
+  }
+]

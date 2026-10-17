@@ -18,6 +18,7 @@ import {
   hasTileArt,
   drawTileHeader,
   drawFooter,
+  INDOCHINE_TILE_THEME,
 } from './tile_texture_drawers';
 
 export const ATLAS_GRID_COLS = 8;
@@ -177,7 +178,7 @@ function drawAtlasTileArt(
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.translate(offsetX, offsetY);
         ctx.scale(scale, scale);
-        ctx.fillStyle = '#F3EEDF';
+        ctx.fillStyle = '#FDFBF7';
         ctx.fillRect(10, 94, 236, 172);
         // Tái lập vùng clip bảo vệ chống vẽ tràn ra ngoài khung tranh (USER-03)
         ctx.beginPath();
@@ -223,7 +224,7 @@ export function getBoardTileAtlas(isMobile = isPhoneHardware()): CanvasTexture |
 
   // ADV-03: Tô kín toàn bộ bề mặt canvas bằng màu ngà parchment chuẩn bàn cờ,
   // triệt tiêu hoàn toàn viền lem đen mipmap ở Hàng 5 (slots 40-47) và lề đáy.
-  ctx.fillStyle = '#F3EEDF';
+  ctx.fillStyle = '#FDFBF7';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   const texture = new CanvasTexture(canvas);
@@ -288,9 +289,9 @@ export function getBoardTileAtlas(isMobile = isPhoneHardware()): CanvasTexture |
         category: 'BÀN CỜ',
         icon: 'default',
       };
-      drawTileHeader(ctx, meta, idx);
+      drawTileHeader(ctx, meta, idx, INDOCHINE_TILE_THEME);
       drawAtlasTileArt(ctx, idx, meta, texture, offsetX, offsetY, scale, atlasImageCache);
-      drawFooter(ctx, meta, idx);
+      drawFooter(ctx, meta, idx, INDOCHINE_TILE_THEME);
     }
     ctx.restore();
   }

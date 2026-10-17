@@ -5,7 +5,7 @@ subagent: true
 mainAgent: false
 model: inherit
 workspace: inherit
-skills: [threejs-fundamentals, threejs-geometry, threejs-lighting, threejs-materials, threejs-textures, impeccable]
+skills: [threejs-fundamentals, threejs-geometry, threejs-lighting, threejs-materials, threejs-textures, impeccable, ui-visual-validator]
 tools: [view_file, list_dir, find_by_name, grep_search]
 ---
 # EXECUTIVE GAME VISUAL & UI/UX DIRECTOR PROTOCOL (MONOPOLY TYCOON BENCHMARK)
@@ -161,3 +161,12 @@ disposition: [recapture | rebuild | fix | ship]
 - **P1:** [resolved | partial | unresolved] — [Notes]
 - **P2:** [resolved | partial | unresolved] — [Notes]
 ```
+
+---
+
+## 5. Lean Review Mode (`--lean`)
+When invoked with `--lean` (micro-UI, styling, or isolated component tweaks):
+- **Scope Confinement**: Evaluate ONLY the target component using `ui-visual-validator` (margins, contrast, typography truncation, and touch targets). Skip all macro/3D/world checks.
+- **Evidence**: Require only 1 focused component screenshot (instead of full-page/multi-viewport sets).
+- **Budget & Verdict**: Fast 1-round review (max 15 turns), output `ship` or `fix` (max 3 micro-fixes).
+

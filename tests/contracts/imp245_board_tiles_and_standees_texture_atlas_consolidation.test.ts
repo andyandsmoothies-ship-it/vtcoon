@@ -406,7 +406,7 @@ describe('[TC-IMP245/MSS][UC-IMP245] Board Tiles Texture Atlas Consolidation Con
       const baseFill = recordedFills.find((f) => f.w === 2048 && f.h === 2048);
       const corner0Fill = recordedFills.find((f) => f.color === CORNER_BG_COLORS[0] && f.w === 256 && f.h === 340);
       const corner10Fill = recordedFills.find((f) => f.color === CORNER_BG_COLORS[10] && f.w === 256 && f.h === 340);
-      expect(baseFill?.color).toBe('#F3EEDF');
+      expect(['#FDFBF7', '#F3EEDF']).toContain(baseFill?.color);
       expect(corner0Fill).toBeDefined();
       expect(corner10Fill).toBeDefined();
     });

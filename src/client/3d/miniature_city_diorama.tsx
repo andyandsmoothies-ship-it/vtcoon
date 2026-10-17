@@ -31,6 +31,12 @@ import {
 } from './diorama/diorama_static_blender_batches';
 import { DioramaChainReaction } from './diorama_chain_reaction';
 import { createDongSonPlazaTexture } from './tabletop_texture_generator';
+import { SafeGLTFModel } from './asset_loader/safe_gltf_model';
+
+export const SUNKEN_ARENA_MODEL_URL = '/models/board/sunken_velvet_dice_arena.glb';
+export const BRIDGE_PLAZAS_MODEL_URL = '/models/board/bridge_landing_plazas.glb';
+export const INDOCHINE_BIOME_MODEL_URL = '/models/board/indochine_botanical_biome.glb';
+export const INDOCHINE_MASTER_LANDSCAPE_URL = '/models/board/indochine_master_landscape.glb';
 
 export {
   DioramaModelRailroad,
@@ -65,26 +71,26 @@ export function CentralMonumentPlaza({ isMobile = false, isDesktopLean = false }
     const dongSonTexture = createDongSonPlazaTexture();
     return (
       <group position={[0, 0.02, 0]} data-testid="central-monument-plaza">
-        {/* 1. Đài bệ đá phiến hoa cương tròn neo vững chân đế sa bàn */}
-        <mesh receiveShadow position={[0, 0.008, 0]}>
-          <cylinderGeometry args={[1.52, 1.58, 0.015, 48]} />
-          <meshStandardMaterial color="#334155" roughness={0.45} metalness={0.1} />
-        </mesh>
-        {/* 2. Đĩa Khảm Trống Đồng PBR phẳng lặng */}
-        <mesh receiveShadow position={[0, 0.015, 0]}>
-          <cylinderGeometry args={[1.38, 1.44, 0.03, 48]} />
-          <meshStandardMaterial
-            color={dongSonTexture ? '#FFFFFF' : '#8C6239'}
-            metalness={0.85}
-            roughness={0.24}
-            map={dongSonTexture ?? undefined}
-          />
-        </mesh>
-        {/* 3. Vành khuyên đồng thau bo viền ngoài (không che mặt đĩa) */}
-        <mesh receiveShadow position={[0, 0.0305, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[1.38, 1.44, 48]} />
-          <meshStandardMaterial color="#D4AF37" metalness={0.9} roughness={0.2} />
-        </mesh>
+        <SafeGLTFModel url={SUNKEN_ARENA_MODEL_URL} position={[0, 0, 0]} receiveShadow fallback={
+            <>
+              {/* 1. Đài bệ đá phiến hoa cương tròn neo vững chân đế sa bàn */}
+              <mesh receiveShadow position={[0, 0.008, 0]}>
+                <cylinderGeometry args={[1.52, 1.58, 0.015, 48]} />
+                <meshStandardMaterial color="#334155" roughness={0.45} metalness={0.1} />
+              </mesh>
+              {/* 2. Đĩa Khảm Trống Đồng PBR phẳng lặng */}
+              <mesh receiveShadow position={[0, 0.015, 0]}>
+                <cylinderGeometry args={[1.38, 1.44, 0.03, 48]} />
+                <meshStandardMaterial color={dongSonTexture ? '#FFFFFF' : '#8C6239'} metalness={0.85} roughness={0.24} map={dongSonTexture ?? undefined} />
+              </mesh>
+              {/* 3. Vành khuyên đồng thau bo viền ngoài (không che mặt đĩa) */}
+              <mesh receiveShadow position={[0, 0.0305, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+                <ringGeometry args={[1.38, 1.44, 48]} />
+                <meshStandardMaterial color="#D4AF37" metalness={0.9} roughness={0.2} />
+              </mesh>
+            </>
+          }
+        />
       </group>
     );
   }
@@ -250,7 +256,12 @@ export function DioramaPedestrianPromenades({ isMobile = false }: { readonly isM
   );
 }
 
-export function DioramaUrbanCanopy({ isMobile = false }: { readonly isMobile?: boolean } = {}): React.ReactElement {
+export interface DioramaUrbanCanopyProps {
+  readonly isMobile?: boolean;
+  readonly isSereneTabletop?: boolean;
+}
+
+export function DioramaUrbanCanopy({ isMobile = false, isSereneTabletop = false }: DioramaUrbanCanopyProps = {}): React.ReactElement {
   const trunkRef = useRef<InstancedMesh>(null);
   const lowerCanopyRef = useRef<InstancedMesh>(null);
   const upperCanopyRef = useRef<InstancedMesh>(null);
@@ -298,18 +309,24 @@ export function DioramaUrbanCanopy({ isMobile = false }: { readonly isMobile?: b
 
   return (
     <group position={[0, 0.02, 0]} data-testid="diorama-urban-canopy">
-      <instancedMesh ref={trunkRef} args={[undefined, undefined, URBAN_TREES.length]} castShadow={!isMobile} receiveShadow>
-        <cylinderGeometry args={[0.025, 0.04, 0.24, 8]} />
-        <meshStandardMaterial color="#78350F" roughness={0.8} />
-      </instancedMesh>
-      <instancedMesh ref={lowerCanopyRef} args={[undefined, undefined, URBAN_TREES.length]} castShadow={!isMobile}>
-        <sphereGeometry args={[0.15, 12, 12]} />
-        <meshStandardMaterial color="#15803D" roughness={0.65} />
-      </instancedMesh>
-      <instancedMesh ref={upperCanopyRef} args={[undefined, undefined, URBAN_TREES.length]} castShadow={!isMobile}>
-        <sphereGeometry args={[0.11, 10, 10]} />
-        <meshStandardMaterial color="#15803D" roughness={0.6} />
-      </instancedMesh>
+      {isSereneTabletop ? (
+        <SafeGLTFModel url={INDOCHINE_BIOME_MODEL_URL} position={[0, 0, 0]} castShadow={!isMobile} receiveShadow fallback={<></>} />
+      ) : (
+        <>
+          <instancedMesh ref={trunkRef} args={[undefined, undefined, URBAN_TREES.length]} castShadow={!isMobile} receiveShadow>
+            <cylinderGeometry args={[0.025, 0.04, 0.24, 8]} />
+            <meshStandardMaterial color="#78350F" roughness={0.8} />
+          </instancedMesh>
+          <instancedMesh ref={lowerCanopyRef} args={[undefined, undefined, URBAN_TREES.length]} castShadow={!isMobile}>
+            <sphereGeometry args={[0.15, 12, 12]} />
+            <meshStandardMaterial color="#15803D" roughness={0.65} />
+          </instancedMesh>
+          <instancedMesh ref={upperCanopyRef} args={[undefined, undefined, URBAN_TREES.length]} castShadow={!isMobile}>
+            <sphereGeometry args={[0.11, 10, 10]} />
+            <meshStandardMaterial color="#15803D" roughness={0.6} />
+          </instancedMesh>
+        </>
+      )}
     </group>
   );
 }
@@ -322,6 +339,7 @@ export interface MiniatureCityDioramaProps {
 
 export function MiniatureCityDiorama({ isMobile: propIsMobile, isVisible = true, isDesktopLean = false }: MiniatureCityDioramaProps = {}): React.ReactElement {
   const isMobile = propIsMobile ?? isMobileDevice();
+  const isSerene = isDesktopLean || isMobile;
   const landmarkGroupRefs = useRef<Array<Group | null>>([]);
   return (
     <group position={[0, 0, 0]} data-testid="miniature-city-diorama">
@@ -332,10 +350,16 @@ export function MiniatureCityDiorama({ isMobile: propIsMobile, isVisible = true,
       {!isMobile && !isDesktopLean && <DioramaWaterfrontStation />}
       {!isMobile && !isDesktopLean && <DioramaLandmarkNorthStation />}
       {!isMobile && !isDesktopLean && <DioramaTropicalFlora />}
-      <DioramaTerrain />
+      <DioramaTerrain isSereneTabletop={isSerene} />
       <CentralMonumentPlaza isMobile={isMobile} isDesktopLean={isDesktopLean} />
       <DioramaPedestrianPromenades isMobile={isMobile} />
-      <DioramaUrbanCanopy isMobile={isMobile} />
+      <DioramaUrbanCanopy isMobile={isMobile} isSereneTabletop={isSerene} />
+      {/* Sa bàn Đông Dương Thượng Lưu (Master Landscape Sculpt: Trống Đồng 3D Relief, Chùa Vàng, Bonsai, Đá Tảng) */}
+      {isDesktopLean && (
+        <SafeGLTFModel url={INDOCHINE_MASTER_LANDSCAPE_URL} position={[0, 0, 0]} receiveShadow fallback={null} />
+      )}
+      {/* Bệ đá cẩm thạch ngà tiếp đất 4 mố cầu (Bridge Landing Plazas) */}
+      <SafeGLTFModel url={BRIDGE_PLAZAS_MODEL_URL} position={[0, 0, 0]} receiveShadow fallback={null} />
       <group name="ChainLandmark_bason-bridge" ref={(el) => { landmarkGroupRefs.current[3] = el; }}>
         {(!isMobile || !isDesktopLean) && <DioramaBridges isMobile={isMobile} isVisible={isVisible} />}
       </group>
@@ -344,9 +368,7 @@ export function MiniatureCityDiorama({ isMobile: propIsMobile, isVisible = true,
       {!isDesktopLean && <DioramaContainerPort isMobile={isMobile} isVisible={isVisible} />}
       {!isDesktopLean && <DioramaMarina isMobile={isMobile} isVisible={isVisible} />}
       <group name="ChainLandmark_saigon-river-cruiser" ref={(el) => { landmarkGroupRefs.current[0] = el; }}>
-        {(!isMobile || !isDesktopLean) && (
-          <DioramaHarborCruiser isMobile={isMobile} isVisible={isVisible} isMoored={isDesktopLean} />
-        )}
+        {(!isMobile || !isDesktopLean) && <DioramaHarborCruiser isMobile={isMobile} isVisible={isVisible} isMoored={isDesktopLean} />}
       </group>
       <group name="ChainLandmark_bitexco-tower" ref={(el) => { landmarkGroupRefs.current[2] = el; }}>
         {(!isMobile || !isDesktopLean) && <DioramaSkyline isMobile={isMobile} isVisible={isVisible} />}
@@ -369,4 +391,3 @@ if (import.meta.hot) {
     disposeDioramaStaticBlenderBatches();
   });
 }
-

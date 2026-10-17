@@ -153,7 +153,7 @@ export function BatchedBoardTiles({
         {tileAtlas ? (
           <meshStandardMaterial map={tileAtlas} roughness={0.98} metalness={0.0} envMapIntensity={0.0} />
         ) : (
-          <meshStandardMaterial color="#EDE5D8" roughness={0.35} metalness={0.06} />
+          <meshStandardMaterial color="#F5F3EF" roughness={0.28} metalness={0.08} />
         )}
       </mesh>
 
@@ -163,7 +163,7 @@ export function BatchedBoardTiles({
         geometry={standardBases}
         receiveShadow
       >
-        <meshStandardMaterial color="#EDE5D8" roughness={0.35} metalness={0.06} envMapIntensity={1.0} />
+        <meshStandardMaterial color="#F5F3EF" roughness={0.28} metalness={0.08} envMapIntensity={1.0} />
       </mesh>
 
       {/* 3. Merged Corner Bases (4 tiles -> 1 Draw Call) */}
@@ -172,7 +172,7 @@ export function BatchedBoardTiles({
         geometry={cornerBases}
         receiveShadow
       >
-        <meshStandardMaterial color="#1E293B" roughness={0.16} metalness={0.25} envMapIntensity={1.2} />
+        <meshStandardMaterial color="#1C1612" roughness={0.22} metalness={0.20} envMapIntensity={1.2} />
       </mesh>
     </group>
   );

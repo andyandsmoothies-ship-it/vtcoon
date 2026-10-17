@@ -11,6 +11,24 @@ import { ALL_28_STAND_TILES } from '../assets/tile_assets';
 
 export const SPECIAL_TILE_INDICES: readonly number[] = [0, 2, 4, 7, 10, 17, 20, 22, 30, 33, 36, 38] as const;
 
+export interface TileDrawerTheme {
+  readonly background: string;
+  readonly borderColor: string;
+  readonly borderWidth: number;
+}
+
+export const LEGACY_TILE_THEME: TileDrawerTheme = {
+  background: '#F3EEDF',
+  borderColor: '#0F172A',
+  borderWidth: 5,
+};
+
+export const INDOCHINE_TILE_THEME: TileDrawerTheme = {
+  background: '#FDFBF7',
+  borderColor: '#C5A059',
+  borderWidth: 3.5,
+};
+
 export function hasTileArt(index: number): boolean {
   return ALL_28_STAND_TILES.includes(index) || SPECIAL_TILE_INDICES.includes(index);
 }
@@ -67,8 +85,13 @@ export function drawNonPropertyHeader(ctx: CanvasRenderingContext2D, meta: TileM
 /**
  * Tạo Header cho ô cờ: 22 ô nhà đất có dải băng màu, 14 ô phi nhà đất nền ngà chữ than đen
  */
-export function drawTileHeader(ctx: CanvasRenderingContext2D, meta: TileMetadata, index: number): void {
-  ctx.fillStyle = '#F3EEDF';
+export function drawTileHeader(
+  ctx: CanvasRenderingContext2D,
+  meta: TileMetadata,
+  index: number,
+  theme: TileDrawerTheme = INDOCHINE_TILE_THEME,
+): void {
+  ctx.fillStyle = theme.background;
   ctx.fillRect(0, 0, 256, 340);
 
   if (isPropertyTile(index)) {
@@ -119,7 +142,7 @@ export function drawTileArt(
       tileImageCache.set(index, img);
       img.onload = () => {
         ctx.save();
-        ctx.fillStyle = '#F3EEDF';
+        ctx.fillStyle = '#FDFBF7';
         ctx.fillRect(10, 94, 236, 172);
         ctx.beginPath();
         ctx.rect(10, 94, 236, 172);
@@ -197,15 +220,20 @@ export function drawTilePriceText(ctx: CanvasRenderingContext2D, meta: TileMetad
   ctx.fillText(priceText, 128, 300);
 }
 
-export function drawFooter(ctx: CanvasRenderingContext2D, meta: TileMetadata, index: number): void {
+export function drawFooter(
+  ctx: CanvasRenderingContext2D,
+  meta: TileMetadata,
+  index: number,
+  theme: TileDrawerTheme = INDOCHINE_TILE_THEME,
+): void {
   if (!isPropertyTile(index) && !isInfrastructureTile(index)) {
     drawActionBadgeFooter(ctx, meta);
   } else {
     drawTilePriceText(ctx, meta);
   }
 
-  ctx.strokeStyle = '#0F172A';
-  ctx.lineWidth = 5;
+  ctx.strokeStyle = theme.borderColor;
+  ctx.lineWidth = theme.borderWidth;
   ctx.strokeRect(2, 2, 252, 336);
 }
 

@@ -5,7 +5,7 @@ subagent: true
 mainAgent: false
 model: inherit
 workspace: branch
-skills: [tdd, code-review, systematic-debugging, mastering-typescript, codebase-design, threejs-fundamentals]
+skills: [tdd, code-review, systematic-debugging, first-principles, mastering-typescript, codebase-design, threejs-fundamentals]
 tools: [view_file, write_to_file, replace_file_content, list_dir, find_by_name, grep_search, run_command, call_mcp_tool]
 hooks: [.agents/hooks_qa.json]
 ---

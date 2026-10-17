@@ -148,8 +148,8 @@ describe('[TC-IMP36/MSS][UC-IMP36] Flat Tile Art & Clean C0 Plot Contract Suite'
               recordedClips++;
             };
           }
-          if (prop in target) {
-            return target[prop];
+          if (prop === 'createRadialGradient' || prop === 'createLinearGradient') {
+            return () => ({ addColorStop: () => {} });
           }
           if (typeof prop === 'string') {
             return (..._args: any[]) => {};

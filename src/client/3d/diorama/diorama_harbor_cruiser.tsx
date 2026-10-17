@@ -36,10 +36,11 @@ export function DioramaHarborCruiser({
 }: DioramaHarborCruiserProps = {}): React.ReactElement {
   const boatRef = useRef<Group>(null);
   const wakeRef = useRef<Mesh>(null);
+  const initialX = isMoored ? 1.6 : 0;
   const initialZ = isMoored ? 2.2 : 5.2;
 
   return (
-    <group ref={boatRef} position={[0, -0.032, initialZ]} data-testid="diorama-harbor-cruiser">
+    <group ref={boatRef} position={[initialX, -0.032, initialZ]} data-testid="diorama-harbor-cruiser">
       {!isMobile && (
         <DioramaHarborCruiserFrameLoop
           isVisible={isVisible}
@@ -99,7 +100,7 @@ export function DioramaHarborCruiserFrameLoop({
     if (boatRef.current) {
       if (isMoored) {
         const y = -0.032 + Math.sin(t * 2.8) * 0.003;
-        boatRef.current.position.set(0, y, 2.2);
+        boatRef.current.position.set(1.6, y, 2.2);
         boatRef.current.rotation.set(0, Math.PI / 2, Math.sin(t * 2.8) * 0.015);
       } else {
         const traj = calculateCruiserTrajectory(t);

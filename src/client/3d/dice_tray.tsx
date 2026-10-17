@@ -144,7 +144,11 @@ function SingleDie({
   );
 }
 
-export function DiceTray(): React.ReactElement {
+export interface DiceTrayProps {
+  readonly hasSunkenArena?: boolean;
+}
+
+export function DiceTray({ hasSunkenArena = false }: DiceTrayProps = {}): React.ReactElement {
   const isSSR = typeof window === 'undefined';
   const ssrState = isSSR ? useGameStore.getState() : null;
 
@@ -226,25 +230,29 @@ export function DiceTray(): React.ReactElement {
 
   return (
     <group position={[0.0, 0.020, 0.0]} data-testid="dice-tray">
-      {/* Sàn diễn xúc xắc phẳng trên sông Sài Gòn với hoa văn la bàn đồng thau */}
-      <mesh receiveShadow position={[0, -0.01, 0]}>
-        <boxGeometry args={[3.2, 0.015, 2.4]} />
-        <meshStandardMaterial color="#94A3B8" roughness={0.65} />
-      </mesh>
-      <mesh receiveShadow position={[0, -0.005, 0]}>
-        <boxGeometry args={[3.0, 0.015, 2.2]} />
-        <meshStandardMaterial color="#CBD5E1" roughness={0.55} />
-      </mesh>
-      {Boolean(isRolling || (isVisible && fadeOpacity > 0)) && (
+      {/* Sàn diễn xúc xắc phẳng trên sông Sài Gòn (ẩn khi dùng Sunken Velvet Dice Arena) */}
+      {!hasSunkenArena && (
         <>
-          <mesh receiveShadow position={[0, 0.001, 0]}>
-            <boxGeometry args={[2.8, 0.015, 2.0]} />
-            <meshStandardMaterial color="#064E3B" roughness={0.85} />
+          <mesh receiveShadow position={[0, -0.01, 0]}>
+            <boxGeometry args={[3.2, 0.015, 2.4]} />
+            <meshStandardMaterial color="#94A3B8" roughness={0.65} />
           </mesh>
-          <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-            <ringGeometry args={[0.45, 0.48, 32]} />
-            <meshBasicMaterial color="#F59E0B" />
+          <mesh receiveShadow position={[0, -0.005, 0]}>
+            <boxGeometry args={[3.0, 0.015, 2.2]} />
+            <meshStandardMaterial color="#CBD5E1" roughness={0.55} />
           </mesh>
+          {Boolean(isRolling || (isVisible && fadeOpacity > 0)) && (
+            <>
+              <mesh receiveShadow position={[0, 0.001, 0]}>
+                <boxGeometry args={[2.8, 0.015, 2.0]} />
+                <meshStandardMaterial color="#064E3B" roughness={0.85} />
+              </mesh>
+              <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+                <ringGeometry args={[0.45, 0.48, 32]} />
+                <meshBasicMaterial color="#F59E0B" />
+              </mesh>
+            </>
+          )}
         </>
       )}
 

@@ -72,9 +72,16 @@ function findInChildren<P>(
   element: TestReactElement<P>,
   predicate: (node: TestReactElement<P>) => boolean
 ): TestReactElement<P> | null {
-  const props = element.props as { children?: React.ReactNode } | undefined;
-  if (!props?.children) return null;
-  return findInArray(React.Children.toArray(props.children), predicate);
+  const props = element.props as { children?: React.ReactNode; fallback?: React.ReactNode } | undefined;
+  if (props?.children) {
+    const found = findInArray(React.Children.toArray(props.children), predicate);
+    if (found) return found;
+  }
+  if (props?.fallback) {
+    const found = findReactNode<P>(props.fallback as React.ReactNode, predicate);
+    if (found) return found;
+  }
+  return null;
 }
 
 /**

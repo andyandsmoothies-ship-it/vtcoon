@@ -30,6 +30,9 @@ import { useDiagnostic3DStore } from './diagnostic_3d_store';
 import { Diagnostic3DPanel } from './diagnostic_3d_panel';
 import { InstancedRegionalBuildingsPool } from './instanced_regional_buildings_pool';
 import { resolveRenderTierProfile } from './procedural_mobile_blender_meshes';
+import { SafeGLTFModel } from './asset_loader/safe_gltf_model';
+
+export const BOARD_CHASSIS_MODEL_URL = '/models/board/board_chassis_walnut.glb';
 
 // Depth Layer Stack triệt tiêu Z-Fighting (IMP-30 Terrain Flush & IMP-32 Executive Tabletop Master Plan)
 export const WALNUT_TABLE_Y = -0.350;
@@ -168,13 +171,32 @@ export function GameBoard({
         />
       </mesh>
 
-      {/* 0. Môi trường Bán đảo Đảo Ngọc nhiệt đới (Vịnh biển, bãi cát, đồi núi & mây trời) */}
-      <group visible={isOceanVisible}>
+      {/* Mẫu thử nghiệm Khung Bàn Cờ Gỗ Óc Chó Vát Cạnh & Chỉ Đồng Thau Giai đoạn 0 (Executive Board Chassis) */}
+      {isTableVisible && (
+        <SafeGLTFModel
+          url={BOARD_CHASSIS_MODEL_URL}
+          position={[0, 0, 0]}
+          castShadow
+          receiveShadow
+          fallback={null}
+        />
+      )}
+
+      {/* 0. Môi trường Bán đảo Đảo Ngọc nhiệt đới (Ẩn trong chế độ Serene Tabletop để đưa về mặt bàn gỗ VIP) */}
+      <group visible={isOceanVisible && isMobile}>
         <CoastalIslandEnvironment
           isMobile={isMobile}
           streamlined={!tierProfile.enableOuterBaySanctuaries}
         />
       </group>
+
+      {/* 0.02. Mặt Bàn Gỗ Óc Chó Thượng Lưu Phòng VIP (Executive VIP Salon Tabletop Plinth) */}
+      {isTableVisible && !isMobile && (
+        <mesh receiveShadow position={[0, WALNUT_TABLE_Y - 0.005, 0]}>
+          <boxGeometry args={[48.0, 0.19, 48.0]} />
+          <meshStandardMaterial color="#1C140D" roughness={0.35} metalness={0.05} />
+        </mesh>
+      )}
 
       {/* 0.05. Bảng Điều Khiển Chẩn Đoán 3D (Kích hoạt khi có ?debug=3d) */}
       <Diagnostic3DPanel />
@@ -191,7 +213,7 @@ export function GameBoard({
       </group>
 
       {/* 3. Sàn diễn xúc xắc 3D thoáng đãng trên Đại Lộ Sài Gòn */}
-      <DiceTray />
+      <DiceTray hasSunkenArena={!isMobile} />
 
       <group visible={isBoardVisible}>
         {/* 3.5. Cụm InstancedMesh nhà đồ chơi chỉ render khi yêu cầu tường minh (mặc định tắt để nhường cho ProceduralBuilding) */}

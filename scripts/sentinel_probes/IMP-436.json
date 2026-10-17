@@ -1,0 +1,50 @@
+[
+  {
+    "file": "src/client/3d/board_layout.tsx",
+    "desc": "AST: Corrupt CoastalIslandEnvironment mobile isolation condition",
+    "target": "<group visible={isOceanVisible && isMobile}>",
+    "replacement": "<group visible={isOceanVisible}>"
+  },
+  {
+    "file": "src/client/3d/board_layout.tsx",
+    "desc": "AST: Corrupt VIP table plinth mobile gate",
+    "target": "{isTableVisible && !isMobile && (",
+    "replacement": "{isTableVisible && ("
+  },
+  {
+    "file": "src/client/3d/board_layout.tsx",
+    "desc": "AST: Corrupt 48m VIP table plinth dimensions",
+    "target": "<boxGeometry args={[48.0, 0.19, 48.0]} />",
+    "replacement": "<boxGeometry args={[12.0, 0.19, 12.0]} />"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Corrupt INDOCHINE_MASTER_LANDSCAPE_URL to dummy path",
+    "target": "export const INDOCHINE_MASTER_LANDSCAPE_URL = '/models/board/indochine_master_landscape.glb';",
+    "replacement": "export const INDOCHINE_MASTER_LANDSCAPE_URL = '/models/board/corrupted_master.glb';"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Invert master landscape isDesktopLean gate",
+    "target": "{isDesktopLean && (",
+    "replacement": "{!isDesktopLean && ("
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Sever SafeGLTFModel URL wiring for master landscape",
+    "target": "url={INDOCHINE_MASTER_LANDSCAPE_URL}",
+    "replacement": "url=\"/models/board/corrupted_master.glb\""
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_terrain.tsx",
+    "desc": "AST: Corrupt infill turf elevation y",
+    "target": "const y = 0.005;",
+    "replacement": "const y = 0.001;"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_terrain.tsx",
+    "desc": "AST: Corrupt central arena exclusion collar radius",
+    "target": "const rCollar = 1.68;",
+    "replacement": "const rCollar = 0.05;"
+  }
+]

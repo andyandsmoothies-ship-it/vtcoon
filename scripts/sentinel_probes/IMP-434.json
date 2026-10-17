@@ -1,0 +1,56 @@
+[
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Corrupt SUNKEN_ARENA_MODEL_URL to dummy path",
+    "target": "export const SUNKEN_ARENA_MODEL_URL = '/models/board/sunken_velvet_dice_arena.glb';",
+    "replacement": "export const SUNKEN_ARENA_MODEL_URL = '/models/board/corrupted_arena.glb';"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Corrupt BRIDGE_PLAZAS_MODEL_URL to dummy path",
+    "target": "export const BRIDGE_PLAZAS_MODEL_URL = '/models/board/bridge_landing_plazas.glb';",
+    "replacement": "export const BRIDGE_PLAZAS_MODEL_URL = '/models/board/corrupted_plazas.glb';"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Sever CentralMonumentPlaza SafeGLTFModel URL wiring",
+    "target": "url={SUNKEN_ARENA_MODEL_URL}",
+    "replacement": "url=\"/models/board/corrupted_arena.glb\""
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Sever CentralMonumentPlaza fallback color",
+    "target": "color={dongSonTexture ? '#FFFFFF' : '#8C6239'}",
+    "replacement": "color={dongSonTexture ? '#FFFFFF' : '#000000'}"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Sever Bridge Landing Plazas SafeGLTFModel URL wiring",
+    "target": "url={BRIDGE_PLAZAS_MODEL_URL}",
+    "replacement": "url=\"/models/board/corrupted_plazas.glb\""
+  },
+  {
+    "file": "src/client/3d/dice_tray.tsx",
+    "desc": "AST: Invert DiceTray hasSunkenArena suppression logic",
+    "target": "{!hasSunkenArena && (",
+    "replacement": "{Boolean(hasSunkenArena) && ("
+  },
+  {
+    "file": "src/client/3d/dice_tray.tsx",
+    "desc": "AST: Invert DiceTray plinth box color #94A3B8 to corrupted color",
+    "target": "<meshStandardMaterial color=\"#94A3B8\" roughness={0.65} />",
+    "replacement": "<meshStandardMaterial color=\"#FF0000\" roughness={0.65} />"
+  },
+  {
+    "file": "src/client/3d/dice_tray.tsx",
+    "desc": "AST: Invert DiceTray default hasSunkenArena prop",
+    "target": "export function DiceTray({ hasSunkenArena = false }: DiceTrayProps = {}): React.ReactElement {",
+    "replacement": "export function DiceTray({ hasSunkenArena = true }: DiceTrayProps = {}): React.ReactElement {"
+  },
+  {
+    "file": "src/client/3d/board_layout.tsx",
+    "desc": "AST: Sever BoardLayout hasSunkenArena presentation wiring",
+    "target": "<DiceTray hasSunkenArena={!isMobile} />",
+    "replacement": "<DiceTray hasSunkenArena={false} />"
+  }
+]

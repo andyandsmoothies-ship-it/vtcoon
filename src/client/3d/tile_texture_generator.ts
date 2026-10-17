@@ -14,6 +14,7 @@ import {
   drawTileArt,
   drawFooter,
   drawPriceTrayFooter,
+  LEGACY_TILE_THEME,
 } from './tile_texture_drawers';
 import { clearTileAtlasCache } from './tile_texture_atlas';
 
@@ -46,7 +47,7 @@ function createStandardTileTexture(
 
   ctx.scale(isMobile ? 2 : 4, isMobile ? 2 : 4);
 
-  drawTileHeader(ctx, meta, index);
+  drawTileHeader(ctx, meta, index, LEGACY_TILE_THEME);
 
   const texture = new CanvasTexture(canvas);
   texture.colorSpace = SRGBColorSpace;
@@ -56,7 +57,7 @@ function createStandardTileTexture(
   texture.magFilter = LinearFilter;
 
   drawTileArt(ctx, index, meta, texture, tileImageCache);
-  drawFooter(ctx, meta, index);
+  drawFooter(ctx, meta, index, LEGACY_TILE_THEME);
 
   texture.needsUpdate = true;
   return texture;

@@ -5,18 +5,19 @@ subagent: true
 mainAgent: false
 model: inherit
 workspace: inherit
-skills: [code-review, codebase-design, systematic-debugging, threejs-fundamentals, threejs-lighting]
+skills: [code-review, codebase-design, first-principles, systematic-debugging, mastering-typescript, concurrency-patterns, impeccable, threejs-fundamentals, threejs-lighting]
 tools: [view_file, list_dir, find_by_name, grep_search, run_command, write_to_file, call_mcp_tool]
 ---
 
 # ADVERSARIAL CHALLENGER PROTOCOL
 
-You run after `audit_plan.mjs` completes. Do NOT repeat its syntax/LOC checklist items. Your job: find failure modes that structural audits miss, grounded in `GEMINI.md`, `docs/FEATURE_MAP.md`, `docs/domain/gotchas/*.md`, and `@.agents/skills/code-review/SKILL.md`.
+You run after `audit_plan.mjs` completes. Do NOT repeat its syntax/LOC checklist items. Your job: find failure modes that structural audits miss, grounded in `GEMINI.md`, `docs/FEATURE_MAP.md`, `docs/domain/gotchas/*.md`, `@.agents/skills/code-review/SKILL.md`, and `@.agents/skills/first-principles/SKILL.md`.
 
 ## 0. Ground Truth & References
 Inspect the following Single Source of Truth (SSOT) files before auditing:
 - `@docs/domain/gotchas/*.md`
 - `@docs/FEATURE_MAP.md`
+- `@.agents/skills/first-principles/SKILL.md` (for ADV-OBJ premise & assumption attacks)
 - `@.agents/skills/code-review/SKILL.md`
 - `@.agents/skills/code-review/reference/cross-cutting/async-concurrency-patterns.md` (concurrency/races)
 - `@.agents/skills/code-review/reference/code-quality-universal.md` (TOCTOU & state traps)
@@ -46,6 +47,10 @@ Run these checks on disk before writing implementation vectors:
 4. **Is the physical surface area exhausted?**
    Search for related siblings, caller variants, or shared lifecycle hooks across codebase. If the plan addresses only an arbitrary subset of affected consumers without explicit justification/waiver:
    → flag `[ADV-OBJ] Incomplete Surface Area — [N] active consumers omitted from scope`.
+
+5. **First Principles Attack (Sunk-Cost & Analogy Trap)**:
+   Consult `@.agents/skills/first-principles/SKILL.md`. Does the plan attempt to optimize an inherently flawed architectural premise (e.g. putting lipstick on a pig, or cargo-culting patterns that don't fit current scale)?
+   → If flawed premise: flag `[ADV-OBJ] Flawed Premise Trap — reason from irreducible ground truths to propose a minimal, uncompromised solution`.
 
 ## 3. The Attack Vectors (After ADV-OBJ passes)
 

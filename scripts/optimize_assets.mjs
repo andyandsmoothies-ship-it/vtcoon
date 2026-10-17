@@ -41,6 +41,11 @@ export const ASSET_BUDGETS = {
       maxTriangles: 1500,
       label: 'Danh Thắng Di Sản (Landmarks)',
     },
+    board: {
+      maxBytes: 150 * 1024,
+      maxTriangles: 2500,
+      label: 'Sa Bàn Bàn Cờ (Board Tabletop)',
+    },
   },
 };
 
@@ -54,6 +59,7 @@ export function detectCategory(filePath) {
   if (norm.includes('/buildings/')) return 'buildings';
   if (norm.includes('/vehicles/')) return 'vehicles';
   if (norm.includes('/landmarks/')) return 'landmarks';
+  if (norm.includes('/board/')) return 'board';
 
   const filename = path.basename(norm);
   if (filename.includes('pawn')) return 'pawns';

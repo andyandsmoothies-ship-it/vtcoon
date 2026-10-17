@@ -1,0 +1,26 @@
+[
+  {
+    "file": "src/client/3d/diorama/batched_diorama_terrain.tsx",
+    "desc": "AST: Corrupt shouldRenderRoads to always true",
+    "target": "const shouldRenderRoads = showRoads ?? !isSereneTabletop;",
+    "replacement": "const shouldRenderRoads = true;"
+  },
+  {
+    "file": "src/client/3d/diorama/batched_diorama_terrain.tsx",
+    "desc": "AST: Corrupt shouldRenderRoads to always false",
+    "target": "const shouldRenderRoads = showRoads ?? !isSereneTabletop;",
+    "replacement": "const shouldRenderRoads = false;"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_terrain.tsx",
+    "desc": "AST: Corrupt isSereneTabletop prop forwarding in DioramaTerrain",
+    "target": "<BatchedDioramaLandmasses isSereneTabletop={isSereneTabletop} />",
+    "replacement": "<BatchedDioramaLandmasses isSereneTabletop={false} />"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Corrupt isSerene evaluation in MiniatureCityDiorama",
+    "target": "const isSerene = isDesktopLean || isMobile;",
+    "replacement": "const isSerene = false;"
+  }
+]

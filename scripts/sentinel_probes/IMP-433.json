@@ -1,0 +1,56 @@
+[
+  {
+    "file": "src/client/3d/batched_board_tiles.tsx",
+    "desc": "AST: Corrupt standard bases PBR material to legacy beige",
+    "target": "<meshStandardMaterial color=\"#F5F3EF\" roughness={0.28} metalness={0.08} envMapIntensity={1.0} />",
+    "replacement": "<meshStandardMaterial color=\"#EDE5D8\" roughness={0.35} metalness={0.06} envMapIntensity={1.0} />"
+  },
+  {
+    "file": "src/client/3d/batched_board_tiles.tsx",
+    "desc": "AST: Corrupt corner bases PBR material to slate blue",
+    "target": "<meshStandardMaterial color=\"#1C1612\" roughness={0.22} metalness={0.20} envMapIntensity={1.2} />",
+    "replacement": "<meshStandardMaterial color=\"#1E293B\" roughness={0.16} metalness={0.25} envMapIntensity={1.2} />"
+  },
+  {
+    "file": "src/client/3d/batched_board_tiles.tsx",
+    "desc": "AST: Corrupt fallback surface material to legacy beige",
+    "target": "<meshStandardMaterial color=\"#F5F3EF\" roughness={0.28} metalness={0.08} />",
+    "replacement": "<meshStandardMaterial color=\"#EDE5D8\" roughness={0.35} metalness={0.06} />"
+  },
+  {
+    "file": "src/client/3d/tile_texture_drawers.ts",
+    "desc": "AST: Corrupt INDOCHINE_TILE_THEME background to parchment #F3EEDF",
+    "target": "background: '#FDFBF7',",
+    "replacement": "background: '#F3EEDF',"
+  },
+  {
+    "file": "src/client/3d/tile_texture_drawers.ts",
+    "desc": "AST: Corrupt INDOCHINE_TILE_THEME borderColor to dark slate #0F172A",
+    "target": "borderColor: '#C5A059',",
+    "replacement": "borderColor: '#0F172A',"
+  },
+  {
+    "file": "src/client/3d/tile_texture_drawers.ts",
+    "desc": "AST: Corrupt INDOCHINE_TILE_THEME borderWidth to 5",
+    "target": "borderWidth: 3.5,",
+    "replacement": "borderWidth: 5,"
+  },
+  {
+    "file": "src/client/3d/tile_texture_drawers.ts",
+    "desc": "AST: Sever theme background wiring in drawTileHeader",
+    "target": "ctx.fillStyle = theme.background;",
+    "replacement": "ctx.fillStyle = '#F3EEDF';"
+  },
+  {
+    "file": "src/client/3d/tile_texture_drawers.ts",
+    "desc": "AST: Sever theme border wiring in drawFooter",
+    "target": "ctx.strokeStyle = theme.borderColor;",
+    "replacement": "ctx.strokeStyle = '#0F172A';"
+  },
+  {
+    "file": "src/client/3d/tile_texture_atlas.ts",
+    "desc": "AST: Corrupt atlas global prefill color to legacy parchment #F3EEDF",
+    "target": "  // ADV-03: Tô kín toàn bộ bề mặt canvas bằng màu ngà parchment chuẩn bàn cờ,\n  // triệt tiêu hoàn toàn viền lem đen mipmap ở Hàng 5 (slots 40-47) và lề đáy.\n  ctx.fillStyle = '#FDFBF7';",
+    "replacement": "  // ADV-03: Tô kín toàn bộ bề mặt canvas bằng màu ngà parchment chuẩn bàn cờ,\n  // triệt tiêu hoàn toàn viền lem đen mipmap ở Hàng 5 (slots 40-47) và lề đáy.\n  ctx.fillStyle = '#F3EEDF';"
+  }
+]

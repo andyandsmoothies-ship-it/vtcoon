@@ -101,7 +101,16 @@ export function createBatchedTerrainGeometries(): {
   return cachedTerrainGeoms;
 }
 
-export function BatchedDioramaLandmasses(): React.ReactElement {
+export interface BatchedDioramaLandmassesProps {
+  readonly isSereneTabletop?: boolean;
+  readonly showRoads?: boolean;
+}
+
+export function BatchedDioramaLandmasses({
+  isSereneTabletop = false,
+  showRoads,
+}: BatchedDioramaLandmassesProps = {}): React.ReactElement {
+  const shouldRenderRoads = showRoads ?? !isSereneTabletop;
   const geoms = useMemo(() => createBatchedTerrainGeometries(), []);
   const noopRaycast = () => null;
   return (
@@ -112,24 +121,28 @@ export function BatchedDioramaLandmasses(): React.ReactElement {
       <mesh geometry={geoms.grassGeom} receiveShadow raycast={noopRaycast}>
         <meshStandardMaterial color="#15803D" roughness={0.85} />
       </mesh>
-      <mesh geometry={geoms.westBoulevardGeom} receiveShadow raycast={noopRaycast}>
-        <meshStandardMaterial color="#1E293B" roughness={0.16} metalness={0.25} />
-      </mesh>
-      <mesh geometry={geoms.eastPromenadeGeom} receiveShadow raycast={noopRaycast}>
-        <meshStandardMaterial color="#334155" roughness={0.2} metalness={0.18} />
-      </mesh>
-      <mesh geometry={geoms.sidewalksGeom} receiveShadow raycast={noopRaycast}>
-        <meshStandardMaterial color="#CBD5E1" roughness={0.35} />
-      </mesh>
-      <mesh geometry={geoms.markingsGeom} raycast={noopRaycast}>
-        <meshStandardMaterial
-          color="#FFFFFF"
-          roughness={0.2}
-          polygonOffset
-          polygonOffsetFactor={-1.0}
-          polygonOffsetUnits={-4.0}
-        />
-      </mesh>
+      {shouldRenderRoads && (
+        <>
+          <mesh geometry={geoms.westBoulevardGeom} receiveShadow raycast={noopRaycast}>
+            <meshStandardMaterial color="#1E293B" roughness={0.16} metalness={0.25} />
+          </mesh>
+          <mesh geometry={geoms.eastPromenadeGeom} receiveShadow raycast={noopRaycast}>
+            <meshStandardMaterial color="#334155" roughness={0.2} metalness={0.18} />
+          </mesh>
+          <mesh geometry={geoms.sidewalksGeom} receiveShadow raycast={noopRaycast}>
+            <meshStandardMaterial color="#CBD5E1" roughness={0.35} />
+          </mesh>
+          <mesh geometry={geoms.markingsGeom} raycast={noopRaycast}>
+            <meshStandardMaterial
+              color="#FFFFFF"
+              roughness={0.2}
+              polygonOffset
+              polygonOffsetFactor={-1.0}
+              polygonOffsetUnits={-4.0}
+            />
+          </mesh>
+        </>
+      )}
     </group>
   );
 }
