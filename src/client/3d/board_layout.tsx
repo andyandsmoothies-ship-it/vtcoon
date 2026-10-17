@@ -93,14 +93,16 @@ export function TabletopSalonAtmosphere({ isDesktopLean = false }: { readonly is
   const storeActiveModal = useGameStore((s) => s.activeModal);
   const activeModal = useGameStore.getState()?.activeModal ?? storeActiveModal;
   const isAuctionActive = activeModal === 'auction';
+  const storeOceanVisible = useDiagnostic3DStore((s) => s.isOceanVisible);
+  const isOceanVisible = useDiagnostic3DStore.getState()?.isOceanVisible ?? storeOceanVisible;
 
   useSafeFrame(({ scene }) => {
-    if (!isDesktopLean || isAuctionActive) return;
+    if (!isDesktopLean || isAuctionActive || isOceanVisible) return;
     if (scene.background && isThreeColor(scene.background)) {
-      scene.background.set('#161311');
+      scene.background.set('#1E293B');
     }
     if (scene.fog && isThreeFog(scene.fog)) {
-      scene.fog.color.set('#241C16');
+      scene.fog.color.set('#1E293B');
       scene.fog.near = 25.0;
       scene.fog.far = 95.0;
     }
@@ -212,30 +214,32 @@ export function GameBoard({
   return (
     <group position={[0, 0, 0]} visible={isTableVisible ? undefined : false}>
       {/* Khung Bàn Gỗ Óc Chó Thượng Lưu (Walnut Tabletop) y = -0.350 */}
-      <mesh receiveShadow visible={isTableVisible} position={[0, WALNUT_TABLE_Y, 0]}>
-        <boxGeometry args={[19.2, 0.2, 19.2]} />
-        <meshStandardMaterial
-          map={walnutDiffuse}
-          roughnessMap={walnutRoughness}
-          color="#2B1D14"
-          roughness={0.28}
-          metalness={0.05}
-        />
-      </mesh>
+      <group visible={isTableVisible}>
+        <mesh receiveShadow visible={isTableVisible} position={[0, WALNUT_TABLE_Y, 0]}>
+          <boxGeometry args={[19.2, 0.2, 19.2]} />
+          <meshStandardMaterial
+            map={walnutDiffuse}
+            roughnessMap={walnutRoughness}
+            color="#2B1D14"
+            roughness={0.28}
+            metalness={0.05}
+          />
+        </mesh>
 
-      {/* Mẫu thử nghiệm Khung Bàn Cờ Gỗ Óc Chó Vát Cạnh & Chỉ Đồng Thau Giai đoạn 0 (Executive Board Chassis) */}
-      {isTableVisible && (
-        <SafeGLTFModel
-          url={BOARD_CHASSIS_MODEL_URL}
-          position={[0, 0, 0]}
-          castShadow
-          receiveShadow
-          fallback={null}
-        />
-      )}
+        {/* Mẫu thử nghiệm Khung Bàn Cờ Gỗ Óc Chó Vát Cạnh & Chỉ Đồng Thau Giai đoạn 0 (Executive Board Chassis) */}
+        {isTableVisible && (
+          <SafeGLTFModel
+            url={BOARD_CHASSIS_MODEL_URL}
+            position={[0, 0, 0]}
+            castShadow
+            receiveShadow
+            fallback={null}
+          />
+        )}
+      </group>
 
       {/* 0. Môi trường Bán đảo Đảo Ngọc nhiệt đới (Ẩn trong chế độ Serene Tabletop để đưa về mặt bàn gỗ VIP) */}
-      <group visible={isOceanVisible && isMobile}>
+      <group visible={isOceanVisible}>
         <CoastalIslandEnvironment
           isMobile={isMobile}
           streamlined={!tierProfile.enableOuterBaySanctuaries}
@@ -244,13 +248,13 @@ export function GameBoard({
 
       {/* 0.02. Mặt Bàn Gỗ Óc Chó Thượng Lưu Phòng VIP (Executive VIP Salon Tabletop Plinth) */}
       {isTableVisible && !isMobile && (
-        <>
+        <group visible={!isOceanVisible}>
           <mesh receiveShadow position={[0, WALNUT_TABLE_Y - 0.005, 0]}>
             <boxGeometry args={[48.0, 0.19, 48.0]} />
             <meshStandardMaterial color="#1C140D" roughness={0.35} metalness={0.05} />
           </mesh>
           <TabletopSalonAtmosphere isDesktopLean={!isMobile} />
-        </>
+        </group>
       )}
 
       {/* 0.05. Bảng Điều Khiển Chẩn Đoán 3D (Kích hoạt khi có ?debug=3d) */}
@@ -270,6 +274,7 @@ export function GameBoard({
             url={PAVED_ESPLANADE_MODEL_URL}
             position={[0, 0, 0]}
             receiveShadow
+            forceFallback
             fallback={null}
           />
         )}

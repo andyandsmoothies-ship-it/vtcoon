@@ -20,11 +20,7 @@ import { DioramaModelRailroad, DioramaWaterfrontStation, DioramaLandmarkNorthSta
 export { DioramaModelRailroad, DioramaWaterfrontStation, DioramaLandmarkNorthStation, DioramaTropicalFlora };
 import { isMobileDevice } from './device_detect';
 import { getCentralMonumentLODDescriptor } from './diorama/diorama_lod_helpers';
-import {
-  URBAN_TREES,
-  getBatchedBoardRimGeometries,
-  disposeDioramaStaticBlenderBatches,
-} from './diorama/diorama_static_blender_batches';
+import { URBAN_TREES, getBatchedBoardRimGeometries, disposeDioramaStaticBlenderBatches } from './diorama/diorama_static_blender_batches';
 import { DioramaChainReaction } from './diorama_chain_reaction';
 import { createDongSonPlazaTexture } from './tabletop_texture_generator';
 import { SafeGLTFModel } from './asset_loader/safe_gltf_model';
@@ -43,27 +39,11 @@ export interface CentralMonumentPlazaProps {
 }
 
 export function CentralMonumentPlaza({ isMobile = false, isDesktopLean = false }: CentralMonumentPlazaProps = {}): React.ReactElement {
-  const desc = getCentralMonumentLODDescriptor(isMobile);
-  if (desc.isMobile) {
-    return (
-      <group position={[0, 0.02, 0]} data-testid="central-monument-plaza">
-        <mesh receiveShadow position={desc.plinth.position}>
-          <cylinderGeometry args={[desc.plinth.radiusTop, desc.plinth.radiusBottom, desc.plinth.height, 24]} />
-          <meshStandardMaterial color={desc.plinth.color} roughness={0.3} metalness={0.1} />
-        </mesh>
-        <mesh receiveShadow position={desc.spire.position}>
-          <cylinderGeometry args={[desc.spire.radiusTop, desc.spire.radiusBottom, desc.spire.height, 16]} />
-          <meshStandardMaterial color={desc.spire.color} metalness={0.85} roughness={0.18} />
-        </mesh>
-      </group>
-    );
-  }
-
   if (isDesktopLean) {
     const dongSonTexture = createDongSonPlazaTexture();
     return (
       <group position={[0, 0.02, 0]} data-testid="central-monument-plaza">
-        <SafeGLTFModel url={SUNKEN_ARENA_MODEL_URL} position={[0, 0, 0]} receiveShadow fallback={
+        <SafeGLTFModel url={SUNKEN_ARENA_MODEL_URL} position={[0, 0, 0]} receiveShadow forceFallback fallback={
             <>
               {/* 1. Đài bệ đá phiến hoa cương tròn neo vững chân đế sa bàn */}
               <mesh receiveShadow position={[0, 0.008, 0]}>
@@ -83,6 +63,22 @@ export function CentralMonumentPlaza({ isMobile = false, isDesktopLean = false }
             </>
           }
         />
+      </group>
+    );
+  }
+
+  const desc = getCentralMonumentLODDescriptor(isMobile);
+  if (desc.isMobile) {
+    return (
+      <group position={[0, 0.02, 0]} data-testid="central-monument-plaza">
+        <mesh receiveShadow position={desc.plinth.position}>
+          <cylinderGeometry args={[desc.plinth.radiusTop, desc.plinth.radiusBottom, desc.plinth.height, 24]} />
+          <meshStandardMaterial color={desc.plinth.color} roughness={0.3} metalness={0.1} />
+        </mesh>
+        <mesh receiveShadow position={desc.spire.position}>
+          <cylinderGeometry args={[desc.spire.radiusTop, desc.spire.radiusBottom, desc.spire.height, 16]} />
+          <meshStandardMaterial color={desc.spire.color} metalness={0.85} roughness={0.18} />
+        </mesh>
       </group>
     );
   }
@@ -302,7 +298,7 @@ export function DioramaUrbanCanopy({ isMobile = false, isSereneTabletop = false 
   return (
     <group position={[0, 0.02, 0]} data-testid="diorama-urban-canopy">
       {isSereneTabletop ? (
-        <SafeGLTFModel url={INDOCHINE_BIOME_MODEL_URL} position={[0, 0, 0]} castShadow={!isMobile} receiveShadow fallback={<></>} />
+        <SafeGLTFModel url={INDOCHINE_BIOME_MODEL_URL} position={[0, 0, 0]} castShadow={!isMobile} receiveShadow visible={false} forceFallback fallback={<></>} />
       ) : (
         <>
           <instancedMesh ref={trunkRef} args={[undefined, undefined, URBAN_TREES.length]} castShadow={!isMobile} receiveShadow>
@@ -342,25 +338,20 @@ export function MiniatureCityDiorama({ isMobile: propIsMobile, isVisible = true,
       {!isMobile && !isDesktopLean && <DioramaWaterfrontStation />}
       {!isMobile && !isDesktopLean && <DioramaLandmarkNorthStation />}
       {!isMobile && !isDesktopLean && <DioramaTropicalFlora />}
-      <DioramaTerrain isSereneTabletop={isSerene} mossPalette={isDesktopLean} />
+      <DioramaTerrain isSereneTabletop={isSerene} mossPalette={false} />
+      <CentralMonumentPlaza isMobile={isMobile} isDesktopLean={isSerene} />
       <group visible={!isDesktopLean}>
-        <CentralMonumentPlaza isMobile={isMobile} isDesktopLean={isDesktopLean} />
         <DioramaPedestrianPromenades isMobile={isMobile} />
       </group>
       <DioramaUrbanCanopy isMobile={isMobile} isSereneTabletop={isSerene} />
       {/* Sa bàn Đông Dương Thượng Lưu (Master Landscape Sculpt & Modular Sub-Assemblies) */}
       {isDesktopLean && (
-        <>
-          <SafeGLTFModel url={BOARD_TERRAIN_BASE_URL} position={[0, 0, 0]} receiveShadow fallback={null} />
-          <SafeGLTFModel url={DICE_ARENA_PLINTH_URL} position={[0, 0, 0]} receiveShadow fallback={null} />
-          <SafeGLTFModel url={LANDMARKS_CLUSTER_URL} position={[0, 0, 0]} receiveShadow castShadow fallback={null} />
-          <SafeGLTFModel url={INDOCHINE_MASTER_LANDSCAPE_URL} position={[0, 0, 0]} receiveShadow fallback={null} visible={false} />
-        </>
+        <SafeGLTFModel url={INDOCHINE_MASTER_LANDSCAPE_URL} position={[0, 0, 0]} receiveShadow visible={false} forceFallback fallback={null} />
       )}
       {/* Bệ đá cẩm thạch ngà tiếp đất 4 mố cầu (Bridge Landing Plazas) */}
-      <SafeGLTFModel url={BRIDGE_PLAZAS_MODEL_URL} position={[0, 0, 0]} receiveShadow fallback={null} visible={!isDesktopLean} />
-      <group name="ChainLandmark_bason-bridge" ref={(el) => { landmarkGroupRefs.current[3] = el; }} visible={!isDesktopLean}>
-        <DioramaBridges isMobile={isMobile} isVisible={isVisible} />
+      <SafeGLTFModel url={BRIDGE_PLAZAS_MODEL_URL} position={[0, 0, 0]} receiveShadow forceFallback fallback={null} visible={!isDesktopLean} />
+      <group name="ChainLandmark_bason-bridge" ref={(el) => { landmarkGroupRefs.current[3] = el; }}>
+        <DioramaBridges isMobile={isMobile} isVisible={isVisible} isDesktopLean={isSerene} />
       </group>
       {!isMobile && !isDesktopLean && <DioramaCivicCenter />}
       {!isMobile && !isDesktopLean && <DioramaWaterfrontPark />}
@@ -369,13 +360,13 @@ export function MiniatureCityDiorama({ isMobile: propIsMobile, isVisible = true,
       <group name="ChainLandmark_saigon-river-cruiser" ref={(el) => { landmarkGroupRefs.current[0] = el; }}>
         {(!isMobile || !isDesktopLean) && <DioramaHarborCruiser isMobile={isMobile} isVisible={isVisible} isMoored={isDesktopLean} />}
       </group>
-      <group name="ChainLandmark_bitexco-tower" ref={(el) => { landmarkGroupRefs.current[2] = el; }} visible={!isDesktopLean}>
+      <group name="ChainLandmark_bitexco-tower" ref={(el) => { landmarkGroupRefs.current[2] = el; }}>
         <DioramaSkyline isMobile={isMobile} isVisible={isVisible} />
       </group>
       {!isMobile && !isDesktopLean && <DioramaHighriseBlocks />}
       {!isMobile && !isDesktopLean && <DioramaResidentialPool />}
-      <group name="ChainLandmark_notre-dame-cathedral" ref={(el) => { landmarkGroupRefs.current[4] = el; }} visible={!isDesktopLean}>
-        <DioramaHeritageDistrict isMobile={isMobile} />
+      <group name="ChainLandmark_notre-dame-cathedral" ref={(el) => { landmarkGroupRefs.current[4] = el; }}>
+        <DioramaHeritageDistrict isMobile={isMobile} isDesktopLean={isSerene} />
       </group>
       {!isMobile && !isDesktopLean && <DioramaShophouseBlocks />}
       {!isDesktopLean && <DioramaMicroLife isMobile={isMobile} isVisible={isVisible} />}

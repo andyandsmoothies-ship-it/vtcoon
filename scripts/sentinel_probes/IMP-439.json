@@ -1,0 +1,62 @@
+[
+  {
+    "file": "src/client/3d/board_layout.tsx",
+    "desc": "AST: Corrupt TabletopSalonAtmosphere studio slate background color",
+    "target": "scene.background.set('#1E293B');",
+    "replacement": "scene.background.set('#FF0000');"
+  },
+  {
+    "file": "src/client/3d/board_layout.tsx",
+    "desc": "AST: Corrupt TabletopSalonAtmosphere studio slate fog color",
+    "target": "scene.fog.color.set('#1E293B');",
+    "replacement": "scene.fog.color.set('#000000');"
+  },
+  {
+    "file": "src/client/3d/board_layout.tsx",
+    "desc": "AST: Invert VIP Tabletop plinth ocean visibility gate",
+    "target": "<group visible={!isOceanVisible}>",
+    "replacement": "<group visible={isOceanVisible}>"
+  },
+  {
+    "file": "src/client/3d/board_layout.tsx",
+    "desc": "AST: Strip forceFallback from GameBoard PAVED_ESPLANADE_MODEL_URL",
+    "target": "url={PAVED_ESPLANADE_MODEL_URL}\n            position={[0, 0, 0]}\n            receiveShadow\n            forceFallback",
+    "replacement": "url={PAVED_ESPLANADE_MODEL_URL}\n            position={[0, 0, 0]}\n            receiveShadow"
+  },
+  {
+    "file": "src/client/3d/time_of_day_lighting.tsx",
+    "desc": "AST: Unconditionally pass scene to updateDiffuseAndAtmosphere in TimeOfDayLighting",
+    "target": "const activeScene = (useDiagnostic3DStore.getState()?.isOceanVisible ?? isOceanVisible) || isAuctionActive ? state.scene : undefined;",
+    "replacement": "const activeScene = state.scene;"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Invert MiniatureCityDiorama mossPalette parameter",
+    "target": "<DioramaTerrain isSereneTabletop={isSerene} mossPalette={false} />",
+    "replacement": "<DioramaTerrain isSereneTabletop={isSerene} mossPalette={true} />"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Suppress isDesktopLean on CentralMonumentPlaza",
+    "target": "<CentralMonumentPlaza isMobile={isMobile} isDesktopLean={isSerene} />",
+    "replacement": "<CentralMonumentPlaza isMobile={isMobile} isDesktopLean={false} />"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_heritage_district.tsx",
+    "desc": "AST: Invert DioramaHeritageDistrict districtPos coordinates",
+    "target": "const districtPos: [number, number, number] = isDesktopLean ? [4.2, 0.16, -4.2] : [-4.5, 0.16, 2.9];",
+    "replacement": "const districtPos: [number, number, number] = !isDesktopLean ? [4.2, 0.16, -4.2] : [-4.5, 0.16, 2.9];"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_bridges.tsx",
+    "desc": "AST: Invert DioramaBridges South Long Bien Bridge visibility",
+    "target": "<group position={[0, 0.12, 3.8]} visible={!isDesktopLean}>",
+    "replacement": "<group position={[0, 0.12, 3.8]} visible={isDesktopLean}>"
+  },
+  {
+    "file": "src/client/3d/toybox_wealth_tray_visuals.ts",
+    "desc": "AST: Desynchronize Notre Dame Cathedral stage 4 worldPosition",
+    "target": "{ stageIndex: 4, id: 'notre-dame-cathedral', delayMs: 720, worldPosition: [4.4, 0.20, -3.32], baseRadius: 0.56, accentColor: '#FDE047' },",
+    "replacement": "{ stageIndex: 4, id: 'notre-dame-cathedral', delayMs: 720, worldPosition: [-4.3, 0.20, 3.78], baseRadius: 0.56, accentColor: '#FDE047' },"
+  }
+]

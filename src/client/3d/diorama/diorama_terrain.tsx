@@ -108,12 +108,12 @@ export function DioramaTerrain({
             url={SAIGON_RIVER_SPLINE_MODEL_URL}
             position={[0, 0, 0]}
             receiveShadow
-            visible={!mossPalette}
+            forceFallback
             fallback={
               <group position={[0, 0, 0]}>
                 <mesh receiveShadow position={[0, RIVER_BED_Y, 0]}>
                   <boxGeometry args={[1.8, 0.008, 15.0]} />
-                  <meshStandardMaterial color="#0E4D44" roughness={0.20} metalness={0.15} transparent opacity={0.92} />
+                  <meshStandardMaterial color="#0284C7" roughness={0.25} metalness={0.10} transparent opacity={0.88} />
                 </mesh>
                 <mesh position={[0, RIVER_BED_Y + 0.005, 0]} data-testid="diorama-river-waves">
                   <boxGeometry args={[1.6, 0.002, 14.8]} />
@@ -126,10 +126,9 @@ export function DioramaTerrain({
           {infillGeom && (
             <mesh
               receiveShadow
-              position={[0, -0.020, 0]}
+              position={[0, 0, 0]}
               geometry={infillGeom}
               data-testid="diorama-tabletop-infill"
-              visible={!mossPalette}
             >
               <meshStandardMaterial color={mossPalette ? '#1B4332' : '#15803D'} roughness={mossPalette ? 0.78 : 0.85} side={DoubleSide} />
             </mesh>
@@ -139,7 +138,6 @@ export function DioramaTerrain({
             receiveShadow
             position={[0, -0.080, 0]}
             data-testid="diorama-void-guard"
-            visible={!mossPalette}
           >
             <boxGeometry args={[13.2, 0.010, 14.0]} />
             <meshStandardMaterial color={mossPalette ? '#1B4332' : '#15803D'} roughness={mossPalette ? 0.78 : 0.85} />
@@ -188,8 +186,8 @@ export function DioramaTerrain({
       {/* ========================================================
           2 & 3. BÁN ĐẢO TÂY & ĐÔNG: Khối nền, đại lộ, vỉa hè & vạch kẻ đường (Batched Merged Geometries)
          ======================================================== */}
-      <BatchedDioramaLandmasses isSereneTabletop={isSereneTabletop} mossPalette={mossPalette} visible={!mossPalette} />
-      <group data-testid="diorama-park-relief" position={[-2.7, 0, -2.5]} visible={!mossPalette}>
+      <BatchedDioramaLandmasses isSereneTabletop={isSereneTabletop} mossPalette={mossPalette} />
+      <group data-testid="diorama-park-relief" position={[-2.7, 0, -2.5]}>
         <mesh receiveShadow position={[0, 0.035, 0]}>
           <boxGeometry args={[1.6, 0.025, 2.2]} />
           <meshStandardMaterial color="#64748B" roughness={0.6} metalness={0.15} />

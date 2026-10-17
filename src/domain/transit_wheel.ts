@@ -24,7 +24,7 @@ export const TRANSIT_WHEEL_CONFIGS: readonly TransitWheelConfig[] = [
     labelVi: 'Tốc Hành',
     shortLabelVi: 'TỐC HÀNH',
     icon: '⚡',
-    color: '#f59e0b',
+    color: '#d97706',
     descriptionVi: 'Gia tốc phản lực, bay thêm 1 - 6 ô về phía trước.',
   },
   {
@@ -33,7 +33,7 @@ export const TRANSIT_WHEEL_CONFIGS: readonly TransitWheelConfig[] = [
     labelVi: 'Vé VIP Hồi Hương',
     shortLabelVi: 'HỒI HƯƠNG',
     icon: '🛡️',
-    color: '#10b981',
+    color: '#059669',
     descriptionVi: 'Bay thẳng về bất động sản gần nhất. Nếu chưa có BĐS, bạn an toàn ở lại trạm.',
   },
   {
@@ -42,7 +42,7 @@ export const TRANSIT_WHEEL_CONFIGS: readonly TransitWheelConfig[] = [
     labelVi: 'Hoàn Cước Dịch Vụ',
     shortLabelVi: 'HOÀN CƯỚC',
     icon: '💰',
-    color: '#8b5cf6',
+    color: '#2563eb',
     descriptionVi: 'Kho Bạc trợ cấp chi phí hành trình lên tới 300 Tr. VNĐ.',
   },
   {
@@ -51,7 +51,7 @@ export const TRANSIT_WHEEL_CONFIGS: readonly TransitWheelConfig[] = [
     labelVi: 'Bay Xuyên Việt',
     shortLabelVi: 'VỀ Ô GO',
     icon: '✈️',
-    color: '#ec4899',
+    color: '#be123c',
     descriptionVi: 'Bay thẳng về ô Khởi Hành (GO), nhận trọn vẹn lương vòng.',
   },
   {
@@ -60,7 +60,7 @@ export const TRANSIT_WHEEL_CONFIGS: readonly TransitWheelConfig[] = [
     labelVi: 'Hoãn Chuyến Bay',
     shortLabelVi: 'HOÃN CHUYẾN',
     icon: '⏳',
-    color: '#64748b',
+    color: '#475569',
     descriptionVi: 'Thời tiết xấu, quân cờ tạm thời lưu lại trạm hiện tại.',
   },
 ] as const;

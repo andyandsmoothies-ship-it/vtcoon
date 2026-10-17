@@ -73,7 +73,7 @@ export const CHAIN_REACTION_STAGE_SPECS: ReadonlyArray<ChainReactionStageSpec> =
   { stageIndex: 1, id: 'metro-line-station', delayMs: 180, worldPosition: [0, 0.45, -6.9], baseRadius: 0.44, accentColor: '#38BDF8' },
   { stageIndex: 2, id: 'bitexco-tower', delayMs: 360, worldPosition: [-4.5, 0.20, -4.4], baseRadius: 0.62, accentColor: '#F59E0B' },
   { stageIndex: 3, id: 'bason-bridge', delayMs: 540, worldPosition: [-0.8, 0.18, -3.8], baseRadius: 0.52, accentColor: '#22D3EE' },
-  { stageIndex: 4, id: 'notre-dame-cathedral', delayMs: 720, worldPosition: [-4.3, 0.20, 3.65], baseRadius: 0.56, accentColor: '#FDE047' },
+  { stageIndex: 4, id: 'notre-dame-cathedral', delayMs: 720, worldPosition: [4.4, 0.20, -3.32], baseRadius: 0.56, accentColor: '#FDE047' },
 ];
 
 const OVERVIEW_ASPECT = 1.6;

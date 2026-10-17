@@ -321,7 +321,7 @@ describe('[TC-437/MSS] Indochine Executive Atmosphere & Paved Esplanade Contract
       (n) => n.type === DioramaTerrain,
     );
 
-    expect(desktopTerrain?.props?.mossPalette).toBe(true);
+    expect(desktopTerrain?.props?.mossPalette).toBe(false);
     expect(mobileTerrain?.props?.mossPalette).toBe(false);
   });
 

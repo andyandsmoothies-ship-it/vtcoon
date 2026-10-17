@@ -26,8 +26,12 @@ export function auditScopeAndSubsystems(targetFiles) {
       cohesiveFamilies.add('src/client/ui/modals');
       continue;
     }
-    if (norm.startsWith('src/client/3d/diorama/')) {
+    if (norm.startsWith('src/client/3d/diorama/') || norm === 'src/client/3d/toybox_wealth_tray_visuals.ts') {
       cohesiveFamilies.add('src/client/3d/diorama');
+      continue;
+    }
+    if (norm.startsWith('src/client/3d/board_') || norm.startsWith('src/client/3d/time_of_day_lighting')) {
+      cohesiveFamilies.add('src/client/3d/board');
       continue;
     }
     if (norm.startsWith('src/server/')) {

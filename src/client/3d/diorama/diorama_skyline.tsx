@@ -22,7 +22,7 @@ const TREE_LOCATIONS: ReadonlyArray<readonly [number, number]> = [
 
 const STREETLAMP_LOCATIONS: ReadonlyArray<readonly [number, number]> = [
   [-4.1, -4.0], [-4.1, -2.0], [-4.1, 0], [-4.1, 2.0], [-4.1, 4.0],
-  [4.1, -4.0], [4.1, -2.0], [4.1, 0], [4.1, 2.0], [4.1, 4.0],
+  [3.4, -4.0], [4.1, -2.0], [4.1, 0], [4.1, 2.0], [4.1, 4.0],
 ];
 
 export function InstancedDioramaTrees(): React.ReactElement {

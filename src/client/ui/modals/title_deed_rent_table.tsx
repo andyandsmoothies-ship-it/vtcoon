@@ -9,10 +9,10 @@ export const PROPERTY_TIERS = [
 ] as const;
 
 export const RAILROAD_TIERS = [
-  { chip: '1 Ga', label: '1 Bến / Ga', icon: '🚊', sub: '1 trạm vận tải' },
-  { chip: '2 Ga', label: '2 Bến / Ga', icon: '🚊', sub: '2 trạm kết nối' },
-  { chip: '3 Ga', label: '3 Bến / Ga', icon: '🚊', sub: '3 trạm liên kết' },
-  { chip: '4 Ga', label: '4 Bến / Ga', icon: '👑', sub: 'Toàn mạng lưới' },
+  { chip: '1 Ga', label: '1 Bến / Trạm', icon: '⚓', sub: '1 mắt xích vận tải' },
+  { chip: '2 Ga', label: '2 Bến / Trạm', icon: '✈️', sub: '2 đầu mối kết nối' },
+  { chip: '3 Ga', label: '3 Bến / Trạm', icon: '🌐', sub: '3 trung tâm liên kết' },
+  { chip: '4 Ga', label: '4 Bến / Trạm', icon: '👑', sub: 'Toàn mạng lưới hạ tầng' },
 ] as const;
 
 export interface TitleDeedRentTableProps {
@@ -58,7 +58,7 @@ export function TitleDeedRentTable({
     <div className="bg-[#F7F2E7] rounded-xl border border-slate-300 p-2 sm:p-2.5 space-y-1.5 sm:space-y-2" data-testid="title-deed-rent-table">
       <div className="flex items-center justify-between">
         <p className="text-[11px] font-bold text-slate-900 uppercase tracking-wider">
-          {isRailroad ? 'Biểu Phí Theo Số Ga Sở Hữu' : isUtility ? 'Phí Dịch Vụ Cơ Bản' : 'Biểu Phí Dừng Chân'}
+          {isRailroad ? 'Biểu Phí Theo Số Ga Sở Hữu • Mạng Lưới Hạ Tầng' : isUtility ? 'Phí Dịch Vụ Cơ Bản' : 'Biểu Phí Dừng Chân'}
         </p>
         <span className="text-[11px] text-slate-600 font-bold">VNĐ</span>
       </div>

@@ -85,6 +85,8 @@ export function TimeOfDayLighting({ isMobile = false }: TimeOfDayLightingProps =
   const prevLevelMapRef = useRef(levelMap);
   const lastMotionTimeRef = useRef<number>(performance.now());
   const isShadowsEnabled = useDiagnostic3DStore((s) => s.isShadowsEnabled);
+  const storeOceanVisible = useDiagnostic3DStore((s) => s.isOceanVisible);
+  const isOceanVisible = useDiagnostic3DStore.getState()?.isOceanVisible ?? storeOceanVisible;
 
   const shadowMapSize = resolveShadowMapSize(isMobile);
 
@@ -146,7 +148,8 @@ export function TimeOfDayLighting({ isMobile = false }: TimeOfDayLightingProps =
         lastMotionTimeRef.current = cacheState.lastMotionTimeMs;
       }
     }
-    updateDiffuseAndAtmosphere(ambientRef.current, hemiRef.current, state.scene, state.gl, preset, phase, isAuctionActive, dt, lerpRate, tempColor, flashBoost, isMobile);
+    const activeScene = (useDiagnostic3DStore.getState()?.isOceanVisible ?? isOceanVisible) || isAuctionActive ? state.scene : undefined;
+    updateDiffuseAndAtmosphere(ambientRef.current, hemiRef.current, activeScene, state.gl, preset, phase, isAuctionActive, dt, lerpRate, tempColor, flashBoost, isMobile);
     if (topDownRef.current) {
       const topDownTarget = calculateTopDownFill(phase, isAuctionActive, isMobile);
       tempColor.set(topDownTarget.color);

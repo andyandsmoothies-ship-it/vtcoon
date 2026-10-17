@@ -46,7 +46,7 @@ export function PurchaseDecisionCard({
       ? 'grid-cols-2'
       : radar.totalCells === 3
         ? 'grid-cols-3'
-        : 'grid-cols-2 sm:grid-cols-4';
+        : 'grid-cols-2';
 
   return (
     <div className="bg-[#F8F5ED] border border-amber-900/15 rounded-xl p-2 sm:p-2.5 space-y-1.5 sm:space-y-2 select-none text-xs text-slate-800" data-testid="purchase-decision-card">

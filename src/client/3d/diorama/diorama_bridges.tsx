@@ -100,11 +100,13 @@ export function InstancedBasonStayCables(): React.ReactElement {
 export interface DioramaBridgesProps {
   readonly isMobile?: boolean;
   readonly isVisible?: boolean;
+  readonly isDesktopLean?: boolean;
 }
 
 export function DioramaBridges({
   isMobile = false,
   isVisible = true,
+  isDesktopLean = false,
 }: DioramaBridgesProps = {}): React.ReactElement {
   const phase = useEnvironmentStore((s) => s.phase);
   const isNight = phase === 'night';
@@ -264,7 +266,7 @@ export function DioramaBridges({
           2. CẦU LONG BIÊN (Phía Nam: Z = +3.8, nối Tây Nam & Đông Nam)
           Kiến trúc cầu giàn thép nhịp vòm kép di sản cổ kính
          ======================================================== */}
-      <group position={[0, 0.12, 3.8]}>
+      <group position={[0, 0.12, 3.8]} visible={!isDesktopLean}>
         {/* Bản mặt cầu đường sắt & đường bộ hỗn hợp bóng bẩy */}
         <mesh receiveShadow castShadow position={[0, 0, 0]}>
           <boxGeometry args={[5.4, 0.04, 0.5]} />

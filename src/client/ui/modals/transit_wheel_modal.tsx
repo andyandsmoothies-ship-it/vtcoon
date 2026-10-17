@@ -122,23 +122,27 @@ export const TransitWheelModal: React.FC<TransitWheelModalProps> = ({
               const y2 = 100 - 95 * Math.cos(endAngle);
               const pathData = `M 100 100 L ${x1} ${y1} A 95 95 0 0 1 ${x2} ${y2} Z`;
               const midDeg = (idx + 0.5) * (360 / TRANSIT_WHEEL_CONFIGS.length);
+              const isFlipped = midDeg > 90 && midDeg < 270;
+              const iconY = isFlipped ? 64 : 36;
+              const textY = isFlipped ? 36 : 64;
               return (
                 <g key={cfg.outcome}>
                   <path d={pathData} fill={cfg.color} stroke="#0f172a" strokeWidth="2" />
                   <g transform={`rotate(${midDeg} 100 100)`}>
                     <text
                       x="100"
-                      y="36"
+                      y={iconY}
                       textAnchor="middle"
                       dominantBaseline="central"
                       fontSize="22"
+                      transform={isFlipped ? `rotate(180 100 ${iconY})` : undefined}
                       className="select-none pointer-events-none drop-shadow"
                     >
                       {cfg.icon}
                     </text>
                     <text
                       x="100"
-                      y="64"
+                      y={textY}
                       textAnchor="middle"
                       dominantBaseline="central"
                       fontSize="12"
@@ -146,6 +150,7 @@ export const TransitWheelModal: React.FC<TransitWheelModalProps> = ({
                       fill="#ffffff"
                       stroke="#0f172a"
                       strokeWidth="0.5"
+                      transform={isFlipped ? `rotate(180 100 ${textY})` : undefined}
                       className="select-none pointer-events-none font-mono tracking-tight"
                     >
                       {cfg.weight}%
@@ -156,47 +161,48 @@ export const TransitWheelModal: React.FC<TransitWheelModalProps> = ({
             })}
           </g>
 
-          {/* Trục xoay trung tâm tĩnh (Center Hub) */}
-          <circle cx="100" cy="100" r="23" fill="#0f172a" stroke="#f59e0b" strokeWidth="2.5" />
-          <circle cx="100" cy="100" r="17" fill="#1e293b" stroke="#d97706" strokeWidth="1" />
+          {/* Trục xoay trung tâm tĩnh (Center Hub) - Đồng thau & Obsidian hoàng gia */}
+          <circle cx="100" cy="100" r="25" fill="#0f172a" stroke="#b45309" strokeWidth="2" />
+          <circle cx="100" cy="100" r="21" fill="#1e293b" stroke="#f59e0b" strokeWidth="2" />
+          <circle cx="100" cy="100" r="16" fill="#0b0f19" stroke="#fbbf24" strokeWidth="1" />
           <text
             x="100"
-            y="101"
+            y="100.5"
             textAnchor="middle"
             dominantBaseline="central"
-            fontSize="13"
-            className="select-none pointer-events-none"
+            fontSize="14"
+            className="select-none pointer-events-none drop-shadow"
           >
             🧭
           </text>
         </svg>
       </div>
 
-      {/* Thẻ hiển thị kết quả chi tiết */}
+      {/* Thẻ hiển thị kết quả chi tiết - Tôn vinh phần thưởng tài chính */}
       {hasFinished && activeConfig && (
-        <div className="w-full mt-2 p-3 bg-slate-800/90 border border-amber-500/40 rounded-xl text-center animate-fade-in flex flex-col gap-1">
-          <div className="text-sm font-bold text-amber-400 flex items-center justify-center gap-1.5 flex-wrap">
-            <span>{activeConfig.icon}</span>
+        <div className="w-full mt-2 p-3.5 bg-gradient-to-b from-slate-800 to-slate-900 border-2 border-amber-500/60 rounded-xl text-center animate-fade-in flex flex-col gap-1.5 shadow-xl">
+          <div className="text-base font-black text-amber-400 flex items-center justify-center gap-1.5 flex-wrap">
+            <span className="text-lg">{activeConfig.icon}</span>
             <span>{activeConfig.labelVi}</span>
             {payload?.boostSteps !== undefined && payload.boostSteps > 0 && (
-              <span className="text-xs bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded font-mono font-bold">
+              <span className="text-xs bg-amber-500/25 text-amber-300 px-2 py-0.5 rounded-full font-mono font-black border border-amber-500/40 shadow-sm">
                 +{payload.boostSteps} ô
               </span>
             )}
             {payload?.payout !== undefined && payload.payout > 0 && (
-              <span className="text-xs bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded font-mono font-bold">
+              <span className="text-xs bg-emerald-500/25 text-emerald-300 px-2 py-0.5 rounded-full font-mono font-black border border-emerald-500/40 shadow-sm">
                 +{payload.payout} Tr.
               </span>
             )}
           </div>
-          <div className="text-xs text-slate-300">{activeConfig.descriptionVi}</div>
+          <div className="text-xs text-slate-300 font-medium">{activeConfig.descriptionVi}</div>
           {payload?.targetCell !== undefined && payload.targetCell !== cellIndex && (
-            <div className="text-[11px] font-medium text-amber-300/90 mt-0.5">
+            <div className="text-[11px] font-bold text-amber-300 bg-amber-950/40 py-1 px-2 rounded-lg border border-amber-500/30 mt-0.5">
               🚀 Đích đến tiếp theo: Ô #{payload.targetCell}
             </div>
           )}
           {payload?.targetCell !== undefined && payload.targetCell === cellIndex && outcome === TransitWheelOutcome.SAFE_HAVEN && (
-            <div className="text-[11px] font-medium text-emerald-300/90 mt-0.5">
+            <div className="text-[11px] font-bold text-emerald-300 bg-emerald-950/40 py-1 px-2 rounded-lg border border-emerald-500/30 mt-0.5">
               🛡️ Chưa sở hữu BĐS: Lưu lại an toàn tại trạm #{cellIndex}
             </div>
           )}
@@ -207,15 +213,17 @@ export const TransitWheelModal: React.FC<TransitWheelModalProps> = ({
       <div className="mt-5 w-full flex justify-center">
         {!isSpinning && !hasFinished ? (
           <button
+            type="button"
             onClick={handleStartSpin}
-            className="w-full min-h-[44px] py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-amber-950 font-bold rounded-xl shadow-lg active:scale-95 transition-all text-sm uppercase tracking-wider focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+            className="w-full min-h-[48px] py-3 px-4 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-amber-950 font-black rounded-xl border-2 border-amber-600 shadow-[0_4px_0_0_#b45309] hover:shadow-[0_4px_0_0_#92400e] active:shadow-[0_1px_0_0_#92400e] active:translate-y-[3px] transition-all text-sm uppercase tracking-wider cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
           >
             Quay Vòng Xoay
           </button>
         ) : hasFinished ? (
           <button
+            type="button"
             onClick={handleDismiss}
-            className="w-full min-h-[44px] py-3 bg-slate-800 hover:bg-slate-700 text-amber-400 font-semibold rounded-xl border border-amber-500/40 active:scale-95 transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+            className="w-full min-h-[48px] py-3 px-4 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-amber-950 font-black rounded-xl border-2 border-amber-600 shadow-[0_4px_0_0_#b45309] hover:shadow-[0_4px_0_0_#92400e] active:shadow-[0_1px_0_0_#92400e] active:translate-y-[3px] transition-all text-sm uppercase tracking-wider cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
           >
             {dismissButtonText}
           </button>

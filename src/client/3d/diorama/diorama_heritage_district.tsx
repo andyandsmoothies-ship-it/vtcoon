@@ -165,22 +165,27 @@ export function CathedralProceduralFallback({
 
 export interface DioramaHeritageDistrictProps {
   readonly isMobile?: boolean;
+  readonly isDesktopLean?: boolean;
 }
 
 /**
  * Phân Khu Di Sản Bến Thành & Nhà Thờ Cổ (Diorama Heritage District)
  * Tích hợp SafeGLTFModel nạp mô hình .glb chuẩn PBR và thềm gạch bông Đông Dương
  */
-export function DioramaHeritageDistrict({ isMobile = false }: DioramaHeritageDistrictProps = {}): React.ReactElement {
+export function DioramaHeritageDistrict({
+  isMobile = false,
+  isDesktopLean = false,
+}: DioramaHeritageDistrictProps = {}): React.ReactElement {
   const phase = useEnvironmentStore((s) => s.phase);
   const isNight = phase === 'night';
   const isSunset = phase === 'sunset';
 
   const encausticTexture = useMemo(() => getHeritageEncausticTileTexture(), []);
   const mobileHeritageGeoms = isMobile ? getBatchedMobileHeritageGeometries() : null;
+  const districtPos: [number, number, number] = isDesktopLean ? [4.2, 0.16, -4.2] : [-4.5, 0.16, 2.9];
 
   return (
-    <group position={[-4.5, 0.16, 2.9]} data-testid="diorama-heritage-district">
+    <group position={districtPos} data-testid="diorama-heritage-district">
       {isMobile ? (
         <mesh position={[0.35, -0.009, 0.02]} receiveShadow>
           <boxGeometry args={[1.7, 0.024, 2.6]} />
@@ -198,7 +203,7 @@ export function DioramaHeritageDistrict({ isMobile = false }: DioramaHeritageDis
           fallback={<CathedralProceduralFallback isNight={isNight} isSunset={isSunset} isMobile={isMobile} />}
           castShadow={!isMobile}
           receiveShadow
-          forceFallback={isMobile ? true : undefined}
+          forceFallback={isMobile || isDesktopLean ? true : undefined}
         />
       </group>
       <group position={[0.2, 0, -0.22]} data-testid="cong-xa-paris-plaza">
