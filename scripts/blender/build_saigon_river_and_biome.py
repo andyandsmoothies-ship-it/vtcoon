@@ -229,7 +229,7 @@ def export_saigon_river():
     # 1: Dark Riverbed
     mat_bed = make_pbr_material("Mat_RiverBedSediment", "#0C4A6E", metallic=0.05, roughness=0.90)
     # 2: Jade River Water
-    mat_water = make_pbr_material("Mat_SaigonJadeWater", "#0284C7", metallic=0.12, roughness=0.18, coat=0.8)
+    mat_water = make_pbr_material("Mat_SaigonJadeWater", "#0E4D44", metallic=0.15, roughness=0.20, coat=0.8)
 
     obj.data.materials.append(mat_stone)
     obj.data.materials.append(mat_bed)

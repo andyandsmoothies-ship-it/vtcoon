@@ -11,6 +11,7 @@ const TILE_BORDER_Y = 0.015;
 const TILE_SURFACE_Y = 0.020;
 
 export const SAIGON_RIVER_SPLINE_MODEL_URL = '/models/board/saigon_river_spline.glb';
+export const PAVED_ESPLANADE_MODEL_URL = '/models/board/indochine_paved_esplanade.glb';
 
 export function getSereneTerrainInfillGeometry(): BufferGeometry {
 
@@ -62,10 +63,12 @@ export function getSereneTerrainInfillGeometry(): BufferGeometry {
 
 export interface DioramaTerrainProps {
   readonly isSereneTabletop?: boolean;
+  readonly mossPalette?: boolean;
 }
 
 export function DioramaTerrain({
   isSereneTabletop = false,
+  mossPalette = false,
 }: DioramaTerrainProps = {}): React.ReactElement {
   const infillGeom = useMemo(() => (isSereneTabletop ? getSereneTerrainInfillGeometry() : null), [isSereneTabletop]);
 
@@ -86,7 +89,7 @@ export function DioramaTerrain({
               <group position={[0, 0, 0]}>
                 <mesh receiveShadow position={[0, RIVER_BED_Y, 0]}>
                   <boxGeometry args={[1.8, 0.008, 15.0]} />
-                  <meshStandardMaterial color="#0284C7" roughness={0.25} metalness={0.10} transparent opacity={0.88} />
+                  <meshStandardMaterial color="#0E4D44" roughness={0.20} metalness={0.15} transparent opacity={0.92} />
                 </mesh>
                 <mesh position={[0, RIVER_BED_Y + 0.005, 0]} data-testid="diorama-river-waves">
                   <boxGeometry args={[1.6, 0.002, 14.8]} />
@@ -98,13 +101,13 @@ export function DioramaTerrain({
           {/* Lớp thảm cỏ trung tâm nối liền bán đảo Tây/Đông với bờ kè đá S-Curve */}
           {infillGeom && (
             <mesh receiveShadow geometry={infillGeom} data-testid="diorama-tabletop-infill">
-              <meshStandardMaterial color="#15803D" roughness={0.85} side={DoubleSide} />
+              <meshStandardMaterial color={mossPalette ? '#1B4332' : '#15803D'} roughness={mossPalette ? 0.78 : 0.85} side={DoubleSide} />
             </mesh>
           )}
           {/* Tấm chắn đáy chống hở void cho góc nhìn dốc trên thiết bị di động */}
           <mesh receiveShadow position={[0, -0.050, 0]} data-testid="diorama-void-guard">
             <boxGeometry args={[13.2, 0.010, 14.0]} />
-            <meshStandardMaterial color="#15803D" roughness={0.85} />
+            <meshStandardMaterial color={mossPalette ? '#1B4332' : '#15803D'} roughness={mossPalette ? 0.78 : 0.85} />
           </mesh>
         </>
       ) : (
@@ -150,7 +153,7 @@ export function DioramaTerrain({
       {/* ========================================================
           2 & 3. BÁN ĐẢO TÂY & ĐÔNG: Khối nền, đại lộ, vỉa hè & vạch kẻ đường (Batched Merged Geometries)
          ======================================================== */}
-      <BatchedDioramaLandmasses isSereneTabletop={isSereneTabletop} />
+      <BatchedDioramaLandmasses isSereneTabletop={isSereneTabletop} mossPalette={mossPalette} />
       <group data-testid="diorama-park-relief" position={[-2.7, 0, -2.5]}>
         <mesh receiveShadow position={[0, 0.035, 0]}>
           <boxGeometry args={[1.6, 0.025, 2.2]} />
@@ -158,7 +161,7 @@ export function DioramaTerrain({
         </mesh>
         <mesh receiveShadow position={[0, 0.05, 0]}>
           <boxGeometry args={[1.5, 0.01, 2.1]} />
-          <meshStandardMaterial color="#15803D" roughness={0.85} />
+          <meshStandardMaterial color={mossPalette ? '#1B4332' : '#15803D'} roughness={mossPalette ? 0.78 : 0.85} />
         </mesh>
       </group>
     </group>

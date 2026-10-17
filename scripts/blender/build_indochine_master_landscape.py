@@ -62,8 +62,8 @@ def build_dong_son_relief(mat_bronze):
     Radius R <= 1.35m.
     """
     bm = bmesh.new()
-    z_base = 0.0020
-    z_relief = 0.0045
+    z_base = 0.0030
+    z_relief = 0.0060
 
     # 1. Central Sun Disc & 14-Ray Sun Star
     num_rays = 14
@@ -417,12 +417,12 @@ def generate_indochine_master_landscape():
     print("=== [IMP-436] BLENDER 5.2 LTS INDOCHINE MASTER TABLETOP SCULPT ===")
 
     # Materials
-    mat_bronze = make_pbr_material("DongSon_Bronze_Relief", "#8C6239", metallic=0.90, roughness=0.18, coat=0.35)
-    mat_gold = make_pbr_material("Pagoda_Gold", "#D4AF37", metallic=0.88, roughness=0.20, coat=0.30)
+    mat_bronze = make_pbr_material("DongSon_Bronze_Relief", "#C5A059", metallic=0.88, roughness=0.20, coat=0.40)
+    mat_gold = make_pbr_material("Pagoda_Gold", "#F59E0B", metallic=0.90, roughness=0.18, coat=0.35)
     mat_wood = make_pbr_material("Indochine_Wood", "#451A03", metallic=0.05, roughness=0.45)
     mat_stone = make_pbr_material("Terrace_Stone", "#78716C", metallic=0.04, roughness=0.75)
-    mat_pot = make_pbr_material("Bonsai_Ceramic_Pot", "#1C1917", metallic=0.18, roughness=0.18, coat=0.50)
-    mat_foliage = make_pbr_material("Bonsai_Foliage", "#16A34A", metallic=0.02, roughness=0.50)
+    mat_pot = make_pbr_material("Bonsai_Ceramic_Pot", "#064E3B", metallic=0.15, roughness=0.18, coat=0.60)
+    mat_foliage = make_pbr_material("Bonsai_Foliage", "#16A34A", metallic=0.02, roughness=0.45)
 
     # 1. 3D Embossed Dong Son Relief
     obj_relief = build_dong_son_relief(mat_bronze)

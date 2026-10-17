@@ -350,7 +350,7 @@ export function MiniatureCityDiorama({ isMobile: propIsMobile, isVisible = true,
       {!isMobile && !isDesktopLean && <DioramaWaterfrontStation />}
       {!isMobile && !isDesktopLean && <DioramaLandmarkNorthStation />}
       {!isMobile && !isDesktopLean && <DioramaTropicalFlora />}
-      <DioramaTerrain isSereneTabletop={isSerene} />
+      <DioramaTerrain isSereneTabletop={isSerene} mossPalette={isDesktopLean} />
       <CentralMonumentPlaza isMobile={isMobile} isDesktopLean={isDesktopLean} />
       <DioramaPedestrianPromenades isMobile={isMobile} />
       <DioramaUrbanCanopy isMobile={isMobile} isSereneTabletop={isSerene} />

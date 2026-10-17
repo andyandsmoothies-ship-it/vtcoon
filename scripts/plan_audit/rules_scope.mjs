@@ -26,6 +26,10 @@ export function auditScopeAndSubsystems(targetFiles) {
       cohesiveFamilies.add('src/client/ui/modals');
       continue;
     }
+    if (norm.startsWith('src/client/3d/diorama/')) {
+      cohesiveFamilies.add('src/client/3d/diorama');
+      continue;
+    }
     if (norm.startsWith('src/server/')) {
       cohesiveFamilies.add('src/server');
       continue;
@@ -51,7 +55,8 @@ export function auditScopeAndSubsystems(targetFiles) {
   const detectedSubsystems = new Set();
   for (const relPath of targetFiles.keys()) {
     const norm = relPath.replace(/\\/g, '/');
-    if (norm.startsWith('scripts/')) detectedSubsystems.add('tooling-scripts');
+    if (norm.startsWith('scripts/blender/')) detectedSubsystems.add('toolchain-blender');
+    else if (norm.startsWith('scripts/')) detectedSubsystems.add('tooling-scripts');
     else if (norm.startsWith('src/client/3d/') || norm === 'src/client/game_canvas.tsx') detectedSubsystems.add('client-3d');
     else if (norm.startsWith('src/client/ui/')) detectedSubsystems.add('client-ui');
     else if (norm.startsWith('src/client/store/') || norm.startsWith('src/client/network/') || norm.startsWith('src/client/hooks/') || norm === 'src/client/main.tsx' || norm === 'src/client/offline_landing.ts') detectedSubsystems.add('client-state');

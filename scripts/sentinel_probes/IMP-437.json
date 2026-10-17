@@ -1,0 +1,56 @@
+[
+  {
+    "file": "src/client/3d/board_layout.tsx",
+    "desc": "AST: Invert TabletopSalonAtmosphere isDesktopLean gate",
+    "target": "if (!isDesktopLean) return null;",
+    "replacement": "if (isDesktopLean) return null;"
+  },
+  {
+    "file": "src/client/3d/board_layout.tsx",
+    "desc": "AST: Corrupt TabletopSalonAtmosphere chandelier key light color",
+    "target": "color=\"#FFF2D6\"",
+    "replacement": "color=\"#FF0000\""
+  },
+  {
+    "file": "src/client/3d/board_layout.tsx",
+    "desc": "AST: Corrupt TabletopSalonAtmosphere auction dimming intensity",
+    "target": "intensity={isAuctionActive ? 0.08 : 0.38}",
+    "replacement": "intensity={isAuctionActive ? 0.99 : 0.38}"
+  },
+  {
+    "file": "src/client/3d/board_layout.tsx",
+    "desc": "AST: Corrupt GameBoard desktop SafeGLTFModel esplanade gate",
+    "target": "{!isMobile && (",
+    "replacement": "{isMobile && ("
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Invert MiniatureCityDiorama mossPalette wiring",
+    "target": "mossPalette={isDesktopLean}",
+    "replacement": "mossPalette={!isDesktopLean}"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_terrain.tsx",
+    "desc": "AST: Corrupt PAVED_ESPLANADE_MODEL_URL path",
+    "target": "export const PAVED_ESPLANADE_MODEL_URL = '/models/board/indochine_paved_esplanade.glb';",
+    "replacement": "export const PAVED_ESPLANADE_MODEL_URL = '/models/board/corrupted_esplanade.glb';"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_terrain.tsx",
+    "desc": "AST: Sever mossPalette propagation to BatchedDioramaLandmasses",
+    "target": "mossPalette={mossPalette}",
+    "replacement": "mossPalette={false}"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_terrain.tsx",
+    "desc": "AST: Corrupt infill moss color",
+    "target": "color={mossPalette ? '#0C2919' : '#15803D'}",
+    "replacement": "color={'#15803D'}"
+  },
+  {
+    "file": "src/client/3d/diorama/batched_diorama_terrain.tsx",
+    "desc": "AST: Corrupt BatchedDioramaLandmasses grass moss color",
+    "target": "color={mossPalette ? '#0C2919' : '#15803D'}",
+    "replacement": "color={'#15803D'}"
+  }
+]

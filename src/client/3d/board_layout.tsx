@@ -31,6 +31,9 @@ import { Diagnostic3DPanel } from './diagnostic_3d_panel';
 import { InstancedRegionalBuildingsPool } from './instanced_regional_buildings_pool';
 import { resolveRenderTierProfile } from './procedural_mobile_blender_meshes';
 import { SafeGLTFModel } from './asset_loader/safe_gltf_model';
+import { useSafeFrame } from './safe_frame';
+import { isThreeFog, isThreeColor } from './time_of_day_lighting_helpers';
+import { PAVED_ESPLANADE_MODEL_URL } from './diorama/diorama_terrain';
 
 export const BOARD_CHASSIS_MODEL_URL = '/models/board/board_chassis_walnut.glb';
 
@@ -84,6 +87,46 @@ export function computeOwnerMap(
     }
   }
   return map;
+}
+
+export function TabletopSalonAtmosphere({ isDesktopLean = false }: { readonly isDesktopLean?: boolean }): React.ReactElement | null {
+  const storeActiveModal = useGameStore((s) => s.activeModal);
+  const activeModal = useGameStore.getState()?.activeModal ?? storeActiveModal;
+  const isAuctionActive = activeModal === 'auction';
+
+  useSafeFrame(({ scene }) => {
+    if (!isDesktopLean || isAuctionActive) return;
+    if (scene.background && isThreeColor(scene.background)) {
+      scene.background.set('#161311');
+    }
+    if (scene.fog && isThreeFog(scene.fog)) {
+      scene.fog.color.set('#241C16');
+      scene.fog.near = 25.0;
+      scene.fog.far = 95.0;
+    }
+  });
+
+  if (!isDesktopLean) return null;
+  return (
+    <>
+      <directionalLight
+        position={[10, 24, 14]}
+        intensity={isAuctionActive ? 0.08 : 0.38}
+        color="#FFF2D6"
+        castShadow
+        shadow-camera-left={-16}
+        shadow-camera-right={16}
+        shadow-camera-top={16}
+        shadow-camera-bottom={-16}
+        shadow-camera-near={1}
+        shadow-camera-far={60}
+        shadow-bias={-0.0001}
+        data-testid="tabletop-salon-light"
+      />
+      <ambientLight color="#FFE8D6" intensity={0.35} data-testid="tabletop-salon-ambient" />
+      <pointLight position={[2.7, 1.8, -1.6]} intensity={0.5} distance={4.0} color="#F59E0B" />
+    </>
+  );
 }
 
 export interface GameBoardProps {
@@ -192,10 +235,13 @@ export function GameBoard({
 
       {/* 0.02. Mặt Bàn Gỗ Óc Chó Thượng Lưu Phòng VIP (Executive VIP Salon Tabletop Plinth) */}
       {isTableVisible && !isMobile && (
-        <mesh receiveShadow position={[0, WALNUT_TABLE_Y - 0.005, 0]}>
-          <boxGeometry args={[48.0, 0.19, 48.0]} />
-          <meshStandardMaterial color="#1C140D" roughness={0.35} metalness={0.05} />
-        </mesh>
+        <>
+          <mesh receiveShadow position={[0, WALNUT_TABLE_Y - 0.005, 0]}>
+            <boxGeometry args={[48.0, 0.19, 48.0]} />
+            <meshStandardMaterial color="#1C140D" roughness={0.35} metalness={0.05} />
+          </mesh>
+          <TabletopSalonAtmosphere isDesktopLean={!isMobile} />
+        </>
       )}
 
       {/* 0.05. Bảng Điều Khiển Chẩn Đoán 3D (Kích hoạt khi có ?debug=3d) */}
@@ -210,6 +256,14 @@ export function GameBoard({
       {/* 2. Sa bàn đô thị thu nhỏ: Đảo tài chính, cầu vượt, sân vận động & bến du thuyền */}
       <group visible={isCityVisible}>
         <MiniatureCityDiorama isMobile={isMobile} isDesktopLean={!isMobile} isVisible={isCityVisible} />
+        {!isMobile && (
+          <SafeGLTFModel
+            url={PAVED_ESPLANADE_MODEL_URL}
+            position={[0, 0, 0]}
+            receiveShadow
+            fallback={null}
+          />
+        )}
       </group>
 
       {/* 3. Sàn diễn xúc xắc 3D thoáng đãng trên Đại Lộ Sài Gòn */}
