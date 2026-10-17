@@ -1,0 +1,44 @@
+[
+  {
+    "file": "src/client/ui/player_card.tsx",
+    "desc": "AST: Invert two-stage property cluster decoupling condition",
+    "target": "(ownedProperties?.length ?? 0) > 0 ? (",
+    "replacement": "(ownedProperties?.length ?? 0) < 0 ? ("
+  },
+  {
+    "file": "src/client/ui/player_card_helpers.ts",
+    "desc": "AST: Corrupt empty property badge label",
+    "target": "Chưa có BĐS",
+    "replacement": "Đã có BĐS"
+  },
+  {
+    "file": "src/client/ui/player_card_helpers.ts",
+    "desc": "AST: Corrupt empty property badge fraction count",
+    "target": "${ownedCount}/28",
+    "replacement": "${ownedCount}/99"
+  },
+  {
+    "file": "src/client/ui/player_card_helpers.ts",
+    "desc": "AST: Suppress luxury jewel gold specular glow on owned property dots",
+    "target": "border-amber-400/90 shadow-[0_0_6px_rgba(245,158,11,0.6)]",
+    "replacement": "border-slate-300 shadow-none"
+  },
+  {
+    "file": "src/client/ui/top_bar.tsx",
+    "desc": "AST: Strip rounded-full capsule geometry from TopBar",
+    "target": "rounded-full shadow-xl shadow-amber-950/10",
+    "replacement": "rounded-none shadow-none"
+  },
+  {
+    "file": "src/client/ui/top_bar.tsx",
+    "desc": "AST: Strip frosted glass backdrop-blur from TopBar",
+    "target": "bg-[#FFFDF8]/85 backdrop-blur-md",
+    "replacement": "bg-[#FFFDF8] backdrop-blur-none"
+  },
+  {
+    "file": "src/client/ui/player_hud_list.tsx",
+    "desc": "AST: Break desktop aside layout width token",
+    "target": "md:w-64",
+    "replacement": "md:w-96"
+  }
+]

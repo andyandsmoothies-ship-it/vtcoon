@@ -113,3 +113,7 @@
     - **Frustum & Clearance**: Outer edge clearance $\ge 10.60\text{m}$ ($\max(|X|, |Z|) - R_{\text{lagoon}} \ge 10.60\text{m}$) outside board outer edge $\pm 10.15\text{m}$. Sited on West/North flanks ($X \le -12\text{m}$ or $Z \le -12\text{m}$) within `overview` frustum (`|ndcX| <= 0.85, |ndcY| <= 0.82`), with zero foreground South/East occlusion.
     - **Stepped Stacking**: Upward tapering ($W_{\text{lower}} > W_{\text{upper}}$) with ascending elevations and $\ge 0.02\text{m}$ inter-volume embedding. Mount real `.glb` monuments via `<SafeGLTFModel fallback={null} />`.
     - **Mobile Zero-Allocation**: Desktop Ultra components MUST be gated by `!isMobile` and short-circuit `useMemo` to `null` on mobile (0 mobile draw calls, 0 allocations).
+
+29. **Overview Camera Bottom-Dock Clearance & Contact Occlusion**:
+    - **Cell 0 GO Clearance**: On desktop overview (1280x800), to prevent fixed bottom action docks (`fixed bottom-4`, height $\sim 64\text{px}$) from occluding the South tile label (Cell 0 Khởi Hành at $[+7.0, 0, +7.0]$), camera look-at center target requires a forward bias ($Z_{\text{target}} \ge +0.3\text{m}$) or pitch angle $\ge 40.0^\circ$ (baseline $38.6^\circ$).
+

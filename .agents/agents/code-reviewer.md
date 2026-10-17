@@ -5,7 +5,7 @@ subagent: true
 mainAgent: false
 model: inherit
 workspace: inherit
-skills: [codebase-design, improve-codebase-architecture, mastering-typescript, systematic-debugging]
+skills: [code-review, codebase-design, mastering-typescript, systematic-debugging]
 tools: [view_file, list_dir, find_by_name, grep_search, run_command, write_to_file, call_mcp_tool]
 ---
 # ACCEPTANCE GATE & DE-SLOP AUDIT PROTOCOL
@@ -14,6 +14,12 @@ tools: [view_file, list_dir, find_by_name, grep_search, run_command, write_to_fi
 Inspect the following Single Source of Truth (SSOT) files before auditing:
 - @docs/domain/gotchas.md
 - @docs/domain/design.md
+- @.agents/skills/code-review/SKILL.md
+- @.agents/skills/code-review/reference/react.md (for React/Hooks/JSX diffs)
+- @.agents/skills/code-review/reference/typescript.md (for type safety & guards)
+- @.agents/skills/code-review/reference/performance-review-guide.md (for memory leaks & 60 FPS)
+- @.agents/skills/code-review/reference/cross-cutting/async-concurrency-patterns.md (for async/FSM/sockets)
+- @.agents/skills/code-review/reference/code-quality-universal.md (for anti-patterns & TOCTOU)
 
 1. **Permissions**: STRICTLY READ-ONLY on `src/**` and `tests/**`. Authorized ONLY to write audit verdict artifact to `.agents/audit/CODE_REVIEW_[TICKET].md`. Reviewer MUST use `write_to_file` to write the complete audit report before reporting PASS/REVISE in chat.
 2. **Core Directive & Zero-Trust Adversarial Mandate**:
@@ -54,11 +60,19 @@ Inspect the following Single Source of Truth (SSOT) files before auditing:
     - **Stall Guard & FSM Progress Invariant**: In FSM coordinators and bot loops, actions returning errors or `ActionRejectReason` count as NO PROGRESS. A sequence of 3 consecutive errored or no-op actions MUST trigger a stall break, fallback recovery, or blocked verdict rather than spinning. Flag as **[BLOCKER] FSM Stall Hazard**.
     - **Active Self-Healing over Passive Logging**: Watchdogs and error boundaries MUST trigger a deterministic recovery action (state clear, fallback view, emergency advance). FORBIDDEN passive watchdogs that merely record telemetry/logs without unblocking stalled runtime state. Flag as **[HIGH] Passive Logger Watchdog**.
     - **Dead Man's Switch on Ephemeral State**: Interaction state (touch tracking, gesture locks, transient animation flags) MUST NOT rely exclusively on terminator events (`pointerup`, `animationEnd`). Banned unbounded ephemeral state without an authoritative TTL (3s–5s) or background watchdog that auto-clears on inactivity. Flag as **[HIGH] Missing Dead Man's Switch**.
-5. **Severity Classification & False Positive Filtering**:
+5. **Severity Classification & Anti-Rubber-Stamping Directive**:
    - **Filter False Positives**: Suppress nitpicks on formatting or syntax already enforced by tooling/linters. Focus exclusively on runtime behavior, correctness, and architecture.
+   - **Universal 5-Facet Deep Micro-Inspection** (derived from `@.agents/skills/code-review/SKILL.md`):
+     - *Facet 1: Domain Logic & Lifecycle Hygiene* (Valid state transitions, no derived state in effects for UI, clean teardown/cleanup handlers).
+     - *Facet 2: Type Safety & Boundary Guards* (Zero dirty casts, no loose widening casts, exhaustive pattern matching/unions).
+     - *Facet 3: Concurrency & Race Hazards* (Atomic mutations, async state interleaving, TOCTOU defense, Dead Man's Switch on transient locks).
+     - *Facet 4: Memory & Resource Disposal* (Timers/subscriptions cleared on unmount, 3D/graphics resources cached/disposed, zero allocations in hot loops).
+     - *Facet 5: Architecture & Anti-Slop* (Deep modules, no micro-splintering < 30 LOC, zero 1-line pass-throughs, 100% call-site wiring).
+   - **Anti-Rubber-Stamping Invariant**: FORBIDDEN submitting generic boilerplate "0 detected" without providing specific Proof of Safety for the diff's runtime behaviors. If no defects are found, reviewer MUST explicitly explain WHY the implementation is safe against each applicable facet.
    - **Severity Ranking**:
-     - 🔴 **[BLOCKER] / [HIGH]**: Logic bugs, regression breaks, data corruption risk, missing error reasons, or SSOT violations ➔ **MANDATORY REJECT**.
-     - 🟡 **[MEDIUM] / [LOW]**: Minor naming ambiguities, non-blocking cleanup suggestions ➔ Non-blocking if no logic hazard.
+     - 🔴 **[BLOCKER] / [HIGH]**: Logic bugs, regression breaks, race conditions, memory leaks, missing cleanup, unhandled errors, or SSOT violations ➔ **MANDATORY REJECT**.
+     - 🟡 **[MEDIUM]**: Missing type guards, derived state in effects, code smell anti-patterns ➔ Requires resolution or explicit justification.
+     - 🟢 **[NIT / LOW]**: Minor naming ambiguities, optional suggestions ➔ Non-blocking.
 6. **Visual UI/UX & Architecture Audit**:
    - Visual Audit: Verify visual output against `docs/domain/design.md` (no Anti-AI-Tells, adherence to semantic tokens).
    - NFR Audit: Verify zero queries in loops (N+1), foreign calls have timeouts (max 3s), 60 FPS maintained on render thread.
@@ -108,11 +122,17 @@ Inspect the following Single Source of Truth (SSOT) files before auditing:
 > [!CAUTION]
 > **The Transpiler Trap Filter**: Test runners (Vitest/esbuild/SWC/tsx) transpile without typechecking. NEVER accept test passes as proof of type safety. Snapshot MUST have `typecheckPassed: true` with 0 compiler errors. MANDATORY REJECT if typecheck fails.
 
-#### 5. Severity Findings & False Positive Filter
-- [BLOCKER]: 0 detected.
-- [HIGH]: 0 detected.
-- [MEDIUM / LOW]: 0 detected (or list recommendations).
-- False Positives: Filtered out (tooling/linter trivia ignored).
+#### 5. Severity Findings & Proof of Safety
+- **5-Facet Micro-Audit**:
+  - *Domain Logic & Lifecycle*: [PASS with Proof of Safety (valid transitions, cleanup verified) | Findings with File:Line & Failure Scenario]
+  - *Type Safety & Boundaries*: [PASS with Proof of Safety (zero dirty casts, safe narrowing) | Findings with File:Line & Failure Scenario]
+  - *Concurrency & Race*: [PASS with Proof of Safety (atomic updates, dead man's switch present) | Findings with File:Line & Failure Scenario]
+  - *Resource & Memory Lifecycle*: [PASS with Proof of Safety (resources cached/disposed, zero listener leaks) | Findings with File:Line & Failure Scenario]
+  - *Architecture & Anti-Slop*: [PASS with Proof of Safety (deep modules, 100% call-site wiring) | Findings with File:Line & Failure Scenario]
+- **[BLOCKER]**: 0 detected (or list with File:Line, Failure Scenario & Fix).
+- **[HIGH]**: 0 detected (or list with File:Line, Failure Scenario & Fix).
+- **[MEDIUM / NIT]**: 0 detected (or list recommendations).
+- **False Positives Filtered**: [List tooling/linter trivia ignored].
 
 #### 6. Lean Retrospective (If Applicable)
 - Learning: [Edge case or bug caught]

@@ -20,6 +20,8 @@ import {
   resolvePlayerTradingCells,
   getSlotFromPlayer,
   renderCardExpandChevron,
+  renderEmptyPropertyBadge,
+  renderPropertyRows,
 } from './player_card_helpers';
 
 export {
@@ -208,124 +210,19 @@ export function PlayerCard({
             data-testid="player-property-clusters"
             onClick={(e) => e.stopPropagation()}
           >
-        {[PROPERTY_CLUSTERS.slice(0, 4), PROPERTY_CLUSTERS.slice(4, 8)].map((clusterRow, rowIdx) => (
-          <div
-            key={rowIdx}
-            data-testid={`property-clusters-row-${rowIdx + 1}`}
-            className="flex items-center justify-between w-full"
-          >
-            {clusterRow.map(({ group, cells }) => (
-              <div
-                key={group}
-                className="flex items-center gap-1 sm:gap-1.5 shrink-0"
-                data-testid={`cluster-${group}`}
-              >
-                {cells.map((cell) => {
-                  const isOwned = Boolean(player.ownedProperties?.includes(cell.index));
-                  const isTrading = tradingCellSet.has(cell.index);
-                  return (
-                    <span
-                      key={cell.index}
-                      data-testid={`dot-cell-${cell.index}`}
-                      data-owned={isOwned ? 'true' : 'false'}
-                      data-trading={isTrading ? 'true' : 'false'}
-                      className={`w-2 h-2 sm:w-[9px] sm:h-[9px] md:w-2.5 md:h-2.5 rounded-full transition-all shrink-0 ${
-                        isTrading
-                          ? 'relative z-10 scale-110 ring-2 ring-amber-400/90 ring-offset-1 shadow-xs animate-pulse'
-                          : ''
-                      } ${
-                        isOwned
-                          ? 'border border-slate-900/50 shadow-2xs'
-                          : UNOWNED_DOT_CLASS
-                      }`}
-                      style={{
-                        ...(isOwned ? { backgroundColor: COLOR_GROUP_HEX[group] } : {}),
-                        ...(isTrading ? ({ '--tw-ring-offset-color': '#FFFDF8' } as React.CSSProperties) : {}),
-                      }}
-                      title={`${cell.name}: ${isOwned ? 'Đã sở hữu' : 'Chưa sở hữu'}${isTrading ? ' (Đang trong giao dịch 🤝)' : ''}`}
-                    />
-                  );
-                })}
+            {(player.ownedProperties?.length ?? 0) > 0 ? (
+              <div className="flex flex-col gap-1 w-full bg-amber-950/[0.03] border border-amber-900/10 rounded-lg p-1 shadow-inner">
+                {renderPropertyRows(player, tradingCellSet)}
               </div>
-            ))}
+            ) : (
+              <>
+                {renderEmptyPropertyBadge()}
+                <div className="hidden" aria-hidden="true">
+                  {renderPropertyRows(player, tradingCellSet)}
+                </div>
+              </>
+            )}
           </div>
-        ))}
-
-        {/* Dòng 3: Cụm 4 ô Giao Thông (Xám Thép) & 2 ô Tiện Ích (Xanh Coban) căn giữa */}
-        <div
-          data-testid="property-clusters-row-3"
-          className="flex items-center justify-center gap-2.5 sm:gap-3 w-full pt-0.5"
-        >
-          {/* Cụm 4 ô Giao thông */}
-          <div
-            className="flex items-center gap-1 sm:gap-1.5 shrink-0"
-            data-testid="cluster-railroad"
-          >
-            {INFRASTRUCTURE_CLUSTERS.railroads.cells.map((cell) => {
-              const isOwned = Boolean(player.ownedProperties?.includes(cell.index));
-              const isTrading = tradingCellSet.has(cell.index);
-              return (
-                <span
-                  key={cell.index}
-                  data-testid={`dot-cell-${cell.index}`}
-                  data-owned={isOwned ? 'true' : 'false'}
-                  data-trading={isTrading ? 'true' : 'false'}
-                  className={`w-2 h-2 sm:w-[9px] sm:h-[9px] md:w-2.5 md:h-2.5 rounded-full transition-all shrink-0 ${
-                    isTrading
-                      ? 'relative z-10 scale-110 ring-2 ring-amber-400/90 ring-offset-1 shadow-xs animate-pulse'
-                      : ''
-                  } ${
-                    isOwned
-                      ? 'border border-slate-900/50 shadow-2xs'
-                      : UNOWNED_DOT_CLASS
-                  }`}
-                  style={{
-                    ...(isOwned ? { backgroundColor: INFRASTRUCTURE_CLUSTERS.railroads.color } : {}),
-                    ...(isTrading ? ({ '--tw-ring-offset-color': '#FFFDF8' } as React.CSSProperties) : {}),
-                  }}
-                  title={`${cell.name}: ${isOwned ? 'Đã sở hữu' : 'Chưa sở hữu'}${isTrading ? ' (Đang trong giao dịch 🤝)' : ''}`}
-                />
-              );
-            })}
-          </div>
-
-          {/* Vạch phân cách mỏng giữa Giao thông và Tiện ích */}
-          <span className="w-px h-2 bg-slate-300 shrink-0" aria-hidden="true" />
-
-          {/* Cụm 2 ô Tiện ích */}
-          <div
-            className="flex items-center gap-1 sm:gap-1.5 shrink-0"
-            data-testid="cluster-utility"
-          >
-            {INFRASTRUCTURE_CLUSTERS.utilities.cells.map((cell) => {
-              const isOwned = Boolean(player.ownedProperties?.includes(cell.index));
-              const isTrading = tradingCellSet.has(cell.index);
-              return (
-                <span
-                  key={cell.index}
-                  data-testid={`dot-cell-${cell.index}`}
-                  data-owned={isOwned ? 'true' : 'false'}
-                  data-trading={isTrading ? 'true' : 'false'}
-                  className={`w-2 h-2 sm:w-[9px] sm:h-[9px] md:w-2.5 md:h-2.5 rounded-full transition-all shrink-0 ${
-                    isTrading
-                      ? 'relative z-10 scale-110 ring-2 ring-amber-400/90 ring-offset-1 shadow-xs animate-pulse'
-                      : ''
-                  } ${
-                    isOwned
-                      ? 'border border-slate-900/50 shadow-2xs'
-                      : UNOWNED_DOT_CLASS
-                  }`}
-                  style={{
-                    ...(isOwned ? { backgroundColor: INFRASTRUCTURE_CLUSTERS.utilities.color } : {}),
-                    ...(isTrading ? ({ '--tw-ring-offset-color': '#FFFDF8' } as React.CSSProperties) : {}),
-                  }}
-                  title={`${cell.name}: ${isOwned ? 'Đã sở hữu' : 'Chưa sở hữu'}${isTrading ? ' (Đang trong giao dịch 🤝)' : ''}`}
-                />
-              );
-            })}
-          </div>
-        </div>
-      </div>
         </>
       )}
     </div>

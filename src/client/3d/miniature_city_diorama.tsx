@@ -30,6 +30,7 @@ import {
   disposeDioramaStaticBlenderBatches,
 } from './diorama/diorama_static_blender_batches';
 import { DioramaChainReaction } from './diorama_chain_reaction';
+import { createDongSonPlazaTexture } from './tabletop_texture_generator';
 
 export {
   DioramaModelRailroad,
@@ -40,9 +41,10 @@ export {
 
 export interface CentralMonumentPlazaProps {
   readonly isMobile?: boolean;
+  readonly isDesktopLean?: boolean;
 }
 
-export function CentralMonumentPlaza({ isMobile = false }: CentralMonumentPlazaProps = {}): React.ReactElement {
+export function CentralMonumentPlaza({ isMobile = false, isDesktopLean = false }: CentralMonumentPlazaProps = {}): React.ReactElement {
   const desc = getCentralMonumentLODDescriptor(isMobile);
   if (desc.isMobile) {
     return (
@@ -58,6 +60,35 @@ export function CentralMonumentPlaza({ isMobile = false }: CentralMonumentPlazaP
       </group>
     );
   }
+
+  if (isDesktopLean) {
+    const dongSonTexture = createDongSonPlazaTexture();
+    return (
+      <group position={[0, 0.02, 0]} data-testid="central-monument-plaza">
+        {/* 1. Đài bệ đá phiến hoa cương tròn neo vững chân đế sa bàn */}
+        <mesh receiveShadow position={[0, 0.008, 0]}>
+          <cylinderGeometry args={[1.52, 1.58, 0.015, 48]} />
+          <meshStandardMaterial color="#334155" roughness={0.45} metalness={0.1} />
+        </mesh>
+        {/* 2. Đĩa Khảm Trống Đồng PBR phẳng lặng */}
+        <mesh receiveShadow position={[0, 0.015, 0]}>
+          <cylinderGeometry args={[1.38, 1.44, 0.03, 48]} />
+          <meshStandardMaterial
+            color={dongSonTexture ? '#FFFFFF' : '#8C6239'}
+            metalness={0.85}
+            roughness={0.24}
+            map={dongSonTexture ?? undefined}
+          />
+        </mesh>
+        {/* 3. Vành khuyên đồng thau bo viền ngoài (không che mặt đĩa) */}
+        <mesh receiveShadow position={[0, 0.0305, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[1.38, 1.44, 48]} />
+          <meshStandardMaterial color="#D4AF37" metalness={0.9} roughness={0.2} />
+        </mesh>
+      </group>
+    );
+  }
+
   return (
     <group position={[0, 0.02, 0]} data-testid="central-monument-plaza">
       {/* 1. Bệ đá cẩm thạch vòng ngoài */}
@@ -286,35 +317,48 @@ export function DioramaUrbanCanopy({ isMobile = false }: { readonly isMobile?: b
 export interface MiniatureCityDioramaProps {
   readonly isMobile?: boolean;
   readonly isVisible?: boolean;
+  readonly isDesktopLean?: boolean;
 }
 
-export function MiniatureCityDiorama({ isMobile: propIsMobile, isVisible = true }: MiniatureCityDioramaProps = {}): React.ReactElement {
+export function MiniatureCityDiorama({ isMobile: propIsMobile, isVisible = true, isDesktopLean = false }: MiniatureCityDioramaProps = {}): React.ReactElement {
   const isMobile = propIsMobile ?? isMobileDevice();
   const landmarkGroupRefs = useRef<Array<Group | null>>([]);
   return (
     <group position={[0, 0, 0]} data-testid="miniature-city-diorama">
       <DioramaBoardRim isMobile={isMobile} />
-      <group name="ChainLandmark_metro-line-station" ref={(el) => { landmarkGroupRefs.current[1] = el; }}><DioramaModelRailroad isMobile={isMobile} isVisible={isVisible} /></group>
-      {!isMobile && <DioramaWaterfrontStation />}
-      {!isMobile && <DioramaLandmarkNorthStation />}
-      {!isMobile && <DioramaTropicalFlora />}
+      <group name="ChainLandmark_metro-line-station" ref={(el) => { landmarkGroupRefs.current[1] = el; }}>
+        {!isDesktopLean && <DioramaModelRailroad isMobile={isMobile} isVisible={isVisible} />}
+      </group>
+      {!isMobile && !isDesktopLean && <DioramaWaterfrontStation />}
+      {!isMobile && !isDesktopLean && <DioramaLandmarkNorthStation />}
+      {!isMobile && !isDesktopLean && <DioramaTropicalFlora />}
       <DioramaTerrain />
-      <CentralMonumentPlaza isMobile={isMobile} />
+      <CentralMonumentPlaza isMobile={isMobile} isDesktopLean={isDesktopLean} />
       <DioramaPedestrianPromenades isMobile={isMobile} />
       <DioramaUrbanCanopy isMobile={isMobile} />
-      <group name="ChainLandmark_bason-bridge" ref={(el) => { landmarkGroupRefs.current[3] = el; }}><DioramaBridges isMobile={isMobile} isVisible={isVisible} /></group>
-      {!isMobile && <DioramaCivicCenter />}
-      {!isMobile && <DioramaWaterfrontPark />}
-      <DioramaContainerPort isMobile={isMobile} isVisible={isVisible} />
-      <DioramaMarina isMobile={isMobile} isVisible={isVisible} />
-      <group name="ChainLandmark_saigon-river-cruiser" ref={(el) => { landmarkGroupRefs.current[0] = el; }}><DioramaHarborCruiser isMobile={isMobile} isVisible={isVisible} /></group>
-      <group name="ChainLandmark_bitexco-tower" ref={(el) => { landmarkGroupRefs.current[2] = el; }}><DioramaSkyline isMobile={isMobile} isVisible={isVisible} /></group>
-      {!isMobile && <DioramaHighriseBlocks />}
-      {!isMobile && <DioramaResidentialPool />}
-      <group name="ChainLandmark_notre-dame-cathedral" ref={(el) => { landmarkGroupRefs.current[4] = el; }}><DioramaHeritageDistrict isMobile={isMobile} /></group>
-      {!isMobile && <DioramaShophouseBlocks />}
-      <DioramaMicroLife isMobile={isMobile} isVisible={isVisible} />
-      <DioramaTraffic isMobile={isMobile} isVisible={isVisible} />
+      <group name="ChainLandmark_bason-bridge" ref={(el) => { landmarkGroupRefs.current[3] = el; }}>
+        {(!isMobile || !isDesktopLean) && <DioramaBridges isMobile={isMobile} isVisible={isVisible} />}
+      </group>
+      {!isMobile && !isDesktopLean && <DioramaCivicCenter />}
+      {!isMobile && !isDesktopLean && <DioramaWaterfrontPark />}
+      {!isDesktopLean && <DioramaContainerPort isMobile={isMobile} isVisible={isVisible} />}
+      {!isDesktopLean && <DioramaMarina isMobile={isMobile} isVisible={isVisible} />}
+      <group name="ChainLandmark_saigon-river-cruiser" ref={(el) => { landmarkGroupRefs.current[0] = el; }}>
+        {(!isMobile || !isDesktopLean) && (
+          <DioramaHarborCruiser isMobile={isMobile} isVisible={isVisible} isMoored={isDesktopLean} />
+        )}
+      </group>
+      <group name="ChainLandmark_bitexco-tower" ref={(el) => { landmarkGroupRefs.current[2] = el; }}>
+        {(!isMobile || !isDesktopLean) && <DioramaSkyline isMobile={isMobile} isVisible={isVisible} />}
+      </group>
+      {!isMobile && !isDesktopLean && <DioramaHighriseBlocks />}
+      {!isMobile && !isDesktopLean && <DioramaResidentialPool />}
+      <group name="ChainLandmark_notre-dame-cathedral" ref={(el) => { landmarkGroupRefs.current[4] = el; }}>
+        {(!isMobile || !isDesktopLean) && <DioramaHeritageDistrict isMobile={isMobile} />}
+      </group>
+      {!isMobile && !isDesktopLean && <DioramaShophouseBlocks />}
+      {!isDesktopLean && <DioramaMicroLife isMobile={isMobile} isVisible={isVisible} />}
+      {!isDesktopLean && <DioramaTraffic isMobile={isMobile} isVisible={isVisible} />}
       {!isMobile && <DioramaChainReaction isMobile={isMobile} isVisible={isVisible} landmarkGroupRefs={landmarkGroupRefs} />}
     </group>
   );

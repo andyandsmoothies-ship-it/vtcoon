@@ -26,19 +26,26 @@ export function calculateCruiserTrajectory(time: number): { x: number; y: number
 export interface DioramaHarborCruiserProps {
   readonly isMobile?: boolean;
   readonly isVisible?: boolean;
+  readonly isMoored?: boolean;
 }
 
-export function DioramaHarborCruiser({ isMobile = false, isVisible = true }: DioramaHarborCruiserProps = {}): React.ReactElement {
+export function DioramaHarborCruiser({
+  isMobile = false,
+  isVisible = true,
+  isMoored = false,
+}: DioramaHarborCruiserProps = {}): React.ReactElement {
   const boatRef = useRef<Group>(null);
   const wakeRef = useRef<Mesh>(null);
+  const initialZ = isMoored ? 2.2 : 5.2;
 
   return (
-    <group ref={boatRef} position={[0, -0.032, 5.2]} data-testid="diorama-harbor-cruiser">
+    <group ref={boatRef} position={[0, -0.032, initialZ]} data-testid="diorama-harbor-cruiser">
       {!isMobile && (
         <DioramaHarborCruiserFrameLoop
           isVisible={isVisible}
           boatRef={boatRef}
           wakeRef={wakeRef}
+          isMoored={isMoored}
         />
       )}
       {/* Zero castShadow theo chuẩn [TC-221.15] */}
@@ -68,12 +75,14 @@ export interface DioramaHarborCruiserFrameLoopProps {
   readonly isVisible?: boolean;
   readonly boatRef: React.RefObject<Group | null>;
   readonly wakeRef?: React.RefObject<Mesh | null>;
+  readonly isMoored?: boolean;
 }
 
 export function DioramaHarborCruiserFrameLoop({
   isVisible = true,
   boatRef,
   wakeRef,
+  isMoored = false,
 }: DioramaHarborCruiserFrameLoopProps): null {
   const timeAccumRef = useRef<number>(0);
 
@@ -88,14 +97,24 @@ export function DioramaHarborCruiserFrameLoop({
     const t = timeAccumRef.current;
 
     if (boatRef.current) {
-      const traj = calculateCruiserTrajectory(t);
-      boatRef.current.position.set(traj.x, traj.y, traj.z);
-      boatRef.current.rotation.y = traj.yaw;
-      boatRef.current.rotation.z = Math.sin(t * 2.8) * 0.02;
+      if (isMoored) {
+        const y = -0.032 + Math.sin(t * 2.8) * 0.003;
+        boatRef.current.position.set(0, y, 2.2);
+        boatRef.current.rotation.set(0, Math.PI / 2, Math.sin(t * 2.8) * 0.015);
+      } else {
+        const traj = calculateCruiserTrajectory(t);
+        boatRef.current.position.set(traj.x, traj.y, traj.z);
+        boatRef.current.rotation.y = traj.yaw;
+        boatRef.current.rotation.z = Math.sin(t * 2.8) * 0.02;
+      }
     }
     if (wakeRef?.current) {
-      const s = calculateCruiserWake(t);
-      wakeRef.current.scale.set(s, 1, s);
+      if (isMoored) {
+        wakeRef.current.scale.set(0, 0, 0);
+      } else {
+        const s = calculateCruiserWake(t);
+        wakeRef.current.scale.set(s, 1, s);
+      }
     }
   });
 

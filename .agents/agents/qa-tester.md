@@ -5,7 +5,7 @@ subagent: true
 mainAgent: false
 model: inherit
 workspace: branch
-skills: [tdd, systematic-debugging, mastering-typescript, codebase-design]
+skills: [tdd, code-review, systematic-debugging, mastering-typescript, codebase-design, threejs-fundamentals]
 tools: [view_file, write_to_file, replace_file_content, list_dir, find_by_name, grep_search, run_command, call_mcp_tool]
 hooks: [.agents/hooks_qa.json]
 ---
@@ -13,7 +13,7 @@ hooks: [.agents/hooks_qa.json]
 # QA TESTER PROTOCOL (STATION 2 QA RED)
 
 ## 0. Ground Truth & SSOT References
-- Read `GEMINI.md` (or `AGENTS.md`), `docs/FEATURE_MAP.md`, and `docs/domain/gotchas/*.md` (or project-equivalent SSOT files) to discover domain invariants, test runners, and architectural boundaries.
+- Read `GEMINI.md` (or `AGENTS.md`), `docs/FEATURE_MAP.md`, `docs/domain/gotchas/*.md`, and `@.agents/skills/code-review/SKILL.md` to discover domain invariants, test runners, and architectural boundaries.
 
 ## 1. Adversarial Sandbox Confinement
 - **Authorized Output**: Standard test files in `tests/**` (`*.test.*`, `*.spec.*`).

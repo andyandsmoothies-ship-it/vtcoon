@@ -114,13 +114,20 @@ ${srcFiles.map((f) => {
 | Assertion Density | \`${contractFile || 'tests'}\` | 1-4 asserts/test, 0 loops | ${contractAssertCount} asserts across ${contractTestCount} tests (avg: ${(contractAssertCount / (contractTestCount || 1)).toFixed(2)}), 0 loops | 0 | APPROVED |
 | Scope Conformance | \`check_scope.mjs\` | 100% matched Plan | 100% matched, zero scope creep | 0 | APPROVED |
 
-#### 5. Severity Findings & False Positive Filter
-- **[BLOCKER]**: 0 detected.
-- **[HIGH]**: 0 detected.
-- **[MEDIUM / LOW]**: 0 detected.
+#### 5. Severity Findings & Proof of Safety
+- **5-Facet Micro-Audit**:
+  - *Domain Logic & Lifecycle*: TODO_REVIEW_REQUIRED: [PASS với Proof of Safety (chuyển đổi hợp lệ, cleanup đầy đủ) | Ghi nhận lỗi]
+  - *Type Safety & Boundaries*: TODO_REVIEW_REQUIRED: [PASS với Proof of Safety (zero dirty casts, thu hẹp type an toàn) | Ghi nhận lỗi]
+  - *Concurrency & Race*: TODO_REVIEW_REQUIRED: [PASS với Proof of Safety (cập nhật nguyên tử, Dead Man's Switch có mặt) | Ghi nhận lỗi]
+  - *Resource & Memory Lifecycle*: TODO_REVIEW_REQUIRED: [PASS với Proof of Safety (giải phóng tài nguyên/cache, không leak listener) | Ghi nhận lỗi]
+  - *Architecture & Anti-Slop*: TODO_REVIEW_REQUIRED: [PASS với Proof of Safety (deep module, 100% dây nối call-site) | Ghi nhận lỗi]
+- **[BLOCKER]**: 0 detected (hoặc danh sách kèm File:Line, Failure Scenario & Hướng sửa).
+- **[HIGH]**: 0 detected (hoặc danh sách kèm File:Line, Failure Scenario & Hướng sửa).
+- **[MEDIUM / NIT]**: 0 detected (hoặc danh sách khuyến nghị).
+- **False Positives Filtered**: Đã lọc sạch các góp ý cú pháp/định dạng do tooling quản lý.
 
 #### 6. Lean Retrospective
-- **Learning**: Việc áp dụng quy trình kiểm soát cơ học giúp phát hiện sớm các điểm lệch pha và bảo vệ tính toàn vẹn của mã nguồn mà không làm chậm nhịp độ phát triển.
+- **Learning**: TODO_REVIEW_REQUIRED: Bài học kỹ thuật cụ thể rút ra từ lát cắt này.
 - **Resolution Layer**: Cập nhật bài học vào tài liệu Gotchas tương ứng.
 
 ---

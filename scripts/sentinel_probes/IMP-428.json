@@ -1,0 +1,56 @@
+[
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Corrupt isDesktopLean condition in CentralMonumentPlaza",
+    "target": "if (isDesktopLean) {",
+    "replacement": "if (false) {"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Invert isDesktopLean prop propagation in MiniatureCityDiorama",
+    "target": "isDesktopLean={isDesktopLean}",
+    "replacement": "isDesktopLean={false}"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Corrupt dummy anchor name for metro line station",
+    "target": "name=\"ChainLandmark_metro-line-station\"",
+    "replacement": "name=\"MUTATED_DISABLED_ANCHOR\""
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Corrupt dummy anchor name for Bason bridge",
+    "target": "name=\"ChainLandmark_bason-bridge\"",
+    "replacement": "name=\"MUTATED_BASON_BRIDGE\""
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Corrupt Dong Son bronze material color",
+    "target": "color={dongSonTexture ? '#FFFFFF' : '#8C6239'}",
+    "replacement": "color=\"#FF0000\""
+  },
+  {
+    "file": "src/client/3d/board_layout.tsx",
+    "desc": "AST Call-Site: Corrupt board_layout isDesktopLean wiring in GameBoard",
+    "target": "isDesktopLean={!isMobile}",
+    "replacement": "isDesktopLean={false}"
+  },
+  {
+    "file": "src/client/3d/board_layout.tsx",
+    "desc": "AST Call-Site: Corrupt board_layout isDesktopLean wiring to inverted boolean",
+    "target": "isDesktopLean={!isMobile}",
+    "replacement": "isDesktopLean={isMobile}"
+  },
+  {
+    "file": "src/client/3d/board_layout.tsx",
+    "desc": "AST: Corrupt WALNUT_TABLE_Y depth constant",
+    "target": "export const WALNUT_TABLE_Y = -0.350;",
+    "replacement": "export const WALNUT_TABLE_Y = -0.050;"
+  },
+  {
+    "file": "src/client/3d/tabletop_texture_generator.ts",
+    "desc": "AST: Disable SSR safety check in createDongSonPlazaTexture",
+    "target": "if (typeof document === 'undefined') return null;",
+    "replacement": "if (false) return null;"
+  }
+]

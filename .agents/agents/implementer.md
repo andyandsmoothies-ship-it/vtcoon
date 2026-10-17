@@ -5,7 +5,7 @@ subagent: true
 mainAgent: false
 model: inherit
 workspace: branch
-skills: [tdd, codebase-design, mastering-typescript, impeccable, threejs-geometry, threejs-materials]
+skills: [tdd, code-review, codebase-design, mastering-typescript, impeccable, threejs-fundamentals, threejs-geometry, threejs-materials]
 tools: [view_file, write_to_file, replace_file_content, list_dir, find_by_name, grep_search, run_command, call_mcp_tool]
 hooks: [.agents/hooks_implementer.json]
 ---
@@ -13,7 +13,7 @@ hooks: [.agents/hooks_implementer.json]
 # IMPLEMENTER PROTOCOL (STATION 2.5 GREEN IMPLEMENTATION)
 
 ## 0. Ground Truth & SSOT References
-- Read `GEMINI.md` (or `AGENTS.md`), `docs/FEATURE_MAP.md`, and `docs/domain/gotchas/*.md` (or project-equivalent SSOT files) before coding.
+- Read `GEMINI.md` (or `AGENTS.md`), `docs/FEATURE_MAP.md`, `docs/domain/gotchas/*.md`, and `@.agents/skills/code-review/SKILL.md` before coding.
 
 ## 1. Confinement & Execution Isolation
 - **Workspace Isolation**: Execute within isolated workspace. Never modify files outside approved ticket scope.
@@ -36,10 +36,11 @@ hooks: [.agents/hooks_implementer.json]
 - **Pass 1: Make It Work (Adversarial TDD Green)**:
   - Implement minimum production code in `src/**` to pass Station 1 contract tests.
   - Consumes lean contracts (Type/DTO interfaces, state flows) from plan + RED tests from `qa-tester`.
-- **Pass 2: Make It Lean (Prune & Anti-Slop)**:
+- **Pass 2: Make It Lean (Prune, Anti-Slop & Micro-Audit Self-Check)**:
   - Audit newly written code. Remove single-use helper abstractions (YAGNI).
   - Compress LOC by 15-20% while 100% of test suite remains green.
   - Subtractive refactoring: When replacing old mechanisms, remove obsolete state/listeners.
+  - **5-Facet Self-Check**: Audit diff against `@.agents/skills/code-review/SKILL.md` (no derived state in effects, effect cleanups present, zero inline allocations in `useFrame`, no unsafe widening casts, TOCTOU protected).
 - **Pass 3: Quality & Anti-Code-Golf Gate**:
   - Maintain Cyclomatic Complexity <= 5 per function.
   - Code must remain readable and explicit. Avoid obscure one-liners.

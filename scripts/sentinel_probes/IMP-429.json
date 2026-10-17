@@ -1,0 +1,56 @@
+[
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Suppress Ba Son bridge on desktop lean",
+    "target": "{(!isMobile || !isDesktopLean) && <DioramaBridges isMobile={isMobile} isVisible={isVisible} />}",
+    "replacement": "{!isDesktopLean && <DioramaBridges isMobile={isMobile} isVisible={isVisible} />}"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Suppress Bitexco tower on desktop lean",
+    "target": "{(!isMobile || !isDesktopLean) && <DioramaSkyline isMobile={isMobile} isVisible={isVisible} />}",
+    "replacement": "{!isDesktopLean && <DioramaSkyline isMobile={isMobile} isVisible={isVisible} />}"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Suppress Heritage district on desktop lean",
+    "target": "{(!isMobile || !isDesktopLean) && <DioramaHeritageDistrict isMobile={isMobile} />}",
+    "replacement": "{!isDesktopLean && <DioramaHeritageDistrict isMobile={isMobile} />}"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Shrink slate plinth below 1.50m radius limit",
+    "target": "<cylinderGeometry args={[1.52, 1.58, 0.015, 48]} />",
+    "replacement": "<cylinderGeometry args={[1.20, 1.25, 0.015, 48]} />"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Corrupt medallion metalness tuning",
+    "target": "color={dongSonTexture ? '#FFFFFF' : '#8C6239'}\n            metalness={0.85}",
+    "replacement": "color={dongSonTexture ? '#FFFFFF' : '#8C6239'}\n            metalness={0.50}"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: Corrupt medallion roughness tuning",
+    "target": "metalness={0.85}\n            roughness={0.24}",
+    "replacement": "metalness={0.85}\n            roughness={0.60}"
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_harbor_cruiser.tsx",
+    "desc": "AST: Disable moored dock position at Z=2.2m",
+    "target": "const initialZ = isMoored ? 2.2 : 5.2;",
+    "replacement": "const initialZ = 5.2;"
+  },
+  {
+    "file": "src/client/3d/tabletop_texture_generator.ts",
+    "desc": "AST: Revert emerald canvas gradient to brown",
+    "target": "baseGrad.addColorStop(0, '#064E3B');",
+    "replacement": "baseGrad.addColorStop(0, '#8C6239');"
+  },
+  {
+    "file": "src/client/3d/board_layout.tsx",
+    "desc": "AST: Corrupt WALNUT_TABLE_Y depth constant",
+    "target": "export const WALNUT_TABLE_Y = -0.350;",
+    "replacement": "export const WALNUT_TABLE_Y = -0.050;"
+  }
+]

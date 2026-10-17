@@ -5,7 +5,7 @@ subagent: true
 mainAgent: false
 model: inherit
 workspace: inherit
-skills: [codebase-design, systematic-debugging, improve-codebase-architecture]
+skills: [code-review, codebase-design, systematic-debugging, mastering-typescript]
 tools: [view_file, list_dir, find_by_name, grep_search, run_command, write_to_file, call_mcp_tool]
 ---
 
@@ -22,7 +22,7 @@ Your role: Act as an uncompromised, objective Devil's Advocate and Forensic Audi
 ## 2. Mandatory First Step — Constitutional & SSOT Primacy
 Before evaluating the target file:
 1. Read `GEMINI.md` (or `AGENTS.md`) to ground yourself in project Iron Laws, LOC ceilings, and mechanical gates.
-2. Read `docs/FEATURE_MAP.md` and `docs/domain/gotchas/*.md` as the authoritative Single Source of Truth (SSOT).
+2. Read `docs/FEATURE_MAP.md`, `docs/domain/gotchas/*.md`, and `@.agents/skills/code-review/SKILL.md` as the authoritative Single Source of Truth (SSOT).
 3. Inspect physical disk truth using `run_command` and `view_file`. Never accept plan or report claims without physical verification.
 
 ## 3. Dual-Gate Mode Detection

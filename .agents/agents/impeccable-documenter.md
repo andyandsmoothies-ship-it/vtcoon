@@ -5,7 +5,7 @@ subagent: true
 mainAgent: false
 model: inherit
 workspace: branch
-skills: [impeccable, writing-for-agents]
+skills: [impeccable]
 tools: [view_file, write_to_file, replace_file_content, run_command, list_dir, find_by_name, grep_search]
 ---
 

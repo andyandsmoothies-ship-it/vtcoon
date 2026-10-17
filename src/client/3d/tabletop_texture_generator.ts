@@ -122,6 +122,108 @@ export function createWalnutRoughnessTexture(): THREE.Texture {
   return walnutRoughnessCache;
 }
 
+export interface DongSonCanvasGradient {
+  addColorStop(offset: number, color: string): void;
+}
+
+export interface DongSonCanvasRenderingContext {
+  beginPath(): void;
+  arc(x: number, y: number, radius: number, startAngle: number, endAngle: number, counterclockwise?: boolean): void;
+  stroke(): void;
+  fill(): void;
+  fillRect(x: number, y: number, w: number, h: number): void;
+  moveTo(x: number, y: number): void;
+  lineTo(x: number, y: number): void;
+  closePath(): void;
+  save(): void;
+  restore(): void;
+  translate(x: number, y: number): void;
+  rotate(angle: number): void;
+  createRadialGradient?(x0: number, y0: number, r0: number, x1: number, y1: number, r1: number): DongSonCanvasGradient;
+  fillStyle: string | DongSonCanvasGradient | CanvasPattern;
+  strokeStyle: string | DongSonCanvasGradient | CanvasPattern;
+  lineWidth: number;
+}
+
+let cachedDongSonTexture: THREE.CanvasTexture | null = null;
+
+export function drawDongSonMedallion(ctx: DongSonCanvasRenderingContext, size: number): void {
+  const center = size / 2;
+  const radius = size * 0.48;
+
+  // 1. Imperial Royal Emerald / Obsidian Marble radial gradient base plate
+  if (typeof ctx.createRadialGradient === 'function') {
+    const baseGrad = ctx.createRadialGradient(center, center, 0, center, center, radius);
+    baseGrad.addColorStop(0, '#064E3B');
+    baseGrad.addColorStop(0.7, '#04382A');
+    baseGrad.addColorStop(1, '#022C22');
+    ctx.fillStyle = baseGrad;
+  } else {
+    ctx.fillStyle = '#064E3B';
+  }
+  ctx.beginPath();
+  ctx.arc(center, center, radius, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 2. Outer antique gold rim
+  ctx.strokeStyle = '#D4AF37';
+  ctx.lineWidth = size * 0.015;
+  ctx.stroke();
+
+  // 3. Concentric geometric decorative bands in gleaming gold
+  const bandRadii = [0.88, 0.72, 0.58, 0.42, 0.28];
+  ctx.lineWidth = size * 0.005;
+  ctx.strokeStyle = '#D4AF37';
+  for (const rFrac of bandRadii) {
+    ctx.beginPath();
+    ctx.arc(center, center, radius * rFrac, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  // 4. Central 14-point Sunburst Star with gold gradient
+  const starRadius = radius * 0.24;
+  const innerStarRadius = radius * 0.08;
+  const rays = 14;
+  if (typeof ctx.createRadialGradient === 'function') {
+    const starGrad = ctx.createRadialGradient(center, center, 0, center, center, starRadius);
+    starGrad.addColorStop(0, '#FEF08A');
+    starGrad.addColorStop(0.5, '#FDE047');
+    starGrad.addColorStop(1, '#D4AF37');
+    ctx.fillStyle = starGrad;
+  } else {
+    ctx.fillStyle = '#D4AF37';
+  }
+  ctx.beginPath();
+  for (let i = 0; i < rays * 2; i++) {
+    const angle = (i * Math.PI) / rays - Math.PI / 2;
+    const r = i % 2 === 0 ? starRadius : innerStarRadius;
+    const x = center + Math.cos(angle) * r;
+    const y = center + Math.sin(angle) * r;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.fill();
+
+  // 5. Flying Lac birds motif band in gold
+  const birdRadius = radius * 0.65;
+  const birdCount = 10;
+  ctx.fillStyle = '#D4AF37';
+  for (let i = 0; i < birdCount; i++) {
+    const angle = (i * 2 * Math.PI) / birdCount;
+    ctx.save();
+    ctx.translate(center + Math.cos(angle) * birdRadius, center + Math.sin(angle) * birdRadius);
+    ctx.rotate(angle + Math.PI / 2);
+    ctx.beginPath();
+    ctx.moveTo(-size * 0.015, -size * 0.01);
+    ctx.lineTo(size * 0.02, 0);
+    ctx.lineTo(-size * 0.015, size * 0.01);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
 export function clearTabletopTextureCache(): void {
   if (walnutDiffuseCache) {
     walnutDiffuseCache.dispose();
@@ -131,8 +233,35 @@ export function clearTabletopTextureCache(): void {
     walnutRoughnessCache.dispose();
     walnutRoughnessCache = null;
   }
+  if (cachedDongSonTexture) {
+    cachedDongSonTexture.dispose();
+    cachedDongSonTexture = null;
+  }
 }
 
 export function clearTextureCaches(): void {
   clearTabletopTextureCache();
 }
+
+export function createDongSonPlazaTexture(): THREE.CanvasTexture | null {
+  if (typeof document === 'undefined') return null;
+  if (cachedDongSonTexture) return cachedDongSonTexture;
+
+  const size = 1024;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  if (ctx) {
+    drawDongSonMedallion(ctx, size);
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.ClampToEdgeWrapping;
+  texture.wrapT = THREE.ClampToEdgeWrapping;
+  texture.needsUpdate = true;
+  cachedDongSonTexture = texture;
+  return cachedDongSonTexture;
+}
+
+
