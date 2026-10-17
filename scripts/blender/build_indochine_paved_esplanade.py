@@ -219,9 +219,9 @@ def build_riverbank_esplanades(mat_granite_light, mat_granite_dark):
 def generate_indochine_paved_esplanade():
     clear_scene()
 
-    # Materials (#94A3B8 / #64748B, roughness >= 0.65)
-    mat_granite_light = make_pbr_material("Granite_Light_Paver", "#94A3B8", metallic=0.08, roughness=0.68)
-    mat_granite_dark = make_pbr_material("Granite_Charcoal_Curbs", "#64748B", metallic=0.10, roughness=0.72)
+    # Materials (#F8F6F0 / #78716C warm Indochine stone, roughness >= 0.65)
+    mat_granite_light = make_pbr_material("Granite_Light_Paver", "#F8F6F0", metallic=0.04, roughness=0.68)
+    mat_granite_dark = make_pbr_material("Granite_Charcoal_Curbs", "#78716C", metallic=0.06, roughness=0.72)
 
     # 1. Circular Beveled Stone Promenade
     obj_promenade = build_circular_promenade(mat_granite_light, mat_granite_dark)

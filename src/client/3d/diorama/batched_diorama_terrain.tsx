@@ -105,18 +105,20 @@ export interface BatchedDioramaLandmassesProps {
   readonly isSereneTabletop?: boolean;
   readonly showRoads?: boolean;
   readonly mossPalette?: boolean;
+  readonly visible?: boolean;
 }
 
 export function BatchedDioramaLandmasses({
   isSereneTabletop = false,
   showRoads,
   mossPalette = false,
+  visible,
 }: BatchedDioramaLandmassesProps = {}): React.ReactElement {
   const shouldRenderRoads = showRoads ?? !isSereneTabletop;
   const geoms = useMemo(() => createBatchedTerrainGeometries(), []);
   const noopRaycast = () => null;
   return (
-    <group position={[0, 0, 0]} data-testid="batched-diorama-landmasses">
+    <group position={[0, 0, 0]} data-testid="batched-diorama-landmasses" visible={visible}>
       <mesh geometry={geoms.soilGeom} receiveShadow raycast={noopRaycast}>
         <meshStandardMaterial color="#D4C5A3" roughness={0.78} />
       </mesh>

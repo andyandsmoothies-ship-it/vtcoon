@@ -123,8 +123,17 @@ export function TabletopSalonAtmosphere({ isDesktopLean = false }: { readonly is
         shadow-bias={-0.0001}
         data-testid="tabletop-salon-light"
       />
-      <ambientLight color="#FFE8D6" intensity={0.35} data-testid="tabletop-salon-ambient" />
+      <ambientLight color="#FFE8D6" intensity={0.75} data-testid="tabletop-salon-ambient" />
       <pointLight position={[2.7, 1.8, -1.6]} intensity={0.5} distance={4.0} color="#F59E0B" />
+      <pointLight
+        position={[0, 4.2, 0]}
+        intensity={isAuctionActive ? 0.4 : 1.8}
+        distance={14.0}
+        color="#FFF4D6"
+        data-testid="tabletop-chandelier-light"
+      />
+      <pointLight position={[-8, 14, -8]} intensity={0.55} distance={20.0} color="#CCFBF1" />
+      <pointLight position={[0, 12, -12]} intensity={0.65} distance={20.0} color="#FDE68A" />
     </>
   );
 }

@@ -14,9 +14,8 @@ export const SAIGON_RIVER_SPLINE_MODEL_URL = '/models/board/saigon_river_spline.
 export const PAVED_ESPLANADE_MODEL_URL = '/models/board/indochine_paved_esplanade.glb';
 
 export function getSereneTerrainInfillGeometry(): BufferGeometry {
-
   const geom = new BufferGeometry();
-  const slices = [
+  const baseSlices = [
     { z: -3.80, wx: -0.96, ex: 0.96 },
     { z: -3.30, wx: -0.40, ex: 1.05 },
     { z: -2.80, wx: 0.10, ex: 1.20 },
@@ -28,15 +27,39 @@ export function getSereneTerrainInfillGeometry(): BufferGeometry {
     { z: 3.80, wx: -0.96, ex: 0.96 },
   ];
 
+  function interpolateSlice(z: number): { z: number; wx: number; ex: number } {
+    if (z <= baseSlices[0]!.z) return baseSlices[0]!;
+    if (z >= baseSlices[baseSlices.length - 1]!.z) return baseSlices[baseSlices.length - 1]!;
+    for (let i = 0; i < baseSlices.length - 1; i += 1) {
+      const b1 = baseSlices[i]!;
+      const b2 = baseSlices[i + 1]!;
+      if (z >= b1.z && z <= b2.z) {
+        const t = (z - b1.z) / (b2.z - b1.z);
+        return {
+          z,
+          wx: b1.wx + t * (b2.wx - b1.wx),
+          ex: b1.ex + t * (b2.ex - b1.ex),
+        };
+      }
+    }
+    return baseSlices[0]!;
+  }
+
+  const numSteps = 32;
+  const slices: Array<{ z: number; wx: number; ex: number }> = [];
+  for (let i = 0; i <= numSteps; i += 1) {
+    const z = -3.80 + (i / numSteps) * 7.60;
+    slices.push(interpolateSlice(z));
+  }
+
   const positions: number[] = [];
   const y = 0.005;
+  const rCollar = 1.78; // Exact outer radius of dice arena brass lip collar (r_outer = 1.78)
 
   for (let i = 0; i < slices.length - 1; i += 1) {
     const s1 = slices[i]!;
     const s2 = slices[i + 1]!;
-    // West strip: connects X = -1.20 to river west curb wx (CCW from +Y), excluding circular arena R <= 1.68m
     const zMid = (s1.z + s2.z) / 2;
-    const rCollar = 1.68;
     if (Math.abs(zMid) < rCollar) {
       const xCollar1 = Math.sqrt(Math.max(0, rCollar * rCollar - s1.z * s1.z));
       const xCollar2 = Math.sqrt(Math.max(0, rCollar * rCollar - s2.z * s2.z));
@@ -85,6 +108,7 @@ export function DioramaTerrain({
             url={SAIGON_RIVER_SPLINE_MODEL_URL}
             position={[0, 0, 0]}
             receiveShadow
+            visible={!mossPalette}
             fallback={
               <group position={[0, 0, 0]}>
                 <mesh receiveShadow position={[0, RIVER_BED_Y, 0]}>
@@ -100,12 +124,23 @@ export function DioramaTerrain({
           />
           {/* Lớp thảm cỏ trung tâm nối liền bán đảo Tây/Đông với bờ kè đá S-Curve */}
           {infillGeom && (
-            <mesh receiveShadow geometry={infillGeom} data-testid="diorama-tabletop-infill">
+            <mesh
+              receiveShadow
+              position={[0, -0.020, 0]}
+              geometry={infillGeom}
+              data-testid="diorama-tabletop-infill"
+              visible={!mossPalette}
+            >
               <meshStandardMaterial color={mossPalette ? '#1B4332' : '#15803D'} roughness={mossPalette ? 0.78 : 0.85} side={DoubleSide} />
             </mesh>
           )}
           {/* Tấm chắn đáy chống hở void cho góc nhìn dốc trên thiết bị di động */}
-          <mesh receiveShadow position={[0, -0.050, 0]} data-testid="diorama-void-guard">
+          <mesh
+            receiveShadow
+            position={[0, -0.080, 0]}
+            data-testid="diorama-void-guard"
+            visible={!mossPalette}
+          >
             <boxGeometry args={[13.2, 0.010, 14.0]} />
             <meshStandardMaterial color={mossPalette ? '#1B4332' : '#15803D'} roughness={mossPalette ? 0.78 : 0.85} />
           </mesh>
@@ -153,8 +188,8 @@ export function DioramaTerrain({
       {/* ========================================================
           2 & 3. BÁN ĐẢO TÂY & ĐÔNG: Khối nền, đại lộ, vỉa hè & vạch kẻ đường (Batched Merged Geometries)
          ======================================================== */}
-      <BatchedDioramaLandmasses isSereneTabletop={isSereneTabletop} mossPalette={mossPalette} />
-      <group data-testid="diorama-park-relief" position={[-2.7, 0, -2.5]}>
+      <BatchedDioramaLandmasses isSereneTabletop={isSereneTabletop} mossPalette={mossPalette} visible={!mossPalette} />
+      <group data-testid="diorama-park-relief" position={[-2.7, 0, -2.5]} visible={!mossPalette}>
         <mesh receiveShadow position={[0, 0.035, 0]}>
           <boxGeometry args={[1.6, 0.025, 2.2]} />
           <meshStandardMaterial color="#64748B" roughness={0.6} metalness={0.15} />

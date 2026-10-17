@@ -107,8 +107,26 @@ export function ensureFreshBuild(repoRoot) {
     needsBuild = checkDirNewer(srcClientDir);
   }
 
+  const publicModelsDir = path.join(repoRoot, 'public', 'models');
+  if (!needsBuild && fs.existsSync(publicModelsDir)) {
+    const distMtime = fs.statSync(distHtml).mtimeMs;
+    function checkModelsNewer(dir) {
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+      for (const ent of entries) {
+        const full = path.join(dir, ent.name);
+        if (ent.isDirectory()) {
+          if (checkModelsNewer(full)) return true;
+        } else if (/\.(glb|gltf|png|jpe?g|bin)$/i.test(ent.name)) {
+          if (fs.statSync(full).mtimeMs > distMtime) return true;
+        }
+      }
+      return false;
+    }
+    needsBuild = checkModelsNewer(publicModelsDir);
+  }
+
   if (needsBuild) {
-    console.log('🔄 Source files in src/client/ are newer than dist/ (or dist missing). Running "npm run build" to ensure fresh bundle...');
+    console.log('🔄 Source files in src/client/ or public/models/ are newer than dist/ (or dist missing). Running "npm run build" to ensure fresh bundle...');
     execSync('npm run build', { stdio: 'inherit' });
   }
 }
