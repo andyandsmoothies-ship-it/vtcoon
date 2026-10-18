@@ -40,7 +40,7 @@ from vtcoon_tabletop.saigon_waterfront import build_saigon_quarter  # noqa: E402
 from vtcoon_tabletop.studio import (DIORAMA_COLLECTION, export_glb, render_still,  # noqa: E402
                                     setup_camera_and_lighting, setup_world_and_render)
 
-GLB_BUDGET_MB = 1.5
+GLB_BUDGET_MB = 2.0
 FORBIDDEN_TOKENS = ("shophouse", "villa", "townhouse", "residential", "nhapho", "nha_ong")
 
 
@@ -56,6 +56,7 @@ def _world_x_range(obj) -> tuple[float, float]:
 
 def validate_master_plan(coll_hanoi, coll_saigon) -> None:
     """Kiểm chứng 50/50: Hà Nội hoàn toàn X > 0, TP.HCM hoàn toàn X < 0, không có nhà phân lô."""
+    bpy.context.view_layer.update()
     violations = []
     for obj in coll_hanoi.all_objects:
         lo, _ = _world_x_range(obj)

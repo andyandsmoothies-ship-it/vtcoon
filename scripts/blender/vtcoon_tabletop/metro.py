@@ -1,16 +1,19 @@
 # -*- coding: utf-8 -*-
-"""Tuyến Metro trên cao hình chữ S Tây → Đông, 10 trụ chữ T và đoàn tàu Toybox 3 toa."""
+"""Tuyến Metro trên cao hình chữ S Tây → Đông, 10 trụ chữ T và đoàn tàu Toybox 3 toa chuyển động tuần hoàn."""
 
 import math
 
+import bpy
 from mathutils import Vector
 
-from .core import MeshBatch, add_box, add_cylinder, sweep_profile
+from .core import MeshBatch, add_box, add_cylinder, assign_action_slot, sweep_profile
 from .foundation import is_in_river
 from .hanoi import is_in_hoan_kiem
 
 DECK_Z = 0.44
 GIRDER_HALF = 0.175
+METRO_LOOP_FRAMES = 300
+CAR_SPACING = 0.64
 
 # Điểm điều khiển (Blender XY): Tây Bắc → vòng qua Bitexco → vượt sông phía Nam trống đồng
 # → lướt giữa Hồ Gươm & Cột Cờ → ôm mép ngoài phía Đông Hồ Hoàn Kiếm → kết thúc phía Bắc Hà Nội.
@@ -46,21 +49,24 @@ def _arc_lengths(pts):
 
 
 def _frame_at(pts, acc, s):
-    """Nội suy vị trí & tiếp tuyến tại độ dài cung s."""
-    s = max(0.0, min(acc[-1], s))
+    """Nội suy vị trí & tiếp tuyến tại độ dài cung s (hỗ trợ modulo tuần hoàn)."""
+    total_len = acc[-1]
+    s = (s % total_len) if total_len > 0.0 else 0.0
     i = max(1, next((k for k in range(1, len(acc)) if acc[k] >= s), len(acc) - 1))
     t = (s - acc[i - 1]) / max(1e-6, acc[i] - acc[i - 1])
     pos = pts[i - 1].lerp(pts[i], t)
-    tang = Vector((pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y, 0.0)).normalized()
+    tang = Vector((pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y, pts[i].z - pts[i - 1].z)).normalized()
     return pos, tang
 
 
-def _train_car(b, center: Vector, tang: Vector, nose_dir: int) -> None:
-    """Toa Toybox bo tròn 0.60m: thân trắng sứ, sọc cyan, kính đen, đèn pha LED."""
-    right = Vector((tang.y, -tang.x, 0.0))
+def _train_car(coll, mats, obj_name: str, nose_dir: int) -> bpy.types.Object:
+    """Tạo đối tượng Toa Toybox độc lập tại gốc tọa độ cục bộ (0,0,0), hướng +X."""
+    b = MeshBatch(obj_name, mats, coll)
+    tang = Vector((1.0, 0.0, 0.0))
+    right = Vector((0.0, -1.0, 0.0))
 
     def at(lx, ly, lz):
-        return center + tang * lx + right * ly + Vector((0.0, 0.0, lz))
+        return tang * lx + right * ly + Vector((0.0, 0.0, lz))
 
     section = [(-0.118, -0.100), (0.118, -0.100), (0.126, -0.020), (0.122, 0.066), (0.094, 0.110),
                (-0.094, 0.110), (-0.122, 0.066), (-0.126, -0.020)]
@@ -83,18 +89,60 @@ def _train_car(b, center: Vector, tang: Vector, nose_dir: int) -> None:
     body.faces.new(list(reversed(rings[0])))
     body.faces.new(rings[-1])
 
-    yaw = math.atan2(tang.y, tang.x)
     span = (x1 - x0) + (0.06 if nose_dir else -0.02)
     mid = 0.5 * (x0 + x1) + 0.02 * nose_dir
-    add_box(b("obsidian_glass"), at(mid, 0.0, 0.026), (span, 0.256, 0.066), yaw)
-    add_box(b("metro_cyan"), at(mid, 0.0, -0.042), (span + 0.02, 0.258, 0.040), yaw)
-    add_box(b("metro_cyan"), at(mid, 0.0, 0.080), (span - 0.04, 0.246, 0.016), yaw)
+    add_box(b("obsidian_glass"), at(mid, 0.0, 0.026), (span, 0.256, 0.066), 0.0)
+    add_box(b("metro_cyan"), at(mid, 0.0, -0.042), (span + 0.02, 0.258, 0.040), 0.0)
+    add_box(b("metro_cyan"), at(mid, 0.0, 0.080), (span - 0.04, 0.246, 0.016), 0.0)
     for hx in (-0.13, 0.13):
-        add_box(b("concrete"), at(hx, 0.0, 0.122), (0.15, 0.13, 0.026), yaw)
+        add_box(b("concrete"), at(hx, 0.0, 0.122), (0.15, 0.13, 0.026), 0.0)
     if nose_dir:
-        add_box(b("obsidian_glass"), at(nose_dir * 0.262, 0.0, 0.024), (0.09, 0.212, 0.066), yaw)
+        add_box(b("obsidian_glass"), at(nose_dir * 0.262, 0.0, 0.024), (0.09, 0.212, 0.066), 0.0)
         for side in (-0.068, 0.068):
-            add_box(b("lamp_glow"), at(nose_dir * 0.316, side, -0.040), (0.032, 0.05, 0.026), yaw)
+            add_box(b("lamp_glow"), at(nose_dir * 0.316, side, -0.040), (0.032, 0.05, 0.026), 0.0)
+    return b.commit_merged(obj_name)
+
+
+def _animate_metro_loop(cars: list[tuple[bpy.types.Object, float]], pts: list[Vector], acc: list[float]) -> None:
+    """Lập trình hoạt ảnh tuần hoàn 300 frames (10s @ 30 FPS) gán vào Action_Metro_Loop."""
+    action = bpy.data.actions.get("Action_Metro_Loop") or bpy.data.actions.new(name="Action_Metro_Loop")
+    action.use_fake_user = True
+    if hasattr(action, "use_frame_range"):
+        action.use_frame_range = True
+        action.frame_start = 1.0
+        action.frame_end = float(METRO_LOOP_FRAMES)
+    if hasattr(action, "use_cyclic"):
+        action.use_cyclic = True
+
+    total_path_length = acc[-1]
+    z_car = DECK_Z + 0.112
+
+    for car_obj, offset in cars:
+        assign_action_slot(car_obj, action)
+        prev_yaw = None
+        for frame in range(1, METRO_LOOP_FRAMES + 1):
+            t = (frame - 1) / float(METRO_LOOP_FRAMES) * total_path_length
+            s = (t + offset) % total_path_length
+            pos, tang = _frame_at(pts, acc, s)
+            _, tang_ahead = _frame_at(pts, acc, (s + 0.25) % total_path_length)
+
+            raw_yaw = math.atan2(tang.y, tang.x)
+            if prev_yaw is None:
+                yaw = raw_yaw
+            else:
+                diff = (raw_yaw - prev_yaw + math.pi) % (2.0 * math.pi) - math.pi
+                yaw = prev_yaw + diff
+            prev_yaw = yaw
+
+            pitch = -math.asin(max(-1.0, min(1.0, tang.z)))
+            yaw_ahead = math.atan2(tang_ahead.y, tang_ahead.x)
+            curvature = (yaw_ahead - raw_yaw + math.pi) % (2.0 * math.pi) - math.pi
+            roll = max(-0.035, min(0.035, curvature * 0.18))
+
+            car_obj.location = (pos.x, pos.y, z_car)
+            car_obj.rotation_euler = (roll, pitch, yaw)
+            car_obj.keyframe_insert(data_path="location", frame=frame)
+            car_obj.keyframe_insert(data_path="rotation_euler", frame=frame)
 
 
 def build_metro(coll, mats) -> list[Vector]:
@@ -138,11 +186,15 @@ def build_metro(coll, mats) -> list[Vector]:
     if piers != 10:
         raise RuntimeError(f"Metro T-pier placement failed: {piers}/10 piers placed")
 
-    # Đoàn tàu 3 toa lướt qua đoạn phía Nam (tâm khung hình camera)
-    s_mid = min(range(len(pts)), key=lambda i: math.hypot(pts[i].x - 1.6, pts[i].y + 2.49))
-    s0 = acc[s_mid]
-    for offset, nose in ((-0.63, -1), (0.0, 0), (0.63, 1)):
-        pos, tang = _frame_at(pts, acc, s0 + offset)
-        _train_car(b, Vector((pos.x, pos.y, DECK_Z + 0.112)), tang, nose)
     b.commit()
+
+    # Tách 3 toa tàu thành 3 Object động độc lập & nướng hoạt ảnh Action_Metro_Loop (300 frames)
+    car_head = _train_car(coll, mats, "NODE_Train_Car_Head", nose_dir=1)
+    car_mid = _train_car(coll, mats, "NODE_Train_Car_Mid", nose_dir=0)
+    car_tail = _train_car(coll, mats, "NODE_Train_Car_Tail", nose_dir=-1)
+    _animate_metro_loop(
+        [(car_head, CAR_SPACING), (car_mid, 0.0), (car_tail, -CAR_SPACING)],
+        pts,
+        acc,
+    )
     return pts

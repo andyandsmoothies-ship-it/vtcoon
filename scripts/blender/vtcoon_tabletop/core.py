@@ -146,6 +146,49 @@ class MeshBatch:
         self._bms.clear()
         return objs
 
+    def commit_merged(self, obj_name: str) -> bpy.types.Object:
+        """Gộp toàn bộ vật liệu trong batch thành 1 Mesh Object duy nhất (dùng cho đối tượng động)."""
+        combined = bmesh.new()
+        mat_list = []
+        has_smooth = False
+        for key, bm in self._bms.items():
+            if len(bm.faces) == 0:
+                bm.free()
+                continue
+            bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-5)
+            bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+            slot_idx = len(mat_list)
+            mat_list.append(self.mats[key])
+            is_sm = key in self._smooth
+            if is_sm:
+                has_smooth = True
+            v_map = {v: combined.verts.new(v.co) for v in bm.verts}
+            for f in bm.faces:
+                nf = combined.faces.new([v_map[v] for v in f.verts])
+                nf.material_index = slot_idx
+                nf.smooth = is_sm
+            bm.free()
+        self._bms.clear()
+        mesh = bpy.data.meshes.new(obj_name)
+        combined.to_mesh(mesh)
+        combined.free()
+        for mat in mat_list:
+            mesh.materials.append(mat)
+        if has_smooth:
+            mesh.set_sharp_from_angle(angle=math.radians(42.0))
+        obj = bpy.data.objects.new(obj_name, mesh)
+        move_to_collection(obj, self.coll)
+        return obj
+
+
+def assign_action_slot(obj: bpy.types.Object, action: bpy.types.Action) -> None:
+    """Gán Action dùng chung (Slotted Action trong Blender 5.x) cho đối tượng động."""
+    obj.animation_data_create()
+    obj.animation_data.action = action
+    if hasattr(action, "slots"):
+        slot = action.slots.get(f"OB{obj.name}") or action.slots.new(id_type="OBJECT", name=obj.name)
+        obj.animation_data.action_slot = slot
+
 
 # -----------------------------------------------------------------------------
 # Primitive điêu khắc

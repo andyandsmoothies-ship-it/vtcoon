@@ -97,20 +97,49 @@ def build_boulevards(b, rng) -> None:
     add_flowerbed(b, BT_PLAZA[0], BT_PLAZA[1], 0.14, rng)
 
 
-def _cruiser(b, x: float, y: float, yaw: float) -> None:
-    """Du thuyền Saigon Cruiser trắng sọc xanh."""
-    z = -0.03
-    add_sphere(b("porcelain", smooth=True), (x, y, z + 0.03), (0.26, 0.075, 0.045), subdiv=2, rot_z=yaw)
-    add_sphere(b("cruiser_blue", smooth=True), (x, y, z + 0.035), (0.262, 0.077, 0.012), subdiv=2, rot_z=yaw)
-    c, s = math.cos(yaw), math.sin(yaw)
-    add_box(b("porcelain"), (x - 0.03 * c, y - 0.03 * s, z + 0.09), (0.26, 0.10, 0.05), yaw)
-    add_box(b("obsidian_glass"), (x - 0.03 * c, y - 0.03 * s, z + 0.093), (0.24, 0.104, 0.022), yaw)
-    add_box(b("porcelain"), (x - 0.06 * c, y - 0.06 * s, z + 0.135), (0.14, 0.08, 0.04), yaw)
-    add_box(b("cruiser_blue"), (x - 0.06 * c, y - 0.06 * s, z + 0.158), (0.15, 0.085, 0.008), yaw)
-    add_cylinder(b("cruiser_blue"), (x - 0.12 * c, y - 0.12 * s, z + 0.18), 0.014, 0.012, 0.05, 10)
+def _cruiser(coll, mats, obj_name: str):
+    """Du thuyền Saigon Cruiser trắng sọc xanh — đối tượng động độc lập tại gốc (0,0,0)."""
+    cb = MeshBatch(obj_name, mats, coll)
+    add_sphere(cb("porcelain", smooth=True), (0.0, 0.0, 0.03), (0.26, 0.075, 0.045), subdiv=2, rot_z=0.0)
+    add_sphere(cb("cruiser_blue", smooth=True), (0.0, 0.0, 0.035), (0.262, 0.077, 0.012), subdiv=2, rot_z=0.0)
+    add_box(cb("porcelain"), (-0.03, 0.0, 0.09), (0.26, 0.10, 0.05), 0.0)
+    add_box(cb("obsidian_glass"), (-0.03, 0.0, 0.093), (0.24, 0.104, 0.022), 0.0)
+    add_box(cb("porcelain"), (-0.06, 0.0, 0.135), (0.14, 0.08, 0.04), 0.0)
+    add_box(cb("cruiser_blue"), (-0.06, 0.0, 0.158), (0.15, 0.085, 0.008), 0.0)
+    add_cylinder(cb("cruiser_blue"), (-0.12, 0.0, 0.18), 0.014, 0.012, 0.05, 10)
+    return cb.commit_merged(obj_name)
 
 
-def build_bach_dang_wharf(b, clearance) -> None:
+def _animate_cruisers_bobbing(cruisers: list[tuple]) -> None:
+    """Lập trình hoạt ảnh thủy tĩnh dao động lệch pha 300 frames (Action_Cruisers_Bobbing)."""
+    import bpy
+    from .core import assign_action_slot
+
+    action = bpy.data.actions.get("Action_Cruisers_Bobbing") or bpy.data.actions.new(name="Action_Cruisers_Bobbing")
+    action.use_fake_user = True
+    if hasattr(action, "use_frame_range"):
+        action.use_frame_range = True
+        action.frame_start = 1.0
+        action.frame_end = 300.0
+    if hasattr(action, "use_cyclic"):
+        action.use_cyclic = True
+
+    for i, (cruiser_obj, x_origin, y_origin, z_origin, yaw_origin) in enumerate(cruisers):
+        assign_action_slot(cruiser_obj, action)
+        phi = i * 2.094  # 120 độ lệch pha giữa các du thuyền
+        for f in range(1, 301):
+            t = 2.0 * math.pi * (f - 1) / 300.0
+            z_val = z_origin + math.sin(2.0 * t + phi) * 0.012 + math.sin(3.0 * t) * 0.004
+            pitch_val = math.sin(2.0 * t + phi + 0.5) * 0.025
+            roll_val = math.cos(2.0 * t + phi) * 0.030
+
+            cruiser_obj.location = (x_origin, y_origin, z_val)
+            cruiser_obj.rotation_euler = (roll_val, pitch_val, yaw_origin)
+            cruiser_obj.keyframe_insert(data_path="location", frame=f)
+            cruiser_obj.keyframe_insert(data_path="rotation_euler", frame=f)
+
+
+def build_bach_dang_wharf(b, clearance, coll, mats) -> None:
     for y0, y1 in ((-6.55, -2.05), (2.05, 6.55)):
         bank = list(reversed(river_bank_path(-1, y0, y1, 36)))
         sweep_profile(b("marble_wharf"), bank, [(0.10, 0.0), (0.40, 0.0), (0.40, 0.022), (0.10, 0.022)], False)
@@ -119,13 +148,17 @@ def build_bach_dang_wharf(b, clearance) -> None:
             if clearance.is_free(px, p.y, 0.02):
                 add_coconut_palm(b, px, p.y, 1.05, math.pi)
                 clearance.add_circle(px, p.y, 0.14)
-    for y in (-3.45, -4.55, -5.65):
+    cruisers = []
+    for idx, y in enumerate((-3.45, -4.55, -5.65)):
         xc, w = river_center_x(y), river_half_width(y)
         bank_x = xc - w
         add_box(b("marble_wharf"), (bank_x + 0.08, y, 0.012), (0.30, 0.09, 0.024))
         for k in (-1, 1):
             add_cylinder(b("cut_stone"), (bank_x + 0.20, y + k * 0.04, 0.02), 0.012, 0.012, 0.05, 8)
-        _cruiser(b, bank_x + 0.17, y - 0.26, math.pi * 0.5 + 0.05)
+        obj_name = f"NODE_Saigon_Cruiser_{idx + 1}"
+        cruiser_obj = _cruiser(coll, mats, obj_name)
+        cruisers.append((cruiser_obj, bank_x + 0.17, y - 0.26, -0.03, math.pi * 0.5 + 0.05))
+    _animate_cruisers_bobbing(cruisers)
 
 
 def build_saigon_quarter(coll, mats, clearance) -> None:
@@ -147,7 +180,7 @@ def build_saigon_quarter(coll, mats, clearance) -> None:
         clearance.add_circle(WHARF_HEAD[0] + (ND_PLAZA[0] - WHARF_HEAD[0]) * f,
                              WHARF_HEAD[1] + (ND_PLAZA[1] - WHARF_HEAD[1]) * f, 0.36)
         clearance.add_circle(-1.75 + (BT_PLAZA[0] + 1.75) * f, -2.95 + (BT_PLAZA[1] + 2.95) * f, 0.30)
-    build_bach_dang_wharf(w, clearance)
+    build_bach_dang_wharf(w, clearance, coll, mats)
     clearance.add_predicate(lambda x, y, m: is_in_river(x, y, 0.42 + m))
     for px, py in ((-2.75, 2.75), (-4.45, 2.6), (-2.95, 0.95)):
         if clearance.is_free(px, py, 0.0):

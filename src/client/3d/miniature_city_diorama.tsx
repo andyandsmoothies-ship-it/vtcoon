@@ -24,12 +24,14 @@ import { URBAN_TREES, getBatchedBoardRimGeometries, disposeDioramaStaticBlenderB
 import { DioramaChainReaction } from './diorama_chain_reaction';
 import { createDongSonPlazaTexture } from './tabletop_texture_generator';
 import { SafeGLTFModel } from './asset_loader/safe_gltf_model';
+import { LivingTabletopDiorama } from './living_tabletop_diorama';
+import { TABLETOP_DIORAMA_GLB_URL } from './living_tabletop_diorama_visuals';
 
 export const SUNKEN_ARENA_MODEL_URL = '/models/board/sunken_velvet_dice_arena.glb';
 export const BRIDGE_PLAZAS_MODEL_URL = '/models/board/bridge_landing_plazas.glb';
 export const INDOCHINE_BIOME_MODEL_URL = '/models/board/indochine_botanical_biome.glb';
 export const INDOCHINE_MASTER_LANDSCAPE_URL = '/models/board/indochine_master_landscape.glb';
-export const TABLETOP_DIORAMA_MODEL_URL = '/models/board/tabletop_diorama.glb';
+export const TABLETOP_DIORAMA_MODEL_URL = TABLETOP_DIORAMA_GLB_URL;
 export const DICE_ARENA_PLINTH_URL = '/models/board/dice_arena_plinth.glb';
 export const LANDMARKS_CLUSTER_URL = '/models/board/landmarks_cluster.glb';
 export const BOARD_TERRAIN_BASE_URL = '/models/board/board_terrain_base.glb';
@@ -345,16 +347,8 @@ export function MiniatureCityDiorama({ isMobile: propIsMobile, isVisible = true,
         <DioramaPedestrianPromenades isMobile={isMobile} />
       </group>
       <DioramaUrbanCanopy isMobile={isMobile} isSereneTabletop={isSerene} />
-      {/* Sa bàn 3D Điêu khắc Hoàn chỉnh (Draco Compressed Blender 5.2.2 LTS Masterpiece) */}
-      {isSerene && (
-        <SafeGLTFModel
-          url={TABLETOP_DIORAMA_MODEL_URL}
-          position={[0, 0, 0]}
-          receiveShadow
-          castShadow={!isMobile}
-          fallback={null}
-        />
-      )}
+      {/* Sa bàn 3D Sống Động (Draco Compressed Blender 5.2.2 LTS + Action_Metro_Loop + Action_Cruisers_Bobbing) */}
+      {isSerene && <LivingTabletopDiorama isMobile={isMobile} />}
       {/* Sa bàn Đông Dương Thượng Lưu (Master Landscape Sculpt & Modular Sub-Assemblies) */}
       {isDesktopLean && (
         <SafeGLTFModel url={INDOCHINE_MASTER_LANDSCAPE_URL} position={[0, 0, 0]} receiveShadow visible={false} forceFallback fallback={null} />

@@ -30,6 +30,9 @@ def setup_world_and_render(scene: bpy.types.Scene) -> None:
             except TypeError:
                 print(f"[VTCOON-STUDIO] EEVEE option {attr} not supported in this build; skipped.")
 
+    scene.render.fps = 30
+    scene.frame_start = 1
+    scene.frame_end = 300
     scene.render.resolution_x = 1280
     scene.render.resolution_y = 800
     scene.render.resolution_percentage = 100
@@ -111,7 +114,10 @@ def setup_camera_and_lighting(scene: bpy.types.Scene, coll_studio: bpy.types.Col
 
 
 def export_glb(filepath: str) -> float:
-    """Xuất duy nhất collection 03_Diorama_Indochine_Master (không chassis, không xúc xắc) → GLB Draco 6."""
+    """Xuất duy nhất collection 03_Diorama_Indochine_Master kèm Animation Actions → GLB Draco 6."""
+    import json
+    import struct
+
     os.makedirs(os.path.dirname(filepath), exist_ok=True)
     coll = bpy.data.collections[DIORAMA_COLLECTION]
     for obj in bpy.context.scene.objects:
@@ -128,6 +134,9 @@ def export_glb(filepath: str) -> float:
         export_cameras=False,
         export_lights=False,
         export_extras=False,
+        export_animations=True,
+        export_animation_mode="ACTIONS",
+        export_optimize_animation_size=True,
         export_draco_mesh_compression_enable=True,
         export_draco_mesh_compression_level=6,
         export_draco_position_quantization=14,
@@ -135,12 +144,22 @@ def export_glb(filepath: str) -> float:
         export_draco_texcoord_quantization=12,
     )
     size_mb = os.path.getsize(filepath) / (1024.0 * 1024.0)
-    print(f"[VTCOON-STUDIO] GLB exported: {filepath} ({size_mb * 1024.0:.1f} KB)")
+    with open(filepath, "rb") as f:
+        raw = f.read()
+    json_len = struct.unpack("<I", raw[12:16])[0]
+    gltf_json = json.loads(raw[20:20 + json_len].decode("utf-8"))
+    exported_actions = [a.get("name") for a in gltf_json.get("animations", [])]
+    print(f"[VTCOON-STUDIO] GLB exported: {filepath} ({size_mb * 1024.0:.1f} KB / {size_mb:.2f} MB)")
+    print(f"[VTCOON-STUDIO] Exported GLB Animation Actions: {exported_actions}")
+    for anim in gltf_json.get("animations", []):
+        print(f"  -> Action '{anim.get('name')}': {len(anim.get('channels', []))} channels, "
+              f"{len(anim.get('samplers', []))} samplers")
     return size_mb
 
 
 def render_still(scene: bpy.types.Scene, filepath: str) -> None:
     os.makedirs(os.path.dirname(filepath), exist_ok=True)
+    scene.frame_set(130)
     scene.render.filepath = filepath
     bpy.ops.render.render(write_still=True)
-    print(f"[VTCOON-STUDIO] Verification render: {filepath}")
+    print(f"[VTCOON-STUDIO] Verification render (frame {scene.frame_current}): {filepath}")

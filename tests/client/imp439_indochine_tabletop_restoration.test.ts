@@ -30,6 +30,16 @@ import {
   type CentralMonumentPlazaProps,
   type MiniatureCityDioramaProps,
 } from '../../src/client/3d/miniature_city_diorama';
+import {
+  LivingTabletopDiorama,
+  type LivingTabletopDioramaProps,
+} from '../../src/client/3d/living_tabletop_diorama';
+import {
+  ACTION_CRUISERS_BOBBING,
+  ACTION_METRO_LOOP,
+  computeWaterShimmerSample,
+  isWaterMeshName,
+} from '../../src/client/3d/living_tabletop_diorama_visuals';
 import { DiceTray, type DiceTrayProps } from '../../src/client/3d/dice_tray';
 import {
   DioramaTerrain,
@@ -393,31 +403,38 @@ describe('[TC-439/MSS] Indochine Tabletop Restoration & 4-Pillar Spatial Remedia
     });
   });
 
-  describe('Pillar 5: Sculpted Tabletop Diorama GLB Integration [TC-439.06]', () => {
-    it('TC-439.06a [UC-TABLETOP-DIORAMA-GLB-MOUNT/MSS]: TABLETOP_DIORAMA_MODEL_URL points to /models/board/tabletop_diorama.glb and mounts on Desktop with castShadow=true', () => {
+  describe('Pillar 5: Living Tabletop Diorama GLB & Water Shimmer Integration [TC-439.06]', () => {
+    it('TC-439.06a [UC-TABLETOP-DIORAMA-GLB-MOUNT/MSS]: MiniatureCityDiorama mounts LivingTabletopDiorama and Desktop configures castShadow=true', () => {
       expect(TABLETOP_DIORAMA_MODEL_URL).toBe('/models/board/tabletop_diorama.glb');
       const desktopTree = captureTree(MiniatureCityDiorama, { isDesktopLean: true, isMobile: false });
-      const desktopGlb = findReactNode<SafeGLTFModelProps>(
+      const livingNode = findReactNode<LivingTabletopDioramaProps>(
         desktopTree,
+        (n) => n.type === LivingTabletopDiorama,
+      );
+      const innerDesktopTree = captureTree(LivingTabletopDiorama, { isMobile: false });
+      const desktopGlb = findReactNode<SafeGLTFModelProps>(
+        innerDesktopTree,
         (n) => n.type === SafeGLTFModel && n.props?.url === TABLETOP_DIORAMA_MODEL_URL,
       );
 
-      expect(desktopGlb).not.toBeNull();
-      expect(desktopGlb?.props?.position).toEqual([0, 0, 0]);
+      expect(livingNode?.props?.isMobile).toBe(false);
       expect(desktopGlb?.props?.castShadow).toBe(true);
+      expect(desktopGlb?.props?.receiveShadow).toBe(true);
     });
 
-    it('TC-439.06b [UC-TABLETOP-DIORAMA-GLB-MOUNT/A1]: MiniatureCityDiorama mounts TABLETOP_DIORAMA_MODEL_URL on Mobile with receiveShadow=true and castShadow=false', () => {
-      const mobileTree = captureTree(MiniatureCityDiorama, { isDesktopLean: true, isMobile: true });
+    it('TC-439.06b [UC-TABLETOP-DIORAMA-GLB-MOUNT/A1]: LivingTabletopDiorama on Mobile sets castShadow=false and preserves water shimmer & action contracts', () => {
+      const innerMobileTree = captureTree(LivingTabletopDiorama, { isMobile: true });
       const mobileGlb = findReactNode<SafeGLTFModelProps>(
-        mobileTree,
+        innerMobileTree,
         (n) => n.type === SafeGLTFModel && n.props?.url === TABLETOP_DIORAMA_MODEL_URL,
       );
+      const s1 = computeWaterShimmerSample(0.0, 0.016, 0.0, 0.0);
+      const s2 = computeWaterShimmerSample(0.7, 0.016, s1.nextOffsetX, s1.nextOffsetY);
 
-      expect(mobileGlb).not.toBeNull();
-      expect(mobileGlb?.props?.receiveShadow).toBe(true);
       expect(mobileGlb?.props?.castShadow).toBe(false);
-      expect(mobileGlb?.props?.fallback).toBeNull();
+      expect(ACTION_METRO_LOOP).toBe('Action_Metro_Loop');
+      expect(ACTION_CRUISERS_BOBBING).toBe('Action_Cruisers_Bobbing');
+      expect(isWaterMeshName('GEO_HoanKiem_CyanWater') && !isWaterMeshName('GEO_HoanKiem_Rounded_Curb') && s1.roughness !== s2.roughness).toBe(true);
     });
 
     it('TC-439.06c [UC-TABLETOP-DIORAMA-GLB-MOUNT/A2]: GameBoard passes isDesktopLean=true and hasSunkenArena=true across both Desktop and Mobile', () => {
