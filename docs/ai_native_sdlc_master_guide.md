@@ -36,6 +36,7 @@
 11. [BẢNG TRA CỨU CÂU LỆNH NHANH (Cheat Sheet & Slash Commands)](#bảng-tra-cứu-câu-lệnh-nhanh-cheat-sheet--slash-commands)
 12. [QUY TRÌNH TUẦN TỰ TOÀN DIỆN TỪ A-Z (The Master SDLC Workflow)](#12-quy-trình-tuần-tự-toàn-diện-từ-a-z-the-master-sdlc-workflow)
     - [12.0 Phân Định Cửa 1 Chiều vs Cửa 2 Chiều (One-Way vs Two-Way Doors)](#120-phân-định-cửa-1-chiều-vs-cửa-2-chiều-one-way-vs-two-way-doors)
+    - [12.0.1 Vượt Thoát Quy Trình Giáo Điều: 7 Nhóm Tác Vụ Đặc Thù Phá Vỡ SDLC Thuần Túy & Đường Ống Thích Ứng](#1201-vượt-thoát-quy-trình-giáo-điều-7-nhóm-tác-vụ-đặc-thù-phá-vỡ-sdlc-thuần-túy--đường-ống-thích-ứng)
     - [12.1 Sổ Tay Prompts Thực Chiến & Quy Trình 4 Trạm Khép Kín (Trạm 1 ➔ 2 ➔ 2.5 ➔ 3 ➔ 4)](#121-sổ-tay-prompts-thực-chiến-4-cạnh-cho-junior-the-4-tier-step-harness-playbook)
     - [12.2 Sổ Tay Prompts Thực Chiến Chặng 4: Production Hardening & Go-Live](#122-sổ-tay-prompts-thực-chiến-chặng-4-production-hardening--go-live)
 
@@ -3639,6 +3640,150 @@ Khi bạn chạy lệnh trong Terminal gặp lỗi đỏ, hoặc Subagent báo t
 
 ---
 
+### 12.0.1 VƯỢT THOÁT QUY TRÌNH GIÁO ĐIỀU: 7 NHÓM TÁC VỤ ĐẶC THÙ PHÁ VỠ SDLC THUẦN TÚY & ĐƯỜNG ỐNG THÍCH ỨNG (BEYOND DOGMATIC SDLC: 7 NON-STANDARD TASK ARCHETYPES & ADAPTIVE PIPELINES)
+
+> *"Quy trình sinh ra để phục vụ sản phẩm, không phải để biến lập trình viên và AI thành tù nhân của thủ tục. Ép một nghệ nhân 3D, một kỹ sư âm thanh hay một chuyên gia tối ưu phần cứng phải đi qua bài test TDD Đỏ-Xanh và tiêm đột biến mã nguồn là đỉnh cao của sự ngớ ngẩn trong kỹ nghệ phần mềm."*
+
+#### 1. Giới Hạn Của Mô Hình SDLC / 4 Trạm Cổ Điển
+Quy trình SDLC 4 Trạm truyền thống (Spec ➔ TDD Đỏ-Xanh ➔ Inversion Gate ➔ Sentinel Mutation) chỉ phát huy hiệu quả tối đa khi bài toán thỏa mãn **3 Tiền Đề Cốt Lõi**:
+1. **Đầu vào & Đầu ra tất định (Deterministic I/O)**: Với dữ liệu $X$, hệ thống bắt buộc cho ra kết quả $Y$.
+2. **Logic nhị phân kiểm chứng được trong bộ nhớ (In-memory Boolean Logic)**: Có thể viết được assertion dạng `expect(output).toBe(expected)`.
+3. **Môi trường phòng thí nghiệm cách ly (Isolated Sandbox)**: Không phụ thuộc vào giác quan con người, sóng radio, hay đặc thù phần cứng vật lý.
+
+Khi một tác vụ vi phạm một trong ba tiền đề trên, việc cố chấp áp dụng TDD và Chaos Sentinel sẽ sinh ra **3 căn bệnh tệ hại**:
+* **Bệnh Test Phế Liệu (Mock Echoes)**: Tự mock một thế giới tưởng tượng chỉ để viết các câu lệnh `expect` chạy qua chạy lại mà không bắt được bất kỳ lỗi thực tế nào.
+* **Bệnh Tê Liệt Tiến Độ (Process Paralysis & Token Bloat)**: Tốn hàng triệu token và hàng giờ tranh cãi về các dòng test vô nghĩa thay vì tập trung vào trải nghiệm người dùng cuối.
+* **Bệnh Mù Phần Cứng & Thẩm Mỹ (Sensory & Hardware Blind Spot)**: Test trong IDE xanh 100% nhưng đưa lên điện thoại thật thì hình ảnh mờ căm, Z-fighting nhấp nháy, âm thanh vỡ tiếng, hoặc FPS tụt dốc thê thảm.
+
+Dưới đây là **7 Nhóm Tác Vụ Đặc Thù Phá Vỡ SDLC Thuần Túy** và **Đường Ống Thích Ứng Tương Ứng**:
+
+---
+
+#### 2. Chi Tiết 7 Nhóm Tác Vụ Đặc Thù & Đường Ống Thích Ứng
+
+##### 🎨 Nhóm 1: Giác Quan, Đồ Họa 3D, Âm Thanh & Giao Diện Cảm Xúc (Sensory, 3D Art & Audio Engineering)
+* **Các tác vụ điển hình**:
+  - Dựng cảnh quan 3D, bàn cờ diorama, địa hình sông núi, thiết lập ánh sáng/đổ bóng, viết custom shader (như bàn cờ diorama trong VTCOON).
+  - Thiết kế âm thanh: Âm thanh xóc xúc xắc, nhạc nền lặp, WebAudio dynamic volume/reverb, spatial audio 3D.
+  - Hoạt cảnh vi mô (Micro-interactions): Điều chỉnh lò xo nảy (spring physics), đường cong gia tốc (cubic-bezier), phản hồi xúc giác (Haptic Feedback trên mobile).
+* **Vì sao SDLC thuần túy gãy**: Máy tính không có mắt và tai để cảm nhận. Viết unit test `expect(riverColor).toBe('#00ffff')` hay tiêm đột biến AST vào tọa độ 3D là vô nghĩa.
+* **Đường ống thích ứng (Perceptual Sandbox & Tech-Art Pipeline)**:
+  1. *Khóa Ngân Sách Phần Cứng*: Giới hạn Draw-calls ($O(1)$ qua gộp mesh theo vật liệu), Polycount, Texture size (<= 2K), Kích thước file GLB (<= 3MB nén Meshopt/Draco).
+  2. *Sản Xuất Asset Từ Gốc*: Dùng Blender gộp vật liệu PBR Principled BSDF, nướng AO, xuất GLB chuẩn WebGL.
+  3. *Đường May View-Model (Rule 41)*: Tách toàn bộ toán biến đổi vào `*_visuals.ts`. Component JSX/TSX chỉ thuần render.
+  4. *Smoke & Dispose Test*: Bài test duy nhất cần viết là mount component vào `r3f_test_harness.ts` và kiểm tra giải phóng sạch bộ nhớ GPU (`geometry.dispose()`, `material.dispose()`) khi unmount. **MIỄN TRỪ HOÀN TOÀN** viết test nghiệp vụ và Chaos Sentinel.
+  5. *Cân Chỉnh Đa Thiết Bị*: Xử lý Z-fighting trên Android (tối ưu near/far plane hoặc log depth buffer) và khử mờ Retina trên iOS (DPR cap = 2.0).
+  6. *Thẩm Định Mỹ Thuật Đối Kháng*: Chụp 5 góc camera chuẩn (`npm run capture:visual`) và triệu hồi `game-3d-visual-critic` thẩm định độ tương phản, ánh sáng, Wow-factor theo chuẩn game thương mại AAA.
+
+---
+
+##### ⚡ Nhóm 2: Hiệu Năng Thực Nghiệm & Cân Chỉnh Phần Cứng (Empirical Performance & Profiling)
+* **Các tác vụ điển hình**:
+  - Tối ưu hóa FPS (từ 25 lên 60 FPS), loại bỏ giật cục (Jank / Stuttering), triệt tiêu frame drop.
+  - Giảm áp lực Garbage Collection (GC Pressure), ngăn ngừa tràn RAM/VRAM trên thiết bị yếu.
+  - Tối ưu hóa truy vấn Database lớn (đánh Index, EXPLAIN ANALYZE, xử lý deadlock).
+  - Tối ưu kích thước bundle mạng (Payload compression, nén ảnh KTX2/WebP).
+* **Vì sao SDLC thuần túy gãy**: Không thể áp dụng TDD viết trước bài test `expect(renderDuration).toBeLessThan(16ms)`. Trên máy lập trình viên (CPU mạnh) test sẽ luôn xanh, nhưng trên điện thoại người dùng (chip yếu, nghẽn nhiệt throttling) app sẽ đơ. Hiệu năng là bài toán thực nghiệm phụ thuộc môi trường vật lý.
+* **Đường ống thích ứng (Empirical Baseline & Stress Pipeline)**:
+  1. *Đo Lường Hiện Trạng (Baseline Profiling)*: Thu thập số liệu vật lý bằng công cụ chuyên dụng (Chrome Performance DevTools, Flamegraph, Memory Heap Snapshot, EXPLAIN ANALYZE).
+  2. *Xác Lập Giả Thuyết & Can Thiệp*: Đưa ra giả thuyết kỹ thuật (ví dụ: "chuyển sang InstancedMesh sẽ giảm 80 draw calls") và thực hiện sửa đổi.
+  3. *Stress Test Thực Tế*: Chạy kịch bản tải nặng (ví dụ: 1.000 thực thể di chuyển cùng lúc) trên thiết bị phần cứng thật hoặc chế độ CPU Throttling giả lập.
+  4. *Đối Soát Chênh Lệch ($\Delta$ Metrics)*: Đo lường $\Delta\text{FPS} \ge +20$, $\Delta\text{RAM} \le -30\%$, hoặc $\Delta\text{Query Time} \le 10\text{ms}$.
+
+---
+
+##### 🤖 Nhóm 3: Xác Suất, Heuristics & Ứng Dụng AI/Data Science (Probabilistic & AI Engineering)
+* **Các tác vụ điển hình**:
+  - Viết Bot AI đàm phán mua bán bất động sản, Bot chơi cờ tự động.
+  - Prompt Engineering cho Large Language Models (LLM) để sinh nội dung hoặc phân tích dữ liệu.
+  - Hệ thống gợi ý (Recommendation Systems), Tìm kiếm ngữ nghĩa (Vector Search / RAG), Thuật toán di truyền (Genetic Algorithms).
+* **Vì sao SDLC thuần túy gãy**: Đầu ra của AI và giải thuật Heuristic mang tính **xác suất (Fuzzy / Non-deterministic)**. Không thể viết `expect(botNegotiation).toBe("Đồng ý giá 500Tr")` vì chỉ cần đổi hạt giống ngẫu nhiên (seed) hoặc nhiệt độ (temperature) là kết quả sẽ đổi khác. Unit test cứng nhắc sẽ vỡ liên tục.
+* **Đường ống thích ứng (Evaluation-Driven Pipeline - Eval Suite)**:
+  1. *Xây Dựng Golden Dataset*: Soạn sẵn bộ dữ liệu thẩm định chuẩn (ví dụ: 100 tình huống đàm phán mẫu từ dễ đến khó).
+  2. *Chạy Mô Phỏng Hàng Loạt (Monte Carlo Simulation)*: Cho Bot AI tự chơi 1.000 ván đấu với các đối thủ baseline.
+  3. *Đánh Giá Theo Tỷ Lệ Thống Kê*: Đo lường bằng các chỉ số khoa học: Tỷ lệ thắng (Win Rate $\ge 55\%$), Hệ số ELO, Độ tương đồng ngữ nghĩa (Semantic Similarity $\ge 0.85$), hoặc F1-Score thay vì so sánh chuỗi ký tự cứng nhắc.
+
+---
+
+##### ☁️ Nhóm 4: Hạ Tầng, Đám Mây & DevOps (Infrastructure as Code & CI/CD)
+* **Các tác vụ điển hình**:
+  - Viết Dockerfile, Kubernetes Manifests, Helm Charts.
+  - Viết kịch bản Terraform / Pulumi cấu hình mạng VPC, Security Groups, IAM Roles.
+  - Thiết lập Nginx Reverse Proxy, SSL Certbot, Cloudflare Tunnels, pipeline CI/CD GitHub Actions.
+* **Vì sao SDLC thuần túy gãy**: Bạn không thể viết một bài unit test in-memory để kiểm tra xem Cloudflare Tunnel có thông mạng với Docker qua cổng 80 hay không. Code hạ tầng chỉ biết đúng hay sai khi thực sự gửi API lên đám mây hoặc thực thi trên nhân Linux.
+* **Đường ống thích ứng (Dry-Run & Ephemeral Staging Pipeline)**:
+  1. *Tiền Kiểm Cú Pháp & Lỗ Hổng*: Chạy `terraform plan`, `hadolint` (soi Dockerfile), `trivy` (quét lỗ hổng bảo mật container) ở chế độ tĩnh.
+  2. *Môi Trường Tạm Thời (Ephemeral Environment)*: Khởi tạo nhánh preview hoặc chạy LocalStack giả lập AWS cục bộ.
+  3. *Probe Kiểm Tra Mạng Thật*: Gửi các lệnh kiểm tra thực tế (cURL endpoint, ping live socket, healthcheck `/health`, đo mã HTTP 200).
+  4. *Chiến Lược Rollback Tự Động*: Chuẩn bị sẵn kịch bản quay lui (Blue/Green Deployment, Canary Release) nếu probe phát hiện lỗi.
+
+---
+
+##### 🔌 Nhóm 5: Thiết Bị Ngoại Vi, Hộp Đen & Driver Nhúng (Hardware, Drivers & 3rd-party Protocols)
+* **Các tác vụ điển hình**:
+  - Giao tiếp Bluetooth Low Energy (BLE), cổng Serial/USB, Camera/Microphone stream trên Web/App.
+  - Xử lý mất ngữ cảnh đồ họa (WebGL Context Loss & Restore khi chuyển app).
+  - Tích hợp cổng thanh toán bên thứ ba (VNPay, MoMo, Stripe webhook) hoặc SDK chưa có tài liệu đầy đủ (Undocumented Blackbox API).
+* **Vì sao SDLC thuần túy gãy**: Thiết bị phần cứng bên ngoài có thể bị người dùng rút dây, mất nguồn, chập chờn, hoặc firmware trả về chuỗi byte dị thường. Việc tự mock toàn bộ phản hồi của thiết bị chỉ là kiểm tra trí tưởng tượng của lập trình viên, hoàn toàn xa rời thực tế.
+* **Quy trình thích ứng (Spike, Sniffing & Defensive Adapter Pipeline)**:
+  1. *Spike & Sniffing (Do thám thực tế)*: Viết kịch bản nháp nhỏ bắt gói tin thật (packet sniffer, webhook logger) để ghi nhận đúng định dạng byte mà phần cứng trả về.
+  2. *Đường May Bọc Phòng Thủ (Defensive Boundary Adapter)*: Bọc toàn bộ tương tác ngoại vi sau một Interface độc lập. Luôn cài đặt Timeout cứng, ngắt mạch tự động (Circuit Breaker) và phương án dự phòng an toàn (Fallback Graceful Degradation).
+  3. *Kiểm Thử Khả Năng Tự Phục Hồi*: Chỉ viết test kiểm tra khả năng sống sót khi thiết bị ngoại vi bị ngắt đột ngột hoặc trả về rác dữ liệu.
+
+---
+
+##### 🚜 Nhóm 6: Di Dời Cú Pháp Hàng Loạt & Nâng Cấp Thư Viện (Mass Codemods & Migrations)
+* **Các tác vụ điển hình**:
+  - Nâng cấp phiên bản framework lớn (React 18 lên 19, Vue 2 lên 3, Vite 4 lên 6).
+  - Đổi tên trường dữ liệu hoặc tái cấu trúc đường dẫn import trên 300–500 file toàn dự án.
+  - Quét dọn mã nguồn chết (Dead-code / Knip sweep).
+* **Vì sao SDLC thuần túy gãy**: Ép AI lập Plan và viết 500 bài contract test cho 500 file chỉ để đổi đường dẫn import là đốt token vô nghĩa và làm tê liệt toàn bộ đội ngũ kỹ thuật.
+* **Đường ống thích ứng (AST Transform & Compiler Parity Pipeline)**:
+  1. *Biến Đổi Cú Pháp Tự Động (AST Codemod)*: Dùng các công cụ chuyên dụng (`jscodeshift`, `ts-morph`, `ast-grep`) để biến đổi cây cú pháp một cách chính xác tuyệt đối, tránh dùng regex thô thiển.
+  2. *Lính Gác Trình Biên Dịch 0-Token*: Dùng compiler strict (`tsc --noEmit`, `cargo check`) quét sạch toàn bộ dự án trong 2 giây để bắt lỗi gãy kiểu.
+  3. *Bảo Toàn Hành Vi Nghiệp Vụ (Behavioral Parity)*: Chạy toàn bộ regression test suite có sẵn trên toàn repo; bảo đảm 100% test nghiệp vụ vẫn xanh nguyên vẹn sau khi di dời mã nguồn.
+
+---
+
+##### 🛡️ Nhóm 7: Bảo Mật Thực Chiến, Săn Lỗ Hổng & Thử Tải Phá Hoại (Pentest & Chaos Fuzzing)
+* **Các tác vụ điển hình**:
+  - Tìm kiếm lỗ hổng bảo mật: Tràn số nguyên (Integer overflow), leo thang đặc quyền (IDOR), SQL injection, Path traversal.
+  - Thử tải phá hoại (DDoS simulation, ngắt mạng bất ngờ giữa giao dịch).
+  - Fuzz Testing: Ném hàng triệu chuỗi ký tự quái đản vào bộ giải mã (Parser) để tìm lỗi văng app (Crash / Segmentation Fault).
+* **Vì sao SDLC thuần túy gãy**: TDD được sinh ra để chứng minh hệ thống hoạt động đúng theo những kịch bản **đã biết trước (Known Knowns)**. Còn an ninh mạng và chaos engineering là hành trình tìm kiếm những góc tối **chưa từng ai nghĩ tới (Unknown Unknowns)**. Lập trình viên không thể viết test cho một lỗ hổng mà chính họ chưa biết là có tồn tại.
+* **Đường ống thích ứng (Chaos Invariant & Fuzzing Pipeline)**:
+  1. *Xác Lập Bất Biến Sinh Tử (System Invariants)*: Định nghĩa các bất biến cốt lõi (ví dụ: "Tổng tiền trong ví người chơi + ngân khố không bao giờ thay đổi", "Server không bao giờ thoát với exit code khác 0").
+  2. *Thả Bot Phá Hoại Tự Động (Automated Fuzzers)*: Sử dụng các công cụ chuyên sâu (`fast-check`, `AFL`, `Chaos Monkey`, `k6`) để bắn phá hệ thống bằng hàng triệu payload ngẫu nhiên.
+  3. *Lưu Vết Hạt Giống Gây Lỗi (Crash Seed Reproduction)*: Khi phát hiện bất biến bị vi phạm, lập tức trích xuất hạt giống (random seed) hoặc payload gây lỗi để biến nó thành một bài test hồi quy (Regression Test) cố định cho các phiên bản sau.
+
+---
+
+#### 3. Minh Họa Thực Tế Ngay Trong Dự Án VTCOON (The 3-Track Project Architecture)
+Ngay trong chính dự án VTCOON, chúng ta đang áp dụng xuất sắc mô hình phân tách 3 luồng công việc để tối ưu hóa hiệu quả:
+
+```text
+[ DỰ ÁN VTCOON: 3 LUỒNG CÔNG VIỆC CHUYÊN BIỆT ]
+ ├── Track A (Domain & Rules)        ──► Chạy SDLC 4 Trạm Chuẩn: TDD Đỏ-Xanh, Chaos Sentinel, AST Mutation Kill 100%.
+ ├── Track B (3D Landscape & Art)    ──► Chạy Tech-Art Pipeline: Ngân sách Mesh/Draw-call, Blender Export, View-Model Seam,
+ │                                       Cân chỉnh đa thiết bị (Z-fighting/Retina), Thẩm định 5 góc máy Game 3D Visual Critic.
+ └── Track C (2D UI & Ergonomics)    ──► Chạy Impeccable Pipeline: 44px Touch Target Guard, Mobile 360px Viewport Overflow,
+                                         Playwright Dual-Viewport Capture.
+```
+
+---
+
+#### 4. Bảng Ma Trận Ra Quyết Định: Chọn Đúng Đường Ống Cho Đúng Loại Tác Vụ (Task-to-Pipeline Master Matrix)
+
+| Nhóm Tác Vụ | Tiêu Chí Nhận Diện | Quy Trình Đề Xuất | Phương Pháp Đo Lường | Thứ Cần Bỏ Qua / Miễn Trừ |
+| :--- | :--- | :--- | :--- | :--- |
+| **Logic Cốt Lõi / FSM / Tiền tệ** | Tính toán số học, Chuyển pha, Quyền hạn | **SDLC 4 Trạm Cổ Điển** | Contract TDD, Chaos Sentinel, Mutation Kill 100% | Không miễn trừ (Giữ kỷ luật tối đa) |
+| **1. Giác quan & Nghệ thuật 3D** | Cảnh quan, Shader, Âm thanh, Hoạt cảnh | **Tech-Art & Perceptual Pipeline** | 5 Góc Camera, Visual Critic AAA, Smoke & Dispose Test | Miễn trừ TDD nghiệp vụ, Miễn trừ Sentinel |
+| **2. Hiệu năng & Phần cứng** | Tụt FPS, Tràn RAM, Z-fighting, Chậm DB | **Empirical Baseline & Stress** | Flamegraph, Trace Profiler, $\Delta\text{FPS}$, $\Delta\text{RAM}$ | Miễn trừ TDD viết trước (Không đoán mò) |
+| **3. Xác suất & AI/Data** | Bot AI, Prompt LLM, RAG, Heuristics | **Evaluation-Driven (Eval Suite)** | Golden Dataset, ELO Rating, Win-rate $\ge 55\%$ | Miễn trừ assert chuỗi cứng `expect().toBe()` |
+| **4. Hạ tầng & Cloud** | Docker, K8s, Terraform, Nginx, Tunnel | **Dry-Run & Ephemeral Staging** | `plan` dry-run, Live cURL probe, Healthcheck `/health` | Miễn trừ mock in-memory, Miễn trừ unit test |
+| **5. Ngoại vi & Hộp đen** | Bluetooth, WebGL Context, Stripe/VNPay | **Spike & Defensive Adapter** | Packet sniffer, Circuit Breaker, Failsafe Fallbacks | Miễn trừ mock hành vi lý tưởng của phần cứng |
+| **6. Codemod diện rộng** | Nâng cấp Framework, Rename 500 file | **AST Transform & Parity Suite** | AST codemod, Compiler 0 lỗi trong 2s, Regression pass | Miễn trừ viết hàng trăm test contract con |
+| **7. Bảo mật & Thử tải** | Săn lỗ hổng, Phá sập hệ thống, Parser | **Chaos Invariant & Fuzzing** | Property-based testing, Crash seed capture, Stress k6 | Miễn trừ TDD kịch bản đã biết trước |
 
 ---
 
