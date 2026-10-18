@@ -36,12 +36,13 @@ describe('TC-412.01 [UC-DEVICE-PROFILE-RESOLUTION-AND-DEFAULTS/MSS]', () => {
     expect(profile.glProfile.antialias).toBe(true);
   });
 
-  it('giai quyet dpr kep tran [0.75, 0.82] va precision mediump khi chi dinh override iPhone', () => {
+  it('giai quyet dpr tieu chuan [0.85, 1.0] va precision highp khi chi dinh override iPhone', () => {
     const iphoneProfile = resolveDeviceProfile({ isMobile: true, isIOSPhone: true });
     expect(iphoneProfile.isMobile).toBe(true);
     expect(iphoneProfile.isIOSPhone).toBe(true);
-    expect(iphoneProfile.recommendedDpr).toEqual([0.75, 0.82]);
-    expect(iphoneProfile.glProfile.precision).toBe('mediump');
+    expect(iphoneProfile.recommendedDpr).toEqual([0.85, 1.0]);
+    expect(iphoneProfile.glProfile.precision).toBe('highp');
+    expect(iphoneProfile.glProfile.antialias).toBe(true);
   });
 
   it('giai quyet dpr tieu chuan [0.85, 1.0] cho thiet bi Android mobile thong thuong', () => {
@@ -49,15 +50,15 @@ describe('TC-412.01 [UC-DEVICE-PROFILE-RESOLUTION-AND-DEFAULTS/MSS]', () => {
     expect(androidProfile.isMobile).toBe(true);
     expect(androidProfile.isIOSPhone).toBe(false);
     expect(androidProfile.recommendedDpr).toEqual([0.85, 1.0]);
-    expect(androidProfile.glProfile.antialias).toBe(false);
+    expect(androidProfile.glProfile.antialias).toBe(true);
   });
 
   it('dam bao tinh hiep bien (relational covariance) giua dpr desktop va mobile', () => {
     const desktopDpr = resolveDeviceProfile({ isMobile: false }).recommendedDpr;
     const mobileDpr = resolveDeviceProfile({ isMobile: true, isIOSPhone: false }).recommendedDpr;
     const iosDpr = resolveDeviceProfile({ isMobile: true, isIOSPhone: true }).recommendedDpr;
-    expect(desktopDpr[0] > mobileDpr[0]).toBe(true);
-    expect(mobileDpr[1] > iosDpr[1]).toBe(true);
+    expect(desktopDpr[0] >= mobileDpr[0]).toBe(true);
+    expect(mobileDpr[1]).toBe(iosDpr[1]);
   });
 });
 
@@ -116,12 +117,12 @@ describe('TC-412.03 [UC-LEAF-CONSUMER-DI-INTEGRATION/MSS]', () => {
     capturedFrameCallback = null;
   });
 
-  it('AdaptiveDprController doc isIOSPhone tu Context va kep tran dpr 0.82 ngay frame dau tien', () => {
+  it('AdaptiveDprController doc isIOSPhone tu Context va kep tran dpr 1.0 ngay frame dau tien cho mobile parity', () => {
     const iphoneProfile: DeviceProfile = {
       isMobile: true,
       isIOSPhone: true,
-      recommendedDpr: [0.75, 0.82],
-      glProfile: { antialias: false, powerPreference: 'high-performance', precision: 'mediump' },
+      recommendedDpr: [0.85, 1.0],
+      glProfile: { antialias: true, powerPreference: 'high-performance', precision: 'highp' },
     };
     renderToStaticMarkup(
       React.createElement(DeviceProfileProvider, { value: iphoneProfile }, React.createElement(AdaptiveDprController))
@@ -131,7 +132,7 @@ describe('TC-412.03 [UC-LEAF-CONSUMER-DI-INTEGRATION/MSS]', () => {
     const mockSetDpr = vi.fn();
     const mockGl = { getPixelRatio: () => 3.0 };
     capturedFrameCallback!({ gl: mockGl, setDpr: mockSetDpr }, 0.016);
-    expect(mockSetDpr).toHaveBeenCalledWith(0.82);
+    expect(mockSetDpr).toHaveBeenCalledWith(1.0);
   });
 
   it('AdaptiveDprController truyen ro rang isIOSPhone vao perfBudget.calculateAdaptiveDpr loai bo silent fallback', () => {

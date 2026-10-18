@@ -46,14 +46,14 @@ def _build_lake_body(coll, mats, boundary) -> None:
         bm.faces.new((center, rim[k], rim[(k + 1) % len(rim)]))
     create_mesh_object("GEO_HoanKiem_CyanWater", bm, mats["hoan_kiem_water"], coll, smooth=True)
 
-    curb = [(-0.04, 0.0), (0.10, 0.0), (0.10, 0.030), (0.088, 0.046), (0.062, 0.056), (0.030, 0.059),
-            (0.002, 0.053), (-0.024, 0.043), (-0.040, 0.028)]
+    curb = [(-0.04, 0.002), (0.10, 0.002), (0.10, 0.032), (0.088, 0.048), (0.062, 0.058), (0.030, 0.061),
+            (0.002, 0.055), (-0.024, 0.045), (-0.040, 0.030)]
     bm = bmesh.new()
     sweep_profile(bm, boundary, curb, closed_path=True, normals=nrm)
     create_mesh_object("GEO_HoanKiem_Rounded_Curb", bm, mats["cut_stone"], coll, smooth=True)
 
     bm = bmesh.new()
-    sweep_profile(bm, boundary, [(0.10, 0.0), (0.40, 0.0), (0.40, 0.012), (0.10, 0.012)], True, nrm)
+    sweep_profile(bm, boundary, [(0.10, 0.002), (0.40, 0.002), (0.40, 0.016), (0.10, 0.016)], True, nrm)
     create_mesh_object("GEO_HoanKiem_Granite_Promenade", bm, mats["granite_paving"], coll)
 
 

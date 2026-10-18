@@ -58,9 +58,9 @@ def build_ben_thanh(b) -> None:
     add_cylinder(b("terracotta_roof"), T(0.0, -0.53, 0.83), 0.15, 0.01, 0.12, 4, BT_ROT + math.pi * 0.25)
 
 
-def _strip(b, key, p0, p1, width, z=0.012) -> None:
+def _strip(b, key, p0, p1, width, z=0.016) -> None:
     dx, dy = p1[0] - p0[0], p1[1] - p0[1]
-    add_box(b(key), ((p0[0] + p1[0]) * 0.5, (p0[1] + p1[1]) * 0.5, z * 0.5), (math.hypot(dx, dy), width, z),
+    add_box(b(key), ((p0[0] + p1[0]) * 0.5, (p0[1] + p1[1]) * 0.5, z * 0.5 + 0.002), (math.hypot(dx, dy), width, z),
             math.atan2(dy, dx))
 
 
@@ -69,8 +69,8 @@ def build_boulevards(b, rng) -> None:
     _strip(b, "granite_paving", WHARF_HEAD, nh_end, 0.50)  # Đại lộ Nguyễn Huệ
     ll0 = (-1.75, -2.95)
     _strip(b, "granite_paving", ll0, (BT_PLAZA[0] + 0.05, BT_PLAZA[1] + 0.25), 0.40)  # Đại lộ Lê Lợi
-    add_cylinder(b("granite_paving"), (ND_PLAZA[0], ND_PLAZA[1], 0.008), 0.42, 0.42, 0.016, 32)
-    add_cylinder(b("granite_paving"), (BT_PLAZA[0], BT_PLAZA[1], 0.008), 0.40, 0.40, 0.016, 32)
+    add_cylinder(b("granite_paving"), (ND_PLAZA[0], ND_PLAZA[1], 0.010), 0.42, 0.42, 0.016, 32)
+    add_cylinder(b("granite_paving"), (BT_PLAZA[0], BT_PLAZA[1], 0.010), 0.40, 0.40, 0.016, 32)
     # Tượng Đức Mẹ Hoà Bình giữa công trường Công xã Paris
     add_cylinder(b("cut_stone"), (ND_PLAZA[0], ND_PLAZA[1], 0.04), 0.06, 0.05, 0.06, 12)
     add_cylinder(b("porcelain"), (ND_PLAZA[0], ND_PLAZA[1], 0.11), 0.022, 0.012, 0.09, 10)

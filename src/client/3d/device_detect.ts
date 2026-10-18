@@ -50,7 +50,6 @@ export function isIOSPhone(): boolean {
 }
 
 export function getRecommendedDpr(isMobile: boolean, isIOSPhoneDevice = isIOSPhone()): [number, number] {
-  if (isIOSPhoneDevice) return [0.75, 0.82];
   return isMobile ? [0.85, 1.0] : [1.0, 1.5];
 }
 
@@ -62,9 +61,9 @@ export interface CanvasGlProfile {
 
 export function getRecommendedGlProfile(isMobile: boolean): CanvasGlProfile {
   return {
-    antialias: !isMobile,
+    antialias: true,
     powerPreference: 'high-performance',
-    precision: isMobile ? 'mediump' : 'highp',
+    precision: 'highp',
   };
 }
 

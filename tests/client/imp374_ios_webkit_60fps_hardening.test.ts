@@ -65,10 +65,10 @@ describe('[IMP-374] Balanced iOS WebKit Performance Hardening Contract Tests', (
   });
 
   // TC-374.04
-  it('[TC-374.04/MSS][UC-DPR-IOS-PHONE-CLAMP] kep tran DPR iPhone xuong IOS_PHONE_MAX (0.82)', () => {
+  it('[TC-374.04/MSS][UC-DPR-IOS-PHONE-CLAMP] kep tran DPR iPhone xuong IOS_PHONE_MAX (1.0)', () => {
     const clamped = resolveClampedDpr(3.0, true, true);
     expect(clamped).toBe(DPR_BOUNDS.IOS_PHONE_MAX);
-    expect(clamped).toBe(0.82);
+    expect(clamped).toBe(1.0);
   });
 
   // TC-374.05
@@ -100,7 +100,7 @@ describe('[IMP-374] Balanced iOS WebKit Performance Hardening Contract Tests', (
     const mockGl = { getPixelRatio: () => 3.0 };
     capturedFrameCallback!({ gl: mockGl, setDpr: mockSetDpr }, 0.016);
 
-    expect(mockSetDpr).toHaveBeenCalledWith(0.82);
+    expect(mockSetDpr).toHaveBeenCalledWith(DPR_BOUNDS.IOS_PHONE_MAX);
   });
 
   // TC-374.09 (Call-site wiring)

@@ -178,6 +178,9 @@ export function GameCanvas({
           camera={{ position: isLobby ? CAMERA_CONFIG.pre_match.position : CAMERA_CONFIG.overview.position, fov: 24, near: 0.5, far: 300 }}
           gl={{
             ...deviceProfile.glProfile,
+            logarithmicDepthBuffer: true,
+            antialias: true,
+            precision: 'highp',
             toneMapping: isMobileDevice ? ACESFilmicToneMapping : NoToneMapping,
             toneMappingExposure: 1.08,
           }}

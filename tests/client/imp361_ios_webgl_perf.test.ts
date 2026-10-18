@@ -73,9 +73,9 @@ describe('[IMP-361] iOS WebGL Performance, Context Hints & Thermal Tuning Contra
   });
 
   describe('Recommended DPR Profile', () => {
-    it('[TC-361.03/MSS][UC-DPR-IOS-PHONE] Given mobile iPhone device environment, When calling getRecommendedDpr, Then returns clamped Retina DPR range 0.75 to 0.82', () => {
+    it('[TC-361.03/MSS][UC-DPR-IOS-PHONE] Given mobile iPhone device environment, When calling getRecommendedDpr, Then returns standard mobile DPR range 0.85 to 1.0 for parity', () => {
       const dprRange = getRecommendedDpr(true, true);
-      expect(dprRange).toEqual([0.75, 0.82]);
+      expect(dprRange).toEqual([0.85, 1.0]);
     });
 
     it('[TC-361.04/MSS][UC-DPR-IOS-TABLET] Given iPadOS tablet device environment, When calling getRecommendedDpr, Then returns standard mobile tablet DPR range 0.85 to 1.0', () => {
@@ -85,12 +85,12 @@ describe('[IMP-361] iOS WebGL Performance, Context Hints & Thermal Tuning Contra
   });
 
   describe('WebGL Context Hints & Power Preference', () => {
-    it('[TC-361.05/MSS][UC-GL-PROFILE] Given mobile hardware context, When calling getRecommendedGlProfile, Then returns high-performance powerPreference and mediump shader precision', () => {
+    it('[TC-361.05/MSS][UC-GL-PROFILE] Given mobile hardware context, When calling getRecommendedGlProfile, Then returns high-performance powerPreference, antialias, and highp shader precision', () => {
       const glProfileMobile = getRecommendedGlProfile(true);
       expect(glProfileMobile).toEqual({
-        antialias: false,
+        antialias: true,
         powerPreference: 'high-performance',
-        precision: 'mediump',
+        precision: 'highp',
       });
 
       const glProfileDesktop = getRecommendedGlProfile(false);
@@ -103,7 +103,7 @@ describe('[IMP-361] iOS WebGL Performance, Context Hints & Thermal Tuning Contra
   });
 
   describe('Adaptive DPR Controller Thermal & Resolution Ceiling', () => {
-    it('[TC-361.06/MSS][UC-ADAPTIVE-IOS-CEILING] Given PerfBudgetController with isIOSPhone true and sustained high FPS above 55, When evaluating adaptive DPR under high FPS, Then steps up strictly to IOS_PHONE_MAX 0.82 and never exceeds 0.82', () => {
+    it('[TC-361.06/MSS][UC-ADAPTIVE-IOS-CEILING] Given PerfBudgetController with isIOSPhone true and sustained high FPS above 55, When evaluating adaptive DPR under high FPS, Then steps up strictly to IOS_PHONE_MAX 1.0 and never exceeds 1.0', () => {
       const controller = new PerfBudgetController();
       const stepUpResult = controller.calculateAdaptiveDpr({
         isMobile: true,
@@ -117,7 +117,7 @@ describe('[IMP-361] iOS WebGL Performance, Context Hints & Thermal Tuning Contra
 
       expect(stepUpResult.shouldUpdate).toBe(true);
       expect(stepUpResult.targetDpr).toBe(DPR_BOUNDS.IOS_PHONE_MAX);
-      expect(stepUpResult.targetDpr).toBeLessThanOrEqual(0.82);
+      expect(stepUpResult.targetDpr).toBeLessThanOrEqual(1.0);
     });
 
     it('[TC-361.07/MSS][UC-ADAPTIVE-IOS-DEGRADED] Given PerfBudgetController with isIOSPhone true and degraded FPS below 45, When evaluating adaptive DPR under low FPS, Then steps down to MOBILE_MIN 0.75 cleanly', () => {
@@ -126,7 +126,7 @@ describe('[IMP-361] iOS WebGL Performance, Context Hints & Thermal Tuning Contra
         isMobile: true,
         isIOSPhone: true,
         currentFps: 30,
-        currentDpr: 0.82,
+        currentDpr: 0.85,
         isMotionActive: false,
         degradedDurationMs: DPR_BOUNDS.STEP_DOWN_DELAY_MS + 100,
         optimalDurationMs: 0,

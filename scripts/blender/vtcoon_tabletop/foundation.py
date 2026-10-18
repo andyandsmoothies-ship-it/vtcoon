@@ -76,7 +76,13 @@ def build_terrain_and_river(coll, mats) -> None:
         for ix in range(res + 1):
             x = -TURF_HALF + 2.0 * TURF_HALF * ix / res
             z = 0.0
-            if abs(y) >= RIVER_Y_GAP - 0.25 and math.hypot(x, y) > DISC_CLEAR_R:
+            r_center = math.hypot(x, y)
+            if r_center < DISC_CLEAR_R:
+                z = -0.045 if r_center < 1.85 else (-0.045 * (1.0 - (r_center - 1.85) / (DISC_CLEAR_R - 1.85)))
+            elif ((x - 3.4) / 2.1) ** 2 + ((y - 0.8) / 2.6) ** 2 < 1.05:
+                d_lake = math.sqrt(((x - 3.4) / 2.1) ** 2 + ((y - 0.8) / 2.6) ** 2) - 1.0
+                z = -0.045 if d_lake <= 0.0 else (-0.045 * (1.0 - d_lake / 0.05) if d_lake < 0.05 else 0.0)
+            elif abs(y) >= RIVER_Y_GAP - 0.25:
                 d = abs(x - river_center_x(y)) - river_half_width(y)
                 z = -0.045 if d <= 0.0 else (-0.045 * (1.0 - d / 0.14) if d < 0.14 else 0.0)
             row.append(bm.verts.new((x, y, z)))

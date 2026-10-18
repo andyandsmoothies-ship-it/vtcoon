@@ -55,7 +55,7 @@ export const LOD_CONFIGS: Record<
 export const DPR_BOUNDS = {
   MOBILE_MIN: 0.75,
   MOBILE_MAX: 1.0,
-  IOS_PHONE_MAX: 0.82,
+  IOS_PHONE_MAX: 1.0,
   DESKTOP_MIN: 1.0,
   DESKTOP_MAX: 1.5,
   STEP_DOWN_DELAY_MS: 1500,
