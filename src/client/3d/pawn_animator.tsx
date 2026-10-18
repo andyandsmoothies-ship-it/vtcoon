@@ -136,6 +136,8 @@ export function ActiveSpringPawn({
     );
   }
 
+  const isDirectFlight = Boolean(animation.isJailFlight || animation.flightType);
+
   return (
     <>
       <PawnHopTrajectory
@@ -143,8 +145,8 @@ export function ActiveSpringPawn({
         toCell={toCell}
         offset={offset}
         color={color}
-        arcHeight={Boolean(animation.isJailFlight) ? JAIL_FLIGHT_ARC : DEFAULT_JUMP_ARC}
-        visible={showTrajectory}
+        arcHeight={isDirectFlight ? JAIL_FLIGHT_ARC : DEFAULT_JUMP_ARC}
+        visible={showTrajectory || isDirectFlight}
       />
       <SingleHopPawn
         key={stepIndex}
@@ -156,7 +158,8 @@ export function ActiveSpringPawn({
         emoteId={emoteId}
         slotIndex={slotIndex}
         isBot={isBot}
-        isJailFlight={Boolean(animation.isJailFlight)}
+        isJailFlight={isDirectFlight}
+        flightType={animation.flightType}
       />
     </>
   );

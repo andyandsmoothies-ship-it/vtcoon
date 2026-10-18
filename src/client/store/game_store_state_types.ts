@@ -13,6 +13,7 @@ import type {
   LastLandedPawn,
   ClientMarketModifier,
   TransitWheelResultInfo,
+  PawnFlightType,
 } from './game_store_subtypes.js';
 
 export interface GameState {
@@ -83,7 +84,7 @@ export interface GameState {
   setPendingPawnMove: (move: PendingPawnMove | null) => void;
   enqueuePawnMove: (task: PawnMoveTask) => void;
   processPawnQueue: () => void;
-  startPawnMove: (playerId: string, targetCell: number, fromCell?: number, isBot?: boolean, isJailFlight?: boolean) => void;
+  startPawnMove: (playerId: string, targetCell: number, fromCell?: number, isBot?: boolean, isJailFlight?: boolean, flightType?: PawnFlightType) => void;
   completePawnMove: (playerId: string) => void;
   clearActivePawnAnimation: () => void;
 

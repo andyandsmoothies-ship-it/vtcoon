@@ -32,6 +32,8 @@
    - [8.1 Bộ 9 Subagents Cốt Lõi Kỹ Thuật & Kiến Trúc (scout, plan-griller, adversarial-challenger, forensic-challenger, qa-tester, implementer, spec-reviewer, re-reviewer, code-reviewer, chaos-sentinel)](#1-file-agentsagentsscoutmd-trinh-sát---định-vị-tọa-độ--nạp-skill-jit)
    - [8.2 Bộ 5 Subagents Thẩm Mỹ, Đồ Họa & Thủ Công (ui-craft-reviewer, game-3d-visual-critic, asset-producer, documenter, manual-edit)](#5-file-agentsagentsui-craft-reviewermd-chuyên-gia-thẩm-định-thủ-công-2d-uiux)
 9. [KỊCH BẢN THỰC CHIẾN: Greenfield, Feature Slices, Bug/CR (Sign-off Test) & Brownfield](#9-kịch-bản-thực-chiến-từ-số-0-greenfield-đến-từng-tính-năng-feature)
+   - [9.1 Kịch Bản Khởi Tạo Dự Án Từ Số 0 (Greenfield Walking Skeleton / Slice 00)](#91-kịch-bản-khởi-tạo-dự-án-từ-số-0-greenfield-walking-skeleton--slice-00)
+   - [9.1.1 Cẩm Nang Khởi Tạo Khả Năng Quan Sát Ngày 0 & Đồng Bộ Lỗi Từ Xa 0 Đồng (Day-0 Observability & Zero-Server Crash Sync)](#911-cẩm-nang-khởi-tạo-khả-năng-quan-sát-ngày-0--đồng-bộ-lỗi-từ-xa-0-đồng-day-0-observability--zero-server-crash-sync)
 10. [GIAI ĐOẠN 8: Nén Bộ Nhớ & Chuyển Phiên (Session Handoff & Visual Mining)](#giai-đoạn-8-nén-bộ-nhớ--chuyển-phiên-session-handoff--visual-mining)
 11. [BẢNG TRA CỨU CÂU LỆNH NHANH (Cheat Sheet & Slash Commands)](#bảng-tra-cứu-câu-lệnh-nhanh-cheat-sheet--slash-commands)
 12. [QUY TRÌNH TUẦN TỰ TOÀN DIỆN TỪ A-Z (The Master SDLC Workflow)](#12-quy-trình-tuần-tự-toàn-diện-từ-a-z-the-master-sdlc-workflow)
@@ -183,11 +185,23 @@
 │      • Contract-First Codegen: OpenAPI / Protobuf / JSON Schema là SSOT duy nhất. AI chỉ nối logic, CẤM tự gõ interface.
 │      • Khóa cứng Trình biên dịch: Bật `strict: true`, `noUncheckedIndexedAccess`. CẤM code phòng thủ rác (`if (x != null)`).
 │
-├── 13. KHẢ NĂNG QUAN SÁT TINH GỌN (LEAN RUNTIME OBSERVABILITY - CHARITY MAJORS):
-│      • "Testing chứng minh lỗi đã biết trong phòng thí nghiệm; Observability giải thích sự cố bất ngờ ngoài đời thực."
-│      • CẤM Tuyệt đối nuốt lỗi âm thầm (empty catch). Mọi ngoại lệ hoặc từ chối hành động bắt buộc có mã lý do (Reason Code).
-│      • Mọi chuyển dịch trạng thái nghiệp vụ (FSM Transitions, Transactions) bắt buộc phát ra Structured Log
-│        ({ event, correlationId, timestamp, delta }) để tua lại hành động khi gặp sự cố ngoài thực tế.
+├── 13. KHẢ NĂNG QUAN SÁT TINH GỌN & TUYÊN NGÔN ĐỘ TRƯỞNG THÀNH KỸ NGHỆ (LEAN OBSERVABILITY & ENGINEERING MATURITY MANIFESTO - ANDREA LAFORGIA & CHARITY MAJORS):
+│      • "Không thần thánh hóa việc gõ code dập lửa trong hoảng loạn lúc 2h sáng (Debugging under pressure).
+│        Thước đo độ trưởng thành kỹ nghệ của một Senior thực thụ không phải là chữa cháy giỏi, mà là xây dựng
+│        hệ thống sao cho đội cứu hỏa trở nên ít cần thiết nhất (Make the fire brigade less necessary)." — Andrea Laforgia
+│      • "Testing chứng minh lỗi đã biết trong phòng thí nghiệm; Observability giải thích sự cố bất ngờ ngoài đời thực." — Charity Majors
+│      • 4 Trụ Cột Phòng Ngừa Từ Ngày Đầu (Day-0 Failure-Proofing Pillars cho Mọi Dự Án Mới):
+│        1. Observable & Well-Instrumented: Tích hợp Hộp đen Flight Recorder in-memory (Ring Buffer lưu 50-100 events/intents gần nhất).
+│           Tự động đóng băng (Auto-Freeze) khi vi phạm bất biến và xuất file dump JSON chẩn đoán.
+│        2. Clear Boundaries & Explicit Failure Modes: Ranh giới phân hệ rõ ràng (Facades `index.ts`, Zero SCC).
+│           100% ngoại lệ hoặc từ chối hành động bắt buộc phát ra mã lý do định danh chuẩn (`Reason Code` / `ActionRejectReason`).
+│           CẤM Tuyệt đối nuốt lỗi âm thầm (`try {} catch {}` rỗng hoặc unhandled async promises).
+│        3. Zero-Cost Remote Crash Sync (Đồng bộ lỗi từ xa 0 đồng): Khi chạy trên hạ tầng đám mây có đĩa tạm thời
+│           (Ephemeral Disks như Render.com, Vercel, Fly.io - nơi log sẽ bị xóa sạch khi restart/spin-down):
+│           Tuyệt đối không lưu log lên đĩa server; tự động đồng bộ Flight Recorder dump về Discord Webhook (0đ)
+│           hoặc Sentry Free Tier (5.000 lỗi/tháng) để nhận ping tức thì trên điện thoại kèm file JSON tái hiện hiện trường.
+│        4. Tự Phục Hồi Thời Gian Chạy (Self-Healing Watchdog & Ephemeral TTL): Cài đặt Dead Man's Switch (3s–5s)
+│           tự động giải phóng khóa (auto-release locks/modals) khi sự kiện mạng bị rơi, chống kẹt chết ứng dụng.
 │
 ├── 14. 3 VÒNG PHÒNG VỆ CHỐNG TRÔI DẠT NGHIỆP VỤ & TÍNH NĂNG MỒ CÔI (THE THREE LINES OF DEFENSE):
 │       • Triệt tiêu 2 căn bệnh cố hữu của LLM: "Mù ngữ cảnh cục bộ (Context Myopia)" và "Ảo tưởng hoàn thành (Completion Illusion)".
@@ -3081,13 +3095,14 @@ tools: [view_file, write_to_file, replace_file_content, run_command, list_dir, f
   > *"Đọc file spec vừa tạo. Dùng skill `use-case-slicing` tạo các ticket kỹ thuật khởi tạo vào `issues/`:
   > - Ticket INFRA-S00: Khởi tạo mã nguồn dự án (package.json / go.mod / pubspec...), cài đặt linter boundary cơ học (Nick Tune), và tạo file `GEMINI.md`.
   > - Ticket INFRA-S01: Dựng luồng Walking Skeleton (Endpoint `/health` + Test kết nối DB test thật).
+  > - Ticket INFRA-S02: Khởi tạo Khả năng Quan sát Ngày 0 (Day-0 Observability: Hộp đen Flight Recorder in-memory + Đồng bộ lỗi từ xa 0 đồng về Discord/Sentry).
   > Ghi nhận tiến độ vào `docs/epics/infrastructure/_epic_ledger.md`."*
-- **Sản phẩm xuất ra**: `docs/epics/infrastructure/_epic_ledger.md` và các file `issues/INFRA-S00-scaffold.md`, `issues/INFRA-S01-walking-skeleton.md`.
+- **Sản phẩm xuất ra**: `docs/epics/infrastructure/_epic_ledger.md` và các file `issues/INFRA-S00-scaffold.md`, `issues/INFRA-S01-walking-skeleton.md`, `issues/INFRA-S02-observability.md`.
 
 #### 🟢 LƯỢT 4: Subagent Thi Công Thông Giàn Giáo (Scaffolding & Tracer Bullet 0)
 - **Bạn gõ vào chat**:
-  > *"Gọi subagent `implementer` thi công ticket `issues/INFRA-S00-scaffold.md` và `issues/INFRA-S01-walking-skeleton.md` trong Workspace: 'branch'. Yêu cầu: Thiết lập đúng ranh giới phân tầng, chạy thử nghiệm test kết nối database thật (`_test`), và chứng minh linter boundary hoạt động tốt."*
-- **Sản phẩm xuất ra**: Toàn bộ khung dự án chạy được, 1 bài test Integration đầu tiên chuyển màu XANH.
+  > *"Gọi subagent `implementer` thi công ticket `issues/INFRA-S00-scaffold.md`, `issues/INFRA-S01-walking-skeleton.md` và `issues/INFRA-S02-observability.md` trong Workspace: 'branch'. Yêu cầu: Thiết lập đúng ranh giới phân tầng, chạy thử nghiệm test kết nối database thật (`_test`), kiểm chứng Hộp đen Flight Recorder ghi nhận được event, và chứng minh linter boundary hoạt động tốt."*
+- **Sản phẩm xuất ra**: Toàn bộ khung dự án chạy được, 1 bài test Integration đầu tiên chuyển màu XANH, hệ thống telemetry sẵn sàng bắt ngoại lệ.
 
 #### 🟢 LƯỢT 5: Kiểm Toán Nền Móng & Chốt Git Commit Đầu Tiên
 - **Bạn gõ vào chat**:
@@ -3096,8 +3111,145 @@ tools: [view_file, write_to_file, replace_file_content, run_command, list_dir, f
   ```cmd
   git init
   git add .
-  git commit -m "chore: initialize project harness, linter boundaries and walking skeleton"
+  git commit -m "chore: initialize project harness, linter boundaries, walking skeleton and day-0 observability"
   ```
+
+---
+
+### 9.1.1 CẨM NANG KHỞI TẠO KHẢ NĂNG QUAN SÁT NGÀY 0 & ĐỒNG BỘ LỖI TỪ XA 0 ĐỒNG (DAY-0 OBSERVABILITY & ZERO-SERVER CRASH SYNC)
+
+> *"Thước đo độ trưởng thành kỹ nghệ của một dự án mới không phải là khả năng thức trắng đêm dập lửa lúc 2h sáng (firefighting under pressure). Đẳng cấp thực sự là xây dựng hệ thống sao cho 'đội cứu hỏa' trở nên ít cần thiết nhất ngay từ Ngày 0 (Day 0)."* — Andrea Laforgia Manifesto
+
+#### 1. Bài Toán Thực Tế Của Các Dự Án Mới & Hạ Tầng Đám Mây Hiện Đại
+Khi bắt đầu một dự án mới, các nhà phát triển hoặc startup thường triển khai trên các nền tảng đám mây hiện đại như **Render.com, Vercel, Fly.io, Cloudflare Pages, Supabase**:
+* **Bẫy Ổ Cứng Tạm Thời (The Ephemeral Filesystem Trap)**: Hầu hết các nền tảng này đều dùng ổ cứng tạm. Mỗi khi server ngủ đông (spin-down sau 15 phút không dùng ở gói Free của Render), hoặc mỗi khi bạn deploy phiên bản mới, **toàn bộ file `.log` ghi trên đĩa server sẽ bị xóa sạch 100%**. Ghi log vào file trên server chỉ đem lại ảo giác an toàn giả tạo.
+* **Bẫy Chi Phí & Bảo Trì Hạ Tầng (The Infrastructure Burden Trap)**: Một dự án mới không thể và không nên gánh thêm chi phí thuê server Elasticsearch, Grafana, hay tự dựng database chỉ để lưu crash logs.
+
+#### 2. Mô Hình Khả Năng Quan Sát 0 Đồng & 0 Cần Server Riêng (Zero-Cost & Zero-Server Architecture)
+Để mọi dự án mới đạt chuẩn độ trưởng thành kỹ nghệ mà không tốn 1 xu chi phí duy trì máy chủ, hãy thiết lập mô hình 4 tầng sau ngay trong ticket `INFRA-S02`:
+
+```text
+[ Người Dùng Cuối / Tester (Web / Mobile) ]
+                    │
+                    ▼
+ ┌─────────────────────────────────────────────────────────────┐
+ │ TẦNG 1: IN-MEMORY FLIGHT RECORDER (BỘ ĐỆM VÒNG TRÒN TRONG RAM) │
+ │ • Lưu trữ 50-100 events, actions, intents gần nhất          │
+ │ • Chạy thuần túy trong RAM (0ms disk I/O, 0 rớt FPS)        │
+ └──────────────────────────────┬──────────────────────────────┘
+                                │
+                                ▼ (Khi gặp Crash / Unhandled Error / Bất biến vi phạm)
+ ┌─────────────────────────────────────────────────────────────┐
+ │ TẦNG 2: CẢM BIẾN TỰ ĐỘNG ĐÓNG BĂNG (AUTO-FREEZE & TRACE)     │
+ │ • Lắng nghe window.onerror / unhandledrejection             │
+ │ • Tự động đóng băng trạng thái và gọi:                       │
+ │   exportFlightRecorderDump() -> match_dump_[ID].json        │
+ └──────────────────────────────┬──────────────────────────────┘
+                                │
+                                ▼ (Gửi ngầm không chặn luồng UI)
+ ┌─────────────────────────────────────────────────────────────┐
+ │ TẦNG 3: KÊNH ĐỒNG BỘ TỪ XA 0 ĐỒNG (ZERO-SERVER REMOTE SYNC)  │
+ │                                                             │
+ │ [KÊNH A: DISCORD WEBHOOK]        [KÊNH B: SENTRY DEV TIER]  │
+ │ • 0đ chi phí, 2 phút cài đặt     • 0đ (5.000 lỗi/tháng)     │
+ │ • Bắn file JSON thẳng vào kênh   • Tự gom nhóm lỗi, chụp    │
+ │   Discord riêng của đội ngũ        stacktrace, GPU & OS     │
+ │ • Điện thoại nhận ping tức thì   • Đính kèm dump vào context│
+ └──────────────────────────────┬──────────────────────────────┘
+                                │
+                                ▼ (Kỹ sư tải file JSON về máy tính)
+ ┌─────────────────────────────────────────────────────────────┐
+ │ TẦNG 4: CÔNG CỤ TÁI HIỆN HIỆN TRƯỜNG NGOẠI TUYẾN            │
+ │ • node scripts/analyze_gameplay_log.mjs dump.json --timeline│
+ │ • Tái hiện từng tick thời gian, cô lập bug trong 30 giây!   │
+ └─────────────────────────────────────────────────────────────┘
+```
+
+#### 3. Hướng Dẫn Triển Khai Thực Chiến Cho Dự Án Mới
+
+##### 🔹 Bước 1: Khởi tạo In-Memory Flight Recorder Store
+Tạo một store nhẹ (Zustand / Redux / Pinia / Map in-memory) tại `src/telemetry/telemetry_store.ts`:
+```typescript
+interface FlightRecorderEntry {
+  timestamp: number;
+  type: string;
+  payload: unknown;
+}
+
+export class FlightRecorder {
+  private static buffer: FlightRecorderEntry[] = [];
+  private static readonly MAX_ENTRIES = 100;
+
+  static record(type: string, payload: unknown) {
+    this.buffer.push({ timestamp: Date.now(), type, payload });
+    if (this.buffer.length > this.MAX_ENTRIES) {
+      this.buffer.shift(); // Giữ lại đúng 100 sự kiện gần nhất (Ring Buffer)
+    }
+  }
+
+  static exportDump() {
+    return {
+      exportedAt: new Date().toISOString(),
+      userAgent: navigator.userAgent,
+      url: window.location.href,
+      events: [...this.buffer],
+    };
+  }
+}
+```
+
+##### 🔹 Bước 2: Bắn Báo Cáo Kèm File Hộp Đen Về Discord Webhook (0 Đồng)
+Tạo 1 kênh Discord riêng `#project-crashes` ➔ *Channel Settings ➔ Integrations ➔ Webhooks ➔ Copy Webhook URL*.
+Thêm hàm đồng bộ sự cố tự động:
+```typescript
+export async function reportCrashToDiscord(error: Error, webhookUrl: string) {
+  try {
+    const dumpData = FlightRecorder.exportDump();
+    const dumpJson = JSON.stringify({ error: error.message, stack: error.stack, ...dumpData }, null, 2);
+
+    const formData = new FormData();
+    formData.append("content", `🚨 **CRASH REPORT DETECTED!**\n> **Lỗi**: \`${error.message}\`\n> **Thiết bị**: \`${navigator.userAgent}\``);
+    formData.append("file", new Blob([dumpJson], { type: "application/json" }), `crash_${Date.now()}.json`);
+
+    await fetch(webhookUrl, {
+      method: "POST",
+      body: formData,
+    });
+  } catch (err) {
+    console.error("Không thể gửi crash report:", err);
+  }
+}
+
+// Bắt lỗi toàn cục tự động
+window.addEventListener("error", (event) => {
+  reportCrashToDiscord(event.error, import.meta.env.VITE_DISCORD_CRASH_WEBHOOK);
+});
+window.addEventListener("unhandledrejection", (event) => {
+  reportCrashToDiscord(new Error(String(event.reason)), import.meta.env.VITE_DISCORD_CRASH_WEBHOOK);
+});
+```
+
+##### 🔹 Bước 3: Tích Hợp Sentry (Nếu Muốn Dashboard Chuyên Nghiệp)
+Cài đặt `@sentry/browser` hoặc `@sentry/react`. Dùng gói miễn phí 5.000 lỗi/tháng:
+```typescript
+import * as Sentry from "@sentry/react";
+
+Sentry.init({
+  dsn: import.meta.env.VITE_SENTRY_DSN,
+  beforeSend(event) {
+    // Đính kèm toàn bộ hộp đen vào ngữ cảnh của Sentry
+    event.contexts = event.contexts || {};
+    event.contexts.flight_recorder = FlightRecorder.exportDump();
+    return event;
+  },
+});
+```
+
+#### 4. Quy Chuẩn Đánh Giá Nghiệm Thu (Acceptance Criteria Cho Khả Năng Quan Sát Ngày 0)
+Mọi dự án mới khi hoàn thành giàn giáo Walking Skeleton bắt buộc phải chứng minh:
+1. **Zero-Log-On-Disk Invariant**: Không phụ thuộc vào việc ghi log lên file server của Render/Vercel.
+2. **Crash-to-Phone Parity**: Cố tình kích hoạt 1 lỗi thử nghiệm trên trình duyệt điện thoại ➔ Sau 3 giây, kênh Discord hoặc Dashboard Sentry nhận được thông báo kèm file JSON hộp đen.
+3. **Offline Replay**: Kéo file JSON về máy, chạy script phân tích CLI và in ra được timeline 100 sự kiện trước khi sập app.
 
 ---
 

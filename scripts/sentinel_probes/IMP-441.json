@@ -1,0 +1,80 @@
+[
+  {
+    "file": "src/client/3d/single_hop_pawn.tsx",
+    "desc": "AST: Corrupt event/transit flight landing audio in computeHopFrame",
+    "target": "soundToPlay = SoundEffect.CARD_DRAW;",
+    "replacement": "soundToPlay = SoundEffect.PAWN_STEP;"
+  },
+  {
+    "file": "src/client/3d/single_hop_pawn.tsx",
+    "desc": "AST: Corrupt audit/jail flight landing audio in computeHopFrame",
+    "target": "soundToPlay = SoundEffect.TAX_PENALTY;",
+    "replacement": "soundToPlay = SoundEffect.CARD_DRAW;"
+  },
+  {
+    "file": "src/client/3d/single_hop_pawn.tsx",
+    "desc": "AST: Corrupt normal step audio in computeHopFrame",
+    "target": "soundToPlay = SoundEffect.PAWN_STEP;",
+    "replacement": "soundToPlay = SoundEffect.CARD_DRAW;"
+  },
+  {
+    "file": "src/client/3d/pawn_animator.tsx",
+    "desc": "AST: Suppress isDirectFlight in ActiveSpringPawn",
+    "target": "const isDirectFlight = Boolean(animation.isJailFlight || animation.flightType);",
+    "replacement": "const isDirectFlight = false;"
+  },
+  {
+    "file": "src/client/network/apply_delta_players.ts",
+    "desc": "AST: Invert isEventFlight detection in processSinglePlayerPosition",
+    "target": "const isEventFlight = cardId === 'MC_MEGA_CONCERT';",
+    "replacement": "const isEventFlight = false;"
+  },
+  {
+    "file": "src/client/network/apply_delta_players.ts",
+    "desc": "AST: Invert isTransitFlight detection in processSinglePlayerPosition",
+    "target": "const isTransitFlight = delta?.lastTransitResult?.playerId === p.id && (transitOutcome === 'SAFE_HAVEN' || transitOutcome === 'PASS_GO_FLIGHT');",
+    "replacement": "const isTransitFlight = false;"
+  },
+  {
+    "file": "src/client/network/apply_delta_players.ts",
+    "desc": "AST: Bypass pendingPawnMove check in determineFromCell",
+    "target": "if (state.pendingPawnMove?.playerId === playerId) {\n    return state.pendingPawnMove.targetCell;\n  }",
+    "replacement": "if (false) {\n    return state.pendingPawnMove.targetCell;\n  }"
+  },
+  {
+    "file": "src/client/network/apply_delta_players.ts",
+    "desc": "AST: Unconditionally overwrite pendingPawnMove in dispatchPawnMove",
+    "target": "if (!state.pendingPawnMove) {",
+    "replacement": "if (true) {"
+  },
+  {
+    "file": "src/client/store/game_store_pawn_actions.ts",
+    "desc": "AST: Sever lastClearedPendingMove recovery in startPawnMove",
+    "target": "const effectiveFlightType =\n        flightType ??\n        (lastClearedPendingMove?.playerId === playerId && lastClearedPendingMove?.targetCell === targetCell\n          ? lastClearedPendingMove.flightType\n          : undefined);",
+    "replacement": "const effectiveFlightType = flightType;"
+  },
+  {
+    "file": "src/client/store/game_store_pawn_actions.ts",
+    "desc": "AST: Suppress isDirectFlight in startPawnMove",
+    "target": "const isDirectFlight = Boolean(isJailFlight || effectiveFlightType);",
+    "replacement": "const isDirectFlight = false;"
+  },
+  {
+    "file": "src/server/network/turn_bot_timer_scheduler.ts",
+    "desc": "AST: Suppress transit result observation pacing in resolveKinematicsServedDelay",
+    "target": "if ((room.phase === TurnPhase.PropertyManagement || room.phase === TurnPhase.ActionPhase) && room.lastTransitResult) {",
+    "replacement": "if (false && room.lastTransitResult) {"
+  },
+  {
+    "file": "src/server/network/turn_bot_timer_scheduler.ts",
+    "desc": "AST: Suppress event card observation pacing in resolveKinematicsServedDelay",
+    "target": "if (room.lastEventCard) {",
+    "replacement": "if (false && room.lastEventCard) {"
+  },
+  {
+    "file": "src/server/network/turn_bot_timer_scheduler.ts",
+    "desc": "AST: Suppress pending transit wheel observation pacing in resolveKinematicsServedDelay",
+    "target": "if (room.pendingTransitWheel) {",
+    "replacement": "if (false && room.pendingTransitWheel) {"
+  }
+]

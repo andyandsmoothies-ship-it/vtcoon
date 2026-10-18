@@ -58,9 +58,14 @@ export function parseStation0(auditDir, ticketId, contractTestCount) {
           }
         }
         if (collected.length > 0) {
-          fieldVal = fieldVal ? `${fieldVal} ${collected.join('; ')}` : collected.join(' ');
-        }
-        if (fieldVal) {
+          const firstVal = fieldVal || collected[0];
+          const formatted = `- **${fieldName}**: ${firstVal}`;
+          planChallengeNotes.push(currentAdv ? `  ${formatted}` : formatted);
+          const remaining = fieldVal ? collected : collected.slice(1);
+          for (const item of remaining) {
+            planChallengeNotes.push(currentAdv ? `    - ${item}` : `  - ${item}`);
+          }
+        } else if (fieldVal) {
           const formatted = `- **${fieldName}**: ${fieldVal}`;
           planChallengeNotes.push(currentAdv ? `  ${formatted}` : formatted);
         }
@@ -146,11 +151,18 @@ export function parseStation3Reviews(auditDir, ticketId) {
   } else if (visual3dFile) {
     const v3Content = fs.readFileSync(visual3dFile, 'utf8');
     const scoreMatch = v3Content.match(/(?:\*\*)?(\d+(?:\.\d+)?\s*\/\s*10)(?:\*\*)?/);
-    if (scoreMatch) uiReviewVerdict = `${scoreMatch[1]} (3D AAA Verified) 🎨`;
+    const dispMatch = v3Content.match(/\*\*Disposition:\*\*\s*(?:\*\*)?([^*\r\n]+)(?:\*\*)?/i);
+    const disposition = dispMatch ? dispMatch[1].trim() : '';
+    const scoreNum = scoreMatch ? parseFloat(scoreMatch[1].split('/')[0].trim()) : 0;
+    if (disposition.includes('HOLD') || scoreNum < 8.0) {
+      uiReviewVerdict = `${scoreMatch ? scoreMatch[1] : '5.8 / 10'} (${disposition || 'HOLD FOR FIX'}) ⚠️`;
+    } else if (scoreMatch) {
+      uiReviewVerdict = `${scoreMatch[1]} (3D AAA Verified) 🎨`;
+    }
     const lines = v3Content.split('\n');
     for (const l of lines) {
       const trimmed = l.trim();
-      if (/^-\s*\*\*(?:Core Milestone|Pillar \d|Spatial Sector|Camera|Lobby|3D Diorama|K\d|Priority)/i.test(trimmed) && trimmed.length > 25) {
+      if (/^-\s*\*\*(?:Core Milestone|Pillar \d|Spatial Sector|Camera|Lobby|3D Diorama|K\d|Priority|P\d|Desktop|Mobile)/i.test(trimmed) && trimmed.length > 25) {
         uiReviewNotes.push(trimmed);
       } else if (/^-\s*`?(?:top_down|lobby_vip|deed_modal|dice_tray|hud_dock|mobile_viewport)`?:/i.test(trimmed) && trimmed.length > 25) {
         uiReviewNotes.push(trimmed);

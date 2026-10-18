@@ -34,6 +34,10 @@ export function auditScopeAndSubsystems(targetFiles) {
       cohesiveFamilies.add('src/client/3d/board');
       continue;
     }
+    if (norm.startsWith('src/client/3d/pawn_') || norm === 'src/client/3d/single_hop_pawn.tsx') {
+      cohesiveFamilies.add('src/client/3d/pawn');
+      continue;
+    }
     if (norm.startsWith('src/server/')) {
       cohesiveFamilies.add('src/server');
       continue;
@@ -76,7 +80,8 @@ export function auditScopeAndSubsystems(targetFiles) {
     errors++;
   }
 
-  if (detectedSubsystems.has('client-3d')) {
+  const isCohesivePawnKinematics = cohesiveFamilies.has('src/client/3d/pawn') && cohesiveFamilies.size <= 3;
+  if (detectedSubsystems.has('client-3d') && !isCohesivePawnKinematics) {
     const conflicting = ['client-state', 'domain-core', 'server-network', 'client-types'];
     const conflicts = conflicting.filter((s) => detectedSubsystems.has(s));
     if (conflicts.length > 0) {

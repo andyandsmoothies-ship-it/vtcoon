@@ -15,6 +15,7 @@ export const DEFAULT_SCENARIOS = [
   'event_card_modal',
   'notifications_financial',
   'notifications_showcase',
+  'pawn_direct_flight_apex',
   'transit_wheel',
 ];
 

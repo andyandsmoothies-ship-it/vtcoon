@@ -15,6 +15,8 @@ export interface TransitWheelResultInfo {
   readonly boostSteps?: number;
 }
 
+export type PawnFlightType = 'audit' | 'transit' | 'event';
+
 export interface PawnAnimationState {
   readonly playerId: string;
   readonly fromCell: number;
@@ -24,6 +26,7 @@ export interface PawnAnimationState {
   readonly isAnimating: boolean;
   readonly isBot?: boolean;
   readonly isJailFlight?: boolean;
+  readonly flightType?: PawnFlightType;
 }
 
 export interface PawnMoveTask {
@@ -33,6 +36,7 @@ export interface PawnMoveTask {
   readonly waypoints: readonly number[];
   readonly isBot?: boolean;
   readonly isJailFlight?: boolean;
+  readonly flightType?: PawnFlightType;
 }
 
 export interface PlayerHudInfo {
@@ -213,6 +217,7 @@ export interface PendingPawnMove {
   readonly fromCell: number;
   readonly isBot?: boolean;
   readonly isJailFlight?: boolean;
+  readonly flightType?: PawnFlightType;
 }
 
 export interface LastLandedPawn {

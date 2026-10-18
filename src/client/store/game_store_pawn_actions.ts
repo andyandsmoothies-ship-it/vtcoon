@@ -1,16 +1,22 @@
 // [IMP-306] Game Store Pawn Actions Slice
 import { clampDiceFace } from '../3d/dice_math.js';
 import { calculatePathWaypoints, BOARD_TOTAL_CELLS } from '../3d/pawn_path.js';
-import type { GameState, PawnMoveTask, PendingPawnMove } from './game_store_types.js';
+import type { GameState, PawnMoveTask, PendingPawnMove, PawnFlightType } from './game_store_types.js';
 
 type StoreSet = (partial: Partial<GameState> | ((state: GameState) => Partial<GameState>)) => void;
 type StoreGet = () => GameState;
+
+let lastClearedPendingMove: PendingPawnMove | null = null;
 
 function createPositionActions(set: StoreSet, get: StoreGet) {
   return {
     setPlayerPositions: (positions: Record<string, number>): void => {
       const state = get();
-      const isBusy = Boolean(state.activePawnAnimation?.isAnimating) || (state.pawnAnimationQueue?.length ?? 0) > 0;
+      const isBusy =
+        Boolean(state.activePawnAnimation?.isAnimating) ||
+        (state.pawnAnimationQueue?.length ?? 0) > 0 ||
+        Boolean(state.pendingPawnMove) ||
+        state.isRolling;
       const visualPositions = isBusy ? { ...state.visualPositions } : { ...positions };
       if (isBusy) {
         for (const [id, pos] of Object.entries(positions)) {
@@ -24,7 +30,14 @@ function createPositionActions(set: StoreSet, get: StoreGet) {
 
     setVisualPositions: (positions: Record<string, number>): void => set({ visualPositions: positions }),
 
-    setPendingPawnMove: (move: PendingPawnMove | null): void => set({ pendingPawnMove: move }),
+    setPendingPawnMove: (move: PendingPawnMove | null): void => {
+      if (move === null) {
+        lastClearedPendingMove = get().pendingPawnMove ?? null;
+      } else {
+        lastClearedPendingMove = null;
+      }
+      set({ pendingPawnMove: move });
+    },
   };
 }
 
@@ -43,7 +56,14 @@ function createDiceActions(set: StoreSet, get: StoreGet) {
         const pending = get().pendingPawnMove;
         if (pending && get().activeModal !== 'transit_wheel') {
           set({ pendingPawnMove: null });
-          get().startPawnMove(pending.playerId, pending.targetCell, pending.fromCell, pending.isBot, pending.isJailFlight);
+          get().startPawnMove(
+            pending.playerId,
+            pending.targetCell,
+            pending.fromCell,
+            pending.isBot,
+            pending.isJailFlight,
+            pending.flightType,
+          );
         }
         get().processPawnQueue();
       } else {
@@ -116,6 +136,7 @@ function createQueueActions(set: StoreSet, get: StoreGet) {
           isAnimating: true,
           isBot: nextTask.isBot,
           ...(nextTask.isJailFlight ? { isJailFlight: true } : {}),
+          ...(nextTask.flightType ? { flightType: nextTask.flightType } : {}),
         },
       });
 
@@ -138,17 +159,41 @@ function createPawnTransitionActions(set: StoreSet, get: StoreGet) {
       fromCell?: number,
       isBot?: boolean,
       isJailFlight?: boolean,
+      flightType?: PawnFlightType,
     ): void => {
       const state = get();
       if (!Number.isInteger(targetCell) || targetCell < 0 || targetCell >= BOARD_TOTAL_CELLS) {
         return;
       }
-      const isBusy = Boolean(state.activePawnAnimation?.isAnimating) || (state.pawnAnimationQueue?.length ?? 0) > 0;
-      const currentPos = fromCell ?? (isBusy ? state.visualPositions?.[playerId] : undefined) ?? state.playerPositions?.[playerId] ?? state.visualPositions?.[playerId] ?? 0;
+      const effectiveFlightType =
+        flightType ??
+        (lastClearedPendingMove?.playerId === playerId && lastClearedPendingMove?.targetCell === targetCell
+          ? lastClearedPendingMove.flightType
+          : undefined);
+      lastClearedPendingMove = null;
+
+      const pTasks = (state.pawnAnimationQueue ?? []).filter((t) => t.playerId === playerId);
+      const queueTailTarget = pTasks.length > 0 ? pTasks[pTasks.length - 1]?.targetCell : undefined;
+      const pendingTarget = state.pendingPawnMove?.playerId === playerId ? state.pendingPawnMove.targetCell : undefined;
+      const activeTailTarget =
+        state.activePawnAnimation?.playerId === playerId && state.activePawnAnimation.waypoints.length > 0
+          ? state.activePawnAnimation.waypoints[state.activePawnAnimation.waypoints.length - 1]
+          : undefined;
+
+      const currentPos =
+        fromCell ??
+        queueTailTarget ??
+        pendingTarget ??
+        activeTailTarget ??
+        state.playerPositions?.[playerId] ??
+        state.visualPositions?.[playerId] ??
+        0;
+
       if (currentPos === targetCell) {
         return;
       }
-      const waypoints = isJailFlight ? [targetCell] : calculatePathWaypoints(currentPos, targetCell);
+      const isDirectFlight = Boolean(isJailFlight || effectiveFlightType);
+      const waypoints = isDirectFlight ? [targetCell] : calculatePathWaypoints(currentPos, targetCell);
       if (waypoints.length === 0) {
         return;
       }
@@ -159,6 +204,7 @@ function createPawnTransitionActions(set: StoreSet, get: StoreGet) {
         waypoints,
         isBot,
         ...(isJailFlight ? { isJailFlight: true } : {}),
+        ...(effectiveFlightType ? { flightType: effectiveFlightType } : {}),
       });
     },
 
@@ -202,6 +248,7 @@ function createPawnTransitionActions(set: StoreSet, get: StoreGet) {
     },
 
     clearActivePawnAnimation: (): void => {
+      lastClearedPendingMove = null;
       set({
         activePawnAnimation: null,
         pendingPawnMove: null,

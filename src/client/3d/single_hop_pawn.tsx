@@ -110,6 +110,7 @@ export interface HopFrameParams {
   readonly offset: readonly [number, number, number];
   readonly soundPlayed: boolean;
   readonly isJailFlight?: boolean;
+  readonly flightType?: 'audit' | 'transit' | 'event';
 }
 
 export interface HopFrameResult {
@@ -142,7 +143,9 @@ export function computeHopFrame(params: HopFrameParams): HopFrameResult {
     let soundToPlay: SoundEffect | undefined;
     let pitch: number | undefined;
     if (!params.soundPlayed) {
-      if (params.isJailFlight) {
+      if (params.flightType === 'event' || params.flightType === 'transit') {
+        soundToPlay = SoundEffect.CARD_DRAW;
+      } else if (params.isJailFlight || params.flightType === 'audit') {
         soundToPlay = SoundEffect.TAX_PENALTY;
       } else {
         soundToPlay = SoundEffect.PAWN_STEP;
@@ -183,6 +186,7 @@ export interface SingleHopProps {
   readonly slotIndex?: number;
   readonly isBot?: boolean;
   readonly isJailFlight?: boolean;
+  readonly flightType?: 'audit' | 'transit' | 'event';
 }
 
 export function SingleHopPawn({
@@ -195,6 +199,7 @@ export function SingleHopPawn({
   slotIndex,
   isBot,
   isJailFlight,
+  flightType,
 }: SingleHopProps): React.ReactElement | null {
   const groupRef = React.useRef<Group>(null);
   const elapsedRef = React.useRef(0);
@@ -203,13 +208,14 @@ export function SingleHopPawn({
   const onHopCompleteRef = React.useRef(onHopComplete);
   onHopCompleteRef.current = onHopComplete;
 
-  const hopDuration = isJailFlight
+  const isDirectFlight = Boolean(isJailFlight || flightType);
+  const hopDuration = isDirectFlight
     ? (isBot ? BOT_JAIL_FLIGHT_DURATION : JAIL_FLIGHT_DURATION)
     : (isBot ? BOT_HOP_DURATION : HOP_DURATION);
-  const landingDuration = isJailFlight
+  const landingDuration = isDirectFlight
     ? JAIL_LANDING_DURATION
     : (isBot ? BOT_LANDING_DURATION : LANDING_DURATION);
-  const arcHeight = isJailFlight ? JAIL_FLIGHT_ARC : DEFAULT_JUMP_ARC;
+  const arcHeight = isDirectFlight ? JAIL_FLIGHT_ARC : DEFAULT_JUMP_ARC;
 
   useEffect(() => {
     if (fromCell === toCell && !completedRef.current) {
@@ -231,7 +237,8 @@ export function SingleHopPawn({
       toCell,
       offset,
       soundPlayed: soundPlayedRef.current,
-      isJailFlight,
+      isJailFlight: isDirectFlight,
+      flightType,
     });
 
     elapsedRef.current = res.elapsed;

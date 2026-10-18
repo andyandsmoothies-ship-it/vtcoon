@@ -13,6 +13,21 @@ export const BOT_START_TURN_BREATHING_ROOM_MS = 2200;
 // 600ms DICE_SETTLE_DWELL_MS (dice_tray.tsx#L20) + 600ms PAWN_LANDING_SETTLE_MS (pawn_animator.tsx#L35) = 1200ms
 export const BOT_KINEMATIC_DWELL_COMPENSATION_MS = 1200;
 
+function resolveKinematicsServedDelay(room: Room, baseDelayMs: number): number {
+  if ((room.phase === TurnPhase.PropertyManagement || room.phase === TurnPhase.ActionPhase) && room.lastTransitResult) {
+    const boost = room.lastTransitResult.boostSteps ?? 0;
+    const cardDelay = room.lastEventCard ? 2500 : 0;
+    return Math.max(baseDelayMs, 1200 + boost * 350 + BOT_TRANSIT_OBSERVATION_DELAY_MS + cardDelay);
+  }
+  if (room.lastEventCard) {
+    return Math.max(baseDelayMs, 2500);
+  }
+  if (room.pendingTransitWheel) {
+    return Math.max(baseDelayMs, BOT_TRANSIT_OBSERVATION_DELAY_MS);
+  }
+  return baseDelayMs;
+}
+
 export function resolveBotStepDelay(
   room: Room | undefined,
   baseDelayMs: number,
@@ -27,7 +42,7 @@ export function resolveBotStepDelay(
   }
 
   if (kinematicsServed) {
-    return baseDelayMs;
+    return resolveKinematicsServedDelay(room, baseDelayMs);
   }
 
   const legacyDelay = calculateBotStepDelay(room, baseDelayMs);

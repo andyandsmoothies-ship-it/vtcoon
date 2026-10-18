@@ -1,6 +1,6 @@
 // [IMP-64] Extracted player delta functions from apply_delta.ts
 // ZERO LOGIC CHANGE — code moved verbatim from apply_delta.ts L26–L184
-import { type GameState, type PlayerHudInfo, type PawnMoveTask, FloatingTextType, type FloatingActionType } from '../store/game_store.js';
+import { type GameState, type PlayerHudInfo, type PawnMoveTask, type PawnFlightType, FloatingTextType, type FloatingActionType } from '../store/game_store.js';
 import { calculatePathWaypoints, calculateJailFlightWaypoints } from '../3d/pawn_path.js';
 import { useLobbyStore } from '../store/lobby_store.js';
 import { PLAYER_TOKEN_PALETTE } from '../../domain/theme.js';
@@ -35,26 +35,38 @@ function determineFromCell(state: GameState, playerId: string, currentPos: numbe
   const pTasks = queue.filter((t) => t.playerId === playerId);
   if (pTasks.length > 0) return pTasks[pTasks.length - 1]!.targetCell;
 
+  const pending = state.pendingPawnMove;
+  if (pending?.playerId === playerId) {
+    return pending.targetCell;
+  }
+
   const anim = state.activePawnAnimation;
   if (anim?.playerId === playerId && anim.waypoints.length > 0) {
     return anim.waypoints[anim.waypoints.length - 1]!;
   }
-  const isBusy = Boolean(anim?.isAnimating) || queue.length > 0;
-  const visualPos = state.visualPositions?.[playerId];
-  return (isBusy && visualPos !== undefined) ? visualPos : currentPos;
+  return currentPos;
 }
 
 function dispatchPawnMove(state: GameState, task: PawnMoveTask, isRolling: boolean): void {
   const isHeldForModal = state.activeModal === 'transit_wheel';
   if ((isRolling || isHeldForModal) && state.setPendingPawnMove) {
-    state.setPendingPawnMove({
-      playerId: task.playerId, targetCell: task.targetCell, fromCell: task.fromCell,
-      ...(task.isJailFlight ? { isJailFlight: true, isBot: Boolean(task.isBot) } : {}),
-    });
+    if (!state.pendingPawnMove) {
+      state.setPendingPawnMove({
+        playerId: task.playerId,
+        targetCell: task.targetCell,
+        fromCell: task.fromCell,
+        ...(task.isJailFlight ? { isJailFlight: true, isBot: Boolean(task.isBot) } : {}),
+        ...(task.flightType ? { flightType: task.flightType } : {}),
+      });
+    } else if (state.enqueuePawnMove) {
+      state.enqueuePawnMove(task);
+    } else {
+      state.startPawnMove?.(task.playerId, task.targetCell, task.fromCell, Boolean(task.isBot), task.isJailFlight, task.flightType);
+    }
   } else if (state.enqueuePawnMove) {
     state.enqueuePawnMove(task);
   } else {
-    state.startPawnMove?.(task.playerId, task.targetCell, task.fromCell, Boolean(task.isBot), task.isJailFlight);
+    state.startPawnMove?.(task.playerId, task.targetCell, task.fromCell, Boolean(task.isBot), task.isJailFlight, task.flightType);
   }
 }
 
@@ -163,6 +175,7 @@ function processSinglePlayerPosition(
   p: DeltaPlayer,
   nextPositions: Record<string, number>,
   isFullSync: boolean,
+  delta?: DeltaPayload,
 ): boolean {
   if (nextPositions[p.id] === p.position) return false;
   const fromCell = determineFromCell(state, p.id, nextPositions[p.id] ?? 0);
@@ -173,8 +186,14 @@ function processSinglePlayerPosition(
   const isGoingToAudit = p.position === 10 && Boolean(p.inAudit || (p.auditTurnsLeft && p.auditTurnsLeft > 0)) && !existingWasInAudit;
 
   if (!isFullSync && fromCell !== p.position) {
+    const cardId = delta?.lastEventCard?.cardId ?? delta?.lastEventCard?.id;
+    const isEventFlight = cardId === 'MC_MEGA_CONCERT';
+    const transitOutcome = delta?.lastTransitResult?.outcome;
+    const isTransitFlight = delta?.lastTransitResult?.playerId === p.id && (transitOutcome === 'SAFE_HAVEN' || transitOutcome === 'PASS_GO_FLIGHT');
     const isJailFlight = isGoingToAudit && p.position === 10;
-    const waypoints = isJailFlight ? calculateJailFlightWaypoints(p.position) : calculatePathWaypoints(fromCell, p.position);
+    const flightType: PawnFlightType | undefined = isJailFlight ? 'audit' : isEventFlight ? 'event' : isTransitFlight ? 'transit' : undefined;
+    const isDirectFlight = Boolean(isJailFlight || flightType);
+    const waypoints = isDirectFlight ? calculateJailFlightWaypoints(p.position) : calculatePathWaypoints(fromCell, p.position);
     if (waypoints.length > 0) {
       dispatchPawnMove(state, {
         playerId: p.id,
@@ -183,6 +202,7 @@ function processSinglePlayerPosition(
         waypoints,
         isBot: Boolean(p.isBot),
         ...(isJailFlight ? { isJailFlight: true } : {}),
+        ...(flightType ? { flightType } : {}),
       }, state.isRolling);
     }
   }
@@ -238,7 +258,7 @@ export function applyPlayerDeltas(
   }
 
   players.forEach((p, pIdx) => {
-    if (processSinglePlayerPosition(state, p, nextPositions, isFullSync)) hasPosChange = true;
+    if (processSinglePlayerPosition(state, p, nextPositions, isFullSync, delta)) hasPosChange = true;
     const existing = playersInfoMap[p.id];
     syncPlayerBalanceDiff(state, p, existing, isFullSync);
     if (!isFullSync && p.bankrupt === true && !existing?.bankrupt) {
