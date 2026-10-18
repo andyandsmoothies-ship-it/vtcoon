@@ -60,6 +60,7 @@ function getModifiedFiles(stagedOnly = false) {
   try {
     const statusOutput = execSync('git status --porcelain -uall', { encoding: 'utf-8' });
     const files = new Set();
+    const harnessFiles = new Set();
 
     for (const rawLine of statusOutput.split('\n')) {
       if (!rawLine.trim()) continue;
@@ -80,9 +81,17 @@ function getModifiedFiles(stagedOnly = false) {
           !filePath.includes('.sentinel_bak_')) {
         files.add(filePath);
       }
+
+      // Track harness and toolchain script modifications (excluding transient log/probe outputs)
+      if (filePath.startsWith('scripts/') &&
+          !filePath.includes('.tmp_') &&
+          !filePath.endsWith('.log') &&
+          !filePath.includes('.sentinel_bak_')) {
+        harnessFiles.add(filePath);
+      }
     }
 
-    return Array.from(files);
+    return { modifiedFiles: Array.from(files), harnessFiles: Array.from(harnessFiles) };
   } catch (error) {
     console.error('❌ Failed to run git status:', error.message);
     process.exit(1);
@@ -103,7 +112,28 @@ function main() {
 
   const registeredFiles = extractRegisteredFiles(planContent);
   const stagedOnly = process.argv.includes('--staged');
-  const modifiedFiles = getModifiedFiles(stagedOnly);
+  const { modifiedFiles, harnessFiles } = getModifiedFiles(stagedOnly);
+
+  // Mechanical Harness Tampering Lock: Reject unannounced toolchain mutations
+  if (harnessFiles.length > 0) {
+    const isAuthorized = planContent.includes('[HARNESS_MUTATION_AUTHORIZED]');
+    if (!isAuthorized) {
+      console.error('❌ [HARNESS TAMPERING DETECTED] The following toolchain scripts under scripts/ were modified without explicit authorization:');
+      for (const hf of harnessFiles) {
+        console.error(`   🚨 ${hf}`);
+      }
+      console.error('\nAction Required:');
+      console.error('1. If intentional, declare "[HARNESS_MUTATION_AUTHORIZED]" in the Plan along with architectural justification.');
+      console.error('2. If accidental, revert changes: git checkout -- <file>\n');
+      process.exit(1);
+    } else {
+      console.log(`🛡️ [HARNESS LOCK] Authorized modification detected for ${harnessFiles.length} harness file(s):`);
+      for (const hf of harnessFiles) {
+        console.log(`   🔧 ${hf} (Authorized via [HARNESS_MUTATION_AUTHORIZED])`);
+      }
+      console.log('');
+    }
+  }
 
   console.log(`📌 Registered files in Plan: ${registeredFiles.size}`);
   for (const f of registeredFiles) {

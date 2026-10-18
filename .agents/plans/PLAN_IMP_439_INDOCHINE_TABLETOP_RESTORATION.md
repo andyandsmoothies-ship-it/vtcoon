@@ -15,6 +15,7 @@
 | `tests/client/imp439_indochine_tabletop_restoration.test.ts (New)` | Living Tests (New) | 0 | 280 | +280 | client-3d | New |
 
 > **Architecture Commitment (LOC Buffer Zone Guard)**: All 8 production target files strictly obey Tier 2 ceilings (`<= 500 LOC`) and `miniature_city_diorama.tsx` reduces from 392 to 386 LOC (`<= 400 LOC`).
+> **Harness Modification Scope**: `[HARNESS_MUTATION_AUTHORIZED]` declared for `scripts/plan_audit/rules_scope.mjs` (cohesive families grouping) and `scripts/check_scope.mjs` (mechanical harness modification lock).
 
 ## 2. Core Contract Invariants
 - **[INV-BANISH-VOID-OCEAN-AND-FRAME-LOOP-PEACE]**: In `board_layout.tsx`, `GameBoard` mounts `<CoastalIslandEnvironment />` inside `<group visible={isOceanVisible}>` across both Desktop and Mobile (`&& isMobile` gate removed), wraps the 48m VIP plinth (`args={[48.0, 0.19, 48.0]}`) and `TabletopSalonAtmosphere` inside `<group visible={!isOceanVisible}>`, and sets `forceFallback` on `PAVED_ESPLANADE_MODEL_URL`. When `!isOceanVisible && !isAuctionActive`, `TabletopSalonAtmosphere` sets `scene.background` and `scene.fog.color` to warm studio slate `#1E293B` while `TimeOfDayLighting` (`time_of_day_lighting.tsx`) guards `updateDiffuseAndAtmosphere` scene background/fog mutation so the two frame loops never fight over `scene.background` or `scene.fog`.

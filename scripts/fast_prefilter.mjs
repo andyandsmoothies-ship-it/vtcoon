@@ -54,23 +54,43 @@ runStep('1. Typecheck (tsc --noEmit)', () => {
 });
 
 // 2. LOC Budgets for Target Files
-if (targetFiles.length > 0) {
-  runStep('2. LOC Budgets (check_loc.mjs)', () => {
-    const quotedFiles = targetFiles.map((f) => `"${f}"`).join(' ');
+const locCandidateFiles = targetFiles.length > 0 ? targetFiles : (() => {
+  try {
+    const gitOut = execSync('git status --porcelain -uall', { encoding: 'utf8' });
+    return gitOut.split('\n')
+      .map((l) => l.trim().slice(2).trim().replace(/^"|"$/g, '').replace(/\\/g, '/'))
+      .filter((f) => (f.startsWith('src/') || f.startsWith('tests/')) && /\.(ts|tsx|js|mjs)$/.test(f) && fs.existsSync(path.resolve(repoRoot, f)));
+  } catch {
+    return [];
+  }
+})();
+
+if (locCandidateFiles.length > 0) {
+  runStep(`2. LOC Budgets (check_loc.mjs - ${locCandidateFiles.length} files)`, () => {
+    const quotedFiles = locCandidateFiles.map((f) => `"${f}"`).join(' ');
     const out = execSync(`node scripts/check_loc.mjs ${quotedFiles}`, { stdio: 'pipe', encoding: 'utf8' });
     if (/❌ HARD ERROR/i.test(out)) {
       throw new Error(out.trim());
     }
   });
 } else {
-  console.log('ℹ️  2. LOC Budgets: Skipped (no explicit files passed, run on demand)');
+  console.log('ℹ️  2. LOC Budgets: Skipped (no explicit files or git modifications detected)');
 }
 
 // 3. Zero Dirty Casts & Banned Spies Scan
 runStep('3. Zero Dirty Casts & Banned AST Patterns', () => {
-  const filesToScan = targetFiles.length > 0
+  let filesToScan = targetFiles.length > 0
     ? targetFiles.filter((f) => fs.existsSync(f) && /\.(ts|tsx|js|mjs)$/.test(f) && !f.replace(/\\/g, '/').startsWith('scripts/'))
     : [];
+
+  if (filesToScan.length === 0) {
+    try {
+      const gitOut = execSync('git status --porcelain -uall', { encoding: 'utf8' });
+      filesToScan = gitOut.split('\n')
+        .map((l) => l.trim().slice(2).trim().replace(/^"|"$/g, '').replace(/\\/g, '/'))
+        .filter((f) => (f.startsWith('src/') || f.startsWith('tests/')) && /\.(ts|tsx|js|mjs)$/.test(f) && fs.existsSync(path.resolve(repoRoot, f)));
+    } catch {}
+  }
 
   const violations = [];
 
@@ -95,6 +115,14 @@ runStep('3. Zero Dirty Casts & Banned AST Patterns', () => {
       // Stray console.log in production code (allow in tests or scripts)
       if (!file.startsWith('tests') && !file.startsWith('scripts') && /console\.log\s*\(/.test(line)) {
         violations.push(`${file}:${lineNum} - Stray console.log in production source: ${line.trim()}`);
+      }
+      // Arbitrary sleeps >= 3000ms in test code (Fast & Deterministic Testing Iron Law)
+      if ((file.startsWith('tests/') || file.includes('/tests/')) && /\b(?:sleep|delay)\s*\(\s*[3-9]\d{3,}\s*\)/.test(line)) {
+        violations.push(`${file}:${lineNum} - Arbitrary sleep >= 3000ms detected: ${line.trim()}. Violates Fast & Deterministic Testing Iron Law.`);
+      }
+      // Unseeded Math.random() in contract tests (Fast & Deterministic Testing Iron Law)
+      if (file.startsWith('tests/contracts/') && /Math\.random\s*\(/.test(line) && !file.includes('seeded_rng')) {
+        violations.push(`${file}:${lineNum} - Unseeded Math.random() detected in contract test: ${line.trim()}. Violates Fast & Deterministic Testing Iron Law.`);
       }
       // Anti-TIDD: Ad-hoc human language word replacement in production source outside i18n
       // Catches kludges like .replace(/Đọc Quyền/gu, 'Độc Quyền') hardcoded in production to bypass test typos

@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { categorizeTier, TIER_RULES } from '../check_loc.mjs';
+import { measureFile, categorizeTier, TIER_RULES } from '../check_loc.mjs';
 import { collectHarnessFiles } from './report_station_collector.mjs';
 
 /**
@@ -309,10 +309,9 @@ ${srcFiles.map((f) => {
   if (!fs.existsSync(abs)) return `| [\`${path.basename(f)}\`](file:///${abs.replace(/\\/g, '/')}) | \`${planSubsystem}\` | **0 SLOC** | <= 400 LOC | ❌ Thiếu file |`;
   const tierKey = categorizeTier(f);
   const tierInfo = TIER_RULES[tierKey] || TIER_RULES.TIER1_LOGIC;
-  const rawLines = fs.readFileSync(abs, 'utf8').split('\n');
-  if (rawLines.length > 0 && rawLines[rawLines.length - 1] === '') rawLines.pop();
-  const physicalLines = rawLines.length;
-  const sloc = rawLines.filter((l) => l.trim().length > 0).length;
+  const measurement = measureFile(abs);
+  const physicalLines = measurement.totalLines;
+  const sloc = measurement.nonEmptySloc;
   const isWarn = sloc > tierInfo.warn && sloc <= tierInfo.ceiling;
   const status = isWarn ? `⚠️ Warning (${sloc} > ${tierInfo.warn})` : (sloc > tierInfo.ceiling ? `❌ Vượt trần (${sloc} > ${tierInfo.ceiling})` : '✅ Đạt chuẩn');
   return `| [\`${path.basename(f)}\`](file:///${abs.replace(/\\/g, '/')}) | ${tierInfo.name} | **${sloc} SLOC** (${physicalLines} L) | <= ${tierInfo.ceiling} LOC | ${status} |`;
@@ -320,10 +319,9 @@ ${srcFiles.map((f) => {
 ${testFiles.map((f) => {
   const abs = path.resolve(repoRoot, f);
   if (!fs.existsSync(abs)) return `| [\`${path.basename(f)}\`](file:///${abs.replace(/\\/g, '/')}) | Living Test | **0 SLOC** | <= 600 LOC | ❌ Thiếu file |`;
-  const rawLines = fs.readFileSync(abs, 'utf8').split('\n');
-  if (rawLines.length > 0 && rawLines[rawLines.length - 1] === '') rawLines.pop();
-  const physicalLines = rawLines.length;
-  const sloc = rawLines.filter((l) => l.trim().length > 0).length;
+  const measurement = measureFile(abs);
+  const physicalLines = measurement.totalLines;
+  const sloc = measurement.nonEmptySloc;
   const status = sloc > 600 ? `❌ Vượt trần (${sloc} > 600)` : '✅ Đạt chuẩn';
   return `| [\`${path.basename(f)}\`](file:///${abs.replace(/\\/g, '/')}) | Living Test | **${sloc} SLOC** (${physicalLines} L) | <= 600 LOC | ${status} |`;
 }).join('\n')}

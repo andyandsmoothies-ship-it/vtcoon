@@ -37,5 +37,7 @@ Thumbs.db
 .impeccable/screenshots/
 .impeccable/live/sessions/
 .impeccable/config.local.json
-
-
+# Blender & Python
+*.blend1
+__pycache__/
+*.pyc

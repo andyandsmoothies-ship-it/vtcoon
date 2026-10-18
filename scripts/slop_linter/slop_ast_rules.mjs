@@ -425,6 +425,73 @@ export function lintAstRules(sf, content, filePath, errors, warnings) {
       }
     }
 
+    // Rule 18: ZERO_ARBITRARY_SLEEPS (GEMINI.md Iron Law: Fast & Deterministic Testing)
+    if (normPath.startsWith('tests/') || normPath.includes('/tests/')) {
+      if (ts.isCallExpression(node)) {
+        let sleepName = '';
+        if (ts.isIdentifier(node.expression)) {
+          sleepName = node.expression.text;
+        } else if (ts.isPropertyAccessExpression(node.expression)) {
+          sleepName = node.expression.name.text;
+        }
+        if ((sleepName === 'sleep' || sleepName === 'delay') && node.arguments && node.arguments.length > 0) {
+          const firstArg = node.arguments[0];
+          if (ts.isNumericLiteral(firstArg) && Number(firstArg.text) >= 3000) {
+            const { line } = sf.getLineAndCharacterOfPosition(node.getStart());
+            errors.push({
+              rule: SLOP_RULES.ZERO_ARBITRARY_SLEEPS,
+              file: filePath,
+              line: line + 1,
+              message: `Arbitrary sleep >= 3000ms (${firstArg.text}ms) detected. Violates Fast & Deterministic Testing Iron Law. Use fake timers (vi.useFakeTimers, vi.advanceTimersByTime) instead.`,
+            });
+          }
+        }
+      }
+    }
+
+    // Rule 19: ZERO_UNSEEDED_RANDOM (GEMINI.md Iron Law: Fast & Deterministic Testing)
+    if ((normPath.startsWith('tests/contracts/') || normPath.includes('/tests/contracts/')) && !normPath.includes('seeded_rng')) {
+      if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression)) {
+        if (ts.isIdentifier(node.expression.expression) && node.expression.expression.text === 'Math' && node.expression.name.text === 'random') {
+          const { line } = sf.getLineAndCharacterOfPosition(node.getStart());
+          errors.push({
+            rule: SLOP_RULES.ZERO_UNSEEDED_RANDOM,
+            file: filePath,
+            line: line + 1,
+            message: 'Unseeded Math.random() detected in contract test. Violates Fast & Deterministic Testing Iron Law. Use seeded PRNG (createPrng) for reproducible assertions.',
+          });
+        }
+      }
+    }
+
+    // Rule 20: SEAM_DISCIPLINE_MONKEYPATCH (GEMINI.md Iron Law: Seam Discipline)
+    if (normPath.startsWith('tests/') || normPath.includes('/tests/')) {
+      if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression)) {
+        if (node.expression.name.text === 'spyOn' && node.arguments && node.arguments.length > 0) {
+          const targetText = node.arguments[0].getText(sf);
+          if (targetText === 'React') {
+            const isLegacy = /imp(?:126|182|188|217|236)_/.test(normPath) || /tropical_water_and_lighting/.test(normPath);
+            const { line } = sf.getLineAndCharacterOfPosition(node.getStart());
+            if (isLegacy) {
+              warnings.push({
+                rule: SLOP_RULES.SEAM_DISCIPLINE_MONKEYPATCH,
+                file: filePath,
+                line: line + 1,
+                message: 'Legacy Seam Discipline Warning: spyOn(React) detected in legacy test. Refactor to public interface boundary in upcoming debt cleanup.',
+              });
+            } else {
+              errors.push({
+                rule: SLOP_RULES.SEAM_DISCIPLINE_MONKEYPATCH,
+                file: filePath,
+                line: line + 1,
+                message: 'Seam Discipline Violation: Monkey-patching framework internals via spyOn(React, ...) is strictly forbidden by GEMINI.md Iron Law. The interface is the test boundary.',
+              });
+            }
+          }
+        }
+      }
+    }
+
     ts.forEachChild(node, visit);
   }
 

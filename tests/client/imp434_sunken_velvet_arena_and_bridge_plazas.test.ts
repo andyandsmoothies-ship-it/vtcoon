@@ -302,7 +302,7 @@ describe('IMP-434: Sunken Velvet Dong Son Arena & Bridge Landing Plazas', () => 
     expect(diceTrayNode?.props?.hasSunkenArena).toBe(true);
   });
 
-  it('TC-434.05b [UC-BOARD-LAYOUT-PRESENTATION-WIRING/A1]: Given BoardLayout rendered with isMobile: true, When inspecting DiceTray child props, Then propagates hasSunkenArena: false for mobile plinth preservation', () => {
+  it('TC-434.05b [UC-BOARD-LAYOUT-PRESENTATION-WIRING/A1]: Given BoardLayout rendered with isMobile: true, When inspecting DiceTray child props, Then propagates hasSunkenArena: true for unified tabletop sunken arena', () => {
     let mobileTree: React.ReactElement | null = null;
     function MobileBoardSpy(): React.ReactElement | null {
       mobileTree = GameBoard({ isMobile: true });
@@ -315,6 +315,6 @@ describe('IMP-434: Sunken Velvet Dong Son Arena & Bridge Landing Plazas', () => 
       (n) => n.type === DiceTray
     );
     expect(diceTrayNode).not.toBeNull();
-    expect(diceTrayNode?.props?.hasSunkenArena).toBe(false);
+    expect(diceTrayNode?.props?.hasSunkenArena).toBe(true);
   });
 });

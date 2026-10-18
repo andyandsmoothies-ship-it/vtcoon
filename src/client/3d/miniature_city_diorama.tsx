@@ -29,6 +29,7 @@ export const SUNKEN_ARENA_MODEL_URL = '/models/board/sunken_velvet_dice_arena.gl
 export const BRIDGE_PLAZAS_MODEL_URL = '/models/board/bridge_landing_plazas.glb';
 export const INDOCHINE_BIOME_MODEL_URL = '/models/board/indochine_botanical_biome.glb';
 export const INDOCHINE_MASTER_LANDSCAPE_URL = '/models/board/indochine_master_landscape.glb';
+export const TABLETOP_DIORAMA_MODEL_URL = '/models/board/tabletop_diorama.glb';
 export const DICE_ARENA_PLINTH_URL = '/models/board/dice_arena_plinth.glb';
 export const LANDMARKS_CLUSTER_URL = '/models/board/landmarks_cluster.glb';
 export const BOARD_TERRAIN_BASE_URL = '/models/board/board_terrain_base.glb';
@@ -333,44 +334,62 @@ export function MiniatureCityDiorama({ isMobile: propIsMobile, isVisible = true,
     <group position={[0, 0, 0]} data-testid="miniature-city-diorama">
       <DioramaBoardRim isMobile={isMobile} />
       <group name="ChainLandmark_metro-line-station" ref={(el) => { landmarkGroupRefs.current[1] = el; }}>
-        {!isDesktopLean && <DioramaModelRailroad isMobile={isMobile} isVisible={isVisible} />}
+        {!isSerene && <DioramaModelRailroad isMobile={isMobile} isVisible={isVisible} />}
       </group>
-      {!isMobile && !isDesktopLean && <DioramaWaterfrontStation />}
-      {!isMobile && !isDesktopLean && <DioramaLandmarkNorthStation />}
-      {!isMobile && !isDesktopLean && <DioramaTropicalFlora />}
-      <DioramaTerrain isSereneTabletop={isSerene} mossPalette={false} />
-      <CentralMonumentPlaza isMobile={isMobile} isDesktopLean={isSerene} />
-      <group visible={!isDesktopLean}>
+      {!isSerene && <DioramaWaterfrontStation />}
+      {!isSerene && <DioramaLandmarkNorthStation />}
+      {!isSerene && <DioramaTropicalFlora />}
+      <group visible={!isSerene}>
+        <DioramaTerrain isSereneTabletop={isSerene} mossPalette={false} />
+        <CentralMonumentPlaza isMobile={isMobile} isDesktopLean={isSerene} />
         <DioramaPedestrianPromenades isMobile={isMobile} />
       </group>
       <DioramaUrbanCanopy isMobile={isMobile} isSereneTabletop={isSerene} />
+      {/* Sa bàn 3D Điêu khắc Hoàn chỉnh (Draco Compressed Blender 5.2.2 LTS Masterpiece) */}
+      {isSerene && (
+        <SafeGLTFModel
+          url={TABLETOP_DIORAMA_MODEL_URL}
+          position={[0, 0, 0]}
+          receiveShadow
+          castShadow={!isMobile}
+          fallback={null}
+        />
+      )}
       {/* Sa bàn Đông Dương Thượng Lưu (Master Landscape Sculpt & Modular Sub-Assemblies) */}
       {isDesktopLean && (
         <SafeGLTFModel url={INDOCHINE_MASTER_LANDSCAPE_URL} position={[0, 0, 0]} receiveShadow visible={false} forceFallback fallback={null} />
       )}
       {/* Bệ đá cẩm thạch ngà tiếp đất 4 mố cầu (Bridge Landing Plazas) */}
-      <SafeGLTFModel url={BRIDGE_PLAZAS_MODEL_URL} position={[0, 0, 0]} receiveShadow forceFallback fallback={null} visible={!isDesktopLean} />
+      <SafeGLTFModel url={BRIDGE_PLAZAS_MODEL_URL} position={[0, 0, 0]} receiveShadow forceFallback fallback={null} visible={!isSerene} />
       <group name="ChainLandmark_bason-bridge" ref={(el) => { landmarkGroupRefs.current[3] = el; }}>
-        <DioramaBridges isMobile={isMobile} isVisible={isVisible} isDesktopLean={isSerene} />
+        <group visible={!isSerene}>
+          <DioramaBridges isMobile={isMobile} isVisible={isVisible} isDesktopLean={isSerene} />
+        </group>
       </group>
-      {!isMobile && !isDesktopLean && <DioramaCivicCenter />}
-      {!isMobile && !isDesktopLean && <DioramaWaterfrontPark />}
-      {!isDesktopLean && <DioramaContainerPort isMobile={isMobile} isVisible={isVisible} />}
-      {!isDesktopLean && <DioramaMarina isMobile={isMobile} isVisible={isVisible} />}
+      {!isSerene && <DioramaCivicCenter />}
+      {!isSerene && <DioramaWaterfrontPark />}
+      {!isSerene && <DioramaContainerPort isMobile={isMobile} isVisible={isVisible} />}
+      {!isSerene && <DioramaMarina isMobile={isMobile} isVisible={isVisible} />}
       <group name="ChainLandmark_saigon-river-cruiser" ref={(el) => { landmarkGroupRefs.current[0] = el; }}>
-        {(!isMobile || !isDesktopLean) && <DioramaHarborCruiser isMobile={isMobile} isVisible={isVisible} isMoored={isDesktopLean} />}
+        <group visible={!isSerene}>
+          {!isMobile && <DioramaHarborCruiser isMobile={isMobile} isVisible={isVisible} isMoored={isDesktopLean} />}
+        </group>
       </group>
       <group name="ChainLandmark_bitexco-tower" ref={(el) => { landmarkGroupRefs.current[2] = el; }}>
-        <DioramaSkyline isMobile={isMobile} isVisible={isVisible} />
+        <group visible={!isSerene}>
+          <DioramaSkyline isMobile={isMobile} isVisible={isVisible} />
+        </group>
       </group>
-      {!isMobile && !isDesktopLean && <DioramaHighriseBlocks />}
-      {!isMobile && !isDesktopLean && <DioramaResidentialPool />}
+      {!isSerene && <DioramaHighriseBlocks />}
+      {!isSerene && <DioramaResidentialPool />}
       <group name="ChainLandmark_notre-dame-cathedral" ref={(el) => { landmarkGroupRefs.current[4] = el; }}>
-        <DioramaHeritageDistrict isMobile={isMobile} isDesktopLean={isSerene} />
+        <group visible={!isSerene}>
+          <DioramaHeritageDistrict isMobile={isMobile} isDesktopLean={isSerene} />
+        </group>
       </group>
-      {!isMobile && !isDesktopLean && <DioramaShophouseBlocks />}
-      {!isDesktopLean && <DioramaMicroLife isMobile={isMobile} isVisible={isVisible} />}
-      {!isDesktopLean && <DioramaTraffic isMobile={isMobile} isVisible={isVisible} />}
+      {!isSerene && <DioramaShophouseBlocks />}
+      {!isSerene && <DioramaMicroLife isMobile={isMobile} isVisible={isVisible} />}
+      {!isSerene && <DioramaTraffic isMobile={isMobile} isVisible={isVisible} />}
       {!isMobile && <DioramaChainReaction isMobile={isMobile} isVisible={isVisible} landmarkGroupRefs={landmarkGroupRefs} />}
     </group>
   );

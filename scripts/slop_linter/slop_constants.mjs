@@ -21,8 +21,10 @@ export const SLOP_RULES = {
   R3F_NO_CONDITIONAL_RETURN_NULL: 'r3f-no-conditional-return-null',
   KINEMATICS_FINITE_DEFENSE: 'kinematics-finite-defense',
   ZERO_MICRO_SPLINTERING: 'zero-micro-splintering',
-  ZERO_PASSTHROUGH_PROXIES: 'zero-passthrough-proxies',
   NO_FS_IN_CLIENT_TESTS: 'no-fs-in-client-tests',
+  ZERO_ARBITRARY_SLEEPS: 'zero-arbitrary-sleeps',
+  ZERO_UNSEEDED_RANDOM: 'zero-unseeded-random',
+  SEAM_DISCIPLINE_MONKEYPATCH: 'seam-discipline-monkeypatch',
 };
 
 export const TIER_BUDGETS = {

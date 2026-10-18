@@ -170,20 +170,23 @@ export function resolveModifiedFilesAndTests(repoRoot, evidenceDir, ticketId, ti
     }
   } else if (snapshotData && Array.isArray(snapshotData.filesModified) && snapshotData.filesModified.length > 0) {
     modifiedFiles = snapshotData.filesModified.map((f) => f.replace(/\\/g, '/'));
-  } else {
-    try {
-      const gitOut = execSync('git status --porcelain', { encoding: 'utf8' });
-      const lines = gitOut.split('\n');
-      for (const line of lines) {
-        const trimmed = line.trim();
-        if (!trimmed) continue;
-        const filePart = trimmed.slice(2).trim().replace(/^"|"$/g, '');
-        if ((filePart.startsWith('src/') || filePart.startsWith('tests/')) && fs.existsSync(path.resolve(repoRoot, filePart))) {
-          modifiedFiles.push(filePart.replace(/\\/g, '/'));
-        }
-      }
-    } catch {}
   }
+
+  // Always merge real-time Git modifications (e.g. updated living tests or concurrent fixes)
+  try {
+    const gitOut = execSync('git status --porcelain -uall', { encoding: 'utf8' });
+    const lines = gitOut.split('\n');
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+      const filePart = trimmed.slice(2).trim().replace(/^"|"$/g, '').replace(/\\/g, '/');
+      if ((filePart.startsWith('src/') || filePart.startsWith('tests/')) &&
+          !filePart.includes('.tmp_') &&
+          fs.existsSync(path.resolve(repoRoot, filePart))) {
+        modifiedFiles.push(filePart);
+      }
+    }
+  } catch {}
 
   // Scope Confinement: Filter modified files against registered files in plan specification
   if (planRegisteredFiles.size > 0) {

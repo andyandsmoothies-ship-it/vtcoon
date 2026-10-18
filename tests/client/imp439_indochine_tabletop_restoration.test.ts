@@ -23,11 +23,14 @@ import {
   SUNKEN_ARENA_MODEL_URL,
   BRIDGE_PLAZAS_MODEL_URL,
   INDOCHINE_BIOME_MODEL_URL,
+  TABLETOP_DIORAMA_MODEL_URL,
   BOARD_TERRAIN_BASE_URL,
   DICE_ARENA_PLINTH_URL,
   LANDMARKS_CLUSTER_URL,
   type CentralMonumentPlazaProps,
+  type MiniatureCityDioramaProps,
 } from '../../src/client/3d/miniature_city_diorama';
+import { DiceTray, type DiceTrayProps } from '../../src/client/3d/dice_tray';
 import {
   DioramaTerrain,
   SAIGON_RIVER_SPLINE_MODEL_URL,
@@ -387,6 +390,55 @@ describe('[TC-439/MSS] Indochine Tabletop Restoration & 4-Pillar Spatial Remedia
 
       expect(infillMesh?.props?.position).toEqual([0, 0, 0]);
       expect(turfMaterial).not.toBeNull();
+    });
+  });
+
+  describe('Pillar 5: Sculpted Tabletop Diorama GLB Integration [TC-439.06]', () => {
+    it('TC-439.06a [UC-TABLETOP-DIORAMA-GLB-MOUNT/MSS]: TABLETOP_DIORAMA_MODEL_URL points to /models/board/tabletop_diorama.glb and mounts on Desktop with castShadow=true', () => {
+      expect(TABLETOP_DIORAMA_MODEL_URL).toBe('/models/board/tabletop_diorama.glb');
+      const desktopTree = captureTree(MiniatureCityDiorama, { isDesktopLean: true, isMobile: false });
+      const desktopGlb = findReactNode<SafeGLTFModelProps>(
+        desktopTree,
+        (n) => n.type === SafeGLTFModel && n.props?.url === TABLETOP_DIORAMA_MODEL_URL,
+      );
+
+      expect(desktopGlb).not.toBeNull();
+      expect(desktopGlb?.props?.position).toEqual([0, 0, 0]);
+      expect(desktopGlb?.props?.castShadow).toBe(true);
+    });
+
+    it('TC-439.06b [UC-TABLETOP-DIORAMA-GLB-MOUNT/A1]: MiniatureCityDiorama mounts TABLETOP_DIORAMA_MODEL_URL on Mobile with receiveShadow=true and castShadow=false', () => {
+      const mobileTree = captureTree(MiniatureCityDiorama, { isDesktopLean: true, isMobile: true });
+      const mobileGlb = findReactNode<SafeGLTFModelProps>(
+        mobileTree,
+        (n) => n.type === SafeGLTFModel && n.props?.url === TABLETOP_DIORAMA_MODEL_URL,
+      );
+
+      expect(mobileGlb).not.toBeNull();
+      expect(mobileGlb?.props?.receiveShadow).toBe(true);
+      expect(mobileGlb?.props?.castShadow).toBe(false);
+      expect(mobileGlb?.props?.fallback).toBeNull();
+    });
+
+    it('TC-439.06c [UC-TABLETOP-DIORAMA-GLB-MOUNT/A2]: GameBoard passes isDesktopLean=true and hasSunkenArena=true across both Desktop and Mobile', () => {
+      const desktopBoard = captureTree(GameBoard, { isMobile: false });
+      const mobileBoard = captureTree(GameBoard, { isMobile: true });
+      const desktopDiorama = findReactNode<MiniatureCityDioramaProps>(
+        desktopBoard,
+        (n) => n.type === MiniatureCityDiorama,
+      );
+      const mobileDiorama = findReactNode<MiniatureCityDioramaProps>(
+        mobileBoard,
+        (n) => n.type === MiniatureCityDiorama,
+      );
+      const mobileDiceTray = findReactNode<DiceTrayProps>(
+        mobileBoard,
+        (n) => n.type === DiceTray,
+      );
+
+      expect(desktopDiorama?.props?.isDesktopLean).toBe(true);
+      expect(mobileDiorama?.props?.isDesktopLean).toBe(true);
+      expect(mobileDiceTray?.props?.hasSunkenArena).toBe(true);
     });
   });
 });

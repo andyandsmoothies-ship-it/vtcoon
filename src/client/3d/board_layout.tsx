@@ -268,7 +268,7 @@ export function GameBoard({
 
       {/* 2. Sa bàn đô thị thu nhỏ: Đảo tài chính, cầu vượt, sân vận động & bến du thuyền */}
       <group visible={isCityVisible}>
-        <MiniatureCityDiorama isMobile={isMobile} isDesktopLean={!isMobile} isVisible={isCityVisible} />
+        <MiniatureCityDiorama isMobile={isMobile} isDesktopLean={true} isVisible={isCityVisible} />
         {!isMobile && (
           <SafeGLTFModel
             url={PAVED_ESPLANADE_MODEL_URL}
@@ -281,7 +281,7 @@ export function GameBoard({
       </group>
 
       {/* 3. Sàn diễn xúc xắc 3D thoáng đãng trên Đại Lộ Sài Gòn */}
-      <DiceTray hasSunkenArena={!isMobile} />
+      <DiceTray hasSunkenArena={true} />
 
       <group visible={isBoardVisible}>
         {/* 3.5. Cụm InstancedMesh nhà đồ chơi chỉ render khi yêu cầu tường minh (mặc định tắt để nhường cho ProceduralBuilding) */}
