@@ -128,7 +128,7 @@ describe('[TC-IMP55/MSS] Bot Pacing & Camera Lock Contract Test Suite', () => {
       expect(mode).toBe('overview');
     });
 
-    it('[TC-IMP55.10/MSS][IMP-103][UC-GAME-016] resolveCameraMode tra ve pawn_chase khi isBotTurn la false nhung isAnimatingPawnBot la true va dang animation', () => {
+    it('[TC-IMP55.10/MSS][IMP-103][UC-GAME-016] resolveCameraMode tra ve overview khi isBotTurn la false nhung isAnimatingPawnBot la true [IMP-443]', () => {
       const params: CameraResolveParams & { isAnimatingPawnBot?: boolean } = {
         isRolling: false,
         isPawnAnimating: true,
@@ -137,7 +137,7 @@ describe('[TC-IMP55/MSS] Bot Pacing & Camera Lock Contract Test Suite', () => {
         isAnimatingPawnBot: true,
       };
       const mode = resolveCameraMode(params);
-      expect(mode).toBe('pawn_chase');
+      expect(mode).toBe('overview');
     });
 
     it('[TC-IMP55.11/MSS][UC-GAME-016] resolveCameraMode tra ve pawn_chase khi quan co Human dang nhay', () => {
@@ -183,12 +183,12 @@ describe('[TC-IMP55/MSS] Bot Pacing & Camera Lock Contract Test Suite', () => {
     });
 
     it.each<readonly [CameraResolveParams, string]>([
-      [{ isRolling: false, isPawnAnimating: true, activeModal: null, isBotTurn: true, isAnimatingPawnBot: true }, 'pawn_chase'],
-      [{ isRolling: false, isPawnAnimating: true, activeModal: null, isBotTurn: true, isAnimatingPawnBot: false }, 'pawn_chase'],
-      [{ isRolling: false, isPawnAnimating: true, activeModal: null, isBotTurn: false, isAnimatingPawnBot: true }, 'pawn_chase'],
+      [{ isRolling: false, isPawnAnimating: true, activeModal: null, isBotTurn: true, isAnimatingPawnBot: true }, 'overview'],
+      [{ isRolling: false, isPawnAnimating: true, activeModal: null, isBotTurn: true, isAnimatingPawnBot: false }, 'overview'],
+      [{ isRolling: false, isPawnAnimating: true, activeModal: null, isBotTurn: false, isAnimatingPawnBot: true }, 'overview'],
       [{ isRolling: false, isPawnAnimating: true, activeModal: null, isBotTurn: false, isAnimatingPawnBot: false }, 'pawn_chase'],
     ])(
-      '[TC-IMP55.15/MSS][IMP-103][UC-GAME-016] resolveCameraMode bang tham so bao ve Bot: %j -> %s',
+      '[TC-IMP55.15/MSS][IMP-103][UC-GAME-016] resolveCameraMode bang tham so bao ve Bot: %j -> %s [IMP-443]',
       (params, expectedMode) => {
         expect(resolveCameraMode(params)).toBe(expectedMode);
       }

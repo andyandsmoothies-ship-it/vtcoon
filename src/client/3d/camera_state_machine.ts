@@ -84,6 +84,7 @@ export interface CameraResolveParams {
   readonly isBotTurn?: boolean;
   readonly isAnimatingPawnBot?: boolean;
   readonly isTargetOwnedByHuman?: boolean;
+  readonly isPostHopSettling?: boolean;
 }
 
 /**
@@ -111,14 +112,27 @@ export function resolveCameraMode(params: CameraResolveParams): CameraMode {
   if (params.isRolling) {
     return 'overview';
   }
-  // 2. Quân cờ đang di chuyển: Bám đuổi theo quân cờ (cả người chơi và Bot để khôi phục góc quay sống động)
+  // [IMP-443] Ổn định góc máy lượt Bot: Giữ Overview tĩnh cho lượt Bot thường (0 whiplash)
+  // Chỉ kích hoạt pawn_chase khi thế cờ kịch tính (High-Stakes),
+  // và chỉ chuyển tile_focus khi Bot hạ cánh vào đất người chơi hoặc mở modal giao dịch
+  if (params.isBotTurn || params.isAnimatingPawnBot) {
+    if (params.activeModal !== null) return 'tile_focus';
+    if (params.isPawnAnimating) {
+      return params.isHighStakesRoll ? 'pawn_chase' : 'overview';
+    }
+    if (params.isTargetOwnedByHuman === true) return 'tile_focus';
+    // [IMP-443-FIX / Post-Hop Settle Window] Khi Bot kết thúc cú nhảy kịch tính (high-stakes roll),
+    // giữ tile_focus trong cửa sổ đệm dừng (isPostHopSettling) để người chơi kịp quan sát ô tiếp đất
+    // trước khi camera hoàn tất chuyển cảnh về overview, triệt tiêu cú giật thốc tức thì (instant snap-back whiplash).
+    if (params.isHighStakesRoll && params.isPostHopSettling) {
+      return 'tile_focus';
+    }
+    return 'overview';
+  }
+
+  // 2. Quân cờ đang di chuyển: Bám đuổi theo quân cờ cho người chơi
   if (params.isPawnAnimating) {
     return 'pawn_chase';
-  }
-  // [IMP-354 / IMP-356] Hài hòa nhịp độ: Khi Bot hạ cánh không mở modal và không vào đất người chơi,
-  // giữ overview để triệt tiêu giật cục góc máy (Camera Whiplash - Gotcha 63)
-  if ((params.isBotTurn || params.isAnimatingPawnBot) && params.isTargetOwnedByHuman === false && params.activeModal === null) {
-    return 'overview';
   }
   // 3. Mở modal tương tác hoặc dừng chân tại ô đất sau khi di chuyển
   if (params.activeModal !== null || params.hasTargetTile || params.hasRolledThisTurn) {
@@ -224,7 +238,7 @@ export function calculateTargetCameraState(
       return configToCameraState(CAMERA_CONFIG.auction_focus);
     case 'overview':
     default:
-      if (options?.isRolling && !options?.isHighStakesRoll) {
+      if (options?.isRolling && !options?.isHighStakesRoll && !options?.isBotTurn) {
         return calculateDicePanCameraState(options?.rollingPlayerPos, options?.aspect);
       }
       if (options?.gamePhase) {

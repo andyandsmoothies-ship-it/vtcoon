@@ -448,9 +448,9 @@ describe('[TC-PRESENTATION-QUEUE/MSS] Client Presentation Queue & Bot Turbo Paci
     expect(queuedTask?.waypoints).toEqual([6, 7, 8]);
   });
 
-  it('TC-TURBO-01: Toc do buoc nhay Turbo cho Bot dat 0.26s/step', () => {
-    expect(BOT_STEP_DURATION).toBe(0.26);
-    expect(Number((BOT_HOP_DURATION + BOT_LANDING_DURATION).toFixed(2))).toBe(0.26);
+  it('TC-TURBO-01: Toc do buoc nhay Turbo cho Bot dat 0.15s/step', () => {
+    expect(BOT_STEP_DURATION).toBe(0.15);
+    expect(Number((BOT_HOP_DURATION + BOT_LANDING_DURATION).toFixed(2))).toBe(0.15);
   });
 
   it('TC-CAM-01: resolveCameraMode tra ve overview khi isBotTurn = true ke ca khi isRolling = true', () => {

@@ -57,6 +57,8 @@ export function AdaptiveCinematicCamera({
   const prevTurnPlayerIdRef = useRef<string | null>(null);
 
   const flightStartTimeRef = useRef<number | null>(null);
+  const postHopSettleUntilRef = useRef<number>(0);
+  const prevIsPawnMovingRef = useRef<boolean>(false);
   const currentOverviewPosRef = useRef<[number, number, number]>([defaultCfg.position[0], defaultCfg.position[1], defaultCfg.position[2]]);
   const currentOverviewTargetRef = useRef<[number, number, number]>([defaultCfg.target[0], defaultCfg.target[1], defaultCfg.target[2]]);
 
@@ -162,6 +164,15 @@ export function AdaptiveCinematicCamera({
     const isBotTurn = Boolean(currentTurnPlayer?.isBot);
     const animatingPlayer = activeAnimation?.playerId ? playersInfo[activeAnimation.playerId] : undefined;
     const isAnimatingPawnBot = Boolean(animatingPlayer?.isBot);
+
+    // [IMP-443-FIX / Post-Hop Settle Window] Khi Bot kết thúc cú nhảy kịch tính (high-stakes),
+    // kích hoạt cửa sổ đệm dừng 1.2s để camera giữ tile_focus trên ô đích trước khi về overview
+    if (prevIsPawnMovingRef.current && !isPawnMoving && isHighStakesRoll && (isBotTurn || isAnimatingPawnBot)) {
+      postHopSettleUntilRef.current = performance.now() + 1200;
+    }
+    prevIsPawnMovingRef.current = isPawnMoving;
+    const isPostHopSettling = performance.now() < postHopSettleUntilRef.current;
+
     const targetCell = resolveCameraTargetCell(
       activeAnimation,
       currentTurnPlayerId,
@@ -214,6 +225,7 @@ export function AdaptiveCinematicCamera({
       isBotTurn,
       isAnimatingPawnBot,
       isTargetOwnedByHuman,
+      isPostHopSettling,
     });
 
     const cellCoords = targetCell !== null && targetCell !== undefined && Number.isFinite(targetCell) ? cellPosition(targetCell) : undefined;

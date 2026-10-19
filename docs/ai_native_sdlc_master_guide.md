@@ -1,7 +1,7 @@
 # CẨM NANG THỰC CHIẾN AI-NATIVE SDLC TRÊN GOOGLE ANTIGRAVITY 2.0
 > **Phiên bản**: 2026 Enterprise Edition (Harness Engineering, Lean Memory, Superhuman Terminal Engine, Context Offloading & Universal Visual UI/UX Governance)  
 > **Kiến trúc**: The Triad Stack (`mattpocock_skills` + `superpowers-antigravity` + `backup` + `google/skills`)  
-> **Tiêu chuẩn khoa học**: Đúc kết từ OpenAI Harness Engineering, Nash (Least New Structure & 6 Slop Flags), Kasong (Closed-Loop Engineering), Anshu Chimala (Apple Aesthetic & Anti-AI-Tells), Vercel design.md (Finite Token Governance), Philipp Schmid (Superhuman Bash & Context Offloading), Matt Pocock (Reduce Slop), Pragmatic Anti-Dogma, Richard Seroter (JIT Skills), arXiv:2608.20195, Sharon Y. Barr 5-Gate Testing, Kartik Mehta AutoQA, và Bitter Lesson in Agent Harness.
+> **Tiêu chuẩn khoa học**: Đúc kết từ OpenAI Harness Engineering, Nash (Least New Structure & 6 Slop Flags), Sean Goedecke (Dropped Requirements & Anti-Phantom Complexity), Kasong (Closed-Loop Engineering), Anshu Chimala (Apple Aesthetic & Anti-AI-Tells), Vercel design.md (Finite Token Governance), Philipp Schmid (Superhuman Bash & Context Offloading), Matt Pocock (Reduce Slop), Pragmatic Anti-Dogma, Richard Seroter (JIT Skills), arXiv:2608.20195, Sharon Y. Barr 5-Gate Testing, Kartik Mehta AutoQA, và Bitter Lesson in Agent Harness.
 
 ---
 
@@ -99,6 +99,22 @@
 │        - Tệp vượt 300 dòng (Tier 1) là trạng thái trung gian hợp lệ: BẮT BUỘC gắn nhãn "⚠️ Warning" (CẤM dán nhãn "Safe")
 │          và đăng ký mã Nợ Kỹ Thuật bất biến (`DEBT-XXX`) trong Sổ Cái với kế hoạch bóc tách ở lát cắt tương lai.
 │        - Dung sai đo lường tự động (check:loc): Cho phép dung sai 5% trên Non-Empty SLOC để tránh false positive từ comment sạch và dòng trống.
+│
+├── 5.1 NGUYÊN TẮC YÊU CẦU TỪ BỎ & CHỐNG PHỨC TẠP HÓA DO AI TỰ ĐẺ (DROPPED REQUIREMENTS & ANTI-PHANTOM COMPLEXITY - SEAN GOEDECKE):
+│      "Khi thiết kế phần mềm, những yêu cầu bạn KHÔNG CÓ cũng quan trọng ngang với những yêu cầu bạn CÓ."
+│      • BẢN CHẤT TÂM LÝ HỌC AI (RLVR BIAS): Được huấn luyện qua phản hồi xác thực để làm hài lòng người chấm điểm,
+│        AI luôn lo sợ bị trừ điểm và tự động suy diễn các tình huống biên giả định (hypothetical edge cases) thành lỗi nghiêm trọng.
+│        Hậu quả: AI tự ý nhét Mutex/Lock, cơ chế đa luồng, double-check TOCTOU, micro-proxy, hoặc đa tầng cache dù không ai yêu cầu,
+│        biến một thay đổi 4 dòng code thành một con quái vật 1.000 dòng code (1000-line monster)!
+│      • 3 CÂU HỎI THỎA HIỆP BẮT BUỘC TRƯỚC KHI LẬP PLAN (TRẠM 0.1):
+│        1. Cái gì được phép CHẬM (Slow)? (Chấp nhận độ trễ vài giây/vài frame, không ép xung realtime vô ích).
+│        2. Cái gì được phép CŨ (Stale)? (Chấp nhận đọc dữ liệu chưa đồng bộ tức thì, không cần khóa phân tán).
+│        3. Cái gì được phép KÉM LINH HOẠT (Inflexible)? (Chỉ giải quyết đúng phạm vi hiện tại, không dựng framework trừu tượng).
+│      • MỤC BẮT BUỘC TRONG MỌI PLAN: "Explicitly Dropped Requirements" (Những yêu cầu chủ động từ bỏ).
+│        Bất kỳ mã nguồn nào do subagent sinh ra nhằm giải quyết các yêu cầu đã tuyên bố từ bỏ sẽ bị coi là Slop và bị REJECT.
+│      • HAI CỔNG KIỂM TOÁN CHỐNG YÊU CẦU MA:
+│        - Trạm 1.5 (adversarial-challenger): Quét Vector 10 [ADV-PHANTOM] — Săn lùng yêu cầu ma do AI tự bịa.
+│        - Trạm 3.2 (code-reviewer): Quét Cờ Đỏ 8 (Phantom Requirements & Artificial Hardening).
 │
 ├── 6. CƯỠNG CHẾ KIẾN TRÚC TẤT ĐỊNH (DETERMINISTIC ARCHITECTURE ENFORCEMENT - NICK TUNE):
 │      "Rào chắn cơ học của Trình biên dịch/Linter luôn đánh bại rào chắn đạo đức trong Markdown."
@@ -3743,7 +3759,8 @@ Khi bạn chạy lệnh trong Terminal gặp lỗi đỏ, hoặc Subagent báo t
 | **2.1** | Cắt Lát Cắt (JIT)<br>*(Song tác nhân)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.1]**: `slicer` soạn thảo ticket ➔ đối soát ranh giới Zone 3 & SSOT trước khi lưu | Flash | File `issues/[TICKET].md` sạch |
 | **2.2** | Trinh sát bối cảnh<br>*(Đơn tác nhân)* | 💬 `[AG 2.0]` Gọi `scout` (Read-only) trinh sát hiện trạng mã nguồn:<br>• **Greenfield (S00):** Dùng **[Mẫu P-2.2A]** Target File Map<br>• **Brownfield (S01+):** Dùng **[Mẫu P-2.2B]** Change Impact | Flash | Báo cáo hiện trạng & tọa độ dòng |
 | **2.25** | **Trạm 0.5: Chẩn Đoán Thực Nghiệm**<br>*(Empirical Root-Cause Gate)* | 💬 `[AG 2.0]` Bắt buộc khi có glitch runtime/3D/WebGL hoặc desync FSM/state: Dùng Flight Recorder (`npm run analyze:log <dump.json>`) hoặc HUD (`?debug=3d`, console traces) cô lập vật lý trước khi lập Plan. | Flash | Telemetry cô lập nguyên nhân gốc |
-| **2.3a** | Lập Plan & Thẩm Định 2 Tầng<br>*(Stage A + Stage B)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3a]**: Chạy `node scripts/audit_plan.mjs <plan> [--auto-sign]` (kiểm toán Wiring Parity) ➔ Với Epic lớn (>50 LOC) gọi `adversarial-challenger` (ADV-OBJ, kinh tế, concurrency) | Sonnet 4.6 | Kế hoạch đạt `HARDENED_APPROVED` |
+| **2.26** | **Trạm 0.1: Khám Phá Giải Pháp & Yêu Cầu Từ Bỏ**<br>*(Solution Discovery & Dropped Requirements)* | 💬 `[AG 2.0]` Trước khi lập Plan: Lập Ma trận 2 Phương án (Phương án A - KISS/In-place vs Phương án B - Mở rộng). Trả lời 3 câu hỏi Sean Goedecke: Cái gì được phép Chậm? Cũ? Kém linh hoạt? Khai báo `Explicitly Dropped Requirements`. | Flash | Ma trận 2 Phương án & Hợp đồng phủ định |
+| **2.3a** | Lập Plan & Thẩm Định 2 Tầng<br>*(Stage A + Stage B)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3a]**: Chạy `node scripts/audit_plan.mjs <plan> [--auto-sign]` (kiểm toán Dropped Requirements & Wiring Parity) ➔ Với Epic lớn (>50 LOC) gọi `adversarial-challenger` (ADV-OBJ, kinh tế, concurrency, ADV-PHANTOM) | Sonnet 4.6 | Kế hoạch đạt `HARDENED_APPROVED` |
 | **2.3b** | Khởi tạo Test Harness<br>*(Đơn tác nhân - S00)* | 💬 `[AG 2.0]` Dùng **[Mẫu Prompt P-2.3b]** gọi `implementer` dựng Test Runner tối thiểu (`package.json`, `tsconfig.json`, `vitest`...) ➔ Chạy smoke test PASS | Flash / Sonnet | Lệnh `npm test` chạy PASS trên CMD |
 | **2.3c** | Thi Công Trạm 1 & 2<br>*(RED ➔ GREEN)* | 💬 `[AG 2.0]` Dùng **[Mẫu P-2.3-STATIONS]**: QA viết test ĐỎ (>= 15 tests, Flow Taxonomy) ➔ Implementer code XANH (Subagent chạy đúng test slice <= 3-5 phút, cấm naked vitest) | Sonnet 4.6 | 100% Contract PASS trên đĩa vật lý |
 | **2.3.5**| Quét Sạch Đĩa Vật Lý<br>*(Trạm 2.5 Fast Pre-Filter)* | 💬 `[AG 2.0]` Chạy script cơ học `npm run prefilter -- <files>`: `tsc --noEmit` (0 lỗi), `check_loc.mjs` (ngân sách LOC), cấm dirty cast (`as any`), thanh trừng `console.log`, i18n mapping | CLI Script | Phán quyết `PREFILTER: PASS` 100% |

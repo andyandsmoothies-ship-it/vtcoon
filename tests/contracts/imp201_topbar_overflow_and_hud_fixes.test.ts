@@ -15,6 +15,7 @@ import { FloatingBadge, FloatingNumbersOverlay } from '../../src/client/ui/float
 import { PlayerHudList } from '../../src/client/ui/player_hud_list';
 import {
   useGameStore,
+  type GameState,
   FloatingTextType,
   type FloatingTextItem,
   type PlayerHudInfo,
@@ -38,37 +39,37 @@ import * as activityBadgeDispatcher from '../../src/client/network/activity_badg
 // Throws explicit MISSING_FUNCTION if not yet implemented/exported by Station 2.
 // ============================================================================
 const getPawnLandingDelay: (playerId?: string) => number =
-  (activityBadgeDispatcher as any).getPawnLandingDelay ??
+  Reflect.get(activityBadgeDispatcher, 'getPawnLandingDelay') ??
   (() => {
     throw new Error('MISSING_FUNCTION: getPawnLandingDelay has not been implemented in activity_badge_dispatcher');
   });
 
 const scheduleAction: (action: () => void, delayMs: number) => NodeJS.Timeout | number | null =
-  (activityBadgeDispatcher as any).scheduleAction ??
+  Reflect.get(activityBadgeDispatcher, 'scheduleAction') ??
   (() => {
     throw new Error('MISSING_FUNCTION: scheduleAction has not been implemented in activity_badge_dispatcher');
   });
 
 const clearPendingBadgeTimers: () => void =
-  (activityBadgeDispatcher as any).clearPendingBadgeTimers ??
+  Reflect.get(activityBadgeDispatcher, 'clearPendingBadgeTimers') ??
   (() => {
     throw new Error('MISSING_FUNCTION: clearPendingBadgeTimers has not been implemented in activity_badge_dispatcher');
   });
 
-const handleRentBadge: (act: ActivityLogEntry, state: any) => void =
-  (activityBadgeDispatcher as any).handleRentBadge ??
+const handleRentBadge: (act: ActivityLogEntry, state: GameState) => void =
+  Reflect.get(activityBadgeDispatcher, 'handleRentBadge') ??
   (() => {
     throw new Error('MISSING_FUNCTION: handleRentBadge has not been exported in activity_badge_dispatcher');
   });
 
-const handleBuyBadge: (act: ActivityLogEntry, state: any) => void =
-  (activityBadgeDispatcher as any).handleBuyBadge ??
+const handleBuyBadge: (act: ActivityLogEntry, state: GameState) => void =
+  Reflect.get(activityBadgeDispatcher, 'handleBuyBadge') ??
   (() => {
     throw new Error('MISSING_FUNCTION: handleBuyBadge has not been exported in activity_badge_dispatcher');
   });
 
-const handleTaxBadge: (act: ActivityLogEntry, state: any) => void =
-  (activityBadgeDispatcher as any).handleTaxBadge ??
+const handleTaxBadge: (act: ActivityLogEntry, state: GameState) => void =
+  Reflect.get(activityBadgeDispatcher, 'handleTaxBadge') ??
   (() => {
     throw new Error('MISSING_FUNCTION: handleTaxBadge has not been exported in activity_badge_dispatcher');
   });
@@ -257,7 +258,7 @@ describe('[TC-201.01/MSS..TC-201.20/MSS][UC-IMP201] IMP-201 TopBar, Badge Collis
       });
 
       const humanStepMs = (HOP_DURATION + LANDING_DURATION) * 1000;
-      const expectedDelay = 1200 + 4 * humanStepMs;
+      const expectedDelay = 1350 + 4 * humanStepMs;
       const actualDelay = getPawnLandingDelay('p1');
 
       expect(actualDelay).toBe(expectedDelay);
@@ -399,8 +400,8 @@ describe('[TC-201.01/MSS..TC-201.20/MSS][UC-IMP201] IMP-201 TopBar, Badge Collis
     beforeEach(() => {
       useGameStore.setState({
         playersInfo: {
-          p1: { id: 'p1', name: 'Tester', isBankrupt: false } as any,
-          p2: { id: 'p2', name: 'Bob', isBankrupt: false } as any,
+          p1: { id: 'p1', name: 'Tester', balance: 10000, tokenColor: '#38BDF8', ownedProperties: [], isBot: false },
+          p2: { id: 'p2', name: 'Bob', balance: 10000, tokenColor: '#F59E0B', ownedProperties: [], isBot: true },
         },
       });
     });

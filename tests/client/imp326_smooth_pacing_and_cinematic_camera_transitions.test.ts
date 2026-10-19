@@ -130,15 +130,15 @@ describe('[IMP-326] Smooth Pacing & Cinematic Camera Transitions Contract Suite'
     expect(staticPawn).not.toBeNull();
     expect(staticPawn?.getAttribute('data-pawn-reaction')).toBe('victory_spin');
 
-    // Sau 250ms: Vẫn đang trong thời gian dwell 600ms, chưa complete
+    // Sau 200ms: Vẫn đang trong thời gian dwell 250ms (IMP-444), chưa complete
     act(() => {
-      vi.advanceTimersByTime(250);
+      vi.advanceTimersByTime(200);
     });
     expect(completedPlayer).toBe('');
 
-    // Sau 350ms tiếp theo (tổng 600ms): Hoàn tất settle dwell
+    // Sau 50ms tiếp theo (tổng 250ms): Hoàn tất settle dwell
     act(() => {
-      vi.advanceTimersByTime(350);
+      vi.advanceTimersByTime(50);
     });
     expect(completedPlayer).toBe('p1');
 

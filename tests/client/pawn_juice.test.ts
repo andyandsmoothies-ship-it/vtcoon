@@ -145,7 +145,7 @@ describe('[TC-JUICE.5/MSS] Step Sound Pitch Variation (Âm Thanh Biến Thiên C
   it('TC-JUICE.5d: AudioEngine.playSfx tự động áp dụng biến thiên pitch cho PAWN_STEP khi rate bỏ trống', () => {
     const howl = AudioEngine.getOrCreateSfx(SoundEffect.PAWN_STEP);
     AudioEngine.playSfx(SoundEffect.PAWN_STEP);
-    const currentRate = (howl as any).currentRate;
+    const currentRate = Reflect.get(howl, 'currentRate');
     if (typeof currentRate === 'number') {
       expect(currentRate).toBeGreaterThanOrEqual(0.95);
       expect(currentRate).toBeLessThanOrEqual(1.10);
@@ -180,9 +180,9 @@ describe('[TC-JUICE.6/MSS] Adaptive Cinematic Camera Math (Toán Lia & Zoom Came
   });
 
   it('TC-JUICE.6d: Hằng số thời lượng bước nhảy đạt chuẩn 60 FPS mượt mà (Golden Cinematic Pacing)', () => {
-    expect(HOP_DURATION).toBe(0.22);
-    expect(LANDING_DURATION).toBe(0.08);
-    expect(HOP_DURATION + LANDING_DURATION).toBeCloseTo(0.30, 4);
+    expect(HOP_DURATION).toBe(0.14);
+    expect(LANDING_DURATION).toBe(0.06);
+    expect(HOP_DURATION + LANDING_DURATION).toBeCloseTo(0.20, 4);
   });
 
   it('TC-JUICE.6e: resolveCameraTargetCell bám sát tiến độ waypoints khi quân cờ đang nhảy', () => {

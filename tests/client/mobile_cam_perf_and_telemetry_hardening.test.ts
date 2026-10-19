@@ -182,57 +182,58 @@ describe('[TC-IMP103/MSS] Mobile Cam, Lobby 1-Row Ergonomics, Telemetry Hardenin
   // FACET 2: STATE REACTIVITY (DYNAMIC CAMERA MODES, BADGES & TELEMETRY)
   // =========================================================================
   describe('Facet 2: State Reactivity', () => {
-    it('[TC-IMP103.09/MSS][UI-S01/MSS][UC-001] resolveCameraMode: Khi isBotTurn = true va isPawnAnimating = true, tra ve pawn_chase', () => {
+    it('[TC-IMP103.09/MSS][UI-S01/MSS][UC-001] resolveCameraMode: Khi isBotTurn = true va isPawnAnimating = true (normal), tra ve overview (IMP-443 anti-whiplash)', () => {
       const mode = resolveCameraMode({
         isRolling: false,
         isPawnAnimating: true,
         activeModal: null,
         isBotTurn: true,
       });
-      expect(mode).toBe('pawn_chase');
+      expect(mode).toBe('overview');
     });
 
-    it('[TC-IMP103.10/MSS][UI-S01/MSS][UC-001] resolveCameraMode: Khi isAnimatingPawnBot = true va isPawnAnimating = true, tra ve pawn_chase', () => {
+    it('[TC-IMP103.10/MSS][UI-S01/MSS][UC-001] resolveCameraMode: Khi isAnimatingPawnBot = true va isPawnAnimating = true (high-stakes), tra ve pawn_chase', () => {
       const mode = resolveCameraMode({
         isRolling: false,
         isPawnAnimating: true,
         activeModal: null,
         isAnimatingPawnBot: true,
+        isHighStakesRoll: true,
       });
       expect(mode).toBe('pawn_chase');
     });
 
-    it('[TC-IMP103.11/MSS][UI-S01/MSS][UC-001] resolveCameraMode: Khi isBotTurn = true va hasTargetTile = true, tra ve tile_focus', () => {
+    it('[TC-IMP103.11/MSS][UI-S01/MSS][UC-001] resolveCameraMode: Khi isBotTurn = true va isTargetOwnedByHuman = true, tra ve tile_focus', () => {
       const mode = resolveCameraMode({
         isRolling: false,
         isPawnAnimating: false,
         activeModal: null,
         isBotTurn: true,
         hasTargetTile: true,
+        isTargetOwnedByHuman: true,
       });
       expect(mode).toBe('tile_focus');
     });
 
-    it('[TC-IMP103.12/MSS][UI-S01/MSS][UC-001] resolveCameraMode: Khi isBotTurn = true va hasRolledThisTurn = true, tra ve tile_focus', () => {
+    it('[TC-IMP103.12/MSS][UI-S01/MSS][UC-001] resolveCameraMode: Khi isBotTurn = false (human) va hasRolledThisTurn = true, tra ve tile_focus', () => {
       const mode = resolveCameraMode({
         isRolling: false,
         isPawnAnimating: false,
         activeModal: null,
-        isBotTurn: true,
+        isBotTurn: false,
         hasRolledThisTurn: true,
       });
       expect(mode).toBe('tile_focus');
     });
 
-    it('[TC-IMP103.13/MSS][UI-S01/MSS][UC-001] resolveCameraMode: Khi isAnimatingPawnBot = true va hasTargetTile = true, tra ve tile_focus', () => {
+    it('[TC-IMP103.13/MSS][UI-S01/MSS][UC-001] resolveCameraMode: Khi isBotTurn = false (human) va isPawnAnimating = true, tra ve pawn_chase', () => {
       const mode = resolveCameraMode({
         isRolling: false,
-        isPawnAnimating: false,
+        isPawnAnimating: true,
         activeModal: null,
-        isAnimatingPawnBot: true,
-        hasTargetTile: true,
+        isBotTurn: false,
       });
-      expect(mode).toBe('tile_focus');
+      expect(mode).toBe('pawn_chase');
     });
 
     it('[TC-IMP103.14/MSS][UI-S02/MSS][UC-002] PreMatchDeck: Hop ma phong hien thi lobby-room-code va badge san sang cung hang', () => {

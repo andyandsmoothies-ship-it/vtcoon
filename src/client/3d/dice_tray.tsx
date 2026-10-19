@@ -17,7 +17,7 @@ interface PipDef {
   readonly isRed?: boolean;
 }
 
-const DICE_SETTLE_DWELL_MS = 600;
+const DICE_SETTLE_DWELL_MS = 250;
 
 const FACE_OFFSET = 0.292;
 const PIP_GAP = 0.11;
@@ -61,9 +61,13 @@ function SingleDie({
     return () => {
       if (settleTimerRef.current) {
         clearTimeout(settleTimerRef.current);
+        settleTimerRef.current = null;
+        if (useGameStore.getState().isRolling) {
+          onRest?.();
+        }
       }
     };
-  }, []);
+  }, [onRest]);
 
   let shouldReset = false;
   if (isRolling) {

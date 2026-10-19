@@ -35,6 +35,9 @@ Inspect the following Single Source of Truth (SSOT) files before auditing:
      - *Deletion Test & Deep Modules*: A deep module hides significant complexity behind a cohesive interface (Ousterhout). Pure calculation and view-model test seams (`*_visuals.ts`, `*_math.ts`) are legitimate seams where the test suite is a valid 2nd consumer (Feathers).
      - *Micro-Splintering Ban*: Flag any newly introduced logic file with < 30 LOC created solely to evade LOC ceilings as **[BLOCKER] Micro-Splintering Slop** (exempt: pure types, constants, barrel re-exports, UI components).
      - *Middle-Man Ban*: Flag any 1-line exact passthrough function that delegates without data transformation or validation as **[BLOCKER] Middle-Man Passthrough** (exempt: default parameter wrappers and public API boundary facades).
+   - 🚩 **Flag 8: Phantom Requirements & Artificial Hardening (Sean Goedecke Invariant)**:
+     - Arbitrary addition of concurrency locks (Mutex, Semaphores), unrequested multi-tier caching, unneeded double-checks (TOCTOU checks that do not eliminate true race windows), or defensive micro-proxies added for hypothetical edge-cases not demanded by user spec or domain contracts.
+     - Check against the ticket's `Explicitly Dropped Requirements`. If the diff introduces complex guards to satisfy an intentionally dropped or out-of-scope scenario, flag as **[BLOCKER] Phantom Complexity Slop — delete artificial hardening and keep implementation minimal**.
 4. **Nearby Context, Bug & Regression Analysis**:
    - **Context Inspection**: Never inspect diff hunks in isolation; read 20-30 lines before and after every modification to detect caller mismatch, state leakage, or broken invariants.
    - **Real Bug & Regression Hunt**: Target edge-case boundary errors, off-by-one arithmetic, concurrency/async race hazards, and unintended breakage of legacy contracts.

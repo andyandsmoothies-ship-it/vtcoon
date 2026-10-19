@@ -35,6 +35,7 @@ import {
   auditAmbientModuleAugmentation,
   auditExportParityAndCallers,
   auditGhostTestPaths,
+  auditDroppedRequirementsAndPhantomSlop,
 } from './audit_plan_rules.mjs';
 import {
   findSourceFiles,
@@ -117,6 +118,7 @@ errors += auditShallowModulePropsExplosion(planContent);
 errors += auditCohesionOrphanFiles(targetFiles);
 errors += auditAmbientModuleAugmentation(targetFiles, planContent);
 errors += auditExportParityAndCallers(targetFiles, planContent);
+errors += auditDroppedRequirementsAndPhantomSlop(planContent, fileSnippetsMap);
 
 // 1.1 Verify new production file code specification
 errors += auditNewFileDeclarations(targetFiles, planContent, fileTargetRegex, snippetRegex, findSourceFiles);

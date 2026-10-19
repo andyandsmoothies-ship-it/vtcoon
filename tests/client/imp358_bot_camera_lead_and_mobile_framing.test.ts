@@ -66,14 +66,14 @@ declare module '../../src/client/3d/cinematic_chase_camera' {
 }
 
 describe('[IMP-358] Bot Camera Lead, Kinematic Boost & Mobile Framing Contract Suite', () => {
-  it('[TC-358.01/MSS][UC-CAM-BOT-PAN] Given Bot turn with isRolling: true, When calling calculateTargetCameraState, Then returns calculateDicePanCameraState without blocking on isBotTurn', () => {
+  it('[TC-358.01/MSS][UC-CAM-BOT-PAN] Given Bot turn with isRolling: true, When calling calculateTargetCameraState, Then returns overview camera state eliminating roll whiplash [IMP-443]', () => {
     const state = calculateTargetCameraState('overview', undefined, undefined, {
       isRolling: true,
       isBotTurn: true,
     });
-    expect(state.position[1]).toBe(19.8);
-    expect(state.fov).toBe(28);
-    expect(state.speed).toBe(4.8);
+    expect(state.position[1]).toBeGreaterThanOrEqual(22.0);
+    expect(state.fov).toBe(24);
+    expect(state.speed).toBe(3.2);
   });
 
   it('[TC-358.02/MSS][UC-CAM-BOT-SPEED-PARITY] Given Bot turn in pawn_chase mode, When calling calculateTargetCameraState, Then returns catch-up boost speed 3.8 matching golden cinematic pacing', () => {
@@ -134,15 +134,15 @@ describe('[IMP-358] Bot Camera Lead, Kinematic Boost & Mobile Framing Contract S
     expect(state.speed).toBe(3.8);
   });
 
-  it('[TC-358.10/MSS][UC-CAM-BOT-DICE-PAN] Given Bot turn with isRolling true, When calling calculateTargetCameraState, Then returns dice pan position with Y=19.8 and FOV=28 eliminating bot camera freeze', () => {
+  it('[TC-358.10/MSS][UC-CAM-BOT-DICE-PAN] Given Bot turn with isRolling true, When calling calculateTargetCameraState, Then returns overview position eliminating bot camera whiplash [IMP-443]', () => {
     const state = calculateTargetCameraState('overview', undefined, undefined, {
       isRolling: true,
       isBotTurn: true,
       rollingPlayerPos: 0,
       aspect: 1.77,
     });
-    expect(state.position[1]).toBe(19.8);
-    expect(state.fov).toBe(28);
+    expect(state.position[1]).toBeGreaterThanOrEqual(22.0);
+    expect(state.fov).toBe(24);
   });
 
   it('[TC-358.11/MSS][UC-CAM-SCREEN-FRAMING] Given mobile portrait aspect ratio (aspect = 0.5), When calculating tile_focus target, Then target Y is elevated to 0.85m centering 3D landmarks in clear viewport', () => {

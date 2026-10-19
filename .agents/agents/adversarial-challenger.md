@@ -85,6 +85,15 @@ Run these checks on disk before writing implementation vectors:
 ### 🧊 Vector 9: 3D/UI GPU Memory, Spatial Frustum & Asset Craft (ADV-GPU)
 - When touching 3D/UI (`src/client/3d/**`, `src/client/ui/**`), enforce all spatial, frustum NDC, stepped podium, `.glb`/Blender asset craft, batching, and mobile isolation invariants defined in `docs/domain/gotchas/3d_cinematics.md` and `docs/domain/gotchas/ui_ergonomics.md`.
 
+### 👻 Vector 10: Phantom Requirements & Artificial Over-Engineering (ADV-PHANTOM)
+- Hunt for mechanisms (e.g. speculative texture atlases, dynamic billboard quads, unrequested mutexes/locks, multi-tier caches, redundant TOCTOU double-checks, micro-proxies) created to satisfy hypothetical edge cases not demanded by the user or domain contracts.
+- Apply the Sean Goedecke Rule (*"What requirements don't you have?"*):
+  - *What can be slow?*
+  - *What can be stale?*
+  - *What can be inflexible?*
+- Verify the plan's `Explicitly Dropped Requirements` section. If the plan proposes a heavy multi-component architecture where an in-place, static, or KISS alternative (e.g. static bilateral text vs real-time camera tracking billboard) can drop unneeded dynamic requirements and cut complexity by > 50%:
+  → flag `[ADV-PHANTOM] Artificial Complexity Trap — drop unneeded dynamic requirement and adopt Option A (KISS)`.
+
 
 
 ## 4. Directive Quality Rules

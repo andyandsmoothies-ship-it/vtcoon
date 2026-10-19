@@ -533,8 +533,9 @@ describe('Station 1 Contract Tests: GameEventNarrativeSynthesizer (IMP-330)', ()
       ],
     };
 
-    const firstRun = synthesizeGameEvents(prev, next, delta);
-    const secondRun = synthesizeGameEvents(prev, next, delta);
+    const options: SynthesizerOptions = { baseTimestamp: 1728000000000 };
+    const firstRun = synthesizeGameEvents(prev, next, delta, options);
+    const secondRun = synthesizeGameEvents(prev, next, delta, options);
 
     expect(firstRun).toHaveLength(1);
     expect(secondRun).toHaveLength(1);

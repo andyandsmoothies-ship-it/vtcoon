@@ -29,10 +29,10 @@ import { SoundEngine } from '../../src/client/audio/sound_engine.js';
 import { applyDeltaToStore } from '../../src/client/network/apply_delta.js';
 
 const getPawnPassGoDelay: ((playerId?: string) => number) | undefined =
-  (ActivityBadgeDispatcher as unknown as { getPawnPassGoDelay?: (playerId?: string) => number }).getPawnPassGoDelay;
+  Reflect.get(ActivityBadgeDispatcher, 'getPawnPassGoDelay');
 
 const handleSalaryBadge: ((act: ActivityLogEntry, state: GameState) => void) | undefined =
-  (ActivityBadgeDispatcher as unknown as { handleSalaryBadge?: (act: ActivityLogEntry, state: GameState) => void }).handleSalaryBadge;
+  Reflect.get(ActivityBadgeDispatcher, 'handleSalaryBadge');
 
 const makeHud = (id: string, name: string, balance: number, color = '#F59E0B', isBot = true, owned: number[] = []): PlayerHudInfo => ({
   id, name, balance, tokenColor: color, ownedProperties: owned, mortgagedProperties: [], isBot,
@@ -63,7 +63,7 @@ function createMockGameState(overrides?: Partial<GameState>): GameState {
     closeModal: vi.fn(),
     activeModal: null,
     ...overrides,
-  } as unknown as GameState;
+  };
 }
 
 describe('[CONTRACT] IMP-230: Pass GO Salary & Rent Subtractive Clean Suite', () => {
@@ -241,8 +241,8 @@ describe('[CONTRACT] IMP-230: Pass GO Salary & Rent Subtractive Clean Suite', ()
       const passGoDelay = getPawnPassGoDelay!('p1');
       const landingDelay = ActivityBadgeDispatcher.getPawnLandingDelay('p1');
 
-      expect(passGoDelay).toBe(600); // 2 steps * 300ms
-      expect(landingDelay).toBe(2400); // 8 steps * 300ms
+      expect(passGoDelay).toBe(400); // 2 steps * 200ms
+      expect(landingDelay).toBe(1600); // 8 steps * 200ms
       expect(passGoDelay).toBeLessThan(landingDelay);
     });
 
@@ -261,7 +261,7 @@ describe('[CONTRACT] IMP-230: Pass GO Salary & Rent Subtractive Clean Suite', ()
       const passGoDelay = getPawnPassGoDelay!('p1');
       const landingDelay = ActivityBadgeDispatcher.getPawnLandingDelay('p1');
 
-      expect(passGoDelay).toBe(600); // 2 steps * 300ms
+      expect(passGoDelay).toBe(400); // 2 steps * 200ms
       expect(passGoDelay).not.toBe(Math.round(landingDelay * 0.5));
     });
 
@@ -276,7 +276,7 @@ describe('[CONTRACT] IMP-230: Pass GO Salary & Rent Subtractive Clean Suite', ()
       expect(getPawnPassGoDelay).toBeDefined();
       const passGoDelay = getPawnPassGoDelay!('p1');
       const landingDelay = ActivityBadgeDispatcher.getPawnLandingDelay('p1');
-      expect(passGoDelay).toBe(600); // 2 steps to 0
+      expect(passGoDelay).toBe(400); // 2 steps to 0
       expect(passGoDelay).toBe(landingDelay);
 
       // 2. [Phản biện 1] Hoạt ảnh nằm trong pawnAnimationQueue (Pha 3)
@@ -287,7 +287,7 @@ describe('[CONTRACT] IMP-230: Pass GO Salary & Rent Subtractive Clean Suite', ()
           { playerId: 'p1', fromCell: 38, targetCell: 6, waypoints: [39, 0, 1, 2, 3, 4, 5, 6], isBot: false },
         ],
       });
-      expect(getPawnPassGoDelay!('p1')).toBe(600);
+      expect(getPawnPassGoDelay!('p1')).toBe(400);
 
       // 3. [Phản biện 1] Fallback an toàn: Không có hoạt ảnh hoặc không qua GO -> trả về 0 ms
       useGameStore.setState({ pendingPawnMove: null, activePawnAnimation: null, pawnAnimationQueue: [] });
@@ -306,12 +306,12 @@ describe('[CONTRACT] IMP-230: Pass GO Salary & Rent Subtractive Clean Suite', ()
         message: 'Hoàn thành 1 vòng', playerId: 'p1', amount: 2000,
       }, mockState);
 
-      // Before delay (at t = 599ms), not called yet
-      vi.advanceTimersByTime(599);
+      // Before delay (at t = 399ms), not called yet
+      vi.advanceTimersByTime(399);
       expect(chimeSpy).not.toHaveBeenCalled();
       expect(mockState.addFloatingText).not.toHaveBeenCalled();
 
-      // At t = 600ms, called!
+      // At t = 400ms, called!
       vi.advanceTimersByTime(1);
       expect(chimeSpy).toHaveBeenCalledTimes(1);
       expect(mockState.addFloatingText).toHaveBeenCalledWith(expect.objectContaining({

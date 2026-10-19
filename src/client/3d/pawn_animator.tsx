@@ -32,7 +32,7 @@ export {
   emoteCanvasCache,
 };
 
-const PAWN_LANDING_SETTLE_MS = 600;
+const PAWN_LANDING_SETTLE_MS = 250;
 
 export const PLAYER_OFFSETS: readonly [number, number, number][] = [
   [-0.2, 0, -0.2], [0.2, 0, -0.2], [-0.2, 0, 0.2], [0.2, 0, 0.2],

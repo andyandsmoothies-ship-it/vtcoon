@@ -1,0 +1,86 @@
+[
+  {
+    "file": "src/client/3d/pawn_path.ts",
+    "desc": "AST: Invert HOP_DURATION from 0.14 to old 0.22s baseline",
+    "target": "export const HOP_DURATION = 0.14 as const;",
+    "replacement": "export const HOP_DURATION = 0.22 as const;"
+  },
+  {
+    "file": "src/client/3d/pawn_path.ts",
+    "desc": "AST: Invert LANDING_DURATION from 0.06 to old 0.08s baseline",
+    "target": "export const LANDING_DURATION = 0.06 as const;",
+    "replacement": "export const LANDING_DURATION = 0.08 as const;"
+  },
+  {
+    "file": "src/client/3d/pawn_path.ts",
+    "desc": "AST: Invert BOT_HOP_DURATION from 0.10 to old 0.18s baseline",
+    "target": "export const BOT_HOP_DURATION = 0.10 as const;",
+    "replacement": "export const BOT_HOP_DURATION = 0.18 as const;"
+  },
+  {
+    "file": "src/client/3d/pawn_path.ts",
+    "desc": "AST: Invert BOT_LANDING_DURATION from 0.05 to old 0.08s baseline",
+    "target": "export const BOT_LANDING_DURATION = 0.05 as const;",
+    "replacement": "export const BOT_LANDING_DURATION = 0.08 as const;"
+  },
+  {
+    "file": "src/client/3d/pawn_path.ts",
+    "desc": "AST: Invert BOT_STEP_DURATION from 0.15 to old 0.26s baseline",
+    "target": "export const BOT_STEP_DURATION = 0.15 as const;",
+    "replacement": "export const BOT_STEP_DURATION = 0.26 as const;"
+  },
+  {
+    "file": "src/client/3d/pawn_path.ts",
+    "desc": "AST: Corrupt HOP_DURATION to sluggish 0.30s",
+    "target": "export const HOP_DURATION = 0.14 as const;",
+    "replacement": "export const HOP_DURATION = 0.30 as const;"
+  },
+  {
+    "file": "src/client/3d/pawn_path.ts",
+    "desc": "AST: Corrupt BOT_HOP_DURATION to excessively fast 0.04s",
+    "target": "export const BOT_HOP_DURATION = 0.10 as const;",
+    "replacement": "export const BOT_HOP_DURATION = 0.04 as const;"
+  },
+  {
+    "file": "src/client/3d/pawn_path.ts",
+    "desc": "AST: Corrupt BOT_STEP_DURATION to 0.10s causing sum mismatch",
+    "target": "export const BOT_STEP_DURATION = 0.15 as const;",
+    "replacement": "export const BOT_STEP_DURATION = 0.10 as const;"
+  },
+  {
+    "file": "src/client/events/pacing_context.ts",
+    "desc": "AST: Invert DEFAULT_HUMAN_STEP_MS from 200 to old 300ms baseline",
+    "target": "export const DEFAULT_HUMAN_STEP_MS = 200;",
+    "replacement": "export const DEFAULT_HUMAN_STEP_MS = 300;"
+  },
+  {
+    "file": "src/client/events/pacing_context.ts",
+    "desc": "AST: Invert DEFAULT_BOT_STEP_MS from 150 to old 260ms baseline",
+    "target": "export const DEFAULT_BOT_STEP_MS = 150;",
+    "replacement": "export const DEFAULT_BOT_STEP_MS = 260;"
+  },
+  {
+    "file": "src/client/events/pacing_context.ts",
+    "desc": "AST: Invert DEFAULT_ROLL_LEAD_MS from 1350 to old 1200ms baseline",
+    "target": "export const DEFAULT_ROLL_LEAD_MS = 1350;",
+    "replacement": "export const DEFAULT_ROLL_LEAD_MS = 1200;"
+  },
+  {
+    "file": "src/client/events/pacing_context.ts",
+    "desc": "AST: Corrupt DEFAULT_HUMAN_STEP_MS to 250ms",
+    "target": "export const DEFAULT_HUMAN_STEP_MS = 200;",
+    "replacement": "export const DEFAULT_HUMAN_STEP_MS = 250;"
+  },
+  {
+    "file": "src/client/events/pacing_context.ts",
+    "desc": "AST: Corrupt DEFAULT_BOT_STEP_MS to 200ms",
+    "target": "export const DEFAULT_BOT_STEP_MS = 150;",
+    "replacement": "export const DEFAULT_BOT_STEP_MS = 200;"
+  },
+  {
+    "file": "src/client/events/pacing_context.ts",
+    "desc": "AST: Corrupt DEFAULT_ROLL_LEAD_MS to 1400ms",
+    "target": "export const DEFAULT_ROLL_LEAD_MS = 1350;",
+    "replacement": "export const DEFAULT_ROLL_LEAD_MS = 1400;"
+  }
+]

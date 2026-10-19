@@ -240,7 +240,7 @@ describe('[TC-356/MSS] Diorama Hollow Rim, Flat Dice Landing & Bot Action Camera
   // FACET 4: Cross-Coupling Blast Radius (Bot Action Camera Restoration)
   // ===========================================================================
 
-  it('[TC-356.07/MSS] [UC-CAM-BOT-ACTION]: Given Bot turn with pawn animating, When calling resolveCameraMode, Then returns pawn_chase following the bot across the board', () => {
+  it('[TC-356.07/MSS] [UC-CAM-BOT-ACTION]: Given Bot turn with pawn animating, When calling resolveCameraMode, Then returns overview eliminating whiplash [IMP-443]', () => {
     const mode = resolveCameraMode({
       isRolling: false,
       isPawnAnimating: true,
@@ -253,7 +253,7 @@ describe('[TC-356/MSS] Diorama Hollow Rim, Flat Dice Landing & Bot Action Camera
       isHighStakesRoll: false,
     });
 
-    expect(mode).toBe('pawn_chase');
+    expect(mode).toBe('overview');
   });
 
   it('[TC-356.08/MSS] [UC-CAM-BOT-SPEED]: Given Bot turn in pawn_chase mode, When calling calculateTargetCameraState, Then uses catch-up speed 3.8 matching golden cinematic pacing', () => {

@@ -1,0 +1,74 @@
+[
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Invert bot routine pawn animating return from overview to pawn_chase",
+    "target": "return params.isHighStakesRoll ? 'pawn_chase' : 'overview';",
+    "replacement": "return 'pawn_chase';"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Suppress high-stakes tension chase during bot pawn animation",
+    "target": "return params.isHighStakesRoll ? 'pawn_chase' : 'overview';",
+    "replacement": "return 'overview';"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Corrupt rent spotlight tile_focus on human property to overview",
+    "target": "if (params.isTargetOwnedByHuman === true) return 'tile_focus';",
+    "replacement": "if (params.isTargetOwnedByHuman === true) return 'overview';"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Invert human property ownership condition to false",
+    "target": "if (params.isTargetOwnedByHuman === true) return 'tile_focus';",
+    "replacement": "if (params.isTargetOwnedByHuman === false) return 'tile_focus';"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Remove bot exemption from dice pan in overview mode",
+    "target": "if (options?.isRolling && !options?.isHighStakesRoll && !options?.isBotTurn) {",
+    "replacement": "if (options?.isRolling && !options?.isHighStakesRoll) {"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Narrow bot recognition check to require both bot flags simultaneously",
+    "target": "if (params.isBotTurn || params.isAnimatingPawnBot) {",
+    "replacement": "if (params.isBotTurn && params.isAnimatingPawnBot) {"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Suppress active modal focus in bot camera check",
+    "target": "if (params.activeModal !== null) return 'tile_focus';",
+    "replacement": "if (params.activeModal !== null) return 'overview';"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Invert activeModal null check to equality",
+    "target": "if (params.activeModal !== null) return 'tile_focus';",
+    "replacement": "if (params.activeModal === null) return 'tile_focus';"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Corrupt safe landing overview return to tile_focus",
+    "target": "if (params.isTargetOwnedByHuman === true) return 'tile_focus';\n    return 'overview';",
+    "replacement": "if (params.isTargetOwnedByHuman === true) return 'tile_focus';\n    return 'tile_focus';"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Invert human pawn animating return from pawn_chase to overview",
+    "target": "if (params.isPawnAnimating) {\n    return 'pawn_chase';\n  }",
+    "replacement": "if (params.isPawnAnimating) {\n    return 'overview';\n  }"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Invert high stakes dice roll camera return from tension_roll to overview",
+    "target": "if (params.isRolling && params.isHighStakesRoll) {\n    return 'tension_roll';\n  }",
+    "replacement": "if (params.isRolling && params.isHighStakesRoll) {\n    return 'overview';\n  }"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: Corrupt dice pan rolling check",
+    "target": "if (options?.isRolling && !options?.isHighStakesRoll && !options?.isBotTurn) {",
+    "replacement": "if (false && options?.isRolling && !options?.isHighStakesRoll && !options?.isBotTurn) {"
+  }
+]

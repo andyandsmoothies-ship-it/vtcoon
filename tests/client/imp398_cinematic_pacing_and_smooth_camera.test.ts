@@ -32,23 +32,23 @@ import { useGameStore, type GameState } from '../../src/client/store/game_store.
 describe('[TC-398/MSS] Cinematic Pacing & Smooth Camera Restoration Suite', () => {
   // === Facet 1: Boundary & Range (Pawn Hop Durations) ===
 
-  it('[TC-398.01/MSS][UC-PAWN-HOP-DURATION/MSS] returns exactly 0.22s for HOP_DURATION', () => {
-    expect(HOP_DURATION).toBe(0.22);
+  it('[TC-398.01/MSS][UC-PAWN-HOP-DURATION/MSS] returns exactly 0.14s for HOP_DURATION', () => {
+    expect(HOP_DURATION).toBe(0.14);
   });
 
-  it('[TC-398.02/MSS][UC-PAWN-STEP-DURATION/MSS] returns exactly 0.30s when summing HOP_DURATION and LANDING_DURATION', () => {
+  it('[TC-398.02/MSS][UC-PAWN-STEP-DURATION/MSS] returns exactly 0.20s when summing HOP_DURATION and LANDING_DURATION', () => {
     const totalHumanStep = Number((HOP_DURATION + LANDING_DURATION).toFixed(2));
-    expect(totalHumanStep).toBe(0.30);
+    expect(totalHumanStep).toBe(0.20);
   });
 
-  it('[TC-398.03a/MSS][UC-PAWN-BOT-STEP-DURATION/MSS] returns exactly 0.18s for BOT_HOP_DURATION', () => {
-    expect(BOT_HOP_DURATION).toBe(0.18);
+  it('[TC-398.03a/MSS][UC-PAWN-BOT-STEP-DURATION/MSS] returns exactly 0.10s for BOT_HOP_DURATION', () => {
+    expect(BOT_HOP_DURATION).toBe(0.10);
   });
 
-  it('[TC-398.03b/MSS][UC-PAWN-BOT-STEP-DURATION/MSS] returns exactly 0.26s for BOT_STEP_DURATION and validates bot landing duration', () => {
-    expect(BOT_STEP_DURATION).toBe(0.26);
-    expect(BOT_LANDING_DURATION).toBe(0.08);
-    expect(BOT_HOP_DURATION + BOT_LANDING_DURATION).toBeCloseTo(0.26);
+  it('[TC-398.03b/MSS][UC-PAWN-BOT-STEP-DURATION/MSS] returns exactly 0.15s for BOT_STEP_DURATION and validates bot landing duration', () => {
+    expect(BOT_STEP_DURATION).toBe(0.15);
+    expect(BOT_LANDING_DURATION).toBe(0.05);
+    expect(BOT_HOP_DURATION + BOT_LANDING_DURATION).toBeCloseTo(0.15);
   });
 
   // === Facet 2: State Reactivity & Camera Speed Calibration ===
@@ -109,19 +109,19 @@ describe('[TC-398/MSS] Cinematic Pacing & Smooth Camera Restoration Suite', () =
 
   // === Facet 4 & 5: Error Defense, Terminal Invariants & SSOT Pacing Wiring ===
 
-  it('[TC-398.08a/MSS][UC-PACING-CONTEXT-SSOT/MSS] returns exactly 300ms for DEFAULT_PACING_CONFIG.stepMs and DEFAULT_HUMAN_STEP_MS', () => {
-    expect(DEFAULT_PACING_CONFIG.stepMs).toBe(300);
-    expect(DEFAULT_HUMAN_STEP_MS).toBe(300);
+  it('[TC-398.08a/MSS][UC-PACING-CONTEXT-SSOT/MSS] returns exactly 200ms for DEFAULT_PACING_CONFIG.stepMs and DEFAULT_HUMAN_STEP_MS', () => {
+    expect(DEFAULT_PACING_CONFIG.stepMs).toBe(200);
+    expect(DEFAULT_HUMAN_STEP_MS).toBe(200);
   });
 
-  it('[TC-398.08b/MSS][UC-PACING-CONTEXT-SSOT/MSS] returns exactly 260ms for DEFAULT_PACING_CONFIG.botStepMs, DEFAULT_BOT_STEP_MS, and verifies rollLeadMs', () => {
-    expect(DEFAULT_PACING_CONFIG.botStepMs).toBe(260);
-    expect(DEFAULT_BOT_STEP_MS).toBe(260);
-    expect(DEFAULT_PACING_CONFIG.rollLeadMs).toBe(1200);
-    expect(DEFAULT_ROLL_LEAD_MS).toBe(1200);
+  it('[TC-398.08b/MSS][UC-PACING-CONTEXT-SSOT/MSS] returns exactly 150ms for DEFAULT_PACING_CONFIG.botStepMs, DEFAULT_BOT_STEP_MS, and verifies rollLeadMs', () => {
+    expect(DEFAULT_PACING_CONFIG.botStepMs).toBe(150);
+    expect(DEFAULT_BOT_STEP_MS).toBe(150);
+    expect(DEFAULT_PACING_CONFIG.rollLeadMs).toBe(1350);
+    expect(DEFAULT_ROLL_LEAD_MS).toBe(1350);
   });
 
-  it('[TC-398.09/MSS][UC-PACING-CONTEXT-DELAY/MSS] derives pawn landing delay matching SSOT step timing for both human (300ms) and bot (260ms)', () => {
+  it('[TC-398.09/MSS][UC-PACING-CONTEXT-DELAY/MSS] derives pawn landing delay matching SSOT step timing for both human (200ms) and bot (150ms)', () => {
     const baseState = useGameStore.getState();
 
     const humanState: GameState = {
@@ -137,7 +137,7 @@ describe('[TC-398/MSS] Cinematic Pacing & Smooth Camera Restoration Suite', () =
       },
     };
     const humanDelay = getPawnLandingDelay('p1', humanState);
-    expect(humanDelay).toBe(900);
+    expect(humanDelay).toBe(600);
 
     const botState: GameState = {
       ...baseState,
@@ -152,10 +152,10 @@ describe('[TC-398/MSS] Cinematic Pacing & Smooth Camera Restoration Suite', () =
       },
     };
     const botDelay = getPawnLandingDelay('bot1', botState);
-    expect(botDelay).toBe(780);
+    expect(botDelay).toBe(450);
   });
 
-  it('[TC-398.10/MSS][UC-PACING-CONTEXT-PASSGO/MSS] derives pawn pass GO delay using SSOT step timing (300ms human, 260ms bot)', () => {
+  it('[TC-398.10/MSS][UC-PACING-CONTEXT-PASSGO/MSS] derives pawn pass GO delay using SSOT step timing (200ms human, 150ms bot)', () => {
     const baseState = useGameStore.getState();
 
     const humanState: GameState = {
@@ -171,7 +171,7 @@ describe('[TC-398/MSS] Cinematic Pacing & Smooth Camera Restoration Suite', () =
       },
     };
     const humanPassGoDelay = getPawnPassGoDelay('p1', humanState);
-    expect(humanPassGoDelay).toBe(600);
+    expect(humanPassGoDelay).toBe(400);
 
     const botState: GameState = {
       ...baseState,
@@ -186,7 +186,7 @@ describe('[TC-398/MSS] Cinematic Pacing & Smooth Camera Restoration Suite', () =
       },
     };
     const botPassGoDelay = getPawnPassGoDelay('bot1', botState);
-    expect(botPassGoDelay).toBe(520);
+    expect(botPassGoDelay).toBe(300);
   });
 
   it('[TC-398.11/MSS][UC-CAMERA-CHASE-LEGACY/MSS] maintains speed 3.2 on legacy fallback without options', () => {

@@ -101,7 +101,7 @@ describe('[UC-DRAMA] Dramatic Pacing & Player-Oriented Dice Pan Contract Suite',
     expect(mode).toBe('tile_focus');
   });
 
-  it('[TC-DRAMA.04/A1][UC-DRAMA] Caller cu khong truyen isTargetOwnedByHuman (undefined) bao toan tile_focus cho IMP-103', () => {
+  it('[TC-DRAMA.04/A1][UC-DRAMA] Caller cu khong truyen isTargetOwnedByHuman (undefined) tra ve overview chong whiplash [IMP-443]', () => {
     const mode = resolveCameraMode({
       isRolling: false,
       isPawnAnimating: false,
@@ -109,7 +109,7 @@ describe('[UC-DRAMA] Dramatic Pacing & Player-Oriented Dice Pan Contract Suite',
       isBotTurn: true,
       hasTargetTile: true,
     });
-    expect(mode).toBe('tile_focus');
+    expect(mode).toBe('overview');
   });
 
   it('[TC-DRAMA.05/MSS][UC-DRAMA] Luot gieo xuc xac thong thuong cua nguoi choi ha do cao Y = 19.8 va FOV 28', () => {
@@ -121,13 +121,13 @@ describe('[UC-DRAMA] Dramatic Pacing & Player-Oriented Dice Pan Contract Suite',
     expect(state.fov).toBe(28);
   });
 
-  it('[TC-DRAMA.06/A2][UC-DRAMA] Luot gieo xuc xac cua Bot kich hoat dice pan camera tai Y = 19.8 chong tre goc nhin', () => {
+  it('[TC-DRAMA.06/A2][UC-DRAMA] Luot gieo xuc xac cua Bot giu static overview tai Y >= 22.0m chong whiplash [IMP-443]', () => {
     const state = calculateTargetCameraState('overview', undefined, undefined, {
       isRolling: true,
       isBotTurn: true,
     });
-    expect(state.position[1]).toBe(19.8);
-    expect(state.fov).toBe(28);
+    expect(state.position[1]).toBeGreaterThanOrEqual(22.0);
+    expect(state.fov).toBe(24);
   });
 
   it('[TC-DRAMA.07/MSS][UC-DRAMA] Nguoi choi gieo xuc xac o man Bac (o 25, side 2) tra ve targetZ = 0.9', () => {

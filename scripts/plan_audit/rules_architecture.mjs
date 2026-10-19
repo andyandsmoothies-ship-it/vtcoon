@@ -179,3 +179,35 @@ export function auditShallowModulePropsExplosion(planContent) {
 
   return errors;
 }
+
+/**
+ * Enforces Sean Goedecke Dropped Requirements & Anti-Phantom Complexity Invariant.
+ * Plans must declare what is explicitly out of scope / dropped (Dropped Requirements / KISS Trade-offs).
+ */
+export function auditDroppedRequirementsAndPhantomSlop(planContent, fileSnippetsMap = new Map()) {
+  let errors = 0;
+  const hasDroppedSection = /(?:Explicitly\s+Dropped\s+Requirements|Dropped\s+Requirements|Yêu\s+cầu\s+từ\s+bỏ|Những\s+thứ\s+cố\s+tình\s+không\s+làm|Out-of-Scope\s+Trade-offs)/i.test(planContent);
+
+  if (hasDroppedSection) {
+    console.log(`  ✔️ Sean Goedecke Rule verified: Explicitly Dropped Requirements section declared in plan.`);
+  } else {
+    console.warn(`  ⚠️  [DROPPED_REQUIREMENTS_ADVISORY] Plan lacks an 'Explicitly Dropped Requirements' section.`);
+    console.warn(`     Sean Goedecke Rule mandates declaring what is deliberately slow, stale, inflexible, or out-of-scope to prevent AI over-engineering.`);
+  }
+
+  for (const snippets of fileSnippetsMap.values()) {
+    for (const snip of snippets) {
+      if (/\b(?:new\s+Mutex|new\s+Semaphore|IntentMutex\.runExclusive)\b/.test(snip)) {
+        const mentionsConcurrency = /concurrency|mutex|race\s+condition|lock/i.test(planContent);
+        if (!mentionsConcurrency) {
+          console.error(`  ❌ [PHANTOM_CONCURRENCY_LOCK] Replacement snippet introduces Mutex/Lock without explicit architectural justification in plan!`);
+          console.error(`     Sean Goedecke Invariant: Subagents are forbidden from introducing unrequested concurrency locks for hypothetical edge cases.`);
+          errors++;
+        }
+      }
+    }
+  }
+
+  return errors;
+}
+
