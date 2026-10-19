@@ -30,17 +30,22 @@ import {
 import { cellPosition } from './board_coords';
 import { shouldTriggerCinematicCamera } from './cinematic_chase_camera';
 import { SoundEngine } from '../audio/sound_engine';
+import { useDeviceProfile } from './device_profile_context';
 
 export interface AdaptiveCinematicCameraProps {
   readonly isPreMatch?: boolean;
+  readonly isMobile?: boolean;
 }
 
 // checkTargetOwnedByHuman moved to use_camera_gestures.ts
 
 export function AdaptiveCinematicCamera({
   isPreMatch = false,
+  isMobile: propIsMobile,
 }: AdaptiveCinematicCameraProps = {}): React.ReactElement {
   const { camera, scene, gl } = useThree();
+  const deviceProfile = useDeviceProfile();
+  const isMobile = propIsMobile ?? deviceProfile.isMobile;
   const controlsRef = useRef<OrbitControlsImpl>(null);
   const defaultCfg = CAMERA_CONFIG[isPreMatch ? 'pre_match' : 'overview'];
   const defaultPos: [number, number, number] = [defaultCfg.position[0], defaultCfg.position[1], defaultCfg.position[2]];
@@ -48,13 +53,23 @@ export function AdaptiveCinematicCamera({
   const camBaseRef = useRef<[number, number, number]>(defaultPos);
   const targetBaseRef = useRef<[number, number, number]>(defaultTarget);
   const isResettingRef = useRef<boolean>(true);
-  const isManualOverviewResetRef = useRef<boolean>(false);
   const prevModeRef = useRef<string | null>(null);
   const prevHasUserCustomCameraRef = useRef<boolean>(false);
   const lastDestinationCellRef = useRef<number | null>(null);
   const gamePhaseRef = useRef<1 | 2 | 3>(1);
   const softReturnRef = useRef<SoftReturnState | null>(null);
   const prevTurnPlayerIdRef = useRef<string | null>(null);
+  const manualOverviewTimestampRef = useRef<number>(0);
+  const isManualOverviewResetRef = React.useMemo<React.MutableRefObject<boolean>>(() => {
+    let val = false;
+    return {
+      get current() { return val; },
+      set current(next: boolean) {
+        val = next;
+        manualOverviewTimestampRef.current = next ? performance.now() : 0;
+      },
+    };
+  }, []);
 
   const flightStartTimeRef = useRef<number | null>(null);
   const postHopSettleUntilRef = useRef<number>(0);
@@ -160,6 +175,19 @@ export function AdaptiveCinematicCamera({
       hasSkippedCurrentMoveRef.current = false;
     }
 
+    const storeState = useGameStore.getState();
+    const liveTurnPlayerId = storeState.currentTurnPlayerId;
+    const liveFocusCell = storeState.cameraFocusCell;
+    const liveRolling = storeState.isRolling;
+    const hasTurnChanged = prevTurnPlayerIdRef.current !== null && prevTurnPlayerIdRef.current !== liveTurnPlayerId;
+    prevTurnPlayerIdRef.current = liveTurnPlayerId;
+    if (isManualOverviewResetRef.current) {
+      const isExpired = performance.now() - manualOverviewTimestampRef.current > 12000;
+      if (hasTurnChanged || liveRolling || isPawnMoving || liveFocusCell !== null || isUserInteractingRef.current || isExpired) {
+        isManualOverviewResetRef.current = false;
+      }
+    }
+
     const currentTurnPlayer = currentTurnPlayerId ? playersInfo[currentTurnPlayerId] : undefined;
     const isBotTurn = Boolean(currentTurnPlayer?.isBot);
     const animatingPlayer = activeAnimation?.playerId ? playersInfo[activeAnimation.playerId] : undefined;
@@ -173,12 +201,13 @@ export function AdaptiveCinematicCamera({
     prevIsPawnMovingRef.current = isPawnMoving;
     const isPostHopSettling = performance.now() < postHopSettleUntilRef.current;
 
+    const effectiveFocusCell = liveFocusCell ?? cameraFocusCell;
     const targetCell = resolveCameraTargetCell(
       activeAnimation,
       currentTurnPlayerId,
       playerPositions,
       modalPayload as { cellIndex?: number } | null,
-      cameraFocusCell
+      effectiveFocusCell
     );
 
     // [ADV-02] Neo su kien theo o dich den cuoi cung cua luot di thay vi o nhay trung gian
@@ -199,7 +228,7 @@ export function AdaptiveCinematicCamera({
 
     // [USER-BUG-01] Truyen isPawnAnimating: isPawnMoving de resolveCameraMode tra ve 'pawn_chase'
     // Sau do calculateTargetCameraState voi options.cinematicChase: false se tra ve 'overview' cho 80% luot thuong
-    const hasTargetTile = (activeModal !== null || hasRolledThisTurn || cameraFocusCell !== null) && targetCell !== null && targetCell !== undefined && Number.isFinite(targetCell);
+    const hasTargetTile = (activeModal !== null || hasRolledThisTurn || effectiveFocusCell !== null) && targetCell !== null && targetCell !== undefined && Number.isFinite(targetCell);
     const effectiveDestCell = finalDestinationCell ?? targetCell ?? lastDestinationCellRef.current;
     const isTargetOwnedByHuman = effectiveDestCell !== null && effectiveDestCell !== undefined && Number.isFinite(effectiveDestCell)
       ? checkTargetOwnedByHuman(playersInfo, effectiveDestCell)
@@ -207,7 +236,8 @@ export function AdaptiveCinematicCamera({
     const effectivePhase = resolveDynamicGamePhase(roundNumber, totalBuildings, gamePhaseRef.current);
     gamePhaseRef.current = effectivePhase;
 
-    const phaseOverview = resolveOverviewConfigByPhase(effectivePhase, CAMERA_CONFIG.overview);
+    const cameraAspect = 'aspect' in camera ? (camera as PerspectiveCamera).aspect : undefined;
+    const phaseOverview = resolveOverviewConfigByPhase(effectivePhase, CAMERA_CONFIG.overview, cameraAspect);
     if (!isPreMatch) {
       currentOverviewPosRef.current = [phaseOverview.position[0], phaseOverview.position[1], phaseOverview.position[2]];
       currentOverviewTargetRef.current = [phaseOverview.target[0], phaseOverview.target[1], phaseOverview.target[2]];
@@ -226,10 +256,12 @@ export function AdaptiveCinematicCamera({
       isAnimatingPawnBot,
       isTargetOwnedByHuman,
       isPostHopSettling,
+      isMobile,
+      aspect: cameraAspect,
+      manualMode: isManualOverviewResetRef.current ? 'overview' : null,
     });
 
     const cellCoords = targetCell !== null && targetCell !== undefined && Number.isFinite(targetCell) ? cellPosition(targetCell) : undefined;
-    const cameraAspect = 'aspect' in camera ? (camera as PerspectiveCamera).aspect : undefined;
 
     const destCoords = finalDestinationCell !== null && finalDestinationCell !== undefined && Number.isFinite(finalDestinationCell)
       ? cellPosition(finalDestinationCell)
@@ -354,9 +386,6 @@ export function AdaptiveCinematicCamera({
       }
     }
 
-    const hasTurnChanged = prevTurnPlayerIdRef.current !== null && prevTurnPlayerIdRef.current !== currentTurnPlayerId;
-    prevTurnPlayerIdRef.current = currentTurnPlayerId;
-
     arbitrationSession.current.checkPreemption(
       activeModal,
       cameraFocusCell,
@@ -414,7 +443,6 @@ export function AdaptiveCinematicCamera({
         if (sample.isFinished) {
           softReturnRef.current = null;
           isResettingRef.current = false;
-          isManualOverviewResetRef.current = false;
         }
       } else if (activeDriver === 'director') {
         targetBaseRef.current[0] += (targetState.target[0] - targetBaseRef.current[0]) * lerpFactor;
@@ -437,7 +465,6 @@ export function AdaptiveCinematicCamera({
           Math.abs(camBaseRef.current[2] - targetState.position[2]) < 0.05
         ) {
           isResettingRef.current = false;
-          isManualOverviewResetRef.current = false;
         }
       }
     }

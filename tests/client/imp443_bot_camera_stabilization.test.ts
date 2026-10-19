@@ -35,6 +35,42 @@ describe('IMP-443: Bot Turn Camera Stabilization & Anti-Whiplash Contracts', () 
     expect(mode === 'overview').toBe(true);
   });
 
+  it('TC-443.01b [UC-CAM-BOT/MOBILE]: Given routine bot turn on mobile viewport (isMobile: true or aspect < 1.0) with isPawnAnimating: true, When calling resolveCameraMode, Then returns "pawn_chase" to prevent frustum clipping', () => {
+    const mobileParams: CameraResolveParams = {
+      isRolling: false,
+      isPawnAnimating: true,
+      isBotTurn: true,
+      isAnimatingPawnBot: true,
+      isTargetOwnedByHuman: false,
+      isHighStakesRoll: false,
+      activeModal: null,
+      isMobile: true,
+    };
+    expect(resolveCameraMode(mobileParams)).toBe('pawn_chase');
+
+    const portraitParams: CameraResolveParams = {
+      ...mobileParams,
+      isMobile: false,
+      aspect: 0.486,
+    };
+    expect(resolveCameraMode(portraitParams)).toBe('pawn_chase');
+  });
+
+  it('TC-443.01c [UC-CAM-BOT/MOBILE]: Given routine bot turn on mobile viewport when isPawnAnimating: false on unowned tile, When calling resolveCameraMode, Then returns "overview" to soft-return smoothly', () => {
+    const mobileParams: CameraResolveParams = {
+      isRolling: false,
+      isPawnAnimating: false,
+      isBotTurn: true,
+      isAnimatingPawnBot: true,
+      isTargetOwnedByHuman: false,
+      isHighStakesRoll: false,
+      activeModal: null,
+      isMobile: true,
+      aspect: 0.486,
+    };
+    expect(resolveCameraMode(mobileParams)).toBe('overview');
+  });
+
   it('TC-443.02 [UC-CAM-BOT/A1]: Given bot turn landing on human property with isPawnAnimating: false and isTargetOwnedByHuman: true, When calling resolveCameraMode, Then returns "tile_focus"', () => {
     const params: CameraResolveParams = {
       isRolling: false,

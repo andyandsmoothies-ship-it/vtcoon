@@ -1,6 +1,9 @@
 // [UI-S01/MSS][UI-S04/MSS][IMP-293] Cinematic Spline Flyby & Macro Pacing
 import type { TargetCameraState } from './camera_types';
-import { calculateTileFocusCameraPosition } from './camera_kinematic_helpers';
+import {
+  calculateTileFocusCameraPosition,
+  calculateResponsiveOverviewCameraState,
+} from './camera_kinematic_helpers';
 import { cellPosition } from './board_coords';
 
 export interface SplineArcParams {
@@ -102,31 +105,9 @@ export function resolveDynamicGamePhase(
 }
 
 export function resolveOverviewConfigByPhase(
-  phase: 1 | 2 | 3,
-  baseConfig: BaseCameraConfig
+  _phase: 1 | 2 | 3,
+  baseConfig: BaseCameraConfig,
+  aspect?: number
 ): TargetCameraState {
-  switch (phase) {
-    case 1:
-      return {
-        position: [baseConfig.position[0], baseConfig.position[1], baseConfig.position[2]],
-        target: [baseConfig.target[0], baseConfig.target[1], baseConfig.target[2]],
-        fov: 24,
-        speed: baseConfig.speed,
-      };
-    case 2:
-      return {
-        position: [21.0, 22.0, 21.0],
-        target: [1.8, 0.0, 1.8],
-        fov: 26,
-        speed: 3.8,
-      };
-    case 3:
-    default:
-      return {
-        position: [17.5, 18.5, 17.5],
-        target: [1.5, 0.0, 1.5],
-        fov: 28,
-        speed: 4.2,
-      };
-  }
+  return calculateResponsiveOverviewCameraState(aspect, baseConfig);
 }

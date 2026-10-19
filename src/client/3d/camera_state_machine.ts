@@ -85,6 +85,8 @@ export interface CameraResolveParams {
   readonly isAnimatingPawnBot?: boolean;
   readonly isTargetOwnedByHuman?: boolean;
   readonly isPostHopSettling?: boolean;
+  readonly isMobile?: boolean;
+  readonly aspect?: number;
 }
 
 /**
@@ -112,12 +114,19 @@ export function resolveCameraMode(params: CameraResolveParams): CameraMode {
   if (params.isRolling) {
     return 'overview';
   }
-  // [IMP-443] Ổn định góc máy lượt Bot: Giữ Overview tĩnh cho lượt Bot thường (0 whiplash)
-  // Chỉ kích hoạt pawn_chase khi thế cờ kịch tính (High-Stakes),
-  // và chỉ chuyển tile_focus khi Bot hạ cánh vào đất người chơi hoặc mở modal giao dịch
+  // [IMP-443] Ổn định góc máy lượt Bot: Giữ Overview tĩnh cho lượt Bot thường trên Desktop (0 whiplash)
+  // Trên Mobile (isMobile hoặc aspect < 1.0), kích hoạt pawn_chase để bám theo quân cờ Bot vì góc nhìn
+  // dọc hẹp (aspect ~0.486) ở overview làm lọt/crop mất các ô cờ ngoài rìa bàn cờ (Frustum Clipping).
+  // Chỉ chuyển tile_focus khi Bot hạ cánh vào đất người chơi hoặc mở modal giao dịch
   if (params.isBotTurn || params.isAnimatingPawnBot) {
     if (params.activeModal !== null) return 'tile_focus';
     if (params.isPawnAnimating) {
+      const isMobileViewport = Boolean(
+        params.isMobile || (typeof params.aspect === 'number' && params.aspect < 1.0)
+      );
+      if (isMobileViewport) {
+        return 'pawn_chase';
+      }
       return params.isHighStakesRoll ? 'pawn_chase' : 'overview';
     }
     if (params.isTargetOwnedByHuman === true) return 'tile_focus';
@@ -241,10 +250,7 @@ export function calculateTargetCameraState(
       if (options?.isRolling && !options?.isHighStakesRoll && !options?.isBotTurn) {
         return calculateDicePanCameraState(options?.rollingPlayerPos, options?.aspect);
       }
-      if (options?.gamePhase) {
-        return resolveOverviewConfigByPhase(options.gamePhase, CAMERA_CONFIG.overview);
-      }
-      return configToCameraState(CAMERA_CONFIG.overview);
+      return resolveOverviewConfigByPhase(options?.gamePhase ?? 1, CAMERA_CONFIG.overview, options?.aspect);
   }
 }
 

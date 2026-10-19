@@ -8,6 +8,7 @@ if (window.__gameStore) {
       p4: { id: 'p4', name: 'Bot AI 3', balance: 7000, tokenColor: '#F59E0B', isBot: true, ownedProperties: [] },
     },
     currentTurnPlayerId: 'p2',
+    roundNumber: 8,
     isRolling: true,
     hasRolledThisTurn: false,
     activeModal: null,

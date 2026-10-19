@@ -192,6 +192,17 @@ describe('[TC-IMP103/MSS] Mobile Cam, Lobby 1-Row Ergonomics, Telemetry Hardenin
       expect(mode).toBe('overview');
     });
 
+    it('[TC-IMP103.09b/MSS][UI-S01/MSS][UC-001] resolveCameraMode: Khi isBotTurn = true va isPawnAnimating = true tren mobile (isMobile = true), tra ve pawn_chase', () => {
+      const mode = resolveCameraMode({
+        isRolling: false,
+        isPawnAnimating: true,
+        activeModal: null,
+        isBotTurn: true,
+        isMobile: true,
+      });
+      expect(mode).toBe('pawn_chase');
+    });
+
     it('[TC-IMP103.10/MSS][UI-S01/MSS][UC-001] resolveCameraMode: Khi isAnimatingPawnBot = true va isPawnAnimating = true (high-stakes), tra ve pawn_chase', () => {
       const mode = resolveCameraMode({
         isRolling: false,

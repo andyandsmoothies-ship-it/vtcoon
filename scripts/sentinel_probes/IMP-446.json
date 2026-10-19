@@ -1,0 +1,50 @@
+[
+  {
+    "file": "src/client/3d/cinematic_spline_flyby.ts",
+    "desc": "AST: Revert overview resolution to hardcoded Phase 3 cramped view Y = 18.5m",
+    "target": "return calculateResponsiveOverviewCameraState(aspect, baseConfig);",
+    "replacement": "return { position: [17.5, 18.5, 17.5], target: [1.5, 0.0, 1.5], fov: 28, speed: 4.2 };"
+  },
+  {
+    "file": "src/client/3d/camera_kinematic_helpers.ts",
+    "desc": "AST: Corrupt mobile portrait FOV ceiling from 50 to 20",
+    "target": "return Math.min(50, Math.max(baseFov, calculatedFov));",
+    "replacement": "return Math.min(20, Math.max(baseFov, calculatedFov));"
+  },
+  {
+    "file": "src/client/3d/camera_kinematic_helpers.ts",
+    "desc": "AST: Corrupt rawScale in calculateResponsiveOverviewCameraState causing elevation collapse",
+    "target": "const rawScale = 1.0 / Math.sqrt(safeAspect);",
+    "replacement": "const rawScale = 0.5;"
+  },
+  {
+    "file": "src/client/3d/camera_kinematic_helpers.ts",
+    "desc": "AST: Corrupt target-relative scaling back to origin-relative scaling",
+    "target": "const posX = tx + (baseConfig.position[0] - tx) * scale + lookDirX * shift;",
+    "replacement": "const posX = baseConfig.position[0] * scale;"
+  },
+  {
+    "file": "src/client/3d/camera_kinematic_helpers.ts",
+    "desc": "AST: Zero out portrait target shift causing lateral flank NDC clipping",
+    "target": "const shift = 2.5 * Math.min(1.0, portraitFactor);",
+    "replacement": "const shift = 0.0;"
+  },
+  {
+    "file": "src/client/3d/adaptive_cinematic_camera.tsx",
+    "desc": "AST: Sever manualMode wiring in resolveCameraMode",
+    "target": "manualMode: isManualOverviewResetRef.current ? 'overview' : null,",
+    "replacement": "manualMode: null,"
+  },
+  {
+    "file": "src/client/3d/adaptive_cinematic_camera.tsx",
+    "desc": "AST: Corrupt 12s Dead Man's Switch timeout from 12000 to 100",
+    "target": "performance.now() - manualOverviewTimestampRef.current > 12000",
+    "replacement": "performance.now() - manualOverviewTimestampRef.current > 100"
+  },
+  {
+    "file": "src/client/3d/adaptive_cinematic_camera.tsx",
+    "desc": "AST: Sever manual overview reset deactivation in watchdog",
+    "target": "isManualOverviewResetRef.current = false;",
+    "replacement": "/* isManualOverviewResetRef.current = false; */"
+  }
+]

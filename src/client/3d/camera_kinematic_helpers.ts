@@ -91,3 +91,52 @@ export function calculateResponsiveChaseFov(aspect?: number, baseFov = 38): numb
   const calculatedFov = Math.round((neededHalfRad * 360) / Math.PI);
   return Math.min(48, Math.max(baseFov, calculatedFov));
 }
+
+export function calculateResponsiveOverviewFov(aspect?: number, baseFov = 24): number {
+  if (typeof aspect !== 'number' || !Number.isFinite(aspect) || aspect >= 1.0) {
+    return baseFov;
+  }
+  const safeAspect = Math.max(0.42, aspect);
+  const targetHalfRad = (baseFov * Math.PI) / 360;
+  const neededHalfRad = Math.atan((Math.tan(targetHalfRad) * 1.05) / safeAspect);
+  const calculatedFov = Math.round((neededHalfRad * 360) / Math.PI);
+  return Math.min(50, Math.max(baseFov, calculatedFov));
+}
+
+export function calculateResponsiveOverviewCameraState(
+  aspect: number | undefined,
+  baseConfig: { readonly position: readonly [number, number, number]; readonly target: readonly [number, number, number]; readonly fov: number; readonly speed: number }
+): { position: [number, number, number]; target: [number, number, number]; fov: number; speed: number } {
+  const fov = calculateResponsiveOverviewFov(aspect, baseConfig.fov);
+  const tx = baseConfig.target[0];
+  const ty = baseConfig.target[1];
+  const tz = baseConfig.target[2];
+  if (typeof aspect !== 'number' || !Number.isFinite(aspect) || aspect >= 1.0) {
+    return {
+      position: [baseConfig.position[0], baseConfig.position[1], baseConfig.position[2]],
+      target: [tx, ty, tz],
+      fov,
+      speed: baseConfig.speed,
+    };
+  }
+  const safeAspect = Math.max(0.42, aspect);
+  const rawScale = 1.0 / Math.sqrt(safeAspect);
+  const scale = Math.min(1.35, Math.max(1.0, rawScale));
+  const portraitFactor = Math.max(0, (1.0 - safeAspect) / (1.0 - 0.48));
+  const shift = 2.5 * Math.min(1.0, portraitFactor);
+
+  const targetX = tx + shift;
+  const targetY = ty;
+  const targetZ = tz + shift;
+
+  const posX = targetX + (baseConfig.position[0] - tx) * scale;
+  const posY = targetY + (baseConfig.position[1] - ty) * scale;
+  const posZ = targetZ + (baseConfig.position[2] - tz) * scale;
+
+  return {
+    position: [posX, posY, posZ],
+    target: [targetX, targetY, targetZ],
+    fov,
+    speed: baseConfig.speed,
+  };
+}

@@ -1,0 +1,50 @@
+[
+  {
+    "file": "src/client/ui/modals/transit_wheel_visuals.ts",
+    "desc": "AST: Corrupt proportional weight angle calculation back to uniform 72 deg",
+    "target": "const rawSpan = Number(((safeWeight / totalWeight) * 360).toFixed(4));",
+    "replacement": "const rawSpan = 72;"
+  },
+  {
+    "file": "src/client/ui/modals/transit_wheel_visuals.ts",
+    "desc": "AST: Disable narrow sector detection causing border collision",
+    "target": "const isNarrow = spanDeg < 45;",
+    "replacement": "const isNarrow = false;"
+  },
+  {
+    "file": "src/client/ui/modals/transit_wheel_visuals.ts",
+    "desc": "AST: Invert degenerate underflow guard causing ghost text collision",
+    "target": "const isCollapsed = spanDeg <= 0.01;",
+    "replacement": "const isCollapsed = false;"
+  },
+  {
+    "file": "src/client/ui/modals/transit_wheel_visuals.ts",
+    "desc": "AST: Corrupt target landing rotation formula from (360 - midDeg) to + midDeg",
+    "target": "return WHEEL_FULL_SPINS_DEG + (360 - midDeg);",
+    "replacement": "return WHEEL_FULL_SPINS_DEG + midDeg;"
+  },
+  {
+    "file": "src/client/ui/modals/transit_wheel_visuals.ts",
+    "desc": "AST: Invert narrow sector typography font size causing text collision",
+    "target": "fontSize: isNarrow ? 10 : 12,",
+    "replacement": "fontSize: isNarrow ? 12 : 10,"
+  },
+  {
+    "file": "src/client/ui/modals/transit_wheel_modal.tsx",
+    "desc": "AST: Sever getProportionalWheelTargetDeg call-site wiring in spin handler",
+    "target": "setRotation(getProportionalWheelTargetDeg(outcomeIndex));",
+    "replacement": "setRotation(1800);"
+  },
+  {
+    "file": "src/client/ui/modals/transit_wheel_modal.tsx",
+    "desc": "AST: Corrupt needle penetration positioning to -top-10",
+    "target": "-top-1.5 left-1/2 -translate-x-1/2",
+    "replacement": "-top-10"
+  },
+  {
+    "file": "src/client/ui/modals/transit_wheel_modal.tsx",
+    "desc": "AST: Sever Safari transparent bounding anchor",
+    "target": "<circle cx=\"100\" cy=\"100\" r=\"95\" fill=\"transparent\" stroke=\"transparent\" strokeWidth=\"1\" pointerEvents=\"none\" />",
+    "replacement": "{/* anchor removed */}"
+  }
+]

@@ -1,9 +1,13 @@
 // [IMP-248] Tactile 2D SVG/CSS Modal: Transit Wheel / Flight Navigator
 import React, { useState, useEffect } from 'react';
 import type { ModalPayloadMap } from '../../store/game_store_types';
-import { TRANSIT_WHEEL_CONFIGS, TransitWheelOutcome, getWheelTargetDeg } from '../../../domain/index.js';
+import { TRANSIT_WHEEL_CONFIGS, TransitWheelOutcome } from '../../../domain/index.js';
 import { audio, SoundEffect } from '../../audio/index.js';
 import { useGameStore } from '../../store/game_store';
+import {
+  getTransitWheelSectorAngles,
+  getProportionalWheelTargetDeg,
+} from './transit_wheel_visuals.js';
 
 export interface TransitWheelModalProps {
   readonly cellIndex: number;
@@ -35,6 +39,7 @@ export const TransitWheelModal: React.FC<TransitWheelModalProps> = ({
   const [hasFinished, setHasFinished] = useState<boolean>(false);
 
   const outcome = payload?.outcome;
+  const sectors = getTransitWheelSectorAngles(TRANSIT_WHEEL_CONFIGS);
 
   const handleStartSpin = () => {
     if (isSpinning || hasFinished) return;
@@ -56,7 +61,7 @@ export const TransitWheelModal: React.FC<TransitWheelModalProps> = ({
     if (outcome && !hasFinished) {
       setIsSpinning(true);
       const outcomeIndex = TRANSIT_WHEEL_CONFIGS.findIndex((c) => c.outcome === outcome);
-      setRotation(getWheelTargetDeg(outcomeIndex, TRANSIT_WHEEL_CONFIGS.length));
+      setRotation(getProportionalWheelTargetDeg(outcomeIndex));
 
       const timer = setTimeout(() => {
         setIsSpinning(false);
@@ -99,7 +104,7 @@ export const TransitWheelModal: React.FC<TransitWheelModalProps> = ({
       {/* Đĩa xoay cơ học 2D SVG với kim chỉ hướng */}
       <div className="relative w-64 h-64 my-4 flex items-center justify-center">
         {/* Kim chỉ hướng */}
-        <div className="absolute -top-3 z-20 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[18px] border-t-amber-400 drop-shadow" />
+        <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 z-20 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[18px] border-t-amber-400 drop-shadow" />
 
         <svg
           role="img"
@@ -110,50 +115,39 @@ export const TransitWheelModal: React.FC<TransitWheelModalProps> = ({
           {/* Nhóm nan quạt xoay động */}
           <g
             className="transition-transform duration-[3500ms] ease-[cubic-bezier(0.15,0.9,0.2,1)]"
-            style={{ transform: `rotate(${rotation}deg)`, transformOrigin: '100px 100px', transformBox: 'view-box' }}
+            style={{ transform: `rotate(${rotation}deg)`, transformOrigin: 'center' }}
           >
-            {TRANSIT_WHEEL_CONFIGS.map((cfg, idx) => {
-              const step = (2 * Math.PI) / TRANSIT_WHEEL_CONFIGS.length;
-              const startAngle = idx * step;
-              const endAngle = (idx + 1) * step;
-              const x1 = 100 + 95 * Math.sin(startAngle);
-              const y1 = 100 - 95 * Math.cos(startAngle);
-              const x2 = 100 + 95 * Math.sin(endAngle);
-              const y2 = 100 - 95 * Math.cos(endAngle);
-              const pathData = `M 100 100 L ${x1} ${y1} A 95 95 0 0 1 ${x2} ${y2} Z`;
-              const midDeg = (idx + 0.5) * (360 / TRANSIT_WHEEL_CONFIGS.length);
-              const isFlipped = midDeg > 90 && midDeg < 270;
-              const iconY = isFlipped ? 64 : 36;
-              const textY = isFlipped ? 36 : 64;
+            {/* Transparent bounding anchor to guarantee rock-solid center in WebKit/Safari */}
+            <circle cx="100" cy="100" r="95" fill="transparent" stroke="transparent" strokeWidth="1" pointerEvents="none" />
+            {sectors.map((sector) => {
+              if (sector.isCollapsed || !sector.pathData) return null;
               return (
-                <g key={cfg.outcome}>
-                  <path d={pathData} fill={cfg.color} stroke="#0f172a" strokeWidth="2" />
-                  <g transform={`rotate(${midDeg} 100 100)`}>
+                <g key={sector.outcome}>
+                  <path d={sector.pathData} fill={sector.color} stroke="#0f172a" strokeWidth="2" />
+                  <g transform={`rotate(${sector.midDeg} 100 100)`}>
                     <text
                       x="100"
-                      y={iconY}
+                      y={sector.iconY}
                       textAnchor="middle"
                       dominantBaseline="central"
-                      fontSize="22"
-                      transform={isFlipped ? `rotate(180 100 ${iconY})` : undefined}
+                      fontSize={sector.iconSize}
                       className="select-none pointer-events-none drop-shadow"
                     >
-                      {cfg.icon}
+                      {sector.icon}
                     </text>
                     <text
                       x="100"
-                      y={textY}
+                      y={sector.textY}
                       textAnchor="middle"
                       dominantBaseline="central"
-                      fontSize="12"
+                      fontSize={sector.fontSize}
                       fontWeight="bold"
                       fill="#ffffff"
                       stroke="#0f172a"
                       strokeWidth="0.5"
-                      transform={isFlipped ? `rotate(180 100 ${textY})` : undefined}
                       className="select-none pointer-events-none font-mono tracking-tight"
                     >
-                      {cfg.weight}%
+                      {sector.weight}%
                     </text>
                   </g>
                 </g>

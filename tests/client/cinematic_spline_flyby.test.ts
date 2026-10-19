@@ -18,8 +18,8 @@
 //   TC-FLY.03: Given màn hình Mobile Portrait aspect 0.48, When gọi calculateSplineArcCameraState({ startCell: 30, targetCell: 10, progress: 0.5, aspect: 0.48 }), Then mở rộng FOV linh hoạt >= 38 độ chống cắt xén.
 //   TC-FLY.04: Given thời điểm biên t = 0 hoặc t = 1, When gọi calculateSplineArcCameraState, Then camera khớp chuẩn với vị trí xuất phát (t=0) hoặc đích đến (t=1).
 //   TC-FLY.05: Given vòng 1 không có nhà, When gọi resolveDynamicGamePhase(1, 0), Then trả về Hồi 1 với cao độ Overview Y = 25.3m và FOV 24 độ.
-//   TC-FLY.06: Given vòng 5 có 4 nhà, When gọi resolveDynamicGamePhase(5, 4), Then trả về Hồi 2 với góc nghiêng Tilt-Shift diorama Y = 22.0m và FOV 26 độ.
-//   TC-FLY.07: Given vòng 10 có 12 nhà, When gọi resolveDynamicGamePhase(10, 12), Then trả về Hồi 3 với góc cận kịch tính Y = 18.5m và FOV 28 độ.
+//   TC-FLY.06: Given vòng 5 có 4 nhà, When gọi resolveDynamicGamePhase(5, 4), Then trả về Hồi 2 với cao độ Overview thống nhất Y = 25.3m và FOV 24 độ.
+//   TC-FLY.07: Given vòng 10 có 12 nhà, When gọi resolveDynamicGamePhase(10, 12), Then trả về Hồi 3 với cao độ Overview thống nhất Y = 25.3m và FOV 24 độ.
 //   TC-FLY.08: Given ván đấu đã đạt Hồi 3, When vòng 11 người chơi giải chấp hết nhà (previousPhase: 3, roundNumber: 11, totalBuildings: 0), Then resolveDynamicGamePhase bảo toàn Hồi 3.
 //   TC-FLY.09: Given người chơi xây thần tốc 6 nhà ở vòng 2, When gọi resolveDynamicGamePhase(2, 6), Then kích hoạt Monotonic Hybrid Trigger nhảy cóc thẳng lên Hồi 2.
 //   TC-FLY.10: Given kiểm tra thời lượng bay tù, When gọi resolveJailFlightDuration, Then trả về chính xác 670ms cho người chơi (isBot: false) và 570ms cho Bot (isBot: true).
@@ -105,22 +105,22 @@ describe('[UC-FLY] Cinematic Flight & Macro Pacing Contract Suite', () => {
     expect(config.speed).toBe(3.2);
   });
 
-  it('[TC-FLY.06/A3][UC-FLY] Vong 5 co 4 nha tra ve Hoi 2 voi goc nghieng Tilt-Shift Y = 22.0m va FOV 26 do', () => {
+  it('[TC-FLY.06/A3][UC-FLY] Vong 5 co 4 nha tra ve Hoi 2 voi cao do Overview thong nhat Y = 25.3m va FOV 24 do', () => {
     const phase = resolveDynamicGamePhase(5, 4);
     const config = resolveOverviewConfigByPhase(phase, CAMERA_CONFIG.overview);
 
     expect(phase).toBe(2);
-    expect(config.position[1]).toBe(22.0);
-    expect(config.fov).toBe(26);
+    expect(config.position[1]).toBe(25.3);
+    expect(config.fov).toBe(24);
   });
 
-  it('[TC-FLY.07/MSS][UC-FLY] Vong 10 co 12 nha tra ve Hoi 3 voi goc can kich tinh Y = 18.5m va FOV 28 do', () => {
+  it('[TC-FLY.07/MSS][UC-FLY] Vong 10 co 12 nha tra ve Hoi 3 voi cao do Overview thong nhat Y = 25.3m va FOV 24 do', () => {
     const phase = resolveDynamicGamePhase(10, 12);
     const config = resolveOverviewConfigByPhase(phase, CAMERA_CONFIG.overview);
 
     expect(phase).toBe(3);
-    expect(config.position[1]).toBe(18.5);
-    expect(config.fov).toBe(28);
+    expect(config.position[1]).toBe(25.3);
+    expect(config.fov).toBe(24);
   });
 
   it('[TC-FLY.08/A4][UC-FLY] Van dau da dat Hoi 3 bao toan bat bien don dieu khi giai chap het nha o vong 11', () => {
@@ -178,17 +178,17 @@ describe('[UC-FLY] Cinematic Flight & Macro Pacing Contract Suite', () => {
     expect(stateOver.position[0]).toBeCloseTo(stateEnd.position[0], 2);
   });
 
-  it('[TC-FLY.14/A10][UC-FLY] calculateTargetCameraState overview voi gamePhase = 2 tra ve dung goc nhin Hoi 2', () => {
+  it('[TC-FLY.14/A10][UC-FLY] calculateTargetCameraState overview voi gamePhase = 2 tra ve dung goc nhin Overview thong nhat', () => {
     const state = calculateTargetCameraState('overview', undefined, undefined, { gamePhase: 2 });
-    expect(state.position[1]).toBe(22.0);
-    expect(state.fov).toBe(26);
-    expect(state.speed).toBe(3.8);
+    expect(state.position[1]).toBe(25.3);
+    expect(state.fov).toBe(24);
+    expect(state.speed).toBe(3.2);
   });
 
-  it('[TC-FLY.15/A11][UC-FLY] calculateTargetCameraState overview voi gamePhase = 3 tra ve dung goc nhin Hoi 3', () => {
+  it('[TC-FLY.15/A11][UC-FLY] calculateTargetCameraState overview voi gamePhase = 3 tra ve dung goc nhin Overview thong nhat', () => {
     const state = calculateTargetCameraState('overview', undefined, undefined, { gamePhase: 3 });
-    expect(state.position[1]).toBe(18.5);
-    expect(state.fov).toBe(28);
-    expect(state.speed).toBe(4.2);
+    expect(state.position[1]).toBe(25.3);
+    expect(state.fov).toBe(24);
+    expect(state.speed).toBe(3.2);
   });
 });
