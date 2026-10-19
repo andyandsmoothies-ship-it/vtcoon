@@ -104,6 +104,8 @@ export interface GameState {
   setSpotlightedCells: (cells: readonly number[] | null) => void;
   readonly isPlayerHudVisible: boolean;
   togglePlayerHudVisibility: () => void;
+  readonly isPlayerHudCompact?: boolean;
+  togglePlayerHudCompact?: () => void;
 
   // UI-04 Business Modals Actions
   openModal: <T extends keyof ModalPayloadMap>(type: T, payload: ModalPayloadMap[T]) => void;
@@ -158,6 +160,7 @@ export type InitialGameState = Pick<
   | 'cameraFocusCell'
   | 'hasUserCustomCamera'
   | 'isPlayerHudVisible'
+  | 'isPlayerHudCompact'
 >;
 
 export const INITIAL_GAME_STATE: InitialGameState = {
@@ -184,6 +187,7 @@ export const INITIAL_GAME_STATE: InitialGameState = {
   isHeatmapActive: false,
   spotlightedCellIndices: null,
   isPlayerHudVisible: true,
+  isPlayerHudCompact: false,
   activeModal: null,
   modalPayload: null,
   lastEventCard: null,

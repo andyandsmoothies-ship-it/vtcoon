@@ -1,0 +1,74 @@
+[
+  {
+    "file": "src/client/ui/player_hud_list.tsx",
+    "desc": "AST: Invert compact container width condition",
+    "target": "isPlayerHudCompact ? 'w-14 sm:w-16' : 'w-44 sm:w-48 md:w-64 max-w-[calc(100vw-6rem)]'",
+    "replacement": "!isPlayerHudCompact ? 'w-14 sm:w-16' : 'w-44 sm:w-48 md:w-64 max-w-[calc(100vw-6rem)]'"
+  },
+  {
+    "file": "src/client/ui/player_hud_list.tsx",
+    "desc": "AST: Corrupt compact width token from w-14 to w-96",
+    "target": "'w-14 sm:w-16'",
+    "replacement": "'w-96 sm:w-96'"
+  },
+  {
+    "file": "src/client/ui/player_hud_list.tsx",
+    "desc": "AST: Corrupt collapse button testid",
+    "target": "data-testid=\"player-hud-collapse-btn\"",
+    "replacement": "data-testid=\"corrupted-collapse-btn\""
+  },
+  {
+    "file": "src/client/ui/player_hud_list.tsx",
+    "desc": "AST: Invert east flank collapse chevron mapping",
+    "target": "isPlayerHudCompact ? '◀' : '▶'",
+    "replacement": "isPlayerHudCompact ? '▶' : '◀'"
+  },
+  {
+    "file": "src/client/ui/player_hud_list.tsx",
+    "desc": "AST: Violate Pillar V touch target floor by dropping to 20px",
+    "target": "min-h-[44px] min-w-[44px]",
+    "replacement": "min-h-[20px] min-w-[20px]"
+  },
+  {
+    "file": "src/client/ui/player_hud_list.tsx",
+    "desc": "AST: Strip pointer-events-auto from collapse button causing dead-clicks",
+    "target": "min-h-[44px] min-w-[44px] pointer-events-auto",
+    "replacement": "min-h-[44px] min-w-[44px] pointer-events-none"
+  },
+  {
+    "file": "src/client/ui/player_hud_mini_chips.tsx",
+    "desc": "AST: Invert formatCompactBalance million threshold",
+    "target": "if (abs >= 1_000_000) return `${sign}${(abs / 1_000_000).toFixed(1)}M`;",
+    "replacement": "if (abs < 1_000_000) return `${sign}${(abs / 1_000_000).toFixed(1)}M`;"
+  },
+  {
+    "file": "src/client/ui/player_hud_mini_chips.tsx",
+    "desc": "AST: Corrupt formatCompactBalance suffix from M to B",
+    "target": "toFixed(1)}M",
+    "replacement": "toFixed(1)}B"
+  },
+  {
+    "file": "src/client/ui/player_hud_mini_chips.tsx",
+    "desc": "AST: Corrupt bankrupt skull indicator to dollar",
+    "target": "isBankrupt ? '💀' : formattedCash",
+    "replacement": "isBankrupt ? '💰' : formattedCash"
+  },
+  {
+    "file": "src/client/ui/player_hud_mini_chips.tsx",
+    "desc": "AST: Strip bankrupt tombstone opacity styling",
+    "target": "opacity-40 grayscale bg-slate-900/60 border border-slate-800",
+    "replacement": "opacity-100 bg-slate-900/80 border border-slate-700"
+  },
+  {
+    "file": "src/client/ui/player_hud_mini_chips.tsx",
+    "desc": "AST: Violate touch target floor on mini chips",
+    "target": "min-h-[44px] min-w-[44px]",
+    "replacement": "min-h-[16px] min-w-[16px]"
+  },
+  {
+    "file": "src/client/store/game_store.ts",
+    "desc": "AST: Neutralize togglePlayerHudCompact state inversion",
+    "target": "togglePlayerHudCompact: () => set((state) => ({ isPlayerHudCompact: !state.isPlayerHudCompact }))",
+    "replacement": "togglePlayerHudCompact: () => set((state) => ({ isPlayerHudCompact: state.isPlayerHudCompact }))"
+  }
+]

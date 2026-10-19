@@ -81,6 +81,8 @@ export const useGameStore = create<GameState>((set, get) => ({
   setHeatmapActive: (active) => set({ isHeatmapActive: active }),
   setSpotlightedCells: (cells) => set({ spotlightedCellIndices: cells }),
   togglePlayerHudVisibility: () => set((state) => ({ isPlayerHudVisible: !state.isPlayerHudVisible })),
+  isPlayerHudCompact: false,
+  togglePlayerHudCompact: () => set((state) => ({ isPlayerHudCompact: !state.isPlayerHudCompact })),
 
   openModal: (type, payload) => set({ activeModal: type, modalPayload: payload }),
   closeModal: () =>

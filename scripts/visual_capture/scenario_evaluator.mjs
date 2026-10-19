@@ -16,6 +16,7 @@ export const DEFAULT_SCENARIOS = [
   'notifications_financial',
   'notifications_showcase',
   'pawn_direct_flight_apex',
+  'player_hud_compact',
   'transit_wheel',
 ];
 
