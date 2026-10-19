@@ -18,12 +18,12 @@ Trong các lượt chơi với Bot (`BOT AI`), người chơi ghi nhận hiện 
    - Hai khoảng thời gian tĩnh vô nghĩa làm chậm trận đấu: thời gian chờ xúc xắc đứng yên sau khi gieo (`DICE_SETTLE_DWELL_MS = 600ms`) và thời gian neo quân cờ sau khi chạm ô đích (`PAWN_LANDING_SETTLE_MS = 600ms`). Tổng thời gian chết lên tới 1200ms mỗi lượt chơi trước khi bảng hành động hoặc hộp thoại mua bán xuất hiện.
 3. **Cơ chế kỹ thuật cốt lõi được triển khai trong IMP-444**:
    - **Tối ưu hóa chuyển động 3 tầng (3-Tier Kinematics)**:
-     - Nhịp nhảy người chơi rút gọn còn **200ms/bước** (`HOP_DURATION = 0.14s`, `LANDING_DURATION = 0.06s`), giữ nguyên hiệu ứng biến dạng squish-stretch sống động nhưng lướt đi dứt khoát.
-     - Nhịp nhảy bot được tinh chỉnh tốc độ cao **150ms/bước** (`BOT_HOP_DURATION = 0.10s`, `BOT_LANDING_DURATION = 0.05s`, `BOT_STEP_DURATION = 0.15s`), giúp lượt bot diễn ra nhanh gấp 1.73 lần mà vẫn giữ được tính tự nhiên của sa bàn vật lý.
+     - Nhịp nhảy người chơi được hiệu chỉnh ở mức cân bằng **260ms/bước** (`HOP_DURATION = 0.19s`, `LANDING_DURATION = 0.07s`), giữ nguyên hiệu ứng biến dạng squish-stretch sống động và cảm giác đầm tay của sa bàn gỗ, nhanh hơn 40ms so với bản cũ (300ms) nhưng không bị vội vã.
+     - Nhịp nhảy bot được tinh chỉnh **220ms/bước** (`BOT_HOP_DURATION = 0.16s`, `BOT_LANDING_DURATION = 0.06s`, `BOT_STEP_DURATION = 0.22s`), nhanh hơn bản cũ 40ms (-15.4%) và chậm hơn 70ms so với mức 150ms quá nhanh trước đó, tạo cảm giác di chuyển tự nhiên và rõ ràng từng ô.
    - **Cắt giảm khoảng lặng vô nghĩa (Dead Air Settle Cut)**:
      - Giảm cả `DICE_SETTLE_DWELL_MS` và `PAWN_LANDING_SETTLE_MS` từ 600ms xuống sàn an toàn **250ms**, giải phóng ngay lập tức 700ms thời gian chờ chết cho mỗi lượt xúc xắc.
    - **Đồng bộ SSOT Pacing Context & Event Bus**:
-     - Cập nhật chuẩn mực thời gian toàn cục tại `src/client/events/pacing_context.ts` (`DEFAULT_HUMAN_STEP_MS = 200`, `DEFAULT_BOT_STEP_MS = 150`, `DEFAULT_ROLL_LEAD_MS = 1350ms`), bảo đảm các subscriber âm thanh (`audio_event_subscriber.ts`) và huy hiệu (`badge_event_subscriber.ts`) phát nổ chính xác tuyệt đối ngay khi quân cờ tiếp đất.
+     - Cập nhật chuẩn mực thời gian toàn cục tại `src/client/events/pacing_context.ts` (`DEFAULT_HUMAN_STEP_MS = 260`, `DEFAULT_BOT_STEP_MS = 220`, `DEFAULT_ROLL_LEAD_MS = 1350ms`), bảo đảm các subscriber âm thanh (`audio_event_subscriber.ts`) và huy hiệu (`badge_event_subscriber.ts`) phát nổ chính xác tuyệt đối ngay khi quân cờ tiếp đất.
    - **Phòng thủ rò rỉ trạng thái `isRolling` ([FLUSH-ON-UNMOUNT])**:
      - Bổ sung cleanup hook trong `SingleDie` (`dice_tray.tsx`) tự động hủy timer khi component bị unmount, ngăn chặn tình trạng kẹt cờ `isRolling: true` làm tê liệt lượt chơi.
 
@@ -41,7 +41,7 @@ Trong các lượt chơi với Bot (`BOT AI`), người chơi ghi nhận hiện 
 | **Trạm 3.1: Spec & Scope Gate** | `spec-reviewer`<br>[`.agents/audit/SPEC_REVIEW_IMP-444.md`](file:///C:/Users/HP/Documents/GitHub/vtcoon/.agents/audit/SPEC_REVIEW_IMP-444.md) | 100% Plan fidelity, zero scope creep, kiểm soát ranh giới phân hệ `client-3d` | **APPROVED** 📋 |
 | **Trạm 3.2: Architecture & Anti-Slop** | `code-reviewer`<br>[`.agents/audit/CODE_REVIEW_IMP-444.md`](file:///C:/Users/HP/Documents/GitHub/vtcoon/.agents/audit/CODE_REVIEW_IMP-444.md) | 0 Slop red flags, Zero TIDD, an toàn bộ nhớ/timer, assertion density 2.13 | **APPROVED** 🛡️ |
 | **Trạm 3.2: 3D Visual & Spatial Review** | `game-3d-visual-critic`<br>[`.agents/audit/3D_VISUAL_REVIEW_IMP-444.md`](file:///C:/Users/HP/Documents/GitHub/vtcoon/.agents/audit/3D_VISUAL_REVIEW_IMP-444.md) | Góc nhìn camera frustum, khoảng cách an toàn (clearance), không tràn viền màn hình 360px | **8.7 / 10 (3D AAA Verified) 🎨** |
-| **Trạm 4: Chaos & Mutation Sentinel** | `chaos-sentinel`<br>[`scripts/check_evidence.mjs`](file:///C:/Users/HP/Documents/GitHub/vtcoon/scripts/check_evidence.mjs) | 18/18 mutants mục tiêu bị tiêu diệt (kill rate: 100%, 0 survived). | **APPROVED 💥** |
+| **Trạm 4: Chaos & Mutation Sentinel** | `chaos-sentinel`<br>[`scripts/check_evidence.mjs`](file:///C:/Users/HP/Documents/GitHub/vtcoon/scripts/check_evidence.mjs) | 22/22 mutants mục tiêu bị tiêu diệt (kill rate: 100%, 0 survived). | **APPROVED 💥** |
 
 ---
 
@@ -178,7 +178,7 @@ Trong các lượt chơi với Bot (`BOT AI`), người chơi ghi nhận hiện 
    - **Pillar 4 (Title Deeds & Collectible Modals):** PASS. The rendered Title Deed modal for Đồng Nai is exemplary:
    - **Pillar 5 (Juicy Tactile HUD & Buttons):** PASS. Glassmorphic top match capsule (Round 1/40, Time 00:56), rounded player status pill, and bottom action dock with glossy red "Đổ Xúc Xắc" CTA pill and tactile secondary buttons.
    - **K1: Snappy 250ms Settle Dwell Floor**: Retain `DICE_SETTLE_DWELL_MS = 250` and `PAWN_LANDING_SETTLE_MS = 250`. Do not revert to the sluggish 600ms baseline.
-   - **K2: Exact 200ms/150ms Kinematic Ratio**: Preserve the $(0.14\text{s} + 0.06\text{s} = 0.20\text{s})$ human step and $(0.10\text{s} + 0.05\text{s} = 0.15\text{s})$ bot step configuration which maintains a 50ms differential between human and bot movement speed.
+   - **K2: Balanced 260ms/220ms Kinematic Ratio**: Preserve the $(0.19\text{s} + 0.07\text{s} = 0.26\text{s})$ human step and $(0.16\text{s} + 0.06\text{s} = 0.22\text{s})$ bot step configuration which maintains a 40ms differential between human and bot movement speed while delivering tactile tabletop presence.
    - **K3: Mobile Frustum FOV Expansion**: Maintain the dynamic FOV calculation ($45.8^\circ$ on portrait viewports) to ensure landing tiles and pawns remain comfortably centered without edge clipping.
    - **K4: Title Deed Modal Poka-Yoke Liquidity Banner**: Preserve the live cashflow preview ("Ví: 15.000 $\to$ Còn lại: 14.000") and collapsible fee drawer on mobile viewports.
    - **P1 (Low - Polish)**: On narrow mobile portrait screens ($W \le 360\text{px}$), slightly increase modal backdrop blur (`backdrop-blur-md`) to further suppress background tile text contrast behind the Title Deed modal.
@@ -188,7 +188,7 @@ Trong các lượt chơi với Bot (`BOT AI`), người chơi ghi nhận hiện 
 
 ### Trạm 4: Cơ Chế Biên & Tiêu Diệt Biến Dị (`chaos-sentinel`)
 - **Phán quyết**: **APPROVED 💥**
-- **Hiệu quả kiểm soát**: 18/18 mutants mục tiêu bị tiêu diệt (kill rate: 100%, 0 survived).
+- **Hiệu quả kiểm soát**: 22/22 mutants mục tiêu bị tiêu diệt (14 source-level mutants, kill rate: 100%, 0 survived).
 - **Xác nhận**: Đã vượt qua kiểm toán cơ học `node scripts/check_evidence.mjs` với 0 defects.
 
 ---

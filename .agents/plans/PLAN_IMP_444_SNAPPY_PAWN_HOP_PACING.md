@@ -13,9 +13,9 @@
   3. `src/client/3d/dice_tray.tsx`: Hardcoded 600ms settle delay before firing `onRest()`.
   4. `src/client/3d/pawn_animator.tsx`: Hardcoded 600ms settle delay before firing `onComplete()`.
 - **Engineering Solution & Adversarial Hardening**:
-  - Accelerate pawn flight physics: Human hop duration $0.14\text{s} + 0.06\text{s} = 0.20\text{s}$ (200ms); Bot hop duration $0.10\text{s} + 0.05\text{s} = 0.15\text{s}$ (150ms).
+  - Calibrate pawn flight physics: Human hop duration $0.19\text{s} + 0.07\text{s} = 0.26\text{s}$ (260ms); Bot hop duration $0.16\text{s} + 0.06\text{s} = 0.22\text{s}$ (220ms).
   - Eliminate dead air: Cut `DICE_SETTLE_DWELL_MS` from 600ms to 250ms; cut `PAWN_LANDING_SETTLE_MS` from 600ms to 250ms (saving 700ms dead air per turn).
-  - Synchronize presentation timing ([ADV-02]): Align `DEFAULT_ROLL_LEAD_MS` to 1350ms ($1100\text{ms spring} + 250\text{ms dwell} = 1350\text{ms}$), with `DEFAULT_HUMAN_STEP_MS = 200` and `DEFAULT_BOT_STEP_MS = 150`.
+  - Synchronize presentation timing ([ADV-02]): Align `DEFAULT_ROLL_LEAD_MS` to 1350ms ($1100\text{ms spring} + 250\text{ms dwell} = 1350\text{ms}$), with `DEFAULT_HUMAN_STEP_MS = 260` and `DEFAULT_BOT_STEP_MS = 220`.
   - Self-Healing Unmount Flush ([ADV-03]): Equip `SingleDie` in `dice_tray.tsx` with `[FLUSH-ON-UNMOUNT]` pattern to prevent trapped `isRolling: true` state on unmount.
   - Living Contract Migration ([ADV-01]): Explicitly modernize `imp230`, `imp333`, `imp398`, `pawn_bot_movement_lifecycle`, `pawn_juice`, `pawn_jump_and_camera_smoothness`, and `imp201`.
 
@@ -44,9 +44,9 @@
 > `[HARNESS_MUTATION_AUTHORIZED]`: Retained SDLC pre-flight auditor upgrades from Sean Goedecke Rule in `scripts/audit_plan.mjs` and `scripts/plan_audit/rules_architecture.mjs`, and probe file `scripts/sentinel_probes/IMP-443.json`.
 
 ## 5. Core Contract Invariants
-- **INV-444.1 (Human Hop & Step Duration)**: In `pawn_path.ts`, `HOP_DURATION = 0.14` and `LANDING_DURATION = 0.06`, resulting in an exact 200ms step duration ($0.14 + 0.06 = 0.20$).
-- **INV-444.2 (Bot Hop & Step Duration)**: In `pawn_path.ts`, `BOT_HOP_DURATION = 0.10`, `BOT_LANDING_DURATION = 0.05`, and `BOT_STEP_DURATION = 0.15`, resulting in an exact 150ms step duration ($0.10 + 0.05 = 0.15$).
-- **INV-444.3 (Pacing Context SSOT Alignment)**: In `pacing_context.ts`, `DEFAULT_HUMAN_STEP_MS = 200`, `DEFAULT_BOT_STEP_MS = 150`, and `DEFAULT_ROLL_LEAD_MS = 1350`, keeping the event adapter in 1:1 mathematical synchronization with physical pawn hop and dice settle duration.
+- **INV-444.1 (Human Hop & Step Duration)**: In `pawn_path.ts`, `HOP_DURATION = 0.19` and `LANDING_DURATION = 0.07`, resulting in an exact 260ms step duration ($0.19 + 0.07 = 0.26$).
+- **INV-444.2 (Bot Hop & Step Duration)**: In `pawn_path.ts`, `BOT_HOP_DURATION = 0.16`, `BOT_LANDING_DURATION = 0.06`, and `BOT_STEP_DURATION = 0.22`, resulting in an exact 220ms step duration ($0.16 + 0.06 = 0.22$).
+- **INV-444.3 (Pacing Context SSOT Alignment)**: In `pacing_context.ts`, `DEFAULT_HUMAN_STEP_MS = 260`, `DEFAULT_BOT_STEP_MS = 220`, and `DEFAULT_ROLL_LEAD_MS = 1350`, keeping the event adapter in 1:1 mathematical synchronization with physical pawn hop and dice settle duration.
 - **INV-444.4 (Dead Air Dwell Elimination)**: `DICE_SETTLE_DWELL_MS = 250` in `dice_tray.tsx` and `PAWN_LANDING_SETTLE_MS = 250` in `pawn_animator.tsx`.
 - **INV-444.5 (Squash & Stretch Integrity)**: `calculateKineticSquashStretch` and `calculatePawnLandingImpact` maintain dynamic compression curves regardless of duration.
 - **INV-444.6 (Flush-on-Unmount Pattern)**: `SingleDie` in `dice_tray.tsx` invokes `onRest?.()` if unmounted while `isRolling` is true to prevent trapped state.
@@ -63,11 +63,11 @@ export const BOT_HOP_DURATION = 0.18 as const;
 export const BOT_LANDING_DURATION = 0.08 as const;
 export const BOT_STEP_DURATION = 0.26 as const;
 ====
-export const HOP_DURATION = 0.14 as const;
-export const LANDING_DURATION = 0.06 as const;
-export const BOT_HOP_DURATION = 0.10 as const;
-export const BOT_LANDING_DURATION = 0.05 as const;
-export const BOT_STEP_DURATION = 0.15 as const;
+export const HOP_DURATION = 0.19 as const;
+export const LANDING_DURATION = 0.07 as const;
+export const BOT_HOP_DURATION = 0.16 as const;
+export const BOT_LANDING_DURATION = 0.06 as const;
+export const BOT_STEP_DURATION = 0.22 as const;
 >>>>
 ```
 
@@ -79,8 +79,8 @@ export const DEFAULT_HUMAN_STEP_MS = 300;
 export const DEFAULT_BOT_STEP_MS = 260;
 export const DEFAULT_ROLL_LEAD_MS = 1200;
 ====
-export const DEFAULT_HUMAN_STEP_MS = 200;
-export const DEFAULT_BOT_STEP_MS = 150;
+export const DEFAULT_HUMAN_STEP_MS = 260;
+export const DEFAULT_BOT_STEP_MS = 220;
 export const DEFAULT_ROLL_LEAD_MS = 1350;
 >>>>
 ```

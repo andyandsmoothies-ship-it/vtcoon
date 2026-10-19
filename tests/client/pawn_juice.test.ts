@@ -180,9 +180,9 @@ describe('[TC-JUICE.6/MSS] Adaptive Cinematic Camera Math (Toán Lia & Zoom Came
   });
 
   it('TC-JUICE.6d: Hằng số thời lượng bước nhảy đạt chuẩn 60 FPS mượt mà (Golden Cinematic Pacing)', () => {
-    expect(HOP_DURATION).toBe(0.14);
-    expect(LANDING_DURATION).toBe(0.06);
-    expect(HOP_DURATION + LANDING_DURATION).toBeCloseTo(0.20, 4);
+    expect(HOP_DURATION).toBe(0.19);
+    expect(LANDING_DURATION).toBe(0.07);
+    expect(HOP_DURATION + LANDING_DURATION).toBeCloseTo(0.26, 4);
   });
 
   it('TC-JUICE.6e: resolveCameraTargetCell bám sát tiến độ waypoints khi quân cờ đang nhảy', () => {

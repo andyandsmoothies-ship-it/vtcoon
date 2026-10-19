@@ -17,16 +17,16 @@ describe('[TC-IMP42/MSS] Pawn Jump Speed & Smooth Camera Suite', () => {
 
   // === 1. Tốc độ nhảy tăng 1.5 lần (0.34s -> 0.23s) ===
 
-  it('[TC-IMP42.1/MSS] HOP_DURATION phải đạt 0.14s (Golden Cinematic Pacing)', () => {
-    expect(HOP_DURATION).toBe(0.14);
+  it('[TC-IMP42.1/MSS] HOP_DURATION phải đạt 0.19s (Golden Cinematic Pacing)', () => {
+    expect(HOP_DURATION).toBe(0.19);
   });
 
-  it('[TC-IMP42.2/MSS] LANDING_DURATION phải đạt 0.06s', () => {
-    expect(LANDING_DURATION).toBe(0.06);
+  it('[TC-IMP42.2/MSS] LANDING_DURATION phải đạt 0.07s', () => {
+    expect(LANDING_DURATION).toBe(0.07);
   });
 
-  it('[TC-IMP42.3/MSS] Tổng thời gian mỗi bước nhảy người chơi phải là 0.20s', () => {
-    expect(Number((HOP_DURATION + LANDING_DURATION).toFixed(2))).toBe(0.20);
+  it('[TC-IMP42.3/MSS] Tổng thời gian mỗi bước nhảy người chơi phải là 0.26s', () => {
+    expect(Number((HOP_DURATION + LANDING_DURATION).toFixed(2))).toBe(0.26);
   });
 
   // === 2. Bỏ hiệu ứng zoom vào xúc xắc gây giật lag ===

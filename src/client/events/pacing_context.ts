@@ -9,8 +9,8 @@ export interface PacingConfig {
   readonly rollLeadMs?: number;
 }
 
-export const DEFAULT_HUMAN_STEP_MS = 200;
-export const DEFAULT_BOT_STEP_MS = 150;
+export const DEFAULT_HUMAN_STEP_MS = 260;
+export const DEFAULT_BOT_STEP_MS = 220;
 export const DEFAULT_ROLL_LEAD_MS = 1350;
 
 export const DEFAULT_PACING_CONFIG: PacingConfig = {
