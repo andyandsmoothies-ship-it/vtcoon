@@ -15,18 +15,21 @@ export interface TileDrawerTheme {
   readonly background: string;
   readonly borderColor: string;
   readonly borderWidth: number;
+  readonly bilateral?: boolean;
 }
 
 export const LEGACY_TILE_THEME: TileDrawerTheme = {
   background: '#F3EEDF',
   borderColor: '#0F172A',
   borderWidth: 5,
+  bilateral: false,
 };
 
 export const INDOCHINE_TILE_THEME: TileDrawerTheme = {
   background: '#FDFBF7',
   borderColor: '#C5A059',
   borderWidth: 3.5,
+  bilateral: true,
 };
 
 export function hasTileArt(index: number): boolean {
@@ -42,7 +45,7 @@ export function getBannerTextColor(bannerColor: string): string {
   return luminance > 0.85 ? '#090D1A' : '#FFFFFF';
 }
 
-export function drawPropertyHeader(ctx: CanvasRenderingContext2D, meta: TileMetadata): void {
+export function drawPropertyHeader(ctx: CanvasRenderingContext2D, meta: TileMetadata, bilateral = true): void {
   ctx.fillStyle = meta.bannerColor;
   ctx.fillRect(0, 0, 256, 56);
 
@@ -56,17 +59,39 @@ export function drawPropertyHeader(ctx: CanvasRenderingContext2D, meta: TileMeta
   ctx.fillStyle = textColor;
   ctx.fillText(meta.title, 128, 28);
 
+  // [IMP-442] Inverted micro-title (180 deg) for opposite camera angle readability
+  if (bilateral && typeof ctx.rotate === 'function' && typeof ctx.translate === 'function') {
+    ctx.save();
+    ctx.translate(128, 10);
+    ctx.rotate(Math.PI);
+    ctx.font = 'bold 11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillStyle = textColor;
+    ctx.fillText(meta.title, 0, 0);
+    ctx.restore();
+  }
+
   ctx.fillStyle = '#020617';
   ctx.font = '900 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   ctx.fillText(meta.subtitle, 128, 74);
 }
 
-export function drawNonPropertyHeader(ctx: CanvasRenderingContext2D, meta: TileMetadata, index: number): void {
+export function drawNonPropertyHeader(ctx: CanvasRenderingContext2D, meta: TileMetadata, index: number, bilateral = true): void {
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillStyle = '#0F172A';
   ctx.font = '900 26px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   ctx.fillText(meta.title, 128, 30);
+
+  // [IMP-442] Inverted micro-title (180 deg) for opposite camera angle readability
+  if (bilateral && typeof ctx.rotate === 'function' && typeof ctx.translate === 'function') {
+    ctx.save();
+    ctx.translate(128, 10);
+    ctx.rotate(Math.PI);
+    ctx.font = 'bold 11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillStyle = '#64748B';
+    ctx.fillText(meta.title, 0, 0);
+    ctx.restore();
+  }
 
   ctx.fillStyle = '#475569';
   ctx.font = '900 16px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
@@ -94,10 +119,11 @@ export function drawTileHeader(
   ctx.fillStyle = theme.background;
   ctx.fillRect(0, 0, 256, 340);
 
+  const bilateral = theme.bilateral ?? false;
   if (isPropertyTile(index)) {
-    drawPropertyHeader(ctx, meta);
+    drawPropertyHeader(ctx, meta, bilateral);
   } else {
-    drawNonPropertyHeader(ctx, meta, index);
+    drawNonPropertyHeader(ctx, meta, index, bilateral);
   }
 }
 

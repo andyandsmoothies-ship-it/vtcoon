@@ -1,0 +1,50 @@
+[
+  {
+    "file": "src/client/3d/tile_texture_drawers.ts",
+    "desc": "AST: Corrupt bilateral translation coordinate in drawPropertyHeader",
+    "target": "ctx.translate(128, 10);",
+    "replacement": "ctx.translate(128, 99);"
+  },
+  {
+    "file": "src/client/3d/tile_texture_drawers.ts",
+    "desc": "AST: Disable 180-degree rotation in drawPropertyHeader",
+    "target": "ctx.rotate(Math.PI);",
+    "replacement": "ctx.rotate(0);"
+  },
+  {
+    "file": "src/client/3d/tile_texture_drawers.ts",
+    "desc": "AST: Corrupt inverted text payload in drawPropertyHeader",
+    "target": "ctx.fillText(meta.title, 0, 0);",
+    "replacement": "ctx.fillText('__CORRUPT__', 0, 0);"
+  },
+  {
+    "file": "src/client/3d/tile_texture_drawers.ts",
+    "desc": "AST: Suppress bilateral condition in drawPropertyHeader",
+    "target": "if (bilateral && typeof ctx.rotate === 'function'",
+    "replacement": "if (false && typeof ctx.rotate === 'function'"
+  },
+  {
+    "file": "src/client/3d/tile_texture_drawers.ts",
+    "desc": "AST: Corrupt bilateral translation in drawNonPropertyHeader",
+    "target": "ctx.translate(128, 10);",
+    "replacement": "ctx.translate(99, 10);"
+  },
+  {
+    "file": "src/client/3d/tile_texture_drawers.ts",
+    "desc": "AST: Corrupt inverted text color in drawNonPropertyHeader",
+    "target": "ctx.fillStyle = '#64748B';",
+    "replacement": "ctx.fillStyle = '#000000';"
+  },
+  {
+    "file": "src/client/3d/tile_texture_drawers.ts",
+    "desc": "AST: Suppress bilateral condition in drawNonPropertyHeader",
+    "target": "if (bilateral && typeof ctx.rotate === 'function'",
+    "replacement": "if (false && typeof ctx.rotate === 'function'"
+  },
+  {
+    "file": "src/client/3d/tile_texture_drawers.ts",
+    "desc": "AST: Corrupt balanced restore call in drawPropertyHeader",
+    "target": "ctx.restore();\n  }",
+    "replacement": "/* missing restore */\n  }"
+  }
+]
