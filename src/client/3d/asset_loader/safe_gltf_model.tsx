@@ -261,16 +261,19 @@ export function SafeGLTFModel({
   }
 
   const isHeadless = forceFallback ?? isHeadlessOrTestEnv();
-  const effectiveFallback = fallback ?? (
-    <DefaultModelFallback
-      scale={scale}
-      position={position}
-      rotation={rotation}
-      castShadow={castShadow}
-      receiveShadow={receiveShadow}
-      visible={visible}
-    />
-  );
+  const effectiveFallback =
+    fallback !== undefined
+      ? fallback
+      : (
+        <DefaultModelFallback
+          scale={scale}
+          position={position}
+          rotation={rotation}
+          castShadow={castShadow}
+          receiveShadow={receiveShadow}
+          visible={visible}
+        />
+      );
 
   if (isHeadless) {
     return <>{effectiveFallback}</>;

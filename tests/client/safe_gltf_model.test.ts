@@ -82,6 +82,32 @@ describe('[TC-IMP29.1/MSS] SafeGLTFModel Headless Guard & Zero-Crash Resilience'
     expect(markup).toContain('Luxury Pawn Fallback');
   });
 
+  it('SafeGLTFModel tôn trọng fallback={null}, không render DefaultModelFallback khi được chỉ định rõ ràng', () => {
+    const markup = renderToStaticMarkup(
+      React.createElement(SafeGLTFModel, {
+        url: '/models/board/indochine_paved_esplanade.glb',
+        fallback: null,
+      })
+    );
+
+    expect(markup).toBe('');
+    expect(markup).not.toContain('#94A3B8');
+  });
+
+  it('SafeGLTFModel với forceFallback=true và fallback={null} trả về markup rỗng', () => {
+    setHeadlessGuardOverride(false);
+    const markup = renderToStaticMarkup(
+      React.createElement(SafeGLTFModel, {
+        url: '/models/board/indochine_paved_esplanade.glb',
+        forceFallback: true,
+        fallback: null,
+      })
+    );
+
+    expect(markup).toBe('');
+    expect(markup).not.toContain('#94A3B8');
+  });
+
   it('forceFallback=true luôn kích hoạt chế độ dự phòng bất kể môi trường', () => {
     setHeadlessGuardOverride(false); // Simulate browser
     const markup = renderToStaticMarkup(
@@ -107,10 +133,25 @@ describe('[TC-IMP29.1/MSS] SafeGLTFModel Headless Guard & Zero-Crash Resilience'
     expect(markup).toContain('#F59E0B');
   });
 
-  it('SafeModelErrorBoundary bắt lỗi, chuyển state sang hasError và kích hoạt onError', () => {
+  it('SafeModelErrorBoundary khởi tạo và chuyển đổi trạng thái khi gặp lỗi', () => {
+    const boundaryProps = {
+      fallback: React.createElement('div', { id: 'error-fallback' }, 'Model Failed Fallback'),
+      startTime: performance.now() - 150,
+      url: '/models/missing.glb',
+      children: React.createElement('div', null, 'Content'),
+    };
+    const boundary = new SafeModelErrorBoundary(boundaryProps);
+    expect(boundary.state.hasError).toBe(false);
+
+    const testError = new Error('GLTF Network 404 Not Found');
+    const errorState = SafeModelErrorBoundary.getDerivedStateFromError(testError);
+    expect(errorState.hasError).toBe(true);
+    expect(errorState.error?.message).toBe('GLTF Network 404 Not Found');
+  });
+
+  it('SafeModelErrorBoundary gọi onError callback khi componentDidCatch', () => {
     const onErrorSpy = vi.fn();
     const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-
     const boundaryProps = {
       fallback: React.createElement('div', { id: 'error-fallback' }, 'Model Failed Fallback'),
       onError: onErrorSpy,
@@ -118,32 +159,31 @@ describe('[TC-IMP29.1/MSS] SafeGLTFModel Headless Guard & Zero-Crash Resilience'
       url: '/models/missing.glb',
       children: React.createElement('div', null, 'Content'),
     };
-
     const boundary = new SafeModelErrorBoundary(boundaryProps);
-
-    // Verify initial state
-    expect(boundary.state.hasError).toBe(false);
-
-    // Verify getDerivedStateFromError
     const testError = new Error('GLTF Network 404 Not Found');
-    const errorState = SafeModelErrorBoundary.getDerivedStateFromError(testError);
-    expect(errorState.hasError).toBe(true);
-    expect(errorState.error?.message).toBe('GLTF Network 404 Not Found');
 
-    // Verify componentDidCatch telemetry
     boundary.componentDidCatch(testError);
     expect(onErrorSpy).toHaveBeenCalledTimes(1);
     expect(onErrorSpy.mock.calls[0]?.[0]?.message).toBe('GLTF Network 404 Not Found');
     expect(onErrorSpy.mock.calls[0]?.[1]).toBeGreaterThanOrEqual(100);
 
-    // Verify fallback rendering when hasError is true
-    boundary.state = { hasError: true, error: testError };
+    consoleWarnSpy.mockRestore();
+  });
+
+  it('SafeModelErrorBoundary render fallback khi hasError là true', () => {
+    const boundaryProps = {
+      fallback: React.createElement('div', { id: 'error-fallback' }, 'Model Failed Fallback'),
+      startTime: performance.now() - 150,
+      url: '/models/missing.glb',
+      children: React.createElement('div', null, 'Content'),
+    };
+    const boundary = new SafeModelErrorBoundary(boundaryProps);
+    boundary.state = { hasError: true, error: new Error('GLTF Network 404 Not Found') };
     const rendered = boundary.render();
     const markup = renderToStaticMarkup(rendered as React.ReactElement);
+
     expect(markup).toContain('id="error-fallback"');
     expect(markup).toContain('Model Failed Fallback');
-
-    consoleWarnSpy.mockRestore();
   });
 
   it('SafeGLTFModel.preload và SafeGLTFModel.clear chạy an toàn trong môi trường test', () => {
@@ -160,30 +200,37 @@ describe('[TC-IMP29.1/MSS] SafeGLTFModel Headless Guard & Zero-Crash Resilience'
     expect(result.isFallback).toBe(true);
   });
 
-  it('[Adversarial] SafeModelErrorBoundary tự động hồi phục khi url thay đổi', () => {
+  it('[Adversarial] SafeModelErrorBoundary giữ nguyên trạng thái lỗi khi URL không đổi', () => {
     const boundaryProps = {
       fallback: React.createElement('div', { id: 'error-fallback' }, 'Model Failed Fallback'),
       startTime: performance.now(),
       url: '/models/failed.glb',
       children: React.createElement('div', { id: 'valid-content' }, 'Valid Content'),
     };
-
     const boundary = new SafeModelErrorBoundary(boundaryProps);
     boundary.state = { hasError: true, error: new Error('Failed 404'), prevUrl: '/models/failed.glb' };
 
-    // Same URL should not reset error
     const sameState = SafeModelErrorBoundary.getDerivedStateFromProps(
       { ...boundaryProps, url: '/models/failed.glb' },
       boundary.state
     );
     expect(sameState).toBeNull();
+  });
 
-    // Changed URL should reset error
+  it('[Adversarial] SafeModelErrorBoundary tự động hồi phục khi URL thay đổi', () => {
+    const boundaryProps = {
+      fallback: React.createElement('div', { id: 'error-fallback' }, 'Model Failed Fallback'),
+      startTime: performance.now(),
+      url: '/models/failed.glb',
+      children: React.createElement('div', { id: 'valid-content' }, 'Valid Content'),
+    };
+    const boundary = new SafeModelErrorBoundary(boundaryProps);
+    boundary.state = { hasError: true, error: new Error('Failed 404'), prevUrl: '/models/failed.glb' };
+
     const nextState = SafeModelErrorBoundary.getDerivedStateFromProps(
       { ...boundaryProps, url: '/models/recovered.glb' },
       boundary.state
     );
-    expect(nextState).not.toBeNull();
     expect(nextState?.hasError).toBe(false);
     expect(nextState?.error).toBeUndefined();
     expect(nextState?.prevUrl).toBe('/models/recovered.glb');
