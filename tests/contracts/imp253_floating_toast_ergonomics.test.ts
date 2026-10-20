@@ -95,16 +95,16 @@ describe('[TC-IMP253.01/MSS..TC-IMP253.17/MSS][UC-IMP253] Floating Toast Ergonom
   // FACET 1: Boundary & Class Contracts (TC-IMP253.01..08)
   // =========================================================================
   describe('Facet 1: Boundary & Class Contracts', () => {
-    it('[TC-IMP253.01/MSS][UC-IMP253] Desktop container định vị md:right-[18.5rem] và md:translate-x-0', () => {
+    it('[TC-IMP253.01/MSS][UC-IMP253] Desktop container định vị md:left-4 và md:translate-x-0', () => {
       useGameStore.setState({
         activeModal: null,
         activeModifiers: [],
         floatingTexts: [sampleRegularItem],
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
-      expect(html).toContain('md:right-[18.5rem]');
+      expect(html).toContain('md:left-4');
       expect(html).toContain('md:translate-x-0');
-      expect(html).not.toContain('md:right-6');
+      expect(html).not.toContain('md:right-[18.5rem]');
     });
 
     it('[TC-IMP253.02/MSS][UC-IMP253] Mobile container định vị bottom-[calc(8.5rem+env(safe-area-inset-bottom))] căn giữa left-1/2 -translate-x-1/2', () => {
@@ -129,36 +129,36 @@ describe('[TC-IMP253.01/MSS..TC-IMP253.17/MSS][UC-IMP253] Floating Toast Ergonom
       expect(html).toContain('md:bottom-auto');
     });
 
-    it('[TC-IMP253.04/MSS][UC-IMP253] Khi activeMarketCount === 1 Desktop áp dụng md:top-28', () => {
+    it('[TC-IMP253.04/MSS][UC-IMP253] Khi activeMarketCount === 1 Desktop áp dụng md:top-20', () => {
       useGameStore.setState({
         activeModal: null,
         activeModifiers: [sampleModifier1],
         floatingTexts: [sampleRegularItem],
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
-      expect(html).toContain('md:top-28');
+      expect(html).toContain('md:top-20');
       expect(html).toContain('md:bottom-auto');
     });
 
-    it('[TC-IMP253.05/MSS][UC-IMP253] Khi activeMarketCount === 2 Desktop áp dụng md:top-36', () => {
+    it('[TC-IMP253.05/MSS][UC-IMP253] Khi activeMarketCount === 2 Desktop áp dụng md:top-20', () => {
       useGameStore.setState({
         activeModal: null,
         activeModifiers: [sampleModifier1, sampleModifier2],
         floatingTexts: [sampleRegularItem],
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
-      expect(html).toContain('md:top-36');
+      expect(html).toContain('md:top-20');
       expect(html).toContain('md:bottom-auto');
     });
 
-    it('[TC-IMP253.06/MSS][UC-IMP253] Khi activeMarketCount >= 3 Desktop áp dụng md:top-44', () => {
+    it('[TC-IMP253.06/MSS][UC-IMP253] Khi activeMarketCount >= 3 Desktop áp dụng md:top-20', () => {
       useGameStore.setState({
         activeModal: null,
         activeModifiers: [sampleModifier1, sampleModifier2, sampleModifier3],
         floatingTexts: [sampleRegularItem],
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
-      expect(html).toContain('md:top-44');
+      expect(html).toContain('md:top-20');
       expect(html).toContain('md:bottom-auto');
     });
 
@@ -284,14 +284,14 @@ describe('[TC-IMP253.01/MSS..TC-IMP253.17/MSS][UC-IMP253] Floating Toast Ergonom
   // FACET 5: Blast Radius (TC-IMP253.16..17)
   // =========================================================================
   describe('Facet 5: Blast Radius', () => {
-    it('[TC-IMP253.16/MSS][UC-IMP253] Desktop container giữ nguyên class căn lề phải md:items-end', () => {
+    it('[TC-IMP253.16/MSS][UC-IMP253] Desktop container áp dụng class căn lề trái md:items-start', () => {
       useGameStore.setState({
         activeModal: null,
         activeModifiers: [],
         floatingTexts: [sampleRegularItem],
       });
       const html = renderToStaticMarkup(React.createElement(FloatingNumbersOverlay));
-      expect(html).toContain('md:items-end');
+      expect(html).toContain('md:items-start');
     });
 
     it('[TC-IMP253.17/MSS][UC-IMP253] Mobile container giữ nguyên class căn lề giữa items-center', () => {

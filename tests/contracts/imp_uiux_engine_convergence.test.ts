@@ -116,8 +116,9 @@ describe('[TC-CONV-01..20/MSS][UC-IMP235] UI/UX & Engine Convergence Contract Su
 
     it('[TC-CONV-02/MSS][UC-IMP235] updateCellLevel trong apply_delta_cells.ts reset client levelMap về 0 và triệt tiêu delta trùng lặp', () => {
       const state = {
-        levelMap: { 19: 3 },
-      } as unknown as GameState;
+        ...useGameStore.getState(),
+        levelMap: { 19: 3 as const },
+      };
       const nextLevelMap: Record<number, 0 | 1 | 2 | 3> = { 19: 3 };
 
       const changed = updateCellLevel({ index: 19, level: 0 }, state, nextLevelMap, false);
@@ -125,8 +126,9 @@ describe('[TC-CONV-01..20/MSS][UC-IMP235] UI/UX & Engine Convergence Contract Su
 
       // Khi oldLevel === targetLevel (0 === 0) và đã có trong nextLevelMap, phải trả về false (Zero-Delta Suppression)
       const stateZero = {
-        levelMap: { 19: 0 },
-      } as unknown as GameState;
+        ...useGameStore.getState(),
+        levelMap: { 19: 0 as const },
+      };
       const suppressed = updateCellLevel({ index: 19, level: 0 }, stateZero, nextLevelMap, false);
       expect(suppressed).toBe(false);
     });
@@ -305,7 +307,7 @@ describe('[TC-CONV-01..20/MSS][UC-IMP235] UI/UX & Engine Convergence Contract Su
       expect(formatLocalizedBotPersonality('Bot AI 3 (Balanced)')).toBe('Bot AI 3 (Cân Bằng)');
     });
 
-    it('[TC-CONV-11/MSS][UC-IMP235] FloatingNumbers overlay container có class md:right-6 md:left-auto md:translate-x-0 trên Desktop', () => {
+    it('[TC-CONV-11/MSS][UC-IMP235] FloatingNumbers overlay container có class md:left-4 md:right-auto md:translate-x-0 trên Desktop', () => {
       useGameStore.setState({
         floatingTexts: [
           {
@@ -323,8 +325,8 @@ describe('[TC-CONV-01..20/MSS][UC-IMP235] UI/UX & Engine Convergence Contract Su
         React.createElement(FloatingNumbersOverlay)
       );
 
-      expect(html).toContain('md:right-[18.5rem]');
-      expect(html).toContain('md:left-auto');
+      expect(html).toContain('md:left-4');
+      expect(html).toContain('md:right-auto');
       expect(html).toContain('md:translate-x-0');
     });
 

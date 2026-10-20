@@ -1,0 +1,50 @@
+[
+  {
+    "file": "src/client/ui/floating_numbers.tsx",
+    "desc": "AST: Corrupt desktop container position from md:left-4 to md:right-[18.5rem]",
+    "target": "md:left-4 md:right-auto md:translate-x-0",
+    "replacement": "md:left-auto md:right-[18.5rem] md:translate-x-0"
+  },
+  {
+    "file": "src/client/ui/floating_numbers.tsx",
+    "desc": "AST: Corrupt desktop alignment from md:items-start to md:items-end",
+    "target": "md:items-start",
+    "replacement": "md:items-end"
+  },
+  {
+    "file": "src/client/ui/floating_numbers.tsx",
+    "desc": "AST: Corrupt desktop container max width from md:max-w-[280px] to md:max-w-md",
+    "target": "md:max-w-[280px]",
+    "replacement": "md:max-w-md"
+  },
+  {
+    "file": "src/client/ui/floating_numbers.tsx",
+    "desc": "AST: Corrupt desktop fixed ceiling from md:top-20 to md:top-44 causing tile collision",
+    "target": "md:bottom-auto md:top-20",
+    "replacement": "md:bottom-auto md:top-44"
+  },
+  {
+    "file": "src/client/ui/floating_numbers.tsx",
+    "desc": "AST: Corrupt activeModal center alignment to left-4",
+    "target": "activeModal !== null\n      ? 'left-1/2 -translate-x-1/2'",
+    "replacement": "activeModal !== null\n      ? 'left-4'"
+  },
+  {
+    "file": "src/client/ui/floating_numbers.tsx",
+    "desc": "AST: Sever formula multi-line wrapping back to truncate",
+    "target": "data-testid=\"transaction-formula-line\"\n          className=\"text-[10px] sm:text-[11px] text-slate-500 font-medium line-clamp-2 break-words pt-0.5 pl-5\"",
+    "replacement": "data-testid=\"transaction-formula-line\"\n          className=\"text-[10px] sm:text-[11px] text-slate-500 font-medium truncate pt-0.5 pl-5\""
+  },
+  {
+    "file": "src/client/ui/floating_numbers.tsx",
+    "desc": "AST: Corrupt badge tactile shadow to shadow-none",
+    "target": "shadow-[0_2px_0_0_#0f172a]",
+    "replacement": "shadow-none"
+  },
+  {
+    "file": "src/client/ui/floating_numbers.tsx",
+    "desc": "AST: Corrupt badge border from border-slate-900/20 to border-red-500",
+    "target": "border-slate-900/20",
+    "replacement": "border-red-500"
+  }
+]

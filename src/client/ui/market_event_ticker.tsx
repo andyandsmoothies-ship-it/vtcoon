@@ -70,7 +70,7 @@ export const MarketEventTicker: React.FC<MarketEventTickerProps> = ({
       data-testid="market-event-ticker"
       role="region"
       aria-label="Sự kiện thị trường đang hiệu lực"
-      className="pointer-events-none select-none z-30 flex flex-col items-center justify-center w-full max-w-[90vw] min-[360px]:max-w-[calc(100vw-8px)] sm:max-w-xl md:max-w-2xl mx-auto mt-1 px-0.5 min-[360px]:px-1 sm:px-2 gap-1"
+      className="pointer-events-none select-none z-30 flex flex-col items-center justify-center w-full max-w-[90vw] min-[360px]:max-w-[calc(100vw-8px)] sm:max-w-md md:max-w-md lg:max-w-xl xl:max-w-2xl mx-auto mt-1 px-0.5 min-[360px]:px-1 sm:px-2 gap-1"
     >
       {displayedActive.map((modifier, index) => {
         const cardType = String(modifier.type ?? '');
