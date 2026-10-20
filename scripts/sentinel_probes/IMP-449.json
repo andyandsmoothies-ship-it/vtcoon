@@ -1,0 +1,38 @@
+[
+  {
+    "file": "src/client/3d/camera_kinematic_helpers.ts",
+    "desc": "AST: Corrupt mobile overview FOV clamp from 45 to 20",
+    "target": "Math.min(45, Math.max(baseFov, calculatedFov));\n}\n\nexport function calculateResponsiveOverviewCameraState",
+    "replacement": "Math.min(20, Math.max(baseFov, calculatedFov));\n}\n\nexport function calculateResponsiveOverviewCameraState"
+  },
+  {
+    "file": "src/client/3d/camera_kinematic_helpers.ts",
+    "desc": "AST: Corrupt elevation scale ceiling from 1.18 to 1.50 causing elevation ballooning",
+    "target": "const scale = Math.min(1.18, Math.max(1.0, rawScale));",
+    "replacement": "const scale = Math.min(1.50, Math.max(1.0, rawScale));"
+  },
+  {
+    "file": "src/client/3d/camera_kinematic_helpers.ts",
+    "desc": "AST: Corrupt mobile target shift from 0.4m to 2.5m pushing Cell 20 under banner",
+    "target": "const shift = 0.4 * Math.min(1.0, portraitFactor);",
+    "replacement": "const shift = 2.5 * Math.min(1.0, portraitFactor);"
+  },
+  {
+    "file": "src/client/ui/market_event_ticker.tsx",
+    "desc": "AST: Sever mobile compact height min-h-[36px]",
+    "target": "min-h-[36px] sm:min-h-[44px]",
+    "replacement": "min-h-[56px]"
+  },
+  {
+    "file": "src/client/ui/market_event_ticker.tsx",
+    "desc": "AST: Sever mobile single-line collapse mechanism",
+    "target": "const itemVisibilityClass = index === 0 ? 'flex' : 'hidden sm:flex';",
+    "replacement": "const itemVisibilityClass = 'flex';"
+  },
+  {
+    "file": "src/client/ui/market_event_ticker.tsx",
+    "desc": "AST: Sever +N badge text for mobile collapsed events",
+    "target": "+{active.length - 1} khác",
+    "replacement": "+0"
+  }
+]

@@ -6,7 +6,7 @@ mainAgent: false
 model: inherit
 workspace: inherit
 skills: [code-review, codebase-design, first-principles, systematic-debugging, mastering-typescript, concurrency-patterns, impeccable, threejs-fundamentals, threejs-lighting]
-tools: [view_file, list_dir, find_by_name, grep_search, run_command, write_to_file, call_mcp_tool]
+tools: [view_file, list_dir, find_by_name, grep_search, run_command, write_to_file]
 ---
 
 # ADVERSARIAL CHALLENGER PROTOCOL

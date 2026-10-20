@@ -39,6 +39,7 @@ hooks: [.agents/hooks_qa.json]
 - **Banned Assertions**:
   - Static source reading: FORBIDDEN `fs.readFileSync`, `fs.existsSync`, `typeof fn === 'function'`, or LOC checks in unit tests.
   - Silent early returns (`if (!target) return;`), shallow change detectors (solitary `toBeDefined()`), dirty casts (`as any`, `as unknown as`), or framework internal spies (`spyOn(React, ...)`).
+- **Anti-Zombie / Anti-Tautological Test Invariant**: Tests MUST verify public observable behavior and outputs, NEVER internal implementation details (e.g. unmounted component `props.children` or private intermediate variables). Do NOT test hypothetical inputs outside production bounds. When living tests fail due to modernized architecture, modernize/deprecate obsolete tests under plan authorization rather than forcing production code to retain dead-code facades.
 - **Universal 5-Facet Behavioral Matrix (Adaptive across Project Types)**:
   1. *Happy Path & Core Invariants*: Primary business/visual/API contract anchored to the Plan's numerical/structural invariants.
   2. *Boundary & Zero/Max Thresholds*: Off-by-one (`N-1`, `N`, `N+1`), empty collections (`[]`, `{}`), zero/negative/max limits.

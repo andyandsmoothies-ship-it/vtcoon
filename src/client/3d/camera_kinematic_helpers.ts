@@ -100,7 +100,8 @@ export function calculateResponsiveOverviewFov(aspect?: number, baseFov = 24): n
   const targetHalfRad = (baseFov * Math.PI) / 360;
   const neededHalfRad = Math.atan((Math.tan(targetHalfRad) * 1.05) / safeAspect);
   const calculatedFov = Math.round((neededHalfRad * 360) / Math.PI);
-  return Math.min(50, Math.max(baseFov, calculatedFov));
+  // [IMP-449] Golden Compromise: clamped to <= 45 deg on portrait to prevent postage-stamp board shrinkage
+  return Math.min(45, Math.max(baseFov, calculatedFov));
 }
 
 export function calculateResponsiveOverviewCameraState(
@@ -111,7 +112,7 @@ export function calculateResponsiveOverviewCameraState(
   const tx = baseConfig.target[0];
   const ty = baseConfig.target[1];
   const tz = baseConfig.target[2];
-  if (typeof aspect !== 'number' || !Number.isFinite(aspect) || aspect >= 1.0) {
+  if (typeof aspect !== 'number' || !Number.isFinite(aspect) || aspect <= 0 || aspect >= 1.0) {
     return {
       position: [baseConfig.position[0], baseConfig.position[1], baseConfig.position[2]],
       target: [tx, ty, tz],
@@ -120,10 +121,12 @@ export function calculateResponsiveOverviewCameraState(
     };
   }
   const safeAspect = Math.max(0.42, aspect);
-  const rawScale = 1.0 / Math.sqrt(safeAspect);
-  const scale = Math.min(1.35, Math.max(1.0, rawScale));
+  // [IMP-449] Golden Compromise scaling curve prevents ballooning elevation to 34.5m
+  const rawScale = 1.0 / Math.pow(safeAspect, 0.25);
+  const scale = Math.min(1.18, Math.max(1.0, rawScale));
   const portraitFactor = Math.max(0, (1.0 - safeAspect) / (1.0 - 0.48));
-  const shift = 2.5 * Math.min(1.0, portraitFactor);
+  // [IMP-449] Shift restrained to <= 0.4m to prevent Cell 20 occlusion under top banners
+  const shift = 0.4 * Math.min(1.0, portraitFactor);
 
   const targetX = tx + shift;
   const targetY = ty;

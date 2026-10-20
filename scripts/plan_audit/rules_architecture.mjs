@@ -205,6 +205,13 @@ export function auditDroppedRequirementsAndPhantomSlop(planContent, fileSnippets
           errors++;
         }
       }
+      if (/\b(?:retryWithBackoff|asyncRetry|new\s+LRUCache)\b/.test(snip)) {
+        const mentionsRetryCache = /retry|cache|backoff/i.test(planContent);
+        if (!mentionsRetryCache) {
+          console.warn(`  ⚠️  [PHANTOM_RETRY_OR_CACHE] Snippet introduces retry/cache mechanism without explicit declaration in plan.`);
+          console.warn(`     Sean Goedecke Invariant: Avoid speculative defensive layers not demanded by requirements.`);
+        }
+      }
     }
   }
 

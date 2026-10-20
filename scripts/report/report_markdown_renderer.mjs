@@ -191,18 +191,46 @@ export function renderFinalReport({
 ## 1. TỔNG QUAN & BỐI CẢNH VẤN ĐỀ
 
 ${(() => {
+  let summaryStr = '';
   if (typeof snapshotData?.summary === 'string' && !/TODO_REVIEW_REQUIRED/.test(snapshotData.summary)) {
-    return `> **Mô tả cốt lõi**: ${snapshotData.summary}`;
-  }
-  const crPath = path.join(repoRoot, '.agents', 'audit', `CODE_REVIEW_${ticketId}.md`);
-  if (fs.existsSync(crPath)) {
-    const crText = fs.readFileSync(crPath, 'utf8');
-    const sumMatch = crText.match(/-\s*\*\*Summary \(ELI5\)\*\*:\s*([^\r\n]+)/i);
-    if (sumMatch && sumMatch[1].trim() && !/TODO_REVIEW_REQUIRED/.test(sumMatch[1])) {
-      return `> **Mô tả cốt lõi**: ${sumMatch[1].trim()}`;
+    summaryStr = `> **Mô tả cốt lõi**: ${snapshotData.summary}`;
+  } else {
+    const crPath = path.join(repoRoot, '.agents', 'audit', `CODE_REVIEW_${ticketId}.md`);
+    if (fs.existsSync(crPath)) {
+      const crText = fs.readFileSync(crPath, 'utf8');
+      const sumMatch = crText.match(/-\s*\*\*Summary \(ELI5\)\*\*:\s*([^\r\n]+)/i);
+      if (sumMatch && sumMatch[1].trim() && !/TODO_REVIEW_REQUIRED/.test(sumMatch[1])) {
+        summaryStr = `> **Mô tả cốt lõi**: ${sumMatch[1].trim()}`;
+      }
     }
   }
-  return `TODO_REVIEW_REQUIRED: Cung cấp bối cảnh nghiệp vụ thực tế, điểm mù cần giải quyết và cơ chế kỹ thuật cốt lõi của ticket \`${ticketId}\`. Tuyệt đối cấm văn mẫu rập khuôn.`;
+  if (!summaryStr) {
+    summaryStr = `TODO_REVIEW_REQUIRED: Cung cấp bối cảnh nghiệp vụ thực tế, điểm mù cần giải quyết và cơ chế kỹ thuật cốt lõi của ticket \`${ticketId}\`. Tuyệt đối cấm văn mẫu rập khuôn.`;
+  }
+
+  // Auto-extract Sean Goedecke Dropped Requirements from ticket plan
+  let droppedStr = '';
+  try {
+    const planDir = path.join(repoRoot, '.agents', 'plans');
+    if (fs.existsSync(planDir)) {
+      const planPattern = new RegExp(`PLAN_${ticketId.replace(/-/g, '_')}`, 'i');
+      const planFiles = fs.readdirSync(planDir).filter(f => planPattern.test(f) || f.includes(ticketId));
+      if (planFiles.length > 0) {
+        const planText = fs.readFileSync(path.join(planDir, planFiles[0]), 'utf8');
+        const match = planText.match(/##\s+(?:[0-9.]+\s+)?(?:Explicitly\s+Dropped\s+Requirements|Dropped\s+Requirements|Yêu\s+cầu\s+từ\s+bỏ)[^\n]*\n([\s\S]*?)(?=\n##\s+|$)/i);
+        if (match && match[1].trim()) {
+          const bullets = match[1].trim().split('\n').filter(l => l.trim().startsWith('-') || l.trim().startsWith('*')).slice(0, 4);
+          if (bullets.length > 0) {
+            droppedStr = `\n>\n> **Yêu cầu chủ động từ bỏ (Sean Goedecke Invariant)**:\n${bullets.map(b => `> ${b.trim()}`).join('\n')}`;
+          }
+        }
+      }
+    }
+  } catch {
+    // safe fallback
+  }
+
+  return summaryStr + droppedStr;
 })()}
 
 ---

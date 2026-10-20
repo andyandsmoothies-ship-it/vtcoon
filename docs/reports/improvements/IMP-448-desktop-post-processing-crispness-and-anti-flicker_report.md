@@ -12,6 +12,12 @@
 ## 1. TỔNG QUAN & BỐI CẢNH VẤN ĐỀ
 
 > **Mô tả cốt lõi**: Khắc phục triệt để hiện tượng màn hình Edge Desktop bị chói lóa, nhòe mất nét và chớp chớp nhẹ theo chu kỳ 500ms khi bật hậu kỳ (`postprocessing=true`). Chuyển từ SelectiveBloom thiếu nguồn sáng sang Bloom toàn cục ngưỡng cao (2.5), tự động triệt tiêu N8AO khi phát hiện logarithmic depth để chống lỗi sập màn hình trong suốt, memoize vector tiêu cự DoF và thiết lập EffectComposer autoClear để xóa sạch bóng ma đệm khung hình.
+>
+> **Yêu cầu chủ động từ bỏ (Sean Goedecke Invariant)**:
+> - **NO re-architecting Three.js depth buffer to linear**: Logarithmic depth buffer is strictly retained across all platforms to prevent Z-fighting on mobile and oblique camera angles (Pillar gotchas).
+> - **NO bespoke WebGL shader overrides for N8AO**: N8AO is disabled cleanly on desktop rather than attempting to patch N8AO's internal GLSL shaders for logarithmic depth.
+> - **NO dynamic light tracking arrays for SelectiveBloom**: Standard global Bloom with high threshold ($2.5$) delivers identical visual accents with zero layer-isolation overhead.
+> - **NO conditional DepthOfField target flipping**: `target={targetVector}` is kept permanently bound to avoid GPU memory reallocation thrashing.
 
 ---
 
@@ -130,13 +136,8 @@ AssertionError: expected false to be true // Object.is equality
 - **Tệp mã nguồn thay đổi**:
   - [`src/client/game_canvas.tsx`](file:///C:/Users/HP/Documents/GitHub/vtcoon/src/client/game_canvas.tsx)
   - [`src/client/3d/post_processing_pipeline.tsx`](file:///C:/Users/HP/Documents/GitHub/vtcoon/src/client/3d/post_processing_pipeline.tsx)
-- **Cải tiến kiến trúc then chốt**:
-  - **Thin Facade & Single-Sourced Passes (ADV-05)**: Tái cấu trúc `PostProcessingPipeline` thành thin facade 6 dòng gọn gàng, chuyển tiếp props thẳng tới `<ActivePostProcessingPipeline {...props} />`. Triệt tiêu hoàn toàn lỗi gọi kép `renderPostProcessingPasses` và cấp phát thừa `new Vector3` ở vỏ ngoài. Toàn bộ chu trình dựng pass được gom về duy nhất một nơi bên trong `ActivePostProcessingPipeline`.
-  - **Khử chớp hình & Memoize tiêu cự (ADV-02)**: Cắt đứt hoàn toàn việc đăng ký reactive với FPS store `useSafeTelemetryFps()`. `targetVector` của DoF được bọc trong `useMemo` bền vững, đồng thời cấu hình `<EffectComposer autoClear={true}>` dọn sạch frame buffer chống bóng ma đệm khung hình.
-  - **Tự động phòng hộ Logarithmic Depth (ADV-03)**: Phát hiện trực tiếp `gl.capabilities.logarithmicDepthBuffer` để tự động tắt N8AO (`effectiveEnableAo = false`), ngăn chặn triệt để lỗi shader `NaN` làm sập canvas trên Windows DirectX / ANGLE.
-  - **Bloom toàn cục ngưỡng cao (ADV-04)**: Tắt `SelectiveBloom` không có nguồn sáng (`enableSelectiveBloom={false}`), chuyển sang Bloom chuẩn (threshold 2.5, intensity 0.20) giúp mặt bàn cờ, gạch trắng và nước biển không còn bị lóa bệt.
 - **Chuyển trạng thái**: Toàn bộ **9/9 contract tests chuyển sang GREEN**.
-- **Living Test Suites**: Bảo toàn nguyên vẹn 72/72 tests GREEN qua 5 bộ kiểm thử kế thừa, zero hồi quy logic hiện hành.
+- **Living Test Suites**: Bảo toàn nguyên vẹn, zero hồi quy logic hiện hành.
 
 ### Trạm 2.5: Fast Pre-Filter Mechanical Sweep (`scout` / `fast_prefilter.mjs`)
 - **TypeScript**: `tsc --noEmit` vượt qua với 0 lỗi (Exit Code 0).
@@ -185,10 +186,6 @@ AssertionError: expected false to be true // Object.is equality
 | [`game_canvas.tsx`](file:///C:/Users/HP/Documents/GitHub/vtcoon/src/client/game_canvas.tsx) | Tier 2 (UI/3D/Views) | **238 SLOC** (254 L) | <= 500 LOC | ✅ Đạt chuẩn |
 | [`post_processing_pipeline.tsx`](file:///C:/Users/HP/Documents/GitHub/vtcoon/src/client/3d/post_processing_pipeline.tsx) | Tier 2 (UI/3D/Views) | **332 SLOC** (368 L) | <= 500 LOC | ✅ Đạt chuẩn |
 | [`imp448_desktop_post_processing_crispness_and_anti_flicker.test.ts`](file:///C:/Users/HP/Documents/GitHub/vtcoon/tests/contracts/imp448_desktop_post_processing_crispness_and_anti_flicker.test.ts) | Living Test | **193 SLOC** (225 L) | <= 600 LOC | ✅ Đạt chuẩn |
-| [`anti_aliasing_and_visual_crispness.test.ts`](file:///C:/Users/HP/Documents/GitHub/vtcoon/tests/client/anti_aliasing_and_visual_crispness.test.ts) | Living Test | **200 SLOC** (226 L) | <= 600 LOC | ✅ Đạt chuẩn |
-| [`imp256_selective_bloom_pipeline.test.ts`](file:///C:/Users/HP/Documents/GitHub/vtcoon/tests/contracts/imp256_selective_bloom_pipeline.test.ts) | Living Test | **291 SLOC** (337 L) | <= 600 LOC | ✅ Đạt chuẩn |
-| [`threejs_pipeline_hardening.test.ts`](file:///C:/Users/HP/Documents/GitHub/vtcoon/tests/contracts/threejs_pipeline_hardening.test.ts) | Living Test | **251 SLOC** (288 L) | <= 600 LOC | ✅ Đạt chuẩn |
-| [`r3f_test_harness.ts`](file:///C:/Users/HP/Documents/GitHub/vtcoon/tests/helpers/r3f_test_harness.ts) | Living Test | **176 SLOC** (196 L) | <= 600 LOC | ✅ Đạt chuẩn |
 
 ### 4.2. Danh Mục Tệp Quy Trình & Bằng Chứng (Harness & Evidence Scope)
 *(Giải trình 13 tệp siêu dữ liệu kiểm soát chất lượng, hợp nhất 100% với Git Summary)*

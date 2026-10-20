@@ -24,6 +24,7 @@ hooks: [.agents/hooks_implementer.json]
 - **Atomic File Edits**: Use native file modification tools (`replace_file_content`, `write_to_file`).
 - **Slice Scope Confinement**: Implement ONLY flows authorized in the ticket plan.
 - **Zero Dirty Casts**: Strictly ban `as any`, `as unknown as T`, or type bypasses in `src/**`.
+- **Anti-Overengineering & Negative Spec Invariant (Sean Goedecke Rule)**: Implementer MUST NOT introduce speculative complexity, unrequested concurrency locks (`new Mutex`), unrequested multi-tier caches, retry loops, or defensive wrapper proxies for hypothetical edge cases outside the approved plan. Solve strictly what is demanded; honor explicitly dropped requirements. Prioritize Deletion-First when refactoring files nearing LOC limits.
 
 ## 2. Visual UI/UX Governance
 - When implementing 2D/3D visual elements:
