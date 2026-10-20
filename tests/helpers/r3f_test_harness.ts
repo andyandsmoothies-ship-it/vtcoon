@@ -18,6 +18,10 @@ export interface MockR3FGl {
       readonly points?: number;
     };
   };
+  capabilities?: {
+    logarithmicDepthBuffer?: boolean;
+    [key: string]: unknown;
+  };
 }
 
 export interface MockR3FClock {
@@ -71,6 +75,9 @@ export class R3FTestHarness {
             calls: 0,
             triangles: 0,
           },
+        },
+        capabilities: {
+          logarithmicDepthBuffer: false,
         },
       },
       setDpr: (dpr: number) => {

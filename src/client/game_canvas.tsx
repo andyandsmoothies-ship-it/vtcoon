@@ -218,7 +218,7 @@ export function GameCanvas({
                   <GameBoard isMobile={isMobileDevice} />
                   <PawnAnimator players={effectivePlayers} />
                   {/* <PostProcessingPipeline /> */}
-                  <PostProcessingPipeline isMobile={isMobileDevice} enabled={isPostProcessingActive} />
+                  <PostProcessingPipeline isMobile={isMobileDevice} enabled={isPostProcessingActive} enableAo={false} />
                 </>
               ) : (
                 <>
@@ -234,7 +234,8 @@ export function GameCanvas({
                   <PostProcessingPipeline
                     isMobile={isMobileDevice}
                     enabled={isPostProcessingActive}
-                    enableSelectiveBloom={!isMobileDevice}
+                    enableAo={false}
+                    enableSelectiveBloom={false}
                     isAuctionActive={isAuctionActive}
                     enableDof={dofConfig.enableDof}
                     dofBokehScale={dofConfig.bokehScale}

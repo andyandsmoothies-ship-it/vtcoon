@@ -18,7 +18,7 @@ import {
 import { Vector3 } from 'three';
 import { ToneMappingMode } from 'postprocessing';
 import { resolveAdaptivePostProcessing } from '../ui/ui_helpers';
-import { useTelemetryStore } from '../telemetry/telemetry_store';
+import { useThree } from '@react-three/fiber';
 import { CAMERA_CONFIG } from './camera_state_machine';
 import { cellPosition } from './board_coords';
 
@@ -170,13 +170,6 @@ export function calculateDynamicVignetteDarkness(
   return Math.max(0.0, Math.min(1.0, raw));
 }
 
-function useSafeTelemetryFps(): number {
-  if (typeof window === 'undefined') {
-    return useTelemetryStore.getState().metrics.fps;
-  }
-  return useTelemetryStore((s) => s.metrics.fps);
-}
-
 export function renderPostProcessingPasses(
   props: PostProcessingPipelineProps,
   targetVector: Vector3,
@@ -325,21 +318,7 @@ export function PostProcessingPipeline(
     return null;
   }
 
-  const dofTarget = props.dofTarget ?? DEFAULT_PIPELINE_CONFIG.dofTarget;
-  const targetVector = new Vector3(dofTarget[0], dofTarget[1], dofTarget[2]);
-  const defaultBloomActive = props.fps !== undefined
-    ? props.fps >= (props.isMobile ? 28 : 42)
-    : true;
-  const initialBloom = props.isBloomActive ?? defaultBloomActive;
-
-  return (
-    <ActivePostProcessingPipeline
-      multisampling={props.multisampling ?? DEFAULT_PIPELINE_CONFIG.multisampling}
-      {...props}
-    >
-      {renderPostProcessingPasses(props, targetVector, initialBloom)}
-    </ActivePostProcessingPipeline>
-  );
+  return <ActivePostProcessingPipeline {...props} />;
 }
 
 export function ActivePostProcessingPipeline(
@@ -349,13 +328,19 @@ export function ActivePostProcessingPipeline(
     multisampling = DEFAULT_PIPELINE_CONFIG.multisampling,
     dofTarget = DEFAULT_PIPELINE_CONFIG.dofTarget,
     isMobile = false,
+    enableAo = DEFAULT_PIPELINE_CONFIG.enableAo,
     fps,
     children,
   } = props;
 
-  const telemetryFps = useSafeTelemetryFps();
-  const currentFps = fps !== undefined ? fps : telemetryFps;
-  const targetVector = new Vector3(dofTarget[0], dofTarget[1], dofTarget[2]);
+  const { gl } = useThree();
+  const isLogarithmicDepth = Boolean(gl?.capabilities?.logarithmicDepthBuffer);
+  const effectiveEnableAo = Boolean(enableAo && !isLogarithmicDepth);
+  const currentFps = fps !== undefined ? fps : 60;
+  const targetVector = useMemo(
+    () => new Vector3(dofTarget[0], dofTarget[1], dofTarget[2]),
+    [dofTarget[0], dofTarget[1], dofTarget[2]]
+  );
 
   const [isBloomActive, setIsBloomActive] = useState(true);
 
@@ -369,11 +354,15 @@ export function ActivePostProcessingPipeline(
     }
   }, [currentFps, isMobile, isBloomActive]);
 
-  const passes = renderPostProcessingPasses({ ...props, fps: currentFps }, targetVector, isBloomActive);
+  const passes = children ?? renderPostProcessingPasses(
+    { ...props, enableAo: effectiveEnableAo, fps: currentFps },
+    targetVector,
+    isBloomActive
+  );
 
   return (
-    <EffectComposer multisampling={multisampling} autoClear={false}>
-      {children ?? passes}
+    <EffectComposer multisampling={multisampling} autoClear={true}>
+      {passes}
     </EffectComposer>
   );
 }

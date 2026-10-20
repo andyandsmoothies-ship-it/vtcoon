@@ -82,7 +82,11 @@ vi.mock('../../src/client/store/environment_store', () => ({
 // Component imports
 import { GameCanvas } from '../../src/client/game_canvas';
 import { SafeEnvironment, AdaptiveToneMappingSync, EnvironmentFallbackLighting } from '../../src/client/3d/safe_environment';
-import { PostProcessingPipeline, ActivePostProcessingPipeline } from '../../src/client/3d/post_processing_pipeline';
+import {
+  PostProcessingPipeline,
+  ActivePostProcessingPipeline,
+  type PostProcessingPipelineProps,
+} from '../../src/client/3d/post_processing_pipeline';
 import { perfBudget } from '../../src/client/3d/perf_budget';
 import { Bloom, DepthOfField, N8AO, SMAA, ToneMapping, Vignette } from '@react-three/postprocessing';
 import { ToneMappingMode } from 'postprocessing';
@@ -90,8 +94,22 @@ import { Environment } from '@react-three/drei';
 
 type AnyReactElement = React.ReactElement<Record<string, any>>;
 
+function isPostProcessingProps(props: unknown): props is PostProcessingPipelineProps {
+  return typeof props === 'object' && props !== null;
+}
+
 function getElementChildren(element: React.ReactElement | null): AnyReactElement[] {
   if (!element) return [];
+  if (element.type === ActivePostProcessingPipeline && isPostProcessingProps(element.props)) {
+    try {
+      const tree = ActivePostProcessingPipeline(element.props);
+      if (tree && React.isValidElement<{ children?: React.ReactNode }>(tree)) {
+        return React.Children.toArray(tree.props.children) as AnyReactElement[];
+      }
+    } catch {
+      // safe fallback
+    }
+  }
   const props = element.props as Record<string, any>;
   return React.Children.toArray(props.children) as AnyReactElement[];
 }

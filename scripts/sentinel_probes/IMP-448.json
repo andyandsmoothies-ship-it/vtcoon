@@ -1,0 +1,50 @@
+[
+  {
+    "file": "src/client/3d/post_processing_pipeline.tsx",
+    "desc": "AST: Corrupt DepthOfField zero-scale bypass when enableDof is false",
+    "target": "bokehScale={enableDof ? resolvedBokehScale : 0}",
+    "replacement": "bokehScale={resolvedBokehScale}"
+  },
+  {
+    "file": "src/client/3d/post_processing_pipeline.tsx",
+    "desc": "AST: Corrupt EffectComposer autoClear back to false causing buffer ghosting",
+    "target": "autoClear={true}",
+    "replacement": "autoClear={false}"
+  },
+  {
+    "file": "src/client/3d/post_processing_pipeline.tsx",
+    "desc": "AST: Corrupt calculateDynamicBloomThreshold back to overexposed 0.45",
+    "target": "return isAuctionActive ? 1.2 : 2.5;",
+    "replacement": "return isAuctionActive ? 1.2 : 0.45;"
+  },
+  {
+    "file": "src/client/3d/post_processing_pipeline.tsx",
+    "desc": "AST: Corrupt N8AO exclusion when enableAo is false",
+    "target": "if (resolvedEnableAo) {",
+    "replacement": "if (true) {"
+  },
+  {
+    "file": "src/client/3d/post_processing_pipeline.tsx",
+    "desc": "AST: Corrupt logarithmic depth detection to always false",
+    "target": "const isLogarithmicDepth = Boolean(gl?.capabilities?.logarithmicDepthBuffer);",
+    "replacement": "const isLogarithmicDepth = false;"
+  },
+  {
+    "file": "src/client/game_canvas.tsx",
+    "desc": "AST: Sever lobby call-site enableAo bypass",
+    "target": "<PostProcessingPipeline isMobile={isMobileDevice} enabled={isPostProcessingActive} enableAo={false} />",
+    "replacement": "<PostProcessingPipeline isMobile={isMobileDevice} enabled={isPostProcessingActive} enableAo={true} />"
+  },
+  {
+    "file": "src/client/game_canvas.tsx",
+    "desc": "AST: Sever in-game call-site enableSelectiveBloom bypass",
+    "target": "enableSelectiveBloom={false}",
+    "replacement": "enableSelectiveBloom={true}"
+  },
+  {
+    "file": "src/client/game_canvas.tsx",
+    "desc": "AST: Sever in-game call-site enableAo bypass",
+    "target": "enabled={isPostProcessingActive}\n                    enableAo={false}",
+    "replacement": "enabled={isPostProcessingActive}\n                    enableAo={true}"
+  }
+]

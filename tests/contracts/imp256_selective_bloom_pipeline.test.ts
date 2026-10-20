@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { Mesh, Group } from 'three';
@@ -17,7 +17,11 @@ import {
   calculateSelectiveBloomThreshold,
   calculateSelectiveBloomIntensity,
 } from '../../src/client/3d/selective_bloom_registry.js';
-import { PostProcessingPipeline } from '../../src/client/3d/post_processing_pipeline.js';
+import { createR3FMock, sharedR3FHarness } from '../helpers/r3f_test_harness.js';
+
+vi.mock('@react-three/fiber', () => createR3FMock(sharedR3FHarness));
+
+import { PostProcessingPipeline, ActivePostProcessingPipeline } from '../../src/client/3d/post_processing_pipeline.js';
 import { TileEventAuraRim } from '../../src/client/3d/tile_event_aura.js';
 
 interface PassProps {
@@ -30,7 +34,20 @@ interface PassProps {
 
 function getElementChildren(element: React.ReactElement | null): React.ReactElement[] {
   if (!element || !React.isValidElement<{ children?: React.ReactNode }>(element)) return [];
-  return React.Children.toArray(element.props.children).filter(React.isValidElement);
+  if (element.type === ActivePostProcessingPipeline) {
+    let captured: React.ReactElement[] = [];
+    renderToStaticMarkup(
+      React.createElement(() => {
+        const composer = ActivePostProcessingPipeline(element.props);
+        if (composer && React.isValidElement<{ children?: React.ReactNode }>(composer)) {
+          captured = React.Children.toArray(composer.props.children).filter(React.isValidElement) as React.ReactElement[];
+        }
+        return null;
+      })
+    );
+    return captured;
+  }
+  return React.Children.toArray(element.props.children).filter(React.isValidElement) as React.ReactElement[];
 }
 
 function getElementProps(element: React.ReactElement | null | undefined): PassProps {

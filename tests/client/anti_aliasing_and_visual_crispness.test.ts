@@ -13,6 +13,8 @@ vi.mock('react', async (importOriginal) => {
 import fs from 'node:fs';
 import path from 'node:path';
 import React from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+import '../helpers/r3f_test_harness.js';
 import { SMAA, DepthOfField, ToneMapping, EffectComposer } from '@react-three/postprocessing';
 import { ToneMappingMode } from 'postprocessing';
 import {
@@ -39,6 +41,16 @@ function getElementProps(element: React.ReactElement | null): Record<string, any
   return (element.props as Record<string, any>) ?? {};
 }
 
+function getCapturedComposer(props: PostProcessingPipelineProps = {}): React.ReactElement | null {
+  let tree: React.ReactElement | null = null;
+  function CaptureHarness(): React.ReactElement | null {
+    tree = ActivePostProcessingPipeline(props);
+    return null;
+  }
+  renderToStaticMarkup(React.createElement(CaptureHarness));
+  return tree;
+}
+
 describe('[TC-IMP34/MSS][UC-IMP34] Anti-Aliasing & Visual Crispness Contract Tests', () => {
   const rootDir = process.cwd();
   const postProcessingPath = path.resolve(rootDir, 'src', 'client', '3d', 'post_processing_pipeline.tsx');
@@ -63,7 +75,7 @@ describe('[TC-IMP34/MSS][UC-IMP34] Anti-Aliasing & Visual Crispness Contract Tes
   });
 
   it('[TC-IMP34.04/MSS][UC-IMP34] PostProcessingPipeline renders SMAA component inside EffectComposer by default', () => {
-    const rendered = PostProcessingPipeline({});
+    const rendered = getCapturedComposer({});
     expect(rendered).not.toBeNull();
     const children = getElementChildren(rendered);
     const smaaElement = children.find(
@@ -73,7 +85,7 @@ describe('[TC-IMP34/MSS][UC-IMP34] Anti-Aliasing & Visual Crispness Contract Tes
   });
 
   it('[TC-IMP34.05/MSS][UC-IMP34] PostProcessingPipeline positions SMAA at terminal anti-aliasing pass', () => {
-    const rendered = PostProcessingPipeline({});
+    const rendered = getCapturedComposer({});
     const children = getElementChildren(rendered);
     const smaaIndex = children.findIndex(
       (c) => c.type === SMAA || (c.type as { name?: string })?.name === 'SMAA'
@@ -97,7 +109,7 @@ describe('[TC-IMP34/MSS][UC-IMP34] Anti-Aliasing & Visual Crispness Contract Tes
   });
 
   it('[TC-IMP34.08/MSS][UC-IMP34] PostProcessingPipeline forwards custom focusRange and bokehScale to DepthOfField', () => {
-    const rendered = PostProcessingPipeline({
+    const rendered = getCapturedComposer({
       enableDof: true,
       dofFocusRange: 175.0,
       dofBokehScale: 0.35,
@@ -113,7 +125,7 @@ describe('[TC-IMP34/MSS][UC-IMP34] Anti-Aliasing & Visual Crispness Contract Tes
   });
 
   it('[TC-IMP34.09/MSS][UC-IMP34] PostProcessingPipeline centers DepthOfField target at origin [0, 0, 0]', () => {
-    const rendered = PostProcessingPipeline({ enableDof: true });
+    const rendered = getCapturedComposer({ enableDof: true });
     const children = getElementChildren(rendered);
     const dofElement = children.find(
       (c) => c.type === DepthOfField || (c.type as { name?: string })?.name === 'DepthOfField'
@@ -151,7 +163,7 @@ describe('[TC-IMP34/MSS][UC-IMP34] Anti-Aliasing & Visual Crispness Contract Tes
   });
 
   it('[TC-IMP34.13/MSS][UC-IMP34] PostProcessingPipeline retains single source of truth AgX ToneMapping in EffectComposer', () => {
-    const rendered = PostProcessingPipeline({});
+    const rendered = getCapturedComposer({});
     const children = getElementChildren(rendered);
     const toneMappingElement = children.find(
       (c) => c.type === ToneMapping || (c.type as { name?: string })?.name === 'ToneMapping'
@@ -179,7 +191,7 @@ describe('[TC-IMP34/MSS][UC-IMP34] Anti-Aliasing & Visual Crispness Contract Tes
   // =========================================================================
   it('[TC-IMP34.16/MSS][UC-IMP34] PostProcessingPipeline excludes SMAA pass when enableSmaa is false', () => {
     const props: Imp34PipelineProps = { enableSmaa: false };
-    const rendered = PostProcessingPipeline(props as PostProcessingPipelineProps);
+    const rendered = getCapturedComposer(props as PostProcessingPipelineProps);
     const children = getElementChildren(rendered);
     const smaaElement = children.find(
       (c) => c.type === SMAA || (c.type as { name?: string })?.name === 'SMAA'
@@ -188,7 +200,7 @@ describe('[TC-IMP34/MSS][UC-IMP34] Anti-Aliasing & Visual Crispness Contract Tes
   });
 
   it('[TC-IMP34.17/MSS][UC-IMP34] PostProcessingPipeline excludes DepthOfField pass when enableDof is false', () => {
-    const rendered = PostProcessingPipeline({ enableDof: false });
+    const rendered = getCapturedComposer({ enableDof: false });
     const children = getElementChildren(rendered);
     const dofElement = children.find(
       (c) => c.type === DepthOfField || (c.type as { name?: string })?.name === 'DepthOfField'
@@ -202,12 +214,13 @@ describe('[TC-IMP34/MSS][UC-IMP34] Anti-Aliasing & Visual Crispness Contract Tes
     expect(rendered).toBeNull();
   });
 
-  it('[TC-IMP34.19/MSS][UC-IMP34] PostProcessingPipeline configures EffectComposer with multisampling and autoClear=false', () => {
-    const rendered = ActivePostProcessingPipeline({});
+  it('[TC-IMP34.19/MSS][UC-IMP34] PostProcessingPipeline configures EffectComposer with multisampling and autoClear=true (INV-448.04 anti-ghosting hardening)', () => {
+    const rendered = getCapturedComposer();
     expect(rendered).not.toBeNull();
     expect(rendered?.type).toBe(EffectComposer);
     const props = getElementProps(rendered);
     expect(props.multisampling).toBeGreaterThanOrEqual(0);
-    expect(props.autoClear).toBe(false);
+    // [INV-448.04] Modernized from autoClear=false to true to prevent stale frame accumulation and ghosting artifacts
+    expect(props.autoClear).toBe(true);
   });
 });
