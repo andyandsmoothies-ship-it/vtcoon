@@ -1,0 +1,44 @@
+[
+  {
+    "file": "src/client/ui/player_card.tsx",
+    "desc": "AST: revert desktop player card property clusters to unconditional sm:flex",
+    "target": "${!isExpanded ? 'hidden' : 'flex'}",
+    "replacement": "${!isExpanded ? 'hidden sm:flex' : 'flex'}"
+  },
+  {
+    "file": "src/client/ui/player_card.tsx",
+    "desc": "AST: corrupt isExpanded calculation to false unconditionally",
+    "target": "const isExpanded = Boolean(isCurrentTurn || isUserExpanded);",
+    "replacement": "const isExpanded = false;"
+  },
+  {
+    "file": "src/client/ui/player_hud_list.tsx",
+    "desc": "AST: revert desktop player HUD list container width from md:w-56 to md:w-64",
+    "target": "md:w-56",
+    "replacement": "md:w-64"
+  },
+  {
+    "file": "src/client/ui/player_hud_list.tsx",
+    "desc": "AST: disable internal vertical scrolling overflow-y-auto on PlayerHudList",
+    "target": "overflow-y-auto",
+    "replacement": "overflow-hidden"
+  },
+  {
+    "file": "src/client/ui/hud_container.tsx",
+    "desc": "AST: break middle HUD container containment by changing overflow-hidden to overflow-visible",
+    "target": "pointer-events-none my-2 overflow-hidden",
+    "replacement": "pointer-events-none my-2 overflow-visible"
+  },
+  {
+    "file": "src/client/ui/floating_numbers.tsx",
+    "desc": "AST: reduce MilestoneBanner close button hit target below WCAG 2.2 AA minimum",
+    "target": "</span>\n        </div>\n        <button\n          type=\"button\"\n          onClick={(e) => {\n            e.stopPropagation();\n            handleDismiss();\n          }}\n          className=\"text-slate-400 hover:text-slate-800 text-[10px] sm:text-xs font-bold leading-none min-w-[24px] min-h-[24px]",
+    "replacement": "</span>\n        </div>\n        <button\n          type=\"button\"\n          onClick={(e) => {\n            e.stopPropagation();\n            handleDismiss();\n          }}\n          className=\"text-slate-400 hover:text-slate-800 text-[10px] sm:text-xs font-bold leading-none min-w-[16px] min-h-[16px]"
+  },
+  {
+    "file": "src/client/ui/floating_numbers.tsx",
+    "desc": "AST: reduce FloatingBadge close button hit target below WCAG 2.2 AA minimum",
+    "target": "</span>\n          </div>\n        </div>\n\n        <button\n          type=\"button\"\n          onClick={(e) => {\n            e.stopPropagation();\n            handleDismiss();\n          }}\n          className=\"text-slate-400 hover:text-slate-800 text-[10px] sm:text-xs font-bold leading-none min-w-[24px] min-h-[24px]",
+    "replacement": "</span>\n          </div>\n        </div>\n\n        <button\n          type=\"button\"\n          onClick={(e) => {\n            e.stopPropagation();\n            handleDismiss();\n          }}\n          className=\"text-slate-400 hover:text-slate-800 text-[10px] sm:text-xs font-bold leading-none min-w-[16px] min-h-[16px]"
+  }
+]

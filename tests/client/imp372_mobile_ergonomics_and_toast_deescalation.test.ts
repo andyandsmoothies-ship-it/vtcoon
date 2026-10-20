@@ -93,7 +93,7 @@ describe('[IMP-372] Mobile UI Ergonomics, Player Card Density & Toast De-escalat
   // FACET 2: State Reactivity & Turn Phase (Property Dots Collapse)
   // ============================================================================
   describe('[IMP-372][Facet-2] Player Card Turn State Reactivity', () => {
-    it('[TC-372.03/MSS][UC-CARD-NON-TURN-DOTS] PlayerCard collapses 28-dot property container on mobile via hidden sm:flex when isCurrentTurn is false', () => {
+    it('[TC-372.03/MSS][UC-CARD-NON-TURN-DOTS] PlayerCard collapses 28-dot property container on mobile via hidden when isCurrentTurn is false', () => {
       const html = renderToStaticMarkup(
         React.createElement(PlayerCard, {
           player: mockPlayer,
@@ -104,7 +104,8 @@ describe('[IMP-372] Mobile UI Ergonomics, Player Card Density & Toast De-escalat
       );
       const clusterMatch = html.match(/<div[^>]*data-testid="player-property-clusters"[^>]*>/);
       expect(clusterMatch).not.toBeNull();
-      expect(clusterMatch![0]).toContain('hidden sm:flex');
+      expect(clusterMatch![0]).toContain('hidden');
+      expect(clusterMatch![0]).not.toContain('sm:flex');
     });
 
     it('[TC-372.04/MSS][UC-CARD-TURN-DOTS] PlayerCard maintains property clusters container visibility with flex layout when isCurrentTurn is true', () => {

@@ -24,8 +24,8 @@ export function PlayerHudList({ initialCollapsed = false }: { initialCollapsed?:
   return (
     <aside
       className={`pointer-events-none flex flex-col gap-2 transition-[width] duration-300 ease-in-out ${
-        isPlayerHudCompact ? 'w-14 sm:w-16' : 'w-44 sm:w-48 md:w-64 max-w-[calc(100vw-6rem)]'
-      } select-none items-end pt-1 sm:pt-0 relative z-20`}
+        isPlayerHudCompact ? 'w-14 sm:w-16' : 'w-44 sm:w-48 md:w-56 max-w-[calc(100vw-6rem)]'
+      } select-none items-end pt-1 sm:pt-0 relative z-20 max-h-full overflow-y-auto scrollbar-none`}
       aria-label="Danh sách người chơi"
     >
       <div className="flex flex-col gap-2 w-full pointer-events-auto items-end">

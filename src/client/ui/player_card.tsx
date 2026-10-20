@@ -80,14 +80,10 @@ export function PlayerCard({
     setIsUserExpanded(false);
   }, [currentTurnPlayerId]);
 
-  const isTradingParty = Boolean(
-    tradingCellSet.size > 0 ||
-    (storePendingTradeOffer && (storePendingTradeOffer.buyerId === player.id || storePendingTradeOffer.sellerId === player.id))
-  );
-  const isExpandedOnMobile = isCurrentTurn || isTradingParty || isUserExpanded;
+  const isExpanded = Boolean(isCurrentTurn || isUserExpanded);
 
   const handleToggleExpand = () => {
-    if (player.bankrupt || isCurrentTurn || isTradingParty) return;
+    if (player.bankrupt || isCurrentTurn) return;
     setIsUserExpanded((prev) => !prev);
   };
 
@@ -101,7 +97,7 @@ export function PlayerCard({
       data-testid="player-ribbon"
       data-in-turn={isCurrentTurn ? 'true' : 'false'}
       onClick={handleToggleExpand}
-      aria-expanded={isExpandedOnMobile}
+      aria-expanded={isExpanded}
       tabIndex={player.bankrupt ? -1 : 0}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -112,7 +108,7 @@ export function PlayerCard({
       className={`pointer-events-auto relative flex flex-col gap-1.5 p-2.5 sm:p-3 rounded-xl border-2 transition-all duration-200 w-full select-none ${
         player.bankrupt
           ? 'opacity-50 grayscale cursor-default'
-          : isCurrentTurn || isTradingParty
+          : isCurrentTurn
           ? 'cursor-default'
           : 'cursor-pointer sm:cursor-default'
       } ${
@@ -170,9 +166,9 @@ export function PlayerCard({
           >
             {formatShortPlayerName(player.name)}
           </span>
-          {!player.bankrupt && !isCurrentTurn && !isTradingParty && (
+          {!player.bankrupt && !isCurrentTurn && (
             <span className="ml-1 shrink-0">
-              {renderCardExpandChevron(isExpandedOnMobile)}
+              {renderCardExpandChevron(isExpanded)}
             </span>
           )}
         </div>
@@ -206,7 +202,7 @@ export function PlayerCard({
         <>
           <span className="sr-only">BĐS:</span>
           <div
-            className={`flex-col gap-1 w-full px-2 pt-1.5 pb-1 border-t border-slate-300 select-none ${!isExpandedOnMobile ? 'hidden sm:flex' : 'flex'}`}
+            className={`flex-col gap-1 w-full px-2 pt-1.5 pb-1 border-t border-slate-300 select-none ${!isExpanded ? 'hidden' : 'flex'}`}
             data-testid="player-property-clusters"
             onClick={(e) => e.stopPropagation()}
           >

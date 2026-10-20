@@ -155,7 +155,7 @@ export function MilestoneBanner({ item }: { readonly item: FloatingTextItem }): 
             e.stopPropagation();
             handleDismiss();
           }}
-          className="text-slate-400 hover:text-slate-700 text-xs font-bold leading-none min-w-[24px] min-h-[24px] flex items-center justify-center p-1 rounded-lg hover:bg-slate-200/50 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 shrink-0 relative after:absolute after:-inset-2 after:content-['']"
+          className="text-slate-400 hover:text-slate-800 text-[10px] sm:text-xs font-bold leading-none min-w-[24px] min-h-[24px] flex items-center justify-center p-1 rounded-lg hover:bg-slate-200/50 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 shrink-0 relative after:absolute after:-inset-2 after:content-['']"
           aria-label="Đóng thông báo"
         >
           ✕
@@ -223,7 +223,7 @@ export function FloatingBadge({ item }: { readonly item: FloatingTextItem }): Re
       data-testid="contextual-transaction-badge"
       onClick={handleDismiss}
       onKeyDown={handleKeyDown}
-      className="pointer-events-auto cursor-pointer flex flex-col gap-1 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl border border-slate-900/20 bg-[#FFFDF8]/95 backdrop-blur-xs select-none shadow-[0_2px_0_0_#0f172a] active:scale-95 animate-in fade-in duration-200 w-full min-w-0"
+      className="pointer-events-auto cursor-pointer flex flex-col gap-1 px-2.5 py-1 rounded-xl bg-[#FFFDF8]/90 backdrop-blur-md border border-slate-900/20 md:border-slate-300/80 text-slate-900 shadow-md shadow-[0_2px_0_0_#0f172a] select-none active:scale-95 animate-in fade-in duration-200 w-full min-w-0"
     >
       {/* Hàng 1: Diễn giải dòng tiền tự nhiên + Icon nhận diện + Nút đóng ✕ */}
       <div className="flex items-start justify-between gap-1.5 min-w-0">
@@ -259,7 +259,7 @@ export function FloatingBadge({ item }: { readonly item: FloatingTextItem }): Re
             e.stopPropagation();
             handleDismiss();
           }}
-          className="text-slate-400 hover:text-slate-700 text-xs font-bold leading-none min-w-[24px] min-h-[24px] flex items-center justify-center p-1 rounded-lg hover:bg-slate-200/50 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 shrink-0 relative after:absolute after:-inset-2 after:content-['']"
+          className="text-slate-400 hover:text-slate-800 text-[10px] sm:text-xs font-bold leading-none min-w-[24px] min-h-[24px] flex items-center justify-center p-1 rounded-lg hover:bg-slate-200/50 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 shrink-0 relative after:absolute after:-inset-2 after:content-['']"
           aria-label="Đóng thông báo"
         >
           ✕

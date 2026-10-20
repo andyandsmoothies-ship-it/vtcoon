@@ -120,13 +120,14 @@ describe('[IMP-373] Player Card Tap-to-Expand & Dual-Party Trade Inspection', ()
     const card = container.querySelector<HTMLElement>('[data-testid="player-ribbon"]');
     const clusters = container.querySelector<HTMLElement>('[data-testid="player-property-clusters"]');
 
-    expect(clusters?.className).toContain('hidden sm:flex');
+    expect(clusters?.className).toContain('hidden');
+    expect(clusters?.className).not.toContain('sm:flex');
 
     act(() => {
       card?.click();
     });
 
-    expect(clusters?.className).not.toContain('hidden sm:flex');
+    expect(clusters?.className).not.toContain('hidden');
     expect(clusters?.className).toContain('flex');
   });
 
@@ -152,7 +153,7 @@ describe('[IMP-373] Player Card Tap-to-Expand & Dual-Party Trade Inspection', ()
     expect(indicatorExpanded?.textContent?.trim()).toBe('▲');
   });
 
-  it('[TC-373.03/MSS][UC-DUAL-TRADE-EXPAND] Given pendingTradeOffer active where PlayerCard belongs to sellerId or buyerId, When rendered with isCurrentTurn false, Then automatically expands property clusters without manual tap', () => {
+  it('[TC-373.03/MSS][UC-DUAL-TRADE-EXPAND] Given pendingTradeOffer active where PlayerCard belongs to sellerId or buyerId, When rendered with isCurrentTurn false, Then collapses property clusters until user tap to prevent viewport clipping', () => {
     useGameStore.setState({
       pendingTradeOffer: mockTradeOffer,
     });
@@ -168,9 +169,14 @@ describe('[IMP-373] Player Card Tap-to-Expand & Dual-Party Trade Inspection', ()
     const card = container.querySelector<HTMLElement>('[data-testid="player-ribbon"]');
     const clusters = container.querySelector<HTMLElement>('[data-testid="player-property-clusters"]');
 
-    expect(clusters?.className).not.toContain('hidden sm:flex');
+    expect(clusters?.className).toContain('hidden');
+
+    act(() => {
+      card?.click();
+    });
+
+    expect(clusters?.className).not.toContain('hidden');
     expect(clusters?.className).toContain('flex');
-    expect(card?.className).toContain('cursor-default');
   });
 
   it('[TC-373.04/MSS][UC-UNINVOLVED-COLLAPSED] Given trade offer active between two players, When uninvolved third-party PlayerCard is rendered, Then maintains collapsed state on mobile', () => {
@@ -190,7 +196,8 @@ describe('[IMP-373] Player Card Tap-to-Expand & Dual-Party Trade Inspection', ()
     const clusters = container.querySelector<HTMLElement>('[data-testid="player-property-clusters"]');
     const indicator = container.querySelector<HTMLElement>('[data-testid="player-card-expand-indicator"]');
 
-    expect(clusters?.className).toContain('hidden sm:flex');
+    expect(clusters?.className).toContain('hidden');
+    expect(clusters?.className).not.toContain('sm:flex');
     expect(indicator?.textContent?.trim()).toBe('▼');
     expect(card?.className).toContain('cursor-pointer sm:cursor-default');
   });
@@ -235,13 +242,14 @@ describe('[IMP-373] Player Card Tap-to-Expand & Dual-Party Trade Inspection', ()
     act(() => {
       card?.click();
     });
-    expect(clusters?.className).not.toContain('hidden sm:flex');
+    expect(clusters?.className).not.toContain('hidden');
 
     act(() => {
       useGameStore.setState({ currentTurnPlayerId: 'p3' });
     });
 
-    expect(clusters?.className).toContain('hidden sm:flex');
+    expect(clusters?.className).toContain('hidden');
+    expect(clusters?.className).not.toContain('sm:flex');
     const indicator = container.querySelector<HTMLElement>('[data-testid="player-card-expand-indicator"]');
     expect(indicator?.textContent?.trim()).toBe('▼');
   });
