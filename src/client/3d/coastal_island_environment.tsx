@@ -21,6 +21,8 @@ import { ToyboxWealthTrayLayer } from './toybox_wealth_tray_layer';
 import { WarRoomStageLayer } from './war_room_stage_layer';
 import { computeQuadrantCounts, validateSectorBalance } from './spatial_geometry_helpers';
 
+export const COASTAL_ARCHIPELAGO_BASE_MODEL_URL = '/models/board/coastal_archipelago_base.glb' as const;
+
 export function ContainerShipProceduralFallback(): React.ReactElement {
   return (
     <group>
@@ -188,8 +190,14 @@ export const CoastalIslandEnvironment: ((props: CoastalIslandEnvironmentProps) =
 
       {/* 2. Các khối ngoại vi hòn đảo (Được ẩn ở chế độ streamlined để giải phóng tối đa tầm nhìn bàn cờ) */}
       {!streamlined && (
-        <>
-          {/* Cao nguyên cỏ xanh nhiệt đới viền quanh bàn cờ (Lush Tropical Lawn Plateau, #22C55E) */}
+        <SafeGLTFModel
+          url={COASTAL_ARCHIPELAGO_BASE_MODEL_URL}
+          position={[0, 0, 0]}
+          receiveShadow
+          castShadow={!isMobile}
+          fallback={
+            <>
+              {/* Cao nguyên cỏ xanh nhiệt đới viền quanh bàn cờ (Lush Tropical Lawn Plateau, #22C55E) */}
           <mesh receiveShadow position={[0, -0.34, 0]}>
             <cylinderGeometry args={[15.6, 17.6, 0.26, 64]} />
             <meshStandardMaterial color="#22C55E" roughness={0.78} metalness={0.02} />
@@ -287,7 +295,9 @@ export const CoastalIslandEnvironment: ((props: CoastalIslandEnvironmentProps) =
             </mesh>
           </group>
         </>
-      )}
+      }
+    />
+  )}
 
       {/* 4. Rặng núi chân trời phía Bắc với tháp radar vi mô (#166534, #15803D, #22C55E) */}
       <HorizonMountainRange />
