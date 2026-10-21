@@ -264,13 +264,13 @@ def add_pitched_roof(bm, center_xy, z_base, width_x, depth_y, roof_h, rot_z=0.0,
 
 
 def add_oriental_curved_roof(bm, center_xy, z_base, width_x, depth_y, roof_h,
-                             corner_upturn: float = 0.05, rot_z: float = 0.0, per_side: int = 6) -> None:
+                             corner_upturn: float = 0.05, rot_z: float = 0.0, per_side: int = 4) -> None:
     """Mái đao cong phương Đông: bụng mái võng lõm + 4 mũi đao cong vểnh ở 4 góc."""
     to_w = local_frame(center_xy[0], center_xy[1], rot_z)
     hx, hy = width_x * 0.5, depth_y * 0.5
     ridge_x = max(0.0, hx - hy) * 0.9 + 0.01
     ridge_y = max(0.0, hy - hx) * 0.9 + 0.01
-    levels = 6
+    levels = 4
     corners = ((-1, -1), (1, -1), (1, 1), (-1, 1))
     rings = []
     for li in range(levels + 1):
@@ -301,7 +301,7 @@ def add_oriental_curved_roof(bm, center_xy, z_base, width_x, depth_y, roof_h,
         bm.faces.new((rings[0][(k + 1) % n], rings[0][k], c_bot))
 
 
-def add_arched_opening(bm, center, width, depth, total_height, rot_z=0.0, arch_segs=8) -> None:
+def add_arched_opening(bm, center, width, depth, total_height, rot_z=0.0, arch_segs=5) -> None:
     """Khối cửa vòm cuốn (chân thẳng + đỉnh bán nguyệt), mặt trước hướng -Y cục bộ."""
     cx, cy, cz = center
     to_w = local_frame(cx, cy, rot_z)

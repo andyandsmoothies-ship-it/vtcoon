@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Tuyến Metro trên cao hình chữ S Tây → Đông, 10 trụ chữ T và đoàn tàu Toybox 3 toa chuyển động tuần hoàn."""
+"""Tuyến Metro trên cao uốn lượn hình chữ S mềm mại (Serpentine S-Curve Viaduct) và đoàn tàu Hitachi 3 toa."""
 
 import math
 
@@ -15,12 +15,29 @@ GIRDER_HALF = 0.175
 METRO_LOOP_FRAMES = 300
 CAR_SPACING = 0.64
 
-# Điểm điều khiển (Blender XY): Tây Bắc → vòng qua Bitexco → vượt sông phía Nam trống đồng
-# → lướt giữa Hồ Gươm & Cột Cờ → ôm mép ngoài phía Đông Hồ Hoàn Kiếm → kết thúc phía Bắc Hà Nội.
+# Đường cong chữ S mềm mại (Serpentine S-Curve Loop):
+# Lướt từ bờ sông gần Cầu Ba Son -> ôm cung tròn mềm quanh Vòng xuyến Trống Đồng -> lượn qua trước Quảng trường Nhà Hát Lớn
+# -> uốn chữ S qua sườn Tây Hồ Hoàn Kiếm -> vòng êm phía sau lưng Hồ Hoàn Kiếm & chu vi ngoài để khép mạch tuần hoàn.
 METRO_CTRL = [
-    (-6.60, 5.05), (-5.30, 4.55), (-3.50, 3.60), (-2.10, 2.85), (-1.75, 1.45), (-2.25, -0.10),
-    (-1.65, -1.85), (-0.35, -2.55), (1.10, -2.50), (2.70, -2.48), (4.30, -2.44), (5.65, -1.70),
-    (6.12, 0.20), (6.00, 2.40), (5.05, 3.95), (3.40, 4.75), (2.15, 5.55), (1.55, 6.60),
+    (-2.45, -3.15),
+    (-1.85, -2.35),
+    (-0.65, -2.35),
+    (0.85, -2.25),
+    (1.95, -1.25),
+    (2.15, 0.15),
+    (1.55, 1.35),
+    (0.45, 2.35),
+    (-0.65, 3.55),
+    (-0.95, 4.95),
+    (0.45, 6.15),
+    (3.35, 6.15),
+    (5.85, 5.25),
+    (6.25, 2.00),
+    (6.25, -2.50),
+    (5.55, -5.85),
+    (1.45, -6.20),
+    (-1.55, -6.15),
+    (-3.05, -4.85),
 ]
 
 
@@ -30,14 +47,18 @@ def _catmull(p0, p1, p2, p3, t):
                   + (-p0 + 3.0 * p1 - 3.0 * p2 + p3) * t3)
 
 
-def sample_metro_path(per_span: int = 14) -> list[Vector]:
+def sample_metro_path(per_span: int = 3) -> list[Vector]:
+    """Lấy mẫu đường spline Catmull-Rom chữ S tuần hoàn khép kín (periodic serpentine S-curve loop)."""
     ctrl = [Vector((x, y, DECK_Z)) for x, y in METRO_CTRL]
-    ext = [ctrl[0] * 2.0 - ctrl[1]] + ctrl + [ctrl[-1] * 2.0 - ctrl[-2]]
+    n = len(ctrl)
     pts = []
-    for i in range(1, len(ext) - 2):
+    for i in range(n):
+        p0 = ctrl[(i - 1) % n]
+        p1 = ctrl[i]
+        p2 = ctrl[(i + 1) % n]
+        p3 = ctrl[(i + 2) % n]
         for k in range(per_span):
-            pts.append(_catmull(ext[i - 1], ext[i], ext[i + 1], ext[i + 2], k / per_span))
-    pts.append(ctrl[-1].copy())
+            pts.append(_catmull(p0, p1, p2, p3, k / float(per_span)))
     return pts
 
 
@@ -60,7 +81,11 @@ def _frame_at(pts, acc, s):
 
 
 def _train_car(coll, mats, obj_name: str, nose_dir: int) -> bpy.types.Object:
-    """Tạo đối tượng Toa Toybox độc lập tại gốc tọa độ cục bộ (0,0,0), hướng +X."""
+    """
+    Toa tàu Metro Tuyến 1 Bến Thành - Suối Tiên (Hitachi Kasado Works rolling stock):
+      • Mũi tàu khí động học Hitachi 3D vát nghiêng với kính chắn gió panorama đen bóng và bảng LED điểm đến.
+      • Thân hợp kim nhôm trắng sứ kết hợp dải sơn xanh dương đặc trưng (signature blue-and-white livery).
+    """
     b = MeshBatch(obj_name, mats, coll)
     tang = Vector((1.0, 0.0, 0.0))
     right = Vector((0.0, -1.0, 0.0))
@@ -68,18 +93,33 @@ def _train_car(coll, mats, obj_name: str, nose_dir: int) -> bpy.types.Object:
     def at(lx, ly, lz):
         return tang * lx + right * ly + Vector((0.0, 0.0, lz))
 
-    section = [(-0.118, -0.100), (0.118, -0.100), (0.126, -0.020), (0.122, 0.066), (0.094, 0.110),
-               (-0.094, 0.110), (-0.122, 0.066), (-0.126, -0.020)]
-    x0 = -0.21 if nose_dir == -1 else -0.285
-    x1 = 0.21 if nose_dir == 1 else 0.285
+    section = [
+        (-0.112, -0.098), (0.112, -0.098), (0.124, -0.032), (0.124, 0.058),
+        (0.098, 0.106), (-0.098, 0.106), (-0.124, 0.058), (-0.124, -0.032),
+    ]
+    x0 = -0.205 if nose_dir == -1 else -0.285
+    x1 = 0.205 if nose_dir == 1 else 0.285
     stations = []
     if nose_dir == -1:
-        stations += [(x0 - 0.11 * (k / 5) ** 0.85, math.cos(k / 5 * math.pi * 0.44),
-                      math.cos(k / 5 * math.pi * 0.40), -0.026 * (k / 5) ** 1.4) for k in range(5, 0, -1)]
+        for k in range(6, 0, -1):
+            u = k / 6.0
+            stations.append((
+                x0 - 0.135 * (u ** 0.82),
+                math.cos(u * math.pi * 0.42),
+                math.cos(u * math.pi * 0.38),
+                -0.028 * (u ** 1.35),
+            ))
     stations += [(x0, 1.0, 1.0, 0.0), (x1, 1.0, 1.0, 0.0)]
     if nose_dir == 1:
-        stations += [(x1 + 0.11 * (k / 5) ** 0.85, math.cos(k / 5 * math.pi * 0.44),
-                      math.cos(k / 5 * math.pi * 0.40), -0.026 * (k / 5) ** 1.4) for k in range(1, 6)]
+        for k in range(1, 7):
+            u = k / 6.0
+            stations.append((
+                x1 + 0.135 * (u ** 0.82),
+                math.cos(u * math.pi * 0.42),
+                math.cos(u * math.pi * 0.38),
+                -0.028 * (u ** 1.35),
+            ))
+
     body = b("porcelain", smooth=True)
     rings = [[body.verts.new(at(sx, cy * sy, cz * sz + dz)) for cy, cz in section] for sx, sy, sz, dz in stations]
     for i in range(len(rings) - 1):
@@ -89,17 +129,41 @@ def _train_car(coll, mats, obj_name: str, nose_dir: int) -> bpy.types.Object:
     body.faces.new(list(reversed(rings[0])))
     body.faces.new(rings[-1])
 
-    span = (x1 - x0) + (0.06 if nose_dir else -0.02)
-    mid = 0.5 * (x0 + x1) + 0.02 * nose_dir
-    add_box(b("obsidian_glass"), at(mid, 0.0, 0.026), (span, 0.256, 0.066), 0.0)
-    add_box(b("metro_cyan"), at(mid, 0.0, -0.042), (span + 0.02, 0.258, 0.040), 0.0)
-    add_box(b("metro_cyan"), at(mid, 0.0, 0.080), (span - 0.04, 0.246, 0.016), 0.0)
+    span = (x1 - x0) + (0.05 if nose_dir else -0.015)
+    mid = 0.5 * (x0 + x1) + 0.015 * nose_dir
+
+    add_box(b("metro_cyan"), at(mid, 0.0, -0.036), (span + 0.025, 0.252, 0.038), 0.0)
+    add_box(b("metro_cyan"), at(mid, 0.0, 0.078), (span - 0.015, 0.238, 0.018), 0.0)
+
+    add_box(b("obsidian_glass"), at(mid, 0.0, 0.022), (span - 0.01, 0.252, 0.064), 0.0)
+    for dx in (-0.15, 0.0, 0.15):
+        door_x = mid + dx * (0.85 if nose_dir else 1.0)
+        add_box(b("silver_steel"), at(door_x, 0.0, 0.004), (0.058, 0.255, 0.115), 0.0)
+        add_box(b("obsidian_glass"), at(door_x, 0.0, 0.024), (0.044, 0.258, 0.055), 0.0)
+
+    for bx in (-0.16, 0.16):
+        add_box(b("dark_granite"), at(bx, 0.0, -0.095), (0.12, 0.19, 0.032), 0.0)
+    if nose_dir != -1:
+        add_box(b("dark_granite"), at(x0 - 0.018, 0.0, -0.005), (0.036, 0.195, 0.175), 0.0)
+    if nose_dir != 1:
+        add_box(b("dark_granite"), at(x1 + 0.018, 0.0, -0.005), (0.036, 0.195, 0.175), 0.0)
+
     for hx in (-0.13, 0.13):
-        add_box(b("concrete"), at(hx, 0.0, 0.122), (0.15, 0.13, 0.026), 0.0)
+        add_box(b("silver_steel"), at(hx, 0.0, 0.116), (0.14, 0.13, 0.024), 0.0)
+    if nose_dir == 0:
+        add_box(b("silver_steel"), at(0.0, 0.0, 0.132), (0.11, 0.10, 0.018), 0.0)
+        # Cần tiếp điện chữ Z (diamond pantograph) trên nóc toa giữa
+        add_box(b("silver_steel"), at(0.0, 0.0, 0.152), (0.09, 0.14, 0.008), 0.0)
+        add_box(b("silver_steel"), at(0.0, 0.0, 0.168), (0.02, 0.18, 0.008), 0.0)
+
     if nose_dir:
-        add_box(b("obsidian_glass"), at(nose_dir * 0.262, 0.0, 0.024), (0.09, 0.212, 0.066), 0.0)
-        for side in (-0.068, 0.068):
-            add_box(b("lamp_glow"), at(nose_dir * 0.316, side, -0.040), (0.032, 0.05, 0.026), 0.0)
+        add_box(b("obsidian_glass"), at(nose_dir * 0.255, 0.0, 0.022), (0.095, 0.205, 0.068), 0.0)
+        # Bảng LED điểm đến "BẾN THÀNH - SUỐI TIÊN" phía trên kính lái và móc nối tự động Scharfenberg ở mũi tàu
+        add_box(b("lamp_glow"), at(nose_dir * 0.238, 0.0, 0.056), (0.018, 0.105, 0.014), 0.0)
+        add_box(b("metro_cyan"), at(nose_dir * 0.295, 0.0, -0.025), (0.075, 0.185, 0.036), 0.0)
+        add_box(b("dark_granite"), at(nose_dir * 0.335, 0.0, -0.072), (0.048, 0.065, 0.028), 0.0)
+        for side in (-0.064, 0.064):
+            add_box(b("lamp_glow"), at(nose_dir * 0.328, side, -0.036), (0.028, 0.046, 0.022), 0.0)
     return b.commit_merged(obj_name)
 
 
@@ -116,13 +180,15 @@ def _animate_metro_loop(cars: list[tuple[bpy.types.Object, float]], pts: list[Ve
 
     total_path_length = acc[-1]
     z_car = DECK_Z + 0.112
+    # Căn pha sao cho tại frame 130 (render kiểm chứng), đoàn tàu nằm ngay khúc cua chữ S trung tâm
+    phase_shift = -0.25 * total_path_length
 
     for car_obj, offset in cars:
         assign_action_slot(car_obj, action)
         prev_yaw = None
         for frame in range(1, METRO_LOOP_FRAMES + 1):
             t = (frame - 1) / float(METRO_LOOP_FRAMES) * total_path_length
-            s = (t + offset) % total_path_length
+            s = (t + phase_shift + offset) % total_path_length
             pos, tang = _frame_at(pts, acc, s)
             _, tang_ahead = _frame_at(pts, acc, (s + 0.25) % total_path_length)
 
@@ -147,54 +213,65 @@ def _animate_metro_loop(cars: list[tuple[bpy.types.Object, float]], pts: list[Ve
 
 def build_metro(coll, mats) -> list[Vector]:
     pts = sample_metro_path()
-    acc = _arc_lengths(pts)
+    pts_closed = pts + [pts[0].copy()]
+    acc = _arc_lengths(pts_closed)
     b = MeshBatch("GEO_Metro", mats, coll)
 
-    girder = [(-0.150, -0.12), (0.150, -0.12), (0.175, -0.08), (0.175, 0.04), (0.142, 0.04),
-              (0.142, 0.00), (-0.142, 0.00), (-0.142, 0.04), (-0.175, 0.04), (-0.175, -0.08)]
-    sweep_profile(b("concrete"), pts, girder, closed_path=False)
+    girder = [
+        (-0.118, -0.135), (0.118, -0.135), (0.152, -0.045), (0.184, -0.025),
+        (0.188, 0.064), (0.156, 0.064), (0.152, 0.002), (-0.152, 0.002),
+        (-0.156, 0.064), (-0.188, 0.064), (-0.184, -0.025), (-0.152, -0.045),
+    ]
+    sweep_profile(b("concrete"), pts, girder, closed_path=True)
+    # Thanh ray dẫn điện thứ 3 (Third Rail) ở chính giữa lòng dầm U-girder + hai đường ray thép chuẩn
+    sweep_profile(b("silver_steel"), pts, [(-0.008, 0.002), (0.008, 0.002), (0.008, 0.018), (-0.008, 0.018)],
+                  closed_path=True)
     for off in (-0.065, 0.065):
-        sweep_profile(b("rail_groove"), pts, [(off - 0.018, 0.001), (off + 0.018, 0.001), (off + 0.018, 0.012),
-                                              (off - 0.018, 0.012)], closed_path=False)
-    for p_end, p_prev in ((pts[0], pts[1]), (pts[-1], pts[-2])):
-        yaw = math.atan2(p_end.y - p_prev.y, p_end.x - p_prev.x)
-        add_box(b("metro_cyan"), (p_end.x, p_end.y, DECK_Z + 0.05), (0.05, 0.30, 0.08), yaw)
+        sweep_profile(b("rail_groove"), pts, [(off - 0.018, 0.003), (off + 0.018, 0.003), (off + 0.018, 0.014),
+                                              (off - 0.018, 0.014)], closed_path=True)
 
-    # 10 trụ chữ T cắm thẳng xuống cốt nền Z = 0.00 (tránh mặt sông, hồ, trống đồng, công trình)
-    blocked = [(4.2, -3.2, 0.62), (-3.6, 1.8, 0.75)]
+    # 12 trụ chữ T (hammerhead piers) dọc tuyến cầu cạn chữ S, giữ thông thoáng tuyệt đối R = 1.55m tại tâm
+    blocked = [
+        (-3.75, -1.75, 0.78),
+        (-2.85, 1.45, 0.85),
+        (1.05, -4.15, 0.88),
+        (4.35, -0.75, 0.88),
+        (-2.25, -4.45, 0.65),
+    ]
 
     def pier_ok(p):
-        if is_in_river(p.x, p.y, 0.12) or is_in_hoan_kiem(p.x, p.y, 0.45) or math.hypot(p.x, p.y) < 2.0:
+        if is_in_river(p.x, p.y, 0.08) or is_in_hoan_kiem(p.x, p.y, 0.25) or math.hypot(p.x, p.y) < 1.62:
             return False
         return all(math.hypot(p.x - bx, p.y - by) > r for bx, by, r in blocked)
 
     total = acc[-1]
-    z_bottom = DECK_Z - 0.12
+    z_bottom = DECK_Z - 0.135
     piers = 0
-    for k in range(10):
-        target = (k + 0.5) / 10.0 * total
-        for delta in (0.0, 0.15, -0.15, 0.3, -0.3, 0.45, -0.45, 0.6, -0.6):
-            pos, tang = _frame_at(pts, acc, target + delta)
+    num_piers = 12
+    for k in range(num_piers):
+        target = (k + 0.5) / float(num_piers) * total
+        for delta in (0.0, 0.25, -0.25, 0.50, -0.50, 0.75, -0.75, 1.05, -1.05, 1.35, -1.35, 1.65, -1.65, 2.00, -2.00):
+            pos, tang = _frame_at(pts_closed, acc, target + delta)
             if pier_ok(pos):
                 yaw = math.atan2(tang.y, tang.x)
-                add_cylinder(b("concrete"), (pos.x, pos.y, 0.02), 0.16, 0.15, 0.04, 16, yaw)
-                add_box(b("concrete"), (pos.x, pos.y, 0.04 + (z_bottom - 0.10) * 0.5), (0.13, 0.15, z_bottom - 0.10), yaw)
-                add_box(b("concrete"), (pos.x, pos.y, z_bottom - 0.035), (0.20, 0.40, 0.07), yaw)
-                add_box(b("concrete"), (pos.x, pos.y, z_bottom - 0.085), (0.16, 0.28, 0.04), yaw)
+                add_cylinder(b("concrete"), (pos.x, pos.y, 0.02), 0.155, 0.145, 0.04, 12, yaw)
+                add_box(b("concrete"), (pos.x, pos.y, 0.04 + (z_bottom - 0.095) * 0.5),
+                        (0.13, 0.15, z_bottom - 0.095), yaw)
+                add_box(b("concrete"), (pos.x, pos.y, z_bottom - 0.032), (0.20, 0.38, 0.064), yaw)
+                add_box(b("concrete"), (pos.x, pos.y, z_bottom - 0.078), (0.16, 0.26, 0.036), yaw)
                 piers += 1
                 break
-    if piers != 10:
-        raise RuntimeError(f"Metro T-pier placement failed: {piers}/10 piers placed")
+    if piers != num_piers:
+        raise RuntimeError(f"Metro T-pier placement failed: {piers}/{num_piers} piers placed")
 
     b.commit()
 
-    # Tách 3 toa tàu thành 3 Object động độc lập & nướng hoạt ảnh Action_Metro_Loop (300 frames)
     car_head = _train_car(coll, mats, "NODE_Train_Car_Head", nose_dir=1)
     car_mid = _train_car(coll, mats, "NODE_Train_Car_Mid", nose_dir=0)
     car_tail = _train_car(coll, mats, "NODE_Train_Car_Tail", nose_dir=-1)
     _animate_metro_loop(
         [(car_head, CAR_SPACING), (car_mid, 0.0), (car_tail, -CAR_SPACING)],
-        pts,
+        pts_closed,
         acc,
     )
-    return pts
+    return pts_closed
