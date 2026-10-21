@@ -90,6 +90,7 @@ Inspect the following Single Source of Truth (SSOT) files before auditing:
    - Verify workspace is clean of scratch files (`.agents/tmp/`), orphan variables, or dead exports. Never run `git` commands (Git is strictly human-controlled).
 8. **Closed-Loop Re-Review**:
    - If findings include any `[BLOCKER]` or `[HIGH]` issue: Issue `[REJECTED]`. Re-review fixed code and re-run tests until 100% clean.
+   - **Remediation Protocol & Budget Guard**: Verify fixes followed the **Sequential Multi-Finding Remediation Protocol** (1 finding = 1 boundary test RED -> 1 fix GREEN -> verify). If a finding remains unresolved after 3 attempts, escalate to Human Review (`CHALLENGE_ESCALATED`) rather than spinning in endless loops.
 9. **Lean Retrospective & Active Gotcha Audit (Anti-Bloat Knowledge Pyramid)**:
    - Extract edge-case learnings following 3-question filter: (1) Fix via Type System? -> Modify type. (2) Fix via Shared Helper? -> Encapsulate function. (3) Project-wide impact? -> Document in `docs/domain/gotchas.md`.
    - **Mandatory Gotcha Verification**: Verify that any resolved non-trivial defect, race condition, or domain trap has an extracted numbered invariant recorded in `docs/domain/gotchas.md` with domain tag and ticket traceability. MANDATORY REJECT if omitted.

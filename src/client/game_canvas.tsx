@@ -8,7 +8,8 @@ import { AdaptiveDprController } from './3d/adaptive_dpr_controller';
 import { AdaptiveIdleCoolingController } from './3d/adaptive_idle_cooling_controller';
 import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, ContactShadows, Environment } from '@react-three/drei';
-import { ACESFilmicToneMapping, NoToneMapping } from 'three';
+import { ACESFilmicToneMapping, NoToneMapping, type WebGLRendererParameters, type ToneMapping } from 'three';
+import type { CanvasGlProfile } from './3d/device_detect';
 import { SafeEnvironment, AdaptiveToneMappingSync } from './3d/safe_environment';
 import type { Player } from '../domain/room';
 import { GameBoard } from './3d/board_layout';
@@ -47,6 +48,23 @@ export {
   calculateCameraZoom,
   resolveCameraTargetCell,
 };
+
+export const DEFAULT_CANVAS_CAMERA_CONFIG = {
+  fov: 24,
+  near: 2.0,
+  far: 140.0,
+} as const;
+
+export function resolveCanvasGlConfig(
+  glProfile: CanvasGlProfile,
+  isMobile: boolean
+): WebGLRendererParameters & { toneMapping: ToneMapping; toneMappingExposure: number } {
+  return {
+    ...glProfile,
+    toneMapping: isMobile ? ACESFilmicToneMapping : NoToneMapping,
+    toneMappingExposure: 1.08,
+  };
+}
 
 // [TC-190.12/MSS] Cau noi tuong thich phong ve cho window.__resetCameraToDefault:
 if (typeof window !== 'undefined') {
@@ -175,15 +193,8 @@ export function GameCanvas({
         <Canvas
           shadows={isMobileDevice ? false : "soft"} /* shadows="soft" */
           dpr={deviceProfile.recommendedDpr}
-          camera={{ position: isLobby ? CAMERA_CONFIG.pre_match.position : CAMERA_CONFIG.overview.position, fov: 24, near: 0.5, far: 300 }}
-          gl={{
-            ...deviceProfile.glProfile,
-            logarithmicDepthBuffer: true,
-            antialias: true,
-            precision: 'highp',
-            toneMapping: isMobileDevice ? ACESFilmicToneMapping : NoToneMapping,
-            toneMappingExposure: 1.08,
-          }}
+          camera={{ position: isLobby ? CAMERA_CONFIG.pre_match.position : CAMERA_CONFIG.overview.position, ...DEFAULT_CANVAS_CAMERA_CONFIG }}
+          gl={resolveCanvasGlConfig(deviceProfile.glProfile, isMobileDevice)}
           onCreated={({ gl }) => {
             if (gl?.info) {
               gl.info.autoReset = false;

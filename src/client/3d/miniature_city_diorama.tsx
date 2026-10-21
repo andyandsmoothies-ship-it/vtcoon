@@ -61,7 +61,7 @@ export function CentralMonumentPlaza({ isMobile = false, isDesktopLean = false }
               {/* 3. Vành khuyên đồng thau bo viền ngoài (không che mặt đĩa) */}
               <mesh receiveShadow position={[0, 0.0305, 0]} rotation={[-Math.PI / 2, 0, 0]}>
                 <ringGeometry args={[1.38, 1.44, 48]} />
-                <meshStandardMaterial color="#D4AF37" metalness={0.9} roughness={0.2} />
+                <meshStandardMaterial color="#D4AF37" metalness={0.9} roughness={0.2} polygonOffset polygonOffsetFactor={-1} polygonOffsetUnits={-2} />
               </mesh>
             </>
           }

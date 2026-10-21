@@ -117,7 +117,7 @@ export function DioramaTerrain({
                 </mesh>
                 <mesh position={[0, RIVER_BED_Y + 0.005, 0]} data-testid="diorama-river-waves">
                   <boxGeometry args={[1.6, 0.002, 14.8]} />
-                  <meshStandardMaterial color="#E0F2FE" transparent opacity={0.35} roughness={0.2} />
+                  <meshStandardMaterial color="#E0F2FE" transparent opacity={0.35} roughness={0.2} depthWrite={false} />
                 </mesh>
               </group>
             }
@@ -166,7 +166,7 @@ export function DioramaTerrain({
           {/* Gờ sóng nước/bọt sóng dập dềnh */}
           <mesh position={[0, RIVER_BED_Y + 0.005, 0]} data-testid="diorama-river-waves">
             <boxGeometry args={[1.6, 0.002, 14.8]} />
-            <meshStandardMaterial color="#E0F2FE" transparent opacity={0.35} roughness={0.2} />
+            <meshStandardMaterial color="#E0F2FE" transparent opacity={0.35} roughness={0.2} depthWrite={false} />
           </mesh>
 
           {/* Bờ kè vát dốc Tây (Embankment slope from 0.000 down to -0.035) */}

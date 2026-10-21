@@ -26,8 +26,12 @@ export function auditScopeAndSubsystems(targetFiles) {
       cohesiveFamilies.add('src/client/ui/modals');
       continue;
     }
-    if (norm.startsWith('src/client/3d/diorama/') || norm === 'src/client/3d/toybox_wealth_tray_visuals.ts') {
+    if (norm.startsWith('src/client/3d/diorama/') || norm === 'src/client/3d/toybox_wealth_tray_visuals.ts' || norm === 'src/client/3d/miniature_city_diorama.tsx') {
       cohesiveFamilies.add('src/client/3d/diorama');
+      continue;
+    }
+    if (norm.startsWith('src/client/3d/camera_') || norm.startsWith('src/client/3d/cinematic_') || norm.startsWith('src/client/3d/adaptive_cinematic_camera') || norm.startsWith('src/client/3d/use_camera_')) {
+      cohesiveFamilies.add('src/client/3d/camera');
       continue;
     }
     if (norm.startsWith('src/client/3d/board_') || norm.startsWith('src/client/3d/time_of_day_lighting')) {

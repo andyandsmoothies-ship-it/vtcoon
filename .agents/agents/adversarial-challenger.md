@@ -54,9 +54,16 @@ Run these checks on disk before writing implementation vectors:
 
 ## 3. The Attack Vectors (After ADV-OBJ passes)
 
-### ⚔️ Vector 1: Exploits & Domain Conservation
+### ⚔️ Vector 1: Exploits, Domain Conservation & STRIDE Threat Defense
 - Can an actor bypass validation, duplicate resources, or violate domain conservation invariants via the new code path?
 - Can actions be spammed or replayed to create illegitimate state?
+- **STRIDE Threat Probing (for Network, Protocol & Economy)**:
+  - **Spoofing**: Can an actor forge `playerId` in action envelopes or impersonate another player?
+  - **Tampering**: Are balances, property ownerships, prices, and rents strictly calculated server-side, or can clients tamper with raw payload values?
+  - **Repudiation**: Are critical state shifts, trade events, and cash transactions recorded in activity logs with verifiable actor attribution?
+  - **Information Disclosure**: Do broadcast deltas leak hidden cards, unrolled dice seeds, or opponent trade intentions to other clients?
+  - **Denial of Service**: Can spamming intents or rapid modal dismissals lock up the turn coordinator or stall ephemeral state (missing TTL Dead Man's Switch)?
+  - **Elevation of Privilege**: Can regular players trigger host/admin intents or bypass turn phase constraints?
 
 ### ⚡ Vector 2: Concurrency & Re-entrancy
 - What if two conflicting intents arrive in the same tick/frame?

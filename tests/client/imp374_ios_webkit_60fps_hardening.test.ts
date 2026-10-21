@@ -65,10 +65,10 @@ describe('[IMP-374] Balanced iOS WebKit Performance Hardening Contract Tests', (
   });
 
   // TC-374.04
-  it('[TC-374.04/MSS][UC-DPR-IOS-PHONE-CLAMP] kep tran DPR iPhone xuong IOS_PHONE_MAX (1.0)', () => {
+  it('[TC-374.04/MSS][UC-DPR-IOS-PHONE-CLAMP] kep tran DPR iPhone xuong IOS_PHONE_MAX (0.82)', () => {
     const clamped = resolveClampedDpr(3.0, true, true);
     expect(clamped).toBe(DPR_BOUNDS.IOS_PHONE_MAX);
-    expect(clamped).toBe(1.0);
+    expect(clamped).toBe(0.82);
   });
 
   // TC-374.05

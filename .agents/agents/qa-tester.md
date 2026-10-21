@@ -43,9 +43,9 @@ hooks: [.agents/hooks_qa.json]
 - **Universal 5-Facet Behavioral Matrix (Adaptive across Project Types)**:
   1. *Happy Path & Core Invariants*: Primary business/visual/API contract anchored to the Plan's numerical/structural invariants.
   2. *Boundary & Zero/Max Thresholds*: Off-by-one (`N-1`, `N`, `N+1`), empty collections (`[]`, `{}`), zero/negative/max limits.
-  3. *Malformed Input & Error Defense*: `NaN`, `null`, `undefined`, out-of-bounds indices, invalid enum/schema rejection without crashing.
+  3. *Malformed Input, Error Defense & STRIDE Boundary*: `NaN`, `null`, `undefined`, out-of-bounds indices, invalid enum/schema rejection without crashing; rejecting spoofed `playerId`, unauthenticated intents, unauthorized role actions, or payload tampering.
   4. *Adaptive Domain Risk & Lifecycle Teardown* (select by project/module type):
-     - **Realtime / 3D / Game / Async UI**: Concurrency, re-entrant storms, ephemeral TTL Dead Man's Switch, `.dispose()` / timer cleanup on unmount.
+     - **Realtime / 3D / Game / Async UI**: Concurrency, re-entrant storms, ephemeral TTL Dead Man's Switch, intentional DoS action spam resistance, `.dispose()` / timer cleanup on unmount.
      - **Backend API / Fintech / E-Commerce**: Idempotency (duplicate request safety), atomic rollback on partial failure, and conservation laws ($A + B = \text{const}$).
      - **SaaS / Auth / Multi-Tenant**: Authorization boundary (AuthZ), tenant isolation, and state immutability.
      - **Mobile (Flutter/RN) / Offline Client**: App lifecycle interruption (background/resume), viewport rotation, and stale cache recovery.

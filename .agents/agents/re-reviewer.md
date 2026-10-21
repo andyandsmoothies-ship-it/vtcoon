@@ -38,6 +38,9 @@ Your mission is two-fold:
 - Verify physical lines with `view_file`.
 - Run targeted tests on modified slices: `npx vitest run <test_path>` (or project test runner).
 - Verify type safety when types change (`npx tsc --noEmit` exits 0).
+- **Remediation Discipline & Attempt Budget Guard**:
+  - Verify fixes adhered to the **Sequential Multi-Finding Remediation Protocol** (discrete verification per finding, zero shotgun edits).
+  - Track Round Number ($N$). If Round $N > 3$ for the same unresolved flaw, issue `REJECTED: Max Attempt Budget (3) Exhausted — Escalate to Human Review` to prevent infinite looping.
 
 ---
 

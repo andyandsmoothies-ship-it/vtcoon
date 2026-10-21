@@ -73,9 +73,9 @@ describe('[IMP-361] iOS WebGL Performance, Context Hints & Thermal Tuning Contra
   });
 
   describe('Recommended DPR Profile', () => {
-    it('[TC-361.03/MSS][UC-DPR-IOS-PHONE] Given mobile iPhone device environment, When calling getRecommendedDpr, Then returns standard mobile DPR range 0.85 to 1.0 for parity', () => {
+    it('[TC-361.03/MSS][UC-DPR-IOS-PHONE] Given mobile iPhone device environment, When calling getRecommendedDpr, Then returns calibrated mobile DPR range 0.75 to 0.82 for thermal stability', () => {
       const dprRange = getRecommendedDpr(true, true);
-      expect(dprRange).toEqual([0.85, 1.0]);
+      expect(dprRange).toEqual([0.75, 0.82]);
     });
 
     it('[TC-361.04/MSS][UC-DPR-IOS-TABLET] Given iPadOS tablet device environment, When calling getRecommendedDpr, Then returns standard mobile tablet DPR range 0.85 to 1.0', () => {
@@ -85,12 +85,13 @@ describe('[IMP-361] iOS WebGL Performance, Context Hints & Thermal Tuning Contra
   });
 
   describe('WebGL Context Hints & Power Preference', () => {
-    it('[TC-361.05/MSS][UC-GL-PROFILE] Given mobile hardware context, When calling getRecommendedGlProfile, Then returns high-performance powerPreference, antialias, and highp shader precision', () => {
+    it('[TC-361.05/MSS][UC-GL-PROFILE] Given mobile hardware context, When calling getRecommendedGlProfile, Then returns high-performance powerPreference, antialias false, mediump precision, and logarithmicDepthBuffer false', () => {
       const glProfileMobile = getRecommendedGlProfile(true);
       expect(glProfileMobile).toEqual({
-        antialias: true,
+        antialias: false,
         powerPreference: 'high-performance',
-        precision: 'highp',
+        precision: 'mediump',
+        logarithmicDepthBuffer: false,
       });
 
       const glProfileDesktop = getRecommendedGlProfile(false);
@@ -98,6 +99,7 @@ describe('[IMP-361] iOS WebGL Performance, Context Hints & Thermal Tuning Contra
         antialias: true,
         powerPreference: 'high-performance',
         precision: 'highp',
+        logarithmicDepthBuffer: true,
       });
     });
   });

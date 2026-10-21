@@ -25,6 +25,7 @@ export const DEFAULT_DEVICE_PROFILE: DeviceProfile = {
     antialias: true,
     powerPreference: 'high-performance',
     precision: 'highp',
+    logarithmicDepthBuffer: true,
   },
 };
 

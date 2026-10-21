@@ -1,0 +1,44 @@
+[
+  {
+    "file": "src/client/3d/cinematic_chase_camera.ts",
+    "desc": "AST: corrupt unified azimuth on portrait back to side-aware quadrant switching",
+    "target": "if (isPortrait) return [offH, offY, offH];",
+    "replacement": "// AST mutation bypass unified azimuth"
+  },
+  {
+    "file": "src/client/3d/cinematic_chase_camera.ts",
+    "desc": "AST: corrupt mobile portrait street chase unified azimuth",
+    "target": "if (isPortrait) {\n    posX = px + trail;\n    posZ = pz + outer;\n    tarX = px - look;\n    tarZ = pz - tilt;\n  }",
+    "replacement": "if (false) {}"
+  },
+  {
+    "file": "src/client/3d/cinematic_chase_camera.ts",
+    "desc": "AST: revert mobile portrait elevated follow heights back to close-zoom 3.6 / 4.2",
+    "target": "const offH = (isPortrait ? 5.8 : 3.6) * kDist;\n  const offY = (isPortrait ? 6.8 : 4.2) * ky;",
+    "replacement": "const offH = 3.6 * kDist;\n  const offY = 4.2 * ky;"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: remove screen-space target HUD clearance shift on portrait",
+    "target": "const target: [number, number, number] = isPortrait\n        ? [safePx + 0.6, 0.4, safePz - 0.6]\n        : [safePx, 0.2, safePz];",
+    "replacement": "const target: [number, number, number] = [safePx, 0.2, safePz];"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: corrupt human portrait transition speed to whiplash 5.2",
+    "target": "const speed = isPortrait\n        ? (options?.isBotTurn ? 5.2 : 2.8)\n        : (options?.isBotTurn ? 3.8 : CAMERA_CONFIG.pawn_chase.speed);",
+    "replacement": "const speed = 5.2;"
+  },
+  {
+    "file": "src/client/3d/miniature_city_diorama.tsx",
+    "desc": "AST: remove polygonOffset from medallion brass ring",
+    "target": "polygonOffset polygonOffsetFactor={-1} polygonOffsetUnits={-2}",
+    "replacement": ""
+  },
+  {
+    "file": "src/client/3d/diorama/diorama_terrain.tsx",
+    "desc": "AST: revert depthWrite={false} on non-serene river waves",
+    "target": "{/* Gờ sóng nước/bọt sóng dập dềnh */}\n          <mesh position={[0, RIVER_BED_Y + 0.005, 0]} data-testid=\"diorama-river-waves\">\n            <boxGeometry args={[1.6, 0.002, 14.8]} />\n            <meshStandardMaterial color=\"#E0F2FE\" transparent opacity={0.35} roughness={0.2} depthWrite={false} />",
+    "replacement": "{/* Gờ sóng nước/bọt sóng dập dềnh */}\n          <mesh position={[0, RIVER_BED_Y + 0.005, 0]} data-testid=\"diorama-river-waves\">\n            <boxGeometry args={[1.6, 0.002, 14.8]} />\n            <meshStandardMaterial color=\"#E0F2FE\" transparent opacity={0.35} roughness={0.2} depthWrite={true} />"
+  }
+]

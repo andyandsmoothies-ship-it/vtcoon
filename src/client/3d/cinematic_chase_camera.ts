@@ -178,8 +178,14 @@ export function calculateStreetChaseCameraState(params: StreetChaseParams): Targ
   let tarY = py + tHeight;
   let tarZ = pz;
 
+  const isPortrait = typeof params.aspect === 'number' && Number.isFinite(params.aspect) && params.aspect < 1.0;
   const isCorner = Boolean(params.isTransientTurnCorner && isCornerCellIndex(params.cellIndex));
-  if (isCorner) {
+  if (isPortrait) {
+    posX = px + trail;
+    posZ = pz + outer;
+    tarX = px - look + 0.6;
+    tarZ = pz - tilt - 0.6;
+  } else if (isCorner) {
     const norm = Math.floor((((params.cellIndex ?? 0) % 40) + 40) % 40);
     const { signX, signZ } = resolveCornerSigns(norm);
     const posRadius = Math.hypot(trail, outer);
@@ -251,8 +257,9 @@ export function resolveStandardChaseOffset(
   const clampedAspect = Math.max(0.35, safeAspect);
   const ky = isPortrait ? Math.min(1.35, Math.max(1.0, 0.95 / Math.sqrt(clampedAspect))) : 1.0;
   const kDist = isPortrait ? Math.min(1.25, Math.max(1.0, 0.88 / Math.sqrt(clampedAspect))) : 1.0;
-  const offH = 3.6 * kDist;
-  const offY = 4.2 * ky;
+  const offH = (isPortrait ? 5.8 : 3.6) * kDist;
+  const offY = (isPortrait ? 6.8 : 4.2) * ky;
+  if (isPortrait) return [offH, offY, offH];
   if (px === 0 && pz === 0) return [offH, offY, offH];
   const side = resolveSideFromCoordinates(px, pz);
   switch (side) {

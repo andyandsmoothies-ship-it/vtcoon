@@ -1,0 +1,38 @@
+[
+  {
+    "file": "src/client/3d/device_detect.ts",
+    "desc": "AST: corrupt mobile glProfile logarithmicDepthBuffer to true",
+    "target": "logarithmicDepthBuffer: false,",
+    "replacement": "logarithmicDepthBuffer: true,"
+  },
+  {
+    "file": "src/client/3d/device_detect.ts",
+    "desc": "AST: corrupt mobile glProfile antialias to true",
+    "target": "antialias: false,\n      powerPreference: 'high-performance',",
+    "replacement": "antialias: true,\n      powerPreference: 'high-performance',"
+  },
+  {
+    "file": "src/client/3d/device_detect.ts",
+    "desc": "AST: corrupt iPhone recommended DPR to unconstrained 1.0",
+    "target": "if (isMobile && isIOSPhoneDevice) {\n    return [0.75, 0.82];\n  }",
+    "replacement": "if (isMobile && isIOSPhoneDevice) {\n    return [0.85, 1.0];\n  }"
+  },
+  {
+    "file": "src/client/3d/perf_budget.ts",
+    "desc": "AST: corrupt IOS_PHONE_MAX from 0.82 back to 1.0",
+    "target": "IOS_PHONE_MAX: 0.82,",
+    "replacement": "IOS_PHONE_MAX: 1.0,"
+  },
+  {
+    "file": "src/client/game_canvas.tsx",
+    "desc": "AST: revert camera near plane from 2.0 back to 0.5 causing z-fighting",
+    "target": "near: 2.0,",
+    "replacement": "near: 0.5,"
+  },
+  {
+    "file": "src/client/game_canvas.tsx",
+    "desc": "AST: corrupt mobile tone mapping in resolveCanvasGlConfig to NoToneMapping",
+    "target": "toneMapping: isMobile ? ACESFilmicToneMapping : NoToneMapping,",
+    "replacement": "toneMapping: NoToneMapping,"
+  }
+]

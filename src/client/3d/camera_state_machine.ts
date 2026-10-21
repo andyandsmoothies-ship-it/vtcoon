@@ -221,13 +221,18 @@ export function calculateTargetCameraState(
       const p = pawnPosition ?? [0, 0, 0];
       const safePx = Number.isFinite(p[0]) ? p[0] : 0;
       const safePz = Number.isFinite(p[2]) ? p[2] : 0;
+      const isPortrait = typeof options?.aspect === 'number' && Number.isFinite(options.aspect) && options.aspect < 1.0;
+      const target: [number, number, number] = isPortrait
+        ? [safePx + 0.6, 0.4, safePz - 0.6]
+        : [safePx, 0.2, safePz];
+      const speed = isPortrait
+        ? (options?.isBotTurn ? 5.2 : 2.8)
+        : (options?.isBotTurn ? 3.8 : CAMERA_CONFIG.pawn_chase.speed);
       return {
         position: calculateChaseCameraPosition(p, undefined, options?.aspect),
-        target: [safePx, 0.2, safePz],
+        target,
         fov: calculateResponsiveChaseFov(options?.aspect),
-        speed: options?.isBotTurn
-          ? (options?.aspect !== undefined && options.aspect < 1.0 ? 5.2 : 3.8)
-          : CAMERA_CONFIG.pawn_chase.speed,
+        speed,
       };
     }
     case 'tile_focus': {

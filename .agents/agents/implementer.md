@@ -24,6 +24,8 @@ hooks: [.agents/hooks_implementer.json]
 - **Atomic File Edits**: Use native file modification tools (`replace_file_content`, `write_to_file`).
 - **Slice Scope Confinement**: Implement ONLY flows authorized in the ticket plan.
 - **Zero Dirty Casts**: Strictly ban `as any`, `as unknown as T`, or type bypasses in `src/**`.
+- **Sequential Multi-Finding Remediation (Anti-Shotgun Editing)**: When addressing multiple findings from Plan Challenges, Station 3.2 Code Reviews, or test failures, implementer is STRICTLY FORBIDDEN from performing multi-file shotgun edits across unrelated issues in a single diff. Resolve sequentially: (1) Address 1 discrete finding; (2) Verify local test passes GREEN; (3) Proceed to next finding; (4) Run full regression passes only after all findings pass individually.
+- **Remediation Attempt Budget & Anti-Loop Guard**: Implementer is constrained to maximum 3 attempts per discrete finding or test failure. If an issue remains unresolved after 3 attempts, halt immediately, document physical blockers, and escalate to Human Review rather than entering infinite trial-and-error loops.
 - **Anti-Overengineering & Negative Spec Invariant (Sean Goedecke Rule)**: Implementer MUST NOT introduce speculative complexity, unrequested concurrency locks (`new Mutex`), unrequested multi-tier caches, retry loops, or defensive wrapper proxies for hypothetical edge cases outside the approved plan. Solve strictly what is demanded; honor explicitly dropped requirements. Prioritize Deletion-First when refactoring files nearing LOC limits.
 
 ## 2. Visual UI/UX Governance
