@@ -1,5 +1,5 @@
-// Visual Scenario: Direct Parabolic Pawn Flight at Apex (IMP-441)
-// Demonstrates high-arc trajectory (JAIL_FLIGHT_ARC = 2.8m), PawnHopTrajectory, and zero modal occlusion.
+// Visual Scenario: Direct Parabolic Pawn Flight at Apex (IMP-454)
+// Demonstrates vehicle_plane.glb at Apex (Y = 2.8m), banking rotation, and hidden pawn mesh.
 
 (function() {
   if (!window.__gameStore) return;
@@ -10,49 +10,48 @@
     window.__lobbyStore.getState().setGameStarted(true);
   }
 
-  // 2. Prevent Title Deed modal by registering ownership and clearing modals
+  // 2. Prevent Title Deed modal by registering ownership of target cells and clearing modals
   const s = window.__gameStore.getState();
   const currentP1 = s.playersInfo?.p1 || { id: 'p1', name: 'Tester', balance: 15000, tokenColor: '#38BDF8' };
-  
+
   window.__gameStore.setState({
     activeModal: null,
     modalPayload: null,
     currentTurnPlayerId: 'p1',
     isRolling: false,
     hasRolledThisTurn: false,
-    playerPositions: { p1: 33, p2: 15, p3: 20, p4: 10 },
-    visualPositions: { p1: 33, p2: 15, p3: 20, p4: 10 },
+    playerPositions: { p1: 0, p2: 15, p3: 20, p4: 10 },
+    visualPositions: { p1: 0, p2: 15, p3: 20, p4: 10 },
     playersInfo: {
       ...s.playersInfo,
-      p1: { ...currentP1, ownedProperties: [6, 8, 30, 33] },
+      p1: { ...currentP1, ownedProperties: [0, 1, 6, 8, 10, 15, 16, 20, 25, 30, 33, 35, 39] },
     },
-    cameraFocusCell: 6,
+    cameraFocusCell: null,
+    hasUserCustomCamera: true,
     activePawnAnimation: null,
   });
 
-  const launchFlight = () => {
+  let count = 0;
+  const loopFlight = () => {
+    count++;
+    // Alternate fromCell around Cell 0 to change animKey while matching active player 'p1'
+    const fromCell = count % 2 === 0 ? 0 : 39;
     window.__gameStore.setState({
       activeModal: null,
       modalPayload: null,
       activePawnAnimation: {
         isAnimating: true,
         playerId: 'p1',
-        fromCell: 33,
-        targetCell: 6,
+        fromCell: fromCell,
+        targetCell: 20,
         currentIndex: 0,
-        waypoints: [6],
-        flightType: 'event',
+        waypoints: [20],
+        flightType: 'transit',
       },
     });
   };
 
-  // Viewport-aware launch timing:
-  // - Desktop: injectScenario (1500ms) + sleep (2500ms) = 4000ms to capture. Apex at 275ms -> launch at 3725ms.
-  // - Mobile: injectScenario (1500ms) + sleep (600ms) = 2100ms to capture. Apex at 275ms -> launch at 1825ms.
-  const isMobile = window.innerWidth <= 480 || /iPhone|Android|Mobile/i.test(navigator.userAgent);
-  if (isMobile) {
-    setTimeout(launchFlight, 1825);
-  } else {
-    setTimeout(launchFlight, 3725);
-  }
+  loopFlight();
+  if (window.__flightLoopTimer) clearInterval(window.__flightLoopTimer);
+  window.__flightLoopTimer = setInterval(loopFlight, 400);
 })();

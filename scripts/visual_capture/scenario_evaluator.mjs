@@ -16,6 +16,7 @@ export const DEFAULT_SCENARIOS = [
   'notifications_financial',
   'notifications_showcase',
   'pawn_direct_flight_apex',
+  'pawn_jail_police_escort',
   'player_hud_compact',
   'transit_wheel',
 ];
@@ -99,16 +100,21 @@ export async function injectScenario(send, scenarioName, scenarioExpr, visualSce
         if (window.__gameStore) {
           window.__gameStore.setState({ hasUserCustomCamera: true, cameraFocusCell: null, isRolling: false });
         }
-        const cam = window.__threeCamera;
-        const controls = window.__orbitControls;
-        if (cam) {
-          ${posExpr}
-          ${targetExpr}
-          cam.updateProjectionMatrix();
-        }
-        if (controls && typeof controls.update === 'function') {
-          controls.update();
-        }
+        if (window.__cameraOverrideTimer) clearInterval(window.__cameraOverrideTimer);
+        const applyOverride = () => {
+          const cam = window.__threeCamera;
+          const controls = window.__orbitControls;
+          if (cam) {
+            ${posExpr}
+            ${targetExpr}
+            cam.updateProjectionMatrix();
+          }
+          if (controls && typeof controls.update === 'function') {
+            controls.update();
+          }
+        };
+        applyOverride();
+        window.__cameraOverrideTimer = setInterval(applyOverride, 16);
       })()`,
       returnByValue: true,
     });

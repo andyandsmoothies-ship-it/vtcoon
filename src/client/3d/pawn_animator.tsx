@@ -13,6 +13,7 @@ import {
 } from './pawn_path';
 import { LuxuryPawnModel } from './luxury_pawn_models';
 import { PawnHopTrajectory } from './pawn_hop_trajectory';
+import { ThematicTransportVehicle } from './thematic_transport_vehicle.js';
 import {
   SingleHopPawn,
   type SingleHopProps,
@@ -64,6 +65,7 @@ export function ActiveSpringPawn({
   const [stepIndex, setStepIndex] = useState(0);
   const [isLandedSettle, setIsLandedSettle] = useState(false);
   const settleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const directFlightProgressRef = useRef(0);
   const waypoints = animation.waypoints;
   const isBot = isBotProp !== undefined ? isBotProp : Boolean(animation.isBot || player.isBot);
 
@@ -96,13 +98,6 @@ export function ActiveSpringPawn({
     }
   }, [waypoints, onComplete, player.id]);
 
-  if (!waypoints || waypoints.length === 0 || stepIndex >= waypoints.length) {
-    return null;
-  }
-
-  const fromCell = stepIndex === 0 ? animation.fromCell : (waypoints[stepIndex - 1] ?? animation.fromCell);
-  const toCell = waypoints[stepIndex] ?? fromCell;
-
   const handleHopComplete = useCallback(() => {
     const nextIdx = stepIndex + 1;
     if (nextIdx < waypoints.length) {
@@ -121,6 +116,13 @@ export function ActiveSpringPawn({
       }, PAWN_LANDING_SETTLE_MS);
     }
   }, [stepIndex, waypoints, player.id, onComplete]);
+
+  if (!waypoints || waypoints.length === 0 || stepIndex >= waypoints.length) {
+    return null;
+  }
+
+  const fromCell = stepIndex === 0 ? animation.fromCell : (waypoints[stepIndex - 1] ?? animation.fromCell);
+  const toCell = waypoints[stepIndex] ?? fromCell;
 
   if (isLandedSettle) {
     return (
@@ -146,8 +148,16 @@ export function ActiveSpringPawn({
         offset={offset}
         color={color}
         arcHeight={isDirectFlight ? JAIL_FLIGHT_ARC : DEFAULT_JUMP_ARC}
-        visible={showTrajectory || isDirectFlight}
+        visible={Boolean(showTrajectory && !isDirectFlight)}
       />
+      {isDirectFlight && (
+        <ThematicTransportVehicle
+          flightType={animation.isJailFlight ? 'audit' : (animation.flightType ?? 'transit')}
+          fromCell={fromCell}
+          toCell={toCell}
+          progressRef={directFlightProgressRef}
+        />
+      )}
       <SingleHopPawn
         key={stepIndex}
         fromCell={fromCell}
@@ -160,6 +170,8 @@ export function ActiveSpringPawn({
         isBot={isBot}
         isJailFlight={isDirectFlight}
         flightType={animation.flightType}
+        hidePawnMesh={isDirectFlight}
+        progressRef={directFlightProgressRef}
       />
     </>
   );

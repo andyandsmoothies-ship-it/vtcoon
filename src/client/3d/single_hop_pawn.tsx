@@ -187,6 +187,8 @@ export interface SingleHopProps {
   readonly isBot?: boolean;
   readonly isJailFlight?: boolean;
   readonly flightType?: 'audit' | 'transit' | 'event';
+  readonly hidePawnMesh?: boolean;
+  readonly progressRef?: React.MutableRefObject<number>;
 }
 
 export function SingleHopPawn({
@@ -200,6 +202,8 @@ export function SingleHopPawn({
   isBot,
   isJailFlight,
   flightType,
+  hidePawnMesh = false,
+  progressRef,
 }: SingleHopProps): React.ReactElement | null {
   const groupRef = React.useRef<Group>(null);
   const elapsedRef = React.useRef(0);
@@ -242,6 +246,9 @@ export function SingleHopPawn({
     });
 
     elapsedRef.current = res.elapsed;
+    if (progressRef) {
+      progressRef.current = Math.min(1, res.elapsed / hopDuration);
+    }
 
     if (res.soundToPlay && !soundPlayedRef.current) {
       soundPlayedRef.current = true;
@@ -269,10 +276,12 @@ export function SingleHopPawn({
       position={[startX + offset[0], startY, startZ + offset[2]]}
       scale={[1, 1, 1]}
     >
-      {slotIndex !== undefined ? (
-        <LuxuryPawnModel slotIndex={slotIndex} playerColor={color} forceFallback={true} />
-      ) : (
-        <PawnMesh color={color} />
+      {!hidePawnMesh && (
+        slotIndex !== undefined ? (
+          <LuxuryPawnModel slotIndex={slotIndex} playerColor={color} forceFallback={true} />
+        ) : (
+          <PawnMesh color={color} />
+        )
       )}
       {emoteId && <PawnEmoteBubble emoteId={emoteId} />}
     </group>

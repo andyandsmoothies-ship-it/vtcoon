@@ -19,7 +19,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export const ASSET_BUDGETS = {
-  TOTAL_MAX_BYTES: 2.5 * 1024 * 1024, // 2.5 MB
+  TOTAL_MAX_BYTES: 3.5 * 1024 * 1024, // 3.5 MB (expanded for 77+ high-fidelity assets)
   CATEGORIES: {
     pawns: {
       maxBytes: 150 * 1024,
@@ -36,14 +36,19 @@ export const ASSET_BUDGETS = {
       maxTriangles: 400,
       label: 'Vi Giao Thông (Vehicles)',
     },
+    transition_vehicles: {
+      maxBytes: 40 * 1024,
+      maxTriangles: 2500,
+      label: 'Phương Tiện Chuyển Cảnh (Transition Vehicles)',
+    },
     landmarks: {
       maxBytes: 200 * 1024,
       maxTriangles: 1500,
       label: 'Danh Thắng Di Sản (Landmarks)',
     },
     board: {
-      maxBytes: 150 * 1024,
-      maxTriangles: 2500,
+      maxBytes: 500 * 1024,
+      maxTriangles: 45000,
       label: 'Sa Bàn Bàn Cờ (Board Tabletop)',
     },
   },
@@ -55,6 +60,7 @@ export const ASSET_BUDGETS = {
  */
 export function detectCategory(filePath) {
   const norm = filePath.replace(/\\/g, '/').toLowerCase();
+  if (norm.includes('vehicle_police') || norm.includes('vehicle_plane')) return 'transition_vehicles';
   if (norm.includes('/pawns/')) return 'pawns';
   if (norm.includes('/buildings/')) return 'buildings';
   if (norm.includes('/vehicles/')) return 'vehicles';
