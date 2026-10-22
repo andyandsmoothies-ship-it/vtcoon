@@ -1,4 +1,4 @@
-// [TC-442.01..TC-442.06][UI-S02/MSS] Contract Test Suite: Bilateral Tile Text Readability (IMP-442)
+// [TC-442.01..TC-442.06][UI-S02/MSS] Contract Test Suite: Clean Tile Header Readability (IMP-442 Clean Typography)
 import { describe, it, expect, vi } from 'vitest';
 import {
   drawPropertyHeader,
@@ -93,25 +93,19 @@ function getRequiredMeta(cellIndex: number): TileMetadata {
   return meta;
 }
 
-describe('[IMP-442] Bilateral Tile Text Readability Contract Suite', () => {
-  describe('Facet 1: Property Tile Bilateral Dual-Direction Header', () => {
-    it('TC-442.01 [UC-BILATERAL-PROP-TRANSFORM/MSS]: Given property cell 11 (Bình Thuận), When drawPropertyHeader executes, Then applies atomic translate(128, 10) and rotate(PI)', () => {
+describe('[IMP-442] Clean Tile Text Readability Contract Suite', () => {
+  describe('Facet 1: Property Tile Clean Header', () => {
+    it('TC-442.01 [UC-CLEAN-PROP-TRANSFORM/MSS]: Given property cell 11 (Bình Thuận), When drawPropertyHeader executes, Then operates without unnecessary matrix rotation', () => {
       const { ctx, transformCalls } = createMockContext();
       const meta = getRequiredMeta(11);
 
       drawPropertyHeader(ctx, meta);
 
-      const translateCall = transformCalls.find(
-        (c) => c.method === 'translate' && c.args[0] === 128 && c.args[1] === 10
-      );
-      const rotateCall = transformCalls.find(
-        (c) => c.method === 'rotate' && c.args[0] !== undefined && Math.abs(c.args[0] - Math.PI) < 0.001
-      );
-      expect(translateCall).toBeDefined();
-      expect(rotateCall).toBeDefined();
+      const rotateCall = transformCalls.find((c) => c.method === 'rotate');
+      expect(rotateCall).toBeUndefined();
     });
 
-    it('TC-442.02 [UC-BILATERAL-PROP-TEXT/MSS]: Given property cell 11, When drawPropertyHeader executes, Then renders inverted micro-title and preserves forward title at y=28', () => {
+    it('TC-442.02 [UC-CLEAN-PROP-TEXT/MSS]: Given property cell 11, When drawPropertyHeader executes, Then renders only clean primary title at y=28 with 0 inverted micro-title', () => {
       const { ctx, fillTextCalls } = createMockContext();
       const meta = getRequiredMeta(11);
 
@@ -123,42 +117,35 @@ describe('[IMP-442] Bilateral Tile Text Readability Contract Suite', () => {
       const primaryTitle = fillTextCalls.find(
         (c) => c.text === meta.title && c.x === 128 && c.y === 28
       );
-      expect(invertedText).toBeDefined();
-      expect(invertedText?.font).toContain('11px');
+      expect(invertedText).toBeUndefined();
       expect(primaryTitle).toBeDefined();
     });
 
-    it('TC-442.03 [UC-BILATERAL-PROP-CONTRAST/MSS]: Given dark banner cell 1 (Tràng Tiền), When drawPropertyHeader renders, Then inverted title uses contrast color #FFFFFF', () => {
+    it('TC-442.03 [UC-CLEAN-PROP-CONTRAST/MSS]: Given dark banner cell 1 (Tràng Tiền), When drawPropertyHeader renders, Then primary title uses contrast color #FFFFFF', () => {
       const { ctx, fillTextCalls } = createMockContext();
       const meta = getRequiredMeta(1);
 
       drawPropertyHeader(ctx, meta);
 
-      const invertedCall = fillTextCalls.find(
-        (c) => c.text === meta.title && c.x === 0 && c.y === 0
+      const primaryCall = fillTextCalls.find(
+        (c) => c.text === meta.title && c.x === 128 && c.y === 28
       );
-      expect(invertedCall?.fillStyle).toBe('#FFFFFF');
+      expect(primaryCall?.fillStyle).toBe('#FFFFFF');
     });
   });
 
-  describe('Facet 2: Non-Property Tile Bilateral Dual-Direction Header', () => {
-    it('TC-442.04 [UC-BILATERAL-NONPROP-TRANSFORM/MSS]: Given railroad cell 5 (Long Thành), When drawNonPropertyHeader executes, Then applies atomic translate(128, 10) and rotate(PI)', () => {
+  describe('Facet 2: Non-Property Tile Clean Header', () => {
+    it('TC-442.04 [UC-CLEAN-NONPROP-TRANSFORM/MSS]: Given railroad cell 5 (Long Thành), When drawNonPropertyHeader executes, Then operates without rotate transform', () => {
       const { ctx, transformCalls } = createMockContext();
       const meta = getRequiredMeta(5);
 
       drawNonPropertyHeader(ctx, meta, 5);
 
-      const translateCall = transformCalls.find(
-        (c) => c.method === 'translate' && c.args[0] === 128 && c.args[1] === 10
-      );
-      const rotateCall = transformCalls.find(
-        (c) => c.method === 'rotate' && c.args[0] !== undefined && Math.abs(c.args[0] - Math.PI) < 0.001
-      );
-      expect(translateCall).toBeDefined();
-      expect(rotateCall).toBeDefined();
+      const rotateCall = transformCalls.find((c) => c.method === 'rotate');
+      expect(rotateCall).toBeUndefined();
     });
 
-    it('TC-442.05 [UC-BILATERAL-NONPROP-TEXT/MSS]: Given non-property cell 5, When drawNonPropertyHeader executes, Then renders inverted micro-title with #64748B and preserves forward title at y=30', () => {
+    it('TC-442.05 [UC-CLEAN-NONPROP-TEXT/MSS]: Given non-property cell 5, When drawNonPropertyHeader executes, Then renders primary title at y=30 with 0 inverted micro-title', () => {
       const { ctx, fillTextCalls } = createMockContext();
       const meta = getRequiredMeta(5);
 
@@ -170,14 +157,13 @@ describe('[IMP-442] Bilateral Tile Text Readability Contract Suite', () => {
       const primaryTitle = fillTextCalls.find(
         (c) => c.text === meta.title && c.x === 128 && c.y === 30
       );
-      expect(invertedText).toBeDefined();
-      expect(invertedText?.fillStyle).toBe('#64748B');
+      expect(invertedText).toBeUndefined();
       expect(primaryTitle).toBeDefined();
     });
   });
 
   describe('Facet 3: Transform Isolation & Matrix Hygiene', () => {
-    it('TC-442.06 [UC-TRANSFORM-ISOLATION/MSS]: Given drawPropertyHeader, When rendered, Then save and restore calls are strictly balanced', () => {
+    it('TC-442.06 [UC-TRANSFORM-ISOLATION/MSS]: Given drawPropertyHeader, When rendered, Then matrix transforms remain completely unpolluted', () => {
       const { ctx, transformCalls } = createMockContext();
       const meta = getRequiredMeta(11);
 
@@ -185,7 +171,6 @@ describe('[IMP-442] Bilateral Tile Text Readability Contract Suite', () => {
 
       const saveCount = transformCalls.filter((c) => c.method === 'save').length;
       const restoreCount = transformCalls.filter((c) => c.method === 'restore').length;
-      expect(saveCount).toBeGreaterThanOrEqual(1);
       expect(saveCount).toBe(restoreCount);
     });
   });
