@@ -74,3 +74,9 @@
     - When authoring tests for tooling/linters that inspect test assertions (e.g. AST spatial assertion linters), mock test input code strings must NOT contain literal assertion tokens like `.toBeGreaterThanOrEqual(`, `.toBeLessThanOrEqual(`, or `.toBeLessThan(`.
     - Cause: Chaos Sentinel mutators search for these tokens in test files and will corrupt the mock code string literals rather than real test assertions, causing mutants to survive.
     - Remedy: Construct mock assertion method names dynamically (e.g. `const gte = 'toBeGreaterThanOrEqual'; const code = \`expect(pos[0]).\${gte}(0.55);\``) so that Sentinel only mutates genuine Vitest assertion calls.
+
+21. **SpecGuard Oracle Independence & Anti-Overfitting (arXiv:2610.16870)**:
+    - **Overfitting Trap**: Coding agents tend to mirror reference implementation details (internal variable names, private methods, specific loop/collection choices) rather than abstract behavioral specifications, causing tests to reject valid alternative implementations (High False Alarm rate). Remedy: Assert strictly against public observable contracts and DTO outputs.
+    - **Superficial Check Trap**: Solitary `expect(res).toBeDefined()` or `expect(fn).toBeCalled()` without asserting return values, balance deltas, or state transitions allows violating implementations to pass undetected.
+    - **Missing Negative Oracle Trap**: Test suites containing exclusively Happy Path (MSS) cases fail to prove defense against malformed inputs or illegal FSM transitions. Every contract suite MUST include $\ge 1$ Negative/Violation assertion (`/A\d+` flow, schema rejection, or error boundary).
+    - **Relational Covariance Trap**: Constant-return mocks or single-point checks ($f(x_1) = c$) can be satisfied by hardcoded stubs. Pure calculations MUST assert directional covariance across $\ge 2$ inputs ($f(x_1) \neq f(x_2)$, $f(x_{\text{high}}) > f(x_{\text{low}})$).

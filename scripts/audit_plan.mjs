@@ -36,6 +36,7 @@ import {
   auditExportParityAndCallers,
   auditGhostTestPaths,
   auditDroppedRequirementsAndPhantomSlop,
+  auditSpecGuardInvariants,
 } from './audit_plan_rules.mjs';
 import {
   findSourceFiles,
@@ -142,6 +143,7 @@ if (testLines.length > 0) {
   errors += auditFunctionToTestParity(targetFiles, planContent);
   errors += auditWiringParityInPlan(targetFiles, planContent);
   errors += auditCompositeTransactionAndSemanticBorrowing(targetFiles, planContent);
+  errors += auditSpecGuardInvariants(testLines, planContent);
 } else {
   console.log(`  ℹ️ No Station 1 test specifications block detected in plan.`);
 }

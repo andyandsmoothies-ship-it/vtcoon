@@ -58,6 +58,16 @@ export const BANNED_TEST_RULES = [
     code: 'NON_ATOMIC_TEST_SPEC',
     desc: 'Test specification bundles multiple action calls in "When" clause. Split into distinct atomic tests (e.g. TC-XXX.YYa and TC-XXX.YYb) to satisfy Atomic Test Mandate.',
   },
+  {
+    regex: /chỉ\s+kiểm\s+tra\s+(?:toBeDefined|tồn\s+tại)|solitary\s+toBeDefined|chỉ\s+assert\s+được\s+gọi\s+mà\s+không\s+kiểm\s+tra\s+kết\s+quả/i,
+    code: 'SPECGUARD_SUPERFICIAL_CHECK',
+    desc: 'SpecGuard Invariant (arXiv:2610.16870): Solitary existence or change detection checks without behavioral value assertions are banned.',
+  },
+  {
+    regex: /kiểm\s+tra\s+biến\s+(?:nội\s+bộ|private|tạm)|assert\s+internal\s+state\s+variable|assert\s+private\s+property/i,
+    code: 'SPECGUARD_OVERFITTING_INTERNAL_STATE',
+    desc: 'SpecGuard Invariant (arXiv:2610.16870): Asserting private/internal state variables creates reference-implementation overfitting. Assert observable contracts instead.',
+  },
 ];
 
 export function collectExportedSymbols(rootDir = 'src', planContent = '') {
@@ -344,6 +354,32 @@ export function auditGhostTestPaths(planContent, repoRoot = process.cwd(), planF
       console.error(`     Referenced regression/contract tests must physically exist on disk, or be explicitly declared as a new test file.`);
       errors++;
     }
+  }
+
+  return errors;
+}
+
+/**
+ * SpecGuard Invariant Audit (arXiv:2610.16870)
+ * Verifies that the plan's contract test specifications include at least one Negative/Violation
+ * flow (alternative flow /A#, error handling, input validation, or illegal state rejection)
+ * to prevent zero-rejection validation harnesses.
+ */
+export function auditSpecGuardInvariants(testLines, planContent) {
+  let errors = 0;
+  if (!testLines || testLines.length < 3) return errors;
+
+  const allTestText = testLines.join('\n');
+  const hasNegativeFlow = /\[UC-[A-Z0-9._-]+\/A\d+\]/i.test(allTestText) ||
+    /(?:reject|throw|invalid|error|từ chối|báo lỗi|bất hợp lệ|out of bounds|boundary|chặn|defense|negative)/i.test(allTestText);
+
+  if (!hasNegativeFlow) {
+    console.error(`  ❌ [SPECGUARD_MISSING_NEGATIVE_ORACLE] SpecGuard Invariant (arXiv:2610.16870) Violation:`);
+    console.error(`     Plan specifies ${testLines.length} contract tests, but ALL are happy-path (MSS) without a single Negative/Violation test case!`);
+    console.error(`     Add at least one [UC-*/A1] or error/rejection contract test to ensure the validation harness actively detects violating implementations.`);
+    errors++;
+  } else {
+    console.log(`  ✔️ SpecGuard Negative Oracle verified: Plan includes mandatory Negative/Violation test contracts.`);
   }
 
   return errors;

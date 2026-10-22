@@ -237,6 +237,17 @@ if (testFilesToScan.length > 0) {
             `${file}:${lineNum} - Tautological Test Anti-Pattern: Test defines local setTimeout() without mounting a component or invoking a production store/function: ${title}`,
           );
         }
+
+        // SpecGuard Invariant (arXiv:2610.16870): Ban solitary superficial change-detection assertions
+        if (expectCount === 1) {
+          const cleanBody = blockBody.replace(/\/\/[^\n]*|\/\*[\s\S]*?\*\//g, '').trim();
+          const solitarySuperficial = /^\s*expect\s*\([^)]+\)\s*\.(?:toBeDefined|toBeTruthy|not\.toBeNull)\s*\(\s*\)\s*;?\s*$/.test(cleanBody);
+          if (solitarySuperficial) {
+            testViolations.push(
+              `${file}:${lineNum} - [SpecGuard Invariant (arXiv:2610.16870)] Solitary superficial assertion detected (only toBeDefined/toBeTruthy without value/property assertion): ${title}. Assert concrete observable properties or values instead.`
+            );
+          }
+        }
       }
 
       // Rule 17: NO_FS_IN_CLIENT_TESTS Guard in Step 3.5 (Client/Server Seam Discipline)

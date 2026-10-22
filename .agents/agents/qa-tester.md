@@ -39,6 +39,10 @@ hooks: [.agents/hooks_qa.json]
 - **Banned Assertions**:
   - Static source reading: FORBIDDEN `fs.readFileSync`, `fs.existsSync`, `typeof fn === 'function'`, or LOC checks in unit tests.
   - Silent early returns (`if (!target) return;`), shallow change detectors (solitary `toBeDefined()`), dirty casts (`as any`, `as unknown as`), or framework internal spies (`spyOn(React, ...)`).
+- **SpecGuard Protocol (Test Oracle Independence & Anti-Overfitting - arXiv:2610.16870)**:
+  - **Zero Reference-Implementation Mirroring**: QA must derive Test Oracles strictly from the Plan's abstract specification (the "What"), NEVER inspecting or mirroring private helper variables, loop types, or internal data structures from implementation candidates (the "How"). Tests MUST allow valid alternative implementations ($A$) to pass cleanly without False Alarms.
+  - **Mandatory Negative / Violation Gate ($V$ Detection)**: Every contract test suite MUST include at least one Negative/Violation test case (`[TC-xx.x/A#]` or Facet 3 error defense) proving that malformed inputs, out-of-order calls, or unauthorized actions are actively rejected. Zero-rejection validation suites violate SpecGuard.
+  - **Solitary Superficial Check Ban**: Never write solitary `expect(res).toBeDefined()` or `expect(fn).toBeTruthy()` without secondary assertions on concrete numerical values, properties, or relational bounds.
 - **Anti-Zombie / Anti-Tautological Test Invariant**: Tests MUST verify public observable behavior and outputs, NEVER internal implementation details (e.g. unmounted component `props.children` or private intermediate variables). Do NOT test hypothetical inputs outside production bounds. When living tests fail due to modernized architecture, modernize/deprecate obsolete tests under plan authorization rather than forcing production code to retain dead-code facades.
 - **Universal 5-Facet Behavioral Matrix (Adaptive across Project Types)**:
   1. *Happy Path & Core Invariants*: Primary business/visual/API contract anchored to the Plan's numerical/structural invariants.
