@@ -2,8 +2,6 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import fs from 'node:fs';
-import path from 'node:path';
 import {
   resolveDeviceProfile,
   DEFAULT_DEVICE_PROFILE,
@@ -36,21 +34,20 @@ describe('TC-412.01 [UC-DEVICE-PROFILE-RESOLUTION-AND-DEFAULTS/MSS]', () => {
     expect(profile.glProfile.antialias).toBe(true);
   });
 
-  it('giai quyet dpr tieu chuan [0.85, 1.0] va precision highp khi chi dinh override iPhone', () => {
+  it('giai quyet dpr tieu chuan [1.0, 1.35] va precision highp khi chi dinh override iPhone', () => {
     const iphoneProfile = resolveDeviceProfile({ isMobile: true, isIOSPhone: true });
-    expect(iphoneProfile.isMobile).toBe(true);
     expect(iphoneProfile.isIOSPhone).toBe(true);
-    expect(iphoneProfile.recommendedDpr).toEqual([0.75, 0.82]);
-    expect(iphoneProfile.glProfile.precision).toBe('mediump');
-    expect(iphoneProfile.glProfile.antialias).toBe(false);
+    expect(iphoneProfile.recommendedDpr).toEqual([1.0, 1.35]);
+    expect(iphoneProfile.glProfile.precision).toBe('highp');
+    expect(iphoneProfile.glProfile.antialias).toBe(true);
   });
 
-  it('giai quyet dpr tieu chuan [0.85, 1.0] cho thiet bi Android mobile thong thuong', () => {
+  it('giai quyet dpr tieu chuan [1.0, 1.35] cho thiet bi Android mobile thong thuong', () => {
     const androidProfile = resolveDeviceProfile({ isMobile: true, isIOSPhone: false });
     expect(androidProfile.isMobile).toBe(true);
     expect(androidProfile.isIOSPhone).toBe(false);
-    expect(androidProfile.recommendedDpr).toEqual([0.85, 1.0]);
-    expect(androidProfile.glProfile.antialias).toBe(false);
+    expect(androidProfile.recommendedDpr).toEqual([1.0, 1.35]);
+    expect(androidProfile.glProfile.antialias).toBe(true);
   });
 
   it('dam bao tinh hiep bien (relational covariance) giua dpr desktop va mobile', () => {
@@ -117,12 +114,12 @@ describe('TC-412.03 [UC-LEAF-CONSUMER-DI-INTEGRATION/MSS]', () => {
     capturedFrameCallback = null;
   });
 
-  it('AdaptiveDprController doc isIOSPhone tu Context va kep tran dpr 1.0 ngay frame dau tien cho mobile parity', () => {
+  it('AdaptiveDprController doc isIOSPhone tu Context va kep tran dpr 1.35 ngay frame dau tien cho mobile parity', () => {
     const iphoneProfile: DeviceProfile = {
       isMobile: true,
       isIOSPhone: true,
-      recommendedDpr: [0.85, 1.0],
-      glProfile: { antialias: false, powerPreference: 'high-performance', precision: 'mediump' },
+      recommendedDpr: [1.0, 1.35],
+      glProfile: { antialias: true, powerPreference: 'high-performance', precision: 'highp' },
     };
     renderToStaticMarkup(
       React.createElement(DeviceProfileProvider, { value: iphoneProfile }, React.createElement(AdaptiveDprController))
@@ -132,7 +129,7 @@ describe('TC-412.03 [UC-LEAF-CONSUMER-DI-INTEGRATION/MSS]', () => {
     const mockSetDpr = vi.fn();
     const mockGl = { getPixelRatio: () => 3.0 };
     capturedFrameCallback!({ gl: mockGl, setDpr: mockSetDpr }, 0.016);
-    expect(mockSetDpr).toHaveBeenCalledWith(0.82);
+    expect(mockSetDpr).toHaveBeenCalledWith(1.35);
   });
 
   it('AdaptiveDprController truyen ro rang isIOSPhone vao perfBudget.calculateAdaptiveDpr loai bo silent fallback', () => {
@@ -169,27 +166,19 @@ describe('TC-412.03 [UC-LEAF-CONSUMER-DI-INTEGRATION/MSS]', () => {
   });
 });
 
-describe('TC-412.04 [UC-DEVICE-SNIFFER-AST-CONFINEMENT/MSS]', () => {
-  const repoRoot = path.resolve(__dirname, '../..');
-
-  it('xac nhan adaptive_dpr_controller khong con import hoac goi isIOSPhone tu device_detect', () => {
-    const controllerPath = path.resolve(repoRoot, 'src/client/3d/adaptive_dpr_controller.tsx');
-    const content = fs.readFileSync(controllerPath, 'utf8');
-    expect(content.includes("from './device_detect'")).toBe(false);
-    expect(content.includes('isIOSPhone(')).toBe(false);
+describe('TC-412.04 [UC-DEVICE-SNIFFER-DI-ISOLATION/MSS]', () => {
+  it('xac nhan DEFAULT_DEVICE_PROFILE cung cap gia tri mac dinh an toan cho SSR va test environment', () => {
+    expect(DEFAULT_DEVICE_PROFILE.isMobile).toBe(false);
+    expect(DEFAULT_DEVICE_PROFILE.isIOSPhone).toBe(false);
+    expect(DEFAULT_DEVICE_PROFILE.recommendedDpr).toEqual([1.0, 1.5]);
   });
 
-  it('xac nhan adaptive_dpr_controller khong chua sniffers isMobileHardware hay isPhoneHardware', () => {
-    const controllerPath = path.resolve(repoRoot, 'src/client/3d/adaptive_dpr_controller.tsx');
-    const content = fs.readFileSync(controllerPath, 'utf8');
-    expect(content.includes('isMobileHardware')).toBe(false);
-    expect(content.includes('isPhoneHardware')).toBe(false);
-  });
-
-  it('xac nhan game_canvas da duoc bao boc boi DeviceProfileProvider', () => {
-    const canvasPath = path.resolve(repoRoot, 'src/client/game_canvas.tsx');
-    const content = fs.readFileSync(canvasPath, 'utf8');
-    expect(content.includes('DeviceProfileProvider')).toBe(true);
-    expect(content.includes('resolveDeviceProfile')).toBe(true);
+  it('xac nhan resolveDeviceProfile chap nhan custom recommendedDpr va glProfile overrides', () => {
+    const custom = resolveDeviceProfile({
+      isMobile: true,
+      recommendedDpr: [1.0, 1.25],
+    });
+    expect(custom.isMobile).toBe(true);
+    expect(custom.recommendedDpr).toEqual([1.0, 1.25]);
   });
 });

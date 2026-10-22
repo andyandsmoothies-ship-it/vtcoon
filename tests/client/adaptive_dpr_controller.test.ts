@@ -42,9 +42,9 @@ describe('[TC-DPR/MSS][UC-DPR] Ma Trận Kiểm Thử Hợp Đồng Adaptive DPR
   // FACET 1: Boundary & Range Clamping (4 tests)
   // ==========================================================================
   describe('Facet 1: Boundary & Range Clamping', () => {
-    it('[TC-DPR01.01/MSS][UC-DPR-01] getRecommendedDpr(true) trả về [0.85, 1.0] cho Mobile (C1)', () => {
+    it('[TC-DPR01.01/MSS][UC-DPR-01] getRecommendedDpr(true) trả về [1.0, 1.35] cho Mobile (C1)', () => {
       const dprRange = getRecommendedDpr(true);
-      expect(dprRange).toEqual([0.85, 1.0]);
+      expect(dprRange).toEqual([1.0, 1.35]);
     });
 
     it('[TC-DPR01.02/MSS][UC-DPR-01] getRecommendedDpr(false) trả về [1.0, 1.5] cho Desktop (C1)', () => {
@@ -52,16 +52,16 @@ describe('[TC-DPR/MSS][UC-DPR] Ma Trận Kiểm Thử Hợp Đồng Adaptive DPR
       expect(dprRange).toEqual([1.0, 1.5]);
     });
 
-    it('[TC-DPR01.03/MSS][UC-DPR-01] calculateAdaptiveDpr không bao giờ trả về DPR < 0.75 trên mobile hoặc > 1.5 trên desktop', () => {
+    it('[TC-DPR01.03/MSS][UC-DPR-01] calculateAdaptiveDpr không bao giờ trả về DPR < 1.0 trên mobile hoặc > 1.5 trên desktop', () => {
       const controller = new PerfBudgetController();
       const mobileClamped = controller.calculateAdaptiveDpr({
         isMobile: true,
         currentFps: 10,
-        currentDpr: 0.75,
+        currentDpr: 1.0,
         degradedDurationMs: 5000,
         optimalDurationMs: 0,
       });
-      expect(mobileClamped.targetDpr).toBeGreaterThanOrEqual(0.75);
+      expect(mobileClamped.targetDpr).toBeGreaterThanOrEqual(1.0);
       expect(mobileClamped.shouldUpdate).toBe(false);
 
       const desktopClamped = controller.calculateAdaptiveDpr({
@@ -93,17 +93,17 @@ describe('[TC-DPR/MSS][UC-DPR] Ma Trận Kiểm Thử Hợp Đồng Adaptive DPR
   // FACET 2: State Reactivity & Step-Down (4 tests - Fresh Instance C2)
   // ==========================================================================
   describe('Facet 2: State Reactivity & Step-Down (Fresh Instance C2)', () => {
-    it('[TC-DPR02.01/MSS][UC-DPR-02] Khi FPS < 45 duy trì >= 1.500ms trên mobile, DPR hạ từ 1.0 xuống 0.85', () => {
+    it('[TC-DPR02.01/MSS][UC-DPR-02] Khi FPS < 45 duy trì >= 1.500ms trên mobile, DPR hạ từ 1.35 xuống 1.0', () => {
       const controller = new PerfBudgetController();
       const result = controller.calculateAdaptiveDpr({
         isMobile: true,
         currentFps: 42,
-        currentDpr: 1.0,
+        currentDpr: 1.35,
         degradedDurationMs: 1500,
         optimalDurationMs: 0,
       });
       expect(result.shouldUpdate).toBe(true);
-      expect(result.targetDpr).toBe(0.85);
+      expect(result.targetDpr).toBe(1.0);
       expect(result.reason).toBe('STEP_DOWN');
     });
 
@@ -175,7 +175,7 @@ describe('[TC-DPR/MSS][UC-DPR] Ma Trận Kiểm Thử Hợp Đồng Adaptive DPR
       const underThreshold = controller.calculateAdaptiveDpr({
         isMobile: true,
         currentFps: 58,
-        currentDpr: 0.85,
+        currentDpr: 1.0,
         degradedDurationMs: 0,
         optimalDurationMs: 2500,
       });
@@ -184,12 +184,12 @@ describe('[TC-DPR/MSS][UC-DPR] Ma Trận Kiểm Thử Hợp Đồng Adaptive DPR
       const atThreshold = controller.calculateAdaptiveDpr({
         isMobile: true,
         currentFps: 58,
-        currentDpr: 0.85,
+        currentDpr: 1.0,
         degradedDurationMs: 0,
         optimalDurationMs: 3000,
       });
       expect(atThreshold.shouldUpdate).toBe(true);
-      expect(atThreshold.targetDpr).toBe(1.0);
+      expect(atThreshold.targetDpr).toBe(1.35);
     });
 
     it('[TC-DPR03.03/MSS][UC-DPR-03] Không có hiện tượng dao động DPR liên tiếp giữa các frame (Zero Thrashing)', () => {
@@ -218,7 +218,7 @@ describe('[TC-DPR/MSS][UC-DPR] Ma Trận Kiểm Thử Hợp Đồng Adaptive DPR
       const stepDown = controller.calculateAdaptiveDpr({
         isMobile: true,
         currentFps: 40,
-        currentDpr: 1.0,
+        currentDpr: 1.35,
         degradedDurationMs: 1500,
         optimalDurationMs: 0,
       });
@@ -246,13 +246,13 @@ describe('[TC-DPR/MSS][UC-DPR] Ma Trận Kiểm Thử Hợp Đồng Adaptive DPR
       const result = controller.calculateAdaptiveDpr({
         isMobile: true,
         currentFps: 60,
-        currentDpr: 0.85,
+        currentDpr: 1.0,
         isMotionActive: true,
         degradedDurationMs: 0,
         optimalDurationMs: 4000,
       });
       expect(result.shouldUpdate).toBe(false);
-      expect(result.targetDpr).toBe(0.85);
+      expect(result.targetDpr).toBe(1.0);
       expect(result.reason).toBe('MAINTAIN');
     });
 
@@ -261,13 +261,13 @@ describe('[TC-DPR/MSS][UC-DPR] Ma Trận Kiểm Thử Hợp Đồng Adaptive DPR
       const result = controller.calculateAdaptiveDpr({
         isMobile: true,
         currentFps: 38,
-        currentDpr: 1.0,
+        currentDpr: 1.35,
         isMotionActive: true,
         degradedDurationMs: 1500,
         optimalDurationMs: 0,
       });
       expect(result.shouldUpdate).toBe(true);
-      expect(result.targetDpr).toBe(0.85);
+      expect(result.targetDpr).toBe(1.0);
       expect(result.reason).toBe('STEP_DOWN');
     });
 
@@ -276,13 +276,13 @@ describe('[TC-DPR/MSS][UC-DPR] Ma Trận Kiểm Thử Hợp Đồng Adaptive DPR
       const result = controller.calculateAdaptiveDpr({
         isMobile: true,
         currentFps: 60,
-        currentDpr: 0.85,
+        currentDpr: 1.0,
         isMotionActive: false,
         degradedDurationMs: 0,
         optimalDurationMs: 3000,
       });
       expect(result.shouldUpdate).toBe(true);
-      expect(result.targetDpr).toBe(1.0);
+      expect(result.targetDpr).toBe(1.35);
       expect(result.reason).toBe('STEP_UP');
     });
   });

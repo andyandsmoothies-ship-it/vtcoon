@@ -98,10 +98,9 @@ export function calculateResponsiveOverviewFov(aspect?: number, baseFov = 24): n
   }
   const safeAspect = Math.max(0.42, aspect);
   const targetHalfRad = (baseFov * Math.PI) / 360;
-  const neededHalfRad = Math.atan((Math.tan(targetHalfRad) * 1.05) / safeAspect);
+  const neededHalfRad = Math.atan((Math.tan(targetHalfRad) * 0.96) / safeAspect);
   const calculatedFov = Math.round((neededHalfRad * 360) / Math.PI);
-  // [IMP-449] Golden Compromise: clamped to <= 45 deg on portrait to prevent postage-stamp board shrinkage
-  return Math.min(45, Math.max(baseFov, calculatedFov));
+  return Math.min(42, Math.max(baseFov, calculatedFov));
 }
 
 export function calculateResponsiveOverviewCameraState(
@@ -121,12 +120,10 @@ export function calculateResponsiveOverviewCameraState(
     };
   }
   const safeAspect = Math.max(0.42, aspect);
-  // [IMP-449] Golden Compromise scaling curve prevents ballooning elevation to 34.5m
-  const rawScale = 1.0 / Math.pow(safeAspect, 0.25);
-  const scale = Math.min(1.18, Math.max(1.0, rawScale));
-  const portraitFactor = Math.max(0, (1.0 - safeAspect) / (1.0 - 0.48));
-  // [IMP-449] Shift restrained to <= 0.4m to prevent Cell 20 occlusion under top banners
-  const shift = 0.4 * Math.min(1.0, portraitFactor);
+  // Bring mobile portrait camera closer and lower (scale ~0.90 -> Y ≈ 22.8m vs 29.9m) for immersive tabletop presence
+  const portraitFactor = Math.min(1.0, Math.max(0, (1.0 - safeAspect) / (1.0 - 0.48)));
+  const scale = 1.0 - 0.10 * portraitFactor;
+  const shift = 0.25 * portraitFactor;
 
   const targetX = tx + shift;
   const targetY = ty;

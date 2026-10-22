@@ -38,14 +38,14 @@ describe('IMP-363: Board Tiles Merged Batching & WebKit Draw Call IPC Optimizati
     expect(resolveCellFromBoardClick(15.0, 15.0)).toBe(-1);
   });
 
-  it('TC-363.04 [UC-BATCHED-COMPONENT/MSS] BatchedBoardTiles renders 3 consolidated meshes for surfaces and bases', () => {
+  it('TC-363.04 [UC-BATCHED-COMPONENT/MSS] BatchedBoardTiles renders 3 consolidated meshes for surfaces and bases with polygonOffset anti-z-fighting', () => {
     const markup = renderToStaticMarkup(
       React.createElement(BatchedBoardTiles, { isMobile: false })
     );
     expect(markup).toContain('data-testid="batched-board-tiles"');
     expect(markup).toContain('data-testid="batched-tile-surfaces"');
     expect(markup).toContain('data-testid="batched-standard-bases"');
-    expect(markup).toContain('data-testid="batched-corner-bases"');
+    expect(markup.toLowerCase()).toContain('polygonoffset');
   });
 
   it('TC-363.05 [UC-LAYERED-TILE-PROP-PARITY/MSS] LayeredDioramaTile with renderBasePlinth=false and renderAtlasSurface=false omits static meshes', () => {

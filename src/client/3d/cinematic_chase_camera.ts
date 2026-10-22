@@ -257,8 +257,8 @@ export function resolveStandardChaseOffset(
   const clampedAspect = Math.max(0.35, safeAspect);
   const ky = isPortrait ? Math.min(1.35, Math.max(1.0, 0.95 / Math.sqrt(clampedAspect))) : 1.0;
   const kDist = isPortrait ? Math.min(1.25, Math.max(1.0, 0.88 / Math.sqrt(clampedAspect))) : 1.0;
-  const offH = (isPortrait ? 5.8 : 3.6) * kDist;
-  const offY = (isPortrait ? 6.8 : 4.2) * ky;
+  const offH = (isPortrait ? 4.4 : 3.6) * kDist;
+  const offY = (isPortrait ? 5.0 : 4.2) * ky;
   if (isPortrait) return [offH, offY, offH];
   if (px === 0 && pz === 0) return [offH, offY, offH];
   const side = resolveSideFromCoordinates(px, pz);

@@ -49,11 +49,8 @@ export function isIOSPhone(): boolean {
   return isIOSDevice() && isPhoneHardware();
 }
 
-export function getRecommendedDpr(isMobile: boolean, isIOSPhoneDevice = isIOSPhone()): [number, number] {
-  if (isMobile && isIOSPhoneDevice) {
-    return [0.75, 0.82];
-  }
-  return isMobile ? [0.85, 1.0] : [1.0, 1.5];
+export function getRecommendedDpr(isMobile: boolean, _isIOSPhoneDevice = isIOSPhone()): [number, number] {
+  return isMobile ? [1.0, 1.35] : [1.0, 1.5];
 }
 
 export interface CanvasGlProfile {
@@ -64,25 +61,17 @@ export interface CanvasGlProfile {
 }
 
 export function getRecommendedGlProfile(isMobile: boolean): CanvasGlProfile {
-  if (isMobile) {
-    return {
-      antialias: false,
-      powerPreference: 'high-performance',
-      precision: 'mediump',
-      logarithmicDepthBuffer: false,
-    };
-  }
   return {
     antialias: true,
     powerPreference: 'high-performance',
     precision: 'highp',
-    logarithmicDepthBuffer: true,
+    logarithmicDepthBuffer: !isMobile,
   };
 }
 
 export function getTileTextureBudget(isMobile: boolean, isTablet = isTabletDevice()): TileTextureBudget {
   return isMobile && !isTablet
-    ? { width: 512, height: 680, cornerSize: 512, scale: 2, anisotropy: 2 }
+    ? { width: 512, height: 680, cornerSize: 512, scale: 2, anisotropy: 4 }
     : { width: 1024, height: 1360, cornerSize: 1024, scale: 4, anisotropy: 16 };
 }
 

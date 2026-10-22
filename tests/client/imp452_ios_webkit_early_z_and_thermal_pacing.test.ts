@@ -5,16 +5,16 @@ import { resolveCanvasGlConfig, DEFAULT_CANVAS_CAMERA_CONFIG } from '../../src/c
 import { ACESFilmicToneMapping, NoToneMapping } from 'three';
 
 describe('IMP-452: iOS WebKit Early-Z Restoration & Thermal Pacing Contract Suite', () => {
-  it('[TC-452.01/MSS][UC-GL-EARLY-Z/MSS][Facet-1/Profile]: Given mobile device environment (isMobile: true), When calling getRecommendedGlProfile(true), Then returns logarithmicDepthBuffer: false, antialias: false, and precision: mediump', () => {
+  it('[TC-452.01/MSS][UC-GL-EARLY-Z/MSS][Facet-1/Profile]: Given mobile device environment (isMobile: true), When calling getRecommendedGlProfile(true), Then returns logarithmicDepthBuffer: false, antialias: true, and precision: highp', () => {
     const profile = getRecommendedGlProfile(true);
     expect(profile.logarithmicDepthBuffer).toBe(false);
-    expect(profile.antialias).toBe(false);
-    expect(profile.precision).toBe('mediump');
+    expect(profile.antialias).toBe(true);
+    expect(profile.precision).toBe('highp');
     expect(profile.powerPreference).toBe('high-performance');
   });
 
-  it('[TC-452.02/MSS][UC-DPR-BOUNDS/MSS][Facet-1/Profile]: Given iOS phone configuration, When inspecting DPR_BOUNDS.IOS_PHONE_MAX, Then value strictly equals 0.82', () => {
-    expect(DPR_BOUNDS.IOS_PHONE_MAX).toBe(0.82);
+  it('[TC-452.02/MSS][UC-DPR-BOUNDS/MSS][Facet-1/Profile]: Given iOS phone configuration, When inspecting DPR_BOUNDS.IOS_PHONE_MAX, Then value strictly equals 1.35', () => {
+    expect(DPR_BOUNDS.IOS_PHONE_MAX).toBe(1.35);
   });
 
   it('[TC-452.03a/MSS][UC-CANVAS-GL-DELEGATION-MOBILE/MSS][Facet-2/Wiring]: Given pure helper resolveCanvasGlConfig, When called with mobile profile, Then preserves logarithmicDepthBuffer: false and injects ACESFilmicToneMapping', () => {
@@ -59,14 +59,14 @@ describe('IMP-452: iOS WebKit Early-Z Restoration & Thermal Pacing Contract Suit
     expect(profile.powerPreference).toBe('high-performance');
   });
 
-  it('[TC-452.05a/MSS][UC-FIRST-FRAME-DPR-IOS/MSS][Facet-1/Profile]: Given iOS phone environment, When calling getRecommendedDpr(true, true), Then returns [0.75, 0.82], preventing frame 0 1.0 DPR spike', () => {
+  it('[TC-452.05a/MSS][UC-FIRST-FRAME-DPR-IOS/MSS][Facet-1/Profile]: Given iOS phone environment, When calling getRecommendedDpr(true, true), Then returns [1.0, 1.35] sweet-spot crisp range', () => {
     const dprRange = getRecommendedDpr(true, true);
-    expect(dprRange).toEqual([0.75, 0.82]);
+    expect(dprRange).toEqual([1.0, 1.35]);
   });
 
   it('[TC-452.05b/MSS][UC-FIRST-FRAME-DPR-OTHER/MSS][Facet-1/Profile]: Given Android mobile or desktop environment, When calling getRecommendedDpr, Then returns calibrated platform baselines', () => {
     const androidDprRange = getRecommendedDpr(true, false);
-    expect(androidDprRange).toEqual([0.85, 1.0]);
+    expect(androidDprRange).toEqual([1.0, 1.35]);
 
     const desktopDprRange = getRecommendedDpr(false, false);
     expect(desktopDprRange).toEqual([1.0, 1.5]);

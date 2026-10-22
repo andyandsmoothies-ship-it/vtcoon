@@ -111,10 +111,10 @@ describe('IMP-453: Mobile Camera Unified Azimuth, Whiplash Elimination & Co-plan
   // =========================================================================
   // CORE INVARIANT 4: PORTRAIT ELEVATED FOLLOW DISTANCE & ALTITUDE
   // =========================================================================
-  it('TC-453.04 [UC-CAM-PORTRAIT-ELEVATED-FOLLOW/MSS]: Given mobile portrait aspect 0.48, resolveStandardChaseOffset returns elevation Y >= 8.5m and horizontal distance H >= 6.5m', () => {
+  it('TC-453.04 [UC-CAM-PORTRAIT-ELEVATED-FOLLOW/MSS]: Given mobile portrait aspect 0.48, resolveStandardChaseOffset returns closer elevation Y >= 6.5m and horizontal distance H >= 5.2m', () => {
     const offset = resolveStandardChaseOffset([0, 0, 0], 0.48);
-    expect(offset[1]).toBeGreaterThanOrEqual(8.5);
-    expect(offset[0]).toBeGreaterThanOrEqual(6.5);
+    expect(offset[1]).toBeGreaterThanOrEqual(6.5);
+    expect(offset[0]).toBeGreaterThanOrEqual(5.2);
   });
 
   // =========================================================================

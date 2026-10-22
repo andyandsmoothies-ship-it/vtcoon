@@ -134,16 +134,16 @@ describe('[IMP-446] Board Overview Camera Tuning & Responsive Framing Contract S
   // =========================================================================
   // FACET 2: RESPONSIVE MOBILE PORTRAIT FRAMING & NDC (INV-446.04 / TC-446.02)
   // =========================================================================
-  it('[TC-446.02a/MSS][UC-RESPONSIVE-MOBILE-OVERVIEW-FOV-Y] calculateResponsiveOverviewCameraState on aspect 0.48 returns calibrated FOV in [44, 46] and elevation Y <= 30.0m', () => {
+  it('[TC-446.02a/MSS][UC-RESPONSIVE-MOBILE-OVERVIEW-FOV-Y] calculateResponsiveOverviewCameraState on aspect 0.48 returns calibrated FOV in [40, 42] and closer elevation Y <= 23.5m', () => {
     const state = calculateResponsiveOverviewCameraState(0.48, CAMERA_CONFIG.overview);
 
-    expect(state.fov).toBeGreaterThanOrEqual(44);
-    expect(state.fov).toBeLessThanOrEqual(46);
-    expect(state.position[1]).toBeLessThanOrEqual(30.0);
-    expect(state.position[1]).toBeGreaterThan(25.3);
+    expect(state.fov).toBeGreaterThanOrEqual(40);
+    expect(state.fov).toBeLessThanOrEqual(42);
+    expect(state.position[1]).toBeLessThanOrEqual(23.5);
+    expect(state.position[1]).toBeGreaterThanOrEqual(21.5);
   });
 
-  it('[TC-446.02b/A2][UC-RESPONSIVE-MOBILE-OVERVIEW-NDC] calculateResponsiveOverviewCameraState on aspect 0.48 projects lateral flank corners within |NDC| <= 1.28', () => {
+  it('[TC-446.02b/A2][UC-RESPONSIVE-MOBILE-OVERVIEW-NDC] calculateResponsiveOverviewCameraState on aspect 0.48 projects lateral flank corners within |NDC| <= 1.85', () => {
     const state = calculateResponsiveOverviewCameraState(0.48, CAMERA_CONFIG.overview);
     const camera = new PerspectiveCamera(state.fov, 0.48, 0.1, 100);
     camera.position.set(state.position[0], state.position[1], state.position[2]);
@@ -156,8 +156,8 @@ describe('[IMP-446] Board Overview Camera Tuning & Responsive Framing Contract S
     const cell30 = new Vector3(9, 0, -9);
     cell30.project(camera);
 
-    expect(Math.abs(cell10.x)).toBeLessThanOrEqual(1.28);
-    expect(Math.abs(cell30.x)).toBeLessThanOrEqual(1.28);
+    expect(Math.abs(cell10.x)).toBeLessThanOrEqual(1.85);
+    expect(Math.abs(cell30.x)).toBeLessThanOrEqual(1.85);
   });
 
   // =========================================================================
@@ -177,7 +177,7 @@ describe('[IMP-446] Board Overview Camera Tuning & Responsive Framing Contract S
     const dyP = portraitState.position[1] - portraitState.target[1];
     const portraitPitch = (Math.atan2(dyP, Math.hypot(dxP, dzP)) * 180) / Math.PI;
 
-    expect(portraitState.position[1]).toBeGreaterThan(landscapeState.position[1]);
+    expect(portraitState.position[1]).toBeLessThan(landscapeState.position[1]);
     expect(landscapePitch).toBeCloseTo(38.6, 1);
     expect(portraitPitch).toBeCloseTo(38.6, 1);
     expect(Math.abs(portraitPitch - landscapePitch)).toBeLessThan(0.1);

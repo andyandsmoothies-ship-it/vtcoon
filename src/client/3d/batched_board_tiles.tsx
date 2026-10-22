@@ -49,7 +49,7 @@ export function createBatchedTileSurfacesGeometry(isMobile?: boolean): BufferGeo
 
     const [tx, ty, tz] = cellPosition(cell.index);
     const [, ry] = tileRotation(cell.index);
-    const localY = isCorner ? 0.115 : 0.103;
+    const localY = isCorner ? 0.118 : 0.106;
 
     // [ADV-06] Local-to-World matrix multiplication order: T(pos) * R(rot) * T(localY) * R(-PI/2)
     const matrix = new Matrix4()
@@ -151,9 +151,24 @@ export function BatchedBoardTiles({
         onClick={handleSurfaceClick}
       >
         {tileAtlas ? (
-          <meshStandardMaterial map={tileAtlas} roughness={0.98} metalness={0.0} envMapIntensity={0.0} />
+          <meshStandardMaterial
+            map={tileAtlas}
+            roughness={0.98}
+            metalness={0.0}
+            envMapIntensity={0.0}
+            polygonOffset
+            polygonOffsetFactor={-1}
+            polygonOffsetUnits={-2}
+          />
         ) : (
-          <meshStandardMaterial color="#F5F3EF" roughness={0.28} metalness={0.08} />
+          <meshStandardMaterial
+            color="#F5F3EF"
+            roughness={0.28}
+            metalness={0.08}
+            polygonOffset
+            polygonOffsetFactor={-1}
+            polygonOffsetUnits={-2}
+          />
         )}
       </mesh>
 
