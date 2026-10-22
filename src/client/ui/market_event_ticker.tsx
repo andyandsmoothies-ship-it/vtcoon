@@ -70,7 +70,7 @@ export const MarketEventTicker: React.FC<MarketEventTickerProps> = ({
       data-testid="market-event-ticker"
       role="region"
       aria-label="Sự kiện thị trường đang hiệu lực"
-      className="pointer-events-none select-none z-30 flex flex-col items-center justify-center w-full max-w-[90vw] min-[360px]:max-w-[calc(100vw-8px)] sm:max-w-md md:max-w-md lg:max-w-xl xl:max-w-2xl mx-auto mt-1 px-0.5 min-[360px]:px-1 sm:px-2 gap-1"
+      className="pointer-events-none select-none z-30 flex flex-col items-center md:items-start justify-center md:justify-start w-full md:w-fit max-w-[90vw] min-[360px]:max-w-[calc(100vw-8px)] sm:max-w-md md:max-w-2xl mx-auto md:mx-0 mt-1 px-0.5 min-[360px]:px-1 sm:px-2 md:px-0 gap-1"
     >
       {displayedActive.map((modifier, index) => {
         const cardType = String(modifier.type ?? '');
@@ -119,39 +119,46 @@ export const MarketEventTicker: React.FC<MarketEventTickerProps> = ({
             data-testid={`market-ticker-item-${cardType}`}
             onClick={handleCardClick}
             title={`${title}: ${formula} (Bấm xem chi tiết)`}
-            className={`w-full pointer-events-auto min-h-[36px] sm:min-h-[44px] ${itemVisibilityClass} items-center justify-between gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1 bg-[#FFFDF8]/98 hover:bg-amber-50/98 backdrop-blur-none md:backdrop-blur-xs border-2 border-slate-900 rounded-lg sm:rounded-xl shadow-[0_1.5px_0_0_#0f172a] sm:shadow-[0_2px_0_0_#0f172a] text-xs font-bold transition-colors cursor-pointer select-none text-slate-900 leading-none`}
+            className={`w-full md:w-[360px] pointer-events-auto min-h-[36px] sm:min-h-[44px] ${itemVisibilityClass} flex-col justify-center gap-0.5 sm:gap-1 px-2.5 sm:px-3 py-1 sm:py-1.5 bg-[#FFFDF8]/98 hover:bg-amber-50/98 backdrop-blur-none md:backdrop-blur-xs border-2 border-slate-900 rounded-lg sm:rounded-xl shadow-[0_1.5px_0_0_#0f172a] sm:shadow-[0_2px_0_0_#0f172a] text-xs font-bold transition-colors cursor-pointer select-none text-slate-900 leading-none`}
           >
-            <div className="flex items-center gap-1.5 min-w-0 flex-1">
-              <span className="text-sm shrink-0" aria-hidden="true">
-                {icon}
-              </span>
-              <span className="font-extrabold text-[11px] sm:text-xs text-slate-900 shrink-0">
-                <span className="sm:hidden">{shortTag}:</span>
-                <span className="hidden sm:inline truncate max-w-[150px]">{title}:</span>
-              </span>
+            {/* Dòng 1: Icon, Tiêu đề, và Đếm ngược vòng */}
+            <div className="flex items-center justify-between w-full min-w-0 gap-1.5">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className="text-sm shrink-0" aria-hidden="true">
+                  {icon}
+                </span>
+                <span className="font-extrabold text-[11px] sm:text-xs text-slate-900 truncate">
+                  <span className="sm:hidden">{shortTag}:</span>
+                  <span className="hidden sm:inline">{title}:</span>
+                </span>
+              </div>
+              <div className="flex items-center gap-1 shrink-0 ml-1">
+                {index === 0 && active.length > 1 && (
+                  <span
+                    data-testid="market-ticker-more-badge"
+                    className="sm:hidden text-[10px] font-extrabold text-amber-950 bg-amber-200/90 px-1.5 py-0.5 rounded-full border border-amber-400 whitespace-nowrap"
+                  >
+                    +{active.length - 1} khác
+                  </span>
+                )}
+                <span className="text-[10px] font-extrabold text-amber-900 bg-amber-100 px-1.5 py-0.5 rounded-full border border-amber-400 whitespace-nowrap">
+                  Còn {modifier.remainingRounds} vòng
+                </span>
+              </div>
+            </div>
+
+            {/* Dòng 2: Huy hiệu chỉ số nổi bật & Nội dung công thức hiệu lực đầy đủ (bảo toàn 100% ngữ nghĩa) */}
+            <div className="flex items-center flex-wrap gap-1.5 w-full min-w-0 pl-5">
               {heroStat.value && (
-                <span className={`hidden sm:inline-flex px-1 py-0.5 rounded text-[10px] sm:text-[11px] font-black uppercase tracking-wider shrink-0 ${heroStyles.badge}`}>
+                <span className={`inline-flex px-1 py-0.5 rounded text-[10px] sm:text-[11px] font-black uppercase tracking-wider shrink-0 ${heroStyles.badge}`}>
                   {heroStat.value}
                 </span>
               )}
               <span
                 data-testid="market-ticker-effect-summary"
-                className="font-semibold text-[11px] sm:text-xs text-slate-700 min-w-0 line-clamp-2 break-words"
+                className="font-semibold text-[11px] sm:text-xs text-slate-700 min-w-0 line-clamp-2 break-words leading-tight"
               >
                 {formula}
-              </span>
-            </div>
-            <div className="flex items-center gap-1 shrink-0 ml-1">
-              {index === 0 && active.length > 1 && (
-                <span
-                  data-testid="market-ticker-more-badge"
-                  className="sm:hidden text-[10px] font-extrabold text-amber-950 bg-amber-200/90 px-1.5 py-0.5 rounded-full border border-amber-400 whitespace-nowrap"
-                >
-                  +{active.length - 1} khác
-                </span>
-              )}
-              <span className="text-[10px] font-extrabold text-amber-900 bg-amber-100 px-1.5 py-0.5 rounded-full border border-amber-400 whitespace-nowrap">
-                Còn {modifier.remainingRounds} vòng
               </span>
             </div>
           </div>

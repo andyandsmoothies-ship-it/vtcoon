@@ -98,19 +98,20 @@ export function TopBar(props: TopBarProps): React.ReactElement {
   return (
     <header
       data-testid="top-bar"
-      className="w-full max-w-full overflow-hidden flex justify-center items-center pointer-events-none px-1 sm:px-4 pt-[calc(0.375rem+env(safe-area-inset-top))] sm:pt-3"
+      className="w-full max-w-full overflow-hidden flex justify-center md:justify-start items-center pointer-events-none px-1 sm:px-4 md:px-0 pt-[calc(0.375rem+env(safe-area-inset-top))] sm:pt-3 md:pt-0"
     >
       <div
-        className={`pointer-events-auto relative flex items-center justify-between gap-1 min-[360px]:gap-1.5 sm:gap-3 md:gap-4 ${onLeaveRoom !== undefined ? 'bg-[#FFFDF8]/85 backdrop-blur-md border border-amber-900/20' : 'bg-[#FFFDF8] border border-slate-300/80'} shadow-xl shadow-amber-950/10 rounded-full p-1.5 sm:p-2 min-[360px]:px-2 sm:px-4 w-full sm:w-auto max-w-[calc(100vw-0.75rem)] sm:max-w-5xl text-slate-900 select-none`}
+        className={`pointer-events-auto relative flex items-center justify-between gap-1 min-[360px]:gap-1.5 sm:gap-3 md:gap-3 ${onLeaveRoom !== undefined ? 'bg-[#FFFDF8]/85 backdrop-blur-md border border-amber-900/20' : 'bg-[#FFFDF8] border border-slate-300/80'} shadow-xl shadow-amber-950/10 rounded-full p-1.5 sm:p-2 min-[360px]:px-2 sm:px-4 md:px-3 w-full sm:w-auto max-w-[calc(100vw-0.75rem)] sm:max-w-5xl md:max-w-none md:w-auto text-slate-900 select-none`}
       >
         {/* Cụm bên trái: Thông tin trận đấu */}
         <div
           data-testid="match-info-capsule"
-          className="flex items-center gap-1 min-[360px]:gap-1 sm:gap-2.5 text-xs md:text-sm font-medium shrink-0 px-1 min-[360px]:px-1.5 sm:pl-3 sm:pr-2"
+          className="flex items-center gap-1 min-[360px]:gap-1 sm:gap-2.5 md:gap-1.5 text-xs md:text-sm font-medium shrink-0 px-1 min-[360px]:px-1.5 sm:pl-3 sm:pr-2 md:pl-2 md:pr-1"
         >
           {/* Vòng đấu */}
-          <div className="flex items-center gap-1 sm:gap-2">
-            <span className="text-slate-600 text-xs uppercase tracking-wider font-bold hidden sm:inline">Vòng</span>
+          <div className="flex items-center gap-1 sm:gap-1.5">
+            <span className="text-slate-600 text-xs uppercase tracking-wider font-bold hidden sm:inline md:hidden">Vòng</span>
+            <span className="text-slate-600 text-xs uppercase tracking-wider font-bold hidden md:inline">V.</span>
             <span className="font-bold text-amber-700 pl-0.5">
               {roundNumber}
               <span className="text-slate-500 text-xs font-normal">/{displayMaxRounds}</span>
@@ -129,22 +130,22 @@ export function TopBar(props: TopBarProps): React.ReactElement {
                 {isAuctionActive ? '🏛️' : isTradeActive ? '🤝' : '🏢'}
               </span>
               <span className="text-xs font-semibold whitespace-nowrap">
-                <span className="hidden min-[380px]:inline sm:hidden">
+                <span className="hidden min-[380px]:inline sm:hidden md:inline">
                   {isAuctionActive ? 'Đấu giá' : isTradeActive ? 'Thương lượng' : 'Mua đứt'}
                 </span>
-                <span className="hidden sm:inline">
+                <span className="hidden sm:inline md:hidden">
                   {isAuctionActive ? 'Đang đấu giá' : isTradeActive ? 'Đang thương lượng' : 'Mua đứt cưỡng chế'}
                 </span>
               </span>
             </div>
           ) : (
             <div
-              className="flex items-center gap-1 sm:gap-2 isolate [transform:translateZ(0)] [backface-visibility:hidden]"
+              className="flex items-center gap-1 sm:gap-1.5 isolate [transform:translateZ(0)] [backface-visibility:hidden]"
               role="timer"
               aria-live="polite"
             >
               <span className="text-sm sm:text-base" aria-hidden="true">⏱️</span>
-              <span className="hidden sm:inline text-xs text-slate-600 font-semibold">Thời gian:</span>
+              <span className="hidden sm:inline md:hidden text-xs text-slate-600 font-semibold">Thời gian:</span>
               <span
                 key={turnTimeRemaining}
                 className={`tabular-nums font-mono text-xs sm:text-base whitespace-nowrap antialiased [transform:translateZ(0)] [backface-visibility:hidden] ${timerColorClass}`}
@@ -164,13 +165,13 @@ export function TopBar(props: TopBarProps): React.ReactElement {
         {/* Cụm bên phải: Tiện ích HUD */}
         <div
           data-testid="hud-utilities-cluster"
-          className="flex items-center gap-1 sm:gap-1.5 shrink-0 px-1 min-[360px]:px-1.5 sm:pl-2 sm:pr-1"
+          className="flex items-center gap-1 sm:gap-1.5 md:gap-1 shrink-0 px-1 min-[360px]:px-1.5 sm:pl-2 sm:pr-1 md:pl-1 md:pr-0.5"
         >
           {/* Nút Bật / Tắt Bảng Điểm người chơi */}
           <button
             type="button"
             onClick={togglePlayerHudVisibility}
-            className={`shrink-0 relative w-8 h-8 min-h-[36px] min-w-[36px] sm:w-auto sm:h-8 sm:min-w-[36px] inline-flex items-center justify-center gap-1.5 p-0 sm:px-3 rounded-xl transition-all cursor-pointer text-xs font-semibold border shadow-xs active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 after:absolute after:-inset-1.5 after:content-[''] ${
+            className={`shrink-0 relative w-8 h-8 min-h-[36px] min-w-[36px] sm:w-auto sm:h-8 sm:min-w-[36px] md:w-8 md:min-w-[32px] md:h-8 md:p-0 inline-flex items-center justify-center gap-1.5 p-0 sm:px-3 rounded-xl transition-all cursor-pointer text-xs font-semibold border shadow-xs active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 after:absolute after:-inset-1.5 after:content-[''] ${
               isPlayerHudVisible
                 ? 'bg-amber-100 text-amber-900 border-amber-400 ring-1 ring-amber-400/50'
                 : 'bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 border-slate-300/80'
@@ -180,59 +181,59 @@ export function TopBar(props: TopBarProps): React.ReactElement {
             data-testid="toggle-hud-topbar-btn"
           >
             <span className="text-sm" aria-hidden="true">👥</span>
-            <span className="hidden sm:inline">Bảng Điểm</span>
+            <span className="hidden sm:inline md:hidden">Bảng Điểm</span>
           </button>
 
           {/* Nút Chu kỳ Thời gian Ngày - Hoàng Hôn - Đêm */}
           <button
             type="button"
             onClick={toggleNextTimeOfDay}
-            className="shrink-0 hidden min-[440px]:inline-flex sm:inline-flex relative w-8 h-8 min-h-[36px] min-w-[36px] sm:w-auto sm:h-8 sm:min-w-[36px] items-center justify-center gap-1.5 p-0 sm:px-3 rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-all cursor-pointer text-xs font-semibold border border-slate-300/80 shadow-xs active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 after:absolute after:-inset-1.5 after:content-['']"
+            className="shrink-0 hidden min-[440px]:inline-flex sm:inline-flex md:inline-flex relative w-8 h-8 min-h-[36px] min-w-[36px] sm:w-auto sm:h-8 sm:min-w-[36px] md:w-8 md:min-w-[32px] md:h-8 md:p-0 items-center justify-center gap-1.5 p-0 sm:px-3 rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-all cursor-pointer text-xs font-semibold border border-slate-300/80 shadow-xs active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 after:absolute after:-inset-1.5 after:content-['']"
             title={`Ánh sáng: ${timeOfDayLabel} (Bấm để đổi)`}
             aria-label={`Chuyển chu kỳ ánh sáng (Hiện tại: ${timeOfDayLabel})`}
             data-testid="time-of-day-toggle-button"
           >
             <span className="text-sm" aria-hidden="true">{timeOfDayIcon}</span>
-            <span className="hidden sm:inline">{timeOfDayLabel}</span>
+            <span className="hidden sm:inline md:hidden">{timeOfDayLabel}</span>
           </button>
 
           {/* Nút Bật / Tắt âm thanh */}
           <button
             type="button"
             onClick={toggleMute}
-            className="shrink-0 relative w-8 h-8 min-h-[36px] min-w-[36px] sm:w-auto sm:h-8 sm:min-w-[36px] inline-flex items-center justify-center gap-1.5 p-0 sm:px-3 rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-all cursor-pointer text-xs font-semibold border border-slate-300/80 shadow-xs active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 after:absolute after:-inset-1.5 after:content-['']"
+            className="shrink-0 relative w-8 h-8 min-h-[36px] min-w-[36px] sm:w-auto sm:h-8 sm:min-w-[36px] md:w-8 md:min-w-[32px] md:h-8 md:p-0 inline-flex items-center justify-center gap-1.5 p-0 sm:px-3 rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-all cursor-pointer text-xs font-semibold border border-slate-300/80 shadow-xs active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 after:absolute after:-inset-1.5 after:content-['']"
             title={isMuted ? 'Bật âm thanh' : 'Tắt âm thanh'}
             aria-label={isMuted ? 'Bật âm thanh trò chơi' : 'Tắt âm thanh trò chơi'}
             data-testid="mute-toggle-button"
           >
             <span className="text-sm" aria-hidden="true">{isMuted ? '🔇' : '🔊'}</span>
-            <span className="hidden sm:inline">{isMuted ? 'Tắt' : 'Bật'}</span>
+            <span className="hidden sm:inline md:hidden">{isMuted ? 'Tắt' : 'Bật'}</span>
           </button>
 
           {/* Nút Hướng Dẫn & Thể Lệ Trò Chơi */}
           <button
             type="button"
             onClick={() => useGameStore.getState().openModal('rules', { initialTab: 'mechanics' })}
-            className="shrink-0 hidden min-[400px]:inline-flex sm:inline-flex relative w-8 h-8 min-h-[36px] min-w-[36px] sm:w-auto sm:h-8 sm:min-w-[36px] items-center justify-center gap-1.5 p-0 sm:px-3 rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-all cursor-pointer text-xs font-semibold border border-slate-300/80 shadow-xs active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 after:absolute after:-inset-1.5 after:content-['']"
+            className="shrink-0 hidden min-[400px]:inline-flex sm:inline-flex md:inline-flex relative w-8 h-8 min-h-[36px] min-w-[36px] sm:w-auto sm:h-8 sm:min-w-[36px] md:w-8 md:min-w-[32px] md:h-8 md:p-0 items-center justify-center gap-1.5 p-0 sm:px-3 rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-all cursor-pointer text-xs font-semibold border border-slate-300/80 shadow-xs active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 after:absolute after:-inset-1.5 after:content-['']"
             title="Xem Luật Chơi & Cơ Chế Game"
             aria-label="Xem Luật Chơi & Cơ Chế Game"
             data-testid="quick-rules-topbar-btn"
           >
             <span className="text-sm" aria-hidden="true">📖</span>
-            <span className="hidden sm:inline">Luật Chơi</span>
+            <span className="hidden sm:inline md:hidden">Luật Chơi</span>
           </button>
 
           {/* Nút Bật / Tắt Nhật Ký Hành Động */}
           <button
             type="button"
             onClick={toggleActivityFeed}
-            className="shrink-0 relative w-8 h-8 min-h-[36px] min-w-[36px] sm:w-auto sm:h-8 sm:min-w-[36px] inline-flex items-center justify-center gap-1.5 p-0 sm:px-3 rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-all cursor-pointer text-xs font-semibold border border-slate-300/80 shadow-xs active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 after:absolute after:-inset-1.5 after:content-['']"
+            className="shrink-0 relative w-8 h-8 min-h-[36px] min-w-[36px] sm:w-auto sm:h-8 sm:min-w-[36px] md:w-8 md:min-w-[32px] md:h-8 md:p-0 inline-flex items-center justify-center gap-1.5 p-0 sm:px-3 rounded-xl bg-[#F7F2E7] hover:bg-amber-100 text-slate-900 transition-all cursor-pointer text-xs font-semibold border border-slate-300/80 shadow-xs active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 after:absolute after:-inset-1.5 after:content-['']"
             title={isActivityFeedOpen ? 'Đóng nhật ký' : 'Mở nhật ký hoạt động'}
             aria-label={`Nhật ký hoạt động${unreadCount > 0 ? ` (${unreadCount} mới)` : ''}`}
             data-testid="activity-feed-toggle-button"
           >
             <span className="text-sm" aria-hidden="true">📜</span>
-            <span className="hidden sm:inline">Nhật Ký</span>
+            <span className="hidden sm:inline md:hidden">Nhật Ký</span>
             {unreadCount > 0 && (
               <span
                 className="absolute -top-1 right-0 flex h-3.5 min-w-[14px] items-center justify-center rounded-full bg-rose-600 px-0.5 text-[8px] font-black text-white shadow-md border border-slate-900 pointer-events-none"
@@ -250,13 +251,13 @@ export function TopBar(props: TopBarProps): React.ReactElement {
               <button
                 type="button"
                 onClick={onLeaveRoom}
-                className="shrink-0 relative w-8 h-8 min-h-[36px] min-w-[36px] sm:w-auto sm:h-8 sm:min-w-[36px] inline-flex items-center justify-center gap-1.5 p-0 sm:px-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-800 transition-all cursor-pointer text-xs font-bold border border-rose-300 shadow-xs active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 after:absolute after:-inset-1.5 after:content-['']"
+                className="shrink-0 relative w-8 h-8 min-h-[36px] min-w-[36px] sm:w-auto sm:h-8 sm:min-w-[36px] md:w-8 md:min-w-[32px] md:h-8 md:p-0 inline-flex items-center justify-center gap-1.5 p-0 sm:px-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-800 transition-all cursor-pointer text-xs font-bold border border-rose-300 shadow-xs active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 after:absolute after:-inset-1.5 after:content-['']"
                 title="Thoát bàn và trở về sảnh chờ"
                 aria-label="Thoát bàn và trở về sảnh chờ"
                 data-testid="leave-room-button"
               >
                 <span className="text-sm shrink-0" aria-hidden="true">🚪</span>
-                <span className="hidden sm:inline">Thoát</span>
+                <span className="hidden sm:inline md:hidden">Thoát</span>
               </button>
             </>
           )}
