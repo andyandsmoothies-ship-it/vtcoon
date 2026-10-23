@@ -139,6 +139,7 @@ export function ActiveSpringPawn({
   }
 
   const isDirectFlight = Boolean(animation.isJailFlight || animation.flightType);
+  const effectiveFlightType = animation.flightType ?? (animation.isJailFlight ? 'audit' : (isDirectFlight ? 'transit' : undefined));
 
   return (
     <>
@@ -152,7 +153,7 @@ export function ActiveSpringPawn({
       />
       {isDirectFlight && (
         <ThematicTransportVehicle
-          flightType={animation.isJailFlight ? 'audit' : (animation.flightType ?? 'transit')}
+          flightType={effectiveFlightType ?? 'transit'}
           fromCell={fromCell}
           toCell={toCell}
           progressRef={directFlightProgressRef}
@@ -169,7 +170,7 @@ export function ActiveSpringPawn({
         slotIndex={slotIndex}
         isBot={isBot}
         isJailFlight={isDirectFlight}
-        flightType={animation.flightType}
+        flightType={effectiveFlightType}
         hidePawnMesh={isDirectFlight}
         progressRef={directFlightProgressRef}
       />

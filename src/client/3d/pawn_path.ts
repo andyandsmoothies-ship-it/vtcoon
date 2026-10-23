@@ -14,6 +14,8 @@ export const BOT_STEP_DURATION = 0.22 as const;
 export const JAIL_FLIGHT_ARC = 2.8 as const;
 export const JAIL_FLIGHT_DURATION = 0.55 as const;
 export const BOT_JAIL_FLIGHT_DURATION = 0.45 as const;
+export const THEMATIC_VEHICLE_DURATION = 2.0 as const;
+export const BOT_THEMATIC_VEHICLE_DURATION = 1.4 as const;
 export const JAIL_LANDING_DURATION = 0.12 as const;
 
 export function calculateJailFlightWaypoints(targetCell: number = 10): number[] {

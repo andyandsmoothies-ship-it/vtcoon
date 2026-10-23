@@ -6,7 +6,7 @@ import { CanvasTexture, type Group } from 'three';
 import { getEmoteDef } from '../../domain/emotes.js';
 import {
   interpolatePawnPosition, DEFAULT_JUMP_ARC, JAIL_FLIGHT_ARC,
-  JAIL_FLIGHT_DURATION, BOT_JAIL_FLIGHT_DURATION, JAIL_LANDING_DURATION,
+  JAIL_FLIGHT_DURATION, BOT_JAIL_FLIGHT_DURATION, THEMATIC_VEHICLE_DURATION, BOT_THEMATIC_VEHICLE_DURATION, JAIL_LANDING_DURATION,
   HOP_DURATION, LANDING_DURATION, BOT_HOP_DURATION, BOT_LANDING_DURATION,
   calculateKineticSquashStretch, calculatePawnLandingImpact, getStepPitchVariation,
 } from './pawn_path.js';
@@ -213,7 +213,10 @@ export function SingleHopPawn({
   onHopCompleteRef.current = onHopComplete;
 
   const isDirectFlight = Boolean(isJailFlight || flightType);
-  const hopDuration = isDirectFlight
+  const isThematicVehicle = Boolean(flightType);
+  const hopDuration = isThematicVehicle
+    ? (isBot ? BOT_THEMATIC_VEHICLE_DURATION : THEMATIC_VEHICLE_DURATION)
+    : isDirectFlight
     ? (isBot ? BOT_JAIL_FLIGHT_DURATION : JAIL_FLIGHT_DURATION)
     : (isBot ? BOT_HOP_DURATION : HOP_DURATION);
   const landingDuration = isDirectFlight

@@ -169,7 +169,7 @@ function createPawnTransitionActions(set: StoreSet, get: StoreGet) {
         flightType ??
         (lastClearedPendingMove?.playerId === playerId && lastClearedPendingMove?.targetCell === targetCell
           ? lastClearedPendingMove.flightType
-          : undefined);
+          : (isJailFlight ? 'audit' : undefined));
       lastClearedPendingMove = null;
 
       const pTasks = (state.pawnAnimationQueue ?? []).filter((t) => t.playerId === playerId);

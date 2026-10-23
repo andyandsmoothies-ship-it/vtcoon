@@ -82,7 +82,14 @@ export const TransitWheelModal: React.FC<TransitWheelModalProps> = ({
     const pending = state.pendingPawnMove;
     if (pending) {
       state.setPendingPawnMove?.(null);
-      state.startPawnMove?.(pending.playerId, pending.targetCell, pending.fromCell, Boolean(pending.isBot), pending.isJailFlight);
+      state.startPawnMove?.(
+        pending.playerId,
+        pending.targetCell,
+        pending.fromCell,
+        Boolean(pending.isBot),
+        pending.isJailFlight,
+        pending.flightType,
+      );
     }
     onClose();
   };

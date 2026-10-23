@@ -18,6 +18,7 @@ import {
   resolveDynamicGamePhase,
   resolveOverviewConfigByPhase,
   resolveJailFlightProgress,
+  resolveThematicFlightProgress,
 } from './cinematic_spline_flyby';
 import { initSoftReturn, sampleSoftReturn, type SoftReturnState } from './camera_soft_return';
 import { useCameraGestures, checkTargetOwnedByHuman, useDebugCameraGlobals } from './use_camera_gestures';
@@ -298,12 +299,13 @@ export function AdaptiveCinematicCamera({
           gamePhase: effectivePhase,
         });
 
-    if (isJailFlight && isPawnMoving) {
+    const isVehicleFlight = Boolean((isJailFlight || activeAnimation?.flightType) && isPawnMoving);
+    if (isVehicleFlight) {
       if (flightStartTimeRef.current === null) flightStartTimeRef.current = performance.now();
-      const flightProgress = resolveJailFlightProgress(flightStartTimeRef.current, performance.now(), isBotTurn);
+      const flightProgress = resolveThematicFlightProgress(flightStartTimeRef.current, performance.now(), isBotTurn);
       targetState = calculateSplineArcCameraState({
-        startCell: activeAnimation?.fromCell ?? 30,
-        targetCell: effectiveDestCell ?? 10,
+        startCell: activeAnimation?.fromCell ?? (isJailFlight ? 30 : 0),
+        targetCell: effectiveDestCell ?? (isJailFlight ? 10 : (targetCell ?? 0)),
         progress: flightProgress,
         aspect: cameraAspect,
       });

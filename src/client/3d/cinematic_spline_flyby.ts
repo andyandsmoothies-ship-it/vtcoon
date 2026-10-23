@@ -24,9 +24,20 @@ export function resolveJailFlightDuration(isBot?: boolean): number {
   return isBot ? 570 : 670;
 }
 
+export function resolveThematicVehicleFlightDuration(isBot?: boolean): number {
+  return isBot ? 1400 : 2000;
+}
+
 export function resolveJailFlightProgress(flightStartTime: number | null, now: number, isBot?: boolean): number {
   if (flightStartTime === null || !Number.isFinite(flightStartTime)) return 0;
   const durationMs = resolveJailFlightDuration(isBot);
+  const elapsed = now - flightStartTime;
+  return Math.min(1, Math.max(0, elapsed / durationMs));
+}
+
+export function resolveThematicFlightProgress(flightStartTime: number | null, now: number, isBot?: boolean): number {
+  if (flightStartTime === null || !Number.isFinite(flightStartTime)) return 0;
+  const durationMs = resolveThematicVehicleFlightDuration(isBot);
   const elapsed = now - flightStartTime;
   return Math.min(1, Math.max(0, elapsed / durationMs));
 }
