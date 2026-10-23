@@ -1,7 +1,7 @@
 // [UI-S01/MSS][UI-S04/MSS] CameraStateMachine — 2026 Cinematic Action Cam & Dynamic Follow System
 // Hỗ trợ các chế độ: Overview, Dice Roll Cinematic, Dynamic Tension Roll, Pawn Chase, và Tile Focus
 import { PROPERTY_DEEDS } from '../../domain/property_data';
-import { calculateStreetChaseCameraState, resolveStandardChaseOffset, calculateDicePanCameraState } from './cinematic_chase_camera';
+import { calculateStreetChaseCameraState, resolveStandardChaseOffset, resolveUnifiedDesktopChaseOffset, calculateDicePanCameraState } from './cinematic_chase_camera';
 import { resolveOverviewConfigByPhase } from './cinematic_spline_flyby';
 import {
   resolveSideAwareCameraOffset,
@@ -129,11 +129,10 @@ export function resolveCameraMode(params: CameraResolveParams): CameraMode {
       }
       return params.isHighStakesRoll ? 'pawn_chase' : 'overview';
     }
-    if (params.isTargetOwnedByHuman === true) return 'tile_focus';
-    // [IMP-443-FIX / Post-Hop Settle Window] Khi Bot kết thúc cú nhảy kịch tính (high-stakes roll),
-    // giữ tile_focus trong cửa sổ đệm dừng (isPostHopSettling) để người chơi kịp quan sát ô tiếp đất
-    // trước khi camera hoàn tất chuyển cảnh về overview, triệt tiêu cú giật thốc tức thì (instant snap-back whiplash).
-    if (params.isHighStakesRoll && params.isPostHopSettling) {
+    if (params.isTargetOwnedByHuman === true && params.isPostHopSettling !== false) {
+      return 'tile_focus';
+    }
+    if (params.isHighStakesRoll && params.isPostHopSettling === true) {
       return 'tile_focus';
     }
     return 'overview';
@@ -162,7 +161,7 @@ export function calculateChaseCameraPosition(
   const px = Number.isFinite(pawnCoords[0]) ? pawnCoords[0] : 0;
   const py = Number.isFinite(pawnCoords[1]) ? pawnCoords[1] : 0;
   const pz = Number.isFinite(pawnCoords[2]) ? pawnCoords[2] : 0;
-  const off = offset ?? resolveStandardChaseOffset(pawnCoords, aspect);
+  const off = offset ?? (aspect !== undefined ? resolveUnifiedDesktopChaseOffset(pawnCoords, aspect) : resolveStandardChaseOffset(pawnCoords));
   return [px + off[0], py + off[1], pz + off[2]];
 }
 

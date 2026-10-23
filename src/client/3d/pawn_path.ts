@@ -14,8 +14,19 @@ export const BOT_STEP_DURATION = 0.22 as const;
 export const JAIL_FLIGHT_ARC = 2.8 as const;
 export const JAIL_FLIGHT_DURATION = 0.55 as const;
 export const BOT_JAIL_FLIGHT_DURATION = 0.45 as const;
-export const THEMATIC_VEHICLE_DURATION = 2.0 as const;
-export const BOT_THEMATIC_VEHICLE_DURATION = 1.4 as const;
+export const THEMATIC_VEHICLE_DURATION = 3.2 as const;
+export const BOT_THEMATIC_VEHICLE_DURATION = 2.4 as const;
+export const THEMATIC_PLANE_DURATION = 3.2 as const;
+export const BOT_THEMATIC_PLANE_DURATION = 2.4 as const;
+export const THEMATIC_POLICE_DURATION = 3.8 as const;
+export const BOT_THEMATIC_POLICE_DURATION = 2.8 as const;
+export function resolveThematicVehicleHopDurationSec(
+  flightType?: 'audit' | 'transit' | 'event',
+  isBot?: boolean
+): number {
+  if (flightType === 'audit') return isBot ? BOT_THEMATIC_POLICE_DURATION : THEMATIC_POLICE_DURATION;
+  return isBot ? BOT_THEMATIC_PLANE_DURATION : THEMATIC_PLANE_DURATION;
+}
 export const JAIL_LANDING_DURATION = 0.12 as const;
 
 export function calculateJailFlightWaypoints(targetCell: number = 10): number[] {

@@ -143,3 +143,67 @@ export function sampleSoftReturn(state: SoftReturnState, now: number): SoftRetur
     isFinished: false,
   };
 }
+
+/**
+ * Lấy mẫu camera soft return dạng lướt thẳng (linear damped glide) trên Desktop
+ */
+export function sampleGlideSoftReturn(
+  state: SoftReturnState,
+  now: number,
+  isDesktop: boolean = true
+): SoftReturnSample {
+  if (!isDesktop) return sampleSoftReturn(state, now);
+
+  const safeDestPos: [number, number, number] = [
+    Number.isFinite(state.destPos[0]) ? state.destPos[0] : DEFAULT_FALLBACK_POS[0],
+    Number.isFinite(state.destPos[1]) ? state.destPos[1] : DEFAULT_FALLBACK_POS[1],
+    Number.isFinite(state.destPos[2]) ? state.destPos[2] : DEFAULT_FALLBACK_POS[2],
+  ];
+  const safeDestTarget: [number, number, number] = [
+    Number.isFinite(state.destTarget[0]) ? state.destTarget[0] : DEFAULT_FALLBACK_TARGET[0],
+    Number.isFinite(state.destTarget[1]) ? state.destTarget[1] : DEFAULT_FALLBACK_TARGET[1],
+    Number.isFinite(state.destTarget[2]) ? state.destTarget[2] : DEFAULT_FALLBACK_TARGET[2],
+  ];
+
+  const hasInvalidCoord =
+    !Number.isFinite(state.startPos[0]) || !Number.isFinite(state.startPos[1]) || !Number.isFinite(state.startPos[2]) ||
+    !Number.isFinite(state.startTarget[0]) || !Number.isFinite(state.startTarget[1]) || !Number.isFinite(state.startTarget[2]) ||
+    !Number.isFinite(state.destPos[0]) || !Number.isFinite(state.destPos[1]) || !Number.isFinite(state.destPos[2]) ||
+    !Number.isFinite(state.destTarget[0]) || !Number.isFinite(state.destTarget[1]) || !Number.isFinite(state.destTarget[2]) ||
+    !Number.isFinite(state.startTime) || !Number.isFinite(now);
+
+  if (hasInvalidCoord) {
+    return {
+      position: safeDestPos,
+      target: safeDestTarget,
+      isFinished: false,
+    };
+  }
+
+  const duration = state.durationMs > 0 ? state.durationMs : 1200;
+  const elapsed = Math.max(0, now - state.startTime);
+  const tau = Math.min(1, elapsed / duration);
+
+  if (tau >= 1.0) {
+    return {
+      position: safeDestPos,
+      target: safeDestTarget,
+      isFinished: true,
+    };
+  }
+
+  const u = 1 - Math.pow(1 - tau, 3);
+  return {
+    position: [
+      state.startPos[0] + (state.destPos[0] - state.startPos[0]) * u,
+      state.startPos[1] + (state.destPos[1] - state.startPos[1]) * u,
+      state.startPos[2] + (state.destPos[2] - state.startPos[2]) * u,
+    ],
+    target: [
+      state.startTarget[0] + (state.destTarget[0] - state.startTarget[0]) * u,
+      state.startTarget[1] + (state.destTarget[1] - state.startTarget[1]) * u,
+      state.startTarget[2] + (state.destTarget[2] - state.startTarget[2]) * u,
+    ],
+    isFinished: false,
+  };
+}

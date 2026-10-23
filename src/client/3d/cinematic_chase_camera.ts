@@ -269,3 +269,15 @@ export function resolveStandardChaseOffset(
     default: return [offH, offY, offH];
   }
 }
+
+/**
+ * Tọa độ offset góc máy bám đuổi đồng nhất trên Desktop (Unified Azimuth)
+ */
+export function resolveUnifiedDesktopChaseOffset(
+  pawnCoords: readonly [number, number, number],
+  aspect?: number
+): readonly [number, number, number] {
+  const isPortrait = typeof aspect === 'number' && aspect < 1.0;
+  if (isPortrait) return resolveStandardChaseOffset(pawnCoords, aspect);
+  return [3.6, 4.2, 3.6];
+}

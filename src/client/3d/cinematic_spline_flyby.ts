@@ -24,8 +24,19 @@ export function resolveJailFlightDuration(isBot?: boolean): number {
   return isBot ? 570 : 670;
 }
 
-export function resolveThematicVehicleFlightDuration(isBot?: boolean): number {
-  return isBot ? 1400 : 2000;
+export function resolveThematicVehicleFlightDurationMs(
+  isBot?: boolean,
+  flightType?: 'audit' | 'transit' | 'event'
+): number {
+  if (flightType === 'audit') return isBot ? 2800 : 3800;
+  return isBot ? 2400 : 3200;
+}
+
+export function resolveThematicVehicleFlightDuration(
+  isBot?: boolean,
+  flightType?: 'audit' | 'transit' | 'event'
+): number {
+  return resolveThematicVehicleFlightDurationMs(isBot, flightType);
 }
 
 export function resolveJailFlightProgress(flightStartTime: number | null, now: number, isBot?: boolean): number {
@@ -35,9 +46,14 @@ export function resolveJailFlightProgress(flightStartTime: number | null, now: n
   return Math.min(1, Math.max(0, elapsed / durationMs));
 }
 
-export function resolveThematicFlightProgress(flightStartTime: number | null, now: number, isBot?: boolean): number {
+export function resolveThematicFlightProgress(
+  flightStartTime: number | null,
+  now: number,
+  isBot?: boolean,
+  flightType?: 'audit' | 'transit' | 'event'
+): number {
   if (flightStartTime === null || !Number.isFinite(flightStartTime)) return 0;
-  const durationMs = resolveThematicVehicleFlightDuration(isBot);
+  const durationMs = resolveThematicVehicleFlightDurationMs(isBot, flightType);
   const elapsed = now - flightStartTime;
   return Math.min(1, Math.max(0, elapsed / durationMs));
 }

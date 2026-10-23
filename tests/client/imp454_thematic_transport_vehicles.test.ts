@@ -269,11 +269,10 @@ describe('[IMP-454] Thematic Transport Vehicles & Neon Trajectory Purge Contract
   });
 
   describe('[TC-454.07/MSS] Thematic Transport Pacing & Transit Airliner Wiring', () => {
-    it('[TC-454.07a/MSS][UC-THEMATIC-DURATION-CALIBRATION] calibrates human transport vehicle flight to 2.0s and bot to 1.4s', () => {
-      expect(THEMATIC_VEHICLE_DURATION).toBe(2.0);
-      expect(BOT_THEMATIC_VEHICLE_DURATION).toBe(1.4);
-      expect(resolveThematicVehicleFlightDuration(false)).toBe(2000);
-      expect(resolveThematicVehicleFlightDuration(true)).toBe(1400);
+    it('[TC-454.07a/MSS][UC-THEMATIC-DURATION-CALIBRATION] calibrates human transport vehicle flight to 3.2s and bot to 2.4s', () => {
+      expect([THEMATIC_VEHICLE_DURATION, BOT_THEMATIC_VEHICLE_DURATION]).toEqual([3.2, 2.4]);
+      expect([resolveThematicVehicleFlightDuration(false), resolveThematicVehicleFlightDuration(true)]).toEqual([3200, 2400]);
+      expect([resolveThematicVehicleFlightDuration(false, 'audit'), resolveThematicVehicleFlightDuration(true, 'audit')]).toEqual([3800, 2800]);
     });
 
     it('[TC-454.07b/MSS][UC-THEMATIC-AIRLINER-TRANSIT-WIRING] renders ThematicTransportVehicle and suppresses neon trajectory during transit airport flight', () => {

@@ -1,0 +1,68 @@
+[
+  {
+    "file": "src/client/3d/cinematic_chase_camera.ts",
+    "desc": "AST: corrupt unified desktop chase offset back to negative quadrant flip",
+    "target": "return [3.6, 4.2, 3.6];",
+    "replacement": "return [-3.6, 4.2, -3.6];"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: remove post-hop settle gating on human property landing (reintroduce early zoom whiplash)",
+    "target": "if (params.isTargetOwnedByHuman === true && params.isPostHopSettling !== false) {",
+    "replacement": "if (params.isTargetOwnedByHuman === true) {"
+  },
+  {
+    "file": "src/client/3d/camera_state_machine.ts",
+    "desc": "AST: bypass call-site wiring of resolveUnifiedDesktopChaseOffset",
+    "target": "const off = offset ?? (aspect !== undefined ? resolveUnifiedDesktopChaseOffset(pawnCoords, aspect) : resolveStandardChaseOffset(pawnCoords));",
+    "replacement": "const off = offset ?? resolveStandardChaseOffset(pawnCoords);"
+  },
+  {
+    "file": "src/client/3d/pawn_path.ts",
+    "desc": "AST: revert calibrated thematic airplane duration back to rushed 2.0s",
+    "target": "export const THEMATIC_PLANE_DURATION = 3.2 as const;",
+    "replacement": "export const THEMATIC_PLANE_DURATION = 2.0 as const;"
+  },
+  {
+    "file": "src/client/3d/pawn_path.ts",
+    "desc": "AST: revert calibrated thematic police duration back to rushed 2.0s",
+    "target": "export const THEMATIC_POLICE_DURATION = 3.8 as const;",
+    "replacement": "export const THEMATIC_POLICE_DURATION = 2.0 as const;"
+  },
+  {
+    "file": "src/client/3d/pawn_path.ts",
+    "desc": "AST: revert bot thematic plane duration back to 1.4s",
+    "target": "export const BOT_THEMATIC_PLANE_DURATION = 2.4 as const;",
+    "replacement": "export const BOT_THEMATIC_PLANE_DURATION = 1.4 as const;"
+  },
+  {
+    "file": "src/client/3d/pawn_path.ts",
+    "desc": "AST: revert bot thematic police duration back to 1.4s",
+    "target": "export const BOT_THEMATIC_POLICE_DURATION = 2.8 as const;",
+    "replacement": "export const BOT_THEMATIC_POLICE_DURATION = 1.4 as const;"
+  },
+  {
+    "file": "src/client/3d/cinematic_spline_flyby.ts",
+    "desc": "AST: revert police flight ms duration back to 2000ms",
+    "target": "return isBot ? 2800 : 3800;",
+    "replacement": "return isBot ? 1400 : 2000;"
+  },
+  {
+    "file": "src/client/3d/cinematic_spline_flyby.ts",
+    "desc": "AST: revert airplane flight ms duration back to 2000ms",
+    "target": "return isBot ? 2400 : 3200;",
+    "replacement": "return isBot ? 1400 : 2000;"
+  },
+  {
+    "file": "src/client/3d/camera_soft_return.ts",
+    "desc": "AST: revert glide soft return back to 180-degree spherical orbit slerp",
+    "target": "if (!isDesktop) return sampleSoftReturn(state, now);",
+    "replacement": "return sampleSoftReturn(state, now);"
+  },
+  {
+    "file": "src/client/3d/camera_soft_return.ts",
+    "desc": "AST: freeze glide progress by forcing u = 0 in sampleGlideSoftReturn",
+    "target": "const u = 1 - Math.pow(1 - tau, 3);\n  return {\n    position: [",
+    "replacement": "const u = 0;\n  return {\n    position: ["
+  }
+]

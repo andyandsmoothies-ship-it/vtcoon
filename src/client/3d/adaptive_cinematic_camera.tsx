@@ -20,14 +20,11 @@ import {
   resolveJailFlightProgress,
   resolveThematicFlightProgress,
 } from './cinematic_spline_flyby';
-import { initSoftReturn, sampleSoftReturn, type SoftReturnState } from './camera_soft_return';
+import { initSoftReturn, sampleGlideSoftReturn, type SoftReturnState } from './camera_soft_return';
 import { useCameraGestures, checkTargetOwnedByHuman, useDebugCameraGlobals } from './use_camera_gestures';
 import { resolveActiveCameraDriver } from './camera_arbitration_engine';
 import { CameraLocationBeacon } from './camera_location_beacon';
-import {
-  calculateCameraZoom,
-  resolveCameraTargetCell,
-} from './use_game_camera';
+import { calculateCameraZoom, resolveCameraTargetCell } from './use_game_camera';
 import { cellPosition } from './board_coords';
 import { shouldTriggerCinematicCamera } from './cinematic_chase_camera';
 import { SoundEngine } from '../audio/sound_engine';
@@ -37,8 +34,6 @@ export interface AdaptiveCinematicCameraProps {
   readonly isPreMatch?: boolean;
   readonly isMobile?: boolean;
 }
-
-// checkTargetOwnedByHuman moved to use_camera_gestures.ts
 
 export function AdaptiveCinematicCamera({
   isPreMatch = false,
@@ -126,14 +121,9 @@ export function AdaptiveCinematicCamera({
   const isHighStakesRoll = highStakesResult.isHighStakes;
 
   useEffect(() => {
-    if (isRolling && isHighStakesRoll) {
-      SoundEngine.playHeartbeatPulse();
-    } else {
-      SoundEngine.stopHeartbeatPulse();
-    }
-    return () => {
-      SoundEngine.stopHeartbeatPulse();
-    };
+    if (isRolling && isHighStakesRoll) SoundEngine.playHeartbeatPulse();
+    else SoundEngine.stopHeartbeatPulse();
+    return () => SoundEngine.stopHeartbeatPulse();
   }, [isRolling, isHighStakesRoll]);
 
   useDebugCameraGlobals({
@@ -194,14 +184,6 @@ export function AdaptiveCinematicCamera({
     const animatingPlayer = activeAnimation?.playerId ? playersInfo[activeAnimation.playerId] : undefined;
     const isAnimatingPawnBot = Boolean(animatingPlayer?.isBot);
 
-    // [IMP-443-FIX / Post-Hop Settle Window] Khi Bot kết thúc cú nhảy kịch tính (high-stakes),
-    // kích hoạt cửa sổ đệm dừng 1.2s để camera giữ tile_focus trên ô đích trước khi về overview
-    if (prevIsPawnMovingRef.current && !isPawnMoving && isHighStakesRoll && (isBotTurn || isAnimatingPawnBot)) {
-      postHopSettleUntilRef.current = performance.now() + 1200;
-    }
-    prevIsPawnMovingRef.current = isPawnMoving;
-    const isPostHopSettling = performance.now() < postHopSettleUntilRef.current;
-
     const effectiveFocusCell = liveFocusCell ?? cameraFocusCell;
     const targetCell = resolveCameraTargetCell(
       activeAnimation,
@@ -211,13 +193,23 @@ export function AdaptiveCinematicCamera({
       effectiveFocusCell
     );
 
-    // [ADV-02] Neo su kien theo o dich den cuoi cung cua luot di thay vi o nhay trung gian
     const finalDestinationCell = activeAnimation?.waypoints?.length
       ? activeAnimation.waypoints[activeAnimation.waypoints.length - 1]
       : (activeAnimation?.targetCell ?? targetCell);
-    if (finalDestinationCell !== null && finalDestinationCell !== undefined && Number.isFinite(finalDestinationCell)) {
+    if (typeof finalDestinationCell === 'number' && Number.isFinite(finalDestinationCell)) {
       lastDestinationCellRef.current = finalDestinationCell;
     }
+    const effectiveDestCell = finalDestinationCell ?? targetCell ?? lastDestinationCellRef.current;
+    const isTargetOwnedByHuman = typeof effectiveDestCell === 'number' && Number.isFinite(effectiveDestCell)
+      ? checkTargetOwnedByHuman(playersInfo, effectiveDestCell)
+      : false;
+
+    if (prevIsPawnMovingRef.current && !isPawnMoving && (isHighStakesRoll || isTargetOwnedByHuman) && (isBotTurn || isAnimatingPawnBot)) {
+      postHopSettleUntilRef.current = performance.now() + 1200;
+    }
+    prevIsPawnMovingRef.current = isPawnMoving;
+    const isPostHopSettling = performance.now() < postHopSettleUntilRef.current;
+
     const isJailFlight = Boolean(activeAnimation?.isJailFlight);
     const shouldCinematic = isPawnMoving
       ? shouldTriggerCinematicCamera({
@@ -227,13 +219,7 @@ export function AdaptiveCinematicCamera({
         })
       : false;
 
-    // [USER-BUG-01] Truyen isPawnAnimating: isPawnMoving de resolveCameraMode tra ve 'pawn_chase'
-    // Sau do calculateTargetCameraState voi options.cinematicChase: false se tra ve 'overview' cho 80% luot thuong
-    const hasTargetTile = (activeModal !== null || hasRolledThisTurn || effectiveFocusCell !== null) && targetCell !== null && targetCell !== undefined && Number.isFinite(targetCell);
-    const effectiveDestCell = finalDestinationCell ?? targetCell ?? lastDestinationCellRef.current;
-    const isTargetOwnedByHuman = effectiveDestCell !== null && effectiveDestCell !== undefined && Number.isFinite(effectiveDestCell)
-      ? checkTargetOwnedByHuman(playersInfo, effectiveDestCell)
-      : false;
+    const hasTargetTile = (activeModal !== null || hasRolledThisTurn || effectiveFocusCell !== null) && typeof targetCell === 'number' && Number.isFinite(targetCell);
     const effectivePhase = resolveDynamicGamePhase(roundNumber, totalBuildings, gamePhaseRef.current);
     gamePhaseRef.current = effectivePhase;
 
@@ -262,9 +248,8 @@ export function AdaptiveCinematicCamera({
       manualMode: isManualOverviewResetRef.current ? 'overview' : null,
     });
 
-    const cellCoords = targetCell !== null && targetCell !== undefined && Number.isFinite(targetCell) ? cellPosition(targetCell) : undefined;
-
-    const destCoords = finalDestinationCell !== null && finalDestinationCell !== undefined && Number.isFinite(finalDestinationCell)
+    const cellCoords = typeof targetCell === 'number' && Number.isFinite(targetCell) ? cellPosition(targetCell) : undefined;
+    const destCoords = typeof finalDestinationCell === 'number' && Number.isFinite(finalDestinationCell)
       ? cellPosition(finalDestinationCell)
       : cellCoords;
     const skipTargetState = calculateTargetCameraState('tile_focus', destCoords, destCoords, {
@@ -276,11 +261,7 @@ export function AdaptiveCinematicCamera({
     });
 
     const isTransientTurnCorner = Boolean(
-      isPawnMoving &&
-      targetCell !== null &&
-      targetCell !== undefined &&
-      targetCell % 10 === 0 &&
-      finalDestinationCell !== targetCell
+      isPawnMoving && typeof targetCell === 'number' && targetCell % 10 === 0 && finalDestinationCell !== targetCell
     );
 
     let targetState = isManualOverviewResetRef.current
@@ -302,7 +283,8 @@ export function AdaptiveCinematicCamera({
     const isVehicleFlight = Boolean((isJailFlight || activeAnimation?.flightType) && isPawnMoving);
     if (isVehicleFlight) {
       if (flightStartTimeRef.current === null) flightStartTimeRef.current = performance.now();
-      const flightProgress = resolveThematicFlightProgress(flightStartTimeRef.current, performance.now(), isBotTurn);
+      const effectiveFlightType = activeAnimation?.flightType ?? (isJailFlight ? 'audit' : undefined);
+      const flightProgress = resolveThematicFlightProgress(flightStartTimeRef.current, performance.now(), isBotTurn, effectiveFlightType);
       targetState = calculateSplineArcCameraState({
         startCell: activeAnimation?.fromCell ?? (isJailFlight ? 30 : 0),
         targetCell: effectiveDestCell ?? (isJailFlight ? 10 : (targetCell ?? 0)),
@@ -313,7 +295,6 @@ export function AdaptiveCinematicCamera({
       flightStartTimeRef.current = null;
     }
 
-    // [USER-BUG-02] Neu da skip luot nhay hien tai, giu chat targetState o o dich den cuoi cung tranh bi keo nguoc lai
     if (hasSkippedCurrentMoveRef.current) {
       targetState = skipTargetState;
     }
@@ -431,7 +412,8 @@ export function AdaptiveCinematicCamera({
         targetBaseRef.current[1] = controlsRef.current.target.y;
         targetBaseRef.current[2] = controlsRef.current.target.z;
       } else if (activeDriver === 'soft_return' && softReturnRef.current) {
-        const sample = sampleSoftReturn(softReturnRef.current, performance.now());
+        const isDesktop = !isMobile && (cameraAspect === undefined || cameraAspect >= 1.0);
+        const sample = sampleGlideSoftReturn(softReturnRef.current, performance.now(), isDesktop);
         camBaseRef.current[0] = sample.position[0];
         camBaseRef.current[1] = sample.position[1];
         camBaseRef.current[2] = sample.position[2];
